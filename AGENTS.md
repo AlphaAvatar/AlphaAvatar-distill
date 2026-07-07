@@ -119,7 +119,22 @@ Expensive GPU runs are allowed only after the relevant code path, logging path, 
 
 ### P9. Match training and deployment numerics when possible
 
-If the target deployment is INT8, INT4, FP8, or another low-precision mode, prefer training and recovery paths that simulate or match deployment numerics as closely as practical.
+If the target deployment is INT8, INT4, FP8, MXFP4, or another low-precision mode, prefer training, recovery, and evaluation paths that simulate or match deployment numerics as closely as practical.
+
+When the target inference architecture only supports specific precisions or kernels, the student should be trained or recovered with those deployment constraints in mind. Do not assume that a model trained in BF16/FP32 will preserve the same behavior after aggressive quantization or architecture-specific inference.
+
+Efficient training methods are encouraged when they improve the quality/cost/latency tradeoff. Candidate baseline or reference methods may include Muon-style optimizers, FP8 training, MXFP4 or other low-precision training paths, quantization-aware training, fake-quantized recovery, fused optimizers, fused kernels, activation checkpointing, efficient attention kernels, and architecture-specific inference-compatible kernels.
+
+These methods are not considered supported until they are implemented, tested, logged, and compared under a fixed budget. Before using a precision mode, optimizer, or kernel path in an official run, the agent must record:
+
+- target inference hardware or runtime;
+- supported inference precision and kernel constraints;
+- training precision and optimizer;
+- quantization or fake-quantization behavior;
+- expected quality/cost/latency benefit;
+- numerical risks;
+- baseline comparison plan;
+- validation and deployment test plan.
 
 Avoid training a student in a regime that will be heavily mismatched at inference.
 
@@ -268,6 +283,11 @@ It may include:
 - evaluation harness;
 - checkpoint and resume;
 - structured logging.
+- efficient optimizer experiments such as Muon-style optimizers when justified;
+- FP8, MXFP4, or other low-precision training paths when supported by the target hardware/runtime;
+- quantization-aware training and fake-quantized recovery;
+- fused optimizers, fused kernels, and efficient tensor layouts;
+- inference-compatible precision and kernel validation;
 
 Requirements:
 
@@ -278,6 +298,10 @@ Requirements:
 - support checkpoint resume;
 - prefer explicit function boundaries;
 - add tests for shape correctness, loss correctness, deterministic behavior, and resume behavior when those components are implemented.
+- do not add a new optimizer, low-precision mode, or custom kernel without a baseline comparison plan;
+- do not use a precision mode that the target inference architecture cannot support unless it is only an explicitly logged ablation;
+- document numerical behavior, hardware support, fallback behavior, and validation coverage for every low-precision or custom-kernel path;
+- prefer efficient training methods only when they preserve reproducibility, debuggability, and deployment compatibility.
 
 ### 2.4 Student model recipe and model card requirements
 
@@ -905,13 +929,13 @@ Validation gate:
 
 ---
 
-### 4.7 Stage 5 — On-policy distillation / OPD and SDPO mix
+### 4.7 Stage 5 — On-policy Distillation
 
 Goal: improve the student on its own generation distribution using preference, correction, or reinforcement-style objectives.
 
-This stage may use a mix of:
+The following methods are initial baseline or reference candidates for this stage. They are not considered supported until they are implemented, tested, logged, and compared under a fixed budget:
 
-* DPO: On-policy distillation;
+* GKD: Generalized Knowledge Distillation;
 * SDPO: Reinforcement Learning via Self-Distillation;
 * TIP: Token Importance in On-Policy Distillation;
 * rejection fine-tuning;
@@ -920,18 +944,22 @@ This stage may use a mix of:
 * GRPO-style methods;
 * other logged on-policy objectives.
 
-The objective must be explicitly recorded. Do not silently change preference loss, beta, reward normalization, sampling policy, or data mixture.
+Before implementing any candidate method, the agent should record why it is relevant, what baseline it will be compared against, what data it needs, what risks it introduces, and how it will be validated.
+
+The objective must be explicitly recorded. Do not silently change preference loss, beta, reward normalization, sampling policy, rollout policy, data filtering, or data mixture.
 
 Default action policy:
 
-* **Act directly** for implementing small-scale DPO/SDPO loss tests, toy preference training, data loader checks, and reproducibility checks.
+* **Act directly** for implementing small-scale objective tests, toy preference training, toy rollout checks, data loader checks, and reproducibility checks.
 * **Ask user first** before running serious on-policy training, changing the official objective mix, using expensive GPUs/APIs, or claiming an optimization record.
 
 Validation gate:
 
 * on-policy training config is logged;
 * objective mix is logged;
-* preference dataset manifest is logged;
+* baseline/reference method is recorded;
+* rollout policy is logged;
+* preference or correction dataset manifest is logged;
 * checkpoint can resume;
 * on-policy model improves over student recovery or gives a clearly documented tradeoff;
 * tool-use format is not broken;

@@ -137,17 +137,23 @@ Agent notes:
 - Record the student checkpoint used to generate the online data.
 -->
 
-### 🎯 Stage 7 — On-policy distillation / DPO / SDPO mix
+### 🎯 Stage 5 — On-policy distillation
 
 <!--
 Agent notes:
 - Record optimizations related to on-policy training.
-- Examples: DPO, SDPO, IPO, rejection fine-tuning, teacher correction distillation,
-  verifier-guided preference optimization, GRPO-style objectives, objective mixing.
-- Every entry should report whether tool format, refusal behavior, latency, and RAG faithfulness regressed.
+- Candidate baseline/reference methods may include GKD, SDPO, TIP, rejection fine-tuning,
+  teacher correction distillation, verifier-guided preference optimization,
+  GRPO-style objectives, and objective mixing.
+- These methods are not considered supported until they are implemented, tested,
+  logged, and compared under a fixed budget.
+- Before adding a record, link to the experiment log, objective config, rollout policy,
+  data manifest, checkpoint, evaluation report, and baseline comparison.
+- Every entry should report whether tool format, refusal behavior, latency,
+  and RAG faithfulness regressed.
 -->
 
-### 🚀 Stage 7 — Deployment validation
+### 🚀 Stage 6 — Deployment validation
 
 <!--
 Agent notes:
