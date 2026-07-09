@@ -24,7 +24,7 @@ Do not add abstraction layers that hide performance bottlenecks. Any optimizatio
 
 Do not create directories, packages, configs, or placeholder files only because a future design may need them. Create structure only when it is required by an implemented and verified milestone.
 
-The first valid repository state is:
+The first minimal repository state is:
 
 ```text
 AlphaAvatar-distill/
@@ -116,6 +116,16 @@ The README may contain empty sections and placeholders, but it must not contain 
 Use CPU, tiny models, toy data, dry runs, static checks, and cheap GPUs before expensive training.
 
 Expensive GPU runs are allowed only after the relevant code path, logging path, resume path, and evaluation path have been tested at small scale.
+
+### P8.1. Hardware-portable environment setup
+
+This repo may be run on CPU-only development servers, local GPU machines, or rented cloud GPU instances. Agents must not assume CUDA or GPU availability.
+
+At the start of a task, the agent should inspect the current environment, infer or create the minimal Python environment needed for the next milestone, and run CPU-compatible checks, static validation, and smoke tests whenever possible.
+
+GPU-dependent training, quantization, benchmarking, kernel validation, and large teacher inference must be gated behind explicit hardware detection such as `nvidia-smi` and `torch.cuda.is_available()`. The implementation should allow the same experiment definition to be prepared on a CPU-only machine and later resumed or executed on a GPU-enabled machine without changing the experiment logic.
+
+If no `pyproject.toml` or dependency lockfile exists yet, the agent may create the smallest reasonable project environment only when it is required by the current milestone. Do not add heavy dependencies unless they are justified, documented, and approved when necessary.
 
 ### P9. Match training and deployment numerics when possible
 
@@ -218,6 +228,20 @@ Agents must never commit API keys, tokens, credentials, private datasets, user d
 Before adding a dataset, checkpoint, teacher output corpus, or external artifact, agents must check and record license constraints, redistribution rules, and privacy risks.
 
 If a task may expose secrets, personal data, or restricted data, ask the user before proceeding.
+
+### P16. Maintain repository hygiene before generating artifacts
+
+Agents must protect the repository before creating code, environments, caches, logs, datasets, checkpoints, or experiment artifacts.
+
+At bootstrap, `.gitignore` is an allowed safety file even if the repository otherwise starts with only `AGENTS.md` and `README.md`. Creating `.gitignore` does not count as pre-generating project structure.
+
+Before running commands that may generate local files, the agent should ensure `.gitignore` covers common local and heavy artifacts, including Python environments, caches, build outputs, editor files, logs when appropriate, datasets, model checkpoints, optimizer states, activation caches, wandb or similar tracking directories, Hugging Face caches, downloaded model weights, temporary experiment outputs, secrets, and local environment files.
+
+Do not commit generated artifacts unless they are intentionally small, reviewable, and useful for reproducibility, such as code, configs, manifests, small metadata, small plots, documentation, model card drafts, or reproducibility records.
+
+If the agent introduces a new artifact location, cache directory, training output path, logging backend, dataset path, or model download path, it must also check whether `.gitignore` and artifact documentation need to be updated.
+
+Repository hygiene is part of the definition of done: the final summary should mention whether new generated files were created, whether they are tracked or ignored, and whether any large or sensitive artifacts were avoided.
 
 ---
 
