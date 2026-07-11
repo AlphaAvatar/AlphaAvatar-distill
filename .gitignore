@@ -1,0 +1,44 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+.venv/
+.python-version.local
+
+# Tooling caches
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.ipynb_checkpoints/
+
+# Editors / OS
+.vscode/
+.idea/
+*.swp
+.DS_Store
+
+# Secrets and local env
+.env
+.env.*
+*.key
+*.pem
+
+# Heavy local artifacts (activation caches, checkpoints, datasets, run outputs)
+artifacts/
+checkpoints/
+datasets/
+wandb/
+runs/
+
+# Model weights anywhere in the tree (small metadata/manifests stay tracked)
+*.safetensors
+*.bin
+*.gguf
+*.pt
+*.pth
+
+# Hugging Face / torch caches if ever redirected into the repo
+hf_cache/
+torch_cache/

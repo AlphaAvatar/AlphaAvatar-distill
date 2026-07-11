@@ -1,0 +1,33 @@
+[project]
+name = "aadistill"
+version = "0.0.1"
+description = "AlphaAvatar-distill: agent-driven compression and distillation of LLMs into realtime student models"
+requires-python = ">=3.11"
+dependencies = [
+    "torch>=2.6",
+    "transformers>=4.53",
+    "safetensors>=0.4",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=8",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/aadistill"]
+
+# CPU-only torch wheels for the current CPU-only dev box (AGENTS.md P8.1).
+# On a GPU machine, switch this index to the matching CUDA channel and re-lock;
+# experiment definitions themselves do not change.
+[[tool.uv.index]]
+name = "pytorch-cpu"
+url = "https://download.pytorch.org/whl/cpu"
+explicit = true
+
+[tool.uv.sources]
+torch = { index = "pytorch-cpu" }

@@ -18,7 +18,13 @@ _Not available yet. This section will describe the actual implemented pipeline o
 
 ## ⚡ Quick start
 
-_Not available yet. No working commands exist in this repository yet._
+Only environment setup works so far — no end-to-end experiment command exists yet:
+
+```bash
+uv sync   # CPU-only torch by default; see pyproject.toml to switch to a CUDA index
+```
+
+The Stage 0 collection script (`scripts/collect_stage0.py`) exists but is not runnable yet: its config and warm-up dataset have not been created. See [`logs/STATE.md`](./logs/STATE.md) for what remains.
 
 ---
 
@@ -26,21 +32,36 @@ _Not available yet. No working commands exist in this repository yet._
 
 This project is developed by autonomous coding agents (e.g. Claude Code, Codex, Cursor). [`AGENTS.md`](./AGENTS.md) is the single source of truth for agent instructions and must be read before making any change to this repository.
 
+The first dense-model compression experiment was kicked off with this instruction to the agent:
+
+> Hi, have a look at the AlphaAvatar-distill repo and start from the teacher model https://huggingface.co/Qwen/Qwen3-4B-Thinking-2507. Let's kick off the first dense-model compression experiment.
+
+Everything under `src/`, `scripts/`, and `logs/` grew from that instruction, following the staged workflow in `AGENTS.md`. Current session state and the next recommended actions live in [`logs/STATE.md`](./logs/STATE.md).
+
 ---
 
 ## 🗂️ Project structure
 
-At this bootstrap stage, the repository contains only:
-
 ```text
 AlphaAvatar-distill/
-├── AGENTS.md
-├── CLAUDE.md
+├── AGENTS.md                   # agent working contract (single source of truth)
+├── CLAUDE.md                   # Claude Code entrypoint (points to AGENTS.md)
 ├── LICENSE
-└── README.md
+├── README.md
+├── pyproject.toml              # uv-managed env; CPU torch index by default
+├── uv.lock
+├── logs/
+│   └── STATE.md                # current project state and next actions
+├── scripts/
+│   └── collect_stage0.py       # Stage 0 CLI (not yet runnable: needs config + data)
+└── src/aadistill/              # algorithm core
+    ├── collect.py              # streaming activation-statistics collector
+    ├── env.py                  # env fingerprint, code-state hash, determinism
+    ├── manifest.py             # sha256 + JSON manifest helpers
+    └── teacher.py              # teacher loading with pinned revision + identity record
 ```
 
-No code, config, or model recipe directories have been created yet. New directories will be added only when required by an implemented and verified milestone, per `AGENTS.md`.
+New directories are added only when required by an implemented and verified milestone, per `AGENTS.md`. Model weights, activation caches, and experiment artifacts are kept out of git (`.gitignore`).
 
 ---
 
