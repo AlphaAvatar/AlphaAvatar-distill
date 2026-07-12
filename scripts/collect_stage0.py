@@ -44,9 +44,11 @@ def load_warmup_dataset(path: Path) -> list[dict]:
 
 def encode_sample(sample: dict, tokenizer, max_seq_len: int) -> torch.Tensor:
     if sample["format"] == "chat":
-        ids = tokenizer.apply_chat_template(
+        out = tokenizer.apply_chat_template(
             sample["messages"], add_generation_prompt=False, return_tensors="pt"
         )
+        # transformers 5.x may return a BatchEncoding rather than a bare tensor.
+        ids = out["input_ids"] if not isinstance(out, torch.Tensor) else out
     else:
         ids = tokenizer(sample["text"], return_tensors="pt").input_ids
     return ids[:, :max_seq_len]

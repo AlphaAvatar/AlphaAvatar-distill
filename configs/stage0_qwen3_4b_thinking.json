@@ -1,0 +1,11 @@
+{
+  "stage": "stage0_init_warmup_collection",
+  "teacher_model_id": "Qwen/Qwen3-4B-Thinking-2507",
+  "teacher_revision": "768f209d9ea81521153ed38c47d515654e938aea",
+  "dtype": "bfloat16",
+  "seed": 20260712,
+  "max_seq_len": 1024,
+  "dataset": "data/warmup/warmup_v0.jsonl",
+  "output_dir": "artifacts/stage0/qwen3_4b_thinking_v0",
+  "cache_budget_gb": 2.5
+}

@@ -18,13 +18,19 @@ _Not available yet. This section will describe the actual implemented pipeline o
 
 ## ⚡ Quick start
 
-Only environment setup works so far — no end-to-end experiment command exists yet:
-
 ```bash
 uv sync   # CPU-only torch by default; see pyproject.toml to switch to a CUDA index
+uv run pytest tests/ -q
 ```
 
-The Stage 0 collection script (`scripts/collect_stage0.py`) exists but is not runnable yet: its config and warm-up dataset have not been created. See [`logs/STATE.md`](./logs/STATE.md) for what remains.
+Stage 0 (teacher activation-statistics collection) runs end to end on CPU:
+
+```bash
+uv run python scripts/collect_stage0.py --config configs/stage0_qwen3_4b_thinking.json
+# dry run: add --limit 2
+```
+
+It writes a gitignored activation-stats cache and a full reproducibility manifest under `artifacts/stage0/`. Later stages are not implemented yet. See [`logs/STATE.md`](./logs/STATE.md) for current state and next actions.
 
 ---
 
@@ -50,10 +56,19 @@ AlphaAvatar-distill/
 ├── README.md
 ├── pyproject.toml              # uv-managed env; CPU torch index by default
 ├── uv.lock
+├── configs/
+│   └── stage0_qwen3_4b_thinking.json   # Stage 0 run config (pinned teacher revision)
+├── data/
+│   └── warmup/warmup_v0.jsonl          # 47 handcrafted warm-up samples, 12 categories
 ├── logs/
-│   └── STATE.md                # current project state and next actions
+│   ├── STATE.md                # current project state and next actions
+│   ├── decisions.md            # decision records
+│   ├── supported_models.md     # model status table
+│   └── experiments/            # per-run experiment logs
 ├── scripts/
-│   └── collect_stage0.py       # Stage 0 CLI (not yet runnable: needs config + data)
+│   └── collect_stage0.py       # Stage 0 CLI: teacher activation-stats collection
+├── tests/
+│   └── test_collect_toy.py     # CPU toy-model tests for the collector
 └── src/aadistill/              # algorithm core
     ├── collect.py              # streaming activation-statistics collector
     ├── env.py                  # env fingerprint, code-state hash, determinism

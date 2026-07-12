@@ -492,18 +492,52 @@ Create only the logs needed by the current milestone.
 
 ### 3.3 Current state log
 
-When implemented, the current state log should answer:
+Once the first meaningful implementation or experiment session begins, maintain a single current-state file at:
 
-- current project status;
-- latest working command, if any;
-- existing directories and their purpose;
-- active model recipe, if any;
-- active training stage, if any;
-- latest successful verification;
-- latest failure;
-- next recommended task.
+```text
+logs/STATE.md
+```
 
-Update it after meaningful coding, experiment, or structure changes.
+`STATE.md` is the canonical handoff document for the repository. It should allow a new human or coding agent to continue the project without relying on chat history.
+
+It is a living snapshot of the current repository state, not an append-only operation history. Update or replace stale information instead of accumulating outdated session notes. Historical decisions, experiments, training events, and optimization records should be stored in their dedicated logs and linked from `STATE.md` when relevant.
+
+The file should clearly distinguish between:
+
+* implemented but not verified;
+* verified on a toy or smoke-test path;
+* verified on the real model or dataset;
+* planned but not implemented;
+* blocked or waiting for user approval;
+* failed or intentionally abandoned.
+
+`STATE.md` should include, when applicable:
+
+* last updated date and time, including timezone;
+* current branch, commit, and whether the working tree is dirty;
+* concise current project status;
+* active teacher, student target, model recipe, and training stage;
+* current environment and important hardware constraints;
+* existing directories and important files, including why they exist;
+* latest known working command;
+* latest successful verification and its scope;
+* latest failure or unresolved issue;
+* generated artifacts and whether they are tracked, ignored, or stored externally;
+* ordered next actions;
+* decisions or approvals currently required from the user;
+* links to relevant experiment logs, decision records, manifests, or training logs.
+
+Update `logs/STATE.md`:
+
+* after meaningful implementation, experiment, environment, dependency, model, or repository-structure changes;
+* after a stage passes, fails, pauses, or changes status;
+* after discovering or resolving a significant bug;
+* before ending or interrupting a nontrivial work session;
+* before handing the repository to another agent.
+
+Do not record speculative results as facts. Explicitly state when a real run, test, dataset download, checkpoint creation, or evaluation has not occurred.
+
+Keep `STATE.md` concise enough to scan quickly. Detailed commands, metrics, hypotheses, and run histories belong in experiment or training logs rather than being duplicated here.
 
 ### 3.4 Supported models log
 
