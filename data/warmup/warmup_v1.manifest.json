@@ -1,0 +1,74 @@
+{
+  "dataset": "warmup_v1",
+  "created_utc": "2026-07-13T09:46:58.278273+00:00",
+  "command": "scripts/build_warmup_v1.py",
+  "purpose": "Stage 0 initialization warm-up statistics (not training data)",
+  "doc_char_cap": 4500,
+  "doc_char_min": 200,
+  "dedup": "exact content sha256 (id excluded)",
+  "sources": [
+    {
+      "name": "fineweb_edu",
+      "dataset": "HuggingFaceFW/fineweb-edu",
+      "config": "sample-10BT",
+      "split": "train",
+      "license": "ODC-By 1.0",
+      "revision": "87f09149ef4734204d70ed1d046ddc9ca3f2b8f9",
+      "samples": 848,
+      "chars": 2404483,
+      "skipped_duplicates": 0
+    },
+    {
+      "name": "dolly",
+      "dataset": "databricks/databricks-dolly-15k",
+      "config": null,
+      "split": "train",
+      "license": "CC-BY-SA 3.0",
+      "revision": "bdd27f4d94b9c1f951818a7da7fd7aeea5dbff1a",
+      "samples": 1048,
+      "chars": 800302,
+      "skipped_duplicates": 0
+    },
+    {
+      "name": "gsm8k",
+      "dataset": "openai/gsm8k",
+      "config": "main",
+      "split": "train",
+      "license": "MIT",
+      "revision": "740312add88f781978c0658806c59bc2815b9866",
+      "samples": 921,
+      "chars": 480107,
+      "skipped_duplicates": 0
+    },
+    {
+      "name": "mbpp",
+      "dataset": "google-research-datasets/mbpp",
+      "config": "full",
+      "split": "train",
+      "license": "CC-BY-4.0",
+      "revision": "4bb6404fdc6cacfda99d4ac4205087b89d32030c",
+      "samples": 338,
+      "chars": 160089,
+      "skipped_duplicates": 0
+    },
+    {
+      "name": "warmup_v0_handcrafted",
+      "dataset": "data/warmup/warmup_v0.jsonl",
+      "config": null,
+      "split": null,
+      "license": "project-authored (license-clean, see v0 record)",
+      "revision": "2dcb4dee92e9c6b1934d955537be10a1f10a82141e9004cd8c8922d0ae3fb573",
+      "samples": 47,
+      "chars": 14881,
+      "skipped_duplicates": 0
+    }
+  ],
+  "total_samples": 3202,
+  "total_chars": 3859862,
+  "output": {
+    "path": "data/warmup/warmup_v1.jsonl",
+    "sha256": "ed5e6b9bd880c30b7d2154060c5a960133abc0267058bac8c00940ad99ef189d",
+    "bytes": 4338208,
+    "tracked_in_git": false
+  }
+}

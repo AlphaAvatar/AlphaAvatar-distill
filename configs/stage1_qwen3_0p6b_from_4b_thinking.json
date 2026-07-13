@@ -1,0 +1,19 @@
+{
+  "stage": "stage1_projection_init",
+  "teacher_model_id": "Qwen/Qwen3-4B-Thinking-2507",
+  "teacher_revision": "768f209d9ea81521153ed38c47d515654e938aea",
+  "dtype": "bfloat16",
+  "seed": 20260713,
+  "stats_dir": "artifacts/stage0/qwen3_4b_thinking_v1",
+  "student_geometry": {
+    "hidden_size": 1024,
+    "num_hidden_layers": 28,
+    "intermediate_size": 3072,
+    "num_attention_heads": 16,
+    "num_key_value_heads": 8,
+    "head_dim": 128,
+    "tie_word_embeddings": true
+  },
+  "output_dir": "artifacts/stage1/qwen3_0p6b_init_v0",
+  "save_random_baseline": true
+}

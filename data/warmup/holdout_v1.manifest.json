@@ -1,0 +1,23 @@
+{
+  "dataset": "holdout_v1",
+  "created_utc": "2026-07-13T17:44:48.640437+00:00",
+  "command": "scripts/build_holdout_v1.py",
+  "purpose": "Held-out perplexity eval for Stage 1 gate (never in warmup_v1)",
+  "source": {
+    "dataset": "HuggingFaceFW/fineweb-edu",
+    "config": "sample-10BT",
+    "split": "train",
+    "revision": "87f09149ef4734204d70ed1d046ddc9ca3f2b8f9",
+    "license": "ODC-By 1.0"
+  },
+  "skip_docs": 5000,
+  "num_docs": 40,
+  "doc_char_cap": 4500,
+  "doc_char_min": 500,
+  "output": {
+    "path": "data/warmup/holdout_v1.jsonl",
+    "sha256": "2d49f637a711ae82510fd55a3af98e332314f972780841869508aebe7b3cd8e8",
+    "bytes": 103513,
+    "tracked_in_git": false
+  }
+}

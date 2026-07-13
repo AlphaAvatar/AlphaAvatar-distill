@@ -25,6 +25,11 @@ dist/
 *.key
 *.pem
 
+# Downloaded third-party warm-up text (rebuild with scripts/build_warmup_v1.py;
+# the committed .manifest.json pins revisions and hashes)
+data/warmup/warmup_v1.jsonl
+data/warmup/holdout_v1.jsonl
+
 # Heavy local artifacts (activation caches, checkpoints, datasets, run outputs)
 artifacts/
 checkpoints/
