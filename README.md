@@ -6,6 +6,10 @@ AlphaAvatar-distill aims to build an agent-guided model compression and distilla
 
 The project goal is to make distillation reproducible, automated, and useful for realtime AI assistant runtimes, including RAG, tool use, reasoning, self-correction, quantized inference, and low-latency deployment.
 
+[![performance trend](./assets/performance_trend.svg)](./assets/performance_trend.svg)
+
+Every point is backed by a log in [`logs/experiments/`](./logs/experiments/); the figure regenerates from [`assets/perf_trend.json`](./assets/perf_trend.json) via `uv run python scripts/plot_perf_trend.py`. New student attempts are appended as stages progress (recovery training has not started yet — the gap to the teacher line is the work ahead).
+
 **Current experiment:** compressing [Qwen/Qwen3-4B-Thinking-2507](https://huggingface.co/Qwen/Qwen3-4B-Thinking-2507) into a 0.6B-class student (Qwen3-0.6B geometry, ~6.7× compression, INT8 deployment target). Stage 0 (teacher activation statistics, ~950K tokens) and Stage 1 (teacher-projected structural initialization, 596M params) have passed their validation gates; recovery training has not started. Details: [Stage 0 log](./logs/experiments/2026-07-13_stage0_qwen3_4b_thinking_v1.md), [Stage 1 log](./logs/experiments/2026-07-14_stage1_qwen3_0p6b_init_v0.md).
 
 _A performance trend chart will be added once official optimization records exist, with every point linked to its experiment record._
@@ -75,6 +79,9 @@ AlphaAvatar-distill/
 ├── README.md
 ├── pyproject.toml              # uv-managed env; CPU torch index by default
 ├── uv.lock
+├── assets/
+│   ├── perf_trend.json                     # trend-figure data (each point links to a log)
+│   └── performance_trend.svg               # rendered by scripts/plot_perf_trend.py
 ├── configs/
 │   ├── stage0_qwen3_4b_thinking.json       # Stage 0 v0 config (47-sample warm-up)
 │   ├── stage0_qwen3_4b_thinking_v1.json    # Stage 0 v1 config (~950K-token warm-up)
@@ -91,6 +98,7 @@ AlphaAvatar-distill/
 │   └── experiments/            # per-run experiment logs
 ├── scripts/
 │   ├── collect_stage0.py       # Stage 0 CLI: teacher activation-stats collection
+│   ├── plot_perf_trend.py      # renders the README performance-trend figure
 │   ├── build_warmup_v1.py      # warm-up corpus builder (revision-pinned sources)
 │   ├── build_holdout_v1.py     # held-out eval set builder
 │   ├── init_stage1.py          # Stage 1 CLI: student init + gate checks + manifest

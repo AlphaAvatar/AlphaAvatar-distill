@@ -1,0 +1,34 @@
+{
+  "metric": "held-out NLL (nats/token) on holdout_v1 (21,080 tokens, fineweb-edu)",
+  "lower_is_better": true,
+  "eval": "scripts/eval_ppl.py --data data/warmup/holdout_v1.jsonl",
+  "references": [
+    {
+      "label": "teacher Qwen3-4B-Thinking-2507",
+      "nll": 2.6264,
+      "log": "logs/experiments/2026-07-14_stage1_qwen3_0p6b_init_v0.md"
+    },
+    {
+      "label": "random-init 0.6B baseline",
+      "nll": 12.1286,
+      "log": "logs/experiments/2026-07-14_stage1_qwen3_0p6b_init_v0.md"
+    }
+  ],
+  "attempts": [
+    {
+      "date": "2026-07-14",
+      "label": "Stage 1 init, recipe attempt 1\n(early-band depth merge)",
+      "stage": "stage1",
+      "nll": 17.7977,
+      "log": "logs/experiments/2026-07-14_stage1_qwen3_0p6b_init_v0.md"
+    },
+    {
+      "date": "2026-07-14",
+      "label": "Stage 1 init, fixed recipe\n(middle-band merge, weighted P)",
+      "label_offset": [6, -30],
+      "stage": "stage1",
+      "nll": 11.7482,
+      "log": "logs/experiments/2026-07-14_stage1_qwen3_0p6b_init_v0.md"
+    }
+  ]
+}
