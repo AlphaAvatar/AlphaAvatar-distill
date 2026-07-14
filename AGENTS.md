@@ -127,6 +127,48 @@ GPU-dependent training, quantization, benchmarking, kernel validation, and large
 
 If no `pyproject.toml` or dependency lockfile exists yet, the agent may create the smallest reasonable project environment only when it is required by the current milestone. Do not add heavy dependencies unless they are justified, documented, and approved when necessary.
 
+### P8.2. Hardware escalation and execution requests
+
+The agent must determine the cheapest suitable hardware for each task instead of assuming that the entire stage should run on one device.
+
+Before executing a nontrivial computation, the agent should classify it as one of:
+
+* **CPU-suitable**: static checks, configuration generation, manifest creation, dataset inspection, tokenizer analysis, small preprocessing, toy-model tests, shape validation, logging, and small deterministic smoke tests;
+* **GPU-preferred**: computations that may technically run on CPU but would be unreasonably slow or memory-constrained, such as real-model activation collection, large PCA or SVD workloads, checkpoint conversion, teacher inference, and medium-scale evaluation;
+* **GPU-required**: training, low-precision kernel validation, CUDA-specific quantization, serious rollout generation, throughput benchmarking, distributed execution, or any computation whose implementation requires a supported accelerator;
+* **user-approval-required**: paid, long-running, multi-GPU, large-storage, irreversible, or public-facing execution.
+
+The agent may automatically perform CPU-suitable work and small local GPU smoke tests when suitable hardware is already available and the action is reversible and inexpensive.
+
+When the next meaningful step is GPU-preferred or GPU-required and suitable hardware is unavailable, or when user approval is required, the agent must not silently skip the step or attempt an impractical CPU fallback. It must prepare a concrete hardware execution request for the user.
+
+The request should include, when known:
+
+* the exact operation to run;
+* why CPU execution is unsuitable or only useful as a smoke test;
+* the minimum and recommended GPU type or capability;
+* estimated GPU memory requirement;
+* expected precision, such as BF16, FP8, INT8, or INT4;
+* expected runtime or fixed execution budget;
+* required GPU count;
+* expected disk and activation-cache usage;
+* whether a cheaper GPU validation run should happen before the full run;
+* the exact command or resumable experiment entry point;
+* what has already been completed and verified on CPU;
+* what validation gate the GPU run is intended to pass.
+
+The agent should prefer hardware escalation in the following order unless a documented technical reason requires otherwise:
+
+1. CPU implementation and validation;
+2. tiny-model or reduced-data CPU smoke test;
+3. single inexpensive GPU smoke test;
+4. single suitable production GPU;
+5. multi-GPU or premium accelerator execution.
+
+Hardware selection must be based on the actual operation, model size, sequence length, batch size, precision, activation memory, optimizer state, and target runtime. Do not request an H100 merely because a task involves model training if a cheaper GPU can validate the same hypothesis under the fixed budget.
+
+If the repository is moved from a CPU environment to a GPU environment, the same logged experiment config and command should remain usable whenever practical. Hardware-specific changes must be expressed through explicit configuration rather than unlogged code edits.
+
 ### P9. Match training and deployment numerics when possible
 
 If the target deployment is INT8, INT4, FP8, MXFP4, or another low-precision mode, prefer training, recovery, and evaluation paths that simulate or match deployment numerics as closely as practical.
