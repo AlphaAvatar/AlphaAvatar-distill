@@ -1,6 +1,7 @@
 # Current project state
 
-Updated: 2026-07-14 (UTC+8 dev box) — Stage 1 initialization **run and gate-passed**.
+Updated: 2026-07-16 (UTC+8 dev box) — Stage 1 gate-passed; RunPod control plane
+verified read-only (see Environment).
 
 ## Status
 
@@ -30,6 +31,13 @@ Verified state of the initialized student (real teacher, real stats, CPU):
   bf16 weights can differ by a few ULPs in logits (oneDNN/AMX alignment-dependent);
   each instance is self-deterministic. Gate checks compare weights bitwise and
   logits with tolerance 0.5.
+- RunPod control plane verified read-only 2026-07-16: `runpodctl` 2.7.1 installed
+  (`~/.local/bin`), authenticated (`~/.runpod/config.toml`, not in repo), balance
+  $250 / $0 per hr spend / $80 spend limit, no pods or volumes exist, 21 GPU types
+  listable, 2 account SSH keys with local private keys present (`~/.ssh/id_ed25519`
+  ed25519 + `~/.runpod/ssh/runpodctl-ssh-key` RSA). Skill at
+  `.agents/skills/runpodctl` (pinned in `skills-lock.json`). No paid resource was
+  created. Ready to rent a GPU worker for Stage 3 pending user approval (P12).
 
 ## What exists and why
 
