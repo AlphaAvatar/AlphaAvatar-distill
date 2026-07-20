@@ -1,0 +1,353 @@
+{
+  "dataset": "stage2_offline_v0",
+  "created_utc": "2026-07-20T19:49:22.913368+00:00",
+  "command": "scripts/build_stage2_v0.py",
+  "purpose": "Stage 2 offline warm-up/distillation data for post-init student recovery (Stage 3+); grouped by training use",
+  "schema": {
+    "fields": "id, group, source, format ('chat'|'text'), messages|text, tools?",
+    "tool_convention": "OpenAI-nested tools/tool_calls, rendered by the Qwen3 chat template (see src/aadistill/data.py)"
+  },
+  "caps": {
+    "msg_char_cap": 6000,
+    "sample_char_cap": 12000,
+    "long_doc_min": 8000,
+    "long_doc_cap": 24000
+  },
+  "split_rule": "per group, index i in build order: i%25==12 -> calib (max 16), i%25==24 -> val, else train; calib across all groups is the quantization-calibration set",
+  "dedup": "global exact content sha256 (id excluded)",
+  "holdout_exclusion": "fineweb stream offset >= 10000 plus first-1000-char match against holdout_v1",
+  "teacher_generated_data": "none in v0",
+  "sources": [
+    {
+      "name": "dolly",
+      "dataset": "databricks/databricks-dolly-15k",
+      "config": null,
+      "split": "train",
+      "license": "CC-BY-SA 3.0",
+      "revision": "bdd27f4d94b9c1f951818a7da7fd7aeea5dbff1a",
+      "chars_instruction": 3201093,
+      "chars_short_realtime": 800155,
+      "skipped_duplicates": 3,
+      "taken_instruction": 2543,
+      "taken_short_realtime": 3748
+    },
+    {
+      "name": "oasst2",
+      "dataset": "OpenAssistant/oasst2",
+      "config": null,
+      "split": "train",
+      "license": "Apache-2.0",
+      "revision": "179dd21fc55192153d94adb0e0ce8f69e222bf75",
+      "chars_instruction": 2501444,
+      "taken_instruction": 1344
+    },
+    {
+      "name": "squad_v2",
+      "dataset": "rajpurkar/squad_v2",
+      "config": null,
+      "split": "train",
+      "license": "CC-BY-SA 4.0",
+      "revision": "3ffb306f725f7d2ce8394bc1873b24868140c412",
+      "chars_rag_evidence": 2501319,
+      "chars_refusal_uncertainty": 800766,
+      "skipped_duplicates": 6,
+      "taken_rag_evidence": 2510,
+      "taken_refusal_uncertainty": 905
+    },
+    {
+      "name": "hotpot_qa",
+      "dataset": "hotpotqa/hotpot_qa",
+      "config": "distractor",
+      "split": "train",
+      "license": "CC-BY-SA 4.0",
+      "revision": "1908d6afbbead072334abe2965f91bd2709910ab",
+      "chars_multihop_qa": 3004920,
+      "rejected_too_long": 1,
+      "taken_multihop_qa": 511
+    },
+    {
+      "name": "glaive_fc_v2",
+      "dataset": "glaiveai/glaive-function-calling-v2",
+      "config": null,
+      "split": "train",
+      "license": "Apache-2.0",
+      "revision": "e7f4b6456019f5d8bcb991ef0dd67d8ff23221ac",
+      "chars_tool_calling": 2501144,
+      "parse_failures": 5,
+      "rejected_schema_or_marker": 7,
+      "skipped_duplicates": 62,
+      "taken_tool_calling": 2430
+    },
+    {
+      "name": "gsm8k",
+      "dataset": "openai/gsm8k",
+      "config": "main",
+      "split": "train",
+      "license": "MIT",
+      "revision": "740312add88f781978c0658806c59bc2815b9866",
+      "chars_code_math": 2500490,
+      "taken_code_math": 4798
+    },
+    {
+      "name": "mbpp",
+      "dataset": "google-research-datasets/mbpp",
+      "config": "full",
+      "split": "train",
+      "license": "CC-BY-4.0",
+      "revision": "4bb6404fdc6cacfda99d4ac4205087b89d32030c",
+      "chars_code_math": 177279,
+      "taken_code_math": 374
+    },
+    {
+      "name": "fineweb_edu_long",
+      "dataset": "HuggingFaceFW/fineweb-edu",
+      "config": "sample-10BT",
+      "split": "train",
+      "license": "ODC-By 1.0",
+      "revision": "87f09149ef4734204d70ed1d046ddc9ca3f2b8f9",
+      "chars_long_context": 3006160,
+      "taken_long_context": 204
+    },
+    {
+      "name": "warmup_v0_handcrafted",
+      "dataset": "data/warmup/warmup_v0.jsonl",
+      "config": null,
+      "split": null,
+      "license": "project-authored (license-clean, see v0 record)",
+      "revision": "2dcb4dee92e9c6b1934d955537be10a1f10a82141e9004cd8c8922d0ae3fb573",
+      "chars_refusal_uncertainty": 1236,
+      "chars_tool_calling": 790,
+      "taken_refusal_uncertainty": 4,
+      "taken_tool_calling": 4
+    }
+  ],
+  "groups": {
+    "instruction": {
+      "train": {
+        "path": "data/stage2/train/instruction.jsonl",
+        "samples": 3716,
+        "chars": 5478203,
+        "sha256": "24dec1e5fb076fbf5841bc974d621dffa7df644194d9fc1afc869d83393bf7e6",
+        "bytes": 6211745,
+        "tracked_in_git": false
+      },
+      "val": {
+        "path": "data/stage2/val/instruction.jsonl",
+        "samples": 155,
+        "chars": 205827,
+        "sha256": "775c97f094608bf8dab6f8e7f97875d3226a0520a19a9fa1b18ac6a6cec3c592",
+        "bytes": 235097,
+        "tracked_in_git": false
+      },
+      "calib": {
+        "path": "data/stage2/calib/instruction.jsonl",
+        "samples": 16,
+        "chars": 18507,
+        "sha256": "bee8981558c307eb9760a4639e8b60f1a47eb44e363feb3bbde91051f6b0d571",
+        "bytes": 21308,
+        "tracked_in_git": false
+      }
+    },
+    "rag_evidence": {
+      "train": {
+        "path": "data/stage2/train/rag_evidence.jsonl",
+        "samples": 2394,
+        "chars": 2379378,
+        "sha256": "a00965f91b8c1e09c449c2e205da3fd575f332467a190f5e05b357bc935c13ec",
+        "bytes": 2826777,
+        "tracked_in_git": false
+      },
+      "val": {
+        "path": "data/stage2/val/rag_evidence.jsonl",
+        "samples": 100,
+        "chars": 104834,
+        "sha256": "7312322dbcd48ff5ca2feae8ae522c69ba7b3204b948e98c91ee29ee00789928",
+        "bytes": 123603,
+        "tracked_in_git": false
+      },
+      "calib": {
+        "path": "data/stage2/calib/rag_evidence.jsonl",
+        "samples": 16,
+        "chars": 17107,
+        "sha256": "70fb001768084b4ccde80c80de9c3843c9a4926c84012698cf9977db1ee7456d",
+        "bytes": 20147,
+        "tracked_in_git": false
+      }
+    },
+    "multihop_qa": {
+      "train": {
+        "path": "data/stage2/train/multihop_qa.jsonl",
+        "samples": 475,
+        "chars": 2798414,
+        "sha256": "363f800e4b85995d63055a870e2ffed83b54d615a6912fd14e7905e2b551560f",
+        "bytes": 2918927,
+        "tracked_in_git": false
+      },
+      "val": {
+        "path": "data/stage2/val/multihop_qa.jsonl",
+        "samples": 20,
+        "chars": 118099,
+        "sha256": "f06966857bbea6e45b25d1545443d868a30f3693b9ae16c6c5f6a72e3fe0dc8a",
+        "bytes": 122865,
+        "tracked_in_git": false
+      },
+      "calib": {
+        "path": "data/stage2/calib/multihop_qa.jsonl",
+        "samples": 16,
+        "chars": 88407,
+        "sha256": "3e1a79e995e0f05afe7668c33cc1dd4bf270f360a1cf68742a13f6189f0fad44",
+        "bytes": 92531,
+        "tracked_in_git": false
+      }
+    },
+    "tool_calling": {
+      "train": {
+        "path": "data/stage2/train/tool_calling.jsonl",
+        "samples": 2321,
+        "chars": 2381268,
+        "sha256": "5f9bf4b3a67569a239d74d4990aee58e5aee04c13f3edf35bd04a9a7939f44e0",
+        "bytes": 3213220,
+        "tracked_in_git": false
+      },
+      "val": {
+        "path": "data/stage2/val/tool_calling.jsonl",
+        "samples": 97,
+        "chars": 103711,
+        "sha256": "bf5b7dd439ee65a9f6a4a1276561f2b5b70f3c0b6cc117637fde052f5f73dd3b",
+        "bytes": 139102,
+        "tracked_in_git": false
+      },
+      "calib": {
+        "path": "data/stage2/calib/tool_calling.jsonl",
+        "samples": 16,
+        "chars": 16955,
+        "sha256": "a599bdcc8db9297790fd4bca355aa39ab3bc4c9dec4a5a2a659146f8275ad24c",
+        "bytes": 23050,
+        "tracked_in_git": false
+      }
+    },
+    "refusal_uncertainty": {
+      "train": {
+        "path": "data/stage2/train/refusal_uncertainty.jsonl",
+        "samples": 857,
+        "chars": 753356,
+        "sha256": "d678785340a8d9be706bac31970ba3fb110530034772d790e3daf3182cf899b2",
+        "bytes": 917042,
+        "tracked_in_git": false
+      },
+      "val": {
+        "path": "data/stage2/val/refusal_uncertainty.jsonl",
+        "samples": 36,
+        "chars": 31756,
+        "sha256": "fe192ca0ed28eb5ced8460b8b44599de187cf4c81fcdf1a6902557d9c16bf5ed",
+        "bytes": 38607,
+        "tracked_in_git": false
+      },
+      "calib": {
+        "path": "data/stage2/calib/refusal_uncertainty.jsonl",
+        "samples": 16,
+        "chars": 16890,
+        "sha256": "4ebb6b8322c8c2800a8772cc19ea87859e6995c75d339691d88ff7445369cecf",
+        "bytes": 19934,
+        "tracked_in_git": false
+      }
+    },
+    "code_math": {
+      "train": {
+        "path": "data/stage2/train/code_math.jsonl",
+        "samples": 4950,
+        "chars": 2559788,
+        "sha256": "c59d4fa9c38e5d174d238f97a3c74c205272b67c38a22dedcc2a4bf1ca4cdf7c",
+        "bytes": 3411072,
+        "tracked_in_git": false
+      },
+      "val": {
+        "path": "data/stage2/val/code_math.jsonl",
+        "samples": 206,
+        "chars": 107288,
+        "sha256": "adc8c4e1d70373acf27e479c56813868049e3086ea5131449e6c035ff8e02e85",
+        "bytes": 142816,
+        "tracked_in_git": false
+      },
+      "calib": {
+        "path": "data/stage2/calib/code_math.jsonl",
+        "samples": 16,
+        "chars": 10693,
+        "sha256": "b4fa5792c4c134c0e88e119c76936e1abdcf3d33eb782df76a48259ef90bb55f",
+        "bytes": 13463,
+        "tracked_in_git": false
+      }
+    },
+    "short_realtime": {
+      "train": {
+        "path": "data/stage2/train/short_realtime.jsonl",
+        "samples": 3583,
+        "chars": 762914,
+        "sha256": "276406ead91899a599c96a1d5409e91df2acc47c1270693112047215b305a42f",
+        "bytes": 1384398,
+        "tracked_in_git": false
+      },
+      "val": {
+        "path": "data/stage2/val/short_realtime.jsonl",
+        "samples": 149,
+        "chars": 33141,
+        "sha256": "6c6d663ba870ea2fb8425084e39aa5e76c6770d7a766dfa0af25121088e87da2",
+        "bytes": 58990,
+        "tracked_in_git": false
+      },
+      "calib": {
+        "path": "data/stage2/calib/short_realtime.jsonl",
+        "samples": 16,
+        "chars": 4100,
+        "sha256": "e4fc934684e7562a379f2f6c8fea8bd2f4e75c5053274b72416c87b49640062e",
+        "bytes": 6865,
+        "tracked_in_git": false
+      }
+    },
+    "long_context": {
+      "train": {
+        "path": "data/stage2/train/long_context.jsonl",
+        "samples": 188,
+        "chars": 2790504,
+        "sha256": "b6b49f87671168da01b414fbe3ff6c73f103fe90a1ec97316ee437a5f2a8034a",
+        "bytes": 2837921,
+        "tracked_in_git": false
+      },
+      "val": {
+        "path": "data/stage2/val/long_context.jsonl",
+        "samples": 8,
+        "chars": 124183,
+        "sha256": "b9f54f314a53c5c27543ff22cff681cf0e5c750b7f0d341ff361808d0f5f09bd",
+        "bytes": 126207,
+        "tracked_in_git": false
+      },
+      "calib": {
+        "path": "data/stage2/calib/long_context.jsonl",
+        "samples": 8,
+        "chars": 91473,
+        "sha256": "3ad9eb9b6a3e8a8e6a34d960f7033610610ff16200642b2c373d2ac7201da548",
+        "bytes": 93042,
+        "tracked_in_git": false
+      }
+    }
+  },
+  "totals": {
+    "train": 18484,
+    "train_chars": 19903825,
+    "val": 771,
+    "val_chars": 828839,
+    "calib": 120,
+    "calib_chars": 264132
+  },
+  "code_state": {
+    "git_commit": "f3c7a244149b2fc19ac2ac05237fa23ef9bafe90",
+    "dirty": true,
+    "uncommitted_state_sha256": "20f1acebda5a65946cf48dee465a234aefc0ac1a6e8e39f514ff54d085db70ea",
+    "untracked_files": [
+      "scripts/build_stage2_v0.py",
+      "scripts/dry_run_stage2.py",
+      "src/aadistill/data.py",
+      "tests/test_data_toy.py"
+    ]
+  }
+}

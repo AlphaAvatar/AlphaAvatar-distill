@@ -30,6 +30,12 @@ dist/
 data/warmup/warmup_v1.jsonl
 data/warmup/holdout_v1.jsonl
 
+# Stage 2 offline mixture (rebuild with scripts/build_stage2_v0.py;
+# the committed manifest in data/stage2/ pins revisions and hashes)
+data/stage2/train/
+data/stage2/val/
+data/stage2/calib/
+
 # Heavy local artifacts (activation caches, checkpoints, datasets, run outputs)
 artifacts/
 checkpoints/
