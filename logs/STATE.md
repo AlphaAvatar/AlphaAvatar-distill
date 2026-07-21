@@ -119,8 +119,11 @@ uv run python scripts/eval_ppl.py --data data/warmup/holdout_v1.jsonl --model <d
 
 ## Open decisions for the user
 
-- **Approve the Stage 3 GPU run** (item 1 above: rent RunPod L40S-class pod,
-  ~$1–3 + pod setup time, smoke-then-full on one pod). Nothing else blocks.
+- None blocking. The Stage 3 GPU run (item 1 above) was **approved by the
+  user on 2026-07-22** ("push code and do it tomorrow") with execution
+  deferred to 2026-07-23: rent one RunPod L40S-class pod, GPU smoke
+  (~10 steps), then the full `stage3_s1_ffn_norm.json` run. Re-confirm cost
+  ceiling at rental time if prices differ materially from the ~$1–3 estimate.
 
 ## Links
 
