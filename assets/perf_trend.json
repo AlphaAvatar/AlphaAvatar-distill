@@ -29,6 +29,13 @@
       "stage": "stage1",
       "nll": 11.7482,
       "log": "logs/experiments/2026-07-14_stage1_qwen3_0p6b_init_v0.md"
+    },
+    {
+      "date": "2026-07-22",
+      "label": "Stage 3 s1 recovery\n(FFN+norm, CE 0.25 + KD 1.0, 660 steps)",
+      "stage": "stage3",
+      "nll": 4.2107,
+      "log": "logs/experiments/2026-07-22_stage3_s1_gpu_run.md"
     }
   ]
 }

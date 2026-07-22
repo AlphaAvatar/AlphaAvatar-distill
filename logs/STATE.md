@@ -1,135 +1,118 @@
 # Current project state
 
-Updated: 2026-07-22 (UTC+8 dev box) — Stage 3 trainer implemented and
-verified at toy + real-model smoke scale; first GPU recovery run awaiting
-user approval.
+Updated: 2026-07-23 (UTC+8 dev box) — Stage 3 recovery sub-stage 1 **ran on
+GPU and passed its gate**; pod torn down; all artifacts hash-verified local.
 
 ## Status
 
 First dense-model compression experiment, teacher **Qwen/Qwen3-4B-Thinking-2507**
-@ `768f209d` (hidden 2560, 36 layers, FFN 9728, 32Q/8KV).
-
-User decisions (2026-07-13, see decisions.md): student target **0.6B-class**
-(hidden 1024, 28 layers, FFN 3072, 16Q/8KV, tied emb — Qwen3-0.6B geometry);
-**BF16 training, INT8 deployment target**; warm-up v1 public-corpus download approved.
+@ `768f209d` (hidden 2560, 36 layers, FFN 9728, 32Q/8KV) → student 0.6B-class
+(hidden 1024, 28 layers, FFN 3072, 16Q/8KV, tied emb). BF16 training,
+INT8 deployment target.
 
 Pipeline position: **Stage 0 passed → Stage 1 passed → Stage 2 passed →
-Stage 3 in progress** (trainer verified; no real recovery run yet). New
-decision this session (2026-07-22, see decisions.md): one config-driven
-trainer for all recovery sub-stages, on-the-fly full-vocab forward-KL KD
-(τ=1, scope "all") + masked CE 0.25, fp32 master weights + bf16 autocast,
-stateless-exact resume; sub-stages 2–3 (span losses) deferred until the
-plain-KD baseline is measured.
+Stage 3 s1 passed (2026-07-22)**; sub-stages 2+ pending a sizing decision.
 
-Verified state:
+Verified state (all on the real model):
 
-- initialized student checkpoint `artifacts/stage1/qwen3_0p6b_init_v0/checkpoint`
-  (596.0M params, bf16); holdout NLL: teacher 2.63 / init 11.75 / random 12.13.
-- Stage 2 offline mixture `stage2_offline_v0`: 8 groups, 18,484 train
-  samples / 5.39M tokens, 771 val, 120 calib (= INT8 calibration set).
-- **Stage 3 trainer** (`aadistill.train` + `scripts/train_stage3.py`):
-  43/43 tests pass (10 new: loss correctness, freeze policy, deterministic
-  block stream, **bitwise-exact resume**, config-refusal on resume). Real
-  CPU smoke (`configs/stage3_smoke_cpu.json`): full path ran — mixture →
-  teacher+student → 3 KD+CE steps (loss 17.64 → 14.85) → checkpoints →
-  evals → jsonl trail; process-restart resume reproduced step 3 and the
-  final eval identically to all logged decimals.
+- **Stage 3 s1 recovery run** (`s1_ffn_norm_v0`, 660 steps × 16×1024-token
+  blocks ≈ 2 epochs of mixture v0, 1× RunPod L40S, 33.5 min train):
+  - stage2-val: val_ce 12.009 → **2.1805** (ppl 8.85), val_kd 11.091 → 1.006,
+    monotone at every eval, no collapse;
+  - **holdout_v1 NLL 4.2107 (ppl 67.4)** vs teacher 2.63 / init 11.75 /
+    random 12.13;
+  - generation smoke passed (valid fluent tokens; chat template + termination
+    correct: `"Okay, 2+2 = 4.<|im_end|>"`); factual/code quality still weak
+    (expected before sub-stages 2+);
+  - GPU resume check: exact state restore (first replayed step identical to
+    all logged decimals); cross-process GPU drift ~1e-4…1e-3 relative/step
+    (P5-logged variance scale);
+  - full log: `logs/experiments/2026-07-22_stage3_s1_gpu_run.md`.
+- Stage 1 init checkpoint `artifacts/stage1/qwen3_0p6b_init_v0/checkpoint`
+  (596.0M params, bf16); Stage 2 mixture `stage2_offline_v0` (18,484 train
+  samples / 5.39M tokens, 771 val, 120 calib).
+- Trainer: 43/43 tests pass locally (torch 2.13.0+cpu) **and on the GPU pod**
+  (torch 2.11.0+cu128 — cu128 channel max; logged deviation).
 
 ## Environment
 
 - CPU-only dev box: 16 threads (AMX/AVX-512 BF16), 30 GB RAM, no GPU.
-- `uv sync`: Python 3.14, torch 2.13.0+cpu, transformers 5.13.1, safetensors 0.8.0,
-  datasets, pytest.
-- Known nondeterminism (logged per P5): two model instances with bitwise-identical
-  bf16 weights can differ by a few ULPs in logits (oneDNN/AMX alignment-dependent);
-  each instance is self-deterministic. (The Stage 3 resume smoke nevertheless
-  reproduced identically at logged precision.)
-- RunPod control plane verified read-only 2026-07-16: `runpodctl` 2.7.1
-  authenticated, balance $250 / $80 spend limit, no pods or volumes, SSH keys
-  present. Skill at `.agents/skills/runpodctl`.
+  `uv sync`: Python 3.14, torch 2.13.0+cpu, transformers 5.13.1.
+- GPU runs: RunPod (runpodctl 2.7.1 authenticated; skill at
+  `.agents/skills/runpodctl`). Balance ≈ $247 after this run (~$4.3 total),
+  $80 spend limit. **No pods or volumes currently exist** (pod
+  `zae6ba3we52vgu` deleted 2026-07-23 after hash-verified artifact download).
+- Pod playbook (hard-won, see experiment log §infrastructure): venv on
+  pod-local disk (`UV_PROJECT_ENVIRONMENT=/root/venv`, network volume fails
+  on venvs and serves stale reads after write bursts — always sha256-verify);
+  torch cu128 (2.11.0) is the max for driver 570; China→US upload needs
+  parallel chunked ssh or croc relay at night; pod→dev download ~1.9 MB/s.
+- Known CPU nondeterminism (oneDNN/AMX ULP-level, P5-logged) unchanged.
 - HF cache ~12 GB (7.6 GB teacher + Stage 2 source datasets).
 
 ## What exists and why
 
-- `src/aadistill/` — `env.py`, `manifest.py`, `teacher.py`, `collect.py`
-  (Stage 0), `project.py`, `sandwich.py`, `student.py` (Stage 1), `data.py`
-  (Stage 2 loader), and new this session: `train.py` — Stage 3 recovery
-  trainer (losses, freeze policy, LR schedule, deterministic block stream,
-  rolling checkpoints with exact resume, jsonl logging).
-- `scripts/` — Stage 0/1/2 scripts as before; new: `train_stage3.py`
-  (config-driven CLI, `--resume [TAG]`, run manifests).
-- `configs/` — Stage 0 v0/v1, Stage 1 init, and new: `stage3_s1_ffn_norm.json`
-  (recovery sub-stage 1, GPU-sized draft — not yet run) and
-  `stage3_smoke_cpu.json` (3-step smoke, already exercised).
+- `src/aadistill/` — env, manifest, teacher, collect (S0), project, sandwich,
+  student (S1), data (S2 loader), train (S3 recovery trainer).
+- `scripts/` — stage scripts + `train_stage3.py`, `eval_ppl.py`,
+  `plot_perf_trend.py`.
+- `configs/` — Stage 0 v0/v1, Stage 1 init, `stage3_s1_ffn_norm.json` (ran),
+  `stage3_s1_gpu_smoke.json` (10-step GPU smoke, ran), `stage3_smoke_cpu.json`.
 - `data/warmup/`, `data/stage2/` — corpora manifests (jsonl gitignored).
-- `tests/` — 43 tests total; new `tests/test_train_toy.py` (10).
-- `artifacts/` (gitignored) — Stage 0 stats, Stage 1 checkpoint + eval,
-  Stage 2 dry-run report, new: `stage3/smoke_cpu_v0/` (smoke run output:
-  jsonl log, run + resume manifests, rolling checkpoints).
-- `logs/` — decisions (7 records), experiments (5), supported_models, this file.
+- `tests/` — 43 tests.
+- `artifacts/` (gitignored) — Stage 0 stats; Stage 1 checkpoint; Stage 3:
+  `s1_ffn_norm_v0/` (train_log.jsonl, run_manifest.json,
+  eval_holdout_v1.json, `checkpoints/step_000660/model/` **final fp32
+  student, sha256 `dc64f244…e900`, bit-verified**, tokenizer files included),
+  `s1_gpu_smoke_v0/` (jsonl + manifests), console logs. Not retained:
+  optimizer state (2.1 GB), smoke checkpoints, rolling checkpoints 440/550.
+- `logs/` — decisions (7), experiments (6), supported_models, this file.
+- `assets/` — perf trend json + svg (now 3 attempt points incl. s1).
 
 ## Latest known working commands
 
 ```
-uv run pytest tests/ -q                                                  # 43 passed
-uv run python scripts/train_stage3.py --config configs/stage3_smoke_cpu.json
-uv run python scripts/train_stage3.py --config configs/stage3_smoke_cpu.json --resume step_000002
-uv run python scripts/train_stage3.py --config configs/stage3_s1_ffn_norm.json   # REAL RUN — GPU, needs approval
-uv run python scripts/dry_run_stage2.py
-uv run python scripts/eval_ppl.py --data data/warmup/holdout_v1.jsonl --model <dir-or-hf-id> ...
+uv run pytest tests/ -q                                          # 43 passed
+uv run python scripts/train_stage3.py --config configs/stage3_s1_ffn_norm.json
+uv run python scripts/eval_ppl.py --data data/warmup/holdout_v1.jsonl \
+  --model artifacts/stage3/s1_ffn_norm_v0/checkpoints/step_000660/model
+uv run python scripts/plot_perf_trend.py
 ```
+
+Note: stage3 checkpoints are saved as `step_XXXXXX/model/` +
+`trainer_state.pt`; copy tokenizer files into `model/` before `eval_ppl.py`
+(done for the retained final checkpoint).
 
 ## Latest verification
 
-- Stage 3 trainer: verified on toy models (bitwise resume, loss math) and
-  on the real teacher/student at smoke scale, 2026-07-22. See
-  `logs/experiments/2026-07-22_stage3_trainer_toy.md`.
-- Stage 2 gate passed 2026-07-21; Stage 1 gate 2026-07-14; Stage 0 v1 2026-07-13.
+- Stage 3 s1 gate passed 2026-07-22 (GPU run, evals, generation smoke,
+  resume check) — `logs/experiments/2026-07-22_stage3_s1_gpu_run.md`.
+- Stage 2 gate 2026-07-21; Stage 1 gate 2026-07-14; Stage 0 v1 2026-07-13.
 
 ## Not done yet (next, in order)
 
-1. **Stage 3 first real run (needs user approval — P12):** recovery
-   sub-stage 1 via `configs/stage3_s1_ffn_norm.json`. Proposed execution
-   (P8.2 request):
-   - *Operation:* GPU smoke (~10 steps, same config, early stop) then the
-     full 660-step run (~10.8M tokens ≈ 2 epochs of mixture v0) on one pod.
-   - *Why not CPU:* ~30 s/step CPU ⇒ ~5.5 h/epoch of pure teacher+student
-     compute at batch 1; the real config (16-block batches) is ~16× that.
-   - *Hardware:* recommended **1× L40S 48 GB** (or A100 80 GB PCIe);
-     minimum RTX 4090 24 GB with `micro_blocks: 2`. Memory estimate:
-     teacher bf16 ~8 GB + student fp32 ~2.4 GB + grads ~1 GB + AdamW
-     moments ~2.1 GB (FFN/norm only, 264M trainable) + logits/activations
-     ~4–8 GB ⇒ ~18–22 GB peak.
-   - *Runtime/cost:* est. 1–2 h on L40S (~$1–3 at current RunPod rates);
-     well under the $80 spend limit. Disk: HF teacher download 8 GB +
-     3 rolling checkpoints ~10 GB ⇒ 40 GB volume is enough.
-   - *Precision:* teacher bf16, student fp32 master + bf16 autocast (per
-     2026-07-22 decision), matching the smoke-verified path.
-   - *Gate it must pass:* AGENTS.md 4.5 — reproducible from logged
-     command/config, resumable, loss + val proxy logged, no collapse,
-     generation smoke, improvement over init baseline (holdout NLL 11.75)
-     or documented failure analysis.
-2. After s1: holdout_v1 + stage2-val evaluation vs init/random baselines,
-   generation smoke test, then decide sub-stage 2 (unfreeze attention) /
-   sub-stage 4 (full offline KD) sizing under a fixed budget.
-3. Later stages: INT8/fake-quant eval path (Stage 3+ per precision policy),
-   Stage 4 online data collection design.
-4. Optional backlog: Stage 2 mixture scale-up (approval needed),
-   Stage 1 ablations (function-aware subspace, per-group P).
+1. **Decide sub-stage 2 sizing** (unfreeze attention, block-level recovery)
+   under a fixed budget, with s1 as the baseline (holdout 4.21 / val_ce
+   2.18). Also consider whether a longer s1 (val curve had not plateaued at
+   660 steps) is worth one comparison run before unfreezing.
+2. INT8/fake-quant eval path (deployment target INT8 — P9); calib set exists.
+3. Stage 4 online data collection design.
+4. Optional backlog: Stage 2 mixture scale-up (approval needed), Stage 1
+   ablations (function-aware subspace, per-group P).
 
 ## Open decisions for the user
 
-- None blocking. The Stage 3 GPU run (item 1 above) was **approved by the
-  user on 2026-07-22** ("push code and do it tomorrow") with execution
-  deferred to 2026-07-23: rent one RunPod L40S-class pod, GPU smoke
-  (~10 steps), then the full `stage3_s1_ffn_norm.json` run. Re-confirm cost
-  ceiling at rental time if prices differ materially from the ~$1–3 estimate.
+- Sub-stage 2 recovery run (GPU, similar cost ≈ $5): needs approval when
+  the sizing proposal is ready (P12).
+- Whether the s1 result should become an official README "Optim record
+  history" entry (requires maintainer approval per AGENTS.md 3.8; the
+  reproducible record exists in the experiment log).
 
 ## Links
 
-- `logs/experiments/2026-07-22_stage3_trainer_toy.md` (this session)
+- `logs/experiments/2026-07-22_stage3_s1_gpu_run.md` (this session)
+- `logs/experiments/2026-07-22_stage3_trainer_toy.md`
 - `logs/experiments/2026-07-21_stage2_offline_v0.md`
 - `logs/experiments/2026-07-14_stage1_qwen3_0p6b_init_v0.md`
 - `logs/experiments/2026-07-13_stage0_qwen3_4b_thinking_v1.md`
-- `logs/decisions.md` (7 records; 1 added 2026-07-22)
-- `logs/supported_models.md`
+- `logs/decisions.md` · `logs/supported_models.md`
