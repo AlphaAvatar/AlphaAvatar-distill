@@ -1,0 +1,56 @@
+{
+  "stage": "stage3_recovery",
+  "run_name": "s1_gpu_smoke_v0",
+  "student_path": "artifacts/stage1/qwen3_0p6b_init_v0/checkpoint",
+  "teacher": {
+    "model_id": "Qwen/Qwen3-4B-Thinking-2507",
+    "revision": "768f209d9ea81521153ed38c47d515654e938aea",
+    "dtype": "bfloat16"
+  },
+  "data_dir": "data/stage2",
+  "groups": null,
+  "block_len": 1024,
+  "dtype": "float32",
+  "autocast_bf16": true,
+  "gradient_checkpointing": false,
+  "device": "auto",
+  "seed": 20260722,
+  "trainable_patterns": [
+    "\\.mlp\\.(gate_proj|up_proj|down_proj)\\.",
+    "input_layernorm",
+    "post_attention_layernorm",
+    "model\\.norm\\."
+  ],
+  "loss": {
+    "ce_weight": 0.25,
+    "kd_weight": 1.0,
+    "kd_temperature": 1.0,
+    "kd_scope": "all"
+  },
+  "optim": {
+    "lr": 0.0003,
+    "weight_decay": 0.01,
+    "betas": [0.9, 0.95],
+    "eps": 1e-08,
+    "grad_clip": 1.0
+  },
+  "schedule": {
+    "total_steps": 10,
+    "warmup_steps": 5,
+    "min_lr_frac": 0.1
+  },
+  "batch": {
+    "blocks_per_step": 16,
+    "micro_blocks": 4
+  },
+  "checkpoint": {
+    "save_every": 5,
+    "keep_last": 2
+  },
+  "intervals": {
+    "log_every": 1,
+    "eval_every": 10,
+    "eval_blocks": 16
+  },
+  "out_dir": "artifacts/stage3/s1_gpu_smoke_v0"
+}
