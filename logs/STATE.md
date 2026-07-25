@@ -1,7 +1,8 @@
 # Current project state
 
-Updated: 2026-07-23 (UTC+8 dev box) — Stage 3 recovery sub-stage 1 **ran on
-GPU and passed its gate**; pod torn down; all artifacts hash-verified local.
+Updated: 2026-07-25 (UTC+8 dev box) — Stage 3 **sub-stage 2 sized and
+prepared** as a fixed-budget A/B from s1@660 (decision record 2026-07-25);
+configs CPU-smoke-verified; **GPU session awaiting user approval (P12)**.
 
 ## Status
 
@@ -11,7 +12,26 @@ First dense-model compression experiment, teacher **Qwen/Qwen3-4B-Thinking-2507*
 INT8 deployment target.
 
 Pipeline position: **Stage 0 passed → Stage 1 passed → Stage 2 passed →
-Stage 3 s1 passed (2026-07-22)**; sub-stages 2+ pending a sizing decision.
+Stage 3 s1 passed (2026-07-22)**; sub-stage 2 designed as an A/B
+(2026-07-25), execution pending approval.
+
+Sub-stage 2 design (decision record 2026-07-25): both arms start from
+`s1_ffn_norm_v0` step 660 with a fresh optimizer, identical budget
+(660 steps × 16×1024 blocks, lr 2e-4 warmup 30 cosine→0.1×, CE 0.25 +
+KD 1.0 τ=1 scope all, shared seed 20260725):
+
+- **arm A** `configs/stage3_s1_ext.json` — control, keeps the s1 freeze set
+  (FFN+norm, 264.3M trainable): answers "was s1 simply not done?";
+- **arm B** `configs/stage3_s2_blocks.json` — unfreezes attention
+  (q/k/v/o + q/k norms; 440.5M trainable, only tied embedding frozen).
+
+Pre-registered rule: adopt arm B's freeze set if it beats arm A by ≥1%
+relative on holdout_v1 NLL (s1 baseline 4.2107); otherwise attention is not
+yet the bottleneck. Verified on CPU 2026-07-25: 43/43 tests; freeze pattern
+matches all 168 `self_attn` tensors of the real checkpoint (trainable
+440,467,456 / 596,049,920, manifest-confirmed); 3-step end-to-end smoke
+(`configs/stage3_s2_smoke_cpu.json`, real student from s1@660 + real
+teacher) — load, train with attention grads, eval, checkpoint all pass.
 
 Verified state (all on the real model):
 
@@ -57,7 +77,9 @@ Verified state (all on the real model):
 - `scripts/` — stage scripts + `train_stage3.py`, `eval_ppl.py`,
   `plot_perf_trend.py`.
 - `configs/` — Stage 0 v0/v1, Stage 1 init, `stage3_s1_ffn_norm.json` (ran),
-  `stage3_s1_gpu_smoke.json` (10-step GPU smoke, ran), `stage3_smoke_cpu.json`.
+  `stage3_s1_gpu_smoke.json` (10-step GPU smoke, ran), `stage3_smoke_cpu.json`,
+  `stage3_s1_ext.json` + `stage3_s2_blocks.json` (A/B arms, not yet run),
+  `stage3_s2_smoke_cpu.json` (3-step CPU smoke, ran 2026-07-25).
 - `data/warmup/`, `data/stage2/` — corpora manifests (jsonl gitignored).
 - `tests/` — 43 tests.
 - `artifacts/` (gitignored) — Stage 0 stats; Stage 1 checkpoint; Stage 3:
@@ -85,16 +107,18 @@ Note: stage3 checkpoints are saved as `step_XXXXXX/model/` +
 
 ## Latest verification
 
+- Sub-stage 2 prep verified on CPU 2026-07-25: 43/43 tests, freeze-pattern
+  check on the real checkpoint, 3-step real-model smoke (see Status above).
 - Stage 3 s1 gate passed 2026-07-22 (GPU run, evals, generation smoke,
   resume check) — `logs/experiments/2026-07-22_stage3_s1_gpu_run.md`.
 - Stage 2 gate 2026-07-21; Stage 1 gate 2026-07-14; Stage 0 v1 2026-07-13.
 
 ## Not done yet (next, in order)
 
-1. **Decide sub-stage 2 sizing** (unfreeze attention, block-level recovery)
-   under a fixed budget, with s1 as the baseline (holdout 4.21 / val_ce
-   2.18). Also consider whether a longer s1 (val curve had not plateaued at
-   660 steps) is worth one comparison run before unfreezing.
+1. **Execute the sub-stage 2 A/B GPU session** (awaiting approval, see
+   below): both arms + holdout evals + generation smoke on one L40S pod.
+   The 2.3 GB fp32 s1@660 checkpoint must reach the pod (croc/chunked-ssh
+   from dev box, or via a private HF artifact repo if approved).
 2. INT8/fake-quant eval path (deployment target INT8 — P9); calib set exists.
 3. Stage 4 online data collection design.
 4. Optional backlog: Stage 2 mixture scale-up (approval needed), Stage 1
@@ -102,8 +126,12 @@ Note: stage3 checkpoints are saved as `step_XXXXXX/model/` +
 
 ## Open decisions for the user
 
-- Sub-stage 2 recovery run (GPU, similar cost ≈ $5): needs approval when
-  the sizing proposal is ready (P12).
+- **Sub-stage 2 A/B GPU session** (P12): 1× L40S ≈ $0.99/hr, ~35 min
+  training per arm + setup/transfer; estimate $3–5, cap $8. Prepared and
+  CPU-verified; see decision record 2026-07-25.
+- Optional: upload the s1@660 checkpoint (2.3 GB) to a **private** HF repo
+  as transfer vehicle + durable external artifact storage (P12 covers
+  checkpoint uploads, so explicit approval needed even for private).
 - Whether the s1 result should become an official README "Optim record
   history" entry (requires maintainer approval per AGENTS.md 3.8; the
   reproducible record exists in the experiment log).
