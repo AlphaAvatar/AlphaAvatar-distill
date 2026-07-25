@@ -10,6 +10,12 @@ Each --model is a local checkpoint dir or an HF id (optionally @revision).
 Reports mean next-token NLL (nats/token) and perplexity per model, teacher
 included, so the Stage 1 gate has an initial evaluation with baselines.
 Deterministic: fixed data order, no sampling, batch size 1.
+
+--fake-quant int8 applies per-channel symmetric INT8 weight fake-quant
+(src/aadistill/quant.py, P9 deployment target) to EVERY --model in the
+invocation after loading; run quantized and unquantized evals as separate
+invocations. --fake-quant-scope selects "all" (default; decoder + lm_head,
+tied embedding quantized once) or "decoder" (attention/FFN linears only).
 """
 
 from __future__ import annotations
@@ -69,6 +75,8 @@ def main() -> None:
     parser.add_argument("--model", action="append", required=True)
     parser.add_argument("--max-seq-len", type=int, default=1024)
     parser.add_argument("--dtype", default="bfloat16")
+    parser.add_argument("--fake-quant", choices=["int8"], default=None)
+    parser.add_argument("--fake-quant-scope", choices=["all", "decoder"], default="all")
     parser.add_argument("--out", default=None)
     args = parser.parse_args()
 
@@ -82,9 +90,19 @@ def main() -> None:
         print(f"Evaluating {spec} ...", flush=True)
         started = time.time()
         model, tokenizer = load_model(spec, dtype, device)
+        quant_summary = None
+        if args.fake_quant == "int8":
+            from aadistill.quant import int8_fake_quantize_
+
+            quant_summary = int8_fake_quantize_(model, scope=args.fake_quant_scope)
+            print(f"  fake-quant int8 scope={quant_summary['scope']}: "
+                  f"{quant_summary['n_linear_quantized']} linears, "
+                  f"{quant_summary['n_params_quantized']:,} params, "
+                  f"mean rel err {quant_summary['mean_rel_fro_err']}", flush=True)
         nll, n_tokens = mean_nll(model, tokenizer, samples, args.max_seq_len, device)
         results.append({
             "model": spec,
+            "fake_quant": quant_summary,
             "mean_nll_nats": round(nll, 4),
             "perplexity": round(float(torch.tensor(nll).exp()), 2),
             "eval_tokens": n_tokens,
@@ -101,6 +119,8 @@ def main() -> None:
                  "num_samples": len(samples)},
         "max_seq_len": args.max_seq_len,
         "dtype": args.dtype,
+        "fake_quant": args.fake_quant,
+        "fake_quant_scope": args.fake_quant_scope if args.fake_quant else None,
         "device": device,
         "code_state": code_state(str(REPO_ROOT)),
         "hardware": hardware_report(),

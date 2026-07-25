@@ -1,11 +1,13 @@
 # Current project state
 
-Updated: 2026-07-25 late (UTC+8 dev box) — Stage 3 **sub-stage 2 A/B ran on
-GPU and answered the sizing question**: attention-unfrozen freeze set
-adopted (beats equal-budget FFN-only by 1.47% relative holdout NLL), but
-**recovery is now data-limited** — neither arm improved holdout over s1@660
-(mixture epochs 3–4 overfit). Pod torn down; artifacts on private HF repo,
-hash-verified. Session cost $2.03.
+Updated: 2026-07-26 (UTC+8 dev box) — **INT8 fake-quant eval path landed
+and measured** (P9): INT8 weight quant is near-lossless on s1@660 (+0.21%
+holdout NLL full-scope, +0.03% decoder-only; 51/51 tests). **Stage 2
+mixture v1 scale-up proposal drafted — awaiting user approval**
+(`logs/proposals/2026-07-26_stage2_mixture_v1_scaleup.md`): ~24M train
+tokens (4.5×), public permissive sources only, licenses verified. Recovery
+remains data-limited per the 2026-07-25 A/B (attention-unfrozen freeze set
+adopted; epochs 3–4 of mixture v0 overfit).
 
 ## Status
 
@@ -41,6 +43,13 @@ preferred start for the next recovery run once fresh data exists.
 
 Verified state (all on the real model):
 
+- **INT8 fake-quant eval (2026-07-26, CPU):** holdout_v1 on s1@660 —
+  bf16 4.2111 (matches GPU 4.2107 within P5 variance), int8 decoder-only
+  4.2122 (+0.03%), int8 full-scope incl. tied head 4.2198 (+0.21%).
+  Deployment-numerics gap negligible at this stage; ~14 s per CPU eval, run
+  it at every future recovery gate. `src/aadistill/quant.py`,
+  `eval_ppl.py --fake-quant int8`;
+  log: `logs/experiments/2026-07-26_int8_fakequant_eval.md`.
 - **Stage 3 s1 recovery run** (`s1_ffn_norm_v0`, 660 steps × 16×1024-token
   blocks ≈ 2 epochs of mixture v0, 1× RunPod L40S, 33.5 min train):
   - stage2-val: val_ce 12.009 → **2.1805** (ppl 8.85), val_kd 11.091 → 1.006,
@@ -57,8 +66,9 @@ Verified state (all on the real model):
 - Stage 1 init checkpoint `artifacts/stage1/qwen3_0p6b_init_v0/checkpoint`
   (596.0M params, bf16); Stage 2 mixture `stage2_offline_v0` (18,484 train
   samples / 5.39M tokens, 771 val, 120 calib).
-- Trainer: 43/43 tests pass locally (torch 2.13.0+cpu) **and on the GPU pod**
-  (torch 2.11.0+cu128 — cu128 channel max; logged deviation).
+- Tests: 51/51 pass locally (torch 2.13.0+cpu; 43 of them also passed on
+  the GPU pod 2026-07-25, torch 2.11.0+cu128 — cu128 channel max; the 8
+  quant tests are newer and CPU-verified only).
 
 ## Environment
 
@@ -86,7 +96,8 @@ Verified state (all on the real model):
 ## What exists and why
 
 - `src/aadistill/` — env, manifest, teacher, collect (S0), project, sandwich,
-  student (S1), data (S2 loader), train (S3 recovery trainer).
+  student (S1), data (S2 loader), train (S3 recovery trainer), quant
+  (INT8 fake-quant eval, P9).
 - `scripts/` — stage scripts + `train_stage3.py`, `eval_ppl.py`,
   `plot_perf_trend.py`.
 - `configs/` — Stage 0 v0/v1, Stage 1 init, `stage3_s1_ffn_norm.json` (ran),
@@ -94,7 +105,9 @@ Verified state (all on the real model):
   `stage3_s1_ext.json` + `stage3_s2_blocks.json` (A/B arms, ran 2026-07-25),
   `stage3_s2_smoke_cpu.json` (3-step CPU smoke, ran 2026-07-25).
 - `data/warmup/`, `data/stage2/` — corpora manifests (jsonl gitignored).
-- `tests/` — 43 tests.
+- `tests/` — 51 tests.
+- `logs/proposals/` — pending-approval proposals (currently: Stage 2
+  mixture v1 scale-up, 2026-07-26).
 - `artifacts/` (gitignored) — Stage 0 stats; Stage 1 checkpoint; Stage 3:
   `s1_ffn_norm_v0/` (logs + `checkpoints/step_000660/model/` **final fp32
   student, sha256 `dc64f244…e900`, bit-verified**, also on HF),
@@ -113,7 +126,8 @@ Verified state (all on the real model):
 uv run pytest tests/ -q                                          # 43 passed
 uv run python scripts/train_stage3.py --config configs/stage3_s1_ffn_norm.json
 uv run python scripts/eval_ppl.py --data data/warmup/holdout_v1.jsonl \
-  --model artifacts/stage3/s1_ffn_norm_v0/checkpoints/step_000660/model
+  --model artifacts/stage3/s1_ffn_norm_v0/checkpoints/step_000660/model \
+  [--fake-quant int8 [--fake-quant-scope decoder]]
 uv run python scripts/plot_perf_trend.py
 ```
 
@@ -123,6 +137,9 @@ Note: stage3 checkpoints are saved as `step_XXXXXX/model/` +
 
 ## Latest verification
 
+- INT8 fake-quant path 2026-07-26: 51/51 tests on the dev box; three CPU
+  holdout evals of s1@660 (bf16 reference reproduced the GPU number within
+  P5 variance) — `logs/experiments/2026-07-26_int8_fakequant_eval.md`.
 - Sub-stage 2 A/B GPU session 2026-07-25: 43/43 tests on pod, bit-verified
   checkpoint transfer, both arms trained without collapse, holdout evals +
   generation smoke run, artifacts hash-verified —
@@ -132,28 +149,33 @@ Note: stage3 checkpoints are saved as `step_XXXXXX/model/` +
 
 ## Not done yet (next, in order)
 
-1. **Propose Stage 2 mixture scale-up** (the measured bottleneck; needs
-   user approval — larger downloads, possibly teacher-generated data).
-   Design the target size/composition against the observed overfit.
-2. INT8/fake-quant eval path (deployment target INT8 — P9); calib set
-   exists; CPU-suitable, should land before the next GPU run.
-3. Next recovery run: from s1@660, adopted attention-unfrozen freeze set,
-   on the scaled mixture (fresh data, not more epochs of v0).
-4. Stage 4 online data collection design.
-5. Optional backlog: Stage 1 ablations (function-aware subspace,
-   per-group P).
+1. **User decision on the Stage 2 mixture v1 proposal**
+   (`logs/proposals/2026-07-26_stage2_mixture_v1_scaleup.md`); on approval:
+   `build_stage2_v1.py`, build + gate + experiment log (CPU session).
+2. Next recovery run on the scaled mixture: adopted attention-unfrozen
+   freeze set; start-point comparison s2_blocks_v0-final vs s1@660 (A/B
+   verdict); separate GPU approval request (~$4–5 L40S).
+3. Stage 4 online data collection design.
+4. Optional backlog: Stage 1 ablations (function-aware subspace,
+   per-group P); teacher-generated data proposal (v2 upgrade path for the
+   QA groups + reasoning traces).
 
 ## Open decisions for the user
 
-- **Stage 2 mixture scale-up approval** (P12: larger downloads / possible
-  teacher-generated data) — proposal to be drafted next session.
+- **Stage 2 mixture v1 scale-up approval** — proposal drafted 2026-07-26,
+  see `logs/proposals/2026-07-26_stage2_mixture_v1_scaleup.md` (~24M train
+  tokens, public permissive sources, ≤3 GB downloads, no paid APIs; optional
+  add-on question: accept the auto-gated xlam-function-calling-60k on the
+  AlphaAvatar HF account for tool-calling variety?).
 - Whether the s1 result (and/or the A/B) should become an official README
   "Optim record history" entry (requires maintainer approval per AGENTS.md
   3.8; reproducible records exist in the experiment logs).
 
 ## Links
 
-- `logs/experiments/2026-07-25_stage3_s2_ab_gpu_run.md` (this session)
+- `logs/experiments/2026-07-26_int8_fakequant_eval.md` (this session)
+- `logs/proposals/2026-07-26_stage2_mixture_v1_scaleup.md` (this session)
+- `logs/experiments/2026-07-25_stage3_s2_ab_gpu_run.md`
 - `logs/experiments/2026-07-22_stage3_s1_gpu_run.md`
 - `logs/experiments/2026-07-22_stage3_trainer_toy.md`
 - `logs/experiments/2026-07-21_stage2_offline_v0.md`
