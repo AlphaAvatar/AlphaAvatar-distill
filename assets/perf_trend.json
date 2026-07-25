@@ -36,6 +36,21 @@
       "stage": "stage3",
       "nll": 4.2107,
       "log": "logs/experiments/2026-07-22_stage3_s1_gpu_run.md"
+    },
+    {
+      "date": "2026-07-25",
+      "label": "s2 A/B arm A: +660 FFN-only steps\n(control; regressed, mixture overfit)",
+      "label_offset": [6, -30],
+      "stage": "stage3",
+      "nll": 4.2747,
+      "log": "logs/experiments/2026-07-25_stage3_s2_ab_gpu_run.md"
+    },
+    {
+      "date": "2026-07-25",
+      "label": "s2 A/B arm B: attention unfrozen\n(holdout flat; freeze set adopted, data-limited)",
+      "stage": "stage3",
+      "nll": 4.2118,
+      "log": "logs/experiments/2026-07-25_stage3_s2_ab_gpu_run.md"
     }
   ]
 }

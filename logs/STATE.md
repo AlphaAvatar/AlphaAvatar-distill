@@ -1,8 +1,11 @@
 # Current project state
 
-Updated: 2026-07-25 (UTC+8 dev box) — Stage 3 **sub-stage 2 sized and
-prepared** as a fixed-budget A/B from s1@660 (decision record 2026-07-25);
-configs CPU-smoke-verified; **GPU session awaiting user approval (P12)**.
+Updated: 2026-07-25 late (UTC+8 dev box) — Stage 3 **sub-stage 2 A/B ran on
+GPU and answered the sizing question**: attention-unfrozen freeze set
+adopted (beats equal-budget FFN-only by 1.47% relative holdout NLL), but
+**recovery is now data-limited** — neither arm improved holdout over s1@660
+(mixture epochs 3–4 overfit). Pod torn down; artifacts on private HF repo,
+hash-verified. Session cost $2.03.
 
 ## Status
 
@@ -12,26 +15,29 @@ First dense-model compression experiment, teacher **Qwen/Qwen3-4B-Thinking-2507*
 INT8 deployment target.
 
 Pipeline position: **Stage 0 passed → Stage 1 passed → Stage 2 passed →
-Stage 3 s1 passed (2026-07-22)**; sub-stage 2 designed as an A/B
-(2026-07-25), execution pending approval.
+Stage 3 s1 passed (2026-07-22) → s2 sizing A/B done (2026-07-25)**.
+Freeze-set recipe fixed; next recovery run blocked on Stage 2 mixture
+scale-up (user approval required).
 
-Sub-stage 2 design (decision record 2026-07-25): both arms start from
-`s1_ffn_norm_v0` step 660 with a fresh optimizer, identical budget
-(660 steps × 16×1024 blocks, lr 2e-4 warmup 30 cosine→0.1×, CE 0.25 +
-KD 1.0 τ=1 scope all, shared seed 20260725):
+Sub-stage 2 A/B result (design: decision record 2026-07-25; full record:
+`logs/experiments/2026-07-25_stage3_s2_ab_gpu_run.md`). Both arms from
+s1@660, equal budget (660 steps × 16×1024 blocks, lr 2e-4, CE 0.25 +
+KD 1.0, shared seed 20260725, 1× L40S):
 
-- **arm A** `configs/stage3_s1_ext.json` — control, keeps the s1 freeze set
-  (FFN+norm, 264.3M trainable): answers "was s1 simply not done?";
-- **arm B** `configs/stage3_s2_blocks.json` — unfreezes attention
-  (q/k/v/o + q/k norms; 440.5M trainable, only tied embedding frozen).
+- **arm A** (control, FFN+norm only, 264.3M trainable): val_ce flat
+  2.602→2.633, holdout NLL **4.2747** — *regressed* 1.5% vs s1@660;
+- **arm B** (+attention q/k/v/o + q/k norms, 440.5M): val_ce 2.602→**2.579**,
+  val_kd 1.061→**0.987**, holdout NLL **4.2118** — flat vs s1@660 (4.2107);
+  generation smoke shows mild chat-format regression (corpus artifacts:
+  stray `</think>`, `####`, one `<|im_start|>` echo).
 
-Pre-registered rule: adopt arm B's freeze set if it beats arm A by ≥1%
-relative on holdout_v1 NLL (s1 baseline 4.2107); otherwise attention is not
-yet the bottleneck. Verified on CPU 2026-07-25: 43/43 tests; freeze pattern
-matches all 168 `self_attn` tensors of the real checkpoint (trainable
-440,467,456 / 596,049,920, manifest-confirmed); 3-step end-to-end smoke
-(`configs/stage3_s2_smoke_cpu.json`, real student from s1@660 + real
-teacher) — load, train with attention grads, eval, checkpoint all pass.
+Pre-registered rule fired (B beats A by 1.47% ≥ 1%): **attention-unfrozen
+freeze set adopted** for all further Stage 3 recovery. Both arms were on
+mixture epochs 3–4; holdout-flat + artifact pickup = **data exhaustion —
+the binding constraint is now Stage 2 data volume, not the recipe**.
+Cost: B is only +3.3% s/step (2.974 vs 2.878), peak VRAM 36.97 GB.
+s1@660 remains the reference checkpoint; `s2_blocks_v0` final is the
+preferred start for the next recovery run once fresh data exists.
 
 Verified state (all on the real model):
 
@@ -59,14 +65,21 @@ Verified state (all on the real model):
 - CPU-only dev box: 16 threads (AMX/AVX-512 BF16), 30 GB RAM, no GPU.
   `uv sync`: Python 3.14, torch 2.13.0+cpu, transformers 5.13.1.
 - GPU runs: RunPod (runpodctl 2.7.1 authenticated; skill at
-  `.agents/skills/runpodctl`). Balance ≈ $247 after this run (~$4.3 total),
-  $80 spend limit. **No pods or volumes currently exist** (pod
-  `zae6ba3we52vgu` deleted 2026-07-23 after hash-verified artifact download).
-- Pod playbook (hard-won, see experiment log §infrastructure): venv on
-  pod-local disk (`UV_PROJECT_ENVIRONMENT=/root/venv`, network volume fails
-  on venvs and serves stale reads after write bursts — always sha256-verify);
-  torch cu128 (2.11.0) is the max for driver 570; China→US upload needs
-  parallel chunked ssh or croc relay at night; pod→dev download ~1.9 MB/s.
+  `.agents/skills/runpodctl`). Balance **$244.32** after the A/B session
+  ($2.03; ~$6.4 total project GPU spend), $80 spend limit. **No pods or
+  volumes currently exist** (pod `simbeepnf8syuu` deleted 2026-07-25 after
+  artifacts were verified on HF).
+- HF: dev box logged in as `AlphaAvatar` (write token, added 2026-07-25);
+  private artifact repo `AlphaAvatar/aadistill-artifacts` holds s1@660 and
+  both A/B finals (see `logs/artifact_manifests.md`).
+- Pod playbook (hard-won, see experiment logs §infrastructure): venv on
+  pod-local disk (`UV_PROJECT_ENVIRONMENT=/root/venv`); torch cu128
+  (2.11.0) is the max for driver 570; **preferred big-file transfer is the
+  private HF repo relay** (dev→HF ~680 KB/s, pod↔HF fast; single-stream
+  scp dev→pod only ~165 KB/s); always sha256-verify after transfer; use
+  `--terminate-after` as a cost backstop. 2026-07-25 pod's /workspace was a
+  local md array (no MooseFS stale reads); older network-volume caveats
+  still apply when a network volume is attached.
 - Known CPU nondeterminism (oneDNN/AMX ULP-level, P5-logged) unchanged.
 - HF cache ~12 GB (7.6 GB teacher + Stage 2 source datasets).
 
@@ -77,19 +90,22 @@ Verified state (all on the real model):
 - `scripts/` — stage scripts + `train_stage3.py`, `eval_ppl.py`,
   `plot_perf_trend.py`.
 - `configs/` — Stage 0 v0/v1, Stage 1 init, `stage3_s1_ffn_norm.json` (ran),
-  `stage3_s1_gpu_smoke.json` (10-step GPU smoke, ran), `stage3_smoke_cpu.json`,
-  `stage3_s1_ext.json` + `stage3_s2_blocks.json` (A/B arms, not yet run),
+  `stage3_s1_gpu_smoke.json` (ran), `stage3_smoke_cpu.json`,
+  `stage3_s1_ext.json` + `stage3_s2_blocks.json` (A/B arms, ran 2026-07-25),
   `stage3_s2_smoke_cpu.json` (3-step CPU smoke, ran 2026-07-25).
 - `data/warmup/`, `data/stage2/` — corpora manifests (jsonl gitignored).
 - `tests/` — 43 tests.
 - `artifacts/` (gitignored) — Stage 0 stats; Stage 1 checkpoint; Stage 3:
-  `s1_ffn_norm_v0/` (train_log.jsonl, run_manifest.json,
-  eval_holdout_v1.json, `checkpoints/step_000660/model/` **final fp32
-  student, sha256 `dc64f244…e900`, bit-verified**, tokenizer files included),
-  `s1_gpu_smoke_v0/` (jsonl + manifests), console logs. Not retained:
-  optimizer state (2.1 GB), smoke checkpoints, rolling checkpoints 440/550.
-- `logs/` — decisions (7), experiments (6), supported_models, this file.
-- `assets/` — perf trend json + svg (now 3 attempt points incl. s1).
+  `s1_ffn_norm_v0/` (logs + `checkpoints/step_000660/model/` **final fp32
+  student, sha256 `dc64f244…e900`, bit-verified**, also on HF),
+  `s1_ext_v0/` + `s2_blocks_v0/` (A/B: train_log.jsonl, run_manifest.json,
+  eval_holdout_v1.json, gen_smoke.json, console.log;
+  **final weights HF-only**, hashes in
+  `ab_artifact_hashes_2026-07-25.txt`), `s1_gpu_smoke_v0/`. Not retained:
+  optimizer states, smoke checkpoints, rolling checkpoints.
+- `logs/` — decisions (8), experiments (7), supported_models,
+  artifact_manifests, this file.
+- `assets/` — perf trend json + svg (now 5 attempt points incl. the A/B).
 
 ## Latest known working commands
 
@@ -107,40 +123,41 @@ Note: stage3 checkpoints are saved as `step_XXXXXX/model/` +
 
 ## Latest verification
 
-- Sub-stage 2 prep verified on CPU 2026-07-25: 43/43 tests, freeze-pattern
-  check on the real checkpoint, 3-step real-model smoke (see Status above).
-- Stage 3 s1 gate passed 2026-07-22 (GPU run, evals, generation smoke,
-  resume check) — `logs/experiments/2026-07-22_stage3_s1_gpu_run.md`.
-- Stage 2 gate 2026-07-21; Stage 1 gate 2026-07-14; Stage 0 v1 2026-07-13.
+- Sub-stage 2 A/B GPU session 2026-07-25: 43/43 tests on pod, bit-verified
+  checkpoint transfer, both arms trained without collapse, holdout evals +
+  generation smoke run, artifacts hash-verified —
+  `logs/experiments/2026-07-25_stage3_s2_ab_gpu_run.md`.
+- Stage 3 s1 gate passed 2026-07-22; Stage 2 gate 2026-07-21; Stage 1 gate
+  2026-07-14; Stage 0 v1 2026-07-13.
 
 ## Not done yet (next, in order)
 
-1. **Execute the sub-stage 2 A/B GPU session** (awaiting approval, see
-   below): both arms + holdout evals + generation smoke on one L40S pod.
-   The 2.3 GB fp32 s1@660 checkpoint must reach the pod (croc/chunked-ssh
-   from dev box, or via a private HF artifact repo if approved).
-2. INT8/fake-quant eval path (deployment target INT8 — P9); calib set exists.
-3. Stage 4 online data collection design.
-4. Optional backlog: Stage 2 mixture scale-up (approval needed), Stage 1
-   ablations (function-aware subspace, per-group P).
+1. **Propose Stage 2 mixture scale-up** (the measured bottleneck; needs
+   user approval — larger downloads, possibly teacher-generated data).
+   Design the target size/composition against the observed overfit.
+2. INT8/fake-quant eval path (deployment target INT8 — P9); calib set
+   exists; CPU-suitable, should land before the next GPU run.
+3. Next recovery run: from s1@660, adopted attention-unfrozen freeze set,
+   on the scaled mixture (fresh data, not more epochs of v0).
+4. Stage 4 online data collection design.
+5. Optional backlog: Stage 1 ablations (function-aware subspace,
+   per-group P).
 
 ## Open decisions for the user
 
-- ~~Sub-stage 2 A/B GPU session~~ — **APPROVED by user 2026-07-25 (both
-  arms, cap $8)**; session in progress on pod `simbeepnf8syuu` (L40S,
-  $0.99/hr, auto-terminate 2026-07-25T18:04Z backstop).
-- ~~Private HF artifact repo~~ — **APPROVED by user 2026-07-25**; created
-  `AlphaAvatar/aadistill-artifacts` (private), s1@660 checkpoint upload in
-  progress (model.safetensors sha256 `dc64f244…e900` re-verified pre-upload).
-- Whether the s1 result should become an official README "Optim record
-  history" entry (requires maintainer approval per AGENTS.md 3.8; the
-  reproducible record exists in the experiment log).
+- **Stage 2 mixture scale-up approval** (P12: larger downloads / possible
+  teacher-generated data) — proposal to be drafted next session.
+- Whether the s1 result (and/or the A/B) should become an official README
+  "Optim record history" entry (requires maintainer approval per AGENTS.md
+  3.8; reproducible records exist in the experiment logs).
 
 ## Links
 
-- `logs/experiments/2026-07-22_stage3_s1_gpu_run.md` (this session)
+- `logs/experiments/2026-07-25_stage3_s2_ab_gpu_run.md` (this session)
+- `logs/experiments/2026-07-22_stage3_s1_gpu_run.md`
 - `logs/experiments/2026-07-22_stage3_trainer_toy.md`
 - `logs/experiments/2026-07-21_stage2_offline_v0.md`
 - `logs/experiments/2026-07-14_stage1_qwen3_0p6b_init_v0.md`
 - `logs/experiments/2026-07-13_stage0_qwen3_4b_thinking_v1.md`
-- `logs/decisions.md` · `logs/supported_models.md`
+- `logs/decisions.md` · `logs/supported_models.md` ·
+  `logs/artifact_manifests.md`
