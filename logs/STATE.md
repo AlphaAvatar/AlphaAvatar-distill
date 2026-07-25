@@ -126,12 +126,12 @@ Note: stage3 checkpoints are saved as `step_XXXXXX/model/` +
 
 ## Open decisions for the user
 
-- **Sub-stage 2 A/B GPU session** (P12): 1× L40S ≈ $0.99/hr, ~35 min
-  training per arm + setup/transfer; estimate $3–5, cap $8. Prepared and
-  CPU-verified; see decision record 2026-07-25.
-- Optional: upload the s1@660 checkpoint (2.3 GB) to a **private** HF repo
-  as transfer vehicle + durable external artifact storage (P12 covers
-  checkpoint uploads, so explicit approval needed even for private).
+- ~~Sub-stage 2 A/B GPU session~~ — **APPROVED by user 2026-07-25 (both
+  arms, cap $8)**; session in progress on pod `simbeepnf8syuu` (L40S,
+  $0.99/hr, auto-terminate 2026-07-25T18:04Z backstop).
+- ~~Private HF artifact repo~~ — **APPROVED by user 2026-07-25**; created
+  `AlphaAvatar/aadistill-artifacts` (private), s1@660 checkpoint upload in
+  progress (model.safetensors sha256 `dc64f244…e900` re-verified pre-upload).
 - Whether the s1 result should become an official README "Optim record
   history" entry (requires maintainer approval per AGENTS.md 3.8; the
   reproducible record exists in the experiment log).
