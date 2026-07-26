@@ -96,7 +96,11 @@ def main() -> None:
     if not all(checks.values()):
         raise RuntimeError(f"dry-run checks failed: {checks}")
 
-    manifest_path = data_dir / "stage2_offline_v0.manifest.json"
+    manifests = sorted(data_dir.glob("*.manifest.json"))
+    if len(manifests) != 1:
+        raise RuntimeError(f"expected exactly one mixture manifest in "
+                           f"{data_dir}, found {[m.name for m in manifests]}")
+    manifest_path = manifests[0]
     report = {
         "created_utc": datetime.now(timezone.utc).isoformat(),
         "command": " ".join(sys.argv),

@@ -1,0 +1,480 @@
+{
+  "dataset": "stage2_offline_v1",
+  "created_utc": "2026-07-26T09:41:18.567549+00:00",
+  "command": "scripts/build_stage2_v1.py",
+  "purpose": "Stage 2 offline mixture v1: approved ~4.5x train scale-up for data-limited Stage 3 recovery (proposal 2026-07-26)",
+  "based_on": {
+    "mixture": "stage2_offline_v0",
+    "manifest_sha256": "7b86d9178f0f2c1d7990c64f03d084db255987742188dd5f6fccf7204585c87a",
+    "carry": {
+      "train_samples": 18484,
+      "train_chars": 19767041,
+      "val_samples": 771,
+      "calib_samples": 120,
+      "gsm8k_train_normalized": 4591
+    },
+    "note": "v0 train carried into v1 train (gsm8k normalized); v0 val/calib stay frozen in data/stage2/ as val_v0 and the first 120 calib samples; v1 val split is val_v1 only"
+  },
+  "schema": {
+    "fields": "id, group, source, format ('chat'|'text'), messages|text, tools?",
+    "tool_convention": "OpenAI-nested tools/tool_calls, rendered by the Qwen3 chat template (see src/aadistill/data.py)"
+  },
+  "caps": {
+    "msg_char_cap": 6000,
+    "sample_char_cap": 12000,
+    "long_doc_min": 8000,
+    "long_doc_cap": 24000,
+    "smol_short_filter": {
+      "max_msgs": 6,
+      "msg_cap": 240,
+      "total_cap": 900
+    }
+  },
+  "split_rule": "new samples only, per group, index i in build order: i%25==12 -> calib (max 10 per group on top of frozen v0 calib), i%25==24 -> val_v1, else train",
+  "dedup": "global exact content sha256 (id excluded), seeded with all v0 sample digests (raw + gsm8k-normalized) = v0 val/calib leakage guard",
+  "fresh_offsets": {
+    "oasst2": 1343,
+    "squad_v2": 8558,
+    "hotpot_qa": 511,
+    "glaive_fc_v2": 3667,
+    "gsm8k": 4797,
+    "fineweb_edu_long": 11814
+  },
+  "normalization": {
+    "gsm8k": "strip <<...>> calculator annotations; rewrite trailing '#### N' as 'The answer is N.' — applied to fresh rows and to v0-carried train samples",
+    "refusal_templates": 12
+  },
+  "holdout_exclusion": "fineweb stream offset > 11814 (v0 consumed) plus first-1000-char match against holdout_v1",
+  "teacher_generated_data": "none in v1 (separate future proposal)",
+  "synthetic_provenance": {
+    "smol_smoltalk": "largely Llama-3.1-405B-generated (Apache-2.0)",
+    "everyday_conversations": "Llama-3.1-generated (Apache-2.0)",
+    "openmath_instruct_2": "Llama-3.1-405B-generated (CC-BY-4.0, Built with Llama)",
+    "magicoder_oss": "GPT-3.5-generated (MIT; release-time license review)"
+  },
+  "sources": [
+    {
+      "name": "oasst2",
+      "dataset": "OpenAssistant/oasst2",
+      "config": null,
+      "split": "train",
+      "license": "Apache-2.0",
+      "revision": "179dd21fc55192153d94adb0e0ce8f69e222bf75",
+      "skip_until_v0_index": 1343,
+      "budget_exhausted": true,
+      "chars_instruction": 3002740,
+      "rejected_too_long": 1,
+      "skipped_v0_consumed": 1344,
+      "taken_instruction": 1552
+    },
+    {
+      "name": "smol_smoltalk",
+      "dataset": "HuggingFaceTB/smol-smoltalk",
+      "config": null,
+      "split": "train",
+      "license": "Apache-2.0",
+      "revision": "f73fe857d519ff6ac5af2ea67c4d3834da7b8bcc",
+      "skip_until_v0_index": -1,
+      "budget_exhausted": false,
+      "chars_instruction": 21002118,
+      "chars_short_realtime": 2857945,
+      "rejected_malformed_or_long": 4966,
+      "rejected_too_long": 11,
+      "skipped_duplicates": 114,
+      "taken_instruction": 5787,
+      "taken_short_realtime": 9117
+    },
+    {
+      "name": "everyday_conversations",
+      "dataset": "HuggingFaceTB/everyday-conversations-llama3.1-2k",
+      "config": null,
+      "split": "train_sft",
+      "license": "Apache-2.0",
+      "revision": "14f543216b9ba42b6b951dc5bd199460d193b162",
+      "skip_until_v0_index": -1,
+      "budget_exhausted": false,
+      "chars_short_realtime": 1429236,
+      "rejected_malformed_or_long": 255,
+      "taken_short_realtime": 2005
+    },
+    {
+      "name": "squad_v2",
+      "dataset": "rajpurkar/squad_v2",
+      "config": null,
+      "split": "train",
+      "license": "CC-BY-SA 4.0",
+      "revision": "3ffb306f725f7d2ce8394bc1873b24868140c412",
+      "skip_until_v0_index": 8558,
+      "budget_exhausted": true,
+      "chars_rag_evidence": 6000395,
+      "chars_refusal_uncertainty": 6000007,
+      "skipped_duplicates": 1,
+      "skipped_v0_consumed": 8559,
+      "taken_rag_evidence": 7553,
+      "taken_refusal_uncertainty": 7039
+    },
+    {
+      "name": "hotpot_qa",
+      "dataset": "hotpotqa/hotpot_qa",
+      "config": "distractor",
+      "split": "train",
+      "license": "CC-BY-SA 4.0",
+      "revision": "1908d6afbbead072334abe2965f91bd2709910ab",
+      "skip_until_v0_index": 511,
+      "budget_exhausted": true,
+      "chars_multihop_qa": 3703072,
+      "rejected_too_long": 5,
+      "skipped_v0_consumed": 512,
+      "taken_multihop_qa": 634
+    },
+    {
+      "name": "glaive_fc_v2",
+      "dataset": "glaiveai/glaive-function-calling-v2",
+      "config": null,
+      "split": "train",
+      "license": "Apache-2.0",
+      "revision": "e7f4b6456019f5d8bcb991ef0dd67d8ff23221ac",
+      "skip_until_v0_index": 3667,
+      "budget_exhausted": true,
+      "chars_tool_calling": 3400370,
+      "parse_failures": 12,
+      "rejected_schema_or_marker": 6,
+      "skipped_duplicates": 162,
+      "skipped_v0_consumed": 2499,
+      "taken_tool_calling": 3272
+    },
+    {
+      "name": "xlam_fc_60k",
+      "dataset": "Salesforce/xlam-function-calling-60k",
+      "config": null,
+      "split": "train",
+      "license": "CC-BY-4.0 (auto-gated, accepted on the AlphaAvatar HF account)",
+      "revision": "26d14ebfe18b1f7b524bd39b404b50af5dc97866",
+      "skip_until_v0_index": -1,
+      "budget_exhausted": true,
+      "chars_tool_calling": 2802013,
+      "skipped_duplicates": 3,
+      "taken_tool_calling": 1744
+    },
+    {
+      "name": "gsm8k",
+      "dataset": "openai/gsm8k",
+      "config": "main",
+      "split": "train",
+      "license": "MIT",
+      "revision": "740312add88f781978c0658806c59bc2815b9866",
+      "skip_until_v0_index": 4797,
+      "budget_exhausted": false,
+      "chars_code_math": 1319680,
+      "skipped_v0_consumed": 4798,
+      "taken_code_math": 2675
+    },
+    {
+      "name": "openmath_instruct_2",
+      "dataset": "nvidia/OpenMathInstruct-2",
+      "config": null,
+      "split": "train_1M",
+      "license": "CC-BY-4.0 (Built with Llama)",
+      "revision": "469216e3f46f4dacf476b382e192485ea51a143e",
+      "skip_until_v0_index": -1,
+      "budget_exhausted": true,
+      "chars_code_math": 6000745,
+      "skipped_duplicate_problem": 4,
+      "taken_code_math": 4524
+    },
+    {
+      "name": "magicoder_oss",
+      "dataset": "ise-uiuc/Magicoder-OSS-Instruct-75K",
+      "config": null,
+      "split": "train",
+      "license": "MIT (GPT-3.5-generated; flag for release-time license review)",
+      "revision": "5f839b1f368a76b161028bb9edff055db34022b2",
+      "skip_until_v0_index": -1,
+      "budget_exhausted": true,
+      "chars_code_math": 3201528,
+      "taken_code_math": 1451
+    },
+    {
+      "name": "fineweb_edu_long",
+      "dataset": "HuggingFaceFW/fineweb-edu",
+      "config": "sample-10BT",
+      "split": "train",
+      "license": "ODC-By 1.0",
+      "revision": "87f09149ef4734204d70ed1d046ddc9ca3f2b8f9",
+      "skip_until_v0_index": 11814,
+      "budget_exhausted": true,
+      "chars_long_context": 9105513,
+      "skipped_v0_consumed": 204,
+      "taken_long_context": 643
+    }
+  ],
+  "new_sample_counts": {
+    "instruction": {
+      "train": 7036,
+      "val": 293,
+      "calib": 10
+    },
+    "rag_evidence": {
+      "train": 7241,
+      "val": 302,
+      "calib": 10
+    },
+    "multihop_qa": {
+      "train": 599,
+      "val": 25,
+      "calib": 10
+    },
+    "tool_calling": {
+      "train": 4806,
+      "val": 200,
+      "calib": 10
+    },
+    "refusal_uncertainty": {
+      "train": 6748,
+      "val": 281,
+      "calib": 10
+    },
+    "code_math": {
+      "train": 8294,
+      "val": 346,
+      "calib": 10
+    },
+    "short_realtime": {
+      "train": 10668,
+      "val": 444,
+      "calib": 10
+    },
+    "long_context": {
+      "train": 608,
+      "val": 25,
+      "calib": 10
+    }
+  },
+  "groups": {
+    "instruction": {
+      "train": {
+        "path": "data/stage2_v1/train/instruction.jsonl",
+        "samples": 10752,
+        "chars": 28493882,
+        "sha256": "aa4c966f388bab1beee66e4ec83c24f406b4f34762cafa535f53aad6dd515cde",
+        "bytes": 31323515,
+        "tracked_in_git": false
+      },
+      "val": {
+        "path": "data/stage2_v1/val/instruction.jsonl",
+        "samples": 293,
+        "chars": 969420,
+        "sha256": "700594d13b65fd4026d57d304938a825bfe28e09e1c3e4cae41814583c91c54f",
+        "bytes": 1056748,
+        "tracked_in_git": false
+      },
+      "calib": {
+        "path": "data/stage2_v1/calib/instruction.jsonl",
+        "samples": 26,
+        "chars": 38266,
+        "sha256": "d16d6116ad1cb8fd21541429f185b1e8ed6c4cd330c8ae234ebf5e50363fed4c",
+        "bytes": 43297,
+        "tracked_in_git": false
+      }
+    },
+    "rag_evidence": {
+      "train": {
+        "path": "data/stage2_v1/train/rag_evidence.jsonl",
+        "samples": 9635,
+        "chars": 8133110,
+        "sha256": "1d2fd3a72ecbcb5609bbdd29b7b67773eff5c4b386a86fe7d4a7c877ec668b9f",
+        "bytes": 9908713,
+        "tracked_in_git": false
+      },
+      "val": {
+        "path": "data/stage2_v1/val/rag_evidence.jsonl",
+        "samples": 302,
+        "chars": 240129,
+        "sha256": "6f4aa9d46cb2704af91aff495b6265a5a44c0d61b51bd49c5c3165ce8ad4e302",
+        "bytes": 295707,
+        "tracked_in_git": false
+      },
+      "calib": {
+        "path": "data/stage2_v1/calib/rag_evidence.jsonl",
+        "samples": 26,
+        "chars": 23641,
+        "sha256": "8ad7bc885cebf578760470578727394d03352d020d7ecd80dc5ebe45f3d41fdc",
+        "bytes": 28508,
+        "tracked_in_git": false
+      }
+    },
+    "multihop_qa": {
+      "train": {
+        "path": "data/stage2_v1/train/multihop_qa.jsonl",
+        "samples": 1074,
+        "chars": 6294234,
+        "sha256": "63de1990b6a4f4df1e99bbd0d8d08ad61f198d29868874a7882b7b8cf796b0ab",
+        "bytes": 6566694,
+        "tracked_in_git": false
+      },
+      "val": {
+        "path": "data/stage2_v1/val/multihop_qa.jsonl",
+        "samples": 25,
+        "chars": 158681,
+        "sha256": "85714b033e02015e34a5f2a3acc16ddcc1b973db0c9bc9660c949cd1efe2054e",
+        "bytes": 165058,
+        "tracked_in_git": false
+      },
+      "calib": {
+        "path": "data/stage2_v1/calib/multihop_qa.jsonl",
+        "samples": 26,
+        "chars": 136978,
+        "sha256": "d3af1e1fac680540745ecff6ce20958d13e66197e570406279ff58495566985f",
+        "bytes": 143417,
+        "tracked_in_git": false
+      }
+    },
+    "tool_calling": {
+      "train": {
+        "path": "data/stage2_v1/train/tool_calling.jsonl",
+        "samples": 7127,
+        "chars": 8334031,
+        "sha256": "e6cdfd042ad276a895f6c0d4e6299e51aa4031ba1484c27607ce61f7aead7548",
+        "bytes": 10619234,
+        "tracked_in_git": false
+      },
+      "val": {
+        "path": "data/stage2_v1/val/tool_calling.jsonl",
+        "samples": 200,
+        "chars": 238851,
+        "sha256": "e638c93d824a4456a578b5f29a42461f6fc9b5229960879b8a3331d44a3fc05c",
+        "bytes": 298617,
+        "tracked_in_git": false
+      },
+      "calib": {
+        "path": "data/stage2_v1/calib/tool_calling.jsonl",
+        "samples": 26,
+        "chars": 27724,
+        "sha256": "f3fa322770149f97cef0ce6a6603aed06d4d9dfed8f61644caf7d6d95f7553ed",
+        "bytes": 37232,
+        "tracked_in_git": false
+      }
+    },
+    "refusal_uncertainty": {
+      "train": {
+        "path": "data/stage2_v1/train/refusal_uncertainty.jsonl",
+        "samples": 7605,
+        "chars": 6507658,
+        "sha256": "04484201b17b8068d058b51d45f8351899f3d49ed9566f088e6b2ff828add4a6",
+        "bytes": 7959150,
+        "tracked_in_git": false
+      },
+      "val": {
+        "path": "data/stage2_v1/val/refusal_uncertainty.jsonl",
+        "samples": 281,
+        "chars": 238225,
+        "sha256": "c0ffecac2ed2684794e59eefc7be370624092449db4d53240447b8c6ff99f61f",
+        "bytes": 291757,
+        "tracked_in_git": false
+      },
+      "calib": {
+        "path": "data/stage2_v1/calib/refusal_uncertainty.jsonl",
+        "samples": 26,
+        "chars": 24370,
+        "sha256": "242fc0f1674d841a037203f4182665cb9fbcfbb4d035bb7562f0ada58ccd862a",
+        "bytes": 29304,
+        "tracked_in_git": false
+      }
+    },
+    "code_math": {
+      "train": {
+        "path": "data/stage2_v1/train/code_math.jsonl",
+        "samples": 13244,
+        "chars": 12504885,
+        "sha256": "c29c94250a1517b005ae00ce09bff84451972ac7b44538740568c6c71c22d1e5",
+        "bytes": 15131947,
+        "tracked_in_git": false
+      },
+      "val": {
+        "path": "data/stage2_v1/val/code_math.jsonl",
+        "samples": 346,
+        "chars": 434942,
+        "sha256": "b10a75b91ebfdc1d1abcafea30fc21249bd0ec9d829cde78218165b2a8a84f3a",
+        "bytes": 510312,
+        "tracked_in_git": false
+      },
+      "calib": {
+        "path": "data/stage2_v1/calib/code_math.jsonl",
+        "samples": 26,
+        "chars": 15823,
+        "sha256": "83bf15704b89a86f51061d6b555a5d0cedd1b8af4483ba9affc30d3b090b60c4",
+        "bytes": 20302,
+        "tracked_in_git": false
+      }
+    },
+    "short_realtime": {
+      "train": {
+        "path": "data/stage2_v1/train/short_realtime.jsonl",
+        "samples": 14251,
+        "chars": 4874638,
+        "sha256": "e242ffa454ca237af7379b6fa5a2c45e282e1097143d7aaa10f857c67f12f0bc",
+        "bytes": 8047913,
+        "tracked_in_git": false
+      },
+      "val": {
+        "path": "data/stage2_v1/val/short_realtime.jsonl",
+        "samples": 444,
+        "chars": 172299,
+        "sha256": "764174f5bc061755c66104c6f72c33a504d6bf3738dfe21a1e9bbdb07a93d5f2",
+        "bytes": 278799,
+        "tracked_in_git": false
+      },
+      "calib": {
+        "path": "data/stage2_v1/calib/short_realtime.jsonl",
+        "samples": 26,
+        "chars": 7258,
+        "sha256": "cd133d1e969fe64bdfb3cdfe172fb5322b691158047c43f78825d1104fe52f29",
+        "bytes": 12155,
+        "tracked_in_git": false
+      }
+    },
+    "long_context": {
+      "train": {
+        "path": "data/stage2_v1/train/long_context.jsonl",
+        "samples": 796,
+        "chars": 11441804,
+        "sha256": "de85ce055643627623e0106df71bcf56534cc9479dba2dafc9d960c13fcf0658",
+        "bytes": 11642594,
+        "tracked_in_git": false
+      },
+      "val": {
+        "path": "data/stage2_v1/val/long_context.jsonl",
+        "samples": 25,
+        "chars": 331702,
+        "sha256": "29551cff51271051b8348eafaf028f868bd43b8c7026ffe5bc6433b270a0039b",
+        "bytes": 337997,
+        "tracked_in_git": false
+      },
+      "calib": {
+        "path": "data/stage2_v1/calib/long_context.jsonl",
+        "samples": 18,
+        "chars": 213984,
+        "sha256": "f32975b2732cf51ebabcb08d19915655df9ba347096b552b00d1ee28e864158f",
+        "bytes": 217772,
+        "tracked_in_git": false
+      }
+    }
+  },
+  "totals": {
+    "train": 64484,
+    "train_chars": 86584242,
+    "val": 1916,
+    "val_chars": 2784249,
+    "calib": 200,
+    "calib_chars": 488044
+  },
+  "code_state": {
+    "git_commit": "b0155af3751bb297e0c1c6243d69706406dbf623",
+    "dirty": true,
+    "uncommitted_state_sha256": "62295af2c596a8567fe5d7d7a33d383f26a34757d3d0b84e57a593e8ba4e2458",
+    "untracked_files": [
+      "scripts/build_stage2_v1.py",
+      "tests/test_build_stage2_v1.py"
+    ]
+  }
+}

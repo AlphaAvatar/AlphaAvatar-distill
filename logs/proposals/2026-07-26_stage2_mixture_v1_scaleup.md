@@ -1,6 +1,9 @@
 # PROPOSAL (needs user approval) — Stage 2 mixture v1 scale-up
 
-Status: **awaiting user approval** (P12: larger public downloads). Drafted
+Status: **APPROVED by maintainer 2026-07-26** (both questions yes: build now,
+and include xlam-function-calling-60k). The xlam gate needs a one-time
+in-browser click-through on the AlphaAvatar HF account (API tokens cannot
+accept HF gates); the build verifies access before including it. Drafted
 2026-07-26 from the 2026-07-25 A/B finding that Stage 3 recovery is now
 **data-limited**: both A/B arms ran mixture-v0 epochs 3–4, holdout went
 flat/regressed, and generation smoke picked up corpus artifacts (gsm8k

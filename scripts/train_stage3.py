@@ -96,6 +96,14 @@ def main() -> None:
         tokenizer, data_dir, "train", cfg["block_len"], cfg["groups"]
     )
     val_blocks = build_blocks(tokenizer, data_dir, "val", cfg["block_len"], cfg["groups"])
+    extra_val_blocks = {}
+    extra_val_stats = {}
+    for name, extra_dir in (cfg.get("extra_val") or {}).items():
+        blocks = build_blocks(
+            tokenizer, REPO_ROOT / extra_dir, "val", cfg["block_len"], None
+        )
+        extra_val_blocks[name] = (blocks[0], blocks[1])
+        extra_val_stats[name] = blocks[3]
     logger.log(
         "dataset_loaded",
         data_dir=cfg["data_dir"],
@@ -103,6 +111,7 @@ def main() -> None:
         tokenizer_sha256=tokenizer_hash(tokenizer),
         train=train_blocks[3],
         val=val_blocks[3],
+        extra_val=extra_val_stats,
     )
 
     teacher = None
@@ -137,6 +146,7 @@ def main() -> None:
         device=device,
         out_dir=out_dir,
         logger=logger,
+        extra_val_blocks=extra_val_blocks,
     )
     if resume_ckpt is not None:
         trainer.restore(resume_ckpt)
@@ -156,7 +166,10 @@ def main() -> None:
             "resumed_from": str(resume_ckpt) if resume_ckpt else None,
             "device": device,
             "data_manifests": {
-                p.name: sha256_file(p) for p in sorted(data_dir.glob("*.manifest.json"))
+                p.name: sha256_file(p)
+                for d in [data_dir]
+                + [REPO_ROOT / e for e in (cfg.get("extra_val") or {}).values()]
+                for p in sorted(Path(d).glob("*.manifest.json"))
             },
             "tokenizer_sha256": tokenizer_hash(tokenizer),
             "teacher": teacher_identity,

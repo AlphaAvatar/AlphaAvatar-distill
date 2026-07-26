@@ -276,3 +276,52 @@ def test_validate_config_rejects_bad_fields(tmp_path):
             bad[key] = value
         with pytest.raises(ValueError):
             validate_train_config(bad)
+
+
+def test_extra_val_sets_logged_separately(tmp_path):
+    cfg = toy_cfg(
+        tmp_path,
+        extra_val={"val_v0": "unused_dir"},
+        schedule={"total_steps": 2},
+        intervals={"log_every": 1, "eval_every": 2, "eval_blocks": 2},
+    )
+    trainer = Trainer(
+        cfg, tiny_model(1), toy_blocks(), toy_blocks(n=3),
+        extra_val_blocks={"val_v0": toy_blocks(n=4, seed=9)}, device="cpu",
+    )
+    summary = trainer.run()
+    assert summary["final_eval"]["val_ce"] > 0
+
+    evals = [
+        json.loads(line)
+        for line in (tmp_path / "run" / "train_log.jsonl").read_text().splitlines()
+        if json.loads(line)["event"] == "eval_result"
+    ]
+    by_set = {}
+    for ev in evals:
+        by_set.setdefault(ev["val_set"], []).append(ev)
+    # step-0 and final evals for both the primary and the extra set
+    assert len(by_set["val"]) == len(by_set["val_v0"]) >= 2
+    assert all("val_ce" in ev for ev in by_set["val_v0"])
+    # different data => different metrics
+    assert by_set["val"][0]["val_ce"] != by_set["val_v0"][0]["val_ce"]
+
+    run_start = next(
+        json.loads(line)
+        for line in (tmp_path / "run" / "train_log.jsonl").read_text().splitlines()
+        if json.loads(line)["event"] == "run_start"
+    )
+    assert run_start["extra_val_blocks"] == {"val_v0": 4}
+
+
+def test_validate_config_extra_val_forms(tmp_path):
+    toy_cfg(tmp_path, extra_val={"val_v0": "data/stage2"})  # valid
+    for bad_extra in ({"val": "x"}, {"v": 3}, ["data/stage2"]):
+        with pytest.raises(ValueError):
+            toy_cfg(tmp_path, extra_val=bad_extra)
+    with pytest.raises(ValueError, match="no primary val"):
+        Trainer(
+            toy_cfg(tmp_path, extra_val={"val_v0": "unused"}),
+            tiny_model(1), toy_blocks(), None,
+            extra_val_blocks={"val_v0": toy_blocks(n=2)}, device="cpu",
+        )

@@ -95,6 +95,14 @@ def validate_train_config(cfg: dict) -> None:
     iv = need(cfg, "intervals", dict)
     for key in ("log_every", "eval_every", "eval_blocks"):
         need(iv, key, int, "intervals.")
+    extra = cfg.get("extra_val")
+    if extra is not None:
+        if not isinstance(extra, dict) or not all(
+            isinstance(k, str) and isinstance(v, str) for k, v in extra.items()
+        ):
+            raise ValueError("extra_val must map val-set names to data dirs")
+        if "val" in extra:
+            raise ValueError("extra_val name 'val' collides with the primary val")
 
 
 def build_blocks(tokenizer, data_dir, split, block_len, groups=None):
@@ -276,6 +284,7 @@ class Trainer:
         device: str = "cpu",
         out_dir: str | Path | None = None,
         logger: JsonlLogger | None = None,
+        extra_val_blocks: dict | None = None,
     ):
         validate_train_config(cfg)
         loss_cfg = cfg["loss"]
@@ -324,6 +333,14 @@ class Trainer:
             self.val_ids, self.val_mask = val_ids[perm], val_mask[perm]
         else:
             self.val_ids = self.val_mask = None
+        # Named secondary val sets (e.g. the frozen val_v0 alongside a v1
+        # mixture's own val split); evaluated and logged next to the primary.
+        self.extra_vals: dict[str, tuple] = {}
+        for name, (ids, mask) in (extra_val_blocks or {}).items():
+            perm = epoch_permutation(ids.shape[0], cfg["seed"] + 777, 0)
+            self.extra_vals[name] = (ids[perm], mask[perm])
+        if self.extra_vals and self.val_ids is None:
+            raise ValueError("extra_val_blocks given but no primary val_blocks")
         self.step = 0
 
     def _autocast(self):
@@ -418,11 +435,9 @@ class Trainer:
         }
 
     @torch.no_grad()
-    def evaluate(self, max_blocks: int | None = None) -> dict:
-        """CE (assistant targets) and KD metrics over the fixed val order."""
-        if self.val_ids is None:
-            raise ValueError("trainer has no validation blocks")
-        n = self.val_ids.shape[0]
+    def _eval_blocks(self, val_ids, val_mask, max_blocks: int | None) -> dict:
+        """CE (assistant targets) and KD metrics over a fixed block order."""
+        n = val_ids.shape[0]
         if max_blocks:
             n = min(n, max_blocks)
         micro = self.cfg["batch"]["micro_blocks"]
@@ -431,8 +446,8 @@ class Trainer:
         ce_s = kd_s = 0.0
         ce_n = kd_n = 0
         for i in range(0, n, micro):
-            ids = self.val_ids[i : i + micro].to(self.device)
-            mask = self.val_mask[i : i + micro].to(self.device)
+            ids = val_ids[i : i + micro].to(self.device)
+            mask = val_mask[i : i + micro].to(self.device)
             ce_sum, cn, kd_sum, kn = self._micro_losses(ids, mask)
             ce_s += float(ce_sum)
             ce_n += cn
@@ -447,6 +462,23 @@ class Trainer:
         if kd_n:
             out["val_kd"] = round(kd_s / kd_n, 6)
         return out
+
+    def evaluate(self, max_blocks: int | None = None) -> dict:
+        """Metrics over the primary val set (see _eval_blocks)."""
+        if self.val_ids is None:
+            raise ValueError("trainer has no validation blocks")
+        return self._eval_blocks(self.val_ids, self.val_mask, max_blocks)
+
+    def _eval_and_log(self, eval_blocks, suffix: str = "") -> dict:
+        """Evaluate primary + named extra val sets, log one event each."""
+        ev = self.evaluate(eval_blocks)
+        self.logger.log("eval_result", step=self.step, val_set="val", **ev)
+        print(f"eval step {self.step}{suffix}: {ev}", flush=True)
+        for name, (ids, mask) in self.extra_vals.items():
+            ex = self._eval_blocks(ids, mask, eval_blocks)
+            self.logger.log("eval_result", step=self.step, val_set=name, **ex)
+            print(f"eval step {self.step}{suffix} [{name}]: {ex}", flush=True)
+        return ev
 
     def save_checkpoint(self) -> Path:
         tag = f"step_{self.step:06d}"
@@ -509,15 +541,17 @@ class Trainer:
                 total_steps=total,
                 train_blocks=int(self.train_ids.shape[0]),
                 val_blocks=int(self.val_ids.shape[0]) if self.val_ids is not None else 0,
+                extra_val_blocks={
+                    name: int(ids.shape[0])
+                    for name, (ids, _) in self.extra_vals.items()
+                },
                 **{
                     k: self.freeze_report[k]
                     for k in ("trainable_params", "total_params")
                 },
             )
             if self.val_ids is not None:
-                ev = self.evaluate(eval_blocks)
-                self.logger.log("eval_result", step=0, **ev)
-                print(f"eval step 0: {ev}", flush=True)
+                self._eval_and_log(eval_blocks)
 
         while self.step < total:
             t0 = time.time()
@@ -542,17 +576,13 @@ class Trainer:
                 and self.step % iv["eval_every"] == 0
                 and not at_end
             ):
-                ev = self.evaluate(eval_blocks)
-                self.logger.log("eval_result", step=self.step, **ev)
-                print(f"eval step {self.step}: {ev}", flush=True)
+                self._eval_and_log(eval_blocks)
             if ck["save_every"] and self.step % ck["save_every"] == 0 and not at_end:
                 self.save_checkpoint()
 
         final_eval = None
         if self.val_ids is not None:
-            final_eval = self.evaluate(eval_blocks)
-            self.logger.log("eval_result", step=self.step, **final_eval)
-            print(f"eval step {self.step} (final): {final_eval}", flush=True)
+            final_eval = self._eval_and_log(eval_blocks, suffix=" (final)")
         ckpt_dir = self.save_checkpoint()
         self.logger.log(
             "run_end", steps=self.step, seconds=round(time.time() - t_start, 1)
