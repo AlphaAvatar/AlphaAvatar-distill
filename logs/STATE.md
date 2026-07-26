@@ -127,7 +127,8 @@ uv run python scripts/eval_ppl.py --data data/warmup/holdout_v1.jsonl \
 
 ## Open decisions for the user
 
-- **GPU session approval for `s2_blocks_v1`** (item 1 above, ~$3–5 L40S).
+- ~~GPU session approval for `s2_blocks_v1`~~ — **approved 2026-07-26**
+  ("continue" after the request in-session); session in progress.
 - Whether s1 and/or the A/B become official README "Optim record history"
   entries (reproducible records exist; needs maintainer approval).
 
