@@ -1,0 +1,2 @@
+db5e3cfbefce0ed253750b67ad96182f749697a805484e98f160714ec0c24b42  /workspace/xfer/transfer/stage2_data_20260726.tar.zst
+3262519b05fc0b2c0fecfeefcee09339832b6f59c22700c64c517f6ec2e13eb3  /workspace/xfer/transfer/repo_20260726.bundle

@@ -127,8 +127,17 @@ uv run python scripts/eval_ppl.py --data data/warmup/holdout_v1.jsonl \
 
 ## Open decisions for the user
 
-- ~~GPU session approval for `s2_blocks_v1`~~ — **approved 2026-07-26**
-  ("continue" after the request in-session); session in progress.
+- ~~GPU session approval for `s2_blocks_v1`~~ — **approved 2026-07-26**,
+  but the session is **PAUSED at the user's request after a RunPod
+  provisioning failure**: three consecutive pods (2× L40S with the
+  playbook image, 1× L40S with the official `runpod-torch-v240` template)
+  sat at `uptimeSeconds: 0` for 15+ min — containers never started; a 4th
+  pod (RTX 6000 Ada, $0.84/h) was deleted before testing. ~$0.80 sunk
+  (balance $243.51). **All pods deleted, nothing billing.** Everything is
+  staged for resume: transfer bundle + data on HF, start-checkpoint hashes
+  pinned, session scripts committed under `scripts/pod/` (see its AGENTS.md
+  for the exact resume procedure). Approval stands; resume whenever the
+  user says go — likely a transient RunPod issue, so just retry later.
 - Whether s1 and/or the A/B become official README "Optim record history"
   entries (reproducible records exist; needs maintainer approval).
 
