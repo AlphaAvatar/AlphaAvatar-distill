@@ -4,6 +4,38 @@ Manifests for artifacts stored outside GitHub (AGENTS.md 2.5). All entries
 in `AlphaAvatar/aadistill-artifacts` are **private** storage/transfer
 artifacts, not public releases.
 
+## stage3/s2_blocks_v1 — mixture-v1 recovery final checkpoint (current best)
+
+- **Artifact:** same repo, path `stage3/s2_blocks_v1/`: `step_002700/model/`
+  (final fp32 checkpoint, 2.3 GB) + `train_log.jsonl`, `run_manifest.json`,
+  `eval_holdout_v1.json`, `eval_holdout_v1_int8.json`,
+  `eval_holdout_v1_int8_decoder.json`, `gen_smoke.json`, `console.log`,
+  `s2v1_artifact_hashes_2026-07-26.txt` (14 files).
+- **Revision:** `b1b5170cb45ce7b141c02c23ca4b1bb89918a85b` (2026-07-26 15:45 UTC,
+  last of the run's upload commits).
+- **Hashes (sha256):** `step_002700/model/model.safetensors`
+  `f275fbfd13b43b61629f92b67a7b9586d34deeea977b6c8e197c708ecd4f591f`;
+  full per-file list in `artifacts/stage3/s2v1_artifact_hashes_2026-07-26.txt`
+  (local, gitignored; computed pod-side before upload) and mirrored in the repo
+  at `stage3/s2_blocks_v1/s2v1_artifact_hashes_2026-07-26.txt`. Upload verified
+  independently after the fact — LFS sha256 for the large weights, download+hash
+  for small files, **14/14 match** (`scripts/pod/verify_and_report_s2v1.py
+  verify`). Weights are HF-only; small files also live locally under
+  `artifacts/stage3/s2_blocks_v1/`.
+- **License:** internal artifact, same derivation as the entries below, plus the
+  `stage2_offline_v1` mixture (permissive public sources; synthetic provenance
+  and share-alike notes recorded in `data/stage2_v1/stage2_offline_v1.manifest.json`).
+  Not for redistribution as-is (no model card).
+- **Creation command:** `uv run python scripts/train_stage3.py --config
+  configs/stage3_s2_blocks_v1.json` (run `s2_blocks_v1`, config sha256
+  `5a61689cb9a8…`, code state git `f73be5516a85` + logged uncommitted diff
+  `2e04f6834922…`, pod `ippwmpc8wzed24`, 1× L40S, 2026-07-26); uploaded by
+  `scripts/pod/post_run.sh` in the same session.
+- **Related logs:** `experiments/2026-07-26_stage3_s2_blocks_v1_gpu_run.md`.
+  Holdout_v1 NLL 3.8003 (bf16) — **current best student checkpoint**; it is also
+  the reference arm (`A0 chain`) of the proposed start-point ablation.
+- **Not retained:** optimizer state and rolling checkpoints (deleted with the pod).
+
 ## stage3/s1_ffn_norm_v0/step_000660 — s1 recovery final checkpoint
 
 - **Artifact:** `https://huggingface.co/AlphaAvatar/aadistill-artifacts`

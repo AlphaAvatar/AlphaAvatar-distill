@@ -2,67 +2,93 @@
 
 ## 📈 Performance Trend and Project Goal
 
-AlphaAvatar-distill aims to build an agent-guided model compression and distillation framework for transforming large teacher models into small, real-time, edge-deployable student models.
+AlphaAvatar-distill is an agent-guided model compression and distillation framework for turning large teacher models into small, real-time, edge-deployable students.
 
-The project goal is to make distillation reproducible, automated, and useful for realtime AI assistant runtimes, including RAG, tool use, reasoning, self-correction, quantized inference, and low-latency deployment.
+The goal is to make distillation **reproducible, automated, and useful for realtime assistant runtimes** — RAG, tool use, reasoning, self-correction, quantized inference, low-latency deployment.
 
 [![performance trend](./assets/performance_trend.svg)](./assets/performance_trend.svg)
 
-Every point is backed by a log in [`logs/experiments/`](./logs/experiments/); the figure regenerates from [`assets/perf_trend.json`](./assets/perf_trend.json) via `uv run python scripts/plot_perf_trend.py`. New student attempts are appended as stages progress (the remaining gap to the teacher line is the work ahead for recovery sub-stages 2+ and on-policy training).
+**Current experiment:** [Qwen/Qwen3-4B-Thinking-2507](https://huggingface.co/Qwen/Qwen3-4B-Thinking-2507) → a 0.6B-class student (Qwen3-0.6B geometry, ~6.7× compression, INT8 deployment target). Numbers below are held-out NLL on `holdout_v1` (21,080 tokens of fineweb-edu); the numbers in the figure are the `#` column here.
 
-**Current experiment:** compressing [Qwen/Qwen3-4B-Thinking-2507](https://huggingface.co/Qwen/Qwen3-4B-Thinking-2507) into a 0.6B-class student (Qwen3-0.6B geometry, ~6.7× compression, INT8 deployment target). Stage 0 (teacher activation statistics, ~950K tokens), Stage 1 (teacher-projected structural initialization, 596M params), and Stage 2 (grouped offline training mixture, 5.39M train tokens across 8 behavior groups) have passed their validation gates. Stage 3 recovery sub-stage 1 (FFN+norm, masked CE + full-vocab teacher KD, 660 steps on one L40S) passed its gate on 2026-07-22: held-out NLL improved from 11.75 (init) to **4.21** (teacher: 2.63), with valid chat-formatted generation. Recovery sub-stages 2+ (attention unfreeze, full offline KD) are next. Details: [Stage 0 log](./logs/experiments/2026-07-13_stage0_qwen3_4b_thinking_v1.md), [Stage 1 log](./logs/experiments/2026-07-14_stage1_qwen3_0p6b_init_v0.md), [Stage 2 log](./logs/experiments/2026-07-21_stage2_offline_v0.md), [Stage 3 trainer log](./logs/experiments/2026-07-22_stage3_trainer_toy.md), [Stage 3 s1 run log](./logs/experiments/2026-07-22_stage3_s1_gpu_run.md).
+| # | date | run | what changed | held-out NLL |
+| ---: | --- | --- | --- | ---: |
+| 1 | 2026-07-14 | [init v0, recipe attempt 1](./logs/experiments/2026-07-14_stage1_qwen3_0p6b_init_v0.md) | early-band depth merge, unweighted projection | 17.7977 |
+| 2 | 2026-07-14 | [init v0, fixed recipe](./logs/experiments/2026-07-14_stage1_qwen3_0p6b_init_v0.md) | middle-band merge, end-weighted projection | 11.7482 |
+| 3 | 2026-07-22 | [s1 recovery](./logs/experiments/2026-07-22_stage3_s1_gpu_run.md) | FFN+norm, CE 0.25 + KD 1.0, 660 steps on mixture v0 | 4.2107 |
+| 4 | 2026-07-25 | [s2 A/B arm A](./logs/experiments/2026-07-25_stage3_s2_ab_gpu_run.md) | control: +660 FFN-only steps; regressed on mixture-v0 epochs 3–4 | 4.2747 |
+| 5 | 2026-07-25 | [s2 A/B arm B](./logs/experiments/2026-07-25_stage3_s2_ab_gpu_run.md) | attention unfrozen; freeze set adopted, holdout flat (data-limited) | 4.2118 |
+| 6 | 2026-07-26 | [s2 on mixture v1](./logs/experiments/2026-07-26_stage3_s2_blocks_v1_gpu_run.md) | same recipe, 4.11× data, 2700 steps; plateau broken | **3.8003** |
+
+Reference points on the same set: teacher **2.6264** · random-init 0.6B baseline **12.1286**.
+
+The latest run closed 26% of the remaining gap to the teacher and left INT8 fake-quant degradation at +0.08%/+0.21%, but its generation smoke still shows answer-style defects, so the next steps are a start-point ablation and a behavioural eval rather than more data volume. Current state and next actions: [`logs/STATE.md`](./logs/STATE.md); costed, unapproved work: [`logs/proposals/`](./logs/proposals/).
+
+The figure regenerates from [`assets/perf_trend.json`](./assets/perf_trend.json) with `uv run python scripts/plot_perf_trend.py`; the table above comes from the same file via `--print-table`, and every point is backed by a log in [`logs/experiments/`](./logs/experiments/).
 
 ---
 
 ## 🧠 How it works
 
-Implemented so far (later stages are described in [`AGENTS.md`](./AGENTS.md) but not yet built):
+| Stage | What it produces | Status |
+| --- | --- | --- |
+| **0** — activation statistics | streaming float64 sufficient statistics from the teacher: per residual point count / sum / `XᵀX`, per-FFN-neuron `Σ\|a\|` and `Σa²`, token frequencies. Fixed 1.95 GB cache regardless of token count. | passed ([log](./logs/experiments/2026-07-13_stage0_qwen3_4b_thinking_v1.md)) |
+| **1** — projection + sandwich init | a complete, runnable Qwen3-format 0.6B student (596M params) plus a same-geometry random baseline, both with reproducibility manifests. | passed ([log](./logs/experiments/2026-07-14_stage1_qwen3_0p6b_init_v0.md)) |
+| **2** — offline warm-up mixture | eight training-use groups from permissive revision-pinned sources (instruction, RAG/evidence, multi-hop QA, tool calling, refusal/uncertainty, code/math, short realtime, long context) with global dedup, holdout exclusion, and train/val/calib splits. | v0 5.39M tokens ([log](./logs/experiments/2026-07-21_stage2_offline_v0.md)), v1 22.13M ([log](./logs/experiments/2026-07-26_stage2_offline_v1.md)) |
+| **3** — student recovery | one config-driven trainer for all recovery sub-stages: regex freeze policy, masked CE + on-the-fly full-vocab teacher KD, exact resume, per-run manifests, gate evals. | sub-stages 1–2 passed; further runs [proposed](./logs/proposals/) |
+| **4–6** — online data, on-policy distillation, deployment validation | specified in [`AGENTS.md`](./AGENTS.md) | not started |
 
-1. **Stage 0 — activation statistics.** The teacher runs over a small, license-clean warm-up corpus while the collector accumulates streaming sufficient statistics in float64: per residual point token count, sum, and uncentered second moment `X^T X`; per-FFN-neuron `sum |a|` and `sum a²`; token frequencies. The cache is fixed-size (1.95 GB for a 4B teacher) regardless of token count.
-2. **Stage 1 — projection + sandwich initialization.** A single global orthonormal projection `P` (eigenvectors of the trace-normalized average of the residual second moments, with the embedding-output and post-final-norm points upweighted) defines the student's hidden space. Every teacher linear is transplanted as `P^T·W·P` with the preceding RMSNorm weight folded in exactly; Q heads are subsampled per GQA group, FFN neurons kept by activation importance, and depth is compressed by merging middle-band layer pairs (first-of-span representative). The result is a complete, runnable Qwen3-format student checkpoint plus a same-geometry random baseline, both wrapped in reproducibility manifests.
-3. **Stage 2 — offline warm-up mixture.** A deterministic, revision-pinned builder assembles eight training-use groups from permissive public sources (instruction, RAG/evidence, multi-hop QA, tool calling in the Qwen3 tool schema, refusal/uncertainty, code/math, short realtime, long context) with global dedup, eval-holdout exclusion, and per-group train/val/calib splits — the stratified calib slice doubles as the INT8 calibration set. The loader renders conversations with the teacher's chat template and computes assistant-span loss masks by character offsets (the Thinking-2507 template is not prefix-stable), packing everything into fixed-length blocks for the recovery trainer.
-4. **Stage 3 — recovery trainer (implemented; first real run pending).** One config-driven trainer covers the recovery sub-stages: a regex freeze policy selects what trains (sub-stage 1 recovers FFN + norms with attention frozen; later sub-stages unfreeze more), and the loss mixes masked next-token CE with on-the-fly forward-KL distillation of the teacher's full-vocab distribution (the teacher runs on the same packed blocks — no cached logits). Block order is a pure function of (seed, epoch), so an interrupted run resumes bitwise-exactly from its checkpoint (verified in tests and in a real-model smoke). Training events stream to an append-only jsonl log; every run writes a manifest with config, data, tokenizer, teacher, and code-state hashes.
+Design choices worth knowing:
 
-Every run records config hash, code state, dataset/tokenizer/teacher hashes, and gate-check results; heavy artifacts stay out of git.
+- **Sufficient statistics, not activation dumps.** Stage 0 caches exactly what Stage 1 consumes (second moments, neuron importances, token frequencies) in float64, so the cache is O(1) in token count and the centering step stays numerically sound.
+- **One global projection, transplanted sandwich-style.** Every teacher linear becomes `Pᵀ·W·P` with the preceding RMSNorm folded in exactly; Q heads are subsampled per GQA group, FFN neurons kept by activation importance, depth compressed by merging middle-band layer pairs. Attempt 1 in the table above is what happened when the merge band was wrong — the recipe is evidence-driven, not assumed.
+- **Loss masks are computed from character offsets.** The Thinking-2507 chat template is *not* prefix-stable (it injects an empty think block into the final assistant turn), so the usual per-turn prefix diffing miscounts spans. The loader renders the conversation once and maps assistant character spans to tokens.
+- **KD runs on the fly over the full vocabulary.** The teacher forwards the same packed blocks each step — no cached logits, so the corpus is not welded to one teacher revision and top-k approximation is unnecessary.
+- **Block order is a pure function of (seed, epoch).** An interrupted run resumes bitwise-exactly. The validation subset is seed-derived too, which is why runs meant to be compared must share a seed ([decision record](./logs/decisions.md)).
+- **Deployment numerics are a gate, not an afterthought.** Every recovery gate re-evaluates under INT8 weight fake-quantization at two scopes, so quality that quantization would destroy never counts as progress.
+- **Ablations are config diffs.** The two proposed start-point arms differ from the completed mixture-v1 run in exactly one meaningful field, verified by diff.
+
+Every run records config hash, code state, dataset/tokenizer/teacher hashes, and gate-check results; heavy artifacts stay out of git. GPU sessions run under a durable OS-level orchestrator that trains, evaluates, uploads artifacts, verifies the upload against pod-side hashes, generates the write-up, and tears the pod down unattended.
 
 ---
 
 ## ⚡ Quick start
 
 ```bash
-uv sync   # CPU-only torch by default; see pyproject.toml to switch to a CUDA index
-uv run pytest tests/ -q
+uv sync                    # CPU torch by default; see pyproject.toml for a CUDA index
+uv run pytest tests/ -q    # 75 CPU tests, no downloads
 ```
 
 The implemented pipeline runs end to end on CPU (GPU optional):
 
 ```bash
-# rebuild the warm-up corpus (revision-pinned public sources, gitignored jsonl)
-uv run python scripts/build_warmup_v1.py
+# corpora (revision-pinned public sources; the jsonl files stay gitignored)
+uv run python scripts/build_warmup_v1.py       # Stage 0/1 warm-up (~1M tokens)
+uv run python scripts/build_holdout_v1.py      # held-out eval set
+uv run python scripts/build_stage2_v0.py       # offline mixture v0 (5.39M train tokens)
+uv run python scripts/build_stage2_v1.py       # offline mixture v1 (22.13M train tokens)
 
-# Stage 0: teacher activation statistics (~1 h CPU for ~950K tokens; dry run: --limit 2)
+# Stage 0 → 1: teacher statistics (~1 h CPU; dry run with --limit 2), then init (~5 min)
 uv run python scripts/collect_stage0.py --config configs/stage0_qwen3_4b_thinking_v1.json
-
-# Stage 1: initialize the 0.6B student from the teacher + stats (~5 min)
 uv run python scripts/init_stage1.py --config configs/stage1_qwen3_0p6b_from_4b_thinking.json
 
-# held-out perplexity comparison (teacher vs init vs random baseline)
-uv run python scripts/build_holdout_v1.py
+# gate checks
+uv run python scripts/dry_run_stage2.py --data-dir data/stage2_v1 \
+  --out artifacts/stage2/dry_run_v1_report.json
 uv run python scripts/eval_ppl.py --data data/warmup/holdout_v1.jsonl \
   --model artifacts/stage1/qwen3_0p6b_init_v0/checkpoint \
   --model artifacts/stage1/qwen3_0p6b_init_v0/random_baseline
 
-# Stage 2: build the grouped offline mixture (revision-pinned public sources)
-uv run python scripts/build_stage2_v0.py
-uv run python scripts/dry_run_stage2.py   # loader gate check (~12 s)
+# Stage 3 recovery: 3 real KD steps on CPU, then the same code path with --resume
+uv run python scripts/train_stage3.py --config configs/stage3_s2v1_smoke_cpu.json
+uv run python scripts/train_stage3.py --config configs/stage3_s2v1_smoke_cpu.json --resume
 
-# Stage 3: recovery trainer smoke (3 real KD steps on CPU, ~3 min); the full
-# run uses configs/stage3_s1_ffn_norm.json on a GPU
-uv run python scripts/train_stage3.py --config configs/stage3_smoke_cpu.json
-uv run python scripts/train_stage3.py --config configs/stage3_smoke_cpu.json --resume
+# any checkpoint, at the deployment precision (bf16 baseline + INT8 weight fake-quant)
+uv run python scripts/eval_ppl.py --data data/warmup/holdout_v1.jsonl \
+  --model artifacts/stage3/s1_ffn_norm_v0/checkpoints/step_000660/model \
+  --fake-quant int8 --fake-quant-scope decoder
 ```
 
-Each step writes gitignored artifacts plus a full reproducibility manifest under `artifacts/` or `data/`. The first real Stage 3 recovery run, and Stages 4+ (on-policy distillation, deployment), have not happened yet. See [`logs/STATE.md`](./logs/STATE.md) for current state and next actions.
+Real recovery runs use the same CLI with a GPU-sized config (e.g. `configs/stage3_s2_blocks_v1.json`) — hardware never changes the experiment definition. Each step writes gitignored artifacts plus a full reproducibility manifest under `artifacts/` or `data/`.
 
 ---
 
@@ -70,11 +96,11 @@ Each step writes gitignored artifacts plus a full reproducibility manifest under
 
 This project is developed by autonomous coding agents (e.g. Claude Code, Codex, Cursor). [`AGENTS.md`](./AGENTS.md) is the single source of truth for agent instructions and must be read before making any change to this repository.
 
-The first dense-model compression experiment was kicked off with this instruction to the agent:
+The first dense-model compression experiment was kicked off with this instruction:
 
 > Hi, have a look at the AlphaAvatar-distill repo and start from the teacher model https://huggingface.co/Qwen/Qwen3-4B-Thinking-2507. Let's kick off the first dense-model compression experiment.
 
-Everything under `src/`, `scripts/`, and `logs/` grew from that instruction, following the staged workflow in `AGENTS.md`. Current session state and the next recommended actions live in [`logs/STATE.md`](./logs/STATE.md).
+Everything under `src/`, `scripts/`, and `logs/` grew from that instruction, following the staged workflow in `AGENTS.md`. The working split is: agents act directly on local, reversible, CPU-scale work, and write a **costed proposal with pre-registered decision rules** for anything paid, long-running, or public-facing — the maintainer approves per session. Pending proposals live in [`logs/proposals/`](./logs/proposals/); current state and next actions in [`logs/STATE.md`](./logs/STATE.md).
 
 ---
 
@@ -82,67 +108,42 @@ Everything under `src/`, `scripts/`, and `logs/` grew from that instruction, fol
 
 ```text
 AlphaAvatar-distill/
-├── AGENTS.md                   # agent working contract (single source of truth)
-├── CLAUDE.md                   # Claude Code entrypoint (points to AGENTS.md)
-├── LICENSE
-├── README.md
-├── pyproject.toml              # uv-managed env; CPU torch index by default
-├── uv.lock
-├── assets/
-│   ├── perf_trend.json                     # trend-figure data (each point links to a log)
-│   └── performance_trend.svg               # rendered by scripts/plot_perf_trend.py
-├── configs/
-│   ├── stage0_qwen3_4b_thinking.json       # Stage 0 v0 config (47-sample warm-up)
-│   ├── stage0_qwen3_4b_thinking_v1.json    # Stage 0 v1 config (~950K-token warm-up)
-│   ├── stage1_qwen3_0p6b_from_4b_thinking.json  # Stage 1 init recipe (0.6B student)
-│   ├── stage3_s1_ffn_norm.json             # Stage 3 recovery sub-stage 1 (GPU-sized; not yet run)
-│   └── stage3_smoke_cpu.json               # Stage 3 3-step CPU smoke config
-├── data/
-│   ├── warmup/
-│   │   ├── warmup_v0.jsonl                 # 47 handcrafted warm-up samples (committed)
-│   │   ├── warmup_v1.manifest.json         # v1 corpus manifest (jsonl gitignored, rebuildable)
-│   │   └── holdout_v1.manifest.json        # held-out eval set manifest (jsonl gitignored)
-│   └── stage2/
-│       └── stage2_offline_v0.manifest.json # offline mixture manifest (train/val/calib jsonl gitignored)
-├── logs/
-│   ├── STATE.md                # current project state and next actions
-│   ├── decisions.md            # decision records
-│   ├── supported_models.md     # model status table
-│   └── experiments/            # per-run experiment logs
-├── scripts/
-│   ├── collect_stage0.py       # Stage 0 CLI: teacher activation-stats collection
-│   ├── plot_perf_trend.py      # renders the README performance-trend figure
-│   ├── build_warmup_v1.py      # warm-up corpus builder (revision-pinned sources)
-│   ├── build_holdout_v1.py     # held-out eval set builder
-│   ├── init_stage1.py          # Stage 1 CLI: student init + gate checks + manifest
-│   ├── eval_ppl.py             # deterministic NLL/perplexity evaluation
-│   ├── build_stage2_v0.py      # Stage 2 offline mixture builder (8 groups, pinned sources)
-│   ├── dry_run_stage2.py       # Stage 2 gate: loader/masking/packing dry run
-│   └── train_stage3.py         # Stage 3 CLI: recovery training with --resume + run manifests
-├── tests/
-│   ├── test_collect_toy.py     # CPU toy tests for the Stage 0 collector
-│   ├── test_stage1_toy.py      # Stage 1 algebra tests (identity-projection exactness)
-│   ├── test_data_toy.py        # Stage 2 loader tests (schema, loss masks, packing)
-│   └── test_train_toy.py       # Stage 3 trainer tests (loss math, freeze, exact resume)
-└── src/aadistill/              # algorithm core
-    ├── collect.py              # streaming activation-statistics collector
-    ├── data.py                 # Stage 2+ loader: schema, chat render, loss masks, packing
-    ├── env.py                  # env fingerprint, code-state hash, determinism
-    ├── manifest.py             # sha256 + JSON manifest helpers
-    ├── project.py              # stream projection + FFN importance + final-norm solve
-    ├── sandwich.py             # depth map, head selection, sandwich init_student
-    ├── student.py              # Qwen3 student config/model builder
-    ├── teacher.py              # teacher loading with pinned revision + identity record
-    └── train.py                # Stage 3 recovery trainer (CE+KD, freeze policy, exact resume)
+├── AGENTS.md               # agent working contract (single source of truth)
+├── CLAUDE.md               # Claude Code entrypoint (points to AGENTS.md)
+├── pyproject.toml          # uv-managed env; CPU torch index by default
+├── src/aadistill/          # algorithm core — model-agnostic, config-driven
+│   ├── collect.py          #   Stage 0 streaming activation statistics
+│   ├── project.py          #   stream projection, FFN importance, final-norm solve
+│   ├── sandwich.py         #   depth map, head selection, sandwich transplant
+│   ├── student.py          #   Qwen3 student config/model builder
+│   ├── teacher.py          #   pinned-revision teacher loading + identity record
+│   ├── data.py             #   mixture loader: schema, chat render, loss masks, packing
+│   ├── train.py            #   Stage 3 recovery trainer (CE+KD, freeze policy, resume)
+│   ├── quant.py            #   INT8 weight fake-quantization for deployment evals
+│   ├── env.py              #   env fingerprint, code-state hash, determinism
+│   └── manifest.py         #   sha256 + JSON manifest helpers
+├── scripts/                # one CLI per stage + corpus builders + eval + figure
+│   └── pod/                #   GPU session scripts and durable orchestrator
+├── configs/                # stage recipes; Stage 3 runs are one config each
+├── data/                   # corpus manifests (jsonl gitignored, rebuildable)
+├── tests/                  # 75 CPU tests: algebra, loader, trainer, quant, builders, figure
+├── logs/                   # project memory — read STATE.md first
+│   ├── STATE.md            #   current state, verified facts, next actions
+│   ├── decisions.md        #   decision records (why, alternatives, risks)
+│   ├── experiments/        #   per-run logs with commands, hashes, gate checks
+│   ├── proposals/          #   costed proposals awaiting maintainer approval
+│   ├── supported_models.md #   model status table
+│   └── artifact_manifests.md  # artifacts stored outside git (HF), with hashes
+└── assets/                 # trend data + rendered figure
 ```
 
-New directories are added only when required by an implemented and verified milestone, per `AGENTS.md`. Model weights, activation caches, and experiment artifacts are kept out of git (`.gitignore`).
+The tree above is abridged to the parts worth knowing about. New directories appear only when an implemented, verified milestone needs them. Model weights, activation caches, and experiment artifacts are kept out of git (`.gitignore`); large checkpoints live in a private Hugging Face repo with hashes recorded in `logs/artifact_manifests.md`.
 
 ---
 
 ## 🏆 Optim record history
 
-Only add records backed by reproducible experiment logs. Do not add placeholder results.
+Official records are stricter than ordinary experiments (AGENTS.md 3.8): exact commit, command, hardware, data and tokenizer hashes, budget, metric log, and maintainer approval. Reproducible Stage 3 records exist in `logs/experiments/`, but none has been approved as an official record yet, so every section below is intentionally empty.
 
 ### 🧪 Stage 0 — Initialization warm-up data collection
 
@@ -178,9 +179,10 @@ _No records yet._
 
 | Reference | Topic | Status | Why it matters here |
 | --- | --- | --- | --- |
-| Muralidharan et al., *Compact Language Models via Pruning and Knowledge Distillation* (Minitron), NVIDIA, 2024. [arXiv:2407.14679](https://arxiv.org/abs/2407.14679) | ffn-pruning, distillation | used | Activation-magnitude neuron/head importance for structured width pruning; establishes that pruned-before-recovery students score near-noise zero-shot and rely on distillation recovery. Informed Stage 1 FFN top-k selection and the interpretation of the init-checkpoint eval (see 2026-07-14 Stage 1 experiment log). |
-| Gromov et al., *The Unreasonable Ineffectiveness of the Deeper Layers*, 2024. [arXiv:2403.17887](https://arxiv.org/abs/2403.17887) | depth-compression | used | Layer-drop studies show early layers are critical and middle/late-middle layers are most redundant. Motivated moving Stage 1 depth merging from the early band to the middle band after the early-merge ablation collapsed (single-axis ablation, 2026-07-14). |
+| Muralidharan et al., *Compact Language Models via Pruning and Knowledge Distillation* (Minitron), NVIDIA, 2024. [arXiv:2407.14679](https://arxiv.org/abs/2407.14679) | ffn-pruning, distillation | used | Activation-magnitude neuron/head importance for structured width pruning; establishes that pruned-before-recovery students score near-noise zero-shot and rely on distillation recovery. Informed Stage 1 FFN top-k selection and the interpretation of the init-checkpoint eval ([log](./logs/experiments/2026-07-14_stage1_qwen3_0p6b_init_v0.md)). |
+| Gromov et al., *The Unreasonable Ineffectiveness of the Deeper Layers*, 2024. [arXiv:2403.17887](https://arxiv.org/abs/2403.17887) | depth-compression | used | Layer-drop studies show early layers are critical and middle/late-middle layers are most redundant. Motivated moving Stage 1 depth merging from the early band to the middle band after the early-merge ablation collapsed. |
 | Xia et al., *Sheared LLaMA: Accelerating Language Model Pre-training via Structured Pruning*, 2023. [arXiv:2310.06694](https://arxiv.org/abs/2310.06694) | svd-compression, distillation | queued | Structured pruning with mask learning + continued pre-training; candidate comparison recipe for Stage 3 recovery design. |
+| Kim & Rush, *Sequence-Level Knowledge Distillation*, EMNLP 2016. [arXiv:1606.07947](https://arxiv.org/abs/1606.07947) | distillation, offline-data | queued | Training the student on the teacher's *generated* targets rather than on gold targets reweighted by the teacher. Basis of the pending teacher-generated-answer proposal, which targets the answer-style defects that survived the mixture-v1 recovery run ([proposal](./logs/proposals/2026-07-27_stage2_teacher_generated_answers.md)). |
 
 ---
 

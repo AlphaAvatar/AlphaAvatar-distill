@@ -131,3 +131,118 @@ should become a README Optim record entry.
 Review the curves and smoke output above, decide the sub-stage 2 verdict,
 update `logs/STATE.md` and the perf trend, and decide on README Optim record
 entries (maintainer approval required).
+
+---
+
+# Review (added 2026-07-27, agent — everything above is machine-generated)
+
+**Verdict: sub-stage 2 quality gate PASSED. The plateau is broken and the
+binding constraint has moved off data volume.** This is the first checkpoint
+that improves on `s1@660` since 2026-07-22; it becomes the project's best
+student checkpoint.
+
+## What the numbers say
+
+| signal | start point (arm B) | this run | change |
+|---|---|---|---|
+| holdout_v1 NLL (bf16) | 4.2118 | **3.8003** | **−9.77%** |
+| holdout_v1 perplexity | 67.48 | **44.71** | −33.7% |
+| gap to teacher (nats) | 1.5854 | **1.1739** | **−26.0%** |
+| val_v1 ce (in-mixture) | 2.762688 | 1.789819 | −35.2% |
+| val_v1 kd | 1.765900 | 0.890753 | −49.6% |
+| val_v0 ce (frozen v0 val) | 2.675080 | 2.437394 | −8.89% |
+| val_v0 kd | 1.097047 | 0.873401 | −20.4% |
+
+1. **The 2026-07-25 data-limited diagnosis was correct.** Same freeze set,
+   same lr, same loss as A/B arm B; the only change was 4.11× more data and a
+   4.1× longer schedule — and the holdout metric that had been flat for two
+   runs moved 9.8%.
+2. **No overfit signature at ~2.0 epochs.** val_v1 ce/kd and val_v0 ce/kd all
+   descend monotonically after the step-150 transient, and holdout tracks
+   them. Contrast the A/B, where in-mixture metrics improved while holdout
+   went flat/worse at epochs 3–4. The "≤2 epochs" sizing rule from the
+   scale-up proposal held.
+3. **val_v0 improving by 8.9% is the strongest generalization evidence
+   here.** val_v0 is *frozen data the start point had already seen for 3–4
+   epochs*; further improvement on it cannot come from memorizing v1 and
+   indicates real recovery, not mixture-specific fitting.
+4. **INT8 robustness is preserved at the new quality level** (+0.08%
+   decoder-scope, +0.21% full-scope — the same pattern measured on s1@660,
+   which was +0.03%/+0.21%). No sign that recovery is buying quality that
+   quantization then destroys (P9).
+5. **The step-150 val_v0 bump (2.675 → 2.762 → down)** is the expected
+   fresh-optimizer + lr-re-warm transient, same shape as both A/B arms.
+
+## Caveats a reader must carry forward
+
+- **Cross-run val_v0 numbers are NOT comparable.** The eval subset is a
+  permutation seeded by `cfg["seed"] + 777` (`src/aadistill/train.py:332`),
+  and this run used seed `20260726` vs the A/B's `20260725` — so the 64-block
+  val_v0 subsets differ. Only the *within-run* val_v0 delta (2.6751 → 2.4374)
+  is a valid comparison; do not compare it against arm B's logged 2.5791.
+  **Consequence for future runs: any run intended to be compared with this
+  one must reuse seed `20260726`.** This is now a pre-registered requirement
+  in the start-point ablation proposal.
+- **holdout_v1 is general web text (fineweb-edu), not behavior.** It measures
+  language-modeling recovery, which is what the recovery sub-stages target,
+  but it is nearly blind to chat-format discipline, grounding, refusal
+  behavior, and tool-call validity. The 9.8% improvement says nothing about
+  whether the student answers *better*.
+- **The generation smoke is still defective, and differently than before.**
+  The v0-corpus artifacts the mixture rebuild targeted are gone (no `<<…>>`,
+  no `####`, no `<|im_start|>` echo — the gsm8k normalization and the
+  smoltalk chat mass did their job), but the replacement failure mode is
+  **question restatement instead of answering** ("Okay, the question is:
+  …<|im_end|>" for 2+2), one stray `</think>` opening, and a confidently
+  wrong fact ("100°C (20°C)"). 2/3 prompts terminate correctly.
+- **Lineage is confounded.** This checkpoint's history is
+  init → s1 (660 steps, v0, lr 3e-4, FFN+norm) → A/B arm B (660 steps, v0
+  **epochs 3–4**, attention unfrozen) → this run (2700 steps, v1). The middle
+  leg is known to have been overfitting a spent corpus. Nothing in this run
+  isolates whether that leg helped, was neutral, or left damage that the
+  2700 steps had to undo. Total ladder cost to reach here: 4020 steps.
+- **Single run, no variance estimate** (as with every GPU run so far; P5
+  nondeterminism is logged, magnitude unmeasured at the holdout level).
+
+## Interpretation — where the constraint moved
+
+The defect is no longer *capacity* or *data volume*; it is **target style**.
+The remaining failures are all "what does a good answer look like", and the
+mixture's answers are public-SFT-grade: terse extractive spans (squad/hotpot),
+noisy prose (dolly/oasst2), and synthetic chat. On-the-fly full-vocab KD does
+**not** fix this, by construction: it distills the teacher's distribution
+*over the dataset's own target tokens*. If the target text is a 3-word span,
+KD teaches the teacher's uncertainty about that span — never the teacher's
+own answering behavior. Changing the answer *text* to the teacher's own
+output (sequence-level KD) is the lever that plausibly addresses it.
+
+Two independent follow-ups therefore fall out of this run, and both are
+written up as proposals:
+
+1. **Which start point should the next run branch from?** —
+   `logs/proposals/2026-07-27_stage3_start_point_ablation.md` (fixed-budget
+   3-arm ablation, one arm already paid for by this run).
+2. **Should Stage 2 targets be teacher-generated?** —
+   `logs/proposals/2026-07-27_stage2_teacher_generated_answers.md` (blocked
+   on a behavioral eval, because holdout_v1 cannot see the improvement it is
+   meant to produce).
+
+The prerequisite for #2 — and the real gap this run exposed — is that the
+project's only behavior signal is three eyeballed prompts. `eval_behavior_v0`
+(CPU-suitable, no approval, spec in `logs/STATE.md`) comes first.
+
+## Cost and infrastructure
+
+- Session cost **$4.49** (RunPod balance 243.51 → 239.02), pod
+  `ippwmpc8wzed24`, 1× L40S, `--terminate-after` backstop, deleted at
+  teardown; 0 pods remaining.
+- Orchestrator wall-clock 3.40 h: setup + transfers **38 min**, training
+  2.32 h (68%), post-run evals + upload + verification 24 min.
+- The durable OS-level orchestrator (`scripts/pod/orchestrate_s2v1.sh`) ran
+  the whole session unattended — including gate evals, HF upload,
+  independent upload verification, write-up generation, commit/push and pod
+  teardown. This is the pattern to reuse; **setup is now the largest
+  non-training cost** (~19% of session spend), which is what running two
+  ablation arms on one pod would amortize.
+- Pod tests: 63 passed / 6 skipped (69 total, cu128 torch 2.11.0, Python
+  3.12.3 vs dev-box 3.14 — the usual logged bridge).

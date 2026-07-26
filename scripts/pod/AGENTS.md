@@ -1,13 +1,23 @@
-# scripts/pod — GPU pod session scripts (s2_blocks_v1)
+# scripts/pod — GPU pod session scripts
 
-Prepared 2026-07-26 for the approved `s2_blocks_v1` recovery run. The first
-attempt was paused because pods appeared not to start; that was a
-**misdiagnosis of two broken readiness signals** — the pods were healthy.
-Root cause and evidence:
+**Status (2026-07-27): the `s2_blocks_v1` session these scripts were written for
+is COMPLETE** — it ran unattended end to end on 2026-07-26 (train → gate evals →
+HF upload → independent upload verification → write-up → commit/push → pod
+teardown) for $4.49. Results:
+`logs/experiments/2026-07-26_stage3_s2_blocks_v1_gpu_run.md`. No pod exists.
+
+Everything below is the **playbook for the next session**. The procedure and the
+readiness rules are hardware/session-independent and stay as-is; the run
+identifiers are not — see "Reusing these scripts" at the end before running
+anything.
+
+Background on why the readiness rules read the way they do: the first attempt at
+this session was paused because pods appeared not to start, which was a
+**misdiagnosis of two broken readiness signals** — the pods were healthy. Root
+cause and evidence:
 `logs/experiments/2026-07-26_runpod_pod_readiness_misdiagnosis.md`.
-Everything here is ready to run unchanged.
 
-## Resume procedure
+## Session procedure
 
 1. `runpodctl pod create --image
    runpod/pytorch:1.0.3-cu1281-torch291-ubuntu2404 --gpu-id "NVIDIA L40S"
@@ -79,4 +89,40 @@ Everything here is ready to run unchanged.
 If the repo has moved past `f73be55` when resuming, regenerate the bundle
 (`git bundle create … HEAD main`), re-upload, and update
 `hashes_transfer.txt` — setup.sh verifies hashes and will fail loudly on
-a stale bundle.
+a stale bundle. **The repo has moved past `f73be55`; regenerating the bundle is
+mandatory for the next session.**
+
+## Reusing these scripts for the next session
+
+These scripts are **hardcoded to the `s2_blocks_v1` run**. The next session
+(most likely the start-point ablation, `logs/proposals/2026-07-27_stage3_start_point_ablation.md`,
+which runs **two arms sequentially on one pod**) needs them parameterized by run
+name / config / start checkpoint. Exact places to change:
+
+| file | line(s) | what is hardcoded |
+| --- | --- | --- |
+| `train.sh` | 10 | `--config configs/stage3_s2_blocks_v1.json`; console path `console_s2v1.log` |
+| `post_run.sh` | 11–12 | `RUN=artifacts/stage3/s2_blocks_v1`, `CKPT=$RUN/checkpoints/step_002700/model` |
+| `post_run.sh` | 53, 61–72 | console copy, local hash-list filename, HF upload paths `stage3/s2_blocks_v1/…` |
+| `setup.sh` | 22–27 | transfer bundle/tarball names + `hashes_transfer.txt` (regenerate for the new commit) |
+| `setup.sh` | (ckpt step) | start-checkpoint download path + `hashes_ckpt.txt` |
+| `orchestrate_s2v1.sh` | 32–40 | `RUN_REL`, log/status filenames, `HASHFILE_REL`, `HF_PREFIX`, remote run dir |
+| `orchestrate_s2v1.sh` | 111–112, 133, 148 | resume command, console path, progress greps |
+| `orchestrate_s2v1.sh` | 222–227 | commit message |
+| `verify_and_report_s2v1.py` | throughout | run name, step tag, and the report template |
+
+Recommended shape for the next session: give each script a
+`RUN_NAME` / `CONFIG` / `STEP_TAG` / `START_CKPT` variable block at the top
+(sourced from one `run_env.sh`), then loop the orchestrator over the arm list.
+Keep the marker-line protocol and the sha256 verification steps exactly as they
+are — they are what made the last session safe to leave unattended.
+
+Also, before the next session:
+
+- **Amortize setup.** It was 38 min (19%) of the last session's spend. Two
+  training arms on one pod pay it once.
+- **Upload the Stage 1 init checkpoint** (`artifacts/stage1/qwen3_0p6b_init_v0/checkpoint`,
+  1.2 GB) to the relay if the `from_init` arm is approved — it is the only
+  start point not already on HF (~30 min at the measured ~680 KB/s).
+- **Keep seed `20260726`** in every config that must be comparable with the
+  completed run (decision record 2026-07-27).

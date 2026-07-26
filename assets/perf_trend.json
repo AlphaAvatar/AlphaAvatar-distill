@@ -1,15 +1,19 @@
 {
   "metric": "held-out NLL (nats/token) on holdout_v1 (21,080 tokens, fineweb-edu)",
+  "metric_axis": "held-out NLL (nats/token) — lower is better",
+  "title": "Qwen3-4B-Thinking-2507 → 0.6B student: held-out NLL by attempt",
   "lower_is_better": true,
   "eval": "scripts/eval_ppl.py --data data/warmup/holdout_v1.jsonl",
   "references": [
     {
       "label": "teacher Qwen3-4B-Thinking-2507",
+      "role": "target",
       "nll": 2.6264,
       "log": "logs/experiments/2026-07-14_stage1_qwen3_0p6b_init_v0.md"
     },
     {
       "label": "random-init 0.6B baseline",
+      "role": "baseline",
       "nll": 12.1286,
       "log": "logs/experiments/2026-07-14_stage1_qwen3_0p6b_init_v0.md"
     }
@@ -17,40 +21,51 @@
   "attempts": [
     {
       "date": "2026-07-14",
-      "label": "Stage 1 init, recipe attempt 1\n(early-band depth merge)",
       "stage": "stage1",
+      "run": "init v0, recipe attempt 1",
+      "summary": "early-band depth merge, unweighted projection",
       "nll": 17.7977,
       "log": "logs/experiments/2026-07-14_stage1_qwen3_0p6b_init_v0.md"
     },
     {
       "date": "2026-07-14",
-      "label": "Stage 1 init, fixed recipe\n(middle-band merge, weighted P)",
-      "label_offset": [6, -30],
       "stage": "stage1",
+      "run": "init v0, fixed recipe",
+      "summary": "middle-band merge, end-weighted projection",
       "nll": 11.7482,
       "log": "logs/experiments/2026-07-14_stage1_qwen3_0p6b_init_v0.md"
     },
     {
       "date": "2026-07-22",
-      "label": "Stage 3 s1 recovery\n(FFN+norm, CE 0.25 + KD 1.0, 660 steps)",
       "stage": "stage3",
+      "run": "s1 recovery",
+      "summary": "FFN+norm, CE 0.25 + KD 1.0, 660 steps on mixture v0",
       "nll": 4.2107,
       "log": "logs/experiments/2026-07-22_stage3_s1_gpu_run.md"
     },
     {
       "date": "2026-07-25",
-      "label": "s2 A/B arm A: +660 FFN-only steps\n(control; regressed, mixture overfit)",
-      "label_offset": [6, -30],
       "stage": "stage3",
+      "run": "s2 A/B arm A",
+      "summary": "control: +660 FFN-only steps; regressed on mixture-v0 epochs 3–4",
       "nll": 4.2747,
       "log": "logs/experiments/2026-07-25_stage3_s2_ab_gpu_run.md"
     },
     {
       "date": "2026-07-25",
-      "label": "s2 A/B arm B: attention unfrozen\n(holdout flat; freeze set adopted, data-limited)",
       "stage": "stage3",
+      "run": "s2 A/B arm B",
+      "summary": "attention unfrozen; freeze set adopted, holdout flat (data-limited)",
       "nll": 4.2118,
       "log": "logs/experiments/2026-07-25_stage3_s2_ab_gpu_run.md"
+    },
+    {
+      "date": "2026-07-26",
+      "stage": "stage3",
+      "run": "s2 on mixture v1",
+      "summary": "same recipe, 4.11× data, 2700 steps; plateau broken",
+      "nll": 3.8003,
+      "log": "logs/experiments/2026-07-26_stage3_s2_blocks_v1_gpu_run.md"
     }
   ]
 }
