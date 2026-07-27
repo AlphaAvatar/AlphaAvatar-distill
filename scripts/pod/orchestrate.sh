@@ -71,6 +71,42 @@ fatal() {
 log "===== orchestrator start (pid $$) session=$SESSION pod=$POD_ID host=$HOST:$PORT ====="
 log "arms: $(arm_names | tr '\n' ' ')"
 
+# Pre-registered abort check (run_env.sh ABORT_ARMS/ABORT_CHECK_STEP). Reads the
+# arm's own train_log.jsonl on the pod and prints one of PENDING / OK / ABORT:...
+# Sent base64-encoded so no quoting survives the trip through ssh.
+ABORT_PY=$(base64 -w0 <<'PY'
+import json, sys
+run, step = sys.argv[1], int(sys.argv[2])
+path = f"artifacts/stage3/{run}/train_log.jsonl"
+ce = {}
+try:
+    for line in open(path):
+        line = line.strip()
+        if not line:
+            continue
+        try:
+            e = json.loads(line)
+        except json.JSONDecodeError:
+            continue
+        if e.get("event") == "eval_result" and e.get("val_set", "val") == "val":
+            ce[e.get("step")] = e.get("val_ce")
+        if e.get("event") == "train_step":
+            loss = e.get("loss")
+            if loss is not None and loss != loss:
+                print(f"ABORT:non_finite_loss_at_step_{e.get('step')}")
+                raise SystemExit
+except FileNotFoundError:
+    print("PENDING")
+    raise SystemExit
+if 0 not in ce or step not in ce:
+    print("PENDING")
+elif ce[step] > ce[0]:
+    print(f"ABORT:val_ce_rose_{ce[0]:.6f}_to_{ce[step]:.6f}_at_step_{step}")
+else:
+    print(f"OK:val_ce_{ce[0]:.6f}_to_{ce[step]:.6f}_at_step_{step}")
+PY
+)
+
 # ---------------------------------------------------------------- phase 1: setup
 setst "RUNNING:wait_setup"
 markers=""
@@ -141,10 +177,28 @@ for arm in "${ARMS[@]}"; do
 
   max_attempts=3
   train_ok=0
+  aborted=0
+  abort_checked=0
+  [[ " $ABORT_ARMS " == *" $RUN_NAME "* ]] || abort_checked=1   # no rule for this arm
   while :; do
     rm=$(rsh "cat /workspace/run_markers.log 2>/dev/null || true" 3 || true)
     if [[ "$rm" == *"TRAIN_DONE:$RUN_NAME"* ]]; then
       train_ok=1; log "TRAIN_DONE observed for $RUN_NAME"; break
+    fi
+
+    # Pre-registered abort rule: stop rather than retune mid-session.
+    if ((abort_checked == 0)); then
+      verdict=$(rsh "cd /workspace/aad && echo '$ABORT_PY' | base64 -d | python3 - '$RUN_NAME' '$ABORT_CHECK_STEP'" 3 || true)
+      case "$verdict" in
+        ABORT*)
+          log "ABORT RULE FIRED for $RUN_NAME: $verdict"
+          rsh "pkill -f 'train_stage3.py --config $CONFIG' || true" 3 >/dev/null || true
+          aborted=1
+          break ;;
+        OK*)
+          log "abort rule cleared for $RUN_NAME: $verdict"
+          abort_checked=1 ;;
+      esac
     fi
     if [[ "$rm" == *"TRAIN_FAILED:$RUN_NAME"* ]]; then
       log "TRAIN_FAILED observed for $RUN_NAME; console tail:"
@@ -168,6 +222,14 @@ for arm in "${ARMS[@]}"; do
     fi
     sleep 60
   done
+
+  if ((aborted == 1)); then
+    # A fired abort rule is a *result*, not an infrastructure failure: it is
+    # reported as a negative result and the session moves on (proposal 2026-07-27).
+    log "ARM ABORTED BY PRE-REGISTERED RULE: $RUN_NAME"
+    ARMS_FAILED+=("$RUN_NAME(aborted-by-rule)")
+    continue
+  fi
 
   if ((train_ok != 1)); then
     # Do not kill the session: the arms are independent, and whatever this arm

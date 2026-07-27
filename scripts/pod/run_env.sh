@@ -39,6 +39,15 @@ TRANSFER_BUNDLE=transfer/repo_20260727.bundle
 TRANSFER_DATA=transfer/stage2_data_20260726.tar.zst
 HF_PREFIX_BASE=stage3
 
+# Pre-registered abort rule (proposal 2026-07-27, "Abort rule for A2"): a
+# from-init start at lr 2e-4 / warmup 60 is outside the regime those
+# hyperparameters were tuned for (s1 used 3e-4 from init). If primary-val ce at
+# step ABORT_CHECK_STEP is above its step-0 value, or a non-finite loss appears,
+# stop that arm and report a negative result rather than retuning mid-session.
+# Read by orchestrate.sh only (the pod-side scripts do not use these).
+ABORT_ARMS="s2v1_from_init"
+ABORT_CHECK_STEP=300
+
 # Gate evals every arm runs (post_run.sh).
 HOLDOUT=data/warmup/holdout_v1.jsonl
 BEHAVIOR_PROMPTS=data/eval_behavior_v0/prompts.jsonl
