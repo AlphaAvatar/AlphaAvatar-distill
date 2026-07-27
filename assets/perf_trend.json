@@ -1,7 +1,8 @@
 {
   "metric": "held-out NLL (nats/token) on holdout_v1 (21,080 tokens, fineweb-edu)",
   "metric_axis": "held-out NLL (nats/token) — lower is better",
-  "title": "Qwen3-4B-Thinking-2507 → 0.6B student: held-out NLL by attempt",
+  "steps_axis": "cumulative optimizer steps from the Stage 1 init (16 × 1024-token blocks/step)",
+  "title": "Qwen3-4B-Thinking-2507 → 0.6B student: held-out NLL by checkpoint lineage",
   "lower_is_better": true,
   "eval": "scripts/eval_ppl.py --data data/warmup/holdout_v1.jsonl",
   "references": [
@@ -20,6 +21,9 @@
   ],
   "attempts": [
     {
+      "id": "init_v0_attempt1",
+      "parent": null,
+      "steps": 0,
       "date": "2026-07-14",
       "stage": "stage1",
       "run": "init v0, recipe attempt 1",
@@ -28,6 +32,9 @@
       "log": "logs/experiments/2026-07-14_stage1_qwen3_0p6b_init_v0.md"
     },
     {
+      "id": "qwen3_0p6b_init_v0",
+      "parent": null,
+      "steps": 0,
       "date": "2026-07-14",
       "stage": "stage1",
       "run": "init v0, fixed recipe",
@@ -36,6 +43,9 @@
       "log": "logs/experiments/2026-07-14_stage1_qwen3_0p6b_init_v0.md"
     },
     {
+      "id": "s1_ffn_norm_v0",
+      "parent": "qwen3_0p6b_init_v0",
+      "steps": 660,
       "date": "2026-07-22",
       "stage": "stage3",
       "run": "s1 recovery",
@@ -44,6 +54,9 @@
       "log": "logs/experiments/2026-07-22_stage3_s1_gpu_run.md"
     },
     {
+      "id": "s1_ext_v0",
+      "parent": "s1_ffn_norm_v0",
+      "steps": 660,
       "date": "2026-07-25",
       "stage": "stage3",
       "run": "s2 A/B arm A",
@@ -52,6 +65,9 @@
       "log": "logs/experiments/2026-07-25_stage3_s2_ab_gpu_run.md"
     },
     {
+      "id": "s2_blocks_v0",
+      "parent": "s1_ffn_norm_v0",
+      "steps": 660,
       "date": "2026-07-25",
       "stage": "stage3",
       "run": "s2 A/B arm B",
@@ -60,6 +76,9 @@
       "log": "logs/experiments/2026-07-25_stage3_s2_ab_gpu_run.md"
     },
     {
+      "id": "s2_blocks_v1",
+      "parent": "s2_blocks_v0",
+      "steps": 2700,
       "date": "2026-07-26",
       "stage": "stage3",
       "run": "s2 on mixture v1",
@@ -68,6 +87,9 @@
       "log": "logs/experiments/2026-07-26_stage3_s2_blocks_v1_gpu_run.md"
     },
     {
+      "id": "s2v1_from_s1",
+      "parent": "s1_ffn_norm_v0",
+      "steps": 2700,
       "date": "2026-07-27",
       "stage": "stage3",
       "run": "start-point ablation: from_s1",
@@ -76,6 +98,9 @@
       "log": "logs/experiments/2026-07-27_stage3_start_point_ablation.md"
     },
     {
+      "id": "s2v1_from_init",
+      "parent": "qwen3_0p6b_init_v0",
+      "steps": 2700,
       "date": "2026-07-27",
       "stage": "stage3",
       "run": "start-point ablation: from_init",

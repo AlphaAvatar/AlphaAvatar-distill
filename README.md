@@ -10,20 +10,22 @@ The goal is to make distillation **reproducible, automated, and useful for realt
 
 **Current experiment:** [Qwen/Qwen3-4B-Thinking-2507](https://huggingface.co/Qwen/Qwen3-4B-Thinking-2507) → a 0.6B-class student (Qwen3-0.6B geometry, ~6.7× compression, INT8 deployment target). Numbers below are held-out NLL on `holdout_v1` (21,080 tokens of fineweb-edu); the numbers in the figure are the `#` column here.
 
-| # | date | run | what changed | held-out NLL |
-| ---: | --- | --- | --- | ---: |
-| 1 | 2026-07-14 | [init v0, recipe attempt 1](./logs/experiments/2026-07-14_stage1_qwen3_0p6b_init_v0.md) | early-band depth merge, unweighted projection | 17.7977 |
-| 2 | 2026-07-14 | [init v0, fixed recipe](./logs/experiments/2026-07-14_stage1_qwen3_0p6b_init_v0.md) | middle-band merge, end-weighted projection | 11.7482 |
-| 3 | 2026-07-22 | [s1 recovery](./logs/experiments/2026-07-22_stage3_s1_gpu_run.md) | FFN+norm, CE 0.25 + KD 1.0, 660 steps on mixture v0 | 4.2107 |
-| 4 | 2026-07-25 | [s2 A/B arm A](./logs/experiments/2026-07-25_stage3_s2_ab_gpu_run.md) | control: +660 FFN-only steps; regressed on mixture-v0 epochs 3–4 | 4.2747 |
-| 5 | 2026-07-25 | [s2 A/B arm B](./logs/experiments/2026-07-25_stage3_s2_ab_gpu_run.md) | attention unfrozen; freeze set adopted, holdout flat (data-limited) | 4.2118 |
-| 6 | 2026-07-26 | [s2 on mixture v1](./logs/experiments/2026-07-26_stage3_s2_blocks_v1_gpu_run.md) | same recipe, 4.11× data, 2700 steps; plateau broken | **3.8003** |
-| 7 | 2026-07-27 | [start-point ablation: from_s1](./logs/experiments/2026-07-27_stage3_start_point_ablation.md) | same 2700-step leg from s1@660; the A/B arm-B leg was neutral (+0.17%) | 3.8067 |
-| 8 | 2026-07-27 | [start-point ablation: from_init](./logs/experiments/2026-07-27_stage3_start_point_ablation.md) | single-stage from Stage 1 init, 2700 steps total; warm-up ladder unnecessary (+0.74%) | 3.8285 |
+The runs are a tree, not a queue, so the figure draws them that way: each point sits at the cumulative optimizer steps of its own lineage and is joined to the checkpoint it started from (the `starts from` column). Sibling arms leave a shared parent — reading them as one sequence would imply progress that was never measured.
+
+| # | date | run | starts from | what changed | total steps | held-out NLL |
+| ---: | --- | --- | :---: | --- | ---: | ---: |
+| 1 | 2026-07-14 | [init v0, recipe attempt 1](./logs/experiments/2026-07-14_stage1_qwen3_0p6b_init_v0.md) | — | early-band depth merge, unweighted projection | 0 | 17.7977 |
+| 2 | 2026-07-14 | [init v0, fixed recipe](./logs/experiments/2026-07-14_stage1_qwen3_0p6b_init_v0.md) | — | middle-band merge, end-weighted projection | 0 | 11.7482 |
+| 3 | 2026-07-22 | [s1 recovery](./logs/experiments/2026-07-22_stage3_s1_gpu_run.md) | #2 | FFN+norm, CE 0.25 + KD 1.0, 660 steps on mixture v0 | 660 | 4.2107 |
+| 4 | 2026-07-25 | [s2 A/B arm A](./logs/experiments/2026-07-25_stage3_s2_ab_gpu_run.md) | #3 | control: +660 FFN-only steps; regressed on mixture-v0 epochs 3–4 | 1320 | 4.2747 |
+| 5 | 2026-07-25 | [s2 A/B arm B](./logs/experiments/2026-07-25_stage3_s2_ab_gpu_run.md) | #3 | attention unfrozen; freeze set adopted, holdout flat (data-limited) | 1320 | 4.2118 |
+| 6 | 2026-07-26 | [s2 on mixture v1](./logs/experiments/2026-07-26_stage3_s2_blocks_v1_gpu_run.md) | #5 | same recipe, 4.11× data, 2700 steps; plateau broken | 4020 | **3.8003** |
+| 7 | 2026-07-27 | [start-point ablation: from_s1](./logs/experiments/2026-07-27_stage3_start_point_ablation.md) | #3 | same 2700-step leg from s1@660; the A/B arm-B leg was neutral (+0.17%) | 3360 | 3.8067 |
+| 8 | 2026-07-27 | [start-point ablation: from_init](./logs/experiments/2026-07-27_stage3_start_point_ablation.md) | #2 | single-stage from Stage 1 init, 2700 steps total; warm-up ladder unnecessary (+0.74%) | 2700 | 3.8285 |
 
 Reference points on the same set: teacher **2.6264** · random-init 0.6B baseline **12.1286**.
 
-Attempts 7–8 are a fixed-budget ablation of the *start point*, not of the training leg: all three of runs 6–8 ran the identical 2700-step leg at the same seed, from lineages costing 4020, 3360 and 2700 total steps. Both landed inside the pre-registered 1% band, so the recovery recipe dropped its two warm-up legs and became a single stage — a third less compute per iteration.
+Attempts 7–8 are a fixed-budget ablation of the *start point*, not of the training leg: runs 6–8 are the three branches that ran the identical 2700-step leg at the same seed, from lineages costing 4020, 3360 and 2700 total steps. Both landed inside the pre-registered 1% band, so the recovery recipe dropped its two warm-up legs and became a single stage — a third less compute per iteration.
 
 That ablation also motivated a second, non-NLL gate. `holdout_v1` is fineweb-edu text and is nearly blind to chat format, grounding, refusal and tool-call validity, which is where these students actually fail; [`eval_behavior_v0`](./data/eval_behavior_v0/) scores 76 held-out prompts with mechanical checks only (no LLM judge, so it is free and reproducible from the stored generations). It **reversed the ranking above**: the cheapest lineage (attempt 8) is the best-behaved one, and the best-NLL checkpoint (attempt 6) is the worst. Details and caveats — single run per arm, no variance estimate — are in the [run log](./logs/experiments/2026-07-27_stage3_start_point_ablation.md). Current state and next actions: [`logs/STATE.md`](./logs/STATE.md); costed, unapproved work: [`logs/proposals/`](./logs/proposals/).
 
@@ -59,7 +61,7 @@ Every run records config hash, code state, dataset/tokenizer/teacher hashes, and
 
 ```bash
 uv sync                    # CPU torch by default; see pyproject.toml for a CUDA index
-uv run pytest tests/ -q    # 75 CPU tests, no downloads
+uv run pytest tests/ -q    # 95 CPU tests, no downloads
 ```
 
 The implemented pipeline runs end to end on CPU (GPU optional):
@@ -134,7 +136,7 @@ AlphaAvatar-distill/
 ├── configs/                # stage recipes; Stage 3 runs are one config each
 ├── data/                   # corpus manifests (jsonl gitignored, rebuildable)
 │   └── eval_behavior_v0/   #   76-prompt behavior set + manifest (both committed)
-├── tests/                  # 91 CPU tests: algebra, loader, trainer, quant, scorers, builders
+├── tests/                  # 95 CPU tests: algebra, loader, trainer, quant, scorers, builders
 ├── logs/                   # project memory — read STATE.md first
 │   ├── STATE.md            #   current state, verified facts, next actions
 │   ├── decisions.md        #   decision records (why, alternatives, risks)
@@ -191,6 +193,8 @@ _No records yet._
 | Gromov et al., *The Unreasonable Ineffectiveness of the Deeper Layers*, 2024. [arXiv:2403.17887](https://arxiv.org/abs/2403.17887) | depth-compression | used | Layer-drop studies show early layers are critical and middle/late-middle layers are most redundant. Motivated moving Stage 1 depth merging from the early band to the middle band after the early-merge ablation collapsed. |
 | Xia et al., *Sheared LLaMA: Accelerating Language Model Pre-training via Structured Pruning*, 2023. [arXiv:2310.06694](https://arxiv.org/abs/2310.06694) | svd-compression, distillation | queued | Structured pruning with mask learning + continued pre-training; candidate comparison recipe for Stage 3 recovery design. |
 | Kim & Rush, *Sequence-Level Knowledge Distillation*, EMNLP 2016. [arXiv:1606.07947](https://arxiv.org/abs/1606.07947) | distillation, offline-data | queued | Training the student on the teacher's *generated* targets rather than on gold targets reweighted by the teacher. Basis of the pending teacher-generated-answer proposal, which targets the answer-style defects that survived the mixture-v1 recovery run ([proposal](./logs/proposals/2026-07-27_stage2_teacher_generated_answers.md)). |
+| Zelikman et al., *STaR: Bootstrapping Reasoning With Reasoning*, NeurIPS 2022. [arXiv:2203.14465](https://arxiv.org/abs/2203.14465) | offline-data, distillation | queued | Keep only generations whose final answer matches the reference. The correctness gate the same proposal now requires (2026-07-28 directive) is this filter applied to the *teacher*: a generated target is trained on only when it verifies against the public gold key it replaces. |
+| Yuan et al., *Scaling Relationship on Learning Mathematical Reasoning with Large Language Models*, 2023. [arXiv:2308.01825](https://arxiv.org/abs/2308.01825) | offline-data | queued | Rejection-sampling fine-tuning with k samples per prompt — the source of the top-n recipe the proposal now uses (sample n candidates, keep a verified-correct one) and of its selection-bias and diversity caveats (accepted answers skew toward items the teacher finds easy). |
 
 ---
 
