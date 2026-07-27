@@ -91,7 +91,10 @@ def main() -> None:
     device = args.device or ("cuda" if torch.cuda.is_available() else "cpu")
     dtype = {"bfloat16": torch.bfloat16, "float32": torch.float32}[args.dtype]
     prompts_path = REPO_ROOT / args.prompts
-    entries = [json.loads(l) for l in prompts_path.read_text().splitlines() if l.strip()]
+    # Iterate the file handle, not `splitlines()`: the latter also splits on
+    # \v, \f and \u2028, which appear in LaTeX-heavy prompts.
+    with open(prompts_path) as f:
+        entries = [json.loads(line) for line in f if line.strip()]
     if args.limit:
         entries = entries[: args.limit]
 

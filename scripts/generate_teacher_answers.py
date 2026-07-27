@@ -49,6 +49,7 @@ REPO_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(REPO_ROOT / "src"))
 
 from aadistill.behavior import split_generation
+from aadistill.data import load_jsonl
 from aadistill.env import code_state, hardware_report
 from aadistill.manifest import sha256_file
 from aadistill.verify import VERIFIABLE, select, verify
@@ -67,16 +68,12 @@ assert set(SLICES.values()) == set(VERIFIABLE), "slice table drifted from the ve
 def load_slice(data_dir: Path, name: str, limit: int | None) -> list[dict]:
     group, source = SLICES[name]
     path = data_dir / "train" / f"{group}.jsonl"
-    rows = []
-    for line in path.read_text().splitlines():
-        if not line.strip():
-            continue
-        sample = json.loads(line)
-        if sample["source"] != source:
-            continue
-        rows.append(sample)
-        if limit and len(rows) >= limit:
-            break
+    # `load_jsonl` iterates the file handle: `read_text().splitlines()` also
+    # splits on \v, \f and \u2028, which LaTeX-heavy openmath targets contain,
+    # and would tear a sample in half.
+    rows = [s for s in load_jsonl(path) if s["source"] == source]
+    if limit:
+        rows = rows[:limit]
     if not rows:
         raise ValueError(f"no samples for slice {name} in {path}")
     return rows
