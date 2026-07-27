@@ -26,6 +26,7 @@ tokenizer's EOS token is appended as a document separator.
 from __future__ import annotations
 
 import json
+import random
 import re
 from pathlib import Path
 
@@ -261,7 +262,7 @@ def pack_blocks(
 
 
 def best_fit_blocks(
-    encoded, block_len: int, pad_id: int = 0
+    encoded, block_len: int, pad_id: int = 0, seed: int = 0
 ) -> tuple[torch.Tensor, torch.Tensor, dict]:
     """Pack samples into blocks so that **no sample is split across a boundary**.
 
@@ -274,23 +275,31 @@ def best_fit_blocks(
     length-aware bin packing: same token efficiency, no unnecessary truncation,
     and materially better reading comprehension and context following.
 
-    This is their best-fit-decreasing packing: samples are placed longest-first
-    into the fullest block that still has room, so blocks fill tightly while
-    every sample stays whole. A sample longer than `block_len` cannot be kept
-    whole by any packing — it is truncated (and counted, because a rising count
-    means `block_len` is too small for the corpus).
+    Placement is best-fit — each sample goes into the fullest block that still
+    has room — but the samples are visited in **seeded random order, not
+    longest-first**. Best-fit-*decreasing* packs marginally tighter and is what
+    the paper describes, but sorting by length is itself a distribution change:
+    it groups long samples with long ones and short with short, so a block's
+    composition correlates with length in a way no deployment context does. The
+    student is trained for the mixed contexts it will actually see (decision
+    record 2026-07-28). The seed keeps this reproducible, which the project's
+    "block order is a pure function of (seed, epoch)" rule requires.
+
+    A sample longer than `block_len` cannot be kept whole by any packing — it is
+    truncated (and counted, because a rising count means `block_len` is too
+    small for the corpus).
 
     Residual capacity is padded; `loss_mask` is False there, so padding never
     contributes to the loss. Returns (input_ids, loss_mask, stats) where stats
     carries the packing efficiency and truncation count that make the trade
     visible in the run manifest.
 
-    **Known limitation, deliberately not solved here:** samples sharing a block
-    still attend to each other — the cross-contamination that Krell et al.,
-    *Efficient Sequence Packing without Cross-contamination* (arXiv:2107.02027)
-    address with block-diagonal attention. Fixing it needs a per-block attention
-    mask through the trainer and the teacher forward; recorded as the next step
-    rather than smuggled in with this change.
+    Samples sharing a block **do** attend to each other, and that is deliberate:
+    Krell et al., *Efficient Sequence Packing without Cross-contamination*
+    (arXiv:2107.02027) block-diagonal that away, but a deployed assistant reads
+    a context window holding several unrelated things and has to attend across
+    it correctly. Training it to ignore irrelevant preceding content is the job,
+    not an artifact to mask out (decision record 2026-07-28).
     """
     items = []
     for ids, mask in encoded:
@@ -305,7 +314,7 @@ def best_fit_blocks(
             ids, mask = ids[:block_len], mask[:block_len]
             truncated += 1
         prepared.append((ids, mask))
-    prepared.sort(key=lambda pair: len(pair[0]), reverse=True)
+    random.Random(seed).shuffle(prepared)
 
     blocks: list[list[tuple[list[int], list[int]]]] = []
     used: list[int] = []

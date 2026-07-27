@@ -251,3 +251,30 @@ def test_best_fit_packing_reports_efficiency():
     _, _, stats = best_fit_blocks(encoded, block_len=8, pad_id=0)
     assert stats["blocks"] == 1 and stats["efficiency"] == 1.0
     assert stats["padding_tokens"] == 0
+
+
+def test_packing_order_is_seeded_and_not_length_sorted():
+    """Composition must be random, not longest-first.
+
+    Sorting by length packs ~0.5-1.2 points tighter (measured on the v1
+    mixture) but groups long samples with long ones, so a block's makeup
+    correlates with length in a way no deployment context does.
+    """
+    import torch
+
+    from aadistill.data import best_fit_blocks
+
+    encoded = [([i] * (3 + (i * 7) % 29), [1] * (3 + (i * 7) % 29))
+               for i in range(1, 60)]
+    first_a = best_fit_blocks(encoded, block_len=64, seed=1)[0]
+    again = best_fit_blocks(encoded, block_len=64, seed=1)[0]
+    other_seed = best_fit_blocks(encoded, block_len=64, seed=2)[0]
+
+    assert torch.equal(first_a, again), "same seed must reproduce the packing"
+    assert not torch.equal(first_a, other_seed), "the seed must change the packing"
+
+    # And the first block is not the longest-first packing that sorting gives:
+    # under best-fit-decreasing the longest sample always lands in block 0.
+    longest_id = max(range(1, 60), key=lambda i: 3 + (i * 7) % 29)
+    assert longest_id not in set(first_a[0].tolist()), (
+        "longest sample sits in block 0 — packing looks length-sorted")
