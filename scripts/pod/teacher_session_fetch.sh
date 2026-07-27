@@ -13,6 +13,10 @@ set -u
 LOG=${LOG:-artifacts/teacher_session_fetch.log}
 POLL_SECONDS=${POLL_SECONDS:-300}
 MAX_HOURS=${MAX_HOURS:-7}
+# Which marker ends the session. `both` waits for the pilot too; `teacher` stops
+# as soon as the scorecard is on disk — used when the remaining work is cheaper
+# on a different engine, so the meter should not keep running.
+STOP_AFTER=${STOP_AFTER:-both}
 SSHOPT="-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o ConnectTimeout=15 -o BatchMode=yes"
 
 mkdir -p "$(dirname "$LOG")" artifacts/teacher artifacts/stage2_v2
@@ -59,6 +63,17 @@ while [ "$(date +%s)" -lt "$deadline" ]; do
     else
       say "pilot manifest did not parse — will retry next poll"
     fi
+  fi
+
+  if [ "$STOP_AFTER" = teacher ] && [ "$teacher_done" = 1 ]; then
+    say "teacher scorecard done and STOP_AFTER=teacher; stopping the session"
+    timeout 60 ssh $SSHOPT -p "$PORT" "root@$HOST" \
+      "pkill -f teacher_session.sh; pkill -f generate_teacher_answers" 2>>"$LOG"
+    fetch "/workspace/session.log" artifacts/
+    say "deleting pod $POD_ID"
+    runpodctl remove pod "$POD_ID" >> "$LOG" 2>&1 || runpodctl pod remove "$POD_ID" >> "$LOG" 2>&1
+    say "DONE (teacher only)"
+    exit 0
   fi
 
   if [ "$teacher_done" = 1 ] && [ "$pilot_done" = 1 ]; then

@@ -22,7 +22,10 @@ Outputs, all under `--out`:
 * `candidates.jsonl` — every candidate with its verdict and reason, so the
   selection can be re-derived without regenerating;
 * `targets.jsonl` — one record per prompt: the selected target or the v1
-  fallback, with provenance;
+  fallback, with provenance. A teacher target carries the **whole generation** —
+  `reasoning_content` (the trace) plus `content` (the answer) — because the
+  student is trained to inherit the reasoning, not just the conclusion
+  (decision record 2026-07-28, option B);
 * `manifest.json` — accept@1 / accept@n and reject-reason histograms per slice,
   thinking-length stats, decode config, hashes, code state, hardware.
 
@@ -228,6 +231,7 @@ def main() -> None:
                         "index": index, "answer": parts["answer"], "think": parts["think"],
                         "raw": raw, "new_tokens": n_new, "accepted": accepted,
                         "reason": reason,
+                        "think_tokens": len(tokenizer(parts["think"]).input_ids),
                     })
 
                 chosen = select(candidates)
@@ -237,8 +241,7 @@ def main() -> None:
                 slice_stats["accept_at_n"] += int(chosen is not None)
                 for candidate in candidates:
                     slice_stats["reasons"][candidate["reason"]] += 1
-                    slice_stats["think_tokens"].append(
-                        len(tokenizer(candidate["think"]).input_ids))
+                    slice_stats["think_tokens"].append(candidate["think_tokens"])
                 if chosen:
                     slice_stats["answer_words"].append(len(chosen["answer"].split()))
 
@@ -253,10 +256,19 @@ def main() -> None:
 
                 target = dict(sample)
                 if chosen:
-                    target["messages"] = (sample["messages"][:-1]
-                                          + [{"role": "assistant", "content": chosen["answer"]}])
+                    # Option B (decision 2026-07-28): the trace is part of the
+                    # target. `reasoning_content` is what the Qwen3-Thinking
+                    # template renders inside <think>…</think> for the final
+                    # assistant turn, and the loss mask spans the whole
+                    # assistant block, so the trace is supervised as-is.
+                    target["messages"] = (sample["messages"][:-1] + [{
+                        "role": "assistant",
+                        "reasoning_content": chosen["think"],
+                        "content": chosen["answer"],
+                    }])
                     target["target_source"] = "teacher_verified"
                     target["candidate_index"] = chosen["index"]
+                    target["think_tokens"] = chosen["think_tokens"]
                 else:
                     target["target_source"] = "v1_public"
                     target["candidate_index"] = None
