@@ -195,47 +195,39 @@ POD_ID=<id> HOST=<ip> PORT=<port> bash scripts/pod/orchestrate.sh   # GPU sessio
 Revised 2026-07-28 for the maintainer directives (decision record 2026-07-28):
 the next work is a **Stage 3 supplementary experiment**, and its teacher targets
 must be **top-n sampled and verified correct**. The experiment is staged behind
-a cheap pilot instead of being one bulk spend; items 2–4 are its prerequisites.
-Item 1 is independent and is the cheapest useful GPU minute the project has.
+a cheap pilot instead of being one bulk spend. Item 2 is the control run that
+every trace comparison needs; without it, "traces helped" and "samples are no
+longer torn" are the same number.
 
-1. **Score the teacher on `eval_behavior_v0` — ≈1 h GPU, ~$1–1.5. Needs
-   approval; recommended first.** Thinking mode, no prefill,
-   `--max-new-tokens 4096`, same 76 prompts, truncation rate reported:
-   `uv run python scripts/eval_behavior.py --model Qwen/Qwen3-4B-Thinking-2507@768f209d
-   --max-new-tokens 4096 --out artifacts/teacher/eval_behavior_v0.json`.
-   This is the ceiling the README figure is missing, and nothing else depends on
-   it. Not viable on the dev box: 10–40 h at the measured 1–3 tok/s.
-2. **`eval_behavior_v1` prompt-set expansion — free, CPU, no approval needed.**
-   The teacher-gen verdict will be read on the behavior scorecard, whose noise
-   floor is currently ±0.11 (n=76 aggregate) and ±0.25 (n=12 per group): a
-   0.000 → 0.083 move in `answer_em_credited` is **one prompt**. Expand to ~36
-   prompts/group from held-out val, keeping the v0 prompts as an exact subset so
-   the four logged scorecards stay comparable. Same status `eval_behavior_v0`
-   had before it was built.
-3. **Top-n teacher pilot — ~$3–5** (`logs/proposals/2026-07-27_stage2_teacher_generated_answers.md`,
-   prerequisite B). 1,000 prompts across the five candidate slices at **n=4**
-   (candidate 0 greedy, 1–3 sampled), plus **the teacher's own scorecard** — the
-   project has never measured its teacher on `eval_behavior_v0`, so the ceiling
-   row does not exist. Returns per-slice **accept@1 vs accept@n**, candidate
-   length distributions (which fix the selection rule), and the engine decision.
-   Attachable to the tail of any approved session. Slice gates: accept@n < 0.5 →
-   no bulk rewrite without an explicit decision; < 0.2 → dropped;
-   accept@n ≈ accept@1 → drop top-n and run the cheap greedy path.
-4. **Bulk verified generation — $25–145 with thinking on, changes the official
-   data mixture** (AGENTS.md 4.4). 29,807 candidate targets × n=4 ≈ 15.5M output
-   tokens (`rag_evidence`, `multihop_qa`, `refusal_uncertainty`, gsm8k,
-   OpenMathInstruct-2); a target is replaced only when a candidate passes its
-   correctness check, otherwise the v1 target stays. vLLM shares prefill across
-   the n samples but is a **heavy pod-only dependency needing P12 approval**.
-   **Decide with pilot accept rates in hand, not before.**
-5. **The Stage 3 run itself — $4–5.** 2700 steps from `s2v1_from_init@2700`,
-   seed 20260726, config identical to `stage3_s2v1_from_init.json` except the
-   data root; v2 vs the logged v1 result. Share the session with (5).
-6. **Measure GPU run-to-run variance** (~$1–2: re-run one arm's final leg with a
-   different seed, or the same seed twice). It would justify or shrink the 1%
-   decision band that two verdicts now rest on, and is the cheapest way to firm
-   up the ablation's conclusions. Marginal cost if attached to (4).
-7. Stage 4 online data collection design (unchanged, still after Stage 3).
+1. **Score the teacher on `eval_behavior_v0`** — ran 2026-07-28 (thinking mode,
+   no prefill, cap 4096, ~72 min, ~$1.20). Gives the figure its missing ceiling
+   *and* the teacher's trace-length distribution, which sizes `block_len`.
+2. **Packing / `block_len` control run — the baseline every trace run needs.**
+   The data path changed (best-fit packing) and the measured length p90 is
+   **1,508 against `block_len` 1024**, so the current baseline trained on torn
+   samples. Re-run `s2v1_from_init`'s recipe with **only the data path
+   changed**: best-fit packing, `block_len` 2048, `blocks_per_step` 8 —
+   identical tokens/step and total token budget (P6), same 2700 steps, same
+   seed 20260726. Hypothesis: grounding and multi-hop improve, since those are
+   the long slices being cut.
+3. **Run-to-run variance** (~$1–2, rides on the same pod as 2). The headline
+   metric is a composite of rates over 7–76 prompts; without a noise floor a
+   "win" is not readable.
+4. **`eval_behavior_v1` prompt-set expansion — free, CPU, no approval needed.**
+   ~36 prompts/group from held-out val, v0 kept as an exact subset. Also raise
+   the student cap to 4096 for trace-trained checkpoints and re-score the
+   references at that cap (a trace student at 512 would score ~0 for protocol
+   reasons).
+5. **Top-n teacher pilot on vLLM** (~$3–5): accept@1 vs accept@n, reject-reason
+   histograms, per-slice trace lengths, engine throughput. Scopes item 6.
+6. **Bulk verified generation** ($25–145 depending on n and slice scope; changes
+   the official data mixture) — decide with pilot numbers, not before.
+7. **The trace-target Stage 3 run (option B)**, compared against (2), not
+   against the old torn-sample runs. The kernel benchmark rides on this session
+   since it needs the production `block_len`.
+8. Stage 4 online data collection design — **now includes real-time teacher
+   generation feeding the student** (decision 2026-07-28): that is on-policy
+   work, not a Stage 3 optimisation.
 8. Optional backlog: Stage 1 ablations; a from-init-tuned lr/warmup sweep (A2
    was run under the ladder's hyperparameters, so single-stage may have more
    headroom than measured).
@@ -244,6 +236,10 @@ Item 1 is independent and is the cheapest useful GPU minute the project has.
 
 - **Score the teacher (~$1–1.5, ≈1 h GPU).** Independent of everything else and
   the fix for the figure's missing ceiling. Recommended first.
+- **Online teacher generation feeding the student is Stage 4/5, not Stage 3**
+  (decision 2026-07-28). The deciding property is whose distribution the
+  training states come from, not whether the teacher runs in real time — the
+  teacher already runs inside Stage 3's loop doing full-vocab KD every step.
 - **Stage 3 supplementary experiment (top-n verified teacher targets), revised
   2026-07-28.** Next decision after the teacher scorecard is the **~$3–5 top-n
   pilot** (next action 3); the mixture-change approval, the vLLM dependency
