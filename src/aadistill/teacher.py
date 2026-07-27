@@ -36,20 +36,30 @@ def load_teacher(
     revision: str | None = None,
     dtype: str = "bfloat16",
     device: str = "cpu",
+    attn_implementation: str | None = None,
 ):
-    """Load teacher model + tokenizer and return them with an identity record."""
+    """Load teacher model + tokenizer and return them with an identity record.
+
+    `attn_implementation` is passed through to transformers ("sdpa" — the
+    default, already a fused/memory-efficient kernel — or "flash_attention_2"
+    where the package is installed, or "eager"). It is recorded in the identity
+    block because it changes attention numerics, so a run cannot silently
+    switch kernels between comparisons (P4/P9).
+    """
     pinned = resolve_revision(model_id, revision)
     config = AutoConfig.from_pretrained(model_id, revision=pinned)
     tokenizer = AutoTokenizer.from_pretrained(model_id, revision=pinned)
-    model = AutoModelForCausalLM.from_pretrained(
-        model_id, revision=pinned, dtype=DTYPES[dtype]
-    ).to(device)
+    kwargs = {"revision": pinned, "dtype": DTYPES[dtype]}
+    if attn_implementation:
+        kwargs["attn_implementation"] = attn_implementation
+    model = AutoModelForCausalLM.from_pretrained(model_id, **kwargs).to(device)
     model.eval()
     identity = {
         "model_id": model_id,
         "revision": pinned,
         "dtype": dtype,
         "device": device,
+        "attn_implementation": getattr(model.config, "_attn_implementation", None),
         "num_parameters": sum(p.numel() for p in model.parameters()),
         "architecture": config.architectures,
         "hidden_size": config.hidden_size,
