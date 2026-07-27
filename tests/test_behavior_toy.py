@@ -10,10 +10,13 @@ a group-specific metric into the overall row.
 import sys
 from pathlib import Path
 
+import pytest
+
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
 
 from aadistill.behavior import (
     aggregate,
+    behavior_score,
     contains_gold,
     echo_rate,
     final_number,
@@ -232,3 +235,40 @@ def test_aggregate_separates_group_metrics_from_overall():
     assert "evidence_hit" not in agg["overall"]
     assert agg["by_group"]["rag_evidence"]["evidence_hit"] == 1.0
     assert "refusal" in agg["by_group"]["refusal_uncertainty"]
+
+
+def test_behavior_score_averages_the_axes_it_can_measure():
+    """Axes with no samples are skipped, not counted as zeros."""
+    scored = [
+        score_sample({"id": "a", "group": "rag_evidence", "prompt_text": "q",
+                      "gold_answer": "Paris"}, "</think>\n\nParis<|im_end|>"),
+        score_sample({"id": "b", "group": "instruction", "prompt_text": "q"}, GOOD),
+    ]
+    result = behavior_score(scored)
+    assert result["axes"]["grounding"] == 1.0 and result["n"]["grounding"] == 1
+    assert result["axes"]["format_ok"] == 1.0
+    # No refusal / tool / math prompts here: reported as n=0 and left out of the mean.
+    for axis in ("refusal", "tool_call", "math"):
+        assert result["axes"][axis] is None and result["n"][axis] == 0
+    measured = [v for v in result["axes"].values() if v is not None]
+    assert result["score"] == round(sum(measured) / len(measured), 4)
+
+
+def test_behavior_score_gives_silence_no_fluency_credit():
+    """A model that emits nothing must not score well for 'not repeating itself'.
+
+    s1@660 answers nothing on 61% of prompts; a naive 1 - rep_3gram term would
+    have ranked it above every later checkpoint.
+    """
+    silent = [score_sample({"id": str(i), "group": "instruction", "prompt_text": "q"},
+                           NEVER_CLOSED) for i in range(4)]
+    assert behavior_score(silent)["axes"]["fluency"] == 0.0
+
+    speaking = [score_sample({"id": str(i), "group": "instruction", "prompt_text": "q"},
+                             GOOD) for i in range(4)]
+    assert behavior_score(speaking)["axes"]["fluency"] == 1.0
+
+
+def test_behavior_score_needs_samples():
+    with pytest.raises(ValueError, match="at least one"):
+        behavior_score([])

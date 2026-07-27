@@ -329,6 +329,57 @@ def score_sample(sample: dict, raw: str, hit_cap: bool = False) -> dict:
 LOWER_IS_BETTER = ("echo_4gram", "rep_3gram", "empty_answer", "answer_is_echo")
 
 
+# The six axes of `behavior_score` — the project's headline number while real
+# test suites are still out of reach for a student this damaged. Each is a rate
+# in [0, 1], higher is better, and each is credited (a copied or empty answer
+# earns nothing), so the score cannot be gamed by saying less.
+#
+# `fluency` deliberately replaces a naive `1 - rep_3gram`: on its own that term
+# *rewards* silence, and s1@660 — which emits nothing on 61% of prompts — would
+# have ranked second on it. Scoring an empty or echoed answer as 0 removes that.
+BEHAVIOR_SCORE_AXES = ("format_ok", "fluency", "grounding", "refusal",
+                       "tool_call", "math")
+
+
+def behavior_score(scored: list[dict]) -> dict:
+    """Composite behavior score in [0, 1] from `score_sample` rows.
+
+    Returns the per-axis rates, the sample count behind each, and their
+    unweighted mean. Unweighted because there is no evidence yet for any other
+    weighting; the axes are listed in the README so the number can be taken
+    apart. An axis with no samples in this prompt set is skipped and reported
+    with n=0 rather than counted as a zero.
+    """
+    n = len(scored)
+    if not n:
+        raise ValueError("behavior_score needs at least one scored sample")
+
+    def credited(groups: tuple[str, ...], key: str) -> tuple[float | None, int]:
+        rows = [r for r in scored if r["group"] in groups and key in r]
+        if not rows:
+            return None, 0
+        return sum(bool(r[key]) for r in rows) / len(rows), len(rows)
+
+    # An answer that is empty or echoed scores 0; otherwise its non-repetition.
+    fluency = sum(0.0 if (r["empty_answer"] or r["answer_is_echo"])
+                  else 1.0 - r["rep_3gram"] for r in scored) / n
+
+    axes = {
+        "format_ok": (sum(float(r["format_ok"]) for r in scored) / n, n),
+        "fluency": (fluency, n),
+        "grounding": credited(("rag_evidence", "multihop_qa"), "evidence_hit_credited"),
+        "refusal": credited(("refusal_uncertainty",), "refusal_credited"),
+        "tool_call": credited(("tool_calling",), "tool_call_parsed"),
+        "math": credited(("code_math",), "answer_em_credited"),
+    }
+    present = [v for v, _ in axes.values() if v is not None]
+    return {
+        "score": round(sum(present) / len(present), 4),
+        "axes": {k: (None if v is None else round(v, 4)) for k, (v, _) in axes.items()},
+        "n": {k: count for k, (_, count) in axes.items()},
+    }
+
+
 def aggregate(scored: list[dict]) -> dict:
     """Per-group and overall means of every boolean/numeric metric."""
 

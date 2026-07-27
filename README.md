@@ -10,26 +10,28 @@ The methods are meant to be **model-family-agnostic**: the same activation-stati
 
 [![performance trend](./assets/performance_trend.svg)](./assets/performance_trend.svg)
 
-**Current experiment:** [Qwen/Qwen3-4B-Thinking-2507](https://huggingface.co/Qwen/Qwen3-4B-Thinking-2507) → a 0.6B-class student (Qwen3-0.6B geometry, ~6.7× compression, INT8 deployment target). Numbers below are held-out NLL on `holdout_v1` (21,080 tokens of fineweb-edu); the numbers in the figure are the `#` column here.
+**Current experiment:** [Qwen/Qwen3-4B-Thinking-2507](https://huggingface.co/Qwen/Qwen3-4B-Thinking-2507) → a 0.6B-class student (Qwen3-0.6B geometry, ~6.7× compression, INT8 deployment target).
 
-The runs are a tree, not a queue, so the figure gives each one a row: the left panel hangs it off the checkpoint it started from (the `starts from` column) and places it at what its whole lineage cost in optimizer steps; the right panel arrows from that checkpoint's held-out NLL to what the run actually reached. Sibling arms leave a shared parent — reading them as one sequence would imply progress that was never measured.
+The figure shows **one point per student at its current best**, against the teacher it is being distilled from — where the model stands now, not every checkpoint it took to get there. The full run history, including the runs that made things worse, is the table below.
 
-| # | date | run | starts from | what changed | total steps | held-out NLL |
-| ---: | --- | --- | :---: | --- | ---: | ---: |
-| 1 | 2026-07-14 | [init v0, recipe attempt 1](./logs/experiments/2026-07-14_stage1_qwen3_0p6b_init_v0.md) | — | early-band depth merge, unweighted projection | 0 | 17.7977 |
-| 2 | 2026-07-14 | [init v0, fixed recipe](./logs/experiments/2026-07-14_stage1_qwen3_0p6b_init_v0.md) | — | middle-band merge, end-weighted projection | 0 | 11.7482 |
-| 3 | 2026-07-22 | [s1 recovery](./logs/experiments/2026-07-22_stage3_s1_gpu_run.md) | #2 | FFN+norm, CE 0.25 + KD 1.0, 660 steps on mixture v0 | 660 | 4.2107 |
-| 4 | 2026-07-25 | [s2 A/B arm A](./logs/experiments/2026-07-25_stage3_s2_ab_gpu_run.md) | #3 | control: +660 FFN-only steps; regressed on mixture-v0 epochs 3–4 | 1320 | 4.2747 |
-| 5 | 2026-07-25 | [s2 A/B arm B](./logs/experiments/2026-07-25_stage3_s2_ab_gpu_run.md) | #3 | attention unfrozen; freeze set adopted, holdout flat (data-limited) | 1320 | 4.2118 |
-| 6 | 2026-07-26 | [s2 on mixture v1](./logs/experiments/2026-07-26_stage3_s2_blocks_v1_gpu_run.md) | #5 | same recipe, 4.11× data, 2700 steps; plateau broken | 4020 | **3.8003** |
-| 7 | 2026-07-27 | [start-point ablation: from_s1](./logs/experiments/2026-07-27_stage3_start_point_ablation.md) | #3 | same 2700-step leg from s1@660; the A/B arm-B leg was neutral (+0.17%) | 3360 | 3.8067 |
-| 8 | 2026-07-27 | [start-point ablation: from_init](./logs/experiments/2026-07-27_stage3_start_point_ablation.md) | #2 | single-stage from Stage 1 init, 2700 steps total; warm-up ladder unnecessary (+0.74%) | 2700 | 3.8285 |
+**What is measured, and why it changed.** The headline metric is `behavior_score_v0`: the unweighted mean of six *credited* mechanical checks over 76 held-out prompts — chat-format validity, fluency (an empty or copied answer scores zero), evidence grounding, refusal on unanswerable questions, parseable tool calls, and gsm8k exact match. No LLM judge, so it is free and reproducible from the stored generations ([scorer](./src/aadistill/behavior.py), [build log](./logs/experiments/2026-07-27_eval_behavior_v0.md)). Held-out NLL used to be the headline; it is now a **guard rail** — it is fineweb-edu text and is nearly blind to the failures that actually matter here. Behavior score is itself a stopgap: **real-world test suites take over as the headline once the student is good enough to attempt them** ([decision](./logs/decisions.md)).
 
-Reference points on the same set: teacher **2.6264** · random-init 0.6B baseline **12.1286**.
+| # | date | run | starts from | what changed | total steps | behavior | held-out NLL |
+| ---: | --- | --- | :---: | --- | ---: | ---: | ---: |
+| 1 | 2026-07-14 | [init v0, recipe attempt 1](./logs/experiments/2026-07-14_stage1_qwen3_0p6b_init_v0.md) | — | early-band depth merge, unweighted projection | 0 | – | 17.7977 |
+| 2 | 2026-07-14 | [init v0, fixed recipe](./logs/experiments/2026-07-14_stage1_qwen3_0p6b_init_v0.md) | — | middle-band merge, end-weighted projection | 0 | – | 11.7482 |
+| 3 | 2026-07-22 | [s1 recovery](./logs/experiments/2026-07-22_stage3_s1_gpu_run.md) | #2 | FFN+norm, CE 0.25 + KD 1.0, 660 steps on mixture v0 | 660 | 12.9% | 4.2107 |
+| 4 | 2026-07-25 | [s2 A/B arm A](./logs/experiments/2026-07-25_stage3_s2_ab_gpu_run.md) | #3 | control: +660 FFN-only steps; regressed on mixture-v0 epochs 3–4 | 1320 | – | 4.2747 |
+| 5 | 2026-07-25 | [s2 A/B arm B](./logs/experiments/2026-07-25_stage3_s2_ab_gpu_run.md) | #3 | attention unfrozen; freeze set adopted, holdout flat (data-limited) | 1320 | – | 4.2118 |
+| 6 | 2026-07-26 | [s2 on mixture v1](./logs/experiments/2026-07-26_stage3_s2_blocks_v1_gpu_run.md) | #5 | same recipe, 4.11× data, 2700 steps; plateau broken | 4020 | 8.9% | **3.8003** |
+| 7 | 2026-07-27 | [start-point ablation: from_s1](./logs/experiments/2026-07-27_stage3_start_point_ablation.md) | #3 | same 2700-step leg from s1@660; the A/B arm-B leg was neutral (+0.17%) | 3360 | 9.5% | 3.8067 |
+| 8 | 2026-07-27 | [start-point ablation: from_init](./logs/experiments/2026-07-27_stage3_start_point_ablation.md) | #2 | single-stage from Stage 1 init, 2700 steps total; warm-up ladder unnecessary (+0.74%) | 2700 | **20.2%** | 3.8285 |
+
+Behavior score is the headline metric. **Held-out NLL is now a guard rail (±1% band), not the target** — teacher Qwen3-4B-Thinking-2507 2.6264 · random-init 0.6B baseline 12.1286. Not scored on the behavior eval yet: teacher Qwen3-4B-Thinking-2507.
 
 Attempts 7–8 are a fixed-budget ablation of the *start point*, not of the training leg: runs 6–8 are the three branches that ran the identical 2700-step leg at the same seed, from lineages costing 4020, 3360 and 2700 total steps. Both landed inside the pre-registered 1% band, so the recovery recipe dropped its two warm-up legs and became a single stage — a third less compute per iteration.
 
-That ablation also motivated a second, non-NLL gate. `holdout_v1` is fineweb-edu text and is nearly blind to chat format, grounding, refusal and tool-call validity, which is where these students actually fail; [`eval_behavior_v0`](./data/eval_behavior_v0/) scores 76 held-out prompts with mechanical checks only (no LLM judge, so it is free and reproducible from the stored generations). It **reversed the ranking above**: the cheapest lineage (attempt 8) is the best-behaved one, and the best-NLL checkpoint (attempt 6) is the worst. Details and caveats — single run per arm, no variance estimate — are in the [run log](./logs/experiments/2026-07-27_stage3_start_point_ablation.md). Current state and next actions: [`logs/STATE.md`](./logs/STATE.md); costed, unapproved work: [`logs/proposals/`](./logs/proposals/).
+The behavior eval **reverses the ranking held-out NLL gives**: the cheapest lineage (attempt 8) is the best-behaved at 20.2%, while the best-NLL checkpoint (attempt 6) is the worst at 8.9% — it improves next-token prediction while getting *worse* at chat format, grounding and tool calls. That result is why the headline metric changed. Caveats a reader must carry: one run per arm, no variance estimate, and the per-axis rates rest on 7–76 prompts each, so only large moves are evidence — see the [run log](./logs/experiments/2026-07-27_stage3_start_point_ablation.md). Current state and next actions: [`logs/STATE.md`](./logs/STATE.md); costed, unapproved work: [`logs/proposals/`](./logs/proposals/).
 
 The figure regenerates from [`assets/perf_trend.json`](./assets/perf_trend.json) with `uv run python scripts/plot_perf_trend.py`; the table above comes from the same file via `--print-table`, and every point is backed by a log in [`logs/experiments/`](./logs/experiments/).
 
@@ -64,7 +66,7 @@ Every run records config hash, code state, dataset/tokenizer/teacher hashes, and
 
 ```bash
 uv sync                    # CPU torch by default; see pyproject.toml for a CUDA index
-uv run pytest tests/ -q    # 94 CPU tests, no downloads
+uv run pytest tests/ -q    # 100 CPU tests, no downloads
 ```
 
 The implemented pipeline runs end to end on CPU (GPU optional):
@@ -139,7 +141,7 @@ AlphaAvatar-distill/
 ├── configs/                # stage recipes; Stage 3 runs are one config each
 ├── data/                   # corpus manifests (jsonl gitignored, rebuildable)
 │   └── eval_behavior_v0/   #   76-prompt behavior set + manifest (both committed)
-├── tests/                  # 94 CPU tests: algebra, loader, trainer, quant, scorers, builders
+├── tests/                  # 100 CPU tests: algebra, loader, trainer, quant, scorers, builders
 ├── logs/                   # project memory — read STATE.md first
 │   ├── STATE.md            #   current state, verified facts, next actions
 │   ├── decisions.md        #   decision records (why, alternatives, risks)

@@ -8,7 +8,15 @@ quality with 33% fewer steps. A new behavior gate, `eval_behavior_v0`, was built
 first and **reversed the ranking the primary metric produced**: the cheapest
 lineage is the best-behaved one. No GPU work is running or billing.
 
-2026-07-28, maintainer directives: the next work is a **Stage 3 supplementary
+2026-07-28, maintainer directives (three): **the headline metric is no longer
+held-out NLL** — it is `behavior_score_v0` (six credited mechanical axes on 76
+held-out prompts; NLL stays as a ±1% guard rail), and the README figure is now
+**one point per student at its current best** against its teacher, ARC-style.
+Real-world test suites take over as the headline once the student can attempt
+them. Current best: `s2v1_from_init@2700` at **20.2%**; the teacher has never
+been scored on this eval, so the ceiling is unknown.
+
+The next work is a **Stage 3 supplementary
 experiment** (recovery run from `s2v1_from_init@2700` on rewritten targets, with
 the corpus build as its Stage 2 prerequisite), and its teacher targets must be
 **top-n sampled and verified correct** — n candidates per prompt, every
@@ -40,11 +48,12 @@ s1 → s2 sizing A/B → s2 quality gate → start-point ablation (2026-07-27)**
 passed. Stage 4 not started.
 
 Repo: branch `main`, clean at the 2026-07-28 documentation commits on top of
-`30c066c`. Those rewrote the trend figure as a **lineage view — one row per
-run** (left: the checkpoint it branched from and what its lineage cost; right:
-an arrow from that checkpoint's NLL to the run's own), rewrote the teacher-target
-proposal for the directives above, and recorded the record/scope policies. No
-experiment data changed — same eight attempts, same NLLs.
+`30c066c`. Those rebuilt the README figure twice — first as a lineage view, then
+(current) as the **leaderboard-style view the maintainer asked for**: one point
+per student at its current best against its teacher, y = behavior score, x =
+parameters. They also rewrote the teacher-target proposal for the directives
+above and recorded the record/scope/metric policies. No experiment data changed;
+the behavior scores are recomputed from scorecards that already existed.
 
 ## The recipe, as it now stands
 
@@ -84,27 +93,32 @@ architecture and data scale.
   behavior axis. Log: `logs/experiments/2026-07-26_stage3_s2_blocks_v1_gpu_run.md`.
 - **Stage 2 mixture v1 (2026-07-26, CPU):** 64,484 train samples / 22,133,631
   train tokens / 21,610 blocks@1024; val_v1 1,916; calib 200.
-- Tests: **94/94** on the dev box (torch 2.13.0+cpu); the 2026-07-27 GPU pod ran
+- Tests: **100/100** on the dev box (torch 2.13.0+cpu); the 2026-07-27 GPU pod ran
   the then-current suite at 85 passed / 6 skipped (torch 2.11.0+cu128,
   Python 3.12.3).
 
 ## Best checkpoint — the two metrics disagree, deliberately
 
-- **Best holdout NLL:** `stage3/s2_blocks_v1/step_002700/model` (3.8003).
-- **Recommended branch point for further work:**
-  `stage3/s2v1_from_init/step_002700/model` (3.8285, +0.74% — inside the
-  pre-registered 1% band) — best on every behavior axis and 33% cheaper to
-  produce. For a realtime agent target (P10) that is the more relevant
-  evidence, but choosing it is a **judgment, not a pre-registered rule**.
+- **Best on the headline metric (and the recommended branch point):**
+  `stage3/s2v1_from_init/step_002700/model` — `behavior_score_v0` **20.2%**,
+  best on every behavior axis, 33% cheaper to produce, holdout 3.8285 (+0.74%,
+  inside the guard-rail band).
+- **Best held-out NLL:** `stage3/s2_blocks_v1/step_002700/model` (3.8003) —
+  and **worst** on behavior (8.9%). NLL is now the guard rail, so this is a
+  diagnostic, not the leader.
+- Other measured checkpoints: s1@660 **12.9%** / 4.2107 · `s2v1_from_s1`
+  **9.5%** / 3.8067. The A/B arms and the two Stage 1 inits were never scored on
+  the behavior eval.
 
 ## Three comparability rules now in force
 
 1. **Pin the seed across compared runs.** The 64-block val subset is a
    permutation of `cfg["seed"] + 777` (`src/aadistill/train.py:332`). Seed
    **20260726** is pinned for this whole family of runs.
-2. **holdout_v1 is a language-modeling metric, not a behavior metric.** It is
-   fineweb-edu web text and is nearly blind to chat format, grounding, refusal
-   and tool-call validity. `eval_behavior_v0` covers those.
+2. **holdout_v1 is a guard rail, not the headline** (decision 2026-07-28). It
+   is fineweb-edu web text, nearly blind to chat format, grounding, refusal and
+   tool-call validity, and it ranked the ablation arms in the *opposite* order
+   to the behavior eval. Band ±1%; a large drop is an abort signal.
 3. **Behavior scorecards are only comparable within one device** (decision
    record 2026-07-27). The same checkpoint scored on CPU vs L40S moved
    `format_ok` by 1–3 prompts, though `terminated`/`truncated_at_cap` matched
@@ -145,19 +159,20 @@ architecture and data scale.
   `s2_blocks_v1`, `s2v1_from_s1`, `s2v1_from_init` (all ran), smoke configs.
 - `data/` — frozen v0 and v1 mixtures (jsonl gitignored, manifests committed);
   **`data/eval_behavior_v0/` (prompts.jsonl + manifest, both committed)**.
-- `tests/` — 94 tests. `logs/` — decisions (16), experiments (13), proposals (3),
+- `tests/` — 100 tests. `logs/` — decisions (16), experiments (13), proposals (3),
   supported_models, artifact_manifests, this file.
 - `artifacts/` (gitignored) — stage0 stats, stage1 checkpoint, stage3 run
   artifacts and reference scorecards (small files local; final weights HF-only
   except s1).
-- `assets/` — perf trend json + svg (8 attempt points, drawn as a lineage
-  tree: each run sits at its lineage's cumulative steps and is joined to the
-  checkpoint it started from; `parent`/`steps` are data fields).
+- `assets/` — perf figure json + svg. The json now carries a `headline` metric
+  block, `systems` (one entry per student: current best + previous best +
+  params), `references` (teacher size, score `null` until measured), the `guard`
+  block (NLL), and the 8-attempt run history that generates the README table.
 
 ## Latest known working commands
 
 ```
-uv run pytest tests/ -q                                          # 94 passed
+uv run pytest tests/ -q                                          # 100 passed
 uv run python scripts/build_eval_behavior_v0.py                  # rebuild prompt set
 uv run python scripts/eval_behavior.py \
   --model artifacts/stage3/s1_ffn_norm_v0/checkpoints/step_000660/model \

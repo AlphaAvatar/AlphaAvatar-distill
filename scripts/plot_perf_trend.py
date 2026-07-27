@@ -1,34 +1,29 @@
-"""Render the README performance-trend figure from `assets/perf_trend.json`.
+"""Render the README performance figure from `assets/perf_trend.json`.
 
 Usage:
     uv run python scripts/plot_perf_trend.py                 # write the SVG
     uv run python scripts/plot_perf_trend.py --print-table   # markdown run table
 
-Data in, layout out. `perf_trend.json` holds only facts — date, run name, the
-checkpoint the run started from, the optimizer steps that run added, a one-line
-summary, the metric value, and the experiment log that backs it (AGENTS.md P7).
-Everything about placement is computed here. Adding an attempt is a pure data
-edit, and the figure grows a row rather than getting more crowded.
+Data in, layout out. `perf_trend.json` holds only facts — measured scores, the
+checkpoint and log behind each, parameter counts, and the run history
+(AGENTS.md P7). Everything about placement is computed here.
 
-**One row per run.** The runs form a tree, not a queue, and the metric spans 14
-nats end to end while the interesting differences are 0.03 — no single scatter
-can hold both, which is what made the earlier steps-vs-NLL version unreadable.
-Rows fix it: every run gets its own line, so nothing overlaps and nothing needs a
-zoom panel.
+**One point per student, at its current best** (quality vs size, the shape the
+ARC-AGI leaderboard uses). Listing every checkpoint was the wrong frame: what a
+reader wants is where each distilled model stands now and how far it is from its
+teacher. Earlier checkpoints stay in the README run table; only the previous
+*best* appears here, as a faded dot with an arrow to the current one, so the
+figure shows direction without turning into a run log.
 
-* left — **lineage and cost**: x is the cumulative optimizer steps of the run's
-  whole lineage, and each run hangs off its start checkpoint by a git-graph
-  elbow. Sibling branches leave a shared parent instead of queueing up behind
-  each other.
-* right — **the metric**: an arrow per run, from its start checkpoint's held-out
-  NLL to what the run reached, against the teacher and random-init rules. The
-  arrow is the run's effect; the tail is where it started. Log axis, because the
-  init points are ~4× the recovered ones; exact values are in the aligned column
-  on the right, so the axis carries magnitude and the column carries precision.
+The y metric is whatever `headline` in the data file names — today
+`behavior_score_v0`, six mechanical axes over 76 held-out prompts, because a
+0.6B student this early cannot meaningfully attempt real test suites. When it
+can, the headline block changes and the same code plots the new metric; held-out
+NLL is demoted to the guard rail it always was.
 
-The figure deliberately carries no per-point prose: the numbered markers key
-into the run table in `README.md`, which `--print-table` regenerates from the
-same file so the two cannot drift.
+The x axis is parameters, standing in for inference cost until Stage 6 measures
+latency and memory. A reference with no score yet (the teacher has never been
+run on this eval) is drawn as its size line only — never as a guessed y.
 
 Output: `assets/performance_trend.svg` (committed; small, reviewable, opaque
 light surface so it reads the same in GitHub's light and dark themes).
@@ -44,7 +39,7 @@ import matplotlib
 
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
-from matplotlib.ticker import ScalarFormatter
+from matplotlib.ticker import FuncFormatter, MaxNLocator, PercentFormatter
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 DATA = REPO_ROOT / "assets/perf_trend.json"
@@ -55,14 +50,11 @@ OUT = REPO_ROOT / "assets/performance_trend.svg"
 # categorical slots.
 STUDENT = "#2a78d6"  # categorical slot 1 — the student series
 TARGET = "#008300"  # the teacher line: a target threshold, not a series
-BASELINE = "#8b8a85"  # random-init reference: recessive chrome
+BASELINE = "#8b8a85"  # recessive chrome
 SURFACE = "#fcfcfb"
 INK = "#0b0b0b"
 INK_SOFT = "#52514e"
 GRID = "#e6e5e1"
-
-ROW_IN = 0.40  # figure inches per attempt row
-CHROME_IN = 1.75  # title, panel headers, axis band
 
 
 def load(path: Path = DATA) -> dict:
@@ -96,126 +88,125 @@ def lineage(attempts: list[dict]) -> list[dict]:
     return nodes
 
 
-def log_ticks(lo: float, hi: float) -> list[float]:
-    """Readable ticks for a log axis over a small range: 1-2-3-5 per decade."""
-    candidates = [c * m for m in (0.1, 1, 10, 100) for c in (1, 2, 3, 4, 5, 7)]
-    return [c for c in sorted(candidates) if lo <= c <= hi]
+def human_params(value: float, _pos: int | None = None) -> str:
+    """0.6B / 1B / 4B — the units people actually compare models in."""
+    billions = value / 1e9
+    return f"{billions:.1f}B".replace(".0B", "B")
 
 
-def style_row_axes(ax, n_rows: int) -> None:
+def size_ticks(lo: float, hi: float) -> list[float]:
+    """1-2-5 style ticks per decade, in parameters."""
+    candidates = [c * 10 ** e for e in range(6, 13) for c in (1, 2, 5)]
+    return [c for c in candidates if lo <= c <= hi]
+
+
+def style_axes(ax) -> None:
     ax.set_facecolor(SURFACE)
-    ax.set_ylim(n_rows - 0.45, -1.25)  # inverted: attempt 1 on top; headroom on top
-    ax.set_yticks(range(n_rows))
-    ax.set_yticklabels([])
-    ax.grid(axis="y", color=GRID, linewidth=0.7)
+    ax.grid(color=GRID, linewidth=0.7)
     ax.set_axisbelow(True)
-    for side in ("top", "right", "left"):
+    for side in ("top", "right"):
         ax.spines[side].set_visible(False)
-    ax.spines["bottom"].set_color(GRID)
-    ax.spines["bottom"].set_linewidth(0.9)
-    ax.tick_params(axis="x", colors=INK_SOFT, labelsize=8.5, length=3, width=0.9)
-    ax.tick_params(axis="y", length=0)
+    for side in ("left", "bottom"):
+        ax.spines[side].set_color(GRID)
+        ax.spines[side].set_linewidth(0.9)
+    ax.tick_params(colors=INK_SOFT, labelsize=9, length=3, width=0.9)
 
 
-def draw_lineage_panel(ax, nodes: list[dict]) -> None:
-    """Git-graph elbows: a run drops out of its start checkpoint, then extends
-    right by what its own leg cost."""
-    xs = [node["total_steps"] for node in nodes]
-    span = max(xs) or 1
-    ax.set_xlim(-span * 0.09, span * 1.09)
-    ax.set_xticks(sorted(set(xs)))
-
-    for i, node in enumerate(nodes):
-        parent = node["parent_index"]
-        if parent is None:
-            continue
-        px = nodes[parent]["total_steps"]
-        ax.plot([px, px, node["total_steps"]], [parent + 0.24, i, i],
-                color=STUDENT, alpha=0.45, linewidth=1.6, zorder=2,
-                solid_joinstyle="round", solid_capstyle="round")
-
-    ax.scatter(xs, range(len(nodes)), s=150, color=STUDENT, zorder=3,
-               linewidths=1.6, edgecolors=SURFACE)
-    for i, x in enumerate(xs):
-        ax.annotate(str(i + 1), xy=(x, i), ha="center", va="center", fontsize=7.5,
-                    color="white", fontweight="bold", zorder=4)
-
-
-def draw_metric_panel(ax, nodes: list[dict], refs: list[dict]) -> None:
-    """One arrow per run: start checkpoint's metric → what the run reached."""
-    values = [node["nll"] for node in nodes] + [ref["nll"] for ref in refs]
-    lo, hi = min(values) * 0.86, max(values) * 1.10
-    ax.set_xscale("log")
-    ax.set_xlim(lo, hi)
-    ax.set_xticks(log_ticks(lo, hi))
-    ax.xaxis.set_major_formatter(ScalarFormatter())
-    ax.minorticks_off()
-
-    for ref in refs:
-        color = TARGET if ref.get("role") == "target" else BASELINE
-        ax.axvline(ref["nll"], color=color, linestyle=(0, (6, 4)), linewidth=1.3, zorder=1)
-        # Reference lines sit near the panel edges, so labels hang inwards —
-        # centering them would push text outside the panel.
-        inward = ref["nll"] < (lo * hi) ** 0.5
-        ax.annotate(f"{ref.get('short', ref['label'])}  {ref['nll']:.2f}",
-                    xy=(ref["nll"], -1.15),
-                    xytext=(4 if inward else -4, 0), textcoords="offset points",
-                    ha="left" if inward else "right", va="bottom",
-                    fontsize=8, color=color)
-
-    best = min(node["nll"] for node in nodes)
-    for i, node in enumerate(nodes):
-        parent = node["parent_index"]
-        if parent is not None:
-            ax.annotate("", xy=(node["nll"], i), xytext=(nodes[parent]["nll"], i),
-                        arrowprops=dict(arrowstyle="-|>", color=STUDENT, alpha=0.55,
-                                        linewidth=1.5, shrinkA=2, shrinkB=8,
-                                        mutation_scale=11), zorder=2)
-        ax.scatter([node["nll"]], [i], s=110, color=STUDENT, zorder=3,
+def draw_reference(ax, ref: dict, hi: float) -> None:
+    """A reference model is a size line; its score appears only once measured."""
+    color = TARGET if ref.get("role") == "target" else BASELINE
+    ax.axvline(ref["params"], color=color, linestyle=(0, (6, 4)), linewidth=1.3, zorder=1)
+    if ref.get("score") is not None:
+        ax.scatter([ref["params"]], [ref["score"]], s=200, color=color, zorder=3,
                    linewidths=1.6, edgecolors=SURFACE)
-        # Values in an aligned column outside the plot: the axis carries
-        # magnitude, the column carries the precision the near-ties need.
-        is_best = node["nll"] == best
-        ax.annotate(f"{node['nll']:.3f}", xy=(1.0, i), xycoords=("axes fraction", "data"),
-                    xytext=(48, 0), textcoords="offset points", ha="right", va="center",
-                    fontsize=8.5, color=INK if is_best else INK_SOFT,
-                    fontweight="bold" if is_best else "normal", annotation_clip=False)
-    ax.annotate("NLL", xy=(1.0, -1.15), xycoords=("axes fraction", "data"),
-                xytext=(48, 0), textcoords="offset points", ha="right", va="bottom",
-                fontsize=8, color=INK_SOFT, annotation_clip=False)
+    label = f"{ref['label']}  ({human_params(ref['params'])})"
+    if ref.get("note"):
+        label += f"\n{ref['note']}"
+    ax.annotate(label, xy=(ref["params"], hi), xytext=(-8, -6), textcoords="offset points",
+                ha="right", va="top", fontsize=8.5, color=color, linespacing=1.5)
+
+
+def draw_system(ax, system: dict) -> None:
+    """Current best, plus an arrow from the previous best — direction, not a log."""
+    x, best = system["params"], system["best"]
+    previous = system.get("previous_best")
+
+    if previous:
+        ax.scatter([x], [previous["score"]], s=110, color=STUDENT, alpha=0.32,
+                   zorder=2, linewidths=1.4, edgecolors=SURFACE)
+        ax.annotate(f"{previous['score']:.1%} · {previous['checkpoint']} · {previous['date']}",
+                    xy=(x, previous["score"]), xytext=(15, 0), textcoords="offset points",
+                    ha="left", va="center", fontsize=8.5, color=INK_SOFT)
+        ax.annotate("", xy=(x, best["score"]), xytext=(x, previous["score"]),
+                    arrowprops=dict(arrowstyle="-|>", color=STUDENT, alpha=0.5,
+                                    linewidth=1.6, shrinkA=9, shrinkB=13,
+                                    mutation_scale=13), zorder=2)
+
+    ax.scatter([x], [best["score"]], s=260, color=STUDENT, zorder=4,
+               linewidths=1.8, edgecolors=SURFACE)
+    ax.annotate(f"{system['label']} · {system['stage']}", xy=(x, best["score"]),
+                xytext=(17, 5), textcoords="offset points", ha="left", va="bottom",
+                fontsize=10.5, color=INK, fontweight="bold")
+    ax.annotate(f"{best['score']:.1%} · {best['checkpoint']} · {best['date']}",
+                xy=(x, best["score"]), xytext=(17, -7), textcoords="offset points",
+                ha="left", va="top", fontsize=8.5, color=INK_SOFT)
+
+
+def draw_compression_bracket(ax, system: dict, ref: dict, y: float) -> None:
+    """The distance between the two size lines is the whole point of the project."""
+    ax.annotate("", xy=(ref["params"], y), xytext=(system["params"], y),
+                arrowprops=dict(arrowstyle="<|-|>", color=BASELINE, linewidth=1.0,
+                                shrinkA=1, shrinkB=1, mutation_scale=9), zorder=2)
+    ax.annotate(f"{ref['params'] / system['params']:.1f}× fewer parameters",
+                xy=((system["params"] * ref["params"]) ** 0.5, y), xytext=(0, 5),
+                textcoords="offset points", ha="center", va="bottom",
+                fontsize=8.5, color=INK_SOFT)
 
 
 def render(data: dict, out: Path = OUT) -> Path:
-    nodes, refs = lineage(data["attempts"]), data["references"]
-    n = len(nodes)
+    systems, refs = data["systems"], data["references"]
+    headline, size_axis = data["headline"], data["size_axis"]
 
-    height = CHROME_IN + ROW_IN * n
-    fig = plt.figure(figsize=(10.0, height), dpi=120)
+    scored = [s["best"]["score"] for s in systems]
+    scored += [s["previous_best"]["score"] for s in systems if s.get("previous_best")]
+    scored += [r["score"] for r in refs if r.get("score") is not None]
+    hi = max(scored) * 1.75
+    sizes = [s["params"] for s in systems] + [r["params"] for r in refs]
+
+    fig = plt.figure(figsize=(10.0, 5.0), dpi=120)
     fig.patch.set_facecolor(SURFACE)
-    grid = fig.add_gridspec(1, 2, width_ratios=[1, 1.45], wspace=0.075,
-                            left=0.035, right=0.925,
-                            top=1 - 0.92 / height, bottom=0.62 / height)
-    ax_tree = fig.add_subplot(grid[0, 0])
-    ax_metric = fig.add_subplot(grid[0, 1], sharey=ax_tree)
-    style_row_axes(ax_tree, n)
-    style_row_axes(ax_metric, n)
+    ax = fig.add_axes((0.088, 0.145, 0.899, 0.665))
+    style_axes(ax)
 
-    draw_lineage_panel(ax_tree, nodes)
-    draw_metric_panel(ax_metric, nodes, refs)
+    ax.set_xscale("log")
+    ax.set_xlim(min(sizes) / 1.4, max(sizes) * 1.4)
+    ax.set_xticks(size_ticks(*ax.get_xlim()))
+    ax.xaxis.set_major_formatter(FuncFormatter(human_params))
+    ax.minorticks_off()
+    ax.set_ylim(0, hi)
+    ax.yaxis.set_major_locator(MaxNLocator(6))
+    ax.yaxis.set_major_formatter(PercentFormatter(xmax=1, decimals=0))
 
-    ax_tree.set_xlabel(data.get("steps_axis", "cumulative optimizer steps"),
-                       fontsize=8.5, color=INK_SOFT)
-    ax_metric.set_xlabel(data.get("metric_axis", "held-out NLL"),
-                         fontsize=8.5, color=INK_SOFT)
+    for ref in refs:
+        draw_reference(ax, ref, hi)
+    for system in systems:
+        draw_system(ax, system)
+    target = next((r for r in refs if r.get("role") == "target"), None)
+    if target and systems:
+        draw_compression_bracket(ax, systems[0], target, hi * 0.085)
 
-    fig.suptitle(data.get("title", "held-out NLL by lineage"), fontsize=12,
-                 color=INK, x=0.035, ha="left", y=1 - 0.24 / height)
-    fig.text(0.035, 1 - 0.52 / height, data["metric"], fontsize=8.5, color=INK_SOFT,
+    ax.set_xlabel(f"{size_axis['label']} — {size_axis['note']}", fontsize=9, color=INK_SOFT)
+    ax.set_ylabel(headline["axis"], fontsize=9, color=INK_SOFT)
+
+    fig.suptitle(data.get("title", "behavior score vs model size"), fontsize=12.5,
+                 color=INK, x=0.088, ha="left", y=0.955)
+    fig.text(0.088, 0.895, headline["summary"], fontsize=8.5, color=INK_SOFT,
              ha="left", va="top")
-    fig.text(0.985, 0.055 / height,
-             "each run hangs off the checkpoint it started from · arrows run from "
-             "that checkpoint's score to the run's own · numbers key into the run "
-             "table in README.md",
+    fig.text(0.088, 0.855, headline["note"], fontsize=8.5, color=INK_SOFT,
+             ha="left", va="top", style="italic")
+    fig.text(0.987, 0.03,
+             "one point per student at its current best · every run, including the "
+             "ones that did not improve, is in the README table",
              ha="right", fontsize=7, color="#9b9a95")
 
     fig.savefig(out, facecolor=SURFACE)  # format follows the suffix (.svg / .png preview)
@@ -226,18 +217,29 @@ def render(data: dict, out: Path = OUT) -> Path:
 def markdown_table(data: dict) -> str:
     """The README run table, generated from the same facts as the figure."""
     nodes = lineage(data["attempts"])
-    best = min(n["nll"] for n in nodes)
-    rows = ["| # | date | run | starts from | what changed | total steps | held-out NLL |",
-            "| ---: | --- | --- | :---: | --- | ---: | ---: |"]
+    best_nll = min(n["nll"] for n in nodes)
+    best_behavior = max((n["behavior"] for n in nodes if "behavior" in n), default=None)
+    rows = ["| # | date | run | starts from | what changed | total steps | behavior | held-out NLL |",
+            "| ---: | --- | --- | :---: | --- | ---: | ---: | ---: |"]
     for node in nodes:
-        nll = f"**{node['nll']:.4f}**" if node["nll"] == best else f"{node['nll']:.4f}"
+        nll = f"**{node['nll']:.4f}**" if node["nll"] == best_nll else f"{node['nll']:.4f}"
+        behavior = "–"
+        if "behavior" in node:
+            behavior = (f"**{node['behavior']:.1%}**" if node["behavior"] == best_behavior
+                        else f"{node['behavior']:.1%}")
         parent = "—" if node["parent_index"] is None else f"#{nodes[node['parent_index']]['n']}"
         rows.append(f"| {node['n']} | {node['date']} "
                     f"| [{node['run']}]({node['log'].replace('logs/', './logs/')}) "
-                    f"| {parent} | {node['summary']} | {node['total_steps']} | {nll} |")
-    refs = " · ".join(f"{r['label']} {r['nll']:.4f}" for r in data["references"])
+                    f"| {parent} | {node['summary']} | {node['total_steps']} "
+                    f"| {behavior} | {nll} |")
+    guard = " · ".join(f"{r['label']} {r['nll']:.4f}"
+                       for r in data["guard"].get("references", []))
+    pending = " · ".join(r["label"] for r in data["references"]
+                         if r.get("score") is None)
     rows.append("")
-    rows.append(f"Reference points on the same set: {refs}.")
+    rows.append(f"Behavior score is the headline metric. **Held-out NLL is now a guard rail "
+                f"({data['guard']['band']} band), not the target** — {guard}. "
+                f"Not scored on the behavior eval yet: {pending}.")
     return "\n".join(rows)
 
 
@@ -252,7 +254,7 @@ def main() -> None:
         print(markdown_table(data))
         return
     out = render(data)
-    print(f"Wrote {out} ({out.stat().st_size} bytes, {len(data['attempts'])} attempts)")
+    print(f"Wrote {out} ({out.stat().st_size} bytes, {len(data['systems'])} systems)")
 
 
 if __name__ == "__main__":

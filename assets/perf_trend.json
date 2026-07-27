@@ -1,23 +1,72 @@
 {
-  "metric": "held-out NLL (nats/token) on holdout_v1 (21,080 tokens, fineweb-edu)",
-  "metric_axis": "held-out NLL (nats/token) — lower is better",
-  "steps_axis": "cumulative optimizer steps (16 × 1024-token blocks/step)",
-  "title": "Qwen3-4B-Thinking-2507 → 0.6B student: held-out NLL by checkpoint lineage",
-  "lower_is_better": true,
-  "eval": "scripts/eval_ppl.py --data data/warmup/holdout_v1.jsonl",
+  "title": "Qwen3-4B-Thinking-2507 → 0.6B: behavior score vs model size",
+  "headline": {
+    "name": "behavior score v0",
+    "axis": "behavior score v0 (76 held-out prompts)",
+    "summary": "behavior score v0 — mean of six credited mechanical axes: chat format, fluency, grounding, refusal, tool calls, math",
+    "axes": [
+      "format_ok",
+      "fluency",
+      "grounding",
+      "refusal",
+      "tool_call",
+      "math"
+    ],
+    "eval": "scripts/eval_behavior.py --model <ckpt>",
+    "scorer": "src/aadistill/behavior.py::behavior_score",
+    "note": "an early-stage proxy for a student too damaged to attempt real suites; real-world test sets take over as the headline once it can",
+    "log": "logs/experiments/2026-07-27_eval_behavior_v0.md"
+  },
+  "guard": {
+    "name": "held-out NLL (nats/token) on holdout_v1 (21,080 tokens, fineweb-edu)",
+    "eval": "scripts/eval_ppl.py --data data/warmup/holdout_v1.jsonl",
+    "note": "no longer the headline metric; a large drop is an abort signal",
+    "references": [
+      {
+        "label": "teacher Qwen3-4B-Thinking-2507",
+        "nll": 2.6264
+      },
+      {
+        "label": "random-init 0.6B baseline",
+        "nll": 12.1286
+      }
+    ],
+    "band": "±1%"
+  },
+  "size_axis": {
+    "label": "parameters",
+    "note": "stands in for inference cost until Stage 6 measures latency and memory"
+  },
+  "systems": [
+    {
+      "id": "qwen3_0p6b_distill",
+      "label": "Qwen3-0.6B distill",
+      "stage": "Stage 3",
+      "params": 596049920,
+      "best": {
+        "checkpoint": "s2v1_from_init@2700",
+        "date": "2026-07-27",
+        "score": 0.2015,
+        "nll": 3.8285,
+        "log": "logs/experiments/2026-07-27_stage3_start_point_ablation.md"
+      },
+      "previous_best": {
+        "checkpoint": "s1_ffn_norm_v0@660",
+        "date": "2026-07-22",
+        "score": 0.1292,
+        "nll": 4.2107,
+        "log": "logs/experiments/2026-07-22_stage3_s1_gpu_run.md"
+      }
+    }
+  ],
   "references": [
     {
       "label": "teacher Qwen3-4B-Thinking-2507",
       "short": "teacher",
       "role": "target",
-      "nll": 2.6264,
-      "log": "logs/experiments/2026-07-14_stage1_qwen3_0p6b_init_v0.md"
-    },
-    {
-      "label": "random-init 0.6B baseline",
-      "short": "random init",
-      "role": "baseline",
-      "nll": 12.1286,
+      "params": 4022468096,
+      "score": null,
+      "note": "not yet scored on this eval",
       "log": "logs/experiments/2026-07-14_stage1_qwen3_0p6b_init_v0.md"
     }
   ],
@@ -53,7 +102,8 @@
       "run": "s1 recovery",
       "summary": "FFN+norm, CE 0.25 + KD 1.0, 660 steps on mixture v0",
       "nll": 4.2107,
-      "log": "logs/experiments/2026-07-22_stage3_s1_gpu_run.md"
+      "log": "logs/experiments/2026-07-22_stage3_s1_gpu_run.md",
+      "behavior": 0.1292
     },
     {
       "id": "s1_ext_v0",
@@ -86,7 +136,8 @@
       "run": "s2 on mixture v1",
       "summary": "same recipe, 4.11× data, 2700 steps; plateau broken",
       "nll": 3.8003,
-      "log": "logs/experiments/2026-07-26_stage3_s2_blocks_v1_gpu_run.md"
+      "log": "logs/experiments/2026-07-26_stage3_s2_blocks_v1_gpu_run.md",
+      "behavior": 0.0887
     },
     {
       "id": "s2v1_from_s1",
@@ -97,7 +148,8 @@
       "run": "start-point ablation: from_s1",
       "summary": "same 2700-step leg from s1@660; the A/B arm-B leg was neutral (+0.17%)",
       "nll": 3.8067,
-      "log": "logs/experiments/2026-07-27_stage3_start_point_ablation.md"
+      "log": "logs/experiments/2026-07-27_stage3_start_point_ablation.md",
+      "behavior": 0.0952
     },
     {
       "id": "s2v1_from_init",
@@ -108,7 +160,8 @@
       "run": "start-point ablation: from_init",
       "summary": "single-stage from Stage 1 init, 2700 steps total; warm-up ladder unnecessary (+0.74%)",
       "nll": 3.8285,
-      "log": "logs/experiments/2026-07-27_stage3_start_point_ablation.md"
+      "log": "logs/experiments/2026-07-27_stage3_start_point_ablation.md",
+      "behavior": 0.2015
     }
   ]
 }
