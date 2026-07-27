@@ -29,10 +29,19 @@ as they are.
 
 ## Session procedure
 
-1. `runpodctl pod create --image
-   runpod/pytorch:1.0.3-cu1281-torch291-ubuntu2404 --gpu-id "NVIDIA L40S"
-   --container-disk-in-gb 60 --volume-in-gb 0 --ports "22/tcp,8888/http"
-   --name aadistill-<session> --terminate-after <utc-now+8h>`
+1. ```bash
+   runpodctl pod create --image runpod/pytorch:1.0.3-cu1281-torch291-ubuntu2404 \
+     --gpu-id "NVIDIA L40S" --container-disk-in-gb 150 --volume-in-gb 0 \
+     --ports "22/tcp,8888/http" --name aadistill-<session> \
+     --terminate-after "$(date -u -d '+8 hours' +%Y-%m-%dT%H:%M:%SZ)"
+   ```
+
+   **`--terminate-after` takes an absolute UTC datetime**
+   (`2026-07-27T18:04:14Z`), *not* a duration like `+8h` — a duration is
+   rejected, which would leave the session without its cost backstop. Size the
+   container disk for the whole session: a two-arm run used ~30 GB with three
+   staged checkpoints plus rolling checkpoints, so 150 GB is comfortable and
+   costs cents.
 
    **`--ports "22/tcp"` is mandatory** (see step 2). Prefer **L40S** so
    throughput/memory stay comparable to s1, the A/B and `s2_blocks_v1`. RTX 6000
