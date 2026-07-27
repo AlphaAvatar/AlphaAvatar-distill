@@ -103,28 +103,59 @@ def generation_prompt(tokenizer, sample: dict) -> str:
     return prompt
 
 
+def stop_ids(model, tokenizer) -> set[int]:
+    """Every id that ends a turn — Qwen3 stops on `<|im_end|>`, not on `<|endoftext|>`."""
+    configured = model.generation_config.eos_token_id
+    ids = set(configured if isinstance(configured, (list, tuple)) else [configured])
+    ids.add(tokenizer.eos_token_id)
+    return {i for i in ids if i is not None}
+
+
+def _cut_at_stop(row: list[int], stops: set[int], cap: int) -> tuple[list[int], int, bool]:
+    """Trim a generated row at its first stop token (kept). -> (ids, n_new, hit_cap)."""
+    for position, token in enumerate(row):
+        if token in stops:
+            return row[: position + 1], position + 1, False
+    return row, len(row), len(row) >= cap
+
+
 @torch.no_grad()
-def generate_candidates(model, tokenizer, prompt: str, *, n: int, max_new_tokens: int,
+def generate_candidates(model, tokenizer, prompts: list[str], *, n: int, max_new_tokens: int,
                         temperature: float, top_p: float, seed: int, device: str):
-    """Candidate 0 greedy, 1..n-1 sampled. Returns a list of (raw, n_new, hit_cap)."""
-    ids = tokenizer(prompt, return_tensors="pt", add_special_tokens=False).input_ids.to(device)
-    out = []
-    for index in range(n):
-        if index:
-            torch.manual_seed(seed + index)
-        result = model.generate(
-            ids,
-            max_new_tokens=max_new_tokens,
-            do_sample=bool(index),
-            temperature=temperature if index else None,
-            top_p=top_p if index else None,
-            top_k=None,
-            pad_token_id=tokenizer.eos_token_id,
-        )
-        new = result.shape[1] - ids.shape[1]
-        text = tokenizer.decode(result[0, ids.shape[1]:], skip_special_tokens=False)
-        out.append((text, new, new >= max_new_tokens))
-    return out
+    """n candidates for each prompt in the batch — candidate 0 greedy, rest sampled.
+
+    Two `generate` calls per batch rather than n per prompt: batch-1 decoding of
+    a thinking teacher is ~50 h for a 1k-prompt pilot, which is the difference
+    between an affordable session and an unaffordable one. Left padding, and
+    each row is cut at its first stop token so a short answer is not scored with
+    another sequence's padding attached.
+
+    Returns, per prompt, a list of (raw_text, n_new_tokens, hit_cap).
+    """
+    encoded = tokenizer(prompts, return_tensors="pt", padding=True,
+                        add_special_tokens=False).to(device)
+    prompt_len = encoded.input_ids.shape[1]
+    stops = stop_ids(model, tokenizer)
+    shared = dict(max_new_tokens=max_new_tokens, top_k=None,
+                  pad_token_id=tokenizer.pad_token_id)
+
+    def rows_of(output):
+        for row in output[:, prompt_len:].tolist():
+            ids, n_new, hit_cap = _cut_at_stop(row, stops, max_new_tokens)
+            yield tokenizer.decode(ids, skip_special_tokens=False), n_new, hit_cap
+
+    per_prompt: list[list] = [[] for _ in prompts]
+    greedy = model.generate(**encoded, do_sample=False, temperature=None, top_p=None, **shared)
+    for index, item in enumerate(rows_of(greedy)):
+        per_prompt[index].append(item)
+
+    if n > 1:
+        torch.manual_seed(seed)
+        sampled = model.generate(**encoded, do_sample=True, temperature=temperature,
+                                 top_p=top_p, num_return_sequences=n - 1, **shared)
+        for index, item in enumerate(rows_of(sampled)):
+            per_prompt[index // (n - 1)].append(item)  # generate keeps prompts contiguous
+    return per_prompt
 
 
 def main() -> None:
@@ -134,6 +165,8 @@ def main() -> None:
     ap.add_argument("--slices", default=",".join(SLICES))
     ap.add_argument("--limit-per-slice", type=int, default=None)
     ap.add_argument("--n", type=int, default=4, help="candidates per prompt")
+    ap.add_argument("--batch-size", type=int, default=8,
+                    help="prompts per generate call; raise until GPU memory is the limit")
     ap.add_argument("--max-new-tokens", type=int, default=4096,
                     help="must fit the teacher's reasoning trace plus its answer")
     ap.add_argument("--temperature", type=float, default=0.7)
@@ -161,6 +194,11 @@ def main() -> None:
     from eval_behavior import load_model  # same loader, same revision pinning
 
     model, tokenizer = load_model(args.model, dtype, device)
+    # Batched generation pads; left padding keeps every prompt flush against the
+    # first generated token, which is what makes `prompt_len` slicing valid.
+    tokenizer.padding_side = "left"
+    if tokenizer.pad_token_id is None:
+        tokenizer.pad_token = tokenizer.eos_token
 
     out_dir = REPO_ROOT / args.out
     out_dir.mkdir(parents=True, exist_ok=True)
@@ -172,15 +210,17 @@ def main() -> None:
 
     with open(out_dir / "candidates.jsonl", "w") as f_cand, \
             open(out_dir / "targets.jsonl", "w") as f_target:
-        for name, samples in work.items():
-            for sample in samples:
-                prompt = generation_prompt(tokenizer, sample)
-                raws = generate_candidates(
-                    model, tokenizer, prompt, n=args.n,
-                    max_new_tokens=args.max_new_tokens, temperature=args.temperature,
-                    top_p=args.top_p, seed=args.seed + abs(hash(sample["id"])) % 10_000,
-                    device=device)
+        batches = [(name, samples[i: i + args.batch_size])
+                   for name, samples in work.items()
+                   for i in range(0, len(samples), args.batch_size)]
+        for batch_index, (name, batch) in enumerate(batches):
+            prompts = [generation_prompt(tokenizer, s) for s in batch]
+            batch_raws = generate_candidates(
+                model, tokenizer, prompts, n=args.n,
+                max_new_tokens=args.max_new_tokens, temperature=args.temperature,
+                top_p=args.top_p, seed=args.seed + batch_index, device=device)
 
+            for sample, raws in zip(batch, batch_raws):
                 candidates = []
                 for index, (raw, n_new, hit_cap) in enumerate(raws):
                     parts = split_generation(raw)
@@ -200,8 +240,8 @@ def main() -> None:
                 slice_stats["accept_at_n"] += int(chosen is not None)
                 for candidate in candidates:
                     slice_stats["reasons"][candidate["reason"]] += 1
-                    think_tokens = len(tokenizer(candidate["think"]).input_ids)
-                    slice_stats["think_tokens"].append(think_tokens)
+                    slice_stats["think_tokens"].append(
+                        len(tokenizer(candidate["think"]).input_ids))
                 if chosen:
                     slice_stats["answer_words"].append(len(chosen["answer"].split()))
 
@@ -224,12 +264,11 @@ def main() -> None:
                     target["target_source"] = "v1_public"
                     target["candidate_index"] = None
                 f_target.write(json.dumps(target, ensure_ascii=False) + "\n")
-
                 done += 1
-                if done % 10 == 0 or done == total:
-                    elapsed = time.time() - started
-                    print(f"  {done}/{total} prompts  {elapsed:.0f}s "
-                          f"({elapsed / done:.1f}s/prompt)", flush=True)
+
+            elapsed = time.time() - started
+            print(f"  {done}/{total} prompts  {elapsed:.0f}s "
+                  f"({elapsed / done:.1f}s/prompt)", flush=True)
 
     summary = {}
     for name, s in stats.items():
