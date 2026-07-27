@@ -13,8 +13,15 @@ held-out NLL** — it is `behavior_score_v0` (six credited mechanical axes on 76
 held-out prompts; NLL stays as a ±1% guard rail), and the README figure is now
 **one point per student at its current best** against its teacher, ARC-style.
 Real-world test suites take over as the headline once the student can attempt
-them. Current best: `s2v1_from_init@2700` at **20.2%**; the teacher has never
-been scored on this eval, so the ceiling is unknown.
+them. Current best: `s2v1_from_init@2700` at **20.2%**; **the teacher has never
+been scored, so the figure has no ceiling** — the top next action is to fix that.
+
+Third directive, same day: **the teacher is never forced out of thinking mode.**
+Evaluation and generation judge it at its actual capability, so the teacher
+scorecard runs with no prefill and a 4096-token cap (≈1 h GPU, ~$1–1.5), and
+teacher-generated candidates cost ~1.65k tokens instead of ~150 — which moves the
+bulk-corpus estimate from $6–11 to **$25–145**. Scope is cut by lowering n or
+dropping slices, never by suppressing reasoning (decision record 2026-07-28).
 
 The next work is a **Stage 3 supplementary
 experiment** (recovery run from `s2v1_from_init@2700` on rewritten targets, with
@@ -189,15 +196,23 @@ Revised 2026-07-28 for the maintainer directives (decision record 2026-07-28):
 the next work is a **Stage 3 supplementary experiment**, and its teacher targets
 must be **top-n sampled and verified correct**. The experiment is staged behind
 a cheap pilot instead of being one bulk spend; items 2–4 are its prerequisites.
+Item 1 is independent and is the cheapest useful GPU minute the project has.
 
-1. **`eval_behavior_v1` prompt-set expansion — free, CPU, no approval needed.**
+1. **Score the teacher on `eval_behavior_v0` — ≈1 h GPU, ~$1–1.5. Needs
+   approval; recommended first.** Thinking mode, no prefill,
+   `--max-new-tokens 4096`, same 76 prompts, truncation rate reported:
+   `uv run python scripts/eval_behavior.py --model Qwen/Qwen3-4B-Thinking-2507@768f209d
+   --max-new-tokens 4096 --out artifacts/teacher/eval_behavior_v0.json`.
+   This is the ceiling the README figure is missing, and nothing else depends on
+   it. Not viable on the dev box: 10–40 h at the measured 1–3 tok/s.
+2. **`eval_behavior_v1` prompt-set expansion — free, CPU, no approval needed.**
    The teacher-gen verdict will be read on the behavior scorecard, whose noise
    floor is currently ±0.11 (n=76 aggregate) and ±0.25 (n=12 per group): a
    0.000 → 0.083 move in `answer_em_credited` is **one prompt**. Expand to ~36
    prompts/group from held-out val, keeping the v0 prompts as an exact subset so
    the four logged scorecards stay comparable. Same status `eval_behavior_v0`
    had before it was built.
-2. **Top-n teacher pilot — ~$2** (`logs/proposals/2026-07-27_stage2_teacher_generated_answers.md`,
+3. **Top-n teacher pilot — ~$3–5** (`logs/proposals/2026-07-27_stage2_teacher_generated_answers.md`,
    prerequisite B). 1,000 prompts across the five candidate slices at **n=4**
    (candidate 0 greedy, 1–3 sampled), plus **the teacher's own scorecard** — the
    project has never measured its teacher on `eval_behavior_v0`, so the ceiling
@@ -206,33 +221,40 @@ a cheap pilot instead of being one bulk spend; items 2–4 are its prerequisites
    Attachable to the tail of any approved session. Slice gates: accept@n < 0.5 →
    no bulk rewrite without an explicit decision; < 0.2 → dropped;
    accept@n ≈ accept@1 → drop top-n and run the cheap greedy path.
-3. **Bulk verified generation — $6–11 (vLLM) / $24–44 (HF), changes the official
+4. **Bulk verified generation — $25–145 with thinking on, changes the official
    data mixture** (AGENTS.md 4.4). 29,807 candidate targets × n=4 ≈ 15.5M output
    tokens (`rag_evidence`, `multihop_qa`, `refusal_uncertainty`, gsm8k,
    OpenMathInstruct-2); a target is replaced only when a candidate passes its
    correctness check, otherwise the v1 target stays. vLLM shares prefill across
    the n samples but is a **heavy pod-only dependency needing P12 approval**.
    **Decide with pilot accept rates in hand, not before.**
-4. **The Stage 3 run itself — $4–5.** 2700 steps from `s2v1_from_init@2700`,
+5. **The Stage 3 run itself — $4–5.** 2700 steps from `s2v1_from_init@2700`,
    seed 20260726, config identical to `stage3_s2v1_from_init.json` except the
    data root; v2 vs the logged v1 result. Share the session with (5).
-5. **Measure GPU run-to-run variance** (~$1–2: re-run one arm's final leg with a
+6. **Measure GPU run-to-run variance** (~$1–2: re-run one arm's final leg with a
    different seed, or the same seed twice). It would justify or shrink the 1%
    decision band that two verdicts now rest on, and is the cheapest way to firm
    up the ablation's conclusions. Marginal cost if attached to (4).
-6. Stage 4 online data collection design (unchanged, still after Stage 3).
-7. Optional backlog: Stage 1 ablations; a from-init-tuned lr/warmup sweep (A2
+7. Stage 4 online data collection design (unchanged, still after Stage 3).
+8. Optional backlog: Stage 1 ablations; a from-init-tuned lr/warmup sweep (A2
    was run under the ladder's hyperparameters, so single-stage may have more
    headroom than measured).
 
 ## Open decisions for the user
 
+- **Score the teacher (~$1–1.5, ≈1 h GPU).** Independent of everything else and
+  the fix for the figure's missing ceiling. Recommended first.
 - **Stage 3 supplementary experiment (top-n verified teacher targets), revised
-  2026-07-28.** The only decision needed now is the **~$2 top-n pilot** (next
-  action 2). The mixture-change approval, the vLLM heavy-dependency approval, and
-  the generation spend all follow the pilot's accept@1/accept@n numbers. Full
-  experiment if it all proceeds: **$12–22** on the vLLM path, **$30–50** on the
-  HF path (was $6–9 before the correctness gate, the math slices and top-n).
+  2026-07-28.** Next decision after the teacher scorecard is the **~$3–5 top-n
+  pilot** (next action 3); the mixture-change approval, the vLLM dependency
+  approval and the build spend all follow its measured thinking lengths and
+  accept rates. Build estimate **$25–145** with the teacher at full capability
+  (was $6–11 when the plan suppressed its reasoning) — scoped by lowering n or
+  dropping slices, never by suppressing thinking.
+- **Target text for teacher-generated data: (A) answer-only, (B) full trace,
+  (C) hybrid.** Recommended (A) for this experiment; B/C change the student's
+  output contract and belong in their own proposal. Needed before the bulk build,
+  not before the pilot.
 *(Closed 2026-07-28: the README Optim-record question. The answer is a standing
 rule — no records during baseline construction, first record point after Stage 6
 — so it is no longer an open decision. See the Status section and the 2026-07-28

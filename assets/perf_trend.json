@@ -66,7 +66,7 @@
       "role": "target",
       "params": 4022468096,
       "score": null,
-      "note": "not yet scored on this eval",
+      "note": "not yet scored — needs ≈1 h GPU in thinking mode",
       "log": "logs/experiments/2026-07-14_stage1_qwen3_0p6b_init_v0.md"
     }
   ],

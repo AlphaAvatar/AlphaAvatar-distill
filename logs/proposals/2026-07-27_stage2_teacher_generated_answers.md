@@ -6,7 +6,7 @@ Status: **REVISED 2026-07-28 (2nd pass) — awaiting maintainer approval.**
 stability (two historical experiment logs point at it). The staging below is
 what governs.
 
-**Two maintainer directives, 2026-07-28:**
+**Three maintainer directives, 2026-07-28:**
 
 1. **This is the next supplementary experiment in Stage 3** — a student-recovery
    run (AGENTS.md 4.5) on rewritten targets, branching from
@@ -16,6 +16,11 @@ what governs.
 2. **The targets must be teacher-generated *and* correct**, produced by
    **sampling n candidates per prompt and selecting a verified-correct one**
    (top-n / rejection sampling), not by a single greedy pass.
+3. **The teacher is never forced out of thinking mode.** Evaluation and
+   generation both judge it at its actual capability. This costs roughly 10×
+   more decode per candidate and is the reason the cost table below moved by an
+   order of magnitude; it also means the teacher can finally be *measured*,
+   which is what the README figure is missing today.
 
 Decision record: `logs/decisions.md`, 2026-07-28.
 
@@ -29,7 +34,8 @@ Decision record: `logs/decisions.md`, 2026-07-28.
 | scope | 3 groups, 18,314 targets | 5 slices, 29,807 candidates (math slices move in) | unchanged |
 | coverage | — | items the teacher fails keep public targets → bimodal corpus, selection bias | **top-n is the direct fix**: accept@n > accept@1, so fewer items fall back |
 | engine | HF transformers | HF transformers | **decided by the pilot**: HF adaptive, or vLLM (shared prefill across the n samples) — a heavy-dependency decision |
-| cost | $6–9 | $11–17 | **$12–22 (vLLM path) / $30–50 (HF top-n)**, gated behind a ~$2 pilot |
+| teacher mode | empty-think prefill (cheap) | same | **native thinking, always** — the framework distills the teacher's real capability, not a suppressed mode |
+| cost | $6–9 | $11–17 | **$5–7 committed** (teacher scorecard + pilot); **$25–145** for the build, scoped by the pilot |
 
 ## The argument (unchanged)
 
@@ -111,18 +117,19 @@ targets). Candidates are 46% of the 64,484-sample train split.
    slice, and the final rule is confirmed from that data before the bulk run.
    Only one target per prompt is kept; see Alternatives for why correct
    candidates are not shipped as extra samples.
-4. **Prefill a closed, empty think block.** The Thinking-2507 generation prompt
-   ends with `…assistant\n<think>\n`; continuing with the closing `</think>`
-   makes the teacher answer directly, matching the empty-think convention the
-   student is trained on (decision 2026-07-21). Without it the teacher emits
-   1k–3k reasoning tokens per candidate — ~10× cost, in a style we do not train,
-   and ~40× once multiplied by n. A CPU assertion verifies the teacher's rendered
-   prompt + prefill is a **prefix-exact match** of the training-time rendering.
-   **Risk this must confront:** suppressing the think block may be exactly what
-   costs the teacher its accuracy on the math slices. accept@1 / accept@n in the
-   pilot measure it before any bulk spend; if they are poor the options are to
-   drop the math slices or to allow thinking and strip it from the target at ~10×
-   cost — a decision, not a silent fallback.
+4. **The teacher runs in its native thinking mode — always** (maintainer
+   directive, 2026-07-28; decision record same date). Earlier drafts prefilled a
+   closed `</think>` so the Thinking-2507 teacher would answer directly and
+   cheaply. That is now ruled out: this is a distillation framework, so the
+   teacher must be used and judged at its **actual capability**, not in a mode we
+   suppressed to save money. Suppressing the think block was also the single most
+   likely explanation for a poor accept rate on the math slices — the plan would
+   have measured our own prompt convention and blamed the teacher.
+   **Consequence, stated plainly:** each candidate now costs ~1k–3k reasoning
+   tokens on top of its answer (~10× decode, ~40× once multiplied by n=4), which
+   is the dominant cost of this experiment and the reason the pilot now also
+   measures the *thinking-length distribution* per slice. Verification is
+   unaffected: the correctness check reads the answer after `</think>`.
 5. **Reproducibility (P5).** Batched sampled generation is not bitwise
    reproducible, so the corpus is the artifact and its hash pins the experiment;
    seeds, engine, engine version, batch layout and decode config are logged, and
@@ -133,8 +140,27 @@ targets). Candidates are 46% of the 64,484-sample train split.
    comparability with all four logged runs.
 7. **Provenance per sample:** `target_source` (`teacher_verified` | `v1_public`),
    candidate index chosen, accept@1/accept@n for its slice, teacher id +
-   revision, decode config, prefill string, prompt-template hash, source sample
-   id, reject reasons for the discarded candidates.
+   revision, decode config, thinking mode + token budget, thinking length,
+   prompt-template hash, source sample id, reject reasons for the discarded
+   candidates.
+8. **Open question — what becomes the target text.** The teacher now produces a
+   reasoning trace *and* an answer, and the student's current convention is an
+   empty think block (decision 2026-07-21, tied to the realtime latency target).
+   Three options, and this needs a maintainer decision before phase 1b:
+   **(A) answer-only** — keep the trace out of the corpus; the student keeps its
+   direct-answer convention and inherits answers that were *produced* by
+   reasoning. No training-side change, no latency change. **Recommended for this
+   experiment.**
+   **(B) full trace** — train the student to reason. Targets grow ~10×, so the
+   same 2700-step budget covers roughly a tenth of the samples (blocks are packed
+   at `block_len` 1024, so a 1.5k-token trace simply spans blocks); it also
+   changes the student's inference latency, its chat convention, and every
+   behavior baseline measured so far.
+   **(C) hybrid** — traces only on the reasoning-heavy slices (gsm8k, openmath,
+   multihop), answers elsewhere.
+   B and C are a different experiment, not a variant of this one: they change the
+   student's output contract. They should be their own proposal, informed by
+   whether (A) moves the behavior scorecard at all.
 
 ## Execution plan and cost (AGENTS.md P8, P8.2)
 
@@ -146,32 +172,51 @@ prompts/group from held-out val, keeping the v0 prompts as an exact subset so th
 four logged scorecards stay comparable (report both rows). Floor per group
 becomes ±0.155.
 
-**Prerequisite B — top-n pilot. ~$2, attachable to any approved session.**
-200 prompts × 5 slices × n=4 ≈ 0.6M output tokens (1–2 h on 1× L40S via HF
-transformers), plus the teacher's own `eval_behavior_v0` scorecard — **the
-project has never measured its teacher on the behavior eval, so the ceiling row
-does not exist.** Deliverables: per-slice **accept@1 and accept@n**, reject-reason
-histograms, correct-candidate length distributions (which fix the selection
-rule), the teacher ceiling row, and the engine decision for C.
+**Prerequisite A2 — score the teacher on `eval_behavior_v0`, in thinking mode.
+≈1 h on 1× L40S, ~$1–1.5.** *The single cheapest thing on this list, and the one
+the figure is currently missing:* the project has never measured its own teacher,
+so the chart has a student point and no ceiling. Run the standard harness with
+**no prefill and `--max-new-tokens 4096`** so the reasoning fits; truncation rate
+is reported, not hidden. Not possible on the dev box: 76 prompts × ~1.5k tokens
+at the measured 1–3 tok/s is 10–40 h of a machine that is also the development
+environment. Record mode and cap in the scorecard — a thinking row and a
+direct-answer row are never mixed silently.
+
+**Prerequisite B — top-n pilot. ~$3–5 with thinking on** (was ~$2 with the
+suppressed think block), attachable to any approved session. 200 prompts ×
+5 slices × n=4 = 4,000 candidates × ~1.65k tokens ≈ **6.6M output tokens**
+(2–5 h on 1× L40S). Deliverables: per-slice **accept@1 and accept@n**,
+reject-reason histograms, correct-candidate length distributions (which fix the
+selection rule), **the thinking-length distribution per slice — now the dominant
+cost driver and the biggest unknown in C**, and the engine decision.
 Pre-registered gates: a slice with **accept@n < 0.5** is not rewritten in bulk
 without an explicit decision (a corpus half teacher-styled and half
 annotator-styled may train worse than either); **< 0.2** is dropped. If
-accept@n ≈ accept@1, drop top-n and run the cheap greedy path.
+accept@n ≈ accept@1, drop top-n and run the cheap n=1 path.
 
 **Prerequisite C — bulk verified generation. Needs the mixture-change approval
-(AGENTS.md 4.4), and possibly a dependency approval.** 29,807 prompts × n=4 ≈
-**15.5M output tokens** (base pass ≈3.9M: rag 0.77M, multihop 0.13M, refusal
-0.46M, gsm8k ~1.3M, openmath ~1.2M) on ≈6M tokens of prefill.
+(AGENTS.md 4.4) and a dependency approval — and its cost is now the open
+question.** With thinking on, 29,807 prompts × n=4 = 119,228 candidates ×
+~1.65k tokens ≈ **197M output tokens**, versus 15.5M under the suppressed-think
+plan. At the repo's own logged vLLM throughput estimate (390–780 tok/s for this
+teacher) that is **70–140 h ≈ $70–140** — an order of magnitude more than the
+$6–11 the previous draft quoted, entirely because the teacher is no longer
+crippled to make it cheap.
 
-| path | dependency | est. runtime (1× L40S) | est. cost | note |
-|---|---|---|---|---|
-| **vLLM, native `n=4`** | heavy, GPU-only — **needs P12 approval**, pod-only install, never in the dev-box lockfile | 6–11 h | **$6–11** | prefill is paid once and shared across the n samples; this is the path top-n makes worth its dependency |
-| HF transformers, `num_return_sequences=4` | none (proven pod env) | 24–44 h | $24–44 | prefill recomputed per candidate; >24 h is also an awkward single session |
-| HF adaptive (greedy, sample only on reject) | none | 1× + reject-rate × 3× | $10–25 | only competitive if accept@1 is high — the pilot says |
+Ways to bring that down **without** touching the thinking rule, in the order the
+pilot should decide them:
 
-The old draft's "vLLM only pays for itself at higher volume" is exactly the
-situation top-n creates. On the CPU dev box this is ≥3 months at the measured
-1–3 tok/s: CPU is good for a 2-sample correctness smoke, not for the build.
+| lever | effect | note |
+|---|---|---|
+| **n=1 or 2 instead of 4** | ÷4 or ÷2 → **$18–70** | thinking should raise accept@1 substantially; if it does, top-n buys little. The pilot measures exactly this. |
+| **reasoning-heavy slices only** (gsm8k, openmath, multihop = 12,567) | ≈83M tokens → **$30–58** | the slices where a reasoning teacher plausibly beats the public target; rag/refusal targets are short spans where thinking may add nothing |
+| **cap the prompts per slice** (e.g. 3,000) | scales linearly | keeps every slice represented; the accept rate, not the volume, is what the experiment tests |
+| faster accelerator (H100) | ~2–3× faster at ~2–3× the price | roughly a wash; not recommended |
+
+**Recommendation: do not approve C as a blank cheque.** Approve the pilot, then
+size C from measured thinking lengths and accept@1 — the pilot converts a
+$70–140 unknown into a scoped number. On the CPU dev box C is years; CPU is good
+for a 2-sample correctness smoke, not for the build.
 
 **The Stage 3 experiment itself — $4–5.** 2700 steps from
 `s2v1_from_init@2700`, seed 20260726, config identical to
@@ -181,9 +226,10 @@ holdout_v1 bf16, INT8 at both scopes, behavior scorecard, no non-finite losses,
 resume path. Attach the **variance measurement** (STATE next action) to the same
 session — one extra leg on a pod already paid for.
 
-End to end: **$12–22** on the vLLM path, **$30–50** on the HF top-n path, versus
-$6–9 in the original greedy draft. Only ~$2 is committed before the accept rates
-are known.
+End to end, with the teacher at full capability: **$5–7 committed now** (the
+teacher scorecard + the pilot), and **$25–145 for the build + comparison run**,
+scoped by what the pilot measures. The previous $12–22 assumed a teacher with its
+reasoning switched off, which is no longer on the table.
 
 ## Pre-registered reading of the results
 
@@ -259,16 +305,26 @@ are known.
 ## Decision requested
 
 1. ~~Approve building `eval_behavior_v0` first~~ — **done 2026-07-27** (free, CPU).
-2. **Approve the top-n pilot (prerequisite B) — ~$2.** 1,000 prompts × n=4 plus
-   the teacher's own scorecard. Returns accept@1/accept@n, the selection-rule
-   data, the teacher ceiling row, and the engine decision. **Recommended: yes**,
-   and it is the only item needing a decision now.
-3. Approve bulk generation (prerequisite C) — **changes the official data
-   mixture** (AGENTS.md 4.4). *Decide with accept rates in hand.*
-4. Approve **vLLM as a pod-only dependency** if the pilot points that way
-   (AGENTS.md P12 heavy-dependency approval) — it is what makes top-n affordable
-   ($6–11 vs $24–44). *Decide with the pilot's throughput numbers.*
-5. Approve the Stage 3 comparison run — **$4–5**, sharing a session with the
+2. **Approve the teacher scorecard (prerequisite A2) — ~$1–1.5, ≈1 h.** Thinking
+   mode, no prefill, cap 4096, same 76 prompts. This is what puts the teacher
+   into the comparison and gives the figure its ceiling; it needs no other
+   decision and nothing downstream depends on it. **Recommended: yes, first.**
+3. **Approve the top-n pilot (prerequisite B) — ~$3–5.** 1,000 prompts × n=4 in
+   thinking mode. Returns accept@1/accept@n, selection-rule data, the
+   thinking-length distribution, and the engine decision. Can share the pod with
+   (2). **Recommended: yes.**
+4. **Decide the target text: (A) answer-only, (B) full trace, (C) hybrid** — see
+   Generation design §8. **Recommended: (A) for this experiment**; B/C change the
+   student's output contract and its latency budget, so they belong in their own
+   proposal. *Needed before the bulk build, not before the pilot.*
+5. Approve bulk generation (prerequisite C) — **changes the official data
+   mixture** (AGENTS.md 4.4), **$25–145** depending on n and slice scope.
+   *Decide with the pilot's measured thinking lengths and accept rates in hand;
+   not a blank cheque.*
+6. Approve **vLLM as a pod-only dependency** if the pilot points that way
+   (AGENTS.md P12 heavy-dependency approval). *Decide with the pilot's throughput
+   numbers.*
+7. Approve the Stage 3 comparison run — **$4–5**, sharing a session with the
    variance measurement. *Decide after C.*
 
 ## References
