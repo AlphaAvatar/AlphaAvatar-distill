@@ -66,7 +66,7 @@ Every run records config hash, code state, dataset/tokenizer/teacher hashes, and
 
 ```bash
 uv sync                    # CPU torch by default; see pyproject.toml for a CUDA index
-uv run pytest tests/ -q    # 100 CPU tests, no downloads
+uv run pytest tests/ -q    # 119 CPU tests, no downloads
 ```
 
 The implemented pipeline runs end to end on CPU (GPU optional):
@@ -141,7 +141,7 @@ AlphaAvatar-distill/
 ├── configs/                # stage recipes; Stage 3 runs are one config each
 ├── data/                   # corpus manifests (jsonl gitignored, rebuildable)
 │   └── eval_behavior_v0/   #   76-prompt behavior set + manifest (both committed)
-├── tests/                  # 100 CPU tests: algebra, loader, trainer, quant, scorers, builders
+├── tests/                  # 119 CPU tests: algebra, loader, trainer, quant, scorers, builders
 ├── logs/                   # project memory — read STATE.md first
 │   ├── STATE.md            #   current state, verified facts, next actions
 │   ├── decisions.md        #   decision records (why, alternatives, risks)

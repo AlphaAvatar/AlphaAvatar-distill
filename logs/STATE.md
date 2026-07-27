@@ -1,7 +1,15 @@
 # Current project state
 
-Updated: 2026-07-28 (UTC+8 dev box) — **Start-point ablation complete; the
-Stage 3 recovery recipe is now single-stage.** Both pre-registered rules fired:
+Updated: 2026-07-28 (UTC+8 dev box) — **The teacher has a ceiling: 0.7443 on
+`eval_behavior_v0` vs the student's 0.2015**, so the figure shows both ends of
+the gap for the first time ([log](experiments/2026-07-28_teacher_behavior_v0.md)).
+The eval itself is validated by that number — a competent model scores 0.74 on
+it, so the student's score is the student's problem, not the harness's. Nothing
+is running or billing; the pod was deleted by its fetch driver on completion
+(~$1.20 for the session).
+
+Earlier context, still current: **the start-point ablation is complete and the
+Stage 3 recovery recipe is single-stage.** Both pre-registered rules fired:
 the A/B arm-B leg was neutral (+0.17%) and the **FFN-first warm-up ladder is
 unnecessary** — a single-stage run from the Stage 1 init reaches the chain's
 quality with 33% fewer steps. A new behavior gate, `eval_behavior_v0`, was built
@@ -101,7 +109,7 @@ architecture and data scale.
   behavior axis. Log: `logs/experiments/2026-07-26_stage3_s2_blocks_v1_gpu_run.md`.
 - **Stage 2 mixture v1 (2026-07-26, CPU):** 64,484 train samples / 22,133,631
   train tokens / 21,610 blocks@1024; val_v1 1,916; calib 200.
-- Tests: **100/100** on the dev box (torch 2.13.0+cpu); the 2026-07-27 GPU pod ran
+- Tests: **119/119** on the dev box (torch 2.13.0+cpu); the 2026-07-27 GPU pod ran
   the then-current suite at 85 passed / 6 skipped (torch 2.11.0+cu128,
   Python 3.12.3).
 
@@ -157,21 +165,28 @@ architecture and data scale.
 
 ## What exists and why
 
-- `src/aadistill/` — env, manifest, teacher, collect (S0), project, sandwich,
-  student (S1), data (S2 loader), train (S3 recovery trainer + extra_val),
-  quant (INT8 fake-quant eval, P9), **behavior (eval_behavior_v0 scorers)**.
+- `src/aadistill/` — env, manifest, teacher (loading + `load_causal_lm`),
+  collect (S0), project, sandwich, student (S1), data (S2 loader, now with
+  **`best_fit_blocks`** — packing that never splits a sample), train (S3
+  recovery trainer + extra_val), quant (INT8 fake-quant eval, P9), behavior
+  (eval_behavior_v0 scorers + **`behavior_score`**, the headline metric),
+  **verify (per-slice correctness rules for teacher targets)**.
 - `scripts/` — stage scripts, `train_stage3.py`, `eval_ppl.py`,
-  **`build_eval_behavior_v0.py`**, **`eval_behavior.py`**, `plot_perf_trend.py`,
-  and `scripts/pod/` (parameterized GPU session scripts).
+  `build_eval_behavior_v0.py`, `eval_behavior.py`, `plot_perf_trend.py`,
+  **`generate_teacher_answers.py`** (top-n verified teacher targets), and
+  `scripts/pod/` (GPU session scripts + **`teacher_session.sh`** /
+  **`teacher_session_fetch.sh`**, the nohup dev-box driver that fetches and
+  deletes the pod without an agent session attached).
 - `configs/` — Stage 0/1; stage3: `s1_ffn_norm`, `s1_ext`, `s2_blocks`,
   `s2_blocks_v1`, `s2v1_from_s1`, `s2v1_from_init` (all ran), smoke configs.
 - `data/` — frozen v0 and v1 mixtures (jsonl gitignored, manifests committed);
   **`data/eval_behavior_v0/` (prompts.jsonl + manifest, both committed)**.
-- `tests/` — 100 tests. `logs/` — decisions (16), experiments (13), proposals (3),
+- `tests/` — 119 tests. `logs/` — decisions (25), experiments (14), proposals (3),
   supported_models, artifact_manifests, this file.
 - `artifacts/` (gitignored) — stage0 stats, stage1 checkpoint, stage3 run
   artifacts and reference scorecards (small files local; final weights HF-only
   except s1).
+- `artifacts/teacher/` (gitignored) — the teacher scorecard + generations.
 - `assets/` — perf figure json + svg. The json now carries a `headline` metric
   block, `systems` (one entry per student: current best + previous best +
   params), `references` (teacher size, score `null` until measured), the `guard`
@@ -180,7 +195,7 @@ architecture and data scale.
 ## Latest known working commands
 
 ```
-uv run pytest tests/ -q                                          # 100 passed
+uv run pytest tests/ -q                                          # 119 passed
 uv run python scripts/build_eval_behavior_v0.py                  # rebuild prompt set
 uv run python scripts/eval_behavior.py \
   --model artifacts/stage3/s1_ffn_norm_v0/checkpoints/step_000660/model \
