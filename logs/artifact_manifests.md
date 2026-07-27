@@ -73,8 +73,9 @@ artifacts, not public releases.
   at `stage3/s2_blocks_v1/s2v1_artifact_hashes_2026-07-26.txt`. Upload verified
   independently after the fact — LFS sha256 for the large weights, download+hash
   for small files, **14/14 match** (`scripts/pod/verify_and_report_s2v1.py
-  verify`). Weights are HF-only; small files also live locally under
-  `artifacts/stage3/s2_blocks_v1/`.
+  verify` — renamed 2026-07-27 to `scripts/pod/verify_and_report.py`;
+  pre-rename file in git history at `f74e5ed`). Weights are HF-only; small
+  files also live locally under `artifacts/stage3/s2_blocks_v1/`.
 - **License:** internal artifact, same derivation as the entries below, plus the
   `stage2_offline_v1` mixture (permissive public sources; synthetic provenance
   and share-alike notes recorded in `data/stage2_v1/stage2_offline_v1.manifest.json`).

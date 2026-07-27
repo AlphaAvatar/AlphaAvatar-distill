@@ -246,3 +246,12 @@ project's only behavior signal is three eyeballed prompts. `eval_behavior_v0`
   ablation arms on one pod would amortize.
 - Pod tests: 63 passed / 6 skipped (69 total, cu128 torch 2.11.0, Python
   3.12.3 vs dev-box 3.14 — the usual logged bridge).
+
+---
+
+*Note added 2026-07-27:* the session scripts named above were run-specific and
+were generalized the next day for multi-arm sessions —
+`scripts/pod/orchestrate_s2v1.sh` → `scripts/pod/orchestrate.sh` and
+`scripts/pod/verify_and_report_s2v1.py` → `scripts/pod/verify_and_report.py`
+(session now declared in `scripts/pod/run_env.sh`). The names above are correct
+for this run; the pre-rename files are in git history at commit `f74e5ed`.

@@ -53,7 +53,9 @@ architecture and data scale.
   Log + review: `logs/experiments/2026-07-27_stage3_start_point_ablation.md`.
 - **`eval_behavior_v0` (2026-07-27, CPU + GPU):** 76 held-out prompts over 7
   chat groups, mechanical scorers only, committed at `data/eval_behavior_v0/`.
-  Run at every recovery gate next to holdout_v1 and the INT8 evals.
+  Run at every recovery gate next to holdout_v1 and the INT8 evals. Build log
+  (including the echo-credit and truncation findings):
+  `logs/experiments/2026-07-27_eval_behavior_v0.md`.
 - **Stage 3 `s2_blocks_v1` (2026-07-26):** holdout 3.8003, the best
   language-modeling result; retains that title, but is **last** on every
   behavior axis. Log: `logs/experiments/2026-07-26_stage3_s2_blocks_v1_gpu_run.md`.
@@ -119,7 +121,7 @@ architecture and data scale.
   `s2_blocks_v1`, `s2v1_from_s1`, `s2v1_from_init` (all ran), smoke configs.
 - `data/` — frozen v0 and v1 mixtures (jsonl gitignored, manifests committed);
   **`data/eval_behavior_v0/` (prompts.jsonl + manifest, both committed)**.
-- `tests/` — 91 tests. `logs/` — decisions (13), experiments (9), proposals (3),
+- `tests/` — 91 tests. `logs/` — decisions (16), experiments (13), proposals (3),
   supported_models, artifact_manifests, this file.
 - `artifacts/` (gitignored) — stage0 stats, stage1 checkpoint, stage3 run
   artifacts and reference scorecards (small files local; final weights HF-only
@@ -173,6 +175,7 @@ POD_ID=<id> HOST=<ip> PORT=<port> bash scripts/pod/orchestrate.sh   # GPU sessio
 ## Links
 
 - `logs/experiments/2026-07-27_stage3_start_point_ablation.md` (latest run + review)
+- `logs/experiments/2026-07-27_eval_behavior_v0.md` (behavior gate: build + baselines)
 - `logs/experiments/2026-07-26_stage3_s2_blocks_v1_gpu_run.md` ·
   `logs/experiments/2026-07-25_stage3_s2_ab_gpu_run.md` ·
   `logs/experiments/2026-07-22_stage3_s1_gpu_run.md`

@@ -1,6 +1,15 @@
 # PROPOSAL (needs user approval) — Stage 3 start-point ablation: chain vs s1@660 vs init
 
-Status: **DRAFT — awaiting maintainer approval of a GPU session.**
+Status: **APPROVED by maintainer 2026-07-27 (both arms, ≤$9 cap) — EXECUTED and
+CLOSED the same day.** Result: 1× L40S, pod `ruib84xvfyieqm`, **$5.82**, both
+arms verified 16/16. **Rule 1 fired** (A1 `from_s1` 3.8067, +0.17% — the arm-B
+leg was neutral) and **Rule 4 fired** (A2 `from_init` 3.8285, +0.74% — the
+warm-up ladder is unnecessary; Stage 3 recovery is now single-stage).
+Everything below is the proposal **as registered before the run** and is left
+unedited so the pre-registration stays auditable. Outcome, review and caveats:
+`logs/experiments/2026-07-27_stage3_start_point_ablation.md`; recipe decision:
+`logs/decisions.md` (2026-07-27, "Start-point ablation verdict").
+
 Drafted 2026-07-27 from the `s2_blocks_v1` review
 (`logs/experiments/2026-07-26_stage3_s2_blocks_v1_gpu_run.md`).
 

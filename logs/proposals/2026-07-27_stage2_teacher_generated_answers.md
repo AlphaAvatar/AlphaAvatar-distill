@@ -1,7 +1,22 @@
 # PROPOSAL (needs user approval) — Stage 2 v2: teacher-generated answers (sequence-level KD)
 
-Status: **DRAFT — awaiting maintainer approval.** Blocked on a prerequisite the
-project can build for free (`eval_behavior_v0`, below). Drafted 2026-07-27 from
+Status: **UNBLOCKED — awaiting maintainer approval.** Updated 2026-07-27.
+The prerequisite below (`eval_behavior_v0`) is **built, committed and run**
+(`logs/experiments/2026-07-27_eval_behavior_v0.md`), so this experiment is now
+measurable and the "before" numbers exist for every candidate branch point.
+The start-point ablation also settled which checkpoint to branch from:
+**`s2v1_from_init@2700`** (`logs/decisions.md`, 2026-07-27). Two approvals are
+still needed and are *not* implied by any earlier approval: this changes the
+**official data mixture** (AGENTS.md 4.4) and it needs **$2–4 of GPU** for
+phase-1 generation plus **$4–5** for the comparison run.
+
+The behavior numbers strengthen the argument below rather than weaken it: all
+three ablation arms share one defect the mixture cannot fix by adding volume —
+verbose, repetitive, non-terminating answers (`rep_3gram` 0.35–0.41,
+`answer_words` 199–231, `truncated_at_cap` 0.58–0.67), with `format_ok` at
+most 0.224 and gsm8k credited EM at 0.000 across the board.
+
+Drafted 2026-07-27 from
 the `s2_blocks_v1` review
 (`logs/experiments/2026-07-26_stage3_s2_blocks_v1_gpu_run.md`); deferred once
 already by the 2026-07-26 mixture-v1 decision ("teacher-generated data — a
@@ -35,17 +50,28 @@ Stage 4 (student rollouts + verifier/teacher correction). It is much cheaper,
 needs no rollout or reward machinery, and fixes a defect that Stage 4 would
 otherwise inherit and amplify.
 
-## Prerequisite (free, no approval needed): `eval_behavior_v0`
+## Prerequisite (free, no approval needed): `eval_behavior_v0` — **DONE 2026-07-27**
 
-**This experiment is currently unmeasurable, and that is the main reason it is
-not just started.** holdout_v1 is fineweb-edu general web text; teacher-style
-answers are expected to leave it **flat by construction**. The only behavior
-signal in the project is three eyeballed prompts.
+**This experiment was unmeasurable when the proposal was written, and that was
+the main reason it was not just started.** holdout_v1 is fineweb-edu general web
+text; teacher-style answers are expected to leave it **flat by construction**.
+The only behavior signal in the project was three eyeballed prompts.
 
-`eval_behavior_v0` (specified in `logs/STATE.md`, CPU-runnable, deterministic,
-mechanical scorers only) must exist and be run on the current best checkpoint
-first, so there is a before-number. Approving this proposal without it buys a
-GPU run whose outcome cannot be read.
+`eval_behavior_v0` now exists: 76 held-out prompts over 7 chat groups, mechanical
+scorers only, committed at `data/eval_behavior_v0/` with a manifest, run at every
+recovery gate (`scripts/eval_behavior.py`; build log
+`logs/experiments/2026-07-27_eval_behavior_v0.md`, design decisions in
+`logs/decisions.md`). Before-numbers exist for s1@660, `s2_blocks_v1@2700` and
+both ablation arms, all scored on one GPU in one session.
+
+Two rules from building it apply directly to reading this experiment:
+
+- **Compare on the `_credited` metrics.** These prompts embed their own answer
+  material, so a parroting student scores `evidence_hit` and `refusal` for free.
+  Teacher-written targets are *expected* to reduce echo, which will move raw and
+  credited metrics in different directions — only the credited ones are evidence.
+- **Score every arm on the same device in the same session** (CPU vs GPU greedy
+  decoding differs by 1–4 prompts on a damaged student).
 
 ## Scope — phase 1 (recommended)
 
@@ -163,13 +189,14 @@ behavior eval).
 
 ## Decision requested
 
-1. Approve building `eval_behavior_v0` first (free, CPU, no approval strictly
-   required — flagged here because it gates everything below). **Recommended:
-   yes, immediately.**
+1. ~~Approve building `eval_behavior_v0` first~~ — **done 2026-07-27**, no
+   approval was required (free, CPU). Both blockers named in item 2 are now
+   cleared: the eval exists, and the ablation fixed the branch point.
 2. Approve phase-1 teacher generation (18.3k prompts, 3 groups, transformers
-   path, $2–4, ideally attached to an approved session)? **Recommended: yes,
-   after the behavior eval exists and after the start-point ablation fixes which
-   checkpoint the comparison run should branch from.**
+   path, $2–4, ideally attached to an approved session)? **Recommended: yes.**
+   Note this is the approval that **changes the official data mixture**
+   (AGENTS.md 4.4) — the generated targets replace public-SFT targets in three
+   groups, creating `stage2_offline_v2`. v1 stays frozen and comparable.
 3. Approve the follow-up comparison run (2700 steps on v2 vs the logged v1
    result, $4–5)? Can be decided later, once phase-1 accept rates are known.
 
