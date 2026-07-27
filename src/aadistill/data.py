@@ -242,7 +242,9 @@ def pack_blocks(
 
     Returns (input_ids [n, block_len] int64, loss_mask [n, block_len] bool,
     dropped_tail_tokens). Samples are packed back-to-back without padding;
-    a sample may straddle a block boundary.
+    **a sample may straddle a block boundary**, which is why `best_fit_blocks`
+    exists — see its docstring. Kept for the four logged runs, whose data path
+    this is.
     """
     ids_buf: list[int] = []
     mask_buf: list[int] = []
@@ -256,3 +258,88 @@ def pack_blocks(
     input_ids = torch.tensor(ids_buf[:kept], dtype=torch.long).view(n_blocks, block_len)
     loss_mask = torch.tensor(mask_buf[:kept], dtype=torch.bool).view(n_blocks, block_len)
     return input_ids, loss_mask, len(ids_buf) - kept
+
+
+def best_fit_blocks(
+    encoded, block_len: int, pad_id: int = 0
+) -> tuple[torch.Tensor, torch.Tensor, dict]:
+    """Pack samples into blocks so that **no sample is split across a boundary**.
+
+    Concatenate-then-cut (`pack_blocks`) tears samples at every block edge. For
+    short targets that is a rounding error; for reasoning traces it is a
+    correctness problem — the second half of a trace trains as a sequence whose
+    premises are not in context, teaching the student to continue reasoning it
+    cannot see. Ding et al., *Fewer Truncations Improve Language Modeling*
+    (ICML 2024, arXiv:2404.10830) measure exactly this and fix it with
+    length-aware bin packing: same token efficiency, no unnecessary truncation,
+    and materially better reading comprehension and context following.
+
+    This is their best-fit-decreasing packing: samples are placed longest-first
+    into the fullest block that still has room, so blocks fill tightly while
+    every sample stays whole. A sample longer than `block_len` cannot be kept
+    whole by any packing — it is truncated (and counted, because a rising count
+    means `block_len` is too small for the corpus).
+
+    Residual capacity is padded; `loss_mask` is False there, so padding never
+    contributes to the loss. Returns (input_ids, loss_mask, stats) where stats
+    carries the packing efficiency and truncation count that make the trade
+    visible in the run manifest.
+
+    **Known limitation, deliberately not solved here:** samples sharing a block
+    still attend to each other — the cross-contamination that Krell et al.,
+    *Efficient Sequence Packing without Cross-contamination* (arXiv:2107.02027)
+    address with block-diagonal attention. Fixing it needs a per-block attention
+    mask through the trainer and the teacher forward; recorded as the next step
+    rather than smuggled in with this change.
+    """
+    items = []
+    for ids, mask in encoded:
+        if len(ids) != len(mask):
+            raise ValueError("ids and mask length mismatch")
+        items.append((list(ids), list(mask)))
+
+    truncated = 0
+    prepared = []
+    for ids, mask in items:
+        if len(ids) > block_len:
+            ids, mask = ids[:block_len], mask[:block_len]
+            truncated += 1
+        prepared.append((ids, mask))
+    prepared.sort(key=lambda pair: len(pair[0]), reverse=True)
+
+    blocks: list[list[tuple[list[int], list[int]]]] = []
+    used: list[int] = []
+    for ids, mask in prepared:
+        best, best_used = None, -1
+        for index, filled in enumerate(used):
+            if filled + len(ids) <= block_len and filled > best_used:
+                best, best_used = index, filled
+        if best is None:
+            blocks.append([(ids, mask)])
+            used.append(len(ids))
+        else:
+            blocks[best].append((ids, mask))
+            used[best] += len(ids)
+
+    ids_rows, mask_rows = [], []
+    for block in blocks:
+        row_ids: list[int] = []
+        row_mask: list[int] = []
+        for ids, mask in block:
+            row_ids.extend(ids)
+            row_mask.extend(mask)
+        pad = block_len - len(row_ids)
+        ids_rows.append(row_ids + [pad_id] * pad)
+        mask_rows.append(row_mask + [0] * pad)
+
+    stats = {
+        "blocks": len(blocks),
+        "samples": len(prepared),
+        "truncated_samples": truncated,
+        "real_tokens": sum(used),
+        "padding_tokens": len(blocks) * block_len - sum(used),
+        "efficiency": round(sum(used) / (len(blocks) * block_len), 4) if blocks else 0.0,
+    }
+    return (torch.tensor(ids_rows, dtype=torch.long),
+            torch.tensor(mask_rows, dtype=torch.bool),
+            stats)

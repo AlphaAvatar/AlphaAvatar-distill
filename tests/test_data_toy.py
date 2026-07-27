@@ -205,3 +205,49 @@ def test_text_format_all_trainable(tokenizer):
 def test_truncation(tokenizer):
     ids, mask = encode_sample(tokenizer, MULTI_TURN, max_seq_len=8)
     assert len(ids) == 8 and len(mask) == 8
+
+
+def test_best_fit_packing_never_splits_a_sample():
+    """The property concatenate-then-cut cannot give: every sample stays whole.
+
+    Reasoning traces make this a correctness issue rather than an efficiency
+    one — half a trace trains as a sequence whose premises are absent.
+    """
+    from aadistill.data import best_fit_blocks
+
+    encoded = [([i] * n, [1] * n) for i, n in enumerate([7, 5, 4, 3, 3, 2], start=1)]
+    ids, mask, stats = best_fit_blocks(encoded, block_len=8, pad_id=0)
+
+    assert stats["truncated_samples"] == 0
+    assert ids.shape[1] == 8 and mask.shape == ids.shape
+    # Each sample is a run of one distinct id; every run must be intact and
+    # inside a single block.
+    seen = {}
+    for row in ids.tolist():
+        for token in set(row) - {0}:
+            assert row.count(token) == len([1 for r in row if r == token])
+            seen[token] = seen.get(token, 0) + row.count(token)
+    assert seen == {1: 7, 2: 5, 3: 4, 4: 3, 5: 3, 6: 2}
+
+
+def test_best_fit_packing_truncates_only_oversized_samples_and_counts_them():
+    from aadistill.data import best_fit_blocks
+
+    encoded = [([1] * 20, [1] * 20), ([2] * 3, [1] * 3)]
+    ids, mask, stats = best_fit_blocks(encoded, block_len=8, pad_id=0)
+    assert stats["truncated_samples"] == 1
+    assert stats["samples"] == 2
+    # Padding is never supervised.
+    for row_ids, row_mask in zip(ids.tolist(), mask.tolist()):
+        for token, supervised in zip(row_ids, row_mask):
+            if token == 0:
+                assert not supervised
+
+
+def test_best_fit_packing_reports_efficiency():
+    from aadistill.data import best_fit_blocks
+
+    encoded = [([1] * 4, [1] * 4), ([2] * 4, [1] * 4)]
+    _, _, stats = best_fit_blocks(encoded, block_len=8, pad_id=0)
+    assert stats["blocks"] == 1 and stats["efficiency"] == 1.0
+    assert stats["padding_tokens"] == 0
