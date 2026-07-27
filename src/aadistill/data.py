@@ -25,6 +25,7 @@ tokenizer's EOS token is appended as a document separator.
 
 from __future__ import annotations
 
+import bisect
 import json
 import random
 import re
@@ -316,19 +317,28 @@ def best_fit_blocks(
         prepared.append((ids, mask))
     random.Random(seed).shuffle(prepared)
 
+    # Best fit = the tightest block the sample still fits in. Kept in a
+    # capacity-sorted list so placement is a binary search rather than a scan
+    # over every open block: the scan is O(samples x blocks), which measured
+    # 44 s on an option-B-shaped corpus and grows quadratically with it.
     blocks: list[list[tuple[list[int], list[int]]]] = []
     used: list[int] = []
+    capacities: list[tuple[int, int]] = []  # (remaining, block index), sorted
     for ids, mask in prepared:
-        best, best_used = None, -1
-        for index, filled in enumerate(used):
-            if filled + len(ids) <= block_len and filled > best_used:
-                best, best_used = index, filled
-        if best is None:
+        size = len(ids)
+        slot = bisect.bisect_left(capacities, (size, -1))
+        if slot == len(capacities):
+            index = len(blocks)
             blocks.append([(ids, mask)])
-            used.append(len(ids))
+            used.append(size)
+            remaining = block_len - size
         else:
-            blocks[best].append((ids, mask))
-            used[best] += len(ids)
+            remaining, index = capacities.pop(slot)
+            blocks[index].append((ids, mask))
+            used[index] += size
+            remaining -= size
+        if remaining > 0:
+            bisect.insort(capacities, (remaining, index))
 
     ids_rows, mask_rows = [], []
     for block in blocks:

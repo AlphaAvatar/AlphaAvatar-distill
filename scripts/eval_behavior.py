@@ -29,23 +29,9 @@ REPO_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(REPO_ROOT / "src"))
 
 from aadistill.behavior import aggregate, score_sample, split_generation
+from aadistill.teacher import load_causal_lm
 from aadistill.env import code_state, hardware_report
 from aadistill.manifest import sha256_file
-
-
-def load_model(spec: str, dtype: torch.dtype, device: str):
-    from transformers import AutoModelForCausalLM, AutoTokenizer
-
-    if (REPO_ROOT / spec).exists():
-        path, revision = str(REPO_ROOT / spec), None
-    elif "@" in spec:
-        path, revision = spec.split("@", 1)
-    else:
-        path, revision = spec, None
-    model = AutoModelForCausalLM.from_pretrained(
-        path, revision=revision, dtype=dtype).to(device).eval()
-    tokenizer = AutoTokenizer.from_pretrained(path, revision=revision)
-    return model, tokenizer
 
 
 @torch.no_grad()
@@ -98,7 +84,7 @@ def main() -> None:
     if args.limit:
         entries = entries[: args.limit]
 
-    model, tokenizer = load_model(args.model, dtype, device)
+    model, tokenizer = load_causal_lm(args.model, dtype, device)
     quant_summary = None
     if args.fake_quant == "int8":
         from aadistill.quant import int8_fake_quantize_

@@ -8,6 +8,8 @@ from __future__ import annotations
 import hashlib
 
 import torch
+from pathlib import Path
+
 from transformers import AutoConfig, AutoModelForCausalLM, AutoTokenizer
 
 DTYPES = {"float32": torch.float32, "bfloat16": torch.bfloat16, "float16": torch.float16}
@@ -29,6 +31,27 @@ def tokenizer_hash(tokenizer) -> str:
     for token, idx in items:
         h.update(f"{idx}:{token}\n".encode())
     return h.hexdigest()
+
+
+def load_causal_lm(spec: str, dtype, device: str, attn_implementation: str | None = None):
+    """Load any causal LM by local path or ``repo_id@revision``.
+
+    Shared by the eval and generation scripts, which previously reached into
+    each other's module to get it. Accepts a repo-relative path (used for local
+    checkpoints) or a Hub id with an optional pinned revision after ``@``.
+    """
+    repo_root = Path(__file__).resolve().parents[2]
+    if (repo_root / spec).exists():
+        path, revision = str(repo_root / spec), None
+    elif "@" in spec:
+        path, revision = spec.split("@", 1)
+    else:
+        path, revision = spec, None
+    kwargs = {"revision": revision, "dtype": dtype}
+    if attn_implementation:
+        kwargs["attn_implementation"] = attn_implementation
+    model = AutoModelForCausalLM.from_pretrained(path, **kwargs).to(device).eval()
+    return model, AutoTokenizer.from_pretrained(path, revision=revision)
 
 
 def load_teacher(

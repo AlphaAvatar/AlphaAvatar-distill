@@ -51,10 +51,11 @@ import torch
 REPO_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(REPO_ROOT / "src"))
 
-from aadistill.behavior import split_generation
+from aadistill.behavior import THINK_CLOSE, split_generation
 from aadistill.data import load_jsonl
 from aadistill.env import code_state, hardware_report
 from aadistill.manifest import sha256_file
+from aadistill.teacher import load_causal_lm
 from aadistill.verify import VERIFIABLE, select, verify
 
 # Slice name -> (group, source). The group is also the mixture file name.
@@ -111,12 +112,22 @@ def stop_ids(model, tokenizer) -> set[int]:
     return {i for i in ids if i is not None}
 
 
-def _cut_at_stop(row: list[int], stops: set[int], cap: int) -> tuple[list[int], int, bool]:
-    """Trim a generated row at its first stop token (kept). -> (ids, n_new, hit_cap)."""
+def _cut_at_stop(row: list[int], stops: set[int], cap: int,
+                 think_close: int | None) -> tuple[list[int], int, bool, int]:
+    """Trim a generated row at its first stop token (kept).
+
+    Returns (ids, n_new, hit_cap, think_tokens). The trace length comes from the
+    position of the `</think>` token, which is a single id — re-tokenizing the
+    trace text instead would re-encode ~1.5k tokens per candidate, hundreds of
+    millions over a bulk run, to recover a number the ids already carry.
+    """
+    kept, n_new, hit_cap = row, len(row), len(row) >= cap
     for position, token in enumerate(row):
         if token in stops:
-            return row[: position + 1], position + 1, False
-    return row, len(row), len(row) >= cap
+            kept, n_new, hit_cap = row[: position + 1], position + 1, False
+            break
+    think_tokens = kept.index(think_close) if think_close in kept else n_new
+    return kept, n_new, hit_cap, think_tokens
 
 
 @torch.no_grad()
@@ -130,19 +141,22 @@ def generate_candidates(model, tokenizer, prompts: list[str], *, n: int, max_new
     each row is cut at its first stop token so a short answer is not scored with
     another sequence's padding attached.
 
-    Returns, per prompt, a list of (raw_text, n_new_tokens, hit_cap).
+    Returns, per prompt, a list of (raw_text, n_new_tokens, hit_cap, think_tokens).
     """
     encoded = tokenizer(prompts, return_tensors="pt", padding=True,
                         add_special_tokens=False).to(device)
     prompt_len = encoded.input_ids.shape[1]
     stops = stop_ids(model, tokenizer)
+    think_close = tokenizer.convert_tokens_to_ids(THINK_CLOSE)
     shared = dict(max_new_tokens=max_new_tokens, top_k=None,
                   pad_token_id=tokenizer.pad_token_id)
 
     def rows_of(output):
         for row in output[:, prompt_len:].tolist():
-            ids, n_new, hit_cap = _cut_at_stop(row, stops, max_new_tokens)
-            yield tokenizer.decode(ids, skip_special_tokens=False), n_new, hit_cap
+            ids, n_new, hit_cap, think_tokens = _cut_at_stop(
+                row, stops, max_new_tokens, think_close)
+            yield (tokenizer.decode(ids, skip_special_tokens=False),
+                   n_new, hit_cap, think_tokens)
 
     per_prompt: list[list] = [[] for _ in prompts]
     greedy = model.generate(**encoded, do_sample=False, temperature=None, top_p=None, **shared)
@@ -190,10 +204,7 @@ def main() -> None:
     print(f"{total} prompts across {len(work)} slices, n={args.n}, "
           f"cap={args.max_new_tokens}, device={device}", flush=True)
 
-    sys.path.insert(0, str(REPO_ROOT / "scripts"))
-    from eval_behavior import load_model  # same loader, same revision pinning
-
-    model, tokenizer = load_model(args.model, dtype, device)
+    model, tokenizer = load_causal_lm(args.model, dtype, device)
     # Batched generation pads; left padding keeps every prompt flush against the
     # first generated token, which is what makes `prompt_len` slicing valid.
     tokenizer.padding_side = "left"
@@ -222,7 +233,7 @@ def main() -> None:
 
             for sample, raws in zip(batch, batch_raws):
                 candidates = []
-                for index, (raw, n_new, hit_cap) in enumerate(raws):
+                for index, (raw, n_new, hit_cap, think_tokens) in enumerate(raws):
                     parts = split_generation(raw)
                     accepted, reason = verify(sample, parts["answer"], raw)
                     if hit_cap:
@@ -230,8 +241,7 @@ def main() -> None:
                     candidates.append({
                         "index": index, "answer": parts["answer"], "think": parts["think"],
                         "raw": raw, "new_tokens": n_new, "accepted": accepted,
-                        "reason": reason,
-                        "think_tokens": len(tokenizer(parts["think"]).input_ids),
+                        "reason": reason, "think_tokens": think_tokens,
                     })
 
                 chosen = select(candidates)
