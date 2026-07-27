@@ -39,12 +39,12 @@ Pipeline position: **Stage 0 → Stage 1 → Stage 2 (v0 + v1 scale-up) → Stag
 s1 → s2 sizing A/B → s2 quality gate → start-point ablation (2026-07-27)**, all
 passed. Stage 4 not started.
 
-Repo: branch `main`, clean at the 2026-07-28 documentation commit on top of
-`30c066c`. That commit reorganized the trend figure from a chronological
-sequence into a **lineage tree** (`assets/perf_trend.json` gained
-`id`/`parent`/`steps`; `scripts/plot_perf_trend.py`, its tests, the README run
-table — no experiment data changed, same eight attempts and NLLs) and rewrote
-the teacher-target proposal for the two directives below.
+Repo: branch `main`, clean at the 2026-07-28 documentation commits on top of
+`30c066c`. Those rewrote the trend figure as a **lineage view — one row per
+run** (left: the checkpoint it branched from and what its lineage cost; right:
+an arrow from that checkpoint's NLL to the run's own), rewrote the teacher-target
+proposal for the directives above, and recorded the record/scope policies. No
+experiment data changed — same eight attempts, same NLLs.
 
 ## The recipe, as it now stands
 
@@ -84,8 +84,9 @@ architecture and data scale.
   behavior axis. Log: `logs/experiments/2026-07-26_stage3_s2_blocks_v1_gpu_run.md`.
 - **Stage 2 mixture v1 (2026-07-26, CPU):** 64,484 train samples / 22,133,631
   train tokens / 21,610 blocks@1024; val_v1 1,916; calib 200.
-- Tests: **91/91** on the dev box (torch 2.13.0+cpu); 85 passed / 6 skipped on
-  the 2026-07-27 GPU pod (torch 2.11.0+cu128, Python 3.12.3).
+- Tests: **94/94** on the dev box (torch 2.13.0+cpu); the 2026-07-27 GPU pod ran
+  the then-current suite at 85 passed / 6 skipped (torch 2.11.0+cu128,
+  Python 3.12.3).
 
 ## Best checkpoint — the two metrics disagree, deliberately
 
@@ -144,7 +145,7 @@ architecture and data scale.
   `s2_blocks_v1`, `s2v1_from_s1`, `s2v1_from_init` (all ran), smoke configs.
 - `data/` — frozen v0 and v1 mixtures (jsonl gitignored, manifests committed);
   **`data/eval_behavior_v0/` (prompts.jsonl + manifest, both committed)**.
-- `tests/` — 95 tests. `logs/` — decisions (16), experiments (13), proposals (3),
+- `tests/` — 94 tests. `logs/` — decisions (16), experiments (13), proposals (3),
   supported_models, artifact_manifests, this file.
 - `artifacts/` (gitignored) — stage0 stats, stage1 checkpoint, stage3 run
   artifacts and reference scorecards (small files local; final weights HF-only
@@ -156,7 +157,7 @@ architecture and data scale.
 ## Latest known working commands
 
 ```
-uv run pytest tests/ -q                                          # 95 passed
+uv run pytest tests/ -q                                          # 94 passed
 uv run python scripts/build_eval_behavior_v0.py                  # rebuild prompt set
 uv run python scripts/eval_behavior.py \
   --model artifacts/stage3/s1_ffn_norm_v0/checkpoints/step_000660/model \

@@ -12,7 +12,7 @@ The methods are meant to be **model-family-agnostic**: the same activation-stati
 
 **Current experiment:** [Qwen/Qwen3-4B-Thinking-2507](https://huggingface.co/Qwen/Qwen3-4B-Thinking-2507) → a 0.6B-class student (Qwen3-0.6B geometry, ~6.7× compression, INT8 deployment target). Numbers below are held-out NLL on `holdout_v1` (21,080 tokens of fineweb-edu); the numbers in the figure are the `#` column here.
 
-The runs are a tree, not a queue, so the figure draws them that way: each point sits at the cumulative optimizer steps of its own lineage and is joined to the checkpoint it started from (the `starts from` column). Sibling arms leave a shared parent — reading them as one sequence would imply progress that was never measured.
+The runs are a tree, not a queue, so the figure gives each one a row: the left panel hangs it off the checkpoint it started from (the `starts from` column) and places it at what its whole lineage cost in optimizer steps; the right panel arrows from that checkpoint's held-out NLL to what the run actually reached. Sibling arms leave a shared parent — reading them as one sequence would imply progress that was never measured.
 
 | # | date | run | starts from | what changed | total steps | held-out NLL |
 | ---: | --- | --- | :---: | --- | ---: | ---: |
@@ -64,7 +64,7 @@ Every run records config hash, code state, dataset/tokenizer/teacher hashes, and
 
 ```bash
 uv sync                    # CPU torch by default; see pyproject.toml for a CUDA index
-uv run pytest tests/ -q    # 95 CPU tests, no downloads
+uv run pytest tests/ -q    # 94 CPU tests, no downloads
 ```
 
 The implemented pipeline runs end to end on CPU (GPU optional):
@@ -139,7 +139,7 @@ AlphaAvatar-distill/
 ├── configs/                # stage recipes; Stage 3 runs are one config each
 ├── data/                   # corpus manifests (jsonl gitignored, rebuildable)
 │   └── eval_behavior_v0/   #   76-prompt behavior set + manifest (both committed)
-├── tests/                  # 95 CPU tests: algebra, loader, trainer, quant, scorers, builders
+├── tests/                  # 94 CPU tests: algebra, loader, trainer, quant, scorers, builders
 ├── logs/                   # project memory — read STATE.md first
 │   ├── STATE.md            #   current state, verified facts, next actions
 │   ├── decisions.md        #   decision records (why, alternatives, risks)

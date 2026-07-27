@@ -2,13 +2,15 @@
 
 The figure is a public artifact (AGENTS.md P7), so the parts that decide what it
 claims are tested: the committed data file stays loadable and log-backed, the
-lineage it draws resolves to a real tree with accumulated step counts, the detail
-panel picks its window from the data, and the generated run table matches the
-plotted points. Rendering is exercised once to catch matplotlib breakage.
+lineage it draws resolves to a real tree with accumulated step counts, and the
+generated run table matches the plotted points. The layout contract — one row
+per run, so nothing can overlap — is checked by rendering. Rendering also
+catches matplotlib breakage.
 """
 
 from __future__ import annotations
 
+import re
 import sys
 from pathlib import Path
 
@@ -25,6 +27,10 @@ def attempt(nll: float, run: str = "r", *, id: str = "", parent: str | None = No
     return {"id": id or run, "parent": parent, "steps": steps,
             "date": "2026-01-01", "stage": "stage3", "run": run,
             "summary": "s", "nll": nll, "log": "logs/experiments/x.md"}
+
+
+def svg_height(path: Path) -> float:
+    return float(re.search(r'height="([\d.]+)pt"', path.read_text()).group(1))
 
 
 def test_committed_data_is_loadable_and_log_backed():
@@ -71,29 +77,9 @@ def test_lineage_fails_loudly_on_a_broken_start_checkpoint():
         pt.lineage([attempt(9.0, "x", id="x"), attempt(4.0, "y", id="x")])
 
 
-def test_detail_window_brackets_the_cluster():
-    nodes = pt.lineage([attempt(17.8, "a", id="a"), attempt(11.7, "b", id="b"),
-                        attempt(4.21, "c", id="c"), attempt(3.80, "d", id="d")])
-    idx, lo, hi = pt.detail_window(nodes)
-    assert idx == [2, 3]
-    # Tight around the cluster — a window stretched to the teacher line would
-    # squeeze sibling branches into one blob.
-    assert lo < 3.80 and hi > 4.21
-    assert hi - lo < 2 * (4.21 - 3.80)
-
-
-def test_detail_window_is_skipped_when_it_would_add_nothing():
-    # All attempts already inside the cluster -> the overview shows everything.
-    assert pt.detail_window(pt.lineage([attempt(4.0, "a", id="a"),
-                                        attempt(3.9, "b", id="b")])) is None
-    # Only one clustered attempt -> nothing to compare in a detail panel.
-    assert pt.detail_window(pt.lineage([attempt(17.8, "a", id="a"), attempt(11.7, "b", id="b"),
-                                        attempt(3.8, "c", id="c")])) is None
-
-
-def test_span_label_collapses_only_contiguous_runs():
-    assert pt.span_label([3, 4, 5]) == "3–5"
-    assert pt.span_label([3, 5, 8]) == "3, 5, 8"
+def test_log_ticks_stay_inside_the_range():
+    assert pt.log_ticks(2.3, 19.6) == [3, 4, 5, 7, 10]
+    assert pt.log_ticks(3.5, 4.4) == [4]
 
 
 def test_markdown_table_matches_the_plotted_points():
@@ -124,3 +110,13 @@ def test_render_writes_an_svg(tmp_path):
     out = pt.render(pt.load(), tmp_path / "trend.svg")
     assert out.exists() and out.stat().st_size > 1000
     assert out.read_text().lstrip().startswith("<?xml")
+
+
+def test_the_figure_grows_a_row_per_attempt(tmp_path):
+    """One row per run is the layout contract — it is why nothing overlaps."""
+    data = pt.load()
+    full = pt.render(data, tmp_path / "full.svg")
+    fewer = pt.render({**data, "attempts": data["attempts"][:4]}, tmp_path / "fewer.svg")
+    dropped = len(data["attempts"]) - 4
+    assert svg_height(full) - svg_height(fewer) == pytest.approx(
+        dropped * pt.ROW_IN * 72, rel=0.02)
