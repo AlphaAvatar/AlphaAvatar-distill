@@ -1,6 +1,26 @@
-# PROPOSAL (needs user approval) — Stage 3 supplementary experiment: recovery on **top-n sampled, verified-correct** teacher targets
+# PROPOSAL (deferred to Stage 4/5) — recovery on **top-n sampled, verified-correct** teacher traces
 
-Status: **REVISED 2026-07-28 (2nd pass) — awaiting maintainer approval.**
+Status: **DEFERRED to Stage 4/5 on 2026-07-28 — no spend committed.**
+
+Reclassified by the maintainer the same day it was scoped: large-scale teacher
+generation belongs to Stage 4/5, because **(a)** a corpus of one teacher's traces
+cannot be applied to another model, so it is a per-teacher artifact rather than a
+reusable Stage 2 mixture (the pipeline is model-family-agnostic by decision), and
+**(b)** generation and training can run in parallel, which is an online data loop
+of the same shape as Stage 4/5 even though the states still come from corpus
+prompts rather than the student. **Nothing below is discarded** — the design,
+costs, verification rules and option-B target format stand as written for when
+this work is picked up. What changed is *when*, and that no money is committed
+now. Decision record: `logs/decisions.md`, 2026-07-28.
+
+Read before reviving this: the public mixture already contains worked-solution
+targets (all 7,149 gsm8k targets carry step-by-step arithmetic, all 4,344
+OpenMathInstruct targets carry full derivations), and the student still scores
+**0.000** gsm8k EM. The case for buying teacher traces should be re-argued after
+the packing control run shows whether the student can use the reasoning
+supervision it already has.
+
+Original status line: **REVISED 2026-07-28 (2nd pass) — awaiting maintainer approval.**
 
 *Filename note:* the path still says `stage2` and is kept that way for link
 stability (two historical experiment logs point at it). The staging below is
@@ -8,11 +28,9 @@ what governs.
 
 **Three maintainer directives, 2026-07-28:**
 
-1. **This is the next supplementary experiment in Stage 3** — a student-recovery
-   run (AGENTS.md 4.5) on rewritten targets, branching from
-   `s2v1_from_init@2700`. The corpus build is a **Stage 2 prerequisite of that
-   experiment**, not an experiment in its own right; nothing here advances the
-   pipeline past Stage 3.
+1. ~~This is the next supplementary experiment in Stage 3~~ — **superseded the
+   same day**: reclassified to Stage 4/5 (see the status block above). The
+   run design below is unchanged; only its stage and timing moved.
 2. **The targets must be teacher-generated *and* correct**, produced by
    **sampling n candidates per prompt and selecting a verified-correct one**
    (top-n / rejection sampling), not by a single greedy pass.
@@ -28,14 +46,14 @@ Decision record: `logs/decisions.md`, 2026-07-28.
 
 | | 2026-07-27 draft | 1st pass (correctness) | now (top-n + Stage 3 framing) |
 |---|---|---|---|
-| framing | "Stage 2 v2 corpus" | same | **Stage 3 supplementary experiment**; corpus is its prerequisite |
+| framing | "Stage 2 v2 corpus" | Stage 3 supplementary experiment | **Stage 4/5, deferred** — a one-teacher corpus is not a reusable Stage 2 mixture |
 | accept rule | grounding filter | **mechanical correctness check** vs a gold key; else keep the v1 target | unchanged |
 | generation | 1 greedy pass | 1 greedy pass, bounded retry on rejects | **n sampled candidates per prompt, verify all, select one** |
 | scope | 3 groups, 18,314 targets | 5 slices, 29,807 candidates (math slices move in) | unchanged |
 | coverage | — | items the teacher fails keep public targets → bimodal corpus, selection bias | **top-n is the direct fix**: accept@n > accept@1, so fewer items fall back |
 | engine | HF transformers | HF transformers | **decided by the pilot**: HF adaptive, or vLLM (shared prefill across the n samples) — a heavy-dependency decision |
 | teacher mode | empty-think prefill (cheap) | same | **native thinking, always** — the framework distills the teacher's real capability, not a suppressed mode |
-| cost | $6–9 | $11–17 | **$5–7 committed** (teacher scorecard + pilot); **$25–145** for the build, scoped by the pilot |
+| cost | $6–9 | $11–17 | **$1.20 spent** (teacher scorecard only, done); the pilot and the $25–145 build are **not committed** |
 
 ## The argument (unchanged)
 

@@ -237,14 +237,19 @@ longer torn" are the same number.
    the student cap to 4096 for trace-trained checkpoints and re-score the
    references at that cap (a trace student at 512 would score ~0 for protocol
    reasons).
-5. **Top-n teacher pilot on vLLM** (~$3–5): accept@1 vs accept@n, reject-reason
-   histograms, per-slice trace lengths, engine throughput. Scopes item 6.
-6. **Bulk verified generation** ($25–145 depending on n and slice scope; changes
-   the official data mixture) — decide with pilot numbers, not before.
-7. **The trace-target Stage 3 run (option B)**, compared against (2), not
-   against the old torn-sample runs. The kernel benchmark rides on this session
-   since it needs the production `block_len`.
-8. Stage 4 online data collection design — **now includes real-time teacher
+5. **Then re-plan from (2)'s results.** The queue past the control run is
+   deliberately not pre-committed. Model-agnostic Stage 3 levers still on the
+   table: KD objective and weights (CE 0.25 + KD 1.0, τ=1, scope `all` have
+   never been varied), training length past ~2 epochs now that samples are no
+   longer torn, public-mixture rebalancing, and the Stage 1 init ablations in
+   the backlog.
+6. **Stage 4/5 — teacher-generated traces at scale** (moved out of Stage 3 on
+   2026-07-28: a one-teacher corpus is not reusable, and generation runs in
+   parallel with training). Design is written and costed in
+   `logs/proposals/2026-07-27_stage2_teacher_generated_answers.md`; **no spend
+   committed**. Revive it if the control run shows form improving while math
+   stays at zero.
+7. Stage 4 online data collection design — **now includes real-time teacher
    generation feeding the student** (decision 2026-07-28): that is on-policy
    work, not a Stage 3 optimisation.
 8. Optional backlog: Stage 1 ablations; a from-init-tuned lr/warmup sweep (A2
@@ -259,17 +264,12 @@ longer torn" are the same number.
   (decision 2026-07-28). The deciding property is whose distribution the
   training states come from, not whether the teacher runs in real time — the
   teacher already runs inside Stage 3's loop doing full-vocab KD every step.
-- **Stage 3 supplementary experiment (top-n verified teacher targets), revised
-  2026-07-28.** Next decision after the teacher scorecard is the **~$3–5 top-n
-  pilot** (next action 3); the mixture-change approval, the vLLM dependency
-  approval and the build spend all follow its measured thinking lengths and
-  accept rates. Build estimate **$25–145** with the teacher at full capability
-  (was $6–11 when the plan suppressed its reasoning) — scoped by lowering n or
-  dropping slices, never by suppressing thinking.
-- **Target text for teacher-generated data: (A) answer-only, (B) full trace,
-  (C) hybrid.** Recommended (A) for this experiment; B/C change the student's
-  output contract and belong in their own proposal. Needed before the bulk build,
-  not before the pilot.
+- **Nothing is pending for the next session except the control run itself.**
+  The teacher-generation branch (pilot, bulk build, trace training) moved to
+  Stage 4/5 on 2026-07-28, taking the mixture-change approval, the vLLM
+  dependency approval and the $25–145 build with it — **no spend is committed**.
+  Option B (full traces) stands as the design for that work, not as a
+  cancellation.
 *(Closed 2026-07-28: the README Optim-record question. The answer is a standing
 rule — no records during baseline construction, first record point after Stage 6
 — so it is no longer an open decision. See the Status section and the 2026-07-28
