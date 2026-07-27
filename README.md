@@ -6,6 +6,8 @@ AlphaAvatar-distill is an agent-guided model compression and distillation framew
 
 The goal is to make distillation **reproducible, automated, and useful for realtime assistant runtimes** — RAG, tool use, reasoning, self-correction, quantized inference, low-latency deployment.
 
+The methods are meant to be **model-family-agnostic**: the same activation-statistics initialization, recovery training and deployment-numerics gates should apply to dense LLMs, MoE, VLM and Omni-models alike. That is a design constraint on the algorithm core, not a claim — the run below is a dense text **baseline**, and no MoE, vision or audio model has been attempted or validated ([scope decision](./logs/decisions.md)).
+
 [![performance trend](./assets/performance_trend.svg)](./assets/performance_trend.svg)
 
 **Current experiment:** [Qwen/Qwen3-4B-Thinking-2507](https://huggingface.co/Qwen/Qwen3-4B-Thinking-2507) → a 0.6B-class student (Qwen3-0.6B geometry, ~6.7× compression, INT8 deployment target). Numbers below are held-out NLL on `holdout_v1` (21,080 tokens of fineweb-edu); the numbers in the figure are the `#` column here.
@@ -52,6 +54,7 @@ Design choices worth knowing:
 - **Block order is a pure function of (seed, epoch).** An interrupted run resumes bitwise-exactly. The validation subset is seed-derived too, which is why runs meant to be compared must share a seed ([decision record](./logs/decisions.md)).
 - **Deployment numerics are a gate, not an afterthought.** Every recovery gate re-evaluates under INT8 weight fake-quantization at two scopes, so quality that quantization would destroy never counts as progress.
 - **Ablations are config diffs.** The two proposed start-point arms differ from the completed mixture-v1 run in exactly one meaningful field, verified by diff.
+- **The core is kept family-agnostic, and is explicit about where it currently isn't.** Stage 0 hooks `mlp.down_proj` and fails loudly on anything else; Stage 1 assumes a dense SwiGLU MLP, GQA attention and one residual stream; the loader and behavior scorers are text-chat specific. Those are precisely the places an MoE, VLM or Omni port would touch — [inventoried](./logs/decisions.md) rather than abstracted away before a second family exists (P1/P2: no plugin system built on speculation).
 
 Every run records config hash, code state, dataset/tokenizer/teacher hashes, and gate-check results; heavy artifacts stay out of git. GPU sessions run under a durable OS-level orchestrator that trains, evaluates, uploads artifacts, verifies the upload against pod-side hashes, generates the write-up, and tears the pod down unattended.
 
@@ -153,7 +156,9 @@ The tree above is abridged to the parts worth knowing about. New directories app
 
 ## 🏆 Optim record history
 
-Official records are stricter than ordinary experiments (AGENTS.md 3.8): exact commit, command, hardware, data and tokenizer hashes, budget, metric log, and maintainer approval. Reproducible Stage 3 records exist in `logs/experiments/`, but none has been approved as an official record yet, so every section below is intentionally empty.
+Official records are stricter than ordinary experiments (AGENTS.md 3.8): exact commit, command, hardware, data and tokenizer hashes, budget, metric log, and maintainer approval.
+
+**No records are being kept during baseline construction** (maintainer decision, 2026-07-28). Everything run so far — including the four Stage 3 runs that already have reproducible records in `logs/experiments/` — is baseline work. The **first record point** will be written once the baseline is carried through Stage 6 deployment validation with satisfactory results; it will be the first entry, not a backfill. Until then every section below is intentionally empty, and the numbers in the run table above are attempts, not records.
 
 ### 🧪 Stage 0 — Initialization warm-up data collection
 

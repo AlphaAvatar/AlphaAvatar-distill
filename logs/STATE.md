@@ -24,6 +24,17 @@ First dense-model compression experiment, teacher **Qwen/Qwen3-4B-Thinking-2507*
 (hidden 1024, 28 layers, FFN 3072, 16Q/8KV, tied emb). BF16 training,
 INT8 deployment target.
 
+**This run is a baseline instance, not the target** (decisions 2026-07-28). Two
+standing rules follow from that: (a) **no README Optim record entries during
+baseline construction** — the first record point is written only after the
+baseline reaches Stage 6 with satisfactory results, and it will be the first
+entry rather than a backfill; (b) the algorithm core stays
+**model-family-agnostic** — the methods are meant to carry to MoE, VLM and
+Omni-models, so family specifics belong in recipes and new core code fails
+loudly on an unsupported architecture. Neither is a claim of support: no
+non-dense, non-text model has been attempted. The porting surface is inventoried
+in the 2026-07-28 scope decision.
+
 Pipeline position: **Stage 0 → Stage 1 → Stage 2 (v0 + v1 scale-up) → Stage 3
 s1 → s2 sizing A/B → s2 quality gate → start-point ablation (2026-07-27)**, all
 passed. Stage 4 not started.
@@ -206,11 +217,10 @@ a cheap pilot instead of being one bulk spend; items 2–4 are its prerequisites
   the generation spend all follow the pilot's accept@1/accept@n numbers. Full
   experiment if it all proceeds: **$12–22** on the vLLM path, **$30–50** on the
   HF path (was $6–9 before the correctness gate, the math slices and top-n).
-- **README "Optim record history" entries.** Four Stage 3 runs now have
-  reproducible records (s1, the A/B, `s2_blocks_v1`, the ablation). AGENTS.md
-  3.8/P12 require maintainer approval before any appears as an official record;
-  **nothing has been added** (user held on 2026-07-27). Say the word and the
-  entries get written from the existing logs.
+*(Closed 2026-07-28: the README Optim-record question. The answer is a standing
+rule — no records during baseline construction, first record point after Stage 6
+— so it is no longer an open decision. See the Status section and the 2026-07-28
+decision record.)*
 
 ## Links
 
