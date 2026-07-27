@@ -1,44 +1,52 @@
 # scripts/pod — GPU pod session scripts
 
-**Status (2026-07-27): the `s2_blocks_v1` session these scripts were written for
-is COMPLETE** — it ran unattended end to end on 2026-07-26 (train → gate evals →
-HF upload → independent upload verification → write-up → commit/push → pod
-teardown) for $4.49. Results:
-`logs/experiments/2026-07-26_stage3_s2_blocks_v1_gpu_run.md`. No pod exists.
+**Status (2026-07-27): parameterized for multi-arm sessions.** The scripts no
+longer hardcode a run; the session is declared in `run_env.sh` and everything
+else reads it. The previous single-run versions (`orchestrate_s2v1.sh`,
+`verify_and_report_s2v1.py`) are in git history at commit `f74e5ed`.
 
-Everything below is the **playbook for the next session**. The procedure and the
-readiness rules are hardware/session-independent and stay as-is; the run
-identifiers are not — see "Reusing these scripts" at the end before running
-anything.
+Last completed session: `s2_blocks_v1` (2026-07-26, $4.49, unattended end to
+end) — `logs/experiments/2026-07-26_stage3_s2_blocks_v1_gpu_run.md`.
+Current session target: the **start-point ablation**, two arms on one pod
+(`logs/proposals/2026-07-27_stage3_start_point_ablation.md`).
 
-Background on why the readiness rules read the way they do: the first attempt at
-this session was paused because pods appeared not to start, which was a
-**misdiagnosis of two broken readiness signals** — the pods were healthy. Root
-cause and evidence:
-`logs/experiments/2026-07-26_runpod_pod_readiness_misdiagnosis.md`.
+## Files
+
+| file | role |
+| --- | --- |
+| `run_env.sh` | **the only file to edit per session**: arms (name/config/step tag), reference checkpoints + revisions, transfer artifact names, eval settings |
+| `setup.sh` | env + repo bundle + data + cu128 torch + checkpoints + tests; markers `ENV_READY`→`CKPT_READY`→`TESTS_PASSED`→`SETUP_DONE` |
+| `score_refs.sh` | scores reference checkpoints on `eval_behavior_v0` **before training**, so every arm is comparable on one device and eval bugs surface in minutes, not after hours of training; marker `REFS_SCORED` |
+| `train.sh` | `train.sh <RUN_NAME> <CONFIG> [--resume]`; markers `TRAIN_DONE:<run>` / `TRAIN_FAILED:<run>` |
+| `post_run.sh` | `post_run.sh <RUN_NAME> <CONFIG> <STEP_TAG>`; gate evals (bf16 holdout, INT8 both scopes, `eval_behavior_v0`, gen smoke) + hashes + HF upload; marker `POST_DONE:<run>` |
+| `orchestrate.sh` | dev-box driver: `POD_ID=… HOST=… PORT=… bash scripts/pod/orchestrate.sh`; loops arms, fetches, verifies, reports, commits, tears down |
+| `verify_and_report.py` | `verify --run <name>` (independent HF upload check) and `report --run a,b` (multi-arm write-up + mechanical decision rules) |
+| `hashes_transfer.txt` / `hashes_ckpt.txt` | sha256 manifests, re-verified pod-side by `setup.sh` and again by the orchestrator |
+
+**Markers are arm-scoped** (`TRAIN_DONE:<run>`), which is what makes a multi-arm
+session safe to leave unattended. Keep that protocol and the sha256 steps exactly
+as they are.
 
 ## Session procedure
 
 1. `runpodctl pod create --image
    runpod/pytorch:1.0.3-cu1281-torch291-ubuntu2404 --gpu-id "NVIDIA L40S"
-   --container-disk-in-gb 40 --volume-in-gb 120 --ports "22/tcp,8888/http"
-   --name aadistill-s2v1 --terminate-after <utc-now+8h>`
+   --container-disk-in-gb 60 --volume-in-gb 0 --ports "22/tcp,8888/http"
+   --name aadistill-<session> --terminate-after <utc-now+8h>`
 
-   **`--ports "22/tcp"` is mandatory** (see step 2). Prefer **L40S** for
-   this project: s1 (2026-07-22) and the A/B (2026-07-25) both ran on L40S,
-   so keeping it holds throughput/memory numbers comparable. RTX 6000 Ada
-   (48 GB, $0.84/h) is a verified working fallback if L40S is unavailable —
-   any 40 GB+ Ampere-or-newer card works, since the venv brings its own
-   cu128 torch and the container image is irrelevant — but note the
-   hardware change in the experiment log if you use it.
+   **`--ports "22/tcp"` is mandatory** (see step 2). Prefer **L40S** so
+   throughput/memory stay comparable to s1, the A/B and `s2_blocks_v1`. RTX 6000
+   Ada (48 GB) is a verified fallback — note the change in the experiment log if
+   used. Prefer pod-local disk (`--volume-in-gb 0`): a `/workspace` network
+   volume may be MooseFS, which serves stale reads after write bursts.
 
-2. Wait for readiness. **Do NOT trust `runpodctl pod get`'s
-   `uptimeSeconds`: in runpodctl 2.7.1 it is always `0`, even on a healthy
-   running pod.** And **`runpodctl ssh info` returning `"pod not ready"`
-   does not mean the pod failed** — it means no public TCP 22 mapping
-   exists, which never appears if the pod was created without
-   `--ports "22/tcp"`. Both were verified against the API on 2026-07-26;
-   together they cost ~$0.95 in healthy pods deleted as "stuck".
+2. Wait for readiness. **Do NOT trust `runpodctl pod get`'s `uptimeSeconds`: in
+   runpodctl 2.7.1 it is always `0`, even on a healthy running pod.** And
+   **`runpodctl ssh info` returning `"pod not ready"` does not mean the pod
+   failed** — it means no public TCP 22 mapping exists, which never appears if
+   the pod was created without `--ports "22/tcp"`. Both were verified against the
+   API on 2026-07-26; together they cost ~$0.95 in healthy pods deleted as
+   "stuck" (`logs/experiments/2026-07-26_runpod_pod_readiness_misdiagnosis.md`).
 
    Use GraphQL, and treat an actual SSH connection as the only ground truth:
 
@@ -50,79 +58,29 @@ cause and evidence:
      -d '{"query":"query { pod(input:{podId:\"<id>\"}) { runtime { uptimeInSeconds ports { ip publicPort privatePort type } } } }"}'
    ```
 
-   `runtime: null` = still starting; non-null `uptimeInSeconds` = container
-   up. Poll until a `tcp`/`privatePort 22` entry appears and use that
-   `ip:publicPort`. Config values are **single-quoted** and the key is
-   lowercase `apikey` — strip `'` as well as `"`, or GraphQL just returns
-   `{"error":{}}`.
+   `runtime: null` = still starting. Poll until a `tcp`/`privatePort 22` entry
+   appears and use that `ip:publicPort`. Config values are **single-quoted** and
+   the key is lowercase `apikey` — strip `'` as well as `"`, or GraphQL returns
+   `{"error":{}}`. Recover a portless pod in place with
+   `runpodctl pod update <id> --ports "22/tcp,8888/http"` + `pod restart`.
 
-   If a pod was already created without ports, recover it in place instead
-   of re-allocating: `runpodctl pod update <id> --ports "22/tcp,8888/http"`
-   then `runpodctl pod restart <id>` (mapping appears ~30 s later).
-3. `scp` (port from ssh info): `setup.sh`, `train.sh`, `post_run.sh`,
-   `hashes_transfer.txt`, `hashes_ckpt.txt` → `/workspace/`, plus write
-   the HF token (from `hf auth token` on the dev box) to
-   `/workspace/hf/token` (mode 600). Never echo the token into logs.
-4. `bash /workspace/setup.sh` → follow `MARKER:` lines in
-   `/workspace/setup.log` (`ENV_READY` → `CKPT_READY` → `TESTS_PASSED` →
-   `SETUP_DONE`; any `SETUP_FAILED:<step>` fails loudly).
-5. `bash /workspace/train.sh` → training detached; markers appended to
-   `/workspace/run_markers.log` (`TRAIN_DONE` / `TRAIN_FAILED`), console
-   at `/workspace/console_s2v1.log`. ~2700 steps ≈ 2.3 h on L40S-class.
-6. `bash /workspace/post_run.sh` → gate evals (bf16 holdout on GPU, INT8
-   fake-quant on CPU, generation smoke) + hash + upload to
-   `AlphaAvatar/aadistill-artifacts` under `stage3/s2_blocks_v1/`
-   (`MARKER:POST_DONE`).
-7. From the dev box: verify the HF listing (file names + sizes) before
-   `runpodctl pod delete`.
+3. `scp` to `/workspace/`: `run_env.sh`, `setup.sh`, `score_refs.sh`, `train.sh`,
+   `post_run.sh`, `hashes_transfer.txt`, `hashes_ckpt.txt`, plus the HF token
+   (from `hf auth token`) to `/workspace/hf/token`, mode 600. Never echo the
+   token into logs.
+4. `bash /workspace/setup.sh`, then run the orchestrator from the dev box under
+   tmux/nohup. It drives everything else and deletes the pod only after upload
+   verification passes.
 
-## Inputs already staged (private HF repo `AlphaAvatar/aadistill-artifacts`)
+## Before each session
 
-- `transfer/repo_20260726.bundle` — git bundle @ commit `f73be55` (main).
-  sha256 in `hashes_transfer.txt`.
-- `transfer/stage2_data_20260726.tar.zst` — data/stage2_v1 + data/stage2
-  splits + holdout_v1.jsonl (26.5 MB). sha256 in `hashes_transfer.txt`.
-- `stage3/s2_blocks_v0/step_000660/model/` @ revision `526caa78…db0c` —
-  start checkpoint; per-file sha256 in `hashes_ckpt.txt` (from
-  `artifacts/stage3/ab_artifact_hashes_2026-07-25.txt`).
-
-If the repo has moved past `f73be55` when resuming, regenerate the bundle
-(`git bundle create … HEAD main`), re-upload, and update
-`hashes_transfer.txt` — setup.sh verifies hashes and will fail loudly on
-a stale bundle. **The repo has moved past `f73be55`; regenerating the bundle is
-mandatory for the next session.**
-
-## Reusing these scripts for the next session
-
-These scripts are **hardcoded to the `s2_blocks_v1` run**. The next session
-(most likely the start-point ablation, `logs/proposals/2026-07-27_stage3_start_point_ablation.md`,
-which runs **two arms sequentially on one pod**) needs them parameterized by run
-name / config / start checkpoint. Exact places to change:
-
-| file | line(s) | what is hardcoded |
-| --- | --- | --- |
-| `train.sh` | 10 | `--config configs/stage3_s2_blocks_v1.json`; console path `console_s2v1.log` |
-| `post_run.sh` | 11–12 | `RUN=artifacts/stage3/s2_blocks_v1`, `CKPT=$RUN/checkpoints/step_002700/model` |
-| `post_run.sh` | 53, 61–72 | console copy, local hash-list filename, HF upload paths `stage3/s2_blocks_v1/…` |
-| `setup.sh` | 22–27 | transfer bundle/tarball names + `hashes_transfer.txt` (regenerate for the new commit) |
-| `setup.sh` | (ckpt step) | start-checkpoint download path + `hashes_ckpt.txt` |
-| `orchestrate_s2v1.sh` | 32–40 | `RUN_REL`, log/status filenames, `HASHFILE_REL`, `HF_PREFIX`, remote run dir |
-| `orchestrate_s2v1.sh` | 111–112, 133, 148 | resume command, console path, progress greps |
-| `orchestrate_s2v1.sh` | 222–227 | commit message |
-| `verify_and_report_s2v1.py` | throughout | run name, step tag, and the report template |
-
-Recommended shape for the next session: give each script a
-`RUN_NAME` / `CONFIG` / `STEP_TAG` / `START_CKPT` variable block at the top
-(sourced from one `run_env.sh`), then loop the orchestrator over the arm list.
-Keep the marker-line protocol and the sha256 verification steps exactly as they
-are — they are what made the last session safe to leave unattended.
-
-Also, before the next session:
-
-- **Amortize setup.** It was 38 min (19%) of the last session's spend. Two
-  training arms on one pod pay it once.
-- **Upload the Stage 1 init checkpoint** (`artifacts/stage1/qwen3_0p6b_init_v0/checkpoint`,
-  1.2 GB) to the relay if the `from_init` arm is approved — it is the only
-  start point not already on HF (~30 min at the measured ~680 KB/s).
+- **Regenerate the git bundle** at the current commit and re-upload it, then
+  update `hashes_transfer.txt` — `setup.sh` verifies hashes and fails loudly on
+  a stale bundle. The tracked `data/eval_behavior_v0/prompts.jsonl` travels with
+  the bundle, so a stale bundle also means a stale prompt set.
+- **Stage any start checkpoint not already on the relay** and add its per-file
+  sha256 to `hashes_ckpt.txt` (dev→HF upload measured ~680 KB/s; HF→pod is fast).
+- **Amortize setup**: it was 38 min (19%) of the last session's spend. Multiple
+  arms on one pod pay it once.
 - **Keep seed `20260726`** in every config that must be comparable with the
-  completed run (decision record 2026-07-27).
+  completed runs (decision record 2026-07-27).

@@ -1,0 +1,123 @@
+{
+  "name": "eval_behavior_v0",
+  "created_utc": "2026-07-27T09:29:17.473371+00:00",
+  "command": "scripts/build_eval_behavior_v0.py",
+  "purpose": "Mechanically scored behavior eval for Stage 3 recovery gates. Complements holdout_v1 (language modeling) with chat-format validity, question-echo, degeneracy, evidence grounding, refusal, tool-call validity and gsm8k exact match.",
+  "source_split": {
+    "data_dir": "data/stage2_v1",
+    "split": "val",
+    "note": "held out from all Stage 3 training; never trained on",
+    "group_sha256": {
+      "instruction": "700594d13b65fd4026d57d304938a825bfe28e09e1c3e4cae41814583c91c54f",
+      "rag_evidence": "6f4aa9d46cb2704af91aff495b6265a5a44c0d61b51bd49c5c3165ce8ad4e302",
+      "multihop_qa": "85714b033e02015e34a5f2a3acc16ddcc1b973db0c9bc9660c949cd1efe2054e",
+      "tool_calling": "e638c93d824a4456a578b5f29a42461f6fc9b5229960879b8a3331d44a3fc05c",
+      "refusal_uncertainty": "c0ffecac2ed2684794e59eefc7be370624092449db4d53240447b8c6ff99f61f",
+      "code_math": "b10a75b91ebfdc1d1abcafea30fc21249bd0ec9d829cde78218165b2a8a84f3a",
+      "short_realtime": "764174f5bc061755c66104c6f72c33a504d6bf3738dfe21a1e9bbdb07a93d5f2"
+    }
+  },
+  "excluded_groups": {
+    "long_context": "format=='text' continuation data; no conversation prefix to prompt from"
+  },
+  "selection": {
+    "seed": 20260727,
+    "per_group": 12,
+    "rule": "first assistant turn is the gold; prefix is the prompt; tool_calling restricted to tool-call golds; prompt <= 1024 tokens; random.Random(f'{seed}:{group}').sample over id-sorted candidates",
+    "max_prompt_tokens": 1024,
+    "max_prompt_tokens_rationale": "equals block_len in the Stage 3 configs, so every prompt is in-distribution for context length",
+    "group_imbalance": "multihop_qa contributes fewer than per_group: only 4 of its 25 val samples fit under the token cap (hotpot p50 is 1515 tokens). Read its group row as indicative only; overall rows are prompt-weighted, so it carries proportionally little weight.",
+    "per_group_stats": {
+      "instruction": {
+        "candidates": 293,
+        "selected": 12,
+        "short_of_target": false,
+        "sources": [
+          "oasst2",
+          "smol_smoltalk"
+        ],
+        "max_prompt_tokens": 415
+      },
+      "rag_evidence": {
+        "candidates": 302,
+        "selected": 12,
+        "short_of_target": false,
+        "sources": [
+          "squad_v2"
+        ],
+        "max_prompt_tokens": 364
+      },
+      "multihop_qa": {
+        "candidates": 4,
+        "selected": 4,
+        "short_of_target": true,
+        "sources": [
+          "hotpot_qa"
+        ],
+        "max_prompt_tokens": 1015
+      },
+      "tool_calling": {
+        "candidates": 123,
+        "selected": 12,
+        "short_of_target": false,
+        "sources": [
+          "glaive_fc_v2",
+          "xlam_fc_60k"
+        ],
+        "max_prompt_tokens": 997
+      },
+      "refusal_uncertainty": {
+        "candidates": 281,
+        "selected": 12,
+        "short_of_target": false,
+        "sources": [
+          "squad_v2"
+        ],
+        "max_prompt_tokens": 245
+      },
+      "code_math": {
+        "candidates": 346,
+        "selected": 12,
+        "short_of_target": false,
+        "sources": [
+          "gsm8k",
+          "openmath_instruct_2"
+        ],
+        "max_prompt_tokens": 134
+      },
+      "short_realtime": {
+        "candidates": 444,
+        "selected": 12,
+        "short_of_target": false,
+        "sources": [
+          "everyday_conversations",
+          "smol_smoltalk"
+        ],
+        "max_prompt_tokens": 105
+      }
+    }
+  },
+  "tokenizer": {
+    "path": "artifacts/stage1/qwen3_0p6b_init_v0/checkpoint",
+    "sha256": "be75606093db2094d7cd20f3c2f385c212750648bd6ea4fb2bf507a6a4c55506"
+  },
+  "refusal_detector_recall_on_gold": 1.0,
+  "prompts": {
+    "path": "data/eval_behavior_v0/prompts.jsonl",
+    "count": 76,
+    "sha256": "96e211883a20c9db87bde2b06e8f3a66e91e1c82f6aaffc06a04db366dc8e539",
+    "total_prompt_tokens": 15001
+  },
+  "code_state": {
+    "git_commit": "f74e5ed37477bab3f8933140ee4f8de34ac887cc",
+    "dirty": true,
+    "uncommitted_state_sha256": "fb1048cff13d18e7b23ac7a0b713b64d1b89a3fae325c27add9d42bc01465784",
+    "untracked_files": [
+      "data/eval_behavior_v0/prompts.jsonl",
+      "scripts/build_eval_behavior_v0.py",
+      "scripts/eval_behavior.py",
+      "src/aadistill/behavior.py",
+      "tests/test_behavior_toy.py"
+    ]
+  }
+}

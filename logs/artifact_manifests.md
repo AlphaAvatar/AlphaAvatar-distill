@@ -4,6 +4,28 @@ Manifests for artifacts stored outside GitHub (AGENTS.md 2.5). All entries
 in `AlphaAvatar/aadistill-artifacts` are **private** storage/transfer
 artifacts, not public releases.
 
+## stage1/qwen3_0p6b_init_v0 — Stage 1 init checkpoint (start point of arm A2)
+
+- **Artifact:** same repo, path `stage1/qwen3_0p6b_init_v0/checkpoint/`
+  (fp32 safetensors, 1.2 GB + tokenizer/config files, 6 files).
+- **Revision:** `b955bd2f79b03a5418e2b8ca518a35faf047f085` (2026-07-27).
+- **Hashes (sha256):** `model.safetensors`
+  `86fbba78e8a2a32481ca77e5ac362ed1f17a39dbc30bcbc952cabd5df2633e54`;
+  full per-file list in `scripts/pod/hashes_ckpt.txt` (committed), verified
+  against the local copy before upload and re-verified pod-side by `setup.sh`.
+- **License:** internal artifact derived from teacher `Qwen/Qwen3-4B-Thinking-2507`
+  (Apache-2.0) via the Stage 1 initialization recipe; not for redistribution
+  as-is (no model card).
+- **Creation command:** `uv run python scripts/init_stage1.py --config
+  configs/stage1_qwen3_0p6b_from_4b_thinking.json` (2026-07-14); uploaded
+  2026-07-27 with `hf upload AlphaAvatar/aadistill-artifacts
+  artifacts/stage1/qwen3_0p6b_init_v0/checkpoint
+  stage1/qwen3_0p6b_init_v0/checkpoint`.
+- **Related logs:** `experiments/2026-07-14_stage1_qwen3_0p6b_init_v0.md`;
+  purpose: transfer vehicle for the `from_init` arm of the start-point ablation
+  (`logs/proposals/2026-07-27_stage3_start_point_ablation.md`). It was the only
+  start point not previously on the relay.
+
 ## stage3/s2_blocks_v1 — mixture-v1 recovery final checkpoint (current best)
 
 - **Artifact:** same repo, path `stage3/s2_blocks_v1/`: `step_002700/model/`

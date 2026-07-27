@@ -1,34 +1,51 @@
 #!/bin/bash
-# Post-training gate evals + artifact upload for s2_blocks_v1.
+# Post-training gate evals + artifact upload for one arm.
+#   bash /workspace/post_run.sh <RUN_NAME> <CONFIG> <STEP_TAG>
+# Marker: POST_DONE:<RUN_NAME> / POST_FAILED:<RUN_NAME>:<step>.
 set -x
-exec > /workspace/post_run.log 2>&1
+RUN_NAME="$1"
+CONFIG="$2"
+STEP_TAG="$3"
+[ -n "$RUN_NAME" ] && [ -n "$CONFIG" ] && [ -n "$STEP_TAG" ] || {
+  echo "usage: post_run.sh <RUN_NAME> <CONFIG> <STEP_TAG>"; exit 2; }
+
+exec > "/workspace/post_run_${RUN_NAME}.log" 2>&1
 export UV_PROJECT_ENVIRONMENT=/root/venv
 export HF_HOME=/workspace/hf
 export PATH="$HOME/.local/bin:$PATH"
 cd /workspace/aad || exit 1
-fail() { echo "MARKER:POST_FAILED:$1" >> /workspace/run_markers.log; exit 1; }
+source /workspace/run_env.sh || { echo "MARKER:POST_FAILED:${RUN_NAME}:source_run_env" >> /workspace/run_markers.log; exit 1; }
+fail() { echo "MARKER:POST_FAILED:${RUN_NAME}:$1" >> /workspace/run_markers.log; exit 1; }
 
-RUN=artifacts/stage3/s2_blocks_v1
-CKPT=$RUN/checkpoints/step_002700/model
-SRC=artifacts/stage3/s2_blocks_v0/checkpoints/step_000660/model
+RUN=artifacts/stage3/$RUN_NAME
+CKPT=$RUN/checkpoints/$STEP_TAG/model
 [ -d "$CKPT" ] || fail no_final_ckpt
+
+# The trainer writes weights + config; tokenizer files come from the arm's own
+# start checkpoint (read from the config so this stays arm-agnostic).
+SRC=$(uv run python -c "import json,sys; print(json.load(open('$CONFIG'))['student_path'])") || fail read_student_path
 for f in tokenizer.json tokenizer_config.json chat_template.jinja; do
   cp -n "$SRC/$f" "$CKPT/$f" || fail "cp_$f"
 done
 
-# 1) bf16 holdout on GPU (comparable to s1/A-B GPU numbers)
-uv run python scripts/eval_ppl.py --data data/warmup/holdout_v1.jsonl \
+# 1) bf16 holdout on GPU (comparable to every prior Stage 3 GPU number)
+uv run python scripts/eval_ppl.py --data "$HOLDOUT" \
   --model "$CKPT" --out "$RUN/eval_holdout_v1.json" || fail holdout_bf16
 # 2) INT8 fake-quant (P9), CPU for comparability with the 2026-07-26 dev log
 CUDA_VISIBLE_DEVICES= uv run python scripts/eval_ppl.py \
-  --data data/warmup/holdout_v1.jsonl --model "$CKPT" \
+  --data "$HOLDOUT" --model "$CKPT" \
   --fake-quant int8 --out "$RUN/eval_holdout_v1_int8.json" || fail holdout_int8
 CUDA_VISIBLE_DEVICES= uv run python scripts/eval_ppl.py \
-  --data data/warmup/holdout_v1.jsonl --model "$CKPT" \
+  --data "$HOLDOUT" --model "$CKPT" \
   --fake-quant int8 --fake-quant-scope decoder \
   --out "$RUN/eval_holdout_v1_int8_decoder.json" || fail holdout_int8_dec
 
-# 3) generation smoke: greedy, 80 new tokens, same 3 prompts as s1/A-B
+# 3) eval_behavior_v0 — the behavior scorecard (GPU, bf16, greedy)
+uv run python scripts/eval_behavior.py --model "$CKPT" \
+  --prompts "$BEHAVIOR_PROMPTS" --max-new-tokens "$BEHAVIOR_MAX_NEW_TOKENS" \
+  --out "$RUN/eval_behavior_v0.json" || fail behavior
+
+# 4) generation smoke: greedy, 80 new tokens, same 3 prompts as every prior run
 uv run python - "$CKPT" "$RUN/gen_smoke.json" <<'EOF' || fail gen_smoke
 import json, sys, torch
 from transformers import AutoModelForCausalLM, AutoTokenizer
@@ -50,25 +67,23 @@ json.dump(out, open(out_path, "w"), ensure_ascii=False, indent=1)
 print(json.dumps(out, ensure_ascii=False)[:600])
 EOF
 
-cp /workspace/console_s2v1.log "$RUN/console.log"
+cp "/workspace/console_${RUN_NAME}.log" "$RUN/console.log"
 
-# 4) hashes of everything retained, then upload to the private HF repo
-( cd /workspace/aad && sha256sum \
-    "$RUN"/train_log.jsonl "$RUN"/run_manifest.json \
-    "$RUN"/eval_holdout_v1.json "$RUN"/eval_holdout_v1_int8.json \
-    "$RUN"/eval_holdout_v1_int8_decoder.json "$RUN"/gen_smoke.json \
-    "$RUN"/console.log "$CKPT"/* \
-  > artifacts/stage3/s2v1_artifact_hashes_2026-07-26.txt ) || fail hash
-uvx --from huggingface_hub hf upload AlphaAvatar/aadistill-artifacts \
-  "$CKPT" stage3/s2_blocks_v1/step_002700/model --repo-type model || fail up_model
-for f in train_log.jsonl run_manifest.json eval_holdout_v1.json \
-         eval_holdout_v1_int8.json eval_holdout_v1_int8_decoder.json \
-         gen_smoke.json console.log; do
-  uvx --from huggingface_hub hf upload AlphaAvatar/aadistill-artifacts \
-    "$RUN/$f" "stage3/s2_blocks_v1/$f" --repo-type model || fail "up_$f"
+# 5) hashes of everything retained, then upload to the private HF repo
+HASHFILE=artifacts/stage3/${RUN_NAME}_artifact_hashes_${SESSION_DATE}.txt
+SMALL_FILES="train_log.jsonl run_manifest.json eval_holdout_v1.json \
+eval_holdout_v1_int8.json eval_holdout_v1_int8_decoder.json eval_behavior_v0.json \
+eval_behavior_v0.generations.jsonl gen_smoke.json console.log"
+( cd /workspace/aad && for f in $SMALL_FILES; do echo "$RUN/$f"; done | xargs sha256sum && sha256sum "$CKPT"/* ) \
+  > "$HASHFILE" || fail hash
+
+uvx --from huggingface_hub hf upload "$HF_REPO" \
+  "$CKPT" "$HF_PREFIX_BASE/$RUN_NAME/$STEP_TAG/model" --repo-type model || fail up_model
+for f in $SMALL_FILES; do
+  uvx --from huggingface_hub hf upload "$HF_REPO" \
+    "$RUN/$f" "$HF_PREFIX_BASE/$RUN_NAME/$f" --repo-type model || fail "up_$f"
 done
-uvx --from huggingface_hub hf upload AlphaAvatar/aadistill-artifacts \
-  artifacts/stage3/s2v1_artifact_hashes_2026-07-26.txt \
-  stage3/s2_blocks_v1/s2v1_artifact_hashes_2026-07-26.txt --repo-type model || fail up_hashes
+uvx --from huggingface_hub hf upload "$HF_REPO" \
+  "$HASHFILE" "$HF_PREFIX_BASE/$RUN_NAME/$(basename "$HASHFILE")" --repo-type model || fail up_hashes
 
-echo "MARKER:POST_DONE" >> /workspace/run_markers.log
+echo "MARKER:POST_DONE:${RUN_NAME}" >> /workspace/run_markers.log

@@ -1,5 +1,8 @@
 #!/bin/bash
-# Pod setup for the s2_blocks_v1 session (2026-07-26). Emits marker lines.
+# Pod setup, parameterized by run_env.sh. Emits MARKER: lines to /workspace/setup.log.
+#
+# Markers, in order: ENV_READY -> CKPT_READY -> TESTS_PASSED -> SETUP_DONE.
+# Any failure emits SETUP_FAILED:<step> and exits non-zero.
 set -x
 exec > /workspace/setup.log 2>&1
 
@@ -11,6 +14,8 @@ mkdir -p "$HF_HOME"
 
 fail() { echo "MARKER:SETUP_FAILED:$1"; exit 1; }
 
+source /workspace/run_env.sh || fail source_run_env
+
 apt-get update -qq && apt-get install -y -qq zstd > /dev/null || fail apt
 command -v uv >/dev/null || curl -LsSf https://astral.sh/uv/install.sh | sh || fail uv_install
 export PATH="$HOME/.local/bin:$PATH"
@@ -18,18 +23,20 @@ export PATH="$HOME/.local/bin:$PATH"
 cd /workspace || fail cd
 # --- transfer bundle + data from the private HF repo ---
 export HF_HUB_ENABLE_HF_TRANSFER=0
-uvx --from huggingface_hub hf download AlphaAvatar/aadistill-artifacts \
-  transfer/repo_20260726.bundle transfer/stage2_data_20260726.tar.zst \
+uvx --from huggingface_hub hf download "$HF_REPO" \
+  "$TRANSFER_BUNDLE" "$TRANSFER_DATA" \
   --repo-type model --local-dir /workspace/xfer || fail hf_transfer_download
 
 sha256sum -c /workspace/hashes_transfer.txt || fail transfer_hash
-git clone /workspace/xfer/transfer/repo_20260726.bundle aad || fail clone
+git clone "/workspace/xfer/$TRANSFER_BUNDLE" aad || fail clone
 cd /workspace/aad || fail cd_repo
 git checkout main || fail checkout
 
 # --- data ---
-tar --use-compress-program=unzstd -xf /workspace/xfer/transfer/stage2_data_20260726.tar.zst || fail untar
-ls data/stage2_v1/train data/stage2/val data/warmup/holdout_v1.jsonl || fail data_layout
+tar --use-compress-program=unzstd -xf "/workspace/xfer/$TRANSFER_DATA" || fail untar
+ls data/stage2_v1/train data/stage2/val "$HOLDOUT" || fail data_layout
+# The behavior prompt set is tracked in the repo, so it arrives with the bundle.
+ls "$BEHAVIOR_PROMPTS" || fail behavior_prompts_missing
 
 # --- cu128 torch + env ---
 sed -i 's|url = "https://download.pytorch.org/whl/cpu"|url = "https://download.pytorch.org/whl/cu128"|' pyproject.toml || fail sed
@@ -40,14 +47,17 @@ uv sync || fail uv_sync
 uv run python -c "import torch; assert torch.cuda.is_available(); print(torch.__version__, torch.cuda.get_device_name(0))" || fail cuda_check
 echo "MARKER:ENV_READY"
 
-# --- start checkpoint from HF (A/B revision-pinned) ---
-uvx --from huggingface_hub hf download AlphaAvatar/aadistill-artifacts \
-  --repo-type model --revision 526caa780132dfcc522fcd1f8093fa7351e0db0c \
-  --include "stage3/s2_blocks_v0/step_000660/model/*" \
-  --local-dir /workspace/hfckpt || fail ckpt_download
-mkdir -p artifacts/stage3/s2_blocks_v0/checkpoints/step_000660
-cp -r /workspace/hfckpt/stage3/s2_blocks_v0/step_000660/model \
-  artifacts/stage3/s2_blocks_v0/checkpoints/step_000660/model || fail ckpt_place
+# --- start + reference checkpoints from HF (each revision-pinned) ---
+for entry in "${REF_CKPTS[@]}"; do
+  glob=$(printf '%s' "$entry" | cut -d'|' -f1)
+  dest=$(printf '%s' "$entry" | cut -d'|' -f2)
+  rev=$(printf '%s' "$entry" | cut -d'|' -f3)
+  uvx --from huggingface_hub hf download "$HF_REPO" \
+    --repo-type model --revision "$rev" \
+    --include "$glob/*" --local-dir /workspace/hfckpt || fail "ckpt_download_$glob"
+  mkdir -p "$(dirname "$dest")"
+  cp -r "/workspace/hfckpt/$glob" "$dest" || fail "ckpt_place_$glob"
+done
 sha256sum -c /workspace/hashes_ckpt.txt || fail ckpt_hash
 echo "MARKER:CKPT_READY"
 
