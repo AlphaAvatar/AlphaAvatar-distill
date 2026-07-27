@@ -217,3 +217,111 @@ weights, download+hash for small files) by
 Review the curves, apply the fired decision rule to the recipe, update
 `logs/STATE.md`, `logs/supported_models.md` and the perf trend, and decide on
 README Optim record entries (maintainer approval required).
+
+---
+
+# Review (added 2026-07-27, agent — everything above is machine-generated)
+
+**Verdict: both pre-registered rules fired. The recovery recipe loses its
+warm-up ladder, and the behavior eval inverted the ranking the primary metric
+produced.** No arm failed; no abort rule fired; every mechanical gate passed.
+
+## What the numbers say
+
+| | s1@660 | A0 `chain` | A1 `from_s1` | A2 `from_init` |
+|---|---|---|---|---|
+| total steps to endpoint | 660 | 4020 | 3360 | **2700** |
+| holdout_v1 NLL (bf16) | 4.2107 | **3.8003** | 3.8067 | 3.8285 |
+| val_v1 ce (final) | – | 1.7898 | 1.7939 | 1.8222 |
+| val_v0 ce (final) | – | 2.4374 | 2.4404 | 2.5173 |
+| INT8 decoder-scope | +0.03% | +0.08% | +0.13% | +0.20% |
+| format_ok | 0.105 | 0.066 | 0.145 | **0.224** |
+| think_closed | 0.263 | 0.316 | 0.513 | **0.605** |
+| empty_answer | 0.605 | 0.382 | 0.211 | **0.171** |
+| tool_call_parsed | 0.083 | 0.000 | 0.000 | **0.250** |
+| rag evidence_hit *credited* | 0.167 | 0.000 | 0.083 | **0.333** |
+
+1. **Rule 1 — the A/B arm-B leg was neutral (+0.17%, band 1%).** The 660 steps
+   spent chaining through a checkpoint that was overfitting a spent corpus
+   bought nothing measurable on the primary metric. val_v1 (+0.23%) and val_v0
+   (+0.12%) agree, and those are directly comparable because the seed was pinned.
+2. **Rule 4 — the warm-up ladder is unnecessary at this data scale (+0.74%).**
+   A single-stage run from the raw Stage 1 init reaches the chain's quality
+   with **33% fewer optimizer steps** and removes two prior training legs from
+   the lineage. This is the outcome the proposal called highest-value because it
+   *deletes machinery* (P1): future recovery runs need one config, not three.
+3. **The behavior eval reverses the holdout ranking.** A0 is first on holdout
+   and **last** on every format axis; A2 is last on holdout (by 0.74%, inside
+   the band) and **first** on every format axis, including the only arm that
+   emits parseable tool calls (3/12) and the best credited grounding (0.333).
+   Read plainly: the extra ladder legs were not just wasted compute, they were
+   *degrading* chat-format discipline while improving next-token NLL.
+4. **INT8 robustness is preserved at every start point** (+0.13%/+0.29% for A1,
+   +0.20%/+0.33% for A2 at decoder/full scope), consistent with s1@660 and A0.
+   Nothing about dropping the ladder costs quantization headroom (P9).
+5. **The shared failure mode is unchanged and is now quantified.** All three
+   2700-step arms are verbose, repetitive and bad at stopping: `rep_3gram`
+   0.35–0.41, `answer_words` 199–231, `truncated_at_cap` 0.58–0.67. The smoke
+   output for A1 is literally `2+2=4 / 2+2=4 / 4+2=6 / 6+2=8 …`. Recovery is
+   improving *what the model knows* while leaving *what a good answer looks
+   like* untouched — the target-style diagnosis from 2026-07-26, now measured
+   rather than eyeballed.
+
+## Caveats a reader must carry forward
+
+- **One run per arm; no variance estimate.** The 1% band is a judgment call
+  carried over from the 2026-07-25 A/B, and GPU run-to-run variance at the
+  holdout level is still unmeasured. A0 vs A1 (+0.17%) is well inside any
+  plausible noise floor; A2's +0.74% is inside the band but not obviously
+  inside noise. Measuring variance once would firm up both conclusions.
+- **The behavior comparison had no pre-registered band.** It was built during
+  this session, so its deltas are exploratory. They are reported because the
+  direction is consistent across four independent format metrics and across
+  three arms, not because any single row is decisive. n=76 prompts (12/group,
+  4 for `multihop_qa`): a 0.08 delta in `format_ok` is ~6 prompts.
+- **A2 is not "single-stage is optimal".** It answers only "does single-stage
+  match the ladder *under the ladder's own recipe*" — lr 2e-4 / warmup 60,
+  tuned for a warm start. A2 doing this well *despite* the mismatch strengthens
+  the conclusion; it does not establish what a from-init-tuned run would reach.
+- **Best checkpoint depends on the metric, and the two disagree.**
+  `s2_blocks_v1` keeps the best holdout NLL by 0.74%; `s2v1_from_init` is
+  better on every behavior axis and costs a third less to produce. For a
+  realtime agent target (P10) the behavior evidence is the more relevant one,
+  which is why the recipe recommendation below follows A2 — but that is a
+  judgment, not a rule the ablation pre-registered.
+- Cross-device scoring is not comparable (decision record 2026-07-27); every
+  row in the behavior table was produced on this session's L40S.
+
+## Consequences for the recipe
+
+1. **The canonical Stage 3 recovery run is now single-stage from the Stage 1
+   init**: `configs/stage3_s2v1_from_init.json`, 2700 steps, attention-unfrozen
+   freeze set, seed 20260726. The `s1_ffn_norm` → `s2_blocks` ladder is retired
+   for this architecture and data scale.
+2. `s2v1_from_init` step 2700 becomes the **default start point / branch point**
+   for the next recovery experiment.
+3. The next lever is unambiguous and unchanged: **target style**. Both remaining
+   proposals point at it; `eval_behavior_v0` can now see it.
+
+## Cost and infrastructure
+
+- Session cost **$5.82** (balance 238.98 → 233.17), pod `ruib84xvfyieqm`,
+  1× L40S, `--terminate-after` backstop 8 h, deleted at teardown; 0 pods remain.
+  Under the $9 approved ceiling and close to the proposal's $6.0–6.5 estimate.
+- Wall clock 5.77 h: setup **4 min** (vs 38 min last session — the transfer
+  relay and a US-side link, not a change in method), reference behavior
+  scorecards 20 min, training 2×2.32 h (80%), post-run gates 17 min per arm,
+  fetch+verify+teardown 2 min.
+- Running two arms on one pod worked as intended: setup was **1.2%** of session
+  spend, down from 19% when it was paid per-arm.
+- The parameterized `scripts/pod/*` drove the whole session unattended,
+  including the new pre-registered abort check (evaluated and cleared for A2:
+  `val_ce 12.084 → 2.605 at step 300`). Pod tests: 85 passed / 6 skipped.
+- Upload verification: **16/16 files per arm** matched pod-side sha256.
+
+## Next action
+
+Teacher-generated answers (`logs/proposals/2026-07-27_stage2_teacher_generated_answers.md`)
+is now unblocked and is the direct attack on the measured defect. It changes the
+official data mixture, so it needs maintainer approval (AGENTS.md 4.4) and a
+budget decision. A cheap variance run would also firm up the 1% band.

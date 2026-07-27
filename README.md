@@ -18,10 +18,14 @@ The goal is to make distillation **reproducible, automated, and useful for realt
 | 4 | 2026-07-25 | [s2 A/B arm A](./logs/experiments/2026-07-25_stage3_s2_ab_gpu_run.md) | control: +660 FFN-only steps; regressed on mixture-v0 epochs 3–4 | 4.2747 |
 | 5 | 2026-07-25 | [s2 A/B arm B](./logs/experiments/2026-07-25_stage3_s2_ab_gpu_run.md) | attention unfrozen; freeze set adopted, holdout flat (data-limited) | 4.2118 |
 | 6 | 2026-07-26 | [s2 on mixture v1](./logs/experiments/2026-07-26_stage3_s2_blocks_v1_gpu_run.md) | same recipe, 4.11× data, 2700 steps; plateau broken | **3.8003** |
+| 7 | 2026-07-27 | [start-point ablation: from_s1](./logs/experiments/2026-07-27_stage3_start_point_ablation.md) | same 2700-step leg from s1@660; the A/B arm-B leg was neutral (+0.17%) | 3.8067 |
+| 8 | 2026-07-27 | [start-point ablation: from_init](./logs/experiments/2026-07-27_stage3_start_point_ablation.md) | single-stage from Stage 1 init, 2700 steps total; warm-up ladder unnecessary (+0.74%) | 3.8285 |
 
 Reference points on the same set: teacher **2.6264** · random-init 0.6B baseline **12.1286**.
 
-The latest run closed 26% of the remaining gap to the teacher and left INT8 fake-quant degradation at +0.08%/+0.21%, but its generation smoke still shows answer-style defects, so the next steps are a start-point ablation and a behavioural eval rather than more data volume. Current state and next actions: [`logs/STATE.md`](./logs/STATE.md); costed, unapproved work: [`logs/proposals/`](./logs/proposals/).
+Attempts 7–8 are a fixed-budget ablation of the *start point*, not of the training leg: all three of runs 6–8 ran the identical 2700-step leg at the same seed, from lineages costing 4020, 3360 and 2700 total steps. Both landed inside the pre-registered 1% band, so the recovery recipe dropped its two warm-up legs and became a single stage — a third less compute per iteration.
+
+That ablation also motivated a second, non-NLL gate. `holdout_v1` is fineweb-edu text and is nearly blind to chat format, grounding, refusal and tool-call validity, which is where these students actually fail; [`eval_behavior_v0`](./data/eval_behavior_v0/) scores 76 held-out prompts with mechanical checks only (no LLM judge, so it is free and reproducible from the stored generations). It **reversed the ranking above**: the cheapest lineage (attempt 8) is the best-behaved one, and the best-NLL checkpoint (attempt 6) is the worst. Details and caveats — single run per arm, no variance estimate — are in the [run log](./logs/experiments/2026-07-27_stage3_start_point_ablation.md). Current state and next actions: [`logs/STATE.md`](./logs/STATE.md); costed, unapproved work: [`logs/proposals/`](./logs/proposals/).
 
 The figure regenerates from [`assets/perf_trend.json`](./assets/perf_trend.json) with `uv run python scripts/plot_perf_trend.py`; the table above comes from the same file via `--print-table`, and every point is backed by a log in [`logs/experiments/`](./logs/experiments/).
 
@@ -120,13 +124,17 @@ AlphaAvatar-distill/
 │   ├── data.py             #   mixture loader: schema, chat render, loss masks, packing
 │   ├── train.py            #   Stage 3 recovery trainer (CE+KD, freeze policy, resume)
 │   ├── quant.py            #   INT8 weight fake-quantization for deployment evals
+│   ├── behavior.py         #   eval_behavior_v0 scorers: format, echo, grounding, tools
 │   ├── env.py              #   env fingerprint, code-state hash, determinism
 │   └── manifest.py         #   sha256 + JSON manifest helpers
 ├── scripts/                # one CLI per stage + corpus builders + eval + figure
-│   └── pod/                #   GPU session scripts and durable orchestrator
+│   ├── eval_ppl.py         #   held-out NLL / perplexity, optional INT8 fake-quant
+│   ├── eval_behavior.py    #   behavior scorecard for a checkpoint (greedy, mechanical)
+│   └── pod/                #   GPU session scripts and durable orchestrator (run_env.sh)
 ├── configs/                # stage recipes; Stage 3 runs are one config each
 ├── data/                   # corpus manifests (jsonl gitignored, rebuildable)
-├── tests/                  # 75 CPU tests: algebra, loader, trainer, quant, builders, figure
+│   └── eval_behavior_v0/   #   76-prompt behavior set + manifest (both committed)
+├── tests/                  # 91 CPU tests: algebra, loader, trainer, quant, scorers, builders
 ├── logs/                   # project memory — read STATE.md first
 │   ├── STATE.md            #   current state, verified facts, next actions
 │   ├── decisions.md        #   decision records (why, alternatives, risks)

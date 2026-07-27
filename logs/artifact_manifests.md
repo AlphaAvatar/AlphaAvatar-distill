@@ -4,6 +4,37 @@ Manifests for artifacts stored outside GitHub (AGENTS.md 2.5). All entries
 in `AlphaAvatar/aadistill-artifacts` are **private** storage/transfer
 artifacts, not public releases.
 
+## stage3/s2v1_from_init and stage3/s2v1_from_s1 — start-point ablation finals
+
+- **Artifact:** same repo, paths `stage3/s2v1_from_init/` and
+  `stage3/s2v1_from_s1/`: `step_002700/model/` (final fp32 checkpoint, 2.3 GB
+  each) + `train_log.jsonl`, `run_manifest.json`, three holdout eval JSONs,
+  `eval_behavior_v0.json`, `eval_behavior_v0.generations.jsonl`,
+  `gen_smoke.json`, `console.log`, and the pod-side sha256 list (16 files each).
+  Reference behavior scorecards for `s1_ffn_norm_v0@660` and
+  `s2_blocks_v1@2700`, scored on the same GPU in the same session, are under
+  `stage3/reference_scorecards/`.
+- **Revision:** uploaded 2026-07-27 by `scripts/pod/post_run.sh`; upload
+  independently verified after the fact — **16/16 files match pod sha256 for
+  each arm** (`scripts/pod/verify_and_report.py verify --run <arm>`).
+- **Hashes (sha256):** per-file lists committed at
+  `artifacts/stage3/s2v1_from_init_artifact_hashes_20260727.txt` and
+  `artifacts/stage3/s2v1_from_s1_artifact_hashes_20260727.txt` (local,
+  gitignored; computed pod-side before upload) and mirrored in the repo under
+  each arm's prefix.
+- **License:** internal artifacts, same derivation as the entries below
+  (teacher Apache-2.0 + the permissive-source `stage2_offline_v1` mixture).
+  Not for redistribution as-is (no model card).
+- **Creation command:** `uv run python scripts/train_stage3.py --config
+  configs/stage3_s2v1_from_init.json` (config sha256 `b2520a2e0ad8…`) and
+  `--config configs/stage3_s2v1_from_s1.json` (`7e0612ccf3aa…`), code state git
+  `f3d7547`, pod `ruib84xvfyieqm`, 1× L40S, 2026-07-27.
+- **Related logs:** `experiments/2026-07-27_stage3_start_point_ablation.md`.
+  `s2v1_from_init` holdout_v1 NLL **3.8285** — **the recommended branch point**
+  for further recovery work (best behavior scorecard, 2700 total steps);
+  `s2v1_from_s1` **3.8067**.
+- **Not retained:** optimizer state and rolling checkpoints (deleted with the pod).
+
 ## stage1/qwen3_0p6b_init_v0 — Stage 1 init checkpoint (start point of arm A2)
 
 - **Artifact:** same repo, path `stage1/qwen3_0p6b_init_v0/checkpoint/`

@@ -66,6 +66,22 @@
       "summary": "same recipe, 4.11× data, 2700 steps; plateau broken",
       "nll": 3.8003,
       "log": "logs/experiments/2026-07-26_stage3_s2_blocks_v1_gpu_run.md"
+    },
+    {
+      "date": "2026-07-27",
+      "stage": "stage3",
+      "run": "start-point ablation: from_s1",
+      "summary": "same 2700-step leg from s1@660; the A/B arm-B leg was neutral (+0.17%)",
+      "nll": 3.8067,
+      "log": "logs/experiments/2026-07-27_stage3_start_point_ablation.md"
+    },
+    {
+      "date": "2026-07-27",
+      "stage": "stage3",
+      "run": "start-point ablation: from_init",
+      "summary": "single-stage from Stage 1 init, 2700 steps total; warm-up ladder unnecessary (+0.74%)",
+      "nll": 3.8285,
+      "log": "logs/experiments/2026-07-27_stage3_start_point_ablation.md"
     }
   ]
 }
