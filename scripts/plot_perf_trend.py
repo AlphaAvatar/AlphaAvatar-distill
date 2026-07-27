@@ -170,7 +170,8 @@ def render(data: dict, out: Path = OUT) -> Path:
     scored = [s["best"]["score"] for s in systems]
     scored += [s["previous_best"]["score"] for s in systems if s.get("previous_best")]
     scored += [r["score"] for r in refs if r.get("score") is not None]
-    hi = max(scored) * 1.75
+    # Headroom for the top label, but never past 100% — these are rates.
+    hi = min(1.0, max(scored) * 1.3)
     sizes = [s["params"] for s in systems] + [r["params"] for r in refs]
 
     fig = plt.figure(figsize=(10.0, 5.0), dpi=120)
@@ -193,7 +194,8 @@ def render(data: dict, out: Path = OUT) -> Path:
         draw_system(ax, system)
     target = next((r for r in refs if r.get("role") == "target"), None)
     if target and systems:
-        draw_compression_bracket(ax, systems[0], target, hi * 0.085)
+        # Low enough to clear the lowest system label above it.
+        draw_compression_bracket(ax, systems[0], target, hi * 0.035)
 
     ax.set_xlabel(f"{size_axis['label']} — {size_axis['note']}", fontsize=9, color=INK_SOFT)
     ax.set_ylabel(headline["axis"], fontsize=9, color=INK_SOFT)

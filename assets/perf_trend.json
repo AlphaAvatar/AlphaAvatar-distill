@@ -65,9 +65,9 @@
       "short": "teacher",
       "role": "target",
       "params": 4022468096,
-      "score": null,
-      "note": "not yet scored — needs ≈1 h GPU in thinking mode",
-      "log": "logs/experiments/2026-07-14_stage1_qwen3_0p6b_init_v0.md"
+      "score": 0.7443,
+      "note": "scored 2026-07-28, native thinking mode, cap 4096",
+      "log": "logs/experiments/2026-07-28_teacher_behavior_v0.md"
     }
   ],
   "attempts": [

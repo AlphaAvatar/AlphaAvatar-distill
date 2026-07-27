@@ -13,8 +13,9 @@ held-out NLL** — it is `behavior_score_v0` (six credited mechanical axes on 76
 held-out prompts; NLL stays as a ±1% guard rail), and the README figure is now
 **one point per student at its current best** against its teacher, ARC-style.
 Real-world test suites take over as the headline once the student can attempt
-them. Current best: `s2v1_from_init@2700` at **20.2%**; **the teacher has never
-been scored, so the figure has no ceiling** — the top next action is to fix that.
+them. Current best: `s2v1_from_init@2700` at **20.2%**; the teacher was scored
+on 2026-07-28 at **74.4%**, so the figure finally has both ends of the gap
+([log](experiments/2026-07-28_teacher_behavior_v0.md)).
 
 Third directive, same day: **the teacher is never forced out of thinking mode.**
 Evaluation and generation judge it at its actual capability, so the teacher
@@ -199,9 +200,12 @@ a cheap pilot instead of being one bulk spend. Item 2 is the control run that
 every trace comparison needs; without it, "traces helped" and "samples are no
 longer torn" are the same number.
 
-1. **Score the teacher on `eval_behavior_v0`** — ran 2026-07-28 (thinking mode,
-   no prefill, cap 4096, ~72 min, ~$1.20). Gives the figure its missing ceiling
-   *and* the teacher's trace-length distribution, which sizes `block_len`.
+1. ~~Score the teacher~~ — **done 2026-07-28**, 0.7443 vs the student's 0.2015
+   ([log](experiments/2026-07-28_teacher_behavior_v0.md)). Biggest gaps: math
+   +0.714, tool_call +0.667, format_ok +0.618. Grounding's ceiling is only
+   0.562, so effort there has little headroom. **Carry the caveat:** student
+   rows were scored at cap 512 and the teacher at 4096, so form metrics are not
+   yet like-for-like — item 2's session re-scores the references at 4096.
 2. **Packing / `block_len` control run — the baseline every trace run needs.**
    The data path changed (best-fit packing) and the measured length p90 is
    **1,508 against `block_len` 1024**, so the current baseline trained on torn
