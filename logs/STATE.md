@@ -1,5 +1,18 @@
 # Current project state
 
+> **A PAID GPU SESSION IS RUNNING (started 2026-07-28 ~05:56 UTC).**
+> Pod `absiebkmq7hjbr` (1× L40S, $0.99/h, auto-terminate 2026-07-28T15:45:16Z).
+> Driver: **tmux session `packing`** on the dev box, orchestrator pid 1953386.
+> Log `artifacts/stage3/packing_control_orchestrator.log` · status file
+> `artifacts/stage3/packing_control_orchestrator.status`.
+> Two arms: `s2v1_bl2048` (control, seed 20260726) and `s2v1_bl2048_seedB`
+> (seed 20260728, the noise floor). Expected ~7.1 h, ~$7.0.
+> Pre-registration: `logs/proposals/2026-07-28_stage3_packing_blocklen_control.md`.
+> The orchestrator deletes the pod itself only after upload verification passes;
+> on a fatal error it leaves the pod up and the terminate-after deadline is the
+> cost backstop. **If it is still running, do not start another GPU session.**
+> Inspect: `tail -f artifacts/stage3/packing_control_orchestrator.log`
+
 Updated: 2026-07-28 (UTC+8 dev box) — **The teacher has a ceiling: 0.7443 on
 `eval_behavior_v0` vs the student's 0.2015**, so the figure shows both ends of
 the gap for the first time ([log](experiments/2026-07-28_teacher_behavior_v0.md)).
