@@ -65,15 +65,24 @@ REF = {
 # INT8 deltas measured on s1@660, 2026-07-26 (CPU fake-quant).
 REF_INT8 = {"decoder_scope_pct": 0.03, "full_scope_pct": 0.21}
 
-# Pre-registered ablation constants
-# (logs/proposals/2026-07-27_stage3_start_point_ablation.md).
-A0_CHAIN_NLL = 3.8003
-DECISION_BAND = 0.01  # 1% relative
-TOTAL_STEPS_TO_ENDPOINT = {
-    "s2_blocks_v1": 4020,
-    "s2v1_from_s1": 3360,
-    "s2v1_from_init": 2700,
+# Pre-registered constants for the CURRENT session
+# (logs/proposals/2026-07-28_stage3_packing_blocklen_control.md).
+#
+# This block plus `apply_decision_rules` and the doc template in `cmd_report`
+# are the session-specific parts of this file; everything else is generic.
+A0_CHAIN_NLL = 3.8003          # kept: the REF table is still quoted against it
+DECISION_BAND = 0.01           # rule R2 guard rail, 1% relative on holdout NLL
+BASELINE_RUN = "s2v1_from_init"          # what the control is measured against
+BASELINE_NLL = 3.8285                    # its holdout_v1 bf16 NLL (2026-07-27)
+BASELINE_REF_SCORECARD = "s2v1_from_init_step2700"  # re-scored this session
+CONTROL_ARM = "s2v1_bl2048"
+REPLICATE_ARM = "s2v1_bl2048_seedB"
+NOISE_REREAD_THRESHOLD = 0.05  # rule R5
+ABLATION_BEHAVIOR = {          # 2026-07-27 ranking, for rule R5's re-read
+    "s2v1_from_init": 0.2015, "s1_ffn_norm_v0@660": 0.1290,
+    "s2v1_from_s1": 0.0947, "s2_blocks_v1": 0.0891,
 }
+REPORT_PATH = "logs/experiments/2026-07-28_stage3_packing_control.md"
 
 
 def run_dir(run: str) -> Path:
@@ -371,57 +380,126 @@ def behavior_table(rows: list[tuple[str, dict]]) -> str:
     return "\n".join(out)
 
 
+def score_of_payload(payload: dict | None) -> float | None:
+    """`behavior_score_v0` from a scorecard JSON.
+
+    The headline metric is *derived* from `per_sample`, not stored in the
+    scorecard (src/aadistill/behavior.py:behavior_score), so it is recomputed
+    here rather than read out of `aggregate`.
+    """
+    if not payload or not payload.get("per_sample"):
+        return None
+    sys.path.insert(0, str(REPO / "src"))
+    from aadistill.behavior import behavior_score
+
+    try:
+        return float(behavior_score(payload["per_sample"])["score"])
+    except (ValueError, KeyError):
+        return None
+
+
 def apply_decision_rules(results: dict[str, dict]) -> list[str]:
     """Mechanically apply the pre-registered rules. Interpretation stays human."""
-    C = A0_CHAIN_NLL
-    S = (results.get("s2v1_from_s1") or {}).get("bf16")
-    I = (results.get("s2v1_from_init") or {}).get("bf16")
-    lines = [f"Pre-registered band: **{DECISION_BAND:.0%} relative** on holdout_v1 "
-             f"bf16 NLL. C (A0 `s2_blocks_v1`) = {C:.4f}."]
+    A = results.get(CONTROL_ARM) or {}
+    B = results.get(REPLICATE_ARM) or {}
+    a_beh = score_of_payload(read_json(CONTROL_ARM, "eval_behavior_v0.json"))
+    b_beh = score_of_payload(read_json(REPLICATE_ARM, "eval_behavior_v0.json"))
+    a_nll, b_nll = A.get("bf16"), B.get("bf16")
 
-    if S is None:
-        lines.append("- Rules 1–3 **not evaluable**: arm `s2v1_from_s1` produced no holdout number.")
+    base_beh = score_of_payload(read_ref_scorecard(BASELINE_REF_SCORECARD))
+
+    lines = [
+        "Rules registered in "
+        "`logs/proposals/2026-07-28_stage3_packing_blocklen_control.md` §6, "
+        "applied mechanically here.",
+        "",
+        f"- Baseline `{BASELINE_RUN}@2700`: holdout **{BASELINE_NLL:.4f}** "
+        f"(2026-07-27), behavior **"
+        + (f"{base_beh:.4f}" if base_beh is not None else "not re-scored")
+        + "** (re-scored on this pod, same device).",
+    ]
+
+    # --- R0: the noise floor -------------------------------------------------
+    noise = None
+    if a_beh is None or b_beh is None:
+        lines.append("- **R0 not evaluable**: both arms must produce a behavior "
+                     "scorecard to estimate the noise floor "
+                     f"(A={a_beh}, B={b_beh}).")
     else:
-        rel = (S - C) / C
-        lines.append(f"- S (`s2v1_from_s1`) = {S:.4f} → S vs C = {rel * 100:+.2f}%")
-        if abs(rel) < DECISION_BAND:
-            lines.append("  → **Rule 1 fires**: the A/B arm-B leg was *neutral*. "
-                         "Adopt `from_s1` as the canonical lineage (shorter, one "
-                         "fewer confound); stop chaining through checkpoints that "
-                         "overfit their mixture.")
-        elif rel < -DECISION_BAND:
-            lines.append("  → **Rule 2 fires**: the arm-B leg *hurt*. s1@660 becomes "
-                         "the canonical branch point; record \"do not continue from a "
-                         "run that exhausted its corpus\" in the recipe.")
-        else:
-            lines.append("  → **Rule 3 fires**: progressive chaining *helps*; keep the "
-                         "ladder and log the measured per-leg benefit.")
+        noise = abs(a_beh - b_beh)
+        lines.append(f"- **R0 — noise floor**: |A − B| = |{a_beh:.4f} − "
+                     f"{b_beh:.4f}| = **{noise:.4f}** on `behavior_score_v0`. "
+                     "This is the project's first run-to-run variance estimate; "
+                     "the arms differ only in seed (data order, packing order "
+                     "and the val subset).")
+        if a_nll is not None and b_nll is not None:
+            lines.append(f"  Holdout NLL noise: |{a_nll:.4f} − {b_nll:.4f}| = "
+                         f"**{abs(a_nll - b_nll):.4f}** "
+                         f"({abs(a_nll - b_nll) / b_nll * 100:.2f}% relative).")
 
-    if I is None:
-        lines.append("- Rules 4–5 **not evaluable**: arm `s2v1_from_init` produced no holdout number.")
-    elif S is not None:
-        best = min(C, S)
-        rel_i = (I - best) / best
-        lines.append(f"- I (`s2v1_from_init`) = {I:.4f} → I vs min(C,S)={best:.4f} "
-                     f"= {rel_i * 100:+.2f}%")
-        if rel_i <= DECISION_BAND:
-            lines.append("  → **Rule 4 fires**: the warm-up ladder is *unnecessary at "
-                         "this data scale*. Future recovery runs start from the Stage 1 "
-                         "init with the full freeze set, saving 660–1320 steps and a "
-                         "session per iteration (P1: this deletes machinery).")
+    # --- R1: adoption --------------------------------------------------------
+    if a_beh is None or base_beh is None or noise is None:
+        lines.append("- **R1 not evaluable**: needs the control's behavior score, "
+                     "the re-scored baseline, and the R0 noise floor.")
+    else:
+        delta = a_beh - base_beh
+        lines.append(f"- **R1 — adoption**: Δbehavior = {a_beh:.4f} − "
+                     f"{base_beh:.4f} = **{delta:+.4f}** against a noise floor of "
+                     f"{noise:.4f}.")
+        if delta > noise:
+            lines.append("  → **R1 fires: adopt** best-fit packing at "
+                         "`block_len` 2048 as the default Stage 3 data path. The "
+                         "improvement exceeds run-to-run variance.")
         else:
-            lines.append("  → **Rule 5 fires**: the ladder is *justified*; quantify the "
-                         "benefit per extra 660/1320 steps and size the next recipe's "
-                         "warm-up leg accordingly.")
+            lines.append("  → **R1 does not fire**: the delta does not exceed the "
+                         "noise floor. The baseline data path stands; record the "
+                         "control as neutral-or-negative. Note this does *not* "
+                         "say packing is harmless — it says the effect is not "
+                         "resolvable at this sample size.")
 
-    lines.append("")
-    lines.append("**Total compute to endpoint (deliberately not fixed — this is a "
-                 "start-point comparison, so a tie means the cheaper lineage wins):**")
-    lines.append("")
-    lines.append("| arm | total steps to endpoint |")
-    lines.append("|---|---:|")
-    for name, steps in TOTAL_STEPS_TO_ENDPOINT.items():
-        lines.append(f"| `{name}` | {steps} |")
+    # --- R2: guard rail ------------------------------------------------------
+    if a_nll is None:
+        lines.append("- **R2 not evaluable**: the control produced no holdout NLL.")
+    else:
+        rel = (a_nll - BASELINE_NLL) / BASELINE_NLL
+        lines.append(f"- **R2 — guard rail**: holdout {a_nll:.4f} vs baseline "
+                     f"{BASELINE_NLL:.4f} = **{rel * 100:+.2f}%** "
+                     f"(band ±{DECISION_BAND:.0%}).")
+        if rel > DECISION_BAND:
+            lines.append("  → **R2 fires**: NLL regressed beyond the band. Do not "
+                         "adopt on behavior alone — report the tradeoff and "
+                         "escalate the decision to the maintainer.")
+        else:
+            lines.append("  → R2 clear: inside the guard-rail band.")
+
+    # --- R5: re-read the ablation -------------------------------------------
+    if noise is None:
+        lines.append("- **R5 not evaluable** (no noise floor).")
+    elif noise > NOISE_REREAD_THRESHOLD:
+        ranked = " / ".join(f"{k} {v:.4f}" for k, v in ABLATION_BEHAVIOR.items())
+        lines.append(f"- **R5 fires**: noise {noise:.4f} exceeds "
+                     f"{NOISE_REREAD_THRESHOLD:.2f}. The 2026-07-27 ablation's "
+                     f"behavior ranking ({ranked}) must be re-read with this band "
+                     "attached, and the \"single-stage is best-behaved\" "
+                     "conclusion re-stated with the appropriate confidence.")
+    else:
+        lines.append(f"- R5 clear: noise {noise:.4f} ≤ "
+                     f"{NOISE_REREAD_THRESHOLD:.2f}, so the ablation's behavior "
+                     "ranking survives at its reported spacing.")
+
+    lines += [
+        "",
+        "**R3 (the stated mechanism) and R4 (abort) are judged by a human/agent "
+        "from the per-group tables below and the orchestrator log** — R3 asks "
+        "whether grounding and multi-hop specifically improved, which the "
+        "aggregate cannot answer.",
+        "",
+        "**Budget check (P6):** both arms ran 2,700 steps × 8 blocks × 2,048 "
+        "tokens = 44,236,800 tokens, identical to the baseline's 2,700 × 16 × "
+        "1,024. Declared asymmetry: the control sees ~7.7% fewer *supervised* "
+        "tokens (10,787,265 vs 11,681,472) because best-fit truncates oversized "
+        "samples and pads; the direction is conservative.",
+    ]
     return lines
 
 
@@ -445,8 +523,7 @@ def cmd_report(runs: list[str]) -> int:
     # behavior comparison: references (GPU-scored this session) + arms.
     beh_rows = []
     for ref_name, label in [
-        ("s1_ffn_norm_v0_step660", "s1@660 (reference)"),
-        ("s2_blocks_v1_step2700", "s2_blocks_v1 @2700 (A0 chain)"),
+        (BASELINE_REF_SCORECARD, f"{BASELINE_RUN}@2700 (baseline, re-scored here)"),
     ]:
         card = read_ref_scorecard(ref_name)
         if card:
@@ -472,25 +549,35 @@ def cmd_report(runs: list[str]) -> int:
     gate_lines = [f"- {'PASS' if ok else 'CHECK'} — {name}: {detail}"
                   for name, ok, detail in gates]
 
-    doc = f"""# 2026-07-27 — Stage 3 start-point ablation: chain vs s1@660 vs init (GPU)
+    doc = f"""# 2026-07-28 — Stage 3 packing / `block_len` control + first run-to-run variance (GPU)
 
 > Auto-generated by `scripts/pod/verify_and_report.py report` from the runs'
 > own logs. Numbers are measured and the pre-registered decision rules are
 > applied mechanically. **The stage verdict and any README Optim record entry
 > are deliberately left for human/agent review.**
 
-- **Agent:** Claude Code (Opus 5), autonomous session `{"start_point_ablation"}`.
-- **Objective:** Re-run the identical 2700-step mixture-v1 leg from different
-  start points to (a) remove the lineage confound from the current best
-  checkpoint and (b) test whether the FFN-first warm-up ladder is still needed
-  at the 22M-token data scale.
-- **Proposal:** `logs/proposals/2026-07-27_stage3_start_point_ablation.md`
+- **Agent:** Claude Code (Opus 5), autonomous session `packing_control`.
+- **Objective:** Re-run the `{BASELINE_RUN}` recipe with **only the data path
+  changed** — best-fit packing at `block_len` 2048 instead of
+  concatenate-then-cut at 1024 — so that later experiments (teacher traces
+  above all) are not confounded by "samples are no longer torn". The second arm
+  repeats the first at a different seed and is the project's **first run-to-run
+  variance measurement**; until now no "win" had a noise floor to be read
+  against.
+- **Proposal:** `logs/proposals/2026-07-28_stage3_packing_blocklen_control.md`
   (arms, budget and decision rules registered before the run).
 - **Arms this session:** {', '.join(f'`{r}`' for r in runs)}.
-  The third arm, `s2_blocks_v1` (A0 `chain`), was already paid for on 2026-07-26.
-- **Shared seed `20260726`** across all arms — required for comparability, since
-  the 64-block val subset is a permutation of `cfg["seed"] + 777`
-  (`src/aadistill/train.py:332`; decision record 2026-07-27).
+  `{CONTROL_ARM}` is the control (seed 20260726); `{REPLICATE_ARM}` is the
+  identical config at seed 20260728.
+- **Budget match (P6):** 2,700 steps × 8 blocks × 2,048 tokens = 44,236,800
+  tokens per arm, identical to the baseline's 2,700 × 16 × 1,024, at 2.01 vs
+  2.00 epochs over the mixture.
+- **Comparability:** the seed differs *between arms by design* (that is the
+  variance being measured), so the in-training primary val is not comparable
+  across them — `holdout_v1` (per-sample, `--max-seq-len` 1024) and
+  `eval_behavior_v0` are. The baseline was re-scored on this pod because
+  behavior scorecards are only comparable within one device (decision record
+  2026-07-27).
 
 ## Holdout comparison (primary metric)
 
@@ -537,7 +624,7 @@ Review the curves, apply the fired decision rule to the recipe, update
 README Optim record entries (maintainer approval required).
 """
 
-    out = REPO / "logs/experiments/2026-07-27_stage3_start_point_ablation.md"
+    out = REPO / REPORT_PATH
     out.write_text(doc)
     print(f"wrote {out}")
     return 0

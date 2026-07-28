@@ -328,9 +328,19 @@ done
 
 # ---------------------------------------------------------------- phase 5: report
 setst "RUNNING:report"
-uv run python scripts/pod/verify_and_report.py report --run "$(IFS=,; echo "${ARMS_DONE[*]}")" >>"$LOG" 2>&1 \
-  || fatal "report_generation_failed"
-log "experiment write-up generated"
+# NOT fatal: by this point every artifact is fetched and upload-verified, so the
+# write-up can be regenerated offline from local files. Treating a formatting
+# bug as fatal would skip teardown and leave a paid pod running for hours —
+# which is a real cost for a cosmetic failure. Upload verification above is the
+# safety condition for deletion; this is not.
+if uv run python scripts/pod/verify_and_report.py report \
+     --run "$(IFS=,; echo "${ARMS_DONE[*]}")" >>"$LOG" 2>&1; then
+  log "experiment write-up generated"
+else
+  log "WARNING: report generation failed — artifacts are fetched and verified;"
+  log "         regenerate with: uv run python scripts/pod/verify_and_report.py \\"
+  log "         report --run $(IFS=,; echo "${ARMS_DONE[*]}")"
+fi
 
 # ---------------------------------------------------------------- phase 6: git
 setst "RUNNING:git"
@@ -339,14 +349,16 @@ if git diff --cached --quiet; then
   log "nothing to commit"
 else
   git commit -q -F - >>"$LOG" 2>&1 <<MSG
-stage3: start-point ablation on mixture v1 (L40S) — logs + write-up
+stage3: packing/block_len control + first variance measurement (L40S) — logs + write-up
 
-Autonomous session, arms: ${ARMS_DONE[*]}. Each arm ran the same 2700-step
-leg from a different start point at seed 20260726, then gate evals (bf16
+Autonomous session ${SESSION}, arms: ${ARMS_DONE[*]}. Each arm ran the same
+2700-step mixture-v1 leg with best-fit packing at block_len 2048 (identical
+tokens/step and total token budget to the 1024 baseline), then gate evals (bf16
 holdout, INT8 fake-quant at both scopes, eval_behavior_v0, generation smoke),
 artifact upload to the private HF repo, and independent upload verification.
-Reference checkpoints were scored on eval_behavior_v0 on the same GPU so all
-arms are directly comparable.
+The two arms differ only in seed, so their spread is the project's first
+run-to-run noise floor. The baseline checkpoint was re-scored on the same GPU
+so the comparison is same-device.
 
 Write-up is auto-generated from the runs' own logs and reports measured
 numbers plus mechanical gate checks; the stage verdict is left open for review.
