@@ -92,22 +92,29 @@ def main() -> None:
     tokenizer = AutoTokenizer.from_pretrained(REPO_ROOT / cfg["student_path"])
     print(f"device {device}; encoding Stage 2 mixture from {cfg['data_dir']} ...")
     data_dir = REPO_ROOT / cfg["data_dir"]
+    packing = cfg.get("packing", "concat")
     train_blocks = build_blocks(
-        tokenizer, data_dir, "train", cfg["block_len"], cfg["groups"]
+        tokenizer, data_dir, "train", cfg["block_len"], cfg["groups"],
+        packing=packing, seed=cfg["seed"],
     )
-    val_blocks = build_blocks(tokenizer, data_dir, "val", cfg["block_len"], cfg["groups"])
+    val_blocks = build_blocks(
+        tokenizer, data_dir, "val", cfg["block_len"], cfg["groups"],
+        packing=packing, seed=cfg["seed"],
+    )
     extra_val_blocks = {}
     extra_val_stats = {}
     for name, extra_dir in (cfg.get("extra_val") or {}).items():
         blocks = build_blocks(
-            tokenizer, REPO_ROOT / extra_dir, "val", cfg["block_len"], None
+            tokenizer, REPO_ROOT / extra_dir, "val", cfg["block_len"], None,
+            packing=packing, seed=cfg["seed"],
         )
-        extra_val_blocks[name] = (blocks[0], blocks[1])
+        extra_val_blocks[name] = (blocks[0], blocks[1], blocks[4])
         extra_val_stats[name] = blocks[3]
     logger.log(
         "dataset_loaded",
         data_dir=cfg["data_dir"],
         block_len=cfg["block_len"],
+        packing=packing,
         tokenizer_sha256=tokenizer_hash(tokenizer),
         train=train_blocks[3],
         val=val_blocks[3],
@@ -140,8 +147,8 @@ def main() -> None:
     trainer = Trainer(
         cfg,
         student,
-        (train_blocks[0], train_blocks[1]),
-        (val_blocks[0], val_blocks[1]),
+        (train_blocks[0], train_blocks[1], train_blocks[4]),
+        (val_blocks[0], val_blocks[1], val_blocks[4]),
         teacher=teacher,
         device=device,
         out_dir=out_dir,

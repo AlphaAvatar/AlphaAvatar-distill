@@ -19,6 +19,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
 
 from aadistill.train import (
     Trainer,
+    build_blocks,
     epoch_permutation,
     kd_forward_kl,
     lr_factor,
@@ -325,3 +326,127 @@ def test_validate_config_extra_val_forms(tmp_path):
             tiny_model(1), toy_blocks(), None,
             extra_val_blocks={"val_v0": toy_blocks(n=2)}, device="cpu",
         )
+
+
+# ---------- packing knob (build_blocks) ----------
+
+
+def test_validate_config_packing_field(tmp_path):
+    """`packing` is optional (the logged runs omit it) and value-checked."""
+    validate_train_config(toy_cfg(tmp_path))  # absent -> concat, still valid
+    validate_train_config(toy_cfg(tmp_path, packing="concat"))
+    validate_train_config(toy_cfg(tmp_path, packing="best_fit"))
+    with pytest.raises(ValueError):
+        validate_train_config(toy_cfg(tmp_path, packing="bin_packing"))
+
+
+@pytest.fixture(scope="module")
+def teacher_tokenizer():
+    from transformers import AutoTokenizer
+
+    try:
+        return AutoTokenizer.from_pretrained(
+            "Qwen/Qwen3-4B-Thinking-2507",
+            revision="768f209d9ea81521153ed38c47d515654e938aea",
+            local_files_only=True,
+        )
+    except Exception:
+        pytest.skip("teacher tokenizer not in local HF cache")
+
+
+def _toy_split(tmp_path, lengths):
+    """Write a one-group train split whose samples have varied token lengths."""
+    split = tmp_path / "train"
+    split.mkdir(parents=True, exist_ok=True)
+    rows = [
+        {"id": f"t-{i:06d}", "group": "instruction", "source": "test",
+         "format": "text", "text": " ".join(["word"] * n)}
+        for i, n in enumerate(lengths)
+    ]
+    (split / "instruction.jsonl").write_text(
+        "\n".join(json.dumps(r) for r in rows) + "\n"
+    )
+    return tmp_path
+
+
+def test_build_blocks_packing_modes_differ_and_report_stats(
+    tmp_path, teacher_tokenizer
+):
+    data_dir = _toy_split(tmp_path / "data", [7, 61, 13, 40, 25, 55, 31, 19] * 6)
+    block_len = 64
+
+    ids_c, mask_c, groups_c, stats_c, content_c = build_blocks(
+        teacher_tokenizer, data_dir, "train", block_len, packing="concat"
+    )
+    ids_b, mask_b, groups_b, stats_b, content_b = build_blocks(
+        teacher_tokenizer, data_dir, "train", block_len, packing="best_fit", seed=7
+    )
+
+    assert ids_c.shape[1] == block_len and ids_b.shape[1] == block_len
+    assert len(groups_c) == ids_c.shape[0] and len(groups_b) == ids_b.shape[0]
+    # concat wastes nothing but tears samples; best_fit pads instead.
+    assert "dropped_tail_tokens" in stats_c["instruction"]
+    assert stats_b["instruction"]["efficiency"] <= 1.0
+    assert stats_b["instruction"]["padding_tokens"] > 0
+    # Padding is never supervised.
+    assert int(mask_b.sum()) < mask_b.numel()
+    assert int(mask_c.sum()) > 0
+    # Best-fit needs at least as many blocks for the same tokens (it pads).
+    assert ids_b.shape[0] >= ids_c.shape[0]
+
+
+def test_build_blocks_rejects_unknown_packing(tmp_path, teacher_tokenizer):
+    data_dir = _toy_split(tmp_path / "data", [10, 20, 30])
+    with pytest.raises(ValueError):
+        build_blocks(teacher_tokenizer, data_dir, "train", 64, packing="nope")
+
+
+def test_concat_has_no_content_mask_but_best_fit_marks_padding(
+    tmp_path, teacher_tokenizer
+):
+    """The content mask exists only where padding does."""
+    data_dir = _toy_split(tmp_path / "data", [7, 61, 13, 40, 25, 55] * 5)
+    _, _, _, _, content_c = build_blocks(
+        teacher_tokenizer, data_dir, "train", 64, packing="concat"
+    )
+    ids_b, _, _, stats_b, content_b = build_blocks(
+        teacher_tokenizer, data_dir, "train", 64, packing="best_fit", seed=3
+    )
+    assert content_c is None, "concat packing never pads"
+    assert content_b is not None and content_b.shape == ids_b.shape
+    padding = int((~content_b).sum())
+    assert padding == stats_b["instruction"]["padding_tokens"]
+    # Padding is a suffix of each block: content is monotone non-increasing.
+    assert bool((content_b[:, :-1].int() >= content_b[:, 1:].int()).all())
+
+
+def test_kd_scope_all_excludes_padding_when_content_mask_given():
+    """`all` means every real position, not every slot in a padded block."""
+    loss_mask = torch.zeros(2, 5, dtype=torch.bool)
+    content = torch.tensor(
+        [[1, 1, 1, 0, 0], [1, 1, 1, 1, 1]], dtype=torch.bool
+    )
+    # No content mask (concat packing): every position counts, as the four
+    # logged runs trained.
+    assert int(prediction_mask(loss_mask, "all").sum()) == 2 * 4
+    # With padding marked, the pad run is excluded from both the loss and the
+    # normalizer.
+    got = prediction_mask(loss_mask, "all", content)
+    assert int(got.sum()) == 2 + 4
+    assert got.shape == (2, 4)
+    # `assistant` is unaffected by the content mask (padding is never
+    # supervised, so loss_mask already excludes it).
+    assert int(prediction_mask(loss_mask, "assistant", content).sum()) == 0
+
+
+def test_trainer_accepts_two_and_three_tuple_blocks(tmp_path):
+    """Back-compat: (ids, mask) still works; (ids, mask, content) is the new form."""
+    from aadistill.train import _unpack_blocks
+
+    ids = torch.zeros(2, 4, dtype=torch.long)
+    mask = torch.ones(2, 4, dtype=torch.bool)
+    content = torch.ones(2, 4, dtype=torch.bool)
+    assert _unpack_blocks((ids, mask))[2] is None
+    assert _unpack_blocks((ids, mask, content))[2] is content
+    with pytest.raises(ValueError):
+        _unpack_blocks((ids,))

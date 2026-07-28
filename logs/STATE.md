@@ -222,16 +222,28 @@ longer torn" are the same number.
    rows were scored at cap 512 and the teacher at 4096, so form metrics are not
    yet like-for-like — item 2's session re-scores the references at 4096.
 2. **Packing / `block_len` control run — the baseline every trace run needs.**
-   The data path changed (best-fit packing) and the measured length p90 is
-   **1,508 against `block_len` 1024**, so the current baseline trained on torn
-   samples. Re-run `s2v1_from_init`'s recipe with **only the data path
-   changed**: best-fit packing, `block_len` 2048, `blocks_per_step` 8 —
-   identical tokens/step and total token budget (P6), same 2700 steps, same
-   seed 20260726. Hypothesis: grounding and multi-hop improve, since those are
-   the long slices being cut.
-3. **Run-to-run variance** (~$1–2, rides on the same pod as 2). The headline
-   metric is a composite of rates over 7–76 prompts; without a noise floor a
-   "win" is not readable.
+   *Approved and prepared 2026-07-28; see
+   [proposal](proposals/2026-07-28_stage3_packing_blocklen_control.md).*
+   Re-run `s2v1_from_init`'s recipe with **only the data path changed**:
+   best-fit packing, `block_len` 2048, `blocks_per_step` 8 — identical
+   tokens/step (16,384) and total token budget (44,236,800) (P6), same 2700
+   steps, same seed 20260726. `configs/stage3_s2v1_bl2048.json`.
+   **Corpus measurement (CPU, 2026-07-28,
+   `artifacts/stage3/packing_survey_v1.json`):** corpus-wide token length p50
+   201, **p90 765**, p99 2,082, max 6,658; 4,433 samples exceed 1024 and 665
+   exceed 2048. best_fit@2048 gives 10,769 blocks at 2.01 epochs vs the
+   baseline's 21,610 at 2.00 — budget-matched.
+   **Correction:** the p90 of **1,508** previously cited here was measured on
+   **four slices only** (the teacher-trace proposal's), not the corpus. The
+   control still stands — concat packing tears samples at *block boundaries*
+   regardless of their length, cutting roughly one sample in three — but the
+   motivation is weaker than the earlier phrasing implied, and the stated
+   grounding hypothesis is partly contradicted (`rag_evidence` is the
+   second-shortest group, p90 298).
+3. **Run-to-run variance** — folded into (2) as arm B: the control repeated at
+   seed 20260728, so `|A − B|` is the noise floor. The headline metric is a
+   composite of rates over 7–76 prompts; without a noise floor a "win" is not
+   readable.
 4. **`eval_behavior_v1` prompt-set expansion — free, CPU, no approval needed.**
    ~36 prompts/group from held-out val, v0 kept as an exact subset. Also raise
    the student cap to 4096 for trace-trained checkpoints and re-score the

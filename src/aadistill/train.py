@@ -40,10 +40,11 @@ from pathlib import Path
 import torch
 import torch.nn.functional as F
 
-from .data import encode_sample, load_split, pack_blocks
+from .data import best_fit_blocks, encode_sample, load_split, pack_blocks
 from .manifest import sha256_json
 
 KD_SCOPES = ("all", "assistant")
+PACKINGS = ("concat", "best_fit")
 
 
 def validate_train_config(cfg: dict) -> None:
@@ -60,6 +61,10 @@ def validate_train_config(cfg: dict) -> None:
         need(cfg, key, str)
     need(cfg, "block_len", int)
     need(cfg, "seed", int)
+    # Optional so the four logged runs' configs stay valid; absent means the
+    # concat path they actually ran.
+    if cfg.get("packing", "concat") not in PACKINGS:
+        raise ValueError(f"config field 'packing' must be one of {PACKINGS}")
     if need(cfg, "dtype", str) not in ("float32", "bfloat16"):
         raise ValueError(f"unsupported dtype {cfg['dtype']!r}")
     need(cfg, "device", str)
@@ -105,45 +110,96 @@ def validate_train_config(cfg: dict) -> None:
             raise ValueError("extra_val name 'val' collides with the primary val")
 
 
-def build_blocks(tokenizer, data_dir, split, block_len, groups=None):
+def build_blocks(
+    tokenizer, data_dir, split, block_len, groups=None, packing="concat", seed=0
+):
     """Encode one split of the Stage 2 mixture into packed training blocks.
 
     Packs per group (a block never straddles groups, keeping attribution)
     and returns (input_ids [N, L], loss_mask [N, L], block_groups, stats).
+
+    `packing` selects the block-building strategy:
+
+    * `"concat"` — concatenate-then-cut (`pack_blocks`). Samples straddle block
+      boundaries. This is the data path of the four logged Stage 3 runs, so it
+      stays the default: changing it would silently make those runs
+      irreproducible from their configs.
+    * `"best_fit"` — length-aware bin packing (`best_fit_blocks`). No sample is
+      split across a boundary; residual capacity is padded and masked out.
+
+    `seed` only affects `"best_fit"`, whose placement order is seeded so block
+    contents are a pure function of (seed, block_len).
     """
+    if packing not in PACKINGS:
+        raise ValueError(f"packing must be one of {PACKINGS}, got {packing!r}")
     loaded = load_split(data_dir, split)
     if groups is not None:
         missing = [g for g in groups if g not in loaded]
         if missing:
             raise ValueError(f"groups {missing} not present in {split} split")
         loaded = {g: loaded[g] for g in groups}
-    ids_parts, mask_parts, block_groups = [], [], []
+    pad_id = tokenizer.pad_token_id
+    if pad_id is None:
+        pad_id = tokenizer.eos_token_id
+    if packing == "best_fit" and pad_id is None:
+        raise ValueError("best_fit packing needs a pad or eos token id")
+    ids_parts, mask_parts, content_parts, block_groups = [], [], [], []
     stats = {}
     for group in sorted(loaded):
         encoded = [encode_sample(tokenizer, s) for s in loaded[group]]
-        ids, mask, dropped = pack_blocks(encoded, block_len)
-        stats[group] = {
-            "samples": len(encoded),
-            "blocks": int(ids.shape[0]),
-            "dropped_tail_tokens": dropped,
-        }
+        if packing == "best_fit":
+            ids, mask, content, group_stats = best_fit_blocks(
+                encoded, block_len, pad_id=pad_id, seed=seed,
+                return_content_mask=True,
+            )
+            content_parts.append(content)
+        else:
+            ids, mask, dropped = pack_blocks(encoded, block_len)
+            group_stats = {
+                "samples": len(encoded),
+                "blocks": int(ids.shape[0]),
+                "dropped_tail_tokens": dropped,
+            }
+        stats[group] = group_stats
         ids_parts.append(ids)
         mask_parts.append(mask)
         block_groups += [group] * int(ids.shape[0])
     input_ids = torch.cat(ids_parts)
     loss_mask = torch.cat(mask_parts)
+    # None under concat packing, which has no padding to exclude.
+    content_mask = torch.cat(content_parts) if content_parts else None
     if input_ids.shape[0] == 0:
         raise ValueError(f"{split} split produced no blocks at block_len={block_len}")
-    return input_ids, loss_mask, block_groups, stats
+    return input_ids, loss_mask, block_groups, stats, content_mask
 
 
-def prediction_mask(loss_mask: torch.Tensor, scope: str) -> torch.Tensor:
-    """Boolean [B, T-1] mask of prediction positions for KD."""
+def prediction_mask(
+    loss_mask: torch.Tensor, scope: str, content_mask: torch.Tensor | None = None
+) -> torch.Tensor:
+    """Boolean [B, T-1] mask of prediction positions for KD.
+
+    `content_mask` marks real (non-padding) tokens. Scope `"all"` means every
+    *real* position: under padded packing the pad run is not a prediction the
+    student should be matched to, and counting it would also inflate the KD
+    normalizer. Absent a content mask (concat packing never pads), `"all"` is
+    every position, which is what the four logged runs trained on.
+    """
     if scope == "all":
-        return torch.ones_like(loss_mask[:, 1:])
+        if content_mask is None:
+            return torch.ones_like(loss_mask[:, 1:])
+        return content_mask[:, 1:].clone()
     if scope == "assistant":
         return loss_mask[:, 1:].clone()
     raise ValueError(f"unknown kd scope {scope!r}")
+
+
+def _unpack_blocks(blocks):
+    """Accept (ids, loss_mask) or (ids, loss_mask, content_mask)."""
+    if len(blocks) == 2:
+        return blocks[0], blocks[1], None
+    if len(blocks) == 3:
+        return blocks
+    raise ValueError("block tuples must be (ids, mask) or (ids, mask, content)")
 
 
 def masked_ce(logits: torch.Tensor, input_ids: torch.Tensor, loss_mask: torch.Tensor):
@@ -322,23 +378,31 @@ class Trainer:
             weight_decay=opt_cfg["weight_decay"],
         )
 
-        self.train_ids, self.train_mask = train_blocks
+        # Block tuples are (ids, loss_mask) or (ids, loss_mask, content_mask);
+        # the content mask is present only under padded (best-fit) packing.
+        self.train_ids, self.train_mask, self.train_content = _unpack_blocks(
+            train_blocks
+        )
         if self.train_ids.shape[0] == 0:
             raise ValueError("no training blocks")
         if val_blocks is not None:
-            val_ids, val_mask = val_blocks
+            val_ids, val_mask, val_content = _unpack_blocks(val_blocks)
             # Fixed shuffle so a truncated eval (eval_blocks < all) still
             # samples across groups instead of the first groups alphabetically.
             perm = epoch_permutation(val_ids.shape[0], cfg["seed"] + 777, 0)
             self.val_ids, self.val_mask = val_ids[perm], val_mask[perm]
+            self.val_content = None if val_content is None else val_content[perm]
         else:
-            self.val_ids = self.val_mask = None
+            self.val_ids = self.val_mask = self.val_content = None
         # Named secondary val sets (e.g. the frozen val_v0 alongside a v1
         # mixture's own val split); evaluated and logged next to the primary.
         self.extra_vals: dict[str, tuple] = {}
-        for name, (ids, mask) in (extra_val_blocks or {}).items():
+        for name, blocks in (extra_val_blocks or {}).items():
+            ids, mask, content = _unpack_blocks(blocks)
             perm = epoch_permutation(ids.shape[0], cfg["seed"] + 777, 0)
-            self.extra_vals[name] = (ids[perm], mask[perm])
+            self.extra_vals[name] = (
+                ids[perm], mask[perm], None if content is None else content[perm]
+            )
         if self.extra_vals and self.val_ids is None:
             raise ValueError("extra_val_blocks given but no primary val_blocks")
         self.step = 0
@@ -349,7 +413,9 @@ class Trainer:
             return torch.autocast(device_type=dev_type, dtype=torch.bfloat16)
         return nullcontext()
 
-    def _micro_losses(self, ids: torch.Tensor, mask: torch.Tensor):
+    def _micro_losses(
+        self, ids: torch.Tensor, mask: torch.Tensor, content: torch.Tensor | None = None
+    ):
         """Forward one microbatch; returns (ce_sum, ce_n, kd_sum, kd_n)."""
         loss_cfg = self.cfg["loss"]
         with self._autocast():
@@ -362,7 +428,7 @@ class Trainer:
             kd_sum, kd_n = kd_forward_kl(
                 logits,
                 t_logits,
-                prediction_mask(mask, loss_cfg["kd_scope"]),
+                prediction_mask(mask, loss_cfg["kd_scope"], content),
                 loss_cfg["kd_temperature"],
             )
         return ce_sum, ce_n, kd_sum, kd_n
@@ -377,11 +443,12 @@ class Trainer:
             self.train_ids.shape[0], cfg["seed"], self.step * bps, bps
         )
         ids, mask = self.train_ids[idxs], self.train_mask[idxs]
+        content = None if self.train_content is None else self.train_content[idxs]
         # Normalizers are known from the masks alone, so microbatch losses can
         # be scaled exactly before backward (sum over micro = true step mean).
         ce_total = int(mask[:, 1:].sum()) if loss_cfg["ce_weight"] > 0 else 0
         kd_total = (
-            int(prediction_mask(mask, loss_cfg["kd_scope"]).sum())
+            int(prediction_mask(mask, loss_cfg["kd_scope"], content).sum())
             if self.teacher is not None and loss_cfg["kd_weight"] > 0
             else 0
         )
@@ -397,7 +464,10 @@ class Trainer:
         for i in range(0, bps, micro):
             mids = ids[i : i + micro].to(self.device)
             mmask = mask[i : i + micro].to(self.device)
-            ce_sum, _, kd_sum, _ = self._micro_losses(mids, mmask)
+            mcontent = (
+                None if content is None else content[i : i + micro].to(self.device)
+            )
+            ce_sum, _, kd_sum, _ = self._micro_losses(mids, mmask, mcontent)
             loss = torch.zeros((), device=self.device)
             if ce_total > 0:
                 loss = loss + loss_cfg["ce_weight"] * ce_sum / ce_total
@@ -435,7 +505,9 @@ class Trainer:
         }
 
     @torch.no_grad()
-    def _eval_blocks(self, val_ids, val_mask, max_blocks: int | None) -> dict:
+    def _eval_blocks(
+        self, val_ids, val_mask, max_blocks: int | None, val_content=None
+    ) -> dict:
         """CE (assistant targets) and KD metrics over a fixed block order."""
         n = val_ids.shape[0]
         if max_blocks:
@@ -448,7 +520,11 @@ class Trainer:
         for i in range(0, n, micro):
             ids = val_ids[i : i + micro].to(self.device)
             mask = val_mask[i : i + micro].to(self.device)
-            ce_sum, cn, kd_sum, kn = self._micro_losses(ids, mask)
+            content = (
+                None if val_content is None
+                else val_content[i : i + micro].to(self.device)
+            )
+            ce_sum, cn, kd_sum, kn = self._micro_losses(ids, mask, content)
             ce_s += float(ce_sum)
             ce_n += cn
             kd_s += float(kd_sum)
@@ -467,15 +543,17 @@ class Trainer:
         """Metrics over the primary val set (see _eval_blocks)."""
         if self.val_ids is None:
             raise ValueError("trainer has no validation blocks")
-        return self._eval_blocks(self.val_ids, self.val_mask, max_blocks)
+        return self._eval_blocks(
+            self.val_ids, self.val_mask, max_blocks, self.val_content
+        )
 
     def _eval_and_log(self, eval_blocks, suffix: str = "") -> dict:
         """Evaluate primary + named extra val sets, log one event each."""
         ev = self.evaluate(eval_blocks)
         self.logger.log("eval_result", step=self.step, val_set="val", **ev)
         print(f"eval step {self.step}{suffix}: {ev}", flush=True)
-        for name, (ids, mask) in self.extra_vals.items():
-            ex = self._eval_blocks(ids, mask, eval_blocks)
+        for name, (ids, mask, content) in self.extra_vals.items():
+            ex = self._eval_blocks(ids, mask, eval_blocks, content)
             self.logger.log("eval_result", step=self.step, val_set=name, **ex)
             print(f"eval step {self.step}{suffix} [{name}]: {ex}", flush=True)
         return ev
@@ -542,8 +620,8 @@ class Trainer:
                 train_blocks=int(self.train_ids.shape[0]),
                 val_blocks=int(self.val_ids.shape[0]) if self.val_ids is not None else 0,
                 extra_val_blocks={
-                    name: int(ids.shape[0])
-                    for name, (ids, _) in self.extra_vals.items()
+                    name: int(blocks[0].shape[0])
+                    for name, blocks in self.extra_vals.items()
                 },
                 **{
                     k: self.freeze_report[k]

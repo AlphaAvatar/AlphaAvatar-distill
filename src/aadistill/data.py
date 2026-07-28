@@ -263,8 +263,12 @@ def pack_blocks(
 
 
 def best_fit_blocks(
-    encoded, block_len: int, pad_id: int = 0, seed: int = 0
-) -> tuple[torch.Tensor, torch.Tensor, dict]:
+    encoded,
+    block_len: int,
+    pad_id: int = 0,
+    seed: int = 0,
+    return_content_mask: bool = False,
+):
     """Pack samples into blocks so that **no sample is split across a boundary**.
 
     Concatenate-then-cut (`pack_blocks`) tears samples at every block edge. For
@@ -291,9 +295,16 @@ def best_fit_blocks(
     small for the corpus).
 
     Residual capacity is padded; `loss_mask` is False there, so padding never
-    contributes to the loss. Returns (input_ids, loss_mask, stats) where stats
-    carries the packing efficiency and truncation count that make the trade
-    visible in the run manifest.
+    contributes to the CE loss. Returns (input_ids, loss_mask, stats) where
+    stats carries the packing efficiency and truncation count that make the
+    trade visible in the run manifest.
+
+    `return_content_mask=True` additionally returns a boolean mask that is True
+    on real tokens and False on padding, as (ids, loss_mask, content_mask,
+    stats). CE is already padding-safe via `loss_mask`, but a KD scope of
+    `"all"` means *every* position, which under padded packing would include
+    the pad run — training the student to match the teacher on a degenerate
+    suffix. Callers doing full-vocab KD must pass this mask through.
 
     Samples sharing a block **do** attend to each other, and that is deliberate:
     Krell et al., *Efficient Sequence Packing without Cross-contamination*
@@ -340,7 +351,7 @@ def best_fit_blocks(
         if remaining > 0:
             bisect.insort(capacities, (remaining, index))
 
-    ids_rows, mask_rows = [], []
+    ids_rows, mask_rows, content_rows = [], [], []
     for block in blocks:
         row_ids: list[int] = []
         row_mask: list[int] = []
@@ -348,6 +359,7 @@ def best_fit_blocks(
             row_ids.extend(ids)
             row_mask.extend(mask)
         pad = block_len - len(row_ids)
+        content_rows.append([1] * len(row_ids) + [0] * pad)
         ids_rows.append(row_ids + [pad_id] * pad)
         mask_rows.append(row_mask + [0] * pad)
 
@@ -359,6 +371,8 @@ def best_fit_blocks(
         "padding_tokens": len(blocks) * block_len - sum(used),
         "efficiency": round(sum(used) / (len(blocks) * block_len), 4) if blocks else 0.0,
     }
-    return (torch.tensor(ids_rows, dtype=torch.long),
-            torch.tensor(mask_rows, dtype=torch.bool),
-            stats)
+    out = (torch.tensor(ids_rows, dtype=torch.long),
+           torch.tensor(mask_rows, dtype=torch.bool))
+    if return_content_mask:
+        return out + (torch.tensor(content_rows, dtype=torch.bool), stats)
+    return out + (stats,)
