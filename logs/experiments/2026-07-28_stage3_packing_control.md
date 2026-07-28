@@ -227,3 +227,116 @@ weights, download+hash for small files) by
 Review the curves, apply the fired decision rule to the recipe, update
 `logs/STATE.md`, `logs/supported_models.md` and the perf trend, and decide on
 README Optim record entries (maintainer approval required).
+
+---
+
+# Interpretation (written by hand after the mechanical section above)
+
+> The section above is generated from the runs' own logs and applies the
+> pre-registered rules. This section is the reading of them, and it is the more
+> important half of this experiment: **the headline finding is not about
+> packing.**
+
+## 1. The packing / `block_len` change hurts, and that part is solid
+
+Both arms regressed on `holdout_v1` against the baseline's 3.8285 — **+2.06%**
+(A) and **+2.15%** (B) — and they agree with each other to within **0.09%**.
+A replicated, outside-the-band regression on a stable metric is about as clean
+as a negative result gets. **R2 fires. The data path is not adopted.**
+
+`configs/stage3_s2v1_bl2048*.json` are kept for reproducibility; `packing`
+stays in the trainer with its default `"concat"`, which is the path all logged
+runs use. The knob is not the problem — the setting is.
+
+Note what this does *not* say. The control changed packing **and** `block_len`
+together (declared in the proposal), so the 2.1% is not attributed between
+them. It also does not transfer to a corpus of teacher traces: this mixture has
+token-length p90 **765**, and the packing argument was always about long
+samples being torn. Block sizing must be re-asked there, not inherited.
+
+## 2. The headline finding: `behavior_score_v0` cannot resolve this project's comparisons
+
+Two runs of the **same config**, differing only in seed, scored **0.1380** and
+**0.2670** — a run-to-run spread of **0.1290**.
+
+For scale, the 2026-07-27 start-point ablation's entire behavior ranking —
+the evidence for "the cheapest lineage is the best-behaved one" — spans
+**0.1124**, from `s2v1_from_init` 0.2015 down to `s2_blocks_v1` 0.0891.
+**The whole ablation fits inside one seed's worth of noise.**
+
+**R5 fires.** The following must now be read as unresolved rather than settled:
+
+- The behavior-based half of the start-point ablation's conclusion. Its
+  *NLL*-based half stands — holdout was inside the ±1% band at 33% fewer steps,
+  and holdout is the metric that turns out to be stable.
+- "Current best `s2v1_from_init@2700` at 20.2%" in `logs/STATE.md`,
+  `logs/supported_models.md` and the README figure. The number is real; the
+  ranking it implies is not supported at n=1 run per arm.
+
+## 3. Why more eval prompts will *not* fix it
+
+The obvious response — expand `eval_behavior_v0` past 76 prompts — is the wrong
+fix, and the axis table shows why:
+
+| axis | n | arm A | arm B | spread |
+|---|---:|---:|---:|---:|
+| format_ok | 76 | 0.1447 | 0.4079 | **0.2632** |
+| fluency | 76 | 0.2459 | 0.4652 | **0.2193** |
+| tool_call | 12 | 0.0833 | 0.3333 | 0.2500 |
+| grounding | 16 | 0.1875 | 0.3125 | 0.1250 |
+| refusal | 12 | 0.1667 | 0.0833 | 0.0834 |
+| math | 7 | 0.0000 | 0.0000 | 0.0000 |
+
+**The largest spreads are on the n=76 axes, not the small ones.** If this were
+sampling noise over prompts, the n=12 axes would be the volatile ones. They are
+not.
+
+`think_closed` moved **0.5000 → 0.8684**: 28 of 76 prompts flipped on whether
+the model closes its think block at all. Independent Bernoulli sampling at
+n=76, p≈0.3 gives ±0.10; the observed spread is ~2.6× that. The flips are
+**correlated** — one global change in the model's protocol behavior moves many
+prompts together, and averaging over more prompts does not average out a
+property of the model.
+
+The student sits near a decision boundary on protocol emission, and data order
+alone is enough to put it on either side. That is a fact about an
+under-recovered 0.6B student, not about the harness.
+
+**Consequence: variance must be spent on seeds, not prompts.** More prompts
+sharpen the estimate of *one model's* score; more seeds are the only thing that
+estimates what a *recipe* produces. Any future behavior comparison in this
+project needs ≥2 seeds per arm or it is not readable.
+
+## 4. Two earlier claims from this session, retracted
+
+Recording these because the intermediate analysis was circulated:
+
+1. **"The control fails to emit `</think>` (49/76), and that is the mechanism
+   for its lower score."** Withdrawn. Arm B, identical config, emits it on
+   86.8% of prompts — better than the baseline. The generations were real; the
+   causal reading of them was seed noise.
+2. **"The composite is noisy because four of six axes have n ≤ 16."**
+   Withdrawn — see §3. The n=76 axes carry the largest spread; the cause is
+   correlated behavioral flips, not small-sample error.
+
+## 5. Cost and hygiene
+
+**$7.17** ($233.17 → $226.00), inside the approved $6–9. 1× L40S, 5h41m
+wall clock, setup ~11 min amortized over both arms. Both arms verified 16/16
+files against pod-side sha256 after upload; pod deleted by the orchestrator
+after verification passed; **0 pods remaining**. Peak GPU memory 42.1 GB of
+46.1 GB at 2×2048 microbatches — recorded for future sizing, since it is
+tighter than the 37 GB the 4×1024 baseline used at matched tokens per forward.
+
+## 6. What this changes next
+
+1. **Do not adopt** best-fit@2048 for this mixture. `concat`@1024 stands.
+2. **Re-state, do not delete, the affected conclusions.** They are unresolved,
+   not refuted; the runs happened and the numbers are real.
+3. **Behavior comparisons need ≥2 seeds per arm from here on.** This roughly
+   doubles the cost of any behavior-based claim, which is itself an argument for
+   making fewer and larger ones.
+4. **The Stage 3 SFT warm-up is unaffected as a direction** — it targets
+   protocol behavior, and §3 says protocol behavior is exactly what is unstable
+   in an under-recovered student. If anything that strengthens the case for
+   supervising it directly. But its evaluation inherits the seed problem.

@@ -1,19 +1,37 @@
 # Current project state
 
-> **A PAID GPU SESSION IS RUNNING (started 2026-07-28 ~05:56 UTC).**
-> Pod `absiebkmq7hjbr` (1× L40S, $0.99/h, auto-terminate 2026-07-28T15:45:16Z).
-> Driver: **tmux session `packing`** on the dev box, orchestrator pid 1953386.
-> Log `artifacts/stage3/packing_control_orchestrator.log` · status file
-> `artifacts/stage3/packing_control_orchestrator.status`.
-> Two arms: `s2v1_bl2048` (control, seed 20260726) and `s2v1_bl2048_seedB`
-> (seed 20260728, the noise floor). Expected ~7.1 h, ~$7.0.
-> Pre-registration: `logs/proposals/2026-07-28_stage3_packing_blocklen_control.md`.
-> The orchestrator deletes the pod itself only after upload verification passes;
-> on a fatal error it leaves the pod up and the terminate-after deadline is the
-> cost backstop. **If it is still running, do not start another GPU session.**
-> Inspect: `tail -f artifacts/stage3/packing_control_orchestrator.log`
+Updated: 2026-07-28 (UTC+8 dev box), after the packing control session —
+**the project's first run-to-run variance measurement, and it is large enough
+to unsettle earlier conclusions.** Two runs of the *same config* differing only
+in seed scored `behavior_score_v0` **0.1380** and **0.2670**: a noise floor of
+**0.1290**, which is *wider than the entire 0.1124 spread* of the 2026-07-27
+start-point ablation's behavior ranking. Rule R5 fired.
+[Log + interpretation](experiments/2026-07-28_stage3_packing_control.md).
 
-Updated: 2026-07-28 (UTC+8 dev box) — **The teacher has a ceiling: 0.7443 on
+Two things follow, and they point in opposite directions:
+
+1. **The packing / `block_len` change is rejected, and that result is solid.**
+   Both arms regressed on `holdout_v1` (+2.06% and +2.15% vs baseline 3.8285)
+   and agree with each other to 0.09%. R2 fired. `concat`@1024 stands as the
+   Stage 3 data path; the `packing` knob stays in the trainer, defaulted to the
+   path every logged run used.
+2. **Every behavior-based ranking in this project is now provisional.** The
+   numbers are real; the *orderings* they were used to justify are not
+   supported at one run per arm. Affected: the behavior half of the start-point
+   ablation's conclusion, and "current best 20.2%" wherever it appears.
+   The ablation's **NLL**-based half stands — holdout is the metric that turned
+   out to be stable.
+
+**New standing rule: behavior comparisons need ≥2 seeds per arm.** And more
+eval prompts will *not* substitute — the largest seed spreads are on the n=76
+axes (`format_ok` 0.2632, `fluency` 0.2193), not the n=12 ones, so this is
+correlated variation in the *model's* protocol behavior, not sampling error
+over prompts (§3 of the log). Variance budget goes to seeds, not prompts.
+
+Nothing is running or billing; pod deleted by the orchestrator after upload
+verification. Session cost **$7.17**, balance **$226.00**.
+
+Earlier header, still true of its own subject — **the teacher has a ceiling: 0.7443 on
 `eval_behavior_v0` vs the student's 0.2015**, so the figure shows both ends of
 the gap for the first time ([log](experiments/2026-07-28_teacher_behavior_v0.md)).
 The eval itself is validated by that number — a competent model scores 0.74 on
@@ -21,38 +39,29 @@ it, so the student's score is the student's problem, not the harness's. Nothing
 is running or billing; the pod was deleted by its fetch driver on completion
 (~$1.20 for the session).
 
-Earlier context, still current: **the start-point ablation is complete and the
-Stage 3 recovery recipe is single-stage.** Both pre-registered rules fired:
-the A/B arm-B leg was neutral (+0.17%) and the **FFN-first warm-up ladder is
-unnecessary** — a single-stage run from the Stage 1 init reaches the chain's
-quality with 33% fewer steps. A new behavior gate, `eval_behavior_v0`, was built
-first and **reversed the ranking the primary metric produced**: the cheapest
-lineage is the best-behaved one. No GPU work is running or billing.
+Standing context, restated for accuracy after today:
 
-2026-07-28, maintainer directives (three): **the headline metric is no longer
-held-out NLL** — it is `behavior_score_v0` (six credited mechanical axes on 76
-held-out prompts; NLL stays as a ±1% guard rail), and the README figure is now
-**one point per student at its current best** against its teacher, ARC-style.
-Real-world test suites take over as the headline once the student can attempt
-them. Current best: `s2v1_from_init@2700` at **20.2%**; the teacher was scored
-on 2026-07-28 at **74.4%**, so the figure finally has both ends of the gap
-([log](experiments/2026-07-28_teacher_behavior_v0.md)).
-
-Third directive, same day: **the teacher is never forced out of thinking mode.**
-Evaluation and generation judge it at its actual capability, so the teacher
-scorecard runs with no prefill and a 4096-token cap (≈1 h GPU, ~$1–1.5), and
-teacher-generated candidates cost ~1.65k tokens instead of ~150 — which moves the
-bulk-corpus estimate from $6–11 to **$25–145**. Scope is cut by lowering n or
-dropping slices, never by suppressing reasoning (decision record 2026-07-28).
-
-The next work is a **Stage 3 supplementary
-experiment** (recovery run from `s2v1_from_init@2700` on rewritten targets, with
-the corpus build as its Stage 2 prerequisite), and its teacher targets must be
-**top-n sampled and verified correct** — n candidates per prompt, every
-candidate checked against a gold key, one correct candidate selected, otherwise
-the public target stays. The proposal is rewritten around that (the two
-verifiable math slices move *in*; a ~$2 top-n pilot gates the bulk spend). See
-decision record 2026-07-28 and next actions below.
+- **The Stage 3 recovery recipe is single-stage** (2026-07-27). The FFN-first
+  warm-up ladder is retired: a single run from the Stage 1 init reaches the
+  chain's holdout quality at 33% fewer steps. This rests on **NLL**, which the
+  noise measurement leaves intact. The companion claim that it was also
+  "best-behaved" is **not supported** at one seed per arm.
+- **The headline metric is `behavior_score_v0`**, six credited mechanical axes
+  on 76 held-out prompts, with holdout NLL as a ±1% guard rail (maintainer,
+  2026-07-28). Today's result does not change the choice of headline, but it
+  does establish that a *single* run of it cannot rank two recipes. Current
+  best measurement: `s2v1_from_init@2700` at **20.2% ± ~0.13**; teacher
+  **74.4%** ([log](experiments/2026-07-28_teacher_behavior_v0.md)).
+- **The teacher is never forced out of thinking mode** (2026-07-28). Evaluation
+  and generation judge it at its actual capability: no prefill, 4096-token cap.
+  Scope is cut by lowering n or dropping slices, never by suppressing reasoning.
+- **Stage 3's next direction is an SFT warm-up on teacher-generated data**
+  (maintainer, 2026-07-28, four decision records). Superseding the earlier
+  plan: targets are the teacher's **unfiltered top-n** — correctness selection
+  moves to Stage 4/5 — with `n` adaptive per prompt from measured divergence,
+  and the target protocol observed from the teacher rather than configured.
+  All four are recorded as **direction/hypothesis, not results**; no spend is
+  committed and the quantitative claims are unmeasured.
 
 ## Status
 
@@ -126,21 +135,38 @@ architecture and data scale.
   the then-current suite at 85 passed / 6 skipped (torch 2.11.0+cu128,
   Python 3.12.3).
 
-## Best checkpoint — the two metrics disagree, deliberately
+## Best checkpoint — the behavior ranking is inside the noise floor
 
-- **Best on the headline metric (and the recommended branch point):**
-  `stage3/s2v1_from_init/step_002700/model` — `behavior_score_v0` **20.2%**,
-  best on every behavior axis, 33% cheaper to produce, holdout 3.8285 (+0.74%,
-  inside the guard-rail band).
-- **Best held-out NLL:** `stage3/s2_blocks_v1/step_002700/model` (3.8003) —
-  and **worst** on behavior (8.9%). NLL is now the guard rail, so this is a
-  diagnostic, not the leader.
+**Read this section with ±0.13 on every behavior number** (measured 2026-07-28,
+see the header). The scores below are real measurements of real checkpoints;
+what is *not* supported is the ordering between any two of them.
+
+- **Recommended branch point, on grounds that survive:**
+  `stage3/s2v1_from_init/step_002700/model` — holdout 3.8285 (+0.74% vs the
+  best NLL, inside the ±1% guard-rail band) at **33% fewer steps**. That is a
+  cost argument backed by the stable metric, and it is why this remains the
+  branch point. Its `behavior_score_v0` **20.2%** is a measurement, not a
+  demonstrated win over the others.
+- **Best held-out NLL:** `stage3/s2_blocks_v1/step_002700/model` (3.8003).
+  Its 8.9% behavior score was previously called "worst on behavior" — with a
+  0.1290 noise floor that claim is **withdrawn**; 8.9% and 20.2% are not
+  separable at one run per arm.
 - Other measured checkpoints: s1@660 **12.9%** / 4.2107 · `s2v1_from_s1`
-  **9.5%** / 3.8067. The A/B arms and the two Stage 1 inits were never scored on
-  the behavior eval.
+  **9.5%** / 3.8067 · `s2v1_bl2048` **13.8%** / 3.9073 · `s2v1_bl2048_seedB`
+  **26.7%** / 3.9109. The last two are the *same config* and bracket every
+  other student on this list — which is the clearest possible statement of the
+  problem.
+- The A/B arms and the two Stage 1 inits were never scored on the behavior eval.
 
 ## Three comparability rules now in force
 
+0. **Behavior comparisons need ≥2 seeds per arm** (measured 2026-07-28). One
+   run per arm cannot support a behavior ranking: the seed-only noise floor on
+   `behavior_score_v0` is **0.1290**, wider than any inter-arm difference this
+   project has reported. This roughly doubles the cost of a behavior-based
+   claim, which is an argument for making fewer and larger ones. Adding eval
+   prompts is **not** a substitute — the spread is correlated across prompts
+   (largest on the n=76 axes), so it is variance in the model, not the sample.
 1. **Pin the seed across compared runs.** The 64-block val subset is a
    permutation of `cfg["seed"] + 777` (`src/aadistill/train.py:332`). Seed
    **20260726** is pinned for this whole family of runs.
@@ -221,65 +247,56 @@ POD_ID=<id> HOST=<ip> PORT=<port> bash scripts/pod/orchestrate.sh   # GPU sessio
 
 ## Next actions (ordered)
 
-Revised 2026-07-28 for the maintainer directives (decision record 2026-07-28):
-the next work is a **Stage 3 supplementary experiment**, and its teacher targets
-must be **top-n sampled and verified correct**. The experiment is staged behind
-a cheap pilot instead of being one bulk spend. Item 2 is the control run that
-every trace comparison needs; without it, "traces helped" and "samples are no
-longer torn" are the same number.
+Revised 2026-07-28 **after** the packing control. The queue changed shape: the
+control answered its question (no) and surfaced a bigger one (behavior
+comparisons are not readable at one seed per arm), so the top of the queue is
+now about making measurements trustworthy before buying more of them.
 
-1. ~~Score the teacher~~ — **done 2026-07-28**, 0.7443 vs the student's 0.2015
+1. ~~Score the teacher~~ — **done 2026-07-28**, 0.7443 vs 0.2015
    ([log](experiments/2026-07-28_teacher_behavior_v0.md)). Biggest gaps: math
    +0.714, tool_call +0.667, format_ok +0.618. Grounding's ceiling is only
-   0.562, so effort there has little headroom. **Carry the caveat:** student
+   0.562, so effort there has little headroom. **Caveat still open:** student
    rows were scored at cap 512 and the teacher at 4096, so form metrics are not
-   yet like-for-like — item 2's session re-scores the references at 4096.
-2. **Packing / `block_len` control run — the baseline every trace run needs.**
-   *Approved and prepared 2026-07-28; see
-   [proposal](proposals/2026-07-28_stage3_packing_blocklen_control.md).*
-   Re-run `s2v1_from_init`'s recipe with **only the data path changed**:
-   best-fit packing, `block_len` 2048, `blocks_per_step` 8 — identical
-   tokens/step (16,384) and total token budget (44,236,800) (P6), same 2700
-   steps, same seed 20260726. `configs/stage3_s2v1_bl2048.json`.
-   **Corpus measurement (CPU, 2026-07-28,
-   `artifacts/stage3/packing_survey_v1.json`):** corpus-wide token length p50
-   201, **p90 765**, p99 2,082, max 6,658; 4,433 samples exceed 1024 and 665
-   exceed 2048. best_fit@2048 gives 10,769 blocks at 2.01 epochs vs the
-   baseline's 21,610 at 2.00 — budget-matched.
-   **Correction:** the p90 of **1,508** previously cited here was measured on
-   **four slices only** (the teacher-trace proposal's), not the corpus. The
-   control still stands — concat packing tears samples at *block boundaries*
-   regardless of their length, cutting roughly one sample in three — but the
-   motivation is weaker than the earlier phrasing implied, and the stated
-   grounding hypothesis is partly contradicted (`rag_evidence` is the
-   second-shortest group, p90 298).
-3. **Run-to-run variance** — folded into (2) as arm B: the control repeated at
-   seed 20260728, so `|A − B|` is the noise floor. The headline metric is a
-   composite of rates over 7–76 prompts; without a noise floor a "win" is not
-   readable.
-4. **`eval_behavior_v1` prompt-set expansion — free, CPU, no approval needed.**
-   ~36 prompts/group from held-out val, v0 kept as an exact subset. Also raise
-   the student cap to 4096 for trace-trained checkpoints and re-score the
-   references at that cap (a trace student at 512 would score ~0 for protocol
-   reasons).
-5. **Then re-plan from (2)'s results.** The queue past the control run is
-   deliberately not pre-committed. Model-agnostic Stage 3 levers still on the
-   table: KD objective and weights (CE 0.25 + KD 1.0, τ=1, scope `all` have
-   never been varied), training length past ~2 epochs now that samples are no
-   longer torn, public-mixture rebalancing, and the Stage 1 init ablations in
-   the backlog.
-6. **Stage 4/5 — teacher-generated traces at scale** (moved out of Stage 3 on
-   2026-07-28: a one-teacher corpus is not reusable, and generation runs in
-   parallel with training). Design is written and costed in
-   `logs/proposals/2026-07-27_stage2_teacher_generated_answers.md`; **no spend
-   committed**. Revive it if the control run shows form improving while math
-   stays at zero.
-7. Stage 4 online data collection design — **now includes real-time teacher
-   generation feeding the student** (decision 2026-07-28): that is on-policy
-   work, not a Stage 3 optimisation.
-8. Optional backlog: Stage 1 ablations; a from-init-tuned lr/warmup sweep (A2
-   was run under the ladder's hyperparameters, so single-stage may have more
-   headroom than measured).
+   like-for-like. The control session did **not** re-score references at 4096 —
+   it kept 512 to stay comparable with existing scorecards.
+2. ~~Packing / `block_len` control~~ — **done 2026-07-28, rejected.** Both arms
+   +2.1% holdout vs baseline, agreeing to 0.09%. R2 fired; `concat`@1024
+   stands ([log](experiments/2026-07-28_stage3_packing_control.md)).
+3. ~~Run-to-run variance~~ — **done, and it is the session's real finding.**
+   Noise floor **0.1290** on `behavior_score_v0`, wider than the 0.1124 spread
+   of the whole start-point ablation. R5 fired.
+4. **Re-state the conclusions R5 unsettled.** Not delete — the runs happened and
+   the numbers are real; the *orderings* are unsupported. Touches
+   `supported_models.md` (done), the README figure caption, and
+   `logs/experiments/2026-07-27_stage3_start_point_ablation.md`, which should
+   carry a pointer to the noise floor rather than be rewritten.
+5. **Decide how to buy trustworthy behavior numbers.** Options, none yet
+   chosen: (a) ≥2 seeds per arm on every future comparison — simple, doubles
+   cost; (b) report a seed-averaged score with its spread, which needs ≥3;
+   (c) find a lower-variance behavior metric — e.g. score the *rate* of protocol
+   compliance over many more generations per prompt rather than one greedy
+   decode, which attacks the correlated-flip problem directly rather than
+   averaging over it. **(c) is the interesting one and is CPU-cheap to
+   prototype** against the four scorecards already on disk.
+6. **Stage 3 SFT warm-up on teacher-generated data** — direction set by the
+   maintainer 2026-07-28 (four decision records, all marked
+   direction/hypothesis, not results). Unaffected by the packing result, and
+   arguably strengthened by it: protocol behavior is exactly what is unstable,
+   so supervising it directly is the obvious lever. Before any spend, three
+   things must be measured, all cheap:
+   - `assert_batch_invariant` on the real 4B teacher in bf16 (verified only on
+     a toy model in fp32 so far);
+   - real batched generation throughput, to replace the 55 s/prompt figure,
+     which was measured at `batch_size` 1 and is not an engine limit;
+   - the per-slice divergence profile that sets the adaptive-`n` thresholds.
+7. **`eval_behavior_v1` prompt-set expansion** — **demoted.** Still worth doing
+   for coverage, but it is explicitly *not* the fix for the noise floor: the
+   spread is largest on the n=76 axes, so it is correlated variance in the
+   model, not sampling error over prompts.
+8. Optional backlog: Stage 1 ablations; a from-init-tuned lr/warmup sweep; KD
+   objective and weights (CE 0.25 + KD 1.0, τ=1, scope `all` have never been
+   varied); attribution of the packing result between packing and `block_len`,
+   which is only worth buying if the data path is revisited for trace data.
 
 ## Open decisions for the user
 
