@@ -193,6 +193,16 @@ what is *not* supported is the ordering between any two of them.
 
 ## Three comparability rules now in force
 
+0b. **Stage 3 has an exit gate, and it is not currently met** (decision
+   2026-07-28). Stage 4/5 makes the student the *data source*, so its format
+   competence bounds everything downstream: below threshold the rollout corpus
+   is mostly parse failures and every verifier label encodes "did this parse".
+   Gate is on `format_ok` / `think_closed` / `empty_answer` at ≥2 seeds; the
+   number is set from a Stage 4 pilot's measured accept rate, not in advance.
+   For scale: at `format_ok` 0.22 only ~21% of prompts yield 2 parseable
+   candidates of 4 — and that is optimistic, since format failures are measured
+   to be *correlated* across a model's samples. Baseline stands at 0.2237, so
+   **Stage 3 is not exitable today.**
 0a. **Metrics are chosen by resolving power, not stage number** (decision
    2026-07-28). A metric applies iff it is off its floor, off its ceiling, and
    its noise is smaller than the effect being chased. Consequences in force:
