@@ -1,5 +1,22 @@
 # Decision records
 
+## 2026-07-28 (later) — Metrics are chosen by resolving power, not by stage number
+
+- **Context:** Maintainer question — should evaluation metrics differ across stages (NLL at 1/2, behavior at 3/4, real benchmarks at 4/5)? Yes, they should differ, but stage number is a *proxy* for the property that actually decides it, and this session produced three measurements that make the real property concrete.
+- **The rule:** a metric belongs in a stage iff it is **off its floor**, **off its ceiling**, and its **noise floor is smaller than the effect being chased**. Stage number correlates with these, but only because capability grows; when the two disagree, resolving power wins.
+- **Measured violations of each, all 2026-07-28:**
+  * **Floor** — `format_ok` at 1000 steps is **0.0132** (1 of 76). A comparison resting on it would be reading rounding. `math` EM has been **0.000 for every student checkpoint ever scored**, while the teacher reaches 0.714: the metric is fine, the student simply cannot attempt it yet.
+  * **Ceiling** — `grounding` reaches only **0.562 for the teacher** under the credited-evidence rule. Effort spent moving a student past ~0.56 is spent against a ceiling that is not there.
+  * **Noise** — `behavior_score_v0` has a seed-only floor of **0.1290**, while `holdout_v1` NLL is stable to **0.09%**. The packing/`block_len` question was decided by NLL (+2.06% and +2.15%, agreeing to 0.09%) because behavior could not resolve it at all.
+- **Decision:**
+  1. **NLL is not retired after Stage 2.** It is demoted from headline to guard rail (2026-07-28), but it stays *on* at every stage: it is the cheapest metric available and the only one measured to be stable, so it remains the reliable discriminator when behavior is noise-bound.
+  2. **Behavior metrics apply once they are off the floor**, and only with **≥2 seeds per arm**. Report the axes individually; the composite averages six axes of very different reliability and is the thing the noise floor was measured on.
+  3. **Every stage additionally carries a targeted diagnostic for the defect it is currently fixing.** This category is new and was forced by evidence: `p(</think>)` moved **0.2907 → 0.9990** under an intervention where NLL moved 0.36% and the behavior composite would have been swamped. Probes are continuous, nearly free on CPU, and aimed at the mechanism, so they resolve what the general ladder cannot.
+  4. **Real benchmarks are gated on measured readiness, not on reaching Stage 4/5.** At `format_ok` 0.22 a benchmark score largely measures parse failure rather than capability. The gate is a format-competence threshold on the eval harness's own metrics; the number is to be set when a checkpoint first approaches it, from data rather than in advance.
+- **Cost gradient, which the rule happens to respect:** probes are ~free (CPU, no generation), NLL is cheap, behavior needs generation *and* ≥2 seeds, benchmarks need generation at scale. Run the cheap ones always; buy the expensive ones when they can resolve something.
+- **Alternatives considered:** a fixed metric per stage as asked — rejected as written because it would retire NLL exactly where it proved most reliable, and would keep behavior metrics in stages where they are floored; one composite everywhere — rejected, that is the arrangement whose noise floor made today's ablation unreadable.
+- **Revisit when:** a student first produces a non-zero `math` axis, or `format_ok` clears the threshold that gates benchmarks — both are the signals that a metric has moved off its floor and the ladder should step up.
+
 ## 2026-07-28 (later) — Streaming is an optimisation that must earn its place; the warm-up loss is an open experimental question
 
 - **Context:** Maintainer, following the stage-boundary correction: (a) which loss the warm-up should use — SFT, KD, or a hybrid — needs experimental evaluation, not assumption; (b) streaming would cost the hashable corpus that P4/P5 rest on; (c) streaming's only goal is to cut wall-clock and cost, so if separated generate-then-train achieves the same result at the lowest cost, that is acceptable; (d) a streamed run's output under the chosen configuration can still be preserved for others to reproduce.

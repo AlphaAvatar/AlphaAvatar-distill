@@ -193,6 +193,16 @@ what is *not* supported is the ordering between any two of them.
 
 ## Three comparability rules now in force
 
+0a. **Metrics are chosen by resolving power, not stage number** (decision
+   2026-07-28). A metric applies iff it is off its floor, off its ceiling, and
+   its noise is smaller than the effect being chased. Consequences in force:
+   NLL is **not** retired after Stage 2 — it is the guard rail *and* the only
+   metric measured to be stable, so it decides when behavior is noise-bound;
+   behavior axes are reported individually and only once off the floor
+   (`format_ok` was 0.0132 at 1000 steps); every stage also carries a targeted
+   **probe** for the defect it is fixing (`p(</think>)` moved 0.2907 → 0.9990
+   where NLL moved 0.36%); and real benchmarks are gated on measured format
+   competence, since at `format_ok` 0.22 a benchmark scores the parser.
 0. **Behavior comparisons need ≥2 seeds per arm** (measured 2026-07-28). One
    run per arm cannot support a behavior ranking: the seed-only noise floor on
    `behavior_score_v0` is **0.1290**, wider than any inter-arm difference this
