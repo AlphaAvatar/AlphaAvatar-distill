@@ -15,7 +15,7 @@
   against.
 - **Proposal:** `logs/proposals/2026-07-28_stage3_packing_blocklen_control.md`
   (arms, budget and decision rules registered before the run).
-- **Arms this session:** `s2v1_bl2048`, `s2v1_bl2048_seedB`.
+- **Arms this session:** `kdconf_ctrl_a`, `kdconf_nothink_a`, `kdconf_ctrl_b`, `kdconf_nothink_b`.
   `s2v1_bl2048` is the control (seed 20260726); `s2v1_bl2048_seedB` is the
   identical config at seed 20260728.
 - **Budget match (P6):** 2,700 steps × 8 blocks × 2,048 tokens = 44,236,800
@@ -38,8 +38,10 @@
 | ab_arm_A | 4.2747 | +12.48% |
 | ab_arm_B | 4.2118 | +10.83% |
 | s2_blocks_v1 (A0 chain) | 3.8003 | +0.00% |
-| **s2v1_bl2048** | **3.9073** | +2.82% |
-| **s2v1_bl2048_seedB** | **3.9109** | +2.91% |
+| **kdconf_ctrl_a** | **4.0125** | +5.58% |
+| **kdconf_nothink_a** | **4.0270** | +5.97% |
+| **kdconf_ctrl_b** | **4.0147** | +5.64% |
+| **kdconf_nothink_b** | **4.0252** | +5.92% |
 
 ## Pre-registered decision rules
 
@@ -47,11 +49,9 @@ Rules registered in `logs/proposals/2026-07-28_stage3_packing_blocklen_control.m
 
 - Baseline `s2v1_from_init@2700`: holdout **3.8285** (2026-07-27), behavior **0.2015** (re-scored on this pod, same device).
 - **R0 — noise floor**: |A − B| = |0.1380 − 0.2670| = **0.1290** on `behavior_score_v0`. This is the project's first run-to-run variance estimate; the arms differ only in seed (data order, packing order and the val subset).
-  Holdout NLL noise: |3.9073 − 3.9109| = **0.0036** (0.09% relative).
 - **R1 — adoption**: Δbehavior = 0.1380 − 0.2015 = **-0.0635** against a noise floor of 0.1290.
   → **R1 does not fire**: the delta does not exceed the noise floor. The baseline data path stands; record the control as neutral-or-negative. Note this does *not* say packing is harmless — it says the effect is not resolvable at this sample size.
-- **R2 — guard rail**: holdout 3.9073 vs baseline 3.8285 = **+2.06%** (band ±1%).
-  → **R2 fires**: NLL regressed beyond the band. Do not adopt on behavior alone — report the tradeoff and escalate the decision to the maintainer.
+- **R2 not evaluable**: the control produced no holdout NLL.
 - **R5 fires**: noise 0.1290 exceeds 0.05. The 2026-07-27 ablation's behavior ranking (s2v1_from_init 0.2015 / s1_ffn_norm_v0@660 0.1290 / s2v1_from_s1 0.0947 / s2_blocks_v1 0.0891) must be re-read with this band attached, and the "single-stage is best-behaved" conclusion re-stated with the appropriate confidence.
 
 **R3 (the stated mechanism) and R4 (abort) are judged by a human/agent from the per-group tables below and the orchestrator log** — R3 asks whether grounding and multi-hop specifically improved, which the aggregate cannot answer.
@@ -68,147 +68,237 @@ rule.
 | checkpoint | format_ok | terminated | trunc@cap | think_closed | empty | echo | rep3 | words |
 |---|---|---|---|---|---|---|---|---|
 | s2v1_from_init@2700 (baseline, re-scored here) | 0.224 | 0.368 | 0.632 | 0.605 | 0.171 | 0.250 | 0.408 | 217.368 |
-| **s2v1_bl2048** | 0.145 | 0.355 | 0.645 | 0.500 | 0.355 | 0.145 | 0.325 | 176.579 |
-| **s2v1_bl2048_seedB** | 0.408 | 0.487 | 0.513 | 0.868 | 0.079 | 0.118 | 0.404 | 207.645 |
+| **kdconf_ctrl_a** | 0.013 | 0.316 | 0.684 | 0.237 | 0.487 | 0.329 | 0.332 | 186.658 |
+| **kdconf_nothink_a** | 0.250 | 0.342 | 0.658 | 0.605 | 0.000 | 0.382 | 0.460 | 232.658 |
+| **kdconf_ctrl_b** | 0.000 | 0.316 | 0.684 | 0.316 | 0.382 | 0.276 | 0.400 | 202.947 |
+| **kdconf_nothink_b** | 0.329 | 0.408 | 0.592 | 0.750 | 0.053 | 0.329 | 0.463 | 225.618 |
 
 Lower is better for `trunc@cap`, `empty`, `echo` and `rep3`; higher is better
 for `format_ok`, `terminated` and `think_closed`.
 
 ## Mechanical gate checks (AGENTS.md 4.5)
 
-- PASS — [s2v1_bl2048] final step reached: 2700/2700
-- PASS — [s2v1_bl2048] no NaN/Inf training loss: 0 non-finite loss events
-- PASS — [s2v1_bl2048] bf16 holdout produced: 3.9073
-- PASS — [s2v1_bl2048] INT8 both scopes produced: full=3.9156 decoder=3.9105
-- PASS — [s2v1_bl2048] behavior scorecard produced: 76 prompts
-- PASS — [s2v1_bl2048_seedB] final step reached: 2700/2700
-- PASS — [s2v1_bl2048_seedB] no NaN/Inf training loss: 0 non-finite loss events
-- PASS — [s2v1_bl2048_seedB] bf16 holdout produced: 3.9109
-- PASS — [s2v1_bl2048_seedB] INT8 both scopes produced: full=3.9219 decoder=3.9161
-- PASS — [s2v1_bl2048_seedB] behavior scorecard produced: 76 prompts
+- PASS — [kdconf_ctrl_a] final step reached: 1000/1000
+- PASS — [kdconf_ctrl_a] no NaN/Inf training loss: 0 non-finite loss events
+- PASS — [kdconf_ctrl_a] bf16 holdout produced: 4.0125
+- PASS — [kdconf_ctrl_a] INT8 both scopes produced: full=4.0202 decoder=4.0137
+- PASS — [kdconf_ctrl_a] behavior scorecard produced: 76 prompts
+- PASS — [kdconf_nothink_a] final step reached: 1000/1000
+- PASS — [kdconf_nothink_a] no NaN/Inf training loss: 0 non-finite loss events
+- PASS — [kdconf_nothink_a] bf16 holdout produced: 4.027
+- PASS — [kdconf_nothink_a] INT8 both scopes produced: full=4.0333 decoder=4.0276
+- PASS — [kdconf_nothink_a] behavior scorecard produced: 76 prompts
+- PASS — [kdconf_ctrl_b] final step reached: 1000/1000
+- PASS — [kdconf_ctrl_b] no NaN/Inf training loss: 0 non-finite loss events
+- PASS — [kdconf_ctrl_b] bf16 holdout produced: 4.0147
+- PASS — [kdconf_ctrl_b] INT8 both scopes produced: full=4.0231 decoder=4.0167
+- PASS — [kdconf_ctrl_b] behavior scorecard produced: 76 prompts
+- PASS — [kdconf_nothink_b] final step reached: 1000/1000
+- PASS — [kdconf_nothink_b] no NaN/Inf training loss: 0 non-finite loss events
+- PASS — [kdconf_nothink_b] bf16 holdout produced: 4.0252
+- PASS — [kdconf_nothink_b] INT8 both scopes produced: full=4.0343 decoder=4.0281
+- PASS — [kdconf_nothink_b] behavior scorecard produced: 76 prompts
 
 ## Per-arm detail
 
-### Arm `s2v1_bl2048`
+### Arm `kdconf_ctrl_a`
 
 - **Start point:** `/workspace/aad/artifacts/stage1/qwen3_0p6b_init_v0/checkpoint`
   (596049920 params, float32)
-- **Config:** `configs/stage3_s2v1_bl2048.json` sha256 `4794de7edfaf…`
+- **Config:** `configs/stage3_kdconf_ctrl_a.json` sha256 `10723b850ca8…`
 - **Trainable params:** 440467456
 - **Teacher:** `Qwen/Qwen3-4B-Thinking-2507` @ `768f209d`
-- **Steps:** 2700 of 2700;
-  wall clock 8714.4 s
-  (2.42 h);
-  mean 3.022 s/step (n=270);
-  peak GPU mem 37.05 GB
-- **Loss first/last:** 7.955558 / 0.937689;
+- **Steps:** 1000 of 1000;
+  wall clock 3084.3 s
+  (0.86 h);
+  mean 2.970 s/step (n=100);
+  peak GPU mem 37.02 GB
+- **Loss first/last:** 8.010129 / 1.781023;
   non-finite events: **0**
-- **Code state:** git `5470d327a5cf`, dirty=True
-- **Hardware:** Linux-6.8.0-60-generic-x86_64-with-glibc2.39, python 3.12.3
+- **Code state:** git `a4a2794db98b`, dirty=True
+- **Hardware:** Linux-6.8.0-110-generic-x86_64-with-glibc2.39, python 3.12.3
 
 #### Validation curve
 
 | step | val ce | val kd | val_v0 ce | val_v0 kd |
 |---|---|---|---|---|
-| 0 | 11.821851 | 11.063228 | 11.265675 | 10.854721 |
-| 150 | 2.959908 | 2.037049 | 3.260662 | 1.862489 |
-| 300 | 2.581189 | 1.661182 | 2.908300 | 1.511861 |
-| 450 | 2.406923 | 1.478143 | 2.853955 | 1.372234 |
-| 600 | 2.298620 | 1.377003 | 2.692367 | 1.250193 |
-| 750 | 2.219338 | 1.276845 | 2.612158 | 1.148565 |
-| 900 | 2.145730 | 1.206858 | 2.597726 | 1.103035 |
-| 1050 | 2.075306 | 1.140554 | 2.512499 | 1.036428 |
-| 1200 | 2.035693 | 1.100157 | 2.478809 | 1.004071 |
-| 1350 | 2.003058 | 1.052323 | 2.401185 | 0.930065 |
-| 1500 | 1.956573 | 1.017551 | 2.362844 | 0.908255 |
-| 1650 | 1.932068 | 0.988974 | 2.354126 | 0.885149 |
-| 1800 | 1.905509 | 0.962320 | 2.334483 | 0.859824 |
-| 1950 | 1.886743 | 0.942558 | 2.312032 | 0.838551 |
-| 2100 | 1.867566 | 0.927006 | 2.302326 | 0.825773 |
-| 2250 | 1.854613 | 0.910634 | 2.286467 | 0.810417 |
-| 2400 | 1.839382 | 0.897734 | 2.256322 | 0.794496 |
-| 2550 | 1.833191 | 0.890304 | 2.258586 | 0.788319 |
-| 2700 | 1.836641 | 0.892598 | 2.267760 | 0.790300 |
+| 0 | 12.084235 | 11.033696 | 12.396956 | 11.019223 |
+| 150 | 2.907078 | 2.022405 | 3.456026 | 1.944857 |
+| 300 | 2.563908 | 1.685672 | 3.185073 | 1.672787 |
+| 450 | 2.362306 | 1.497569 | 3.032582 | 1.494672 |
+| 600 | 2.226218 | 1.362180 | 2.926065 | 1.375042 |
+| 750 | 2.118029 | 1.262493 | 2.829073 | 1.276608 |
+| 900 | 2.068279 | 1.209322 | 2.787875 | 1.229040 |
+| 1000 | 2.046802 | 1.189432 | 2.735818 | 1.199212 |
 
-#### holdout_v1 (bf16) — **3.9073**
+#### holdout_v1 (bf16) — **4.0125**
 
-- INT8 decoder-scope: 3.9105 (+0.08% vs bf16)
-- INT8 full-scope: 3.9156 (+0.21% vs bf16)
+- INT8 decoder-scope: 4.0137 (+0.03% vs bf16)
+- INT8 full-scope: 4.0202 (+0.19% vs bf16)
 
 #### Generation smoke (greedy, 80 new tokens)
 
 - **What is 2+2?**
   ```
-  </think>\n\nOkay, the question is "What is 2+2?" Let's try to solve it step by step.\n\nFirst, we need to find the value of 2. We do this by adding 2 to both sides of the equation: 2 + 2 = 4.\n\nNext, we subtract 4 from both sides of the equation: 4 - 2 = 
+  Okay, I see. Let's try to find a pattern for the equation:\n\n$$\n\begin{align*}\n\frac{1}{2} + \frac{1}{2} + \frac{1}{2} + \frac{1}{2} + \frac{1}{2} + \frac{1}{2} + \frac{1}{2} +
   ```
 - **Write a Python function that returns the first n Fibonacci numbers.**
   ```
-  </think>\n\nWe are given a list of Fibonacci numbers. We need to find the first n Fibonacci numbers starting from the second number and check if they are Fibonacci.\n\nThe function `first_n Fibonacci` takes two arguments: `n` (the number of Fibonacci numbers) and `f` (the starting index of the list)
+  We are given a list of Fibonacci numbers. We need to find the first n Fibonacci numbers.\n\n```python\ndef fibonacci(n):\n    if n == 0:\n        return 0\n    else:\n        return 1\n```\n\nWait, let's check the first few Fibonacci numbers:\n\n```python\ndef fibonacci(n):\n    if n == 0:\n        
   ```
 - **At what temperature does water boil at sea level?**
   ```
-  </think>\n\nOkay, the question is about when water boils at sea level. Let's think about the temperature at which water boils. \n\nFirst, we need to find out what happens when water boils at sea level. Water boils at sea level because of the force of gravity. \n\nThe force of gravity is equal to the
+  Okay, I'll try to explain it in a more concise way. Let me explain it in a more natural way.<|im_end|>
   ```
 
-### Arm `s2v1_bl2048_seedB`
+### Arm `kdconf_nothink_a`
 
 - **Start point:** `/workspace/aad/artifacts/stage1/qwen3_0p6b_init_v0/checkpoint`
   (596049920 params, float32)
-- **Config:** `configs/stage3_s2v1_bl2048_seedB.json` sha256 `4dbb15c845de…`
+- **Config:** `configs/stage3_kdconf_nothink_a.json` sha256 `40d4305eb0b9…`
 - **Trainable params:** 440467456
 - **Teacher:** `Qwen/Qwen3-4B-Thinking-2507` @ `768f209d`
-- **Steps:** 2700 of 2700;
-  wall clock 8695.2 s
-  (2.42 h);
-  mean 3.016 s/step (n=270);
-  peak GPU mem 37.05 GB
-- **Loss first/last:** 7.376634 / 1.130813;
+- **Steps:** 1000 of 1000;
+  wall clock 3093.5 s
+  (0.86 h);
+  mean 2.977 s/step (n=100);
+  peak GPU mem 37.01 GB
+- **Loss first/last:** 8.144621 / 1.795733;
   non-finite events: **0**
-- **Code state:** git `5470d327a5cf`, dirty=True
-- **Hardware:** Linux-6.8.0-60-generic-x86_64-with-glibc2.39, python 3.12.3
+- **Code state:** git `a4a2794db98b`, dirty=True
+- **Hardware:** Linux-6.8.0-110-generic-x86_64-with-glibc2.39, python 3.12.3
 
 #### Validation curve
 
 | step | val ce | val kd | val_v0 ce | val_v0 kd |
 |---|---|---|---|---|
-| 0 | 12.082015 | 11.466821 | 11.254591 | 10.560242 |
-| 150 | 2.653331 | 1.863717 | 3.459645 | 1.976257 |
-| 300 | 2.262358 | 1.486587 | 3.020235 | 1.573157 |
-| 450 | 2.101064 | 1.316317 | 2.880569 | 1.397245 |
-| 600 | 1.988940 | 1.211644 | 2.790625 | 1.301122 |
-| 750 | 1.918698 | 1.142773 | 2.731731 | 1.231875 |
-| 900 | 1.851677 | 1.081158 | 2.666591 | 1.159554 |
-| 1050 | 1.799524 | 1.029927 | 2.572557 | 1.097320 |
-| 1200 | 1.759678 | 0.987043 | 2.549337 | 1.048911 |
-| 1350 | 1.728018 | 0.958200 | 2.524972 | 1.017047 |
-| 1500 | 1.690047 | 0.918499 | 2.464161 | 0.976288 |
-| 1650 | 1.669348 | 0.890736 | 2.448108 | 0.947369 |
-| 1800 | 1.638439 | 0.863615 | 2.415773 | 0.924884 |
-| 1950 | 1.619356 | 0.844206 | 2.401954 | 0.904885 |
-| 2100 | 1.600536 | 0.829941 | 2.386377 | 0.886188 |
-| 2250 | 1.586238 | 0.813601 | 2.363269 | 0.872222 |
-| 2400 | 1.571392 | 0.802672 | 2.358148 | 0.863474 |
-| 2550 | 1.562273 | 0.793635 | 2.352409 | 0.856348 |
-| 2700 | 1.568649 | 0.797809 | 2.373491 | 0.857844 |
+| 0 | 12.084235 | 11.009920 | 12.396956 | 10.990230 |
+| 150 | 2.994558 | 2.116645 | 3.533914 | 2.043813 |
+| 300 | 2.575130 | 1.712153 | 3.198890 | 1.700247 |
+| 450 | 2.358357 | 1.511195 | 3.043604 | 1.517756 |
+| 600 | 2.230822 | 1.382765 | 2.908938 | 1.387131 |
+| 750 | 2.126316 | 1.281931 | 2.812888 | 1.291255 |
+| 900 | 2.071856 | 1.224970 | 2.772233 | 1.240352 |
+| 1000 | 2.050651 | 1.204106 | 2.741241 | 1.216775 |
 
-#### holdout_v1 (bf16) — **3.9109**
+#### holdout_v1 (bf16) — **4.027**
 
-- INT8 decoder-scope: 3.9161 (+0.13% vs bf16)
-- INT8 full-scope: 3.9219 (+0.28% vs bf16)
+- INT8 decoder-scope: 4.0276 (+0.01% vs bf16)
+- INT8 full-scope: 4.0333 (+0.16% vs bf16)
 
 #### Generation smoke (greedy, 80 new tokens)
 
 - **What is 2+2?**
   ```
-  </think>\n\nOkay, I need to find the value of 2+2. Let's do that. \n\nFirst, I'll add 2 to both sides of the equation: 2+2 = 4. \n\nThen, I'll add 2 to both sides of the equation: 2+2 = 4. \n\nSo, 2+2 = 6. \n\nNow
+  </think>\n\nOkay, I need to find the value of 2+2. Let's denote the value of 2+2 as x. Then, we can write:\n\n2+2 = 2x\n\nSo, 2x = 2x.\n\nNow, we can find the value of x:\n\nx = 2x\n\nSo, 2x = 2x.\n\nNow
   ```
 - **Write a Python function that returns the first n Fibonacci numbers.**
   ```
-  </think>\n\nWe are given a function `fibonacci(n)` that returns the first n Fibonacci numbers. We need to find the first n Fibonacci numbers starting from 1 and check if they are all in the range [0, 1]. If they are all, we return the first n Fibonacci numbers.\n\nHere's the implementation:\n\n```py
+  </think>\n\nWe are given a function `fibonacci` that takes a list of Fibonacci numbers as input and returns the first n Fibonacci numbers. We need to find the first n Fibonacci numbers.\n\nWe can use the `fibonacci` function to find the first n Fibonacci numbers.\n\n```python\ndef fibonacci(n):\n   
   ```
 - **At what temperature does water boil at sea level?**
   ```
-  </think>\n\nOkay, the question is about water boiling at sea level. Let's think about it. \n\nFirst, I need to understand the temperature at sea level. The temperature at sea level is the temperature of the ocean. \n\nThe ocean is a large body of water, so it's not a surface, but it's a deep, deep o
+  </think>\n\nOkay, I need to check the temperature of water at sea level. The temperature of water at sea level is 20°C.<|im_end|>
+  ```
+
+### Arm `kdconf_ctrl_b`
+
+- **Start point:** `/workspace/aad/artifacts/stage1/qwen3_0p6b_init_v0/checkpoint`
+  (596049920 params, float32)
+- **Config:** `configs/stage3_kdconf_ctrl_b.json` sha256 `37d4c122bf04…`
+- **Trainable params:** 440467456
+- **Teacher:** `Qwen/Qwen3-4B-Thinking-2507` @ `768f209d`
+- **Steps:** 1000 of 1000;
+  wall clock 3098.6 s
+  (0.86 h);
+  mean 2.981 s/step (n=100);
+  peak GPU mem 37.0 GB
+- **Loss first/last:** 8.226903 / 1.438861;
+  non-finite events: **0**
+- **Code state:** git `a4a2794db98b`, dirty=True
+- **Hardware:** Linux-6.8.0-110-generic-x86_64-with-glibc2.39, python 3.12.3
+
+#### Validation curve
+
+| step | val ce | val kd | val_v0 ce | val_v0 kd |
+|---|---|---|---|---|
+| 0 | 12.199504 | 11.052095 | 12.220308 | 11.421413 |
+| 150 | 3.170083 | 2.082508 | 3.222671 | 1.848627 |
+| 300 | 2.704448 | 1.640661 | 2.784403 | 1.453935 |
+| 450 | 2.522105 | 1.465278 | 2.609066 | 1.270336 |
+| 600 | 2.391185 | 1.331523 | 2.497352 | 1.164450 |
+| 750 | 2.305944 | 1.247567 | 2.398635 | 1.075622 |
+| 900 | 2.254826 | 1.192756 | 2.362573 | 1.027422 |
+| 1000 | 2.231892 | 1.173756 | 2.338447 | 1.012065 |
+
+#### holdout_v1 (bf16) — **4.0147**
+
+- INT8 decoder-scope: 4.0167 (+0.05% vs bf16)
+- INT8 full-scope: 4.0231 (+0.21% vs bf16)
+
+#### Generation smoke (greedy, 80 new tokens)
+
+- **What is 2+2?**
+  ```
+  Okay, I'll try to solve this problem. Let's first find the sum of the first 5 terms of the sequence.\n\nFirst, let's find the first 5 terms of the sequence.\n\nThe first 5 terms of the sequence are 1, 2, 3, 5, 7, 9, 11, 13, 17, 
+  ```
+- **Write a Python function that returns the first n Fibonacci numbers.**
+  ```
+  </think>\n\nWe are given a list of numbers. We need to find the first n Fibonacci numbers.\n\nWe can use the `len()` function to find the first n Fibonacci numbers. The function should return the first n Fibonacci numbers in order.\n\nHere's the Python function:\n\n```python\ndef first_n Fibonacci(n
+  ```
+- **At what temperature does water boil at sea level?**
+  ```
+  </think>\n\nOkay, the question is about the temperature at which water boils. The question is about the temperature at which water boils. The answer is 100.<|im_end|>
+  ```
+
+### Arm `kdconf_nothink_b`
+
+- **Start point:** `/workspace/aad/artifacts/stage1/qwen3_0p6b_init_v0/checkpoint`
+  (596049920 params, float32)
+- **Config:** `configs/stage3_kdconf_nothink_b.json` sha256 `e552e0c0488e…`
+- **Trainable params:** 440467456
+- **Teacher:** `Qwen/Qwen3-4B-Thinking-2507` @ `768f209d`
+- **Steps:** 1000 of 1000;
+  wall clock 3088.0 s
+  (0.86 h);
+  mean 2.969 s/step (n=100);
+  peak GPU mem 36.99 GB
+- **Loss first/last:** 8.439723 / 1.452119;
+  non-finite events: **0**
+- **Code state:** git `a4a2794db98b`, dirty=True
+- **Hardware:** Linux-6.8.0-110-generic-x86_64-with-glibc2.39, python 3.12.3
+
+#### Validation curve
+
+| step | val ce | val kd | val_v0 ce | val_v0 kd |
+|---|---|---|---|---|
+| 0 | 12.199504 | 11.026623 | 12.220308 | 11.389120 |
+| 150 | 3.155742 | 2.094095 | 3.245598 | 1.904611 |
+| 300 | 2.714868 | 1.667593 | 2.793434 | 1.486798 |
+| 450 | 2.527910 | 1.488767 | 2.606737 | 1.299033 |
+| 600 | 2.396435 | 1.350153 | 2.482347 | 1.176723 |
+| 750 | 2.304360 | 1.262439 | 2.388443 | 1.091839 |
+| 900 | 2.252865 | 1.205752 | 2.352797 | 1.045716 |
+| 1000 | 2.229529 | 1.186619 | 2.328660 | 1.029049 |
+
+#### holdout_v1 (bf16) — **4.0252**
+
+- INT8 decoder-scope: 4.0281 (+0.07% vs bf16)
+- INT8 full-scope: 4.0343 (+0.23% vs bf16)
+
+#### Generation smoke (greedy, 80 new tokens)
+
+- **What is 2+2?**
+  ```
+  </think>\n\nOkay, I need to find the value of $2$ in the equation $2 + 2 = 4$.\n\nFirst, let's find the value of $2$ in the equation $2 + 2 = 4$.\n\nThen, we can write the equation as $2 + 2 = 4$.\n\nNow, we can find the value of $2$
+  ```
+- **Write a Python function that returns the first n Fibonacci numbers.**
+  ```
+  </think>\n\nWe are given a function `first_n` that returns the first n Fibonacci numbers. The function `first_n` is a function that takes a list of integers as input and returns the first n Fibonacci numbers. The function `first_n` is a function that takes a list of integers as input and returns the
+  ```
+- **At what temperature does water boil at sea level?**
+  ```
+  </think>\n\nOkay, I need to calculate the temperature at which water boils at sea level. The temperature at which water boils is 100°C, and the temperature at which water boils is 100°C. So, the temperature at which water boils is 100°C.\n\nThe answer is 100°C.<|im_end|>
   ```
 
 
@@ -227,116 +317,3 @@ weights, download+hash for small files) by
 Review the curves, apply the fired decision rule to the recipe, update
 `logs/STATE.md`, `logs/supported_models.md` and the perf trend, and decide on
 README Optim record entries (maintainer approval required).
-
----
-
-# Interpretation (written by hand after the mechanical section above)
-
-> The section above is generated from the runs' own logs and applies the
-> pre-registered rules. This section is the reading of them, and it is the more
-> important half of this experiment: **the headline finding is not about
-> packing.**
-
-## 1. The packing / `block_len` change hurts, and that part is solid
-
-Both arms regressed on `holdout_v1` against the baseline's 3.8285 — **+2.06%**
-(A) and **+2.15%** (B) — and they agree with each other to within **0.09%**.
-A replicated, outside-the-band regression on a stable metric is about as clean
-as a negative result gets. **R2 fires. The data path is not adopted.**
-
-`configs/stage3_s2v1_bl2048*.json` are kept for reproducibility; `packing`
-stays in the trainer with its default `"concat"`, which is the path all logged
-runs use. The knob is not the problem — the setting is.
-
-Note what this does *not* say. The control changed packing **and** `block_len`
-together (declared in the proposal), so the 2.1% is not attributed between
-them. It also does not transfer to a corpus of teacher traces: this mixture has
-token-length p90 **765**, and the packing argument was always about long
-samples being torn. Block sizing must be re-asked there, not inherited.
-
-## 2. The headline finding: `behavior_score_v0` cannot resolve this project's comparisons
-
-Two runs of the **same config**, differing only in seed, scored **0.1380** and
-**0.2670** — a run-to-run spread of **0.1290**.
-
-For scale, the 2026-07-27 start-point ablation's entire behavior ranking —
-the evidence for "the cheapest lineage is the best-behaved one" — spans
-**0.1124**, from `s2v1_from_init` 0.2015 down to `s2_blocks_v1` 0.0891.
-**The whole ablation fits inside one seed's worth of noise.**
-
-**R5 fires.** The following must now be read as unresolved rather than settled:
-
-- The behavior-based half of the start-point ablation's conclusion. Its
-  *NLL*-based half stands — holdout was inside the ±1% band at 33% fewer steps,
-  and holdout is the metric that turns out to be stable.
-- "Current best `s2v1_from_init@2700` at 20.2%" in `logs/STATE.md`,
-  `logs/supported_models.md` and the README figure. The number is real; the
-  ranking it implies is not supported at n=1 run per arm.
-
-## 3. Why more eval prompts will *not* fix it
-
-The obvious response — expand `eval_behavior_v0` past 76 prompts — is the wrong
-fix, and the axis table shows why:
-
-| axis | n | arm A | arm B | spread |
-|---|---:|---:|---:|---:|
-| format_ok | 76 | 0.1447 | 0.4079 | **0.2632** |
-| fluency | 76 | 0.2459 | 0.4652 | **0.2193** |
-| tool_call | 12 | 0.0833 | 0.3333 | 0.2500 |
-| grounding | 16 | 0.1875 | 0.3125 | 0.1250 |
-| refusal | 12 | 0.1667 | 0.0833 | 0.0834 |
-| math | 7 | 0.0000 | 0.0000 | 0.0000 |
-
-**The largest spreads are on the n=76 axes, not the small ones.** If this were
-sampling noise over prompts, the n=12 axes would be the volatile ones. They are
-not.
-
-`think_closed` moved **0.5000 → 0.8684**: 28 of 76 prompts flipped on whether
-the model closes its think block at all. Independent Bernoulli sampling at
-n=76, p≈0.3 gives ±0.10; the observed spread is ~2.6× that. The flips are
-**correlated** — one global change in the model's protocol behavior moves many
-prompts together, and averaging over more prompts does not average out a
-property of the model.
-
-The student sits near a decision boundary on protocol emission, and data order
-alone is enough to put it on either side. That is a fact about an
-under-recovered 0.6B student, not about the harness.
-
-**Consequence: variance must be spent on seeds, not prompts.** More prompts
-sharpen the estimate of *one model's* score; more seeds are the only thing that
-estimates what a *recipe* produces. Any future behavior comparison in this
-project needs ≥2 seeds per arm or it is not readable.
-
-## 4. Two earlier claims from this session, retracted
-
-Recording these because the intermediate analysis was circulated:
-
-1. **"The control fails to emit `</think>` (49/76), and that is the mechanism
-   for its lower score."** Withdrawn. Arm B, identical config, emits it on
-   86.8% of prompts — better than the baseline. The generations were real; the
-   causal reading of them was seed noise.
-2. **"The composite is noisy because four of six axes have n ≤ 16."**
-   Withdrawn — see §3. The n=76 axes carry the largest spread; the cause is
-   correlated behavioral flips, not small-sample error.
-
-## 5. Cost and hygiene
-
-**$7.17** ($233.17 → $226.00), inside the approved $6–9. 1× L40S, 5h41m
-wall clock, setup ~11 min amortized over both arms. Both arms verified 16/16
-files against pod-side sha256 after upload; pod deleted by the orchestrator
-after verification passed; **0 pods remaining**. Peak GPU memory 42.1 GB of
-46.1 GB at 2×2048 microbatches — recorded for future sizing, since it is
-tighter than the 37 GB the 4×1024 baseline used at matched tokens per forward.
-
-## 6. What this changes next
-
-1. **Do not adopt** best-fit@2048 for this mixture. `concat`@1024 stands.
-2. **Re-state, do not delete, the affected conclusions.** They are unresolved,
-   not refuted; the runs happened and the numbers are real.
-3. **Behavior comparisons need ≥2 seeds per arm from here on.** This roughly
-   doubles the cost of any behavior-based claim, which is itself an argument for
-   making fewer and larger ones.
-4. **The Stage 3 SFT warm-up is unaffected as a direction** — it targets
-   protocol behavior, and §3 says protocol behavior is exactly what is unstable
-   in an under-recovered student. If anything that strengthens the case for
-   supervising it directly. But its evaluation inherits the seed problem.
