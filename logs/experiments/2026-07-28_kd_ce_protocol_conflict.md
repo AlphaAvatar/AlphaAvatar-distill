@@ -139,3 +139,78 @@ PY
 - `logs/experiments/2026-07-28_stage3_packing_control.md` (the noise floor this explains)
 - `logs/decisions.md` 2026-07-21 (empty-think targets), 2026-07-22 (KD design)
 - `logs/decisions.md` 2026-07-28 (the Stage 3 SFT warm-up direction this supports)
+
+---
+
+# Addendum — a second conflict at the terminator, and what it generalises to
+
+Prompted by decomposing `format_ok` on the intervention's first two arms. **CPU,
+$0.**
+
+## `format_ok` is ceilinged by termination, not by think-closing
+
+`format_ok = terminated AND think_closed AND no_stray_markers`
+(`src/aadistill/behavior.py:146`). Decomposed at 1000 steps:
+
+| arm | terminated | think_closed | no_stray | format_ok | trunc@cap |
+|---|---:|---:|---:|---:|---:|
+| `kdconf_ctrl_a` | 0.3158 | 0.2368 | 1.0000 | 0.0132 | 0.6842 |
+| `kdconf_nothink_a` | 0.3421 | **0.6053** | 1.0000 | 0.2500 | 0.6579 |
+
+`no_stray_markers` is 1.0 in both — never binding. `terminated` is ~0.34 in both
+and the intervention barely moved it. **So `format_ok` cannot exceed ~0.34
+however well the think block is handled**, and the treatment's 0.2500 is already
+73% of that ceiling. The remaining headroom is termination.
+
+## The same conflict exists at `<|im_end|>`, and is slice-dependent
+
+Teacher probability at the position where the target terminates the assistant
+turn (CE-supervised in every case):
+
+| slice | p(`<\|im_end\|>`) | teacher's top token |
+|---|---:|---|
+| rag_evidence | 0.000029 | ` as` (0.871) |
+| tool_calling | 0.000376 | ` For` (0.529) |
+| instruction | 0.003647 | ` The` (0.541) |
+| **code_math** | **0.610379** | **`<\|im_end\|>` (0.610)** |
+
+**The `code_math` row is the internal control that makes the rest
+interpretable.** The probe is not measuring "the teacher never wants to stop" —
+where the public target resembles what the teacher would itself have written,
+the two agree. `code_math` targets are worked solutions (all 7,149 gsm8k targets
+carry step-by-step arithmetic at ~53 words; all 4,344 OpenMathInstruct targets
+carry full derivations at ~204 words), and there the teacher picks the
+terminator. On the terse human-written slices it does not.
+
+## What this generalises to
+
+The `</think>` conflict was not a template quirk at one token. The general
+statement is:
+
+> **The teacher disagrees with any target it did not write, and wherever it
+> disagrees, KD at 2× CE's per-position weight wins.**
+
+Two measured instances so far — `</think>` (uniform across slices) and
+`<|im_end|>` (slice-dependent, worst where targets are tersest) — and the
+student's two most conspicuous failures are exactly these: it does not close its
+think block (`think_closed` 0.24) and it does not stop (`terminated` 0.32).
+
+`all_no_think` addresses the first and leaves the second, which is precisely
+what the arms show.
+
+## Consequences
+
+1. **Masking is whack-a-mole.** Each masked span fixes one disagreement. The
+   count of disagreements is a property of the corpus, not of the template.
+2. **This is an independent argument for teacher-generated targets** (the
+   maintainer's Stage 3 warm-up direction), and a stronger one than the first:
+   if the target *is* the teacher's own generation, there is no disagreement
+   anywhere, so both conflicts vanish together rather than one at a time.
+3. **Stage 3's exit gate is gated on termination.** Reaching `format_ok` ~0.6
+   requires `terminated` ~0.6+, which neither arm approaches. A terminator-span
+   mask is the cheap analogue of `all_no_think` and would test whether the same
+   fix transfers; it is *not* proposed as the recipe, for reason (1).
+4. **Claim strength:** the probabilities and the `format_ok` decomposition are
+   **measured**. That the terminator conflict *causes* the low termination rate
+   is inference of the same kind the running 2×2 is currently testing for
+   `</think>` — and it should be held to the same standard before being acted on.
