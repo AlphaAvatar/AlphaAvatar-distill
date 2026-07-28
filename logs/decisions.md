@@ -2,6 +2,14 @@
 
 ## 2026-07-28 — n is adaptive per prompt, driven by teacher divergence, and applied within slice
 
+> **Status: DIRECTION + HYPOTHESIS, not a validated result** (maintainer, 2026-07-28:
+> "this is just an idea; more specific details need to be verified through
+> experiments"). What is decided is the *shape* of the approach and that it will be
+> tested. Every quantitative claim below — that adaptive `n` beats flat `n`, the
+> ~25% saving, the thresholds, which divergence measure to use — is **unmeasured**.
+> The code implements the measures; it does not establish that the rule helps.
+> Nothing here may be cited as a result. See "How this gets verified" at the end.
+
 - **Context:** Maintainer directive, settling the `n` question left open earlier the same day. The number of candidates kept should depend on how much the n candidates differ: wide differences mean the teacher's distribution on that prompt is divergent and multiple candidates carry information; near-identical candidates mean it is deterministic and one suffices.
 - **Decision:** (1) `n` is **per prompt, not global**, chosen from measured divergence. (2) Generation is **round-based** so the saving is real: round 1 draws 2 candidates for every prompt fully batched, divergence is measured, round 2 tops up only divergent prompts to `n_max`. (3) Divergence is measured from **the teacher's own per-token predictive entropy**, logged free during generation, cross-checked against a lexical measure (distinct-n / normalized edit distance). (4) Both **answer-level agreement** and **trace-level lexical diversity** are computed; which one drives the rule is decided from pilot data, not assumed. (5) The rule is applied **within each slice**, with cross-slice mixture proportions controlled explicitly.
 - **The constraint that shapes the design:** divergence is only measurable *after* generation, so naive adaptive-n saves corpus size and training skew but **not GPU cost** — the candidates are already paid for. Round-based generation is what converts it into an actual generation saving, and it preserves batching because each round is still one large batch. Expected effect if roughly half the corpus settles at 2 candidates: mean `n` ≈ 3 against a flat `n` = 4, ~25% less generation.
@@ -10,8 +18,28 @@
 - **The fork left to data:** measured on raw traces almost every prompt looks divergent (wording and exploration order vary even at a fixed conclusion); measured on extracted answers, path variety is discarded although the warm-up trains on the whole output. The pilot reports both and the rule is fixed from that, before any bulk spend.
 - **Alternatives considered:** flat `n` for every prompt — rejected: it pays equally for prompts that carry no extra information and upweights them in the corpus; predicting divergence *before* generating (from prompt features or a short greedy prefix) — attractive because it would save the round-1 cost too, but rejected for now as an unvalidated proxy, revisitable if round 1 proves expensive; post-hoc dedup only, at flat `n` — rejected as strictly worse than round-based, since it fixes the corpus but pays the full bill.
 - **Revisit when:** the pilot reports the entropy/lexical agreement and the trace-vs-answer comparison; or a slice's divergence profile turns out to make its `n` degenerate (all 1 or all `n_max`), which would mean the threshold, not the rule, is wrong.
+- **How this gets verified (nothing above is established until these run):**
+  1. **Divergence profile per slice** — generate a small candidate set and report the distribution of `lexical_diversity`, `answer_agreement` and `mean_token_entropy` per slice. *Falsifies the rule if* the measures do not separate prompts, i.e. every prompt lands in the same bucket: then adaptive `n` is a flat `n` with extra machinery, and the simpler thing wins (P1).
+  2. **Do the measures agree?** Correlate teacher entropy against the two sample-based measures. *If they disagree*, the free signal (entropy) is not a substitute for the expensive one, and the choice has to be made on which predicts downstream gain rather than on cost.
+  3. **Trace vs answer** — do the two views rank prompts differently? Only worth carrying both if they do.
+  4. **Does it help at fixed budget?** The claim "adaptive `n` beats flat `n`" is a *training* claim and needs an A/B at matched generation cost (P6), not a corpus statistic. Until that runs, adaptive `n` is a cost-shaping heuristic with a plausible story, nothing more.
+  5. **The ~25% saving** is arithmetic from an assumed 50/50 split, not a measurement. It is replaced by the profile in (1).
 
 ## 2026-07-28 — Stage 3 warm-up trains the teacher's *unfiltered* top-n distribution; correctness selection moves to Stage 4/5
+
+> **Status: mixed — read the two halves differently** (maintainer, 2026-07-28:
+> "this is just an idea; more specific details need to be verified through
+> experiments").
+> **Decided (a staging/policy choice, not an empirical claim):** correctness
+> selection — verifiers, reward models, environment validation, gold-key
+> comparison — belongs to Stage 4/5, per AGENTS.md 4.6. This is where the
+> project chooses to put that machinery.
+> **Hypothesis, unmeasured:** that an unfiltered corpus produces a *better
+> student* than a filtered one. No run has compared them. The supporting
+> arguments below (coverage, sequence-level KD, selection bias) are reasons to
+> try it, not evidence that it works.
+> The 58.3% truncation figure is measured; the inference that training on those
+> traces would harm termination is not.
 
 - **Context:** Maintainer directive. For the Stage 3 SFT warm-up, keep the top-n teacher generations **regardless of correctness**, so the corpus covers the teacher's answer distribution. Answer-detection models, environment validation and gold-key comparison are introduced only in Stage 4/5, to select correct candidates out of that pool. This reverses the correctness gate the 2026-07-27 proposal had put on the corpus build.
 - **Decision:** (1) The Stage 3 warm-up corpus keeps **all n sampled candidates per prompt, unfiltered for correctness**. (2) **Hygiene filtering stays** and is not correctness filtering: empty, non-terminating, cap-truncated and repetition-collapsed generations are artifacts, not samples from the teacher's distribution. (3) On the five verifiable `(group, source)` pairs, the verdict is **computed and stored as metadata but not acted on** — free, since the gold keys already exist and verification is CPU-only. (4) Correctness-based selection, verifiers, reward models and environment validation are Stage 4/5, per AGENTS.md 4.6.
@@ -25,6 +53,17 @@
 - **Revisit when:** the pilot reports accept-free n-scaling; or Stage 4/5 begins, at which point the stored verdicts become the selection signal this decision defers to.
 
 ## 2026-07-28 — Generation stays in the training stack; the target protocol is whatever the teacher natively emits
+
+> **Status: decided as working policy; one supporting claim still unmeasured.**
+> Decided: no second inference stack for now, token-ids-in/token-ids-out, and the
+> target protocol is observed from the teacher rather than configured. These are
+> engineering choices the project is making, and the code implements them.
+> **Unmeasured:** that in-stack batched generation is *fast enough* for the
+> Stage 3 warm-up, let alone Stage 4/5 rollouts. The `batch_size` 1 finding is
+> measured; the throughput a batched path actually reaches is not. Also
+> unmeasured: whether batch invariance survives on the real 4B teacher in bf16 —
+> it is verified only on a toy model in fp32, which is the friendly case. If
+> either fails, the recorded upgrade path exists precisely for that.
 
 - **Context:** Two maintainer directives, both prompted by the packing control's finding that the student's dominant deficit is *protocol* rather than knowledge (it emits `</think>` on 49/76 prompts vs the baseline's 63/76 and the teacher's 88%). (1) A small teacher-generated **SFT warm-up belongs in Stage 3**, before large-scale rollout in Stage 4/5. (2) The generated pattern must be **aligned to the given teacher**, not fixed to a thinking or non-thinking mode. (3) Prefer a **lighter-weight inference backend than vLLM**, reusable in later stages, with **token-in/token-out** so inference and training do not drift apart.
 - **Decision:**
