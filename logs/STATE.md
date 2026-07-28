@@ -28,6 +28,29 @@ axes (`format_ok` 0.2632, `fluency` 0.2193), not the n=12 ones, so this is
 correlated variation in the *model's* protocol behavior, not sampling error
 over prompts (§3 of the log). Variance budget goes to seeds, not prompts.
 
+**And a follow-up CPU investigation found what is probably causing that
+variance — at $0** ([log](experiments/2026-07-28_kd_ce_protocol_conflict.md)).
+At the token the instability lives on, **CE and KD want opposite things**:
+
+| signal | wants at `<think>\n\n` → | weight |
+|---|---|---|
+| CE (mask confirmed) | `</think>`, one-hot | 0.25 |
+| KD (`scope: all`, τ=1) | `Okay`/`Hmm` ≈1.0; **p(`</think>`) = 0.000000** | 1.0 |
+
+Per position **KD pulls 2.0× harder than CE** (`ce_targets`≈7,950 vs
+`kd_positions`≈15,740 measured on both arms). The student equilibrates at
+**p(`</think>`) ≈ 0.334**, uniform to ±0.015 across four unrelated groups —
+a force balance, not noise — and greedy decoding turns that near-tie into
+correlated flips across many prompts, which is exactly the observed signature.
+The cause is that the teacher is **teacher-forced through an empty-think target
+it would never produce**, so KD transmits a contradiction rather than knowledge.
+This has been in every Stage 3 run since 2026-07-22.
+
+*Claim strength:* the conflict, the 2.0× ratio and the 0.334 equilibrium are
+**measured**; that they *cause* the instability is inferred and needs an
+intervention to confirm (two mechanism claims were retracted earlier the same
+day, so this one is held to that standard).
+
 Nothing is running or billing; pod deleted by the orchestrator after upload
 verification. Session cost **$7.17**, balance **$226.00**.
 
@@ -270,7 +293,17 @@ now about making measurements trustworthy before buying more of them.
    `supported_models.md` (done), the README figure caption, and
    `logs/experiments/2026-07-27_stage3_start_point_ablation.md`, which should
    carry a pointer to the noise floor rather than be rewritten.
-5. **Decide how to buy trustworthy behavior numbers.** Options, none yet
+5. **Test the CE/KD protocol conflict — now the highest-value next experiment**
+   ([log](experiments/2026-07-28_kd_ce_protocol_conflict.md)). Candidate fixes,
+   cheapest first: (a) exclude the template-inserted think block from KD — the
+   trainer already threads a content mask for padding, so it is the same
+   mechanism on a different span; (b) drop the empty-think rendering;
+   (c) teacher-generated targets, which removes the cause rather than the
+   symptom and is already the maintainer's direction; (d) reweight CE/KD, which
+   trades one arbitrary balance for another. Readout is `think_closed`,
+   `format_ok`, `empty_answer` — not the composite. **≥2 seeds per arm.**
+   (a) is a short run and would confirm or kill the mechanism cheaply.
+6. **Decide how to buy trustworthy behavior numbers.** Options, none yet
    chosen: (a) ≥2 seeds per arm on every future comparison — simple, doubles
    cost; (b) report a seed-averaged score with its spread, which needs ≥3;
    (c) find a lower-variance behavior metric — e.g. score the *rate* of protocol
@@ -278,7 +311,7 @@ now about making measurements trustworthy before buying more of them.
    decode, which attacks the correlated-flip problem directly rather than
    averaging over it. **(c) is the interesting one and is CPU-cheap to
    prototype** against the four scorecards already on disk.
-6. **Stage 3 SFT warm-up on teacher-generated data** — direction set by the
+7. **Stage 3 SFT warm-up on teacher-generated data** — direction set by the
    maintainer 2026-07-28 (four decision records, all marked
    direction/hypothesis, not results). Unaffected by the packing result, and
    arguably strengthened by it: protocol behavior is exactly what is unstable,
@@ -289,11 +322,11 @@ now about making measurements trustworthy before buying more of them.
    - real batched generation throughput, to replace the 55 s/prompt figure,
      which was measured at `batch_size` 1 and is not an engine limit;
    - the per-slice divergence profile that sets the adaptive-`n` thresholds.
-7. **`eval_behavior_v1` prompt-set expansion** — **demoted.** Still worth doing
+8. **`eval_behavior_v1` prompt-set expansion** — **demoted.** Still worth doing
    for coverage, but it is explicitly *not* the fix for the noise floor: the
    spread is largest on the n=76 axes, so it is correlated variance in the
    model, not sampling error over prompts.
-8. Optional backlog: Stage 1 ablations; a from-init-tuned lr/warmup sweep; KD
+9. Optional backlog: Stage 1 ablations; a from-init-tuned lr/warmup sweep; KD
    objective and weights (CE 0.25 + KD 1.0, τ=1, scope `all` have never been
    varied); attribution of the packing result between packing and `block_len`,
    which is only worth buying if the data path is revisited for trace data.
