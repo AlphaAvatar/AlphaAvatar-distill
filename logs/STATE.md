@@ -1,6 +1,35 @@
 # Current project state
 
-Updated: 2026-07-28 (UTC+8 dev box), after the packing control session —
+Updated: 2026-07-28 (UTC+8 dev box), after the CE/KD conflict intervention —
+**the conflict is confirmed causal, and it is the best-understood defect in the
+project** ([log](experiments/2026-07-28_kd_conflict_intervention.md)). A 2x2
+({`all`, `all_no_think`} x 2 seeds, 1000 steps, $4.48) moved p(`</think>`) from
+**0.2995 ±0.0176 to 0.9989 ±0.0004** — a factor of 40 over the seed spread, with
+the spread itself collapsing 44x. R1 and R2 fired; R3 (holdout +0.31%) is inside
+the guard rail; **R4 did not fire** and is reported as registered.
+
+| | ctrl (2 seeds) | treat (2 seeds) | baseline @2700 |
+|---|---:|---:|---:|
+| p(`</think>`) | 0.2995 | **0.9989** | — |
+| think_closed | 0.2763 | **0.6776** | 0.6053 |
+| format_ok | 0.0066 | **0.2894** | 0.2237 |
+| empty_answer | 0.4342 | **0.0263** | 0.1711 |
+| terminated | 0.3158 | 0.3750 | — |
+
+The treatment beats the full-length baseline on every form metric at **37% of
+the steps**. It is **not adopted as the recipe**: it is a confirmed diagnostic,
+and the corpus contains an unknown number of similar disagreements — a second is
+already measured at `<|im_end|>` (teacher p≈0.00003–0.004 on stopping for terse
+slices, but **0.610 on code_math**, where targets resemble teacher output). That
+is why `terminated` barely moved, and why **Stage 3's exit gate is blocked on
+termination, not think-closing**.
+
+General statement, now with two confirmed instances: **the teacher disagrees
+with any target it did not write, and where it disagrees KD at 2x per-position
+weight wins.** Masking is one span per disagreement; teacher-generated targets
+remove all of them at once.
+
+Earlier the same day, the packing control session —
 **the project's first run-to-run variance measurement, and it is large enough
 to unsettle earlier conclusions.** Two runs of the *same config* differing only
 in seed scored `behavior_score_v0` **0.1380** and **0.2670**: a noise floor of
