@@ -78,6 +78,16 @@ Standing context, restated for accuracy after today:
 - **The teacher is never forced out of thinking mode** (2026-07-28). Evaluation
   and generation judge it at its actual capability: no prefill, 4096-token cap.
   Scope is cut by lowering n or dropping slices, never by suppressing reasoning.
+- **Stage boundary, restated (maintainer, 2026-07-28, supersedes two earlier
+  records the same day):** "on-policy" means the training **states come from the
+  student**. So **Stage 3 owns all teacher-generated data** — offline, streamed
+  or interleaved, at any scale — because those states come from a fixed prompt
+  corpus. **Stage 4/5 begins only when the student's own generations become
+  training states.** "Online" is retired as a staging word: it describes a
+  schedule, not a distribution, and conflating the two is what made the earlier
+  records inconsistent. Surviving constraint, independent of staging: any
+  streamed generation must still be **snapshotted to a hashed artifact** before
+  it trains anything, or the run is not reproducible (P4/P5).
 - **Stage 3's next direction is an SFT warm-up on teacher-generated data**
   (maintainer, 2026-07-28, four decision records). Superseding the earlier
   plan: targets are the teacher's **unfiltered top-n** — correctness selection

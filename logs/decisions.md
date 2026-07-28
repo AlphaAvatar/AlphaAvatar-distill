@@ -1,5 +1,19 @@
 # Decision records
 
+## 2026-07-28 (later) — "On-policy" means the *states* come from the student. Teacher-generated data is Stage 3, however it is produced
+
+- **Context:** Maintainer directive: move online teacher-generated answers and student learning into Stage 3, to make the meaning of "on-policy" unambiguous. **This supersedes the two earlier 2026-07-28 records** that placed teacher generation in Stage 4/5.
+- **The earlier record was internally inconsistent, and that is why this correction matters.** It named the right criterion — *"whose distribution the training states come from, not whether the teacher runs in real time"* — and then classified by the wrong one. It explicitly analysed variant 1 (teacher generates targets for the corpus's own prompts, streamed during training) and concluded the training distribution "is unchanged — off-policy prompts, teacher targets — so this is a *logistics* change, not an algorithmic one" … and then assigned it to Stage 4/5 anyway, on the grounds that it was "architecturally the same shape". Architecture and timing are not the criterion. By the record's own test, variant 1 is **not on-policy** and belongs in Stage 3.
+- **Decision — one sentence per stage, no overlap:**
+  1. **Stage 3 owns everything whose training states come from a fixed prompt corpus**, including teacher-generated targets, and **regardless of whether generation is offline, streamed, or interleaved with training**. Production schedule is an implementation detail, not a stage boundary.
+  2. **Stage 4/5 owns only work whose training states come from the student's own distribution** — the student generates, then a teacher/verifier/reward model evaluates or corrects at *those* states. That is on-policy distillation (GKD and relatives).
+  3. **The word "online" is retired as a staging term** in this project. It conflates *when* data is produced with *whose distribution it comes from*, which is the exact conflation that produced the earlier inconsistency. Use "streamed" for the schedule and "on-policy" only for the distribution.
+- **What actually moves:** the teacher-generated warm-up corpus (all four of the same-day directives: unfiltered top-n, adaptive n, protocol observed from the teacher, in-stack generation) is **Stage 3 work**. The earlier "large-scale teacher generation moves to Stage 4/5 entirely" record is superseded on its *staging* claim. Its other argument — that a one-teacher corpus is not reusable across teachers, so it is not "official mixture v2" — is **unaffected and still stands**: it is an argument about artifact naming and reuse, not about which stage owns the work.
+- **A constraint that survives the move, and must not be lost with it:** the earlier record's objection to *streaming* was that it "costs the hashable corpus that every comparison in this project rests on (P4/P5)". That concern is real and is **independent of staging**. Moving this work into Stage 3 does not oblige us to stream it, and if we ever do, the generated data must still be snapshotted to a hashed artifact before it trains anything — otherwise a run cannot be reproduced or compared. **Staging and reproducibility are separate questions; the earlier record conflated those too.**
+- **Alternatives considered:** keep teacher generation in Stage 4/5 and define on-policy loosely enough to cover it — rejected: it makes "on-policy" mean "a model is running during training", which is already true of Stage 3's KD and therefore distinguishes nothing; split by cost or scale instead of by distribution — rejected: the same algorithm does not change stage because it got bigger.
+- **Consequence for the pipeline:** Stage 4/5 is now strictly smaller and strictly better defined — it starts the first time the student's own generations become training states, and not before. Stage 3 correspondingly grows to include the warm-up corpus work.
+- **Revisit when:** a proposal genuinely mixes both — e.g. teacher targets on student-generated prompts. That is a real hybrid and would need its own classification, decided by where the *states* come from.
+
 ## 2026-07-28 — n is adaptive per prompt, driven by teacher divergence, and applied within slice
 
 > **Status: DIRECTION + HYPOTHESIS, not a validated result** (maintainer, 2026-07-28:
@@ -87,6 +101,12 @@
 
 ## 2026-07-28 — Large-scale teacher generation moves to Stage 4/5 entirely; the Stage 3 queue drops it
 
+> **SUPERSEDED IN PART the same day.** Its *staging* claim is reversed: teacher
+> generation is Stage 3 work regardless of scale or schedule. Its other
+> argument — that a one-teacher corpus is not transferable and so is not an
+> "official mixture v2" — is **unaffected and still stands**, as is its point
+> that the math gap most plausibly needs better reasoning supervision.
+
 - **Context:** The plan still had a teacher-generated corpus as a *Stage 2 prerequisite of a Stage 3 run* (pilot → bulk → trace training). Maintainer reclassified it: large-scale teacher generation belongs to Stage 4/5 outright, for two reasons — **(a) the data is not transferable.** A corpus of Qwen3-4B-Thinking traces is only useful for distilling that teacher; it cannot be applied to another model, so calling it "official mixture v2" contradicts the 2026-07-28 scope decision that the pipeline stays model-family-agnostic. The Stage 2 mixtures are public, revision-pinned, reusable data; teacher outputs are a per-teacher artifact. (This is the sharper form of the "corpus staleness" risk the proposal already carried — it is not just that a teacher change invalidates the corpus, it is that the corpus was never a property of the *pipeline* in the first place.) **(b) Generation and training can run in parallel**, which makes it an online data loop — not mainstream on-policy, since the states still come from corpus prompts rather than the student, but architecturally the same shape as Stage 4/5, where a model in the loop produces data while another trains.
 - **Decision:** (1) The teacher-generated-answer work — pilot, bulk generation, and the trace-target training run — is **removed from the Stage 3 queue** and reclassified as Stage 4/5. The proposal is retitled and its status changed to deferred; nothing about its design is discarded. (2) **Option B (trace targets) stands as the design** for when that work happens; it is not cancelled, it is relocated. (3) The vLLM dependency approval and the $25–145 build defer with it — **no spend is committed**. (4) Stage 3 continues with model-agnostic work only: the data path, the objective, and the public mixture. (5) Next step is the control run (item 1); the queue after it is chosen from its results rather than pre-committed.
 - **Consequence worth stating plainly:** with teacher generation deferred, Stage 3's remaining levers are unlikely to close the **math gap (+0.714)** — that axis most plausibly needs better reasoning supervision. Expect Stage 3 to move form, fluency and possibly grounding, and treat math as a Stage 4/5 target. **But one check first:** the public mixture *already contains* worked-solution targets — all 7,149 gsm8k targets carry step-by-step arithmetic (mean 53 words) and all 4,344 OpenMathInstruct targets carry full derivations (mean 204 words). So the student's 0.000 EM is **not** an absence of reasoning-style supervision. Something is stopping it from using data it already has, and the packing defect is a live suspect: an OpenMath target at ~270+ tokens plus its prompt was routinely torn at `block_len` 1024. That makes the control run a real test of the math axis too, at no extra cost — and it means the case for buying teacher traces should be re-argued *after* seeing whether the student can use the derivations it was already given.
@@ -94,6 +114,14 @@
 - **Revisit when:** The control run reports. If form improves but math stays at zero *and* the packing fix is shown not to be the cause, that is the evidence that buys teacher-generated reasoning at Stage 4/5.
 
 ## 2026-07-28 — Online teacher generation is Stage 4/5, not Stage 3; Stage 3 gets more offline experiments first
+
+> **SUPERSEDED the same day** by "On-policy means the *states* come from the
+> student" above. This record named the deciding criterion correctly — whose
+> distribution the training states come from — and then classified by a
+> different one (architecture/timing), assigning to Stage 4/5 a variant it had
+> itself analysed as *not* on-policy. Its analysis of the two variants stands
+> and is worth reading; its **Decision (1) and (3) do not.** The P4/P5 objection
+> to streaming survives as a reproducibility constraint, not a staging one.
 
 - **Context:** Maintainer question — should a teacher that generates answers in real time and feeds them to the student *during* training count as Stage 3, or as a later stage? The instinct in the question (later stage, run more Stage 3 experiments first) is the one adopted here, and the reason is worth stating precisely because "online" is the wrong axis to decide on.
 - **The distinction that actually decides it — whose distribution the training states come from, not whether the teacher runs in real time.** This project *already* runs the teacher inside the training loop: Stage 3's KD forwards the same packed blocks through the teacher every step and takes full-vocab distributions, with no cached logits. Teacher-in-the-loop is not the new thing. Two very different proposals hide behind "online generation":
