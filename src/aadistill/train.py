@@ -43,7 +43,7 @@ import torch.nn.functional as F
 from .data import best_fit_blocks, encode_sample, load_split, pack_blocks
 from .manifest import sha256_json
 
-KD_SCOPES = ("all", "assistant")
+KD_SCOPES = ("all", "assistant", "all_no_think")
 PACKINGS = ("concat", "best_fit")
 
 
@@ -173,8 +173,33 @@ def build_blocks(
     return input_ids, loss_mask, block_groups, stats, content_mask
 
 
+def think_span_mask(
+    input_ids: torch.Tensor, open_id: int, close_id: int
+) -> torch.Tensor:
+    """Boolean [B, T], True on tokens inside a think span, `</think>` included.
+
+    Marks the region `<think> … </think>`. Under the empty-think rendering that
+    is only 3-4 tokens per sample, but they are the tokens the teacher and the
+    CE target disagree about most sharply (experiment log 2026-07-28).
+
+    Computed from ids rather than tracked through packing so it is correct
+    regardless of how blocks were built, and so a block holding several packed
+    samples gets every one of its spans marked.
+    """
+    opens = (input_ids == open_id).int()
+    closes = (input_ids == close_id).int()
+    # Open contributes from its own position; close ends the run *after* itself,
+    # so the closing tag is added back explicitly.
+    inside = (opens.cumsum(1) - closes.cumsum(1)) > 0
+    return inside | closes.bool()
+
+
 def prediction_mask(
-    loss_mask: torch.Tensor, scope: str, content_mask: torch.Tensor | None = None
+    loss_mask: torch.Tensor,
+    scope: str,
+    content_mask: torch.Tensor | None = None,
+    input_ids: torch.Tensor | None = None,
+    think_ids: tuple[int, int] | None = None,
 ) -> torch.Tensor:
     """Boolean [B, T-1] mask of prediction positions for KD.
 
@@ -183,14 +208,32 @@ def prediction_mask(
     student should be matched to, and counting it would also inflate the KD
     normalizer. Absent a content mask (concat packing never pads), `"all"` is
     every position, which is what the four logged runs trained on.
+
+    `"all_no_think"` is `"all"` minus the template-inserted think span. The
+    reason it exists: with empty-think targets the teacher is forced through a
+    protocol it would never produce, and at `</think>` it puts p≈0 on the very
+    token CE demands — so KD there transmits a contradiction rather than
+    knowledge, at 2× CE's per-position weight
+    (`logs/experiments/2026-07-28_kd_ce_protocol_conflict.md`). This scope
+    removes the contested positions and leaves the rest of KD untouched.
     """
-    if scope == "all":
-        if content_mask is None:
-            return torch.ones_like(loss_mask[:, 1:])
-        return content_mask[:, 1:].clone()
     if scope == "assistant":
         return loss_mask[:, 1:].clone()
-    raise ValueError(f"unknown kd scope {scope!r}")
+    if scope not in ("all", "all_no_think"):
+        raise ValueError(f"unknown kd scope {scope!r}")
+
+    if content_mask is None:
+        keep = torch.ones_like(loss_mask, dtype=torch.bool)
+    else:
+        keep = content_mask.clone()
+    if scope == "all_no_think":
+        if input_ids is None or think_ids is None:
+            raise ValueError(
+                "kd_scope 'all_no_think' needs input_ids and think_ids; "
+                "the caller must resolve <think>/</think> from the tokenizer"
+            )
+        keep = keep & ~think_span_mask(input_ids, *think_ids)
+    return keep[:, 1:]
 
 
 def _unpack_blocks(blocks):
@@ -341,11 +384,21 @@ class Trainer:
         out_dir: str | Path | None = None,
         logger: JsonlLogger | None = None,
         extra_val_blocks: dict | None = None,
+        think_ids: tuple[int, int] | None = None,
     ):
         validate_train_config(cfg)
         loss_cfg = cfg["loss"]
         if loss_cfg["kd_weight"] > 0 and teacher is None:
             raise ValueError("loss.kd_weight > 0 requires a teacher model")
+        # Fail here rather than at the first backward: a run that silently fell
+        # back to plain "all" would look like the treatment arm and quietly
+        # invalidate the comparison it exists to make.
+        if loss_cfg["kd_scope"] == "all_no_think" and think_ids is None:
+            raise ValueError(
+                "loss.kd_scope 'all_no_think' requires think_ids=(open, close); "
+                "resolve them from the tokenizer and pass them to Trainer"
+            )
+        self.think_ids = think_ids
         if loss_cfg["ce_weight"] <= 0 and loss_cfg["kd_weight"] <= 0:
             raise ValueError("at least one of ce_weight / kd_weight must be > 0")
         self.cfg = cfg
@@ -428,7 +481,8 @@ class Trainer:
             kd_sum, kd_n = kd_forward_kl(
                 logits,
                 t_logits,
-                prediction_mask(mask, loss_cfg["kd_scope"], content),
+                prediction_mask(mask, loss_cfg["kd_scope"], content,
+                                input_ids=ids, think_ids=self.think_ids),
                 loss_cfg["kd_temperature"],
             )
         return ce_sum, ce_n, kd_sum, kd_n
@@ -448,7 +502,8 @@ class Trainer:
         # be scaled exactly before backward (sum over micro = true step mean).
         ce_total = int(mask[:, 1:].sum()) if loss_cfg["ce_weight"] > 0 else 0
         kd_total = (
-            int(prediction_mask(mask, loss_cfg["kd_scope"], content).sum())
+            int(prediction_mask(mask, loss_cfg["kd_scope"], content,
+                                input_ids=ids, think_ids=self.think_ids).sum())
             if self.teacher is not None and loss_cfg["kd_weight"] > 0
             else 0
         )

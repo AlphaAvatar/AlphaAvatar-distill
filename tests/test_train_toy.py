@@ -450,3 +450,100 @@ def test_trainer_accepts_two_and_three_tuple_blocks(tmp_path):
     assert _unpack_blocks((ids, mask, content))[2] is content
     with pytest.raises(ValueError):
         _unpack_blocks((ids,))
+
+
+# ---------- kd_scope all_no_think (the CE/KD protocol conflict fix) ----------
+
+
+def test_think_span_mask_marks_open_through_close():
+    from aadistill.train import think_span_mask
+
+    OPEN, CLOSE = 90, 91
+    ids = torch.tensor([[5, OPEN, 7, 8, CLOSE, 9, 10]])
+    m = think_span_mask(ids, OPEN, CLOSE)
+    assert m.tolist() == [[False, True, True, True, True, False, False]], (
+        "span must cover <think> through </think> inclusive")
+
+
+def test_think_span_mask_handles_several_packed_samples():
+    """A packed block holds many samples; every span must be marked."""
+    from aadistill.train import think_span_mask
+
+    OPEN, CLOSE = 90, 91
+    ids = torch.tensor([[OPEN, 1, CLOSE, 2, 3, OPEN, 4, CLOSE, 5]])
+    m = think_span_mask(ids, OPEN, CLOSE)
+    assert m.tolist() == [[True, True, True, False, False, True, True, True, False]]
+
+
+def test_think_span_mask_without_any_span_is_all_false():
+    from aadistill.train import think_span_mask
+
+    ids = torch.tensor([[1, 2, 3, 4]])
+    assert not think_span_mask(ids, 90, 91).any()
+
+
+def test_all_no_think_is_all_minus_the_span():
+    """The contested positions leave the KD target set; nothing else changes."""
+    OPEN, CLOSE = 90, 91
+    ids = torch.tensor([[5, OPEN, 7, CLOSE, 9, 10]])
+    loss_mask = torch.ones(1, 6, dtype=torch.bool)
+    every = prediction_mask(loss_mask, "all")
+    without = prediction_mask(loss_mask, "all_no_think", None,
+                              input_ids=ids, think_ids=(OPEN, CLOSE))
+    assert int(every.sum()) == 5
+    # positions 1..3 are the span; shifted by one, entries 0..2 drop out.
+    assert without.tolist() == [[False, False, False, True, True]]
+    assert int(without.sum()) == 2
+
+
+def test_all_no_think_composes_with_the_padding_content_mask():
+    OPEN, CLOSE = 90, 91
+    ids = torch.tensor([[OPEN, 7, CLOSE, 9, 0, 0]])
+    loss_mask = torch.ones(1, 6, dtype=torch.bool)
+    content = torch.tensor([[1, 1, 1, 1, 0, 0]], dtype=torch.bool)
+    got = prediction_mask(loss_mask, "all_no_think", content,
+                          input_ids=ids, think_ids=(OPEN, CLOSE))
+    # Neither padding nor the think span may be a KD target.
+    assert got.tolist() == [[False, False, True, False, False]]
+
+
+def test_all_no_think_fails_loudly_without_think_ids():
+    """A silent fallback to 'all' would look like the treatment arm."""
+    loss_mask = torch.ones(1, 4, dtype=torch.bool)
+    with pytest.raises(ValueError, match="all_no_think"):
+        prediction_mask(loss_mask, "all_no_think", None)
+    with pytest.raises(ValueError, match="all_no_think"):
+        prediction_mask(loss_mask, "all_no_think", None,
+                        input_ids=torch.zeros(1, 4, dtype=torch.long))
+
+
+def test_trainer_rejects_all_no_think_without_think_ids(tmp_path):
+    cfg = toy_cfg(tmp_path, loss={"ce_weight": 0.5, "kd_weight": 1.0,
+                                  "kd_scope": "all_no_think"})
+    with pytest.raises(ValueError, match="think_ids"):
+        Trainer(cfg, tiny_model(1), toy_blocks(), toy_blocks(n=2),
+                teacher=tiny_model(2), device="cpu")
+
+
+def test_trainer_trains_with_all_no_think(tmp_path):
+    cfg = toy_cfg(tmp_path, loss={"ce_weight": 0.5, "kd_weight": 1.0,
+                                  "kd_scope": "all_no_think"})
+    ids, mask = toy_blocks()
+    ids[:, 3] = 60   # <think>   (must be inside the toy VOCAB of 64)
+    ids[:, 5] = 61   # </think>
+    trainer = Trainer(cfg, tiny_model(1), (ids, mask), toy_blocks(n=2),
+                      teacher=tiny_model(2), device="cpu", think_ids=(60, 61))
+    m = trainer.step_once()
+    assert m["kd"] is not None and torch.isfinite(torch.tensor(m["loss"]))
+    # Fewer KD positions than plain "all" — the span was removed.
+    every = toy_cfg(tmp_path / "b", loss={"ce_weight": 0.5, "kd_weight": 1.0,
+                                          "kd_scope": "all"})
+    t2 = Trainer(every, tiny_model(1), (ids, mask), toy_blocks(n=2),
+                 teacher=tiny_model(2), device="cpu")
+    assert m["kd_positions"] < t2.step_once()["kd_positions"]
+
+
+def test_real_tokenizer_think_tags_are_single_tokens(teacher_tokenizer):
+    """The scope depends on this; if it ever stops holding, fail visibly."""
+    assert len(teacher_tokenizer.encode("<think>", add_special_tokens=False)) == 1
+    assert len(teacher_tokenizer.encode("</think>", add_special_tokens=False)) == 1

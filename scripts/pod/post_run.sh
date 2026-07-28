@@ -45,6 +45,13 @@ uv run python scripts/eval_behavior.py --model "$CKPT" \
   --prompts "$BEHAVIOR_PROMPTS" --max-new-tokens "$BEHAVIOR_MAX_NEW_TOKENS" \
   --out "$RUN/eval_behavior_v0.json" || fail behavior
 
+# 3b) p(</think>) probe — the CE/KD conflict experiment's PRIMARY readout.
+# Continuous and far less seed-noisy than the generation metrics, whose measured
+# run-to-run floor is 0.1290 on the composite
+# (logs/experiments/2026-07-28_kd_ce_protocol_conflict.md).
+uv run python scripts/probe_think_close.py --model "$CKPT" \
+  --per-group 4 --out "$RUN/probe_think_close.json" || fail probe_think
+
 # 4) generation smoke: greedy, 80 new tokens, same 3 prompts as every prior run
 uv run python - "$CKPT" "$RUN/gen_smoke.json" <<'EOF' || fail gen_smoke
 import json, sys, torch
@@ -73,7 +80,7 @@ cp "/workspace/console_${RUN_NAME}.log" "$RUN/console.log"
 HASHFILE=artifacts/stage3/${RUN_NAME}_artifact_hashes_${SESSION_DATE}.txt
 SMALL_FILES="train_log.jsonl run_manifest.json eval_holdout_v1.json \
 eval_holdout_v1_int8.json eval_holdout_v1_int8_decoder.json eval_behavior_v0.json \
-eval_behavior_v0.generations.jsonl gen_smoke.json console.log"
+eval_behavior_v0.generations.jsonl probe_think_close.json gen_smoke.json console.log"
 ( cd /workspace/aad && for f in $SMALL_FILES; do echo "$RUN/$f"; done | xargs sha256sum && sha256sum "$CKPT"/* ) \
   > "$HASHFILE" || fail hash
 

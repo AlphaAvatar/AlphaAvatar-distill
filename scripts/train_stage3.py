@@ -92,6 +92,20 @@ def main() -> None:
     tokenizer = AutoTokenizer.from_pretrained(REPO_ROOT / cfg["student_path"])
     print(f"device {device}; encoding Stage 2 mixture from {cfg['data_dir']} ...")
     data_dir = REPO_ROOT / cfg["data_dir"]
+    # kd_scope "all_no_think" needs the think tokens; resolve them here rather
+    # than in the core, which stays model-agnostic (P3). Single-token ids are
+    # required so the span scan is unambiguous.
+    think_ids = None
+    if cfg["loss"]["kd_scope"] == "all_no_think":
+        opened = tokenizer.encode("<think>", add_special_tokens=False)
+        closed = tokenizer.encode("</think>", add_special_tokens=False)
+        if len(opened) != 1 or len(closed) != 1:
+            raise ValueError(
+                "kd_scope 'all_no_think' needs <think>/</think> to be single "
+                f"tokens for this tokenizer; got {opened} and {closed}"
+            )
+        think_ids = (opened[0], closed[0])
+
     packing = cfg.get("packing", "concat")
     train_blocks = build_blocks(
         tokenizer, data_dir, "train", cfg["block_len"], cfg["groups"],
@@ -115,6 +129,8 @@ def main() -> None:
         data_dir=cfg["data_dir"],
         block_len=cfg["block_len"],
         packing=packing,
+        kd_scope=cfg["loss"]["kd_scope"],
+        think_ids=list(think_ids) if think_ids else None,
         tokenizer_sha256=tokenizer_hash(tokenizer),
         train=train_blocks[3],
         val=val_blocks[3],
@@ -154,6 +170,7 @@ def main() -> None:
         out_dir=out_dir,
         logger=logger,
         extra_val_blocks=extra_val_blocks,
+        think_ids=think_ids,
     )
     if resume_ckpt is not None:
         trainer.restore(resume_ckpt)

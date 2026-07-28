@@ -305,7 +305,7 @@ for RUN_NAME in "${ARMS_DONE[@]}"; do
   for f in train_log.jsonl run_manifest.json eval_holdout_v1.json \
            eval_holdout_v1_int8.json eval_holdout_v1_int8_decoder.json \
            eval_behavior_v0.json eval_behavior_v0.generations.jsonl \
-           gen_smoke.json console.log; do
+           probe_think_close.json gen_smoke.json console.log; do
     scp_try "$REMOTE_RUN/$f" "$LOCAL_RUN/$f" || fatal "fetch_failed_${RUN_NAME}_$f"
   done
   HASHFILE_REL=artifacts/stage3/${RUN_NAME}_artifact_hashes_${SESSION_DATE}.txt
