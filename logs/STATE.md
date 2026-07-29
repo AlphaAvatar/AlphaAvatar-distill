@@ -528,12 +528,28 @@ Long reasoning here is floundering, not care — the pre-registered risk, measur
 **No bulk corpus is built yet** (maintainer, 2026-07-30): the $2.27/1k figure is
 real, but the engine is unchosen and a corpus is not worth building twice.
 
-1. **Build the rollout log-prob path — the gating item.** `aadistill.engines`
-   returns tokens only. Criteria 3–6 of the new adoption gate are all blocked on
-   per-token rollout log-probs, a hashed rollout-snapshot format (token ids +
-   log-probs + policy/checkpoint version + engine identity), and a trainer-side
-   scorer that recomputes log-probs on recorded token ids. All CPU-testable
-   against a toy model before any spend (P8).
+1. ~~Build the rollout log-prob path~~ — **done 2026-07-30, CPU, $0.**
+   `Engine.generate(logprobs=True)` returns per-token rollout log-probs aligned
+   1:1 with tokens, with the alignment *enforced* in `_finalize` rather than
+   trusted; `aadistill.rollout` adds `score_tokens` (trainer-side teacher-forced
+   recompute), `importance_stats` (ratio quantiles, off-policy rate against a
+   band, k3 KL), `aggregate_stats` (pooled **by token**, not by sequence), and
+   hashed `write_snapshot`/`read_snapshot` with mandatory policy and engine
+   identity. **218 tests pass.** The load-bearing test generates with log-probs
+   and recomputes them with the scorer on the same model — the only end-to-end
+   evidence that both halves of a ratio refer to the same token.
+
+   Two deliberate design points worth carrying forward: masked positions (a
+   re-appended stop token has no rollout log-prob) are **dropped and counted,
+   never imputed**, since a fabricated denominator would bias every statistic;
+   and `HFEngine` log-probs cost ~10 GB at 4k tokens × batch 4 because HF keeps
+   per-step vocab scores, which is fine for its oracle role and is another reason
+   the production rollout path is a serving engine.
+
+   Still missing for a real pilot: **`VLLMServerEngine` log-probs are written but
+   unexecuted** (it requests `logprobs: 0` and refuses a response without
+   `token_logprobs`), and SGLang raises `NotImplementedError` rather than
+   pretending.
 2. **Compare rollout engines** per
    [`proposals/2026-07-30_rollout_engine_comparison.md`](proposals/2026-07-30_rollout_engine_comparison.md):
    vLLM 0.11.0 vs SGLang deterministic mode, on a driver that supports both. If
