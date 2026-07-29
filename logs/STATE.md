@@ -26,9 +26,33 @@ unquantified batch-composition term, which would sit beside the 0.1290 seed
 noise floor as a second source of behavior-metric instability. Eval batching has
 never been varied in a completed run.
 
-Nothing is running or billing; no pods exist. The GPU benchmark is
-**pre-registered and awaiting approval on spend**
-([proposal](proposals/2026-07-29_engine_benchmark.md), ~$3.5–5.2 on 1× L40S).
+> ⚠️ **A PAID GPU SESSION IS RUNNING RIGHT NOW** (started 2026-07-29 05:52 UTC).
+> Pod `g8ajahpwirhrfx`, 1× L40S at **$0.99/h**, `--terminate-after` backstop at
+> **11:37 UTC**. Driver: `scripts/pod/bench_and_generate.sh` under `setsid nohup`
+> pod-side, so it survives any agent session ending. It benchmarks, then chains
+> into the corpus pilot (capped `--max-hours 3.0`), then uploads to
+> `AlphaAvatar/aadistill-artifacts` under `engine_bench_20260729/` and marks
+> `SESSION_DONE`. **The pod is NOT auto-deleted** — delete it with
+> `runpodctl remove pod g8ajahpwirhrfx` once artifacts are verified.
+> Progress: `ssh -p 43268 root@103.196.86.5 'tail /workspace/markers/session.log'`.
+
+**Engine result, already decided and not by throughput:** both serving engines
+are **incompatible with this project's pinned stack in-process**, measured on
+the pod. vLLM 0.26.0 installs but its compiled extension needs
+`libcudart.so.13` (CUDA 13) while the image and this project's torch are
+**cu128** — it does not import. SGLang 0.5.9 installs *and imports*, but only by
+**downgrading torch 2.11.0 → 2.9.1 and transformers 5.13.1 → 4.57.1**, a major
+transformers version this repo's code does not target; `uv sync` restored the
+environment. So the benchmark runs `hf` alone, and rule R3 (a second stack must
+earn its keep) is satisfied by integration cost rather than by tokens/second.
+Untested follow-up: driving a serving engine from an isolated venv as a
+subprocess, which is a real deployment pattern but more integration surface —
+exactly the cost being weighed.
+
+The `hf` arm still buys the session's highest-value unknowns: real batched
+throughput on the 4B teacher (replacing the `batch_size` 1 figure of 55 s/prompt
+that started this line), **batch invariance on the 4B in bf16**, and a measured
+$/1k prompts that prices the bulk build.
 
 Earlier context — the CE/KD conflict intervention —
 **the conflict is confirmed causal, and it is the best-understood defect in the

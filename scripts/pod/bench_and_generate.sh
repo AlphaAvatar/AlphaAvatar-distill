@@ -38,23 +38,40 @@ cd "$REPO" || { mark "FAILED:no_repo"; exit 1; }
 
 # --- engine installs -------------------------------------------------------
 # Each is independent: SGLang failing must not cost us the vLLM arm.
-ENGINES=hf
-log "installing vllm"
-if uv pip install --quiet vllm 2>&1 | tail -5; then
-  ENGINES=$ENGINES,vllm
-  log "vllm ok: $(uv pip show vllm 2>/dev/null | awk '/^Version/{print $2}')"
-  mark "VLLM_INSTALLED"
-else
-  log "vllm install FAILED — arm skipped (recorded as integration cost)"
-fi
+#
+# `--python` is required and is not optional pedantry: `uv pip` does NOT read
+# UV_PROJECT_ENVIRONMENT (that governs `uv sync`/`uv run`), so without it every
+# install fails instantly with "No virtual environment found" and both serving
+# arms get silently recorded as integration failures. Measured the hard way on
+# this pod at 05:43 UTC — both installs "failed" in the same second, which is
+# the tell that no download was ever attempted.
+VENV_PY=/root/venv/bin/python
+install_engine() { # install_engine <name> <pip-spec>
+  local name=$1 spec=$2 t0 t1
+  log "installing $name"
+  t0=$(date +%s)
+  if uv pip install --python "$VENV_PY" "$spec" > "$MARKERS/install_$name.log" 2>&1; then
+    t1=$(date +%s)
+    ENGINES=$ENGINES,$name
+    log "$name ok in $((t1 - t0))s: $(uv pip show --python "$VENV_PY" "$name" 2>/dev/null | awk '/^Version/{print $2}')"
+    mark "$(echo "$name" | tr '[:lower:]' '[:upper:]')_INSTALLED"
+  else
+    log "$name install FAILED after $(($(date +%s) - t0))s — arm skipped; see install_$name.log"
+    tail -5 "$MARKERS/install_$name.log" | while read -r l; do log "  | $l"; done
+  fi
+}
 
-log "installing sglang"
-if uv pip install --quiet "sglang[all]" 2>&1 | tail -5; then
-  ENGINES=$ENGINES,sglang
-  log "sglang ok: $(uv pip show sglang 2>/dev/null | awk '/^Version/{print $2}')"
-  mark "SGLANG_INSTALLED"
+ENGINES=hf
+if [ -n "${ENGINES_OVERRIDE:-}" ]; then
+  # Set when the installs have already been attempted and their outcome decided
+  # out of band — see the 2026-07-29 session, where both serving engines turned
+  # out to be incompatible with this project's pinned stack and re-running the
+  # installs would have re-broken the restored environment.
+  ENGINES=$ENGINES_OVERRIDE
+  log "install step skipped; engines fixed to: $ENGINES"
 else
-  log "sglang install FAILED — arm skipped (recorded as integration cost)"
+  install_engine vllm vllm
+  install_engine sglang "sglang[all]"
 fi
 log "engines to benchmark: $ENGINES"
 
