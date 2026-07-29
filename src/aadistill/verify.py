@@ -159,18 +159,24 @@ def verify(sample: dict, answer: str, raw: str) -> tuple[bool, str]:
 def select(candidates: list[dict]) -> dict | None:
     """Pick the target from n verified candidates, or None if none verified.
 
-    Greedy (candidate 0) wins whenever it verified: it is the teacher's modal
-    answer and the only deterministic one. Otherwise the **median-length**
-    accepted candidate, tie-broken by candidate index.
+    The **median-length** accepted candidate, tie-broken by candidate index.
 
     Not "shortest correct": on the math slices that systematically selects
     answers that skip the derivation (`The answer is 42.`), which would train the
     student to state answers without working them out.
+
+    Candidate 0 used to win outright whenever it verified, on the grounds that
+    it was greedy — "the teacher's modal answer and the only deterministic one".
+    Both halves of that are gone (2026-07-29). Answer generation no longer
+    decodes a greedy candidate at all, and the determinism claim did not survive
+    measurement: bf16 greedy decoding is not batch-invariant, so candidate 0 was
+    never reproducible across batch compositions the way the rule assumed
+    ([log](../../logs/experiments/2026-07-29_engine_adapter_and_bf16_invariance.md)).
+    With every candidate an equal draw, privileging index 0 would just be
+    selecting on batch position.
     """
     accepted = [c for c in candidates if c["accepted"]]
     if not accepted:
         return None
-    if accepted[0]["index"] == 0:
-        return accepted[0]
     by_length = sorted(accepted, key=lambda c: (len(c["answer"].split()), c["index"]))
     return by_length[len(by_length) // 2]

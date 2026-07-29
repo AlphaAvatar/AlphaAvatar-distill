@@ -130,13 +130,22 @@ class Engine:
         max_new_tokens: int,
         stop_ids: set[int],
         greedy: bool = True,
-        temperature: float = 0.7,
-        top_p: float = 0.95,
+        temperature: float = 1.0,
+        top_p: float = 1.0,
+        top_k: int = 0,
         seed: int | None = None,
     ) -> list[dict]:
+        """`top_k=0` disables top-k. It is threaded explicitly and never left to
+        an engine default, because the defaults disagree: HF `generate` uses
+        `top_k=50` unless told otherwise, while vLLM and SGLang disable it. Left
+        implicit, the arms would be sampling from different distributions and
+        the cross-engine comparison would be measuring that instead of the
+        engines.
+        """
         raw = self._raw_generate(
             prompts, max_new_tokens=max_new_tokens, stop_ids=stop_ids,
-            greedy=greedy, temperature=temperature, top_p=top_p, seed=seed,
+            greedy=greedy, temperature=temperature, top_p=top_p, top_k=top_k,
+            seed=seed,
         )
         if len(raw) != len(prompts):
             raise RuntimeError(
@@ -172,7 +181,7 @@ class HFEngine(Engine):
 
     @torch.no_grad()
     def _raw_generate(self, prompts, *, max_new_tokens, stop_ids, greedy,
-                      temperature, top_p, seed):
+                      temperature, top_p, top_k, seed):
         out: list[tuple[list[int], str] | None] = [None] * len(prompts)
         # Length-sorted batches so one long prompt does not pad out the rest;
         # the original index rides along to restore input order.
@@ -188,7 +197,8 @@ class HFEngine(Engine):
                 "max_new_tokens": max_new_tokens,
                 "pad_token_id": self.pad_token_id,
                 "eos_token_id": sorted(stop_ids),
-                "top_k": None,
+                # None, not 0: transformers reads 0 as "no tokens allowed".
+                "top_k": top_k or None,
             }
             if greedy:
                 kwargs.update(do_sample=False, temperature=None, top_p=None)
@@ -233,13 +243,14 @@ class VLLMEngine(Engine):
         )
 
     def _raw_generate(self, prompts, *, max_new_tokens, stop_ids, greedy,
-                      temperature, top_p, seed):
+                      temperature, top_p, top_k, seed):
         from vllm import SamplingParams
         from vllm.inputs import TokensPrompt
 
         params = SamplingParams(
             temperature=0.0 if greedy else temperature,
             top_p=1.0 if greedy else top_p,
+            top_k=-1 if (greedy or not top_k) else top_k,  # -1 disables in vLLM
             max_tokens=max_new_tokens,
             stop_token_ids=sorted(stop_ids),
             seed=seed if not greedy else None,
@@ -290,10 +301,11 @@ class SGLangEngine(Engine):
         self.deterministic = deterministic
 
     def _raw_generate(self, prompts, *, max_new_tokens, stop_ids, greedy,
-                      temperature, top_p, seed):
+                      temperature, top_p, top_k, seed):
         params = {
             "temperature": 0.0 if greedy else temperature,
             "top_p": 1.0 if greedy else top_p,
+            "top_k": -1 if (greedy or not top_k) else top_k,  # -1 disables in SGLang
             "max_new_tokens": max_new_tokens,
             "stop_token_ids": sorted(stop_ids),
         }

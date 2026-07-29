@@ -107,12 +107,21 @@ def candidate(index, accepted, words):
     return {"index": index, "accepted": accepted, "answer": " ".join(["w"] * words)}
 
 
-def test_select_prefers_a_verified_greedy_candidate():
-    chosen = select([candidate(0, True, 50), candidate(1, True, 10)])
-    assert chosen["index"] == 0
+def test_select_does_not_privilege_candidate_zero():
+    """Candidate 0 used to win outright as the greedy draw. Answer generation no
+    longer decodes greedily (2026-07-29) and bf16 greedy is not batch-invariant
+    anyway, so with every candidate an equal sample, preferring index 0 would be
+    selecting on batch position. Median length decides instead — here that is
+    candidate 1, which the old rule would have passed over."""
+    chosen = select([candidate(0, True, 50), candidate(1, True, 10),
+                     candidate(2, True, 30)])
+    assert chosen["index"] == 2  # 10 < 30 < 50 -> median is 30 words
+
+    # Two accepted candidates: the upper median, whichever index it sits at.
+    assert select([candidate(0, True, 10), candidate(1, True, 50)])["index"] == 1
 
 
-def test_select_falls_back_to_the_median_length_accepted_candidate():
+def test_select_uses_the_median_length_accepted_candidate():
     """Not the shortest: on math that picks the answer with no derivation."""
     chosen = select([candidate(0, False, 5), candidate(1, True, 8),
                      candidate(2, True, 200), candidate(3, True, 60)])

@@ -98,9 +98,19 @@ be pre-registering a threshold on a quantity nobody has ever measured here.
 ## 7. Pilot corpus
 
 Runs only if a winner exists. 200 prompts/slice × 5 slices = 1,000 prompts,
-`n=4` candidates (candidate 0 greedy), cap 4096 — the shape already described in
-`generate_teacher_answers.py`, with unfiltered top-n selection deferred to
+`n=4` candidates, cap 4096, with unfiltered top-n selection deferred to
 Stage 4/5 per the 2026-07-28 direction.
+
+**All four candidates are sampled untruncated — temperature 1.0, top_p 1.0,
+top_k off — and none is greedy** (maintainer, 2026-07-29; decision record same
+date). With a verifier downstream this is rejection sampling, where candidate
+diversity is what makes accept@n exceed accept@1. Note that `accept_at_1`
+consequently changes meaning, from "greedy was accepted" to "one sample was
+accepted", and is not comparable to any earlier figure.
+
+The benchmark itself still decodes **greedily**, and that is not an
+inconsistency: agreement and batch-invariance are only meaningful between
+deterministic decodes. The benchmark measures engines; the pilot builds a corpus.
 
 Its purpose is threefold and all three are prerequisites the queue already
 lists: a real accept@1/accept@n rate, the per-slice divergence profile that sets

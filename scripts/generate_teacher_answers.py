@@ -4,12 +4,18 @@
         --slices rag_evidence,multihop_qa,refusal_uncertainty,gsm8k,openmath \
         --limit-per-slice 200 --n 4 --out artifacts/stage2_v2/pilot
 
-For each prompt the teacher produces **n candidates in its native thinking
-mode** (candidate 0 greedy, the rest sampled), every candidate is verified
-against the gold key with `aadistill.verify`, and one accepted candidate becomes
-the new target. A prompt with no accepted candidate **keeps its v1 public
-target** — no unverified teacher text ever enters training (decision record
-2026-07-28).
+For each prompt the teacher produces **n sampled candidates in its native
+thinking mode**, every candidate is verified against the gold key with
+`aadistill.verify`, and one accepted candidate becomes the new target. A prompt
+with no accepted candidate **keeps its v1 public target** — no unverified
+teacher text ever enters training (decision record 2026-07-28).
+
+Sampling is **untruncated** (temperature 1.0, top_p 1.0, top_k off) and there is
+**no greedy candidate** (maintainer, 2026-07-29), following mainstream on-policy
+rollout practice rather than the vendor's single-answer serving preset. With a
+verifier downstream this is rejection sampling, where candidate diversity is
+what makes accept@n exceed accept@1. `accept_at_1` therefore now means "one
+sample was accepted", not "greedy was accepted".
 
 The teacher is never prefilled with a closed think block. Suppressing its
 reasoning would be ~10× cheaper and would measure our prompt convention rather
@@ -29,10 +35,12 @@ Outputs, all under `--out`:
 * `manifest.json` — accept@1 / accept@n and reject-reason histograms per slice,
   thinking-length stats, decode config, hashes, code state, hardware.
 
-Determinism: greedy candidate 0 is reproducible on fixed hardware; sampled
-candidates are seeded per (prompt, candidate) but batched generation is not
+Determinism: candidates are seeded per batch, but batched generation is not
 bitwise reproducible, so **the corpus is the artifact** and its hash pins the
-experiment (P5).
+experiment (P5). That stance is now measured rather than assumed — even *greedy*
+bf16 decoding is not batch-invariant on this project's own hardware
+(`logs/experiments/2026-07-29_engine_adapter_and_bf16_invariance.md`), which is
+part of why no candidate is generated greedily any more.
 """
 
 from __future__ import annotations
@@ -137,46 +145,53 @@ def build_engine(args, model, tokenizer):
 @torch.no_grad()
 def generate_candidates(engine, tokenizer, prompt_ids: list[list[int]], *, n: int,
                         max_new_tokens: int, temperature: float, top_p: float,
-                        seed: int, stops: set[int], think_close: int):
-    """n candidates for each prompt in the batch — candidate 0 greedy, rest sampled.
+                        top_k: int, seed: int, stops: set[int], think_close: int):
+    """n **sampled** candidates for each prompt in the batch.
 
-    Two engine calls per batch rather than n per prompt: batch-1 decoding of a
-    thinking teacher is ~50 h for a 1k-prompt pilot, which is the difference
-    between an affordable session and an unaffordable one.
+    No greedy candidate (maintainer, 2026-07-29). Every candidate is an equal
+    draw from the teacher's distribution, following mainstream on-policy rollout
+    practice: DAPO and GRPO-style systems sample untruncated because truncating
+    the tail suppresses low-probability tokens at exactly the high-entropy
+    positions where the interesting branches live, so the corpus would reflect a
+    *truncated* teacher rather than the teacher. With `n` candidates and a
+    verifier, this is rejection sampling, and diversity is what makes accept@n
+    exceed accept@1.
 
-    Driven through `aadistill.engines` rather than `model.generate` so the
-    corpus can be built by whichever engine the benchmark selected
-    (`logs/proposals/2026-07-29_engine_benchmark.md`) without this script
-    knowing which one it is. The adapter is token-in/token-out and does the
-    stop-cutting itself, in one shared code path for every engine — so a corpus
-    built on vLLM is trimmed identically to one built in-stack, and the text
-    here is derived for verification and readability only.
+    Two further reasons the greedy candidate is gone. It was mode-collapsed by
+    construction — n candidates of which one is the argmax path is n-1 samples
+    plus a duplicate-prone outlier. And the determinism that justified
+    privileging it in `verify.select` does not exist: bf16 greedy decoding is
+    not batch-invariant on this project's own measurement (experiment log
+    2026-07-29), so "the deterministic candidate" was never deterministic across
+    batch compositions.
+
+    One engine call per batch, with each prompt replicated `n` times
+    contiguously: batch-1 decoding of a thinking teacher is ~50 h for a 1k-prompt
+    pilot, and replicating into a single call keeps a continuous-batching engine
+    saturated, which is most of the throughput on the serving arms.
+
+    Driven through `aadistill.engines` rather than `model.generate` so the corpus
+    can be built by whichever engine the benchmark selected
+    (`logs/proposals/2026-07-29_engine_benchmark.md`) without this script knowing
+    which one it is. The adapter is token-in/token-out and does the stop-cutting
+    itself, in one shared code path for every engine, so a corpus built on vLLM
+    is trimmed identically to one built in-stack; the text here is derived for
+    verification and readability only.
 
     Returns, per prompt, a list of (raw_text, n_new_tokens, hit_cap, think_tokens).
     """
-    def rows_of(completions):
-        for completion in completions:
-            ids = completion["tokens"]
-            think_tokens = ids.index(think_close) if think_close in ids else completion["n_new"]
-            yield (tokenizer.decode(ids, skip_special_tokens=False),
-                   completion["n_new"], completion["hit_cap"], think_tokens)
+    repeated = [ids for ids in prompt_ids for _ in range(n)]
+    completions = engine.generate(
+        repeated, max_new_tokens=max_new_tokens, stop_ids=stops, greedy=False,
+        temperature=temperature, top_p=top_p, top_k=top_k, seed=seed)
 
     per_prompt: list[list] = [[] for _ in prompt_ids]
-    greedy = engine.generate(prompt_ids, max_new_tokens=max_new_tokens,
-                             stop_ids=stops, greedy=True)
-    for index, item in enumerate(rows_of(greedy)):
-        per_prompt[index].append(item)
-
-    if n > 1:
-        # Each prompt repeated (n-1) times contiguously. Replicating into one
-        # call rather than looping keeps a continuous-batching engine saturated,
-        # which is most of the throughput on the serving arms.
-        repeated = [ids for ids in prompt_ids for _ in range(n - 1)]
-        sampled = engine.generate(repeated, max_new_tokens=max_new_tokens,
-                                  stop_ids=stops, greedy=False,
-                                  temperature=temperature, top_p=top_p, seed=seed)
-        for index, item in enumerate(rows_of(sampled)):
-            per_prompt[index // (n - 1)].append(item)
+    for index, completion in enumerate(completions):
+        ids = completion["tokens"]
+        think_tokens = ids.index(think_close) if think_close in ids else completion["n_new"]
+        per_prompt[index // n].append(
+            (tokenizer.decode(ids, skip_special_tokens=False),
+             completion["n_new"], completion["hit_cap"], think_tokens))
     return per_prompt
 
 
@@ -191,8 +206,18 @@ def main() -> None:
                     help="prompts per generate call; raise until GPU memory is the limit")
     ap.add_argument("--max-new-tokens", type=int, default=4096,
                     help="must fit the teacher's reasoning trace plus its answer")
-    ap.add_argument("--temperature", type=float, default=0.7)
-    ap.add_argument("--top-p", type=float, default=0.95)
+    # Untruncated sampling, following mainstream on-policy rollout practice
+    # (DAPO/GRPO) rather than Qwen3-Thinking's single-answer serving preset
+    # (0.6 / 0.95 / top_k 20). The preset optimizes one good answer; this job
+    # wants n *diverse* candidates whose distribution is the teacher's own, with
+    # the verifier — not the sampler — doing the filtering. See the decision
+    # record 2026-07-29. The pilot measures accept@1/accept@n, which is the
+    # empirical check on whether this is too hot.
+    ap.add_argument("--temperature", type=float, default=1.0)
+    ap.add_argument("--top-p", type=float, default=1.0)
+    ap.add_argument("--top-k", type=int, default=0,
+                    help="0 disables top-k; threaded explicitly because engine "
+                         "defaults disagree (HF 50, vLLM/SGLang off)")
     ap.add_argument("--seed", type=int, default=20260728)
     ap.add_argument("--dtype", default="bfloat16")
     ap.add_argument("--device", default=None)
@@ -278,7 +303,7 @@ def main() -> None:
             batch_raws = generate_candidates(
                 engine, tokenizer, prompt_ids, n=args.n,
                 max_new_tokens=args.max_new_tokens, temperature=args.temperature,
-                top_p=args.top_p, seed=args.seed + batch_index,
+                top_p=args.top_p, top_k=args.top_k, seed=args.seed + batch_index,
                 stops=stops, think_close=think_close)
 
             for sample, raws in zip(batch, batch_raws):
@@ -365,8 +390,9 @@ def main() -> None:
         "teacher": args.model,
         "thinking_mode": True,  # never suppressed — decision record 2026-07-28
         "decoding": {
-            "n": args.n, "candidate_0": "greedy", "temperature": args.temperature,
-            "top_p": args.top_p, "max_new_tokens": args.max_new_tokens,
+            "n": args.n, "all_candidates_sampled": True,
+            "temperature": args.temperature, "top_p": args.top_p,
+            "top_k": args.top_k, "max_new_tokens": args.max_new_tokens,
             "seed": args.seed, "dtype": args.dtype, "device": device,
             # The engine changes the numerics, so it is part of the corpus's
             # identity: two corpora built by different backends are not

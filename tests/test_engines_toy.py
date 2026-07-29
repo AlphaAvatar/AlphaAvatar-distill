@@ -204,7 +204,7 @@ def _sglang_stub(outputs):
 def _raw(engine, prompts):
     return engine._raw_generate(
         prompts, max_new_tokens=8, stop_ids={EOS}, greedy=True,
-        temperature=0.7, top_p=0.95, seed=None)
+        temperature=1.0, top_p=1.0, top_k=0, seed=None)
 
 
 def test_sglang_trims_the_echo_using_completion_tokens():

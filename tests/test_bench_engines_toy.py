@@ -132,35 +132,38 @@ def _run(n, prompts):
     engine = _StubEngine()
     result = generate_candidates(
         engine, _StubTokenizer(), prompts, n=n, max_new_tokens=32,
-        temperature=0.7, top_p=0.95, seed=1, stops={2},
+        temperature=1.0, top_p=1.0, top_k=0, seed=1, stops={2},
         think_close=THINK_CLOSE_ID)
     return engine, result
 
 
-def test_greedy_only_when_n_is_one():
+def test_no_candidate_is_generated_greedily():
+    """Maintainer decision 2026-07-29: every candidate is an equal sampled draw.
+    A greedy candidate would be mode-collapsed by construction, and the
+    determinism that once justified it does not survive bf16 batching."""
     engine, per_prompt = _run(1, [[10], [20]])
     assert [len(c) for c in per_prompt] == [1, 1]
-    assert engine.calls == [{"n": 2, "greedy": True}]
+    assert engine.calls == [{"n": 2, "greedy": False}]
+    assert all(call["greedy"] is False for call in engine.calls)
 
 
-def test_sampled_candidates_map_back_to_their_own_prompt():
+def test_all_n_candidates_come_from_one_batched_call():
+    """One call with prompts replicated n times, not n calls: it is what keeps a
+    continuous-batching engine saturated."""
+    engine, per_prompt = _run(4, [[10], [20], [30]])
+    assert [len(c) for c in per_prompt] == [4, 4, 4]
+    assert engine.calls == [{"n": 12, "greedy": False}]
+
+
+def test_candidates_map_back_to_their_own_prompt():
     """The replication is contiguous per prompt; an off-by-one here would
     attach one prompt's candidates to another prompt's gold key, and every
     verifier verdict downstream would be silently wrong."""
     prompts = [[10], [20], [30]]
-    engine, per_prompt = _run(4, prompts)
-    assert [len(c) for c in per_prompt] == [4, 4, 4]
-    # Every candidate for prompt i must carry prompt i's first token.
+    _engine, per_prompt = _run(4, prompts)
     for prompt, candidates in zip(prompts, per_prompt):
         for raw, _n_new, _cap, _think in candidates:
             assert raw.split()[0] == str(prompt[0])
-    assert engine.calls == [{"n": 3, "greedy": True}, {"n": 9, "greedy": False}]
-
-
-def test_candidate_zero_is_the_greedy_one():
-    engine, per_prompt = _run(2, [[10]])
-    assert engine.calls[0]["greedy"] is True
-    assert len(per_prompt[0]) == 2
 
 
 def test_think_tokens_is_the_position_of_the_close_tag():
