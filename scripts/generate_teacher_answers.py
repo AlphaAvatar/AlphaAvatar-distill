@@ -53,6 +53,7 @@ sys.path.insert(0, str(REPO_ROOT / "src"))
 
 from aadistill.behavior import THINK_CLOSE, split_generation
 from aadistill.data import load_jsonl
+from aadistill.engines import HFEngine, SGLangEngine, VLLMEngine
 from aadistill.env import code_state, hardware_report
 from aadistill.manifest import sha256_file
 from aadistill.teacher import load_causal_lm
@@ -112,63 +113,70 @@ def stop_ids(model, tokenizer) -> set[int]:
     return {i for i in ids if i is not None}
 
 
-def _cut_at_stop(row: list[int], stops: set[int], cap: int,
-                 think_close: int | None) -> tuple[list[int], int, bool, int]:
-    """Trim a generated row at its first stop token (kept).
+def build_engine(args, model, tokenizer):
+    """Construct the decode backend named by `--engine`.
 
-    Returns (ids, n_new, hit_cap, think_tokens). The trace length comes from the
-    position of the `</think>` token, which is a single id — re-tokenizing the
-    trace text instead would re-encode ~1.5k tokens per candidate, hundreds of
-    millions over a bulk run, to recover a number the ids already carry.
+    The in-stack engine reuses the already-loaded model. The serving engines
+    load their own copy, so the training-stack model is moved off the GPU first
+    — otherwise it holds memory that vLLM/SGLang want for their KV cache and the
+    build fails at allocation time rather than for any real reason.
     """
-    kept, n_new, hit_cap = row, len(row), len(row) >= cap
-    for position, token in enumerate(row):
-        if token in stops:
-            kept, n_new, hit_cap = row[: position + 1], position + 1, False
-            break
-    think_tokens = kept.index(think_close) if think_close in kept else n_new
-    return kept, n_new, hit_cap, think_tokens
+    if args.engine == "hf":
+        return HFEngine(model, tokenizer.pad_token_id, batch_size=args.batch_size)
+
+    if torch.cuda.is_available():
+        model.to("cpu")
+        torch.cuda.empty_cache()
+    spec = args.model
+    path, revision = (spec.split("@", 1) if "@" in spec else (spec, None))
+    if args.engine == "vllm":
+        return VLLMEngine(path, dtype=args.dtype, revision=revision)
+    return SGLangEngine(path, dtype=args.dtype, revision=revision)
 
 
 @torch.no_grad()
-def generate_candidates(model, tokenizer, prompts: list[str], *, n: int, max_new_tokens: int,
-                        temperature: float, top_p: float, seed: int, device: str):
+def generate_candidates(engine, tokenizer, prompt_ids: list[list[int]], *, n: int,
+                        max_new_tokens: int, temperature: float, top_p: float,
+                        seed: int, stops: set[int], think_close: int):
     """n candidates for each prompt in the batch — candidate 0 greedy, rest sampled.
 
-    Two `generate` calls per batch rather than n per prompt: batch-1 decoding of
-    a thinking teacher is ~50 h for a 1k-prompt pilot, which is the difference
-    between an affordable session and an unaffordable one. Left padding, and
-    each row is cut at its first stop token so a short answer is not scored with
-    another sequence's padding attached.
+    Two engine calls per batch rather than n per prompt: batch-1 decoding of a
+    thinking teacher is ~50 h for a 1k-prompt pilot, which is the difference
+    between an affordable session and an unaffordable one.
+
+    Driven through `aadistill.engines` rather than `model.generate` so the
+    corpus can be built by whichever engine the benchmark selected
+    (`logs/proposals/2026-07-29_engine_benchmark.md`) without this script
+    knowing which one it is. The adapter is token-in/token-out and does the
+    stop-cutting itself, in one shared code path for every engine — so a corpus
+    built on vLLM is trimmed identically to one built in-stack, and the text
+    here is derived for verification and readability only.
 
     Returns, per prompt, a list of (raw_text, n_new_tokens, hit_cap, think_tokens).
     """
-    encoded = tokenizer(prompts, return_tensors="pt", padding=True,
-                        add_special_tokens=False).to(device)
-    prompt_len = encoded.input_ids.shape[1]
-    stops = stop_ids(model, tokenizer)
-    think_close = tokenizer.convert_tokens_to_ids(THINK_CLOSE)
-    shared = dict(max_new_tokens=max_new_tokens, top_k=None,
-                  pad_token_id=tokenizer.pad_token_id)
-
-    def rows_of(output):
-        for row in output[:, prompt_len:].tolist():
-            ids, n_new, hit_cap, think_tokens = _cut_at_stop(
-                row, stops, max_new_tokens, think_close)
+    def rows_of(completions):
+        for completion in completions:
+            ids = completion["tokens"]
+            think_tokens = ids.index(think_close) if think_close in ids else completion["n_new"]
             yield (tokenizer.decode(ids, skip_special_tokens=False),
-                   n_new, hit_cap, think_tokens)
+                   completion["n_new"], completion["hit_cap"], think_tokens)
 
-    per_prompt: list[list] = [[] for _ in prompts]
-    greedy = model.generate(**encoded, do_sample=False, temperature=None, top_p=None, **shared)
+    per_prompt: list[list] = [[] for _ in prompt_ids]
+    greedy = engine.generate(prompt_ids, max_new_tokens=max_new_tokens,
+                             stop_ids=stops, greedy=True)
     for index, item in enumerate(rows_of(greedy)):
         per_prompt[index].append(item)
 
     if n > 1:
-        torch.manual_seed(seed)
-        sampled = model.generate(**encoded, do_sample=True, temperature=temperature,
-                                 top_p=top_p, num_return_sequences=n - 1, **shared)
+        # Each prompt repeated (n-1) times contiguously. Replicating into one
+        # call rather than looping keeps a continuous-batching engine saturated,
+        # which is most of the throughput on the serving arms.
+        repeated = [ids for ids in prompt_ids for _ in range(n - 1)]
+        sampled = engine.generate(repeated, max_new_tokens=max_new_tokens,
+                                  stop_ids=stops, greedy=False,
+                                  temperature=temperature, top_p=top_p, seed=seed)
         for index, item in enumerate(rows_of(sampled)):
-            per_prompt[index // (n - 1)].append(item)  # generate keeps prompts contiguous
+            per_prompt[index // (n - 1)].append(item)
     return per_prompt
 
 
@@ -188,8 +196,30 @@ def main() -> None:
     ap.add_argument("--seed", type=int, default=20260728)
     ap.add_argument("--dtype", default="bfloat16")
     ap.add_argument("--device", default=None)
+    ap.add_argument("--engine", default="hf", choices=["hf", "vllm", "sglang"],
+                    help="decode backend; `hf` is in-stack and training-identical")
+    ap.add_argument("--max-hours", type=float, default=None,
+                    help="wall-clock budget; stops cleanly at the next batch "
+                         "boundary and writes complete artifacts for the "
+                         "prompts finished so far (P6)")
+    ap.add_argument("--engine-from", default=None,
+                    help="path to a bench_engines.py decision.json — takes the "
+                         "winner from it, so a session can chain benchmark → "
+                         "generation without an agent in the loop")
     ap.add_argument("--out", required=True)
     args = ap.parse_args()
+
+    if args.engine_from:
+        decision = json.loads(Path(args.engine_from).read_text())
+        winner = decision.get("winner")
+        if not winner:
+            raise SystemExit(
+                f"{args.engine_from} selected no engine "
+                f"({decision.get('reason')}) — refusing to guess a backend for a "
+                "corpus build")
+        args.engine = winner
+        print(f"engine {winner!r} from {args.engine_from} "
+              f"(rule {decision.get('rule')})", flush=True)
 
     device = args.device or ("cuda" if torch.cuda.is_available() else "cpu")
     dtype = {"bfloat16": torch.bfloat16, "float32": torch.float32}[args.dtype]
@@ -206,10 +236,15 @@ def main() -> None:
 
     model, tokenizer = load_causal_lm(args.model, dtype, device)
     # Batched generation pads; left padding keeps every prompt flush against the
-    # first generated token, which is what makes `prompt_len` slicing valid.
+    # first generated token, which is what makes prompt-length slicing valid.
     tokenizer.padding_side = "left"
     if tokenizer.pad_token_id is None:
         tokenizer.pad_token = tokenizer.eos_token
+    stops = stop_ids(model, tokenizer)
+    think_close = tokenizer.convert_tokens_to_ids(THINK_CLOSE)
+
+    engine = build_engine(args, model, tokenizer)
+    print(f"engine: {engine.name}", flush=True)
 
     out_dir = REPO_ROOT / args.out
     out_dir.mkdir(parents=True, exist_ok=True)
@@ -224,12 +259,27 @@ def main() -> None:
         batches = [(name, samples[i: i + args.batch_size])
                    for name, samples in work.items()
                    for i in range(0, len(samples), args.batch_size)]
+        budget_stopped = False
         for batch_index, (name, batch) in enumerate(batches):
-            prompts = [generation_prompt(tokenizer, s) for s in batch]
+            # Checked at the batch boundary so the artifacts on disk are always
+            # a complete prefix of the corpus, never a half-written batch. An
+            # unattended run on a paid pod needs a backstop that does not depend
+            # on anyone watching it (P6/P12).
+            if args.max_hours and (time.time() - started) / 3600 >= args.max_hours:
+                budget_stopped = True
+                print(f"\n!! wall-clock budget {args.max_hours}h reached after "
+                      f"{done}/{total} prompts — stopping cleanly", flush=True)
+                break
+            prompt_ids = [
+                tokenizer(generation_prompt(tokenizer, s),
+                          add_special_tokens=False).input_ids
+                for s in batch
+            ]
             batch_raws = generate_candidates(
-                model, tokenizer, prompts, n=args.n,
+                engine, tokenizer, prompt_ids, n=args.n,
                 max_new_tokens=args.max_new_tokens, temperature=args.temperature,
-                top_p=args.top_p, seed=args.seed + batch_index, device=device)
+                top_p=args.top_p, seed=args.seed + batch_index,
+                stops=stops, think_close=think_close)
 
             for sample, raws in zip(batch, batch_raws):
                 candidates = []
@@ -291,6 +341,12 @@ def main() -> None:
 
     summary = {}
     for name, s in stats.items():
+        if not s["prompts"]:
+            # Reachable when `--max-hours` stops the run before a slice starts.
+            # Reporting 0.0 would read as "nothing was accepted" rather than
+            # "nothing was attempted", which is a different and much worse claim.
+            summary[name] = {"prompts": 0, "not_reached": True}
+            continue
         summary[name] = {
             "prompts": s["prompts"],
             "accept_at_1": round(s["accept_at_1"] / s["prompts"], 4),
@@ -312,8 +368,20 @@ def main() -> None:
             "n": args.n, "candidate_0": "greedy", "temperature": args.temperature,
             "top_p": args.top_p, "max_new_tokens": args.max_new_tokens,
             "seed": args.seed, "dtype": args.dtype, "device": device,
+            # The engine changes the numerics, so it is part of the corpus's
+            # identity: two corpora built by different backends are not
+            # interchangeable even at identical decode settings (P4/P9).
+            "engine": engine.name,
+            "engine_selected_by": args.engine_from,
         },
         "data_dir": args.data_dir,
+        # A budget-stopped corpus is a valid artifact but not a complete one;
+        # anything training on it must know that, so it is recorded next to the
+        # hashes rather than inferred from a prompt count (P4/P11).
+        "complete": not budget_stopped,
+        "prompts_requested": total,
+        "prompts_generated": done,
+        "max_hours": args.max_hours,
         "slices": summary,
         "seconds": round(time.time() - started, 1),
         "outputs": {

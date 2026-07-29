@@ -1,0 +1,407 @@
+"""Inference-engine adapters, token-in / token-out.
+
+Why this exists
+---------------
+Teacher generation is the next spend, and its cost is dominated by decode
+throughput (`logs/proposals/2026-07-29_inference_engine_survey.md`). The survey
+reached one conclusion: **benchmark, do not pick from a table** — the published
+engine ordering is driven by prefix-cache reuse under concurrent load, and a
+corpus build of unique prompts is the workload where that ordering reverses.
+
+This module is the thing being benchmarked *and* the thing being priced. An
+engine's cost to this project is not only tokens/second; it is also how much
+code and dependency weight it drags in (P1). So the adapter is deliberately the
+whole integration surface: if an engine cannot be driven through
+`Engine.generate` below, that is a finding about the engine, not a reason to
+grow the interface.
+
+The contract, and why it is this narrow
+---------------------------------------
+An adapter implements exactly one thing:
+
+    _raw_generate(prompts) -> list[(new_token_ids, finish_reason)]
+
+Prompt **token ids** in, completion **token ids** out. No string round-trip:
+`decode` then `encode` is not the identity for most tokenizers, so a corpus
+stored as text can train the model on a different token sequence than the one
+the teacher actually produced (`generate.py` makes the same argument).
+
+Everything after that — cutting at the stop token, the `hit_cap` flag, the
+finished flag — is done **once, here, for every engine** by `_finalize`. That is
+not tidiness: the benchmark's headline metric is whether two engines emit the
+*same tokens*, and if each adapter did its own trimming, that comparison would
+partly be measuring the trimming code. One shared post-processing path means a
+disagreement is a real numerical disagreement.
+
+Two engine hazards are handled by construction rather than trusted
+------------------------------------------------------------------
+* **vLLM** removed the `LLM.generate(prompt_token_ids=...)` keyword; tokenized
+  input now goes through `TokensPrompt`. Passing the old keyword raises
+  `TypeError` on current versions.
+* **SGLang** has a reported bug where `output_ids` includes a prefix that
+  overlaps the suffix of `input_ids` (sgl-project/sglang#10896). `_strip_prefix`
+  removes it defensively for every engine, so the corpus cannot silently gain a
+  duplicated prompt tail.
+
+Neither adapter has been executed — the dev box is CPU-only and both engines are
+CUDA-only. They are written against documented APIs and are **unverified until
+the pod session**; `bench_engines.py` isolates each engine's failure so a wrong
+guess here costs one arm, not the session.
+"""
+
+from __future__ import annotations
+
+import time
+
+import torch
+
+from .generate import _left_pad
+
+# A completion is the same dict shape `generate.generate_ids` already returns,
+# so an engine can be dropped into the generation script without a translation
+# layer: {"tokens", "n_new", "hit_cap", "finished"}.
+
+
+def _strip_prefix(out_ids: list[int], prompt_ids: list[int]) -> list[int]:
+    """Drop a whole-prompt echo from the front of `out_ids`.
+
+    Engines disagree about whether `output_ids` means "new tokens" or "the whole
+    sequence", so the unambiguous case is handled here: if the output opens with
+    the *entire* prompt, that prefix is echo and goes.
+
+    **Partial overlaps are deliberately not guessed at.** The earlier version of
+    this function also stripped the longest prompt-suffix/output-prefix overlap,
+    to defend against sglang#10896. `test_hf_engine_respects_the_cap` caught what
+    that costs: prompt `[5, 6, 7]` with a genuine completion `[7, 7, 7, 7]` lost
+    a real token, because a completion is perfectly entitled to begin with the
+    same token the prompt ended on. A heuristic that silently shortens targets is
+    worse than the bug it defends against — it corrupts data instead of crashing.
+    The SGLang case is resolved exactly instead, from that engine's own token
+    counts (see `SGLangEngine._raw_generate`).
+    """
+    if out_ids and len(out_ids) >= len(prompt_ids) and out_ids[: len(prompt_ids)] == prompt_ids:
+        return out_ids[len(prompt_ids):]
+    return out_ids
+
+
+def _finalize(
+    new_ids: list[int],
+    finish_reason: str,
+    stop_ids: set[int],
+    cap: int,
+) -> dict:
+    """Shared post-processing for every engine — see the module docstring.
+
+    Cuts at the first stop token and keeps it. If the engine reports a stop but
+    strips the token itself (vLLM's default for `stop_token_ids`), the canonical
+    stop is re-appended so `n_new` is comparable across engines rather than
+    off-by-one for some of them.
+    """
+    for position, token in enumerate(new_ids):
+        if token in stop_ids:
+            kept = new_ids[: position + 1]
+            return {"tokens": kept, "n_new": len(kept), "hit_cap": False, "finished": True}
+
+    if finish_reason == "stop" and stop_ids:
+        # Engine stopped on a stop token but did not return it. Re-append the
+        # canonical one so lengths line up with engines that do return it.
+        kept = new_ids + [min(stop_ids)]
+        return {"tokens": kept, "n_new": len(kept), "hit_cap": False, "finished": True}
+
+    return {
+        "tokens": new_ids,
+        "n_new": len(new_ids),
+        "hit_cap": len(new_ids) >= cap,
+        "finished": False,
+    }
+
+
+class Engine:
+    """Base class holding the shared contract. Subclasses implement `_raw_generate`."""
+
+    name = "base"
+    # Set by subclasses that load a model, for the memory line in the report.
+    supports_deterministic = False
+
+    def generate(
+        self,
+        prompts: list[list[int]],
+        *,
+        max_new_tokens: int,
+        stop_ids: set[int],
+        greedy: bool = True,
+        temperature: float = 0.7,
+        top_p: float = 0.95,
+        seed: int | None = None,
+    ) -> list[dict]:
+        raw = self._raw_generate(
+            prompts, max_new_tokens=max_new_tokens, stop_ids=stop_ids,
+            greedy=greedy, temperature=temperature, top_p=top_p, seed=seed,
+        )
+        if len(raw) != len(prompts):
+            raise RuntimeError(
+                f"{self.name}: got {len(raw)} completions for {len(prompts)} prompts — "
+                "an engine that reorders or drops rows cannot build a corpus")
+        return [
+            _finalize(_strip_prefix(ids, prompt), reason, stop_ids, max_new_tokens)
+            for (ids, reason), prompt in zip(raw, prompts)
+        ]
+
+    def _raw_generate(self, prompts, **kw) -> list[tuple[list[int], str]]:
+        raise NotImplementedError
+
+    def close(self) -> None:
+        pass
+
+
+class HFEngine(Engine):
+    """In-stack `transformers.generate` — the incumbent.
+
+    Its numerics are training-identical by construction (same modeling code,
+    kernels and dtype as the trainer), which is why it is the reference every
+    other engine is scored against rather than just another arm.
+    """
+
+    name = "hf"
+
+    def __init__(self, model, pad_token_id: int, batch_size: int = 8):
+        self.model = model
+        self.pad_token_id = pad_token_id
+        self.batch_size = batch_size
+        self.device = next(model.parameters()).device
+
+    @torch.no_grad()
+    def _raw_generate(self, prompts, *, max_new_tokens, stop_ids, greedy,
+                      temperature, top_p, seed):
+        out: list[tuple[list[int], str] | None] = [None] * len(prompts)
+        # Length-sorted batches so one long prompt does not pad out the rest;
+        # the original index rides along to restore input order.
+        order = sorted(range(len(prompts)), key=lambda i: len(prompts[i]))
+
+        for start in range(0, len(order), self.batch_size):
+            idxs = order[start:start + self.batch_size]
+            ids, mask = _left_pad([prompts[i] for i in idxs], self.pad_token_id)
+            ids, mask = ids.to(self.device), mask.to(self.device)
+            width = ids.shape[1]
+
+            kwargs = {
+                "max_new_tokens": max_new_tokens,
+                "pad_token_id": self.pad_token_id,
+                "eos_token_id": sorted(stop_ids),
+                "top_k": None,
+            }
+            if greedy:
+                kwargs.update(do_sample=False, temperature=None, top_p=None)
+            else:
+                kwargs.update(do_sample=True, temperature=temperature, top_p=top_p)
+                if seed is not None:
+                    torch.manual_seed(seed + start)
+
+            seq = self.model.generate(ids, attention_mask=mask, **kwargs)
+            for row, i in enumerate(idxs):
+                new = seq[row, width:].tolist()
+                # `generate` pads finished rows out to the longest row in the
+                # batch; `_finalize` cuts at the stop, so the reason only has to
+                # distinguish "ran to cap" from "stopped".
+                reason = "length" if not any(t in stop_ids for t in new) else "stop"
+                out[i] = (new, reason)
+        return [o for o in out if o is not None]
+
+
+class VLLMEngine(Engine):
+    """vLLM offline `LLM.generate`.
+
+    `TokensPrompt`, not the removed `prompt_token_ids=` keyword — see the module
+    docstring. `--model-impl transformers` is available upstream and would keep
+    one model implementation across train and generate; it is left off here so
+    the arm measures vLLM's own path, and is recorded as a follow-up if vLLM
+    wins on throughput but loses on agreement.
+    """
+
+    name = "vllm"
+
+    def __init__(self, model_path: str, *, dtype: str = "bfloat16",
+                 revision: str | None = None, max_model_len: int | None = None,
+                 gpu_memory_utilization: float = 0.90):
+        from vllm import LLM
+
+        self.llm = LLM(
+            model=model_path, revision=revision, dtype=dtype,
+            max_model_len=max_model_len,
+            gpu_memory_utilization=gpu_memory_utilization,
+            enforce_eager=False,
+        )
+
+    def _raw_generate(self, prompts, *, max_new_tokens, stop_ids, greedy,
+                      temperature, top_p, seed):
+        from vllm import SamplingParams
+        from vllm.inputs import TokensPrompt
+
+        params = SamplingParams(
+            temperature=0.0 if greedy else temperature,
+            top_p=1.0 if greedy else top_p,
+            max_tokens=max_new_tokens,
+            stop_token_ids=sorted(stop_ids),
+            seed=seed if not greedy else None,
+        )
+        outputs = self.llm.generate(
+            [TokensPrompt(prompt_token_ids=p) for p in prompts],
+            params, use_tqdm=False,
+        )
+        # vLLM preserves input order for offline generate, but the corpus depends
+        # on that, so assert rather than assume where the API exposes an index.
+        return [(list(o.outputs[0].token_ids), o.outputs[0].finish_reason or "length")
+                for o in outputs]
+
+    def close(self) -> None:
+        del self.llm
+        if torch.cuda.is_available():
+            torch.cuda.empty_cache()
+
+
+class SGLangEngine(Engine):
+    """SGLang offline `Engine.generate`.
+
+    The only candidate shipping an explicit **deterministic mode** (batch-
+    invariant operators; Qwen3 is named as supported), at a cited ~34% average
+    throughput cost. That is the axis this project cares most about, so the arm
+    is worth its setup cost even if it loses on raw tokens/second.
+    """
+
+    name = "sglang"
+    supports_deterministic = True
+
+    def __init__(self, model_path: str, *, dtype: str = "bfloat16",
+                 revision: str | None = None, deterministic: bool = False,
+                 mem_fraction_static: float = 0.85):
+        import sglang as sgl
+
+        kwargs = dict(model_path=model_path, dtype=dtype,
+                      mem_fraction_static=mem_fraction_static)
+        if revision:
+            kwargs["revision"] = revision
+        if deterministic:
+            # Named `enable_deterministic_inference` in the released flag set;
+            # if the installed build spells it differently the arm fails loudly
+            # here rather than silently benchmarking the nondeterministic path,
+            # which would be the worst possible outcome for this measurement.
+            kwargs["enable_deterministic_inference"] = True
+        self.engine = sgl.Engine(**kwargs)
+        self.deterministic = deterministic
+
+    def _raw_generate(self, prompts, *, max_new_tokens, stop_ids, greedy,
+                      temperature, top_p, seed):
+        params = {
+            "temperature": 0.0 if greedy else temperature,
+            "top_p": 1.0 if greedy else top_p,
+            "max_new_tokens": max_new_tokens,
+            "stop_token_ids": sorted(stop_ids),
+        }
+        outputs = self.engine.generate(input_ids=prompts, sampling_params=params)
+        rows = []
+        for out, prompt in zip(outputs, prompts):
+            ids = out.get("output_ids")
+            if ids is None:
+                # Falling back to re-encoding `text` would break token-in/token-out
+                # and quietly reintroduce retokenization drift into the corpus.
+                # That is a disqualifying property, so say so instead of coping.
+                raise RuntimeError(
+                    "sglang returned no output_ids — this build cannot do "
+                    "token-in/token-out, which the corpus build requires")
+            meta = out.get("meta_info") or {}
+            ids = list(ids)
+
+            # sglang#10896: `output_ids` can carry a prefix overlapping the tail
+            # of `input_ids`. Resolve it *exactly* rather than by pattern-guessing
+            # (see `_strip_prefix` for why guessing corrupts data): the engine
+            # reports how many tokens it actually completed, so anything above
+            # that count is echo and its length is known, not inferred.
+            completion_tokens = meta.get("completion_tokens")
+            if isinstance(completion_tokens, int) and 0 < completion_tokens < len(ids):
+                ids = ids[len(ids) - completion_tokens:]
+            elif len(ids) >= len(prompt) and ids[: len(prompt)] == prompt:
+                ids = ids[len(prompt):]
+
+            reason = meta.get("finish_reason")
+            if isinstance(reason, dict):
+                reason = reason.get("type", "length")
+            rows.append((ids, str(reason or "length")))
+        return rows
+
+    def close(self) -> None:
+        try:
+            self.engine.shutdown()
+        except Exception:
+            pass
+
+
+def agreement(a: list[dict], b: list[dict]) -> dict:
+    """Token-level agreement between two engines' completions on the same prompts.
+
+    This is the property Stage 4/5 needs and that no vendor claims across stacks:
+    if the rollout engine and the trainer disagree, "on-policy" updates are
+    quietly off-policy. Reported as an exact-match rate plus where the first
+    divergence lands, because *how far in* it diverges says whether this is a
+    last-bits argmax flip or a different decode entirely.
+    """
+    if len(a) != len(b):
+        raise ValueError(f"length mismatch: {len(a)} vs {len(b)}")
+    first: list[int | None] = []
+    for x, y in zip(a, b):
+        tx, ty = x["tokens"], y["tokens"]
+        point = None
+        for i in range(min(len(tx), len(ty))):
+            if tx[i] != ty[i]:
+                point = i
+                break
+        if point is None and len(tx) != len(ty):
+            point = min(len(tx), len(ty))
+        first.append(point)
+    matched = sum(p is None for p in first)
+    diverged = [p for p in first if p is not None]
+    return {
+        "n": len(first),
+        "exact_match": matched,
+        "exact_match_rate": round(matched / len(first), 4) if first else 0.0,
+        "first_divergence": first,
+        "median_divergence_token": (sorted(diverged)[len(diverged) // 2]
+                                    if diverged else None),
+    }
+
+
+def batch_invariance(engine: Engine, prompts: list[list[int]], *,
+                     stop_ids: set[int], max_new_tokens: int = 64) -> dict:
+    """Does batching change the tokens a prompt generates, on this engine?
+
+    Float addition is not associative and batch size changes how kernels split
+    reductions, so identical prompts can take different numerical paths to
+    logits and flip an argmax under greedy decoding. Generates every prompt
+    alone, then all of them as one batch, and compares.
+
+    `generate.assert_batch_invariant` does this for the in-stack path only; this
+    is the same check hoisted to the interface so every candidate faces it.
+    """
+    alone: list[dict] = []
+    for p in prompts:
+        alone.extend(engine.generate([p], max_new_tokens=max_new_tokens,
+                                     stop_ids=stop_ids, greedy=True))
+    batched = engine.generate(prompts, max_new_tokens=max_new_tokens,
+                              stop_ids=stop_ids, greedy=True)
+    result = agreement(alone, batched)
+    result["identical"] = result["exact_match"] == result["n"]
+    return result
+
+
+def timed(fn, *args, **kwargs) -> tuple[object, float]:
+    """Run `fn`, return `(result, wall_seconds)` with the GPU actually drained.
+
+    `torch.cuda.synchronize` matters here: without it a CUDA-async engine
+    returns before the work is done and the arm looks faster than it is.
+    """
+    if torch.cuda.is_available():
+        torch.cuda.synchronize()
+    start = time.perf_counter()
+    result = fn(*args, **kwargs)
+    if torch.cuda.is_available():
+        torch.cuda.synchronize()
+    return result, time.perf_counter() - start
