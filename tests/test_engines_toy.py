@@ -22,7 +22,8 @@ import torch
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
 
 from aadistill.engines import (
-    Engine, HFEngine, SGLangEngine, VLLMServerEngine, _finalize, _strip_prefix, agreement,
+    Engine, HFEngine, SGLangEngine, SGLangServerEngine, VLLMServerEngine, _finalize,
+    _strip_prefix, agreement,
     batch_invariance, timed,
 )
 
@@ -320,3 +321,60 @@ def test_server_engine_passes_sampling_params_when_sampling():
     assert engine.sent["temperature"] == 1.0
     assert engine.sent["top_k"] == -1  # 0 means disabled, which vLLM spells -1
     assert engine.sent["seed"] == 7
+
+
+# --- SGLang native HTTP adapter, against a stub server ---------------------
+
+
+def _sglang_server_stub(response):
+    engine = object.__new__(SGLangServerEngine)
+    engine.base_url, engine.timeout = "http://x", 1.0
+    engine.sent = {}
+
+    def _post(path, payload):
+        engine.sent = payload
+        return response
+    engine._post = _post
+    return engine
+
+
+def _ssraw(engine, prompts, **kw):
+    params = dict(max_new_tokens=8, stop_ids={EOS}, greedy=True,
+                  temperature=1.0, top_p=1.0, top_k=0, seed=None)
+    params.update(kw)
+    return engine._raw_generate(prompts, **params)
+
+
+def test_sglang_server_sends_input_ids_and_takes_output_ids():
+    engine = _sglang_server_stub([{"output_ids": [20, 21],
+                                   "meta_info": {"completion_tokens": 2,
+                                                 "finish_reason": {"type": "stop"}}}])
+    assert _ssraw(engine, [[10, 11]]) == [([20, 21], "stop")]
+    assert engine.sent["input_ids"] == [[10, 11]]
+
+
+def test_sglang_server_trims_echo_by_completion_tokens():
+    """sgl-project/sglang#10896, resolved exactly rather than guessed."""
+    engine = _sglang_server_stub([{"output_ids": [11, 20, 21],
+                                   "meta_info": {"completion_tokens": 2}}])
+    assert _ssraw(engine, [[10, 11]]) == [([20, 21], "length")]
+
+
+def test_sglang_server_verifies_logprob_token_alignment():
+    """A positional zip would attach each probability to its neighbour's token."""
+    good = [{"output_ids": [20, 21],
+             "meta_info": {"completion_tokens": 2,
+                           "output_token_logprobs": [[-0.5, 20, "a"], [-1.5, 21, "b"]]}}]
+    assert _ssraw(_sglang_server_stub(good), [[10]], logprobs=True) == \
+        [([20, 21], "length", [-0.5, -1.5])]
+
+    bad = [{"output_ids": [20, 21],
+            "meta_info": {"completion_tokens": 2,
+                          "output_token_logprobs": [[-0.5, 99, "a"], [-1.5, 21, "b"]]}}]
+    with pytest.raises(RuntimeError, match="do not match output_ids"):
+        _ssraw(_sglang_server_stub(bad), [[10]], logprobs=True)
+
+
+def test_sglang_server_refuses_a_build_without_output_ids():
+    with pytest.raises(RuntimeError, match="token-in/token-out"):
+        _ssraw(_sglang_server_stub([{"text": "hi", "meta_info": {}}]), [[1]])

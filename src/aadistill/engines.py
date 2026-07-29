@@ -540,6 +540,100 @@ class VLLMServerEngine(Engine):
         return rows  # type: ignore[return-value]
 
 
+class SGLangServerEngine(Engine):
+    """Talks to an SGLang server over its **native** `/generate` endpoint.
+
+    Why not its OpenAI-compatible surface, as for vLLM: that surface is built
+    around text, and this project requires token-in/token-out. SGLang's native
+    endpoint accepts `input_ids` and returns `output_ids`, which is the property
+    the corpus and rollout paths depend on. Which of the two a given build
+    actually honours is one of the things the benchmark reports rather than
+    assumes.
+
+    The `output_ids` prefix-overlap bug (sgl-project/sglang#10896) is resolved
+    exactly, from the engine's own `completion_tokens`, the same way the
+    in-process adapter does it — never by guessing at overlaps, which corrupts
+    completions that legitimately repeat the prompt's last token.
+    """
+
+    name = "sglang_server"
+    supports_deterministic = True
+
+    def __init__(self, base_url: str, *, timeout: float = 3600.0):
+        self.base_url = base_url.rstrip("/")
+        self.timeout = timeout
+
+    def _post(self, path: str, payload: dict):
+        import json
+        import urllib.request
+
+        request = urllib.request.Request(
+            f"{self.base_url}{path}", data=json.dumps(payload).encode(),
+            headers={"Content-Type": "application/json"})
+        with urllib.request.urlopen(request, timeout=self.timeout) as response:
+            return json.loads(response.read())
+
+    def _raw_generate(self, prompts, *, max_new_tokens, stop_ids, greedy,
+                      temperature, top_p, top_k, seed, logprobs=False):
+        params = {
+            "temperature": 0.0 if greedy else temperature,
+            "top_p": 1.0 if greedy else top_p,
+            "top_k": -1 if (greedy or not top_k) else top_k,
+            "max_new_tokens": max_new_tokens,
+            "stop_token_ids": sorted(stop_ids),
+        }
+        payload = {"input_ids": [list(p) for p in prompts], "sampling_params": params}
+        if logprobs:
+            payload["return_logprob"] = True
+
+        outputs = self._post("/generate", payload)
+        if isinstance(outputs, dict):
+            outputs = [outputs]
+        if len(outputs) != len(prompts):
+            raise RuntimeError(
+                f"{self.name}: {len(outputs)} outputs for {len(prompts)} prompts")
+
+        rows = []
+        for out, prompt in zip(outputs, prompts):
+            meta = out.get("meta_info") or {}
+            ids = out.get("output_ids")
+            if ids is None:
+                raise RuntimeError(
+                    f"{self.name}: no output_ids — this build cannot do "
+                    "token-in/token-out, which the rollout path requires")
+            ids = list(ids)
+            completion_tokens = meta.get("completion_tokens")
+            if isinstance(completion_tokens, int) and 0 < completion_tokens < len(ids):
+                ids = ids[len(ids) - completion_tokens:]
+            elif len(ids) >= len(prompt) and ids[: len(prompt)] == prompt:
+                ids = ids[len(prompt):]
+
+            reason = meta.get("finish_reason")
+            if isinstance(reason, dict):
+                reason = reason.get("type", "length")
+            reason = str(reason or "length")
+
+            if not logprobs:
+                rows.append((ids, reason))
+                continue
+            # SGLang reports `output_token_logprobs` as (logprob, token_id, text)
+            # triples. Take the log-prob positionally but verify the token id
+            # matches, rather than trusting the order: a silent misalignment here
+            # would attach each probability to its neighbour's token.
+            triples = meta.get("output_token_logprobs")
+            if not triples:
+                raise RuntimeError(
+                    f"{self.name}: return_logprob set but no output_token_logprobs")
+            lps = [float(t[0]) if t[0] is not None else None for t in triples]
+            token_ids = [int(t[1]) for t in triples]
+            if token_ids[-len(ids):] != ids:
+                raise RuntimeError(
+                    f"{self.name}: logprob token ids do not match output_ids — "
+                    "refusing to guess the alignment")
+            rows.append((ids, reason, lps[-len(ids):]))
+        return rows
+
+
 def agreement(a: list[dict], b: list[dict]) -> dict:
     """Token-level agreement between two engines' completions on the same prompts.
 
