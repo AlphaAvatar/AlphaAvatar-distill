@@ -1,6 +1,36 @@
 # Current project state
 
-Updated: 2026-07-28 (UTC+8 dev box), after the CE/KD conflict intervention —
+Updated: 2026-07-29 (UTC+8 dev box). **The engine benchmark is built, validated
+on CPU, and pre-registered — and it found something before costing anything**
+([log](experiments/2026-07-29_engine_adapter_and_bf16_invariance.md)).
+
+**bf16 batched greedy generation is not batch-invariant.** With every prompt
+truncated to a common length so the batch needs *no padding at all*, the Stage 1
+student matched its own batch-1 output on **1 of 6** prompts; **fp32 matched
+6 of 6** at the identical configuration. Only the dtype changed, so this is
+reduction order, not padding — and padding-free batching is therefore not a
+mitigation. The existing toy test missed it because it runs in fp32, which its
+own docstring flags as the friendly case.
+
+Two consequences. **SGLang's deterministic mode is now the most interesting arm
+of the benchmark**, not a curiosity: it sells batch-invariant kernels, and this
+project has now confirmed it lacks the property. And **the "corpus is the
+artifact" stance is justified rather than assumed** — even *greedy* decoding is
+not reproducible across batch compositions in bf16.
+
+*Claim strength:* measured on **CPU, on the 0.6B student**. Not measured: GPU,
+the 4B teacher, any serving engine, or whether divergent tokens change answer
+*content*. An open hypothesis worth more than the engine ranking: if the 4B
+teacher behaves the same, every batched-eval behavior scorecard carries an
+unquantified batch-composition term, which would sit beside the 0.1290 seed
+noise floor as a second source of behavior-metric instability. Eval batching has
+never been varied in a completed run.
+
+Nothing is running or billing; no pods exist. The GPU benchmark is
+**pre-registered and awaiting approval on spend**
+([proposal](proposals/2026-07-29_engine_benchmark.md), ~$3.5–5.2 on 1× L40S).
+
+Earlier context — the CE/KD conflict intervention —
 **the conflict is confirmed causal, and it is the best-understood defect in the
 project** ([log](experiments/2026-07-28_kd_conflict_intervention.md)). A 2x2
 ({`all`, `all_no_think`} x 2 seeds, 1000 steps, $4.48) moved p(`</think>`) from
@@ -193,7 +223,8 @@ architecture and data scale.
   behavior axis. Log: `logs/experiments/2026-07-26_stage3_s2_blocks_v1_gpu_run.md`.
 - **Stage 2 mixture v1 (2026-07-26, CPU):** 64,484 train samples / 22,133,631
   train tokens / 21,610 blocks@1024; val_v1 1,916; calib 200.
-- Tests: **119/119** on the dev box (torch 2.13.0+cpu); the 2026-07-27 GPU pod ran
+- Tests: **191/191** on the dev box (torch 2.13.0+cpu), +33 from the engine
+  adapter layer on 2026-07-29; the 2026-07-27 GPU pod ran
   the then-current suite at 85 passed / 6 skipped (torch 2.11.0+cu128,
   Python 3.12.3).
 
@@ -286,6 +317,12 @@ what is *not* supported is the ordering between any two of them.
 
 ## What exists and why
 
+- `src/aadistill/engines.py` (2026-07-29) — token-in/token-out `Engine`
+  interface with `hf` / `vllm` / `sglang` adapters. Adapters do only "prompt ids
+  in → new ids out"; stop-cutting and cap flags are shared, so a cross-engine
+  token comparison measures engines rather than three copies of the trimming
+  code. **The vLLM and SGLang adapters have never executed** (both CUDA-only);
+  they are smoke-tested pod-side before any timed run.
 - `src/aadistill/` — env, manifest, teacher (loading + `load_causal_lm`),
   collect (S0), project, sandwich, student (S1), data (S2 loader, now with
   **`best_fit_blocks`** — packing that never splits a sample), train (S3
@@ -326,6 +363,23 @@ uv run python scripts/eval_ppl.py --data data/warmup/holdout_v1.jsonl \
 uv run python scripts/plot_perf_trend.py [--print-table]
 POD_ID=<id> HOST=<ip> PORT=<port> bash scripts/pod/orchestrate.sh   # GPU session
 ```
+
+## Next action: the engine benchmark GPU session (awaiting approval)
+
+Pre-registered in [`proposals/2026-07-29_engine_benchmark.md`](proposals/2026-07-29_engine_benchmark.md).
+One L40S, ~$3.5–5.2, unattended, chaining **benchmark → mechanical decision →
+pilot corpus** via `scripts/pod/bench_and_generate.sh`. Selection rules R1–R4
+are applied by code (`bench_engines.py::decide`) and consumed by
+`generate_teacher_answers.py --engine-from`, so no agent interprets numbers
+mid-session. Generation is capped at `--max-hours 3.0` and stops at a batch
+boundary with complete, hashed artifacts; the manifest records `complete: false`
+if it stops early. Rule R4 blocks generation entirely if the in-stack reference
+arm fails.
+
+It answers, in one session, three prerequisites the queue below already lists
+(batch invariance on the real 4B, real batched throughput, the per-slice
+divergence profile) plus the engine choice and a measured $/1k that finally
+prices the bulk build — previously a guessed $25–145.
 
 ## Next actions (ordered)
 
