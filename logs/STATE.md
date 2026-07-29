@@ -475,11 +475,39 @@ R2 (≥3×) fires at 5.29×; **R1 (≥0.90 agreement) fails at 0.000**, so
 divergence is token **260** — the stacks track each other for a few hundred
 tokens then split. vLLM is also *less* batch-invariant than in-stack.
 
-**Adopted as a stage-scoped split** (decision 2026-07-30), which is what the
-pre-registration prescribed for this exact outcome: **Stage 3 offline corpus →
-vLLM server** (correctness is verified per candidate, so the trainer's token
-identity is not required); **Stage 4/5 rollouts → in-stack only** (policy
-identity is the whole point there). Engine is recorded per corpus manifest.
+**Not adopted — the engine question is reopened** (maintainer correction,
+2026-07-30). The session's *rule* R1 made exact token agreement an adoption gate
+and produced `winner: hf`; **that gate is retired**, and with it the stage-scoped
+split this line previously recorded. Two reasons, both independent of the
+measurements:
+
+- **Token equality is not a prerequisite for on-policy training.** Production RL
+  systems pair an inference-optimized rollout engine with a separate trainer,
+  generate asynchronously, and correct the mismatch explicitly — rollout and
+  trainer log-probs, policy/checkpoint versioning, bounded staleness, token- or
+  sequence-level importance sampling, clipping or rejection of far-off-policy
+  samples, hashed rollout snapshots. A different engine creates a *measurable*
+  mismatch, not an impossible one.
+- **One measured alternative cannot select a standing backend.** SGLang was
+  never actually tested: 2026-07-29 blamed a Python dependency conflict when the
+  real constraint is the host's CUDA-12.8 driver.
+
+The 0/8 figure survives as a **diagnostic** — median first divergence at token
+260 is a useful prior on how large a correction term must be — and it gates
+nothing. Note the gate was incoherent anyway: decoding is not batch-invariant
+*within* one stack (7/8 in-stack, 4/8 vLLM here), so demanding cross-stack token
+identity asks for a property the trainer lacks against itself.
+
+**Standing position:** vLLM 0.11.0 is the **first measured engine, not the
+choice**. **HF `model.generate` is retired as the planned production rollout
+path** — reference implementation, debugging path, small-scale correctness
+oracle, and fallback only. The production direction is one efficient, isolated
+rollout service reused across Stages 3, 4 and 5, with Stage 4/5 designed around
+**asynchronous generation plus explicit correction**. Adoption criteria are now
+token-in/token-out transport, exact rollout token-ID recording, rollout log-prob
+availability, measured KL / importance-ratio distribution, bounded off-policy
+rate and staleness, stable corrected training in a pilot, and throughput/cost/
+reliability. **This project meets the first two and none of the rest.**
 
 **2. The 2026-07-29 "vLLM is incompatible" conclusion was version-specific.**
 The real wall is the **host driver**: latest vLLM needs CUDA 13, this box runs
@@ -495,15 +523,25 @@ binding), but **accuracy among closing candidates collapsed 0.750 → 0.294**
 (3 → 10), and cost per accepted target **doubles** (14,931 → 29,707 tokens).
 Long reasoning here is floundering, not care — the pre-registered risk, measured.
 
-## Next action: re-price and scope the bulk corpus
+## Next action: build the log-prob path, then compare rollout engines
 
-At **$2.27/1k prompts** a bulk build is roughly **$9 per 1,000 prompts** at n=4
-on the in-scope slices, against ~$49 in-stack. That changes the corpus from
-unaffordable to routine, and it needs a scoped proposal — size, slices, and the
-alignment-tax check on any group that is not primary-transfer — before spend.
+**No bulk corpus is built yet** (maintainer, 2026-07-30): the $2.27/1k figure is
+real, but the engine is unchosen and a corpus is not worth building twice.
 
-Then: add a `vllm_server` path to the corpus builder with the Stage 4/5 ban
-enforced in code, not just in a record.
+1. **Build the rollout log-prob path — the gating item.** `aadistill.engines`
+   returns tokens only. Criteria 3–6 of the new adoption gate are all blocked on
+   per-token rollout log-probs, a hashed rollout-snapshot format (token ids +
+   log-probs + policy/checkpoint version + engine identity), and a trainer-side
+   scorer that recomputes log-probs on recorded token ids. All CPU-testable
+   against a toy model before any spend (P8).
+2. **Compare rollout engines** per
+   [`proposals/2026-07-30_rollout_engine_comparison.md`](proposals/2026-07-30_rollout_engine_comparison.md):
+   vLLM 0.11.0 vs SGLang deterministic mode, on a driver that supports both. If
+   SGLang cannot run, substitute a third candidate rather than adopt on one.
+3. **Run the correction experiment**, with its pre-registered stability bound:
+   corrected training stays inside a same-seed in-stack pilot's band, the
+   clipped/rejected token fraction stays **below 5%**, and the corrected run is
+   not worse than an uncorrected control on the guard rail.
 
 ## Superseded — the isolated-venv engine test (completed 2026-07-30)
 

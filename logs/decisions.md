@@ -493,6 +493,14 @@
 
 ## 2026-07-30 — vLLM adopted for Stage 3 offline corpus, banned for Stage 4/5 rollouts
 
+> **SUPERSEDED same day** by "Rollout engine selection is reopened" below
+> (maintainer correction). The **measurements** stand. The **rule does not**:
+> it made exact greedy token agreement with HF an adoption gate, and on that
+> basis assigned HF to Stage 4/5 permanently on the strength of a single
+> measured alternative. Both halves are wrong — token equality is not a
+> prerequisite for on-policy training, and one comparison cannot select a
+> standing backend. Read the superseding record.
+
 - **Context:** The isolated-venv test measured an vLLM 0.11.0 server at **213.9 tok/s / $2.27 per 1k prompts** against the in-stack path's **40.4 tok/s / $12.33** — 5.3× faster, 5.4× cheaper — while agreeing with the in-stack reference on **0 of 8 prompts** (median first divergence at token 260). Rule R2 (≥3× throughput) fires; rule R1 (≥0.90 agreement) fails, so `decision.json` mechanically records `winner: hf`.
 - **Decision:** Split adoption by stage, as the pre-registration's §8 table prescribed for exactly this outcome. **Stage 3 offline teacher-target generation uses the isolated-venv vLLM server. Stage 4/5 rollouts use the in-stack path only.** The engine is recorded in every corpus manifest (`decoding.engine`), because two corpora built by different backends are not interchangeable.
 - **Why the split is principled and not a relaxation of a failed rule:** R1 exists because Stage 4/5 trains on data *the model itself produced*, so a rollout engine that is a different policy from the trainer makes "on-policy" a fiction. That argument does not transfer to Stage 3 offline targets, where the requirement is not "the trainer would have emitted these tokens" but "the teacher emitted them and the verifier accepted them" — correctness is checked directly, per candidate, by `aadistill.verify`.
@@ -510,3 +518,20 @@
 - **Alternatives considered:** (a) Raise to 8,192 as a compromise — not measured, and the mechanism argues against it: the failure is not "a bit more room needed" but "hard problems produce long wrong answers". (b) Keep the long traces as training data regardless of correctness — rejected: unverified teacher text has never been allowed into training (decision 2026-07-28), and these are measurably wrong more often than right.
 - **Note on P10:** raising a cap is the opposite of a terseness constraint, so this decision does **not** reject targets for being long. It rejects them for being *wrong*; length is only how the cost was counted.
 - **Risks:** measured on 10 prompts, with accuracy resting on 12 and 17 candidates. The direction (0.750 → 0.294) is far larger than that uncertainty; the exact values are not. Revisit if openmath yield becomes load-bearing — the lever is then prompt selection or a different teacher, not more tokens.
+
+## 2026-07-30 — Rollout engine selection is reopened; HF `generate` is retired as the production path
+
+- **Context:** Maintainer correction to the same day's engine decision. That record used exact greedy token agreement (0/8 vs the in-stack reference) as an adoption gate, concluded `winner: hf`, and split adoption by stage — vLLM for Stage 3, HF for Stage 4/5 permanently. Two things are wrong with it. **(a)** Byte-for-byte agreement with the training stack is not a prerequisite for on-policy training; modern LLM RL systems routinely pair an inference-optimized rollout engine with a separate training backend and correct the mismatch explicitly. **(b)** Only HF in-stack and one pinned vLLM build were ever measured, so nothing in the data supports selecting a *permanent* Stage 4/5 backend.
+- **Decision:**
+  1. **Do not declare HF the winner on the strength of 0/8 agreement.** The mechanical `winner: hf` in `artifacts/bench/engines_v1/decision.json` is retained as the honest output of the rule that was pre-registered, and that rule is now retired.
+  2. **vLLM 0.11.0 is recorded as the first measured engine, not the engine choice.** It stays a viable candidate on its measured 5.29× throughput / 5.4× cost advantage, but is **not adopted** until compared against at least one further serious candidate — **SGLang deterministic mode** in particular, where technically feasible on the available driver.
+  3. **HF `model.generate` is retired as the planned production rollout path.** It remains a reference implementation, a debugging path, a small-scale correctness oracle, and a fallback when no efficient engine is available.
+  4. **Exact token agreement is removed as an adoption gate**, replaced by: correct token-in/token-out transport; exact recording of rollout token IDs; rollout log-prob availability; measured KL / importance-ratio distribution against the trainer policy; bounded off-policy rate and staleness; stable corrected training in a small Stage 4/5 pilot; and throughput, cost and operational reliability.
+  5. **Stage 4/5 is designed around asynchronous generation with explicit rollout correction**, not synchronous in-process generation.
+  6. **Corpus and rollout snapshots stay hashed artifacts** (P4/P5) — unchanged, and now load-bearing, since the recorded tokens are the ground truth a correction term is computed against.
+  7. **No bulk corpus is built yet.** The engine benchmark proposal is revised first to compare rollout engines and to define the importance-sampling/correction experiment.
+- **Alternatives considered:** (a) Keep the stage split as a conservative interim — rejected: it reads as policy, would shape Stage 4/5 design around a synchronous HF path, and is built on a gate now known to be wrong. (b) Adopt vLLM outright on throughput — rejected for the same reason the original decision was wrong in the other direction: one measured alternative is not a comparison. (c) Keep exact agreement as a *secondary* diagnostic — retained in this weaker form only; divergence remains worth logging as a mismatch signal, but it gates nothing.
+- **Expected upside:** The rollout path becomes a reusable, efficient service shared across Stages 3–5 instead of a per-stage compromise, and the train/inference mismatch becomes a measured, corrected quantity rather than something avoided by giving up 5.3× throughput.
+- **Risks:** Importance-sampling correction has its own failure modes — high-variance ratios, silent clipping, staleness drift — and adds machinery the project does not yet have (no log-prob path exists in `aadistill.engines` today). These are why the pilot in the revised proposal has to demonstrate *stable corrected training*, not merely a measured KL.
+- **Code implication, not yet built:** the `Engine` interface returns tokens only. Rollout log probabilities, policy/checkpoint version stamping, and a hashed rollout-snapshot format are required additions before any Stage 4/5 pilot.
+- **Revisit when:** the revised benchmark has compared at least two rollout engines under a fixed budget and the correction experiment has produced a stability bound.

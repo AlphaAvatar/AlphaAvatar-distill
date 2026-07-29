@@ -1,5 +1,18 @@
 # 2026-07-30 — Isolated-venv vLLM + openmath cap: both hypotheses answered
 
+> **Conclusion corrected 2026-07-30 (maintainer).** Every measurement in this
+> log stands. **§2's recommendation does not** and has been rewritten in place.
+>
+> The error was in the pre-registered gate, not the arithmetic: R1 made exact
+> greedy token agreement with the in-stack path a prerequisite, and §2 then
+> assigned HF to Stage 4/5 *permanently* on the strength of one measured
+> alternative. Token equality is not a prerequisite for on-policy training —
+> production RL systems pair an inference-optimized rollout engine with a
+> separate trainer and correct the mismatch explicitly — and one comparison
+> cannot select a standing backend. **vLLM 0.11.0 is the first measured engine,
+> not the chosen one.** See the 2026-07-30 decision record "Rollout engine
+> selection is reopened". §4 (openmath cap) is unaffected.
+
 - **Agent:** Claude, pods `wdpyamp2pp5v8t` (dead on arrival) and `w86xu7t78y571h`
   (1× L40S, $0.99/h)
 - **Pre-registration:** [`proposals/2026-07-30_isolated_engine_and_cap.md`](../proposals/2026-07-30_isolated_engine_and_cap.md)
@@ -34,32 +47,54 @@ measured across stacks rather than assumed.
 Note also that **vLLM is itself less batch-invariant than the in-stack path**
 (4/8 vs 7/8 identical). Neither is invariant; the faster one is worse.
 
-## 2. What this means, and the scope split
+## 2. What this means (rewritten 2026-07-30 after the maintainer correction)
 
-The pre-registered §8 table already prescribed this outcome's action, so the
-recommendation below is not a post-hoc reinterpretation of a failed rule:
+**vLLM 0.11.0 is the first rollout engine this project has measured. It is not
+the engine choice.** It stays a live candidate on its 5.29× throughput and 5.4×
+cost advantage, and it is not adopted until compared against at least one other
+serious candidate — SGLang deterministic mode above all, which was never reached
+because 2026-07-29 mis-attributed its failure to a Python conflict when the real
+constraint is the host's CUDA-12.8 driver.
 
-> ≥3× and <0.90 agreement → **fast but off-policy: usable for Stage 3 offline
-> targets, not for Stage 4/5 rollouts. Record the split explicitly.**
+**The 0/8 agreement figure does not disqualify anything.** The original §2 read
+it as a gate and concluded HF should own Stage 4/5 permanently. That reasoning
+is retired for two independent reasons:
 
-The reasoning holds up on inspection. R1 exists because *Stage 4/5 trains on
-data the model produced*, so a rollout engine that is a different policy from
-the trainer makes "on-policy" a fiction. **That argument does not apply to Stage
-3 offline teacher targets**, where the requirement is not "the trainer would
-have produced these tokens" but "the teacher produced them and the verifier
-accepted them". Correctness is checked directly, per candidate, by
-`aadistill.verify`.
+* **Token equality is not a prerequisite for on-policy training.** Production RL
+  systems routinely run an inference-optimized rollout engine separate from the
+  trainer, asynchronously, and handle the resulting mismatch explicitly — with
+  rollout and trainer log probabilities, policy/checkpoint versioning, bounded
+  staleness, token- or sequence-level importance sampling, clipping or rejection
+  of excessively off-policy samples, and hashed snapshots of the exact rollout
+  tokens. A different engine creates a *measurable* mismatch, not an impossible
+  one. The real question is whether that mismatch can be quantified and
+  corrected inside a pre-registered stability bound.
+* **The gate is incoherent with this project's own measurements anyway.**
+  Decoding is not batch-invariant *within* a single stack — 7/8 for in-stack,
+  4/8 for vLLM in this very session. A criterion demanding cross-stack token
+  identity is asking for a property the trainer does not have against itself.
 
-**Recommendation:**
+What the 0/8 figure *is* worth: a mismatch signal. Median first divergence at
+token **260** says the stacks share a few hundred tokens of reasoning and then
+separate, which is a useful prior for how large a correction term will need to
+be. It is a diagnostic, and it gates nothing.
 
-* **Stage 3 offline corpus builds: adopt the isolated-venv vLLM server.** It is
-  5.4× cheaper per prompt, which is the difference between a bulk corpus costing
-  ~$40 and ~$7.4 at the same scale.
-* **Stage 4/5 rollouts: in-stack only.** Agreement 0.000 disqualifies it exactly
-  where the policy identity matters.
-* The engine must be recorded in every corpus manifest (it already is —
-  `decoding.engine`), because two corpora built by different backends are not
-  interchangeable.
+**HF `model.generate` is retired as the planned production rollout path**
+(decision 2026-07-30). It remains a reference implementation, a debugging path,
+a small-scale correctness oracle, and a fallback when no efficient engine is
+available. The production direction is an efficient, isolated rollout service
+reusable across Stages 3, 4 and 5 — the same service, not a per-stage split.
+
+**The adoption criteria are replaced.** Instead of exact agreement: correct
+token-in/token-out transport; exact recording of rollout token IDs; rollout
+log-prob availability; measured KL / importance-ratio distribution against the
+trainer policy; bounded off-policy rate and staleness; stable corrected training
+in a small pilot; and throughput, cost and operational reliability. **This
+project satisfies the first two today and none of the rest** — `aadistill.engines`
+has no log-prob path at all, which is now the gating piece of work.
+
+**No bulk corpus is built on this result.** The benchmark proposal is revised
+first (see `proposals/2026-07-30_rollout_engine_comparison.md`).
 
 ## 3. The isolated venv works, but only when pinned — three failures deep
 
@@ -158,12 +193,18 @@ one SSH invocation; kill by PID, or use separate calls.**
   have wide error bars. The *direction* (0.750 → 0.294) is far larger than that
   uncertainty; the exact values are not.
 
-## 8. Next actions
+## 8. Next actions (revised 2026-07-30)
 
-1. **Re-price the bulk corpus at $2.27/1k prompts** and bring a scoped proposal.
-   At n=4 and the in-scope slices this is roughly **$9 per 1,000 prompts** of
-   candidates, versus ~$49 in-stack.
-2. **Add a `vllm_server` path to the corpus builder**, with the engine recorded
-   in the manifest and a hard rule that Stage 4/5 rollouts do not use it.
-3. **Leave the openmath cap at 4,096.** If openmath yield matters later, the
+1. **Revise the engine benchmark into a rollout-engine comparison** and define
+   the importance-sampling/correction experiment:
+   `proposals/2026-07-30_rollout_engine_comparison.md`. At minimum vLLM 0.11.0
+   versus SGLang deterministic mode, on a driver that supports both.
+2. **Build the log-prob path.** `aadistill.engines` returns tokens only; rollout
+   log probabilities, policy/checkpoint version stamping and a hashed
+   rollout-snapshot format are prerequisites for any Stage 4/5 pilot and for
+   measuring the KL / importance-ratio distribution.
+3. **Do not build the bulk corpus yet** (maintainer, 2026-07-30). The $2.27/1k
+   figure is real but the engine is not chosen, and a corpus is not worth
+   building twice.
+4. **Leave the openmath cap at 4,096.** If openmath yield matters later, the
    lever is prompt selection or a different teacher — not more tokens.

@@ -1043,6 +1043,12 @@ Process:
 3. positive, negative, corrected, or ranked examples are stored;
 4. data is filtered, deduplicated, and assigned to an on-policy training mixture.
 
+**Rollout generation runs on an efficient, isolated rollout service, not in the training process.** This is the intended architecture for Stage 3, Stage 4 and Stage 5 alike, and it follows normal practice in modern LLM RL systems: an inference-optimized engine generates rollouts, asynchronously and at a different cadence from the trainer, and the resulting policy mismatch is handled **explicitly** rather than avoided. In-stack `model.generate` is retained only as a reference implementation, a debugging path, a small-scale correctness oracle, or a fallback when no efficient engine is available. It is not the planned production rollout path.
+
+**Byte-for-byte or greedy token agreement with the training stack is not an adoption requirement for a rollout engine.** A different engine implementation produces a measurable policy mismatch; that is a quantity to correct, not a disqualification. Requiring token equality would also be self-defeating, since decoding is not even batch-invariant within a single stack. Mismatch is instead handled through: token-in/token-out rollout records; rollout-policy log probabilities; trainer-policy log probabilities; policy/checkpoint versioning; bounded staleness and weight synchronization; token- or sequence-level importance sampling; clipping, masking, or rejection of excessively off-policy samples; and reproducible hashed snapshots of the exact rollout tokens and metadata. The question an engine must answer is whether its mismatch can be **quantified and corrected within a pre-registered stability bound** — not whether it reproduces another engine's tokens.
+
+No engine becomes the standing choice on a single measurement. A candidate is compared against at least one other serious candidate under a fixed budget before adoption, and the comparison is recorded as a decision record.
+
 Online data may include:
 
 * student answers and teacher corrections;
@@ -1070,6 +1076,16 @@ Validation gate:
 * data can be loaded by the on-policy trainer;
 * privacy, license, and safety risks are recorded;
 * the online dataset can be traced back to source prompts and student checkpoints.
+
+A rollout engine additionally qualifies on these criteria, which replace any notion of exact cross-stack token agreement:
+
+* correct token-in/token-out transport, with no text round-trip anywhere in the path;
+* exact recording of rollout token IDs, snapshotted to a hashed artifact before anything trains on them;
+* rollout-policy log probabilities available per token;
+* measured KL and importance-ratio distribution against the trainer policy;
+* bounded off-policy rate and bounded staleness, with weight synchronization logged;
+* stable corrected training demonstrated in a small pilot;
+* throughput, cost, and operational reliability under the intended workload.
 
 ---
 
