@@ -43,6 +43,12 @@ The codebase should eventually have two conceptual areas:
 
 The algorithm core must not hard-code one model recipe. Model recipes may depend on the algorithm core, but the core should stay reusable.
 
+Semantic task categories such as refusal, uncertainty, tool use, or realtime interaction are data and evaluation concepts, not separate framework-level answer protocols. The algorithm core must not hard-code refusal-specific target text, generic word-count limits, or fallback-to-public-target rules. If a task explicitly requires a constrained form, express that requirement in the model recipe, dataset contract, or evaluation configuration, and validate it without weakening answer correctness or usefulness.
+
+Each model recipe must declare the capability scope it is trying to preserve or improve. AlphaAvatar-distill is a selective distillation framework, not an obligation to clone every capability, style, or alignment behavior of the teacher. For the current dense baseline, the primary objective is to transfer the teacher's strongest reasoning, problem-solving, and agent decision capabilities into the student under the deployment budget. Capabilities outside the declared target scope may be measured, but they must not silently receive equal weight or redefine success.
+
+A recipe's dataset list is therefore a capability-selection decision, not a completeness checklist. Include only data groups that serve the declared target capability, a demonstrated supporting dependency, or a non-negotiable safety/deployment requirement. A group such as refusal may be omitted from training, or kept evaluation-only, when it is outside the recipe's target scope; the omission and its risks must be recorded. If such a group is included, it follows the same teacher-native protocol and quality rules as every other included group rather than receiving framework-level special handling.
+
 ### P4. Reproducibility is part of the result
 
 Every experiment must be reproducible from a logged command, logged config, logged environment, and logged implementation state.
@@ -190,9 +196,13 @@ These methods are not considered supported until they are implemented, tested, l
 
 Avoid training a student in a regime that will be heavily mismatched at inference.
 
-### P10. Optimize for realtime agent usefulness
+### P10. Optimize for realtime agent usefulness without sacrificing answer quality
 
 AlphaAvatar-distill is not only about closed-book benchmark scores.
+
+Realtime usefulness is an end-to-end systems property, not a synonym for short answers. Do not accept, reject, truncate, or replace a training target solely because its answer is longer or shorter. Correctness, relevance, completeness, teacher-protocol consistency, and task usefulness take precedence over generic terseness. A brevity constraint is valid only when it is explicitly required by the prompt, product contract, model recipe, or evaluation task.
+
+Answer length may be logged as a workload characteristic because generated tokens affect total latency and cost, but it must not be used as the primary proxy for realtime capability or as a framework-wide quality gate. Optimize realtime performance primarily through the student architecture and model size, inference engine and kernels, decoding strategy, quantization or low-precision execution, memory and KV-cache design, streaming, and later architecture or runtime improvements. Report response quality and systems latency separately so a faster system is not obtained by silently degrading the answer.
 
 Evaluation should eventually cover:
 
@@ -203,11 +213,30 @@ Evaluation should eventually cover:
 - refusal and uncertainty;
 - code and math subsets;
 - self-correction;
-- short realtime responses;
+- realtime interaction quality;
+- answer correctness, relevance, and completeness;
 - quantized inference;
-- streaming latency;
+- time to first token, inter-token latency, end-to-end latency, and throughput;
 - memory footprint;
 - integration with realtime assistant runtimes such as AlphaAvatar.
+
+### P10.1. Measure and control alignment tax
+
+Alignment, safety, refusal, style, and protocol objectives may consume limited student capacity or trade off against the target reasoning capability, especially for small students. Treat this cost as an explicit **alignment tax**: the measured loss in target capability, efficiency, or usable capacity caused by alignment- or behavior-shaping data, filters, losses, rewards, or post-training.
+
+AlphaAvatar-distill does not aim to preserve every teacher capability equally. Each model recipe must name its primary capability target and distinguish it from supporting capabilities, non-negotiable safety or usability constraints, and out-of-scope teacher behaviours. For the current dense baseline, top-tier reasoning and agent decision quality are the primary transfer target; broad teacher imitation is not.
+
+Alignment tax also applies to data inclusion itself. Do not add refusal, style, safety, conversational, or other auxiliary slices merely for coverage or because the teacher has those behaviours. Each slice must justify the student capacity, tokens, and optimization pressure it consumes. An out-of-scope capability may remain an evaluation guard rail without becoming a training objective. When a safety or deployment requirement makes a slice mandatory, preserve the minimum requirement and measure its Pareto tradeoff against the primary reasoning target.
+
+Before adding or increasing an alignment-oriented data slice, loss, reward, filter, or training stage, record:
+
+- the requirement it serves;
+- whether it is a non-negotiable safety or usability constraint, or an optimization preference;
+- the target reasoning metrics and guard rails that may regress;
+- the fixed budget and baseline comparison;
+- the ablation or Pareto comparison that will measure the tax.
+
+Preserve minimum required safety, parseability, and deployment integrity, but do not sacrifice answer correctness, reasoning depth, or task usefulness merely to improve terseness, stylistic conformity, refusal frequency, or a broad average over teacher capabilities. Report target reasoning capability and alignment or behaviour axes separately. A change should be adopted only when the tradeoff is explicit and acceptable for the declared model recipe.
 
 ### P11. Failed experiments must remain useful
 
@@ -382,7 +411,8 @@ A model recipe may contain:
 - teacher and student metadata;
 - tokenizer compatibility notes;
 - initialization recipe;
-- dataset list for each training stage;
+- declared capability scope: the primary capability target, supporting capabilities, non-negotiable safety/deployment constraints, and out-of-scope teacher behaviours (P3, P10.1);
+- dataset list for each training stage, with every group classified against that scope;
 - training stage config;
 - inference script or engine adapter;
 - evaluation script;
@@ -898,10 +928,12 @@ Inputs may include:
 * tool-use formatting data;
 * refusal and uncertainty data;
 * code/math subsets;
-* short realtime conversation data;
+* realtime interaction data;
 * long-context samples.
 
-The data should be organized by intended training use, not mixed into an opaque blob.
+The data should be organized by intended training use, not mixed into an opaque blob. Each model recipe must label data groups as primary capability transfer, supporting capability, non-negotiable safety/deployment constraint, evaluation-only, or out of scope. Mixture weights must follow the declared target capability instead of assuming that every teacher capability deserves equal preservation.
+
+The recommended groups below are candidates, not mandatory coverage requirements. Before adding a group to the training mixture, record why it is needed for the recipe's target capability or constraints, what capacity or compute it consumes, and how its alignment tax will be measured. Groups that are not required — including refusal or uncertainty for a reasoning-focused recipe — may be omitted from training and retained only for evaluation.
 
 Recommended data groups:
 
@@ -911,9 +943,11 @@ Recommended data groups:
 * tool calling and structured outputs;
 * refusal, uncertainty, and safety behavior;
 * code and math subsets;
-* short realtime interaction;
+* realtime interaction;
 * long-context understanding;
 * quantization-sensitive calibration/eval samples.
+
+Teacher-generated targets should preserve the selected teacher's native output protocol consistently across every data group selected by the recipe. Refusal is not a framework-level special answer type and is not a mandatory training slice. If refusal or uncertainty is included, do not retain a public target, reject a teacher target, or change the data mixture solely because the teacher's refusal is longer than an annotator-written refusal. If it is excluded, the reason must be capability scope or a measured alignment-tax tradeoff, not a refusal-specific formatting shortcut. Generic hygiene rules may reject truncated, malformed, corrupted, or unparseable generations; correctness and quality checks must be explicit, logged, and applied according to the task rather than through a refusal-specific word-count shortcut.
 
 Default action policy:
 
@@ -929,6 +963,10 @@ Validation gate:
 * data can be loaded by the intended training pipeline;
 * small-batch dry run passes;
 * data mixture is reproducible;
+* the capability role of every included data group and every intentional omission is recorded;
+* teacher-generated targets preserve the recorded teacher protocol across the task groups that are included;
+* target acceptance or fallback decisions are not based solely on generic answer length;
+* alignment tax is measured or a concrete ablation plan is logged for auxiliary or alignment-oriented slices;
 * known data risks or license constraints are recorded.
 
 ---
@@ -944,7 +982,7 @@ This stage may include multiple recovery sub-stages, but they belong to the same
 3. student-forced span recovery;
 4. optional full-model offline KD/SFT warm-up.
 
-The purpose is to repair structural compression damage and reduce mismatch between teacher-forced training and real student execution.
+The purpose is to repair structural compression damage and reduce mismatch between teacher-forced training and real student execution. Stage 3 is selective: it should prioritize the model recipe's declared reasoning and agent-decision target rather than indiscriminately imitate every teacher capability. Any alignment- or behaviour-shaping component must be evaluated for alignment tax against the primary capability metrics.
 
 Recovery losses may include:
 
@@ -967,6 +1005,8 @@ Recommended recovery order:
 
 Do not force attention-map equality when head count, hidden width, or GQA grouping differs. Prefer block output loss, projected hidden/span loss, and generation behavior.
 
+When Stage 3 uses teacher-generated SFT targets, use the teacher's native output protocol consistently across every task group selected by the model recipe. Refusal and uncertainty are optional capability slices, not framework requirements. If selected, they follow the same generation, storage, hygiene, and quality rules as other examples; the core must not impose a special refusal answer, generic maximum word count, or fallback to a public target merely to make the answer shorter. If omitted, record the capability-scope or alignment-tax reason and keep any required safety evaluation as a separate guard rail. Any task-specific brevity requirement must be explicit in the prompt or recipe and must not override correctness, relevance, or completeness. Realtime goals must be measured through deployment and runtime metrics rather than manufactured by shortening training answers.
+
 Default action policy:
 
 * **Act directly** for toy recovery loops, unit tests, loss implementation, checkpoint/resume tests, and small local dry runs.
@@ -980,6 +1020,10 @@ Validation gate:
 * no exploding activations or severe generation collapse;
 * generation smoke test produces valid tokens;
 * autoregressive behavior improves or failure is explained;
+* teacher-generated targets are not accepted, rejected, or replaced solely by generic answer length;
+* response quality and protocol fidelity are evaluated separately from latency and answer length;
+* primary reasoning or agent-capability metrics are reported separately from alignment, safety, style, and format metrics;
+* any alignment tax introduced by the data mixture, objective, filtering, or protocol constraints is measured, or explicitly logged as unresolved before adoption;
 * latency and memory are measured when relevant;
 * quantized evaluation is run if the target deployment is quantized;
 * stage result is documented in experiment logs.
@@ -1007,7 +1051,7 @@ Online data may include:
 * RAG answer faithfulness checks;
 * self-correction traces;
 * refusal/uncertainty comparisons;
-* short realtime interaction rollouts;
+* realtime interaction rollouts;
 * code/math verifier outcomes.
 
 Default action policy:
@@ -1046,7 +1090,7 @@ The following methods are initial baseline or reference candidates for this stag
 
 Before implementing any candidate method, the agent should record why it is relevant, what baseline it will be compared against, what data it needs, what risks it introduces, and how it will be validated.
 
-The objective must be explicitly recorded. Do not silently change preference loss, beta, reward normalization, sampling policy, rollout policy, data filtering, or data mixture.
+The objective must be explicitly recorded. Do not silently change preference loss, beta, reward normalization, sampling policy, rollout policy, data filtering, or data mixture. On-policy alignment or preference objectives must also report their alignment tax against the declared reasoning and agent-capability targets. A gain in refusal rate, style compliance, or aggregate reward is not sufficient if it hides a material loss in reasoning quality, correctness, or task usefulness.
 
 Default action policy:
 
@@ -1065,7 +1109,7 @@ Validation gate:
 * tool-use format is not broken;
 * refusal and uncertainty behavior is not degraded;
 * RAG faithfulness does not regress severely;
-* latency remains within target;
+* latency remains within target without using generic answer truncation or terseness as a substitute for runtime optimization;
 * final evaluation is reproducible;
 * result is documented before any README Optim record entry is added.
 
@@ -1078,14 +1122,19 @@ Goal: confirm that the student works in the intended runtime, target precision, 
 Validate:
 
 * local inference;
+* answer correctness, relevance, completeness, and protocol fidelity in the deployed runtime;
+* preservation of the model recipe's declared reasoning and agent-capability target after alignment, quantization, and runtime integration;
+* alignment tax relative to the pre-alignment or pre-deployment checkpoint, when applicable;
 * quantized inference;
-* streaming token latency;
+* time to first token, inter-token latency, end-to-end latency, throughput, and response-length distribution as separate measurements;
 * memory footprint;
 * target device behavior;
 * compatibility with RAG/tool/persona/memory assumptions;
 * failure behavior under uncertainty;
 * checkpoint loading from external artifact storage;
 * model card and license constraints.
+
+Do not define realtime readiness from answer length alone. Response length is part of the workload, while realtime performance is determined by the combined model architecture and size, inference engine and kernels, precision and quantization, decoding and streaming strategy, memory system, and target hardware. Deployment validation must not report a latency win obtained by degrading answer quality.
 
 Default action policy:
 

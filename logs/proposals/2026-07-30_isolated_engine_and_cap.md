@@ -1,7 +1,16 @@
 # 2026-07-30 — Isolated-venv engine test + openmath cap measurement (pre-registration)
 
 **Status:** pre-registered, **not run, no spend committed.** Written before the
-session so the rules cannot be chosen after seeing the numbers (P6).
+session so the rules cannot be chosen after seeing the numbers (P6). Revised
+2026-07-30 for the capability-scope / alignment-tax principle (P3, P10, P10.1).
+
+**Capability scope of this session.** Both arms serve the recipe's **primary
+capability target** — reasoning and problem-solving — and nothing else. The
+engine arm is infrastructure for transferring it; the cap arm is about
+`openmath`, a primary-transfer slice. **No refusal data is generated, and no
+alignment-oriented slice is added.** `refusal_uncertainty` is evaluation-only
+for this recipe (decision 2026-07-30), so it is absent from the corpus by scope,
+not by a length filter.
 
 Successor to [`2026-07-29_engine_benchmark.md`](2026-07-29_engine_benchmark.md),
 which measured the in-stack path and found both serving engines unusable
@@ -70,6 +79,18 @@ completions already recorded** in `engine_bench_20260729/bench/report.json`.
 **Cap arm.** The same 10 openmath prompts, n=4, at caps **4096 (control,
 already measured) and 16384**. Report, per cap: fraction closing their reasoning,
 accuracy among those that close, and think-token distribution.
+
+Raising a cap is the opposite of a terseness constraint and is consistent with
+P10: it lets the teacher reason to its natural length instead of truncating a
+higher-quality answer to fit a budget. The extra tokens are logged as a workload
+characteristic (they set the corpus's cost), not treated as a quality signal in
+either direction.
+
+**Slices used anywhere in this session:** `rag_evidence`, `multihop_qa`,
+`gsm8k`, `openmath`. The benchmark arm's prompt sampler is slice-balanced over
+that list. `refusal_uncertainty` is excluded by capability scope, which also
+removes the most expensive slice per accepted sample from the job — a budget
+saving that falls out of the scope decision rather than motivating it.
 
 ## 5. Pre-registered rules
 

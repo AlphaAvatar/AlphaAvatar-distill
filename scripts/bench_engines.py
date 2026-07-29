@@ -59,14 +59,19 @@ from aadistill.teacher import load_causal_lm
 from generate_teacher_answers import SLICES, generation_prompt, load_slice, stop_ids
 
 
-def build_prompts(tokenizer, data_dir: Path, n_prompts: int, seed: int) -> list[dict]:
+def build_prompts(tokenizer, data_dir: Path, n_prompts: int, seed: int,
+                  names: list[str] | None = None) -> list[dict]:
     """Take a deterministic, slice-balanced sample and render it to token ids.
 
-    Balanced across slices because thinking-trace length varies a lot by slice
-    (code_math traces run far longer than refusal ones), and a sample skewed to
-    one slice would measure that slice's trace length rather than the engine.
+    Balanced across the slices in scope because thinking-trace length varies a
+    lot by slice, and a sample skewed to one slice would measure that slice's
+    trace length rather than the engine.
+
+    `names` defaults to every verifiable slice, but a benchmark should normally
+    be given the slices its recipe actually trains: measuring throughput on data
+    that is out of capability scope prices work nobody intends to buy (P10.1).
     """
-    names = sorted(SLICES)
+    names = sorted(names or SLICES)
     per_slice = max(1, n_prompts // len(names))
     rows: list[dict] = []
     for name in names:
@@ -272,6 +277,10 @@ def main() -> None:
     ap.add_argument("--model", default="Qwen/Qwen3-4B-Thinking-2507@768f209d")
     ap.add_argument("--engines", default="hf,vllm,sglang")
     ap.add_argument("--data-dir", default="data/stage2_v1")
+    ap.add_argument("--slices", default="rag_evidence,multihop_qa,gsm8k,openmath",
+                    help="slices to sample the job shape from; defaults to the "
+                         "dense baseline's in-scope slices (refusal_uncertainty "
+                         "is evaluation-only, decision 2026-07-30)")
     ap.add_argument("--n-prompts", type=int, default=32)
     ap.add_argument("--max-new-tokens", type=int, default=4096)
     ap.add_argument("--hf-batch-sizes", default="2,4,8")
@@ -305,8 +314,12 @@ def main() -> None:
         tokenizer.pad_token = tokenizer.eos_token
     stops = stop_ids(model, tokenizer)
 
+    slice_names = [s.strip() for s in args.slices.split(",") if s.strip()]
+    unknown = set(slice_names) - set(SLICES)
+    if unknown:
+        raise SystemExit(f"unknown slice(s): {sorted(unknown)}; known: {sorted(SLICES)}")
     prompts = build_prompts(tokenizer, REPO_ROOT / args.data_dir,
-                            args.n_prompts, args.seed)
+                            args.n_prompts, args.seed, slice_names)
     print(f"{len(prompts)} prompts, mean {sum(p['n_prompt'] for p in prompts)/len(prompts):.0f} "
           f"prompt tokens, cap {args.max_new_tokens}, stops {sorted(stops)}", flush=True)
 

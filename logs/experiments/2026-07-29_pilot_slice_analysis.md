@@ -1,5 +1,20 @@
 # 2026-07-29 — Pilot slice analysis: one "failure" is the guard working
 
+> **Reframed 2026-07-30 (AGENTS.md P3 / P10 / P10.1).** The measurements below
+> stand. The *argument* in §1 does not: it rejects teacher refusals because they
+> are ~6× longer than the public targets, and length is now explicitly not a
+> valid reason to reject or replace a target. Nor is "the fallback preserved a
+> shorter target" a defence — the fallback-to-public-target rule is itself
+> recorded as P3 debt.
+>
+> The conclusion survives on different grounds. Refusal is not a training slice
+> for this recipe because it is **outside the declared capability scope**
+> (reasoning, problem-solving, agent decision) and no product or safety
+> requirement makes it mandatory — an **alignment-tax** decision, not a length
+> one. It stays **evaluation-only** so the safety guard rail is preserved. See
+> the 2026-07-30 decision records. §2 (the teacher answering unanswerable
+> questions) and §3 (openmath is cap-bound) are unaffected.
+
 - **Agent:** Claude, dev box, **CPU only, $0** — read-only analysis of an
   artifact already on disk (P8)
 - **Input:** `artifacts/stage2_v2/pilot/candidates.jsonl`, sha256
@@ -41,11 +56,15 @@ The fallback is designed to preserve the public target when nothing verifies,
 and here it preserved a *better* target. accept@n 0.100 is the guard reporting
 success, not a yield problem.
 
-**Recommendation:** leave `REFUSAL_MAX_WORDS` at 60, and **exclude
-`refusal_uncertainty` from teacher-target generation entirely**. It is the
-second most expensive slice to generate (median 1,628 think tokens per
-candidate) and its measured yield is ~0 by design. Dropping it is a pure budget
-saving with no data loss.
+**Recommendation (as written 2026-07-29; superseded in its reasoning — see the
+banner):** leave `REFUSAL_MAX_WORDS` at 60, and exclude `refusal_uncertainty`
+from teacher-target generation.
+
+*2026-07-30:* the slice is indeed excluded, but on capability-scope grounds, and
+the threshold is now debt rather than a defended value. The durable observation
+here is the **cost**: refusal is the second most expensive slice to generate
+(median 1,628 think tokens per candidate), which is a real alignment-tax input
+for any future decision to include it.
 
 ## 2. Independent finding: the teacher hallucinates on unanswerable questions
 

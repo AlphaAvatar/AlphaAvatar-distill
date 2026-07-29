@@ -199,7 +199,13 @@ def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--model", default="Qwen/Qwen3-4B-Thinking-2507@768f209d")
     ap.add_argument("--data-dir", default="data/stage2_v1")
-    ap.add_argument("--slices", default=",".join(SLICES))
+    # Defaults to the dense baseline's in-scope slices, not to every slice the
+    # verifier *can* check. `refusal_uncertainty` is evaluation-only for this
+    # recipe (decision 2026-07-30): it is outside the declared capability target,
+    # so generating it would spend student capacity and GPU budget on an
+    # alignment tax nothing has justified. Pass it explicitly to override.
+    IN_SCOPE = ("rag_evidence", "multihop_qa", "gsm8k", "openmath")
+    ap.add_argument("--slices", default=",".join(IN_SCOPE))
     ap.add_argument("--limit-per-slice", type=int, default=None)
     ap.add_argument("--n", type=int, default=4, help="candidates per prompt")
     ap.add_argument("--batch-size", type=int, default=8,

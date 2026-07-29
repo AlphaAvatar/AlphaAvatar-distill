@@ -48,15 +48,19 @@ volumes remain. Three results, in order of how much they change the plan:
    ([log](experiments/2026-07-29_pilot_slice_analysis.md), two decision records
    2026-07-29). `rag_evidence` 1.000, `gsm8k` 1.000, `multihop_qa` 0.900.
 
-   - **`refusal_uncertainty` (accept@n 0.100) is the guard working.** 29/40
-     candidates were rejected only for length, and raising `REFUSAL_MAX_WORDS`
-     60→100 would have lifted accept@n to 0.900. **Rejected.** The public
-     targets it would displace are 13–16 words (median **15**); the teacher's
-     refusals are 66–160 (median **87**) — ~6× longer. The "fix" would have
-     regressed P10 (short realtime responses) while making the accept table look
-     better, which is exactly what P7/P14 forbid. 9/10 prompts correctly kept
-     `v1_public`. **The slice is dropped from teacher generation** — zero data
-     loss, and it was the second most expensive slice per candidate.
+   - **`refusal_uncertainty` (accept@n 0.100) is evaluation-only** — a
+     **capability-scope / alignment-tax** decision (2026-07-30), *not* a
+     judgement about answer length. It sits outside the recipe's declared target
+     (reasoning, problem-solving, agent decision) and no product or safety
+     requirement makes it mandatory, so the capacity, tokens and optimization
+     pressure it would consume are unjustified for this baseline. The safety
+     guard rail is preserved: refusal stays scored in `eval_behavior_v0`.
+     *The earlier framing on this line — excluding it because the teacher's
+     refusals are ~6× longer than the public targets — is **withdrawn**; P10
+     now states length is not a reason to reject a target.* If refusal is ever
+     trained it uses the teacher's native protocol and the same generic rules as
+     every other slice: no refusal-specific word limit, no forced terseness, no
+     public-target fallback.
    - **`openmath` (0.300) is genuinely cap-bound**: 28/40 truncated, but among
      the 12 that finished, accuracy is **0.750** and the longest used only 2,970
      of 4,096 tokens. The truncated ones are censored at exactly the cap, so
@@ -67,8 +71,9 @@ volumes remain. Three results, in order of how much they change the plan:
    **Standing consequence:** teacher targets are strongest where the corpus was
    already fine and weakest where the student is weakest. Separately, **the
    teacher answered 10/40 unanswerable questions** ("Hyrule", "GameCube and
-   Wii.") — consistent with its measured grounding ceiling of 0.562, and a
-   second independent reason not to source refusal targets from it.
+   Wii.") — consistent with its measured grounding ceiling of 0.562. That is a
+   fact about the teacher's grounding, recorded as such; it is not the reason
+   refusal is out of the training mixture (scope is).
 
 **Engine choice, decided by integration cost rather than throughput:** both serving engines
 are **incompatible with this project's pinned stack in-process**, measured on
@@ -425,6 +430,33 @@ uv run python scripts/plot_perf_trend.py [--print-table]
 POD_ID=<id> HOST=<ip> PORT=<port> bash scripts/pod/orchestrate.sh   # GPU session
 ```
 
+## Capability scope (declared 2026-07-30)
+
+The recipe's **primary capability target** is the teacher's reasoning,
+problem-solving and agent-decision quality under the deployment budget. Broad
+teacher imitation is explicitly **not** the objective (AGENTS.md P3, P10.1).
+Every Stage 2 group is classified against that target:
+
+| group | class |
+|---|---|
+| `code_math` (gsm8k, openmath), `multihop_qa` | **primary capability transfer** |
+| `rag_evidence`, `tool_calling`, `instruction`, `long_context` | **supporting capability** |
+| `short_realtime` | **evaluation-only (provisional — currently still in the trained mixture; moving it needs an ablation)** |
+| `refusal_uncertainty` | **evaluation-only** |
+
+Mixture weights are not uniform by default, and reasoning capability is reported
+**separately** from refusal, safety, style and format axes. Adding or increasing
+any alignment-oriented slice, loss or filter requires the P10.1 record: the
+requirement it serves, whether it is non-negotiable, the reasoning metrics that
+may regress, a fixed budget, and the ablation that will measure the tax.
+
+**Known debt (decision 2026-07-30):** `src/aadistill/verify.py` still hard-codes
+refusal-specific and generic word-count rules (`REFUSAL_MAX_WORDS = 60`,
+`MAX_ANSWER_WORDS = 600`) and `generate_teacher_answers.py` still falls back to
+the public target — all three are P3 violations. They are inert while refusal is
+evaluation-only, but **anyone adding a slice to teacher generation inherits the
+600-word answer ceiling and must fix it first.**
+
 ## Next action: buy the isolated-venv engine test
 
 The 2026-07-29 session closed three prerequisites (4B batch invariance, real
@@ -451,16 +483,17 @@ Rules: adopt only at **>=3x** in-stack throughput (stricter than the previous
 1.5x, because a process boundary is real integration surface) **and** >=0.90
 greedy agreement with the in-stack reference.
 
-**Both slice questions are now closed on the CPU side** (decisions 2026-07-29):
-`refusal_uncertainty` is dropped from teacher generation, `openmath` keeps its
-4,096 cap until a measurement justifies raising it. The openmath cap test should
+**Both slice questions are now closed on the CPU side** (decisions 2026-07-29,
+refusal reframed 2026-07-30): `refusal_uncertainty` is **evaluation-only by
+capability scope**, `openmath` keeps its 4,096 cap until a measurement justifies
+raising it. The openmath cap test should
 **ride along with the engine session** rather than justify its own pod — same 10
 prompts at a raised cap, reporting both completion rate *and* accuracy, since
 longer reasoning is not automatically better reasoning.
 
-Generation runs should now pass
-`--slices rag_evidence,multihop_qa,gsm8k,openmath` (dropping
-`refusal_uncertainty`); the flag already exists, so no code change is needed.
+Both generation and benchmark scripts now **default** to the in-scope slices
+`rag_evidence,multihop_qa,gsm8k,openmath`; pass `--slices` explicitly to
+override.
 
 ## Next actions (ordered)
 

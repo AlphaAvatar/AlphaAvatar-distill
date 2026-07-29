@@ -429,6 +429,15 @@
 
 ## 2026-07-29 — `refusal_uncertainty` is dropped from teacher-target generation
 
+> **SUPERSEDED 2026-07-30** by "Capability scope for the dense baseline" below.
+> The conclusion (refusal is not a training slice for this recipe) stands, but
+> **the reasoning recorded here is not a valid basis for it.** This record
+> excludes the slice because the teacher's refusals are longer than the public
+> targets — and P10/P10.1 now state that a target must not be rejected or
+> replaced solely because its answer is longer. The correct basis is capability
+> scope and alignment tax. Read the superseding record for the reasoning; this
+> one is kept for the measurements it contains.
+
 - **Context:** The 2026-07-29 pilot scored `refusal_uncertainty` at accept@1 0.000 / accept@n 0.100, with 29 of 40 candidates rejected solely as `refusal_too_long` against `REFUSAL_MAX_WORDS = 60`. The obvious reading was a miscalibrated threshold: raising it to 100 would have lifted accept@n to 0.900, and to 150 would have made it 1.000.
 - **Decision:** **Leave `REFUSAL_MAX_WORDS` at 60 and stop generating teacher targets for this slice.** The low accept rate is the guard working, not a yield problem. Refusal prompts keep their v1 public targets, which is what already happened for 9 of 10 prompts in the pilot.
 - **Alternatives considered:** (a) Raise the threshold to 100 — rejected: the public targets it would displace are 13–16 words (median 15) while the teacher's refusals are 66–160 (median 87), so the change would make refusals ~6× longer on 9 of 10 prompts, a direct regression against P10 (short realtime responses) bought by relaxing a rule until a metric moved. (b) Keep generating and accept the ~0 yield — rejected as pure waste: it is the second most expensive slice per candidate (median 1,628 think tokens). (c) Rewrite the refusal rule to score terseness relative to the gold rather than an absolute word count — deferred; it is a better rule but nothing currently needs it, since the slice is no longer a target source.
@@ -445,3 +454,39 @@
 - **Expected upside:** A cheap, well-scoped measurement (the same 10 prompts at a raised cap) either recovers a slice where the teacher is 75% accurate, or rules it out with evidence.
 - **Risks:** Longer reasoning is not automatically better reasoning; the cap raise could recover completions without recovering accuracy. The measurement must report both.
 - **Revisit when:** the isolated-venv engine test is bought — the cap measurement should ride along with it rather than justify its own pod.
+
+## 2026-07-30 — Capability scope for the dense baseline, and where refusal sits
+
+- **Context:** The maintainer added the alignment-tax / selective-capability-transfer principle (AGENTS.md P3, P10, P10.1). It changes both the framing of the 2026-07-29 refusal decision and the standing of the mixture as a whole. The earlier record reached a defensible conclusion by an invalid route: it excluded refusal because the teacher's refusals are ~6× longer than the public targets, and length is now explicitly not a reason to reject a target.
+- **Decision:** Declare the capability scope of the `qwen3-4b-thinking-distill` recipe, and classify every Stage 2 data group against it:
+
+  | group | class | rationale |
+  | --- | --- | --- |
+  | `code_math` (gsm8k, openmath) | **primary capability transfer** | reasoning and problem-solving — the declared target |
+  | `multihop_qa` | **primary capability transfer** | multi-step reasoning over retrieved evidence |
+  | `rag_evidence` | **supporting capability** | evidence grounding is a demonstrated dependency of the agent-decision target, not an end in itself |
+  | `tool_calling` | **supporting capability** | agent-decision target requires parseable tool invocation |
+  | `instruction` | **supporting capability** | carries the chat protocol the other groups are expressed in |
+  | `long_context` | **supporting capability** | dependency of RAG/multi-hop at deployment lengths |
+  | `short_realtime` | **evaluation-only** (provisional) | realtime quality is a systems property (P10); no measured evidence it needs a training slice |
+  | `refusal_uncertainty` | **evaluation-only** | out of the declared target scope; see below |
+
+- **Refusal, framed correctly:** refusal is **not** excluded for being verbose, and **not** included for being a standard capability category. It is evaluation-only because it is outside this recipe's declared target (reasoning, problem-solving, agent decision) and no product or safety requirement currently makes it mandatory. It therefore consumes student capacity, tokens and optimization pressure without serving the primary objective — the alignment tax is not justified for this baseline. The safety guard rail is preserved: refusal remains scored in `eval_behavior_v0` and any regression is visible there.
+- **If refusal is ever trained:** it uses the **teacher's native protocol** and the **same generic hygiene and quality rules as every other included slice** — no refusal-specific word limit, no forced terseness, no fallback to a public target. Inclusion requires either an explicit product/safety requirement or a measured ablation showing the primary reasoning metrics do not regress unacceptably.
+- **Alternatives considered:** (a) Keep refusal as a training slice for coverage — rejected: coverage is not a justification under P10.1, and this recipe's target does not include it. (b) Train refusal with the current terseness rule — rejected twice over: it violates P3 (framework-level special handling of a semantic category) and P10 (length as a quality gate). (c) Drop refusal from evaluation as well — rejected: scope reduction must not silently remove a safety guard rail.
+- **Expected upside:** Mixture weight, generation budget and evaluation attention concentrate on the declared target instead of being spread evenly over teacher behaviours. Removes the most expensive slice per accepted sample from generation runs at no cost to the target capability.
+- **Risks:** A student never trained on refusal data may refuse poorly or not at all, and the evaluation guard rail will show that without fixing it. This is an accepted, recorded scope decision rather than an oversight. Revisit if a product requirement appears, or if grounding/hallucination behaviour on unanswerable inputs becomes a deployment blocker.
+- **Consequence for `short_realtime`:** classified evaluation-only **provisionally** and flagged as unverified. It is currently in the trained mixture, so this is a claim about where it *should* sit, not a description of what has been trained. Moving it requires a mixture change and an ablation; recorded here so the classification is explicit rather than assumed.
+- **Revisit when:** the capability scope changes, a safety/product requirement is added, or an ablation measures the tax of any of these groups.
+
+## 2026-07-30 — Refusal-specific rules in the algorithm core are technical debt (P3)
+
+- **Context:** AGENTS.md P3 now states that the algorithm core must not hard-code refusal-specific target text, generic word-count limits, or fallback-to-public-target rules; such constraints belong to a model recipe, dataset contract, or evaluation config.
+- **Decision:** Record the existing violations as debt and do **not** refactor them in the same change as the principle update. They are inert for the current plan — refusal is evaluation-only, so the refusal verifier rule no longer runs in a corpus build — and a refactor touching the verifier would need its own tests and would not change any measurement.
+- **The violations, concretely:**
+  - `src/aadistill/verify.py`: `REFUSAL_MAX_WORDS = 60` (refusal-specific word limit); `MAX_ANSWER_WORDS = 600` (generic word-count limit applied to every slice via `hygiene_reason`); the `refusal` rule itself, which encodes a product preference for terseness inside a *correctness* check.
+  - `scripts/generate_teacher_answers.py`: the fallback that keeps the v1 public target when no candidate verifies.
+- **Alternatives considered:** (a) Refactor now — rejected as scope creep against a records-only request, and it would mix a principle change with a behaviour change in one commit. (b) Leave it unrecorded — rejected: undocumented debt against a stated principle is exactly what P14 forbids.
+- **Direction when it is done:** correctness rules stay in the core; form/terseness constraints move to a per-slice dataset contract expressed in config, so a slice that genuinely requires a constrained form declares it rather than inheriting a framework default. `MAX_ANSWER_WORDS` should become a runaway-generation guard expressed in tokens against the cap, not a quality gate in words.
+- **Risks:** While the debt stands, any future slice added to teacher generation silently inherits a 600-word answer ceiling that P10 says must not be a quality gate. Anyone adding a slice must check this first.
+- **Revisit when:** a slice with a genuine form requirement is added, or refusal is reconsidered for training.
