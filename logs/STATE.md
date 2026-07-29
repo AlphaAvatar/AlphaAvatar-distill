@@ -43,18 +43,32 @@ volumes remain. Three results, in order of how much they change the plan:
    / 1514** new tokens at batch 2 / 4 / 8, so the logits themselves move with
    batch composition. "The corpus is the artifact" (P5) is now a measured
    requirement, not a preference.
-3. **The pilot's two failing slices are the interesting part** (§7 of the log).
-   `openmath` is **cap-bound** — median think block hits the 4,096 cap exactly,
-   28/40 candidates rejected `truncated_at_cap`, so most never reached an
-   answer. `refusal_uncertainty` is a **protocol mismatch**: accept@1 **0.000**,
-   accept@n 0.100, with 29/40 rejected `refusal_too_long` — a thinking teacher
-   reasons 1,628 tokens before declining, and the verifier wants terseness.
-   Meanwhile `rag_evidence` is 1.000/1.000 and `gsm8k` 0.900/1.000.
+3. **The pilot's two failing slices are the interesting part** — and a follow-up
+   CPU analysis at $0 found that **one of them is not failing**
+   ([log](experiments/2026-07-29_pilot_slice_analysis.md), two decision records
+   2026-07-29). `rag_evidence` 1.000, `gsm8k` 1.000, `multihop_qa` 0.900.
 
-   **This partly inverts the 2026-07-28 teacher-target direction.** Teacher
-   targets are strongest where the corpus was already fine and unusable where
-   the student is weakest on behavior. For refusal, the teacher *is* the
-   conflict — it disagrees with the desired **format**, not the content.
+   - **`refusal_uncertainty` (accept@n 0.100) is the guard working.** 29/40
+     candidates were rejected only for length, and raising `REFUSAL_MAX_WORDS`
+     60→100 would have lifted accept@n to 0.900. **Rejected.** The public
+     targets it would displace are 13–16 words (median **15**); the teacher's
+     refusals are 66–160 (median **87**) — ~6× longer. The "fix" would have
+     regressed P10 (short realtime responses) while making the accept table look
+     better, which is exactly what P7/P14 forbid. 9/10 prompts correctly kept
+     `v1_public`. **The slice is dropped from teacher generation** — zero data
+     loss, and it was the second most expensive slice per candidate.
+   - **`openmath` (0.300) is genuinely cap-bound**: 28/40 truncated, but among
+     the 12 that finished, accuracy is **0.750** and the longest used only 2,970
+     of 4,096 tokens. The truncated ones are censored at exactly the cap, so
+     **the yield of a higher cap is unmeasurable from this run** — it is a
+     hypothesis with an unknown payoff, and at measured throughput a 16k cap
+     costs ~4× per candidate. Not raised; queued as a measurement.
+
+   **Standing consequence:** teacher targets are strongest where the corpus was
+   already fine and weakest where the student is weakest. Separately, **the
+   teacher answered 10/40 unanswerable questions** ("Hyrule", "GameCube and
+   Wii.") — consistent with its measured grounding ceiling of 0.562, and a
+   second independent reason not to source refusal targets from it.
 
 **Engine choice, decided by integration cost rather than throughput:** both serving engines
 are **incompatible with this project's pinned stack in-process**, measured on
@@ -425,11 +439,16 @@ Scope it small: one new `Engine` subclass, the same 10-prompt job shape, and the
 cross-stack **agreement** measurement that H2 pre-registered and this session
 could not run. Until that number exists, no bulk corpus should be sized.
 
-Second, cheaper, and independent: **the two failing pilot slices**. `openmath`
-needs a higher cap (it is cap-bound, not wrong) and `refusal_uncertainty` needs
-a decision — either the verifier's terseness rule relaxes, or refusal targets
-cannot come from this teacher. Both are CPU-side judgement calls on data already
-on disk.
+**Both slice questions are now closed on the CPU side** (decisions 2026-07-29):
+`refusal_uncertainty` is dropped from teacher generation, `openmath` keeps its
+4,096 cap until a measurement justifies raising it. The openmath cap test should
+**ride along with the engine session** rather than justify its own pod — same 10
+prompts at a raised cap, reporting both completion rate *and* accuracy, since
+longer reasoning is not automatically better reasoning.
+
+Generation runs should now pass
+`--slices rag_evidence,multihop_qa,gsm8k,openmath` (dropping
+`refusal_uncertainty`); the flag already exists, so no code change is needed.
 
 ## Next actions (ordered)
 
