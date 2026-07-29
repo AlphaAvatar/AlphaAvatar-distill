@@ -568,7 +568,45 @@ justify the determinism tax.
 `--max-model-len 8192`, no room for a ~410-token prompt; two restarts failed).
 SGLang's cap-8192 numbers **stand alone and are not a comparison**.
 
-## Next actions
+## Next action: Stage 3 teacher-target 2×2 (awaiting approval)
+
+**Priority changed (maintainer, 2026-07-30): Stage 3 teacher-target SFT warm-up
+comes before the Stage 4/5 corrected-training pilot.** The engine prerequisite
+is sufficiently resolved — **vLLM 0.26.0 provisionally** for offline Stage 3
+generation, with exact token ids and metadata snapshotted; the final rollout
+engine stays deferred to Stage 4/5.
+
+**CPU preflight is complete, $0** ([log](experiments/2026-07-30_stage3_target_preflight.md)),
+and it found a blocking defect in the current recipe:
+
+- Teacher-native targets are **4.2× longer** than public ones (rendered p50 997
+  vs 245, max 5193) with **5.2× the supervised span**.
+- Against the Stage 3 recipe (`concat` @ `block_len` 1024), **48.5% of teacher
+  targets exceed a whole block** and the expected split rate is **79.9%**. Split
+  traces train the student to continue premises it cannot see — no crash, no log.
+- **The naive fix is worse:** `best_fit` @ 1024 silently discards **56% of
+  supervised tokens** (18,161 of 41,276), because no packing can keep a sample
+  longer than a block whole.
+- **Proven lossless:** `best_fit` @ **8192** — `truncated_samples = 0`,
+  **41,276/41,276** supervised tokens preserved. Bounded by construction: worst
+  prompt 2,765 + cap 4,096 + overhead ≈ 6,925 < 8,192.
+- Both arms must share that packing, or the experiment measures fragmentation
+  rather than targets. This supersedes the 2026-07-28 packing decision **for this
+  experiment only** — that one measured public targets, where splitting is a
+  rounding error.
+
+Pre-registered:
+[`proposals/2026-07-30_stage3_teacher_target_2x2.md`](proposals/2026-07-30_stage3_teacher_target_2x2.md)
+— 750 prompts × n=2 (both sampled, no greedy), in-scope four slices, cap 4096;
+2×2 = public vs teacher targets × two seeds; readouts `format_ok`,
+`think_closed`, `terminated`, `empty_answer`, **p(`</think>`)**,
+**p(`<|im_end|>`)**, holdout NLL as ±1% guard rail. **$3–6, ceiling $7.**
+
+**Unmeasured prerequisite:** training throughput and memory at `block_len` 8192
+on the 0.6B student — attention is quadratic in sequence length, so a smoke test
+sizes the runs before the paid ones.
+
+## Deferred
 
 1. **Corrected-training pilot (criterion 6)** — the actual discriminator, and
    likely uneventful given off-policy rate 0.000. Separate request.
