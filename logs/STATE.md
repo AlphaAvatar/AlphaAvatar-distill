@@ -26,17 +26,37 @@ unquantified batch-composition term, which would sit beside the 0.1290 seed
 noise floor as a second source of behavior-metric instability. Eval batching has
 never been varied in a completed run.
 
-> ⚠️ **A PAID GPU SESSION IS RUNNING RIGHT NOW** (started 2026-07-29 05:52 UTC).
-> Pod `g8ajahpwirhrfx`, 1× L40S at **$0.99/h**, `--terminate-after` backstop at
-> **11:37 UTC**. Driver: `scripts/pod/bench_and_generate.sh` under `setsid nohup`
-> pod-side, so it survives any agent session ending. It benchmarks, then chains
-> into the corpus pilot (capped `--max-hours 3.0`), then uploads to
-> `AlphaAvatar/aadistill-artifacts` under `engine_bench_20260729/` and marks
-> `SESSION_DONE`. **The pod is NOT auto-deleted** — delete it with
-> `runpodctl remove pod g8ajahpwirhrfx` once artifacts are verified.
-> Progress: `ssh -p 43268 root@103.196.86.5 'tail /workspace/markers/session.log'`.
+**GPU session complete** ([log](experiments/2026-07-29_engine_benchmark_gpu.md)).
+Pod deleted after upload verification; **$2.60**, nothing billing, no pods or
+volumes remain. Three results, in order of how much they change the plan:
 
-**Engine result, already decided and not by throughput:** both serving engines
+1. **In-stack decoding does not scale with batch size, and the bulk corpus is
+   unaffordable on it.** 37.5 / 43.9 / 39.3 tok/s at batch 2 / 4 / 8 — flat
+   across a 4× range, at 9–13 GB of 44 GB. This **refutes the founding premise
+   of `src/aadistill/generate.py`**, that batching was the missing speedup. At
+   ~44 tok/s and ~1,600 tokens/candidate the pre-registered 1,000-prompt × n=4
+   pilot needs **~40 GPU-hours (~$40)**; the guessed $25–145 bulk cost now has a
+   measured basis and the answer is "not in-stack".
+2. **Batch invariance fails on the 4B teacher**, as it did on the 0.6B student:
+   7/8 identical at cap 64, one diverging at token 50. Corroborated at long
+   context — the same ten prompts under *greedy* decoding average **1568 / 1760
+   / 1514** new tokens at batch 2 / 4 / 8, so the logits themselves move with
+   batch composition. "The corpus is the artifact" (P5) is now a measured
+   requirement, not a preference.
+3. **The pilot's two failing slices are the interesting part** (§7 of the log).
+   `openmath` is **cap-bound** — median think block hits the 4,096 cap exactly,
+   28/40 candidates rejected `truncated_at_cap`, so most never reached an
+   answer. `refusal_uncertainty` is a **protocol mismatch**: accept@1 **0.000**,
+   accept@n 0.100, with 29/40 rejected `refusal_too_long` — a thinking teacher
+   reasons 1,628 tokens before declining, and the verifier wants terseness.
+   Meanwhile `rag_evidence` is 1.000/1.000 and `gsm8k` 0.900/1.000.
+
+   **This partly inverts the 2026-07-28 teacher-target direction.** Teacher
+   targets are strongest where the corpus was already fine and unusable where
+   the student is weakest on behavior. For refusal, the teacher *is* the
+   conflict — it disagrees with the desired **format**, not the content.
+
+**Engine choice, decided by integration cost rather than throughput:** both serving engines
 are **incompatible with this project's pinned stack in-process**, measured on
 the pod. vLLM 0.26.0 installs but its compiled extension needs
 `libcudart.so.13` (CUDA 13) while the image and this project's torch are
@@ -49,10 +69,13 @@ Untested follow-up: driving a serving engine from an isolated venv as a
 subprocess, which is a real deployment pattern but more integration surface —
 exactly the cost being weighed.
 
-The `hf` arm still buys the session's highest-value unknowns: real batched
-throughput on the 4B teacher (replacing the `batch_size` 1 figure of 55 s/prompt
-that started this line), **batch invariance on the 4B in bf16**, and a measured
-$/1k prompts that prices the bulk build.
+**This is a bound on what was tested, not a verdict on the engines.** The
+untested path is running a serving engine from an **isolated venv** as a
+subprocess or local HTTP server — a normal deployment pattern that sidesteps the
+dependency conflict at the cost of a process boundary. Given result 1 above,
+that path is now the highest-value next purchase: it is the only route that
+could make a bulk corpus affordable, and the `Engine` interface already isolates
+it to one new subclass.
 
 Earlier context — the CE/KD conflict intervention —
 **the conflict is confirmed causal, and it is the best-understood defect in the
@@ -388,22 +411,25 @@ uv run python scripts/plot_perf_trend.py [--print-table]
 POD_ID=<id> HOST=<ip> PORT=<port> bash scripts/pod/orchestrate.sh   # GPU session
 ```
 
-## Next action: the engine benchmark GPU session (awaiting approval)
+## Next action: buy the isolated-venv engine test
 
-Pre-registered in [`proposals/2026-07-29_engine_benchmark.md`](proposals/2026-07-29_engine_benchmark.md).
-One L40S, ~$3.5–5.2, unattended, chaining **benchmark → mechanical decision →
-pilot corpus** via `scripts/pod/bench_and_generate.sh`. Selection rules R1–R4
-are applied by code (`bench_engines.py::decide`) and consumed by
-`generate_teacher_answers.py --engine-from`, so no agent interprets numbers
-mid-session. Generation is capped at `--max-hours 3.0` and stops at a batch
-boundary with complete, hashed artifacts; the manifest records `complete: false`
-if it stops early. Rule R4 blocks generation entirely if the in-stack reference
-arm fails.
+The 2026-07-29 session closed three prerequisites (4B batch invariance, real
+batched throughput, the per-slice accept/divergence profile) and opened one
+question that now gates the whole teacher-target direction: **can a serving
+engine be driven from an isolated venv?** In-stack decoding is measured at ~44
+tok/s and flat in batch size, which prices a bulk corpus at ~$40/1k prompts —
+too expensive to scale. A subprocess/HTTP-server engine with its own torch build
+is the only known route around both that and the dependency conflict.
 
-It answers, in one session, three prerequisites the queue below already lists
-(batch invariance on the real 4B, real batched throughput, the per-slice
-divergence profile) plus the engine choice and a measured $/1k that finally
-prices the bulk build — previously a guessed $25–145.
+Scope it small: one new `Engine` subclass, the same 10-prompt job shape, and the
+cross-stack **agreement** measurement that H2 pre-registered and this session
+could not run. Until that number exists, no bulk corpus should be sized.
+
+Second, cheaper, and independent: **the two failing pilot slices**. `openmath`
+needs a higher cap (it is cap-bound, not wrong) and `refusal_uncertainty` needs
+a decision — either the verifier's terseness rule relaxes, or refusal targets
+cannot come from this teacher. Both are CPU-side judgement calls on data already
+on disk.
 
 ## Next actions (ordered)
 

@@ -128,3 +128,30 @@ artifacts, not public releases.
   configs/stage3_s1_ext.json` / `--config configs/stage3_s2_blocks.json`
   (commit `6230a14`, pod `simbeepnf8syuu`, 2026-07-25).
 - **Related logs:** `experiments/2026-07-25_stage3_s2_ab_gpu_run.md`.
+
+## engine_bench_20260729 — engine benchmark + teacher-corpus pilot
+
+- **Artifact store:** `AlphaAvatar/aadistill-artifacts` (private), prefix `engine_bench_20260729/`
+- **Created:** 2026-07-29, pod `g8ajahpwirhrfx` (1× L40S, $0.99/h, ~2.6 h, ≈$2.60)
+- **Creation commands:**
+  - `python scripts/bench_engines.py --engines hf --n-prompts 10 --max-new-tokens 4096 --hourly-usd 0.99 --out artifacts/bench/engines_v0`
+  - `python scripts/generate_teacher_answers.py --engine hf --limit-per-slice 10 --n 4 --batch-size 4 --max-new-tokens 4096 --max-hours 2.2 --out artifacts/stage2_v2/pilot`
+- **Teacher:** `Qwen/Qwen3-4B-Thinking-2507@768f209d`, bf16
+- **Experiment log:** `logs/experiments/2026-07-29_engine_benchmark_gpu.md`
+
+| file | size | sha256 |
+| --- | --- | --- |
+| `bench/report.json` | 3.3 KB | (see `code_state` block inside) |
+| `bench/decision.json` | 202 B | winner `hf`, rule R2 |
+| `pilot/candidates.jsonl` | 1.38 MB | `169cece8d02bbad469aa435161942af1f9316012276de03aa80422cc5b6bd821` |
+| `pilot/targets.jsonl` | 250 KB | `2a5986490f8b5ee8eb25eccbc8c49dabd33e418d0606b1b4d1650d514a06573e` |
+| `pilot/manifest.json` | 2.9 KB | carries both hashes above, `complete: true`, 50/50 prompts |
+
+**License/provenance:** derived from `data/stage2_v1` prompts (public datasets,
+licenses recorded in the Stage 2 v1 manifest) plus generations from a public
+Apache-2.0 teacher. No user data, no secrets.
+
+**Caveat:** the corpus is **not** reproducible token-for-token. Sampling is
+untruncated at temperature 1.0, and this session measured that even *greedy*
+bf16 decoding is not batch-invariant on this teacher — so the hashes above pin
+the experiment (P5), not a re-derivable procedure.

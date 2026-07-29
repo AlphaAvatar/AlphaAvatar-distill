@@ -4,7 +4,7 @@
 - **Pre-registration:** [`proposals/2026-07-29_engine_benchmark.md`](../proposals/2026-07-29_engine_benchmark.md)
 - **Objective:** choose the decode backend by weighing throughput against
   integration cost (maintainer, 2026-07-29), then build a teacher-corpus pilot
-- **Status of this file:** benchmark complete; pilot running at time of writing
+- **Status:** complete. Pod deleted after upload verification; **$2.60** total
 
 ## 1. Headline: the engine choice was decided by integration cost, not speed
 
@@ -124,7 +124,67 @@ re-derived policy — as ground truth.
    quantified. That sits beside the 0.1290 seed noise floor as a *second*
    unmeasured source of behavior-metric variance.
 
-## 7. Pilot corpus (in progress)
+## 7. Pilot corpus — complete, and two slices are in trouble
+
+50 prompts (10/slice), n=4 sampled candidates, batch 4, cap 4096, **3,197 s**
+(53 min). `complete: true`, 50/50. Artifacts on the relay at
+`engine_bench_20260729/pilot/` — `candidates.jsonl` (1.38 MB, sha256
+`169cece8…`), `targets.jsonl` (250 KB, `2a598649…`), `manifest.json`. The
+manifest's recorded hashes match the files transferred to the dev box, so the
+relay is verified end to end.
+
+| slice | accept@1 | accept@n | think median (tok) | dominant reject |
+|---|---:|---:|---:|---|
+| rag_evidence | **1.000** | **1.000** | 305 | none — 40/40 ok |
+| gsm8k | 0.900 | **1.000** | 614 | truncated_at_cap 3 |
+| multihop_qa | 0.600 | 0.900 | 971 | gold_span_missing 8 |
+| openmath | 0.200 | 0.300 | **4096** | **truncated_at_cap 28/40** |
+| refusal_uncertainty | **0.000** | **0.100** | 1628 | **refusal_too_long 29/40**, not_a_refusal 10 |
+
+Note `accept@1` now means "one sample was accepted", not "greedy was accepted"
+(decision 2026-07-29) — it is not comparable to any earlier figure.
+
+**Two slices fail for opposite reasons, and neither is a teacher quality
+problem.**
+
+* **`openmath` is cap-bound, not wrong.** The median candidate's think block
+  never closes — `think_median` is exactly the 4,096-token cap — and 28 of 40
+  candidates are rejected as `truncated_at_cap`. The teacher needs a longer
+  budget for these problems than the corpus allows. This is a **fixable
+  configuration** finding: raise the cap for this slice, or drop it. What it is
+  *not* is evidence the teacher answers openmath badly, because most candidates
+  never got to an answer at all.
+* **`refusal_uncertainty` is a protocol mismatch.** accept@1 is **0.000** and
+  accept@n **0.100**: 29 of 40 candidates are rejected as `refusal_too_long` and
+  10 as `not_a_refusal`. A thinking teacher reasons at length (median 1,628
+  think tokens) before declining, and the verifier wants a terse refusal. So the
+  teacher cannot supply targets for this slice under the current rules **and the
+  rules are arguably right** — a realtime assistant should decline briefly.
+  This is the sharpest instance yet of the standing finding that *the teacher
+  disagrees with any target it did not write*: here it disagrees with the
+  desired **format**, not the content.
+
+**Consequence for the teacher-target direction.** Teacher-generated targets are
+strong exactly where the existing corpus was already fine (rag_evidence, gsm8k)
+and unusable where the student is weakest on behavior (refusal, and format
+generally). That is close to the opposite of what the 2026-07-28 direction
+assumed, and it should be weighed before any bulk build: the plan's premise was
+that teacher targets remove the CE/KD conflict wholesale, but for refusal the
+teacher *is* the conflict.
+
+Cost per **accepted** sample varies ~10× across slices as a result, so a bulk
+build should be priced per slice rather than per prompt.
+
+## 8. Session accounting
+
+Pod `g8ajahpwirhrfx` created 05:37 UTC, deleted 08:15 UTC after upload
+verification — **≈2.6 h × $0.99 ≈ $2.60**, inside the $3.5–5.2 pre-registered
+band despite one 45-minute arm being lost and re-run. No pods or volumes remain.
+
+## 9. Superseded section
+
+*(The pre-registration's §7 pilot scope — 200 prompts/slice — was rescoped to 10
+before the run; see the reasoning above §7's table.)*
 
 Rescoped from the pre-registered 200 prompts/slice to **10 prompts/slice (50
 total), n=4, batch 4, cap 4096, `--max-hours 2.2`**. Reason: at the measured
