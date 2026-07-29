@@ -89,6 +89,7 @@ def _finalize(
     finish_reason: str,
     stop_ids: set[int],
     cap: int,
+    logprobs: list[float | None] | None = None,
 ) -> dict:
     """Shared post-processing for every engine — see the module docstring.
 
@@ -96,24 +97,43 @@ def _finalize(
     strips the token itself (vLLM's default for `stop_token_ids`), the canonical
     stop is re-appended so `n_new` is comparable across engines rather than
     off-by-one for some of them.
+
+    `logprobs`, when given, is trimmed **in lockstep** with the tokens and the
+    result is length-checked. That check is not defensive padding: an importance
+    ratio is `exp(logp_trainer - logp_rollout)` for one specific token, so a
+    single position of drift between the two lists silently computes every
+    downstream ratio against the wrong token. It would not crash and it would not
+    look wrong — it would just corrupt the correction term.
+
+    A re-appended stop token gets `None` rather than a fabricated value: the
+    engine never reported a probability for a token it did not return, and
+    inventing one would put a made-up number into the correction path.
     """
+    def out(kept_ids, kept_lps, *, hit_cap, finished):
+        record = {"tokens": kept_ids, "n_new": len(kept_ids),
+                  "hit_cap": hit_cap, "finished": finished}
+        if logprobs is not None:
+            if len(kept_lps) != len(kept_ids):
+                raise RuntimeError(
+                    f"logprob/token length mismatch: {len(kept_lps)} vs "
+                    f"{len(kept_ids)} — importance ratios would be misaligned")
+            record["logprobs"] = kept_lps
+        return record
+
+    lps = list(logprobs) if logprobs is not None else []
+
     for position, token in enumerate(new_ids):
         if token in stop_ids:
-            kept = new_ids[: position + 1]
-            return {"tokens": kept, "n_new": len(kept), "hit_cap": False, "finished": True}
+            return out(new_ids[: position + 1], lps[: position + 1],
+                       hit_cap=False, finished=True)
 
     if finish_reason == "stop" and stop_ids:
         # Engine stopped on a stop token but did not return it. Re-append the
         # canonical one so lengths line up with engines that do return it.
-        kept = new_ids + [min(stop_ids)]
-        return {"tokens": kept, "n_new": len(kept), "hit_cap": False, "finished": True}
+        return out(new_ids + [min(stop_ids)], lps + [None],
+                   hit_cap=False, finished=True)
 
-    return {
-        "tokens": new_ids,
-        "n_new": len(new_ids),
-        "hit_cap": len(new_ids) >= cap,
-        "finished": False,
-    }
+    return out(new_ids, lps, hit_cap=len(new_ids) >= cap, finished=False)
 
 
 class Engine:
@@ -134,6 +154,7 @@ class Engine:
         top_p: float = 1.0,
         top_k: int = 0,
         seed: int | None = None,
+        logprobs: bool = False,
     ) -> list[dict]:
         """`top_k=0` disables top-k. It is threaded explicitly and never left to
         an engine default, because the defaults disagree: HF `generate` uses
@@ -141,22 +162,48 @@ class Engine:
         implicit, the arms would be sampling from different distributions and
         the cross-engine comparison would be measuring that instead of the
         engines.
+
+        `logprobs=True` adds a `logprobs` list to each completion, aligned 1:1
+        with `tokens`, holding the **rollout policy's** log-probability of each
+        token it emitted. This is what a correction term is computed against
+        (AGENTS.md §4.6): it must come from the engine that actually sampled,
+        not be recomputed later, because recomputation is not even
+        batch-invariant on this project's own measurements.
+
+        Positions the engine did not report a probability for are `None`. They
+        are not fabricated and callers must mask them.
         """
         raw = self._raw_generate(
             prompts, max_new_tokens=max_new_tokens, stop_ids=stop_ids,
             greedy=greedy, temperature=temperature, top_p=top_p, top_k=top_k,
-            seed=seed,
+            seed=seed, logprobs=logprobs,
         )
         if len(raw) != len(prompts):
             raise RuntimeError(
                 f"{self.name}: got {len(raw)} completions for {len(prompts)} prompts — "
                 "an engine that reorders or drops rows cannot build a corpus")
-        return [
-            _finalize(_strip_prefix(ids, prompt), reason, stop_ids, max_new_tokens)
-            for (ids, reason), prompt in zip(raw, prompts)
-        ]
 
-    def _raw_generate(self, prompts, **kw) -> list[tuple[list[int], str]]:
+        out = []
+        for item, prompt in zip(raw, prompts):
+            ids, reason = item[0], item[1]
+            lps = item[2] if len(item) > 2 else None
+            if logprobs and lps is None:
+                raise RuntimeError(
+                    f"{self.name}: logprobs requested but the engine returned none — "
+                    "this backend cannot supply rollout log-probabilities, which "
+                    "Stage 4/5 correction requires")
+            kept = _strip_prefix(ids, prompt)
+            if lps is not None:
+                # Whatever the prefix strip removed from the tokens must come off
+                # the log-probs too, or the two lists desynchronise silently.
+                lps = list(lps)[len(ids) - len(kept):]
+            out.append(_finalize(kept, reason, stop_ids, max_new_tokens,
+                                 lps if logprobs else None))
+        return out
+
+    def _raw_generate(self, prompts, **kw) -> list[tuple]:
+        """Return one `(token_ids, finish_reason)` or
+        `(token_ids, finish_reason, logprobs)` per prompt, in input order."""
         raise NotImplementedError
 
     def close(self) -> None:
@@ -181,8 +228,8 @@ class HFEngine(Engine):
 
     @torch.no_grad()
     def _raw_generate(self, prompts, *, max_new_tokens, stop_ids, greedy,
-                      temperature, top_p, top_k, seed):
-        out: list[tuple[list[int], str] | None] = [None] * len(prompts)
+                      temperature, top_p, top_k, seed, logprobs=False):
+        out: list[tuple | None] = [None] * len(prompts)
         # Length-sorted batches so one long prompt does not pad out the rest;
         # the original index rides along to restore input order.
         order = sorted(range(len(prompts)), key=lambda i: len(prompts[i]))
@@ -207,14 +254,42 @@ class HFEngine(Engine):
                 if seed is not None:
                     torch.manual_seed(seed + start)
 
-            seq = self.model.generate(ids, attention_mask=mask, **kwargs)
+            if logprobs:
+                # `output_scores` keeps one (batch, vocab) tensor per generated
+                # step, so memory grows as steps x batch x vocab: a 4k-token
+                # generation at batch 4 on a 152k vocab is ~10 GB. Fine for the
+                # oracle role this engine now has (reference, debugging, toy
+                # validation) and for short runs; it is a reason the production
+                # rollout path is a serving engine that streams its own
+                # log-probs rather than this one (AGENTS.md §4.6).
+                kwargs.update(output_scores=True, return_dict_in_generate=True)
+                result = self.model.generate(ids, attention_mask=mask, **kwargs)
+                seq, scores = result.sequences, result.scores
+            else:
+                seq, scores = self.model.generate(ids, attention_mask=mask, **kwargs), None
+
             for row, i in enumerate(idxs):
                 new = seq[row, width:].tolist()
                 # `generate` pads finished rows out to the longest row in the
                 # batch; `_finalize` cuts at the stop, so the reason only has to
                 # distinguish "ran to cap" from "stopped".
                 reason = "length" if not any(t in stop_ids for t in new) else "stop"
-                out[i] = (new, reason)
+                if scores is None:
+                    out[i] = (new, reason)
+                    continue
+                # `scores[t]` holds the distribution the sampler actually drew
+                # from at step t, after any temperature/top-p processing. That is
+                # the behaviour policy, which is the correct denominator for an
+                # importance ratio. At temperature 1.0 / top_p 1.0 / top_k off —
+                # this project's rollout setting (decision 2026-07-29) — it also
+                # equals the model's own distribution.
+                row_lps: list[float | None] = []
+                for step, token in enumerate(new):
+                    if step >= len(scores):
+                        break
+                    logits = scores[step][row].float()
+                    row_lps.append(float(torch.log_softmax(logits, dim=-1)[token]))
+                out[i] = (new, reason, row_lps)
         return [o for o in out if o is not None]
 
 
@@ -243,7 +318,11 @@ class VLLMEngine(Engine):
         )
 
     def _raw_generate(self, prompts, *, max_new_tokens, stop_ids, greedy,
-                      temperature, top_p, top_k, seed):
+                      temperature, top_p, top_k, seed, logprobs=False):
+        if logprobs:
+            raise NotImplementedError(
+                "in-process vLLM logprobs are not wired; use VLLMServerEngine, "
+                "which is the supported isolated path")
         from vllm import SamplingParams
         from vllm.inputs import TokensPrompt
 
@@ -301,7 +380,11 @@ class SGLangEngine(Engine):
         self.deterministic = deterministic
 
     def _raw_generate(self, prompts, *, max_new_tokens, stop_ids, greedy,
-                      temperature, top_p, top_k, seed):
+                      temperature, top_p, top_k, seed, logprobs=False):
+        if logprobs:
+            raise NotImplementedError(
+                "sglang logprobs are not wired yet; it is an untested candidate "
+                "(proposal 2026-07-30)")
         params = {
             "temperature": 0.0 if greedy else temperature,
             "top_p": 1.0 if greedy else top_p,
@@ -396,7 +479,7 @@ class VLLMServerEngine(Engine):
             return json.loads(response.read())
 
     def _raw_generate(self, prompts, *, max_new_tokens, stop_ids, greedy,
-                      temperature, top_p, top_k, seed):
+                      temperature, top_p, top_k, seed, logprobs=False):
         payload = {
             "model": self.model,
             "prompt": [list(p) for p in prompts],  # token ids, not text
@@ -407,6 +490,11 @@ class VLLMServerEngine(Engine):
             "stop_token_ids": sorted(stop_ids),
             "return_token_ids": True,
         }
+        if logprobs:
+            # `logprobs: 0` asks for the chosen token's own log-probability and
+            # no alternatives — the only value a correction term needs, and the
+            # cheapest thing to ship over the wire.
+            payload["logprobs"] = 0
         if seed is not None and not greedy:
             payload["seed"] = seed
 
@@ -431,7 +519,21 @@ class VLLMServerEngine(Engine):
                     "`return_token_ids`)")
             if not 0 <= index < len(prompts):
                 raise RuntimeError(f"{self.name}: choice index {index} out of range")
-            rows[index] = (list(ids), str(choice.get("finish_reason") or "length"))
+            reason = str(choice.get("finish_reason") or "length")
+            if not logprobs:
+                rows[index] = (list(ids), reason)
+                continue
+            lp = (choice.get("logprobs") or {}).get("token_logprobs")
+            if lp is None:
+                raise RuntimeError(
+                    f"{self.name}: logprobs requested but the response carries "
+                    "none; this server build cannot supply rollout "
+                    "log-probabilities")
+            if len(lp) != len(ids):
+                raise RuntimeError(
+                    f"{self.name}: {len(lp)} logprobs for {len(ids)} tokens — "
+                    "refusing to guess the alignment")
+            rows[index] = (list(ids), reason, [None if v is None else float(v) for v in lp])
         missing = [i for i, r in enumerate(rows) if r is None]
         if missing:
             raise RuntimeError(f"{self.name}: no choice returned for prompts {missing}")
