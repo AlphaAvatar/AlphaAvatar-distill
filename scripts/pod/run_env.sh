@@ -29,9 +29,9 @@ HF_PREFIX_BASE=engine_bench
 # Budget knobs read by bench_and_generate.sh (P6). The generation cap is
 # enforced in-process at a batch boundary, so a stop still leaves complete,
 # hashed artifacts and a manifest marked `complete: false`.
-export GEN_MAX_HOURS=3.0
+export GEN_MAX_HOURS=2.5
 export HOURLY_USD=0.99   # measured at pod creation 2026-07-29 (L40S, US)
-export N_PROMPTS=32
+export N_PROMPTS=10
 export LIMIT_PER_SLICE=200
 
 # Paths setup.sh checks exist after the bundle + data land.

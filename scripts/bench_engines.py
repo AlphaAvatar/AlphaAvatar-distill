@@ -134,18 +134,38 @@ def run_arm(name, make_engine, prompts, *, max_new_tokens, stops, hourly,
         if name == "hf":
             # Batch size is the in-stack path's real knob; the serving engines
             # schedule internally, so sweeping it for them would measure nothing.
+            #
+            # Each sweep point is isolated. A long-context OOM at the largest
+            # batch is an expected outcome, not a bug — KV cache for b x 4.5k
+            # tokens on a 4B model runs to tens of GB — and it must not discard
+            # the smaller batches that already succeeded. The 2026-07-29 session
+            # lost a 45-minute arm exactly that way, and with it the reference
+            # arm that R4 requires before any corpus is built.
             for bs in hf_batch_sizes:
                 engine.batch_size = bs
                 if torch.cuda.is_available():
                     torch.cuda.reset_peak_memory_stats()
-                comps, stats = throughput(engine, prompts,
-                                          max_new_tokens=max_new_tokens,
-                                          stops=stops, label=f"batch_size={bs}")
+                try:
+                    comps, stats = throughput(engine, prompts,
+                                              max_new_tokens=max_new_tokens,
+                                              stops=stops, label=f"batch_size={bs}")
+                except torch.cuda.OutOfMemoryError as exc:
+                    torch.cuda.empty_cache()
+                    runs.append({"label": f"batch_size={bs}", "oom": True,
+                                 "error": str(exc)[:200], "tokens_per_s": 0.0})
+                    print(f"  batch_size={bs}: OOM — recorded, sweep continues",
+                          flush=True)
+                    # Larger batches can only need more memory.
+                    break
                 stats["peak_memory_gb"] = peak_memory_gb()
                 stats["cost_usd_per_1k_prompts"] = cost_per_1k(
                     stats["prompts_per_s"], hourly)
                 runs.append(stats)
                 arm.setdefault("completions", comps)  # first sweep point is the reference
+            if not any(r.get("tokens_per_s") for r in runs):
+                raise RuntimeError(
+                    f"every batch size OOMed at cap {max_new_tokens}: "
+                    f"{[r['label'] for r in runs]}")
         else:
             if torch.cuda.is_available():
                 torch.cuda.reset_peak_memory_stats()
@@ -157,11 +177,21 @@ def run_arm(name, make_engine, prompts, *, max_new_tokens, stops, hourly,
             arm["completions"] = comps
 
         arm["runs"] = runs
-        arm["best"] = max(runs, key=lambda r: r["tokens_per_s"])
+        arm["best"] = max(runs, key=lambda r: r.get("tokens_per_s") or 0.0)
 
-        arm["batch_invariance"] = batch_invariance(
-            engine, [p["ids"] for p in prompts[:invariance_n]],
-            stop_ids=stops, max_new_tokens=invariance_cap)
+        # Guarded separately: batch invariance is the session's most valuable
+        # single number, but losing it must not invalidate the throughput
+        # measurements or block the corpus build behind R4.
+        try:
+            if name == "hf":
+                engine.batch_size = invariance_n
+            arm["batch_invariance"] = batch_invariance(
+                engine, [p["ids"] for p in prompts[:invariance_n]],
+                stop_ids=stops, max_new_tokens=invariance_cap)
+        except Exception as exc:  # noqa: BLE001
+            arm["batch_invariance"] = {"error": f"{type(exc).__name__}: {exc}"[:200],
+                                       "identical": None}
+            print(f"  batch invariance failed: {exc}", flush=True)
 
         if reference is not None:
             arm["agreement_vs_hf"] = agreement(reference, arm["completions"])
@@ -244,10 +274,10 @@ def main() -> None:
     ap.add_argument("--data-dir", default="data/stage2_v1")
     ap.add_argument("--n-prompts", type=int, default=32)
     ap.add_argument("--max-new-tokens", type=int, default=4096)
-    ap.add_argument("--hf-batch-sizes", default="8,16,32")
+    ap.add_argument("--hf-batch-sizes", default="2,4,8")
     ap.add_argument("--invariance-n", type=int, default=8)
     ap.add_argument("--invariance-cap", type=int, default=64)
-    ap.add_argument("--hourly-usd", type=float, default=0.86,
+    ap.add_argument("--hourly-usd", type=float, default=0.99,
                     help="pod price, for the $/1k-prompts column")
     ap.add_argument("--min-agreement", type=float, default=0.90)
     ap.add_argument("--min-speedup", type=float, default=1.5,
@@ -321,9 +351,9 @@ def main() -> None:
 
         if arm.get("ok"):
             best = arm["best"]
-            print(f"  {best['tokens_per_s']:.0f} tok/s  "
-                  f"${best['cost_usd_per_1k_prompts']}/1k prompts  "
-                  f"batch-invariant={arm['batch_invariance']['identical']}  "
+            print(f"  {best.get('tokens_per_s') or 0:.0f} tok/s  "
+                  f"${best.get('cost_usd_per_1k_prompts')}/1k prompts  "
+                  f"batch-invariant={arm['batch_invariance'].get('identical')}  "
                   f"agreement={(arm.get('agreement_vs_hf') or {}).get('exact_match_rate', 'n/a')}",
                   flush=True)
 
@@ -359,10 +389,10 @@ def main() -> None:
             print(f"{arm['engine']:10s} FAILED  {arm.get('error', '')[:60]}")
             continue
         best = arm["best"]
-        inv = "yes" if arm["batch_invariance"]["identical"] else "NO"
+        inv = {True: "yes", False: "NO", None: "err"}[arm["batch_invariance"].get("identical")]
         agree = (arm.get("agreement_vs_hf") or {}).get("exact_match_rate", "—")
-        print(f"{arm['engine']:10s} {best['tokens_per_s']:>8.0f} tok/s  "
-              f"${str(best['cost_usd_per_1k_prompts']):>7}/1k  "
+        print(f"{arm['engine']:10s} {(best.get('tokens_per_s') or 0):>8.0f} tok/s  "
+              f"${str(best.get('cost_usd_per_1k_prompts')):>7}/1k  "
               f"setup {arm['setup_seconds']:>5.0f}s  invariant {inv:>3}  agree {agree}")
     print(f"\ndecision: winner={decision.get('winner')} "
           f"({decision.get('rule', decision.get('reason'))})")

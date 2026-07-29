@@ -101,11 +101,22 @@ if [ -z "$WINNER" ]; then
   log "no winner selected (R4) — skipping generation, benchmark still uploads"
   mark "GEN_SKIPPED"
 else
-  log "generation starting on engine=$WINNER, budget ${GEN_MAX_HOURS}h"
+  # Take the batch size from the sweep rather than a guess. At cap 4096 the KV
+  # cache for this teacher is tens of GB, and the 2026-07-29 session OOMed at
+  # batch 8 — so the largest size the benchmark actually completed is the only
+  # one known to fit. Falls back to 2 if the label cannot be parsed.
+  GEN_BS=$(uv run python -c "
+import json
+runs = json.load(open('$REPO/$OUT_BENCH/report.json'))['arms'][0].get('runs', [])
+ok = [r for r in runs if not r.get('oom') and r.get('tokens_per_s')]
+print(max((int(r['label'].split('=')[1]) for r in ok if '=' in r['label']), default=2))
+" 2>/dev/null || echo 2)
+  log "generation starting on engine=$WINNER, batch_size=$GEN_BS, budget ${GEN_MAX_HOURS}h"
   uv run python scripts/generate_teacher_answers.py \
     --engine-from "$OUT_BENCH/decision.json" \
     --limit-per-slice "$LIMIT_PER_SLICE" \
     --n 4 \
+    --batch-size "$GEN_BS" \
     --max-new-tokens 4096 \
     --max-hours "$GEN_MAX_HOURS" \
     --out "$OUT_GEN" 2>&1 | tee -a "$MARKERS/generate.log"
