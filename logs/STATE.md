@@ -435,9 +435,21 @@ tok/s and flat in batch size, which prices a bulk corpus at ~$40/1k prompts —
 too expensive to scale. A subprocess/HTTP-server engine with its own torch build
 is the only known route around both that and the dependency conflict.
 
-Scope it small: one new `Engine` subclass, the same 10-prompt job shape, and the
-cross-stack **agreement** measurement that H2 pre-registered and this session
-could not run. Until that number exists, no bulk corpus should be sized.
+**Pre-registered and ready to run, awaiting approval on spend:**
+[`proposals/2026-07-30_isolated_engine_and_cap.md`](proposals/2026-07-30_isolated_engine_and_cap.md)
+— 1x L40S, ceiling **2.5 h ≈ $2.50**, no corpus built (sizing a bulk build is
+the *output* of this test, not an activity to run beside it). It bundles the
+openmath cap measurement so that question does not justify its own pod.
+
+The code is already written and CPU-verified: `VLLMServerEngine` in
+`src/aadistill/engines.py` drives a vLLM OpenAI-compatible server over HTTP,
+sends **token ids** rather than text, requires `return_token_ids`, and orders
+choices by the server's `index` rather than arrival — the OpenAI schema carries
+an index because order is not contractual, and mispairing completions with
+prompts is silently wrong. It adds **no dependency** (`urllib`, stdlib).
+Rules: adopt only at **>=3x** in-stack throughput (stricter than the previous
+1.5x, because a process boundary is real integration surface) **and** >=0.90
+greedy agreement with the in-stack reference.
 
 **Both slice questions are now closed on the CPU side** (decisions 2026-07-29):
 `refusal_uncertainty` is dropped from teacher generation, `openmath` keeps its

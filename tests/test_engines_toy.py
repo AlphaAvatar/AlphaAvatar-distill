@@ -22,7 +22,7 @@ import torch
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
 
 from aadistill.engines import (
-    Engine, HFEngine, SGLangEngine, _finalize, _strip_prefix, agreement,
+    Engine, HFEngine, SGLangEngine, VLLMServerEngine, _finalize, _strip_prefix, agreement,
     batch_invariance, timed,
 )
 
@@ -238,3 +238,85 @@ def test_timed_returns_result_and_a_duration():
     value, seconds = timed(lambda: 21 * 2)
     assert value == 42
     assert seconds >= 0.0
+
+
+# --- the HTTP adapter, against a stub server -------------------------------
+
+
+def _server_stub(response):
+    """A VLLMServerEngine whose `_post` is replaced, so the contract is tested
+    without a GPU, a vLLM install, or a socket."""
+    engine = object.__new__(VLLMServerEngine)
+    engine.base_url, engine.model, engine.timeout = "http://x", "m", 1.0
+    engine.sent = {}
+
+    def _post(path, payload):
+        engine.sent = payload
+        return response
+    engine._post = _post
+    return engine
+
+
+def _sraw(engine, prompts, **kw):
+    params = dict(max_new_tokens=8, stop_ids={EOS}, greedy=True,
+                  temperature=1.0, top_p=1.0, top_k=0, seed=None)
+    params.update(kw)
+    return engine._raw_generate(prompts, **params)
+
+
+def test_server_engine_sends_token_ids_not_text():
+    """Text in the request would reintroduce the retokenization drift the whole
+    token-in/token-out contract exists to remove."""
+    engine = _server_stub({"choices": [{"index": 0, "token_ids": [5, 6],
+                                        "finish_reason": "stop"}]})
+    _sraw(engine, [[1, 2, 3]])
+    assert engine.sent["prompt"] == [[1, 2, 3]]
+    assert engine.sent["return_token_ids"] is True
+    assert engine.sent["stop_token_ids"] == [EOS]
+
+
+def test_server_engine_orders_by_index_not_arrival():
+    """The OpenAI schema carries an index because order is not contractual.
+    Pairing completions with the wrong prompts is silently wrong."""
+    engine = _server_stub({"choices": [
+        {"index": 2, "token_ids": [30], "finish_reason": "length"},
+        {"index": 0, "token_ids": [10], "finish_reason": "length"},
+        {"index": 1, "token_ids": [20], "finish_reason": "length"},
+    ]})
+    rows = _sraw(engine, [[1], [2], [3]])
+    assert [ids for ids, _ in rows] == [[10], [20], [30]]
+
+
+def test_server_engine_rejects_a_response_without_token_ids():
+    engine = _server_stub({"choices": [{"index": 0, "text": "hello"}]})
+    with pytest.raises(RuntimeError, match="token-in/token-out"):
+        _sraw(engine, [[1]])
+
+
+def test_server_engine_rejects_a_choice_count_mismatch():
+    engine = _server_stub({"choices": [{"index": 0, "token_ids": [1]}]})
+    with pytest.raises(RuntimeError, match="choices for"):
+        _sraw(engine, [[1], [2]])
+
+
+def test_server_engine_rejects_an_out_of_range_index():
+    engine = _server_stub({"choices": [{"index": 7, "token_ids": [1]}]})
+    with pytest.raises(RuntimeError, match="out of range"):
+        _sraw(engine, [[1]])
+
+
+def test_server_engine_greedy_ignores_sampling_params():
+    engine = _server_stub({"choices": [{"index": 0, "token_ids": [1]}]})
+    _sraw(engine, [[1]], greedy=True, temperature=0.7, top_p=0.9, top_k=20, seed=5)
+    assert engine.sent["temperature"] == 0.0
+    assert engine.sent["top_p"] == 1.0
+    assert engine.sent["top_k"] == -1
+    assert "seed" not in engine.sent
+
+
+def test_server_engine_passes_sampling_params_when_sampling():
+    engine = _server_stub({"choices": [{"index": 0, "token_ids": [1]}]})
+    _sraw(engine, [[1]], greedy=False, temperature=1.0, top_p=1.0, top_k=0, seed=7)
+    assert engine.sent["temperature"] == 1.0
+    assert engine.sent["top_k"] == -1  # 0 means disabled, which vLLM spells -1
+    assert engine.sent["seed"] == 7

@@ -347,6 +347,97 @@ class SGLangEngine(Engine):
             pass
 
 
+class VLLMServerEngine(Engine):
+    """Talks to a vLLM OpenAI-compatible server over HTTP.
+
+    Why this exists rather than `VLLMEngine`
+    ----------------------------------------
+    The in-process adapter cannot be used with this project's pinned stack: on
+    2026-07-29 vLLM 0.26.0 installed but would not import, because its compiled
+    extension wants `libcudart.so.13` while the trainer runs on cu128, and
+    SGLang imported only after downgrading transformers by a major version. An
+    engine that must own its own torch build cannot share a process with the
+    trainer — so it gets its own process, its own venv, and a socket.
+
+    That is not a workaround, it is how these engines are actually deployed. The
+    cost is a process boundary and a serialization hop; the benefit is that the
+    engine's dependency tree stops being the trainer's problem entirely, which
+    is the "impact on the overall code" the benchmark exists to weigh (P1).
+
+    Token-in / token-out over HTTP
+    ------------------------------
+    `/v1/completions` accepts `prompt` as token ids, and `return_token_ids`
+    makes it return them, which is the property this corpus build needs — vLLM
+    added it precisely because re-encoding text reintroduces retokenization
+    drift in agent RL. If a server cannot do it, this adapter fails loudly
+    rather than silently round-tripping through text.
+
+    Uses `urllib` from the standard library on purpose: an HTTP client is not
+    worth a new dependency (P1), and adding one would need approval (P12).
+    """
+
+    name = "vllm_server"
+
+    def __init__(self, base_url: str, model: str, *, timeout: float = 3600.0):
+        self.base_url = base_url.rstrip("/")
+        self.model = model
+        self.timeout = timeout
+
+    def _post(self, path: str, payload: dict) -> dict:
+        import json
+        import urllib.request
+
+        request = urllib.request.Request(
+            f"{self.base_url}{path}",
+            data=json.dumps(payload).encode(),
+            headers={"Content-Type": "application/json"},
+        )
+        with urllib.request.urlopen(request, timeout=self.timeout) as response:
+            return json.loads(response.read())
+
+    def _raw_generate(self, prompts, *, max_new_tokens, stop_ids, greedy,
+                      temperature, top_p, top_k, seed):
+        payload = {
+            "model": self.model,
+            "prompt": [list(p) for p in prompts],  # token ids, not text
+            "max_tokens": max_new_tokens,
+            "temperature": 0.0 if greedy else temperature,
+            "top_p": 1.0 if greedy else top_p,
+            "top_k": -1 if (greedy or not top_k) else top_k,
+            "stop_token_ids": sorted(stop_ids),
+            "return_token_ids": True,
+        }
+        if seed is not None and not greedy:
+            payload["seed"] = seed
+
+        choices = self._post("/v1/completions", payload).get("choices", [])
+        if len(choices) != len(prompts):
+            raise RuntimeError(
+                f"{self.name}: {len(choices)} choices for {len(prompts)} prompts")
+
+        # Order by the server's `index`, never by arrival. The OpenAI schema
+        # carries an index precisely because the order is not contractual, and a
+        # corpus that pairs completions with the wrong prompts is silently wrong
+        # in a way no downstream check would catch.
+        rows: list[tuple[list[int], str] | None] = [None] * len(prompts)
+        for position, choice in enumerate(choices):
+            index = choice.get("index", position)
+            ids = choice.get("token_ids")
+            if ids is None:
+                raise RuntimeError(
+                    f"{self.name}: response has no token_ids — this server "
+                    "cannot do token-in/token-out, which the corpus build "
+                    "requires (start it with a build supporting "
+                    "`return_token_ids`)")
+            if not 0 <= index < len(prompts):
+                raise RuntimeError(f"{self.name}: choice index {index} out of range")
+            rows[index] = (list(ids), str(choice.get("finish_reason") or "length"))
+        missing = [i for i, r in enumerate(rows) if r is None]
+        if missing:
+            raise RuntimeError(f"{self.name}: no choice returned for prompts {missing}")
+        return rows  # type: ignore[return-value]
+
+
 def agreement(a: list[dict], b: list[dict]) -> dict:
     """Token-level agreement between two engines' completions on the same prompts.
 
