@@ -457,7 +457,55 @@ the public target — all three are P3 violations. They are inert while refusal 
 evaluation-only, but **anyone adding a slice to teacher generation inherits the
 600-word answer ceiling and must fix it first.**
 
-## Next action: buy the isolated-venv engine test
+## Latest session: isolated-venv engine + openmath cap (2026-07-30, $1.85)
+
+[Log](experiments/2026-07-30_isolated_engine_and_cap.md). Pods deleted, nothing
+billing. No corpus built, no refusal data generated, no alignment slice added.
+
+**1. An isolated-venv vLLM server is 5.3× faster and agrees with the trainer on
+nothing.**
+
+| engine | tok/s | $/1k prompts | batch-invariant | agreement vs in-stack |
+|---|---:|---:|---:|---:|
+| `hf` in-stack | 40.4 | $12.33 | 7/8 identical | — (reference) |
+| `vllm_server` | **213.9** | **$2.27** | 4/8 identical | **0/8 = 0.000** |
+
+R2 (≥3×) fires at 5.29×; **R1 (≥0.90 agreement) fails at 0.000**, so
+`decision.json` records `winner: hf`. Divergence is not immediate — median first
+divergence is token **260** — the stacks track each other for a few hundred
+tokens then split. vLLM is also *less* batch-invariant than in-stack.
+
+**Adopted as a stage-scoped split** (decision 2026-07-30), which is what the
+pre-registration prescribed for this exact outcome: **Stage 3 offline corpus →
+vLLM server** (correctness is verified per candidate, so the trainer's token
+identity is not required); **Stage 4/5 rollouts → in-stack only** (policy
+identity is the whole point there). Engine is recorded per corpus manifest.
+
+**2. The 2026-07-29 "vLLM is incompatible" conclusion was version-specific.**
+The real wall is the **host driver**: latest vLLM needs CUDA 13, this box runs
+570.124.06 (CUDA 12.8), and no venv fixes that. vLLM **0.11.0** (torch
+2.8.0+cu128) does run — with `transformers==4.57.1` pinned *inside its own venv*
+and `/opt/vllm-venv/bin` on PATH for `ninja`. Bounded, documented, buys 5.4×.
+
+**3. OpenMath cap stays at 4,096 — R3 does not fire.** Closure improved 0.300 →
+0.850 (R3a fires; true median trace is **6,487** tokens, so the cap was really
+binding), but **accuracy among closing candidates collapsed 0.750 → 0.294**
+(R3b fails). The candidates needing >4,096 tokens are the ones the teacher gets
+**wrong**: raising the cap converts `truncated_at_cap` into `answer_mismatch`
+(3 → 10), and cost per accepted target **doubles** (14,931 → 29,707 tokens).
+Long reasoning here is floundering, not care — the pre-registered risk, measured.
+
+## Next action: re-price and scope the bulk corpus
+
+At **$2.27/1k prompts** a bulk build is roughly **$9 per 1,000 prompts** at n=4
+on the in-scope slices, against ~$49 in-stack. That changes the corpus from
+unaffordable to routine, and it needs a scoped proposal — size, slices, and the
+alignment-tax check on any group that is not primary-transfer — before spend.
+
+Then: add a `vllm_server` path to the corpus builder with the Stage 4/5 ban
+enforced in code, not just in a record.
+
+## Superseded — the isolated-venv engine test (completed 2026-07-30)
 
 The 2026-07-29 session closed three prerequisites (4B batch invariance, real
 batched throughput, the per-slice accept/divergence profile) and opened one
