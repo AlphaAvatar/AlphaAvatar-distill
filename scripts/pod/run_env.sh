@@ -30,7 +30,7 @@ HF_PREFIX_BASE=engine_bench
 # enforced in-process at a batch boundary, so a stop still leaves complete,
 # hashed artifacts and a manifest marked `complete: false`.
 export GEN_MAX_HOURS=3.0
-export HOURLY_USD=0.86
+export HOURLY_USD=0.99   # measured at pod creation 2026-07-29 (L40S, US)
 export N_PROMPTS=32
 export LIMIT_PER_SLICE=200
 
