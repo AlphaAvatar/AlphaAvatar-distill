@@ -76,9 +76,24 @@ prompts, mean ~374 prompt tokens, cap 4096, greedy, `$/1k prompts` at $0.99/h.
 Measure throughput, batch invariance, and **agreement against the in-stack
 completions already recorded** in `engine_bench_20260729/bench/report.json`.
 
-**Cap arm.** The same 10 openmath prompts, n=4, at caps **4096 (control,
-already measured) and 16384**. Report, per cap: fraction closing their reasoning,
-accuracy among those that close, and think-token distribution.
+**Cap arm.** The same 10 openmath prompts at caps **4096 (control, already
+measured in the pilot) and 16384**. Report, per cap: fraction closing their
+reasoning, accuracy among those that close, and think-token distribution.
+
+> **Scope corrected 2026-07-30, before the run.** This arm was pre-registered at
+> `n=4` inside a 0.7 h budget. That is arithmetically impossible and the error is
+> mine: at the measured ~44 tok/s in-stack, 10 prompts × 4 candidates × up to
+> 16,384 tokens is **~4 hours**, not 0.7. Corrected to **`n=2`, batch 2,
+> `--max-hours 1.0`**, which fits the ceiling and still answers the question —
+> completion rate and accuracy are per-candidate rates, so halving `n` widens
+> their error bars without changing what is being measured. Batch 2 is also a
+> memory requirement, not a preference: KV cache for 4 sequences × 16,384 tokens
+> on this teacher is ~48 GB, which does not fit a 48 GB card.
+>
+> The arm runs **in-stack**, not on the vLLM server, so it is comparable with the
+> 4096 control from the pilot. Running it on a different engine would confound a
+> cap effect with an engine effect, and this session has already measured that
+> engines do not agree token-for-token.
 
 Raising a cap is the opposite of a terseness constraint and is consistent with
 P10: it lets the teacher reason to its natural length instead of truncating a

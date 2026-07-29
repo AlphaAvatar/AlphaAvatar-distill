@@ -52,7 +52,8 @@ sys.path.insert(0, str(REPO_ROOT / "src"))
 sys.path.insert(0, str(REPO_ROOT / "scripts"))
 
 from aadistill.engines import (
-    HFEngine, SGLangEngine, VLLMEngine, agreement, batch_invariance, timed,
+    HFEngine, SGLangEngine, VLLMEngine, VLLMServerEngine, agreement,
+    batch_invariance, timed,
 )
 from aadistill.env import code_state, hardware_report
 from aadistill.teacher import load_causal_lm
@@ -292,6 +293,10 @@ def main() -> None:
     ap.add_argument("--min-speedup", type=float, default=1.5,
                     help="a second stack must beat in-stack by this much to be worth owning")
     ap.add_argument("--sglang-deterministic", action="store_true")
+    ap.add_argument("--vllm-server-url", default="http://127.0.0.1:8000",
+                    help="base URL of an already-running vLLM OpenAI server; "
+                         "the `vllm_server` arm talks to it over HTTP so the "
+                         "engine can own its torch build in a separate venv")
     ap.add_argument("--dtype", default="bfloat16")
     ap.add_argument("--seed", type=int, default=20260729)
     ap.add_argument("--out", required=True)
@@ -334,6 +339,10 @@ def main() -> None:
                                    max_model_len=None),
         "sglang": lambda: SGLangEngine(model_path, dtype=args.dtype, revision=revision,
                                        deterministic=args.sglang_deterministic),
+        # Constructed, not started: the server runs in its own venv and process,
+        # which is the entire point of this arm (2026-07-29 measured that vLLM
+        # cannot share a process with this project's pinned stack).
+        "vllm_server": lambda: VLLMServerEngine(args.vllm_server_url, model_path),
     }
     unknown = set(names) - set(builders)
     if unknown:
@@ -345,7 +354,7 @@ def main() -> None:
         # The in-stack model occupies GPU memory that a serving engine also
         # wants. Release it before building one, or vLLM/SGLang will fail to
         # allocate their KV cache and the arm will look unsupported.
-        if name != "hf" and reference is not None:
+        if name not in ("hf", "vllm_server") and reference is not None:
             model.to("cpu")
             torch.cuda.empty_cache() if torch.cuda.is_available() else None
 

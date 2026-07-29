@@ -9,8 +9,8 @@
 # than orchestrate.sh. setup.sh is still the entry point and is unchanged: it
 # only reads HF_REPO, the transfer artifacts, REF_CKPTS and the eval paths.
 
-SESSION=engine_bench
-SESSION_DATE=20260729
+SESSION=isolated_engine
+SESSION_DATE=20260730
 
 # No training arms this session.
 ARMS=()
@@ -22,9 +22,9 @@ REF_CKPTS=()
 
 # Transfer artifacts on the private HF relay (staged from the dev box).
 HF_REPO=AlphaAvatar/aadistill-artifacts
-TRANSFER_BUNDLE=transfer/repo_20260729.bundle
+TRANSFER_BUNDLE=transfer/repo_20260730.bundle
 TRANSFER_DATA=transfer/stage2_data_20260726.tar.zst
-HF_PREFIX_BASE=engine_bench
+HF_PREFIX_BASE=isolated_engine
 
 # Budget knobs read by bench_and_generate.sh (P6). The generation cap is
 # enforced in-process at a batch boundary, so a stop still leaves complete,
