@@ -523,7 +523,61 @@ binding), but **accuracy among closing candidates collapsed 0.750 → 0.294**
 (3 → 10), and cost per accepted target **doubles** (14,931 → 29,707 tokens).
 Long reasoning here is floundering, not care — the pre-registered risk, measured.
 
-## Next action: build the log-prob path, then compare rollout engines
+## Latest session: current-engine benchmark (2026-07-31, $0.93 of a $3.00 ceiling)
+
+[Log](experiments/2026-07-31_current_engine_benchmark.md). All pods deleted,
+nothing billing. No corpus, no refusal data, no corrected-training pilot.
+
+**Both current engines run on an L40S** — the GPU type the previous session
+called incompatible. `--min-cuda-version 13.0` was the entire difference.
+
+| arm | driver | CUDA | engine | torch | transformers |
+|---|---|---|---|---|---|
+| A | 580.126.09 | 13.0 | **vLLM 0.26.0** | 2.11.0+cu130 | 5.14.1 |
+| B | 580.159.03 | 13.0 | **SGLang 0.5.12** | 2.11.0+cu130 | 5.6.0 |
+
+**Throughput is tied.** 247.5 vs 241.0 tok/s, and on the fairer statistic —
+wall-clock for an identical 8-prompt workload — **57.03 s vs 56.87 s, 0.3%
+apart**. Both are **~5.5×** the retired in-stack HF path (~44 tok/s) and, unlike
+it, both scale with concurrency (vLLM **2.07×** from conc 2→8, SGLang 1.68×).
+Cost ~**$1.95/1k prompts** at n=1 on both.
+
+**Token/log-prob transport: both pass** — token-in/token-out, per-token
+log-probs, aligned 1:1, **0 masked positions**. Criteria 1–3 satisfied by both.
+
+**The result that settles the retired gate.** Importance ratios against the
+trainer policy: **median 1.000, max 1.083, off-policy rate 0.000** on all three
+configurations — not one token in 864 outside the [0.5, 2.0] band, KL ~1e-4.
+The 2026-07-30 session measured **0/8 exact token agreement** and called the
+engine unusable for on-policy work. Both are true at once: greedy decoding takes
+an argmax, so a one-in-a-thousand logit difference flips a near-tied token while
+the *distributions* stay nearly identical. **Token divergence is not policy
+divergence.** Gating on token identity would have traded 5.5× throughput for a
+KL of 0.0001. (Upper bound: trainer scored fp32/CPU vs bf16/GPU rollouts, so part
+of the residual is dtype.)
+
+**Deterministic inference costs 55%**, not the ~34% documented (241.0 → 108.6
+tok/s). Per-run option, never a default.
+
+**Neither engine is adopted or eliminated.** Criterion 6 — stable corrected
+training — is the remaining discriminator and was out of scope. Provisional lean
+**vLLM 0.26.0** on concurrency scaling; SGLang retained for workloads that
+justify the determinism tax.
+
+**Owed:** vLLM's cap-8192 cells were never measured (server launched with
+`--max-model-len 8192`, no room for a ~410-token prompt; two restarts failed).
+SGLang's cap-8192 numbers **stand alone and are not a comparison**.
+
+## Next actions
+
+1. **Corrected-training pilot (criterion 6)** — the actual discriminator, and
+   likely uneventful given off-policy rate 0.000. Separate request.
+2. **Re-run long-context on both arms in one session** — the comparison this
+   session owes.
+3. Re-price the bulk corpus at **~$1.95/1k**; the earlier $2.27 came from the
+   obsolete 0.11.0 build and is retired.
+
+## Superseded — build the log-prob path, then compare rollout engines
 
 **No bulk corpus is built yet** (maintainer, 2026-07-30): the $2.27/1k figure is
 real, but the engine is unchosen and a corpus is not worth building twice.
