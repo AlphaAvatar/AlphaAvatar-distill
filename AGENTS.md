@@ -1049,6 +1049,12 @@ Process:
 
 No engine becomes the standing choice on a single measurement. A candidate is compared against at least one other serious candidate under a fixed budget before adoption, and the comparison is recorded as a decision record.
 
+**Every engine is benchmarked in a compatible, engine-native environment — its own current official image, on host hardware and drivers that image supports.** Do not force an engine onto the training image, and do not downgrade an engine to fit the training environment: a version pinned backwards for compatibility is not a measurement of that engine, because scheduler, kernels, CUDA-graph behaviour, throughput, log-prob support and operational characteristics all move between releases. Select the host, GPU and image before launch from the engine's requirements and cost, rather than inheriting whatever the previous session used. An engine that cannot run because the *infrastructure* was chosen wrongly has not lost the comparison and must not be recorded as if it had; fix the infrastructure or substitute another candidate.
+
+Because engines ship their own images, expect one pod per engine rather than one pod per session, and budget accordingly.
+
+Every arm pins and reports: engine name and exact version or commit; official image digest; CUDA runtime and host driver version; torch and transformers versions; GPU architecture; dtype and quantization; attention and sampling backend; and the observed rollout token/log-prob API behaviour. A benchmark that cannot state these is not reproducible and does not support an adoption decision (P4).
+
 Online data may include:
 
 * student answers and teacher corrections;

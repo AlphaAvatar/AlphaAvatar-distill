@@ -550,10 +550,23 @@ real, but the engine is unchosen and a corpus is not worth building twice.
    unexecuted** (it requests `logprobs: 0` and refuses a response without
    `token_logprobs`), and SGLang raises `NotImplementedError` rather than
    pretending.
-2. **Compare rollout engines** per
-   [`proposals/2026-07-30_rollout_engine_comparison.md`](proposals/2026-07-30_rollout_engine_comparison.md):
-   vLLM 0.11.0 vs SGLang deterministic mode, on a driver that supports both. If
-   SGLang cannot run, substitute a third candidate rather than adopt on one.
+2. **Compare *current* rollout engines** per
+   [`proposals/2026-07-31_current_engine_benchmark.md`](proposals/2026-07-31_current_engine_benchmark.md)
+   — **awaiting approval, no pod created.** `vllm/vllm-openai:v0.26.0` vs
+   `lmsysorg/sglang:v0.5.12`, each in its **own official image** on a
+   CUDA-13 host, **one pod per engine**, ≤3.0 h ≈ **$3.00**.
+
+   **vLLM 0.11.0's numbers do not carry forward.** That build was reached by
+   pinning backwards until the engine fit the training image; it is a
+   measurement of an obsolete compatibility build, not of vLLM. The 0.26.0
+   failure was **environment selection, not an engine result** — the host ran
+   driver 570.124.06 / CUDA 12.8 against an engine targeting CUDA 13. The fix is
+   one flag that was never passed: **`runpodctl pod create --min-cuda-version
+   13.0`** (RunPod's `allowedCudaVersions` includes 13.0). L40S hosts with driver
+   580.95.05 / CUDA 13.0 exist, so the GPU was never the problem.
+
+   An engine that cannot be scheduled has **not lost**; a third candidate
+   substitutes rather than SGLang being recorded as a loss.
 3. **Run the correction experiment**, with its pre-registered stability bound:
    corrected training stays inside a same-seed in-stack pilot's band, the
    clipped/rejected token fraction stays **below 5%**, and the corrected run is

@@ -1,5 +1,19 @@
 # 2026-07-30 — Rollout engine comparison + rollout-correction experiment (pre-registration)
 
+> **RETIRED UNRUN 2026-07-30 (maintainer).** This plan was built around **vLLM
+> 0.11.0**, a build reached by pinning backwards until the engine fit this
+> project's training image. That is not a measurement of vLLM: the gap to the
+> current stable 0.26.0 spans scheduler, kernels, CUDA-graph behaviour,
+> throughput, log-prob support and operational characteristics. The 0.26.0
+> failure it rests on was **environment selection, not an engine result** — the
+> host ran driver 570.124.06 / CUDA 12.8 against an engine targeting CUDA 13,
+> and `runpodctl --min-cuda-version` was never passed.
+>
+> Superseded by
+> [`2026-07-31_current_engine_benchmark.md`](2026-07-31_current_engine_benchmark.md).
+> The **correction experiment** in §5 survives intact and is carried forward;
+> only the engine/version/environment framing is retired.
+
 **Status:** pre-registered, **not run, no spend committed.** Supersedes the
 engine-selection half of
 [`2026-07-30_isolated_engine_and_cap.md`](2026-07-30_isolated_engine_and_cap.md);
