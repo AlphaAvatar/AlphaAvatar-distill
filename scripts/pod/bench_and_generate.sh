@@ -16,7 +16,10 @@
 set -uo pipefail
 
 WORK=/workspace
-REPO=$WORK/AlphaAvatar-distill
+REPO=$WORK/aad                      # where setup.sh clones the bundle
+export UV_PROJECT_ENVIRONMENT=/root/venv
+export HF_HOME=$WORK/hf
+export PATH="$HOME/.local/bin:$PATH"
 OUT_BENCH=artifacts/bench/engines_v0
 OUT_GEN=artifacts/stage2_v2/pilot
 MARKERS=$WORK/markers
@@ -37,18 +40,18 @@ cd "$REPO" || { mark "FAILED:no_repo"; exit 1; }
 # Each is independent: SGLang failing must not cost us the vLLM arm.
 ENGINES=hf
 log "installing vllm"
-if pip install --quiet vllm 2>&1 | tail -5; then
+if uv pip install --quiet vllm 2>&1 | tail -5; then
   ENGINES=$ENGINES,vllm
-  log "vllm ok: $(pip show vllm 2>/dev/null | awk '/^Version/{print $2}')"
+  log "vllm ok: $(uv pip show vllm 2>/dev/null | awk '/^Version/{print $2}')"
   mark "VLLM_INSTALLED"
 else
   log "vllm install FAILED — arm skipped (recorded as integration cost)"
 fi
 
 log "installing sglang"
-if pip install --quiet "sglang[all]" 2>&1 | tail -5; then
+if uv pip install --quiet "sglang[all]" 2>&1 | tail -5; then
   ENGINES=$ENGINES,sglang
-  log "sglang ok: $(pip show sglang 2>/dev/null | awk '/^Version/{print $2}')"
+  log "sglang ok: $(uv pip show sglang 2>/dev/null | awk '/^Version/{print $2}')"
   mark "SGLANG_INSTALLED"
 else
   log "sglang install FAILED — arm skipped (recorded as integration cost)"
@@ -57,7 +60,7 @@ log "engines to benchmark: $ENGINES"
 
 # --- benchmark -------------------------------------------------------------
 log "benchmark starting"
-python scripts/bench_engines.py \
+uv run python scripts/bench_engines.py \
   --engines "$ENGINES" \
   --n-prompts "$N_PROMPTS" \
   --max-new-tokens 4096 \
@@ -76,13 +79,13 @@ log "decision: $(cat "$REPO/$OUT_BENCH/decision.json" | tr -d '\n')"
 # Rule R4: no reference arm, no decision, no corpus. `--engine-from` exits
 # non-zero on a null winner, so this is belt and braces rather than the only
 # guard.
-WINNER=$(python -c "import json;print(json.load(open('$REPO/$OUT_BENCH/decision.json')).get('winner') or '')")
+WINNER=$(uv run python -c "import json;print(json.load(open('$REPO/$OUT_BENCH/decision.json')).get('winner') or '')")
 if [ -z "$WINNER" ]; then
   log "no winner selected (R4) — skipping generation, benchmark still uploads"
   mark "GEN_SKIPPED"
 else
   log "generation starting on engine=$WINNER, budget ${GEN_MAX_HOURS}h"
-  python scripts/generate_teacher_answers.py \
+  uv run python scripts/generate_teacher_answers.py \
     --engine-from "$OUT_BENCH/decision.json" \
     --limit-per-slice "$LIMIT_PER_SLICE" \
     --n 4 \
@@ -106,7 +109,7 @@ log "hashed $(wc -l < "$MARKERS/hashes_out.txt") output files"
 if [ -f "$WORK/hf/token" ]; then
   HF_TOKEN=$(cat "$WORK/hf/token")
   export HF_TOKEN
-  python - "$REPO" "$OUT_BENCH" "$OUT_GEN" <<'PY' 2>&1 | tee -a "$MARKERS/upload.log"
+  uv run python - "$REPO" "$OUT_BENCH" "$OUT_GEN" <<'PY' 2>&1 | tee -a "$MARKERS/upload.log"
 import sys, os
 from pathlib import Path
 from huggingface_hub import HfApi
