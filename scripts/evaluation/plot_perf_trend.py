@@ -239,9 +239,14 @@ def markdown_table(data: dict) -> str:
     pending = " · ".join(r["label"] for r in data["references"]
                          if r.get("score") is None)
     rows.append("")
-    rows.append(f"Behavior score is the headline metric. **Held-out NLL is now a guard rail "
-                f"({data['guard']['band']} band), not the target** — {guard}. "
-                f"Not scored on the behavior eval yet: {pending}.")
+    caption = (f"Behavior score is the headline metric. **Held-out NLL is now a guard rail "
+               f"({data['guard']['band']} band), not the target** — {guard}.")
+    # Only mention unscored references when there are some. The teacher was the
+    # last one outstanding and was scored on 2026-07-28, which left this trailing
+    # an empty list.
+    if pending:
+        caption += f" Not scored on the behavior eval yet: {pending}."
+    rows.append(caption)
     return "\n".join(rows)
 
 
