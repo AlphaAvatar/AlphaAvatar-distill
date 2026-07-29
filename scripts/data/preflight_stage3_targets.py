@@ -20,11 +20,11 @@ from __future__ import annotations
 import argparse, json, statistics, sys
 from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parent.parent
+REPO_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO_ROOT / "src"))
 
 from transformers import AutoTokenizer
-from aadistill.data import encode_sample
+from aadistill.data.dataset import encode_sample
 
 ap = argparse.ArgumentParser()
 ap.add_argument("--targets", default="artifacts/stage2_v2/pilot/targets.jsonl")

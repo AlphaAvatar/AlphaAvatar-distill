@@ -4,7 +4,7 @@
 # config, checkpoint or HF path.
 #
 # Current session: the **engine benchmark + teacher-corpus pilot**
-# (logs/proposals/2026-07-29_engine_benchmark.md). This session does no
+# (logs/proposals/rollout/2026-07-29_engine_benchmark.md). This session does no
 # training, so ARMS is empty and the driver is bench_and_generate.sh rather
 # than orchestrate.sh. setup.sh is still the entry point and is unchanged: it
 # only reads HF_REPO, the transfer artifacts, REF_CKPTS and the eval paths.

@@ -19,9 +19,9 @@ from pathlib import Path
 import pytest
 import torch
 
-sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "src"))
 
-from aadistill.engines import (
+from aadistill.rollout.engines import (
     Engine, HFEngine, SGLangEngine, SGLangServerEngine, VLLMServerEngine, _finalize,
     _strip_prefix, agreement,
     batch_invariance, timed,

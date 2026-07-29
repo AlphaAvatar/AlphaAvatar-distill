@@ -1,6 +1,6 @@
 """Benchmark one rollout engine, from inside that engine's own image.
 
-    python scripts/bench_rollout_engines.py --engine vllm_server \
+    python scripts/rollout/bench_rollout_engines.py --engine vllm_server \
         --base-url http://127.0.0.1:8000 --prompts prompts.json --out report.json
 
 Why this exists separately from `bench_engines.py`
@@ -41,9 +41,9 @@ import sys
 import time
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "src"))
 
-from aadistill.engines import SGLangServerEngine, VLLMServerEngine
+from aadistill.rollout.engines import SGLangServerEngine, VLLMServerEngine
 
 
 def _run(cmd: list[str]) -> str:

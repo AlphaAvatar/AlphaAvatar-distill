@@ -1,18 +1,18 @@
 """Stage 1: build a teacher-projected student checkpoint.
 
 Usage:
-    uv run python scripts/init_stage1.py --config configs/stage1_qwen3_0p6b_from_4b_thinking.json
+    uv run python scripts/training/init_stage1.py --config configs/stage1/qwen3_0p6b_from_4b_thinking.json
 
 Consumes the Stage 0 activation-statistics cache, initializes the student via
 global activation-PCA stream projection + sandwich init (see
-src/aadistill/sandwich.py), and writes:
+src/aadistill/init/sandwich.py), and writes:
 
     <output_dir>/checkpoint/          initialized student (+ tokenizer)
     <output_dir>/random_baseline/     same geometry, standard random init
     <output_dir>/manifest.json        recipe hash + gate-check record
 
 Gate checks run inline: parameter count, forward smoke test, save/reload
-logit equality. Evaluation is a separate script (scripts/eval_ppl.py).
+logit equality. Evaluation is a separate script (scripts/evaluation/eval_ppl.py).
 """
 
 from __future__ import annotations
@@ -26,14 +26,14 @@ from pathlib import Path
 
 import torch
 
-REPO_ROOT = Path(__file__).resolve().parent.parent
+REPO_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO_ROOT / "src"))
 
-from aadistill.env import code_state, hardware_report, set_determinism
-from aadistill.manifest import sha256_file, sha256_json, write_manifest
-from aadistill.sandwich import init_student
-from aadistill.student import build_student, build_student_config
-from aadistill.teacher import load_teacher
+from aadistill.infrastructure.env import code_state, hardware_report, set_determinism
+from aadistill.infrastructure.manifest import sha256_file, sha256_json, write_manifest
+from aadistill.init.sandwich import init_student
+from aadistill.models.student import build_student, build_student_config
+from aadistill.models.teacher import load_teacher
 
 
 def forward_smoke(model, tokenizer) -> dict:

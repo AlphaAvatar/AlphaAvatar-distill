@@ -1,8 +1,8 @@
 """Render the README performance figure from `assets/perf_trend.json`.
 
 Usage:
-    uv run python scripts/plot_perf_trend.py                 # write the SVG
-    uv run python scripts/plot_perf_trend.py --print-table   # markdown run table
+    uv run python scripts/evaluation/plot_perf_trend.py                 # write the SVG
+    uv run python scripts/evaluation/plot_perf_trend.py --print-table   # markdown run table
 
 Data in, layout out. `perf_trend.json` holds only facts — measured scores, the
 checkpoint and log behind each, parameter counts, and the run history
@@ -41,7 +41,7 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 from matplotlib.ticker import FuncFormatter, MaxNLocator, PercentFormatter
 
-REPO_ROOT = Path(__file__).resolve().parent.parent
+REPO_ROOT = Path(__file__).resolve().parents[2]
 DATA = REPO_ROOT / "assets/perf_trend.json"
 OUT = REPO_ROOT / "assets/performance_trend.svg"
 

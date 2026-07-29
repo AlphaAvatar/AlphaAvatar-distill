@@ -1,7 +1,7 @@
 """Stage 2 gate check: loader dry run over the built offline mixture.
 
 Usage:
-    uv run python scripts/dry_run_stage2.py \
+    uv run python scripts/data/dry_run_stage2.py \
         [--data-dir data/stage2] [--block-len 1024] \
         [--tokenizer Qwen/Qwen3-4B-Thinking-2507@<revision>] \
         [--out artifacts/stage2/dry_run_v0_report.json]
@@ -23,13 +23,13 @@ import time
 from datetime import datetime, timezone
 from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parent.parent
+REPO_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO_ROOT / "src"))
 
-from aadistill.data import SPLITS, encode_sample, load_split, pack_blocks
-from aadistill.env import code_state, hardware_report
-from aadistill.manifest import sha256_file
-from aadistill.teacher import tokenizer_hash
+from aadistill.data.dataset import SPLITS, encode_sample, load_split, pack_blocks
+from aadistill.infrastructure.env import code_state, hardware_report
+from aadistill.infrastructure.manifest import sha256_file
+from aadistill.models.teacher import tokenizer_hash
 
 DEFAULT_TOKENIZER = (
     "Qwen/Qwen3-4B-Thinking-2507@768f209d9ea81521153ed38c47d515654e938aea"

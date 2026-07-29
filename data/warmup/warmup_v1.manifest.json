@@ -1,7 +1,7 @@
 {
   "dataset": "warmup_v1",
-  "created_utc": "2026-07-13T09:46:58.278273+00:00",
-  "command": "scripts/build_warmup_v1.py",
+  "created_utc": "2026-07-29T16:35:39.282476+00:00",
+  "command": "scripts/data/build_warmup_v1.py --help",
   "purpose": "Stage 0 initialization warm-up statistics (not training data)",
   "doc_char_cap": 4500,
   "doc_char_min": 200,

@@ -15,9 +15,9 @@ import pytest
 import torch
 import torch.nn.functional as F
 
-sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "src"))
 
-from aadistill.train import (
+from aadistill.training.train import (
     Trainer,
     build_blocks,
     epoch_permutation,
@@ -130,8 +130,8 @@ def test_kd_forward_kl_properties():
 
 def test_select_trainable_real_stage3_patterns():
     patterns = json.loads(
-        (Path(__file__).resolve().parent.parent
-         / "configs" / "stage3_s1_ffn_norm.json").read_text()
+        (Path(__file__).resolve().parents[2]
+         / "configs" / "stage3" / "s1_ffn_norm.json").read_text()
     )["trainable_patterns"]
     model = tiny_model(0)
     report = select_trainable(model, patterns)
@@ -441,7 +441,7 @@ def test_kd_scope_all_excludes_padding_when_content_mask_given():
 
 def test_trainer_accepts_two_and_three_tuple_blocks(tmp_path):
     """Back-compat: (ids, mask) still works; (ids, mask, content) is the new form."""
-    from aadistill.train import _unpack_blocks
+    from aadistill.training.train import _unpack_blocks
 
     ids = torch.zeros(2, 4, dtype=torch.long)
     mask = torch.ones(2, 4, dtype=torch.bool)
@@ -456,7 +456,7 @@ def test_trainer_accepts_two_and_three_tuple_blocks(tmp_path):
 
 
 def test_think_span_mask_marks_open_through_close():
-    from aadistill.train import think_span_mask
+    from aadistill.training.train import think_span_mask
 
     OPEN, CLOSE = 90, 91
     ids = torch.tensor([[5, OPEN, 7, 8, CLOSE, 9, 10]])
@@ -467,7 +467,7 @@ def test_think_span_mask_marks_open_through_close():
 
 def test_think_span_mask_handles_several_packed_samples():
     """A packed block holds many samples; every span must be marked."""
-    from aadistill.train import think_span_mask
+    from aadistill.training.train import think_span_mask
 
     OPEN, CLOSE = 90, 91
     ids = torch.tensor([[OPEN, 1, CLOSE, 2, 3, OPEN, 4, CLOSE, 5]])
@@ -476,7 +476,7 @@ def test_think_span_mask_handles_several_packed_samples():
 
 
 def test_think_span_mask_without_any_span_is_all_false():
-    from aadistill.train import think_span_mask
+    from aadistill.training.train import think_span_mask
 
     ids = torch.tensor([[1, 2, 3, 4]])
     assert not think_span_mask(ids, 90, 91).any()

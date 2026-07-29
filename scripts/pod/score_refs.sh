@@ -24,7 +24,7 @@ for entry in "${REF_CKPTS[@]}"; do
   dest=$(printf '%s' "$entry" | cut -d'|' -f2)
   name=$(printf '%s' "$entry" | cut -d'|' -f4)
   [ -n "$name" ] || continue
-  uv run python scripts/eval_behavior.py --model "$dest" \
+  uv run python scripts/evaluation/eval_behavior.py --model "$dest" \
     --prompts "$BEHAVIOR_PROMPTS" --max-new-tokens "$BEHAVIOR_MAX_NEW_TOKENS" \
     --out "$OUT/${name}_behavior_v0.json" || fail "$name"
   uvx --from huggingface_hub hf upload "$HF_REPO" \

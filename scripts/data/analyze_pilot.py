@@ -1,6 +1,6 @@
 """Analyze a teacher-generation pilot to decide slice-level policy.
 
-    uv run python scripts/analyze_pilot.py --pilot artifacts/stage2_v2/pilot
+    uv run python scripts/data/analyze_pilot.py --pilot artifacts/stage2_v2/pilot
 
 The 2026-07-29 pilot produced two slice failures that look alike in the summary
 (low accept@n) but have opposite causes, and the summary cannot tell them apart:
@@ -28,11 +28,11 @@ import sys
 from collections import Counter
 from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parent.parent
+REPO_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO_ROOT / "src"))
 
-from aadistill.behavior import normalize_text
-from aadistill.verify import REFUSAL_MAX_WORDS
+from aadistill.evaluation.behavior import normalize_text
+from aadistill.data.verify import REFUSAL_MAX_WORDS
 
 # Thresholds probed for the refusal rule. The question is not "what is the
 # teacher's median length" but "is there a threshold that recovers most

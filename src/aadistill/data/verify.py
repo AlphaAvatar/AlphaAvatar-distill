@@ -29,7 +29,7 @@ from __future__ import annotations
 
 import re
 
-from .behavior import (
+from ..evaluation.behavior import (
     IM_END,
     STRAY_MARKERS,
     contains_gold,
@@ -171,7 +171,7 @@ def select(candidates: list[dict]) -> dict | None:
     decodes a greedy candidate at all, and the determinism claim did not survive
     measurement: bf16 greedy decoding is not batch-invariant, so candidate 0 was
     never reproducible across batch compositions the way the rule assumed
-    ([log](../../logs/experiments/2026-07-29_engine_adapter_and_bf16_invariance.md)).
+    ([log](../../logs/experiments/rollout/2026-07-29_engine_adapter_and_bf16_invariance.md)).
     With every candidate an equal draw, privileging index 0 would just be
     selecting on batch position.
     """

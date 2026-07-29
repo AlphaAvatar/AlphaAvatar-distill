@@ -40,8 +40,8 @@ from pathlib import Path
 import torch
 import torch.nn.functional as F
 
-from .data import best_fit_blocks, encode_sample, load_split, pack_blocks
-from .manifest import sha256_json
+from ..data.dataset import best_fit_blocks, encode_sample, load_split, pack_blocks
+from ..infrastructure.manifest import sha256_json
 
 KD_SCOPES = ("all", "assistant", "all_no_think")
 PACKINGS = ("concat", "best_fit")
@@ -214,7 +214,7 @@ def prediction_mask(
     protocol it would never produce, and at `</think>` it puts p≈0 on the very
     token CE demands — so KD there transmits a contradiction rather than
     knowledge, at 2× CE's per-position weight
-    (`logs/experiments/2026-07-28_kd_ce_protocol_conflict.md`). This scope
+    (`logs/experiments/stage3/2026-07-28_kd_ce_protocol_conflict.md`). This scope
     removes the contested positions and leaves the rest of KD untouched.
     """
     if scope == "assistant":

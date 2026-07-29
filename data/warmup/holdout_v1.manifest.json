@@ -1,7 +1,7 @@
 {
   "dataset": "holdout_v1",
-  "created_utc": "2026-07-13T17:44:48.640437+00:00",
-  "command": "scripts/build_holdout_v1.py",
+  "created_utc": "2026-07-29T16:35:48.257381+00:00",
+  "command": "scripts/data/build_holdout_v1.py --help",
   "purpose": "Held-out perplexity eval for Stage 1 gate (never in warmup_v1)",
   "source": {
     "dataset": "HuggingFaceFW/fineweb-edu",

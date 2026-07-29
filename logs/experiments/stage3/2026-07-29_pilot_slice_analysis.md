@@ -22,7 +22,7 @@
   (relay: `engine_bench_20260729/pilot/`)
 - **Command:** `uv run python scripts/analyze_pilot.py`
 - **Objective:** decide what to do about the two slices the
-  [pilot](2026-07-29_engine_benchmark_gpu.md) flagged — `refusal_uncertainty`
+  [pilot](../rollout/2026-07-29_engine_benchmark_gpu.md) flagged — `refusal_uncertainty`
   (accept@n 0.100) and `openmath` (0.300)
 
 ## 1. `refusal_uncertainty` is not failing. It is refusing to make things worse.

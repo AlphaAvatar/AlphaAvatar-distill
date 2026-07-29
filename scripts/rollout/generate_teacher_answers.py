@@ -1,6 +1,6 @@
 """Generate verified-correct teacher targets for a mixture slice (Stage 2 v2).
 
-    uv run python scripts/generate_teacher_answers.py \
+    uv run python scripts/rollout/generate_teacher_answers.py \
         --slices rag_evidence,multihop_qa,refusal_uncertainty,gsm8k,openmath \
         --limit-per-slice 200 --n 4 --out artifacts/stage2_v2/pilot
 
@@ -39,7 +39,7 @@ Determinism: candidates are seeded per batch, but batched generation is not
 bitwise reproducible, so **the corpus is the artifact** and its hash pins the
 experiment (P5). That stance is now measured rather than assumed — even *greedy*
 bf16 decoding is not batch-invariant on this project's own hardware
-(`logs/experiments/2026-07-29_engine_adapter_and_bf16_invariance.md`), which is
+(`logs/experiments/rollout/2026-07-29_engine_adapter_and_bf16_invariance.md`), which is
 part of why no candidate is generated greedily any more.
 """
 
@@ -56,16 +56,16 @@ from pathlib import Path
 
 import torch
 
-REPO_ROOT = Path(__file__).resolve().parent.parent
+REPO_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO_ROOT / "src"))
 
-from aadistill.behavior import THINK_CLOSE, split_generation
-from aadistill.data import load_jsonl
-from aadistill.engines import HFEngine, SGLangEngine, VLLMEngine
-from aadistill.env import code_state, hardware_report
-from aadistill.manifest import sha256_file
-from aadistill.teacher import load_causal_lm
-from aadistill.verify import VERIFIABLE, select, verify
+from aadistill.evaluation.behavior import THINK_CLOSE, split_generation
+from aadistill.data.dataset import load_jsonl
+from aadistill.rollout.engines import HFEngine, SGLangEngine, VLLMEngine
+from aadistill.infrastructure.env import code_state, hardware_report
+from aadistill.infrastructure.manifest import sha256_file
+from aadistill.models.teacher import load_causal_lm
+from aadistill.data.verify import VERIFIABLE, select, verify
 
 # Slice name -> (group, source). The group is also the mixture file name.
 SLICES = {
@@ -172,7 +172,7 @@ def generate_candidates(engine, tokenizer, prompt_ids: list[list[int]], *, n: in
 
     Driven through `aadistill.engines` rather than `model.generate` so the corpus
     can be built by whichever engine the benchmark selected
-    (`logs/proposals/2026-07-29_engine_benchmark.md`) without this script knowing
+    (`logs/proposals/rollout/2026-07-29_engine_benchmark.md`) without this script knowing
     which one it is. The adapter is token-in/token-out and does the stop-cutting
     itself, in one shared code path for every engine, so a corpus built on vLLM
     is trimmed identically to one built in-stack; the text here is derived for

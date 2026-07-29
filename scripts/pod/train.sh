@@ -16,7 +16,7 @@ cd /workspace/aad || exit 1
 mkdir -p artifacts/stage3
 
 nohup bash -c "
-  uv run python scripts/train_stage3.py --config '$CONFIG' $RESUME \
+  uv run python scripts/training/train_stage3.py --config '$CONFIG' $RESUME \
     >> /workspace/console_${RUN_NAME}.log 2>&1
   rc=\$?
   if [ \$rc -eq 0 ]; then echo 'MARKER:TRAIN_DONE:${RUN_NAME}'; else echo \"MARKER:TRAIN_FAILED:${RUN_NAME} rc=\$rc\"; fi >> /workspace/run_markers.log

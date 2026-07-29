@@ -1,7 +1,7 @@
 """Stage 0: collect teacher activation statistics for student initialization.
 
 Usage:
-    uv run python scripts/collect_stage0.py --config configs/stage0_qwen3_4b_thinking.json [--limit N]
+    uv run python scripts/training/collect_stage0.py --config configs/stage0/qwen3_4b_thinking.json [--limit N]
 
 Reads a JSON config, forwards the warm-up dataset through the teacher one
 sequence at a time, and writes:
@@ -23,13 +23,13 @@ from pathlib import Path
 
 import torch
 
-REPO_ROOT = Path(__file__).resolve().parent.parent
+REPO_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO_ROOT / "src"))
 
-from aadistill.collect import ActivationStatsCollector, residual_covariance
-from aadistill.env import code_state, hardware_report, set_determinism
-from aadistill.manifest import sha256_file, sha256_json, write_manifest
-from aadistill.teacher import load_teacher
+from aadistill.init.collect import ActivationStatsCollector, residual_covariance
+from aadistill.infrastructure.env import code_state, hardware_report, set_determinism
+from aadistill.infrastructure.manifest import sha256_file, sha256_json, write_manifest
+from aadistill.models.teacher import load_teacher
 
 
 def load_warmup_dataset(path: Path) -> list[dict]:

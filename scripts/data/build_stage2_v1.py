@@ -2,9 +2,9 @@
 5.39M -> ~24M-train-token scale-up (proposal 2026-07-26, approved same day).
 
 Usage:
-    uv run python scripts/build_stage2_v1.py
+    uv run python scripts/data/build_stage2_v1.py
 
-Design (see logs/proposals/2026-07-26_stage2_mixture_v1_scaleup.md):
+Design (see logs/proposals/stage2/2026-07-26_stage2_mixture_v1_scaleup.md):
 
 * v0 train is carried into v1 train verbatim, except gsm8k samples, which are
   format-normalized (strip `<<...>>` calculator annotations, rewrite the
@@ -26,7 +26,7 @@ Design (see logs/proposals/2026-07-26_stage2_mixture_v1_scaleup.md):
 
 Reuses the v0 builders (oasst2 threading, glaive parsing, fineweb filtering)
 unmodified by iterating sources from row 0 with a sink that skips indices
-consumed by v0; `scripts/build_stage2_v0.py` itself is untouched.
+consumed by v0; `scripts/data/build_stage2_v0.py` itself is untouched.
 """
 
 from __future__ import annotations
@@ -39,14 +39,14 @@ from collections import defaultdict
 from datetime import datetime, timezone
 from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parent.parent
+REPO_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO_ROOT / "src"))
-sys.path.insert(0, str(REPO_ROOT / "scripts"))
+sys.path.insert(0, str(REPO_ROOT / "scripts" / "data"))
 
 import build_stage2_v0 as v0
-from aadistill.data import GROUPS, load_jsonl, validate_sample
-from aadistill.env import code_state
-from aadistill.manifest import sha256_file, write_manifest
+from aadistill.data.dataset import GROUPS, load_jsonl, validate_sample
+from aadistill.infrastructure.env import code_state
+from aadistill.infrastructure.manifest import sha256_file, write_manifest
 
 V0_DIR = REPO_ROOT / "data/stage2"
 OUT_DIR = REPO_ROOT / "data/stage2_v1"
@@ -492,7 +492,7 @@ def main() -> None:
         "schema": {
             "fields": "id, group, source, format ('chat'|'text'), messages|text, tools?",
             "tool_convention": ("OpenAI-nested tools/tool_calls, rendered by the "
-                                "Qwen3 chat template (see src/aadistill/data.py)"),
+                                "Qwen3 chat template (see src/aadistill/data/dataset.py)"),
         },
         "caps": {"msg_char_cap": v0.MSG_CHAR_CAP,
                  "sample_char_cap": v0.SAMPLE_CHAR_CAP,

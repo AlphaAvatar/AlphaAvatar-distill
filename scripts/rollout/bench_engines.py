@@ -1,6 +1,6 @@
 """Benchmark inference engines at this project's actual job shape.
 
-    uv run python scripts/bench_engines.py --engines hf,vllm,sglang \
+    uv run python scripts/rollout/bench_engines.py --engines hf,vllm,sglang \
         --n-prompts 32 --max-new-tokens 4096 --out artifacts/bench/engines_v0
 
 Why not read a leaderboard
@@ -28,7 +28,7 @@ What is measured, and why each one is load-bearing
    the fastest engine is the cheapest one to own.
 
 The output `decision.json` applies the pre-registered rules from
-`logs/proposals/2026-07-29_engine_benchmark.md` mechanically, so an unattended
+`logs/proposals/rollout/2026-07-29_engine_benchmark.md` mechanically, so an unattended
 session can chain into generation without an agent interpreting the numbers.
 
 Each engine is isolated: a construction or generation failure records the
@@ -47,16 +47,16 @@ from pathlib import Path
 
 import torch
 
-REPO_ROOT = Path(__file__).resolve().parent.parent
+REPO_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO_ROOT / "src"))
-sys.path.insert(0, str(REPO_ROOT / "scripts"))
+sys.path.insert(0, str(REPO_ROOT / "scripts" / "rollout"))
 
-from aadistill.engines import (
+from aadistill.rollout.engines import (
     HFEngine, SGLangEngine, VLLMEngine, VLLMServerEngine, agreement,
     batch_invariance, timed,
 )
-from aadistill.env import code_state, hardware_report
-from aadistill.teacher import load_causal_lm
+from aadistill.infrastructure.env import code_state, hardware_report
+from aadistill.models.teacher import load_causal_lm
 from generate_teacher_answers import SLICES, generation_prompt, load_slice, stop_ids
 
 

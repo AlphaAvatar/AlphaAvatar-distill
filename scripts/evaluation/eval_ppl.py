@@ -1,7 +1,7 @@
 """Token-level NLL / perplexity evaluation on a warm-up-format jsonl.
 
 Usage:
-    uv run python scripts/eval_ppl.py --data data/warmup/holdout_v1.jsonl \
+    uv run python scripts/evaluation/eval_ppl.py --data data/warmup/holdout_v1.jsonl \
         --model artifacts/stage1/qwen3_0p6b_init_v0/checkpoint \
         [--model Qwen/Qwen3-4B-Thinking-2507@<revision> ...] \
         [--max-seq-len 1024] [--out <report.json>]
@@ -12,7 +12,7 @@ included, so the Stage 1 gate has an initial evaluation with baselines.
 Deterministic: fixed data order, no sampling, batch size 1.
 
 --fake-quant int8 applies per-channel symmetric INT8 weight fake-quant
-(src/aadistill/quant.py, P9 deployment target) to EVERY --model in the
+(src/aadistill/models/quant.py, P9 deployment target) to EVERY --model in the
 invocation after loading; run quantized and unquantized evals as separate
 invocations. --fake-quant-scope selects "all" (default; decoder + lm_head,
 tied embedding quantized once) or "decoder" (attention/FFN linears only).
@@ -30,11 +30,11 @@ from pathlib import Path
 import torch
 import torch.nn.functional as F
 
-REPO_ROOT = Path(__file__).resolve().parent.parent
+REPO_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO_ROOT / "src"))
 
-from aadistill.env import code_state, hardware_report
-from aadistill.manifest import sha256_file
+from aadistill.infrastructure.env import code_state, hardware_report
+from aadistill.infrastructure.manifest import sha256_file
 
 
 def load_model(spec: str, dtype: torch.dtype, device: str):
@@ -92,7 +92,7 @@ def main() -> None:
         model, tokenizer = load_model(spec, dtype, device)
         quant_summary = None
         if args.fake_quant == "int8":
-            from aadistill.quant import int8_fake_quantize_
+            from aadistill.models.quant import int8_fake_quantize_
 
             quant_summary = int8_fake_quantize_(model, scope=args.fake_quant_scope)
             print(f"  fake-quant int8 scope={quant_summary['scope']}: "

@@ -14,26 +14,26 @@ The methods are meant to be **model-family-agnostic**: the same activation-stati
 
 The figure shows **one point per student at its current best**, against the teacher it is being distilled from — where the model stands now, not every checkpoint it took to get there. The full run history, including the runs that made things worse, is the table below.
 
-**What is measured, and why it changed.** The headline metric is `behavior_score_v0`: the unweighted mean of six *credited* mechanical checks over 76 held-out prompts — chat-format validity, fluency (an empty or copied answer scores zero), evidence grounding, refusal on unanswerable questions, parseable tool calls, and gsm8k exact match. No LLM judge, so it is free and reproducible from the stored generations ([scorer](./src/aadistill/behavior.py), [build log](./logs/experiments/2026-07-27_eval_behavior_v0.md)). Held-out NLL used to be the headline; it is now a **guard rail** — it is fineweb-edu text and is nearly blind to the failures that actually matter here. Behavior score is itself a stopgap: **real-world test suites take over as the headline once the student is good enough to attempt them** ([decision](./logs/decisions.md)).
+**What is measured, and why it changed.** The headline metric is `behavior_score_v0`: the unweighted mean of six *credited* mechanical checks over 76 held-out prompts — chat-format validity, fluency (an empty or copied answer scores zero), evidence grounding, refusal on unanswerable questions, parseable tool calls, and gsm8k exact match. No LLM judge, so it is free and reproducible from the stored generations ([scorer](./src/aadistill/evaluation/behavior.py), [build log](./logs/experiments/evaluation/2026-07-27_eval_behavior_v0.md)). Held-out NLL used to be the headline; it is now a **guard rail** — it is fineweb-edu text and is nearly blind to the failures that actually matter here. Behavior score is itself a stopgap: **real-world test suites take over as the headline once the student is good enough to attempt them** ([decision](./logs/decisions.md)).
 
 | # | date | run | starts from | what changed | total steps | behavior | held-out NLL |
 | ---: | --- | --- | :---: | --- | ---: | ---: | ---: |
-| 1 | 2026-07-14 | [init v0, recipe attempt 1](./logs/experiments/2026-07-14_stage1_qwen3_0p6b_init_v0.md) | — | early-band depth merge, unweighted projection | 0 | – | 17.7977 |
-| 2 | 2026-07-14 | [init v0, fixed recipe](./logs/experiments/2026-07-14_stage1_qwen3_0p6b_init_v0.md) | — | middle-band merge, end-weighted projection | 0 | – | 11.7482 |
-| 3 | 2026-07-22 | [s1 recovery](./logs/experiments/2026-07-22_stage3_s1_gpu_run.md) | #2 | FFN+norm, CE 0.25 + KD 1.0, 660 steps on mixture v0 | 660 | 12.9% | 4.2107 |
-| 4 | 2026-07-25 | [s2 A/B arm A](./logs/experiments/2026-07-25_stage3_s2_ab_gpu_run.md) | #3 | control: +660 FFN-only steps; regressed on mixture-v0 epochs 3–4 | 1320 | – | 4.2747 |
-| 5 | 2026-07-25 | [s2 A/B arm B](./logs/experiments/2026-07-25_stage3_s2_ab_gpu_run.md) | #3 | attention unfrozen; freeze set adopted, holdout flat (data-limited) | 1320 | – | 4.2118 |
-| 6 | 2026-07-26 | [s2 on mixture v1](./logs/experiments/2026-07-26_stage3_s2_blocks_v1_gpu_run.md) | #5 | same recipe, 4.11× data, 2700 steps; plateau broken | 4020 | 8.9% | **3.8003** |
-| 7 | 2026-07-27 | [start-point ablation: from_s1](./logs/experiments/2026-07-27_stage3_start_point_ablation.md) | #3 | same 2700-step leg from s1@660; the A/B arm-B leg was neutral (+0.17%) | 3360 | 9.5% | 3.8067 |
-| 8 | 2026-07-27 | [start-point ablation: from_init](./logs/experiments/2026-07-27_stage3_start_point_ablation.md) | #2 | single-stage from Stage 1 init, 2700 steps total; warm-up ladder unnecessary (+0.74%) | 2700 | **20.2%** | 3.8285 |
+| 1 | 2026-07-14 | [init v0, recipe attempt 1](./logs/experiments/stage1/2026-07-14_stage1_qwen3_0p6b_init_v0.md) | — | early-band depth merge, unweighted projection | 0 | – | 17.7977 |
+| 2 | 2026-07-14 | [init v0, fixed recipe](./logs/experiments/stage1/2026-07-14_stage1_qwen3_0p6b_init_v0.md) | — | middle-band merge, end-weighted projection | 0 | – | 11.7482 |
+| 3 | 2026-07-22 | [s1 recovery](./logs/experiments/stage3/2026-07-22_stage3_s1_gpu_run.md) | #2 | FFN+norm, CE 0.25 + KD 1.0, 660 steps on mixture v0 | 660 | 12.9% | 4.2107 |
+| 4 | 2026-07-25 | [s2 A/B arm A](./logs/experiments/stage3/2026-07-25_stage3_s2_ab_gpu_run.md) | #3 | control: +660 FFN-only steps; regressed on mixture-v0 epochs 3–4 | 1320 | – | 4.2747 |
+| 5 | 2026-07-25 | [s2 A/B arm B](./logs/experiments/stage3/2026-07-25_stage3_s2_ab_gpu_run.md) | #3 | attention unfrozen; freeze set adopted, holdout flat (data-limited) | 1320 | – | 4.2118 |
+| 6 | 2026-07-26 | [s2 on mixture v1](./logs/experiments/stage3/2026-07-26_stage3_s2_blocks_v1_gpu_run.md) | #5 | same recipe, 4.11× data, 2700 steps; plateau broken | 4020 | 8.9% | **3.8003** |
+| 7 | 2026-07-27 | [start-point ablation: from_s1](./logs/experiments/stage3/2026-07-27_stage3_start_point_ablation.md) | #3 | same 2700-step leg from s1@660; the A/B arm-B leg was neutral (+0.17%) | 3360 | 9.5% | 3.8067 |
+| 8 | 2026-07-27 | [start-point ablation: from_init](./logs/experiments/stage3/2026-07-27_stage3_start_point_ablation.md) | #2 | single-stage from Stage 1 init, 2700 steps total; warm-up ladder unnecessary (+0.74%) | 2700 | **20.2%** | 3.8285 |
 
 Behavior score is the headline metric. **Held-out NLL is now a guard rail (±1% band), not the target** — teacher Qwen3-4B-Thinking-2507 2.6264 · random-init 0.6B baseline 12.1286. Not scored on the behavior eval yet: teacher Qwen3-4B-Thinking-2507.
 
 Attempts 7–8 are a fixed-budget ablation of the *start point*, not of the training leg: runs 6–8 are the three branches that ran the identical 2700-step leg at the same seed, from lineages costing 4020, 3360 and 2700 total steps. Both landed inside the pre-registered 1% band, so the recovery recipe dropped its two warm-up legs and became a single stage — a third less compute per iteration.
 
-The behavior eval **reverses the ranking held-out NLL gives**: the cheapest lineage (attempt 8) is the best-behaved at 20.2%, while the best-NLL checkpoint (attempt 6) is the worst at 8.9% — it improves next-token prediction while getting *worse* at chat format, grounding and tool calls. That result is why the headline metric changed. Caveats a reader must carry: one run per arm, no variance estimate, and the per-axis rates rest on 7–76 prompts each, so only large moves are evidence — see the [run log](./logs/experiments/2026-07-27_stage3_start_point_ablation.md). Current state and next actions: [`logs/STATE.md`](./logs/STATE.md); costed, unapproved work: [`logs/proposals/`](./logs/proposals/).
+The behavior eval **reverses the ranking held-out NLL gives**: the cheapest lineage (attempt 8) is the best-behaved at 20.2%, while the best-NLL checkpoint (attempt 6) is the worst at 8.9% — it improves next-token prediction while getting *worse* at chat format, grounding and tool calls. That result is why the headline metric changed. Caveats a reader must carry: one run per arm, no variance estimate, and the per-axis rates rest on 7–76 prompts each, so only large moves are evidence — see the [run log](./logs/experiments/stage3/2026-07-27_stage3_start_point_ablation.md). Current state and next actions: [`logs/STATE.md`](./logs/STATE.md); costed, unapproved work: [`logs/proposals/`](./logs/proposals/).
 
-The figure regenerates from [`assets/perf_trend.json`](./assets/perf_trend.json) with `uv run python scripts/plot_perf_trend.py`; the table above comes from the same file via `--print-table`, and every point is backed by a log in [`logs/experiments/`](./logs/experiments/).
+The figure regenerates from [`assets/perf_trend.json`](./assets/perf_trend.json) with `uv run python scripts/evaluation/plot_perf_trend.py`; the table above comes from the same file via `--print-table`, and every point is backed by a log in [`logs/experiments/`](./logs/experiments/).
 
 ---
 
@@ -41,9 +41,9 @@ The figure regenerates from [`assets/perf_trend.json`](./assets/perf_trend.json)
 
 | Stage | What it produces | Status |
 | --- | --- | --- |
-| **0** — activation statistics | streaming float64 sufficient statistics from the teacher: per residual point count / sum / `XᵀX`, per-FFN-neuron `Σ\|a\|` and `Σa²`, token frequencies. Fixed 1.95 GB cache regardless of token count. | passed ([log](./logs/experiments/2026-07-13_stage0_qwen3_4b_thinking_v1.md)) |
-| **1** — projection + sandwich init | a complete, runnable Qwen3-format 0.6B student (596M params) plus a same-geometry random baseline, both with reproducibility manifests. | passed ([log](./logs/experiments/2026-07-14_stage1_qwen3_0p6b_init_v0.md)) |
-| **2** — offline warm-up mixture | eight training-use groups from permissive revision-pinned sources (instruction, RAG/evidence, multi-hop QA, tool calling, refusal/uncertainty, code/math, short realtime, long context) with global dedup, holdout exclusion, and train/val/calib splits. | v0 5.39M tokens ([log](./logs/experiments/2026-07-21_stage2_offline_v0.md)), v1 22.13M ([log](./logs/experiments/2026-07-26_stage2_offline_v1.md)) |
+| **0** — activation statistics | streaming float64 sufficient statistics from the teacher: per residual point count / sum / `XᵀX`, per-FFN-neuron `Σ\|a\|` and `Σa²`, token frequencies. Fixed 1.95 GB cache regardless of token count. | passed ([log](./logs/experiments/stage0/2026-07-13_stage0_qwen3_4b_thinking_v1.md)) |
+| **1** — projection + sandwich init | a complete, runnable Qwen3-format 0.6B student (596M params) plus a same-geometry random baseline, both with reproducibility manifests. | passed ([log](./logs/experiments/stage1/2026-07-14_stage1_qwen3_0p6b_init_v0.md)) |
+| **2** — offline warm-up mixture | eight training-use groups from permissive revision-pinned sources (instruction, RAG/evidence, multi-hop QA, tool calling, refusal/uncertainty, code/math, short realtime, long context) with global dedup, holdout exclusion, and train/val/calib splits. | v0 5.39M tokens ([log](./logs/experiments/stage2/2026-07-21_stage2_offline_v0.md)), v1 22.13M ([log](./logs/experiments/stage2/2026-07-26_stage2_offline_v1.md)) |
 | **3** — student recovery | one config-driven trainer for all recovery sub-stages: regex freeze policy, masked CE + on-the-fly full-vocab teacher KD, exact resume, per-run manifests, gate evals. | sub-stages 1–2 passed; further runs [proposed](./logs/proposals/) |
 | **4–6** — online data, on-policy distillation, deployment validation | specified in [`AGENTS.md`](./AGENTS.md) | not started |
 
@@ -73,33 +73,33 @@ The implemented pipeline runs end to end on CPU (GPU optional):
 
 ```bash
 # corpora (revision-pinned public sources; the jsonl files stay gitignored)
-uv run python scripts/build_warmup_v1.py       # Stage 0/1 warm-up (~1M tokens)
-uv run python scripts/build_holdout_v1.py      # held-out eval set
-uv run python scripts/build_stage2_v0.py       # offline mixture v0 (5.39M train tokens)
-uv run python scripts/build_stage2_v1.py       # offline mixture v1 (22.13M train tokens)
+uv run python scripts/data/build_warmup_v1.py       # Stage 0/1 warm-up (~1M tokens)
+uv run python scripts/data/build_holdout_v1.py      # held-out eval set
+uv run python scripts/data/build_stage2_v0.py       # offline mixture v0 (5.39M train tokens)
+uv run python scripts/data/build_stage2_v1.py       # offline mixture v1 (22.13M train tokens)
 
 # Stage 0 → 1: teacher statistics (~1 h CPU; dry run with --limit 2), then init (~5 min)
-uv run python scripts/collect_stage0.py --config configs/stage0_qwen3_4b_thinking_v1.json
-uv run python scripts/init_stage1.py --config configs/stage1_qwen3_0p6b_from_4b_thinking.json
+uv run python scripts/training/collect_stage0.py --config configs/stage0/qwen3_4b_thinking_v1.json
+uv run python scripts/training/init_stage1.py --config configs/stage1/qwen3_0p6b_from_4b_thinking.json
 
 # gate checks
-uv run python scripts/dry_run_stage2.py --data-dir data/stage2_v1 \
+uv run python scripts/data/dry_run_stage2.py --data-dir data/stage2_v1 \
   --out artifacts/stage2/dry_run_v1_report.json
-uv run python scripts/eval_ppl.py --data data/warmup/holdout_v1.jsonl \
+uv run python scripts/evaluation/eval_ppl.py --data data/warmup/holdout_v1.jsonl \
   --model artifacts/stage1/qwen3_0p6b_init_v0/checkpoint \
   --model artifacts/stage1/qwen3_0p6b_init_v0/random_baseline
 
 # Stage 3 recovery: 3 real KD steps on CPU, then the same code path with --resume
-uv run python scripts/train_stage3.py --config configs/stage3_s2v1_smoke_cpu.json
-uv run python scripts/train_stage3.py --config configs/stage3_s2v1_smoke_cpu.json --resume
+uv run python scripts/training/train_stage3.py --config configs/stage3/s2v1_smoke_cpu.json
+uv run python scripts/training/train_stage3.py --config configs/stage3/s2v1_smoke_cpu.json --resume
 
 # any checkpoint, at the deployment precision (bf16 baseline + INT8 weight fake-quant)
-uv run python scripts/eval_ppl.py --data data/warmup/holdout_v1.jsonl \
+uv run python scripts/evaluation/eval_ppl.py --data data/warmup/holdout_v1.jsonl \
   --model artifacts/stage3/s1_ffn_norm_v0/checkpoints/step_000660/model \
   --fake-quant int8 --fake-quant-scope decoder
 ```
 
-Real recovery runs use the same CLI with a GPU-sized config (e.g. `configs/stage3_s2_blocks_v1.json`) — hardware never changes the experiment definition. Each step writes gitignored artifacts plus a full reproducibility manifest under `artifacts/` or `data/`.
+Real recovery runs use the same CLI with a GPU-sized config (e.g. `configs/stage3/s2_blocks_v1.json`) — hardware never changes the experiment definition. Each step writes gitignored artifacts plus a full reproducibility manifest under `artifacts/` or `data/`.
 
 ---
 
@@ -196,15 +196,15 @@ _No records yet._
 
 | Reference | Topic | Status | Why it matters here |
 | --- | --- | --- | --- |
-| Muralidharan et al., *Compact Language Models via Pruning and Knowledge Distillation* (Minitron), NVIDIA, 2024. [arXiv:2407.14679](https://arxiv.org/abs/2407.14679) | ffn-pruning, distillation | used | Activation-magnitude neuron/head importance for structured width pruning; establishes that pruned-before-recovery students score near-noise zero-shot and rely on distillation recovery. Informed Stage 1 FFN top-k selection and the interpretation of the init-checkpoint eval ([log](./logs/experiments/2026-07-14_stage1_qwen3_0p6b_init_v0.md)). |
+| Muralidharan et al., *Compact Language Models via Pruning and Knowledge Distillation* (Minitron), NVIDIA, 2024. [arXiv:2407.14679](https://arxiv.org/abs/2407.14679) | ffn-pruning, distillation | used | Activation-magnitude neuron/head importance for structured width pruning; establishes that pruned-before-recovery students score near-noise zero-shot and rely on distillation recovery. Informed Stage 1 FFN top-k selection and the interpretation of the init-checkpoint eval ([log](./logs/experiments/stage1/2026-07-14_stage1_qwen3_0p6b_init_v0.md)). |
 | Gromov et al., *The Unreasonable Ineffectiveness of the Deeper Layers*, 2024. [arXiv:2403.17887](https://arxiv.org/abs/2403.17887) | depth-compression | used | Layer-drop studies show early layers are critical and middle/late-middle layers are most redundant. Motivated moving Stage 1 depth merging from the early band to the middle band after the early-merge ablation collapsed. |
 | Xia et al., *Sheared LLaMA: Accelerating Language Model Pre-training via Structured Pruning*, 2023. [arXiv:2310.06694](https://arxiv.org/abs/2310.06694) | svd-compression, distillation | queued | Structured pruning with mask learning + continued pre-training; candidate comparison recipe for Stage 3 recovery design. |
-| Kim & Rush, *Sequence-Level Knowledge Distillation*, EMNLP 2016. [arXiv:1606.07947](https://arxiv.org/abs/1606.07947) | distillation, offline-data | queued | Training the student on the teacher's *generated* targets rather than on gold targets reweighted by the teacher. Basis of the pending teacher-generated-answer proposal, which targets the answer-style defects that survived the mixture-v1 recovery run ([proposal](./logs/proposals/2026-07-27_stage2_teacher_generated_answers.md)). |
+| Kim & Rush, *Sequence-Level Knowledge Distillation*, EMNLP 2016. [arXiv:1606.07947](https://arxiv.org/abs/1606.07947) | distillation, offline-data | queued | Training the student on the teacher's *generated* targets rather than on gold targets reweighted by the teacher. Basis of the pending teacher-generated-answer proposal, which targets the answer-style defects that survived the mixture-v1 recovery run ([proposal](./logs/proposals/stage2/2026-07-27_stage2_teacher_generated_answers.md)). |
 | Zelikman et al., *STaR: Bootstrapping Reasoning With Reasoning*, NeurIPS 2022. [arXiv:2203.14465](https://arxiv.org/abs/2203.14465) | offline-data, distillation | queued | Keep only generations whose final answer matches the reference. The correctness gate the same proposal now requires (2026-07-28 directive) is this filter applied to the *teacher*: a generated target is trained on only when it verifies against the public gold key it replaces. |
 | Karpathy, *nanochat* — minimal full-stack LLM training/inference repo, 2025. [github.com/karpathy/nanochat](https://github.com/karpathy/nanochat) | kernel, distributed-training | queued | A dependency-minimal reference for how an efficient training loop is actually assembled (~8k LOC covering tokenizer → pretrain → midtrain → SFT → RL → serve). To be read **before** adding any kernel dependency here: the question it answers is which kernels earn their place in a small codebase and how they are called, which is the cheaper first move than importing a framework ([kernel plan](./logs/decisions.md)). |
 | Ding et al., *Fewer Truncations Improve Language Modeling*, ICML 2024. [arXiv:2404.10830](https://arxiv.org/abs/2404.10830) | offline-data, distillation | used | Concatenate-then-cut packing silently truncates documents at every block boundary and measurably hurts grounded generation; best-fit-decreasing bin packing removes the truncations at the same token efficiency. Adopted as `best_fit_blocks` — load-bearing once targets carry reasoning traces, since a torn trace trains a continuation whose premises are out of context. |
 | Krell et al., *Efficient Sequence Packing without Cross-contamination*, Graphcore, 2021. [arXiv:2107.02027](https://arxiv.org/abs/2107.02027) | offline-data, kernel | partially-used | Formalizes packing as bin packing and pairs it with block-diagonal attention so packed samples cannot attend across each other. The packing half is adopted; the **masking half is deliberately rejected** — a deployed assistant reads a window holding several unrelated things and must attend across it, so training it to ignore irrelevant neighbours is the job rather than an artifact to mask ([decision](./logs/decisions.md)). |
-| LMSYS, *Towards Deterministic Inference in SGLang and Reproducible RL Training*, 2025. [lmsys.org](https://www.lmsys.org/blog/2025-09-22-sglang-deterministic/) | on-policy, rollout, kernel | queued | Batch-invariant kernels give **batch-invariant output** — same prompt, same tokens, regardless of how it was batched — at ~34% average slowdown (CUDA graphs recover ~2.8×), and report identical rollout responses *and* loss values across repeated RL runs. Dense models only, with **Qwen3 named**, which is this project's teacher family. Changes the 2026-07-28 in-stack argument: determinism is now a purchasable ~34% tax rather than a reason to avoid a serving engine ([survey](./logs/proposals/2026-07-29_inference_engine_survey.md)). |
+| LMSYS, *Towards Deterministic Inference in SGLang and Reproducible RL Training*, 2025. [lmsys.org](https://www.lmsys.org/blog/2025-09-22-sglang-deterministic/) | on-policy, rollout, kernel | queued | Batch-invariant kernels give **batch-invariant output** — same prompt, same tokens, regardless of how it was batched — at ~34% average slowdown (CUDA graphs recover ~2.8×), and report identical rollout responses *and* loss values across repeated RL runs. Dense models only, with **Qwen3 named**, which is this project's teacher family. Changes the 2026-07-28 in-stack argument: determinism is now a purchasable ~34% tax rather than a reason to avoid a serving engine ([survey](./logs/proposals/rollout/2026-07-29_inference_engine_survey.md)). |
 | DeepSeek, *nano-vLLM*, 2025. [HF blog](https://huggingface.co/blog/zamal/introduction-to-nano-vllm) | runtime-deployment | queued | ~1.2k lines, pure Python + Triton, no C++/CUDA extension, offline-inference focus with prefix caching and CUDA graphs; reported near-parity with vLLM on offline workloads. The profile that would give throughput without the dependency weight — determinism properties unknown and unverified by us. |
 | Liu et al., *Defeating the Training-Inference Mismatch via FP16*, 2025. [arXiv:2510.26788](https://arxiv.org/abs/2510.26788) | on-policy, rollout, quantization | queued | Argues the RL training/inference gap is mostly a *numerics* problem, and that BF16's 7-bit mantissa is the culprit: reverting the rollout+training path to FP16 removes the mismatch and stabilizes optimization. Directly in tension with this project's BF16 training policy ([decision 2026-07-13](./logs/decisions.md)) — recorded as a **revisit trigger for Stage 4/5**, not acted on, since changing precision now would break comparability with every logged run. |
 | vLLM team, *No More Train-Inference Mismatch: Bitwise Consistent On-Policy RL with vLLM and TorchTitan*, 2025. [blog.vllm.ai](https://blog.vllm.ai/2025/11/10/bitwise-consistent-train-inference.html) | on-policy, rollout, kernel | queued | Achieves bitwise-identical sampler and trainer numerics by matching kernels, reporting faster convergence and higher reward. The strongest form of the guarantee this project wants, at the cost of the heaviest stack; the reference point for what "consistent" can mean. |

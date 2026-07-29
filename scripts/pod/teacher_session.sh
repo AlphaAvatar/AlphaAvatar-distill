@@ -55,14 +55,14 @@ echo "MARKER:TESTS_PASSED"
 
 # --- 1. teacher scorecard, native thinking mode, no prefill ---------------
 # The cap must fit a full reasoning trace; truncation is reported, not hidden.
-uv run python scripts/eval_behavior.py \
+uv run python scripts/evaluation/eval_behavior.py \
   --model "$TEACHER" \
   --max-new-tokens "$BEHAVIOR_MAX_NEW_TOKENS" \
   --out artifacts/teacher/eval_behavior_v0.json || fail teacher_scorecard
 echo "MARKER:TEACHER_SCORED"
 
 # --- 2. top-n verified-generation pilot -----------------------------------
-uv run python scripts/generate_teacher_answers.py \
+uv run python scripts/rollout/generate_teacher_answers.py \
   --model "$TEACHER" \
   --data-dir data/pilot_pack \
   --limit-per-slice "$PILOT_LIMIT" \

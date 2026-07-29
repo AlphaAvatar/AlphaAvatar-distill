@@ -8,7 +8,7 @@
   weigh engine efficiency against its impact on the codebase (P1)
 - **Status:** harness verified end to end on CPU. The GPU benchmark itself is
   **pre-registered but not run** —
-  [`logs/proposals/2026-07-29_engine_benchmark.md`](../proposals/2026-07-29_engine_benchmark.md)
+  [`logs/proposals/2026-07-29_engine_benchmark.md`](../../proposals/rollout/2026-07-29_engine_benchmark.md)
 
 ## 1. What was built
 
@@ -123,7 +123,7 @@ fully in §2.
 it came from. No decision changed yet — the engine choice is still unmeasured.
 
 **Next:** the GPU session in
-[`logs/proposals/2026-07-29_engine_benchmark.md`](../proposals/2026-07-29_engine_benchmark.md),
+[`logs/proposals/2026-07-29_engine_benchmark.md`](../../proposals/rollout/2026-07-29_engine_benchmark.md),
 which is pre-registered and awaiting maintainer approval on spend. It should add
 one arm to its readout that this log motivates: **in-stack batch invariance on
 the 4B teacher in bf16**, which the harness already measures for free.

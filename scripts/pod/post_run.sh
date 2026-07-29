@@ -29,27 +29,27 @@ for f in tokenizer.json tokenizer_config.json chat_template.jinja; do
 done
 
 # 1) bf16 holdout on GPU (comparable to every prior Stage 3 GPU number)
-uv run python scripts/eval_ppl.py --data "$HOLDOUT" \
+uv run python scripts/evaluation/eval_ppl.py --data "$HOLDOUT" \
   --model "$CKPT" --out "$RUN/eval_holdout_v1.json" || fail holdout_bf16
 # 2) INT8 fake-quant (P9), CPU for comparability with the 2026-07-26 dev log
-CUDA_VISIBLE_DEVICES= uv run python scripts/eval_ppl.py \
+CUDA_VISIBLE_DEVICES= uv run python scripts/evaluation/eval_ppl.py \
   --data "$HOLDOUT" --model "$CKPT" \
   --fake-quant int8 --out "$RUN/eval_holdout_v1_int8.json" || fail holdout_int8
-CUDA_VISIBLE_DEVICES= uv run python scripts/eval_ppl.py \
+CUDA_VISIBLE_DEVICES= uv run python scripts/evaluation/eval_ppl.py \
   --data "$HOLDOUT" --model "$CKPT" \
   --fake-quant int8 --fake-quant-scope decoder \
   --out "$RUN/eval_holdout_v1_int8_decoder.json" || fail holdout_int8_dec
 
 # 3) eval_behavior_v0 — the behavior scorecard (GPU, bf16, greedy)
-uv run python scripts/eval_behavior.py --model "$CKPT" \
+uv run python scripts/evaluation/eval_behavior.py --model "$CKPT" \
   --prompts "$BEHAVIOR_PROMPTS" --max-new-tokens "$BEHAVIOR_MAX_NEW_TOKENS" \
   --out "$RUN/eval_behavior_v0.json" || fail behavior
 
 # 3b) p(</think>) probe — the CE/KD conflict experiment's PRIMARY readout.
 # Continuous and far less seed-noisy than the generation metrics, whose measured
 # run-to-run floor is 0.1290 on the composite
-# (logs/experiments/2026-07-28_kd_ce_protocol_conflict.md).
-uv run python scripts/probe_think_close.py --model "$CKPT" \
+# (logs/experiments/stage3/2026-07-28_kd_ce_protocol_conflict.md).
+uv run python scripts/evaluation/probe_think_close.py --model "$CKPT" \
   --per-group 4 --out "$RUN/probe_think_close.json" || fail probe_think
 
 # 4) generation smoke: greedy, 80 new tokens, same 3 prompts as every prior run

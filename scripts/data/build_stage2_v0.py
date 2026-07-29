@@ -1,7 +1,7 @@
 """Build the Stage 2 offline warm-up mixture v0 (`stage2_offline_v0`).
 
 Usage:
-    uv run python scripts/build_stage2_v0.py
+    uv run python scripts/data/build_stage2_v0.py
 
 Data groups (AGENTS.md 4.4) and sources, all public and permissively licensed:
 
@@ -35,12 +35,12 @@ from collections import defaultdict
 from datetime import datetime, timezone
 from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parent.parent
+REPO_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO_ROOT / "src"))
 
-from aadistill.data import GROUPS, validate_sample
-from aadistill.env import code_state
-from aadistill.manifest import sha256_file, write_manifest
+from aadistill.data.dataset import GROUPS, validate_sample
+from aadistill.infrastructure.env import code_state
+from aadistill.infrastructure.manifest import sha256_file, write_manifest
 
 OUT_DIR = REPO_ROOT / "data/stage2"
 MIXTURE = "stage2_offline_v0"
@@ -508,7 +508,7 @@ def main() -> None:
         "schema": {
             "fields": "id, group, source, format ('chat'|'text'), messages|text, tools?",
             "tool_convention": ("OpenAI-nested tools/tool_calls, rendered by the "
-                                "Qwen3 chat template (see src/aadistill/data.py)"),
+                                "Qwen3 chat template (see src/aadistill/data/dataset.py)"),
         },
         "caps": {"msg_char_cap": MSG_CHAR_CAP, "sample_char_cap": SAMPLE_CHAR_CAP,
                  "long_doc_min": LONG_DOC_MIN, "long_doc_cap": LONG_DOC_CAP},

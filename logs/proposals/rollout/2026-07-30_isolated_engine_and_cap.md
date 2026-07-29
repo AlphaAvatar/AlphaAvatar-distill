@@ -44,7 +44,7 @@ makes the engine's dependency tree stop being the trainer's problem.
   candidates without lowering accuracy.** Grounded in the finished candidates
   being 0.750 accurate at ≤2,970 think tokens, but the truncated ones are
   censored at exactly 4,096, so the payoff is genuinely unknown
-  ([analysis](../experiments/2026-07-29_pilot_slice_analysis.md)).
+  ([analysis](../../experiments/stage3/2026-07-29_pilot_slice_analysis.md)).
 
 ## 3. Fixed budget
 

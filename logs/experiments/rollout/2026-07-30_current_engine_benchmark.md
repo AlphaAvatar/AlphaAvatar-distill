@@ -1,6 +1,6 @@
 # 2026-07-31 — Current-engine benchmark: vLLM 0.26.0 vs SGLang 0.5.12
 
-- **Pre-registration:** [`proposals/2026-07-31_current_engine_benchmark.md`](../proposals/2026-07-31_current_engine_benchmark.md)
+- **Pre-registration:** [`proposals/2026-07-31_current_engine_benchmark.md`](../../proposals/rollout/2026-07-30_current_engine_benchmark.md)
 - **Cost:** **$0.93** against a $3.00 ceiling (+$1 contingency unused)
 - **Pods:** `ibht1nb8o0nhyh` (failed, deleted), `lwf2th777hri8c` (Arm A),
   `oy00tooo4ckkv9` (Arm B). All deleted; nothing billing.

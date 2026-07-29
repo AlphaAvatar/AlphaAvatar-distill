@@ -11,13 +11,13 @@ import json
 import sys
 from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parent.parent
+REPO_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO_ROOT / "src"))
-sys.path.insert(0, str(REPO_ROOT / "scripts"))
+sys.path.insert(0, str(REPO_ROOT / "scripts" / "data"))
 
 import build_stage2_v0 as v0
 import build_stage2_v1 as v1
-from aadistill.data import validate_sample
+from aadistill.data.dataset import validate_sample
 
 
 def chat_sample(sid: str, content: str = "hi") -> dict:
@@ -134,7 +134,7 @@ class TestRefusalPool:
     def test_pool_size_and_hygiene(self):
         pool = v1.UNANSWERABLE_RESPONSES_V1
         assert len(pool) == 12 and len(set(pool)) == 12
-        from aadistill.data import FORBIDDEN_MARKERS
+        from aadistill.data.dataset import FORBIDDEN_MARKERS
         for resp in pool:
             assert all(m not in resp for m in FORBIDDEN_MARKERS)
 

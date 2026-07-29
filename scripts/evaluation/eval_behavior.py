@@ -1,7 +1,7 @@
 """Score a checkpoint on `eval_behavior_v0` — deterministic greedy generation
 plus the mechanical scorers in `aadistill.behavior`.
 
-    uv run python scripts/eval_behavior.py \
+    uv run python scripts/evaluation/eval_behavior.py \
         --model artifacts/stage3/s1_ffn_norm_v0/checkpoints/step_000660/model \
         --out artifacts/stage3/s1_ffn_norm_v0/eval_behavior_v0.json
 
@@ -25,13 +25,13 @@ from pathlib import Path
 
 import torch
 
-REPO_ROOT = Path(__file__).resolve().parent.parent
+REPO_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO_ROOT / "src"))
 
-from aadistill.behavior import aggregate, score_sample, split_generation
-from aadistill.teacher import load_causal_lm
-from aadistill.env import code_state, hardware_report
-from aadistill.manifest import sha256_file
+from aadistill.evaluation.behavior import aggregate, score_sample, split_generation
+from aadistill.models.teacher import load_causal_lm
+from aadistill.infrastructure.env import code_state, hardware_report
+from aadistill.infrastructure.manifest import sha256_file
 
 
 @torch.no_grad()
@@ -87,7 +87,7 @@ def main() -> None:
     model, tokenizer = load_causal_lm(args.model, dtype, device)
     quant_summary = None
     if args.fake_quant == "int8":
-        from aadistill.quant import int8_fake_quantize_
+        from aadistill.models.quant import int8_fake_quantize_
 
         quant_summary = int8_fake_quantize_(model, scope=args.fake_quant_scope)
         print(f"fake-quant int8 scope={quant_summary['scope']}: "

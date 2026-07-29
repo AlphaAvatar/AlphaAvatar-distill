@@ -10,7 +10,7 @@
 > and `runpodctl --min-cuda-version` was never passed.
 >
 > Superseded by
-> [`2026-07-31_current_engine_benchmark.md`](2026-07-31_current_engine_benchmark.md).
+> [`2026-07-31_current_engine_benchmark.md`](2026-07-30_current_engine_benchmark.md).
 > The **correction experiment** in §5 survives intact and is carried forward;
 > only the engine/version/environment framing is retired.
 

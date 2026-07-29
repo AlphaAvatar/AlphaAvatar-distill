@@ -1,7 +1,7 @@
 # 2026-07-29 — Engine benchmark on the 4B teacher (L40S) + corpus pilot
 
 - **Agent:** Claude, driving pod `g8ajahpwirhrfx` (1× L40S, $0.99/h)
-- **Pre-registration:** [`proposals/2026-07-29_engine_benchmark.md`](../proposals/2026-07-29_engine_benchmark.md)
+- **Pre-registration:** [`proposals/2026-07-29_engine_benchmark.md`](../../proposals/rollout/2026-07-29_engine_benchmark.md)
 - **Objective:** choose the decode backend by weighing throughput against
   integration cost (maintainer, 2026-07-29), then build a teacher-corpus pilot
 - **Status:** complete. Pod deleted after upload verification; **$2.60** total

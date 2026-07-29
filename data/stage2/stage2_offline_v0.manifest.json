@@ -1,11 +1,11 @@
 {
   "dataset": "stage2_offline_v0",
-  "created_utc": "2026-07-20T19:49:22.913368+00:00",
-  "command": "scripts/build_stage2_v0.py",
+  "created_utc": "2026-07-29T16:38:48.216046+00:00",
+  "command": "scripts/data/build_stage2_v0.py --help",
   "purpose": "Stage 2 offline warm-up/distillation data for post-init student recovery (Stage 3+); grouped by training use",
   "schema": {
     "fields": "id, group, source, format ('chat'|'text'), messages|text, tools?",
-    "tool_convention": "OpenAI-nested tools/tool_calls, rendered by the Qwen3 chat template (see src/aadistill/data.py)"
+    "tool_convention": "OpenAI-nested tools/tool_calls, rendered by the Qwen3 chat template (see src/aadistill/data/dataset.py)"
   },
   "caps": {
     "msg_char_cap": 6000,
@@ -340,14 +340,9 @@
     "calib_chars": 264132
   },
   "code_state": {
-    "git_commit": "f3c7a244149b2fc19ac2ac05237fa23ef9bafe90",
+    "git_commit": "633dc6b4c6e3eb1d6eb726eef03c6793b7cd2c2a",
     "dirty": true,
-    "uncommitted_state_sha256": "20f1acebda5a65946cf48dee465a234aefc0ac1a6e8e39f514ff54d085db70ea",
-    "untracked_files": [
-      "scripts/build_stage2_v0.py",
-      "scripts/dry_run_stage2.py",
-      "src/aadistill/data.py",
-      "tests/test_data_toy.py"
-    ]
+    "uncommitted_state_sha256": "184fa666c7bf0d92e840be2efb3b5cdf3d03d4364ed93868f98460ae22b89896",
+    "untracked_files": []
   }
 }

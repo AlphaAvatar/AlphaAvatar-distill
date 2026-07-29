@@ -1,7 +1,7 @@
 """Measure a model's probability on `</think>` at the contested position.
 
 The primary readout for the CE/KD conflict experiment
-(`logs/experiments/2026-07-28_kd_ce_protocol_conflict.md`). It is preferred to
+(`logs/experiments/stage3/2026-07-28_kd_ce_protocol_conflict.md`). It is preferred to
 `think_closed` for the same reason a thermometer beats "does it feel warm":
 
 * it is **continuous**, so it moves smoothly with the force balance instead of
@@ -16,7 +16,7 @@ mechanistic one. Both are reported, because a mechanism that moves without the
 behaviour following would itself be a finding.
 
 Usage:
-    uv run python scripts/probe_think_close.py --model <path-or-id[@rev]> \
+    uv run python scripts/evaluation/probe_think_close.py --model <path-or-id[@rev]> \
         [--data-dir data/stage2_v1] [--per-group 4] [--out probe.json]
 """
 
@@ -29,11 +29,11 @@ from pathlib import Path
 
 import torch
 
-REPO_ROOT = Path(__file__).resolve().parent.parent
+REPO_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO_ROOT / "src"))
 
-from aadistill.data import load_split, render_chat  # noqa: E402
-from aadistill.teacher import load_causal_lm  # noqa: E402
+from aadistill.data.dataset import load_split, render_chat  # noqa: E402
+from aadistill.models.teacher import load_causal_lm  # noqa: E402
 
 TEACHER_TOKENIZER = "Qwen/Qwen3-4B-Thinking-2507"
 TEACHER_REVISION = "768f209d9ea81521153ed38c47d515654e938aea"

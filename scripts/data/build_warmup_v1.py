@@ -1,7 +1,7 @@
 """Build warm-up v1 for Stage 0 activation-statistics collection.
 
 Usage:
-    uv run python scripts/build_warmup_v1.py
+    uv run python scripts/data/build_warmup_v1.py
 
 Mixture (user-approved 2026-07-13, see logs/decisions.md): permissively
 licensed public sources plus the 47 handcrafted v0 samples. Char budgets
@@ -25,10 +25,10 @@ import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parent.parent
+REPO_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO_ROOT / "src"))
 
-from aadistill.manifest import sha256_file
+from aadistill.infrastructure.manifest import sha256_file
 
 # Per-sample cap: Stage 0 truncates at max_seq_len 1024 tokens (~4.2K chars),
 # so longer text would be downloaded but never forwarded.

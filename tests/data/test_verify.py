@@ -14,9 +14,9 @@ from pathlib import Path
 
 import pytest
 
-sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "src"))
 
-from aadistill.verify import boxed_answer, normalize_math, select, verify
+from aadistill.data.verify import boxed_answer, normalize_math, select, verify
 
 TERMINATED = "<|im_end|>"
 
@@ -133,7 +133,7 @@ def test_select_returns_none_when_nothing_verified():
 
 
 def test_verify_is_exhaustive_over_its_slice_table():
-    from aadistill.verify import VERIFIABLE
+    from aadistill.data.verify import VERIFIABLE
 
     for (group, source) in VERIFIABLE:
         accepted, reason = check(group, source, "gold", "gold")

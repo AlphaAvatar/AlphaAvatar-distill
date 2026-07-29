@@ -13,11 +13,11 @@ from pathlib import Path
 import pytest
 import torch
 
-sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "src"))
 
-from aadistill.collect import ActivationStatsCollector
-from aadistill.sandwich import depth_span_map, init_student, select_q_heads
-from aadistill.student import build_student, build_student_config
+from aadistill.init.collect import ActivationStatsCollector
+from aadistill.init.sandwich import depth_span_map, init_student, select_q_heads
+from aadistill.models.student import build_student, build_student_config
 
 
 def tiny_teacher(seed: int = 7):

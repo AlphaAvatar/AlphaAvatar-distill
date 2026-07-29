@@ -9,9 +9,9 @@ from __future__ import annotations
 import argparse, hashlib, json, sys
 from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parent.parent
+REPO_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO_ROOT / "src"))
-sys.path.insert(0, str(REPO_ROOT / "scripts"))
+sys.path.insert(0, str(REPO_ROOT / "scripts" / "rollout"))
 
 from transformers import AutoTokenizer, GenerationConfig
 from generate_teacher_answers import SLICES, generation_prompt, load_slice

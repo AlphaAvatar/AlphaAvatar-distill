@@ -15,7 +15,7 @@
 
 - **Agent:** Claude, pods `wdpyamp2pp5v8t` (dead on arrival) and `w86xu7t78y571h`
   (1× L40S, $0.99/h)
-- **Pre-registration:** [`proposals/2026-07-30_isolated_engine_and_cap.md`](../proposals/2026-07-30_isolated_engine_and_cap.md)
+- **Pre-registration:** [`proposals/2026-07-30_isolated_engine_and_cap.md`](../../proposals/rollout/2026-07-30_isolated_engine_and_cap.md)
 - **Cost:** **$1.85** against a $2.50 ceiling. No corpus built, no refusal data
   generated, no alignment-oriented slice added.
 - **Artifacts:** relay `isolated_engine_20260730/`; `report.json` sha256

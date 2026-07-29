@@ -13,9 +13,9 @@ from pathlib import Path
 import pytest
 import torch
 
-sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "src"))
 
-from aadistill.data import encode_sample, pack_blocks, validate_sample
+from aadistill.data.dataset import encode_sample, pack_blocks, validate_sample
 
 TEACHER = "Qwen/Qwen3-4B-Thinking-2507"
 REVISION = "768f209d9ea81521153ed38c47d515654e938aea"
@@ -213,7 +213,7 @@ def test_best_fit_packing_never_splits_a_sample():
     Reasoning traces make this a correctness issue rather than an efficiency
     one — half a trace trains as a sequence whose premises are absent.
     """
-    from aadistill.data import best_fit_blocks
+    from aadistill.data.dataset import best_fit_blocks
 
     encoded = [([i] * n, [1] * n) for i, n in enumerate([7, 5, 4, 3, 3, 2], start=1)]
     ids, mask, stats = best_fit_blocks(encoded, block_len=8, pad_id=0)
@@ -231,7 +231,7 @@ def test_best_fit_packing_never_splits_a_sample():
 
 
 def test_best_fit_packing_truncates_only_oversized_samples_and_counts_them():
-    from aadistill.data import best_fit_blocks
+    from aadistill.data.dataset import best_fit_blocks
 
     encoded = [([1] * 20, [1] * 20), ([2] * 3, [1] * 3)]
     ids, mask, stats = best_fit_blocks(encoded, block_len=8, pad_id=0)
@@ -245,7 +245,7 @@ def test_best_fit_packing_truncates_only_oversized_samples_and_counts_them():
 
 
 def test_best_fit_packing_reports_efficiency():
-    from aadistill.data import best_fit_blocks
+    from aadistill.data.dataset import best_fit_blocks
 
     encoded = [([1] * 4, [1] * 4), ([2] * 4, [1] * 4)]
     _, _, stats = best_fit_blocks(encoded, block_len=8, pad_id=0)
@@ -262,7 +262,7 @@ def test_packing_order_is_seeded_and_not_length_sorted():
     """
     import torch
 
-    from aadistill.data import best_fit_blocks
+    from aadistill.data.dataset import best_fit_blocks
 
     encoded = [([i] * (3 + (i * 7) % 29), [1] * (3 + (i * 7) % 29))
                for i in range(1, 60)]

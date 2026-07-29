@@ -66,7 +66,7 @@ REF = {
 REF_INT8 = {"decoder_scope_pct": 0.03, "full_scope_pct": 0.21}
 
 # Pre-registered constants for the CURRENT session
-# (logs/proposals/2026-07-28_stage3_packing_blocklen_control.md).
+# (logs/proposals/stage3/2026-07-28_stage3_packing_blocklen_control.md).
 #
 # This block plus `apply_decision_rules` and the doc template in `cmd_report`
 # are the session-specific parts of this file; everything else is generic.
@@ -82,7 +82,7 @@ ABLATION_BEHAVIOR = {          # 2026-07-27 ranking, for rule R5's re-read
     "s2v1_from_init": 0.2015, "s1_ffn_norm_v0@660": 0.1290,
     "s2v1_from_s1": 0.0947, "s2_blocks_v1": 0.0891,
 }
-REPORT_PATH = "logs/experiments/2026-07-28_stage3_packing_control.md"
+REPORT_PATH = "logs/experiments/stage3/2026-07-28_stage3_packing_control.md"
 
 
 def run_dir(run: str) -> Path:
@@ -384,13 +384,13 @@ def score_of_payload(payload: dict | None) -> float | None:
     """`behavior_score_v0` from a scorecard JSON.
 
     The headline metric is *derived* from `per_sample`, not stored in the
-    scorecard (src/aadistill/behavior.py:behavior_score), so it is recomputed
+    scorecard (src/aadistill/evaluation/behavior.py:behavior_score), so it is recomputed
     here rather than read out of `aggregate`.
     """
     if not payload or not payload.get("per_sample"):
         return None
     sys.path.insert(0, str(REPO / "src"))
-    from aadistill.behavior import behavior_score
+    from aadistill.evaluation.behavior import behavior_score
 
     try:
         return float(behavior_score(payload["per_sample"])["score"])
@@ -410,7 +410,7 @@ def apply_decision_rules(results: dict[str, dict]) -> list[str]:
 
     lines = [
         "Rules registered in "
-        "`logs/proposals/2026-07-28_stage3_packing_blocklen_control.md` §6, "
+        "`logs/proposals/stage3/2026-07-28_stage3_packing_blocklen_control.md` §6, "
         "applied mechanically here.",
         "",
         f"- Baseline `{BASELINE_RUN}@2700`: holdout **{BASELINE_NLL:.4f}** "
@@ -564,7 +564,7 @@ def cmd_report(runs: list[str]) -> int:
   repeats the first at a different seed and is the project's **first run-to-run
   variance measurement**; until now no "win" had a noise floor to be read
   against.
-- **Proposal:** `logs/proposals/2026-07-28_stage3_packing_blocklen_control.md`
+- **Proposal:** `logs/proposals/stage3/2026-07-28_stage3_packing_blocklen_control.md`
   (arms, budget and decision rules registered before the run).
 - **Arms this session:** {', '.join(f'`{r}`' for r in runs)}.
   `{CONTROL_ARM}` is the control (seed 20260726); `{REPLICATE_ARM}` is the
@@ -591,7 +591,7 @@ def cmd_report(runs: list[str]) -> int:
 
 All rows below were generated on the **same GPU, dtype and code** in this
 session, so they are directly comparable. Mechanical scorers only; see
-`src/aadistill/behavior.py` for the think-block contract and the echo-credit
+`src/aadistill/evaluation/behavior.py` for the think-block contract and the echo-credit
 rule.
 
 {behavior_table(beh_rows) if beh_rows else '- not produced'}

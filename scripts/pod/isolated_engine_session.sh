@@ -2,7 +2,7 @@
 # Pod-side driver: isolated-venv vLLM server benchmark + openmath cap arm.
 #
 # Plan and pre-registered rules:
-#   logs/proposals/2026-07-30_isolated_engine_and_cap.md
+#   logs/proposals/rollout/2026-07-30_isolated_engine_and_cap.md
 #
 # The whole point of this session is that vLLM gets its **own venv and its own
 # torch build**. On 2026-07-29 vLLM could not be imported into the project env
@@ -92,7 +92,7 @@ fi
 # the same teacher in the same GPU at the same time; both arms must run in one
 # process to compare tokens.
 log "benchmark starting, engines=$ENGINES"
-uv run python scripts/bench_engines.py \
+uv run python scripts/rollout/bench_engines.py \
   --engines "$ENGINES" \
   --slices rag_evidence,multihop_qa,gsm8k,openmath \
   --n-prompts "$N_PROMPTS" \
@@ -116,7 +116,7 @@ fi
 # n=2 and batch 2: KV cache for 4 sequences x 16,384 tokens on this teacher is
 # ~48 GB and does not fit the card. See the proposal's corrected scope.
 log "openmath cap arm starting (cap 16384, n=2, batch 2, budget ${CAP_MAX_HOURS}h)"
-uv run python scripts/generate_teacher_answers.py \
+uv run python scripts/rollout/generate_teacher_answers.py \
   --slices openmath --limit-per-slice 10 --n 2 --batch-size 2 \
   --max-new-tokens 16384 --max-hours "$CAP_MAX_HOURS" \
   --out "$OUT_CAP" 2>&1 | tee -a "$MARKERS/cap.log"

@@ -1,8 +1,8 @@
 """Stage 3 CLI: recovery training over the Stage 2 offline mixture.
 
 Usage:
-    uv run python scripts/train_stage3.py --config configs/stage3_<name>.json
-    uv run python scripts/train_stage3.py --config ... --resume [step_XXXXXX]
+    uv run python scripts/training/train_stage3.py --config configs/stage3_<name>.json
+    uv run python scripts/training/train_stage3.py --config ... --resume [step_XXXXXX]
 
 A fresh run refuses to write into an out_dir that already contains
 checkpoints (pass --resume, or pick a new out_dir). --resume without an
@@ -22,15 +22,15 @@ import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parent.parent
+REPO_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO_ROOT / "src"))
 
 import torch
 
-from aadistill.env import code_state, hardware_report, set_determinism
-from aadistill.manifest import sha256_file, sha256_json, write_manifest
-from aadistill.teacher import DTYPES, load_teacher, tokenizer_hash
-from aadistill.train import (
+from aadistill.infrastructure.env import code_state, hardware_report, set_determinism
+from aadistill.infrastructure.manifest import sha256_file, sha256_json, write_manifest
+from aadistill.models.teacher import DTYPES, load_teacher, tokenizer_hash
+from aadistill.training.train import (
     JsonlLogger,
     Trainer,
     build_blocks,

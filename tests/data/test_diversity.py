@@ -13,9 +13,9 @@ from pathlib import Path
 
 import pytest
 
-sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "src"))
 
-from aadistill.diversity import (
+from aadistill.data.diversity import (
     answer_agreement,
     choose_n,
     lexical_diversity,

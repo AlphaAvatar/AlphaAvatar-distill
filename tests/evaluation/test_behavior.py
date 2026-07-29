@@ -12,9 +12,9 @@ from pathlib import Path
 
 import pytest
 
-sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "src"))
 
-from aadistill.behavior import (
+from aadistill.evaluation.behavior import (
     aggregate,
     behavior_score,
     contains_gold,

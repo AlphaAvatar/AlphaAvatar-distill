@@ -22,10 +22,10 @@ from pathlib import Path
 import pytest
 import torch
 
-sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "src"))
 
-from aadistill.engines import HFEngine
-from aadistill.rollout import (
+from aadistill.rollout.engines import HFEngine
+from aadistill.rollout.snapshots import (
     aggregate_stats, importance_stats, read_snapshot, score_tokens, write_snapshot,
 )
 
@@ -101,7 +101,7 @@ def test_generate_without_logprobs_omits_the_key():
 
 def test_engine_rejects_a_backend_that_cannot_supply_logprobs():
     """Silently returning no log-probs would leave Stage 4/5 uncorrectable."""
-    from aadistill.engines import Engine
+    from aadistill.rollout.engines import Engine
 
     class _NoLogprobs(Engine):
         name = "mute"

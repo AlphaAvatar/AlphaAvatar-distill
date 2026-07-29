@@ -20,9 +20,9 @@ from pathlib import Path
 import pytest
 import torch
 
-sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "src"))
 
-from aadistill.generate import _left_pad, assert_batch_invariant, generate_ids
+from aadistill.rollout.generate import _left_pad, assert_batch_invariant, generate_ids
 
 VOCAB = 64
 EOS = 2

@@ -1,6 +1,6 @@
 """Build the `eval_behavior_v0` prompt set from held-out val data.
 
-    uv run python scripts/build_eval_behavior_v0.py \
+    uv run python scripts/data/build_eval_behavior_v0.py \
         --data-dir data/stage2_v1 --out-dir data/eval_behavior_v0
 
 Selection is deterministic: candidates are filtered, sorted by id, and sampled
@@ -23,13 +23,13 @@ import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parent.parent
+REPO_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO_ROOT / "src"))
 
-from aadistill.behavior import BEHAVIOR_GROUPS, final_number, is_refusal
-from aadistill.data import load_split
-from aadistill.env import code_state
-from aadistill.manifest import sha256_file
+from aadistill.evaluation.behavior import BEHAVIOR_GROUPS, final_number, is_refusal
+from aadistill.data.dataset import load_split
+from aadistill.infrastructure.env import code_state
+from aadistill.infrastructure.manifest import sha256_file
 
 SEED = 20260727
 PER_GROUP = 12

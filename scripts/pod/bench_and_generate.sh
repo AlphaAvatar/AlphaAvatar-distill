@@ -2,7 +2,7 @@
 # Pod-side driver: engine benchmark -> mechanical decision -> pilot corpus.
 #
 # Session plan and pre-registered rules:
-#   logs/proposals/2026-07-29_engine_benchmark.md
+#   logs/proposals/rollout/2026-07-29_engine_benchmark.md
 #
 # Runs unattended. Every stage writes an arm-scoped marker so the dev-box driver
 # can tell progress from failure without parsing logs, following the protocol in
@@ -77,7 +77,7 @@ log "engines to benchmark: $ENGINES"
 
 # --- benchmark -------------------------------------------------------------
 log "benchmark starting"
-uv run python scripts/bench_engines.py \
+uv run python scripts/rollout/bench_engines.py \
   --engines "$ENGINES" \
   --n-prompts "$N_PROMPTS" \
   --max-new-tokens 4096 \
@@ -112,7 +112,7 @@ ok = [r for r in runs if not r.get('oom') and r.get('tokens_per_s')]
 print(max((int(r['label'].split('=')[1]) for r in ok if '=' in r['label']), default=2))
 " 2>/dev/null || echo 2)
   log "generation starting on engine=$WINNER, batch_size=$GEN_BS, budget ${GEN_MAX_HOURS}h"
-  uv run python scripts/generate_teacher_answers.py \
+  uv run python scripts/rollout/generate_teacher_answers.py \
     --engine-from "$OUT_BENCH/decision.json" \
     --limit-per-slice "$LIMIT_PER_SLICE" \
     --n 4 \

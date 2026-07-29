@@ -16,12 +16,12 @@ from pathlib import Path
 
 import pytest
 
-REPO_ROOT = Path(__file__).resolve().parent.parent
-sys.path.insert(0, str(REPO_ROOT / "scripts"))
+REPO_ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(REPO_ROOT / "scripts" / "evaluation"))
 sys.path.insert(0, str(REPO_ROOT / "src"))
 
 import plot_perf_trend as pt
-from aadistill.behavior import behavior_score
+from aadistill.evaluation.behavior import behavior_score
 
 
 def attempt(nll: float, run: str = "r", *, id: str = "", parent: str | None = None,

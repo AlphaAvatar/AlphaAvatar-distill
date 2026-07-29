@@ -4,7 +4,7 @@
 Awaiting approval of scope, sequence-length handling, runtime and budget.
 
 Rests on the CPU preflight
-([log](../experiments/2026-07-30_stage3_target_preflight.md)), which is complete.
+([log](../../experiments/stage3/2026-07-30_stage3_target_preflight.md)), which is complete.
 
 ## 1. Question
 

@@ -11,12 +11,12 @@ from __future__ import annotations
 import argparse, json, sys
 from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parent.parent
+REPO_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO_ROOT / "src"))
 
 import torch
-from aadistill.rollout import aggregate_stats, importance_stats, score_tokens
-from aadistill.teacher import load_causal_lm
+from aadistill.rollout.snapshots import aggregate_stats, importance_stats, score_tokens
+from aadistill.models.teacher import load_causal_lm
 
 ap = argparse.ArgumentParser()
 ap.add_argument("--reports", nargs="+", required=True)
