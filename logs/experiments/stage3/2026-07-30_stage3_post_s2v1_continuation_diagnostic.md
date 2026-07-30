@@ -1,6 +1,33 @@
-# 2026-07-30 — Stage 3 teacher-target SFT warm-up: 2x2 result
+# 2026-07-30 — Post-s2v1 continuation diagnostic (relabelled; **not** a teacher-target baseline)
 
-- **Pre-registration:** [`proposals/stage3/2026-07-30_stage3_teacher_target_2x2.md`](../../proposals/stage3/2026-07-30_stage3_teacher_target_2x2.md)
+> **RELABELLED 2026-07-30 by maintainer direction. Read this first.**
+>
+> This run was designed and executed as *the* teacher-target 2×2. It is not one,
+> and its verdict must not be used to accept or reject teacher-native training.
+>
+> **Both arms started from `stage3/s2v1_from_init/step_002700`, which is already
+> 2,700 steps of training on public targets.** The public-target control
+> therefore began inside its own target distribution while the teacher-native
+> treatment began outside it. That is a path-dependent advantage for the
+> control, and it is not something the readouts can be corrected for after the
+> fact.
+>
+> What this run actually measures: **short post-s2v1 continuation** on two
+> target sets — i.e. what happens when you continue an already-public-trained
+> checkpoint for 137 steps. That is a useful diagnostic and its measurements
+> stand. It is not the pre-registered question, which was whether teacher-native
+> targets beat public targets **from the common student initialization**.
+>
+> **The R2 "reject" outcome below is void as evidence about teacher-native
+> targets.** The corrected baseline is specified in
+> [`proposals/stage3/2026-07-30_stage3_teacher_target_2x2.md`](../../proposals/stage3/2026-07-30_stage3_teacher_target_2x2.md) §11
+> and starts every arm from the Stage 1 structural-initialization checkpoint.
+>
+> Sections 6–7 below independently found two invalid *instruments*. Those
+> findings survive relabelling and apply to the corrected baseline too, but they
+> are a second, separate problem from the start-point confound named here.
+
+- **Original pre-registration:** [`proposals/stage3/2026-07-30_stage3_teacher_target_2x2.md`](../../proposals/stage3/2026-07-30_stage3_teacher_target_2x2.md)
 - **Generated mechanically** by `scripts/pod/report_tt2x2.py` from the runs' own artifacts. Numbers are measured; the rules below are applied mechanically; the stage verdict is left to review.
 
 ## 1. Corpus

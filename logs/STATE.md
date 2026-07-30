@@ -2,8 +2,10 @@
 
 **Updated:** 2026-07-30 (UTC+8 dev box) · branch `main` ·
 **nothing running, nothing billing, no pods or volumes exist.**
-Last session: the Stage 3 teacher-target 2x2 ran end to end, **$4.87** of a
-$7.00 ceiling.
+Last session: a four-arm run completed end to end (**$4.87** of a $7.00
+ceiling) and was then **relabelled a post-s2v1 continuation diagnostic** — its
+start point was invalid, so it is not a teacher-target baseline. The corrected
+baseline is specified and **awaiting approval before any paid work** (§8).
 
 This file is the canonical handoff. It is a *snapshot*, not an archive —
 historical detail lives in `logs/experiments/`, `logs/proposals/` and
@@ -56,11 +58,15 @@ trainable), CE 0.25 + full-vocab KD 1.0 at τ=1 scope `all`, lr 2e-4 / warmup 60
 cosine to 0.1×, fp32 master + bf16 autocast, **seed 20260726**, eval every 150
 steps. The FFN-first warm-up ladder is retired.
 
-**The teacher-target 2x2 is done and the branch point is unchanged.** Its
-pre-registered rule R2 fired (reject), but §3 records why that verdict is about
-the instrument rather than the intervention
-([log](experiments/stage3/2026-07-30_stage3_teacher_target_2x2.md)). Both arms
-regressed holdout NLL against the branch point, so neither replaces it.
+**The teacher-target question is still open.** A four-arm run completed on
+2026-07-30 but started every arm from `s2v1_from_init/step_002700`, which is
+already 2,700 steps of public-target training — a path-dependent advantage for
+the public arm. It is relabelled a **post-s2v1 continuation diagnostic**
+([log](experiments/stage3/2026-07-30_stage3_post_s2v1_continuation_diagnostic.md));
+its R2 "reject" is **void as evidence about teacher-native targets**. Both arms
+regressed holdout NLL, so neither replaces the branch point. The corrected
+baseline forks from the **Stage 1 structural init**
+([proposal §11](proposals/stage3/2026-07-30_stage3_teacher_target_2x2.md)).
 
 **Best checkpoint / branch point:** `stage3/s2v1_from_init/step_002700/model` —
 holdout NLL **3.8285**, `behavior_score_v0` 20.2%, at 33% fewer steps than the
@@ -83,13 +89,14 @@ best-NLL run (`s2_blocks_v1`, 3.8003). Teacher ceiling on the same eval:
 | **openmath is cap-bound but raising it fails** | cap 16384 closure 0.300 → **0.850**, accuracy among closed **0.750 → 0.294**, cost/accepted doubled | 07-29 |
 | **Teacher targets would be shredded by the data path** | 48.5% exceed `block_len` 1024; `best_fit`@1024 loses **56%** of supervision; **`best_fit`@8192 is lossless** | 07-30 |
 | **`block_len` 8192 needs gradient checkpointing** | peak **44,983 / 46,068 MiB (97.6%)** with it on; `best_fit` pads every block, so this is constant, not sample-dependent. ~4.3 s/step | 07-30 |
-| **A short SFT warm-up fixes a lot of protocol, on either target set** | `format_ok` 0.250 → **0.625** (public) / 0.354 (teacher-native) in 137 steps | 07-30 |
-| **...and costs the LM in both arms** | holdout NLL 3.8285 → 4.0622 (public) / **3.9653** (teacher-native) | 07-30 |
+| **Continuing s2v1@2700 for 137 steps moves protocol a lot** | `format_ok` 0.250 → **0.625** (public) / 0.354 (teacher-native). **Diagnostic only** — arms forked from a public-trained checkpoint | 07-30 |
+| **...and costs the LM in both arms** | holdout NLL 3.8285 → 4.0622 (public) / **3.9653** (teacher-native). Same caveat | 07-30 |
 | **`p(</think>)` is inverted for teacher-native work** | measured where the *public* render demands it, so it scores "skip reasoning entirely" | 07-30 |
 | **The 512-token scorecard was saturated for one arm** | treatment hit the cap on **84.2%** of prompts vs 42%/24%; re-scored at 2048 | 07-30 |
 | **Conditioned on finishing, the arms are near-identical** | treatment `terminated` **1.000**, `format_ok` 0.909; the gap is *finishing less often*, not malformed output | 07-30 |
 | **The control wins protocol partly by being terse** | median finished answer **2 words** (control) vs 34 (teacher-native) | 07-30 |
-| **n=2 candidates were the same sample twice** | 92.7% byte-identical; a serving engine seeds per *request*. accept@n == accept@1 by construction | 07-30 |
+| **The corpus is effectively n=1** | 92.7% byte-identical pairs; a serving engine seeds per *request*, so the draws were never independent. accept@n == accept@1 by construction. **Not** evidence about sampling diversity | 07-30 |
+| **A start point trained on one arm's targets invalidates the fork** | `s2v1_from_init@2700` is 2,700 public-target steps; forking both arms there compares target sets *conditioned on one of them* | 07-30 |
 
 **The two that most changed the plan:**
 
@@ -180,33 +187,62 @@ fragmentation rather than targets.
 
 ---
 
-## 8. Gate 1 is complete — decisions now open
+## 8. Awaiting approval — corrected teacher-target baseline
 
-**Approved and run 2026-07-30 (maintainer approved the whole gate; total tokens
-held equal). $4.87 of a $7.00 ceiling. Nothing is billing.**
+**Nothing is running or billing. No paid work until the maintainer approves the
+budget in §8.3.**
 
-* Corpus: 752 prompts, **540 accepted**
-  ([log](experiments/stage3/2026-07-30_teacher_corpus_750.md))
-* 2x2: four arms, two seeds each, all completed, all upload-verified 16/16
-  ([log](experiments/stage3/2026-07-30_stage3_teacher_target_2x2.md))
-* Pre-registered verdict: **R2 fired — treatment rejected.** Not trustworthy
-  evidence about teacher-native targets; see that log §6-7.
+Spent 2026-07-30: **$4.87** of a $7.00 ceiling, on the corpus (still valid) and
+the run now relabelled a diagnostic (start point invalid).
 
-### Open questions for the maintainer
+### 8.1 What is settled
 
-1. **The protocol readouts reward terseness.** `format_ok` / `terminated` are
-   maximised by a 2-word answer, and the control's median finished answer *is*
-   2 words. P10 forbids reading that as a win. Any re-run needs an
-   answer-quality axis alongside them — this is a metric-design decision, not an
-   implementation detail.
-2. **`p(</think>)` should be dropped or re-sited** for teacher-native work: it
-   is measured where the *public* render demands the token and therefore scores
-   "skip reasoning entirely".
-3. **Both arms lost 3.6-6.1% holdout NLL.** A warm-up that damages the LM to buy
-   format may be a bad trade at 0.6B; the lr/step budget deserves its own
-   ablation before more corpus is bought.
-4. **The design cannot separate "teacher-native" from "18.9x more supervised
-   tokens".** If that separation matters, it needs a different control.
+* **Corpus stands** — 540 accepted targets, hashed, reusable as-is; recorded as
+  **effectively n=1** ([log](experiments/stage3/2026-07-30_teacher_corpus_750.md)).
+  Not regenerated (maintainer direction).
+* **Arms stand** — 487 train / 53 val, identical prompt sets and split
+  membership, lossless at `best_fit`@8192.
+* **Start point pinned** — `artifacts/stage1/qwen3_0p6b_init_v0/checkpoint`,
+  `model.safetensors` sha256 `86fbba78…`, verified identical local vs relay.
+* **Optimizer/scheduler reset is automatic** when launching from `student_path`
+  without `--resume` (verified in code; proposal §11.3).
+
+### 8.2 Blocked, by maintainer direction
+
+No LR sweep, no step-budget ablation, no metric redesign, no final-only or
+trace-length variants, no new corpus, no corpus regeneration — **until the
+corrected baseline exists**.
+
+### 8.3 The one decision needed: step budget from a cold start
+
+The corrected baseline forks from the Stage 1 init (holdout NLL **11.748**), not
+from a checkpoint at 3.83. The registered per-arm parity rule is unchanged
+(equal total training tokens); the absolute budget is not fixed by the
+pre-registration and is the maintainer's call.
+
+| option | steps | tokens | treatment passes | control passes |
+|---|---:|---:|---:|---:|
+| parity with the diagnostic | 137 | 2.24M | 3.0 | 7.6 |
+| **1× corpus-limited** | 273 | 4.47M | 6.0 | 15.2 |
+| deeper | 546 | 8.94M | 12.0 | 30.3 |
+
+**The tension to settle:** the reference run needed 2,700 steps / 44.2M tokens to
+take this init from 11.75 → 3.83 on a 22.1M-token mixture. This corpus holds
+0.71M real tokens (treatment) / 0.26M (control), so *no* budget on it produces a
+converged model — more steps buy repetition, not coverage. Both arms will be far
+from convergence at any of the above, and the control repeats 2.5× more often
+than the treatment at equal tokens.
+
+### 8.4 The confound that survives the correction
+
+At equal total tokens the treatment arm gets **18.9×** the supervised tokens
+(519,478 vs 27,526 per epoch), because a public target for these slices is a few
+tokens and a teacher-native one is a full trace. From a common cold init this
+matters *more*, not less: an arm with 18.9× the gradient signal should win on
+almost any axis. A treatment win therefore establishes "teacher-native beats the
+best available public alternative at equal compute" and **not** "traces beat
+short answers per supervised token". Separating those needs a third arm and is
+out of scope until this baseline exists.
 
 ## 9. Superseded conclusions — do not act on these
 

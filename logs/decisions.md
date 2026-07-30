@@ -564,3 +564,37 @@
 - **Claim strength:** ratios measured on 3 sequences × 96 tokens per engine, greedy, cap 256, with the trainer scoring in fp32/CPU against bf16/GPU rollouts — so part of the residual is dtype, making these an **upper bound** on engine-attributable mismatch. Unmeasured: ratios under sampling, long sequences, staleness.
 - **Owed by this session:** vLLM's cap-8192 cells were never measured, because the server was launched with `--max-model-len 8192` leaving no room for a ~410-token prompt, and two restarts failed. SGLang's cap-8192 numbers therefore **stand alone and are not a comparison**. Re-run long-context on both arms in one session.
 - **Revisit when:** the corrected-training pilot runs, or an engine ships a materially different release.
+
+## 2026-07-30 — The teacher-target fork must start from the Stage 1 init
+
+- **Context:** the first teacher-target 2×2 forked a public-target control and a
+  teacher-native treatment from `stage3/s2v1_from_init/step_002700`. That
+  checkpoint is 2,700 optimizer steps of training on public targets, so the
+  control resumed inside its own target distribution while the treatment had to
+  move away from it. The run completed ($4.87) and its rule R2 fired "reject".
+- **Decision (maintainer):** the primary baseline is invalid. Every arm forks
+  from the **Stage 1 structural-initialization checkpoint**
+  (`artifacts/stage1/qwen3_0p6b_init_v0/checkpoint`, `model.safetensors` sha256
+  `86fbba78…`) — not Stage 3 `s1@660`, not `step_002700`. `step_002700` is kept
+  as an **external reference only, never an initialization**. Optimizer and
+  scheduler state reset in every arm. The completed run is relabelled a
+  *post-s2v1 continuation diagnostic* and its R2 outcome must not be used to
+  accept or reject teacher-native training.
+- **Also decided:** the corpus is recorded as **effectively n=1** — 92.7%
+  byte-identical candidate pairs indicate the implementation did not produce
+  independent draws, which is *not* evidence that nucleus sampling lacks
+  diversity. It is **not** regenerated for now.
+- **Frozen until the corrected baseline exists:** no LR, step-budget, metric,
+  final-only, trace-length or new-corpus experiments.
+- **Alternatives considered:** re-scoring the completed run at a larger cap and
+  with corrected probes. Rejected — re-scoring cannot remove a path-dependent
+  start point; only re-forking can.
+- **Expected upside:** a comparison that answers the registered question —
+  whether teacher-native targets beat public targets *from the common student
+  initialization* — instead of one conditioned on 2,700 steps of one arm.
+- **Risks:** the corpus holds 0.71M/0.26M real tokens, so no budget on it yields
+  a converged model from a cold init; and the treatment arm's 18.9× supervised
+  token advantage is amplified from a cold start, so a treatment win will not
+  isolate "teacher-native" from "more supervision" (proposal §11.7).
+- **Revisit when:** the corrected baseline has run and its step-0 and per-arm
+  metrics are recorded.

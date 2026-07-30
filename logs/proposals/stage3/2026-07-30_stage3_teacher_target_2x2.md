@@ -1,7 +1,14 @@
 # 2026-07-30 — Stage 3 teacher-target SFT warm-up: 2×2 pilot (pre-registration)
 
-**Status:** pre-registered, **nothing run, no pod created, no spend committed.**
-Awaiting approval of scope, sequence-length handling, runtime and budget.
+**Status (amended 2026-07-30, second revision):** the design in §1–§9 was run
+and is **superseded**. Its start point was invalid — see §10. The corrected
+baseline is **§11**, which is what any future paid run implements.
+
+The first execution ($4.87) is relabelled a *post-s2v1 continuation diagnostic*
+([log](../../experiments/stage3/2026-07-30_stage3_post_s2v1_continuation_diagnostic.md));
+its R2 "reject" outcome is void as evidence about teacher-native targets.
+
+*Original status: pre-registered, nothing run, no spend committed.*
 
 Rests on the CPU preflight
 ([log](../../experiments/stage3/2026-07-30_stage3_target_preflight.md)), which is complete.
@@ -149,3 +156,157 @@ to approve generation and training as two separate gates.
 * No Stage 4/5, no corrected-training pilot, no rollout-engine adoption.
 * No refusal data and no alignment-oriented slice.
 * The openmath cap stays 4096.
+
+---
+
+# 10. Why §1–§9 was invalid: the start point
+
+The design above started both arms from
+`stage3/s2v1_from_init/step_002700`. That checkpoint is **2,700 optimizer steps
+of training on public targets** (mixture v1). Forking a public-target control
+and a teacher-native treatment from it does not compare the two target sets: it
+compares them *conditioned on 2,700 steps of one of them*.
+
+Concretely, the control resumes inside its own target distribution — same answer
+style, same empty-`<think>` convention, same length profile — while the
+treatment must move away from it. Any measured difference confounds "which
+target set is better" with "which target set this checkpoint was already trained
+on". No re-scoring, cap change or metric substitution fixes a path-dependent
+start; the arms have to be forked from a point neutral to both.
+
+This is independent of, and more fundamental than, the instrument problems the
+run also uncovered (invalid `p(</think>)` siting, saturated generation cap,
+protocol metrics that reward terseness). Those remain real and are carried into
+§11 as constraints on the readouts.
+
+**Consequence:** the completed run is a post-s2v1 continuation diagnostic. Its
+R2 outcome is not evidence for or against teacher-native training.
+
+# 11. Corrected baseline (to be run; supersedes §2 and §4's start point)
+
+## 11.1 What changes
+
+| | superseded (§1–§9) | corrected |
+|---|---|---|
+| start point | `s2v1_from_init/step_002700` (2,700 public-target steps) | **Stage 1 structural init**, before any Stage 3 training |
+| what it answers | short post-s2v1 continuation | **teacher-native vs public from the common student initialization** |
+| `step_002700` | initialization | **external reference only, never an initialization** |
+
+Everything else is deliberately unchanged: the accepted paired corpus, the
+train/val split, `best_fit` packing at `block_len` 8192, the trainable parameter
+set, block-ordering rules, loss weights, and per-arm parity of the total
+training-token budget. **Only the assistant turn of each sample may differ
+between arms.**
+
+## 11.2 Start point, pinned
+
+`artifacts/stage1/qwen3_0p6b_init_v0/checkpoint`, on the relay at
+`stage1/qwen3_0p6b_init_v0/checkpoint/`. Verified identical local vs relay:
+
+| file | sha256 |
+|---|---|
+| `model.safetensors` | `86fbba78e8a2a32481ca77e5ac362ed1f17a39dbc30bcbc952cabd5df2633e54` |
+| `config.json` | `a7131bb092b38a078edc213961f0eb57eaead24f1396e25741f4887b1a694054` |
+| `tokenizer.json` | `be75606093db2094d7cd20f3c2f385c212750648bd6ea4fb2bf507a6a4c55506` |
+| `tokenizer_config.json` | `8fa82a4ba512c8bee7c1c5e82b9a71ddbef362e4665be5c8f7ce0afd78af129a` |
+| `generation_config.json` | `0019fccc989feeebf6d72934e1f6b917b320cc61f294dca1e562bce4c9cf5f83` |
+| `chat_template.jinja` | `3802169b2a02b81e6adb7ab4f64f91ff02db753c8c3a64a01c35192d3a61d8d7` |
+
+This is the Stage 1 PCA/sandwich init ([log](../../experiments/stage1/2026-07-14_stage1_qwen3_0p6b_init_v0.md)),
+**not** Stage 3 `s1@660` and **not** `step_002700`.
+
+## 11.3 Optimizer and scheduler reset — verified, not assumed
+
+Launching an arm from `student_path` **without** `--resume` already resets both:
+
+* `AdamW` is constructed fresh in `Trainer.__init__` (`src/aadistill/training/train.py:426`);
+* `restore()` loads optimizer state **only** on the `--resume` path (`:640`);
+* the LR is a pure function `lr_factor(step, total_steps, warmup_steps, min_lr_frac)`
+  (`:315`) — there is no scheduler state object, and `step` starts at 0.
+
+So the reset requirement is satisfied by construction, provided **no arm is ever
+launched with `--resume`** except to recover an interrupted arm of the same run.
+
+## 11.4 Shared step-0 model
+
+All four arms share one step-0 model, so it is evaluated **once** and recorded as
+the common baseline, on the same GPU in the same session as the arms.
+
+Known already (CPU, 2026-07-14): `holdout_v1` NLL **11.748**, PPL 126.5K,
+top-1 0.0175, against random init 12.13 and teacher 2.63.
+
+Not yet measured and required at step 0: `eval_behavior_v0` (`format_ok`,
+`terminated`, `think_closed`, `empty_answer`, `truncated_at_cap`), the
+`p(</think>)` / `p(<|im_end|>)` probes, and INT8 holdout. These are what make the
+per-arm deltas readable from a common origin.
+
+## 11.5 Arms
+
+Four arms, one variable plus seed:
+
+| arm | targets | seed |
+|---|---|---|
+| `ttb_ctrl_a` | public v1 | 20260726 |
+| `ttb_ctrl_b` | public v1 | 20260728 |
+| `ttb_treat_a` | teacher-native | 20260726 |
+| `ttb_treat_b` | teacher-native | 20260728 |
+
+Generated by `scripts/data/make_tt2x2_configs.py`, which asserts the four configs
+differ only in `data_dir`, `seed`, `run_name`, `out_dir` and a purpose note.
+
+## 11.6 Corpus, split and exposure — unchanged and shared
+
+540 accepted prompts, **487 train / 53 val**, identical prompt sets and identical
+split membership in both arms (`sha256(id)`-derived, seed-free, arm-independent).
+
+| | control | treatment |
+|---|---:|---:|
+| train prompts | 487 | 487 |
+| train blocks @ `best_fit` 8192 | **36** | **91** |
+| real tokens / epoch | 263,840 | 714,941 |
+| supervised tokens / epoch | **27,526** | **519,478** |
+| supervised fraction | 0.0929 | 0.6591 |
+| packing efficiency | 0.895 | 0.959 |
+
+## 11.7 The confound this design still cannot remove
+
+At equal total training tokens the treatment arm receives **18.9×** the
+supervised tokens (519,478 vs 27,526 per epoch). A public target for these
+slices is a few tokens after an empty think block; a teacher-native one is a
+full trace. **The extra supervision is not a nuisance — it is inseparable from
+the intervention**, because a public target cannot be given a reasoning trace.
+
+From the corrected common initialization this matters *more* than it did from a
+trained start: an arm with 18.9× the gradient signal should move further on
+almost any axis, so a treatment win is close to guaranteed and would not by
+itself establish that teacher-native targets are better *per supervised token*.
+
+The corrected baseline is still worth running — it removes a confound that
+currently makes the comparison unreadable in the *opposite* direction — but its
+result must be reported as "teacher-native targets vs the best available public
+alternative at equal compute", never as "traces beat short answers per token".
+Separating those needs a third arm (e.g. public targets at matched supervised
+tokens), which is explicitly **out of scope** until this baseline exists.
+
+## 11.8 Readout constraints carried over from the diagnostic
+
+* **`p(</think>)` is not a valid protocol readout here.** It is measured where
+  the *public* render demands the token, so it scores "skip reasoning entirely".
+  Report it as a descriptive statistic only, or re-site it on teacher-native
+  renders; it must not gate a decision in its current form.
+* **The generation cap must not saturate either arm.** At 512 the treatment arm
+  truncated 84.2% of prompts. Score at a cap where `truncated_at_cap` is
+  reported for both arms, and report every protocol metric **both** raw and
+  conditioned on generations that finished.
+* **Protocol metrics must be paired with an answer-quality/length axis.**
+  `format_ok` and `terminated` are maximised by a 2-word answer, and the
+  control's median finished answer was 2 words. P10 forbids reading that as a
+  win.
+
+Decision rules are **not** re-registered here: the maintainer has directed that
+metric design is settled after this baseline exists, not before it.
+
+## 11.9 Out of scope until this baseline exists
+
+No LR sweep, no step-budget ablation, no metric redesign, no final-only or
+trace-length variants, no new corpus, and no regeneration of the corpus.

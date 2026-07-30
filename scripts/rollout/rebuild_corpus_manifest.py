@@ -116,10 +116,13 @@ def main() -> int:
         "byte_identical_candidate_sets": identical,
         "identical_rate": round(identical / len(multi), 4) if multi else None,
         "rescued_by_a_later_candidate": rescued,
+        "effective_n": 1,
         "note": "the generating run replicated each prompt inside ONE request "
-                "under ONE seed; vLLM seeds per request, so the replicas decoded "
-                "identically and rejection sampling was a no-op. Fixed after this "
-                "build: each candidate index now draws under its own seed.",
+                "under ONE seed; vLLM seeds per request, so the replicas were "
+                "NOT independent draws and this corpus must be read as n=1. "
+                "This is a property of the implementation, not evidence about "
+                "sampling diversity. Fixed after this build: each candidate "
+                "index now draws under its own seed.",
     }
     snap_manifest_path = out_dir / "rollout_snapshot" / "manifest.json"
     snapshot = (json.loads(snap_manifest_path.read_text())

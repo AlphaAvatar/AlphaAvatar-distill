@@ -11,11 +11,15 @@
 
 ## 1. Result
 
-752 prompts, slice-balanced across the in-scope four, n=2, cap 4096, sampled at
-temperature 1.0 / top_p 1.0 / top_k off. **540 targets accepted (71.8%)**, inside
-the pre-registered 400–550 expectation.
+752 prompts, slice-balanced across the in-scope four, nominal n=2 but
+**effectively n=1** (§2), cap 4096, sampled at temperature 1.0 / top_p 1.0 /
+top_k off. **540 targets accepted (71.8%)**, inside the pre-registered 400–550
+expectation.
 
-| slice | prompts | accept@1 | accept@n |
+Both columns below are the same measurement: the two candidates were not
+independent draws, so accept@n carries no information beyond accept@1.
+
+| slice | prompts | accept@1 | accept@n *(= accept@1, §2)* |
 |---|---:|---:|---:|
 | rag_evidence | 188 | 0.979 | 0.979 |
 | multihop_qa | 188 | 0.825 | 0.825 |
@@ -34,26 +38,36 @@ do not saturate the engine was correct.
 Environment, pinned: `vllm/vllm-openai:v0.26.0`, vLLM 0.26.0, torch 2.11.0+cu130,
 transformers 5.14.1, L40S 46 GB, driver 580.159.03, CUDA 13, sm_89.
 
-## 2. The corpus is fit for purpose, and n=2 did nothing
+## 2. The corpus must be recorded as effectively n=1
 
 **697 of 752 candidate pairs (92.7%) are byte-identical, and candidate 2 rescued
 0 of 212 first-candidate failures.** accept@n therefore equals accept@1 in every
 slice above — by construction, not by coincidence.
 
+**This is a statement about the implementation, not about sampling.** At
+temperature 1.0 / top_p 1.0 with independent RNG streams, two draws from a
+thinking teacher would not agree byte-for-byte 92.7% of the time; that rate is
+the signature of draws that were never independent. It is **not** evidence that
+nucleus sampling lacks diversity, and must not be cited as such.
+
 Cause: `generate_candidates` replicated each prompt `n` times inside **one**
 engine request under **one** seed. A serving engine seeds per *request*, so the
 replicas decoded identically. The replication trick only ever worked for
 in-process HF `generate`, which draws every sequence from one rolling RNG; it was
-carried over to the server path unexamined. The rejection-sampling design was
-therefore inert, at 2× the token cost.
+carried over to the server path unexamined.
 
-Fixed: each candidate index now draws under its own seed
+**Recorded status: this corpus is effectively n=1** — 540 targets each accepted
+on a single draw, at 2× the token cost. Every accept rate above is an accept@1.
+It is **not** regenerated for now (maintainer direction 2026-07-30): 540 verified
+single-draw targets are sufficient for the corrected baseline, and GPU time is
+not spent on diversity that baseline does not depend on.
+
+Fixed in code: each candidate index now draws under its own seed
 (`seed + index * 1_000_003`), with a regression test asserting distinct seeds per
-call. **The existing corpus is used rather than regenerated** — 540 verified
-targets is inside the pre-registered range, every target passed the same
-verifier, and regeneration would cost ~$1.20 to buy diversity the 2×2 does not
-depend on. The measured diversity is recorded in the corpus manifest so nobody
-later reads accept@n as evidence that n candidates helped.
+call. **The fix is untested against real acceptance** — no regenerated corpus
+exists to confirm that independent draws raise accept@n. The measured
+non-independence is recorded in the corpus manifest so nobody later reads
+accept@n as evidence that n candidates helped.
 
 **This matters more for Stage 4/5 than for here.** GRPO-style on-policy methods
 depend on genuine sample diversity per prompt; had this reached rollout
