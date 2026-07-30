@@ -1,5 +1,12 @@
 # 2026-07-30 — Unrestricted (P18) generation pilot: the degeneration is the whole line, not the targets
 
+> **Scope note added 2026-07-31.** Every generation here was **no-system**. Under
+> the project protocol (proposal §13) that is the **auxiliary/control**
+> distribution, not the primary one. The findings below stand as measured — most
+> importantly that `s2v1@2700` degenerates 8/8 — but they characterise
+> user-only inference. The primary, system-conditioned distribution has never
+> been generated, trained or measured.
+
 - **Cost:** **$0.79** (pilot) · session total **$7.93** of the $15.00 authorization
 - **Pod:** `2dbp44q6jpp5jk` (vLLM 0.26.0 official image, L40S), deleted; nothing billing
 - **Artifacts:** `artifacts/pilot/*.json` — complete raw output, exact token ids,
@@ -101,10 +108,12 @@ Remaining live causes, in order of evidential support:
    term anywhere in the recipe.
 4. **Missing representation-level distillation** — the objective is CE + full-vocab
    logit KD only; no hidden-state or sequence-level term.
-5. ~~System-prompt coverage gap~~ — **retracted 2026-07-31**: the teacher
-   requires no system message, and all four in-repo paths share a byte-identical
-   prompt prefix. Not a cause.
-   ([contract](2026-07-31_system_prompt_contract.md))
+5. **No system-conditioned data exists.** The *template* requires no system
+   message ([contract](2026-07-31_system_prompt_contract.md)) — but the *project
+   protocol* mandates one (proposal §13), so 100% of training and all six
+   checkpoints sit on the auxiliary distribution. Not a cause of the degeneration
+   measured here, which is no-system throughout, but it means the primary
+   distribution is entirely unmeasured.
 
 ## 5. Effect of the former 4096-token teacher cap
 

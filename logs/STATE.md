@@ -221,7 +221,8 @@ progress.
 
 | finding | measurement |
 |---|---|
-| **Prompt contract is CLEAN — earlier 'system mismatch' RETRACTED** | The teacher requires no system message: the template has no default-system fallback and the model card never mentions one. Paths 1-4 share a byte-identical prompt prefix (`b19e629c…`). Remaining: 6/76 eval prompts carry a system turn training never saw (7.9%, eval-side only) ([log](experiments/stage3/2026-07-31_system_prompt_contract.md)) |
+| **Teacher template FACT: no default system message is injected** | Template has no default-system fallback; model card never mentions one; paths 1-4 share a byte-identical prompt prefix `b19e629c…`. Proves only that user-only inference is *technically supported* ([log](experiments/stage3/2026-07-31_system_prompt_contract.md)) |
+| **Project PROTOCOL: an explicit system message is MANDATORY** | Maintainer, 07-31. System context is the control interface for task rules, tool definitions, evidence-use and decision constraints. Required in teacher generation, training, primary evaluation and inference. **100% of the primary target distribution (540 targets) is no-system and is demoted to auxiliary/control** ([proposal §13](proposals/stage3/2026-07-30_stage3_teacher_target_2x2.md)) |
 | **Data path is clean** | 8/8 samples: one `<think>`, no dropped trace chars, `</think>` and final `<|im_end|>` supervised, packing lossless |
 | **Teacher terminates naturally 80.1%** | p25 466, p50 727, p99 3854; the old 512 eval cap sat inside the teacher's first quartile |
 | **The 4096 teacher cap censored 19.9%** | openmath **69.7%** — explains its 0.261 accept rate; corpus composition is biased, content is not |
@@ -229,11 +230,20 @@ progress.
 
 ### 8.3 Next — needs approval
 
-The standing plan is [proposal §12](proposals/stage3/2026-07-30_stage3_teacher_target_2x2.md):
-convergence probe first (~$4-6), then corpus expansion to ~8,000 prompts (~$13,
-**exceeds the remaining authorization**), then exposure-bias and representation
-KD. Convergence criteria: natural-termination >=0.8, degeneration <=0.05,
-length p50 within 0.5-2x of the teacher's 727.
+The standing plan is now [proposal §13](proposals/stage3/2026-07-30_stage3_teacher_target_2x2.md)
+— **system-conditioned**, superseding §12's user-only probe as the primary line:
+
+* **Phase R** — regenerate all 752 prompts with the teacher conditioned on
+  `aadistill-sys-v1` (40% versioned neutral default / 60% task-specific from
+  per-slice pools of 6), fixed per-candidate seeds, stop-id union
+  `[151645, 151643]`, **no 4096 cap** (openmath lost 69.7% to it). **$1.80-2.40**
+* **Phase C** — paired 4-arm continuation, system-conditioned vs the existing
+  no-system corpus as control, identical prompt set. **$1.60-2.00**
+* **Gate** — system-conditioned uncapped probe: natural-termination >=0.8,
+  degeneration <=0.05, length p50 within 0.5-2x of 727, system-instruction
+  adherence, and default-vs-task-specific condition sensitivity. **$0.25**
+
+**Total $4.00-5.00, fits the remaining $7.07.** Awaiting review; no GPU spend.
 
 ## 9. Superseded conclusions — do not act on these
 

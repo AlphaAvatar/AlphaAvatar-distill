@@ -83,7 +83,18 @@ Assistant-turn rendering differs only where it should:
   (**empty** think block — the protocol substitution, as previously found);
 * teacher → `<think>\n{trace}\n</think>\n\n{answer}<|im_end|>`.
 
-## 4. What genuinely remains (restated, much smaller)
+## 4. SUPERSEDED 2026-07-31 by the project protocol
+
+Sections 1-3 are **template facts** and stand. The framing below — "absent
+capability, not a defect", "much smaller" — was written before the maintainer
+set the project protocol, under which **an explicit system message is
+mandatory** for teacher generation, training, primary evaluation and inference
+(proposal §13). Under that protocol the missing system conditioning IS a
+training-coverage problem covering 100% of the primary target distribution, and
+the 6 system-conditioned eval prompts are retained precisely because their
+mismatch reveals it. Retained verbatim below for the record.
+
+## 4a. What genuinely remains (restated, much smaller) — SUPERSEDED
 
 1. **6 of 76 evaluation prompts carry a system turn** the student has never seen
    in training. That is a **7.9% evaluation-side inconsistency**, not a corpus

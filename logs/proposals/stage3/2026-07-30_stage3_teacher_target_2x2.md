@@ -416,3 +416,132 @@ Checkpoints every 100 steps, probe at each, keep the best two by
 **Not proposed, deliberately:** no bulk regeneration before A reports; no
 76-prompt full evaluation before the probe is trusted; no LR/metric sweep; and
 no target-behaviour change of any kind.
+
+---
+
+# 13. System message is a MANDATORY project protocol (maintainer, 2026-07-31)
+
+Supersedes §12E. Two statements that must never be conflated:
+
+1. **Teacher template fact.** `Qwen3-4B-Thinking-2507@768f209d` injects **no**
+   default system message. With no tools and no system turn it emits no system
+   block at all. This is verified and stands
+   ([contract](../../experiments/stage3/2026-07-31_system_prompt_contract.md)).
+   It proves only that user-only inference is *technically supported*.
+2. **Project protocol requirement.** For AlphaAvatar-distill an explicit system
+   message is **mandatory** in teacher generation, student training, primary
+   evaluation and final inference. System context is the control interface for
+   task rules, behavioural boundaries, tool definitions, evidence-use
+   requirements and decision constraints. It is not optional and is not deferred
+   until after convergence.
+
+(1) does not determine (2). The template fact describes the checkpoint; the
+protocol requirement describes this product.
+
+## 13.1 Consequences
+
+* Teacher targets are generated **under the exact system condition recorded with
+  them**. A system message is **never** prepended to an existing target.
+* The existing 540 accepted targets become **labelled auxiliary / control data**.
+  They no longer define the primary target distribution.
+* The 6 system-conditioned evaluation prompts are **retained**. Their mismatch is
+  evidence of a training-coverage problem, not a reason to drop them.
+* No-system evaluation continues as a **diagnostic**, not the deployment gate.
+
+## 13.2 Affected scope — total
+
+| corpus | n | with system | status under the protocol |
+|---|---:|---:|---|
+| teacher corpus targets | 752 | **0** | regenerate under system conditions |
+| — accepted (primary) | **540** | **0** | demoted to auxiliary/control |
+| pilot control arm | 540 | 0 | control arm |
+| pilot treatment arm | 540 | 0 | control arm |
+| stage2_v1 in-scope | 23,953 | 0 | public data, unchanged role |
+| `eval_behavior_v0` | 76 | 6 (7.9%) | retained; coverage gap is the finding |
+
+**100% of the primary target distribution is no-system**, and all six trained
+checkpoints were trained entirely on no-system data.
+
+## 13.3 The prompt set (proposed, versioned)
+
+`configs/system_prompts/aadistill_system_prompts_v1.json`, version
+**`aadistill-sys-v1`**.
+
+**Default, `aadistill-sys-default-v1` (weight 0.40):**
+
+> You are AlphaAvatar, a helpful AI assistant. Work through the user's request
+> carefully and give an accurate, complete final answer. Use any context,
+> evidence or tools provided to you.
+
+**Task-specific (weight 0.60)**, sampled uniformly from a per-slice pool of **6
+paraphrases** each (`rag_evidence`, `multihop_qa`, `code_math`), each carrying
+the slice's genuine task rule — evidence-only answering, multi-hop combination,
+solve-and-state. Pools rather than one string so nothing is memorised, and the
+differing rules are what train instruction priority.
+
+**Tool-specific: weight 0.0 in the minimum experiment** — none of the trained
+in-scope four carry tool definitions. It arrives with `tool_calling` data, where
+the template already forces a system block to carry the `<tools>` spec.
+
+Two constraints, from P10 and P17: **no prompt imposes a length or terseness
+constraint**, and **no prompt instructs the model to skip or shorten reasoning**.
+
+## 13.4 Minimum paired experiment
+
+Paired by prompt, one variable: presence of the system condition.
+
+**Phase R — regeneration (required first).** Re-generate all **752** prompts with
+the teacher conditioned on a sampled `aadistill-sys-v1` prompt, recording the
+prompt id, its sha256 and the sampled weight class with every target. Fixed
+per-candidate seeds (the n>1 bug is fixed), stop-id union from
+`generation_config` (`[151645, 151643]`), and **no 4096 cap** — degeneration-stop
+only — so openmath's long-reasoning instances stop being systematically rejected
+(69.7% of them were).
+
+**Phase C — paired continuation, 4 arms × 137 steps** from the Stage 1 init:
+
+| arm | targets | system condition |
+|---|---|---|
+| `sysv1_treat_{a,b}` | teacher-native, system-conditioned | **`aadistill-sys-v1`** |
+| `nosys_treat_{a,b}` | teacher-native, existing corpus | none (control) |
+
+Both arms use only prompts accepted in **both** corpora, so the prompt set is
+identical and the sole difference is the system condition.
+
+## 13.5 System-conditioned convergence and degeneration evaluation
+
+Primary gate, **system-conditioned**, uncapped (P18), on the 8 deterministic
+prompts each rendered under (a) the default, (b) a task-specific prompt, and
+(c) no system — 24 generations per checkpoint, ~$0.03:
+
+* `natural_termination_rate` — target ≥0.8 (the teacher's own rate);
+* `degeneration_rate` — target ≤0.05;
+* generated-length p50 within 0.5–2× of the teacher's 727;
+* **system-instruction adherence** — for `rag_evidence`, does the answer refuse
+  when the context is insufficient; for `multihop_qa`, does it use >1 passage;
+* **condition sensitivity** — the default-vs-task-specific delta, which is the
+  direct evidence that the student reads the system turn rather than ignoring it.
+
+Secondary, diagnostic only: no-system generation, holdout NLL (guard rail — it
+improved monotonically while generation degenerated), `eval_behavior_v0`
+including all 6 system-conditioned prompts.
+
+## 13.6 Cost against the remaining $7.07
+
+| phase | estimate |
+|---|---:|
+| R. regeneration, 752 prompts, n=2, uncapped + degeneration stop | **$1.80–2.40** |
+| C. paired continuation, 4 arms × 137 steps + gate evals | **$1.60–2.00** |
+| system-conditioned uncapped probe × ~8 checkpoints | **$0.25** |
+| pod setup ×2 | **$0.35** |
+| **total** | **$4.00–5.00** |
+
+**Fits within $7.07** with ~$2 of headroom. Priced from measured rates: 5.8
+s/prompt at n=2, 566 tok/s aggregate, 21 min per training arm including evals.
+Uncapped generation carries the widest uncertainty — 19.9% of rollouts previously
+hit 4096 — which is why the degeneration stop is in the loop.
+
+**Explicitly out of scope until R and C report:** the §12 user-only convergence
+probe (superseded as a *primary* line — it would measure the auxiliary
+distribution), corpus expansion to ~8,000 prompts, exposure-bias and
+representation-KD pilots.
