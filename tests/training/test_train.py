@@ -131,21 +131,25 @@ def test_kd_forward_kl_properties():
 def test_select_trainable_real_stage3_patterns():
     patterns = json.loads(
         (Path(__file__).resolve().parents[2]
-         / "configs" / "stage3" / "s1_ffn_norm.json").read_text()
+         / "configs" / "stage3" / "recovery.json").read_text()
     )["trainable_patterns"]
     model = tiny_model(0)
     report = select_trainable(model, patterns)
+    # configs/stage3/recovery.json uses the attention-unfrozen freeze set adopted
+    # by the 2026-07-27 start-point ablation: attention (incl. q_norm/k_norm),
+    # FFN and every norm train; the tied embedding does not.
     for name, param in model.named_parameters():
         expected = (
-            ".mlp." in name
+            ".self_attn." in name
+            or ".mlp." in name
             or "input_layernorm" in name
             or "post_attention_layernorm" in name
             or name.startswith("model.norm.")
         )
         assert param.requires_grad == expected, name
-    # Attention (incl. q_norm/k_norm) and the tied embedding stay frozen.
+    trainable = {n for n, p in model.named_parameters() if p.requires_grad}
+    assert any("self_attn.q_norm" in n for n in trainable)
     frozen = {n for n, p in model.named_parameters() if not p.requires_grad}
-    assert any("self_attn.q_norm" in n for n in frozen)
     assert "model.embed_tokens.weight" in frozen
     assert 0 < report["trainable_params"] < report["total_params"]
 

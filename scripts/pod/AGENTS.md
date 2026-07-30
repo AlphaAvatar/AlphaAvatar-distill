@@ -5,11 +5,6 @@ longer hardcode a run; the session is declared in `run_env.sh` and everything
 else reads it. The previous single-run versions (`orchestrate_s2v1.sh`,
 `verify_and_report_s2v1.py`) are in git history at commit `f74e5ed`.
 
-Last completed session: `s2_blocks_v1` (2026-07-26, $4.49, unattended end to
-end) — `logs/experiments/stage3/2026-07-26_stage3_s2_blocks_v1_gpu_run.md`.
-Current session target: the **start-point ablation**, two arms on one pod
-(`logs/proposals/stage3/2026-07-27_stage3_start_point_ablation.md`).
-
 ## Files
 
 | file | role |
@@ -55,7 +50,7 @@ as they are.
    failed** — it means no public TCP 22 mapping exists, which never appears if
    the pod was created without `--ports "22/tcp"`. Both were verified against the
    API on 2026-07-26; together they cost ~$0.95 in healthy pods deleted as
-   "stuck" (`logs/experiments/infrastructure/2026-07-26_runpod_pod_readiness_misdiagnosis.md`).
+   "stuck" (`logs/EXPERIMENTS.md`).
 
    Use GraphQL, and treat an actual SSH connection as the only ground truth:
 

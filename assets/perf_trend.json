@@ -1,9 +1,9 @@
 {
-  "title": "Qwen3-4B-Thinking-2507 → 0.6B: behavior score vs model size",
+  "title": "Qwen3-4B-Thinking-2507 \u2192 0.6B: behavior score vs model size",
   "headline": {
     "name": "behavior score v0",
     "axis": "behavior score v0 (76 held-out prompts)",
-    "summary": "behavior score v0 — mean of six credited mechanical axes: chat format, fluency, grounding, refusal, tool calls, math",
+    "summary": "behavior score v0 \u2014 mean of six credited mechanical axes: chat format, fluency, grounding, refusal, tool calls, math",
     "axes": [
       "format_ok",
       "fluency",
@@ -15,7 +15,7 @@
     "eval": "scripts/eval_behavior.py --model <ckpt>",
     "scorer": "src/aadistill/behavior.py::behavior_score",
     "note": "an early-stage proxy for a student too damaged to attempt real suites; real-world test sets take over as the headline once it can",
-    "log": "logs/experiments/evaluation/2026-07-27_eval_behavior_v0.md"
+    "log": "logs/EXPERIMENTS.md"
   },
   "guard": {
     "name": "held-out NLL (nats/token) on holdout_v1 (21,080 tokens, fineweb-edu)",
@@ -31,7 +31,7 @@
         "nll": 12.1286
       }
     ],
-    "band": "±1%"
+    "band": "\u00b11%"
   },
   "size_axis": {
     "label": "parameters",
@@ -48,14 +48,14 @@
         "date": "2026-07-27",
         "score": 0.2015,
         "nll": 3.8285,
-        "log": "logs/experiments/stage3/2026-07-27_stage3_start_point_ablation.md"
+        "log": "logs/EXPERIMENTS.md"
       },
       "previous_best": {
         "checkpoint": "s1_ffn_norm_v0@660",
         "date": "2026-07-22",
         "score": 0.1292,
         "nll": 4.2107,
-        "log": "logs/experiments/stage3/2026-07-22_stage3_s1_gpu_run.md"
+        "log": "logs/EXPERIMENTS.md"
       }
     }
   ],
@@ -67,7 +67,7 @@
       "params": 4022468096,
       "score": 0.7443,
       "note": "scored 2026-07-28, native thinking mode, cap 4096",
-      "log": "logs/experiments/evaluation/2026-07-28_teacher_behavior_v0.md"
+      "log": "logs/EXPERIMENTS.md"
     }
   ],
   "attempts": [
@@ -80,7 +80,7 @@
       "run": "init v0, recipe attempt 1",
       "summary": "early-band depth merge, unweighted projection",
       "nll": 17.7977,
-      "log": "logs/experiments/stage1/2026-07-14_stage1_qwen3_0p6b_init_v0.md"
+      "log": "logs/EXPERIMENTS.md"
     },
     {
       "id": "qwen3_0p6b_init_v0",
@@ -91,7 +91,7 @@
       "run": "init v0, fixed recipe",
       "summary": "middle-band merge, end-weighted projection",
       "nll": 11.7482,
-      "log": "logs/experiments/stage1/2026-07-14_stage1_qwen3_0p6b_init_v0.md"
+      "log": "logs/EXPERIMENTS.md"
     },
     {
       "id": "s1_ffn_norm_v0",
@@ -102,7 +102,7 @@
       "run": "s1 recovery",
       "summary": "FFN+norm, CE 0.25 + KD 1.0, 660 steps on mixture v0",
       "nll": 4.2107,
-      "log": "logs/experiments/stage3/2026-07-22_stage3_s1_gpu_run.md",
+      "log": "logs/EXPERIMENTS.md",
       "behavior": 0.1292
     },
     {
@@ -112,9 +112,9 @@
       "date": "2026-07-25",
       "stage": "stage3",
       "run": "s2 A/B arm A",
-      "summary": "control: +660 FFN-only steps; regressed on mixture-v0 epochs 3–4",
+      "summary": "control: +660 FFN-only steps; regressed on mixture-v0 epochs 3\u20134",
       "nll": 4.2747,
-      "log": "logs/experiments/stage3/2026-07-25_stage3_s2_ab_gpu_run.md"
+      "log": "logs/EXPERIMENTS.md"
     },
     {
       "id": "s2_blocks_v0",
@@ -125,7 +125,7 @@
       "run": "s2 A/B arm B",
       "summary": "attention unfrozen; freeze set adopted, holdout flat (data-limited)",
       "nll": 4.2118,
-      "log": "logs/experiments/stage3/2026-07-25_stage3_s2_ab_gpu_run.md"
+      "log": "logs/EXPERIMENTS.md"
     },
     {
       "id": "s2_blocks_v1",
@@ -134,9 +134,9 @@
       "date": "2026-07-26",
       "stage": "stage3",
       "run": "s2 on mixture v1",
-      "summary": "same recipe, 4.11× data, 2700 steps; plateau broken",
+      "summary": "same recipe, 4.11\u00d7 data, 2700 steps; plateau broken",
       "nll": 3.8003,
-      "log": "logs/experiments/stage3/2026-07-26_stage3_s2_blocks_v1_gpu_run.md",
+      "log": "logs/EXPERIMENTS.md",
       "behavior": 0.0887
     },
     {
@@ -148,7 +148,7 @@
       "run": "start-point ablation: from_s1",
       "summary": "same 2700-step leg from s1@660; the A/B arm-B leg was neutral (+0.17%)",
       "nll": 3.8067,
-      "log": "logs/experiments/stage3/2026-07-27_stage3_start_point_ablation.md",
+      "log": "logs/EXPERIMENTS.md",
       "behavior": 0.0952
     },
     {
@@ -160,7 +160,7 @@
       "run": "start-point ablation: from_init",
       "summary": "single-stage from Stage 1 init, 2700 steps total; warm-up ladder unnecessary (+0.74%)",
       "nll": 3.8285,
-      "log": "logs/experiments/stage3/2026-07-27_stage3_start_point_ablation.md",
+      "log": "logs/EXPERIMENTS.md",
       "behavior": 0.2015
     }
   ]
