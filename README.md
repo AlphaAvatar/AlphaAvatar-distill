@@ -33,9 +33,9 @@ Behavior score is the headline metric. **Held-out NLL is now a guard rail (±1% 
 
 Attempts 7–8 are a fixed-budget ablation of the *start point*, not of the training leg: runs 6–8 are the three branches that ran the identical 2700-step leg at the same seed, from lineages costing 4020, 3360 and 2700 total steps. Both landed inside the pre-registered 1% band, so the recovery recipe dropped its two warm-up legs and became a single stage — a third less compute per iteration.
 
-The behavior eval **reverses the ranking held-out NLL gives**: the cheapest lineage (attempt 8) is the best-behaved at 20.2%, while the best-NLL checkpoint (attempt 6) is the worst at 8.9% — it improves next-token prediction while getting *worse* at chat format, grounding and tool calls. That result is why the headline metric changed. Caveats a reader must carry: one run per arm, no variance estimate, and the per-axis rates rest on 7–76 prompts each, so only large moves are evidence — see the [run log](./logs/EXPERIMENTS.md). Current state and next actions: [`logs/STATE.md`](./logs/STATE.md); costed, unapproved work: [`logs/proposals/`](./logs/proposals/).
+The behavior eval **reverses the ranking held-out NLL gives**: the cheapest lineage (attempt 8) is the best-behaved at 20.2%, while the best-NLL checkpoint (attempt 6) is the worst at 8.9% — it improves next-token prediction while getting *worse* at chat format, grounding and tool calls. That result is why the headline metric changed. Caveats a reader must carry: one run per arm, no variance estimate, and the per-axis rates rest on 7–76 prompts each, so only large moves are evidence — see the [run log](./logs/EXPERIMENTS.md). Current state and next actions: [`logs/STATE.md`](./logs/STATE.md); costed, unapproved work: [`logs/PROPOSAL.md`](./logs/PROPOSAL.md).
 
-The figure regenerates from [`assets/perf_trend.json`](./assets/perf_trend.json) with `uv run python scripts/evaluation/plot_perf_trend.py`; the table above comes from the same file via `--print-table`, and every point is backed by a log in [`logs/experiments/`](./logs/experiments/).
+The figure regenerates from [`assets/perf_trend.json`](./assets/perf_trend.json) with `uv run python scripts/evaluation/plot_perf_trend.py`; the table above comes from the same file via `--print-table`, and every point is backed by the consolidated record in [`logs/EXPERIMENTS.md`](./logs/EXPERIMENTS.md).
 
 ---
 
@@ -113,7 +113,7 @@ The first dense-model compression experiment was kicked off with this instructio
 
 > Hi, have a look at the AlphaAvatar-distill repo and start from the teacher model https://huggingface.co/Qwen/Qwen3-4B-Thinking-2507. Let's kick off the first dense-model compression experiment.
 
-Everything under `src/`, `scripts/`, and `logs/` grew from that instruction, following the staged workflow in `AGENTS.md`. The working split is: agents act directly on local, reversible, CPU-scale work, and write a **costed proposal with pre-registered decision rules** for anything paid, long-running, or public-facing — the maintainer approves per session. Pending proposals live in [`logs/proposals/`](./logs/proposals/); current state and next actions in [`logs/STATE.md`](./logs/STATE.md).
+Everything under `src/`, `scripts/`, and `logs/` grew from that instruction, following the staged workflow in `AGENTS.md`. The working split is: agents act directly on local, reversible, CPU-scale work, and write a **costed proposal with pre-registered decision rules** for anything paid, long-running, or public-facing — the maintainer approves per session. The active proposal lives in [`logs/PROPOSAL.md`](./logs/PROPOSAL.md); current state and next actions in [`logs/STATE.md`](./logs/STATE.md).
 
 ---
 
@@ -168,7 +168,7 @@ Historical experiment logs quote the paths that existed when they ran. The 2026-
 
 Official records are stricter than ordinary experiments (AGENTS.md 3.8): exact commit, command, hardware, data and tokenizer hashes, budget, metric log, and maintainer approval.
 
-**No records are being kept during baseline construction** (maintainer decision, 2026-07-28). Everything run so far — including the four Stage 3 runs that already have reproducible records in `logs/experiments/` — is baseline work. The **first record point** will be written once the baseline is carried through Stage 6 deployment validation with satisfactory results; it will be the first entry, not a backfill. Until then every section below is intentionally empty, and the numbers in the run table above are attempts, not records.
+**No records are being kept during baseline construction** (maintainer decision, 2026-07-28). Everything run so far — including the Stage 3 runs recorded in `logs/EXPERIMENTS.md` — is baseline work. The **first record point** will be written once the baseline is carried through Stage 6 deployment validation with satisfactory results; it will be the first entry, not a backfill. Until then every section below is intentionally empty, and the numbers in the run table above are attempts, not records.
 
 ### 🧪 Stage 0 — Initialization warm-up data collection
 

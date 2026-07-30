@@ -48,7 +48,7 @@ uv run python scripts/evaluation/eval_behavior.py --model "$CKPT" \
 # 3b) p(</think>) probe — the CE/KD conflict experiment's PRIMARY readout.
 # Continuous and far less seed-noisy than the generation metrics, whose measured
 # run-to-run floor is 0.1290 on the composite
-# (logs/experiments/stage3/2026-07-28_kd_ce_protocol_conflict.md).
+# (logs/EXPERIMENTS.md, CE/KD conflict).
 uv run python scripts/evaluation/probe_think_close.py --model "$CKPT" \
   --per-group 4 --out "$RUN/probe_think_close.json" || fail probe_think
 

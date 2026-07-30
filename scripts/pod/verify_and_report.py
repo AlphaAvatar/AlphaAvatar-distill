@@ -72,7 +72,7 @@ REF = {
 REF_INT8 = {"decoder_scope_pct": 0.03, "full_scope_pct": 0.21}
 
 # Pre-registered constants for the CURRENT session
-# (logs/proposals/stage3/2026-07-28_stage3_packing_blocklen_control.md).
+# (retired experiment; see logs/EXPERIMENTS.md).
 #
 # This block plus `apply_decision_rules` and the doc template in `cmd_report`
 # are the session-specific parts of this file; everything else is generic.
