@@ -54,24 +54,70 @@ Why 8,000: at the measured 71.8% accept rate this yields ≈5,700 accepted targe
 student from 11.75 to 3.83. Below ~2,000 prompts the largest arm cannot exceed
 ~2 corpus passes, which is where the current degeneration sits.
 
-**Step B — train at 1,000 / 2,000 / 3,000 / … / 8,000 accepted samples**, each
-from the pinned Stage 1 init, identical recipe, one variable: corpus size.
+**Step B — train on progressively increasing TOKEN-COUNT subsets** (maintainer
+correction 2026-07-31: the data-size variable is **token count**, not sample
+count).
 
-**Readouts per size point** (uncapped, system-conditioned, on a fixed held-out
-prompt set):
+**The measured variable is supervised tokens** — the tokens that actually carry
+loss, and therefore the recovery signal whose required quantity we are trying to
+predict. Rendered and packed real tokens are reported alongside at every point so
+the relationship can be re-expressed in whichever unit turns out to generalise.
+
+Measured on the existing corpus, per accepted sample: **962 supervised tokens**,
+1,460 rendered, 1,468 packed real (supervised fraction 0.659, packing efficiency
+0.959 at `best_fit`@8192).
+
+**Ladder — geometric, six points up to the corpus maximum:**
+
+| supervised tokens | ≈ samples | blocks @8192 | real tokens |
+|---:|---:|---:|---:|
+| 0.25M | 259 | 47 | 0.38M |
+| 0.50M | 519 | 94 | 0.76M |
+| 1.00M | 1,039 | 187 | 1.53M |
+| 2.00M | 2,079 | 373 | 3.05M |
+| 4.00M | 4,158 | 746 | 6.10M |
+| **5.50M** (max) | 5,717 | 1,025 | 8.39M |
+
+Geometric rather than linear spacing: a scaling relationship is fitted in log
+space, so evenly spaced *ratios* place points where the curve actually bends.
+Linear spacing would cluster four of six points in the flat top decade.
+
+**Subsets are nested and deterministic** — the 0.25M subset is a prefix of the
+0.50M subset and so on — so the ladder is a clean scaling series rather than six
+unrelated draws, and each subset stays slice-balanced so composition does not
+drift with size (otherwise size and mixture are confounded).
+
+**Readouts per token point**, uncapped and system-conditioned on a fixed held-out
+prompt set:
 
 * `natural_termination_rate` — target ≥0.8 (the teacher's own rate)
 * `degeneration_rate` — target ≤0.05
-* generated-length p50 vs the teacher's 727
-* holdout NLL (guard rail only — it improved monotonically while generation
-  degenerated, so it never decides adoption)
+* generated-length p50 against the teacher's 727
+* holdout NLL (guard rail only)
 
-**Output:** the convergence curve of each readout against corpus size, and the
-fitted relationship plus the point at which the curve saturates.
+Each reported against **supervised tokens**, with rendered and real token counts
+recorded for re-expression.
 
-**Seeds:** 2 per size point for behaviour (noise floor 0.1290). Holdout NLL is
-not seed-resolvable from cold start at 2 seeds (2.21-nat spread) and is reported
-with that caveat rather than seeded to 4, which would double the cost.
+**Output:** the convergence curve of each readout versus supervised-token count,
+the token count at which it saturates, and the fitted form — the first point in
+a relationship intended to predict required recovery tokens from teacher
+architecture/scale and student size.
+
+### 3.1 One decision this correction forces
+
+Token-count subsets change what "one run" costs, because a bigger subset needs
+more optimizer steps to be trained comparably. Two defensible designs:
+
+* **(i) Fixed passes (3 epochs) per point** — each point trained to comparable
+  exposure, so the curve measures *data quantity*. Steps scale with tokens: 71 →
+  1,538. This is the standard shape for a data-scaling law and is what I
+  recommend.
+* **(ii) Fixed optimizer budget per point** — equal compute everywhere, so the
+  curve measures *data diversity* at fixed compute. Cheaper and flat-cost, but it
+  conflates "more data" with "fewer passes", which is what made the 137-step runs
+  uninterpretable.
+
+Costs below assume **(i)**.
 
 ## 4. Experiment 2 — difficulty curriculum (later, not now)
 
@@ -86,27 +132,28 @@ measured diversity is zero everywhere.
 
 ## 5. Cost
 
-| item | estimate |
-|---|---:|
-| Step A — generate 8,000 prompts, n=2, uncapped | **$13–17** |
-| Step B — 8 size points × 2 seeds × ~137-step runs + evals | **$12–18** |
-| uncapped evaluation probes | ~$0.5 |
-| **total** | **$26–36** |
+Priced from measured rates: 5.8 s/prompt at n=2 generation; ~4.3 s/step training
+at `block_len` 8192 with gradient checkpointing; ~10 min of gate evals per point;
+$0.99/h L40S.
 
-Priced from measured rates: 5.8 s/prompt at n=2, ~21 min per training arm
-including gate evals, $0.99/h L40S. Uncapped generation is the widest
-uncertainty because 19.9% of rollouts previously hit 4096.
+| item | detail | cost |
+|---|---|---:|
+| Step A — generate 8,000 prompts, n=2, uncapped | ~13 h | **$13–17** |
+| Step B — 6 token points × 2 seeds, 3 passes each | 3,610 steps × 2 seeds ≈ 8.6 h + evals | **$10–13** |
+| uncapped evaluation probes | ~$0.03 per checkpoint | ~$0.5 |
+| **total** | | **$24–31** |
 
-**This exceeds the remaining $7.07.** Options, for the maintainer to choose:
+**This exceeds the remaining $7.07.** Options:
 
-| option | corpus | size points | cost |
-|---|---|---|---|
-| **A — full study** | 8,000 | 1k…8k (8 points) | $26–36 |
-| **B — half study** | 4,000 | 1k…4k (4 points) | $13–18 |
-| **C — within current budget** | 2,000 | 1k, 2k (2 points) | **$6.5–7.0** |
+| option | corpus | token ladder | cost |
+|---|---|---|---:|
+| **A — full study** | 8,000 prompts (5.5M supervised) | 0.25M…5.5M, 6 points | **$24–31** |
+| **B — half** | 4,000 prompts (2.8M supervised) | 0.25M…2.75M, 5 points | **$12–16** |
+| **C — within current budget** | 2,000 prompts (1.4M supervised) | 0.25M / 0.5M / 1.0M, 3 points | **$6.5–7.0** |
 
-Option C fits $7.07 but yields only two points — enough to show direction, not
-to fit a scaling relationship. Option A is what the objective actually requires.
+Option C fits $7.07 and gives three log-spaced points — enough to see a trend and
+its direction, not enough to fit a relationship with confidence. Option A is what
+the scaling objective requires.
 
 ## 6. Stopping rules
 
