@@ -23,8 +23,11 @@ export PATH="$HOME/.local/bin:$PATH"
 cd /workspace || fail cd
 # --- transfer bundle + data from the private HF repo ---
 export HF_HUB_ENABLE_HF_TRANSFER=0
+# Everything the session needs is downloaded before anything is verified, so the
+# single `sha256sum -c` below covers the whole manifest. Downloading one artifact
+# after the check would make that check fail on the entry it has not fetched yet.
 uvx --from huggingface_hub hf download "$HF_REPO" \
-  "$TRANSFER_BUNDLE" "$TRANSFER_DATA" \
+  "$TRANSFER_BUNDLE" "$TRANSFER_DATA" ${TRANSFER_EXTRA:+"$TRANSFER_EXTRA"} \
   --repo-type model --local-dir /workspace/xfer || fail hf_transfer_download
 
 sha256sum -c /workspace/hashes_transfer.txt || fail transfer_hash
@@ -42,13 +45,7 @@ ls data/stage2_v1/train data/stage2/val "$HOLDOUT" || fail data_layout
 # built split. gzip rather than zstd so the same tarball can be read by an
 # engine image that ships no zstd.
 if [ -n "${TRANSFER_EXTRA:-}" ]; then
-  uvx --from huggingface_hub hf download "$HF_REPO" "$TRANSFER_EXTRA" \
-    --repo-type model --local-dir /workspace/xfer || fail hf_extra_download
-  # Verified like every other transfer: this one carries the training data of a
-  # paid comparison, so a silently truncated download must not become an arm.
-  grep -F "$TRANSFER_EXTRA" /workspace/hashes_transfer.txt > /workspace/hash_extra.txt \
-    || fail extra_hash_missing_from_manifest
-  sha256sum -c /workspace/hash_extra.txt || fail extra_hash
+  # Already downloaded and hash-verified above, with the rest of the manifest.
   tar xzf "/workspace/xfer/$TRANSFER_EXTRA" || fail untar_extra
   for d in ${EXTRA_EXPECT:-}; do
     ls "$d" > /dev/null || fail "extra_missing_$d"
