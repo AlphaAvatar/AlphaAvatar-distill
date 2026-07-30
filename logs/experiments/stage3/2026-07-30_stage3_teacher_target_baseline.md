@@ -1,4 +1,38 @@
-# 2026-07-30 — Stage 3 teacher-target SFT warm-up: 2x2 result
+# 2026-07-30 — Corrected teacher-target baseline: **cold-start / non-convergence diagnostic**
+
+> **RECLASSIFIED 2026-07-30 by maintainer direction. Read this first.**
+>
+> This run fixed the initialization confound of the earlier attempt — every arm
+> forked from the Stage 1 structural init. **It does not establish that
+> teacher-native supervision is unsuitable, and its R2 trigger must not be used
+> to justify a public / no-think warm-up, final-only targets, shortened
+> reasoning, or any other target-behaviour change** (AGENTS.md P17).
+>
+> Its interpretation is **both convergence-limited and measurement-limited**:
+>
+> * The teacher-treatment arm improved holdout NLL **11.7565 → 6.2255**, a
+>   *larger* absolute improvement than the public arm's 11.7565 → 7.7260.
+> * The run used **137 steps ≈ 5%** of the 2,700-step reference run.
+> * The corpus is **487 training prompts, ~0.71M real tokens** (treatment).
+> * It therefore cannot establish convergence or the final achievable behaviour
+>   of either recipe.
+> * **99.3% of teacher-treatment generations were forcibly stopped at 512
+>   tokens**, so their natural termination behaviour was never measured. Those
+>   are **right-censored** observations, not failures (AGENTS.md P18).
+> * `empty_answer` means the parser found no final answer after a closing
+>   reasoning delimiter. It does **not** prove the model emitted no useful
+>   reasoning.
+> * The public targets teach the model to close an **empty `<think>` block
+>   immediately**. That makes short-window format compliance easier while moving
+>   the behavioural protocol away from the thinking-only teacher.
+> * Lower teacher-forced NLL alongside unstable free generation may indicate
+>   insufficient optimization, exposure bias, target-rendering problems or
+>   on-policy mismatch — not an intrinsically unsuitable target.
+>
+> The recorded metrics and the historical R2 trigger are preserved unchanged
+> below. **An unrestricted re-evaluation (no artificial generation cap) is
+> required before any route-level conclusion.**
+
 
 - **Pre-registration:** [`proposals/stage3/2026-07-30_stage3_teacher_target_2x2.md`](../../proposals/stage3/2026-07-30_stage3_teacher_target_2x2.md)
 - **Generated mechanically** by `scripts/pod/report_tt2x2.py` from the runs' own artifacts. Numbers are measured; the rules below are applied mechanically; the stage verdict is left to review.
@@ -129,11 +163,16 @@ opposite directions on the two axes that matter.**
   empty think block, and the treatment stays at 0.0000 because teacher-native
   targets never skip reasoning. It is measuring target style, not competence.
 
-## 6.4 Verdict
+## 6.4 Verdict — **SUPERSEDED by the reclassification banner at the top**
 
-* **Pre-registered rule R2 fires: the treatment is rejected at this fixed
-  compute.** Unlike the diagnostic, this verdict is *not* confounded by the
-  start point.
+The wording below was written before the maintainer reclassified this run. It is
+kept verbatim because the measurements behind it stand; its *route-level*
+reading does not. R2's trigger is a historical fact about a **capped,
+non-converged** measurement, not a rejection of teacher-native supervision.
+
+* **Pre-registered rule R2 fires at this fixed compute.** Unlike the earlier
+  diagnostic, that trigger is not confounded by the start point — but it is
+  confounded by a 99.3% censoring rate and by 5% of the reference step budget.
 * **The honest statement of it:** at 137 steps from the Stage 1 init, on a
   487-prompt corpus, the public-target recipe yields a protocol-competent model
   and the teacher-native recipe does not yield a model that can finish an
@@ -148,13 +187,15 @@ opposite directions on the two axes that matter.**
   metric, which is itself informative about how much this student can absorb at
   this budget.
 
-## 6.5 Next actions (for maintainer decision — nothing run)
+## 6.5 Next actions (superseded — see the audit directive)
 
-1. **The 512-token scorecard cannot evaluate a teacher-native arm.** Any further
-   teacher-target work needs a cap where both arms report a non-degenerate
-   `truncated_at_cap`, plus metrics conditioned on finished generations.
-2. **Holdout NLL needs ≥4 seeds at this budget**, or it cannot separate arms
+Items 1-3 below are retained; the standing plan is now the maintainer's audit
+and unrestricted re-evaluation directive of 2026-07-30, which supersedes any
+"pick a bigger cap" framing: **no artificial generation cap at all** (P18).
+
+1. **No cap may be used for formal measurement.** Generation runs to natural
+   EOS / `<|im_end|>` or to the actual supported context, per sample.
+2. **Holdout NLL needs >=4 seeds at this budget**, or it cannot separate arms
    from a cold init (2.21-nat control spread).
-3. The open questions from the diagnostic stand: protocol metrics reward
-   terseness, and this design cannot separate "teacher-native" from "more
-   supervised tokens".
+3. Protocol metrics reward terseness, and this design cannot separate
+   "teacher-native" from "more supervised tokens".

@@ -62,3 +62,6 @@ runs/
 # Hugging Face / torch caches if ever redirected into the repo
 hf_cache/
 torch_cache/
+
+# Audit artifacts (complete generations preserved locally / on the relay)
+artifacts/audit/

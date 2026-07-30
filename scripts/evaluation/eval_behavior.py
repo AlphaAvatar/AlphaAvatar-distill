@@ -34,9 +34,41 @@ from aadistill.infrastructure.env import code_state, hardware_report
 from aadistill.infrastructure.manifest import sha256_file
 
 
+def supported_context(model, tokenizer) -> int:
+    """The model's actual supported context, resolved and never guessed (P18).
+
+    Taken from the model config's `max_position_embeddings`, adjusted by any RoPE
+    scaling factor, and floored by the tokenizer's own limit when it declares a
+    smaller one. This is deliberately NOT lowered for memory: P18 requires that a
+    memory constraint be met by reducing batch size or changing hardware, not by
+    silently shrinking the measurement window.
+    """
+    cfg = model.config
+    ctx = int(getattr(cfg, "max_position_embeddings", 0) or 0)
+    scaling = getattr(cfg, "rope_scaling", None) or {}
+    factor = scaling.get("factor") if isinstance(scaling, dict) else None
+    if factor:
+        ctx = int(ctx * float(factor))
+    tok_max = getattr(tokenizer, "model_max_length", None)
+    if isinstance(tok_max, int) and 0 < tok_max < 10**7:
+        ctx = min(ctx, tok_max) if ctx else tok_max
+    if ctx <= 0:
+        raise ValueError("could not resolve a supported context length")
+    return ctx
+
+
 @torch.no_grad()
-def generate(model, tokenizer, entry: dict, max_new_tokens: int, device: str):
-    """Greedy-decode one prompt. Returns (raw_text, n_new_tokens, hit_cap)."""
+def generate(model, tokenizer, entry: dict, max_new_tokens: int | None, device: str,
+             context_len: int | None = None):
+    """Greedy-decode one prompt.
+
+    `max_new_tokens=None` means **unrestricted** (P18): the allowance is
+    `context_len - len(rendered_prompt)`, so generation stops only on the
+    model's own EOS / `<|im_end|>` or at the actual context limit. A stop at the
+    context limit is a right-censored observation, not a failure.
+
+    Returns (raw_text, n_new, hit_limit, allowance).
+    """
     text = tokenizer.apply_chat_template(
         entry["messages"],
         tools=entry.get("tools"),
@@ -44,9 +76,20 @@ def generate(model, tokenizer, entry: dict, max_new_tokens: int, device: str):
         add_generation_prompt=True,
     )
     ids = tokenizer(text, return_tensors="pt", add_special_tokens=False).input_ids
+    prompt_len = int(ids.shape[1])
+    if max_new_tokens is None:
+        if context_len is None:
+            raise ValueError("unrestricted generation needs a context length")
+        allowance = context_len - prompt_len
+        if allowance <= 0:
+            raise ValueError(
+                f"prompt of {prompt_len} tokens leaves no room in a "
+                f"{context_len}-token context")
+    else:
+        allowance = max_new_tokens
     out = model.generate(
         ids.to(device),
-        max_new_tokens=max_new_tokens,
+        max_new_tokens=allowance,
         do_sample=False,
         temperature=None,
         top_p=None,
@@ -55,7 +98,7 @@ def generate(model, tokenizer, entry: dict, max_new_tokens: int, device: str):
     )
     n_new = out.shape[1] - ids.shape[1]
     raw = tokenizer.decode(out[0, ids.shape[1]:], skip_special_tokens=False)
-    return raw, n_new, n_new >= max_new_tokens
+    return raw, n_new, n_new >= allowance, allowance
 
 
 def main() -> None:
@@ -63,10 +106,17 @@ def main() -> None:
     ap.add_argument("--model", required=True)
     ap.add_argument("--prompts", default="data/eval_behavior_v0/prompts.jsonl")
     ap.add_argument("--out", required=True)
-    # 512 keeps the cap off the critical path: at 200, every single
-    # non-termination in the s2_blocks_v1 baseline was a cap hit, which made
-    # `terminated` a verbosity measure rather than a format one.
+    # A fixed cap is NOT permitted for formal measurement (AGENTS.md P18): it
+    # censors exactly the behaviour being measured. `--unrestricted` derives the
+    # allowance per sample from the actual supported context. The numeric flag
+    # is retained only for reproducing historical capped runs and for cheap
+    # smoke tests, and it is recorded in the manifest as a censored measurement.
     ap.add_argument("--max-new-tokens", type=int, default=512)
+    ap.add_argument("--unrestricted", action="store_true",
+                    help="P18: generate to natural EOS or the actual context "
+                         "limit; no artificial token budget")
+    ap.add_argument("--context-len", type=int, default=None,
+                    help="override the resolved supported context (recorded)")
     ap.add_argument("--dtype", default="bfloat16")
     ap.add_argument("--device", default=None)
     ap.add_argument("--fake-quant", choices=["int8"], default=None)
@@ -85,6 +135,20 @@ def main() -> None:
         entries = entries[: args.limit]
 
     model, tokenizer = load_causal_lm(args.model, dtype, device)
+    # Resolve the measurement window once, and record where it came from.
+    if args.context_len:
+        ctx_len, ctx_source = args.context_len, "cli:--context-len"
+    else:
+        ctx_len = supported_context(model, tokenizer)
+        ctx_source = "config:max_position_embeddings(+rope_scaling, tokenizer floor)"
+    if args.unrestricted:
+        print(f"P18 unrestricted: context {ctx_len}, allowance = context - prompt",
+              flush=True)
+    else:
+        print(f"CENSORED measurement: max_new_tokens={args.max_new_tokens} "
+              f"(context {ctx_len}). Not valid for natural-termination claims.",
+              flush=True)
+
     quant_summary = None
     if args.fake_quant == "int8":
         from aadistill.models.quant import int8_fake_quantize_
@@ -96,16 +160,27 @@ def main() -> None:
     started = time.time()
     generations, scored = [], []
     for i, entry in enumerate(entries, 1):
-        raw, n_new, hit_cap = generate(
-            model, tokenizer, entry, args.max_new_tokens, device)
+        raw, n_new, hit_limit, allowance = generate(
+            model, tokenizer, entry,
+            None if args.unrestricted else args.max_new_tokens,
+            device, context_len=ctx_len)
         parts = split_generation(raw)
+        # Under P18 a stop at the context limit is right-censored, not a cap
+        # hit: `context_limit_reached` is the honest label and the two must not
+        # be conflated when reading `terminated` / `empty_answer`.
         generations.append({
             "id": entry["id"], "group": entry["group"], "source": entry["source"],
             "raw": raw, "answer": parts["answer"], "think": parts["think"],
-            "new_tokens": n_new, "truncated_at_cap": hit_cap,
+            "new_tokens": n_new,
+            "truncated_at_cap": hit_limit and not args.unrestricted,
+            "context_limit_reached": hit_limit and args.unrestricted,
+            "right_censored": hit_limit,
+            "generation_allowance": allowance,
+            "stop_reason": ("context_limit" if (hit_limit and args.unrestricted)
+                            else "cap" if hit_limit else "eos"),
             "gold_answer": entry.get("gold_answer", ""),
         })
-        scored.append(score_sample(entry, raw, hit_cap=hit_cap))
+        scored.append(score_sample(entry, raw, hit_cap=hit_limit))
         if i % 10 == 0 or i == len(entries):
             elapsed = time.time() - started
             print(f"  {i}/{len(entries)} prompts  {elapsed:.0f}s "
@@ -130,7 +205,17 @@ def main() -> None:
             "count": len(entries),
         },
         "decoding": {
-            "greedy": True, "max_new_tokens": args.max_new_tokens,
+            "greedy": True,
+            # P18: `unrestricted` means the allowance came from the resolved
+            # context minus each rendered prompt, so nothing but the model's own
+            # EOS or the context limit stopped generation. A capped run is
+            # recorded as a censored measurement so it can never be mistaken for
+            # a natural-termination measurement later.
+            "unrestricted": bool(args.unrestricted),
+            "censored_measurement": not bool(args.unrestricted),
+            "max_new_tokens": None if args.unrestricted else args.max_new_tokens,
+            "context_len_resolved": ctx_len,
+            "context_len_source": ctx_source,
             "batch_size": 1, "dtype": args.dtype, "device": device,
         },
         "fake_quant": quant_summary,

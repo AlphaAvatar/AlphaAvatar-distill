@@ -102,8 +102,8 @@ best-NLL run (`s2_blocks_v1`, 3.8003). Teacher ceiling on the same eval:
 | **The control wins protocol partly by being terse** | median finished answer **2 words** (control) vs 34 (teacher-native) | 07-30 |
 | **The corpus is effectively n=1** | 92.7% byte-identical pairs; a serving engine seeds per *request*, so the draws were never independent. accept@n == accept@1 by construction. **Not** evidence about sampling diversity | 07-30 |
 | **A start point trained on one arm's targets invalidates the fork** | `s2v1_from_init@2700` is 2,700 public-target steps; forking both arms there compares target sets *conditioned on one of them* | 07-30 |
-| **From the Stage 1 init, public targets reach protocol competence in 137 steps** | `format_ok` 0 → **0.625**, `terminated` 0 → **0.658** — both above `s2v1@2700` (0.224 / 0.368) at 5% of its steps | 07-30 |
-| **Teacher-native targets at the same budget produce no finishable output** | **99.3%** truncated at 512, `empty_answer` 0.980 — while holding the *better* holdout NLL (6.23 vs 7.73) | 07-30 |
+| **From the Stage 1 init, public targets score well *inside a 512-token window*** | `format_ok` 0 → **0.625**, `terminated` 0 → **0.658**. Public targets close an **empty `<think>`** immediately, which is easier in a short window and is a *different protocol* from the thinking-only teacher | 07-30 |
+| **Teacher-native at 137 steps did not finish inside a 512-token cap** | **99.3% right-censored** at 512 — natural termination was never measured. Holds the *better* holdout NLL (6.23 vs 7.73) and the larger NLL gain from step-0. **Censored + non-converged; not a route rejection** (P17/P18) | 07-30 |
 | **Holdout NLL is unresolvable from a cold init at 2 seeds** | control seed spread **2.21 nats** (6.62 vs 8.83); the inter-arm gap of 1.50 sits inside it | 07-30 |
 
 **The two that most changed the plan:**
@@ -195,62 +195,59 @@ fragmentation rather than targets.
 
 ---
 
-## 8. Awaiting approval — corrected teacher-target baseline
+## 8. Audit and unrestricted re-evaluation (maintainer directive 2026-07-30)
 
-**Nothing is running or billing. No paid work until the maintainer approves the
-budget in §8.3.**
+**Nothing running, nothing billing. No further training until the audit and the
+unrestricted re-evaluation are reviewed.** Session spend to date **$7.18**.
 
-Spent 2026-07-30: **$4.87** of a $7.00 ceiling, on the corpus (still valid) and
-the run now relabelled a diagnostic (start point invalid).
+**Binding policy added: AGENTS.md P17 (teacher-behaviour fidelity, optimization
+first) and P18 (unrestricted generation during model measurement).**
 
-### 8.1 What is settled
+### 8.1 Reclassified
 
-* **Corpus stands** — 540 accepted targets, hashed, reusable as-is; recorded as
-  **effectively n=1** ([log](experiments/stage3/2026-07-30_teacher_corpus_750.md)).
-  Not regenerated (maintainer direction).
-* **Arms stand** — 487 train / 53 val, identical prompt sets and split
-  membership, lossless at `best_fit`@8192.
-* **Start point pinned** — `artifacts/stage1/qwen3_0p6b_init_v0/checkpoint`,
-  `model.safetensors` sha256 `86fbba78…`, verified identical local vs relay.
-* **Optimizer/scheduler reset is automatic** when launching from `student_path`
-  without `--resume` (verified in code; proposal §11.3).
+Both 2026-07-30 four-arm runs are diagnostics, not route decisions:
 
-### 8.2 Blocked, by maintainer direction
+* the first is a **post-s2v1 continuation diagnostic** (invalid start point);
+* the corrected one is a **cold-start / non-convergence diagnostic** — 137 steps
+  ≈ 5% of the reference budget, 487 prompts, and **99.3% of teacher-treatment
+  generations right-censored at 512 tokens**.
 
-No LR sweep, no step-budget ablation, no metric redesign, no final-only or
-trace-length variants, no new corpus, no corpus regeneration — **until the
-corrected baseline exists**.
+Neither may be used to justify a public/no-think warm-up, final-only targets,
+shortened reasoning, or any other target-behaviour change.
 
-### 8.3 The one decision needed: step budget from a cold start
+### 8.2 Structural audit — the data path is NOT the failure mode
 
-The corrected baseline forks from the Stage 1 init (holdout NLL **11.748**), not
-from a checkpoint at 3.83. The registered per-arm parity rule is unchanged
-(equal total training tokens); the absolute budget is not fixed by the
-pre-registration and is the maintainer's call.
+8 deterministic stratified samples, raw teacher output decoded from the hashed
+rollout snapshot's exact token ids
+([artifact](../artifacts/audit/paired_samples_20260730/), console
+`artifacts/audit_console.txt`):
 
-| option | steps | tokens | treatment passes | control passes |
-|---|---:|---:|---:|---:|
-| parity with the diagnostic | 137 | 2.24M | 3.0 | 7.6 |
-| **1× corpus-limited** | 273 | 4.47M | 6.0 | 15.2 |
-| deeper | 546 | 8.94M | 12.0 | 30.3 |
+| check | result |
+|---|---|
+| generation prompt opens `<think>` | 8/8 — the Qwen3-Thinking contract, expected |
+| raw teacher output has an *opening* `<think>` | **0/8** — the template supplies it |
+| raw teacher output has `</think>` | 8/8 |
+| rendered training turn `<think>` count | **exactly 1** in all 8 — no duplication |
+| parsing dropped trace characters | **0/8** |
+| `</think>` supervised | 8/8 |
+| final `<|im_end|>` supervised | 8/8 |
+| packing @8192 lossless | 8/8 |
+| **public target renders an EMPTY think block** | **8/8 — confirmed** |
 
-**The tension to settle:** the reference run needed 2,700 steps / 44.2M tokens to
-take this init from 11.75 → 3.83 on a 22.1M-token mixture. This corpus holds
-0.71M real tokens (treatment) / 0.26M (control), so *no* budget on it produces a
-converged model — more steps buy repetition, not coverage. Both arms will be far
-from convergence at any of the above, and the control repeats 2.5× more often
-than the treatment at equal tokens.
+Ruled out as causes: delimiter duplication, target-rendering error, loss-mask
+error, unsupervised final answer or stop token, packing loss.
 
-### 8.4 The confound that survives the correction
+### 8.3 Open — unrestricted re-evaluation is blocked on a hardware decision
 
-At equal total tokens the treatment arm gets **18.9×** the supervised tokens
-(519,478 vs 27,526 per epoch), because a public target for these slices is a few
-tokens and a teacher-native one is a full trace. From a common cold init this
-matters *more*, not less: an arm with 18.9× the gradient signal should win on
-almost any axis. A treatment win therefore establishes "teacher-native beats the
-best available public alternative at equal compute" and **not** "traces beat
-short answers per supervised token". Separating those needs a third arm and is
-out of scope until this baseline exists.
+The student's resolved context is **262,144** (`max_position_embeddings`, no RoPE
+scaling). KV cache is **112 KiB/token** (28L x 8KV x 128 x 2 x bf16), so **one
+sequence at full context needs ~28.7 GiB** — an L40S (46 GB) holds ~1.5. Full
+P18 compliance over 76 prompts x 6 checkpoints is ~$650 of L40S time in the
+worst case and cannot be parallelised away.
+
+**Proposed:** a fully uncapped pilot on a small deterministic subset to measure
+the real generated-length distribution, then cost the full run from it. Fewer
+prompts is not a P18 violation; a cap is. **Awaiting maintainer decision.**
 
 ## 9. Superseded conclusions — do not act on these
 

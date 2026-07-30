@@ -314,6 +314,84 @@ If the agent introduces a new artifact location, cache directory, training outpu
 
 Repository hygiene is part of the definition of done: the final summary should mention whether new generated files were created, whether they are tracked or ignored, and whether any large or sensitive artifacts were avoided.
 
+### P17. Teacher-behaviour fidelity and optimization first
+
+AlphaAvatar-distill MUST preserve the target teacher's behavioural contract
+during compression. For a thinking-only teacher, the student training target
+MUST preserve thinking mode, chat-template semantics, reasoning delimiters,
+final-answer behaviour and natural termination, unless a different product
+behaviour is explicitly approved and evaluated as a separate objective.
+
+Training difficulty, slow convergence, long reasoning, or failure during a short
+experiment MUST NOT be addressed by silently replacing teacher behaviour with an
+easier no-think, empty-think, final-only, manually shortened, or otherwise
+behaviourally incompatible target.
+
+Before rejecting a teacher-aligned recipe or changing its behavioural mode,
+experiments MUST investigate convergence, data coverage, data ordering within
+the same teacher mode, target rendering, loss masks, trainable parameters,
+optimization, packing, distillation objectives, on-policy mismatch, numerical
+precision, quantization, kernels and target-runtime alignment.
+
+A curriculum MAY progress from easier or naturally shorter valid teacher-native
+examples to more difficult or longer teacher-native examples. It MUST preserve
+the teacher protocol. Introducing no-think or empty-think behaviour is a
+target-behaviour change and MUST be evaluated separately — it must never be
+assumed as a prerequisite curriculum, because it first trains the student to
+close `<think>` immediately and later asks it to produce genuine reasoning.
+
+Short fixed-compute runs are **diagnostics** unless convergence evidence
+demonstrates sufficient data coverage and optimization. A short-run failure MUST
+NOT by itself reject the teacher-aligned route.
+
+### P18. Unrestricted generation during model measurement
+
+Formal model measurement MUST NOT impose an artificial reasoning-token or
+generation-token budget.
+
+Each evaluated sample MUST be allowed to generate until either:
+
+1. the model naturally emits its configured EOS / `<|im_end|>`; or
+2. the model reaches its actual maximum supported context length.
+
+The generation allowance MUST be derived per sample as
+`actual_supported_context_length - complete_rendered_prompt_length`. Smaller
+limits such as 512, 1024 or 2048 tokens MUST NOT be used as stopping conditions,
+acceptance gates, or proxies for the intended inference budget. Where an
+inference API requires `max_tokens` / `max_new_tokens`, it MUST be set to that
+full remaining capacity.
+
+The actual supported context MUST be resolved from the model configuration, the
+tokenizer/template requirements, the RoPE or context-scaling configuration, and
+the runtime engine's effective maximum model length. It MUST NOT be silently
+lowered because of batching or memory pressure — reduce batch size or use
+appropriate hardware instead, and record the resolved value and its derivation.
+
+Token positions such as 512, 1024 and 2048 MAY be analyzed **only post hoc** from
+complete saved generations. They MUST NOT alter generation.
+
+A sample that reaches the maximum context length MUST be recorded as
+`context_limit_reached` and treated as a **right-censored** observation. A
+context-limit hit alone MUST NOT be classified as an empty answer, malformed
+output, or a failed training recipe; it MUST be inspected separately for valid
+reasoning, repetition, degeneration, delimiter errors, and the presence of a
+final answer.
+
+The complete raw generation MUST be saved for every evaluated sample.
+
+Evaluation MUST separately report natural termination, context-limit hits,
+reasoning length, final-answer length, repetition or degeneration, answer
+correctness, time to first token, decode throughput, total latency and peak
+memory.
+
+Fixed **training**-compute budgets remain valid for controlled comparisons. They
+MUST NOT be conflated with **inference** reasoning budgets.
+
+Realtime behaviour MUST be achieved through student scale, architecture,
+distillation, numerical format, quantization, operators, kernels, target
+hardware and deployment-runtime optimization — not by truncating or changing the
+intended model behaviour during model-quality measurement.
+
 ---
 
 ## 2. Project Writing Requirements
