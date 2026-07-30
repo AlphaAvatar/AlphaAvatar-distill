@@ -195,59 +195,45 @@ fragmentation rather than targets.
 
 ---
 
-## 8. Audit and unrestricted re-evaluation (maintainer directive 2026-07-30)
+## 8. Where the project actually is (2026-07-30, after the audits)
 
-**Nothing running, nothing billing. No further training until the audit and the
-unrestricted re-evaluation are reviewed.** Session spend to date **$7.18**.
+**Nothing running or billing. Session spend $7.93 of a $15.00 authorization.**
+No further training, bulk regeneration or full 76-prompt evaluation pending review.
 
-**Binding policy added: AGENTS.md P17 (teacher-behaviour fidelity, optimization
-first) and P18 (unrestricted generation during model measurement).**
+### 8.1 The finding that reframes everything
 
-### 8.1 Reclassified
+Under **unrestricted generation** (no cap, full 262,144 context, concurrency 1),
+**`s2v1@2700` — the best checkpoint, 2,700 steps, holdout NLL 3.8285 — produces
+0/8 natural terminations and degenerates on every prompt**
+([log](experiments/stage3/2026-07-30_unrestricted_pilot.md)).
 
-Both 2026-07-30 four-arm runs are diagnostics, not route decisions:
+Degeneration is therefore **not caused by teacher-native targets**: it is the
+state of this student line at every checkpoint measured. Both 2026-07-30 four-arm
+runs compared two degenerate models. **Zero context-limit hits anywhere** — the
+512-token cap was hiding a repetition loop, not long reasoning.
 
-* the first is a **post-s2v1 continuation diagnostic** (invalid start point);
-* the corrected one is a **cold-start / non-convergence diagnostic** — 137 steps
-  ≈ 5% of the reference budget, 487 prompts, and **99.3% of teacher-treatment
-  generations right-censored at 512 tokens**.
+The public arm's apparent win was **protocol substitution**: its natural
+terminations are 5-18 token stubs after an empty `<think>` (`</think>\n\nArthur's
+Magazine<|im_end|>`), and several are incoherent. P17 forbids reading that as
+progress.
 
-Neither may be used to justify a public/no-think warm-up, final-only targets,
-shortened reasoning, or any other target-behaviour change.
+### 8.2 Confirmed mismatches and measured facts
 
-### 8.2 Structural audit — the data path is NOT the failure mode
-
-8 deterministic stratified samples, raw teacher output decoded from the hashed
-rollout snapshot's exact token ids
-([artifact](../artifacts/audit/paired_samples_20260730/), console
-`artifacts/audit_console.txt`):
-
-| check | result |
+| finding | measurement |
 |---|---|
-| generation prompt opens `<think>` | 8/8 — the Qwen3-Thinking contract, expected |
-| raw teacher output has an *opening* `<think>` | **0/8** — the template supplies it |
-| raw teacher output has `</think>` | 8/8 |
-| rendered training turn `<think>` count | **exactly 1** in all 8 — no duplication |
-| parsing dropped trace characters | **0/8** |
-| `</think>` supervised | 8/8 |
-| final `<|im_end|>` supervised | 8/8 |
-| packing @8192 lossless | 8/8 |
-| **public target renders an EMPTY think block** | **8/8 — confirmed** |
+| **System-prompt coverage is zero in training** | 0/23,953 stage2_v1, 0/752 corpus, 0/487 per arm; eval 6/76; template injects no default. **Confirmed coverage + train/inference mismatch** |
+| **Data path is clean** | 8/8 samples: one `<think>`, no dropped trace chars, `</think>` and final `<|im_end|>` supervised, packing lossless |
+| **Teacher terminates naturally 80.1%** | p25 466, p50 727, p99 3854; the old 512 eval cap sat inside the teacher's first quartile |
+| **The 4096 teacher cap censored 19.9%** | openmath **69.7%** — explains its 0.261 accept rate; corpus composition is biased, content is not |
+| **Student failure mode is repetition** | e.g. 17-token block x15 from position 513 — loops, not long reasoning |
 
-Ruled out as causes: delimiter duplication, target-rendering error, loss-mask
-error, unsupervised final answer or stop token, packing loss.
+### 8.3 Next — needs approval
 
-### 8.3 Open — unrestricted re-evaluation is blocked on a hardware decision
-
-The student's resolved context is **262,144** (`max_position_embeddings`, no RoPE
-scaling). KV cache is **112 KiB/token** (28L x 8KV x 128 x 2 x bf16), so **one
-sequence at full context needs ~28.7 GiB** — an L40S (46 GB) holds ~1.5. Full
-P18 compliance over 76 prompts x 6 checkpoints is ~$650 of L40S time in the
-worst case and cannot be parallelised away.
-
-**Proposed:** a fully uncapped pilot on a small deterministic subset to measure
-the real generated-length distribution, then cost the full run from it. Fewer
-prompts is not a P18 violation; a cap is. **Awaiting maintainer decision.**
+The standing plan is [proposal §12](proposals/stage3/2026-07-30_stage3_teacher_target_2x2.md):
+convergence probe first (~$4-6), then corpus expansion to ~8,000 prompts (~$13,
+**exceeds the remaining authorization**), then exposure-bias and representation
+KD. Convergence criteria: natural-termination >=0.8, degeneration <=0.05,
+length p50 within 0.5-2x of the teacher's 727.
 
 ## 9. Superseded conclusions — do not act on these
 

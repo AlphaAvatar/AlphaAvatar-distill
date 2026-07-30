@@ -310,3 +310,103 @@ metric design is settled after this baseline exists, not before it.
 
 No LR sweep, no step-budget ablation, no metric redesign, no final-only or
 trace-length variants, no new corpus, and no regeneration of the corpus.
+
+---
+
+# 12. Teacher-mode-preserving programme (proposed; nothing run)
+
+Supersedes §11 as the standing plan. Grounded in the unrestricted pilot
+([log](../../experiments/stage3/2026-07-30_unrestricted_pilot.md)), the
+structural audit and the system-prompt audit. **Every item preserves the
+thinking-only protocol** (P17): no no-think, empty-think, final-only or
+shortened targets appear anywhere below.
+
+## 12.1 What the evidence forces
+
+`s2v1@2700`, the best checkpoint, degenerates on 8/8 uncapped prompts. So the
+first question is **not** "which target set" but **"can this student reach
+non-degenerate free generation at all, in teacher mode"**. Until one checkpoint
+does, target-set comparisons are comparisons between degenerate models.
+
+## 12.2 Ordered programme
+
+**A. Convergence probe (highest value, cheapest).** Take the teacher-native
+recipe and extend exposure until free generation stops degenerating or provably
+plateaus. Measure the uncapped 8-prompt probe at every checkpoint — it costs
+~$0.02 per checkpoint and is the only metric that has distinguished anything.
+This directly tests "insufficient optimization", the top-ranked cause.
+
+**B. Data coverage.** 487 prompts / 0.71M real tokens is the binding limit for A.
+Required coverage is estimated in §12.4. Regeneration must be **uncapped** (or
+capped far above the teacher's p99 of 3,854) so openmath's long-reasoning
+instances stop being systematically rejected.
+
+**C. Exposure-bias correction**, only after A shows whether it is needed:
+sequence-level / on-policy GKD, teacher correction, or self-distillation on the
+student's own prefixes. The teacher-forced-vs-free gap (NLL 11.76 → 6.23 while
+generation degenerates) is the textbook indication.
+
+**D. Representation-level distillation.** Add hidden-state / span KD to the
+current CE + logit KD, which is the cheapest capacity-side lever that does not
+touch the behavioural target.
+
+**E. System-prompt coverage** (from the separate audit). Generate teacher targets
+**conditioned on** varied, representative deployment system prompts — never
+attached retrospectively to existing targets. Include a **no-system control** so
+the effect is isolated, and add system-instruction adherence to evaluation.
+Sampling from a pool of many varied personas/tool contracts, not one static
+string, so the student learns to follow the system turn rather than memorise it.
+
+**F. Architecture / quantization / runtime** — the P10 route to realtime, kept
+last because it is irrelevant until free generation is stable.
+
+## 12.3 Convergence criteria and stopping rules
+
+Primary (uncapped probe, teacher mode):
+
+* `natural_termination_rate` — target **≥0.8**, matching the teacher's own 80.1%;
+* `degeneration_rate` — target **≤0.05**;
+* generated-length p50 within **0.5×–2×** of the teacher's 727.
+
+Secondary: holdout NLL (guard rail only — it improved monotonically while
+generation degenerated, so it must never be the adoption metric again);
+answer correctness; system-instruction adherence.
+
+**Stopping rules.** Stop a run when: the probe's `degeneration_rate` fails to
+improve across 3 consecutive checkpoints; or `natural_termination_rate` ≥0.8 with
+`degeneration_rate` ≤0.05; or the pre-registered token budget is exhausted; or
+val CE rises above its step-0 value (existing R4). Report ≥2 seeds before any
+behaviour claim — and ≥4 for holdout NLL, whose cold-start seed spread was 2.21
+nats.
+
+## 12.4 Required data and token coverage (estimate, to be approved)
+
+The reference run needed 22.1M tokens to reach NLL 3.83 and is still degenerate.
+A convergence test on teacher-native data therefore needs, at minimum, the same
+order of token exposure **without** relying on repetition:
+
+| | current | needed for a convergence test |
+|---|---:|---:|
+| accepted prompts | 487 | **~6,000–8,000** |
+| real tokens (treatment) | 0.71M | **~10–15M** |
+| passes at 22M-token budget | 31× | **~2–3×** |
+
+Generation cost at the measured 5.8 s/prompt (n=1, uncapped ≈ same, since 80%
+terminate naturally): ~8,000 prompts ≈ **13 h ≈ $13** on one L40S. This exceeds
+the remaining authorization and is the main thing needing approval.
+
+## 12.5 Cost, checkpoints, and what is NOT proposed
+
+| item | estimate |
+|---|---:|
+| A. convergence probe on existing corpus (≈1,000 steps, 2 seeds) | ~$4–6 |
+| uncapped probe per checkpoint | ~$0.02 |
+| B. corpus expansion to ~8,000 prompts | ~$13 |
+| C/D. exposure-bias + representation KD pilots | scoped after A |
+
+Checkpoints every 100 steps, probe at each, keep the best two by
+`degeneration_rate`.
+
+**Not proposed, deliberately:** no bulk regeneration before A reports; no
+76-prompt full evaluation before the probe is trusted; no LR/metric sweep; and
+no target-behaviour change of any kind.
