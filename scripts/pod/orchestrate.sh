@@ -333,13 +333,13 @@ setst "RUNNING:report"
 # bug as fatal would skip teardown and leave a paid pod running for hours —
 # which is a real cost for a cosmetic failure. Upload verification above is the
 # safety condition for deletion; this is not.
-if uv run python scripts/pod/verify_and_report.py report \
-     --run "$(IFS=,; echo "${ARMS_DONE[*]}")" >>"$LOG" 2>&1; then
+REPORT_INVOCATION="${REPORT_CMD:-scripts/pod/verify_and_report.py report --run $(IFS=,; echo "${ARMS_DONE[*]}")}"
+log "report: uv run python $REPORT_INVOCATION"
+if uv run python $REPORT_INVOCATION >>"$LOG" 2>&1; then
   log "experiment write-up generated"
 else
   log "WARNING: report generation failed — artifacts are fetched and verified;"
-  log "         regenerate with: uv run python scripts/pod/verify_and_report.py \\"
-  log "         report --run $(IFS=,; echo "${ARMS_DONE[*]}")"
+  log "         regenerate with: uv run python $REPORT_INVOCATION"
 fi
 
 # ---------------------------------------------------------------- phase 6: git

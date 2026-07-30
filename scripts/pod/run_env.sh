@@ -47,7 +47,12 @@ TRANSFER_DATA=transfer/stage2_data_20260726.tar.zst
 # the hashed generation corpus, gitignored like every other built split.
 TRANSFER_EXTRA=transfer/stage3_pilot_20260730.tar.gz
 EXTRA_EXPECT="data/stage3_pilot/control/train data/stage3_pilot/treatment/train"
-HF_PREFIX_BASE=ttb
+export HF_PREFIX_BASE=ttb
+
+# Which reporter the orchestrator runs. verify_and_report.py's rules are the
+# 2026-07-28 packing control's, so pointing it at this session would commit a
+# confident write-up of the wrong hypothesis.
+REPORT_CMD="scripts/pod/report_tt2x2.py --control ttb_ctrl_a,ttb_ctrl_b --treatment ttb_treat_a,ttb_treat_b --out logs/experiments/stage3/2026-07-30_stage3_teacher_target_baseline.md"
 
 # Pre-registered abort rule R4: stop an arm whose primary-val CE at the first
 # eval exceeds its step-0 value, rather than retuning mid-session.
