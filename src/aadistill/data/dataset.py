@@ -68,12 +68,22 @@ _ASSISTANT_SEG = re.compile(
 
 
 def content_fields(sample: dict):
-    """Yield every free-text field of a sample (for hygiene checks)."""
+    """Yield every free-text field of a sample (for hygiene checks).
+
+    ``reasoning_content`` is included: the Qwen3-Thinking template renders it
+    into the ``<think>`` block of the assistant turn, so its text lands inside
+    the span that `encode_sample` locates by scanning for
+    ``<|im_start|>assistant ... <|im_end|>``. A trace carrying a literal
+    ``<|im_end|>`` would truncate that span and silently mis-mask the loss.
+    """
     if sample.get("format") == "text":
         yield sample.get("text", "")
         return
     for msg in sample.get("messages", []):
         yield msg.get("content", "")
+        reasoning = msg.get("reasoning_content")
+        if reasoning is not None:
+            yield reasoning
 
 
 def validate_sample(sample: dict) -> None:
@@ -122,6 +132,12 @@ def validate_sample(sample: dict) -> None:
                     ) or not isinstance(fn.get("arguments"), dict):
                         fail(f"message {i}: malformed tool_call {tc!r}")
                 saw_tool_call = True
+            reasoning = msg.get("reasoning_content")
+            if reasoning is not None:
+                if role != "assistant":
+                    fail(f"message {i}: reasoning_content only allowed on assistant")
+                if not isinstance(reasoning, str):
+                    fail(f"message {i}: reasoning_content must be a string")
             if role == "assistant":
                 if not content.strip() and not tool_calls:
                     fail(f"message {i}: assistant needs content or tool_calls")

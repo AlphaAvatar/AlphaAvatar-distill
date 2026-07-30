@@ -78,15 +78,31 @@ SLICES = {
 assert set(SLICES.values()) == set(VERIFIABLE), "slice table drifted from the verifier"
 
 
-def load_slice(data_dir: Path, name: str, limit: int | None) -> list[dict]:
+def load_slice(
+    data_dir: Path, name: str, limit: int | None, select: str = "prefix"
+) -> list[dict]:
+    """Take `limit` prompts from one slice, deterministically and seed-free.
+
+    `select="stride"` spreads the take evenly across the whole slice instead of
+    taking the head. The slices are far larger than any pilot take (squad_v2
+    9,635 / hotpot_qa 1,074 / gsm8k 7,149 / openmath 4,344), so a prefix samples
+    only the first few percent of a file whose order is the upstream dataset's \u2014
+    for openmath that risks correlating the take with problem difficulty.
+    Both modes are order-deterministic and reproducible from the manifest.
+    """
+    if select not in ("prefix", "stride"):
+        raise ValueError(f"unknown select mode {select!r}")
     group, source = SLICES[name]
     path = data_dir / "train" / f"{group}.jsonl"
     # `load_jsonl` iterates the file handle: `read_text().splitlines()` also
     # splits on \v, \f and \u2028, which LaTeX-heavy openmath targets contain,
     # and would tear a sample in half.
     rows = [s for s in load_jsonl(path) if s["source"] == source]
-    if limit:
-        rows = rows[:limit]
+    if limit and limit < len(rows):
+        if select == "prefix":
+            rows = rows[:limit]
+        else:
+            rows = rows[:: len(rows) // limit][:limit]
     if not rows:
         raise ValueError(f"no samples for slice {name} in {path}")
     return rows
@@ -207,6 +223,9 @@ def main() -> None:
     IN_SCOPE = ("rag_evidence", "multihop_qa", "gsm8k", "openmath")
     ap.add_argument("--slices", default=",".join(IN_SCOPE))
     ap.add_argument("--limit-per-slice", type=int, default=None)
+    ap.add_argument("--select", default="prefix", choices=["prefix", "stride"],
+                    help="how to take --limit-per-slice from each slice; "
+                         "'stride' spreads the take across the whole slice")
     ap.add_argument("--n", type=int, default=4, help="candidates per prompt")
     ap.add_argument("--batch-size", type=int, default=8,
                     help="prompts per generate call; raise until GPU memory is the limit")
@@ -260,7 +279,8 @@ def main() -> None:
         raise SystemExit(f"unknown slice(s): {sorted(unknown)}; known: {sorted(SLICES)}")
 
     data_dir = REPO_ROOT / args.data_dir
-    work = {name: load_slice(data_dir, name, args.limit_per_slice) for name in names}
+    work = {name: load_slice(data_dir, name, args.limit_per_slice, args.select)
+            for name in names}
     total = sum(len(v) for v in work.values())
     print(f"{total} prompts across {len(work)} slices, n={args.n}, "
           f"cap={args.max_new_tokens}, device={device}", flush=True)
@@ -407,6 +427,12 @@ def main() -> None:
             "engine_selected_by": args.engine_from,
         },
         "data_dir": args.data_dir,
+        # The prompt take is part of the corpus's identity: the same slice at the
+        # same limit yields a different prompt set under prefix vs stride (P4).
+        "prompt_selection": {
+            "mode": args.select, "limit_per_slice": args.limit_per_slice,
+            "slices": names,
+        },
         # A budget-stopped corpus is a valid artifact but not a complete one;
         # anything training on it must know that, so it is recorded next to the
         # hashes rather than inferred from a prompt count (P4/P11).

@@ -39,6 +39,12 @@ data/stage2_v1/train/
 data/stage2_v1/val/
 data/stage2_v1/calib/
 
+# Stage 3 teacher-target 2x2 arms (rebuild with scripts/data/build_stage3_pilot.py
+# from the hashed generation corpus; the committed manifest.json pins both arms'
+# per-file hashes, counts and packing)
+data/stage3_pilot/*/train/
+data/stage3_pilot/*/val/
+
 # Heavy local artifacts (activation caches, checkpoints, datasets, run outputs)
 artifacts/
 checkpoints/

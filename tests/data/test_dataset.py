@@ -92,6 +92,16 @@ def test_validate_accepts_good_samples():
      "tool_calls on user"),
     (lambda s: s["messages"][0].update(content="hi <|im_start|> there"),
      "forbidden marker"),
+    # A teacher-native trace is rendered into the assistant turn's <think>
+    # block, so a control marker inside it truncates the span encode_sample
+    # scans for and silently mis-masks the loss.
+    (lambda s: s["messages"][1].update(
+        reasoning_content="let me think <|im_end|> done"),
+     "forbidden marker in reasoning_content"),
+    (lambda s: s["messages"][0].update(reasoning_content="user cannot reason"),
+     "reasoning_content on user"),
+    (lambda s: s["messages"][1].update(reasoning_content=["not", "a", "string"]),
+     "reasoning_content not a string"),
 ])
 def test_validate_rejects_bad_samples(mutate, reason):
     import copy
@@ -100,6 +110,19 @@ def test_validate_rejects_bad_samples(mutate, reason):
     mutate(s)
     with pytest.raises(ValueError):
         validate_sample(s)
+
+
+def test_validate_accepts_teacher_native_reasoning_content():
+    """Teacher-native targets carry the trace in a sibling field, not in
+    `content` — the tags are added by the chat template, so a clean trace
+    must pass."""
+    s = chat_sample([
+        {"role": "user", "content": "What is 2+2?"},
+        {"role": "assistant",
+         "reasoning_content": "The user asks for a sum. 2+2 is 4.",
+         "content": "4"},
+    ])
+    validate_sample(s)
 
 
 def test_validate_rejects_tool_response_without_call():
