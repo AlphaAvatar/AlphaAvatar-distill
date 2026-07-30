@@ -72,6 +72,9 @@ def main() -> None:
     ap.add_argument("--eval-every", type=int, default=None)
     ap.add_argument("--eval-blocks", type=int, default=16)
     ap.add_argument("--out-dir", default="configs/stage3")
+    # Run names must not collide with an earlier session's: out_dir is derived
+    # from them, and the 2026-07-30 diagnostic already occupies tt2x2_*.
+    ap.add_argument("--name-prefix", default="tt2x2")
     args = ap.parse_args()
 
     manifest = json.loads((REPO_ROOT / args.pilot_manifest).read_text())
@@ -103,7 +106,7 @@ def main() -> None:
     written = {}
     for arm_tag, (arm_dir, description) in ARMS.items():
         for seed_tag, seed in SEEDS.items():
-            name = f"tt2x2_{arm_tag}_{seed_tag}"
+            name = f"{args.name_prefix}_{arm_tag}_{seed_tag}"
             cfg = {
                 "stage": "stage3_recovery",
                 "run_name": name,

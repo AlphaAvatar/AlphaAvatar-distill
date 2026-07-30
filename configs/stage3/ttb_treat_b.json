@@ -1,0 +1,62 @@
+{
+  "stage": "stage3_recovery",
+  "run_name": "ttb_treat_b",
+  "_purpose": "teacher-target 2x2 \u2014 teacher-native targets (trace + answer), seed 20260728",
+  "student_path": "artifacts/stage1/qwen3_0p6b_init_v0/checkpoint",
+  "teacher": {
+    "model_id": "Qwen/Qwen3-4B-Thinking-2507",
+    "revision": "768f209d9ea81521153ed38c47d515654e938aea",
+    "dtype": "bfloat16"
+  },
+  "data_dir": "data/stage3_pilot/treatment",
+  "groups": null,
+  "packing": "best_fit",
+  "block_len": 8192,
+  "dtype": "float32",
+  "autocast_bf16": true,
+  "gradient_checkpointing": true,
+  "device": "auto",
+  "seed": 20260728,
+  "trainable_patterns": [
+    "\\.self_attn\\.(q_proj|k_proj|v_proj|o_proj|q_norm|k_norm)\\.",
+    "\\.mlp\\.(gate_proj|up_proj|down_proj)\\.",
+    "input_layernorm",
+    "post_attention_layernorm",
+    "model\\.norm\\."
+  ],
+  "loss": {
+    "ce_weight": 0.25,
+    "kd_weight": 1.0,
+    "kd_temperature": 1.0,
+    "kd_scope": "all"
+  },
+  "optim": {
+    "lr": 5e-05,
+    "weight_decay": 0.01,
+    "betas": [
+      0.9,
+      0.95
+    ],
+    "eps": 1e-08,
+    "grad_clip": 1.0
+  },
+  "schedule": {
+    "total_steps": 137,
+    "warmup_steps": 14,
+    "min_lr_frac": 0.1
+  },
+  "batch": {
+    "blocks_per_step": 2,
+    "micro_blocks": 1
+  },
+  "checkpoint": {
+    "save_every": 45,
+    "keep_last": 2
+  },
+  "intervals": {
+    "log_every": 5,
+    "eval_every": 22,
+    "eval_blocks": 16
+  },
+  "out_dir": "artifacts/stage3/ttb_treat_b"
+}

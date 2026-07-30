@@ -24,6 +24,19 @@ for entry in "${REF_CKPTS[@]}"; do
   dest=$(printf '%s' "$entry" | cut -d'|' -f2)
   name=$(printf '%s' "$entry" | cut -d'|' -f4)
   [ -n "$name" ] || continue
+
+  # The shared step-0 model of a from-scratch fork needs the SAME readouts the
+  # arms get, or the per-arm deltas have no origin to be measured from. Behavior
+  # alone is not enough (proposal 11.4): holdout NLL is the guard rail, the two
+  # probes are the mechanistic readouts, and INT8 is the deployment guard rail.
+  uv run python scripts/evaluation/eval_ppl.py --data "$HOLDOUT" \
+    --model "$dest" --out "$OUT/${name}_holdout_v1.json" || fail "holdout_$name"
+  CUDA_VISIBLE_DEVICES= uv run python scripts/evaluation/eval_ppl.py \
+    --data "$HOLDOUT" --model "$dest" --fake-quant int8 \
+    --out "$OUT/${name}_holdout_v1_int8.json" || fail "holdout_int8_$name"
+  uv run python scripts/evaluation/probe_think_close.py --model "$dest" \
+    --per-group 4 --out "$OUT/${name}_probe_think_close.json" || fail "probe_$name"
+
   uv run python scripts/evaluation/eval_behavior.py --model "$dest" \
     --prompts "$BEHAVIOR_PROMPTS" --max-new-tokens "$BEHAVIOR_MAX_NEW_TOKENS" \
     --out "$OUT/${name}_behavior_v0.json" || fail "$name"
@@ -35,6 +48,12 @@ for entry in "${REF_CKPTS[@]}"; do
     "$OUT/${name}_behavior_v0.generations.jsonl" \
     "$HF_PREFIX_BASE/reference_scorecards/${name}_behavior_v0.generations.jsonl" \
     --repo-type model || fail "upload_gen_$name"
+  for extra in holdout_v1 holdout_v1_int8 probe_think_close; do
+    uvx --from huggingface_hub hf upload "$HF_REPO" \
+      "$OUT/${name}_${extra}.json" \
+      "$HF_PREFIX_BASE/reference_scorecards/${name}_${extra}.json" \
+      --repo-type model || fail "upload_${extra}_$name"
+  done
 done
 
 echo "MARKER:REFS_SCORED" >> /workspace/run_markers.log
