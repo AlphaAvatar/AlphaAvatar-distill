@@ -3,36 +3,48 @@
 # script in scripts/pod/ sources this file instead of hardcoding a run name,
 # config, checkpoint or HF path.
 #
-# Current session: the **engine benchmark + teacher-corpus pilot**
-# (logs/proposals/rollout/2026-07-29_engine_benchmark.md). This session does no
-# training, so ARMS is empty and the driver is bench_and_generate.sh rather
-# than orchestrate.sh. setup.sh is still the entry point and is unchanged: it
-# only reads HF_REPO, the transfer artifacts, REF_CKPTS and the eval paths.
+# Current session: the **Stage 3 teacher-target 2x2**
+# (logs/proposals/stage3/2026-07-30_stage3_teacher_target_2x2.md). Four arms on
+# one pod: public-target control vs teacher-native treatment, two seeds each.
+# Both arms share the start checkpoint, the prompt set, the packing
+# (best_fit @ block_len 8192), the schedule and the total training-token budget;
+# they differ only in the assistant turn of each training sample.
 
-SESSION=isolated_engine
+SESSION=tt2x2
 SESSION_DATE=20260730
 
-# No training arms this session.
-ARMS=()
+# Arm entries are name|config|final-step-tag. The two seeds of an arm are
+# separate entries because the trainer takes its seed from the config.
+ARMS=(
+  "tt2x2_ctrl_a|configs/stage3/tt2x2_ctrl_a.json|STEP_TAG"
+  "tt2x2_ctrl_b|configs/stage3/tt2x2_ctrl_b.json|STEP_TAG"
+  "tt2x2_treat_a|configs/stage3/tt2x2_treat_a.json|STEP_TAG"
+  "tt2x2_treat_b|configs/stage3/tt2x2_treat_b.json|STEP_TAG"
+)
 
-# No checkpoints to stage. The teacher is pulled from the Hub at its pinned
-# revision by the benchmark itself, and nothing is being fine-tuned or scored
-# against a reference student, so hashes_ckpt.txt is empty by design.
-REF_CKPTS=()
+# The 2x2's start checkpoint, scored on this GPU before training so all four
+# arms have a same-device baseline. Greedy-decode behavior metrics differ
+# between CPU and GPU on a damaged student, so the reference must be re-scored
+# in-session rather than quoted from the run that produced it.
+# Entry format: hf-glob|local-dest|revision|scorecard-name
+REF_CKPTS=(
+  "stage3/s2v1_from_init/step_002700/model|artifacts/stage3/s2v1_from_init/checkpoints/step_002700/model|main|s2v1_from_init_2700"
+)
 
 # Transfer artifacts on the private HF relay (staged from the dev box).
 HF_REPO=AlphaAvatar/aadistill-artifacts
-TRANSFER_BUNDLE=transfer/repo_20260730.bundle
+TRANSFER_BUNDLE=transfer/repo_20260730b.bundle
 TRANSFER_DATA=transfer/stage2_data_20260726.tar.zst
-HF_PREFIX_BASE=isolated_engine
+# The 2x2 arms: built on the dev box by scripts/data/build_stage3_pilot.py from
+# the hashed generation corpus, gitignored like every other built split.
+TRANSFER_EXTRA=transfer/stage3_pilot_20260730.tar.gz
+EXTRA_EXPECT="data/stage3_pilot/control/train data/stage3_pilot/treatment/train"
+HF_PREFIX_BASE=tt2x2
 
-# Budget knobs read by bench_and_generate.sh (P6). The generation cap is
-# enforced in-process at a batch boundary, so a stop still leaves complete,
-# hashed artifacts and a manifest marked `complete: false`.
-export GEN_MAX_HOURS=2.5
-export HOURLY_USD=0.99   # measured at pod creation 2026-07-29 (L40S, US)
-export N_PROMPTS=10
-export LIMIT_PER_SLICE=200
+# Pre-registered abort rule R4: stop an arm whose primary-val CE at the first
+# eval exceeds its step-0 value, rather than retuning mid-session.
+ABORT_ARMS="tt2x2_ctrl_a tt2x2_ctrl_b tt2x2_treat_a tt2x2_treat_b"
+ABORT_CHECK_STEP=EVAL_EVERY
 
 # Paths setup.sh checks exist after the bundle + data land.
 HOLDOUT=data/warmup/holdout_v1.jsonl

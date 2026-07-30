@@ -35,6 +35,21 @@ git checkout main || fail checkout
 # --- data ---
 tar --use-compress-program=unzstd -xf "/workspace/xfer/$TRANSFER_DATA" || fail untar
 ls data/stage2_v1/train data/stage2/val "$HOLDOUT" || fail data_layout
+
+# Optional third artifact: data built on the dev box that is neither tracked in
+# the repo nor part of the standing mixture — the Stage 3 2x2 arms, which are
+# derived from a hashed generation corpus and are gitignored like every other
+# built split. gzip rather than zstd so the same tarball can be read by an
+# engine image that ships no zstd.
+if [ -n "${TRANSFER_EXTRA:-}" ]; then
+  uvx --from huggingface_hub hf download "$HF_REPO" "$TRANSFER_EXTRA" \
+    --repo-type model --local-dir /workspace/xfer || fail hf_extra_download
+  tar xzf "/workspace/xfer/$TRANSFER_EXTRA" || fail untar_extra
+  for d in ${EXTRA_EXPECT:-}; do
+    ls "$d" > /dev/null || fail "extra_missing_$d"
+  done
+  echo "extra data staged: ${EXTRA_EXPECT:-<unchecked>}"
+fi
 # The behavior prompt set is tracked in the repo, so it arrives with the bundle.
 ls "$BEHAVIOR_PROMPTS" || fail behavior_prompts_missing
 
