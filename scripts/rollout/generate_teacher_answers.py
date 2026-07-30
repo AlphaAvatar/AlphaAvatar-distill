@@ -39,7 +39,7 @@ Determinism: candidates are seeded per batch, but batched generation is not
 bitwise reproducible, so **the corpus is the artifact** and its hash pins the
 experiment (P5). That stance is now measured rather than assumed — even *greedy*
 bf16 decoding is not batch-invariant on this project's own hardware
-(`logs/experiments/rollout/2026-07-29_engine_adapter_and_bf16_invariance.md`), which is
+(`logs/EXPERIMENTS.md`), which is
 part of why no candidate is generated greedily any more.
 """
 
@@ -220,7 +220,7 @@ def generate_candidates(engine, tokenizer, prompt_ids: list[list[int]], *, n: in
 
     Driven through `aadistill.engines` rather than `model.generate` so the corpus
     can be built by whichever engine the benchmark selected
-    (`logs/proposals/rollout/2026-07-29_engine_benchmark.md`) without this script knowing
+    (`logs/EXPERIMENTS.md`) without this script knowing
     which one it is. The adapter is token-in/token-out and does the stop-cutting
     itself, in one shared code path for every engine, so a corpus built on vLLM
     is trimmed identically to one built in-stack; the text here is derived for

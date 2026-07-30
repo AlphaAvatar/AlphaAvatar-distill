@@ -1,6 +1,6 @@
 """Build the two arms of the Stage 3 teacher-target 2x2 from a generated corpus.
 
-Pre-registration: logs/proposals/stage3/2026-07-30_stage3_teacher_target_2x2.md
+Pre-registration: logs/PROPOSAL.md
 
 The experiment asks whether teacher-native targets beat public ones at a fixed
 compute budget, so the two arms must differ in *exactly one thing*: the

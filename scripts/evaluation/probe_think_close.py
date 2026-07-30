@@ -2,9 +2,9 @@
 where the protocol demands them.
 
 The primary readout for the CE/KD conflict experiment
-(`logs/experiments/stage3/2026-07-28_kd_ce_protocol_conflict.md`) and for the
+(`logs/EXPERIMENTS.md`) and for the
 teacher-target 2x2, whose rule R1 requires **both** probes to improve
-(`logs/proposals/stage3/2026-07-30_stage3_teacher_target_2x2.md`). The two are
+(`logs/PROPOSAL.md`). The two are
 different failure modes and move independently: `</think>` is whether the model
 can leave its reasoning block, `<|im_end|>` is whether it can end its turn at
 all. `terminated` — the metric Stage 3's exit gate is blocked on — is the

@@ -333,9 +333,14 @@ setst "RUNNING:report"
 # bug as fatal would skip teardown and leave a paid pod running for hours —
 # which is a real cost for a cosmetic failure. Upload verification above is the
 # safety condition for deletion; this is not.
-REPORT_INVOCATION="${REPORT_CMD:-scripts/pod/verify_and_report.py report --run $(IFS=,; echo "${ARMS_DONE[*]}")}"
-log "report: uv run python $REPORT_INVOCATION"
-if uv run python $REPORT_INVOCATION >>"$LOG" 2>&1; then
+# No default reporter: verify_and_report.py is verify-only, and inheriting
+# another experiment's decision rules is how a session auto-generates a
+# confident write-up of the wrong hypothesis. A session sets REPORT_CMD or gets
+# no auto write-up, which is the safe default.
+REPORT_INVOCATION="${REPORT_CMD:-}"
+if [[ -z "$REPORT_INVOCATION" ]]; then
+  log "no REPORT_CMD configured — skipping auto write-up (artifacts are fetched and verified)"
+elif uv run python $REPORT_INVOCATION >>"$LOG" 2>&1; then
   log "experiment write-up generated"
 else
   log "WARNING: report generation failed — artifacts are fetched and verified;"

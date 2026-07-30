@@ -4,7 +4,7 @@
 Usage:
     uv run python scripts/data/build_stage2_v1.py
 
-Design (see logs/proposals/stage2/2026-07-26_stage2_mixture_v1_scaleup.md):
+Design (see logs/EXPERIMENTS.md):
 
 * v0 train is carried into v1 train verbatim, except gsm8k samples, which are
   format-normalized (strip `<<...>>` calculator annotations, rewrite the
