@@ -350,12 +350,18 @@ generation degenerates) is the textbook indication.
 current CE + logit KD, which is the cheapest capacity-side lever that does not
 touch the behavioural target.
 
-**E. System-prompt coverage** (from the separate audit). Generate teacher targets
-**conditioned on** varied, representative deployment system prompts — never
-attached retrospectively to existing targets. Include a **no-system control** so
-the effect is isolated, and add system-instruction adherence to evaluation.
-Sampling from a pool of many varied personas/tool contracts, not one static
-string, so the student learns to follow the system turn rather than memorise it.
+**E. System-prompt capability — a NEW objective, not a repair.** Rechecked
+2026-07-31: the teacher requires no system message, the template has no
+default-system fallback, and all four in-repo paths share a byte-identical
+prompt prefix, so the corpus is native-correct and nothing needs correcting
+([contract](../../experiments/stage3/2026-07-31_system_prompt_contract.md)).
+
+If system-conditioned deployment is wanted, it is an **added capability** with
+its own objective: generate teacher targets **conditioned on** varied,
+representative system prompts sampled from a pool (never one static string, never
+retrofitted to existing targets), keep a **no-system control** to isolate the
+effect, and add system-instruction adherence to evaluation. Deprioritised below
+A-D: it cannot help a model that degenerates without a system prompt.
 
 **F. Architecture / quantization / runtime** — the P10 route to realtime, kept
 last because it is irrelevant until free generation is stable.

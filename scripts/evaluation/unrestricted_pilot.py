@@ -62,8 +62,21 @@ def main() -> int:
     scaling = getattr(cfg, "rope_scaling", None) or {}
     if isinstance(scaling, dict) and scaling.get("factor"):
         ctx = int(ctx * float(scaling["factor"]))
+    # Native stopping semantics come from the MODEL's generation_config, which
+    # may list several eos ids (the teacher lists <|im_end|> AND <|endoftext|>).
+    # Taking only the tokenizer's single eos would silently narrow the stop set
+    # and turn a natural termination into a non-termination.
     im_end = tok.convert_tokens_to_ids("<|im_end|>")
-    stop_ids = sorted({i for i in (im_end, tok.eos_token_id) if i is not None})
+    cfg_eos = getattr(cfg, "eos_token_id", None)
+    cfg_eos = cfg_eos if isinstance(cfg_eos, (list, tuple)) else [cfg_eos]
+    try:
+        from transformers import GenerationConfig
+        gen_eos = GenerationConfig.from_pretrained(args.model).eos_token_id
+        gen_eos = gen_eos if isinstance(gen_eos, (list, tuple)) else [gen_eos]
+    except Exception:
+        gen_eos = []
+    stop_ids = sorted({i for i in (*cfg_eos, *gen_eos, im_end, tok.eos_token_id)
+                       if isinstance(i, int)})
     print(f"[{args.label}] resolved context {ctx}; stop ids {stop_ids}", flush=True)
 
     ids = [x for x in args.prompt_ids.replace(",", " ").split() if x]

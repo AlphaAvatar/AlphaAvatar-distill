@@ -221,7 +221,7 @@ progress.
 
 | finding | measurement |
 |---|---|
-| **System-prompt coverage is zero in training** | 0/23,953 stage2_v1, 0/752 corpus, 0/487 per arm; eval 6/76; template injects no default. **Confirmed coverage + train/inference mismatch** |
+| **Prompt contract is CLEAN — earlier 'system mismatch' RETRACTED** | The teacher requires no system message: the template has no default-system fallback and the model card never mentions one. Paths 1-4 share a byte-identical prompt prefix (`b19e629c…`). Remaining: 6/76 eval prompts carry a system turn training never saw (7.9%, eval-side only) ([log](experiments/stage3/2026-07-31_system_prompt_contract.md)) |
 | **Data path is clean** | 8/8 samples: one `<think>`, no dropped trace chars, `</think>` and final `<|im_end|>` supervised, packing lossless |
 | **Teacher terminates naturally 80.1%** | p25 466, p50 727, p99 3854; the old 512 eval cap sat inside the teacher's first quartile |
 | **The 4096 teacher cap censored 19.9%** | openmath **69.7%** — explains its 0.261 accept rate; corpus composition is biased, content is not |

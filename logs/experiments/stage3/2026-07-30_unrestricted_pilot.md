@@ -101,8 +101,10 @@ Remaining live causes, in order of evidential support:
    term anywhere in the recipe.
 4. **Missing representation-level distillation** — the objective is CE + full-vocab
    logit KD only; no hidden-state or sequence-level term.
-5. **System-prompt coverage gap** — zero system turns in training vs a
-   system-conditioned deployment (separate audit).
+5. ~~System-prompt coverage gap~~ — **retracted 2026-07-31**: the teacher
+   requires no system message, and all four in-repo paths share a byte-identical
+   prompt prefix. Not a cause.
+   ([contract](2026-07-31_system_prompt_contract.md))
 
 ## 5. Effect of the former 4096-token teacher cap
 
