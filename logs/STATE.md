@@ -2,10 +2,10 @@
 
 **Updated:** 2026-07-30 (UTC+8 dev box) · branch `main` ·
 **nothing running, nothing billing, no pods or volumes exist.**
-Last session: a four-arm run completed end to end (**$4.87** of a $7.00
-ceiling) and was then **relabelled a post-s2v1 continuation diagnostic** — its
-start point was invalid, so it is not a teacher-target baseline. The corrected
-baseline is specified and **awaiting approval before any paid work** (§8).
+Last session: the **corrected teacher-target baseline has run** — four arms
+from the Stage 1 structural init, $2.30 (session total **$7.18**). The earlier
+four-arm run is relabelled a post-s2v1 continuation diagnostic (invalid start
+point). Result and open decisions in §8.
 
 This file is the canonical handoff. It is a *snapshot*, not an archive —
 historical detail lives in `logs/experiments/`, `logs/proposals/` and
@@ -58,15 +58,20 @@ trainable), CE 0.25 + full-vocab KD 1.0 at τ=1 scope `all`, lr 2e-4 / warmup 60
 cosine to 0.1×, fp32 master + bf16 autocast, **seed 20260726**, eval every 150
 steps. The FFN-first warm-up ladder is retired.
 
-**The teacher-target question is still open.** A four-arm run completed on
-2026-07-30 but started every arm from `s2v1_from_init/step_002700`, which is
-already 2,700 steps of public-target training — a path-dependent advantage for
-the public arm. It is relabelled a **post-s2v1 continuation diagnostic**
+**The corrected teacher-target baseline has run**
+([log](experiments/stage3/2026-07-30_stage3_teacher_target_baseline.md)): four
+arms from the Stage 1 structural init, 137 steps, shared step-0 model scored
+on the same GPU. **R2 fires — the teacher-native arm is rejected at this fixed
+compute**, and unlike the earlier run that verdict is not confounded by the
+start point. At 137 steps the public arm reaches `format_ok` 0.625 /
+`terminated` 0.658 from an init that scored 0 on both, while the teacher-native
+arm truncates **99.3%** of generations and answers nothing — yet has the better
+holdout NLL (6.23 vs 7.73). Read as an early fixed-compute comparison only.
+
+The earlier four-arm run is relabelled a **post-s2v1 continuation diagnostic**
 ([log](experiments/stage3/2026-07-30_stage3_post_s2v1_continuation_diagnostic.md));
-its R2 "reject" is **void as evidence about teacher-native targets**. Both arms
-regressed holdout NLL, so neither replaces the branch point. The corrected
-baseline forks from the **Stage 1 structural init**
-([proposal §11](proposals/stage3/2026-07-30_stage3_teacher_target_2x2.md)).
+its R2 outcome is void as evidence about teacher-native targets. **The branch
+point is unchanged** — no arm of either run approaches `s2v1@2700`'s 3.8285.
 
 **Best checkpoint / branch point:** `stage3/s2v1_from_init/step_002700/model` —
 holdout NLL **3.8285**, `behavior_score_v0` 20.2%, at 33% fewer steps than the
@@ -97,6 +102,9 @@ best-NLL run (`s2_blocks_v1`, 3.8003). Teacher ceiling on the same eval:
 | **The control wins protocol partly by being terse** | median finished answer **2 words** (control) vs 34 (teacher-native) | 07-30 |
 | **The corpus is effectively n=1** | 92.7% byte-identical pairs; a serving engine seeds per *request*, so the draws were never independent. accept@n == accept@1 by construction. **Not** evidence about sampling diversity | 07-30 |
 | **A start point trained on one arm's targets invalidates the fork** | `s2v1_from_init@2700` is 2,700 public-target steps; forking both arms there compares target sets *conditioned on one of them* | 07-30 |
+| **From the Stage 1 init, public targets reach protocol competence in 137 steps** | `format_ok` 0 → **0.625**, `terminated` 0 → **0.658** — both above `s2v1@2700` (0.224 / 0.368) at 5% of its steps | 07-30 |
+| **Teacher-native targets at the same budget produce no finishable output** | **99.3%** truncated at 512, `empty_answer` 0.980 — while holding the *better* holdout NLL (6.23 vs 7.73) | 07-30 |
+| **Holdout NLL is unresolvable from a cold init at 2 seeds** | control seed spread **2.21 nats** (6.62 vs 8.83); the inter-arm gap of 1.50 sits inside it | 07-30 |
 
 **The two that most changed the plan:**
 
