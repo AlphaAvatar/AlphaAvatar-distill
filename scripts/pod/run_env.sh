@@ -16,10 +16,10 @@ SESSION_DATE=20260730
 # Arm entries are name|config|final-step-tag. The two seeds of an arm are
 # separate entries because the trainer takes its seed from the config.
 ARMS=(
-  "tt2x2_ctrl_a|configs/stage3/tt2x2_ctrl_a.json|STEP_TAG"
-  "tt2x2_ctrl_b|configs/stage3/tt2x2_ctrl_b.json|STEP_TAG"
-  "tt2x2_treat_a|configs/stage3/tt2x2_treat_a.json|STEP_TAG"
-  "tt2x2_treat_b|configs/stage3/tt2x2_treat_b.json|STEP_TAG"
+  "tt2x2_ctrl_a|configs/stage3/tt2x2_ctrl_a.json|step_000137"
+  "tt2x2_ctrl_b|configs/stage3/tt2x2_ctrl_b.json|step_000137"
+  "tt2x2_treat_a|configs/stage3/tt2x2_treat_a.json|step_000137"
+  "tt2x2_treat_b|configs/stage3/tt2x2_treat_b.json|step_000137"
 )
 
 # The 2x2's start checkpoint, scored on this GPU before training so all four
@@ -44,7 +44,7 @@ HF_PREFIX_BASE=tt2x2
 # Pre-registered abort rule R4: stop an arm whose primary-val CE at the first
 # eval exceeds its step-0 value, rather than retuning mid-session.
 ABORT_ARMS="tt2x2_ctrl_a tt2x2_ctrl_b tt2x2_treat_a tt2x2_treat_b"
-ABORT_CHECK_STEP=EVAL_EVERY
+ABORT_CHECK_STEP=22
 
 # Commit message the orchestrator uses for this session's logs (it no longer
 # hardcodes one experiment's description).

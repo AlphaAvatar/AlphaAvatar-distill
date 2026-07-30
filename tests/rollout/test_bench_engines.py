@@ -119,7 +119,8 @@ class _StubEngine:
         self.calls = []
 
     def generate(self, prompts, *, max_new_tokens, stop_ids, greedy=True, **kw):
-        self.calls.append({"n": len(prompts), "greedy": greedy})
+        self.calls.append({"n": len(prompts), "greedy": greedy,
+                           "seed": kw.get("seed")})
         out = []
         for p in prompts:
             tokens = [p[0], THINK_CLOSE_ID, 7]
@@ -143,16 +144,28 @@ def test_no_candidate_is_generated_greedily():
     determinism that once justified it does not survive bf16 batching."""
     engine, per_prompt = _run(1, [[10], [20]])
     assert [len(c) for c in per_prompt] == [1, 1]
-    assert engine.calls == [{"n": 2, "greedy": False}]
     assert all(call["greedy"] is False for call in engine.calls)
 
 
-def test_all_n_candidates_come_from_one_batched_call():
-    """One call with prompts replicated n times, not n calls: it is what keeps a
-    continuous-batching engine saturated."""
+def test_the_whole_prompt_batch_goes_in_one_call_per_candidate_index():
+    """The prompt batch is what saturates a continuous-batching engine, so it
+    stays intact; the candidate index is what varies across calls."""
     engine, per_prompt = _run(4, [[10], [20], [30]])
     assert [len(c) for c in per_prompt] == [4, 4, 4]
-    assert engine.calls == [{"n": 12, "greedy": False}]
+    assert len(engine.calls) == 4
+    assert all(call["n"] == 3 for call in engine.calls)
+
+
+def test_each_candidate_index_draws_under_its_own_seed():
+    """Regression, 2026-07-30: candidates were replicated inside ONE request
+    under ONE seed. A serving engine seeds per request, so the replicas decoded
+    identically — 698 of 752 pairs byte-identical, candidate 2 rescuing 0 of 212
+    failures, and accept@n equal to accept@1 by construction at 2x the cost.
+    Distinct seeds per candidate index are what make n candidates n samples."""
+    engine, _ = _run(4, [[10], [20], [30]])
+    seeds = [call["seed"] for call in engine.calls]
+    assert len(set(seeds)) == 4, f"candidate indices share a seed: {seeds}"
+    assert all(s is not None for s in seeds)
 
 
 def test_candidates_map_back_to_their_own_prompt():

@@ -1,0 +1,297 @@
+{
+  "created_utc": "2026-07-30T07:05:59.047088+00:00",
+  "command": "scripts/data/build_stage3_pilot.py --targets artifacts/stage2_v2/teacher_corpus_750/targets.jsonl --out data/stage3_pilot --block-len 8192",
+  "purpose": "Stage 3 teacher-target 2x2: control vs treatment over one shared accepted prompt subset",
+  "targets_corpus": {
+    "path": "artifacts/stage2_v2/teacher_corpus_750/targets.jsonl",
+    "sha256": "18028f0cb80091323cf87b3b0474c1692867f8a6e9568a625e5e3b8237dd3897",
+    "rows": 752
+  },
+  "public_dir": "data/stage2_v1",
+  "accepted_prompts": 540,
+  "dropped_public_fallback": 212,
+  "capability_scope": {
+    "allowed_groups": [
+      "rag_evidence",
+      "multihop_qa",
+      "code_math"
+    ],
+    "dropped_out_of_scope": {}
+  },
+  "packing": {
+    "mode": "best_fit",
+    "block_len": 8192,
+    "seed": 20260726
+  },
+  "val_frac": 0.1,
+  "val_assignment": "sha256(id) % 10000 < val_frac*10000 \u2014 shared by both arms, seed-free",
+  "arms": {
+    "control": {
+      "counts": {
+        "train": {
+          "total": 487,
+          "by_group": {
+            "code_math": 187,
+            "multihop_qa": 137,
+            "rag_evidence": 163
+          },
+          "by_slice": {
+            "squad_v2": 163,
+            "hotpot_qa": 137,
+            "gsm8k": 142,
+            "openmath_instruct_2": 45
+          }
+        },
+        "val": {
+          "total": 53,
+          "by_group": {
+            "code_math": 14,
+            "multihop_qa": 18,
+            "rag_evidence": 21
+          },
+          "by_slice": {
+            "squad_v2": 21,
+            "hotpot_qa": 18,
+            "gsm8k": 10,
+            "openmath_instruct_2": 4
+          }
+        }
+      },
+      "tokens": {
+        "rendered_tokens": {
+          "n": 540,
+          "min": 80,
+          "p50": 213,
+          "p90": 1500,
+          "max": 2384,
+          "mean": 548.6
+        },
+        "supervised_tokens": {
+          "n": 540,
+          "min": 6,
+          "p50": 10,
+          "p90": 136,
+          "max": 877,
+          "mean": 51.0
+        },
+        "supervised_total": 27526,
+        "supervised_fraction": 0.0929,
+        "packed_best_fit_8192": {
+          "train": {
+            "blocks": 36,
+            "block_tokens": 294912,
+            "real_tokens": 263840,
+            "padding_tokens": 31072,
+            "efficiency": 0.8946,
+            "supervised_kept": 25520,
+            "truncated_samples": 0,
+            "by_group": {
+              "code_math": {
+                "blocks": 5,
+                "samples": 187,
+                "truncated_samples": 0,
+                "real_tokens": 35049,
+                "padding_tokens": 5911,
+                "efficiency": 0.8557
+              },
+              "multihop_qa": {
+                "blocks": 26,
+                "samples": 137,
+                "truncated_samples": 0,
+                "real_tokens": 195863,
+                "padding_tokens": 17129,
+                "efficiency": 0.9196
+              },
+              "rag_evidence": {
+                "blocks": 5,
+                "samples": 163,
+                "truncated_samples": 0,
+                "real_tokens": 32928,
+                "padding_tokens": 8032,
+                "efficiency": 0.8039
+              }
+            }
+          },
+          "val": {
+            "blocks": 6,
+            "block_tokens": 49152,
+            "real_tokens": 32383,
+            "padding_tokens": 16769,
+            "efficiency": 0.6588,
+            "supervised_kept": 2006,
+            "truncated_samples": 0,
+            "by_group": {
+              "code_math": {
+                "blocks": 1,
+                "samples": 14,
+                "truncated_samples": 0,
+                "real_tokens": 2641,
+                "padding_tokens": 5551,
+                "efficiency": 0.3224
+              },
+              "multihop_qa": {
+                "blocks": 4,
+                "samples": 18,
+                "truncated_samples": 0,
+                "real_tokens": 25918,
+                "padding_tokens": 6850,
+                "efficiency": 0.791
+              },
+              "rag_evidence": {
+                "blocks": 1,
+                "samples": 21,
+                "truncated_samples": 0,
+                "real_tokens": 3824,
+                "padding_tokens": 4368,
+                "efficiency": 0.4668
+              }
+            }
+          }
+        },
+        "lossless": true
+      },
+      "files": {
+        "control/train/code_math.jsonl": "c594b02302243d9243e7f0c0344f9ab5a1c2d6bef0ced1f03ab147fd28f8e9da",
+        "control/train/multihop_qa.jsonl": "4b58a7fcbb576032006f6f0168933f0de0b1d39ecfa9431bf54aeda07416c9ee",
+        "control/train/rag_evidence.jsonl": "50b8ed918e5a19fe7ade243fa438402255ea3e35ad5e19c29efd97454ec5c97c",
+        "control/val/code_math.jsonl": "e22e604d8731a578463e3a85a83a39b57c688f61e7667ed6e5fe69fbffc1a42a",
+        "control/val/multihop_qa.jsonl": "da1ba6a13f06690f49da993e6f8bfde88c4dcc4f621fa68c9a6651490c436531",
+        "control/val/rag_evidence.jsonl": "75dac164f0ee32fbda1ee42cc16fdaaca528258872905be132becd924dbef2aa"
+      }
+    },
+    "treatment": {
+      "counts": {
+        "train": {
+          "total": 487,
+          "by_group": {
+            "code_math": 187,
+            "multihop_qa": 137,
+            "rag_evidence": 163
+          },
+          "by_slice": {
+            "squad_v2": 163,
+            "hotpot_qa": 137,
+            "gsm8k": 142,
+            "openmath_instruct_2": 45
+          }
+        },
+        "val": {
+          "total": 53,
+          "by_group": {
+            "code_math": 14,
+            "multihop_qa": 18,
+            "rag_evidence": 21
+          },
+          "by_slice": {
+            "squad_v2": 21,
+            "hotpot_qa": 18,
+            "gsm8k": 10,
+            "openmath_instruct_2": 4
+          }
+        }
+      },
+      "tokens": {
+        "rendered_tokens": {
+          "n": 540,
+          "min": 240,
+          "p50": 1149,
+          "p90": 2850,
+          "max": 5457,
+          "mean": 1459.6
+        },
+        "supervised_tokens": {
+          "n": 540,
+          "min": 89,
+          "p50": 688,
+          "p90": 1919,
+          "max": 4071,
+          "mean": 962.0
+        },
+        "supervised_total": 519478,
+        "supervised_fraction": 0.6591,
+        "packed_best_fit_8192": {
+          "train": {
+            "blocks": 91,
+            "block_tokens": 745472,
+            "real_tokens": 714941,
+            "padding_tokens": 30531,
+            "efficiency": 0.959,
+            "supervised_kept": 476621,
+            "truncated_samples": 0,
+            "by_group": {
+              "code_math": {
+                "blocks": 34,
+                "samples": 187,
+                "truncated_samples": 0,
+                "real_tokens": 271583,
+                "padding_tokens": 6945,
+                "efficiency": 0.9751
+              },
+              "multihop_qa": {
+                "blocks": 42,
+                "samples": 137,
+                "truncated_samples": 0,
+                "real_tokens": 323145,
+                "padding_tokens": 20919,
+                "efficiency": 0.9392
+              },
+              "rag_evidence": {
+                "blocks": 15,
+                "samples": 163,
+                "truncated_samples": 0,
+                "real_tokens": 120213,
+                "padding_tokens": 2667,
+                "efficiency": 0.9783
+              }
+            }
+          },
+          "val": {
+            "blocks": 11,
+            "block_tokens": 90112,
+            "real_tokens": 73234,
+            "padding_tokens": 16878,
+            "efficiency": 0.8127,
+            "supervised_kept": 42857,
+            "truncated_samples": 0,
+            "by_group": {
+              "code_math": {
+                "blocks": 3,
+                "samples": 14,
+                "truncated_samples": 0,
+                "real_tokens": 17905,
+                "padding_tokens": 6671,
+                "efficiency": 0.7286
+              },
+              "multihop_qa": {
+                "blocks": 6,
+                "samples": 18,
+                "truncated_samples": 0,
+                "real_tokens": 42312,
+                "padding_tokens": 6840,
+                "efficiency": 0.8608
+              },
+              "rag_evidence": {
+                "blocks": 2,
+                "samples": 21,
+                "truncated_samples": 0,
+                "real_tokens": 13017,
+                "padding_tokens": 3367,
+                "efficiency": 0.7945
+              }
+            }
+          }
+        },
+        "lossless": true
+      },
+      "files": {
+        "treatment/train/code_math.jsonl": "481a32f8e68ab1725d0f42f917d435f799511cfefae2cf98cfab56b987827b76",
+        "treatment/train/multihop_qa.jsonl": "03f8b53ade7502517ccab0dc9818cc7a4909d376bfd8e51f3e13eefa42c52763",
+        "treatment/train/rag_evidence.jsonl": "913b64759b0df77131d4b1fe277d2084a78c20776ebf73356b7c4fec5cbfe448",
+        "treatment/val/code_math.jsonl": "98d4c5ff319520aea57cda863c2e117f2b067b93bd486fcabba4c951690199ca",
+        "treatment/val/multihop_qa.jsonl": "aabf896d043b7ae01b836b9b43b618cb8631cb119d1e910cbaf9d042cb968e8e",
+        "treatment/val/rag_evidence.jsonl": "e8f418bf802fbc6c170e52cedcdeaa31ef085deace00b74885fbb3923a9799cb"
+      }
+    }
+  },
+  "prompt_sets_identical": true
+}

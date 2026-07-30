@@ -85,6 +85,10 @@ SLICES = {
 }
 assert set(SLICES.values()) == set(VERIFIABLE), "slice table drifted from the verifier"
 
+# Seed spacing between candidate indices. Larger than any plausible batch count,
+# so candidate i of batch b never reuses candidate j of batch b'.
+SEED_STRIDE = 1_000_003
+
 
 def load_slice(
     data_dir: Path, name: str, limit: int | None, select: str = "prefix"
@@ -198,10 +202,21 @@ def generate_candidates(engine, tokenizer, prompt_ids: list[list[int]], *, n: in
     2026-07-29), so "the deterministic candidate" was never deterministic across
     batch compositions.
 
-    One engine call per batch, with each prompt replicated `n` times
-    contiguously: batch-1 decoding of a thinking teacher is ~50 h for a 1k-prompt
-    pilot, and replicating into a single call keeps a continuous-batching engine
-    saturated, which is most of the throughput on the serving arms.
+    **One engine call per candidate index, each under its own seed**, with the
+    whole prompt batch inside it. Batch-1 decoding of a thinking teacher is ~50 h
+    for a 1k-prompt pilot, so the prompt batch is what keeps a continuous-batching
+    engine saturated.
+
+    The earlier shape — one call with each prompt replicated `n` times under a
+    single seed — is wrong for a *server* engine and produced a corpus where
+    rejection sampling did nothing. A serving engine seeds **per request**, so
+    identical prompts replicated inside one request decode identically: the
+    2026-07-30 build came back with 698 of 752 candidate pairs byte-identical and
+    candidate 2 rescuing **0** of 212 first-candidate failures, making accept@n
+    equal accept@1 by construction while costing 2x the tokens. The replication
+    trick only ever worked for in-process HF `generate`, which draws each
+    sequence from one rolling RNG. Seeds are spaced by a large stride so two
+    candidate indices can never collide across batches.
 
     Driven through `aadistill.engines` rather than `model.generate` so the corpus
     can be built by whichever engine the benchmark selected
@@ -219,22 +234,23 @@ def generate_candidates(engine, tokenizer, prompt_ids: list[list[int]], *, n: in
     Returns, per prompt, a list of dicts with `raw`, `n_new`, `hit_cap`,
     `think_tokens`, `tokens` and `logprobs`.
     """
-    repeated = [ids for ids in prompt_ids for _ in range(n)]
-    completions = engine.generate(
-        repeated, max_new_tokens=max_new_tokens, stop_ids=stops, greedy=False,
-        temperature=temperature, top_p=top_p, top_k=top_k, seed=seed,
-        logprobs=logprobs)
-
     per_prompt: list[list] = [[] for _ in prompt_ids]
-    for index, completion in enumerate(completions):
-        ids = completion["tokens"]
-        think_tokens = ids.index(think_close) if think_close in ids else completion["n_new"]
-        per_prompt[index // n].append({
-            "raw": tokenizer.decode(ids, skip_special_tokens=False),
-            "n_new": completion["n_new"], "hit_cap": completion["hit_cap"],
-            "think_tokens": think_tokens, "tokens": ids,
-            "logprobs": completion.get("logprobs"),
-        })
+    for candidate_index in range(n):
+        completions = engine.generate(
+            list(prompt_ids), max_new_tokens=max_new_tokens, stop_ids=stops,
+            greedy=False, temperature=temperature, top_p=top_p, top_k=top_k,
+            seed=None if seed is None else seed + candidate_index * SEED_STRIDE,
+            logprobs=logprobs)
+        for index, completion in enumerate(completions):
+            ids = completion["tokens"]
+            think_tokens = (ids.index(think_close) if think_close in ids
+                            else completion["n_new"])
+            per_prompt[index].append({
+                "raw": tokenizer.decode(ids, skip_special_tokens=False),
+                "n_new": completion["n_new"], "hit_cap": completion["hit_cap"],
+                "think_tokens": think_tokens, "tokens": ids,
+                "logprobs": completion.get("logprobs"),
+            })
     return per_prompt
 
 
