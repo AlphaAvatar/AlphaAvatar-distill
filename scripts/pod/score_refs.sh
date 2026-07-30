@@ -20,6 +20,19 @@ fail() { echo "MARKER:REFS_FAILED:$1" >> /workspace/run_markers.log; exit 1; }
 OUT=artifacts/stage3/reference_scorecards
 mkdir -p "$OUT"
 
+# Warm the teacher tokenizer into HF_HOME before anything reads it.
+# `probe_think_close.py` opens it with `local_files_only=True` — deliberately, so
+# a run can never silently pick up a different revision — and this script now
+# runs BEFORE any training, so nothing has populated the cache yet. Previously
+# the probe only ran in post_run, after the trainer had already downloaded the
+# teacher for KD, which is why the dependency was invisible.
+uv run python -c "
+from transformers import AutoTokenizer
+AutoTokenizer.from_pretrained('Qwen/Qwen3-4B-Thinking-2507',
+                              revision='768f209d9ea81521153ed38c47d515654e938aea')
+print('teacher tokenizer cached')
+" || fail warm_tokenizer_cache
+
 for entry in "${REF_CKPTS[@]}"; do
   dest=$(printf '%s' "$entry" | cut -d'|' -f2)
   name=$(printf '%s' "$entry" | cut -d'|' -f4)
