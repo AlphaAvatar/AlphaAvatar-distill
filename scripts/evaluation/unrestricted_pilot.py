@@ -41,10 +41,18 @@ def main() -> int:
     ap.add_argument("--context-len", type=int, default=None,
                     help="override; default resolves from the model config")
     ap.add_argument("--gpu-mem-util", type=float, default=0.92)
+    # Degeneration is a SEMANTIC stop, not a token budget: a model in a
+    # repetition loop never emits EOS, so the full context buys no information
+    # beyond "it degenerated". Recorded as its own class with evidence, never
+    # conflated with natural termination or a context-limit hit.
+    ap.add_argument("--no-degeneration-stop", action="store_true")
+    ap.add_argument("--check-every", type=int, default=256)
     ap.add_argument("--out", required=True)
     args = ap.parse_args()
 
     import torch
+    sys.path.insert(0, str(REPO_ROOT / "scripts" / "evaluation"))
+    import degeneration  # noqa: E402
     from transformers import AutoConfig, AutoTokenizer
     from vllm import LLM, SamplingParams
 
@@ -89,16 +97,44 @@ def main() -> int:
         params = SamplingParams(temperature=0.0, top_p=1.0, top_k=-1,
                                 max_tokens=allowance, stop_token_ids=stop_ids)
         t0 = time.time()
-        res = llm.generate([{"prompt_token_ids": p_ids}], params, use_tqdm=False)[0]
+        gen_ids, degen, ttft = [], None, None
+        if args.no_degeneration_stop:
+            res = llm.generate([{"prompt_token_ids": p_ids}], params, use_tqdm=False)[0]
+            gen_ids = list(res.outputs[0].token_ids)
+            finish = res.outputs[0].finish_reason
+        else:
+            # Stream so the content can be judged while it is produced; abort the
+            # request the moment it stops producing new information.
+            eng = llm.llm_engine
+            rid = f"{args.label}-{sid}"
+            eng.add_request(rid, {"prompt_token_ids": p_ids}, params)
+            finish, last_check = None, 0
+            while eng.has_unfinished_requests():
+                for step_out in eng.step():
+                    if step_out.request_id != rid:
+                        continue
+                    gen_ids = list(step_out.outputs[0].token_ids)
+                    if ttft is None and gen_ids:
+                        ttft = time.time() - t0
+                    if step_out.finished:
+                        finish = step_out.outputs[0].finish_reason
+                if finish is not None:
+                    break
+                if len(gen_ids) - last_check >= args.check_every:
+                    last_check = len(gen_ids)
+                    degen = degeneration.check(gen_ids)
+                    if degen:
+                        eng.abort_request(rid)
+                        finish = "degeneration"
+                        break
         dt = time.time() - t0
-        o = res.outputs[0]
-        gen_ids = list(o.token_ids)
         n_new = len(gen_ids)
         hit_ctx = n_new >= allowance
         ended_stop = bool(gen_ids) and gen_ids[-1] in stop_ids
         raw = tok.decode(gen_ids, skip_special_tokens=False)
-        stop_reason = ("context_limit" if hit_ctx and not ended_stop
-                       else "eos" if ended_stop else o.finish_reason or "unknown")
+        stop_reason = ("eos" if ended_stop else
+                       "degeneration" if degen else
+                       "context_limit" if hit_ctx else finish or "unknown")
         rec = {
             "id": sid, "label": args.label, "group": r["group"], "source": r["source"],
             "prompt_tokens": len(p_ids), "context_len": ctx,
@@ -107,8 +143,12 @@ def main() -> int:
             "stop_reason": stop_reason,
             "natural_termination": stop_reason == "eos",
             "context_limit_reached": stop_reason == "context_limit",
-            "right_censored": stop_reason == "context_limit",
-            "vllm_finish_reason": o.finish_reason,
+            # Both non-EOS outcomes are right-censored: neither observed the
+            # model's own stopping decision.
+            "right_censored": stop_reason in ("context_limit", "degeneration"),
+            "degeneration": degen,
+            "vllm_finish_reason": finish,
+            "ttft_seconds": round(ttft, 3) if ttft else None,
             "seconds": round(dt, 2),
             "decode_tok_per_s": round(n_new / dt, 1) if dt > 0 else None,
             "raw": raw,
@@ -133,8 +173,11 @@ def main() -> int:
     p.parent.mkdir(parents=True, exist_ok=True)
     p.write_text(json.dumps(payload, indent=2, ensure_ascii=False))
     nat = sum(s["natural_termination"] for s in out)
-    print(f"[{args.label}] WAVE DONE: {nat}/{len(out)} natural, "
-          f"{len(out)-nat} context-limited, {payload['wave_seconds']}s -> {p}", flush=True)
+    deg = sum(1 for s in out if s["stop_reason"] == "degeneration")
+    ctx_hit = sum(s["context_limit_reached"] for s in out)
+    print(f"[{args.label}] WAVE DONE: {nat} natural / {deg} degenerated / "
+          f"{ctx_hit} context-limited of {len(out)}, "
+          f"{payload['wave_seconds']}s -> {p}", flush=True)
     return 0
 
 
