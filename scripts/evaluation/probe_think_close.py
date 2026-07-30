@@ -1,7 +1,16 @@
-"""Measure a model's probability on `</think>` at the contested position.
+"""Measure a model's probability on `</think>` and `<|im_end|>` at the positions
+where the protocol demands them.
 
 The primary readout for the CE/KD conflict experiment
-(`logs/experiments/stage3/2026-07-28_kd_ce_protocol_conflict.md`). It is preferred to
+(`logs/experiments/stage3/2026-07-28_kd_ce_protocol_conflict.md`) and for the
+teacher-target 2x2, whose rule R1 requires **both** probes to improve
+(`logs/proposals/stage3/2026-07-30_stage3_teacher_target_2x2.md`). The two are
+different failure modes and move independently: `</think>` is whether the model
+can leave its reasoning block, `<|im_end|>` is whether it can end its turn at
+all. `terminated` — the metric Stage 3's exit gate is blocked on — is the
+behavioural form of the second.
+
+It is preferred to
 `think_closed` for the same reason a thermometer beats "does it feel warm":
 
 * it is **continuous**, so it moves smoothly with the force balance instead of
@@ -55,10 +64,14 @@ def main() -> None:
     tok = AutoTokenizer.from_pretrained(
         TEACHER_TOKENIZER, revision=TEACHER_REVISION, local_files_only=True
     )
-    close_ids = tok.encode("</think>", add_special_tokens=False)
-    if len(close_ids) != 1:
-        raise ValueError(f"</think> is not a single token: {close_ids}")
-    close = close_ids[0]
+    def single_token(text: str) -> int:
+        ids = tok.encode(text, add_special_tokens=False)
+        if len(ids) != 1:
+            raise ValueError(f"{text} is not a single token: {ids}")
+        return ids[0]
+
+    close = single_token("</think>")
+    im_end = single_token("<|im_end|>")
 
     device = args.device or ("cuda" if torch.cuda.is_available() else "cpu")
     dtype = {"float32": torch.float32, "bfloat16": torch.bfloat16}[args.dtype]
@@ -69,9 +82,9 @@ def main() -> None:
     model.eval()
 
     splits = load_split(REPO_ROOT / args.data_dir, args.split)
-    rows, per_group = [], {}
+    rows, per_group, per_group_end = [], {}, {}
     for group in sorted(splits):
-        probs = []
+        probs, probs_end = [], []
         for sample in splits[group][: args.per_group]:
             if sample.get("format") != "chat":
                 continue
@@ -79,26 +92,45 @@ def main() -> None:
             if close not in ids:
                 continue
             i = ids.index(close)
+            # The `<|im_end|>` that closes the FINAL assistant turn: earlier ones
+            # end the user/system turns, where ending the turn is not the
+            # model's decision and the probe would measure nothing contested.
+            j = len(ids) - 1 - ids[::-1].index(im_end) if im_end in ids else None
+            # One forward over the whole sequence serves both positions: the
+            # model is causal, so logits at a position depend only on tokens up
+            # to it and are identical to those from a truncated prefix.
             with torch.no_grad():
-                logits = model(torch.tensor([ids[: i + 1]], device=device))
-                logits = logits.logits[0, i - 1].float()
-            p = torch.softmax(logits, -1)
+                out = model(torch.tensor([ids], device=device)).logits[0]
+            p = torch.softmax(out[i - 1].float(), -1)
             top = torch.topk(p, 1)
             probs.append(float(p[close]))
-            rows.append({
+            row = {
                 "group": group, "id": sample["id"],
                 "p_close": round(float(p[close]), 6),
                 "top_token": tok.decode([int(top.indices[0])]),
                 "top_p": round(float(top.values[0]), 6),
                 "argmax_is_close": int(top.indices[0]) == close,
-            })
+            }
+            if j is not None and j > 0:
+                pe = torch.softmax(out[j - 1].float(), -1)
+                tope = torch.topk(pe, 1)
+                probs_end.append(float(pe[im_end]))
+                row.update({
+                    "p_im_end": round(float(pe[im_end]), 6),
+                    "top_token_at_end": tok.decode([int(tope.indices[0])]),
+                    "argmax_is_im_end": int(tope.indices[0]) == im_end,
+                })
+            rows.append(row)
         if probs:
             per_group[group] = round(sum(probs) / len(probs), 6)
+        if probs_end:
+            per_group_end[group] = round(sum(probs_end) / len(probs_end), 6)
 
     if not rows:
         raise SystemExit("no chat samples with a </think> token were found")
     overall = sum(r["p_close"] for r in rows) / len(rows)
     closed = sum(r["argmax_is_close"] for r in rows)
+    end_rows = [r for r in rows if "p_im_end" in r]
     report = {
         "model": args.model,
         "dtype": args.dtype,
@@ -113,6 +145,15 @@ def main() -> None:
         # behaviour metrics.
         "argmax_is_close_rate": round(closed / len(rows), 6),
         "per_group_p_close": per_group,
+        # The second half of rule R1: whether the model can end its turn.
+        # `terminated` is the behavioural form of this number.
+        "n_im_end": len(end_rows),
+        "p_im_end_mean": (round(sum(r["p_im_end"] for r in end_rows)
+                                / len(end_rows), 6) if end_rows else None),
+        "argmax_is_im_end_rate": (round(sum(r["argmax_is_im_end"]
+                                            for r in end_rows)
+                                        / len(end_rows), 6) if end_rows else None),
+        "per_group_p_im_end": per_group_end,
         "samples": rows,
     }
     print(json.dumps({k: v for k, v in report.items() if k != "samples"}, indent=2))
