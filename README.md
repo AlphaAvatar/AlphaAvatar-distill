@@ -68,7 +68,7 @@ Every run records config hash, code state, dataset/tokenizer/teacher hashes, and
 
 ```bash
 uv sync                    # CPU torch by default; see pyproject.toml for a CUDA index
-uv run pytest tests/ -q    # 222 CPU tests, no downloads
+uv run pytest tests/ -q    # 220 CPU tests, no downloads
 ```
 
 The implemented pipeline runs end to end on CPU (GPU optional):
@@ -84,24 +84,29 @@ uv run python scripts/data/build_stage2_v1.py       # offline mixture v1 (22.13M
 uv run python scripts/training/collect_stage0.py --config configs/stage0/qwen3_4b_thinking_v1.json
 uv run python scripts/training/init_stage1.py --config configs/stage1/qwen3_0p6b_from_4b_thinking.json
 
-# gate checks
-uv run python scripts/data/dry_run_stage2.py --data-dir data/stage2_v1 \
-  --out artifacts/stage2/dry_run_v1_report.json
+# gate check
 uv run python scripts/evaluation/eval_ppl.py --data data/warmup/holdout_v1.jsonl \
   --model artifacts/stage1/qwen3_0p6b_init_v0/checkpoint \
   --model artifacts/stage1/qwen3_0p6b_init_v0/random_baseline
 
-# Stage 3 recovery: 3 real KD steps on CPU, then the same code path with --resume
-uv run python scripts/training/train_stage3.py --config configs/stage3/s2v1_smoke_cpu.json
-uv run python scripts/training/train_stage3.py --config configs/stage3/s2v1_smoke_cpu.json --resume
+# Stage 3 recovery: the canonical config, resumable through the same code path
+uv run python scripts/training/train_stage3.py --config configs/stage3/recovery.json
+uv run python scripts/training/train_stage3.py --config configs/stage3/recovery.json --resume
 
 # any checkpoint, at the deployment precision (bf16 baseline + INT8 weight fake-quant)
 uv run python scripts/evaluation/eval_ppl.py --data data/warmup/holdout_v1.jsonl \
-  --model artifacts/stage3/s1_ffn_norm_v0/checkpoints/step_000660/model \
+  --model artifacts/stage1/qwen3_0p6b_init_v0/checkpoint \
   --fake-quant int8 --fake-quant-scope decoder
+
+# behaviour, generated WITHOUT an artificial token budget (AGENTS.md P18)
+uv run python scripts/evaluation/eval_behavior.py --unrestricted \
+  --model artifacts/stage1/qwen3_0p6b_init_v0/checkpoint \
+  --out artifacts/eval/step0_behavior.json
 ```
 
-Real recovery runs use the same CLI with a GPU-sized config (e.g. `configs/stage3/s2_blocks_v1.json`) — hardware never changes the experiment definition. Each step writes gitignored artifacts plus a full reproducibility manifest under `artifacts/` or `data/`.
+`configs/stage3/recovery.json` is the single recovery recipe; a run differs from
+it only in `data_dir` and `schedule.total_steps` — hardware never changes the
+experiment definition. Each step writes gitignored artifacts plus a full reproducibility manifest under `artifacts/` or `data/`.
 
 ---
 
@@ -138,21 +143,21 @@ AlphaAvatar-distill/
 │   ├── evaluation/         #   eval_behavior_v0 scorers and the headline metric
 │   └── infrastructure/     #   env fingerprint, code-state hash, sha256 manifests
 ├── scripts/                # entry points, one per responsibility
-│   ├── data/               #   mixture + eval-set builders, dry runs, corpus preflight
+│   ├── data/               #   mixture + eval-set builders
 │   ├── training/           #   collect_stage0 · init_stage1 · train_stage3
-│   ├── evaluation/         #   eval_ppl · eval_behavior · probe_think_close · plot_perf_trend
-│   ├── rollout/            #   teacher generation, engine benchmarks, rollout scoring
+│   ├── evaluation/         #   eval_ppl · eval_behavior · unrestricted_pilot ·
+│   │                       #   degeneration · probe_think_close · plot_perf_trend
+│   ├── rollout/            #   teacher generation
 │   └── pod/                #   GPU session scripts + durable orchestrator (run_env.sh)
-├── configs/                # stage recipes: stage0/ · stage1/ · stage3/
+├── configs/                # stage recipes: stage0/ · stage1/ · stage3/recovery.json
 ├── data/                   # corpus manifests (jsonl gitignored, rebuildable)
 │   └── eval_behavior_v0/   #   76-prompt behavior set + manifest (both committed)
-├── tests/                  # 222 CPU tests, mirroring the source areas
+├── tests/                  # 220 CPU tests, mirroring the source areas
 ├── logs/                   # project memory — read STATE.md first
 │   ├── STATE.md            #   canonical handoff: a snapshot, not an archive
+│   ├── EXPERIMENTS.md      #   the consolidated record: what ran, results, cost
+│   ├── PROPOSAL.md         #   the single active plan, costed, with stopping rules
 │   ├── decisions.md        #   decision records (why, alternatives, risks)
-│   ├── indexes/            #   experiment + proposal indexes by stage, date, status
-│   ├── experiments/        #   per-run logs, grouped by stage/rollout/evaluation
-│   ├── proposals/          #   costed proposals with pre-registered decision rules
 │   ├── supported_models.md #   model status table
 │   └── artifact_manifests.md  # artifacts stored outside git (HF), with hashes
 └── assets/                 # trend data + rendered figure
@@ -160,7 +165,7 @@ AlphaAvatar-distill/
 
 The tree is abridged to the parts worth knowing about. New directories appear only when an implemented, verified milestone needs them — no empty placeholders. Model weights, activation caches and experiment artifacts are kept out of git (`.gitignore`); large checkpoints live in a private Hugging Face repo with hashes recorded in `logs/artifact_manifests.md`.
 
-Historical experiment logs quote the paths that existed when they ran. The 2026-07-30 reorganization moved files with `git mv`, so `git log --follow` still works, and those records were deliberately left unrewritten rather than repointed at paths that did not exist at the time.
+On 2026-07-31 the 25 per-run experiment logs and 11 per-experiment proposals were consolidated into [`logs/EXPERIMENTS.md`](./logs/EXPERIMENTS.md) and [`logs/PROPOSAL.md`](./logs/PROPOSAL.md), and ~26 GB of superseded artifacts were removed. The originals remain in git history at commit `866dac2`, and every deleted checkpoint is on the private Hugging Face relay.
 
 ---
 
