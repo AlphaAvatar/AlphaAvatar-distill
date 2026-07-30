@@ -1,7 +1,9 @@
 # Current project state
 
-**Updated:** 2026-07-30 (UTC+8 dev box) · branch `main`, clean ·
+**Updated:** 2026-07-30 (UTC+8 dev box) · branch `main` ·
 **nothing running, nothing billing, no pods or volumes exist.**
+Last session: the Stage 3 teacher-target 2x2 ran end to end, **$4.87** of a
+$7.00 ceiling.
 
 This file is the canonical handoff. It is a *snapshot*, not an archive —
 historical detail lives in `logs/experiments/`, `logs/proposals/` and
@@ -54,6 +56,12 @@ trainable), CE 0.25 + full-vocab KD 1.0 at τ=1 scope `all`, lr 2e-4 / warmup 60
 cosine to 0.1×, fp32 master + bf16 autocast, **seed 20260726**, eval every 150
 steps. The FFN-first warm-up ladder is retired.
 
+**The teacher-target 2x2 is done and the branch point is unchanged.** Its
+pre-registered rule R2 fired (reject), but §3 records why that verdict is about
+the instrument rather than the intervention
+([log](experiments/stage3/2026-07-30_stage3_teacher_target_2x2.md)). Both arms
+regressed holdout NLL against the branch point, so neither replaces it.
+
 **Best checkpoint / branch point:** `stage3/s2v1_from_init/step_002700/model` —
 holdout NLL **3.8285**, `behavior_score_v0` 20.2%, at 33% fewer steps than the
 best-NLL run (`s2_blocks_v1`, 3.8003). Teacher ceiling on the same eval:
@@ -74,6 +82,14 @@ best-NLL run (`s2_blocks_v1`, 3.8003). Teacher ceiling on the same eval:
 | **SGLang deterministic tax** | **55%** throughput loss (241.0 → 108.6), vs ~34% documented | 07-29 |
 | **openmath is cap-bound but raising it fails** | cap 16384 closure 0.300 → **0.850**, accuracy among closed **0.750 → 0.294**, cost/accepted doubled | 07-29 |
 | **Teacher targets would be shredded by the data path** | 48.5% exceed `block_len` 1024; `best_fit`@1024 loses **56%** of supervision; **`best_fit`@8192 is lossless** | 07-30 |
+| **`block_len` 8192 needs gradient checkpointing** | peak **44,983 / 46,068 MiB (97.6%)** with it on; `best_fit` pads every block, so this is constant, not sample-dependent. ~4.3 s/step | 07-30 |
+| **A short SFT warm-up fixes a lot of protocol, on either target set** | `format_ok` 0.250 → **0.625** (public) / 0.354 (teacher-native) in 137 steps | 07-30 |
+| **...and costs the LM in both arms** | holdout NLL 3.8285 → 4.0622 (public) / **3.9653** (teacher-native) | 07-30 |
+| **`p(</think>)` is inverted for teacher-native work** | measured where the *public* render demands it, so it scores "skip reasoning entirely" | 07-30 |
+| **The 512-token scorecard was saturated for one arm** | treatment hit the cap on **84.2%** of prompts vs 42%/24%; re-scored at 2048 | 07-30 |
+| **Conditioned on finishing, the arms are near-identical** | treatment `terminated` **1.000**, `format_ok` 0.909; the gap is *finishing less often*, not malformed output | 07-30 |
+| **The control wins protocol partly by being terse** | median finished answer **2 words** (control) vs 34 (teacher-native) | 07-30 |
+| **n=2 candidates were the same sample twice** | 92.7% byte-identical; a serving engine seeds per *request*. accept@n == accept@1 by construction | 07-30 |
 
 **The two that most changed the plan:**
 
@@ -123,9 +139,12 @@ best-NLL run (`s2_blocks_v1`, 3.8003). Teacher ceiling on the same eval:
 
 ---
 
-## 6. The blocker for tomorrow's work
+## 6. Resolved: the packing blocker
 
-**The Stage 3 data path would silently shred teacher-native targets.**
+**Resolved 2026-07-30.** `best_fit` @ `block_len` 8192 was used for both arms
+and was lossless on the real 540-prompt corpus (`truncated_samples` 0, packing
+efficiency 0.895 control / 0.959 treatment). It needs gradient checkpointing —
+97.6% of an L40S. Original finding below.
 ([preflight](experiments/stage3/2026-07-30_stage3_target_preflight.md))
 
 Teacher targets are **4.2× longer** than public ones (rendered p50 997 vs 245,
@@ -152,48 +171,42 @@ fragmentation rather than targets.
 | item | why it matters | where |
 |---|---|---|
 | **P3 violations in the core** — `REFUSAL_MAX_WORDS = 60`, generic `MAX_ANSWER_WORDS = 600` applied to every slice, and the fallback-to-public-target rule | Any slice added to teacher generation silently inherits a 600-word answer ceiling, which P10 forbids as a quality gate. Inert while refusal is evaluation-only | `src/aadistill/data/verify.py`, `scripts/rollout/generate_teacher_answers.py` |
-| **`block_len` 8192 training throughput/memory unmeasured** | Attention is quadratic in sequence length; batch and accumulation cannot be sized without it | gates the 2×2 |
 | **vLLM cap-8192 cells never measured** | SGLang's cap-8192 numbers stand alone and are **not** a comparison | [log](experiments/rollout/2026-07-30_current_engine_benchmark.md) |
 | **In-process vLLM / SGLang log-probs not wired** | Both raise `NotImplementedError`; only the HTTP paths supply rollout log-probs | `src/aadistill/rollout/engines.py` |
 | **Server adapters' error branches verified only against CPU stubs** | Live transport was exercised in the benchmark; the failure branches were not | `tests/rollout/` |
+| **`verify_and_report.py` still applies the 2026-07-28 packing rules** | Its R1 means "adopt best-fit packing"; the 2×2 uses `report_tt2x2.py` instead. Pointing the old one at a new experiment auto-generates a confident write-up of the wrong hypothesis | `scripts/pod/verify_and_report.py` |
+| **Per-candidate seeding is fixed but its effect is unmeasured** | accept@n was identical to accept@1 because candidates were clones; distinct seeds are tested, the acceptance gain is not | `scripts/rollout/generate_teacher_answers.py` |
 | Date drift in two filenames | Written as `2026-07-31` from a UTC/local mix-up; renamed to `2026-07-30`. Contents carry exact UTC timestamps | logs |
 
 ---
 
-## 8. Pending approval — tomorrow's Gate 1
+## 8. Gate 1 is complete — decisions now open
 
-**Nothing below has been launched. No pod exists. Today's session spent $0.**
+**Approved and run 2026-07-30 (maintainer approved the whole gate; total tokens
+held equal). $4.87 of a $7.00 ceiling. Nothing is billing.**
 
-**Gate 1: Stage 3 teacher-target SFT warm-up, 2×2**
-([pre-registration](proposals/stage3/2026-07-30_stage3_teacher_target_2x2.md))
+* Corpus: 752 prompts, **540 accepted**
+  ([log](experiments/stage3/2026-07-30_teacher_corpus_750.md))
+* 2x2: four arms, two seeds each, all completed, all upload-verified 16/16
+  ([log](experiments/stage3/2026-07-30_stage3_teacher_target_2x2.md))
+* Pre-registered verdict: **R2 fired — treatment rejected.** Not trustworthy
+  evidence about teacher-native targets; see that log §6-7.
 
-- **Corpus:** 750 prompts, slice-balanced over the in-scope four, **n=2 both
-  sampled, no greedy**, cap 4096, **vLLM 0.26.0 provisionally** in its official
-  image on a CUDA-13 host (`--min-cuda-version 13.0`), token ids + log-probs
-  snapshotted to a hashed artifact. Final rollout-engine choice stays deferred to
-  Stage 4/5.
-- **Experiment:** public-target control vs teacher-native treatment, **2 seeds
-  per arm**, identical start checkpoint, prompt set (the accepted subset), total
-  training-token budget and recipe. No prefill, no forced mode, no answer-length
-  quality gate.
-- **Sequence handling:** `best_fit` @ `block_len` **8192**, both arms (§6).
-- **Readouts:** `format_ok`, `think_closed`, `terminated`, `empty_answer`,
-  **p(`</think>`)**, **p(`<|im_end|>`)**; holdout NLL as a ±1% guard rail.
-  Reported as two-seed means with spread.
-- **Budget:** $3–6, **hard ceiling $7.00**. Recommended as **two separate
-  gates** — generation, then training — because no run has ever used
-  `block_len` 8192.
-- **Prerequisite:** a `block_len` 8192 throughput/memory smoke test sizes the
-  runs first.
+### Open questions for the maintainer
 
-**Open question for the maintainer:** identical prompt set *and* identical
-training-token budget cannot both hold naively when targets are 4.2× longer. The
-pilot defaults to holding **total training tokens** equal and reporting that the
-treatment arm receives **~26% more supervised tokens** (supervised fraction 0.687
-vs 0.547). Say if you would rather equalize supervised tokens and accept unequal
-compute.
-
----
+1. **The protocol readouts reward terseness.** `format_ok` / `terminated` are
+   maximised by a 2-word answer, and the control's median finished answer *is*
+   2 words. P10 forbids reading that as a win. Any re-run needs an
+   answer-quality axis alongside them — this is a metric-design decision, not an
+   implementation detail.
+2. **`p(</think>)` should be dropped or re-sited** for teacher-native work: it
+   is measured where the *public* render demands the token and therefore scores
+   "skip reasoning entirely".
+3. **Both arms lost 3.6-6.1% holdout NLL.** A warm-up that damages the LM to buy
+   format may be a bad trade at 0.6B; the lr/step budget deserves its own
+   ablation before more corpus is bought.
+4. **The design cannot separate "teacher-native" from "18.9x more supervised
+   tokens".** If that separation matters, it needs a different control.
 
 ## 9. Superseded conclusions — do not act on these
 

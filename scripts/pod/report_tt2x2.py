@@ -225,16 +225,28 @@ def rule_lines(ctrl: list[dict], treat: list[dict]) -> list[str]:
             lines.append("  → R2 clear.")
 
     # --- R3 ------------------------------------------------------------------
-    if close_win is None or end_win is None:
+    # "Inconclusive" means the arms genuinely OVERLAP within seed spread, so it
+    # is |difference| <= spread. Testing `not (treatment > control + spread)`
+    # would also fire when the treatment is decisively *worse*, which is a
+    # conclusive result reported as an inconclusive one.
+    def overlaps(t, c, band):
+        if t is None or c is None or band is None:
+            return None
+        return abs(t - c) <= band
+
+    close_overlap = overlaps(t_close, c_close, close_band)
+    end_overlap = overlaps(t_end, c_end, end_band)
+    if close_overlap is None or end_overlap is None:
         lines.append("- **R3 not evaluable** (no spread available).")
-    elif not close_win and not end_win:
+    elif close_overlap and end_overlap:
         lines.append("- **R3 FIRES: inconclusive.** The arms overlap within seed "
                      "spread on both probes. Recorded as such; per the "
                      "pre-registration a **larger corpus is the lever, not a "
                      "rerun**.")
     else:
-        lines.append("- R3 does not fire: at least one probe separates the arms "
-                     "beyond seed spread.")
+        lines.append("- R3 does not fire: the arms are separated by more than the "
+                     "seed spread on at least one probe, so the comparison is "
+                     "conclusive — in whichever direction R1/R2 report.")
 
     # --- R4 ------------------------------------------------------------------
     reached = [a["run"] for a in ctrl + treat if a["last_step"] is not None]

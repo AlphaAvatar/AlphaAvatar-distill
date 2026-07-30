@@ -26,12 +26,18 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import os
 import sys
 from pathlib import Path
 
 REPO = Path(__file__).resolve().parents[2]
 HF_REPO = "AlphaAvatar/aadistill-artifacts"
-HF_PREFIX_BASE = "stage3"
+# Must match run_env.sh's HF_PREFIX_BASE, which is what post_run.sh uploads
+# under. It was a hardcoded "stage3" here while a session could set any prefix,
+# so a session that changed it saw all four arms fail verification against a
+# path nothing had ever written to — a false negative that, by design, blocks
+# teardown and leaves a paid pod running.
+HF_PREFIX_BASE = os.environ.get("HF_PREFIX_BASE", "stage3")
 
 RUN_FILES = [
     "train_log.jsonl",
