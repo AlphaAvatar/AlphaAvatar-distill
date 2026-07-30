@@ -1,2 +1,2 @@
-db5e3cfbefce0ed253750b67ad96182f749697a805484e98f160714ec0c24b42  /workspace/xfer/transfer/stage2_data_20260726.tar.zst
-47e328ff5df1dfe591e5fe4720576452febc867c4dfebc26c9f597f3ec73af1a  /workspace/xfer/transfer/repo_20260730.bundle
+d67f8d748cdd737cc9f943eae64f3f58026d44fdeafb462788f575379e0d74b8  /workspace/xfer/transfer/repo_20260730b.bundle
+a33a87109a998f9cddba384d24977d8fee0b75e6476f4d3eb40fc0130d60796d  /workspace/xfer/transfer/stage3_pilot_20260730.tar.gz

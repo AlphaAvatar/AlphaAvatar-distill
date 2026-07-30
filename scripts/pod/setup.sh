@@ -44,6 +44,11 @@ ls data/stage2_v1/train data/stage2/val "$HOLDOUT" || fail data_layout
 if [ -n "${TRANSFER_EXTRA:-}" ]; then
   uvx --from huggingface_hub hf download "$HF_REPO" "$TRANSFER_EXTRA" \
     --repo-type model --local-dir /workspace/xfer || fail hf_extra_download
+  # Verified like every other transfer: this one carries the training data of a
+  # paid comparison, so a silently truncated download must not become an arm.
+  grep -F "$TRANSFER_EXTRA" /workspace/hashes_transfer.txt > /workspace/hash_extra.txt \
+    || fail extra_hash_missing_from_manifest
+  sha256sum -c /workspace/hash_extra.txt || fail extra_hash
   tar xzf "/workspace/xfer/$TRANSFER_EXTRA" || fail untar_extra
   for d in ${EXTRA_EXPECT:-}; do
     ls "$d" > /dev/null || fail "extra_missing_$d"
