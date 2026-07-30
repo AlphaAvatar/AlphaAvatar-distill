@@ -348,20 +348,25 @@ git add -A logs/ scripts/pod/ >>"$LOG" 2>&1
 if git diff --cached --quiet; then
   log "nothing to commit"
 else
+  # Session-generic: the previous version hardcoded one session's description,
+  # which then described the wrong experiment for every session after it.
+  # SESSION_COMMIT_SUBJECT/BODY come from run_env.sh.
   git commit -q -F - >>"$LOG" 2>&1 <<MSG
-stage3: packing/block_len control + first variance measurement (L40S) — logs + write-up
+${SESSION_COMMIT_SUBJECT:-stage3: ${SESSION} session — logs + write-up}
 
-Autonomous session ${SESSION}, arms: ${ARMS_DONE[*]}. Each arm ran the same
-2700-step mixture-v1 leg with best-fit packing at block_len 2048 (identical
-tokens/step and total token budget to the 1024 baseline), then gate evals (bf16
-holdout, INT8 fake-quant at both scopes, eval_behavior_v0, generation smoke),
-artifact upload to the private HF repo, and independent upload verification.
-The two arms differ only in seed, so their spread is the project's first
-run-to-run noise floor. The baseline checkpoint was re-scored on the same GPU
-so the comparison is same-device.
+Autonomous session ${SESSION} (${SESSION_DATE}), arms: ${ARMS_DONE[*]}.
+Failed or aborted: ${ARMS_FAILED[*]:-none}.
 
-Write-up is auto-generated from the runs' own logs and reports measured
-numbers plus mechanical gate checks; the stage verdict is left open for review.
+${SESSION_COMMIT_BODY:-}
+
+Each completed arm ran its configured schedule, then the gate evals (bf16
+holdout, INT8 fake-quant at both scopes, eval_behavior_v0, the p(</think>) and
+p(<|im_end|>) probes, generation smoke), artifact upload to the private HF repo,
+and independent upload verification. Reference checkpoints were re-scored on the
+same GPU in the same session, so every comparison here is same-device.
+
+Write-up is auto-generated from the runs' own logs and reports measured numbers
+plus mechanical gate checks; the stage verdict is left open for review.
 
 Co-Authored-By: Claude Opus 5 (1M context) <noreply@anthropic.com>
 MSG

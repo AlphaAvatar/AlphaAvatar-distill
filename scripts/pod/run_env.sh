@@ -46,6 +46,24 @@ HF_PREFIX_BASE=tt2x2
 ABORT_ARMS="tt2x2_ctrl_a tt2x2_ctrl_b tt2x2_treat_a tt2x2_treat_b"
 ABORT_CHECK_STEP=EVAL_EVERY
 
+# Commit message the orchestrator uses for this session's logs (it no longer
+# hardcodes one experiment's description).
+SESSION_COMMIT_SUBJECT="stage3: teacher-target 2x2 on L40S — logs + write-up"
+SESSION_COMMIT_BODY="Public-target control vs teacher-native treatment, two seeds
+per arm, from stage3/s2v1_from_init/step_002700. Both arms share the start
+checkpoint, the accepted prompt subset, best_fit packing at block_len 8192, the
+schedule and the total training-token budget; they differ only in the assistant
+turn of each sample and in the seed. Passes over the prompt set differ between
+arms because teacher targets are several times longer — that is reported, not
+corrected (maintainer decision 2026-07-30: hold total training tokens equal).
+
+Primary readouts are protocol competence: format_ok, think_closed, terminated,
+empty_answer, p(</think>) and p(<|im_end|>), with holdout NLL as a +/-1% guard
+rail. Rules R1-R4 are pre-registered in
+logs/proposals/stage3/2026-07-30_stage3_teacher_target_2x2.md. Behavior numbers
+are read against the measured 0.1290 seed-only noise floor, which is why every
+arm has two seeds."
+
 # Paths setup.sh checks exist after the bundle + data land.
 HOLDOUT=data/warmup/holdout_v1.jsonl
 BEHAVIOR_PROMPTS=data/eval_behavior_v0/prompts.jsonl
