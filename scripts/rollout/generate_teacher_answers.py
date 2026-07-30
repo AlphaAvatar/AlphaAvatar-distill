@@ -55,16 +55,24 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 import torch
+from transformers import __version__ as transformers_version
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO_ROOT / "src"))
 
 from aadistill.evaluation.behavior import THINK_CLOSE, split_generation
 from aadistill.data.dataset import load_jsonl
-from aadistill.rollout.engines import HFEngine, SGLangEngine, VLLMEngine
+from aadistill.rollout.engines import (
+    HFEngine,
+    SGLangEngine,
+    SGLangServerEngine,
+    VLLMEngine,
+    VLLMServerEngine,
+)
+from aadistill.rollout.snapshots import write_snapshot
 from aadistill.infrastructure.env import code_state, hardware_report
 from aadistill.infrastructure.manifest import sha256_file
-from aadistill.models.teacher import load_causal_lm
+from aadistill.models.teacher import load_causal_lm, tokenizer_hash
 from aadistill.data.verify import VERIFIABLE, select, verify
 
 # Slice name -> (group, source). The group is also the mixture file name.
@@ -148,11 +156,19 @@ def build_engine(args, model, tokenizer):
     if args.engine == "hf":
         return HFEngine(model, tokenizer.pad_token_id, batch_size=args.batch_size)
 
+    # The server engines talk to an already-running process that owns its own
+    # GPU memory, so the training-stack model must come off the card either way.
     if torch.cuda.is_available():
         model.to("cpu")
         torch.cuda.empty_cache()
     spec = args.model
     path, revision = (spec.split("@", 1) if "@" in spec else (spec, None))
+    if args.engine in ("vllm_server", "sglang_server"):
+        if not args.server_url:
+            raise SystemExit(f"--engine {args.engine} requires --server-url")
+        if args.engine == "vllm_server":
+            return VLLMServerEngine(args.server_url, model=path)
+        return SGLangServerEngine(args.server_url)
     if args.engine == "vllm":
         return VLLMEngine(path, dtype=args.dtype, revision=revision)
     return SGLangEngine(path, dtype=args.dtype, revision=revision)
@@ -161,7 +177,8 @@ def build_engine(args, model, tokenizer):
 @torch.no_grad()
 def generate_candidates(engine, tokenizer, prompt_ids: list[list[int]], *, n: int,
                         max_new_tokens: int, temperature: float, top_p: float,
-                        top_k: int, seed: int, stops: set[int], think_close: int):
+                        top_k: int, seed: int, stops: set[int], think_close: int,
+                        logprobs: bool = False):
     """n **sampled** candidates for each prompt in the batch.
 
     No greedy candidate (maintainer, 2026-07-29). Every candidate is an equal
@@ -194,20 +211,30 @@ def generate_candidates(engine, tokenizer, prompt_ids: list[list[int]], *, n: in
     is trimmed identically to one built in-stack; the text here is derived for
     verification and readability only.
 
-    Returns, per prompt, a list of (raw_text, n_new_tokens, hit_cap, think_tokens).
+    `logprobs=True` additionally carries the rollout policy's per-token
+    log-probabilities out, for the hashed snapshot: they must come from the
+    engine that actually sampled, because recomputing them later is not even
+    batch-invariant in this stack (AGENTS.md §4.6).
+
+    Returns, per prompt, a list of dicts with `raw`, `n_new`, `hit_cap`,
+    `think_tokens`, `tokens` and `logprobs`.
     """
     repeated = [ids for ids in prompt_ids for _ in range(n)]
     completions = engine.generate(
         repeated, max_new_tokens=max_new_tokens, stop_ids=stops, greedy=False,
-        temperature=temperature, top_p=top_p, top_k=top_k, seed=seed)
+        temperature=temperature, top_p=top_p, top_k=top_k, seed=seed,
+        logprobs=logprobs)
 
     per_prompt: list[list] = [[] for _ in prompt_ids]
     for index, completion in enumerate(completions):
         ids = completion["tokens"]
         think_tokens = ids.index(think_close) if think_close in ids else completion["n_new"]
-        per_prompt[index // n].append(
-            (tokenizer.decode(ids, skip_special_tokens=False),
-             completion["n_new"], completion["hit_cap"], think_tokens))
+        per_prompt[index // n].append({
+            "raw": tokenizer.decode(ids, skip_special_tokens=False),
+            "n_new": completion["n_new"], "hit_cap": completion["hit_cap"],
+            "think_tokens": think_tokens, "tokens": ids,
+            "logprobs": completion.get("logprobs"),
+        })
     return per_prompt
 
 
@@ -246,7 +273,15 @@ def main() -> None:
     ap.add_argument("--seed", type=int, default=20260728)
     ap.add_argument("--dtype", default="bfloat16")
     ap.add_argument("--device", default=None)
-    ap.add_argument("--engine", default="hf", choices=["hf", "vllm", "sglang"],
+    ap.add_argument("--server-url", default=None,
+                    help="base URL of an already-running engine server, for "
+                         "--engine vllm_server / sglang_server")
+    ap.add_argument("--snapshot", action="store_true",
+                    help="record exact sampled token ids and the rollout "
+                         "policy's per-token log-probs to a hashed snapshot")
+    ap.add_argument("--engine", default="hf",
+                    choices=["hf", "vllm", "sglang", "vllm_server",
+                             "sglang_server"],
                     help="decode backend; `hf` is in-stack and training-identical")
     ap.add_argument("--max-hours", type=float, default=None,
                     help="wall-clock budget; stops cleanly at the next batch "
@@ -277,6 +312,10 @@ def main() -> None:
     unknown = set(names) - set(SLICES)
     if unknown:
         raise SystemExit(f"unknown slice(s): {sorted(unknown)}; known: {sorted(SLICES)}")
+    # Checked before the teacher is loaded: on a paid pod a missing URL should
+    # cost a second, not an 8 GB model load.
+    if args.engine in ("vllm_server", "sglang_server") and not args.server_url:
+        raise SystemExit(f"--engine {args.engine} requires --server-url")
 
     data_dir = REPO_ROOT / args.data_dir
     work = {name: load_slice(data_dir, name, args.limit_per_slice, args.select)
@@ -304,6 +343,7 @@ def main() -> None:
                     "reasons": Counter(), "think_tokens": [], "answer_words": []}
              for name in names}
     done = 0
+    rollout_records: list[dict] = []
 
     with open(out_dir / "candidates.jsonl", "w") as f_cand, \
             open(out_dir / "targets.jsonl", "w") as f_target:
@@ -330,20 +370,33 @@ def main() -> None:
                 engine, tokenizer, prompt_ids, n=args.n,
                 max_new_tokens=args.max_new_tokens, temperature=args.temperature,
                 top_p=args.top_p, top_k=args.top_k, seed=args.seed + batch_index,
-                stops=stops, think_close=think_close)
+                stops=stops, think_close=think_close, logprobs=args.snapshot)
 
-            for sample, raws in zip(batch, batch_raws):
+            for sample, prompt, raws in zip(batch, prompt_ids, batch_raws):
                 candidates = []
-                for index, (raw, n_new, hit_cap, think_tokens) in enumerate(raws):
+                for index, item in enumerate(raws):
+                    raw, n_new = item["raw"], item["n_new"]
                     parts = split_generation(raw)
                     accepted, reason = verify(sample, parts["answer"], raw)
-                    if hit_cap:
+                    if item["hit_cap"]:
                         accepted, reason = False, "truncated_at_cap"
                     candidates.append({
                         "index": index, "answer": parts["answer"], "think": parts["think"],
                         "raw": raw, "new_tokens": n_new, "accepted": accepted,
-                        "reason": reason, "think_tokens": think_tokens,
+                        "reason": reason, "think_tokens": item["think_tokens"],
                     })
+                    if args.snapshot:
+                        # Exact sampled token ids, kept alongside the rollout
+                        # policy's own log-probs. The training target is
+                        # re-rendered from text through the chat template, so
+                        # this is the record that makes the corpus auditable
+                        # token-for-token rather than the training path (P4).
+                        rollout_records.append({
+                            "prompt_id": f"{sample['id']}#{index}",
+                            "slice": name, "prompt_tokens": prompt,
+                            "tokens": item["tokens"], "logprobs": item["logprobs"],
+                            "accepted": accepted, "reason": reason,
+                        })
 
                 chosen = select(candidates)
                 slice_stats = stats[name]
@@ -390,6 +443,26 @@ def main() -> None:
             print(f"  {done}/{total} prompts  {elapsed:.0f}s "
                   f"({elapsed / done:.1f}s/prompt)", flush=True)
 
+    snapshot_manifest = None
+    if args.snapshot:
+        # Written before the corpus manifest, so a corpus that claims a snapshot
+        # always has one on disk to be checked against (P4/P5).
+        snapshot_manifest = write_snapshot(
+            out_dir / "rollout_snapshot", rollout_records,
+            policy={"checkpoint": args.model, "step": None, "role": "teacher",
+                    "revision": (args.model.split("@", 1)[1]
+                                 if "@" in args.model else None)},
+            engine={"name": engine.name, "server_url": args.server_url,
+                    "version": getattr(engine, "version", None)},
+            sampling={"n": args.n, "greedy": False,
+                      "temperature": args.temperature, "top_p": args.top_p,
+                      "top_k": args.top_k, "max_new_tokens": args.max_new_tokens,
+                      "seed_base": args.seed, "seed_per_batch": "seed + batch_index"},
+        )
+        print(f"snapshot: {snapshot_manifest['n_records']} rollouts, "
+              f"{snapshot_manifest['n_tokens']} tokens, "
+              f"sha256 {snapshot_manifest['rollouts_sha256'][:12]}…", flush=True)
+
     summary = {}
     for name, s in stats.items():
         if not s["prompts"]:
@@ -414,6 +487,15 @@ def main() -> None:
         "created_utc": datetime.now(timezone.utc).isoformat(),
         "command": " ".join(sys.argv),
         "teacher": args.model,
+        # The prompt the teacher answered is produced by the tokenizer's chat
+        # template, so the tokenizer is part of the corpus's identity. It matters
+        # here in particular: a serving engine's official image ships its own
+        # transformers version, which is not the training environment's, and a
+        # template change would move every prompt without any other signal (P4).
+        "tokenizer": {
+            "sha256": tokenizer_hash(tokenizer),
+            "transformers_version": transformers_version,
+        },
         "thinking_mode": True,  # never suppressed — decision record 2026-07-28
         "decoding": {
             "n": args.n, "all_candidates_sampled": True,
@@ -446,6 +528,7 @@ def main() -> None:
             "candidates": sha256_file(out_dir / "candidates.jsonl"),
             "targets": sha256_file(out_dir / "targets.jsonl"),
         },
+        "rollout_snapshot": snapshot_manifest,
         "code_state": code_state(str(REPO_ROOT)),
         "hardware": hardware_report(),
     }

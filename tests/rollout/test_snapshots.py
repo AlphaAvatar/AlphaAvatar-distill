@@ -239,3 +239,52 @@ def test_kl_uses_the_same_clamped_ratio_as_the_quantiles():
     # r - 1 - log r for the clamped pair, averaged with the identical pair's 0.
     expected = ((math.exp(80.0) - 1.0 - 80.0) + 0.0) / 2
     assert stats["kl"] == pytest.approx(expected, rel=1e-9)
+
+
+def test_corpus_build_snapshot_shape_round_trips(tmp_path):
+    """The corpus builder writes its snapshot in the *last* step of a paid
+    generation run, so a schema mismatch there costs the whole run. This pins
+    the record shape generate_teacher_answers.py actually emits, including the
+    `id#candidate_index` prompt key that keeps n candidates distinct."""
+    records_out = [
+        {"prompt_id": "squad_v2-000000#0", "slice": "rag_evidence",
+         "prompt_tokens": [5, 6, 7], "tokens": [11, 12, EOS],
+         "logprobs": [-0.1, -0.2, -0.3], "accepted": True, "reason": "ok"},
+        {"prompt_id": "squad_v2-000000#1", "slice": "rag_evidence",
+         "prompt_tokens": [5, 6, 7], "tokens": [11, 13],
+         "logprobs": [-0.1, -0.9], "accepted": False, "reason": "wrong_answer"},
+    ]
+    manifest = write_snapshot(
+        tmp_path, records_out,
+        policy={"checkpoint": "Qwen/Qwen3-4B-Thinking-2507@768f209d",
+                "step": None, "role": "teacher", "revision": "768f209d"},
+        engine={"name": "vllm_server", "server_url": "http://127.0.0.1:8000",
+                "version": None},
+        sampling={"n": 2, "greedy": False, "temperature": 1.0, "top_p": 1.0,
+                  "top_k": 0, "max_new_tokens": 4096, "seed_base": 20260728,
+                  "seed_per_batch": "seed + batch_index"},
+    )
+    assert manifest["n_records"] == 2
+    assert manifest["n_tokens"] == 5
+
+    back, read_manifest = read_snapshot(tmp_path)
+    assert read_manifest["rollouts_sha256"] == manifest["rollouts_sha256"]
+    assert [r["prompt_id"] for r in back] == [r["prompt_id"] for r in records_out]
+    # Two candidates of the same prompt must not collide into one record.
+    assert len({r["prompt_id"] for r in back}) == 2
+    assert back[0]["logprobs"] == [-0.1, -0.2, -0.3]
+
+
+def test_snapshot_tolerates_an_engine_that_reports_no_logprobs(tmp_path):
+    """`--snapshot` off, or a backend that cannot supply them: the record still
+    has to be writable, with None rather than a fabricated value."""
+    manifest = write_snapshot(
+        tmp_path,
+        [{"prompt_id": "gsm8k-000001#0", "prompt_tokens": [1],
+          "tokens": [2, 3], "logprobs": None}],
+        policy={"checkpoint": "c", "step": None},
+        engine={"name": "hf"}, sampling={"n": 1},
+    )
+    assert manifest["n_tokens"] == 2
+    back, _ = read_snapshot(tmp_path)
+    assert back[0]["logprobs"] is None

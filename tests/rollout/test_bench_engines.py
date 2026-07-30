@@ -162,11 +162,19 @@ def test_candidates_map_back_to_their_own_prompt():
     prompts = [[10], [20], [30]]
     _engine, per_prompt = _run(4, prompts)
     for prompt, candidates in zip(prompts, per_prompt):
-        for raw, _n_new, _cap, _think in candidates:
-            assert raw.split()[0] == str(prompt[0])
+        for candidate in candidates:
+            assert candidate["raw"].split()[0] == str(prompt[0])
 
 
 def test_think_tokens_is_the_position_of_the_close_tag():
     _engine, per_prompt = _run(1, [[10]])
-    _raw, _n_new, _hit_cap, think_tokens = per_prompt[0][0]
-    assert think_tokens == 1  # [prompt0, </think>, 7] -> close tag at index 1
+    assert per_prompt[0][0]["think_tokens"] == 1  # [p0, </think>, 7] -> index 1
+
+
+def test_snapshot_fields_are_carried_out_of_generate_candidates():
+    """The hashed snapshot needs the engine's own token ids and log-probs; a
+    recomputed log-prob is not batch-invariant in this stack (AGENTS.md 4.6)."""
+    _engine, per_prompt = _run(1, [[10]])
+    candidate = per_prompt[0][0]
+    assert candidate["tokens"]                    # exact sampled ids
+    assert "logprobs" in candidate                # key present even when unused
