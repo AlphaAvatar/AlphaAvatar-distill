@@ -40,8 +40,11 @@ SSH_OPTS="-i $SSHK -o IdentitiesOnly=yes -o StrictHostKeyChecking=no
  -o ServerAliveInterval=15 -o ServerAliveCountMax=3 -o BatchMode=yes"
 
 OUTDIR=$REPO/artifacts/stage3
-LOG=$OUTDIR/${SESSION}_orchestrator.log
-STATUS=$OUTDIR/${SESSION}_orchestrator.status
+# POD_ROLE keeps a split session's pods from writing over each other's log,
+# status file and fetched artifacts.
+TAG=${SESSION}${POD_ROLE:+_$POD_ROLE}
+LOG=$OUTDIR/${TAG}_orchestrator.log
+STATUS=$OUTDIR/${TAG}_orchestrator.status
 mkdir -p "$OUTDIR"
 
 log() { printf '%s | %s\n' "$(date -u +%FT%TZ)" "$*" >>"$LOG"; }
@@ -135,7 +138,7 @@ tv=$(rsh "cd /workspace && sha256sum -c hashes_transfer.txt 2>&1" 3 || true)
 grep -q "FAILED" <<<"$tv" && { log "$tv"; fatal "transfer_hash_mismatch"; }
 log "transfer hashes re-verified: $(tr '\n' ' ' <<<"$tv")"
 
-cv=$(rsh "cd /workspace/aad && sha256sum -c /workspace/hashes_ckpt.txt 2>&1" 3 || true)
+cv=$(rsh "cd /workspace/aad && sha256sum -c "${CKPT_HASHES:-/workspace/hashes_ckpt.txt}" 2>&1" 3 || true)
 grep -q "FAILED" <<<"$cv" && { log "$cv"; fatal "ckpt_hash_mismatch"; }
 log "start-checkpoint hashes re-verified: $(grep -c ': OK' <<<"$cv") files OK"
 
@@ -379,6 +382,13 @@ else
 fi
 
 # ---------------------------------------------------------------- phase 6: git
+# Skipped when several pods share a session: two orchestrators staging and
+# committing the same worktree race on the index and on the push. The session
+# owner commits once, after both pods have reported.
+if [[ "${GIT_COMMIT:-1}" != "1" ]]; then
+  setst "DONE:no_git"
+  log "GIT_COMMIT=0 — leaving logs uncommitted for the session owner"
+else
 setst "RUNNING:git"
 git add -A logs/ scripts/pod/ >>"$LOG" 2>&1
 if git diff --cached --quiet; then
@@ -395,10 +405,9 @@ Failed or aborted: ${ARMS_FAILED[*]:-none}.
 
 ${SESSION_COMMIT_BODY:-}
 
-Each completed arm ran its configured schedule, then the gate evals (bf16
-holdout, INT8 fake-quant at both scopes, eval_behavior_v0, the p(</think>) and
-p(<|im_end|>) probes, generation smoke), artifact upload to the private HF repo,
-and independent upload verification. Reference checkpoints were re-scored on the
+Each completed arm ran its configured schedule, then this session's post-run
+step (see scripts/pod/post_run.sh for exactly which evals that is), artifact
+upload to the private HF repo, and independent upload verification. Reference checkpoints were re-scored on the
 same GPU in the same session, so every comparison here is same-device.
 
 Write-up is auto-generated from the runs' own logs and reports measured numbers
@@ -414,6 +423,7 @@ if git -c credential.helper='!gh auth git-credential' push origin main >>"$LOG" 
 else
   log "WARNING: git push failed — commit is local only, see log above"
 fi
+fi   # GIT_COMMIT
 
 # ---------------------------------------------------------------- phase 7: teardown
 if ((VERIFIED == 1)); then

@@ -78,8 +78,8 @@ done
 # A session with no checkpoints to stage (e.g. the 2026-07-29 engine benchmark,
 # whose teacher comes straight from the Hub) leaves this manifest empty, and
 # `sha256sum -c` treats an empty file as an error rather than a no-op.
-if [ -s /workspace/hashes_ckpt.txt ]; then
-  sha256sum -c /workspace/hashes_ckpt.txt || fail ckpt_hash
+if [ -s "${CKPT_HASHES:-/workspace/hashes_ckpt.txt}" ]; then
+  sha256sum -c "${CKPT_HASHES:-/workspace/hashes_ckpt.txt}" || fail ckpt_hash
 else
   echo "no checkpoints staged this session; skipping ckpt hash check"
 fi

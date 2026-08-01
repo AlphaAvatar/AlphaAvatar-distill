@@ -56,23 +56,21 @@ if [ "$POD_ROLE" = "rand" ]; then ARMS=("${ARMS_RAND[@]}"); else ARMS=("${ARMS_P
 
 # Reference checkpoints scored on the same GPU before training, so every arm has
 # a same-device baseline. Format: hf-glob|local-dest|revision|scorecard-name.
-# Both Stage 1 inits are staged (an arm's student_path must exist), but only the
-# pod's own init is scored — the step-0 point of the curve it is measuring.
-# Both are staged on both pods — hashes_ckpt.txt covers both, and a missing file
-# fails the manifest check. An empty 4th field means "stage but do not score",
-# which both score_refs.sh and the orchestrator honour.
+# A pod stages only the init its own arms start from, and verifies only that
+# init's hashes (CKPT_HASHES). Staging both would make each pod wait on a 1.2 GB
+# checkpoint it never opens.
 REF_CKPTS_PCA=(
   "stage1/qwen3_0p6b_init_v0/checkpoint|artifacts/stage1/qwen3_0p6b_init_v0/checkpoint|main|stage1_init_v0_step0"
-  "stage1/qwen3_0p6b_init_v0/random_baseline|artifacts/stage1/qwen3_0p6b_init_v0/random_baseline|main|"
 )
 REF_CKPTS_RAND=(
   "stage1/qwen3_0p6b_init_v0/random_baseline|artifacts/stage1/qwen3_0p6b_init_v0/random_baseline|main|stage1_random_step0"
-  "stage1/qwen3_0p6b_init_v0/checkpoint|artifacts/stage1/qwen3_0p6b_init_v0/checkpoint|main|"
 )
 if [ "$POD_ROLE" = "rand" ]; then
   REF_CKPTS=("${REF_CKPTS_RAND[@]}")
+  CKPT_HASHES=/workspace/hashes_ckpt_rand.txt
 else
   REF_CKPTS=("${REF_CKPTS_PCA[@]}")
+  CKPT_HASHES=/workspace/hashes_ckpt_pca.txt
 fi
 
 # Transfer artifacts on the private HF relay (staged from the dev box).
