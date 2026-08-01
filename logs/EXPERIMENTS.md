@@ -338,6 +338,42 @@ polling was driven by user prompts rather than a timer and `--terminate-after`
 was a 32 h backstop. Standing instruction since: tear down a finished pod without
 being asked.
 
-**Where the corpus lives:** the built corpus and ladder (≈950 MB) were pulled to
-the dev box and are **not yet on the HF relay** — see the durability warning in
-[`STATE.md`](STATE.md) §2. Persisting them is the next CPU-only action.
+**Where the corpus lives:** persisted 2026-08-01 to the relay under
+`stage3_recovery_corpus_v2/` (corpus + both ladder cuts), **9/9 files
+hash-verified** against the local copies — LFS oid for the large files,
+download-and-hash for the small ones.
+
+---
+
+## 11. Experiment 1 — data-scaling matrix (LAUNCHED 2026-08-01, running)
+
+**Objective:** does the student's behavioural recovery scale with
+teacher-generated supervised tokens? Token count is the only variable; the
+mixture is held constant and uniform (the capability-gap weighting is
+Experiment 2, the difficulty curriculum Experiment 3).
+
+**Design:** 24 arms = 6 rungs × 2 seeds × 2 inits, 3 epochs per rung, on the
+uniform ladder cut. 44,024 steps, ~52.6 h at the measured 4.3 s/step. Arms
+differ from `configs/stage3/recovery.json` only in data source, rung, seed and
+start checkpoint (`scripts/data/build_experiment1_configs.py`).
+
+**Hardware/budget:** two L40S pods split by initialization (`1ligfkwnaous4u`
+pca, `vjavemn7m2tw5a` rand), each with a hard `--terminate-after` at 30.0 h, so
+the session cannot exceed **$59.40** against the $60 cap. Orchestrators refuse
+to start an arm they cannot finish before that deadline.
+
+**Enabling change:** the trainer could not consume the ladder before this
+session — it always re-packed from a Stage 2 mixture dir, which would have made
+the rungs trained differ from the rungs measured. `packing: "ladder"` reads the
+pack as cut; the run manifest records the pack's hashes.
+
+**Readouts, and what is deferred:** the pods produce holdout NLL and a
+generation smoke test per arm. The **P18 uncapped behavioural readouts** —
+`natural_termination_rate`, `degeneration_rate`, length p50 — are *not* run
+inline: `eval_behavior.py --unrestricted` has no degeneration stop, so a
+checkpoint in a repetition loop generates until the 262,144-token context is
+exhausted and one prompt can outlast a training arm. They run afterwards from
+the uploaded checkpoints on vLLM with the tested semantic degeneration stop,
+costed separately. **Until then this experiment has checkpoints, not a curve.**
+
+**Result:** pending. **Verdict:** pending.

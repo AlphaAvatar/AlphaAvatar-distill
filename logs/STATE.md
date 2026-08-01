@@ -1,9 +1,8 @@
 # Current project state
 
-**Updated:** 2026-08-01 08:11 UTC · branch `main` at `a1e4aa5` (PR #1 merged
-`stage3/recovery-corpus-v2`), this documentation update committed on top ·
-**nothing running, nothing billing, no pods or volumes exist.** Spend to date
-**$34.52**.
+**Updated:** 2026-08-01 08:45 UTC · branch `main` · **TWO L40S PODS ARE RUNNING
+AND BILLING** — Experiment 1 is under way (§12). Spend before this session
+**$34.52**; this session is capped at **$59.40** by pod deadlines.
 
 **Active work:** the recovery-data scaling study. The teacher corpus and the
 nested token ladder are **built and gate-passed**; the training matrix is
@@ -275,6 +274,55 @@ the canonical recipe already runs.
 applying it to a multi-session message list **silently deletes every earlier
 trace**. Verified directly. Sessions are therefore rendered independently and
 concatenated at token level (asserted exact), with the system block emitted once.
+
+## 12. Experiment 1 — LAUNCHED 2026-08-01 08:42 UTC
+
+**Corpus v2 and both ladder cuts are on the relay**, prefix
+`stage3_recovery_corpus_v2/` — 9/9 files hash-verified against the local copies
+(LFS oid for the large ones, download-and-hash for the small). The §2 durability
+risk is closed.
+
+**Two L40S pods, split by initialization** so a lost pod costs one init axis
+rather than half of every curve:
+
+| pod | id | role | arms | steps |
+|---|---|---|---:|---:|
+| `aadistill-e1-pca` | `1ligfkwnaous4u` | PCA/sandwich init | 12 | 22,012 |
+| `aadistill-e1-rand` | `vjavemn7m2tw5a` | random-baseline init | 12 | 22,012 |
+
+Both carry a hard `--terminate-after 2026-08-02T14:31:18Z` (30.0 h), so the
+session cannot exceed **2 × 30.0 × $0.99 = $59.40** even if every software guard
+fails. The orchestrators additionally refuse to *start* an arm they cannot
+finish before that deadline, so a budget-cut session ends with completed
+uploads rather than a pod killed mid-transfer.
+
+Expected: ~26.3 h training + ~0.5 h setup + ~1.6 h post-run per pod ≈ 28.4 h,
+against 30.0 h. **Slack is ~1.5 h**, and the pca pod already spent ~0.4 h on two
+setup failures. If a pod runs out of deadline it will skip its last arm(s),
+which by arm ordering is the tail of **seed b** — seed a's full rung series
+completes on both inits first.
+
+Drive/monitor from the dev box (both orchestrators are `nohup`'d and survive any
+session ending):
+
+```bash
+tail -f artifacts/stage3/e1_scaling_pca_orchestrator.log
+cat artifacts/stage3/e1_scaling_{pca,rand}_orchestrator.status
+```
+
+**Deliberately deferred: the P18 uncapped behavioural readout.** It is not run
+inline because its cost is unbounded on this model line —
+`eval_behavior.py --unrestricted` has **no degeneration stop**, so a checkpoint
+in a repetition loop generates until the 262,144-token context is exhausted, and
+one prompt can outlast a whole training arm. Every checkpoint is uploaded to
+`e1_scaling_20260801/`, so the readouts (`natural_termination_rate`,
+`degeneration_rate`, length p50) run afterwards from the relay on vLLM with the
+tested semantic degeneration stop, costed separately. **Until that runs,
+Experiment 1 has trained checkpoints and holdout NLL, but no scaling curve.**
+
+Per-arm the pods run: holdout NLL (bf16), a greedy 80-token generation smoke
+test, sha256 of every retained file, upload to the relay, and independent
+dev-box verification; the pod is deleted only after verification passes.
 
 ## 11. Next actions
 
