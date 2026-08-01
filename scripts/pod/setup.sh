@@ -31,6 +31,9 @@ uvx --from huggingface_hub hf download "$HF_REPO" \
   --repo-type model --local-dir /workspace/xfer || fail hf_transfer_download
 
 sha256sum -c /workspace/hashes_transfer.txt || fail transfer_hash
+# Re-runnable: a setup that failed after cloning must not be blocked by its own
+# leftovers on the retry. The clone is disposable — the repo lives in the bundle.
+rm -rf /workspace/aad
 git clone "/workspace/xfer/$TRANSFER_BUNDLE" aad || fail clone
 cd /workspace/aad || fail cd_repo
 git checkout main || fail checkout
