@@ -83,6 +83,19 @@ if [ -s /workspace/hashes_ckpt.txt ]; then
 else
   echo "no checkpoints staged this session; skipping ckpt hash check"
 fi
+# --- the packed token ladder Experiment 1 trains on ---
+# Pulled straight from the relay and hash-checked: it is the experiment's data
+# identity, and a silently different pack would make every rung unreproducible.
+if [ -n "${LADDER_PREFIX:-}" ]; then
+  uvx --from huggingface_hub hf download "$HF_REPO" --repo-type model \
+    --include "$LADDER_PREFIX/*" --local-dir /workspace/hfladder || fail ladder_download
+  mkdir -p "$LADDER_DEST"
+  cp "/workspace/hfladder/$LADDER_PREFIX"/* "$LADDER_DEST/" || fail ladder_place
+  sha256sum -c /workspace/hashes_ladder.txt || fail ladder_hash
+  ls "$LADDER_DEST/blocks.npz" "$LADDER_DEST/audit.jsonl" "$LADDER_DEST/ladder.json" || fail ladder_layout
+  echo "MARKER:LADDER_READY"
+fi
+
 echo "MARKER:CKPT_READY"
 
 # --- tests ---

@@ -160,16 +160,50 @@ done
 log "reference scorecards done"
 
 # ------------------------------------------------------ phase 3: per-arm training
+#
+# Budget guard (AGENTS.md P6/P12). The pod carries a hard --terminate-after at
+# POD_DEADLINE_HOURS, which caps the bill even if everything else fails. That
+# backstop is a blunt instrument though: fired mid-upload it destroys the arm it
+# interrupts. So before each arm the orchestrator projects
+# `train + post_run` from the measured step rate and refuses to start work it
+# cannot finish, ending the session cleanly with everything already produced
+# uploaded and verified.
 ARMS_DONE=()
 ARMS_FAILED=()
+ARMS_SKIPPED=()
+SESSION_START=${SESSION_START:-$(date +%s)}
+DEADLINE_S=$(awk -v h="${POD_DEADLINE_HOURS:-30}" 'BEGIN{printf "%d", h*3600}')
+
+arm_seconds() {  # projected wall seconds for one arm: training + post_run
+  local cfg="$1" steps
+  steps=$(python3 -c "import json;print(json.load(open('$REPO/$cfg'))['schedule']['total_steps'])" 2>/dev/null) || return 1
+  awk -v s="$steps" -v r="${SECONDS_PER_STEP:-4.3}" -v p="${POST_RUN_RESERVE_MIN:-25}" \
+      'BEGIN{printf "%d", s*r + p*60}'
+}
+
 for arm in "${ARMS[@]}"; do
   RUN_NAME=$(arm_field "$arm" 1)
   CONFIG=$(arm_field "$arm" 2)
   STEP_TAG=$(arm_field "$arm" 3)
   REMOTE_RUN=/workspace/aad/artifacts/stage3/$RUN_NAME
 
+  elapsed=$(( $(date +%s) - SESSION_START ))
+  need=$(arm_seconds "$CONFIG") || fatal "cannot_read_steps_$RUN_NAME"
+  if (( elapsed + need > DEADLINE_S )); then
+    left=$(( (DEADLINE_S - elapsed) / 60 ))
+    log "BUDGET STOP: $RUN_NAME needs $((need / 60)) min, only ${left} min left "\
+"before the ${POD_DEADLINE_HOURS}h deadline — skipping it and every arm after it"
+    ARMS_SKIPPED+=("$RUN_NAME")
+    for rest in "${ARMS[@]}"; do
+      r=$(arm_field "$rest" 1)
+      [[ " ${ARMS_DONE[*]-} ${ARMS_FAILED[*]-} ${ARMS_SKIPPED[*]-} " == *" $r "* ]] || ARMS_SKIPPED+=("$r")
+    done
+    break
+  fi
+
   setst "RUNNING:train:$RUN_NAME"
   log "--- arm $RUN_NAME (config $CONFIG, final $STEP_TAG) ---"
+  log "budget: ${elapsed}s elapsed, arm needs ~${need}s, deadline ${DEADLINE_S}s"
 
   attempt=1
   rsh "bash /workspace/train.sh '$RUN_NAME' '$CONFIG'" 3 >/dev/null || fatal "train_launch_failed_$RUN_NAME"
@@ -302,10 +336,7 @@ for RUN_NAME in "${ARMS_DONE[@]}"; do
   LOCAL_RUN=$REPO/artifacts/stage3/$RUN_NAME
   REMOTE_RUN=/workspace/aad/artifacts/stage3/$RUN_NAME
   mkdir -p "$LOCAL_RUN"
-  for f in train_log.jsonl run_manifest.json eval_holdout_v1.json \
-           eval_holdout_v1_int8.json eval_holdout_v1_int8_decoder.json \
-           eval_behavior_v0.json eval_behavior_v0.generations.jsonl \
-           probe_think_close.json gen_smoke.json console.log; do
+  for f in ${ARM_ARTIFACTS:-train_log.jsonl run_manifest.json eval_holdout_v1.json gen_smoke.json console.log}; do
     scp_try "$REMOTE_RUN/$f" "$LOCAL_RUN/$f" || fatal "fetch_failed_${RUN_NAME}_$f"
   done
   HASHFILE_REL=artifacts/stage3/${RUN_NAME}_artifact_hashes_${SESSION_DATE}.txt

@@ -44,7 +44,7 @@ from ..data.dataset import best_fit_blocks, encode_sample, load_split, pack_bloc
 from ..infrastructure.manifest import sha256_json
 
 KD_SCOPES = ("all", "assistant", "all_no_think")
-PACKINGS = ("concat", "best_fit")
+PACKINGS = ("concat", "best_fit", "ladder")
 
 
 def validate_train_config(cfg: dict) -> None:
@@ -65,6 +65,19 @@ def validate_train_config(cfg: dict) -> None:
     # concat path they actually ran.
     if cfg.get("packing", "concat") not in PACKINGS:
         raise ValueError(f"config field 'packing' must be one of {PACKINGS}")
+    # `"ladder"` trains on a pre-packed token ladder: `data_dir` is the pack and
+    # `rung` selects the prefix. Nothing is re-encoded or re-packed, so the rung
+    # trained is the rung the gate measured.
+    if cfg.get("packing") == "ladder":
+        need(cfg, "rung", int)
+        if cfg.get("groups") is not None:
+            raise ValueError("packing 'ladder' cannot subset groups; the pack "
+                             "already fixes the mixture")
+        if cfg.get("extra_val") is not None:
+            raise ValueError("packing 'ladder' does not support extra_val")
+        val_blocks = cfg.get("val_blocks", 16)
+        if not isinstance(val_blocks, int) or val_blocks < 1:
+            raise ValueError("config field 'val_blocks' must be a positive int")
     if need(cfg, "dtype", str) not in ("float32", "bfloat16"):
         raise ValueError(f"unsupported dtype {cfg['dtype']!r}")
     need(cfg, "device", str)

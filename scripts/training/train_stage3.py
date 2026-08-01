@@ -1,4 +1,4 @@
-"""Stage 3 CLI: recovery training over the Stage 2 offline mixture.
+"""Stage 3 CLI: recovery training over an offline mixture or a packed token ladder.
 
 Usage:
     uv run python scripts/training/train_stage3.py --config configs/stage3_<name>.json
@@ -30,6 +30,7 @@ import torch
 from aadistill.infrastructure.env import code_state, hardware_report, set_determinism
 from aadistill.infrastructure.manifest import sha256_file, sha256_json, write_manifest
 from aadistill.models.teacher import DTYPES, load_teacher, tokenizer_hash
+from aadistill.data.ladder import ladder_blocks
 from aadistill.training.train import (
     JsonlLogger,
     Trainer,
@@ -90,7 +91,9 @@ def main() -> None:
     from transformers import AutoModelForCausalLM, AutoTokenizer
 
     tokenizer = AutoTokenizer.from_pretrained(REPO_ROOT / cfg["student_path"])
-    print(f"device {device}; encoding Stage 2 mixture from {cfg['data_dir']} ...")
+    source = ("packed token ladder" if cfg.get("packing") == "ladder"
+              else "Stage 2 mixture")
+    print(f"device {device}; loading {source} from {cfg['data_dir']} ...")
     data_dir = REPO_ROOT / cfg["data_dir"]
     # kd_scope "all_no_think" needs the think tokens; resolve them here rather
     # than in the core, which stays model-agnostic (P3). Single-token ids are
@@ -107,33 +110,49 @@ def main() -> None:
         think_ids = (opened[0], closed[0])
 
     packing = cfg.get("packing", "concat")
-    train_blocks = build_blocks(
-        tokenizer, data_dir, "train", cfg["block_len"], cfg["groups"],
-        packing=packing, seed=cfg["seed"],
-    )
-    val_blocks = build_blocks(
-        tokenizer, data_dir, "val", cfg["block_len"], cfg["groups"],
-        packing=packing, seed=cfg["seed"],
-    )
     extra_val_blocks = {}
     extra_val_stats = {}
-    for name, extra_dir in (cfg.get("extra_val") or {}).items():
-        blocks = build_blocks(
-            tokenizer, REPO_ROOT / extra_dir, "val", cfg["block_len"], None,
+    if packing == "ladder":
+        # The pack is the data. Blocks are read as cut, so the rung trained is
+        # byte-identical to the rung the corpus gate validated.
+        train_tuple, val_tuple, ladder_stats = ladder_blocks(
+            data_dir, cfg["rung"], n_val=cfg.get("val_blocks", 16)
+        )
+        if int(ladder_stats["block_len"]) != cfg["block_len"]:
+            raise ValueError(
+                f"pack was cut at block_len {ladder_stats['block_len']} but the "
+                f"config says {cfg['block_len']}")
+        train_stats, val_stats = ladder_stats, ladder_stats["val_token_mix"]
+    else:
+        train_blocks = build_blocks(
+            tokenizer, data_dir, "train", cfg["block_len"], cfg["groups"],
             packing=packing, seed=cfg["seed"],
         )
-        extra_val_blocks[name] = (blocks[0], blocks[1], blocks[4])
-        extra_val_stats[name] = blocks[3]
+        val_blocks = build_blocks(
+            tokenizer, data_dir, "val", cfg["block_len"], cfg["groups"],
+            packing=packing, seed=cfg["seed"],
+        )
+        train_tuple = (train_blocks[0], train_blocks[1], train_blocks[4])
+        val_tuple = (val_blocks[0], val_blocks[1], val_blocks[4])
+        train_stats, val_stats = train_blocks[3], val_blocks[3]
+        for name, extra_dir in (cfg.get("extra_val") or {}).items():
+            blocks = build_blocks(
+                tokenizer, REPO_ROOT / extra_dir, "val", cfg["block_len"], None,
+                packing=packing, seed=cfg["seed"],
+            )
+            extra_val_blocks[name] = (blocks[0], blocks[1], blocks[4])
+            extra_val_stats[name] = blocks[3]
     logger.log(
         "dataset_loaded",
         data_dir=cfg["data_dir"],
         block_len=cfg["block_len"],
         packing=packing,
+        rung=cfg.get("rung"),
         kd_scope=cfg["loss"]["kd_scope"],
         think_ids=list(think_ids) if think_ids else None,
         tokenizer_sha256=tokenizer_hash(tokenizer),
-        train=train_blocks[3],
-        val=val_blocks[3],
+        train=train_stats,
+        val=val_stats,
         extra_val=extra_val_stats,
     )
 
@@ -163,8 +182,8 @@ def main() -> None:
     trainer = Trainer(
         cfg,
         student,
-        (train_blocks[0], train_blocks[1], train_blocks[4]),
-        (val_blocks[0], val_blocks[1], val_blocks[4]),
+        train_tuple,
+        val_tuple,
         teacher=teacher,
         device=device,
         out_dir=out_dir,
@@ -195,6 +214,16 @@ def main() -> None:
                 + [REPO_ROOT / e for e in (cfg.get("extra_val") or {}).values()]
                 for p in sorted(Path(d).glob("*.manifest.json"))
             },
+            # A ladder run's data identity is the pack itself, not a mixture
+            # manifest: these hashes pin the exact blocks that trained (P4).
+            "ladder": (
+                {**{k: v for k, v in ladder_stats.items()
+                    if k != "val_block_indices"},
+                 "blocks_sha256": sha256_file(data_dir / "blocks.npz"),
+                 "ladder_json_sha256": sha256_file(data_dir / "ladder.json"),
+                 "audit_sha256": sha256_file(data_dir / "audit.jsonl")}
+                if cfg.get("packing") == "ladder" else None
+            ),
             "tokenizer_sha256": tokenizer_hash(tokenizer),
             "teacher": teacher_identity,
             "student_source": str(model_path),
