@@ -1,5 +1,90 @@
 # Decision records
 
+## 2026-08-01 (maintainer) — Experiment order: teacher-answer scaling first, on a neutral mixture; data mixing and curriculum come after
+
+- **Context:** the plan folded three questions into one run. Corpus v2 was
+  generated under a capability-gap-weighted mixture (`gsm8k` 22% / `rag_evidence`
+  20% / `openmath` 17% / `code` 16% / `tool_calling` 15% / `multihop_qa` 10%,
+  declared in supervised tokens), and the ladder was cut to that mixture, so the
+  first training matrix would have measured data quantity *through* a designed
+  composition. A difficulty **curriculum** was queued as a later experiment, but
+  the difficulty-weighted **mixture** was already inside the first one.
+- **Decision (maintainer):** *"At this stage, we should avoid introducing
+  unnecessary variables. Currently, we are only comparing whether Student's
+  behavioral recovery exhibits a scaling law. Data mixing and course learning
+  will be considered later."* Concretely:
+  1. **Experiment 1 — scaling on teacher-generated answers.** The single question
+     is whether behavioural recovery scales with supervised-token count. The only
+     variable is token count.
+  2. **Composition is held constant across rungs and neutral**: uniform six-way
+     token shares (16.67% each). Constant because a drifting composition would
+     confound size with mixture; uniform because any weighting is itself a
+     data-mixing decision, and that is a later experiment.
+  3. **Experiment 2 — data mixing.** The capability-gap weighting is not
+     withdrawn, only deferred to the experiment that can actually test it.
+  4. **Experiment 3 — difficulty curriculum**, ordering samples by teacher
+     candidate disagreement. Unchanged in design, still last.
+- **Cost of the correction: $0.** The mixture is a parameter of the *ladder cut*,
+  not a property of the generated data, so the corpus is untouched. The ladder
+  was re-cut on CPU and **all six rungs are reachable at uniform shares**:
+  216 / 380 / 682 / 1,174 / 1,944 / 2,941 blocks for 0.25M → 5.50M supervised
+  tokens, realized within **0.3 pp** of uniform at the smallest rung and
+  **0.03 pp** at the top. The weighted cut is kept for Experiment 2.
+- **What it costs elsewhere, measured:**
+  * **+6.2% training compute** — 7,337 blocks/epoch against the weighted cut's
+    6,907, because uniform raises the share of the badly-packing `tool_calling`
+    type from 15% to 16.7%. The 24-run matrix goes from ~$49 to ~**$52**, plus
+    ~$5 of evals, against the $60 cap.
+  * **The saturation headroom largely disappears.** Under uniform the corpus
+    supports at most **6.08M** supervised tokens (bound by `multihop_qa`'s
+    1,012,726 post-packing tokens), against 10.8M under the weighted cut. Rungs
+    above ~6M would require either more `multihop_qa`/`tool_calling` generation
+    or a non-uniform mixture — i.e. Experiment 2.
+- **Neutral at the cut, not at the source.** The prompt counts the corpus was
+  *generated* from were themselves chosen from the capability gaps (1,700 gsm8k,
+  900 openmath, 1,200 code, 2,600 tool, 4,100 rag, 1,074 multihop). Uniform
+  cutting can only rebalance what exists: `code` contributes 16.7% from a 3.48M
+  pool while `multihop_qa` contributes the same 16.7% from 1.01M. This is a
+  limitation of the experiment, not a property removed by the re-cut.
+- **Alternatives considered:** keep the weighted mixture for Experiment 1 —
+  rejected by the maintainer as an unnecessary variable; cut `tool_calling` to
+  reduce padding — rejected, that is a mixing decision too, and it was already
+  rejected on cost grounds earlier today.
+- **Revisit when:** Experiment 1 reports a curve. If behavioural recovery does
+  not scale on a neutral mixture, mixing and curriculum are the next levers to
+  test — in that order.
+
+## 2026-08-01 — Corpus generation samples at the teacher's official preset, reversing half of the 2026-07-29 untruncated-sampling decision
+
+- **Recorded retroactively.** The change was made when the §6 validation gate was
+  specified (2026-07-30/31) and carried into the corpus v2 bulk build; it was
+  pinned in the gate report, the corpus manifest, `STATE.md` and `PROPOSAL.md`,
+  but never written as a decision record. This entry closes that gap rather than
+  announcing a new choice.
+- **Context:** the 2026-07-29 record adopted DAPO-style untruncated sampling for
+  answer generation — temperature 1.0 / top_p 1.0 / top_k off — explicitly
+  *rejecting* the vendor's published serving preset as optimizing one good answer
+  rather than n diverse candidates. Corpus v1 was generated that way.
+- **Decision:** corpus v2 generates at `temperature 0.6 / top_p 0.95 / top_k 20 /
+  min_p 0` — the preset published for `Qwen3-4B-Thinking-2507` — with `n=4` and
+  per-candidate seeds (`seed + batch_index + candidate_index × 1000003`). What
+  survives from the 2026-07-29 record: **no greedy candidate**; every candidate is
+  sampled, and all four are stored with their verdicts.
+- **What the corpus records support:** the gate confirmed distinct per-candidate
+  seeds and non-identical candidates for all six types, which is what corpus v1
+  failed (92.7% byte-identical pairs, effectively n=1). It did **not** measure
+  candidate diversity *as a function of preset*, so this record cannot claim the
+  preset was chosen on measured evidence — it is the teacher's own recommendation,
+  applied consistently across generation, training and evaluation.
+- **Risks:** DAPO's argument now applies to our corpus — top_k 20 truncates
+  exactly the high-entropy branch points, so measured candidate diversity is a
+  floor rather than the teacher's true spread, and the Experiment 2 difficulty
+  signal (candidate disagreement) inherits that compression. Corpus v1 and v2 are
+  also **not comparable draws** and must not be pooled.
+- **Revisit when:** Experiment 2 measures candidate diversity and finds it too
+  compressed to rank difficulty, or a run needs the untruncated distribution for
+  an on-policy objective (Stage 4/5), where the 2026-07-29 reasoning still stands.
+
 ## 2026-08-01 — Accept 3.35x padding rather than relax the system-prompt packing boundary
 
 - **Context:** `tool_calling` renders each conversation's own tool schema into the rendered system block, and the packing protocol makes the system prompt a hard boundary — one system block, first, never mid-sample. Measured: **5,068 unique schemas across 7,127 conversations, 4,394 of them singletons**, median group size 1. So tool sessions almost never share a block.
@@ -452,7 +537,7 @@
 - **Alternatives considered:** (a) Qwen3-Thinking-2507's published serving preset (0.6 / 0.95 / top_k 20) — rejected as optimizing *one good answer*, whereas this job wants `n` diverse candidates whose distribution is the teacher's own, with the verifier rather than the sampler doing the filtering. (b) Keeping a greedy candidate 0 alongside sampled ones — rejected: it is mode-collapsed by construction, and the determinism that justified privileging it does not exist (see below). (c) Mid-range truncation (top_p 0.95, temperature 1.0) — rejected for the pilot as an unprincipled midpoint; the pilot measures accept@1/accept@n, which is the empirical evidence for revisiting it.
 - **Expected upside:** Candidate diversity is what makes accept@n exceed accept@1, so untruncated sampling should raise the yield per prompt at fixed `n` — the quantity that prices the bulk build. It also makes the corpus reflect the teacher's actual distribution rather than a truncated one, which matters because DAPO/GRPO-style work reports that truncating the tail suppresses low-probability tokens at exactly the high-entropy positions where branching happens.
 - **Risks:** Temperature 1.0 with no truncation can derail a thinking model into degenerate traces, and traces run to a 4096-token cap, so tail risk compounds into wasted GPU budget. Mitigated by measurement, not assumption: the pilot reports accept@1/accept@n and `truncated_at_cap` per slice. Also, `accept_at_1` changes meaning — it now reads "one sample was accepted" rather than "greedy was accepted", so it is not comparable to any pre-2026-07-29 figure.
-- **Supporting measurement:** the determinism half of the old greedy justification did not survive testing. bf16 greedy decoding is **not batch-invariant** on this project's own hardware — 1/6 prompts identical between batch-1 and batch-6 with padding eliminated, versus 6/6 in fp32 ([log](experiments/rollout/2026-07-29_engine_adapter_and_bf16_invariance.md)). Candidate 0 was never reproducible across batch compositions the way `select` assumed.
+- **Supporting measurement:** the determinism half of the old greedy justification did not survive testing. bf16 greedy decoding is **not batch-invariant** on this project's own hardware — 1/6 prompts identical between batch-1 and batch-6 with padding eliminated, versus 6/6 in fp32 ([record](EXPERIMENTS.md) §4). Candidate 0 was never reproducible across batch compositions the way `select` assumed.
 - **Revisit when:** the pilot's accept@n comes in low, or per-slice `truncated_at_cap` rises sharply against the earlier preset — either would argue for reintroducing mild truncation. Also revisit if this corpus is ever used for importance-weighted on-policy objectives, where the sampling distribution must be recorded exactly.
 
 ## 2026-07-29 — `refusal_uncertainty` is dropped from teacher-target generation
@@ -471,7 +556,7 @@
 - **Alternatives considered:** (a) Raise the threshold to 100 — rejected: the public targets it would displace are 13–16 words (median 15) while the teacher's refusals are 66–160 (median 87), so the change would make refusals ~6× longer on 9 of 10 prompts, a direct regression against P10 (short realtime responses) bought by relaxing a rule until a metric moved. (b) Keep generating and accept the ~0 yield — rejected as pure waste: it is the second most expensive slice per candidate (median 1,628 think tokens). (c) Rewrite the refusal rule to score terseness relative to the gold rather than an absolute word count — deferred; it is a better rule but nothing currently needs it, since the slice is no longer a target source.
 - **Expected upside:** Removes the slice with the worst cost-per-accepted-sample from every future generation run at zero data loss, and prevents a regression that would have looked like an improvement in the accept-rate table.
 - **Risks:** If the public refusal targets are themselves weak, this decision preserves that weakness rather than fixing it — but that is a Stage 2 data-quality question, not something teacher generation was going to solve. Revisit if refusal behavior is still the student's weakest axis after the CE/KD conflict is addressed.
-- **Supporting measurement:** independently, **10 of 40 candidates (25%) answered a question squad_v2 marks unanswerable** (`"Hyrule"`, `"GameCube and Wii."`, `"the answer is December 2006"`), rejected as `not_a_refusal`. This is consistent with the teacher's measured grounding ceiling of 0.562, its lowest behavior axis, and is a second independent reason not to source refusal targets from this teacher. Full analysis: [log](experiments/stage3/2026-07-29_pilot_slice_analysis.md).
+- **Supporting measurement:** independently, **10 of 40 candidates (25%) answered a question squad_v2 marks unanswerable** (`"Hyrule"`, `"GameCube and Wii."`, `"the answer is December 2006"`), rejected as `not_a_refusal`. This is consistent with the teacher's measured grounding ceiling of 0.562, its lowest behavior axis, and is a second independent reason not to source refusal targets from this teacher. Full analysis: [record](EXPERIMENTS.md) §5.
 - **Revisit when:** a different teacher is used for this slice, or the refusal rule is rewritten to be gold-relative.
 
 ## 2026-07-29 — `openmath` is cap-bound; the fix is a measurement, not a setting

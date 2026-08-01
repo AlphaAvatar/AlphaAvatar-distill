@@ -1,9 +1,67 @@
 # Supported / in-progress models
 
-Status values follow AGENTS.md 3.4. A model is listed here only once real work exists for it; nothing below is a released or validated result.
+Status values follow AGENTS.md 3.4. A model is listed here only once real work
+exists for it; nothing below is a released or validated result.
 
-Only the dense text baseline below has been attempted. The methods are *intended* to generalize to other families (MoE, VLM, Omni-models) — that is intent, not support, and no such model gets a row here until real work exists for it (decision 2026-07-28). No entry becomes a README Optim record during baseline construction (same date).
+Only the dense text baseline below has been attempted. The methods are *intended*
+to generalize to other families (MoE, VLM, Omni-models) — that is intent, not
+support, and no such model gets a row here until real work exists for it
+([decision 2026-07-28](decisions.md)). No entry becomes a README Optim record
+during baseline construction (same date).
 
 | Model | Teacher | Student target | Status | Stages passed | Best checkpoint | Notes |
 | --- | --- | --- | --- | --- | --- | --- |
-| qwen3-4b-thinking-distill (working name) | Qwen/Qwen3-4B-Thinking-2507 @ `768f209d` | 0.6B-class (hidden 1024, 28L, FFN 3072, 16Q/8KV, tied emb; user-chosen 2026-07-13) | stage3-running (sub-stage 2 gate passed; start-point ablation complete — recipe simplified to single-stage) | Stage 0, Stage 1, Stage 2 (v0+v1), Stage 3 s1, Stage 3 s2 | best holdout: `stage3/s2_blocks_v1/step_002700/model` @ `b1b5170c` (**3.8003**); **recommended branch point: `stage3/s2v1_from_init/step_002700/model`** (holdout 3.8285, +0.74% — inside the 1% band — but best on every behavior axis and 33% cheaper to produce). Both fp32, HF-only on `AlphaAvatar/aadistill-artifacts` | Stage 0 v1: 949,859 tokens ([log](experiments/stage0/2026-07-13_stage0_qwen3_4b_thinking_v1.md)). Stage 1 init gate passed; holdout NLL 11.75 vs random 12.13 vs teacher 2.63 ([log](experiments/stage1/2026-07-14_stage1_qwen3_0p6b_init_v0.md)). Stage 2 mixture v0 5.39M train tokens ([log](experiments/stage2/2026-07-21_stage2_offline_v0.md)), v1 scale-up 22.13M ([log](experiments/stage2/2026-07-26_stage2_offline_v1.md)). Stage 3 s1 (FFN+norm, 660 steps, L40S) gate passed 2026-07-22: holdout **4.21** ([log](experiments/stage3/2026-07-22_stage3_s1_gpu_run.md)). Sub-stage 2 sizing A/B 2026-07-25: attention-unfrozen freeze set adopted; holdout flat — mixture v0 exhausted ([log](experiments/stage3/2026-07-25_stage3_s2_ab_gpu_run.md)). Sub-stage 2 quality gate passed 2026-07-26 on mixture v1: holdout **3.80** (−9.8%, 26% of the teacher gap closed), val_v0 −8.9% on frozen data, INT8 +0.08%/+0.21% ([log](experiments/stage3/2026-07-26_stage3_s2_blocks_v1_gpu_run.md)). Start-point ablation 2026-07-27: both pre-registered rules fired — the arm-B leg was neutral (+0.17%) and the **warm-up ladder is unnecessary** (single-stage from init reaches +0.74% with 33% fewer steps); `eval_behavior_v0` reversed the holdout ranking, with the single-stage arm best on format, grounding and tool-call validity ([log](experiments/stage3/2026-07-27_stage3_start_point_ablation.md)). Behavior score `behavior_score_v0`: **0.2015** (`s2v1_from_init@2700`) against a measured teacher ceiling of **0.7443**. **Carry the error bar: the seed-only noise floor on this metric is 0.1290** (2026-07-28, two runs of one config; [log](experiments/stage3/2026-07-28_stage3_packing_control.md)), so behavior *orderings* between this project's checkpoints are not supported at one run per arm — the scores are measurements, not a ranking. Behavior comparisons now require >=2 seeds per arm ([log](experiments/evaluation/2026-07-28_teacher_behavior_v0.md)); biggest gaps math +0.714, tool_call +0.667, format_ok +0.618. Packing/`block_len` control 2026-07-28: **rejected** — best-fit@2048 regressed holdout +2.1% on both seeds (agreeing to 0.09%), R2 fired; `concat`@1024 stands ([log](experiments/stage3/2026-07-28_stage3_packing_control.md)). Teacher-target run 2026-07-30 ($4.87) — **relabelled a post-s2v1 continuation diagnostic; not a teacher-target baseline.** Corpus of 752 prompts -> **540 accepted** targets (recorded as **effectively n=1**: 92.7% byte-identical pairs mean the draws were never independent, which is *not* evidence about sampling diversity). Four arms at best_fit@8192 with equal total training tokens, but **every arm forked from `s2v1_from_init/step_002700`, already 2,700 steps of public-target training** — a path-dependent advantage for the public arm, so its **R2 "reject" is void as evidence about teacher-native targets** ([log](experiments/stage3/2026-07-30_stage3_post_s2v1_continuation_diagnostic.md), [corpus](experiments/stage3/2026-07-30_teacher_corpus_750.md)). Two invalid instruments were also found and survive relabelling: `p(</think>)` is measured where the *public* render demands the token (so it scores "skip reasoning entirely"), and the 512-token scorecard was saturated for the treatment arm only (84.2% truncated); conditioned on generations that finish, the arms are near-identical (treatment `terminated` **1.000**, `format_ok` 0.909) while the control's median finished answer is **2 words** vs 34. Diagnostic-only measurements: `format_ok` 0.250 -> 0.625 (public) / 0.354 (teacher-native), holdout NLL 3.8285 -> 4.0622 / 3.9653. **Branch point unchanged.** Corrected baseline forks every arm from the **Stage 1 structural init** ([proposal §11](proposals/stage3/2026-07-30_stage3_teacher_target_2x2.md)); awaiting a step-budget decision before any paid work. Deployment target: INT8. |
+| qwen3-4b-thinking-distill (working name) | `Qwen/Qwen3-4B-Thinking-2507` @ `768f209d` | 0.6B-class: hidden 1024, 28L, FFN 3072, 16Q/8KV, tied emb (user-chosen 2026-07-13) | **stage3-running** | Stage 0, Stage 1, Stage 2 (v0+v1); Stage 3 sub-stages 1–2 | `stage3/s2v1_from_init/step_002700/model` — holdout NLL **3.8285**, `behavior_score_v0` **0.2015**; fp32, HF-only on `AlphaAvatar/aadistill-artifacts` | Stage 3 has **not** exited: no checkpoint generates usable output under unrestricted generation. See below. |
+
+---
+
+## qwen3-4b-thinking-distill — current position
+
+Everything below is recorded in the consolidated
+[experiment record](EXPERIMENTS.md); per-run logs were merged into it on
+2026-07-31 and remain in git history at commit `866dac2`.
+
+**What passed.** Stage 0 collected 949,859 tokens of teacher sufficient
+statistics. Stage 1's PCA/sandwich init reached holdout NLL 11.748 against a
+random-init 12.129 and a teacher 2.6264, and its checkpoint
+(`model.safetensors` sha256 `86fbba78…`) is the pinned fork point for all
+recovery work. Stage 2 built offline mixtures v0 (5.39M train tokens) and v1
+(22.13M). Stage 3 sub-stage 1 (FFN+norm, 660 steps) passed its gate at holdout
+4.21; sub-stage 2 on mixture v1 reached **3.8003**; the start-point ablation
+then retired the warm-up ladder — single-stage from the Stage 1 init reaches
+3.8285 (+0.74%, inside the pre-registered 1% band) with 33% fewer steps, and is
+best on every behaviour axis.
+
+**Why the recommended checkpoint is not the best-NLL one.**
+`s2v1_from_init@2700` (3.8285) is recommended over `s2_blocks_v1@2700` (3.8003)
+because it is cheaper to produce and scored better on `eval_behavior_v0`.
+**Carry the error bar:** the seed-only noise floor on that metric is **0.1290**,
+so behaviour *orderings* between this project's checkpoints are not supported at
+one run per arm. The scores are measurements, not a ranking. Behaviour
+comparisons now require ≥2 seeds; cold-start holdout-NLL comparisons need ≥4
+(two seeds of one config differed by 2.21 nats).
+
+**Why Stage 3 has not exited.** Under unrestricted generation (P18, full 262,144
+context, no token cap) **every** checkpoint in this line — including
+`s2v1_from_init@2700` — degenerates into repetition, with **zero** context-limit
+hits. The 512-token evaluation cap used before 2026-07-30 was hiding repetition
+loops, not long reasoning. Neither 2026-07-30 four-arm run supports a
+route-level claim about teacher-native supervision: one forked from a
+public-trained checkpoint (invalid), and both were convergence- and
+measurement-limited.
+
+**Largest measured capability gaps** against the teacher's `behavior_score_v0`
+ceiling of 0.7443: math EM +0.714, tool_call +0.667, format_ok +0.618. These
+gaps set how many prompts of each type the recovery corpus was generated from.
+
+**What exists for the next step.** A teacher corpus (corpus v2, 2026-08-01):
+11,174 accepted sessions, 66.08M generated tokens, gate-passed, cut into a
+six-rung nested token ladder. The first experiment over that ladder asks only
+**whether behavioural recovery scales with supervised-token count**, so it runs
+on a neutral uniform type mixture; data mixing and difficulty curriculum are
+separate later experiments (maintainer, 2026-08-01). The training matrix is
+specified and costed but **not started** — it awaits a go-ahead against the $60
+training budget ([`PROPOSAL.md`](PROPOSAL.md)).
+
+**Deployment target:** INT8. Every recovery gate already re-evaluates under INT8
+weight fake-quantization at two scopes.

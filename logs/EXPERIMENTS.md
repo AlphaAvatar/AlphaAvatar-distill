@@ -7,7 +7,8 @@ proposal files, which are preserved in git history at commit `866dac2`.
 32Q/8KV) → **student** 0.6B-class (1024 hidden, 28L, FFN 3072, 16Q/8KV, tied
 embeddings). BF16 training, INT8 deployment target.
 
-**Total spend to date: $7.93.** Itemised in §6, including what was wasted.
+**Total spend to date: $34.52.** Training and evaluation $7.93 (§6, including
+what was wasted); teacher generation $26.59 (§9 gate $1.03 + §10 corpus $25.56).
 
 ---
 
@@ -18,7 +19,7 @@ embeddings). BF16 training, INT8 deployment target.
 | 0 — activation collection | 949,859 tokens, v1 | **done** |
 | 1 — structural init | `stage1/qwen3_0p6b_init_v0/checkpoint`, holdout NLL 11.748 | **done, pinned start point** |
 | 2 — offline mixture | `stage2_v1`, 22.13M train tokens | **done** |
-| 3 — recovery | best checkpoint `s2v1_from_init@2700`, holdout **3.8285** | **open — no checkpoint generates usable output** |
+| 3 — recovery | best checkpoint `s2v1_from_init@2700`, holdout **3.8285**; teacher corpus v2 + 6-rung token ladder built and gate-passed (§10) | **open — no checkpoint generates usable output; training matrix not started** |
 | 4/5/6 | — | not started |
 
 **The blocking fact:** under unrestricted generation, *every* checkpoint
@@ -116,15 +117,21 @@ supervision is supported by any run so far.**
 |---|---:|---|
 | Stage 3 recovery runs (s1, A/B, v1, ablation, packing, CE/KD) | prior sessions | necessary |
 | engine benchmark + isolated engine | prior sessions | necessary once; now concluded and deferred |
-| teacher corpus generation (752 prompts) | **$1.37** | necessary; reusable |
+| teacher corpus v1 generation (752 prompts) | **$1.37** | necessary; superseded by corpus v2 |
 | post-s2v1 continuation 4-arm run | **$3.50** | **wasted** — invalid start point, my error |
 | corrected baseline 4-arm run | **$2.30** | diagnostic only; convergence- and measurement-limited |
 | unrestricted pilot | **$0.79** | necessary; produced the finding that reframed everything |
-| **this session total** | **$7.93** | of which **$3.50 was avoidable** |
+| **training/eval subtotal** | **$7.93** | of which **$3.50 was avoidable** |
+| §6 validation gate (§9) | **$1.03** | necessary; ~$0.65 of it lost to two infrastructure failures |
+| corpus v2 bulk generation (§10) | **$25.56** | necessary; **~$8.70 of it was idle pod time** |
+| **project total to date** | **$34.52** | generation subtotal $26.59, all against the $50 generation cap |
 
 **Wasted:** the 2026-07-30 continuation run. Forking both arms from a
 public-trained checkpoint was an error that a five-minute check of the start
 point would have caught before spending.
+
+**Also wasted:** ~$8.70 of idle pod time on the corpus v2 run (§10) — the job
+finished hours before the pod was deleted.
 
 **Also avoidable in hindsight:** the 512-token evaluation cap, which censored
 99.3% of one arm and made two runs uninterpretable. Now forbidden by AGENTS.md
@@ -144,13 +151,19 @@ P18.
 | Corpus is **effectively n=1** (92.7% byte-identical candidates); per-candidate seeds fixed | 07-30 |
 | Teacher template injects **no** default system message — a fact about the checkpoint | 07-31 |
 | **Project protocol: an explicit system message is mandatory**, fixed requirement, not an experimental variable | 07-31 |
+| Capability-gap ("difficulty-aware") mixture, declared in **supervised tokens**, replaces equal four-way balance — it shaped generation | 08-01 |
+| **Experiment order: scaling first on a uniform mixture; data mixing second; difficulty curriculum third** | 08-01 |
+| Multi-turn data enters by **turn expansion**; only the newly generated turn is supervised, siblings never share a block | 08-01 |
+| Keep the system-prompt packing boundary and pay 3.35× padding; training budget raised to **$60** | 08-01 |
+| Corpus generation samples at the teacher's **official preset** (`0.6 / 0.95 / 20 / min_p 0`), no greedy candidate | 08-01 |
 
 ## 8. Reusable assets
 
 | asset | where |
 |---|---|
 | Stage 1 init (pinned fork point) | `stage1/qwen3_0p6b_init_v0/checkpoint`, sha256 `86fbba78…` |
-| teacher corpus, 752 prompts / 540 accepted | `stage3_teacher_corpus_20260730/`, targets sha256 `18028f0c…` |
+| **recovery corpus v2 + ladder** (2026-08-01) | `sessions.jsonl` `2b4edc2e…`, `candidates.jsonl` `f7f5035e…` — **local only, not yet on the relay** |
+| teacher corpus v1, 752 prompts / 540 accepted | `stage3_teacher_corpus_20260730/`, targets sha256 `18028f0c…` (superseded) |
 | rollout snapshot, 1,504 rollouts / 2.46M tokens | same prefix, sha256 `0e5b20dd…` |
 | all trained checkpoints | relay under `stage3/`, `tt2x2/`, `ttb/` |
 | Stage 2 mixture v1 | `data/stage2_v1` (regenerable from its manifest) |
@@ -185,10 +198,15 @@ HotpotQA n=70: accept 1.000, supervised mean **963** sd 850 (cv 0.88), 95% CI
 [764, 1162]. Packing discard **21.2%**; efficiency 0.958. Throughput 339 tok/s
 at 10 concurrent, **682 tok/s** at 70 concurrent.
 
-**Verdict: blocked on corpus size, not on correctness.** Equal four-way balance
-needs 1,474 prompts/type for 5.50M post-packing supervised tokens; `hotpot_qa`
-has 1,074. Max reachable **4.01M** (conservative 3.84M). Stopped per §11 rather
-than alter the balance, target or pool.
+**Verdict at the time: blocked on corpus size, not on correctness.** Equal
+four-way balance needs 1,474 prompts/type for 5.50M post-packing supervised
+tokens; `hotpot_qa` has 1,074. Max reachable **4.01M** (conservative 3.84M). The
+session stopped and escalated rather than quietly alter the balance, target or
+pool. **Resolved 2026-07-31/08-01:** the maintainer lifted equal balance in
+favour of a capability-gap mixture and admitted multi-turn data via turn
+expansion, which is what §10 generated. That weighting shaped **generation**;
+the first training experiment cuts the same corpus at a **uniform** mixture
+(§10, ladder re-cut).
 
 **Cost: $1.03**, all against the $50 generation cap. Of that, ~$0.65 was spent on
 two infrastructure failures before the successful run.
@@ -206,11 +224,11 @@ two infrastructure failures before the successful run.
 
 ---
 
-## 10. Difficulty-aware recovery corpus v2 (2026-08-01)
+## 10. Recovery corpus v2 (2026-08-01)
 
 **Objective:** build the maximal reusable teacher corpus for the data-scaling
-study, under an 8,192-token end-to-end session limit, with a difficulty-aware
-mixture rather than equal four-way balance.
+study, under an 8,192-token end-to-end session limit, with prompt counts per type
+set from the measured capability gaps rather than equal four-way balance.
 
 **Stack, pinned:** L40S 46,068 MiB, driver 580.159.03; vLLM **0.26.0** offline
 `LLM.generate` with per-example `SamplingParams`; torch 2.11.0+cu130,
@@ -220,21 +238,76 @@ template sha `3802169b…`, stop ids `[151643, 151645]` from
 per-example budget `8192 − rendered_prompt − 8`.
 
 **Result:** 11,574 examples → **11,174 accepted (96.5%)**, 66.08M generated
-tokens, 16.5 h, **$25.56**. Gate re-run on the full corpus: **PASSED**.
+tokens, 59,367 s (16.5 h) on one L40S, **$25.56**. Gate re-run on the full
+corpus: **PASSED** — every check for all six types, plus the pack-level checks
+(`blocks_match_audit`, `no_session_repacked`, `ladder_monotonic`,
+`loader_roundtrip`, `loader_no_truncation`).
 
-| type | examples | accepted | ex accept | tok/cand | supervised | sup/session |
-|---|---:|---:|---:|---:|---:|---:|
-| rag_evidence | 4,100 | 4,100 | 1.000 | 503 | 2,087,594 | 509 |
-| multihop_qa | 1,074 | 1,074 | 1.000 | 1,061 | 1,134,028 | 1,056 |
-| gsm8k | 1,700 | 1,698 | 0.999 | 1,190 | 1,998,183 | 1,177 |
-| openmath | 900 | 579 | 0.643 | 5,196 | 1,977,473 | 3,415 |
-| code | 1,200 | 1,123 | 0.936 | 4,609 | 4,773,086 | 4,250 |
-| tool_calling | 2,600 | 2,600 | 1.000 | 419 | 1,073,688 | 413 |
+| type | examples | accepted | ex accept | tok/cand | supervised | sup/session | correctness |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| rag_evidence | 4,100 | 4,100 | 1.000 | 503 | 2,087,594 | 509 | 0.978 |
+| multihop_qa | 1,074 | 1,074 | 1.000 | 1,061 | 1,134,028 | 1,056 | 0.861 |
+| gsm8k | 1,700 | 1,698 | 0.999 | 1,190 | 1,998,183 | 1,177 | 0.890 |
+| openmath | 900 | 579 | 0.643 | 5,196 | 1,977,473 | 3,415 | **0.380** |
+| code | 1,200 | 1,123 | 0.936 | 4,609 | 4,773,086 | 4,250 | n/a |
+| tool_calling | 2,600 | 2,600 | 1.000 | 419 | 1,073,688 | 413 | n/a |
 
-**Ladder:** 3,720 blocks, 11,174 sessions, **10,805,451 post-packing supervised
-tokens** — ~2× the 5.50M rung, leaving headroom for saturation rungs above it.
-Every rung lands within **0.2 pp** of the declared mixture; nesting is exact and
-monotonic.
+**Acceptance is hygiene, not correctness** — by design (2026-07-28 decision:
+Stage 3 trains the teacher's unfiltered distribution; correctness selection is
+Stage 4/5). Correctness is *computed and stored* per candidate: `code` and
+`tool_calling` have no mechanical key (`unverifiable_slice`), and **openmath's
+0.380 means roughly a third of accepted openmath targets teach a wrong final
+answer**. Rejections are dominated by the 8,192-token session limit:
+`length_limited` took 1,541/3,600 openmath candidates and 702/4,800 code ones.
+
+**Ladder:** one pack cut into six nested rungs — 3,720 blocks, 11,174 sessions,
+**10,805,451 post-packing supervised tokens** (corpus-wide packing efficiency
+0.4709, 1,861 system-prompt groups). ~2× the 5.50M rung, leaving headroom for
+saturation rungs above it. Every rung lands within **0.2 pp** of the declared
+mixture; nesting is exact and monotonic.
+
+| rung | actual supervised | blocks | sessions | real tokens | padding | terminal truncations |
+|---:|---:|---:|---:|---:|---:|---:|
+| 0.25M | 254,026 | 197 | 446 | 403,962 | 1,209,862 | 29 |
+| 0.46M | 464,029 | 351 | 800 | 729,900 | 2,145,492 | 53 |
+| 0.86M | 862,793 | 617 | 1,449 | 1,349,125 | 3,705,339 | 103 |
+| 1.60M | 1,600,687 | 1,064 | 2,587 | 2,442,920 | 6,273,368 | 189 |
+| 2.96M | 2,960,131 | 1,815 | 4,501 | 4,434,241 | 10,434,239 | 341 |
+| **5.50M** | 5,500,516 | 2,863 | 7,531 | 7,928,141 | 15,525,555 | 625 |
+
+**Ladder re-cut for Experiment 1 (2026-08-01, CPU, $0).** The maintainer
+corrected the experiment order: the first study asks only whether behavioural
+recovery scales with supervised-token count, so composition must be a constant,
+not a designed treatment. The mixture is a parameter of the *cut*, not of the
+generated data, so the pack was simply re-cut at **uniform 16.67% × 6**. All six
+rungs remain reachable:
+
+| rung | actual supervised | blocks | sessions | real tokens | terminal truncations |
+|---:|---:|---:|---:|---:|---:|
+| 0.25M | 252,985 | 216 | 479 | 449,307 | 33 |
+| 0.46M | 460,088 | 380 | 848 | 797,951 | 62 |
+| 0.86M | 864,750 | 682 | 1,502 | 1,472,149 | 109 |
+| 1.60M | 1,600,353 | 1,174 | 2,649 | 2,661,299 | 190 |
+| 2.96M | 2,960,507 | 1,944 | 4,524 | 4,730,748 | 352 |
+| **5.50M** | 5,501,372 | 2,941 | 7,350 | 8,256,511 | 635 |
+
+Uniform is realized within **0.3 pp** at the smallest rung and **0.03 pp** at the
+top; nesting is exact and monotonic. Two measured costs: **+6.2% training
+compute** (7,337 blocks/epoch vs 6,907, because `tool_calling` rises 15% → 16.7%
+and packs worst), and the **saturation ceiling falls to 6,076,356** supervised
+tokens, bound by `multihop_qa`'s 1,012,726 post-packing tokens — against 10.81M
+under the weighted cut. Artifacts: `artifacts/stage3/ladder_uniform_probe`
+(gitignored), `blocks.npz` sha256 `6f324cb0…`, `ladder.json` `d4941722…`,
+`audit.jsonl` `15f16b7b…`. The weighted cut is kept for Experiment 2.
+
+**Reproducibility gap (P4).** The corpus manifest's `code_state` block carries
+**no git commit**: the shipped bundle was unpacked outside a git checkout, so
+`git rev-parse` failed and the manifest stored `code_state_error` instead. The
+corpus is pinned by data hashes (`sessions.jsonl` `2b4edc2e…`,
+`candidates.jsonl` `f7f5035e…`, both re-verified locally 2026-08-01), teacher
+revision, tokenizer and chat-template hashes, and the full command — but its
+code state is pinned only by the bundle that was shipped. Fix the bundle to
+carry the commit before the next paid generation.
 
 **Sizing lesson.** Prompt counts were set from deliberately conservative
 supervised-token estimates, and those were most wrong on the most expensive
@@ -258,8 +331,13 @@ where a dense pack would need ~855 — **3.35× training compute**. Maintainer
 accepted the cost rather than relax the packing rule (2026-08-01) and raised the
 training budget to $60.
 
-**Cost, including waste:** generation **$26.69** total ($1.13 gate + $25.56
-corpus). Of the corpus run, **~$8.70 was idle pod time** — the job finished at
-06:27 and the pod was deleted at 15:14, because polling was driven by user
-prompts rather than a timer and `--terminate-after` was a 32 h backstop. Standing
-instruction since: tear down a finished pod without being asked.
+**Cost, including waste:** generation **$26.59** total ($1.03 gate + $25.56
+corpus), against the $50 generation cap. Of the corpus run, **~$8.70 was idle pod
+time** — the job finished at 06:27 and the pod was deleted at 15:14, because
+polling was driven by user prompts rather than a timer and `--terminate-after`
+was a 32 h backstop. Standing instruction since: tear down a finished pod without
+being asked.
+
+**Where the corpus lives:** the built corpus and ladder (≈950 MB) were pulled to
+the dev box and are **not yet on the HF relay** — see the durability warning in
+[`STATE.md`](STATE.md) §2. Persisting them is the next CPU-only action.

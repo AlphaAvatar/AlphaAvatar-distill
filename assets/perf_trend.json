@@ -12,14 +12,14 @@
       "tool_call",
       "math"
     ],
-    "eval": "scripts/eval_behavior.py --model <ckpt>",
-    "scorer": "src/aadistill/behavior.py::behavior_score",
+    "eval": "scripts/evaluation/eval_behavior.py --model <ckpt>",
+    "scorer": "src/aadistill/evaluation/behavior.py::behavior_score",
     "note": "an early-stage proxy for a student too damaged to attempt real suites; real-world test sets take over as the headline once it can",
     "log": "logs/EXPERIMENTS.md"
   },
   "guard": {
     "name": "held-out NLL (nats/token) on holdout_v1 (21,080 tokens, fineweb-edu)",
-    "eval": "scripts/eval_ppl.py --data data/warmup/holdout_v1.jsonl",
+    "eval": "scripts/evaluation/eval_ppl.py --data data/warmup/holdout_v1.jsonl",
     "note": "no longer the headline metric; a large drop is an abort signal",
     "references": [
       {

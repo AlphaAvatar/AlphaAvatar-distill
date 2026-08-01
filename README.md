@@ -29,7 +29,7 @@ The figure shows **one point per student at its current best**, against the teac
 
 Behavior score is the headline metric. **Held-out NLL is now a guard rail (±1% band), not the target** — teacher Qwen3-4B-Thinking-2507 2.6264 · random-init 0.6B baseline 12.1286.
 
-Behavior score is the headline metric. **Held-out NLL is now a guard rail (±1% band), not the target** — teacher Qwen3-4B-Thinking-2507 2.6264 · random-init 0.6B baseline 12.1286.
+> **Every behavior score in the table was measured under a 512-token generation cap, and that cap was hiding a failure.** Re-measured on 2026-07-30 with no cap at all (full 262,144-token context, per AGENTS.md P18), **every checkpoint in this line — including attempt 8 — degenerates into repetition**, with zero context-limit hits. No student here yet produces a complete answer in the teacher's thinking protocol, so read the table as progress on mechanical form, not as a working model. Stage 3 is open; the fix is being pursued as a data-scaling study ([record](./logs/EXPERIMENTS.md), [state](./logs/STATE.md)).
 
 Attempts 7–8 are a fixed-budget ablation of the *start point*, not of the training leg: runs 6–8 are the three branches that ran the identical 2700-step leg at the same seed, from lineages costing 4020, 3360 and 2700 total steps. Both landed inside the pre-registered 1% band, so the recovery recipe dropped its two warm-up legs and became a single stage — a third less compute per iteration.
 
@@ -46,7 +46,7 @@ The figure regenerates from [`assets/perf_trend.json`](./assets/perf_trend.json)
 | **0** — activation statistics | streaming float64 sufficient statistics from the teacher: per residual point count / sum / `XᵀX`, per-FFN-neuron `Σ\|a\|` and `Σa²`, token frequencies. Fixed 1.95 GB cache regardless of token count. | passed ([log](./logs/EXPERIMENTS.md)) |
 | **1** — projection + sandwich init | a complete, runnable Qwen3-format 0.6B student (596M params) plus a same-geometry random baseline, both with reproducibility manifests. | passed ([log](./logs/EXPERIMENTS.md)) |
 | **2** — offline warm-up mixture | eight training-use groups from permissive revision-pinned sources (instruction, RAG/evidence, multi-hop QA, tool calling, refusal/uncertainty, code/math, short realtime, long context) with global dedup, holdout exclusion, and train/val/calib splits. | v0 5.39M tokens ([log](./logs/EXPERIMENTS.md)), v1 22.13M ([log](./logs/EXPERIMENTS.md)) |
-| **3** — student recovery | one config-driven trainer for all recovery sub-stages: regex freeze policy, masked CE + on-the-fly full-vocab teacher KD, exact resume, per-run manifests, gate evals. | sub-stages 1–2 passed; not exitable yet — the gate is format competence (`format_ok` 0.2237). Next step is a pre-registered teacher-target 2×2 ([proposal](./logs/EXPERIMENTS.md)) |
+| **3** — student recovery | one config-driven trainer for all recovery sub-stages: regex freeze policy, masked CE + on-the-fly full-vocab teacher KD, exact resume, per-run manifests, gate evals. Plus the recovery corpus builder: teacher generation at the model's official preset, session rendering, system-grouped packing and a nested token ladder. | sub-stages 1–2 passed; **not exitable** — every checkpoint degenerates under uncapped generation. Recovery corpus v2 (11,174 teacher sessions, 66.08M generated tokens) and its six-rung token ladder are built and gate-passed; the data-scaling training matrix is costed and awaiting approval ([record](./logs/EXPERIMENTS.md), [plan](./logs/PROPOSAL.md)) |
 | **4–6** — online data, on-policy distillation, deployment validation | specified in [`AGENTS.md`](./AGENTS.md) | not started |
 
 Design choices worth knowing:
@@ -57,7 +57,9 @@ Design choices worth knowing:
 - **KD runs on the fly over the full vocabulary.** The teacher forwards the same packed blocks each step — no cached logits, so the corpus is not welded to one teacher revision and top-k approximation is unnecessary.
 - **Block order is a pure function of (seed, epoch).** An interrupted run resumes bitwise-exactly. The validation subset is seed-derived too, which is why runs meant to be compared must share a seed ([decision record](./logs/decisions.md)).
 - **Deployment numerics are a gate, not an afterthought.** Every recovery gate re-evaluates under INT8 weight fake-quantization at two scopes, so quality that quantization would destroy never counts as progress.
-- **Ablations are config diffs.** The two proposed start-point arms differ from the completed mixture-v1 run in exactly one meaningful field, verified by diff.
+- **Ablations are config diffs.** Compared arms differ from their reference run in exactly one meaningful field, verified by diff — the start-point ablation and the packing control were both run this way.
+- **Teacher sessions are rendered one at a time, then concatenated as tokens.** The official Thinking-2507 template renders `<think>…</think>` only for the assistant turn after the *last* user message, so applying it to a multi-session message list silently deletes every earlier reasoning trace. Measured directly, then designed around: each session renders alone, the system block is emitted once, and the token-level concatenation is asserted exact.
+- **The system prompt is a hard packing boundary, and it is expensive.** Tool schemas render into the system block, so tool sessions almost never share a packed block: at the top ladder rung they supply 15% of the supervision and consume 72% of the blocks (efficiency 0.092 against 0.985 elsewhere). The rule was kept and the padding paid for, rather than relaxed ([decision](./logs/decisions.md)).
 - **The core is kept family-agnostic, and is explicit about where it currently isn't.** Stage 0 hooks `mlp.down_proj` and fails loudly on anything else; Stage 1 assumes a dense SwiGLU MLP, GQA attention and one residual stream; the loader and behavior scorers are text-chat specific. Those are precisely the places an MoE, VLM or Omni port would touch — [inventoried](./logs/decisions.md) rather than abstracted away before a second family exists (P1/P2: no plugin system built on speculation).
 
 Every run records config hash, code state, dataset/tokenizer/teacher hashes, and gate-check results; heavy artifacts stay out of git. GPU sessions run under a durable OS-level orchestrator that trains, evaluates, uploads artifacts, verifies the upload against pod-side hashes, generates the write-up, and tears the pod down unattended.
@@ -68,7 +70,7 @@ Every run records config hash, code state, dataset/tokenizer/teacher hashes, and
 
 ```bash
 uv sync                    # CPU torch by default; see pyproject.toml for a CUDA index
-uv run pytest tests/ -q    # 220 CPU tests, no downloads
+uv run pytest tests/ -q    # 279 CPU tests, no downloads
 ```
 
 The implemented pipeline runs end to end on CPU (GPU optional):
@@ -104,6 +106,27 @@ uv run python scripts/evaluation/eval_behavior.py --unrestricted \
   --out artifacts/eval/step0_behavior.json
 ```
 
+The Stage 3 recovery corpus is generated by the teacher, so its first step needs
+a GPU; the pack, the token ladder and the gate are CPU work on its output.
+
+```bash
+# teacher generation (GPU, vLLM) — n=4 at the model's official preset,
+# 8192-token end-to-end sessions. --limits sets how many prompts per type.
+uv run python scripts/rollout/build_recovery_corpus.py --engine vllm --n 4 \
+  --limits gsm8k=1700,openmath=900,code=1200,tool_calling=2600,rag_evidence=4100,multihop_qa=1074 \
+  --out artifacts/stage3_corpus_v2
+
+# one pass of system-grouped packing, cut into six nested token rungs (CPU)
+uv run python scripts/data/build_token_ladder.py \
+  --sessions artifacts/stage3_corpus_v2/sessions.jsonl \
+  --mixture gsm8k=0.22,openmath=0.17,code=0.16,tool_calling=0.15,rag_evidence=0.20,multihop_qa=0.10 \
+  --out artifacts/stage3_ladder_v2
+
+# gate: template, seeds, budgets, masks, packing, nesting, loader round-trip
+uv run python scripts/data/validate_corpus_gate.py \
+  --corpus artifacts/stage3_corpus_v2 --packed artifacts/stage3_ladder_v2 --skip-logits
+```
+
 `configs/stage3/recovery.json` is the single recovery recipe; a run differs from
 it only in `data_dir` and `schedule.total_steps` — hardware never changes the
 experiment definition. Each step writes gitignored artifacts plus a full reproducibility manifest under `artifacts/` or `data/`.
@@ -136,6 +159,7 @@ AlphaAvatar-distill/
 │   ├── models/             #   teacher/student loading, INT8 fake-quant
 │   ├── init/               #   Stage 0/1: activation stats, projection, sandwich transplant
 │   ├── data/               #   mixture loader (schema, chat render, loss masks, packing),
+│   │                       #   session rendering + system-grouped packing (sessions.py),
 │   │                       #   diversity, per-slice correctness rules
 │   ├── training/           #   Stage 3 recovery trainer (CE+KD, freeze policy, resume)
 │   ├── rollout/            #   engine adapters, in-stack generation, hashed rollout
@@ -143,16 +167,17 @@ AlphaAvatar-distill/
 │   ├── evaluation/         #   eval_behavior_v0 scorers and the headline metric
 │   └── infrastructure/     #   env fingerprint, code-state hash, sha256 manifests
 ├── scripts/                # entry points, one per responsibility
-│   ├── data/               #   mixture + eval-set builders
+│   ├── data/               #   mixture + eval-set builders · build_token_ladder ·
+│   │                       #   validate_corpus_gate
 │   ├── training/           #   collect_stage0 · init_stage1 · train_stage3
 │   ├── evaluation/         #   eval_ppl · eval_behavior · unrestricted_pilot ·
 │   │                       #   degeneration · probe_think_close · plot_perf_trend
-│   ├── rollout/            #   teacher generation
+│   ├── rollout/            #   teacher generation · build_recovery_corpus
 │   └── pod/                #   GPU session scripts + durable orchestrator (run_env.sh)
 ├── configs/                # stage recipes: stage0/ · stage1/ · stage3/recovery.json
 ├── data/                   # corpus manifests (jsonl gitignored, rebuildable)
 │   └── eval_behavior_v0/   #   76-prompt behavior set + manifest (both committed)
-├── tests/                  # 220 CPU tests, mirroring the source areas
+├── tests/                  # 279 CPU tests, mirroring the source areas
 ├── logs/                   # project memory — read STATE.md first
 │   ├── STATE.md            #   canonical handoff: a snapshot, not an archive
 │   ├── EXPERIMENTS.md      #   the consolidated record: what ran, results, cost
@@ -222,7 +247,7 @@ _No records yet._
 | Liu et al., *Defeating the Training-Inference Mismatch via FP16*, 2025. [arXiv:2510.26788](https://arxiv.org/abs/2510.26788) | on-policy, rollout, quantization | queued | Argues the RL training/inference gap is mostly a *numerics* problem, and that BF16's 7-bit mantissa is the culprit: reverting the rollout+training path to FP16 removes the mismatch and stabilizes optimization. Directly in tension with this project's BF16 training policy ([decision 2026-07-13](./logs/decisions.md)) — recorded as a **revisit trigger for Stage 4/5**, not acted on, since changing precision now would break comparability with every logged run. |
 | vLLM team, *No More Train-Inference Mismatch: Bitwise Consistent On-Policy RL with vLLM and TorchTitan*, 2025. [blog.vllm.ai](https://blog.vllm.ai/2025/11/10/bitwise-consistent-train-inference.html) | on-policy, rollout, kernel | queued | Achieves bitwise-identical sampler and trainer numerics by matching kernels, reporting faster convergence and higher reward. The strongest form of the guarantee this project wants, at the cost of the heaviest stack; the reference point for what "consistent" can mean. |
 | Hugging Face, *Native-speed vLLM transformers modeling backend*, 2026. [huggingface.co/blog](https://huggingface.co/blog/native-speed-vllm-transformers-backend) | on-policy, rollout, runtime-deployment | queued | `vllm serve --model-impl transformers` runs vLLM's serving machinery over transformers modeling code, at or above native throughput on Qwen3 4B, so training and rollouts share one model implementation. The **upgrade path** for this project if in-stack generation stops scaling — noted with the caveat that the post makes *no* numerical-consistency claim, so equivalence would have to be measured, not assumed ([decision 2026-07-28](./logs/decisions.md)). |
-| Yu et al., *DAPO: An Open-Source LLM Reinforcement Learning System at Scale*, ByteDance Seed, 2025. [arXiv:2503.14476](https://arxiv.org/abs/2503.14476) | on-policy, rollout, offline-data | used | Rollouts are sampled **untruncated** because truncating the tail suppresses low-probability tokens at exactly the high-entropy positions where branching happens, biasing the sampled distribution away from the policy. Adopted for answer generation over the vendor's single-answer serving preset: temperature 1.0 / top_p 1.0 / top_k off, and **no greedy candidate** — with a verifier downstream this is rejection sampling, where diversity is what makes accept@n exceed accept@1 ([decision](./logs/decisions.md)). |
+| Yu et al., *DAPO: An Open-Source LLM Reinforcement Learning System at Scale*, ByteDance Seed, 2025. [arXiv:2503.14476](https://arxiv.org/abs/2503.14476) | on-policy, rollout, offline-data | partially-used | Rollouts are sampled **untruncated** because truncating the tail suppresses low-probability tokens at exactly the high-entropy positions where branching happens, biasing the sampled distribution away from the policy. The **no-greedy-candidate** half is standing — every candidate is sampled, with per-candidate seeds, because with a verifier downstream this is rejection sampling and diversity is what makes accept@n exceed accept@1. The **untruncated** half was reversed in practice: corpus v2 (2026-08-01) generates at the teacher's own published preset, `0.6 / 0.95 / top_k 20 / min_p 0`, so this paper's truncation-bias argument now applies to our corpus and is carried as a known deviation ([decision](./logs/decisions.md)). |
 | Yuan et al., *Scaling Relationship on Learning Mathematical Reasoning with Large Language Models*, 2023. [arXiv:2308.01825](https://arxiv.org/abs/2308.01825) | offline-data | queued | Rejection-sampling fine-tuning with k samples per prompt — the source of the top-n recipe the proposal now uses (sample n candidates, keep a verified-correct one) and of its selection-bias and diversity caveats (accepted answers skew toward items the teacher finds easy). |
 
 ---

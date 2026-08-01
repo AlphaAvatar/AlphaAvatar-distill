@@ -76,6 +76,40 @@ as they are.
    tmux/nohup. It drives everything else and deletes the pod only after upload
    verification passes.
 
+## Teacher-generation sessions (vLLM) — different image, different rules
+
+The scripts above are the **training** path. The 2026-07-30 gate and the
+2026-08-01 corpus build ran a generation job instead, under its own venv, and
+paid for four infrastructure lessons (`logs/EXPERIMENTS.md` §9):
+
+- **Create the pod with `--min-cuda-version 13.0`.** vLLM 0.26.0's wheel links
+  `libcudart.so.13`; a 570.x-driver host cannot run it, and
+  `--torch-backend=cu128` does not help because it changes torch, not the vLLM
+  extension.
+- **`ninja` must be on `PATH`.** FlashInfer JIT-builds the top-k sampling kernel
+  during warmup, and `top_k=20` is in the official preset — without ninja the
+  engine dies *after* loading weights.
+- **Put the venv on the container disk**, not `/workspace`: a torch install onto
+  the network mount took >9 minutes.
+- **`tar` needs `--no-same-owner`** on that mount or it exits non-zero on chown.
+
+The build itself is one long unattended command; drive it from the dev box under
+tmux/nohup with the same marker protocol (`MARKER:GEN_DONE`,
+`MARKER:LADDER_DONE`, `MARKER:GATE_EXIT:<rc>`, `MARKER:ALL_DONE`).
+
+## Cost discipline
+
+**Tear the pod down when the job finishes, not when `--terminate-after` fires.**
+The corpus build finished at 06:27 and the pod was deleted at 15:14, because
+polling was driven by user prompts and the backstop was 32 h — **~$8.70 of the
+$25.56 run was idle time**. Tie teardown to the completion marker; the
+`--terminate-after` timestamp is a backstop, never the plan.
+
+**Fix the bundle so `code_state` carries a git commit.** The corpus v2 manifest
+records `code_state_error` instead of a commit, because the bundle was unpacked
+outside a git checkout (P4 gap, `logs/EXPERIMENTS.md` §10). Ship the commit hash
+with the bundle, or unpack into a real checkout.
+
 ## Before each session
 
 - **Regenerate the git bundle** at the current commit and re-upload it, then
