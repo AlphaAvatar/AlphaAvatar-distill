@@ -84,6 +84,21 @@ def _strip_prefix(out_ids: list[int], prompt_ids: list[int]) -> list[int]:
     return out_ids
 
 
+def _caps(max_new_tokens: int | list[int], n: int) -> list[int]:
+    """Normalize a scalar or per-prompt completion budget to a list of length `n`.
+
+    `Engine.generate` already normalizes, but the adapters accept either form so
+    that calling `_raw_generate` directly — which the engine tests and any future
+    debugging path do — cannot silently iterate an int or apply one prompt's
+    budget to all of them.
+    """
+    caps = ([int(max_new_tokens)] * n if isinstance(max_new_tokens, int)
+            else [int(v) for v in max_new_tokens])
+    if len(caps) != n:
+        raise ValueError(f"{len(caps)} completion budgets for {n} prompts")
+    return caps
+
+
 def _finalize(
     new_ids: list[int],
     finish_reason: str,
@@ -147,12 +162,13 @@ class Engine:
         self,
         prompts: list[list[int]],
         *,
-        max_new_tokens: int,
+        max_new_tokens: int | list[int],
         stop_ids: set[int],
         greedy: bool = True,
         temperature: float = 1.0,
         top_p: float = 1.0,
         top_k: int = 0,
+        min_p: float = 0.0,
         seed: int | None = None,
         logprobs: bool = False,
     ) -> list[dict]:
@@ -161,7 +177,14 @@ class Engine:
         `top_k=50` unless told otherwise, while vLLM and SGLang disable it. Left
         implicit, the arms would be sampling from different distributions and
         the cross-engine comparison would be measuring that instead of the
-        engines.
+        engines. `min_p` is threaded for the same reason and defaults to 0.0,
+        which disables it in every backend.
+
+        `max_new_tokens` may be a **per-prompt list**. The 8,192-token
+        end-to-end session limit makes each prompt's completion allowance
+        `8192 - rendered_prompt - allowance`, which differs per prompt, and a
+        flat cap would either overflow the limit for long prompts or waste the
+        budget for short ones.
 
         `logprobs=True` adds a `logprobs` list to each completion, aligned 1:1
         with `tokens`, holding the **rollout policy's** log-probability of each
@@ -173,10 +196,22 @@ class Engine:
         Positions the engine did not report a probability for are `None`. They
         are not fabricated and callers must mask them.
         """
+        caps = ([int(max_new_tokens)] * len(prompts)
+                if isinstance(max_new_tokens, int)
+                else [int(v) for v in max_new_tokens])
+        if len(caps) != len(prompts):
+            raise ValueError(
+                f"{self.name}: {len(caps)} caps for {len(prompts)} prompts")
+        if any(c <= 0 for c in caps):
+            raise ValueError(
+                f"{self.name}: non-positive completion budget {min(caps)} — the "
+                "prompt leaves no room for an answer and must be skipped, not "
+                "generated")
+
         raw = self._raw_generate(
-            prompts, max_new_tokens=max_new_tokens, stop_ids=stop_ids,
+            prompts, max_new_tokens=caps, stop_ids=stop_ids,
             greedy=greedy, temperature=temperature, top_p=top_p, top_k=top_k,
-            seed=seed, logprobs=logprobs,
+            min_p=min_p, seed=seed, logprobs=logprobs,
         )
         if len(raw) != len(prompts):
             raise RuntimeError(
@@ -184,7 +219,7 @@ class Engine:
                 "an engine that reorders or drops rows cannot build a corpus")
 
         out = []
-        for item, prompt in zip(raw, prompts):
+        for item, prompt, cap in zip(raw, prompts, caps):
             ids, reason = item[0], item[1]
             lps = item[2] if len(item) > 2 else None
             if logprobs and lps is None:
@@ -197,8 +232,16 @@ class Engine:
                 # Whatever the prefix strip removed from the tokens must come off
                 # the log-probs too, or the two lists desynchronise silently.
                 lps = list(lps)[len(ids) - len(kept):]
-            out.append(_finalize(kept, reason, stop_ids, max_new_tokens,
-                                 lps if logprobs else None))
+            record = _finalize(kept, reason, stop_ids, cap,
+                               lps if logprobs else None)
+            # A completion may terminate naturally yet still exceed the budget
+            # this prompt was allowed (only reachable on backends that cannot
+            # enforce a per-prompt cap, e.g. HF's batch-wide `max_new_tokens`).
+            # Such a session would not fit the 8,192-token limit, so it is
+            # length-limited even though the engine reported a clean stop.
+            record["over_budget"] = record["n_new"] > cap
+            record["cap"] = cap
+            out.append(record)
         return out
 
     def _raw_generate(self, prompts, **kw) -> list[tuple]:
@@ -228,7 +271,8 @@ class HFEngine(Engine):
 
     @torch.no_grad()
     def _raw_generate(self, prompts, *, max_new_tokens, stop_ids, greedy,
-                      temperature, top_p, top_k, seed, logprobs=False):
+                      temperature, top_p, top_k, min_p=0.0, seed, logprobs=False):
+        max_new_tokens = _caps(max_new_tokens, len(prompts))
         out: list[tuple | None] = [None] * len(prompts)
         # Length-sorted batches so one long prompt does not pad out the rest;
         # the original index rides along to restore input order.
@@ -240,8 +284,12 @@ class HFEngine(Engine):
             ids, mask = ids.to(self.device), mask.to(self.device)
             width = ids.shape[1]
 
+            # `generate` takes one cap per call, so the batch runs to the
+            # largest budget in it and `Engine.generate` flags any completion
+            # that overran its own. This backend is the reference/debug path;
+            # the production engine enforces the cap per prompt exactly.
             kwargs = {
-                "max_new_tokens": max_new_tokens,
+                "max_new_tokens": max(max_new_tokens[i] for i in idxs),
                 "pad_token_id": self.pad_token_id,
                 "eos_token_id": sorted(stop_ids),
                 # None, not 0: transformers reads 0 as "no tokens allowed".
@@ -251,6 +299,8 @@ class HFEngine(Engine):
                 kwargs.update(do_sample=False, temperature=None, top_p=None)
             else:
                 kwargs.update(do_sample=True, temperature=temperature, top_p=top_p)
+                if min_p:
+                    kwargs["min_p"] = min_p
                 if seed is not None:
                     torch.manual_seed(seed + start)
 
@@ -308,8 +358,13 @@ class VLLMEngine(Engine):
     def __init__(self, model_path: str, *, dtype: str = "bfloat16",
                  revision: str | None = None, max_model_len: int | None = None,
                  gpu_memory_utilization: float = 0.90):
+        import vllm
         from vllm import LLM
 
+        # Part of the corpus's identity: a corpus built by a different engine
+        # build is not interchangeable with this one even at identical decode
+        # settings (P4/P9), so the version travels into the manifest.
+        self.version = vllm.__version__
         self.llm = LLM(
             model=model_path, revision=revision, dtype=dtype,
             max_model_len=max_model_len,
@@ -318,7 +373,7 @@ class VLLMEngine(Engine):
         )
 
     def _raw_generate(self, prompts, *, max_new_tokens, stop_ids, greedy,
-                      temperature, top_p, top_k, seed, logprobs=False):
+                      temperature, top_p, top_k, min_p=0.0, seed, logprobs=False):
         if logprobs:
             raise NotImplementedError(
                 "in-process vLLM logprobs are not wired; use VLLMServerEngine, "
@@ -326,14 +381,25 @@ class VLLMEngine(Engine):
         from vllm import SamplingParams
         from vllm.inputs import TokensPrompt
 
-        params = SamplingParams(
-            temperature=0.0 if greedy else temperature,
-            top_p=1.0 if greedy else top_p,
-            top_k=-1 if (greedy or not top_k) else top_k,  # -1 disables in vLLM
-            max_tokens=max_new_tokens,
-            stop_token_ids=sorted(stop_ids),
-            seed=seed if not greedy else None,
-        )
+        max_new_tokens = _caps(max_new_tokens, len(prompts))
+
+        # One SamplingParams per prompt so each carries its own completion
+        # budget. vLLM's continuous batching handles heterogeneous `max_tokens`
+        # natively, so this costs no throughput and keeps every session inside
+        # the 8,192-token limit by construction rather than by post-hoc
+        # rejection.
+        params = [
+            SamplingParams(
+                temperature=0.0 if greedy else temperature,
+                top_p=1.0 if greedy else top_p,
+                top_k=-1 if (greedy or not top_k) else top_k,  # -1 disables in vLLM
+                min_p=0.0 if greedy else min_p,
+                max_tokens=cap,
+                stop_token_ids=sorted(stop_ids),
+                seed=seed if not greedy else None,
+            )
+            for cap in max_new_tokens
+        ]
         outputs = self.llm.generate(
             [TokensPrompt(prompt_token_ids=p) for p in prompts],
             params, use_tqdm=False,
@@ -380,18 +446,23 @@ class SGLangEngine(Engine):
         self.deterministic = deterministic
 
     def _raw_generate(self, prompts, *, max_new_tokens, stop_ids, greedy,
-                      temperature, top_p, top_k, seed, logprobs=False):
+                      temperature, top_p, top_k, min_p=0.0, seed, logprobs=False):
         if logprobs:
             raise NotImplementedError(
                 "sglang logprobs are not wired yet; it is an untested candidate "
                 "(proposal 2026-07-30)")
-        params = {
-            "temperature": 0.0 if greedy else temperature,
-            "top_p": 1.0 if greedy else top_p,
-            "top_k": -1 if (greedy or not top_k) else top_k,  # -1 disables in SGLang
-            "max_new_tokens": max_new_tokens,
-            "stop_token_ids": sorted(stop_ids),
-        }
+        max_new_tokens = _caps(max_new_tokens, len(prompts))
+        params = [
+            {
+                "temperature": 0.0 if greedy else temperature,
+                "top_p": 1.0 if greedy else top_p,
+                "top_k": -1 if (greedy or not top_k) else top_k,  # -1 disables in SGLang
+                "min_p": 0.0 if greedy else min_p,
+                "max_new_tokens": cap,
+                "stop_token_ids": sorted(stop_ids),
+            }
+            for cap in max_new_tokens
+        ]
         outputs = self.engine.generate(input_ids=prompts, sampling_params=params)
         rows = []
         for out, prompt in zip(outputs, prompts):
@@ -479,14 +550,27 @@ class VLLMServerEngine(Engine):
             return json.loads(response.read())
 
     def _raw_generate(self, prompts, *, max_new_tokens, stop_ids, greedy,
-                      temperature, top_p, top_k, seed, logprobs=False):
+                      temperature, top_p, top_k, min_p=0.0, seed, logprobs=False):
+        # One `/v1/completions` request carries a single `max_tokens` for every
+        # prompt in it. Silently applying one prompt's budget to another would
+        # either overflow the 8,192-token session limit or truncate a completion
+        # that had room, so heterogeneous budgets are refused rather than
+        # approximated — use the offline `vllm` engine, which sets the cap per
+        # prompt exactly.
+        max_new_tokens = _caps(max_new_tokens, len(prompts))
+        if len(set(max_new_tokens)) > 1:
+            raise NotImplementedError(
+                f"{self.name}: per-prompt completion budgets are not supported "
+                f"over /v1/completions ({len(set(max_new_tokens))} distinct caps "
+                "in one batch); use --engine vllm for the corpus build")
         payload = {
             "model": self.model,
             "prompt": [list(p) for p in prompts],  # token ids, not text
-            "max_tokens": max_new_tokens,
+            "max_tokens": max_new_tokens[0],
             "temperature": 0.0 if greedy else temperature,
             "top_p": 1.0 if greedy else top_p,
             "top_k": -1 if (greedy or not top_k) else top_k,
+            "min_p": 0.0 if greedy else min_p,
             "stop_token_ids": sorted(stop_ids),
             "return_token_ids": True,
         }
@@ -574,14 +658,19 @@ class SGLangServerEngine(Engine):
             return json.loads(response.read())
 
     def _raw_generate(self, prompts, *, max_new_tokens, stop_ids, greedy,
-                      temperature, top_p, top_k, seed, logprobs=False):
-        params = {
-            "temperature": 0.0 if greedy else temperature,
-            "top_p": 1.0 if greedy else top_p,
-            "top_k": -1 if (greedy or not top_k) else top_k,
-            "max_new_tokens": max_new_tokens,
-            "stop_token_ids": sorted(stop_ids),
-        }
+                      temperature, top_p, top_k, min_p=0.0, seed, logprobs=False):
+        max_new_tokens = _caps(max_new_tokens, len(prompts))
+        params = [
+            {
+                "temperature": 0.0 if greedy else temperature,
+                "top_p": 1.0 if greedy else top_p,
+                "top_k": -1 if (greedy or not top_k) else top_k,
+                "min_p": 0.0 if greedy else min_p,
+                "max_new_tokens": cap,
+                "stop_token_ids": sorted(stop_ids),
+            }
+            for cap in max_new_tokens
+        ]
         payload = {"input_ids": [list(p) for p in prompts], "sampling_params": params}
         if logprobs:
             payload["return_logprob"] = True

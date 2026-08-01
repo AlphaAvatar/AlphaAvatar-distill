@@ -211,6 +211,63 @@ def render_chat(tokenizer, sample: dict) -> str:
     )
 
 
+def _mask_from_spans(tokenizer, text: str, keep_last_only: bool):
+    """Tokenize `text` and mark the chosen assistant span(s) by character offset."""
+    if not tokenizer.is_fast:
+        raise ValueError("assistant masking requires a fast tokenizer (offset mapping)")
+    spans = [
+        (m.start() + len(_ASSISTANT_HEADER), m.end())
+        for m in _ASSISTANT_SEG.finditer(text)
+    ]
+    if not spans:
+        raise ValueError("no assistant segment in render")
+    if keep_last_only:
+        spans = spans[-1:]
+    enc = tokenizer(text, add_special_tokens=False, return_offsets_mapping=True)
+    ids = enc.input_ids
+    mask = [False] * len(ids)
+    span_iter = iter(spans)
+    span = next(span_iter)
+    for i, (a, b) in enumerate(enc.offset_mapping):
+        while span is not None and a >= span[1]:
+            span = next(span_iter, None)
+        if span is None:
+            break
+        if a < span[1] and b > span[0]:
+            mask[i] = True
+    return ids, mask
+
+
+def assistant_loss_mask(tokenizer, text: str) -> tuple[list[int], list[bool]]:
+    """Supervise **every** assistant segment in `text`.
+
+    The project's original definition of "what is supervised": every token of
+    each span running from just after ``<|im_start|>assistant\\n`` through the
+    closing ``<|im_end|>``, located by offset mapping so it is robust to how the
+    tokenizer happens to split the surrounding template text.
+
+    This is the rule `encode_sample` uses, and it is the data path of the logged
+    Stage 2/3 runs — it must not change.
+    """
+    return _mask_from_spans(tokenizer, text, keep_last_only=False)
+
+
+def final_assistant_loss_mask(tokenizer, text: str) -> tuple[list[int], list[bool]]:
+    """Supervise **only the last** assistant segment; everything else is context.
+
+    Required by turn expansion. A multi-turn source session is expanded into one
+    generation example per eligible user turn, and in each example only the newly
+    generated teacher completion is a trainable target — the preceding assistant
+    turns are the *original public* responses, kept as conversational context.
+    Supervising them would train the student on public targets and silently mix
+    two target distributions in one block (P17).
+
+    For a single-turn session there is exactly one assistant segment, so this
+    agrees with `assistant_loss_mask` and the two rules coincide.
+    """
+    return _mask_from_spans(tokenizer, text, keep_last_only=True)
+
+
 def encode_sample(
     tokenizer, sample: dict, max_seq_len: int | None = None
 ) -> tuple[list[int], list[int]]:
@@ -228,25 +285,11 @@ def encode_sample(
         ids.append(tokenizer.eos_token_id)
         mask = [1] * len(ids)
     else:
-        text = render_chat(tokenizer, sample)
-        spans = [
-            (m.start() + len(_ASSISTANT_HEADER), m.end())
-            for m in _ASSISTANT_SEG.finditer(text)
-        ]
-        if not spans:
-            raise ValueError(f"sample {sample['id']}: no assistant segment in render")
-        enc = tokenizer(text, add_special_tokens=False, return_offsets_mapping=True)
-        ids = enc.input_ids
-        mask = [0] * len(ids)
-        span_iter = iter(spans)
-        span = next(span_iter)
-        for i, (a, b) in enumerate(enc.offset_mapping):
-            while span is not None and a >= span[1]:
-                span = next(span_iter, None)
-            if span is None:
-                break
-            if a < span[1] and b > span[0]:
-                mask[i] = 1
+        try:
+            ids, flags = assistant_loss_mask(tokenizer, render_chat(tokenizer, sample))
+        except ValueError as e:
+            raise ValueError(f"sample {sample['id']}: {e}") from e
+        mask = [int(v) for v in flags]
 
     if max_seq_len is not None:
         ids, mask = ids[:max_seq_len], mask[:max_seq_len]

@@ -154,3 +154,112 @@ P18.
 | rollout snapshot, 1,504 rollouts / 2.46M tokens | same prefix, sha256 `0e5b20dd…` |
 | all trained checkpoints | relay under `stage3/`, `tt2x2/`, `ttb/` |
 | Stage 2 mixture v1 | `data/stage2_v1` (regenerable from its manifest) |
+
+---
+
+## 9. Data-scaling experiment — §6 validation gate (2026-07-30)
+
+**Objective:** gate into bulk teacher generation for the recovery-data scaling
+study. 10 prompts × 4 types × `n=4`, full production path, plus a HotpotQA-only
+follow-up at n=70.
+
+**Hardware/stack, pinned:** RunPod L40S 46,068 MiB, driver **580.159.03**;
+vLLM **0.26.0** (offline `LLM.generate`, per-prompt `SamplingParams`), torch
+2.11.0+cu130, transformers 5.14.1, Python 3.12, isolated venv.
+Teacher `Qwen/Qwen3-4B-Thinking-2507@768f209d`, chat template sha `3802169b…`,
+stop ids `[151643, 151645]` from `generation_config.json`.
+Preset `temperature 0.6 / top_p 0.95 / top_k 20 / min_p 0`, session limit 8,192
+end-to-end, per-prompt completion budget `8192 − rendered_prompt − 8`.
+
+**Result: gate PASSED** — every §9 check across all four types (generation,
+packing, loader, prefix equivalence).
+
+| type | prompt accept | cand accept | pre-pack sup | post-pack sup | reject |
+|---|---:|---:|---:|---:|---|
+| rag_evidence | 1.000 | 1.000 | 368 | 368 | — |
+| multihop_qa | 1.000 | 1.000 | 998 | 740 | — |
+| gsm8k | 1.000 | 1.000 | 1,037 | 1,037 | — |
+| openmath | 0.700 | 0.600 | 3,382 | 2,267 | length_limited 16/40 |
+
+HotpotQA n=70: accept 1.000, supervised mean **963** sd 850 (cv 0.88), 95% CI
+[764, 1162]. Packing discard **21.2%**; efficiency 0.958. Throughput 339 tok/s
+at 10 concurrent, **682 tok/s** at 70 concurrent.
+
+**Verdict: blocked on corpus size, not on correctness.** Equal four-way balance
+needs 1,474 prompts/type for 5.50M post-packing supervised tokens; `hotpot_qa`
+has 1,074. Max reachable **4.01M** (conservative 3.84M). Stopped per §11 rather
+than alter the balance, target or pool.
+
+**Cost: $1.03**, all against the $50 generation cap. Of that, ~$0.65 was spent on
+two infrastructure failures before the successful run.
+
+**Infrastructure findings (reusable):**
+* vLLM 0.26.0's wheel links `libcudart.so.13`; a 570.x driver host cannot run it
+  and `--torch-backend=cu128` does not help, because it changes torch, not the
+  vLLM extension. Create the pod with `--min-cuda-version 13.0`.
+* FlashInfer JIT-builds the top-k sampling kernel during vLLM warmup, so `ninja`
+  must be on `PATH` — `top_k=20` is in the official preset, so without it the
+  engine dies *after* loading weights.
+* Put the venv on the container disk: a torch install onto the network-mounted
+  `/workspace` took >9 minutes.
+* `tar` needs `--no-same-owner` on that mount, or it exits non-zero on chown.
+
+---
+
+## 10. Difficulty-aware recovery corpus v2 (2026-08-01)
+
+**Objective:** build the maximal reusable teacher corpus for the data-scaling
+study, under an 8,192-token end-to-end session limit, with a difficulty-aware
+mixture rather than equal four-way balance.
+
+**Stack, pinned:** L40S 46,068 MiB, driver 580.159.03; vLLM **0.26.0** offline
+`LLM.generate` with per-example `SamplingParams`; torch 2.11.0+cu130,
+transformers 5.14.1. Teacher `Qwen/Qwen3-4B-Thinking-2507@768f209d`, chat
+template sha `3802169b…`, stop ids `[151643, 151645]` from
+`generation_config.json`. Preset `0.6 / 0.95 / top_k 20 / min_p 0`, `n=4`,
+per-example budget `8192 − rendered_prompt − 8`.
+
+**Result:** 11,574 examples → **11,174 accepted (96.5%)**, 66.08M generated
+tokens, 16.5 h, **$25.56**. Gate re-run on the full corpus: **PASSED**.
+
+| type | examples | accepted | ex accept | tok/cand | supervised | sup/session |
+|---|---:|---:|---:|---:|---:|---:|
+| rag_evidence | 4,100 | 4,100 | 1.000 | 503 | 2,087,594 | 509 |
+| multihop_qa | 1,074 | 1,074 | 1.000 | 1,061 | 1,134,028 | 1,056 |
+| gsm8k | 1,700 | 1,698 | 0.999 | 1,190 | 1,998,183 | 1,177 |
+| openmath | 900 | 579 | 0.643 | 5,196 | 1,977,473 | 3,415 |
+| code | 1,200 | 1,123 | 0.936 | 4,609 | 4,773,086 | 4,250 |
+| tool_calling | 2,600 | 2,600 | 1.000 | 419 | 1,073,688 | 413 |
+
+**Ladder:** 3,720 blocks, 11,174 sessions, **10,805,451 post-packing supervised
+tokens** — ~2× the 5.50M rung, leaving headroom for saturation rungs above it.
+Every rung lands within **0.2 pp** of the declared mixture; nesting is exact and
+monotonic.
+
+**Sizing lesson.** Prompt counts were set from deliberately conservative
+supervised-token estimates, and those were most wrong on the most expensive
+types: `code` came in at 4,609 tok/candidate against a 1,300 estimate (3.5×),
+while `tool_calling` came in at 419 against 900. Net effect was over-provisioning
+of `code`/`openmath` and a corpus ~2× the target — useful as saturation headroom,
+but ~$4 of it bought tokens the 5.50M rung cannot consume.
+
+**Packing efficiency 0.34 at the 5.50M rung**, and this is the dominant cost of
+the whole study:
+
+| at the 5.50M rung | blocks | efficiency | sessions/block | supervised/block |
+|---|---:|---:|---:|---:|
+| tool blocks | 2,074 | 0.092 | 1.11 | 398 |
+| non-tool blocks | 789 | 0.985 | 6.62 | 5,925 |
+
+`tool_calling` supplies 15% of the supervision and consumes **72% of the
+blocks**, because each conversation's tool schema renders into the system block
+and the system prompt is a hard packing boundary. The rung needs 2,863 blocks
+where a dense pack would need ~855 — **3.35× training compute**. Maintainer
+accepted the cost rather than relax the packing rule (2026-08-01) and raised the
+training budget to $60.
+
+**Cost, including waste:** generation **$26.69** total ($1.13 gate + $25.56
+corpus). Of the corpus run, **~$8.70 was idle pod time** — the job finished at
+06:27 and the pod was deleted at 15:14, because polling was driven by user
+prompts rather than a timer and `--terminate-after` was a 32 h backstop. Standing
+instruction since: tear down a finished pod without being asked.

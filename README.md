@@ -4,7 +4,7 @@
 
 AlphaAvatar-distill is an agent-guided model compression and distillation framework for turning large teacher models into small, real-time, edge-deployable students.
 
-The goal is to make distillation **reproducible, automated, and useful for realtime assistant runtimes** — RAG, tool use, reasoning, self-correction, quantized inference, low-latency deployment.
+The goal is to make distillation reproducible and automated, producing efficient student models with long-context and multi-turn comprehension, strong reasoning and self-correction, and reliable accuracy across sustained interactions and long-running agentic workloads such as AlphaAvatar—including RAG, tool use, quantized inference, and low-latency deployment.
 
 The methods are meant to be **model-family-agnostic**: the same activation-statistics initialization, recovery training and deployment-numerics gates should apply to dense LLMs, MoE, VLM and Omni-models alike. That is a design constraint on the algorithm core, not a claim — the run below is a dense text **baseline**, and no MoE, vision or audio model has been attempted or validated ([scope decision](./logs/decisions.md)).
 
