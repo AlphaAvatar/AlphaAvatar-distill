@@ -372,8 +372,78 @@ generation smoke test per arm. The **P18 uncapped behavioural readouts** —
 `natural_termination_rate`, `degeneration_rate`, length p50 — are *not* run
 inline: `eval_behavior.py --unrestricted` has no degeneration stop, so a
 checkpoint in a repetition loop generates until the 262,144-token context is
-exhausted and one prompt can outlast a training arm. They run afterwards from
-the uploaded checkpoints on vLLM with the tested semantic degeneration stop,
-costed separately. **Until then this experiment has checkpoints, not a curve.**
+exhausted and one prompt can outlast a training arm.
 
-**Result:** pending. **Verdict:** pending.
+**Maintainer direction 2026-08-02:** a rising holdout NLL may mean the student
+is shedding *knowledge* rather than *reasoning*, and NLL cannot separate those —
+so behavioural and reasoning benchmarks must be run before the checkpoints are
+released, and they must use **vLLM with no fixed 512-token truncation**, not the
+capped path.
+
+Both training pods run driver **570.124.06**, which cannot host vLLM 0.26 (its
+wheel links `libcudart.so.13`; `--torch-backend=cu128` does not help because it
+changes torch, not the extension). They were created without
+`--min-cuda-version 13.0` — correct for training, fatal for engine work. Rather
+than downgrade the engine to fit the host, the maintainer directed releasing the
+training pods and provisioning a dedicated evaluation pod. The uncapped battery
+therefore runs there, against checkpoints pulled from the relay.
+
+**Infrastructure lessons from the teardown, all self-inflicted and all cheap to
+avoid next time:**
+* `pgrep -f <pattern>` **matches the command carrying the pattern**. A watcher
+  waiting on `pgrep -f train_stage3` never fires, and `pkill -f <script>` kills
+  the shell running the pkill. Bracket the first character (`[t]rain_stage3`) or
+  match on recorded PIDs.
+* `sed 's|.*/||'` on a `sha256sum` line is greedy from the line start and eats
+  the hash along with the path. Rewrite only the path column: `s|  .*/|  |`.
+* `scp 'host:dir/*/train_log.jsonl' dest/` collapses every arm onto one basename
+  and silently keeps the last. Tar the tree instead. This cost one arm's
+  `train_log.jsonl`; its eval lines were recovered from the console log, which
+  survived only because console filenames are arm-unique.
+
+**Result: all 24 arms trained.** Both pods released 2026-08-02 (pca 08:33, rand
+08:49). Training spend **$47.6**, inside the $59.40 cap. Per-arm results in
+`artifacts/stage3/e1_results.json`.
+
+| supervised tokens | PCA sa | PCA sb | rand sa | rand sb |
+|---:|---:|---:|---:|---:|
+| step 0 | 10.9199 | 10.9199 | 12.1615 | 12.1615 |
+| 0.25M | 2.0938 | 2.1427 | 8.8291 | 8.8234 |
+| 0.46M | 1.7477 | 1.7611 | 8.3346 | 8.3575 |
+| 0.86M | 1.5101 | 1.5038 | 7.9403 | 7.9542 |
+| 1.60M | 1.2952 | 1.3015 | 7.4068 | 7.4025 |
+| 2.96M | 1.1468 | 1.1486 | 6.6812 | 6.6643 |
+| **5.50M** | **1.0032** | **1.0052** | **5.9807** | **5.9789** |
+
+(teacher-native held-out CE, 16 pack-tail blocks disjoint from every rung)
+
+**Three findings, all at two seeds:**
+
+1. **Seed noise is negligible on this metric.** The largest seed gap across all
+   12 pairs is **0.049** (0.25M PCA) and most are under 0.02 — one to two orders
+   of magnitude below the per-rung effect of adding data. Teacher-native val CE
+   is a usable instrument here, unlike `behavior_score_v0`, whose 0.129 noise
+   floor swamped its own effects.
+2. **Neither init has saturated at 5.50M.** PCA's per-rung gain decays
+   (0.35 → 0.24 → 0.21 → 0.15 → 0.14) but is still clearly non-zero at the top
+   rung; random's gain *grows* (0.49 → 0.39 → 0.53 → 0.73 → 0.70). The curves
+   approach the ceiling from opposite directions. **The question "how much data
+   is enough" is therefore not yet answered** — and the uniform cut caps this
+   corpus at ~6.08M, so answering it needs more generation, not more training.
+3. **Initialization dominates data over this range.** At the top rung PCA is at
+   1.0032 against random's 5.9807. Extrapolating random's ~0.7/rung, it would
+   need many further doublings to reach where PCA already sits at 0.25M. Stage
+   1's structural init is not a head start that data erases.
+
+**Holdout NLL moves opposite to teacher-native CE on the PCA arms** — 6.72 →
+6.16 → 8.88 → 9.71 → 10.40 → 10.79 while CE falls monotonically — but drifts
+*down* on the random arms (10.92 → 10.24). The reading that fits both: the PCA
+student has general LM ability to trade away as it specialises onto teacher
+reasoning traces; the random student has none to lose. **Whether that trade is
+knowledge or reasoning is not answerable from NLL**, which is why the maintainer
+directed a full behavioural evaluation (below) before any conclusion.
+
+**Verdict: the scaling relationship is measured and clean, but the saturation
+point is outside the corpus.** Recovery-data sizing cannot be closed until
+either the corpus grows past ~6M uniform tokens or the mixture is relaxed
+(Experiment 2).

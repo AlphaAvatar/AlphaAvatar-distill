@@ -1,13 +1,11 @@
-# Current project state
+**Updated:** 2026-08-02 09:05 UTC · branch `main` · **no pods running, nothing
+billing** — both Experiment 1 training pods released after hash-verified
+teardown. Spend to date **$82.1** ($34.52 before this session + $47.6 training).
 
-**Updated:** 2026-08-01 08:45 UTC · branch `main` · **TWO L40S PODS ARE RUNNING
-AND BILLING** — Experiment 1 is under way (§12). Spend before this session
-**$34.52**; this session is capped at **$59.40** by pod deadlines.
-
-**Active work:** the recovery-data scaling study. The teacher corpus and the
-nested token ladder are **built and gate-passed**; the training matrix is
-specified and costed but **not started** — it needs the maintainer's go-ahead
-against the raised $60 training budget.
+**Active work:** the recovery-data scaling study. Corpus, ladder and the
+**24-arm training matrix are all complete** (§12). What remains is evaluation:
+the checkpoints have holdout NLL but no behavioural or reasoning readout, and
+that is what decides how to read the result.
 
 **Experiment order (maintainer, 2026-08-01):** (1) does behavioural recovery
 scale with teacher-generated supervised tokens — *token count is the only
@@ -50,13 +48,17 @@ convergence- and measurement-limited (`EXPERIMENTS.md` §5).
 | best recovery checkpoint (reference only) | `s2v1_from_init@2700`, holdout 3.8285 |
 | relay | `AlphaAvatar/aadistill-artifacts` (private) |
 
-> **Durability risk — act before the next paid step.** Corpus v2 and its ladder
-> (≈950 MB) exist **only** in the dev-box session scratchpad
-> `/tmp/claude-1000/…/2e9e81e1-…/scratchpad/bulk/`. They are **not** on the HF
-> relay and not on durable disk. Both file hashes were re-verified against the
-> manifest on 2026-08-01 and match. Losing `/tmp` costs $25.56 and 16.5 h of
-> teacher generation. Upload to the relay under `stage3_recovery_corpus_v2/`
-> before the training matrix runs.
+> **Resolved 2026-08-01:** corpus v2 and both ladder cuts are on the relay under
+> `stage3_recovery_corpus_v2/`, 9/9 files hash-verified against the local copies.
+>
+> **Open storage constraint.** The relay hit its private-storage limit during the
+> run. Deleting the superseded `tt2x2`/`ttb` weights (19.07 GB, approved) dropped
+> the tree to 80.31 GB but reclaimed **nothing** — HF bills LFS storage including
+> history. The maintainer approved squashing history to reclaim it (see
+> [decisions](decisions.md), 2026-08-02); until that runs, **four arms are
+> dev-box-only**: `e1_r2960k_sb_pca`, `e1_r5500k_sb_pca`, `e1_r2960k_sb_rand`,
+> `e1_r5500k_sb_rand`, each hash-verified under
+> `artifacts/stage3/rescued/`.
 
 ## 3. Protocol requirements (binding)
 
@@ -275,67 +277,71 @@ applying it to a multi-session message list **silently deletes every earlier
 trace**. Verified directly. Sessions are therefore rendered independently and
 concatenated at token level (asserted exact), with the system block emitted once.
 
-## 12. Experiment 1 — LAUNCHED 2026-08-01 08:42 UTC
+## 12. Experiment 1 — COMPLETE 2026-08-02, all 24 arms, $47.6
 
-**Corpus v2 and both ladder cuts are on the relay**, prefix
-`stage3_recovery_corpus_v2/` — 9/9 files hash-verified against the local copies
-(LFS oid for the large ones, download-and-hash for the small). The §2 durability
-risk is closed.
+Two L40S pods split by initialization; both released after hash-verified
+teardown (pca 08:33, rand 08:49). Training ran at **3.08–3.8 s/step** against a
+4.3 s/step projection, so the matrix finished inside the $59.40 cap.
 
-**Two L40S pods, split by initialization** so a lost pod costs one init axis
-rather than half of every curve:
+**Teacher-native held-out CE** (16 pack-tail blocks, disjoint from every rung,
+identical across all arms):
 
-| pod | id | role | arms | steps |
-|---|---|---|---:|---:|
-| `aadistill-e1-pca` | `1ligfkwnaous4u` | PCA/sandwich init | 12 | 22,012 |
-| `aadistill-e1-rand` | `vjavemn7m2tw5a` | random-baseline init | 12 | 22,012 |
+| supervised tokens | PCA sa | PCA sb | rand sa | rand sb |
+|---:|---:|---:|---:|---:|
+| step 0 | 10.9199 | 10.9199 | 12.1615 | 12.1615 |
+| 0.25M | 2.0938 | 2.1427 | 8.8291 | 8.8234 |
+| 0.46M | 1.7477 | 1.7611 | 8.3346 | 8.3575 |
+| 0.86M | 1.5101 | 1.5038 | 7.9403 | 7.9542 |
+| 1.60M | 1.2952 | 1.3015 | 7.4068 | 7.4025 |
+| 2.96M | 1.1468 | 1.1486 | 6.6812 | 6.6643 |
+| **5.50M** | **1.0032** | **1.0052** | **5.9807** | **5.9789** |
 
-Both carry a hard `--terminate-after 2026-08-02T14:31:18Z` (30.0 h), so the
-session cannot exceed **2 × 30.0 × $0.99 = $59.40** even if every software guard
-fails. The orchestrators additionally refuse to *start* an arm they cannot
-finish before that deadline, so a budget-cut session ends with completed
-uploads rather than a pod killed mid-transfer.
+Full table incl. holdout NLL: `artifacts/stage3/e1_results.json` and
+[`EXPERIMENTS.md`](EXPERIMENTS.md) §11. Headlines: seed gaps ≤0.049 (usable
+instrument); **neither init saturates at 5.50M**; initialization dominates data
+over this range (1.0032 vs 5.9807 at the top rung).
 
-Expected: ~26.3 h training + ~0.5 h setup + ~1.6 h post-run per pod ≈ 28.4 h,
-against 30.0 h. **Slack is ~1.5 h**, and the pca pod already spent ~0.4 h on two
-setup failures. If a pod runs out of deadline it will skip its last arm(s),
-which by arm ordering is the tail of **seed b** — seed a's full rung series
-completes on both inits first.
+**Holdout NLL rises on PCA arms while CE falls** (6.72 → 10.79) and drifts down
+on random arms. NLL cannot say whether the loss is knowledge or reasoning — the
+open question §13 exists to answer.
 
-Drive/monitor from the dev box (both orchestrators are `nohup`'d and survive any
-session ending):
+## 13. Evaluation is the open work — vLLM pod required
 
-```bash
-tail -f artifacts/stage3/e1_scaling_pca_orchestrator.log
-cat artifacts/stage3/e1_scaling_{pca,rand}_orchestrator.status
-```
+**Maintainer, 2026-08-02:** behaviour recovery and reasoning benchmarks must be
+run before conclusions, using **vLLM with no fixed 512-token truncation**.
 
-**Deliberately deferred: the P18 uncapped behavioural readout.** It is not run
-inline because its cost is unbounded on this model line —
-`eval_behavior.py --unrestricted` has **no degeneration stop**, so a checkpoint
-in a repetition loop generates until the 262,144-token context is exhausted, and
-one prompt can outlast a whole training arm. Every checkpoint is uploaded to
-`e1_scaling_20260801/`, so the readouts (`natural_termination_rate`,
-`degeneration_rate`, length p50) run afterwards from the relay on vLLM with the
-tested semantic degeneration stop, costed separately. **Until that runs,
-Experiment 1 has trained checkpoints and holdout NLL, but no scaling curve.**
+Both training pods ran driver **570.124.06**, which cannot host vLLM 0.26
+(wheel links `libcudart.so.13`; `--torch-backend=cu128` changes torch, not the
+extension). They were created without `--min-cuda-version 13.0` — fine for
+training, fatal for engine work. Maintainer directed releasing them and
+provisioning a dedicated evaluation pod instead of downgrading the engine.
 
-Per-arm the pods run: holdout NLL (bf16), a greedy 80-token generation smoke
-test, sha256 of every retained file, upload to the relay, and independent
-dev-box verification; the pod is deleted only after verification passes.
+**Sequence still to run:**
+
+1. Squash the relay history to reclaim the 19 GB (approved; invalidates the
+   recorded revisions — [decision](decisions.md)).
+2. Upload and verify the four dev-box-only arms (§2).
+3. Create the evaluation pod **with `--min-cuda-version 13.0`**, pull all 24
+   checkpoints from the relay, and run the uncapped battery: behaviour score
+   with per-axis rates, and the **100-prompt reserved gsm8k reasoning slice**
+   (`build_reasoning_slice.py`) — the built-in math axis has only 12 prompts,
+   SE ≈ 0.14, too coarse to separate knowledge loss from reasoning loss.
+   Estimated **$3–5**, outside the $60 training cap.
+4. `e1_r2960k_sb_pca` needs its holdout NLL recomputed there — its
+   `eval_holdout_v1.json` was lost to a bad fetch (its checkpoint is safe and
+   hash-verified; val CE was recovered from the console log).
 
 ## 11. Next actions
 
-1. **Persist corpus v2 to the relay** under `stage3_recovery_corpus_v2/`, with
-   both ladder cuts, and write its manifest entry (§2 risk). Cheap, CPU-only, no
-   approval needed beyond the upload itself.
-2. **Maintainer decision required:** start the 24-run Experiment-1 matrix
-   (~$52 + ~$5 evals against the $60 cap), or cut it first — dropping the init
-   axis or one seed halves it to ~$26, dropping the top rung gives ~$31. Nothing
-   paid runs until this is answered.
-3. Fix the pod bundle so `code_state` carries a git commit (§5), before the next
-   paid generation run.
-4. After Experiment 1: fit the convergence curve of natural-termination rate,
-   degeneration rate, generated-length p50 and holdout NLL against supervised
-   tokens — the deliverable of the study ([`PROPOSAL.md`](PROPOSAL.md)). Only
-   then Experiment 2 (data mixing), then Experiment 3 (difficulty curriculum).
+1. **Squash the relay history**, then upload and verify the four dev-box-only
+   arms (§2, §13). CPU-only, no approval outstanding.
+2. **Provision the evaluation pod** with `--min-cuda-version 13.0` and run the
+   uncapped vLLM battery over all 24 checkpoints (§13). ~$3–5, approved in
+   principle; report before spending more.
+3. Fit the convergence curve once the behavioural readouts exist — the CE curve
+   alone does not settle whether recovery is saturating in the way that matters.
+4. Only then Experiment 2 (data mixing) and Experiment 3 (difficulty curriculum).
+5. Carry forward the tooling fixes recorded in
+   [`EXPERIMENTS.md`](EXPERIMENTS.md) §11 (self-matching `pgrep`, greedy `sed`
+   on hash lines, basename-collapsing `scp` globs) — each cost real time or data
+   this session.
