@@ -491,11 +491,34 @@ data-scaling law. It is not a defect, but it *is* a limit on the claim: the
 curve measures **data quantity at constant passes**, not data quantity at
 constant compute.
 
-**The control that would separate them** — train the 0.25M rung for 4,412 steps
-(≈40.9 epochs), matching the top rung's compute exactly. If it approaches the
-top rung's 1.0032, the curve is largely a compute effect; if it plateaus well
-above, the curve is a data effect. One arm, ~3.9 h on one L40S, ~**$3.9**. Not
-run; recommended before any scaling-law claim is published.
+**The step-matched compute control (approved 2026-08-02, running).**
+`e1_ctl_r0250k_sa_pca_stepmatched`: the 0.25M rung trained for **4,412 steps**
+(~40.9 effective epochs), matching the 5.50M arm's optimizer budget. The config
+is `e1_r5500k_sa_pca.json` with **only `rung` changed** — same PCA init, same
+seed 20260726, same optimizer, same step-based LR schedule (4,412 total, 221
+warmup, `min_lr_frac` 0.1), same 16 validation blocks, same eval protocol.
+Verified by diff: the only differing fields are `rung`, `run_name`, `out_dir`
+and `_purpose`.
+
+**It is a step-matched control, not a token-compute-matched one**, and the
+record must say so: packing density differs across rungs (1,171 vs 1,870
+supervised tokens per block), so equal optimizer steps do **not** mean equal
+supervised tokens processed — the control sees 4,412 × 2 × 8,192 = 72.29M
+processed tokens like the 5.50M arm, but its supervised content is 216 blocks
+repeated ~40.9 times rather than 2,941 blocks repeated 3 times.
+
+**The three-way comparison it enables** — same 4,412 steps for (2) and (3),
+same unique data for (1) and (2):
+
+| # | arm | unique blocks | steps | effective epochs |
+|---|---|---:|---:|---:|
+| 1 | PCA 0.25M, original | 216 | 324 | 3.0 |
+| 2 | PCA 0.25M, step-matched control | 216 | 4,412 | 40.9 |
+| 3 | PCA 5.50M | 2,941 | 4,412 | 3.0 |
+
+If (2) approaches (3), the curve is largely a compute effect and the
+data-scaling reading is unsafe. If (2) plateaus near (1), the improvement is
+data. Result pending; **no scaling-law claim may be published before it lands**.
 
 **Verdict: the scaling relationship is measured and internally clean, but two
 things stop it short of a law.** The saturation point is outside the corpus
