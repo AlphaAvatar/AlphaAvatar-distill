@@ -1,6 +1,6 @@
-**Updated:** 2026-08-02 09:05 UTC · branch `main` · **no pods running, nothing
-billing** — both Experiment 1 training pods released after hash-verified
-teardown. Spend to date **$82.1** ($34.52 before this session + $47.6 training).
+**Updated:** 2026-08-02 18:10 UTC · branch `main` · **no pods running, nothing
+billing** — all three pods released after hash-verified teardown. Spend to date
+**$90.2** ($34.52 prior + $47.6 training + $8.1 control/eval).
 
 **Active work:** the recovery-data scaling study. Corpus, ladder and the
 **24-arm training matrix are all complete** (§12). What remains is evaluation:
@@ -305,31 +305,39 @@ over this range (1.0032 vs 5.9807 at the top rung).
 on random arms. NLL cannot say whether the loss is knowledge or reasoning — the
 open question §13 exists to answer.
 
-## 13. Evaluation is the open work — vLLM pod required
+## 13. Evaluation — three-way done, all-25 sweep still open
 
-**Maintainer, 2026-08-02:** behaviour recovery and reasoning benchmarks must be
-run before conclusions, using **vLLM with no fixed 512-token truncation**.
+**The step-matched compute control settled the data-vs-compute question**
+([`EXPERIMENTS.md`](EXPERIMENTS.md) §11): CE improvement is a **data** effect
+(1.0032 vs 2.2907 at identical compute), but behaviour goes the other way — the
+control terminates naturally 0.908 vs 0.829 and degenerates 0.092 vs 0.171 —
+and GSM8K EM is ~0.01 on every arm. Distributional fit is bought by data,
+protocol competence by passes, reasoning by neither. The behaviour *ranking* is
+below the 0.129 seed noise floor and is not claimable at one seed.
 
-Both training pods ran driver **570.124.06**, which cannot host vLLM 0.26
-(wheel links `libcudart.so.13`; `--torch-backend=cu128` changes torch, not the
-extension). They were created without `--min-cuda-version 13.0` — fine for
-training, fatal for engine work. Maintainer directed releasing them and
-provisioning a dedicated evaluation pod instead of downgrading the engine.
+**Two measurement corrections made on 2026-08-02, both now permanent:**
 
-**Sequence still to run:**
+1. **Effective context is derived from the trained `block_len` (8,192)**, not
+   the architectural 262,144 the student inherits from the Qwen3 geometry. A
+   262k allowance spent ~97% of its compute on a regime the model never trained
+   in — one 76-prompt wave ran over an hour without finishing. The derivation is
+   recorded per sample; output from this path must never be described as a
+   262K-context evaluation. Waves now take ~6 min.
+2. **A third degeneration signal** catches non-repeating, non-terminating
+   rambling that the cycle and low-novelty signals both miss. It fired on 6
+   samples in the first corrected wave alone. Thresholds are fixed and identical
+   across checkpoints.
 
-1. Squash the relay history to reclaim the 19 GB (approved; invalidates the
-   recorded revisions — [decision](decisions.md)).
-2. Upload and verify the four dev-box-only arms (§2).
-3. Create the evaluation pod **with `--min-cuda-version 13.0`**, pull all 24
-   checkpoints from the relay, and run the uncapped battery: behaviour score
-   with per-axis rates, and the **100-prompt reserved gsm8k reasoning slice**
-   (`build_reasoning_slice.py`) — the built-in math axis has only 12 prompts,
-   SE ≈ 0.14, too coarse to separate knowledge loss from reasoning loss.
-   Estimated **$3–5**, outside the $60 training cap.
-4. `e1_r2960k_sb_pca` needs its holdout NLL recomputed there — its
-   `eval_holdout_v1.json` was lost to a bad fetch (its checkpoint is safe and
-   hash-verified; val CE was recovered from the console log).
+**Still open:** the uncapped behavioural sweep across all 25 checkpoints (only
+the 3 three-way arms are done), the all-25 GSM8K, and `e1_r2960k_sb_pca`'s
+holdout NLL. All 25 checkpoints are preserved, so this is re-runnable on a fresh
+pod at ~6 min/wave — roughly 2.5 h ~ $2.5 for the behaviour sweep.
+
+**Artifacts, all hash-verified on the dev box:** 12 evaluation outputs
+(summaries + per-sample generations) under `artifacts/eval/e1/`, and the control
+checkpoint under `artifacts/stage3/rescued/`. Four arms remain relay-blocked by
+the HF LFS quota (GC still had not credited the squash as of 17:00); dev-box
+copies are retained and verified.
 
 ## 11. Next actions
 

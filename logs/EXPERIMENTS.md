@@ -507,18 +507,53 @@ supervised tokens processed — the control sees 4,412 × 2 × 8,192 = 72.29M
 processed tokens like the 5.50M arm, but its supervised content is 216 blocks
 repeated ~40.9 times rather than 2,941 blocks repeated 3 times.
 
-**The three-way comparison it enables** — same 4,412 steps for (2) and (3),
-same unique data for (1) and (2):
+**The three-way comparison — RESULT, 2026-08-02.** Same 4,412 steps for (2) and
+(3); same unique data for (1) and (2).
 
-| # | arm | unique blocks | steps | effective epochs |
-|---|---|---:|---:|---:|
-| 1 | PCA 0.25M, original | 216 | 324 | 3.0 |
-| 2 | PCA 0.25M, step-matched control | 216 | 4,412 | 40.9 |
-| 3 | PCA 5.50M | 2,941 | 4,412 | 3.0 |
+| # | arm | blocks | steps | epochs | **val CE** | holdout NLL | **behaviour** | nat. term | degen | GSM8K EM |
+|---|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| 1 | PCA 0.25M original | 216 | 324 | 3.0 | 2.0938 | 6.7169 | 0.3432 | 0.461 | 0.539 | 0.01 |
+| 2 | PCA 0.25M step-matched | 216 | 4,412 | 40.9 | **2.2907** | 10.7082 | **0.4577** | **0.908** | **0.092** | 0.00 |
+| 3 | PCA 5.50M | 2,941 | 4,412 | 3.0 | **1.0032** | 10.7875 | 0.3806 | 0.829 | 0.171 | 0.01 |
 
-If (2) approaches (3), the curve is largely a compute effect and the
-data-scaling reading is unsafe. If (2) plateaus near (1), the improvement is
-data. Result pending; **no scaling-law claim may be published before it lands**.
+**The two axes disagree, and that is the finding.**
+
+* **Distributional fit is bought by data.** Arms 2 and 3 are identical in init,
+  seed, optimizer, LR schedule, step count and validation set — they differ
+  *only* in unique data — and CE differs by **1.29 nats**, far above the ~0.05
+  seed noise. Giving the small corpus the large corpus's entire compute budget
+  did not merely fail to close the gap, it made CE **worse** than the 324-step
+  original (2.0938 → 2.2907): the control peaked at CE 1.9716 by step 551 and
+  overfitted monotonically thereafter while train loss fell to ~0.05.
+* **Protocol competence is bought by passes.** On behaviour the *control* leads:
+  natural termination **0.908** vs 0.829, degeneration **0.092** vs 0.171,
+  fluency 0.821 vs 0.515, format_ok 0.842 vs 0.790. Repetition over a small
+  corpus teaches the student to *finish a turn*; unique data does not, at this
+  scale.
+* **Neither buys reasoning.** GSM8K EM is **0.01 / 0.00 / 0.01** on 100 reserved
+  prompts. There is no reasoning to trade away yet, which reframes the rising
+  holdout NLL: it is the cost of training duration (the control and the 5.50M
+  arm land at 10.71 vs 10.79 despite a 1.29-nat CE gap), not evidence that data
+  destroys general ability.
+
+**The honest limit on the behaviour half:** the three arms span **0.115** on the
+behaviour composite, *below* the project's measured seed-only noise floor of
+**0.129**. The behaviour numbers are reportable; the behaviour *ranking* is not
+supported at one seed per arm. Only the CE difference clears its noise floor.
+
+**Verdict on the gate:** the scaling curve may be reported as a **data** effect
+on teacher-native CE. It may **not** be reported as a general capability effect
+— behaviour does not follow it, and reasoning is absent from every arm.
+
+**Measurement protocol (identical for all three arms).** Uncapped within the
+model's **effective context of 8,192**, derived from the trained `block_len` and
+recorded per sample with its full derivation (architectural context 262,144,
+source `trained_block_len`). **This is not a 262K-context evaluation.** Zero
+context-limit hits at 8,192, so nothing was truncated. Greedy decoding, the
+mandatory system message, the same 76-prompt behaviour set and 100-prompt
+reserved GSM8K slice, and a fixed degeneration detector with identical
+thresholds everywhere. Per sample we record generated tokens, stop reason,
+degeneration trigger and kind, right-censoring, and the complete raw output.
 
 **Verdict: the scaling relationship is measured and internally clean, but two
 things stop it short of a law.** The saturation point is outside the corpus
