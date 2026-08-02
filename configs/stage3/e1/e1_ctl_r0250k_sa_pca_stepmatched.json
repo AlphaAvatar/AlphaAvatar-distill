@@ -1,0 +1,64 @@
+{
+  "stage": "stage3_recovery",
+  "run_name": "e1_ctl_r0250k_sa_pca_stepmatched",
+  "_purpose": "Experiment 1 STEP-MATCHED COMPUTE CONTROL (maintainer, 2026-08-02). Identical to e1_r5500k_sa_pca in every field except the rung: same PCA init, same seed 20260726, same optimizer, same step-based LR schedule (4412 total steps, 221 warmup, min_lr_frac 0.1), same 16 validation blocks, same eval protocol. Only the amount of UNIQUE training data differs \u2014 216 blocks instead of 2941, i.e. ~40.9 effective epochs instead of 3.0. It is a step-matched control, NOT a token-compute-matched control: packing density differs across rungs (1,171 vs 1,870 supervised tokens per block), so matching steps does not match supervised tokens processed.",
+  "student_path": "artifacts/stage1/qwen3_0p6b_init_v0/checkpoint",
+  "teacher": {
+    "model_id": "Qwen/Qwen3-4B-Thinking-2507",
+    "revision": "768f209d9ea81521153ed38c47d515654e938aea",
+    "dtype": "bfloat16"
+  },
+  "data_dir": "artifacts/stage3/ladder_uniform",
+  "groups": null,
+  "packing": "ladder",
+  "block_len": 8192,
+  "dtype": "float32",
+  "autocast_bf16": true,
+  "gradient_checkpointing": true,
+  "device": "auto",
+  "seed": 20260726,
+  "trainable_patterns": [
+    "\\.self_attn\\.(q_proj|k_proj|v_proj|o_proj|q_norm|k_norm)\\.",
+    "\\.mlp\\.(gate_proj|up_proj|down_proj)\\.",
+    "input_layernorm",
+    "post_attention_layernorm",
+    "model\\.norm\\."
+  ],
+  "loss": {
+    "ce_weight": 0.25,
+    "kd_weight": 1.0,
+    "kd_temperature": 1.0,
+    "kd_scope": "all"
+  },
+  "optim": {
+    "lr": 5e-05,
+    "weight_decay": 0.01,
+    "betas": [
+      0.9,
+      0.95
+    ],
+    "eps": 1e-08,
+    "grad_clip": 1.0
+  },
+  "schedule": {
+    "total_steps": 4412,
+    "warmup_steps": 221,
+    "min_lr_frac": 0.1
+  },
+  "batch": {
+    "blocks_per_step": 2,
+    "micro_blocks": 1
+  },
+  "checkpoint": {
+    "save_every": 2206,
+    "keep_last": 1
+  },
+  "intervals": {
+    "log_every": 10,
+    "eval_every": 551,
+    "eval_blocks": 16
+  },
+  "out_dir": "artifacts/stage3/e1_ctl_r0250k_sa_pca_stepmatched",
+  "rung": 250000,
+  "val_blocks": 16
+}
