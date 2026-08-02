@@ -1,5 +1,43 @@
 # Decision records
 
+## 2026-08-02 (maintainer) — Reclaim relay storage by squashing history; old checkpoint revisions are intentionally invalidated
+
+- **Context:** the private HF relay hit its storage limit mid-session (99.38 GB),
+  and checkpoint uploads began failing with *"Private repository storage limit
+  reached"*. Deleting the 8 superseded `tt2x2`/`ttb` diagnostic weight files
+  (19.07 GB, maintainer-approved) dropped the working tree to 80.31 GB but
+  **did not** reclaim quota: HF counts LFS storage including git history, so the
+  blobs stay billed while any commit references them.
+- **Decision (maintainer):** squash the relay's history to reclaim the space.
+  Old checkpoints do not need preserving — **only their manifests matter**. Do
+  **not** upgrade the HF plan.
+- **What this intentionally destroys:** every commit revision previously recorded
+  in [`artifact_manifests.md`](artifact_manifests.md) — `b955bd2f…` (stage1
+  init), `b1b5170c…` (s2_blocks_v1), `526caa78…` (sub-stage 2 A/B), `727c837e…`
+  (s1 recovery), and the start-point ablation entries. Those revision pointers
+  are **deliberately invalidated**; the artifacts they name are either still in
+  the current tree (addressed by content hash, which is unaffected) or were
+  superseded diagnostics. Per-file sha256 manifests remain the identity of
+  record, which is why they were kept when the weights were deleted.
+- **Ordering, which is the safety property:** squash only **after** every
+  remaining artifact is fetched to the dev box **and hash-verified against its
+  pod-side manifest**. A squash is irreversible and the pods are transient; doing
+  it while data still lived only on a pod would risk losing an arm to reclaim
+  disk. The four un-uploaded arms are then uploaded from the dev box and verified
+  against the relay.
+- **Alternatives considered:** upgrade the plan — rejected by the maintainer;
+  leave the four arms dev-box-only — rejected, it splits the session's artifacts
+  across two stores and breaks the manifest scheme; delete more `stage3/`
+  history — rejected, it contains the standing branch point.
+- **Risks:** the relay's commit history is gone, so "which upload happened when"
+  is answerable only from these logs, not from the repo. Content hashes still
+  pin every artifact. If a future session needs revision-level provenance on the
+  relay, it must record it here at upload time rather than relying on HF history.
+- **Revisit when:** relay usage again approaches the limit — the next lever is
+  pruning `e1_scaling_20260801` checkpoints once the P18 readouts have been
+  computed from them, since after that the weights are reproducible from the
+  logged config, pack hashes and seed.
+
 ## 2026-08-01 (maintainer) — Experiment order: teacher-answer scaling first, on a neutral mixture; data mixing and curriculum come after
 
 - **Context:** the plan folded three questions into one run. Corpus v2 was
