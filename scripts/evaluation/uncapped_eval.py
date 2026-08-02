@@ -128,7 +128,14 @@ def main() -> int:
     pending = {}
     for s in samples:
         turns = [m for m in s["messages"] if m["role"] != "assistant"]
-        if args.system:
+        # A system message is mandatory (project protocol), but the sample's own
+        # system prompt is PRESERVED when it has one — that is the rule the
+        # corpus was generated under (`system_prompt_policy.source_prompt_
+        # preserved`). Injecting unconditionally rendered two `<|im_start|>system`
+        # turns for the 6 behaviour prompts that carry their own, which is a
+        # context the model never saw in training.
+        has_system = any(m.get("role") == "system" for m in turns)
+        if args.system and not has_system:
             turns = [{"role": "system", "content": args.system}] + turns
         prompt = tok.apply_chat_template(turns, tools=s.get("tools"),
                                          tokenize=False, add_generation_prompt=True)
@@ -141,6 +148,7 @@ def main() -> int:
                                 max_tokens=allowance, stop_token_ids=stop_ids)
         eng.add_request(rid, {"prompt_token_ids": p_ids}, params)
         pending[rid] = {"sample": s, "p_ids": p_ids, "allowance": allowance,
+                        "system_source": ("sample" if has_system else "default"),
                         "gen": [], "last_check": 0, "degen": None,
                         "finish": None, "t0": time.time(), "ttft": None}
 
@@ -185,6 +193,7 @@ def main() -> int:
         rec = {
             "id": s["id"], "label": args.label, "group": s.get("group"),
             "source": s.get("source"), "prompt_tokens": len(st["p_ids"]),
+            "system_source": st["system_source"],
             "context_len": ctx, "context_resolution": ctx_info,
             "generation_allowance": st["allowance"],
             "generated_tokens": len(gen), "stop_reason": reason,
