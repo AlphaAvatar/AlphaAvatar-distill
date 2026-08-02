@@ -31,12 +31,38 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO_ROOT / "src"))
 
 
-def resolve_context(cfg, override: int | None) -> int:
-    ctx = override or int(cfg.max_position_embeddings)
+def resolve_context(cfg, override: int | None, trained_context: int | None) -> dict:
+    """Resolve the effective context and return the derivation, not just a number.
+
+    `config.max_position_embeddings` is 262,144 for this student because it
+    inherits the Qwen3 geometry — but the student was trained exclusively on
+    `block_len` 8,192 blocks and has never seen a position beyond that. Running
+    it to 262k does not measure it more faithfully; it spends ~97% of the
+    compute on a regime it was never trained for, and one wave cost an hour of
+    L40S time when we tried (2026-08-02).
+
+    So the *runtime effective* context is the trained context, and the
+    derivation is recorded with every result. Output described this way must
+    never be reported as a 262K-context evaluation.
+    """
+    arch_ctx = int(cfg.max_position_embeddings)
     scaling = getattr(cfg, "rope_scaling", None) or {}
     if isinstance(scaling, dict) and scaling.get("factor"):
-        ctx = int(ctx * float(scaling["factor"]))
-    return ctx
+        arch_ctx = int(arch_ctx * float(scaling["factor"]))
+    if override:
+        ctx, source = int(override), "cli:--context-len"
+    elif trained_context:
+        ctx, source = min(int(trained_context), arch_ctx), "trained_block_len"
+    else:
+        ctx, source = arch_ctx, "config:max_position_embeddings"
+    return {"resolved_context": ctx, "context_source": source,
+            "config_max_position_embeddings": int(cfg.max_position_embeddings),
+            "rope_scaling_factor": (scaling or {}).get("factor"),
+            "architectural_context": arch_ctx,
+            "trained_context": trained_context,
+            "note": ("effective context is the TRAINED context; this is not a "
+                     "262K-context evaluation")
+            if source == "trained_block_len" else None}
 
 
 def resolve_stop_ids(model: str, tok, cfg) -> list[int]:
@@ -61,7 +87,12 @@ def main() -> int:
     ap.add_argument("--prompts", required=True)
     ap.add_argument("--tokenizer", default=None,
                     help="defaults to the checkpoint's own tokenizer")
-    ap.add_argument("--context-len", type=int, default=None)
+    ap.add_argument("--context-len", type=int, default=None,
+                    help="explicit override; bypasses the trained-context rule")
+    ap.add_argument("--trained-context", type=int, default=8192,
+                    help="the block_len the student was trained on; the runtime "
+                         "effective context is derived from this, not from the "
+                         "architectural max_position_embeddings")
     ap.add_argument("--gpu-mem-util", type=float, default=0.90)
     ap.add_argument("--check-every", type=int, default=256)
     ap.add_argument("--no-degeneration-stop", action="store_true")
@@ -81,9 +112,12 @@ def main() -> int:
 
     tok = AutoTokenizer.from_pretrained(args.tokenizer or args.model)
     cfg = AutoConfig.from_pretrained(args.model)
-    ctx = resolve_context(cfg, args.context_len)
+    ctx_info = resolve_context(cfg, args.context_len, args.trained_context)
+    ctx = ctx_info["resolved_context"]
     stop_ids = resolve_stop_ids(args.model, tok, cfg)
-    print(f"[{args.label}] context {ctx}; stop ids {stop_ids}", flush=True)
+    print(f"[{args.label}] effective context {ctx} "
+          f"(source {ctx_info['context_source']}, architectural "
+          f"{ctx_info['architectural_context']}); stop ids {stop_ids}", flush=True)
 
     samples = [json.loads(l) for l in Path(args.prompts).read_text().splitlines()
                if l.strip()]
@@ -151,8 +185,11 @@ def main() -> int:
         rec = {
             "id": s["id"], "label": args.label, "group": s.get("group"),
             "source": s.get("source"), "prompt_tokens": len(st["p_ids"]),
-            "context_len": ctx, "generation_allowance": st["allowance"],
+            "context_len": ctx, "context_resolution": ctx_info,
+            "generation_allowance": st["allowance"],
             "generated_tokens": len(gen), "stop_reason": reason,
+            "degeneration_triggered": st["degen"] is not None,
+            "degeneration_kind": (st["degen"] or {}).get("kind"),
             "natural_termination": reason == "eos",
             "context_limit_reached": reason == "context_limit",
             # Neither a context hit nor a degeneration abort observed the
@@ -173,8 +210,12 @@ def main() -> int:
     summary = {
         "label": args.label, "model": args.model, "prompts": args.prompts,
         "n_samples": n,
-        "uncapped": True, "censored_measurement": False,
-        "context_len": ctx, "stop_ids": stop_ids,
+        # "unrestricted within the model's effective context" — the allowance is
+        # not a chosen token budget, but it is NOT the architectural 262K either.
+        "unrestricted_within_effective_context": True,
+        "censored_measurement": False,
+        "context_len": ctx, "context_resolution": ctx_info,
+        "stop_ids": stop_ids,
         "system_message": args.system,
         "degeneration_stop": not args.no_degeneration_stop,
         "wave_seconds": round(time.time() - t_wave, 1),
@@ -184,6 +225,9 @@ def main() -> int:
             sum(x["natural_termination"] for x in records) / n, 4),
         "degeneration_rate": round(
             sum(x["stop_reason"] == "degeneration" for x in records) / n, 4),
+        "degeneration_kinds": {k: sum(1 for x in records
+                                      if x.get("degeneration_kind") == k)
+                               for k in ("cycle", "low_novelty", "rambling")},
         "context_limit_rate": round(
             sum(x["context_limit_reached"] for x in records) / n, 4),
         "right_censored_rate": round(
