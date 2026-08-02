@@ -443,7 +443,64 @@ reasoning traces; the random student has none to lose. **Whether that trade is
 knowledge or reasoning is not answerable from NLL**, which is why the maintainer
 directed a full behavioural evaluation (below) before any conclusion.
 
-**Verdict: the scaling relationship is measured and clean, but the saturation
-point is outside the corpus.** Recovery-data sizing cannot be closed until
-either the corpus grows past ~6M uniform tokens or the mixture is relaxed
-(Experiment 2).
+### Training-exposure accounting (audit, 2026-08-02)
+
+| rung | blocks | supervised (unique) | steps | blocks consumed | supervised consumed | effective epochs | repeats |
+|---:|---:|---:|---:|---:|---:|---:|---|
+| 0.25M | 216 | 252,985 | 324 | 648 | 758,955 | 3.0000 | every block ×3 |
+| 0.46M | 380 | 460,088 | 570 | 1,140 | 1,380,264 | 3.0000 | every block ×3 |
+| 0.86M | 682 | 864,750 | 1,023 | 2,046 | 2,594,250 | 3.0000 | every block ×3 |
+| 1.60M | 1,174 | 1,600,353 | 1,761 | 3,522 | 4,801,059 | 3.0000 | every block ×3 |
+| 2.96M | 1,944 | 2,960,507 | 2,916 | 5,832 | 8,881,521 | 3.0000 | every block ×3 |
+| 5.50M | 2,941 | 5,501,372 | 4,412 | 8,824 | 16,505,986 | 3.0003 | every block ×3, **one block ×4** |
+
+Effective epochs = consumed training blocks ÷ available training blocks. Blocks
+consumed = `total_steps × blocks_per_step` (2). Validation blocks (16, from the
+pack tail) are excluded throughout and are never trained on.
+
+**How the step count was set.** `scripts/data/build_experiment1_configs.py`
+computes `total_steps = ceil(blocks × 3 / blocks_per_step)` — a *fixed number of
+passes*, not a fixed optimizer budget. The trainer consumes blocks from a
+deterministic stream of per-epoch permutations
+(`stream_block_indices(n_blocks, seed, step × bps, bps)`), so each epoch is a
+full permutation and every block is seen the same number of times. The single
+`×4` block at the top rung is the `ceil` on an odd product (8,823 → 8,824).
+Verified against the runs' own logs: `train_blocks=216 → total_steps=324`, and
+`tokens_seen` at step 320 = 5,242,880 = 320 × 2 × 8,192.
+
+**Does this isolate supervised-token quantity? No — and that must be carried
+with every reading of the curve.** Effective *passes* are held constant at 3.0,
+but absolute exposure scales with the rung:
+
+* unique supervised tokens span **21.7×** (252,985 → 5,501,372)
+* optimizer steps span **13.6×** (324 → 4,412)
+* tokens processed span **13.6×** (5.31M → 72.29M)
+* effective epochs span **1.0001×** (3.0000 → 3.0003)
+
+So **dataset size and training exposure moved together by construction.** A
+lower CE at a higher rung is consistent with "more unique data" *and* with
+"more gradient updates"; this experiment cannot separate them. The two spans
+differ (21.7× vs 13.6×) only because supervised tokens per block rise from 1,171
+to 1,870 across the ladder as packing density improves — far too little
+decoupling to identify the two factors.
+
+This is the **pre-registered** design: `PROPOSAL.md` §4 chose fixed passes
+(design i) and explicitly rejected a fixed optimizer budget (design ii) because
+that conflates "more data" with "fewer passes". It is the standard shape for a
+data-scaling law. It is not a defect, but it *is* a limit on the claim: the
+curve measures **data quantity at constant passes**, not data quantity at
+constant compute.
+
+**The control that would separate them** — train the 0.25M rung for 4,412 steps
+(≈40.9 epochs), matching the top rung's compute exactly. If it approaches the
+top rung's 1.0032, the curve is largely a compute effect; if it plateaus well
+above, the curve is a data effect. One arm, ~3.9 h on one L40S, ~**$3.9**. Not
+run; recommended before any scaling-law claim is published.
+
+**Verdict: the scaling relationship is measured and internally clean, but two
+things stop it short of a law.** The saturation point is outside the corpus
+(neither init has flattened at 5.50M, and the uniform cut caps this pack at
+~6.08M), and data quantity is confounded with training compute by the
+fixed-passes design. Recovery-data sizing cannot be closed until the corpus
+grows past ~6M uniform tokens or the mixture is relaxed (Experiment 2), and the
+data-vs-compute control above is run.
