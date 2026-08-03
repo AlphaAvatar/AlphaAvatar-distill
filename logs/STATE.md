@@ -12,7 +12,8 @@ Cartesian sweep.
 (`capability-v2`, 846 prompts, safety refusal now a separate XSTest set),
 evaluators validated at 112 tests, checkpoints inventoried and cleaned. Phase 1
 costs **$12.30 expected / $18.78 pessimistic** and **fits** the unchanged $30
-cap; **all three phases now cost $42.90 expected / $66.15 pessimistic, which does
+cap (itemized to the component in [`PROPOSAL.md`](PROPOSAL.md) §8.2 — training is
+$2.03, battery generation on 10 checkpoints is $9.26, everything else $1.01); **all three phases now cost $42.90 expected / $66.15 pessimistic, which does
 not fit** — reported rather than absorbed, and a phase-2/3 budget decision is
 deferred until phase 1 reports. **Nothing is launched.** See
 [`PROPOSAL.md`](PROPOSAL.md).

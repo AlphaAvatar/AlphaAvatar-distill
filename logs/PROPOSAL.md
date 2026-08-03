@@ -498,33 +498,6 @@ D0's two endpoints once for the whole experiment.
 | restart / failure allowance | **pessimistic column only**: one lost run per phase, +25% training rate, +25% evaluation, and the full 5-identity checkpoint set |
 | scoring (`score_battery.py`, `rescore_gsm8k.py`) | **not billed** — CPU, offline, re-runnable |
 
-### The result
-
-**Phase 1 fits: $12.30 expected, $18.78 pessimistic, against the $30 cap.** That
-is the only thing being authorized now, and it leaves $11.22 even in its own
-worst case.
-
-**The full three-phase sequence does not fit: $42.90 expected against a $30
-cap.** Reported, not absorbed — no seed, evaluation set, training length or
-standard has been reduced to make the arithmetic work.
-
-Two things drove it up from the previous $22.92 / $36.01: the battery grew from
-746 to **846 prompts** when the safety set was added, and the checkpoint counts
-were corrected from an assumed collapse of `final` and `best-val-CE` to the
-**measured** fact that they are different steps.
-
-**Nothing needs deciding today.** Phase 1 is authorized and fits. When phase 1
-reports, the re-cost will have real numbers for the per-checkpoint battery time —
-the largest single uncertainty here — and the phase-2/3 decision can be taken
-then, on one of:
-
-1. raise the incremental cap for phases 2–3;
-2. run the full battery on `final` and `best-held-out-NLL` only, with the cheap
-   metrics (CE, NLL, behaviour, generations) still at all nine points — this
-   roughly halves the evaluation bill and is a coverage reduction that needs
-   explicit approval;
-3. stop after phase 2.
-
 ### 8.1 Operational constraints at launch
 
 * **One pod with `--min-cuda-version 13.0`** so the same host trains and runs the
@@ -535,6 +508,92 @@ then, on one of:
   `--terminate-after`, and status polling is set up at launch.
 * **Phase 1 spending is limited to its pessimistic estimate, $18.78.** If the run
   is tracking above that, it stops and reports rather than continuing.
+
+### 8.2 Phase 1 itemized — every component, summing exactly
+
+$0.99/h L40S throughout. Training alone is only **$2.03**; the remaining
+**$10.27** is itemized here.
+
+| # | component | hours | $/h | cost |
+|---|---|---:|---:|---:|
+| 1a | **training**, D1 seed `sa` — 1,023 steps × 3.603 s | 1.0239 | 0.99 | **$1.01** |
+| 1b | **training**, D1 seed `sb` | 1.0239 | 0.99 | **$1.01** |
+| 2 | **D0 endpoint battery** — 2 checkpoints × 846 prompts × 0.9361 h | 1.8722 | 0.99 | **$1.85** |
+| 3a | held-out NLL, 8 intermediate points, `sa` (8 × 45 s) | 0.1000 | 0.99 | $0.10 |
+| 3b | held-out NLL, 8 intermediate points, `sb` | 0.1000 | 0.99 | $0.10 |
+| 3c | `post_run` — final holdout + generation smoke, `sa` (72 s) | 0.0200 | 0.99 | $0.02 |
+| 3d | `post_run`, `sb` | 0.0200 | 0.99 | $0.02 |
+| 3e | **D1 battery** — 8 identities (2 seeds × 4) × 0.9361 h | 7.4888 | 0.99 | **$7.41** |
+| 4a | checkpoint writes, `sa` (8 × 6 s) | 0.0133 | 0.99 | $0.01 |
+| 4b | checkpoint writes, `sb` | 0.0133 | 0.99 | $0.01 |
+| 4c | transfer, hashing, artifact processing | 0.2500 | 0.99 | $0.25 |
+| 5 | pod provisioning + engine init (**idle**) | 0.5000 | 0.99 | $0.49 |
+| | **TOTAL** | **12.4255** | 0.99 | **$12.30** |
+
+**Where the $10.27 goes: $9.26 of it (90%) is capability-battery generation on 10
+checkpoints.** Everything else — in-run evals, checkpoint writes, transfer,
+hashing and pod idle — is $1.01 combined.
+
+Per-checkpoint battery time is `0.05 h fixed + 846 prompts × 3.771 s`
+= **0.9361 h**, derived from Experiment 1's measured sweep (5.859 h billed for 25
+checkpoints on 176 prompts).
+
+**Contingencies inside the expected estimate:** only the 0.5 h provisioning and
+the 0.25 h transfer/verify allowance. No rate margin, no failure margin, no spare
+checkpoints.
+
+### 8.3 What the pessimistic $18.78 adds
+
+| # | component | hours | $/h | cost |
+|---|---|---:|---:|---:|
+| 1 | training, 2 seeds, **+25% rate margin** | 2.5597 | 0.99 | $2.53 |
+| 3 | in-run evals + checkpoint writes, +25% | 0.3333 | 0.99 | $0.33 |
+| 2 | D0 endpoint battery, 2 × **1.1701 h** (+25%) | 2.3403 | 0.99 | $2.32 |
+| 3e | D1 battery, **10** identities (5/seed) × 1.1701 h | 11.7013 | 0.99 | $11.58 |
+| 5 | pod provisioning + engine init | 0.5000 | 0.99 | $0.49 |
+| 4 | transfer / hashing / processing, **×1.5** | 0.3750 | 0.99 | $0.37 |
+| 7 | **one lost-and-repeated D1 run** | 1.1572 | 0.99 | $1.15 |
+| | **TOTAL** | **18.9669** | 0.99 | **$18.78** |
+
+Four additional contingencies: a +25% rate margin on everything, the 5th
+checkpoint identity per seed materialising, a 1.5× transfer allowance, and one
+complete run lost and repeated.
+
+### 8.4 Storage count is not evaluation count
+
+The maintainer is right that retaining an identity does not by itself justify GPU
+cost. Phase 1's three counts are different numbers:
+
+| count | value | what it is |
+|---|---:|---|
+| **evaluated on the full battery** | **10** | D0 2 endpoints + D1 2 seeds × 4 identities. **This is the only count that costs GPU time**, and it is what line 2 and 3e are priced on. |
+| **newly stored weights** | **8** | D1 identities only. D0's two are already on the relay and cost nothing to keep. |
+| eval points with cheap metrics only | 10 | 2 seeds × the 5 of 9 points that are *not* battery identities — val CE (free, inside training) and held-out NLL (lines 3a/3b) |
+
+For D1 the storage and evaluation counts coincide **by construction**: an
+identity is retained *because* it receives the preregistered battery. Nothing is
+stored that is not evaluated, and the only thing evaluated without new storage is
+D0.
+
+### 8.5 Two disclosures against these figures
+
+**(a) The estimate is conservative by roughly $3.25.** The per-checkpoint figure
+scales Experiment 1's sweep-wide average of 3.771 s/prompt. The directly relevant
+measurement — the two Experiment 1 **0.86M PCA** arms, the closest thing to what
+D1 will be — is **2.341 s/prompt** (824 s of wave time over 352 prompts), and the
+measured non-generation overhead is 3.5 min/checkpoint. At that rate a checkpoint
+costs **0.6078 h** rather than 0.9361 h, and phase 1's 10 checkpoints cost
+**$3.25 less**.
+
+**(b) One preregistered item is not funded by the $12.30, and should be.** The
+retention policy promises *metrics and generations* at all nine eval points, but
+the itemization above only funds generation at the 4 battery identities per seed.
+Running the 76-prompt behaviour set at the other 8 points, both seeds, costs
+2 × 8 × (76 × 1.562 s + 208 s load) = **1.451 h = $1.44** at measured rates.
+
+Applying both: **$12.30 − $3.25 + $1.44 = $10.49 expected.** The committed
+figures are left unchanged and the hard stop stays at **$18.78** — (a) more than
+covers (b), and a conservative ceiling is the right thing to authorize against.
 
 ## 9. Checkpoint inventory, cleanup and persistence
 

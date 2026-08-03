@@ -876,6 +876,26 @@ absorbed. Two things moved it from $22.92/$36.01: the battery grew 746 → 846 w
 the safety set was added, and the checkpoint counts were corrected from an
 assumed collapse to the measured fact.
 
+**Phase 1 itemized** (full table in [`PROPOSAL.md`](PROPOSAL.md) §8.2). Training
+alone is $2.03; **$9.26 of the remaining $10.27 is capability-battery generation
+on 10 checkpoints**, and everything else — in-run evals, checkpoint writes,
+transfer, hashing and pod idle — is $1.01 combined.
+
+**Three counts that are not the same number**: 10 checkpoints are *evaluated* on
+the full battery (D0's 2 endpoints + D1's 2 seeds × 4 identities) and that is the
+only count costing GPU time; 8 sets of weights are *newly stored* (D1 only —
+D0's are already on the relay); and 10 eval points get cheap metrics only. For D1
+storage and evaluation coincide by construction: an identity is retained because
+it receives the preregistered battery.
+
+**Two disclosures.** (a) The estimate is conservative by ~$3.25: it scales
+Experiment 1's sweep-wide 3.771 s/prompt, where the directly relevant 0.86M PCA
+arms measured **2.341 s/prompt** (824 s over 352 prompts). (b) One preregistered
+item is unfunded — generations at the 5 non-battery eval points would cost
+**$1.44** at measured rates. Applying both gives $10.49; the committed figures
+and the $18.78 hard stop are left unchanged, because (a) more than covers (b) and
+a conservative ceiling is the right thing to authorize against.
+
 ### 12.12 Checkpoint inventory and cleanup
 
 `scripts/pod/checkpoint_inventory.py` → 9 dev-box + 34 relay weight files,
