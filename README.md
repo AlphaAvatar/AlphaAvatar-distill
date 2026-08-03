@@ -8,11 +8,28 @@ The goal is to make distillation reproducible and automated, producing efficient
 
 The methods are meant to be **model-family-agnostic**: the same activation-statistics initialization, recovery training and deployment-numerics gates should apply to dense LLMs, MoE, VLM and Omni-models alike. That is a design constraint on the algorithm core, not a claim — the run below is a dense text **baseline**, and no MoE, vision or audio model has been attempted or validated ([scope decision](./logs/decisions.md)).
 
-[![performance trend](./assets/performance_trend.svg)](./assets/performance_trend.svg)
+[![Experiment 1 recovery-data scaling](./assets/e1_scaling.svg)](./assets/e1_scaling.svg)
+
+**Where the project stands.** Teacher-native held-out cross-entropy falls
+monotonically with recovery data on both initializations and has **not saturated**
+at 5.50M supervised tokens — the top of what this corpus reaches under a uniform
+mixture. Natural termination on uncapped generation rose from **0/8** on every
+earlier checkpoint to **0.93**, so the degeneration that blocked this line since
+2026-07-30 is substantially resolved. What has *not* moved is reasoning: GSM8K
+exact match is ≤0.05 across all 25 checkpoints. Full numbers, variance analysis
+and the data-vs-compute control are in [Experiment 1](#-experiment-1--recovery-data-scaling).
 
 **Current experiment:** [Qwen/Qwen3-4B-Thinking-2507](https://huggingface.co/Qwen/Qwen3-4B-Thinking-2507) → a 0.6B-class student (Qwen3-0.6B geometry, ~6.7× compression, INT8 deployment target).
 
-The figure shows **one point per student at its current best**, against the teacher it is being distilled from — where the model stands now, not every checkpoint it took to get there. The full run history, including the runs that made things worse, is the table below.
+<details>
+<summary><b>Historical run table (superseded metric — click to expand)</b></summary>
+
+The runs below were scored on `behavior_score_v0` under a **512-token generation
+cap**, which AGENTS.md P18 now forbids for formal measurement — the cap was
+hiding repetition loops rather than measuring behaviour. They are kept as the
+record of how the recovery recipe was built, and are **not comparable
+point-for-point** with the uncapped numbers above. The size-vs-behaviour figure
+they feed is [`assets/performance_trend.svg`](./assets/performance_trend.svg).
 
 **What is measured, and why it changed.** The headline metric is `behavior_score_v0`: the unweighted mean of six *credited* mechanical checks over 76 held-out prompts — chat-format validity, fluency (an empty or copied answer scores zero), evidence grounding, refusal on unanswerable questions, parseable tool calls, and gsm8k exact match. No LLM judge, so it is free and reproducible from the stored generations ([scorer](./src/aadistill/evaluation/behavior.py), [build log](./logs/EXPERIMENTS.md)). Held-out NLL used to be the headline; it is now a **guard rail** — it is fineweb-edu text and is nearly blind to the failures that actually matter here. Behavior score is itself a stopgap: **real-world test suites take over as the headline once the student is good enough to attempt them** ([decision](./logs/decisions.md)).
 
@@ -36,6 +53,8 @@ Attempts 7–8 are a fixed-budget ablation of the *start point*, not of the trai
 The behavior eval **reverses the ranking held-out NLL gives**: the cheapest lineage (attempt 8) is the best-behaved at 20.2%, while the best-NLL checkpoint (attempt 6) is the worst at 8.9% — it improves next-token prediction while getting *worse* at chat format, grounding and tool calls. That result is why the headline metric changed. Caveats a reader must carry: one run per arm, no variance estimate, and the per-axis rates rest on 7–76 prompts each, so only large moves are evidence — see the [run log](./logs/EXPERIMENTS.md). Current state and next actions: [`logs/STATE.md`](./logs/STATE.md); costed, unapproved work: [`logs/PROPOSAL.md`](./logs/PROPOSAL.md).
 
 The figure regenerates from [`assets/perf_trend.json`](./assets/perf_trend.json) with `uv run python scripts/evaluation/plot_perf_trend.py`; the table above comes from the same file via `--print-table`, and every point is backed by the consolidated record in [`logs/EXPERIMENTS.md`](./logs/EXPERIMENTS.md).
+
+</details>
 
 
 ---
@@ -65,6 +84,8 @@ CE is cross-entropy on held-out **teacher-native** sessions (16 packed blocks di
 - **What passes *do* buy is protocol competence:** the control leads every arm on natural termination (0.961) and behaviour (0.468).
 - **The behaviour composite barely resolves** — only 3.3× the seed spread, so its rung ordering is not claimable. Held-out NLL is weaker still (between-seed |Δ| 0.66).
 - **No reasoning emerged anywhere.** GSM8K exact match across all 25 checkpoints: min 0.000, max 0.050, mean 0.006, with the random init at 0.000 at every rung and seed.
+
+The figure above regenerates from `artifacts/stage3/e1_consolidated.json` with `uv run python scripts/evaluation/plot_e1_scaling.py`.
 
 **Reviewable samples:** [`logs/e1_test_cases.md`](./logs/e1_test_cases.md) — 46 generations stratified over stop reason and answer correctness, with the untruncated copies in `logs/e1_test_cases.jsonl`.
 
