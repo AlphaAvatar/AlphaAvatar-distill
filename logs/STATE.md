@@ -386,6 +386,16 @@ is the fully matched comparison.
   collisions**, **112** evaluator-validation tests — all five required policies
   verified on the safety set (always-answer 0/50 pairs, always-refuse 0/50,
   correct selective refusal 50/50, malformed 0/50, degenerate 0/50).
+* **Evaluation throughput audited and the execution path corrected.** Experiment
+  1 evaluated at **255 output tok/s** on a 0.6B model — ~10x low. The submission
+  pattern was already correct (all requests queued before stepping, so vLLM
+  continuously batches), but the engine was re-initialized **per prompt set**
+  (1.73 min each; 7 sets = 12.1 min/checkpoint) and every scheduler step copied
+  every running request's full token list. Fixed: one engine for all seven sets,
+  lazy token materialisation, `detokenize=False`. **No decoding or evaluation
+  semantics changed**, proven by 20 equivalence tests. Structural saving $1.71;
+  the generation speedup is measured by the D0 baseline before D1 battery money
+  is spent, and phase 1 **stops and reports** if throughput is still ~255 tok/s.
 * **Terminology corrected**: zero hash collisions proves item-level exclusion,
   not distributional novelty. Sets are labelled source-disjoint, split-held-out,
   or split-held-out near-domain item-disjoint. No out-of-domain claim is made.

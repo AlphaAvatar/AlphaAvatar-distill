@@ -80,11 +80,78 @@ def resolve_stop_ids(model: str, tok, cfg) -> list[int]:
                    if isinstance(i, int)})
 
 
+def engine_config(llm, ctx: int, gpu_mem_util: float) -> dict:
+    """The vLLM knobs that decide batching, read back from the live engine.
+
+    Read rather than assumed: `max_num_seqs` and `max_num_batched_tokens` are
+    never set by this script, so they are whatever the installed vLLM defaults
+    to, and that default is what actually caps the batch. Recording them is the
+    difference between "the evaluator batches" and "the evaluator batched 37
+    sequences because the scheduler said so".
+    """
+    out = {"max_model_len": ctx, "gpu_memory_utilization": gpu_mem_util,
+           "max_num_seqs": None, "max_num_batched_tokens": None,
+           "vllm_version": None, "enforce_eager": None}
+    try:
+        import vllm
+        out["vllm_version"] = getattr(vllm, "__version__", None)
+    except Exception:
+        pass
+    for path in (("vllm_config", "scheduler_config"),
+                 ("llm_engine", "vllm_config", "scheduler_config"),
+                 ("llm_engine", "scheduler_config")):
+        obj = llm
+        for attr in path:
+            obj = getattr(obj, attr, None)
+            if obj is None:
+                break
+        if obj is None:
+            continue
+        for key in ("max_num_seqs", "max_num_batched_tokens"):
+            if getattr(obj, key, None) is not None:
+                out[key] = getattr(obj, key)
+        break
+    for path in (("vllm_config", "model_config"),
+                 ("llm_engine", "model_config")):
+        obj = llm
+        for attr in path:
+            obj = getattr(obj, attr, None)
+            if obj is None:
+                break
+        if obj is not None:
+            out["enforce_eager"] = getattr(obj, "enforce_eager", None)
+            break
+    return out
+
+
+def gpu_sample() -> dict:
+    """One nvidia-smi sample. Cheap, and it is the only utilization evidence."""
+    import subprocess
+    try:
+        q = ("utilization.gpu,utilization.memory,memory.used,memory.total,"
+             "power.draw,clocks.sm")
+        raw = subprocess.run(
+            ["nvidia-smi", f"--query-gpu={q}", "--format=csv,noheader,nounits"],
+            capture_output=True, text=True, timeout=15).stdout.strip()
+        vals = [v.strip() for v in raw.split(",")]
+        return dict(zip(q.split(","), vals))
+    except Exception as e:  # never let instrumentation break a paid run
+        return {"error": f"{type(e).__name__}: {e}"}
+
+
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--model", required=True)
     ap.add_argument("--label", required=True)
-    ap.add_argument("--prompts", required=True)
+    ap.add_argument("--prompts", required=True, nargs="+",
+                    help="one or more prompt files. Several files are run through "
+                         "ONE engine instance: loading the engine per set cost "
+                         "~1.75 min each in Experiment 1, which with the "
+                         "seven-set capability battery would be ~12 min of pure "
+                         "init per checkpoint.")
+    ap.add_argument("--out-dir", default=None,
+                    help="with several prompt files, write <stem>.json here "
+                         "instead of a single --out")
     ap.add_argument("--tokenizer", default=None,
                     help="defaults to the checkpoint's own tokenizer")
     ap.add_argument("--context-len", type=int, default=None,
@@ -98,8 +165,15 @@ def main() -> int:
     ap.add_argument("--no-degeneration-stop", action="store_true")
     ap.add_argument("--system", default="You are a helpful Assistant.",
                     help="mandatory project system message (protocol, not a variable)")
-    ap.add_argument("--out", required=True)
+    ap.add_argument("--out", default=None)
+    ap.add_argument("--diagnostics", action="store_true",
+                    help="record engine settings, concurrency samples, effective "
+                         "batch size and GPU utilization alongside the results")
     args = ap.parse_args()
+    if not args.out and not args.out_dir:
+        raise SystemExit("one of --out or --out-dir is required")
+    if len(args.prompts) > 1 and not args.out_dir:
+        raise SystemExit("--out-dir is required with several prompt files")
 
     sys.path.insert(0, str(REPO_ROOT / "scripts" / "evaluation"))
     import degeneration  # noqa: E402
@@ -119,142 +193,200 @@ def main() -> int:
           f"(source {ctx_info['context_source']}, architectural "
           f"{ctx_info['architectural_context']}); stop ids {stop_ids}", flush=True)
 
-    samples = [json.loads(l) for l in Path(args.prompts).read_text().splitlines()
-               if l.strip()]
+    t_init = time.time()
     llm = LLM(model=args.model, dtype="bfloat16", max_model_len=ctx,
               gpu_memory_utilization=args.gpu_mem_util)
     eng = llm.llm_engine
+    init_seconds = round(time.time() - t_init, 1)
+    engine_settings = engine_config(llm, ctx, args.gpu_mem_util)
+    print(f"[{args.label}] engine ready in {init_seconds}s: {engine_settings}",
+          flush=True)
 
-    pending = {}
-    for s in samples:
-        turns = [m for m in s["messages"] if m["role"] != "assistant"]
-        # A system message is mandatory (project protocol), but the sample's own
-        # system prompt is PRESERVED when it has one — that is the rule the
-        # corpus was generated under (`system_prompt_policy.source_prompt_
-        # preserved`). Injecting unconditionally rendered two `<|im_start|>system`
-        # turns for the 6 behaviour prompts that carry their own, which is a
-        # context the model never saw in training.
-        has_system = any(m.get("role") == "system" for m in turns)
-        if args.system and not has_system:
-            turns = [{"role": "system", "content": args.system}] + turns
-        prompt = tok.apply_chat_template(turns, tools=s.get("tools"),
-                                         tokenize=False, add_generation_prompt=True)
-        p_ids = tok(prompt, add_special_tokens=False).input_ids
-        allowance = ctx - len(p_ids)
-        if allowance <= 0:
-            raise SystemExit(f"{s['id']}: prompt {len(p_ids)} leaves no room in {ctx}")
-        rid = f"{args.label}::{s['id']}"
-        params = SamplingParams(temperature=0.0, top_p=1.0, top_k=-1,
-                                max_tokens=allowance, stop_token_ids=stop_ids)
-        eng.add_request(rid, {"prompt_token_ids": p_ids}, params)
-        pending[rid] = {"sample": s, "p_ids": p_ids, "allowance": allowance,
-                        "system_source": ("sample" if has_system else "default"),
-                        "gen": [], "last_check": 0, "degen": None,
-                        "finish": None, "t0": time.time(), "ttft": None}
-
-    t_wave = time.time()
-    done = {}
-    while eng.has_unfinished_requests():
-        for out in eng.step():
-            st = pending.get(out.request_id)
-            if st is None:
-                continue
-            st["gen"] = list(out.outputs[0].token_ids)
-            if st["ttft"] is None and st["gen"]:
-                st["ttft"] = time.time() - st["t0"]
-            if out.finished:
-                st["finish"] = out.outputs[0].finish_reason
-                done[out.request_id] = st
-                pending.pop(out.request_id, None)
-                continue
-            if (not args.no_degeneration_stop
-                    and len(st["gen"]) - st["last_check"] >= args.check_every):
-                st["last_check"] = len(st["gen"])
-                d = degeneration.check(st["gen"])
-                if d:
-                    st["degen"] = d
-                    eng.abort_request(out.request_id)
-                    st["finish"] = "degeneration"
+    results = []
+    for prompts_path in args.prompts:
+        samples = [json.loads(l)
+                   for l in Path(prompts_path).read_text().splitlines() if l.strip()]
+        pending = {}
+        for s in samples:
+            turns = [m for m in s["messages"] if m["role"] != "assistant"]
+            # A system message is mandatory (project protocol), but the sample's
+            # own system prompt is PRESERVED when it has one — the rule the
+            # corpus was generated under. Injecting unconditionally rendered two
+            # `<|im_start|>system` turns for the 6 behaviour prompts that carry
+            # their own, a context the model never saw in training.
+            has_system = any(m.get("role") == "system" for m in turns)
+            if args.system and not has_system:
+                turns = [{"role": "system", "content": args.system}] + turns
+            prompt = tok.apply_chat_template(turns, tools=s.get("tools"),
+                                             tokenize=False,
+                                             add_generation_prompt=True)
+            p_ids = tok(prompt, add_special_tokens=False).input_ids
+            allowance = ctx - len(p_ids)
+            if allowance <= 0:
+                raise SystemExit(
+                    f"{s['id']}: prompt {len(p_ids)} leaves no room in {ctx}")
+            rid = f"{args.label}::{Path(prompts_path).stem}::{s['id']}"
+            # `detokenize=False` skips vLLM's incremental detokenization, which
+            # this evaluator never reads — the record is decoded once from the
+            # final token ids. It changes no sampling semantics.
+            params = SamplingParams(temperature=0.0, top_p=1.0, top_k=-1,
+                                    max_tokens=allowance, stop_token_ids=stop_ids,
+                                    detokenize=False)
+            eng.add_request(rid, {"prompt_token_ids": p_ids}, params)
+            pending[rid] = {"sample": s, "p_ids": p_ids, "allowance": allowance,
+                            "system_source": ("sample" if has_system
+                                              else "default"),
+                            "gen": [], "n_gen": 0, "last_check": 0, "degen": None,
+                            "finish": None, "t0": time.time(), "ttft": None}
+        t_wave = time.time()
+        done, conc = {}, []
+        steps = 0
+        while eng.has_unfinished_requests():
+            outs = eng.step()
+            steps += 1
+            conc.append(len(outs))
+            for out in outs:
+                st = pending.get(out.request_id)
+                if st is None:
+                    continue
+                # Track the LENGTH per step, not a copy of the whole token list.
+                # The old line rebuilt every running request's full token list on
+                # every scheduler step — O(sum of L^2) list copies on the decode
+                # critical path. The tokens are materialised only when something
+                # actually reads them: the degeneration check, or completion.
+                st["n_gen"] = len(out.outputs[0].token_ids)
+                if st["ttft"] is None and st["n_gen"]:
+                    st["ttft"] = time.time() - st["t0"]
+                if out.finished:
+                    st["gen"] = list(out.outputs[0].token_ids)
+                    st["finish"] = out.outputs[0].finish_reason
                     done[out.request_id] = st
                     pending.pop(out.request_id, None)
-    done.update(pending)
+                    continue
+                if (not args.no_degeneration_stop
+                        and st["n_gen"] - st["last_check"] >= args.check_every):
+                    st["last_check"] = st["n_gen"]
+                    st["gen"] = list(out.outputs[0].token_ids)
+                    d = degeneration.check(st["gen"])
+                    if d:
+                        st["degen"] = d
+                        eng.abort_request(out.request_id)
+                        st["finish"] = "degeneration"
+                        done[out.request_id] = st
+                        pending.pop(out.request_id, None)
+        done.update(pending)
+        wave_seconds = round(time.time() - t_wave, 1)
 
-    records, scored = [], []
-    for rid, st in done.items():
-        s = st["sample"]
-        gen = st["gen"]
-        dt = time.time() - st["t0"]
-        hit_ctx = len(gen) >= st["allowance"]
-        ended_stop = bool(gen) and gen[-1] in stop_ids
-        raw = tok.decode(gen, skip_special_tokens=False)
-        reason = ("eos" if ended_stop else
-                  "degeneration" if st["degen"] else
-                  "context_limit" if hit_ctx else st["finish"] or "unknown")
-        rec = {
-            "id": s["id"], "label": args.label, "group": s.get("group"),
-            "source": s.get("source"), "prompt_tokens": len(st["p_ids"]),
-            "system_source": st["system_source"],
+        records, scored = [], []
+        for rid, st in done.items():
+            s_ = st["sample"]
+            gen = st["gen"]
+            dt = time.time() - st["t0"]
+            hit_ctx = len(gen) >= st["allowance"]
+            ended_stop = bool(gen) and gen[-1] in stop_ids
+            raw = tok.decode(gen, skip_special_tokens=False)
+            reason = ("eos" if ended_stop else
+                      "degeneration" if st["degen"] else
+                      "context_limit" if hit_ctx else st["finish"] or "unknown")
+            rec = {
+                "id": s_["id"], "label": args.label, "group": s_.get("group"),
+                "source": s_.get("source"), "prompt_tokens": len(st["p_ids"]),
+                "system_source": st["system_source"],
+                "context_len": ctx, "context_resolution": ctx_info,
+                "generation_allowance": st["allowance"],
+                "generated_tokens": len(gen), "stop_reason": reason,
+                "degeneration_triggered": st["degen"] is not None,
+                "degeneration_kind": (st["degen"] or {}).get("kind"),
+                "natural_termination": reason == "eos",
+                "context_limit_reached": reason == "context_limit",
+                # Neither a context hit nor a degeneration abort observed the
+                # model's own stopping decision, so both are right-censored.
+                "right_censored": reason in ("context_limit", "degeneration"),
+                "degeneration": st["degen"], "vllm_finish_reason": st["finish"],
+                "ttft_seconds": round(st["ttft"], 3) if st["ttft"] else None,
+                "seconds": round(dt, 2), "raw": raw,
+            }
+            records.append(rec)
+            # `hit_cap` marks a censored generation for the scorer. Under P18 the
+            # only cap is the real context, so it is set from that, never from a
+            # chosen token budget.
+            scored.append(score_sample(s_, raw, hit_cap=rec["context_limit_reached"]))
+
+        records.sort(key=lambda r: r["id"])
+        n = len(records)
+        in_tok = sum(r["prompt_tokens"] for r in records)
+        out_tok = sum(r["generated_tokens"] for r in records)
+        lens = sorted(r["generated_tokens"] for r in records)
+        summary = {
+            "label": args.label, "model": args.model, "prompts": prompts_path,
+            "n_samples": n,
+            # "unrestricted within the model's effective context" — the allowance
+            # is not a chosen token budget, but it is NOT the architectural 262K.
+            "unrestricted_within_effective_context": True,
+            "censored_measurement": False,
             "context_len": ctx, "context_resolution": ctx_info,
-            "generation_allowance": st["allowance"],
-            "generated_tokens": len(gen), "stop_reason": reason,
-            "degeneration_triggered": st["degen"] is not None,
-            "degeneration_kind": (st["degen"] or {}).get("kind"),
-            "natural_termination": reason == "eos",
-            "context_limit_reached": reason == "context_limit",
-            # Neither a context hit nor a degeneration abort observed the
-            # model's own stopping decision, so both are right-censored.
-            "right_censored": reason in ("context_limit", "degeneration"),
-            "degeneration": st["degen"], "vllm_finish_reason": st["finish"],
-            "ttft_seconds": round(st["ttft"], 3) if st["ttft"] else None,
-            "seconds": round(dt, 2), "raw": raw,
+            "stop_ids": stop_ids,
+            "system_message": args.system,
+            "degeneration_stop": not args.no_degeneration_stop,
+            "wave_seconds": wave_seconds,
+            "throughput": {
+                "input_tokens": in_tok, "output_tokens": out_tok,
+                "output_tokens_p50": lens[n // 2],
+                "output_tokens_p95": lens[min(n - 1, int(n * 0.95))],
+                "output_tokens_max": lens[-1],
+                "generation_wall_seconds": wave_seconds,
+                "output_tokens_per_second": round(out_tok / wave_seconds, 1)
+                if wave_seconds else None,
+                "prompts_per_second": round(n / wave_seconds, 4)
+                if wave_seconds else None,
+                "scheduler_steps": steps,
+                "seconds_per_step": round(wave_seconds / steps, 4) if steps else None,
+                "concurrency_start": conc[0] if conc else 0,
+                "concurrency_max": max(conc) if conc else 0,
+                "effective_batch_size_mean": round(sum(conc) / len(conc), 2)
+                if conc else None,
+                "submission": ("all requests added to the engine before the first "
+                               "step; vLLM schedules them with continuous "
+                               "batching — not a serial loop"),
+            },
+            "engine": {**engine_settings, "init_seconds": init_seconds,
+                       "init_amortised_over_sets": len(args.prompts)},
+            "stop_reasons": {r: sum(1 for x in records if x["stop_reason"] == r)
+                             for r in sorted({x["stop_reason"] for x in records})},
+            "natural_termination_rate": round(
+                sum(x["natural_termination"] for x in records) / n, 4),
+            "degeneration_rate": round(
+                sum(x["stop_reason"] == "degeneration" for x in records) / n, 4),
+            "degeneration_kinds": {k: sum(1 for x in records
+                                          if x.get("degeneration_kind") == k)
+                                   for k in ("cycle", "low_novelty", "rambling")},
+            "context_limit_rate": round(
+                sum(x["context_limit_reached"] for x in records) / n, 4),
+            "right_censored_rate": round(
+                sum(x["right_censored"] for x in records) / n, 4),
+            "generated_tokens_p50": lens[n // 2],
+            "generated_tokens_mean": round(out_tok / n, 1),
+            "behavior": behavior_score(scored),
+            "aggregate": aggregate(scored),
         }
-        records.append(rec)
-        # `hit_cap` marks a censored generation for the scorer. Under P18 the
-        # only cap is the real context, so it is set from that, never from a
-        # chosen token budget.
-        scored.append(score_sample(s, raw, hit_cap=rec["context_limit_reached"]))
+        if args.diagnostics:
+            summary["gpu"] = gpu_sample()
+        out = (Path(args.out) if args.out
+               else Path(args.out_dir) / f"{Path(prompts_path).stem}.json")
+        out.parent.mkdir(parents=True, exist_ok=True)
+        out.write_text(json.dumps(summary, indent=1, ensure_ascii=False))
+        with open(out.with_suffix(".generations.jsonl"), "w") as f:
+            for r in records:
+                f.write(json.dumps(r, ensure_ascii=False) + "\n")
+        results.append(summary)
+        t = summary["throughput"]
+        print(f"[{args.label}] {Path(prompts_path).stem}: {n} prompts, "
+              f"{out_tok:,} out-tok in {wave_seconds}s = "
+              f"{t['output_tokens_per_second']} tok/s, "
+              f"{t['prompts_per_second']} prompts/s, "
+              f"eff.batch {t['effective_batch_size_mean']}, "
+              f"{t['seconds_per_step']}s/step", flush=True)
 
-    records.sort(key=lambda r: r["id"])
-    n = len(records)
-    summary = {
-        "label": args.label, "model": args.model, "prompts": args.prompts,
-        "n_samples": n,
-        # "unrestricted within the model's effective context" — the allowance is
-        # not a chosen token budget, but it is NOT the architectural 262K either.
-        "unrestricted_within_effective_context": True,
-        "censored_measurement": False,
-        "context_len": ctx, "context_resolution": ctx_info,
-        "stop_ids": stop_ids,
-        "system_message": args.system,
-        "degeneration_stop": not args.no_degeneration_stop,
-        "wave_seconds": round(time.time() - t_wave, 1),
-        "stop_reasons": {r: sum(1 for x in records if x["stop_reason"] == r)
-                         for r in sorted({x["stop_reason"] for x in records})},
-        "natural_termination_rate": round(
-            sum(x["natural_termination"] for x in records) / n, 4),
-        "degeneration_rate": round(
-            sum(x["stop_reason"] == "degeneration" for x in records) / n, 4),
-        "degeneration_kinds": {k: sum(1 for x in records
-                                      if x.get("degeneration_kind") == k)
-                               for k in ("cycle", "low_novelty", "rambling")},
-        "context_limit_rate": round(
-            sum(x["context_limit_reached"] for x in records) / n, 4),
-        "right_censored_rate": round(
-            sum(x["right_censored"] for x in records) / n, 4),
-        "generated_tokens_p50": sorted(x["generated_tokens"] for x in records)[n // 2],
-        "generated_tokens_mean": round(
-            sum(x["generated_tokens"] for x in records) / n, 1),
-        "behavior": behavior_score(scored),
-        "aggregate": aggregate(scored),
-    }
-    out = Path(args.out)
-    out.parent.mkdir(parents=True, exist_ok=True)
-    out.write_text(json.dumps(summary, indent=1, ensure_ascii=False))
-    with open(out.with_suffix(".generations.jsonl"), "w") as f:
-        for r in records:
-            f.write(json.dumps(r, ensure_ascii=False) + "\n")
-    print(json.dumps({k: v for k, v in summary.items()
-                      if k not in ("aggregate",)}, indent=1)[:1200], flush=True)
     return 0
 
 

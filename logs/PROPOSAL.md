@@ -575,7 +575,95 @@ identity is retained *because* it receives the preregistered battery. Nothing is
 stored that is not evaluated, and the only thing evaluated without new storage is
 D0.
 
-### 8.5 Two disclosures against these figures
+### 8.5 Throughput audit of the evaluation path (2026-08-03)
+
+Prompted by the maintainer's observation that 824 s for 352 prompts is only
+**0.427 prompts/s**. Measured from the stored Experiment 1 artifacts, for the two
+0.86M PCA arms — the closest thing to what D1 will be:
+
+| quantity | `sa` behaviour | `sa` gsm8k | `sb` behaviour | `sb` gsm8k | **total** |
+|---|---:|---:|---:|---:|---:|
+| input tokens | 15,711 | 7,979 | 15,711 | 7,979 | **47,380** |
+| generated tokens | 34,591 | 76,085 | 37,207 | 61,967 | **209,850** |
+| output p50 / p95 / max | 320/1280/1536 | 768/1280/2048 | 306/1536/2048 | 634/1280/1280 | max **2,048** |
+| generation wall time (s) | 123.7 | 341.9 | 113.7 | 244.2 | **823.5** |
+| output tokens/s | 279.6 | 222.5 | 327.2 | 253.8 | **254.8** |
+| prompts/s | 0.614 | 0.292 | 0.668 | 0.410 | **0.427** |
+| natural stop / context-limit | 0.75 / 0.00 | 0.38 / 0.00 | 0.78 / 0.00 | 0.58 / 0.00 | — |
+
+**255 output tokens/s aggregate for a 0.6B model on an L40S is roughly an order
+of magnitude below what the hardware should deliver.** The wave ends when the
+longest request finishes, so scheduler steps ≥ max output length; for `sa` gsm8k
+that is ≥2,048 steps in 341.9 s = **167 ms/step**, with a mean effective batch of
+76,085/2,048 ≈ **37 concurrent sequences**. A 0.6B decode step at batch 37 should
+be ~10 ms.
+
+**The submission pattern was already correct.** Every request is added to the
+engine *before* the first `step()`, and the loop then drives
+`while eng.has_unfinished_requests(): eng.step()`. That is vLLM continuous
+batching — **not** a serial Python loop and **not** one request at a time. Two
+different problems were found instead.
+
+**Defect 1 — the engine was re-initialized per prompt set.** `LLM(...)` is built
+once per *invocation*, and the orchestrator invokes the script once per
+(checkpoint, prompt set). Measured non-generation overhead is **1.73 min per
+invocation** (5.859 h billed − 4.416 h of wave time, over 25 checkpoints × 2
+sets). With capability-v2's **seven** sets that would have been 7 model loads per
+checkpoint — **12.1 min of pure init**, against the 3 min the committed estimate
+assumed.
+
+**Defect 2 — a full token-list copy on every scheduler step.**
+`st["gen"] = list(out.outputs[0].token_ids)` ran for every *unfinished* request on
+every step, i.e. O(Σ L²) list copies on the decode critical path, plus vLLM's
+incremental detokenization producing text this evaluator never reads.
+
+**Corrections made — execution path only, no decoding or evaluation semantics
+touched.** One engine now serves all seven sets (`--prompts` takes several files,
+request ids namespaced per set); the token list is materialised only when the
+degeneration check or completion actually reads it, with the *length* tracked per
+step; and `detokenize=False` skips text the evaluator discards. Sampling
+(`temperature=0.0`, `top_p=1.0`, `top_k=-1`, `max_tokens=allowance`,
+`stop_token_ids`), the effective-context derivation, the degeneration stop and
+every recorded field are unchanged.
+
+**Equivalence is proven, not asserted:** `tests/evaluation/test_uncapped_eval_path.py`
+drives the reference loop and the corrected loop through the same stub engine
+across five request plans (short, mixed lengths, one degenerate, all degenerate,
+single request), at four `--check-every` intervals, with the degeneration stop on
+and off, and asserts byte-identical tokens, finish reasons and degeneration
+verdicts — 20 tests. It also asserts the engine is built outside the set loop and
+that the corrected loop copies <1/10 the tokens.
+
+**Forecast effect — one certain, one not.**
+
+| | hours over phase 1's 10 evaluated checkpoints | cost |
+|---|---:|---:|
+| old path, 7 model loads/checkpoint | 2.020 | $2.00 |
+| **committed assumption (0.05 h/ckpt)** | **0.500** | **$0.49** |
+| corrected path, 1 model load/checkpoint | 0.289 | $0.29 |
+
+So the committed $12.30 **under-costed the old path by $1.51**, and the corrected
+path lands **$0.21 under** the committed assumption — a $1.71 swing, structural
+and not dependent on any further measurement.
+
+**The generation speedup is not claimed.** Defect 2's cost has not been
+attributed, only bounded circumstantially. If the corrected loop reaches even
+1,000 tok/s, phase 1's generation drops from 8.86 h to ~1.4 h — but that is a
+hypothesis, and the committed figures assume no such gain.
+
+**Verification is the first thing phase 1 does.** The D0 endpoint baseline is
+$1.85 of the $12.30 and runs before any D1 battery spending. The instrumented
+evaluator now records, per set: input and output tokens, output p50/p95/max,
+generation wall time, output tokens/s, prompts/s, scheduler steps, seconds/step,
+starting and maximum concurrency, mean effective batch size, the engine's
+`max_num_seqs` / `max_num_batched_tokens` / `max_model_len` /
+`gpu_memory_utilization` / version read back from the live engine rather than
+assumed, engine init seconds, an `nvidia-smi` utilization sample, and the
+natural-stop and context-limit rates. **If throughput is still ~255 tok/s after
+the fix, phase 1 stops there and reports rather than spending the D1 battery
+budget.**
+
+### 8.6 Two further disclosures against these figures
 
 **(a) The estimate is conservative by roughly $3.25.** The per-checkpoint figure
 scales Experiment 1's sweep-wide average of 3.771 s/prompt. The directly relevant
