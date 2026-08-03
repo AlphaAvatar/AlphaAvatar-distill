@@ -103,10 +103,25 @@ def battery_prompt_files(battery: Path, behavior_prompts: Path) -> list[str]:
 def evaluate_checkpoint(model: Path, label: str, out_dir: Path, battery: Path,
                         behavior_prompts: Path, vllm_python: str,
                         full_battery: bool) -> None:
-    """One engine, all prompt files. `full_battery=False` runs behaviour only."""
+    """One engine, all prompt files. `full_battery=False` runs behaviour only.
+
+    Already-complete work is skipped. A crash late in a long evaluation phase
+    otherwise costs every checkpoint before it a second time — ~3 GPU hours here
+    — and re-generating is not merely expensive, it discards generations that
+    were already produced under the frozen protocol.
+    """
     out_dir.mkdir(parents=True, exist_ok=True)
     files = (battery_prompt_files(battery, behavior_prompts) if full_battery
              else [str(staged_behavior(behavior_prompts))])
+    want = {Path(f).stem for f in files}
+    have = {p.name[: -len(".generations.jsonl")]
+            for p in out_dir.glob("*.generations.jsonl")}
+    if want <= have:
+        log(f"{label}: all {len(want)} sets already generated; skipping")
+        return
+    if have:
+        files = [f for f in files if Path(f).stem not in have]
+        log(f"{label}: resuming, {len(have)} sets done, {len(files)} to go")
     run([vllm_python, "scripts/evaluation/uncapped_eval.py",
          "--model", model, "--label", label,
          "--prompts", *files, "--out-dir", out_dir, "--diagnostics"])

@@ -43,6 +43,7 @@ Every content metric consequently ships in two forms: the raw check, and a
 from __future__ import annotations
 
 import json
+import math
 import re
 from collections import Counter
 
@@ -199,6 +200,12 @@ def final_number(text: str) -> str | None:
     try:
         f = float(value)
     except ValueError:
+        return value
+    # A degenerate generation can emit a digit string long enough that float()
+    # overflows to inf, and int(inf) raises. Fall back to the literal token
+    # rather than crashing the scorer: such a "number" will never match a gold
+    # value, so the verdict is unchanged — only the exception is.
+    if not math.isfinite(f):
         return value
     return str(int(f)) if f == int(f) else str(f)
 
