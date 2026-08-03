@@ -11,9 +11,10 @@ Cartesian sweep.
 **Phase 1 is fully prepared on CPU for $0** — capability battery frozen
 (`capability-v2`, 846 prompts, safety refusal now a separate XSTest set),
 evaluators validated at 112 tests, checkpoints inventoried and cleaned. Phase 1
-costs **$12.30 expected / $18.78 pessimistic** and **fits** the unchanged $30
-cap (itemized to the component in [`PROPOSAL.md`](PROPOSAL.md) §8.2 — training is
-$2.03, battery generation on 10 checkpoints is $9.26, everything else $1.01); **all three phases now cost $42.90 expected / $66.15 pessimistic, which does
+costs **$13.17 expected / $18.78 pessimistic** and **fits** the unchanged $30
+cap (itemized in [`PROPOSAL.md`](PROPOSAL.md) §8.2/§8.8 — training $2.03, battery
+generation $9.06, mandatory behaviour generations at the 5 non-battery eval
+points $1.07, everything else $1.01); **all three phases now cost $42.90 expected / $66.15 pessimistic, which does
 not fit** — reported rather than absorbed, and a phase-2/3 budget decision is
 deferred until phase 1 reports. **Nothing is launched.** See
 [`PROPOSAL.md`](PROPOSAL.md).
@@ -406,9 +407,11 @@ is the fully matched comparison.
 
 ## 11. Next actions
 
-1. **Maintainer approval to launch phase 1** (D1, both seeds, $12.30 expected /
-   $18.78 pessimistic, spending capped at the pessimistic figure). Nothing else
-   blocks it.
+1. **Launch phase 1** — authorized: D1 only, both seeds, `capability-v2` frozen
+   at manifest `060bdd31…`, hard spending stop **$18.78**. **The first D0
+   endpoint evaluation runs first and the throughput gate decides whether to
+   continue** (`scripts/pod/throughput_gate.py`); on failure, preserve output and
+   telemetry, tear down, report actual cost, stop.
 2. After phase 1 reports, decide phases 2–3: raise the cap, cut the battery to
    `final` + `best-held-out-NLL` only (needs approval), or stop after phase 2.
    **The $30 incremental cap is unchanged and no destructive HF cleanup will be

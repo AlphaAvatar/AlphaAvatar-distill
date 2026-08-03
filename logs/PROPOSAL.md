@@ -663,7 +663,90 @@ natural-stop and context-limit rates. **If throughput is still ~255 tok/s after
 the fix, phase 1 stops there and reports rather than spending the D1 battery
 budget.**
 
-### 8.6 Two further disclosures against these figures
+### 8.6 The Phase 1 throughput gate (preregistered)
+
+**Execution order, binding:**
+
+1. Run the **first** preregistered D0 endpoint evaluation — before either D1
+   training run starts.
+2. Record every instrumented field (§8.5).
+3. Compare against the stored baseline of **254.8 output tokens/s**.
+4. **Stop and report before the second D0 endpoint or any D1 training** if any of:
+   * aggregate throughput **≤ 306 output tokens/s** (within 20% of baseline);
+   * a comparable long-output wave still shows **≥ 100 ms median scheduler-step
+     time at an effective batch near 37** — "comparable" is fixed in advance as
+     output p50 ≥ 300 tokens and mean effective batch in [20, 60], the regime the
+     baseline waves ran in;
+   * telemetry shows substantial unexplained GPU starvation (median in-wave
+     utilization below 40%) or another execution defect.
+5. If it passes, phase 1 continues **without another approval**, under the
+   unchanged **$18.78** hard spending stop and every frozen scientific
+   requirement.
+
+Implemented as `scripts/pod/throughput_gate.py`, exit 0 pass / 1 fail / 2
+cannot-evaluate, with 21 tests covering every condition firing and not firing —
+including that the exact Experiment 1 result (209,850 tok / 823.5 s, 167 ms/step)
+fails all three. The gate is deliberately not passable by a large batch masking
+slow steps: conditions 1 and 2 are independent.
+
+**On failure:** preserve partial output and telemetry, tear the pod down safely,
+report actual cost, stop. **On pass:** phase 1 only — phases 2 and 3 remain
+unauthorized.
+
+### 8.7 Set count, confirmed before launch
+
+| | count | prompts |
+|---|---:|---:|
+| capability sets in `battery_v2/` | **7** | **770** |
+| `behavior_v0` (separate file, `data/eval_behavior_v0/prompts.jsonl`) | 1 | **76** |
+| **full-battery workload per checkpoint** | **8 files** | **846** |
+
+Verified against the frozen artifacts: each set's line count equals its manifest
+`n` and its recorded sha256, `battery_v2/` holds exactly seven `.jsonl` files
+totalling 770, and `behavior_v0` is not among them.
+
+* **The seven sets carry all 770 non-behaviour prompts** — `knowledge` 150,
+  `math_verified` 100, `gsm8k` 100, `multihop` 100, `rag` 100,
+  `answerability_paired` 120, `safety_paired` 100.
+* **`behavior_v0` remains separately generated, scored and persisted.** It is its
+  own prompt file, gets its own `behavior_v0.json` and
+  `behavior_v0.generations.jsonl`, and is scored by `behavior_score` — not by the
+  capability scorers, and never merged into a capability aggregate. It is passed
+  to the shared engine as the eighth prompt file purely to avoid an eighth model
+  load; that is an execution-path detail and changes nothing about how it is
+  scored or stored.
+* **The complete required workload is 846 prompts at every full-battery
+  checkpoint.**
+* **The 76-prompt generations at the remaining evaluation points remain
+  mandatory.** With 9 eval points and 4 full-battery identities, that is **5
+  behaviour-only points per seed**, 10 across both — now explicitly funded (§8.8).
+
+Per-seed workload: 4 × 846 + 5 × 76 = **3,764 prompt-generations**; both seeds
+**7,528**, plus D0's 2 × 846 = **1,692**.
+
+### 8.8 Revised Phase 1 expected cost
+
+The mandatory behaviour generations at the 5 non-battery points were the unfunded
+item disclosed in §8.9(b). They are now costed in, and the engine-reuse saving is
+applied:
+
+| component | hours | $/h | cost |
+|---|---:|---:|---:|
+| training, 2 D1 seeds | 2.0478 | 0.99 | $2.03 |
+| in-run held-out NLL (8 points) + `post_run`, 2 seeds | 0.2400 | 0.99 | $0.24 |
+| checkpoint writes, 2 seeds | 0.0267 | 0.99 | $0.03 |
+| D0 endpoints, 2 × full battery (846) | 1.8302 | 0.99 | $1.81 |
+| D1 full battery, 8 identities × 846 | 7.3207 | 0.99 | $7.25 |
+| **D1 behaviour-only, 2 seeds × 5 points × 76** | 1.0851 | 0.99 | **$1.07** |
+| pod provisioning + engine init (idle) | 0.5000 | 0.99 | $0.49 |
+| transfer, hashing, artifact processing | 0.2500 | 0.99 | $0.25 |
+| **TOTAL** | **13.3004** | 0.99 | **$13.17** |
+
+$12.30 + $1.07 (mandatory behaviour) − $0.21 (engine reuse) = **$13.17**, against
+the unchanged **$18.78** hard stop — **$5.61 of headroom**. Every figure still
+uses the conservative 3.771 s/prompt rate; the gate measures the real one.
+
+### 8.9 Two further disclosures against these figures
 
 **(a) The estimate is conservative by roughly $3.25.** The per-checkpoint figure
 scales Experiment 1's sweep-wide average of 3.771 s/prompt. The directly relevant
@@ -673,15 +756,18 @@ measured non-generation overhead is 3.5 min/checkpoint. At that rate a checkpoin
 costs **0.6078 h** rather than 0.9361 h, and phase 1's 10 checkpoints cost
 **$3.25 less**.
 
-**(b) One preregistered item is not funded by the $12.30, and should be.** The
+**(b) One preregistered item was not funded by the $12.30 — now it is.** The
 retention policy promises *metrics and generations* at all nine eval points, but
-the itemization above only funds generation at the 4 battery identities per seed.
-Running the 76-prompt behaviour set at the other 8 points, both seeds, costs
-2 × 8 × (76 × 1.562 s + 208 s load) = **1.451 h = $1.44** at measured rates.
+the original itemization funded generation only at the 4 battery identities per
+seed. **Resolved in §8.8**: the 76-prompt behaviour set at the other 5 points per
+seed is costed at **$1.07**, and the maintainer has confirmed it is mandatory.
+(The earlier $1.44 figure used 8 points, double-counting the 4 battery
+identities.)
 
-Applying both: **$12.30 − $3.25 + $1.44 = $10.49 expected.** The committed
-figures are left unchanged and the hard stop stays at **$18.78** — (a) more than
-covers (b), and a conservative ceiling is the right thing to authorize against.
+Net: **$13.17 expected** (§8.8) against the unchanged **$18.78** hard stop.
+Disclosure (a) is *not* banked — every figure still uses the conservative
+3.771 s/prompt rate, and the throughput gate (§8.6) measures the real one before
+the D1 battery budget is committed.
 
 ## 9. Checkpoint inventory, cleanup and persistence
 

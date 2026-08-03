@@ -80,6 +80,11 @@ def resolve_stop_ids(model: str, tok, cfg) -> list[int]:
                    if isinstance(i, int)})
 
 
+def _pct(values, q: float):
+    v = sorted(values)
+    return v[min(len(v) - 1, int(len(v) * q))] if v else None
+
+
 def engine_config(llm, ctx: int, gpu_mem_util: float) -> dict:
     """The vLLM knobs that decide batching, read back from the live engine.
 
@@ -166,6 +171,8 @@ def main() -> int:
     ap.add_argument("--system", default="You are a helpful Assistant.",
                     help="mandatory project system message (protocol, not a variable)")
     ap.add_argument("--out", default=None)
+    ap.add_argument("--gpu-sample-every", type=int, default=200,
+                    help="scheduler steps between nvidia-smi samples")
     ap.add_argument("--diagnostics", action="store_true",
                     help="record engine settings, concurrency samples, effective "
                          "batch size and GPU utilization alongside the results")
@@ -239,12 +246,20 @@ def main() -> int:
                             "gen": [], "n_gen": 0, "last_check": 0, "degen": None,
                             "finish": None, "t0": time.time(), "ttft": None}
         t_wave = time.time()
-        done, conc = {}, []
+        done, conc, step_s, gpu_samples = {}, [], [], []
         steps = 0
+        t_prev = time.time()
         while eng.has_unfinished_requests():
             outs = eng.step()
+            now = time.time()
+            step_s.append(now - t_prev)
+            t_prev = now
             steps += 1
             conc.append(len(outs))
+            # Sample utilization *during* the wave, not after it. One sample at
+            # the end says nothing about starvation while decoding.
+            if args.diagnostics and steps % args.gpu_sample_every == 0:
+                gpu_samples.append({"step": steps, **gpu_sample()})
             for out in outs:
                 st = pending.get(out.request_id)
                 if st is None:
@@ -341,6 +356,11 @@ def main() -> int:
                 if wave_seconds else None,
                 "scheduler_steps": steps,
                 "seconds_per_step": round(wave_seconds / steps, 4) if steps else None,
+                # Median, not just the mean: a few long prefill steps skew the
+                # mean, and the gate is written against the median.
+                "step_seconds_p50": round(_pct(step_s, 0.50), 5) if step_s else None,
+                "step_seconds_p95": round(_pct(step_s, 0.95), 5) if step_s else None,
+                "step_ms_p50": round(_pct(step_s, 0.50) * 1000, 2) if step_s else None,
                 "concurrency_start": conc[0] if conc else 0,
                 "concurrency_max": max(conc) if conc else 0,
                 "effective_batch_size_mean": round(sum(conc) / len(conc), 2)
@@ -370,7 +390,13 @@ def main() -> int:
             "aggregate": aggregate(scored),
         }
         if args.diagnostics:
-            summary["gpu"] = gpu_sample()
+            summary["gpu"] = {"final": gpu_sample(), "during_wave": gpu_samples}
+            utils = [int(g["utilization.gpu"]) for g in gpu_samples
+                     if str(g.get("utilization.gpu", "")).isdigit()]
+            if utils:
+                summary["gpu"]["utilization_p50"] = _pct(sorted(utils), 0.50)
+                summary["gpu"]["utilization_min"] = min(utils)
+                summary["gpu"]["samples"] = len(utils)
         out = (Path(args.out) if args.out
                else Path(args.out_dir) / f"{Path(prompts_path).stem}.json")
         out.parent.mkdir(parents=True, exist_ok=True)

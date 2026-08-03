@@ -955,7 +955,36 @@ scheduler steps, s/step, concurrency and mean effective batch, the engine's
 `nvidia-smi` sample, and stop-reason rates. **If throughput is still ~255 tok/s,
 phase 1 stops and reports rather than spending the D1 battery budget.**
 
-### 12.14 Status
+### 12.14 The Phase 1 throughput gate and the confirmed set count
+
+**Gate (preregistered, `scripts/pod/throughput_gate.py`, 21 tests).** The first
+D0 endpoint evaluation runs **before either D1 training run**. Phase 1 stops and
+reports — before the second D0 endpoint or any D1 training — if aggregate
+throughput is **≤ 306 output tok/s** (within 20% of the 254.8 baseline), or a
+comparable long-output wave still shows **≥ 100 ms median scheduler-step time at
+an effective batch near 37** (comparable fixed in advance as output p50 ≥ 300 and
+mean effective batch in [20, 60]), or telemetry shows GPU starvation (median
+in-wave utilization < 40%) or another execution defect. Conditions 1 and 2 are
+independent, so a large batch cannot mask slow steps. On failure: preserve
+partial output and telemetry, tear the pod down, report actual cost, stop. On
+pass: phase 1 continues without further approval under the unchanged $18.78 stop.
+
+**Set count, verified against the frozen artifacts.** `battery_v2/` holds exactly
+**7 `.jsonl` files totalling 770 prompts** (knowledge 150, math_verified 100,
+gsm8k 100, multihop 100, rag 100, answerability_paired 120, safety_paired 100);
+each file's line count matches its manifest `n` and sha256. **`behavior_v0` (76)
+is a separate file** at `data/eval_behavior_v0/prompts.jsonl`, separately
+generated, separately scored by `behavior_score`, and separately persisted; it is
+passed to the shared engine as an eighth prompt file only to avoid an eighth
+model load. **846 prompts per full-battery checkpoint.** The 76-prompt
+generations at the **5 remaining eval points per seed** are mandatory.
+
+**Revised phase 1 expected: $13.17** = $12.30 + $1.07 (the now-mandatory
+behaviour generations, previously unfunded) − $0.21 (engine reuse), against the
+unchanged **$18.78** hard stop — $5.61 of headroom. Still on the conservative
+3.771 s/prompt rate; the gate measures the real one.
+
+### 12.15 Status
 
 **Nothing launched.** Zero GPU time spent. Phase 1 is authorized in principle and
 fits; phases 2–3 need a budget decision after phase 1 reports.
