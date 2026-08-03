@@ -183,6 +183,17 @@ def main() -> None:
                          "proportional to session counts")
     ap.add_argument("--mixture-note", default=None,
                     help="free-text rationale recorded in ladder.json")
+    ap.add_argument("--session-order", default=None,
+                    help="newline-delimited session ids giving the session order "
+                         "to use instead of recomputing the stratified "
+                         "interleave, and the order blocks are emitted in. "
+                         "Sessions absent from the file follow, in corpus order. "
+                         "Used to anchor a re-cut pack to an already-trained "
+                         "pack so a controlled comparison keeps prompt overlap. "
+                         "The anchor pack's own order already carried the "
+                         "declared mixture, so replaying it preserves the "
+                         "mixture; the realized per-rung mix is reported either "
+                         "way, and must be checked rather than assumed.")
     ap.add_argument("--out", required=True)
     args = ap.parse_args()
 
@@ -229,7 +240,30 @@ def main() -> None:
             raise SystemExit(
                 f"mixture declares {missing} but the corpus has no accepted "
                 f"session of those types; have {sorted(by_type)}")
-    order = interleave(dict(by_type), shares)
+    anchor_rank = None
+    if args.session_order:
+        # Anchor to an existing pack's session order. Cleaning removes sessions
+        # and changes lengths, and the largest-remainder interleave is a global
+        # function of both — so recomputing it from scratch reshuffles the whole
+        # corpus and a rung prefix ends up holding a substantially different
+        # prompt set. Replaying the anchor order keeps the comparison about
+        # target quality instead of about which prompts landed in the cut.
+        anchor_rank = {}
+        with open(args.session_order) as f:
+            for i, line in enumerate(f):
+                sid = line.strip()
+                if sid:
+                    anchor_rank.setdefault(sid, i)
+        unranked = len(anchor_rank)
+        order = sorted(rendered,
+                       key=lambda r: (anchor_rank.get(r.session_id, unranked),
+                                      r.session_id))
+        anchored = sum(1 for r in rendered if r.session_id in anchor_rank)
+        print(f"session order anchored to {args.session_order}: "
+              f"{anchored}/{len(rendered)} sessions ranked, "
+              f"{len(rendered) - anchored} appended in corpus order", flush=True)
+    else:
+        order = interleave(dict(by_type), shares)
 
     system_ids_by_key, system_text_by_key = {}, {}
     for r in rendered:
@@ -247,6 +281,13 @@ def main() -> None:
     # would be one group's data rather than the mixture. Reorder the blocks with
     # the same largest-remainder rule, now on each block's per-type supervised
     # tokens, so every prefix carries the declared mixture at block granularity.
+    # Block ordering is *not* anchored, even when the sessions are. Replaying the
+    # anchor's block order was tried and measured: it lifts prompt overlap but
+    # wrecks the mixture, because the anchor's blocks group different sessions
+    # once cleaning removes some — the 2.96M rung came out at code 0.193 /
+    # openmath 0.130 against a declared 0.1667, a 5.9 pp drift that would turn a
+    # target-quality experiment into a mixture experiment. Mixture fidelity wins;
+    # the overlap that costs is reported instead of hidden.
     blocks = order_blocks(blocks, shares)
 
     cumulative, running = [], 0

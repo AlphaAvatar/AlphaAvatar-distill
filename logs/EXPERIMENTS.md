@@ -650,3 +650,114 @@ things stop it short of a law.** The saturation point is outside the corpus
 fixed-passes design. Recovery-data sizing cannot be closed until the corpus
 grows past ~6M uniform tokens or the mixture is relaxed (Experiment 2), and the
 data-vs-compute control above is run.
+
+---
+
+## 12. Experiment 2 — three sequential 2.96M diagnostics (phase 1 PREPARED, not launched)
+
+**Redesign (maintainer, 2026-08-03).** Experiment 2 is no longer "data mixing".
+It is three sequential single-variable diagnostics, all at the Experiment 1
+2.96M rung, each reusing the previous phase's winner as its control:
+**(1) data cleaning · (2) loss, KL-only first · (3) learning rate.** Not a
+Cartesian sweep; one phase reports and is approved before the next starts.
+
+Full pre-registration, arm tables, gates and costing:
+[`PROPOSAL.md`](PROPOSAL.md).
+
+### 12.1 What the Experiment 1 record actually says about 2.96M
+
+Reconstructed per seed from the arms' own logs (PCA, held-out NLL):
+
+| rung | steps | sa | sb | mean | seed \|Δ\| |
+|---:|---:|---:|---:|---:|---:|
+| 252,985 | 324 | 6.7169 | 7.8699 | 7.2934 | 1.153 |
+| 460,088 | 570 | 6.1616 | 6.2948 | **6.2282** | 0.133 |
+| 864,750 | 1,023 | 8.8758 | 9.3649 | 9.1204 | 0.489 |
+| 1,600,353 | 1,761 | 9.7145 | 9.4845 | 9.5995 | 0.230 |
+| **2,960,507** | **2,916** | 10.4031 | 9.7864 | 10.0948 | 0.617 |
+| 5,501,372 | 4,412 | 10.7875 | 9.4548 | 10.1212 | 1.333 |
+
+**The deterioration begins at 0.86M, not 2.96M.** The largest jump is
+0.46M → 0.86M (+2.89 nats); 2.96M → 5.50M is +0.026, far below the 0.617–1.333
+between-seed spread. The 2.96M rung sits on the plateau, and it is kept as the
+maintainer selected. The step-matched control (0.25M of data, 4,412 steps,
+10.7082) says this metric tracks **optimizer steps**, not unique data.
+
+**Recovered measurement.** Six pca arms previously read `val_ce: null` in
+`e1_consolidated.json` — their `train_log.jsonl` were destroyed by the
+Experiment 1 `scp` basename collapse. `consolidate_e1.py` now falls back to the
+arm-unique console logs, and all 25 checkpoints carry val CE again
+(`e1_r2960k_sb_pca` = 1.148564).
+
+**D0 has no intermediate checkpoints** (`save_every: 1458, keep_last: 1`), so
+there is no within-run held-out-NLL trajectory anywhere in Experiment 1. The
+fixed-step endpoint is the only fully matched D0↔D1 comparison; new arms fix
+this by evaluating and retaining at every eval point.
+
+### 12.2 The verified Experiment 1 loss (binding for every Experiment 2 arm)
+
+```
+L = 0.25 · Σ_{CE mask} CE / N_ce  +  1.00 · τ² · Σ_{KD mask} KL(teacher_τ ‖ student_τ) / N_kd
+```
+
+Forward KL, τ = 1.0 (τ² present, a no-op), `kd_scope: "all"`. **CE runs on
+assistant-target positions; KD runs on every real non-padding position** —
+different masks, different normalizers. Teacher distributions are computed
+**online** every step; no cached logits exist in the repository. η = 5e-5,
+warmup 146, cosine to 5e-6 at 2,916 steps. Seeds `sa` 20260726 / `sb` 20260801
+differ only in block order.
+
+`train.py`, `train_stage3.py` and `ladder.py` are byte-identical between the
+Experiment 1 commit `69c3fe1` and HEAD, and the committed arm config reproduces
+the run manifest's `config_sha256` `34d8a4c8…`.
+
+### 12.3 Phase 1 — D1 cleaning, prepared on CPU for $0
+
+`aadistill.data.cleaning` (`clean-v1`) re-selects from the retained `n=4`
+candidates through four ordered gates — serialization, correctness, tool
+protocol, completion/degeneration — then keeps D0's candidate if it survives,
+else the shortest survivor by supervised-token length, tie-broken by index.
+Nothing is generated.
+
+**10,778 of 11,174 sessions kept (96.5%).** `openmath` is the weak slice
+(keep 0.713, replacement 0.099, 166 prompts with no correct candidate),
+consistent with its 0.380 per-candidate correctness. `code` and `tool_calling`
+have no mechanical key and pass gate 2 by exemption, recorded as
+`unverifiable_slice`.
+
+**The D1 rung matches D0 where it must:**
+
+| quantity | D0 | D1 | Δ |
+|---|---:|---:|---:|
+| blocks / steps / packed tokens | 1,944 / 2,916 / 15,925,248 | 1,944 / 2,916 / 15,925,248 | **exact** |
+| unique supervised tokens | 2,960,507 | 2,968,828 | +0.281% |
+| per-type share drift | — | — | ≤ 0.05 pp |
+| prompt overlap | — | 3,574 / 4,524 | **79.0%** |
+
+The 21% overlap loss is 3.7% cleaning and **17.3% re-packing displacement**.
+Anchoring the session order lifted overlap 63.6% → 79.0%; anchoring the *block*
+order too was measured and rejected — it drifted the mixture 5.9 pp
+(`code` 0.193, `openmath` 0.130 vs 0.1667), which would have made this a mixture
+experiment.
+
+### 12.4 GSM8K evaluator corrected; Experiment 1 re-scored offline
+
+`aadistill.evaluation.strict_answer` replaces last-number extraction:
+`\boxed{}` first, else an explicit standalone `Final Answer:` / `Answer:`,
+tool-call payloads stripped, no valid final answer = incorrect, and
+protocol-invalid or degenerate output = incorrect regardless of content.
+
+Re-scoring all 25 stored generation sets (CPU, $0) **changes two arms by one
+sample each** (`0250k_sa_pca` 0.010→0.000, `1600k_sb_pca` 0.050→0.040).
+Experiment 1's "no reasoning at any rung" now holds under a rule degeneration
+cannot game. Corrected D0 at 2.96M PCA: strict EM sa 0.020 / sb 0.010,
+protocol-valid 0.880 / 0.900, final-answer-present 0.870 / 0.910.
+
+### 12.5 Status: blocked on budget
+
+**Verified spend $96.02** against the **$100 cap** → **$3.98 left**.
+Phase 1 as specified costs **$8.09** (worst case ~$9.3); the minimum valid
+alternative — dropping the new capability sets so D0 needs no GPU
+re-evaluation — is **$7.40**. A one-seed run is not offered: the between-seed
+|Δ| at this rung is 0.617 nats on held-out NLL. **Nothing launched; awaiting
+a cap decision.**

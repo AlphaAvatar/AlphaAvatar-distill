@@ -1,5 +1,32 @@
 # Decision records
 
+## 2026-08-03 — Experiment 2 is three sequential 2.96M diagnostics, not a mixture study
+
+- **Context:** Experiment 1 finished with two metrics disagreeing. Teacher-native val CE falls monotonically with data at 74x the between-seed noise, while FineWeb-Edu held-out NLL rises on the PCA arms. NLL cannot say whether the loss is knowledge or reasoning, and the step-matched control showed it tracks optimizer steps rather than unique data. The queued "data mixing" experiment would not have addressed any of that.
+- **Decision:** the maintainer replaced Experiment 2 with **three sequential single-variable diagnostics, all at the 2.96M rung**: (1) data cleaning, (2) loss with KL-only tested first, (3) learning-rate scale. Each phase trains only its new arm and reuses the previous phase's winner as its control; no valid historical control is retrained; nothing runs as a Cartesian sweep; one phase reports and is approved before the next is prepared. Every arm restarts from the Stage 1 PCA init `86fbba78...` at the two Experiment 1 seeds (20260726 / 20260801), never from a trained checkpoint.
+- **Alternatives considered:** the queued mixture study (deferred — it changes composition, which is a different question from why NLL deteriorates); a factorial data x loss x LR sweep (rejected: 8+ arms x 2 seeds is far outside any plausible budget and confounds three mechanisms); starting at the rung where the rise actually begins, 0.86M (rejected by the maintainer, who kept 2.96M; the nuance is recorded in `PROPOSAL.md` §1 and `EXPERIMENTS.md` §12.1).
+- **Expected upside:** each phase answers one question with one new arm, and the reuse chain (D0 -> D1/L0 -> L1/R0 -> R1, R2) means five conclusions cost four trained arms rather than twelve.
+- **Risks:** the Experiment 1 evidence already points at optimizer steps rather than data, so phase 1 may well return "cleaning does not explain it" — which is a real answer but a $8 one. Sequencing also means a null result in phase 1 does not shorten phases 2 and 3.
+- **Revisit when:** phase 1 reports against its pre-registered gate.
+
+## 2026-08-03 — D1 matches D0 on optimizer steps, and pays for it in prompt overlap
+
+- **Context:** the cleaning arm has to hold everything except target quality fixed, but a cleaned corpus cannot simultaneously match D0's unique supervised tokens, its block count and its prompt set. Cleaning drops 3.5% of sessions and changes target lengths, and the packer's stratified interleave and block-level mixture repair are both global functions of the session set.
+- **Decision:** **optimizer-step parity is the binding constraint.** D1 is cut at exactly **1,944 blocks**, matching D0's steps (2,916), packed tokens (15,925,248) and effective compute exactly, and the unique-supervised-token difference is declared (+0.281%, 2,960,507 -> 2,968,828). Session order is **anchored** to Experiment 1's own pack via a new `--session-order` flag, which lifts prompt overlap from 63.6% to **79.0%**. Block order is **not** anchored.
+- **Alternatives considered:** cutting D1 at the 2.96M token target instead (1,924 blocks) — rejected: it changes the optimizer budget by 30 steps, and the instruction is explicit that residual mismatch must not alter steps; anchoring the block order as well — **tried and measured, then rejected**: it raised overlap but drifted the realized mixture to `code` 0.193 / `openmath` 0.130 against a declared 0.1667, a 5.9 pp drift that would have turned a target-quality experiment into a mixture experiment. The rejected path and its numbers are recorded in `build_token_ladder.py` so it is not retried blind.
+- **Expected upside:** the D0 vs D1 contrast is exactly "same compute, same mixture, same prompts where possible, different target text".
+- **Risks:** 21% of D0's rung prompts are absent from D1's, and only 3.7 points of that is cleaning — the other 17.3 points is re-packing displacement, which adds prompt-set variance to a comparison that wanted none. Paired bootstrap CIs are computed on the shared 3,574 prompts for this reason.
+- **Revisit when:** phase 1 reports, or a packer change makes prefix membership stable under session removal.
+
+## 2026-08-03 — GSM8K scoring: boxed-or-explicit-marker, and degeneration is never correct
+
+- **Context:** Experiment 1 scored GSM8K with `behavior.final_number`, the last number anywhere in the answer. That credits a number inside a `<tool_call>` payload on a task with no tool schema, credits prose that never states a conclusion, and lets a repetition loop containing the gold value score as correct — so degeneration could raise exact match.
+- **Decision:** `aadistill.evaluation.strict_answer` becomes the scoring rule. Prefer the last brace-balanced `\boxed{...}`; otherwise require an explicit standalone `Final Answer:` / `Answer:` marker; strip `<tool_call>` payloads before reading anything; no valid final answer is **incorrect**, never "fall back to the last number"; and a protocol-invalid or degenerate generation is incorrect regardless of content. Natural termination and protocol validity are returned as separate fields and are never folded into correctness.
+- **Alternatives considered:** keeping last-number extraction with a tool-call filter only (rejected: it still credits answers that state no conclusion); an LLM judge (rejected: cost, non-determinism, and P5 wants a re-derivable scorer).
+- **Expected upside:** "the model learned to terminate" can no longer be reported as "the model learned to reason" — the distinction Experiment 2 exists to make.
+- **Risks:** the rule is stricter than most published GSM8K harnesses, so absolute EM here is not comparable to external numbers; that is stated wherever the metric appears. Re-scoring all 25 Experiment 1 arms offline moved only two arms by one sample each, so no historical conclusion changes.
+- **Revisit when:** a student produces enough correct answers that extraction-path share (`boxed` vs `marker`) starts to matter for the comparison.
+
 ## 2026-08-03 — Evaluation protocol for the student line: effective context, degeneration, and one rendering
 
 - **Context:** the first uncapped wave under P18 cost over an hour for a single

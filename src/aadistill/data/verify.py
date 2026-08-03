@@ -117,6 +117,21 @@ def verify(sample: dict, answer: str, raw: str) -> tuple[bool, str]:
     reason = hygiene_reason(answer, raw)
     if reason:
         return False, reason
+    return verify_answer_key(sample, answer)
+
+
+def verify_answer_key(sample: dict, answer: str) -> tuple[bool, str]:
+    """The slice's mechanical answer key alone — no hygiene, no length rule.
+
+    Split out so a caller that runs its own structural and completion gates can
+    ask *only* "is this answer correct" without also inheriting
+    `hygiene_reason`'s generic `MAX_ANSWER_WORDS` cut, which AGENTS.md P3/P10
+    forbid as a quality gate and which the corpus build already declined to
+    apply.
+    """
+    rule = VERIFIABLE.get((sample["group"], sample["source"]))
+    if rule is None:
+        return False, "unverifiable_slice"
 
     gold = sample["messages"][-1]["content"]
 

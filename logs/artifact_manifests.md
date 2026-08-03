@@ -48,7 +48,7 @@ Two reading notes:
 - **Related logs:** [`EXPERIMENTS.md`](EXPERIMENTS.md) §11,
   [`STATE.md`](STATE.md) §12–13, `artifacts/stage3/e1_consolidated.json`.
 
-## recovery corpus v2 + token ladders — NOT YET PERSISTED
+## recovery corpus v2 + token ladders
 
 - **Artifact:** the Stage 3 recovery corpus and its six-rung nested token
   ladders, built 2026-08-01: `sessions.jsonl` (74 MB, 11,174 accepted sessions),
@@ -62,12 +62,13 @@ Two reading notes:
   `audit.jsonl` `15f16b7b22b229e9c0ae510b85b4c967948828e0e7d50fac15c3e516e3e911e6`).
   Both packs derive from the same `sessions.jsonl` and are regenerable from it
   in ~15 min of CPU.
-- **Storage: none yet — this is the open risk.** The only copy is the dev-box
-  session scratchpad
+- **Storage: on the relay under `stage3_recovery_corpus_v2/`** (9/9 files
+  hash-verified 2026-08-01, [`STATE.md`](STATE.md) §2) **and** on the dev box at
   `/tmp/claude-1000/-home-ecs-user-AlphaAvatar-distill/2e9e81e1-…/scratchpad/bulk/`.
-  It is **not** on the HF relay. $25.56 and 16.5 h of L40S teacher generation
-  with no second copy. Upload under `stage3_recovery_corpus_v2/` before the
-  training matrix runs.
+  This entry previously read "NOT YET PERSISTED", contradicting `STATE.md`;
+  corrected 2026-08-03 after both `candidates.jsonl` (`f7f5035e…`) and
+  `sessions.jsonl` (`2b4edc2e…`) were re-hashed against the local copies and
+  matched.
 - **Hashes (sha256):** `candidates.jsonl`
   `f7f5035ef8b42fb4bacd4f28692d214ff734f4ff820c1f6e37436e328546ecc7`;
   `sessions.jsonl`
@@ -283,3 +284,36 @@ Apache-2.0 teacher. No user data, no secrets.
 untruncated at temperature 1.0, and this session measured that even *greedy*
 bf16 decoding is not batch-invariant on this teacher — so the hashes above pin
 the experiment (P5), not a re-derivable procedure.
+
+## corpus_v2_clean + ladder_uniform_clean_anchored — Experiment 2 phase 1 (D1)
+
+- **Artifact:** `artifacts/stage3/corpus_v2_clean/` (`sessions_clean.jsonl`
+  sha256 `7d22b3e037b0de45c2b7fd23d9fb6706955eef59f472d9e6937b8e4ea1a76bc3`,
+  68 MB; `cleaning_audit.json` `8d97e03a5aadbee40b17aa276bf89a8a805cee275006d6fa2f2c7cb3b541a324`;
+  `cleaning_per_example.jsonl`; `d0_session_order.txt`) and the pack
+  `artifacts/stage3/ladder_uniform_clean_anchored/` (`blocks.npz`
+  `1c8792dbc796e22f5547e0848ad7bd301b5c0b1a8a369672efc05ddce5e37b79`,
+  `ladder.json` `510476400f661a351b50352a7744a2736b388247c8edfc42a10b7d8383ae9d05`,
+  `audit.jsonl` `213a422d2e690abd0fe04a4cb295e69895ae650e457236fec2d9eaa62c7130ef`).
+  Comparison record: `artifacts/stage3/e2_d1_corpus_audit.json`
+  `a27ae3dfe755a2fb081a42e87720e7071bac702e84dcd5a888ad3929176659bb`.
+- **Created:** 2026-08-03, **CPU only, $0**. 114 s to screen 11,174 sessions,
+  ~9 min to pack. No teacher inference: every target is a completion already
+  present in corpus v2's retained `n=4` candidates.
+- **Derivation:** `scripts/data/build_cleaned_corpus.py` (rules
+  `aadistill.data.cleaning`, `RULES_VERSION = "clean-v1"`) over
+  `candidates.jsonl` `f7f5035e…` + `sessions.jsonl` `2b4edc2e…`, then
+  `scripts/data/build_token_ladder.py --session-order` anchored to Experiment
+  1's pack, uniform mixture, block-len 8192.
+- **Contents:** 10,778 of 11,174 sessions (96.5%); the 2,968,828-supervised-token
+  rung is 1,944 blocks — block-, step- and packed-token-identical to Experiment
+  1's 2.96M rung.
+- **Tokenizer/template:** teacher `Qwen/Qwen3-4B-Thinking-2507@768f209d`, vocab
+  sha256 `3ec3c124…`, chat template `3802169b…` — both reproduced exactly on the
+  dev box under transformers 5.13.1 against the corpus's 5.14.1.
+- **Status: prepared, NOT trained on.** Phase 1 is awaiting budget approval
+  ([`PROPOSAL.md`](PROPOSAL.md) §7).
+- **License/provenance:** derived from corpus v2; same constraints. No new
+  generation, no new sources.
+- **Related logs:** [`PROPOSAL.md`](PROPOSAL.md) §3,
+  [`EXPERIMENTS.md`](EXPERIMENTS.md) §12.

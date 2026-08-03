@@ -300,3 +300,59 @@ def test_only_the_teacher_turn_is_supervised(pipeline, tokenizer):
                 assert prior["content"][:40] not in supervised
         # Exactly one assistant segment is supervised.
         assert supervised.count("<|im_end|>") == 1
+
+
+def test_session_order_anchor_replays_an_existing_pack(pipeline, tmp_path):
+    """`--session-order` must reproduce the anchor's session order.
+
+    The Experiment 2 cleaning arm re-cuts a pack after dropping sessions, and
+    the largest-remainder interleave is a global function of the session set —
+    so without an anchor the rung prefix holds a substantially different prompt
+    set and the comparison stops being about target quality.
+    """
+    corpus, packed = pipeline
+
+    anchor_order = []
+    with (packed / "audit.jsonl").open() as f:
+        for line in f:
+            for s in json.loads(line)["sessions"]:
+                anchor_order.append(s["session_id"])
+    anchor_file = tmp_path / "anchor.txt"
+    anchor_file.write_text("\n".join(reversed(anchor_order)) + "\n")
+
+    out = tmp_path / "anchored"
+    ladder = load_script("build_token_ladder", "scripts/data/build_token_ladder.py")
+    sys.argv = [
+        "build_token_ladder.py",
+        "--sessions", str(corpus / "sessions.jsonl"),
+        "--model", f"{TEACHER}@{REVISION}",
+        "--block-len", str(BLOCK_LEN),
+        "--ladder", "1000,3000",
+        "--session-order", str(anchor_file),
+        "--out", str(out),
+    ]
+    ladder.main()
+
+    replayed = []
+    with (out / "audit.jsonl").open() as f:
+        for line in f:
+            for s in json.loads(line)["sessions"]:
+                replayed.append(s["session_id"])
+    assert sorted(replayed) == sorted(anchor_order)
+    # Packing groups by system prompt and blocks are then mixture-ordered, so
+    # the emitted order is not the anchor verbatim; what must hold is that the
+    # anchor drove session order, i.e. the reversed anchor is closer to the
+    # replay than the original order is.
+    rank = {sid: i for i, sid in enumerate(reversed(anchor_order))}
+    replay_rank = {sid: i for i, sid in enumerate(replayed)}
+    reversed_corr = sum(abs(rank[s] - replay_rank[s]) for s in replayed)
+    forward_rank = {sid: i for i, sid in enumerate(anchor_order)}
+    forward_corr = sum(abs(forward_rank[s] - replay_rank[s]) for s in replayed)
+    assert reversed_corr < forward_corr
+
+
+def test_session_order_anchor_is_optional_and_default_free(pipeline):
+    """Omitting the anchor keeps the seed-free stratified interleave."""
+    _, packed = pipeline
+    ladder = json.loads((packed / "ladder.json").read_text())
+    assert "interleave" in ladder["ordering"]

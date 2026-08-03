@@ -12,7 +12,9 @@ and which do not.
 from __future__ import annotations
 
 import argparse
+import ast
 import json
+import re
 import statistics
 from pathlib import Path
 
@@ -20,12 +22,15 @@ RUNGS = [("0250k", 250_000), ("0460k", 460_000), ("0860k", 860_000),
          ("1600k", 1_600_000), ("2960k", 2_960_000), ("5500k", 5_500_000)]
 
 
+_CONSOLE_EVAL = re.compile(r"eval step (\d+)(?: \(final\))?: (\{.*?\})")
+
+
 def val_ce(paths: list[Path]) -> float | None:
     for p in paths:
         if not p.is_file():
             continue
         last = None
-        for line in p.read_text().splitlines():
+        for line in p.read_text(errors="replace").splitlines():
             if not line.strip():
                 continue
             try:
@@ -37,6 +42,29 @@ def val_ce(paths: list[Path]) -> float | None:
         if last is not None:
             return last
     return None
+
+
+def val_ce_from_console(path: Path) -> float | None:
+    """Recover the final val CE from an arm's console log.
+
+    Needed because the pca arms' per-arm `train_log.jsonl` were collapsed onto
+    one basename by `scp 'host:dir/*/train_log.jsonl'` during the Experiment 1
+    teardown; only the console logs are arm-unique, and they carry the same
+    `eval step N: {...}` lines. Without this the pca arms read `val_ce: null`
+    and the strongest instrument in the experiment goes missing from the
+    consolidated table.
+    """
+    if not path.is_file():
+        return None
+    last = None
+    for line in path.read_text(errors="replace").splitlines():
+        m = _CONSOLE_EVAL.search(line)
+        if m:
+            try:
+                last = ast.literal_eval(m.group(2)).get("val_ce", last)
+            except (ValueError, SyntaxError):
+                continue
+    return last
 
 
 def jload(p: Path):
@@ -71,7 +99,8 @@ def collect(repo: Path, eval_dir: Path) -> list[dict]:
                 repo / f"artifacts/stage3/rescued/_relay/{arm}/train_log.jsonl",
                 repo / f"artifacts/stage3/rescued/_logs_rand/{arm}/train_log.jsonl",
                 repo / f"artifacts/stage3/rescued/{arm}/train_log.jsonl",
-            ]),
+            ]) or val_ce_from_console(
+                repo / f"artifacts/stage3/rescued/_logs_{init}/console_{arm}.log"),
             "holdout_nll": nll,
             "behavior": (beh or {}).get("behavior", {}).get("score"),
             "nat_term": (beh or {}).get("natural_termination_rate"),
