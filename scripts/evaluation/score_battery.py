@@ -50,6 +50,7 @@ from aadistill.evaluation.capability import (  # noqa: E402
     BATTERY_VERSION,
     PAIRED_SETS,
     SCORERS,
+    sympy_available,
 )
 from aadistill.evaluation.strict_answer import score_numeric  # noqa: E402
 from aadistill.infrastructure.env import code_state  # noqa: E402
@@ -119,6 +120,15 @@ def main() -> None:
     ap.add_argument("--out", required=True, type=Path)
     ap.add_argument("--per-sample", type=Path, default=None)
     args = ap.parse_args()
+
+    # Scoring must be identical on every machine that runs it. sympy decides
+    # 5 of the 100 frozen math answers; without it they fall to string
+    # comparison and the same generations get a different score.
+    if not sympy_available():
+        raise SystemExit(
+            "sympy is not installed — the math scorer would silently degrade "
+            "from symbolic to string comparison and score the frozen battery "
+            "differently than the dev box. Install it before scoring.")
 
     manifest = json.loads((args.battery / "manifest.json").read_text())
     if manifest["battery_version"] != BATTERY_VERSION:

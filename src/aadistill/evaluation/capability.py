@@ -155,8 +155,24 @@ def _rational_equal(a: str, b: str) -> bool | None:
     return fa == fb
 
 
+def sympy_available() -> bool:
+    try:
+        import sympy  # noqa: F401
+    except Exception:
+        return False
+    return True
+
+
 def _sympy_equal(a: str, b: str) -> bool | None:
-    """True/False if sympy can decide, None if it cannot parse either side."""
+    """True/False if sympy can decide, None if it cannot parse either side.
+
+    A missing sympy is **not** treated as "cannot decide". On the dev box 5 of
+    the 100 frozen MATH-500 answers are decided on this path; on a machine
+    without sympy they would silently fall through to string comparison and
+    score differently. Two machines scoring one frozen battery differently is
+    the exact failure freezing it is meant to prevent, so the driver asserts the
+    dependency up front (`score_battery.py`) rather than degrading here.
+    """
     try:
         from sympy import simplify, sympify
     except Exception:

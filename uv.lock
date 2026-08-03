@@ -23,6 +23,7 @@ source = { editable = "." }
 dependencies = [
     { name = "datasets" },
     { name = "safetensors" },
+    { name = "sympy" },
     { name = "torch", version = "2.13.0", source = { registry = "https://download.pytorch.org/whl/cpu" }, marker = "sys_platform == 'darwin'" },
     { name = "torch", version = "2.13.0+cpu", source = { registry = "https://download.pytorch.org/whl/cpu" }, marker = "sys_platform != 'darwin'" },
     { name = "transformers" },
@@ -38,6 +39,7 @@ dev = [
 requires-dist = [
     { name = "datasets", specifier = ">=5.0.0" },
     { name = "safetensors", specifier = ">=0.4" },
+    { name = "sympy", specifier = ">=1.13" },
     { name = "torch", specifier = ">=2.6", index = "https://download.pytorch.org/whl/cpu" },
     { name = "transformers", specifier = ">=4.53" },
 ]

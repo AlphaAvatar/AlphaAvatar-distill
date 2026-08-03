@@ -94,13 +94,26 @@ test -f "$REPO/artifacts/eval/battery_v2/manifest.json"
 test -f "$REPO/artifacts/stage3/rung_0860k_clean_median/blocks.npz"
 mark DATA_READY
 
-# --- training venv ---------------------------------------------------------
-say "training venv (torch cu128) on the container disk"
-python -m venv /opt/train
-/opt/train/bin/pip install -q --upgrade pip
-/opt/train/bin/pip install -q torch --index-url https://download.pytorch.org/whl/cu128
-/opt/train/bin/pip install -q transformers accelerate safetensors numpy huggingface_hub
-/opt/train/bin/python -c "import torch;print('train torch',torch.__version__,torch.cuda.is_available())"
+# --- training env: uv sync against the committed lockfile ------------------
+# NOT a hand-listed pip install. Experiment 1's proven setup.sh uses uv against
+# pyproject.toml/uv.lock, which is why it installed everything the repo declares.
+# Hand-listing packages cost three pods here: huggingface_hub, then matplotlib,
+# then sympy would have silently changed the math scorer. The lockfile is the
+# dependency contract; use it.
+say "training env via uv sync (cu128 torch)"
+command -v uv >/dev/null || { curl -LsSf https://astral.sh/uv/install.sh | sh; }
+export PATH="$HOME/.local/bin:$PATH"
+cd "$REPO"
+sed -i 's|url = "https://download.pytorch.org/whl/cpu"|url = "https://download.pytorch.org/whl/cu128"|' pyproject.toml
+sed -i 's|name = "pytorch-cpu"|name = "pytorch-cu128"|' pyproject.toml
+sed -i 's|torch = { index = "pytorch-cpu" }|torch = { index = "pytorch-cu128" }|' pyproject.toml
+export UV_PROJECT_ENVIRONMENT=/opt/train
+uv lock
+uv sync --group dev
+/opt/train/bin/python -c "import torch, sympy, transformers; \
+  assert torch.cuda.is_available(); \
+  print('train torch', torch.__version__, torch.cuda.get_device_name(0), \
+        '| sympy', sympy.__version__)"
 
 # --- vLLM venv -------------------------------------------------------------
 say "vLLM venv on the container disk"
@@ -147,17 +160,12 @@ PY
 mark CKPT_READY
 
 # --- tests -----------------------------------------------------------------
-# The point of running tests here is to catch a broken code path that this
-# session depends on, before any paid generation — not to validate the whole
-# repo. Two suites are skipped for reasons unrelated to correctness:
-#   * test_recovery_corpus_pipeline needs a teacher download and a stub engine;
-#   * test_perf_trend imports the plotting stack (matplotlib), which this pod
-#     has no reason to install.
+# `uv sync --group dev` brings pytest and matplotlib, so the suite runs whole
+# apart from the corpus pipeline, which needs a teacher download and a stub
+# engine and is not on this session's path.
 say "CPU test suite (fails loudly before any paid generation)"
-/opt/train/bin/pip install -q pytest
 cd "$REPO" && /opt/train/bin/python -m pytest tests/ -q \
-    --ignore=tests/data/test_recovery_corpus_pipeline.py \
-    --ignore=tests/evaluation/test_perf_trend.py 2>&1 | tail -5
+    --ignore=tests/data/test_recovery_corpus_pipeline.py 2>&1 | tail -5
 mark TESTS_PASSED
 mark SETUP_DONE
 say "setup complete"
