@@ -119,7 +119,30 @@ def score_checkpoint(label: str, gen_dir: Path, battery: Path, out: Path) -> Non
          "--out", out, "--per-sample", out.with_suffix(".per_sample.jsonl")])
 
 
-def holdout_trajectory(run_dir: Path, holdout: Path, out: Path) -> None:
+def ensure_tokenizer(model_dir: Path, source: Path) -> None:
+    """Copy tokenizer files into a checkpoint that has none.
+
+    The trainer's `save_pretrained` writes `config.json`,
+    `generation_config.json` and `model.safetensors` — no tokenizer. Loading such
+    a directory does **not** fail: `AutoTokenizer.from_pretrained` builds a
+    degenerate vocab-size-1 tokenizer from the config, every text encodes to zero
+    tokens, and `eval_ppl` divides by zero. A silent-wrong failure, so it is
+    fixed at the source rather than worked around downstream.
+
+    The tokenizer is a project-wide constant (vocab hash 7781771a…, verified at
+    setup), so this changes nothing about the checkpoint's behaviour — it
+    restores a file that should have been written beside the weights, and that
+    Experiment 1's uploaded checkpoints do carry.
+    """
+    import shutil
+    for name in ("tokenizer.json", "tokenizer_config.json", "chat_template.jinja"):
+        src, dst = source / name, model_dir / name
+        if src.is_file() and not dst.is_file():
+            shutil.copy(src, dst)
+
+
+def holdout_trajectory(run_dir: Path, holdout: Path, out: Path,
+                       tokenizer_source: Path) -> None:
     """Held-out NLL for every saved checkpoint, in one process.
 
     `eval_ppl.py --model` appends, so all nine checkpoints are scored without
@@ -133,6 +156,7 @@ def holdout_trajectory(run_dir: Path, holdout: Path, out: Path) -> None:
         return
     args = []
     for c in ckpts:
+        ensure_tokenizer(c, tokenizer_source)
         args += ["--model", str(c)]
     tmp = out.with_suffix(".raw.json")
     run([sys.executable, "scripts/evaluation/eval_ppl.py",
@@ -166,7 +190,11 @@ def main() -> int:
     ap.add_argument("--d0-root", type=Path, default=Path("/workspace/d0"))
     ap.add_argument("--vllm-python", default="/opt/vllm/bin/python")
     ap.add_argument("--stage", default="all",
-                    choices=["all", "d0_sa", "gate", "rest"])
+                    choices=["all", "d0_sa", "gate", "rest", "evals"])
+    ap.add_argument("--tokenizer-source", type=Path,
+                    default=REPO / "artifacts/stage1/qwen3_0p6b_init_v0/checkpoint",
+                    help="where to copy tokenizer files from into checkpoints "
+                         "the trainer saved without one")
     args = ap.parse_args()
 
     args.out_root.mkdir(parents=True, exist_ok=True)
@@ -202,34 +230,39 @@ def main() -> int:
             return 0
 
     # ---- 3. the second D0 endpoint ------------------------------------
-    model = args.d0_root / "e1_r0860k_sb_pca/step_001023/model"
-    log(f"D0 sb endpoint: {model}")
-    evaluate_checkpoint(model, "d0_sb", args.out_root / "d0_sb", args.battery,
-                        args.behavior_prompts, args.vllm_python,
-                        full_battery=True)
-    score_checkpoint("d0_sb", args.out_root / "d0_sb", args.battery,
-                     args.out_root / "d0_sb_battery.json")
-    mark("D0_DONE:sb")
+    # `evals` resumes a session whose training already finished, so it skips
+    # everything before the per-seed evaluation rather than repeating ~3 GPU
+    # hours of work that is already on disk.
+    if args.stage != "evals":
+      model = args.d0_root / "e1_r0860k_sb_pca/step_001023/model"
+      log(f"D0 sb endpoint: {model}")
+      evaluate_checkpoint(model, "d0_sb", args.out_root / "d0_sb", args.battery,
+                          args.behavior_prompts, args.vllm_python,
+                          full_battery=True)
+      score_checkpoint("d0_sb", args.out_root / "d0_sb", args.battery,
+                       args.out_root / "d0_sb_battery.json")
+      mark("D0_DONE:sb")
 
-    # ---- 4. D1 training, both seeds ------------------------------------
-    for seed in seeds:
-        arm = f"e2_d1_{seed}_pca"
-        cfg = REPO / f"configs/stage3/e2/{arm}.json"
-        log(f"training {arm}")
-        rc = run([sys.executable, "scripts/training/train_stage3.py",
-                  "--config", cfg], check=False)
-        if rc != 0:
-            mark(f"TRAIN_FAILED:{seed}")
-            mark("HALTED:training")
-            return 1
-        mark(f"TRAIN_DONE:{seed}")
+      # ---- 4. D1 training, both seeds ------------------------------------
+      for seed in seeds:
+          arm = f"e2_d1_{seed}_pca"
+          cfg = REPO / f"configs/stage3/e2/{arm}.json"
+          log(f"training {arm}")
+          rc = run([sys.executable, "scripts/training/train_stage3.py",
+                    "--config", cfg], check=False)
+          if rc != 0:
+              mark(f"TRAIN_FAILED:{seed}")
+              mark("HALTED:training")
+              return 1
+          mark(f"TRAIN_DONE:{seed}")
 
     # ---- 5. per-seed evaluation ----------------------------------------
     for seed in seeds:
         arm = f"e2_d1_{seed}_pca"
         run_dir = REPO / f"artifacts/stage3/{arm}"
         holdout_trajectory(run_dir, args.holdout,
-                           run_dir / "holdout_trajectory.jsonl")
+                           run_dir / "holdout_trajectory.jsonl",
+                           args.tokenizer_source)
         decision = retained_identities(run_dir)
         keep = {int(k) for k in decision["keep"]}
         all_steps = {int(p["step"]) for p in decision["trajectory"]
