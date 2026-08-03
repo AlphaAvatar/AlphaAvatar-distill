@@ -34,16 +34,23 @@ command -v ninja >/dev/null || { echo "ninja missing"; exit 1; }
 mark ENV_READY
 
 # --- repo ------------------------------------------------------------------
+# The base image ships no huggingface_hub, and swallowing this install with
+# `|| true` cost a pod: the failure only surfaced as an ImportError one line
+# later. Install it loudly and prove the import before using it.
+say "installing huggingface_hub"
+python3 -m pip install -q --no-input --break-system-packages \
+    "huggingface_hub[hf_transfer]" 2>&1 | tail -3
+python3 -c "import huggingface_hub as h; print('huggingface_hub', h.__version__)"
+
 say "fetching the repo bundle"
-pip install -q --no-input huggingface_hub[hf_transfer] >/dev/null 2>&1 || true
-python - <<'PY'
-import os
+python3 - <<'PY'
+import os, shutil
 from huggingface_hub import hf_hub_download
-import shutil
-for name in (os.environ["BUNDLE_NAME"],):
-    p = hf_hub_download("AlphaAvatar/aadistill-artifacts", f"transfer/{name}",
-                        repo_type="model", token=os.environ["HF_TOKEN"])
-    shutil.copy(p, f"/workspace/{name}")
+name = os.environ["BUNDLE_NAME"]
+p = hf_hub_download("AlphaAvatar/aadistill-artifacts", f"transfer/{name}",
+                    repo_type="model", token=os.environ["HF_TOKEN"])
+shutil.copy(p, f"/workspace/{name}")
+print("bundle at", p)
 PY
 rm -rf "$REPO"
 git clone -q "$WS/$BUNDLE_NAME" "$REPO"
@@ -56,8 +63,8 @@ mark REPO_READY
 
 # --- data + battery + the D1 pack -----------------------------------------
 say "fetching data, capability battery and the D1 pack"
-python - <<'PY'
-import os, tarfile, shutil
+python3 - <<'PY'
+import os, shutil, subprocess
 from pathlib import Path
 from huggingface_hub import hf_hub_download, snapshot_download
 tok = os.environ["HF_TOKEN"]; repo = "AlphaAvatar/aadistill-artifacts"
@@ -65,8 +72,9 @@ root = Path("/workspace/aad")
 
 p = hf_hub_download(repo, "transfer/stage2_data_20260726.tar.zst",
                     repo_type="model", token=tok)
-shutil.unpack_archive(p, "/workspace/data_tmp", format="zstd") if False else None
-os.system(f"tar --no-same-owner -I zstd -xf {p} -C {root}")
+# --no-same-owner: this mount rejects chown and tar exits non-zero without it.
+subprocess.run(["tar", "--no-same-owner", "-I", "zstd", "-xf", p, "-C", str(root)],
+               check=True)
 
 for prefix, dest in (
     (os.environ["BATTERY_PREFIX"], root / "artifacts/eval/battery_v2"),
@@ -104,7 +112,7 @@ mark VLLM_READY
 
 # --- checkpoints: the two D0 endpoints and the Stage 1 PCA init ------------
 say "staging checkpoints"
-python - <<'PY'
+python3 - <<'PY'
 import os
 from pathlib import Path
 from huggingface_hub import snapshot_download
@@ -128,7 +136,7 @@ for prefix, dest in want.items():
     print("staged", dest)
 PY
 # The fork point every D1 arm starts from, verified before anything trains.
-python - <<'PY'
+python3 - <<'PY'
 import hashlib, sys
 p = "/workspace/aad/artifacts/stage1/qwen3_0p6b_init_v0/checkpoint/model.safetensors"
 h = hashlib.sha256(open(p, "rb").read()).hexdigest()
