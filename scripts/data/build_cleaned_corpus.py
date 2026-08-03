@@ -45,6 +45,7 @@ import degeneration  # noqa: E402
 
 from aadistill.data.cleaning import (  # noqa: E402
     RULES_VERSION,
+    SELECTION_RULES,
     is_verifiable,
     select_clean,
 )
@@ -97,6 +98,11 @@ def main() -> None:
     ap.add_argument("--tokenizer", required=True)
     ap.add_argument("--out", required=True, type=Path)
     ap.add_argument("--block-len", type=int, default=BLOCK_LEN)
+    ap.add_argument("--selection", default="median", choices=list(SELECTION_RULES),
+                    help="which survivor replaces a failing original: 'median' "
+                         "(the survivor closest to the median supervised-token "
+                         "length) or 'shortest'. Length is consulted only among "
+                         "candidates that already passed every gate.")
     ap.add_argument("--limit", type=int, default=None,
                     help="screen only the first N examples (smoke tests)")
     args = ap.parse_args()
@@ -168,7 +174,7 @@ def main() -> None:
                 return render_cache[key] if render_cache[key] is not None else 1 << 30
 
             verdict = select_clean(example, degeneration, length_of,
-                                   original_index[eid])
+                                   original_index[eid], rule=args.selection)
 
             for index, reason in verdict["reasons"].items():
                 st["reasons"][reason] += 1
@@ -182,7 +188,7 @@ def main() -> None:
                 example = {**example, "candidates": [
                     c for c in example["candidates"] if c["index"] != chosen["index"]]}
                 verdict = select_clean(example, degeneration, length_of,
-                                       original_index[eid])
+                                       original_index[eid], rule=args.selection)
                 chosen = verdict["chosen"]
 
             if chosen is None:
@@ -214,6 +220,8 @@ def main() -> None:
                 "chosen_index": chosen["index"],
                 "retained_original": verdict["retained_original"],
                 "n_survivors": verdict["n_survivors"],
+                "survivor_lengths": verdict["survivor_lengths"],
+                "selection_rule": args.selection,
                 "sup_before": original_supervised[eid],
                 "sup_after": rendered.n_supervised,
                 "reasons": verdict["reasons"],
@@ -231,6 +239,17 @@ def main() -> None:
     audit = {
         "created_utc": datetime.now(timezone.utc).isoformat(),
         "rules_version": RULES_VERSION,
+        "selection_rule": {
+            "name": args.selection,
+            "applies": "only among candidates that passed every cleaning gate",
+            "length_unit": ("assistant supervised tokens after exact chat "
+                            "serialization (render_session), not characters and "
+                            "not raw pre-template tokens"),
+            "retain_original": ("the corpus's own candidate is kept whenever it "
+                                "passes every gate; length is consulted only "
+                                "when it fails"),
+            "tie_break": "original candidate index",
+        },
         "command": " ".join(sys.argv),
         "source_corpus": {
             "dir": str(args.corpus),

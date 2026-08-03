@@ -27,12 +27,26 @@ reason, so rejections break down by cause:
    degeneration under the **current** detector, which is stricter than the one
    the corpus was built with (`rambling` did not exist on 2026-08-01).
 5. `selection`     — keep the corpus's own candidate when it survives all four;
-   otherwise the shortest surviving candidate by supervised-token length, tie
-   broken by candidate index.
+   otherwise the surviving candidate whose length is **closest to the median**
+   of the survivors, tie broken by candidate index.
 
-The stage order is load-bearing and matches the pre-registered specification:
-"shortest" is a tie-break *after* correctness, evidence, protocol validity and
-completeness, never a quality criterion of its own.
+The stage order is load-bearing: length is consulted only *after* correctness,
+evidence, protocol validity and completeness, never as a quality criterion of
+its own, and never as a pre-filter.
+
+**Why median and not shortest** (maintainer, 2026-08-03). `verify.select` had
+already recorded the failure mode: on the math slices, shortest-correct
+systematically picks answers that state a result without deriving it
+(`The answer is 42.`), which trains the student to skip the reasoning this
+project exists to transfer. The median survivor is the same deterministic
+function of the candidate set without that bias. `SELECTION_RULES` keeps
+`shortest` implemented so the two can be compared on one corpus rather than
+argued about.
+
+Length is measured in **assistant supervised tokens after exact chat
+serialization** — the unit the training budget is denominated in — not
+characters and not raw pre-template tokens. The driver supplies it by rendering
+each candidate through `render_session`.
 
 `RULES_VERSION` is recorded in every audit and every emitted manifest. Changing
 a rule requires bumping it, because two corpora cleaned under different rule
@@ -43,13 +57,15 @@ from __future__ import annotations
 
 import json
 import re
+import statistics
 
 from ..evaluation.behavior import IM_END, STRAY_MARKERS, THINK_CLOSE, split_generation
 from .verify import VERIFIABLE, verify_answer_key
 
-RULES_VERSION = "clean-v1"
+RULES_VERSION = "clean-v2"
 
 STAGES = ("serialization", "correctness", "tool_protocol", "completion")
+SELECTION_RULES = ("median", "shortest")
 
 _TOOL_CALL = re.compile(r"<tool_call>\s*(.*?)\s*</tool_call>", re.DOTALL)
 
@@ -189,21 +205,44 @@ def screen_candidate(candidate: dict, example: dict, degeneration) -> str | None
     return None
 
 
+def pick_survivor(survivors: list[dict], length_of, rule: str = "median") -> dict:
+    """Deterministically choose among candidates that already passed every gate.
+
+    `median` — the survivor whose supervised-token length is closest to the
+    median of the survivors' lengths, ties broken by candidate index. With an
+    even number of survivors the median is the midpoint of the two middle
+    lengths, so "closest" is what resolves it rather than an arbitrary
+    upper-median pick.
+
+    `shortest` — the shortest survivor, ties broken by candidate index. Retained
+    only so the two rules can be compared on one corpus; it biases the math
+    slices toward answers that skip the derivation.
+    """
+    if rule not in SELECTION_RULES:
+        raise ValueError(f"selection rule must be one of {SELECTION_RULES}")
+    if rule == "shortest":
+        return min(survivors, key=lambda c: (length_of(c), c["index"]))
+    target = statistics.median(length_of(c) for c in survivors)
+    return min(survivors, key=lambda c: (abs(length_of(c) - target), c["index"]))
+
+
 def select_clean(
     example: dict,
     degeneration,
     length_of,
     original_index: int | None,
+    rule: str = "median",
 ) -> dict:
     """Screen every candidate and choose the replacement deterministically.
 
-    `length_of(candidate) -> int` supplies the length used for the tie-break;
-    the driver passes the *supervised-token* length of the rendered session, so
-    "shortest" is measured in the unit the training budget is denominated in
-    rather than in words.
+    `length_of(candidate) -> int` is the candidate's **assistant supervised
+    token count after exact chat serialization**; the driver renders each
+    candidate through `render_session` to produce it. Length is never consulted
+    before the gates — only among candidates that have already passed all four.
 
-    Returns a verdict dict: the chosen candidate index (or None), whether the
-    corpus's original candidate was retained, and the per-candidate reasons.
+    Returns a verdict dict: the chosen candidate (or None), whether the corpus's
+    original candidate was retained, the per-candidate reasons, and the survivor
+    lengths that drove the choice.
     """
     reasons = {}
     survivors = []
@@ -215,15 +254,19 @@ def select_clean(
 
     if not survivors:
         return {"chosen": None, "retained_original": False, "reasons": reasons,
-                "n_survivors": 0}
+                "n_survivors": 0, "survivor_lengths": {}, "rule": rule}
+
+    lengths = {c["index"]: length_of(c) for c in survivors}
 
     # Rule 1: minimise change — keep the corpus's own target when it survives.
     for candidate in survivors:
         if candidate["index"] == original_index:
             return {"chosen": candidate, "retained_original": True,
-                    "reasons": reasons, "n_survivors": len(survivors)}
+                    "reasons": reasons, "n_survivors": len(survivors),
+                    "survivor_lengths": lengths, "rule": rule}
 
-    # Rule 2: shortest complete-and-correct survivor, tie-broken by index.
-    chosen = min(survivors, key=lambda c: (length_of(c), c["index"]))
+    # Rule 2: only now does length enter, among survivors only.
+    chosen = pick_survivor(survivors, length_of, rule)
     return {"chosen": chosen, "retained_original": False, "reasons": reasons,
-            "n_survivors": len(survivors)}
+            "n_survivors": len(survivors), "survivor_lengths": lengths,
+            "rule": rule}

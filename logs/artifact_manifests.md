@@ -285,35 +285,67 @@ untruncated at temperature 1.0, and this session measured that even *greedy*
 bf16 decoding is not batch-invariant on this teacher — so the hashes above pin
 the experiment (P5), not a re-derivable procedure.
 
-## corpus_v2_clean + ladder_uniform_clean_anchored — Experiment 2 phase 1 (D1)
+## corpus_v2_clean + rung_0860k_clean_median — Experiment 2 phase 1 (D1)
 
-- **Artifact:** `artifacts/stage3/corpus_v2_clean/` (`sessions_clean.jsonl`
-  sha256 `7d22b3e037b0de45c2b7fd23d9fb6706955eef59f472d9e6937b8e4ea1a76bc3`,
-  68 MB; `cleaning_audit.json` `8d97e03a5aadbee40b17aa276bf89a8a805cee275006d6fa2f2c7cb3b541a324`;
-  `cleaning_per_example.jsonl`; `d0_session_order.txt`) and the pack
-  `artifacts/stage3/ladder_uniform_clean_anchored/` (`blocks.npz`
-  `1c8792dbc796e22f5547e0848ad7bd301b5c0b1a8a369672efc05ddce5e37b79`,
-  `ladder.json` `510476400f661a351b50352a7744a2736b388247c8edfc42a10b7d8383ae9d05`,
-  `audit.jsonl` `213a422d2e690abd0fe04a4cb295e69895ae650e457236fec2d9eaa62c7130ef`).
-  Comparison record: `artifacts/stage3/e2_d1_corpus_audit.json`
-  `a27ae3dfe755a2fb081a42e87720e7071bac702e84dcd5a888ad3929176659bb`.
-- **Created:** 2026-08-03, **CPU only, $0**. 114 s to screen 11,174 sessions,
-  ~9 min to pack. No teacher inference: every target is a completion already
-  present in corpus v2's retained `n=4` candidates.
-- **Derivation:** `scripts/data/build_cleaned_corpus.py` (rules
-  `aadistill.data.cleaning`, `RULES_VERSION = "clean-v1"`) over
+- **Artifact:** `artifacts/stage3/corpus_v2_clean/` (`sessions_clean.jsonl` sha256
+  `9cbdd59acc44f64c44623a2351b7d2dc799097e513d40cd4eff4f2e9b0d67bd6`, 68 MB;
+  `cleaning_audit.json`
+  `c70c85288df7a0ca487965321b6c7a2bb33eefee3b112a9ed337e923d2af543d`;
+  `cleaning_per_example.jsonl`; `d0_session_order.txt`) and the packed rung
+  `artifacts/stage3/rung_0860k_clean_median/` (`blocks.npz`
+  `d87a4688f723c97ce7a6d6fcb80ac9d93ef83236ede205d10041c3b9aeb9003c`,
+  `ladder.json`
+  `8dc700095abf5560dbb9f0ccea47a9bb00992dfcd3f03df85ac0457c70022a1b`,
+  `audit.jsonl`
+  `fb10f9faf6f232109779dc23033c82c4ee5db7f6ec7e9f0e9035ab00fcc7a38e`, 2.7 MB
+  total). Comparison records: `artifacts/stage3/e2_d1_corpus_audit.json`
+  `04d04378269e4881c19265a45925670bc31edebd7f118da9bfbff851bf9494ee` and
+  `artifacts/stage3/e2_selection_rule_audit.json`
+  `70c380d469400ffe518d9bed9c92b1c6d8068e2263ab0bff69168b26b6c6b58a`.
+- **Created:** 2026-08-03, **CPU only, $0**. ~4 min to screen 11,174 sessions,
+  ~10 min to pack. No teacher inference: every target is a completion already
+  present in corpus v2's retained `n=4` candidates, and KD teacher distributions
+  are computed online at training time, so a changed target needs no logit
+  recomputation.
+- **Derivation:** `scripts/data/build_cleaned_corpus.py --selection median`
+  (rules `aadistill.data.cleaning`, `RULES_VERSION = "clean-v2"`) over
   `candidates.jsonl` `f7f5035e…` + `sessions.jsonl` `2b4edc2e…`, then
-  `scripts/data/build_token_ladder.py --session-order` anchored to Experiment
-  1's pack, uniform mixture, block-len 8192.
-- **Contents:** 10,778 of 11,174 sessions (96.5%); the 2,968,828-supervised-token
-  rung is 1,944 blocks — block-, step- and packed-token-identical to Experiment
-  1's 2.96M rung.
+  `scripts/data/build_matched_rung.py --control-rung 860000` against
+  `artifacts/stage3/ladder_uniform_probe`, uniform mixture, block-len 8192,
+  pool overshoot 1.20.
+- **Contents:** 10,778 of 11,174 sessions cleaned (96.5%). The rung is **682
+  blocks / 1,023 optimizer steps / 5,586,944 packed tokens — identical to
+  Experiment 1's 0.86M PCA control** — at 858,409 supervised tokens (−0.733%),
+  1,479 sessions, **89.1% prompt overlap** with that control, per-type share
+  drift ≤ 0.17 pp. The control's 16 validation blocks are appended verbatim
+  (token-ids sha256 `4d36705cfcf414af…`, 81,195 supervised tokens) and verified
+  byte-identical through `aadistill.data.ladder`.
+- **A second corpus exists for comparison only:**
+  `artifacts/stage3/corpus_v2_clean_shortest/`, identical gates with
+  `--selection shortest`. Never trained on; it exists so the two selection rules
+  could be measured against each other rather than argued about.
 - **Tokenizer/template:** teacher `Qwen/Qwen3-4B-Thinking-2507@768f209d`, vocab
   sha256 `3ec3c124…`, chat template `3802169b…` — both reproduced exactly on the
   dev box under transformers 5.13.1 against the corpus's 5.14.1.
-- **Status: prepared, NOT trained on.** Phase 1 is awaiting budget approval
-  ([`PROPOSAL.md`](PROPOSAL.md) §7).
+- **Status: prepared, NOT trained on.** Awaiting launch approval
+  ([`PROPOSAL.md`](PROPOSAL.md)).
 - **License/provenance:** derived from corpus v2; same constraints. No new
   generation, no new sources.
-- **Related logs:** [`PROPOSAL.md`](PROPOSAL.md) §3,
+- **Related logs:** [`PROPOSAL.md`](PROPOSAL.md) §3–§4,
   [`EXPERIMENTS.md`](EXPERIMENTS.md) §12.
+
+## e1_r0860k_s{a,b}_pca run records — recovered from the relay
+
+- **Artifact:** `artifacts/stage3/rescued/_relay/e1_r0860k_s{a,b}_pca/` —
+  `run_manifest.json`, `train_log.jsonl`, `eval_holdout_v1.json`,
+  `gen_smoke.json` and the pod-side hash list, fetched 2026-08-03 from
+  `AlphaAvatar/aadistill-artifacts` under `e1_scaling_20260801/`.
+- **Why:** these are the Experiment 2 control's authoritative records. The
+  dev-box copies were destroyed by the Experiment 1 `scp` basename collapse; the
+  relay kept per-arm copies. They restore the full 10-point val-CE trajectories
+  and let the committed configs be verified against the run manifests
+  (`config_sha256` `08264ef1…` and `9048173d…`, both reproduced).
+- **Also on the relay, unchanged:** `step_001023/model/` for both arms — the D0
+  weights Experiment 2 will re-evaluate on any new capability set.
+- **Related logs:** [`PROPOSAL.md`](PROPOSAL.md) §2,
+  [`EXPERIMENTS.md`](EXPERIMENTS.md) §12.2.

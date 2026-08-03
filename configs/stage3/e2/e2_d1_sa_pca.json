@@ -1,14 +1,14 @@
 {
   "stage": "stage3_recovery",
   "run_name": "e2_d1_sa_pca",
-  "_purpose": "Experiment 2 phase d1: cleaned teacher targets (aadistill.data.cleaning, clean-v1). Rung 2,968,828 at 1944 blocks / 2916 steps, matching the Experiment 1 2.96M PCA control exactly. Seed 20260726, Stage 1 PCA init. Differs from configs/stage3/recovery.json only in the fields this phase is testing plus data source, rung, seed and schedule length.",
+  "_purpose": "Experiment 2 phase d1: cleaned teacher targets (aadistill.data.cleaning, clean-v1). Rung 858,409 at 682 blocks / 1023 steps, matching the Experiment 1 0.86M PCA control (864,750 supervised) exactly on compute. Seed 20260726, Stage 1 PCA init. Differs from configs/stage3/recovery.json only in the fields this phase is testing plus data source, rung, seed and schedule length.",
   "student_path": "artifacts/stage1/qwen3_0p6b_init_v0/checkpoint",
   "teacher": {
     "model_id": "Qwen/Qwen3-4B-Thinking-2507",
     "revision": "768f209d9ea81521153ed38c47d515654e938aea",
     "dtype": "bfloat16"
   },
-  "data_dir": "artifacts/stage3/ladder_uniform_clean_anchored",
+  "data_dir": "artifacts/stage3/rung_0860k_clean_median",
   "groups": null,
   "packing": "ladder",
   "block_len": 8192,
@@ -41,8 +41,8 @@
     "grad_clip": 1.0
   },
   "schedule": {
-    "total_steps": 2916,
-    "warmup_steps": 146,
+    "total_steps": 1023,
+    "warmup_steps": 51,
     "min_lr_frac": 0.1
   },
   "batch": {
@@ -50,15 +50,15 @@
     "micro_blocks": 1
   },
   "checkpoint": {
-    "save_every": 364,
+    "save_every": 127,
     "keep_last": 9
   },
   "intervals": {
     "log_every": 10,
-    "eval_every": 364,
+    "eval_every": 127,
     "eval_blocks": 16
   },
   "out_dir": "artifacts/stage3/e2_d1_sa_pca",
-  "rung": 2968828,
+  "rung": 858409,
   "val_blocks": 16
 }

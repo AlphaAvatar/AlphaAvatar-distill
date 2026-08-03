@@ -1,16 +1,17 @@
-**Updated:** 2026-08-03 16:10 UTC · branch `main` · **no pods running, nothing
-billing.** Verified spend to date **$96.02** ($34.52 prior + $47.6 E1 training +
-$8.1 control/eval + $5.8 sweep) against a **$100 hard cap** — **$3.98 left**.
+**Updated:** 2026-08-03 19:40 UTC · branch `main` · **no pods running, nothing
+billing.** Verified spend **$96.02**. **Experiment 2 has an approved incremental
+budget of $30.00** (maintainer, 2026-08-03) → **new cumulative hard cap
+$126.02**.
 
-**Active work:** **Experiment 2**, redesigned by the maintainer on 2026-08-03 as
-**three sequential single-variable diagnostics at the Experiment 1 2.96M rung** —
-(1) data cleaning, (2) loss with KL-only first, (3) learning rate — each reusing
-the previous phase's winner as its control. Not a Cartesian sweep.
+**Active work:** **Experiment 2** — three sequential single-variable diagnostics
+at Experiment 1's **0.86M** rung: (1) data cleaning, (2) loss with KL-only first,
+(3) learning rate. Each reuses the previous phase's winner as its control. Not a
+Cartesian sweep.
 
-**Phase 1 (data cleaning) is fully prepared on CPU for $0 and is NOT launched:
-it does not fit the remaining budget.** Phase 1 costs **$8.09** as specified
-(minimum valid alternative **$7.40**); **$3.98** remains. A decision on the cap
-is the only thing blocking it. See [`PROPOSAL.md`](PROPOSAL.md) §7.
+**Phase 1 is fully prepared on CPU for $0 and fits the budget** (expected $6.48;
+all three phases $21.02 expected / $29.84 pessimistic). **Nothing is launched** —
+awaiting explicit approval to train D1 at both seeds. See
+[`PROPOSAL.md`](PROPOSAL.md).
 
 Canonical handoff. Companions:
 
@@ -256,7 +257,7 @@ uncapped evals for 24 checkpoints — against the raised **$60** cap.
 
 ## 10. Implementation state (CPU-verified)
 
-**346 tests pass on CPU** (`uv run pytest tests/ -q`, ~12 s, no downloads).
+**361 tests pass on CPU** (`uv run pytest tests/ -q`, ~12 s, no downloads).
 
 | piece | file | state |
 |---|---|---|
@@ -267,9 +268,12 @@ uncapped evals for 24 checkpoints — against the raised **$60** cap.
 | one-pass pack + nested ladder cut | `scripts/data/build_token_ladder.py` | produced the 6-rung ladder |
 | §6/§9 gate validator | `scripts/data/validate_corpus_gate.py` | PASS on the full corpus |
 | end-to-end CPU dress rehearsal | `tests/data/test_recovery_corpus_pipeline.py` | builder→ladder→gate with a stub engine |
-| candidate cleaning rules (`clean-v1`) | `src/aadistill/data/cleaning.py` | built the D1 corpus; 26 rule tests |
+| candidate cleaning rules (`clean-v2`) | `src/aadistill/data/cleaning.py` | median-length survivor; built the D1 corpus; 30 rule tests |
 | cleaned-corpus driver | `scripts/data/build_cleaned_corpus.py` | 11,174 sessions screened in 114 s |
 | ladder session-order anchor | `scripts/data/build_token_ladder.py --session-order` | keeps a re-cut pack on the anchor's prompts |
+| prompt-matched single-rung packer | `scripts/data/build_matched_rung.py` | 89.1% D0 overlap at exact compute; appends the control's validation blocks |
+| selection-rule comparison | `scripts/data/audit_selection_rule.py` | median vs shortest on one corpus |
+| checkpoint retention policy | `scripts/pod/retain_checkpoints.py` | trajectory-driven keep set; 13 tests |
 | D0↔D1 corpus audit | `scripts/data/audit_d1_corpus.py` | overlap, shares, budget, residual mismatch |
 | strict final-answer rule | `src/aadistill/evaluation/strict_answer.py` | replaces last-number GSM8K scoring; 17 tests |
 | offline GSM8K re-scoring | `scripts/evaluation/rescore_gsm8k.py` | re-scored all 25 E1 arms, $0 |
@@ -340,46 +344,49 @@ reason and GSM8K correctness across rungs, seeds and inits.
 checkpoints remain relay-blocked and are held, hash-verified, on the dev box
 under `artifacts/stage3/rescued/`.
 
-## 14. Experiment 2 phase 1 — prepared, blocked on budget
+## 14. Experiment 2 phase 1 — prepared, awaiting launch approval
 
-All zero-GPU preparation is complete and verified ([`PROPOSAL.md`](PROPOSAL.md),
+Zero-GPU preparation complete and verified ([`PROPOSAL.md`](PROPOSAL.md),
 [`EXPERIMENTS.md`](EXPERIMENTS.md) §12):
 
-* **Corpus verified.** `candidates.jsonl` `f7f5035e…` / `sessions.jsonl`
-  `2b4edc2e…` re-hashed and matching; 400/400 sessions re-render token-exact on
-  the dev box; tokenizer vocab `3ec3c124…` and template `3802169b…` reproduced.
-* **D1 built.** `aadistill.data.cleaning` (`clean-v1`) kept 10,778/11,174
-  sessions (96.5%); the rung is **1,944 blocks / 2,916 steps / 15,925,248 packed
-  tokens — exact matches to D0** — at 2,968,828 unique supervised tokens
-  (+0.281%), per-type share drift ≤0.05 pp, prompt overlap **79.0%**.
-* **E1 loss and LR resolved** from source, configs and manifests; the trainer is
-  byte-identical between the E1 commit and HEAD.
-* **GSM8K evaluator corrected** and all 25 E1 arms re-scored offline; the
-  correction moves two arms by one sample each.
-* **Six pca arms' val CE recovered** from console logs; `e1_consolidated.json`
-  has no missing measurements.
+* **Rung: 0.86M**, chosen because held-out NLL bottoms at 0.46M and takes its
+  largest jump 0.46M → 0.86M; 2.96M is post-deterioration plateau.
+* **Exact D0 baseline parsed, not scaled**: 864,750 supervised · 682 blocks ·
+  1,502 sessions · 5,586,944 packed tokens · 1,023 steps · η 5e-5 / warmup 51 ·
+  seeds 20260726 / 20260801 · init `86fbba78…` · config sha `08264ef1…` /
+  `9048173d…`, both recomputed and matching the run manifests. Per-arm
+  `train_log.jsonl` and `run_manifest.json` recovered **from the relay**.
+* **`clean-v2` median-length survivor selection.** On the 73 prompts where it
+  disagrees with shortest-survivor it keeps **1.35× more reasoning trace**.
+* **D1 built and matched**: 682 blocks / 1,023 steps / 5,586,944 packed tokens
+  exact, 858,409 supervised (−0.733%), **89.1% prompt overlap**, ≤0.17 pp share
+  drift, and **byte-identical validation blocks** verified through the real
+  trainer path.
+* **Retention resolved**: `scripts/pod/retain_checkpoints.py` — metrics at all 9
+  eval points, weights only for final / best-val-CE / best-NLL / the
+  deterioration bracket. ~73 GB for eight arms against 117 GB free on the dev box.
 
-**Two facts that shape how phase 1 should be read.** The held-out NLL rise
-begins at **0.86M**, not 2.96M, and by 2.96M the curve has flattened; and the
-step-matched control shows the metric tracks **optimizer steps**, not unique
-data. Phase 3 (learning rate) is where the mechanism most likely lives.
+**What D0 cannot support:** Experiment 1 ran `keep_last: 1`, so best-checkpoint
+and within-run-onset comparisons exist for new arms only. The fixed-step endpoint
+is the fully matched comparison.
 
-**Also carry:** Experiment 1 kept only final checkpoints
-(`save_every: 1458, keep_last: 1`), so D0 supports **only** the fixed-step
-endpoint comparison. New arms evaluate and retain at every eval point.
+**One zero-GPU prerequisite left:** the new capability evaluation sets
+(knowledge QA, verifier math, multihop, RAG, refusal) do not exist. Their design
+needs a decision; phase 1 can run on Experiment 1's existing battery for ~$2 less.
 
 ## 11. Next actions
 
-1. **Maintainer decision: raise the $100 cap, or take the $7.40 reduced phase
-   1.** Nothing else is blocking. Recommendation: raise to $110 — it funds phase
-   1 in full (~$9.3 worst case) and leaves room to start phase 2, whose L1 arm
-   is the same 2,916 steps.
-2. On approval: provision one L40S with `--min-cuda-version 13.0` (so the same
-   pod can train and run the vLLM battery), train D1 at both seeds from the
-   Stage 1 PCA init `86fbba78…`, evaluate, upload, hash-verify, tear down.
-3. Report phase 1 against the pre-registered gate before preparing phase 2.
-4. Carry forward the Experiment 1 tooling fixes recorded in
-   [`EXPERIMENTS.md`](EXPERIMENTS.md) §11 (self-matching `pgrep`, greedy `sed`
-   on hash lines, basename-collapsing `scp` globs).
-5. Still open from Experiment 1: squash the relay history, then upload and
-   verify the four dev-box-only arms (§2, §13). CPU-only, no approval needed.
+1. **Maintainer approval to launch phase 1** (D1, both seeds, ~$6.48). Nothing
+   else blocks it.
+2. Decide the evaluation battery: build the new capability sets (CPU, free) or
+   run phase 1 against Experiment 1's existing behaviour + GSM8K battery.
+3. On approval: one L40S with `--min-cuda-version 13.0` and ~100 GB container
+   disk, train both seeds from `86fbba78…`, evaluate, retain per §14, transfer,
+   hash-verify on the dev box, tear down.
+4. Report phase 1 against the pre-registered gate; re-cost phases 2–3 against
+   actual spend before preparing phase 2.
+5. Still open: the approved relay history squash (destructive, confirm
+   separately) and the four dev-box-only Experiment 1 arms. Not a prerequisite —
+   Experiment 2 stores weights on the dev box.
+6. Carry forward the Experiment 1 tooling fixes in
+   [`EXPERIMENTS.md`](EXPERIMENTS.md) §11.

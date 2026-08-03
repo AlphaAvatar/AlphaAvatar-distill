@@ -188,26 +188,79 @@ def test_the_corpus_candidate_is_retained_when_it_survives():
     assert verdict["chosen"]["index"] == 0
 
 
-def test_a_failing_original_is_replaced_by_the_shortest_survivor():
+def test_a_failing_original_is_replaced_by_the_median_survivor():
+    """Length enters only among survivors, and picks the middle one.
+
+    Survivor lengths are 12, 7 and 4 words; the median is 7, so the 7-word
+    candidate wins — the shortest (4 words, which states the answer without
+    deriving it) does not.
+    """
     ex = example(candidates=[
-        candidate(0, answer="The answer is 8."),            # wrong
-        candidate(1, answer="After working it through, the answer is 7."),
-        candidate(2, answer="The answer is 7."),            # shortest correct
+        candidate(0, answer="The answer is 8."),                     # wrong
+        candidate(1, answer="First add the parts, then divide them, so the answer is 7."),
+        candidate(2, answer="Adding the parts gives the answer is 7."),
+        candidate(3, answer="The answer is 7."),
     ])
     verdict = select_clean(ex, degeneration, _by_words, original_index=0)
     assert verdict["retained_original"] is False
     assert verdict["chosen"]["index"] == 2
     assert verdict["reasons"][0] == "correctness:answer_mismatch"
+    assert verdict["rule"] == "median"
 
 
-def test_ties_break_on_candidate_index():
+def test_median_of_an_even_survivor_set_ties_on_index():
+    """With two survivors the median is their midpoint, so both are equidistant."""
     ex = example(candidates=[
         candidate(0, answer="The answer is 8."),
+        candidate(1, answer="After working it through, the answer is 7."),
         candidate(2, answer="The answer is 7."),
-        candidate(1, answer="The answer is 7."),
     ])
     verdict = select_clean(ex, degeneration, _by_words, original_index=0)
     assert verdict["chosen"]["index"] == 1
+
+
+def test_shortest_rule_is_still_available_for_comparison():
+    ex = example(candidates=[
+        candidate(0, answer="The answer is 8."),
+        candidate(1, answer="First add the parts, then divide them, so the answer is 7."),
+        candidate(2, answer="Adding the parts gives the answer is 7."),
+        candidate(3, answer="The answer is 7."),
+    ])
+    median = select_clean(ex, degeneration, _by_words, original_index=0)
+    shortest = select_clean(ex, degeneration, _by_words, original_index=0,
+                            rule="shortest")
+    assert median["chosen"]["index"] == 2
+    assert shortest["chosen"]["index"] == 3
+    assert median["chosen"]["index"] != shortest["chosen"]["index"]
+
+
+def test_an_unknown_selection_rule_fails_loudly():
+    ex = example(candidates=[candidate(0, answer="The answer is 8."),
+                             candidate(1, answer="The answer is 7.")])
+    with pytest.raises(ValueError, match="selection rule"):
+        select_clean(ex, degeneration, _by_words, original_index=0, rule="longest")
+
+
+def test_survivor_lengths_are_recorded_for_the_audit():
+    ex = example(candidates=[
+        candidate(0, answer="The answer is 8."),
+        candidate(1, answer="Adding the parts gives the answer is 7."),
+        candidate(2, answer="The answer is 7."),
+    ])
+    verdict = select_clean(ex, degeneration, _by_words, original_index=0)
+    assert set(verdict["survivor_lengths"]) == {1, 2}
+    assert 0 not in verdict["survivor_lengths"]
+
+
+def test_a_retained_original_never_consults_length():
+    """The corpus's own candidate wins outright, however long it is."""
+    ex = example(candidates=[
+        candidate(0, answer="A far longer but entirely correct route to the answer is 7."),
+        candidate(1, answer="The answer is 7."),
+    ])
+    verdict = select_clean(ex, degeneration, _by_words, original_index=0)
+    assert verdict["retained_original"] is True
+    assert verdict["chosen"]["index"] == 0
 
 
 def test_no_survivor_yields_no_target():

@@ -4,7 +4,9 @@
     uv run python scripts/data/build_experiment2_configs.py --phase d1
 
 Experiment 2 is three sequential single-variable diagnostics at the Experiment 1
-2.96M rung. Each phase changes exactly one thing against the arm it is compared
+**0.86M** rung — the first rung clearly inside the held-out-NLL deterioration
+region (the minimum is at 0.46M and the largest single jump is 0.46M -> 0.86M),
+where 2.96M sits on the post-deterioration plateau. Each phase changes exactly one thing against the arm it is compared
 with, and every arm restarts from the Stage 1 PCA init at the two Experiment 1
 seeds — never from a trained checkpoint.
 
@@ -14,10 +16,10 @@ seeds — never from a trained checkpoint.
 | 2 loss  | `e2_l1` | `ce_weight` 0.25 -> 0.0; data, LR, steps unchanged |
 | 3 lr    | `e2_r1` / `e2_r2` | whole LR schedule scaled by 1/2 and 1/4 |
 
-The step budget is **pinned to Experiment 1's 2,916**, not recomputed from the
+The step budget is **pinned to Experiment 1's 1,023**, not recomputed from the
 new pack's block count, because optimizer-step parity is what makes the arms
-comparable (2026-08-03 decision). The D1 pack is cut at 1,944 blocks precisely so
-that `ceil(1944 * 3 / 2)` reproduces it.
+comparable (2026-08-03 decision). The D1 pack is cut at 682 blocks precisely so
+that `ceil(682 * 3 / 2)` reproduces it.
 
 Phase 2 and 3 read `--data-dir` / `--rung` from whatever phase 1 selected, so the
 same script emits them once that decision exists.
@@ -33,9 +35,12 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parents[2]
 CANONICAL = REPO_ROOT / "configs/stage3/recovery.json"
 
-# Experiment 1's 2.96M PCA control, which every phase-1 arm must match.
-D0_STEPS = 2916
-D0_BLOCKS = 1944
+# Experiment 1's 0.86M PCA control, which every Experiment 2 arm must match.
+# Read off `configs/stage3/e1/e1_r0860k_s*_pca.json` and their run manifests,
+# not derived by scaling another rung.
+D0_STEPS = 1023
+D0_BLOCKS = 682
+D0_SUPERVISED = 864_750
 EPOCHS = 3
 SEEDS = [("a", 20260726), ("b", 20260801)]
 PCA_INIT = "artifacts/stage1/qwen3_0p6b_init_v0/checkpoint"
@@ -88,7 +93,8 @@ def build(phase: str, out_dir: Path, data_dir: str, rung: int, val_blocks: int,
         cfg["_purpose"] = (
             f"Experiment 2 phase {phase}: {spec['what']}. Rung {rung:,} at "
             f"{D0_BLOCKS} blocks / {D0_STEPS} steps, matching the Experiment 1 "
-            f"2.96M PCA control exactly. Seed {seed}, Stage 1 PCA init. "
+            f"0.86M PCA control ({D0_SUPERVISED:,} supervised) exactly on "
+            f"compute. Seed {seed}, Stage 1 PCA init. "
             "Differs from configs/stage3/recovery.json only in the fields this "
             "phase is testing plus data source, rung, seed and schedule length."
         )
@@ -121,6 +127,11 @@ def build(phase: str, out_dir: Path, data_dir: str, rung: int, val_blocks: int,
         # per eval point, which is what phase 3 needs to locate the step where
         # deterioration starts.
         eval_every = max(25, D0_STEPS // evals)
+        # Every eval point is also a checkpoint. Experiment 1 kept only the
+        # final one, which is why no Experiment 1 run has a held-out-NLL
+        # trajectory; phase 3 cannot locate the onset of deterioration without
+        # them. Retention off the pod is handled by
+        # `scripts/pod/retain_checkpoints.py`, not by keeping everything.
         cfg["checkpoint"] = {"save_every": eval_every, "keep_last": evals + 1}
         cfg["intervals"] = {"log_every": 10, "eval_every": eval_every,
                             "eval_blocks": val_blocks}
@@ -140,15 +151,16 @@ def main() -> None:
     ap.add_argument("--phase", required=True, choices=sorted(PHASES))
     ap.add_argument("--out", default="configs/stage3/e2")
     ap.add_argument("--data-dir",
-                    default="artifacts/stage3/ladder_uniform_clean_anchored",
-                    help="the packed ladder this phase's arms read")
-    ap.add_argument("--rung", type=int, default=2_968_828,
-                    help="the block-matched cleaned rung (1,944 blocks)")
+                    default="artifacts/stage3/rung_0860k_clean_median",
+                    help="the packed rung this phase's arms read")
+    ap.add_argument("--rung", type=int, default=858_409,
+                    help="the compute-matched cleaned 0.86M rung (682 blocks)")
     ap.add_argument("--val-blocks", type=int, default=16)
     ap.add_argument("--evals", type=int, default=8,
                     help="eval + checkpoint points per run")
-    ap.add_argument("--seconds-per-step", type=float, default=3.53,
-                    help="measured Experiment 1 rate at this rung")
+    ap.add_argument("--seconds-per-step", type=float, default=3.603,
+                    help="measured Experiment 1 rate at the 0.86M rung "
+                         "(3,686 s / 1,023 steps, both pca seeds)")
     ap.add_argument("--hourly-usd", type=float, default=0.99)
     args = ap.parse_args()
 
