@@ -73,9 +73,27 @@ def run(cmd: list[str], cwd: Path = REPO, check: bool = True) -> int:
     return rc
 
 
+def staged_behavior(behavior_prompts: Path) -> Path:
+    """`behavior_v0` under its own name, because the output stem becomes the
+    artifact name.
+
+    The tracked file is `data/eval_behavior_v0/prompts.jsonl`, whose stem would
+    write `prompts.json` / `prompts.generations.jsonl` — an unidentifiable
+    artifact for a mandatory, separately-persisted measurement. Staging a copy
+    named `behavior_v0.jsonl` makes the output `behavior_v0.json` and
+    `behavior_v0.generations.jsonl`, which is what the retention and reporting
+    rules refer to. Content is untouched.
+    """
+    staged = Path("/workspace/prompts/behavior_v0.jsonl")
+    staged.parent.mkdir(parents=True, exist_ok=True)
+    if not staged.is_file() or staged.read_bytes() != behavior_prompts.read_bytes():
+        staged.write_bytes(behavior_prompts.read_bytes())
+    return staged
+
+
 def battery_prompt_files(battery: Path, behavior_prompts: Path) -> list[str]:
     files = [str(battery / f"{n}.jsonl") for n in CAPABILITY_SETS]
-    files.append(str(behavior_prompts))
+    files.append(str(staged_behavior(behavior_prompts)))
     missing = [f for f in files if not Path(f).is_file()]
     if missing:
         raise SystemExit(f"missing prompt files: {missing}")
@@ -88,7 +106,7 @@ def evaluate_checkpoint(model: Path, label: str, out_dir: Path, battery: Path,
     """One engine, all prompt files. `full_battery=False` runs behaviour only."""
     out_dir.mkdir(parents=True, exist_ok=True)
     files = (battery_prompt_files(battery, behavior_prompts) if full_battery
-             else [str(behavior_prompts)])
+             else [str(staged_behavior(behavior_prompts))])
     run([vllm_python, "scripts/evaluation/uncapped_eval.py",
          "--model", model, "--label", label,
          "--prompts", *files, "--out-dir", out_dir, "--diagnostics"])
