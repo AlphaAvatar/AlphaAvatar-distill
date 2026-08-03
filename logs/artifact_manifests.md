@@ -349,3 +349,52 @@ the experiment (P5), not a re-derivable procedure.
   weights Experiment 2 will re-evaluate on any new capability set.
 - **Related logs:** [`PROPOSAL.md`](PROPOSAL.md) §2,
   [`EXPERIMENTS.md`](EXPERIMENTS.md) §12.2.
+
+## battery_v1 — the frozen Experiment 2 capability battery
+
+- **Artifact:** `artifacts/eval/battery_v1/` — six jsonl sets plus
+  `manifest.json` (sha256
+  `a194179a88b2270c7cb05d6528910ee9ab77d2e3a8c751995ebb9c059f1bab46`), 2.2 MB.
+  Per-set sha256: `knowledge` `2d4420ce…` (150) · `math_verified` `bf73cb4a…`
+  (100) · `gsm8k` `1ad4ad22…` (100) · `multihop` `3bd25d89…` (100) · `rag`
+  `1e31c9e0…` (100) · `refusal_paired` `dfb680fc…` (120 = 60 pairs). Plus the
+  76-prompt `data/eval_behavior_v0/prompts.jsonl` reused verbatim. **746 total.**
+- **Created:** 2026-08-03, **CPU only, $0**, by
+  `scripts/data/build_capability_battery.py`.
+- **Sources and revisions:** `mandarjoshi/trivia_qa` `rc.nocontext` validation
+  (Apache-2.0) · `HuggingFaceH4/MATH-500` test (MIT) · `openai/gsm8k` `main` test
+  (MIT) · `hotpotqa/hotpot_qa` `distractor` validation (CC-BY-SA-4.0) ·
+  `rajpurkar/squad_v2` validation (CC-BY-SA-4.0). All exact sample ids are in the
+  manifest.
+- **Scorers:** `src/aadistill/evaluation/capability.py` sha256 `6553fdc7…`,
+  `src/aadistill/evaluation/strict_answer.py` `ad82892f…`, degeneration detector
+  pinned in the manifest. Deterministic only — no LLM judge is a primary scorer.
+- **Leakage:** 0 collisions in 15,107 candidates, against 65,913 content hashes,
+  59,113 reserved prompt hashes and 10,128 corpus-v2 prompt hashes, using the
+  corpus's own `content_key`/`prompt_key` rule. A self-test confirms a real
+  corpus-v2 prompt does hash into the exclusion set.
+- **Validation:** 84 CPU tests (`tests/evaluation/test_capability.py`), including
+  that an always-refusing policy wins 0 of 60 refusal pairs.
+- **Status: frozen.** Changing any rule requires bumping `BATTERY_VERSION`.
+- **License/provenance:** derived from the public sources above; no teacher
+  generations, no user data.
+- **Related logs:** [`PROPOSAL.md`](PROPOSAL.md) §6–§7,
+  [`EXPERIMENTS.md`](EXPERIMENTS.md) §12.7–§12.8.
+
+## checkpoint_inventory — both stores, 2026-08-03
+
+- **Artifact:** `artifacts/stage3/checkpoint_inventory.json` — every weight and
+  optimizer-state file on the dev box and in `AlphaAvatar/aadistill-artifacts`,
+  with size, hash, duplicate status, required-by and proposed action.
+- **Totals:** dev box 9 files / 17.51 GiB before cleanup, 7 / 13.32 GiB after;
+  relay 34 files / 73.28 GiB, untouched.
+- **Deleted:** the two-step ladder smoke test's `model.safetensors` (2.22 GiB)
+  and `trainer_state.pt` (1.97 GiB). **4.19 GiB reclaimed**, dev box 117 → 121
+  GiB free. Its manifest, train log and model config were kept.
+- **Duplicates found:** exactly two — the Stage 1 `checkpoint` and
+  `random_baseline`, byte-identical between dev box and relay by LFS object
+  sha256. Every other checkpoint on either store is single-copy.
+- **Relay: 0 bytes reclaimed and no file touched.** Ordinary deletion does not
+  free LFS quota there; the operations that would all invalidate existing
+  revisions and are reported for separate approval.
+- **Related logs:** [`PROPOSAL.md`](PROPOSAL.md) §9.

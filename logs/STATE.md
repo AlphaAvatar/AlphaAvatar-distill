@@ -8,10 +8,12 @@ at Experiment 1's **0.86M** rung: (1) data cleaning, (2) loss with KL-only first
 (3) learning rate. Each reuses the previous phase's winner as its control. Not a
 Cartesian sweep.
 
-**Phase 1 is fully prepared on CPU for $0 and fits the budget** (expected $6.48;
-all three phases $21.02 expected / $29.84 pessimistic). **Nothing is launched** —
-awaiting explicit approval to train D1 at both seeds. See
-[`PROPOSAL.md`](PROPOSAL.md).
+**Phase 1 is fully prepared on CPU for $0** — capability battery frozen,
+evaluators validated, checkpoints inventoried and cleaned. Phase 1 costs
+**$7.15 expected / $11.05 pessimistic**; all three phases **$22.92 / $36.01**,
+so the *pessimistic* total exceeds the $30 cap by $6.01 and is reported rather
+than absorbed. **Nothing is launched** — awaiting explicit approval to train D1
+at both seeds. See [`PROPOSAL.md`](PROPOSAL.md).
 
 Canonical handoff. Companions:
 
@@ -257,7 +259,7 @@ uncapped evals for 24 checkpoints — against the raised **$60** cap.
 
 ## 10. Implementation state (CPU-verified)
 
-**361 tests pass on CPU** (`uv run pytest tests/ -q`, ~12 s, no downloads).
+**447 tests pass on CPU** (`uv run pytest tests/ -q`, ~12 s, no downloads).
 
 | piece | file | state |
 |---|---|---|
@@ -274,6 +276,10 @@ uncapped evals for 24 checkpoints — against the raised **$60** cap.
 | prompt-matched single-rung packer | `scripts/data/build_matched_rung.py` | 89.1% D0 overlap at exact compute; appends the control's validation blocks |
 | selection-rule comparison | `scripts/data/audit_selection_rule.py` | median vs shortest on one corpus |
 | checkpoint retention policy | `scripts/pod/retain_checkpoints.py` | trajectory-driven keep set; 13 tests |
+| frozen capability battery | `scripts/data/build_capability_battery.py` | 746 prompts, 6 sets, 0 leakage collisions |
+| deterministic capability scorers | `src/aadistill/evaluation/capability.py` | alias EM, symbolic math, evidence recall, paired refusal; 84 tests |
+| battery scoring driver | `scripts/evaluation/score_battery.py` | pair-accuracy headline; offline, re-runnable |
+| checkpoint inventory + cleanup | `scripts/pod/checkpoint_inventory.py` | both stores, hash-matched duplicates, declared classification |
 | D0↔D1 corpus audit | `scripts/data/audit_d1_corpus.py` | overlap, shares, budget, residual mismatch |
 | strict final-answer rule | `src/aadistill/evaluation/strict_answer.py` | replaces last-number GSM8K scoring; 17 tests |
 | offline GSM8K re-scoring | `scripts/evaluation/rescore_gsm8k.py` | re-scored all 25 E1 arms, $0 |
@@ -370,16 +376,23 @@ Zero-GPU preparation complete and verified ([`PROPOSAL.md`](PROPOSAL.md),
 and within-run-onset comparisons exist for new arms only. The fixed-step endpoint
 is the fully matched comparison.
 
-**One zero-GPU prerequisite left:** the new capability evaluation sets
-(knowledge QA, verifier math, multihop, RAG, refusal) do not exist. Their design
-needs a decision; phase 1 can run on Experiment 1's existing battery for ~$2 less.
+* **Capability battery frozen**: `artifacts/eval/battery_v1/`, manifest sha256
+  `a194179a…`, **746 prompts** across knowledge / verifier-math / GSM8K /
+  multihop / RAG / paired-refusal / behaviour. Deterministic scorers only,
+  **0 leakage collisions in 15,107 candidates**, 84 evaluator-validation tests —
+  including that an always-refusing policy wins **0 of 60** refusal pairs.
+* **Checkpoints inventoried and cleaned**: 4.19 GiB reclaimed on the dev box
+  (117 → 121 GiB free); **0 reclaimed on the relay**, where ordinary deletion
+  cannot free LFS quota and every option that could invalidates existing
+  revisions — reported for a separate decision, not performed.
 
 ## 11. Next actions
 
-1. **Maintainer approval to launch phase 1** (D1, both seeds, ~$6.48). Nothing
-   else blocks it.
-2. Decide the evaluation battery: build the new capability sets (CPU, free) or
-   run phase 1 against Experiment 1's existing behaviour + GSM8K battery.
+1. **Maintainer approval to launch phase 1** (D1, both seeds, $7.15 expected /
+   $11.05 pessimistic). Nothing else blocks it.
+2. **Decide the cap question**: approve phase 1 only and re-cost phases 2–3 from
+   measured spend (recommended), or raise the incremental cap to $36 to cover
+   the compounded pessimistic path now.
 3. On approval: one L40S with `--min-cuda-version 13.0` and ~100 GB container
    disk, train both seeds from `86fbba78…`, evaluate, retain per §14, transfer,
    hash-verify on the dev box, tear down.

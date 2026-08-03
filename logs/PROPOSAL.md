@@ -306,70 +306,266 @@ For R1/R2 the whole schedule scales, not just the peak: `min_lr_frac` is a
 fraction of the peak so the floor follows automatically, and warmup stays a fixed
 proportion of the run.
 
-## 6. Remaining zero-GPU prerequisite, not yet done
+## 6. The frozen capability battery (`capability-v1`)
 
-The capability decomposition in the maintainer's brief needs held-out sets that
-**do not exist yet**: leakage-safe factual/knowledge QA, verifier-backed math,
-multihop, RAG evidence-supported correctness, unsupported-refusal. Experiment 1's
-battery covers only behaviour (76 prompts) and GSM8K (100).
+Built and frozen **before** D1 trains: `artifacts/eval/battery_v1/`, manifest
+sha256 `a194179a88b2270c7cb05d6528910ee9ab77d2e3a8c751995ebb9c059f1bab46`.
+Nothing in it may be tuned after results are seen.
 
-They are cheap to build (CPU, no generation) but their design has choices —
-sources, leakage rules against corpus v2, size — that should be settled rather
-than assumed, and the cost table in §7 already prices the larger battery. **Flag,
-not a blocker:** phase 1 can run against the existing battery if you prefer, at
-roughly $2 less. Say which and it is built before launch.
+| set | n | source | split | license | sha256 |
+|---|---:|---|---|---|---|
+| `knowledge` | 150 | `mandarjoshi/trivia_qa` `rc.nocontext` | validation | Apache-2.0 | `2d4420ce…` |
+| `math_verified` | 100 | `HuggingFaceH4/MATH-500` | test | MIT | `bf73cb4a…` |
+| `gsm8k` | 100 | `openai/gsm8k` `main` | test | MIT | `1ad4ad22…` |
+| `multihop` | 100 | `hotpotqa/hotpot_qa` `distractor` | validation | CC-BY-SA-4.0 | `3bd25d89…` |
+| `rag` | 100 | `rajpurkar/squad_v2` | validation | CC-BY-SA-4.0 | `1e31c9e0…` |
+| `refusal_paired` | 120 (60 pairs) | `rajpurkar/squad_v2` | validation | CC-BY-SA-4.0 | `dfb680fc…` |
+| `behavior_v0` | 76 | reused unchanged from Experiment 1 | — | — | — |
+| **total** | **746** | | | | |
 
-## 7. Cost, from measured 0.86M timestamps
+`behavior_v0` is reused verbatim so D0's stored behaviour generations stay
+comparable without a re-run. Every set carries its exact sample ids in the
+manifest.
+
+**Scoring is deterministic everywhere; no LLM judge is a primary scorer.**
+Alias-set exact match (knowledge); numeric → rational → symbolic → normalized
+comparison of a `\boxed{}` answer (math); strict `\boxed{}`-or-explicit-marker
+(GSM8K); span containment plus supporting-title recall (multihop); span
+containment plus evidence attribution, unsupported-claim rate and echo detection
+(RAG); paired must-answer / must-refuse (refusal). Scorer
+`src/aadistill/evaluation/capability.py` sha256 `6553fdc7…`,
+`strict_answer.py` `ad82892f…`, degeneration detector pinned in the manifest.
+
+**Decoding is identical to Experiment 1's** — greedy, unrestricted within the
+8,192 effective context derived from the trained `block_len`, stop ids from the
+model's `generation_config`, degeneration stop on, mandatory system message with
+a sample's own preserved. D0 and every new arm use the same prompts, decoding
+and evaluators.
+
+### Leakage
+
+Two independent guarantees.
+
+1. **Structural.** `build_stage2_v1.py` drew every source from its `train`
+   split, so the `validation`/`test` splits used here were never eligible for
+   corpus v2. TriviaQA and MATH-500 have never been used by this project at all.
+2. **Hash.** Every candidate is checked with the corpus's own `content_key` /
+   `prompt_key` rule against 65,913 content hashes and 59,113 reserved prompt
+   hashes (`stage2_v1` train+val+calib, `eval_behavior_v0`) plus **10,128
+   corpus-v2 prompt hashes**.
+
+**Result: 0 collisions in 15,107 candidates.** The check is not vacuous — a
+self-test confirms a real corpus-v2 prompt does hash into the exclusion set, so
+zero is a measurement, not a wiring bug.
+
+**Recorded weakness:** `multihop` and `rag` share source *families* (HotpotQA,
+SQuAD v2) with corpus v2's training slices — item-disjoint and on a different
+split, so near-domain rather than out-of-domain. `knowledge` and `math_verified`
+are fully out-of-domain.
+
+### Evaluator validation (CPU, before any model output)
+
+`tests/evaluation/test_capability.py`, 84 tests. Every scorer is run against
+known **correct, incorrect, malformed, tool-call, refusal and degenerate**
+outputs, and then against every row of the frozen sets:
+
+* gold answers score **100%** on `knowledge` (150/150), `multihop` (100/100),
+  `rag` (100/100) and `math_verified` (100/100 with the gold boxed —
+  verification paths 63 numeric / 17 rational / 5 symbolic / 15 normalized);
+* unrelated answers score **0%** on every set;
+* every scorer rejects every malformed mode (degenerate, unterminated, missing
+  `</think>`, unexpected tool call, empty) even when the correct answer is
+  present;
+* **an always-refusing policy wins 0 of 60 pairs** while scoring 0.5 per row —
+  verified end-to-end through `score_battery.py` on synthesized generations.
+
+The suite found and fixed two real evaluator defects before any GPU time: the
+math scorer scored `\boxed{0.5}` wrong against gold `1/2` (sympy's LaTeX parser
+needs an uninstalled `antlr4` runtime, so the symbolic path silently failed — now
+a rational path handles it and the symbolic path no longer depends on `antlr4`),
+and the RAG echo check compared against the instruction alone instead of the
+instruction plus context, so copying the passage back would have passed.
+
+### Where the battery runs
+
+| checkpoint | full battery? |
+|---|---|
+| all 9 eval points | no — CE, held-out NLL, behaviour metrics and generations only |
+| final | **yes** |
+| best validation CE | **yes** |
+| best held-out NLL | **yes** |
+| deterioration bracket (2) | **yes** |
+| identical checkpoints | scored **once**; the reasons collapse in practice |
+| **D0** | **fixed-step endpoint only** — Experiment 1 kept no other checkpoint |
+
+**Fixed-step D0↔D1 conclusions and within-D1 trajectory conclusions are reported
+separately and never merged.** Only the endpoint is a matched D0 comparison;
+everything else is a statement about D1's own trajectory.
+
+## 7. The reasoning floor, treated explicitly
+
+Corrected D0 strict GSM8K EM at 0.86M is **0.000 on both seeds**. Therefore:
+
+* **GSM8K strict EM is preregistered as a one-sided improvement metric.** Any
+  increase counts for D1; no decrease is possible, so it can never reject D1.
+* **No no-degradation gate is defined at a zero baseline** — a gate that cannot
+  fire is not a gate.
+* **`0 → 0` is not evidence that reasoning was preserved.** It is evidence the
+  metric is uninformative at this scale.
+* `math_verified` (MATH-500, harder and out-of-domain) and `multihop` exist to
+  give reasoning a more discriminating baseline. Their D0 values are unknown
+  until D0's endpoint is scored, which happens in phase 1.
+* **If every reasoning metric — strict GSM8K, `math_verified`, `multihop` — is at
+  floor on both D0 and D1, reasoning preservation is reported as
+  `inconclusive`**, not as preserved and not as damaged.
+* **No post-hoc composite will be created or retuned** to conceal the floor.
+
+## 8. Cost, from measured 0.86M timestamps and the frozen battery
 
 **Baseline: verified cumulative spend $96.02. Experiment 2 incremental hard cap
 $30.00. New cumulative hard cap $126.02.**
 
 Measured, not extrapolated — Experiment 1's own 0.86M PCA orchestrator
-timestamps: `sa` launched 10:01:36 → `TRAIN_DONE` 11:03:03 (**3,687 s**),
-`sb` 21:06:33 → 22:07:58 (**3,685 s**); `post_run` 72 s and 73 s. That is
-**3.603 s/step** at 1,023 steps.
+timestamps: `sa` 10:01:36 → 11:03:03 (**3,687 s**), `sb` 21:06:33 → 22:07:58
+(**3,685 s**), `post_run` 72 s and 73 s. That is **3.603 s/step** at 1,023 steps.
 
 Per-seed run = 1.024 h training + 0.020 h post-run + 0.100 h inline held-out NLL
 at the 8 intermediate eval points + 0.013 h checkpoint writes = **1.157 h**.
 
-Evaluation: Experiment 1's sweep was $5.80 for 25 checkpoints = 0.234 h each on
-176 prompts. Splitting that into ~0.05 h fixed and the rest generation, the 626-
-prompt Experiment 2 battery costs **0.706 h per checkpoint**.
+Evaluation: Experiment 1's sweep measured 0.234 h per checkpoint on 176 prompts;
+splitting that into 0.05 h fixed and the rest generation gives **0.831 h per
+checkpoint** for the frozen 746-prompt battery.
 
-| phase | seeds | training h | eval ckpts | eval h | expected h | expected $ | pessimistic h | pessimistic $ |
+| phase | seeds | training h | battery ckpts exp/pess | eval h | expected h | expected $ | pessimistic h | pessimistic $ |
 |---|---:|---:|---:|---:|---:|---:|---:|---:|
-| 1 — data (D1) | 2 | 2.31 | 5 | 3.53 | 6.54 | **$6.48** | 9.08 | $8.99 |
-| 2 — loss (L1) | 2 | 2.31 | 3 | 2.12 | 5.13 | **$5.08** | 7.67 | $7.60 |
-| 3 — LR (R1, R2) | 4 | 4.63 | 6 | 4.23 | 9.56 | **$9.47** | 13.39 | $13.25 |
-| **total** | **8** | **9.26** | **14** | **9.88** | **21.24** | **$21.02** | **30.15** | **$29.84** |
+| 1 — data (D1) | 2 | 2.31 | 5 / 6 | 4.16 | 7.22 | **$7.15** | 11.16 | **$11.05** |
+| 2 — loss (L1) | 2 | 2.31 | 3 / 4 | 2.49 | 5.56 | **$5.50** | 9.08 | **$8.99** |
+| 3 — LR (R1, R2) | 4 | 4.63 | 6 / 8 | 4.99 | 10.37 | **$10.26** | 16.13 | **$15.97** |
+| **total** | **8** | **9.26** | **14 / 18** | **11.64** | **23.15** | **$22.92** | **36.37** | **$36.01** |
 
-Each phase includes 0.50 h pod provisioning and 0.20 h upload/hash/teardown;
-pessimistic adds 25% to the training rate, the full checkpoint set, and one lost
-run per phase.
+### What these numbers include — explicitly
 
-**Pod occupancy during checkpoint and generation processing** is inside these
-numbers: 0.113 h/seed of in-run checkpointing and held-out scoring, 0.706 h per
-evaluated checkpoint, and 0.20 h/phase of upload and hash verification with the
-pod still billing.
+| item | included? |
+|---|---|
+| generation **and** scoring of the complete 746-prompt battery | **yes**, at 0.831 h/checkpoint |
+| D0 final-checkpoint capability evaluation, both seeds | **yes**, inside phase 1's 5 checkpoints, charged once for the whole experiment |
+| capability evaluation of the selected D1/L1/R1/R2 checkpoints | **yes** — final always, best-val-CE and best-NLL when they differ |
+| **online teacher forwards** | **yes** — inside the measured 3.603 s/step; there is no logit cache, so no separate line exists |
+| checkpoint transfer and processing | **yes**, in the 0.25 h/phase upload-and-verify allowance, pod still billing |
+| pod idle time during evaluation and artifact handling | **yes** — every hour above is billed pod time, including 0.5 h/phase provisioning |
+| restart / failure allowance | **pessimistic column only**: one lost run per phase, +25% training rate, +25% evaluation for the degeneration surcharge, and the full best-checkpoint set |
+| scoring (`score_battery.py`, `rescore_gsm8k.py`) | **not billed** — CPU, offline, re-runnable |
 
-**Verdict: the complete sequential experiment fits.** Expected **$21.02**, which
-leaves **$8.98** of the $30 and lands cumulative at **$117.04**. The pessimistic
-path is **$29.84** — inside the cap with **$0.16** to spare, i.e. no margin at
-all. The sequential structure is the control: after phase 1 the real spend is
-known and phases 2–3 are re-costed against what remains before either is
-launched. Nothing is shortened, single-seeded or evaluated on a reduced set to
-make the arithmetic work; if phase 3 will not fit when its turn comes, that is
-reported and paused rather than trimmed.
+### The result, and the one thing it changes
 
-## 8. Checkpoint retention and persistence
+**Expected $22.92 — fits, $7.08 of headroom, cumulative $118.94.**
 
-Resolved before launch, by `scripts/pod/retain_checkpoints.py` (13 tests).
+**Pessimistic $36.01 — exceeds the $30 incremental cap by $6.01** (cumulative
+$132.03 against $126.02). The previous $21.02 / $29.84 assumed a 626-prompt
+battery; freezing it at 746 and adding a degeneration surcharge is what moved it.
 
-**The shape of the problem.** Reducing the rung cut optimizer steps 2,916 →
-1,023 but not checkpoint size: each is **4.3 GB** (2.3 GB weights + 2.0 GB
-optimizer state). Nine per arm is 39 GB, and eight arms would be 310 GB.
+Reported rather than absorbed: no seed, evaluation set, training length or
+standard has been reduced to make the arithmetic fit.
 
-**Retention policy.**
+**Phase 1 by itself is nowhere near the cap** — $7.15 expected, $11.05 worst
+case. The pessimistic total compounds a lost run, a slow rate, a degeneration
+surcharge and the maximum checkpoint set across all three phases at once, and the
+sequential design exists precisely so phases 2 and 3 are re-costed against
+measured spend before either launches. Three options, in the order I would take
+them:
+
+1. **Approve phase 1 only** ($7.15 / $11.05) and re-cost phases 2–3 from what
+   phase 1 actually costs. Most of the pessimistic margin is uncertainty phase 1
+   resolves.
+2. **Raise the incremental cap to $36** to cover the compounded worst case now.
+3. **Reduce coverage** — not recommended, and it needs explicit approval.
+
+### 8.1 Operational constraints at launch
+
+* **One pod, created with `--min-cuda-version 13.0`** so the same host trains and
+  runs the vLLM battery. Experiment 1 needed a separate evaluation pod because
+  the training driver could not host vLLM 0.26.
+* **~100 GB container disk** for 9 checkpoints/arm at 4.3 GB during a run.
+* **Pods idle-bill.** Teardown is tied to job completion, not to a generous
+  `--terminate-after`, and status polling is set up at launch.
+
+## 9. Checkpoint inventory, cleanup and persistence
+
+### 9.1 Inventory
+
+`scripts/pod/checkpoint_inventory.py` → `artifacts/stage3/checkpoint_inventory.json`.
+Every weight and optimizer-state file on both stores, with size, hash,
+duplicate status, what needs it and a proposed action. Classification is
+declared in the tool, not inferred; anything matching neither the required list
+nor a provable-obsolescence rule is `decide` — retained and flagged.
+
+| store | files | size | retain | delete | decide |
+|---|---:|---:|---:|---:|---:|
+| dev box | 9 → 7 | 17.51 → 13.32 GiB | 3 | 2 | 4 |
+| Hugging Face relay | 34 | 73.28 GiB | 4 | 0 | 30 |
+
+**Duplicate detection is real, and it found exactly two.** The local Stage 1
+`checkpoint` (`86fbba78…`) and `random_baseline` are byte-identical to their
+relay copies, matched on the LFS object sha256 without downloading anything.
+**Every other checkpoint on either store is single-copy.**
+
+### 9.2 Deleted
+
+| file | size | why |
+|---|---:|---|
+| `artifacts/stage3/_smoke_ladder/checkpoints/step_000002/model/model.safetensors` | 2.22 GiB | two-step CPU smoke test of the ladder loader, superseded by 24 real Experiment 1 arms on the same code path |
+| `artifacts/stage3/_smoke_ladder/checkpoints/step_000002/trainer_state.pt` | 1.97 GiB | optimizer state of that smoke test; it will never be resumed |
+
+**4.19 GiB reclaimed on the dev box: 117 → 121 GiB free.** Its
+`run_manifest.json`, `train_log.jsonl` and model config were kept, so the run
+remains reproducible from records.
+
+Nothing else was deleted, and that is the honest outcome rather than a thin one:
+
+* the four dev-box-only Experiment 1 arms (`e1_r2960k_sb_pca`,
+  `e1_r2960k_sb_rand`, `e1_r5500k_sb_pca`, `e1_r5500k_sb_rand`) are the **only
+  copy** of those weights;
+* `e1_ctl_r0250k_sa_pca_stepmatched` carries the single strongest Experiment 1
+  finding — that held-out NLL tracks optimizer steps, not data — and is
+  single-copy;
+* the 30 relay `decide` entries (Experiment 1's other rungs and the pre-E1
+  Stage 3 line: `s1_ffn_norm_v0`, `s1_ext_v0`, `s2_blocks_v0/v1`,
+  `s2v1_from_init/from_s1`, `s2v1_bl2048{,_seedB}`, `kdconf_ctrl_{a,b}`,
+  `kdconf_nothink_{a,b}`) are not required by the D0→D1→L1→R1/R2 chain or the
+  frozen battery, but their diagnostic value is not provably zero. The
+  `kdconf_*` pair in particular is a **`kd_scope` A/B**, which is adjacent to
+  phase 2's loss question — the weights are unlikely to be reused given P17 and
+  a different data regime, but that is a judgement, not a proof. Flagged,
+  retained.
+
+### 9.3 The Hugging Face boundary — nothing reclaimed, and why
+
+**0 bytes were reclaimed on the relay, and no relay file was touched.**
+
+Removing a file from the current revision **does not reclaim LFS quota**: the
+object stays referenced by history. This was measured on 2026-08-02 — deleting
+19.07 GB of superseded `tt2x2`/`ttb` weights dropped the working tree to
+80.31 GB and reclaimed **nothing**.
+
+So relay reclamation requires one of the operations that are out of scope
+without explicit approval. Reported, not performed:
+
+| option | reclaims | risk |
+|---|---:|---|
+| squash history (approved in principle 2026-08-02, never run) | up to ~73 GiB of superseded LFS objects | **invalidates every existing revision hash**; every artifact manifest entry that pins a revision becomes unresolvable; irreversible |
+| `super_squash_history` on the repo | same | same, plus it is a single opaque commit — provenance for 20 Experiment 1 arms collapses |
+| delete and recreate the repo | all of it | destroys every revision and every uploaded artifact; unacceptable |
+| move superseded prefixes to a second repo, then delete the first | ~26 GiB (`stage3/` pre-E1) | requires re-uploading 12 checkpoints, and the source repo still needs a history operation to actually free the objects |
+
+**Recommendation: do none of them now.** Experiment 2 does not need relay space —
+weights go to the dev box (§9.5), and only small files go to the relay, which has
+always worked because they are not LFS objects. The squash is a separate
+destructive decision to take on its own merits, not folded into a launch.
+
+### 9.4 Retention policy for Experiment 2 arms
+
+`scripts/pod/retain_checkpoints.py` (13 tests), unchanged from the previous
+revision and reaffirmed here.
 
 | eval point | metrics + generations | weights | optimizer state |
 |---|---|---|---|
@@ -380,12 +576,19 @@ optimizer state). Nine per arm is 39 GB, and eight arms would be 310 GB.
 | deterioration onset, and the eval after it | yes | **always** | no |
 
 Onset is the first step after which held-out NLL rises for **two consecutive**
-evaluations — not the first up-tick, which is meaningless against a 0.489-nat
-between-seed spread. The raw trajectory is retained regardless, so a different
-definition can be applied later without re-running anything.
+evaluations — not the first up-tick, against a 0.489-nat between-seed spread. The
+raw trajectory is retained regardless, so a different definition can be applied
+later without re-running anything. Optimizer state is discarded except where an
+active run must stay resumable.
 
-The reasons collapse in practice: val CE is monotone at this budget, so
-final == best-val-CE, giving **≈4 distinct checkpoints per arm ≈ 9.2 GB**.
+**Held-out NLL is scored by the orchestrator per checkpoint and merged from
+`holdout_trajectory.jsonl`. The trainer is not modified** — byte identity with
+D0's trainer is the one thing an A/B against D0 cannot give up.
+
+### 9.5 Storage plan, from the post-cleanup state
+
+Reasons collapse in practice — val CE is monotone at this budget, so
+final == best-val-CE — giving **≈4 distinct checkpoints per arm ≈ 9.2 GB**.
 
 | phase | arms | retained | storage |
 |---|---:|---:|---:|
@@ -394,58 +597,68 @@ final == best-val-CE, giving **≈4 distinct checkpoints per arm ≈ 9.2 GB**.
 | 3 (R1, R2) | 4 | ~4 each | ~37 GB |
 | **total** | **8** | | **~73 GB** |
 
-Plus metrics, trajectories, generations and manifests: **< 1 GB total.**
+Metrics, trajectories, generations, battery results and manifests: **< 1 GB.**
 
-**Where it lives.**
+* **Primary store: this dev box**, `artifacts/stage3/<arm>/`. **121 GiB free**
+  after cleanup — enough for all three phases with ~48 GiB spare. Nothing
+  required is ever left only on a paid pod.
+* **Small files also to the relay** under `e2_0860k_<phase>/` — not LFS objects,
+  so the quota does not block them, exactly as Experiment 1's evaluation JSONs.
+* **Weights are not planned onto the relay.** The squash is therefore not a
+  prerequisite for Experiment 2.
 
-* **Primary: this dev box** under `artifacts/stage3/<arm>/`. **117 GB free**,
-  measured — enough for all three phases with headroom. Nothing required is ever
-  left only on a paid pod.
-* **Small files** (trajectories, metrics, generations, manifests, hashes) also
-  go to the relay under `e2_0860k_<phase>/`; these are not LFS objects and upload
-  fine, exactly as Experiment 1's evaluation JSONs did.
-* **The relay is still at its private-LFS limit** and the approved history squash
-  has not run. **Weights are therefore not planned onto the relay**, and the
-  squash is not a prerequisite for Experiment 2. It stays an open item, and it is
-  a destructive operation on a shared store that will be confirmed separately
-  rather than folded into this launch.
-
-**Verification and recoverability.** `retain_checkpoints.py --apply` hashes every
-surviving file into `retention.json` before anything is deleted; the transfer to
-the dev box is verified against those hashes, and the pod is torn down only after
-verification passes. Order at teardown: (1) evaluate, (2) retain + hash on the
-pod, (3) transfer, (4) verify hashes on the dev box, (5) upload small files to the
-relay, (6) delete the pod. A dry run prints the plan without deleting; the final
+**Verification and recovery.** `retain_checkpoints.py --apply` hashes every
+surviving file into `retention.json` *before* deleting anything. Teardown order:
+(1) evaluate, (2) retain + hash on the pod, (3) transfer, (4) verify hashes on
+the dev box, (5) upload small files to the relay, (6) **delete the pod only after
+verification passes**. A dry run prints the plan without deleting, and the final
 step can never be pruned.
 
-## 9. Pre-registered D1 selection gate
+## 10. Pre-registered per-metric and phase gates
 
-Fixed before training, from the measured 0.86M seed variation in §2.
+Fixed before training, from the measured 0.86M seed variation in §2. Where a D0
+baseline does not exist yet (the new capability sets), the threshold is stated as
+a rule against the D0 value that phase 1 measures, not as a number invented now.
 
-**Select D1** only if **both**:
+### Per-metric
 
-* held-out NLL improves by **more than 0.489 nats** on the seed mean — the
-  measured between-seed |Δ| at this exact rung — **and** the improvement has the
-  same sign on both seeds;
-* and no material degradation: protocol-valid rate ≥ D0 − 0.05; natural
-  termination ≥ D0 − 0.05 (seed |Δ| 0.026); degeneration ≤ D0 + 0.05; RAG /
-  grounding and tool-call axes ≥ D0 − 0.10 (both small-n).
+| metric | role | rule |
+|---|---|---|
+| held-out NLL | **primary** | improve by **> 0.489 nats** on the seed mean — the measured between-seed \|Δ\| at this rung — with the same sign on both seeds |
+| teacher-native val CE | reported | seed \|Δ\| is 0.0063, so any change > 0.02 is real; not a gate, because D1 optimises a different target text |
+| `knowledge` | guard rail | ≥ D0 − 0.05 |
+| `math_verified` | one-sided | see §7 — floor expected; improvement counts, no decrease possible if D0 is 0 |
+| `gsm8k` strict EM | one-sided | **cannot reject D1** (D0 = 0.000) |
+| `multihop` answer | guard rail | ≥ D0 − 0.05 |
+| `multihop` evidence recall | reported | separately, never merged with answer correctness |
+| `rag` correct | guard rail | ≥ D0 − 0.05 |
+| `rag` attribution / unsupported-claim / echo | reported | four separate numbers |
+| `refusal_paired` **pair accuracy** | guard rail | ≥ D0 − 0.05; per-row accuracy is never the headline |
+| protocol-valid rate | guard rail | ≥ D0 − 0.05 |
+| natural termination | guard rail | ≥ D0 − 0.05 (seed \|Δ\| 0.026) |
+| degeneration rate | guard rail | ≤ D0 + 0.05 |
 
-**GSM8K strict EM is at floor (0.000 on both seeds), so it is a one-sided
-criterion here**: any increase counts in D1's favour, and no decrease is
-possible. It cannot be used to reject D1, and that asymmetry is recorded rather
-than hidden inside a "no degradation" clause that could never fire.
+### Phase gate
 
-**Reject D1** if held-out NLL does not improve beyond noise → report that
-cleaning does not explain the deterioration; D0 stays phase 2's dataset.
+**Select D1** if held-out NLL passes its primary rule **and** no guard rail is
+breached.
 
-**Stop and report** if D1 improves NLL while degrading any axis past its
-threshold. No composite score will be improvised to break such a tie.
+**Reject D1** if held-out NLL does not improve beyond noise → cleaning does not
+explain the deterioration; D0 stays phase 2's dataset.
+
+**Stop and report** if D1 improves NLL while breaching any guard rail. No
+composite will be improvised to break such a tie, and none will be created or
+retuned after results are seen.
+
+**Report `inconclusive`** for reasoning preservation if strict GSM8K,
+`math_verified` and `multihop` are all at floor on both arms.
 
 Paired bootstrap CIs on the **1,339 shared prompts** for every generation metric;
-val CE and held-out NLL reported per seed, as a mean, and as full trajectories.
+val CE and held-out NLL per seed, as a mean, and as full trajectories.
+**Fixed-step D0↔D1 conclusions are reported separately from within-D1 trajectory
+conclusions** — only the endpoint is a matched D0 comparison.
 
-## 10. What will not happen
+## 11. What will not happen
 
 No Cartesian sweep. No phase launched before the previous one reports and is
 approved. No retraining of any valid historical or preceding control. No arm at
