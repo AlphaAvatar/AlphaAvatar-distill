@@ -8,12 +8,14 @@ at Experiment 1's **0.86M** rung: (1) data cleaning, (2) loss with KL-only first
 (3) learning rate. Each reuses the previous phase's winner as its control. Not a
 Cartesian sweep.
 
-**Phase 1 is fully prepared on CPU for $0** — capability battery frozen,
-evaluators validated, checkpoints inventoried and cleaned. Phase 1 costs
-**$7.15 expected / $11.05 pessimistic**; all three phases **$22.92 / $36.01**,
-so the *pessimistic* total exceeds the $30 cap by $6.01 and is reported rather
-than absorbed. **Nothing is launched** — awaiting explicit approval to train D1
-at both seeds. See [`PROPOSAL.md`](PROPOSAL.md).
+**Phase 1 is fully prepared on CPU for $0** — capability battery frozen
+(`capability-v2`, 846 prompts, safety refusal now a separate XSTest set),
+evaluators validated at 112 tests, checkpoints inventoried and cleaned. Phase 1
+costs **$12.30 expected / $18.78 pessimistic** and **fits** the unchanged $30
+cap; **all three phases now cost $42.90 expected / $66.15 pessimistic, which does
+not fit** — reported rather than absorbed, and a phase-2/3 budget decision is
+deferred until phase 1 reports. **Nothing is launched.** See
+[`PROPOSAL.md`](PROPOSAL.md).
 
 Canonical handoff. Companions:
 
@@ -259,7 +261,7 @@ uncapped evals for 24 checkpoints — against the raised **$60** cap.
 
 ## 10. Implementation state (CPU-verified)
 
-**447 tests pass on CPU** (`uv run pytest tests/ -q`, ~12 s, no downloads).
+**473 tests pass on CPU** (`uv run pytest tests/ -q`, ~12 s, no downloads).
 
 | piece | file | state |
 |---|---|---|
@@ -276,8 +278,8 @@ uncapped evals for 24 checkpoints — against the raised **$60** cap.
 | prompt-matched single-rung packer | `scripts/data/build_matched_rung.py` | 89.1% D0 overlap at exact compute; appends the control's validation blocks |
 | selection-rule comparison | `scripts/data/audit_selection_rule.py` | median vs shortest on one corpus |
 | checkpoint retention policy | `scripts/pod/retain_checkpoints.py` | trajectory-driven keep set; 13 tests |
-| frozen capability battery | `scripts/data/build_capability_battery.py` | 746 prompts, 6 sets, 0 leakage collisions |
-| deterministic capability scorers | `src/aadistill/evaluation/capability.py` | alias EM, symbolic math, evidence recall, paired refusal; 84 tests |
+| frozen capability battery | `scripts/data/build_capability_battery.py` | `capability-v2`, 846 prompts, 7 sets, 0 leakage collisions |
+| deterministic capability scorers | `src/aadistill/evaluation/capability.py` | alias EM, symbolic math, evidence recall, paired answerability **and** paired safety; 112 tests |
 | battery scoring driver | `scripts/evaluation/score_battery.py` | pair-accuracy headline; offline, re-runnable |
 | checkpoint inventory + cleanup | `scripts/pod/checkpoint_inventory.py` | both stores, hash-matched duplicates, declared classification |
 | D0↔D1 corpus audit | `scripts/data/audit_d1_corpus.py` | overlap, shares, budget, residual mismatch |
@@ -376,11 +378,16 @@ Zero-GPU preparation complete and verified ([`PROPOSAL.md`](PROPOSAL.md),
 and within-run-onset comparisons exist for new arms only. The fixed-step endpoint
 is the fully matched comparison.
 
-* **Capability battery frozen**: `artifacts/eval/battery_v1/`, manifest sha256
-  `a194179a…`, **746 prompts** across knowledge / verifier-math / GSM8K /
-  multihop / RAG / paired-refusal / behaviour. Deterministic scorers only,
-  **0 leakage collisions in 15,107 candidates**, 84 evaluator-validation tests —
-  including that an always-refusing policy wins **0 of 60** refusal pairs.
+* **Capability battery frozen**: `artifacts/eval/battery_v2/`, manifest sha256
+  `060bdd31…`, **846 prompts**. Safety refusal is now its **own XSTest set**,
+  separate from the SQuAD-v2 pairs (renamed `answerability_paired`) which measure
+  evidence abstention on benign prompts. Deterministic scorers only, **0 leakage
+  collisions**, **112** evaluator-validation tests — all five required policies
+  verified on the safety set (always-answer 0/50 pairs, always-refuse 0/50,
+  correct selective refusal 50/50, malformed 0/50, degenerate 0/50).
+* **Terminology corrected**: zero hash collisions proves item-level exclusion,
+  not distributional novelty. Sets are labelled source-disjoint, split-held-out,
+  or split-held-out near-domain item-disjoint. No out-of-domain claim is made.
 * **Checkpoints inventoried and cleaned**: 4.19 GiB reclaimed on the dev box
   (117 → 121 GiB free); **0 reclaimed on the relay**, where ordinary deletion
   cannot free LFS quota and every option that could invalidates existing
@@ -388,11 +395,13 @@ is the fully matched comparison.
 
 ## 11. Next actions
 
-1. **Maintainer approval to launch phase 1** (D1, both seeds, $7.15 expected /
-   $11.05 pessimistic). Nothing else blocks it.
-2. **Decide the cap question**: approve phase 1 only and re-cost phases 2–3 from
-   measured spend (recommended), or raise the incremental cap to $36 to cover
-   the compounded pessimistic path now.
+1. **Maintainer approval to launch phase 1** (D1, both seeds, $12.30 expected /
+   $18.78 pessimistic, spending capped at the pessimistic figure). Nothing else
+   blocks it.
+2. After phase 1 reports, decide phases 2–3: raise the cap, cut the battery to
+   `final` + `best-held-out-NLL` only (needs approval), or stop after phase 2.
+   **The $30 incremental cap is unchanged and no destructive HF cleanup will be
+   performed.**
 3. On approval: one L40S with `--min-cuda-version 13.0` and ~100 GB container
    disk, train both seeds from `86fbba78…`, evaluate, retain per §14, transfer,
    hash-verify on the dev box, tear down.

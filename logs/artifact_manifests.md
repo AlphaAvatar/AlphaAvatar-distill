@@ -350,31 +350,43 @@ the experiment (P5), not a re-derivable procedure.
 - **Related logs:** [`PROPOSAL.md`](PROPOSAL.md) §2,
   [`EXPERIMENTS.md`](EXPERIMENTS.md) §12.2.
 
-## battery_v1 — the frozen Experiment 2 capability battery
+## battery_v2 — the frozen Experiment 2 capability battery
 
-- **Artifact:** `artifacts/eval/battery_v1/` — six jsonl sets plus
+- **Artifact:** `artifacts/eval/battery_v2/` — seven jsonl sets plus
   `manifest.json` (sha256
-  `a194179a88b2270c7cb05d6528910ee9ab77d2e3a8c751995ebb9c059f1bab46`), 2.2 MB.
-  Per-set sha256: `knowledge` `2d4420ce…` (150) · `math_verified` `bf73cb4a…`
-  (100) · `gsm8k` `1ad4ad22…` (100) · `multihop` `3bd25d89…` (100) · `rag`
-  `1e31c9e0…` (100) · `refusal_paired` `dfb680fc…` (120 = 60 pairs). Plus the
-  76-prompt `data/eval_behavior_v0/prompts.jsonl` reused verbatim. **746 total.**
+  `060bdd3170c5cfe0cdb749a7bf32e6d264d943085f0d24717f8b86d5706561df`).
+  Per-set sha256: `knowledge` `2d4420ce…` (150) · `math_verified`
+  `bf73cb4a…` (100) · `gsm8k` `1ad4ad22…` (100) ·
+  `multihop` `3bd25d89…` (100) · `rag` `1e31c9e0…` (100) ·
+  `answerability_paired` `1a436932…` (120 = 60 pairs) ·
+  `safety_paired` `ee73e208…` (100 = 50 pairs). Plus the
+  76-prompt `data/eval_behavior_v0/prompts.jsonl` reused verbatim. **846 total.**
 - **Created:** 2026-08-03, **CPU only, $0**, by
   `scripts/data/build_capability_battery.py`.
+- **Supersedes `battery_v1`** (746 prompts, `capability-v1`), which used SQuAD-v2
+  pairs as its refusal set. That measured evidence-conditioned answerability on
+  benign prompts, not safety refusal; the set is renamed `answerability_paired`
+  and a distinct XSTest-based `safety_paired` was added. `battery_v1` was deleted
+  rather than retained — it was never used to score any model output.
 - **Sources and revisions:** `mandarjoshi/trivia_qa` `rc.nocontext` validation
   (Apache-2.0) · `HuggingFaceH4/MATH-500` test (MIT) · `openai/gsm8k` `main` test
   (MIT) · `hotpotqa/hotpot_qa` `distractor` validation (CC-BY-SA-4.0) ·
-  `rajpurkar/squad_v2` validation (CC-BY-SA-4.0). All exact sample ids are in the
-  manifest.
-- **Scorers:** `src/aadistill/evaluation/capability.py` sha256 `6553fdc7…`,
-  `src/aadistill/evaluation/strict_answer.py` `ad82892f…`, degeneration detector
-  pinned in the manifest. Deterministic only — no LLM judge is a primary scorer.
-- **Leakage:** 0 collisions in 15,107 candidates, against 65,913 content hashes,
-  59,113 reserved prompt hashes and 10,128 corpus-v2 prompt hashes, using the
-  corpus's own `content_key`/`prompt_key` rule. A self-test confirms a real
-  corpus-v2 prompt does hash into the exclusion set.
-- **Validation:** 84 CPU tests (`tests/evaluation/test_capability.py`), including
-  that an always-refusing policy wins 0 of 60 refusal pairs.
+  `rajpurkar/squad_v2` validation (CC-BY-SA-4.0) · `Paul/XSTest` train
+  (CC-BY-4.0). Exact sample ids are in the manifest.
+- **Scorers:** `src/aadistill/evaluation/capability.py`,
+  `src/aadistill/evaluation/strict_answer.py` and the degeneration detector, all
+  hashed in the manifest. Deterministic only — no LLM judge is a primary scorer.
+  Both paired sets are reported and gated on **pair accuracy**.
+- **Leakage:** 0 collisions, checked structurally and by the corpus's own
+  `content_key`/`prompt_key` rule against 65,913 content, 59,113 reserved-prompt
+  and 10,128 corpus-v2-prompt hashes. A self-test confirms a real corpus-v2
+  prompt does hash into the exclusion set. **Item-level exclusion only** —
+  `knowledge`, `math_verified` and `safety_paired` are source-disjoint; `gsm8k`
+  is split-held-out; `multihop`, `rag` and `answerability_paired` are
+  split-held-out, near-domain item-disjoint. No out-of-domain claim is made.
+- **Validation:** 112 CPU tests, including all five required safety policies
+  (always-answer 0/50 pairs, always-refuse 0/50, correct selective refusal 50/50,
+  malformed 0/50, degenerate 0/50).
 - **Status: frozen.** Changing any rule requires bumping `BATTERY_VERSION`.
 - **License/provenance:** derived from the public sources above; no teacher
   generations, no user data.

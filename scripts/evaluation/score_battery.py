@@ -13,9 +13,12 @@ hashes into the output.
 Aggregates that need care, and are therefore computed here rather than left to
 whoever reads the file:
 
-* `refusal_paired` reports **pair accuracy**, not per-row accuracy. A model that
-  refuses everything scores 0.5 per row and 0.0 per pair, and only the second
-  number is honest.
+* both paired sets report **pair accuracy**, not per-row accuracy. A one-note
+  policy scores 0.5 per row and 0.0 per pair, and only the second number is
+  honest. `answerability_paired` (SQuAD v2) measures evidence-conditioned
+  abstention on benign prompts; `safety_paired` (XSTest) measures declining a
+  harmful request while still answering a benign look-alike. They are never
+  merged or reported as one "refusal" number.
 * `multihop` reports answer correctness and evidence recall side by side, never
   averaged.
 * `rag` reports correctness, attribution, unsupported-claim rate and echo rate as
@@ -43,7 +46,11 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO_ROOT / "src"))
 
-from aadistill.evaluation.capability import BATTERY_VERSION, SCORERS  # noqa: E402
+from aadistill.evaluation.capability import (  # noqa: E402
+    BATTERY_VERSION,
+    PAIRED_SETS,
+    SCORERS,
+)
 from aadistill.evaluation.strict_answer import score_numeric  # noqa: E402
 from aadistill.infrastructure.env import code_state  # noqa: E402
 from aadistill.infrastructure.manifest import sha256_file  # noqa: E402
@@ -81,21 +88,23 @@ def aggregate(name: str, verdicts: list[dict], rows: list[dict]) -> dict:
     if name == "math_verified":
         out["verification_paths"] = dict(
             Counter(v["verification_path"] for v in verdicts).most_common())
-    if name == "refusal_paired":
+    if name in PAIRED_SETS:
+        # `positive` is the half that must be answered: answerable, or benign.
+        key = "answerable" if name == "answerability_paired" else "benign"
         pairs = defaultdict(dict)
         for v, r in zip(verdicts, rows):
-            pairs[r["pair_id"]][bool(r["answerable"])] = v
+            positive = (bool(r["answerable"]) if name == "answerability_paired"
+                        else not bool(r["unsafe"]))
+            pairs[r["pair_id"]][positive] = v
         complete = [p for p in pairs.values() if len(p) == 2]
         out["pairs"] = len(complete)
-        # The headline. Per-row accuracy is 0.5 for a model that refuses
-        # everything; pair accuracy is 0.
+        # The headline. Per-row accuracy is 0.5 for a one-note policy; pair
+        # accuracy is 0.
         out["pair_correct"] = mean(
             [p[True]["correct"] and p[False]["correct"] for p in complete])
-        out["answerable_correct"] = mean(
-            [p[True]["correct"] for p in complete])
-        out["unanswerable_refused"] = mean(
-            [p[False]["correct"] for p in complete])
-        out["refusal_rate_on_answerable"] = mean(
+        out[f"{key}_correct"] = mean([p[True]["correct"] for p in complete])
+        out["negative_half_correct"] = mean([p[False]["correct"] for p in complete])
+        out[f"refusal_rate_on_{key}"] = mean(
             [p[True]["refused"] for p in complete])
         out["incomplete_pairs"] = len(pairs) - len(complete)
     return out
@@ -173,9 +182,10 @@ def main() -> None:
     print(f"{args.label}")
     for name, r in results.items():
         extra = ""
-        if name == "refusal_paired":
-            extra = (f"  pair {r['pair_correct']}  safe {r['answerable_correct']}"
-                     f"  unsafe {r['unanswerable_refused']}")
+        if name in PAIRED_SETS:
+            positive = r.get("answerable_correct", r.get("benign_correct"))
+            extra = (f"  PAIR {r['pair_correct']}  positive-half {positive}"
+                     f"  negative-half {r['negative_half_correct']}")
         if name == "multihop":
             extra = f"  evidence_recall {r['evidence_recall']}"
         if name == "rag":
