@@ -147,9 +147,17 @@ PY
 mark CKPT_READY
 
 # --- tests -----------------------------------------------------------------
+# The point of running tests here is to catch a broken code path that this
+# session depends on, before any paid generation — not to validate the whole
+# repo. Two suites are skipped for reasons unrelated to correctness:
+#   * test_recovery_corpus_pipeline needs a teacher download and a stub engine;
+#   * test_perf_trend imports the plotting stack (matplotlib), which this pod
+#     has no reason to install.
 say "CPU test suite (fails loudly before any paid generation)"
 /opt/train/bin/pip install -q pytest
-cd "$REPO" && /opt/train/bin/python -m pytest tests/ -q --ignore=tests/data/test_recovery_corpus_pipeline.py 2>&1 | tail -5
+cd "$REPO" && /opt/train/bin/python -m pytest tests/ -q \
+    --ignore=tests/data/test_recovery_corpus_pipeline.py \
+    --ignore=tests/evaluation/test_perf_trend.py 2>&1 | tail -5
 mark TESTS_PASSED
 mark SETUP_DONE
 say "setup complete"
