@@ -11,7 +11,7 @@ during baseline construction (same date).
 
 | Model | Teacher | Student target | Status | Stages passed | Best checkpoint | Notes |
 | --- | --- | --- | --- | --- | --- | --- |
-| qwen3-4b-thinking-distill (working name) | `Qwen/Qwen3-4B-Thinking-2507` @ `768f209d` | 0.6B-class: hidden 1024, 28L, FFN 3072, 16Q/8KV, tied emb (user-chosen 2026-07-13) | **stage3-running** | Stage 0, Stage 1, Stage 2 (v0+v1); Stage 3 sub-stages 1–2 | `stage3/s2v1_from_init/step_002700/model` — holdout NLL **3.8285**, `behavior_score_v0` **0.2015**; fp32, HF-only on `AlphaAvatar/aadistill-artifacts` | Stage 3 has **not** exited: no checkpoint generates usable output under unrestricted generation. See below. |
+| qwen3-4b-thinking-distill (working name) | `Qwen/Qwen3-4B-Thinking-2507` @ `768f209d` | 0.6B-class: hidden 1024, 28L, FFN 3072, 16Q/8KV, tied emb (user-chosen 2026-07-13) | **stage3-running** | Stage 0, Stage 1, Stage 2 (v0+v1); Stage 3 sub-stages 1–2; Experiment 1 data-scaling matrix complete | `e1_r5500k_sa_pca` — teacher-native held-out CE **1.0032**; best behaviour/termination `e1_r2960k_sa_pca` (0.4413 / **0.934**). 20 arms on `AlphaAvatar/aadistill-artifacts`, 5 held verified on the dev box | Natural termination rose from 0/8 to **0.934** on teacher-native recovery data. Stage 3 still not exited: **no reasoning at any rung** (GSM8K EM ≤0.05). See below. |
 
 ---
 
@@ -41,18 +41,29 @@ one run per arm. The scores are measurements, not a ranking. Behaviour
 comparisons now require ≥2 seeds; cold-start holdout-NLL comparisons need ≥4
 (two seeds of one config differed by 2.21 nats).
 
-**Why Stage 3 has not exited.** Under unrestricted generation (P18, full 262,144
-context, no token cap) **every** checkpoint in this line — including
-`s2v1_from_init@2700` — degenerates into repetition, with **zero** context-limit
-hits. The 512-token evaluation cap used before 2026-07-30 was hiding repetition
-loops, not long reasoning. Neither 2026-07-30 four-arm run supports a
-route-level claim about teacher-native supervision: one forked from a
-public-trained checkpoint (invalid), and both were convergence- and
-measurement-limited.
+**Where Stage 3 stands after Experiment 1.** The degeneration blocker is
+substantially resolved: on teacher-native recovery data the best arm terminates
+naturally on **93.4%** of held-out prompts (`e1_r2960k_sa_pca`), against 0/8 for
+every checkpoint measured before. Teacher-native held-out CE scales cleanly with
+data — 74× the between-seed noise — and reaches **1.0032** at 5.50M supervised
+tokens.
+
+**Why it still has not exited.** Two things block it. First, **no reasoning**:
+GSM8K exact match is ≤0.05 across all 25 checkpoints (mean 0.006) and exactly
+0.000 at every rung and seed on the random init, so the student can hold the
+protocol without solving anything. Second, the exit gate is format competence
+measured at ≥2 seeds, and the behaviour composite resolves at only **3.3×** the
+seed spread — it cannot rank the rungs, only separate the initializations.
 
 **Largest measured capability gaps** against the teacher's `behavior_score_v0`
 ceiling of 0.7443: math EM +0.714, tool_call +0.667, format_ok +0.618. These
 gaps set how many prompts of each type the recovery corpus was generated from.
+
+**What Experiment 1 also established, and what it cost.** Data quantity — not
+optimizer updates — drives the CE gain (a step-matched control at 4,412 steps on
+the smallest rung came out *worse* than the same rung at 324 steps), and
+initialization dominates data over the whole measured range. $61.5 across 25
+checkpoints.
 
 **What exists for the next step.** A teacher corpus (corpus v2, 2026-08-01):
 11,174 accepted sessions, 66.08M generated tokens, gate-passed, cut into a

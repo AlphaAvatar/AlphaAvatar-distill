@@ -16,6 +16,38 @@ Two reading notes:
   in git history at `866dac2`. "Related logs" below point at the consolidated
   record.
 
+## e1_scaling_20260801 — Experiment 1 checkpoints and evaluation results
+
+- **Artifact:** same repo, prefix `e1_scaling_20260801/`. Per arm:
+  `step_*/model/` (fp32 checkpoint), `train_log.jsonl`, `run_manifest.json`,
+  `eval_holdout_v1.json`, `gen_smoke.json`, `console.log` and a pod-side sha256
+  list. Evaluation results for all 25 checkpoints are under
+  `e1_scaling_20260801/_evaluation/` (75 JSON summaries: behaviour, GSM8K,
+  holdout NLL).
+- **Created:** 2026-08-01/03 across four L40S pods. Training $47.6, control +
+  first evaluation $8.1, full sweep $5.8.
+- **Coverage:** **20 of 25 checkpoints hold weights on the relay.** Five do not —
+  `e1_r2960k_sb_pca`, `e1_r5500k_sb_pca`, `e1_r2960k_sb_rand`,
+  `e1_r5500k_sb_rand` and the step-matched control
+  `e1_ctl_r0250k_sa_pca_stepmatched` — because the relay hit its private LFS
+  storage limit mid-session and the squash was never credited (see the 2026-08-02
+  decision). All five are held on the dev box under
+  `artifacts/stage3/rescued/<arm>/`, each **hash-verified 6/6 against its
+  pod-side manifest**, with the manifest retained alongside as `pod_hashes.txt`.
+  The small evaluation JSONs uploaded successfully because they are not LFS
+  objects.
+- **Evaluation protocol pinned with the results:** uncapped generation within an
+  effective context of **8,192** derived from the trained `block_len` (the
+  derivation is recorded in every summary and every per-sample record — this is
+  *not* a 262K-context evaluation), greedy decoding, mandatory system message
+  with a sample's own preserved when present, chat template sha256 `3802169b…`
+  identical to corpus-generation time, and a fixed degeneration detector applied
+  with the same thresholds to every checkpoint.
+- **License/provenance:** internal artifacts derived from the Apache-2.0 teacher
+  and the permissive-source corpus v2. Not for redistribution as-is.
+- **Related logs:** [`EXPERIMENTS.md`](EXPERIMENTS.md) §11,
+  [`STATE.md`](STATE.md) §12–13, `artifacts/stage3/e1_consolidated.json`.
+
 ## recovery corpus v2 + token ladders — NOT YET PERSISTED
 
 - **Artifact:** the Stage 3 recovery corpus and its six-rung nested token

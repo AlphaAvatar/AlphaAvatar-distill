@@ -29,7 +29,7 @@ The figure shows **one point per student at its current best**, against the teac
 
 Behavior score is the headline metric. **Held-out NLL is now a guard rail (±1% band), not the target** — teacher Qwen3-4B-Thinking-2507 2.6264 · random-init 0.6B baseline 12.1286.
 
-> **Every behavior score in the table was measured under a 512-token generation cap, and that cap was hiding a failure.** Re-measured on 2026-07-30 with no cap at all (full 262,144-token context, per AGENTS.md P18), **every checkpoint in this line — including attempt 8 — degenerates into repetition**, with zero context-limit hits. No student here yet produces a complete answer in the teacher's thinking protocol, so read the table as progress on mechanical form, not as a working model. Stage 3 is open; the fix is being pursued as a data-scaling study ([record](./logs/EXPERIMENTS.md), [state](./logs/STATE.md)).
+> **The behavior scores in this table were measured under a 512-token generation cap, and that cap was hiding a failure.** Re-measured without it, every checkpoint in *this* line degenerated into repetition. That blocker has since been **substantially resolved** by Experiment 1's teacher-native recovery data: the best arm now terminates naturally on **93.4%** of held-out prompts (`e1_r2960k_sa_pca`), against 0/8 for every checkpoint above. The table below is retained as the historical record on the superseded capped metric; the current results are in [Experiment 1](#-experiment-1--recovery-data-scaling) and use a different, uncapped protocol, so the two are **not comparable point-for-point**.
 
 Attempts 7–8 are a fixed-budget ablation of the *start point*, not of the training leg: runs 6–8 are the three branches that ran the identical 2700-step leg at the same seed, from lineages costing 4020, 3360 and 2700 total steps. Both landed inside the pre-registered 1% band, so the recovery recipe dropped its two warm-up legs and became a single stage — a third less compute per iteration.
 
@@ -37,6 +37,38 @@ The behavior eval **reverses the ranking held-out NLL gives**: the cheapest line
 
 The figure regenerates from [`assets/perf_trend.json`](./assets/perf_trend.json) with `uv run python scripts/evaluation/plot_perf_trend.py`; the table above comes from the same file via `--print-table`, and every point is backed by the consolidated record in [`logs/EXPERIMENTS.md`](./logs/EXPERIMENTS.md).
 
+
+---
+
+## 🔬 Experiment 1 — recovery-data scaling
+
+**Question:** how much teacher-generated recovery data does this student need, and does the answer depend on how it was initialized?
+
+**Design.** Six nested data rungs (0.25M → 5.50M supervised tokens) × 2 seeds × 2 initializations = 24 arms, each trained for a fixed **3 passes** over its own rung, plus a **step-matched compute control** — the 0.25M rung run for the 5.50M arm's full 4,412 optimizer steps, so data quantity can be separated from optimizer updates. Every arm differs from the canonical recipe in exactly four fields (rung, seed, start checkpoint, derived schedule).
+
+| supervised tokens | PCA CE | random CE | PCA behaviour | PCA natural-termination | PCA GSM8K EM |
+|---:|---:|---:|---:|---:|---:|
+| 0.25M | 2.1183 | 8.8263 | 0.3194 | 0.533 | 0.005 |
+| 0.46M | 1.7544 | 8.3461 | 0.3626 | 0.671 | 0.000 |
+| 0.86M | 1.5069 | 7.9472 | 0.3695 | 0.763 | 0.000 |
+| 1.60M | 1.2983 | 7.4047 | 0.4076 | 0.835 | 0.040 |
+| 2.96M | 1.1468 | 6.6727 | 0.4180 | **0.921** | 0.015 |
+| **5.50M** | **1.0042** | **5.9798** | 0.3781 | 0.803 | 0.020 |
+
+CE is cross-entropy on held-out **teacher-native** sessions (16 packed blocks disjoint from every rung). Behaviour, natural termination and GSM8K EM come from uncapped generation within the model's **effective context of 8,192**, derived from the trained `block_len` — not the architectural 262,144 the geometry inherits. Seed-averaged; per-arm values in [`logs/EXPERIMENTS.md`](./logs/EXPERIMENTS.md).
+
+**What the variance analysis supports.** Between-seed spread is compared against the range each metric covers, so claims are graded rather than asserted:
+
+- **CE scales with data decisively** — 74× (PCA) and 261× (random) the between-seed noise, monotone at every rung, and **not saturated at 5.50M**.
+- **Initialization dominates data over this range.** At the top rung the PCA init reaches CE 1.0042 against the random init's 5.9798. Every random-init arm sits at p50 = 768 generated tokens, the signature of the degeneration stop firing.
+- **The improvement is data, not compute.** The step-matched control — same init, seed, optimizer, LR schedule, step count and validation set, differing *only* in unique data — reached CE 2.2907, **worse** than the same rung at 324 steps (2.0938) and far from the 5.50M arm's 1.0032. More passes over a small corpus overfit; more unique data did not.
+- **What passes *do* buy is protocol competence:** the control leads every arm on natural termination (0.961) and behaviour (0.468).
+- **The behaviour composite barely resolves** — only 3.3× the seed spread, so its rung ordering is not claimable. Held-out NLL is weaker still (between-seed |Δ| 0.66).
+- **No reasoning emerged anywhere.** GSM8K exact match across all 25 checkpoints: min 0.000, max 0.050, mean 0.006, with the random init at 0.000 at every rung and seed.
+
+**Reviewable samples:** [`logs/e1_test_cases.md`](./logs/e1_test_cases.md) — 46 generations stratified over stop reason and answer correctness, with the untruncated copies in `logs/e1_test_cases.jsonl`.
+
+**Cost:** $61.5 — 24 training arms $47.6, control + first evaluation $8.1, full sweep $5.8. Every pod was released after hash-verified teardown.
 ---
 
 ## 🧠 How it works
@@ -46,7 +78,7 @@ The figure regenerates from [`assets/perf_trend.json`](./assets/perf_trend.json)
 | **0** — activation statistics | streaming float64 sufficient statistics from the teacher: per residual point count / sum / `XᵀX`, per-FFN-neuron `Σ\|a\|` and `Σa²`, token frequencies. Fixed 1.95 GB cache regardless of token count. | passed ([log](./logs/EXPERIMENTS.md)) |
 | **1** — projection + sandwich init | a complete, runnable Qwen3-format 0.6B student (596M params) plus a same-geometry random baseline, both with reproducibility manifests. | passed ([log](./logs/EXPERIMENTS.md)) |
 | **2** — offline warm-up mixture | eight training-use groups from permissive revision-pinned sources (instruction, RAG/evidence, multi-hop QA, tool calling, refusal/uncertainty, code/math, short realtime, long context) with global dedup, holdout exclusion, and train/val/calib splits. | v0 5.39M tokens ([log](./logs/EXPERIMENTS.md)), v1 22.13M ([log](./logs/EXPERIMENTS.md)) |
-| **3** — student recovery | one config-driven trainer for all recovery sub-stages: regex freeze policy, masked CE + on-the-fly full-vocab teacher KD, exact resume, per-run manifests, gate evals. Plus the recovery corpus builder: teacher generation at the model's official preset, session rendering, system-grouped packing and a nested token ladder. | sub-stages 1–2 passed; **not exitable** — every checkpoint degenerates under uncapped generation. Recovery corpus v2 (11,174 teacher sessions, 66.08M generated tokens) and its six-rung token ladder are built and gate-passed; the data-scaling training matrix is costed and awaiting approval ([record](./logs/EXPERIMENTS.md), [plan](./logs/PROPOSAL.md)) |
+| **3** — student recovery | one config-driven trainer for all recovery sub-stages: regex freeze policy, masked CE + on-the-fly full-vocab teacher KD, exact resume, per-run manifests, gate evals. Plus the recovery corpus builder (teacher generation at the model's official preset, session rendering, system-grouped packing, nested token ladder) and an uncapped vLLM evaluation harness with a semantic degeneration detector. | **Experiment 1 complete**: 24-arm data-scaling matrix + a step-matched compute control, all 25 checkpoints measured on four metrics ([results](./logs/EXPERIMENTS.md)). Natural termination reaches 0.934; reasoning has not emerged at any rung. Not yet exitable — see the exit gate below |
 | **4–6** — online data, on-policy distillation, deployment validation | specified in [`AGENTS.md`](./AGENTS.md) | not started |
 
 Design choices worth knowing:
@@ -70,7 +102,7 @@ Every run records config hash, code state, dataset/tokenizer/teacher hashes, and
 
 ```bash
 uv sync                    # CPU torch by default; see pyproject.toml for a CUDA index
-uv run pytest tests/ -q    # 279 CPU tests, no downloads
+uv run pytest tests/ -q    # 301 CPU tests, no downloads
 ```
 
 The implemented pipeline runs end to end on CPU (GPU optional):
@@ -170,14 +202,15 @@ AlphaAvatar-distill/
 │   ├── data/               #   mixture + eval-set builders · build_token_ladder ·
 │   │                       #   validate_corpus_gate
 │   ├── training/           #   collect_stage0 · init_stage1 · train_stage3
-│   ├── evaluation/         #   eval_ppl · eval_behavior · unrestricted_pilot ·
-│   │                       #   degeneration · probe_think_close · plot_perf_trend
+│   ├── evaluation/         #   eval_ppl · eval_behavior · uncapped_eval (P18, vLLM) ·
+│   │                       #   degeneration · audit_prompt_rendering · exposure_report ·
+│   │                       #   consolidate_e1 · build_test_cases · plot_perf_trend
 │   ├── rollout/            #   teacher generation · build_recovery_corpus
 │   └── pod/                #   GPU session scripts + durable orchestrator (run_env.sh)
 ├── configs/                # stage recipes: stage0/ · stage1/ · stage3/recovery.json
 ├── data/                   # corpus manifests (jsonl gitignored, rebuildable)
 │   └── eval_behavior_v0/   #   76-prompt behavior set + manifest (both committed)
-├── tests/                  # 279 CPU tests, mirroring the source areas
+├── tests/                  # 301 CPU tests, mirroring the source areas
 ├── logs/                   # project memory — read STATE.md first
 │   ├── STATE.md            #   canonical handoff: a snapshot, not an archive
 │   ├── EXPERIMENTS.md      #   the consolidated record: what ran, results, cost

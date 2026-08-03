@@ -1,26 +1,30 @@
 # Active proposal — recovery-data scaling study
 
-**Status 2026-08-01:** Step A (corpus + ladder) is **done, gate-passed and
-paid** — $26.59 of the $50 generation cap. Step B (the training matrix) is
-**specified, costed and not started**; it needs a maintainer go-ahead against
-the **$60** training budget. Supersedes the 2026-07-31 version of this file,
-whose sizing assumptions were replaced by measurements (git history).
+**Status 2026-08-03: Experiment 1 is COMPLETE.** All 24 arms plus the
+step-matched compute control are trained and measured on four metrics; results,
+variance analysis and verdict are in [`EXPERIMENTS.md`](EXPERIMENTS.md) §11.
+Total $61.5. Every pod released after hash-verified teardown.
 
-**Experiment order (maintainer, 2026-08-01).** Three questions, run in this
-order, one at a time:
+**What Experiment 1 settled**
 
-| # | question | status |
-|---|---|---|
-| **1** | **Does the student's behavioural recovery scale with teacher-generated supervised tokens?** | ready to run — §4 |
-| 2 | Does the *mixture* of that data matter (capability-gap weighting vs uniform)? | later — §8 |
-| 3 | Does *ordering* it by difficulty (curriculum) help? | later — §9 |
+* CE scales with teacher-generated data at 74–261× the between-seed noise and
+  has **not saturated** at 5.50M — the top of what the uniform cut of this
+  corpus can reach (~6.08M).
+* The gain is **data, not optimizer updates** (step-matched control).
+* **Initialization dominates** data over this range.
+* **No reasoning emerged at any rung, seed or initialization** (GSM8K EM max
+  0.050, mean 0.006).
 
-Experiment 1 therefore trains on a **uniform six-way type mixture**, held
-constant across every rung. Size is the only variable; the capability-gap
-weighting built into the original ladder cut is deferred to Experiment 2.
+**What it did not settle, and what that implies for the queue below**
 
-Written to the maintainer's instructions of 2026-07-31 and the four 2026-08-01
-decisions. No additional experiments, comparisons or side investigations.
+1. **Where the curve saturates.** Both inits were still improving at the top
+   rung, so "how much data is enough" has no answer yet. Reaching it needs more
+   generation — the uniform cut caps at ~6.08M — or a non-uniform mixture, which
+   is Experiment 2's territory.
+2. **Whether reasoning is reachable at this scale at all.** A 0.6B student
+   trained on ≤5.5M supervised tokens shows no GSM8K signal. Before spending on
+   Experiment 2 or 3, it is worth asking whether either can plausibly move a
+   metric that is flat at zero across a 22× data range and two initializations.
 
 ## 0. Cancelled
 
@@ -100,7 +104,7 @@ post-packing). Saturation rungs meaningfully above 5.50M are therefore not
 available to Experiment 1 — they need either more `multihop_qa`/`tool_calling`
 generation or a non-uniform mixture, which is Experiment 2.
 
-## 4. Step B — the training matrix (the thing awaiting approval)
+## 4. Step B — the training matrix (COMPLETE 2026-08-03)
 
 **The measured variable is supervised tokens** — the tokens that actually carry
 loss, and therefore the recovery signal whose required quantity we are trying to

@@ -1,5 +1,47 @@
 # Decision records
 
+## 2026-08-03 — Evaluation protocol for the student line: effective context, degeneration, and one rendering
+
+- **Context:** the first uncapped wave under P18 cost over an hour for a single
+  76-prompt checkpoint and did not finish. Three separate defects were behind it
+  and behind several silently wrong numbers, all found only by looking at
+  artifacts rather than at metrics.
+- **Decisions, now standing for every evaluation of this student line:**
+  1. **Effective context is derived from the trained `block_len` (8,192)**, not
+     the architectural `max_position_embeddings` (262,144) inherited from the
+     Qwen3 geometry. The student has never seen a position past 8,192; running to
+     262k spends ~97% of the compute measuring an out-of-distribution regime.
+     The derivation is written into every summary and every per-sample record,
+     and results from this path must never be described as a 262K-context
+     evaluation. Zero context-limit hits at 8,192 confirm nothing is truncated.
+  2. **A third degeneration signal — rambling** — catches output that keeps
+     minting new tokens while re-treading phrasing, which the cycle and
+     token-novelty signals both miss. Measured as the fraction of trailing-window
+     8-grams unseen earlier in the same generation, held to a 2,048-token floor
+     so a long-but-progressing answer is never cut for being long. **Thresholds
+     are fixed constants applied identically to every checkpoint** — a per-arm
+     detector would make arms incomparable.
+  3. **One rendering rule:** a system message is mandatory, but a sample's own
+     system prompt is *preserved* and the project default injected only when
+     absent — the rule the corpus was generated under. Injecting unconditionally
+     put two `<|im_start|>system` turns into 6 of 76 behaviour prompts.
+- **Made mechanical, not asserted:** `scripts/evaluation/audit_prompt_rendering.py`
+  checks the template hash against the corpus manifest and verifies every prompt
+  in every suite (one system turn, correct system source, tools rendered, ends at
+  the assistant generation prompt with `<think>` open, no assistant leakage).
+  Tests pin the rambling detector and the rendering rules.
+- **Cost of finding these late:** every behaviour number computed before the
+  rendering fix was discarded and recomputed, and GSM8K exact match was not
+  computed at all until the axis values were inspected — `score_sample` credits
+  it only from a precomputed `gsm8k_answer` field the slice builder had omitted.
+- **Risks:** the 8,192 effective context is a *deliberate* narrowing of P18's
+  "actual supported context". It is correct for a student trained only on 8,192
+  blocks and must be revisited if a future student trains on longer blocks or if
+  long-context behaviour becomes the object of measurement.
+- **Revisit when:** block length changes, or a checkpoint starts producing
+  legitimately long answers that the rambling floor would clip.
+
+
 ## 2026-08-02 (maintainer) — Reclaim relay storage by squashing history; old checkpoint revisions are intentionally invalidated
 
 - **Context:** the private HF relay hit its storage limit mid-session (99.38 GB),

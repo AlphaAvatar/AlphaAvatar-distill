@@ -11,6 +11,7 @@ logs/
   decisions.md             decision records
   supported_models.md      model status table
   artifact_manifests.md    external artifact manifests
+  e1_test_cases.md         reviewable sample generations (jsonl alongside)
 configs/
   stage0/ stage1/          collection and init configs
   stage3/recovery.json     canonical recovery config for the scaling study
@@ -21,10 +22,12 @@ src/aadistill/             algorithm core (data, init, models, rollout, training
 scripts/
   data/                    dataset builders · build_token_ladder · validate_corpus_gate
   training/                stage entry points
-  evaluation/              eval + unrestricted (P18) generation
+  evaluation/              eval + uncapped (P18) vLLM generation, degeneration
+                           detection, prompt-rendering audit, exposure and
+                           result consolidation, reviewable test-case extraction
   rollout/                 teacher generation · build_recovery_corpus
   pod/                     GPU session scripts (run_env.sh is the only per-session edit)
-tests/                     mirrors src/ and scripts/ — 279 CPU tests
+tests/                     mirrors src/ and scripts/ — 301 CPU tests
 assets/                    perf_trend.json + the rendered trend figure
 artifacts/                 gitignored; large outputs live on the HF relay
 data/                      gitignored splits; manifests are tracked
