@@ -1,6 +1,6 @@
-**Updated:** 2026-08-02 18:10 UTC · branch `main` · **no pods running, nothing
-billing** — all three pods released after hash-verified teardown. Spend to date
-**$90.2** ($34.52 prior + $47.6 training + $8.1 control/eval).
+**Updated:** 2026-08-03 00:50 UTC · branch `main` · **no pods running, nothing
+billing** — all four pods released after hash-verified teardown. Spend to date
+**$96.0** ($34.52 prior + $47.6 training + $8.1 control/eval + $5.8 sweep).
 
 **Active work:** the recovery-data scaling study. Corpus, ladder and the
 **24-arm training matrix are all complete** (§12). What remains is evaluation:
@@ -305,39 +305,34 @@ over this range (1.0032 vs 5.9807 at the top rung).
 on random arms. NLL cannot say whether the loss is knowledge or reasoning — the
 open question §13 exists to answer.
 
-## 13. Evaluation — three-way done, all-25 sweep still open
+## 13. Evaluation — COMPLETE, all 25 checkpoints
 
-**The step-matched compute control settled the data-vs-compute question**
-([`EXPERIMENTS.md`](EXPERIMENTS.md) §11): CE improvement is a **data** effect
-(1.0032 vs 2.2907 at identical compute), but behaviour goes the other way — the
-control terminates naturally 0.908 vs 0.829 and degenerates 0.092 vs 0.171 —
-and GSM8K EM is ~0.01 on every arm. Distributional fit is bought by data,
-protocol competence by passes, reasoning by neither. The behaviour *ranking* is
-below the 0.129 seed noise floor and is not claimable at one seed.
+Behaviour, GSM8K and holdout NLL measured for every arm under one protocol; the
+sweep's 125 artifacts were hash-verified on the dev box and the pod released
+automatically at 00:21. Full results and variance analysis:
+[`EXPERIMENTS.md`](EXPERIMENTS.md) §11. Consolidated table:
+`artifacts/stage3/e1_consolidated.json` (regenerate with
+`scripts/evaluation/consolidate_e1.py`).
 
-**Two measurement corrections made on 2026-08-02, both now permanent:**
+**Headline:** CE scales with data at 74–261x the between-seed noise and has not
+saturated at 5.50M. Initialization dominates: PCA reaches CE 1.0042 / behaviour
+0.378 at the top rung against random's 5.9798 / 0.110, and every random arm sits
+at p50 = 768 generated tokens — the degeneration-stop signature. **No rung, seed
+or initialization developed measurable reasoning:** GSM8K EM across all 25
+checkpoints is min 0.000, max 0.050, mean 0.006.
 
-1. **Effective context is derived from the trained `block_len` (8,192)**, not
-   the architectural 262,144 the student inherits from the Qwen3 geometry. A
-   262k allowance spent ~97% of its compute on a regime the model never trained
-   in — one 76-prompt wave ran over an hour without finishing. The derivation is
-   recorded per sample; output from this path must never be described as a
-   262K-context evaluation. Waves now take ~6 min.
-2. **A third degeneration signal** catches non-repeating, non-terminating
-   rambling that the cycle and low-novelty signals both miss. It fired on 6
-   samples in the first corrected wave alone. Thresholds are fixed and identical
-   across checkpoints.
+**Instrument quality, measured:** val CE resolves the effect 74x over seed noise;
+the behaviour composite only 3.3x, so its rung ordering is not claimable; holdout
+NLL has a between-seed |Δ| of 0.66 and is the weakest of the four.
 
-**Still open:** the uncapped behavioural sweep across all 25 checkpoints (only
-the 3 three-way arms are done), the all-25 GSM8K, and `e1_r2960k_sb_pca`'s
-holdout NLL. All 25 checkpoints are preserved, so this is re-runnable on a fresh
-pod at ~6 min/wave — roughly 2.5 h ~ $2.5 for the behaviour sweep.
+**Reviewable samples for human analysis:** `logs/e1_test_cases.md` (46 cases,
+readable) and `logs/e1_test_cases.jsonl` (untruncated), stratified over stop
+reason and GSM8K correctness across rungs, seeds and inits.
 
-**Artifacts, all hash-verified on the dev box:** 12 evaluation outputs
-(summaries + per-sample generations) under `artifacts/eval/e1/`, and the control
-checkpoint under `artifacts/stage3/rescued/`. Four arms remain relay-blocked by
-the HF LFS quota (GC still had not credited the squash as of 17:00); dev-box
-copies are retained and verified.
+**Artifacts:** evaluation JSONs are on the relay under
+`e1_scaling_20260801/_evaluation` (small files pass the LFS quota). Four
+checkpoints remain relay-blocked and are held, hash-verified, on the dev box
+under `artifacts/stage3/rescued/`.
 
 ## 11. Next actions
 

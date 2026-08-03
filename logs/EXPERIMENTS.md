@@ -443,6 +443,70 @@ reasoning traces; the random student has none to lose. **Whether that trade is
 knowledge or reasoning is not answerable from NLL**, which is why the maintainer
 directed a full behavioural evaluation (below) before any conclusion.
 
+### Complete results — 25 checkpoints, four measurements each (2026-08-03)
+
+Every arm carries teacher-native val CE, FineWeb-Edu holdout NLL, uncapped
+behaviour and GSM8K EM. **No missing measurements.** Consolidated table:
+`artifacts/stage3/e1_consolidated.json`; regenerate with
+`scripts/evaluation/consolidate_e1.py`.
+
+**Scaling curves, seed-averaged:**
+
+| supervised tokens | PCA CE | rand CE | PCA behaviour | rand behaviour | PCA nat.term | rand nat.term | PCA GSM8K EM |
+|---:|---:|---:|---:|---:|---:|---:|---:|
+| 0.25M | 2.1183 | 8.8263 | 0.3194 | 0.0001 | 0.533 | 0.007 | 0.005 |
+| 0.46M | 1.7544 | 8.3461 | 0.3626 | 0.0053 | 0.671 | 0.013 | 0.000 |
+| 0.86M | 1.5069 | 7.9472 | 0.3695 | 0.0403 | 0.763 | 0.039 | 0.000 |
+| 1.60M | 1.2983 | 7.4047 | 0.4076 | 0.0781 | 0.835 | 0.072 | 0.040 |
+| 2.96M | 1.1468 | 6.6727 | 0.4180 | 0.0639 | 0.921 | 0.079 | 0.015 |
+| **5.50M** | **1.0042** | **5.9798** | 0.3781 | 0.1099 | 0.803 | 0.165 | 0.020 |
+
+**Variance analysis — which differences are real.** Between-seed |Δ| against the
+range the metric spans across rungs:
+
+| metric | init | seed \|Δ\| mean | seed \|Δ\| max | range across rungs | range/noise |
+|---|---|---:|---:|---:|---:|
+| val CE | PCA | 0.0154 | 0.0489 | 1.1395 | **74×** |
+| val CE | rand | 0.0109 | 0.0229 | 2.8502 | **261×** |
+| holdout NLL | PCA | 0.6591 | 1.3327 | 4.6259 | 7× |
+| holdout NLL | rand | 0.0685 | 0.1275 | 0.7700 | 11× |
+| natural termination | PCA | 0.0526 | 0.1315 | 0.4474 | 8.5× |
+| behaviour | PCA | 0.0472 | 0.0894 | 0.1564 | **3.3×** |
+| behaviour | rand | 0.0275 | 0.0717 | 0.1205 | 4.4× |
+| GSM8K EM | PCA | 0.0100 | 0.0200 | 0.0500 | 5× |
+| GSM8K EM | rand | 0.0000 | 0.0000 | 0.0000 | — |
+
+**What the data supports, in descending order of confidence.**
+
+1. **CE scales with data — decisively.** 74× (PCA) and 261× (random) the
+   between-seed noise, monotone on both inits at every rung. Neither has
+   saturated at 5.50M: the last doubling still buys 0.14 (PCA) and 0.70 (random)
+   nats.
+2. **Natural termination scales with data on the PCA init** — 0.533 → 0.921
+   through 2.96M at 8.5× the seed noise. It dips to 0.803 at 5.50M, which is
+   within ~1.5 seed-|Δ| and should not be read as a real reversal.
+3. **Initialization dominates everything.** At the top rung PCA reaches CE
+   1.0042 against random's 5.9798, and behaviour 0.378 against 0.110. The random
+   arms sit at p50 = 768 generated tokens at *every* rung — the signature of the
+   degeneration stop firing — i.e. they essentially never terminate naturally.
+4. **The behaviour composite barely resolves.** Its across-rung range is only
+   **3.3×** the between-seed spread, versus 74× for CE. The rung-to-rung
+   ordering on behaviour is not claimable; the init gap on it is.
+5. **No reasoning develops anywhere.** GSM8K EM across all 25 checkpoints:
+   min 0.000, max **0.050**, mean **0.006**. Random init is 0.000 at every rung
+   and seed. The single highest value (0.050, `1600k_sb_pca`) is ~2 SE at n=100
+   and is not reproduced by its own seed pair (`1600k_sa_pca` = 0.030) nor by
+   larger rungs. **No rung, seed or initialization developed measurable
+   reasoning ability** — which is the direct answer to whether the metric floor
+   was hiding a signal. It was not.
+
+**Consequence for the holdout-NLL story.** NLL rises with training duration
+(PCA 6.72 → 10.79) while CE falls, but its between-seed |Δ| is **0.66** — an
+order of magnitude noisier than CE — so it is a weak instrument here. The
+step-matched control lands at 10.71 against the 5.50M arm's 10.79 despite a
+1.29-nat CE gap: the FineWeb-Edu degradation tracks **optimizer steps**, not
+unique data, and it is not evidence that data destroys general ability.
+
 ### Training-exposure accounting (audit, 2026-08-02)
 
 | rung | blocks | supervised (unique) | steps | blocks consumed | supervised consumed | effective epochs | repeats |
@@ -554,6 +618,30 @@ mandatory system message, the same 76-prompt behaviour set and 100-prompt
 reserved GSM8K slice, and a fixed degeneration detector with identical
 thresholds everywhere. Per sample we record generated tokens, stop reason,
 degeneration trigger and kind, right-censoring, and the complete raw output.
+
+**Sweep execution.** 25 checkpoints x (behaviour + GSM8K) + holdout NLLs on one
+L40S, 2026-08-02/03, **$5.8**. 125 artifacts hash-verified on the dev box before
+the pod was released automatically. Four arms were staged from verified dev-box
+copies because the HF relay remained storage-blocked.
+
+**Defects found and fixed during evaluation, each of which would have corrupted
+the result silently:**
+
+* **A second `<|im_start|>system` turn** was injected into the 6 behaviour
+  prompts that carry their own system message — a context the model never saw in
+  training. Every behaviour number computed before the fix was discarded and
+  recomputed. Now audited mechanically for all 176 prompts
+  (`scripts/evaluation/audit_prompt_rendering.py`) and pinned by tests.
+* **GSM8K exact match was never computed**: `score_sample` credits EM only from a
+  precomputed `gsm8k_answer` field, which the slice builder did not emit. The
+  reasoning benchmark ran with no reasoning metric until the axis values were
+  checked.
+* **The effective context was the architectural 262,144** rather than the trained
+  8,192, making one wave cost over an hour and measuring an out-of-distribution
+  regime.
+* **`ninja` was not on `PATH`**, so FlashInfer could not JIT the top-k kernel and
+  every vLLM wave failed — the same failure recorded in this log from the corpus
+  build.
 
 **Verdict: the scaling relationship is measured and internally clean, but two
 things stop it short of a law.** The saturation point is outside the corpus
