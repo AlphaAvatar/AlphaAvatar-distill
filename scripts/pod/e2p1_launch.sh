@@ -11,7 +11,7 @@
 set -uo pipefail
 
 SCR=${SCR:?}
-POD_ID=${POD_ID:?}
+POD_ID=${POD_ID:-}
 SESSION_COMMIT=${SESSION_COMMIT:?}
 BUNDLE_NAME=${BUNDLE_NAME:?}
 BATTERY_PREFIX=${BATTERY_PREFIX:-e2p1_20260803/battery_v2}
@@ -34,17 +34,56 @@ d=json.load(sys.stdin); rt=(d.get('data') or {}).get('pod',{}).get('runtime')
 print('' if not rt else next((f\"{p['ip']} {p['publicPort']}\" for p in (rt.get('ports') or []) if p.get('privatePort')==22 and p.get('type')=='tcp'),''))" 2>/dev/null
 }
 
-say "waiting for pod $POD_ID"
+# A pod that has not exposed TCP 22 within STARTUP_LIMIT_MIN is not starting
+# slowly, it is not starting. Two pods burned 22 and 18 minutes at
+# `runtime: null` before this bound existed; at $0.99/h that is $0.66 of pure
+# scheduling failure with nothing to show. The bound is deliberately tight —
+# recreating is free and lands on a different machine, whereas waiting is not —
+# and the launcher now recreates rather than asking a human to.
+STARTUP_LIMIT_MIN=${STARTUP_LIMIT_MIN:-15}
+MAX_POD_ATTEMPTS=${MAX_POD_ATTEMPTS:-4}
+
+create_pod() {
+  local deadline
+  deadline=$(date -u -d '+8 hours' +%Y-%m-%dT%H:%M:%SZ)
+  runpodctl pod create \
+    --image runpod/pytorch:1.0.3-cu1281-torch291-ubuntu2404 \
+    --gpu-id "NVIDIA L40S" --gpu-count 1 \
+    --container-disk-in-gb 150 --volume-in-gb 0 \
+    --min-cuda-version 13.0 \
+    --ports "22/tcp,8888/http" \
+    --name "aadistill-e2p1-a$1" \
+    --terminate-after "$deadline" 2>&1 |
+  python3 -c "import sys,re; m=re.search(r'\"id\":\s*\"([^\"]+)\"', sys.stdin.read()); print(m.group(1) if m else '')"
+}
+
 EP=""
-for i in $(seq 1 180); do            # up to 60 min; a cold image pull is slow
-  EP=$(endpoint)
+for attempt in $(seq 1 "$MAX_POD_ATTEMPTS"); do
+  if [ -z "${POD_ID:-}" ] || [ "$attempt" -gt 1 ]; then
+    POD_ID=$(create_pod "$attempt")
+    [ -z "$POD_ID" ] && { say "attempt $attempt: pod create failed"; continue; }
+    date -u +%s > "$SCR/pod_start_epoch"
+    echo "$POD_ID" > "$SCR/pod_id"
+    say "attempt $attempt: created pod $POD_ID"
+  fi
+  say "waiting for $POD_ID (hard limit ${STARTUP_LIMIT_MIN} min)"
+  DEADLINE_TS=$(( $(date -u +%s) + STARTUP_LIMIT_MIN * 60 ))
+  i=0
+  while [ "$(date -u +%s)" -lt "$DEADLINE_TS" ]; do
+    EP=$(endpoint)
+    [ -n "$EP" ] && break
+    i=$((i + 1))
+    [ $((i % 6)) -eq 0 ] && say "  still starting ($((i*20))s) — $(cost)"
+    sleep 20
+  done
   [ -n "$EP" ] && break
-  [ $((i % 6)) -eq 0 ] && say "  still starting ($((i*20))s) — $(cost)"
-  sleep 20
+  say "attempt $attempt: no TCP 22 within ${STARTUP_LIMIT_MIN} min — $(cost). Deleting."
+  runpodctl remove pod "$POD_ID" >>"$LOG" 2>&1
+  echo "$STARTUP_LIMIT_MIN" >> "$SCR/wasted_startup_min"
+  POD_ID=""
 done
 if [ -z "$EP" ]; then
-  say "FATAL: pod never exposed TCP 22. $(cost). Deleting to stop the meter."
-  runpodctl remove pod "$POD_ID" >>"$LOG" 2>&1
+  say "ABORT: ${MAX_POD_ATTEMPTS} pods failed to start. No pod is running."
   echo "LAUNCH_FAILED:no_endpoint" > "$SCR/e2p1.state"
   exit 1
 fi
