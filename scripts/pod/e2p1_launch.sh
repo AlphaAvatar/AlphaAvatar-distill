@@ -46,10 +46,16 @@ MAX_POD_ATTEMPTS=${MAX_POD_ATTEMPTS:-4}
 create_pod() {
   local deadline
   deadline=$(date -u -d '+8 hours' +%Y-%m-%dT%H:%M:%SZ)
+  # A cuda-13-NATIVE image, paired with --min-cuda-version 13.0. The previous
+  # spec asked cuda-13 hosts to run a cu128 image, which none of them had
+  # cached: five pods in a row sat at `runtime: null` through what was almost
+  # certainly a ~20 GB pull, costing $1.30 and starting nothing. The disk is
+  # 120 GB rather than 150 to widen placement — the session needs ~100 GB
+  # (two arms x 9 checkpoints at 4.3 GB, plus the 4B teacher and two venvs).
   runpodctl pod create \
-    --image runpod/pytorch:1.0.3-cu1281-torch291-ubuntu2404 \
+    --image "${POD_IMAGE:-runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404}" \
     --gpu-id "NVIDIA L40S" --gpu-count 1 \
-    --container-disk-in-gb 150 --volume-in-gb 0 \
+    --container-disk-in-gb 120 --volume-in-gb 0 \
     --min-cuda-version 13.0 \
     --ports "22/tcp,8888/http" \
     --name "aadistill-e2p1-a$1" \
