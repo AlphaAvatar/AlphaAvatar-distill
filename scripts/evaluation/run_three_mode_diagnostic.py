@@ -266,6 +266,90 @@ def main() -> None:
             results[mode]["numeric_split"] = {k: summarize(v)
                                               for k, v in split.items()}
 
+    # ---- mode 3: teacher-forced answer metrics ---------------------------
+    if "forced" in args.modes:
+        from transformers import AutoConfig, AutoModelForCausalLM
+        scfg = AutoConfig.from_pretrained(args.student)
+        rp = getattr(scfg, "rope_parameters", None)
+        if isinstance(rp, dict) and rp.get("rope_theta") is not None:
+            scfg.rope_theta = float(rp["rope_theta"])
+        from aadistill.models.student import assert_rope_matches_config
+        dev = "cuda" if torch.cuda.is_available() else "cpu"
+        model = AutoModelForCausalLM.from_pretrained(
+            args.student, config=scfg, dtype=torch.float32).to(dev).eval()
+        print("forced-mode rope base:",
+              f"{assert_rope_matches_config(model, scfg):,.0f}")
+        close_id = tok.convert_tokens_to_ids("</think>")
+        end_id = tok.convert_tokens_to_ids("<|im_end|>")
+        digits = set("0123456789")
+        ops = set("+-*/=^%")
+
+        acc = defaultdict(lambda: {"n": 0, "top1": 0, "ce": 0.0,
+                                   "prob": 0.0, "rank": 0})
+        per_sample = []
+        with torch.no_grad():
+            for s_, p_ in prepared:
+                full = p_.full_ids
+                if len(full) > args.context:
+                    continue
+                t = torch.tensor([full], device=dev)
+                logits = model(t).logits[0].float()
+                # target j is predicted by position j-1 (causal shift)
+                lp = torch.log_softmax(logits[:-1], dim=-1)
+                tgt = t[0, 1:]
+                tok_lp = lp.gather(1, tgt[:, None]).squeeze(1)
+                top1 = lp.argmax(-1) == tgt
+                rank = (lp > tok_lp[:, None]).sum(-1) + 1
+                b = p_.boundary
+                for j in range(len(tgt)):
+                    idx = j + 1                       # index into `full`
+                    tid_ = full[idx]
+                    if idx < b:
+                        if tid_ == close_id:
+                            role = "think_close"
+                        elif idx <= p_.n_reasoning_tokens + 2:
+                            role = "reasoning"
+                        else:
+                            role = "reasoning"
+                    elif tid_ == end_id:
+                        role = "im_end"
+                    elif idx == b:
+                        role = "first_answer_token"
+                    else:
+                        role = "answer_span"
+                    piece = tok.decode([tid_])
+                    roles = [role]
+                    if idx >= b and any(c in digits for c in piece):
+                        roles.append("answer_digits")
+                    if idx >= b and any(c in ops for c in piece):
+                        roles.append("answer_operators")
+                    for r in roles:
+                        a = acc[r]
+                        a["n"] += 1
+                        a["top1"] += int(top1[j])
+                        a["ce"] += float(-tok_lp[j])
+                        a["prob"] += float(tok_lp[j].exp())
+                        a["rank"] += int(rank[j])
+                per_sample.append({"id": s_["id"], "data_type": s_["data_type"],
+                                   "boundary": b, "total_tokens": len(full)})
+        forced = {r: {"n": a["n"],
+                      "top1_accuracy": round(a["top1"] / a["n"], 4),
+                      "mean_ce": round(a["ce"] / a["n"], 4),
+                      "mean_target_probability": round(a["prob"] / a["n"], 4),
+                      "mean_target_rank": round(a["rank"] / a["n"], 2)}
+                  for r, a in sorted(acc.items()) if a["n"]}
+        results["forced"] = {"by_role": forced, "n_sessions": len(per_sample)}
+        (args.out / "forced.per_sample.jsonl").write_text(
+            "".join(json.dumps(r) + "\n" for r in per_sample))
+        del model
+        if torch.cuda.is_available():
+            torch.cuda.empty_cache()
+        print("\nTEACHER-FORCED BY ROLE")
+        for r, v in forced.items():
+            print(f"  {r:20s} n={v['n']:>7,}  top1 {v['top1_accuracy']:.4f}  "
+                  f"CE {v['mean_ce']:.4f}  p(target) {v['mean_target_probability']:.4f}  "
+                  f"rank {v['mean_target_rank']}")
+
     report = {
         "created_utc": datetime.now(timezone.utc).isoformat(),
         "command": " ".join(sys.argv),
