@@ -151,16 +151,29 @@ def main() -> None:
     tok = AutoTokenizer.from_pretrained(args.model)
     args.out.mkdir(parents=True, exist_ok=True)
 
+    from aadistill.data.sessions import render_session
+
     prepared = []
     for s in picked:
+        # The gold target is the RENDERED supervised span, not the assistant
+        # message's `content`. `content` is the final answer only; the reasoning
+        # lives in `reasoning_content`, and the template renders
+        # <think>{reasoning_content}</think>{content}<|im_end|>. The 2026-08-04
+        # run used `content` and so compared the model's reasoning against an
+        # answer, guaranteeing a divergence at token 0 and feeding answer-shaped
+        # text into an open think block at every k>0 (EXPERIMENTS.md §15).
         turns = [m for m in s["messages"] if m["role"] != "assistant"]
-        gold_text = next(m["content"] for m in reversed(s["messages"])
-                         if m["role"] == "assistant")
         prompt = tok.apply_chat_template(turns, tools=s.get("tools"),
                                          tokenize=False,
                                          add_generation_prompt=True)
         p_ids = tok(prompt, add_special_tokens=False).input_ids
-        gold_ids = tok(gold_text, add_special_tokens=False).input_ids
+        rendered = render_session(tok, s)
+        sup = [i for i, m in enumerate(rendered.body_mask) if m]
+        gold_ids = [rendered.body_ids[i] for i in sup]
+        think_open = tok.convert_tokens_to_ids("<think>")
+        if gold_ids and gold_ids[0] == think_open:
+            gold_ids = gold_ids[1:]   # the prompt already emitted it
+        gold_text = tok.decode(gold_ids)
         prepared.append({"sample": s, "p_ids": p_ids, "gold_ids": gold_ids,
                          "gold_text": gold_text})
 

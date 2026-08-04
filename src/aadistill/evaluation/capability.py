@@ -59,10 +59,20 @@ def token_f1(pred: str, gold: str) -> float:
 
 
 def _shared(record: dict) -> dict:
-    """Protocol, termination and degeneration facts every scorer reports."""
+    """Protocol, termination and degeneration facts every scorer reports.
+
+    The record carries `think_preopened` — whether the chat template that
+    produced this generation had already opened the think block. It is read from
+    the record rather than assumed, because the answer differs per model: the
+    teacher's template pre-opens it, the released Qwen3-0.6B's does not, and
+    judging one under the other's rule rejects every generation. Absent (every
+    record written before 2026-08-04) it defaults to True, which is correct for
+    every checkpoint in this project's own lineage.
+    """
     raw = record.get("raw", "")
-    parts = split_generation(raw)
-    valid, reason = protocol_valid(raw)
+    preopened = bool(record.get("think_preopened", True))
+    parts = split_generation(raw, think_preopened=preopened)
+    valid, reason = protocol_valid(raw, think_preopened=preopened)
     return {
         "answer": parts["answer"],
         "protocol_valid": valid,
@@ -70,6 +80,7 @@ def _shared(record: dict) -> dict:
         "natural_termination": bool(record.get("natural_termination")),
         "degenerate": bool(record.get("degeneration_triggered")),
         "degeneration_kind": record.get("degeneration_kind"),
+        "think_preopened": preopened,
     }
 
 

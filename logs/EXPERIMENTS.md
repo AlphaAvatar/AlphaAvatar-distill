@@ -1413,3 +1413,126 @@ free-generation correctness is, if anything, evidence that the *target
 construction or masking* is the place to look before the rollout distribution.
 
 Phases 2/3 and L1/R1/R2 remain paused. No training experiment was started.
+
+## 15. Forensic audit of the recall result (2026-08-04, CPU, $0)
+
+Six checks, all local. **The headline of §14.3 does not survive them: it was my
+own target-construction defect, not a model property.**
+
+### 15.1 Template-aware protocol validation, and the Diagnostic-A rescore
+
+`split_generation` / `protocol_valid` now take `think_preopened`, the
+assistant-prefix state the active chat template creates, read from the record
+(`uncapped_eval` records it per sample) and defaulting to `True` so every
+existing caller is unchanged. Both states stay strict: a pre-opened generation
+containing `<think>` is still a violation, and a self-opening one must open
+exactly once, before any content, and close exactly once.
+
+`score_numeric` — the GSM8K path — needed the same fix. Missing it left gsm8k at
+0 while every other set rescored, which is how it was caught.
+
+Rescored from the **saved** generations, no GPU. Originals untouched; derived
+artifacts under `artifacts/eval/e2diag_rescored_v2/` with input/output hashes and
+a `rescore_meta.json` recording the template state and its source.
+
+| set | correct before → after (project) | native | protocol-valid proj/nat |
+|---|---|---|---|
+| knowledge | 0 → **0.1733** | 0 → 0.1733 | 0.947 / 0.940 |
+| math_verified | 0 → **0.62** | 0 → 0.58 | 0.730 / 0.700 |
+| gsm8k | 0 → **0.70** | 0 → 0.69 | 0.890 / 0.830 |
+| multihop | 0 → **0.60** | 0 → 0.52 | 0.950 / 0.940 |
+| rag | 0 → **0.74** | 0 → 0.71 | 1.000 / 1.000 |
+| answerability (pair) | 0 → **0.333** | 0 → 0.367 | 0.992 / 0.975 |
+| safety (pair) | 0 → **0.08** | 0 → 0.02 | 1.000 / 1.000 |
+
+### 15.2 Prompt rendering is token-identical through the generation boundary
+
+200 sessions: training's `render_session` and evaluation's
+`apply_chat_template(add_generation_prompt=True)` agree **token for token, zero
+mismatches**. The evaluation prompt ends with `\n<think>\n`, confirming the
+teacher template pre-opens the block. **No train/eval boundary defect.**
+
+### 15.3 Masks cover the protocol tokens
+
+On the real 0.25M pack (216 blocks, 252,985 supervised tokens):
+
+| token | occurrences | in CE mask | coverage |
+|---|---:|---:|---:|
+| `<think>` | 479 | 479 | **1.000** |
+| `</think>` | 453 | 453 | **1.000** |
+| `<|im_end|>` | 1,503 | 446 | 0.297 (correct — only assistant terminators) |
+| `<|im_start|>` | 1,536 | 0 | 0.000 (correct) |
+| `<|endoftext|>` (pad) | 1,320,165 | 0 | 0.000 (correct) |
+
+479 CE spans, **446 (93.11%) end on `<|im_end|>`**. The 33 that do not are
+exactly the 33 terminal truncations the pack records, and 26 spans (5.4%) never
+close `</think>`. That is a real but small labelling defect — **not** an
+explanation for total failure. **No masking defect.**
+
+### 15.4 The target-construction defect that produced §14.3
+
+A session's assistant message carries **two** fields: `reasoning_content` (the
+think block) and `content` (the final answer). The template renders
+`<think>{reasoning_content}</think>{content}<|im_end|>`.
+
+`diagnose_training_recall.py` used **`content` alone** as the gold target. So:
+
+* **`prefix_match = 0` was guaranteed** regardless of model quality — the model
+  correctly emits reasoning first (the prompt pre-opened `<think>`), and it was
+  compared against a sequence that starts with the final answer;
+* **`gold_prefix_top1 = 0.7803` teacher-forced the model through
+  out-of-distribution text** — answer prose placed immediately after `<think>`;
+* **the k=16/64/256 release rows fed answer-shaped text into an open, unclosed
+  think block**, a state that appears nowhere in training.
+
+### 15.5 Teacher-forced top-1 by role, on the *correct* target
+
+| role | n | top-1 |
+|---|---:|---:|
+| `</think>` | 44 | **1.0000** |
+| first token after `</think>` | 44 | **1.0000** |
+| `<|im_end|>` | 39 | **0.9744** |
+| digit | 4,784 | 0.9829 |
+| answer span | 4,139 | 0.9524 |
+| prose | 30,064 | 0.9147 |
+
+By decile: 0.901 · 0.944 · 0.943 · 0.938 · 0.935 · 0.925 · 0.915 · 0.921 · 0.919
+· 0.932. First 16 tokens 0.868.
+
+**~0.92 overall, not 0.78, and the protocol tokens are the model's *best*
+tokens.** It predicts `</think>` perfectly and `<|im_end|>` at 97%. Measured with
+the RoPE base forced from `rope_parameters` and verified against the model's
+actual `inv_freq`; the tokenizer was substituted with the teacher's after
+verifying vocab, merges, added tokens and chat template are identical (the
+checkpoint's own `tokenizer_config.json` is transformers-5.x-only).
+
+### 15.6 The forced-prefix release curve is explained
+
+Protocol validity falling 0.647 → 0.446 → 0.413 → 0.158 across k=0/16/64/256 is
+**the injected prefix, not the model**: the larger k, the more answer-shaped text
+sits inside the unclosed `<think>`, and the model must still emit `</think>` and
+a fresh answer. The measurement is invalidated; the diagnostic is fixed to use
+the rendered supervised span, and a test now asserts the two fields are distinct.
+
+### 15.7 Verdict
+
+**Not a serialization, template, EOS or masking defect.** All four are clean:
+rendering is token-identical, `<think>`/`</think>` have 1.000 CE coverage,
+93.11% of spans terminate correctly, and the model reproduces every protocol
+token near-perfectly under teacher forcing.
+
+**What survives as a genuine finding:** at k=0 — where the prompt is rendered
+correctly and no bad prefix is injected — the model still produces **0.0
+correctness** with fluent, well-formed output and wrong arithmetic
+("81 × 90 = 81", "15 × 15 = 21"). That measurement never depended on the gold
+sequence and stands.
+
+So the failure is **sequence-level and computational, not structural**: the model
+has learned the *surface form* of the teacher's reasoning — delimiters, register,
+answer scaffolding — at ~92% next-token accuracy, without the computation the
+form is wrapped around. Exact reproduction was never a reasonable expectation
+anyway: 0.92 per token over a ~500-token target compounds to ≈0.
+
+Both §14.3 claims that rested on the bad gold are **withdrawn**: "median prefix
+match 0" and "more gold prefix makes it worse" are artifacts. The §14.2 reference
+result is unaffected, and after the rescore it is stronger, not weaker.

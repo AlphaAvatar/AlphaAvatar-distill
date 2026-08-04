@@ -272,3 +272,56 @@ def test_behavior_score_gives_silence_no_fluency_credit():
 def test_behavior_score_needs_samples():
     with pytest.raises(ValueError, match="at least one"):
         behavior_score([])
+
+
+# --- template-aware think handling ----------------------------------------
+# Whether the prompt already opened <think> is a property of the CHAT TEMPLATE.
+# Judging a self-opening model under the pre-opened rule rejected 100% of
+# otherwise-perfect generations (EXPERIMENTS.md 14.2), so both states are
+# supported -- and both stay strict.
+
+def test_template_opens_think_reads_the_prompt():
+    from aadistill.evaluation.behavior import template_opens_think
+    assert template_opens_think("<|im_start|>assistant\n<think>")
+    assert template_opens_think("<|im_start|>assistant\n<think>\n")
+    assert not template_opens_think("<|im_start|>assistant\n")
+
+
+def test_split_generation_preopened_rejects_a_second_open():
+    from aadistill.evaluation.behavior import split_generation
+    ok = split_generation("thinking</think>Answer.<|im_end|>", think_preopened=True)
+    assert ok["think_closed"] and ok["answer"] == "Answer."
+    # Re-opening an already-open block is a real violation.
+    bad = split_generation("<think>thinking</think>Answer.<|im_end|>",
+                           think_preopened=True)
+    assert not bad["think_closed"]
+    assert "<think>" in bad["stray_markers"]
+
+
+def test_split_generation_self_opening_accepts_and_still_checks():
+    from aadistill.evaluation.behavior import split_generation
+    ok = split_generation("<think>thinking</think>Answer.<|im_end|>",
+                          think_preopened=False)
+    assert ok["think_closed"] and ok["answer"] == "Answer."
+    assert ok["think"].strip() == "thinking"
+    assert "<think>" not in ok["stray_markers"]
+    # Missing open, late open, and doubled open all remain violations.
+    for raw in ("thinking</think>Answer.<|im_end|>",
+                "preamble<think>t</think>A.<|im_end|>",
+                "<think>a<think>b</think>A.<|im_end|>"):
+        assert not split_generation(raw, think_preopened=False)["think_closed"], raw
+
+
+def test_protocol_valid_threads_the_state_and_defaults_to_preopened():
+    from aadistill.evaluation.strict_answer import protocol_valid
+    selfopen = "<think>t</think>A.<|im_end|>"
+    assert protocol_valid(selfopen, think_preopened=False)[0]
+    assert not protocol_valid(selfopen)[0]          # default = teacher template
+    assert protocol_valid("t</think>A.<|im_end|>")[0]
+
+
+def test_shared_reads_think_preopened_from_the_record():
+    from aadistill.evaluation.capability import _shared
+    rec = {"raw": "<think>t</think>A.<|im_end|>", "natural_termination": True}
+    assert not _shared(rec)["protocol_valid"]                    # legacy default
+    assert _shared({**rec, "think_preopened": False})["protocol_valid"]

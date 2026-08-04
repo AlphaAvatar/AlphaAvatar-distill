@@ -90,11 +90,16 @@ def extract_final_answer(answer: str) -> tuple[str | None, str]:
     return None, "no_final_answer"
 
 
-def protocol_valid(raw: str) -> tuple[bool, str]:
-    """Structural validity of the generation, independent of its content."""
+def protocol_valid(raw: str, *, think_preopened: bool = True) -> tuple[bool, str]:
+    """Structural validity of the generation, independent of its content.
+
+    `think_preopened` is the assistant-prefix state the active chat template
+    created; see `behavior.split_generation`. The default matches the teacher's
+    template, so every existing caller keeps its exact behaviour.
+    """
     if IM_END not in raw:
         return False, "not_terminated"
-    parts = split_generation(raw)
+    parts = split_generation(raw, think_preopened=think_preopened)
     if not parts["think_closed"]:
         return False, "think_delimiters_invalid"
     if any(marker in parts["answer"] for marker in STRAY_MARKERS):
@@ -113,8 +118,12 @@ def score_numeric(record: dict, gold: str) -> dict:
     optionally `degeneration_triggered` / `natural_termination`.
     """
     raw = record.get("raw", "")
-    parts = split_generation(raw)
-    valid, protocol_reason = protocol_valid(raw)
+    # Same rule as capability._shared: the template state travels with the
+    # record. GSM8K takes this path rather than the capability scorers, and
+    # missing it here left gsm8k at 0 while every other set rescored correctly.
+    preopened = bool(record.get("think_preopened", True))
+    parts = split_generation(raw, think_preopened=preopened)
+    valid, protocol_reason = protocol_valid(raw, think_preopened=preopened)
     degenerate = bool(record.get("degeneration_triggered"))
 
     extracted, how = extract_final_answer(parts["answer"])

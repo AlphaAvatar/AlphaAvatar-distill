@@ -1058,3 +1058,50 @@
   way versus 65% `not_terminated`, so **E1/E2 conclusions are unaffected**.
 - **Revisit when:** the fix is written; then rescore the reference run from the
   stored generations and report both scorings.
+
+## 2026-08-04 — Withdraw the §14.3 recall claims; the failure is computational
+
+- **Context:** the forensic audit (EXPERIMENTS §15) checked all six things that
+  could have made §14.3 an artifact. Two of them were.
+- **Decision:** **withdraw** "median prefix match 0 tokens" and "more gold prefix
+  makes protocol validity worse". Both came from using the assistant message's
+  `content` field as the gold target when the real target is the rendered
+  `<think>{reasoning_content}</think>{content}<|im_end|>`. **Retain** the k=0
+  free-generation result: correctness 0.0 with fluent output and wrong
+  arithmetic, which never depended on the gold sequence.
+- **What the audit cleared:** prompt rendering is token-identical between
+  training and evaluation (200/200); `<think>` and `</think>` have 1.000 CE
+  coverage; 93.11% of CE spans end on `<|im_end|>` (the 33 that do not are the
+  33 recorded terminal truncations); and under teacher forcing on the correct
+  target the model scores **1.000 on `</think>`, 0.974 on `<|im_end|>`, 0.952 on
+  the answer span, ~0.92 overall** — the protocol tokens are its *best* tokens.
+- **Revised diagnosis:** the model has learned the **surface form** of the
+  teacher's reasoning without the computation inside it. This is a
+  sequence-level capability failure, not a structural or labelling one.
+- **Consequence for the on-policy question:** an exposure-bias remedy is aimed at
+  a model that drifts off a distribution it can otherwise represent. This model
+  represents the form correctly and gets the arithmetic wrong, so rollout
+  correction is **still not indicated**. It remains paused.
+- **Risks:** ~92% next-token accuracy compounds to ≈0 over a 500-token target, so
+  "cannot reproduce its training target exactly" was never going to be
+  informative and should not be measured that way again.
+- **Revisit when:** a controlled objective experiment separates form from
+  computation (see PROPOSAL §13).
+
+## 2026-08-04 — How the Qwen3-0.6B result may and may not be used
+
+- **Decision:** record it as **evidence that the battery is achievable at
+  near-identical 0.6B parameter scale** — nothing more.
+- **It does support:** rejecting "0.6B is too small for these tasks" and "the
+  battery is too hard". After the template-aware rescore, a 595,984,384-parameter
+  model scores gsm8k 0.70, rag 0.74, math 0.62, multihop 0.60 under our own
+  frozen battery and scorer.
+- **It does NOT support:** that our data budget is sufficient, that our
+  architecture is right, or that our initialization or recipe must therefore
+  work. Qwen3-0.6B is **near**-geometry, not same-geometry (`rope_theta` 1e6 vs
+  5e6, `max_position_embeddings` 40,960 vs 262,144) and — decisively — it was
+  trained on a full pretraining corpus, whereas our student has seen at most
+  5.5M supervised tokens from a cold structural initialization. The comparison
+  bounds the *task*, not the *recipe*.
+- **Risks:** this result is easy to over-read as "so our approach must work".
+  Recorded here explicitly so it is not.

@@ -114,3 +114,33 @@ def test_termination_is_reported_separately_from_correctness():
     assert verdict["natural_termination"] is True
     assert verdict["correct"] is False
     assert verdict["reason"] == "answer_mismatch"
+
+
+def test_score_numeric_honours_the_template_state():
+    """gsm8k takes this path, not capability._shared -- it needs the flag too."""
+    from aadistill.evaluation.strict_answer import score_numeric
+    raw = "<think>work</think>\n\nFinal Answer: 42<|im_end|>"
+    legacy = score_numeric({"raw": raw}, "42")
+    assert not legacy["correct"] and legacy["reason"].startswith("protocol:")
+    fixed = score_numeric({"raw": raw, "think_preopened": False}, "42")
+    assert fixed["correct"] and fixed["protocol_valid"]
+
+
+def test_gold_target_is_the_rendered_span_not_the_content_field():
+    """The 2026-08-04 recall diagnostic used `content` and measured an artifact.
+
+    A session's assistant message splits the target across two fields:
+    `reasoning_content` (the think block) and `content` (the final answer). Using
+    `content` alone omits everything the model emits first.
+    """
+    import json
+    from pathlib import Path
+    p = Path("artifacts/stage3/corpus_v2/sessions.jsonl")
+    if not p.is_file():
+        import pytest
+        pytest.skip("corpus not present locally")
+    s = json.loads(p.open().readline())
+    assistant = [m for m in s["messages"] if m["role"] == "assistant"][-1]
+    assert "reasoning_content" in assistant, "the think block lives here"
+    assert "<think>" not in assistant["content"]
+    assert assistant["reasoning_content"] not in assistant["content"]

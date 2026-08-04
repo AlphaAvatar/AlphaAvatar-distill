@@ -101,33 +101,81 @@ def normalize_text(s: str) -> str:
     return " ".join(_WORD.findall(s.lower()))
 
 
-def split_generation(raw: str) -> dict:
+def template_opens_think(rendered_prompt: str) -> bool:
+    """Does the rendered prompt already open the think block?
+
+    The teacher's template emits `<think>` as part of the generation prompt, so
+    the model's continuation starts *inside* the block and must only close it.
+    Other templates (the released Qwen3-0.6B among them) leave the model to open
+    its own. Which of those is true is a property of the **prompt**, never of the
+    generation, so it is read from the prompt and passed in.
+    """
+    return rendered_prompt.rstrip().endswith(THINK_OPEN)
+
+
+def split_generation(raw: str, *, think_preopened: bool = True) -> dict:
     """Split a raw decoded continuation into its structural parts.
+
+    `think_preopened` describes the assistant-prefix state the active chat
+    template created, and it changes what a *well-formed* generation looks like:
+
+    * ``True`` (default, the teacher's template) — the prompt already emitted
+      `<think>`, so a correct continuation contains **no** `<think>` and exactly
+      one `</think>`. A `<think>` here is a real protocol violation: the model
+      re-opened a block that was already open.
+    * ``False`` — the prompt did not open the block, so a correct continuation
+      opens it **exactly once, before any other content**, and closes it exactly
+      once. A missing or late `<think>` is a violation.
+
+    Getting this wrong is not cosmetic. Scoring a self-opening model under the
+    pre-opened rule marked its own `<think>` as a stray marker and rejected 100%
+    of otherwise-perfect generations (EXPERIMENTS.md §14.2). Delimiter checking
+    stays strict in both states — this widens *which* shape is legal, not how
+    loosely it is checked.
 
     Returns a dict with:
       ``terminated``      — the generation emitted ``<|im_end|>``;
-      ``think_closed``    — exactly one ``</think>`` and no ``<think>``;
-      ``think_immediate`` — the generation closes the think block right away
-                            (only whitespace before ``</think>``), the behavior
-                            the training data teaches;
+      ``think_closed``    — the delimiters match `think_preopened` exactly;
+      ``think_immediate`` — the block is closed right away (only whitespace
+                            inside), the behavior the training data teaches;
       ``no_stray_markers``— no template control markers in the body;
-      ``think``           — text before ``</think>`` (the model's thinking);
+      ``think``           — the thinking span;
       ``answer``          — text after ``</think>``, terminator stripped;
                             empty when the block was never closed.
+      ``think_preopened`` — the state this split was evaluated under.
     """
     body = raw.split(IM_END)[0]
     terminated = IM_END in raw
     n_close = body.count(THINK_CLOSE)
     n_open = body.count(THINK_OPEN)
-    think_closed = n_close == 1 and n_open == 0
+
+    if think_preopened:
+        think_closed = n_close == 1 and n_open == 0
+        opening_is_legal = False
+    else:
+        # Exactly one open, exactly one close, the open first and before any
+        # non-whitespace content, and the close after it.
+        head, _, rest = body.partition(THINK_OPEN)
+        think_closed = (
+            n_open == 1 and n_close == 1
+            and head.strip() == ""
+            and rest.count(THINK_CLOSE) == 1
+        )
+        opening_is_legal = think_closed
 
     if n_close >= 1:
         think, answer = body.split(THINK_CLOSE, 1)
     else:
         think, answer = body, ""
+    if opening_is_legal:
+        think = think.partition(THINK_OPEN)[2]
     think_immediate = think_closed and think.strip() == ""
 
     stray = [m for m in STRAY_MARKERS if m in body]
+    if opening_is_legal and THINK_OPEN in stray:
+        # The model was *supposed* to open the block here; that is the protocol,
+        # not a stray marker.
+        stray.remove(THINK_OPEN)
     # A second <|im_end|> would mean the model kept talking past its terminator.
     if raw.count(IM_END) > 1:
         stray.append(IM_END)
@@ -139,6 +187,8 @@ def split_generation(raw: str) -> dict:
         "no_stray_markers": not stray,
         "stray_markers": stray,
         "n_think_close": n_close,
+        "n_think_open": n_open,
+        "think_preopened": think_preopened,
         "think": think,
         "answer": answer.strip(),
     }
