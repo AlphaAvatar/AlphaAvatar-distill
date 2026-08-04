@@ -41,19 +41,21 @@ gql() {
 
 # --- 1. price guard --------------------------------------------------------
 say "checking $GPU_NAME availability at <= \$$MAX_PRICE/h"
-PRICE=$(gql '{"query":"query { gpuTypes { id displayName memoryInGb lowestPrice(input:{gpuCount:1}) { uninterruptablePrice } } }"}' |
-  GPU_NAME="$GPU_NAME" python3 -c "
-import sys, json, os
-want = os.environ['GPU_NAME']
+# `runpodctl pod create` provisions SECURE cloud, so the guard must read
+# securePrice. lowestPrice/uninterruptablePrice is the COMMUNITY floor: on
+# 2026-08-04 it read $0.33 for an A6000 that then billed $0.53, and two earlier
+# pods were costed against that wrong number.
+PRICE=$(gql "{\"query\":\"query { gpuTypes(input:{id:\\\"$GPU_NAME\\\"}) { id securePrice communityPrice lowestPrice(input:{gpuCount:1}) { stockStatus } } }\"}" |
+  python3 -c "
+import sys, json
 d = json.load(sys.stdin)['data']['gpuTypes']
-for g in d:
-    if g['id'] == want or g['displayName'] == want.replace('NVIDIA ', ''):
-        p = (g.get('lowestPrice') or {}).get('uninterruptablePrice')
-        print(p if p is not None else '')
-        break
-else:
+if not d:
     print('')
-")
+else:
+    g = d[0]
+    sys.stderr.write(f\"  securePrice={g.get('securePrice')} communityPrice={g.get('communityPrice')} stock={(g.get('lowestPrice') or {}).get('stockStatus')}\\n\")
+    print(g.get('securePrice') if g.get('securePrice') is not None else '')
+" 2>>"$LOG")
 if [ -z "$PRICE" ]; then
   say "ABORT: $GPU_NAME not offered right now. Not substituting another GPU."
   echo "LAUNCH_ABORT:gpu_unavailable" > "$STATE"; exit 1
@@ -76,8 +78,18 @@ create_pod() {
     --min-cuda-version 13.0 \
     --ports "22/tcp" \
     --name "aadistill-p0asst-a$1" \
-    --terminate-after "$deadline" 2>&1 |
-  python3 -c "import sys,re; m=re.search(r'\"id\":\s*\"([^\"]+)\"', sys.stdin.read()); print(m.group(1) if m else '')"
+    --terminate-after "$deadline" >"$SCR/create_raw_$1.txt" 2>&1
+  python3 - "$SCR/create_raw_$1.txt" <<'PYEOF'
+import json, re, sys
+raw = open(sys.argv[1]).read()
+pid = ""
+try:                                   # runpodctl emits JSON on success
+    pid = json.loads(raw).get("id", "")
+except Exception:
+    m = re.search(r'"id"\s*:\s*"([^"]+)"', raw)
+    pid = m.group(1) if m else ""
+print(pid)
+PYEOF
 }
 
 endpoint() {
@@ -98,7 +110,22 @@ EP=""; POD_ID=${POD_ID:-}
 for attempt in $(seq 1 "$MAX_POD_ATTEMPTS"); do
   if [ -z "$POD_ID" ]; then
     POD_ID=$(create_pod "$attempt")
-    [ -z "$POD_ID" ] && { say "attempt $attempt: create failed"; continue; }
+    if [ -z "$POD_ID" ]; then
+      say "attempt $attempt: create failed — raw output follows"
+      head -20 "$SCR/create_raw_$attempt.txt" | tee -a "$LOG"
+      continue
+    fi
+    # Refuse a pod that provisioned above the authorized rate.
+    ACTUAL=$(python3 -c "
+import json,sys
+try: print(json.load(open('$SCR/create_raw_$attempt.txt')).get('costPerHr',''))
+except Exception: print('')")
+    if [ -n "$ACTUAL" ] && [ "$(echo "$ACTUAL > $MAX_PRICE" | bc -l)" = "1" ]; then
+      say "ABORT: pod provisioned at \$$ACTUAL/h, above the authorized \$$MAX_PRICE/h. Deleting."
+      runpodctl remove pod "$POD_ID" >>"$LOG" 2>&1
+      echo "LAUNCH_ABORT:actual_price_$ACTUAL" > "$STATE"; exit 1
+    fi
+    say "attempt $attempt: pod costPerHr \$$ACTUAL (authorized \$$MAX_PRICE)"
     date -u +%s > "$SCR/pod_start_epoch"; echo "$POD_ID" > "$SCR/pod_id"
     say "attempt $attempt: created $POD_ID"
   else
