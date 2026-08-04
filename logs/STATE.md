@@ -104,7 +104,12 @@ convergence- and measurement-limited (`EXPERIMENTS.md` §5).
 * Thinking mode is never suppressed; `<think>` is opened by the template
   unconditionally on `add_generation_prompt`.
 * **No artificial generation cap in formal measurement** (P18). Allowance is
-  `context − prompt`; context resolves to **262,144**.
+  `context − prompt`. Context resolves to the **trained** `block_len` = **8,192**,
+  not the architectural 262,144 the geometry inherits — recorded per measurement
+  as `context_resolution.context_source = "trained_block_len"`. Experiment 2
+  phase 1 confirmed `context_limit_rate` **0.0000 at all 20 checkpoints**, so
+  nothing has ever been engine-truncated under this rule; the only stop reasons
+  observed are `eos` and the degeneration stop.
 * Stop ids come from the model's `generation_config` (teacher `[151645, 151643]`),
   not the tokenizer alone.
 * No no-think / empty-think / final-only / shortened substitute targets (P17).
