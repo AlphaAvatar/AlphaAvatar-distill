@@ -669,6 +669,106 @@ data-vs-compute control above is run.
 
 ---
 
+## 13. Refactor equivalence audits and padding truncation (2026-08-04, CPU, $0)
+
+All local; no GPU time. Verdicts under `artifacts/audit/` (gitignored).
+
+### 13.1 Degeneration replay — PASS
+
+`scripts/evaluation/audit_degeneration_replay.py` over **13,686 retained
+generations** (E1, E2 phase 1, and the earlier runs).
+
+| tier | question | result |
+| --- | --- | --- |
+| A (asserted) | do the pre- and post-move modules agree on the same input? | **13,686 / 13,686** |
+| B (rate) | do degenerate records reproduce their recorded evidence dict? | **6,040 / 6,057 = 99.72%** |
+| B' (asserted) | do both modules fail on exactly the same records? | **identical sets** |
+| C (reported) | do surviving records stay non-degenerate? | 5,234 / 5,236 |
+
+The module is the same git blob `dd5d5f68` on both sides of the move. Token ids
+were never persisted, so ids are reconstructed by re-encoding the saved text;
+equal length does not imply equal ids, because a model may emit a non-canonical
+tokenization. The 17 tier-B residuals are therefore **input-caused, and the audit
+proves it rather than asserting it**: since both modules agree on every replayed
+input and fail on the same records, `recorded != new(x)` forces `x != x_orig`.
+15 of the 17 sit within 0.02 of the low-novelty threshold or are period-2 cycles
+— the structures a one-token difference destroys. The 2 tier-C trips are
+call-pattern artifacts: the live loop checked only at scheduler-timed points.
+
+### 13.2 Experiment 1 mixture rebuild — PASS, byte-identical
+
+`scripts/data/audit_e1_mixture_rebuild.py`. `sessions.jsonl` was downloaded and
+verified (`2b4edc2e…`, 11,174 sessions), then the ladder was **rebuilt from the
+corpus** through the relocated `mixture` module — not replayed from the pack, so
+the session interleave and packing are exercised too.
+
+**20 / 20 checks pass.** `blocks.npz` rebuilds to the recorded sha256
+`6f324cb0…` and `audit.jsonl` to `15f16b7b…` — byte-identical. Arrays match
+element-for-element at 3,715 × 8,192; block session order matches with no
+differing block; all six rung entries match field-for-field; nesting holds; and
+12 arms (6 rungs × 2 seeds) produce distinct, deterministic, resume-equivalent
+block streams.
+
+### 13.3 Padding-suffix truncation — implemented, validated, NOT yet benchmarked
+
+Precondition checked mechanically on all three real packs: real tokens form a
+contiguous prefix in every block, `ce_mask ⊆ content_mask`, single pad id
+`151643`. Fill fractions are worse than the aggregates suggested — the **median
+block is 14.1% full (E1) and 7.0% full (E2 D1)**.
+
+`nonpad_extent()` re-checks contiguity at runtime and raises rather than
+mis-training. Every sequence-aligned tensor is sliced together; this trainer has
+no separate attention-mask or label tensor. `logical_block_tokens`,
+`executed_positions`, `executed_nonpad_tokens` and `supervised_tokens` are
+reported separately.
+
+**Default off.** The paths agree mathematically but not bitwise, so defaulting on
+would silently change what an already-logged config computes (P4). Opting in
+changes the config hash, so the manifest records the path.
+
+Equivalence on real blocks, native 8,192 width, ids remapped into a 4,096 vocab
+(a `[1,8192,151936]` logits tensor is ~5 GB and cannot be held twice), plus a
+true-vocab cross-check at 768:
+
+| regime | fill | loss diff | grad max abs | cosine | param delta |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| heavy_pad | 0.028 | 0.000e+00 | 1.118e-08 | 1.000000000 | 0.73% of one step |
+| median_pad | 0.141 | 0.000e+00 | 7.451e-09 | 1.000000000 | 1.14% of one step |
+| dense | 1.000 | 0.000e+00 | 0.000e+00 | 1.000000000 | 0 (exact) |
+
+CE, KD, total loss and validation CE are **exactly equal** in every regime. The
+dense regime — where truncation is a no-op — is exactly zero throughout, which is
+the control showing the residual comes only from shorter float32 reductions. Adam
+amplifies those ~1e-8 differences on near-zero-gradient components, so the
+parameter delta is judged as a fraction of one optimizer step. Executed positions
+fell 16,384 → 462 and 16,384 → 2,308.
+
+**No speedup is claimed.** Wall-clock, memory and throughput need a GPU and have
+not been measured.
+
+### 13.4 Reference geometry, and a transformers version hazard
+
+`Qwen/Qwen3-0.6B @ c1899de2` is **near-geometry, not same-geometry**. Every
+parameter-bearing field matches — hidden 1024, 28L, FFN 3072, 16Q/8KV, head_dim
+128, vocab 151,936, tied embeddings, **identical 595,984,384 parameters** — but
+`max_position_embeddings` is 40,960 vs our 262,144 and `rope_theta` is 1e6 vs the
+teacher-inherited 5e6.
+
+Chasing that surfaced a live hazard. transformers moved `rope_theta` into a
+nested `rope_parameters` dict between 4.x and 5.x. **`uv.lock` pins 5.13.1, which
+writes and reads the nested form, so E1 and E2 used the correct 5,000,000 — there
+is no historical defect.** But reading the same checkpoint under transformers
+4.57.1 resolves `config.rope_theta` to the class default **10,000** while
+`rope_parameters` still says 5,000,000, building a model with a positional basis
+500× too small, silently.
+
+Two fixes: `hardware_report()` now records transformers/tokenizers/safetensors/
+numpy/datasets/vllm versions (it previously captured `torch` but not the library
+that decides this, so the skew was undetectable from any existing manifest); and
+`assert_rope_matches_config()` inverts `inv_freq[1]` to recover the base the
+model will really use and raises on disagreement — checking runtime frequencies
+rather than the config attribute, because the attribute is what lies.
+
 ## 12. Experiment 2 — three sequential 0.86M diagnostics (phase 1 PREPARED, not launched)
 
 **Design (maintainer, 2026-08-03).** Three sequential single-variable
