@@ -107,6 +107,8 @@ def validate_train_config(cfg: dict) -> None:
     for key in ("blocks_per_step", "micro_blocks"):
         if need(batch, key, int, "batch.") < 1:
             raise ValueError(f"batch.{key} must be >= 1")
+    if "truncate_padding" in batch and not isinstance(batch["truncate_padding"], bool):
+        raise ValueError("batch.truncate_padding must be a bool")
     ck = need(cfg, "checkpoint", dict)
     for key in ("save_every", "keep_last"):
         need(ck, key, int, "checkpoint.")
@@ -247,6 +249,31 @@ def prediction_mask(
             )
         keep = keep & ~think_span_mask(input_ids, *think_ids)
     return keep[:, 1:]
+
+
+def nonpad_extent(content_mask: torch.Tensor) -> int:
+    """Positions that must be forwarded for a microbatch: 1 + the last real one.
+
+    Padding is a contiguous *suffix* of every packed block (`pack_sessions`
+    appends the pad run after the last real token), and attention is causal, so
+    no real token's hidden state depends on a position at or beyond this extent.
+    Everything past it therefore contributes nothing to CE, KD or the gradient
+    and does not need to be forwarded.
+
+    The contiguity that licenses this is **checked, not assumed** — a future
+    packer that interleaved padding would silently invalidate the optimization,
+    so a violating block raises instead of being quietly mis-trained.
+    """
+    if content_mask.dtype != torch.bool:
+        content_mask = content_mask.bool()
+    counts = content_mask.sum(dim=1)
+    positions = torch.arange(content_mask.shape[1], device=content_mask.device)
+    if not torch.equal(content_mask, positions[None, :] < counts[:, None]):
+        raise ValueError(
+            "padding is not a contiguous suffix of every block: real tokens must "
+            "form a prefix for suffix truncation to be sound. Set "
+            "batch.truncate_padding=false, or fix the packer.")
+    return int(counts.max())
 
 
 def _unpack_blocks(blocks):
@@ -416,6 +443,25 @@ class Trainer:
             raise ValueError("at least one of ce_weight / kd_weight must be > 0")
         self.cfg = cfg
         self.config_sha = sha256_json(cfg)
+        # Skip the padding suffix in every forward. It changes no normalizer, no
+        # logical block length and no supervised-token count — only the positions
+        # actually pushed through the models.
+        #
+        # Default **off**, deliberately. The two paths agree mathematically but
+        # not bitwise: a shorter sequence reorders float32 reductions, and Adam
+        # amplifies the resulting ~1e-8 gradient differences on near-zero-gradient
+        # components. Defaulting on would silently change what a previously
+        # logged config computes, which is exactly what P4 forbids. Opting in per
+        # config also changes that config's hash, so the manifest records which
+        # path a run took instead of leaving it to the code version.
+        self.truncate_padding = bool(cfg["batch"].get("truncate_padding", False))
+        # Token accounting, kept as three distinct quantities so a saving is
+        # never confused with a change in how much supervision the run saw.
+        self._exec_logical = 0         # cumulative: blocks x logical block length
+        self._exec_positions = 0       # cumulative: positions actually forwarded
+        self._exec_nonpad = 0          # cumulative: real (non-pad) tokens forwarded
+        self._step_positions = 0       # same two, for the current step only
+        self._step_nonpad = 0
         self.device = device
         self.out_dir = Path(out_dir) if out_dir is not None else Path(cfg["out_dir"])
         self.logger = logger or JsonlLogger(self.out_dir / "train_log.jsonl")
@@ -482,8 +528,36 @@ class Trainer:
     def _micro_losses(
         self, ids: torch.Tensor, mask: torch.Tensor, content: torch.Tensor | None = None
     ):
-        """Forward one microbatch; returns (ce_sum, ce_n, kd_sum, kd_n)."""
+        """Forward one microbatch; returns (ce_sum, ce_n, kd_sum, kd_n).
+
+        With `batch.truncate_padding` the microbatch is sliced to its non-pad
+        extent before either model runs. Every sequence-aligned tensor is sliced
+        together — `input_ids`, the CE mask and the content mask — so positions
+        stay aligned; there is no separate attention mask or label tensor in this
+        trainer (targets are `input_ids` shifted, and padding is excluded by the
+        masks rather than by an attention mask).
+
+        The logical block length is unchanged: `mask`/`content` past the extent
+        are all False, so the CE and KD normalizers computed by the caller from
+        the *full* masks are the same numbers this path produces. Only the work
+        disappears.
+        """
         loss_cfg = self.cfg["loss"]
+        n_blocks, logical_len = ids.shape[0], ids.shape[1]
+        nonpad = int(content.sum()) if content is not None else n_blocks * logical_len
+        if self.truncate_padding and content is not None:
+            extent = nonpad_extent(content)
+            if extent < logical_len:
+                ids = ids[:, :extent]
+                mask = mask[:, :extent]
+                content = content[:, :extent]
+        # Accounted in both paths so the two are directly comparable.
+        executed = int(ids.shape[0] * ids.shape[1])
+        self._exec_logical += n_blocks * logical_len
+        self._exec_positions += executed
+        self._exec_nonpad += nonpad
+        self._step_positions += executed
+        self._step_nonpad += nonpad
         with self._autocast():
             logits = self.student(ids).logits
         ce_sum, ce_n = masked_ce(logits, ids, mask)
@@ -528,6 +602,7 @@ class Trainer:
 
         self.student.train()
         self.opt.zero_grad(set_to_none=True)
+        self._step_positions = self._step_nonpad = 0
         ce_acc = kd_acc = 0.0
         for i in range(0, bps, micro):
             mids = ids[i : i + micro].to(self.device)
@@ -570,6 +645,18 @@ class Trainer:
             "grad_norm": round(float(grad_norm), 4),
             "ce_targets": ce_total,
             "kd_positions": kd_total,
+            # Three deliberately distinct quantities. `logical_block_tokens` is
+            # the block capacity the run is defined in and never changes;
+            # `executed_nonpad_tokens` is the real tokens the models saw;
+            # `supervised_tokens` is what CE trained on. Truncation moves only
+            # the positions actually forwarded, which is reported separately as
+            # `executed_positions` — it equals `executed_nonpad_tokens` when
+            # micro_blocks == 1 and exceeds it when a microbatch mixes lengths.
+            "logical_block_tokens": bps * self.train_ids.shape[1],
+            "executed_positions": self._step_positions,
+            "executed_nonpad_tokens": self._step_nonpad,
+            "supervised_tokens": ce_total,
+            "truncate_padding": self.truncate_padding,
         }
 
     @torch.no_grad()

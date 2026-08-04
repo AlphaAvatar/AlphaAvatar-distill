@@ -551,3 +551,106 @@ def test_real_tokenizer_think_tags_are_single_tokens(teacher_tokenizer):
     """The scope depends on this; if it ever stops holding, fail visibly."""
     assert len(teacher_tokenizer.encode("<think>", add_special_tokens=False)) == 1
     assert len(teacher_tokenizer.encode("</think>", add_special_tokens=False)) == 1
+
+
+# --- padding-suffix truncation -------------------------------------------
+# Padding is a contiguous suffix and attention is causal, so the pad run cannot
+# affect a real token. Truncating it before the forward is therefore a pure
+# saving. These guard the three ways that could go wrong: the contiguity
+# precondition, the numbers the run reports, and the accounting.
+
+def _padded_blocks(n=2, length=32, real=(11, 20)):
+    """Blocks whose real tokens form a prefix and whose tail is pad."""
+    ids = (torch.arange(length).unsqueeze(0) * 3 + torch.arange(n).unsqueeze(1)) % VOCAB
+    content = torch.zeros(n, length, dtype=torch.bool)
+    mask = torch.zeros(n, length, dtype=torch.bool)
+    for i, r in enumerate(real[:n]):
+        content[i, :r] = True
+        mask[i, r // 2:r] = True          # supervise the back half of the real span
+    ids = torch.where(content, ids, torch.full_like(ids, 0))
+    return ids.long(), mask, content
+
+
+def test_nonpad_extent_is_the_last_real_position_plus_one():
+    from aadistill.training.train import nonpad_extent
+    _, _, content = _padded_blocks(real=(11, 20))
+    assert nonpad_extent(content) == 20            # max over the microbatch
+    assert nonpad_extent(content[:1]) == 11
+
+
+def test_nonpad_extent_rejects_non_contiguous_padding():
+    """A packer that interleaved padding would silently break the optimization."""
+    from aadistill.training.train import nonpad_extent
+    holey = torch.tensor([[1, 1, 0, 1, 0]], dtype=torch.bool)
+    with pytest.raises(ValueError, match="contiguous suffix"):
+        nonpad_extent(holey)
+
+
+def test_truncation_leaves_losses_and_normalizers_unchanged(tmp_path):
+    """Same CE, KD and normalizers; only the executed positions shrink."""
+    ids, mask, content = _padded_blocks()
+    blocks = (ids, mask, content)
+    out = {}
+    for flag in (False, True):
+        cfg = toy_cfg(tmp_path, batch={"truncate_padding": flag},
+                      loss={"ce_weight": 1.0, "kd_weight": 1.0,
+                            "kd_temperature": 1.0, "kd_scope": "all"})
+        torch.manual_seed(0)
+        tr = Trainer(cfg, tiny_model(1), blocks, blocks,
+                     teacher=tiny_model(2).eval(), device="cpu")
+        out[flag] = tr.step_once()
+    full, trunc = out[False], out[True]
+    # The quantities that define the run are untouched.
+    for key in ("ce_targets", "kd_positions", "logical_block_tokens",
+                "executed_nonpad_tokens", "supervised_tokens"):
+        assert full[key] == trunc[key], key
+    # Mathematically the same computation; float32 reductions are reordered, so
+    # this is a tolerance, not bitwise equality.
+    assert full["ce"] == pytest.approx(trunc["ce"], abs=1e-6)
+    assert full["kd"] == pytest.approx(trunc["kd"], abs=1e-6)
+    assert full["loss"] == pytest.approx(trunc["loss"], abs=1e-6)
+    # And the saving is real. At micro_blocks=1 each block is forwarded at its
+    # own extent, so the cost is the sum of the real lengths (11 + 20), not the
+    # batch maximum -- mixed-length blocks cost nothing extra.
+    assert trunc["executed_positions"] < full["executed_positions"]
+    assert full["executed_positions"] == 2 * 32
+    assert trunc["executed_positions"] == 11 + 20
+
+
+def test_truncation_uses_the_microbatch_maximum_when_blocks_share_a_forward(tmp_path):
+    """At micro_blocks>1 a short block rides along to the longest row's extent."""
+    ids, mask, content = _padded_blocks(real=(11, 20))
+    blocks = (ids, mask, content)
+    cfg = toy_cfg(tmp_path, batch={"blocks_per_step": 2, "micro_blocks": 2,
+                                   "truncate_padding": True})
+    torch.manual_seed(0)
+    tr = Trainer(cfg, tiny_model(1), blocks, device="cpu")
+    m = tr.step_once()
+    assert m["executed_positions"] == 2 * 20        # both rows padded to 20
+    assert m["executed_nonpad_tokens"] == 11 + 20   # real tokens, unchanged
+    assert m["logical_block_tokens"] == 2 * 32
+
+
+def test_truncation_is_a_noop_on_dense_blocks(tmp_path):
+    """With nothing to drop the two paths must agree exactly, not approximately."""
+    ids, mask, content = _padded_blocks(real=(32, 32))
+    blocks = (ids, mask, content)
+    res = {}
+    for flag in (False, True):
+        cfg = toy_cfg(tmp_path, batch={"truncate_padding": flag})
+        torch.manual_seed(0)
+        tr = Trainer(cfg, tiny_model(1), blocks, blocks, device="cpu")
+        res[flag] = tr.step_once()
+    assert res[False]["loss"] == res[True]["loss"]
+    assert res[False]["executed_positions"] == res[True]["executed_positions"]
+
+
+def test_truncation_defaults_off_so_logged_configs_keep_their_path(tmp_path):
+    """P4: enabling it must be an explicit, hash-visible config choice."""
+    cfg = toy_cfg(tmp_path)
+    assert "truncate_padding" not in cfg["batch"]
+    ids, mask, content = _padded_blocks()
+    tr = Trainer(cfg, tiny_model(1), (ids, mask, content), device="cpu")
+    assert tr.truncate_padding is False
+    with pytest.raises(ValueError, match="truncate_padding"):
+        toy_cfg(tmp_path, batch={"truncate_padding": "yes"})
