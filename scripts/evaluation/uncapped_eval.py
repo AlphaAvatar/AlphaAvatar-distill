@@ -22,6 +22,7 @@ recorded as its own class.
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import sys
 import time
@@ -65,14 +66,15 @@ def resolve_context(cfg, override: int | None, trained_context: int | None) -> d
             if source == "trained_block_len" else None}
 
 
-def resolve_stop_ids(model: str, tok, cfg) -> list[int]:
+def resolve_stop_ids(model: str, tok, cfg, revision: str | None = None) -> list[int]:
     """Native stopping semantics come from the model's own generation_config."""
     im_end = tok.convert_tokens_to_ids("<|im_end|>")
     cfg_eos = getattr(cfg, "eos_token_id", None)
     cfg_eos = cfg_eos if isinstance(cfg_eos, (list, tuple)) else [cfg_eos]
     try:
         from transformers import GenerationConfig
-        gen_eos = GenerationConfig.from_pretrained(model).eos_token_id
+        gen_eos = GenerationConfig.from_pretrained(
+            model, revision=revision).eos_token_id
         gen_eos = gen_eos if isinstance(gen_eos, (list, tuple)) else [gen_eos]
     except Exception:
         gen_eos = []
@@ -194,6 +196,7 @@ def main() -> int:
         raise SystemExit("--out-dir is required with several prompt files")
 
     from aadistill.evaluation import degeneration  # noqa: E402
+    from aadistill.infrastructure.env import library_versions  # noqa: E402
     from transformers import AutoConfig, AutoTokenizer
     from vllm import LLM, SamplingParams
 
@@ -201,11 +204,13 @@ def main() -> int:
         aggregate, behavior_score, score_sample,
     )
 
-    tok = AutoTokenizer.from_pretrained(args.tokenizer or args.model)
-    cfg = AutoConfig.from_pretrained(args.model)
+    rev = {"revision": args.revision} if args.revision else {}
+    tok = AutoTokenizer.from_pretrained(args.tokenizer or args.model,
+                                        **({} if args.tokenizer else rev))
+    cfg = AutoConfig.from_pretrained(args.model, **rev)
     ctx_info = resolve_context(cfg, args.context_len, args.trained_context)
     ctx = ctx_info["resolved_context"]
-    stop_ids = resolve_stop_ids(args.model, tok, cfg)
+    stop_ids = resolve_stop_ids(args.model, tok, cfg, args.revision)
     print(f"[{args.label}] effective context {ctx} "
           f"(source {ctx_info['context_source']}, architectural "
           f"{ctx_info['architectural_context']}); stop ids {stop_ids}", flush=True)
@@ -360,6 +365,13 @@ def main() -> int:
             "protocol": args.protocol,
             "chat_template_kwargs": template_kwargs,
             "model_revision": args.revision,
+            "tokenizer_source": args.tokenizer or args.model,
+            "chat_template_sha256": hashlib.sha256(
+                (tok.chat_template or "").encode()).hexdigest(),
+            "thinking_mode": template_kwargs.get(
+                "enable_thinking",
+                "template-default (not overridden)"),
+            "libraries": library_versions(),
             "degeneration_stop": not args.no_degeneration_stop,
             "wave_seconds": wave_seconds,
             "throughput": {
