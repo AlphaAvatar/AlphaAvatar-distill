@@ -441,22 +441,78 @@ is the fully matched comparison.
 
 ## 11. Next actions
 
-1. **Launch phase 1** — authorized: D1 only, both seeds, `capability-v2` frozen
-   at manifest `060bdd31…`, hard spending stop **$18.78**. **The first D0
-   endpoint evaluation runs first and the throughput gate decides whether to
-   continue** (`scripts/pod/throughput_gate.py`); on failure, preserve output and
-   telemetry, tear down, report actual cost, stop.
-2. After phase 1 reports, decide phases 2–3: raise the cap, cut the battery to
-   `final` + `best-held-out-NLL` only (needs approval), or stop after phase 2.
-   **The $30 incremental cap is unchanged and no destructive HF cleanup will be
-   performed.**
-3. On approval: one L40S with `--min-cuda-version 13.0` and ~100 GB container
-   disk, train both seeds from `86fbba78…`, evaluate, retain per §14, transfer,
-   hash-verify on the dev box, tear down.
-4. Report phase 1 against the pre-registered gate; re-cost phases 2–3 against
-   actual spend before preparing phase 2.
-5. Still open: the approved relay history squash (destructive, confirm
+Ordered by expected value per dollar. Items 1–3 came out of the 2026-08-04
+organization pass; all three are cheap relative to what they decide.
+
+1. **Truncate padded blocks before the forward — a free ~3× on every future
+   training run.** Blocks are **66–73% padding** (0.86M rung: 1,349,125 real
+   positions in 617 × 8192 = 5,054,464). The trainer calls `self.student(ids)`
+   and `self.teacher(ids)` on the full 8192 width, so both models — including the
+   **4B teacher, which runs online every step** — spend most of their FLOPs on
+   pad positions whose logits are then masked out of CE, KD and accounting.
+
+   This is safe to do exactly, not approximately: padding is right-aligned and
+   attention is causal, so a real token's hidden state does not depend on the pad
+   run. Verified numerically on 2026-08-04 (tiny Qwen3, sdpa): max |Δ| on real
+   positions **2.8e-07**, `allclose` True. `micro_blocks` is already **1**, so no
+   length bucketing is needed — slice `ids[:, :unpadded]` in `_micro_losses` and
+   `_eval_blocks`, where `unpadded` comes from the content mask already in hand.
+
+   Expected: **~3.0–3.75× fewer linear FLOPs** and up to ~9–14× fewer attention
+   FLOPs; realized wall-clock gain must be measured, since short blocks may
+   become launch-bound. **This also dissolves most of §8's accepted 3.35×
+   `tool_calling` penalty** — tool blocks are 0.092 *fill*, i.e. **90.8%
+   padding**, so truncation shrinks exactly the blocks that dominate the count.
+   Revisiting §8 was already flagged as due; this is the cheaper answer than
+   relaxing the packing rule, and it changes no rendered token.
+
+   Validation gate: identical loss to 1e-5 on a fixed batch before/after, then a
+   measured tokens/s comparison. CPU-testable; no GPU needed to prove the
+   equivalence.
+
+2. **Measure a same-geometry reference on `capability-v2` (~$0.50, one battery
+   run).** Every capability number in the project is measured against the 4B
+   teacher or against this project's own students. **`correct` is at the floor on
+   every set, arm, rung and seed**, and nothing on record distinguishes "the
+   student is bad" from "the target is not reachable at 0.6B under this
+   protocol". Running the released **Qwen3-0.6B** — the student's exact geometry,
+   properly trained — through the frozen battery settles it in one run:
+   * if it also scores ~0, the battery or the protocol is misspecified for this
+     size and the whole reasoning objective needs restating;
+   * if it scores well, the gap is attributable to the distillation recipe and
+     its size bounds what recovery can buy.
+
+   This is the highest information-per-dollar measurement available and it
+   gates how to read every result so far.
+
+3. **Quantify the teacher-forcing gap, then use the rollout stack that already
+   exists.** The defining unexplained fact: teacher-native held-out CE is
+   **1.0042 nats (PPL 2.73)** at the 5.50M rung — the student predicts teacher
+   tokens very well *given a teacher prefix* — while free generation solves ~0%
+   and degenerates. Degeneration is **`cycle`-dominated at every checkpoint**
+   (11–60 per 76 prompts, vs 0–15 `low_novelty` and 0–12 `rambling`), i.e. exact
+   repetition loops, which is the signature of a model with good local statistics
+   and no sustained plan — the classic exposure-bias picture.
+
+   Meanwhile `src/aadistill/rollout/` holds **2,075 lines of tested
+   infrastructure** (engines, snapshots, off-policy measurement) and **no
+   training path consumes any of it**. Stage 3 sub-stage 3 (student-forced span
+   recovery) and Stages 4–5 are exactly the remedy AGENTS.md already specifies.
+   Step one is cheap and CPU-side: report CE under teacher forcing against CE on
+   the student's *own* prefixes for the same prompts, so the gap is a number
+   before anything is trained against it.
+
+4. **Replace the headline metric.** `best_holdout_nll` is retired
+   ([decision](decisions.md) 2026-08-04). `behavior_score_v0` resolves at only
+   **3.3×** its seed spread and cannot rank rungs. Aggregate **protocol validity
+   on `capability-v2`** moved consistently on both seeds in phase 1 (−0.0898,
+   −0.0731) and is the best-resolving generation metric currently available;
+   `correct` stays reported but is at floor and cannot rank anything yet.
+
+5. **Phases 2–3 of Experiment 2 remain unauthorized**, and **phase 3 should not
+   run as written** — it was built around the retired metric
+   ([`PROPOSAL.md`](PROPOSAL.md) §12). $17.03 of the $30 allocation is unspent.
+
+6. Still open, unchanged: the approved relay history squash (destructive, confirm
    separately) and the four dev-box-only Experiment 1 arms. Not a prerequisite —
    Experiment 2 stores weights on the dev box.
-6. Carry forward the Experiment 1 tooling fixes in
-   [`EXPERIMENTS.md`](EXPERIMENTS.md) §11.
