@@ -978,3 +978,56 @@ No Cartesian sweep. No phase launched before the previous one reports and is
 approved. No retraining of any valid historical or preceding control. No arm at
 any rung other than 0.86M. No one-seed substitution, no shortened training, no
 reduced evaluation set to fit a budget.
+
+---
+
+## 12. Phase 1 outcome (2026-08-04) — what this pre-registration got right and wrong
+
+Phase 1 ran exactly as registered: same rung, same two seeds, both arms forked
+from the Stage 1 init with the hash verified on the pod, byte-identical trainer,
+no shortened run, no one-seed substitution, no reduced evaluation set. Result and
+full numbers in [`EXPERIMENTS.md`](EXPERIMENTS.md) §12.15.
+
+**What the pre-registration got right.**
+
+* **The throughput gate.** Registering it as a hard precondition, measured on the
+  first D0 endpoint before anything else ran, cost nothing and confirmed the
+  evaluator was actually batching (318.5 tok/s, 1.25× baseline). Without it the
+  same phase could have run 4× slower and blown the stop.
+* **The reasoning floor rule.** `correct` never left the floor on any set or arm,
+  and the registered rule produced `inconclusive` instead of a fabricated tie.
+* **Retaining the deterioration onset and after-onset checkpoints.** These are
+  what made the metric failure visible; a `final`-only retention would have kept
+  the arms whose behaviour looks ordinary and discarded both checkpoints that
+  disprove the metric.
+* **Reporting fixed-step D0↔D1 conclusions separately from within-D1 trajectory
+  conclusions.** The endpoint comparison and the trajectory tell opposite
+  stories, and merging them would have hidden that.
+* **Refusing to compare on answer length.** `sa`@127 has the best natural
+  termination in the phase on a 51-token median generation; any length-flavoured
+  gate would have crowned it.
+
+**What it got wrong.**
+
+* **The primary gate was stated in a metric the phase then invalidated.** The
+  0.489-nat threshold, the > 0-on-both-seeds rule and the mean rule are all
+  arithmetically fine and all passed. They are still not actionable, because
+  `best_holdout_nll` selects checkpoints that produce nothing. A gate can be
+  precise and unambiguous and still measure the wrong quantity — precision in the
+  statement is not validation of the metric.
+* **Two seeds were pre-registered as sufficient, and are not.** The D1 arms land
+  2.381 nats apart from identical data and initialization, ~4.9× the D0 seed
+  spread the 0.489 threshold was derived from. The noise floor was estimated on
+  the control and assumed to carry to the treatment; it did not.
+* **The battery was validated against known-bad policies but not against a
+  known-*degenerate* one.** 112 evaluator tests caught three real defects, none
+  of which was "the model emits nothing coherent." That case turned out to be the
+  dominant one at 5 of 20 checkpoints.
+
+**Consequence for phases 2 and 3.** Phase 3 as registered locates the held-out
+NLL deterioration onset. That onset is an artifact of measuring general-text
+perplexity on a protocol-specialising student, so **phase 3 should not run as
+written**. Phase 2 (KL-only first) does not depend on the retired metric, but its
+registered acceptance criteria do, and would need restating against protocol
+validity and termination before it is worth funding. Both remain unauthorized;
+~$18.7 of the $30 allocation is unspent.
