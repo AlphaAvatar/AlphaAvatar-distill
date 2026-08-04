@@ -172,3 +172,17 @@ def test_gold_answer_extracts_the_bare_numeric_answer():
     assert gold_answer({"data_type": "rag_evidence",
                         "gold": "in the late 1990s"}) == "in the late 1990s"
     assert gold_answer({"data_type": "gsm8k", "gold": None}) is None
+
+
+def test_free_form_qa_is_not_held_to_the_numeric_final_answer_rule():
+    """A verbatim-correct QA answer carries no boxed/Final-Answer marker."""
+    sys.path.insert(0, str(REPO_ROOT / "scripts" / "evaluation"))
+    from run_three_mode_diagnostic import score
+    rag = {"data_type": "rag_evidence", "gold": "Mumbai, India"}
+    assert score(rag, "Mumbai, India") is True
+    assert score(rag, "The city is Mumbai, India.") is True
+    assert score(rag, "Delhi") is False
+    # numeric tasks keep the strict marker rule
+    num = {"data_type": "gsm8k", "gold": "The answer is 72."}
+    assert score(num, "72") is False              # no explicit marker
+    assert score(num, "Final Answer: 72") is True

@@ -489,3 +489,25 @@ The control checkpoint `e1_ctl_r0250k_sa_pca_stepmatched` was pushed from the de
 box (`model.safetensors` sha256 `bfdcb4436f51eb31deea810be45a20e1fd39f6614d4f4b78c60ab952529858e2`,
 2,384,234,968 B) and verified on the pod by hash before diagnostic B ran. It
 remains dev-box-only; the relay holds only its evaluation JSONs.
+
+## D0 diagnostic outputs (2026-08-04)
+
+Pod `0cn6ipb4aobca3` (RTX A6000, $0.33/h) deleted after transfer; nothing remains.
+
+| field | value |
+| --- | --- |
+| file | `d0_final.tar.gz` |
+| sha256 | `2a29c4fc2938ed34c97e21efb5aab72858df027a42ffd11766a987af16ea6960` |
+| verified | byte-identical on the pod and after transfer |
+| unpacked to | `artifacts/audit/three_mode/`, `artifacts/audit/kd_decomposition_*.json` |
+
+An earlier partial bundle `d0_partial.tar.gz` (sha256 `21eebf14976619ea…`) was
+pulled mid-run so no completed result depended on the pod surviving.
+
+Contents: `three_mode/P0-real-{sa,sb}/` with 150 free and 150 oracle generations
+each (token ids included), `forced.per_sample.jsonl`, and the recomputed
+`summary_free_oracle.json`; plus `kd_decomposition_P0-real-{sa,sb}.json` over the
+full 682-block rung, batch sha256 `bffd9305fe5d51ef…`.
+
+Registration: `artifacts/audit/p0_real_registration.json`. Inclusion mask
+`d6e24e0b09da1bcc692b1dc96d8236808d29551a9fc94a47d1d968fd3f73d6ba`.

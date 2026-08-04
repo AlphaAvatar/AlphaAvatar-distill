@@ -99,17 +99,27 @@ def answer_in_reasoning(session: dict) -> bool | None:
 
 
 def score(session: dict, answer_text: str) -> bool | None:
+    """Task-appropriate scoring.
+
+    Numeric tasks keep the strict pre-registered rule: an explicit `\boxed{}` or
+    `Final Answer:` marker, no falling back to the last number. Free-form QA does
+    NOT get that rule -- those answers are the whole response and carry no
+    marker, so demanding one scores a verbatim-correct "Mumbai, India" as wrong.
+    They use the battery's own containment rule against the full answer text.
+    """
     gold = gold_answer(session)
     if gold is None:
         return None
-    pred, _ = extract_final_answer(answer_text)
-    if pred is None:
-        return False
     if session["data_type"] in NUMERIC:
+        pred, _ = extract_final_answer(answer_text)
+        if pred is None:
+            return False
         p, g = normalize_number(pred), normalize_number(gold)
         if p is not None and g is not None:
             return p == g
-    return normalize_answer(gold) in normalize_answer(pred)
+        return normalize_answer(gold) in normalize_answer(pred)
+    # free-form QA: the gold span must appear in the answer, marker or not
+    return normalize_answer(gold) in normalize_answer(answer_text)
 
 
 def summarize(rows: list[dict]) -> dict:

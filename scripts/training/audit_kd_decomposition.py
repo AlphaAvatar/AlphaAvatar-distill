@@ -204,9 +204,40 @@ def main() -> None:
                 if ce_total else None),
         }
 
+    def write(payload):
+        args.out.parent.mkdir(parents=True, exist_ok=True)
+        args.out.write_text(json.dumps(payload, indent=1))
+
+    base = {
+        "created_utc": datetime.now(timezone.utc).isoformat(),
+        "command": " ".join(sys.argv), "label": args.label,
+        "student": args.student, "teacher": args.teacher,
+        "pack": str(args.pack), "rung": args.rung,
+        "blocks_measured": n, "rung_blocks": n_rung,
+        "batch_sha256": batch_hash, "loss_config": loss_cfg,
+        "kd_mask_is_exactly_every_real_token": kd_equals_content,
+        "denominators": {"ce_total": ce_total, "kd_total": kd_total},
+        "totals": {"kd_loss_mass": round(kd_sum, 4),
+                   "ce_loss_mass": round(ce_sum, 4)},
+        "partitions": partitions, "gradient_probe": None,
+        "libraries": library_versions(), "code_state": code_state(REPO_ROOT),
+        "note": "No optimizer.step() was called; no weight was modified.",
+    }
+    write(base)
+    print(f"decomposition written to {args.out} before the probe", flush=True)
+
     # ---- no-update gradient probe ---------------------------------------
     probe = None
     if args.grad_probe_blocks > 0:
+        # After the decomposition loop the allocator is full and fragmented, and
+        # the probe additionally needs a backward graph over a
+        # [1, 8192, 151936] float32 logits tensor. Free the cache and turn on
+        # gradient checkpointing rather than hoping it fits.
+        torch.cuda.empty_cache()
+        student.gradient_checkpointing_enable()
+        student.config.use_cache = False
+        for prm in student.parameters():
+            prm.requires_grad_(True)
         trainable = select_trainable(student, cfg["trainable_patterns"])
         params = [p for p in trainable.values()]
         g = args.grad_probe_blocks
@@ -228,13 +259,17 @@ def main() -> None:
                                    device=args.device)[None, :] & pm
                 if not int(sel.sum()):
                     continue
-                s_log = student(ids).logits
                 with torch.no_grad():
                     t_log = teacher(ids).logits.float()
+                s_log = student(ids).logits
                 v, _ = kd_forward_kl(s_log, t_log, sel, loss_cfg["kd_temperature"])
                 (loss_cfg["kd_weight"] * v / max(kd_total, 1)).backward()
-            return torch.cat([p.grad.detach().flatten() for p in params
-                              if p.grad is not None])
+                del s_log, t_log, v
+                torch.cuda.empty_cache()
+            g = torch.cat([p.grad.detach().flatten().float() for p in params
+                           if p.grad is not None])
+            torch.cuda.empty_cache()
+            return g
 
         gp = grads_for("prompt_context")
         ga = grads_for("assistant")
@@ -252,6 +287,7 @@ def main() -> None:
         }
 
     out = {
+        **base,
         "created_utc": datetime.now(timezone.utc).isoformat(),
         "command": " ".join(sys.argv),
         "label": args.label,

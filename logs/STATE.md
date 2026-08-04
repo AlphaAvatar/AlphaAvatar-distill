@@ -1,44 +1,42 @@
-**Updated:** 2026-08-04 09:10 UTC · branch `main` · **no pods running, nothing
-billing.** Verified spend **$109.51** of the **$126.02** cap ($96.02 prior +
-$12.97 Experiment 2 phase 1 + **$0.52** the 2026-08-04 diagnostic session).
-**$16.51 of the $30 Experiment 2 allocation is unspent.**
+**Updated:** 2026-08-04 15:00 UTC · branch `main` · **no pods running, nothing
+billing.** Verified spend **$110.66** of the **$126.02** cap ($109.51 prior +
+**$1.15** for the D0 diagnostics). **$15.36 of the $30 Experiment 2 allocation
+is unspent.**
 
-**Active work:** Experiment 2 phase 1 complete; the 2026-08-04 diagnostic session
-complete. Full records in [`EXPERIMENTS.md`](EXPERIMENTS.md) §13–§14.
+**Active work: D0 complete. No training has been started.** Full record in
+[`EXPERIMENTS.md`](EXPERIMENTS.md) §16.
 
-**The three results that matter now:**
+**The bottleneck is producing reliable reasoning — not the answer block, not the
+template, not EOS, not masking.** Three independent lines agree:
 
-1. **Capacity and task difficulty are ruled out.** The released `Qwen3-0.6B`
-   (near-geometry: **identical 595,984,384 parameters**, but `rope_theta` 1e6 vs
-   5e6 and `max_position_embeddings` 40,960 vs 262,144) solves **~70% of GSM8K**
-   and **~78% of RAG** on our frozen battery. A 0.6B model can do this task. The
-   gap is the recipe.
-2. **The overfitted control cannot reproduce its own training targets.** After
-   ~41 passes over the same rung it reaches **0.7803 gold-prefix next-token
-   top-1** and **0.0 correctness**, median prefix match **0 tokens**. Handing it
-   more gold prefix makes protocol validity *fall* (0.647 → 0.158 at k=256), so
-   this is not simply a failure to get started.
-3. **Padding truncation is worth ~2.69×** on the realistic block mixture (7.96×
-   on the most padded, 0.996× on dense — the control). The 4B teacher forward is
-   41% of a full-width step.
+1. **Supply gold reasoning and correctness rises ~4×** on both seeds (0.153 →
+   0.627 and 0.213 → 0.647), reaching **0.92–0.97 on multihop and RAG**. Empty
+   answers go 0.31/0.20 → **0.000**; repetition and context exhaustion fall with
+   them.
+2. **Under teacher forcing, reasoning is the worst-modelled role** — top-1 0.570
+   at mean rank 134/248, against `</think>` at **1.000** and `<|im_end|>` at
+   0.90–0.95. The model has mastered the structure and not the content.
+3. **The objective spends 39.5% of its total loss on prompt/context tokens the
+   model never generates** (KD mass share 49.70/49.57% over the full 682-block
+   rung, seed-consistent), and ~0.00% on the structural tokens it already gets
+   right. Answer content receives ≈8.3%.
 
-**Decision taken (see [decisions.md](decisions.md)): rollout/on-policy training
-is NOT enabled.** The pre-registered gate points to auditing template, EOS
-supervision, loss masking and target construction first. Exact repetition loops
-are consistent with exposure bias but do not prove it; EOS supervision, greedy
-decoding, entropy collapse, initialization and objective imbalance stay live.
+**Not claimed:** that the model can compute. Where the answer sits literally in
+the reasoning, oracle correctness is only 0.323/0.400 — that is extraction. The
+lift concentrates on retrieval-style tasks; openmath stays 0.16–0.30.
 
-**Measurement caveat carried forward:** `protocol_valid` assumes a generation
-begins inside an already-open `<think>`, so **`correct` is not comparable across
-models** until the splitter is fixed. This affects 1.9% of our own generations
-(vs 65% `not_terminated`), so **E1/E2 conclusions stand**. Raw generations are
-saved; rescoring is free.
+**Registered:** `P0-real-sa` = `e1_r0860k_sa_pca` (seed 20260726, config
+`08264ef1…`), `P0-real-sb` = `e1_r0860k_sb_pca` (seed 20260801, config
+`9048173d…`). Every manifest field verified; rung identity pinned by content
+hashes the manifests omit.
 
-**`batch.truncate_padding` is adopted per config and the code default stays
-`false`** — the paths are mathematically equivalent but not bitwise identical, and
-flipping the default would silently change already-logged configs.
+**Not obtained:** the D0.4 gradient probe — one genuine CUDA OOM, then a bug in
+the patch meant to fix it. Dropped rather than retried a third time, and recorded
+as unobtained.
 
-Phases 2/3 and L1/R1/R2 remain paused. No training experiment was started.
+**Next, awaiting authorization:** the assistant-only KD-scope P0 arms
+([`PROPOSAL.md`](PROPOSAL.md) §13). The evidence supports them; nothing is
+started. Phases 2/3, L1/R1/R2 and all rollout/on-policy work remain paused.
 
 Canonical handoff. Companions:
 

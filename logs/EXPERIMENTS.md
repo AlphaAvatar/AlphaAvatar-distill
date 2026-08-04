@@ -1536,3 +1536,125 @@ anyway: 0.92 per token over a ~500-token target compounds to ≈0.
 Both §14.3 claims that rested on the bad gold are **withdrawn**: "median prefix
 match 0" and "more gold prefix makes it worse" are artifacts. The §14.2 reference
 result is unaffected, and after the rescore it is stronger, not weaker.
+
+## 16. D0 — no-training diagnostics on P0-real-sa/sb (2026-08-04, $1.15)
+
+Pod `0cn6ipb4aobca3`, **1× RTX A6000 at $0.33/h**, price-verified before create.
+**210 min, $1.15** against a $1.32 ceiling and a RunPod-side 4 h backstop. Commit
+`07a5533`. torch 2.11.0+cu128, transformers 5.13.1 (train) / 5.14.1 (vLLM),
+vLLM 0.26.0. **RoPE base verified in both venvs before any measurement.**
+
+**No optimizer step, verified by AST rather than grep:** parsing both running
+scripts finds zero executable `.step()` calls. No weight was modified, no
+checkpoint written, no corpus altered, no artifact overwritten.
+
+### 16.1 Registration (D0.1)
+
+| | `P0-real-sa` | `P0-real-sb` |
+|---|---|---|
+| run | `e1_r0860k_sa_pca` | `e1_r0860k_sb_pca` |
+| seed | 20260726 | 20260801 |
+| `config_sha256` | `08264ef1225c119a…` | `9048173dc62cca84…` |
+| manifest sha256 | `45ab80be2c52c61d…` | `ae4b873cc0f4c850…` |
+
+Shared: Stage 1 PCA init; rung 860,000 → **682 blocks / 864,750 supervised
+tokens / 1,502 sessions**; `0.25·CE + 1.0·KD`, τ=1.0, `kd_scope: all`; trainable
+attention+FFN+norms (440,467,456 / 596,049,920); 1,023 steps × 2 blocks; teacher
+`Qwen3-4B-Thinking-2507@768f209d`; rope_theta 5,000,000. Every `config_sha256`
+reproduces from its tracked config. **`kd_scope="all"` is literally
+`real_tokens`** — checked against `prediction_mask`, not the config string.
+
+Rung identity pinned by the registration (the manifests pin only counts):
+membership `84bf9e3a…`, packing order `e64dcb1a…`, `input_ids` `bffd9305…`,
+`ce_mask` `05d1d673…`. **Manifest gaps recorded:** init stored as a path not a
+hash, `data_manifests` empty, transformers version absent.
+
+### 16.2 Three-mode diagnostic (D0.3)
+
+150 examples per arm, identical fixed set, inclusion mask `d6e24e0b…`
+(1,502 rung sessions → **758 verified-correct**, 744 excluded as unverified or
+wrong; 150 sampled stratified; **150 prepared, 0 rejected**). Corpus unmodified.
+
+`correct` — free → **oracle**:
+
+| task | sa free | **sa oracle** | sb free | **sb oracle** |
+|---|---:|---:|---:|---:|
+| **overall** | 0.153 | **0.627** | 0.213 | **0.647** |
+| gsm8k | 0.026 | 0.316 | 0.026 | 0.526 |
+| openmath | 0.000 | 0.297 | 0.000 | 0.162 |
+| multihop | 0.053 | **0.947** | 0.237 | **0.921** |
+| rag | 0.541 | **0.946** | 0.595 | **0.973** |
+
+Supporting rates, free → oracle: **empty answers 0.307/0.200 → 0.000**;
+repetition 0.413/0.307 → 0.260/0.220; context-limit 0.420/0.300 → 0.253/0.220;
+protocol validity 0.513/0.593 → 0.727/0.740; natural termination 0.580/0.700 →
+0.747/0.780; answer p50 758/514 → **90/80** tokens. **Reopened `<think>` 0.000
+everywhere**; reasoning leakage 0.027/0.047.
+
+Teacher-forced, per role:
+
+| role | sa top-1 / CE / p(target) / rank | sb top-1 / CE / p / rank |
+|---|---|---|
+| `</think>` | **1.0000** / 0.018 / 0.985 / 1.00 | **1.0000** / 0.023 / 0.980 / 1.00 |
+| `<|im_end|>` | 0.9533 / 0.296 / 0.816 / 1.16 | 0.9000 / 0.418 / 0.735 / 1.26 |
+| answer digits | 0.8552 / 0.458 / 0.801 / 1.36 | 0.8705 / 0.421 / 0.807 / 1.32 |
+| answer span | 0.7397 / 1.063 / 0.651 / 14.58 | 0.7413 / 1.062 / 0.648 / 9.77 |
+| answer operators | 0.7315 / 0.986 / 0.619 / 5.09 | 0.7493 / 0.936 / 0.635 / 4.25 |
+| first answer token | 0.6533 / 1.027 / 0.538 / 1.81 | 0.6467 / 1.042 / 0.514 / 1.89 |
+| **reasoning** | **0.5695** / **2.113** / 0.471 / **133.98** | **0.5720** / **2.115** / 0.469 / **247.94** |
+
+**Numeric split** (the extraction-vs-computation control): answer literally in
+`reasoning_content` n=65 → **0.323 (sa) / 0.400 (sb)**; requires transformation
+n=10 → 0.200 / 0.000.
+
+### 16.3 KD decomposition (D0.4) — full 682-block rung, both arms
+
+`kd_scope="all"` confirmed literally every real token. Denominators identical by
+construction: `ce_total 864,750`, `kd_total 1,471,467`.
+
+| role | KD tokens | tok % | mass % sa / sb | mean/tok | KD scalar sa / sb | CE scalar sa |
+|---|---:|---:|---|---:|---|---:|
+| **prompt_context** | 606,717 | 41.23% | **49.70 / 49.57** | 1.1366 | **0.4687 / 0.4660** | 0.0 |
+| reasoning | 719,940 | 48.93% | 43.16 / 43.15 | 0.8320 | 0.4071 / 0.4056 | 0.2111 |
+| answer_content | 142,006 | 9.65% | 7.11 / 7.25 | 0.6947 | 0.0670 / 0.0681 | 0.0320 |
+| `<|im_end|>` | 1,395 | 0.09% | 0.03 / 0.03 | 0.2674 | 0.000253 / 0.000292 | 7.7e-05 |
+| `</think>` | 1,409 | 0.10% | 0.00 / 0.00 | **0.0081** | 8e-06 / 7e-06 | 4e-06 |
+| padding | 0 | 0.00% | 0.00 | — | 0.0 | 0.0 |
+
+Totals: KD scalar 0.9430 / 0.9400, CE scalar 0.2432 / 0.2436, **total loss
+1.1862 / 1.1836**. **Prompt/context KD alone is 39.5% / 39.4% of the entire
+training signal**, spent on tokens the model is never asked to generate.
+Answer content receives ≈8.3%.
+
+**Gradient probe: NOT OBTAINED.** First attempt died on a genuine CUDA OOM (a
+backward graph over a `[1, 8192, 151936]` float32 logits tensor beside a resident
+4B teacher on 48 GB); the second died on `UnboundLocalError` — a bug in the patch
+written to fix the first. The brief made the probe conditional on being
+computationally reasonable; after two failures and with the backstop closing it
+was dropped rather than attempted a third time. Recorded as unobtained, not
+inferred.
+
+### 16.4 Verdict
+
+Against the pre-registered branches this is **free low, oracle high,
+teacher-forced high → the primary bottleneck is producing reliable reasoning**,
+and three independent lines agree:
+
+1. supplying gold reasoning raises correctness ~4× on both seeds, and every
+   failure mode that dominates free rollout — empty answers (0.31/0.20 → 0.000),
+   repetition, context exhaustion — collapses with it;
+2. under teacher forcing **reasoning is the worst-modelled role** (top-1 0.570,
+   mean rank 134/248) while `</think>` is 1.000 and `<|im_end|>` 0.90–0.95;
+3. the objective spends **39.5% of its total mass on prompt/context** and 0.00%
+   on the structural tokens the model has already mastered.
+
+**Not claimed:** that the model can compute. Per the pre-registration, oracle
+success where the answer sits literally in the reasoning is *extraction*, and
+that half scores only 0.323/0.400. The lift concentrates on retrieval-style
+tasks (multihop, RAG ≈0.92–0.97); openmath stays 0.16–0.30 with 0.59 repetition.
+Free-form QA is scored by containment, which is permissive and may over-credit.
+
+**Evidence supports proceeding to the assistant-only KD-scope P0 arms.** The
+measured 39.5% of loss on never-generated positions is a concrete, single-field
+mechanism aimed at the bottleneck D0.3 localized. That remains a proposal
+(`PROPOSAL.md` §13), not an authorization.
