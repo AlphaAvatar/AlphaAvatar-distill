@@ -39,6 +39,11 @@ import numpy as np
 REPO_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO_ROOT / "src"))
 
+from aadistill.data.mixture import (  # noqa: E402
+    block_token_mix,
+    interleave,
+    order_blocks,
+)
 from aadistill.data.sessions import (  # noqa: E402
     SYSTEM_DEFAULT,
     pack_sessions,
@@ -49,123 +54,6 @@ from aadistill.infrastructure.env import code_state  # noqa: E402
 from aadistill.infrastructure.manifest import sha256_file  # noqa: E402
 
 LADDER = [250_000, 460_000, 860_000, 1_600_000, 2_960_000, 5_500_000]
-
-
-def interleave(by_type: dict[str, list], shares: dict[str, float] | None = None) -> list:
-    """Deterministic stratified interleave: every prefix keeps the type mixture.
-
-    Without `shares`, types are emitted in proportion to their session counts.
-    With `shares`, the target is a **supervised-token** share per type — the
-    quantity that actually trains the model, and the one a difficulty-aware
-    mixture is declared in. Session lengths differ by ~6x across these types, so
-    an equal session count is not an equal token contribution.
-
-    Either way the rule is largest-remainder: emit from whichever type is
-    furthest behind its target so far. It needs no seed and no shuffling, so the
-    order is a pure function of the per-type session lists and the declared
-    shares — which is what keeps every ladder rung and both training seeds on
-    one fixed mixture.
-
-    A type that runs out early stops contributing; the caller compares the
-    realized shares against the declared ones and reports the drift.
-    """
-    live = {t: v for t, v in by_type.items() if v}
-    if not live:
-        return []
-    cursors = {t: 0 for t in live}
-    order = []
-
-    if shares is None:
-        totals = {t: len(v) for t, v in live.items()}
-        grand = sum(totals.values())
-        for step in range(grand):
-            best, best_deficit = None, None
-            for t in sorted(totals):
-                if cursors[t] >= totals[t]:
-                    continue
-                deficit = (totals[t] / grand) * step - cursors[t]
-                if best is None or deficit > best_deficit:
-                    best, best_deficit = t, deficit
-            order.append(live[best][cursors[best]])
-            cursors[best] += 1
-        return order
-
-    weights = {t: shares.get(t, 0.0) for t in live}
-    if sum(weights.values()) <= 0:
-        raise ValueError("declared mixture shares sum to zero")
-    scale = sum(weights.values())
-    weights = {t: w / scale for t, w in weights.items()}
-    emitted = {t: 0 for t in live}  # supervised tokens emitted per type
-    total_emitted = 0
-    remaining = sum(len(v) for v in live.values())
-
-    for _ in range(remaining):
-        best, best_deficit = None, None
-        for t in sorted(live):
-            if cursors[t] >= len(live[t]) or weights[t] <= 0:
-                continue
-            deficit = weights[t] * total_emitted - emitted[t]
-            if best is None or deficit > best_deficit:
-                best, best_deficit = t, deficit
-        if best is None:
-            break
-        session = live[best][cursors[best]]
-        order.append(session)
-        cursors[best] += 1
-        emitted[best] += session.n_supervised
-        total_emitted += session.n_supervised
-    return order
-
-
-def block_token_mix(block) -> Counter:
-    """Supervised tokens contributed by each data type inside one packed block."""
-    mix = Counter()
-    for m in block.audit["sessions"]:
-        mix[m["data_type"]] += m["supervised_retained"]
-    return mix
-
-
-def order_blocks(blocks, shares):
-    """Order packed blocks so every prefix carries the declared token mixture.
-
-    Sessions cannot be interleaved across system-prompt groups — the system
-    prompt is a hard packing boundary — so the mixture is restored one level up,
-    on blocks. Largest-remainder again: emit whichever block most reduces the
-    gap between the emitted per-type token shares and the declared ones.
-
-    Without declared shares the input order is kept, which is the single-group
-    behaviour and leaves the session-level interleave in charge.
-    """
-    if not shares or len(blocks) <= 1:
-        return list(blocks)
-    scale = sum(shares.values())
-    weights = {t: w / scale for t, w in shares.items()}
-    pending = list(range(len(blocks)))
-    mixes = [block_token_mix(b) for b in blocks]
-    emitted = Counter()
-    total = 0
-    out = []
-    while pending:
-        best, best_score = None, None
-        for i in pending:
-            mix = mixes[i]
-            n = sum(mix.values())
-            # Squared error of the resulting shares against the declared ones;
-            # lower is better, so the block that best repairs the mix wins.
-            new_total = total + n
-            if new_total == 0:
-                score = 0.0
-            else:
-                score = sum(
-                    (weights.get(t, 0.0) - (emitted[t] + mix[t]) / new_total) ** 2
-                    for t in set(weights) | set(emitted) | set(mix))
-            if best is None or score < best_score:
-                best, best_score = i, score
-        out.append(blocks[best])
-        emitted += mixes[best]
-        total += sum(mixes[best].values())
-        pending.remove(best)
-    return out
 
 
 def main() -> None:

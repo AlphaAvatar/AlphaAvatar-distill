@@ -12,9 +12,8 @@ from __future__ import annotations
 import sys
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "scripts" / "evaluation"))
 
-import degeneration  # noqa: E402
+from aadistill.evaluation import degeneration  # noqa: E402
 
 
 def progressing(n: int) -> list[int]:

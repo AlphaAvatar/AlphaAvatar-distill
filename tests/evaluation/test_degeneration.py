@@ -7,13 +7,7 @@ the exact failure AGENTS.md P18 exists to prevent. So both directions matter.
 from __future__ import annotations
 
 import random
-import sys
-from pathlib import Path
-
-REPO_ROOT = Path(__file__).resolve().parents[2]
-sys.path.insert(0, str(REPO_ROOT / "scripts" / "evaluation"))
-
-from degeneration import check, distinct_ratio, find_cycle  # noqa: E402
+from aadistill.evaluation.degeneration import check, distinct_ratio, find_cycle
 
 
 def rnd(n, seed=0, vocab=5000):

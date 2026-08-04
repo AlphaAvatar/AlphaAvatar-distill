@@ -182,8 +182,7 @@ def main() -> int:
     if len(args.prompts) > 1 and not args.out_dir:
         raise SystemExit("--out-dir is required with several prompt files")
 
-    sys.path.insert(0, str(REPO_ROOT / "scripts" / "evaluation"))
-    import degeneration  # noqa: E402
+    from aadistill.evaluation import degeneration  # noqa: E402
     from transformers import AutoConfig, AutoTokenizer
     from vllm import LLM, SamplingParams
 

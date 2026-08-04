@@ -65,6 +65,7 @@ import numpy as np
 REPO_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO_ROOT / "src"))
 
+from aadistill.data.mixture import order_blocks  # noqa: E402
 from aadistill.data.sessions import (  # noqa: E402
     SYSTEM_DEFAULT,
     pack_sessions,
@@ -73,9 +74,6 @@ from aadistill.data.sessions import (  # noqa: E402
 )
 from aadistill.infrastructure.env import code_state  # noqa: E402
 from aadistill.infrastructure.manifest import sha256_file  # noqa: E402
-
-sys.path.insert(0, str(REPO_ROOT / "scripts" / "data"))
-from build_token_ladder import order_blocks  # noqa: E402
 
 
 def read_control(ladder_dir: Path, target: int):

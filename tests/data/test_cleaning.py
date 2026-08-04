@@ -7,8 +7,7 @@ from pathlib import Path
 
 import pytest
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "scripts" / "evaluation"))
-import degeneration  # noqa: E402
+from aadistill.evaluation import degeneration  # noqa: E402
 
 from aadistill.data.cleaning import (  # noqa: E402
     check_completion,
