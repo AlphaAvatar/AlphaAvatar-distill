@@ -17,7 +17,7 @@ mixture. Natural termination on uncapped generation rose from **0/8** on every
 earlier checkpoint to **0.93**, so the degeneration that blocked this line since
 2026-07-30 is substantially resolved. What has *not* moved is reasoning: GSM8K
 exact match is ≤0.05 across all 25 checkpoints. Full numbers, variance analysis
-and the data-vs-compute control are in [Experiment 1](#-experiment-1--recovery-data-scaling).
+and the data-vs-compute control are in [Experiment 1](#-experiment-1--recovery-data-scaling); [Experiment 2 phase 1](#-experiment-2-phase-1--what-held-out-nll-is-worth) then showed that held-out NLL is **anti-correlated** with generation capability early in training, and retired it as a checkpoint-selection metric.
 
 **Current experiment:** [Qwen/Qwen3-4B-Thinking-2507](https://huggingface.co/Qwen/Qwen3-4B-Thinking-2507) → a 0.6B-class student (Qwen3-0.6B geometry, ~6.7× compression, INT8 deployment target).
 
@@ -90,6 +90,26 @@ The figure above regenerates from `artifacts/stage3/e1_consolidated.json` with `
 **Reviewable samples:** [`logs/e1_test_cases.md`](./logs/e1_test_cases.md) — 46 generations stratified over stop reason and answer correctness, with the untruncated copies in `logs/e1_test_cases.jsonl`.
 
 **Cost:** $61.5 — 24 training arms $47.6, control + first evaluation $8.1, full sweep $5.8. Every pod was released after hash-verified teardown.
+
+---
+
+## 🧭 Experiment 2 phase 1 — what held-out NLL is worth
+
+**Question:** does Experiment 1's held-out-NLL deterioration reflect real capability loss, and does cleaning the recovery corpus help?
+
+**Design.** One variable — corpus cleaning (median-length survivor selection) — at Experiment 1's 0.86M rung, two seeds, both arms forked from the same Stage 1 init, byte-identical trainer, matched token count. Ten evaluation points per seed, scored on a frozen 846-prompt capability battery (knowledge, verifier-backed math, GSM8K, multihop, RAG, paired answerability, paired safety refusal, behaviour) with deterministic scorers and no LLM judge.
+
+**The corpus is not adopted, and the headline finding is about the metric rather than the data.**
+
+- **Held-out NLL and generation capability move in opposite directions early in training.** The checkpoint with the **best held-out NLL of its whole trajectory** (`sb`@127, 8.5010 — better than the control and better than its own endpoint) produces **zero protocol-valid generations across all 726 battery prompts**. The other seed shows the same failure, milder. General-text perplexity peaks *before* the student specialises onto the teacher's thinking protocol, and that specialisation is the objective — so the metric selects under-trained checkpoints by construction. `best_holdout_nll` has been [retired as a checkpoint-selection identity](./logs/decisions.md).
+- **Any single scalar is gameable by a degenerate policy.** One checkpoint reports natural termination **1.000**, the best figure in the experiment, on a **51-token** median generation. It terminates perfectly because it says almost nothing.
+- **Cleaning's only seed-consistent effect points the wrong way:** aggregate protocol validity falls 0.090 and 0.073 at the matched endpoint. The NLL gate passed arithmetically, but 99.2% of its margin came from one seed, and cleaning **raised** the between-seed spread from 0.489 to 2.381 nats on identical data and initialization.
+- **Task correctness never left the floor** on any set or arm at this rung, so the reasoning axis is reported as `inconclusive` rather than as a tie.
+
+This is the sharpest evidence yet for a caveat the run table above already carried: held-out NLL is a guard rail, not a target. Full record, per-set numbers and the same-machine control in [`logs/EXPERIMENTS.md`](./logs/EXPERIMENTS.md) §12.15.
+
+**Cost:** $11.3 on one L40S, against an $18.78 pre-registered stop. Pod released after hash-verified teardown.
+
 ---
 
 ## 🧠 How it works
