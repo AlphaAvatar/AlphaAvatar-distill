@@ -69,7 +69,7 @@ say "$GPU_NAME available at \$$PRICE/h — within the \$$MAX_PRICE cap"
 create_pod() {
   local deadline
   deadline=$(date -u -d "+${BACKSTOP_HOURS} hours" +%Y-%m-%dT%H:%M:%SZ)
-  say "  backstop --terminate-after $deadline (${BACKSTOP_HOURS}h => max \$$(echo "$BACKSTOP_HOURS*$MAX_PRICE" | bc -l))"
+  echo "[$(date -u +%FT%TZ)]   backstop --terminate-after $deadline" >>"$LOG"
   runpodctl pod create \
     --image "${POD_IMAGE:-runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404}" \
     --gpu-id "$GPU_NAME" --gpu-count 1 \
@@ -95,12 +95,16 @@ teardown() {
 }
 
 # --- 2. create, bounded ----------------------------------------------------
-EP=""; POD_ID=""
+EP=""; POD_ID=${POD_ID:-}
 for attempt in $(seq 1 "$MAX_POD_ATTEMPTS"); do
-  POD_ID=$(create_pod "$attempt")
-  [ -z "$POD_ID" ] && { say "attempt $attempt: create failed"; continue; }
-  date -u +%s > "$SCR/pod_start_epoch"; echo "$POD_ID" > "$SCR/pod_id"
-  say "attempt $attempt: created $POD_ID"
+  if [ -z "$POD_ID" ]; then
+    POD_ID=$(create_pod "$attempt")
+    [ -z "$POD_ID" ] && { say "attempt $attempt: create failed"; continue; }
+    date -u +%s > "$SCR/pod_start_epoch"; echo "$POD_ID" > "$SCR/pod_id"
+    say "attempt $attempt: created $POD_ID"
+  else
+    say "attempt $attempt: reusing existing pod $POD_ID"
+  fi
   DEADLINE_TS=$(( $(date -u +%s) + STARTUP_LIMIT_MIN * 60 )); i=0
   while [ "$(date -u +%s)" -lt "$DEADLINE_TS" ]; do
     EP=$(endpoint); [ -n "$EP" ] && break
@@ -126,9 +130,20 @@ for i in $(seq 1 30); do $SSH "root@$HOST" true 2>/dev/null && break; sleep 10; 
 
 say "transferring session"
 $SSH "root@$HOST" 'mkdir -p /workspace/hf /workspace/ckpt && chmod 700 /workspace/hf'
-hf auth token > "$SCR/hf_token" && chmod 600 "$SCR/hf_token"
-$SCP "$SCR/hf_token" "root@$HOST:/workspace/hf/token" >>"$LOG" 2>&1
-$SSH "root@$HOST" 'chmod 600 /workspace/hf/token'; rm -f "$SCR/hf_token"
+# Read the cached token file directly. `hf auth token` is not a subcommand in
+# every CLI version: where it is missing it prints usage to STDERR and nothing to
+# stdout, so the redirect produces a 0-byte file, scp copies it happily, and the
+# pod fails 8 minutes later with "Illegal header value b'Bearer '". Verify the
+# size here rather than discovering it on the pod.
+TOKEN_SRC=${TOKEN_SRC:-$HOME/.cache/huggingface/token}
+if [ ! -s "$TOKEN_SRC" ]; then
+  say "FATAL: no HF token at $TOKEN_SRC"; teardown
+  echo "LAUNCH_FAILED:no_token" > "$STATE"; exit 1
+fi
+$SCP "$TOKEN_SRC" "root@$HOST:/workspace/hf/token" >>"$LOG" 2>&1
+$SSH "root@$HOST" 'test -s /workspace/hf/token' \
+  || { say "FATAL: token arrived empty on the pod"; teardown
+       echo "LAUNCH_FAILED:empty_token" > "$STATE"; exit 1; }
 $SCP scripts/pod/e2diag_setup.sh "root@$HOST:/workspace/" >>"$LOG" 2>&1
 
 # The control checkpoint exists ONLY on this dev box: the relay holds its

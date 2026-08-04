@@ -7,15 +7,16 @@ proposal files, which are preserved in git history at commit `866dac2`.
 32Q/8KV) → **student** 0.6B-class (1024 hidden, 28L, FFN 3072, 16Q/8KV, tied
 embeddings). BF16 training, INT8 deployment target.
 
-**Total spend to date: $108.99** of the **$126.02** cap.
+**Total spend to date: $109.51** of the **$126.02** cap.
 
 | period | $ | detail |
 |---|---:|---|
 | through corpus v2 (2026-08-01) | 34.52 | §6 — training/eval $7.93, teacher generation $26.59 |
 | Experiment 1, data-scaling matrix | 61.50 | §11 — 24 arms $47.6, control + first eval $8.1, sweep $5.8 |
 | Experiment 2 phase 1, data cleaning | 12.97 | §12.15 — experiment $11.23, avoidable pod waste $1.74 |
+| Diagnostic session (benchmark + reference + recall) | 0.52 | §14 — 94 min on an RTX A6000 at $0.33/h |
 
-**$17.03 of the $30 Experiment 2 allocation is unspent.** §6 below is the
+**$16.51 of the $30 Experiment 2 allocation is unspent.** §6 below is the
 *pre-Experiment-1* breakdown and its "project total" line is scoped to that
 period; this table is the current figure.
 
@@ -1246,7 +1247,7 @@ degenerate checkpoints drove it — `sb`@127 alone cost ~75 min against the
 endpoint's ~20, because nothing terminated and the scheduler held batch 63.
 
 Cumulative project spend **$108.99** of the $126.02 cap ($96.02 prior + $12.97).
-**$17.03 of the $30 Experiment 2 allocation is unspent.**
+**$16.51 of the $30 Experiment 2 allocation is unspent.**
 
 #### Artifacts
 
@@ -1276,3 +1277,139 @@ Cumulative project spend **$108.99** of the $126.02 cap ($96.02 prior + $12.97).
 
 Phase 1 complete. **Phases 2 and 3 are not authorized and phase 3 should not run
 as designed** — its primary metric is the one this phase invalidated.
+
+## 14. Diagnostic session — benchmark + reference + recall (2026-08-04, $0.52)
+
+Pod `tct4820z4t3hvn`, **1× RTX A6000 48 GB at $0.33/h**, price verified before
+creation. 94 min, **$0.52** against a $2.00 hard stop and a RunPod-side 5 h
+`--terminate-after` backstop. Commit `f480350`. Deleted after hash-verified
+transfer (`5988da19…`).
+
+Environment, recorded because it decides config semantics: torch 2.11.0+cu128,
+CUDA 12.8, **transformers 5.13.1**, vLLM 0.26.0. The RoPE guard passed in *both*
+venvs before any measurement.
+
+### 14.1 Padding truncation — measured, all four regimes, both paths
+
+| regime | fill | full-width | truncated | **speedup** | peak GiB | mem ratio |
+|---|---:|---:|---:|---:|---|---:|
+| heavy_pad | 0.034 | 4.6498 s | 0.5843 s | **7.96×** | 22.89 → 16.35 | 0.714 |
+| median_pad | 0.141 | 4.7824 s | 0.8972 s | **5.33×** | 23.79 → 18.98 | 0.798 |
+| **random_mixture** | 0.304 | 5.0376 s | 1.8721 s | **2.69×** | 39.21 → 39.20 | 1.000 |
+| dense | 1.000 | 5.9666 s | 5.9899 s | 0.996× | 39.78 → 39.78 | 1.000 |
+
+**`random_mixture` — 2.69× — is the operational number**; it is the block
+mixture a real run consumes. `dense` at 0.996× is the control: with nothing to
+drop, truncation costs nothing, which rules out an instrumentation artifact.
+
+Two things the padding ratio alone could not have told us:
+
+* **The 4B teacher forward dominates.** Of the 5.038 s full-width step,
+  teacher-forward is **2.061 s (41%)** and student-forward 0.638 s; truncation
+  cuts the teacher to 0.756 s. Online KD with no logit cache is where the waste
+  was concentrated.
+* **Memory follows the longest block in the microbatch, not the mean.** Peak
+  falls 22.89 → 16.35 GiB on `heavy_pad` but is unchanged on `random_mixture`
+  and `dense`. Truncation is a throughput win; it is a memory win only when every
+  block in the stream is short.
+
+### 14.2 Diagnostic A — the reference is near-geometry and it works
+
+`Qwen/Qwen3-0.6B @ c1899de2`, both protocols, greedy, effective context 8,192,
+846 prompts each. **Near-geometry**: identical parameter-bearing fields and
+identical **595,984,384** parameters, but `rope_theta` 1e6 vs our 5e6 and
+`max_position_embeddings` 40,960 vs 262,144.
+
+`correct / ignoring-protocol / protocol-valid`:
+
+| set | project | native |
+|---|---|---|
+| knowledge | 0 / 0.173 / 0 | 0 / 0.173 / 0 |
+| math_verified | 0 / **0.62** / 0 | 0 / 0.58 / 0 |
+| gsm8k | 0 / **0.70** / 0 | 0 / 0.69 / 0 |
+| multihop | 0 / **0.60** / 0 | 0 / 0.52 / 0 |
+| rag | 0 / **0.78** / 0 | 0 / 0.77 / 0 |
+| answerability (pair) | 0 / 0 / 0 | 0 / 0 / 0 |
+| safety (pair) | 0 / 0 / 0 | 0 / 0 / 0 |
+
+Natural termination 0.83–1.00, degeneration 0–0.20, lengths p50 356/414,
+p90 ≈2.1k, max ≈8.1k.
+
+**The reference scores 0 `correct` everywhere purely because `protocol_valid`
+rejects 100% of its output.** `split_generation` returns `n_think_close: 1` yet
+`think_closed: False` with `stray_markers: ['<think>']`: **the validator assumes
+a generation begins inside an already-open `<think>`**, which is true of our
+teacher's template and false for any model that opens its own. Failure split:
+`think_delimiters_invalid` 83–89%, `not_terminated` 11–17% (real 8,192 hits).
+
+**Scope, measured not assumed:** across 3,400 of our own E1+E2 GSM8K
+generations only **1.9%** fail this way, against 65% `not_terminated`. Our E1/E2
+numbers are **not** materially affected; what is broken is cross-model comparison.
+
+**This settles the capacity question. A model with our student's exact parameter
+count solves ~70% of GSM8K and ~78% of RAG.** The task is not beyond 0.6B and the
+battery is not too hard. The gap is the recipe.
+
+### 14.3 Diagnostic B — the overfitted control cannot reproduce its own targets
+
+`e1_ctl_r0250k_sa_pca_stepmatched` (4,412 steps × 2 blocks over 216 blocks ≈ **41
+passes**), 150 stratified prompts **from the rung it trained on**, all four
+forced-prefix releases.
+
+| k | n | correct | protocol-valid | nat.term | degen | median prefix match |
+|---:|---:|---:|---:|---:|---:|---:|
+| 0 | 150 | **0.0** | 0.647 | 0.940 | 0.053 | **0** |
+| 16 | 130 | **0.0** | 0.446 | 0.915 | 0.108 | 4 |
+| 64 | 92 | **0.0** | 0.413 | 0.891 | 0.109 | 3 |
+| 256 | 57 | **0.0** | 0.158 | 0.930 | 0.070 | 4 |
+
+**Gold-prefix next-token top-1 accuracy: 0.7803** — code 0.746, gsm8k 0.840,
+multihop 0.552, openmath 0.793, rag 0.807, tool_calling 0.945.
+
+The dissociation is total. Under teacher forcing the model predicts the next
+token correctly **78%** of the time on data it saw 41 times; generating freely it
+matches **zero** gold tokens at the median and gets **no** answer right.
+Handing it more of its own gold prefix makes things *worse* — protocol validity
+falls 0.647 → 0.158 from k=0 to k=256 — so this is not a failure to get started.
+
+Correctness 0.0 was verified as genuine, not a scoring artifact: extraction works
+(`\boxed{81}` → `81`); the model simply answers wrongly, typically emitting an
+intermediate quantity, with broken arithmetic ("81 × 90 = 81", "15 × 15 = 21").
+
+### 14.4 Three measurement bugs, and what they cost
+
+* **`protocol_valid` is template-bound** (pre-existing). Invalidates cross-model
+  `correct`; affects 1.9% of our own generations. Raw generations are saved, so
+  rescoring is free and needs no GPU.
+* **`skip_special_tokens=True` in the recall diagnostic** (mine, this session).
+  Stripped `<|im_end|>` so every generation read `not_terminated` and protocol
+  validity read 0.0. Re-run with `skip_special_tokens=False` for ~$0.03; the
+  first pass is retained at `training_recall_specialstripped` for comparison.
+  Token ids are now persisted, which also removes the reconstruction limitation
+  that capped §13.1's tier B at 99.72%.
+* **The battery was never staged on the pod** (mine). The prompt glob silently
+  returned nothing, so only the 76 behaviour prompts generated and the scorer
+  died on a missing manifest. Setup now stages it and asserts the manifest at
+  `DATA_READY`.
+
+Add the empty-HF-token failure (`hf auth token` is not a subcommand in the
+installed CLI; it printed usage to stderr and nothing to stdout) and the pattern
+is consistent: **four of five failures this session were silent-empty results,
+not exceptions.** Each is now asserted at its source.
+
+### 14.5 Decision-gate outcome
+
+Against the pre-registered branches: the official model **works under both
+protocols** (subject to the validator defect), and the overfitted checkpoint
+**cannot reproduce its own training targets**. That is the first branch, whose
+instruction is explicit — **audit template, EOS, masking and target construction
+first; only then propose a minimal rollout/on-policy correction.**
+
+**Rollout/on-policy training is therefore NOT enabled.** Exact repetition loops
+remain consistent with exposure bias but are not proof of it, and the competing
+explanations are still live: EOS supervision, greedy decoding, entropy collapse,
+initialization, and objective imbalance. The 78% teacher-forced top-1 against 0%
+free-generation correctness is, if anything, evidence that the *target
+construction or masking* is the place to look before the rollout distribution.
+
+Phases 2/3 and L1/R1/R2 remain paused. No training experiment was started.

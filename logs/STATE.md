@@ -1,52 +1,44 @@
-**Updated:** 2026-08-04 01:30 UTC · branch `main` · **no pods running, nothing
-billing** — `n7xjbzlmsyx9b2` deleted after all 44 checkpoint files were verified
-hash-identical on both stores. Verified spend **$108.99** of the **$126.02** cap
-($96.02 prior + **$12.97** for Experiment 2 phase 1, against its $18.78 stop;
-$1.74 of that was avoidable pod waste). **$17.03 of the $30 allocation is
-unspent.**
+**Updated:** 2026-08-04 09:10 UTC · branch `main` · **no pods running, nothing
+billing.** Verified spend **$109.51** of the **$126.02** cap ($96.02 prior +
+$12.97 Experiment 2 phase 1 + **$0.52** the 2026-08-04 diagnostic session).
+**$16.51 of the $30 Experiment 2 allocation is unspent.**
 
-**Active work:** **Experiment 2 phase 1 is COMPLETE** — the data-cleaning
-diagnostic ran end to end on one L40S pod, 2026-08-03T14:02:30Z → 00:06:56Z, one
-pod attempt, no restarts. Full record in [`EXPERIMENTS.md`](EXPERIMENTS.md) §12.15.
+**Active work:** Experiment 2 phase 1 complete; the 2026-08-04 diagnostic session
+complete. Full records in [`EXPERIMENTS.md`](EXPERIMENTS.md) §13–§14.
 
-**Result, in one line: the primary gate passed arithmetically and should not be
-acted on, because phase 1 also showed that the metric behind it is
-anti-correlated with generation capability on this student.**
+**The three results that matter now:**
 
-* Primary gate: `sa` **+1.9079**, `sb` **+0.0157**, mean **+0.9618** → PASS
-  (both > 0, mean > 0.489). But 99.2% of the mean is one seed; seed disagreement
-  is 3.9× the noise floor; cleaning **raised** the seed spread from 0.489 to
-  2.381 nats. D0 was re-measured on the same pod and reproduces E1 to four
-  decimals, so this is not a machine artifact — it is a real, unresolvable
-  two-seed split.
-* **`best_holdout_nll` is disqualified as a selection identity.** `sb@127` holds
-  its trajectory's best held-out NLL and scores **0 protocol-valid on all 726
-  battery prompts**. `sa@508` is the same failure, milder. NLL on general text
-  peaks *before* the student specialises onto the teacher protocol.
-* Only seed-consistent capability result: **aggregate protocol validity falls**,
-  −0.0898 (`sa`) and −0.0731 (`sb`), D1 below D0 at the matched endpoint.
-* `correct` is at the floor on every set and every arm → reasoning axis reports
-  **`inconclusive`**, as the pre-registered floor rule requires.
-* Throughput gate: **PASS ×3** — 318.5 tok/s (1.25× the 254.8 baseline), step
-  p50 29.9/31.9/34.2 ms, GPU p50 100%. **`context_limit_rate` 0.0000 at all 20
-  checkpoints**; P18 intact.
+1. **Capacity and task difficulty are ruled out.** The released `Qwen3-0.6B`
+   (near-geometry: **identical 595,984,384 parameters**, but `rope_theta` 1e6 vs
+   5e6 and `max_position_embeddings` 40,960 vs 262,144) solves **~70% of GSM8K**
+   and **~78% of RAG** on our frozen battery. A 0.6B model can do this task. The
+   gap is the recipe.
+2. **The overfitted control cannot reproduce its own training targets.** After
+   ~41 passes over the same rung it reaches **0.7803 gold-prefix next-token
+   top-1** and **0.0 correctness**, median prefix match **0 tokens**. Handing it
+   more gold prefix makes protocol validity *fall* (0.647 → 0.158 at k=256), so
+   this is not simply a failure to get started.
+3. **Padding truncation is worth ~2.69×** on the realistic block mixture (7.96×
+   on the most padded, 0.996× on dense — the control). The 4B teacher forward is
+   41% of a full-width step.
 
-**Artifacts, all verified.** Results bundle `e2p1_results.tar.gz`, sha256
-`b70e2ffb…`, byte-identical after transfer — complete raw generations for every
-evaluated sample, per-sample verdicts, 9 battery scorings, 20 `behavior_v0`
-measurements, both holdout trajectories, both run manifests and train logs,
-`throughput_gate.json`, and the same-machine D0 control. 7 retained checkpoints
-(23 GB) at `/home/ecs-user/aad-artifacts/e2p1/`, **44/44 files hash-verified**.
-Not on the relay: its LFS quota is full and deletion does not reclaim it, and no
-follow-up arm forks from a trained checkpoint anyway. Manifest in
-[`artifact_manifests.md`](artifact_manifests.md).
+**Decision taken (see [decisions.md](decisions.md)): rollout/on-policy training
+is NOT enabled.** The pre-registered gate points to auditing template, EOS
+supervision, loss masking and target construction first. Exact repetition loops
+are consistent with exposure bias but do not prove it; EOS supervision, greedy
+decoding, entropy collapse, initialization and objective imbalance stay live.
 
-**Decision needed from the maintainer:** **phase 3 should not run as designed** —
-it was built to locate the held-out-NLL deterioration onset, which phase 1 shows
-is an artifact of measuring general-text NLL on a protocol-specialising student.
-Phase 2 does not depend on the retired metric, but its registered acceptance
-criteria do and would need restating against protocol validity and termination.
-Both remain unauthorized.
+**Measurement caveat carried forward:** `protocol_valid` assumes a generation
+begins inside an already-open `<think>`, so **`correct` is not comparable across
+models** until the splitter is fixed. This affects 1.9% of our own generations
+(vs 65% `not_terminated`), so **E1/E2 conclusions stand**. Raw generations are
+saved; rescoring is free.
+
+**`batch.truncate_padding` is adopted per config and the code default stays
+`false`** — the paths are mathematically equivalent but not bitwise identical, and
+flipping the default would silently change already-logged configs.
+
+Phases 2/3 and L1/R1/R2 remain paused. No training experiment was started.
 
 Canonical handoff. Companions:
 

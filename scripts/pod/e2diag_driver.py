@@ -19,8 +19,10 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import hashlib
 import subprocess
 import sys
+import time
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -95,6 +97,35 @@ def stage_diag_a(args) -> None:
 
 
 def stage_diag_b(args) -> None:
+    """Wait for the control checkpoint, then verify it before trusting it.
+
+    The 2.3 GB checkpoint is pushed from the dev box (the relay has only its
+    evaluation JSONs) over a ~0.7 MB/s uplink, so it arrives while the earlier
+    stages run. A partially-transferred safetensors file loads as garbage rather
+    than failing, so the wait ends on a **hash match**, not on file existence.
+    """
+    weights = Path(CONTROL) / "model.safetensors"
+    deadline = time.time() + 100 * 60
+    while time.time() < deadline:
+        if weights.exists() and weights.stat().st_size == args.control_bytes:
+            h = hashlib.sha256()
+            with weights.open("rb") as f:
+                for chunk in iter(lambda: f.read(1 << 22), b""):
+                    h.update(chunk)
+            if h.hexdigest() == args.control_sha256:
+                print("control checkpoint verified", flush=True)
+                break
+            print(f"size matches but sha256 differs ({h.hexdigest()[:16]}…); "
+                  "still transferring", flush=True)
+        else:
+            have = weights.stat().st_size if weights.exists() else 0
+            print(f"waiting for the control checkpoint: "
+                  f"{have/1e9:.2f}/{args.control_bytes/1e9:.2f} GB", flush=True)
+        time.sleep(60)
+    else:
+        mark("DIAGB_SKIPPED:checkpoint_never_arrived")
+        return
+
     out = REPO / "artifacts/audit/training_recall"
     if (out / "report.json").exists():
         print("recall diagnostic already done; skipping", flush=True)
@@ -115,6 +146,9 @@ def main() -> None:
     ap.add_argument("--teacher-revision",
                     default="768f209d9ea81521153ed38c47d515654e938aea")
     ap.add_argument("--n-recall", type=int, default=150)
+    ap.add_argument("--control-sha256",
+                    default="bfdcb4436f51eb31deea810be45a20e1fd39f6614d4f4b78c60ab952529858e2")
+    ap.add_argument("--control-bytes", type=int, default=2384234968)
     args = ap.parse_args()
     OUT.mkdir(parents=True, exist_ok=True)
 

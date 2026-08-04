@@ -63,6 +63,18 @@ from huggingface_hub import hf_hub_download, snapshot_download
 tok = os.environ["HF_TOKEN"]; repo = "AlphaAvatar/aadistill-artifacts"
 root = Path("/workspace/aad/artifacts/stage3")
 
+# The frozen capability battery. Omitting this cost a diag_a run: the glob for
+# prompt files silently returned nothing, so only behavior_v0 generated and the
+# scorer then died on a missing manifest.
+d = snapshot_download(repo, repo_type="model", token=tok,
+                      allow_patterns=["e2p1_20260803/battery_v2/*"])
+bsrc = Path(d) / "e2p1_20260803/battery_v2"
+bdest = Path("/workspace/aad/artifacts/eval/battery_v2")
+bdest.mkdir(parents=True, exist_ok=True)
+for f in bsrc.iterdir():
+    shutil.copy(f, bdest / f.name)
+print("battery:", sorted(x.name for x in bdest.iterdir()))
+
 d = snapshot_download(repo, repo_type="model", token=tok,
                       allow_patterns=["stage3_recovery_corpus_v2/ladder_uniform/*"])
 src = Path(d) / "stage3_recovery_corpus_v2/ladder_uniform"
@@ -77,6 +89,7 @@ p = hf_hub_download(repo, "stage3_recovery_corpus_v2/sessions.jsonl",
 shutil.copy(p, root / "corpus_v2/sessions.jsonl")
 print("corpus staged")
 PY
+test -f "$REPO/artifacts/eval/battery_v2/manifest.json"
 test -f "$REPO/artifacts/stage3/ladder_uniform_probe/blocks.npz"
 test -f "$REPO/artifacts/stage3/corpus_v2/sessions.jsonl"
 mark DATA_READY

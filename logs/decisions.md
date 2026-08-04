@@ -986,3 +986,75 @@
   remaining allocation and would still be measured by the retired metric.
 - **Revisit when:** a rung large enough to lift `correct` off the floor is
   funded, at which point cleaning can be judged on task success.
+
+## 2026-08-04 — Adopt padding-suffix truncation per config, keep the default off
+
+- **Context:** the benchmark is complete (EXPERIMENTS §14.1). On the block
+  mixture a real run consumes, truncation is **2.69× faster** per step; on the
+  most padded blocks 7.96×; on dense blocks 0.996×, i.e. free when it does
+  nothing. Equivalence was measured beforehand (§13.3): CE, KD, total loss and
+  validation CE exactly equal, gradients agreeing to ~1e-8, cosine 1.000000000.
+- **Decision:** **adopt it for new runs by setting `batch.truncate_padding: true`
+  explicitly in their configs. The code default stays `false`.**
+- **Why not flip the default:** the two paths are mathematically equivalent but
+  **not bitwise identical** — shorter sequences reorder float32 reductions and
+  Adam amplifies the residual on near-zero-gradient components. Flipping the
+  default would silently change what every already-logged config computes, which
+  P4 forbids. Setting it per config also changes that config's hash, so the
+  manifest records which path a run took instead of leaving it to infer from the
+  code version.
+- **What is claimed:** mathematical equivalence, tolerance-level numerical
+  agreement, and a measured wall-clock speedup. **Bitwise identity is not
+  claimed** and never was.
+- **Risks:** a long run under truncation will drift from an untruncated run of
+  the same seed, exactly as it would across a kernel or batch-shape change. Peak
+  memory is unchanged whenever any block in the microbatch is long, so this is a
+  throughput win and only sometimes a memory win.
+- **Revisit when:** micro_blocks > 1 is used (length bucketing would then matter),
+  or if a packer is introduced that does not put padding in a contiguous suffix —
+  `nonpad_extent()` raises in that case rather than mis-training.
+
+## 2026-08-04 — Do not enable rollout/on-policy training yet
+
+- **Context:** the two diagnostics were run precisely to decide this
+  (EXPERIMENTS §14.2–14.3).
+- **Decision:** **rollout/on-policy training is not enabled.** Audit template,
+  EOS supervision, loss masking and target construction first, then propose a
+  *minimal* correction experiment.
+- **Evidence, in the order it matters:**
+  1. A released model with our student's **identical 595,984,384 parameters**
+     solves ~70% of GSM8K and ~78% of RAG. Capacity and task difficulty are ruled
+     out as the explanation.
+  2. The overfitted control — 41 passes over the same data — reaches **0.7803
+     gold-prefix next-token top-1** and **0.0 correctness**, with a **median
+     prefix match of 0 tokens**.
+  3. Handing it more of its own gold prefix makes protocol validity *fall*
+     (0.647 at k=0 → 0.158 at k=256). A pure exposure-bias story predicts
+     recovery as the handed prefix grows; the opposite happened.
+- **Alternatives considered:** switching on the existing 2,075-line rollout stack
+  immediately, since teacher-forced and free-generation metrics disagree.
+  Rejected — that disagreement is necessary but not sufficient, and (3) actively
+  argues against the on-policy remedy being the right one.
+- **Competing explanations kept live:** EOS supervision, greedy decoding, entropy
+  collapse, initialization, objective imbalance. Exact repetition loops are
+  *consistent with* exposure bias, not proof of it.
+- **Risks:** the audit may find nothing and cost time; but a rollout run started
+  on a mis-specified target would cost far more and be uninterpretable.
+- **Revisit when:** the template/EOS/masking/target audit reports.
+
+## 2026-08-04 — `protocol_valid` is template-bound and cannot compare models
+
+- **Context:** Qwen3-0.6B scored **0 `correct` on every set under both
+  protocols** while answering ~70% of GSM8K correctly ignoring protocol.
+- **Cause:** `split_generation` assumes the generation begins *inside* an
+  already-open `<think>`, which is true of the teacher's template and false for
+  any model that opens its own; the literal `<think>` is then counted as a stray
+  marker and the block never reads as closed.
+- **Decision:** treat `correct` as **not comparable across models** until the
+  splitter accepts a self-opened think block. Do **not** rescore or amend any
+  completed result yet — raw generations are saved, so rescoring is free and can
+  be done deliberately rather than mid-session.
+- **Scope, measured:** 1.9% of our own 3,400 E1+E2 GSM8K generations fail this
+  way versus 65% `not_terminated`, so **E1/E2 conclusions are unaffected**.
+- **Revisit when:** the fix is written; then rescore the reference run from the
+  stored generations and report both scorings.

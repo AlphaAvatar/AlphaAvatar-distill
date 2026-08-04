@@ -458,3 +458,34 @@ An upload would need either a new repository or an approved history rewrite;
 neither was requested and neither is needed, since no follow-up arm starts from a
 trained checkpoint — the maintainer's standing rule is that every new arm forks
 from the Stage 1 init (`86fbba78e8a2a324…`).
+
+## Diagnostic session outputs (2026-08-04)
+
+Pod `tct4820z4t3hvn` (RTX A6000, $0.33/h) deleted after transfer; nothing remains.
+
+| field | value |
+| --- | --- |
+| file | `e2diag_results.tar.gz` |
+| size | 2,101,323 B |
+| sha256 | `5988da19e01dfcc697ecc9604591b4a4032ded67b6acb4e4b646c0f048f0a290` |
+| verified | byte-identical on the pod and after transfer |
+| unpacked to | `artifacts/audit/`, `artifacts/eval/e2diag/` (gitignored) |
+
+Contents: `padding_truncation_benchmark.json` (4 regimes × 2 paths, per-regime
+s/step, peak memory, student/teacher forward split); `reference_geometry.json`;
+`eval/e2diag/ref_qwen3_0p6b_{project,native}/` with complete raw generations for
+846 prompts each plus their battery scorings and per-sample verdicts;
+`audit/training_recall/` with 429 generations (now including token ids),
+`gold_prefix_top1.jsonl` and `report.json` (generations sha256 `479df460…`); and
+`audit/training_recall_specialstripped/` — the first pass, retained because its
+`skip_special_tokens=True` decode is what revealed the scoring bug.
+
+Model identities pinned in every record: `Qwen/Qwen3-0.6B @ c1899de2…`,
+`Qwen/Qwen3-4B-Thinking-2507 @ 768f209d…`, chat-template sha256, thinking-mode
+setting, and library versions (torch 2.11.0+cu128, transformers 5.13.1,
+vLLM 0.26.0).
+
+The control checkpoint `e1_ctl_r0250k_sa_pca_stepmatched` was pushed from the dev
+box (`model.safetensors` sha256 `bfdcb4436f51eb31deea810be45a20e1fd39f6614d4f4b78c60ab952529858e2`,
+2,384,234,968 B) and verified on the pod by hash before diagnostic B ran. It
+remains dev-box-only; the relay holds only its evaluation JSONs.

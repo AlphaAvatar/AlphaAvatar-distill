@@ -112,6 +112,24 @@ This is the sharpest evidence yet for a caveat the run table above already carri
 
 ---
 
+## 🔭 Diagnostic session — is 0.6B the limit, or the recipe?
+
+**Question:** our student sits at the correctness floor on every task. Is that the model size, the task, or how we are training it?
+
+**Design.** One RTX A6000 for 94 minutes ($0.52): benchmark the padding-truncation optimization, run the frozen 846-prompt battery on the *released* `Qwen3-0.6B` under two protocols, and ask an intentionally overfitted checkpoint to reproduce the targets it trained on ~41 times.
+
+**The size question is settled — it is the recipe.** The released Qwen3-0.6B is *near*-geometry to our student: identical parameter-bearing fields and an identical **595,984,384 parameters**, differing only in `rope_theta` (1e6 vs 5e6) and `max_position_embeddings` (40,960 vs 262,144). On our own frozen battery it answers **~70% of GSM8K** and **~78% of RAG**. A 0.6B model can do this task, and the battery is not too hard.
+
+**The overfitted checkpoint cannot reproduce its own training data.** After ~41 passes over the same rung it reaches **0.7803 gold-prefix next-token top-1 accuracy** and **0.0 correctness**, with a **median prefix match of zero tokens**. Handing it more of its own gold prefix makes protocol validity *fall* (0.647 → 0.158), so this is not merely a failure to get started.
+
+**Padding truncation is worth 2.69×** on the block mixture a real run consumes (7.96× on the most padded blocks; 0.996× on dense blocks — the control that shows the measurement is honest). The 4B teacher's forward pass alone is 41% of a full-width step.
+
+**A measurement caveat, stated because it changes how the table above should be read:** `protocol_valid` assumes a generation begins inside an already-open `<think>`, which is true of our teacher's template and false for any model that opens its own. Qwen3-0.6B therefore scores **0 `correct`** despite answering correctly — cross-model `correct` is not comparable until that is fixed. It affects **1.9%** of our own generations, so the Experiment 1 and 2 conclusions stand. Full numbers: [`logs/EXPERIMENTS.md`](./logs/EXPERIMENTS.md) §14.
+
+**No on-policy training was started.** The pre-registered decision gate points first at template, EOS supervision, loss masking and target construction ([decision](./logs/decisions.md)).
+
+---
+
 ## 🧠 How it works
 
 | Stage | What it produces | Status |

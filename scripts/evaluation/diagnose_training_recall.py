@@ -192,7 +192,11 @@ def main() -> None:
     for (rid, ids, allow), out in zip(reqs, outputs):
         item, k = meta[rid]
         gen_ids = list(out.outputs[0].token_ids)
-        text = tok.decode(gen_ids, skip_special_tokens=True)
+        # skip_special_tokens=False on purpose: `protocol_valid` looks for
+        # <|im_end|> and the think delimiters IN THE TEXT, so stripping them
+        # makes every generation read as `not_terminated` regardless of what the
+        # model did. Decoding them out was a scoring bug, not a model result.
+        text = tok.decode(gen_ids, skip_special_tokens=False)
         degen = degeneration.check(gen_ids)
         valid, reason = protocol_valid(text)
         ended = bool(gen_ids) and gen_ids[-1] in stop_ids
@@ -210,6 +214,10 @@ def main() -> None:
             "gold_tokens": len(item["gold_ids"]),
             **prefix_agreement(gen_ids, item["gold_ids"][k:]),
             "raw": text,
+            # Persist the ids. The E2 phase-1 audit could only reconstruct them
+            # by re-encoding text, which is not always the tokenization the model
+            # emitted; saving them makes this run exactly replayable.
+            "token_ids": gen_ids,
         })
     (args.out / "generations.jsonl").write_text(
         "".join(json.dumps(r) + "\n" for r in rows))
