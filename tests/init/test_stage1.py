@@ -178,3 +178,39 @@ def test_init_rejects_geometry_mismatch():
     student = build_student(cfg, torch.float32, seed=1)
     with pytest.raises(ValueError, match="KV head count"):
         init_student(teacher, student, state)
+
+
+# --- RoPE base / transformers version skew --------------------------------
+
+def test_rope_guard_accepts_a_consistent_model():
+    from transformers import AutoConfig, AutoModelForCausalLM
+    from aadistill.models.student import assert_rope_matches_config
+    cfg = AutoConfig.for_model(
+        "qwen3", vocab_size=128, hidden_size=32, num_hidden_layers=1,
+        num_attention_heads=4, num_key_value_heads=2, intermediate_size=48,
+        head_dim=8, rope_theta=5_000_000, max_position_embeddings=64)
+    model = AutoModelForCausalLM.from_config(cfg)
+    base = assert_rope_matches_config(model, cfg)
+    assert abs(base - 5_000_000) / 5_000_000 < 1e-3
+
+
+def test_rope_guard_catches_the_transformers_4x_5x_skew():
+    """A 4.x reader on a 5.x config silently builds a 500x-wrong basis."""
+    import pytest
+    from transformers import AutoConfig, AutoModelForCausalLM
+    from aadistill.models.student import assert_rope_matches_config
+    cfg = AutoConfig.for_model(
+        "qwen3", vocab_size=128, hidden_size=32, num_hidden_layers=1,
+        num_attention_heads=4, num_key_value_heads=2, intermediate_size=48,
+        head_dim=8, rope_theta=10_000, max_position_embeddings=64)
+    model = AutoModelForCausalLM.from_config(cfg)
+    # What a 5.x-written checkpoint records, which this model does NOT implement.
+    cfg.rope_parameters = {"rope_theta": 5_000_000, "rope_type": "default"}
+    with pytest.raises(ValueError, match="RoPE base mismatch"):
+        assert_rope_matches_config(model, cfg, "skewed-checkpoint")
+
+
+def test_manifest_records_the_library_that_decides_rope():
+    from aadistill.infrastructure.env import hardware_report
+    libs = hardware_report()["libraries"]
+    assert "transformers" in libs and libs["transformers"]

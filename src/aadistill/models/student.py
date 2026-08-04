@@ -42,3 +42,41 @@ def build_student(config: Qwen3Config, dtype: torch.dtype, seed: int) -> Qwen3Fo
     model = Qwen3ForCausalLM(config).to(dtype)
     model.eval()
     return model
+
+
+def assert_rope_matches_config(model, config, path: str = "") -> float:
+    """Fail if the loaded model's RoPE base is not the one the config stores.
+
+    transformers 5.x writes `rope_theta` inside a nested `rope_parameters` dict.
+    A 4.x reader loading such a config silently falls back to the class default
+    (10000) — `config.rope_theta` reads 10000 while `config.rope_parameters`
+    still says 5000000, and the model is built with the wrong basis. Nothing
+    warns, and the run looks normal.
+
+    So the check is made against the *runtime* frequencies rather than any config
+    attribute: `inv_freq[1] == base ** (-2/head_dim)` inverts to the base the
+    model will actually use. Returns it, and raises when it disagrees with what
+    the checkpoint recorded.
+    """
+    stored = None
+    params = getattr(config, "rope_parameters", None)
+    if isinstance(params, dict) and params.get("rope_theta") is not None:
+        stored = float(params["rope_theta"])
+    elif getattr(config, "rope_theta", None) is not None:
+        stored = float(config.rope_theta)
+    if stored is None:
+        return float("nan")
+
+    inv = model.model.rotary_emb.inv_freq
+    head_dim = getattr(config, "head_dim", None) or (
+        config.hidden_size // config.num_attention_heads)
+    runtime = float(inv[1]) ** (-head_dim / 2.0)
+    if abs(runtime - stored) / stored > 1e-3:
+        raise ValueError(
+            f"RoPE base mismatch for {path or 'model'}: the checkpoint records "
+            f"{stored:,.0f} but the model was built with {runtime:,.0f}. This is "
+            "the transformers 4.x/5.x `rope_parameters` skew — the installed "
+            "transformers cannot read this checkpoint's config correctly. "
+            "Install the locked version rather than training on a 500x-wrong "
+            "positional basis.")
+    return runtime

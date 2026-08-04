@@ -170,6 +170,17 @@ def main() -> int:
     ap.add_argument("--no-degeneration-stop", action="store_true")
     ap.add_argument("--system", default="You are a helpful Assistant.",
                     help="mandatory project system message (protocol, not a variable)")
+    # Additive: the defaults below reproduce the frozen behaviour exactly. They
+    # exist so a reference model can also be run under ITS OWN chat protocol,
+    # which is a different question from how our student is evaluated.
+    ap.add_argument("--protocol", choices=("project", "native"), default="project",
+                    help="'native' skips the project system injection and applies "
+                         "the model's own template defaults")
+    ap.add_argument("--chat-template-kwargs", default="{}",
+                    help='JSON passed to apply_chat_template, e.g. '
+                         '\'{"enable_thinking": true}\'')
+    ap.add_argument("--revision", default=None,
+                    help="pin the model revision (reference models)")
     ap.add_argument("--out", default=None)
     ap.add_argument("--gpu-sample-every", type=int, default=200,
                     help="scheduler steps between nvidia-smi samples")
@@ -199,9 +210,11 @@ def main() -> int:
           f"(source {ctx_info['context_source']}, architectural "
           f"{ctx_info['architectural_context']}); stop ids {stop_ids}", flush=True)
 
+    template_kwargs = json.loads(args.chat_template_kwargs)
     t_init = time.time()
     llm = LLM(model=args.model, dtype="bfloat16", max_model_len=ctx,
-              gpu_memory_utilization=args.gpu_mem_util)
+              gpu_memory_utilization=args.gpu_mem_util,
+              **({"revision": args.revision} if args.revision else {}))
     eng = llm.llm_engine
     init_seconds = round(time.time() - t_init, 1)
     engine_settings = engine_config(llm, ctx, args.gpu_mem_util)
@@ -221,11 +234,13 @@ def main() -> int:
             # `<|im_start|>system` turns for the 6 behaviour prompts that carry
             # their own, a context the model never saw in training.
             has_system = any(m.get("role") == "system" for m in turns)
-            if args.system and not has_system:
+            inject = args.system and not has_system and args.protocol == "project"
+            if inject:
                 turns = [{"role": "system", "content": args.system}] + turns
             prompt = tok.apply_chat_template(turns, tools=s.get("tools"),
                                              tokenize=False,
-                                             add_generation_prompt=True)
+                                             add_generation_prompt=True,
+                                             **template_kwargs)
             p_ids = tok(prompt, add_special_tokens=False).input_ids
             allowance = ctx - len(p_ids)
             if allowance <= 0:
@@ -241,7 +256,8 @@ def main() -> int:
             eng.add_request(rid, {"prompt_token_ids": p_ids}, params)
             pending[rid] = {"sample": s, "p_ids": p_ids, "allowance": allowance,
                             "system_source": ("sample" if has_system
-                                              else "default"),
+                                              else ("default" if inject
+                                                    else "none")),
                             "gen": [], "n_gen": 0, "last_check": 0, "degen": None,
                             "finish": None, "t0": time.time(), "ttft": None}
         t_wave = time.time()
@@ -340,7 +356,10 @@ def main() -> int:
             "censored_measurement": False,
             "context_len": ctx, "context_resolution": ctx_info,
             "stop_ids": stop_ids,
-            "system_message": args.system,
+            "system_message": args.system if args.protocol == "project" else None,
+            "protocol": args.protocol,
+            "chat_template_kwargs": template_kwargs,
+            "model_revision": args.revision,
             "degeneration_stop": not args.no_degeneration_stop,
             "wave_seconds": wave_seconds,
             "throughput": {

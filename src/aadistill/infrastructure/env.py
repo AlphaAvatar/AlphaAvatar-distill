@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import hashlib
 import os
+import importlib.metadata
 import platform
 import random
 import subprocess
@@ -71,6 +72,26 @@ def code_state(repo_root: str) -> dict:
     }
 
 
+def library_versions() -> dict:
+    """Versions of the libraries that can change numerics or config semantics.
+
+    `transformers` is here for a concrete reason. It moved `rope_theta` from a
+    flat config key into a nested `rope_parameters` dict between 4.x and 5.x, and
+    a 4.x reader loading a 5.x-written config resolves `config.rope_theta` to the
+    **default 10000 instead of the stored 5000000** — silently, with no warning,
+    giving a model whose positional basis is 500x wrong. Recording only `torch`
+    (as this report did until 2026-08-04) cannot detect that skew after the fact.
+    """
+    out = {}
+    for name in ("transformers", "tokenizers", "safetensors", "numpy",
+                 "datasets", "vllm"):
+        try:
+            out[name] = importlib.metadata.version(name)
+        except importlib.metadata.PackageNotFoundError:
+            out[name] = None
+    return out
+
+
 def hardware_report() -> dict:
     report = {
         "platform": platform.platform(),
@@ -78,6 +99,7 @@ def hardware_report() -> dict:
         "torch": torch.__version__,
         "cpu_count": torch.get_num_threads(),
         "cuda_available": torch.cuda.is_available(),
+        "libraries": library_versions(),
     }
     if report["cuda_available"]:
         report["cuda_devices"] = [
