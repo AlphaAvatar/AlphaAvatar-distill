@@ -7,8 +7,17 @@ proposal files, which are preserved in git history at commit `866dac2`.
 32Q/8KV) → **student** 0.6B-class (1024 hidden, 28L, FFN 3072, 16Q/8KV, tied
 embeddings). BF16 training, INT8 deployment target.
 
-**Total spend to date: $34.52.** Training and evaluation $7.93 (§6, including
-what was wasted); teacher generation $26.59 (§9 gate $1.03 + §10 corpus $25.56).
+**Total spend to date: $108.99** of the **$126.02** cap.
+
+| period | $ | detail |
+|---|---:|---|
+| through corpus v2 (2026-08-01) | 34.52 | §6 — training/eval $7.93, teacher generation $26.59 |
+| Experiment 1, data-scaling matrix | 61.50 | §11 — 24 arms $47.6, control + first eval $8.1, sweep $5.8 |
+| Experiment 2 phase 1, data cleaning | 12.97 | §12.15 — experiment $11.23, avoidable pod waste $1.74 |
+
+**$17.03 of the $30 Experiment 2 allocation is unspent.** §6 below is the
+*pre-Experiment-1* breakdown and its "project total" line is scoped to that
+period; this table is the current figure.
 
 ---
 
@@ -124,7 +133,11 @@ supervision is supported by any run so far.**
 | **training/eval subtotal** | **$7.93** | of which **$3.50 was avoidable** |
 | §6 validation gate (§9) | **$1.03** | necessary; ~$0.65 of it lost to two infrastructure failures |
 | corpus v2 bulk generation (§10) | **$25.56** | necessary; **~$8.70 of it was idle pod time** |
-| **project total to date** | **$34.52** | generation subtotal $26.59, all against the $50 generation cap |
+| **subtotal through 2026-08-01** | **$34.52** | generation subtotal $26.59, all against the $50 generation cap |
+
+This table covers everything **before Experiment 1**. Experiment 1 ($61.50, §11)
+and Experiment 2 phase 1 ($12.97, §12.15) are costed in their own sections; the
+running project total is in the header.
 
 **Wasted:** the 2026-07-30 continuation run. Forking both arms from a
 public-trained checkpoint was an error that a five-minute check of the start

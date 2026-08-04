@@ -11,7 +11,7 @@ during baseline construction (same date).
 
 | Model | Teacher | Student target | Status | Stages passed | Best checkpoint | Notes |
 | --- | --- | --- | --- | --- | --- | --- |
-| qwen3-4b-thinking-distill (working name) | `Qwen/Qwen3-4B-Thinking-2507` @ `768f209d` | 0.6B-class: hidden 1024, 28L, FFN 3072, 16Q/8KV, tied emb (user-chosen 2026-07-13) | **stage3-running** | Stage 0, Stage 1, Stage 2 (v0+v1); Stage 3 sub-stages 1–2; Experiment 1 data-scaling matrix complete | `e1_r5500k_sa_pca` — teacher-native held-out CE **1.0032**; best behaviour/termination `e1_r2960k_sa_pca` (0.4413 / **0.934**). 20 arms on `AlphaAvatar/aadistill-artifacts`, 5 held verified on the dev box | Natural termination rose from 0/8 to **0.934** on teacher-native recovery data. Stage 3 still not exited: **no reasoning at any rung** (GSM8K EM ≤0.05). See below. |
+| qwen3-4b-thinking-distill (working name) | `Qwen/Qwen3-4B-Thinking-2507` @ `768f209d` | 0.6B-class: hidden 1024, 28L, FFN 3072, 16Q/8KV, tied emb (user-chosen 2026-07-13) | **stage3-running** | Stage 0, Stage 1, Stage 2 (v0+v1); Stage 3 sub-stages 1–2; Experiment 1 data-scaling matrix complete; Experiment 2 phase 1 (data cleaning) complete | `e1_r5500k_sa_pca` — teacher-native held-out CE **1.0032**; best behaviour/termination `e1_r2960k_sa_pca` (0.4413 / **0.934**). 20 arms on `AlphaAvatar/aadistill-artifacts`, 5 held verified on the dev box | Natural termination rose from 0/8 to **0.934** on teacher-native recovery data. Stage 3 still not exited: **no reasoning at any rung** (GSM8K EM ≤0.05). See below. |
 
 ---
 
@@ -65,14 +65,30 @@ the smallest rung came out *worse* than the same rung at 324 steps), and
 initialization dominates data over the whole measured range. $61.5 across 25
 checkpoints.
 
-**What exists for the next step.** A teacher corpus (corpus v2, 2026-08-01):
-11,174 accepted sessions, 66.08M generated tokens, gate-passed, cut into a
-six-rung nested token ladder. The first experiment over that ladder asks only
-**whether behavioural recovery scales with supervised-token count**, so it runs
-on a neutral uniform type mixture; data mixing and difficulty curriculum are
-separate later experiments (maintainer, 2026-08-01). The training matrix is
-specified and costed but **not started** — it awaits a go-ahead against the $60
-training budget ([`PROPOSAL.md`](PROPOSAL.md)).
+**What Experiment 2 phase 1 then established (2026-08-04).** Median-length
+corpus cleaning was tested at the 0.86M rung, two seeds, matched tokens, both
+arms forked from the pinned Stage 1 init. **The cleaned corpus is not adopted.**
+Its held-out-NLL gate passed arithmetically (mean +0.9618 > the 0.489 floor) but
+99.2% of the margin came from one seed, and cleaning *raised* the between-seed
+spread from 0.489 to 2.381 nats on identical data and init. The only
+seed-consistent capability reading went the other way: aggregate protocol
+validity fell 0.090 and 0.073 at the matched endpoint.
+
+The phase's durable output is a **measurement finding, not a data decision**:
+`best_holdout_nll` is retired as a checkpoint-selection identity. The checkpoint
+holding the best held-out NLL of its trajectory (`sb`@127) produces **zero
+protocol-valid generations across all 726 battery prompts** — general-text
+perplexity peaks *before* the student specialises onto the teacher protocol, so
+the metric and the objective diverge by construction
+([decision](decisions.md), [record](EXPERIMENTS.md) §12.15).
+
+**What exists for the next step.** Corpus v2 (11,174 accepted sessions, 66.08M
+generated tokens, gate-passed) cut into the six-rung nested token ladder, plus a
+frozen 846-prompt capability battery (`capability-v2`) with deterministic
+scorers and no LLM judge, validated at 112 evaluator tests. Experiment 2 phases
+2 (loss) and 3 (learning rate) are **specified but unauthorized**, and phase 3
+should not run as written — it was built around the metric phase 1 retired
+([`PROPOSAL.md`](PROPOSAL.md) §12).
 
 **Deployment target:** INT8. Every recovery gate already re-evaluates under INT8
 weight fake-quantization at two scopes.
