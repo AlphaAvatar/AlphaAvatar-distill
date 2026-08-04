@@ -35,7 +35,8 @@ scripts/
                            result consolidation, reviewable test-case extraction
   rollout/                 teacher generation · build_recovery_corpus
   pod/                     GPU session scripts (run_env.sh is the only per-session edit)
-tests/                     mirrors src/ and scripts/ — 503 CPU tests, ~6 s
+tests/                     mirrors src/ and scripts/ (CPU only; count is a
+                           dated snapshot, not a property — see below)
 assets/                    perf_trend.json + the rendered trend figure
 artifacts/                 gitignored; large outputs live on the HF relay
 data/                      gitignored splits; manifests are tracked
@@ -60,6 +61,24 @@ Where new files go:
 * **Anything heavy** (checkpoints, corpora, activation caches) → `artifacts/` or
   `data/`, both gitignored, with a manifest entry in
   `logs/artifact_manifests.md` when it lives outside git.
+
+**Test-suite snapshot (2026-08-04): 503 CPU tests, ~6 s.** This is a dated
+observation, not a repository invariant — it will drift with every change and
+should be re-measured rather than cited. Run
+`PYTHONPATH=src python -m pytest tests/ -q` for the current figure.
+
+**Data-level audits** live alongside the suite but are not part of it, because
+they run against retained experiment artifacts rather than fixtures:
+
+* `scripts/evaluation/audit_degeneration_replay.py` — replays retained
+  generations through the relocated degeneration detector and asserts the
+  pre- and post-move modules are behaviourally identical;
+* `scripts/data/audit_e1_mixture_rebuild.py` — rebuilds Experiment 1's token
+  ladder from `sessions.jsonl` through the relocated mixture code and compares
+  artifacts, rung cuts and per-seed block streams against the historical pack.
+
+Both write JSON verdicts under `artifacts/audit/` (gitignored) and exit non-zero
+on failure, so they can gate a refactor that touches either path.
 
 Per-run logs and per-experiment proposals were consolidated into
 `logs/EXPERIMENTS.md` on 2026-07-31; the originals are in git history at commit
