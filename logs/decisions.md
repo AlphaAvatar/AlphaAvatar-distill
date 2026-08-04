@@ -1105,3 +1105,34 @@
   bounds the *task*, not the *recipe*.
 - **Risks:** this result is easy to over-read as "so our approach must work".
   Recorded here explicitly so it is not.
+
+## 2026-08-05 — Reject assistant-only KD; P1 aliases the P0-real arms
+
+- **Context:** D0.4 measured that 39.5% of the training loss fell on
+  prompt/context positions the model never generates, and D0.3 localized the
+  bottleneck to reasoning production. `kd_scope: assistant` was the minimal
+  single-field change aimed at both.
+- **Decision:** **reject the change.** Register `P1-sa` → `e1_r0860k_sa_pca` and
+  `P1-sb` → `e1_r0860k_sb_pca` — the P0-real arms. No retraining.
+- **Evidence:** free-rollout correctness (the pre-registered selector) fell from
+  a P0-real mean of 0.1833 to 0.1467, was not seed-consistent (sa +0.033, sb
+  −0.107), and produced a *wider* seed spread than the control. Teacher-forced
+  reasoning top-1 fell 0.570/0.572 → 0.522/0.522 with mean rank blowing out from
+  134/248 to 885/1,017. Held-out CE regressed +0.026–0.036 on both arms against a
+  0.0063 P0-real seed spread.
+- **What it did buy:** materially better free-rollout behaviour — natural
+  termination 0.580→0.767, empty answers 0.307→0.147, repetition 0.413→0.247.
+  Real, but not what was being selected on, and bought at the cost of the thing
+  that was.
+- **The methodological correction:** loss-mass accounting locates an objective's
+  mass; it does not establish that the mass is misspent. The 39.5% on
+  prompt/context was doing work as a general language-modelling signal. I
+  inferred waste from the share and was wrong — the ablation is what settled it,
+  which is why it was worth running rather than reasoning about.
+- **Risks:** two seeds; the sa arm did improve, so a larger seed count could in
+  principle show a smaller effect than −0.0366. But no arm cleared the control's
+  spread, and the support metric regressed on *both*, so the direction is not in
+  doubt.
+- **Revisit when:** a mechanism is proposed that improves reasoning modelling
+  without removing the general LM signal — e.g. reweighting rather than masking,
+  or a separate term for context positions.

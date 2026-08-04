@@ -1658,3 +1658,126 @@ Free-form QA is scored by containment, which is permissive and may over-credit.
 measured 39.5% of loss on never-generated positions is a concrete, single-field
 mechanism aimed at the bottleneck D0.3 localized. That remains a proposal
 (`PROPOSAL.md` §13), not an authorization.
+
+## 17. P0-assistant — assistant-only KD with assistant-token normalization (2026-08-05, $2.75)
+
+Pod `4pge0934xnly22`, **1× NVIDIA L40S, secure cloud, $0.99/h**, 167 min, **$2.75**
+against a $4.25 ceiling and a 270-min backstop. Commit `5f0e6f4`. Deleted after
+hash-verified transfer (`9c2ad23e…`).
+
+**The GPU matters and was chosen deliberately.** P0-real's immutable manifests
+record `cuda_devices: ["NVIDIA L40S"]`, torch 2.11.0+cu128, teacher bf16 with
+`sdpa`, master float32 + `autocast_bf16` + gradient checkpointing. This is a
+causal comparison against those checkpoints, so it ran on the same GPU model, not
+the cheaper A6000 used for the D0 measurements.
+
+### 17.1 The intervention
+
+**Assistant-only KD with assistant-token normalization** — not a removal.
+`kd_scope: assistant` resolves to exactly the CE mask, so:
+
+* the 606,717 prompt/context positions leave the KD term entirely, **and**
+* the denominator falls 1,471,467 → **864,750**, raising every surviving
+  assistant token's KD contribution by **×1.7016**.
+
+Both halves are the treatment. Verified live: `kd_positions` moves 92 → 47 on a
+fixture where `ce_targets` is 47.
+
+### 17.2 Single-variable guarantee, asserted three times
+
+Configs `dccf60d0f623a3f2…` (sa) and `252f09463773add1…` (sb) differ from
+P0-real only in `loss.kd_scope`, `run_name`, `out_dir`, `_purpose`. Asserted on
+the dev box, **again on the pod before training**, and per arm inside the driver.
+`truncate_padding` deliberately left unset so the code path matches P0-real,
+costing ~2.7× runtime and paid on purpose.
+
+**The trainer changed since P0-real** (commit `69c3fe1f` → now, +88 lines, all
+`truncate_padding`). The E1-era trainer was extracted from git and run against
+the current one on an identical batch and seed: **identical loss, CE, KD, grad
+norm, and identical gradient and parameter checksums**. `kd_scope` is the only
+behavioural difference.
+
+### 17.3 Training
+
+| arm | wall | s/step | P0-real counterpart |
+| --- | --- | ---: | --- |
+| `P0-assistant-sa` | 58.6 min | 3.44 | 61.1 min / 3.546 |
+| `P0-assistant-sb` | 58.6 min | 3.44 | 61.1 min / 3.543 |
+
+~4% faster, consistent with KD covering 864,750 positions rather than 1,471,467.
+
+### 17.4 Result — the change does NOT beat P0-real
+
+Free-rollout correctness, the pre-registered selection metric, on the identical
+150 fixed examples and mask `d6e24e0b…`:
+
+| arm | **overall** | gsm8k | openmath | multihop | rag | oracle |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| P0-real-sa | 0.1533 | 0.0263 | 0.000 | 0.0526 | 0.5405 | 0.6267 |
+| P0-real-sb | **0.2133** | 0.0263 | 0.000 | 0.2368 | 0.5946 | 0.6467 |
+| P0-assistant-sa | 0.1867 | 0.0263 | 0.000 | 0.0789 | 0.6486 | 0.6333 |
+| P0-assistant-sb | **0.1067** | 0.000 | 0.000 | 0.0526 | 0.3784 | 0.6200 |
+
+**P0-real mean 0.1833 (spread 0.0600) vs P0-assistant mean 0.1467 (spread
+0.0800): Δ = −0.0366.** Not seed-consistent — sa improved (+0.033) while sb
+regressed (−0.107), and the P0-assistant spread is *wider* than P0-real's.
+**No arm clears the P0-real seed spread.**
+
+The support metric moved decisively the wrong way:
+
+| | P0-real | P0-assistant |
+| --- | --- | --- |
+| reasoning top-1 sa | 0.5695 | **0.5222** |
+| reasoning top-1 sb | 0.5720 | **0.5222** |
+| reasoning mean rank sa | 134 | **885** |
+| reasoning mean rank sb | 248 | **1,017** |
+| reasoning CE | 2.113 / 2.115 | 2.963 / 3.006 |
+
+Held-out CE guard rail: P0-assistant 1.5393 / 1.5360 against P0-real 1.5101 /
+1.5038 — **+0.026 to +0.036 on both arms** versus a P0-real seed spread of
+0.0063. A small but consistent regression.
+
+### 17.5 What it did improve, and the likely mechanism
+
+Free-rollout *behaviour* improved markedly on sa and modestly on sb: protocol
+validity 0.513 → 0.613, natural termination 0.580 → 0.767, empty answers 0.307 →
+0.147, repetition 0.413 → 0.247, context-limit 0.420 → 0.233, answer p50 758 →
+492. `</think>` CE fell 0.0182 → 0.0063.
+
+The coherent reading: **prompt/context KD was functioning as a general
+language-modelling signal, not as waste.** Concentrating KD on assistant tokens
+made the model better at emitting well-formed, terminating output and worse at
+modelling the teacher's reasoning distribution — which is exactly what the
+reasoning top-1, the reasoning rank and the held-out CE all say together.
+
+D0.4 measured that 39.5% of the loss sat on never-generated positions and
+inferred it was misspent. **That inference was wrong.** Token-share and loss-mass
+accounting says where the objective's mass is, not whether it is doing useful
+work; this experiment is what distinguishes the two, and it is why it was run.
+
+### 17.6 P1 alias
+
+Per the pre-registered rule — no seed-consistent improvement beyond the seed
+spread — **P1 aliases the P0-real arms, not the P0-assistant arms**:
+
+* **`P1-sa` → `e1_r0860k_sa_pca`** (seed 20260726, config `08264ef1225c119a…`)
+* **`P1-sb` → `e1_r0860k_sb_pca`** (seed 20260801, config `9048173dc62cca84…`)
+
+`P0-real-sb` is the better single arm (free-rollout 0.2133). **Nothing is
+retrained**; P1 is a name for existing checkpoints, exactly as P0-real was.
+
+### 17.7 Two recurring defects
+
+* The trainer's `save_checkpoint` writes `config.json`, `generation_config.json`
+  and `model.safetensors` but **no tokenizer**, so evaluation died on
+  `tokenizer.chat_template is not set`. This is the same defect that broke
+  Experiment 2 phase 1's `eval_ppl`; the fix then lived in that session's driver
+  rather than in `save_checkpoint`, so it recurred. Cost ~6 min. Tokenizer copied
+  from the Stage 1 init and **verified equivalent before re-running** (vocab
+  151,669, chat-template sha `3802169b…`, prompt ends with `<think>`).
+* The launcher's price guard read `lowestPrice.uninterruptablePrice` — the
+  *community* floor — while `runpodctl pod create` provisions **secure**. It now
+  reads `securePrice` and re-checks `costPerHr` on the created pod. A separate
+  bug made `BACKSTOP_HOURS=4.5` produce an empty `--terminate-after` and a pod
+  with **no backstop at all**; that pod was deleted within ~5 min and the
+  deadline is now computed in integer minutes.

@@ -511,3 +511,26 @@ full 682-block rung, batch sha256 `bffd9305fe5d51ef…`.
 
 Registration: `artifacts/audit/p0_real_registration.json`. Inclusion mask
 `d6e24e0b09da1bcc692b1dc96d8236808d29551a9fc94a47d1d968fd3f73d6ba`.
+
+## P0-assistant outputs (2026-08-05)
+
+Pod `4pge0934xnly22` (L40S secure, $0.99/h) deleted after transfer.
+
+| field | value |
+| --- | --- |
+| file | `p0asst_final.tar.gz` |
+| sha256 | `9c2ad23e292b8857623a5379ec13462b5eec8b650560ce81be316720a21c3321` |
+| verified | byte-identical on the pod and after transfer |
+
+Contents: `three_mode/P0-assistant-{sa,sb}/` with 150 free and 150 oracle
+generations each plus the teacher-forced per-role reports, and both arms'
+`train_log.jsonl` / `run_manifest.json`.
+
+Configs: `configs/stage3/p0/p0_assistant_sa.json` (`dccf60d0f623a3f2…`),
+`p0_assistant_sb.json` (`252f09463773add1…`).
+
+**The two P0-assistant checkpoints were left on the pod and are gone.** They lost
+on the pre-registered selector, `P1` aliases the P0-real arms instead, and
+retaining 4.6 GB of rejected weights was not worth the transfer time. Their
+training logs, manifests and complete evaluation generations are retained, so the
+result is fully reproducible from the configs.

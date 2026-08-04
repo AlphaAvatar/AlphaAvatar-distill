@@ -1,42 +1,42 @@
-**Updated:** 2026-08-04 15:00 UTC · branch `main` · **no pods running, nothing
-billing.** Verified spend **$110.66** of the **$126.02** cap ($109.51 prior +
-**$1.15** for the D0 diagnostics). **$15.36 of the $30 Experiment 2 allocation
-is unspent.**
+**Updated:** 2026-08-05 20:10 UTC · branch `main` · **no pods running, nothing
+billing.** Verified spend **$114.44** of the **$126.02** cap. **$11.58 of the $30
+Experiment 2 allocation is unspent.**
 
-**Active work: D0 complete. No training has been started.** Full record in
-[`EXPERIMENTS.md`](EXPERIMENTS.md) §16.
+**P0-assistant is complete and DID NOT beat P0-real.** Full record in
+[`EXPERIMENTS.md`](EXPERIMENTS.md) §17.
 
-**The bottleneck is producing reliable reasoning — not the answer block, not the
-template, not EOS, not masking.** Three independent lines agree:
+**The result.** Assistant-only KD with assistant-token normalization
+(`kd_scope: assistant`: 606,717 prompt/context positions leave the KD term *and*
+the denominator falls 1,471,467 → 864,750, scaling surviving assistant tokens by
+×1.7016) on the free-rollout selection metric:
 
-1. **Supply gold reasoning and correctness rises ~4×** on both seeds (0.153 →
-   0.627 and 0.213 → 0.647), reaching **0.92–0.97 on multihop and RAG**. Empty
-   answers go 0.31/0.20 → **0.000**; repetition and context exhaustion fall with
-   them.
-2. **Under teacher forcing, reasoning is the worst-modelled role** — top-1 0.570
-   at mean rank 134/248, against `</think>` at **1.000** and `<|im_end|>` at
-   0.90–0.95. The model has mastered the structure and not the content.
-3. **The objective spends 39.5% of its total loss on prompt/context tokens the
-   model never generates** (KD mass share 49.70/49.57% over the full 682-block
-   rung, seed-consistent), and ~0.00% on the structural tokens it already gets
-   right. Answer content receives ≈8.3%.
+| | overall | reasoning top-1 | held-out CE |
+|---|---:|---:|---:|
+| P0-real sa / sb | 0.1533 / **0.2133** | 0.5695 / 0.5720 | 1.5101 / 1.5038 |
+| P0-assistant sa / sb | 0.1867 / 0.1067 | **0.5222 / 0.5222** | 1.5393 / 1.5360 |
 
-**Not claimed:** that the model can compute. Where the answer sits literally in
-the reasoning, oracle correctness is only 0.323/0.400 — that is extraction. The
-lift concentrates on retrieval-style tasks; openmath stays 0.16–0.30.
+Mean 0.1833 → 0.1467 (**Δ −0.0366**), not seed-consistent, spread *wider* than
+P0-real's 0.0600. The support metric moved decisively the wrong way: reasoning
+mean rank 134/248 → **885/1,017**. Held-out CE regressed +0.026–0.036 on both
+arms against a 0.0063 seed spread.
 
-**Registered:** `P0-real-sa` = `e1_r0860k_sa_pca` (seed 20260726, config
-`08264ef1…`), `P0-real-sb` = `e1_r0860k_sb_pca` (seed 20260801, config
-`9048173d…`). Every manifest field verified; rung identity pinned by content
-hashes the manifests omit.
+**What it did improve:** free-rollout behaviour — protocol validity 0.513→0.613,
+natural termination 0.580→0.767, empty answers 0.307→0.147, repetition
+0.413→0.247, context-limit 0.420→0.233.
 
-**Not obtained:** the D0.4 gradient probe — one genuine CUDA OOM, then a bug in
-the patch meant to fix it. Dropped rather than retried a third time, and recorded
-as unobtained.
+**The correction this forces.** D0.4 measured 39.5% of the loss on
+never-generated positions and I inferred it was misspent. **That inference was
+wrong.** Prompt/context KD was acting as a general language-modelling signal;
+removing it bought well-formed termination at the cost of reasoning modelling.
+Loss-mass accounting says where an objective's mass sits, not whether it is
+useful — only the ablation distinguishes those.
 
-**Next, awaiting authorization:** the assistant-only KD-scope P0 arms
-([`PROPOSAL.md`](PROPOSAL.md) §13). The evidence supports them; nothing is
-started. Phases 2/3, L1/R1/R2 and all rollout/on-policy work remain paused.
+**P1 alias (no retraining):** `P1-sa` → `e1_r0860k_sa_pca` (seed 20260726,
+config `08264ef1…`), `P1-sb` → `e1_r0860k_sb_pca` (seed 20260801, config
+`9048173d…`). `P0-real-sb` is the better single arm.
+
+**Nothing further is authorized.** Phases 2/3, L1/R1/R2 and all rollout/on-policy
+work remain paused, and the reasoning bottleneck identified in D0 is still open.
 
 Canonical handoff. Companions:
 
