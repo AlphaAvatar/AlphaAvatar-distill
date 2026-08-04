@@ -1,6 +1,9 @@
-**Updated:** 2026-08-04 00:30 UTC · branch `main` · **pod teardown in progress,
-artifact transfer running.** Verified spend **≈$107.3** of the **$126.02** cap
-($96.02 prior + ≈$11.3 for Experiment 2 phase 1, against its $18.78 stop).
+**Updated:** 2026-08-04 01:30 UTC · branch `main` · **no pods running, nothing
+billing** — `n7xjbzlmsyx9b2` deleted after all 44 checkpoint files were verified
+hash-identical on both stores. Verified spend **$108.99** of the **$126.02** cap
+($96.02 prior + **$12.97** for Experiment 2 phase 1, against its $18.78 stop;
+$1.74 of that was avoidable pod waste). **$17.03 of the $30 allocation is
+unspent.**
 
 **Active work:** **Experiment 2 phase 1 is COMPLETE** — the data-cleaning
 diagnostic ran end to end on one L40S pod, 2026-08-03T14:02:30Z → 00:06:56Z, one
@@ -28,10 +31,22 @@ anti-correlated with generation capability on this student.**
   p50 29.9/31.9/34.2 ms, GPU p50 100%. **`context_limit_rate` 0.0000 at all 20
   checkpoints**; P18 intact.
 
+**Artifacts, all verified.** Results bundle `e2p1_results.tar.gz`, sha256
+`b70e2ffb…`, byte-identical after transfer — complete raw generations for every
+evaluated sample, per-sample verdicts, 9 battery scorings, 20 `behavior_v0`
+measurements, both holdout trajectories, both run manifests and train logs,
+`throughput_gate.json`, and the same-machine D0 control. 7 retained checkpoints
+(23 GB) at `/home/ecs-user/aad-artifacts/e2p1/`, **44/44 files hash-verified**.
+Not on the relay: its LFS quota is full and deletion does not reclaim it, and no
+follow-up arm forks from a trained checkpoint anyway. Manifest in
+[`artifact_manifests.md`](artifact_manifests.md).
+
 **Decision needed from the maintainer:** **phase 3 should not run as designed** —
 it was built to locate the held-out-NLL deterioration onset, which phase 1 shows
 is an artifact of measuring general-text NLL on a protocol-specialising student.
-Phases 2 and 3 remain unauthorized. ~$18.7 of the $30 allocation is unspent.
+Phase 2 does not depend on the retired metric, but its registered acceptance
+criteria do and would need restating against protocol validity and termination.
+Both remain unauthorized.
 
 Canonical handoff. Companions:
 

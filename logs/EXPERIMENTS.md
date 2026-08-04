@@ -1113,16 +1113,27 @@ Phase 1's question — does E1's held-out NLL deterioration reflect real capabil
 loss — is answered: **no, and the reverse is closer to true.** Held-out NLL and
 generation capability move in opposite directions across the early trajectory.
 
-#### Actual cost
+#### Actual cost — measured from timestamps
 
-| item | h | $ |
-| --- | ---: | ---: |
-| pod, create → `ALL_DONE` (14:02:30 → 00:06:56) | 10.07 | 9.97 |
-| D0 re-score + artifact transfer + teardown | ~1.3 | ~1.29 |
-| **phase 1 total** | **~11.4** | **~$11.3** |
+| item | min | $ | assessment |
+| --- | ---: | ---: | --- |
+| 5 pods that never left `runtime: null` | 79 | **1.30** | **wasted** — `--min-cuda-version 13.0` on a cu128 image |
+| pods that started and crashed in setup | ~27 | **~0.44** | **wasted** — hand-listed deps instead of the lockfile |
+| pod `n7xjbzlmsyx9b2`, create → teardown | 681 | **11.23** | the experiment |
+| **phase 1 total** | **787** | **$12.97** | of which **$1.74 was avoidable** |
 
-Against the $18.78 hard stop and the $13.17 forecast — **under both**. Cumulative
-project spend ≈ $107.3 of the $126.02 cap.
+Against the **$18.78** hard stop and the $13.17 forecast — under the stop with
+$5.81 unspent, and $0.20 under the forecast **only because the forecast happened
+to absorb my own $1.74 of waste**. The experiment itself came in at $11.23.
+
+The 681 productive minutes break down as: setup 34, both D0 endpoints + gate 49,
+training both arms 133, evaluation 389 (20 checkpoints, 6 full batteries), D0
+re-score + transfer + teardown 76. **Evaluation was 57% of the bill**, and the
+degenerate checkpoints drove it — `sb`@127 alone cost ~75 min against the
+endpoint's ~20, because nothing terminated and the scheduler held batch 63.
+
+Cumulative project spend **$108.99** of the $126.02 cap ($96.02 prior + $12.97).
+**$17.03 of the $30 Experiment 2 allocation is unspent.**
 
 #### Artifacts
 
