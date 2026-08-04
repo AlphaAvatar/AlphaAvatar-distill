@@ -1,23 +1,37 @@
-**Updated:** 2026-08-03 19:40 UTC · branch `main` · **no pods running, nothing
-billing.** Verified spend **$96.02**. **Experiment 2 has an approved incremental
-budget of $30.00** (maintainer, 2026-08-03) → **new cumulative hard cap
-$126.02**.
+**Updated:** 2026-08-04 00:30 UTC · branch `main` · **pod teardown in progress,
+artifact transfer running.** Verified spend **≈$107.3** of the **$126.02** cap
+($96.02 prior + ≈$11.3 for Experiment 2 phase 1, against its $18.78 stop).
 
-**Active work:** **Experiment 2** — three sequential single-variable diagnostics
-at Experiment 1's **0.86M** rung: (1) data cleaning, (2) loss with KL-only first,
-(3) learning rate. Each reuses the previous phase's winner as its control. Not a
-Cartesian sweep.
+**Active work:** **Experiment 2 phase 1 is COMPLETE** — the data-cleaning
+diagnostic ran end to end on one L40S pod, 2026-08-03T14:02:30Z → 00:06:56Z, one
+pod attempt, no restarts. Full record in [`EXPERIMENTS.md`](EXPERIMENTS.md) §12.15.
 
-**Phase 1 is fully prepared on CPU for $0** — capability battery frozen
-(`capability-v2`, 846 prompts, safety refusal now a separate XSTest set),
-evaluators validated at 112 tests, checkpoints inventoried and cleaned. Phase 1
-costs **$13.17 expected / $18.78 pessimistic** and **fits** the unchanged $30
-cap (itemized in [`PROPOSAL.md`](PROPOSAL.md) §8.2/§8.8 — training $2.03, battery
-generation $9.06, mandatory behaviour generations at the 5 non-battery eval
-points $1.07, everything else $1.01); **all three phases now cost $42.90 expected / $66.15 pessimistic, which does
-not fit** — reported rather than absorbed, and a phase-2/3 budget decision is
-deferred until phase 1 reports. **Nothing is launched.** See
-[`PROPOSAL.md`](PROPOSAL.md).
+**Result, in one line: the primary gate passed arithmetically and should not be
+acted on, because phase 1 also showed that the metric behind it is
+anti-correlated with generation capability on this student.**
+
+* Primary gate: `sa` **+1.9079**, `sb` **+0.0157**, mean **+0.9618** → PASS
+  (both > 0, mean > 0.489). But 99.2% of the mean is one seed; seed disagreement
+  is 3.9× the noise floor; cleaning **raised** the seed spread from 0.489 to
+  2.381 nats. D0 was re-measured on the same pod and reproduces E1 to four
+  decimals, so this is not a machine artifact — it is a real, unresolvable
+  two-seed split.
+* **`best_holdout_nll` is disqualified as a selection identity.** `sb@127` holds
+  its trajectory's best held-out NLL and scores **0 protocol-valid on all 726
+  battery prompts**. `sa@508` is the same failure, milder. NLL on general text
+  peaks *before* the student specialises onto the teacher protocol.
+* Only seed-consistent capability result: **aggregate protocol validity falls**,
+  −0.0898 (`sa`) and −0.0731 (`sb`), D1 below D0 at the matched endpoint.
+* `correct` is at the floor on every set and every arm → reasoning axis reports
+  **`inconclusive`**, as the pre-registered floor rule requires.
+* Throughput gate: **PASS ×3** — 318.5 tok/s (1.25× the 254.8 baseline), step
+  p50 29.9/31.9/34.2 ms, GPU p50 100%. **`context_limit_rate` 0.0000 at all 20
+  checkpoints**; P18 intact.
+
+**Decision needed from the maintainer:** **phase 3 should not run as designed** —
+it was built to locate the held-out-NLL deterioration onset, which phase 1 shows
+is an artifact of measuring general-text NLL on a protocol-specialising student.
+Phases 2 and 3 remain unauthorized. ~$18.7 of the $30 allocation is unspent.
 
 Canonical handoff. Companions:
 

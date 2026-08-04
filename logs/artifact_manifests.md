@@ -410,3 +410,51 @@ the experiment (P5), not a re-derivable procedure.
   free LFS quota there; the operations that would all invalidate existing
   revisions and are reported for separate approval.
 - **Related logs:** [`PROPOSAL.md`](PROPOSAL.md) §9.
+
+## Experiment 2 phase 1 outputs (2026-08-04)
+
+Pod `n7xjbzlmsyx9b2` deleted after transfer; nothing remains on it.
+
+### Results bundle — transferred and hash-verified
+
+| field | value |
+| --- | --- |
+| file | `e2p1_results.tar.gz` |
+| size | 2,676,197 B |
+| sha256 | `b70e2ffb8efa59a3520a9781b6daa8e958e45cfec775c1c9f32940dd6aeee6be` |
+| verified | byte-identical on the pod and after transfer |
+| location | dev box, session scratchpad + unpacked alongside the checkpoints |
+| creation | `tar czf … eval/e2p1 --exclude=checkpoints stage3/e2_d1_{sa,sb}_pca` |
+
+Contents: complete raw generations for all 846 prompts × 6 full-battery
+checkpoints plus 76 prompts × 14 behaviour-only points, per-sample verdicts, 9
+battery scorings, 20 `behavior_v0` measurements, both `holdout_trajectory.jsonl`,
+both `run_manifest.json`, both `train_log.jsonl`, `throughput_gate.json`, and the
+same-machine D0 control `d0_holdout_nll_samemachine.json`.
+
+### Retained checkpoints — dev box only, NOT the relay
+
+`/home/ecs-user/aad-artifacts/e2p1/`, 23.7 GB, 7 checkpoints. Kept per the
+pre-registered retention rule; the two `step_001023` entries include
+`trainer_state.pt` and are resumable.
+
+| arm | step | identities | size |
+| --- | --- | --- | --- |
+| `e2_d1_sa_pca` | 508 | `best_holdout_nll`, `deterioration_onset` | 2.3 G |
+| `e2_d1_sa_pca` | 635 | `after_deterioration_onset` | 2.3 G |
+| `e2_d1_sa_pca` | 1016 | `best_val_ce` | 2.3 G |
+| `e2_d1_sa_pca` | 1023 | `final` (+ trainer state) | 5.6 G |
+| `e2_d1_sb_pca` | 127 | `best_holdout_nll`, `deterioration_onset` | 2.3 G |
+| `e2_d1_sb_pca` | 254 | `after_deterioration_onset` | 2.3 G |
+| `e2_d1_sb_pca` | 1023 | `final`, `best_val_ce` (+ trainer state) | 5.6 G |
+
+Dropped by retention on the pod before transfer: 24.6 GB across the 11
+non-retained eval points, whose **generations and metrics were all captured
+first** — every eval point has a `behavior_v0` measurement in the bundle.
+
+**Not uploaded to the relay.** Its LFS quota is full and ordinary deletion does
+not reclaim it, so these live on the dev box (117 GB free before, ~93 GB after).
+An upload would need either a new repository or an approved history rewrite;
+neither was requested and neither is needed, since no follow-up arm starts from a
+trained checkpoint — the maintainer's standing rule is that every new arm forks
+from the Stage 1 init (`86fbba78e8a2a324…`).

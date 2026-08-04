@@ -984,7 +984,171 @@ behaviour generations, previously unfunded) − $0.21 (engine reuse), against th
 unchanged **$18.78** hard stop — $5.61 of headroom. Still on the conservative
 3.771 s/prompt rate; the gate measures the real one.
 
-### 12.15 Status
+### 12.15 Phase 1 — executed and complete (2026-08-03 → 2026-08-04)
 
-**Nothing launched.** Zero GPU time spent. Phase 1 is authorized in principle and
-fits; phases 2–3 need a budget decision after phase 1 reports.
+Pod `n7xjbzlmsyx9b2` (1× L40S, $0.99/h), created 2026-08-03T14:02:30Z, one
+attempt, no restarts. Repo bundle @ `3d79242`, driver commits `ef3e70f` and
+`13aa8e7` applied live to the **evaluation resume path only** — never to the
+trainer, which stayed byte-identical to the one that produced D0.
+
+Markers: `SETUP_DONE` 14:36:39 · `D0_DONE:sa` 15:00:43 · `GATE_PASS` 15:00:46 ·
+`D0_DONE:sb` 15:25:58 · `TRAIN_DONE:sa` 16:37:33 · `TRAIN_DONE:sb` 17:38:49 ·
+`EVAL_DONE:sa` 21:15:32 · `EVAL_DONE:sb` 00:06:43 · `ALL_DONE` 00:06:56.
+
+Configs: `sa` `16093a59c4d561a7…`, `sb` `f87d4bc62d26dc54…`. Both arms started
+from the Stage 1 PCA/sandwich init, sha256 `86fbba78e8a2a324…` verified on the
+pod before either trained. Neither started from a trained checkpoint.
+
+#### The throughput gate — PASS on all three conditions
+
+Measured on the first D0 endpoint before anything else ran, as specified.
+
+| condition | measured | limit | verdict |
+| --- | --- | --- | --- |
+| aggregate output tok/s | **318.5** (1.25× the 254.8 baseline) | ≥ 306.0 | PASS |
+| scheduler step p50, comparable waves | 29.9 / 31.9 / 34.2 ms | ≤ 100 | PASS |
+| GPU utilization p50 | 100% | ≥ 40 | PASS |
+
+426,898 output tokens in 1,340.5 s of generation wall time. vLLM 0.26.0,
+`max_num_seqs` 256, `max_num_batched_tokens` 8192, `max_model_len` 8192,
+`gpu_memory_utilization` 0.9, one engine init (89.3 s) amortised over 8 prompt
+files. Continuous batching confirmed: effective batch tracked model health from
+13.9 (healthy D0) to 63.4 (fully degenerate `sb@127`).
+
+**`context_limit_rate` is 0.0000 at every one of the 20 evaluated checkpoints.**
+Resolved effective context 8,192 = the *trained* block length, recorded as such
+rather than the architectural 262,144. Only two stop reasons ever occur, `eos`
+and `degeneration`, and `right_censored_rate == degeneration_rate` exactly — so
+no generation was truncated by the engine and P18 holds for the whole phase.
+
+#### The primary gate — arithmetically PASS, and not to be relied on
+
+`improvement_s = NLL(D0_s) − NLL(D1_s)`, both at step 1023:
+
+| seed | D0 | D1 | improvement |
+| --- | --- | --- | --- |
+| sa | 8.8758 | 6.9679 | **+1.9079** |
+| sb | 9.3649 | 9.3492 | **+0.0157** |
+| mean | 9.1204 | 8.1585 | **+0.9618** |
+
+Both > 0, mean > 0.489 → **PASS**. The D0 numbers were **re-measured on this pod**
+after `ALL_DONE` and reproduce the E1-logged values to four decimals, so the
+result is not a cross-machine artifact.
+
+It should still not be used as evidence that cleaning helped:
+
+* **99.2% of the mean comes from one seed.** Seed disagreement is 1.8922 nats,
+  **3.9× the 0.489 noise floor**; `sb`'s improvement is 0.032× that floor, i.e.
+  indistinguishable from zero.
+* **Cleaning increased seed variance ~4.9×.** D0's two seeds land 0.489 nats
+  apart; D1's land **2.381** apart (6.9679 vs 9.3492) from identical data and
+  identical init. `sa`'s trajectory is flat and low (6.88–7.43, never
+  deteriorates); `sb`'s wanders over 1.28 nats (8.50–9.78) and deteriorates from
+  step 127. Two seeds cannot resolve a difference smaller than that spread.
+* **The metric is anti-correlated with capability in this regime** (below).
+
+#### Held-out NLL does not track generation capability
+
+`sb@127` holds the **best held-out NLL of its entire trajectory** (8.5010, better
+than D0's 9.3649 and better than its own endpoint) and scores **0 protocol-valid
+on all 726 battery prompts**, with 98.7% degeneration on `behavior_v0`. `sa@508`,
+also `best_holdout_nll`, is the same failure one notch milder. On both seeds the
+checkpoint selected by held-out NLL is the one least able to produce a
+terminating generation, because NLL on general web text is maximised *before* the
+student specialises onto the teacher protocol — and that specialisation is the
+objective.
+
+**Consequence: `best_holdout_nll` is disqualified as a checkpoint-selection
+identity for this recipe, and phase 3 as designed — locating the NLL
+deterioration onset — would be measuring an artifact.** Phase 3 needs re-scoping
+before it is worth spending on.
+
+A second trap in the same family: `sa@127` reports **natural termination 1.000**,
+the best figure anywhere in the phase, beating D0's 0.816. Its median generation
+is **51 tokens**. It terminates perfectly because it says almost nothing. Neither
+`natural_termination_rate` nor `holdout_nll` can be read alone.
+
+#### The matched endpoint comparison — the only seed-consistent result
+
+Protocol-valid rate at step 1023, D1 − D0:
+
+| set | D0 sa | D1 sa | D0 sb | D1 sb |
+| --- | --- | --- | --- | --- |
+| knowledge | 0.1467 | 0.1333 | 0.1267 | 0.1867 |
+| math_verified | 0.2900 | 0.2100 | 0.1900 | 0.0800 |
+| gsm8k | 0.3600 | 0.3500 | 0.4600 | 0.2900 |
+| multihop | 0.4900 | 0.5500 | 0.6700 | 0.4800 |
+| rag | 0.8800 | 0.5700 | 0.7500 | 0.6700 |
+| answerability (pair) | 0.8500 | 0.5750 | 0.7500 | 0.7083 |
+| safety (pair) | 0.0500 | 0.0500 | 0.0700 | 0.0900 |
+| **mean** | **0.4381** | **0.3483** | **0.4310** | **0.3579** |
+
+**Aggregate protocol validity falls on both seeds: −0.0898 (`sa`), −0.0731
+(`sb`).** This is the one quantity in the phase that agrees across seeds, and it
+points against the cleaned corpus. `behavior_score_v0` also falls on both
+(0.3731→0.3425, 0.3640→0.3601) but both deltas are inside the 0.1290 seed-noise
+floor and carry no weight.
+
+**`correct` is at the floor for every set on every arm** (max 0.07, mostly 0.00).
+Per the pre-registered floor rule the reasoning axis reports **`inconclusive`**:
+0.86M supervised tokens does not lift a 0.6B student off zero, so this rung
+cannot rank two corpora on task correctness — only on protocol behaviour, where
+it ranks D1 below D0.
+
+Protocol competence returns **shortest-prompt-first**. At `sb@254`, `knowledge`
+protocol is 0.447 (3.5× D0's 0.127) and carries the phase's only non-zero
+knowledge `correct` reading (0.0133), while `multihop` sits at 0.02 and `rag` at
+0.36. Recovery is bounded by how far into a generation format survives, not by
+task difficulty.
+
+#### Verdict
+
+**Median-length cleaning bought a held-out NLL improvement that one seed produced
+entirely and the other did not reproduce, and cost ~0.08 aggregate protocol
+validity consistently on both seeds. No capability metric improved. The phase's
+main product is not a corpus decision but the finding that its own primary metric
+is unreliable here.**
+
+Phase 1's question — does E1's held-out NLL deterioration reflect real capability
+loss — is answered: **no, and the reverse is closer to true.** Held-out NLL and
+generation capability move in opposite directions across the early trajectory.
+
+#### Actual cost
+
+| item | h | $ |
+| --- | ---: | ---: |
+| pod, create → `ALL_DONE` (14:02:30 → 00:06:56) | 10.07 | 9.97 |
+| D0 re-score + artifact transfer + teardown | ~1.3 | ~1.29 |
+| **phase 1 total** | **~11.4** | **~$11.3** |
+
+Against the $18.78 hard stop and the $13.17 forecast — **under both**. Cumulative
+project spend ≈ $107.3 of the $126.02 cap.
+
+#### Artifacts
+
+* `e2p1_results.tar.gz`, 2,676,197 B, sha256
+  `b70e2ffb8efa59a3520a9781b6daa8e958e45cfec775c1c9f32940dd6aeee6be`, verified
+  byte-identical after transfer. Holds all complete raw generations, per-sample
+  verdicts, 9 battery scorings, 20 `behavior_v0` measurements, both holdout
+  trajectories, both run manifests, both train logs, `throughput_gate.json`.
+* 7 retained checkpoints, 23.7 GB, on the dev box at
+  `/home/ecs-user/aad-artifacts/e2p1/` — **not** on the relay, whose LFS quota is
+  full and not reclaimable by deletion. Retention followed the pre-registered
+  rule: `sa` {508 `best_holdout_nll`+`deterioration_onset`, 635 after-onset, 1016
+  `best_val_ce`, 1023 `final`}, `sb` {127 `best_holdout_nll`+onset, 254
+  after-onset, 1023 `final`+`best_val_ce`}.
+
+#### Two defects found and fixed during the run
+
+* `behavior.py::final_number` raised `OverflowError` on a ~400-digit generated
+  number (`float()` → `inf` → `int(inf)`). Pre-existing since E1; guarded with
+  `math.isfinite`. No completed result changed.
+* D1 checkpoints ship no tokenizer files, and `AutoTokenizer.from_pretrained`
+  silently built a **vocab-size-1** tokenizer rather than failing — `eval_ppl`
+  then divided by zero tokens. Fixed by copying the tokenizer from the Stage 1
+  init before scoring. A silent-wrong failure, which is why it is recorded here.
+
+#### Status
+
+Phase 1 complete. **Phases 2 and 3 are not authorized and phase 3 should not run
+as designed** — its primary metric is the one this phase invalidated.

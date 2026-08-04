@@ -918,3 +918,71 @@
   isolate "teacher-native" from "more supervision" (proposal §11.7).
 - **Revisit when:** the corrected baseline has run and its step-0 and per-arm
   metrics are recorded.
+
+## 2026-08-04 — Held-out NLL is not a checkpoint-selection metric for this recipe
+
+- **Context:** Experiment 2 phase 1 measured held-out NLL and a 846-prompt
+  capability battery at 10 eval points per seed on two D1 arms plus both D0
+  endpoints. The phase's primary gate is stated in held-out NLL, and phase 3 was
+  designed entirely around locating that metric's deterioration onset.
+- **Decision:** **retire `best_holdout_nll` as a checkpoint-selection identity,
+  and do not run phase 3 as designed.** Keep measuring held-out NLL as a
+  diagnostic of general-text fit; stop treating it as a proxy for model quality
+  or as the basis for selecting or ranking checkpoints.
+- **Evidence:** `e2_d1_sb_pca@127` holds the best held-out NLL of its entire
+  trajectory (8.5010 — better than D0's 9.3649 and better than its own endpoint)
+  and produces **0 protocol-valid generations across all 726 battery prompts**,
+  with 98.7% degeneration on `behavior_v0`. `e2_d1_sa_pca@508`, also
+  `best_holdout_nll`, is the same failure milder. On both seeds the checkpoint
+  the metric selects is the one least able to terminate a generation.
+- **Mechanism:** NLL on general web text is maximised *before* the student
+  specialises onto the teacher's thinking protocol. Specialisation is the
+  training objective, so the metric and the objective diverge by construction,
+  and the divergence is largest early in training — exactly where the onset
+  detector looks.
+- **Alternatives considered:** (a) keep the metric and widen the seed count —
+  rejected, the problem is bias not variance, more seeds would measure the wrong
+  thing more precisely; (b) keep phase 3 but change its target metric — deferred
+  to the maintainer, since it is a re-scoping of an unauthorized phase, not a
+  correction to an authorized one.
+- **Related trap, same family:** `sa@127` reports natural termination **1.000**,
+  the best figure in the phase, on a **51-token** median generation. Any single
+  scalar — `natural_termination_rate`, `holdout_nll`, `behavior_score_v0` — is
+  gameable by a degenerate policy. Selection must read correctness, protocol
+  validity, termination and length together.
+- **Expected upside:** stops a phase-3 spend on an artifact, and stops future
+  recipes shipping an under-trained checkpoint because it won on perplexity.
+- **Risks:** no validated replacement selection metric yet. `best_val_ce` and
+  `final` remain retained but are not themselves validated as good selectors;
+  at this rung every checkpoint scores at the correctness floor, so no metric can
+  currently be ranked against task success.
+- **Revisit when:** a rung exists at which `correct` leaves the floor, so
+  selection identities can be scored against task success rather than against
+  each other.
+
+## 2026-08-04 — Experiment 2 phase 1 result: cleaning is not adopted
+
+- **Context:** phase 1 asked whether median-length survivor cleaning (`clean-v2`)
+  improves on the E1 0.86M corpus, at matched tokens, matched seeds, matched
+  init, matched trainer.
+- **Decision:** **do not adopt the cleaned corpus.** Record the phase as
+  answering its diagnostic question, not as selecting a corpus.
+- **Evidence:** the primary NLL gate passes arithmetically (`sa` +1.9079, `sb`
+  +0.0157, mean +0.9618 > 0.489) but 99.2% of the mean comes from one seed, and
+  cleaning **raised** the between-seed spread from D0's 0.489 nats to 2.381 —
+  identical data and init, seed alone. The only seed-consistent capability
+  reading points the other way: aggregate protocol validity falls −0.0898 (`sa`)
+  and −0.0731 (`sb`) at the matched endpoint. `correct` is at the floor
+  everywhere, so the reasoning axis is **`inconclusive`** by the pre-registered
+  floor rule.
+- **Alternatives considered:** adopting on the gate as written — rejected; the
+  gate was pre-registered in good faith but phase 1 itself invalidated its
+  metric, and adopting on it would be following a rule past the point where its
+  premise failed.
+- **Expected upside:** avoids carrying a corpus change forward on one seed's
+  result.
+- **Risks:** a real effect may exist and be hidden by the 2.381-nat seed spread;
+  two seeds cannot resolve it. Re-running at more seeds costs more than the
+  remaining allocation and would still be measured by the retired metric.
+- **Revisit when:** a rung large enough to lift `correct` off the floor is
+  funded, at which point cleaning can be judged on task success.
