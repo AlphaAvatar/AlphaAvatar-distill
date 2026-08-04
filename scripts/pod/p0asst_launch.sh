@@ -6,7 +6,7 @@
 #   1. GPU price is CHECKED before creating anything. An RTX A6000 above the
 #      authorized $0.33/h, or absent, stops the run — there is no fallback to a
 #      pricier card, because the authorization named both the card and the price.
-#   2. `--terminate-after` is an absolute UTC deadline set from BACKSTOP_HOURS.
+#   2. `--terminate-after` is an absolute UTC deadline set from BACKSTOP_MINUTES.
 #      It is RunPod-side, so it fires even if this launcher, the pod-side driver
 #      and the poller are all dead. At 5 h x $0.33 that caps exposure at $1.65.
 #   3. The launcher deletes the pod itself the moment ALL_DONE lands, so the
@@ -20,7 +20,11 @@ SESSION_COMMIT=${SESSION_COMMIT:?}
 BUNDLE_NAME=${BUNDLE_NAME:?}
 GPU_NAME=${GPU_NAME:-NVIDIA RTX A6000}
 MAX_PRICE=${MAX_PRICE:-0.33}
-BACKSTOP_HOURS=${BACKSTOP_HOURS:-7}
+# Minutes, not hours: `date -d "+4.5 hours"` is rejected by GNU date and
+# silently produced an EMPTY --terminate-after on 2026-08-04, creating a pod
+# with no backstop at all -- the one safety property that must survive the
+# orchestrator dying. Integer minutes always parse.
+BACKSTOP_MINUTES=${BACKSTOP_MINUTES:-270}
 STARTUP_LIMIT_MIN=${STARTUP_LIMIT_MIN:-15}
 MAX_POD_ATTEMPTS=${MAX_POD_ATTEMPTS:-2}
 REF_REVISION=${REF_REVISION:-c1899de289a04d12100db370d81485cdf75e47ca}
@@ -69,8 +73,12 @@ say "$GPU_NAME available at \$$PRICE/h — within the \$$MAX_PRICE cap"
 
 create_pod() {
   local deadline
-  deadline=$(date -u -d "+${BACKSTOP_HOURS} hours" +%Y-%m-%dT%H:%M:%SZ)
-  echo "[$(date -u +%FT%TZ)]   backstop --terminate-after $deadline" >>"$LOG"
+  deadline=$(date -u -d "+${BACKSTOP_MINUTES} minutes" +%Y-%m-%dT%H:%M:%SZ)
+  if [ -z "$deadline" ]; then
+    echo "[$(date -u +%FT%TZ)] FATAL: empty backstop deadline; refusing" >>"$LOG"
+    return 1
+  fi
+  echo "[$(date -u +%FT%TZ)]   backstop $deadline (${BACKSTOP_MINUTES} min)" >>"$LOG"
   runpodctl pod create \
     --image "${POD_IMAGE:-runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404}" \
     --gpu-id "$GPU_NAME" --gpu-count 1 \
