@@ -1031,3 +1031,71 @@ written**. Phase 2 (KL-only first) does not depend on the retired metric, but it
 registered acceptance criteria do, and would need restating against protocol
 validity and termination before it is worth funding. Both remain unauthorized;
 ~$18.7 of the $30 allocation is unspent.
+
+---
+
+## 13. Proposed next experiment (2026-08-04) — NOT authorized, not started
+
+The forensic audit (EXPERIMENTS §15) put us in the branch the maintainer
+pre-registered as: *"if the overfitted checkpoint reproduces training targets but
+held-out correctness remains at floor, treat this primarily as a
+generalization/distillation problem and propose a small CE-versus-KD mechanism
+test."* It does reproduce them — ~0.92 teacher-forced top-1 with `</think>` at
+1.000 and `<|im_end|>` at 0.974 — and held-out correctness is at floor.
+
+### 13.1 One free check first, before any GPU
+
+The corpus records per-target verification. It is **not** uniformly clean:
+
+| type | n | verified correct | dominant failure |
+|---|---:|---:|---|
+| rag_evidence | 4,100 | 0.979 | gold_span_missing 88 |
+| gsm8k | 1,698 | **0.888** | answer_mismatch 190 |
+| multihop_qa | 1,074 | 0.858 | gold_span_missing 152 |
+| openmath | 579 | **0.642** | answer_mismatch 160, no_boxed 44 |
+| code | 1,123 | — | unverifiable slice |
+| tool_calling | 2,600 | — | unverifiable slice |
+
+**11.2% of GSM8K targets and 35.8% of openmath targets teach a wrong answer.**
+That is real supervision contamination and it is free to remove — the corpus is
+already generated and already labelled. It is **not** sufficient to explain 0%
+correctness (89% of GSM8K targets are correct), so it is a confound to remove,
+not the cause.
+
+### 13.2 The proposed arms — one variable, cheapest rung, two seeds
+
+At the **0.86M** rung, both seeds, every arm forked from the Stage 1 init
+(`86fbba78…`), `truncate_padding: true`, all else identical to D0:
+
+| arm | change | question |
+|---|---|---|
+| **M0** | the existing D0 (0.25·CE + 1.0·KD, `kd_scope: all`) | control, already run |
+| **M1** | `kd_scope: assistant` | is KD over context tokens spending capacity on form rather than computation? |
+| **M2** | CE only (1.0/0.0) | does the teacher's distribution contribute anything the hard labels do not? |
+| **M3** | M1 + verified-correct targets only | does removing 11%/36% wrong supervision move correctness? |
+
+M1 is the single most informative single-field change: KD currently applies at
+**every real position**, so the majority of the KD signal is on prompt and
+context tokens the model is not asked to produce. That is a plausible mechanism
+for "learned the surface form, not the computation" and it is one config field.
+
+**Primary metric: strict correctness on the frozen battery**, reported per set,
+with protocol validity and termination reported separately and never folded in.
+Held-out NLL is a guard rail only — it was retired as a selection metric on
+2026-08-04 and nothing here reinstates it.
+
+**Pre-registered floor rule:** if all arms remain at the correctness floor, the
+result is `inconclusive` on the mechanism and the next lever is scale or
+initialization, not another objective tweak.
+
+### 13.3 Cost, and what it is not
+
+3 new arms × 2 seeds × ~35 min ≈ 3.5 h training, plus ~1.5 h evaluation, on an
+RTX A6000 at $0.33/h ≈ **$1.7 expected, ~$2.6 pessimistic**. Against $16.51
+remaining in the Experiment 2 allocation.
+
+**This is a re-scoped version of the paused Phase 2, not a new authorization and
+not a way around the pause.** It needs explicit approval before anything runs.
+Phase 3, L1, R1, R2 and all rollout/on-policy work remain paused and are not
+proposed here — the audit found nothing that makes an exposure-bias remedy
+indicated.
