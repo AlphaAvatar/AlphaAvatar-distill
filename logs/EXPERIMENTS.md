@@ -1354,7 +1354,14 @@ numbers are **not** materially affected; what is broken is cross-model compariso
 
 **This settles the capacity question. A model with our student's exact parameter
 count solves ~70% of GSM8K and ~78% of RAG.** The task is not beyond 0.6B and the
-battery is not too hard. The gap is the recipe.
+battery is not too hard.
+
+What it does **not** do is localise the gap. It shows a model at approximately
+this size can perform substantially better; it does not separate which part of
+our training stack or trajectory is responsible. **Attribute the gap to the whole
+stack — initialization, data, token budget, stages, curriculum and objectives —
+until evidence separates them.** No single component, and specifically not the
+loss recipe, is implicated by this measurement.
 
 ### 14.3 Diagnostic B — the overfitted control cannot reproduce its own targets
 

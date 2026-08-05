@@ -1254,6 +1254,9 @@ a cross-model capacity scale. See [`decisions.md`](decisions.md), 2026-08-05.
 **The capacity question needs no anchor.** It is already answered by the
 completed capability battery (`EXPERIMENTS.md` §14.2, rescored §15.1): the
 official 0.6B substantially outperforms the current student under our own
-protocol. Nothing further is required to establish that the gap is the recipe.
+protocol. That closes whether a model at approximately this size can perform
+substantially better; it does **not** isolate the gap to any one component, which
+belongs to the broader training stack and trajectory until evidence separates
+them.
 
 The optional oracle component was withdrawn with it and was not run.

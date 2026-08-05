@@ -1105,6 +1105,16 @@
   bounds the *task*, not the *recipe*.
 - **Risks:** this result is easy to over-read as "so our approach must work".
   Recorded here explicitly so it is not.
+- **Amended 2026-08-05 — reaffirmed after I drifted past it.** Summarising the
+  battery in `STATE.md` after P2, I wrote "the gap is the recipe" in three places.
+  That is the *symmetric* over-read this record already warned against: it bounds
+  the task, and it localises nothing. The maintainer corrected it. **Binding
+  wording: the battery closes whether a model at approximately this size can
+  perform substantially better; the remaining gap belongs to the broader training
+  stack and trajectory — initialization, data, token budget, stages, curriculum
+  and objectives — until further evidence separates them.** The guard rail existed
+  and was still crossed, so the constraint is now stated in `STATE.md` and
+  `EXPERIMENTS.md` §14.2 at the point of use, not only here.
 
 ## 2026-08-05 — Reject assistant-only KD; P1 aliases the P0-real arms
 

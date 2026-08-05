@@ -458,8 +458,16 @@ Rescored `correct`, project / native:
 | 0.173 / 0.173 | 0.62 / 0.58 | **0.70 / 0.69** | 0.60 / 0.52 | **0.74 / 0.71** | 0.333 / 0.367 | 0.08 / 0.02 |
 
 **A model with our student's geometry solves ~70% of GSM8K and ~74% of RAG under
-our own protocol.** The task is reachable at 0.6B, the battery is not too hard,
-and the gap is the recipe. Artifacts: `artifacts/eval/e2diag_rescored_v2/`.
+our own protocol.** The task is reachable at 0.6B and the battery is not too
+hard. Artifacts: `artifacts/eval/e2diag_rescored_v2/`.
+
+**What this does not establish.** The battery closes whether a model at
+approximately this size *can* perform substantially better. It does **not**
+isolate the remaining gap to any one component. **Attribute the gap to the
+broader training stack and trajectory — initialization, data, token budget,
+stages, curriculum and objectives — until further evidence separates them.**
+Writing "the gap is the recipe" overstates it and is not supported by anything on
+record.
 
 **Binding scope rule for teacher-forced reasoning top-1.** It is a
 **within-family controlled-comparison metric** — valid for P1 vs P0-assistant vs
@@ -477,8 +485,11 @@ anchor — the battery above already answers it.
    reasoning top-1 is ~0.57 and moves by only ~0.05 across every recipe tried,
    while free-rollout correctness sits at 0.15–0.21 and is dominated by
    `cycle` degeneration — exact repetition loops, the classic exposure-bias
-   signature. **Offline objectives are not the lever; the train/inference
-   distribution mismatch is.**
+   signature. Train/inference distribution mismatch is the **leading hypothesis**
+   for what remains, and the cheapest one to test. It is not established: what
+   §17/§18 rule out is *reweighting the two existing loss terms*, which is
+   narrower than "offline objectives". Initialization, data, token budget, stages
+   and curriculum remain equally unseparated.
 
    `src/aadistill/rollout/` holds **2,075 lines of tested infrastructure**
    (engines, snapshots, off-policy measurement) and **no training path consumes
