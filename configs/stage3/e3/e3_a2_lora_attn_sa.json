@@ -1,7 +1,7 @@
 {
  "stage": "stage3_recovery",
  "run_name": "e3_a2_lora_attn_sa",
- "_purpose": "Experiment 3 arm A2 (attention LoRA r8): identical to A1 except that LoRA (rank 8, alpha 16, dropout 0, bias none, B=0 so the initial merged model is exactly the Stage 1 model) is added to self_attn q/k/v/o while their base weights stay frozen. LoRA tensors are optimized by the SAME single AdamW group, learning rate, schedule and weight decay as every other trainable parameter -- no separate LoRA lr, no separate parameter group. lora.seed is pinned across both arms so the run seed varies block order only, exactly as in A0/A1.",
+ "_purpose": "Experiment 3 arm A2 (attention LoRA r8): identical to A1 except that LoRA (rank 32, alpha 16 -- alpha is held constant in r, the LoRA paper's own convention for varying rank, so the alpha/r scaling moves 2.0 -> 0.5 and no learning rate needs retuning, dropout 0, bias none, B=0 so the initial merged model is exactly the Stage 1 model) is added to self_attn q/k/v/o while their base weights stay frozen. LoRA tensors are optimized by the SAME single AdamW group, learning rate, schedule and weight decay as every other trainable parameter -- no separate LoRA lr, no separate parameter group. lora.seed is pinned across both arms so the run seed varies block order only, exactly as in A0/A1.",
  "student_path": "artifacts/stage1/qwen3_0p6b_init_v0/checkpoint",
  "teacher": {
   "model_id": "Qwen/Qwen3-4B-Thinking-2507",
@@ -62,7 +62,7 @@
  "rung": 860000,
  "val_blocks": 16,
  "lora": {
-  "rank": 8,
+  "rank": 32,
   "alpha": 16,
   "dropout": 0.0,
   "bias": "none",

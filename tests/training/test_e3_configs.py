@@ -96,8 +96,11 @@ def test_a2_differs_from_a1_only_by_the_adapter(seed):
     assert differing == {"lora"}, differing
 
     cfg = LoRAConfig.from_dict(arm["lora"])
-    assert (cfg.rank, cfg.alpha, cfg.dropout, cfg.bias) == (8, 16.0, 0.0, "none")
-    assert cfg.scaling == 2.0
+    assert (cfg.rank, cfg.alpha, cfg.dropout, cfg.bias) == (32, 16.0, 0.0, "none")
+    # alpha is a constant in r (the LoRA paper's convention for varying rank):
+    # the alpha/r scaling is what lets one learning rate serve several ranks, so
+    # raising r to 32 lowers scaling to 0.5 rather than requiring a retune.
+    assert cfg.scaling == 0.5
     assert cfg.target_patterns == (r"\.self_attn\.(q_proj|k_proj|v_proj|o_proj)$",)
     # No separate optimizer settings anywhere in the arm.
     assert arm["optim"] == base["optim"] == p1(seed)["optim"]

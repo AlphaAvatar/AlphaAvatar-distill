@@ -2450,7 +2450,7 @@ Two arms, one variable each, against the existing baseline:
 | --- | --- | --- |
 | **A0** = **P2-ceheavy** `p2_ceheavy_{sa,sb}` | q/k/v/o + q_norm/k_norm, full-rank | — |
 | **A1** | q_norm/k_norm only; **projections frozen** | identical to A0 |
-| **A2** | A1 + **LoRA r8** on q/k/v/o, base frozen | identical to A1 |
+| **A2** | A1 + **LoRA r32** on q/k/v/o, base frozen | identical to A1 |
 
 A0 is **not** retrained. Its recorded results are the baseline, so the comparison
 inherits the exact 150 fixed examples and inclusion mask `d6e24e0b…` that every
@@ -2463,7 +2463,7 @@ have been confounded with the loss-weight change that separates the two
 families, and §18 measured that change to be worth −0.0141 on teacher-forced
 reasoning top-1. `tests/training/test_e3_configs.py` asserts the inheritance.
 
-**A2's adapter is not tuned.** Rank 8, alpha 16, dropout 0, bias none, and the
+**A2's adapter is not tuned.** Rank 32, alpha 16, dropout 0, bias none, and the
 LoRA tensors sit in the **same single AdamW group** at the same learning rate,
 schedule and weight decay as every other trainable parameter. There is no
 separate LoRA learning rate, no separate parameter group, and no rank or module
@@ -2487,10 +2487,18 @@ Trainable-parameter counts, measured on the real geometry (CPU, $0):
 | --- | ---: | ---: | ---: | ---: |
 | A0 | 440,467,456 | — | 440,467,456 | 73.9% |
 | A1 | 264,306,688 | — | 264,306,688 | 44.3% |
-| A2 | 264,306,688 | 2,293,760 | 266,600,448 | 44.7% |
+| A2 | 264,306,688 | 9,175,040 | 273,481,728 | 45.9% |
 
 A1 removes exactly the 176,160,768 parameters of the four projections. A2 puts
-back 1.3% of that as a rank-8 subspace, over 112 adapted modules.
+back 5.2% of that as a rank-32 subspace, over 112 adapted modules.
+
+**Rank was raised 8 → 32 by the maintainer at 16:10 UTC**, after both A1 arms had
+finished and before any A2 weight existed. **Alpha stays 16**, so the `α/r`
+scaling moves 2.0 → 0.5. That is the LoRA paper's own convention — α is held
+constant in `r` precisely so one learning rate serves several ranks — and it is
+the reading consistent with this experiment's rule that A2 varies low-rank
+*parameterization* and not optimization. Holding the scaling at 2.0 instead
+would have required α = 64, which is an optimization change nobody asked for.
 
 **The single-variable property is asserted mechanically, not by eye**
 (`tests/training/test_e3_configs.py`): each arm's config is diffed against the
@@ -2559,8 +2567,9 @@ teacher-native CE / FineWeb NLL are diagnostics that never rank an arm alone.
 
 * **n=2 seeds per arm.** A spread is one draw per condition; no variance claim
   will be made from it.
-* **Rank 8 is a single point.** A null result means "r8 on q/k/v/o under the
-  baseline's optimizer settings does not help", not "LoRA does not help".
+* **Rank 32 is a single point.** A null result means "r32 on q/k/v/o under the
+  baseline's optimizer settings does not help", not "LoRA does not help". The
+  r8 configuration was never trained, so this experiment says nothing about it.
 * **`usable_rollout` is blind to correctness by construction**, and its five
   components are not independent — `protocol_valid` subsumes two of them.
 * **INT8 is measured as held-out NLL only** (fake-quant, scopes `all` and
