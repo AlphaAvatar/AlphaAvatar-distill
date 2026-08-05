@@ -7,7 +7,8 @@ proposal files, which are preserved in git history at commit `866dac2`.
 32Q/8KV) → **student** 0.6B-class (1024 hidden, 28L, FFN 3072, 16Q/8KV, tied
 embeddings). BF16 training, INT8 deployment target.
 
-**Total spend to date: $109.51** of the **$126.02** cap.
+**Total spend to date: $117.32** of the **$126.02** cap — **$8.70 remains, and
+nothing beyond Experiment 3 is authorized.**
 
 | period | $ | detail |
 |---|---:|---|
@@ -15,8 +16,17 @@ embeddings). BF16 training, INT8 deployment target.
 | Experiment 1, data-scaling matrix | 61.50 | §11 — 24 arms $47.6, control + first eval $8.1, sweep $5.8 |
 | Experiment 2 phase 1, data cleaning | 12.97 | §12.15 — experiment $11.23, avoidable pod waste $1.74 |
 | Diagnostic session (benchmark + reference + recall) | 0.52 | §14 — 94 min on an RTX A6000 at $0.33/h |
+| D0 no-training diagnostics | 1.15 | §16 — 210 min on an RTX A6000 |
+| P0-assistant | 2.75 | §17 — 167 min on an L40S |
+| P2-ceheavy | 2.88 | §18 — 174.6 min on an L40S |
+| **itemized subtotal** | **116.29** | |
 
-**$16.51 of the $30 Experiment 2 allocation is unspent.** §6 below is the
+**Unreconciled: $1.03.** The itemized rows sum to $116.29 while the verified
+running total carried in `STATE.md` is **$117.32**. The difference is not
+attributed to any session here, so the **larger** figure is used for every
+remaining-budget decision. Do not "fix" this by deleting the gap.
+
+**$8.70 of the $30 Experiment 2 allocation is unspent.** §6 below is the
 *pre-Experiment-1* breakdown and its "project total" line is scoped to that
 period; this table is the current figure.
 
@@ -2416,3 +2426,180 @@ P0-assistant. P2-ceheavy is the only Stage 2/3 candidate with a verified local
 copy. No action is taken here — copying P1 to the dev box costs ~4.8 GB of the
 85 GB free and is a one-line operation, but it is a retention decision, not part
 of this re-analysis.
+
+---
+
+## 20. Experiment 3 — restricting attention updates at the 0.86M rung
+
+> **STATUS AT WRITING: REGISTERED BEFORE TRAINING.** Machine-readable
+> registration with every hash: [`logs/e3_registration.json`](e3_registration.json).
+> Results are appended below only after the run; nothing in §20.1–§20.4 was
+> written with knowledge of an outcome.
+
+### 20.1 The question
+
+Every Stage 2/3 family so far trains all four attention projections full-rank,
+and every one of them degenerates in free rollout: **31.1% of 900 rollouts run to
+the context limit** (§19.8), which is the classic exposure-bias signature. This
+experiment asks a narrow, cheap question about one candidate mechanism: **is the
+full-rank attention update itself a source of drift at this rung?**
+
+Two arms, one variable each, against the existing control:
+
+| | trainable attention | everything else |
+| --- | --- | --- |
+| **A0** = P1 = `e1_r0860k_{sa,sb}_pca` | q/k/v/o + q_norm/k_norm, full-rank | — |
+| **A1** | q_norm/k_norm only; **projections frozen** | identical to A0 |
+| **A2** | A1 + **LoRA r8** on q/k/v/o, base frozen | identical to A1 |
+
+A0 is **not** retrained. Its recorded results are the control, so the comparison
+inherits P1's exact 150 fixed examples and inclusion mask `d6e24e0b…`.
+
+**A2's adapter is not tuned.** Rank 8, alpha 16, dropout 0, bias none, and the
+LoRA tensors sit in the **same single AdamW group** at the same learning rate,
+schedule and weight decay as every other trainable parameter. There is no
+separate LoRA learning rate, no separate parameter group, and no rank or module
+sweep. A2 isolates low-rank *parameterization*; it is not an adapter
+hyperparameter search, and a second optimizer setting would be a second variable.
+
+### 20.2 What is held fixed, and what that costs
+
+Held fixed: the Stage 1 PCA fork point (`86fbba78…`), the nested uniform 0.86M
+rung (**682 blocks / 864,750 supervised tokens / 1,502 sessions**) and its exact
+block order, seeds `20260726`/`20260801`, `0.25·CE + 1.0·KD` at τ=1.0 with
+`kd_scope: all`, AdamW 5e-5 / wd 0.01 / betas (0.9, 0.95) / clip 1.0, 1,023 steps
+with 51 warmup, 2 blocks/step at `block_len` 8192, and the whole evaluation
+protocol including greedy decoding and unrestricted generation (P18).
+
+Trainable-parameter counts, measured on the real geometry (CPU, $0):
+
+| arm | full-rank | LoRA | total trainable | of 596,049,920 |
+| --- | ---: | ---: | ---: | ---: |
+| A0 | 440,467,456 | — | 440,467,456 | 73.9% |
+| A1 | 264,306,688 | — | 264,306,688 | 44.3% |
+| A2 | 264,306,688 | 2,293,760 | 266,600,448 | 44.7% |
+
+A1 removes exactly the 176,160,768 parameters of the four projections. A2 puts
+back 1.3% of that as a rank-8 subspace, over 112 adapted modules.
+
+**The single-variable property is asserted mechanically, not by eye**
+(`tests/training/test_e3_configs.py`): each arm's config is diffed against the
+control's and the differing key set must be exactly `{trainable_patterns}` for
+A1 and exactly `{lora}` for A2, with `run_name`/`out_dir`/`_purpose` excluded.
+
+### 20.3 The LoRA implementation, and why it is native
+
+`src/aadistill/training/lora.py`. Three properties a runtime-only adapter does
+not give for free, each of which the experiment depends on:
+
+1. **The saved `model/` is always the merged, adapter-free checkpoint.** All
+   three arms are therefore measured through one inference architecture, and no
+   evaluation path can accidentally score the un-adapted base model.
+2. **Exact resume.** The frozen base attention weights and the raw LoRA tensors
+   are stored next to the merged model (`lora_state.safetensors`) rather than
+   recovered by subtracting the delta — `(w + d) − d` is not exactly `w`, and an
+   inexact resume is not a resume.
+3. **`LoRALinear` subclasses `nn.Linear` and shares the base weight tensor**, so
+   the module keeps the `state_dict` key it replaced and costs no extra memory
+   for the base matrix.
+
+`B = 0` at initialization, so the initial merged model is *exactly* the Stage 1
+model; `A` is drawn from `U(±1/√fan_in)` with an explicit `torch.Generator`, so
+the draw is a pure function of (seed, module order, shapes) and does not perturb
+global RNG. **`lora.seed` is pinned across both A2 arms**, so the run seed varies
+block order only — exactly as it does in A0 and A1, keeping A2's seed spread
+comparable to theirs rather than inflated by a second random draw.
+
+### 20.4 Pre-registered decision rules and noise floors
+
+Applied mechanically by `scripts/evaluation/analyze_e3.py`:
+
+* **R1** — A1 improving rollout stability without materially reducing
+  correctness ⇒ full-rank attention updates are likely causing harmful drift.
+* **R2** — A2 beating both A1 and A0 **on both seeds** ⇒ constrained attention
+  adaptation is the preferred policy.
+* **R3** — A2 improving only teacher-forced CE/top-1 and not autonomous rollout
+  ⇒ **do not** claim the main problem is solved.
+* **R4** — both arms improving FineWeb NLL but not rollout ⇒ stop freeze-policy
+  exploration, recommend student-prefix / on-policy recovery.
+* **R5** — no promotion on one seed alone.
+* **R6** — no promotion for terminating earlier if correctness **conditional on
+  a usable rollout** falls.
+
+Every delta is read against P1's own two-seed spread on this same set:
+**usable rollout 0.0800**, free-rollout correctness **0.0600**, teacher-forced
+reasoning top-1 **0.0025**, teacher-native held-out CE **0.0063**.
+
+The evaluation hierarchy is not inverted: `usable_rollout` and its five
+components are primary, correctness secondary, and teacher-forced top-1 /
+teacher-native CE / FineWeb NLL are diagnostics that never rank an arm alone.
+
+### 20.5 What this cannot settle, stated in advance
+
+* **n=2 seeds per arm.** A spread is one draw per condition; no variance claim
+  will be made from it.
+* **Rank 8 is a single point.** A null result means "r8 on q/k/v/o under P1's
+  optimizer settings does not help", not "LoRA does not help".
+* **`usable_rollout` is blind to correctness by construction**, and its five
+  components are not independent — `protocol_valid` subsumes two of them.
+* **INT8 is measured as held-out NLL only** (fake-quant, scopes `all` and
+  `decoder`). INT8 *rollout behaviour* is not measured and no claim is made
+  about it.
+* **A0's free/oracle/forced numbers come from an earlier session.** Only its
+  FineWeb NLL is re-measured on the same machine as A1/A2, so the BF16/INT8
+  comparison is same-machine while the rollout comparison is not.
+
+### 20.6 Pre-launch validation (CPU, $0)
+
+* **581 tests pass** (`uv run pytest tests/ -q`), including 32 new ones covering
+  the adapter's zero initial delta, merge fidelity in BF16, bitwise-exact resume
+  through a merged checkpoint, the block-stream position surviving a restart, the
+  freeze policy, and the config single-variable guarantees.
+* `scripts/training/validate_e3_arms.py` ran all six arms **on the real
+  596M-parameter student with the real Stage 1 weights**: freeze policy correct
+  for every arm, embeddings frozen everywhere, attention projections frozen in
+  A1/A2, 112 adapted modules in A2, **initial BF16 logits bit-identical before
+  and after `apply_lora`**, and the merged state dict free of adapter keys.
+  Report: `artifacts/audit/e3_prelaunch_validation.json`.
+* A0's parameter movement was computed locally from the rescued P1 weights, at
+  no cost, giving the control's baseline before any GPU was allocated:
+
+| group | A0-sa `‖ΔW‖_F / ‖W_init‖_F` | A0-sb |
+| --- | ---: | ---: |
+| ffn | 0.032538 | 0.032471 |
+| attn_proj | 0.016799 | 0.016751 |
+| decoder_norm | 0.001183 | 0.001169 |
+| attn_norm | 0.001121 | 0.001116 |
+| final_norm | 0.000446 | 0.000447 |
+| embedding | **0.000000** | **0.000000** |
+
+The control moves its attention projections by 1.68% relative. A1 forces that to
+exactly zero; A2 confines it to a rank-8 subspace. The zero on `embedding`
+is also the tool validating itself against a parameter known to be frozen.
+
+### 20.7 Budget
+
+Costed from the **measured** P2-ceheavy session (174.6 min for two arms of this
+exact rung on an L40S at $0.99/h), not by scaling token counts.
+
+| phase | min |
+| --- | ---: |
+| setup, downloads, test suite, arm validation | 38 |
+| train A1 ×2 | 123 |
+| A1 freeze gate | 6 |
+| train A2 ×2 | 126 |
+| tokenizer, merge check, movement ×4 | 22 |
+| held-out NLL, 3 precisions × 6 models | 24 |
+| three-mode harness ×4 | 44 |
+| checkpoint transfer | 25 |
+| **total** | **402 ≈ 6.7 h → $6.63** |
+
+Hard backstop 450 min = **$7.43**. Ledger remaining **$8.70**.
+
+**A budget discrepancy is recorded rather than resolved silently.** The
+instruction for this experiment cited an "established $50 hard cap" for student
+training. No such line exists in the ledger: the recorded caps are a **$50
+generation** cap (§6), a **$60 training** cap (2026-08-01 decision), and the
+binding **cumulative $126.02** cap with **$117.32 spent**. This session enforces
+the **strictest** of the available readings — the $8.70 cumulative remainder —
+and fits inside it, so the two readings do not disagree about whether to proceed.

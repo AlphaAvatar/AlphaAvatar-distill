@@ -228,6 +228,13 @@ def main() -> None:
             "teacher": teacher_identity,
             "student_source": str(model_path),
             "trainable_params": trainer.freeze_report["trainable_params"],
+            # Recorded separately so a run can always state how much of its
+            # capacity was full-rank and how much was low-rank (P4).
+            "full_rank_trainable_params":
+                trainer.freeze_report["full_rank_trainable_params"],
+            "lora_trainable_params": trainer.freeze_report["lora_trainable_params"],
+            "lora": (trainer.lora_cfg.to_dict() if trainer.lora_cfg else None),
+            "lora_modules": trainer.freeze_report.get("lora_modules"),
             "total_params": trainer.freeze_report["total_params"],
             "code_state": code_state(str(REPO_ROOT)),
             "hardware": hardware_report(),

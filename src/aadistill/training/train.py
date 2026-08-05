@@ -10,13 +10,23 @@ decision). `kd_scope` chooses whether KD applies at every prediction
 position ("all", dense signal including context tokens) or only where the
 CE mask is on ("assistant").
 
+An optional `lora` config adds low-rank adapters to selected linear modules
+(Experiment 3 arm A2: attention q/k/v/o) while their base matrices stay frozen.
+The saved `model/` directory is always the *merged*, adapter-free Hugging Face
+checkpoint, so every arm is evaluated through the same inference architecture;
+see `lora.py` for the design and the exact-resume argument.
+
 Reproducibility contract:
 - Block order is an infinite deterministic stream: epoch e's permutation is
   derived from (seed, e) alone, and a run's position in the stream is just
   `step * blocks_per_step`, so resume needs no dataloader state.
+- The LR schedule is a pure function of the step counter, so there is no
+  separate scheduler state to save either.
 - Checkpoints hold the student (save_pretrained, runtime-loadable) plus
-  optimizer state, step counter, RNG state, and the config hash; `restore`
-  refuses a checkpoint written under a different config or freeze set.
+  optimizer state, step counter, consumed-block position, RNG state, the
+  config hash and — for a LoRA run — the adapter config and the unmerged base
+  and LoRA tensors; `restore` refuses a checkpoint written under a different
+  config, freeze set or adapter spec.
 - The training log is append-only jsonl (AGENTS.md 3.7); resumed runs keep
   appending to the same file.
 
@@ -42,9 +52,18 @@ import torch.nn.functional as F
 
 from ..data.dataset import best_fit_blocks, encode_sample, load_split, pack_blocks
 from ..infrastructure.manifest import sha256_json
+from .lora import (
+    LoRAConfig,
+    apply_lora,
+    lora_and_base_tensors,
+    lora_report,
+    load_lora_and_base_,
+    merged_state_dict,
+)
 
 KD_SCOPES = ("all", "assistant", "all_no_think")
 PACKINGS = ("concat", "best_fit", "ladder")
+LORA_SUFFIXES = (".lora_A", ".lora_B")
 
 
 def validate_train_config(cfg: dict) -> None:
@@ -99,6 +118,20 @@ def validate_train_config(cfg: dict) -> None:
         need(optim, key, (int, float), "optim.")
     if len(need(optim, "betas", list, "optim.")) != 2:
         raise ValueError("optim.betas must have two entries")
+    # LoRA tensors are optimized by the *same* single AdamW group, learning rate,
+    # schedule and weight-decay semantics as every other trainable parameter.
+    # There is deliberately no separate LoRA learning rate or parameter group:
+    # A2 isolates low-rank attention parameterization, not adapter tuning, and a
+    # second optimizer setting would be a second variable.
+    if cfg.get("lora") is not None:
+        if not isinstance(cfg["lora"], dict):
+            raise ValueError("config field 'lora' must be a dict")
+        LoRAConfig.from_dict(cfg["lora"])          # raises on a bad adapter spec
+    for field in ("lora_lr", "lora_weight_decay", "no_decay_patterns"):
+        if field in optim:
+            raise ValueError(
+                f"optim.{field} is not supported: LoRA and full-rank parameters "
+                "share one optimizer group with identical settings")
     sched = need(cfg, "schedule", dict)
     for key in ("total_steps", "warmup_steps"):
         need(sched, key, int, "schedule.")
@@ -326,29 +359,45 @@ def kd_forward_kl(
     return total * (temperature * temperature), count
 
 
-def select_trainable(model, patterns) -> dict:
-    """Set requires_grad per parameter name; 'all' or a list of regexes."""
-    if patterns == "all":
-        names = []
-        for name, param in model.named_parameters():
+def select_trainable(model, patterns, lora_modules=None) -> dict:
+    """Set requires_grad per parameter name; 'all' or a list of regexes.
+
+    LoRA parameters are **not** governed by `trainable_patterns`: an adapter
+    exists only to be trained, and making it depend on a regex written for the
+    base model invites a silent no-op arm. They are excluded from the regex
+    sweep, forced trainable, and counted separately so a run can always state
+    how much of its capacity was full-rank and how much was low-rank.
+    """
+    lora_modules = lora_modules or {}
+    is_lora = {f"{m}{suffix}" for m in lora_modules for suffix in LORA_SUFFIXES}
+    full_names, lora_names = [], []
+    for name, param in model.named_parameters():
+        if name in is_lora:
             param.requires_grad_(True)
-            names.append(name)
-    else:
-        regexes = [re.compile(p) for p in patterns]
-        names = []
-        for name, param in model.named_parameters():
-            keep = any(r.search(name) for r in regexes)
-            param.requires_grad_(keep)
-            if keep:
-                names.append(name)
-        if not names:
-            raise ValueError(f"no parameters match trainable_patterns {patterns}")
+            lora_names.append(name)
+            continue
+        keep = patterns == "all" or any(
+            re.search(p, name) for p in patterns)
+        param.requires_grad_(keep)
+        if keep:
+            full_names.append(name)
+    if not full_names and patterns != "all":
+        raise ValueError(f"no parameters match trainable_patterns {patterns}")
+    full = sum(p.numel() for n, p in model.named_parameters()
+               if p.requires_grad and n not in is_lora)
+    lora = sum(p.numel() for n, p in model.named_parameters() if n in is_lora)
     return {
-        "trainable_names": names,
-        "trainable_params": sum(
-            p.numel() for p in model.parameters() if p.requires_grad
-        ),
-        "total_params": sum(p.numel() for p in model.parameters()),
+        "trainable_names": full_names + lora_names,
+        "full_rank_trainable_names": full_names,
+        "lora_trainable_names": lora_names,
+        "trainable_params": full + lora,
+        "full_rank_trainable_params": full,
+        "lora_trainable_params": lora,
+        # The base model's parameter count, i.e. what the merged deployable
+        # checkpoint holds. LoRA tensors are excluded because they do not
+        # survive the merge.
+        "total_params": sum(p.numel() for n, p in model.named_parameters()
+                            if n not in is_lora),
     }
 
 
@@ -479,7 +528,21 @@ class Trainer:
             for p in self.teacher.parameters():
                 p.requires_grad_(False)
 
-        self.freeze_report = select_trainable(self.student, cfg["trainable_patterns"])
+        # LoRA is applied *before* the freeze sweep and the optimizer is built,
+        # so the adapter is part of the trainable set from step 0 and never
+        # bolted onto a running optimizer.
+        self.lora_cfg = (
+            LoRAConfig.from_dict(cfg["lora"]) if cfg.get("lora") else None)
+        self.lora_modules = (
+            apply_lora(self.student, self.lora_cfg) if self.lora_cfg else {})
+
+        self.freeze_report = select_trainable(
+            self.student, cfg["trainable_patterns"], self.lora_modules)
+        if self.lora_cfg:
+            self.freeze_report.update(lora_report(self.lora_modules, self.lora_cfg))
+        # One group, one learning rate, one weight decay — for full-rank and
+        # LoRA parameters alike. Identical in shape and settings to every run
+        # before Experiment 3, so A2 differs from A1 only by the adapter itself.
         self.params = [p for _, p in self.student.named_parameters() if p.requires_grad]
         opt_cfg = cfg["optim"]
         self.opt = torch.optim.AdamW(
@@ -594,6 +657,8 @@ class Trainer:
             if self.teacher is not None and loss_cfg["kd_weight"] > 0
             else 0
         )
+        # A pure function of `step`, which is why the checkpoint needs no
+        # separate scheduler state.
         lr = cfg["optim"]["lr"] * lr_factor(
             self.step, sched["total_steps"], sched["warmup_steps"], sched["min_lr_frac"]
         )
@@ -713,17 +778,45 @@ class Trainer:
             print(f"eval step {self.step}{suffix} [{name}]: {ex}", flush=True)
         return ev
 
+    def consumed_blocks(self) -> int:
+        """Position in the infinite block stream. Resume needs no loader state."""
+        return self.step * self.cfg["batch"]["blocks_per_step"]
+
     def save_checkpoint(self) -> Path:
         tag = f"step_{self.step:06d}"
         ckpt_dir = self.out_dir / "checkpoints" / tag
-        self.student.save_pretrained(ckpt_dir / "model")
+        if self.lora_modules:
+            # `model/` is ALWAYS the deployable artifact: a plain Hugging Face
+            # checkpoint with the delta folded into q/k/v/o and no LoRA keys.
+            # Every arm of the experiment is then evaluated through the same
+            # inference architecture, and no evaluation path can accidentally
+            # score the un-adapted base model.
+            self.student.save_pretrained(
+                ckpt_dir / "model",
+                state_dict=merged_state_dict(self.student, self.lora_modules),
+            )
+            from safetensors.torch import save_file
+
+            save_file(lora_and_base_tensors(self.lora_modules),
+                      str(ckpt_dir / "lora_state.safetensors"))
+            (ckpt_dir / "checkpoint_meta.json").write_text(json.dumps({
+                "step": self.step,
+                "consumed_blocks": self.consumed_blocks(),
+                "model_dir_is_merged": True,
+                "config_sha256": self.config_sha,
+                **lora_report(self.lora_modules, self.lora_cfg),
+            }, indent=1))
+        else:
+            self.student.save_pretrained(ckpt_dir / "model")
         torch.save(
             {
                 "step": self.step,
+                "consumed_blocks": self.consumed_blocks(),
                 "optimizer": self.opt.state_dict(),
                 "torch_rng_state": torch.get_rng_state(),
                 "config_sha256": self.config_sha,
                 "trainable_names": self.freeze_report["trainable_names"],
+                "lora_config": self.lora_cfg.to_dict() if self.lora_cfg else None,
             },
             ckpt_dir / "trainer_state.pt",
         )
@@ -741,8 +834,14 @@ class Trainer:
 
         The caller loads the student weights from ``<ckpt_dir>/model`` before
         constructing the Trainer; this restores everything else.
+
+        For a LoRA run ``model/`` holds the *merged* weights, so the frozen base
+        attention matrices and the LoRA tensors are read back from
+        ``lora_state.safetensors`` and written over them. They are stored, not
+        recovered by subtracting the delta: ``(w + d) - d`` is not exactly ``w``.
         """
-        state = torch.load(Path(ckpt_dir) / "trainer_state.pt", weights_only=True)
+        ckpt_dir = Path(ckpt_dir)
+        state = torch.load(ckpt_dir / "trainer_state.pt", weights_only=True)
         if state["config_sha256"] != self.config_sha:
             raise ValueError(
                 "checkpoint was written under a different config "
@@ -751,10 +850,28 @@ class Trainer:
             )
         if list(state["trainable_names"]) != self.freeze_report["trainable_names"]:
             raise ValueError("checkpoint freeze set differs from current config")
+        saved_lora = state.get("lora_config")
+        current_lora = self.lora_cfg.to_dict() if self.lora_cfg else None
+        if saved_lora != current_lora:
+            raise ValueError("checkpoint LoRA config differs from current config")
+        if self.lora_modules:
+            from safetensors.torch import load_file
+
+            path = ckpt_dir / "lora_state.safetensors"
+            if not path.is_file():
+                raise FileNotFoundError(
+                    f"{path} missing; a LoRA run cannot resume from merged weights")
+            load_lora_and_base_(self.lora_modules, load_file(str(path)))
         self.opt.load_state_dict(state["optimizer"])
         self.step = int(state["step"])
+        expected = state.get("consumed_blocks")
+        if expected is not None and expected != self.consumed_blocks():
+            raise ValueError(
+                f"consumed-block position {self.consumed_blocks()} does not match "
+                f"the checkpoint's {expected}; batch config changed")
         torch.set_rng_state(state["torch_rng_state"])
-        self.logger.log("resume_loaded", step=self.step, checkpoint=str(ckpt_dir))
+        self.logger.log("resume_loaded", step=self.step, checkpoint=str(ckpt_dir),
+                        consumed_blocks=self.consumed_blocks())
 
     def run(self) -> dict:
         """Train to total_steps with periodic logging/eval/checkpointing."""
@@ -780,8 +897,10 @@ class Trainer:
                 },
                 **{
                     k: self.freeze_report[k]
-                    for k in ("trainable_params", "total_params")
+                    for k in ("trainable_params", "full_rank_trainable_params",
+                              "lora_trainable_params", "total_params")
                 },
+                lora_config=self.lora_cfg.to_dict() if self.lora_cfg else None,
             )
             if self.val_ids is not None:
                 self._eval_and_log(eval_blocks)
