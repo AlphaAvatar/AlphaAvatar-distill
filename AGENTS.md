@@ -907,6 +907,25 @@ Every stage must be reproducible, recorded, and resumable.
 
 Goal: collect the teacher signals needed for teacher-aware student initialization.
 
+**Stage 0/1 primary objective (clarified 2026-08-05).** Stage 0 and Stage 1 are
+the student-*initialization* stages. Their immediate primary objective is to give
+the student a **materially lower true step-0 initialization NLL** than a random or
+naive initialization under the same architecture, tokenizer, corpus and evaluation
+protocol.
+
+They are **not** expected to complete autonomous behaviour recovery. Their role is
+to provide a better starting point for the offline Stage 2/3 experiments, so their
+downstream value must be **tested rather than assumed**. A successful
+initialization should ideally produce: lower step-0 NLL; faster Stage 2/3
+behaviour recovery; fewer supervised tokens or steps to reach a usable-rollout
+level; greater seed stability; less behavioural collapse during training; and,
+once behaviour is comparable, better secondary correctness.
+
+**Do not equate lower initialization NLL with recovered behaviour** unless matched
+downstream experiments demonstrate that relationship. Keep initialization NLL,
+teacher-native CE, FineWeb NLL and teacher-forced top-1 as **separate** metrics;
+do not silently substitute one for another or combine them into a common scale.
+
 This stage is specifically for initialization, not for full offline distillation.
 
 Inputs may include:
@@ -1052,6 +1071,42 @@ Validation gate:
 ### 4.5 Stage 3 — Student recovery
 
 Goal: recover the initialized student before full on-policy training.
+
+**Stage 2/3 primary objective (clarified 2026-08-05).** Stage 2 and Stage 3 are
+the offline student-*behaviour-recovery* stages. Their primary objective is to
+restore **stable autonomous rollout capability**, so the student can later produce
+usable trajectories for Stage 5/6 on-policy distillation.
+
+Evaluation hierarchy — do not invert it:
+
+* **Primary — autonomous rollout behaviour:** non-empty output; natural
+  termination; no severe repetition or degeneration; no context-limit failure;
+  protocol-valid output.
+* **Secondary — task performance:** overall correctness; per-task correctness;
+  correctness conditional on a behaviour-valid/usable rollout.
+* **Diagnostic only:** teacher-forced reasoning top-1 and mean rank;
+  teacher-native CE; FineWeb NLL; training loss.
+
+The primary sample-level metric is
+
+```
+usable_rollout = non_empty AND natural_termination AND no_severe_repetition
+                 AND no_context_limit AND protocol_valid
+```
+
+implemented in `src/aadistill/evaluation/usable_rollout.py`. Report
+`usable_rollout_rate` **together with every component rate**. Do not hide
+trade-offs inside an arbitrary weighted average, and note that the components are
+not independent — `protocol_valid` subsumes two of them by construction, so the
+conjunction must not be presented as five agreeing checks.
+
+`usable_rollout` is blind to correctness by construction: a terse contentless but
+well-formed reply scores perfectly. That is why correctness is a separate
+secondary axis and must never be folded in.
+
+Any Stage 2/3 pass threshold must be **registered prospectively**, before the run
+it judges. Post-hoc re-analysis may rank candidates and inform a future gate; it
+must not be cited as though it had been pre-registered.
 
 This stage may include multiple recovery sub-stages, but they belong to the same high-level stage:
 

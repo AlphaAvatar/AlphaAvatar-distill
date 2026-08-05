@@ -1187,3 +1187,87 @@
 - **Revisit when:** a candidate reference model has been trained on this teacher's
   output distribution, or a metric is proposed for cross-model use — in which case
   the construct-validity question must be answered before the cost question.
+
+## 2026-08-05 — Clarified Stage 0/1 and Stage 2/3 objectives, and the `usable_rollout` metric
+
+- **Context:** Stage verdicts had drifted onto whichever metric happened to
+  resolve differences — teacher-distribution metrics for P0-assistant and
+  P2-ceheavy, held-out NLL before that. Neither is the objective those stages
+  exist to serve, and no metric expressed "can the student roll out on its own".
+- **Decision (maintainer):**
+  * **Stage 0/1 are the student-initialization stages.** Stage 0 characterizes the
+    teacher and produces the activation statistics, residual-stream projection and
+    structural selections; Stage 1 builds the initialization from them. Their
+    immediate primary objective is a **materially lower true step-0 initialization
+    NLL** than a random or naive initialization under the same architecture,
+    tokenizer, corpus and protocol. They are **not** expected to complete
+    autonomous behaviour recovery — their role is to give Stage 2/3 a better
+    starting point, and that downstream value must be **tested, not assumed**.
+  * **Stage 2/3 are offline behaviour-recovery stages.** Primary objective:
+    restore **stable autonomous rollout capability**, so the student can later
+    produce usable trajectories for Stage 5/6 on-policy distillation.
+  * **Evaluation hierarchy.** Primary: autonomous rollout behaviour. Secondary:
+    correctness, per-task correctness, correctness given a usable rollout.
+    Diagnostic only: teacher-forced top-1 and mean rank, teacher-native CE,
+    FineWeb NLL, training loss.
+  * **Primary sample-level metric:**
+    `usable_rollout = non_empty AND natural_termination AND no_severe_repetition
+    AND no_context_limit AND protocol_valid`, reported with **every component
+    rate**. No arbitrary weighted average; trade-offs are not hidden inside a
+    single scalar.
+  * **Keep initialization NLL, teacher-native CE, FineWeb NLL and teacher-forced
+    top-1 as separate metrics.** Do not substitute one for another or combine them
+    onto a common scale. Do not equate lower initialization NLL with recovered
+    behaviour unless matched downstream experiments demonstrate the relationship.
+- **Implementation:** `src/aadistill/evaluation/usable_rollout.py` with 19 tests,
+  including the assertion that a terse contentless reply scores a perfect usable
+  rollout — the metric's documented blind spot, and the reason correctness stays a
+  separate axis.
+- **Known limitation, measured not assumed:** the five components are **not
+  independent**. `protocol_valid` implies `non_empty` and `natural_termination` by
+  construction (505/505), `not natural_termination` ⟺ `context_limit` (900/900),
+  and `usable_rollout == protocol_valid` on **897/900** samples. The conjunction
+  is effectively one measurement. Reporting it as five agreeing checks would
+  overstate the evidence ~5×; the component rates are the honest view and must
+  always accompany it (`EXPERIMENTS.md` §19.2).
+- **Risks:** the metric rewards terseness and ignores correctness entirely. It
+  must never be used alone to select a checkpoint for release, only to answer
+  whether Stage 2/3's own objective is being met.
+- **Revisit when:** a prospectively registered Stage 2/3 gate is proposed — the
+  threshold must be set **before** the run that is judged by it, and the §19
+  re-analysis must not be cited as if it had been.
+
+## 2026-08-05 — No model has completed the Stage 2/3 objective; P1 is not confirmed by behaviour
+
+- **Context:** P1 was selected as the reference using teacher-distribution
+  metrics. The clarified hierarchy demotes those to diagnostics, so the selection
+  had to be re-examined rather than inherited (`EXPERIMENTS.md` §19).
+- **Decision:** **No existing model has yet completed the Stage 2/3 objective.**
+  Record the distinction explicitly:
+  * **Best current training/reference checkpoint:** P1 = `e1_r0860k_{sa,sb}_pca`
+    **retained as a working baseline only** — for continuity of comparison, not
+    because behaviour confirms it. Nothing displaces it: no candidate is
+    seed-consistently better on the primary metric.
+  * **A model that has passed a behaviour-recovery gate:** **none exists.**
+- **Evidence:** usable-rollout means P0-assistant 0.5867, P0-real 0.5533,
+  P2-ceheavy 0.5333 — every gap smaller than P0-real's own **0.0800** seed spread.
+  Paired at the prompt level both interventions gain on `sa` and lose on `sb`
+  (P0-assistant +14 / −4, P2-ceheavy +1 / −7). 31.1% of all rollouts never
+  terminate.
+- **Not adopted, and why:** **P2-ceheavy is not promoted** despite the best
+  secondary correctness (mean 0.1900, spread 0.0200, best `correct | usable` on
+  both seeds). Correctness is secondary and may only break a tie between
+  behaviour-comparable candidates; it cannot substitute for the seed-consistent
+  behaviour improvement none of them shows. **P1 is equally not confirmed** — it
+  is the incumbent, not the winner.
+- **Alternatives considered:** promoting P0-assistant on the highest usable-rollout
+  mean — rejected, not seed-consistent, and its weights no longer exist; promoting
+  P2-ceheavy on correctness — rejected as above.
+- **Consequence:** the dominant open failure is **non-termination with
+  repetition**, not delimiter formatting (44/900) and not fluent-but-wrong output.
+  The strongest untested lead is the **token budget**: the 2.96M and 1.60M rungs
+  show markedly better behaviour than the 0.86M rung every Stage 2/3 candidate was
+  trained at, on the same evaluation set with the same init and seeds
+  (`EXPERIMENTS.md` §19.11).
+- **Revisit when:** any candidate shows a seed-consistent usable-rollout gain
+  exceeding 0.0800, measured against a prospectively registered gate.

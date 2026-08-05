@@ -1,45 +1,79 @@
-**Updated:** 2026-08-05 10:40 UTC · branch `main` · **no pods running, nothing
+**Updated:** 2026-08-05 11:30 UTC · branch `main` · **no pods running, nothing
 billing.** Verified spend **$117.32** of the **$126.02** cap. **$8.70 of the $30
-Experiment 2 allocation is unspent.**
+Experiment 2 allocation is unspent.** Nothing further is authorized.
 
-**P2-ceheavy is complete and DID NOT beat P1.** Full record in
-[`EXPERIMENTS.md`](EXPERIMENTS.md) §18. P1 (= P0-real) remains the reference.
+## NO EXISTING MODEL HAS YET COMPLETED THE STAGE 2/3 OBJECTIVE
 
-**The result.** Swapping the loss weights (`ce_weight` 0.25 → 1.0, `kd_weight`
-1.0 → 0.25, `kd_scope` held at `all` so both denominators are unchanged):
+A post-hoc re-evaluation of every retained model under the clarified stage
+objectives is in [`EXPERIMENTS.md`](EXPERIMENTS.md) §19 (CPU, $0, no generation).
+Two decision records: [`decisions.md`](decisions.md), 2026-08-05.
 
-| | free-rollout overall | reasoning top-1 | held-out CE | FineWeb NLL |
-|---|---:|---:|---:|---:|
-| P1 = P0-real sa / sb | 0.1533 / **0.2133** | 0.5695 / 0.5720 | 1.5101 / 1.5038 | 8.8758 / 9.3649 |
-| P2-ceheavy sa / sb | 0.2000 / 0.1800 | **0.5511 / 0.5623** | 1.5299 / 1.5182 | 8.9504 / 8.9578 |
+**Stage 0/1 = initialization. Stage 2/3 = behaviour recovery.** Primary Stage 2/3
+metric:
 
-Selector mean 0.1833 → 0.1900, **Δ +0.0067 against a P0-real seed spread of
-0.0600** — 9× smaller than the noise it must clear, and every per-task delta
-(±0.013) is exactly one example out of 37–38. **Null.** The pre-launch gradient
-cosine of **0.970** predicted this, which is what makes the null interpretable.
+```
+usable_rollout = non_empty AND natural_termination AND no_severe_repetition
+                 AND no_context_limit AND protocol_valid
+```
 
-**The one metric that separates.** Reasoning top-1: both P2 arms fall below both
-P0-real arms — complete separation, mean −0.0141 against a 0.0025 seed spread.
-Held-out CE regressed +0.0198 / +0.0144 on both arms.
+Primary = autonomous rollout behaviour. Secondary = correctness, per-task
+correctness, correctness | usable rollout. **Diagnostic only** = teacher-forced
+top-1 and rank, teacher-native CE, FineWeb NLL, training loss. Keep them separate;
+never combine onto one scale.
 
-**The pattern this establishes.** Two independent ways of reducing KD influence —
-cutting its *scope* (§17, −0.0486 top-1) and cutting its *magnitude* (§18,
-−0.0141) — both cost teacher-distribution fidelity, both bought some
-free-generation tidiness, and the size tracks the dose. **Prompt/context KD is
-doing real language-modelling work.** The next lever should not be another
-reweighting of the existing two terms.
+### Stage 0/1 — the initialization works, and its downstream value is proven
 
-**One suggestive observation, not a result.** FineWeb NLL spread collapsed from
-0.4891 (P0-real) to 0.0074 (P2), a 66× reduction. With n=2 per condition this is
-a single draw per group; recorded as a hypothesis for a future seeded run.
+| | step-0 NLL | perplexity |
+|---|---:|---:|
+| teacher Qwen3-4B-Thinking | 2.6264 | 13.8 |
+| **Stage 1 PCA init** | **11.7482** | 126,532 |
+| random init | 12.1286 | 185,090 |
 
-**Retained.** Both P2 `step_001023/model` checkpoints are transferred and
-hash-verified byte-identical (12/12 files), 2.3 GB each, in
-`/home/ecs-user/aad-artifacts/p2_ceheavy/` — unlike the P0-assistant weights,
-which were discarded and are unrecoverable.
+−0.3804 nats: real but small (~4% of the gap to the teacher), n=1 per condition.
+**Downstream it is decisive** — on the matched Experiment 1 arms PCA beats random
+on `usable_rollout` in **12/12** pairs (behaviour) and 11/12 with one tie (gsm8k),
+mean **+0.364** / **+0.494**. Random init produces **zero usable rollouts at every
+rung through 2.96M**. FineWeb NLL even *reverses* by 5.50M while behaviour stays
+8× apart — lower held-out NLL is not recovered behaviour.
 
-**Nothing further is authorized.** Phases 2/3, L1/R1/R2 and all rollout/on-policy
-work remain paused, and the reasoning bottleneck identified in D0 is still open.
+### Stage 2/3 — nothing separates, and nothing passes
+
+| family | usable sa / sb | mean | spread | correct mean | correct \| usable |
+|---|---|---:|---:|---:|---|
+| P0-assistant | 0.6067 / 0.5667 | **0.5867** | 0.0400 | 0.1467 | 0.2747 / 0.1765 |
+| **P1 = P0-real** | 0.5133 / 0.5933 | 0.5533 | 0.0800 | 0.1833 | 0.2727 / 0.2921 |
+| P2-ceheavy | 0.5200 / 0.5467 | 0.5333 | 0.0267 | **0.1900** | **0.3590 / 0.2927** |
+
+**Every gap is smaller than P0-real's own 0.0800 seed spread**, and paired at the
+prompt level both interventions gain on `sa` and lose on `sb` (P0-assistant
++14/−4, P2-ceheavy +1/−7). **P1 is retained as the working baseline for
+continuity, not confirmed by behaviour. P2 is not promoted** despite the best
+secondary correctness — correctness may only break a tie between
+behaviour-comparable candidates.
+
+### The dominant failure is that the model does not stop
+
+**31.1% of all 900 rollouts run to the 8,192-token context limit**, accounting for
+280 of 395 protocol failures. Delimiter errors are a distant third (44/900, 4.9%).
+`openmath` correctness given a usable rollout is **0.000 on five of six arms**.
+
+### Two caveats that bound every number above
+
+* **`usable_rollout` is one measurement, not five.** `protocol_valid` implies
+  `non_empty` and `natural_termination` by construction (505/505),
+  `not natural_termination` ⟺ `context_limit` (900/900), and
+  `usable_rollout == protocol_valid` on **897/900**. Always report the components.
+* **Correctness must be re-scored, never read from stored `correct`.** The stored
+  field puts P0-real-sa at 0.0067; the corrected scorer at 0.1533 — pre-fix and
+  post-fix arms are not comparable on the stored field.
+
+### Strongest untested lead: the token budget, not the loss
+
+All three Stage 2/3 families trained at the **0.86M rung**. On the same E1
+evaluation set with the same init and seeds, **2.96M reaches 0.5921/0.5395** and
+1.60M reaches 0.4868/0.5132 against 0.86M's 0.3684/0.4342. The higher rungs have
+never been run through the 150-example harness, so they are **not evaluable**
+without new generation.
 
 Canonical handoff. Companions:
 
@@ -59,8 +93,16 @@ Stages 0 → 1 → 2 complete. **Stage 3 recovery is open.**
 **The blocking fact:** under unrestricted generation *every* checkpoint,
 including the best one (`s2v1_from_init@2700`, holdout 3.8285), degenerates into
 repetition. No model in this line yet produces a complete answer in the
-teacher's thinking protocol. **Zero context-limit hits** — the old 512-token
-evaluation cap was hiding repetition loops, not long reasoning.
+teacher's thinking protocol.
+
+**Corrected 2026-08-05 — "zero context-limit hits" was a stop-policy artifact.**
+The behaviour wave ran with the degeneration stop active, which cuts a repetition
+loop early and records `stop_reason: degeneration`, so `context_limit_rate` read
+0.0000. The three-mode harness does **not** cut, and the *same weights*
+(`e1_r0860k_sa_pca` = P0-real-sa) then run to the limit: median 8,099 tokens,
+**31.1% of all 900 rollouts context-limited**. Same phenomenon, two accounting
+policies. Do not read "zero context-limit hits" as evidence that generations
+terminate — it means they were stopped before they could be counted.
 
 Neither 2026-07-30 four-arm run supports a route-level claim about
 teacher-native supervision: one had an invalid start point, and both were
@@ -100,9 +142,11 @@ convergence- and measurement-limited (`EXPERIMENTS.md` §5).
   `context − prompt`. Context resolves to the **trained** `block_len` = **8,192**,
   not the architectural 262,144 the geometry inherits — recorded per measurement
   as `context_resolution.context_source = "trained_block_len"`. Experiment 2
-  phase 1 confirmed `context_limit_rate` **0.0000 at all 20 checkpoints**, so
-  nothing has ever been engine-truncated under this rule; the only stop reasons
-  observed are `eos` and the degeneration stop.
+  phase 1 reported `context_limit_rate` **0.0000 at all 20 checkpoints** — but
+  only because the **degeneration stop was active**, cutting loops before the
+  limit (`stop_reason: degeneration`). With the stop disabled, the same weights
+  context-limit on 31.1% of rollouts. When comparing context-limit rates, the
+  stop policy must match or the comparison is meaningless.
 * Stop ids come from the model's `generation_config` (teacher `[151645, 151643]`),
   not the tokenizer alone.
 * No no-think / empty-think / final-only / shortened substitute targets (P17).

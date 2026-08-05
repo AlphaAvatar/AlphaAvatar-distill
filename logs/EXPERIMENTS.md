@@ -1987,3 +1987,334 @@ retained alongside. See `logs/artifact_manifests.md`.
 `extra_special_tokens`). This is library skew, not checkpoint corruption — the
 Stage 1 init tokenizer fails identically. Verify tokenizer integrity by byte
 hash against the init, or load in a 5.x venv.
+
+---
+
+## 19. Post-hoc program-level re-evaluation under the clarified stage objectives (2026-08-05, CPU, $0)
+
+> **STATUS: POST-HOC AND EXPLORATORY.** This re-reads retained artifacts under an
+> evaluation hierarchy defined *after* those artifacts were produced. **It does
+> not convert any earlier experiment into a pre-registered behaviour experiment,
+> and it declares no pass/fail threshold.** Every original pre-registered verdict
+> in §12–§18 stands unaltered as a historical record. This section may rank
+> current candidates and inform a *prospectively* registered Stage 2/3 gate.
+
+No training, no GPU, no teacher generation, no battery re-run. Nothing was
+generated; retained artifacts were re-read. Report:
+`artifacts/audit/stage23_reevaluation.json`. Code:
+`scripts/evaluation/reevaluate_stage23.py`, metric in
+`src/aadistill/evaluation/usable_rollout.py`, 19 tests.
+
+### 19.1 The primary metric
+
+```
+usable_rollout = non_empty AND natural_termination AND no_severe_repetition
+                 AND no_context_limit AND protocol_valid
+```
+
+Reported with every component rate. `no_severe_repetition` is the existing
+degeneration detector's verdict (cycle / low-novelty / rambling, the same
+detector that stops generation), not a new severity cut invented here.
+
+**The metric is deliberately blind to correctness.** A reply of "42" that closes
+`<think>` and stops on `<|im_end|>` is a perfect usable rollout and a useless
+answer — asserted in the tests so it cannot be forgotten. That is why correctness
+is a separate secondary axis and why `correct_given_usable` is reported.
+
+### 19.2 Structural finding: the five components are not five independent gates
+
+Measured over all 900 Stage 2/3 free rollouts:
+
+| relation | count |
+| --- | --- |
+| `protocol_valid` ⟹ `non_empty` | **505 / 505** |
+| `protocol_valid` ⟹ `natural_termination` | **505 / 505** |
+| `not natural_termination` ⟺ `context_limit` | **900 / 900** |
+| `usable_rollout` == `protocol_valid` | **897 / 900** |
+
+`protocol_valid` requires `<|im_end|>` present and a non-empty answer *by
+construction*, so it subsumes two of the other four components; and in this
+harness a generation either stops on EOS or hits the context limit, so
+`natural_termination` and `no_context_limit` are the same measurement. The
+conjunction is therefore **effectively `protocol_valid AND no_severe_repetition`,
+and empirically almost exactly `protocol_valid`** — only 3 samples in 900 are
+separated by repetition alone.
+
+This does not make the metric wrong; it makes one reading of it wrong. Reporting
+`usable_rollout` as the agreement of five independent behaviour checks would
+overstate the evidence by roughly a factor of five. **The component rates are the
+honest view and are always reported.** A first-failure census is also emitted but
+is a presentation aid only: it attributes in a fixed order, so `non_empty`
+absorbs failures that `protocol_valid` would have caught anyway.
+
+### 19.3 Inventory — what exists and what is evaluable
+
+| family | arms | behaviour | correctness | weights |
+| --- | --- | --- | --- | --- |
+| Stage 1 PCA init | 1 | not evaluable — no rollouts | — | **local** |
+| Stage 1 random init | 1 | not evaluable — no rollouts | — | **local** |
+| Experiment 1 | 24 (6 rungs × 2 seeds × 2 inits) | ✅ rescored from retained raw | ✅ gsm8k-100 re-scored | 4 of 24 local, rest relay-only |
+| E1 step-matched control | 1 | ✅ | ✅ | local |
+| **P1 = P0-real** | 2 | ✅ full three-mode | ✅ | **relay only, no local copy** |
+| P0-assistant | 2 | ✅ full three-mode | ✅ | **discarded, unrecoverable** |
+| P2-ceheavy | 2 | ✅ full three-mode | ✅ | **local, hash-verified** |
+| E2 D1 | 7 checkpoints | partial — battery per-sample | ✅ | local |
+| Qwen3-0.6B reference | 1 | ✅ battery, both protocols | ✅ | external model |
+
+Experiment 1 generations predate `protocol_valid`, so those two components were
+**recomputed from the retained `raw` text** — a rescore, not a new measurement.
+
+**Correctness had to be re-scored, not read.** The stored `correct` field puts
+P0-real-sa at **0.0067**; the corrected scorer puts it at **0.1533**, a 23×
+difference. The P0-real generations were scored before two scorer fixes (free-form
+QA must not be held to the numeric final-answer-marker rule; the corpus `gold` is
+a worked solution, not a bare answer) and P2's were scored after. Reading the
+stored field would have made every pre-fix arm look catastrophically worse than
+every post-fix arm, for reasons entirely unrelated to the models.
+
+### 19.4 Stage 0/1 — did the initialization achieve a lower step-0 NLL?
+
+**Yes.** Pinned protocol, identical to every later FineWeb measurement:
+`holdout_v1.jsonl` sha `2d49f637…`, 40 samples, 21,080 tokens, max_seq 1024, bf16.
+
+| model | step-0 NLL (nats) | perplexity |
+| --- | ---: | ---: |
+| teacher `Qwen3-4B-Thinking` | 2.6264 | 13.8 |
+| **Stage 1 PCA/teacher-derived init** | **11.7482** | 126,532 |
+| random init | 12.1286 | 185,090 |
+
+**−0.3804 nats, 31.6% lower perplexity.** Real, but small next to the 9.12-nat
+gap to the teacher: it closes ~4% of it, and both starting points are still
+astronomically far from a working language model. **One draw per condition** — no
+random-init seed spread was measured, so the step-0 gap has no error bar.
+
+### 19.5 Stage 0/1 — did it demonstrably help downstream? Yes, and decisively
+
+The matched Experiment 1 arms are exactly this test: same rung, same seed, same
+budget, only the initialization differs. `usable_rollout` on the 76 behaviour
+prompts and the 100 gsm8k prompts:
+
+| rung | seed | behaviour PCA | behaviour rand | Δ | gsm8k PCA | gsm8k rand | Δ |
+| --- | --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| 0.25M | sa | 0.0132 | 0.0000 | +0.0132 | 0.0400 | 0.0000 | +0.0400 |
+| 0.25M | sb | 0.0789 | 0.0000 | +0.0789 | 0.0000 | 0.0000 | 0.0000 |
+| 0.46M | sa | 0.2632 | 0.0000 | +0.2632 | 0.1600 | 0.0000 | +0.1600 |
+| 0.46M | sb | 0.1447 | 0.0000 | +0.1447 | 0.1600 | 0.0000 | +0.1600 |
+| 0.86M | sa | 0.3684 | 0.0000 | +0.3684 | 0.3000 | 0.0000 | +0.3000 |
+| 0.86M | sb | 0.4342 | 0.0000 | +0.4342 | 0.5400 | 0.0000 | +0.5400 |
+| 1.60M | sa | 0.4868 | 0.0000 | +0.4868 | 0.7000 | 0.0000 | +0.7000 |
+| 1.60M | sb | 0.5132 | 0.0000 | +0.5132 | 0.5600 | 0.0000 | +0.5600 |
+| 2.96M | sa | **0.5921** | 0.0000 | +0.5921 | **0.8800** | 0.0000 | +0.8800 |
+| 2.96M | sb | 0.5395 | 0.0000 | +0.5395 | **0.9000** | 0.0000 | +0.9000 |
+| 5.50M | sa | 0.5526 | 0.0658 | +0.4868 | 0.8900 | 0.0100 | +0.8800 |
+| 5.50M | sb | 0.5395 | 0.0921 | +0.4474 | 0.8700 | 0.0600 | +0.8100 |
+
+**PCA wins 12/12 on behaviour and 11/12 with one tie on gsm8k.** Mean advantage
+**+0.3640** and **+0.4942**. Random initialization produces **zero usable
+rollouts at every rung through 2.96M** and barely 6–9% at 5.50M.
+
+This is the clearest result in the project. The −0.38-nat step-0 advantage is
+small; its downstream consequence is the difference between a model that can hold
+the protocol and one that essentially never does, at every budget tested.
+
+**Tokens/steps to reach a comparable level:** PCA reaches 0.49–0.51 behaviour
+usable rollout at **1.60M** supervised tokens. Random init never reaches it —
+its best is 0.0921 at 5.50M, **3.4× more tokens**. A ratio cannot be quoted
+because the random arm never crosses the level.
+
+**The diagnostics disagree with the primary metric, which is the point.** FineWeb
+NLL favours PCA hugely at 0.25M (6.72 vs 10.92) and the ordering **reverses** by
+5.50M (10.79 PCA vs 10.24 random) — while behaviour is 0.55 vs 0.066. Lower
+held-out NLL is not recovered behaviour. This is the same divergence that retired
+`best_holdout_nll` as a selection identity, now visible in the init comparison
+too.
+
+### 19.6 Stage 2/3 — primary: autonomous rollout behaviour
+
+150 fixed examples, mask `d6e24e0b…`, unrestricted generation.
+
+| arm | **usable rollout** | non-empty | nat. term | no repetition | no ctx-limit | protocol valid |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| P0-real-sa (P1) | 0.5133 | 0.6933 | 0.5800 | 0.5867 | 0.5800 | 0.5133 |
+| P0-real-sb (P1) | 0.5933 | 0.8000 | 0.7000 | 0.6933 | 0.7000 | 0.5933 |
+| P0-assistant-sa | **0.6067** | 0.8533 | 0.7667 | 0.7533 | 0.7667 | 0.6133 |
+| P0-assistant-sb | 0.5667 | 0.7733 | 0.7200 | 0.7067 | 0.7200 | 0.5800 |
+| P2-ceheavy-sa | 0.5200 | 0.7933 | 0.7200 | 0.7200 | 0.7200 | 0.5200 |
+| P2-ceheavy-sb | 0.5467 | 0.7533 | 0.6467 | 0.6400 | 0.6467 | 0.5467 |
+
+| family | sa | sb | mean | spread |
+| --- | ---: | ---: | ---: | ---: |
+| P0-real (P1) | 0.5133 | 0.5933 | 0.5533 | 0.0800 |
+| P0-assistant | 0.6067 | 0.5667 | **0.5867** | 0.0400 |
+| P2-ceheavy | 0.5200 | 0.5467 | 0.5333 | 0.0267 |
+
+**Every gap between families is smaller than P0-real's own seed spread of
+0.0800.** Paired at the prompt level on identical ids:
+
+| comparison | usable gained | lost | net | correct gained | lost |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| P0-assistant-sa vs P0-real-sa | 31 | 17 | **+14** | 12 | 7 |
+| P0-assistant-sb vs P0-real-sb | 30 | 34 | **−4** | 4 | 20 |
+| P2-ceheavy-sa vs P0-real-sa | 24 | 23 | **+1** | 14 | 7 |
+| P2-ceheavy-sb vs P0-real-sb | 25 | 32 | **−7** | 9 | 14 |
+
+**Neither intervention is seed-consistent.** Both gain on `sa` and lose on `sb`.
+The churn is also large relative to the net: P0-assistant-sa moves 48 prompts to
+net +14, so the effect is mostly reshuffling which prompts succeed.
+
+### 19.7 Stage 2/3 — secondary: correctness
+
+| family | correct sa | correct sb | mean | spread | correct \| usable sa | sb |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| P0-real (P1) | 0.1533 | 0.2133 | 0.1833 | 0.0600 | 0.2727 | 0.2921 |
+| P0-assistant | 0.1867 | 0.1067 | 0.1467 | 0.0800 | 0.2747 | 0.1765 |
+| P2-ceheavy | 0.2000 | 0.1800 | **0.1900** | **0.0200** | **0.3590** | 0.2927 |
+
+Per task, `usable_rollout` / `correct | usable`:
+
+| arm | gsm8k | multihop | openmath | rag |
+| --- | --- | --- | --- | --- |
+| P0-real-sa | 0.526 / 0.050 | 0.500 / 0.105 | 0.189 / 0.000 | 0.838 / 0.581 |
+| P0-real-sb | 0.553 / 0.000 | 0.658 / 0.280 | 0.297 / 0.000 | 0.865 / 0.594 |
+| P0-assistant-sa | 0.474 / 0.056 | 0.789 / 0.100 | 0.243 / 0.000 | 0.919 / 0.618 |
+| P0-assistant-sb | 0.605 / 0.000 | 0.474 / 0.111 | 0.351 / 0.000 | 0.838 / 0.419 |
+| P2-ceheavy-sa | 0.316 / 0.000 | 0.658 / 0.200 | 0.216 / 0.000 | 0.892 / **0.697** |
+| P2-ceheavy-sb | 0.526 / 0.050 | 0.526 / 0.300 | 0.297 / 0.091 | 0.838 / 0.516 |
+
+**`openmath` correctness given a usable rollout is 0.000 on five of six arms.**
+Well-formed output, no correct answers. `rag_evidence` is the only task where a
+usable rollout is usually also correct (0.42–0.70). Behaviour and correctness are
+not the same failure.
+
+### 19.8 The dominant failure mode
+
+Marginal failure counts over all 900 rollouts (a sample can fail several):
+
+| component | fails on | rate |
+| --- | ---: | ---: |
+| `protocol_valid` | 395 | 0.4389 |
+| `no_severe_repetition` | 285 | 0.3167 |
+| `natural_termination` | 280 | 0.3111 |
+| `no_context_limit` | 280 | 0.3111 |
+| `non_empty` | 200 | 0.2222 |
+
+Protocol failure reasons:
+
+| reason | count |
+| --- | ---: |
+| **`not_terminated`** | **280** |
+| `unexpected_tool_call` | 71 |
+| `think_delimiters_invalid` | 44 |
+
+**The dominant failure is that the model does not stop.** 280 of 900 rollouts
+(31.1%) run to the 8,192-token context limit, and 285 are flagged as degenerate —
+essentially the same population, since only 6 degenerate rollouts terminate
+before the limit. Delimiter errors are a distant third at 44/900 (4.9%).
+
+This is not a fluent-but-wrong problem and not a formatting problem. Roughly a
+third of the time the student enters a repetition loop and never emits
+`<|im_end|>`.
+
+### 19.9 External reference — behaviour only
+
+`Qwen3-0.6B` on `capability-v2` (846 prompts). **Different prompt population from
+everything above; the numbers do not sit on the same axis and are not ranked
+against ours.**
+
+| protocol | usable rollout | non-empty | nat. term | no repetition | protocol valid | correct |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| project | **0.8169** | 0.8169 | 0.9325 | 0.9455 | 0.9325 | 0.5351 |
+| native | 0.8078 | 0.8078 | 0.9156 | 0.9286 | 0.9156 | 0.5130 |
+
+Context-limit was not recorded for the battery. This is harmless for the
+conjunction: natural termination and a context-limit hit are mutually exclusive
+stop reasons, so requiring `natural_termination` already implies
+`no_context_limit`. Cross-model teacher-forced top-1 is **not** computed
+(`decisions.md`, 2026-08-05).
+
+### 19.10 Answers to the six assessment questions
+
+1. **Did Stage 0/1 achieve a lower and valid initialization NLL?** Yes — 11.7482
+   vs 12.1286 nats, −0.3804, under the pinned protocol. Valid but small (~4% of
+   the gap to the teacher) and measured at n=1 per condition.
+2. **Did it demonstrably help Stage 2/3 behaviour recovery?** **Yes, decisively.**
+   12/12 matched pairs on behaviour, 11/12 with one tie on gsm8k, mean +0.364 /
+   +0.494. Random init never exceeds 0.092 usable rollout at any budget tested.
+   The downstream benefit is far larger than the step-0 NLL gap suggests.
+3. **Strongest seed-consistent autonomous rollout behaviour?** **None.** No family
+   separates from another by more than P0-real's own 0.0800 seed spread, and both
+   interventions gain on one seed and lose on the other.
+4. **Among behaviour-comparable models, best correctness?** The three families
+   *are* behaviour-comparable (nothing separates them). On that basis **P2-ceheavy
+   has the best correctness** — highest mean (0.1900), tightest spread (0.0200),
+   and the best `correct | usable` on both seeds (0.3590 / 0.2927). This is a
+   secondary-axis observation among behaviourally indistinguishable candidates,
+   not a demonstrated behaviour improvement.
+5. **Has any model passed a defensible Stage 2/3 behaviour-recovery gate?**
+   **No.** No gate existed to pass, and none is invented here. Descriptively: the
+   best arm produces a usable rollout on **60.7%** of prompts, ~31% of rollouts
+   never terminate, and no candidate is seed-consistently better than any other.
+6. **Dominant remaining failure mode?** **Non-termination with repetition** —
+   31.1% of rollouts run to the context limit, accounting for 280 of 395 protocol
+   failures.
+
+### 19.11 What this changes about the candidate set
+
+All three Stage 2/3 families were trained at the **0.86M rung**. Under the
+behaviour metric that rung is not the best available: on the E1 behaviour prompts
+the 2.96M arms reach **0.5921 / 0.5395** and 1.60M reaches **0.4868 / 0.5132**,
+against 0.86M's **0.3684 / 0.4342** — same evaluation set, same init, same seeds.
+
+This is the strongest lead in the re-analysis and it is **not** a conclusion the
+retained artifacts can close: the higher rungs have never been run through the
+150-example three-mode harness, so they are `not_evaluable` on the Stage 2/3
+candidate set without new generation. Weights exist locally for `r2960k_sb` and
+`r5500k_sb` (both init variants); the `sa` counterparts are relay-only.
+
+Note also that **P1's own weights have no local copy** — `e1_r0860k_{sa,sb}_pca`
+live only on the storage-constrained relay — and the P0-assistant weights are
+gone entirely. The reference checkpoint is the least well retained of the three.
+
+### 19.12 Limitations
+
+* Post-hoc. The hierarchy was defined after the artifacts existed.
+* `usable_rollout` is empirically almost exactly `protocol_valid` (§19.2); it is
+  one measurement presented as five.
+* n=2 seeds per family. A 0.0800 seed spread on the primary metric bounds what
+  any comparison here can resolve.
+* E1 behaviour (76 prompts) and the Stage 2/3 set (150 prompts) are **different
+  populations**. `e1_r0860k_sa_pca` *is* P0-real-sa and scores 0.3684 on one and
+  0.5133 on the other. Never compare across the two.
+* Random init was evaluated at n=1 at step 0 and n=12 downstream; the step-0
+  number carries no error bar.
+* The metric ignores correctness by construction, and a terse well-formed reply
+  scores perfectly.
+
+### 19.13 Reconciliation: "zero context-limit hits" was a stop-policy artifact
+
+§19.8 reports 31.1% context-limited rollouts, while `STATE.md` and Experiment 2
+phase 1 both recorded `context_limit_rate` **0.0000**. Both are correct
+measurements of different stop policies, on the *same weights*:
+
+| | E1 behaviour wave | three-mode free |
+| --- | --- | --- |
+| checkpoint | `e1_r0860k_sa_pca` | P0-real-sa — **the same weights** |
+| degeneration stop | **active** | not applied during generation |
+| n | 76 | 150 |
+| median generated tokens | 315 | 722 |
+| **max generated tokens** | **1,536** | **8,144** |
+| `context_limit` | **0** | **63** |
+| degeneration flagged | 19 (`stop_reason: degeneration`) | 62 |
+| degenerate median length | 768 | 8,097 |
+
+With the stop active a repetition loop is cut at ~768 tokens and booked as
+`degeneration`; with it inactive the identical loop runs to the 8,192 limit and is
+booked as `context_limit` **and** `degenerate`. The 280 context-limited rollouts
+in §19.8 are real — median 8,099 tokens, minimum 5,594 — not a mislabelling.
+
+**Consequence for reading the record:** "zero context-limit hits" never meant
+generations terminate. It meant they were stopped before they could be counted.
+Context-limit rates are only comparable between runs with the same stop policy,
+and both policies must be stated whenever the number is quoted. This does not
+change any earlier verdict — degeneration was reported in both cases — but it does
+retire "no model has ever been engine-truncated" as a statement about this project.

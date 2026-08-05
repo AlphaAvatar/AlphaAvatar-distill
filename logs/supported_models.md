@@ -93,24 +93,51 @@ should not run as written — it was built around the metric phase 1 retired
 **Deployment target:** INT8. Every recovery gate already re-evaluates under INT8
 weight fake-quantization at two scopes.
 
-## Stage 3 recovery arms — 2026-08-05 status
+## Stage 3 recovery arms — 2026-08-05, under the clarified Stage 2/3 objective
 
-`P1` is the current reference and is an **alias for existing checkpoints, not a
-new training run**.
+**No arm has completed the Stage 2/3 objective.** Primary metric is
+`usable_rollout`; correctness is secondary; teacher-forced top-1 is a diagnostic
+only ([`decisions.md`](decisions.md) 2026-08-05, [`EXPERIMENTS.md`](EXPERIMENTS.md) §19).
 
-| alias | run | seed | loss weights | `kd_scope` | free-rollout | reasoning top-1 | status |
-| --- | --- | --- | --- | --- | ---: | ---: | --- |
-| **P1-sa** | `e1_r0860k_sa_pca` | 20260726 | ce 0.25 / kd 1.0 | all | 0.1533 | 0.5695 | **reference** |
-| **P1-sb** | `e1_r0860k_sb_pca` | 20260801 | ce 0.25 / kd 1.0 | all | **0.2133** | 0.5720 | **reference**, better arm |
-| P0-assistant-sa | `p0_assistant_sa` | 20260726 | ce 0.25 / kd 1.0 | assistant | 0.1867 | 0.5222 | rejected, weights discarded |
-| P0-assistant-sb | `p0_assistant_sb` | 20260801 | ce 0.25 / kd 1.0 | assistant | 0.1067 | 0.5222 | rejected, weights discarded |
-| P2-ceheavy-sa | `p2_ceheavy_sa` | 20260726 | **ce 1.0 / kd 0.25** | all | 0.2000 | 0.5511 | rejected, **weights retained** |
-| P2-ceheavy-sb | `p2_ceheavy_sb` | 20260801 | **ce 1.0 / kd 0.25** | all | 0.1800 | 0.5623 | rejected, **weights retained** |
+150 fixed examples, mask `d6e24e0b…`, unrestricted generation.
 
-All six arms: same Stage 1 init (`86fbba78…`), same 0.86M rung, 1,023 steps,
-η 5e-5, warmup 51, teacher `Qwen/Qwen3-4B-Thinking-2507@768f209d`. Free-rollout
-correctness is on 150 fixed examples, mask `d6e24e0b…`, unrestricted generation.
+| alias | run | seed | loss | `kd_scope` | **usable rollout** | correct | correct \| usable | *fwd top-1* | status |
+| --- | --- | --- | --- | --- | ---: | ---: | ---: | ---: | --- |
+| **P1-sa** | `e1_r0860k_sa_pca` | 20260726 | ce .25 / kd 1.0 | all | 0.5133 | 0.1533 | 0.2727 | *0.5695* | **working baseline** |
+| **P1-sb** | `e1_r0860k_sb_pca` | 20260801 | ce .25 / kd 1.0 | all | 0.5933 | 0.2133 | 0.2921 | *0.5720* | **working baseline** |
+| P0-assistant-sa | `p0_assistant_sa` | 20260726 | ce .25 / kd 1.0 | assistant | **0.6067** | 0.1867 | 0.2747 | *0.5222* | not adopted; weights gone |
+| P0-assistant-sb | `p0_assistant_sb` | 20260801 | ce .25 / kd 1.0 | assistant | 0.5667 | 0.1067 | 0.1765 | *0.5222* | not adopted; weights gone |
+| P2-ceheavy-sa | `p2_ceheavy_sa` | 20260726 | **ce 1.0 / kd .25** | all | 0.5200 | 0.2000 | **0.3590** | *0.5511* | not adopted; weights retained |
+| P2-ceheavy-sb | `p2_ceheavy_sb` | 20260801 | **ce 1.0 / kd .25** | all | 0.5467 | 0.1800 | 0.2927 | *0.5623* | not adopted; weights retained |
 
-**No arm has beaten P1 on the pre-registered selector.** The measured seed spread
-of that selector is **0.0600**, which bounds what any future comparison at n=2
-can resolve. Records: [`EXPERIMENTS.md`](EXPERIMENTS.md) §17, §18.
+Family means — usable rollout: P0-assistant **0.5867**, P1 0.5533, P2 0.5333.
+**Every gap is smaller than P1's own 0.0800 seed spread**, and paired at the
+prompt level both interventions gain on `sa` and lose on `sb`. P1 is the
+**incumbent baseline retained for continuity, not a behaviour-confirmed winner**;
+P2 has the best secondary correctness but is not promoted on it.
+
+All six trained at the 0.86M rung, 1,023 steps, η 5e-5, warmup 51, same Stage 1
+init (`86fbba78…`), teacher `Qwen/Qwen3-4B-Thinking-2507@768f209d`.
+
+**Weight retention differs sharply:** P2 is local and hash-verified; **P1 exists
+only on the storage-constrained relay**; P0-assistant is gone.
+
+## Experiment 1 initialization arms — the Stage 0/1 downstream test
+
+| | behaviour usable rollout, PCA vs random |
+| --- | --- |
+| 0.25M | 0.0132 / 0.0789 vs **0.0000 / 0.0000** |
+| 0.46M | 0.2632 / 0.1447 vs **0.0000 / 0.0000** |
+| 0.86M | 0.3684 / 0.4342 vs **0.0000 / 0.0000** |
+| 1.60M | 0.4868 / 0.5132 vs **0.0000 / 0.0000** |
+| **2.96M** | **0.5921 / 0.5395** vs **0.0000 / 0.0000** |
+| 5.50M | 0.5526 / 0.5395 vs 0.0658 / 0.0921 |
+
+**PCA initialization wins 12/12 matched pairs** (11/12 with one tie on gsm8k).
+Random init produces zero usable rollouts at every rung through 2.96M. This is the
+strongest result in the project.
+
+Note that **2.96M and 1.60M behave better than the 0.86M rung** every Stage 2/3
+candidate was trained at — same evaluation set, init and seeds. Those rungs have
+never been run through the 150-example harness and are **not evaluable** on the
+Stage 2/3 candidate set without new generation.
