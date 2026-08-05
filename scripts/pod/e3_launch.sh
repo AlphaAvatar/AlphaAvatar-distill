@@ -195,8 +195,14 @@ fi
 say "setup done — $(cost)"
 
 say "starting the E3 driver: A1 (2 seeds) -> freeze gate -> A2 (2 seeds) -> evaluation"
-$SSH "root@$HOST" "cd /workspace/aad && nohup /opt/train/bin/python \
-  scripts/pod/e3_driver.py --stage all > /workspace/e3_run.log 2>&1 &" >>"$LOG" 2>&1
+# `nohup ... &` alone does NOT detach here: the remote wrapper shell stays alive
+# holding the SSH channel open, so this call blocks until the driver exits and
+# the launcher never reaches its polling loop. Measured on 2026-08-05 -- the run
+# completed, but with no progress logging for five hours. `setsid` plus a
+# closed stdin puts the driver in its own session so the channel closes at once.
+$SSH "root@$HOST" "cd /workspace/aad && setsid nohup /opt/train/bin/python \
+  scripts/pod/e3_driver.py --stage all > /workspace/e3_run.log 2>&1 < /dev/null & \
+  disown" >>"$LOG" 2>&1
 say "driver running — $(cost)"
 
 # --- 3. poll to completion -------------------------------------------------

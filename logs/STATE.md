@@ -1,46 +1,54 @@
-**Updated:** 2026-08-05 14:05 UTC · branch `main` · commit `81d668a` ·
-⚠️ **ONE POD RUNNING AND BILLING: `94slla57nnqjqa`, 1× L40S, $0.99/h**, created
-14:02 UTC with a RunPod-side backstop at **21:32 UTC (450 min, $7.43 max)**.
-Verified spend before this session **$117.32** of the **$126.02** cap; Experiment
-3 is projected at **$6.16** against the **$8.70** remainder.
+**Updated:** 2026-08-05 20:10 UTC · branch `main` · **no pods running, nothing
+billing.** Verified spend **$123.08** of the **$126.02** cap. **$2.94 remains and
+nothing further is authorized.**
 
-**Experiment 3 is in flight** — does restricting attention updates improve
-autonomous generation stability at the 0.86M rung? Registered before training in
-[`logs/e3_registration.json`](e3_registration.json) and
-[`EXPERIMENTS.md`](EXPERIMENTS.md) §20.
+## EXPERIMENT 3 IS COMPLETE — RESTRICTING ATTENTION UPDATES MAKES IT WORSE
 
-| arm | trainable attention | status |
-|---|---|---|
-| **A0** = `p2_ceheavy_{sa,sb}` | q/k/v/o + q_norm/k_norm full-rank | **baseline, not retrained** |
-| **A1** = `e3_a1_frozen_attn_{sa,sb}` | q_norm/k_norm only, projections frozen | training |
-| **A2** = `e3_a2_lora_attn_{sa,sb}` | A1 + LoRA r8 on q/k/v/o, base frozen | queued behind A1's freeze gate |
+Full record: [`EXPERIMENTS.md`](EXPERIMENTS.md) §20. Registered before training in
+[`e3_registration.json`](e3_registration.json). Cost **$5.76**, 349 min on one
+L40S, pod self-deleted, 28/28 files hash-verified.
 
-**If this session dies, nothing is stranded.** The launcher runs under `nohup`
-(`scripts/pod/e3_launch.sh`), deletes the pod itself on `ALL_DONE`, and is backed
-by an independent dev-box watchdog plus the RunPod-side deadline. To check:
-`runpodctl get pod 94slla57nnqjqa`; the launcher log and all state live in this
-session's scratch dir, and results land in `/home/ecs-user/aad-artifacts/e3/`.
+| | A0 = P2-ceheavy | A1 frozen attn | A2 LoRA r32 |
+|---|---:|---:|---:|
+| attention movement `‖ΔW‖/‖W‖` | 0.0167 | **0.0000** | 0.0048 |
+| **usable_rollout_rate** | **0.5333** | 0.4467 | 0.4400 |
+| correct_overall | 0.1900 | 0.1067 | 0.1366 |
+| correct_given_usable | 0.3258 | 0.1737 | 0.2882 |
+| teacher-native CE | 1.5240 | 1.6823 | 1.6151 |
+| FineWeb NLL BF16 / INT8 | 8.9554 / 8.9794 | 9.9100 / 9.9700 | 8.8997 / 8.9439 |
 
-**After the pod returns**, three commands finish the experiment:
+**Both treatments are worse than the baseline on both seeds and on all five
+usable-rollout components.** Deltas −0.0866 (A1) and −0.0933 (A2) clear the
+registered 0.0800 floor. Paired at the prompt level each arm loses more prompts
+than it gains. **None of the four pre-registered rules fired; neither arm is
+promotable.**
 
-```bash
-tar xzf /home/ecs-user/aad-artifacts/e3/e3_side.tar.gz -C .    # audit artifacts
-PYTHONPATH=src uv run python scripts/evaluation/eval_ppl.py \
-  --data data/warmup/holdout_v1.jsonl \
-  --model /home/ecs-user/aad-artifacts/p2_ceheavy/p2_ceheavy_sa \
-  --model /home/ecs-user/aad-artifacts/p2_ceheavy/p2_ceheavy_sb \
-  --model /home/ecs-user/aad-artifacts/e3/e3_a1_frozen_attn_sa/model \
-  --model /home/ecs-user/aad-artifacts/e3/e3_a1_frozen_attn_sb/model \
-  --model /home/ecs-user/aad-artifacts/e3/e3_a2_lora_attn_sa/model \
-  --model /home/ecs-user/aad-artifacts/e3/e3_a2_lora_attn_sb/model \
-  --max-seq-len 1024 --dtype bfloat16 --out artifacts/audit/e3_holdout_nll_bf16.json
-#   ... repeat with --fake-quant int8 --fake-quant-scope {all,decoder}
-PYTHONPATH=src uv run python scripts/evaluation/analyze_e3.py
-```
+**The leading hypothesis since §19.8 is refuted: full-rank attention updating is
+not the source of the degeneration.** Attention capacity is *needed* — restrict
+it and both teacher fit and autonomous behaviour degrade, monotonically in how
+much you restrict.
 
-Held-out NLL runs on **CPU on purpose**: 25 s per model, it reproduces the
-recorded GPU value to 0.02%, and it is the one metric measured on a single
-device for all six arms. A0's three precisions are already computed (§20.6).
+What A2 does buy, and it is real but insufficient: `correct_given_usable` 0.2882
+vs A1's 0.1737, seed-stable, for 9,175,040 adapter parameters and 29% of the
+baseline's attention movement. It does not recover rollout stability.
+
+**Do not read A2's FineWeb mean (8.8997, best of any arm) as an improvement** —
+its seed spread is 0.4668 against A0's 0.0143, so the −0.0557 mean is one draw.
+
+### Standing recommendation, and its status
+
+Move to **student-prefix / on-policy recovery** (Stage 3 sub-stage 3, Stages 4–5).
+This is an **engineering judgement, not a fired rule** — R4's precondition
+required both arms to improve FineWeb NLL and A1's rose by 0.9546. What E3 adds
+is negative evidence: the offline family has now been probed three ways — KD
+scope (§17), KD magnitude (§18), attention capacity (§20) — and **none moved
+autonomous rollout.** `src/aadistill/rollout/` holds 2,075 lines of tested
+infrastructure that no training path consumes.
+
+**Native LoRA now exists** (`src/aadistill/training/lora.py`): merged-on-save so
+every arm shares one inference architecture, exact resume from stored base + A/B
+tensors, adapter config in checkpoint metadata, and full-rank/LoRA parameter
+counts reported separately. 32 tests.
 
 ## NO EXISTING MODEL HAS YET COMPLETED THE STAGE 2/3 OBJECTIVE
 
@@ -557,15 +565,14 @@ is the fully matched comparison.
 
 ## 11. Next actions
 
-Ordered by expected value per dollar. **$8.70 remained before Experiment 3, which
-is projected to consume $6.16 of it. Nothing beyond E3 is authorized.**
+Ordered by expected value per dollar. **$2.94 remains and nothing is
+authorized.** Experiment 3 is complete (§20); the freeze-policy question is
+closed.
 
-**0. Finish Experiment 3.** Collect the pod's artifacts, run the six-model NLL
-table and `analyze_e3.py`, and write the verdict into `EXPERIMENTS.md` §20 under
-the rules registered in §20.4 — including the two that only ever *block* a
-promotion (no single-seed winners; no promotion for terminating earlier if
-correctness given a usable rollout falls). A null is a result: §20.5 lists what
-the design cannot settle, and that list was written before the numbers.
+**0. Nothing costing money is authorized.** The remaining $2.94 does not fund a
+two-seed arm at this rung (~$3 of training alone, before evaluation), so the next
+paid step needs a maintainer decision, not a plan. Do not silently shrink an
+experiment to fit it.
 
 **What the last three experiments settled.** D0 (§16) located the bottleneck;
 P0-assistant (§17) and P2-ceheavy (§18) each tried to fix it by reducing KD's

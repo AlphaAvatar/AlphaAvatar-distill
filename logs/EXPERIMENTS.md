@@ -7,8 +7,8 @@ proposal files, which are preserved in git history at commit `866dac2`.
 32Q/8KV) → **student** 0.6B-class (1024 hidden, 28L, FFN 3072, 16Q/8KV, tied
 embeddings). BF16 training, INT8 deployment target.
 
-**Total spend to date: $117.32** of the **$126.02** cap — **$8.70 remains, and
-nothing beyond Experiment 3 is authorized.**
+**Total spend to date: $123.08** of the **$126.02** cap — **$2.94 remains, and
+nothing further is authorized.**
 
 | period | $ | detail |
 |---|---:|---|
@@ -19,14 +19,15 @@ nothing beyond Experiment 3 is authorized.**
 | D0 no-training diagnostics | 1.15 | §16 — 210 min on an RTX A6000 |
 | P0-assistant | 2.75 | §17 — 167 min on an L40S |
 | P2-ceheavy | 2.88 | §18 — 174.6 min on an L40S |
-| **itemized subtotal** | **116.29** | |
+| Experiment 3, attention restriction | 5.76 | §20 — 349 min on an L40S, four arms |
+| **itemized subtotal** | **122.05** | |
 
-**Unreconciled: $1.03.** The itemized rows sum to $116.29 while the verified
-running total carried in `STATE.md` is **$117.32**. The difference is not
+**Unreconciled: $1.03.** The itemized rows sum to $122.05 while the verified
+running total is **$123.08**. The difference is not
 attributed to any session here, so the **larger** figure is used for every
 remaining-budget decision. Do not "fix" this by deleting the gap.
 
-**$8.70 of the $30 Experiment 2 allocation is unspent.** §6 below is the
+**$2.94 of the $30 Experiment 2 allocation is unspent.** §6 below is the
 *pre-Experiment-1* breakdown and its "project total" line is scoped to that
 period; this table is the current figure.
 
@@ -2431,10 +2432,11 @@ of this re-analysis.
 
 ## 20. Experiment 3 — restricting attention updates at the 0.86M rung
 
-> **STATUS AT WRITING: REGISTERED BEFORE TRAINING.** Machine-readable
-> registration with every hash: [`logs/e3_registration.json`](e3_registration.json).
-> Results are appended below only after the run; nothing in §20.1–§20.7 was
-> written with knowledge of an outcome.
+> **STATUS: COMPLETE 2026-08-05, $5.76.** Registered before training in
+> [`logs/e3_registration.json`](e3_registration.json); nothing in §20.1–§20.7 was
+> written with knowledge of an outcome. Results are §20.8 onward.
+> **Verdict: restricting attention updates does not improve autonomous
+> generation stability at this rung — it degrades it. Neither arm is adopted.**
 
 ### 20.1 The question
 
@@ -2653,3 +2655,163 @@ generation** cap (§6), a **$60 training** cap (2026-08-01 decision), and the
 binding **cumulative $126.02** cap with **$117.32 spent**. This session enforces
 the **strictest** of the available readings — the $8.70 cumulative remainder —
 and fits inside it, so the two readings do not disagree about whether to proceed.
+
+
+### 20.8 Execution
+
+Pod `94slla57nnqjqa`, 1× NVIDIA L40S secure at $0.99/h, 14:02 → 19:52 UTC =
+**349 min = $5.76**, against a $6.16 projection, a 450-min RunPod-side backstop
+that never fired, and $8.70 of ledger headroom. Setup took 7 min against a 33-min
+estimate. Training ran at 3.32–3.44 s/step, peak 37.96 GiB of 46 GiB.
+
+The pod deleted itself on `ALL_DONE`. All **28 transferred files hash-verified
+byte-identical** against a manifest computed pod-side before transfer.
+
+**Two mid-run reconfigurations by the maintainer, both applied before any A2
+checkpoint existed and neither touching A1:** rank 8 → 32 (16:10) and alpha
+16 → 64 (16:26). An α=16/r=32 run reached step 180 of 1,023 and was stopped;
+its partial log is retained as `artifacts/audit/e3_aborted_a2_sa_alpha16/` and
+**is not a data point** — 180 of 1,023 steps under a different scaling is not a
+result. Combined cost of both changes: ~$0.30.
+
+The A1 freeze gate passed before A2 was allowed to start: attention-projection
+movement exactly `0.000000` on both seeds.
+
+### 20.9 Primary — autonomous rollout behaviour
+
+150 fixed examples, inclusion mask `d6e24e0b…` asserted equal to the baseline's
+on every arm, greedy decoding, unrestricted generation (P18).
+
+| metric | A0 | A1 | A2 | A1−A0 | A2−A0 |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| **usable_rollout_rate** | **0.5333** | 0.4467 | 0.4400 | **−0.0866** | **−0.0933** |
+| non_empty | 0.7733 | 0.6734 | 0.6666 | −0.0999 | −0.1067 |
+| natural_termination | 0.6834 | 0.5400 | 0.5300 | −0.1434 | −0.1534 |
+| no_severe_repetition | 0.6800 | 0.5333 | 0.5100 | −0.1467 | −0.1700 |
+| no_context_limit | 0.6834 | 0.5400 | 0.5300 | −0.1434 | −0.1534 |
+| protocol_valid | 0.5333 | 0.4533 | 0.4534 | −0.0800 | −0.0799 |
+
+Per seed, with no overlap between the baseline and either treatment:
+
+| | sa | sb | mean | spread |
+| --- | ---: | ---: | ---: | ---: |
+| A0 | 0.5200 | 0.5467 | 0.5333 | 0.0267 |
+| A1 | 0.4267 | 0.4667 | 0.4467 | 0.0400 |
+| A2 | 0.4533 | 0.4267 | 0.4400 | 0.0266 |
+
+Both treatments are worse **on both seeds, on all five components**, and both
+mean deltas clear the registered 0.0800 floor. Paired at the prompt level each
+arm loses more prompts than it gains against its own-seed baseline — net −14,
+−12 (A1) and −10, −18 (A2) of 150 — so this is not a mixture shift.
+
+### 20.10 Secondary — correctness
+
+| | A0 | A1 | A2 |
+| --- | ---: | ---: | ---: |
+| correct_overall | 0.1900 | 0.1067 | 0.1366 |
+| correct_given_usable | 0.3258 | 0.1737 | **0.2882** |
+
+`correct_given_usable` is the one axis where the adapter clearly earns its
+parameters: **0.2882 vs A1's 0.1737**, and seed-stable (0.2794 / 0.2969 against
+A1's 0.2188 / 0.1286). Per task, the damage is concentrated in evidence reading —
+`rag_evidence` 0.676 → 0.405 (A1) → 0.460 (A2) on `sa` — while `gsm8k` and
+`openmath` sit at floor in every arm and cannot register a change.
+
+### 20.11 Diagnostics — reported, never used to rank
+
+| | A0 | A1 | A2 |
+| --- | ---: | ---: | ---: |
+| teacher-native held-out CE | 1.5240 | 1.6823 | 1.6151 |
+| teacher-forced reasoning top-1 | 0.5567 | 0.5193 | 0.5347 |
+| FineWeb NLL, BF16 | 8.9554 | 9.9100 | 8.8997 |
+| FineWeb NLL, INT8 `all` | 8.9794 | 9.9700 | 8.9439 |
+| INT8 penalty | +0.0239 | +0.0600 | +0.0442 |
+
+All six arms were measured on **one device** (dev-box CPU, 21,080 tokens each,
+checksum matching every prior measurement), so BF16 and INT8 are comparable
+across arms rather than across sessions. INT8 weight fake-quant costs 0.02–0.06
+nats everywhere; **no arm is disproportionately quantization-fragile**, and INT8
+rollout behaviour was not measured.
+
+**A2's FineWeb mean is the best of any arm (8.8997) and means nothing**: its seed
+spread is **0.4668** (8.6663 / 9.1331) against A0's 0.0143 — 33× wider — so the
+−0.0557 mean sits deep inside a single draw. Recorded, not claimed.
+
+### 20.12 Parameter movement — the mechanism is exactly as designed
+
+`‖ΔW‖_F / ‖W_init‖_F` against the Stage 1 fork point:
+
+| group | A0-sa | A0-sb | A1-sa | A1-sb | A2-sa | A2-sb |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| ffn | 0.031893 | 0.031841 | 0.033628 | 0.033569 | 0.033551 | 0.033535 |
+| **attn_proj** | 0.016665 | 0.016647 | **0.000000** | **0.000000** | **0.004800** | **0.004771** |
+| attn_norm | 0.001136 | 0.001116 | 0.001501 | 0.001493 | 0.001093 | 0.001080 |
+| decoder_norm | 0.001167 | 0.001164 | 0.001227 | 0.001223 | 0.001183 | 0.001181 |
+| embedding | 0 | 0 | 0 | 0 | 0 | 0 |
+
+Attention displacement is **1.67% → 0% → 0.48%**, exactly the three points the
+design asked for. A2 spends 29% of the baseline's attention movement and recovers
+~44% of A1's CE loss for 9,175,040 parameters. The adapter is not uniform:
+`q_proj` (3.13–3.16) carries ~2× `k_proj` and ~3× `v_proj`. A1's attention norms
+strain **32% above** the baseline while A2's fall slightly below it — visible
+evidence of norms compensating for frozen projections.
+
+**Merge integrity, verified independently on both A2 arms:** zero LoRA keys in
+`model/`, loads through the normal path with no adapter code, finite logits, 112
+modules, and the merged-minus-init delta **equals a fresh recomputation of
+`scaling · B @ A`**. The evaluated artifact is the trained model.
+
+### 20.13 Verdict — none of the four rules fired
+
+| rule | fired | why |
+| --- | --- | --- |
+| R1 full-rank attention updates cause harmful drift | **no** | the prediction is *inverted*: A1 is worse on rollout **and** correctness |
+| R2 constrained adaptation is preferred | **no** | A2 loses to A0 on both seeds |
+| R3 do not claim the problem is solved | **no** | A2's teacher-forced top-1 also fell (−0.022); the guard had nothing to catch |
+| R4 stop freeze-policy work, go on-policy | **no** | it required *both* arms to improve FineWeb NLL; A1's rose 0.9546 |
+
+**Both promotion guards return `promotable: false`.** Neither result is a
+single-seed artifact, and neither arm terminates earlier — A1 and A2 terminate
+*less* often than the baseline, so R6 had no trade-off to weigh.
+
+**What the experiment establishes.** At the 0.86M rung, restricting attention
+updates degrades autonomous generation stability, monotonically in how much is
+restricted, and costs teacher-distribution fit at the same time. Full-rank
+attention updating is **not** the source of the degeneration this project has
+been chasing since §19.8 — the leading hypothesis going in is refuted, on both
+seeds, on nine independent measurements.
+
+**What it does not establish.** Rank 32 at `α/r = 2.0` is a single point; neither
+r8 nor `α/r = 0.5` was trained to completion, so nothing here is a rank-scaling
+result. n=2 seeds means every spread is one draw. `usable_rollout` is blind to
+correctness by construction and its components are not independent. A0's rollout
+numbers come from the earlier P2 session on different hardware; only NLL is
+single-device across all six arms.
+
+**Where this leaves the next step.** R4's *recommendation* — student-prefix and
+on-policy recovery — is unchanged in attractiveness, but it is now an engineering
+judgement rather than a fired rule, and the record must not imply otherwise. What
+this experiment adds to the case is negative evidence: the offline-freeze family
+of interventions has now been probed three ways (KD scope §17, KD magnitude §18,
+attention capacity §20) and none has moved autonomous rollout. `src/aadistill/rollout/`
+still holds 2,075 lines of tested infrastructure that no training path consumes.
+
+### 20.14 Retained artifacts
+
+`/home/ecs-user/aad-artifacts/e3/` (external to git), 18.6 GB, **28/28 files
+`sha256sum -c` OK** against the pod-side manifest:
+
+| arm | contents | size |
+| --- | --- | ---: |
+| `e3_a1_frozen_attn_{sa,sb}` | merged `model/` + `trainer_state.pt` | 4.3 GB each |
+| `e3_a2_lora_attn_{sa,sb}` | merged `model/` + `lora_state.safetensors` (741 MB) + `trainer_state.pt` | 5.0 GB each |
+
+Every A2 checkpoint is **both** deployable and resumable: `model/` is a plain
+Hugging Face checkpoint with the adapter merged, and `lora_state.safetensors`
+carries the frozen base and raw LoRA tensors for exact resume.
+
+`e3_side.tar.gz` (1.2 MB) holds all four arms' 150 free + 150 oracle generations,
+teacher-forced per-role reports, movement reports, merge check, pre-launch
+validation, configs, `run_manifest.json` and `train_log.jsonl`, plus the aborted
+α=16 run's log. **Not uploaded to the relay** — its LFS quota is full and no
+follow-up arm forks from a trained checkpoint.

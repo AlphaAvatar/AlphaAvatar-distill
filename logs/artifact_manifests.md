@@ -627,3 +627,49 @@ approved-but-unexecuted history squash pending, **which invalidates existing
 revisions**. P0-assistant's weights were already lost to the same class of
 problem. Every Stage 2/3 candidate that still has weights now has a verified local
 copy.
+
+## Experiment 3 outputs and checkpoints (2026-08-05)
+
+Pod `94slla57nnqjqa` (L40S secure, $0.99/h) deleted after transfer and
+verification. Store: `/home/ecs-user/aad-artifacts/e3/` (external to git;
+`artifacts/` is `.gitignore`d). **28/28 files `sha256sum -c` OK** against
+`e3_pod_hashes.txt`, computed **on the pod before transfer**.
+
+### Checkpoints — 18.6 GB, dev box only
+
+| arm | contents | size |
+| --- | --- | ---: |
+| `e3_a1_frozen_attn_sa` | `model/` (merged HF) + `trainer_state.pt` | 4.3 GB |
+| `e3_a1_frozen_attn_sb` | same | 4.3 GB |
+| `e3_a2_lora_attn_sa` | `model/` (merged HF) + `lora_state.safetensors` (741 MB) + `trainer_state.pt` | 5.0 GB |
+| `e3_a2_lora_attn_sb` | same | 5.0 GB |
+
+Every A2 checkpoint is **both deployable and resumable**: `model/` is a plain
+Hugging Face checkpoint with the LoRA delta merged into q/k/v/o and **no adapter
+keys**, verified to load through the normal path with no LoRA code; the frozen
+base attention weights and raw A/B tensors live in `lora_state.safetensors` for
+exact resume. The merged delta was independently re-derived as
+`scaling · B @ A` and matched on both arms.
+
+The four tokenizer/config files are byte-identical across all four arms **and**
+to `artifacts/stage1/qwen3_0p6b_init_v0/checkpoint`, which is where the driver
+copied them from.
+
+**Not uploaded to the relay.** Its LFS quota is full, ordinary deletion cannot
+reclaim it, and no follow-up arm forks from a trained checkpoint — every arm
+forks from the Stage 1 init `86fbba78e8a2a324…`.
+
+### Side artifacts
+
+`e3_side.tar.gz`, 1.2 MB: all four arms' 150 free + 150 oracle generations with
+full token ids, teacher-forced per-role reports, `e3_movement/` (six arms),
+`e3_merge_check.json`, both pre-launch validations, the four E3 configs, and each
+arm's `run_manifest.json` / `train_log.jsonl`. Also
+`e3_aborted_a2_sa_alpha16/` — the log and manifest of the α=16 run stopped at
+step 180 of 1,023, retained as a record and **not** a data point.
+
+Alongside: `e3_run.log` (232 KB), `e3.status`, `e3_pod_hashes.txt`.
+
+Configs: `e3_a1_frozen_attn_sa` (`cc6ba2972a28c7c2…`), `_sb` (`477cbf347ba39df4…`),
+`e3_a2_lora_attn_sa` (`f9c5cdd26af067ae…`), `_sb` (`74e8846e25b12d1f…`) —
+`sha256_json` of the parsed config, matching `logs/e3_registration.json`.
