@@ -589,3 +589,26 @@ differ from `sha256sum` of the file bytes (`a43775013a5534b5…`, `01b6c3cfa47a7
 
 Inclusion mask (shared with P0-real and P0-assistant):
 `d6e24e0b09da1bcc692b1dc96d8236808d29551a9fc94a47d1d968fd3f73d6ba`.
+
+
+## Experiment 1 checkpoint recoverability — verified 2026-08-05
+
+Full detail in [`EXPERIMENTS.md`](EXPERIMENTS.md) §19.14. Digests:
+`artifacts/audit/relay_e1_digests.json` (git-ignored; regenerate from the relay).
+
+* **Local** `artifacts/stage3/rescued/`: 30/30 files verified against the
+  pod-side `pod_hashes.txt` recorded before transfer — 0 mismatched, 0 missing.
+  Covers `e1_r2960k_sb_{pca,rand}`, `e1_r5500k_sb_{pca,rand}` and the 0.25M
+  step-matched control.
+* **Relay** `AlphaAvatar/aadistill-artifacts` (729 files): `e1_r0860k_{sa,sb}_pca`
+  (**= P1**), all four 1.60M arms, and `e1_r2960k_sa_{pca,rand}` are present at
+  2.38 GB each with LFS sha256 recorded.
+* **End-to-end verified:** `e1_r1600k_sa_pca` (`6f77676ab8fde397…`) and **P1-sa**
+  (`18ee10a10333481d…`) downloaded, ~165 s each, recomputed sha256 matching the
+  LFS digest exactly. The relay path is live and its digests are real.
+
+**⚠️ P1 exists in one place only.** The relay is at its private-storage limit and
+has an approved-but-unexecuted history squash pending, **which invalidates
+existing revisions**. P0-assistant's weights were already lost. Copying P1 to the
+dev box costs ~4.8 GB of 85 GB free; not performed here, as retention is a
+separate decision.

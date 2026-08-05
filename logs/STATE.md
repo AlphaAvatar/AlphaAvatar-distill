@@ -30,26 +30,40 @@ never combine onto one scale.
 | random init | 12.1286 | 185,090 |
 
 −0.3804 nats: real but small (~4% of the gap to the teacher), n=1 per condition.
-**Downstream it is decisive** — on the matched Experiment 1 arms PCA beats random
-on `usable_rollout` in **12/12** pairs (behaviour) and 11/12 with one tie (gsm8k),
-mean **+0.364** / **+0.494**. Random init produces **zero usable rollouts at every
-rung through 2.96M**. FineWeb NLL even *reverses* by 5.50M while behaviour stays
-8× apart — lower held-out NLL is not recovered behaviour.
+**Downstream it is decisive.** Across the 12 matched Experiment 1 pairs, PCA vs
+random on `usable_rollout` is **12 wins / 0 ties / 0 losses** on behaviour prompts
+and **11 wins / 1 tie / 0 losses** on gsm8k — the single tie is 0.25M `sb` where
+*both* score 0.0000, a shared floor rather than a contest PCA failed to win. Mean
+**+0.364** / **+0.494**. Random init produces **zero usable rollouts at every rung
+through 2.96M**. FineWeb NLL even *reverses* by 5.50M while behaviour stays 8×
+apart — lower held-out NLL is not recovered behaviour.
 
-### Stage 2/3 — nothing separates, and nothing passes
+### Stage 2/3 — nothing separates; no prospectively defined gate has been passed
 
-| family | usable sa / sb | mean | spread | correct mean | correct \| usable |
-|---|---|---:|---:|---:|---|
-| P0-assistant | 0.6067 / 0.5667 | **0.5867** | 0.0400 | 0.1467 | 0.2747 / 0.1765 |
-| **P1 = P0-real** | 0.5133 / 0.5933 | 0.5533 | 0.0800 | 0.1833 | 0.2727 / 0.2921 |
-| P2-ceheavy | 0.5200 / 0.5467 | 0.5333 | 0.0267 | **0.1900** | **0.3590 / 0.2927** |
+**No model has demonstrated passage of a prospectively defined behaviour-recovery
+gate.** No such gate existed when any of these runs launched, and **no threshold
+may be invented post hoc** — this is the absence of a registered criterion, not a
+measured failure against one.
+
+| family | usable sa / sb | mean | spread | overall correct sa / sb (mean) | correct \| usable sa / sb |
+|---|---|---:|---:|---|---|
+| P0-assistant | 0.6067 / 0.5667 | **0.5867** | 0.0400 | 0.1867 / 0.1067 (0.1467) | 0.2747 / 0.1765 |
+| **P1 = P0-real** | 0.5133 / 0.5933 | 0.5533 | 0.0800 | 0.1533 / 0.2133 (0.1833) | 0.2727 / 0.2921 |
+| P2-ceheavy | 0.5200 / 0.5467 | 0.5333 | 0.0267 | 0.2000 / 0.1800 (**0.1900**) | **0.3590 / 0.2927** |
 
 **Every gap is smaller than P0-real's own 0.0800 seed spread**, and paired at the
-prompt level both interventions gain on `sa` and lose on `sb` (P0-assistant
-+14/−4, P2-ceheavy +1/−7). **P1 is retained as the working baseline for
-continuity, not confirmed by behaviour. P2 is not promoted** despite the best
-secondary correctness — correctness may only break a tie between
-behaviour-comparable candidates.
+prompt level both interventions gain on `sa` and lose on `sb`.
+
+* **P1 = P0-real is the incumbent reference checkpoint** — retained for continuity
+  of comparison. It is **not** the best checkpoint on any primary measure and is
+  not confirmed by behaviour.
+* **P0-assistant holds the highest observed mean usable-rollout rate, 0.5867.** It
+  is **not seed-consistent** (0.6067 / 0.5667; paired +14 on `sa`, **−4** on `sb`)
+  and **its weights no longer exist**, so it cannot be re-measured or built on.
+* **P2-ceheavy holds the best correctness conditional on a usable rollout**
+  (0.3590 / 0.2927, highest on both seeds). Its overall correctness is reported
+  separately (0.2000 / 0.1800, mean 0.1900). **It is not promoted** — correctness
+  may only break a tie between behaviour-comparable candidates.
 
 ### The dominant failure is that the model does not stop
 
@@ -69,11 +83,36 @@ behaviour-comparable candidates.
 
 ### Strongest untested lead: the token budget, not the loss
 
-All three Stage 2/3 families trained at the **0.86M rung**. On the same E1
-evaluation set with the same init and seeds, **2.96M reaches 0.5921/0.5395** and
-1.60M reaches 0.4868/0.5132 against 0.86M's 0.3684/0.4342. The higher rungs have
-never been run through the 150-example harness, so they are **not evaluable**
-without new generation.
+All three Stage 2/3 families trained at the **0.86M rung**. **Preliminary**
+evidence that this is not the best rung:
+
+> **n=76 behaviour prompts · E1 behaviour-wave harness · degeneration stop
+> ACTIVE** (loops cut at ~768 tokens, max 1,536)
+
+| rung | sa | sb |
+|---|---:|---:|
+| 0.86M *(the candidate rung)* | 0.3684 | 0.4342 |
+| **1.60M** | **0.4868** | **0.5132** |
+| **2.96M** | **0.5921** | 0.5395 |
+
+**These values must not be compared with the 150-example usable-rollout rates
+above** — different prompt population, different harness, and a stop policy that
+changes the termination and context-limit components outright. The same weights
+score 0.3684 here and 0.5133 there. The higher rungs have never been run through
+the 150-example harness and are **not evaluable** on it without new generation.
+
+**Recoverable and hash-valid (verified 2026-08-05).** 30/30 local files match
+their pod-side manifests. Relay digests recorded in
+`artifacts/audit/relay_e1_digests.json`; **two were downloaded and recomputed
+byte-exact** (`e1_r1600k_sa_pca` and P1-sa). Every E1 rung is covered across local
++ relay.
+
+> ⚠️ **P1 storage risk.** The incumbent reference exists in **one place only** —
+> the relay — which is at its storage limit and has an **approved but unexecuted
+> history squash pending, which invalidates existing revisions**. If that runs
+> before P1 is copied out, the project loses its own reference weights, exactly as
+> happened to P0-assistant. Copying costs ~4.8 GB of 85 GB free. **Not done here —
+> it is a retention decision, not part of the re-analysis.**
 
 Canonical handoff. Companions:
 

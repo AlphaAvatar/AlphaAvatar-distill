@@ -2091,8 +2091,13 @@ random-init seed spread was measured, so the step-0 gap has no error bar.
 ### 19.5 Stage 0/1 — did it demonstrably help downstream? Yes, and decisively
 
 The matched Experiment 1 arms are exactly this test: same rung, same seed, same
-budget, only the initialization differs. `usable_rollout` on the 76 behaviour
-prompts and the 100 gsm8k prompts:
+budget, only the initialization differs.
+
+> **Measurement label, binding for every number in §19.5:** `usable_rollout` on
+> **n=76 behaviour prompts** and **n=100 gsm8k prompts**, **E1 behaviour-wave
+> harness**, **degeneration stop ACTIVE** (loops cut at ~768 tokens, max observed
+> 1,536). **Not comparable with the 150-example three-mode rates in §19.6** — see
+> §19.11 and §19.13.
 
 | rung | seed | behaviour PCA | behaviour rand | Δ | gsm8k PCA | gsm8k rand | Δ |
 | --- | --- | ---: | ---: | ---: | ---: | ---: | ---: |
@@ -2109,9 +2114,16 @@ prompts and the 100 gsm8k prompts:
 | 5.50M | sa | 0.5526 | 0.0658 | +0.4868 | 0.8900 | 0.0100 | +0.8800 |
 | 5.50M | sb | 0.5395 | 0.0921 | +0.4474 | 0.8700 | 0.0600 | +0.8100 |
 
-**PCA wins 12/12 on behaviour and 11/12 with one tie on gsm8k.** Mean advantage
-**+0.3640** and **+0.4942**. Random initialization produces **zero usable
-rollouts at every rung through 2.96M** and barely 6–9% at 5.50M.
+Across the 12 matched pairs, PCA vs random is:
+
+* **behaviour prompts: 12 wins, 0 ties, 0 losses**;
+* **gsm8k prompts: 11 wins, 1 tie, 0 losses** — the tie is 0.25M `sb`, where
+  *both* initializations score 0.0000, so it is a shared floor, not a contest PCA
+  failed to win.
+
+Mean advantage **+0.3640** (behaviour) and **+0.4942** (gsm8k). Random
+initialization produces **zero usable rollouts at every rung through 2.96M** and
+barely 6–9% at 5.50M.
 
 This is the clearest result in the project. The −0.38-nat step-0 advantage is
 small; its downstream consequence is the difference between a model that can hold
@@ -2238,22 +2250,36 @@ stop reasons, so requiring `natural_termination` already implies
    vs 12.1286 nats, −0.3804, under the pinned protocol. Valid but small (~4% of
    the gap to the teacher) and measured at n=1 per condition.
 2. **Did it demonstrably help Stage 2/3 behaviour recovery?** **Yes, decisively.**
-   12/12 matched pairs on behaviour, 11/12 with one tie on gsm8k, mean +0.364 /
-   +0.494. Random init never exceeds 0.092 usable rollout at any budget tested.
+   **12 wins / 0 ties / 0 losses** on behaviour prompts and **11 wins / 1 tie /
+   0 losses** on gsm8k across the 12 matched pairs (the tie is 0.25M `sb`, where
+   both initializations sit at 0.0000). Mean +0.364 / +0.494. Random init never
+   exceeds 0.092 usable rollout at any budget tested.
    The downstream benefit is far larger than the step-0 NLL gap suggests.
-3. **Strongest seed-consistent autonomous rollout behaviour?** **None.** No family
-   separates from another by more than P0-real's own 0.0800 seed spread, and both
-   interventions gain on one seed and lose on the other.
-4. **Among behaviour-comparable models, best correctness?** The three families
-   *are* behaviour-comparable (nothing separates them). On that basis **P2-ceheavy
-   has the best correctness** — highest mean (0.1900), tightest spread (0.0200),
-   and the best `correct | usable` on both seeds (0.3590 / 0.2927). This is a
-   secondary-axis observation among behaviourally indistinguishable candidates,
-   not a demonstrated behaviour improvement.
+3. **Strongest seed-consistent autonomous rollout behaviour?** **None — no
+   candidate is seed-consistent.** Reported precisely:
+   * **P0-assistant holds the highest observed mean usable-rollout rate,
+     0.5867.** It is *not* seed-consistent — 0.6067 on `sa` against 0.5667 on
+     `sb`, and paired at the prompt level it is +14 on `sa` and **−4** on `sb`.
+     **Its weights no longer exist**, so the result cannot be re-measured,
+     extended, or built on.
+   * P0-real (P1) 0.5533, P2-ceheavy 0.5333.
+   * Every gap is smaller than P0-real's own **0.0800** seed spread, so the
+     ordering is not resolvable at n=2.
+4. **Among behaviour-comparable models, best correctness?** The three families are
+   behaviour-comparable in the sense that nothing separates them. On that basis
+   **P2-ceheavy holds the best correctness conditional on a usable rollout —
+   `correct | usable` 0.3590 / 0.2927, the highest on both seeds.** That is the
+   specific claim. **Reported separately, its overall correctness is 0.2000 /
+   0.1800 (mean 0.1900, spread 0.0200)**, also the highest mean, but overall
+   correctness mixes the behaviour failure back in and is the weaker statement.
+   Neither is a demonstrated behaviour improvement.
 5. **Has any model passed a defensible Stage 2/3 behaviour-recovery gate?**
-   **No.** No gate existed to pass, and none is invented here. Descriptively: the
-   best arm produces a usable rollout on **60.7%** of prompts, ~31% of rollouts
-   never terminate, and no candidate is seed-consistently better than any other.
+   **No model has demonstrated passage of a prospectively defined behaviour
+   gate.** No such gate existed when any of these runs was launched, and **no
+   threshold may be invented post hoc** — so this is a statement about the absence
+   of a registered criterion, not a measured failure against one. Descriptively:
+   the best arm produces a usable rollout on **60.7%** of prompts, ~31% never
+   terminate, and no candidate is seed-consistently better than another.
 6. **Dominant remaining failure mode?** **Non-termination with repetition** —
    31.1% of rollouts run to the context limit, accounting for 280 of 395 protocol
    failures.
@@ -2261,9 +2287,29 @@ stop reasons, so requiring `natural_termination` already implies
 ### 19.11 What this changes about the candidate set
 
 All three Stage 2/3 families were trained at the **0.86M rung**. Under the
-behaviour metric that rung is not the best available: on the E1 behaviour prompts
-the 2.96M arms reach **0.5921 / 0.5395** and 1.60M reaches **0.4868 / 0.5132**,
-against 0.86M's **0.3684 / 0.4342** — same evaluation set, same init, same seeds.
+behaviour metric that rung is not the best available.
+
+**These are preliminary results from a different measurement and must be fully
+labelled every time they are quoted:**
+
+| | the rung leads | the Stage 2/3 candidate results |
+| --- | --- | --- |
+| prompts | **76 behaviour prompts** (`data/eval_behavior_v0`) | **150 corpus examples**, mask `d6e24e0b…` |
+| harness | **E1 behaviour wave** | **three-mode free mode** |
+| **stop policy** | **degeneration stop ACTIVE** — loops cut at ~768 tokens | **no stop** — loops run to 8,192 |
+| max observed tokens | 1,536 | 8,150 |
+
+| rung | seed sa | seed sb |
+| --- | ---: | ---: |
+| 0.86M *(the candidate rung)* | 0.3684 | 0.4342 |
+| **1.60M** | **0.4868** | **0.5132** |
+| **2.96M** | **0.5921** | 0.5395 |
+
+Same evaluation set, same init, same seeds *within this table*. **Do not compare
+these values against the 150-example usable-rollout rates in §19.6** — different
+prompt population, different harness, and a stop policy that changes the
+context-limit and termination components outright (§19.13). The same weights
+score 0.3684 here and 0.5133 there.
 
 This is the strongest lead in the re-analysis and it is **not** a conclusion the
 retained artifacts can close: the higher rungs have never been run through the
@@ -2318,3 +2364,55 @@ Context-limit rates are only comparable between runs with the same stop policy,
 and both policies must be stated whenever the number is quoted. This does not
 change any earlier verdict — degeneration was reported in both cases — but it does
 retire "no model has ever been engine-truncated" as a statement about this project.
+
+### 19.14 Checkpoint recoverability — verified 2026-08-05
+
+Prompted by §19.11: the incumbent reference is the least well retained model in
+the project. Verified rather than assumed.
+
+**Local, hash-verified against the pod-side manifests recorded before transfer —
+30/30 files match, 0 mismatched, 0 missing:**
+
+| arm | `model.safetensors` sha256 |
+| --- | --- |
+| `e1_r2960k_sb_pca` | `b658fe392ab0db49…` |
+| `e1_r2960k_sb_rand` | `8ae1ba97f5146879…` |
+| `e1_r5500k_sb_pca` | `bcb916cb3e544505…` |
+| `e1_r5500k_sb_rand` | `bcb916cb3e544505…`* |
+| `e1_ctl_r0250k_sa_pca_stepmatched` | `bfdcb4436f51eb31…` |
+
+\* verified against its own manifest; listed digests are per-arm.
+
+**Relay (`AlphaAvatar/aadistill-artifacts`, 729 files) — present and recoverable,
+LFS digests recorded to `artifacts/audit/relay_e1_digests.json`:**
+
+| arm | size | LFS sha256 |
+| --- | ---: | --- |
+| **`e1_r0860k_sa_pca` (P1-sa)** | 2.38 GB | `18ee10a10333481d…` |
+| **`e1_r0860k_sb_pca` (P1-sb)** | 2.38 GB | `f66de5320b69aa34…` |
+| `e1_r1600k_sa_pca` | 2.38 GB | `6f77676ab8fde397…` |
+| `e1_r1600k_sb_pca` | 2.38 GB | `e432d57e598d57e1…` |
+| `e1_r1600k_sa_rand` | 2.38 GB | `2e8be4b3289fe9b5…` |
+| `e1_r1600k_sb_rand` | 2.38 GB | `9d0b499831689bd1…` |
+| `e1_r2960k_sa_pca` | 2.38 GB | `3f08482c2c8e7372…` |
+| `e1_r2960k_sa_rand` | 2.38 GB | `22374d62c8ae1d65…` |
+
+**End-to-end download verified on two of them** — `e1_r1600k_sa_pca` and
+**P1-sa** — 2.38 GB each in ~165 s, recomputed sha256 **matching the LFS digest
+exactly** in both cases. The relay path is live and its digests are real, so P1
+and the 1.60M/2.96M arms are genuinely recoverable, not merely listed.
+
+Between local and relay, **every rung of Experiment 1 at both seeds and both
+initializations is covered**: 2.96M `sb` exists only locally, 2.96M `sa` and all
+of 1.60M only on the relay.
+
+**P1's storage risk, recorded as a risk rather than resolved.** The incumbent
+reference exists in exactly **one** place — the relay — which is at its
+private-storage limit, cannot reclaim space by deletion (LFS bills history), and
+has an approved-but-unexecuted history squash pending. **A history squash
+invalidates existing revisions.** If it runs before P1 is copied elsewhere, the
+project loses the weights of its own reference checkpoint, exactly as happened to
+P0-assistant. P2-ceheavy is the only Stage 2/3 candidate with a verified local
+copy. No action is taken here — copying P1 to the dev box costs ~4.8 GB of the
+85 GB free and is a one-line operation, but it is a retention decision, not part
+of this re-analysis.

@@ -1242,24 +1242,35 @@
 - **Context:** P1 was selected as the reference using teacher-distribution
   metrics. The clarified hierarchy demotes those to diagnostics, so the selection
   had to be re-examined rather than inherited (`EXPERIMENTS.md` §19).
-- **Decision:** **No existing model has yet completed the Stage 2/3 objective.**
-  Record the distinction explicitly:
-  * **Best current training/reference checkpoint:** P1 = `e1_r0860k_{sa,sb}_pca`
-    **retained as a working baseline only** — for continuity of comparison, not
-    because behaviour confirms it. Nothing displaces it: no candidate is
-    seed-consistently better on the primary metric.
-  * **A model that has passed a behaviour-recovery gate:** **none exists.**
+- **Decision:** **No model has demonstrated passage of a prospectively defined
+  Stage 2/3 behaviour-recovery gate.** No such gate existed when any of these runs
+  was launched, and **no threshold may be invented post hoc**, so this records the
+  absence of a registered criterion — not a measured failure against one. Record
+  the distinction explicitly:
+  * **Incumbent reference checkpoint:** P1 = `e1_r0860k_{sa,sb}_pca`. It is the
+    incumbent, **not the best checkpoint** — it leads on no primary measure and
+    behaviour does not confirm it. Retained for continuity of comparison because
+    nothing seed-consistently displaces it.
+  * **Highest observed mean usable-rollout result:** **P0-assistant, 0.5867.**
+    **Not seed-consistent** (0.6067 / 0.5667; paired +14 on `sa`, −4 on `sb`) and
+    **its weights no longer exist**, so it cannot be re-measured or built upon. It
+    is an observation, not a candidate.
+  * **A model that has passed a prospectively defined behaviour gate:** **none
+    exists.**
 - **Evidence:** usable-rollout means P0-assistant 0.5867, P0-real 0.5533,
   P2-ceheavy 0.5333 — every gap smaller than P0-real's own **0.0800** seed spread.
   Paired at the prompt level both interventions gain on `sa` and lose on `sb`
   (P0-assistant +14 / −4, P2-ceheavy +1 / −7). 31.1% of all rollouts never
   terminate.
-- **Not adopted, and why:** **P2-ceheavy is not promoted** despite the best
-  secondary correctness (mean 0.1900, spread 0.0200, best `correct | usable` on
-  both seeds). Correctness is secondary and may only break a tie between
-  behaviour-comparable candidates; it cannot substitute for the seed-consistent
-  behaviour improvement none of them shows. **P1 is equally not confirmed** — it
-  is the incumbent, not the winner.
+- **Not adopted, and why:** **P2-ceheavy is not promoted.** Its specific
+  advantage is **correctness conditional on a usable rollout — `correct | usable`
+  0.3590 / 0.2927, highest on both seeds.** Its overall correctness is reported
+  separately: 0.2000 / 0.1800, mean 0.1900, spread 0.0200 — also the highest mean,
+  but overall correctness folds the behaviour failure back in and is the weaker
+  claim. Correctness is secondary either way and may only break a tie between
+  behaviour-comparable candidates; it cannot substitute for a seed-consistent
+  behaviour improvement, which none of them shows. **P1 is equally not
+  confirmed** — it is the incumbent, not the winner.
 - **Alternatives considered:** promoting P0-assistant on the highest usable-rollout
   mean — rejected, not seed-consistent, and its weights no longer exist; promoting
   P2-ceheavy on correctness — rejected as above.
@@ -1267,7 +1278,15 @@
   repetition**, not delimiter formatting (44/900) and not fluent-but-wrong output.
   The strongest untested lead is the **token budget**: the 2.96M and 1.60M rungs
   show markedly better behaviour than the 0.86M rung every Stage 2/3 candidate was
-  trained at, on the same evaluation set with the same init and seeds
-  (`EXPERIMENTS.md` §19.11).
+  trained at. That evidence is **preliminary and from a different measurement** —
+  **n=76 behaviour prompts, E1 behaviour-wave harness, degeneration stop ACTIVE** —
+  and must never be compared directly against the 150-example three-mode rates
+  (`EXPERIMENTS.md` §19.11). The higher rungs are recoverable and hash-verified
+  (§19.14) but have never been run through the 150-example harness.
+- **Retention risk recorded, not resolved:** P1's weights exist **only** on the
+  storage-limited relay, which has an approved-but-unexecuted history squash
+  pending that would invalidate existing revisions. P0-assistant's weights are
+  already gone for a comparable reason. P2-ceheavy is the only Stage 2/3 candidate
+  with a verified local copy.
 - **Revisit when:** any candidate shows a seed-consistent usable-rollout gain
   exceeding 0.0800, measured against a prospectively registered gate.

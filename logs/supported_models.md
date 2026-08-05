@@ -112,9 +112,15 @@ only ([`decisions.md`](decisions.md) 2026-08-05, [`EXPERIMENTS.md`](EXPERIMENTS.
 
 Family means — usable rollout: P0-assistant **0.5867**, P1 0.5533, P2 0.5333.
 **Every gap is smaller than P1's own 0.0800 seed spread**, and paired at the
-prompt level both interventions gain on `sa` and lose on `sb`. P1 is the
-**incumbent baseline retained for continuity, not a behaviour-confirmed winner**;
-P2 has the best secondary correctness but is not promoted on it.
+prompt level both interventions gain on `sa` and lose on `sb`.
+
+* **P1 is the incumbent reference checkpoint**, retained for continuity of
+  comparison — **not the best checkpoint**, and not confirmed by behaviour.
+* **P0-assistant holds the highest observed mean usable-rollout rate (0.5867)** —
+  not seed-consistent, and **its weights no longer exist**.
+* **P2-ceheavy holds the best correctness conditional on a usable rollout**
+  (0.3590 / 0.2927). Its overall correctness (0.2000 / 0.1800, mean 0.1900) is a
+  separate and weaker statement. Not promoted on either.
 
 All six trained at the 0.86M rung, 1,023 steps, η 5e-5, warmup 51, same Stage 1
 init (`86fbba78…`), teacher `Qwen/Qwen3-4B-Thinking-2507@768f209d`.
@@ -133,11 +139,23 @@ only on the storage-constrained relay**; P0-assistant is gone.
 | **2.96M** | **0.5921 / 0.5395** vs **0.0000 / 0.0000** |
 | 5.50M | 0.5526 / 0.5395 vs 0.0658 / 0.0921 |
 
-**PCA initialization wins 12/12 matched pairs** (11/12 with one tie on gsm8k).
+**PCA initialization: 12 wins / 0 ties / 0 losses on behaviour prompts, and
+11 wins / 1 tie / 0 losses on gsm8k** — the tie is 0.25M `sb`, where both
+initializations score 0.0000 (a shared floor, not a contest PCA failed to win).
 Random init produces zero usable rollouts at every rung through 2.96M. This is the
 strongest result in the project.
 
-Note that **2.96M and 1.60M behave better than the 0.86M rung** every Stage 2/3
-candidate was trained at — same evaluation set, init and seeds. Those rungs have
-never been run through the 150-example harness and are **not evaluable** on the
-Stage 2/3 candidate set without new generation.
+> All values in this section: **n=76 behaviour prompts / n=100 gsm8k prompts,
+> E1 behaviour-wave harness, degeneration stop ACTIVE.** They are **not
+> comparable** with the 150-example three-mode rates in the table above — the same
+> weights score 0.3684 here and 0.5133 there.
+
+**2.96M and 1.60M behave better than the 0.86M rung** every Stage 2/3 candidate
+was trained at. Those rungs have never been run through the 150-example harness
+and are **not evaluable** on the Stage 2/3 candidate set without new generation.
+
+**Recoverability verified 2026-08-05:** 30/30 local files match their pod-side
+manifests; relay LFS digests recorded in `artifacts/audit/relay_e1_digests.json`,
+with `e1_r1600k_sa_pca` and P1-sa downloaded and recomputed byte-exact. Every rung
+is covered across local + relay. **P1's weights exist only on the relay** — see
+the storage risk in [`STATE.md`](STATE.md).
