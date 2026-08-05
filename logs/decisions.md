@@ -1022,7 +1022,7 @@
   EOS supervision, loss masking and target construction first, then propose a
   *minimal* correction experiment.
 - **Evidence, in the order it matters:**
-  1. A released model with our student's **identical 595,984,384 parameters**
+  1. A released model with our student's **identical 596,049,920 parameters**
      solves ~70% of GSM8K and ~78% of RAG. Capacity and task difficulty are ruled
      out as the explanation.
   2. The overfitted control — 41 passes over the same data — reaches **0.7803
@@ -1093,7 +1093,7 @@
 - **Decision:** record it as **evidence that the battery is achievable at
   near-identical 0.6B parameter scale** — nothing more.
 - **It does support:** rejecting "0.6B is too small for these tasks" and "the
-  battery is too hard". After the template-aware rescore, a 595,984,384-parameter
+  battery is too hard". After the template-aware rescore, a 596,049,920-parameter
   model scores gsm8k 0.70, rag 0.74, math 0.62, multihop 0.60 under our own
   frozen battery and scorer.
 - **It does NOT support:** that our data budget is sufficient, that our

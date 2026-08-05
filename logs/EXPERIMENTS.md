@@ -751,7 +751,7 @@ not been measured.
 
 `Qwen/Qwen3-0.6B @ c1899de2` is **near-geometry, not same-geometry**. Every
 parameter-bearing field matches — hidden 1024, 28L, FFN 3072, 16Q/8KV, head_dim
-128, vocab 151,936, tied embeddings, **identical 595,984,384 parameters** — but
+128, vocab 151,936, tied embeddings, **identical 596,049,920 parameters** — but
 `max_position_embeddings` is 40,960 vs our 262,144 and `rope_theta` is 1e6 vs the
 teacher-inherited 5e6.
 
@@ -1317,8 +1317,14 @@ Two things the padding ratio alone could not have told us:
 
 `Qwen/Qwen3-0.6B @ c1899de2`, both protocols, greedy, effective context 8,192,
 846 prompts each. **Near-geometry**: identical parameter-bearing fields and
-identical **595,984,384** parameters, but `rope_theta` 1e6 vs our 5e6 and
+identical **596,049,920** parameters, but `rope_theta` 1e6 vs our 5e6 and
 `max_position_embeddings` 40,960 vs 262,144.
+
+> **Correction 2026-08-05.** This count was first logged as `595,984,384`, an
+> error of 65,536. Re-measured by one method on both models: state_dict keys and
+> shapes are **identical with zero differences** and both total **596,049,920**.
+> The "identical parameter count" claim was right; the figure was not. Corrected
+> here, in `decisions.md` and in `STATE.md`.
 
 `correct / ignoring-protocol / protocol-valid`:
 

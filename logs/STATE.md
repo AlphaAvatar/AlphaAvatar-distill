@@ -445,23 +445,23 @@ rose slightly. **The two-term CE/KD objective has been reweighted in both
 available directions and neither helps.** Further reweighting of these two terms
 is not worth money.
 
-1. **Measure a same-geometry reference on `capability-v2` (~$0.50, one battery
-   run).** Still the highest information-per-dollar measurement available, and
-   still not done. Every capability number in the project is measured against the
-   4B teacher or against this project's own students, and **`correct` is at the
-   floor on every set, arm, rung and seed** — including now both P0-assistant and
-   both P2-ceheavy arms. Nothing on record distinguishes "the student is bad"
-   from "the target is not reachable at 0.6B under this protocol". Running the
-   released **Qwen3-0.6B** — the student's exact geometry, properly trained —
-   through the frozen battery settles it:
-   * if it also scores ~0, the battery or the protocol is misspecified for this
-     size and the whole reasoning objective needs restating;
-   * if it scores well, the gap is attributable to the distillation recipe.
+**The capacity question is CLOSED — do not re-run the battery.** The
+near-geometry reference `Qwen/Qwen3-0.6B @ c1899de2` (identical parameter-bearing
+fields and the **same 596,049,920** parameters; differs only in `rope_theta`
+1e6 vs 5e6 and `max_position_embeddings`) was measured on the frozen
+846-prompt `capability-v2` under **both** the project and native protocols in
+Diagnostic A (§14.2) and rescored with the template-aware validator (§15.1).
+Rescored `correct`, project / native:
 
-   This gates how to read every result so far, and after two null recipe
-   experiments it should come *before* a third.
+| knowledge | math_verified | gsm8k | multihop | rag | answerability | safety |
+| ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| 0.173 / 0.173 | 0.62 / 0.58 | **0.70 / 0.69** | 0.60 / 0.52 | **0.74 / 0.71** | 0.333 / 0.367 | 0.08 / 0.02 |
 
-2. **Quantify the teacher-forcing gap, then use the rollout stack that already
+**A model with our student's geometry solves ~70% of GSM8K and ~74% of RAG under
+our own protocol.** The task is reachable at 0.6B, the battery is not too hard,
+and the gap is the recipe. Artifacts: `artifacts/eval/e2diag_rescored_v2/`.
+
+1. **Quantify the teacher-forcing gap, then use the rollout stack that already
    exists.** The defining unexplained fact is sharper after §18: teacher-forced
    reasoning top-1 is ~0.57 and moves by only ~0.05 across every recipe tried,
    while free-rollout correctness sits at 0.15–0.21 and is dominated by
@@ -475,6 +475,19 @@ is not worth money.
    are exactly the remedy AGENTS.md specifies. Step one is cheap and CPU-side:
    report CE under teacher forcing against CE on the student's *own* prefixes for
    the same prompts, so the gap is a number before anything is trained against it.
+
+2. **Anchor the teacher-forced reasoning top-1 scale (evaluation-only; the part
+   that matters is CPU and costs $0).**
+   The *one* genuinely missing reference metric — see [`PROPOSAL.md`](PROPOSAL.md)
+   §15. The battery reference covers free generation only; it has **no oracle and
+   no teacher-forced number**, because those modes did not exist when it ran.
+   Teacher-forced reasoning top-1 is now the only metric in the project that
+   resolves recipe differences (spread 0.0025 against the selector's 0.0600), and
+   **we have been adopting and rejecting recipes on a metric with no known
+   scale.** Running the *already-downloaded* `Qwen3-0.6B` through `oracle` and
+   `forced` modes of the existing three-mode harness, on the same 150 examples and
+   mask `d6e24e0b…`, supplies it. **This is not the battery and does not repeat
+   it** — different prompt population, different modes, no `free` mode needed.
 
 3. **Test the NLL-variance observation, if a seeded run is being paid for
    anyway.** P2's FineWeb NLL spread was 66× tighter than P0-real's (§18.7). At
@@ -499,4 +512,5 @@ is not worth money.
 
 **Done since this list was last written:** padding-suffix truncation is
 implemented (`truncate_padding`, default **off** for P4 reproducibility, §13),
-and the same-geometry battery item is the only pre-$1 item still outstanding.
+and the same-geometry capability reference is **complete** (§14.2, rescored
+§15.1) — it is a settled fact above, not an action.
