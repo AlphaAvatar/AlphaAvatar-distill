@@ -106,17 +106,17 @@ def main() -> None:
                   "from P1.",
             "A1": "FFN + all norms full-rank; all four attention projections "
                   "frozen. Everything else identical to A0.",
-            "A2": "A1 + LoRA rank 32 / alpha 16 / dropout 0 / bias none on "
+            "A2": "A1 + LoRA rank 32 / alpha 64 / dropout 0 / bias none on "
                   "self_attn q,k,v,o with base weights frozen; B=0 so the "
                   "initial merged model is exactly the Stage 1 model. LoRA "
                   "tensors share A0's single optimizer group, learning rate, "
                   "schedule and weight-decay semantics — no separate LoRA "
                   "learning rate, no separate parameter group, no rank or "
-                  "module sweep. Rank was raised 8 -> 32 by the maintainer "
-                  "before A2 trained and after both A1 arms finished; alpha is "
-                  "held constant in r per the LoRA paper's own convention, so "
-                  "the alpha/r scaling moves 2.0 -> 0.5 and the shared learning "
-                  "rate needs no retune.",
+                  "module sweep. Rank was raised 8 -> 32 and alpha 16 -> 64 by "
+                  "the maintainer before any A2 checkpoint existed and after "
+                  "both A1 arms finished. Alpha is scaled with rank so alpha/r "
+                  "stays 2.0: the adapter's effective update magnitude is held "
+                  "fixed and only the subspace dimension changes.",
         },
         "held_fixed": [
             "Stage 1 PCA initialization (the fork point for every arm)",

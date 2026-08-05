@@ -1,12 +1,12 @@
 {
- "created_utc": "2026-08-05T16:10:38.674636+00:00",
+ "created_utc": "2026-08-05T16:25:04.194643+00:00",
  "experiment": "E3 \u2014 does restricting attention updates improve autonomous generation stability at the 0.86M supervised-token rung?",
  "status": "REGISTERED BEFORE TRAINING",
  "hypothesis": "Full-rank attention updates at this rung may be a source of drift that degrades autonomous rollout. Freezing them (A1) or confining them to a rank-8 subspace (A2) should improve usable-rollout rate without materially reducing correctness. The null \u2014 that attention capacity is needed and restricting it costs correctness, or that nothing moves beyond seed noise \u2014 is an equally reportable outcome.",
  "arms": {
   "A0": "existing 0.86M P2-ceheavy baseline (ce 1.0 / kd 0.25, scope all); FFN + all norms + attention projections, all full-rank. NOT retrained; recorded results are reused. A1 and A2 inherit this objective, so the treatment is not confounded with the loss-weight change that separates P2 from P1.",
   "A1": "FFN + all norms full-rank; all four attention projections frozen. Everything else identical to A0.",
-  "A2": "A1 + LoRA rank 32 / alpha 16 / dropout 0 / bias none on self_attn q,k,v,o with base weights frozen; B=0 so the initial merged model is exactly the Stage 1 model. LoRA tensors share A0's single optimizer group, learning rate, schedule and weight-decay semantics \u2014 no separate LoRA learning rate, no separate parameter group, no rank or module sweep. Rank was raised 8 -> 32 by the maintainer before A2 trained and after both A1 arms finished; alpha is held constant in r per the LoRA paper's own convention, so the alpha/r scaling moves 2.0 -> 0.5 and the shared learning rate needs no retune."
+  "A2": "A1 + LoRA rank 32 / alpha 64 / dropout 0 / bias none on self_attn q,k,v,o with base weights frozen; B=0 so the initial merged model is exactly the Stage 1 model. LoRA tensors share A0's single optimizer group, learning rate, schedule and weight-decay semantics \u2014 no separate LoRA learning rate, no separate parameter group, no rank or module sweep. Rank was raised 8 -> 32 and alpha 16 -> 64 by the maintainer before any A2 checkpoint existed and after both A1 arms finished. Alpha is scaled with rank so alpha/r stays 2.0: the adapter's effective update magnitude is held fixed and only the subspace dimension changes."
  },
  "held_fixed": [
   "Stage 1 PCA initialization (the fork point for every arm)",
@@ -40,13 +40,13 @@
   },
   "A2-lora-attn-sa": {
    "path": "configs/stage3/e3/e3_a2_lora_attn_sa.json",
-   "config_sha256": "ef9d868b589d8102c4e0d9de0ca404c3d47d1e1d12d8e9dec02fba4c5c35388b",
-   "file_sha256": "cc0a7845db1967e5c30a522a31824e09a26fc0f2c23b5c5717988753b37304cf"
+   "config_sha256": "f9c5cdd26af067ae3608d5d682a7f4dc09de5a08fe441ee0c23150dd0bb62666",
+   "file_sha256": "a8a359a562c07b1e009cd6c29fd6b8209f562e8bc54c85012cb2360f282a1839"
   },
   "A2-lora-attn-sb": {
    "path": "configs/stage3/e3/e3_a2_lora_attn_sb.json",
-   "config_sha256": "ecca8fc84e5d7010219dc47e1f601b6d8f348b98aa70194c829c75413f6674cb",
-   "file_sha256": "0f7dda999ed070529fb23b474528c087a47feda45582f69ee9a8132286feb27f"
+   "config_sha256": "74e8846e25b12d1fc0a731eb6105436739e740f7c9abda5c5efe7aeb95879c73",
+   "file_sha256": "b355d72ede89f65173882c82c5848fd8894bf3d592eaab08d87b860f7d1ddd27"
   }
  },
  "initialization": {
@@ -168,10 +168,10 @@
   "A0 is not re-trained, so its free/oracle/forced numbers come from the 2026-08-05 P2-ceheavy session and were produced on different hardware from A1/A2. FineWeb NLL is the one metric measured on one device for all six arms, because it runs on the dev-box CPU."
  ],
  "code_state": {
-  "git_commit": "1ac7989ef6297bf61715a939373449a5fc288a67",
+  "git_commit": "54af894123e16442b98e9ed116169431c3032249",
   "git_commit_source": "git",
   "dirty": true,
-  "uncommitted_state_sha256": "48e88c0e3418747dfbca9f81abfb6fcb61d91289d8cae375ea7231c64add708c",
+  "uncommitted_state_sha256": "147ee3cf14d3e97ae1e7569b665cc8fc65262e4ba60b3fb0e580ed2dde07d6db",
   "untracked_files": []
  }
 }

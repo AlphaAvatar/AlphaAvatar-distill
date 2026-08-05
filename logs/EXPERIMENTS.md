@@ -2463,7 +2463,7 @@ have been confounded with the loss-weight change that separates the two
 families, and §18 measured that change to be worth −0.0141 on teacher-forced
 reasoning top-1. `tests/training/test_e3_configs.py` asserts the inheritance.
 
-**A2's adapter is not tuned.** Rank 32, alpha 16, dropout 0, bias none, and the
+**A2's adapter is not tuned.** Rank 32, alpha 64, dropout 0, bias none, and the
 LoRA tensors sit in the **same single AdamW group** at the same learning rate,
 schedule and weight decay as every other trainable parameter. There is no
 separate LoRA learning rate, no separate parameter group, and no rank or module
@@ -2492,13 +2492,17 @@ Trainable-parameter counts, measured on the real geometry (CPU, $0):
 A1 removes exactly the 176,160,768 parameters of the four projections. A2 puts
 back 5.2% of that as a rank-32 subspace, over 112 adapted modules.
 
-**Rank was raised 8 → 32 by the maintainer at 16:10 UTC**, after both A1 arms had
-finished and before any A2 weight existed. **Alpha stays 16**, so the `α/r`
-scaling moves 2.0 → 0.5. That is the LoRA paper's own convention — α is held
-constant in `r` precisely so one learning rate serves several ranks — and it is
-the reading consistent with this experiment's rule that A2 varies low-rank
-*parameterization* and not optimization. Holding the scaling at 2.0 instead
-would have required α = 64, which is an optimization change nobody asked for.
+**The adapter was resized twice by the maintainer before any A2 checkpoint
+existed**, both times after both A1 arms had finished: rank 8 → 32 at 16:10 UTC,
+then alpha 16 → 64 at 16:26 UTC. **`α/r` therefore stays at 2.0**, the same
+scaling the original r8/α16 configuration had, so the adapter's effective update
+magnitude is unchanged and **only the subspace dimension moves** — 8 → 32.
+
+An α = 16 / r = 32 run reached step 180 of 1,023 before being stopped; its
+partial training log is retained on the pod as `_aborted_a2_sa_alpha16` and no
+checkpoint from it exists. It is **not** a rank-scaling data point: 180 of 1,023
+steps under a different scaling is not a result, and nothing in this record
+treats it as one. ~$0.16 of GPU time.
 
 **The single-variable property is asserted mechanically, not by eye**
 (`tests/training/test_e3_configs.py`): each arm's config is diffed against the
@@ -2567,9 +2571,10 @@ teacher-native CE / FineWeb NLL are diagnostics that never rank an arm alone.
 
 * **n=2 seeds per arm.** A spread is one draw per condition; no variance claim
   will be made from it.
-* **Rank 32 is a single point.** A null result means "r32 on q/k/v/o under the
-  baseline's optimizer settings does not help", not "LoRA does not help". The
-  r8 configuration was never trained, so this experiment says nothing about it.
+* **Rank 32 / α 64 is a single point.** A null result means "r32 at α/r = 2.0 on
+  q/k/v/o under the baseline's optimizer settings does not help", not "LoRA does
+  not help". Neither r8 nor α/r = 0.5 was trained to completion, so this
+  experiment says nothing about either.
 * **`usable_rollout` is blind to correctness by construction**, and its five
   components are not independent — `protocol_valid` subsumes two of them.
 * **INT8 is measured as held-out NLL only** (fake-quant, scopes `all` and

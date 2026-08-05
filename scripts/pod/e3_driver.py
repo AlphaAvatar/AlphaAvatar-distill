@@ -104,7 +104,7 @@ def train_arms(arms: dict) -> None:
         for field in ("lora_lr", "lora_weight_decay", "no_decay_patterns"):
             assert field not in cfg["optim"], field
         if name.startswith("e3_a2"):
-            assert cfg["lora"]["rank"] == 32 and cfg["lora"]["alpha"] == 16
+            assert cfg["lora"]["rank"] == 32 and cfg["lora"]["alpha"] == 64
             assert cfg["lora"]["dropout"] == 0.0 and cfg["lora"]["bias"] == "none"
         else:
             assert "lora" not in cfg
