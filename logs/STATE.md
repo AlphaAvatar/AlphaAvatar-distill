@@ -1,39 +1,42 @@
-**Updated:** 2026-08-05 20:10 UTC · branch `main` · **no pods running, nothing
-billing.** Verified spend **$114.44** of the **$126.02** cap. **$11.58 of the $30
+**Updated:** 2026-08-05 10:40 UTC · branch `main` · **no pods running, nothing
+billing.** Verified spend **$117.32** of the **$126.02** cap. **$8.70 of the $30
 Experiment 2 allocation is unspent.**
 
-**P0-assistant is complete and DID NOT beat P0-real.** Full record in
-[`EXPERIMENTS.md`](EXPERIMENTS.md) §17.
+**P2-ceheavy is complete and DID NOT beat P1.** Full record in
+[`EXPERIMENTS.md`](EXPERIMENTS.md) §18. P1 (= P0-real) remains the reference.
 
-**The result.** Assistant-only KD with assistant-token normalization
-(`kd_scope: assistant`: 606,717 prompt/context positions leave the KD term *and*
-the denominator falls 1,471,467 → 864,750, scaling surviving assistant tokens by
-×1.7016) on the free-rollout selection metric:
+**The result.** Swapping the loss weights (`ce_weight` 0.25 → 1.0, `kd_weight`
+1.0 → 0.25, `kd_scope` held at `all` so both denominators are unchanged):
 
-| | overall | reasoning top-1 | held-out CE |
-|---|---:|---:|---:|
-| P0-real sa / sb | 0.1533 / **0.2133** | 0.5695 / 0.5720 | 1.5101 / 1.5038 |
-| P0-assistant sa / sb | 0.1867 / 0.1067 | **0.5222 / 0.5222** | 1.5393 / 1.5360 |
+| | free-rollout overall | reasoning top-1 | held-out CE | FineWeb NLL |
+|---|---:|---:|---:|---:|
+| P1 = P0-real sa / sb | 0.1533 / **0.2133** | 0.5695 / 0.5720 | 1.5101 / 1.5038 | 8.8758 / 9.3649 |
+| P2-ceheavy sa / sb | 0.2000 / 0.1800 | **0.5511 / 0.5623** | 1.5299 / 1.5182 | 8.9504 / 8.9578 |
 
-Mean 0.1833 → 0.1467 (**Δ −0.0366**), not seed-consistent, spread *wider* than
-P0-real's 0.0600. The support metric moved decisively the wrong way: reasoning
-mean rank 134/248 → **885/1,017**. Held-out CE regressed +0.026–0.036 on both
-arms against a 0.0063 seed spread.
+Selector mean 0.1833 → 0.1900, **Δ +0.0067 against a P0-real seed spread of
+0.0600** — 9× smaller than the noise it must clear, and every per-task delta
+(±0.013) is exactly one example out of 37–38. **Null.** The pre-launch gradient
+cosine of **0.970** predicted this, which is what makes the null interpretable.
 
-**What it did improve:** free-rollout behaviour — protocol validity 0.513→0.613,
-natural termination 0.580→0.767, empty answers 0.307→0.147, repetition
-0.413→0.247, context-limit 0.420→0.233.
+**The one metric that separates.** Reasoning top-1: both P2 arms fall below both
+P0-real arms — complete separation, mean −0.0141 against a 0.0025 seed spread.
+Held-out CE regressed +0.0198 / +0.0144 on both arms.
 
-**The correction this forces.** D0.4 measured 39.5% of the loss on
-never-generated positions and I inferred it was misspent. **That inference was
-wrong.** Prompt/context KD was acting as a general language-modelling signal;
-removing it bought well-formed termination at the cost of reasoning modelling.
-Loss-mass accounting says where an objective's mass sits, not whether it is
-useful — only the ablation distinguishes those.
+**The pattern this establishes.** Two independent ways of reducing KD influence —
+cutting its *scope* (§17, −0.0486 top-1) and cutting its *magnitude* (§18,
+−0.0141) — both cost teacher-distribution fidelity, both bought some
+free-generation tidiness, and the size tracks the dose. **Prompt/context KD is
+doing real language-modelling work.** The next lever should not be another
+reweighting of the existing two terms.
 
-**P1 alias (no retraining):** `P1-sa` → `e1_r0860k_sa_pca` (seed 20260726,
-config `08264ef1…`), `P1-sb` → `e1_r0860k_sb_pca` (seed 20260801, config
-`9048173d…`). `P0-real-sb` is the better single arm.
+**One suggestive observation, not a result.** FineWeb NLL spread collapsed from
+0.4891 (P0-real) to 0.0074 (P2), a 66× reduction. With n=2 per condition this is
+a single draw per group; recorded as a hypothesis for a future seeded run.
+
+**Retained.** Both P2 `step_001023/model` checkpoints are transferred and
+hash-verified byte-identical (12/12 files), 2.3 GB each, in
+`/home/ecs-user/aad-artifacts/p2_ceheavy/` — unlike the P0-assistant weights,
+which were discarded and are unrecoverable.
 
 **Nothing further is authorized.** Phases 2/3, L1/R1/R2 and all rollout/on-policy
 work remain paused, and the reasoning bottleneck identified in D0 is still open.
@@ -378,7 +381,7 @@ reason and GSM8K correctness across rungs, seeds and inits.
 checkpoints remain relay-blocked and are held, hash-verified, on the dev box
 under `artifacts/stage3/rescued/`.
 
-## 14. Experiment 2 phase 1 — prepared, awaiting launch approval
+## 14. Experiment 2 phase 1 — COMPLETE 2026-08-04 (historical; see EXPERIMENTS.md §12)
 
 Zero-GPU preparation complete and verified ([`PROPOSAL.md`](PROPOSAL.md),
 [`EXPERIMENTS.md`](EXPERIMENTS.md) §12):
@@ -431,78 +434,69 @@ is the fully matched comparison.
 
 ## 11. Next actions
 
-Ordered by expected value per dollar. Items 1–3 came out of the 2026-08-04
-organization pass; all three are cheap relative to what they decide.
+Ordered by expected value per dollar. **$8.70 of the $30 Experiment 2 allocation
+is unspent, and nothing further is authorized.**
 
-1. **Truncate padded blocks before the forward — a free ~3× on every future
-   training run.** Blocks are **66–73% padding** (0.86M rung: 1,349,125 real
-   positions in 617 × 8192 = 5,054,464). The trainer calls `self.student(ids)`
-   and `self.teacher(ids)` on the full 8192 width, so both models — including the
-   **4B teacher, which runs online every step** — spend most of their FLOPs on
-   pad positions whose logits are then masked out of CE, KD and accounting.
+**What the last three experiments settled.** D0 (§16) located the bottleneck;
+P0-assistant (§17) and P2-ceheavy (§18) each tried to fix it by reducing KD's
+influence — once by scope, once by magnitude — and both failed the same way:
+reasoning top-1 fell in proportion to the dose while free-generation tidiness
+rose slightly. **The two-term CE/KD objective has been reweighted in both
+available directions and neither helps.** Further reweighting of these two terms
+is not worth money.
 
-   This is safe to do exactly, not approximately: padding is right-aligned and
-   attention is causal, so a real token's hidden state does not depend on the pad
-   run. Verified numerically on 2026-08-04 (tiny Qwen3, sdpa): max |Δ| on real
-   positions **2.8e-07**, `allclose` True. `micro_blocks` is already **1**, so no
-   length bucketing is needed — slice `ids[:, :unpadded]` in `_micro_losses` and
-   `_eval_blocks`, where `unpadded` comes from the content mask already in hand.
-
-   Expected: **~3.0–3.75× fewer linear FLOPs** and up to ~9–14× fewer attention
-   FLOPs; realized wall-clock gain must be measured, since short blocks may
-   become launch-bound. **This also dissolves most of §8's accepted 3.35×
-   `tool_calling` penalty** — tool blocks are 0.092 *fill*, i.e. **90.8%
-   padding**, so truncation shrinks exactly the blocks that dominate the count.
-   Revisiting §8 was already flagged as due; this is the cheaper answer than
-   relaxing the packing rule, and it changes no rendered token.
-
-   Validation gate: identical loss to 1e-5 on a fixed batch before/after, then a
-   measured tokens/s comparison. CPU-testable; no GPU needed to prove the
-   equivalence.
-
-2. **Measure a same-geometry reference on `capability-v2` (~$0.50, one battery
-   run).** Every capability number in the project is measured against the 4B
-   teacher or against this project's own students. **`correct` is at the floor on
-   every set, arm, rung and seed**, and nothing on record distinguishes "the
-   student is bad" from "the target is not reachable at 0.6B under this
-   protocol". Running the released **Qwen3-0.6B** — the student's exact geometry,
-   properly trained — through the frozen battery settles it in one run:
+1. **Measure a same-geometry reference on `capability-v2` (~$0.50, one battery
+   run).** Still the highest information-per-dollar measurement available, and
+   still not done. Every capability number in the project is measured against the
+   4B teacher or against this project's own students, and **`correct` is at the
+   floor on every set, arm, rung and seed** — including now both P0-assistant and
+   both P2-ceheavy arms. Nothing on record distinguishes "the student is bad"
+   from "the target is not reachable at 0.6B under this protocol". Running the
+   released **Qwen3-0.6B** — the student's exact geometry, properly trained —
+   through the frozen battery settles it:
    * if it also scores ~0, the battery or the protocol is misspecified for this
      size and the whole reasoning objective needs restating;
-   * if it scores well, the gap is attributable to the distillation recipe and
-     its size bounds what recovery can buy.
+   * if it scores well, the gap is attributable to the distillation recipe.
 
-   This is the highest information-per-dollar measurement available and it
-   gates how to read every result so far.
+   This gates how to read every result so far, and after two null recipe
+   experiments it should come *before* a third.
 
-3. **Quantify the teacher-forcing gap, then use the rollout stack that already
-   exists.** The defining unexplained fact: teacher-native held-out CE is
-   **1.0042 nats (PPL 2.73)** at the 5.50M rung — the student predicts teacher
-   tokens very well *given a teacher prefix* — while free generation solves ~0%
-   and degenerates. Degeneration is **`cycle`-dominated at every checkpoint**
-   (11–60 per 76 prompts, vs 0–15 `low_novelty` and 0–12 `rambling`), i.e. exact
-   repetition loops, which is the signature of a model with good local statistics
-   and no sustained plan — the classic exposure-bias picture.
+2. **Quantify the teacher-forcing gap, then use the rollout stack that already
+   exists.** The defining unexplained fact is sharper after §18: teacher-forced
+   reasoning top-1 is ~0.57 and moves by only ~0.05 across every recipe tried,
+   while free-rollout correctness sits at 0.15–0.21 and is dominated by
+   `cycle` degeneration — exact repetition loops, the classic exposure-bias
+   signature. **Offline objectives are not the lever; the train/inference
+   distribution mismatch is.**
 
-   Meanwhile `src/aadistill/rollout/` holds **2,075 lines of tested
-   infrastructure** (engines, snapshots, off-policy measurement) and **no
-   training path consumes any of it**. Stage 3 sub-stage 3 (student-forced span
-   recovery) and Stages 4–5 are exactly the remedy AGENTS.md already specifies.
-   Step one is cheap and CPU-side: report CE under teacher forcing against CE on
-   the student's *own* prefixes for the same prompts, so the gap is a number
-   before anything is trained against it.
+   `src/aadistill/rollout/` holds **2,075 lines of tested infrastructure**
+   (engines, snapshots, off-policy measurement) and **no training path consumes
+   any of it**. Stage 3 sub-stage 3 (student-forced span recovery) and Stages 4–5
+   are exactly the remedy AGENTS.md specifies. Step one is cheap and CPU-side:
+   report CE under teacher forcing against CE on the student's *own* prefixes for
+   the same prompts, so the gap is a number before anything is trained against it.
 
-4. **Replace the headline metric.** `best_holdout_nll` is retired
+3. **Test the NLL-variance observation, if a seeded run is being paid for
+   anyway.** P2's FineWeb NLL spread was 66× tighter than P0-real's (§18.7). At
+   n=2 per condition this is one draw per group and no claim is made — but if any
+   future experiment runs ≥3 seeds, recording FineWeb NLL costs ~8 s per
+   checkpoint and would either confirm or kill it for free.
+
+4. **Headline metric.** `best_holdout_nll` is retired
    ([decision](decisions.md) 2026-08-04). `behavior_score_v0` resolves at only
    **3.3×** its seed spread and cannot rank rungs. Aggregate **protocol validity
-   on `capability-v2`** moved consistently on both seeds in phase 1 (−0.0898,
-   −0.0731) and is the best-resolving generation metric currently available;
-   `correct` stays reported but is at floor and cannot rank anything yet.
+   on `capability-v2`** is the best-resolving generation metric currently
+   available; `correct` stays reported but is at floor. Note that free-rollout
+   correctness on the 150-example diagnostic set has a measured seed spread of
+   **0.0600** — any future selector needs an effect larger than that.
 
 5. **Phases 2–3 of Experiment 2 remain unauthorized**, and **phase 3 should not
    run as written** — it was built around the retired metric
-   ([`PROPOSAL.md`](PROPOSAL.md) §12). $17.03 of the $30 allocation is unspent.
+   ([`PROPOSAL.md`](PROPOSAL.md) §12).
 
 6. Still open, unchanged: the approved relay history squash (destructive, confirm
-   separately) and the four dev-box-only Experiment 1 arms. Not a prerequisite —
-   Experiment 2 stores weights on the dev box.
+   separately) and the four dev-box-only Experiment 1 arms.
+
+**Done since this list was last written:** padding-suffix truncation is
+implemented (`truncate_padding`, default **off** for P4 reproducibility, §13),
+and the same-geometry battery item is the only pre-$1 item still outstanding.

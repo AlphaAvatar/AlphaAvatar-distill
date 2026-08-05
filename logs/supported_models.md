@@ -92,3 +92,25 @@ should not run as written — it was built around the metric phase 1 retired
 
 **Deployment target:** INT8. Every recovery gate already re-evaluates under INT8
 weight fake-quantization at two scopes.
+
+## Stage 3 recovery arms — 2026-08-05 status
+
+`P1` is the current reference and is an **alias for existing checkpoints, not a
+new training run**.
+
+| alias | run | seed | loss weights | `kd_scope` | free-rollout | reasoning top-1 | status |
+| --- | --- | --- | --- | --- | ---: | ---: | --- |
+| **P1-sa** | `e1_r0860k_sa_pca` | 20260726 | ce 0.25 / kd 1.0 | all | 0.1533 | 0.5695 | **reference** |
+| **P1-sb** | `e1_r0860k_sb_pca` | 20260801 | ce 0.25 / kd 1.0 | all | **0.2133** | 0.5720 | **reference**, better arm |
+| P0-assistant-sa | `p0_assistant_sa` | 20260726 | ce 0.25 / kd 1.0 | assistant | 0.1867 | 0.5222 | rejected, weights discarded |
+| P0-assistant-sb | `p0_assistant_sb` | 20260801 | ce 0.25 / kd 1.0 | assistant | 0.1067 | 0.5222 | rejected, weights discarded |
+| P2-ceheavy-sa | `p2_ceheavy_sa` | 20260726 | **ce 1.0 / kd 0.25** | all | 0.2000 | 0.5511 | rejected, **weights retained** |
+| P2-ceheavy-sb | `p2_ceheavy_sb` | 20260801 | **ce 1.0 / kd 0.25** | all | 0.1800 | 0.5623 | rejected, **weights retained** |
+
+All six arms: same Stage 1 init (`86fbba78…`), same 0.86M rung, 1,023 steps,
+η 5e-5, warmup 51, teacher `Qwen/Qwen3-4B-Thinking-2507@768f209d`. Free-rollout
+correctness is on 150 fixed examples, mask `d6e24e0b…`, unrestricted generation.
+
+**No arm has beaten P1 on the pre-registered selector.** The measured seed spread
+of that selector is **0.0600**, which bounds what any future comparison at n=2
+can resolve. Records: [`EXPERIMENTS.md`](EXPERIMENTS.md) §17, §18.

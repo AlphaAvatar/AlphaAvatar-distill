@@ -534,3 +534,58 @@ on the pre-registered selector, `P1` aliases the P0-real arms instead, and
 retaining 4.6 GB of rejected weights was not worth the transfer time. Their
 training logs, manifests and complete evaluation generations are retained, so the
 result is fully reproducible from the configs.
+
+## P2-ceheavy outputs and checkpoints (2026-08-05)
+
+Pod `r3dlq1g6q51xnw` (L40S secure, $0.99/h) deleted after transfer and
+verification. Store: `/home/ecs-user/aad-artifacts/p2_ceheavy/` (external to git;
+`artifacts/` is `.gitignore`d).
+
+### Checkpoints — retained, unlike P0-assistant
+
+Both `step_001023/model` directories transferred and verified with
+`sha256sum -c` against a manifest computed **on the pod before transfer**: 12/12
+files OK. 2.3 GB each.
+
+| file | p2_ceheavy_sa | p2_ceheavy_sb |
+| --- | --- | --- |
+| `model.safetensors` | `4aface45a12cd02e…` | `9828b1780a5eb4e2…` |
+| `config.json` | `62d14acfb86e397e…` | *(identical)* |
+| `generation_config.json` | `0019fccc989feeeb…` | *(identical)* |
+| `chat_template.jinja` | `3802169b2a02b81e…` | *(identical)* |
+| `tokenizer.json` | `be75606093db2094…` | *(identical)* |
+| `tokenizer_config.json` | `8fa82a4ba512c8be…` | *(identical)* |
+
+The four tokenizer/config files are byte-identical across both arms **and** to
+`artifacts/stage1/qwen3_0p6b_init_v0/checkpoint`, which is where the driver
+copied them from. Full manifest: `p2_ckpt.sha256` in the store.
+
+Both load on CPU: 596,049,920 params, RoPE base 4,999,984, finite logits.
+`trainer_state.pt` was **not** retained — exact training resume is not needed.
+
+These arms also lost on the pre-registered selector, but were retained on
+explicit instruction, so unlike P0-assistant the weights remain measurable.
+
+### Side artifacts
+
+| field | value |
+| --- | --- |
+| file | `p2_side.tar.gz` |
+| sha256 | `7e95040b503c149dbf9163dba9c3ffca6e3cbbb2a6a8bc27b0c0083b026e3f09` |
+| size | 532 KB, 24 entries |
+| verified | byte-identical on the pod and after transfer |
+
+Contents: `artifacts/audit/p2_holdout_nll.json`;
+`artifacts/audit/three_mode/P2-ceheavy-{sa,sb}/` with 150 free and 150 oracle
+generations each (token ids included), `forced/forced.per_sample.jsonl` and both
+reports; `configs/stage3/p2/p2_ceheavy_{sa,sb}.json`; both `run_manifest.json`
+and `train_log.jsonl`. Pod `p2_run.log` (107 KB) and `p2.status` retained beside
+it.
+
+Configs, canonical `sha256_json` of the parsed config as recorded in the run
+manifests: sa `42616c1921419d01…`, sb `b846fee7bcae670f…`. These intentionally
+differ from `sha256sum` of the file bytes (`a43775013a5534b5…`, `01b6c3cfa47a7e4e…`)
+— the trainer hashes the parsed config so formatting cannot change the identity.
+
+Inclusion mask (shared with P0-real and P0-assistant):
+`d6e24e0b09da1bcc692b1dc96d8236808d29551a9fc94a47d1d968fd3f73d6ba`.

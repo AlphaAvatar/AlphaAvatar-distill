@@ -1781,3 +1781,196 @@ retrained**; P1 is a name for existing checkpoints, exactly as P0-real was.
   bug made `BACKSTOP_HOURS=4.5` produce an empty `--terminate-after` and a pod
   with **no backstop at all**; that pod was deleted within ~5 min and the
   deadline is now computed in integer minutes.
+
+---
+
+## 18. P2-ceheavy — swapping the CE/KD loss weights (2026-08-05, $2.88)
+
+**Date** 2026-08-05 · **Agent** Claude Opus 5 · **Commit** `fde72096` (+ dirty
+`9b8114fa…`) · **Hardware** 1× NVIDIA L40S secure, $0.99/h · **Pod**
+`r3dlq1g6q51xnw`, 07:39:36Z → 10:34:11Z = **174.6 min = $2.88** against a $6.00
+hard ceiling and a 330-min backstop that never fired.
+
+### 18.1 Objective and pre-registration
+
+P0-assistant (§17) reduced KD's *scope* and traded reasoning fidelity for
+free-generation behaviour. This experiment asks whether the same trade appears
+when KD's *magnitude* is reduced instead, holding scope fixed.
+
+Two arms, treatment only. Baseline is **P1 = the existing P0-real arms**; no
+baseline re-run, so the comparison inherits P1's exact 150 fixed examples and
+inclusion mask `d6e24e0b…`.
+
+| | P1 = P0-real (baseline) | **P2-ceheavy (treatment)** |
+| --- | --- | --- |
+| `ce_weight` | 0.25 | **1.0** |
+| `kd_weight` | 1.0 | **0.25** |
+| `kd_scope` | all | all (**unchanged**) |
+| `kd_temperature` | 1.0 | 1.0 |
+| everything else | — | identical |
+
+Because `kd_scope` stays `all`, both denominators are unchanged (KD 1,471,467;
+CE 864,750) and **only the scalar mixing moves**. `truncate_padding` is absent
+from both configs, so the executed code path matches P0-real exactly.
+
+Seeds `20260726` (sa) and `20260801` (sb), matching P0-real arm-for-arm.
+Canonical config hashes (`sha256_json` of the *parsed* config, not file bytes —
+these will not match `sha256sum` on the file): sa `42616c1921419d01…`,
+sb `b846fee7bcae670f…`.
+
+### 18.2 Pre-launch numerical-safety diagnostic (CPU, $0)
+
+`scripts/training/diagnose_loss_weights.py`, 4 fixed blocks, seq 1024, from the
+shared Stage 1 initialization. No optimizer step (`optimizer_step_called:
+False`).
+
+| setting | CE/tok | KD/tok | CE scalar | KD scalar | total | ‖grad‖ |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| baseline kd1.0 ce0.25 | 9.9725 | 10.2820 | 2.4931 | 10.2820 | 12.7751 | 3594.66 |
+| treatment kd0.25 ce1.0 | 9.9725 | 10.2820 | 9.9725 | 2.5705 | 12.5430 | 3745.91 |
+
+**Gradient cosine 0.96996 (≈14.1°), norm ratio 1.042.** Numerically safe — no
+scale blow-up, no sign flip. The high cosine was recorded as a *prior on effect
+size*, not acted on: the two recipes point in nearly the same direction from the
+shared start point, so a large separation was not expected. It did not change
+the learning rate, clipping, or any other field.
+
+### 18.3 Training
+
+Both arms completed 1,023 steps. **61.5 min each, 3.61 s/step** (P0-real: 61.1
+min, 3.546 s/step) — a 1.8% slowdown with no code change, i.e. host noise.
+
+Setup assertions all passed: `holdout_v1.jsonl` sha256 `2d49f637…` verified;
+RoPE base 4,999,984 confirmed in both venvs (transformers 5.13.1 training /
+5.14.1 vLLM); and the on-pod check that **`ce_weight`/`kd_weight` are the only
+differing fields and `kd_scope` is unchanged**.
+
+Final teacher-native held-out CE — the guard rail, not the selector:
+
+| | P0-real | P2-ceheavy |
+| --- | ---: | ---: |
+| sa | 1.510093 | 1.529854 |
+| sb | 1.503762 | 1.518195 |
+
++0.0198 / +0.0144 against a P0-real seed spread of 0.0063. A small, consistent
+regression on both arms — same direction as P0-assistant, roughly half the size.
+
+### 18.4 Free-rollout correctness — the pre-registered selector
+
+150 fixed examples, mask `d6e24e0b…`, unrestricted generation (P18).
+
+| task | P0-real-sa | P0-real-sb | P2-sa | P2-sb | P0 mean | P2 mean | Δ |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| **OVERALL** | 0.1533 | 0.2133 | 0.2000 | 0.1800 | 0.1833 | 0.1900 | **+0.0067** |
+| gsm8k | 0.0263 | 0.0263 | 0.0000 | 0.0263 | 0.0263 | 0.0132 | −0.0132 |
+| openmath | 0.0000 | 0.0000 | 0.0000 | 0.0270 | 0.0000 | 0.0135 | +0.0135 |
+| multihop_qa | 0.0526 | 0.2368 | 0.1316 | 0.1842 | 0.1447 | 0.1579 | +0.0132 |
+| rag_evidence | 0.5405 | 0.5946 | 0.6757 | 0.4865 | 0.5675 | 0.5811 | +0.0135 |
+
+**Δ = +0.0067 against a P0-real seed spread of 0.0600 — the effect is 9× smaller
+than the noise it would have to clear.** Every per-task delta of ±0.0132–0.0135
+is *exactly one example* out of 37–38; that is the resolution floor of this
+battery, not a signal. Neither P2 arm falls outside the P0-real range
+[0.1533, 0.2133].
+
+**Verdict: null on the selector.** Consistent with the 0.970 gradient cosine.
+
+### 18.5 Teacher-forced reasoning top-1 — the one metric that separates
+
+| arm | reasoning top-1 | mean target rank |
+| --- | ---: | ---: |
+| P0-real-sa | 0.5695 | 134 |
+| P0-real-sb | 0.5720 | 248 |
+| **P2-ceheavy-sa** | **0.5511** | 238 |
+| **P2-ceheavy-sb** | **0.5623** | 233 |
+
+Both P2 arms sit below both P0-real arms — **complete separation**, mean
+−0.0141, against a P0-real seed spread of only 0.0025. Mean rank is too noisy
+across seeds (P0-real spread 114) to support any claim.
+
+This is the **third independent observation in the same direction**: reducing
+KD's scope (§17, −0.0486), reducing KD's magnitude (here, −0.0141), and the
+held-out CE guard rail all say the same thing. The effect tracks how much KD
+influence was removed. Prompt/context KD is doing real language-modelling work.
+
+### 18.6 Oracle correctness and supporting rates
+
+Oracle (reasoning supplied, answer generated) is flat: 0.6367 → 0.6400
+(+0.0033). Expected — neither change targets answer extraction.
+
+| free-rollout rate | P0-real mean | P2 mean | Δ |
+| --- | ---: | ---: | ---: |
+| protocol valid | 0.5533 | 0.5333 | −0.0200 |
+| natural termination | 0.6400 | 0.6834 | +0.0434 |
+| empty answer | 0.2533 | 0.2267 | −0.0266 |
+| repetition | 0.3600 | 0.3200 | −0.0400 |
+| context-limit | 0.3600 | 0.3166 | −0.0433 |
+
+Directionally the same behavioural improvement P0-assistant showed, but roughly
+a third the size and **not seed-consistent** (sa improved on all five, sb
+regressed on three). Per
+[protocol-metrics-reward-terseness], these are not treated as quality evidence
+on their own.
+
+### 18.7 FineWeb held-out NLL, exact historical protocol
+
+`scripts/evaluation/eval_ppl.py`, `holdout_v1.jsonl` sha256 `2d49f637…`,
+max_seq_len 1024, bf16, batch 1, token-weighted. The **21,080-token checksum
+matched exactly on both arms**, confirming the same corpus and truncation as the
+P0-real measurements.
+
+| arm | mean NLL (nats) | perplexity | eval tokens |
+| --- | ---: | ---: | ---: |
+| P0-real-sa (P1) | 8.8758 | 7,156.40 | 21,080 |
+| P0-real-sb (P1) | 9.3649 | 11,671.33 | 21,080 |
+| **P2-ceheavy-sa** | **8.9504** | 7,711.06 | 21,080 ✓ |
+| **P2-ceheavy-sb** | **8.9578** | 7,767.91 | 21,080 ✓ |
+
+Mean 8.9541 vs 9.1204 (−0.166) sits well inside the P0-real spread of 0.4891, so
+**no mean-improvement claim is made**. Direction is mixed per seed: sa worse by
++0.075, sb better by −0.407.
+
+The striking number is the spread: **0.0074 for P2 against 0.4891 for P0-real, a
+66× reduction.** An F(1,1) ratio test gives one-sided p ≈ 0.0096, but with n=2
+per condition each "spread" is a single draw and the test leans on a normality
+assumption that cannot be checked at this sample size. **Treated as suggestive
+only — a hypothesis for a future seeded run, not a result.** A plausible
+mechanism is that a dominant CE term anchors general language modelling more
+consistently than a dominant KD term, but nothing here establishes that.
+
+### 18.8 Verdict
+
+**P2-ceheavy is not adopted. P1 (= P0-real) remains the reference.**
+
+The selector moved +0.0067 against a 0.0600 noise floor; the single metric that
+separates cleanly moved the *wrong* way; the held-out CE guard rail regressed on
+both arms. The pre-launch gradient cosine of 0.970 predicted exactly this, and
+recording it before launch is what makes the null interpretable rather than
+merely disappointing.
+
+What the experiment bought, at $2.88: it converts §17's single observation into a
+**dose-response pattern across two independent ways of reducing KD influence**,
+which is much harder to explain as a seed artifact. The next lever should not be
+another reweighting of the existing two terms.
+
+### 18.9 Retained artifacts
+
+Both `step_001023/model` checkpoints transferred and **hash-verified
+byte-identical** (12/12 files `sha256sum -c` OK) to
+`/home/ecs-user/aad-artifacts/p2_ceheavy/`, 2.3 GB each. Both load on CPU:
+596,049,920 params, RoPE base 4,999,984, finite logits. Tokenizer files are
+byte-identical to the Stage 1 init they were copied from. `trainer_state.pt` was
+not retained (exact training resume not required).
+
+Side artifacts (`p2_side.tar.gz`, sha256 `7e95040b…`, 532 KB, 24 entries):
+`artifacts/audit/` with all three-mode generations and reports, both configs,
+both `run_manifest.json`, both `train_log.jsonl`. Pod run log and status file
+retained alongside. See `logs/artifact_manifests.md`.
+
+### 18.10 Note for future agents
+
+`AutoTokenizer` written by transformers 5.x **cannot be loaded by the dev box's
+4.57.1** (`AttributeError: 'list' object has no attribute 'keys'` on
+`extra_special_tokens`). This is library skew, not checkpoint corruption — the
+Stage 1 init tokenizer fails identically. Verify tokenizer integrity by byte
+hash against the init, or load in a 5.x venv.
