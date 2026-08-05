@@ -107,12 +107,12 @@ their pod-side manifests. Relay digests recorded in
 byte-exact** (`e1_r1600k_sa_pca` and P1-sa). Every E1 rung is covered across local
 + relay.
 
-> ⚠️ **P1 storage risk.** The incumbent reference exists in **one place only** —
-> the relay — which is at its storage limit and has an **approved but unexecuted
-> history squash pending, which invalidates existing revisions**. If that runs
-> before P1 is copied out, the project loses its own reference weights, exactly as
-> happened to P0-assistant. Copying costs ~4.8 GB of 85 GB free. **Not done here —
-> it is a retention decision, not part of the re-analysis.**
+> ✅ **P1 storage risk RESOLVED 2026-08-05.** Both P1 arms are now copied to
+> `artifacts/stage3/rescued/` and **hash-verified against the relay LFS digests**
+> (`18ee10a1…`, `f66de532…`), each with a full tokenizer, each loading on CPU.
+> The relay's pending history squash can no longer destroy the reference weights.
+> **Every Stage 2/3 candidate that still has weights now has a verified local
+> copy;** P0-assistant remains unrecoverable.
 
 Canonical handoff. Companions:
 

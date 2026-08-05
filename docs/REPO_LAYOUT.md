@@ -24,9 +24,13 @@ src/aadistill/             algorithm core (data, init, models, rollout, training
   data/mixture.py          type-mixture ordering so every ladder prefix keeps the mix
   data/ladder.py           reads a pre-packed ladder at training time
   data/cleaning.py         the five ordered corpus-hygiene gates (clean-v2)
+  evaluation/usable_rollout.py Stage 2/3 PRIMARY metric: can the student roll out
+                               on its own? (five components, reported separately)
   evaluation/degeneration.py   when a generation has stopped producing information
   evaluation/capability.py     the frozen battery's deterministic scorers
   evaluation/strict_answer.py  boxed-first numeric answer extraction
+  evaluation/behavior.py       generation splitting, template-aware think handling
+  evaluation/oracle_reasoning.py  builds the gold-reasoning prefix for oracle mode
 scripts/
   data/                    dataset builders · build_token_ladder · validate_corpus_gate
   training/                stage entry points
@@ -85,3 +89,27 @@ Per-run logs and per-experiment proposals were consolidated into
 `866dac2`. Source, scripts, configs, logs and tests were grouped by
 responsibility and stage on 2026-07-30 (`633dc6b`), so commands recorded in
 older logs use pre-reorganization paths.
+
+## Evaluation entry points worth knowing
+
+| script | what it does |
+| --- | --- |
+| `scripts/evaluation/run_three_mode_diagnostic.py` | free / oracle / teacher-forced rollout on a fixed sample; the source of every Stage 2/3 candidate number |
+| `scripts/evaluation/summarize_three_mode.py` | rebuilds free/oracle summaries **from saved generations** with the current scorer — use this rather than the stored `correct`, which is stale for anything generated before the 2026-08-04 scorer fixes |
+| `scripts/evaluation/reevaluate_stage23.py` | the post-hoc program-level re-analysis: `usable_rollout` for every retained arm, the Stage 0/1 init comparison, PCA-vs-random, and the external reference |
+| `scripts/evaluation/eval_ppl.py` | the **pinned** held-out NLL protocol (`holdout_v1`, max_seq 1024, bf16, batch 1, token-weighted). Step-0 initialization NLL and every later FineWeb number use this same path, which is what makes them comparable |
+
+**A scoring rule that has bitten twice:** correctness must be **re-scored** from
+retained generations, never read from a record's stored `correct`. The scorer was
+corrected twice; the stored field puts one arm at 0.0067 where the current scorer
+puts it at 0.1533, so arms generated on either side of a fix are not comparable on
+it.
+
+## Checkpoints
+
+Weights never enter git. They live on the private HF relay
+(`AlphaAvatar/aadistill-artifacts`) and/or the dev box under
+`artifacts/stage3/rescued/` and `/home/ecs-user/aad-artifacts/`, with sha256
+manifests in `logs/artifact_manifests.md`. Every rescued directory carries a
+`pod_hashes.txt` recorded **before** transfer, so a copy can always be verified
+against the source rather than against itself.

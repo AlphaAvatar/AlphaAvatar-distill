@@ -239,8 +239,15 @@ def markdown_table(data: dict) -> str:
     pending = " · ".join(r["label"] for r in data["references"]
                          if r.get("score") is None)
     rows.append("")
-    caption = (f"Behavior score is the headline metric. **Held-out NLL is now a guard rail "
-               f"({data['guard']['band']} band), not the target** — {guard}.")
+    # Both metrics in this table have since been retired: `behavior_score_v0`
+    # resolves at only 3.3x its seed spread, and `best_holdout_nll` selects
+    # checkpoints that produce zero protocol-valid generations (decisions.md,
+    # 2026-08-04). The caption says so rather than presenting either as current.
+    caption = (f"**Both metrics in this table are retired.** `behavior_score_v0` was the "
+               f"headline at the time and resolves at only 3.3x its seed spread; held-out "
+               f"NLL ({data['guard']['band']} band) was its guard rail and was later retired "
+               f"as a selection identity outright. Reference values — {guard}. The current "
+               f"Stage 2/3 primary metric is `usable_rollout`; see logs/EXPERIMENTS.md.")
     # Only mention unscored references when there are some. The teacher was the
     # last one outstanding and was scored on 2026-07-28, which left this trailing
     # an empty list.

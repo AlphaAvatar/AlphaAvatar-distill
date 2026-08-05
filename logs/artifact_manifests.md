@@ -607,8 +607,23 @@ Full detail in [`EXPERIMENTS.md`](EXPERIMENTS.md) §19.14. Digests:
   (`18ee10a10333481d…`) downloaded, ~165 s each, recomputed sha256 matching the
   LFS digest exactly. The relay path is live and its digests are real.
 
-**⚠️ P1 exists in one place only.** The relay is at its private-storage limit and
-has an approved-but-unexecuted history squash pending, **which invalidates
-existing revisions**. P0-assistant's weights were already lost. Copying P1 to the
-dev box costs ~4.8 GB of 85 GB free; not performed here, as retention is a
-separate decision.
+### P1 rescued to the dev box — 2026-08-05
+
+**Resolved.** P1 no longer exists in one place only. Both arms were copied from
+the relay to `artifacts/stage3/rescued/` and **hash-verified against the relay LFS
+digests**:
+
+| arm | `model.safetensors` sha256 | verdict |
+| --- | --- | --- |
+| `e1_r0860k_sa_pca` (P1-sa) | `18ee10a10333481d…` | **matches relay LFS digest** |
+| `e1_r0860k_sb_pca` (P1-sb) | `f66de5320b69aa34…` | **matches relay LFS digest** |
+
+Both load on CPU: 596,049,920 params, RoPE base 4,999,984, finite logits. Each
+directory carries a full tokenizer (the trainer's `save_checkpoint` does not write
+one) and a `pod_hashes.txt` for future verification. 4.6 GB; 80 GB free remains.
+
+The risk this closes: the relay is at its private-storage limit and has an
+approved-but-unexecuted history squash pending, **which invalidates existing
+revisions**. P0-assistant's weights were already lost to the same class of
+problem. Every Stage 2/3 candidate that still has weights now has a verified local
+copy.

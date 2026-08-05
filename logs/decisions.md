@@ -1041,6 +1041,22 @@
 - **Risks:** the audit may find nothing and cost time; but a rollout run started
   on a mis-specified target would cost far more and be uninterpretable.
 - **Revisit when:** the template/EOS/masking/target audit reports.
+- **Amended 2026-08-05 — evidence items 2 and 3 are WITHDRAWN.** The audit this
+  record called for ran the same day and found the defect was **mine, not the
+  model's**: `diagnose_training_recall.py` used the assistant message's `content`
+  (the final answer) as the gold target instead of the rendered
+  `<think>{reasoning_content}</think>{content}`. Consequently **"0.7803
+  gold-prefix top-1" and "median prefix match of 0 tokens" are artifacts** — on
+  the correct target the same checkpoint scores **~0.92**, and the protocol tokens
+  are its *best* tokens (`</think>` 1.0000, `<|im_end|>` 0.9744). Item 3's release
+  curve is likewise explained by answer-shaped text injected into an unclosed
+  `<think>` block. See `EXPERIMENTS.md` §15.4–§15.7. Item 1 stands (rescored:
+  ~0.70 GSM8K, ~0.74 RAG under the project protocol).
+  **The decision itself stands and was strengthened, not weakened** — what
+  survived the audit is that at k=0, with a correctly rendered prompt, the model
+  still produces 0.0 correctness with fluent output and broken arithmetic. The
+  failure is sequence-level and computational, not structural. This amendment
+  exists so the withdrawn numbers are never re-quoted from here.
 
 ## 2026-08-04 — `protocol_valid` is template-bound and cannot compare models
 

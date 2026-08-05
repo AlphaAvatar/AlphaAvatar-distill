@@ -10,28 +10,108 @@ The methods are meant to be **model-family-agnostic**: the same activation-stati
 
 [![Experiment 1 recovery-data scaling](./assets/e1_scaling.svg)](./assets/e1_scaling.svg)
 
-**Where the project stands.** Teacher-native held-out cross-entropy falls
-monotonically with recovery data on both initializations and has **not saturated**
-at 5.50M supervised tokens — the top of what this corpus reaches under a uniform
-mixture. Natural termination on uncapped generation rose from **0/8** on every
-earlier checkpoint to **0.93**, so the degeneration that blocked this line since
-2026-07-30 is substantially resolved. What has *not* moved is reasoning: GSM8K
-exact match is ≤0.05 across all 25 checkpoints. Full numbers, variance analysis
-and the data-vs-compute control are in [Experiment 1](#-experiment-1--recovery-data-scaling); [Experiment 2 phase 1](#-experiment-2-phase-1--what-held-out-nll-is-worth) then showed that held-out NLL is **anti-correlated** with generation capability early in training, and retired it as a checkpoint-selection metric.
+**Where the project stands.** Two things are established and one is not.
+
+**Stage 0/1 — the teacher-derived initialization works, and its downstream value
+is proven.** Step-0 held-out NLL is 11.7482 nats against a random initialization's
+12.1286 (teacher: 2.6264). That −0.38-nat edge is small, but downstream it decides
+everything: across 12 matched Experiment 1 pairs — same rung, seed, budget and
+optimizer, differing only in initialization — the PCA init wins **12/0/0** on
+autonomous-rollout behaviour and **11/1/0** on GSM8K. **Random initialization
+produces zero usable rollouts at every data rung through 2.96M supervised
+tokens.** This is the strongest result in the project.
+
+**Stage 2/3 — no model has demonstrated passage of a prospectively defined
+behaviour-recovery gate.** The student can be trained to hold the teacher's
+protocol some of the time, and cannot yet be trained to hold it reliably. The best
+arm produces a well-formed, self-terminating rollout on ~61% of prompts. **The
+dominant failure is that the model does not stop:** 31% of rollouts run to the
+8,192-token context limit in a repetition loop.
+
+**Reasoning has not emerged at any budget tried.** On the fixed diagnostic set,
+correctness *given* a usable rollout is 0.000 on `openmath` for five of six arms.
+
+**What is not the problem.** The released `Qwen3-0.6B` — the student's exact
+geometry and parameter count — answers ~70% of GSM8K and ~74% of RAG on this
+project's own frozen battery under this project's own protocol. A model this size
+can do the task and the battery is not too hard. That bounds the *task*; it does
+**not** localise our gap, which belongs to the whole training stack and trajectory
+— initialization, data, token budget, stages, curriculum and objectives — until
+evidence separates them.
 
 **Current experiment:** [Qwen/Qwen3-4B-Thinking-2507](https://huggingface.co/Qwen/Qwen3-4B-Thinking-2507) → a 0.6B-class student (Qwen3-0.6B geometry, ~6.7× compression, INT8 deployment target).
 
+Full record: [`logs/EXPERIMENTS.md`](./logs/EXPERIMENTS.md). Current state and next
+actions: [`logs/STATE.md`](./logs/STATE.md). Total paid compute to date: **$117.32**.
+
+### How Stage 2/3 is measured
+
+The primary metric is `usable_rollout` — can the student produce a well-formed
+trajectory on its own?
+
+```
+usable_rollout = non_empty AND natural_termination AND no_severe_repetition
+                 AND no_context_limit AND protocol_valid
+```
+
+Reported with **every component rate**, never as a weighted average. Correctness
+is a **separate secondary axis**; teacher-forced top-1, teacher-native CE, FineWeb
+NLL and training loss are **diagnostics only** and are never combined onto one
+scale. Two caveats travel with the metric: it is blind to correctness by
+construction (a terse well-formed reply scores perfectly), and its components are
+**not independent** — `protocol_valid` subsumes two of them, and empirically
+`usable_rollout == protocol_valid` on 897/900 samples.
+
+### What has been ruled out
+
+| tried | result |
+| --- | --- |
+| More recovery data (0.25M → 5.50M, 24 arms) | Teacher-native CE falls monotonically and has not saturated. Behaviour improves to ~0.59; reasoning does not emerge. |
+| Selecting on held-out NLL | **Retired.** The checkpoint with the best held-out NLL of its trajectory produces *zero* protocol-valid generations. |
+| Assistant-only KD (`kd_scope`) | No seed-consistent gain; teacher-forced reasoning top-1 fell 0.049. |
+| Swapping the CE/KD weights | Null on the selector (+0.007 against a 0.060 seed spread); top-1 fell 0.014. |
+
+Reducing KD's influence two independent ways cost teacher-distribution fidelity in
+proportion to the dose, so **reweighting the existing two loss terms is not the
+lever**. The strongest untested lead is the **token budget**: the 1.60M and 2.96M
+rungs behave markedly better than the 0.86M rung every Stage 2/3 candidate was
+trained at.
+
 <details>
-<summary><b>Historical run table (superseded metric — click to expand)</b></summary>
+<summary><b>Experiment 1 — recovery-data scaling (24 arms + compute control, $61.5)</b></summary>
 
-The runs below were scored on `behavior_score_v0` under a **512-token generation
-cap**, which AGENTS.md P18 now forbids for formal measurement — the cap was
-hiding repetition loops rather than measuring behaviour. They are kept as the
-record of how the recovery recipe was built, and are **not comparable
-point-for-point** with the uncapped numbers above. The size-vs-behaviour figure
-they feed is [`assets/performance_trend.svg`](./assets/performance_trend.svg).
+Six nested data rungs (0.25M → 5.50M supervised tokens) × 2 seeds × 2
+initializations, each trained a fixed 3 passes over its own rung, plus a
+step-matched compute control.
 
-**What is measured, and why it changed.** The headline metric is `behavior_score_v0`: the unweighted mean of six *credited* mechanical checks over 76 held-out prompts — chat-format validity, fluency (an empty or copied answer scores zero), evidence grounding, refusal on unanswerable questions, parseable tool calls, and gsm8k exact match. No LLM judge, so it is free and reproducible from the stored generations ([scorer](./src/aadistill/evaluation/behavior.py), [build log](./logs/EXPERIMENTS.md)). Held-out NLL used to be the headline; it is now a **guard rail** — it is fineweb-edu text and is nearly blind to the failures that actually matter here. Behavior score is itself a stopgap: **real-world test suites take over as the headline once the student is good enough to attempt them** ([decision](./logs/decisions.md)).
+| supervised tokens | PCA CE | random CE | PCA natural-termination | PCA GSM8K EM |
+|---:|---:|---:|---:|---:|
+| 0.25M | 2.1183 | 8.8263 | 0.533 | 0.005 |
+| 0.46M | 1.7544 | 8.3461 | 0.671 | 0.000 |
+| 0.86M | 1.5069 | 7.9472 | 0.763 | 0.000 |
+| 1.60M | 1.2983 | 7.4047 | 0.835 | 0.040 |
+| 2.96M | 1.1468 | 6.6727 | **0.921** | 0.015 |
+| **5.50M** | **1.0042** | **5.9798** | 0.803 | 0.020 |
+
+- **CE scales with data decisively** — 74× (PCA) and 261× (random) the
+  between-seed noise, monotone at every rung, **not saturated at 5.50M**.
+- **The improvement is data, not compute.** The step-matched control — same init,
+  seed, optimizer, schedule and step count, differing *only* in unique data —
+  reached CE 2.2907, **worse** than the same rung at 324 steps.
+- **No reasoning emerged anywhere.** GSM8K exact match across all 25 checkpoints:
+  min 0.000, max 0.050, mean 0.006.
+
+Reviewable samples: [`logs/e1_test_cases.md`](./logs/e1_test_cases.md).
+
+</details>
+
+<details>
+<summary><b>Superseded metric — the pre-Experiment-1 run table</b></summary>
+
+These runs were scored on `behavior_score_v0` under a **512-token generation
+cap**, which AGENTS.md P18 now forbids for formal measurement — the cap was hiding
+repetition loops rather than measuring behaviour. Kept as the record of how the
+recovery recipe was built; **not comparable point-for-point** with anything above.
 
 | # | date | run | starts from | what changed | total steps | behavior | held-out NLL |
 | ---: | --- | --- | :---: | --- | ---: | ---: | ---: |
@@ -44,89 +124,21 @@ they feed is [`assets/performance_trend.svg`](./assets/performance_trend.svg).
 | 7 | 2026-07-27 | [start-point ablation: from_s1](./logs/EXPERIMENTS.md) | #3 | same 2700-step leg from s1@660; the A/B arm-B leg was neutral (+0.17%) | 3360 | 9.5% | 3.8067 |
 | 8 | 2026-07-27 | [start-point ablation: from_init](./logs/EXPERIMENTS.md) | #2 | single-stage from Stage 1 init, 2700 steps total; warm-up ladder unnecessary (+0.74%) | 2700 | **20.2%** | 3.8285 |
 
-Behavior score is the headline metric. **Held-out NLL is now a guard rail (±1% band), not the target** — teacher Qwen3-4B-Thinking-2507 2.6264 · random-init 0.6B baseline 12.1286.
+**Both metrics in this table are retired.** `behavior_score_v0` was the headline at the time and resolves at only 3.3x its seed spread; held-out NLL (±1% band) was its guard rail and was later retired as a selection identity outright. Reference values — teacher Qwen3-4B-Thinking-2507 2.6264 · random-init 0.6B baseline 12.1286. The current Stage 2/3 primary metric is `usable_rollout`; see logs/EXPERIMENTS.md.
 
-> **The behavior scores in this table were measured under a 512-token generation cap, and that cap was hiding a failure.** Re-measured without it, every checkpoint in *this* line degenerated into repetition. That blocker has since been **substantially resolved** by Experiment 1's teacher-native recovery data: the best arm now terminates naturally on **93.4%** of held-out prompts (`e1_r2960k_sa_pca`), against 0/8 for every checkpoint above. The table below is retained as the historical record on the superseded capped metric; the current results are in [Experiment 1](#-experiment-1--recovery-data-scaling) and use a different, uncapped protocol, so the two are **not comparable point-for-point**.
+Attempts 7–8 are a fixed-budget ablation of the *start point*: all three branches
+ran the identical 2,700-step leg at the same seed from lineages costing 4,020,
+3,360 and 2,700 total steps. All landed inside the pre-registered 1% band, so the
+recipe dropped its two warm-up legs and became a single stage. The behaviour eval
+**reversed the ranking held-out NLL gives**, which is why the headline metric
+changed — and, later, why held-out NLL was retired outright. One run per arm, no
+variance estimate.
 
-Attempts 7–8 are a fixed-budget ablation of the *start point*, not of the training leg: runs 6–8 are the three branches that ran the identical 2700-step leg at the same seed, from lineages costing 4020, 3360 and 2700 total steps. Both landed inside the pre-registered 1% band, so the recovery recipe dropped its two warm-up legs and became a single stage — a third less compute per iteration.
-
-The behavior eval **reverses the ranking held-out NLL gives**: the cheapest lineage (attempt 8) is the best-behaved at 20.2%, while the best-NLL checkpoint (attempt 6) is the worst at 8.9% — it improves next-token prediction while getting *worse* at chat format, grounding and tool calls. That result is why the headline metric changed. Caveats a reader must carry: one run per arm, no variance estimate, and the per-axis rates rest on 7–76 prompts each, so only large moves are evidence — see the [run log](./logs/EXPERIMENTS.md). Current state and next actions: [`logs/STATE.md`](./logs/STATE.md); costed, unapproved work: [`logs/PROPOSAL.md`](./logs/PROPOSAL.md).
-
-The figure regenerates from [`assets/perf_trend.json`](./assets/perf_trend.json) with `uv run python scripts/evaluation/plot_perf_trend.py`; the table above comes from the same file via `--print-table`, and every point is backed by the consolidated record in [`logs/EXPERIMENTS.md`](./logs/EXPERIMENTS.md).
+The figure [`assets/performance_trend.svg`](./assets/performance_trend.svg)
+regenerates from [`assets/perf_trend.json`](./assets/perf_trend.json) with
+`uv run python scripts/evaluation/plot_perf_trend.py`.
 
 </details>
-
-
----
-
-## 🔬 Experiment 1 — recovery-data scaling
-
-**Question:** how much teacher-generated recovery data does this student need, and does the answer depend on how it was initialized?
-
-**Design.** Six nested data rungs (0.25M → 5.50M supervised tokens) × 2 seeds × 2 initializations = 24 arms, each trained for a fixed **3 passes** over its own rung, plus a **step-matched compute control** — the 0.25M rung run for the 5.50M arm's full 4,412 optimizer steps, so data quantity can be separated from optimizer updates. Every arm differs from the canonical recipe in exactly four fields (rung, seed, start checkpoint, derived schedule).
-
-| supervised tokens | PCA CE | random CE | PCA behaviour | PCA natural-termination | PCA GSM8K EM |
-|---:|---:|---:|---:|---:|---:|
-| 0.25M | 2.1183 | 8.8263 | 0.3194 | 0.533 | 0.005 |
-| 0.46M | 1.7544 | 8.3461 | 0.3626 | 0.671 | 0.000 |
-| 0.86M | 1.5069 | 7.9472 | 0.3695 | 0.763 | 0.000 |
-| 1.60M | 1.2983 | 7.4047 | 0.4076 | 0.835 | 0.040 |
-| 2.96M | 1.1468 | 6.6727 | 0.4180 | **0.921** | 0.015 |
-| **5.50M** | **1.0042** | **5.9798** | 0.3781 | 0.803 | 0.020 |
-
-CE is cross-entropy on held-out **teacher-native** sessions (16 packed blocks disjoint from every rung). Behaviour, natural termination and GSM8K EM come from uncapped generation within the model's **effective context of 8,192**, derived from the trained `block_len` — not the architectural 262,144 the geometry inherits. Seed-averaged; per-arm values in [`logs/EXPERIMENTS.md`](./logs/EXPERIMENTS.md).
-
-**What the variance analysis supports.** Between-seed spread is compared against the range each metric covers, so claims are graded rather than asserted:
-
-- **CE scales with data decisively** — 74× (PCA) and 261× (random) the between-seed noise, monotone at every rung, and **not saturated at 5.50M**.
-- **Initialization dominates data over this range.** At the top rung the PCA init reaches CE 1.0042 against the random init's 5.9798. Every random-init arm sits at p50 = 768 generated tokens, the signature of the degeneration stop firing.
-- **The improvement is data, not compute.** The step-matched control — same init, seed, optimizer, LR schedule, step count and validation set, differing *only* in unique data — reached CE 2.2907, **worse** than the same rung at 324 steps (2.0938) and far from the 5.50M arm's 1.0032. More passes over a small corpus overfit; more unique data did not.
-- **What passes *do* buy is protocol competence:** the control leads every arm on natural termination (0.961) and behaviour (0.468).
-- **The behaviour composite barely resolves** — only 3.3× the seed spread, so its rung ordering is not claimable. Held-out NLL is weaker still (between-seed |Δ| 0.66).
-- **No reasoning emerged anywhere.** GSM8K exact match across all 25 checkpoints: min 0.000, max 0.050, mean 0.006, with the random init at 0.000 at every rung and seed.
-
-The figure above regenerates from `artifacts/stage3/e1_consolidated.json` with `uv run python scripts/evaluation/plot_e1_scaling.py`.
-
-**Reviewable samples:** [`logs/e1_test_cases.md`](./logs/e1_test_cases.md) — 46 generations stratified over stop reason and answer correctness, with the untruncated copies in `logs/e1_test_cases.jsonl`.
-
-**Cost:** $61.5 — 24 training arms $47.6, control + first evaluation $8.1, full sweep $5.8. Every pod was released after hash-verified teardown.
-
----
-
-## 🧭 Experiment 2 phase 1 — what held-out NLL is worth
-
-**Question:** does Experiment 1's held-out-NLL deterioration reflect real capability loss, and does cleaning the recovery corpus help?
-
-**Design.** One variable — corpus cleaning (median-length survivor selection) — at Experiment 1's 0.86M rung, two seeds, both arms forked from the same Stage 1 init, byte-identical trainer, matched token count. Ten evaluation points per seed, scored on a frozen 846-prompt capability battery (knowledge, verifier-backed math, GSM8K, multihop, RAG, paired answerability, paired safety refusal, behaviour) with deterministic scorers and no LLM judge.
-
-**The corpus is not adopted, and the headline finding is about the metric rather than the data.**
-
-- **Held-out NLL and generation capability move in opposite directions early in training.** The checkpoint with the **best held-out NLL of its whole trajectory** (`sb`@127, 8.5010 — better than the control and better than its own endpoint) produces **zero protocol-valid generations across all 726 battery prompts**. The other seed shows the same failure, milder. General-text perplexity peaks *before* the student specialises onto the teacher's thinking protocol, and that specialisation is the objective — so the metric selects under-trained checkpoints by construction. `best_holdout_nll` has been [retired as a checkpoint-selection identity](./logs/decisions.md).
-- **Any single scalar is gameable by a degenerate policy.** One checkpoint reports natural termination **1.000**, the best figure in the experiment, on a **51-token** median generation. It terminates perfectly because it says almost nothing.
-- **Cleaning's only seed-consistent effect points the wrong way:** aggregate protocol validity falls 0.090 and 0.073 at the matched endpoint. The NLL gate passed arithmetically, but 99.2% of its margin came from one seed, and cleaning **raised** the between-seed spread from 0.489 to 2.381 nats on identical data and initialization.
-- **Task correctness never left the floor** on any set or arm at this rung, so the reasoning axis is reported as `inconclusive` rather than as a tie.
-
-This is the sharpest evidence yet for a caveat the run table above already carried: held-out NLL is a guard rail, not a target. Full record, per-set numbers and the same-machine control in [`logs/EXPERIMENTS.md`](./logs/EXPERIMENTS.md) §12.15.
-
-**Cost:** $11.3 on one L40S, against an $18.78 pre-registered stop. Pod released after hash-verified teardown.
-
----
-
-## 🔭 Diagnostic session — is 0.6B the limit, or the recipe?
-
-**Question:** our student sits at the correctness floor on every task. Is that the model size, the task, or how we are training it?
-
-**Design.** One RTX A6000 for 94 minutes ($0.52): benchmark the padding-truncation optimization, run the frozen 846-prompt battery on the *released* `Qwen3-0.6B` under two protocols, and ask an intentionally overfitted checkpoint to reproduce the targets it trained on ~41 times.
-
-**The size question is settled — it is the recipe.** The released Qwen3-0.6B is *near*-geometry to our student: identical parameter-bearing fields and an identical **595,984,384 parameters**, differing only in `rope_theta` (1e6 vs 5e6) and `max_position_embeddings` (40,960 vs 262,144). On our own frozen battery it answers **~70% of GSM8K** and **~78% of RAG**. A 0.6B model can do this task, and the battery is not too hard.
-
-**The overfitted checkpoint cannot reproduce its own training data.** After ~41 passes over the same rung it reaches **0.7803 gold-prefix next-token top-1 accuracy** and **0.0 correctness**, with a **median prefix match of zero tokens**. Handing it more of its own gold prefix makes protocol validity *fall* (0.647 → 0.158), so this is not merely a failure to get started.
-
-**Padding truncation is worth 2.69×** on the block mixture a real run consumes (7.96× on the most padded blocks; 0.996× on dense blocks — the control that shows the measurement is honest). The 4B teacher's forward pass alone is 41% of a full-width step.
-
-**A measurement caveat, stated because it changes how the table above should be read:** `protocol_valid` assumes a generation begins inside an already-open `<think>`, which is true of our teacher's template and false for any model that opens its own. Qwen3-0.6B therefore scores **0 `correct`** despite answering correctly — cross-model `correct` is not comparable until that is fixed. It affects **1.9%** of our own generations, so the Experiment 1 and 2 conclusions stand. Full numbers: [`logs/EXPERIMENTS.md`](./logs/EXPERIMENTS.md) §14.
-
-**No on-policy training was started.** The pre-registered decision gate points first at template, EOS supervision, loss masking and target construction ([decision](./logs/decisions.md)).
 
 ---
 
@@ -137,7 +149,7 @@ This is the sharpest evidence yet for a caveat the run table above already carri
 | **0** — activation statistics | streaming float64 sufficient statistics from the teacher: per residual point count / sum / `XᵀX`, per-FFN-neuron `Σ\|a\|` and `Σa²`, token frequencies. Fixed 1.95 GB cache regardless of token count. | passed ([log](./logs/EXPERIMENTS.md)) |
 | **1** — projection + sandwich init | a complete, runnable Qwen3-format 0.6B student (596M params) plus a same-geometry random baseline, both with reproducibility manifests. | passed ([log](./logs/EXPERIMENTS.md)) |
 | **2** — offline warm-up mixture | eight training-use groups from permissive revision-pinned sources (instruction, RAG/evidence, multi-hop QA, tool calling, refusal/uncertainty, code/math, short realtime, long context) with global dedup, holdout exclusion, and train/val/calib splits. | v0 5.39M tokens ([log](./logs/EXPERIMENTS.md)), v1 22.13M ([log](./logs/EXPERIMENTS.md)) |
-| **3** — student recovery | one config-driven trainer for all recovery sub-stages: regex freeze policy, masked CE + on-the-fly full-vocab teacher KD, exact resume, per-run manifests, gate evals. Plus the recovery corpus builder (teacher generation at the model's official preset, session rendering, system-grouped packing, nested token ladder) and an uncapped vLLM evaluation harness with a semantic degeneration detector. | **Experiment 1 complete**: 24-arm data-scaling matrix + a step-matched compute control, all 25 checkpoints measured on four metrics ([results](./logs/EXPERIMENTS.md)). Natural termination reaches 0.934; reasoning has not emerged at any rung. Not yet exitable — see the exit gate below |
+| **3** — student recovery | one config-driven trainer for all recovery sub-stages: regex freeze policy, masked CE + on-the-fly full-vocab teacher KD, exact resume, per-run manifests, gate evals. Plus the recovery corpus builder (teacher generation at the model's official preset, session rendering, system-grouped packing, nested token ladder) and an uncapped vLLM evaluation harness with a semantic degeneration detector. | **open.** Experiment 1 (24-arm scaling + compute control) and three loss/scope experiments are complete and recorded; **no model has demonstrated passage of a prospectively defined behaviour-recovery gate** ([results](./logs/EXPERIMENTS.md)). Best `usable_rollout` ~0.61; 31% of rollouts never terminate |
 | **4–6** — online data, on-policy distillation, deployment validation | specified in [`AGENTS.md`](./AGENTS.md) | not started |
 
 Design choices worth knowing:
@@ -161,7 +173,7 @@ Every run records config hash, code state, dataset/tokenizer/teacher hashes, and
 
 ```bash
 uv sync                    # CPU torch by default; see pyproject.toml for a CUDA index
-uv run pytest tests/ -q    # 301 CPU tests, no downloads
+uv run pytest tests/ -q    # 562 CPU tests, no downloads
 ```
 
 The implemented pipeline runs end to end on CPU (GPU optional):
@@ -255,7 +267,8 @@ AlphaAvatar-distill/
 │   ├── training/           #   Stage 3 recovery trainer (CE+KD, freeze policy, resume)
 │   ├── rollout/            #   engine adapters, in-stack generation, hashed rollout
 │   │                       #   snapshots + importance-ratio diagnostics
-│   ├── evaluation/         #   eval_behavior_v0 scorers and the headline metric
+│   ├── evaluation/         #   usable_rollout (Stage 2/3 primary metric), strict
+│   │                       #   answer/protocol scorers, degeneration, oracle prefix
 │   └── infrastructure/     #   env fingerprint, code-state hash, sha256 manifests
 ├── scripts/                # entry points, one per responsibility
 │   ├── data/               #   mixture + eval-set builders · build_token_ladder ·
@@ -269,7 +282,7 @@ AlphaAvatar-distill/
 ├── configs/                # stage recipes: stage0/ · stage1/ · stage3/recovery.json
 ├── data/                   # corpus manifests (jsonl gitignored, rebuildable)
 │   └── eval_behavior_v0/   #   76-prompt behavior set + manifest (both committed)
-├── tests/                  # 301 CPU tests, mirroring the source areas
+├── tests/                  # 562 CPU tests, mirroring the source areas
 ├── logs/                   # project memory — read STATE.md first
 │   ├── STATE.md            #   canonical handoff: a snapshot, not an archive
 │   ├── EXPERIMENTS.md      #   the consolidated record: what ran, results, cost
@@ -282,7 +295,13 @@ AlphaAvatar-distill/
 
 The tree is abridged to the parts worth knowing about. New directories appear only when an implemented, verified milestone needs them — no empty placeholders. Model weights, activation caches and experiment artifacts are kept out of git (`.gitignore`); large checkpoints live in a private Hugging Face repo with hashes recorded in `logs/artifact_manifests.md`.
 
-On 2026-07-31 the 25 per-run experiment logs and 11 per-experiment proposals were consolidated into [`logs/EXPERIMENTS.md`](./logs/EXPERIMENTS.md) and [`logs/PROPOSAL.md`](./logs/PROPOSAL.md), and ~26 GB of superseded artifacts were removed. The originals remain in git history at commit `866dac2`, and every deleted checkpoint is on the private Hugging Face relay.
+On 2026-07-31 the 25 per-run experiment logs and 11 per-experiment proposals were consolidated into [`logs/EXPERIMENTS.md`](./logs/EXPERIMENTS.md) and [`logs/PROPOSAL.md`](./logs/PROPOSAL.md), and ~26 GB of superseded artifacts were removed. The originals remain in git history at commit `866dac2`.
+
+**Checkpoint retention is uneven and tracked.** Weights live outside git, on the
+private relay or the dev box, with hashes in
+[`logs/artifact_manifests.md`](./logs/artifact_manifests.md). One arm's weights
+(`P0-assistant`) were discarded and are unrecoverable — recorded rather than
+quietly dropped, because the loss bounds what can be re-measured.
 
 ---
 
@@ -290,7 +309,11 @@ On 2026-07-31 the 25 per-run experiment logs and 11 per-experiment proposals wer
 
 Official records are stricter than ordinary experiments (AGENTS.md 3.8): exact commit, command, hardware, data and tokenizer hashes, budget, metric log, and maintainer approval.
 
-**No records are being kept during baseline construction** (maintainer decision, 2026-07-28). Everything run so far — including the Stage 3 runs recorded in `logs/EXPERIMENTS.md` — is baseline work. The **first record point** will be written once the baseline is carried through Stage 6 deployment validation with satisfactory results; it will be the first entry, not a backfill. Until then every section below is intentionally empty, and the numbers in the run table above are attempts, not records.
+**No records are being kept during baseline construction** (maintainer decision, 2026-07-28). Everything run so far — including every Stage 3 run in `logs/EXPERIMENTS.md` — is baseline work. The **first record point** will be written once the baseline is carried through Stage 6 deployment validation with satisfactory results; it will be the first entry, not a backfill. Until then every section below is intentionally empty, and every number on this page is an attempt, not a record.
+
+This applies to the Stage 0/1 initialization result above as well: it is a strong,
+reproducible finding, but it has not been through the record procedure and is not
+claimed as one.
 
 ### 🧪 Stage 0 — Initialization warm-up data collection
 
