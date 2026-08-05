@@ -1,6 +1,46 @@
-**Updated:** 2026-08-05 11:30 UTC · branch `main` · **no pods running, nothing
-billing.** Verified spend **$117.32** of the **$126.02** cap. **$8.70 of the $30
-Experiment 2 allocation is unspent.** Nothing further is authorized.
+**Updated:** 2026-08-05 14:05 UTC · branch `main` · commit `81d668a` ·
+⚠️ **ONE POD RUNNING AND BILLING: `94slla57nnqjqa`, 1× L40S, $0.99/h**, created
+14:02 UTC with a RunPod-side backstop at **21:32 UTC (450 min, $7.43 max)**.
+Verified spend before this session **$117.32** of the **$126.02** cap; Experiment
+3 is projected at **$6.16** against the **$8.70** remainder.
+
+**Experiment 3 is in flight** — does restricting attention updates improve
+autonomous generation stability at the 0.86M rung? Registered before training in
+[`logs/e3_registration.json`](e3_registration.json) and
+[`EXPERIMENTS.md`](EXPERIMENTS.md) §20.
+
+| arm | trainable attention | status |
+|---|---|---|
+| **A0** = `p2_ceheavy_{sa,sb}` | q/k/v/o + q_norm/k_norm full-rank | **baseline, not retrained** |
+| **A1** = `e3_a1_frozen_attn_{sa,sb}` | q_norm/k_norm only, projections frozen | training |
+| **A2** = `e3_a2_lora_attn_{sa,sb}` | A1 + LoRA r8 on q/k/v/o, base frozen | queued behind A1's freeze gate |
+
+**If this session dies, nothing is stranded.** The launcher runs under `nohup`
+(`scripts/pod/e3_launch.sh`), deletes the pod itself on `ALL_DONE`, and is backed
+by an independent dev-box watchdog plus the RunPod-side deadline. To check:
+`runpodctl get pod 94slla57nnqjqa`; the launcher log and all state live in this
+session's scratch dir, and results land in `/home/ecs-user/aad-artifacts/e3/`.
+
+**After the pod returns**, three commands finish the experiment:
+
+```bash
+tar xzf /home/ecs-user/aad-artifacts/e3/e3_side.tar.gz -C .    # audit artifacts
+PYTHONPATH=src uv run python scripts/evaluation/eval_ppl.py \
+  --data data/warmup/holdout_v1.jsonl \
+  --model /home/ecs-user/aad-artifacts/p2_ceheavy/p2_ceheavy_sa \
+  --model /home/ecs-user/aad-artifacts/p2_ceheavy/p2_ceheavy_sb \
+  --model /home/ecs-user/aad-artifacts/e3/e3_a1_frozen_attn_sa/model \
+  --model /home/ecs-user/aad-artifacts/e3/e3_a1_frozen_attn_sb/model \
+  --model /home/ecs-user/aad-artifacts/e3/e3_a2_lora_attn_sa/model \
+  --model /home/ecs-user/aad-artifacts/e3/e3_a2_lora_attn_sb/model \
+  --max-seq-len 1024 --dtype bfloat16 --out artifacts/audit/e3_holdout_nll_bf16.json
+#   ... repeat with --fake-quant int8 --fake-quant-scope {all,decoder}
+PYTHONPATH=src uv run python scripts/evaluation/analyze_e3.py
+```
+
+Held-out NLL runs on **CPU on purpose**: 25 s per model, it reproduces the
+recorded GPU value to 0.02%, and it is the one metric measured on a single
+device for all six arms. A0's three precisions are already computed (§20.6).
 
 ## NO EXISTING MODEL HAS YET COMPLETED THE STAGE 2/3 OBJECTIVE
 
@@ -517,8 +557,15 @@ is the fully matched comparison.
 
 ## 11. Next actions
 
-Ordered by expected value per dollar. **$8.70 of the $30 Experiment 2 allocation
-is unspent, and nothing further is authorized.**
+Ordered by expected value per dollar. **$8.70 remained before Experiment 3, which
+is projected to consume $6.16 of it. Nothing beyond E3 is authorized.**
+
+**0. Finish Experiment 3.** Collect the pod's artifacts, run the six-model NLL
+table and `analyze_e3.py`, and write the verdict into `EXPERIMENTS.md` §20 under
+the rules registered in §20.4 — including the two that only ever *block* a
+promotion (no single-seed winners; no promotion for terminating earlier if
+correctness given a usable rollout falls). A null is a result: §20.5 lists what
+the design cannot settle, and that list was written before the numbers.
 
 **What the last three experiments settled.** D0 (§16) located the bottleneck;
 P0-assistant (§17) and P2-ceheavy (§18) each tried to fix it by reducing KD's
