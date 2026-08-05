@@ -1,10 +1,10 @@
 {
- "created_utc": "2026-08-05T13:49:59.887097+00:00",
+ "created_utc": "2026-08-05T13:56:47.520277+00:00",
  "experiment": "E3 \u2014 does restricting attention updates improve autonomous generation stability at the 0.86M supervised-token rung?",
  "status": "REGISTERED BEFORE TRAINING",
  "hypothesis": "Full-rank attention updates at this rung may be a source of drift that degrades autonomous rollout. Freezing them (A1) or confining them to a rank-8 subspace (A2) should improve usable-rollout rate without materially reducing correctness. The null \u2014 that attention capacity is needed and restricting it costs correctness, or that nothing moves beyond seed noise \u2014 is an equally reportable outcome.",
  "arms": {
-  "A0": "existing 0.86M P1 control; FFN + all norms + attention projections, all full-rank. NOT retrained; recorded results are reused.",
+  "A0": "existing 0.86M P2-ceheavy baseline (ce 1.0 / kd 0.25, scope all); FFN + all norms + attention projections, all full-rank. NOT retrained; recorded results are reused. A1 and A2 inherit this objective, so the treatment is not confounded with the loss-weight change that separates P2 from P1.",
   "A1": "FFN + all norms full-rank; all four attention projections frozen. Everything else identical to A0.",
   "A2": "A1 + LoRA rank 8 / alpha 16 / dropout 0 / bias none on self_attn q,k,v,o with base weights frozen; B=0 so the initial merged model is exactly the Stage 1 model. LoRA tensors share A0's single optimizer group, learning rate, schedule and weight-decay semantics \u2014 no separate LoRA learning rate, no separate parameter group, no rank or module sweep."
  },
@@ -12,41 +12,41 @@
   "Stage 1 PCA initialization (the fork point for every arm)",
   "the nested uniform 0.86M rung and its exact block order",
   "seeds 20260726 (sa) and 20260801 (sb)",
-  "0.25\u00b7CE + 1.0\u00b7KD, temperature 1.0, kd_scope 'all'",
+  "1.0\u00b7CE + 0.25\u00b7KD, temperature 1.0, kd_scope 'all' (the P2 objective)",
   "AdamW lr 5e-5, wd 0.01, betas (0.9, 0.95), eps 1e-8, clip 1.0",
   "1,023 steps, 51 warmup, cosine to 0.1, 2 blocks/step, block_len 8192",
   "the 150-example evaluation set, its inclusion mask, greedy decoding and unrestricted generation (P18)"
  ],
  "configs": {
-  "A0-P1-sa": {
-   "path": "configs/stage3/e1/e1_r0860k_sa_pca.json",
-   "config_sha256": "08264ef1225c119a703bf74cf2c0ab680ca9ffed811555ef65ba2e96b980a686",
-   "file_sha256": "4c888aadc3f80361b882ea173501fd7fed726afb63006b502f2cf9d46ae8f8f1"
+  "A0-P2-sa": {
+   "path": "configs/stage3/p2/p2_ceheavy_sa.json",
+   "config_sha256": "42616c1921419d019ad0c36357d1ef9f230109dbccc4d4b2e5b7a1e97f2e53e5",
+   "file_sha256": "a43775013a5534b51d3081f508000e33980923921d8fda0bd89465f0a7d64eca"
   },
-  "A0-P1-sb": {
-   "path": "configs/stage3/e1/e1_r0860k_sb_pca.json",
-   "config_sha256": "9048173dc62cca849e74a5e3133e8a42769261ca7df6cdbbddec950ab06bb176",
-   "file_sha256": "27efbb680c5cf57d82c9e07276958591ca2f2fe03854a458cc8d0d64646516aa"
+  "A0-P2-sb": {
+   "path": "configs/stage3/p2/p2_ceheavy_sb.json",
+   "config_sha256": "b846fee7bcae670f7c3970099a7cf1d64e5c59107eab6214d3d6153c7b16119d",
+   "file_sha256": "01b6c3cfa47a7e4e6aa2fcced2d8da5d81eadf74b28fde8cc528de12fc63863c"
   },
   "A1-frozen-attn-sa": {
    "path": "configs/stage3/e3/e3_a1_frozen_attn_sa.json",
-   "config_sha256": "ce07f4c57a1a348b27e118ed3b7945db2861a14bd221f98191acd19dd423534f",
-   "file_sha256": "e932a6b9207e20ccb29ca3e02c789e196d2cb526cfdafbc681d458478c975efa"
+   "config_sha256": "cc6ba2972a28c7c232427cdd6f169534778d70c237b4d251ef6ab460fe17f3cd",
+   "file_sha256": "f276f7923508f0edc46dda22cbaac076bff57850993c5f294000e53eca36405f"
   },
   "A1-frozen-attn-sb": {
    "path": "configs/stage3/e3/e3_a1_frozen_attn_sb.json",
-   "config_sha256": "3d75382584e723c978d125d1d56f712cd303243a9dd595c42b2efb0f3a69a0bb",
-   "file_sha256": "bd3c6fbcaf676415ff0faaec2c23fa7f6ee3a502b9f31ee4221e8abaf6ec3ec6"
+   "config_sha256": "477cbf347ba39df4133d84e922ff802113942bbc2378030970b186d13b1ac31a",
+   "file_sha256": "83d59d11b32b2616dab8274c510435e07230fb5a89ef1024c1ff6e3bfc388417"
   },
   "A2-lora-attn-sa": {
    "path": "configs/stage3/e3/e3_a2_lora_attn_sa.json",
-   "config_sha256": "7ece18e162386405a9983ab1cf9d0728e6571620581789def0b0d35afb46e5b8",
-   "file_sha256": "9d8adf944fe9cc54cf68da94e57363e7225158d0dddfe73366e48891e4f48846"
+   "config_sha256": "f7c16934de3f43152129136e794c35797a07dac1418019631b3aef200389a5db",
+   "file_sha256": "0bcbdf8577977c849f919c1f14a8c6ca2030e7538676cef01575ff7d0f37d1fa"
   },
   "A2-lora-attn-sb": {
    "path": "configs/stage3/e3/e3_a2_lora_attn_sb.json",
-   "config_sha256": "57191d0d8288c71fad91b3e06abcf760f03b5994e871c22cfb0774546d69caa0",
-   "file_sha256": "29bd06ec34450b9f28583935812a840ef95506d13a379775fd8e0fafd7c3404c"
+   "config_sha256": "d251e5637f2875ca97574ddcc1c8f75fb7296db14f12f9cdf0c32d7a56446159",
+   "file_sha256": "07af7cac0a10ea4ce7abdcdce7b171203173c06e69d4725fe22ea8a97a24831d"
   }
  },
  "initialization": {
@@ -122,7 +122,7 @@
    "teacher-native held-out CE",
    "FineWeb held-out NLL (BF16 and INT8 fake-quant)"
   ],
-  "int8": "per-channel symmetric weight fake-quant, scopes 'all' and 'decoder'; NLL only. INT8 rollout behaviour is NOT measured and no claim is made about it."
+  "int8": "per-channel symmetric weight fake-quant, scopes 'all' and 'decoder'; NLL only, dev-box CPU, all six arms on one device. INT8 rollout behaviour is NOT measured and no claim is made about it."
  },
  "decision_rules": [
   "R1 \u2014 if A1 improves rollout stability without materially reducing correctness, full-rank attention updates are likely causing harmful drift.",
@@ -135,46 +135,43 @@
  "noise_floors": {
   "usable_rollout_rate": 0.08,
   "free_rollout_correctness": 0.06,
-  "teacher_forced_reasoning_top1": 0.0025,
-  "teacher_native_holdout_ce": 0.0063,
-  "source": "P1 (= P0-real) two-seed spread on this same 150-example set"
+  "teacher_forced_reasoning_top1": 0.0112,
+  "teacher_native_holdout_ce": 0.0117,
+  "rule": "max(P1 spread, P2 spread) \u2014 the conservative choice",
+  "P1_seed_spread": {
+   "usable_rollout_rate": 0.08,
+   "free_rollout_correctness": 0.06,
+   "teacher_forced_reasoning_top1": 0.0025,
+   "teacher_native_holdout_ce": 0.0063
+  },
+  "P2_seed_spread": {
+   "usable_rollout_rate": 0.0267,
+   "free_rollout_correctness": 0.02,
+   "teacher_forced_reasoning_top1": 0.0112,
+   "teacher_native_holdout_ce": 0.0117
+  }
  },
  "budget": {
   "gpu": "1x NVIDIA L40S secure",
   "authorized_rate_usd_per_hour": 0.99,
-  "expected_minutes": 402,
-  "expected_cost_usd": 6.63,
+  "expected_minutes": 373,
+  "expected_cost_usd": 6.16,
   "hard_backstop_minutes": 450,
   "hard_ceiling_usd": 7.43,
   "ledger_remaining_usd": 8.7,
-  "note": "Costed from the measured P2-ceheavy session (174.6 min for two arms of this exact rung), not by scaling token counts."
+  "note": "Costed from the measured P2-ceheavy session (174.6 min for two arms of this exact rung), not by scaling token counts. Held-out NLL was moved off the pod to the dev-box CPU (25 s/model, reproduces the GPU value to 0.02%), removing ~24 min of paid time."
  },
  "what_this_cannot_settle": [
   "n=2 seeds per arm: a spread is one draw per condition, so no variance claim is made.",
   "LoRA rank 8 is a single point; no rank, module or hyperparameter sweep is run, so 'LoRA does not help' would mean 'r8 on q/k/v/o under P1's optimizer settings does not help'.",
   "usable_rollout is blind to correctness by construction, and its five components are not independent (protocol_valid subsumes two).",
-  "A0 is not re-trained, so its free/oracle/forced numbers come from an earlier session; only its FineWeb NLL is re-measured on the same machine as A1/A2."
+  "A0 is not re-trained, so its free/oracle/forced numbers come from the 2026-08-05 P2-ceheavy session and were produced on different hardware from A1/A2. FineWeb NLL is the one metric measured on one device for all six arms, because it runs on the dev-box CPU."
  ],
  "code_state": {
-  "git_commit": "d55e16080706e6716870f6b306cd912061eadb88",
+  "git_commit": "bec2264a0084598774ff72081de2d1dceffaf19c",
   "git_commit_source": "git",
   "dirty": true,
-  "uncommitted_state_sha256": "c35563bb5f59831ad74c5bcd0aa58c10aea8ac8af1bc7e1fa26a2e184eb0d10f",
-  "untracked_files": [
-   "configs/stage3/e3/e3_a1_frozen_attn_sa.json",
-   "configs/stage3/e3/e3_a1_frozen_attn_sb.json",
-   "configs/stage3/e3/e3_a2_lora_attn_sa.json",
-   "configs/stage3/e3/e3_a2_lora_attn_sb.json",
-   "scripts/evaluation/analyze_e3.py",
-   "scripts/evaluation/parameter_movement.py",
-   "scripts/pod/e3_driver.py",
-   "scripts/pod/e3_launch.sh",
-   "scripts/pod/e3_setup.sh",
-   "scripts/training/register_e3.py",
-   "scripts/training/validate_e3_arms.py",
-   "src/aadistill/training/lora.py",
-   "tests/training/test_e3_configs.py",
-   "tests/training/test_lora.py"
-  ]
+  "uncommitted_state_sha256": "5ba0659d721cf93f3d07414d45aee0a4718163f0a6ba8a443467e8df42f02e3f",
+  "untracked_files": []
  }
 }

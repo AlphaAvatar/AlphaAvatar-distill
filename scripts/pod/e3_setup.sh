@@ -2,16 +2,16 @@
 # Setup for the Experiment 3 pod: attention-update restriction at the 0.86M rung.
 #
 # Four training arms in one session (A1-sa, A1-sb, then A2-sa, A2-sb), evaluated
-# with the unified P1 harness. A0 is NOT re-trained -- its two checkpoints are
-# fetched from the relay so the INT8 fake-quant reference is measured on this
-# same machine rather than compared across hardware.
+# with the unified P1 harness. The baseline A0 = P2-ceheavy is NOT re-trained and
+# is not staged here: its recorded results are the control, and its one missing
+# measurement (held-out NLL under INT8 fake-quant) runs on the dev-box CPU.
 #
 # Two stacks, as in every prior session: the training venv (uv sync) for
 # training, teacher-forced scoring and NLL, and a vLLM venv on the container
 # disk for free/oracle rollouts.
 #
 # Markers: ENV_READY -> REPO_READY -> DATA_READY -> TRAIN_ENV -> VLLM_READY
-#          -> CKPT_READY -> A0_READY -> ROPE_OK -> TESTS_OK -> ARMS_VALIDATED
+#          -> CKPT_READY -> ROPE_OK -> TESTS_OK -> ARMS_VALIDATED
 #          -> SETUP_DONE
 set -euo pipefail
 
@@ -146,33 +146,11 @@ sys.exit(0 if h == want else f'INIT HASH MISMATCH: {h}')
 "
 mark CKPT_READY
 
-# A0 = P1 = the existing 0.86M full-attention arms. Fetched, not retrained: this
-# experiment reuses their recorded results and only adds the INT8 fake-quant
-# reference, which must be measured on the same machine as A1/A2 to be
-# comparable at all.
-say "staging the A0 (P1) reference checkpoints from the relay"
-python3 -c "
-import hashlib, os, shutil, sys
-from pathlib import Path
-from huggingface_hub import hf_hub_download
-tok = os.environ['HF_TOKEN']; repo = 'AlphaAvatar/aadistill-artifacts'
-want = {'e1_r0860k_sa_pca': '18ee10a10333481d3d6178d2fc5d4e0a705aca04d8a1d69a4ce83ac7f1e45b9c',
-        'e1_r0860k_sb_pca': 'f66de5320b69aa34abf421a45b5d468bbbaf23d2a400750e3340873f20e40035'}
-init = Path('/workspace/aad/artifacts/stage1/qwen3_0p6b_init_v0/checkpoint')
-for arm, sha in want.items():
-    dest = Path(f'/workspace/ckpt/{arm}/model'); dest.mkdir(parents=True, exist_ok=True)
-    p = hf_hub_download(repo, f'e1_scaling_20260801/{arm}/step_001023/model/model.safetensors',
-                        repo_type='model', token=tok)
-    shutil.copy(p, dest / 'model.safetensors')
-    got = hashlib.sha256((dest / 'model.safetensors').read_bytes()).hexdigest()
-    if got != sha:
-        sys.exit(f'{arm} HASH MISMATCH: {got}')
-    for f in ('config.json', 'generation_config.json', 'tokenizer.json',
-              'tokenizer_config.json', 'chat_template.jinja'):
-        shutil.copy(init / f, dest / f)
-    print(f'{arm} staged and hash-verified')
-"
-mark A0_READY
+# A0 = P2-ceheavy is NOT staged here. It is not on the relay (its weights live
+# only on the dev box), and it does not need to be: the only measurement A0
+# still needs is held-out NLL, which runs on the dev-box CPU in 25 s per model
+# at $0 and reproduces the recorded GPU value to 0.02%. Keeping it off the pod
+# removes ~24 min of paid time and an upload against a full LFS quota.
 
 # A silently wrong positional basis would invalidate every number this pod
 # produces, and it does not raise on its own.

@@ -25,8 +25,8 @@
   "model\\.norm\\."
  ],
  "loss": {
-  "ce_weight": 0.25,
-  "kd_weight": 1.0,
+  "ce_weight": 1.0,
+  "kd_weight": 0.25,
   "kd_temperature": 1.0,
   "kd_scope": "all"
  },

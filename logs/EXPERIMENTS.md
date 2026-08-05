@@ -2433,7 +2433,7 @@ of this re-analysis.
 
 > **STATUS AT WRITING: REGISTERED BEFORE TRAINING.** Machine-readable
 > registration with every hash: [`logs/e3_registration.json`](e3_registration.json).
-> Results are appended below only after the run; nothing in §20.1–§20.4 was
+> Results are appended below only after the run; nothing in §20.1–§20.7 was
 > written with knowledge of an outcome.
 
 ### 20.1 The question
@@ -2444,16 +2444,24 @@ the context limit** (§19.8), which is the classic exposure-bias signature. This
 experiment asks a narrow, cheap question about one candidate mechanism: **is the
 full-rank attention update itself a source of drift at this rung?**
 
-Two arms, one variable each, against the existing control:
+Two arms, one variable each, against the existing baseline:
 
 | | trainable attention | everything else |
 | --- | --- | --- |
-| **A0** = P1 = `e1_r0860k_{sa,sb}_pca` | q/k/v/o + q_norm/k_norm, full-rank | — |
+| **A0** = **P2-ceheavy** `p2_ceheavy_{sa,sb}` | q/k/v/o + q_norm/k_norm, full-rank | — |
 | **A1** | q_norm/k_norm only; **projections frozen** | identical to A0 |
 | **A2** | A1 + **LoRA r8** on q/k/v/o, base frozen | identical to A1 |
 
-A0 is **not** retrained. Its recorded results are the control, so the comparison
-inherits P1's exact 150 fixed examples and inclusion mask `d6e24e0b…`.
+A0 is **not** retrained. Its recorded results are the baseline, so the comparison
+inherits the exact 150 fixed examples and inclusion mask `d6e24e0b…` that every
+Stage 2/3 family at this rung has been measured on.
+
+**The baseline is P2-ceheavy, so A1 and A2 inherit the P2 objective**
+(`ce_weight 1.0`, `kd_weight 0.25`, τ=1.0, `kd_scope: all`) — not P1's
+`0.25·CE + 1.0·KD`. Had they kept P1's weights, the attention treatment would
+have been confounded with the loss-weight change that separates the two
+families, and §18 measured that change to be worth −0.0141 on teacher-forced
+reasoning top-1. `tests/training/test_e3_configs.py` asserts the inheritance.
 
 **A2's adapter is not tuned.** Rank 8, alpha 16, dropout 0, bias none, and the
 LoRA tensors sit in the **same single AdamW group** at the same learning rate,
@@ -2461,12 +2469,14 @@ schedule and weight decay as every other trainable parameter. There is no
 separate LoRA learning rate, no separate parameter group, and no rank or module
 sweep. A2 isolates low-rank *parameterization*; it is not an adapter
 hyperparameter search, and a second optimizer setting would be a second variable.
+The trainer now rejects `optim.lora_lr`, `optim.lora_weight_decay` and
+`optim.no_decay_patterns` outright rather than accepting them quietly.
 
 ### 20.2 What is held fixed, and what that costs
 
 Held fixed: the Stage 1 PCA fork point (`86fbba78…`), the nested uniform 0.86M
 rung (**682 blocks / 864,750 supervised tokens / 1,502 sessions**) and its exact
-block order, seeds `20260726`/`20260801`, `0.25·CE + 1.0·KD` at τ=1.0 with
+block order, seeds `20260726`/`20260801`, `1.0·CE + 0.25·KD` at τ=1.0 with
 `kd_scope: all`, AdamW 5e-5 / wd 0.01 / betas (0.9, 0.95) / clip 1.0, 1,023 steps
 with 51 warmup, 2 blocks/step at `block_len` 8192, and the whole evaluation
 protocol including greedy decoding and unrestricted generation (P18).
@@ -2484,7 +2494,7 @@ back 1.3% of that as a rank-8 subspace, over 112 adapted modules.
 
 **The single-variable property is asserted mechanically, not by eye**
 (`tests/training/test_e3_configs.py`): each arm's config is diffed against the
-control's and the differing key set must be exactly `{trainable_patterns}` for
+baseline's and the differing key set must be exactly `{trainable_patterns}` for
 A1 and exactly `{lora}` for A2, with `run_name`/`out_dir`/`_purpose` excluded.
 
 ### 20.3 The LoRA implementation, and why it is native
@@ -2526,9 +2536,20 @@ Applied mechanically by `scripts/evaluation/analyze_e3.py`:
 * **R6** — no promotion for terminating earlier if correctness **conditional on
   a usable rollout** falls.
 
-Every delta is read against P1's own two-seed spread on this same set:
-**usable rollout 0.0800**, free-rollout correctness **0.0600**, teacher-forced
-reasoning top-1 **0.0025**, teacher-native held-out CE **0.0063**.
+Two families have been measured at this rung on this same set and their two-seed
+spreads disagree. **The larger is used as the noise floor**, because with n=2 a
+spread is a single draw and P2's unusually tight one is recorded as suggestive
+rather than established (§18.7):
+
+| | P1 spread | P2 spread | **floor used** |
+| --- | ---: | ---: | ---: |
+| usable rollout | 0.0800 | 0.0267 | **0.0800** |
+| free-rollout correctness | 0.0600 | 0.0200 | **0.0600** |
+| teacher-forced reasoning top-1 | 0.0025 | 0.0112 | **0.0112** |
+| teacher-native held-out CE | 0.0063 | 0.0117 | **0.0117** |
+
+Taking the smaller would have made it too easy to call an effect against the
+very baseline this experiment is compared with.
 
 The evaluation hierarchy is not inverted: `usable_rollout` and its five
 components are primary, correctness secondary, and teacher-forced top-1 /
@@ -2538,44 +2559,59 @@ teacher-native CE / FineWeb NLL are diagnostics that never rank an arm alone.
 
 * **n=2 seeds per arm.** A spread is one draw per condition; no variance claim
   will be made from it.
-* **Rank 8 is a single point.** A null result means "r8 on q/k/v/o under P1's
-  optimizer settings does not help", not "LoRA does not help".
+* **Rank 8 is a single point.** A null result means "r8 on q/k/v/o under the
+  baseline's optimizer settings does not help", not "LoRA does not help".
 * **`usable_rollout` is blind to correctness by construction**, and its five
   components are not independent — `protocol_valid` subsumes two of them.
 * **INT8 is measured as held-out NLL only** (fake-quant, scopes `all` and
   `decoder`). INT8 *rollout behaviour* is not measured and no claim is made
   about it.
-* **A0's free/oracle/forced numbers come from an earlier session.** Only its
-  FineWeb NLL is re-measured on the same machine as A1/A2, so the BF16/INT8
-  comparison is same-machine while the rollout comparison is not.
+* **A0's free/oracle/forced numbers come from the 2026-08-05 P2 session** and
+  were produced on different hardware from A1/A2. FineWeb NLL is the one metric
+  measured on a single device for all six arms.
 
 ### 20.6 Pre-launch validation (CPU, $0)
 
 * **581 tests pass** (`uv run pytest tests/ -q`), including 32 new ones covering
   the adapter's zero initial delta, merge fidelity in BF16, bitwise-exact resume
-  through a merged checkpoint, the block-stream position surviving a restart, the
-  freeze policy, and the config single-variable guarantees.
+  through a merged checkpoint, the block-stream position surviving a restart,
+  training under gradient checkpointing and BF16 autocast, the freeze policy, and
+  the config single-variable guarantees.
 * `scripts/training/validate_e3_arms.py` ran all six arms **on the real
   596M-parameter student with the real Stage 1 weights**: freeze policy correct
   for every arm, embeddings frozen everywhere, attention projections frozen in
   A1/A2, 112 adapted modules in A2, **initial BF16 logits bit-identical before
   and after `apply_lora`**, and the merged state dict free of adapter keys.
   Report: `artifacts/audit/e3_prelaunch_validation.json`.
-* A0's parameter movement was computed locally from the rescued P1 weights, at
-  no cost, giving the control's baseline before any GPU was allocated:
+* **A0's parameter movement was computed locally from the retained P2 weights**,
+  giving the baseline before any GPU was allocated:
 
-| group | A0-sa `‖ΔW‖_F / ‖W_init‖_F` | A0-sb |
+| group | A0-P2-sa `‖ΔW‖_F / ‖W_init‖_F` | A0-P2-sb |
 | --- | ---: | ---: |
-| ffn | 0.032538 | 0.032471 |
-| attn_proj | 0.016799 | 0.016751 |
-| decoder_norm | 0.001183 | 0.001169 |
-| attn_norm | 0.001121 | 0.001116 |
-| final_norm | 0.000446 | 0.000447 |
+| ffn | 0.031893 | 0.031841 |
+| attn_proj | 0.016665 | 0.016647 |
+| decoder_norm | 0.001167 | 0.001164 |
+| attn_norm | 0.001136 | 0.001116 |
+| final_norm | 0.000410 | 0.000415 |
 | embedding | **0.000000** | **0.000000** |
 
-The control moves its attention projections by 1.68% relative. A1 forces that to
-exactly zero; A2 confines it to a rank-8 subspace. The zero on `embedding`
-is also the tool validating itself against a parameter known to be frozen.
+The baseline moves its attention projections by 1.67% relative. A1 forces that
+to exactly zero; A2 confines it to a rank-8 subspace. The zero on `embedding` is
+also the tool validating itself against a parameter known to be frozen.
+
+* **A0's held-out NLL was measured at all three precisions on the dev-box CPU**,
+  21,080 tokens each, checksum matching every prior measurement:
+
+| | BF16 | INT8 (`all`) | INT8 (`decoder`) |
+| --- | ---: | ---: | ---: |
+| A0-P2-sa | 8.9482 | 8.9992 | 9.0116 |
+| A0-P2-sb | 8.9626 | 8.9596 | 8.9587 |
+
+The BF16 figures reproduce the recorded GPU values (8.9504 / 8.9578, §18.7) to
+**0.002 and 0.005 nats** — 0.02% and 0.06%. That agreement is what licenses
+moving the whole NLL measurement off the pod: it costs **25 s per model** on
+CPU, it puts the baseline and both treatment arms on **one device**, and it
+needs no upload against a full LFS quota. It removes ~24 min of paid GPU time.
 
 ### 20.7 Budget
 
@@ -2584,17 +2620,17 @@ exact rung on an L40S at $0.99/h), not by scaling token counts.
 
 | phase | min |
 | --- | ---: |
-| setup, downloads, test suite, arm validation | 38 |
+| setup, downloads, test suite, arm validation | 33 |
 | train A1 ×2 | 123 |
 | A1 freeze gate | 6 |
 | train A2 ×2 | 126 |
-| tokenizer, merge check, movement ×4 | 22 |
-| held-out NLL, 3 precisions × 6 models | 24 |
+| tokenizer, merge check, movement ×4 | 16 |
 | three-mode harness ×4 | 44 |
 | checkpoint transfer | 25 |
-| **total** | **402 ≈ 6.7 h → $6.63** |
+| **total** | **373 ≈ 6.2 h → $6.16** |
 
-Hard backstop 450 min = **$7.43**. Ledger remaining **$8.70**.
+Hard backstop 450 min = **$7.43**. Ledger remaining **$8.70**. Held-out NLL is
+absent from this table because it runs on the dev box at $0.
 
 **A budget discrepancy is recorded rather than resolved silently.** The
 instruction for this experiment cited an "established $50 hard cap" for student

@@ -3,7 +3,7 @@
 
     /opt/train/bin/python scripts/pod/e3_driver.py --stage all
 
-Arms (A0 is not retrained; its recorded results are the control):
+Arms (A0 = P2-ceheavy is not retrained; its recorded results are the control):
 
     A1  FFN + all norms full-rank, attention projections FROZEN
     A2  A1 + LoRA r8 on q/k/v/o, base projections frozen, one optimizer group
@@ -13,17 +13,21 @@ before A2 starts.** The gate is not decoration — it recomputes the attention
 projection movement against the Stage 1 init and refuses to spend money on A2
 if A1's frozen set moved at all.
 
+Held-out NLL is deliberately NOT run here. It costs 25 s per model on the dev
+box CPU and reproduces the GPU value to 0.02%, so running it off-pod keeps the
+baseline and the treatment arms on one device, needs no upload against a full
+LFS quota, and removes ~24 min of paid GPU time.
+
 Stages: train_a1 -> gate_a1 -> train_a2 -> tokenizer -> merge_check -> movement
-        -> nll -> three_mode
+        -> three_mode
 
 Markers: TRAIN_DONE:<arm> -> A1_GATE_PASS/FAIL -> TOKENIZER_OK -> MERGE_OK
-         -> MOVEMENT_DONE -> NLL_DONE -> EVAL_DONE:<arm> -> ALL_DONE
+         -> MOVEMENT_DONE -> EVAL_DONE:<arm> -> ALL_DONE
 """
 
 from __future__ import annotations
 
 import argparse
-import hashlib
 import json
 import os
 import shutil
@@ -39,7 +43,6 @@ TRAIN_PY = "/opt/train/bin/python"
 VLLM_PY = "/opt/vllm/bin/python"
 PACK = REPO / "artifacts/stage3/ladder_uniform_probe"
 SESSIONS = REPO / "artifacts/stage3/corpus_v2/sessions.jsonl"
-HOLDOUT = REPO / "data/warmup/holdout_v1.jsonl"
 INIT = REPO / "artifacts/stage1/qwen3_0p6b_init_v0/checkpoint"
 
 A1 = {"A1-frozen-attn-sa": "e3_a1_frozen_attn_sa",
@@ -47,14 +50,6 @@ A1 = {"A1-frozen-attn-sa": "e3_a1_frozen_attn_sa",
 A2 = {"A2-lora-attn-sa": "e3_a2_lora_attn_sa",
       "A2-lora-attn-sb": "e3_a2_lora_attn_sb"}
 ARMS = {**A1, **A2}
-# A0 = P1, staged from the relay by setup. Evaluated here only for the INT8
-# fake-quant reference and the same-machine BF16 control; free/oracle/forced
-# results are reused from the existing records.
-A0 = {"A0-P1-sa": Path("/workspace/ckpt/e1_r0860k_sa_pca/model"),
-      "A0-P1-sb": Path("/workspace/ckpt/e1_r0860k_sb_pca/model")}
-
-HOLDOUT_SHA = "2d49f637a711ae82510fd55a3af98e332314f972780841869508aebe7b3cd8e8"
-EXPECTED_EVAL_TOKENS = 21080          # every P0-real arm scored exactly this
 EXPECTED_MASK = "d6e24e0b09da1bcc692b1dc96d8236808d29551a9fc94a47d1d968fd3f73d6ba"
 TOKENIZER_FILES = ("tokenizer.json", "tokenizer_config.json", "chat_template.jinja")
 STEP = "step_001023"
@@ -98,7 +93,8 @@ def train_arms(arms: dict) -> None:
             continue
         cfg = json.loads(config_path(name).read_text())
         # Assert the arm is what it claims to be, from the file that will train.
-        assert cfg["loss"] == {"ce_weight": 0.25, "kd_weight": 1.0,
+        # The P2-ceheavy objective, which the baseline was trained under.
+        assert cfg["loss"] == {"ce_weight": 1.0, "kd_weight": 0.25,
                                "kd_temperature": 1.0, "kd_scope": "all"}, cfg["loss"]
         assert cfg["rung"] == 860000 and cfg["schedule"]["total_steps"] == 1023
         assert "truncate_padding" not in cfg["batch"], cfg["batch"]
@@ -229,42 +225,6 @@ def stage_movement(args):
     mark("MOVEMENT_DONE")
 
 
-def stage_nll(args):
-    """FineWeb held-out NLL under the exact protocol used for P0-real, plus INT8.
-
-    All six arms (A0 reference included) are measured in one invocation per
-    precision, on this machine, so BF16 and INT8 are comparable across arms
-    rather than across sessions.
-    """
-    got = hashlib.sha256(HOLDOUT.read_bytes()).hexdigest()
-    assert got == HOLDOUT_SHA, f"holdout corpus mismatch: {got}"
-    models = []
-    for alias, path in A0.items():
-        models += ["--model", str(path)]
-    for alias, name in ARMS.items():
-        if model_dir(name).is_dir():
-            models += ["--model", str(model_dir(name))]
-
-    for tag, extra in (("bf16", []),
-                       ("int8_all", ["--fake-quant", "int8",
-                                     "--fake-quant-scope", "all"]),
-                       ("int8_decoder", ["--fake-quant", "int8",
-                                         "--fake-quant-scope", "decoder"])):
-        out = OUT / f"e3_holdout_nll_{tag}.json"
-        if out.exists():
-            print(f"NLL {tag} already done; skipping", flush=True)
-            continue
-        run(["scripts/evaluation/eval_ppl.py", "--data", "data/warmup/holdout_v1.jsonl",
-             *models, "--max-seq-len", 1024, "--dtype", "bfloat16",
-             *extra, "--out", out])
-        for r in json.loads(out.read_text())["results"]:
-            n = r["eval_tokens"]
-            flag = "OK" if n == EXPECTED_EVAL_TOKENS else f"!! want {EXPECTED_EVAL_TOKENS}"
-            print(f"  [{tag}] {r['model']}: nll {r['mean_nll_nats']} "
-                  f"ppl {r['perplexity']} tokens {n} {flag}", flush=True)
-    mark("NLL_DONE")
-
-
 def stage_three_mode(args):
     """The unified P1 harness, unchanged: same 150 examples, same decoding."""
     for alias, name in ARMS.items():
@@ -299,7 +259,6 @@ STAGES = {
     "tokenizer": stage_tokenizer,
     "merge_check": stage_merge_check,
     "movement": stage_movement,
-    "nll": stage_nll,
     "three_mode": stage_three_mode,
 }
 # A1 must finish and pass its gate before A2 trains; a failure there stops the

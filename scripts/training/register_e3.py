@@ -33,8 +33,8 @@ from aadistill.infrastructure.manifest import sha256_file, sha256_json  # noqa: 
 PACK = REPO_ROOT / "artifacts/stage3/ladder_uniform_probe"
 INIT = REPO_ROOT / "artifacts/stage1/qwen3_0p6b_init_v0/checkpoint"
 CONFIGS = {
-    "A0-P1-sa": "configs/stage3/e1/e1_r0860k_sa_pca.json",
-    "A0-P1-sb": "configs/stage3/e1/e1_r0860k_sb_pca.json",
+    "A0-P2-sa": "configs/stage3/p2/p2_ceheavy_sa.json",
+    "A0-P2-sb": "configs/stage3/p2/p2_ceheavy_sb.json",
     "A1-frozen-attn-sa": "configs/stage3/e3/e3_a1_frozen_attn_sa.json",
     "A1-frozen-attn-sb": "configs/stage3/e3/e3_a1_frozen_attn_sb.json",
     "A2-lora-attn-sa": "configs/stage3/e3/e3_a2_lora_attn_sa.json",
@@ -55,12 +55,22 @@ DECISION_RULES = [
     "conditional on a usable rollout falls.",
 ]
 
+# Two families have been measured at this rung on this same set and their seed
+# spreads disagree. The LARGER is used throughout: with n=2 a spread is a single
+# draw, and P2's unusually tight one is recorded as suggestive rather than
+# established (§18.7). Taking the smaller would make it too easy to call an
+# effect on the very baseline this experiment is compared against.
+P1_SEED_SPREAD = {"usable_rollout_rate": 0.0800, "free_rollout_correctness": 0.0600,
+                  "teacher_forced_reasoning_top1": 0.0025,
+                  "teacher_native_holdout_ce": 0.0063}
+P2_SEED_SPREAD = {"usable_rollout_rate": 0.0267, "free_rollout_correctness": 0.0200,
+                  "teacher_forced_reasoning_top1": 0.0112,
+                  "teacher_native_holdout_ce": 0.0117}
 NOISE_FLOORS = {
-    "usable_rollout_rate": 0.0800,
-    "free_rollout_correctness": 0.0600,
-    "teacher_forced_reasoning_top1": 0.0025,
-    "teacher_native_holdout_ce": 0.0063,
-    "source": "P1 (= P0-real) two-seed spread on this same 150-example set",
+    **{k: max(P1_SEED_SPREAD[k], P2_SEED_SPREAD[k]) for k in P1_SEED_SPREAD},
+    "rule": "max(P1 spread, P2 spread) — the conservative choice",
+    "P1_seed_spread": P1_SEED_SPREAD,
+    "P2_seed_spread": P2_SEED_SPREAD,
 }
 
 
@@ -73,7 +83,7 @@ def main() -> None:
     _, _, stats = ladder_blocks(PACK, 860000, n_val=16)
 
     a0_report = json.loads(
-        (REPO_ROOT / "artifacts/audit/three_mode/P0-real-sa/report.json").read_text())
+        (REPO_ROOT / "artifacts/audit/three_mode/P2-ceheavy-sa/report.json").read_text())
 
     payload = {
         "created_utc": datetime.now(timezone.utc).isoformat(),
@@ -88,9 +98,12 @@ def main() -> None:
             "capacity is needed and restricting it costs correctness, or that "
             "nothing moves beyond seed noise — is an equally reportable outcome."),
         "arms": {
-            "A0": "existing 0.86M P1 control; FFN + all norms + attention "
-                  "projections, all full-rank. NOT retrained; recorded results "
-                  "are reused.",
+            "A0": "existing 0.86M P2-ceheavy baseline (ce 1.0 / kd 0.25, scope "
+                  "all); FFN + all norms + attention projections, all "
+                  "full-rank. NOT retrained; recorded results are reused. A1 "
+                  "and A2 inherit this objective, so the treatment is not "
+                  "confounded with the loss-weight change that separates P2 "
+                  "from P1.",
             "A1": "FFN + all norms full-rank; all four attention projections "
                   "frozen. Everything else identical to A0.",
             "A2": "A1 + LoRA rank 8 / alpha 16 / dropout 0 / bias none on "
@@ -105,7 +118,7 @@ def main() -> None:
             "Stage 1 PCA initialization (the fork point for every arm)",
             "the nested uniform 0.86M rung and its exact block order",
             "seeds 20260726 (sa) and 20260801 (sb)",
-            "0.25·CE + 1.0·KD, temperature 1.0, kd_scope 'all'",
+            "1.0·CE + 0.25·KD, temperature 1.0, kd_scope 'all' (the P2 objective)",
             "AdamW lr 5e-5, wd 0.01, betas (0.9, 0.95), eps 1e-8, clip 1.0",
             "1,023 steps, 51 warmup, cosine to 0.1, 2 blocks/step, block_len 8192",
             "the 150-example evaluation set, its inclusion mask, greedy decoding "
@@ -158,21 +171,25 @@ def main() -> None:
                             "teacher-native held-out CE",
                             "FineWeb held-out NLL (BF16 and INT8 fake-quant)"],
             "int8": "per-channel symmetric weight fake-quant, scopes 'all' and "
-                    "'decoder'; NLL only. INT8 rollout behaviour is NOT measured "
-                    "and no claim is made about it.",
+                    "'decoder'; NLL only, dev-box CPU, all six arms on one "
+                    "device. INT8 rollout behaviour is NOT measured and no "
+                    "claim is made about it.",
         },
         "decision_rules": DECISION_RULES,
         "noise_floors": NOISE_FLOORS,
         "budget": {
             "gpu": "1x NVIDIA L40S secure",
             "authorized_rate_usd_per_hour": 0.99,
-            "expected_minutes": 402,
-            "expected_cost_usd": 6.63,
+            "expected_minutes": 373,
+            "expected_cost_usd": 6.16,
             "hard_backstop_minutes": 450,
             "hard_ceiling_usd": 7.43,
             "ledger_remaining_usd": 8.70,
             "note": "Costed from the measured P2-ceheavy session (174.6 min for "
-                    "two arms of this exact rung), not by scaling token counts.",
+                    "two arms of this exact rung), not by scaling token counts. "
+                    "Held-out NLL was moved off the pod to the dev-box CPU "
+                    "(25 s/model, reproduces the GPU value to 0.02%), removing "
+                    "~24 min of paid time.",
         },
         "what_this_cannot_settle": [
             "n=2 seeds per arm: a spread is one draw per condition, so no "
@@ -183,8 +200,9 @@ def main() -> None:
             "usable_rollout is blind to correctness by construction, and its "
             "five components are not independent (protocol_valid subsumes two).",
             "A0 is not re-trained, so its free/oracle/forced numbers come from "
-            "an earlier session; only its FineWeb NLL is re-measured on the "
-            "same machine as A1/A2.",
+            "the 2026-08-05 P2-ceheavy session and were produced on different "
+            "hardware from A1/A2. FineWeb NLL is the one metric measured on one "
+            "device for all six arms, because it runs on the dev-box CPU.",
         ],
         "code_state": code_state(REPO_ROOT),
     }

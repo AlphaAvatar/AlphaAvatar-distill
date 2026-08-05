@@ -4,7 +4,8 @@
     PYTHONPATH=src python scripts/evaluation/analyze_e3.py \
         --out artifacts/audit/e3_comparison.json
 
-    A0  0.86M P1 control — FFN + norms + attention projections, all full-rank
+    A0  0.86M P2-ceheavy baseline — FFN + norms + attention projections, all
+        full-rank, under the ce 1.0 / kd 0.25 objective
     A1  attention projections FROZEN
     A2  attention projections adapted by LoRA r8, base frozen
 
@@ -38,12 +39,12 @@ AUDIT = REPO_ROOT / "artifacts/audit"
 
 # alias -> (three-mode directory, training-log path, movement report)
 ARMS = {
-    "A0-P1-sa": ("P0-real-sa",
-                 "artifacts/stage3/rescued/_relay/e1_r0860k_sa_pca/train_log.jsonl",
-                 "A0-P1-sa"),
-    "A0-P1-sb": ("P0-real-sb",
-                 "artifacts/stage3/rescued/_relay/e1_r0860k_sb_pca/train_log.jsonl",
-                 "A0-P1-sb"),
+    "A0-P2-sa": ("P2-ceheavy-sa",
+                 "artifacts/stage3/p2_ceheavy_sa/train_log.jsonl",
+                 "A0-P2-sa"),
+    "A0-P2-sb": ("P2-ceheavy-sb",
+                 "artifacts/stage3/p2_ceheavy_sb/train_log.jsonl",
+                 "A0-P2-sb"),
     "A1-frozen-attn-sa": ("A1-frozen-attn-sa",
                           "artifacts/stage3/e3_a1_frozen_attn_sa/train_log.jsonl",
                           "A1-frozen-attn-sa"),
@@ -57,15 +58,23 @@ ARMS = {
                         "artifacts/stage3/e3_a2_lora_attn_sb/train_log.jsonl",
                         "A2-lora-attn-sb"),
 }
-FAMILIES = {"A0": ["A0-P1-sa", "A0-P1-sb"],
+FAMILIES = {"A0": ["A0-P2-sa", "A0-P2-sb"],
             "A1": ["A1-frozen-attn-sa", "A1-frozen-attn-sb"],
             "A2": ["A2-lora-attn-sa", "A2-lora-attn-sb"]}
 SEEDS = ("sa", "sb")
 
-# Measured noise floors on this 150-example set, from the P1 arms. Any claimed
-# effect is read against these, not against zero.
+# Measured noise floors on this same 150-example set. Two families have been
+# run at this rung and their seed spreads disagree, so the LARGER is used: with
+# n=2 a "spread" is a single draw, and P2's unusually tight one (§18.7) is
+# explicitly recorded as suggestive rather than established. Taking the smaller
+# would make it too easy to call an effect.
 P1_SEED_SPREAD = {"usable_rollout_rate": 0.0800, "correct_overall": 0.0600,
-                  "teacher_forced_reasoning_top1": 0.0025}
+                  "teacher_forced_reasoning_top1": 0.0025,
+                  "teacher_native_holdout_ce": 0.0063}
+P2_SEED_SPREAD = {"usable_rollout_rate": 0.0267, "correct_overall": 0.0200,
+                  "teacher_forced_reasoning_top1": 0.0112,
+                  "teacher_native_holdout_ce": 0.0117}
+NOISE_FLOOR = {k: max(P1_SEED_SPREAD[k], P2_SEED_SPREAD[k]) for k in P1_SEED_SPREAD}
 
 
 def jsonl(p: Path) -> list[dict]:
@@ -115,7 +124,7 @@ def nll_table(tag: str) -> dict:
 
 def match_nll(table: dict, alias: str) -> dict | None:
     """Find this arm's row by the run-directory stem inside the model path."""
-    stems = {"A0-P1-sa": "e1_r0860k_sa_pca", "A0-P1-sb": "e1_r0860k_sb_pca",
+    stems = {"A0-P2-sa": "p2_ceheavy_sa", "A0-P2-sb": "p2_ceheavy_sb",
              "A1-frozen-attn-sa": "e3_a1_frozen_attn_sa",
              "A1-frozen-attn-sb": "e3_a1_frozen_attn_sb",
              "A2-lora-attn-sa": "e3_a2_lora_attn_sa",
@@ -234,7 +243,7 @@ def decide(fams: dict) -> dict:
             "usable_exceeds_p1_seed_spread": (
                 None if d(a1, a0, "usable_rollout_rate") is None else
                 abs(d(a1, a0, "usable_rollout_rate"))
-                > P1_SEED_SPREAD["usable_rollout_rate"]),
+                > NOISE_FLOOR["usable_rollout_rate"]),
             "usable_wins_on_both_seeds": both_seeds_beat(a1, a0,
                                                          "usable_rollout_rate"),
             "correct_overall_delta": d(a1, a0, "correct_overall"),
@@ -274,7 +283,7 @@ def decide(fams: dict) -> dict:
         rules.append({
             "rule": "R1 full-rank attention updates cause harmful drift",
             "fired": fired,
-            "basis": ("A1 usable-rollout gain clears the 0.0800 P1 seed spread on "
+            "basis": ("A1 usable-rollout gain clears the 0.0800 noise floor on "
                       "both seeds with no loss in correctness | usable rollout"),
         })
 
@@ -328,7 +337,8 @@ def decide(fams: dict) -> dict:
         })
 
     return {"findings": findings, "rules": rules, "promotion_guards": guards,
-            "noise_floors_used": P1_SEED_SPREAD}
+            "noise_floors_used": NOISE_FLOOR,
+            "noise_floor_sources": {"P1": P1_SEED_SPREAD, "P2": P2_SEED_SPREAD}}
 
 
 def main() -> None:
@@ -370,10 +380,10 @@ def main() -> None:
         "paired_prompt_level": {
             f"{b} vs {a}": paired(arms, a, b)
             for a, b in [
-                ("A0-P1-sa", "A1-frozen-attn-sa"),
-                ("A0-P1-sb", "A1-frozen-attn-sb"),
-                ("A0-P1-sa", "A2-lora-attn-sa"),
-                ("A0-P1-sb", "A2-lora-attn-sb"),
+                ("A0-P2-sa", "A1-frozen-attn-sa"),
+                ("A0-P2-sb", "A1-frozen-attn-sb"),
+                ("A0-P2-sa", "A2-lora-attn-sa"),
+                ("A0-P2-sb", "A2-lora-attn-sb"),
                 ("A1-frozen-attn-sa", "A2-lora-attn-sa"),
                 ("A1-frozen-attn-sb", "A2-lora-attn-sb"),
             ]},

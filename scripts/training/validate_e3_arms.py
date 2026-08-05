@@ -45,8 +45,8 @@ INIT = REPO_ROOT / "artifacts/stage1/qwen3_0p6b_init_v0/checkpoint"
 INIT_SHA = "86fbba78e8a2a32481ca77e5ac362ed1f17a39dbc30bcbc952cabd5df2633e54"
 
 ARMS = {
-    "A0_control_p1_sa": "configs/stage3/e1/e1_r0860k_sa_pca.json",
-    "A0_control_p1_sb": "configs/stage3/e1/e1_r0860k_sb_pca.json",
+    "A0_control_p2_sa": "configs/stage3/p2/p2_ceheavy_sa.json",
+    "A0_control_p2_sb": "configs/stage3/p2/p2_ceheavy_sb.json",
     "A1_frozen_attn_sa": "configs/stage3/e3/e3_a1_frozen_attn_sa.json",
     "A1_frozen_attn_sb": "configs/stage3/e3/e3_a1_frozen_attn_sb.json",
     "A2_lora_attn_sa": "configs/stage3/e3/e3_a2_lora_attn_sa.json",
@@ -205,7 +205,7 @@ def main() -> None:
         require(a1["by_group"] == a2["by_group"],
                 f"{seed}: A1/A2 per-group freeze layout differs")
         require(a2["lora_trainable_params"] > 0, f"{seed}: A2 has no adapter")
-        a0 = arms[f"A0_control_p1_{seed}"]
+        a0 = arms[f"A0_control_p2_{seed}"]
         require(a1["trainable_params"] < a0["trainable_params"],
                 f"{seed}: A1 must train fewer parameters than the control")
 
