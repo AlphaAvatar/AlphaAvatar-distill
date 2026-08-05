@@ -1136,3 +1136,44 @@
 - **Revisit when:** a mechanism is proposed that improves reasoning modelling
   without removing the general LM signal — e.g. reweighting rather than masking,
   or a separate term for context positions.
+
+## 2026-08-05 — Teacher-forced reasoning top-1 is a within-family metric, not a capacity scale
+
+- **Context:** After §17 and §18, teacher-forced reasoning top-1 is the only
+  metric in the project that resolves differences between recipes — seed spread
+  **0.0025** against the free-rollout selector's **0.0600** — and it decided both
+  experiments. I proposed anchoring its scale by scoring the official
+  `Qwen/Qwen3-0.6B` against our teacher's gold traces on the same 150 examples,
+  arguing that identical tokenizer (`tokenizer.json` sha `aeb13307…`), identical
+  state_dict keys/shapes and identical 596,049,920 parameters made the comparison
+  valid.
+- **Decision:** **Rejected before running, by the maintainer.** Teacher-forced
+  reasoning top-1 is valid only for controlled comparisons among students that
+  share teacher distribution, architecture, initialization and evaluation set —
+  P1, P0-assistant, P2. It **must not be promoted into a cross-model capacity
+  scale**, and no model outside this family is to be scored against our teacher's
+  traces for that purpose.
+- **Why the proposal was wrong:** matching tokenizer and geometry are necessary
+  but not sufficient. `Qwen3-0.6B` and `Qwen3-4B-Thinking-2507` were trained
+  under **different reasoning regimes with different next-token distributions**.
+  Scoring the official 0.6B against traces *sampled from* the 4B-Thinking teacher
+  measures **compatibility with that teacher's reasoning style**, not a model-size
+  ceiling and not general reasoning capability. A low score is the expected
+  default for any model outside that distribution, so the measurement cannot
+  separate "our students transferred something real" from "the reference writes
+  differently" — which is precisely the reading the proposal leaned on hardest.
+  The error was treating an *identity check on the input space* (same ids, same
+  shapes) as evidence about the *output distribution*, which it is not.
+- **Alternatives considered:** running it anyway as a weak lower bound — rejected,
+  because an uninterpretable number in the record invites later misuse, and the
+  branch structure I pre-registered would have licensed exactly that; scoring
+  against a second teacher's traces — same defect, one level removed.
+- **Consequence:** the capacity question needs no anchor. The completed capability
+  battery (`EXPERIMENTS.md` §14.2, rescored §15.1) already establishes that the
+  official 0.6B substantially outperforms the current student under our own
+  protocol, which is the comparison that was actually needed. `PROPOSAL.md` §15 is
+  reduced to a withdrawal record; the optional oracle component was withdrawn with
+  it and never ran. **$0 was spent.**
+- **Revisit when:** a candidate reference model has been trained on this teacher's
+  output distribution, or a metric is proposed for cross-model use — in which case
+  the construct-validity question must be answered before the cost question.

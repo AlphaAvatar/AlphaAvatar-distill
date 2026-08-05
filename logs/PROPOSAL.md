@@ -1224,131 +1224,36 @@ L1/R1/R2 remain paused.
 
 ---
 
-## 15. Reference anchor for teacher-forced reasoning top-1 (2026-08-05) — EVALUATION-ONLY, NOT AUTHORIZED
+## 15. Reference anchor for teacher-forced reasoning top-1 — PROPOSED AND WITHDRAWN (2026-08-05)
 
-**This is not a re-run of the capability battery.** The battery reference is
-complete: `Qwen/Qwen3-0.6B @ c1899de2` was measured on all 846 `capability-v2`
-prompts under both the project and native protocols (`EXPERIMENTS.md` §14.2) and
-rescored with the template-aware validator (§15.1). The capacity question it was
-built to answer is **closed** — a model with our student's geometry solves ~70%
-of GSM8K and ~74% of RAG under our own protocol, so the task is reachable at 0.6B
-and the gap is the recipe. Nothing here repeats that measurement, uses those
-prompts, or needs `free` mode.
+**Withdrawn by the maintainer before any part was run. Not authorized, and it
+should not be re-proposed.** The full execution plan is deliberately not retained
+— what is retained is why the idea is wrong, because it is easy to re-derive.
 
-### 15.1 The exact metric that is missing
+**The proposal was:** score `Qwen/Qwen3-0.6B` teacher-forced against our teacher's
+gold reasoning traces on the same 150 examples, to give the project's
+best-resolving metric — teacher-forced reasoning top-1 — a cross-model scale.
 
-**Teacher-forced reasoning top-1 has no reference value.**
+**Why it is invalid.** Matching tokenizer, parameter count and architecture are
+necessary but not sufficient. `Qwen3-0.6B` and `Qwen3-4B-Thinking-2507` were
+trained under **different reasoning regimes and have different next-token
+distributions**. Scoring the official 0.6B against traces *sampled from* the
+4B-Thinking teacher measures **compatibility with that teacher's reasoning
+style**, not a model-size ceiling and not general reasoning capability. A low
+score is the expected default for any model outside that distribution, so the
+measurement cannot distinguish "our students transferred something real" from
+"the reference simply writes differently" — which was the reading the proposal
+leaned on hardest, and it was circular.
 
-The battery reference was generated before the three-mode harness existed. Its
-per-sample records contain exactly `correct`, `answer_matches_ignoring_protocol`,
-`protocol_valid`, `natural_termination`, `degenerate` — **free generation only.**
-There is no `oracle` and no `forced` measurement for any model other than our own
-students.
+**What remains true.** Teacher-forced reasoning top-1 stays valid for the
+comparisons it is already used for — P1 vs P0-assistant vs P2 — because those
+share teacher distribution, architecture, initialization and evaluation set. It
+is a **within-family controlled-comparison metric**. It must not be promoted into
+a cross-model capacity scale. See [`decisions.md`](decisions.md), 2026-08-05.
 
-This now matters because of what §18 established:
+**The capacity question needs no anchor.** It is already answered by the
+completed capability battery (`EXPERIMENTS.md` §14.2, rescored §15.1): the
+official 0.6B substantially outperforms the current student under our own
+protocol. Nothing further is required to establish that the gap is the recipe.
 
-| metric | P1 value | seed spread | resolves recipe differences? |
-| --- | ---: | ---: | --- |
-| free-rollout correctness | 0.1833 | **0.0600** | no — killed both §17 and §18 |
-| oracle correctness | 0.6367 | 0.0200 | weakly |
-| **teacher-forced reasoning top-1** | **0.5708** | **0.0025** | **yes — the only one that does** |
-
-Both of the last two experiments were decided by teacher-forced reasoning top-1:
-P0-assistant −0.0486, P2-ceheavy −0.0141, complete arm-level separation in both.
-**We have been adopting and rejecting recipes on a metric with no known scale.**
-0.5708 could be near a 0.6B ceiling, or barely above what an untrained model
-scores. Nothing on record distinguishes those, and the difference changes what
-the −0.0141 means and what the next experiment should target.
-
-The secondary gap, measurable in the same pass: **oracle correctness has no
-reference either.** Our arms extract the right answer from supplied gold
-reasoning 64% of the time. Whether that is near ceiling or badly broken is
-unknown, and it decides whether answer extraction deserves any attention at all.
-
-### 15.2 Why the reference is valid for this measurement — verified, not assumed
-
-| check | result |
-| --- | --- |
-| `tokenizer.json` byte-identical to the teacher's | **yes**, sha256 `aeb13307a71acd8f…` on both |
-| vocab dicts identical | yes, 151,643 entries |
-| merges identical | yes |
-| added tokens identical | yes, 26 |
-| state_dict keys and shapes vs our student | **identical, zero differences** |
-| parameter count | **596,049,920 — exactly equal to our student** |
-| architecture fields | hidden 1024, 28L, FFN 3072, 16Q/8KV, head_dim 128, vocab 151,936, tied — all identical |
-| differences | `rope_theta` 1e6 vs 5e6; `max_position_embeddings` 40,960 vs 262,144 |
-
-The identical `tokenizer.json` is what makes this measurement possible at all:
-teacher-forced scoring compares the model's next-token distribution against **our
-teacher's gold token ids**, so the two id spaces must coincide exactly. They do.
-No re-tokenization, no id remapping, no approximation.
-
-Note the record correction this check produced: the parameter count was logged as
-595,984,384 in four places. Measured directly by one method on both models today,
-both are **596,049,920**. The "identical parameter count" claim was correct; the
-number was wrong by 65,536 and is now fixed.
-
-### 15.3 What would run
-
-The **existing** harness, unmodified — `scripts/evaluation/run_three_mode_diagnostic.py`,
-which already accepts `--tokenizer` and already falls back to CPU for `forced`.
-Same 150 fixed examples, same rung, same inclusion mask `d6e24e0b…`, same seed
-`20260804`, so the numbers land directly beside the P1/P0-assistant/P2 rows.
-
-Rendering uses `--tokenizer Qwen/Qwen3-4B-Thinking-2507@768f209d` — the **project
-protocol**, matching how every one of our arms was measured. Verified on the dev
-box: it loads under the local transformers 4.57.1, reports vocab 151,669, and the
-rendered prompt ends `<|im_start|>assistant\n<think>\n`, so `think_preopened=True`
-is correct and the harness's existing assumption holds without modification.
-
-```
-# Part A — CPU, dev box, $0
-PYTHONPATH=src python scripts/evaluation/run_three_mode_diagnostic.py \
-    --student Qwen/Qwen3-0.6B \
-    --tokenizer Qwen/Qwen3-4B-Thinking-2507 \
-    --label REF-qwen3-0.6b --pack artifacts/stage3/ladder_uniform_probe \
-    --rung 860000 --sessions artifacts/stage3/corpus_v2/sessions.jsonl \
-    --n 150 --modes forced \
-    --out artifacts/audit/three_mode/REF-qwen3-0.6b/forced
-```
-
-**Part A is free and needs no GPU.** Measured on the dev box: the reference loads
-in 89 s and a CPU forward costs 0.90 s at 512 tokens / 3.62 s at 2,048. Forced
-mode is one forward per example, so 150 examples ≈ **15 minutes, $0**, and it
-delivers the metric that actually gates the decision.
-
-Part B — oracle mode — needs generation and therefore a GPU. It cannot run on CPU
-without violating P18: the allowance is `context − prompt`, and generating that
-unrestricted at ~0.5 s/token would take hours per sample. One RTX A6000 at
-$0.33/h, ~25 min including image pull and engine start: **~$0.15, hard ceiling
-$0.60.** Same command with `--modes oracle` and the vLLM interpreter.
-
-### 15.4 Pre-registered reading
-
-Recorded before the run so the result cannot be reinterpreted afterwards. Our
-arms sit at **0.5511–0.5720**.
-
-| reference top-1 | reading | consequence |
-| --- | --- | --- |
-| **≈ our range (0.53–0.59)** | distillation has bought ~nothing in teacher-distribution modelling | the metric cannot discriminate recipe quality; §17/§18 deltas are movement inside noise-of-meaning and **both verdicts weaken**; a new selector is required before any further training |
-| **clearly below (≲0.45)** | our 0.57 reflects real transfer | the −0.0141/−0.0486 deltas are meaningful losses within a genuinely transferred capability; the dose-response conclusion **strengthens** |
-| **clearly above (≳0.68)** | a 0.6B can model this distribution far better than ours does | the recovery recipe is leaving capability on the table and offline objectives are **not** exhausted — which would contradict §18's conclusion and is the outcome most worth knowing |
-
-Every branch changes what happens next, which is the test for whether a
-measurement is worth running. The third branch is the one that could overturn a
-conclusion already written down, so the reading is fixed in advance.
-
-Oracle, secondary: if the reference also lands near 0.64, answer extraction is at
-a 0.6B ceiling and needs no work; if it lands near 0.9, extraction is a real and
-separately fixable defect.
-
-### 15.5 What this is not
-
-* **Not** a battery re-run. Different prompt population (corpus_v2 sessions at the
-  0.86M rung, not `capability-v2`), different modes, and `free` is not requested —
-  the reference's free-generation behaviour is already recorded in §14.2/§15.1.
-* **Not** training. No optimizer step, no weight modification, no checkpoint written.
-* **Not** a new metric. It is the scale for a metric already in use for two
-  adoption decisions.
-* **Not** authorized. Part A costs $0 and touches nothing; Part B needs approval
-  and a pod.
+The optional oracle component was withdrawn with it and was not run.

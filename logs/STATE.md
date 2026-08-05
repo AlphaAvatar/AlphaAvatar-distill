@@ -461,6 +461,17 @@ Rescored `correct`, project / native:
 our own protocol.** The task is reachable at 0.6B, the battery is not too hard,
 and the gap is the recipe. Artifacts: `artifacts/eval/e2diag_rescored_v2/`.
 
+**Binding scope rule for teacher-forced reasoning top-1.** It is a
+**within-family controlled-comparison metric** — valid for P1 vs P0-assistant vs
+P2 because those share teacher distribution, architecture, initialization and
+evaluation set. It **must not be promoted into a cross-model capacity scale**.
+Scoring any model not trained on this teacher's traces against them measures
+compatibility with that teacher's reasoning style, not capability. A proposal to
+anchor it against the official `Qwen3-0.6B` was withdrawn before running for
+exactly this reason ([`PROPOSAL.md`](PROPOSAL.md) §15,
+[`decisions.md`](decisions.md) 2026-08-05). The capacity question needs no such
+anchor — the battery above already answers it.
+
 1. **Quantify the teacher-forcing gap, then use the rollout stack that already
    exists.** The defining unexplained fact is sharper after §18: teacher-forced
    reasoning top-1 is ~0.57 and moves by only ~0.05 across every recipe tried,
@@ -476,26 +487,13 @@ and the gap is the recipe. Artifacts: `artifacts/eval/e2diag_rescored_v2/`.
    report CE under teacher forcing against CE on the student's *own* prefixes for
    the same prompts, so the gap is a number before anything is trained against it.
 
-2. **Anchor the teacher-forced reasoning top-1 scale (evaluation-only; the part
-   that matters is CPU and costs $0).**
-   The *one* genuinely missing reference metric — see [`PROPOSAL.md`](PROPOSAL.md)
-   §15. The battery reference covers free generation only; it has **no oracle and
-   no teacher-forced number**, because those modes did not exist when it ran.
-   Teacher-forced reasoning top-1 is now the only metric in the project that
-   resolves recipe differences (spread 0.0025 against the selector's 0.0600), and
-   **we have been adopting and rejecting recipes on a metric with no known
-   scale.** Running the *already-downloaded* `Qwen3-0.6B` through `oracle` and
-   `forced` modes of the existing three-mode harness, on the same 150 examples and
-   mask `d6e24e0b…`, supplies it. **This is not the battery and does not repeat
-   it** — different prompt population, different modes, no `free` mode needed.
-
-3. **Test the NLL-variance observation, if a seeded run is being paid for
+2. **Test the NLL-variance observation, if a seeded run is being paid for
    anyway.** P2's FineWeb NLL spread was 66× tighter than P0-real's (§18.7). At
    n=2 per condition this is one draw per group and no claim is made — but if any
    future experiment runs ≥3 seeds, recording FineWeb NLL costs ~8 s per
    checkpoint and would either confirm or kill it for free.
 
-4. **Headline metric.** `best_holdout_nll` is retired
+3. **Headline metric.** `best_holdout_nll` is retired
    ([decision](decisions.md) 2026-08-04). `behavior_score_v0` resolves at only
    **3.3×** its seed spread and cannot rank rungs. Aggregate **protocol validity
    on `capability-v2`** is the best-resolving generation metric currently
@@ -503,11 +501,11 @@ and the gap is the recipe. Artifacts: `artifacts/eval/e2diag_rescored_v2/`.
    correctness on the 150-example diagnostic set has a measured seed spread of
    **0.0600** — any future selector needs an effect larger than that.
 
-5. **Phases 2–3 of Experiment 2 remain unauthorized**, and **phase 3 should not
+4. **Phases 2–3 of Experiment 2 remain unauthorized**, and **phase 3 should not
    run as written** — it was built around the retired metric
    ([`PROPOSAL.md`](PROPOSAL.md) §12).
 
-6. Still open, unchanged: the approved relay history squash (destructive, confirm
+5. Still open, unchanged: the approved relay history squash (destructive, confirm
    separately) and the four dev-box-only Experiment 1 arms.
 
 **Done since this list was last written:** padding-suffix truncation is
