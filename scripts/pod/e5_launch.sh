@@ -31,6 +31,8 @@ MAX_PRICE=${MAX_PRICE:-0.99}
 BACKSTOP_MINUTES=${BACKSTOP_MINUTES:-90}
 STARTUP_LIMIT_MIN=${STARTUP_LIMIT_MIN:-15}
 MAX_POD_ATTEMPTS=${MAX_POD_ATTEMPTS:-2}
+# Seconds between create attempts when the GPU is out of capacity.
+CREATE_RETRY_DELAY_S=${CREATE_RETRY_DELAY_S:-300}
 POLL_LIMIT_MIN=${POLL_LIMIT_MIN:-85}
 CKPT_TRANSFER_LIMIT_MIN=${CKPT_TRANSFER_LIMIT_MIN:-10}
 TEACHER_REVISION=${TEACHER_REVISION:-768f209d9ea81521153ed38c47d515654e938aea}
@@ -124,7 +126,17 @@ for attempt in $(seq 1 "$MAX_POD_ATTEMPTS"); do
     POD_ID=$(create_pod "$attempt")
     if [ -z "$POD_ID" ]; then
       say "attempt $attempt: create failed — raw output follows"
-      head -20 "$SCR/create_raw_$attempt.txt" | tee -a "$LOG"
+      head -3 "$SCR/create_raw_$attempt.txt" | tee -a "$LOG"
+      # `stockStatus: Low` does not mean available: the 2026-08-06 pilot launch
+      # passed the price guard and then got "There are no longer any instances
+      # available" on create. Capacity is a race, so back off and re-try the
+      # REGISTERED card rather than substituting a different one -- a different
+      # GPU would also change the throughput this pilot exists to measure.
+      # Waiting costs nothing: no pod exists yet.
+      if [ "$attempt" -lt "$MAX_POD_ATTEMPTS" ]; then
+        say "  no capacity; retrying in ${CREATE_RETRY_DELAY_S}s ($((MAX_POD_ATTEMPTS-attempt)) left)"
+        sleep "$CREATE_RETRY_DELAY_S"
+      fi
       continue
     fi
     ACTUAL=$(python3 -c "
