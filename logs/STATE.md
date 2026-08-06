@@ -2,7 +2,8 @@
 billing.** Verified spend **$127.91** of the **$130.02** cap. **$2.11 remains and
 nothing further is authorized.**
 
-## EXPERIMENT 4 IS COMPLETE — SCALE FIXES BEHAVIOUR, NOT CORRECTNESS
+## EXPERIMENT 4 COMPLETE — SCALE SUBSTANTIALLY IMPROVES ROLLOUT STABILITY,
+## BUT DOES NOT RESOLVE CORRECTNESS
 
 Full record: [`EXPERIMENTS.md`](EXPERIMENTS.md) §21. Registered before training in
 [`e4_registration.json`](e4_registration.json). **$4.83**, 290 min on one L40S,
@@ -17,25 +18,36 @@ pod self-deleted, 12/12 files hash-verified.
 | teacher-native CE | 1.5240 | 1.2983 | 1.3126 |
 | FineWeb NLL BF16 / INT8 | 8.9554 / 8.9794 | — | 8.0992 / 8.1467 |
 
-**Scaling 0.86M → 1.60M moves usable rollout +0.2000 on both seeds** (0.5200/0.5467
-→ 0.7133/0.7533, ranges disjoint), clearing the 0.0800 floor by 2.5×. Paired per
-prompt: sa +41/−12, sb +47/−16, both bootstrap CIs excluding zero.
+**Scaling 0.86M → 1.60M substantially improves autonomous rollout stability:**
+usable rollout +0.2000 on both seeds (0.5200/0.5467 → 0.7133/0.7533, ranges
+disjoint), clearing the 0.0800 floor by 2.5×; repetition failures −0.0833 and
+context-limit failures −0.0833. Paired per prompt: sa +41/−12, sb +47/−16, both
+bootstrap CIs excluding zero.
 
-**Correctness does not move.** +0.0100 is inside the 0.0600 floor and regresses on
-`sb`. And `correct_given_usable` **falls** 0.3258 → 0.2695: the ~30 extra
-well-formed rollouts per seed are mostly wrong. **The student learned to stop, not
-to reason.**
+**It is an improvement, not a solution: 26.7% of rollouts remain unusable.**
 
-**At matched scale the objective is a tie** — P2-1.60M vs P1-1.60M is inside every
-floor on every metric, and P1 gained from scale too (0.5533 → 0.7300). The +0.20
-belongs to **scale**, not to CE-heavy.
+**Scaling does not materially improve autonomous correctness.** `correct_overall`
+moves only 0.1900 → 0.2000, inside the 0.0600 floor, with `sa` improving and `sb`
+regressing. `correct_given_usable` **falls** 0.3258 → 0.2695, showing that most
+newly completed rollouts remain incorrect.
+
+**At 1.60M, P1 and P2 are effectively tied on behaviour.** No claim is made that
+CE-heavy wins at matched scale: every delta is inside its floor, none wins on both
+seeds, no CI excludes zero, and P1 gained from scale too (0.5533 → 0.7300). **The
+major improvement belongs to scale, not to the CE/KD weighting change.**
 
 **R2 fired**: teacher-native CE improved −0.2114 (18× its floor) while autonomous
-correctness stayed flat — more teacher-prefix data does not resolve the reasoning
-gap. R1, R3, R4 did not fire; **no arm is adopted as the anchor**.
+correctness stayed flat. R1, R3, R4 did not fire; **no arm is adopted as the
+anchor**.
 
-The honest form of R1 is narrower than the rule anticipated: **P2 was
-behaviour-limited at 0.86M, not correctness-limited.**
+**Supported conclusion.** P2-0.86M was **behaviour/stability-limited**; additional
+teacher-prefix training fixes a substantial part of that stability problem; and
+additional teacher-prefix training **does not resolve the remaining
+reasoning/correctness gap**.
+
+**Teacher-native CE and FineWeb NLL remain diagnostics, never promotion
+metrics.** Both improved here while the primary axis did not, which is exactly
+the dissociation they are kept separate for.
 
 **Binding limitation:** the 150 evaluation prompts are shared **training** prompts
 for every arm compared. Both rungs contain all 150, so no arm gains exposure and
@@ -55,6 +67,8 @@ moved it**, and only its behavioural half:
 | **token scale 0.86M → 1.60M (§21)** | **+0.2000** | **flat** |
 
 Correctness has not moved in any experiment. That is the standing open problem.
+Note the asymmetry: scale improved the *stability* axis substantially without
+touching the *reasoning* axis at all.
 
 ## NO EXISTING MODEL HAS YET COMPLETED THE STAGE 2/3 OBJECTIVE
 

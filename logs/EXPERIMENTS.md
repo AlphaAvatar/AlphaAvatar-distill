@@ -2826,9 +2826,16 @@ follow-up arm forks from a trained checkpoint.
 ## 21. Experiment 4 — P2-CE-heavy scaled from the 0.86M to the 1.60M rung
 
 > **STATUS: COMPLETE 2026-08-06, $4.83.** Registered before training in
-> [`logs/e4_registration.json`](e4_registration.json). **Verdict: scaling fixes
-> autonomous *behaviour* and does nothing for *correctness*. P2 was
-> behaviour-limited at 0.86M, not correctness-limited.**
+> [`logs/e4_registration.json`](e4_registration.json).
+>
+> **Verdict.** Scaling 0.86M → 1.60M **substantially improves autonomous rollout
+> stability** (+0.2000 usable rollout, both seeds, repetition and context-limit
+> failures each −0.0833) and **does not materially improve autonomous
+> correctness** (0.1900 → 0.2000, inside the floor, one seed up and one down,
+> with `correct_given_usable` falling). **26.7% of rollouts remain unusable — this
+> is a substantial improvement, not a solved problem.** At 1.60M, P1 and P2 are
+> **effectively tied on behaviour**; the improvement belongs to **scale**, not to
+> the CE/KD weighting change.
 
 ### 21.1 The question and the arms
 
@@ -2878,8 +2885,9 @@ CI excluding zero. `correct_and_naturally_terminated` behaves identically —
 sb's paired net is exactly **0**.
 
 **The mechanism is visible in one number.** `correct_given_usable` *falls*
-0.3258 → 0.2695. Scaling bought ~30 additional well-formed rollouts per seed and
-most of them are wrong: the student learned to **stop**, not to **reason**.
+0.3258 → 0.2695: scaling produced ~30 additional well-formed rollouts per seed
+and **most newly completed rollouts remain incorrect**. Stability improved
+substantially; reasoning did not.
 
 ### 21.3 Objective at matched scale — a tie
 
@@ -2931,9 +2939,24 @@ Parameter movement scales as expected, embeddings exactly 0:
 | R3 do not promote P2 on CE/NLL alone | **moot** | P2-1.60M does not underperform P1-1.60M |
 | R4 adopt P2-1.60M as the anchor | **no** | required beating **both** references; vs P1-1.60M it is a tie inside every floor |
 
-**The honest form of R1 is narrower than the rule anticipated.** P2 was
-**behaviour-limited** at 0.86M — scale buys termination, not reasoning. Writing
-"P2 was data-limited" would claim a correctness gain the data does not show.
+### 21.5.1 The supported conclusion, stated exactly
+
+1. **P2-0.86M was behaviour/stability-limited.**
+2. **Additional teacher-prefix training fixes a substantial part of that
+   stability problem** — usable rollout +0.2000 on both seeds, repetition and
+   context-limit failures each −0.0833. It does not eliminate it: **26.7% of
+   rollouts are still unusable at 1.60M**.
+3. **Additional teacher-prefix training does not resolve the remaining
+   reasoning/correctness gap.** `correct_overall` 0.1900 → 0.2000 is inside the
+   floor, splits by seed, and `correct_given_usable` falls.
+
+Writing "P2 was data-limited" would claim a correctness gain the data does not
+show, and "scale fixes behaviour" would overstate a 73.3% usable rate.
+
+**Teacher-native CE and FineWeb NLL are diagnostics, not promotion metrics.**
+Both improved substantially here (CE −0.2114, 18× its floor; NLL −0.856) while
+the primary axis did not move. That dissociation is the entire reason the
+hierarchy keeps them below `correct_overall`, and no arm is promoted on them.
 
 ### 21.6 What this cannot settle
 
@@ -2956,6 +2979,49 @@ Pod `qzevis6g43en33`, L40S at $0.99/h, 06:58 → 11:49 = **290 min = $4.78**, pl
 sa 108.3 min at 3.625 s/step; sb similar. Pod self-deleted; **12/12 files
 `sha256sum -c` OK** against a pod-side manifest. Retained:
 `/home/ecs-user/aad-artifacts/e4/`, 11.2 GB, plus a 1.1 MB side bundle.
+
+### 21.7.1 Exact reproduction record
+
+Commit **`1dafec29b1637d3e1412be7fcf453640c4cd97d9`** (both arms' manifests agree).
+
+```bash
+# preflight, CPU, $0
+PYTHONPATH=src python scripts/training/preflight_e4.py \
+    --out artifacts/audit/e4_preflight.json
+PYTHONPATH=src python scripts/training/register_e4.py --out logs/e4_registration.json
+
+# the pod session (self-tearing-down)
+SCR=… SESSION_COMMIT=1dafec29b1637d3e1412be7fcf453640c4cd97d9 \
+  BUNDLE_NAME=aad_e4_1dafec29.bundle BACKSTOP_MINUTES=415 \
+  nohup bash scripts/pod/e4_launch.sh &
+# pod-side, started by the launcher:
+#   /opt/train/bin/python scripts/pod/e4_driver.py --stage all
+
+# post-run, CPU, $0
+PYTHONPATH=src python scripts/evaluation/eval_ppl.py \
+    --data data/warmup/holdout_v1.jsonl \
+    --model …/p2_ceheavy_sa --model …/p2_ceheavy_sb \
+    --model …/e4_p2_r1600k_sa/model --model …/e4_p2_r1600k_sb/model \
+    --max-seq-len 1024 --dtype bfloat16 [--fake-quant int8 --fake-quant-scope all|decoder] \
+    --out artifacts/audit/e4_holdout_nll_{bf16,int8_all,int8_decoder}.json
+PYTHONPATH=src python scripts/evaluation/analyze_e4.py --bootstrap 10000
+```
+
+| identity | value |
+| --- | --- |
+| config sha256 (`sha256_json`) | sa `8256bfba8b3241a8…` · sb `7c3817a729133dc9…` |
+| final `model.safetensors` sha256 | sa `7ee1d9355b97563f…` · sb `98e8c9811414e982…` |
+| Stage 1 fork point | `86fbba78e8a2a324…`, asserted on the pod before training |
+| ladder pack `blocks.npz` | `6f324cb0f37bc0f0…`, 1,174 blocks / 1,600,353 supervised |
+| teacher | `Qwen/Qwen3-4B-Thinking-2507` @ `768f209d9e…` |
+| P1-1.60M references | `6f77676ab8fde397…` / `e432d57e598d57e1…`, asserted at download |
+| evaluation inclusion mask | `d6e24e0b09da1bcc…`, asserted on all four arms |
+| trainable parameters | 440,467,456 of 596,049,920 |
+
+**Teardown and final state:** pod `qzevis6g43en33` deleted by the launcher at
+11:49:18Z (`runpodctl pod list` → `[]`); dev-box watchdog confirmed
+"already gone"; zero stray launcher/watchdog processes; **12/12 artifacts
+`sha256sum -c` OK**; 626 tests pass; working tree clean.
 
 ### 21.8 Three infrastructure defects, all mine, all from one blind spot
 
