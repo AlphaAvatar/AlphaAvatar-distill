@@ -254,3 +254,107 @@ def comparability_report(c: list[dict], r: list[dict], *,
                  "and teacher trajectories differ in length, and that difference "
                  "is part of what E5 tests"),
     }
+
+
+# The registered nested-rung increment: unique supervised tokens added when the
+# 0.86M rung is extended to 1.60M. It is the *scale* E5 is trying to reproduce,
+# and it is NOT interchangeable with a block or step count.
+NESTED_RUNG_INCREMENT = 735_603
+
+
+def suffix_overlap(examples: list[dict]) -> dict:
+    """Repeated supervision caused by two truncations of one trajectory.
+
+    Two cuts `k1 < k2` of the same span yield continuations `[k1,end)` and
+    `[k2,end)`: the second is entirely inside the first. So the *union* is the
+    longer continuation and the shorter one is counted twice in any naive sum.
+    Reporting the sum alone overstates coverage by exactly that overlap, which is
+    why the candidate count and the unique count are both required.
+    """
+    by_source: dict[str, list[int]] = defaultdict(list)
+    for e in examples:
+        by_source[e["source_session_id"]].append(int(e["n_continuation_tokens"]))
+    candidate = sum(sum(v) for v in by_source.values())
+    unique = sum(max(v) for v in by_source.values())
+    return {
+        "candidate_continuation_tokens": candidate,
+        "unique_supervised_tokens": unique,
+        "repeated_presentation_tokens": candidate - unique,
+        "repeated_share": round((candidate - unique) / candidate, 4) if candidate else 0.0,
+        "source_trajectories": len(by_source),
+    }
+
+
+def select_paired_to_token_target(c_kept: list[dict], r_kept: list[dict],
+                                  target: int = NESTED_RUNG_INCREMENT,
+                                  *, salt: str = "e5") -> tuple[list, list, dict]:
+    """Choose the paired subset whose CE-token totals sit closest to `target`.
+
+    The tolerance is a hard ceiling, not an aim: this searches the paired count
+    `n` to minimise the *worse* of the two arms' relative deviations from the
+    target, using the composition-preserving stratified selector at every
+    candidate `n`. Whole samples only — nothing is truncated to close a gap.
+
+    Both arms are scored because a pair contributes a different number of tokens
+    to each: C's continuation and R's continuation come from different
+    trajectories even at the same relative cut depth.
+    """
+    if len(c_kept) != len(r_kept):
+        raise ValueError("arms differ in length; intersect() first")
+
+    def totals(n: int) -> tuple[int, int, list[int]]:
+        idx = stratified_take(c_kept, n, salt=salt)
+        return (sum(int(c_kept[i]["n_continuation_tokens"]) for i in idx),
+                sum(int(r_kept[i]["n_continuation_tokens"]) for i in idx), idx)
+
+    def cost(n: int) -> float:
+        ct, rt, _ = totals(n)
+        return max(abs(ct - target), abs(rt - target)) / max(1, target)
+
+    lo, hi = 1, len(c_kept)
+    best_n, best_cost = hi, cost(hi)
+    # Coarse sweep then local refinement: the totals are monotone in n up to
+    # stratum granularity, but not perfectly, so a pure binary search can stop
+    # one stratum early.
+    step = max(1, len(c_kept) // 64)
+    for n in range(lo, hi + 1, step):
+        c = cost(n)
+        if c < best_cost:
+            best_n, best_cost = n, c
+    for n in range(max(lo, best_n - step), min(hi, best_n + step) + 1):
+        c = cost(n)
+        if c < best_cost:
+            best_n, best_cost = n, c
+
+    ct, rt, idx = totals(best_n)
+    c_sel = [c_kept[i] for i in idx]
+    r_sel = [r_kept[i] for i in idx]
+    return c_sel, r_sel, {
+        "target_supervised_tokens": target,
+        "selected_pairs": best_n,
+        "available_pairs": len(c_kept),
+        "arm_c_supervised": ct,
+        "arm_r_supervised": rt,
+        "arm_c_vs_target": round(ct / target, 4),
+        "arm_r_vs_target": round(rt / target, 4),
+        "worst_relative_deviation_from_target": round(best_cost, 5),
+    }
+
+
+def packing_report(examples: list[dict], n_blocks: int, block_len: int) -> dict:
+    """Utilisation of a fixed block budget by a corpus that is never truncated."""
+    nonpad = sum(int(e["n_total_tokens"]) for e in examples)
+    ce = sum(int(e["n_continuation_tokens"]) for e in examples)
+    capacity = n_blocks * block_len
+    return {
+        "blocks": n_blocks, "block_len": block_len, "capacity_tokens": capacity,
+        "total_nonpadding_tokens": nonpad,
+        "padding_tokens": max(0, capacity - nonpad),
+        "packing_efficiency": round(nonpad / capacity, 4) if capacity else 0.0,
+        # kd_scope="all" is literally every real token, so the KD mask is the
+        # non-padding count and the CE mask is the continuation count.
+        "ce_mask_tokens": ce,
+        "kd_mask_tokens": nonpad,
+        "ce_share_of_kd": round(ce / nonpad, 4) if nonpad else 0.0,
+        "fits": nonpad <= capacity,
+    }

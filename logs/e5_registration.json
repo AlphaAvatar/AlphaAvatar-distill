@@ -1,7 +1,7 @@
 {
  "created_utc": "2026-08-06T12:29:24.557154+00:00",
  "experiment": "E5 \u2014 matched-budget teacher-prefix continuation (C) vs student-prefix on-policy KD plus teacher recovery continuation (R)",
- "status": "REGISTERED \u2014 arm C built and validated offline; paired/packing machinery built and tested; R generation not started",
+ "status": "REGISTERED \u2014 arm C built; paired/packing/token-accounting machinery built and tested; R generation not started",
  "authorization": {
   "additional_usd": 6.0,
   "prior_remainder_usd": 2.11,
@@ -207,5 +207,37 @@
   "cause": "unit mismatch in reporting: rejections were counted per SESSION while the denominator counted EXAMPLES, and one rejected session removes two candidate examples. No sample was lost unexplained.",
   "underlying_defect": "the single rejection was a ~1-in-10,000 hash collision in the truncation-fraction draw. build_splits had an integer fallback for post-clamp collisions but it was unreachable for outright fraction collisions.",
   "resolution": "fallback wired for fraction collisions; arm C now builds at 2,294 of 2,294 = 100.0%. Censuses now report session-level and example-level counts separately."
+ },
+ "token_accounting": {
+  "principle": "'492 blocks / 738 steps' is a COMPUTE budget and is NOT a definition of matched token scale. The registered scale target is the nested-rung increment of 735,603 supervised tokens, and both must be reported.",
+  "quantities_reported_for_each_packed_arm": [
+   "candidate continuation tokens (sum over examples)",
+   "unique supervised tokens (union per source trajectory)",
+   "repeated-presentation tokens from suffix overlap",
+   "final per-pass supervised continuation tokens (= CE-mask tokens)",
+   "total supervised-token presentations across 738 steps (= per-pass x passes)",
+   "CE-mask token count",
+   "KD-mask token count (kd_scope=all -> every non-padding token)",
+   "total non-padding token count",
+   "packing efficiency and padding tokens",
+   "final C/R relative token difference",
+   "final comparison with the 735,603 nested-rung increment"
+  ],
+  "suffix_overlap_measured_on_arm_C_sa": {
+   "candidate_continuation_tokens": 905488,
+   "unique_supervised_tokens": 601863,
+   "repeated_presentation_tokens": 303625,
+   "repeated_share": 0.3353,
+   "explanation": "two cuts k1<k2 of one trajectory give nested continuations [k1,end) and [k2,end); the shorter is contained in the longer, so a naive sum double-counts it"
+  },
+  "feasibility_measured_before_spend": {
+   "block_capacity_tokens": 4030464,
+   "full_candidate_corpus_nonpadding_tokens": 2541406,
+   "utilisation_if_everything_kept": 0.6305,
+   "verdict": "NO trade-off is required: the full candidate corpus occupies 63% of the 492-block budget, so the token target and the compute budget can both be met. The registered contingency (choose token-matched OR compute-matched) does not trigger.",
+   "consequence": "selecting down to the 735,603 target lowers utilisation further and adds padding, which the maintainer explicitly accepted in preference to missing the token scale"
+  },
+  "tolerance_is_a_ceiling": "the 5% C/R bound is a hard stop, not an aim; the selector minimises the worse arm's deviation from the target subject to whole untruncated samples",
+  "forbidden_phrasing": "a compute-matched 492-block/738-step continuation must NOT be called '1.60M-equivalent' in token scale"
  }
 }

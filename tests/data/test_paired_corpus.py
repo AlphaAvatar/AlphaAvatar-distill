@@ -177,3 +177,67 @@ def test_comparability_report_states_the_relative_depth_caveat():
     rep = comparability_report(corpus(4), corpus(4), supervised_tolerance=0.05)
     assert "FRACTION" in rep["note"] and "absolute prefix tokens differ" in rep["note"]
     assert rep["arm_c"]["n"] == rep["arm_r"]["n"] == 4
+
+
+# --------------------------------------------- token accounting and targeting
+
+def test_suffix_overlap_counts_repeated_supervision_not_coverage():
+    """Two cuts of one trajectory nest: the shorter continuation is inside the longer.
+
+    A naive sum therefore overstates how much distinct teacher text the arm
+    covers, which is exactly the confusion between a candidate-corpus count and
+    a nested-rung supervised-token increment.
+    """
+    from aadistill.data.paired_corpus import suffix_overlap
+    exs = [ex("s1", "sa", 0, cont=100), ex("s1", "sa", 1, cont=40),
+           ex("s2", "sa", 0, cont=70), ex("s2", "sa", 1, cont=70)]
+    o = suffix_overlap(exs)
+    assert o["candidate_continuation_tokens"] == 280
+    assert o["unique_supervised_tokens"] == 100 + 70
+    assert o["repeated_presentation_tokens"] == 110
+    assert o["source_trajectories"] == 2
+
+
+def test_token_target_selection_beats_taking_everything():
+    from aadistill.data.paired_corpus import select_paired_to_token_target
+    ck, rk, _ = intersect(corpus(300), corpus(300))
+    total = sum(e["n_continuation_tokens"] for e in ck)
+    target = int(total * 0.6)
+    _, _, rep = select_paired_to_token_target(ck, rk, target)
+    assert rep["selected_pairs"] < len(ck)
+    assert rep["worst_relative_deviation_from_target"] < 0.02
+    assert abs(rep["arm_c_supervised"] - target) < abs(total - target)
+
+
+def test_token_target_scores_both_arms_not_just_c():
+    """A pair contributes different token counts to each arm; both must be near."""
+    from aadistill.data.paired_corpus import select_paired_to_token_target
+    c = corpus(200)
+    r = [dict(e, n_continuation_tokens=int(e["n_continuation_tokens"] * 1.4))
+         for e in corpus(200)]
+    ck, rk, _ = intersect(c, r)
+    target = int(sum(e["n_continuation_tokens"] for e in ck) * 0.5)
+    _, _, rep = select_paired_to_token_target(ck, rk, target)
+    assert rep["arm_c_supervised"] <= target * 1.3
+    assert rep["arm_r_supervised"] >= target * 0.7
+    # The reported deviation is the WORSE arm, never the flattering one.
+    worst = max(abs(rep["arm_c_supervised"] - target),
+                abs(rep["arm_r_supervised"] - target)) / target
+    assert rep["worst_relative_deviation_from_target"] == pytest.approx(worst, abs=1e-4)
+
+
+def test_packing_report_separates_ce_kd_and_padding():
+    from aadistill.data.paired_corpus import packing_report
+    exs = [ex("s1", "sa", 0, prefix=100, cont=50)] * 1
+    rep = packing_report(exs, n_blocks=1, block_len=1000)
+    assert rep["kd_mask_tokens"] == 150          # kd_scope=all -> every real token
+    assert rep["ce_mask_tokens"] == 50           # continuation only
+    assert rep["padding_tokens"] == 850
+    assert rep["packing_efficiency"] == pytest.approx(0.15)
+    assert rep["fits"] is True
+
+
+def test_packing_report_flags_a_corpus_that_does_not_fit():
+    from aadistill.data.paired_corpus import packing_report
+    exs = [ex(f"s{i}", "sa", 0, prefix=900, cont=100) for i in range(10)]
+    assert packing_report(exs, n_blocks=1, block_len=1000)["fits"] is False
