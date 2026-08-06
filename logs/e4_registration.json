@@ -1,0 +1,255 @@
+{
+ "created_utc": "2026-08-06T06:34:36.585223+00:00",
+ "experiment": "E4 \u2014 does the P2-CE-heavy recipe improve autonomous generation when scaled from 0.86M to the nested 1.60M supervised-token rung?",
+ "status": "REGISTERED BEFORE TRAINING",
+ "hypothesis": "P2-CE-heavy may be data-limited at 0.86M: 1.86x the unique supervised tokens, same objective and same optimizer semantics, should improve autonomous rollout and correctness. The null \u2014 that more teacher-prefix data moves teacher-forced CE but not autonomous behaviour \u2014 is an equally reportable outcome and is what E1's behaviour wave weakly suggests. This experiment establishes the larger-scale P2 anchor BEFORE any student-prefix recovery work; it is not itself a recovery experiment.",
+ "arms": {
+  "reference_P2_0.86M": "existing P2-ceheavy at 0.86M, both seeds. NOT retrained; its recorded three-mode results are reused.",
+  "reference_P1_1.60M": "existing E1 arms at 1.60M under the P1 objective (ce 0.25 / kd 1.0), both seeds. NOT retrained, but RE-EVALUATED: their recorded numbers came from the 76-prompt behaviour wave with the degeneration stop ACTIVE, which is a different measurement from the 150-example unrestricted harness and must not be mixed with it.",
+  "treatment_P2_1.60M": "new: P2-CE-heavy at the nested 1.60M rung, two seeds, forked from the Stage 1 PCA init. Differs from P2-0.86M only in the rung and the schedule/cadence E1 derives from it (1,174 blocks, 1,600,353 supervised tokens, 1,761 steps = 3 passes, warmup 88 = 5%)."
+ },
+ "held_fixed": [
+  "Stage 1 PCA initialization (the fork point for every arm)",
+  "the nested uniform ladder pack; the 1.60M rung is a strict superset of the 0.86M rung on actual token ids and CE masks",
+  "seeds 20260726 (sa) and 20260801 (sb)",
+  "1.0\u00b7CE + 0.25\u00b7KD, temperature 1.0, kd_scope 'all' (the P2 objective)",
+  "AdamW lr 5e-5, wd 0.01, betas (0.9, 0.95), eps 1e-8, clip 1.0",
+  "2 blocks/step, block_len 8192, cosine to 0.1, 3 passes over the rung, warmup 5% of total steps",
+  "the 16 pack-tail validation blocks, identical for both rungs",
+  "the 150-example evaluation set, its inclusion mask, greedy decoding and unrestricted generation (P18)"
+ ],
+ "configs": {
+  "P2-0.86M-sa": {
+   "path": "configs/stage3/p2/p2_ceheavy_sa.json",
+   "config_sha256": "42616c1921419d019ad0c36357d1ef9f230109dbccc4d4b2e5b7a1e97f2e53e5",
+   "file_sha256": "a43775013a5534b51d3081f508000e33980923921d8fda0bd89465f0a7d64eca"
+  },
+  "P2-0.86M-sb": {
+   "path": "configs/stage3/p2/p2_ceheavy_sb.json",
+   "config_sha256": "b846fee7bcae670f7c3970099a7cf1d64e5c59107eab6214d3d6153c7b16119d",
+   "file_sha256": "01b6c3cfa47a7e4e6aa2fcced2d8da5d81eadf74b28fde8cc528de12fc63863c"
+  },
+  "P1-1.60M-sa": {
+   "path": "configs/stage3/e1/e1_r1600k_sa_pca.json",
+   "config_sha256": "222a0925e966048d41704d58bf92829b8ded3428491f07779b68f23eb5ae225e",
+   "file_sha256": "062998a275e0500ba85fe6f49c663464d33601cdab926ebd88be50fa2bb3798e"
+  },
+  "P1-1.60M-sb": {
+   "path": "configs/stage3/e1/e1_r1600k_sb_pca.json",
+   "config_sha256": "486e9e90d77c93ce6ddd758031ffd319c909ba63a0604938c3b4d917854eee97",
+   "file_sha256": "2c07eda59a42e5b701702d856a2f47ad2ed078ec41e0cdc6d08c91c17b765aea"
+  },
+  "E4-P2-1.60M-sa": {
+   "path": "configs/stage3/e4/e4_p2_r1600k_sa.json",
+   "config_sha256": "8256bfba8b3241a8bc3640627d71fac589e99cb3712c943b2832a72538716257",
+   "file_sha256": "ce45f98ef45c84fa3e9e20fa4aae84b7147e7a56e8cda8fca7a8523c5600fea8"
+  },
+  "E4-P2-1.60M-sb": {
+   "path": "configs/stage3/e4/e4_p2_r1600k_sb.json",
+   "config_sha256": "7c3817a729133dc94d2d4b7671b72142d7206c21dc1b472a085a577565d68642",
+   "file_sha256": "ffd9adaed06f7c065b05798df0831b7ce43a5b59dfeb1c7736810df2109d1cc8"
+  }
+ },
+ "initialization": {
+  "path": "artifacts/stage1/qwen3_0p6b_init_v0/checkpoint",
+  "model_safetensors_sha256": "86fbba78e8a2a32481ca77e5ac362ed1f17a39dbc30bcbc952cabd5df2633e54",
+  "config_sha256": "a7131bb092b38a078edc213961f0eb57eaead24f1396e25741f4887b1a694054",
+  "tokenizer_sha256": "be75606093db2094d7cd20f3c2f385c212750648bd6ea4fb2bf507a6a4c55506"
+ },
+ "data": {
+  "pack": "artifacts/stage3/ladder_uniform_probe",
+  "blocks_npz_sha256": "6f324cb0f37bc0f07128e554ce8c161879419537478950496534f75fcecb249c",
+  "ladder_json_sha256": "d4941722a099754ef5ba82d529c0fe2274a6b97af61b2fa52519ed22b84201f0",
+  "audit_jsonl_sha256": "15f16b7b22b229e9c0ae510b85b4c967948828e0e7d50fac15c3e516e3e911e6",
+  "block_len": 8192,
+  "rung": 1600000,
+  "reference_rung": 860000,
+  "reference_rung_blocks": 682,
+  "reference_rung_supervised_tokens": 864750,
+  "strict_superset_of_reference_rung": true,
+  "rung_blocks": 1174,
+  "rung_supervised_tokens": 1600353,
+  "rung_token_mix": {
+   "code": 0.1656,
+   "gsm8k": 0.1665,
+   "multihop_qa": 0.1665,
+   "openmath": 0.1674,
+   "rag_evidence": 0.1669,
+   "tool_calling": 0.1672
+  },
+  "val_blocks": 16,
+  "val_block_indices": [
+   2941,
+   2942,
+   2943,
+   2944,
+   2945,
+   2946,
+   2947,
+   2948,
+   2949,
+   2950,
+   2951,
+   2952,
+   2953,
+   2955,
+   2957,
+   2969
+  ],
+  "corpus_sessions_sha256": "2b4edc2e2cc16cd56dae3d340345e1a17e2c4a8baa9837650a7bf5e340fa6fcd",
+  "holdout_v1_sha256": "2d49f637a711ae82510fd55a3af98e332314f972780841869508aebe7b3cd8e8"
+ },
+ "evaluation": {
+  "harness": "scripts/evaluation/run_three_mode_diagnostic.py",
+  "modes": [
+   "free",
+   "oracle",
+   "forced"
+  ],
+  "n": 150,
+  "inclusion_mask_sha256": "d6e24e0b09da1bcc692b1dc96d8236808d29551a9fc94a47d1d968fd3f73d6ba",
+  "sampling_seed": 20260804,
+  "context": 8192,
+  "decoding": {
+   "greedy": true,
+   "temperature": 0.0
+  },
+  "generation_allowance": "context - prompt, no artificial cap (P18)",
+  "degeneration_stop": false,
+  "primary_metric": "usable_rollout, reported with all five components",
+  "secondary_metrics": [
+   "correct_overall",
+   "correct_given_usable",
+   "per-task correctness"
+  ],
+  "diagnostics": [
+   "teacher-forced reasoning top-1",
+   "teacher-native held-out CE",
+   "FineWeb held-out NLL (BF16 and INT8 fake-quant)"
+  ],
+  "int8": "per-channel symmetric weight fake-quant, scopes 'all' and 'decoder'; NLL only, dev-box CPU, all six arms on one device. INT8 rollout behaviour is NOT measured and no claim is made about it."
+ },
+ "decision_rules": [
+  "R1 \u2014 if P2-1.60M improves mean correct_overall AND usable_rollout over P2-0.86M with no serious regression on either seed, P2 was data-limited at 0.86M.",
+  "R2 \u2014 if teacher-native CE improves but autonomous rollout does not, increasing teacher-prefix data alone does not resolve the rollout gap.",
+  "R3 \u2014 if P2-1.60M underperforms P1-1.60M on the primary behavioural metrics, do NOT promote P2 on the strength of better CE or NLL.",
+  "R4 \u2014 if P2-1.60M beats both P2-0.86M and P1-1.60M, adopt it as the checkpoint anchor for the later matched-budget continuation vs student-prefix-recovery experiment.",
+  "R5 \u2014 no result is promoted on one seed alone.",
+  "R6 \u2014 account for the established seed spread and paired per-prompt outcomes; a mean delta inside the noise floor is not an effect."
+ ],
+ "decision_priority_order": [
+  "correct_overall",
+  "correct_and_naturally_terminated",
+  "usable_rollout_rate",
+  "repetition and context-limit reduction",
+  "correct_given_usable"
+ ],
+ "reference_weights": {
+  "P2-0.86M-sa": {
+   "where": "local",
+   "path": "/home/ecs-user/aad-artifacts/p2_ceheavy/p2_ceheavy_sa",
+   "sha256_prefix": "4aface45a12cd02e"
+  },
+  "P2-0.86M-sb": {
+   "where": "local",
+   "path": "/home/ecs-user/aad-artifacts/p2_ceheavy/p2_ceheavy_sb",
+   "sha256_prefix": "9828b1780a5eb4e2"
+  },
+  "P1-1.60M-sa": {
+   "where": "relay",
+   "path": "e1_scaling_20260801/e1_r1600k_sa_pca/step_001761/model",
+   "sha256_prefix": "6f77676ab8fde397"
+  },
+  "P1-1.60M-sb": {
+   "where": "relay",
+   "path": "e1_scaling_20260801/e1_r1600k_sb_pca/step_001761/model",
+   "sha256_prefix": "e432d57e598d57e1"
+  }
+ },
+ "noise_floors": {
+  "usable_rollout_rate": 0.08,
+  "free_rollout_correctness": 0.06,
+  "teacher_forced_reasoning_top1": 0.0112,
+  "teacher_native_holdout_ce": 0.0117,
+  "rule": "max(P1 spread, P2 spread) \u2014 the conservative choice",
+  "P1_seed_spread": {
+   "usable_rollout_rate": 0.08,
+   "free_rollout_correctness": 0.06,
+   "teacher_forced_reasoning_top1": 0.0025,
+   "teacher_native_holdout_ce": 0.0063
+  },
+  "P2_seed_spread": {
+   "usable_rollout_rate": 0.0267,
+   "free_rollout_correctness": 0.02,
+   "teacher_forced_reasoning_top1": 0.0112,
+   "teacher_native_holdout_ce": 0.0117
+  }
+ },
+ "budget": {
+  "measured_s_per_step": {
+   "P2-ceheavy 0.86M (full attention, ce1.0/kd0.25)": 3.61,
+   "E3 A1 0.86M (attention frozen)": 3.323,
+   "E3 A2 0.86M (attention LoRA r32)": 3.441
+  },
+  "s_per_step_used": 3.61,
+  "steps_per_arm": 1761,
+  "arms": 2,
+  "phases_min": {
+   "setup, downloads, tests, preflight": 10,
+   "train 2 x 1.60M arms": 212,
+   "stage P1-1600k from relay + hash-verify": 5,
+   "three-mode eval: 2 new + 2 P1-1600k re-eval": 44,
+   "parameter movement x 2": 5,
+   "checkpoint transfer + teardown": 20
+  },
+  "total_min": 296,
+  "rate_usd_per_hour": 0.99,
+  "expected_usd": 4.88,
+  "backstop_min": 420,
+  "backstop_usd": 6.93,
+  "ledger_remaining_usd": 2.94,
+  "shortfall_expected_usd": 1.94,
+  "shortfall_backstop_usd": 3.99,
+  "cost_split_usd": {
+   "training (2 x 1.60M seeds)": 3.5,
+   "evaluation (4 checkpoints, three-mode)": 0.73,
+   "infrastructure (setup, staging, movement, transfer, teardown)": 0.66
+  },
+  "detail": {
+   "gpu": "1x NVIDIA L40S secure",
+   "authorized_rate_usd_per_hour": 0.99,
+   "expected_minutes": 373,
+   "expected_cost_usd": 6.16,
+   "hard_backstop_minutes": 450,
+   "hard_ceiling_usd": 7.43,
+   "ledger_remaining_usd": 8.7,
+   "note": "Costed from the measured P2-ceheavy session (174.6 min for two arms of this exact rung), not by scaling token counts. Held-out NLL was moved off the pod to the dev-box CPU (25 s/model, reproduces the GPU value to 0.02%), removing ~24 min of paid time."
+  }
+ },
+ "what_this_cannot_settle": [
+  "n=2 seeds per arm: a spread is one draw per condition, so no variance claim is made from it.",
+  "The 150 evaluation prompts are drawn from the 0.86M rung and are therefore TRAINING prompts for every arm compared. Both rungs contain all 150, so no arm gains or loses exposure \u2014 but these are recall-style measurements, not held-out generalization.",
+  "P2-0.86M's rollout numbers come from the 2026-08-05 session on different hardware; only the new arms and the P1-1.60M re-runs are measured in this session.",
+  "Two rungs is not a scaling curve. A null at 1.60M does not establish that 2.96M or 5.50M would also be null.",
+  "usable_rollout is blind to correctness by construction and its five components are not independent."
+ ],
+ "code_state": {
+  "git_commit": "d2a48387ccdb0517af005414d52d0cb2d0ad6385",
+  "git_commit_source": "git",
+  "dirty": true,
+  "uncommitted_state_sha256": "2ada26b8bff94fcfeb5ea291f8081c143768b5065ea69608e58d757ec2858edf",
+  "untracked_files": [
+   "configs/stage3/e4/e4_p2_r1600k_sa.json",
+   "configs/stage3/e4/e4_p2_r1600k_sb.json",
+   "logs/e4_registration.json",
+   "scripts/pod/e4_driver.py",
+   "scripts/pod/e4_launch.sh",
+   "scripts/pod/e4_setup.sh",
+   "scripts/training/preflight_e4.py",
+   "scripts/training/register_e4.py",
+   "src/aadistill/evaluation/paired_stats.py",
+   "tests/evaluation/test_paired_stats.py",
+   "tests/training/test_e4_configs.py"
+  ]
+ }
+}

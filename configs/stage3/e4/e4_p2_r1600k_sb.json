@@ -1,0 +1,64 @@
+{
+ "stage": "stage3_recovery",
+ "run_name": "e4_p2_r1600k_sb",
+ "_purpose": "Experiment 4 (P2 scale anchor): the P2-CE-heavy objective (ce 1.0 / kd 0.25, scope all) trained at the existing strictly nested 1.60M rung instead of 0.86M. Differs from p2_ceheavy_sb ONLY in the rung and the schedule/cadence that E1 derives from it (1,174 blocks, 1,600,353 supervised tokens, 1,761 steps = 3 passes at 2 blocks/step, warmup 88 = 5% as at every other rung, save_every 880, eval_every 220). Forks from the same Stage 1 PCA init as every other arm; does NOT continue from the P2-0.86M checkpoint.",
+ "student_path": "artifacts/stage1/qwen3_0p6b_init_v0/checkpoint",
+ "teacher": {
+  "model_id": "Qwen/Qwen3-4B-Thinking-2507",
+  "revision": "768f209d9ea81521153ed38c47d515654e938aea",
+  "dtype": "bfloat16"
+ },
+ "data_dir": "artifacts/stage3/ladder_uniform",
+ "groups": null,
+ "packing": "ladder",
+ "block_len": 8192,
+ "dtype": "float32",
+ "autocast_bf16": true,
+ "gradient_checkpointing": true,
+ "device": "auto",
+ "seed": 20260801,
+ "trainable_patterns": [
+  "\\.self_attn\\.(q_proj|k_proj|v_proj|o_proj|q_norm|k_norm)\\.",
+  "\\.mlp\\.(gate_proj|up_proj|down_proj)\\.",
+  "input_layernorm",
+  "post_attention_layernorm",
+  "model\\.norm\\."
+ ],
+ "loss": {
+  "ce_weight": 1.0,
+  "kd_weight": 0.25,
+  "kd_temperature": 1.0,
+  "kd_scope": "all"
+ },
+ "optim": {
+  "lr": 5e-05,
+  "weight_decay": 0.01,
+  "betas": [
+   0.9,
+   0.95
+  ],
+  "eps": 1e-08,
+  "grad_clip": 1.0
+ },
+ "schedule": {
+  "total_steps": 1761,
+  "warmup_steps": 88,
+  "min_lr_frac": 0.1
+ },
+ "batch": {
+  "blocks_per_step": 2,
+  "micro_blocks": 1
+ },
+ "checkpoint": {
+  "save_every": 880,
+  "keep_last": 1
+ },
+ "intervals": {
+  "log_every": 10,
+  "eval_every": 220,
+  "eval_blocks": 16
+ },
+ "out_dir": "artifacts/stage3/e4_p2_r1600k_sb",
+ "rung": 1600000,
+ "val_blocks": 16
+}
