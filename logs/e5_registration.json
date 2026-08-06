@@ -1,7 +1,7 @@
 {
  "created_utc": "2026-08-06T12:29:24.557154+00:00",
  "experiment": "E5 \u2014 matched-budget teacher-prefix continuation (C) vs student-prefix on-policy KD plus teacher recovery continuation (R)",
- "status": "REGISTERED \u2014 arm C built; paired/packing/token-accounting machinery built and tested; R generation not started",
+ "status": "REGISTERED \u2014 arm C built; bundle-atomic pairing, token targeting and KD-normalization proof complete; R generation and full-path pilot not started",
  "authorization": {
   "additional_usd": 6.0,
   "prior_remainder_usd": 2.11,
@@ -239,5 +239,79 @@
   },
   "tolerance_is_a_ceiling": "the 5% C/R bound is a hard stop, not an aim; the selector minimises the worse arm's deviation from the target subject to whole untruncated samples",
   "forbidden_phrasing": "a compute-matched 492-block/738-step continuation must NOT be called '1.60M-equivalent' in token scale"
+ },
+ "atomic_bundles": {
+  "unit": "(source_session_id, source_seed) with BOTH truncation indices",
+  "rule": "a bundle survives only if every truncation passes generation and all ten gates in R; if either fails, both truncations are removed from both C and R",
+  "selection_unit": "the two-truncation bundle is the smallest selectable unit for token-target selection and stratified down-selection",
+  "why": "allowing a session to contribute one surviving cut would silently change the registered two-truncations-per-prompt design for part of the corpus",
+  "implementation": "paired_corpus.intersect / take_bundles / select_paired, asserted by tests including a single-cut-survivor case"
+ },
+ "kd_normalization_verified": {
+  "verified_through": "the real Trainer.step_once, not a reimplementation",
+  "artifact": "artifacts/audit/e5_normalization.json",
+  "result": "PASS \u2014 prefix length does not alter the effective CE/KD weighting",
+  "measured": {
+   "C_like_short_prefix": {
+    "ce_mask_tokens": 122,
+    "kd_mask_tokens": 510,
+    "ce_mean": 7.6042,
+    "kd_mean": 0.0255,
+    "weighted_ce": 7.6042,
+    "weighted_kd": 0.0064,
+    "kd_per_ce_token": 4.1803
+   },
+   "R_like_long_prefix": {
+    "ce_mask_tokens": 54,
+    "kd_mask_tokens": 510,
+    "ce_mean": 7.5981,
+    "kd_mean": 0.0255,
+    "weighted_ce": 7.5981,
+    "weighted_kd": 0.0064,
+    "kd_per_ce_token": 9.4444
+   }
+  },
+  "properties_proven": [
+   "CE is normalized only over CE-mask continuation tokens",
+   "KD is normalized only over KD-mask (non-padding) prediction positions",
+   "padding is excluded from both",
+   "KD is not summed without normalization",
+   "KD is not divided by block length",
+   "KD is not divided by the CE denominator",
+   "ce_weight and kd_weight remain the effective coefficients in both arms"
+  ],
+  "interpretation": "both terms are per-token MEANS, so a longer prefix changes the CE denominator but not the KD denominator and does not reweight KD against CE. What a longer prefix does change is KD's COMPOSITION \u2014 4.18 vs 9.44 KD tokens per CE token \u2014 which is the E5 treatment, not an implementation artifact."
+ },
+ "token_target_terminology": {
+  "the_target": "~735,603 refers to CE-MASK SUPERVISED-TOKEN INSTANCES PER PASS, not unique trajectory tokens",
+  "forbidden": "describing the result as 735,603 unique recovery tokens",
+  "report_separately": [
+   "CE-mask token instances (per pass)",
+   "unique supervised coverage by original trajectory",
+   "repeated presentations from overlapping suffixes",
+   "total CE-token presentations across the three passes",
+   "KD-mask token instances",
+   "total non-padding tokens",
+   "padding tokens and packing utilisation"
+  ]
+ },
+ "feasibility_status": {
+  "current_basis": "arm C only",
+  "measured_on_C": {
+   "nonpadding_tokens": 2541406,
+   "capacity_tokens": 4030464,
+   "utilisation": 0.6305
+  },
+  "status": "NOT YET JOINTLY SATISFIED \u2014 C-only evidence is insufficient",
+  "must_be_demonstrated_by": "the production R corpus or a sufficiently representative production-path pilot",
+  "joint_conditions": [
+   "~735,603 CE-mask tokens per arm within the 5% tolerance",
+   "492 packed blocks",
+   "738 optimizer steps",
+   "no truncation of any prefix or continuation",
+   "atomic two-truncation bundles",
+   "the registered C/R composition constraints"
+  ],
+  "hypothesis_not_fact": "that R continuations will be longer than C's is a HYPOTHESIS until measured; the token-target selector makes no assumption about it and scores both arms"
  }
 }

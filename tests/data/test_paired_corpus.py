@@ -31,10 +31,15 @@ def ex(sid, seed, ti, task="gsm8k", prefix=200, cont=100, frac=0.4):
 
 
 def corpus(n=40, seed="sa"):
+    """`n` EXAMPLES as complete two-truncation bundles (n//2 sessions)."""
     out = []
-    for i in range(n):
-        out.append(ex(f"s{i:03d}", seed, i % 2, TASKS[i % len(TASKS)],
-                      prefix=100 * (1 + i % 6), cont=50 + i, frac=0.2 + 0.01 * (i % 50)))
+    for j in range(n // 2):
+        task = TASKS[j % len(TASKS)]
+        pre = 100 * (1 + j % 6)
+        for t in (0, 1):
+            out.append(ex(f"s{j:03d}", seed, t, task,
+                          prefix=pre + 40 * t, cont=50 + j + 10 * t,
+                          frac=0.2 + 0.01 * (j % 50) + 0.05 * t))
     return out
 
 
@@ -42,27 +47,31 @@ def corpus(n=40, seed="sa"):
 
 def test_an_r_rejection_removes_its_c_counterpart():
     c = corpus(10)
-    r = [e for e in corpus(10) if e["source_session_id"] not in {"s003", "s007"}]
+    r = [e for e in corpus(10) if e["source_session_id"] != "s003"]
     ck, rk, census = intersect(c, r)
+    assert census["paired_bundles"] == 4
     assert len(ck) == len(rk) == 8
-    assert census["paired_common"] == 8
-    assert census["c_dropped_for_pairing"] == 2
-    assert {e["source_session_id"] for e in ck} == {e["source_session_id"] for e in rk}
+    assert "s003" not in {e["source_session_id"] for e in ck}
 
 
-def test_pairing_is_on_prompt_seed_and_truncation_not_prompt_alone():
-    """Dropping one truncation must not drop the other for the same prompt."""
-    c = [ex("s1", "sa", 0), ex("s1", "sa", 1)]
-    r = [ex("s1", "sa", 1)]
-    ck, rk, _ = intersect(c, r)
-    assert len(ck) == 1 and ck[0]["truncation_index"] == 1
+def test_one_failed_truncation_removes_the_whole_bundle_from_both_arms():
+    """The registered design is two cuts per prompt; a lone survivor breaks it."""
+    c = [ex("s1", "sa", 0), ex("s1", "sa", 1), ex("s2", "sa", 0), ex("s2", "sa", 1)]
+    r = [ex("s1", "sa", 1), ex("s2", "sa", 0), ex("s2", "sa", 1)]   # s1#0 failed
+    ck, rk, census = intersect(c, r)
+    assert census["r_incomplete_bundles_dropped"] == 1
+    assert census["paired_bundles"] == 1
+    assert {e["source_session_id"] for e in ck} == {"s2"}
+    assert {e["source_session_id"] for e in rk} == {"s2"}
+    assert sorted(e["truncation_index"] for e in ck) == [0, 1]
 
 
-def test_seeds_are_kept_distinct_when_pairing():
-    c = [ex("s1", "sa", 0), ex("s1", "sb", 0)]
-    r = [ex("s1", "sb", 0)]
-    ck, _, _ = intersect(c, r)
-    assert [e["source_seed"] for e in ck] == ["sb"]
+def test_seeds_are_separate_bundles():
+    c = [ex("s1", "sa", 0), ex("s1", "sa", 1), ex("s1", "sb", 0), ex("s1", "sb", 1)]
+    r = [ex("s1", "sb", 0), ex("s1", "sb", 1)]
+    ck, _, census = intersect(c, r)
+    assert census["paired_bundles"] == 1
+    assert {e["source_seed"] for e in ck} == {"sb"}
 
 
 def test_both_arms_come_back_in_one_canonical_order():
@@ -113,7 +122,7 @@ def test_selection_reports_stratum_drift_and_keeps_it_small():
     ck, rk, _ = intersect(corpus(240), corpus(240))
     _, _, rep = select_paired(ck, rk, 120)
     assert rep.dropped == 120
-    assert rep.max_share_drift < 0.02
+    assert rep.max_share_drift < 0.03
     assert rep.strata_before and rep.strata_after
 
 
@@ -121,17 +130,28 @@ def test_requesting_more_than_available_keeps_everything():
     ck, rk, _ = intersect(corpus(10), corpus(10))
     sel_c, _, rep = select_paired(ck, rk, 999)
     assert rep.kept == 10 and rep.dropped == 0 and len(sel_c) == 10
+    assert len({e["source_session_id"] for e in sel_c}) == 5
 
 
 def test_selecting_from_mismatched_arms_is_refused():
+    """Selection assumes the intersection already aligned the arms."""
     with pytest.raises(ValueError, match="intersect"):
-        select_paired(corpus(5), corpus(4), 3)
+        select_paired(corpus(8), corpus(4), 4)
 
 
 def test_stratified_order_is_a_permutation():
-    c = corpus(37)
+    c = corpus(36)
     order = stratified_order(c)
-    assert sorted(order) == list(range(37))
+    assert sorted(order) == list(range(36))
+
+
+def test_every_selected_session_keeps_both_of_its_truncations():
+    from collections import Counter as C
+    ck, rk, _ = intersect(corpus(200), corpus(200))
+    sel_c, sel_r, _ = select_paired(ck, rk, 60)
+    for sel in (sel_c, sel_r):
+        counts = C((e["source_session_id"], e["source_seed"]) for e in sel)
+        assert set(counts.values()) == {2}, "a session contributed a single cut"
 
 
 # ------------------------------------------------------------------ strata

@@ -59,11 +59,56 @@ def stratum(example: dict) -> tuple:
             prefix_bucket(int(example["n_prefix_tokens"])))
 
 
-def intersect(c_examples: list[dict], r_examples: list[dict]) -> tuple[list, list, dict]:
-    """Keep only the pair keys present and accepted in **both** arms.
+def bundle_key(example: dict) -> tuple:
+    """The atomic unit of selection: one source trajectory under one seed.
 
-    Returns `(c_kept, r_kept, census)` with both lists in one canonical order, so
-    downstream selection and packing see the arms in the same sequence.
+    The registered design is *two truncations per prompt*. Letting a session
+    contribute one surviving cut would quietly change that design for part of
+    the corpus, so bundles survive or fail together and are selected together.
+    """
+    return (example["source_session_id"], example.get("source_seed"))
+
+
+def bundle_stratum(bundle: list[dict]) -> tuple:
+    """Stratum for a whole bundle. `truncation_index` drops out — every bundle
+    holds both indices by construction — and the prefix bucket is taken from the
+    shallower cut, which is the one that determines how much context the bundle
+    carries at its lightest."""
+    first = bundle[0]
+    return (first["data_type"], first.get("source_seed"),
+            prefix_bucket(min(int(e["n_prefix_tokens"]) for e in bundle)))
+
+
+def group_bundles(examples: list[dict], *, expected: int = 2) -> dict[tuple, list[dict]]:
+    """Group examples into bundles, keeping only complete ones.
+
+    An incomplete bundle is not an error here — it is the normal consequence of
+    one truncation failing an R gate — but it must never reach selection, so it
+    is dropped whole.
+    """
+    groups: dict[tuple, list[dict]] = defaultdict(list)
+    for e in examples:
+        groups[bundle_key(e)].append(e)
+    out = {}
+    for key, members in groups.items():
+        members.sort(key=lambda e: int(e["truncation_index"]))
+        if len(members) == expected and len({
+                int(e["truncation_index"]) for e in members}) == expected:
+            out[key] = members
+    return out
+
+
+def intersect(c_examples: list[dict], r_examples: list[dict], *,
+              truncations: int = 2) -> tuple[list, list, dict]:
+    """Keep only the **complete bundles** accepted in both arms.
+
+    Bundle-atomic by requirement: if either truncation of a `(session, seed)`
+    fails generation or any R quality gate, both truncations are removed from
+    both arms. A single-cut survivor would silently violate the registered
+    two-truncations-per-prompt design for part of the corpus.
+
+    Returns `(c_kept, r_kept, census)` in one canonical order so downstream
+    selection and packing see the arms in the same sequence.
     """
     c_by = {pair_key(e): e for e in c_examples}
     r_by = {pair_key(e): e for e in r_examples}
@@ -71,17 +116,77 @@ def intersect(c_examples: list[dict], r_examples: list[dict]) -> tuple[list, lis
         raise ValueError("duplicate pair keys in arm C")
     if len(r_by) != len(r_examples):
         raise ValueError("duplicate pair keys in arm R")
-    common = sorted(set(c_by) & set(r_by), key=lambda k: (str(k[0]), str(k[1]), k[2]))
+
+    c_bundles = group_bundles(c_examples, expected=truncations)
+    r_bundles = group_bundles(r_examples, expected=truncations)
+    common = sorted(set(c_bundles) & set(r_bundles), key=lambda k: (str(k[0]), str(k[1])))
+
+    c_kept, r_kept = [], []
+    for key in common:
+        c_kept += c_bundles[key]
+        r_kept += r_bundles[key]
+
+    c_all = {bundle_key(e) for e in c_examples}
+    r_all = {bundle_key(e) for e in r_examples}
     census = {
-        "c_candidates": len(c_examples),
-        "r_candidates": len(r_examples),
-        "paired_common": len(common),
-        "c_dropped_for_pairing": len(c_by) - len(common),
-        "r_dropped_for_pairing": len(r_by) - len(common),
-        "c_only_examples": sorted(str(k) for k in set(c_by) - set(r_by))[:20],
-        "r_only_examples": sorted(str(k) for k in set(r_by) - set(c_by))[:20],
+        "truncations_per_bundle": truncations,
+        "c_candidate_examples": len(c_examples),
+        "r_candidate_examples": len(r_examples),
+        "c_candidate_bundles": len(c_all),
+        "r_candidate_bundles": len(r_all),
+        "c_complete_bundles": len(c_bundles),
+        "r_complete_bundles": len(r_bundles),
+        "r_incomplete_bundles_dropped": len(r_all) - len(r_bundles),
+        "paired_bundles": len(common),
+        "paired_examples": len(c_kept),
+        "c_bundles_dropped_for_pairing": len(c_bundles) - len(common),
+        "r_bundles_dropped_for_pairing": len(r_bundles) - len(common),
+        "c_only_bundles": sorted(str(k) for k in set(c_bundles) - set(common))[:20],
+        "r_only_bundles": sorted(str(k) for k in set(r_bundles) - set(common))[:20],
     }
-    return [c_by[k] for k in common], [r_by[k] for k in common], census
+    return c_kept, r_kept, census
+
+
+def _bundle_cells(bundles: list[list[dict]], salt: str) -> dict[tuple, list[int]]:
+    """Bundle indices grouped by bundle stratum, each group in hashed order."""
+    cells: dict[tuple, list[int]] = defaultdict(list)
+    for i, b in enumerate(bundles):
+        cells[bundle_stratum(b)].append(i)
+    for key in cells:
+        cells[key].sort(
+            key=lambda i: hashlib.sha256(
+                (salt + "|" + "|".join(map(str, bundle_key(bundles[i][0])))).encode()
+            ).hexdigest())
+    return cells
+
+
+def take_bundles(bundles: list[list[dict]], n: int, *, salt: str = "e5") -> list[int]:
+    """`n` bundle indices, largest-remainder over bundle strata."""
+    n = max(0, min(n, len(bundles)))
+    cells = _bundle_cells(bundles, salt)
+    total = len(bundles) or 1
+    quota, remainders = {}, []
+    for key, idxs in cells.items():
+        exact = n * len(idxs) / total
+        quota[key] = min(len(idxs), int(exact))
+        remainders.append((exact - int(exact), key))
+    short = n - sum(quota.values())
+    for _, key in sorted(remainders, key=lambda t: (-t[0], str(t[1]))):
+        if short <= 0:
+            break
+        if quota[key] < len(cells[key]):
+            quota[key] += 1
+            short -= 1
+    out: list[int] = []
+    for key in sorted(cells, key=str):
+        out += cells[key][:quota[key]]
+    return sorted(out)
+
+
+def as_bundles(examples: list[dict], *, truncations: int = 2) -> list[list[dict]]:
+    """Canonical bundle list for an already-intersected arm."""
+    groups = group_bundles(examples, expected=truncations)
+    return [groups[k] for k in sorted(groups, key=lambda k: (str(k[0]), str(k[1])))]
 
 
 def _cells(examples: list[dict], salt: str) -> dict[tuple, list[int]]:
@@ -170,19 +275,25 @@ def select_paired(c_kept: list[dict], r_kept: list[dict], n: int,
     """
     if len(c_kept) != len(r_kept):
         raise ValueError("arms differ in length; intersect() first")
-    n = min(n, len(c_kept))
-    order = stratified_take(c_kept, n, salt=salt)
-    before = Counter(stratum(e) for e in c_kept)
-    after = Counter(stratum(c_kept[i]) for i in order)
+    # Bundle-atomic: `n` counts EXAMPLES for the caller's convenience but is
+    # honoured in whole bundles, so a session never contributes one cut.
+    c_bundles, r_bundles = as_bundles(c_kept), as_bundles(r_kept)
+    per = len(c_bundles[0]) if c_bundles else 1
+    n_bundles = min(len(c_bundles), max(0, n) // per)
+    picked = take_bundles(c_bundles, n_bundles, salt=salt)
+    before = Counter(bundle_stratum(b) for b in c_bundles)
+    after = Counter(bundle_stratum(c_bundles[i]) for i in picked)
     total_b, total_a = sum(before.values()) or 1, sum(after.values()) or 1
     drift = max((abs(after[k] / total_a - before[k] / total_b) for k in before),
                 default=0.0)
+    c_sel = [e for i in picked for e in c_bundles[i]]
+    r_sel = [e for i in picked for e in r_bundles[i]]
     report = SelectionReport(
-        kept=len(order), dropped=len(c_kept) - len(order),
+        kept=len(c_sel), dropped=len(c_kept) - len(c_sel),
         strata_before={str(k): v for k, v in sorted(before.items())},
         strata_after={str(k): v for k, v in sorted(after.items())},
         max_share_drift=round(drift, 5))
-    return [c_kept[i] for i in order], [r_kept[i] for i in order], report
+    return c_sel, r_sel, report
 
 
 def length_profile(examples: list[dict]) -> dict:
@@ -302,21 +413,27 @@ def select_paired_to_token_target(c_kept: list[dict], r_kept: list[dict],
     if len(c_kept) != len(r_kept):
         raise ValueError("arms differ in length; intersect() first")
 
+    c_bundles = as_bundles(c_kept)
+    r_bundles = as_bundles(r_kept)
+    if len(c_bundles) != len(r_bundles):
+        raise ValueError("bundle counts differ; intersect() first")
+
     def totals(n: int) -> tuple[int, int, list[int]]:
-        idx = stratified_take(c_kept, n, salt=salt)
-        return (sum(int(c_kept[i]["n_continuation_tokens"]) for i in idx),
-                sum(int(r_kept[i]["n_continuation_tokens"]) for i in idx), idx)
+        idx = take_bundles(c_bundles, n, salt=salt)
+        ct = sum(int(e["n_continuation_tokens"]) for i in idx for e in c_bundles[i])
+        rt = sum(int(e["n_continuation_tokens"]) for i in idx for e in r_bundles[i])
+        return ct, rt, idx
 
     def cost(n: int) -> float:
         ct, rt, _ = totals(n)
         return max(abs(ct - target), abs(rt - target)) / max(1, target)
 
-    lo, hi = 1, len(c_kept)
+    lo, hi = 1, len(c_bundles)
     best_n, best_cost = hi, cost(hi)
     # Coarse sweep then local refinement: the totals are monotone in n up to
     # stratum granularity, but not perfectly, so a pure binary search can stop
     # one stratum early.
-    step = max(1, len(c_kept) // 64)
+    step = max(1, len(c_bundles) // 64)
     for n in range(lo, hi + 1, step):
         c = cost(n)
         if c < best_cost:
@@ -327,11 +444,14 @@ def select_paired_to_token_target(c_kept: list[dict], r_kept: list[dict],
             best_n, best_cost = n, c
 
     ct, rt, idx = totals(best_n)
-    c_sel = [c_kept[i] for i in idx]
-    r_sel = [r_kept[i] for i in idx]
+    c_sel = [e for i in idx for e in c_bundles[i]]
+    r_sel = [e for i in idx for e in r_bundles[i]]
     return c_sel, r_sel, {
         "target_supervised_tokens": target,
-        "selected_pairs": best_n,
+        "selection_unit": "two-truncation session bundle",
+        "selected_bundles": best_n,
+        "available_bundles": len(c_bundles),
+        "selected_pairs": len(c_sel),
         "available_pairs": len(c_kept),
         "arm_c_supervised": ct,
         "arm_r_supervised": rt,
