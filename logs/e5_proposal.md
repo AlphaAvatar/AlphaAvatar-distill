@@ -1,8 +1,13 @@
 # Experiment 5 — proposal: matched-budget teacher-prefix continuation (C) vs student-prefix recovery (R)
 
-> **STATUS: PROPOSED, NOT REGISTERED, NOT LAUNCHED.** No GPU allocated, no paid
-> teacher data generated. Everything below is offline analysis of retained
-> artifacts plus a design and budget for approval.
+> **STATUS: APPROVED AND REGISTERED 2026-08-06** — [`logs/e5_registration.json`](e5_registration.json).
+> $6.00 additional authorized, $8.11 available, $7.92 backstop. Arm C is **built
+> and validated offline at $0**. No paid teacher data generated, no GPU allocated.
+>
+> **Two design points changed at approval and supersede §4–§5 below:** C is now
+> structurally symmetric with R (prefix + supervised continuation, not unsplit
+> continuation training), and R's accurate name is **student-prefix on-policy KD
+> plus teacher recovery continuation**.
 
 ## 1. What E4 established, and why it points here
 
@@ -47,8 +52,13 @@ At matched budget from the same starting checkpoints, does **student-prefix
 recovery** supervision improve autonomous correctness more than **ordinary
 teacher-prefix continuation**?
 
-* **C — teacher-prefix continuation.** Continue P2-0.86M on the incremental
-  0.86M→1.60M blocks exactly as they are.
+* **C — teacher-prefix continuation, structurally symmetric with R.** For each
+  matched prompt/truncation instance, C conditions on a **teacher-native prefix**
+  and supervises the corresponding teacher continuation. It is *not* ordinary
+  unsplit full-completion training: that would confound the state distribution
+  with the prefix/continuation shape, which is the very thing R changes.
+  C needs **no generation** — truncation only moves the loss mask over tokens
+  already in the corpus.
 * **R — student-prefix recovery.** Continue P2-0.86M on the same prompts, but
   each example is *the student's own partial trajectory* followed by the
   teacher's recovery continuation, with loss on the continuation only.
@@ -103,18 +113,30 @@ the matched design.
 **4.3 Truncation.** For each prompt, take **two** independent truncation points
 (so one prompt yields two training examples covering different student states):
 
-* let `L` be the number of student reasoning tokens before `</think>`;
-* if `L = 0` (the student emitted nothing — the single most common repaired
-  failure, 50/88), then `k = 0`: the teacher writes the whole trajectory. This is
-  a legitimate and important recovery case, not a degenerate one;
-* otherwise draw `k ~ Uniform{1 … min(L, context − reserve)}`, `reserve = 2048`
-  tokens kept for the teacher's continuation;
-* **never cut inside a multi-token special sequence**; snap `k` back to the
-  nearest token boundary that leaves `<think>` open and `</think>` unemitted.
+**Superseded at approval — `k = 0` is now forbidden.** The registered guard is
+*no empty assistant prefix*, so every example must carry at least one student
+token. The rule is:
 
-Truncation is uniform over the reasoning span on purpose: the student's error
-distribution is not concentrated at one depth, and a fixed cut point would teach
-recovery from only one kind of state.
+* let `L` be the student's generated span; `k ≥ 1` always;
+* the cut fraction is drawn deterministically from the sample's identity hash and
+  clamped into `[1, L − 8]`, so the continuation is always at least 8 tokens and
+  the cut never lands at or past the end of the answer;
+* the prefix never ends on a stop token — that would ask the model to continue
+  past its own `<|im_end|>`;
+* the two truncations of one rollout are never identical;
+* a sample whose total length exceeds the context budget is **rejected
+  deterministically before packing**, never silently cut by the packer.
+
+**Consequence, recorded rather than hidden:** a rollout that generated *nothing*
+cannot yield a legal prefix and is rejected as `no_supervised_tokens` /
+`too_short_to_split`. Since `non_empty` was the failure scale repaired most often
+(50 of 88), R's corpus will **under-represent the empty-output failure mode**
+relative to its prevalence in P2-0.86M. The rejection census reports exactly how
+many prompts this costs, by task and source seed.
+
+Cutting at a deterministic fraction of the span is deliberate: the student's
+error distribution is not concentrated at one depth, and a fixed cut point would
+teach recovery from only one kind of state.
 
 **4.4 Serialization.** Token-level concatenation, asserted exact:
 `[system + user rendered by the chat template, `<think>` open] + [student tokens
@@ -137,9 +159,19 @@ prefix. Two defensible readings:
 * **restrict KD to the continuation** — matches the CE mask, but makes R's
   objective differ from C's in a second way.
 
-**Recommendation: keep `kd_scope: all`** for parity, and record that KD is
-evaluated over student-generated context. The scope variant is the natural
-follow-up, not part of this experiment.
+**LOCKED AT APPROVAL: keep `kd_scope: all` in both arms**, preserving the P2
+objective semantics.
+
+For R this means **KD is applied on the student-generated prefix states as well
+as on the teacher recovery continuation**, while CE remains limited to the
+continuation. R is therefore named exactly:
+
+> **student-prefix on-policy KD plus teacher recovery continuation**
+
+It must **not** be described as pure continuation-only recovery, and a result
+must **not** later be attributed exclusively to the recovery continuation. The
+treatment jointly tests learning on student-visited states and teacher-guided
+recovery from those states.
 
 ## 5. Mixture: R should be 100% recovery data
 
@@ -219,3 +251,52 @@ rests on both-seed consistency.
 5. No promotion on one seed alone.
 6. Teacher-native CE and FineWeb NLL remain diagnostics and never select a
    winner (E4's standing lesson).
+
+
+---
+
+## 9. Approval addendum (2026-08-06) — what changed, and what is now built
+
+**C is structurally symmetric with R.** Both arms are prefix + supervised
+continuation; CE applies to the continuation only in both; `kd_scope` is `all` in
+both; both use two truncations per source prompt; and packed blocks, optimizer
+steps, LR, scheduler, objective weights and trainable parameters are matched.
+**The intended sole difference is the prefix state distribution** — teacher-native
+(C) versus student-visited (R).
+
+**Prefix lengths are matched on *fraction*, not on absolute tokens.** A teacher
+target averages 641 supervised tokens while a student rollout at this stage runs
+far longer, so equal token counts would force the two arms to cut at completely
+different relative depths. Paired C and R examples share seed material and
+therefore cut at the **same relative depth by construction**; the residual
+difference in absolute prefix tokens is measured and reported.
+
+**Arm C is built and validated, at $0** (`artifacts/stage3/e5_arm_c/`):
+
+| | |
+| --- | ---: |
+| source sessions (incremental slice) | 1,147 |
+| examples (2 truncations each) | **2,292** of 2,294 |
+| acceptance | **99.9%** (1 rejection: `duplicate_fractions`) |
+| supervised continuation tokens | **904,597** |
+| prefix tokens p25/p50/p75/max | 245 / 386 / 822 / 7,453 |
+| continuation tokens p25/p50/p75/max | 94 / 197 / 399 / 6,629 |
+
+This is the profile R's corpus is matched against, and it is the reason C was
+built first: if the split path could not produce a sound corpus from data that
+already exists, generating paid teacher data would have been premature.
+
+**Truncation guards, all implemented and tested** (`prefix_split.py`, 20 tests):
+no empty assistant prefix; continuation ≥ 8 tokens so no cut at or past the
+answer end; the prefix never ends on a stop token; the two truncations of one
+rollout are never identical; prefix and continuation lengths recorded per
+example; oversized samples rejected deterministically **before** the packer can
+cut them; and packing never truncates a prefix or a supervised continuation.
+
+**Interpretation boundaries** are registered: C vs R is the primary causal
+comparison; C/R vs the from-scratch P2-1.60M checkpoint is a **recipe**
+comparison because continuation schedule and data order differ; per-seed recovery
+data is intentionally on-policy with source-checkpoint identity stored per
+sample; and **no promotion on improved usable rollout alone** — the question is
+whether student-prefix training converts more prompts into *correct and
+naturally terminated* trajectories.
