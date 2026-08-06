@@ -1,7 +1,7 @@
 {
  "created_utc": "2026-08-06T12:29:24.557154+00:00",
  "experiment": "E5 \u2014 matched-budget teacher-prefix continuation (C) vs student-prefix on-policy KD plus teacher recovery continuation (R)",
- "status": "REGISTERED \u2014 arm C built and validated offline; R generation not started",
+ "status": "REGISTERED \u2014 arm C built and validated offline; paired/packing machinery built and tested; R generation not started",
  "authorization": {
   "additional_usd": 6.0,
   "prior_remainder_usd": 2.11,
@@ -144,5 +144,68 @@
    "src/aadistill/data/prefix_split.py",
    "tests/data/test_prefix_split.py"
   ]
+ },
+ "paired_construction": {
+  "requirement": "the formal corpora are the PAIRED ACCEPTANCE INTERSECTION",
+  "rule": "an R example failing generation or any quality gate removes the C example with the same (source_session_id, source_seed, truncation_index). Final C and R prompt/truncation composition is identical by construction, asserted before packing.",
+  "down_selection": "deterministic largest-remainder allocation over strata of (task, source seed, truncation index, prefix-length bucket) \u2014 never the first N examples or blocks. Round-robin was implemented first and rejected: it over-represents small strata, measured at 6.7 pp drift on a 240-example synthetic corpus.",
+  "never_truncate_to_fit": "whole paired samples are dropped in stratum order; no prefix or supervised continuation is ever cut to meet a budget",
+  "reported_for_both_arms": [
+   "common paired-example count",
+   "supervised continuation tokens",
+   "total non-padding tokens",
+   "prefix length distribution",
+   "continuation length distribution",
+   "truncation-fraction distribution",
+   "prefix-length bucket histogram",
+   "packing efficiency"
+  ],
+  "implementation": "src/aadistill/data/paired_corpus.py, 16 tests"
+ },
+ "supervised_token_tolerance": {
+  "value": 0.05,
+  "definition": "|C_supervised - R_supervised| / mean(C,R) <= 0.05, computed on supervised CONTINUATION tokens after paired selection",
+  "pre_registered": true,
+  "registered_before": "any R generation, training or evaluation",
+  "why_a_tolerance_is_needed": "exact equality is unreachable while keeping whole untruncated paired samples: C and R continuations differ in length because the underlying trajectories differ, and the only way to force equality would be to cut samples, which the registration forbids",
+  "if_exceeded": "STOP and report before training; do not adjust the tolerance"
+ },
+ "state_distribution_scope": {
+  "matched": "relative cut depth (truncation fraction), by construction",
+  "not_matched_and_intentional": [
+   "prefix content",
+   "prefix correctness",
+   "absolute prefix token length",
+   "context position of the continuation"
+  ],
+  "claim_boundary": "E5 tests the FULL student-visited state distribution. It does NOT isolate erroneous content alone: a student prefix differs from a teacher prefix in content, correctness, absolute length and context position simultaneously, and any effect may come from any of these.",
+  "reporting": "both relative cut fractions and absolute token-length distributions are reported for both arms"
+ },
+ "empty_prefix_exclusion": {
+  "rule": "k >= 1 always; a rollout that generated nothing is rejected",
+  "rationale": "an empty student prefix collapses into ordinary teacher-prefix continuation and would not test student-prefix recovery",
+  "consequence": "E5 therefore does NOT evaluate recovery from empty-output failures \u2014 the failure mode scaling repaired most often (50 of 88 repairs in the E4 transition table). The rejection census reports the cost by task and source seed."
+ },
+ "pilot_gate": {
+  "required_before_full_paid_generation": true,
+  "path": [
+   "student rollout",
+   "prefix selection",
+   "teacher recovery",
+   "all ten quality gates",
+   "serialization",
+   "loader round-trip",
+   "paired filtering",
+   "packing",
+   "real-model optimizer step"
+  ],
+  "constraint": "must use the same production code paths and schemas as the full run; a pilot that exercises a different path proves nothing",
+  "on_failure": "STOP before full generation and report"
+ },
+ "census_reconciliation": {
+  "issue": "the first arm-C build reported 2,292 accepted of 2,294 candidates with one rejection recorded \u2014 a gap of 2 explained by 1 rejection",
+  "cause": "unit mismatch in reporting: rejections were counted per SESSION while the denominator counted EXAMPLES, and one rejected session removes two candidate examples. No sample was lost unexplained.",
+  "underlying_defect": "the single rejection was a ~1-in-10,000 hash collision in the truncation-fraction draw. build_splits had an integer fallback for post-clamp collisions but it was unreachable for outright fraction collisions.",
+  "resolution": "fallback wired for fraction collisions; arm C now builds at 2,294 of 2,294 = 100.0%. Censuses now report session-level and example-level counts separately."
  }
 }

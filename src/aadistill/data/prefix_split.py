@@ -211,8 +211,18 @@ def build_splits(ids: list[int], mask: list[bool], *, seed_material: str,
     start, end = supervised_span(mask)
     n_supervised = end - start
     if by_fraction:
-        fracs = truncation_fractions(seed_material=seed_material, count=count)
-        points = [k_from_fraction(n_supervised, f) for f in fracs]
+        try:
+            fracs = truncation_fractions(seed_material=seed_material, count=count)
+            points = [k_from_fraction(n_supervised, f) for f in fracs]
+        except TruncationError as exc:
+            # Two hashed fractions can collide outright (~1 in 10,000 per
+            # sample). Rejecting the sample for that would discard a perfectly
+            # good rollout for a hash accident, so fall back to the integer
+            # policy — the same fallback a post-clamp collision already uses.
+            if exc.reason != "duplicate_fractions":
+                raise
+            points = truncation_points(n_supervised, seed_material=seed_material,
+                                       count=count)
         # Clamping can collapse two nearby fractions onto one integer on a short
         # span. The registration forbids identical truncations, so fall back to
         # the integer policy rather than emitting a silent duplicate.

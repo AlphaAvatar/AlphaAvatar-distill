@@ -208,3 +208,31 @@ def test_fraction_path_still_honours_every_guard():
         assert s.k >= 1
         assert s.n_continuation_tokens >= MIN_CONTINUATION_TOKENS
         assert ids[s.n_prefix_tokens - 1] not in STOP
+
+
+def test_a_fraction_collision_falls_back_instead_of_discarding_the_sample():
+    """A ~1-in-10,000 hash accident must not cost a usable rollout.
+
+    Found in the real arm-C build: one session of 1,147 drew two identical
+    fractions and was rejected outright, even though the integer fallback for
+    post-clamp collisions was sitting right there.
+    """
+    import hashlib
+    from aadistill.data.prefix_split import truncation_fractions
+
+    colliding = None
+    for i in range(200000):
+        m = f"probe-{i}"
+        d = hashlib.sha256(("frac:" + m).encode()).digest()
+        a = int.from_bytes(d[0:4], "big") % 9999
+        b = int.from_bytes(d[4:8], "big") % 9999
+        if a == b:
+            colliding = m
+            break
+    assert colliding, "no collision found in the probe range"
+    with pytest.raises(TruncationError, match="duplicate_fractions"):
+        truncation_fractions(seed_material=colliding)
+
+    ids, mask = sample(5, 400)
+    splits = build_splits(ids, mask, seed_material=colliding, stop_ids=STOP)
+    assert len(splits) == 2 and splits[0].k != splits[1].k

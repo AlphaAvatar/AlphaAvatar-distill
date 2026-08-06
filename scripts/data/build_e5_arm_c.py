@@ -48,6 +48,10 @@ def main() -> None:
     ap.add_argument("--truncations", type=int, default=2)
     ap.add_argument("--block-len", type=int, default=8192)
     ap.add_argument("--tokenizer", type=Path, default=INIT)
+    # C's tokens do not depend on a seed, but the pair key does: R generates one
+    # prefix set per source checkpoint, so C must be emitted per seed to pair
+    # one-to-one with it.
+    ap.add_argument("--source-seed", default="sa")
     args = ap.parse_args()
 
     from transformers import AutoTokenizer
@@ -64,7 +68,9 @@ def main() -> None:
     print(f"incremental sessions: {len(incremental)}")
 
     examples, rejected = [], Counter()
+    candidate_sessions = 0
     all_splits = []
+    rejected_sessions: list[dict] = []
     by_task: Counter = Counter()
     for line in SESSIONS.open():
         s = json.loads(line)
@@ -75,6 +81,7 @@ def main() -> None:
         except ValueError as exc:
             rejected[f"render:{str(exc)[:40]}"] += 1
             continue
+        candidate_sessions += 1
         try:
             splits = build_splits(
                 rendered.body_ids, rendered.body_mask,
@@ -83,11 +90,16 @@ def main() -> None:
                 max_total_tokens=args.block_len - rendered.n_system_tokens)
         except TruncationError as exc:
             rejected[exc.reason] += 1
+            rejected_sessions.append({"session_id": s["id"], "reason": exc.reason,
+                                      "data_type": s["data_type"]})
             continue
         for j, sp in enumerate(splits):
             examples.append({
                 "id": f"{s['id']}#c{j}",
                 "source_session_id": s["id"],
+                "source_seed": args.source_seed,
+                "truncation_index": j,
+                "truncation_fraction": round(sp.k / max(1, sp.span_end - sp.span_start), 4),
                 "data_type": s["data_type"],
                 "arm": "C",
                 "prefix_source": "teacher_native",
@@ -112,6 +124,21 @@ def main() -> None:
         "truncations_per_prompt": args.truncations,
         "block_len": args.block_len,
         "source_sessions": len(incremental),
+        # Session-level and example-level censuses are reported separately: one
+        # rejected session removes `truncations` candidate examples, and mixing
+        # the units made an earlier build look like it had lost a sample it had
+        # not (see logs/e5_registration.json census_reconciliation).
+        "sessions": {
+            "candidates": len(incremental),
+            "accepted": len(incremental) - len(rejected_sessions),
+            "rejected": len(rejected_sessions),
+            "rejected_detail": rejected_sessions,
+        },
+        "examples_census": {
+            "candidates": len(incremental) * args.truncations,
+            "accepted": len(examples),
+            "lost_to_session_rejections": len(rejected_sessions) * args.truncations,
+        },
         "examples": len(examples),
         "rejected": dict(rejected.most_common()),
         "acceptance_rate": round(
@@ -125,6 +152,7 @@ def main() -> None:
         "code_state": code_state(REPO_ROOT),
     }
     args.out.mkdir(parents=True, exist_ok=True)
+    report["source_seed"] = args.source_seed
     (args.out / "examples.jsonl").write_text(
         "".join(json.dumps(e) + "\n" for e in examples))
     (args.out / "manifest.json").write_text(json.dumps(report, indent=1))
