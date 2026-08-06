@@ -673,3 +673,32 @@ Alongside: `e3_run.log` (232 KB), `e3.status`, `e3_pod_hashes.txt`.
 Configs: `e3_a1_frozen_attn_sa` (`cc6ba2972a28c7c2…`), `_sb` (`477cbf347ba39df4…`),
 `e3_a2_lora_attn_sa` (`f9c5cdd26af067ae…`), `_sb` (`74e8846e25b12d1f…`) —
 `sha256_json` of the parsed config, matching `logs/e3_registration.json`.
+
+
+## Experiment 4 outputs and checkpoints (2026-08-06)
+
+Pod `qzevis6g43en33` (L40S secure, $0.99/h) deleted after transfer. Store:
+`/home/ecs-user/aad-artifacts/e4/`, **12/12 files `sha256sum -c` OK** against
+`e4_pod_hashes.txt`, computed on the pod before transfer.
+
+| arm | contents | size |
+| --- | --- | ---: |
+| `e4_p2_r1600k_sa` | `model/` (step_001761) + `trainer_state.pt` | 5.6 GB |
+| `e4_p2_r1600k_sb` | same | 5.6 GB |
+
+Config hashes `8256bfba8b3241a8…` (sa) / `7c3817a729133dc9…` (sb), matching
+`logs/e4_registration.json`. Both fork from the Stage 1 init `86fbba78…`; neither
+continues from P2-0.86M.
+
+`e4_side.tar.gz` (1.1 MB): 150 free + 150 oracle generations for all four
+evaluated checkpoints (both new arms **and** the two P1-1.60M re-evaluations),
+teacher-forced per-role reports, `e4_movement/`, the preflight, both configs and
+each arm's `run_manifest.json` / `train_log.jsonl`.
+
+**Not uploaded to the relay** — LFS quota is full and no follow-up arm forks from
+a trained checkpoint.
+
+**The P1-1.60M re-evaluation is the reusable asset here**: those two checkpoints
+now have 150-example unrestricted-harness results (`three_mode/P1-1600k-{sa,sb}/`)
+comparable with every Stage 2/3 family, where before they had only 76-prompt
+behaviour-wave numbers taken with the degeneration stop active.

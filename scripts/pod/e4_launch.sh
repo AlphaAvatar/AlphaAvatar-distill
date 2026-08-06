@@ -209,7 +209,7 @@ say "driver running — $(cost)"
 DEADLINE_TS=$(( $(date -u +%s) + POLL_LIMIT_MIN * 60 )); LAST=""
 while [ "$(date -u +%s)" -lt "$DEADLINE_TS" ]; do
   sleep 120
-  STATUS_TXT=$($SSH "root@$HOST" 'cat /workspace/e3.status 2>/dev/null | tail -1' 2>/dev/null)
+  STATUS_TXT=$($SSH "root@$HOST" 'cat /workspace/e4.status 2>/dev/null | tail -1' 2>/dev/null)
   if [ -n "$STATUS_TXT" ] && [ "$STATUS_TXT" != "$LAST" ]; then
     LAST="$STATUS_TXT"; say "  $STATUS_TXT — $(cost)"
   fi
@@ -225,11 +225,11 @@ say "bundling small artifacts on the pod"
 $SSH "root@$HOST" 'cd /workspace/aad && tar czf /workspace/e4_side.tar.gz \
   artifacts/audit configs/stage3/e3 \
   $(ls -d artifacts/stage3/e4_*/train_log.jsonl artifacts/stage3/e4_*/run_manifest.json 2>/dev/null) \
-  2>/dev/null; cp /workspace/e4_run.log /workspace/e3.status /workspace/ 2>/dev/null; \
+  2>/dev/null; cp /workspace/e4_run.log /workspace/e4.status /workspace/ 2>/dev/null; \
   sha256sum /workspace/e4_side.tar.gz' >>"$LOG" 2>&1
 $SCP "root@$HOST:/workspace/e4_side.tar.gz" "$STORE/" >>"$LOG" 2>&1
 $SCP "root@$HOST:/workspace/e4_run.log" "$STORE/" >>"$LOG" 2>&1
-$SCP "root@$HOST:/workspace/e3.status" "$STORE/" >>"$LOG" 2>&1
+$SCP "root@$HOST:/workspace/e4.status" "$STORE/" >>"$LOG" 2>&1
 if [ -s "$STORE/e4_side.tar.gz" ]; then
   say "results bundle retrieved ($(du -h "$STORE/e4_side.tar.gz" | cut -f1)) — $(cost)"
 else

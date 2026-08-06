@@ -91,6 +91,37 @@ def test_pinned_hashes_are_full_length_sha256(script):
         assert len(value) == 64, f"{script.name}: {name} is {len(value)} chars, not 64"
 
 
+@pytest.mark.parametrize("prefix", sorted({f.name[:2] for f in POD.glob("e[0-9]_*")}))
+def test_setup_driver_and_launcher_agree_on_the_status_file(prefix):
+    """All three components must name the SAME marker file.
+
+    This is the third instance of one blind spot. `sed s/e3_/e4_/g` does not
+    match `e3.status` (a dot, not an underscore), so the E4 launcher polled a
+    file the E4 driver never wrote. The run would have finished at 11:00 and the
+    launcher would have idled to its 400-minute timeout — roughly $2.65 of
+    billing for nothing, against a $4.00 authorization. Caught live and patched
+    with a symlink; this test is the durable fix.
+    """
+    paths = {}
+    for name, pattern in (("setup", f"{prefix}_setup.sh"),
+                          ("driver", f"{prefix}_driver.py"),
+                          ("launcher", f"{prefix}_launch.sh")):
+        f = POD / pattern
+        if not f.is_file():
+            continue
+        found = set(re.findall(r"/?workspace/(e\d+\.status)", f.read_text()))
+        found |= set(re.findall(r"STATUS=\$WS/(e\d+\.status)", f.read_text()))
+        if found:
+            paths[name] = found
+    if len(paths) < 2:
+        pytest.skip(f"{prefix}: fewer than two components reference a status file")
+    everything = set().union(*paths.values())
+    assert len(everything) == 1, (
+        f"{prefix}: components disagree on the status file — {paths}. "
+        "The launcher polls it for ALL_DONE; a mismatch means teardown never "
+        "fires on completion and the pod idle-bills to its timeout.")
+
+
 def test_the_stage1_fork_point_hash_is_identical_everywhere():
     """Every script that *verifies* the init must verify the SAME init.
 

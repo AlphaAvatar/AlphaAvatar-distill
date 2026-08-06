@@ -1,71 +1,60 @@
-**Updated:** 2026-08-05 21:00 UTC · branch `main` · **Experiment 4 launching.**
-Verified spend **$123.08** of the **$130.02** cap (+$4.00 authorized for E4 on
-2026-08-05). **$6.94 available for this run, $6.93 hard backstop, nothing beyond
-it authorized.**
+**Updated:** 2026-08-06 12:10 UTC · branch `main` · **no pods running, nothing
+billing.** Verified spend **$127.91** of the **$130.02** cap. **$2.11 remains and
+nothing further is authorized.**
 
-**E4 asks whether P2-CE-heavy was data-limited at 0.86M**: same objective, same
-optimizer semantics, same parameter policy, scaled to the nested 1.60M rung
-(1,174 blocks, 1,600,353 supervised tokens, 1,761 steps). Registered before
-training in [`e4_registration.json`](e4_registration.json). Two new arms
-`e4_p2_r1600k_{sa,sb}`; P2-0.86M reused as-is; **P1-1.60M re-evaluated, not
-retrained**, because its recorded numbers came from the older 76-prompt
-behaviour wave with the degeneration stop active.
+## EXPERIMENT 4 IS COMPLETE — SCALE FIXES BEHAVIOUR, NOT CORRECTNESS
 
-**The battery is pinned to the registered 0.86M mask `d6e24e0b…` for every arm.**
-The harness samples from whatever rung it is given and the 1.60M rung holds 2,649
-sessions against 1,502, so an unpinned run would silently resample and end the
-like-for-like comparison. **These 150 prompts are shared *training* prompts for
-every arm compared** — both rungs contain all 150, so no arm gains exposure, but
-the rollout result measures recall-style autonomous behaviour, **not held-out
-generalization.**
+Full record: [`EXPERIMENTS.md`](EXPERIMENTS.md) §21. Registered before training in
+[`e4_registration.json`](e4_registration.json). **$4.83**, 290 min on one L40S,
+pod self-deleted, 12/12 files hash-verified.
 
-## EXPERIMENT 3 IS COMPLETE — RESTRICTING ATTENTION UPDATES MAKES IT WORSE
-
-Full record: [`EXPERIMENTS.md`](EXPERIMENTS.md) §20. Registered before training in
-[`e3_registration.json`](e3_registration.json). Cost **$5.76**, 349 min on one
-L40S, pod self-deleted, 28/28 files hash-verified.
-
-| | A0 = P2-ceheavy | A1 frozen attn | A2 LoRA r32 |
+| | P2-0.86M | P1-1.60M | **P2-1.60M** |
 |---|---:|---:|---:|
-| attention movement `‖ΔW‖/‖W‖` | 0.0167 | **0.0000** | 0.0048 |
-| **usable_rollout_rate** | **0.5333** | 0.4467 | 0.4400 |
-| correct_overall | 0.1900 | 0.1067 | 0.1366 |
-| correct_given_usable | 0.3258 | 0.1737 | 0.2882 |
-| teacher-native CE | 1.5240 | 1.6823 | 1.6151 |
-| FineWeb NLL BF16 / INT8 | 8.9554 / 8.9794 | 9.9100 / 9.9700 | 8.8997 / 8.9439 |
+| **usable_rollout_rate** | 0.5333 | 0.7300 | **0.7333** |
+| correct_overall | 0.1900 | 0.1867 | 0.2000 |
+| correct_and_naturally_terminated | 0.1834 | 0.1867 | 0.2000 |
+| **correct_given_usable** | **0.3258** | 0.2532 | 0.2695 |
+| teacher-native CE | 1.5240 | 1.2983 | 1.3126 |
+| FineWeb NLL BF16 / INT8 | 8.9554 / 8.9794 | — | 8.0992 / 8.1467 |
 
-**Both treatments are worse than the baseline on both seeds and on all five
-usable-rollout components.** Deltas −0.0866 (A1) and −0.0933 (A2) clear the
-registered 0.0800 floor. Paired at the prompt level each arm loses more prompts
-than it gains. **None of the four pre-registered rules fired; neither arm is
-promotable.**
+**Scaling 0.86M → 1.60M moves usable rollout +0.2000 on both seeds** (0.5200/0.5467
+→ 0.7133/0.7533, ranges disjoint), clearing the 0.0800 floor by 2.5×. Paired per
+prompt: sa +41/−12, sb +47/−16, both bootstrap CIs excluding zero.
 
-**The leading hypothesis since §19.8 is refuted: full-rank attention updating is
-not the source of the degeneration.** Attention capacity is *needed* — restrict
-it and both teacher fit and autonomous behaviour degrade, monotonically in how
-much you restrict.
+**Correctness does not move.** +0.0100 is inside the 0.0600 floor and regresses on
+`sb`. And `correct_given_usable` **falls** 0.3258 → 0.2695: the ~30 extra
+well-formed rollouts per seed are mostly wrong. **The student learned to stop, not
+to reason.**
 
-What A2 does buy, and it is real but insufficient: `correct_given_usable` 0.2882
-vs A1's 0.1737, seed-stable, for 9,175,040 adapter parameters and 29% of the
-baseline's attention movement. It does not recover rollout stability.
+**At matched scale the objective is a tie** — P2-1.60M vs P1-1.60M is inside every
+floor on every metric, and P1 gained from scale too (0.5533 → 0.7300). The +0.20
+belongs to **scale**, not to CE-heavy.
 
-**Do not read A2's FineWeb mean (8.8997, best of any arm) as an improvement** —
-its seed spread is 0.4668 against A0's 0.0143, so the −0.0557 mean is one draw.
+**R2 fired**: teacher-native CE improved −0.2114 (18× its floor) while autonomous
+correctness stayed flat — more teacher-prefix data does not resolve the reasoning
+gap. R1, R3, R4 did not fire; **no arm is adopted as the anchor**.
 
-### Standing recommendation, and its status
+The honest form of R1 is narrower than the rule anticipated: **P2 was
+behaviour-limited at 0.86M, not correctness-limited.**
 
-Move to **student-prefix / on-policy recovery** (Stage 3 sub-stage 3, Stages 4–5).
-This is an **engineering judgement, not a fired rule** — R4's precondition
-required both arms to improve FineWeb NLL and A1's rose by 0.9546. What E3 adds
-is negative evidence: the offline family has now been probed three ways — KD
-scope (§17), KD magnitude (§18), attention capacity (§20) — and **none moved
-autonomous rollout.** `src/aadistill/rollout/` holds 2,075 lines of tested
-infrastructure that no training path consumes.
+**Binding limitation:** the 150 evaluation prompts are shared **training** prompts
+for every arm compared. Both rungs contain all 150, so no arm gains exposure and
+the comparison is fair — but this measures **recall-style autonomous behaviour,
+not held-out generalization.**
 
-**Native LoRA now exists** (`src/aadistill/training/lora.py`): merged-on-save so
-every arm shares one inference architecture, exact resume from stored base + A/B
-tensors, adapter config in checkpoint metadata, and full-rank/LoRA parameter
-counts reported separately. 32 tests.
+### What the program now knows
+
+Four interventions have been tested against autonomous rollout. **Only scale has
+moved it**, and only its behavioural half:
+
+| intervention | usable rollout | correctness |
+|---|---|---|
+| KD scope (§17) | ~flat | ~flat |
+| KD magnitude (§18) | ~flat | ~flat |
+| attention restriction (§20) | **worse** | worse |
+| **token scale 0.86M → 1.60M (§21)** | **+0.2000** | **flat** |
+
+Correctness has not moved in any experiment. That is the standing open problem.
 
 ## NO EXISTING MODEL HAS YET COMPLETED THE STAGE 2/3 OBJECTIVE
 

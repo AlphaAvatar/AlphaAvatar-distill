@@ -7,11 +7,11 @@ proposal files, which are preserved in git history at commit `866dac2`.
 32Q/8KV) → **student** 0.6B-class (1024 hidden, 28L, FFN 3072, 16Q/8KV, tied
 embeddings). BF16 training, INT8 deployment target.
 
-**Total spend to date: $123.08** of the **$130.02** cap — **$6.94 available for
-Experiment 4, and nothing beyond it is authorized.** The cap rose from $126.02 on
-2026-08-05 when the maintainer added **$4.00** for E4 after the registered
-projection ($4.88 expected / $6.93 at the 420-min backstop) was reported as
-exceeding the $2.94 remainder. The experiment was **not** reduced to fit.
+**Total spend to date: $127.91** of the **$130.02** cap — **$2.11 remains and
+nothing further is authorized.** The cap rose from $126.02 on 2026-08-05 when the
+maintainer added **$4.00** for E4 after the registered projection was reported as
+exceeding the $2.94 remainder; the experiment was **not** reduced to fit, and it
+came in at **$4.83** against the $6.94 available.
 
 | period | $ | detail |
 |---|---:|---|
@@ -23,14 +23,15 @@ exceeding the $2.94 remainder. The experiment was **not** reduced to fit.
 | P0-assistant | 2.75 | §17 — 167 min on an L40S |
 | P2-ceheavy | 2.88 | §18 — 174.6 min on an L40S |
 | Experiment 3, attention restriction | 5.76 | §20 — 349 min on an L40S, four arms |
-| **itemized subtotal** | **122.05** | |
+| Experiment 4, P2 at the 1.60M rung | 4.83 | §21 — 290 min on an L40S + $0.05 failed pod |
+| **itemized subtotal** | **126.88** | |
 
-**Unreconciled: $1.03.** The itemized rows sum to $122.05 while the verified
-running total is **$123.08**. The difference is not
+**Unreconciled: $1.03.** The itemized rows sum to $126.88 while the verified
+running total is **$127.91**. The difference is not
 attributed to any session here, so the **larger** figure is used for every
 remaining-budget decision. Do not "fix" this by deleting the gap.
 
-**$2.94 of the $30 Experiment 2 allocation is unspent.** §6 below is the
+**$2.11 of the authorized total is unspent.** §6 below is the
 *pre-Experiment-1* breakdown and its "project total" line is scoped to that
 period; this table is the current figure.
 
@@ -2818,3 +2819,159 @@ teacher-forced per-role reports, movement reports, merge check, pre-launch
 validation, configs, `run_manifest.json` and `train_log.jsonl`, plus the aborted
 α=16 run's log. **Not uploaded to the relay** — its LFS quota is full and no
 follow-up arm forks from a trained checkpoint.
+
+
+---
+
+## 21. Experiment 4 — P2-CE-heavy scaled from the 0.86M to the 1.60M rung
+
+> **STATUS: COMPLETE 2026-08-06, $4.83.** Registered before training in
+> [`logs/e4_registration.json`](e4_registration.json). **Verdict: scaling fixes
+> autonomous *behaviour* and does nothing for *correctness*. P2 was
+> behaviour-limited at 0.86M, not correctness-limited.**
+
+### 21.1 The question and the arms
+
+Does the P2-CE-heavy recipe improve autonomous generation when scaled to the
+existing nested 1.60M rung? Secondarily: at matched scale, does CE-heavy beat P1?
+
+| arm | rung | objective | status |
+| --- | --- | --- | --- |
+| **P2-0.86M** `p2_ceheavy_{sa,sb}` | 0.86M | ce 1.0 / kd 0.25 | reference, not retrained |
+| **P1-1.60M** `e1_r1600k_{sa,sb}_pca` | 1.60M | ce 0.25 / kd 1.0 | **re-evaluated**, not retrained |
+| **P2-1.60M** `e4_p2_r1600k_{sa,sb}` | 1.60M | ce 1.0 / kd 0.25 | **new** |
+
+P1-1.60M was re-evaluated because its recorded numbers came from the 76-prompt
+behaviour wave with the degeneration stop **active** — a different measurement
+from the 150-example unrestricted harness, and not mixable with it.
+
+**The rung is the only free variable.** Everything it drags with it — 1,174
+blocks, 1,600,353 supervised tokens, 1,761 steps (3 passes), warmup 88 (5%, as
+at every rung), save/eval cadence — is copied from the tracked E1 config for the
+same rung. `tests/training/test_e4_configs.py` asserts the differing key set is
+exactly that closed set, that the 1.60M rung is a **strict superset** of 0.86M on
+real token ids **and** CE masks, and that both rungs validate on the identical
+held-out tail.
+
+### 21.2 Primary — the result
+
+150 fixed examples, mask `d6e24e0b…` **asserted equal on all four arms**, greedy,
+unrestricted generation (P18).
+
+| metric | P2-0.86M | P1-1.60M | **P2-1.60M** | scale Δ |
+| --- | ---: | ---: | ---: | ---: |
+| **usable_rollout_rate** | 0.5333 | 0.7300 | **0.7333** | **+0.2000** |
+| natural_termination | 0.6834 | 0.7600 | 0.7667 | +0.0833 |
+| no_severe_repetition | 0.6800 | 0.7533 | 0.7633 | +0.0833 |
+| no_context_limit | 0.6834 | 0.7600 | 0.7667 | +0.0833 |
+| correct_overall | 0.1900 | 0.1867 | 0.2000 | +0.0100 |
+| correct_and_naturally_terminated | 0.1834 | 0.1867 | 0.2000 | +0.0166 |
+| **correct_given_usable** | **0.3258** | 0.2532 | 0.2695 | **−0.0563** |
+
+Per seed, usable rollout: P2-0.86M 0.5200/0.5467 → P2-1.60M 0.7133/0.7533. **No
+overlap.** Paired per prompt: sa **+41/−12** (net +29), sb **+47/−16** (net +31);
+bootstrap CIs **[+0.100, +0.280]** and **[+0.107, +0.307]**, both excluding zero.
+
+Correctness does not move. +0.0100 mean is inside the 0.0600 floor and is **not**
+seed-consistent: sa +0.0333, sb **−0.0133**. Paired nets are +5 and −2, neither
+CI excluding zero. `correct_and_naturally_terminated` behaves identically —
+sb's paired net is exactly **0**.
+
+**The mechanism is visible in one number.** `correct_given_usable` *falls*
+0.3258 → 0.2695. Scaling bought ~30 additional well-formed rollouts per seed and
+most of them are wrong: the student learned to **stop**, not to **reason**.
+
+### 21.3 Objective at matched scale — a tie
+
+| | usable | correct | correct·term | correct \| usable |
+| --- | ---: | ---: | ---: | ---: |
+| P1-1.60M | 0.7300 | 0.1867 | 0.1867 | 0.2532 |
+| P2-1.60M | 0.7333 | 0.2000 | 0.2000 | 0.2695 |
+| Δ | +0.0033 | +0.0133 | +0.0133 | +0.0163 |
+
+Every delta is inside its floor, none wins on both seeds, and no CI excludes
+zero (usable: sa **−10**, sb **+11**). **At 1.60M the objective barely matters.**
+
+Decisively, **P1 gained from scale too** — 0.5533 at 0.86M → 0.7300 at 1.60M. The
++0.20 belongs to **scale**, not to CE-heavy.
+
+### 21.4 Diagnostics
+
+| | P2-0.86M | P1-1.60M | P2-1.60M |
+| --- | ---: | ---: | ---: |
+| teacher-native held-out CE | 1.5240 | **1.2983** | 1.3126 |
+| FineWeb NLL BF16 | 8.9554 | — | **8.0992** |
+| FineWeb NLL INT8 (`all`) | 8.9794 | — | 8.1467 |
+| INT8 penalty | +0.0240 | — | +0.0475 |
+
+Teacher-native CE improves **−0.2114** with scale, 18× its 0.0117 floor — while
+autonomous correctness does not move at all. That is **R2 firing**, and it is the
+sharpest statement this experiment makes.
+
+FineWeb NLL improves −0.856 but its seeds are 8.5645/7.6339, a spread of
+**0.9306** against P2-0.86M's 0.0143 — 65× wider. **No mean claim is made.** INT8
+weight fake-quant costs 0.024–0.048 nats; neither family is disproportionately
+quantization-fragile. All six models were measured on one device (dev-box CPU,
+21,080 tokens each), $0.
+
+Parameter movement scales as expected, embeddings exactly 0:
+
+| group | P2-0.86M | P2-1.60M-sa | P2-1.60M-sb |
+| --- | ---: | ---: | ---: |
+| ffn | 0.031867 | 0.041368 | 0.041420 |
+| attn_proj | 0.016656 | 0.021816 | 0.021857 |
+| embedding | 0.000000 | **0.000000** | **0.000000** |
+
+### 21.5 Registered rules
+
+| rule | fired | why |
+| --- | --- | --- |
+| R1 P2 was data-limited at 0.86M | **no** | required correct_overall **and** usable to improve with no serious per-seed regression; correctness is inside noise and regresses on `sb` |
+| R2 more teacher-prefix data does not resolve the rollout gap | **YES** | CE −0.2114 (18× floor) while autonomous correctness is flat |
+| R3 do not promote P2 on CE/NLL alone | **moot** | P2-1.60M does not underperform P1-1.60M |
+| R4 adopt P2-1.60M as the anchor | **no** | required beating **both** references; vs P1-1.60M it is a tie inside every floor |
+
+**The honest form of R1 is narrower than the rule anticipated.** P2 was
+**behaviour-limited** at 0.86M — scale buys termination, not reasoning. Writing
+"P2 was data-limited" would claim a correctness gain the data does not show.
+
+### 21.6 What this cannot settle
+
+* **The 150 prompts are shared *training* prompts for every arm.** Both rungs
+  contain all 150, so no arm gains exposure and the comparison is fair — but this
+  measures **recall-style autonomous behaviour, not held-out generalization**.
+* n=2 seeds; every spread is one draw. What carries weight is that usable rollout
+  moves the same way on **both** seeds with non-overlapping ranges.
+* Two rungs is not a scaling curve. A gain at 1.60M says nothing about 2.96M.
+* `usable_rollout` is blind to correctness by construction — which is precisely
+  why the falling `correct_given_usable` matters and is reported beside it.
+* The paired bootstrap resamples **prompts at fixed checkpoints**; it is not a
+  seed-level inference.
+
+### 21.7 Execution and cost
+
+Pod `qzevis6g43en33`, L40S at $0.99/h, 06:58 → 11:49 = **290 min = $4.78**, plus
+**$0.05** for a pod that failed in 3 min on a bad relay path (§21.8) —
+**$4.83 total** against $6.94 authorized and a 415-min backstop that never fired.
+sa 108.3 min at 3.625 s/step; sb similar. Pod self-deleted; **12/12 files
+`sha256sum -c` OK** against a pod-side manifest. Retained:
+`/home/ecs-user/aad-artifacts/e4/`, 11.2 GB, plus a 1.1 MB side bundle.
+
+### 21.8 Three infrastructure defects, all mine, all from one blind spot
+
+`sed 's/e3_/e4_/g'` when deriving the E4 pod scripts:
+
+1. **Rewrote the middle of `stag`*`e3_`*`recovery_corpus_v2`** → `stage4_…`. Pod
+   downloaded nothing, died on the first `iterdir`, self-deleted. **$0.05.**
+2. **Missed `e3.status`** (a dot, not an underscore), so the launcher polled a
+   file the driver never wrote. The run finished at 11:17; the launcher would
+   have idled to its 400-min timeout — **≈$2.65 of billing for nothing**, against
+   a $4.00 authorization. Caught in a routine status check, patched live with a
+   symlink, verified by writing a marker through it.
+3. **The teardown watchdog was armed on the wrong pid** — `pgrep -f` matched the
+   *orchestrating shell's own command line*. It would have deleted a **healthy
+   pod mid-training** when that shell exited. Caught before it fired; the
+   watchdog now verifies the pid's argv is the launcher and refuses otherwise.
+
+All three are now guarded by `tests/pod/test_pod_script_paths.py`, each verified
+by reintroducing the exact defect and confirming the test names it.

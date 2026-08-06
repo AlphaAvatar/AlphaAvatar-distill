@@ -18,7 +18,7 @@ set -euo pipefail
 
 WS=/workspace
 REPO=$WS/aad
-STATUS=$WS/e3.status
+STATUS=$WS/e4.status
 mark() { echo "MARKER:$1"; echo "$(date -u +%FT%TZ) MARKER:$1" >>"$STATUS"; }
 say()  { echo "[$(date -u +%T)] $*"; }
 
