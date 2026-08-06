@@ -61,13 +61,13 @@ from huggingface_hub import hf_hub_download, snapshot_download
 tok = os.environ['HF_TOKEN']; repo = 'AlphaAvatar/aadistill-artifacts'
 root = Path('/workspace/aad/artifacts/stage3')
 d = snapshot_download(repo, repo_type='model', token=tok,
-                      allow_patterns=['stage4_recovery_corpus_v2/ladder_uniform/*'])
-src = Path(d) / 'stage4_recovery_corpus_v2/ladder_uniform'
+                      allow_patterns=['stage3_recovery_corpus_v2/ladder_uniform/*'])
+src = Path(d) / 'stage3_recovery_corpus_v2/ladder_uniform'
 for nm in ('ladder_uniform', 'ladder_uniform_probe'):
     dest = root / nm; dest.mkdir(parents=True, exist_ok=True)
     for f in src.iterdir(): shutil.copy(f, dest / f.name)
 print('pack staged as ladder_uniform and ladder_uniform_probe')
-p = hf_hub_download(repo, 'stage4_recovery_corpus_v2/sessions.jsonl',
+p = hf_hub_download(repo, 'stage3_recovery_corpus_v2/sessions.jsonl',
                     repo_type='model', token=tok)
 (root / 'corpus_v2').mkdir(parents=True, exist_ok=True)
 shutil.copy(p, root / 'corpus_v2/sessions.jsonl')
