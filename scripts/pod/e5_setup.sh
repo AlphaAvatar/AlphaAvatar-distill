@@ -35,6 +35,35 @@ python3 -m pip install -q --no-input --break-system-packages \
     "huggingface_hub[hf_transfer]" 2>&1 | tail -3
 python3 -c "import huggingface_hub as h; print('huggingface_hub', h.__version__)"
 
+# Explicit per-file fetch with retry. `snapshot_download(allow_patterns=...)`
+# enumerates the ENTIRE repo tree before filtering, and on this relay (700+
+# files) that call 504s at the HF gateway -- it killed the 2026-08-06 pilot in
+# setup. Naming the files avoids the tree walk completely, fails loudly if one
+# is missing, and makes the staged set an explicit contract rather than a glob.
+cat > /workspace/fetch.py <<'FETCHEOF'
+import os, shutil, sys, time
+from pathlib import Path
+from huggingface_hub import hf_hub_download
+REPO = "AlphaAvatar/aadistill-artifacts"
+TOKEN = os.environ["HF_TOKEN"]
+
+def fetch(prefix, names, dest, tries=5):
+    dest = Path(dest); dest.mkdir(parents=True, exist_ok=True)
+    for name in names:
+        last = None
+        for attempt in range(tries):
+            try:
+                p = hf_hub_download(REPO, f"{prefix}/{name}", repo_type="model",
+                                    token=TOKEN)
+                shutil.copy(p, dest / name)
+                break
+            except Exception as exc:                      # transient 5xx / CDN
+                last = exc
+                time.sleep(5 * (attempt + 1))
+        else:
+            sys.exit(f"FETCH FAILED {prefix}/{name}: {last}")
+        print(f"  {prefix}/{name}", flush=True)
+FETCHEOF
 say "fetching the repo bundle"
 python3 -c "
 import os, shutil
@@ -54,23 +83,14 @@ mark REPO_READY
 
 say "fetching the uniform ladder pack and the corpus"
 python3 -c "
-import os, shutil
-from pathlib import Path
-from huggingface_hub import hf_hub_download, snapshot_download
-tok = os.environ['HF_TOKEN']; repo = 'AlphaAvatar/aadistill-artifacts'
-root = Path('/workspace/aad/artifacts/stage3')
-d = snapshot_download(repo, repo_type='model', token=tok,
-                      allow_patterns=['stage3_recovery_corpus_v2/ladder_uniform/*'])
-src = Path(d) / 'stage3_recovery_corpus_v2/ladder_uniform'
+import sys; sys.path.insert(0, '/workspace')
+from fetch import fetch
+LAD = 'stage3_recovery_corpus_v2/ladder_uniform'
 for nm in ('ladder_uniform', 'ladder_uniform_probe'):
-    dest = root / nm; dest.mkdir(parents=True, exist_ok=True)
-    for f in src.iterdir(): shutil.copy(f, dest / f.name)
-print('pack staged as ladder_uniform and ladder_uniform_probe')
-p = hf_hub_download(repo, 'stage3_recovery_corpus_v2/sessions.jsonl',
-                    repo_type='model', token=tok)
-(root / 'corpus_v2').mkdir(parents=True, exist_ok=True)
-shutil.copy(p, root / 'corpus_v2/sessions.jsonl')
-print('corpus staged')
+    fetch(LAD, ['blocks.npz', 'ladder.json', 'audit.jsonl'],
+          f'/workspace/aad/artifacts/stage3/{nm}')
+fetch('stage3_recovery_corpus_v2', ['sessions.jsonl'],
+      '/workspace/aad/artifacts/stage3/corpus_v2')
 "
 test -f "$REPO/artifacts/stage3/ladder_uniform/blocks.npz"
 test -f "$REPO/artifacts/stage3/ladder_uniform_probe/blocks.npz"
@@ -115,17 +135,12 @@ mark VLLM_READY
 
 say "staging the Stage 1 init and the teacher"
 python3 -c "
-import os, shutil
-from pathlib import Path
-from huggingface_hub import snapshot_download
-tok = os.environ['HF_TOKEN']; repo = 'AlphaAvatar/aadistill-artifacts'
-d = snapshot_download(repo, repo_type='model', token=tok,
-                      allow_patterns=['stage1/qwen3_0p6b_init_v0/checkpoint/*'])
-src = Path(d) / 'stage1/qwen3_0p6b_init_v0/checkpoint'
-dest = Path('/workspace/aad/artifacts/stage1/qwen3_0p6b_init_v0/checkpoint')
-dest.mkdir(parents=True, exist_ok=True)
-for f in src.iterdir(): shutil.copy(f, dest / f.name)
-print('stage1 init staged')
+import sys; sys.path.insert(0, '/workspace')
+from fetch import fetch
+fetch('stage1/qwen3_0p6b_init_v0/checkpoint',
+      ['config.json', 'generation_config.json', 'model.safetensors',
+       'tokenizer.json', 'tokenizer_config.json', 'chat_template.jinja'],
+      '/workspace/aad/artifacts/stage1/qwen3_0p6b_init_v0/checkpoint')
 "
 python3 -c "
 import os
@@ -151,21 +166,17 @@ mark CKPT_READY
 # retained on 2026-08-05.
 say "staging the P2-0.86M start checkpoints from the relay"
 python3 -c "
-import hashlib, os, shutil, sys
+import hashlib, os, sys
 from pathlib import Path
-from huggingface_hub import snapshot_download
-tok = os.environ['HF_TOKEN']; repo = 'AlphaAvatar/aadistill-artifacts'
+sys.path.insert(0, '/workspace')
+from fetch import fetch
 want = {'sa': '4aface45a12cd02e', 'sb': '9828b1780a5eb4e2'}
-seeds = os.environ.get('E5_SEEDS', 'sa').split(',')
-for seed in seeds:
-    d = snapshot_download(repo, repo_type='model', token=tok,
-                          allow_patterns=[f'e5_start/p2_ceheavy_{seed}/*'])
-    src = Path(d) / f'e5_start/p2_ceheavy_{seed}'
-    dest = Path(f'/workspace/ckpt/p2_ceheavy_{seed}')
-    dest.mkdir(parents=True, exist_ok=True)
-    for f in src.iterdir():
-        shutil.copy(f, dest / f.name)
-    got = hashlib.sha256((dest / 'model.safetensors').read_bytes()).hexdigest()
+for seed in os.environ.get('E5_SEEDS', 'sa').split(','):
+    dest = f'/workspace/ckpt/p2_ceheavy_{seed}'
+    fetch(f'e5_start/p2_ceheavy_{seed}',
+          ['config.json', 'generation_config.json', 'model.safetensors',
+           'tokenizer.json', 'tokenizer_config.json', 'chat_template.jinja'], dest)
+    got = hashlib.sha256(Path(dest, 'model.safetensors').read_bytes()).hexdigest()
     if not got.startswith(want[seed]):
         sys.exit(f'p2_ceheavy_{seed} HASH MISMATCH: {got[:16]}')
     print(f'p2_ceheavy_{seed} staged and hash-verified ({got[:16]})')
