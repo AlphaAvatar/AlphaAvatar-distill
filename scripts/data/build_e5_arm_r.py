@@ -35,6 +35,7 @@ the paired intersection then filters against arm C.
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import sys
 from collections import Counter, defaultdict
@@ -61,6 +62,18 @@ SESSIONS = REPO_ROOT / "artifacts/stage3/corpus_v2/sessions.jsonl"
 INIT = REPO_ROOT / "artifacts/stage1/qwen3_0p6b_init_v0/checkpoint"
 # Official model-card preset, as used to build corpus v2.
 PRESET = {"temperature": 0.6, "top_p": 0.95, "top_k": 20, "min_p": 0.0}
+
+
+def stable_seed(session_id: str, source_seed: str) -> int:
+    """A per-prompt sampling seed that survives a restart.
+
+    `hash()` on a str is randomized per interpreter process (PYTHONHASHSEED), so
+    using it here would give a different student rollout on every run and make
+    the corpus unreproducible from its manifest — a P4 violation that no test
+    would catch, because each run is internally consistent.
+    """
+    digest = hashlib.sha256(f"{session_id}|{source_seed}".encode()).digest()
+    return int.from_bytes(digest[:4], "big") % (2 ** 31)
 
 
 def stratified_prompts(sessions: list[dict], limit: int | None, seed: int) -> list[dict]:
@@ -123,10 +136,17 @@ def main() -> None:
     sessions = stratified_prompts(sessions, args.limit, seed=20260806)
     print(f"prompts: {len(sessions)} (of {len(incremental)} incremental)", flush=True)
 
-    held_out = set()          # the battery is drawn from the 0.86M rung; assert it
-    for line in (REPO_ROOT / "artifacts/audit/three_mode/P2-ceheavy-sa"
-                 / "free.generations.jsonl").open():
-        held_out.add(json.loads(line)["id"])
+    # The evaluation battery, read from a COMMITTED pin rather than from
+    # artifacts/audit/ -- that tree is gitignored, so the original read worked on
+    # the dev box and FileNotFound-ed on the pod after 53 minutes of setup. The
+    # pin carries the registered mask hash and is verified here, so a silently
+    # different exclusion set cannot slip through.
+    pin = json.loads((REPO_ROOT / "logs/e5_heldout_eval_ids.json").read_text())
+    held_out = set(pin["ids"])
+    got = hashlib.sha256(json.dumps(sorted(held_out)).encode()).hexdigest()
+    if got != pin["mask_sha256"] or not got.startswith("d6e24e0b09da1bcc"):
+        raise SystemExit(f"held-out pin does not match the registered mask: {got[:16]}")
+    print(f"held-out battery: {len(held_out)} prompts, mask {got[:16]}", flush=True)
     leak = {s["id"] for s in sessions} & held_out
     if leak:
         raise SystemExit(f"evaluation prompts leaked into the R source: {sorted(leak)[:5]}")
@@ -144,7 +164,7 @@ def main() -> None:
         meta.append(s)
     outs = llm.generate(
         [{"prompt_token_ids": p} for p in prompts],
-        [SamplingParams(**PRESET, seed=abs(hash((s["id"], args.source_seed))) % (2**31),
+        [SamplingParams(**PRESET, seed=stable_seed(s["id"], args.source_seed),
                         max_tokens=max(1, args.context - len(p)),
                         stop_token_ids=list(stop_ids), detokenize=False)
          for p, s in zip(prompts, meta)])
