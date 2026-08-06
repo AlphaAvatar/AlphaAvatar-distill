@@ -335,6 +335,36 @@
    "the_pilot_does_not_prove": "that the complete corpus satisfies the joint token/block constraints",
    "final_joint_feasibility": "checked only after the COMPLETE R corpus is generated and paired with C",
    "on_conflict": "if the full corpus cannot simultaneously satisfy the CE-token target, atomic bundles, the 492-block budget and the C/R tolerance, STOP before training and report the measured conflict"
+  },
+  "gradient_attribution": {
+   "correction_accepted": "scalar loss share is NOT gradient share. CE and KL have different numerical scales, so a term with a tiny value can still steer the update.",
+   "required_on_real_C_and_R_pilot_batches": [
+    "weighted CE loss",
+    "weighted total KD loss",
+    "prefix-only weighted KD loss",
+    "continuation-only weighted KD loss",
+    "weighted CE gradient norm",
+    "weighted total KD gradient norm",
+    "prefix-only KD gradient norm",
+    "continuation-only KD gradient norm",
+    "CE/KD gradient cosine similarity",
+    "the same statistics by FFN / attention-projection / norm parameter group"
+   ],
+   "method": {
+    "each_term_backwarded_separately": true,
+    "gradients_flattened_and_compared_directly": true,
+    "kd_pieces_share_the_production_denominator": true,
+    "why_shared_denominator": "re-normalizing prefix-only KD over its own token count measures a different objective; sharing kd_total makes the pieces sum to the term the trainer optimizes",
+    "objective_unchanged": true,
+    "optimizer_step_taken": false,
+    "uses_production_trainer_and_model": true
+   },
+   "degenerate_teacher_refused": "a teacher that is a copy of the student gives KL == 0 identically, which would render every KD number 0.0 and read as a finding. The tool refuses unless --allow-degenerate-teacher is passed explicitly.",
+   "interpretation_rule": {
+    "if_loss_AND_gradient_both_negligible": "describe R as primarily 'teacher recovery continuation CE conditioned on student-generated context, with a very small on-policy KD component'",
+    "if_scalar_small_but_gradient_material": "do NOT call it a rounding error; report the gradient contribution as the operative quantity"
+   },
+   "implementation": "scripts/training/diagnose_e5_gradients.py"
   }
  }
 }
