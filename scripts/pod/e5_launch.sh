@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
-# Dev-box orchestrator for the Experiment 3 pod (attention-update restriction).
+# Dev-box orchestrator for the E5 PILOT pod (first-contact validation of the
+# real vLLM and two-engine paths). Deliberately given a much smaller backstop
+# than the full E5 run: this is a validity gate, not the experiment.
 # Runs under nohup so a paid pod never depends on a conversation staying open.
 #
 #   SCR=… SESSION_COMMIT=… BUNDLE_NAME=… bash scripts/pod/e4_launch.sh
@@ -24,17 +26,18 @@ GPU_NAME=${GPU_NAME:-NVIDIA L40S}
 MAX_PRICE=${MAX_PRICE:-0.99}
 # Integer minutes: `date -d "+7.5 hours"` is rejected by GNU date and silently
 # produces an EMPTY --terminate-after, i.e. a pod with no backstop at all.
-# 420 min x $0.99 = $6.93 worst case, against ~$4.88 expected.
-BACKSTOP_MINUTES=${BACKSTOP_MINUTES:-420}
+# PILOT backstop: 90 min x $0.99 = $1.49 worst case, against ~40 min expected.
+# The full E5 run keeps its own $7.92 / 480 min ceiling; this must not consume it.
+BACKSTOP_MINUTES=${BACKSTOP_MINUTES:-90}
 STARTUP_LIMIT_MIN=${STARTUP_LIMIT_MIN:-15}
 MAX_POD_ATTEMPTS=${MAX_POD_ATTEMPTS:-2}
-POLL_LIMIT_MIN=${POLL_LIMIT_MIN:-400}
-CKPT_TRANSFER_LIMIT_MIN=${CKPT_TRANSFER_LIMIT_MIN:-45}
+POLL_LIMIT_MIN=${POLL_LIMIT_MIN:-85}
+CKPT_TRANSFER_LIMIT_MIN=${CKPT_TRANSFER_LIMIT_MIN:-10}
 TEACHER_REVISION=${TEACHER_REVISION:-768f209d9ea81521153ed38c47d515654e938aea}
-STORE=${STORE:-/home/ecs-user/aad-artifacts/e4}
-LOG=$SCR/e4_launch.log
+STORE=${STORE:-/home/ecs-user/aad-artifacts/e5_pilot}
+LOG=$SCR/e5_pilot_launch.log
 KEY=$(cat "$SCR/rp_key")
-STATE=$SCR/e4.state
+STATE=$SCR/e5_pilot.state
 
 say() { echo "[$(date -u +%FT%TZ)] $*" | tee -a "$LOG"; }
 cost() {
@@ -86,7 +89,7 @@ create_pod() {
     --container-disk-in-gb 150 --volume-in-gb 0 \
     --min-cuda-version 13.0 \
     --ports "22/tcp" \
-    --name "aadistill-e4-a$1" \
+    --name "aadistill-e5pilot-a$1" \
     --terminate-after "$deadline" >"$SCR/create_raw_$1.txt" 2>&1
   python3 - "$SCR/create_raw_$1.txt" <<'PYEOF'
 import json, re, sys
@@ -178,7 +181,7 @@ $SCP "$TOKEN_SRC" "root@$HOST:/workspace/hf/token" >>"$LOG" 2>&1
 $SSH "root@$HOST" 'test -s /workspace/hf/token' \
   || { say "FATAL: token arrived empty on the pod"; teardown
        echo "LAUNCH_FAILED:empty_token" > "$STATE"; exit 1; }
-$SCP scripts/pod/e4_setup.sh "root@$HOST:/workspace/" >>"$LOG" 2>&1
+$SCP scripts/pod/e5_setup.sh "root@$HOST:/workspace/" >>"$LOG" 2>&1
 $SSH "root@$HOST" 'mkdir -p /workspace/aad_holdout'
 $SCP data/warmup/holdout_v1.jsonl "root@$HOST:/workspace/aad_holdout/" >>"$LOG" 2>&1
 
@@ -186,22 +189,22 @@ say "running setup"
 $SSH "root@$HOST" "cd /workspace && SESSION_COMMIT=$SESSION_COMMIT \
   BUNDLE_NAME=$BUNDLE_NAME TEACHER_REVISION=$TEACHER_REVISION \
   HOLDOUT_SRC=/workspace/aad_holdout/holdout_v1.jsonl \
-  bash /workspace/e4_setup.sh" \
-  >>"$SCR/e4_setup.log" 2>&1
+  E5_SEEDS=sa bash /workspace/e5_setup.sh" \
+  >>"$SCR/e5_pilot_setup.log" 2>&1
 if [ $? -ne 0 ]; then
-  say "FATAL: setup failed. $(cost)"; tail -25 "$SCR/e4_setup.log" | tee -a "$LOG"
+  say "FATAL: setup failed. $(cost)"; tail -25 "$SCR/e5_pilot_setup.log" | tee -a "$LOG"
   teardown; echo "LAUNCH_FAILED:setup" > "$STATE"; exit 1
 fi
 say "setup done — $(cost)"
 
-say "starting the E4 driver: train 2 x 1.60M -> movement -> evaluate 4 checkpoints"
+say "starting the E5 PILOT: rollout -> recovery -> gates -> pairing -> optimizer step"
 # `nohup ... &` alone does NOT detach here: the remote wrapper shell stays alive
 # holding the SSH channel open, so this call blocks until the driver exits and
 # the launcher never reaches its polling loop. Measured on 2026-08-05 -- the run
 # completed, but with no progress logging for five hours. `setsid` plus a
 # closed stdin puts the driver in its own session so the channel closes at once.
 $SSH "root@$HOST" "cd /workspace/aad && setsid nohup /opt/train/bin/python \
-  scripts/pod/e4_driver.py --stage all > /workspace/e4_run.log 2>&1 < /dev/null & \
+  scripts/pod/e5_pilot.py --limit 24 --seed sa > /workspace/e5_run.log 2>&1 < /dev/null & \
   disown" >>"$LOG" 2>&1
 say "driver running — $(cost)"
 
@@ -209,52 +212,34 @@ say "driver running — $(cost)"
 DEADLINE_TS=$(( $(date -u +%s) + POLL_LIMIT_MIN * 60 )); LAST=""
 while [ "$(date -u +%s)" -lt "$DEADLINE_TS" ]; do
   sleep 120
-  STATUS_TXT=$($SSH "root@$HOST" 'cat /workspace/e4.status 2>/dev/null | tail -1' 2>/dev/null)
+  STATUS_TXT=$($SSH "root@$HOST" 'cat /workspace/e5.status 2>/dev/null | tail -1' 2>/dev/null)
   if [ -n "$STATUS_TXT" ] && [ "$STATUS_TXT" != "$LAST" ]; then
     LAST="$STATUS_TXT"; say "  $STATUS_TXT — $(cost)"
   fi
   case "$STATUS_TXT" in
     *ALL_DONE*) say "driver reported ALL_DONE — $(cost)"; break ;;
-    *ABORTED_AFTER_TRAIN_FAILURE*) say "driver aborted after a training failure — $(cost)"; break ;;
+    *PILOT_FAILED*) say "PILOT FAILED — tearing down — $(cost)"; break ;;
   esac
 done
 
 # --- 4. fetch results, then weights, then delete ---------------------------
 mkdir -p "$STORE"
 say "bundling small artifacts on the pod"
-$SSH "root@$HOST" 'cd /workspace/aad && tar czf /workspace/e4_side.tar.gz \
-  artifacts/audit configs/stage3/e4 \
-  $(ls -d artifacts/stage3/e4_*/train_log.jsonl artifacts/stage3/e4_*/run_manifest.json 2>/dev/null) \
-  2>/dev/null; cp /workspace/e4_run.log /workspace/e4.status /workspace/ 2>/dev/null; \
-  sha256sum /workspace/e4_side.tar.gz' >>"$LOG" 2>&1
-$SCP "root@$HOST:/workspace/e4_side.tar.gz" "$STORE/" >>"$LOG" 2>&1
-$SCP "root@$HOST:/workspace/e4_run.log" "$STORE/" >>"$LOG" 2>&1
-$SCP "root@$HOST:/workspace/e4.status" "$STORE/" >>"$LOG" 2>&1
+$SSH "root@$HOST" 'cd /workspace/aad && tar czf /workspace/e5_side.tar.gz \
+  artifacts/audit artifacts/stage3/e5_pilot_sa configs/stage3/e5 \
+  $(ls -d artifacts/stage3/e5_*/manifest.json 2>/dev/null) \
+  2>/dev/null; cp /workspace/e5_run.log /workspace/e5.status /workspace/ 2>/dev/null; \
+  sha256sum /workspace/e5_side.tar.gz' >>"$LOG" 2>&1
+$SCP "root@$HOST:/workspace/e5_side.tar.gz" "$STORE/" >>"$LOG" 2>&1
+$SCP "root@$HOST:/workspace/e5_run.log" "$STORE/" >>"$LOG" 2>&1
+$SCP "root@$HOST:/workspace/e5.status" "$STORE/" >>"$LOG" 2>&1
 if [ -s "$STORE/e4_side.tar.gz" ]; then
   say "results bundle retrieved ($(du -h "$STORE/e4_side.tar.gz" | cut -f1)) — $(cost)"
 else
   say "WARNING: results bundle is empty or missing"
 fi
 
-say "hashing checkpoints on the pod"
-$SSH "root@$HOST" 'cd /workspace/aad/artifacts/stage3 && \
-  find e4_*/checkpoints/step_001761 -type f \( -name "*.safetensors" -o -name "*.json" \
-    -o -name "*.jinja" \) | sort | xargs sha256sum' > "$SCR/e4_pod_hashes.txt" 2>>"$LOG"
-cp "$SCR/e4_pod_hashes.txt" "$STORE/" 2>/dev/null
-
-say "fetching checkpoints (time-boxed to ${CKPT_TRANSFER_LIMIT_MIN} min)"
-for arm in e4_p2_r1600k_sa e4_p2_r1600k_sb; do
-  ELAPSED=$(( ($(date -u +%s) - $(cat "$SCR/pod_start_epoch")) / 60 ))
-  if [ "$ELAPSED" -gt "$POLL_LIMIT_MIN" ]; then
-    say "WARNING: past the poll limit; skipping $arm weights to stop billing"
-    break
-  fi
-  timeout "${CKPT_TRANSFER_LIMIT_MIN}m" $SCP -r \
-    "root@$HOST:/workspace/aad/artifacts/stage3/$arm/checkpoints/step_001761" \
-    "$STORE/$arm" >>"$LOG" 2>&1 \
-    || say "WARNING: $arm weights not retrieved (results bundle is unaffected)"
-done
-
+# The pilot trains nothing, so there are no checkpoints to fetch.
 teardown
 echo "DONE" > "$STATE"
 say "session complete. artifacts under $STORE"

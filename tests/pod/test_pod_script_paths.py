@@ -28,6 +28,7 @@ RELAY_PREFIXES = {
     "stage3_recovery_corpus_v2/ladder_uniform",
     "stage3_recovery_corpus_v2/sessions.jsonl",
     "e1_scaling_20260801",
+    "e5_start",
     "transfer",
 }
 # Local trees inside the checked-out repo on the pod.
@@ -41,7 +42,8 @@ LOCAL_PREFIXES = {
     "tests",
     "src",
 }
-SCRIPTS = sorted(POD.glob("e[0-9]_setup.sh")) + sorted(POD.glob("e[0-9]_driver.py"))
+SCRIPTS = (sorted(POD.glob("e[0-9]_setup.sh")) + sorted(POD.glob("e[0-9]_driver.py"))
+           + sorted(POD.glob("e[0-9]_pilot.py")))
 
 # `stageN` names that are real. Anything else is almost certainly sed damage:
 # the project has stages 0-6 but only these directory families exist.
@@ -53,7 +55,10 @@ VALID_STAGE_TOKENS = {"stage0", "stage1", "stage2", "stage3", "stage2_v1",
 def test_no_invented_stage_directories(script):
     """`stage4_…`/`stage5_…` do not exist; finding one means a rename went wide."""
     text = script.read_text()
-    for token in set(re.findall(r"stage\d+[a-z0-9_]*", text)):
+    # Only PATH-like uses: a stage token followed by a slash. Without the
+    # lookahead this fires on identifiers such as `stage1_init_sha256`, which is
+    # a JSON key and not a directory.
+    for token in set(re.findall(r"stage\d+[a-z0-9_]*(?=/)", text)):
         assert token in VALID_STAGE_TOKENS, (
             f"{script.name} references {token!r}, which is not a real stage "
             "directory — most likely collateral from a global rename")
@@ -66,8 +71,10 @@ def test_relay_paths_are_known(script):
     quoted = re.findall(r"""['"]([A-Za-z0-9_][A-Za-z0-9_/*.:-]{6,})['"]""", text)
     for value in quoted:
         # Only look at things that look like relay object paths.
-        if not re.match(r"^(stage[0-9]|e1_scaling|transfer)", value):
+        if not re.match(r"^(stage[0-9]|e1_scaling|e5_start|transfer)", value):
             continue
+        if "/" not in value:
+            continue                      # an identifier, not a relay object path
         stem = value.rstrip("*").rstrip("/")
         assert any(stem == p or stem.startswith(p + "/") or p.startswith(stem)
                    for p in RELAY_PREFIXES), \
@@ -109,8 +116,9 @@ def test_setup_driver_and_launcher_agree_on_the_status_file(prefix):
         f = POD / pattern
         if not f.is_file():
             continue
-        found = set(re.findall(r"/?workspace/(e\d+\.status)", f.read_text()))
-        found |= set(re.findall(r"STATUS=\$WS/(e\d+\.status)", f.read_text()))
+        text = f.read_text()
+        found = set(re.findall(r"/?workspace/(e\d+\.status)", text))
+        found |= set(re.findall(r"STATUS=\$WS/(e\d+\.status)", text))
         if found:
             paths[name] = found
     if len(paths) < 2:
@@ -142,3 +150,24 @@ def test_the_stage1_fork_point_hash_is_identical_everywhere():
                 f"{script.name}: truncated/altered init hash {match.group()}")
             verifying += 1
     assert verifying >= 1, "no pod script verifies the Stage 1 fork point"
+
+
+@pytest.mark.parametrize("script", sorted(POD.glob("e[0-9]_launch.sh")),
+                         ids=lambda p: p.name)
+def test_launcher_scratch_paths_match_its_own_experiment(script):
+    """`e3.state` in the E4 launcher survived a rename because of the dot.
+
+    Same blind spot as `stage3_recovery_corpus_v2` and `e3.status`: a global
+    `s/e3_/e4_/` matches neither. The state file is what the teardown watchdog
+    reads, so a stale one makes the watchdog report an empty state forever.
+    """
+    prefix = script.name[:2]
+    text = script.read_text()
+    for token in set(re.findall(r"\$SCR/(e\d+)[._]", text)):
+        assert token == prefix, (
+            f"{script.name} references scratch path {token!r} but belongs to "
+            f"{prefix!r} — collateral from a global rename")
+    for token in set(re.findall(r"configs/stage3/(e\d+)\b", text)):
+        assert token == prefix, (
+            f"{script.name} bundles {token!r} configs but belongs to {prefix!r} "
+            "— the returned side bundle would carry the wrong experiment")
