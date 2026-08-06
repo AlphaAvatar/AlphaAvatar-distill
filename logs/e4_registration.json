@@ -1,5 +1,5 @@
 {
- "created_utc": "2026-08-06T06:34:36.585223+00:00",
+ "created_utc": "2026-08-06T06:50:52.858701+00:00",
  "experiment": "E4 \u2014 does the P2-CE-heavy recipe improve autonomous generation when scaled from 0.86M to the nested 1.60M supervised-token rung?",
  "status": "REGISTERED BEFORE TRAINING",
  "hypothesis": "P2-CE-heavy may be data-limited at 0.86M: 1.86x the unique supervised tokens, same objective and same optimizer semantics, should improve autonomous rollout and correctness. The null \u2014 that more teacher-prefix data moves teacher-forced CE but not autonomous behaviour \u2014 is an equally reportable outcome and is what E1's behaviour wave weakly suggests. This experiment establishes the larger-scale P2 anchor BEFORE any student-prefix recovery work; it is not itself a recovery experiment.",
@@ -185,6 +185,21 @@
    "teacher_native_holdout_ce": 0.0117
   }
  },
+ "authorization": {
+  "granted_utc": "2026-08-05",
+  "prior_remainder_usd": 2.94,
+  "additional_authorized_usd": 4.0,
+  "available_for_this_run_usd": 6.94,
+  "approved_hard_backstop_usd": 6.93,
+  "approved_backstop_minutes": 420,
+  "constraints": [
+   "do not exceed the additional $4.00",
+   "do not reduce the experiment",
+   "do not add another arm",
+   "do not start any student-prefix / recovery experiment",
+   "keep the battery pinned to the registered 0.86M mask"
+  ]
+ },
  "budget": {
   "measured_s_per_step": {
    "P2-ceheavy 0.86M (full attention, ce1.0/kd0.25)": 3.61,
@@ -234,22 +249,10 @@
   "usable_rollout is blind to correctness by construction and its five components are not independent."
  ],
  "code_state": {
-  "git_commit": "d2a48387ccdb0517af005414d52d0cb2d0ad6385",
+  "git_commit": "66db2a1e9fd97f0f0244ae9e1b21ec40e44857a2",
   "git_commit_source": "git",
   "dirty": true,
-  "uncommitted_state_sha256": "2ada26b8bff94fcfeb5ea291f8081c143768b5065ea69608e58d757ec2858edf",
-  "untracked_files": [
-   "configs/stage3/e4/e4_p2_r1600k_sa.json",
-   "configs/stage3/e4/e4_p2_r1600k_sb.json",
-   "logs/e4_registration.json",
-   "scripts/pod/e4_driver.py",
-   "scripts/pod/e4_launch.sh",
-   "scripts/pod/e4_setup.sh",
-   "scripts/training/preflight_e4.py",
-   "scripts/training/register_e4.py",
-   "src/aadistill/evaluation/paired_stats.py",
-   "tests/evaluation/test_paired_stats.py",
-   "tests/training/test_e4_configs.py"
-  ]
+  "uncommitted_state_sha256": "b9d4325f0cc2cd79fcb2964d52c1f98c012565515d6aab890a901820735d8daf",
+  "untracked_files": []
  }
 }

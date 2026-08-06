@@ -210,6 +210,21 @@ def main() -> None:
         "reference_weights": {k: {"where": v[0], "path": v[1], "sha256_prefix": v[2]}
                               for k, v in REFERENCE_WEIGHTS.items()},
         "noise_floors": NOISE_FLOORS,
+        "authorization": {
+            "granted_utc": "2026-08-05",
+            "prior_remainder_usd": 2.94,
+            "additional_authorized_usd": 4.00,
+            "available_for_this_run_usd": 6.94,
+            "approved_hard_backstop_usd": 6.93,
+            "approved_backstop_minutes": 420,
+            "constraints": [
+                "do not exceed the additional $4.00",
+                "do not reduce the experiment",
+                "do not add another arm",
+                "do not start any student-prefix / recovery experiment",
+                "keep the battery pinned to the registered 0.86M mask",
+            ],
+        },
         "budget": {**cost, "detail": {
             "gpu": "1x NVIDIA L40S secure",
             "authorized_rate_usd_per_hour": 0.99,

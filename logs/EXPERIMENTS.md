@@ -7,8 +7,11 @@ proposal files, which are preserved in git history at commit `866dac2`.
 32Q/8KV) → **student** 0.6B-class (1024 hidden, 28L, FFN 3072, 16Q/8KV, tied
 embeddings). BF16 training, INT8 deployment target.
 
-**Total spend to date: $123.08** of the **$126.02** cap — **$2.94 remains, and
-nothing further is authorized.**
+**Total spend to date: $123.08** of the **$130.02** cap — **$6.94 available for
+Experiment 4, and nothing beyond it is authorized.** The cap rose from $126.02 on
+2026-08-05 when the maintainer added **$4.00** for E4 after the registered
+projection ($4.88 expected / $6.93 at the 420-min backstop) was reported as
+exceeding the $2.94 remainder. The experiment was **not** reduced to fit.
 
 | period | $ | detail |
 |---|---:|---|

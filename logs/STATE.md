@@ -1,6 +1,23 @@
-**Updated:** 2026-08-05 20:10 UTC · branch `main` · **no pods running, nothing
-billing.** Verified spend **$123.08** of the **$126.02** cap. **$2.94 remains and
-nothing further is authorized.**
+**Updated:** 2026-08-05 21:00 UTC · branch `main` · **Experiment 4 launching.**
+Verified spend **$123.08** of the **$130.02** cap (+$4.00 authorized for E4 on
+2026-08-05). **$6.94 available for this run, $6.93 hard backstop, nothing beyond
+it authorized.**
+
+**E4 asks whether P2-CE-heavy was data-limited at 0.86M**: same objective, same
+optimizer semantics, same parameter policy, scaled to the nested 1.60M rung
+(1,174 blocks, 1,600,353 supervised tokens, 1,761 steps). Registered before
+training in [`e4_registration.json`](e4_registration.json). Two new arms
+`e4_p2_r1600k_{sa,sb}`; P2-0.86M reused as-is; **P1-1.60M re-evaluated, not
+retrained**, because its recorded numbers came from the older 76-prompt
+behaviour wave with the degeneration stop active.
+
+**The battery is pinned to the registered 0.86M mask `d6e24e0b…` for every arm.**
+The harness samples from whatever rung it is given and the 1.60M rung holds 2,649
+sessions against 1,502, so an unpinned run would silently resample and end the
+like-for-like comparison. **These 150 prompts are shared *training* prompts for
+every arm compared** — both rungs contain all 150, so no arm gains exposure, but
+the rollout result measures recall-style autonomous behaviour, **not held-out
+generalization.**
 
 ## EXPERIMENT 3 IS COMPLETE — RESTRICTING ATTENTION UPDATES MAKES IT WORSE
 
