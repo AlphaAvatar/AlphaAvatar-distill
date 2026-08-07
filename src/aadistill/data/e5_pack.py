@@ -136,15 +136,23 @@ def pack_e5(examples: list[dict], system_ids_by_key: dict[str, list[int]], *,
 
 def write_pack(blocks: list[PackedBlock], out_dir: Path, *, arm: str, seed: str,
                block_len: int, pad_id: int, target_ce_tokens: int,
+               val_blocks: list[PackedBlock] | None = None,
                extra: dict | None = None) -> dict:
     """Emit `blocks.npz`, `ladder.json` and `audit.jsonl` in the loader's contract.
 
-    `ladder.json` declares a single rung covering every block, because an E5 pack
-    is one fixed budget rather than a nested ladder. The loader only needs the
-    rung it is asked for, so a one-rung ladder is a complete artifact and not a
-    stub.
+    `ladder.json` declares ONE rung, covering the training blocks only. An E5
+    pack is a fixed budget rather than a nested ladder, but the loader takes its
+    validation set from the blocks *past* the largest rung -- so a rung covering
+    every block leaves an empty tail and `ladder_blocks` refuses to load it. That
+    is what killed attempt 7 after every gate had passed.
+
+    `val_blocks` are appended after the training blocks and sit outside the rung.
+    They come from bundles that were never selected for training, so validation
+    is genuinely held out and the training token budget is untouched.
     """
     out_dir.mkdir(parents=True, exist_ok=True)
+    n_train = len(blocks)
+    blocks = list(blocks) + list(val_blocks or [])
     n = len(blocks)
     ids = np.zeros((n, block_len), dtype=np.int32)
     ce = np.zeros((n, block_len), dtype=bool)
@@ -165,12 +173,15 @@ def write_pack(blocks: list[PackedBlock], out_dir: Path, *, arm: str, seed: str,
                 m["bundle_id"] = m["session_id"].rsplit("#", 1)[0]
             f.write(json.dumps(row) + "\n")
 
-    supervised = int(sum(b.n_supervised for b in blocks))
-    real = int(content.sum())
+    # Every corpus statistic describes the TRAINING blocks. The validation tail
+    # is held out, so folding it in would overstate the budget the arm trained on.
+    train_blocks = blocks[:n_train]
+    supervised = int(sum(b.n_supervised for b in train_blocks))
+    real = int(content[:n_train].sum())
     types: Counter = Counter()
     sessions_seen, bundles_seen = set(), set()
     truncations = 0
-    for b in blocks:
+    for b in train_blocks:
         for m in b.audit.get("sessions", []):
             types[m["data_type"]] += int(m["supervised_retained"])
             sessions_seen.add(m["session_id"])
@@ -181,26 +192,29 @@ def write_pack(blocks: list[PackedBlock], out_dir: Path, *, arm: str, seed: str,
         "packing": "e5_prefix_continuation",
         "arm": arm, "seed": seed,
         "block_len": block_len, "pad_id": pad_id,
-        "n_blocks": n, "n_sessions": len(sessions_seen),
+        "n_blocks": n_train, "n_val_blocks": n - n_train,
+        "n_blocks_total": n, "n_sessions": len(sessions_seen),
         "n_bundles": len(bundles_seen),
         "terminal_truncations": truncations,
         "allow_terminal_truncation": False,
         "corpus_supervised_tokens": supervised,
         "corpus_type_mix": {k: round(v / max(1, supervised), 4)
                             for k, v in sorted(types.items())},
-        "packing_efficiency": round(real / (n * block_len), 4) if n else 0.0,
+        "packing_efficiency": round(real / (n_train * block_len), 4) if n_train else 0.0,
         "real_tokens": real,
-        "padding_tokens": n * block_len - real,
+        "padding_tokens": n_train * block_len - real,
+        "validation_source": ("blocks past the rung, packed from bundles never "
+                              "selected for training"),
         "ordering": "paired stratified token-target selection",
         "block_ordering": "sequential within system-prompt group",
         "rungs": [{
             "target_supervised_tokens": target_ce_tokens,
             "reachable": True,
-            "n_blocks": n,
+            "n_blocks": n_train,
             "actual_supervised_tokens": supervised,
             "n_sessions": len(sessions_seen),
             "real_tokens": real,
-            "padding_tokens": n * block_len - real,
+            "padding_tokens": n_train * block_len - real,
             "terminal_truncations": truncations,
             "token_mix": {k: round(v / max(1, supervised), 4)
                           for k, v in sorted(types.items())},
@@ -214,13 +228,24 @@ def write_pack(blocks: list[PackedBlock], out_dir: Path, *, arm: str, seed: str,
 
 def verify_pack(out_dir: Path, examples: list[dict], *, expected_blocks: int,
                 target_ce_tokens: int, tolerance: float,
-                steps: int, blocks_per_step: int) -> dict:
-    """Prove the registered conditions against the ARTIFACTS, not estimates."""
+                steps: int, blocks_per_step: int, expected_val_blocks: int = 0) -> dict:
+    """Prove the registered conditions against the ARTIFACTS, not estimates.
+
+    Everything about the budget is checked over the TRAINING blocks -- the rung
+    -- because the validation tail is held out and counting it would overstate
+    what the arm trained on. The tail gets its own checks: that it exists, and
+    that it shares no bundle with training, which is what makes it held out
+    rather than merely later in the file.
+    """
     arrays = np.load(out_dir / "blocks.npz")
     ids, ce, content = arrays["input_ids"], arrays["ce_mask"], arrays["content_mask"]
-    audit = [json.loads(l) for l in (out_dir / "audit.jsonl").open() if l.strip()]
+    full_audit = [json.loads(l) for l in (out_dir / "audit.jsonl").open() if l.strip()]
     ladder = json.loads((out_dir / "ladder.json").read_text())
-    n = int(ids.shape[0])
+    n_total = int(ids.shape[0])
+    n = int(ladder["n_blocks"])
+    val_audit = full_audit[n:]
+    audit = full_audit[:n]
+    ids, ce, content = ids[:n], ce[:n], content[:n]
 
     per_example = {str(e["id"]): int(sum(bool(m) for m in e["mask"])) for e in examples}
     packed_supervised: Counter = Counter()
@@ -230,10 +255,17 @@ def verify_pack(out_dir: Path, examples: list[dict], *, expected_blocks: int,
             packed_supervised[m["session_id"]] += int(m["supervised_retained"])
             bundles[m["session_id"].rsplit("#", 1)[0]].add(m["session_id"])
 
+    train_bundles = set(bundles)
+    val_bundles = {m["session_id"].rsplit("#", 1)[0]
+                   for r in val_audit for m in r["sessions"]}
     ce_tokens = int(ce.sum())
     checks = {
         "blocks_exact": n == expected_blocks,
         "n_blocks": n,
+        "n_val_blocks": len(val_audit),
+        "n_blocks_total": n_total,
+        "validation_tail_present": len(val_audit) == expected_val_blocks,
+        "validation_is_held_out": not (train_bundles & val_bundles),
         "every_block_has_real_tokens": bool((content.sum(axis=1) > 0).all()),
         "every_block_has_supervision": bool((ce.sum(axis=1) > 0).all()),
         "no_terminal_truncation": ladder["terminal_truncations"] == 0
@@ -257,7 +289,8 @@ def verify_pack(out_dir: Path, examples: list[dict], *, expected_blocks: int,
         checks["ce_target_relative_error"] <= tolerance)
     checks["packed_examples"] = len(packed_supervised)
     checks["all_examples_packed"] = len(packed_supervised) == len(examples)
-    failures = [k for k in ("blocks_exact", "every_block_has_real_tokens",
+    failures = [k for k in ("blocks_exact", "validation_tail_present",
+                            "validation_is_held_out", "every_block_has_real_tokens",
                             "every_block_has_supervision", "no_terminal_truncation",
                             "no_duplicate_examples", "all_bundles_complete",
                             "supervision_preserved", "ce_target_within_tolerance",

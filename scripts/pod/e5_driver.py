@@ -48,6 +48,8 @@ INIT = REPO / "artifacts/stage1/qwen3_0p6b_init_v0/checkpoint"
 SEEDS = ("sa", "sb")
 STEP = None        # resolved from the measured step count at train time
 EXPECTED_MASK = "d6e24e0b09da1bcc692b1dc96d8236808d29551a9fc94a47d1d968fd3f73d6ba"
+N_VAL = 16          # must equal intervals.eval_blocks in the arm configs
+MEASURED_SEC_PER_STEP = 1.2955   # attempt 7, final C pack, truncated path
 TARGET_CE_TOKENS = 735_603
 TOLERANCE = 0.05
 BLOCKS, STEPS = 492, 738
@@ -328,9 +330,20 @@ def stage_pair(args):
             len([e for e in c_sel if e["source_session_id"] == sid]) == 2
             for sid in {e["source_session_id"] for e in c_sel})
         conditions.append((f"{seed} atomic two-truncation bundles", bundles_ok, ""))
-        for arm, rows in (("C", c_sel), ("R", r_sel)):
+        from aadistill.data.paired_corpus import bundle_key
+        for arm, rows, pool in (("C", c_sel, ck), ("R", r_sel, rk)):
             path = REPO / f"artifacts/stage3/e5_final_{arm}_{seed}.jsonl"
             path.write_text("".join(json.dumps(e) + "\n" for e in rows))
+            # Bundles never selected for training become the validation tail.
+            # The trainer takes its validation set from blocks past the rung, so
+            # a pack whose rung covers everything cannot be loaded at all --
+            # attempt 7 died there with every gate already passed.
+            chosen = {bundle_key(e) for e in rows}
+            held = [e for e in pool if bundle_key(e) not in chosen]
+            vpath = REPO / f"artifacts/stage3/e5_val_{arm}_{seed}.jsonl"
+            vpath.write_text("".join(json.dumps(e) + "\n" for e in held))
+            print(f"  {seed}/{arm}: {len(rows)} train, {len(held)} held out "
+                  f"for validation", flush=True)
 
     # Common block count = max(C_min, R_min) across both arms and seeds, then
     # both arms are repacked to exactly that count. The easier-to-pack arm
@@ -366,11 +379,21 @@ def stage_pair(args):
                     if l.strip()]
             out = REPO / f"artifacts/stage3/e5_pack_{arm.lower()}_{seed}"
             blocks = pack_e5(rows, sysids, block_len=8192, target_blocks=common)
+            held = [json.loads(l) for l in
+                    (REPO / f"artifacts/stage3/e5_val_{arm}_{seed}.jsonl").open()
+                    if l.strip()]
+            val_blocks = pack_e5(held, sysids, block_len=8192)[:N_VAL]
+            if len(val_blocks) < N_VAL:
+                raise AssertionError(
+                    f"{seed}/{arm}: only {len(val_blocks)} held-out blocks, "
+                    f"need {N_VAL} for validation")
             write_pack(blocks, out, arm=arm.lower(), seed=seed, block_len=8192,
-                       pad_id=151643, target_ce_tokens=TARGET_CE_TOKENS)
+                       pad_id=151643, target_ce_tokens=TARGET_CE_TOKENS,
+                       val_blocks=val_blocks)
             v = verify_pack(out, rows, expected_blocks=common,
                             target_ce_tokens=TARGET_CE_TOKENS, tolerance=TOLERANCE,
-                            steps=report["optimizer_steps"], blocks_per_step=2)
+                            steps=report["optimizer_steps"], blocks_per_step=2,
+                            expected_val_blocks=N_VAL)
             report.setdefault("packed", {})[f"{arm}_{seed}"] = v
             conditions.append((f"{seed}/{arm} packed artifact verified",
                                v["passed"], str(v["failures"])))
@@ -538,9 +561,19 @@ def stage_budget_gate_1(args):
     phases = {"r_generation": 0 if staged else 90, "verify_records": 2,
               "pair_pack": 20, "final_benchmark": 5,
               "evaluate": 44, "transfer_teardown": 35}
-    rep = _budget(spent, args.authorized_usd - spent, args.assumed_blocks,
-                  SEC_PER_STEP / max(0.01, speedup), phases_min=phases)
+    # With the corpora staged, the packs are a deterministic function of
+    # hash-verified inputs, and attempt 7 MEASURED both quantities on exactly
+    # those packs: 904 common blocks (per-arm minima 882/591/904/674, reproduced
+    # independently offline) and 1.2955 s/step on the registered truncated path.
+    # Using a measurement of the same artifact is evidence, not an assumption --
+    # and gate 2 re-measures regardless. Without staged corpora the conservative
+    # speedup-derived rate still applies.
+    rate = MEASURED_SEC_PER_STEP if staged else SEC_PER_STEP / max(0.01, speedup)
+    rep = _budget(spent, args.authorized_usd - spent, args.assumed_blocks, rate,
+                  phases_min=phases)
     rep["r_corpora_staged"] = staged
+    rep["rate_basis"] = ("measured on attempt 7's final packs (identical inputs)"
+                         if staged else "full-width reference / measured speedup")
     rep["gate"] = "pre-generation"
     rep["r_generation_basis"] = (
         "0 -- the R corpora are staged and hash-verified, so generation is "
@@ -639,15 +672,14 @@ def main() -> None:
     ap.add_argument("--validate-limit", type=int, default=24)
     ap.add_argument("--bench-steps", type=int, default=12)
     ap.add_argument("--final-bench-steps", type=int, default=8)
-    ap.add_argument("--authorized-usd", type=float, default=5.37)
+    ap.add_argument("--authorized-usd", type=float, default=4.83)
     ap.add_argument("--spent-usd", type=float, default=0.0,
                     help="pod spend so far, supplied by the launcher")
-    ap.add_argument("--assumed-blocks", type=int, default=1012,
-                    help="gate 1 only. Under nested selection C BINDS, not R: "
-                         "C is measured at 872/880 blocks on the real corpus "
-                         "and R estimates at ~591/596, so 1012 is 1.15x the "
-                         "measured binding arm. Replaced by the real common "
-                         "count at gate 2.")
+    ap.add_argument("--assumed-blocks", type=int, default=904,
+                    help="gate 1 only. MEASURED on attempt 7 from the same "
+                         "staged corpora (per-arm minima 882/591/904/674) and "
+                         "reproduced independently offline. Re-derived and "
+                         "re-checked at gate 2.")
     args = ap.parse_args()
     OUT.mkdir(parents=True, exist_ok=True)
     for name in (list(STAGES) if args.stage == "all" else [args.stage]):

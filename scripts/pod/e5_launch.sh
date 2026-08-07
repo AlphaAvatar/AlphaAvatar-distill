@@ -28,13 +28,13 @@ MAX_PRICE=${MAX_PRICE:-0.99}
 # Integer minutes: `date -d "+7.5 hours"` is rejected by GNU date and silently
 # produces an EMPTY --terminate-after, i.e. a pod with no backstop at all.
 #
-# Attempt 7 runs under $5.38, what survived attempts 1-6. 326 min x $0.99 =
-# $5.38, so the RunPod-side deadline cannot on its own exceed
+# Attempt 8 runs under $4.84, what survived attempts 1-7. 293 min x $0.99 =
+# $4.83, so the RunPod-side deadline cannot on its own exceed
 # the authorization even if every other layer fails. With arm R staged rather
 # than regenerated the post-gate backstop is 250 min ($4.12), leaving 96 min
 # ($1.59) of pre-gate allowance against ~22 min of warm-path need. The gates
 # re-price from ACTUAL elapsed session time regardless.
-BACKSTOP_MINUTES=${BACKSTOP_MINUTES:-326}
+BACKSTOP_MINUTES=${BACKSTOP_MINUTES:-293}
 STARTUP_LIMIT_MIN=${STARTUP_LIMIT_MIN:-15}
 # Capacity is a race, and waiting for it costs NOTHING because no pod exists
 # yet. Two attempts five minutes apart is not patience -- both of attempt 5's
@@ -48,7 +48,7 @@ MAX_POD_ATTEMPTS=${MAX_POD_ATTEMPTS:-12}
 MAX_HOST_DRAWS=${MAX_HOST_DRAWS:-4}
 # Seconds between create attempts when the GPU is out of capacity.
 CREATE_RETRY_DELAY_S=${CREATE_RETRY_DELAY_S:-420}
-POLL_LIMIT_MIN=${POLL_LIMIT_MIN:-316}   # inside the 326-min backstop
+POLL_LIMIT_MIN=${POLL_LIMIT_MIN:-283}   # inside the 293-min backstop
 CKPT_TRANSFER_LIMIT_MIN=${CKPT_TRANSFER_LIMIT_MIN:-40}
 TEACHER_REVISION=${TEACHER_REVISION:-768f209d9ea81521153ed38c47d515654e938aea}
 STORE=${STORE:-/home/ecs-user/aad-artifacts/e5}

@@ -212,3 +212,70 @@ def test_a_producer_that_drops_the_payload_is_caught_before_packing(tmp_path):
         reloaded = write_and_reload([crippled], tmp_path)
         with pytest.raises(ValueError, match=f"missing.*{dropped}"):
             example_to_rendered(reloaded[0])
+
+
+# --- the validation tail (2026-08-07, attempt 7) ------------------------------
+# Attempt 7 passed every gate, including gate 2, and then died on the first
+# training call: `ladder_blocks` takes its validation set from the blocks PAST
+# the largest rung, and an E5 pack whose single rung covered every block left an
+# empty tail. The pack was correct as a corpus and unloadable as an artifact.
+
+def test_the_pack_loads_through_the_production_ladder_loader(tmp_path):
+    """The exact call that failed: pack -> ladder_blocks."""
+    from aadistill.data.ladder import ladder_blocks
+
+    train = [r_example(f"gsm8k-{i}", j).to_record()
+             for i in range(40) for j in range(2)]
+    held = [r_example(f"held-{i}", j).to_record() for i in range(40) for j in range(2)]
+    reloaded = write_and_reload(train, tmp_path)
+    d = tmp_path / "held"
+    d.mkdir()
+    held_reloaded = write_and_reload(held, d)
+
+    sysmap = {SYSTEM_KEY: SYSTEM_IDS}
+    blocks = pack_e5(reloaded, sysmap, block_len=256, pad_id=PAD)
+    val = pack_e5(held_reloaded, sysmap, block_len=256, pad_id=PAD)[:4]
+    out = tmp_path / "pack"
+    ce_total = sum(r["n_continuation_tokens"] for r in reloaded)
+    write_pack(blocks, out, arm="r", seed="sa", block_len=256, pad_id=PAD,
+               target_ce_tokens=ce_total, val_blocks=val)
+
+    tr, va, _ = ladder_blocks(out, ce_total, n_val=4)
+    assert tr[0].shape[0] == len(blocks), "training must be the rung, not the file"
+    assert va[0].shape[0] == 4
+    # The budget is the rung. Counting the tail would overstate what was trained on.
+    assert int(tr[1].sum()) == ce_total
+
+
+def test_a_pack_with_no_validation_tail_is_rejected(tmp_path):
+    """Reproduces attempt 7 directly: no tail, and the loader cannot proceed."""
+    from aadistill.data.ladder import ladder_blocks
+
+    reloaded = write_and_reload(
+        [r_example(f"gsm8k-{i}", j).to_record() for i in range(20) for j in range(2)],
+        tmp_path)
+    blocks = pack_e5(reloaded, {SYSTEM_KEY: SYSTEM_IDS}, block_len=256, pad_id=PAD)
+    out = tmp_path / "pack"
+    ce_total = sum(r["n_continuation_tokens"] for r in reloaded)
+    write_pack(blocks, out, arm="r", seed="sa", block_len=256, pad_id=PAD,
+               target_ce_tokens=ce_total)
+    with pytest.raises(ValueError, match="blocks past the largest rung"):
+        ladder_blocks(out, ce_total, n_val=4)
+
+
+def test_validation_blocks_share_no_bundle_with_training(tmp_path):
+    """A tail drawn from training bundles would leak, and `verify_pack` must say so."""
+    reloaded = write_and_reload(
+        [r_example(f"gsm8k-{i}", j).to_record() for i in range(30) for j in range(2)],
+        tmp_path)
+    sysmap = {SYSTEM_KEY: SYSTEM_IDS}
+    blocks = pack_e5(reloaded, sysmap, block_len=256, pad_id=PAD)
+    out = tmp_path / "pack"
+    ce_total = sum(r["n_continuation_tokens"] for r in reloaded)
+    # Deliberately reuse training blocks as the "validation" tail.
+    write_pack(blocks[:20], out, arm="r", seed="sa", block_len=256, pad_id=PAD,
+               target_ce_tokens=ce_total, val_blocks=blocks[:4])
+    rep = verify_pack(out, reloaded, expected_blocks=20, target_ce_tokens=ce_total,
+                      tolerance=1.0, steps=30, blocks_per_step=2,
+                      expected_val_blocks=4)
+    assert "validation_is_held_out" in rep["failures"]
