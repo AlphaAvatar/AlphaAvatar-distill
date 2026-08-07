@@ -28,18 +28,23 @@ MAX_PRICE=${MAX_PRICE:-0.99}
 # Integer minutes: `date -d "+7.5 hours"` is rejected by GNU date and silently
 # produces an EMPTY --terminate-after, i.e. a pod with no backstop at all.
 #
-# Attempt 3 runs under $8.24: what survived attempts 1-2 ($6.74) plus $1.50.
-# 499 min x $0.99 = $8.23, so the RunPod-side deadline cannot on its own exceed
-# the authorization even if every other layer fails. Expected work is ~372 min
-# on measured phases, leaving ~127 min of headroom for a cold setup, an
-# abandoned pod, or an R corpus that packs worse than assumed. The gates
+# Attempt 4 runs under $8.79: $6.79 surviving attempts 1-3, plus $2.00.
+# 532 min x $0.99 = $8.78, so the RunPod-side deadline cannot on its own exceed
+# the authorization even if every other layer fails. The registered post-gate
+# backstop is 396 min ($6.55), leaving 136 min ($2.24) of pre-gate allowance;
+# reserves against it are 63 min (startup, warm setup, validate, benchmark, one
+# abandoned pod, two cold-host redraws), so 73 min stays unallocated. The gates
 # re-price from ACTUAL elapsed session time regardless.
-BACKSTOP_MINUTES=${BACKSTOP_MINUTES:-499}
+BACKSTOP_MINUTES=${BACKSTOP_MINUTES:-532}
 STARTUP_LIMIT_MIN=${STARTUP_LIMIT_MIN:-15}
 MAX_POD_ATTEMPTS=${MAX_POD_ATTEMPTS:-2}
+# Cold-host redraws. Each costs ~6 min of tripwire plus ~4 min of startup; four
+# draws is ~40 min ($0.66), well inside the reserve, and P(4 cold in a row) is
+# ~1% at the observed 1-in-3 base rate.
+MAX_HOST_DRAWS=${MAX_HOST_DRAWS:-4}
 # Seconds between create attempts when the GPU is out of capacity.
 CREATE_RETRY_DELAY_S=${CREATE_RETRY_DELAY_S:-300}
-POLL_LIMIT_MIN=${POLL_LIMIT_MIN:-487}   # inside the 499-min backstop
+POLL_LIMIT_MIN=${POLL_LIMIT_MIN:-520}   # inside the 532-min backstop
 CKPT_TRANSFER_LIMIT_MIN=${CKPT_TRANSFER_LIMIT_MIN:-40}
 TEACHER_REVISION=${TEACHER_REVISION:-768f209d9ea81521153ed38c47d515654e938aea}
 STORE=${STORE:-/home/ecs-user/aad-artifacts/e5}
@@ -125,7 +130,15 @@ teardown() {
   say "pod deleted — $(cost)"
 }
 
-# --- 2. create, bounded ----------------------------------------------------
+# --- 2. create, bounded, with cold-host redraw -----------------------------
+# A cold host is a HOST property, not a pod property, and RunPod assigns hosts
+# from the unrestricted pool at random. So the answer to a cold draw is another
+# draw -- setup exits 90, this pod is abandoned, and the next one costs a fresh
+# ~4 min instead of the 150+ min a cold host would have taken. Every draw is
+# charged against the cumulative authorization: `pod_start_epoch` is written
+# once per SESSION, so nothing here resets the meter.
+REDRAWS=0
+for draw in $(seq 1 "$MAX_HOST_DRAWS"); do
 EP=""; POD_ID=${POD_ID:-}
 for attempt in $(seq 1 "$MAX_POD_ATTEMPTS"); do
   if [ -z "$POD_ID" ]; then
@@ -215,11 +228,30 @@ $SSH "root@$HOST" "cd /workspace && SESSION_COMMIT=$SESSION_COMMIT \
   HOLDOUT_SRC=/workspace/aad_holdout/holdout_v1.jsonl \
   E5_SEEDS=sa,sb bash /workspace/e5_setup.sh" \
   >>"$SCR/e5_setup.log" 2>&1
-if [ $? -ne 0 ]; then
-  say "FATAL: setup failed. $(cost)"; tail -25 "$SCR/e5_setup.log" | tee -a "$LOG"
+SETUP_RC=$?
+if [ "$SETUP_RC" -eq 90 ]; then
+  REDRAWS=$((REDRAWS+1))
+  COLD_LINE=$(grep -a "COLD HOST" "$SCR/e5_setup.log" | tail -1)
+  say "COLD HOST on draw $draw — abandoning $POD_ID and redrawing. $(cost)"
+  say "  $COLD_LINE"
+  printf '%s draw=%d pod=%s %s billed_to_date=%s\n' \
+    "$(date -u +%FT%TZ)" "$draw" "$POD_ID" "$COLD_LINE" "$(cost)" \
+    >> "$SCR/redraws.log"
+  runpodctl remove pod "$POD_ID" >>"$LOG" 2>&1
+  POD_ID=""; EP=""
+  if [ "$draw" -lt "$MAX_HOST_DRAWS" ]; then continue; fi
+  say "ABORT: ${MAX_HOST_DRAWS} consecutive cold hosts. Nothing is running."
+  echo "LAUNCH_FAILED:all_hosts_cold" > "$STATE"; exit 1
+fi
+if [ "$SETUP_RC" -ne 0 ]; then
+  say "FATAL: setup failed (rc $SETUP_RC). $(cost)"
+  tail -25 "$SCR/e5_setup.log" | tee -a "$LOG"
   teardown; echo "LAUNCH_FAILED:setup" > "$STATE"; exit 1
 fi
-say "setup done — $(cost)"
+say "setup done on draw $draw after $REDRAWS redraw(s) — $(cost)"
+break
+done
+[ -n "${EP:-}" ] || { say "ABORT: no usable host"; exit 1; }
 
 say "starting FORMAL E5: validation gate -> R generation -> feasibility -> 4 arms -> eval"
 # `nohup ... &` alone does NOT detach here: the remote wrapper shell stays alive

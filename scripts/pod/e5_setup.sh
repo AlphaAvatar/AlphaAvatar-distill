@@ -117,7 +117,43 @@ sed -i 's|name = "pytorch-cpu"|name = "pytorch-cu128"|' pyproject.toml
 sed -i 's|torch = { index = "pytorch-cpu" }|torch = { index = "pytorch-cu128" }|' pyproject.toml
 export UV_PROJECT_ENVIRONMENT=/opt/train
 uv lock
-uv sync --group dev
+
+# --- cold-host tripwire ----------------------------------------------------
+# Setup time varies ~30x on identical image, script and GPU, purely with how
+# much the host has cached: `uv sync` measured 44 s, ~50 s, then 62 MINUTES
+# (2026-08-07). The cold case is not a slow warm case -- it is an order of
+# magnitude away, and it cost $1.45 before it was caught by hand.
+#
+# So a host that has not finished in TRIP_S is classified cold and abandoned,
+# and the launcher redraws another from the unrestricted pool. The grace clause
+# exists so a host that is genuinely finishing is not thrown away: if the venv
+# interpreter already exists and site-packages is still growing, uv is linking
+# rather than downloading, and one bounded extension is granted.
+TRIP_S=${UV_TRIP_S:-360}
+GRACE_S=${UV_GRACE_S:-180}
+uv sync --group dev &
+UV_PID=$!
+t0=$(date -u +%s); graced=0
+while kill -0 "$UV_PID" 2>/dev/null; do
+  sleep 15
+  el=$(( $(date -u +%s) - t0 ))
+  [ "$el" -lt "$TRIP_S" ] && continue
+  if [ "$graced" -eq 0 ] && [ -x /opt/train/bin/python ]; then
+    a=$(du -sb /opt/train 2>/dev/null | cut -f1 || echo 0); sleep 20
+    b=$(du -sb /opt/train 2>/dev/null | cut -f1 || echo 0)
+    if [ "$((b - a))" -gt 20000000 ]; then      # >20 MB in 20 s: still linking
+      say "uv sync past ${TRIP_S}s but linking ($(( (b-a)/1048576 )) MB/20s) — one ${GRACE_S}s grace"
+      graced=1; TRIP_S=$(( TRIP_S + GRACE_S )); continue
+    fi
+  fi
+  kill -9 "$UV_PID" 2>/dev/null || true
+  cache=$(du -sm /root/.cache/uv 2>/dev/null | cut -f1 || echo 0)
+  say "COLD HOST: uv sync unfinished after ${el}s (cache ${cache} MB). Abandoning."
+  mark "HOST_COLD:${el}s:${cache}MB"
+  exit 90                                        # the launcher redraws on 90
+done
+wait "$UV_PID" || { say "uv sync failed"; exit 1; }
+say "uv sync completed in $(( $(date -u +%s) - t0 ))s"
 /opt/train/bin/python -c "import torch, transformers, sympy; \
   assert torch.cuda.is_available(); \
   print('train torch', torch.__version__, torch.cuda.get_device_name(0), \

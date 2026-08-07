@@ -589,5 +589,86 @@
    "setup_time_policy": "the 5-minute warm-image setup from attempt 1 is NOT assumed. Gates charge ACTUAL elapsed pod time, and ~100 min of headroom is reserved for a cold setup.",
    "hard_rule": "if a blocking stage fails: stop and teardown. Do not reduce the token target, change the treatment, drop a seed, or add an arm to fit the budget."
   }
+ },
+ "attempt_4_2026-08-07": {
+  "status": "REGISTERED; relaunch approved under $8.79",
+  "prior_attempts": {
+   "1": {
+    "usd": 1.57,
+    "stopped": "pairing, data-contract defect"
+   },
+   "2": {
+    "usd": 0.81,
+    "stopped": "gate 1, stale cost model"
+   },
+   "3": {
+    "usd": 1.45,
+    "stopped": "setup, cold host"
+   },
+   "cumulative_usd": 3.83,
+   "c_r_evidence": "none"
+  },
+  "network_volume": {
+   "decision": "REJECTED on availability",
+   "volume_capable_datacenters": 17,
+   "with_L40S": [
+    "US-NC-1 (Low)"
+   ],
+   "other_ge40gb_gpus_in_volume_dcs": [
+    "RTX 6000 Ada in US-IL-1 (Low)"
+   ],
+   "instrument_validated": "RTX 4090 returns Low/Low/Medium/None/Low across the same DCs, so the dataCenterId filter discriminates",
+   "also": "would not have fixed the binding budget constraint"
+  },
+  "budget_reconciliation": {
+   "available_usd": 8.79,
+   "post_gate_backstop_usd": 6.55,
+   "post_gate_components_min": {
+    "r_generation": 90,
+    "verify_records": 2,
+    "pair_pack": 20,
+    "final_benchmark": 5,
+    "train_4_arms": 158,
+    "evaluate_4": 44,
+    "transfer_teardown": 35,
+    "raw_total": 354,
+    "x1.12": 396
+   },
+   "pre_gate_allowance_usd": 2.24,
+   "pre_gate_allowance_min": 136,
+   "reserves_min": {
+    "pod_startup": 4,
+    "setup_warm": 9,
+    "validate": 7,
+    "benchmark": 2,
+    "one_abandoned_pod": 15,
+    "two_tripwire_redraws": 26,
+    "total": 63
+   },
+   "unallocated_slack_min": 73,
+   "runpod_deadline_min": 532,
+   "runpod_deadline_usd": 8.78,
+   "correction": "an earlier report said the $2.00 restored ~55 pre-gate minutes; that conflated the 1.00xC row at $6.79. At $8.79 against the 1.30xC backstop the allowance is 136 min."
+  },
+  "cold_host_tripwire": {
+   "trip_seconds": 360,
+   "grace_seconds": 180,
+   "max_host_draws": 4,
+   "basis": "uv sync measured 44s, ~50s, then 62 min on identical image/script/GPU",
+   "grace_clause": "if the venv interpreter exists and site-packages grows >20 MB in 20 s, uv is linking not downloading: one bounded extension",
+   "on_trip": "exit 90 -> launcher abandons the pod, deletes it, records the redraw with elapsed time and billed-to-date, and redraws from the UNRESTRICTED pool",
+   "charged": "yes; pod_start_epoch is written once per session, so redraws bill",
+   "record": "scratch redraws.log, copied into the experiment record",
+   "unchanged": [
+    "token target",
+    "treatment",
+    "arm list",
+    "seeds",
+    "gate 1 assumed_blocks = 1123 (1.30 x C)",
+    "1.12 backstop",
+    "gate 1 and gate 2 both retained"
+   ],
+   "tested": "tests/pod/test_cold_host_tripwire.sh, 7 behaviours, 8 mutations caught"
+  }
  }
 }

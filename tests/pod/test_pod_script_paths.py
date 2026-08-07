@@ -282,7 +282,7 @@ def test_pairing_merges_both_arms_system_blocks():
 
 # --- E5 attempt 2: $7.55, arm C reused, records verified from disk ------------
 
-AUTHORIZED_USD = 8.24     # $6.74 surviving attempts 1-2, plus $1.50 approved
+AUTHORIZED_USD = 8.79     # $6.79 surviving attempts 1-3, plus $2.00 approved
 
 
 def test_the_pod_deadline_cannot_exceed_the_remaining_authorization():
@@ -344,3 +344,56 @@ def test_gate_1_prices_r_generation_from_the_measurement():
     assert 74 <= measured <= 110, \
         f"r_generation {measured} is not a margin over the measured 74.1 min"
     assert "MEASURED 74.1 min" in gate, "the basis must travel with the number"
+
+
+# --- cold-host tripwire and redraw (2026-08-07) -------------------------------
+
+def test_the_tripwire_behavioural_suite_passes():
+    """Runs the shell tripwire against synthetic warm/cold/linking hosts.
+
+    Shell, not a python reimplementation: the thing that runs on a pod is shell,
+    and a reimplementation would prove nothing about it."""
+    import subprocess
+    r = subprocess.run(["bash", str(REPO / "tests/pod/test_cold_host_tripwire.sh")],
+                       capture_output=True, text=True, timeout=300)
+    assert r.returncode == 0, r.stdout + r.stderr
+    assert "7 passed, 0 failed" in r.stdout, r.stdout
+
+
+def test_setup_and_the_tripwire_test_stay_in_sync():
+    """The test lifted the tripwire's structure; if setup's version drifts, the
+    passing test stops meaning anything."""
+    setup = (REPO / "scripts/pod/e5_setup.sh").read_text()
+    for token in ('TRIP_S=${UV_TRIP_S:-360}', 'GRACE_S=${UV_GRACE_S:-180}',
+                  'uv sync --group dev &', 'kill -0 "$UV_PID"',
+                  'graced=0', 'exit 90',
+                  # without the comparison the loop never trips at all
+                  '[ "$el" -lt "$TRIP_S" ] && continue',
+                  'el=$(( $(date -u +%s) - t0 ))'):
+        assert token in setup, f"tripwire lost {token!r}"
+    assert 'if [ "$graced" -eq 0 ] && [ -x /opt/train/bin/python ]' in setup, \
+        "the grace clause must check the venv before abandoning a linking host"
+    assert 'wait "$UV_PID" || { say "uv sync failed"; exit 1; }' in setup, \
+        "a genuine sync failure must exit 1, never 90 -- 90 means redraw"
+
+
+def test_launcher_redraws_on_a_cold_host_and_charges_it():
+    src = (REPO / "scripts/pod/e5_launch.sh").read_text()
+    assert 'for draw in $(seq 1 "$MAX_HOST_DRAWS"); do' in src
+    block = src[src.index("SETUP_RC=$?"):src.index("say \"starting FORMAL E5")]
+    assert '[ "$SETUP_RC" -eq 90 ]' in block, "90 must mean redraw"
+    assert 'runpodctl remove pod "$POD_ID"' in block, "the cold pod must be deleted"
+    assert 'redraws.log' in block, "every redraw must be recorded"
+    assert 'billed_to_date' in block, "with its cost"
+    assert '[ "$SETUP_RC" -ne 0 ]' in block, "other failures stay fatal"
+    # The meter must not restart on a redraw.
+    assert '[ -f "$SCR/pod_start_epoch" ] || date -u +%s > "$SCR/pod_start_epoch"' in src
+
+
+def test_gate_1_keeps_the_conservative_block_assumption():
+    """1123 = 1.30 x C is unmeasured and must stay until the real R pack exists.
+    Lowering it would make the arithmetic pass by assuming the answer."""
+    src = _e5_driver()
+    assert 'ap.add_argument("--assumed-blocks", type=int, default=1123)' in src or \
+        '"--assumed-blocks", type=int, default=1123' in src, \
+        "gate 1 must keep the conservative 1.30x C assumption"
