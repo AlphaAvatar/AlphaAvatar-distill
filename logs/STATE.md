@@ -1,29 +1,33 @@
-**Updated:** 2026-08-07 09:20 UTC · branch `main` · **no pods running, nothing
-billing.** E5 attempt 1 aborted at the pairing gate on a code defect; **$1.57**
-spent, **$7.55 of the $9.12 E5 authorization remains.** A relaunch is affordable
-(~$6.56 at backstop) but has not been authorized.
+**Updated:** 2026-08-07 10:30 UTC · branch `main` · **no pods running, nothing
+billing.** E5 attempt 2 stopped by budget gate 1 before paid generation; **$0.81**
+spent, **$6.74 of the $7.55 authorization remains.** A relaunch is blocked on a
+budget decision.
 
-## E5 ATTEMPT 1 — ABORTED AT THE PAIRING GATE, NO RESULT
+## E5 — TWO ATTEMPTS, NO C/R RESULT YET
 
-Full record: [`EXPERIMENTS.md`](EXPERIMENTS.md) §22. `RecoveryExample.to_record()`
-wrote only summary counts and dropped `ids`/`mask`, so 4,196 gated R examples
-were unpackable and are unrecoverable. Arm C wrote its payload independently, so
-every offline check passed — the two arms shared one packing contract that only
-one had been tested against.
+Attempt 1 ([`EXPERIMENTS.md`](EXPERIMENTS.md) §22, $1.57): generated both R
+corpora, then died at pairing on a data-contract defect — `to_record()` dropped
+`ids`/`mask`. Fixed, guarded, and now verified from disk by a new blocking
+`verify_records` stage.
 
-Fixed and guarded (728 tests): the packing fields are required at construction;
-the R builder verifies every record through `example_to_rendered` before
-accepting it; both arms' system maps are merged and cross-checked; the driver
-catches every exception and the launcher tears down a pod whose driver has died
-without a terminal marker (that gap would have idle-billed ~$6–7).
+Attempt 2 ([`EXPERIMENTS.md`](EXPERIMENTS.md) §23, $0.81): **gate 1 refused to
+proceed**, shortfall $0.55, pod torn down before paid generation. The gate was
+carrying `r_generation: 152` min — an estimate made before R had ever run.
+Attempt 1 measured the same operation at **74.1 min**. Correcting only that
+stale input, the run projects at **$6.14 expected / $6.44 at a 1.05 backstop /
+$6.87 at the registered 1.12**, against $6.74 remaining.
 
-**Retained:** `/home/ecs-user/aad-artifacts/e5/rescue/` — both arm C corpora
-(complete, reusable) and the R manifests. R must be regenerated (~74 min, $1.22).
+**Decision required:** a small additional authorization to restore the 1.12
+margin, or an explicit choice to run at 1.05 with ~$0.30 headroom. No token
+target, treatment, seed or arm may be changed to fit the budget.
 
-**Measured and worth keeping:** `truncate_padding` gives a **2.497×** wall-clock
-speedup (3.245× position reduction — the position count is an upper bound, not a
-prediction). Warm-image setup is **5 min**, not the 53 min previously measured.
-R generation acceptance 92.8% / 91.3%, dominated by `natural_termination`.
+**Reusable now:** arm C corpora for both seeds, hash-verified and staged on the
+relay at `e5_start/e5_arm_c.tar.gz` (2,294 examples/seed, 1,034 blocks, 905,488
+candidate CE tokens). R must still be regenerated.
+
+**Measured twice, independently:** `truncate_padding` wall-clock speedup
+**2.497×** (attempt 1) and **2.559×** (attempt 2). Warm-image setup 5–9 min.
+R generation 74 min for both seeds, acceptance 92.8% / 91.3%.
 
 ## EXPERIMENT 4 COMPLETE — SCALE SUBSTANTIALLY IMPROVES ROLLOUT STABILITY,
 ## BUT DOES NOT RESOLVE CORRECTNESS

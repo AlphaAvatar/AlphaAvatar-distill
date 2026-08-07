@@ -3157,3 +3157,90 @@ Relaunch requires regenerating R (~74 min, ~$1.22). Estimated total for a
 complete run from a warm image: ~355 min, ~$5.86 expected, ~$6.56 at the 1.12
 backstop, against **$7.55 remaining** — roughly $1.00 of slack. Awaiting a
 decision on whether to spend it.
+
+---
+
+## 23. Experiment 5 — attempt 2: stopped by budget gate 1 (2026-08-07, $0.81)
+
+**Verdict: no paid generation, no training, no E5 result.** Gate 1 refused to
+proceed and the pod was torn down 11 minutes after setup. This is the budget
+layer working as designed — it stopped *before* the expensive stage, not after.
+
+| | |
+| --- | --- |
+| Pods | `2lz4xqdok1z5s1` (abandoned), `adevfxvuiwu2lw` |
+| Billed | **$0.81** total — $0.25 abandoned + $0.56 |
+| Commit | `40f8122` |
+| Authorization | $7.55; **$6.74 remains** |
+| Reached | setup → validate → benchmark → **gate 1 FAIL**, shortfall $0.55 |
+
+### Infrastructure note: a pod that never came up
+
+The first pod never exposed TCP 22 within the 15-minute startup bound. The
+launcher deleted it and created a replacement, which was ready in 2 minutes.
+That is the bound doing its job, but it exposed a gap: the launcher rewrites
+`pod_start_epoch` for the replacement, so the abandoned pod's $0.25 would have
+been invisible to the gates, and a fresh 457-minute deadline would have put the
+worst case at $7.79 — above the authorization. Corrected by backdating the epoch
+by the abandoned pod's exact 913-second lifetime, which flows through both the
+reported cost and the driver's starting balance without editing a running
+script, and by restarting the watchdog against the corrected origin.
+
+### What the gate found
+
+```
+blocks 1123 | sec_per_step 1.4105 | spent $0.52
+remaining: r_generation 152, pair_pack 20, evaluate 44, transfer 35, train 158
+expected $6.76 | backstop $7.57 | remaining authorization $7.02
+covered: false | shortfall $0.55
+```
+
+Reused arm C staged and verified clean in the pod's own environment. The
+`truncate_padding` benchmark reproduced independently on a second pod:
+**2.559×** measured wall-clock speedup (attempt 1: 2.497×), full-width 3.884 →
+truncated 1.517 s/step. Two independent measurements 2.5% apart is a usable
+figure for the cost model.
+
+### The cost model contained one stale input
+
+`r_generation: 152` was an estimate made before any R generation had ever run.
+Attempt 1 then **measured** the identical operation — same hardware, engine,
+prompts, student, both seeds — at **74.1 minutes** (sa 34.6, sb 39.5). The gate
+was carrying a 78-minute phantom, worth $1.29, and it is the difference between
+passing and failing.
+
+Replacing an unmeasured prior with a direct measurement of the same operation is
+not moving the goalpost; leaving a known 2× overestimate in place would block a
+run that fits. Every other phase estimate is left untouched, and the two other
+phases that attempt 2 measured are folded in at their measured values.
+
+Re-projected, with margin over the measurement rather than the measurement
+itself:
+
+| phase | min | basis |
+| --- | --- | --- |
+| pod startup + setup | 9 | measured, attempt 2 |
+| validate | 7 | measured, attempt 2 |
+| benchmark | 2 | measured, attempt 2 |
+| R generation | 90 | **measured 74**, +21% margin |
+| verify_records | 2 | new CPU stage |
+| pair + pack | 20 | unmeasured, unchanged |
+| final benchmark | 5 | unmeasured, unchanged |
+| train 4 arms | 158 | 1123 blocks (R = 1.30 × C, unmeasured) |
+| evaluate 4 | 44 | unmeasured, unchanged |
+| transfer + teardown | 35 | unmeasured, unchanged |
+| **total** | **372** | **$6.14 expected** |
+
+Against $6.74 remaining: **fits at expected and at a 1.05 backstop ($6.44), and
+is $0.13 short at the registered 1.12 backstop ($6.87).**
+
+The dominant remaining uncertainty is not generation but `train`, which rests on
+the unmeasured assumption that R packs to 1.30 × C blocks. That number is
+unknowable until R exists, which is exactly what gate 2 is for.
+
+### Next
+
+A relaunch needs either a small additional authorization to restore the 1.12
+margin, or an explicit decision to run at a 1.05 backstop with roughly $0.30 of
+headroom — thin enough that one more abandoned pod would consume it. No token
+target, treatment, seed or arm was altered to fit the budget, and none should be.
