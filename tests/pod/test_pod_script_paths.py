@@ -248,3 +248,33 @@ def test_launcher_hands_the_driver_a_real_starting_balance():
     assert "pod_start_epoch" in src[:src.index("scripts/pod/e5_driver.py --stage all")]
     assert "GATE_CEILING=$(echo \"$BACKSTOP_MINUTES/60*$MAX_PRICE\"" in src, \
         "the gate ceiling must be bound to the RunPod deadline it has to fit inside"
+
+
+# --- 2026-08-07: uncaught exception left a finished pod billing ---------------
+
+def test_driver_marks_every_stage_failure_not_just_three_types():
+    """A narrow except tuple let a ValueError escape main(), so no marker was
+    written and the launcher had no terminal state to poll for."""
+    src = _e5_driver()
+    main = src[src.index("def main()"):]
+    assert "except Exception as exc:" in main, \
+        "an uncaught exception on a paid pod is a billing event"
+    assert "except (subprocess.CalledProcessError" not in main
+
+
+def test_launcher_stops_when_the_driver_process_dies():
+    src = (REPO / "scripts/pod/e5_launch.sh").read_text()
+    poll = src[src.index("DEADLINE_TS=$(( $(date -u +%s) + POLL_LIMIT_MIN"):]
+    assert "[e]5_driver.py" in poll, \
+        "liveness must be checked without pgrep matching its own command line"
+    assert "DRIVER PROCESS GONE" in poll
+
+
+def test_pairing_merges_both_arms_system_blocks():
+    src = _e5_driver()
+    assert "def _system_ids(" in src
+    fn = src[src.index("def _system_ids("):src.index("def stage_pair(")]
+    assert 'for arm in ("c", "r")' in fn, "R's system blocks must be included"
+    assert "clashes" in fn, "disagreement between arms must be reported"
+    pair = src[src.index("def stage_pair("):src.index("def stage_train(")]
+    assert 'e5_arm_c_{seed}"\n                             / "system_ids.json"' not in pair

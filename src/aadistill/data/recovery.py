@@ -60,6 +60,13 @@ class RecoveryExample:
     truncation_index: int
     truncation_fraction: float
     data_type: str
+    # Both are part of the PACKING contract, not decoration: the packer strips
+    # the leading `n_system_tokens` and re-emits the block keyed by `system_key`.
+    # They are required fields because the alternative -- letting the builder
+    # staple them onto the record afterwards -- is what let an R corpus be
+    # generated, gated, written and only then found unpackable.
+    system_key: str
+    n_system_tokens: int
     meta: dict = field(default_factory=dict)
 
     @property
@@ -67,8 +74,19 @@ class RecoveryExample:
         return len(self.ids)
 
     def to_record(self) -> dict:
+        """The on-disk record. MUST satisfy `e5_pack.REQUIRED_FIELDS`.
+
+        `ids` and `mask` are the example; everything else is description. An
+        earlier version emitted only the description, so 2,278 gated R samples
+        were written without the tokens they had just been validated against.
+        `test_recovery_record_is_packable` now pins this.
+        """
         return {
             "id": f"{self.source_session_id}#r{self.truncation_index}",
+            "ids": list(self.ids),
+            "mask": [bool(m) for m in self.mask],
+            "system_key": self.system_key,
+            "n_system_tokens": self.n_system_tokens,
             "source_session_id": self.source_session_id,
             "source_seed": self.source_seed,
             "truncation_index": self.truncation_index,
@@ -89,6 +107,7 @@ def build_example(*, prompt_ids: list[int], student_prefix_ids: list[int],
                   teacher_continuation_ids: list[int], source_session_id: str,
                   source_seed: str, truncation_index: int,
                   truncation_fraction: float, data_type: str,
+                  system_key: str, n_system_tokens: int,
                   meta: dict | None = None) -> RecoveryExample:
     """Concatenate at token level and mask the recovery only.
 
@@ -111,12 +130,13 @@ def build_example(*, prompt_ids: list[int], student_prefix_ids: list[int],
         n_continuation_tokens=len(teacher_continuation_ids),
         source_session_id=source_session_id, source_seed=source_seed,
         truncation_index=truncation_index, truncation_fraction=truncation_fraction,
-        data_type=data_type, meta=meta or {})
+        data_type=data_type, system_key=system_key,
+        n_system_tokens=n_system_tokens, meta=meta or {})
 
 
 def check_gates(example: RecoveryExample, *, echoed_prefix_ids: list[int],
                 student_prefix_ids: list[int], stop_ids: set[int] | frozenset[int],
-                context_limit_hit: bool, block_len: int, n_system_tokens: int,
+                context_limit_hit: bool, block_len: int,
                 held_out_ids: set[str], seen_targets: set[tuple],
                 answer_ok: bool | None) -> None:
     """Run every registered gate; raise `GateFailure` on the first that fails.
@@ -140,9 +160,12 @@ def check_gates(example: RecoveryExample, *, echoed_prefix_ids: list[int],
         raise GateFailure("no_context_limit")
     if example.source_session_id in held_out_ids:
         raise GateFailure("not_held_out", example.source_session_id)
-    total = example.n_total_tokens + n_system_tokens
-    if total > block_len:
-        raise GateFailure("within_context_budget", f"{total} > {block_len}")
+    # `example.ids` ALREADY opens with the system block -- the prompt was
+    # rendered from the full message list. Adding `n_system_tokens` again here
+    # charged the block twice and rejected otherwise-valid long samples.
+    if example.n_total_tokens > block_len:
+        raise GateFailure("within_context_budget",
+                          f"{example.n_total_tokens} > {block_len}")
     if sum(example.mask) != example.n_continuation_tokens:
         raise GateFailure("mask_matches_supervision",
                           f"{sum(example.mask)} != {example.n_continuation_tokens}")

@@ -247,6 +247,15 @@ while [ "$(date -u +%s)" -lt "$DEADLINE_TS" ]; do
     *ALL_DONE*) say "driver reported ALL_DONE — $(cost)"; break ;;
     *ABORTED_AT_GATE*) say "STOPPED AT A GATE — tearing down — $(cost)"; break ;;
   esac
+  # Liveness, not just markers. The driver now catches every exception, but it
+  # can still be OOM-killed or die with the pod's python. Polling for a marker
+  # that will never arrive kept a finished pod billing on 2026-08-07 -- so a dead
+  # driver with no terminal marker ends the run here instead of at POLL_LIMIT_MIN.
+  if ! $SSH "root@$HOST" 'pgrep -f "[e]5_driver.py" >/dev/null' 2>/dev/null; then
+    say "DRIVER PROCESS GONE with no terminal marker — tearing down — $(cost)"
+    say "  last status line: ${STATUS_TXT:-<none>}"
+    break
+  fi
 done
 
 # --- 4. fetch results, then weights, then delete ---------------------------

@@ -52,7 +52,9 @@ from aadistill.data.prefix_split import (  # noqa: E402
 from aadistill.data.recovery import (  # noqa: E402
     GateFailure, build_example, check_gates, roundtrip_ok,
 )
-from aadistill.data.sessions import render_system_block  # noqa: E402
+from aadistill.data.e5_pack import example_to_rendered  # noqa: E402
+from aadistill.data.sessions import (  # noqa: E402
+    render_system_block, system_group_key)
 from aadistill.infrastructure.env import code_state, library_versions  # noqa: E402
 from aadistill.infrastructure.manifest import sha256_file  # noqa: E402
 from diagnose_training_recall import rung_session_ids  # noqa: E402
@@ -213,6 +215,7 @@ def main() -> None:
 
     # ---- 4/5. gates, then bundle atomicity ------------------------------
     seen_targets: set = set()
+    system_ids: dict[str, list[int]] = {}
     per_bundle: dict[tuple, list] = defaultdict(list)
     for m, req, o in zip(req_meta, requests, touts):
         s = m["session"]
@@ -222,26 +225,41 @@ def main() -> None:
             if args.reject_bundle and s["id"] == args.reject_bundle \
                     and m["truncation_index"] == 0:
                 raise GateFailure("answer_valid", "deliberate pilot rejection")
+            sys_text = next((x["content"] for x in s["messages"]
+                             if x["role"] == "system"), "")
+            sys_ids = tok(render_system_block(tok, sys_text, s.get("tools")),
+                          add_special_tokens=False).input_ids
+            n_sys, key = len(sys_ids), system_group_key(sys_text, s.get("tools"))
+            # The packer strips these leading tokens and re-emits the block it
+            # has stored under `key`. If the two ever disagreed, R would train on
+            # a system block it never generated under -- silently. Assert here,
+            # where both are in hand.
+            if list(m["prompt_ids"][:n_sys]) != list(sys_ids):
+                raise GateFailure("roundtrip_stable",
+                                  "prompt does not open with its system block")
+            system_ids.setdefault(key, list(sys_ids))
+            if system_ids[key] != list(sys_ids):
+                raise GateFailure("roundtrip_stable",
+                                  f"system_key {key[:12]} maps to two blocks")
             ex = build_example(
                 prompt_ids=m["prompt_ids"], student_prefix_ids=m["prefix_ids"],
                 teacher_continuation_ids=cont,
                 source_session_id=str(s["id"]), source_seed=args.source_seed,
                 truncation_index=m["truncation_index"],
-                truncation_fraction=m["fraction"], data_type=s["data_type"])
-            n_sys = len(tok(render_system_block(
-                tok, next((x["content"] for x in s["messages"]
-                           if x["role"] == "system"), ""), s.get("tools")),
-                add_special_tokens=False).input_ids)
+                truncation_fraction=m["fraction"], data_type=s["data_type"],
+                system_key=key, n_system_tokens=n_sys)
             check_gates(
                 ex, echoed_prefix_ids=echoed[len(m["prompt_ids"]):],
                 student_prefix_ids=m["prefix_ids"], stop_ids=stop_ids,
                 context_limit_hit=len(cont) >= args.context - len(req),
-                block_len=args.block_len, n_system_tokens=n_sys,
+                block_len=args.block_len,
                 held_out_ids=held_out, seen_targets=seen_targets, answer_ok=None)
             roundtrip_ok(ex, json.loads(json.dumps(ex.ids)),
                          json.loads(json.dumps(ex.mask)))
             rec = ex.to_record()
-            rec["n_system_tokens"] = n_sys
+            # The record must be packable BEFORE it is accepted. Discovering this
+            # after generation cost a full R corpus on 2026-08-07.
+            example_to_rendered(json.loads(json.dumps(rec)))
             per_bundle[(str(s["id"]), args.source_seed)].append(rec)
         except GateFailure as exc:
             rejected[exc.reason] += 1
@@ -274,6 +292,7 @@ def main() -> None:
         "rejected_by_reason": dict(rejected.most_common()),
         "rejected_bundles": bundle_reject,
         "examples_by_task": dict(by_task.most_common()),
+        "system_blocks": len(system_ids),
         "deliberate_rejection": args.reject_bundle,
         "sessions_sha256": sha256_file(SESSIONS),
         "libraries": library_versions(),
@@ -282,6 +301,9 @@ def main() -> None:
     args.out.mkdir(parents=True, exist_ok=True)
     (args.out / "examples.jsonl").write_text(
         "".join(json.dumps(e) + "\n" for e in examples))
+    # Written per arm so R is self-sufficient; the pairing stage checks that the
+    # arms agree on every shared key rather than assuming C's copy covers R.
+    (args.out / "system_ids.json").write_text(json.dumps(system_ids))
     (args.out / "manifest.json").write_text(json.dumps(report, indent=1))
     print(f"accepted {len(examples)} examples in "
           f"{report['complete_bundles']} complete bundles; "

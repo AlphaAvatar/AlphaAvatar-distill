@@ -3041,3 +3041,119 @@ PYTHONPATH=src python scripts/evaluation/analyze_e4.py --bootstrap 10000
 
 All three are now guarded by `tests/pod/test_pod_script_paths.py`, each verified
 by reintroducing the exact defect and confirming the test names it.
+
+---
+
+## 22. Experiment 5 — attempt 1: R corpus generated, then found unpackable (2026-08-07, $1.57)
+
+**Verdict: aborted at the pairing gate. No training ran. No E5 result exists.**
+The failure is a defect in this repository's own code, not evidence about
+teacher-prefix (C) versus student-prefix (R) continuation.
+
+| | |
+| --- | --- |
+| Pod | RunPod L40S `n1kavevctllrvi`, $0.99/h securePrice-verified |
+| Billed | **$1.57** (95 min), pod self-deleted 09:02 UTC |
+| Commit | `91cd1cd` |
+| Authorization | $9.12; **$7.55 remains** |
+| Reached | setup → validate → benchmark → **gate 1 PASS** → generate sa+sb → **pair FAILED** |
+
+### What worked, and is worth keeping
+
+Setup completed in **5 minutes**, not the 53 minutes measured on 2026-08-06 —
+the image was warm. All eleven markers, both venvs, three checkpoint hashes
+verified, 689 tests passed on the pod.
+
+The `truncate_padding` benchmark returned a **measured 2.497× wall-clock
+speedup** against a 3.245× executed-position reduction, confirming that the
+position count was an upper bound rather than a prediction. Full-width 3.222
+s/step → truncated 1.290 s/step, on 30 blocks spanning the real E5-C length
+distribution (min 362, p50 678, max 8188 real tokens). Gate 1 passed at $7.64
+backstop against $8.55 remaining.
+
+R generation itself worked and was cheaper than budgeted: **74 minutes for both
+seeds**, against 152 projected. Acceptance was high and the gates fired
+sensibly:
+
+| seed | rollouts | recovery requests | accepted | complete bundles | dominant rejection |
+| --- | --- | --- | --- | --- | --- |
+| sa | 1147 | 2280 | 2116 (92.8%) | 1058 | `natural_termination` 110 |
+| sb | 1147 | 2278 | 2080 (91.3%) | 1040 | `natural_termination` 135 |
+
+`natural_termination` dominating is the expected shape given E4: the student
+still fails to terminate on roughly a quarter of rollouts.
+
+### The defect
+
+`RecoveryExample.to_record()` emitted only the **summary counts** — token
+lengths, fractions, task labels — and dropped `ids` and `mask`. The tokens were
+built, gated, and round-trip-checked in memory, then discarded on the way to
+disk. `stage_pair` raised on the first record:
+
+```
+ValueError: example 'glaive-000008#t1#r0' missing ['ids', 'mask', 'system_key']
+```
+
+Arm C's builder wrote its records independently and did include the payload, so
+**every offline validation passed**: the registration records the packing path
+as "built and validated offline on arm C". The two arms answered to one packing
+contract that only one of them had ever been tested against. The full-path pilot
+that would have caught this died in setup twice, on 2026-08-06.
+
+4,196 gated R examples were lost. They cannot be recovered from the saved
+records because the tokens were never written.
+
+### The second defect, which is the more dangerous one
+
+The driver caught only `(CalledProcessError, AssertionError, OSError)`. A
+`ValueError` escaped `main()`, so **no marker was written at all** — not
+`STAGE_FAILED`, not `ABORTED_AT_GATE`. The launcher polls for a terminal marker
+and would have kept polling for its full 520-minute window with the work already
+dead, idle-billing an estimated **$6–7**. It cost ~6 minutes only because the
+scheduled status check caught it. A crash on a paid pod is a billing event, not
+just a stack trace.
+
+### A third defect, found while fixing the first
+
+`check_gates` computed the context budget as `n_total_tokens + n_system_tokens`,
+but `ids` already opens with the system block — the prompt is rendered from the
+full message list. The gate was stricter than intended by the system-block
+length and rejected valid long samples. Conservative rather than corrupting, but
+wrong; a test had codified the double count.
+
+### Fixes (commit `<this>`)
+
+* `system_key` and `n_system_tokens` are now **required fields** on
+  `RecoveryExample`, and `to_record()` emits `ids`/`mask`/`system_key`. The
+  missing-field class of bug becomes a construction error rather than a
+  discovery made after generation is paid for.
+* `build_e5_arm_r.py` derives `system_key` from the same `system_group_key`
+  helper arm C uses, writes its own `system_ids.json`, asserts the prompt opens
+  with exactly the system block it keys, and **runs `example_to_rendered` on
+  every record before accepting it**.
+* `stage_pair` merges *both* arms' system maps and fails if they disagree about
+  the tokens behind a shared key.
+* The driver catches `Exception`; the launcher additionally checks driver
+  liveness each poll and tears down a pod whose driver has died with no terminal
+  marker.
+* `check_gates` counts the system block once.
+
+Verified: `test_recovery_record_is_packable` reproduces the exact failing call
+and fails against the old `to_record`. An offline rehearsal built R-shaped
+records from 400 **real** rescued arm-C examples and ran the complete path —
+`to_record` → JSON → `example_to_rendered` → `pack_e5` → `write_pack` →
+`verify_pack` — packing 34/34 blocks with `passed: True`. 728 tests pass.
+
+### Artifacts retained
+
+`/home/ecs-user/aad-artifacts/e5/` — pod status, run log, side bundle, and
+`rescue/` holding both arms' corpora and manifests pulled before teardown. The
+arm C corpora (33 MB per seed) are complete and reusable. The R corpora are
+metadata only and must be regenerated.
+
+### Next
+
+Relaunch requires regenerating R (~74 min, ~$1.22). Estimated total for a
+complete run from a warm image: ~355 min, ~$5.86 expected, ~$6.56 at the 1.12
+backstop, against **$7.55 remaining** — roughly $1.00 of slack. Awaiting a
+decision on whether to spend it.

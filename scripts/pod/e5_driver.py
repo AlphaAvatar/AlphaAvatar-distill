@@ -34,6 +34,7 @@ import shutil
 import subprocess
 import sys
 import time
+import traceback
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -108,6 +109,27 @@ def stage_generate(args):
             run(["scripts/data/build_e5_arm_c.py", "--source-seed", seed, "--out", c])
 
 
+def _system_ids(seed: str, conditions: list) -> dict:
+    """Union of both arms' system blocks, with disagreement made fatal.
+
+    Each arm writes its own map. Taking only C's would let an R example whose
+    system block C never saw be packed under a KeyError -- or worse, let the two
+    arms disagree about the tokens behind one key and train on different system
+    blocks while reporting one corpus.
+    """
+    merged: dict[str, list[int]] = {}
+    clashes = []
+    for arm in ("c", "r"):
+        path = REPO / f"artifacts/stage3/e5_arm_{arm}_{seed}/system_ids.json"
+        for key, ids in json.loads(path.read_text()).items():
+            if key in merged and merged[key] != ids:
+                clashes.append(key)
+            merged[key] = ids
+    conditions.append((f"{seed} arms agree on shared system blocks",
+                       not clashes, f"{len(merged)} blocks, {len(clashes)} clash"))
+    return merged
+
+
 def stage_pair(args):
     """Intersection, token targeting, packing — then the joint feasibility gate."""
     sys.path.insert(0, str(REPO / "src"))
@@ -164,8 +186,7 @@ def stage_pair(args):
     from aadistill.data.e5_pack import pack_e5, write_pack, verify_pack
     minima = {}
     for seed in SEEDS:
-        sysids = json.loads((REPO / f"artifacts/stage3/e5_arm_c_{seed}"
-                             / "system_ids.json").read_text())
+        sysids = _system_ids(seed, conditions)
         for arm in ("C", "R"):
             rows = [json.loads(l) for l in
                     (REPO / f"artifacts/stage3/e5_final_{arm}_{seed}.jsonl").open()
@@ -178,8 +199,7 @@ def stage_pair(args):
     print(f"  minima {report['per_arm_minimum_blocks']} -> common {common} blocks, "
           f"{report['optimizer_steps']} steps", flush=True)
     for seed in SEEDS:
-        sysids = json.loads((REPO / f"artifacts/stage3/e5_arm_c_{seed}"
-                             / "system_ids.json").read_text())
+        sysids = _system_ids(seed, conditions)
         for arm in ("C", "R"):
             rows = [json.loads(l) for l in
                     (REPO / f"artifacts/stage3/e5_final_{arm}_{seed}.jsonl").open()
@@ -448,9 +468,16 @@ def main() -> None:
     for name in (list(STAGES) if args.stage == "all" else [args.stage]):
         try:
             STAGES[name](args)
-        except (subprocess.CalledProcessError, AssertionError, OSError) as exc:
+        # `except Exception`, deliberately broad. A narrower tuple let a
+        # ValueError escape `main()` on 2026-08-07: no marker was written, so the
+        # launcher -- which polls for a terminal marker -- had nothing to see and
+        # would have kept a finished pod alive for its full 520-minute poll
+        # window. On a paid pod an uncaught exception is a billing event, not
+        # just a stack trace.
+        except Exception as exc:
             mark(f"STAGE_FAILED:{name}:{type(exc).__name__}")
             print(f"STAGE FAILED: {name}: {exc}", flush=True)
+            traceback.print_exc()
             if name in BLOCKING and args.stage == "all":
                 # `return`, not `break`: the launcher reads the LAST status line,
                 # so falling through to ALL_DONE would record a stopped gate as a

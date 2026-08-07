@@ -28,7 +28,7 @@ def make(prompt=5, prefix=10, cont=20, stop=True, **kw):
     c = list(range(300, 300 + cont - 1)) + [151645 if stop else 999]
     kwargs = dict(source_session_id="gsm8k-1", source_seed="sa",
                   truncation_index=0, truncation_fraction=0.4,
-                  data_type="gsm8k")
+                  data_type="gsm8k", system_key="k0", n_system_tokens=3)
     kwargs.update(kw)
     return build_example(prompt_ids=p, student_prefix_ids=s,
                          teacher_continuation_ids=c, **kwargs), p, s, c
@@ -36,7 +36,7 @@ def make(prompt=5, prefix=10, cont=20, stop=True, **kw):
 
 def gate(ex, s, **over):
     kw = dict(echoed_prefix_ids=s, student_prefix_ids=s, stop_ids=STOP,
-              context_limit_hit=False, block_len=8192, n_system_tokens=20,
+              context_limit_hit=False, block_len=8192,
               held_out_ids=set(), seen_targets=set(), answer_ok=True)
     kw.update(over)
     check_gates(ex, **kw)
@@ -67,7 +67,8 @@ def test_an_empty_student_prefix_is_refused_at_construction():
         build_example(prompt_ids=[1], student_prefix_ids=[],
                       teacher_continuation_ids=[2], source_session_id="x",
                       source_seed="sa", truncation_index=0,
-                      truncation_fraction=0.5, data_type="gsm8k")
+                      truncation_fraction=0.5, data_type="gsm8k",
+                      system_key="k0", n_system_tokens=1)
 
 
 def test_an_empty_continuation_is_refused_at_construction():
@@ -75,7 +76,8 @@ def test_an_empty_continuation_is_refused_at_construction():
         build_example(prompt_ids=[1], student_prefix_ids=[2],
                       teacher_continuation_ids=[], source_session_id="x",
                       source_seed="sa", truncation_index=0,
-                      truncation_fraction=0.5, data_type="gsm8k")
+                      truncation_fraction=0.5, data_type="gsm8k",
+                      system_key="k0", n_system_tokens=1)
 
 
 # -------------------------------------------------------------------- gates
@@ -116,11 +118,15 @@ def test_held_out_prompts_are_refused():
         gate(ex, s, held_out_ids={"gsm8k-1"})
 
 
-def test_context_budget_accounts_for_the_system_block():
-    ex, _, s, _ = make(prompt=5, prefix=10, cont=20)   # 35 tokens
-    gate(ex, s, block_len=60, n_system_tokens=20)      # 55 <= 60, fine
+def test_the_context_budget_counts_the_system_block_exactly_once():
+    """`prompt_ids` are rendered from the FULL message list, so the system block
+    is already inside `ids`. Charging `n_system_tokens` again on top made the
+    gate reject valid long samples for a budget they never exceeded."""
+    ex, _, s, _ = make(prompt=5, prefix=10, cont=20)   # 35 tokens INCLUDING system
+    assert ex.n_total_tokens == 35
+    gate(ex, s, block_len=35)                          # exactly fits
     with pytest.raises(GateFailure, match="within_context_budget"):
-        gate(ex, s, block_len=50, n_system_tokens=20)  # 55 > 50
+        gate(ex, s, block_len=34)
 
 
 def test_a_mask_that_disagrees_with_the_supervision_count_is_refused():
@@ -192,3 +198,59 @@ def test_loss_attribution_handles_a_missing_decomposition():
                          kd_weight=1.0, decomposition={})
     assert a["prefix_kd_contribution"] is None
     assert a["kd_share_of_total_loss"] == pytest.approx(0.5)
+
+
+# ------------------------------------------------- the on-disk packing contract
+# 2026-08-07: the E5 pod generated, gated and wrote 4,196 R examples, then died
+# at the pairing gate because `to_record()` emitted only the summary counts --
+# the token payload it had just validated was dropped on the way to disk. Arm C
+# was unaffected, so every offline check passed. These tests close that gap by
+# asserting the record against the packer's own contract rather than against a
+# hand-written field list.
+
+def test_recovery_record_is_packable():
+    """The exact call that failed on the pod: record -> packer input."""
+    from aadistill.data.e5_pack import REQUIRED_FIELDS, example_to_rendered
+
+    ex, p, s, c = make(prompt=5, prefix=10, cont=20)
+    rec = ex.to_record()
+    missing = [f for f in REQUIRED_FIELDS if f not in rec]
+    assert not missing, f"to_record() omits packer-required fields: {missing}"
+
+    rendered = example_to_rendered(rec)
+    # The system block is stripped for packing and re-emitted per block.
+    assert rendered.n_system_tokens == ex.n_system_tokens
+    assert rendered.body_ids == ex.ids[ex.n_system_tokens:]
+    assert rendered.body_mask == [bool(m) for m in ex.mask[ex.n_system_tokens:]]
+    assert sum(rendered.body_mask) == ex.n_continuation_tokens
+    # `source_id` is the trajectory, which is what keeps bundle siblings apart.
+    assert rendered.source_id == ex.source_session_id
+
+
+def test_the_record_carries_the_tokens_not_just_their_lengths():
+    ex, p, s, c = make(prompt=5, prefix=10, cont=20)
+    rec = ex.to_record()
+    assert rec["ids"] == ex.ids and rec["mask"] == [bool(m) for m in ex.mask]
+    # A record that survives JSON must still be packable -- this is how it lands.
+    import json
+
+    from aadistill.data.e5_pack import example_to_rendered
+    assert example_to_rendered(json.loads(json.dumps(rec))).body_ids \
+        == ex.ids[ex.n_system_tokens:]
+
+
+def test_both_arms_satisfy_one_packing_contract():
+    """C and R are packed by the same function, so they answer to one contract.
+
+    Arm C's record shape is asserted here from its builder's own field list so
+    the two arms cannot drift apart silently again."""
+    from aadistill.data.e5_pack import REQUIRED_FIELDS
+
+    ex, *_ = make()
+    r_record = set(ex.to_record())
+    c_record = {"id", "ids", "mask", "system_key", "n_system_tokens",
+                "source_session_id", "truncation_index", "truncation_fraction",
+                "data_type", "arm", "prefix_source", "source_seed"}
+    for field_name in REQUIRED_FIELDS:
+        assert field_name in r_record, f"arm R record missing {field_name}"
+        assert field_name in c_record, f"arm C record missing {field_name}"
