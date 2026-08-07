@@ -282,7 +282,7 @@ def test_pairing_merges_both_arms_system_blocks():
 
 # --- E5 attempt 2: $7.55, arm C reused, records verified from disk ------------
 
-AUTHORIZED_USD = 5.71     # what survived attempts 1-5
+AUTHORIZED_USD = 5.38     # what survived attempts 1-6
 
 
 def test_the_pod_deadline_cannot_exceed_the_remaining_authorization():
@@ -340,7 +340,9 @@ def test_gate_1_prices_r_generation_from_the_measurement():
     src = _e5_driver()
     gate = src[src.index("def stage_budget_gate_1"):src.index("def stage_final_benchmark")]
     assert '"r_generation": 152' not in gate, "the stale estimate must be gone"
-    measured = int(re.search(r'"r_generation": (\d+)', gate).group(1))
+    # Two prices: 0 when the corpora are staged, else a margin over the measured
+    # 74.1 min. Both must be present -- the gate chooses between them at runtime.
+    measured = int(re.search(r'"r_generation": 0 if staged else (\d+)', gate).group(1))
     assert 74 <= measured <= 110, \
         f"r_generation {measured} is not a margin over the measured 74.1 min"
     assert "MEASURED 74.1 min" in gate, "the basis must travel with the number"
@@ -535,3 +537,15 @@ def test_corpus_retention_does_not_depend_on_an_inherited_env_var():
     fn = src[src.index("def _retain_corpora("):src.index("def _system_ids(")]
     assert 'os.environ.get("HF_TOKEN")' in fn and "/workspace/hf/token" in fn
     assert 'os.environ["HF_TOKEN"]' not in fn
+
+
+def test_gate_1_does_not_budget_generation_that_will_be_skipped():
+    """With the corpora staged, reserving 90 min for generation is a $1.48
+    phantom. It failed gate 1 by $0.94 on 2026-08-07 while the real plan fitted."""
+    src = _e5_driver()
+    g = src[src.index("def stage_budget_gate_1"):src.index("def stage_final_benchmark")]
+    assert 'staged = all(' in g and 'e5_arm_r_{s_}/examples.jsonl' in g
+    assert '"r_generation": 0 if staged else 90' in g
+    assert '"r_corpora_staged"' in g, "the gate must record which plan it priced"
+    # The stale 1.30x-R rationale must not outlive the design it described.
+    assert "conservative R = 1.30x" not in g

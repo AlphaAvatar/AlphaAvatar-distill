@@ -529,21 +529,31 @@ def stage_budget_gate_1(args):
     # 90 min is that measurement plus 21%, so the gate is still conservative
     # while no longer carrying a 78-minute phantom worth $1.29. Every other
     # phase estimate is unchanged; verify_records is a new CPU-only stage.
+    # Budget generation only if it is actually going to run. When the corpora
+    # are staged, reserving 90 minutes for work that will be skipped is a $1.48
+    # phantom -- it failed this gate by $0.94 on 2026-08-07 while the real plan
+    # fitted comfortably.
+    staged = all((REPO / f"artifacts/stage3/e5_arm_r_{s_}/examples.jsonl").is_file()
+                 for s_ in SEEDS)
+    phases = {"r_generation": 0 if staged else 90, "verify_records": 2,
+              "pair_pack": 20, "final_benchmark": 5,
+              "evaluate": 44, "transfer_teardown": 35}
     rep = _budget(spent, args.authorized_usd - spent, args.assumed_blocks,
-                  SEC_PER_STEP / max(0.01, speedup),
-                  phases_min={"r_generation": 90, "verify_records": 2,
-                              "pair_pack": 20, "final_benchmark": 5,
-                              "evaluate": 44, "transfer_teardown": 35})
+                  SEC_PER_STEP / max(0.01, speedup), phases_min=phases)
+    rep["r_corpora_staged"] = staged
     rep["gate"] = "pre-generation"
-    rep["r_generation_basis"] = ("MEASURED 74.1 min over both seeds in attempt 1 "
-                                 "(2026-08-07), +21% margin; not the 152-min "
-                                 "pre-measurement estimate")
+    rep["r_generation_basis"] = (
+        "0 -- the R corpora are staged and hash-verified, so generation is "
+        "skipped" if staged else
+        "MEASURED 74.1 min over both seeds in attempt 1 (2026-08-07), +21% "
+        "margin; not the 152-min pre-measurement estimate")
     rep["rate_source"] = ("C full-width reference / measured truncate_padding "
                           f"speedup {speedup:.3f}x; replaced at gate 2 by an "
                           "absolute measurement on the final packs")
-    rep["assumed_blocks_rationale"] = ("conservative R = 1.30x the measured C "
-                                       "minimum; replaced by the real common "
-                                       "block count at gate 2")
+    rep["assumed_blocks_rationale"] = ("1.15x the measured binding arm (C at "
+                                       "904 blocks under nested selection); "
+                                       "replaced by the real common block count "
+                                       "at gate 2")
     (OUT / "e5_budget_gate1.json").write_text(json.dumps(rep, indent=1))
     print(json.dumps(rep, indent=1), flush=True)
     mark("BUDGET_GATE_1_PASS" if rep["covered"] else "BUDGET_GATE_1_FAIL")
@@ -629,7 +639,7 @@ def main() -> None:
     ap.add_argument("--validate-limit", type=int, default=24)
     ap.add_argument("--bench-steps", type=int, default=12)
     ap.add_argument("--final-bench-steps", type=int, default=8)
-    ap.add_argument("--authorized-usd", type=float, default=5.70)
+    ap.add_argument("--authorized-usd", type=float, default=5.37)
     ap.add_argument("--spent-usd", type=float, default=0.0,
                     help="pod spend so far, supplied by the launcher")
     ap.add_argument("--assumed-blocks", type=int, default=1012,
