@@ -1,41 +1,30 @@
-**Updated:** 2026-08-07 15:05 UTC · branch `main` · **no pods running, nothing
-billing.** Four E5 attempts, **$5.36 spent, no C/R result.** **$7.26 of the $8.79
-authorization remains.** Blocked on a design decision, not on infrastructure.
+**Updated:** 2026-08-08 03:05 UTC · branch `main` · **no pods running, nothing
+billing.** Five E5 attempts, **$6.91 spent, no C/R training result.** **$5.71 of
+the $7.26 authorization remains.** Ready to launch; one plan question open.
 
-## E5 — ATTEMPT 4 REACHED THE FEASIBILITY GATE AND FOUND A REAL CONFLICT
+## E5 — ATTEMPT 5 GENERATED REAL R AND KEPT IT; THE DESIGN IS NOW FEASIBLE
 
 | attempt | cost | stopped at | cause |
 | --- | --- | --- | --- |
-| 1 ([§22](EXPERIMENTS.md)) | $1.57 | pairing | `to_record()` dropped `ids`/`mask` — fixed |
-| 2 ([§23](EXPERIMENTS.md)) | $0.81 | gate 1 | stale 152-min estimate — fixed |
-| 3 ([§24](EXPERIMENTS.md)) | $1.45 | setup | cold host — tripwire added |
-| 4 ([§25](EXPERIMENTS.md)) | $1.53 | **feasibility gate** | **real design conflict** |
+| 1 ([§22](EXPERIMENTS.md)) | $1.57 | pairing | `to_record()` dropped ids/mask |
+| 2 ([§23](EXPERIMENTS.md)) | $0.81 | gate 1 | stale 152-min estimate |
+| 3 ([§24](EXPERIMENTS.md)) | $1.45 | setup | cold host |
+| 4 ([§25](EXPERIMENTS.md)) | $1.53 | feasibility | R/C token asymmetry, 1.66-1.76x |
+| 5 ([§26](EXPERIMENTS.md)) | $1.55 | feasibility | C pooled over the intersection |
 
-**Working now:** setup 4 min 45 s on the first draw, tripwire silent;
-`RECORDS_VERIFIED` **passed** on 2,102 + 2,056 real records — zero missing
-fields, zero unrenderable, zero system-block mismatches. The attempt-1 contract
-defect is fixed and confirmed on generated data.
+**The R corpora survived** — 2,098 + 2,042 real records, zero unusable, staged on
+the relay at `e5_start/e5_arm_r.tar.gz` (`e2cbbd45…`). The relay push failed on a
+missing `HF_TOKEN`, but the side-bundle copy worked.
 
-**The conflict.** R's supervised continuation is **1.66× (sa) / 1.76× (sb)**
-longer than C's on the same bundle at the same cut depth. C's span is the
-teacher's own remaining trajectory; R's is a fresh teacher generation from a
-student prefix, and the teacher repairs rather than continues. So with atomic
-bundles and identical composition, **no single bundle count puts both arms on
-735,603 tokens** — at 778 bundles C was 24.7% under and R 24.7% over.
+**The corrected design, computed offline on the real corpora at $0:** C pools over
+its full corpus rather than the R intersection, which was vestigial once
+composition stopped being identical. T\* = **735,603 unreduced**; both arms land
+on it exactly, arm-to-arm delta **0.0000%**; C 963/989 bundles, R 603/672,
+nested; common block count **904**, **1,356** steps, **117 min** training.
 
-**A resolution inside the registered 5%:** select each arm independently, R
-nested in C's pool — sa: C 1,034 → 735,823, R 624 → 735,918; sb: C all 1,028 →
-703,337 (0.956×), R 610 → 735,495. Composition then differs (R ≈ 0.60× C's
-bundles). This does not affect the paired statistics, which run over the 150
-pinned held-out prompts, not over training bundles. Caveats: sb's C arm has zero
-headroom, and these per-bundle rates are **extrapolated** and must be re-measured.
-
-**Decision required:** independent per-arm selection (tokens matched, composition
-differs) or identical composition (R sees ~69% more supervised signal).
-
-**Fixed since:** R corpora are now pushed to the relay inside `verify_records`,
-the moment they are verified — they were lost at teardown twice because the side
-bundle shipped manifests, not examples.
+**Budget forces one decision:** regenerating R costs $1.48 and leaves the run
+**$0.07 short**; reusing the staged corpora leaves **$1.59 (96 min)** of pre-gate
+allowance. Setup stages and contract-checks arm R exactly as it does arm C.
 
 ## EXPERIMENT 4 COMPLETE — SCALE SUBSTANTIALLY IMPROVES ROLLOUT STABILITY,
 ## BUT DOES NOT RESOLVE CORRECTNESS
