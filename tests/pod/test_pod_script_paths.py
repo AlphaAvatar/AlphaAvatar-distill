@@ -459,3 +459,37 @@ def test_the_launcher_waits_out_a_capacity_drought():
         f"{tries} x {delay}s = {tries*delay}s waits out under an hour of drought"
     # Backing off must happen before a pod exists, so it must not be billed.
     assert "no capacity; retrying in" in src
+
+
+def test_the_runtime_deadline_is_computed_per_create_not_at_launch():
+    """Free capacity waiting must not consume the runtime backstop.
+
+    Attempt 5 waited 7 minutes for capacity: the failed create at 16:47:36
+    computed a 00:07:36Z deadline and created nothing, and the successful create
+    at 16:54:37 computed a fresh 00:14:37Z. That only holds because `deadline` is
+    computed INSIDE create_pod, once per attempt. Hoisting it to script scope
+    would silently charge every drought minute against the pod's runtime.
+    """
+    src = (REPO / "scripts/pod/e5_launch.sh").read_text()
+    fn = src[src.index("create_pod() {"):src.index("\n}", src.index("create_pod() {"))]
+    assert 'deadline=$(date -u -d "+${BACKSTOP_MINUTES} minutes"' in fn, \
+        "the deadline must be computed inside create_pod, per attempt"
+    assert '--terminate-after "$deadline"' in fn
+    # And it must not also be computed at script scope, where it would freeze.
+    before = src[:src.index("create_pod() {")]
+    assert "BACKSTOP_MINUTES} minutes" not in before, \
+        "a script-scope deadline would be fixed before capacity is acquired"
+
+
+def test_the_spending_meter_starts_at_the_successful_create():
+    """`pod_start_epoch` is what every gate charges from, so it must be written
+    only once a pod actually exists -- never during a capacity drought."""
+    src = (REPO / "scripts/pod/e5_launch.sh").read_text()
+    loop = src[src.index("POD_ID=$(create_pod"):src.index("# runpodctl 2.7.1")]
+    epoch_at = loop.index('date -u +%s > "$SCR/pod_start_epoch"')
+    fail_at = loop.index('if [ -z "$POD_ID" ]; then')
+    assert fail_at < epoch_at, \
+        "the failed-create branch must return before the meter starts"
+    assert '[ -f "$SCR/pod_start_epoch" ] ||' in loop, "written once per session"
+    wd_note = (REPO / "scripts/pod/e5_launch.sh").read_text()
+    assert "no capacity; retrying in" in wd_note
