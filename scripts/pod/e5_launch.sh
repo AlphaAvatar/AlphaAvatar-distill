@@ -28,19 +28,18 @@ MAX_PRICE=${MAX_PRICE:-0.99}
 # Integer minutes: `date -d "+7.5 hours"` is rejected by GNU date and silently
 # produces an EMPTY --terminate-after, i.e. a pod with no backstop at all.
 #
-# Attempt 2 runs under what SURVIVED attempt 1: $7.55, not the original $9.12.
-# 457 min x $0.99 = $7.54, so the RunPod-side deadline cannot on its own exceed
-# the authorization even if every other layer fails. Expected work is ~355 min,
-# leaving ~100 min of headroom -- deliberately not spent in advance on the
-# assumption that attempt 1's 5-minute warm-image setup repeats. If setup runs
-# cold instead, the headroom absorbs it and the gates re-price from the ACTUAL
-# elapsed time rather than from either measurement.
-BACKSTOP_MINUTES=${BACKSTOP_MINUTES:-457}
+# Attempt 3 runs under $8.24: what survived attempts 1-2 ($6.74) plus $1.50.
+# 499 min x $0.99 = $8.23, so the RunPod-side deadline cannot on its own exceed
+# the authorization even if every other layer fails. Expected work is ~372 min
+# on measured phases, leaving ~127 min of headroom for a cold setup, an
+# abandoned pod, or an R corpus that packs worse than assumed. The gates
+# re-price from ACTUAL elapsed session time regardless.
+BACKSTOP_MINUTES=${BACKSTOP_MINUTES:-499}
 STARTUP_LIMIT_MIN=${STARTUP_LIMIT_MIN:-15}
 MAX_POD_ATTEMPTS=${MAX_POD_ATTEMPTS:-2}
 # Seconds between create attempts when the GPU is out of capacity.
 CREATE_RETRY_DELAY_S=${CREATE_RETRY_DELAY_S:-300}
-POLL_LIMIT_MIN=${POLL_LIMIT_MIN:-445}   # inside the 457-min backstop
+POLL_LIMIT_MIN=${POLL_LIMIT_MIN:-487}   # inside the 499-min backstop
 CKPT_TRANSFER_LIMIT_MIN=${CKPT_TRANSFER_LIMIT_MIN:-40}
 TEACHER_REVISION=${TEACHER_REVISION:-768f209d9ea81521153ed38c47d515654e938aea}
 STORE=${STORE:-/home/ecs-user/aad-artifacts/e5}
@@ -156,7 +155,13 @@ except Exception: print('')")
       echo "LAUNCH_ABORT:actual_price_$ACTUAL" > "$STATE"; exit 1
     fi
     say "attempt $attempt: pod costPerHr \$$ACTUAL (authorized \$$MAX_PRICE)"
-    date -u +%s > "$SCR/pod_start_epoch"; echo "$POD_ID" > "$SCR/pod_id"
+    # Written ONCE per session, at the FIRST create. On 2026-08-07 a pod that
+    # never exposed TCP 22 was deleted and replaced, and resetting this epoch
+    # hid its $0.25 from every gate while handing the replacement a fresh full
+    # deadline -- together putting the worst case above the authorization.
+    # Billing is per session, not per pod, so the origin is too.
+    [ -f "$SCR/pod_start_epoch" ] || date -u +%s > "$SCR/pod_start_epoch"
+    echo "$POD_ID" > "$SCR/pod_id"
     say "attempt $attempt: created $POD_ID"
   else
     say "attempt $attempt: reusing existing pod $POD_ID"

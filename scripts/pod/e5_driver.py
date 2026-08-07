@@ -423,11 +423,21 @@ def stage_budget_gate_1(args):
     bench = json.loads((OUT / "e5_throughput.json").read_text())
     speedup = bench["measured_wall_clock_speedup"]
     spent = _spent(args)
+    # r_generation was 152 min: an estimate made before R had ever been
+    # generated. Attempt 1 measured the identical operation -- same hardware,
+    # engine, prompts, student, both seeds -- at 74.1 min (sa 34.6, sb 39.5).
+    # 90 min is that measurement plus 21%, so the gate is still conservative
+    # while no longer carrying a 78-minute phantom worth $1.29. Every other
+    # phase estimate is unchanged; verify_records is a new CPU-only stage.
     rep = _budget(spent, args.authorized_usd - spent, args.assumed_blocks,
                   SEC_PER_STEP / max(0.01, speedup),
-                  phases_min={"r_generation": 152, "pair_pack": 20,
+                  phases_min={"r_generation": 90, "verify_records": 2,
+                              "pair_pack": 20, "final_benchmark": 5,
                               "evaluate": 44, "transfer_teardown": 35})
     rep["gate"] = "pre-generation"
+    rep["r_generation_basis"] = ("MEASURED 74.1 min over both seeds in attempt 1 "
+                                 "(2026-08-07), +21% margin; not the 152-min "
+                                 "pre-measurement estimate")
     rep["rate_source"] = ("C full-width reference / measured truncate_padding "
                           f"speedup {speedup:.3f}x; replaced at gate 2 by an "
                           "absolute measurement on the final packs")
@@ -519,7 +529,7 @@ def main() -> None:
     ap.add_argument("--validate-limit", type=int, default=24)
     ap.add_argument("--bench-steps", type=int, default=12)
     ap.add_argument("--final-bench-steps", type=int, default=8)
-    ap.add_argument("--authorized-usd", type=float, default=9.12)
+    ap.add_argument("--authorized-usd", type=float, default=8.23)
     ap.add_argument("--spent-usd", type=float, default=0.0,
                     help="pod spend so far, supplied by the launcher")
     ap.add_argument("--assumed-blocks", type=int, default=1123,

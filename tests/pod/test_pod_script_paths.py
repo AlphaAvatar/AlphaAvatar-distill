@@ -282,16 +282,19 @@ def test_pairing_merges_both_arms_system_blocks():
 
 # --- E5 attempt 2: $7.55, arm C reused, records verified from disk ------------
 
+AUTHORIZED_USD = 8.24     # $6.74 surviving attempts 1-2, plus $1.50 approved
+
+
 def test_the_pod_deadline_cannot_exceed_the_remaining_authorization():
-    """Attempt 2 runs on what survived attempt 1. The RunPod-side deadline is
-    the one layer that fires even if launcher, driver and poller are all dead,
-    so it must itself sit under the authorization."""
+    """The RunPod-side deadline is the one layer that fires even if launcher,
+    driver and poller are all dead, so it must itself sit under the
+    authorization -- including any pod abandoned earlier in the session."""
     src = (REPO / "scripts/pod/e5_launch.sh").read_text()
     backstop = int(re.search(r"BACKSTOP_MINUTES=\$\{BACKSTOP_MINUTES:-(\d+)\}",
                              src).group(1))
     rate = float(re.search(r"MAX_PRICE=\$\{MAX_PRICE:-([\d.]+)\}", src).group(1))
-    assert backstop / 60 * rate <= 7.55, \
-        f"{backstop} min at ${rate}/h exceeds the $7.55 remaining authorization"
+    assert backstop / 60 * rate <= AUTHORIZED_USD, \
+        f"{backstop} min at ${rate}/h exceeds the ${AUTHORIZED_USD} authorization"
     poll = int(re.search(r"POLL_LIMIT_MIN=\$\{POLL_LIMIT_MIN:-(\d+)\}", src).group(1))
     assert poll < backstop, "polling must end before the pod is killed under it"
 
@@ -319,3 +322,25 @@ def test_persisted_records_are_verified_from_disk_before_pairing():
     assert 'examples.jsonl").open()' in stage, "must re-read the file, not reuse memory"
     assert "example_to_rendered(rec)" in stage
     assert 'for arm in ("c", "r")' in stage, "both producers must be verified"
+
+
+def test_a_replaced_pod_does_not_reset_the_session_billing_origin():
+    """2026-08-07: a pod that never exposed TCP 22 was deleted and replaced. The
+    replacement reset `pod_start_epoch`, hiding the abandoned pod's $0.25 from
+    every gate and handing the replacement a fresh full deadline."""
+    src = (REPO / "scripts/pod/e5_launch.sh").read_text()
+    assert '[ -f "$SCR/pod_start_epoch" ] || date -u +%s > "$SCR/pod_start_epoch"' in src, \
+        "the billing origin must be written once per session, not once per pod"
+    assert 'date -u +%s > "$SCR/pod_start_epoch"; echo' not in src
+
+
+def test_gate_1_prices_r_generation_from_the_measurement():
+    """152 min was a pre-measurement estimate; attempt 1 measured 74.1 min. The
+    phantom was worth $1.29 and failed a run short by $0.55."""
+    src = _e5_driver()
+    gate = src[src.index("def stage_budget_gate_1"):src.index("def stage_final_benchmark")]
+    assert '"r_generation": 152' not in gate, "the stale estimate must be gone"
+    measured = int(re.search(r'"r_generation": (\d+)', gate).group(1))
+    assert 74 <= measured <= 110, \
+        f"r_generation {measured} is not a margin over the measured 74.1 min"
+    assert "MEASURED 74.1 min" in gate, "the basis must travel with the number"
