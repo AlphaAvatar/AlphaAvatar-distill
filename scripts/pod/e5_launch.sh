@@ -28,14 +28,13 @@ MAX_PRICE=${MAX_PRICE:-0.99}
 # Integer minutes: `date -d "+7.5 hours"` is rejected by GNU date and silently
 # produces an EMPTY --terminate-after, i.e. a pod with no backstop at all.
 #
-# Attempt 4 runs under $8.79: $6.79 surviving attempts 1-3, plus $2.00.
-# 532 min x $0.99 = $8.78, so the RunPod-side deadline cannot on its own exceed
-# the authorization even if every other layer fails. The registered post-gate
-# backstop is 396 min ($6.55), leaving 136 min ($2.24) of pre-gate allowance;
-# reserves against it are 63 min (startup, warm setup, validate, benchmark, one
-# abandoned pod, two cold-host redraws), so 73 min stays unallocated. The gates
-# re-price from ACTUAL elapsed session time regardless.
-BACKSTOP_MINUTES=${BACKSTOP_MINUTES:-532}
+# Attempt 5 runs under $7.26, what survived attempts 1-4. 440 min x $0.99 =
+# $7.26, so the RunPod-side deadline cannot on its own exceed
+# the authorization even if every other layer fails. Under nested selection the
+# post-gate backstop is 347 min ($5.72) at the measured binding arm, leaving
+# 93 min ($1.54) of pre-gate allowance against ~22 min of warm-path need. The
+# gates re-price from ACTUAL elapsed session time regardless.
+BACKSTOP_MINUTES=${BACKSTOP_MINUTES:-440}
 STARTUP_LIMIT_MIN=${STARTUP_LIMIT_MIN:-15}
 MAX_POD_ATTEMPTS=${MAX_POD_ATTEMPTS:-2}
 # Cold-host redraws. Each costs ~6 min of tripwire plus ~4 min of startup; four
@@ -44,7 +43,7 @@ MAX_POD_ATTEMPTS=${MAX_POD_ATTEMPTS:-2}
 MAX_HOST_DRAWS=${MAX_HOST_DRAWS:-4}
 # Seconds between create attempts when the GPU is out of capacity.
 CREATE_RETRY_DELAY_S=${CREATE_RETRY_DELAY_S:-300}
-POLL_LIMIT_MIN=${POLL_LIMIT_MIN:-520}   # inside the 532-min backstop
+POLL_LIMIT_MIN=${POLL_LIMIT_MIN:-428}   # inside the 440-min backstop
 CKPT_TRANSFER_LIMIT_MIN=${CKPT_TRANSFER_LIMIT_MIN:-40}
 TEACHER_REVISION=${TEACHER_REVISION:-768f209d9ea81521153ed38c47d515654e938aea}
 STORE=${STORE:-/home/ecs-user/aad-artifacts/e5}

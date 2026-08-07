@@ -282,7 +282,7 @@ def test_pairing_merges_both_arms_system_blocks():
 
 # --- E5 attempt 2: $7.55, arm C reused, records verified from disk ------------
 
-AUTHORIZED_USD = 8.79     # $6.79 surviving attempts 1-3, plus $2.00 approved
+AUTHORIZED_USD = 7.26     # what survived attempts 1-4
 
 
 def test_the_pod_deadline_cannot_exceed_the_remaining_authorization():
