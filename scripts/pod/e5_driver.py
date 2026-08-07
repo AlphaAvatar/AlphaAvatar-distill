@@ -629,7 +629,7 @@ def main() -> None:
     ap.add_argument("--validate-limit", type=int, default=24)
     ap.add_argument("--bench-steps", type=int, default=12)
     ap.add_argument("--final-bench-steps", type=int, default=8)
-    ap.add_argument("--authorized-usd", type=float, default=8.23)
+    ap.add_argument("--authorized-usd", type=float, default=5.70)
     ap.add_argument("--spent-usd", type=float, default=0.0,
                     help="pod spend so far, supplied by the launcher")
     ap.add_argument("--assumed-blocks", type=int, default=1012,
