@@ -493,3 +493,38 @@ def test_the_spending_meter_starts_at_the_successful_create():
     assert '[ -f "$SCR/pod_start_epoch" ] ||' in loop, "written once per session"
     wd_note = (REPO / "scripts/pod/e5_launch.sh").read_text()
     assert "no capacity; retrying in" in wd_note
+
+
+def test_arm_r_is_staged_and_contract_checked_like_arm_c():
+    """Attempt 5's R corpora cost ~$1.24 and survived; regenerating them costs
+    90 min and pushes the run past the authorization."""
+    setup = (REPO / "scripts/pod/e5_setup.sh").read_text()
+    assert "e5_start/e5_arm_r.tar.gz" in setup
+    assert "ARM R BUNDLE MISMATCH" in setup, "the staged bundle must be hashed"
+    assert "arm R {seed} fails the current contract" in setup, \
+        "a staged corpus must satisfy the CURRENT contract, not just a hash"
+    # The driver must then SKIP generation rather than overwrite it.
+    src = _e5_driver()
+    gen = src[src.index("def stage_generate("):src.index("def stage_verify_records(")]
+    assert 'if (d / "examples.jsonl").exists():' in gen
+    assert "skipping" in gen
+
+
+def test_c_draws_from_its_full_pool_not_the_intersection():
+    """The intersection was needed only while both arms shared a composition.
+    Keeping it cost C 23.8% of its pool on sb and made attempt 5 infeasible."""
+    src = _e5_driver()
+    pair = src[src.index("def stage_pair("):src.index("def stage_final_benchmark(")]
+    assert 'pools[f"C_{seed}"] = as_bundles(c_rows)' in pair, \
+        "C must pool over its full corpus"
+    assert 'pools[f"R_{seed}"] = as_bundles(rk)' in pair, "R stays intersected"
+    assert 'kept[seed] = (c_rows, rk, census)' in pair
+
+
+def test_corpus_retention_does_not_depend_on_an_inherited_env_var():
+    """The driver is detached with setsid and does not inherit setup's HF_TOKEN;
+    attempt 5 raised KeyError and fell back to the side bundle."""
+    src = _e5_driver()
+    fn = src[src.index("def _retain_corpora("):src.index("def _system_ids(")]
+    assert 'os.environ.get("HF_TOKEN")' in fn and "/workspace/hf/token" in fn
+    assert 'os.environ["HF_TOKEN"]' not in fn

@@ -3400,3 +3400,90 @@ The design decision is the user's: independent per-arm selection to the token
 target (composition differs), or identical composition with unmatched tokens
 (R sees ~69% more supervised signal). No token target, treatment, seed or arm
 should be changed to force the other to fit.
+
+---
+
+## 26. Experiment 5 — attempt 5: the selector worked, a vestigial restriction did not (2026-08-07, $1.55)
+
+**Verdict: stopped at the feasibility gate. No training, no C/R result — but the
+R corpora survived, and the design is now demonstrably feasible offline.**
+
+| | |
+| --- | --- |
+| Pod | `m8mmk8f2389f8s`, second create after a capacity drought, no cold redraws |
+| Billed | **$1.55** (94 min); cumulative E5 **$6.91** |
+| Commit | `c94a96a` |
+| Authorization | $7.26; **$5.71 remains** |
+| Reached | gate 1 → generate sa+sb → **`RECORDS_VERIFIED`** → `CORPORA_RETAIN_FAILED` → pair → **INFEASIBLE** |
+
+### What worked
+
+Setup 5 min on the first draw. `GENERATED:sa` at 34.9 min, matching the 34.6 and
+36.1 of previous attempts. `RECORDS_VERIFIED` passed on 2,098 + 2,042 records.
+
+**The new nested selector passed every one of its own conditions**: arm-to-arm
+token delta **0.0000%** on both seeds, R nested in C, atomic bundles intact,
+system blocks agreeing, task shares within 2.6 points.
+
+**The R corpora survived.** The relay push failed — the driver is detached with
+`setsid` and does not inherit setup's exported `HF_TOKEN`, so it raised
+`KeyError` — but the second copy in the side bundle worked, and 32 MB + 30 MB of
+real R records came back. The belt-and-braces retention did its job on its first
+outing, through the belt failing.
+
+### Why it stopped
+
+T\* came out at **689,621**, 6.25% below the registered 735,603 and outside the
+5% ceiling, because `C_sb`'s pool was short. The cause is a **vestigial
+restriction**: C was pooling over the *intersection* with R rather than its own
+full corpus.
+
+| seed | C full pool | C paired pool | cost of pairing |
+| --- | --- | --- | --- |
+| sa | 905,488 (1.231×) | 743,088 (1.010×) | 162,400 — 17.9% |
+| sb | 905,488 (1.231×) | **689,621 (0.937×)** | 215,867 — **23.8%** |
+
+The intersection was required when both arms had to share a composition. That
+requirement was dropped in favour of independent per-arm selection, where only
+`R_selected ⊆ C_selected` must hold — and C's full pool satisfies it by
+construction, since every R bundle comes from a C prompt.
+
+Keeping it was also not methodologically neutral. The bundles it removed are
+exactly the prompts where the teacher's recovery from a student prefix failed a
+gate, mostly on natural termination. Restricting C to prompts where R succeeded
+conditions C's corpus on R's outcome.
+
+### The corrected design, computed on the real corpora at $0
+
+With C pooling over its full corpus, using attempt 5's actual R:
+
+| | sa | sb |
+| --- | --- | --- |
+| T\* | **735,603** — unreduced, 0.0000% | same |
+| C | 963 bundles → 735,603 (1.0000×) → 882 blocks | 989 → 735,603 → 904 blocks |
+| R | 603 bundles → 735,603 (1.0000×) → 591 blocks | 672 → 735,603 → 674 blocks |
+| shared / C-only | 603 / 360 | 672 / 317 |
+| arm-to-arm delta | 0.0000% | 0.0000% |
+| KD-mask = non-padding, C / R | 2,086,364 / 1,534,148 | 2,120,212 / 1,617,726 |
+
+Common block count **904** (even), **1,356** optimizer steps, **117 min** of
+training across four arms.
+
+### Budget: the decision the numbers force
+
+| plan | post-gate | ×1.12 | pre-gate allowance |
+| --- | --- | --- | --- |
+| regenerate R | 313 min | $5.78 | **−$0.07 — SHORT** |
+| **reuse the real R corpora** | 223 min | **$4.12** | **+$1.59 = 96 min** |
+
+Regenerating R would reproduce data that already exists, cost $1.48, and put the
+run $0.07 past the authorization. The corpora are staged on the relay,
+hash-verified (`e2cbbd45…`), and re-checked against the current contract in the
+pod's own environment — the same posture arm C has had since attempt 4.
+
+### Fixed
+
+* C pools over its full corpus; only R is intersected.
+* `_retain_corpora` reads `/workspace/hf/token` rather than requiring an
+  inherited `HF_TOKEN`.
+* Setup stages and contract-checks arm R alongside arm C.

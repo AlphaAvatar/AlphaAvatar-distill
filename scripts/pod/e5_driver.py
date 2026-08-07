@@ -201,7 +201,11 @@ def _retain_corpora() -> None:
     size_mb = tar.stat().st_size / 1e6
     try:
         from huggingface_hub import HfApi
-        HfApi(token=os.environ["HF_TOKEN"]).upload_file(
+        # The driver is detached with `setsid` and does not inherit setup's
+        # exported HF_TOKEN, so attempt 5 raised KeyError here and fell back to
+        # the side bundle. Read the file the setup staged instead.
+        token = os.environ.get("HF_TOKEN") or Path("/workspace/hf/token").read_text().strip()
+        HfApi(token=token).upload_file(
             path_or_fileobj=str(tar), path_in_repo="e5_start/e5_arm_r_corpora.tar.gz",
             repo_id="AlphaAvatar/aadistill-artifacts", repo_type="model")
         digest = hashlib.sha256(tar.read_bytes()).hexdigest()
@@ -255,9 +259,23 @@ def stage_pair(args):
                   (REPO / f"artifacts/stage3/e5_arm_r_{seed}/examples.jsonl").open()
                   if l.strip()]
         ck, rk, census = intersect(c_rows, r_rows)
-        pools[f"C_{seed}"] = as_bundles(ck)
+        # C draws from its FULL pool, not the intersection. The intersection was
+        # required when both arms had to share a composition; that requirement
+        # was dropped in favour of independent per-arm selection, and only
+        # `R_selected subset of C_selected` remains -- which C's full pool
+        # satisfies by construction, since every R bundle comes from a C prompt.
+        #
+        # Keeping the restriction cost C 17.9% (sa) and 23.8% (sb) of its pool
+        # and pushed C_sb to 0.937x the target, which is what made attempt 5
+        # infeasible. It also conditioned C's corpus on R's success: the dropped
+        # bundles are exactly the prompts where the teacher's recovery from a
+        # student prefix failed a gate, mostly on natural termination. Training C
+        # only where R succeeded is a confound, not a neutral restriction.
+        pools[f"C_{seed}"] = as_bundles(c_rows)
         pools[f"R_{seed}"] = as_bundles(rk)
-        kept[seed] = (ck, rk, census)
+        kept[seed] = (c_rows, rk, census)
+        census["c_pool_policy"] = "full"
+        census["c_bundles_dropped_for_pairing"] = 0
 
     # T* is fixed ONCE, across every arm and seed, before any arm is selected.
     # Choosing it per seed would let two seeds train on different budgets and

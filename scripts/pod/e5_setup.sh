@@ -302,6 +302,50 @@ for seed in ('sa', 'sb'):
         sys.exit(f'arm C {seed} fails the current contract: {bad}/{len(rows)}')
     print(f'  arm C {seed}: {len(rows)} examples, {len(pack_e5(rows, sysids, block_len=8192))} blocks, contract OK')
 "
+# The arm R corpora from attempt 5, staged the same way as arm C. They cost
+# ~$1.24 of GPU time, passed RECORDS_VERIFIED on the pod, and were re-verified
+# offline against the current contract: 2,098 + 2,042 records, zero unusable.
+# Regenerating identical data would cost 90 min ($1.48) and push the run $0.07
+# past the authorization; staging it leaves $1.59 of pre-gate allowance.
+if [ "${E5_STAGE_R:-1}" = "1" ]; then
+  say "staging the arm R corpora from attempt 5"
+  python3 -c "
+import os, shutil
+from huggingface_hub import hf_hub_download
+p = hf_hub_download('AlphaAvatar/aadistill-artifacts', 'e5_start/e5_arm_r.tar.gz',
+                    repo_type='model', token=os.environ['HF_TOKEN'])
+shutil.copy(p, '/workspace/e5_arm_r.tar.gz')
+"
+  python3 -c "
+import hashlib, sys
+h = hashlib.sha256(open('/workspace/e5_arm_r.tar.gz','rb').read()).hexdigest()
+want = 'e2cbbd45eefa98b142911414036e6b77fa926024dea368e2e7bc2d075b2c8e96'
+print('arm R bundle sha256', h)
+sys.exit(0 if h == want else f'ARM R BUNDLE MISMATCH: {h}')
+"
+  tar xzf /workspace/e5_arm_r.tar.gz --no-same-owner -C "$REPO/artifacts/stage3"
+  cd "$REPO" && PYTHONPATH=src /opt/train/bin/python -c "
+import json, sys
+from pathlib import Path
+from aadistill.data.e5_pack import REQUIRED_FIELDS, example_to_rendered
+for seed in ('sa', 'sb'):
+    d = Path('artifacts/stage3', f'e5_arm_r_{seed}')
+    rows = [json.loads(l) for l in (d/'examples.jsonl').open() if l.strip()]
+    sysids = json.loads((d/'system_ids.json').read_text())
+    bad = 0
+    for e in rows:
+        if [f for f in REQUIRED_FIELDS if f not in e]:
+            bad += 1; continue
+        try:
+            example_to_rendered(e)
+            assert e['ids'][:e['n_system_tokens']] == sysids[e['system_key']]
+        except Exception:
+            bad += 1
+    if bad or not rows:
+        sys.exit(f'arm R {seed} fails the current contract: {bad}/{len(rows)}')
+    print(f'  arm R {seed}: {len(rows)} records, contract OK')
+"
+fi
 mark ARMS_VALIDATED
 mark TESTS_OK
 
