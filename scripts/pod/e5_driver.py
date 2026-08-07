@@ -43,12 +43,16 @@ TRAIN_PY = "/opt/train/bin/python"
 VLLM_PY = "/opt/vllm/bin/python"
 INIT = REPO / "artifacts/stage1/qwen3_0p6b_init_v0/checkpoint"
 SEEDS = ("sa", "sb")
-STEP = "step_000738"
+STEP = None        # resolved from the measured step count at train time
 EXPECTED_MASK = "d6e24e0b09da1bcc692b1dc96d8236808d29551a9fc94a47d1d968fd3f73d6ba"
 TARGET_CE_TOKENS = 735_603
 TOLERANCE = 0.05
 BLOCKS, STEPS = 492, 738
 TOKENIZER_FILES = ("tokenizer.json", "tokenizer_config.json", "chat_template.jinja")
+TEACHER = "Qwen/Qwen3-4B-Thinking-2507"
+TEACHER_REV = "768f209d9ea81521153ed38c47d515654e938aea"
+SEC_PER_STEP = 3.61        # measured full-width; divided by the measured speedup
+RATE = 0.99
 
 
 def mark(name: str) -> None:
@@ -152,6 +156,43 @@ def stage_pair(args):
             path = REPO / f"artifacts/stage3/e5_final_{arm}_{seed}.jsonl"
             path.write_text("".join(json.dumps(e) + "\n" for e in rows))
 
+    # Common block count = max(C_min, R_min) across both arms and seeds, then
+    # both arms are repacked to exactly that count. The easier-to-pack arm
+    # carries additional ordinary padding; nothing is duplicated or truncated.
+    from aadistill.data.e5_pack import pack_e5, write_pack, verify_pack
+    minima = {}
+    for seed in SEEDS:
+        sysids = json.loads((REPO / f"artifacts/stage3/e5_arm_c_{seed}"
+                             / "system_ids.json").read_text())
+        for arm in ("C", "R"):
+            rows = [json.loads(l) for l in
+                    (REPO / f"artifacts/stage3/e5_final_{arm}_{seed}.jsonl").open()
+                    if l.strip()]
+            minima[(arm, seed)] = len(pack_e5(rows, sysids, block_len=8192))
+    common = max(minima.values())
+    report["per_arm_minimum_blocks"] = {f"{a}_{s_}": v for (a, s_), v in minima.items()}
+    report["common_block_count"] = common
+    report["optimizer_steps"] = common * 3 // 2
+    print(f"  minima {report['per_arm_minimum_blocks']} -> common {common} blocks, "
+          f"{report['optimizer_steps']} steps", flush=True)
+    for seed in SEEDS:
+        sysids = json.loads((REPO / f"artifacts/stage3/e5_arm_c_{seed}"
+                             / "system_ids.json").read_text())
+        for arm in ("C", "R"):
+            rows = [json.loads(l) for l in
+                    (REPO / f"artifacts/stage3/e5_final_{arm}_{seed}.jsonl").open()
+                    if l.strip()]
+            out = REPO / f"artifacts/stage3/e5_pack_{arm.lower()}_{seed}"
+            blocks = pack_e5(rows, sysids, block_len=8192, target_blocks=common)
+            write_pack(blocks, out, arm=arm.lower(), seed=seed, block_len=8192,
+                       pad_id=151643, target_ce_tokens=TARGET_CE_TOKENS)
+            v = verify_pack(out, rows, expected_blocks=common,
+                            target_ce_tokens=TARGET_CE_TOKENS, tolerance=TOLERANCE,
+                            steps=report["optimizer_steps"], blocks_per_step=2)
+            report.setdefault("packed", {})[f"{arm}_{seed}"] = v
+            conditions.append((f"{seed}/{arm} packed artifact verified",
+                               v["passed"], str(v["failures"])))
+
     report["conditions"] = [{"name": n, "passed": bool(p), "detail": d}
                             for n, p, d in conditions]
     report["feasible"] = all(p for _, p, _ in conditions)
@@ -169,10 +210,23 @@ def stage_train(args):
     for arm in ("c", "r"):
         for seed in SEEDS:
             name = f"e5_{arm}_{seed}"
-            if (arm_dir(arm, seed) / f"checkpoints/{STEP}/model").is_dir():
+            step_tag = f"step_{json.loads((OUT / 'e5_joint_feasibility.json').read_text())['optimizer_steps']:06d}"
+            if (arm_dir(arm, seed) / f"checkpoints/{step_tag}/model").is_dir():
                 mark(f"TRAIN_DONE:{name}")
                 continue
-            cfg = REPO / f"configs/stage3/e5/{name}.json"
+            cfg_path = REPO / f"configs/stage3/e5/{name}.json"
+            feas = json.loads((OUT / "e5_joint_feasibility.json").read_text())
+            if cfg_path.is_file():
+                c = json.loads(cfg_path.read_text())
+                c["data_dir"] = f"artifacts/stage3/e5_pack_{arm}_{seed}"
+                c["rung"] = TARGET_CE_TOKENS
+                steps = feas["optimizer_steps"]
+                c["schedule"] = {**c["schedule"], "total_steps": steps,
+                                 "warmup_steps": max(1, round(steps * 0.05))}
+                c["checkpoint"] = {"save_every": steps // 2, "keep_last": 1}
+                c["intervals"] = {**c["intervals"], "eval_every": max(1, steps // 6)}
+                cfg_path.write_text(json.dumps(c, indent=1) + "\n")
+            cfg = cfg_path
             if not cfg.is_file():
                 mark(f"TRAIN_SKIPPED:{name}:no_config")
                 continue
@@ -187,7 +241,8 @@ def stage_evaluate(args):
     for arm in ("c", "r"):
         for seed in SEEDS:
             name, alias = f"e5_{arm}_{seed}", f"E5-{arm.upper()}-{seed}"
-            m = arm_dir(arm, seed) / f"checkpoints/{STEP}/model"
+            step_tag = f"step_{json.loads((OUT / 'e5_joint_feasibility.json').read_text())['optimizer_steps']:06d}"
+            m = arm_dir(arm, seed) / f"checkpoints/{step_tag}/model"
             if not m.is_dir():
                 mark(f"EVAL_SKIPPED:{alias}")
                 continue
@@ -211,44 +266,124 @@ def stage_evaluate(args):
             mark(f"EVAL_DONE:{alias}")
 
 
+def _pack_c(seed: str) -> Path:
+    """Build the token-matched C pack. Free, and the benchmark needs real blocks."""
+    sys.path.insert(0, str(REPO / "src"))
+    from aadistill.data.e5_pack import pack_e5, write_pack
+    from aadistill.data.paired_corpus import (
+        as_bundles, intersect, select_paired_to_token_target,
+    )
+    out = REPO / f"artifacts/stage3/e5_pack_c_{seed}"
+    if (out / "blocks.npz").is_file():
+        return out
+    d = REPO / f"artifacts/stage3/e5_arm_c_{seed}"
+    ex = [json.loads(l) for l in (d / "examples.jsonl").open() if l.strip()]
+    sysids = json.loads((d / "system_ids.json").read_text())
+    ck, rk, _ = intersect(ex, [dict(e) for e in ex])
+    c_sel, _, sel = select_paired_to_token_target(ck, rk, TARGET_CE_TOKENS)
+    blocks = pack_e5(c_sel, sysids, block_len=8192)
+    write_pack(blocks, out, arm="c", seed=seed, block_len=8192, pad_id=151643,
+               target_ce_tokens=TARGET_CE_TOKENS, extra={"selection": sel})
+    print(f"C pack {seed}: {len(blocks)} blocks, "
+          f"{sel['arm_c_supervised']:,} CE tokens", flush=True)
+    return out
+
+
 def stage_benchmark(args):
-    """Short no-checkpoint throughput comparison, used ONLY to update the cost model.
+    """Measure the truncate_padding speedup on real E5-C blocks, before paying for R.
 
-    Executed-position accounting predicts a 3.18x reduction, but the median E5
-    block holds 675 real tokens, where a 0.6B student and a 4B teacher underuse
-    the GPU and launch overhead dominates. So wall-clock speedup cannot be
-    inferred from positions and is measured here on real E5-C batches with the
-    real models.
-
-    Both formal arms train on the registered truncate_padding=true path
-    regardless of what this measures; the full-width path is run only as the
-    reference for the ratio. No checkpoint is written and no weight is kept.
+    Placed immediately after validation on purpose: the C pack already exists, so
+    there is no reason to buy the recovery corpus before knowing whether the
+    training path fits the remaining budget.
     """
     out = OUT / "e5_throughput.json"
     if out.exists():
         print("throughput benchmark already done; skipping", flush=True)
         return mark("BENCHMARKED")
-    pack = REPO / "artifacts/stage3/e5_pack_c_sa"
-    if not (pack / "blocks.npz").is_file():
-        mark("BENCHMARK_SKIPPED:no_pack")
-        return
-    run(["scripts/training/benchmark_padding_truncation.py", "--pack", pack,
+    pack = _pack_c("sa")
+    run(["scripts/training/benchmark_e5_throughput.py", "--pack", pack,
          "--student", "/workspace/ckpt/p2_ceheavy_sa",
-         "--teacher", "Qwen/Qwen3-4B-Thinking-2507@768f209d9ea81521153ed38c47d515654e938aea",
-         "--steps", 8, "--out", out])
+         "--teacher", f"{TEACHER}@{TEACHER_REV}",
+         "--steps", args.bench_steps, "--out", out])
     mark("BENCHMARKED")
 
 
-STAGES = {"validate": stage_validate, "generate": stage_generate,
-          "pair": stage_pair, "benchmark": stage_benchmark,
+def _budget(spent_usd: float, remaining_usd: float, blocks: int, speedup: float,
+            *, phases_min: dict) -> dict:
+    """Project the rest of the run at the MEASURED speedup."""
+    train_min = 4 * (blocks * 3 / 2) * (SEC_PER_STEP / max(0.01, speedup)) / 60
+    rest = sum(phases_min.values()) + train_min
+    expected = rest / 60 * RATE
+    backstop = rest * 1.12 / 60 * RATE
+    return {"blocks": blocks, "speedup": round(speedup, 3),
+            "remaining_phases_min": {**phases_min, "train": round(train_min)},
+            "remaining_minutes": round(rest),
+            "expected_usd": round(expected, 2),
+            "backstop_usd": round(backstop, 2),
+            "authorization_remaining_usd": round(remaining_usd, 2),
+            "covered": backstop <= remaining_usd,
+            "shortfall_usd": round(max(0.0, backstop - remaining_usd), 2)}
+
+
+def stage_budget_gate_1(args):
+    """Before paying for R: does the measured speedup make the rest affordable?"""
+    bench = json.loads((OUT / "e5_throughput.json").read_text())
+    speedup = bench["measured_wall_clock_speedup"]
+    spent = args.spent_usd + bench["benchmark_cost_usd"]
+    rep = _budget(spent, args.authorized_usd - spent, args.assumed_blocks, speedup,
+                  phases_min={"r_generation": 152, "pair_pack": 20,
+                              "evaluate": 44, "transfer_teardown": 35})
+    rep["gate"] = "pre-generation"
+    rep["assumed_blocks_rationale"] = ("conservative R = 1.30x the measured C "
+                                       "minimum; replaced by the real common "
+                                       "block count at gate 2")
+    (OUT / "e5_budget_gate1.json").write_text(json.dumps(rep, indent=1))
+    print(json.dumps(rep, indent=1), flush=True)
+    mark("BUDGET_GATE_1_PASS" if rep["covered"] else "BUDGET_GATE_1_FAIL")
+    if not rep["covered"]:
+        raise AssertionError(
+            f"remaining ${rep['authorization_remaining_usd']} does not cover "
+            f"${rep['backstop_usd']}; short ${rep['shortfall_usd']}")
+
+
+def stage_budget_gate_2(args):
+    """After pairing: re-gate on the ACTUAL common block count."""
+    bench = json.loads((OUT / "e5_throughput.json").read_text())
+    feas = json.loads((OUT / "e5_joint_feasibility.json").read_text())
+    blocks = feas["common_block_count"]
+    rep = _budget(args.spent_usd, args.authorized_usd - args.spent_usd, blocks,
+                  bench["measured_wall_clock_speedup"],
+                  phases_min={"evaluate": 44, "transfer_teardown": 35})
+    rep["gate"] = "pre-training"
+    (OUT / "e5_budget_gate2.json").write_text(json.dumps(rep, indent=1))
+    print(json.dumps(rep, indent=1), flush=True)
+    mark("BUDGET_GATE_2_PASS" if rep["covered"] else "BUDGET_GATE_2_FAIL")
+    if not rep["covered"]:
+        raise AssertionError(
+            f"remaining ${rep['authorization_remaining_usd']} does not cover "
+            f"training+eval backstop ${rep['backstop_usd']}; "
+            f"short ${rep['shortfall_usd']}")
+
+
+# Order matters and is the point: measure the training path BEFORE buying the
+# recovery corpus, and re-gate on the real block count before training.
+STAGES = {"validate": stage_validate, "benchmark": stage_benchmark,
+          "budget_gate_1": stage_budget_gate_1, "generate": stage_generate,
+          "pair": stage_pair, "budget_gate_2": stage_budget_gate_2,
           "train": stage_train, "evaluate": stage_evaluate}
-BLOCKING = ("validate", "pair")
+BLOCKING = ("validate", "benchmark", "budget_gate_1", "pair", "budget_gate_2")
 
 
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--stage", default="all", choices=("all", *STAGES))
     ap.add_argument("--validate-limit", type=int, default=24)
+    ap.add_argument("--bench-steps", type=int, default=12)
+    ap.add_argument("--authorized-usd", type=float, default=9.12)
+    ap.add_argument("--spent-usd", type=float, default=0.0,
+                    help="pod spend so far, supplied by the launcher")
+    ap.add_argument("--assumed-blocks", type=int, default=1123,
+                    help="conservative R=1.30x C, used only at gate 1")
     args = ap.parse_args()
     OUT.mkdir(parents=True, exist_ok=True)
     for name in (list(STAGES) if args.stage == "all" else [args.stage]):
