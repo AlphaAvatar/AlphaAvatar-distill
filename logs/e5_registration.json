@@ -449,6 +449,66 @@
     "shortfall_usd": 5.42
    }
   },
-  "status": "INSUFFICIENT \u2014 additional authorization required before any pod"
+  "status": "INSUFFICIENT \u2014 additional authorization required before any pod",
+  "with_truncate_padding": {
+   "expected_usd_by_speedup_at_1123_blocks": {
+    "1.0x": 12.12,
+    "1.5x": 9.89,
+    "2.0x": 8.77,
+    "2.5x": 8.1,
+    "3.18x": 7.53
+   },
+   "backstop_usd_by_speedup_at_1123_blocks": {
+    "1.0x": 13.57,
+    "1.5x": 11.07,
+    "2.0x": 9.83,
+    "2.5x": 9.08,
+    "3.18x": 8.44
+   },
+   "available_usd": 9.12,
+   "fits_at_speedup": ">= ~2.4x on the conservative 1123-block scenario"
+  }
+ },
+ "truncate_padding_amendment_2026-08-07": {
+  "change": "batch.truncate_padding = true in all four E5 configs",
+  "nature": "EXECUTION OPTIMIZATION ONLY. It slices the contiguous padding suffix from the tensors forwarded through student and teacher. Logical block length, examples, CE mask, KD mask, both normalizers, supervised-token exposure and block identity are unchanged.",
+  "prospective": "amended before any E5 treatment result exists, and it changes the config hash, so the run remains reproducible from its own config rather than silently altering a logged one",
+  "applies_to_both_arms": true,
+  "measured_on_the_real_C_pack": {
+   "blocks": 864,
+   "block_len": 8192,
+   "logical_positions_per_pass": 7077888,
+   "nonpadding_positions_per_pass": 2225834,
+   "executed_positions_per_pass_micro1": 2225834,
+   "executed_over_logical": 0.3145,
+   "executed_over_nonpadding": 1.0,
+   "position_reduction": "3.18x for BOTH student and teacher forwards",
+   "ce_mask_tokens": 735647,
+   "kd_mask_tokens": 2225834,
+   "block_real_length_p50_p90_max": [
+    675,
+    7783,
+    8188
+   ]
+  },
+  "numerical_equivalence_on_E5_blocks": {
+   "sampled": "most-padded, median and fullest blocks (real lengths 362/675/8188)",
+   "ce_delta": 0.0,
+   "kd_delta": 0.0,
+   "ce_targets_identical": true,
+   "kd_positions_identical": true,
+   "logical_block_tokens_identical": true,
+   "grad_norm_identical": true,
+   "max_param_delta_after_one_step": 5.96e-08,
+   "interpretation": "float32 reduction-order difference only, the known non-bitwise behaviour already documented for this path"
+  },
+  "wall_clock_not_predictable": "the median E5 block is 675 real tokens, where a 0.6B student and 4B teacher underuse the GPU and launch overhead dominates, so positions do not give wall-clock. A short no-checkpoint benchmark runs on the formal pod between pairing and training, and updates the cost model only.",
+  "semantics_not_relaxed": [
+   "system-prompt packing boundary",
+   "source-collision rule",
+   "no-truncation of any prefix or continuation",
+   "atomic two-truncation bundles",
+   "CE-token target"
+  ]
  }
 }

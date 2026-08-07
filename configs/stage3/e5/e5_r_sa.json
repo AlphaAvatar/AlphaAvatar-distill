@@ -1,7 +1,7 @@
 {
  "stage": "stage3_recovery",
  "run_name": "e5_r_sa",
- "_purpose": "E5 arm R: student-prefix on-policy KD plus teacher recovery continuation. Identical to C except the prefix is the STUDENT's own rollout, so KD (scope 'all') also covers student-visited states. Not continuation-only recovery; a result may not be attributed to the continuation alone.",
+ "_purpose": "E5 arm R: student-prefix on-policy KD plus teacher recovery continuation. Identical to C except the prefix is the STUDENT's own rollout, so KD (scope 'all') also covers student-visited states. Not continuation-only recovery; a result may not be attributed to the continuation alone. EXECUTION NOTE: batch.truncate_padding=true, amended prospectively before any E5 result exists. This is an execution optimization only -- it slices the contiguous padding suffix from the tensors forwarded through student and teacher. Logical block length, examples, CE mask, KD mask, both normalizers, supervised-token exposure and block identity are unchanged. It changes the config hash, so the run stays reproducible from its own config. Both C and R use it; the padding-execution policy is identical across arms.",
  "student_path": "/workspace/ckpt/p2_ceheavy_sa",
  "teacher": {
   "model_id": "Qwen/Qwen3-4B-Thinking-2507",
@@ -47,7 +47,8 @@
  },
  "batch": {
   "blocks_per_step": 2,
-  "micro_blocks": 1
+  "micro_blocks": 1,
+  "truncate_padding": true
  },
  "checkpoint": {
   "save_every": 369,

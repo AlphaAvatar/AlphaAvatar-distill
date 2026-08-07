@@ -1,7 +1,7 @@
 {
  "stage": "stage3_recovery",
  "run_name": "e5_c_sa",
- "_purpose": "E5 arm C: teacher-prefix continuation. Continues from P2-0.86M-sa on prefix+continuation examples whose prefix is the TEACHER's own trajectory. CE on the continuation only; kd_scope 'all' as registered.",
+ "_purpose": "E5 arm C: teacher-prefix continuation. Continues from P2-0.86M-sa on prefix+continuation examples whose prefix is the TEACHER's own trajectory. CE on the continuation only; kd_scope 'all' as registered. EXECUTION NOTE: batch.truncate_padding=true, amended prospectively before any E5 result exists. This is an execution optimization only -- it slices the contiguous padding suffix from the tensors forwarded through student and teacher. Logical block length, examples, CE mask, KD mask, both normalizers, supervised-token exposure and block identity are unchanged. It changes the config hash, so the run stays reproducible from its own config. Both C and R use it; the padding-execution policy is identical across arms.",
  "student_path": "/workspace/ckpt/p2_ceheavy_sa",
  "teacher": {
   "model_id": "Qwen/Qwen3-4B-Thinking-2507",
@@ -47,7 +47,8 @@
  },
  "batch": {
   "blocks_per_step": 2,
-  "micro_blocks": 1
+  "micro_blocks": 1,
+  "truncate_padding": true
  },
  "checkpoint": {
   "save_every": 369,

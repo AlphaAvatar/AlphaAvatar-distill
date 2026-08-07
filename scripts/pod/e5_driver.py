@@ -211,8 +211,37 @@ def stage_evaluate(args):
             mark(f"EVAL_DONE:{alias}")
 
 
+def stage_benchmark(args):
+    """Short no-checkpoint throughput comparison, used ONLY to update the cost model.
+
+    Executed-position accounting predicts a 3.18x reduction, but the median E5
+    block holds 675 real tokens, where a 0.6B student and a 4B teacher underuse
+    the GPU and launch overhead dominates. So wall-clock speedup cannot be
+    inferred from positions and is measured here on real E5-C batches with the
+    real models.
+
+    Both formal arms train on the registered truncate_padding=true path
+    regardless of what this measures; the full-width path is run only as the
+    reference for the ratio. No checkpoint is written and no weight is kept.
+    """
+    out = OUT / "e5_throughput.json"
+    if out.exists():
+        print("throughput benchmark already done; skipping", flush=True)
+        return mark("BENCHMARKED")
+    pack = REPO / "artifacts/stage3/e5_pack_c_sa"
+    if not (pack / "blocks.npz").is_file():
+        mark("BENCHMARK_SKIPPED:no_pack")
+        return
+    run(["scripts/training/benchmark_padding_truncation.py", "--pack", pack,
+         "--student", "/workspace/ckpt/p2_ceheavy_sa",
+         "--teacher", "Qwen/Qwen3-4B-Thinking-2507@768f209d9ea81521153ed38c47d515654e938aea",
+         "--steps", 8, "--out", out])
+    mark("BENCHMARKED")
+
+
 STAGES = {"validate": stage_validate, "generate": stage_generate,
-          "pair": stage_pair, "train": stage_train, "evaluate": stage_evaluate}
+          "pair": stage_pair, "benchmark": stage_benchmark,
+          "train": stage_train, "evaluate": stage_evaluate}
 BLOCKING = ("validate", "pair")
 
 
