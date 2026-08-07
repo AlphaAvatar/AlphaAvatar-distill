@@ -33,6 +33,7 @@ import os
 import shutil
 import subprocess
 import sys
+import time
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -51,6 +52,7 @@ BLOCKS, STEPS = 492, 738
 TOKENIZER_FILES = ("tokenizer.json", "tokenizer_config.json", "chat_template.jinja")
 TEACHER = "Qwen/Qwen3-4B-Thinking-2507"
 TEACHER_REV = "768f209d9ea81521153ed38c47d515654e938aea"
+T0 = time.time()
 SEC_PER_STEP = 3.61        # measured full-width; divided by the measured speedup
 RATE = 0.99
 
@@ -308,14 +310,25 @@ def stage_benchmark(args):
     mark("BENCHMARKED")
 
 
-def _budget(spent_usd: float, remaining_usd: float, blocks: int, speedup: float,
-            *, phases_min: dict) -> dict:
-    """Project the rest of the run at the MEASURED speedup."""
-    train_min = 4 * (blocks * 3 / 2) * (SEC_PER_STEP / max(0.01, speedup)) / 60
+def _spent(args) -> float:
+    """Pod spend to date: what the launcher paid for setup, plus driver elapsed.
+
+    Elapsed-based accounting is what makes gate 2 honest without bookkeeping:
+    whatever the R generation and the gate-2 benchmark actually cost is already
+    inside the wall clock by the time the gate reads it.
+    """
+    return args.spent_usd + (time.time() - T0) / 3600 * RATE
+
+
+def _budget(spent_usd: float, remaining_usd: float, blocks: int,
+            sec_per_step: float, *, phases_min: dict) -> dict:
+    """Project the rest of the run at a MEASURED absolute sec/step."""
+    train_min = 4 * (blocks * 3 / 2) * sec_per_step / 60
     rest = sum(phases_min.values()) + train_min
     expected = rest / 60 * RATE
     backstop = rest * 1.12 / 60 * RATE
-    return {"blocks": blocks, "speedup": round(speedup, 3),
+    return {"blocks": blocks, "sec_per_step": round(sec_per_step, 4),
+            "spent_usd": round(spent_usd, 2),
             "remaining_phases_min": {**phases_min, "train": round(train_min)},
             "remaining_minutes": round(rest),
             "expected_usd": round(expected, 2),
@@ -329,11 +342,15 @@ def stage_budget_gate_1(args):
     """Before paying for R: does the measured speedup make the rest affordable?"""
     bench = json.loads((OUT / "e5_throughput.json").read_text())
     speedup = bench["measured_wall_clock_speedup"]
-    spent = args.spent_usd + bench["benchmark_cost_usd"]
-    rep = _budget(spent, args.authorized_usd - spent, args.assumed_blocks, speedup,
+    spent = _spent(args)
+    rep = _budget(spent, args.authorized_usd - spent, args.assumed_blocks,
+                  SEC_PER_STEP / max(0.01, speedup),
                   phases_min={"r_generation": 152, "pair_pack": 20,
                               "evaluate": 44, "transfer_teardown": 35})
     rep["gate"] = "pre-generation"
+    rep["rate_source"] = ("C full-width reference / measured truncate_padding "
+                          f"speedup {speedup:.3f}x; replaced at gate 2 by an "
+                          "absolute measurement on the final packs")
     rep["assumed_blocks_rationale"] = ("conservative R = 1.30x the measured C "
                                        "minimum; replaced by the real common "
                                        "block count at gate 2")
@@ -346,15 +363,54 @@ def stage_budget_gate_1(args):
             f"${rep['backstop_usd']}; short ${rep['shortfall_usd']}")
 
 
+def stage_final_benchmark(args):
+    """Absolute sec/step on the FINAL packs, before gate 2 commits to training.
+
+    C's measured rate does not transfer to R. The two arms hold different
+    material at the same block count: R's blocks carry student-generated
+    prefixes, so their non-padding lengths -- and therefore how much the
+    registered truncated path can actually skip -- are a different distribution
+    from C's. Assuming C's sec/step for R would let an underestimate of R turn
+    into an overrun that only shows up mid-training.
+
+    Registered truncated path only. The full-width reference is not repeated:
+    padding equivalence was already established at the earlier benchmark, and
+    gate 2 needs an absolute rate, not a ratio.
+    """
+    out = OUT / "e5_throughput_final.json"
+    if out.exists():
+        print("final-pack benchmark already done; skipping", flush=True)
+        return mark("BENCHMARKED_FINAL")
+    seed = SEEDS[0]
+    packs = [REPO / f"artifacts/stage3/e5_pack_{a}_{seed}" for a in ("c", "r")]
+    run(["scripts/training/benchmark_e5_throughput.py", "--absolute-only",
+         "--packs", *packs, "--labels", f"C_{seed}", f"R_{seed}",
+         "--student", f"/workspace/ckpt/p2_ceheavy_{seed}",
+         "--teacher", f"{TEACHER}@{TEACHER_REV}",
+         "--steps", args.final_bench_steps, "--out", out])
+    mark("BENCHMARKED_FINAL")
+
+
 def stage_budget_gate_2(args):
-    """After pairing: re-gate on the ACTUAL common block count."""
-    bench = json.loads((OUT / "e5_throughput.json").read_text())
+    """After pairing: re-gate on the ACTUAL common block count and the SLOWER
+    of the two measured arm rates."""
+    bench = json.loads((OUT / "e5_throughput_final.json").read_text())
     feas = json.loads((OUT / "e5_joint_feasibility.json").read_text())
     blocks = feas["common_block_count"]
-    rep = _budget(args.spent_usd, args.authorized_usd - args.spent_usd, blocks,
-                  bench["measured_wall_clock_speedup"],
+    spent = _spent(args)          # already includes the gate-2 benchmark itself
+    rep = _budget(spent, args.authorized_usd - spent, blocks,
+                  bench["sec_per_step_for_projection"],
                   phases_min={"evaluate": 44, "transfer_teardown": 35})
     rep["gate"] = "pre-training"
+    rep["rate_source"] = {
+        "measured_on": "final packed corpora, registered truncate_padding path",
+        "per_arm_sec_per_step": {k: v["sec_per_step"]
+                                 for k, v in bench["arms"].items()},
+        "slower_arm_used": bench["slowest_arm"],
+        "benchmark_cost_usd": bench["benchmark_cost_usd"],
+        "benchmark_cost_accounting": ("charged through elapsed pod time, which "
+                                      "is measured after the benchmark ran"),
+    }
     (OUT / "e5_budget_gate2.json").write_text(json.dumps(rep, indent=1))
     print(json.dumps(rep, indent=1), flush=True)
     mark("BUDGET_GATE_2_PASS" if rep["covered"] else "BUDGET_GATE_2_FAIL")
@@ -369,9 +425,11 @@ def stage_budget_gate_2(args):
 # recovery corpus, and re-gate on the real block count before training.
 STAGES = {"validate": stage_validate, "benchmark": stage_benchmark,
           "budget_gate_1": stage_budget_gate_1, "generate": stage_generate,
-          "pair": stage_pair, "budget_gate_2": stage_budget_gate_2,
+          "pair": stage_pair, "final_benchmark": stage_final_benchmark,
+          "budget_gate_2": stage_budget_gate_2,
           "train": stage_train, "evaluate": stage_evaluate}
-BLOCKING = ("validate", "benchmark", "budget_gate_1", "pair", "budget_gate_2")
+BLOCKING = ("validate", "benchmark", "budget_gate_1", "pair",
+            "final_benchmark", "budget_gate_2")
 
 
 def main() -> None:
@@ -379,6 +437,7 @@ def main() -> None:
     ap.add_argument("--stage", default="all", choices=("all", *STAGES))
     ap.add_argument("--validate-limit", type=int, default=24)
     ap.add_argument("--bench-steps", type=int, default=12)
+    ap.add_argument("--final-bench-steps", type=int, default=8)
     ap.add_argument("--authorized-usd", type=float, default=9.12)
     ap.add_argument("--spent-usd", type=float, default=0.0,
                     help="pod spend so far, supplied by the launcher")
@@ -393,8 +452,11 @@ def main() -> None:
             mark(f"STAGE_FAILED:{name}:{type(exc).__name__}")
             print(f"STAGE FAILED: {name}: {exc}", flush=True)
             if name in BLOCKING and args.stage == "all":
+                # `return`, not `break`: the launcher reads the LAST status line,
+                # so falling through to ALL_DONE would record a stopped gate as a
+                # completed run.
                 mark("ABORTED_AT_GATE")
-                break
+                return
             continue
     mark("ALL_DONE")
 

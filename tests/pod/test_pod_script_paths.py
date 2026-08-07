@@ -171,3 +171,68 @@ def test_launcher_scratch_paths_match_its_own_experiment(script):
         assert token == prefix, (
             f"{script.name} bundles {token!r} configs but belongs to {prefix!r} "
             "— the returned side bundle would carry the wrong experiment")
+
+
+# --- Experiment 5 gate-2 amendment -------------------------------------------
+# Gate 2 must not price R's training at C's measured rate. These assertions pin
+# the amendment's three moving parts so a later refactor cannot quietly restore
+# the cheaper-but-wrong projection.
+
+E5_DRIVER = REPO / "scripts/pod/e5_driver.py"
+E5_BENCH = REPO / "scripts/training/benchmark_e5_throughput.py"
+
+
+def _e5_driver() -> str:
+    return E5_DRIVER.read_text()
+
+
+def test_final_benchmark_runs_between_pairing_and_gate_2():
+    src = _e5_driver()
+    order = src[src.index("STAGES = {"):src.index("BLOCKING = (")]
+    for earlier, later in (("pair", "final_benchmark"),
+                           ("final_benchmark", "budget_gate_2"),
+                           ("budget_gate_2", "train")):
+        assert order.index(f'"{earlier}"') < order.index(f'"{later}"'), \
+            f"{earlier} must be ordered before {later}"
+    blocking = src[src.index("BLOCKING = ("):src.index("def main()")]
+    assert '"final_benchmark"' in blocking, "the gate-2 benchmark must be blocking"
+
+
+def test_gate_2_projects_from_the_slower_final_pack_measurement():
+    src = _e5_driver()
+    gate = src[src.index("def stage_budget_gate_2"):src.index("# Order matters")]
+    assert "e5_throughput_final.json" in gate, \
+        "gate 2 must read the final-pack benchmark, not the gate-1 one"
+    assert "sec_per_step_for_projection" in gate, \
+        "gate 2 must project from a measured absolute sec/step"
+    assert "measured_wall_clock_speedup" not in gate, \
+        "gate 2 must not reuse C's speedup as R's rate"
+    assert "_spent(args)" in gate, \
+        "gate 2 must charge elapsed pod time, which covers its own benchmark"
+
+
+def test_final_benchmark_measures_both_arms_on_the_registered_path():
+    src = _e5_driver()
+    stage = src[src.index("def stage_final_benchmark"):
+                src.index("def stage_budget_gate_2")]
+    assert "--absolute-only" in stage, "the full-width reference is not repeated"
+    assert "e5_pack_{a}_{seed}" in stage, "must measure the FINAL packs"
+    assert '("c", "r")' in stage, "both arms must be measured"
+
+
+def test_absolute_only_mode_reports_the_slowest_arm():
+    src = E5_BENCH.read_text()
+    assert '"--absolute-only"' in src
+    block = src[src.index("if args.absolute_only:"):src.index("ids, ce, content, sel_real, real = load(args.pack)")]
+    assert 'max(results, key=lambda k: results[k]["sec_per_step"])' in block, \
+        "the projection rate must be the SLOWER arm"
+    assert '"benchmark_cost_usd"' in block, "the benchmark must price itself"
+
+
+def test_a_stopped_gate_is_not_recorded_as_a_completed_run():
+    src = _e5_driver()
+    main = src[src.index("def main()"):]
+    assert main.index('mark("ABORTED_AT_GATE")') < main.index('mark("ALL_DONE")')
+    aborted = main[main.index('mark("ABORTED_AT_GATE")"'[:-1]):]
+    assert aborted.split("\n")[1].strip() == "return", \
+        "aborting must return, or the last status line becomes ALL_DONE"

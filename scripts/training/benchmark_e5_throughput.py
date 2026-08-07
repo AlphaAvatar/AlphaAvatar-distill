@@ -123,7 +123,15 @@ def time_condition(truncate: bool, blocks, student_path: str, teacher, *,
 
 def main() -> None:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--pack", required=True, type=Path)
+    ap.add_argument("--pack", type=Path, help="single pack; full-width vs truncated")
+    ap.add_argument("--packs", nargs="+", type=Path,
+                    help="several packs; with --absolute-only, measures each on "
+                         "the registered truncated path")
+    ap.add_argument("--labels", nargs="+", default=None)
+    ap.add_argument("--absolute-only", action="store_true",
+                    help="skip the full-width reference. Used at gate 2, whose "
+                         "purpose is absolute remaining-cost estimation, not "
+                         "re-validating padding equivalence")
     ap.add_argument("--student", required=True)
     ap.add_argument("--teacher", required=True)
     ap.add_argument("--steps", type=int, default=12)
@@ -137,26 +145,70 @@ def main() -> None:
     from transformers import AutoModelForCausalLM
 
     device = "cuda" if torch.cuda.is_available() else "cpu"
-    arrays = np.load(args.pack / "blocks.npz")
-    real = arrays["content_mask"].sum(axis=1)
-    need = (args.steps + args.warmup) * args.blocks_per_step
-    picks = spread_indices(real, need)
-    ids = torch.from_numpy(arrays["input_ids"][picks].astype(np.int64))
-    ce = torch.from_numpy(arrays["ce_mask"][picks])
-    content = torch.from_numpy(arrays["content_mask"][picks])
-    sel_real = real[picks]
-    print(f"benchmark blocks {len(picks)} | real length min/p50/max "
-          f"{sel_real.min()}/{int(np.median(sel_real))}/{sel_real.max()} "
-          f"| pack p50 {int(np.median(real))}", flush=True)
-
     tid, _, rev = args.teacher.partition("@")
     teacher = AutoModelForCausalLM.from_pretrained(
         tid, revision=rev or None, dtype=torch.bfloat16)
     teacher.eval()
-    for p in teacher.parameters():
-        p.requires_grad_(False)
+    for p_ in teacher.parameters():
+        p_.requires_grad_(False)
+
+    def load(pack: Path):
+        arrays = np.load(pack / "blocks.npz")
+        real = arrays["content_mask"].sum(axis=1)
+        need = (args.steps + args.warmup) * args.blocks_per_step
+        picks = spread_indices(real, need)
+        return (torch.from_numpy(arrays["input_ids"][picks].astype(np.int64)),
+                torch.from_numpy(arrays["ce_mask"][picks]),
+                torch.from_numpy(arrays["content_mask"][picks]),
+                real[picks], real)
 
     results = {}
+    if args.absolute_only:
+        packs = args.packs or [args.pack]
+        labels = args.labels or [p_.name for p_ in packs]
+        for label, pack in zip(labels, packs):
+            ids, ce, content, sel_real, real = load(pack)
+            print(f"{label}: blocks {len(sel_real)} | real len min/p50/max "
+                  f"{sel_real.min()}/{int(np.median(sel_real))}/{sel_real.max()} "
+                  f"| pack p50 {int(np.median(real))}", flush=True)
+            results[label] = time_condition(
+                True, (ids, ce, content), args.student, teacher, steps=args.steps,
+                warmup=args.warmup, micro=args.micro_blocks,
+                bps=args.blocks_per_step, device=device)
+            results[label]["pack"] = str(pack)
+            results[label]["pack_real_len_p50"] = int(np.median(real))
+            print(f"  {label:10s} {results[label]['sec_per_step']:.4f} s/step",
+                  flush=True)
+        bench_min = sum(r["seconds"] for r in results.values()) / 60
+        slowest = max(results, key=lambda k: results[k]["sec_per_step"])
+        payload = {
+            "created_utc": datetime.now(timezone.utc).isoformat(),
+            "command": " ".join(sys.argv),
+            "mode": "absolute_only",
+            "purpose": ("absolute sec/step on the FINAL packed corpora, on the "
+                        "registered truncated path only. C's rate is not assumed "
+                        "to apply to R: R's absolute-prefix and non-padding "
+                        "length distributions differ."),
+            "arms": results,
+            "slowest_arm": slowest,
+            "sec_per_step_for_projection": results[slowest]["sec_per_step"],
+            "benchmark_minutes": round(bench_min, 2),
+            "benchmark_cost_usd": round(bench_min / 60 * args.rate, 3),
+            "hardware": hardware_report(), "code_state": code_state(REPO_ROOT),
+        }
+        args.out.parent.mkdir(parents=True, exist_ok=True)
+        args.out.write_text(json.dumps(payload, indent=1))
+        print(f"\nslowest arm {slowest}: "
+              f"{payload['sec_per_step_for_projection']:.4f} s/step "
+              f"(used for the gate-2 projection)")
+        print(f"benchmark cost ${payload['benchmark_cost_usd']:.3f}")
+        print(f"wrote {args.out}")
+        return
+
+    ids, ce, content, sel_real, real = load(args.pack)
+    print(f"benchmark blocks {len(sel_real)} | real length min/p50/max "
+          f"{sel_real.min()}/{int(np.median(sel_real))}/{sel_real.max()} "
+          f"| pack p50 {int(np.median(real))}", flush=True)
     for truncate in (False, True):
         label = "truncated" if truncate else "full_width"
         results[label] = time_condition(
@@ -173,6 +225,7 @@ def main() -> None:
     payload = {
         "created_utc": datetime.now(timezone.utc).isoformat(),
         "command": " ".join(sys.argv),
+        "mode": "full_width_vs_truncated",
         "purpose": "measure the real wall-clock speedup of truncate_padding on "
                    "E5-C blocks; used ONLY to update the cost model",
         "method": {
@@ -183,7 +236,7 @@ def main() -> None:
             "warmup_steps": args.warmup,
             "blocks_span_length_distribution": True,
         },
-        "blocks": {"n": len(picks),
+        "blocks": {"n": len(sel_real),
                    "real_len_min": int(sel_real.min()),
                    "real_len_p50": int(np.median(sel_real)),
                    "real_len_max": int(sel_real.max()),
