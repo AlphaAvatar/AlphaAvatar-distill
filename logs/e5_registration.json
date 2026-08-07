@@ -510,5 +510,84 @@
    "atomic two-truncation bundles",
    "CE-token target"
   ]
+ },
+ "attempt_2_2026-08-07": {
+  "status": "REGISTERED; relaunch approved under the $7.55 surviving authorization",
+  "attempt_1": {
+   "verdict": "FAILED at the pairing gate on a data-contract defect, not on evidence",
+   "cost_usd": 1.57,
+   "interpretation_boundary": "no E5 C/R result exists. None of the registered decision rules may be read against attempt 1 in any direction.",
+   "cause": "RecoveryExample.to_record() dropped ids/mask; 4,196 gated R examples unusable",
+   "record": "EXPERIMENTS.md 22"
+  },
+  "carried_forward_unchanged": [
+   "735,603 CE-mask token target per pass, 5% tolerance",
+   "atomic two-truncation bundles, 100% recovery treatment for R",
+   "kd_scope=all and batch.truncate_padding=true in both arms",
+   "common block count = max(C_min, R_min), decided only after R exists",
+   "three passes, four registered arms, two seeds",
+   "the 150 pinned held-out prompts, mask d6e24e0b09da1bcc"
+  ],
+  "arm_c_reuse": {
+   "decision": "REUSE attempt 1's arm C corpora; do NOT rebuild",
+   "rationale": "arm C is a mask move over teacher trajectories -- no generation -- so a rebuild buys nothing and risks a difference",
+   "verified_before_upload": {
+    "examples_per_seed": 2294,
+    "missing_required_fields": 0,
+    "unrenderable": 0,
+    "packs_to_blocks": 1034,
+    "candidate_ce_tokens": 905488,
+    "system_blocks": 362
+   },
+   "sha256": {
+    "bundle": "fdf44b34a89164a88c59256129e692fd89021bcf53209831ca6d8d9eb6e49bee",
+    "sa/examples.jsonl": "4bc23c3fb54c8feff621b75445977fc47d24a343854f5131f6a4a770cdd46179",
+    "sb/examples.jsonl": "03c9ba9af78908a29a1ad9b3fb7abd5ede53737ce66fe566c8867cdacb104e96",
+    "system_ids.json (both seeds)": "18ace28a0ee785852af508c89bdffd7578b5527874589ed4572404f55df39535"
+   },
+   "re_checked_on_pod": "against the CURRENT packing contract, not only the hash"
+  },
+  "arm_r_regeneration": "REQUIRED; attempt 1's records did not persist ids/mask",
+  "no_separate_pilot": {
+   "rationale": "the real-engine path already succeeded in attempt 1: P2 student rollout, 4B teacher recovery, both seeds, >90% acceptance, and the production truncate_padding benchmark. The failure was after generation, at the persistence handoff, which is now offline-testable.",
+   "exercised_offline_instead": "tests/data/test_e5_persisted_contract.py"
+  },
+  "stage_order": [
+   "setup",
+   "validate",
+   "benchmark",
+   "budget_gate_1",
+   "generate",
+   "verify_records",
+   "pair",
+   "final_benchmark",
+   "budget_gate_2",
+   "train",
+   "evaluate"
+  ],
+  "blocking": [
+   "validate",
+   "benchmark",
+   "budget_gate_1",
+   "verify_records",
+   "pair",
+   "final_benchmark",
+   "budget_gate_2"
+  ],
+  "new_blocking_stage": {
+   "name": "verify_records",
+   "when": "after R generation, before pairing",
+   "what": "reloads every accepted record FROM DISK for both arms and converts it through example_to_rendered; also asserts each record's leading tokens are the system block its system_key maps to",
+   "why": "attempt 1 passed every in-memory check and still wrote an unusable corpus"
+  },
+  "budget": {
+   "remaining_authorization_usd": 7.55,
+   "runpod_deadline_minutes": 457,
+   "runpod_deadline_usd": 7.54,
+   "expected_usd": 5.86,
+   "backstop_estimate_usd": 6.56,
+   "setup_time_policy": "the 5-minute warm-image setup from attempt 1 is NOT assumed. Gates charge ACTUAL elapsed pod time, and ~100 min of headroom is reserved for a cold setup.",
+   "hard_rule": "if a blocking stage fails: stop and teardown. Do not reduce the token target, change the treatment, drop a seed, or add an arm to fit the budget."
+  }
  }
 }

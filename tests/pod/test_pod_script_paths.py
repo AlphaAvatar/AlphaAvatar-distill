@@ -278,3 +278,44 @@ def test_pairing_merges_both_arms_system_blocks():
     assert "clashes" in fn, "disagreement between arms must be reported"
     pair = src[src.index("def stage_pair("):src.index("def stage_train(")]
     assert 'e5_arm_c_{seed}"\n                             / "system_ids.json"' not in pair
+
+
+# --- E5 attempt 2: $7.55, arm C reused, records verified from disk ------------
+
+def test_the_pod_deadline_cannot_exceed_the_remaining_authorization():
+    """Attempt 2 runs on what survived attempt 1. The RunPod-side deadline is
+    the one layer that fires even if launcher, driver and poller are all dead,
+    so it must itself sit under the authorization."""
+    src = (REPO / "scripts/pod/e5_launch.sh").read_text()
+    backstop = int(re.search(r"BACKSTOP_MINUTES=\$\{BACKSTOP_MINUTES:-(\d+)\}",
+                             src).group(1))
+    rate = float(re.search(r"MAX_PRICE=\$\{MAX_PRICE:-([\d.]+)\}", src).group(1))
+    assert backstop / 60 * rate <= 7.55, \
+        f"{backstop} min at ${rate}/h exceeds the $7.55 remaining authorization"
+    poll = int(re.search(r"POLL_LIMIT_MIN=\$\{POLL_LIMIT_MIN:-(\d+)\}", src).group(1))
+    assert poll < backstop, "polling must end before the pod is killed under it"
+
+
+def test_arm_c_is_staged_and_verified_never_rebuilt():
+    setup = (REPO / "scripts/pod/e5_setup.sh").read_text()
+    assert "e5_start/e5_arm_c.tar.gz" in setup, "arm C must be staged from the relay"
+    assert "ARM C BUNDLE MISMATCH" in setup and "ARM C MISMATCH" in setup, \
+        "both the bundle and the per-file hashes must be asserted"
+    assert "fails the current contract" in setup, \
+        "a reused corpus must satisfy the CURRENT packing contract, not just a hash"
+    driver = _e5_driver()
+    gen = driver[driver.index("def stage_generate("):driver.index("def stage_verify_records(")]
+    assert "build_e5_arm_c.py" not in gen, "the driver must not rebuild arm C"
+    assert "staged in setup, not built here" in gen
+
+
+def test_persisted_records_are_verified_from_disk_before_pairing():
+    src = _e5_driver()
+    order = src[src.index("STAGES = {"):src.index("BLOCKING = (")]
+    for earlier, later in (("generate", "verify_records"), ("verify_records", "pair")):
+        assert order.index(f'"{earlier}"') < order.index(f'"{later}"')
+    assert '"verify_records"' in src[src.index("BLOCKING = ("):src.index("def main()")]
+    stage = src[src.index("def stage_verify_records("):src.index("def _system_ids(")]
+    assert 'examples.jsonl").open()' in stage, "must re-read the file, not reuse memory"
+    assert "example_to_rendered(rec)" in stage
+    assert 'for arm in ("c", "r")' in stage, "both producers must be verified"

@@ -206,13 +206,66 @@ say "CPU test suite (includes the LoRA and single-variable guarantees)"
 cd "$REPO" && /opt/train/bin/python -m pytest tests/ -q \
     --ignore=tests/data/test_recovery_corpus_pipeline.py 2>&1 | tail -4
 
-# The same pre-launch gate that ran on the dev box, re-run here on the real
-# weights in this environment. It asserts the freeze policy of all six arms,
-# that A2's adapter is a no-op at initialization, and that merging leaves a
-# plain checkpoint behind.
-say "Experiment 5 preflight: build arm C on the real corpus"
-cd "$REPO" && PYTHONPATH=src /opt/train/bin/python scripts/data/build_e5_arm_c.py \
-    --source-seed sa --out artifacts/stage3/e5_arm_c_sa
+# Arm C is REUSED from attempt 1, not rebuilt. It is a mask move over teacher
+# trajectories -- no generation -- and the attempt-1 corpora were verified
+# against the current schema and packing checks on the dev box before upload:
+# 2,294 examples per seed, 0 missing fields, 0 unrenderable, 1,034 blocks,
+# 905,488 candidate CE tokens, 362 system blocks. Regenerating would only risk
+# a difference; hashes are asserted here instead.
+say "staging the arm C corpora from attempt 1"
+python3 -c "
+import os, shutil, sys
+from huggingface_hub import hf_hub_download
+p = hf_hub_download('AlphaAvatar/aadistill-artifacts', 'e5_start/e5_arm_c.tar.gz',
+                    repo_type='model', token=os.environ['HF_TOKEN'])
+shutil.copy(p, '/workspace/e5_arm_c.tar.gz')
+"
+python3 -c "
+import hashlib, sys
+h = hashlib.sha256(open('/workspace/e5_arm_c.tar.gz','rb').read()).hexdigest()
+want = 'fdf44b34a89164a88c59256129e692fd89021bcf53209831ca6d8d9eb6e49bee'
+print('arm C bundle sha256', h)
+sys.exit(0 if h == want else f'ARM C BUNDLE MISMATCH: {h}')
+"
+tar xzf /workspace/e5_arm_c.tar.gz --no-same-owner -C "$REPO/artifacts/stage3"
+python3 -c "
+import hashlib, sys
+from pathlib import Path
+want = {
+ 'e5_arm_c_sa/examples.jsonl': '4bc23c3fb54c8feff621b75445977fc47d24a343854f5131f6a4a770cdd46179',
+ 'e5_arm_c_sb/examples.jsonl': '03c9ba9af78908a29a1ad9b3fb7abd5ede53737ce66fe566c8867cdacb104e96',
+ 'e5_arm_c_sa/system_ids.json': '18ace28a0ee785852af508c89bdffd7578b5527874589ed4572404f55df39535',
+ 'e5_arm_c_sb/system_ids.json': '18ace28a0ee785852af508c89bdffd7578b5527874589ed4572404f55df39535',
+}
+for rel, exp in want.items():
+    got = hashlib.sha256(Path('$REPO/artifacts/stage3', rel).read_bytes()).hexdigest()
+    if got != exp:
+        sys.exit(f'ARM C MISMATCH {rel}: {got}')
+    print(f'  {rel} verified')
+"
+# The reused corpora must satisfy the CURRENT packing contract in THIS
+# environment, not merely match a hash from the environment that made them.
+cd "$REPO" && PYTHONPATH=src /opt/train/bin/python -c "
+import json, sys
+from pathlib import Path
+from aadistill.data.e5_pack import REQUIRED_FIELDS, example_to_rendered, pack_e5
+for seed in ('sa', 'sb'):
+    d = Path('artifacts/stage3', f'e5_arm_c_{seed}')
+    rows = [json.loads(l) for l in (d/'examples.jsonl').open() if l.strip()]
+    sysids = json.loads((d/'system_ids.json').read_text())
+    bad = 0
+    for e in rows:
+        if [f for f in REQUIRED_FIELDS if f not in e]:
+            bad += 1; continue
+        try:
+            example_to_rendered(e)
+            assert e['ids'][:e['n_system_tokens']] == sysids[e['system_key']]
+        except Exception:
+            bad += 1
+    if bad or not rows:
+        sys.exit(f'arm C {seed} fails the current contract: {bad}/{len(rows)}')
+    print(f'  arm C {seed}: {len(rows)} examples, {len(pack_e5(rows, sysids, block_len=8192))} blocks, contract OK')
+"
 mark ARMS_VALIDATED
 mark TESTS_OK
 

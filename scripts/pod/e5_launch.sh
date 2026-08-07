@@ -27,14 +27,20 @@ GPU_NAME=${GPU_NAME:-NVIDIA L40S}
 MAX_PRICE=${MAX_PRICE:-0.99}
 # Integer minutes: `date -d "+7.5 hours"` is rejected by GNU date and silently
 # produces an EMPTY --terminate-after, i.e. a pod with no backstop at all.
-# 533 min x $0.99 = $8.79, the authorized $8.80 ceiling, against ~480 min
-# expected (464 corrected for MEASURED 53-min setup, plus the ~15-min gate).
-BACKSTOP_MINUTES=${BACKSTOP_MINUTES:-533}
+#
+# Attempt 2 runs under what SURVIVED attempt 1: $7.55, not the original $9.12.
+# 457 min x $0.99 = $7.54, so the RunPod-side deadline cannot on its own exceed
+# the authorization even if every other layer fails. Expected work is ~355 min,
+# leaving ~100 min of headroom -- deliberately not spent in advance on the
+# assumption that attempt 1's 5-minute warm-image setup repeats. If setup runs
+# cold instead, the headroom absorbs it and the gates re-price from the ACTUAL
+# elapsed time rather than from either measurement.
+BACKSTOP_MINUTES=${BACKSTOP_MINUTES:-457}
 STARTUP_LIMIT_MIN=${STARTUP_LIMIT_MIN:-15}
 MAX_POD_ATTEMPTS=${MAX_POD_ATTEMPTS:-2}
 # Seconds between create attempts when the GPU is out of capacity.
 CREATE_RETRY_DELAY_S=${CREATE_RETRY_DELAY_S:-300}
-POLL_LIMIT_MIN=${POLL_LIMIT_MIN:-520}
+POLL_LIMIT_MIN=${POLL_LIMIT_MIN:-445}   # inside the 457-min backstop
 CKPT_TRANSFER_LIMIT_MIN=${CKPT_TRANSFER_LIMIT_MIN:-40}
 TEACHER_REVISION=${TEACHER_REVISION:-768f209d9ea81521153ed38c47d515654e938aea}
 STORE=${STORE:-/home/ecs-user/aad-artifacts/e5}

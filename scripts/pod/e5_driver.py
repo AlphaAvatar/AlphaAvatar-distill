@@ -103,10 +103,70 @@ def stage_generate(args):
              "--student", f"/workspace/ckpt/p2_ceheavy_{seed}",
              "--source-seed", seed, "--out", d], py=VLLM_PY)
         mark(f"GENERATED:{seed}")
-        # Arm C for the same seed costs nothing and must exist before pairing.
+        # Arm C is STAGED from attempt 1 and hash-verified in setup, never
+        # rebuilt: a rebuild would silently substitute a corpus for the one the
+        # comparison is registered against. Missing here is a setup failure.
         c = REPO / f"artifacts/stage3/e5_arm_c_{seed}"
         if not (c / "examples.jsonl").exists():
-            run(["scripts/data/build_e5_arm_c.py", "--source-seed", seed, "--out", c])
+            raise AssertionError(
+                f"arm C for {seed} is absent; it is staged in setup, not built here")
+
+
+def stage_verify_records(args):
+    """Reload every accepted record FROM DISK and convert it for the packer.
+
+    The builder already checks each record before accepting it, but it checks the
+    object it just built. This stage re-reads the file the next stage will read,
+    which is the only thing that proves the corpus on disk is trainable. Attempt
+    1 passed every in-memory check and still wrote 4,196 unusable records.
+
+    Blocking, and placed before pairing, so a bad corpus stops the run while the
+    only thing spent is generation -- not four training arms on top of it.
+    """
+    sys.path.insert(0, str(REPO / "src"))
+    from aadistill.data.e5_pack import REQUIRED_FIELDS, example_to_rendered
+
+    report = {"required_fields": list(REQUIRED_FIELDS), "per_corpus": {}}
+    failures = []
+    for arm in ("c", "r"):
+        for seed in SEEDS:
+            d = REPO / f"artifacts/stage3/e5_arm_{arm}_{seed}"
+            rows = [json.loads(line) for line
+                    in (d / "examples.jsonl").open() if line.strip()]
+            sysids = json.loads((d / "system_ids.json").read_text())
+            missing, unrenderable, bad_system = 0, 0, 0
+            for rec in rows:
+                if [f for f in REQUIRED_FIELDS if f not in rec]:
+                    missing += 1
+                    continue
+                try:
+                    example_to_rendered(rec)
+                except Exception:
+                    unrenderable += 1
+                    continue
+                # The packer re-emits the block stored under this key, so the
+                # record's own leading tokens must be that block.
+                if rec["ids"][:rec["n_system_tokens"]] != sysids.get(
+                        rec["system_key"], []):
+                    bad_system += 1
+            entry = {"examples": len(rows), "system_blocks": len(sysids),
+                     "missing_fields": missing, "unrenderable": unrenderable,
+                     "system_block_mismatch": bad_system,
+                     "ce_tokens": sum(sum(r["mask"]) for r in rows
+                                      if "mask" in r)}
+            report["per_corpus"][f"{arm}_{seed}"] = entry
+            ok = not (missing or unrenderable or bad_system) and rows
+            print(f"  [{'PASS' if ok else 'FAIL'}] {arm}_{seed}: {len(rows)} records, "
+                  f"missing {missing}, unrenderable {unrenderable}, "
+                  f"system mismatch {bad_system}", flush=True)
+            if not ok:
+                failures.append(f"{arm}_{seed}")
+    report["passed"] = not failures
+    report["failed_corpora"] = failures
+    (OUT / "e5_persisted_records.json").write_text(json.dumps(report, indent=1))
+    mark("RECORDS_VERIFIED" if report["passed"] else "RECORDS_INVALID")
+    if failures:
+        raise AssertionError(f"persisted records unusable: {failures}")
 
 
 def _system_ids(seed: str, conditions: list) -> dict:
@@ -445,11 +505,12 @@ def stage_budget_gate_2(args):
 # recovery corpus, and re-gate on the real block count before training.
 STAGES = {"validate": stage_validate, "benchmark": stage_benchmark,
           "budget_gate_1": stage_budget_gate_1, "generate": stage_generate,
+          "verify_records": stage_verify_records,
           "pair": stage_pair, "final_benchmark": stage_final_benchmark,
           "budget_gate_2": stage_budget_gate_2,
           "train": stage_train, "evaluate": stage_evaluate}
-BLOCKING = ("validate", "benchmark", "budget_gate_1", "pair",
-            "final_benchmark", "budget_gate_2")
+BLOCKING = ("validate", "benchmark", "budget_gate_1", "verify_records",
+            "pair", "final_benchmark", "budget_gate_2")
 
 
 def main() -> None:
