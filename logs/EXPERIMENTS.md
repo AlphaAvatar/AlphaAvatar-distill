@@ -3244,3 +3244,64 @@ A relaunch needs either a small additional authorization to restore the 1.12
 margin, or an explicit decision to run at a 1.05 backstop with roughly $0.30 of
 headroom — thin enough that one more abandoned pod would consume it. No token
 target, treatment, seed or arm was altered to fit the budget, and none should be.
+
+---
+
+## 24. Experiment 5 — attempt 3: stopped on a cold host (2026-08-07, $1.45)
+
+**Verdict: terminated during setup, before gate 1. No generation, no training,
+no E5 result.** The environment build could not finish inside the budget.
+
+| | |
+| --- | --- |
+| Pod | `dvoosn07fjs1oh` |
+| Billed | **$1.45** (88 min), terminated manually |
+| Commit | `917fc34` |
+| Authorization | $8.24; **$6.79 remains** |
+| Reached | `ENV_READY → REPO_READY → DATA_READY → TRAIN_ENV`, then stopped |
+
+### Setup time is the dominant risk, and it is not under control
+
+| pod | `uv sync` | full setup |
+| --- | --- | --- |
+| attempt 1 | 44 s | **5 min** |
+| attempt 2 (2nd pod) | ~50 s | **8.5 min** |
+| attempt 3 | **62 min** | ≥150 min (projected) |
+
+The same script, the same image tag, the same GPU. The difference is whether the
+host has the layers and wheels cached. On this host `uv sync` took 62 minutes;
+21 minutes into the vLLM install the venv was **13 MB and growing at 0 KB/s**,
+and the teacher was 95 MB of ~8 GB. Raw PyPI throughput measured 1.27 MB/s, so
+the link was not broken — the volume is simply several GB and nothing was cached.
+
+Gate 1 would have had to run by 12:45 UTC to stay inside the registered 1.12
+backstop. Remaining setup was clearly an hour or more, and even ignoring the
+backstop, a ~13:40 setup finish plus ~340 min of real work exceeds the $8.23
+ceiling at *expected* cost. The run could not complete. It was terminated rather
+than left to spend another $0.50–1.00 reaching a foreseeable failure.
+
+### Why this is worth naming as its own failure mode
+
+Setup is pure overhead paid before any science, and it varies **30×** between
+hosts — 5 minutes to 150. On a run whose total work is ~370 minutes, an
+unpredictable 150-minute tax is not something a cost model can absorb; it is
+larger than R generation and training combined at the low end. Three attempts
+have now produced no C/R evidence, and the direct causes were different each
+time, but the third is the only one that will recur without an infrastructure
+change: attempts 1 and 2 fixed code, and code stays fixed.
+
+Observed base rate so far: **1 cold host in 3**. Expected setup cost per attempt
+is roughly 55 min ($0.90) with a variance that dominates the budget.
+
+### Next: eliminate the environment build, do not retry into it
+
+A fourth attempt on the current setup path carries roughly a one-in-three chance
+of losing another ~$1.50 to the same cause. The environment should be persisted
+rather than rebuilt — a RunPod network volume holding `/opt/train`, `/opt/vllm`
+and the Hugging Face cache is the natural fit, since it is RunPod-native, avoids
+the HF LFS quota problem, and turns a 5-to-150-minute step into a mount. The
+tradeoff to weigh is that a network volume pins the pod to one datacenter, which
+narrows L40S availability.
+
+No token target, treatment, seed or arm was altered. $6.79 of the authorization
+is intact.

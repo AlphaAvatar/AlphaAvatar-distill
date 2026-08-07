@@ -1,33 +1,37 @@
-**Updated:** 2026-08-07 10:30 UTC · branch `main` · **no pods running, nothing
-billing.** E5 attempt 2 stopped by budget gate 1 before paid generation; **$0.81**
-spent, **$6.74 of the $7.55 authorization remains.** A relaunch is blocked on a
-budget decision.
+**Updated:** 2026-08-07 12:35 UTC · branch `main` · **no pods running, nothing
+billing.** Three E5 attempts, **$3.83 spent, no C/R result.** **$6.79 of the
+$8.24 authorization remains.** A fourth attempt is blocked on an infrastructure
+decision, not on the experiment.
 
-## E5 — TWO ATTEMPTS, NO C/R RESULT YET
+## E5 — THREE ATTEMPTS, NO C/R RESULT YET
 
-Attempt 1 ([`EXPERIMENTS.md`](EXPERIMENTS.md) §22, $1.57): generated both R
-corpora, then died at pairing on a data-contract defect — `to_record()` dropped
-`ids`/`mask`. Fixed, guarded, and now verified from disk by a new blocking
-`verify_records` stage.
+| attempt | cost | stopped at | cause | fixed? |
+| --- | --- | --- | --- | --- |
+| 1 ([§22](EXPERIMENTS.md)) | $1.57 | pairing | `to_record()` dropped `ids`/`mask` | yes — code |
+| 2 ([§23](EXPERIMENTS.md)) | $0.81 | gate 1 | stale 152-min generation estimate | yes — code |
+| 3 ([§24](EXPERIMENTS.md)) | $1.45 | setup | **cold host: 62-min `uv sync`** | **no** |
 
-Attempt 2 ([`EXPERIMENTS.md`](EXPERIMENTS.md) §23, $0.81): **gate 1 refused to
-proceed**, shortfall $0.55, pod torn down before paid generation. The gate was
-carrying `r_generation: 152` min — an estimate made before R had ever run.
-Attempt 1 measured the same operation at **74.1 min**. Correcting only that
-stale input, the run projects at **$6.14 expected / $6.44 at a 1.05 backstop /
-$6.87 at the registered 1.12**, against $6.74 remaining.
+Attempts 1 and 2 fixed code, and code stays fixed. Attempt 3 is the only cause
+that recurs on its own.
 
-**Decision required:** a small additional authorization to restore the 1.12
-margin, or an explicit choice to run at 1.05 with ~$0.30 headroom. No token
-target, treatment, seed or arm may be changed to fit the budget.
+**The blocking problem: setup time varies 30×.** Same script, same image tag,
+same GPU — 5 min, 8.5 min, then 150+ min depending on whether the host has the
+layers and wheels cached. That is pure overhead before any science, and at the
+cold end it exceeds R generation and training combined. Observed base rate: 1
+cold host in 3. A fourth attempt on the current path risks ~$1.50 to the same
+cause with no new information.
 
-**Reusable now:** arm C corpora for both seeds, hash-verified and staged on the
-relay at `e5_start/e5_arm_c.tar.gz` (2,294 examples/seed, 1,034 blocks, 905,488
-candidate CE tokens). R must still be regenerated.
+**Proposed fix:** persist the environment on a RunPod network volume
+(`/opt/train`, `/opt/vllm`, HF cache) instead of rebuilding it per pod —
+RunPod-native, avoids the HF LFS quota problem, turns a 5-to-150-minute step
+into a mount. Tradeoff: pins the pod to one datacenter, narrowing L40S
+availability. **Not yet approved.**
 
-**Measured twice, independently:** `truncate_padding` wall-clock speedup
-**2.497×** (attempt 1) and **2.559×** (attempt 2). Warm-image setup 5–9 min.
-R generation 74 min for both seeds, acceptance 92.8% / 91.3%.
+**Ready and unaffected:** the fixed data contract with disk-level verification;
+arm C corpora for both seeds staged and hash-verified on the relay; the cost
+model rebuilt on measurements; `truncate_padding` speedup measured twice
+independently (2.497×, 2.559×); R generation measured at 74 min for both seeds
+with 92.8% / 91.3% acceptance.
 
 ## EXPERIMENT 4 COMPLETE — SCALE SUBSTANTIALLY IMPROVES ROLLOUT STABILITY,
 ## BUT DOES NOT RESOLVE CORRECTNESS
