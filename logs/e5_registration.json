@@ -670,5 +670,75 @@
    ],
    "tested": "tests/pod/test_cold_host_tripwire.sh, 7 behaviours, 8 mutations caught"
   }
+ },
+ "attempt_5_2026-08-08": {
+  "status": "REGISTERED; independent per-arm selection under one token budget",
+  "design_change": {
+   "from": "one common bundle count, identical composition in both arms",
+   "to": "independent per-arm selection to one token budget T*, R nested in C",
+   "why": "attempt 4 MEASURED R's supervised continuation at 1.657x (sa) / 1.762x (sb) C's on the same bundle at the same cut depth, so no single bundle count puts both arms on one token target",
+   "rejected": "identical composition with ~69% more R supervision -- an R win would be ambiguous between the recovery treatment and simply receiving more supervised signal"
+  },
+  "T_star": {
+   "rule": "min(original_target, largest target every arm/seed pool can reach)",
+   "value": 735603,
+   "reduced_from_original": 0,
+   "binding_pool": "C_sb at 853,744 CE tokens",
+   "correction": "an earlier report proposed T* ~= 703,337 on the premise that C_sb bound below the original target. That figure was EXTRAPOLATED from a 778-bundle stratified selection. Re-measuring the real corpus gives C_sb = 853,744, above the target, so T* is the original 735,603 and no reduction applies. Re-confirmed on the pod once real R exists.",
+   "tolerance_role": "5% stays a hard feasibility ceiling, not a target"
+  },
+  "selection": {
+   "achieved_arm_to_arm_delta": 0.0,
+   "achieved_deviation_from_target": 0.0,
+   "nesting": "R_selected subset of C_selected, by construction",
+   "strata": [
+    "task",
+    "source_seed",
+    "truncation_index",
+    "cut_depth_bucket"
+   ],
+   "method": "R selected first as the constrained arm; C keeps every R bundle and adds more from the complement, stratified, then single-bundle within-stratum swaps close the gap"
+  },
+  "measured_on_real_arm_C": {
+   "sa": {
+    "C_bundles": 900,
+    "R_bundles": 517,
+    "shared": 517,
+    "C_only": 383,
+    "C_blocks_packed": 872,
+    "R_blocks_estimated": 591,
+    "C_nonpadding": 2065054,
+    "R_nonpadding": 1504416
+   },
+   "sb": {
+    "C_bundles": 885,
+    "R_bundles": 505,
+    "shared": 505,
+    "C_only": 380,
+    "C_blocks_packed": 880,
+    "R_blocks_estimated": 596,
+    "C_nonpadding": 2069326,
+    "R_nonpadding": 1505490
+   },
+   "note": "arm C is real and packed exactly; R is reconstructed at the measured per-seed ratio and its block counts are ESTIMATES at attempt-4 packing density. Gate 2 measures the real packs.",
+   "binding_arm": "C, not R -- the reverse of the pre-attempt-4 assumption"
+  },
+  "budget": {
+   "common_block_count": 880,
+   "optimizer_steps": 1320,
+   "train_4_arms_min": 114,
+   "post_gate_raw_min": 310,
+   "post_gate_backstop_usd": 5.72,
+   "remaining_usd": 7.26,
+   "pre_gate_allowance_usd": 1.54,
+   "pre_gate_allowance_min": 93,
+   "verdict": "COVERED",
+   "gate_1_assumed_blocks": 1012,
+   "gate_1_basis": "1.15x the measured binding arm (880)"
+  },
+  "claim_boundary": "Evaluation remains paired on the fixed 150-prompt battery, but training composition is no longer identical. E5 estimates the performance of the complete teacher-prefix-continuation versus student-prefix-recovery RECIPES under a matched supervised-token budget. It does NOT isolate the pure causal effect of prefix content/state with training composition held constant.",
+  "primary_estimand": "Which continuation recipe produces better autonomous behaviour per fixed CE-supervision budget?",
+  "statistics_caveat": "paired McNemar/bootstrap preserve paired EVALUATION only; they do NOT remove the training-composition difference and must never be described as doing so",
+  "attempt_4": "feasibility failure, no C/R training result"
  }
 }

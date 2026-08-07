@@ -55,6 +55,17 @@ TOKENIZER_FILES = ("tokenizer.json", "tokenizer_config.json", "chat_template.jin
 TEACHER = "Qwen/Qwen3-4B-Thinking-2507"
 TEACHER_REV = "768f209d9ea81521153ed38c47d515654e938aea"
 T0 = time.time()
+CLAIM_BOUNDARY = (
+    "Evaluation remains paired on the fixed 150-prompt battery, but training "
+    "composition is no longer identical. E5 therefore estimates the performance "
+    "of the complete teacher-prefix-continuation versus student-prefix-recovery "
+    "RECIPES under a matched supervised-token budget. It does NOT isolate the "
+    "pure causal effect of prefix content/state with training composition held "
+    "constant. Primary estimand: which continuation recipe produces better "
+    "autonomous behaviour per fixed CE-supervision budget? The paired "
+    "McNemar/bootstrap statistics preserve paired EVALUATION; they do not remove "
+    "the training-composition difference and must never be described as doing so."
+)
 SEC_PER_STEP = 3.61        # measured full-width; divided by the measured speedup
 RATE = 0.99
 
@@ -228,12 +239,14 @@ def stage_pair(args):
     """Intersection, token targeting, packing — then the joint feasibility gate."""
     sys.path.insert(0, str(REPO / "src"))
     from aadistill.data.paired_corpus import (
-        comparability_report, intersect, packing_report,
-        select_paired_to_token_target, suffix_overlap,
+        as_bundles, common_token_target, comparability_report,
+        composition_report, intersect, packing_report,
+        select_nested_to_target, suffix_overlap,
     )
     report = {"target_ce_tokens": TARGET_CE_TOKENS, "tolerance": TOLERANCE,
-              "blocks": BLOCKS, "steps": STEPS, "per_seed": {}}
-    conditions = []
+              "blocks": BLOCKS, "steps": STEPS, "per_seed": {},
+              "claim_boundary": CLAIM_BOUNDARY}
+    conditions, pools, kept = [], {}, {}
     for seed in SEEDS:
         c_rows = [json.loads(l) for l in
                   (REPO / f"artifacts/stage3/e5_arm_c_{seed}/examples.jsonl").open()
@@ -242,7 +255,27 @@ def stage_pair(args):
                   (REPO / f"artifacts/stage3/e5_arm_r_{seed}/examples.jsonl").open()
                   if l.strip()]
         ck, rk, census = intersect(c_rows, r_rows)
-        c_sel, r_sel, sel = select_paired_to_token_target(ck, rk, TARGET_CE_TOKENS)
+        pools[f"C_{seed}"] = as_bundles(ck)
+        pools[f"R_{seed}"] = as_bundles(rk)
+        kept[seed] = (ck, rk, census)
+
+    # T* is fixed ONCE, across every arm and seed, before any arm is selected.
+    # Choosing it per seed would let two seeds train on different budgets and
+    # call the result a seed comparison.
+    tstar = common_token_target(pools, TARGET_CE_TOKENS)
+    report["common_target"] = tstar
+    print(f"  T* = {tstar['common_target']:,} "
+          f"(bound by {tstar['binding_pool']} at {tstar['binding_pool_total']:,}; "
+          f"original {tstar['original_target']:,})", flush=True)
+    conditions.append(("T* within tolerance of the registered target",
+                       tstar["reduction_fraction"] <= TOLERANCE,
+                       f"reduced {tstar['reduction_fraction']:.4%}"))
+
+    for seed in SEEDS:
+        ck, rk, census = kept[seed]
+        res = select_nested_to_target(ck, rk, tstar["common_target"])
+        c_sel, r_sel = res["examples"]
+        sel = res["report"]
         comp = comparability_report(c_sel, r_sel, supervised_tolerance=TOLERANCE)
         pack_c = packing_report(c_sel, BLOCKS, 8192)
         pack_r = packing_report(r_sel, BLOCKS, 8192)
@@ -250,6 +283,7 @@ def stage_pair(args):
             "census": census, "selection": sel, "comparability": comp,
             "packing_C": pack_c, "packing_R": pack_r,
             "overlap_C": suffix_overlap(c_sel), "overlap_R": suffix_overlap(r_sel),
+            "composition": composition_report(c_sel, r_sel),
             "ce_token_presentations_over_3_passes": {
                 "C": pack_c["ce_mask_tokens"] * 3,
                 "R": pack_r["ce_mask_tokens"] * 3},
@@ -264,8 +298,14 @@ def stage_pair(args):
                                f"{pack['total_nonpadding_tokens']:,} tokens"))
         conditions.append((f"{seed} C/R within tolerance", comp["within_tolerance"],
                            f"delta {comp['supervised_token_relative_delta']}"))
-        conditions.append((f"{seed} identical composition",
-                           len(c_sel) == len(r_sel), f"{len(c_sel)} vs {len(r_sel)}"))
+        # Composition is deliberately NOT identical -- see CLAIM_BOUNDARY. What
+        # must hold is nesting, so the arms share every bundle R uses.
+        conditions.append((f"{seed} R nested in C", sel["nested"],
+                           f"{sel['shared_bundles']} shared, "
+                           f"{sel['c_only_bundles']} C-only"))
+        conditions.append((f"{seed} arm-to-arm token delta under 1%",
+                           sel["arm_to_arm_relative_delta"] < 0.01,
+                           f"{sel['arm_to_arm_relative_delta']:.4%}"))
         bundles_ok = all(
             len([e for e in c_sel if e["source_session_id"] == sid]) == 2
             for sid in {e["source_session_id"] for e in c_sel})
@@ -566,8 +606,12 @@ def main() -> None:
     ap.add_argument("--authorized-usd", type=float, default=8.23)
     ap.add_argument("--spent-usd", type=float, default=0.0,
                     help="pod spend so far, supplied by the launcher")
-    ap.add_argument("--assumed-blocks", type=int, default=1123,
-                    help="conservative R=1.30x C, used only at gate 1")
+    ap.add_argument("--assumed-blocks", type=int, default=1012,
+                    help="gate 1 only. Under nested selection C BINDS, not R: "
+                         "C is measured at 872/880 blocks on the real corpus "
+                         "and R estimates at ~591/596, so 1012 is 1.15x the "
+                         "measured binding arm. Replaced by the real common "
+                         "count at gate 2.")
     args = ap.parse_args()
     OUT.mkdir(parents=True, exist_ok=True)
     for name in (list(STAGES) if args.stage == "all" else [args.stage]):

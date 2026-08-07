@@ -478,3 +478,188 @@ def packing_report(examples: list[dict], n_blocks: int, block_len: int) -> dict:
         "ce_share_of_kd": round(ce / nonpad, 4) if nonpad else 0.0,
         "fits": nonpad <= capacity,
     }
+
+
+# --- independent per-arm selection to one common token budget -----------------
+# Attempt 4 measured what makes this necessary: R's supervised continuation runs
+# 1.66x (sa) to 1.76x (sb) longer than C's on the same bundle at the same cut
+# depth, because C's span is the teacher's own remaining trajectory while R's is
+# a fresh teacher generation from a student prefix. One common bundle count
+# therefore cannot put both arms on one token target -- at 778 bundles C was
+# 24.7% under and R 24.7% over.
+#
+# So the arms are selected independently to the SAME token budget and the
+# composition is allowed to differ, with R's bundles nested inside C's so the
+# two corpora share as much material as the budget allows.
+
+def supervised_tokens(bundle: list[dict]) -> int:
+    return sum(int(e["n_continuation_tokens"]) for e in bundle)
+
+
+def common_token_target(pools: dict[str, list[list[dict]]], original: int) -> dict:
+    """T* = min(original target, the largest target EVERY pool can reach).
+
+    A pool that cannot reach the original target binds the whole experiment: the
+    alternative is letting one arm sit low inside the tolerance while the others
+    sit on target, which spends the tolerance on an avoidable mismatch instead of
+    keeping it as the feasibility ceiling it was registered to be.
+    """
+    totals = {k: sum(supervised_tokens(b) for b in v) for k, v in pools.items()}
+    binding = min(totals, key=lambda k: totals[k])
+    target = min(original, totals[binding])
+    return {"original_target": original, "pool_totals": totals,
+            "binding_pool": binding, "binding_pool_total": totals[binding],
+            "common_target": int(target),
+            "reduced_from_original": int(original - target),
+            "reduction_fraction": round((original - target) / original, 5)}
+
+
+def _tokens_of(bundles: list[list[dict]], idxs) -> int:
+    return sum(supervised_tokens(bundles[i]) for i in idxs)
+
+
+def _refine(bundles: list[list[dict]], chosen: list[int], target: int, *,
+            locked: set[int], salt: str, passes: int = 6) -> list[int]:
+    """Swap single bundles within their own stratum to close on the target.
+
+    Swapping inside a stratum leaves every stratum quota exactly as the
+    largest-remainder allocation set it, so the composition guarantee survives
+    the refinement. `locked` bundles are never given up -- that is what keeps
+    R's selection nested inside C's.
+    """
+    chosen = list(chosen)
+    cells = _bundle_cells(bundles, salt)
+    stratum_of = {i: k for k, idxs in cells.items() for i in idxs}
+    for _ in range(passes):
+        cur = _tokens_of(bundles, chosen)
+        gap = target - cur
+        if gap == 0:
+            break
+        sel = set(chosen)
+        best = None                              # (new_abs_gap, out_idx, in_idx)
+        for out in sorted(sel - locked):
+            for cand in cells[stratum_of[out]]:
+                if cand in sel:
+                    continue
+                delta = supervised_tokens(bundles[cand]) - supervised_tokens(bundles[out])
+                new = abs(gap - delta)
+                if new < abs(gap) and (best is None or new < best[0]):
+                    best = (new, out, cand)
+        if best is None:
+            break
+        _, out, cand = best
+        chosen.remove(out)
+        chosen.append(cand)
+    return sorted(chosen)
+
+
+def _select_arm(bundles: list[list[dict]], target: int, *, locked: list[int],
+                salt: str) -> list[int]:
+    """Stratified selection closest to `target`, always containing `locked`.
+
+    The sweep runs over bundles ADDED to `locked`, drawn stratified from the
+    complement -- not over re-selections of the whole pool. Sweeping the whole
+    pool made the union jump straight past the target: `take_bundles(n)` and the
+    locked set are drawn under different salts, so at n = |locked| the union was
+    already ~2|locked| bundles and 10% over budget, and every larger n was worse.
+    Selecting the *additions* is also what the design says C does -- keep every R
+    bundle, then add more, because its continuations are shorter.
+    """
+    locked_set = set(locked)
+    rest = [i for i in range(len(bundles)) if i not in locked_set]
+    sub = [bundles[i] for i in rest]
+    n_best, best = sorted(locked_set), None
+    for k in range(0, len(sub) + 1):
+        idxs = locked_set | {rest[j] for j in take_bundles(sub, k, salt=salt)}
+        d = abs(_tokens_of(bundles, idxs) - target)
+        if best is None or d < best:
+            best, n_best = d, sorted(idxs)
+    return _refine(bundles, n_best, target, locked=locked_set, salt=salt)
+
+
+def select_nested_to_target(c_kept: list[dict], r_kept: list[dict], target: int,
+                            *, salt: str = "e5", truncations: int = 2) -> dict:
+    """Select both arms to one supervised-token budget, R nested inside C.
+
+    R is chosen first because it is the constrained arm: it carries more
+    supervised tokens per bundle, so it reaches the budget with fewer bundles and
+    has the least freedom. C then keeps every R bundle and adds more, which is
+    what makes `R_selected` a subset of `C_selected` by construction rather than
+    by chance.
+    """
+    c_bundles = as_bundles(c_kept, truncations=truncations)
+    r_bundles = as_bundles(r_kept, truncations=truncations)
+    order = {bundle_key(b[0]): i for i, b in enumerate(c_bundles)}
+    if {bundle_key(b[0]) for b in r_bundles} - set(order):
+        raise ValueError("R holds bundles absent from C; intersect first")
+
+    r_idx = _select_arm(r_bundles, target, locked=[], salt=salt + "|R")
+    r_keys = {bundle_key(r_bundles[i][0]) for i in r_idx}
+    locked = sorted(order[k] for k in r_keys)
+    c_idx = _select_arm(c_bundles, target, locked=locked, salt=salt + "|C")
+
+    c_sel = [e for i in c_idx for e in c_bundles[i]]
+    r_sel = [e for i in r_idx for e in r_bundles[i]]
+    c_keys = {bundle_key(c_bundles[i][0]) for i in c_idx}
+    if not r_keys <= c_keys:
+        raise AssertionError("nesting violated: R holds a bundle C dropped")
+    c_tok, r_tok = _tokens_of(c_bundles, c_idx), _tokens_of(r_bundles, r_idx)
+    return {
+        "examples": (c_sel, r_sel),
+        "report": {
+            "common_target": target,
+            "arm_c_supervised": c_tok, "arm_r_supervised": r_tok,
+            "arm_c_vs_target": round(c_tok / target, 5),
+            "arm_r_vs_target": round(r_tok / target, 5),
+            "arm_to_arm_relative_delta": round(
+                abs(c_tok - r_tok) / max(c_tok, r_tok), 5),
+            "worst_relative_deviation_from_target": round(
+                max(abs(c_tok - target), abs(r_tok - target)) / target, 5),
+            "shared_bundles": len(r_keys),
+            "c_only_bundles": len(c_keys - r_keys),
+            "c_selected_bundles": len(c_keys), "r_selected_bundles": len(r_keys),
+            "c_available_bundles": len(c_bundles),
+            "r_available_bundles": len(r_bundles),
+            "nested": True,
+            "c_unique_sessions": len({e["source_session_id"] for e in c_sel}),
+            "r_unique_sessions": len({e["source_session_id"] for e in r_sel}),
+            "c_examples": len(c_sel), "r_examples": len(r_sel),
+        },
+    }
+
+
+def composition_report(c_sel: list[dict], r_sel: list[dict]) -> dict:
+    """Task, seed, truncation-index and cut-depth distributions for both arms.
+
+    Reported side by side because the arms no longer share a composition: the
+    experiment now compares two recipes under one supervised-token budget, and
+    the reader has to be able to see exactly how the corpora differ.
+    """
+    def dist(rows, key):
+        c = Counter(key(e) for e in rows)
+        n = sum(c.values()) or 1
+        return {str(k): {"n": v, "share": round(v / n, 4)}
+                for k, v in sorted(c.items(), key=lambda kv: str(kv[0]))}
+    out = {}
+    for arm, rows in (("C", c_sel), ("R", r_sel)):
+        out[arm] = {
+            "examples": len(rows),
+            "unique_sessions": len({e["source_session_id"] for e in rows}),
+            "task": dist(rows, lambda e: e["data_type"]),
+            "source_seed": dist(rows, lambda e: e.get("source_seed")),
+            "truncation_index": dist(rows, lambda e: int(e["truncation_index"])),
+            "cut_depth_bucket": dist(
+                rows, lambda e: prefix_bucket(int(e["n_prefix_tokens"]))),
+            "truncation_fraction_mean": round(
+                sum(float(e["truncation_fraction"]) for e in rows) / max(1, len(rows)), 4),
+            "ce_mask_tokens": sum(int(e["n_continuation_tokens"]) for e in rows),
+            # kd_scope=all: every non-padding position carries KD, so the KD mask
+            # is the context, not the supervised span.
+            "kd_mask_tokens": sum(int(e["n_total_tokens"]) for e in rows),
+            "nonpadding_tokens": sum(int(e["n_total_tokens"]) for e in rows),
+        }
+    tasks = sorted({t for a in out.values() for t in a["task"]})
+    out["task_share_delta"] = {
+        t: round(out["C"]["task"].get(t, {"share": 0})["share"]
+                 - out["R"]["task"].get(t, {"share": 0})["share"], 4) for t in tasks}
+    return out

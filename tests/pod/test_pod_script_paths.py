@@ -390,13 +390,32 @@ def test_launcher_redraws_on_a_cold_host_and_charges_it():
     assert '[ -f "$SCR/pod_start_epoch" ] || date -u +%s > "$SCR/pod_start_epoch"' in src
 
 
-def test_gate_1_keeps_the_conservative_block_assumption():
-    """1123 = 1.30 x C is unmeasured and must stay until the real R pack exists.
-    Lowering it would make the arithmetic pass by assuming the answer."""
+def test_gate_1_stays_conservative_about_the_binding_arm():
+    """Under nested selection C binds, not R: C is measured at 872/880 blocks on
+    the real corpus while R estimates at ~591/596. The gate-1 figure must sit
+    ABOVE the measured binding arm, so it can only be wrong in the safe
+    direction until gate 2 measures the real packs."""
+    import re as _re
     src = _e5_driver()
-    assert 'ap.add_argument("--assumed-blocks", type=int, default=1123)' in src or \
-        '"--assumed-blocks", type=int, default=1123' in src, \
-        "gate 1 must keep the conservative 1.30x C assumption"
+    n = int(_re.search(r'"--assumed-blocks", type=int, default=(\d+)', src).group(1))
+    assert n >= 968, f"assumed-blocks {n} is below 1.10x the measured 880"
+
+
+def test_the_claim_boundary_travels_with_the_result():
+    # Read the EVALUATED constant, not the source text: the literal is split
+    # across source lines, so substring checks on the raw file silently pass.
+    import ast
+    tree = ast.parse(_e5_driver())
+    cb = next(ast.literal_eval(n.value) for n in tree.body
+              if isinstance(n, ast.Assign)
+              and getattr(n.targets[0], "id", None) == "CLAIM_BOUNDARY")
+    for phrase in ("training composition is no longer identical",
+                   "does NOT isolate the pure causal effect",
+                   "per fixed CE-supervision budget",
+                   "do not remove the training-composition difference"):
+        assert phrase in cb, f"claim boundary lost: {phrase!r}"
+    assert '"claim_boundary": CLAIM_BOUNDARY' in _e5_driver(), \
+        "the boundary must be written into the feasibility report"
 
 
 def test_generated_corpora_are_retained_before_anything_can_fail():
