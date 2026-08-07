@@ -3305,3 +3305,98 @@ narrows L40S availability.
 
 No token target, treatment, seed or arm was altered. $6.79 of the authorization
 is intact.
+
+---
+
+## 25. Experiment 5 — attempt 4: the feasibility gate found a real conflict (2026-08-07, $1.53)
+
+**Verdict: stopped at the joint feasibility gate. No training, no C/R result —
+but the first attempt to produce a genuine measurement about the design.**
+
+| | |
+| --- | --- |
+| Pod | `8nheigrv25aeq8`, one draw, **no cold-host redraws** |
+| Billed | **$1.53** (93 min); cumulative E5 **$5.36** |
+| Commit | `a4935c4` |
+| Authorization | $8.79; **$7.26 remains** |
+| Reached | setup → validate → benchmark → **gate 1 PASS** → generate sa+sb → **`RECORDS_VERIFIED`** → pair → **INFEASIBLE** |
+
+### Two things worked that had never worked before
+
+Setup finished in **4 min 45 s** on the first draw; the tripwire never fired.
+
+**`RECORDS_VERIFIED` passed.** Every accepted R record was re-read from disk and
+converted through `example_to_rendered` — 2,102 records for `sa`, 2,056 for `sb`,
+zero missing fields, zero unrenderable, zero system-block mismatches. The
+attempt-1 data-contract defect is fixed and now confirmed on real generated data
+rather than on synthetic examples.
+
+### The conflict the gate found
+
+R's supervised continuation is systematically **1.66–1.76× longer than C's** on
+the same bundle at the same relative cut depth:
+
+| seed | C tok/bundle | R tok/bundle | R/C |
+| --- | --- | --- | --- |
+| sa | 711.6 | 1179.4 | **1.657** |
+| sb | 684.2 | 1205.7 | **1.762** |
+
+This is a property of the treatments, not a bug. C's supervised span is the
+teacher's *own remaining trajectory* after the cut, which is bounded by the
+trajectory that already exists. R's is a *fresh* teacher generation conditioned
+on a student prefix, and the teacher handed a partial student reasoning chain
+writes a longer completion than its own remainder would have been — it repairs
+or restarts rather than continuing.
+
+The consequence is structural: with atomic bundles and identical composition,
+**one common bundle count cannot put both arms on the token target.** At the 778
+bundles the selector chose, C landed 24.7% under and R 24.7% over (sa); 27.6%
+under and 27.5% over (sb). The gate refused, exactly as registered — "if the full
+corpus cannot simultaneously satisfy the CE-token target, atomic bundles, the
+block budget and the C/R tolerance, STOP before training and report the measured
+conflict."
+
+### A resolution exists, and it is within the registered tolerance
+
+Selecting each arm independently to the same token target, with R's bundles
+nested inside C's pool:
+
+| seed | C | R |
+| --- | --- | --- |
+| sa | 1,034 of 1,051 bundles → 735,823 tok (1.000×) | 624 bundles → 735,918 tok (1.000×) |
+| sb | **all** 1,028 bundles → 703,337 tok (0.956×) | 610 bundles → 735,495 tok (1.000×) |
+
+Both arms land inside the registered 5% for both seeds. The cost is that
+composition is no longer identical: R trains on ~0.60× as many distinct bundles
+as C, seeing fewer problems at greater supervised depth each.
+
+This does **not** damage the paired statistics. McNemar and the paired bootstrap
+run over the **150 pinned held-out evaluation prompts at fixed checkpoints**, not
+over training bundles, so training composition was never what made the
+comparison paired.
+
+Two caveats. `sb`'s C arm has no headroom — it needs its entire paired pool and
+still lands 4.4% under target, inside tolerance but with nothing spare. And the
+per-bundle rates above are **extrapolated** from the 778-bundle stratified
+selection; they must be re-measured on the real corpus before being registered,
+not assumed.
+
+### The R corpora were lost again — my defect
+
+The launcher's side bundle ships `artifacts/audit`, configs and `manifest.json`
+files, but not `examples.jsonl`. So a corpus costing ~$1.20 of GPU time was
+generated, verified, and discarded at teardown — for the **second** time
+(attempt 1 lost it to the record defect; attempt 4 lost it to the transfer).
+
+Waiting for teardown to preserve an artifact means losing it precisely when the
+run stops early, which is when it is most worth keeping. Fixed by pushing the
+corpora to the relay inside `verify_records`, the moment they are known good and
+before anything downstream can fail, with the side bundle carrying a second copy.
+Retention failure warns and never aborts the run.
+
+### Next
+
+The design decision is the user's: independent per-arm selection to the token
+target (composition differs), or identical composition with unmatched tokens
+(R sees ~69% more supervised signal). No token target, treatment, seed or arm
+should be changed to force the other to fit.

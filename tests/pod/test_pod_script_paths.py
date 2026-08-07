@@ -397,3 +397,20 @@ def test_gate_1_keeps_the_conservative_block_assumption():
     assert 'ap.add_argument("--assumed-blocks", type=int, default=1123)' in src or \
         '"--assumed-blocks", type=int, default=1123' in src, \
         "gate 1 must keep the conservative 1.30x C assumption"
+
+
+def test_generated_corpora_are_retained_before_anything_can_fail():
+    """Twice an R corpus costing ~$1.20 of GPU time was generated, accepted, and
+    lost at teardown because the side bundle ships manifests, not examples."""
+    src = _e5_driver()
+    assert "_retain_corpora()" in src
+    fn = src[src.index("def _retain_corpora("):src.index("def _system_ids(")]
+    assert "e5_arm_r_corpora.tar.gz" in fn and "upload_file" in fn
+    assert "except Exception as exc:" in fn, "retention must never fail the run"
+    # It must run immediately after verification, not at teardown.
+    stage = src[src.index("def stage_verify_records("):src.index("def _retain_corpora(")]
+    assert stage.rstrip().endswith("_retain_corpora()")
+    launcher = (REPO / "scripts/pod/e5_launch.sh").read_text()
+    tar = launcher[launcher.index("tar czf"):launcher.index("cp /workspace/e5_run.log")]
+    assert "e5_arm_r_*/" in tar, "the side bundle must carry the corpora too"
+    assert "e5_final_*.jsonl" in tar, "and the paired selection"

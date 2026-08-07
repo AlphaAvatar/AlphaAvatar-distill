@@ -28,6 +28,7 @@ Markers: VALIDATED -> GENERATED:<seed> -> PAIRED -> FEASIBLE/INFEASIBLE
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import os
 import shutil
@@ -167,6 +168,39 @@ def stage_verify_records(args):
     mark("RECORDS_VERIFIED" if report["passed"] else "RECORDS_INVALID")
     if failures:
         raise AssertionError(f"persisted records unusable: {failures}")
+    _retain_corpora()
+
+
+def _retain_corpora() -> None:
+    """Push the generated R corpora to the relay the moment they are known good.
+
+    Twice now -- 2026-08-07 attempts 1 and 4 -- an R corpus that cost ~$1.20 of
+    GPU time was generated, accepted, and then lost when the pod was torn down,
+    because the launcher's side bundle ships manifests and not `examples.jsonl`.
+    Waiting for teardown to preserve an artifact means losing it whenever the run
+    stops early, which is exactly when it is most worth keeping. So this runs
+    here, right after the records are verified and before anything can fail.
+    """
+    import tarfile
+    tar = OUT / "e5_arm_r_corpora.tar.gz"
+    with tarfile.open(tar, "w:gz") as t:
+        for seed in SEEDS:
+            d = REPO / f"artifacts/stage3/e5_arm_r_{seed}"
+            t.add(d, arcname=d.name)
+    size_mb = tar.stat().st_size / 1e6
+    try:
+        from huggingface_hub import HfApi
+        HfApi(token=os.environ["HF_TOKEN"]).upload_file(
+            path_or_fileobj=str(tar), path_in_repo="e5_start/e5_arm_r_corpora.tar.gz",
+            repo_id="AlphaAvatar/aadistill-artifacts", repo_type="model")
+        digest = hashlib.sha256(tar.read_bytes()).hexdigest()
+        print(f"R corpora retained on the relay: {size_mb:.1f} MB, "
+              f"sha256 {digest[:16]}", flush=True)
+        mark(f"CORPORA_RETAINED:{digest[:16]}")
+    except Exception as exc:                       # never fail the run over this
+        print(f"WARNING: R corpora upload failed ({exc}); the local tarball at "
+              f"{tar} is still in the side bundle", flush=True)
+        mark("CORPORA_RETAIN_FAILED")
 
 
 def _system_ids(seed: str, conditions: list) -> dict:

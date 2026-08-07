@@ -263,13 +263,14 @@ say "starting FORMAL E5: validation gate -> R generation -> feasibility -> 4 arm
 # creation -- startup plus the ~53-min setup. Handing the driver a zero starting
 # balance would understate spend by ~$1 at both gates.
 SPENT_AT_DRIVER_START=$(echo "($(date -u +%s) - $(cat "$SCR/pod_start_epoch"))/3600*$MAX_PRICE" | bc -l)
-# The gates are budgeted against the RunPod-side deadline, not the $9.12
-# authorization. The deadline is the binding constraint: a plan that fits $9.12
-# but not the backstop gets killed by RunPod mid-training, which is the exact
-# outcome the gates exist to prevent. $9.12 remains the ceiling neither can cross.
+# The gates are budgeted against the RunPod-side deadline, not the standing
+# authorization. The deadline is the binding constraint: a plan that fits the
+# authorization but not the backstop gets killed by RunPod mid-training, which is
+# the exact outcome the gates exist to prevent. The authorization remains the
+# ceiling neither can cross, and BACKSTOP_MINUTES is derived to sit under it.
 GATE_CEILING=$(echo "$BACKSTOP_MINUTES/60*$MAX_PRICE" | bc -l)
 say "driver budget: \$$(printf '%.2f' "$SPENT_AT_DRIVER_START") already billed, \
-gate ceiling \$$(printf '%.2f' "$GATE_CEILING") (backstop-bound, under the \$9.12 authorization)"
+gate ceiling \$$(printf '%.2f' "$GATE_CEILING") (backstop-bound, under the authorization)"
 $SSH "root@$HOST" "cd /workspace/aad && setsid nohup /opt/train/bin/python \
   scripts/pod/e5_driver.py --stage all \
   --spent-usd $(printf '%.3f' "$SPENT_AT_DRIVER_START") \
@@ -306,6 +307,8 @@ mkdir -p "$STORE"
 say "bundling small artifacts on the pod"
 $SSH "root@$HOST" 'cd /workspace/aad && tar czf /workspace/e5_side.tar.gz \
   artifacts/audit artifacts/stage3/e5_pilot_sa configs/stage3/e5 \
+  $(ls -d artifacts/stage3/e5_arm_r_*/ 2>/dev/null) \
+  $(ls artifacts/stage3/e5_final_*.jsonl 2>/dev/null) \
   $(ls -d artifacts/stage3/e5_*/manifest.json 2>/dev/null) \
   2>/dev/null; cp /workspace/e5_run.log /workspace/e5.status /workspace/ 2>/dev/null; \
   sha256sum /workspace/e5_side.tar.gz' >>"$LOG" 2>&1

@@ -1,37 +1,41 @@
-**Updated:** 2026-08-07 12:35 UTC · branch `main` · **no pods running, nothing
-billing.** Three E5 attempts, **$3.83 spent, no C/R result.** **$6.79 of the
-$8.24 authorization remains.** A fourth attempt is blocked on an infrastructure
-decision, not on the experiment.
+**Updated:** 2026-08-07 15:05 UTC · branch `main` · **no pods running, nothing
+billing.** Four E5 attempts, **$5.36 spent, no C/R result.** **$7.26 of the $8.79
+authorization remains.** Blocked on a design decision, not on infrastructure.
 
-## E5 — THREE ATTEMPTS, NO C/R RESULT YET
+## E5 — ATTEMPT 4 REACHED THE FEASIBILITY GATE AND FOUND A REAL CONFLICT
 
-| attempt | cost | stopped at | cause | fixed? |
-| --- | --- | --- | --- | --- |
-| 1 ([§22](EXPERIMENTS.md)) | $1.57 | pairing | `to_record()` dropped `ids`/`mask` | yes — code |
-| 2 ([§23](EXPERIMENTS.md)) | $0.81 | gate 1 | stale 152-min generation estimate | yes — code |
-| 3 ([§24](EXPERIMENTS.md)) | $1.45 | setup | **cold host: 62-min `uv sync`** | **no** |
+| attempt | cost | stopped at | cause |
+| --- | --- | --- | --- |
+| 1 ([§22](EXPERIMENTS.md)) | $1.57 | pairing | `to_record()` dropped `ids`/`mask` — fixed |
+| 2 ([§23](EXPERIMENTS.md)) | $0.81 | gate 1 | stale 152-min estimate — fixed |
+| 3 ([§24](EXPERIMENTS.md)) | $1.45 | setup | cold host — tripwire added |
+| 4 ([§25](EXPERIMENTS.md)) | $1.53 | **feasibility gate** | **real design conflict** |
 
-Attempts 1 and 2 fixed code, and code stays fixed. Attempt 3 is the only cause
-that recurs on its own.
+**Working now:** setup 4 min 45 s on the first draw, tripwire silent;
+`RECORDS_VERIFIED` **passed** on 2,102 + 2,056 real records — zero missing
+fields, zero unrenderable, zero system-block mismatches. The attempt-1 contract
+defect is fixed and confirmed on generated data.
 
-**The blocking problem: setup time varies 30×.** Same script, same image tag,
-same GPU — 5 min, 8.5 min, then 150+ min depending on whether the host has the
-layers and wheels cached. That is pure overhead before any science, and at the
-cold end it exceeds R generation and training combined. Observed base rate: 1
-cold host in 3. A fourth attempt on the current path risks ~$1.50 to the same
-cause with no new information.
+**The conflict.** R's supervised continuation is **1.66× (sa) / 1.76× (sb)**
+longer than C's on the same bundle at the same cut depth. C's span is the
+teacher's own remaining trajectory; R's is a fresh teacher generation from a
+student prefix, and the teacher repairs rather than continues. So with atomic
+bundles and identical composition, **no single bundle count puts both arms on
+735,603 tokens** — at 778 bundles C was 24.7% under and R 24.7% over.
 
-**Proposed fix:** persist the environment on a RunPod network volume
-(`/opt/train`, `/opt/vllm`, HF cache) instead of rebuilding it per pod —
-RunPod-native, avoids the HF LFS quota problem, turns a 5-to-150-minute step
-into a mount. Tradeoff: pins the pod to one datacenter, narrowing L40S
-availability. **Not yet approved.**
+**A resolution inside the registered 5%:** select each arm independently, R
+nested in C's pool — sa: C 1,034 → 735,823, R 624 → 735,918; sb: C all 1,028 →
+703,337 (0.956×), R 610 → 735,495. Composition then differs (R ≈ 0.60× C's
+bundles). This does not affect the paired statistics, which run over the 150
+pinned held-out prompts, not over training bundles. Caveats: sb's C arm has zero
+headroom, and these per-bundle rates are **extrapolated** and must be re-measured.
 
-**Ready and unaffected:** the fixed data contract with disk-level verification;
-arm C corpora for both seeds staged and hash-verified on the relay; the cost
-model rebuilt on measurements; `truncate_padding` speedup measured twice
-independently (2.497×, 2.559×); R generation measured at 74 min for both seeds
-with 92.8% / 91.3% acceptance.
+**Decision required:** independent per-arm selection (tokens matched, composition
+differs) or identical composition (R sees ~69% more supervised signal).
+
+**Fixed since:** R corpora are now pushed to the relay inside `verify_records`,
+the moment they are verified — they were lost at teardown twice because the side
+bundle shipped manifests, not examples.
 
 ## EXPERIMENT 4 COMPLETE — SCALE SUBSTANTIALLY IMPROVES ROLLOUT STABILITY,
 ## BUT DOES NOT RESOLVE CORRECTNESS
