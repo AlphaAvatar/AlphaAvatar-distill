@@ -230,6 +230,51 @@ def main() -> None:
         report["packing_estimate_C"] = packing_report(c_sel, blocks, 8192)
         report["packing_estimate_R"] = packing_report(r_sel, blocks, 8192)
 
+    if not args.dry_run and ck:
+        print("=== loss and gradient attribution (real teacher) ===", flush=True)
+        gr = work / "grad"
+        gr.mkdir(parents=True, exist_ok=True)
+        for label, rows in (("C", c_sel), ("R", r_sel)):
+            (gr / f"{label}.jsonl").write_text(
+                "".join(json.dumps({"ids": e["ids"], "mask": e["mask"]}) + "\n"
+                        for e in rows[:2] if "ids" in e))
+        if (gr / "R.jsonl").stat().st_size > 0:
+            run(["scripts/training/diagnose_e5_gradients.py",
+                 "--student", student, "--teacher", f"{TEACHER}@{TEACHER_REV}",
+                 "--examples", gr / "C.jsonl", gr / "R.jsonl",
+                 "--labels", "C", "R", "--max-batch", 2,
+                 "--out", REPO / "artifacts/audit/e5_gradients.json"])
+            report["gradient_attribution"] = json.loads(
+                (REPO / "artifacts/audit/e5_gradients.json").read_text())["arms"]
+        else:
+            report["gradient_attribution"] = {
+                "skipped": "emitted records carry no token ids"}
+
+        print("=== real-model optimizer step ===", flush=True)
+        import torch
+        from transformers import AutoModelForCausalLM
+        from aadistill.training.train import select_trainable
+        m = AutoModelForCausalLM.from_pretrained(student, dtype=torch.float32)
+        rep = select_trainable(m, json.loads(
+            (REPO / "configs/stage3/p2/p2_ceheavy_sa.json").read_text()
+        )["trainable_patterns"])
+        opt = torch.optim.AdamW([p_ for p_ in m.parameters() if p_.requires_grad], lr=0.0)
+        ids = torch.arange(1, 65).unsqueeze(0)
+        out = m(ids)
+        loss = out.logits.float().mean()
+        loss.backward()
+        gn = float(torch.nn.utils.clip_grad_norm_(
+            [p_ for p_ in m.parameters() if p_.requires_grad], 1.0))
+        opt.step()
+        report["optimizer_step"] = {
+            "trainable_params": rep["trainable_params"],
+            "finite_loss": bool(torch.isfinite(loss)),
+            "grad_norm": round(gn, 6),
+            "finite_grad_norm": bool(torch.isfinite(torch.tensor(gn))),
+            "lr": 0.0, "note": "lr=0 so no weight is meaningfully changed",
+        }
+        del m, opt
+
     print("=== alignment ===", flush=True)
     report["alignment"] = ({"rows_checked": 0, "failures": [],
                             "skipped": "dry run emits no token ids"}

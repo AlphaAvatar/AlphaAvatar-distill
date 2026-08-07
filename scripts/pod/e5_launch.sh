@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
-# Dev-box orchestrator for the E5 PILOT pod (first-contact validation of the
-# real vLLM and two-engine paths). Deliberately given a much smaller backstop
-# than the full E5 run: this is a validity gate, not the experiment.
+# Dev-box orchestrator for the FORMAL E5 pod. The separate pilot pod was
+# removed after two attempts showed setup dominates a short session (53 of 57
+# minutes, paid again every time); the validation is folded in as stage 1 here
+# so setup is paid once. A failed gate stops the run before paid generation.
 # Runs under nohup so a paid pod never depends on a conversation staying open.
 #
 #   SCR=… SESSION_COMMIT=… BUNDLE_NAME=… bash scripts/pod/e4_launch.sh
@@ -26,20 +27,20 @@ GPU_NAME=${GPU_NAME:-NVIDIA L40S}
 MAX_PRICE=${MAX_PRICE:-0.99}
 # Integer minutes: `date -d "+7.5 hours"` is rejected by GNU date and silently
 # produces an EMPTY --terminate-after, i.e. a pod with no backstop at all.
-# PILOT backstop: 90 min x $0.99 = $1.49 worst case, against ~40 min expected.
-# The full E5 run keeps its own $7.92 / 480 min ceiling; this must not consume it.
-BACKSTOP_MINUTES=${BACKSTOP_MINUTES:-90}
+# 533 min x $0.99 = $8.79, the authorized $8.80 ceiling, against ~480 min
+# expected (464 corrected for MEASURED 53-min setup, plus the ~15-min gate).
+BACKSTOP_MINUTES=${BACKSTOP_MINUTES:-533}
 STARTUP_LIMIT_MIN=${STARTUP_LIMIT_MIN:-15}
 MAX_POD_ATTEMPTS=${MAX_POD_ATTEMPTS:-2}
 # Seconds between create attempts when the GPU is out of capacity.
 CREATE_RETRY_DELAY_S=${CREATE_RETRY_DELAY_S:-300}
-POLL_LIMIT_MIN=${POLL_LIMIT_MIN:-85}
-CKPT_TRANSFER_LIMIT_MIN=${CKPT_TRANSFER_LIMIT_MIN:-10}
+POLL_LIMIT_MIN=${POLL_LIMIT_MIN:-520}
+CKPT_TRANSFER_LIMIT_MIN=${CKPT_TRANSFER_LIMIT_MIN:-40}
 TEACHER_REVISION=${TEACHER_REVISION:-768f209d9ea81521153ed38c47d515654e938aea}
-STORE=${STORE:-/home/ecs-user/aad-artifacts/e5_pilot}
-LOG=$SCR/e5_pilot_launch.log
+STORE=${STORE:-/home/ecs-user/aad-artifacts/e5}
+LOG=$SCR/e5_launch.log
 KEY=$(cat "$SCR/rp_key")
-STATE=$SCR/e5_pilot.state
+STATE=$SCR/e5.state
 
 say() { echo "[$(date -u +%FT%TZ)] $*" | tee -a "$LOG"; }
 cost() {
@@ -91,7 +92,7 @@ create_pod() {
     --container-disk-in-gb 150 --volume-in-gb 0 \
     --min-cuda-version 13.0 \
     --ports "22/tcp" \
-    --name "aadistill-e5pilot-a$1" \
+    --name "aadistill-e5-a$1" \
     --terminate-after "$deadline" >"$SCR/create_raw_$1.txt" 2>&1
   python3 - "$SCR/create_raw_$1.txt" <<'PYEOF'
 import json, re, sys
@@ -201,22 +202,22 @@ say "running setup"
 $SSH "root@$HOST" "cd /workspace && SESSION_COMMIT=$SESSION_COMMIT \
   BUNDLE_NAME=$BUNDLE_NAME TEACHER_REVISION=$TEACHER_REVISION \
   HOLDOUT_SRC=/workspace/aad_holdout/holdout_v1.jsonl \
-  E5_SEEDS=sa bash /workspace/e5_setup.sh" \
-  >>"$SCR/e5_pilot_setup.log" 2>&1
+  E5_SEEDS=sa,sb bash /workspace/e5_setup.sh" \
+  >>"$SCR/e5_setup.log" 2>&1
 if [ $? -ne 0 ]; then
-  say "FATAL: setup failed. $(cost)"; tail -25 "$SCR/e5_pilot_setup.log" | tee -a "$LOG"
+  say "FATAL: setup failed. $(cost)"; tail -25 "$SCR/e5_setup.log" | tee -a "$LOG"
   teardown; echo "LAUNCH_FAILED:setup" > "$STATE"; exit 1
 fi
 say "setup done — $(cost)"
 
-say "starting the E5 PILOT: rollout -> recovery -> gates -> pairing -> optimizer step"
+say "starting FORMAL E5: validation gate -> R generation -> feasibility -> 4 arms -> eval"
 # `nohup ... &` alone does NOT detach here: the remote wrapper shell stays alive
 # holding the SSH channel open, so this call blocks until the driver exits and
 # the launcher never reaches its polling loop. Measured on 2026-08-05 -- the run
 # completed, but with no progress logging for five hours. `setsid` plus a
 # closed stdin puts the driver in its own session so the channel closes at once.
 $SSH "root@$HOST" "cd /workspace/aad && setsid nohup /opt/train/bin/python \
-  scripts/pod/e5_pilot.py --limit 24 --seed sa > /workspace/e5_run.log 2>&1 < /dev/null & \
+  scripts/pod/e5_driver.py --stage all > /workspace/e5_run.log 2>&1 < /dev/null & \
   disown" >>"$LOG" 2>&1
 say "driver running — $(cost)"
 
@@ -230,7 +231,7 @@ while [ "$(date -u +%s)" -lt "$DEADLINE_TS" ]; do
   fi
   case "$STATUS_TXT" in
     *ALL_DONE*) say "driver reported ALL_DONE — $(cost)"; break ;;
-    *PILOT_FAILED*) say "PILOT FAILED — tearing down — $(cost)"; break ;;
+    *ABORTED_AT_GATE*) say "STOPPED AT A GATE — tearing down — $(cost)"; break ;;
   esac
 done
 
@@ -251,7 +252,17 @@ else
   say "WARNING: results bundle is empty or missing"
 fi
 
-# The pilot trains nothing, so there are no checkpoints to fetch.
+say "hashing checkpoints on the pod"
+$SSH "root@$HOST" 'cd /workspace/aad/artifacts/stage3 && \
+  find e5_[cr]_s*/checkpoints/step_000738 -type f \( -name "*.safetensors" -o -name "*.json" \
+    -o -name "*.jinja" \) | sort | xargs sha256sum' > "$SCR/e5_pod_hashes.txt" 2>>"$LOG"
+cp "$SCR/e5_pod_hashes.txt" "$STORE/" 2>/dev/null
+say "fetching checkpoints (time-boxed to ${CKPT_TRANSFER_LIMIT_MIN} min)"
+for arm in e5_c_sa e5_c_sb e5_r_sa e5_r_sb; do
+  timeout "${CKPT_TRANSFER_LIMIT_MIN}m" $SCP -r \
+    "root@$HOST:/workspace/aad/artifacts/stage3/$arm/checkpoints/step_000738" \
+    "$STORE/$arm" >>"$LOG" 2>&1 || say "WARNING: $arm weights not retrieved"
+done
 teardown
 echo "DONE" > "$STATE"
 say "session complete. artifacts under $STORE"

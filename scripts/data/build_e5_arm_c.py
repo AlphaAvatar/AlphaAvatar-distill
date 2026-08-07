@@ -32,7 +32,9 @@ sys.path.insert(0, str(REPO_ROOT / "scripts" / "evaluation"))
 from aadistill.data.prefix_split import (  # noqa: E402
     TruncationError, build_splits, prefix_length_profile,
 )
-from aadistill.data.sessions import render_session  # noqa: E402
+from aadistill.data.sessions import (  # noqa: E402
+    render_session, render_system_block,
+)
 from aadistill.infrastructure.env import code_state  # noqa: E402
 from aadistill.infrastructure.manifest import sha256_file  # noqa: E402
 from diagnose_training_recall import rung_session_ids  # noqa: E402
@@ -68,6 +70,7 @@ def main() -> None:
     print(f"incremental sessions: {len(incremental)}")
 
     examples, rejected = [], Counter()
+    system_ids: dict[str, list[int]] = {}
     candidate_sessions = 0
     all_splits = []
     rejected_sessions: list[dict] = []
@@ -93,6 +96,12 @@ def main() -> None:
             rejected_sessions.append({"session_id": s["id"], "reason": exc.reason,
                                       "data_type": s["data_type"]})
             continue
+        if rendered.system_key not in system_ids:
+            sys_text = next((m["content"] for m in s["messages"]
+                             if m["role"] == "system"), "")
+            system_ids[rendered.system_key] = tok(
+                render_system_block(tok, sys_text, s.get("tools")),
+                add_special_tokens=False).input_ids
         for j, sp in enumerate(splits):
             examples.append({
                 "id": f"{s['id']}#c{j}",
@@ -109,6 +118,11 @@ def main() -> None:
                 "n_total_tokens": sp.n_tokens,
                 "n_system_tokens": rendered.n_system_tokens,
                 "system_key": rendered.system_key,
+                # The packer consumes tokens, not metadata. Arm C's ids are the
+                # rendered session with the system block back in front, so both
+                # arms present the same shape to e5_pack.
+                "ids": system_ids[rendered.system_key] + rendered.body_ids,
+                "mask": [False] * rendered.n_system_tokens + list(sp.mask),
             })
             by_task[s["data_type"]] += sp.n_continuation_tokens
         all_splits += splits
@@ -155,6 +169,7 @@ def main() -> None:
     report["source_seed"] = args.source_seed
     (args.out / "examples.jsonl").write_text(
         "".join(json.dumps(e) + "\n" for e in examples))
+    (args.out / "system_ids.json").write_text(json.dumps(system_ids))
     (args.out / "manifest.json").write_text(json.dumps(report, indent=1))
 
     print(f"examples {len(examples)} of a possible "

@@ -1,7 +1,7 @@
 {
  "created_utc": "2026-08-06T12:29:24.557154+00:00",
  "experiment": "E5 \u2014 matched-budget teacher-prefix continuation (C) vs student-prefix on-policy KD plus teacher recovery continuation (R)",
- "status": "REGISTERED \u2014 arm C built; bundle-atomic pairing, token targeting, KD-normalization proof and arm-R construction/gates complete; generation driver and full-path pilot next",
+ "status": "REGISTERED, REVISED to token-presentation matching; packing path built and validated offline on arm C; BLOCKED on budget",
  "authorization": {
   "additional_usd": 6.0,
   "prior_remainder_usd": 2.11,
@@ -366,5 +366,89 @@
    },
    "implementation": "scripts/training/diagnose_e5_gradients.py"
   }
+ },
+ "matching_definition_revised_2026-08-07": {
+  "e5_is": "a SUPERVISED-TOKEN-PRESENTATION-MATCHED continuation experiment",
+  "e5_is_not": "a compute-matched continuation experiment",
+  "binding_scale_target": "~735,603 CE-mask token INSTANCES per pass, so that P2-0.86M (864,750x3 = 2,594,250) plus the E5 continuation (735,603x3 = 2,206,809) totals 4,801,059 CE-token presentations -- effectively identical to P2-1.60M's 1,600,353x3 = 4,801,059",
+  "p2_1600k_role": "a matched CE-EXPOSURE anchor, not a matched-compute control. E5 necessarily consumes more optimizer steps and context tokens because prefix/recovery examples carry substantially more unsupervised context and pack poorly across system-prompt groups.",
+  "forbidden_phrasing": "calling the E5 continuation '735,603 unique tokens'; it is matched on CE-token PRESENTATIONS",
+  "block_and_step_count": {
+   "not_yet_locked": true,
+   "measured_c_minimum": 864,
+   "procedure": [
+    "measure the minimum non-empty block count for C",
+    "measure the minimum non-empty block count for R",
+    "take the LARGER as the common E5 block count",
+    "repack both arms to exactly that count -- no duplication, no truncation, no padding-only blocks; the easier-to-pack arm carries additional ordinary padding",
+    "derive one common optimizer-step count from blocks x 3 / 2"
+   ],
+   "implementation": "aadistill.data.e5_pack.pack_e5(target_blocks=...), which reaches the target exactly by splitting multi-example blocks one at a time"
+  },
+  "both_arms_match_on": [
+   "~735,603 CE-mask token instances per pass (5% tolerance)",
+   "common non-empty block count",
+   "common optimizer steps",
+   "three passes",
+   "starting checkpoints",
+   "LR and scheduler",
+   "CE/KD objective",
+   "trainable parameters",
+   "paired composition"
+  ],
+  "treatment": "the prefix/recovery state distribution",
+  "option_2_rejected": "411,597 CE tokens/pass would bring the continued model to ~1.28M-equivalent CE exposure, not the intended 1.60M",
+  "one_truncation_rejected": "would alter the registered treatment, and measured trajectory-union coverage does not obviously recover the target anyway"
+ },
+ "measured_c_packing": {
+  "bundles": 951,
+  "examples": 1902,
+  "ce_mask_tokens": 735647,
+  "ce_vs_target": 1.0001,
+  "minimum_blocks": 864,
+  "steps_at_3_passes": 1296,
+  "nonpadding_tokens": 2225834,
+  "packing_efficiency": 0.3145,
+  "terminal_truncations": 0,
+  "system_prompt_groups": 362,
+  "why_efficiency_is_low": "each example carries its full context but supervises only the continuation (3.03x tokens per CE token), on top of the system-prompt group boundary that already costs ~3.35x padding (see EXPERIMENTS 8)"
+ },
+ "budget_revised_2026-08-07": {
+  "available": 9.12,
+  "fixed_phases_min": {
+   "setup_measured": 53,
+   "validation_gate": 15,
+   "r_generation_2_seeds": 152,
+   "pair_pack_feasibility": 20,
+   "evaluate_4": 44,
+   "transfer_teardown": 35
+  },
+  "scenarios": {
+   "C_minimum_864_blocks": {
+    "steps": 1296,
+    "expected_usd": 10.41,
+    "backstop_usd": 11.66,
+    "shortfall_usd": 2.54
+   },
+   "R_1.15x_994_blocks": {
+    "steps": 1491,
+    "expected_usd": 11.18,
+    "backstop_usd": 12.53,
+    "shortfall_usd": 3.41
+   },
+   "R_1.30x_1123_blocks": {
+    "steps": 1684,
+    "expected_usd": 11.95,
+    "backstop_usd": 13.39,
+    "shortfall_usd": 4.27
+   },
+   "R_1.50x_1296_blocks": {
+    "steps": 1944,
+    "expected_usd": 12.98,
+    "backstop_usd": 14.54,
+    "shortfall_usd": 5.42
+   }
+  },
+  "status": "INSUFFICIENT \u2014 additional authorization required before any pod"
  }
 }

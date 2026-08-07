@@ -280,6 +280,7 @@ def pack_group(
     *,
     block_len: int,
     pad_id: int,
+    allow_terminal_truncation: bool = True,
 ) -> list[PackedBlock]:
     """Pack one exact-system-prompt group sequentially into `block_len` blocks.
 
@@ -351,6 +352,20 @@ def pack_group(
                 continue
 
             # The session does not fit whole: it can only be the terminal one.
+            if not allow_terminal_truncation:
+                # E5 forbids cutting any sample: a cut prefix changes the state
+                # being trained on and a cut continuation silently shortens the
+                # supervision. Close the block instead and let this session open
+                # the next one whole. A session that cannot fit an EMPTY block
+                # should have been rejected at build time, so that is an error
+                # rather than an infinite loop.
+                if session.n_body_tokens > block_len - len(system_ids):
+                    raise RuntimeError(
+                        f"session {session.session_id!r} is {session.n_body_tokens} "
+                        f"body tokens and cannot fit a {block_len}-token block with "
+                        f"{len(system_ids)} system tokens; it should have been "
+                        "rejected before packing")
+                break
             retained = int(sum(session.body_mask[:room]))
             if retained == 0:
                 # Appending would add prompt tokens and no supervision. §5
@@ -487,6 +502,7 @@ def pack_sessions(
     *,
     block_len: int = 8192,
     pad_id: int = 151643,
+    allow_terminal_truncation: bool = True,
 ) -> list[PackedBlock]:
     """Pack an ordered session list, never mixing system-prompt groups (§4).
 
@@ -507,5 +523,6 @@ def pack_sessions(
         blocks.extend(pack_group(
             by_key[key], system_ids_by_key[key],
             block_len=block_len, pad_id=pad_id,
+            allow_terminal_truncation=allow_terminal_truncation,
         ))
     return blocks

@@ -1,0 +1,64 @@
+{
+ "stage": "stage3_recovery",
+ "run_name": "e5_c_sa",
+ "_purpose": "E5 arm C: teacher-prefix continuation. Continues from P2-0.86M-sa on prefix+continuation examples whose prefix is the TEACHER's own trajectory. CE on the continuation only; kd_scope 'all' as registered.",
+ "student_path": "/workspace/ckpt/p2_ceheavy_sa",
+ "teacher": {
+  "model_id": "Qwen/Qwen3-4B-Thinking-2507",
+  "revision": "768f209d9ea81521153ed38c47d515654e938aea",
+  "dtype": "bfloat16"
+ },
+ "data_dir": "artifacts/stage3/e5_pack_c_sa",
+ "groups": null,
+ "packing": "ladder",
+ "block_len": 8192,
+ "dtype": "float32",
+ "autocast_bf16": true,
+ "gradient_checkpointing": true,
+ "device": "auto",
+ "seed": 20260726,
+ "trainable_patterns": [
+  "\\.self_attn\\.(q_proj|k_proj|v_proj|o_proj|q_norm|k_norm)\\.",
+  "\\.mlp\\.(gate_proj|up_proj|down_proj)\\.",
+  "input_layernorm",
+  "post_attention_layernorm",
+  "model\\.norm\\."
+ ],
+ "loss": {
+  "ce_weight": 1.0,
+  "kd_weight": 0.25,
+  "kd_temperature": 1.0,
+  "kd_scope": "all"
+ },
+ "optim": {
+  "lr": 5e-05,
+  "weight_decay": 0.01,
+  "betas": [
+   0.9,
+   0.95
+  ],
+  "eps": 1e-08,
+  "grad_clip": 1.0
+ },
+ "schedule": {
+  "total_steps": 738,
+  "warmup_steps": 37,
+  "min_lr_frac": 0.1
+ },
+ "batch": {
+  "blocks_per_step": 2,
+  "micro_blocks": 1
+ },
+ "checkpoint": {
+  "save_every": 369,
+  "keep_last": 1
+ },
+ "intervals": {
+  "log_every": 10,
+  "eval_every": 123,
+  "eval_blocks": 16
+ },
+ "out_dir": "artifacts/stage3/e5_c_sa",
+ "rung": 735603,
+ "val_blocks": 16
+}
