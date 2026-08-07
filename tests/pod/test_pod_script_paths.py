@@ -501,8 +501,15 @@ def test_arm_r_is_staged_and_contract_checked_like_arm_c():
     setup = (REPO / "scripts/pod/e5_setup.sh").read_text()
     assert "e5_start/e5_arm_r.tar.gz" in setup
     assert "ARM R BUNDLE MISMATCH" in setup, "the staged bundle must be hashed"
-    assert "arm R {seed} fails the current contract" in setup, \
-        "a staged corpus must satisfy the CURRENT contract, not just a hash"
+    assert "scripts/data/verify_staged_r.py" in setup, \
+        "a reused corpus needs independent verification, not just a bundle hash"
+    v = (REPO / "scripts/data/verify_staged_r.py").read_text()
+    for required in ("record count", "teacher revision", "decoding preset",
+                     "P2-0.86M checkpoint identity", "chat_template.jinja",
+                     "example_to_rendered", "system block matches its key",
+                     "seed derivation calls sha256"):
+        assert required in v, f"staged-R verification lost: {required}"
+    assert "sys.exit(f\"STAGED R VERIFICATION FAILED" in v, "failures must be fatal"
     # The driver must then SKIP generation rather than overwrite it.
     src = _e5_driver()
     gen = src[src.index("def stage_generate("):src.index("def stage_verify_records(")]

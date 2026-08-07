@@ -740,5 +740,69 @@
   "primary_estimand": "Which continuation recipe produces better autonomous behaviour per fixed CE-supervision budget?",
   "statistics_caveat": "paired McNemar/bootstrap preserve paired EVALUATION only; they do NOT remove the training-composition difference and must never be described as doing so",
   "attempt_4": "feasibility failure, no C/R training result"
+ },
+ "attempt_6_2026-08-08": {
+  "status": "REGISTERED; arm R reused from attempt 5, not regenerated",
+  "r_reuse": {
+   "decision": "REUSE attempt 5's arm-R corpora. Regeneration NOT authorized.",
+   "why_sound": "already-paid production outputs under the registered teacher/student/decoding configuration; passed the generation gates and RECORDS_VERIFIED on the pod; attempt 5 produced NO training result, so nothing about them is outcome-dependent. This is artifact reuse, not reuse of an experimental outcome.",
+   "why_necessary": "regeneration costs ~$1.48 and leaves the run $0.07 past the registered backstop; reuse leaves $1.59 of pre-gate allowance",
+   "records": {
+    "sa": 2098,
+    "sb": 2042
+   },
+   "sha256": {
+    "bundle": "e2cbbd45eefa98b142911414036e6b77fa926024dea368e2e7bc2d075b2c8e96",
+    "sa/examples.jsonl": "247941ab7816adc04807b3300c2d145d0927b3a2ce5ef605c662129e4136dd3c",
+    "sa/manifest.json": "eea4f1a3bc362328a4e3dc245e4a72bcf8606d92964bcd8026d3f4885496dbd4",
+    "sa/system_ids.json": "f89a33862bdf5b34ca8d3af6ec8f73e6710c5d69f4229267b64822005254023d",
+    "sb/examples.jsonl": "ae1a420355098c70f80001865ed4e2d4f161be997df9272d0d0caf56f3ef7b9e",
+    "sb/manifest.json": "9efdddcda6c5c6258ba013d97e7ff8751be18e8c4f6a57978f13d342417d628a",
+    "sb/system_ids.json": "6ab6194560f20e7128f290ea507606bf3fc54450ba0f4b5a0c3b925b104cbdf1"
+   },
+   "independent_verification": {
+    "script": "scripts/data/verify_staged_r.py",
+    "when": "pod-side setup, before ARMS_VALIDATED, all checks fatal",
+    "covers": [
+     "per-seed record counts",
+     "corpus and manifest hashes",
+     "teacher id and revision",
+     "P2-0.86M checkpoint identity by weight hash",
+     "tokenizer.json / tokenizer_config.json / chat_template.jinja hashes",
+     "decoding preset",
+     "source sessions corpus hash",
+     "deterministic sha256 seed derivation, never randomized hash()",
+     "every record reloads through example_to_rendered",
+     "no missing ids/masks/system mappings",
+     "every record's leading tokens match its system_key block"
+    ],
+    "validated_offline": "all corpus-side checks pass on the real artifacts; a one-record truncation is rejected on both the hash and the record count"
+   }
+  },
+  "selection_semantics": {
+   "C_pool": "full valid C corpus",
+   "R_pool": "valid R corpus",
+   "constraint": "R_selected subset of C_selected",
+   "not": "C reduced to the C-intersect-R candidate intersection"
+  },
+  "to_reconfirm_on_pod": {
+   "T_star": 735603,
+   "expectation": "C-sa/C-sb/R-sa/R-sb each on T* as closely as whole bundles allow; zero arm-to-arm CE-token mismatch reproduced",
+   "block_counts": "re-derived from the staged corpora, NOT assumed; common count = max measured minimum, rounded up only for three-pass / two-block-step divisibility",
+   "measured_expectation_not_a_constant": {
+    "common_blocks": 904,
+    "steps": 1356
+   },
+   "then": "final C/R throughput benchmark and Gate 2 against the actual packs"
+  },
+  "budget": {
+   "authorization_usd": 5.71,
+   "post_gate_backstop_usd": 4.12,
+   "pre_gate_allowance_usd": 1.59,
+   "pre_gate_allowance_min": 96,
+   "additional_authorization": "none",
+   "regeneration": "not authorized"
+  },
+  "attempt_5": "feasibility-gate failure, no C/R training result"
  }
 }

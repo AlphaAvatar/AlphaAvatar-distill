@@ -324,27 +324,14 @@ print('arm R bundle sha256', h)
 sys.exit(0 if h == want else f'ARM R BUNDLE MISMATCH: {h}')
 "
   tar xzf /workspace/e5_arm_r.tar.gz --no-same-owner -C "$REPO/artifacts/stage3"
-  cd "$REPO" && PYTHONPATH=src /opt/train/bin/python -c "
-import json, sys
-from pathlib import Path
-from aadistill.data.e5_pack import REQUIRED_FIELDS, example_to_rendered
-for seed in ('sa', 'sb'):
-    d = Path('artifacts/stage3', f'e5_arm_r_{seed}')
-    rows = [json.loads(l) for l in (d/'examples.jsonl').open() if l.strip()]
-    sysids = json.loads((d/'system_ids.json').read_text())
-    bad = 0
-    for e in rows:
-        if [f for f in REQUIRED_FIELDS if f not in e]:
-            bad += 1; continue
-        try:
-            example_to_rendered(e)
-            assert e['ids'][:e['n_system_tokens']] == sysids[e['system_key']]
-        except Exception:
-            bad += 1
-    if bad or not rows:
-        sys.exit(f'arm R {seed} fails the current contract: {bad}/{len(rows)}')
-    print(f'  arm R {seed}: {len(rows)} records, contract OK')
-"
+  # Independent verification of a REUSED artifact: provenance by hash, usability
+  # by contract, and the configuration the corpus claims to have been generated
+  # under. Every check is fatal -- a corpus failing any of them is not the corpus
+  # the experiment registered.
+  cd "$REPO" && PYTHONPATH=src /opt/train/bin/python scripts/data/verify_staged_r.py \
+      --root artifacts/stage3 --ckpt-dir /workspace/ckpt \
+      --teacher-revision "$TEACHER_REVISION" \
+      --out artifacts/audit/e5_staged_r_verify.json
 fi
 mark ARMS_VALIDATED
 mark TESTS_OK
