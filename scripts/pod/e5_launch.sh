@@ -36,13 +36,18 @@ MAX_PRICE=${MAX_PRICE:-0.99}
 # gates re-price from ACTUAL elapsed session time regardless.
 BACKSTOP_MINUTES=${BACKSTOP_MINUTES:-440}
 STARTUP_LIMIT_MIN=${STARTUP_LIMIT_MIN:-15}
-MAX_POD_ATTEMPTS=${MAX_POD_ATTEMPTS:-2}
+# Capacity is a race, and waiting for it costs NOTHING because no pod exists
+# yet. Two attempts five minutes apart is not patience -- both of attempt 5's
+# creates failed on "no longer any instances available" inside 5 minutes and the
+# launcher gave up. Twelve attempts at 7-minute intervals waits out ~84 minutes
+# of drought for free, which is the correct trade against a $0 downside.
+MAX_POD_ATTEMPTS=${MAX_POD_ATTEMPTS:-12}
 # Cold-host redraws. Each costs ~6 min of tripwire plus ~4 min of startup; four
 # draws is ~40 min ($0.66), well inside the reserve, and P(4 cold in a row) is
 # ~1% at the observed 1-in-3 base rate.
 MAX_HOST_DRAWS=${MAX_HOST_DRAWS:-4}
 # Seconds between create attempts when the GPU is out of capacity.
-CREATE_RETRY_DELAY_S=${CREATE_RETRY_DELAY_S:-300}
+CREATE_RETRY_DELAY_S=${CREATE_RETRY_DELAY_S:-420}
 POLL_LIMIT_MIN=${POLL_LIMIT_MIN:-428}   # inside the 440-min backstop
 CKPT_TRANSFER_LIMIT_MIN=${CKPT_TRANSFER_LIMIT_MIN:-40}
 TEACHER_REVISION=${TEACHER_REVISION:-768f209d9ea81521153ed38c47d515654e938aea}

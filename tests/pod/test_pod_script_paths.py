@@ -445,3 +445,17 @@ def test_the_common_block_count_is_even_so_three_passes_divide():
     assert "rounded_up_for_even_passes" in pair, "the bump must be reported"
     # And the arithmetic must still be exact afterwards.
     assert 'report["optimizer_steps"] = common * 3 // 2' in pair
+
+
+def test_the_launcher_waits_out_a_capacity_drought():
+    """Waiting for capacity costs nothing -- no pod exists yet -- so giving up
+    after two tries five minutes apart trades a free wait for a lost launch.
+    Both of attempt 5's creates failed inside that window."""
+    src = (REPO / "scripts/pod/e5_launch.sh").read_text()
+    tries = int(re.search(r"MAX_POD_ATTEMPTS=\$\{MAX_POD_ATTEMPTS:-(\d+)\}", src).group(1))
+    delay = int(re.search(r"CREATE_RETRY_DELAY_S=\$\{CREATE_RETRY_DELAY_S:-(\d+)\}", src).group(1))
+    assert tries >= 8, f"{tries} create attempts is not patient enough"
+    assert tries * delay >= 3600, \
+        f"{tries} x {delay}s = {tries*delay}s waits out under an hour of drought"
+    # Backing off must happen before a pod exists, so it must not be billed.
+    assert "no capacity; retrying in" in src
