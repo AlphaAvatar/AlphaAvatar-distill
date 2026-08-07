@@ -327,7 +327,15 @@ def stage_pair(args):
                     if l.strip()]
             minima[(arm, seed)] = len(pack_e5(rows, sysids, block_len=8192))
     common = max(minima.values())
+    # Three passes at two blocks per step needs 3n/2 to be a whole number, so the
+    # common count must be EVEN. Attempt 4 landed on 759 and `verify_pack` failed
+    # `three_passes_equal_registered_steps` for that reason alone. Rounding UP
+    # adds one mostly-padded block: no example is duplicated, cut, or dropped,
+    # and the extra block costs one step of mostly-padding compute.
+    odd_bump = common % 2
+    common += odd_bump
     report["per_arm_minimum_blocks"] = {f"{a}_{s_}": v for (a, s_), v in minima.items()}
+    report["rounded_up_for_even_passes"] = bool(odd_bump)
     report["common_block_count"] = common
     report["optimizer_steps"] = common * 3 // 2
     print(f"  minima {report['per_arm_minimum_blocks']} -> common {common} blocks, "

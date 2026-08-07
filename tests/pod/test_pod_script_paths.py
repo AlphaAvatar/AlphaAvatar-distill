@@ -433,3 +433,15 @@ def test_generated_corpora_are_retained_before_anything_can_fail():
     tar = launcher[launcher.index("tar czf"):launcher.index("cp /workspace/e5_run.log")]
     assert "e5_arm_r_*/" in tar, "the side bundle must carry the corpora too"
     assert "e5_final_*.jsonl" in tar, "and the paired selection"
+
+
+def test_the_common_block_count_is_even_so_three_passes_divide():
+    """`verify_pack` requires steps * blocks_per_step == 3 * n, so an odd n can
+    never satisfy three passes at two blocks per step. Attempt 4 landed on 759
+    and failed that check for no other reason."""
+    src = _e5_driver()
+    pair = src[src.index("common = max(minima.values())"):src.index("def stage_train(")]
+    assert "odd_bump = common % 2" in pair and "common += odd_bump" in pair
+    assert "rounded_up_for_even_passes" in pair, "the bump must be reported"
+    # And the arithmetic must still be exact afterwards.
+    assert 'report["optimizer_steps"] = common * 3 // 2' in pair
