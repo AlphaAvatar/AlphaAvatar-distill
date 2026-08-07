@@ -216,8 +216,22 @@ say "starting FORMAL E5: validation gate -> R generation -> feasibility -> 4 arm
 # the launcher never reaches its polling loop. Measured on 2026-08-05 -- the run
 # completed, but with no progress logging for five hours. `setsid` plus a
 # closed stdin puts the driver in its own session so the channel closes at once.
+# The gates measure their own elapsed time, but the pod has been billing since
+# creation -- startup plus the ~53-min setup. Handing the driver a zero starting
+# balance would understate spend by ~$1 at both gates.
+SPENT_AT_DRIVER_START=$(echo "($(date -u +%s) - $(cat "$SCR/pod_start_epoch"))/3600*$MAX_PRICE" | bc -l)
+# The gates are budgeted against the RunPod-side deadline, not the $9.12
+# authorization. The deadline is the binding constraint: a plan that fits $9.12
+# but not the backstop gets killed by RunPod mid-training, which is the exact
+# outcome the gates exist to prevent. $9.12 remains the ceiling neither can cross.
+GATE_CEILING=$(echo "$BACKSTOP_MINUTES/60*$MAX_PRICE" | bc -l)
+say "driver budget: \$$(printf '%.2f' "$SPENT_AT_DRIVER_START") already billed, \
+gate ceiling \$$(printf '%.2f' "$GATE_CEILING") (backstop-bound, under the \$9.12 authorization)"
 $SSH "root@$HOST" "cd /workspace/aad && setsid nohup /opt/train/bin/python \
-  scripts/pod/e5_driver.py --stage all > /workspace/e5_run.log 2>&1 < /dev/null & \
+  scripts/pod/e5_driver.py --stage all \
+  --spent-usd $(printf '%.3f' "$SPENT_AT_DRIVER_START") \
+  --authorized-usd $(printf '%.2f' "$GATE_CEILING") \
+  > /workspace/e5_run.log 2>&1 < /dev/null & \
   disown" >>"$LOG" 2>&1
 say "driver running — $(cost)"
 

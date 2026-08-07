@@ -236,3 +236,15 @@ def test_a_stopped_gate_is_not_recorded_as_a_completed_run():
     aborted = main[main.index('mark("ABORTED_AT_GATE")"'[:-1]):]
     assert aborted.split("\n")[1].strip() == "return", \
         "aborting must return, or the last status line becomes ALL_DONE"
+
+
+def test_launcher_hands_the_driver_a_real_starting_balance():
+    """A zero starting balance would hide startup + the ~53-min setup from both
+    gates, which is roughly $1 of the authorization."""
+    src = (REPO / "scripts/pod/e5_launch.sh").read_text()
+    invoke = src[src.index("scripts/pod/e5_driver.py --stage all"):]
+    assert "--spent-usd" in invoke.split("disown")[0]
+    assert "--authorized-usd" in invoke.split("disown")[0]
+    assert "pod_start_epoch" in src[:src.index("scripts/pod/e5_driver.py --stage all")]
+    assert "GATE_CEILING=$(echo \"$BACKSTOP_MINUTES/60*$MAX_PRICE\"" in src, \
+        "the gate ceiling must be bound to the RunPod deadline it has to fit inside"
