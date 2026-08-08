@@ -27,9 +27,15 @@ say()  { echo "[$(date -u +%T)] $*"; }
 export HF_TOKEN="$(cat $WS/hf/token)"
 export HF_HOME=/root/.cache/huggingface
 
-say "apt: git, zstd"
+# ninja is NOT optional. vLLM's flashinfer sampling path JIT-compiles a kernel on
+# first use and shells out to `ninja` to build it; without it the engine dies with
+# `FileNotFoundError: 'ninja'` at LLM() construction — after setup, both venvs and
+# every checkpoint download have already been paid for. Dropping it from this list
+# cost a repaired pod on 2026-08-08.
+say "apt: git, ninja, zstd"
 export DEBIAN_FRONTEND=noninteractive
-apt-get update -qq && apt-get install -y -qq git zstd >/dev/null
+apt-get update -qq && apt-get install -y -qq git ninja-build zstd >/dev/null
+command -v ninja >/dev/null || { echo "ninja missing after install"; exit 1; }
 mark ENV_READY
 
 say "installing huggingface_hub"
