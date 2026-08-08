@@ -125,13 +125,60 @@ def test_setup_stages_relay_only_so_it_cannot_race_the_devbox_upload():
     # The launcher's own call must NOT restrict the stores, or the sb arms are
     # never staged at all and half the seeds silently vanish.
     call = launch[launch.index("e6_stage_checkpoints.py"):]
-    call = call[:call.index("|| {")]
+    call = call[:call.index("--out")] + "--out artifacts/audit/e6_checkpoint_manifest.json"
     assert "--stores" not in call, \
         "the launcher must stage both stores; restricting it drops the sb arms"
-    assert "e6_checkpoint_manifest.json" in call, \
-        "the driver reads e6_checkpoint_manifest.json; the launcher must write it"
-    assert launch.index("wait \"$UPLOAD_PID\"") < launch.index("e6_stage_checkpoints.py"), \
+    assert launch.index('wait "$UPLOAD_PID"') < launch.index("e6_stage_checkpoints.py"), \
         "the upload must be joined before the full staging pass runs"
+    assert "e6_checkpoint_manifest.json" in setup, \
+        "setup must write the manifest the driver reads, with the relay arms in it"
+
+
+def test_the_driver_starts_before_the_upload_is_joined():
+    """The overlap is the design, not an accident.
+
+    The dev box uploads at ~0.72 MB/s, so the two dev-box-only checkpoints take
+    roughly 90 minutes compressed — longer than the entire evaluation. Starting
+    the driver first means the four relay arms are generated *during* that
+    transfer. Joining the upload before launching the driver would restore an
+    idle pod and roughly double the bill.
+    """
+    launch = LAUNCH.read_text()
+    assert launch.index("e6_driver.py") < launch.index('wait "$UPLOAD_PID"'), \
+        "the driver must be launched before the upload is joined, or the pod idles"
+
+
+def test_the_upload_is_compressed_and_parallel():
+    launch = LAUNCH.read_text()
+    block = launch[launch.index("uploading the two dev-box-only"):
+                   launch.index("UPLOAD_PID=$!")]
+    assert ".zst" in block and "zstd -d" in block, \
+        "the transfer must ship compressed and decompress on the pod"
+    assert block.count("&\n") >= 1 and "pids+=" in block, \
+        "both files must stream in parallel"
+
+
+def test_staging_outcome_is_always_signalled_to_the_driver():
+    """A driver waiting on a marker that never arrives idles at $0.99/h."""
+    launch = LAUNCH.read_text()
+    driver = DRIVER.read_text()
+    assert "touch /workspace/ckpt_local/STAGED" in launch, \
+        "success must be signalled or the driver waits out its timeout"
+    assert launch.count("touch /workspace/ckpt_local/FAILED") >= 2, \
+        "both the upload failure and the staging failure must be signalled"
+    assert "STAGED" in driver and "STAGING_FAILED" in driver, \
+        "the driver must observe both outcomes"
+    assert "stage_wait_minutes" in driver, \
+        "the wait must be bounded; an unbounded wait is an idle-billing pod"
+
+
+def test_a_failed_upload_still_yields_the_relay_arms():
+    """Losing the sb arms is a partial result, not a reason to discard four arms."""
+    launch = LAUNCH.read_text()
+    fail = launch[launch.index("UPLOAD FAILED"):launch.index("# --- 3. poll")]
+    assert "teardown" not in fail, \
+        "an upload failure must not tear down a pod that is still evaluating"
+    assert "PARTIAL:" in fail, "the partial outcome must be recorded in the state file"
 
 
 def test_staging_reverifies_bytes_before_skipping_work():

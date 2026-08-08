@@ -200,7 +200,7 @@ say "staging and hash-verifying the four relay checkpoints"
     --devbox-src /workspace/ckpt_local \
     --stores relay \
     --init /workspace/aad/artifacts/stage1/qwen3_0p6b_init_v0/checkpoint \
-    --out /workspace/aad/artifacts/audit/e6_relay_checkpoints.json
+    --out /workspace/aad/artifacts/audit/e6_checkpoint_manifest.json
 mark CKPT_READY
 
 say "checking the RoPE base resolves correctly in both venvs"

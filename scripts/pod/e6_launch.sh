@@ -14,8 +14,10 @@
 #   4. The driver re-prices before every arm from ACTUAL elapsed time and stops
 #      rather than starting an arm it cannot pay for.
 #
-# 150 min x $0.99 = $2.48. Two abandoned cold-host draws add ~$0.40, so the
-# worst path is ~$2.88 against the $3.47 authorized for E6.
+# 165 min x $0.99 = $2.72. Two abandoned cold-host draws add ~$0.40, so the
+# worst path is ~$3.12 against the $3.44 authorized for E6. The deadline is
+# set by the TRANSFER, not the evaluation: 54 min of generation sits inside
+# a ~90-min compressed upload of the two dev-box-only checkpoints.
 set -uo pipefail
 
 SCR=${SCR:?}
@@ -23,18 +25,20 @@ SESSION_COMMIT=${SESSION_COMMIT:?}
 BUNDLE_NAME=${BUNDLE_NAME:?}
 GPU_NAME=${GPU_NAME:-NVIDIA L40S}
 MAX_PRICE=${MAX_PRICE:-0.99}
-BACKSTOP_MINUTES=${BACKSTOP_MINUTES:-150}
+BACKSTOP_MINUTES=${BACKSTOP_MINUTES:-165}
 STARTUP_LIMIT_MIN=${STARTUP_LIMIT_MIN:-15}
 MAX_POD_ATTEMPTS=${MAX_POD_ATTEMPTS:-12}
 MAX_HOST_DRAWS=${MAX_HOST_DRAWS:-3}
 CREATE_RETRY_DELAY_S=${CREATE_RETRY_DELAY_S:-420}
-POLL_LIMIT_MIN=${POLL_LIMIT_MIN:-145}
+POLL_LIMIT_MIN=${POLL_LIMIT_MIN:-160}
 # The two sb high-rung checkpoints exist only here. 4.8 GB over scp; time-boxed
 # so a slow link fails the run loudly instead of silently eating the budget.
-CKPT_UPLOAD_LIMIT_MIN=${CKPT_UPLOAD_LIMIT_MIN:-25}
-AUTHORIZED_USD=${AUTHORIZED_USD:-3.47}
+CKPT_UPLOAD_LIMIT_MIN=${CKPT_UPLOAD_LIMIT_MIN:-140}
+AUTHORIZED_USD=${AUTHORIZED_USD:-3.44}
 STORE=${STORE:-/home/ecs-user/aad-artifacts/e6}
-DEVBOX_CKPT=${DEVBOX_CKPT:-/home/ecs-user/AlphaAvatar-distill/artifacts/stage3/rescued}
+# Pre-compressed copies of the two dev-box-only checkpoints, built before the
+# pod exists so no GPU time is spent compressing.
+XFER=${XFER:-/home/ecs-user/aad-scratch/e6/xfer}
 LOG=$SCR/e6_launch.log
 KEY=$(cat "$SCR/rp_key")
 STATE=$SCR/e6.state
@@ -192,17 +196,35 @@ $SSH "root@$HOST" 'test -s /workspace/hf/token' \
        echo "LAUNCH_FAILED:empty_token" > "$STATE"; exit 1; }
 $SCP scripts/pod/e6_setup.sh "root@$HOST:/workspace/" >>"$LOG" 2>&1
 
-# The two sb high-rung checkpoints are dev-box-only. Start them now, in the
-# background, so 4.8 GB of transfer overlaps `uv sync` instead of following it.
-# A cold-host redraw kills this and the next draw starts it again.
-say "uploading the two dev-box-only checkpoints in the background"
-( for arm in e1_r2960k_sb_pca e1_r5500k_sb_pca; do
+# The two sb high-rung checkpoints are dev-box-only: the relay never received
+# them and its LFS quota, which deletion cannot reclaim, cannot take 4.8 GB.
+#
+# The dev box uploads at ~0.72 MB/s (measured, twice), so this transfer is the
+# longest thing in the session -- far longer than the evaluation it feeds. Two
+# things make that affordable instead of dominant:
+#
+#   * the files are shipped **zstd-compressed** (measured 0.809 whole-file, so
+#     4.77 -> 3.86 GB) and decompressed on the pod, which is free CPU there;
+#   * both stream **in parallel**, in case the limit is per-connection rather
+#     than the link;
+#
+# and the driver evaluates the four relay arms while this runs, so the pod is
+# doing useful work throughout rather than watching a progress bar.
+say "uploading the two dev-box-only checkpoints (compressed, parallel) in the background"
+( pids=()
+  for arm in e1_r2960k_sb_pca e1_r5500k_sb_pca; do
     $SSH "root@$HOST" "mkdir -p /workspace/ckpt_local/$arm"
-    timeout "${CKPT_UPLOAD_LIMIT_MIN}m" $SCP \
-      "$DEVBOX_CKPT/$arm/model.safetensors" \
-      "root@$HOST:/workspace/ckpt_local/$arm/" || exit 1
-    echo "uploaded $arm"
-  done; touch "$SCR/ckpt_upload_ok" ) >>"$SCR/e6_upload.log" 2>&1 &
+    ( timeout "${CKPT_UPLOAD_LIMIT_MIN}m" $SCP "$XFER/$arm.zst" \
+        "root@$HOST:/workspace/ckpt_local/$arm/model.safetensors.zst" \
+      && $SSH "root@$HOST" "zstd -d -q -f \
+           /workspace/ckpt_local/$arm/model.safetensors.zst \
+           -o /workspace/ckpt_local/$arm/model.safetensors \
+         && rm -f /workspace/ckpt_local/$arm/model.safetensors.zst" \
+      && echo "uploaded and decompressed $arm" ) &
+    pids+=($!)
+  done
+  ok=1; for p in "${pids[@]}"; do wait "$p" || ok=0; done
+  [ "$ok" = "1" ] && touch "$SCR/ckpt_upload_ok" ) >>"$SCR/e6_upload.log" 2>&1 &
 UPLOAD_PID=$!
 
 say "running setup"
@@ -235,26 +257,6 @@ break
 done
 [ -n "${EP:-}" ] || { say "ABORT: no usable host"; exit 1; }
 
-# Setup stages the four relay arms itself but cannot verify the two uploaded
-# ones until they land, so the upload is joined here and re-verified on the pod.
-say "waiting for the dev-box checkpoint upload"
-wait "$UPLOAD_PID"
-if [ ! -f "$SCR/ckpt_upload_ok" ]; then
-  say "FATAL: dev-box checkpoint upload failed or timed out. $(cost)"
-  tail -10 "$SCR/e6_upload.log" | tee -a "$LOG"
-  teardown; echo "LAUNCH_FAILED:ckpt_upload" > "$STATE"; exit 1
-fi
-say "dev-box checkpoints uploaded — $(cost)"
-$SSH "root@$HOST" "cd /workspace/aad && /opt/train/bin/python \
-  scripts/pod/e6_stage_checkpoints.py \
-    --registration logs/e6_registration.json --relay-dest /workspace/ckpt \
-    --devbox-src /workspace/ckpt_local \
-    --init artifacts/stage1/qwen3_0p6b_init_v0/checkpoint \
-    --out artifacts/audit/e6_checkpoint_manifest.json" >>"$LOG" 2>&1 \
-  || { say "FATAL: checkpoint staging or hash verification failed. $(cost)"
-       teardown; echo "LAUNCH_FAILED:ckpt_verify" > "$STATE"; exit 1; }
-say "all six checkpoints staged and hash-verified — $(cost)"
-
 say "starting E6 evaluation: 6 arms x (free, oracle, forced) on the frozen battery"
 # `nohup … &` alone does NOT detach over ssh: the remote wrapper shell holds the
 # channel open, so the call blocks for the whole run and the launcher never
@@ -271,6 +273,37 @@ $SSH "root@$HOST" "cd /workspace/aad && setsid nohup /opt/train/bin/python \
   > /workspace/e6_run.log 2>&1 < /dev/null & \
   disown" >>"$LOG" 2>&1
 say "driver running — $(cost)"
+
+# --- 2b. join the upload while the driver evaluates the relay arms ---------
+# The driver is detached and already working through the four relay arms, so
+# blocking here costs nothing. When the transfer lands, the same staging script
+# runs over BOTH stores and the manifest it rewrites is what unblocks the two
+# dev-box arms the driver is waiting on.
+say "waiting for the dev-box checkpoint upload (driver is evaluating meanwhile)"
+wait "$UPLOAD_PID"
+if [ ! -f "$SCR/ckpt_upload_ok" ]; then
+  say "UPLOAD FAILED — the two sb high-rung arms will not be evaluated. $(cost)"
+  tail -10 "$SCR/e6_upload.log" | tee -a "$LOG"
+  # Tell the driver to stop waiting rather than idle to its timeout. The four
+  # relay arms it has already produced are a real, if partial, result.
+  $SSH "root@$HOST" 'touch /workspace/ckpt_local/FAILED' >>"$LOG" 2>&1
+  echo "PARTIAL:ckpt_upload" > "$STATE"
+else
+  say "dev-box checkpoints uploaded and decompressed — $(cost)"
+  if $SSH "root@$HOST" "cd /workspace/aad && /opt/train/bin/python \
+      scripts/pod/e6_stage_checkpoints.py \
+        --registration logs/e6_registration.json --relay-dest /workspace/ckpt \
+        --devbox-src /workspace/ckpt_local \
+        --init artifacts/stage1/qwen3_0p6b_init_v0/checkpoint \
+        --out artifacts/audit/e6_checkpoint_manifest.json" >>"$LOG" 2>&1; then
+    say "all six checkpoints staged and hash-verified — $(cost)"
+    $SSH "root@$HOST" 'touch /workspace/ckpt_local/STAGED' >>"$LOG" 2>&1
+  else
+    say "STAGING FAILED after upload — the sb arms will not be evaluated. $(cost)"
+    $SSH "root@$HOST" 'touch /workspace/ckpt_local/FAILED' >>"$LOG" 2>&1
+    echo "PARTIAL:ckpt_verify" > "$STATE"
+  fi
+fi
 
 # --- 3. poll to completion -------------------------------------------------
 DEADLINE_TS=$(( $(date -u +%s) + POLL_LIMIT_MIN * 60 )); LAST=""

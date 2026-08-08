@@ -40,11 +40,19 @@ CKPT = Path("/workspace/ckpt")
 EVAL_RUNG = 860000          # pinned; see the module docstring
 EXPECTED_MASK = "d6e24e0b09da1bcc692b1dc96d8236808d29551a9fc94a47d1d968fd3f73d6ba"
 
-# Evaluation order is deliberate: one arm of each rung first, so a session that
-# runs out of budget still yields a partial scale curve rather than two seeds of
-# one rung. It never changes what any arm sees.
-ORDER = ["E1-1.60M-sa", "E1-2.96M-sa", "E1-5.50M-sa",
-         "E1-1.60M-sb", "E1-2.96M-sb", "E1-5.50M-sb"]
+# Evaluation order is deliberate and does not change what any arm sees.
+#
+# The four RELAY arms run first because they are on disk the moment setup ends,
+# while the two dev-box arms are still arriving over a ~0.72 MB/s uplink. The pod
+# therefore evaluates for the first ~40 minutes of a transfer it would otherwise
+# have spent idle. Within the relay group the order still alternates rungs, so a
+# session that runs out of budget yields a partial scale curve rather than two
+# seeds of one rung.
+ORDER = ["E1-1.60M-sa", "E1-2.96M-sa", "E1-5.50M-sa", "E1-1.60M-sb",
+         "E1-2.96M-sb", "E1-5.50M-sb"]
+CKPT_LOCAL = Path("/workspace/ckpt_local")
+STAGED = CKPT_LOCAL / "STAGED"          # launcher writes it after the full pass
+STAGING_FAILED = CKPT_LOCAL / "FAILED"  # launcher writes it if the upload dies
 
 # Scripts this driver executes. None of them may contain an executable optimizer
 # step: E6 is evaluation-only and that is proven by parsing, not asserted in a
@@ -92,11 +100,44 @@ def stage_notrain(args) -> None:
     mark("NOTRAIN_PROVEN")
 
 
+def _manifest() -> dict:
+    return json.loads((OUT / "e6_checkpoint_manifest.json").read_text())
+
+
+def _await_staging(alias: str, deadline_s: float) -> dict:
+    """Block until the launcher finishes staging the dev-box arms, or give up.
+
+    Setup writes a manifest holding only the relay arms, because the dev-box
+    checkpoints are still uploading while it runs. The launcher rewrites that
+    manifest over all six once the transfer lands and touches STAGED. Waiting
+    here is what lets the relay arms be evaluated during the transfer instead of
+    after it.
+    """
+    waited = 0.0
+    while time.time() < deadline_s:
+        if STAGING_FAILED.exists():
+            mark(f"STAGING_FAILED_UPSTREAM:{alias}")
+            return _manifest()
+        if STAGED.exists():
+            mark(f"STAGING_LANDED:{alias}:{waited / 60:.1f}min")
+            return _manifest()
+        time.sleep(30)
+        waited += 30
+        if waited % 300 == 0:
+            print(f"  waiting for the dev-box upload ({waited / 60:.0f} min)",
+                  flush=True)
+    mark(f"STAGING_WAIT_TIMEOUT:{alias}")
+    return _manifest()
+
+
 def stage_three_mode(args) -> None:
     """The binding harness, unchanged, on the pinned 150-example battery."""
-    manifest = json.loads((OUT / "e6_checkpoint_manifest.json").read_text())
+    manifest = _manifest()
     started = time.time()
+    wait_deadline = started + args.stage_wait_minutes * 60
     for alias in ORDER:
+        if alias not in manifest["arms"]:
+            manifest = _await_staging(alias, wait_deadline)
         arm = manifest["arms"].get(alias)
         if arm is None:
             mark(f"EVAL_SKIPPED:{alias}:not_staged")
@@ -146,6 +187,9 @@ def main() -> None:
     ap.add_argument("--authorized-usd", type=float, default=2.48)
     ap.add_argument("--rate", type=float, default=0.99)
     ap.add_argument("--per-arm-minutes", type=float, default=11.0)
+    ap.add_argument("--stage-wait-minutes", type=float, default=130.0,
+                    help="how long to wait for the dev-box upload before "
+                         "giving up on the arms it carries")
     args = ap.parse_args()
     OUT.mkdir(parents=True, exist_ok=True)
     for name in (list(STAGES) if args.stage == "all" else [args.stage]):
