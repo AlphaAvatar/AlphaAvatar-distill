@@ -1,0 +1,464 @@
+#!/usr/bin/env python
+"""Experiment 6 analysis: the E1 PCA scale curve on the frozen 150-prompt battery.
+
+    PYTHONPATH=src python scripts/evaluation/analyze_e6.py \
+        --out artifacts/audit/e6_results.json --report logs/e6_report.md
+
+Nothing is generated here. Every arm is re-scored from its retained raw
+generations with the current scorer, and no stored `correct`, `usable` or
+termination field is carried into an E6 number. Run it as often as you like: the
+paired bootstrap is seeded, so the report is reproducible from the artifacts
+alone.
+
+Two sessions produced the artifacts, and the registration fixed in advance which
+one answers which question:
+
+* the **E1 scale curve** (2.96M and 5.50M against 1.60M) is read entirely from
+  the E6 session, so all three rungs were measured together on one GPU;
+* the **anchor comparisons at 1.60M** are read from the E4 session, where
+  P2-1.60M and E1-1.60M were measured together.
+
+E1-1.60M therefore exists in both sessions on identical weights, which turns the
+cross-session difference from an assumption into a measurement. It is reported
+as `session_replicate` and never quietly averaged with anything.
+"""
+
+from __future__ import annotations
+
+import argparse
+import json
+import statistics
+import sys
+from datetime import datetime, timezone
+from pathlib import Path
+
+REPO_ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(REPO_ROOT / "src"))
+sys.path.insert(0, str(REPO_ROOT / "scripts" / "evaluation"))
+
+from aadistill.evaluation import usable_rollout as ur  # noqa: E402
+from aadistill.evaluation.behavior import split_generation  # noqa: E402
+from aadistill.evaluation.paired_stats import (  # noqa: E402
+    joint_rate, mcnemar_counts, paired_bootstrap_ci,
+)
+from aadistill.evaluation.strict_answer import extract_final_answer  # noqa: E402
+from aadistill.infrastructure.env import code_state  # noqa: E402
+from run_three_mode_diagnostic import NUMERIC, score  # noqa: E402
+
+AUDIT = REPO_ROOT / "artifacts/audit"
+THREE_MODE = AUDIT / "three_mode"
+SESSIONS_PATH = REPO_ROOT / "artifacts/stage3/corpus_v2/sessions.jsonl"
+REGISTRATION = REPO_ROOT / "logs/e6_registration.json"
+
+# Carried unchanged from the E3/E4/E5 registry; see the registration.
+FLOORS = {"usable_rollout_rate": 0.0800, "correct_overall": 0.0600}
+
+RUNGS = {"E1-1.60M": 1600353, "E1-2.96M": 2960507, "E1-5.50M": 5501372,
+         "P2-1.60M": 1600353}
+# Rung tokens are UNIQUE supervised tokens. Every arm trains 3 epochs, so the
+# cumulative CE-token exposure is 3x the rung -- reported separately because the
+# question is phrased in rung terms and the two must not be confused.
+EPOCHS = 3
+SEEDS = ("sa", "sb")
+
+
+def jsonl(p: Path) -> list[dict]:
+    return [json.loads(line) for line in p.open() if line.strip()]
+
+
+def load_sessions() -> dict:
+    return {s["id"]: s for s in jsonl(SESSIONS_PATH)}
+
+
+def rescore_arm(directory: Path, sessions: dict) -> dict | None:
+    """Every metric E6 reports for one arm, computed from raw generations."""
+    free = directory / "free.generations.jsonl"
+    if not free.is_file():
+        return None
+    recs = jsonl(free)
+
+    comp = [ur.components(r) for r in recs]
+    usable = [all(c.values()) for c in comp]
+    correct, parse_fail, applicable = [], [], []
+    for r in recs:
+        s = sessions.get(r["id"])
+        if s is None:
+            raise KeyError(f"session {r['id']} absent; cannot re-score {directory.name}")
+        body = split_generation(r["raw"], think_preopened=True)["answer"].strip()
+        correct.append(bool(score(s, body)))
+        numeric = s["data_type"] in NUMERIC
+        applicable.append(numeric)
+        # A parse failure is a NON-EMPTY answer from which the pre-registered
+        # numeric rule extracts nothing. An empty answer is an empty answer and
+        # is counted there, not here; conflating them would let a silent model
+        # look like a formatting problem.
+        parse_fail.append(bool(numeric and body
+                               and extract_final_answer(body)[0] is None))
+
+    n = len(recs)
+    lengths = [r["generated_tokens"] for r in recs]
+    n_usable = sum(usable)
+    n_numeric = sum(applicable)
+
+    def rate(xs) -> float:
+        return round(sum(xs) / n, 4)
+
+    out = {
+        "n": n,
+        "usable_rollout_rate": rate(usable),
+        "correct_overall": rate(correct),
+        "correct_given_usable": (round(sum(c for c, u in zip(correct, usable) if u)
+                                       / n_usable, 4) if n_usable else None),
+        "protocol_valid_rate": rate(c["protocol_valid"] for c in comp),
+        "natural_termination_rate": rate(c["natural_termination"] for c in comp),
+        "context_limit_rate": rate(not c["no_context_limit"] for c in comp),
+        "severe_repetition_rate": rate(not c["no_severe_repetition"] for c in comp),
+        "empty_output_rate": rate(not c["non_empty"] for c in comp),
+        "answer_parse_failure_rate_numeric": (
+            round(sum(parse_fail) / n_numeric, 4) if n_numeric else None),
+        "answer_parse_failure_rate_all": rate(parse_fail),
+        "generated_tokens": {
+            "mean": round(statistics.fmean(lengths), 1),
+            "p50": int(statistics.median_low(lengths)),
+            "p90": int(sorted(lengths)[min(n - 1, int(0.9 * n))]),
+            "max": max(lengths),
+        },
+        "counts": {
+            "included": n,
+            "usable": n_usable,
+            "correct": sum(correct),
+            "correct_and_usable": sum(c and u for c, u in zip(correct, usable)),
+            "natural_termination": sum(c["natural_termination"] for c in comp),
+            "context_limit": sum(not c["no_context_limit"] for c in comp),
+            "severe_repetition": sum(not c["no_severe_repetition"] for c in comp),
+            "empty": sum(not c["non_empty"] for c in comp),
+            "numeric_prompts": n_numeric,
+            "answer_parse_failure": sum(parse_fail),
+        },
+        "first_failure_census": ur.summarize(recs)["first_failure"],
+        "by_task": {},
+        "per_sample": {
+            "usable": {r["id"]: u for r, u in zip(recs, usable)},
+            "correct": {r["id"]: c for r, c in zip(recs, correct)},
+            "natural_termination": {r["id"]: c["natural_termination"]
+                                    for r, c in zip(recs, comp)},
+            "context_limit": {r["id"]: not c["no_context_limit"]
+                              for r, c in zip(recs, comp)},
+            "generated_tokens": {r["id"]: r["generated_tokens"] for r in recs},
+        },
+    }
+    for task in sorted({r["data_type"] for r in recs}):
+        idx = [i for i, r in enumerate(recs) if r["data_type"] == task]
+        nu = sum(usable[i] for i in idx)
+        out["by_task"][task] = {
+            "n": len(idx),
+            "usable_rollout_rate": round(nu / len(idx), 4),
+            "correct_overall": round(sum(correct[i] for i in idx) / len(idx), 4),
+            "correct_given_usable": (
+                round(sum(correct[i] for i in idx if usable[i]) / nu, 4) if nu else None),
+            "natural_termination_rate": round(
+                sum(comp[i]["natural_termination"] for i in idx) / len(idx), 4),
+            "context_limit_rate": round(
+                sum(not comp[i]["no_context_limit"] for i in idx) / len(idx), 4),
+            "counts": {"included": len(idx), "usable": nu,
+                       "correct": sum(correct[i] for i in idx)},
+        }
+    return out
+
+
+def arm_alias(family: str, seed: str) -> str:
+    """`E1-1.60M` + `sa` -> `E1-1.60M-sa`; `E1-1.60M@E4` -> `E1-1.60M-sa@E4`.
+
+    The session suffix belongs to the arm, not to the family, so it has to be
+    reattached after the seed. Getting this wrong silently drops a comparison —
+    `family_compare` then reports `incomplete` for a pair whose arms are both
+    loaded, which reads exactly like a missing measurement.
+    """
+    if family.endswith("@E4"):
+        return f"{family[:-3]}-{seed}@E4"
+    return f"{family}-{seed}"
+
+
+def compare(a_alias: str, b_alias: str, arms: dict, iterations: int) -> dict | None:
+    """b against a, paired on the shared prompt mask."""
+    a, b = arms.get(a_alias), arms.get(b_alias)
+    if a is None or b is None:
+        return None
+    out = {"a": a_alias, "b": b_alias}
+    for axis in ("usable", "correct"):
+        pa, pb = a["per_sample"][axis], b["per_sample"][axis]
+        counts = mcnemar_counts(pa, pb)
+        ci = paired_bootstrap_ci(pa, pb, iterations=iterations)
+        out[axis] = {
+            "rate_a": counts["rate_a"], "rate_b": counts["rate_b"],
+            "delta": counts["delta"],
+            "win": counts["b_gained"], "loss": counts["b_lost"],
+            "tie": counts["both_true"] + counts["both_false"],
+            "n_paired": counts["n_paired"],
+            "bootstrap_ci": [ci["ci_low"], ci["ci_high"]],
+            "ci_excludes_zero": ci["ci_excludes_zero"],
+        }
+    out["natural_termination"] = mcnemar_counts(
+        a["per_sample"]["natural_termination"], b["per_sample"]["natural_termination"])
+    out["correct_and_naturally_terminated"] = {
+        "a": joint_rate(a["per_sample"]["correct"],
+                        a["per_sample"]["natural_termination"]),
+        "b": joint_rate(b["per_sample"]["correct"],
+                        b["per_sample"]["natural_termination"]),
+    }
+    return out
+
+
+def family_compare(fa: str, fb: str, arms: dict, iterations: int) -> dict:
+    """Both seeds independently, the two-seed direction, and the pooled delta."""
+    per_seed = {s: compare(arm_alias(fa, s), arm_alias(fb, s), arms, iterations)
+                for s in SEEDS}
+    per_seed = {s: v for s, v in per_seed.items() if v is not None}
+    out = {"a": fa, "b": fb, "per_seed": per_seed}
+    if len(per_seed) != len(SEEDS):
+        out["incomplete"] = f"only {sorted(per_seed)} available"
+        return out
+    for axis, floor_key in (("usable", "usable_rollout_rate"),
+                            ("correct", "correct_overall")):
+        deltas = [per_seed[s][axis]["delta"] for s in SEEDS]
+        pooled = round(statistics.fmean(deltas), 4)
+        directions = {"up" if d > 0 else "down" if d < 0 else "flat" for d in deltas}
+        out[axis] = {
+            "delta_per_seed": {s: per_seed[s][axis]["delta"] for s in SEEDS},
+            "pooled_delta": pooled,
+            "seed_consistent": len(directions) == 1 and directions != {"flat"},
+            "direction": sorted(directions),
+            "floor": FLOORS[floor_key],
+            "exceeds_floor": abs(pooled) >= FLOORS[floor_key],
+            "both_cis_exclude_zero": all(
+                per_seed[s][axis]["ci_excludes_zero"] for s in SEEDS),
+            "verdict": _verdict(pooled, directions, FLOORS[floor_key]),
+        }
+    return out
+
+
+def _verdict(pooled: float, directions: set, floor: float) -> str:
+    if abs(pooled) < floor:
+        return "inside the floor — not an effect"
+    if len(directions) != 1:
+        return "above the floor but seeds disagree — not claimable"
+    return f"above the floor and seed-consistent ({'better' if pooled > 0 else 'worse'})"
+
+
+def examples(a_alias: str, b_alias: str, arms: dict, sessions: dict, k: int) -> dict:
+    """A deterministic sample of what changed, for explanation only."""
+    a, b = arms.get(a_alias), arms.get(b_alias)
+    if a is None or b is None:
+        return {}
+    buckets: dict[str, list] = {"newly_usable": [], "newly_unusable": [],
+                                "newly_correct": [], "newly_incorrect": [],
+                                "termination_improved": [], "termination_regressed": []}
+    for pid in sorted(set(a["per_sample"]["usable"]) & set(b["per_sample"]["usable"])):
+        ua, ub = a["per_sample"]["usable"][pid], b["per_sample"]["usable"][pid]
+        ca, cb = a["per_sample"]["correct"][pid], b["per_sample"]["correct"][pid]
+        ta = a["per_sample"]["natural_termination"][pid]
+        tb = b["per_sample"]["natural_termination"][pid]
+        row = {"id": pid, "data_type": sessions[pid]["data_type"],
+               "tokens_a": a["per_sample"]["generated_tokens"][pid],
+               "tokens_b": b["per_sample"]["generated_tokens"][pid]}
+        if ub and not ua:
+            buckets["newly_usable"].append(row)
+        if ua and not ub:
+            buckets["newly_unusable"].append(row)
+        if cb and not ca:
+            buckets["newly_correct"].append(row)
+        if ca and not cb:
+            buckets["newly_incorrect"].append(row)
+        if tb and not ta:
+            buckets["termination_improved"].append(row)
+        if ta and not tb:
+            buckets["termination_regressed"].append(row)
+    return {name: {"n": len(rows), "sample": rows[:k]} for name, rows in buckets.items()}
+
+
+def main() -> None:
+    ap = argparse.ArgumentParser()
+    # Small enough to track (~140 KB): the per-sample maps are stripped before
+    # writing, so this is the summary, not the generations. The generations stay
+    # under the gitignored `artifacts/` tree and on the dev-box store.
+    ap.add_argument("--out", type=Path, default=REPO_ROOT / "logs/e6_results.json")
+    ap.add_argument("--report", type=Path, default=REPO_ROOT / "logs/e6_report.md")
+    ap.add_argument("--bootstrap", type=int, default=10000)
+    ap.add_argument("--examples", type=int, default=3)
+    args = ap.parse_args()
+
+    reg = json.loads(REGISTRATION.read_text())
+    sessions = load_sessions()
+
+    # Where each arm's generations live. A regenerated arm is read from the E6
+    # session directory; a reused arm from the retained one it was registered
+    # against. E1-1.60M is read from BOTH and the E4 copy is kept separate.
+    arms, provenance, missing = {}, {}, []
+    for alias, arm in reg["arms"].items():
+        d = THREE_MODE / (alias if arm["generate"] else arm["retained_three_mode"])
+        scored = rescore_arm(d, sessions)
+        if scored is None:
+            missing.append(alias)
+        else:
+            arms[alias] = scored
+            provenance[alias] = {
+                "directory": str(d.relative_to(REPO_ROOT)),
+                "session": "E6" if arm["generate"] else "E4",
+                "rung": arm["rung"], "seed": arm["seed"],
+                "run": arm["run"], "weights_sha256": arm["weights_sha256"]}
+        # The retained replicate is loaded whether or not the E6 arm exists, so
+        # a failed regeneration cannot silently take the anchor comparison with
+        # it -- that comparison is answered by the E4 session either way.
+        if arm["generate"] and arm["retained_three_mode"]:
+            rd = THREE_MODE / arm["retained_three_mode"]
+            rep = rescore_arm(rd, sessions)
+            if rep is not None:
+                alias4 = f"{alias}@E4"
+                arms[alias4] = rep
+                provenance[alias4] = {
+                    "directory": str(rd.relative_to(REPO_ROOT)),
+                    "session": "E4", "rung": arm["rung"], "seed": arm["seed"],
+                    "run": arm["run"], "weights_sha256": arm["weights_sha256"],
+                    "role": "cross-session replicate of the same weights"}
+
+    families = {}
+    for fam in ("E1-1.60M", "E1-2.96M", "E1-5.50M", "P2-1.60M", "E1-1.60M@E4"):
+        present = [p for p in (arm_alias(fam, s) for s in SEEDS) if p in arms]
+        if len(present) != len(SEEDS):
+            continue
+        families[fam] = {
+            "seeds": {p: {k: arms[p][k] for k in
+                          ("usable_rollout_rate", "correct_overall",
+                           "correct_given_usable", "protocol_valid_rate",
+                           "natural_termination_rate", "context_limit_rate",
+                           "severe_repetition_rate", "empty_output_rate",
+                           "answer_parse_failure_rate_numeric", "generated_tokens",
+                           "counts")} for p in present},
+            "mean": {k: round(statistics.fmean([arms[p][k] for p in present]), 4)
+                     for k in ("usable_rollout_rate", "correct_overall",
+                               "protocol_valid_rate", "natural_termination_rate",
+                               "context_limit_rate", "severe_repetition_rate",
+                               "empty_output_rate")},
+            # Pooled over both seeds' prompts, which is how every earlier table
+            # in this project reported it. The per-seed values above are the
+            # primary reading; this exists so E6 rows line up with E4's and E5's.
+            "correct_given_usable_pooled": round(
+                sum(arms[p]["counts"]["correct_and_usable"] for p in present)
+                / max(1, sum(arms[p]["counts"]["usable"] for p in present)), 4),
+            "spread": {k: round(abs(arms[present[0]][k] - arms[present[1]][k]), 4)
+                       for k in ("usable_rollout_rate", "correct_overall")},
+            "rung_unique_supervised_tokens": RUNGS.get(fam.replace("@E4", "")),
+            "cumulative_ce_tokens": (RUNGS.get(fam.replace("@E4", "")) or 0) * EPOCHS,
+        }
+
+    # The registered comparison set. Curve comparisons read the E6 session; the
+    # anchor comparisons at 1.60M read the E4 session for both sides.
+    comparisons = {
+        "E1-2.96M vs E1-1.60M": family_compare("E1-1.60M", "E1-2.96M", arms, args.bootstrap),
+        "E1-5.50M vs E1-1.60M": family_compare("E1-1.60M", "E1-5.50M", arms, args.bootstrap),
+        "E1-5.50M vs E1-2.96M": family_compare("E1-2.96M", "E1-5.50M", arms, args.bootstrap),
+        "E1-1.60M vs P2-1.60M": family_compare("P2-1.60M", "E1-1.60M@E4", arms, args.bootstrap),
+        "E1-2.96M vs P2-1.60M": family_compare("P2-1.60M", "E1-2.96M", arms, args.bootstrap),
+        "E1-5.50M vs P2-1.60M": family_compare("P2-1.60M", "E1-5.50M", arms, args.bootstrap),
+    }
+    session_replicate = {
+        s: compare(f"E1-1.60M-{s}@E4", f"E1-1.60M-{s}", arms, args.bootstrap)
+        for s in SEEDS if f"E1-1.60M-{s}@E4" in arms and f"E1-1.60M-{s}" in arms
+    }
+
+    qualitative = {
+        f"{name} [{s}]": examples(arm_alias(c["a"], s), arm_alias(c["b"], s),
+                                  arms, sessions, args.examples)
+        for name, c in comparisons.items() if "a" in c for s in SEEDS
+    }
+
+    result = {
+        "created_utc": datetime.now(timezone.utc).isoformat(),
+        "experiment": reg["experiment"],
+        "registration_sha256": reg["registration_sha256"],
+        "inclusion_mask_sha256": reg["frozen_assets"]["inclusion_mask_sha256"],
+        "floors": FLOORS,
+        "arms": {a: {k: v for k, v in m.items() if k != "per_sample"}
+                 for a, m in arms.items()},
+        "provenance": provenance,
+        "missing_arms": missing,
+        "families": families,
+        "comparisons": comparisons,
+        "session_replicate": session_replicate,
+        "qualitative_examples": qualitative,
+        "code_state": code_state(str(REPO_ROOT)),
+    }
+    args.out.parent.mkdir(parents=True, exist_ok=True)
+    args.out.write_text(json.dumps(result, indent=2) + "\n")
+    print(f"wrote {args.out}")
+    if missing:
+        print(f"  MISSING ARMS: {missing}")
+
+    args.report.write_text(render(result))
+    print(f"wrote {args.report}")
+
+
+def render(r: dict) -> str:
+    L = ["# Experiment 6 — the E1 PCA scale curve on the frozen battery", "",
+         f"Generated {r['created_utc']} from retained generations only; nothing was",
+         "generated by this script. Inclusion mask "
+         f"`{r['inclusion_mask_sha256'][:16]}…`, 150 prompts, greedy, unrestricted",
+         "generation (P18). Every arm re-scored with the current scorer.", "",
+         "## Headline", "",
+         "| model | CE exposure (unique / cumulative) | seed | usable | correct | correct\\|usable |",
+         "| --- | ---: | --- | ---: | ---: | ---: |"]
+    order = ["E1-1.60M", "E1-2.96M", "E1-5.50M", "P2-1.60M"]
+    for fam in order:
+        f = r["families"].get(fam)
+        if f is None:
+            L.append(f"| {fam} | — | — | not evaluated | | |")
+            continue
+        exposure = f"{f['rung_unique_supervised_tokens']:,} / {f['cumulative_ce_tokens']:,}"
+        for alias, m in f["seeds"].items():
+            cgu = m["correct_given_usable"]
+            L.append(f"| {fam} | {exposure} | {alias.rsplit('-', 1)[-1]} | "
+                     f"{m['usable_rollout_rate']:.4f} | {m['correct_overall']:.4f} | "
+                     f"{cgu if cgu is None else f'{cgu:.4f}'} |")
+    L += ["", "## Component rates and counts", "",
+          "| arm | protocol | nat.term | ctx-limit | repetition | empty | parse-fail (numeric) | tokens p50 / p90 / max |",
+          "| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |"]
+    for alias, m in r["arms"].items():
+        g = m["generated_tokens"]
+        pf = m["answer_parse_failure_rate_numeric"]
+        L.append(f"| {alias} | {m['protocol_valid_rate']:.4f} | "
+                 f"{m['natural_termination_rate']:.4f} | {m['context_limit_rate']:.4f} | "
+                 f"{m['severe_repetition_rate']:.4f} | {m['empty_output_rate']:.4f} | "
+                 f"{'—' if pf is None else f'{pf:.4f}'} | "
+                 f"{g['p50']} / {g['p90']} / {g['max']} |")
+    L += ["", "## Paired comparisons on the shared mask", ""]
+    for name, c in r["comparisons"].items():
+        L.append(f"### {name}")
+        if "incomplete" in c or "usable" not in c:
+            L += ["", f"Not evaluable: {c.get('incomplete', 'missing arms')}.", ""]
+            continue
+        for axis in ("usable", "correct"):
+            a = c[axis]
+            L.append(f"* **{axis}** pooled Δ {a['pooled_delta']:+.4f} "
+                     f"(floor {a['floor']:.4f}) — {a['verdict']}; "
+                     f"seeds {a['delta_per_seed']}, "
+                     f"seed-consistent {a['seed_consistent']}")
+            for s, v in c["per_seed"].items():
+                x = v[axis]
+                L.append(f"  * {s}: {x['rate_a']:.4f} → {x['rate_b']:.4f}, "
+                         f"win/tie/loss {x['win']}/{x['tie']}/{x['loss']}, "
+                         f"95% CI [{x['bootstrap_ci'][0]:+.4f}, {x['bootstrap_ci'][1]:+.4f}]"
+                         f"{' excludes 0' if x['ci_excludes_zero'] else ''}")
+        L.append("")
+    if r["session_replicate"]:
+        L += ["## Cross-session replicate — identical weights, two sessions", ""]
+        for s, c in r["session_replicate"].items():
+            L.append(f"* E1-1.60M-{s}: usable {c['usable']['rate_a']:.4f} (E4) → "
+                     f"{c['usable']['rate_b']:.4f} (E6), Δ {c['usable']['delta']:+.4f}; "
+                     f"correct {c['correct']['rate_a']:.4f} → {c['correct']['rate_b']:.4f}, "
+                     f"Δ {c['correct']['delta']:+.4f}")
+        L.append("")
+    return "\n".join(L) + "\n"
+
+
+if __name__ == "__main__":
+    main()
