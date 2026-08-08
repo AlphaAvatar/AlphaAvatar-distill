@@ -220,6 +220,39 @@ def diagnostics(reg: dict) -> dict:
     return out
 
 
+def prior_harness() -> dict:
+    """What the retired 76-prompt wave said about these same three rungs.
+
+    Included so E6 can answer whether the earlier ordering survives — and only
+    the **ordering**. The levels are not comparable and must never be put in one
+    table as if they were: different prompt population (76 behaviour prompts vs
+    150 corpus examples), and the degeneration stop was ACTIVE, which cuts a
+    repetition loop early and so changes the termination and context-limit
+    components outright. The same weights score 0.4868 there and something else
+    entirely here.
+    """
+    path = REPO_ROOT / "artifacts/audit/stage23_reevaluation.json"
+    if not path.is_file():
+        return {"not_evaluable": "stage23_reevaluation.json absent"}
+    arms = json.loads(path.read_text())["experiment1_arms"]
+    out = {}
+    for fam, stem in (("E1-1.60M", "r1600k"), ("E1-2.96M", "r2960k"),
+                      ("E1-5.50M", "r5500k")):
+        per = {}
+        for seed in SEEDS:
+            b = arms.get(f"{stem}_{seed}_pca", {}).get("behavior_76")
+            if b:
+                per[seed] = b["usable_rollout_rate"]
+        if len(per) == len(SEEDS):
+            out[fam] = {"usable_rollout_rate_per_seed": per,
+                        "mean": round(statistics.fmean(per.values()), 4)}
+    ranked = sorted(out, key=lambda k: -out[k]["mean"])
+    return {"harness": "76 behaviour prompts, E1 behaviour wave, degeneration "
+                       "stop ACTIVE",
+            "comparable_with_e6": "ORDERING ONLY — never the levels",
+            "arms": out, "ranking_best_first": ranked}
+
+
 def environment(provenance: dict) -> dict:
     """What produced each arm's generations, read from its own report.
 
@@ -503,6 +536,7 @@ def main() -> None:
         "families": families,
         "comparisons": comparisons,
         "environment": environment(provenance),
+        "prior_harness": prior_harness(),
         "diagnostics": diagnostics(reg),
         "session_replicate": session_replicate,
         "qualitative_examples": qualitative,
@@ -588,6 +622,23 @@ def render(r: dict) -> str:
                          f"95% CI [{x['bootstrap_ci'][0]:+.4f}, {x['bootstrap_ci'][1]:+.4f}]"
                          f"{' excludes 0' if x['ci_excludes_zero'] else ''}")
         L.append("")
+    ph = r.get("prior_harness", {})
+    if ph.get("arms"):
+        L += ["## Does the retired harness's ordering survive?", "",
+              f"Prior: {ph['harness']}. **{ph['comparable_with_e6']}** —",
+              "different prompt population and a stop policy that changes the",
+              "termination and context-limit components outright.", "",
+              "| rung | prior usable (sa / sb) | prior mean | E6 mean |",
+              "| --- | --- | ---: | ---: |"]
+        for fam, v in ph["arms"].items():
+            ps = v["usable_rollout_rate_per_seed"]
+            now = r["families"].get(fam, {}).get("mean", {}).get(
+                "usable_rollout_rate")
+            L.append(f"| {fam} | {ps['sa']:.4f} / {ps['sb']:.4f} | "
+                     f"{v['mean']:.4f} | "
+                     f"{'not evaluated' if now is None else f'{now:.4f}'} |")
+        L += ["", f"Prior ranking, best first: **{' > '.join(ph['ranking_best_first'])}**.",
+              ""]
     if r.get("diagnostics"):
         L += ["## Diagnostics — reported, never used to rank", "",
               "| arm | teacher-native val CE | FineWeb holdout NLL | teacher-forced reasoning top-1 |",
