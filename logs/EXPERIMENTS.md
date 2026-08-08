@@ -3592,3 +3592,58 @@ launcher's checkpoint fetch still names `step_000738`, a constant from the
 superseded 492-block design, while the real tag is `step_001356`. The weights
 died with the pod. The result stands on the retained evaluation artifacts, but
 the checkpoints would have to be retrained to re-evaluate.
+
+### 27.1 Post-hoc: C against the P2-1.60M matched-CE anchor
+
+**Not a pre-registered contrast.** E5 registered C vs R. This compares C to the
+E4 arms on the *same* 150-prompt battery — inclusion mask `d6e24e0b09da1bcc`
+asserted identical across all eight arms — because C's continuation was sized as
+the nested-rung increment, so its cumulative CE exposure lands within 0.3% of
+P2-1.60M's.
+
+| model | cumulative CE tokens | usable | correct | correct \| usable | seeds (usable) |
+| --- | ---: | ---: | ---: | ---: | --- |
+| P2-0.86M (E5's start) | 860,000 | 0.5333 | 0.1900 | 0.3258 | 0.5200/0.5467 |
+| P1-1.60M | 1,600,353 | 0.7300 | 0.1867 | 0.2511 | 0.7800/0.6800 |
+| **P2-1.60M** | 1,600,353 | **0.7333** | **0.2000** | 0.2682 | 0.7133/0.7533 |
+| **E5-C** | 1,595,603 | **0.7667** | **0.1300** | 0.1652 | 0.7600/0.7733 |
+| **E5-R** | 1,595,603 | **0.4467** | **0.1100** | 0.2463 | 0.4600/0.4333 |
+
+Paired against P2-1.60M on the same prompts:
+
+| seed | metric | P2-1.60M | C | Δ | C gained/lost | bootstrap 95% CI |
+| --- | --- | ---: | ---: | ---: | --- | --- |
+| sa | usable | 0.7133 | 0.7600 | +0.0467 | 23 / 16 | [−0.0333, +0.1267] |
+| sb | usable | 0.7533 | 0.7733 | +0.0200 | 22 / 19 | [−0.0667, +0.1067] |
+| sa | correct | 0.2333 | 0.1400 | **−0.0933** | 9 / 23 | **[−0.1667, −0.0200]** excludes 0 |
+| sb | correct | 0.1667 | 0.1200 | −0.0467 | 8 / 15 | [−0.1067, +0.0133] |
+
+**On behaviour, C ties the anchor.** +0.0334 pooled, inside the 0.0800 floor,
+neither seed's CI excluding zero. Teacher-prefix continuation reaches the same
+rollout stability as simply training the ordinary next rung — it does not beat
+it. C's seed range does sit entirely above P2-1.60M's (0.7600–0.7733 against
+0.7133–0.7533), which is suggestive, but the paired test is the stronger
+instrument and it says tied.
+
+**On correctness, C appears to lose.** −0.0700 pooled, above the 0.0600 floor,
+same direction on both seeds, and sa's CI excludes zero with C losing 23 prompts
+and gaining 9. Against its own starting point C is 0.1900 → 0.1300, a drop right
+at the floor. This is one seed significant and one not, so it is a signal to take
+seriously rather than a settled result.
+
+**R is worse than not continuing at all.** Against P2-0.86M it loses 0.0866 usable
+rollout and 0.0800 correctness, both above their floors. The student would have
+been better left alone.
+
+`correct_given_usable` falls monotonically along the whole sequence — 0.3258 →
+0.2682 → 0.1652 — which extends E4's finding rather than contradicting it: each
+increment of behavioural stability arrives with a *lower* hit rate among the
+rollouts it makes usable.
+
+**What this does not establish.** C and P2-1.60M differ in more than the prefix
+treatment: different data (prefix/continuation splits with CE on the continuation
+only, versus the ordinary next ladder rung), and a different schedule (two
+sequential cosine runs against one). Cumulative CE tokens match to 0.3%; nothing
+else is controlled. The honest reading is that these are two ways of spending
+~1.6M cumulative supervised tokens, and the cheaper, simpler one is at least as
+good on behaviour and possibly better on correctness.
