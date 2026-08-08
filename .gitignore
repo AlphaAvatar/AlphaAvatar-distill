@@ -65,3 +65,6 @@ torch_cache/
 
 # Audit artifacts (complete generations preserved locally / on the relay)
 artifacts/audit/
+
+# Git bundles used to ship the session to a pod; built in scratch, never here.
+*.bundle

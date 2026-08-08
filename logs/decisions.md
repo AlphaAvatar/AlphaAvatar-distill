@@ -1315,3 +1315,47 @@
   with a verified local copy.
 - **Revisit when:** any candidate shows a seed-consistent usable-rollout gain
   exceeding 0.0800, measured against a prospectively registered gate.
+
+## 2026-08-08 — Neither Experiment 5 continuation recipe is adopted; P2-1.60M stands
+
+- **Context:** E5 compared teacher-prefix continuation (C) against student-prefix
+  recovery (R) from P2-0.86M under a matched CE-supervision budget of 735,603
+  tokens per pass. It cost $11.64 over ten paid events, of which eight produced
+  no result. All arms were evaluated on the frozen 150-prompt battery, mask
+  `d6e24e0b…`, asserted identical across E4's and E5's arms.
+- **Decision:** adopt neither. **P2-1.60M remains the best checkpoint** and the
+  start point for any Stage 4/5 work.
+  - **R is rejected outright.** It is worse than not continuing at all: −0.0866
+    usable rollout and −0.0800 correctness against its own starting point, both
+    above their floors.
+  - **C is not adopted.** It ties the matched-CE anchor on behaviour (0.7667 vs
+    0.7333, inside the 0.0800 floor, neither paired CI excluding zero) and
+    appears to cost correctness (0.1300 vs 0.2000, above the 0.0600 floor, same
+    direction on both seeds, `sa`'s CI excluding zero at −0.0933).
+- **Alternatives considered:** adopting C on its point estimate, which is the
+  highest usable-rollout figure the project has produced. Rejected — the paired
+  test says tied on the axis where it leads, and the axis where it loses is the
+  one the project has been unable to move for six experiments. Promoting a
+  checkpoint that trades correctness for a behavioural tie inverts the stated
+  priority.
+- **Expected upside of the decision:** the simpler recipe stands, so Stage 4/5
+  starts from a checkpoint reachable by training the ordinary next rung, with no
+  prefix/continuation machinery in the lineage.
+- **Risks:** C's correctness loss is one seed significant and one not, so it may
+  be noise; and the C/R weights were lost to a stale checkpoint tag, so
+  re-measuring either needs retraining. If a future experiment wants C, it must
+  pay for it again.
+- **What E5 does establish, and is worth keeping:** training a student only on
+  continuations conditioned on a prefix it will not have at inference teaches
+  continuation and not closure. R's median rollout is 6,362–6,692 tokens against
+  C's 513–562, it hits the context limit on >50% of prompts, and of ~77 empty
+  answers per seed exactly one terminated naturally. Oracle mode gives R
+  0.59–0.61 correct with zero empties, so the model is intact and simply cannot
+  stop. Any future recipe that supervises only mid-trajectory spans inherits this
+  failure unless closure is supervised somewhere.
+- **Claim boundary carried forward:** training composition was not identical
+  (C 963/989 bundles, R 603/672), because matching the CE budget forces different
+  counts when R's continuations run 1.66–1.76× longer. E5 compares complete
+  recipes under a matched token budget; it does not isolate prefix state.
+- **Revisit when:** Stage 4/5 on-policy work needs a mid-trajectory objective, or
+  a future experiment supervises trajectory closure explicitly.

@@ -3593,6 +3593,41 @@ superseded 492-block design, while the real tag is `step_001356`. The weights
 died with the pod. The result stands on the retained evaluation artifacts, but
 the checkpoints would have to be retrained to re-evaluate.
 
+### 27.0 The complete Experiment 5 ledger
+
+Ten paid events, $11.64. Two attempts (6 and 7) and the two pre-attempt pilots
+had no section of their own until this pass; they are recorded here so the ledger
+reconciles and so their causes stay useful (P11).
+
+| # | date | event | cost | stopped at | cause |
+| ---: | --- | --- | ---: | --- | --- |
+| — | 08-06 | pilot 1 | $0.07 | setup | `list_repo_tree(recursive)` 504s on a 700-file relay; replaced with per-file fetch |
+| — | 08-06 | pilot 2 | $0.92 | setup | held-out battery read from a gitignored path; pinned to `e5_heldout_eval_ids.json` |
+| 1 | 08-07 | [attempt 1](#22-experiment-5--attempt-1-r-corpus-generated-then-found-unpackable-2026-08-07-157) | $1.57 | pairing | `to_record()` dropped `ids`/`mask`; 4,196 gated R examples unusable |
+| 2 | 08-07 | [attempt 2](#23-experiment-5--attempt-2-stopped-by-budget-gate-1-2026-08-07-081) | $0.81 | gate 1 | cost model carried a 152-min generation estimate; measured 74.1 |
+| 3 | 08-07 | [attempt 3](#24-experiment-5--attempt-3-stopped-on-a-cold-host-2026-08-07-145) | $1.45 | setup | cold host: `uv sync` 62 min against 44 s warm |
+| 4 | 08-07 | [attempt 4](#25-experiment-5--attempt-4-the-feasibility-gate-found-a-real-conflict-2026-08-07-153) | $1.53 | feasibility | R/C supervised-token asymmetry 1.66–1.76×; one bundle count cannot serve both |
+| 5 | 08-07 | [attempt 5](#26-experiment-5--attempt-5-the-selector-worked-a-vestigial-restriction-did-not-2026-08-07-155) | $1.55 | feasibility | C pooled over the C∩R intersection, costing it 23.8% of its corpus |
+| 6 | 08-07 | attempt 6 | $0.33 | gate 1 | gate still reserved 90 min for generation that had become a staged artifact |
+| 7 | 08-07 | attempt 7 | $0.54 | training | pack declared one rung over every block, leaving no validation tail for `ladder_blocks` |
+| 8 | 08-07 | **attempt 8 — complete** | **$2.87** | — | four arms trained and evaluated |
+
+Attempts 6 and 7 are short because each died at a gate it reached quickly, and
+both were caused by a change made between attempts rather than by anything the
+experiment was testing: attempt 6 by switching R from generated to staged without
+repricing the phase, attempt 7 by a packing contract that had never been exercised
+against the trainer's validation-block selection.
+
+Three of the ten events were the *same* class of failure — an artifact or model
+that was correct in one respect and unusable in another — which is why the run now
+verifies provenance and usability separately (`verify_staged_r.py`) and re-reads
+every corpus from disk before pairing.
+
+**The gates worked.** Every failure stopped before the money went into training;
+the one attempt that reached training completed. The cost of eight attempts is
+the price of finding out that six things were broken, not the price of six wrong
+answers.
+
 ### 27.1 Post-hoc: C against the P2-1.60M matched-CE anchor
 
 **Not a pre-registered contrast.** E5 registered C vs R. This compares C to the

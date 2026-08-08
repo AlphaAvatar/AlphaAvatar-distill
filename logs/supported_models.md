@@ -11,7 +11,7 @@ during baseline construction (same date).
 
 | Model | Teacher | Student target | Status | Stages passed | Best checkpoint | Notes |
 | --- | --- | --- | --- | --- | --- | --- |
-| qwen3-4b-thinking-distill (working name) | `Qwen/Qwen3-4B-Thinking-2507` @ `768f209d` | 0.6B-class: hidden 1024, 28L, FFN 3072, 16Q/8KV, tied emb (user-chosen 2026-07-13) | **stage3-running** | Stage 0, Stage 1, Stage 2 (v0+v1); Stage 3 sub-stages 1–2; Experiment 1 data-scaling matrix complete; Experiment 2 phase 1 (data cleaning) complete | `e1_r5500k_sa_pca` — teacher-native held-out CE **1.0032**; best behaviour/termination `e1_r2960k_sa_pca` (0.4413 / **0.934**). 20 arms on `AlphaAvatar/aadistill-artifacts`, 5 held verified on the dev box | Natural termination rose from 0/8 to **0.934** on teacher-native recovery data. Stage 3 still not exited: **no reasoning at any rung** (GSM8K EM ≤0.05). See below. |
+| qwen3-4b-thinking-distill (working name) | `Qwen/Qwen3-4B-Thinking-2507` @ `768f209d` | 0.6B-class: hidden 1024, 28L, FFN 3072, 16Q/8KV, tied emb (user-chosen 2026-07-13) | **stage3-running** | Stage 0, Stage 1, Stage 2 (v0+v1); Stage 3 sub-stages 1–2; Experiments 1–5 complete | **`e4_p2_r1600k_{sa,sb}`** — best behaviour *and* correctness on the frozen battery (usable 0.7333, correct 0.2000). Lowest teacher-native CE remains `e1_r5500k_sa_pca` (1.0032), which is a diagnostic and not a selection identity | Natural termination rose from 0/8 to **0.934** on teacher-native recovery data. Stage 3 still not exited: **no reasoning at any rung** (GSM8K EM ≤0.05). See below. |
 
 ---
 
@@ -121,6 +121,26 @@ prompt level both interventions gain on `sa` and lose on `sb`.
 * **P2-ceheavy holds the best correctness conditional on a usable rollout**
   (0.3590 / 0.2927). Its overall correctness (0.2000 / 0.1800, mean 0.1900) is a
   separate and weaker statement. Not promoted on either.
+
+### Beyond the 0.86M rung — Experiments 3, 4 and 5
+
+Same 150 examples, same mask `d6e24e0b…`, unrestricted generation, so every row
+below is directly comparable to the table above.
+
+| alias | rung / continuation | seeds | **usable rollout** | correct | correct \| usable | status |
+| --- | --- | --- | ---: | ---: | ---: | --- |
+| E3-A1 | 0.86M, attention frozen | sa/sb | 0.4467 | — | — | **rejected** — −0.087 vs P2 |
+| E3-A2 | 0.86M, LoRA r32 α64 on q/k/v/o | sa/sb | 0.4400 | — | — | **rejected** — −0.093 vs P2 |
+| P1-1.60M | 1.60M rung | sa/sb | 0.7300 | 0.1867 | 0.2511 | re-evaluated reference |
+| **P2-1.60M** | 1.60M rung | sa/sb | **0.7333** | **0.2000** | 0.2682 | **best behaviour+correctness so far**; weights retained |
+| E5-C | +735,603 teacher-prefix continuation from P2-0.86M | sa/sb | 0.7667 | 0.1300 | 0.1652 | not adopted — ties P2-1.60M on behaviour, appears to cost correctness; **weights lost** |
+| E5-R | +735,603 student-prefix recovery from P2-0.86M | sa/sb | 0.4467 | 0.1100 | 0.2463 | **rejected** — worse than its own start point; **weights lost** |
+
+**P2-1.60M is the current best checkpoint on both axes** and the reference any
+Stage 4/5 work should start from. E5's two arms cost $11.64 across ten paid
+events and neither beat it; the C and R weights were lost to a stale checkpoint
+tag in the transfer path ([EXPERIMENTS.md](EXPERIMENTS.md) §27), so re-evaluating
+either would require retraining.
 
 All six trained at the 0.86M rung, 1,023 steps, η 5e-5, warmup 51, same Stage 1
 init (`86fbba78…`), teacher `Qwen/Qwen3-4B-Thinking-2507@768f209d`.

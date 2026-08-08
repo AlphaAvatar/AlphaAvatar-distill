@@ -1,114 +1,71 @@
-**Updated:** 2026-08-08 05:10 UTC · branch `main` · **no pods running, nothing
-billing.** **E5 IS COMPLETE.** Eight attempts, **$10.65**, **$1.97 of the last
-authorization remains.**
+**Updated:** 2026-08-08 · branch `main` · **no pods running, nothing billing.**
+**Experiment 5 is complete.** Ten paid events, **$11.64**; project total
+**$138.52**. 766 CPU tests pass.
 
-## EXPERIMENT 5 COMPLETE — TEACHER-PREFIX CONTINUATION BEATS STUDENT-PREFIX
-## RECOVERY UNDER A MATCHED SUPERVISION BUDGET
+## E5 COMPLETE — AND NEITHER CONTINUATION RECIPE IS ADOPTED
 
-Full record: [`EXPERIMENTS.md`](EXPERIMENTS.md) §27. Registered before training in
-[`e5_registration.json`](e5_registration.json).
+Two findings, and the second matters more than the first.
 
-| | C teacher-prefix | R student-prefix | Δ | floor |
-| --- | --- | --- | --- | --- |
-| **usable_rollout** | **0.7667** | **0.4467** | **−0.3200** | 0.0800 |
-| correctness | 0.1300 | 0.1100 | −0.0200 | 0.0600 |
-| correct_given_usable | 0.1652 | 0.2463 | — | selection-biased, not evidence |
+**1. Teacher-prefix continuation (C) beats student-prefix recovery (R) decisively
+on behaviour.** usable_rollout 0.7667 vs 0.4467, Δ −0.3200 — four times the
+0.0800 floor, both seeds, every component, paired bootstrap CIs excluding zero.
+Correctness is indistinguishable (0.1300 vs 0.1100, inside the 0.0600 floor).
 
-Both seeds, every component, same direction. Paired bootstrap CIs on the 150
-pinned prompts exclude zero for usable rollout ([−0.393, −0.200] and [−0.427,
-−0.253]) and include zero for correctness. Within-arm seed spread 0.0133/0.0267.
+**2. Neither arm beats simply training the next rung.** Against the matched-CE
+anchor P2-1.60M, C *ties* on behaviour (0.7667 vs 0.7333, inside the floor,
+neither paired CI excluding zero) and **appears to cost correctness** (0.1300 vs
+0.2000, above the floor, same direction on both seeds, `sa`'s CI excluding zero).
+R is worse than not continuing at all: −0.0866 usable and −0.0800 correct against
+its own starting point.
 
-**Mechanism: R does not stop.** Median generation 6,362–6,692 tokens against C's
-513–562; context-limit rate 0.52–0.55 against 0.15–0.17. Of R's ~77 empty answers
-per seed, **1** terminated naturally — emptiness is a consequence of never
-reaching `</think>`. In oracle mode, where the reasoning is supplied, R answers
-correctly 0.59–0.61 with zero empty answers: the model is intact, it just cannot
-decide to stop. Every R target is a teacher recovery conditioned on an existing
-prefix, so R is supervised only on continuing a trace, never on closing one from
-a cold start.
+**→ `e4_p2_r1600k_{sa,sb}` (P2-1.60M) remains the best checkpoint and the start
+point for Stage 4/5.** Decision record:
+[`decisions.md`](decisions.md) 2026-08-08.
 
-**Claim boundary (registered):** evaluation is paired, but training composition
-is not identical — C 963/989 bundles, R 603/672 nested inside C — because
-matching the CE budget forces different counts when R's continuations run
-1.66–1.76× longer. E5 estimates the two complete **recipes** under a matched
-supervised-token budget; it does not isolate prefix state with composition held
-fixed, and the paired statistics preserve paired *evaluation* only.
+**Why R fails, which is the reusable part.** Every R target is a teacher recovery
+conditioned on a student prefix, so the recipe supervises *continuation* and never
+*closure from a cold start*. R's median rollout is 6,362–6,692 tokens against C's
+513–562; it hits the 8,192 context limit on >50% of prompts; of ~77 empty answers
+per seed exactly **one** terminated naturally. In oracle mode, with the reasoning
+supplied, R scores 0.59–0.61 with zero empties — the model is intact and simply
+cannot stop.
 
-**Corpus:** T\* = 735,603 CE tokens/pass, all four arms exactly on target,
-arm-to-arm delta 0.0000%, 904 common blocks, 1,356 steps.
+**Claim boundary (registered).** Evaluation is paired on the frozen 150-prompt
+battery, but training composition is not identical — C 963/989 bundles, R 603/672
+nested inside C — because matching the CE budget forces different counts when R's
+continuations run 1.66–1.76× longer. E5 compares complete **recipes** under a
+matched supervised-token budget; it does not isolate prefix state, and the paired
+statistics preserve paired *evaluation* only.
 
-**Lost:** the four trained checkpoints. The launcher fetched `step_000738`, a
-constant from the superseded 492-block design, while the real tag was
-`step_001356`. Fixed to derive the tag from the feasibility report. The result
-stands on retained evaluation artifacts; re-evaluating would need retraining.
+**Lost:** the four E5 checkpoints. The launcher fetched `step_000738`, a constant
+from the superseded 492-block design, while the real tag was `step_001356`. Fixed
+to derive the tag from the feasibility report; re-evaluating either arm would need
+retraining.
 
-## EXPERIMENT 4 COMPLETE — SCALE SUBSTANTIALLY IMPROVES ROLLOUT STABILITY,
-## BUT DOES NOT RESOLVE CORRECTNESS
+## THE STANDING PICTURE ACROSS EXPERIMENTS 1–5
 
-Full record: [`EXPERIMENTS.md`](EXPERIMENTS.md) §21. Registered before training in
-[`e4_registration.json`](e4_registration.json). **$4.83**, 290 min on one L40S,
-pod self-deleted, 12/12 files hash-verified.
+| checkpoint | tokens | usable rollout | correct | correct \| usable |
+| --- | ---: | ---: | ---: | ---: |
+| P1 / P2 at 0.86M | 860,000 | 0.5133–0.5933 | 0.1533–0.2133 | 0.2727–0.3590 |
+| P1-1.60M | 1,600,353 | 0.7300 | 0.1867 | 0.2511 |
+| **P2-1.60M** | 1,600,353 | **0.7333** | **0.2000** | 0.2682 |
+| E5-C | 1,595,603 | 0.7667 | 0.1300 | 0.1652 |
+| E5-R | 1,595,603 | 0.4467 | 0.1100 | 0.2463 |
 
-| | P2-0.86M | P1-1.60M | **P2-1.60M** |
-|---|---:|---:|---:|
-| **usable_rollout_rate** | 0.5333 | 0.7300 | **0.7333** |
-| correct_overall | 0.1900 | 0.1867 | 0.2000 |
-| correct_and_naturally_terminated | 0.1834 | 0.1867 | 0.2000 |
-| **correct_given_usable** | **0.3258** | 0.2532 | 0.2695 |
-| teacher-native CE | 1.5240 | 1.2983 | 1.3126 |
-| FineWeb NLL BF16 / INT8 | 8.9554 / 8.9794 | — | 8.0992 / 8.1467 |
+One frozen 150-prompt battery, mask `d6e24e0b…`, greedy, unrestricted generation
+(P18). Floors: usable 0.0800, correctness 0.0600.
 
-**Scaling 0.86M → 1.60M substantially improves autonomous rollout stability:**
-usable rollout +0.2000 on both seeds (0.5200/0.5467 → 0.7133/0.7533, ranges
-disjoint), clearing the 0.0800 floor by 2.5×; repetition failures −0.0833 and
-context-limit failures −0.0833. Paired per prompt: sa +41/−12, sb +47/−16, both
-bootstrap CIs excluding zero.
+**Behaviour moves; reasoning does not.** Six interventions have now been tried —
+more recovery data, held-out-NLL selection, assistant-only KD, CE/KD reweighting,
+restricted attention, and two continuation recipes — and the only one that moved
+autonomous rollout stability materially was **token scale** (+0.2000 from 0.86M to
+1.60M, both seeds, CIs excluding zero). Correctness has stayed in 0.11–0.20
+throughout, and `correct_given_usable` **falls** as stability rises: 0.3258 →
+0.2682 → 0.1652. Each intervention that makes more rollouts well-formed makes them
+well-formed and wrong.
 
-**It is an improvement, not a solution: 26.7% of rollouts remain unusable.**
-
-**Scaling does not materially improve autonomous correctness.** `correct_overall`
-moves only 0.1900 → 0.2000, inside the 0.0600 floor, with `sa` improving and `sb`
-regressing. `correct_given_usable` **falls** 0.3258 → 0.2695, showing that most
-newly completed rollouts remain incorrect.
-
-**At 1.60M, P1 and P2 are effectively tied on behaviour.** No claim is made that
-CE-heavy wins at matched scale: every delta is inside its floor, none wins on both
-seeds, no CI excludes zero, and P1 gained from scale too (0.5533 → 0.7300). **The
-major improvement belongs to scale, not to the CE/KD weighting change.**
-
-**R2 fired**: teacher-native CE improved −0.2114 (18× its floor) while autonomous
-correctness stayed flat. R1, R3, R4 did not fire; **no arm is adopted as the
-anchor**.
-
-**Supported conclusion.** P2-0.86M was **behaviour/stability-limited**; additional
-teacher-prefix training fixes a substantial part of that stability problem; and
-additional teacher-prefix training **does not resolve the remaining
-reasoning/correctness gap**.
-
-**Teacher-native CE and FineWeb NLL remain diagnostics, never promotion
-metrics.** Both improved here while the primary axis did not, which is exactly
-the dissociation they are kept separate for.
-
-**Binding limitation:** the 150 evaluation prompts are shared **training** prompts
-for every arm compared. Both rungs contain all 150, so no arm gains exposure and
-the comparison is fair — but this measures **recall-style autonomous behaviour,
-not held-out generalization.**
-
-### What the program now knows
-
-Four interventions have been tested against autonomous rollout. **Only scale has
-moved it**, and only its behavioural half:
-
-| intervention | usable rollout | correctness |
-|---|---|---|
-| KD scope (§17) | ~flat | ~flat |
-| KD magnitude (§18) | ~flat | ~flat |
-| attention restriction (§20) | **worse** | worse |
-| **token scale 0.86M → 1.60M (§21)** | **+0.2000** | **flat** |
-
-Correctness has not moved in any experiment. That is the standing open problem.
-Note the asymmetry: scale improved the *stability* axis substantially without
-touching the *reasoning* axis at all.
+Full records: E3 [§20](EXPERIMENTS.md), E4 [§21](EXPERIMENTS.md), E5
+[§27](EXPERIMENTS.md).
 
 ## NO EXISTING MODEL HAS YET COMPLETED THE STAGE 2/3 OBJECTIVE
 

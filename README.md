@@ -23,13 +23,17 @@ tokens.** This is the strongest result in the project.
 
 **Stage 2/3 — no model has demonstrated passage of a prospectively defined
 behaviour-recovery gate.** The student can be trained to hold the teacher's
-protocol some of the time, and cannot yet be trained to hold it reliably. The best
-arm produces a well-formed, self-terminating rollout on ~61% of prompts. **The
-dominant failure is that the model does not stop:** 31% of rollouts run to the
-8,192-token context limit in a repetition loop.
+protocol most of the time, and cannot yet be trained to hold it reliably. The best
+arm produces a well-formed, self-terminating rollout on **77%** of prompts. **The
+dominant failure is that the model does not stop:** the rest run to the
+8,192-token context limit, usually in a repetition loop.
 
-**Reasoning has not emerged at any budget tried.** On the fixed diagnostic set,
-correctness *given* a usable rollout is 0.000 on `openmath` for five of six arms.
+**Behaviour responds to scale; reasoning does not respond to anything tried.**
+Autonomous rollout stability has moved 0.53 → 0.77 across the 0.86M → 1.60M token
+budgets, but correctness has stayed near 0.13–0.20 throughout, and
+`correct_given_usable` **falls** as stability rises (0.3258 → 0.2682 → 0.1652).
+Each intervention that makes more rollouts well-formed makes them well-formed
+*and wrong*.
 
 **What is not the problem.** The released `Qwen3-0.6B` — the student's exact
 geometry and parameter count — answers ~70% of GSM8K and ~74% of RAG on this
@@ -42,7 +46,7 @@ evidence separates them.
 **Current experiment:** [Qwen/Qwen3-4B-Thinking-2507](https://huggingface.co/Qwen/Qwen3-4B-Thinking-2507) → a 0.6B-class student (Qwen3-0.6B geometry, ~6.7× compression, INT8 deployment target).
 
 Full record: [`logs/EXPERIMENTS.md`](./logs/EXPERIMENTS.md). Current state and next
-actions: [`logs/STATE.md`](./logs/STATE.md). Total paid compute to date: **$117.32**.
+actions: [`logs/STATE.md`](./logs/STATE.md). Total paid compute to date: **$138.52**.
 
 ### How Stage 2/3 is measured
 
@@ -70,12 +74,23 @@ construction (a terse well-formed reply scores perfectly), and its components ar
 | Selecting on held-out NLL | **Retired.** The checkpoint with the best held-out NLL of its trajectory produces *zero* protocol-valid generations. |
 | Assistant-only KD (`kd_scope`) | No seed-consistent gain; teacher-forced reasoning top-1 fell 0.049. |
 | Swapping the CE/KD weights | Null on the selector (+0.007 against a 0.060 seed spread); top-1 fell 0.014. |
+| Restricting attention updates (frozen, and LoRA r32/α64) | **Degrades** stability: −0.087 and −0.093 usable rollout, both seeds, every component. |
+| Scaling 0.86M → 1.60M tokens | Stability **+0.2000** (both seeds, CIs exclude zero); correctness +0.0100, inside the floor. The gain belongs to scale, not to the objective — P1 gained equally. |
+| Student-prefix recovery continuation | **Worse than not continuing at all**: −0.087 usable rollout and −0.080 correctness against its own start point. Trained only on continuations, it never learns to stop. |
+| Teacher-prefix continuation | Ties the matched-CE anchor on behaviour (0.7667 vs 0.7333, inside the floor) and appears to **cost** correctness (0.1300 vs 0.2000, one seed's CI excluding zero). |
 
 Reducing KD's influence two independent ways cost teacher-distribution fidelity in
 proportion to the dose, so **reweighting the existing two loss terms is not the
-lever**. The strongest untested lead is the **token budget**: the 1.60M and 2.96M
-rungs behave markedly better than the 0.86M rung every Stage 2/3 candidate was
-trained at.
+lever**. The token budget *was* the strongest lead and it delivered — on
+behaviour only. Scaling to 1.60M bought +0.20 usable rollout and nothing
+measurable in correctness, and neither continuation recipe beat it.
+
+**Six interventions have now moved behaviour and none has moved reasoning.** The
+remaining hypotheses are the ones no experiment has separated: the token budget
+beyond 1.60M, the data mixture, the initialization, and the possibility that
+Stage 3's teacher-forced offline objective cannot produce reasoning at this scale
+regardless of how it is weighted — which is what Stage 4/5 on-policy work exists
+to test.
 
 <details>
 <summary><b>Experiment 1 — recovery-data scaling (24 arms + compute control, $61.5)</b></summary>
@@ -282,7 +297,7 @@ AlphaAvatar-distill/
 ├── configs/                # stage recipes: stage0/ · stage1/ · stage3/recovery.json
 ├── data/                   # corpus manifests (jsonl gitignored, rebuildable)
 │   └── eval_behavior_v0/   #   76-prompt behavior set + manifest (both committed)
-├── tests/                  # 562 CPU tests, mirroring the source areas
+├── tests/                  # 766 CPU tests, mirroring the source areas
 ├── logs/                   # project memory — read STATE.md first
 │   ├── STATE.md            #   canonical handoff: a snapshot, not an archive
 │   ├── EXPERIMENTS.md      #   the consolidated record: what ran, results, cost
