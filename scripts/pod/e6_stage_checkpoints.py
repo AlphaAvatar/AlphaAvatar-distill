@@ -66,7 +66,12 @@ def main() -> None:
     ap.add_argument("--devbox-src", required=True, type=Path)
     ap.add_argument("--init", required=True, type=Path)
     ap.add_argument("--out", required=True, type=Path)
+    ap.add_argument("--stores", default="relay,devbox",
+                    help="comma-separated stores to stage in this pass; setup "
+                         "runs 'relay' while the dev-box upload is still in "
+                         "flight, and the launcher runs both once it lands")
     args = ap.parse_args()
+    stores = {s.strip() for s in args.stores.split(",") if s.strip()}
 
     reg = json.loads(args.registration.read_text())
     token = Path("/workspace/hf/token").read_text().strip() \
@@ -78,8 +83,17 @@ def main() -> None:
         if not arm["generate"]:
             continue                                   # re-scored, never staged
         store, ref = arm["source"]
+        if store not in stores:
+            continue
         dest = args.relay_dest / arm["run"] / "model"
-        if store == "relay":
+        # The launcher re-runs this over both stores after the dev-box upload
+        # lands, so an arm staged by setup is already here and correct. Re-check
+        # the bytes rather than the filename before skipping ~10 GB of copying.
+        already = ((dest / "model.safetensors").is_file()
+                   and sha256(dest / "model.safetensors") == arm["weights_sha256"])
+        if already:
+            print(f"  {alias:14s} {store:6s} already staged and verified", flush=True)
+        elif store == "relay":
             stage_relay(ref, dest, token)
         elif store == "devbox":
             stage_devbox(args.devbox_src / arm["run"], dest)
@@ -108,10 +122,13 @@ def main() -> None:
          "arms": manifest, "failures": failures}, indent=2) + "\n")
     if failures:
         sys.exit("CHECKPOINT HASH MISMATCH:\n  " + "\n  ".join(failures))
-    expected = sum(1 for a in reg["arms"].values() if a["generate"])
+    expected = sum(1 for a in reg["arms"].values()
+                   if a["generate"] and a["source"][0] in stores)
     if len(manifest) != expected:
-        sys.exit(f"staged {len(manifest)} arms, registration declares {expected}")
-    print(f"all {len(manifest)} evaluation checkpoints staged and hash-verified")
+        sys.exit(f"staged {len(manifest)} arms, registration declares {expected} "
+                 f"for stores {sorted(stores)}")
+    print(f"all {len(manifest)} {'/'.join(sorted(stores))} checkpoints staged "
+          "and hash-verified")
 
 
 if __name__ == "__main__":

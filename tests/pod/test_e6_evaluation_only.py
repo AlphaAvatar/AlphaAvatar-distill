@@ -110,6 +110,38 @@ def test_staging_only_stages_arms_the_registration_marks_for_generation():
         "the staged count must be reconciled against the registration"
 
 
+def test_setup_stages_relay_only_so_it_cannot_race_the_devbox_upload():
+    """A real race, caught before it cost anything.
+
+    The launcher uploads the two dev-box checkpoints in the background so 4.8 GB
+    overlaps `uv sync`. Setup therefore cannot verify them — a partial file is
+    present but wrong, and staging would exit on the hash. Setup stages `relay`
+    only; the launcher joins the upload and re-runs over both stores.
+    """
+    setup = SETUP.read_text()
+    launch = LAUNCH.read_text()
+    assert "--stores relay" in setup, \
+        "setup must stage relay checkpoints only; the dev-box upload is in flight"
+    # The launcher's own call must NOT restrict the stores, or the sb arms are
+    # never staged at all and half the seeds silently vanish.
+    call = launch[launch.index("e6_stage_checkpoints.py"):]
+    call = call[:call.index("|| {")]
+    assert "--stores" not in call, \
+        "the launcher must stage both stores; restricting it drops the sb arms"
+    assert "e6_checkpoint_manifest.json" in call, \
+        "the driver reads e6_checkpoint_manifest.json; the launcher must write it"
+    assert launch.index("wait \"$UPLOAD_PID\"") < launch.index("e6_stage_checkpoints.py"), \
+        "the upload must be joined before the full staging pass runs"
+
+
+def test_staging_reverifies_bytes_before_skipping_work():
+    """The second pass may skip a staged arm only after re-hashing it."""
+    src = STAGE.read_text()
+    block = src[src.index("already = ("):src.index("got = sha256")]
+    assert "sha256(dest" in block and 'arm["weights_sha256"]' in block, \
+        "a skip must be justified by the bytes on disk, not by the file existing"
+
+
 def test_launcher_budget_layers_are_all_present():
     src = LAUNCH.read_text()
     assert "securePrice" in src, "the price guard must read securePrice, not community"

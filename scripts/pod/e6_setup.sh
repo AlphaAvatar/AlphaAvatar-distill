@@ -187,17 +187,20 @@ sys.exit(0 if h == want else f'INIT HASH MISMATCH: {h}')
 "
 mark INIT_READY
 
-# Four arms come from the relay; two were scp'd from the dev box by the launcher
-# into /workspace/ckpt_local. Both routes end in the same place, dressed with the
-# same tokenizer files, and every weight file is checked against the hash the
-# registration pinned before any GPU existed.
-say "staging and hash-verifying all six evaluation checkpoints"
+# Only the FOUR relay arms are staged here. The other two exist only on the dev
+# box and are scp'd concurrently with this setup so 4.8 GB of transfer overlaps
+# `uv sync` instead of following it — which means they are not necessarily on
+# disk yet. Staging them here would race the upload and fail on a partial file,
+# so the launcher joins the upload and runs the same script again over all six.
+# `--stores relay` is what makes that split explicit rather than accidental.
+say "staging and hash-verifying the four relay checkpoints"
 /opt/train/bin/python "$REPO/scripts/pod/e6_stage_checkpoints.py" \
     --registration "$REPO/logs/e6_registration.json" \
     --relay-dest /workspace/ckpt \
     --devbox-src /workspace/ckpt_local \
+    --stores relay \
     --init /workspace/aad/artifacts/stage1/qwen3_0p6b_init_v0/checkpoint \
-    --out /workspace/aad/artifacts/audit/e6_checkpoint_manifest.json
+    --out /workspace/aad/artifacts/audit/e6_relay_checkpoints.json
 mark CKPT_READY
 
 say "checking the RoPE base resolves correctly in both venvs"
