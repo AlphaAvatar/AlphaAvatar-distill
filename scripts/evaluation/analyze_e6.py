@@ -220,6 +220,61 @@ def diagnostics(reg: dict) -> dict:
     return out
 
 
+def environment(provenance: dict) -> dict:
+    """What produced each arm's generations, read from its own report.
+
+    Recorded per arm rather than once for the run, because E6 deliberately mixes
+    two sessions and the whole point of the reuse rule is that the difference is
+    visible. If a library version or the harness command differs anywhere, it
+    shows up here rather than in a footnote.
+    """
+    out, seen = {}, {}
+    for alias, p in provenance.items():
+        report = Path(p["directory"]) / "report.json"
+        report = report if report.is_absolute() else REPO_ROOT / report
+        if not report.is_file():
+            continue
+        r = json.loads(report.read_text())
+        out[alias] = {
+            "session": p["session"],
+            "created_utc": r.get("created_utc"),
+            "command": r.get("command"),
+            "libraries": r.get("libraries"),
+            "code_state": r.get("code_state"),
+            "context": r.get("context"),
+            "decoding": r.get("decoding"),
+            "rung": r.get("rung"),
+            "inclusion": r.get("inclusion", {}).get("mask_sha256"),
+        }
+        key = json.dumps([r.get("libraries"), r.get("code_state", {}).get("git_commit"),
+                          r.get("context"), r.get("decoding")], sort_keys=True)
+        seen.setdefault(key, []).append(alias)
+    out["_distinct_environments"] = [
+        {"arms": sorted(v), "n": len(v)} for v in seen.values()]
+    return out
+
+
+def write_per_prompt(arms: dict, sessions: dict, path: Path) -> int:
+    """One scored record per (arm, prompt): the evidence behind every rate."""
+    path.parent.mkdir(parents=True, exist_ok=True)
+    n = 0
+    with path.open("w") as f:
+        for alias, m in sorted(arms.items()):
+            ps = m["per_sample"]
+            for pid in sorted(ps["usable"]):
+                f.write(json.dumps({
+                    "arm": alias, "id": pid,
+                    "data_type": sessions[pid]["data_type"],
+                    "usable_rollout": ps["usable"][pid],
+                    "correct": ps["correct"][pid],
+                    "natural_termination": ps["natural_termination"][pid],
+                    "context_limit": ps["context_limit"][pid],
+                    "generated_tokens": ps["generated_tokens"][pid],
+                }) + "\n")
+                n += 1
+    return n
+
+
 def arm_alias(family: str, seed: str) -> str:
     """`E1-1.60M` + `sa` -> `E1-1.60M-sa`; `E1-1.60M@E4` -> `E1-1.60M-sa@E4`.
 
@@ -338,6 +393,10 @@ def main() -> None:
     # under the gitignored `artifacts/` tree and on the dev-box store.
     ap.add_argument("--out", type=Path, default=REPO_ROOT / "logs/e6_results.json")
     ap.add_argument("--report", type=Path, default=REPO_ROOT / "logs/e6_report.md")
+    # 1,500 rows of raw evidence: too big for logs/, and it lives beside the
+    # generations it summarises under the gitignored artifacts tree.
+    ap.add_argument("--per-prompt", type=Path,
+                    default=AUDIT / "e6_per_prompt.jsonl")
     ap.add_argument("--bootstrap", type=int, default=10000)
     ap.add_argument("--examples", type=int, default=3)
     # Only so the whole pipeline can be exercised end-to-end against a scratch
@@ -443,6 +502,7 @@ def main() -> None:
         "missing_arms": missing,
         "families": families,
         "comparisons": comparisons,
+        "environment": environment(provenance),
         "diagnostics": diagnostics(reg),
         "session_replicate": session_replicate,
         "qualitative_examples": qualitative,
@@ -451,6 +511,8 @@ def main() -> None:
     args.out.parent.mkdir(parents=True, exist_ok=True)
     args.out.write_text(json.dumps(result, indent=2) + "\n")
     print(f"wrote {args.out}")
+    rows = write_per_prompt(arms, sessions, args.per_prompt)
+    print(f"wrote {args.per_prompt} ({rows} scored records)")
     if missing:
         print(f"  MISSING ARMS: {missing}")
 
@@ -490,6 +552,23 @@ def render(r: dict) -> str:
                  f"{m['severe_repetition_rate']:.4f} | {m['empty_output_rate']:.4f} | "
                  f"{'—' if pf is None else f'{pf:.4f}'} | "
                  f"{g['p50']} / {g['p90']} / {g['max']} |")
+    L += ["", "## By frozen evaluation subset", "",
+          "The battery's four partitions are `gsm8k`, `multihop_qa`, `openmath` and",
+          "`rag_evidence`, fixed by the corpus and identical for every arm. There is",
+          "**no `behavior` partition here** — that name belongs to the retired",
+          "76-prompt `eval_behavior_v0` wave, a different prompt population under a",
+          "different stop policy, and it has no counterpart on this battery. It is",
+          "absent rather than omitted.", "",
+          "| arm | subset | n | usable | correct | correct\\|usable | nat.term | ctx-limit |",
+          "| --- | --- | ---: | ---: | ---: | ---: | ---: | ---: |"]
+    for alias, m in r["arms"].items():
+        for task, t in m["by_task"].items():
+            cgu = t["correct_given_usable"]
+            L.append(f"| {alias} | {task} | {t['n']} | {t['usable_rollout_rate']:.4f} | "
+                     f"{t['correct_overall']:.4f} | "
+                     f"{'—' if cgu is None else f'{cgu:.4f}'} | "
+                     f"{t['natural_termination_rate']:.4f} | "
+                     f"{t['context_limit_rate']:.4f} |")
     L += ["", "## Paired comparisons on the shared mask", ""]
     for name, c in r["comparisons"].items():
         L.append(f"### {name}")
