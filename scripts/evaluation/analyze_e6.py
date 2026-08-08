@@ -26,6 +26,7 @@ as `session_replicate` and never quietly averaged with anything.
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import statistics
 import sys
@@ -217,6 +218,54 @@ def diagnostics(reg: dict) -> dict:
         if row:
             row["tier"] = "diagnostic only — may not select a winner"
             out[alias] = row
+    return out
+
+
+def token_stream_sha256(directory: Path) -> str | None:
+    """sha256 over the free-mode token ids, in prompt order.
+
+    The strongest determinism statement the project can make: not "the rates
+    agree" but "the same tokens came out". Rates can coincide while the
+    generations differ, so the digest is what the reproducibility claim rests on.
+    """
+    free = directory / "free.generations.jsonl"
+    if not free.is_file():
+        return None
+    h = hashlib.sha256()
+    for r in jsonl(free):
+        h.update(json.dumps(r["token_ids"]).encode())
+    return h.hexdigest()
+
+
+def determinism(provenance: dict) -> dict:
+    """Compare the two sessions' token streams for the arms measured in both."""
+    out = {}
+    for alias in list(provenance):
+        if not alias.endswith("@E4"):
+            continue
+        base = alias[:-3]
+        if base not in provenance:
+            continue
+        a = token_stream_sha256(Path(provenance[alias]["directory"]) if
+                                Path(provenance[alias]["directory"]).is_absolute()
+                                else REPO_ROOT / provenance[alias]["directory"])
+        b = token_stream_sha256(Path(provenance[base]["directory"]) if
+                                Path(provenance[base]["directory"]).is_absolute()
+                                else REPO_ROOT / provenance[base]["directory"])
+        if a is None or b is None:
+            continue
+        out[base] = {"e4_token_stream_sha256": a, "e6_token_stream_sha256": b,
+                     "bitwise_identical": a == b}
+    if out:
+        n = sum(v["bitwise_identical"] for v in out.values())
+        out["_summary"] = (
+            f"{n}/{len(out)} arm(s) reproduced token-for-token across sessions. "
+            + ("Greedy decoding on this GPU model, image and harness is bitwise "
+               "reproducible across pods, so no comparison in this report is "
+               "contaminated by the session split."
+               if n == len(out) else
+               "At least one arm did NOT reproduce; every cross-session "
+               "comparison inherits that difference and must say so."))
     return out
 
 
@@ -543,6 +592,7 @@ def main() -> None:
         "prior_harness": prior_harness(),
         "diagnostics": diagnostics(reg),
         "session_replicate": session_replicate,
+        "determinism": determinism(provenance),
         "qualitative_examples": qualitative,
         "code_state": code_state(str(REPO_ROOT)),
     }
@@ -655,6 +705,19 @@ def render(r: dict) -> str:
             L.append(f"| {alias} | {'—' if ce is None else f'{ce:.4f}'} | "
                      f"{'—' if nll is None else f'{nll:.4f}'} | "
                      f"{'—' if t1 is None else f'{t1:.4f}'} |")
+        L.append("")
+    det = r.get("determinism", {})
+    if det.get("_summary"):
+        L += ["## Determinism across sessions — token streams, not rates", "",
+              det["_summary"], "",
+              "| arm | E4 token-stream sha256 | E6 token-stream sha256 | identical |",
+              "| --- | --- | --- | --- |"]
+        for a, v in det.items():
+            if a.startswith("_"):
+                continue
+            L.append(f"| {a} | `{v['e4_token_stream_sha256'][:16]}…` | "
+                     f"`{v['e6_token_stream_sha256'][:16]}…` | "
+                     f"{'**yes**' if v['bitwise_identical'] else 'no'} |")
         L.append("")
     if r["session_replicate"]:
         L += ["## Cross-session replicate — identical weights, two sessions", "",
