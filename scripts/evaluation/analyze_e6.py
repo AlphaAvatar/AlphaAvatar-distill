@@ -602,13 +602,32 @@ def render(r: dict) -> str:
                      f"{'—' if t1 is None else f'{t1:.4f}'} |")
         L.append("")
     if r["session_replicate"]:
-        L += ["## Cross-session replicate — identical weights, two sessions", ""]
+        L += ["## Cross-session replicate — identical weights, two sessions", "",
+              "The same `e1_r1600k_{sa,sb}_pca` weights, the same frozen battery and",
+              "the same harness, measured once in the E4 session and once in E6. This",
+              "is the only thing that bounds how much of a cross-session comparison is",
+              "the model and how much is the session.", ""]
+        worst_u = worst_c = 0.0
         for s, c in r["session_replicate"].items():
+            worst_u = max(worst_u, abs(c["usable"]["delta"]))
+            worst_c = max(worst_c, abs(c["correct"]["delta"]))
             L.append(f"* E1-1.60M-{s}: usable {c['usable']['rate_a']:.4f} (E4) → "
                      f"{c['usable']['rate_b']:.4f} (E6), Δ {c['usable']['delta']:+.4f}; "
                      f"correct {c['correct']['rate_a']:.4f} → {c['correct']['rate_b']:.4f}, "
                      f"Δ {c['correct']['delta']:+.4f}")
-        L.append("")
+        fu, fc = r["floors"]["usable_rollout_rate"], r["floors"]["correct_overall"]
+        L += ["", f"**Largest session difference: {worst_u:.4f} usable, {worst_c:.4f} "
+              f"correct** (floors {fu:.4f} / {fc:.4f}).",
+              "", ("Both sit inside their floors, so the cross-session anchor "
+                   "comparisons — the 2.96M and 5.50M rungs against P2-1.60M — are not "
+                   "materially contaminated by the session split."
+                   if worst_u < fu and worst_c < fc else
+                   "**At least one exceeds its floor.** Any comparison that crosses the "
+                   "session boundary — every E1 high rung against the P2-1.60M anchor — "
+                   "carries at least this much uncertainty on top of its own interval, "
+                   "and must not be read as a clean model-to-model difference. The E1 "
+                   "scale curve is unaffected: all three rungs were measured in the E6 "
+                   "session."), ""]
     return "\n".join(L) + "\n"
 
 

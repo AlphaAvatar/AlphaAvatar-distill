@@ -676,6 +676,29 @@ revisions**. P0-assistant's weights were already lost to the same class of
 problem. Every Stage 2/3 candidate that still has weights now has a verified local
 copy.
 
+### `e1_r5500k_sa_pca` — digest recorded 2026-08-08, at E6 preflight
+
+The 2026-08-05 sweep recorded relay LFS digests for eight E1 arms; the 5.50M `sa`
+pair was not among them, so the top rung of the PCA curve had **no recorded
+weight hash anywhere** — not locally, not in `relay_e1_digests.json`, and not in
+its own `pod_hashes.txt`, which was never retained for the relay-only arms.
+
+Recorded now, from the relay's LFS metadata and independently confirmed by
+recomputation on the E6 pod after download:
+
+| arm | path | size | sha256 |
+| --- | --- | ---: | --- |
+| `e1_r5500k_sa_pca` | `e1_scaling_20260801/e1_r5500k_sa_pca/step_004412/model/model.safetensors` | 2,384,234,968 | `3069b329df3edfbd5edc0356516cd06ee7f02fe59663c19df7b30ef6acd8e397` |
+
+**Provenance boundary, stated rather than papered over.** This digest pins the
+bytes the relay holds at the canonical Experiment 1 path, step and size, and E6
+evaluated exactly those bytes. It is **not** an independent attestation from the
+training pod, because none was retained for this arm — unlike the four
+`rescued/` arms, whose `pod_hashes.txt` was written before transfer. A future
+session should treat it as "the artifact the relay published" rather than "the
+artifact the trainer wrote", and the two are only known to coincide by the
+absence of any event that would separate them.
+
 ## Experiment 3 outputs and checkpoints (2026-08-05)
 
 Pod `94slla57nnqjqa` (L40S secure, $0.99/h) deleted after transfer and
