@@ -1,71 +1,86 @@
 **Updated:** 2026-08-08 · branch `main` · **no pods running, nothing billing.**
-**Experiment 5 is complete.** Ten paid events, **$11.64**; project total
-**$138.52**. 766 CPU tests pass.
+**Experiment 6 is complete.** Four paid events, **$2.36**; project total
+**$141.91** of the **$143.02** cap. 834 CPU tests pass.
 
-## E5 COMPLETE — AND NEITHER CONTINUATION RECIPE IS ADOPTED
+## E6 COMPLETE — THE BEST CHECKPOINT CHANGED
 
-Two findings, and the second matters more than the first.
-
-**1. Teacher-prefix continuation (C) beats student-prefix recovery (R) decisively
-on behaviour.** usable_rollout 0.7667 vs 0.4467, Δ −0.3200 — four times the
-0.0800 floor, both seeds, every component, paired bootstrap CIs excluding zero.
-Correctness is indistinguishable (0.1300 vs 0.1100, inside the 0.0600 floor).
-
-**2. Neither arm beats simply training the next rung.** Against the matched-CE
-anchor P2-1.60M, C *ties* on behaviour (0.7667 vs 0.7333, inside the floor,
-neither paired CI excluding zero) and **appears to cost correctness** (0.1300 vs
-0.2000, above the floor, same direction on both seeds, `sa`'s CI excluding zero).
-R is worse than not continuing at all: −0.0866 usable and −0.0800 correct against
-its own starting point.
-
-**→ `e4_p2_r1600k_{sa,sb}` (P2-1.60M) remains the best checkpoint and the start
-point for Stage 4/5.** Decision record:
+**`e1_r2960k_{sa,sb}_pca` (E1 PCA 2.96M) is now the best checkpoint the project
+has evaluated**, displacing `e4_p2_r1600k_{sa,sb}`. Decision record:
 [`decisions.md`](decisions.md) 2026-08-08.
 
-**Why R fails, which is the reusable part.** Every R target is a teacher recovery
-conditioned on a student prefix, so the recipe supervises *continuation* and never
-*closure from a cold start*. R's median rollout is 6,362–6,692 tokens against C's
-513–562; it hits the 8,192 context limit on >50% of prompts; of ~77 empty answers
-per seed exactly **one** terminated naturally. In oracle mode, with the reasoning
-supplied, R scores 0.59–0.61 with zero empties — the model is intact and simply
-cannot stop.
+E6 was evaluation-only — nothing trained, no checkpoint written or modified,
+proven by AST over every executed script. It put the original Experiment 1 PCA
+scale curve onto the frozen 150-prompt unrestricted protocol for the first time;
+the high rungs had only ever been scored on the retired 76-prompt wave with the
+degeneration stop active.
 
-**Claim boundary (registered).** Evaluation is paired on the frozen 150-prompt
-battery, but training composition is not identical — C 963/989 bundles, R 603/672
-nested inside C — because matching the CE budget forces different counts when R's
-continuations run 1.66–1.76× longer. E5 compares complete **recipes** under a
-matched supervised-token budget; it does not isolate prefix state, and the paired
-statistics preserve paired *evaluation* only.
+**The lineage improves from 1.60M to 2.96M and then plateaus.**
 
-**Lost:** the four E5 checkpoints. The launcher fetched `step_000738`, a constant
-from the superseded 492-block design, while the real tag was `step_001356`. Fixed
-to derive the tag from the feasibility report; re-evaluating either arm would need
-retraining.
-
-## THE STANDING PICTURE ACROSS EXPERIMENTS 1–5
-
-| checkpoint | tokens | usable rollout | correct | correct \| usable |
+| checkpoint | unique / cumulative CE tokens | usable rollout | correct | correct \| usable |
 | --- | ---: | ---: | ---: | ---: |
-| P1 / P2 at 0.86M | 860,000 | 0.5133–0.5933 | 0.1533–0.2133 | 0.2727–0.3590 |
-| P1-1.60M | 1,600,353 | 0.7300 | 0.1867 | 0.2511 |
-| **P2-1.60M** | 1,600,353 | **0.7333** | **0.2000** | 0.2682 |
-| E5-C | 1,595,603 | 0.7667 | 0.1300 | 0.1652 |
-| E5-R | 1,595,603 | 0.4467 | 0.1100 | 0.2463 |
+| P1 / P2 at 0.86M | 860,000 / 2.58M | 0.5133–0.5933 | 0.1533–0.2133 | 0.2727–0.3590 |
+| E1-1.60M (= P1) | 1,600,353 / 4.80M | 0.7300 | 0.1867 | 0.2511 |
+| P2-1.60M | 1,600,353 / 4.80M | 0.7333 | 0.2000 | 0.2682 |
+| **E1-2.96M** | 2,960,507 / 8.88M | **0.8400** | **0.2067** | 0.2460 |
+| E1-5.50M | 5,501,372 / 16.50M | 0.8500 | 0.1767 | 0.2039 |
+| E5-C | 1,595,603 / — | 0.7667 | 0.1300 | 0.1652 |
+| E5-R | 1,595,603 / — | 0.4467 | 0.1100 | 0.2463 |
 
 One frozen 150-prompt battery, mask `d6e24e0b…`, greedy, unrestricted generation
-(P18). Floors: usable 0.0800, correctness 0.0600.
+(P18), every arm re-scored from raw generations. Floors: usable 0.0800,
+correctness 0.0600.
 
-**Behaviour moves; reasoning does not.** Six interventions have now been tried —
+**What is claimable, and what is not.**
+
+* **2.96M beats 1.60M on behaviour: +0.1100**, above the floor, same direction on
+  both seeds. **5.50M beats 1.60M: +0.1200.** **5.50M vs 2.96M: +0.0100**, inside
+  the floor with the seeds disagreeing — a **tie**.
+* **2.96M beats the P2-1.60M anchor by +0.1067** usable rollout, above the floor
+  and seed-consistent, while tying on correctness (+0.0067).
+* **No correctness comparison anywhere in E6 is both above its floor and
+  seed-consistent.** Correctness has still never moved.
+* 2.96M is preferred over 5.50M by the registered tie-break — correctness may
+  break a tie between behaviour-comparable candidates — leading 0.2067 vs 0.1767
+  on both seeds, at half the tokens.
+* **No arm passed a Stage 2/3 gate**, because no prospectively registered gate
+  exists. E6 ranks; it does not certify.
+
+**What changed is termination, not reasoning.** Context-limit hits fall from
+28/44 prompts at 1.60M to 19/23 at 2.96M; numeric answer-parse failure falls from
+0.17/0.24 to 0.03/0.13. GSM8K usable rollout rises 0.71 → 0.92 while GSM8K
+correctness stays at **0.00–0.01**. The higher rungs learn to finish a maths
+problem, not to solve one. The residual failure is **silence**: `non_empty` is the
+largest failure bucket at every rung and barely moves (≈1 prompt in 8).
+
+**After 2.96M, only the diagnostics move.** Teacher-native CE falls monotonically
+(1.298 → 1.148 → 1.004) and teacher-forced reasoning top-1 rises (0.596 → 0.618 →
+0.639) across all three rungs, while behaviour stops improving and correctness
+never starts. This is the sharpest CE/behaviour dissociation on record here, and
+the reason those metrics may not select a checkpoint.
+
+**The harness is bitwise reproducible across sessions.** `e1_r1600k_{sa,sb}_pca`
+was measured in the E4 session and again in E6, on a different host two days
+later, and reproduced **token for token** — 150/150 identical token-id sequences
+on both seeds, matching sha256. The standing "same session, same GPU" rule came
+from CPU-vs-L40S differences and is restated as **same device, image, engine
+version and harness commit**; session identity is not itself a requirement
+([`decisions.md`](decisions.md) 2026-08-08).
+
+**Behaviour moves; reasoning does not.** Seven interventions have now been tried —
 more recovery data, held-out-NLL selection, assistant-only KD, CE/KD reweighting,
-restricted attention, and two continuation recipes — and the only one that moved
-autonomous rollout stability materially was **token scale** (+0.2000 from 0.86M to
-1.60M, both seeds, CIs excluding zero). Correctness has stayed in 0.11–0.20
-throughout, and `correct_given_usable` **falls** as stability rises: 0.3258 →
-0.2682 → 0.1652. Each intervention that makes more rollouts well-formed makes them
-well-formed and wrong.
+restricted attention, two continuation recipes, and now the full token-scale curve
+— and the only lever that has ever moved autonomous rollout stability is **token
+scale**: +0.2000 from 0.86M to 1.60M, and +0.1100 again from 1.60M to 2.96M.
+Correctness has stayed in 0.11–0.21 throughout every one of them.
+
+**Open, not decided:** whether the planned E7 FineWeb experiment changes in light
+of this. E6 states the implication and stops there — that is a separate decision.
 
 Full records: E3 [§20](EXPERIMENTS.md), E4 [§21](EXPERIMENTS.md), E5
-[§27](EXPERIMENTS.md).
+[§27](EXPERIMENTS.md), **E6 [§28](EXPERIMENTS.md)**; report
+[`logs/e6_report.md`](e6_report.md), machine-readable
+[`logs/e6_results.json`](e6_results.json), registration
+[`logs/e6_registration.json`](e6_registration.json).
 
 ## NO EXISTING MODEL HAS YET COMPLETED THE STAGE 2/3 OBJECTIVE
 

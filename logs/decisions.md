@@ -1359,3 +1359,74 @@
   recipes under a matched token budget; it does not isolate prefix state.
 - **Revisit when:** Stage 4/5 on-policy work needs a mid-trajectory objective, or
   a future experiment supervises trajectory closure explicitly.
+
+## 2026-08-08 — E1-2.96M displaces P2-1.60M as the best evaluated checkpoint
+
+- **Context:** Experiment 6 put the E1 PCA scale curve (1.60M, 2.96M, 5.50M, two
+  seeds each) onto the frozen 150-prompt unrestricted protocol for the first
+  time. The high rungs had only ever been measured on the retired 76-prompt
+  behaviour wave with the degeneration stop active — a different prompt
+  population under a stop policy that changes the termination and context-limit
+  components outright. Evaluation only; nothing trained.
+- **Decision:** **`e1_r2960k_{sa,sb}_pca` replaces `e4_p2_r1600k_{sa,sb}` as the
+  best checkpoint the project has evaluated**, and is the start point to consider
+  for Stage 4/5 work. This **supersedes the decision taken earlier the same day**
+  that P2-1.60M stands — that decision was correct on the evidence then
+  available, which did not include any measurement of the high rungs on this
+  harness.
+- **Evidence:** usable rollout 0.8400 against P2-1.60M's 0.7333, **+0.1067**
+  paired, above the 0.0800 floor and in the same direction on both seeds
+  (+0.1400 sa with its CI excluding zero, +0.0733 sb). Correctness ties:
+  +0.0067, well inside the 0.0600 floor. Against its own lineage at 1.60M it is
+  +0.1100 usable, again above the floor and seed-consistent.
+- **Why 2.96M and not 5.50M:** they are **tied** on the primary axis (+0.0100,
+  inside the floor, seeds disagreeing), so the registered tie-break applies —
+  correctness may break a tie between behaviour-comparable candidates. 2.96M
+  leads on `correct_overall` (0.2067 vs 0.1767) and `correct_given_usable`
+  (0.2460 vs 0.2039), same direction on both seeds. It also costs half the
+  supervised tokens and 66% of the optimizer steps. Choosing 5.50M would pay
+  double for a behavioural tie and a correctness point in the wrong direction.
+- **Alternatives considered:** keeping P2-1.60M for continuity — rejected, the
+  gap is above the floor and seed-consistent on the axis the hierarchy calls
+  primary; promoting 5.50M on its 0.8500 point estimate — rejected, the paired
+  test says tied and the tie-break goes the other way.
+- **Not claimed:** that any arm passed a Stage 2/3 gate. **No prospectively
+  registered gate exists**, and none may be invented now. E6 ranks candidates on
+  the registered hierarchy; it does not certify one. Nor is this a correctness
+  result: **no correctness comparison anywhere in E6 is both above its floor and
+  seed-consistent.**
+- **Risks:** n=2 seeds. The 150 evaluation prompts are training prompts for every
+  arm — exposure is identical across rungs (3 epochs each, so exactly 3 passes
+  per prompt) and the comparison is fair, but it measures recall-style autonomous
+  behaviour rather than held-out generalization. Rung and optimizer steps scale
+  together, so "more data" is not separated from "more steps".
+- **Revisit when:** a held-out battery is available, or a prospectively
+  registered behaviour gate is proposed.
+
+## 2026-08-08 — The same-session rule is about devices, not sessions
+
+- **Context:** the 2026-07-27 comparability rule ("every checkpoint in a
+  comparison is scored in the same session on the same GPU") was measured from
+  **CPU dev box vs L40S** differences, which moved aggregates by 1–5 points. It
+  has since been applied as though session identity itself were the risk, and it
+  is what drove E6 to regenerate its 1.60M rung rather than reuse a perfectly
+  good measurement.
+- **Decision:** restate the rule in terms of what was actually measured. Compare
+  only across a **fixed device, image, engine version and harness commit**;
+  session identity is not itself a requirement. Reuse of retained generations is
+  legitimate when those four agree and the raw generations are complete.
+- **Evidence:** `e1_r1600k_{sa,sb}_pca` was evaluated in the E4 session and again
+  in E6, on a different physical host two days later, and reproduced **token for
+  token** — 150/150 identical token-id sequences and identical decoded text on
+  both seeds, identical sha256 over each free-mode stream. Every rate agreed to
+  the digit.
+- **Consequence:** E6's cross-session comparisons carry no session penalty, and
+  future experiments may re-score retained artifacts instead of paying to
+  regenerate a control — which for E6 would have saved ~18 minutes of GPU and,
+  more importantly, would have been the right call rather than a lucky one.
+- **Boundary:** this is a statement about **greedy** decoding on **one GPU model**
+  with a pinned image. It says nothing about sampling, about a different card, or
+  about a different vLLM version — bf16 decoding is still not batch-invariant,
+  and the CPU-vs-GPU finding stands unchanged.
+- **Revisit when:** the engine version, image or GPU model changes, or a sampled
+  (non-greedy) protocol is introduced.

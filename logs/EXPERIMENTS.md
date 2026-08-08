@@ -7,11 +7,12 @@ proposal files, which are preserved in git history at commit `866dac2`.
 32Q/8KV) → **student** 0.6B-class (1024 hidden, 28L, FFN 3072, 16Q/8KV, tied
 embeddings). BF16 training, INT8 deployment target.
 
-**Total spend to date: $127.91** of the **$130.02** cap — **$2.11 remains and
-nothing further is authorized.** The cap rose from $126.02 on 2026-08-05 when the
-maintainer added **$4.00** for E4 after the registered projection was reported as
-exceeding the $2.94 remainder; the experiment was **not** reduced to fit, and it
-came in at **$4.83** against the $6.94 available.
+**Total spend to date: $141.91** of the **$143.02** cap — **$1.11 remains and
+nothing further is authorized.** The cap history: $126.02, then **+$4.00** for E4
+on 2026-08-05 ($130.02), then **+$11.50** for E5 across four top-ups during its
+eight attempts ($141.52), then **+$1.50** for E6 on 2026-08-08 ($143.02). No
+experiment was reduced to fit a remainder; each shortfall was reported with its
+expected and pessimistic cost and the scientific cost of the cheaper option.
 
 | period | $ | detail |
 |---|---:|---|
@@ -24,14 +25,16 @@ came in at **$4.83** against the $6.94 available.
 | P2-ceheavy | 2.88 | §18 — 174.6 min on an L40S |
 | Experiment 3, attention restriction | 5.76 | §20 — 349 min on an L40S, four arms |
 | Experiment 4, P2 at the 1.60M rung | 4.83 | §21 — 290 min on an L40S + $0.05 failed pod |
-| **itemized subtotal** | **126.88** | |
+| Experiment 5, continuation vs recovery | 11.64 | §22–27 — ten paid events, eight of which produced no result |
+| Experiment 6, high-rung normalization | 2.36 | §28 — 130 min on an L40S + $0.22 across three pods killed early |
+| **itemized subtotal** | **140.88** | |
 
-**Unreconciled: $1.03.** The itemized rows sum to $126.88 while the verified
-running total is **$127.91**. The difference is not
+**Unreconciled: $1.03.** The itemized rows sum to $140.88 while the verified
+running total is **$141.91**. The difference is not
 attributed to any session here, so the **larger** figure is used for every
 remaining-budget decision. Do not "fix" this by deleting the gap.
 
-**$2.11 of the authorized total is unspent.** §6 below is the
+**$1.11 of the authorized total is unspent.** §6 below is the
 *pre-Experiment-1* breakdown and its "project total" line is scoped to that
 period; this table is the current figure.
 
@@ -3682,3 +3685,275 @@ sequential cosine runs against one). Cumulative CE tokens match to 0.3%; nothing
 else is controlled. The honest reading is that these are two ways of spending
 ~1.6M cumulative supervised tokens, and the cheaper, simpler one is at least as
 good on behaviour and possibly better on correctness.
+
+---
+
+## 28. Experiment 6 — the E1 PCA scale curve, normalized onto the frozen battery (2026-08-08, $2.36)
+
+> **STATUS: COMPLETE.** Evaluation only — nothing trained, no checkpoint written,
+> merged, quantized or overwritten, proven by AST over every executed script
+> (`artifacts/audit/e6_notrain_proof.json`). Registered before any GPU existed in
+> [`logs/e6_registration.json`](e6_registration.json).
+>
+> **Verdict. The original PCA lineage improves from 1.60M to 2.96M and then
+> plateaus.** Usable rollout +0.1100 at 2.96M and +0.1200 at 5.50M against
+> 1.60M — both above the 0.0800 floor, both seed-consistent — while 5.50M against
+> 2.96M is +0.0100, inside the floor, with the seeds disagreeing. **Correctness
+> never moves**: every correctness comparison in the experiment is inside the
+> 0.0600 floor.
+>
+> **`e1_r2960k_{sa,sb}_pca` is the best checkpoint this project has evaluated.**
+> It beats the standing P2-1.60M anchor by **+0.1067** usable rollout, above the
+> floor and in the same direction on both seeds, while tying it on correctness
+> (+0.0067). **This supersedes the 2026-08-08 decision that P2-1.60M is the best
+> checkpoint** — that decision was taken when the high rungs had never been run
+> through this harness.
+
+### 28.1 Headline
+
+150 fixed examples, inclusion mask `d6e24e0b…` asserted on all eight arms,
+greedy, unrestricted generation (P18). Every arm re-scored from raw generations
+with the current scorer; no stored `correct`/`usable`/termination field was
+carried in.
+
+| model | CE exposure (unique / cumulative) | seed | usable | correct | correct \| usable |
+| --- | ---: | --- | ---: | ---: | ---: |
+| E1 PCA 1.60M | 1,600,353 / 4,801,059 | sa | 0.7800 | 0.1733 | 0.2222 |
+| E1 PCA 1.60M | 1,600,353 / 4,801,059 | sb | 0.6800 | 0.2000 | 0.2843 |
+| **E1 PCA 1.60M** | | **mean** | **0.7300** | **0.1867** | 0.2511 |
+| E1 PCA 2.96M | 2,960,507 / 8,881,521 | sa | 0.8533 | 0.2133 | 0.2500 |
+| E1 PCA 2.96M | 2,960,507 / 8,881,521 | sb | 0.8267 | 0.2000 | 0.2419 |
+| **E1 PCA 2.96M** | | **mean** | **0.8400** | **0.2067** | 0.2460 |
+| E1 PCA 5.50M | 5,501,372 / 16,504,116 | sa | 0.8467 | 0.2067 | 0.2362 |
+| E1 PCA 5.50M | 5,501,372 / 16,504,116 | sb | 0.8533 | 0.1467 | 0.1719 |
+| **E1 PCA 5.50M** | | **mean** | **0.8500** | **0.1767** | 0.2039 |
+| P2 1.60M | 1,600,353 / 4,801,059 | sa | 0.7133 | 0.2333 | 0.3178 |
+| P2 1.60M | 1,600,353 / 4,801,059 | sb | 0.7533 | 0.1667 | 0.2212 |
+| **P2 1.60M** | | **mean** | **0.7333** | **0.2000** | 0.2682 |
+
+"Unique" is the rung's supervised-token count; "cumulative" is 3× that, because
+every arm trains 3 epochs. The two must not be confused, and neither is a free
+variable separable from optimizer steps — see §28.6.
+
+### 28.2 Paired comparisons on the shared mask
+
+Floors carried unchanged from the E3/E4/E5 registry: usable **0.0800**,
+correct_overall **0.0600**. `*` marks a bootstrap interval excluding zero.
+
+| comparison | axis | sa | sb | pooled | verdict |
+| --- | --- | ---: | ---: | ---: | --- |
+| 2.96M vs 1.60M | usable | +0.0733 | +0.1467 `*` | **+0.1100** | above floor, seed-consistent |
+| 2.96M vs 1.60M | correct | +0.0400 | +0.0000 | +0.0200 | inside floor |
+| 5.50M vs 1.60M | usable | +0.0667 | +0.1733 `*` | **+0.1200** | above floor, seed-consistent |
+| 5.50M vs 1.60M | correct | +0.0333 | −0.0533 | −0.0100 | inside floor, seeds disagree |
+| 5.50M vs 2.96M | usable | −0.0067 | +0.0267 | +0.0100 | inside floor, seeds disagree |
+| 5.50M vs 2.96M | correct | −0.0067 | −0.0533 | −0.0300 | inside floor |
+| 2.96M vs P2-1.60M | usable | +0.1400 `*` | +0.0733 | **+0.1067** | above floor, seed-consistent |
+| 2.96M vs P2-1.60M | correct | −0.0200 | +0.0333 | +0.0067 | inside floor |
+| 5.50M vs P2-1.60M | usable | +0.1333 `*` | +0.1000 `*` | **+0.1167** | above floor, both CIs exclude 0 |
+| 5.50M vs P2-1.60M | correct | −0.0267 | −0.0200 | −0.0234 | inside floor |
+| 1.60M vs P2-1.60M | usable | +0.0667 | −0.0733 | −0.0033 | inside floor, seeds disagree |
+| 1.60M vs P2-1.60M | correct | −0.0600 | +0.0333 | −0.0133 | inside floor, seeds disagree |
+
+Prompt-level win/tie/loss for the two comparisons that carry the result:
+2.96M over 1.60M gains 21 and loses 10 on `sa`, gains 34 and loses 12 on `sb`;
+2.96M over P2-1.60M gains 28 and loses 7 on `sa`, 24 and 13 on `sb`.
+
+### 28.3 Components and raw counts
+
+| arm | usable/150 | correct/150 | correct/usable | protocol | nat.term | ctx-limit | repetition | empty | numeric parse-fail | tokens p50 / p90 |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| E1-1.60M-sa | 117 | 26 | 26/117 | 0.7800 | 0.8133 | 0.1867 | 0.1867 | 0.1400 | 0.1733 | 576 / 8117 |
+| E1-1.60M-sb | 102 | 30 | 29/102 | 0.6933 | 0.7067 | 0.2933 | 0.3067 | 0.2200 | 0.2400 | 616 / 8119 |
+| E1-2.96M-sa | 128 | 32 | 32/128 | 0.8733 | 0.8733 | 0.1267 | 0.1467 | 0.1200 | 0.0267 | 585 / 8098 |
+| E1-2.96M-sb | 124 | 30 | 30/124 | 0.8333 | 0.8467 | 0.1533 | 0.1600 | 0.1267 | 0.1333 | 586 / 8105 |
+| E1-5.50M-sa | 127 | 31 | 30/127 | 0.8533 | 0.8533 | 0.1467 | 0.1533 | 0.1333 | 0.0267 | 574 / 8063 |
+| E1-5.50M-sb | 128 | 22 | 22/128 | 0.8533 | 0.8533 | 0.1467 | 0.1467 | 0.1133 | 0.1067 | 580 / 8039 |
+| P2-1.60M-sa | 107 | 35 | 34/107 | 0.7133 | 0.7467 | 0.2533 | 0.2533 | 0.2333 | 0.1200 | 566 / 8123 |
+| P2-1.60M-sb | 113 | 25 | 25/113 | 0.7600 | 0.7867 | 0.2133 | 0.2200 | 0.1933 | 0.1333 | 731 / 8108 |
+
+**What actually changed is termination.** Context-limit hits fall from 28/44
+prompts at 1.60M to 19/23 at 2.96M and 22/22 at 5.50M; repetition tracks it
+almost exactly, as it has in every prior measurement. Numeric answer-parse
+failure falls from 0.1733/0.2400 to 0.0267/0.1333 — the higher rungs emit a
+recognisable final answer far more often.
+
+**The residual failure is silence, not malformation.** In the first-failure
+census `non_empty` is the largest bucket at every rung and barely moves:
+21/33 prompts at 1.60M, 18/19 at 2.96M, 20/17 at 5.50M. Roughly one prompt in
+eight still produces no answer at all, and more data does not fix it.
+
+### 28.4 By frozen evaluation subset (family means)
+
+| family | gsm8k usable / correct | multihop usable / correct | openmath usable / correct | rag usable / correct |
+| --- | ---: | ---: | ---: | ---: |
+| E1-1.60M | 0.7106 / 0.0000 | 0.8158 / 0.2369 | 0.4189 / 0.0135 | 0.9730 / 0.5000 |
+| E1-2.96M | 0.9079 / 0.0132 | 0.9343 / 0.2369 | 0.5675 / 0.0135 | 0.9460 / 0.5676 |
+| E1-5.50M | 0.9211 / 0.0132 | 0.8552 / 0.1184 | 0.6622 / 0.0000 | 0.9594 / 0.5811 |
+| P2-1.60M | 0.7237 / 0.0000 | 0.8158 / 0.1842 | 0.4189 / 0.0135 | 0.9729 / 0.6081 |
+
+**GSM8K usable rollout rises from 0.71 to 0.92 while GSM8K correctness stays at
+0.00–0.01.** The same holds on `openmath` (0.42 → 0.66 usable, correctness at
+floor). The higher rungs learn to finish a maths problem and not to solve one.
+
+There is **no `behavior` partition** on this battery — that name belongs to the
+retired 76-prompt `eval_behavior_v0` wave. It is absent, not omitted.
+
+### 28.5 Diagnostics — they move, and they keep moving after behaviour stops
+
+| arm | teacher-native val CE | teacher-forced reasoning top-1 | FineWeb holdout NLL |
+| --- | ---: | ---: | ---: |
+| E1-1.60M sa / sb | 1.2952 / 1.3015 | 0.5976 / 0.5940 | 9.7145 / 9.4845 |
+| E1-2.96M sa / sb | 1.1468 / 1.1486 | 0.6152 / 0.6213 | 10.4031 / — |
+| E1-5.50M sa / sb | 1.0032 / 1.0052 | 0.6403 / 0.6389 | 10.7875 / 9.4548 |
+| P2-1.60M sa / sb | 1.3112 / 1.3140 | 0.5815 / 0.5818 | — |
+
+CE falls monotonically (1.298 → 1.148 → 1.004) and teacher-forced reasoning top-1
+rises monotonically (0.596 → 0.618 → 0.639) across all three rungs. **Behaviour
+stops improving after 2.96M and correctness never improves at all.** From 2.96M
+to 5.50M the diagnostics are the *only* thing that moves — which is the sharpest
+statement of the CE/behaviour dissociation the project has recorded, and the
+reason these metrics may not select a checkpoint. `e1_r2960k_sb_pca`'s FineWeb
+NLL was never measured in Experiment 1 and is reported absent rather than
+imputed.
+
+### 28.6 Determinism — token streams, not agreeing rates
+
+`e1_r1600k_{sa,sb}_pca` was measured in the E4 session and again in E6, on a
+**different physical host two days later**, and reproduced **token for token**:
+
+| arm | E4 token-stream sha256 | E6 token-stream sha256 | identical |
+| --- | --- | --- | --- |
+| E1-1.60M-sa | `045bc96f93c86cb3…` | `045bc96f93c86cb3…` | **yes** (150/150) |
+| E1-1.60M-sb | (matching) | (matching) | **yes** (150/150) |
+
+150/150 identical token-id sequences and identical decoded text on both seeds;
+every rate agrees to the digit. This is a stronger claim than matching
+percentages, which can coincide while generations differ.
+
+**Consequence:** the cross-session split that shaped this experiment's design is
+empirically null, so no comparison here inherits uncertainty from it. The
+project's standing "same session, same GPU" rule came from **CPU vs L40S**
+differences (2026-07-27); within one GPU model, image and harness, greedy
+decoding is bitwise reproducible across pods. The rule should be restated in
+those terms rather than dropped.
+
+### 28.7 Does the retired harness's ordering survive?
+
+| rung | prior usable (76-prompt wave, sa / sb) | prior mean | **E6 mean** |
+| --- | --- | ---: | ---: |
+| 1.60M | 0.4868 / 0.5132 | 0.5000 | **0.7300** |
+| 2.96M | 0.5921 / 0.5395 | 0.5658 | **0.8400** |
+| 5.50M | 0.5526 / 0.5395 | 0.5461 | **0.8500** |
+
+**Ordering only — never the levels.** The prior wave used 76 behaviour prompts
+with the degeneration stop ACTIVE, which cuts a repetition loop before it can be
+counted and so changes the termination and context-limit components outright.
+
+The prior ranking was 2.96M > 5.50M > 1.60M. E6 confirms **both high rungs beat
+1.60M**, and refines the top: 2.96M and 5.50M are **tied**, not ordered. The
+prior ordering's top two were within noise and are still within noise.
+
+### 28.8 The conclusion, stated exactly
+
+1. **Best E1 rung: 2.96M.** It and 5.50M are tied on the primary axis (+0.0100,
+   inside the floor, seeds disagreeing), so the registered tie-break applies —
+   correctness may break a tie between behaviour-comparable candidates — and
+   2.96M leads on `correct_overall` (0.2067 vs 0.1767) and `correct_given_usable`
+   (0.2460 vs 0.2039), in the same direction on both seeds. It also costs half
+   the tokens and 66% of the optimizer steps.
+2. **Best existing evaluated checkpoint: `e1_r2960k_{sa,sb}_pca`.** Above the
+   floor and seed-consistent against P2-1.60M on behaviour, tied on correctness.
+3. **Scale trend: improve, then plateau.** The gain is spent between 1.60M and
+   2.96M; nothing on either primary axis moves after that.
+4. **Seed consistency:** every behaviour gain is same-direction on both seeds.
+   **No correctness comparison in the entire experiment is both above its floor
+   and seed-consistent.**
+5. **Higher exposure changes stability, then only diagnostics.**
+6. **"1.60M is the practical high point" does not survive.** It was never
+   measured on this harness; it does not hold here.
+
+### 28.9 What E6 cannot settle
+
+* The 150 evaluation prompts are **training** prompts for every arm. The ladder
+  is nested and every rung trains 3 epochs, so each evaluated prompt is seen
+  exactly 3 times by every arm — exposure to them is identical across rungs and
+  the comparison is fair, but this measures recall-style autonomous behaviour,
+  **not held-out generalization**.
+* Rung and optimizer steps scale together by construction, so "more distinct
+  data" and "more steps" are not separated.
+* n=2 seeds; every spread is one draw.
+* `usable_rollout` is blind to correctness by construction. At 2.96M the model
+  finishes 84% of rollouts and answers 21% of them correctly.
+* **No prospectively registered Stage 2/3 gate exists**, so no arm here has
+  "passed" one. E6 ranks candidates on the registered hierarchy; it does not
+  certify one.
+
+### 28.10 Execution and cost
+
+Pod `xikv3u8moofu6c`, L40S at $0.99/h securePrice-verified, 10:59 → 13:10 =
+**130 min = $2.14**, plus **$0.22** across three pods killed early (§28.11) —
+**$2.36 total** against $3.47 authorized. Pod self-deleted at 13:10:12;
+`runpodctl pod list` → `[]`. Artifacts digest-verified before teardown
+(`2b757282…`, 1.5 MB) and additionally fetched incrementally per arm.
+
+**The session was transfer-bound, not compute-bound.** The six evaluations took
+~36 minutes; the two dev-box-only checkpoints took **117 minutes** to upload at
+~0.5 MB/s. The driver evaluated the four relay arms during that upload and waited
+on a marker for the rest, so the pod was idle for roughly 50 of 130 minutes
+rather than 117.
+
+**Deviation recorded (P4).** `ninja-build` was installed on the running pod at
+11:23 UTC, outside the setup script pinned by `SESSION_COMMIT=ad250cd1`. No
+source file on the pod differs from that commit; the package is a build tool for
+flashinfer's JIT sampling kernel and its absence had killed the driver at its
+first `LLM()` call. Installing it restored parity with the E4 session, whose
+setup installs ninja and whose arms E6 re-scores. Fixed in the repo at `bf97424`
+with a test.
+
+### 28.11 The paid-compute ledger
+
+| # | pod | billed | stopped at | cause |
+| ---: | --- | ---: | --- | --- |
+| 1 | `qp7xm2k01h6dg4` | $0.03 | before setup | setup would have hash-verified the dev-box checkpoints while the launcher was still uploading them; found by reading the launcher, killed rather than edited while running |
+| 2 | `9nrdoydt53nlzc` | $0.09 | during setup | measured the dev-box uplink at 0.72 MB/s; the 4.77 GB transfer could not finish inside the deadline, so the run was doomed as configured |
+| 3 | `jusu7nm5e5xcyc` | $0.10 | pod test gate | probe pack fetched without `audit.jsonl`, which `ladder_blocks` reads; and one test read gitignored artifacts a pod never receives |
+| 4 | `xikv3u8moofu6c` | **$2.14** | — | **complete: six arms evaluated** |
+
+Every fix carries a test: `--stores relay` staging split, the ninja requirement
+across all nine vLLM setups, the ladder-loader file list derived from `ladder.py`
+itself, and `scripts/pod/simulate_pod_env.sh`, which runs the pod's exact test
+command with every gitignored artifact hidden and would have caught two of the
+three for free.
+
+### 28.12 Exact reproduction record
+
+Commit **`ad250cd1dfb5867373a44755113b8fcecb94fbd1`** (evaluation session).
+
+```bash
+# preflight and registration, CPU, $0
+PYTHONPATH=src python scripts/evaluation/register_e6.py --authorized-usd 3.47
+bash scripts/pod/simulate_pod_env.sh
+
+# the pod session (self-tearing-down)
+SCR=… SESSION_COMMIT=ad250cd1dfb5867373a44755113b8fcecb94fbd1 \
+  BUNDLE_NAME=aad_e6_ad250cd1.bundle AUTHORIZED_USD=3.25 \
+  setsid nohup bash scripts/pod/e6_launch.sh &
+# pod-side: /opt/train/bin/python scripts/pod/e6_driver.py --stage all
+
+# analysis, CPU, $0, reproducible from the retained generations alone
+PYTHONPATH=src python scripts/evaluation/analyze_e6.py --bootstrap 10000
+```
+
+| identity | value |
+| --- | --- |
+| inclusion mask | `d6e24e0b09da1bcc…`, rebuilt on the pod and asserted per arm |
+| pack `blocks.npz` | `6f324cb0f37bc0f0…` |
+| corpus `sessions.jsonl` | `2b4edc2e2cc16cd5…` |
+| Stage 1 init | `86fbba78e8a2a324…` |
+| E1 1.60M weights | `6f77676ab8fde397…` / `e432d57e598d57e1…` |
+| E1 2.96M weights | `3f08482c2c8e7372…` / `b658fe392ab0db49…` |
+| E1 5.50M weights | `3069b329df3edfbd…` / `bcb916cb3e544505…` |
+| P2 1.60M weights | `7ee1d9355b97563f…` / `98e8c9811414e982…` |
+| engine | vLLM 0.26.0, bf16, greedy, context 8192, no degeneration stop |
+| artifacts | `logs/e6_results.json`, `logs/e6_report.md`, `artifacts/audit/e6_per_prompt.jsonl` (1,500 records), `artifacts/audit/three_mode/E1-*` |
