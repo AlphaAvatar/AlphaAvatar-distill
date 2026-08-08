@@ -17,7 +17,8 @@
 #
 # 2916 steps x 3.625 s/step measured = 176 min per arm, x2 = 352 min of
 # training. With setup, evaluation, fetch and teardown the expected session is
-# ~400 min ($6.61) and the backstop is 440 min ($7.26).
+# ~400 min ($6.61) and the backstop is 431 min ($7.11), just under the $7.12
+# hard authorization — the RunPod deadline alone cannot bill past it.
 set -uo pipefail
 
 SCR=${SCR:?}
@@ -25,16 +26,16 @@ SESSION_COMMIT=${SESSION_COMMIT:?}
 BUNDLE_NAME=${BUNDLE_NAME:?}
 GPU_NAME=${GPU_NAME:-NVIDIA L40S}
 MAX_PRICE=${MAX_PRICE:-0.99}
-BACKSTOP_MINUTES=${BACKSTOP_MINUTES:-440}
+BACKSTOP_MINUTES=${BACKSTOP_MINUTES:-431}
 STARTUP_LIMIT_MIN=${STARTUP_LIMIT_MIN:-15}
 MAX_POD_ATTEMPTS=${MAX_POD_ATTEMPTS:-12}
 MAX_HOST_DRAWS=${MAX_HOST_DRAWS:-3}
 CREATE_RETRY_DELAY_S=${CREATE_RETRY_DELAY_S:-420}
-POLL_LIMIT_MIN=${POLL_LIMIT_MIN:-430}
+POLL_LIMIT_MIN=${POLL_LIMIT_MIN:-422}
 # Fetching the produced weights back, in the fast direction. Time-boxed so a
 # slow link costs weights, never the result.
 CKPT_FETCH_LIMIT_MIN=${CKPT_FETCH_LIMIT_MIN:-45}
-AUTHORIZED_USD=${AUTHORIZED_USD:-7.26}
+AUTHORIZED_USD=${AUTHORIZED_USD:-7.12}
 STORE=${STORE:-/home/ecs-user/aad-artifacts/e6b}
 LOG=$SCR/e6b_launch.log
 KEY=$(cat "$SCR/rp_key")
