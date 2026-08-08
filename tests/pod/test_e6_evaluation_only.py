@@ -81,6 +81,25 @@ def test_driver_fails_when_the_training_pack_is_present():
     assert 'raise AssertionError("the training ladder pack is present' in src
 
 
+def test_setup_fetches_every_file_the_ladder_loader_reads():
+    """`ladder_blocks` reads audit.jsonl, and a pack without it fails only on a pod.
+
+    The dev box happens to have `audit.jsonl` beside every pack, so a setup that
+    fetched only `blocks.npz` and `ladder.json` passed every local check and then
+    failed the pod's own test gate — after `uv sync`, both venvs and four
+    checkpoint downloads had already been paid for.
+    """
+    loader = (REPO / "src/aadistill/data/ladder.py").read_text()
+    needed = set(re.findall(r'packed_dir / "([a-z_]+\.[a-z]+)"', loader))
+    assert needed, "the ladder loader's file reads are no longer detectable"
+    setup = SETUP.read_text()
+    fetch = setup[setup.index("ladder_uniform'"):setup.index("ladder_uniform_probe')")]
+    for name in needed:
+        assert name in fetch, (
+            f"e6_setup.sh does not fetch {name}, which ladder.py reads; the pack "
+            "would load on the dev box and fail on the pod")
+
+
 def test_setup_verifies_the_frozen_battery_assets_by_hash():
     src = SETUP.read_text()
     for sha in ("6f324cb0f37bc0f07128e554ce8c161879419537478950496534f75fcecb249c",

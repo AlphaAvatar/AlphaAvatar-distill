@@ -87,8 +87,11 @@ say "fetching the probe pack and the corpus"
 python3 -c "
 import sys; sys.path.insert(0, '/workspace')
 from fetch import fetch
+# audit.jsonl is not optional: ladder_blocks() reads it to pick validation
+# blocks and to reconcile the block count, so a pack without it loads on the dev
+# box (where the file happens to exist) and fails on the pod.
 fetch('stage3_recovery_corpus_v2/ladder_uniform',
-      ['blocks.npz', 'ladder.json'],
+      ['blocks.npz', 'ladder.json', 'audit.jsonl'],
       '/workspace/aad/artifacts/stage3/ladder_uniform_probe')
 fetch('stage3_recovery_corpus_v2', ['sessions.jsonl'],
       '/workspace/aad/artifacts/stage3/corpus_v2')
