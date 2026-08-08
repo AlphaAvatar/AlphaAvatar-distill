@@ -358,7 +358,11 @@ def family_compare(fa: str, fb: str, arms: dict, iterations: int) -> dict:
     per_seed = {s: v for s, v in per_seed.items() if v is not None}
     out = {"a": fa, "b": fb, "per_seed": per_seed}
     if len(per_seed) != len(SEEDS):
-        out["incomplete"] = f"only {sorted(per_seed)} available"
+        have = sorted(per_seed)
+        missing = [s for s in SEEDS if s not in per_seed]
+        out["incomplete"] = (
+            f"needs both seeds of {fa} and {fb}; have {have or 'neither'}, "
+            f"missing {missing}. No claim is made from one seed.")
         return out
     for axis, floor_key in (("usable", "usable_rollout_rate"),
                             ("correct", "correct_overall")):
