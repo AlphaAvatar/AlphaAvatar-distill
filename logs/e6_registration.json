@@ -1,0 +1,307 @@
+{
+  "created_utc": "2026-08-08T10:29:44.873899+00:00",
+  "experiment": "E6 -- high-rung checkpoint normalization onto the frozen 150-prompt unrestricted protocol",
+  "kind": "evaluation-only",
+  "trains_anything": false,
+  "modifies_any_checkpoint": false,
+  "questions": [
+    "Q1 -- Under the current 150-prompt unrestricted protocol, does the E1 PCA lineage improve, plateau or regress from 1.60M to 2.96M to 5.50M?",
+    "Q2 -- Which rung is the best checkpoint within the E1 PCA scale curve?",
+    "Q3 -- Which is the best checkpoint among all evaluated existing lineages, including the P2-1.60M anchor?",
+    "Q4 -- Does higher exposure change stability, correctness, or only the teacher-forced/CE diagnostics?",
+    "Q5 -- Does the standing conclusion that 1.60M is the practical high point survive normalization onto this harness?"
+  ],
+  "arms": {
+    "E1-1.60M-sa": {
+      "run": "e1_r1600k_sa_pca",
+      "seed": 20260726,
+      "rung": 1600000,
+      "step": "step_001761",
+      "config": "configs/stage3/e1/e1_r1600k_sa_pca.json",
+      "weights_sha256": "6f77676ab8fde397ef7af75fda3e62171b5c84f315c439a1abb49917e46f6697",
+      "source": [
+        "relay",
+        "e1_scaling_20260801/e1_r1600k_sa_pca/step_001761/model"
+      ],
+      "generate": true,
+      "retained_three_mode": "P1-1600k-sa",
+      "lineage": "E1 PCA scale curve"
+    },
+    "E1-1.60M-sb": {
+      "run": "e1_r1600k_sb_pca",
+      "seed": 20260801,
+      "rung": 1600000,
+      "step": "step_001761",
+      "config": "configs/stage3/e1/e1_r1600k_sb_pca.json",
+      "weights_sha256": "e432d57e598d57e1633392e92955c8185faab57909f75f44bc1c349db6ccf39e",
+      "source": [
+        "relay",
+        "e1_scaling_20260801/e1_r1600k_sb_pca/step_001761/model"
+      ],
+      "generate": true,
+      "retained_three_mode": "P1-1600k-sb",
+      "lineage": "E1 PCA scale curve"
+    },
+    "E1-2.96M-sa": {
+      "run": "e1_r2960k_sa_pca",
+      "seed": 20260726,
+      "rung": 2960000,
+      "step": "step_002916",
+      "config": "configs/stage3/e1/e1_r2960k_sa_pca.json",
+      "weights_sha256": "3f08482c2c8e7372fc87fd2496f50c1c618f61feaec021d73c0cc646413b80c3",
+      "source": [
+        "relay",
+        "e1_scaling_20260801/e1_r2960k_sa_pca/step_002916/model"
+      ],
+      "generate": true,
+      "retained_three_mode": null,
+      "lineage": "E1 PCA scale curve"
+    },
+    "E1-2.96M-sb": {
+      "run": "e1_r2960k_sb_pca",
+      "seed": 20260801,
+      "rung": 2960000,
+      "step": "step_002916",
+      "config": "configs/stage3/e1/e1_r2960k_sb_pca.json",
+      "weights_sha256": "b658fe392ab0db492c0df73c7008fc79ed89c0f526ad10edb10404c3bdb6f8c5",
+      "source": [
+        "devbox",
+        "artifacts/stage3/rescued/e1_r2960k_sb_pca"
+      ],
+      "generate": true,
+      "retained_three_mode": null,
+      "lineage": "E1 PCA scale curve"
+    },
+    "E1-5.50M-sa": {
+      "run": "e1_r5500k_sa_pca",
+      "seed": 20260726,
+      "rung": 5500000,
+      "step": "step_004412",
+      "config": "configs/stage3/e1/e1_r5500k_sa_pca.json",
+      "weights_sha256": "3069b329df3edfbd5edc0356516cd06ee7f02fe59663c19df7b30ef6acd8e397",
+      "source": [
+        "relay",
+        "e1_scaling_20260801/e1_r5500k_sa_pca/step_004412/model"
+      ],
+      "generate": true,
+      "retained_three_mode": null,
+      "lineage": "E1 PCA scale curve"
+    },
+    "E1-5.50M-sb": {
+      "run": "e1_r5500k_sb_pca",
+      "seed": 20260801,
+      "rung": 5500000,
+      "step": "step_004412",
+      "config": "configs/stage3/e1/e1_r5500k_sb_pca.json",
+      "weights_sha256": "bcb916cb3e544505770cddf021c680b0af6ded3ec7b5cfafe37eea5bb1541742",
+      "source": [
+        "devbox",
+        "artifacts/stage3/rescued/e1_r5500k_sb_pca"
+      ],
+      "generate": true,
+      "retained_three_mode": null,
+      "lineage": "E1 PCA scale curve"
+    },
+    "P2-1.60M-sa": {
+      "run": "e4_p2_r1600k_sa",
+      "seed": 20260726,
+      "rung": 1600000,
+      "step": "step_001761",
+      "config": "configs/stage3/e4/e4_p2_r1600k_sa.json",
+      "weights_sha256": "7ee1d9355b97563f095c15850dff51b7693d65e29d544a10c1575b63fdc78dce",
+      "source": [
+        "devbox",
+        "/home/ecs-user/aad-artifacts/e4/e4_p2_r1600k_sa/model"
+      ],
+      "generate": false,
+      "retained_three_mode": "E4-P2-1600k-sa",
+      "lineage": "external anchor (P2 CE-heavy objective)"
+    },
+    "P2-1.60M-sb": {
+      "run": "e4_p2_r1600k_sb",
+      "seed": 20260801,
+      "rung": 1600000,
+      "step": "step_001761",
+      "config": "configs/stage3/e4/e4_p2_r1600k_sb.json",
+      "weights_sha256": "98e8c9811414e982150bac934ae08cd17bb0772b797eaedae8efb2157721708c",
+      "source": [
+        "devbox",
+        "/home/ecs-user/aad-artifacts/e4/e4_p2_r1600k_sb/model"
+      ],
+      "generate": false,
+      "retained_three_mode": "E4-P2-1600k-sb",
+      "lineage": "external anchor (P2 CE-heavy objective)"
+    }
+  },
+  "scale_curve": [
+    "E1-1.60M",
+    "E1-2.96M",
+    "E1-5.50M"
+  ],
+  "anchor": "P2-1.60M",
+  "reuse_rule": {
+    "regenerated_in_the_e6_session": [
+      "E1-1.60M-sa",
+      "E1-1.60M-sb",
+      "E1-2.96M-sa",
+      "E1-2.96M-sb",
+      "E1-5.50M-sa",
+      "E1-5.50M-sb"
+    ],
+    "reused_from_retained_generations": [
+      "P2-1.60M-sa",
+      "P2-1.60M-sb"
+    ],
+    "why": "The whole E1 PCA scale curve is regenerated inside one session so the primary comparison -- 1.60M vs 2.96M vs 5.50M -- is within-session on one GPU, satisfying the standing rule that checkpoints in a comparison are scored together (decisions.md 2026-07-27). The P2-1.60M anchor is NOT regenerated: its raw generations are retained complete, and its harness, scorers and engine version are byte-identical to the ones E6 runs, so re-scoring them is a rescore and not a new measurement.",
+    "cross_session_replicate": "E1-1.60M was already measured in the E4 session, in the same session as the P2-1.60M anchor. E6 therefore obtains a direct measurement of the session-to-session difference on identical weights and identical frozen assets -- an instrument check that costs nothing extra.",
+    "primary_source_for_each_comparison": {
+      "E1 scale curve (2.96M vs 1.60M, 5.50M vs 1.60M, 5.50M vs 2.96M)": "the E6-session generations for all three rungs",
+      "each E1 rung vs the P2-1.60M anchor": "E4-session generations for BOTH P2-1.60M and E1-1.60M (same session, so the 1.60M contrast is clean), and E6-session generations for the 2.96M/5.50M rungs against the E4-session anchor (cross-session; the measured E1-1.60M session difference bounds that contamination)"
+    },
+    "registered_before_data": true
+  },
+  "protocol": {
+    "harness": "scripts/evaluation/run_three_mode_diagnostic.py",
+    "modes": [
+      "free",
+      "oracle",
+      "forced"
+    ],
+    "primary_mode": "free",
+    "n": 150,
+    "context": 8192,
+    "context_source": "trained_block_len",
+    "generation_allowance": "context - len(prompt_ids), per sample (P18)",
+    "decoding": {
+      "temperature": 0.0,
+      "top_p": 1.0,
+      "top_k": -1,
+      "greedy": true
+    },
+    "stop_token_ids": [
+      "<|im_end|>",
+      "<|endoftext|>"
+    ],
+    "degeneration_stop": false,
+    "degeneration_recorded_not_enforced": true,
+    "output_repair": false,
+    "post_generation_truncation": false,
+    "synthetic_terminal_tokens": false,
+    "engine": "vLLM 0.26.0, bfloat16, gpu_memory_utilization 0.9",
+    "forced_mode_dtype": "float32 (HF, not vLLM)",
+    "answer_extraction": "src/aadistill/evaluation/strict_answer.py",
+    "correctness_scorer": "strict_answer.extract_final_answer + normalize_number / capability.normalize_answer, per task type",
+    "usable_rollout_classifier": "src/aadistill/evaluation/usable_rollout.py",
+    "rescore_policy": "Every arm is re-scored from its raw generations with the current scorer. No historical correct/usable/termination field is copied into an E6 result.",
+    "retry_policy": "Only a proven infrastructure failure is retried, and only by re-running the identical deterministic command for that arm. A model failure -- empty output, non-termination, degeneration, context-limit -- is a result and is never retried."
+  },
+  "frozen_assets": {
+    "pack_blocks_npz_sha256": "6f324cb0f37bc0f07128e554ce8c161879419537478950496534f75fcecb249c",
+    "pack_ladder_json_sha256": "d4941722a099754ef5ba82d529c0fe2274a6b97af61b2fa52519ed22b84201f0",
+    "sessions_jsonl_sha256": "2b4edc2e2cc16cd56dae3d340345e1a17e2c4a8baa9837650a7bf5e340fa6fcd",
+    "stage1_init_sha256": "86fbba78e8a2a32481ca77e5ac362ed1f17a39dbc30bcbc952cabd5df2633e54",
+    "chat_template_sha256": "3802169b2a02b81e6adb7ab4f64f91ff02db753c8c3a64a01c35192d3a61d8d7",
+    "tokenizer_json_sha256": "be75606093db2094d7cd20f3c2f385c212750648bd6ea4fb2bf507a6a4c55506",
+    "tokenizer_config_sha256": "8fa82a4ba512c8bee7c1c5e82b9a71ddbef362e4665be5c8f7ce0afd78af129a",
+    "generation_config_sha256": "0019fccc989feeebf6d72934e1f6b917b320cc61f294dca1e562bce4c9cf5f83",
+    "eval_rung": 860000,
+    "rung_sessions": 1502,
+    "verified_correct": 758,
+    "excluded_unverified": 744,
+    "sampled": 150,
+    "sample_seed": 20260804,
+    "inclusion_mask_sha256": "d6e24e0b09da1bcc692b1dc96d8236808d29551a9fc94a47d1d968fd3f73d6ba",
+    "inclusion_mask_matches_binding": true,
+    "inclusion_mask_by_task": {
+      "gsm8k": 38,
+      "multihop_qa": 38,
+      "openmath": 37,
+      "rag_evidence": 37
+    },
+    "inclusion_mask_is_model_independent": "The mask is a function of (pack, rung, sessions, n, seed) only. No model output enters it, and no prompt is ever excluded because of what a model produced.",
+    "system_prompt": "Carried per session inside sessions.jsonl and rendered by the official chat template; pinned by sessions_jsonl_sha256. It is a fixed project requirement, never an experimental variable."
+  },
+  "evaluator_unchanged_since_reused_artifacts": {
+    "verified": true,
+    "diff_stat": "",
+    "against_commit": "1dafec29b1637d3e1412be7fcf453640c4cd97d9",
+    "paths": [
+      "scripts/evaluation/run_three_mode_diagnostic.py",
+      "scripts/evaluation/diagnose_training_recall.py",
+      "src/aadistill/evaluation",
+      "src/aadistill/data/verify.py"
+    ]
+  },
+  "interpretation": {
+    "hierarchy": "Primary = autonomous rollout behaviour (usable_rollout and every component rate). Secondary = correctness, per-task correctness, correct_given_usable. Diagnostic only = teacher-native CE, FineWeb NLL, teacher-forced top-1, training loss. Do not invert; do not combine onto one scale; do not select a winner on a diagnostic.",
+    "floors": {
+      "usable_rollout_rate": 0.08,
+      "correct_overall": 0.06
+    },
+    "floors_provenance": "Carried unchanged from the E3/E4/E5 registry. 0.0800 is P0-real's own measured seed spread on this battery; 0.0600 is the measured seed spread of free-rollout correctness on the same 150 examples. Neither is recomputed or renegotiated for E6.",
+    "no_new_composite": "No new composite score may be defined after the data is seen. usable_rollout is reported with all five component rates, and the components are known not to be independent (protocol_valid implies non_empty and natural_termination by construction), so the conjunction must never be presented as five agreeing checks.",
+    "seed_rule": "Nothing is claimed on one seed. A mean movement whose direction disagrees across seeds is reported as disagreement, never hidden inside the mean.",
+    "paired_statistics_scope": "The paired bootstrap resamples PROMPTS at fixed checkpoints. An interval excluding zero is not by itself evidence the rung moved -- the seed floor governs that, and both are reported side by side."
+  },
+  "claim_boundaries": [
+    "The 150 evaluation prompts are TRAINING prompts for every arm. The ladder is nested, so the 0.86M subset the battery is drawn from is contained in the 1.60M, 2.96M and 5.50M rungs alike, and every arm trains 3 epochs -- so each evaluated prompt is seen exactly 3 times by every arm. Exposure to the evaluated prompts is therefore IDENTICAL across rungs and the comparison is fair, but it measures recall-style autonomous behaviour, not held-out generalization.",
+    "Rung and optimizer steps scale together by construction (3 epochs at every rung), so E6 cannot separate 'more distinct data' from 'more optimizer steps'. It measures the effect of the RUNG as Experiment 1 defined it.",
+    "P2-1.60M differs from E1-1.60M in the objective weights (CE 1.0 / KD 0.25 versus CE 0.25 / KD 1.0), not only in lineage. It is an external anchor, not a point on the E1 curve.",
+    "n=2 seeds per rung. Every spread is a single draw.",
+    "The 2.96M and 5.50M arms are measured in the E6 session while the P2-1.60M anchor is measured in the E4 session. The E1-1.60M arm, measured in both, bounds that cross-session difference; it does not eliminate it.",
+    "E6 does not evaluate the random-init arms, any official pretrained reference, or any new initialization. It adds no arms beyond the eight registered here."
+  ],
+  "cost": {
+    "gpu": "L40S",
+    "rate_usd_per_hour": 0.99,
+    "arms_generated": 6,
+    "prompts_per_arm": 150,
+    "modes_per_arm": [
+      "free",
+      "oracle",
+      "forced"
+    ],
+    "generated_candidates": 1800,
+    "max_possible_generated_tokens": 14745600,
+    "stage_minutes": {
+      "boot": 4.0,
+      "setup": 9.0,
+      "checkpoints": 12.0,
+      "evaluation": 54.0,
+      "retrieve_verify": 6.0,
+      "teardown": 2.0
+    },
+    "expected_minutes": 87.0,
+    "expected_usd": 1.44,
+    "pessimistic_minutes": 129.4,
+    "pessimistic_usd": 2.14,
+    "basis": "Per-arm evaluation time is the measured E4 three-mode wall clock (8.67, 7.42, 6.53, 8.31 minutes for four arms on an L40S), rounded up to 9.0. Setup and boot are the warm-host E4 measurements; the pessimistic column carries one cold-host redraw, which is the dominant measured risk (setup has varied 5 -> 8.5 -> 150+ minutes on identical scripts and images)."
+  },
+  "authorization": {
+    "remaining_authorized_usd": 3.47,
+    "hard_backstop_usd": 2.14,
+    "covers": [
+      "one evaluation pod",
+      "six regenerated arms",
+      "artifact retrieval, verification and teardown"
+    ],
+    "excludes": [
+      "any training",
+      "any new initialization",
+      "any FineWeb experiment",
+      "any additional arm",
+      "any checkpoint upload or overwrite"
+    ],
+    "fits": true
+  },
+  "code_state": {
+    "git_commit": "f7fb08df6bcbeb630a7db33813cd2acf8a84782b",
+    "git_commit_source": "git",
+    "dirty": true,
+    "uncommitted_state_sha256": "ccac31f9a13e063060b8ed8a2cd5aa13aaa93ced3ff0f6292a17c797a09e7efb",
+    "untracked_files": [
+      "logs/e6_registration.json"
+    ]
+  },
+  "registration_sha256": "452a3f64890d13d2fb783cd9d49b0518ca80773ee77d4363f4c65a01002543c3"
+}
