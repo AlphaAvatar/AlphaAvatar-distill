@@ -3873,6 +3873,26 @@ prior ordering's top two were within noise and are still within noise.
 6. **"1.60M is the practical high point" does not survive.** It was never
    measured on this harness; it does not hold here.
 
+### 28.8.1 Scope clarification, added 2026-08-09 (E6b preregistration)
+
+E6's scale conclusion is about the **E1/P1 KD-heavy lineage**, and nothing in
+E6 licenses extending it to other objectives. Stated precisely:
+
+* **Established by E6** — for the E1/P1 objective (ce 0.25 / kd 1.0): 1.60M →
+  2.96M improves usable rollout above the floor and seed-consistently; 2.96M →
+  5.50M is a tie.
+* **NOT established by E6** — that 2.96M is a plateau *for any other objective*.
+  P2 CE-heavy has never been trained above 1.60M, so whether the plateau is a
+  property of the **data** or of that **particular objective** is unknown.
+
+The two objectives are tied at 1.60M under both registered floors, which is
+exactly the situation in which a shared plateau cannot be assumed: tied at one
+scale says nothing about behaviour at the next. E6b fills the missing cell
+(P2 × 2.96M) and is the only experiment that makes the interaction computable.
+
+Until E6b reports, write "the E1/P1 lineage plateaus after 2.96M", never "2.96M
+is a plateau". E6's findings are unchanged and remain valid as recorded.
+
 ### 28.9 What E6 cannot settle
 
 * The 150 evaluation prompts are **training** prompts for every arm. The ladder

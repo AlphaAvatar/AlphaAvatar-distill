@@ -1,0 +1,66 @@
+{
+  "e6b_p2_r2960k_sa": {
+    "objective_parent": "configs/stage3/e4/e4_p2_r1600k_sa.json",
+    "objective_parent_sha256": "8256bfba8b3241a8bc3640627d71fac589e99cb3712c943b2832a72538716257",
+    "rung_parent": "configs/stage3/e1/e1_r2960k_sa_pca.json",
+    "rung_parent_sha256": "c2e46e61b6b10ef0046acc2e1cf82c613991af113399568a5605fa819d6bd07c",
+    "taken_from_rung_parent": [
+      "rung",
+      "schedule",
+      "checkpoint",
+      "intervals"
+    ],
+    "identity_only": [
+      "run_name",
+      "out_dir",
+      "_purpose"
+    ],
+    "loss_taken_from": "objective parent (the experimental variable)",
+    "loss": {
+      "ce_weight": 1.0,
+      "kd_weight": 0.25,
+      "kd_temperature": 1.0,
+      "kd_scope": "all"
+    },
+    "e1_loss_at_same_rung": {
+      "ce_weight": 0.25,
+      "kd_weight": 1.0,
+      "kd_temperature": 1.0,
+      "kd_scope": "all"
+    },
+    "parents_agree_on_everything_else": true,
+    "config_sha256": "963aa00ead1676820abd66c1fced12a90424bb144c19b4dede8ea08b0e985002"
+  },
+  "e6b_p2_r2960k_sb": {
+    "objective_parent": "configs/stage3/e4/e4_p2_r1600k_sb.json",
+    "objective_parent_sha256": "7c3817a729133dc94d2d4b7671b72142d7206c21dc1b472a085a577565d68642",
+    "rung_parent": "configs/stage3/e1/e1_r2960k_sb_pca.json",
+    "rung_parent_sha256": "8b385927accb73dd24233b69d0bf70bffd026d1a22e943bc39a0e7cfdc585afe",
+    "taken_from_rung_parent": [
+      "rung",
+      "schedule",
+      "checkpoint",
+      "intervals"
+    ],
+    "identity_only": [
+      "run_name",
+      "out_dir",
+      "_purpose"
+    ],
+    "loss_taken_from": "objective parent (the experimental variable)",
+    "loss": {
+      "ce_weight": 1.0,
+      "kd_weight": 0.25,
+      "kd_temperature": 1.0,
+      "kd_scope": "all"
+    },
+    "e1_loss_at_same_rung": {
+      "ce_weight": 0.25,
+      "kd_weight": 1.0,
+      "kd_temperature": 1.0,
+      "kd_scope": "all"
+    },
+    "parents_agree_on_everything_else": true,
+    "config_sha256": "da71974841a39b96aceb05d6c39a2723a18624afc6c8c78630937d49ecfa1aef"
+  }
+}

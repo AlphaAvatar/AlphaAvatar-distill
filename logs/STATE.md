@@ -73,6 +73,16 @@ restricted attention, two continuation recipes, and now the full token-scale cur
 scale**: +0.2000 from 0.86M to 1.60M, and +0.1100 again from 1.60M to 2.96M.
 Correctness has stayed in 0.11–0.21 throughout every one of them.
 
+**Scope of the plateau, corrected 2026-08-09.** E6's curve is the **E1/P1
+KD-heavy lineage only**. P2 CE-heavy has never been trained above 1.60M, so
+whether the plateau after 2.96M is a property of the **data** or of that
+**objective** is unknown — and the two objectives are tied at 1.60M, which is
+precisely when a shared plateau cannot be assumed. Write "the E1/P1 lineage
+plateaus after 2.96M", not "2.96M is a plateau". **E6b** fills the missing
+P2 × 2.96M cell and is preregistered in
+[`logs/e6b_registration.json`](e6b_registration.json); it is **blocked on
+authorization**, not on preparation.
+
 **Open, not decided:** whether the planned E7 FineWeb experiment changes in light
 of this. E6 states the implication and stops there — that is a separate decision.
 

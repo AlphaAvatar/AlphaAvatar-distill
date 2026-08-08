@@ -1,0 +1,428 @@
+{
+  "created_utc": "2026-08-08T16:28:46.245548+00:00",
+  "experiment": "E6b \u2014 P2 CE-heavy scale completion at the 2.96M rung (objective x data-scale interaction)",
+  "kind": "training + evaluation",
+  "questions": [
+    "Q1 \u2014 does P2 CE-heavy improve when scaled 1.60M -> 2.96M?",
+    "Q2 \u2014 at the 2.96M rung, is P2 better than E1/P1?",
+    "Q3 \u2014 does the objective interact with data scale?",
+    "Q4 \u2014 does P2 preserve or improve correctness while gaining the rollout-stability improvement E1 showed?",
+    "Q5 \u2014 should P2-2.96M replace E1-2.96M as the default behavioural anchor and control recipe?"
+  ],
+  "matrix": {
+    "rows": [
+      "E1/P1 KD-heavy (ce 0.25 / kd 1.0)",
+      "P2 CE-heavy (ce 1.0 / kd 0.25)"
+    ],
+    "columns": [
+      "1.60M",
+      "2.96M"
+    ],
+    "cell_filled_by_e6b": "P2 CE-heavy x 2.96M"
+  },
+  "arms": {
+    "P2-2.96M-sa": {
+      "config": "configs/stage3/e6b/e6b_p2_r2960k_sa.json",
+      "run": "e6b_p2_r2960k_sa",
+      "train": true,
+      "objective": "CE-heavy",
+      "rung": 2960000,
+      "retained_three_mode": null,
+      "seed": 20260726,
+      "config_sha256": "963aa00ead1676820abd66c1fced12a90424bb144c19b4dede8ea08b0e985002",
+      "loss": {
+        "ce_weight": 1.0,
+        "kd_weight": 0.25,
+        "kd_temperature": 1.0,
+        "kd_scope": "all"
+      },
+      "student_path": "artifacts/stage1/qwen3_0p6b_init_v0/checkpoint",
+      "total_steps": 2916,
+      "warmup_steps": 146
+    },
+    "P2-2.96M-sb": {
+      "config": "configs/stage3/e6b/e6b_p2_r2960k_sb.json",
+      "run": "e6b_p2_r2960k_sb",
+      "train": true,
+      "objective": "CE-heavy",
+      "rung": 2960000,
+      "retained_three_mode": null,
+      "seed": 20260801,
+      "config_sha256": "da71974841a39b96aceb05d6c39a2723a18624afc6c8c78630937d49ecfa1aef",
+      "loss": {
+        "ce_weight": 1.0,
+        "kd_weight": 0.25,
+        "kd_temperature": 1.0,
+        "kd_scope": "all"
+      },
+      "student_path": "artifacts/stage1/qwen3_0p6b_init_v0/checkpoint",
+      "total_steps": 2916,
+      "warmup_steps": 146
+    },
+    "P2-1.60M-sa": {
+      "config": "configs/stage3/e4/e4_p2_r1600k_sa.json",
+      "run": "e4_p2_r1600k_sa",
+      "train": false,
+      "objective": "CE-heavy",
+      "rung": 1600000,
+      "retained_three_mode": "E4-P2-1600k-sa",
+      "seed": 20260726,
+      "config_sha256": "8256bfba8b3241a8bc3640627d71fac589e99cb3712c943b2832a72538716257",
+      "loss": {
+        "ce_weight": 1.0,
+        "kd_weight": 0.25,
+        "kd_temperature": 1.0,
+        "kd_scope": "all"
+      },
+      "student_path": "artifacts/stage1/qwen3_0p6b_init_v0/checkpoint",
+      "total_steps": 1761,
+      "warmup_steps": 88
+    },
+    "P2-1.60M-sb": {
+      "config": "configs/stage3/e4/e4_p2_r1600k_sb.json",
+      "run": "e4_p2_r1600k_sb",
+      "train": false,
+      "objective": "CE-heavy",
+      "rung": 1600000,
+      "retained_three_mode": "E4-P2-1600k-sb",
+      "seed": 20260801,
+      "config_sha256": "7c3817a729133dc94d2d4b7671b72142d7206c21dc1b472a085a577565d68642",
+      "loss": {
+        "ce_weight": 1.0,
+        "kd_weight": 0.25,
+        "kd_temperature": 1.0,
+        "kd_scope": "all"
+      },
+      "student_path": "artifacts/stage1/qwen3_0p6b_init_v0/checkpoint",
+      "total_steps": 1761,
+      "warmup_steps": 88
+    },
+    "E1-2.96M-sa": {
+      "config": "configs/stage3/e1/e1_r2960k_sa_pca.json",
+      "run": "e1_r2960k_sa_pca",
+      "train": false,
+      "objective": "KD-heavy",
+      "rung": 2960000,
+      "retained_three_mode": "E1-2.96M-sa",
+      "seed": 20260726,
+      "config_sha256": "c2e46e61b6b10ef0046acc2e1cf82c613991af113399568a5605fa819d6bd07c",
+      "loss": {
+        "ce_weight": 0.25,
+        "kd_weight": 1.0,
+        "kd_temperature": 1.0,
+        "kd_scope": "all"
+      },
+      "student_path": "artifacts/stage1/qwen3_0p6b_init_v0/checkpoint",
+      "total_steps": 2916,
+      "warmup_steps": 146
+    },
+    "E1-2.96M-sb": {
+      "config": "configs/stage3/e1/e1_r2960k_sb_pca.json",
+      "run": "e1_r2960k_sb_pca",
+      "train": false,
+      "objective": "KD-heavy",
+      "rung": 2960000,
+      "retained_three_mode": "E1-2.96M-sb",
+      "seed": 20260801,
+      "config_sha256": "8b385927accb73dd24233b69d0bf70bffd026d1a22e943bc39a0e7cfdc585afe",
+      "loss": {
+        "ce_weight": 0.25,
+        "kd_weight": 1.0,
+        "kd_temperature": 1.0,
+        "kd_scope": "all"
+      },
+      "student_path": "artifacts/stage1/qwen3_0p6b_init_v0/checkpoint",
+      "total_steps": 2916,
+      "warmup_steps": 146
+    },
+    "E1-1.60M-sa": {
+      "config": "configs/stage3/e1/e1_r1600k_sa_pca.json",
+      "run": "e1_r1600k_sa_pca",
+      "train": false,
+      "objective": "KD-heavy",
+      "rung": 1600000,
+      "retained_three_mode": "E1-1.60M-sa",
+      "seed": 20260726,
+      "config_sha256": "222a0925e966048d41704d58bf92829b8ded3428491f07779b68f23eb5ae225e",
+      "loss": {
+        "ce_weight": 0.25,
+        "kd_weight": 1.0,
+        "kd_temperature": 1.0,
+        "kd_scope": "all"
+      },
+      "student_path": "artifacts/stage1/qwen3_0p6b_init_v0/checkpoint",
+      "total_steps": 1761,
+      "warmup_steps": 88
+    },
+    "E1-1.60M-sb": {
+      "config": "configs/stage3/e1/e1_r1600k_sb_pca.json",
+      "run": "e1_r1600k_sb_pca",
+      "train": false,
+      "objective": "KD-heavy",
+      "rung": 1600000,
+      "retained_three_mode": "E1-1.60M-sb",
+      "seed": 20260801,
+      "config_sha256": "486e9e90d77c93ce6ddd758031ffd319c909ba63a0604938c3b4d917854eee97",
+      "loss": {
+        "ce_weight": 0.25,
+        "kd_weight": 1.0,
+        "kd_temperature": 1.0,
+        "kd_scope": "all"
+      },
+      "student_path": "artifacts/stage1/qwen3_0p6b_init_v0/checkpoint",
+      "total_steps": 1761,
+      "warmup_steps": 88
+    }
+  },
+  "single_variable_proof": {
+    "e6b_p2_r2960k_sa": {
+      "objective_parent": "configs/stage3/e4/e4_p2_r1600k_sa.json",
+      "objective_parent_sha256": "8256bfba8b3241a8bc3640627d71fac589e99cb3712c943b2832a72538716257",
+      "rung_parent": "configs/stage3/e1/e1_r2960k_sa_pca.json",
+      "rung_parent_sha256": "c2e46e61b6b10ef0046acc2e1cf82c613991af113399568a5605fa819d6bd07c",
+      "taken_from_rung_parent": [
+        "rung",
+        "schedule",
+        "checkpoint",
+        "intervals"
+      ],
+      "identity_only": [
+        "run_name",
+        "out_dir",
+        "_purpose"
+      ],
+      "loss_taken_from": "objective parent (the experimental variable)",
+      "loss": {
+        "ce_weight": 1.0,
+        "kd_weight": 0.25,
+        "kd_temperature": 1.0,
+        "kd_scope": "all"
+      },
+      "e1_loss_at_same_rung": {
+        "ce_weight": 0.25,
+        "kd_weight": 1.0,
+        "kd_temperature": 1.0,
+        "kd_scope": "all"
+      },
+      "parents_agree_on_everything_else": true,
+      "config_sha256": "963aa00ead1676820abd66c1fced12a90424bb144c19b4dede8ea08b0e985002"
+    },
+    "e6b_p2_r2960k_sb": {
+      "objective_parent": "configs/stage3/e4/e4_p2_r1600k_sb.json",
+      "objective_parent_sha256": "7c3817a729133dc94d2d4b7671b72142d7206c21dc1b472a085a577565d68642",
+      "rung_parent": "configs/stage3/e1/e1_r2960k_sb_pca.json",
+      "rung_parent_sha256": "8b385927accb73dd24233b69d0bf70bffd026d1a22e943bc39a0e7cfdc585afe",
+      "taken_from_rung_parent": [
+        "rung",
+        "schedule",
+        "checkpoint",
+        "intervals"
+      ],
+      "identity_only": [
+        "run_name",
+        "out_dir",
+        "_purpose"
+      ],
+      "loss_taken_from": "objective parent (the experimental variable)",
+      "loss": {
+        "ce_weight": 1.0,
+        "kd_weight": 0.25,
+        "kd_temperature": 1.0,
+        "kd_scope": "all"
+      },
+      "e1_loss_at_same_rung": {
+        "ce_weight": 0.25,
+        "kd_weight": 1.0,
+        "kd_temperature": 1.0,
+        "kd_scope": "all"
+      },
+      "parents_agree_on_everything_else": true,
+      "config_sha256": "da71974841a39b96aceb05d6c39a2723a18624afc6c8c78630937d49ecfa1aef"
+    }
+  },
+  "rung_facts_verified_from_loader": {
+    "rung_1600000": {
+      "train_blocks": 1174,
+      "supervised_ce_tokens_unique": 1600353,
+      "supervised_ce_tokens_audit": 1600353,
+      "packed_tokens": 9617408,
+      "real_tokens": 2661299,
+      "padding_tokens": 6956109,
+      "packing_efficiency": 0.2767,
+      "optimizer_steps": 1761,
+      "blocks_per_step": 2,
+      "block_visits": 3522,
+      "exposures": 3.0,
+      "exposures_uniform_per_block": true,
+      "blocks_touched": 1174,
+      "cumulative_ce_tokens": 4801059,
+      "token_mix": {
+        "code": 0.1656,
+        "gsm8k": 0.1665,
+        "multihop_qa": 0.1665,
+        "openmath": 0.1674,
+        "rag_evidence": 0.1669,
+        "tool_calling": 0.1672
+      },
+      "val_blocks": 16,
+      "val_supervised_tokens": 81195,
+      "val_disjoint_from_all_rungs": true
+    },
+    "rung_2960000": {
+      "train_blocks": 1944,
+      "supervised_ce_tokens_unique": 2960507,
+      "supervised_ce_tokens_audit": 2960507,
+      "packed_tokens": 15925248,
+      "real_tokens": 4730748,
+      "padding_tokens": 11194500,
+      "packing_efficiency": 0.2971,
+      "optimizer_steps": 2916,
+      "blocks_per_step": 2,
+      "block_visits": 5832,
+      "exposures": 3.0,
+      "exposures_uniform_per_block": true,
+      "blocks_touched": 1944,
+      "cumulative_ce_tokens": 8881521,
+      "token_mix": {
+        "code": 0.1665,
+        "gsm8k": 0.1671,
+        "multihop_qa": 0.1665,
+        "openmath": 0.1669,
+        "rag_evidence": 0.1667,
+        "tool_calling": 0.1664
+      },
+      "val_blocks": 16,
+      "val_supervised_tokens": 81195,
+      "val_disjoint_from_all_rungs": true,
+      "is_strict_token_prefix_of_this_rung": {
+        "input_ids": true,
+        "ce_mask": true,
+        "content_mask": true,
+        "prior_rung": 1600000,
+        "block_increment": 770
+      }
+    }
+  },
+  "frozen_assets": {
+    "pack_blocks_npz_sha256": "6f324cb0f37bc0f07128e554ce8c161879419537478950496534f75fcecb249c",
+    "pack_audit_sha256": "15f16b7b22b229e9c0ae510b85b4c967948828e0e7d50fac15c3e516e3e911e6",
+    "sessions_jsonl_sha256": "2b4edc2e2cc16cd56dae3d340345e1a17e2c4a8baa9837650a7bf5e340fa6fcd",
+    "stage1_init_sha256": "86fbba78e8a2a32481ca77e5ac362ed1f17a39dbc30bcbc952cabd5df2633e54",
+    "chat_template_sha256": "3802169b2a02b81e6adb7ab4f64f91ff02db753c8c3a64a01c35192d3a61d8d7",
+    "tokenizer_json_sha256": "be75606093db2094d7cd20f3c2f385c212750648bd6ea4fb2bf507a6a4c55506",
+    "inclusion_mask_sha256": "d6e24e0b09da1bcc692b1dc96d8236808d29551a9fc94a47d1d968fd3f73d6ba",
+    "eval_rung": 860000
+  },
+  "evaluation_protocol": "identical to E6 \u2014 scripts/evaluation/run_three_mode_diagnostic.py, 150 prompts, mask d6e24e0b\u2026, greedy, context 8192, unrestricted (P18), no degeneration stop, no repair, no truncation, no synthetic terminals",
+  "control_reuse_rule": "The six control arms are re-scored from retained generations, not regenerated. E6 established that this harness reproduces token for token across sessions on the same GPU model, image and evaluator commit (150/150 on both 1.60M seeds), so reuse is a rescore rather than a second measurement. Regenerating them for cosmetic consistency would spend money to reproduce bytes already in hand.",
+  "metric_hierarchy": {
+    "primary": "usable_rollout_rate",
+    "secondary": "correct_overall",
+    "diagnostic": [
+      "correct_given_usable",
+      "failure taxonomy",
+      "teacher-forced CE / NLL / top-1",
+      "training loss"
+    ]
+  },
+  "floors": {
+    "usable_rollout_rate": 0.08,
+    "correct_overall": 0.06
+  },
+  "floors_provenance": "carried unchanged from E3/E4/E5/E6; measured seed spreads, not preferences, and not renegotiable after seeing E6b's numbers",
+  "comparisons": {
+    "A_same_scale_objective": "P2-2.96M vs E1-2.96M (primary)",
+    "B_p2_scale": "P2-2.96M vs P2-1.60M",
+    "C_e1_scale_reference": "E1-2.96M vs E1-1.60M (from E6 artifacts)",
+    "D_interaction": "(P2_2.96 - P2_1.60) - (E1_2.96 - E1_1.60)"
+  },
+  "interaction_metrics": [
+    "usable_rollout_rate",
+    "correct_overall",
+    "correct_given_usable",
+    "natural_termination_rate",
+    "context_limit_rate",
+    "severe_repetition_rate",
+    "empty_output_rate",
+    "answer_parse_failure_rate_numeric"
+  ],
+  "decision_rules": [
+    "R1 \u2014 the primary axis is usable_rollout_rate; correct_overall is secondary; correct_given_usable and the failure taxonomy are diagnostic. Teacher-forced CE/NLL/top-1 and training loss may NEVER select a winner.",
+    "R2 \u2014 a difference below its registered floor is a TIE, stated as such. It may support a compute-efficiency preference, labelled as below-threshold evidence, but never as a demonstrated behavioural win.",
+    "R3 \u2014 nothing is claimed from one seed. A pooled difference whose seeds disagree in direction is reported as disagreement, never hidden in a mean.",
+    "R4 \u2014 best objective at 2.96M is decided on the primary axis first. If the objectives tie there, correctness may break the tie; if it also ties, the objectives are behaviourally indistinguishable at this scale and the already-canonical arm remains the anchor.",
+    "R5 \u2014 the interaction is a difference-in-differences: (P2_2.96 - P2_1.60) - (E1_2.96 - E1_1.60). A nonzero point estimate is NOT evidence of interaction. It is claimed only if it exceeds the metric's floor AND is consistent in direction across seeds.",
+    "R6 \u2014 P2-2.96M replaces E1-2.96M as the anchor only if it wins the primary axis above the floor and seed-consistently, or ties the primary axis and wins correctness above its floor and seed-consistently.",
+    "R7 \u2014 P2-5.50M is NOT authorized and is not initiated by any outcome here. E6b states whether a preregistered justification exists and stops."
+  ],
+  "failure_conditions": [
+    "F1 \u2014 a trained arm's final config_sha256 does not match this registration.",
+    "F2 \u2014 an arm did not start from the Stage 1 PCA init 86fbba78\u2026, or resumed from any trained checkpoint.",
+    "F3 \u2014 realized optimizer steps != 2916, or realized supervised CE tokens != 2,960,507 per exposure, or exposures != 3.",
+    "F4 \u2014 the evaluation inclusion mask is not d6e24e0b\u2026, or an arm is scored on a different prompt set.",
+    "F5 \u2014 loss becomes non-finite, or a checkpoint fails to load.",
+    "A poor MODEL result is not a failure condition. Only F1-F5 are, and only they justify a retry. Retries must be deterministic, documented, and limited to verified infrastructure faults."
+  ],
+  "claim_boundaries": [
+    "The 150 evaluation prompts are TRAINING prompts for every arm. The ladder is nested and every arm trains 3 exposures, so each evaluated prompt is seen exactly 3 times by every arm at every rung \u2014 exposure is identical and the comparison is fair, but it measures recall-style autonomous behaviour, not held-out generalization.",
+    "Rung and optimizer steps scale together by construction (3 exposures at every rung), so 'more distinct data' is not separated from 'more steps'.",
+    "n=2 seeds per cell. Every spread is a single draw, and the difference-in-differences compounds four such draws \u2014 it is the noisiest quantity in the experiment and is reported with that caveat attached.",
+    "E6b does not evaluate P2-5.50M, so the P2 curve has two points and cannot distinguish 'plateau' from 'still climbing' at the top rung."
+  ],
+  "cost": {
+    "gpu": "NVIDIA L40S",
+    "rate_usd_per_hour": 0.99,
+    "why_this_gpu": "E1-2.96M and P2-1.60M were both TRAINED on an L40S and E6's evaluations ran on one. Training elsewhere would add a device difference to the one comparison E6b exists to make.",
+    "arms_trained": 2,
+    "optimizer_steps_per_arm": 2916,
+    "measured_step_seconds": {
+      "e4_p2_1600k_sa": 3.625,
+      "e4_p2_1600k_sb": 3.598,
+      "e1_2960k_sa_console_mean": 3.464,
+      "e1_2960k_sa_console_p90": 3.82,
+      "used_for_expected": 3.625,
+      "used_for_pessimistic": 3.82
+    },
+    "no_devbox_upload_required": "Unlike E6, every input (Stage 1 init, probe pack, corpus) is on the relay, so the ~0.5 MB/s dev-box uplink is not on the critical path. Only the ~4.8 GB of produced weights move, and in the fast direction.",
+    "stage_minutes": {
+      "boot": 4.0,
+      "setup": 12.0,
+      "train_sa": 176.2,
+      "train_sb": 176.2,
+      "tokenizer_and_movement": 2.0,
+      "evaluate_2_arms": 18.0,
+      "fetch_and_hash": 10.0,
+      "teardown": 2.0
+    },
+    "expected_minutes": 400.4,
+    "expected_usd": 6.61,
+    "pessimistic_minutes": 431.3,
+    "pessimistic_usd": 7.12
+  },
+  "authorization": {
+    "remaining_authorized_usd": 1.11,
+    "required_backstop_usd": 7.12,
+    "fits": false,
+    "additional_required_usd": 6.01,
+    "excludes": [
+      "P2-5.50M",
+      "any FineWeb work",
+      "any initialization change",
+      "any loss sweep"
+    ]
+  },
+  "code_state": {
+    "git_commit": "cff5889368e2f1ad4eeefffb3eea838c6f1152a8",
+    "git_commit_source": "git",
+    "dirty": true,
+    "uncommitted_state_sha256": "6c0af3b695992cff8f4dee2c861abff85c2e53a8701c7031f2ee7e8a112e659a",
+    "untracked_files": [
+      "configs/stage3/e6b/e6b_p2_r2960k_sa.json",
+      "configs/stage3/e6b/e6b_p2_r2960k_sb.json",
+      "configs/stage3/e6b/provenance.json",
+      "scripts/training/build_e6b_configs.py",
+      "scripts/training/register_e6b.py"
+    ]
+  },
+  "registration_sha256": "262abaef5a6fefe08522628e477c6f7b10d1efcfcc96525fb31e6f188d3787a6"
+}
