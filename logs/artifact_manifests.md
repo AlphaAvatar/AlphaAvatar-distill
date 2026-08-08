@@ -16,6 +16,54 @@ Two reading notes:
   in git history at `866dac2`. "Related logs" below point at the consolidated
   record.
 
+## e5_start/ — the Experiment 5 corpora (arm C and arm R)
+
+- **Artifact:** `AlphaAvatar/aadistill-artifacts`, prefix `e5_start/`.
+  - `e5_arm_c.tar.gz` — 4.4 MB, sha256
+    `fdf44b34a89164a88c59256129e692fd89021bcf53209831ca6d8d9eb6e49bee`.
+    Both seeds' arm-C corpora: 2,294 examples each, 1,034 blocks, 905,488
+    candidate CE tokens, 362 system blocks. Per-file:
+    `sa/examples.jsonl` `4bc23c3f…`, `sb/examples.jsonl` `03c9ba9a…`,
+    `system_ids.json` (identical for both seeds) `18ace28a…`.
+  - `e5_arm_r.tar.gz` — 4.5 MB, sha256
+    `e2cbbd45eefa98b142911414036e6b77fa926024dea368e2e7bc2d075b2c8e96`.
+    Both seeds' arm-R corpora from attempt 5: **2,098** (sa) and **2,042** (sb)
+    records. Per-file: `sa/examples.jsonl` `247941ab…`, `sa/manifest.json`
+    `eea4f1a3…`, `sa/system_ids.json` `f89a3386…`; `sb/examples.jsonl`
+    `ae1a4203…`, `sb/manifest.json` `9efdddcd…`, `sb/system_ids.json`
+    `6ab61945…`.
+  - `e5_arm_r_corpora.tar.gz` — 4.3 MB, sha256 prefix `867029bece693a6c`, pushed
+    by the pod itself at `CORPORA_RETAINED` on attempt 8. Same content lineage,
+    kept as the in-run copy.
+- **Created:** arm R generated on attempt 5 (2026-08-07, ~$1.24 of the $1.55) from
+  `Qwen/Qwen3-4B-Thinking-2507@768f209d…` over student rollouts from
+  `p2_ceheavy_{sa,sb}`, preset `{temperature 0.6, top_p 0.95, top_k 20, min_p 0}`,
+  sessions corpus `2b4edc2e…`. Arm C is a mask move over the same teacher
+  trajectories and needs no generation.
+- **Verification:** `scripts/data/verify_staged_r.py` asserts all of the above on
+  the pod before anything trains — record counts, every file hash, teacher id and
+  revision, the P2 checkpoint identity by *weight* hash, tokenizer and
+  chat-template hashes, decoding preset, sessions hash, deterministic sha256 seed
+  derivation, and that every record reloads through `example_to_rendered`. All 36
+  checks passed on attempts 6, 7 and 8. Every check is fatal.
+- **Why it is kept:** these corpora cost GPU time twice before surviving — lost at
+  teardown on attempt 1 (records without token payloads) and again on attempt 4
+  (the side bundle shipped manifests only). Reuse is artifact reuse, not reuse of
+  an experimental outcome: attempt 5 produced no training result.
+
+## E5 trained checkpoints — LOST
+
+- **Artifact:** none. `e5_{c,r}_{sa,sb}` at `step_001356` were trained on attempt
+  8 (117 minutes of L40S) and never left the pod: the launcher fetched
+  `step_000738`, a constant from the superseded 492-block design, so the copy
+  matched nothing and the weights died with the pod.
+- **Consequence:** the E5 result stands on the retained evaluation artifacts
+  (reports, per-sample generations, feasibility report, gate records). Any
+  *re-evaluation* of C or R would require retraining, at roughly $2.90.
+- **Fixed:** the step tag is now derived from the feasibility report's measured
+  `optimizer_steps`, guarded by a test, and the remote `find` was moved out of the
+  single quotes where the variable could never have expanded.
+
 ## e1_scaling_20260801 — Experiment 1 checkpoints and evaluation results
 
 - **Artifact:** same repo, prefix `e1_scaling_20260801/`. Per arm:
