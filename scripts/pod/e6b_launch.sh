@@ -36,6 +36,10 @@ POLL_LIMIT_MIN=${POLL_LIMIT_MIN:-422}
 # slow link costs weights, never the result.
 CKPT_FETCH_LIMIT_MIN=${CKPT_FETCH_LIMIT_MIN:-45}
 AUTHORIZED_USD=${AUTHORIZED_USD:-7.12}
+# KD needs the teacher, and setup reads this. E6 had no teacher, so its
+# launcher never forwarded it — the omission survived the derivation and
+# killed a pod at INIT_READY.
+TEACHER_REVISION=${TEACHER_REVISION:-768f209d9ea81521153ed38c47d515654e938aea}
 STORE=${STORE:-/home/ecs-user/aad-artifacts/e6b}
 LOG=$SCR/e6b_launch.log
 KEY=$(cat "$SCR/rp_key")
@@ -197,7 +201,8 @@ $SCP scripts/pod/e6b_setup.sh "root@$HOST:/workspace/" >>"$LOG" 2>&1
 
 say "running setup"
 $SSH "root@$HOST" "cd /workspace && SESSION_COMMIT=$SESSION_COMMIT \
-  BUNDLE_NAME=$BUNDLE_NAME bash /workspace/e6b_setup.sh" \
+  BUNDLE_NAME=$BUNDLE_NAME TEACHER_REVISION=$TEACHER_REVISION \
+  bash /workspace/e6b_setup.sh" \
   >>"$SCR/e6b_setup.log" 2>&1
 SETUP_RC=$?
 if [ "$SETUP_RC" -eq 90 ]; then
