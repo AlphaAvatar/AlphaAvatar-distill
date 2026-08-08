@@ -62,6 +62,18 @@ EPOCHS = 3
 SEEDS = ("sa", "sb")
 
 
+def _rel(p: Path) -> str:
+    """Repo-relative when it is inside the repo; absolute otherwise.
+
+    The smoke path points at a scratch copy outside the tree, and
+    `relative_to` raises rather than falling back.
+    """
+    try:
+        return str(p.relative_to(REPO_ROOT))
+    except ValueError:
+        return str(p)
+
+
 def jsonl(p: Path) -> list[dict]:
     return [json.loads(line) for line in p.open() if line.strip()]
 
@@ -163,6 +175,48 @@ def rescore_arm(directory: Path, sessions: dict) -> dict | None:
             "counts": {"included": len(idx), "usable": nu,
                        "correct": sum(correct[i] for i in idx)},
         }
+    return out
+
+
+def diagnostics(reg: dict) -> dict:
+    """Teacher-native CE, FineWeb NLL and teacher-forced top-1, per arm.
+
+    Reported so question 4 -- does higher exposure move behaviour, correctness,
+    or only the diagnostics -- can be answered. **None of these may select a
+    winner.** Every one is on the diagnostic tier of the registered hierarchy,
+    and E4 already demonstrated the dissociation: CE improved by 18x its floor
+    while the primary axis did not move at all.
+    """
+    e1 = {r["arm"]: r for r in
+          json.loads((REPO_ROOT / "artifacts/stage3/e1_results.json").read_text())}
+    out = {}
+    for alias, arm in reg["arms"].items():
+        row = {}
+        rec = e1.get(arm["run"])
+        if rec is not None:
+            row["teacher_native_val_ce"] = rec["val_ce_final"]
+            row["fineweb_holdout_nll"] = rec["holdout_nll"]
+        else:
+            # The anchors are not Experiment 1 arms, so their CE comes from their
+            # own training log.
+            log = REPO_ROOT / f"artifacts/stage3/{arm['run']}/train_log.jsonl"
+            if log.is_file():
+                evals = [r for r in jsonl(log) if r["event"] == "eval_result"
+                         and r.get("val_set") == "val"]
+                if evals:
+                    row["teacher_native_val_ce"] = evals[-1]["val_ce"]
+        for tag, d in (("", THREE_MODE / alias),
+                       ("@E4", THREE_MODE / (arm["retained_three_mode"] or "_"))):
+            fr = d / "forced" / "report.json"
+            if not fr.is_file():
+                continue
+            by_role = json.loads(fr.read_text())["results"]["forced"]["by_role"]
+            row[f"teacher_forced_reasoning_top1{tag}"] = by_role["reasoning"]["top1_accuracy"]
+            row[f"teacher_forced_reasoning_mean_rank{tag}"] = \
+                by_role["reasoning"]["mean_target_rank"]
+        if row:
+            row["tier"] = "diagnostic only — may not select a winner"
+            out[alias] = row
     return out
 
 
@@ -277,6 +331,7 @@ def examples(a_alias: str, b_alias: str, arms: dict, sessions: dict, k: int) -> 
 
 
 def main() -> None:
+    global THREE_MODE
     ap = argparse.ArgumentParser()
     # Small enough to track (~140 KB): the per-sample maps are stripped before
     # writing, so this is the summary, not the generations. The generations stay
@@ -285,8 +340,12 @@ def main() -> None:
     ap.add_argument("--report", type=Path, default=REPO_ROOT / "logs/e6_report.md")
     ap.add_argument("--bootstrap", type=int, default=10000)
     ap.add_argument("--examples", type=int, default=3)
+    # Only so the whole pipeline can be exercised end-to-end against a scratch
+    # copy before the real generations land. The default is the real tree.
+    ap.add_argument("--three-mode", type=Path, default=THREE_MODE)
     args = ap.parse_args()
 
+    THREE_MODE = args.three_mode
     reg = json.loads(REGISTRATION.read_text())
     sessions = load_sessions()
 
@@ -302,7 +361,7 @@ def main() -> None:
         else:
             arms[alias] = scored
             provenance[alias] = {
-                "directory": str(d.relative_to(REPO_ROOT)),
+                "directory": _rel(d),
                 "session": "E6" if arm["generate"] else "E4",
                 "rung": arm["rung"], "seed": arm["seed"],
                 "run": arm["run"], "weights_sha256": arm["weights_sha256"]}
@@ -316,7 +375,7 @@ def main() -> None:
                 alias4 = f"{alias}@E4"
                 arms[alias4] = rep
                 provenance[alias4] = {
-                    "directory": str(rd.relative_to(REPO_ROOT)),
+                    "directory": _rel(rd),
                     "session": "E4", "rung": arm["rung"], "seed": arm["seed"],
                     "run": arm["run"], "weights_sha256": arm["weights_sha256"],
                     "role": "cross-session replicate of the same weights"}
@@ -384,6 +443,7 @@ def main() -> None:
         "missing_arms": missing,
         "families": families,
         "comparisons": comparisons,
+        "diagnostics": diagnostics(reg),
         "session_replicate": session_replicate,
         "qualitative_examples": qualitative,
         "code_state": code_state(str(REPO_ROOT)),
@@ -448,6 +508,19 @@ def render(r: dict) -> str:
                          f"win/tie/loss {x['win']}/{x['tie']}/{x['loss']}, "
                          f"95% CI [{x['bootstrap_ci'][0]:+.4f}, {x['bootstrap_ci'][1]:+.4f}]"
                          f"{' excludes 0' if x['ci_excludes_zero'] else ''}")
+        L.append("")
+    if r.get("diagnostics"):
+        L += ["## Diagnostics — reported, never used to rank", "",
+              "| arm | teacher-native val CE | FineWeb holdout NLL | teacher-forced reasoning top-1 |",
+              "| --- | ---: | ---: | ---: |"]
+        for alias, d in r["diagnostics"].items():
+            ce = d.get("teacher_native_val_ce")
+            nll = d.get("fineweb_holdout_nll")
+            t1 = d.get("teacher_forced_reasoning_top1",
+                       d.get("teacher_forced_reasoning_top1@E4"))
+            L.append(f"| {alias} | {'—' if ce is None else f'{ce:.4f}'} | "
+                     f"{'—' if nll is None else f'{nll:.4f}'} | "
+                     f"{'—' if t1 is None else f'{t1:.4f}'} |")
         L.append("")
     if r["session_replicate"]:
         L += ["## Cross-session replicate — identical weights, two sessions", ""]
