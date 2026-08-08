@@ -551,3 +551,19 @@ def test_gate_1_does_not_budget_generation_that_will_be_skipped():
     assert '"r_corpora_staged"' in g, "the gate must record which plan it priced"
     # The stale 1.30x-R rationale must not outlive the design it described.
     assert "conservative R = 1.30x" not in g
+
+
+def test_the_checkpoint_tag_is_derived_not_hard_coded():
+    """`step_000738` was a constant from the superseded 492-block design. It
+    silently matched nothing and lost all four trained checkpoints on
+    2026-08-07, after they had cost 117 minutes of GPU time."""
+    src = (REPO / "scripts/pod/e5_launch.sh").read_text()
+    # Executable lines only. The comment that explains this fix names the stale
+    # tag, and a whole-file search flags the documentation for the bug it
+    # documents -- the same trap the `hash()` docstring sprang earlier.
+    code = [ln for ln in src.splitlines() if not ln.lstrip().startswith("#")]
+    assert not [ln for ln in code if "step_000738" in ln], "the stale tag must not return"
+    assert "STEP_TAG=$(" in src and "optimizer_steps" in src, \
+        "the tag must come from the feasibility report's measured step count"
+    fetch = src[src.index("hashing checkpoints on the pod"):]
+    assert "$STEP_TAG" in fetch, "the fetch must use the derived tag"

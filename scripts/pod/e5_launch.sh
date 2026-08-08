@@ -325,15 +325,24 @@ else
   say "WARNING: results bundle is empty or missing"
 fi
 
+# The step tag is derived from the ACTUAL common block count, not hard-coded:
+# it was left at step_000738 from the superseded 492-block design and silently
+# fetched nothing, losing all four trained checkpoints on 2026-08-07.
+STEP_TAG=$($SSH "root@$HOST" 'python3 -c "
+import json
+print(\"step_%06d\" % json.load(open(\"/workspace/aad/artifacts/audit/e5_joint_feasibility.json\"))[\"optimizer_steps\"])
+"' 2>/dev/null)
+[ -n "$STEP_TAG" ] || STEP_TAG=step_unknown
+say "checkpoint tag from the feasibility report: $STEP_TAG"
 say "hashing checkpoints on the pod"
-$SSH "root@$HOST" 'cd /workspace/aad/artifacts/stage3 && \
-  find e5_[cr]_s*/checkpoints/step_000738 -type f \( -name "*.safetensors" -o -name "*.json" \
-    -o -name "*.jinja" \) | sort | xargs sha256sum' > "$SCR/e5_pod_hashes.txt" 2>>"$LOG"
+$SSH "root@$HOST" "cd /workspace/aad/artifacts/stage3 && \
+  find e5_[cr]_s*/checkpoints/$STEP_TAG -type f \( -name '*.safetensors' -o -name '*.json' \
+    -o -name '*.jinja' \) | sort | xargs sha256sum" > "$SCR/e5_pod_hashes.txt" 2>>"$LOG"
 cp "$SCR/e5_pod_hashes.txt" "$STORE/" 2>/dev/null
 say "fetching checkpoints (time-boxed to ${CKPT_TRANSFER_LIMIT_MIN} min)"
 for arm in e5_c_sa e5_c_sb e5_r_sa e5_r_sb; do
   timeout "${CKPT_TRANSFER_LIMIT_MIN}m" $SCP -r \
-    "root@$HOST:/workspace/aad/artifacts/stage3/$arm/checkpoints/step_000738" \
+    "root@$HOST:/workspace/aad/artifacts/stage3/$arm/checkpoints/$STEP_TAG" \
     "$STORE/$arm" >>"$LOG" 2>&1 || say "WARNING: $arm weights not retrieved"
 done
 teardown

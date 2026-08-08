@@ -3487,3 +3487,108 @@ pod's own environment — the same posture arm C has had since attempt 4.
 * `_retain_corpora` reads `/workspace/hf/token` rather than requiring an
   inherited `HF_TOKEN`.
 * Setup stages and contract-checks arm R alongside arm C.
+
+---
+
+## 27. Experiment 5 — COMPLETE: teacher-prefix continuation beats student-prefix recovery (2026-08-07, $2.87)
+
+**Verdict: under a matched CE-supervision budget, teacher-prefix continuation (C)
+is decisively better than student-prefix recovery (R) on autonomous rollout
+behaviour. Correctness is not distinguishable between the arms.**
+
+| | |
+| --- | --- |
+| Pod | `3wku8lc1yztfbj` (second draw; the first never opened :22) |
+| Billed | **$2.87** (174 min); cumulative E5 **$10.65** |
+| Commit | `8c85223` |
+| Arms | 4 trained, 4 evaluated, `ALL_DONE` 23:44:41 |
+| Corpus | T\* = 735,603 CE tokens/pass, all four arms exactly on target, arm-to-arm delta 0.0000% |
+| Budget | 904 common blocks, 1,356 steps, 3 passes, 2 blocks/step |
+
+### Primary — autonomous rollout behaviour
+
+| arm | usable | non_empty | natural_term | no_severe_rep | no_context_limit | protocol_valid |
+| --- | --- | --- | --- | --- | --- | --- |
+| C-sa | 0.7600 | 0.8667 | 0.8333 | 0.8333 | 0.8333 | 0.7600 |
+| C-sb | 0.7733 | 0.8600 | 0.8533 | 0.8467 | 0.8533 | 0.7800 |
+| R-sa | 0.4600 | 0.5000 | 0.4800 | 0.4733 | 0.4800 | 0.4667 |
+| R-sb | 0.4333 | 0.4733 | 0.4467 | 0.4467 | 0.4467 | 0.4400 |
+| **C** | **0.7667** | 0.8633 | 0.8433 | 0.8400 | 0.8433 | 0.7700 |
+| **R** | **0.4467** | 0.4867 | 0.4633 | 0.4600 | 0.4633 | 0.4533 |
+
+**Δ = −0.3200**, four times the 0.0800 noise floor, in the same direction on both
+seeds and on *every* component. Within-arm seed spread is 0.0133 (C) and 0.0267
+(R), an order of magnitude smaller than the gap.
+
+Paired, on the 150 pinned prompts at fixed checkpoints:
+
+| seed | metric | C | R | Δ | McNemar (R gained / lost) | bootstrap 95% CI |
+| --- | --- | --- | --- | --- | --- | --- |
+| sa | usable | 0.7600 | 0.4600 | −0.3000 | 11 / 56, net −45 | [−0.3933, −0.2000] **excludes 0** |
+| sb | usable | 0.7733 | 0.4333 | −0.3400 | 5 / 56, net −51 | [−0.4267, −0.2533] **excludes 0** |
+| sa | correct | 0.1400 | 0.1067 | −0.0333 | 11 / 16, net −5 | [−0.1000, +0.0333] includes 0 |
+| sb | correct | 0.1200 | 0.1133 | −0.0067 | 9 / 10, net −1 | [−0.0600, +0.0533] includes 0 |
+
+### Secondary — correctness
+
+C 0.1300, R 0.1100, Δ −0.0200 — inside the 0.0600 floor, with both bootstrap
+intervals spanning zero and McNemar nets of −5 and −1 on 27 and 19 discordant
+pairs. **The arms are not distinguishable on correctness.**
+
+`correct_given_usable` is C 0.1652 against R 0.2463. **This does not favour R.**
+It conditions on 67 usable R rollouts against 115 usable C rollouts, and the
+subsets are selected by the very outcome that differs, so the comparison is
+selection-biased by construction. It is reported because the registration
+requires it, not as evidence.
+
+### The mechanism: R does not stop
+
+The dominant failure is not malformed output — it is that R never terminates.
+
+| arm | median generated tokens | context-limit rate | natural termination |
+| --- | --- | --- | --- |
+| C | 513–562 | 0.147–0.167 | 0.833–0.853 |
+| R | **6,362–6,692** | **0.520–0.553** | 0.447–0.480 |
+
+R's median rollout is **twelve times longer** than C's and runs into the 8,192
+context limit on more than half of prompts. Of R's ~77 empty answers per seed,
+**1** terminated naturally: the emptiness is a *consequence* of never reaching
+`</think>`, not a separate defect. `first_failure` attributes 75/79 of R's
+unusable rollouts to `non_empty`, but the census is a presentation aid — the
+per-component rates show the whole cluster moving together.
+
+Oracle mode isolates it. Given the reasoning and asked only to write the answer,
+R answers correctly 0.5933/0.6067 against C's 0.7400/0.7733, with **zero** empty
+answers in either arm. R can extract an answer; it cannot decide to stop
+reasoning.
+
+That is what the recipe trains. Every R target is a teacher recovery
+*conditioned on an existing student prefix*, so R is supervised only on how to
+continue an in-progress trace and never on how to bring one to a close from a
+cold start. At inference it must produce the whole trajectory from the prompt,
+and it continues.
+
+### Claim boundary, as registered
+
+Evaluation is paired on the fixed 150-prompt battery, but **training composition
+was not identical**: C trained on 963/989 bundles and R on 603/672, nested inside
+C's selection, because matching the CE-supervision budget forces different bundle
+counts when R's continuations run 1.66–1.76× longer. E5 therefore estimates the
+performance of the two **complete recipes** under a matched supervised-token
+budget. It does not isolate the causal effect of prefix content or state with
+composition held fixed, and the paired statistics preserve paired *evaluation*
+only — they do not remove the composition difference.
+
+R trained on ~37% fewer distinct prompts, which is a live alternative explanation
+for a diversity-sensitive outcome. It is a poor explanation for *this* outcome:
+the failure is a specific behavioural one, and the oracle result shows the model
+is intact when it does not have to terminate on its own.
+
+### Artifacts and a loss
+
+Evaluation reports, generations, feasibility report, gate records and packing
+audits are all retained. **The four trained checkpoints were not**: the
+launcher's checkpoint fetch still names `step_000738`, a constant from the
+superseded 492-block design, while the real tag is `step_001356`. The weights
+died with the pod. The result stands on the retained evaluation artifacts, but
+the checkpoints would have to be retrained to re-evaluate.

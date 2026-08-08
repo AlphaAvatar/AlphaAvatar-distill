@@ -1,30 +1,46 @@
-**Updated:** 2026-08-08 03:05 UTC · branch `main` · **no pods running, nothing
-billing.** Five E5 attempts, **$6.91 spent, no C/R training result.** **$5.71 of
-the $7.26 authorization remains.** Ready to launch; one plan question open.
+**Updated:** 2026-08-08 05:10 UTC · branch `main` · **no pods running, nothing
+billing.** **E5 IS COMPLETE.** Eight attempts, **$10.65**, **$1.97 of the last
+authorization remains.**
 
-## E5 — ATTEMPT 5 GENERATED REAL R AND KEPT IT; THE DESIGN IS NOW FEASIBLE
+## EXPERIMENT 5 COMPLETE — TEACHER-PREFIX CONTINUATION BEATS STUDENT-PREFIX
+## RECOVERY UNDER A MATCHED SUPERVISION BUDGET
 
-| attempt | cost | stopped at | cause |
-| --- | --- | --- | --- |
-| 1 ([§22](EXPERIMENTS.md)) | $1.57 | pairing | `to_record()` dropped ids/mask |
-| 2 ([§23](EXPERIMENTS.md)) | $0.81 | gate 1 | stale 152-min estimate |
-| 3 ([§24](EXPERIMENTS.md)) | $1.45 | setup | cold host |
-| 4 ([§25](EXPERIMENTS.md)) | $1.53 | feasibility | R/C token asymmetry, 1.66-1.76x |
-| 5 ([§26](EXPERIMENTS.md)) | $1.55 | feasibility | C pooled over the intersection |
+Full record: [`EXPERIMENTS.md`](EXPERIMENTS.md) §27. Registered before training in
+[`e5_registration.json`](e5_registration.json).
 
-**The R corpora survived** — 2,098 + 2,042 real records, zero unusable, staged on
-the relay at `e5_start/e5_arm_r.tar.gz` (`e2cbbd45…`). The relay push failed on a
-missing `HF_TOKEN`, but the side-bundle copy worked.
+| | C teacher-prefix | R student-prefix | Δ | floor |
+| --- | --- | --- | --- | --- |
+| **usable_rollout** | **0.7667** | **0.4467** | **−0.3200** | 0.0800 |
+| correctness | 0.1300 | 0.1100 | −0.0200 | 0.0600 |
+| correct_given_usable | 0.1652 | 0.2463 | — | selection-biased, not evidence |
 
-**The corrected design, computed offline on the real corpora at $0:** C pools over
-its full corpus rather than the R intersection, which was vestigial once
-composition stopped being identical. T\* = **735,603 unreduced**; both arms land
-on it exactly, arm-to-arm delta **0.0000%**; C 963/989 bundles, R 603/672,
-nested; common block count **904**, **1,356** steps, **117 min** training.
+Both seeds, every component, same direction. Paired bootstrap CIs on the 150
+pinned prompts exclude zero for usable rollout ([−0.393, −0.200] and [−0.427,
+−0.253]) and include zero for correctness. Within-arm seed spread 0.0133/0.0267.
 
-**Budget forces one decision:** regenerating R costs $1.48 and leaves the run
-**$0.07 short**; reusing the staged corpora leaves **$1.59 (96 min)** of pre-gate
-allowance. Setup stages and contract-checks arm R exactly as it does arm C.
+**Mechanism: R does not stop.** Median generation 6,362–6,692 tokens against C's
+513–562; context-limit rate 0.52–0.55 against 0.15–0.17. Of R's ~77 empty answers
+per seed, **1** terminated naturally — emptiness is a consequence of never
+reaching `</think>`. In oracle mode, where the reasoning is supplied, R answers
+correctly 0.59–0.61 with zero empty answers: the model is intact, it just cannot
+decide to stop. Every R target is a teacher recovery conditioned on an existing
+prefix, so R is supervised only on continuing a trace, never on closing one from
+a cold start.
+
+**Claim boundary (registered):** evaluation is paired, but training composition
+is not identical — C 963/989 bundles, R 603/672 nested inside C — because
+matching the CE budget forces different counts when R's continuations run
+1.66–1.76× longer. E5 estimates the two complete **recipes** under a matched
+supervised-token budget; it does not isolate prefix state with composition held
+fixed, and the paired statistics preserve paired *evaluation* only.
+
+**Corpus:** T\* = 735,603 CE tokens/pass, all four arms exactly on target,
+arm-to-arm delta 0.0000%, 904 common blocks, 1,356 steps.
+
+**Lost:** the four trained checkpoints. The launcher fetched `step_000738`, a
+constant from the superseded 492-block design, while the real tag was
+`step_001356`. Fixed to derive the tag from the feasibility report. The result
+stands on retained evaluation artifacts; re-evaluating would need retraining.
 
 ## EXPERIMENT 4 COMPLETE — SCALE SUBSTANTIALLY IMPROVES ROLLOUT STABILITY,
 ## BUT DOES NOT RESOLVE CORRECTNESS
