@@ -37,6 +37,19 @@ from typing import Protocol
 
 RUNPOD_GRAPHQL = "https://api.runpod.io/graphql"
 
+# RunPod's edge rejects the default `Python-urllib/3.x` User-Agent with **403
+# Forbidden** — every query, including ones that succeed byte-for-byte from
+# curl. Found on 2026-08-09 while preparing the control-plane canary, before any
+# pod existed.
+#
+# It matters more than a header usually would. `PodState.billing` treats an
+# unanswered poll as "still billing", which is the safe direction for deciding
+# to terminate — but it also means the watchdog's *verification* poll could
+# never confirm the pod was gone. Every session would have ended in
+# `TERMINATION_FAILED` with a pod that had actually died. The launchers never
+# hit this because they shell out to curl.
+USER_AGENT = "aadistill-watchdog/1.0 (+https://github.com/AlphaAvatar/AlphaAvatar-distill)"
+
 # Provider states in which a pod is no longer accruing GPU time. `EXITED` is
 # included: a stopped pod still holds disk, but the GPU meter — the only thing
 # these thresholds are denominated in — has stopped.
@@ -119,7 +132,8 @@ class RunPodProvider:
         req = urllib.request.Request(
             f"{RUNPOD_GRAPHQL}?api_key={self._key}",
             data=json.dumps({"query": query}).encode(),
-            headers={"Content-Type": "application/json"},
+            headers={"Content-Type": "application/json",
+                     "User-Agent": USER_AGENT},
             method="POST",
         )
         with urllib.request.urlopen(req, timeout=self.timeout) as resp:

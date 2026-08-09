@@ -1,0 +1,71 @@
+{
+  "staged_utc": "2026-08-09T11:24:49+00:00",
+  "command": "scripts/data/stage_e7_streams.py --verify-roundtrip",
+  "relay": "AlphaAvatar/aadistill-artifacts",
+  "repo_type": "model",
+  "prefix": "e7_streams_20260809",
+  "streams": {
+    "e7_fineweb_kd": {
+      "local_dir": "artifacts/stage3/e7_fineweb_kd",
+      "relay_prefix": "e7_streams_20260809/e7_fineweb_kd",
+      "sha256": {
+        "blocks.npz": "b70beffac337ee37b0280cef581fec7967a1d5d6a390a73272d75223aeb39633",
+        "docs.jsonl": "492212ef7c19ae79d6d190f25bfe13b48a34f1f8a864f6a93bae4a1fba8761db",
+        "manifest.json": "449c51321a5e15eaa7509a9695c9564ae794e26fe7aa97f3bedf8a1091a96dd1"
+      },
+      "n_blocks": 1761,
+      "block_len": 1024,
+      "kd_positions": 1801503,
+      "padding_tokens": 0,
+      "kind": "general_text_kd",
+      "roundtrip_sha256": {
+        "blocks.npz": "b70beffac337ee37b0280cef581fec7967a1d5d6a390a73272d75223aeb39633",
+        "docs.jsonl": "492212ef7c19ae79d6d190f25bfe13b48a34f1f8a864f6a93bae4a1fba8761db",
+        "manifest.json": "449c51321a5e15eaa7509a9695c9564ae794e26fe7aa97f3bedf8a1091a96dd1"
+      },
+      "roundtrip_verified": true
+    },
+    "e7_control_kd": {
+      "local_dir": "artifacts/stage3/e7_control_kd",
+      "relay_prefix": "e7_streams_20260809/e7_control_kd",
+      "sha256": {
+        "blocks.npz": "4e54f8e18baf01dc44eee80ae044188e902fa5f2ce675723ccdc5bf3aa5c05ea",
+        "docs.jsonl": "ad1f6f44ce66e20dfe975b4f9654fee7f62e057dc85ea8f81159601185bba7d8",
+        "manifest.json": "f400d65b222ab0146c03f3d022438f69c543c1a453967fca52f290de0c7e8803"
+      },
+      "n_blocks": 1761,
+      "block_len": 1024,
+      "kd_positions": 1801503,
+      "padding_tokens": 0,
+      "kind": "in_domain_kd_control",
+      "roundtrip_sha256": {
+        "blocks.npz": "4e54f8e18baf01dc44eee80ae044188e902fa5f2ce675723ccdc5bf3aa5c05ea",
+        "docs.jsonl": "ad1f6f44ce66e20dfe975b4f9654fee7f62e057dc85ea8f81159601185bba7d8",
+        "manifest.json": "f400d65b222ab0146c03f3d022438f69c543c1a453967fca52f290de0c7e8803"
+      },
+      "roundtrip_verified": true
+    },
+    "e7_fineweb_val": {
+      "local_dir": "artifacts/stage3/e7_fineweb_val",
+      "relay_prefix": "e7_streams_20260809/e7_fineweb_val",
+      "sha256": {
+        "blocks.npz": "e4002bbbbadf1a9106f41e2531fffddcf9ce329b894232246211b9c5d665014e",
+        "docs.jsonl": "5606d98c55f499552ca8e26f21854fafa8dee8f104296a24e993546e7fba7199",
+        "manifest.json": "3f3eb515391dab56a8aa24c744a9488b5e409584c8b9666f2f080c681525783d"
+      },
+      "n_blocks": 512,
+      "block_len": 1024,
+      "kd_positions": 523776,
+      "padding_tokens": 0,
+      "kind": "general_text_kd",
+      "roundtrip_sha256": {
+        "blocks.npz": "e4002bbbbadf1a9106f41e2531fffddcf9ce329b894232246211b9c5d665014e",
+        "docs.jsonl": "5606d98c55f499552ca8e26f21854fafa8dee8f104296a24e993546e7fba7199",
+        "manifest.json": "3f3eb515391dab56a8aa24c744a9488b5e409584c8b9666f2f080c681525783d"
+      },
+      "roundtrip_verified": true
+    }
+  },
+  "failures": [],
+  "staged": true
+}
