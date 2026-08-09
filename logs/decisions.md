@@ -1430,3 +1430,73 @@
   and the CPU-vs-GPU finding stands unchanged.
 - **Revisit when:** the engine version, image or GPU model changes, or a sampled
   (non-greedy) protocol is introduced.
+
+## 2026-08-09 — The plateau belongs to the E1 objective, not to the data
+
+- **Context:** E6 showed the E1/P1 KD-heavy lineage improving 1.60M → 2.96M and
+  then flattening. Because the two objectives are tied at 1.60M, that left open
+  whether the ceiling was a property of the corpus at this scale or of that
+  particular loss. E6b trained P2 CE-heavy at 2.96M — the missing cell — from the
+  same Stage 1 init, on the same nested rung, with the objective as the only
+  intended difference.
+- **Decision:** record three findings and change no anchor.
+  * **P2 does not scale.** 1.60M → 2.96M is +0.0267 usable rollout: inside the
+    0.0800 floor, seeds disagreeing (+0.0600 / −0.0067). A tie.
+  * **KD-heavy wins at 2.96M.** P2-2.96M vs E1-2.96M is −0.0800 usable, at the
+    floor, **−0.0800 on both seeds**, both bootstrap CIs excluding zero.
+    Correctness ties (−0.0167).
+  * **The objective interacts with data scale**, on the primary axis:
+    difference-in-differences −0.0833, above the floor, direction-consistent.
+- **Consequence for the anchor:** `e1_r2960k_{sa,sb}_pca` **remains the best
+  evaluated checkpoint**. E6b does not displace it — it removes the alternative
+  explanation for E6's result. The plateau after 2.96M is now known to be a
+  statement about the E1 objective's curve, and separately, P2's curve is flat
+  from the start.
+- **The caveat that limits the interaction claim:** the per-seed interactions are
+  −0.0133 and −0.1533. They agree in direction but differ by an order of
+  magnitude, so the pooled figure rests almost entirely on `sb`. Read it as "P2
+  does not convert the rung the way E1 does", not as a calibrated effect size.
+  A difference-in-differences over four two-seed cells stacks four single draws.
+- **Alternatives considered:** promoting P2-2.96M on its slightly better
+  `correct_given_usable` at 1.60M — rejected, that advantage did not survive
+  scaling and correctness ties everywhere in E6b; declaring P2 "regressed" —
+  rejected, +0.0267 is a tie, not a regression.
+- **What this does NOT say:** that CE-heavy is a worse objective in general. It
+  is tied with KD-heavy at 1.60M and loses at 2.96M *on this corpus, at these two
+  rungs, with this initialization*. And nothing here is about correctness: no
+  correctness comparison in E6b clears its floor with consistent seeds, and GSM8K
+  correctness stays at 0.00–0.05 for both objectives at both rungs.
+- **P2-5.50M is not justified** and was not initiated: P2 failed to convert the
+  smaller rung, so no preregistered basis exists to expect it to convert a larger
+  one.
+- **Revisit when:** a held-out battery exists, or an objective is proposed that
+  changes the termination behaviour rather than the token-level loss weighting.
+
+## 2026-08-09 — Two budget stop-layers were inert simultaneously
+
+- **Context:** E6b overran its $7.12 authorization, finishing at $7.68. The
+  proximate cause was a 14% step-time miss (4.15 s measured against 3.625 s
+  priced from a comparable run). The structural cause is worse and is what this
+  record exists for.
+- **Findings, both empirical:**
+  * **RunPod's `--terminate-after` did not fire.** The absolute deadline was set
+    at creation for 00:28:47; the pod was still `RUNNING` at 00:34 and was
+    deleted only by the launcher at 00:56. This flag has been documented as the
+    last-resort budget layer since E4 and **has never once been observed to
+    fire** — every prior session was torn down by its launcher first. It was
+    trusted, never tested.
+  * **The launcher's driver-start ssh did not detach.** The same
+    `setsid nohup … < /dev/null & disown` form returned in ~74 s in E6 and here
+    blocked for the entire 434-minute run, so the launcher never reached its
+    polling loop and could not tear down on completion. The invocation is
+    byte-identical to E6's, so the difference lies in what the driver runs.
+- **Decision:** stop treating `--terminate-after` as a guarantee. Until it is
+  demonstrated to fire, the budget model has **one** working automatic layer —
+  the launcher's own teardown — plus a dev-box watchdog. Any future session must
+  **poll the pod, not the orchestrator log**: a blocked launcher emits no lines,
+  and silence then looks identical to an idle experiment. That gap is what turned
+  a 14% cost miss into an unattended overrun.
+- **Not adopted:** lowering the deadline to compensate. A deadline that does not
+  fire is not made safer by being earlier.
+- **Revisit when:** `--terminate-after` is observed to actually terminate a pod,
+  or the launcher's detachment is diagnosed. Until then, assume neither.

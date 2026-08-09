@@ -1,96 +1,100 @@
-**Updated:** 2026-08-08 · branch `main` · **no pods running, nothing billing.**
-**Experiment 6 is complete.** Four paid events, **$2.36**; project total
-**$141.91** of the **$143.02** cap. 834 CPU tests pass.
+**Updated:** 2026-08-09 · branch `main` · **no pods running, nothing billing.**
+**Experiment 6b is complete.** Two paid events, **$7.68** against a $7.12
+authorization — **an overrun of $0.56, recorded below**; project total
+**$149.59**. 879 CPU tests pass.
 
-## E6 COMPLETE — THE BEST CHECKPOINT CHANGED
+## E6b COMPLETE — THE PLATEAU BELONGS TO THE OBJECTIVE, NOT THE DATA
 
-**`e1_r2960k_{sa,sb}_pca` (E1 PCA 2.96M) is now the best checkpoint the project
-has evaluated**, displacing `e4_p2_r1600k_{sa,sb}`. Decision record:
-[`decisions.md`](decisions.md) 2026-08-08.
+E6b trained P2 CE-heavy at the 2.96M rung, filling the missing cell of the
+objective × data-scale matrix. Both arms from the Stage 1 PCA init, the objective
+the only intended difference from `e1_r2960k_{sa,sb}_pca`, verified on the pod
+before a step was taken. Decision records: [`decisions.md`](decisions.md)
+2026-08-09.
 
-E6 was evaluation-only — nothing trained, no checkpoint written or modified,
-proven by AST over every executed script. It put the original Experiment 1 PCA
-scale curve onto the frozen 150-prompt unrestricted protocol for the first time;
-the high rungs had only ever been scored on the retired 76-prompt wave with the
-degeneration stop active.
-
-**The lineage improves from 1.60M to 2.96M and then plateaus.**
-
-| checkpoint | unique / cumulative CE tokens | usable rollout | correct | correct \| usable |
+| model | unique / cumulative CE | usable | correct | correct \| usable |
 | --- | ---: | ---: | ---: | ---: |
-| P1 / P2 at 0.86M | 860,000 / 2.58M | 0.5133–0.5933 | 0.1533–0.2133 | 0.2727–0.3590 |
-| E1-1.60M (= P1) | 1,600,353 / 4.80M | 0.7300 | 0.1867 | 0.2511 |
-| P2-1.60M | 1,600,353 / 4.80M | 0.7333 | 0.2000 | 0.2682 |
-| **E1-2.96M** | 2,960,507 / 8.88M | **0.8400** | **0.2067** | 0.2460 |
-| E1-5.50M | 5,501,372 / 16.50M | 0.8500 | 0.1767 | 0.2039 |
-| E5-C | 1,595,603 / — | 0.7667 | 0.1300 | 0.1652 |
-| E5-R | 1,595,603 / — | 0.4467 | 0.1100 | 0.2463 |
+| E1/P1 1.60M | 1.60M / 4.80M | 0.7300 | 0.1867 | 0.2511 |
+| **E1/P1 2.96M** | 2.96M / 8.88M | **0.8400** | **0.2067** | 0.2460 |
+| P2 1.60M | 1.60M / 4.80M | 0.7333 | 0.2000 | 0.2682 |
+| P2 2.96M | 2.96M / 8.88M | 0.7600 | 0.1900 | 0.2456 |
 
-One frozen 150-prompt battery, mask `d6e24e0b…`, greedy, unrestricted generation
-(P18), every arm re-scored from raw generations. Floors: usable 0.0800,
-correctness 0.0600.
+**Three findings, kept separate.**
 
-**What is claimable, and what is not.**
+1. **P2 scaling effect — a tie.** P2-1.60M → P2-2.96M is **+0.0267** usable,
+   inside the 0.0800 floor, seeds disagreeing (+0.0600 / −0.0067). Correctness
+   −0.0100, also a tie. **P2 does not convert the extra rung.**
+2. **Same-scale objective effect — KD-heavy wins.** P2-2.96M vs E1-2.96M is
+   **−0.0800** usable: at the floor, **−0.0800 on both seeds**, both paired CIs
+   excluding zero. Correctness ties (−0.0167).
+3. **Objective × scale interaction — present.**
+   `(P2_2.96 − P2_1.60) − (E1_2.96 − E1_1.60)` = **−0.0833** on usable rollout,
+   above the floor and direction-consistent. E1 turns the rung into +0.1100 of
+   stability; P2 turns it into +0.0267.
 
-* **2.96M beats 1.60M on behaviour: +0.1100**, above the floor, same direction on
-  both seeds. **5.50M beats 1.60M: +0.1200.** **5.50M vs 2.96M: +0.0100**, inside
-  the floor with the seeds disagreeing — a **tie**.
-* **2.96M beats the P2-1.60M anchor by +0.1067** usable rollout, above the floor
-  and seed-consistent, while tying on correctness (+0.0067).
-* **No correctness comparison anywhere in E6 is both above its floor and
-  seed-consistent.** Correctness has still never moved.
-* 2.96M is preferred over 5.50M by the registered tie-break — correctness may
-  break a tie between behaviour-comparable candidates — leading 0.2067 vs 0.1767
-  on both seeds, at half the tokens.
-* **No arm passed a Stage 2/3 gate**, because no prospectively registered gate
-  exists. E6 ranks; it does not certify.
+**→ `e1_r2960k_{sa,sb}_pca` remains the best evaluated checkpoint.** E6b does not
+displace it; it removes the alternative explanation for E6's plateau. The
+ceiling after 2.96M is a fact about the **E1 objective's curve**, and P2's curve
+is separately flat from the start.
 
-**What changed is termination, not reasoning.** Context-limit hits fall from
-28/44 prompts at 1.60M to 19/23 at 2.96M; numeric answer-parse failure falls from
-0.17/0.24 to 0.03/0.13. GSM8K usable rollout rises 0.71 → 0.92 while GSM8K
-correctness stays at **0.00–0.01**. The higher rungs learn to finish a maths
-problem, not to solve one. The residual failure is **silence**: `non_empty` is the
-largest failure bucket at every rung and barely moves (≈1 prompt in 8).
+**The magnitude caveat, which bounds finding 3.** Per-seed interactions are
+−0.0133 and −0.1533 — same direction, an order of magnitude apart, so the pooled
+figure rests almost entirely on `sb`. Read it as "P2 does not convert the rung
+the way E1 does", not as a calibrated effect size. A difference-in-differences
+over four two-seed cells stacks four single draws.
 
-**After 2.96M, only the diagnostics move.** Teacher-native CE falls monotonically
-(1.298 → 1.148 → 1.004) and teacher-forced reasoning top-1 rises (0.596 → 0.618 →
-0.639) across all three rungs, while behaviour stops improving and correctness
-never starts. This is the sharpest CE/behaviour dissociation on record here, and
-the reason those metrics may not select a checkpoint.
+**What differs between the objectives is termination.** From 1.60M to 2.96M, E1's
+context-limit hits fall 28/44 → 19/23 prompts; P2's only 38/32 → 30/36. What they
+share is parsing: numeric answer-parse failures fall for both. And what neither
+touches is reasoning — **GSM8K correctness is 0.00–0.05 at every cell** while
+GSM8K usable rollout climbs for both objectives.
 
-**The harness is bitwise reproducible across sessions.** `e1_r1600k_{sa,sb}_pca`
-was measured in the E4 session and again in E6, on a different host two days
-later, and reproduced **token for token** — 150/150 identical token-id sequences
-on both seeds, matching sha256. The standing "same session, same GPU" rule came
-from CPU-vs-L40S differences and is restated as **same device, image, engine
-version and harness commit**; session identity is not itself a requirement
-([`decisions.md`](decisions.md) 2026-08-08).
+**Both objectives improve the diagnostic identically.** P2's val CE falls
+1.31 → 1.17 against E1's 1.30 → 1.15, while only E1's behaviour moves. This is
+the cleanest instance yet of the CE/behaviour dissociation and the strongest
+argument for the standing rule that diagnostics may not select a checkpoint.
 
-**Behaviour moves; reasoning does not.** Seven interventions have now been tried —
-more recovery data, held-out-NLL selection, assistant-only KD, CE/KD reweighting,
-restricted attention, two continuation recipes, and now the full token-scale curve
-— and the only lever that has ever moved autonomous rollout stability is **token
-scale**: +0.2000 from 0.86M to 1.60M, and +0.1100 again from 1.60M to 2.96M.
-Correctness has stayed in 0.11–0.21 throughout every one of them.
+**P2-5.50M is not justified** and was not initiated.
 
-**Scope of the plateau, corrected 2026-08-09.** E6's curve is the **E1/P1
-KD-heavy lineage only**. P2 CE-heavy has never been trained above 1.60M, so
-whether the plateau after 2.96M is a property of the **data** or of that
-**objective** is unknown — and the two objectives are tied at 1.60M, which is
-precisely when a shared plateau cannot be assumed. Write "the E1/P1 lineage
-plateaus after 2.96M", not "2.96M is a plateau". **E6b** fills the missing
-P2 × 2.96M cell and is preregistered in
-[`logs/e6b_registration.json`](e6b_registration.json); it is **blocked on
-authorization**, not on preparation.
+### The overrun, and the part that matters more than the money
 
-**Open, not decided:** whether the planned E7 FineWeb experiment changes in light
-of this. E6 states the implication and stops there — that is a separate decision.
+$7.68 against $7.12. The proximate cause was a **14% step-time miss** — 4.15 s
+measured against the 3.625 s priced from E4's comparable arms — which is ~$0.81
+of unbudgeted time and put the session over before any teardown decision existed.
 
-Full records: E3 [§20](EXPERIMENTS.md), E4 [§21](EXPERIMENTS.md), E5
-[§27](EXPERIMENTS.md), **E6 [§28](EXPERIMENTS.md)**; report
-[`logs/e6_report.md`](e6_report.md), machine-readable
-[`logs/e6_results.json`](e6_results.json), registration
-[`logs/e6_registration.json`](e6_registration.json).
+The structural cause is that **two independent stop layers were inert at once**:
+
+* **RunPod's `--terminate-after` did not fire.** Deadline 00:28:47; pod still
+  `RUNNING` at 00:34. Documented as the last-resort layer since E4 and **never
+  once observed to fire** — always trusted, never tested.
+* **The launcher's driver-start ssh did not detach**, blocking for the whole
+  434-minute run, so the launcher never polled and could not tear down at
+  completion. Byte-identical invocation to E6's, which returned in 74 s.
+
+The monitoring gap is mine: the watcher tailed the orchestrator **log**, and a
+blocked launcher writes no lines, so seven hours of silence looked exactly like
+seven hours of nothing happening. **Poll the pod, not the log.**
+
+**Lost:** the structured `train_log.jsonl` and `run_manifest.json` for both arms —
+a bundling glob that did not expand inside ssh quoting, noticed after teardown.
+The training curve, per-step timings and final val CE survive in `e6b_run.log`;
+the machine-readable event stream does not. **Retained and hash-verified:** both
+checkpoints (`89b14b83…`, `3c4709b5…`), all four generation sets, driver log.
+
+Full records: E5 [§27](EXPERIMENTS.md), E6 [§28](EXPERIMENTS.md), **E6b
+[§29](EXPERIMENTS.md)**; report [`logs/e6b_report.md`](e6b_report.md),
+machine-readable [`logs/e6b_results.json`](e6b_results.json), registration
+[`logs/e6b_registration.json`](e6b_registration.json).
+
+## E6 — THE E1 SCALE CURVE (unchanged; scope clarified by E6b)
+
+E6 placed the E1 PCA lineage on the frozen battery: 1.60M 0.7300 → 2.96M 0.8400
+→ 5.50M 0.8500 usable rollout. Improves once, then plateaus. Correctness never
+moved at any rung, and past 2.96M only the diagnostics move. The harness was also
+shown **bitwise reproducible across sessions** — the 1.60M arms reproduced token
+for token on a different host two days later, 150/150 on both seeds.
+
+E6b confirms that curve exactly (E1 +0.1100 re-derived) and settles what it means:
+the plateau is the **E1 objective's**, not the corpus's.
 
 ## NO EXISTING MODEL HAS YET COMPLETED THE STAGE 2/3 OBJECTIVE
 

@@ -7,12 +7,18 @@ proposal files, which are preserved in git history at commit `866dac2`.
 32Q/8KV) → **student** 0.6B-class (1024 hidden, 28L, FFN 3072, 16Q/8KV, tied
 embeddings). BF16 training, INT8 deployment target.
 
-**Total spend to date: $141.91** of the **$143.02** cap — **$1.11 remains and
-nothing further is authorized.** The cap history: $126.02, then **+$4.00** for E4
-on 2026-08-05 ($130.02), then **+$11.50** for E5 across four top-ups during its
-eight attempts ($141.52), then **+$1.50** for E6 on 2026-08-08 ($143.02). No
-experiment was reduced to fit a remainder; each shortfall was reported with its
-expected and pessimistic cost and the scientific cost of the cheaper option.
+**Total spend to date: $149.59** of the **$149.03** cap — **the cap is exceeded
+by $0.56 and nothing further is authorized.** The cap history: $126.02, then
+**+$4.00** for E4 on 2026-08-05 ($130.02), then **+$11.50** for E5 across four
+top-ups during its eight attempts ($141.52), **+$1.50** for E6 on 2026-08-08
+($143.02), then **+$6.01** for E6b on 2026-08-09 ($149.03). No experiment was
+reduced to fit a remainder; each shortfall was reported with its expected and
+pessimistic cost and the scientific cost of the cheaper option.
+
+**The $0.56 overrun is E6b's and is not amortized away** (§29.7): a 14% step-time
+miss put the session past its backstop, and both automatic stop layers —
+RunPod's `--terminate-after` and the launcher's own teardown — were inert at the
+same time. Recorded rather than smoothed.
 
 | period | $ | detail |
 |---|---:|---|
@@ -27,14 +33,15 @@ expected and pessimistic cost and the scientific cost of the cheaper option.
 | Experiment 4, P2 at the 1.60M rung | 4.83 | §21 — 290 min on an L40S + $0.05 failed pod |
 | Experiment 5, continuation vs recovery | 11.64 | §22–27 — ten paid events, eight of which produced no result |
 | Experiment 6, high-rung normalization | 2.36 | §28 — 130 min on an L40S + $0.22 across three pods killed early |
-| **itemized subtotal** | **140.88** | |
+| Experiment 6b, P2 at the 2.96M rung | 7.68 | §29 — 458 min on an L40S + $0.12 failed pod; **$0.56 over its $7.12 authorization** |
+| **itemized subtotal** | **148.56** | |
 
-**Unreconciled: $1.03.** The itemized rows sum to $140.88 while the verified
-running total is **$141.91**. The difference is not
+**Unreconciled: $1.03.** The itemized rows sum to $148.56 while the verified
+running total is **$149.59**. The difference is not
 attributed to any session here, so the **larger** figure is used for every
 remaining-budget decision. Do not "fix" this by deleting the gap.
 
-**$1.11 of the authorized total is unspent.** §6 below is the
+**The authorized total is exceeded by $0.56.** §6 below is the
 *pre-Experiment-1* breakdown and its "project total" line is scoped to that
 period; this table is the current figure.
 
@@ -3977,3 +3984,238 @@ PYTHONPATH=src python scripts/evaluation/analyze_e6.py --bootstrap 10000
 | P2 1.60M weights | `7ee1d9355b97563f…` / `98e8c9811414e982…` |
 | engine | vLLM 0.26.0, bf16, greedy, context 8192, no degeneration stop |
 | artifacts | `logs/e6_results.json`, `logs/e6_report.md`, `artifacts/audit/e6_per_prompt.jsonl` (1,500 records), `artifacts/audit/three_mode/E1-*` |
+
+---
+
+## 29. Experiment 6b — P2 CE-heavy at 2.96M: the objective interacts with scale (2026-08-09, $7.68)
+
+> **STATUS: COMPLETE.** Both arms trained to completion from the Stage 1 PCA init
+> and evaluated on the frozen battery. Registered before training in
+> [`logs/e6b_registration.json`](e6b_registration.json).
+>
+> **Verdict, three separate findings.**
+>
+> 1. **P2 does not scale.** P2-1.60M → P2-2.96M is **+0.0267** usable rollout —
+>    inside the 0.0800 floor, and the seeds disagree in direction (+0.0600 /
+>    −0.0067). A tie. Correctness likewise (−0.0100).
+> 2. **At 2.96M the KD-heavy objective wins on behaviour.** P2-2.96M against
+>    E1-2.96M is **−0.0800** usable — at the floor, **−0.0800 on *both* seeds**,
+>    both bootstrap CIs excluding zero. Correctness ties (−0.0167).
+> 3. **The objective interacts with data scale.** The
+>    difference-in-differences on usable rollout is **−0.0833**, above the floor
+>    and consistent in direction across seeds. E1 converts the extra rung into
+>    +0.1100 of rollout stability; P2 converts it into +0.0267.
+>
+> **`e1_r2960k_{sa,sb}_pca` remains the best evaluated checkpoint.** E6b does not
+> displace it; it removes the possibility that E6's plateau was a property of the
+> data rather than of the E1 objective.
+
+### 29.1 Headline
+
+150 fixed examples, mask `d6e24e0b…` asserted on all eight arms, greedy,
+unrestricted (P18). Every arm re-scored from raw generations with the current
+scorer. "Unique" is the rung; "cumulative" is 3× it (3 exposures, verified).
+
+| model | unique CE | cumulative CE | seed | usable | correct | correct \| usable |
+| --- | ---: | ---: | --- | ---: | ---: | ---: |
+| E1/P1 1.60M | 1,600,353 | 4,801,059 | sa | 0.7800 | 0.1733 | 0.2222 |
+| E1/P1 1.60M | 1,600,353 | 4,801,059 | sb | 0.6800 | 0.2000 | 0.2843 |
+| **E1/P1 1.60M** | | | **mean** | **0.7300** | **0.1867** | 0.2511 |
+| E1/P1 2.96M | 2,960,507 | 8,881,521 | sa | 0.8533 | 0.2133 | 0.2500 |
+| E1/P1 2.96M | 2,960,507 | 8,881,521 | sb | 0.8267 | 0.2000 | 0.2419 |
+| **E1/P1 2.96M** | | | **mean** | **0.8400** | **0.2067** | 0.2460 |
+| P2 1.60M | 1,600,353 | 4,801,059 | sa | 0.7133 | 0.2333 | 0.3178 |
+| P2 1.60M | 1,600,353 | 4,801,059 | sb | 0.7533 | 0.1667 | 0.2212 |
+| **P2 1.60M** | | | **mean** | **0.7333** | **0.2000** | 0.2682 |
+| P2 2.96M | 2,960,507 | 8,881,521 | sa | 0.7733 | 0.1800 | 0.2241 |
+| P2 2.96M | 2,960,507 | 8,881,521 | sb | 0.7467 | 0.2000 | 0.2679 |
+| **P2 2.96M** | | | **mean** | **0.7600** | **0.1900** | 0.2456 |
+
+### 29.2 The three comparisons, kept separate
+
+**A — same-scale objective effect: P2-2.96M vs E1-2.96M.**
+
+| seed | usable | correct | usable win/tie/loss | usable 95% CI |
+| --- | --- | --- | --- | --- |
+| sa | 0.8533 → 0.7733 (**−0.0800**) | 0.2133 → 0.1800 (−0.0333) | 10/118/22 | [−0.1533, −0.0067] **excl. 0** |
+| sb | 0.8267 → 0.7467 (**−0.0800**) | 0.2000 → 0.2000 (0.0000) | 11/116/23 | [−0.1533, −0.0067] **excl. 0** |
+
+−0.0800 pooled, **identical on both seeds**, both CIs excluding zero. At 2.96M
+the KD-heavy objective is better on the primary axis. Correctness −0.0167, inside
+the floor: a tie.
+
+**B — P2 scaling effect: P2-2.96M vs P2-1.60M.**
+
+| seed | usable | correct | usable win/tie/loss | usable 95% CI |
+| --- | --- | --- | --- | --- |
+| sa | 0.7133 → 0.7733 (+0.0600) | 0.2333 → 0.1800 (−0.0533) | 25/109/16 | [−0.0200, +0.1467] |
+| sb | 0.7533 → 0.7467 (−0.0067) | 0.1667 → 0.2000 (+0.0333) | 21/107/22 | [−0.0933, +0.0800] |
+
++0.0267 pooled, inside the floor, **seeds disagree in direction**. P2 does not
+benefit from the rung. Correctness also a tie, also seed-inconsistent.
+
+**C — E1 scaling reference (re-derived, matches E6 §28 exactly).**
++0.1100 usable, above the floor, seed-consistent (+0.0733 / +0.1467).
+
+### 29.3 Objective × scale interaction
+
+`(P2_2.96 − P2_1.60) − (E1_2.96 − E1_1.60)`, per metric:
+
+| metric | better | P2 Δ | E1 Δ | interaction | per seed | consistent | claimable |
+| --- | --- | ---: | ---: | ---: | --- | --- | --- |
+| usable_rollout_rate | higher | +0.0267 | +0.1100 | **−0.0833** | −0.0133 / −0.1533 | yes | **yes** |
+| correct_overall | higher | −0.0100 | +0.0200 | −0.0300 | −0.0933 / +0.0333 | no | no |
+| correct_given_usable | higher | −0.0235 | −0.0073 | −0.0162 | −0.1215 / +0.0891 | no | no |
+| natural_termination_rate | higher | +0.0133 | +0.1000 | −0.0867 | −0.0067 / −0.1667 | yes | no floor |
+| context_limit_rate | lower | −0.0133 | −0.1000 | +0.0867 | +0.0067 / +0.1667 | yes | no floor |
+| severe_repetition_rate | lower | −0.0100 | −0.0933 | +0.0833 | −0.0000 / +0.1667 | no | no |
+| empty_output_rate | lower | −0.0166 | −0.0566 | +0.0400 | −0.0333 / +0.1133 | no | no |
+| answer_parse_failure (numeric) | lower | −0.0666 | −0.1266 | +0.0600 | +0.0799 / +0.0401 | yes | no floor |
+
+**Only `usable_rollout_rate` clears its floor with a consistent direction, and it
+is the primary axis, so the interaction is claimable there.** Every metric
+without a registered floor is reported and not claimed, however suggestive.
+
+**The honest caveat on magnitude.** The per-seed interactions are −0.0133 and
+−0.1533. They agree in *direction* but differ by an order of magnitude, so the
+pooled −0.0833 is carried almost entirely by `sb`. A difference-in-differences
+over four two-seed cells stacks four single draws; this one satisfies the
+registered rule, and it is the weakest kind of evidence that rule admits. It
+should be treated as "P2 does not convert the rung the way E1 does" rather than
+as a calibrated effect size.
+
+### 29.4 Components and counts
+
+| arm | usable/150 | correct/150 | c∧u/usable | protocol | nat.term | ctx-limit | repetition | empty | parse-fail | p50 / p90 |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| E1-1.60M-sa | 117 | 26 | 26/117 | 0.7800 | 0.8133 | 0.1867 | 0.1867 | 0.1400 | 13/75 | 576 / 8117 |
+| E1-1.60M-sb | 102 | 30 | 29/102 | 0.6933 | 0.7067 | 0.2933 | 0.3067 | 0.2200 | 18/75 | 616 / 8119 |
+| E1-2.96M-sa | 128 | 32 | 32/128 | 0.8733 | 0.8733 | 0.1267 | 0.1467 | 0.1200 | 2/75 | 585 / 8098 |
+| E1-2.96M-sb | 124 | 30 | 30/124 | 0.8333 | 0.8467 | 0.1533 | 0.1600 | 0.1267 | 10/75 | 586 / 8105 |
+| P2-1.60M-sa | 107 | 35 | 34/107 | 0.7133 | 0.7467 | 0.2533 | 0.2533 | 0.2333 | 9/75 | 566 / 8123 |
+| P2-1.60M-sb | 113 | 25 | 25/113 | 0.7600 | 0.7867 | 0.2133 | 0.2200 | 0.1933 | 10/75 | 731 / 8108 |
+| **P2-2.96M-sa** | 116 | 27 | 26/116 | 0.7867 | 0.8000 | 0.2000 | 0.2133 | 0.1800 | 4/75 | 688 / 8105 |
+| **P2-2.96M-sb** | 112 | 30 | 30/112 | 0.7467 | 0.7600 | 0.2400 | 0.2400 | 0.2133 | 5/75 | 653 / 8117 |
+
+**Where the two objectives diverge is termination.** From 1.60M to 2.96M, E1's
+context-limit hits fall 28/44 → 19/23 prompts; P2's fall only 38/32 → 30/36.
+E1 converts the extra data into trajectories that stop; P2 largely does not.
+
+**Where they agree is parsing.** Numeric answer-parse failures fall on *both*
+objectives (E1 13/18 → 2/10, P2 9/10 → 4/5 of 75 numeric prompts). More data
+teaches both to emit a recognisable final answer.
+
+**GSM8K, the sharpest single view:** usable rollout rises for both objectives
+(E1 0.71 → 0.91, P2 0.72 → 0.84) while GSM8K correctness stays at **0.00–0.05
+everywhere**. Neither objective at any rung learns to solve a grade-school maths
+problem; both learn to finish one.
+
+### 29.5 Diagnostics — both objectives improve; only one improves behaviour
+
+| arm | final val CE | teacher-forced reasoning top-1 |
+| --- | ---: | ---: |
+| E1-2.96M sa / sb | 1.1468 / 1.1486 | 0.6152 / 0.6213 |
+| P2-1.60M sa / sb | 1.3112 / 1.3140 | 0.5815 / 0.5818 |
+| **P2-2.96M sa / sb** | **1.1694 / 1.1740** | see `logs/e6b_results.json` |
+
+P2's val CE improves with scale exactly as E1's does (1.31 → 1.17 against
+1.30 → 1.15), while its rollout behaviour does not. This is the third independent
+instance of the CE/behaviour dissociation, and the cleanest: the two objectives
+move nearly identically on the diagnostic and differently on the primary axis.
+**Diagnostics may not select a checkpoint** — E6b is the strongest evidence yet
+for that rule.
+
+### 29.6 Conclusions, against the registered rules
+
+* **Best existing evaluated checkpoint:** `e1_r2960k_{sa,sb}_pca`, unchanged.
+* **Best objective at 2.96M:** **E1/P1 KD-heavy**, on the primary axis, at the
+  floor, seed-consistent, both CIs excluding zero.
+* **P2 scale trend:** **does not improve** — a tie, with the seeds disagreeing.
+  Whether it is a true plateau or simply a smaller gain than this design can
+  resolve is not separable at n=2.
+* **Objective × scale interaction:** **evidence of interaction on the primary
+  axis**, with the magnitude caveat in §29.3.
+* **Correctness vs stability:** P2-2.96M does neither. It is not the E1 pattern
+  of "more usable but not more correct" — it is not materially more of either.
+* **P2-5.50M:** **not justified.** P2 did not convert the 1.60M → 2.96M rung, so
+  there is no preregistered basis to expect it to convert a larger one. Not
+  initiated; a separate decision if ever wanted.
+
+### 29.7 Execution, cost, and an overrun that must be recorded
+
+Pod `luy1txyjro2msz`, L40S at $0.99/h, 17:17 → 00:56 = **458 min = $7.56**, plus
+**$0.12** for a pod that died at `INIT_READY` on an unforwarded environment
+variable (§29.8) — **$7.68 total against a $7.12 authorization. Overrun $0.56.**
+
+**Root cause of the overrun: the step time.** The cost model used 3.625 s/step,
+measured from E4's P2 arms on the same GPU, image, batch and block length. The
+run measured **4.148 / 4.110 s/step** — 14% slower for reasons not attributable
+to anything in the recipe. That alone is 49 min ≈ $0.81 of unbudgeted time, and
+it put the session over the backstop *before* any teardown decision existed.
+
+**Two independent stop mechanisms were inert at the same time, which is the more
+important finding.**
+
+1. **The launcher's ssh call to start the driver did not detach.** It used the
+   same `setsid nohup … < /dev/null & disown` form that returned in ~74 s in E6,
+   and here it blocked for the whole 434-minute run. The launcher therefore never
+   reached its polling loop, never saw `ALL_DONE`, and could not tear down at
+   completion. Cause not established; the invocation is byte-identical to E6's,
+   so it is a property of what the driver runs, not of how it is launched.
+2. **RunPod's `--terminate-after` did not fire.** The deadline was set to
+   00:28:47 at creation and the pod was still `RUNNING` at 00:34. This flag has
+   been the documented last-resort budget layer since E4 and **has never once
+   been observed to fire** — every previous session was torn down by its
+   launcher first. It was trusted, not tested.
+
+With both inert, nothing would have stopped the pod except the work finishing,
+which it did at 00:31:56. The monitoring gap is mine: the watcher tailed the
+orchestrator *log*, and a blocked launcher writes no lines, so seven hours of
+silence was indistinguishable from seven hours of nothing happening. **Poll the
+pod, not the log.**
+
+**Retained:** both checkpoints (5.6 GB each, sha256 `89b14b83…` / `3c4709b5…`,
+verified local-vs-pod), all four generation sets, the driver console log, and the
+pod-side hash manifests. **Lost:** the structured `train_log.jsonl` and
+`run_manifest.json` for both arms — the bundling command's `$(ls -d …)` globs did
+not expand inside the ssh quoting, and the pod was deleted before it was noticed.
+The training curve, per-step timings and final val CE survive in
+`e6b_run.log`; the machine-readable event stream (AGENTS.md 3.7) does not. A P4
+gap, recorded rather than papered over.
+
+### 29.8 The $0.12 pod
+
+`e6b_setup.sh` reads `TEACHER_REVISION` because E6b computes KD. Its launcher was
+derived from E6's, which had no teacher and never forwarded that variable, so the
+pod died with a bare `KeyError` at `INIT_READY` — after both venvs were built and
+the Stage 1 init downloaded and hash-verified. No existing guard could see it:
+the pod simulation runs the test suite, not the setup script, and `bash -n`
+parses fine. `tests/pod/test_launcher_forwards_setup_env.py` now checks, for all
+21 launcher/setup pairs, that every variable a setup consumes is forwarded and
+defaulted. Verified to bite: with the fix reverted it names `TEACHER_REVISION`.
+
+### 29.9 Exact reproduction record
+
+Commit **`6375e299815416dddc1bd0c12fd6fe273035a9e9`**.
+
+```bash
+PYTHONPATH=src python scripts/training/build_e6b_configs.py
+PYTHONPATH=src python scripts/training/register_e6b.py --authorized-usd 7.12
+bash scripts/pod/simulate_pod_env.sh
+SCR=… SESSION_COMMIT=6375e299815416dddc1bd0c12fd6fe273035a9e9 \
+  BUNDLE_NAME=aad_e6b_6375e299.bundle AUTHORIZED_USD=7.00 \
+  setsid nohup bash scripts/pod/e6b_launch.sh &
+PYTHONPATH=src python scripts/evaluation/analyze_e6b.py --bootstrap 10000
+```
+
+| identity | value |
+| --- | --- |
+| config sha256 | sa `963aa00ead167682…` · sb `da71974841a39b96…` |
+| final `model.safetensors` | sa `89b14b839ff9b8a2…` · sb `3c4709b51792c7e6…` |
+| Stage 1 fork point | `86fbba78e8a2a324…`, asserted on the pod before training |
+| teacher | `Qwen/Qwen3-4B-Thinking-2507` @ `768f209d9e…` |
+| rung | 1,944 blocks · 2,960,507 unique CE tokens · 3.0000 exposures · 8,881,521 cumulative |
+| nesting | strict token-level prefix of 1.60M on `input_ids`, `ce_mask`, `content_mask` |
+| objective | ce 1.0 / kd 0.25, τ 1.0, scope all |
+| evaluation | mask `d6e24e0b…` on all 8 arms · 150 prompts · greedy · ctx 8192 · vLLM 0.26.0 |
+| artifacts | `logs/e6b_results.json`, `logs/e6b_report.md`, `artifacts/audit/e6b_per_prompt.jsonl` (1,200 records) |
