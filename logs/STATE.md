@@ -80,6 +80,13 @@ The training curve, per-step timings and final val CE survive in `e6b_run.log`;
 the machine-readable event stream does not. **Retained and hash-verified:** both
 checkpoints (`89b14b83…`, `3c4709b5…`), all four generation sets, driver log.
 
+**Disk, 2026-08-09:** Experiment 3's four checkpoints (19.6 GB) were deleted
+with maintainer approval — the approach was rejected and no live claim needs the
+weights. Hashes recorded before deletion and all of E3's evaluation artifacts
+survive, so it stays re-analysable ([`artifact_manifests.md`](artifact_manifests.md)).
+**50 GB free.** Remaining checkpoint stores: e2p1 23 GB (phases 2-3 unauthorized),
+e6b 12 GB and e4 12 GB (both single-copy, both live), p2_ceheavy 4.5 GB.
+
 Full records: E5 [§27](EXPERIMENTS.md), E6 [§28](EXPERIMENTS.md), **E6b
 [§29](EXPERIMENTS.md)**; report [`logs/e6b_report.md`](e6b_report.md),
 machine-readable [`logs/e6b_results.json`](e6b_results.json), registration

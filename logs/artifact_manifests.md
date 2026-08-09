@@ -774,6 +774,40 @@ now have 150-example unrestricted-harness results (`three_mode/P1-1600k-{sa,sb}/
 comparable with every Stage 2/3 family, where before they had only 76-prompt
 behaviour-wave numbers taken with the degeneration stop active.
 
+## Experiment 3 checkpoints — DELETED 2026-08-09 (maintainer-approved)
+
+- **Artifact:** the four Experiment 3 arms, `e3_a1_frozen_attn_{sa,sb}` and
+  `e3_a2_lora_attn_{sa,sb}`, formerly at `/home/ecs-user/aad-artifacts/e3/`,
+  **19.6 GB**, dev box only (never on the relay — its private LFS quota has been
+  at the limit since 2026-08-02).
+- **Why deleted:** Experiment 3's verdict is that restricting attention updates
+  **degrades** autonomous generation stability (−0.087 and −0.093 usable rollout,
+  both seeds, every component). **Neither arm was adopted** and no live claim
+  depends on the weights. Deleted to reclaim dev-box space for training sessions.
+- **Weight hashes, recorded before deletion** so the record identifies exactly
+  what existed:
+
+| file | sha256 |
+| --- | --- |
+| `e3_a1_frozen_attn_sa/model/model.safetensors` | `c813b5972e7c140103880fb50b800e9ba4a617d4c15215d717c64b77c640532c` |
+| `e3_a1_frozen_attn_sb/model/model.safetensors` | `104813dec07cf9acfa11cb8103bb491de520d1338979326c021bf0f7f35369a0` |
+| `e3_a2_lora_attn_sa/model/model.safetensors` | `a8f397791b2b94c2d834c158494efa99733c71e67219b98bdb5471b4e2b5bb20` |
+| `e3_a2_lora_attn_sa/lora_state.safetensors` | `34f9ab5d7d2af6920d72151c4fcd173a254bea092b43924e4bbe6c17c5869f70` |
+| `e3_a2_lora_attn_sb/model/model.safetensors` | `2e6530d05b2ab59672974b5cb420d3ac7fab9b0bc2299291b67616f2c7f61100` |
+| `e3_a2_lora_attn_sb/lora_state.safetensors` | `6eb5132291706a125ee0904126e7afd64ad056c354e460df5e1bfb48b739f04a` |
+
+- **What survives, and it is everything except the weights:** all four evaluation
+  sets (`artifacts/audit/three_mode/A{1,2}-*`, 150 generations each with token
+  ids and decoded text), `artifacts/audit/e3_comparison.json`,
+  `artifacts/audit/e3_movement/`, the preregistration
+  [`logs/e3_registration.json`](e3_registration.json), and the full record at
+  [`EXPERIMENTS.md`](EXPERIMENTS.md) §20. **The experiment remains fully
+  re-analysable; it is not re-runnable without retraining** (~$5.76).
+- **Distinguish this from a loss.** P0-assistant's and E5's checkpoints were
+  *lost* to defects. These were *deleted deliberately*, with hashes recorded and
+  maintainer approval, because a rejected approach's weights are the cheapest
+  thing on the disk to give up.
+
 ## Experiment 6b outputs and checkpoints (2026-08-09)
 
 Session commit `6375e299815416dddc1bd0c12fd6fe273035a9e9`, pod
