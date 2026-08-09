@@ -81,10 +81,26 @@
   },
   {
     "artifact_class": "driver_console",
-    "pattern": "../e7_run.log",
+    "pattern": "audit/e7_session/e7_run.log",
     "required": false,
     "min_matches": 1,
     "min_bytes": 1,
     "lifecycle": "mutable_snapshot"
+  },
+  {
+    "artifact_class": "session_status",
+    "pattern": "audit/e7_session/e7.status",
+    "required": true,
+    "min_matches": 1,
+    "min_bytes": 32,
+    "lifecycle": "final_required"
+  },
+  {
+    "artifact_class": "preflight_summary",
+    "pattern": "audit/e7_preflight_summary.json",
+    "required": true,
+    "min_matches": 1,
+    "min_bytes": 32,
+    "lifecycle": "final_required"
   }
 ]

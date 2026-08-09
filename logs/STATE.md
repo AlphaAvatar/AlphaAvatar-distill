@@ -1,8 +1,8 @@
 **Updated:** 2026-08-09 · branch `main` · **no pods running, nothing billing.**
 **E6b is complete, accepted and CLOSED — not to be modified or rerun.**
 **The live control-plane canary PASSED 12/12 on its clean rerun**, unaided, for
-$0.033. **E7 is designed, implemented, preregistered in draft and costed — and
-still NOT authorized.** **1,071 CPU tests pass**, 3 skipped.
+$0.033. **E7 IS AUTHORIZED — full B+C design, $12.82 hard backstop, cumulative cap
+$162.49.** **1,071 CPU tests pass**, 3 skipped.
 
 ## BUDGET ACCOUNTING — READ BEFORE PROPOSING ANY PAID RUN
 
@@ -12,8 +12,14 @@ actual cumulative spend:            $149.668  <-- the planning baseline
   E6b overrun                          $0.56
   canary run 1 (FAILED 9/10)           $0.045
   canary run 2 (PASSED 12/12)          $0.033
-temporary cumulative cap:           $150.41   ($0.742 remaining)
+temporary canary cap (spent, closed): $150.41
+**AUTHORIZED CUMULATIVE CAP:          $162.49**  = $149.668 + $12.82
 ```
+
+**The cap is built from actual cumulative spend, never from unused room under a
+previous authorization.** $162.49, not $163.23 — the earlier figure carried
+forward canary authorization that was never spent and is not part of the
+actual-spend baseline.
 
 **The historical $149.03 authorization is not remaining balance and must never
 be treated as one.** All future planning uses the **actual cumulative spend** as

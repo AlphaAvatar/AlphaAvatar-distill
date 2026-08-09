@@ -29,9 +29,22 @@ AMBIENT = {
     "UV_PID", "TRIP_S", "GRACE_S", "UV_TRIP_S", "UV_GRACE_S",
 }
 
-PAIRS = [(POD / f"{p.name[:-len('_setup.sh')]}_launch.sh", p)
-         for p in sorted(POD.glob("*_setup.sh"))
-         if (POD / f"{p.name[:-len('_setup.sh')]}_launch.sh").is_file()]
+def _launcher_for(setup: Path):
+    """A launcher may be bash or Python; both forward the same contract.
+
+    E7's orchestrator is `e7_launch.py`. A pairing rule that only knew about
+    `.sh` would silently stop checking the very contract whose omission killed
+    the E6b setup at INIT_READY after both venvs were built.
+    """
+    stem = setup.name[: -len("_setup.sh")]
+    for cand in (POD / f"{stem}_launch.sh", POD / f"{stem}_launch.py"):
+        if cand.is_file():
+            return cand
+    return None
+
+
+PAIRS = [(_launcher_for(p), p) for p in sorted(POD.glob("*_setup.sh"))
+         if _launcher_for(p) is not None]
 
 
 def required_env(setup_text: str) -> set[str]:
@@ -50,14 +63,43 @@ def test_pairs_are_discovered():
     assert PAIRS, "no launcher/setup pairs found; the detector is broken"
 
 
+def forwards(launch: Path, var: str) -> bool:
+    """Is `var` set on the command line that runs the setup?
+
+    Two shapes, because launchers come in two languages. Bash writes
+    `VAR=$VAR`; Python interpolates, `f"VAR={self.a.thing}"`. A detector that
+    knew only the first would silently stop checking the moment an orchestrator
+    was rewritten — which is exactly how the E6b setup came to die on an
+    unforwarded TEACHER_REVISION after both venvs were built.
+    """
+    text = launch.read_text()
+    if re.search(rf"\b{var}=\$\{{?{var}\b", text):
+        return True
+    return bool(re.search(rf"\b{var}=\{{[^}}]+\}}", text))
+
+
+def python_source_is_non_empty(launch: Path, var: str) -> bool:
+    """The interpolated value must come from a required or defaulted option."""
+    text = launch.read_text()
+    m = re.search(rf"\b{var}=\{{\s*self\.a\.([a-z0-9_]+)", text)
+    if not m:
+        return False
+    flag = "--" + m.group(1).replace("_", "-")
+    for decl in re.findall(rf'add_argument\(\s*"{re.escape(flag)}"(.*?)\)',
+                           text, re.S):
+        if "required=True" in decl:
+            return True
+        d = re.search(r'default=("([^"]*)"|[^,\s)]+)', decl)
+        if d and d.group(2) != "" and d.group(1) not in ("None", '""'):
+            return True
+    return False
+
+
 @pytest.mark.parametrize("launch,setup", PAIRS,
                          ids=lambda p: p.name if isinstance(p, Path) else str(p))
 def test_launcher_forwards_every_variable_the_setup_reads(launch, setup):
     needed = required_env(setup.read_text())
-    launch_text = launch.read_text()
-    # The forwarding happens on the ssh line that runs the setup script.
-    missing = sorted(v for v in needed
-                     if not re.search(rf"\b{v}=\$\{{?{v}\b", launch_text))
+    missing = sorted(v for v in needed if not forwards(launch, v))
     assert not missing, (
         f"{setup.name} reads {missing} but {launch.name} never forwards "
         f"{'it' if len(missing) == 1 else 'them'} over ssh. The pod fails at "
@@ -70,11 +112,15 @@ def test_forwarded_variables_have_a_launcher_side_default(launch, setup):
     """Forwarding an unset variable forwards an empty string, which is worse."""
     needed = required_env(setup.read_text())
     launch_text = launch.read_text()
-    undefaulted = sorted(
-        v for v in needed
-        if re.search(rf"\b{v}=\$\{{?{v}\b", launch_text)
-        and not re.search(rf"^{v}=\$\{{{v}:[-?]", launch_text, re.M)
-        and not re.search(rf"^{v}=\$\{{{v}:\?", launch_text, re.M))
+    if launch.suffix == ".py":
+        undefaulted = sorted(v for v in needed
+                             if not python_source_is_non_empty(launch, v))
+    else:
+        undefaulted = sorted(
+            v for v in needed
+            if re.search(rf"\b{v}=\$\{{?{v}\b", launch_text)
+            and not re.search(rf"^{v}=\$\{{{v}:[-?]", launch_text, re.M)
+            and not re.search(rf"^{v}=\$\{{{v}:\?", launch_text, re.M))
     assert not undefaulted, (
         f"{launch.name} forwards {undefaulted} without a default or a required "
         "marker; if the caller does not export it the pod receives an empty "

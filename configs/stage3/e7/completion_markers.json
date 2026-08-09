@@ -1,18 +1,26 @@
 [
   {
-    "path": "../e7.status",
-    "contains": "MARKER:TRAIN_DONE:e7_fineweb_r1600k_sa"
+    "path": "audit/e7_session/e7.status",
+    "contains": "MARKER:TRAIN_DONE:E7-B-FineWeb-sa"
   },
   {
-    "path": "../e7.status",
-    "contains": "MARKER:TRAIN_DONE:e7_fineweb_r1600k_sb"
+    "path": "audit/e7_session/e7.status",
+    "contains": "MARKER:TRAIN_DONE:E7-B-FineWeb-sb"
   },
   {
-    "path": "../e7.status",
+    "path": "audit/e7_session/e7.status",
+    "contains": "MARKER:TRAIN_DONE:E7-C-Control-sa"
+  },
+  {
+    "path": "audit/e7_session/e7.status",
+    "contains": "MARKER:TRAIN_DONE:E7-C-Control-sb"
+  },
+  {
+    "path": "audit/e7_session/e7.status",
     "contains": "MARKER:EVAL_DONE"
   },
   {
-    "path": "../e7.status",
+    "path": "audit/e7_session/e7.status",
     "contains": "MARKER:ALL_DONE"
   }
 ]
