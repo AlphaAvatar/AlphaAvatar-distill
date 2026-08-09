@@ -343,6 +343,9 @@ def test_safe_teardown_runs_the_whole_sequence(session):
     manifest = build_manifest(root, SPECS)
     state["artifact_manifest_created"] = True
     state["required_files_present"] = manifest.ok
+    # The arms have finished; nothing is being appended, so the streams are
+    # final rather than snapshots.
+    state["final_streams_quiescent"] = manifest.final_streams_quiescent
 
     archive = create_archive(manifest, session.tmp / "e6b.tar.gz")
     state["archive_created"] = archive.is_file()
@@ -372,14 +375,19 @@ def test_emergency_budget_teardown_deletes_and_records_the_loss(session):
 
     decision = evaluate_teardown(
         {"training_complete": True, "evaluation_complete": True,
-         "artifact_manifest_created": True, "required_files_present": False},
+         "artifact_manifest_created": True, "required_files_present": False,
+         "final_streams_quiescent": False},
         emergency_budget=True,
-        emergency_reason="hard limit 431 min reached; $7.12 authorization")
+        emergency_reason="hard limit 431 min reached; $7.12 authorization",
+        incomplete_event_streams=("stage3/e6b_p2_r2960k_sa/train_log.jsonl",))
     assert decision.allowed and decision.emergency
     assert decision.failed_check == "required_files_present"
     assert "LOST" in decision.reason
     assert "archive_created" in decision.reason, (
         "the record must name every check that did not run")
+    assert "THE FINAL EVENT STREAM IS INCOMPLETE" in decision.reason
+    assert decision.incomplete_event_streams == (
+        "stage3/e6b_p2_r2960k_sa/train_log.jsonl",)
 
     session.provider.terminate("pod-e6b")
     assert session.provider.exists is False

@@ -167,6 +167,7 @@ def test_collect_artifacts_full_cycle(tmp_path):
     state.write_text(json.dumps({
         "training_complete": True, "evaluation_complete": True,
         "artifact_manifest_created": True, "required_files_present": True,
+        "final_streams_quiescent": True,
         "archive_created": True, "archive_contents_verified": True,
         "transfer_complete": True, "local_hashes_verified": True,
         "checkpoint_hashes_matched": True, "report_inputs_verified": True}))

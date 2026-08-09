@@ -65,22 +65,44 @@ STATUS = f"{WS}/canary.status"
 # The pod-side job: a harmless loop that emits one structured event and one
 # marker every few seconds and outlives the watchdog, so "already-emitted events
 # survived the pod" is demonstrated rather than asserted.
+JOB_TICKS = 50          # x3 s = 150 s: long enough to relay from a live writer,
+                        # short enough that the run finishes inside the backstop
 JOB_CMD = (
     f"mkdir -p {CANARY_DIR}; i=0; "
-    f"while [ $i -lt 600 ]; do "
+    f"while [ $i -lt {JOB_TICKS} ]; do "
     f"printf '{{\"time\":\"%s\",\"event\":\"canary_tick\",\"step\":%d}}\\n' "
     f"\"$(date -u +%Y-%m-%dT%H:%M:%SZ)\" \"$i\" >> {EVENTS}; "
     f"printf '%s MARKER:TICK:%d\\n' \"$(date -u +%Y-%m-%dT%H:%M:%SZ)\" \"$i\" "
     f">> {STATUS}; "
-    f"i=$((i+1)); sleep 3; done"
+    f"i=$((i+1)); sleep 3; done; "
+    # The terminal marker. `final_required` means "the producer said it
+    # finished", not merely "the file stopped changing while I looked".
+    f"printf '%s MARKER:ALL_DONE\\n' \"$(date -u +%Y-%m-%dT%H:%M:%SZ)\" >> {STATUS}"
 )
 
-ARTIFACT_SPEC = [
+# Phase A, while the job is still writing: the event stream is a
+# `mutable_snapshot`. Its claim is "these bytes are durable", not "this file is
+# finished", so growth during archiving is expected and recorded.
+SPEC_SNAPSHOT = [
     {"artifact_class": "event_stream", "pattern": "canary/train_log.jsonl",
-     "required": True, "min_matches": 1, "min_bytes": 256},
+     "required": True, "min_matches": 1, "min_bytes": 256,
+     "lifecycle": "mutable_snapshot"},
     {"artifact_class": "job_descriptor", "pattern": "jobs/*.job.json",
-     "required": True, "min_matches": 1, "min_bytes": 32},
+     "required": True, "min_matches": 1, "min_bytes": 32,
+     "lifecycle": "final_required"},
 ]
+# Phase B, after the terminal marker: the same stream is now `final_required`
+# and must be marker-backed and quiescent. This is the shape a normal E7
+# teardown uses.
+SPEC_FINAL = [
+    {"artifact_class": "event_stream", "pattern": "canary/train_log.jsonl",
+     "required": True, "min_matches": 1, "min_bytes": 256,
+     "lifecycle": "final_required"},
+    {"artifact_class": "job_descriptor", "pattern": "jobs/*.job.json",
+     "required": True, "min_matches": 1, "min_bytes": 32,
+     "lifecycle": "final_required"},
+]
+COMPLETION_MARKERS = [{"path": "canary.status", "contains": "MARKER:ALL_DONE"}]
 
 MINI_TREE = [
     ("scripts/pod/collect_artifacts.py", "aad/scripts/pod/collect_artifacts.py"),
@@ -107,6 +129,9 @@ class Canary:
         self.start_epoch = 0.0
         self.price = None
         self.candidates: list = []
+        self.launches: dict[str, int] = {"safety": 0, "test": 0}
+        self.backstop_minutes = float(args.backstop_minutes)
+        self.safety_minutes = float(args.backstop_minutes) - 5.0
         self.cli = shutil.which("runpodctl") or os.path.expanduser(
             "~/.local/bin/runpodctl")
         if not Path(self.cli).is_file():
@@ -171,21 +196,34 @@ class Canary:
         self.price = quotes[0][0]
         self.ev["quoted_price_per_hour"] = self.price
         self.ev["stock_status"] = quotes[0][2]
-        # The worst case this session can bill, before anything is created.
-        worst = self.a.backstop_minutes / 60 * self.price
-        self.ev["worst_case_at_backstop_usd"] = round(worst, 4)
-        self.say(f"selected {quotes[0][1]} at ${self.price}/h — worst case at "
-                 f"the {self.a.backstop_minutes:.0f} min backstop ${worst:.3f} "
-                 f"(authorized ${self.a.authorized_usd})")
-        if worst > self.a.authorized_usd:
-            self.say("ABORT: the backstop itself exceeds the authorization")
+        self.say(f"selected {quotes[0][1]} at ${self.price}/h")
+        # The backstop is DERIVED from the quote, never the other way round.
+        # The authorization is a dollar figure; minutes are whatever fits inside
+        # it. If that leaves too little time to complete the canary, stop and
+        # report — do not widen the backstop to make the run fit.
+        fitted = self.a.authorized_usd / self.price * 60
+        self.ev["backstop_minutes_fitted"] = round(fitted, 2)
+        if fitted < self.a.min_backstop_minutes:
+            self.say(
+                f"ABORT: ${self.a.authorized_usd} buys only {fitted:.1f} min at "
+                f"${self.price}/h, under the {self.a.min_backstop_minutes:.0f} "
+                "min this canary needs. Reporting rather than changing the "
+                "backstop.")
             return False
+        self.backstop_minutes = min(self.a.backstop_minutes, fitted)
+        self.safety_minutes = max(1.0, self.backstop_minutes - 5.0)
+        worst = self.backstop_minutes / 60 * self.price
+        self.ev["backstop_minutes"] = round(self.backstop_minutes, 2)
+        self.ev["worst_case_at_backstop_usd"] = round(worst, 4)
+        self.say(f"backstop {self.backstop_minutes:.1f} min = ${worst:.3f} "
+                 f"(authorized ${self.a.authorized_usd}); safety watchdog at "
+                 f"{self.safety_minutes:.1f} min")
         return True
 
     # -- 2. create ---------------------------------------------------------
     def create(self) -> bool:
         deadline = (datetime.now(timezone.utc)
-                    + timedelta(minutes=self.a.backstop_minutes))
+                    + timedelta(minutes=self.backstop_minutes))
         pid, chosen, price = "", "", None
         for sp, gpu, _stock in self.candidates:
             raw = subprocess.run(
@@ -257,8 +295,9 @@ class Canary:
         subprocess.Popen(cmd, stdout=out, stderr=subprocess.STDOUT,
                          stdin=subprocess.DEVNULL, cwd=REPO_ROOT, env=env,
                          start_new_session=True)
-        self.say(f"watchdog[{tag}] detached — hard {hard_minutes:.1f} min, "
-                 f"runpodctl={runpodctl or 'real'}")
+        self.launches[tag] = self.launches.get(tag, 0) + 1
+        self.say(f"watchdog[{tag}] detached (launch #{self.launches[tag]}) — "
+                 f"hard {hard_minutes:.1f} min, runpodctl={runpodctl or 'real'}")
         return journal
 
     # -- 4. endpoint -------------------------------------------------------
@@ -281,11 +320,84 @@ class Canary:
             time.sleep(10)
         return None
 
-    # -- 5-9 ---------------------------------------------------------------
+    def collect(self, target, host, scp, phase: str, spec_name: str, *,
+                settle: float, markers: str) -> dict:
+        """One full collection round, pod-side then dev-box-side.
+
+        Returns data rather than asserting, so the caller decides what each
+        phase was supposed to prove: the snapshot round claims durability, the
+        final round claims completeness, and they are not the same claim.
+        """
+        cc = ("cd /workspace/aad && PYTHONPATH=/workspace/aad/src python3 "
+              "scripts/pod/collect_artifacts.py")
+        mpath = f"{WS}/manifest_{phase}.json"
+        apath = f"{WS}/artifacts_{phase}.tar.gz"
+        cmd = (f"{cc} manifest --root {WS} --spec {WS}/{spec_name} "
+               f"--out {mpath} --settle-seconds {settle}")
+        if markers:
+            cmd += f" --completion-markers {markers}"
+        man = target.run(cmd, timeout=240)
+        self.say(f"  [{phase}] manifest rc={man.returncode} :: "
+                 f"{man.stdout.strip().splitlines()[-1] if man.stdout.strip() else ''}")
+        arc = target.run(f"{cc} archive --manifest {mpath} --out {apath}",
+                         timeout=240)
+        ver = target.run(f"{cc} verify-archive --manifest {mpath} "
+                         f"--archive {apath}", timeout=240)
+        store = self.scr / f"store_{phase}"
+        store.mkdir(exist_ok=True)
+        for remote, local in ((mpath, store / "manifest.json"),
+                              (apath, store / "artifacts.tar.gz")):
+            subprocess.run(scp + [f"root@{host}:{remote}", str(local)],
+                           capture_output=True, timeout=300)
+        out = {"phase": phase, "manifest_rc": man.returncode,
+               "archive_rc": arc.returncode, "verify_archive_rc": ver.returncode,
+               "pod_manifest_stdout": man.stdout.strip()[-600:],
+               "local_ok": False, "manifest": {}, "gate": None}
+        if not (store / "manifest.json").is_file():
+            return out
+        import tarfile
+        extract = store / "extracted"
+        extract.mkdir(exist_ok=True)
+        try:
+            with tarfile.open(store / "artifacts.tar.gz") as tar:
+                tar.extractall(extract, filter="data")
+            manifest = ArtifactManifest.load(store / "manifest.json")
+            problems = verify_extracted(extract, manifest)
+            out["local_ok"] = not problems
+            out["local_problems"] = problems
+            out["manifest"] = {
+                "ok": manifest.ok,
+                "final_streams_quiescent": manifest.final_streams_quiescent,
+                "final_entries": len(manifest.final_entries()),
+                "snapshot_entries": len(manifest.snapshot_entries()),
+                "appended_during_archive": manifest.appended_during_archive,
+                "still_being_written": manifest.still_being_written,
+                "completion_marker_failures": manifest.completion_marker_failures,
+                "entries": [{"path": e.path, "lifecycle": e.lifecycle,
+                             "size_bytes": e.size_bytes,
+                             "sha256": e.sha256[:16] + "…"}
+                            for e in manifest.entries],
+            }
+            out["gate"] = evaluate_teardown({
+                "training_complete": True, "evaluation_complete": True,
+                "artifact_manifest_created": True,
+                "required_files_present": manifest.ok,
+                "final_streams_quiescent": manifest.final_streams_quiescent,
+                "archive_created": True,
+                "archive_contents_verified": ver.returncode == 0,
+                "transfer_complete": True,
+                "local_hashes_verified": out["local_ok"],
+                "checkpoint_hashes_matched": True,
+                "report_inputs_verified": True}).as_dict()
+        except Exception as exc:  # noqa: BLE001
+            out["error"] = f"{type(exc).__name__}: {exc}"
+        return out
+
+    # -- 5-12 --------------------------------------------------------------
     def run(self) -> bool:
         if not self.price_guard() or not self.create():
             return False
-        safety = self.launch_watchdog("safety", self.a.safety_minutes, None)
+        safety = self.launch_watchdog("safety", self.safety_minutes, None)
         self.ev["watchdog_safety_journal"] = str(safety)
 
         ep = self.wait_endpoint()
@@ -309,10 +421,13 @@ class Canary:
             subprocess.run(scp + [str(REPO_ROOT / local),
                                   f"root@{host}:{WS}/{remote}"],
                            capture_output=True, timeout=120)
-        spec_path = self.scr / "artifacts_spec.json"
-        spec_path.write_text(json.dumps(ARTIFACT_SPEC, indent=2))
-        subprocess.run(scp + [str(spec_path), f"root@{host}:{WS}/spec.json"],
-                       capture_output=True, timeout=120)
+        for name, payload in (("spec_snapshot.json", SPEC_SNAPSHOT),
+                              ("spec_final.json", SPEC_FINAL),
+                              ("markers.json", COMPLETION_MARKERS)):
+            local = self.scr / name
+            local.write_text(json.dumps(payload, indent=2))
+            subprocess.run(scp + [str(local), f"root@{host}:{WS}/{name}"],
+                           capture_output=True, timeout=120)
 
         # -- criterion 1-2: detached start + durable descriptor
         job_spec = JobSpec(job_id="canary", workdir=WS, command=JOB_CMD,
@@ -333,100 +448,77 @@ class Canary:
                     and alive == "ALIVE",
                     {"descriptor": desc.stdout.strip()[:300], "liveness": alive})
 
-        # -- criterion 3: structured logs off the pod, before teardown
-        relay_dir = self.scr / "relay"
-        relay = LogRelay(target, (RelaySpec(EVENTS, "canary.train_log.jsonl"),),
-                         relay_dir)
+        # -- criterion 3: structured logs off the pod while the writer is live
+        relay_spec = RelaySpec(EVENTS, "canary.train_log.jsonl")
+        relay = LogRelay(target, (relay_spec,), self.scr / "relay")
         cycles = []
         for k in range(4):
-            time.sleep(20)
+            time.sleep(15)
             r = relay.sync_once()
             cycles.append({"cycle": k + 1, **r.as_dict()})
             self.say(f"  relay cycle {k + 1}: {r.as_dict()}")
-        events = relay.recovered_events(RelaySpec(EVENTS, "canary.train_log.jsonl"))
+        live = probe(target, job)[0]
+        events = relay.recovered_events(relay_spec)
         self.ev["relay_cycles"] = cycles
-        self.record("structured_logs_off_pod_before_teardown",
-                    len(events) >= 3 and all(e.get("event") == "canary_tick"
-                                             for e in events),
-                    {"events_synced": len(events),
+        self.record("structured_logs_relayed_while_process_active",
+                    len(events) >= 3 and live == "ALIVE"
+                    and all(e.get("event") == "canary_tick" for e in events),
+                    {"events_synced": len(events), "job_liveness": live,
                      "first": events[0] if events else None,
-                     "last": events[-1] if events else None,
-                     "local_path": str(relay.local_path(
-                         RelaySpec(EVENTS, "canary.train_log.jsonl")))})
+                     "last": events[-1] if events else None})
 
         # -- criterion 4: the provider-only watchdog sees a live billing pod
         rows = Journal(safety).records()
         polls = [r for r in rows if r["event"] == "poll"]
-        self.record("watchdog_sees_live_billing_pod",
+        self.record("watchdog_starts_and_polls_live_billing_pod",
                     any(p.get("pod_billing") and p.get("desired_status") == "RUNNING"
                         for p in polls),
-                    {"polls": len(polls),
-                     "last": polls[-1] if polls else None})
+                    {"polls": len(polls), "last": polls[-1] if polls else None})
 
-        # -- criterion 9 (part 1): manifest + archive, pod-side, in Python
-        cc = ("cd /workspace/aad && PYTHONPATH=/workspace/aad/src python3 "
-              "scripts/pod/collect_artifacts.py")
-        man = target.run(f"{cc} manifest --root {WS} --spec {WS}/spec.json "
-                         f"--out {WS}/manifest.json", timeout=180)
-        arc = target.run(f"{cc} archive --manifest {WS}/manifest.json "
-                         f"--out {WS}/canary_artifacts.tar.gz", timeout=180)
-        self.say(f"  pod manifest rc={man.returncode} archive rc={arc.returncode}")
-        ver = target.run(f"{cc} verify-archive --manifest {WS}/manifest.json "
-                         f"--archive {WS}/canary_artifacts.tar.gz", timeout=180)
-        store = self.scr / "store"
-        store.mkdir(exist_ok=True)
-        for f in ("manifest.json", "canary_artifacts.tar.gz"):
-            subprocess.run(scp + [f"root@{host}:{WS}/{f}", str(store / f)],
-                           capture_output=True, timeout=300)
-        local_ok = False
-        gate = None
-        if (store / "manifest.json").is_file():
-            import tarfile
-            extract = store / "extracted"
-            extract.mkdir(exist_ok=True)
-            try:
-                with tarfile.open(store / "canary_artifacts.tar.gz") as tar:
-                    tar.extractall(extract, filter="data")
-                manifest = ArtifactManifest.load(store / "manifest.json")
-                problems = verify_extracted(extract, manifest)
-                local_ok = not problems
-                self.ev["local_hash_problems"] = problems
-                gate = evaluate_teardown({
-                    "training_complete": True, "evaluation_complete": True,
-                    "artifact_manifest_created": True,
-                    "required_files_present": manifest.ok,
-                    "archive_created": True,
-                    "archive_contents_verified": ver.returncode == 0,
-                    "transfer_complete": True,
-                    "local_hashes_verified": local_ok,
-                    "checkpoint_hashes_matched": True,
-                    "report_inputs_verified": True}).as_dict()
-            except Exception as exc:  # noqa: BLE001
-                self.ev["local_verify_error"] = f"{type(exc).__name__}: {exc}"
-        self.record("artifact_manifest_and_local_hash_verification",
-                    man.returncode == 0 and arc.returncode == 0
-                    and ver.returncode == 0 and local_ok
-                    and bool(gate and gate["allowed"]),
-                    {"pod_manifest_rc": man.returncode,
-                     "pod_archive_rc": arc.returncode,
-                     "pod_verify_archive_rc": ver.returncode,
-                     "local_hashes_verified": local_ok, "gate": gate})
+        # -- criterion 9: mutable-snapshot semantics, writer still active
+        snap = self.collect(target, host, scp, "snapshot", "spec_snapshot.json",
+                            settle=0.0, markers="")
+        snap_ok = (snap["manifest_rc"] == 0 and snap["archive_rc"] == 0
+                   and snap["verify_archive_rc"] == 0 and snap["local_ok"]
+                   and snap["manifest"].get("snapshot_entries", 0) >= 1)
+        self.record("mutable_snapshot_semantics_without_hash_races", snap_ok,
+                    snap)
+
+        # -- criterion 10: final_required semantics, after the terminal marker
+        self.say("waiting for the job's terminal marker")
+        done = False
+        deadline = time.time() + self.a.job_wait_min * 60
+        while time.time() < deadline:
+            r = target.run(f"grep -c ALL_DONE {STATUS} || true", timeout=60)
+            if r.stdout.strip() not in ("", "0"):
+                done = True
+                break
+            time.sleep(10)
+        self.say(f"  terminal marker {'seen' if done else 'NOT seen'} at "
+                 f"{self.elapsed():.1f} min")
+        final = self.collect(target, host, scp, "final", "spec_final.json",
+                             settle=self.a.settle_seconds,
+                             markers=f"{WS}/markers.json")
+        gate = final.get("gate")
+        final_ok = (done and final["manifest_rc"] == 0
+                    and final["archive_rc"] == 0
+                    and final["verify_archive_rc"] == 0 and final["local_ok"]
+                    and final["manifest"].get("final_streams_quiescent") is True
+                    and bool(gate and gate["allowed"]) and not gate["emergency"])
+        self.record("final_artifact_and_hash_verification_under_declared_semantics",
+                    final_ok, final)
 
         # -- criteria 5-8: the test watchdog, forced onto the GraphQL fallback
         threshold = self.elapsed() + self.a.cross_after_min
         self.say(f"launching the test watchdog: threshold {threshold:.2f} min "
                  f"(now {self.elapsed():.2f}), CLI path forced to fail")
-        test_j = self.launch_watchdog("test", threshold,
-                                      self.a.broken_runpodctl)
+        test_j = self.launch_watchdog("test", threshold, self.a.broken_runpodctl)
         self.ev["watchdog_test_journal"] = str(test_j)
         deadline = time.time() + self.a.watchdog_wait_min * 60
         reason = None
         while time.time() < deadline:
-            time.sleep(15)
+            time.sleep(10)
             rows = Journal(test_j).records()
-            # Break on the terminal facts, not on `watchdog_end`: the run loop
-            # only ends after `escalate_after_minutes`, and waiting for that
-            # would burn pod minutes to learn something already in the journal.
             if any(r["event"] == "terminated" for r in rows):
                 reason = "terminated"
                 break
@@ -437,56 +529,87 @@ class Canary:
         (self.scr / "watchdog_test_records.json").write_text(
             json.dumps(rows, indent=2))
         self.ev["watchdog_test_reason"] = reason
+        self.ev["watchdog_launches"] = dict(self.launches)
 
+        attempts = [r for r in rows if r["event"] == "terminate_attempt"]
+        cli = [a for r in attempts for a in r["attempts"]
+               if a["method"] == "runpodctl remove pod"]
+        gql = [a for r in attempts for a in r["attempts"]
+               if a["method"] == "graphql podTerminate"]
         crossed = [r for r in rows if r["event"] == "hard_limit_reached"]
         under = [r for r in rows if r["event"] == "poll"
                  and r.get("over_hard_limit") is False]
-        self.record("watchdog_crosses_threshold_without_launcher",
-                    bool(crossed) and bool(under),
-                    {"polls_below_limit": len(under),
+
+        # 5 — the deliberately broken primary path fails as intended
+        self.record("broken_primary_runpodctl_fails_as_intended",
+                    bool(cli) and not any(a["ok"] for a in cli)
+                    and all(a["verified_transport"] for a in cli),
+                    {"attempts": cli,
+                     "path": self.a.broken_runpodctl,
+                     "note": "no provider state altered; only this process's "
+                             "view of the CLI"})
+        # 6 — the same watchdog invokes the GraphQL fallback automatically
+        self.record("graphql_fallback_invoked_automatically",
+                    bool(gql) and any(a["ok"] for a in gql) and bool(crossed)
+                    and bool(under) and self.launches["test"] == 1,
+                    {"attempts": gql,
+                     "test_watchdog_launches": self.launches["test"],
+                     "polls_below_limit": len(under),
                      "hard_limit_reached": crossed[0] if crossed else None})
-
-        attempts = [r for r in rows if r["event"] == "terminate_attempt"]
-        methods = [a["method"] for r in attempts for a in r["attempts"]]
-        gql_tried = [a for r in attempts for a in r["attempts"]
-                     if a["method"] == "graphql podTerminate"]
-        cli_failed = [a for r in attempts for a in r["attempts"]
-                      if a["method"] == "runpodctl remove pod" and not a["ok"]]
-        self.record("graphql_fallback_transport_exercised",
-                    bool(gql_tried) and bool(cli_failed),
-                    {"methods": methods,
-                     "cli_attempt": cli_failed[0] if cli_failed else None,
-                     "graphql_attempt": gql_tried[0] if gql_tried else None})
-        self.record("termination_issued_and_journaled", bool(attempts),
-                    {"rounds": len(attempts)})
-
+        # 7 — provider polling verifies the pod is gone
         verifies = [r for r in rows if r["event"] == "terminate_verify"]
-        terminated = [r for r in rows if r["event"] == "terminated"]
-        self.record("provider_polling_confirms_disappearance",
-                    bool(terminated) and bool(verifies),
+        gone_rows = [r for r in verifies if r.get("pod_exists") is False
+                     and r.get("billing") is False]
+        self.record("provider_polling_verifies_disappearance",
+                    bool(gone_rows)
+                    and gone_rows[0].get("desired_status") == "TERMINATED",
                     {"verify_polls": len(verifies),
-                     "terminated": terminated[0] if terminated else None})
+                     "first_gone": gone_rows[0] if gone_rows else None})
+        # 8 — the journal durably records the whole sequence
+        seq = [r["event"] for r in rows]
+        required_seq = ["watchdog_start", "poll", "hard_limit_reached",
+                        "terminate_attempt", "terminate_verify", "terminated"]
+        self.record("journal_records_complete_termination_sequence",
+                    all(e in seq for e in required_seq)
+                    and Path(test_j).is_file(),
+                    {"events": seq, "journal": str(test_j),
+                     "bytes": Path(test_j).stat().st_size
+                     if Path(test_j).is_file() else 0})
 
         # -- phase 2: never leave a pod running to prove a point
-        final = self.provider.get(self.pod_id)
-        if final.billing:
+        final_state = self.provider.get(self.pod_id)
+        if final_state.billing:
             self.say("test watchdog did not remove the pod — PHASE 2: real CLI")
             self.ev["phase_2_invoked"] = True
             subprocess.run([self.cli, "remove", "pod", self.pod_id],
                            capture_output=True, timeout=120)
             for _ in range(12):
                 time.sleep(10)
-                final = self.provider.get(self.pod_id)
-                if not final.billing:
+                final_state = self.provider.get(self.pod_id)
+                if not final_state.billing:
                     break
         self.ev["final_pod_state"] = {
-            "exists": final.exists, "desired_status": final.desired_status,
-            "billing": final.billing, "error": final.error}
-        self.record("no_pod_remains_running", not final.billing,
+            "exists": final_state.exists,
+            "desired_status": final_state.desired_status,
+            "billing": final_state.billing, "error": final_state.error}
+
+        # 11 — the orchestration got here on its own
+        self.record(
+            "orchestration_completed_without_human_repair",
+            all(c["pass"] for c in self.ev["criteria"].values())
+            and self.launches == {"safety": 1, "test": 1}
+            and not self.ev.get("phase_2_invoked"),
+            {"watchdog_launches": dict(self.launches),
+             "phase_2_invoked": bool(self.ev.get("phase_2_invoked")),
+             "note": "one launch command; no manual watchdog restart, ssh "
+                     "repair or substitution"})
+        # 12 — nothing left running
+        self.record("no_pod_remains_running", not final_state.billing,
                     self.ev["final_pod_state"])
 
         self.ev["cost"] = {
             "price_per_hour": self.price,
+            "backstop_minutes": round(self.backstop_minutes, 2),
             "elapsed_minutes": round(self.elapsed(), 2),
             "actual_usd": round(self.usd(), 4),
             "authorized_usd": self.a.authorized_usd,
@@ -508,12 +631,17 @@ def main() -> int:
                          "canary needs no GPU compute")
     ap.add_argument("--image",
                     default="runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404")
-    ap.add_argument("--max-price", type=float, default=0.80,
-                    help="at the 50-minute backstop, 0.80/h bills $0.667 — "
-                         "inside the $0.82 authorization")
-    ap.add_argument("--authorized-usd", type=float, default=0.82)
-    ap.add_argument("--backstop-minutes", type=float, default=50.0)
-    ap.add_argument("--safety-minutes", type=float, default=42.0)
+    ap.add_argument("--max-price", type=float, default=0.40,
+                    help="above this, $0.12 does not buy enough minutes")
+    ap.add_argument("--authorized-usd", type=float, default=0.12)
+    ap.add_argument("--backstop-minutes", type=float, default=30.0,
+                    help="upper bound; the effective backstop is the smaller of "
+                         "this and what --authorized-usd buys at the live quote")
+    ap.add_argument("--min-backstop-minutes", type=float, default=20.0,
+                    help="below this the canary cannot complete; abort and "
+                         "report rather than widening the backstop")
+    ap.add_argument("--job-wait-min", type=float, default=6.0)
+    ap.add_argument("--settle-seconds", type=float, default=6.0)
     ap.add_argument("--cross-after-min", type=float, default=1.5,
                     help="how far above 'now' to set the test watchdog's "
                          "threshold, so it is genuinely crossed during the run")
@@ -523,7 +651,7 @@ def main() -> int:
                     default="/nonexistent/runpodctl-canary-forced-failure")
     ap.add_argument("--runpod-config",
                     default=os.path.expanduser("~/.runpod/config.toml"))
-    ap.add_argument("--out", default="logs/e7_canary_evidence.json")
+    ap.add_argument("--out", default="logs/e7_canary_rerun_evidence.json")
     args = ap.parse_args()
 
     c = Canary(args)

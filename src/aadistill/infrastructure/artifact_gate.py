@@ -30,6 +30,7 @@ from __future__ import annotations
 import hashlib
 import json
 import tarfile
+import time
 from dataclasses import dataclass, asdict, field
 from pathlib import Path
 
@@ -40,12 +41,53 @@ class ArtifactError(RuntimeError):
     """A required artifact class is missing or unusable."""
 
 
+# Two different claims a manifest can make about a file, and they must never be
+# confused. The 2026-08-09 canary made the bounded-read fix necessary; this makes
+# it safe.
+#
+# `mutable_snapshot`  the writer may still be active. The archive records the
+#                     exact byte boundary it captured and hashes those bytes.
+#                     It proves **already-emitted data is durable**. It does not
+#                     claim the file is complete, and it must not be accepted as
+#                     a finished artifact.
+# `final_required`    the producing process has finished, its terminal marker
+#                     exists, and the file is quiescent. Only then is a manifest
+#                     entry a claim about a *complete* artifact.
+#
+# `final_required` is the default, deliberately: a spec written without thinking
+# about it gets the strict reading, and a bounded prefix of a still-growing file
+# can never satisfy a normal teardown by accident.
+LIFECYCLES = ("final_required", "mutable_snapshot")
+
+
+@dataclass(frozen=True)
+class CompletionMarker:
+    """Evidence that the process producing an artifact has actually finished."""
+
+    path: str
+    contains: str
+
+    def satisfied(self, root: Path) -> tuple[bool, str]:
+        p = root / self.path
+        if not p.is_file():
+            return False, f"{self.path} does not exist"
+        text = p.read_text(errors="replace")
+        if self.contains not in text:
+            return False, f"{self.path} does not contain {self.contains!r}"
+        return True, ""
+
+    def as_dict(self) -> dict:
+        return asdict(self)
+
+
 @dataclass(frozen=True)
 class ArtifactSpec:
     """One declared artifact class and the paths that must satisfy it.
 
     `pattern` is expanded by Python's `glob`, relative to the manifest root —
     never by a remote shell inside a quoted ssh command.
+
+    `lifecycle` says what a matching file *means*: see `LIFECYCLES`.
     """
 
     artifact_class: str
@@ -53,6 +95,13 @@ class ArtifactSpec:
     required: bool = True
     min_matches: int = 1
     min_bytes: int = 1
+    lifecycle: str = "final_required"
+
+    def __post_init__(self) -> None:
+        if self.lifecycle not in LIFECYCLES:
+            raise ArtifactError(
+                f"lifecycle must be one of {LIFECYCLES}, got "
+                f"{self.lifecycle!r}")
 
     def as_dict(self) -> dict:
         return asdict(self)
@@ -79,6 +128,7 @@ class ManifestEntry:
     artifact_class: str
     size_bytes: int
     sha256: str
+    lifecycle: str = "final_required"
 
 
 @dataclass
@@ -92,10 +142,33 @@ class ArtifactManifest:
     # silently absorbed: it is normal for an append-only training log and it is
     # a red flag for anything else.
     appended_during_archive: list[dict] = field(default_factory=list)
+    completion_markers: list[dict] = field(default_factory=list)
+    completion_marker_failures: list[str] = field(default_factory=list)
+    still_being_written: list[str] = field(default_factory=list)
 
     @property
     def ok(self) -> bool:
         return not self.missing
+
+    @property
+    def final_streams_quiescent(self) -> bool:
+        """Every `final_required` class is complete, settled and marker-backed.
+
+        Separate from `ok` because they answer different questions. `ok` asks
+        "is everything here"; this asks "is what is here *finished*". A bounded
+        prefix of a growing log can make the first true and must never make the
+        second true.
+        """
+        if self.completion_marker_failures or self.still_being_written:
+            return False
+        return not any(m.get("lifecycle", "final_required") == "final_required"
+                       for m in self.missing)
+
+    def snapshot_entries(self) -> list[ManifestEntry]:
+        return [e for e in self.entries if e.lifecycle == "mutable_snapshot"]
+
+    def final_entries(self) -> list[ManifestEntry]:
+        return [e for e in self.entries if e.lifecycle == "final_required"]
 
     def paths(self) -> list[str]:
         return [e.path for e in self.entries]
@@ -112,6 +185,10 @@ class ArtifactManifest:
             "entries": [asdict(e) for e in self.entries],
             "missing": self.missing,
             "appended_during_archive": self.appended_during_archive,
+            "completion_markers": self.completion_markers,
+            "completion_marker_failures": self.completion_marker_failures,
+            "still_being_written": self.still_being_written,
+            "final_streams_quiescent": self.final_streams_quiescent,
         }
 
     def write(self, path: str | Path) -> Path:
@@ -130,11 +207,21 @@ class ArtifactManifest:
             missing=d.get("missing", []),
             created_utc=d.get("created_utc", ""),
             appended_during_archive=d.get("appended_during_archive", []),
+            completion_markers=d.get("completion_markers", []),
+            completion_marker_failures=d.get("completion_marker_failures", []),
+            still_being_written=d.get("still_being_written", []),
         )
 
 
+def _fingerprint(p: Path) -> tuple[int, float]:
+    st = p.stat()
+    return st.st_size, st.st_mtime
+
+
 def build_manifest(root: str | Path, specs: tuple[ArtifactSpec, ...], *,
-                   created_utc: str = "") -> ArtifactManifest:
+                   created_utc: str = "", settle_seconds: float = 0.0,
+                   completion_markers: tuple[CompletionMarker, ...] = (),
+                   sleep=time.sleep) -> ArtifactManifest:
     """Expand every spec against the filesystem and hash what is there.
 
     Does not raise on a missing required artifact: it records it in `missing`
@@ -142,24 +229,73 @@ def build_manifest(root: str | Path, specs: tuple[ArtifactSpec, ...], *,
     the files still reachable — whether to hunt for it or to accept the loss
     knowingly. Raising here would only turn a recoverable gap into a crashed
     collection step.
+
+    **`final_required` classes are held to two extra conditions**, because the
+    bounded-read archive makes a growing file *archivable* and that must not make
+    it *acceptable*:
+
+    * every `completion_marker` must be present and carry its expected content —
+      evidence the producing process actually finished, not merely that a file
+      exists;
+    * the file must be **quiescent**: size and mtime unchanged across a
+      `settle_seconds` window. A file that is still growing is recorded as
+      missing with reason `still being written`, so it can never satisfy a
+      normal teardown.
+
+    `mutable_snapshot` classes skip both. That is their whole point: they claim
+    "these bytes are durable", not "this file is finished".
     """
     root = Path(root)
     manifest = ArtifactManifest(root=str(root), created_utc=created_utc,
                                 specs=[s.as_dict() for s in specs])
+    manifest.completion_markers = [m.as_dict() for m in completion_markers]
+
+    marker_failures = []
+    if any(s.lifecycle == "final_required" and s.required for s in specs):
+        for marker in completion_markers:
+            ok, why = marker.satisfied(root)
+            if not ok:
+                marker_failures.append(why)
+    manifest.completion_marker_failures = marker_failures
+
     seen: set[str] = set()
     for spec in specs:
         matches = sorted(p for p in root.glob(spec.pattern) if p.is_file())
         usable = [p for p in matches if p.stat().st_size >= spec.min_bytes]
-        if spec.required and len(usable) < spec.min_matches:
+
+        growing: list[str] = []
+        if spec.lifecycle == "final_required" and usable and settle_seconds > 0:
+            before = {p: _fingerprint(p) for p in usable}
+            sleep(settle_seconds)
+            for p in list(usable):
+                if not p.is_file() or _fingerprint(p) != before[p]:
+                    growing.append(str(p.relative_to(root)))
+                    usable.remove(p)
+        if growing:
+            manifest.still_being_written.extend(growing)
+
+        blocked = spec.lifecycle == "final_required" and marker_failures
+        if spec.required and (len(usable) < spec.min_matches or blocked):
+            if blocked:
+                reason = ("the producing process has not signalled completion: "
+                          + "; ".join(marker_failures))
+            elif growing:
+                reason = (f"still being written ({', '.join(growing)}); a "
+                          "bounded prefix of a growing file is a snapshot, not "
+                          "a final artifact")
+            elif not matches:
+                reason = "no file matched the pattern"
+            else:
+                reason = (f"{len(matches) - len(usable)} match(es) below "
+                          f"{spec.min_bytes} bytes")
             manifest.missing.append({
                 "artifact_class": spec.artifact_class,
                 "pattern": spec.pattern,
+                "lifecycle": spec.lifecycle,
                 "matches": len(matches),
                 "usable_matches": len(usable),
                 "min_matches": spec.min_matches,
-                "reason": ("no file matched the pattern" if not matches
-                           else f"{len(matches) - len(usable)} match(es) below "
-                                f"{spec.min_bytes} bytes"),
+                "reason": reason,
             })
         for p in usable:
             rel = str(p.relative_to(root))
@@ -168,7 +304,8 @@ def build_manifest(root: str | Path, specs: tuple[ArtifactSpec, ...], *,
             seen.add(rel)
             manifest.entries.append(ManifestEntry(
                 path=rel, artifact_class=spec.artifact_class,
-                size_bytes=p.stat().st_size, sha256=sha256_file(p)))
+                size_bytes=p.stat().st_size, sha256=sha256_file(p),
+                lifecycle=spec.lifecycle))
     return manifest
 
 
@@ -235,6 +372,15 @@ def create_archive(manifest: ArtifactManifest, out_path: str | Path) -> Path:
                 reader = _HashingLimitedReader(fh, size_now)
                 tar.addfile(info, reader)
             if size_now != entry.size_bytes:
+                if entry.lifecycle == "final_required":
+                    raise ArtifactError(
+                        f"{entry.path} is declared final_required and grew from "
+                        f"{entry.size_bytes} to {size_now} bytes during "
+                        "archiving; its producer is still running. A bounded "
+                        "prefix is a mutable_snapshot, not a final artifact — "
+                        "wait for the completion marker and quiescence, or "
+                        "declare the class mutable_snapshot and accept that it "
+                        "makes no completeness claim.")
                 grew.append({"path": entry.path,
                              "manifest_bytes": entry.size_bytes,
                              "archived_bytes": size_now})
@@ -300,6 +446,11 @@ GATE_ORDER: tuple[str, ...] = (
     "evaluation_complete",
     "artifact_manifest_created",
     "required_files_present",
+    # Separate from `required_files_present` on purpose. Presence is "the file
+    # is here"; quiescence is "its producer has finished and it stopped
+    # growing". The bounded-read archive can capture a growing log — that makes
+    # it archivable, not finished — so a normal teardown asks both questions.
+    "final_streams_quiescent",
     "archive_created",
     "archive_contents_verified",
     "transfer_complete",
@@ -316,13 +467,18 @@ class GateDecision:
     failed_check: str | None
     reason: str
     checks: dict[str, bool]
+    # Named event streams the session is knowingly losing the tail of. Empty on
+    # every normal teardown by construction — a normal teardown cannot pass with
+    # `final_streams_quiescent` false.
+    incomplete_event_streams: tuple[str, ...] = ()
 
     def as_dict(self) -> dict:
         return asdict(self)
 
 
 def evaluate_teardown(state: dict[str, bool], *, emergency_budget: bool = False,
-                      emergency_reason: str = "") -> GateDecision:
+                      emergency_reason: str = "",
+                      incomplete_event_streams: tuple[str, ...] = ()) -> GateDecision:
     """May the pod be deleted?
 
     Normal path: every check in `GATE_ORDER` must be True. A check absent from
@@ -339,16 +495,37 @@ def evaluate_teardown(state: dict[str, bool], *, emergency_budget: bool = False,
     if failed is None:
         return GateDecision(True, False, None,
                             "every teardown check passed", checks)
+    if failed == "final_streams_quiescent" and not emergency_budget:
+        return GateDecision(
+            False, False, failed,
+            "teardown blocked: a required event stream is still being written "
+            "or its producer has not signalled completion. What is on disk is a "
+            "mutable_snapshot — durable, but not a complete artifact — and a "
+            "bounded prefix must not be accepted as the final one. Wait for the "
+            "completion marker and quiescence, or take the emergency path and "
+            "record the loss.", checks)
     if emergency_budget:
         if not emergency_reason.strip():
             raise ArtifactError(
                 "an emergency teardown must record its reason; an unexplained "
                 "override is indistinguishable from the bug it is overriding")
+        incomplete = tuple(incomplete_event_streams)
+        note = ""
+        if not checks["final_streams_quiescent"]:
+            if not incomplete:
+                raise ArtifactError(
+                    "an emergency teardown over a non-quiescent event stream "
+                    "must name the streams it is truncating; 'the final event "
+                    "stream is incomplete' has to be in the record, not "
+                    "inferred from it later")
+            note = (f" THE FINAL EVENT STREAM IS INCOMPLETE for {list(incomplete)}"
+                    f": only a mutable_snapshot survives and its tail is lost.")
         return GateDecision(
             True, True, failed,
             f"EMERGENCY budget teardown over a failed gate ({failed}): "
             f"{emergency_reason}. Artifacts for the remaining checks "
-            f"{[c for c in GATE_ORDER if not checks[c]]} are LOST.", checks)
+            f"{[c for c in GATE_ORDER if not checks[c]]} are LOST.{note}",
+            checks, incomplete)
     return GateDecision(
         False, False, failed,
         f"teardown blocked at {failed!r}; the pod must not be deleted while a "

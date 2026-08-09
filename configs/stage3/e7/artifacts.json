@@ -4,69 +4,87 @@
     "pattern": "stage3/e7_*_r1600k_*/train_log.jsonl",
     "required": true,
     "min_matches": 1,
-    "min_bytes": 1024
+    "min_bytes": 1024,
+    "lifecycle": "final_required"
   },
   {
     "artifact_class": "run_manifest",
     "pattern": "stage3/e7_*_r1600k_*/run_manifest*.json",
     "required": true,
     "min_matches": 1,
-    "min_bytes": 512
+    "min_bytes": 512,
+    "lifecycle": "final_required"
   },
   {
     "artifact_class": "extra_stream_manifest",
     "pattern": "stage3/e7_*_kd/manifest.json",
     "required": true,
     "min_matches": 1,
-    "min_bytes": 256
+    "min_bytes": 256,
+    "lifecycle": "final_required"
   },
   {
     "artifact_class": "disjointness_proof",
     "pattern": "stage3/e7_disjointness.json",
     "required": true,
     "min_matches": 1,
-    "min_bytes": 128
+    "min_bytes": 128,
+    "lifecycle": "final_required"
   },
   {
     "artifact_class": "arm_preflight",
     "pattern": "audit/e7_preflight*.json",
     "required": true,
     "min_matches": 1,
-    "min_bytes": 128
+    "min_bytes": 128,
+    "lifecycle": "final_required"
   },
   {
     "artifact_class": "gradient_share_preflight",
     "pattern": "audit/e7_gradient_share*.json",
     "required": true,
     "min_matches": 1,
-    "min_bytes": 64
+    "min_bytes": 64,
+    "lifecycle": "final_required"
   },
   {
     "artifact_class": "general_text_diagnostics",
     "pattern": "audit/e7_general_text/*.json",
     "required": true,
     "min_matches": 1,
-    "min_bytes": 64
+    "min_bytes": 64,
+    "lifecycle": "final_required"
   },
   {
     "artifact_class": "rollout_generations",
     "pattern": "audit/three_mode/E7-*/free.generations.jsonl",
     "required": true,
     "min_matches": 1,
-    "min_bytes": 1024
+    "min_bytes": 1024,
+    "lifecycle": "final_required"
   },
   {
     "artifact_class": "rollout_report",
     "pattern": "audit/three_mode/E7-*/report.json",
     "required": true,
     "min_matches": 1,
-    "min_bytes": 128
+    "min_bytes": 128,
+    "lifecycle": "final_required"
   },
   {
     "artifact_class": "checkpoint_hashes",
     "pattern": "stage3/e7_*_r1600k_*/checkpoints/step_001761/*.json",
     "required": false,
     "min_matches": 1,
-    "min_bytes": 1
+    "min_bytes": 1,
+    "lifecycle": "final_required"
+  },
+  {
+    "artifact_class": "driver_console",
+    "pattern": "../e7_run.log",
+    "required": false,
+    "min_matches": 1,
+    "min_bytes": 1,
+    "lifecycle": "mutable_snapshot"
   }
 ]

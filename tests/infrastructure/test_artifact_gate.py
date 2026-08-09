@@ -211,7 +211,7 @@ def test_an_unexplained_override_is_refused():
 def test_the_gate_order_matches_the_documented_sequence():
     assert GATE_ORDER == (
         "training_complete", "evaluation_complete", "artifact_manifest_created",
-        "required_files_present", "archive_created",
+        "required_files_present", "final_streams_quiescent", "archive_created",
         "archive_contents_verified", "transfer_complete",
         "local_hashes_verified", "checkpoint_hashes_matched",
         "report_inputs_verified")
@@ -229,12 +229,17 @@ def test_training_session_specs_always_require_the_event_stream():
 # --------------------------------------------------------------------------
 
 def test_a_log_that_grows_between_manifest_and_archive_still_verifies(tmp_path):
-    """The 2026-08-09 canary failure, reproduced.
+    """The 2026-08-09 canary failure, reproduced — as a **mutable snapshot**.
 
     `train_log.jsonl` was 2,166 bytes when the manifest hashed it and 2,230 when
-    tar read it — the job wrote one more event in the gap. The archive then
-    could not match the manifest, and the teardown gate blocked forever on
-    `archive_contents_verified` with nothing actually wrong.
+    tar read it — the job wrote one more event in the gap — so the archive could
+    not match the manifest and the gate blocked with nothing actually wrong.
+
+    The bounded read fixes that *for a snapshot*, which is what this is: the
+    writer is still active, the archive records the captured boundary, and the
+    claim is "these bytes are durable" rather than "this file is finished". The
+    same growth under `final_required` is refused
+    (`test_a_growing_snapshot_archives_but_a_growing_final_does_not`).
     """
     root = tmp_path / "artifacts"
     arm = root / "stage3" / "run"
@@ -242,7 +247,8 @@ def test_a_log_that_grows_between_manifest_and_archive_still_verifies(tmp_path):
     log = arm / "train_log.jsonl"
     log.write_text("".join(json.dumps({"event": "train_step", "step": i}) + "\n"
                            for i in range(20)))
-    specs = (ArtifactSpec("event_stream", "stage3/*/train_log.jsonl"),)
+    specs = (ArtifactSpec("event_stream", "stage3/*/train_log.jsonl",
+                          lifecycle="mutable_snapshot"),)
 
     manifest = build_manifest(root, specs)
     at_manifest = manifest.entries[0].size_bytes
@@ -271,6 +277,7 @@ def test_a_log_that_grows_between_manifest_and_archive_still_verifies(tmp_path):
     assert evaluate_teardown({
         "training_complete": True, "evaluation_complete": True,
         "artifact_manifest_created": True, "required_files_present": manifest.ok,
+        "final_streams_quiescent": manifest.final_streams_quiescent,
         "archive_created": True,
         "archive_contents_verified": not verify_archive(archive, manifest),
         "transfer_complete": True,
@@ -284,7 +291,8 @@ def test_the_archived_hash_is_of_the_bytes_actually_written(tmp_path):
     root.mkdir()
     f = root / "x.jsonl"
     f.write_bytes(b"one\n")
-    manifest = build_manifest(root, (ArtifactSpec("event_stream", "x.jsonl"),))
+    manifest = build_manifest(root, (ArtifactSpec(
+        "event_stream", "x.jsonl", lifecycle="mutable_snapshot"),))
     with open(f, "ab") as fh:
         fh.write(b"two\n")
     create_archive(manifest, tmp_path / "b.tar.gz")
@@ -315,3 +323,164 @@ def test_a_rewritten_manifest_round_trips(tmp_path):
     reloaded = ArtifactManifest.load(path)
     assert reloaded.entries[0].sha256 == manifest.entries[0].sha256
     assert reloaded.appended_during_archive == manifest.appended_during_archive
+
+
+# --------------------------------------------------------------------------
+# mutable_snapshot vs final_required
+# --------------------------------------------------------------------------
+
+from aadistill.infrastructure.artifact_gate import (  # noqa: E402
+    CompletionMarker, LIFECYCLES,
+)
+
+DONE = (CompletionMarker("run.status", "MARKER:ALL_DONE"),)
+
+
+def growing_pod(tmp_path, *, finished: bool):
+    root = tmp_path / "artifacts"
+    arm = root / "stage3" / "run"
+    arm.mkdir(parents=True)
+    (arm / "train_log.jsonl").write_text(
+        "".join(json.dumps({"event": "train_step", "step": i}) + "\n"
+                for i in range(30)))
+    (root / "run.status").write_text(
+        "MARKER:TRAIN_DONE\nMARKER:ALL_DONE\n" if finished
+        else "MARKER:TRAIN_DONE\n")
+    return root
+
+
+def test_final_required_is_the_default_so_a_thoughtless_spec_is_strict():
+    assert ArtifactSpec("c", "p").lifecycle == "final_required"
+    assert LIFECYCLES[0] == "final_required"
+
+
+def test_an_unknown_lifecycle_is_refused():
+    with pytest.raises(ArtifactError, match="lifecycle must be one of"):
+        ArtifactSpec("c", "p", lifecycle="whenever")
+
+
+def test_a_growing_final_required_stream_is_not_complete(tmp_path):
+    """The correction: archivable is not the same as finished."""
+    root = growing_pod(tmp_path, finished=True)
+    log = root / "stage3" / "run" / "train_log.jsonl"
+    specs = (ArtifactSpec("event_stream", "stage3/*/train_log.jsonl"),)
+
+    # `settle_seconds` observes the file across a window; the writer appends
+    # inside it, exactly as a trainer does.
+    def writer(_seconds):
+        with open(log, "a") as f:
+            f.write(json.dumps({"event": "train_step", "step": 30}) + "\n")
+
+    m = build_manifest(root, specs, settle_seconds=0.01,
+                       completion_markers=DONE, sleep=writer)
+    assert not m.ok
+    assert m.final_streams_quiescent is False
+    assert m.still_being_written == ["stage3/run/train_log.jsonl"]
+    assert "still being written" in m.missing[0]["reason"]
+    assert "bounded prefix" in m.missing[0]["reason"]
+
+
+def test_a_quiescent_marker_backed_stream_is_complete(tmp_path):
+    root = growing_pod(tmp_path, finished=True)
+    specs = (ArtifactSpec("event_stream", "stage3/*/train_log.jsonl"),)
+    m = build_manifest(root, specs, settle_seconds=0.01,
+                       completion_markers=DONE)
+    assert m.ok and m.final_streams_quiescent
+    assert m.final_entries() and not m.snapshot_entries()
+    assert m.entries[0].lifecycle == "final_required"
+
+
+def test_a_missing_completion_marker_blocks_final_classes(tmp_path):
+    """A quiescent file whose producer never said it finished is not final —
+    a crashed trainer leaves exactly that."""
+    root = growing_pod(tmp_path, finished=False)
+    specs = (ArtifactSpec("event_stream", "stage3/*/train_log.jsonl"),)
+    m = build_manifest(root, specs, settle_seconds=0.01,
+                       completion_markers=DONE)
+    assert not m.ok and m.final_streams_quiescent is False
+    assert m.completion_marker_failures
+    assert "not signalled completion" in m.missing[0]["reason"]
+
+
+def test_a_mutable_snapshot_ignores_markers_and_growth(tmp_path):
+    """Its claim is 'these bytes are durable', not 'this file is finished'."""
+    root = growing_pod(tmp_path, finished=False)
+    specs = (ArtifactSpec("event_stream", "stage3/*/train_log.jsonl",
+                          lifecycle="mutable_snapshot"),)
+    m = build_manifest(root, specs, settle_seconds=0.01,
+                       completion_markers=DONE)
+    assert m.ok
+    assert m.snapshot_entries() and not m.final_entries()
+    # It makes no completeness claim, so it cannot make the gate's claim either.
+    assert m.final_streams_quiescent is True, (
+        "no final_required class is declared, so there is nothing to be "
+        "non-quiescent about")
+
+
+def test_a_growing_snapshot_archives_but_a_growing_final_does_not(tmp_path):
+    root = growing_pod(tmp_path, finished=True)
+    log = root / "stage3" / "run" / "train_log.jsonl"
+
+    snap = build_manifest(root, (ArtifactSpec(
+        "event_stream", "stage3/*/train_log.jsonl",
+        lifecycle="mutable_snapshot"),))
+    with open(log, "a") as f:
+        f.write(json.dumps({"event": "train_step", "step": 99}) + "\n")
+    create_archive(snap, tmp_path / "snap.tar.gz")          # allowed
+    assert snap.appended_during_archive
+
+    final = build_manifest(root, (ArtifactSpec(
+        "event_stream", "stage3/*/train_log.jsonl"),),
+        completion_markers=DONE)
+    with open(log, "a") as f:
+        f.write(json.dumps({"event": "train_step", "step": 100}) + "\n")
+    with pytest.raises(ArtifactError, match="declared final_required and grew"):
+        create_archive(final, tmp_path / "final.tar.gz")
+
+
+def test_normal_teardown_refuses_a_non_quiescent_stream():
+    state = {name: True for name in GATE_ORDER}
+    state["final_streams_quiescent"] = False
+    d = evaluate_teardown(state)
+    assert not d.allowed
+    assert d.failed_check == "final_streams_quiescent"
+    assert "mutable_snapshot" in d.reason and "bounded prefix" in d.reason
+    assert d.incomplete_event_streams == ()
+
+
+def test_emergency_teardown_may_keep_a_snapshot_but_must_name_the_loss():
+    state = {name: True for name in GATE_ORDER}
+    state["final_streams_quiescent"] = False
+    d = evaluate_teardown(
+        state, emergency_budget=True,
+        emergency_reason="hard limit reached at 545 min",
+        incomplete_event_streams=("stage3/e7_fineweb_r1600k_sa/train_log.jsonl",))
+    assert d.allowed and d.emergency
+    assert d.incomplete_event_streams == (
+        "stage3/e7_fineweb_r1600k_sa/train_log.jsonl",)
+    assert "THE FINAL EVENT STREAM IS INCOMPLETE" in d.reason
+    assert "tail is lost" in d.reason
+
+
+def test_an_emergency_that_truncates_a_stream_without_naming_it_is_refused():
+    state = {name: True for name in GATE_ORDER}
+    state["final_streams_quiescent"] = False
+    with pytest.raises(ArtifactError, match="must name the streams"):
+        evaluate_teardown(state, emergency_budget=True,
+                          emergency_reason="hard limit")
+
+
+def test_the_two_lifecycles_survive_a_manifest_round_trip(tmp_path):
+    root = growing_pod(tmp_path, finished=True)
+    m = build_manifest(root, (
+        ArtifactSpec("event_stream", "stage3/*/train_log.jsonl"),
+        ArtifactSpec("status", "run.status", lifecycle="mutable_snapshot"),
+    ), completion_markers=DONE)
+    path = m.write(tmp_path / "manifest.json")
+    back = ArtifactManifest.load(path)
+    assert {e.path: e.lifecycle for e in back.entries} == {
+        "stage3/run/train_log.jsonl": "final_required",
+        "run.status": "mutable_snapshot"}
+    assert back.completion_markers == [
+        {"path": "run.status", "contains": "MARKER:ALL_DONE"}]
+    assert json.loads(path.read_text())["final_streams_quiescent"] is True

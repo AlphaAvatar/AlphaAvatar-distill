@@ -40,8 +40,8 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "src"))
 
 from aadistill.infrastructure.artifact_gate import (  # noqa: E402
-    ArtifactManifest, ArtifactSpec, GATE_ORDER, build_manifest, create_archive,
-    evaluate_teardown, verify_archive, verify_extracted,
+    ArtifactManifest, ArtifactSpec, CompletionMarker, GATE_ORDER, build_manifest,
+    create_archive, evaluate_teardown, verify_archive, verify_extracted,
 )
 
 
@@ -50,20 +50,36 @@ def load_specs(path: str) -> tuple[ArtifactSpec, ...]:
     return tuple(ArtifactSpec(**item) for item in raw)
 
 
+def load_markers(path: str) -> tuple[CompletionMarker, ...]:
+    if not path:
+        return ()
+    return tuple(CompletionMarker(**m) for m in json.loads(Path(path).read_text()))
+
+
 def cmd_manifest(args) -> int:
     manifest = build_manifest(
         args.root, load_specs(args.spec),
-        created_utc=datetime.now(timezone.utc).isoformat(timespec="seconds"))
+        created_utc=datetime.now(timezone.utc).isoformat(timespec="seconds"),
+        settle_seconds=args.settle_seconds,
+        completion_markers=load_markers(args.completion_markers))
     manifest.write(args.out)
     print(f"{len(manifest.entries)} file(s) across "
           f"{len({e.artifact_class for e in manifest.entries})} class(es) "
           f"-> {args.out}")
+    print(f"  final_required: {len(manifest.final_entries())} · "
+          f"mutable_snapshot: {len(manifest.snapshot_entries())} · "
+          f"final_streams_quiescent: {manifest.final_streams_quiescent}")
     for gap in manifest.missing:
-        print(f"  MISSING {gap['artifact_class']}: {gap['pattern']} "
-              f"({gap['reason']})")
+        print(f"  MISSING {gap['artifact_class']} [{gap.get('lifecycle')}]: "
+              f"{gap['pattern']} ({gap['reason']})")
+    for f in manifest.completion_marker_failures:
+        print(f"  NOT COMPLETE: {f}")
+    for f in manifest.still_being_written:
+        print(f"  STILL BEING WRITTEN: {f}")
     if not manifest.ok:
-        print("required artifacts are absent; find them before teardown — this "
-              "is the point in the session where that is still possible")
+        print("required artifacts are absent or unfinished; find them before "
+              "teardown — this is the point in the session where that is still "
+              "possible")
         return 5
     return 0
 
@@ -112,7 +128,8 @@ def cmd_gate(args) -> int:
     state = json.loads(Path(args.state).read_text())
     decision = evaluate_teardown(
         state, emergency_budget=args.emergency,
-        emergency_reason=args.emergency_reason)
+        emergency_reason=args.emergency_reason,
+        incomplete_event_streams=tuple(args.incomplete_stream))
     print(json.dumps(decision.as_dict(), indent=2))
     return 0 if decision.allowed else 5
 
@@ -126,6 +143,13 @@ def main() -> int:
     m.add_argument("--root", required=True)
     m.add_argument("--spec", required=True, help="JSON list of ArtifactSpec")
     m.add_argument("--out", required=True)
+    m.add_argument("--settle-seconds", type=float, default=0.0,
+                   help="observe every final_required file across this window; "
+                        "one that changes is still being written and cannot be "
+                        "a final artifact")
+    m.add_argument("--completion-markers", default="",
+                   help="JSON list of {path, contains} proving the producing "
+                        "process finished")
     m.set_defaults(fn=cmd_manifest)
 
     a = sub.add_parser("archive")
@@ -149,6 +173,10 @@ def main() -> int:
     g.add_argument("--state", required=True, help="JSON {check: bool}")
     g.add_argument("--emergency", action="store_true")
     g.add_argument("--emergency-reason", default="")
+    g.add_argument("--incomplete-stream", action="append", default=[],
+                   help="an event stream whose tail this emergency teardown is "
+                        "knowingly losing; required when "
+                        "final_streams_quiescent is false")
     g.set_defaults(fn=cmd_gate)
 
     args = ap.parse_args()

@@ -1,0 +1,18 @@
+[
+  {
+    "path": "../e7.status",
+    "contains": "MARKER:TRAIN_DONE:e7_fineweb_r1600k_sa"
+  },
+  {
+    "path": "../e7.status",
+    "contains": "MARKER:TRAIN_DONE:e7_fineweb_r1600k_sb"
+  },
+  {
+    "path": "../e7.status",
+    "contains": "MARKER:EVAL_DONE"
+  },
+  {
+    "path": "../e7.status",
+    "contains": "MARKER:ALL_DONE"
+  }
+]
