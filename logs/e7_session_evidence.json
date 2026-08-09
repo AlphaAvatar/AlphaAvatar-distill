@@ -1,0 +1,304 @@
+{
+  "timeline": [
+    {
+      "utc": "2026-08-09T12:41:48+00:00",
+      "elapsed_min": 0.0,
+      "msg": "budget: expected 679 min $11.20 \u00b7 soft stop 747 min $12.32 \u00b7 hard 777 min $12.82 (authorized $12.82)"
+    },
+    {
+      "utc": "2026-08-09T12:41:49+00:00",
+      "elapsed_min": 0.0,
+      "msg": "NVIDIA L40S securePrice $0.99/h, stock Low"
+    },
+    {
+      "utc": "2026-08-09T12:41:50+00:00",
+      "elapsed_min": 0.0,
+      "msg": "created spa2i4615a10wu at $0.99/h; --terminate-after 2026-08-10T01:38:45Z (redundant layer)"
+    },
+    {
+      "utc": "2026-08-09T12:41:50+00:00",
+      "elapsed_min": 0.0,
+      "msg": "watchdog detached \u2014 hard 777 min = $12.82"
+    },
+    {
+      "utc": "2026-08-09T12:42:43+00:00",
+      "elapsed_min": 0.89,
+      "msg": "  starting (60s) \u2014 $0.01"
+    },
+    {
+      "utc": "2026-08-09T12:43:46+00:00",
+      "elapsed_min": 1.94,
+      "msg": "  starting (120s) \u2014 $0.03"
+    },
+    {
+      "utc": "2026-08-09T12:44:49+00:00",
+      "elapsed_min": 2.99,
+      "msg": "  starting (180s) \u2014 $0.05"
+    },
+    {
+      "utc": "2026-08-09T12:45:10+00:00",
+      "elapsed_min": 3.34,
+      "msg": "TCP 22 at 64.247.206.217:10270 after 3.3 min"
+    },
+    {
+      "utc": "2026-08-09T12:45:13+00:00",
+      "elapsed_min": 3.39,
+      "msg": "draw 1: ssh reachable \u2014 $0.06"
+    },
+    {
+      "utc": "2026-08-09T12:45:26+00:00",
+      "elapsed_min": 3.61,
+      "msg": "draw 1: running setup"
+    },
+    {
+      "utc": "2026-08-09T13:43:26+00:00",
+      "elapsed_min": 61.6,
+      "msg": "draw 1: setup complete \u2014 $1.02"
+    },
+    {
+      "utc": "2026-08-09T13:43:33+00:00",
+      "elapsed_min": 61.72,
+      "msg": "driver detached, pid 2381, confirmed by descriptor_probe \u2014 $1.02"
+    },
+    {
+      "utc": "2026-08-09T13:45:55+00:00",
+      "elapsed_min": 64.09,
+      "msg": "  2026-08-09T13:44:23.921741+00:00 MARKER:PREFLIGHT_OK \u2014 $1.06"
+    },
+    {
+      "utc": "2026-08-09T15:46:38+00:00",
+      "elapsed_min": 184.8,
+      "msg": "  2026-08-09T15:44:48.499681+00:00 MARKER:TRAIN_DONE:E7-B-FineWeb-sa \u2014 $3.05"
+    },
+    {
+      "utc": "2026-08-09T17:45:05+00:00",
+      "elapsed_min": 303.25,
+      "msg": "  2026-08-09T17:44:39.431391+00:00 MARKER:TRAIN_DONE:E7-B-FineWeb-sb \u2014 $5.00"
+    },
+    {
+      "utc": "2026-08-09T19:46:03+00:00",
+      "elapsed_min": 424.21,
+      "msg": "  2026-08-09T19:44:18.126862+00:00 MARKER:TRAIN_DONE:E7-C-Control-sa \u2014 $7.00"
+    },
+    {
+      "utc": "2026-08-09T21:44:22+00:00",
+      "elapsed_min": 542.53,
+      "msg": "  2026-08-09T21:44:17.255087+00:00 MARKER:TOKENIZER_OK \u2014 $8.95"
+    },
+    {
+      "utc": "2026-08-09T21:46:48+00:00",
+      "elapsed_min": 544.96,
+      "msg": "  2026-08-09T21:46:36.875623+00:00 MARKER:MOVEMENT_DONE \u2014 $8.99"
+    },
+    {
+      "utc": "2026-08-09T21:54:03+00:00",
+      "elapsed_min": 552.22,
+      "msg": "  2026-08-09T21:53:40.274470+00:00 MARKER:GENERAL_TEXT_DONE \u2014 $9.11"
+    },
+    {
+      "utc": "2026-08-09T22:03:42+00:00",
+      "elapsed_min": 561.87,
+      "msg": "  2026-08-09T22:02:37.059715+00:00 MARKER:EVAL_DONE:E7-B-FineWeb-sa \u2014 $9.27"
+    },
+    {
+      "utc": "2026-08-09T22:13:22+00:00",
+      "elapsed_min": 571.54,
+      "msg": "  2026-08-09T22:11:19.795533+00:00 MARKER:EVAL_DONE:E7-B-FineWeb-sb \u2014 $9.43"
+    },
+    {
+      "utc": "2026-08-09T22:20:40+00:00",
+      "elapsed_min": 578.83,
+      "msg": "  2026-08-09T22:18:16.569463+00:00 MARKER:EVAL_DONE:E7-C-Control-sa \u2014 $9.55"
+    },
+    {
+      "utc": "2026-08-09T22:27:58+00:00",
+      "elapsed_min": 586.14,
+      "msg": "  2026-08-09T22:26:41.868340+00:00 MARKER:ALL_DONE \u2014 $9.67"
+    },
+    {
+      "utc": "2026-08-09T22:27:58+00:00",
+      "elapsed_min": 586.14,
+      "msg": "polling ended: ALL_DONE \u2014 $9.67"
+    },
+    {
+      "utc": "2026-08-09T22:32:02+00:00",
+      "elapsed_min": 590.2,
+      "msg": "  manifest rc=0\n38 file(s) across 11 class(es) -> /workspace/e7_manifest.json\n  final_required: 37 \u00b7 mutable_snapshot: 1 \u00b7 final_streams_quiescent: True"
+    },
+    {
+      "utc": "2026-08-09T22:43:18+00:00",
+      "elapsed_min": 601.47,
+      "msg": "  checkpoint e7_fineweb_r1600k_sa: rc=0"
+    },
+    {
+      "utc": "2026-08-09T22:54:06+00:00",
+      "elapsed_min": 612.26,
+      "msg": "  checkpoint e7_fineweb_r1600k_sb: rc=0"
+    },
+    {
+      "utc": "2026-08-09T23:05:16+00:00",
+      "elapsed_min": 623.44,
+      "msg": "  checkpoint e7_control_r1600k_sa: rc=0"
+    },
+    {
+      "utc": "2026-08-09T23:17:10+00:00",
+      "elapsed_min": 635.34,
+      "msg": "  checkpoint e7_control_r1600k_sb: rc=0"
+    },
+    {
+      "utc": "2026-08-09T23:17:10+00:00",
+      "elapsed_min": 635.34,
+      "msg": "teardown gate: allowed=True failed=None"
+    },
+    {
+      "utc": "2026-08-09T23:17:10+00:00",
+      "elapsed_min": 635.34,
+      "msg": "deleting pod (gate passed)"
+    },
+    {
+      "utc": "2026-08-09T23:17:21+00:00",
+      "elapsed_min": 635.52,
+      "msg": "pod deleted \u2014 635.5 min, $10.49"
+    }
+  ],
+  "stages": {
+    "setup": [
+      {
+        "draw": 1,
+        "setup_done": "1",
+        "host_cold": "0",
+        "tail": "SETUP_RC=0"
+      }
+    ]
+  },
+  "budget_plan": {
+    "price_per_hour": 0.99,
+    "authorized_usd": 12.82,
+    "expected_minutes": 679.04,
+    "soft_stop_minutes": 746.9440000000001,
+    "artifact_recovery_reserve_minutes": 30.0,
+    "hard_terminate_minutes": 776.9440000000001,
+    "step_time": {
+      "seconds": 4.6,
+      "source": "E6b measured 4.15 s/step + 10% for the extra stream",
+      "measured": true
+    },
+    "breakdown": [
+      {
+        "name": "setup",
+        "minutes": 45.0
+      },
+      {
+        "name": "train",
+        "minutes": 540.04
+      },
+      {
+        "name": "evaluate",
+        "minutes": 42.0
+      },
+      {
+        "name": "transfer",
+        "minutes": 40.0
+      },
+      {
+        "name": "arm_A_general_text_diagnostics",
+        "minutes": 4.0
+      },
+      {
+        "name": "artifact_manifest_and_verify",
+        "minutes": 8.0
+      }
+    ],
+    "notes": [],
+    "expected_usd": 11.2042,
+    "soft_stop_usd": 12.3246,
+    "artifact_recovery_reserve_usd": 0.495,
+    "hard_terminate_usd": 12.8196
+  },
+  "quoted_price_per_hour": 0.99,
+  "stock_status": "Low",
+  "pod_id": "spa2i4615a10wu",
+  "actual_price_per_hour": 0.99,
+  "terminate_after_utc": "2026-08-10T01:38:45Z",
+  "watchdog_journals": [
+    "/home/ecs-user/aad-scratch/e7_20260809_124148/watchdog.jsonl"
+  ],
+  "driver_job": {
+    "job_id": "e7_driver",
+    "pid": 2381,
+    "workdir": "/workspace/aad",
+    "command": "/opt/train/bin/python scripts/pod/e7_driver.py --stage all --spent-usd 1.016 --soft-stop-usd 12.32 --authorized-usd 12.82 --rate 0.99",
+    "log_path": "/workspace/e7_run.log",
+    "status_path": "/workspace/e7.status",
+    "pid_path": "/workspace/jobs/e7_driver.pid",
+    "descriptor_path": "/workspace/jobs/e7_driver.job.json",
+    "exit_path": "/workspace/jobs/e7_driver.exit",
+    "started_utc": "2026-08-09T13:43:29Z",
+    "start_channel_closed": true,
+    "confirmed_by": "descriptor_probe"
+  },
+  "terminal": "ALL_DONE",
+  "local_hash_problems": [],
+  "checkpoints_fetched": [
+    {
+      "arm": "e7_fineweb_r1600k_sa",
+      "rc": 0
+    },
+    {
+      "arm": "e7_fineweb_r1600k_sb",
+      "rc": 0
+    },
+    {
+      "arm": "e7_control_r1600k_sa",
+      "rc": 0
+    },
+    {
+      "arm": "e7_control_r1600k_sb",
+      "rc": 0
+    }
+  ],
+  "teardown_gate": {
+    "allowed": true,
+    "emergency": false,
+    "failed_check": null,
+    "reason": "every teardown check passed",
+    "checks": {
+      "training_complete": true,
+      "evaluation_complete": true,
+      "artifact_manifest_created": true,
+      "required_files_present": true,
+      "final_streams_quiescent": true,
+      "archive_created": true,
+      "archive_contents_verified": true,
+      "transfer_complete": true,
+      "local_hashes_verified": true,
+      "checkpoint_hashes_matched": true,
+      "report_inputs_verified": true
+    },
+    "incomplete_event_streams": []
+  },
+  "manifest_summary": {
+    "ok": true,
+    "final_streams_quiescent": true,
+    "entries": 38,
+    "final_entries": 37,
+    "snapshot_entries": 1,
+    "missing": [],
+    "still_being_written": [],
+    "completion_marker_failures": []
+  },
+  "final_pod_state": {
+    "exists": false,
+    "desired_status": "TERMINATED",
+    "billing": false
+  },
+  "cost": {
+    "price_per_hour": 0.99,
+    "elapsed_minutes": 635.52,
+    "actual_usd": 10.4861,
+    "authorized_usd": 12.82,
+    "within_backstop": true
+  },
+  "passed": true,
+  "finished_utc": "2026-08-09T23:17:21+00:00"
+}

@@ -57,6 +57,17 @@ accurately. Both objectives also improve teacher-native CE almost identically
 evidence yet for the standing rule that **diagnostics may never select a
 checkpoint**.
 
+**And restoring general language modelling does not help either.** The rollout
+recipe destroys general text — held-out FineWeb NLL falls to 6.16 by the 0.46M
+rung and climbs back to ~9.5 by 1.60M. Adding general-text teacher KD alongside
+the unchanged rollout stream **restores it decisively: −5.22 nats, both seeds,
+teacher KL 7.34 → 1.94, top-1 up 9×.** Autonomous behaviour moved by **nothing**
+— usable rollout +0.0000 against the baseline, every paired comparison inside its
+registered floor, GSM8K correctness 0.0000 on five of six arms. A matched
+in-domain control recovers 90% of the same NLL gain, so what restores general
+text is *extra KD signal on unseen text*, largely regardless of which text. Lost
+language modelling is **not** what causes the correctness ceiling.
+
 **What is not the problem.** The released `Qwen3-0.6B` — the student's exact
 geometry and parameter count — answers ~70% of GSM8K and ~74% of RAG on this
 project's own frozen battery under this project's own protocol. A model this size
@@ -68,7 +79,7 @@ evidence separates them.
 **Current experiment:** [Qwen/Qwen3-4B-Thinking-2507](https://huggingface.co/Qwen/Qwen3-4B-Thinking-2507) → a 0.6B-class student (Qwen3-0.6B geometry, ~6.7× compression, INT8 deployment target).
 
 Full record: [`logs/EXPERIMENTS.md`](./logs/EXPERIMENTS.md). Current state and next
-actions: [`logs/STATE.md`](./logs/STATE.md). Total paid compute to date: **$149.59**.
+actions: [`logs/STATE.md`](./logs/STATE.md). Total paid compute to date: **$160.16**.
 
 ### How Stage 2/3 is measured
 

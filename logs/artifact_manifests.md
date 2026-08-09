@@ -896,3 +896,31 @@ and all seven `capability-v2` files. Zero overlaps involving any E7 stream.
 
 Rebuild commands: [`e7_preregistration.md`](e7_preregistration.md) §11.
 
+
+
+## E7 arms — trained 2026-08-09, $10.49 (dev-box only, NOT yet on the relay)
+
+Four checkpoints at `step_001761`, 5.6 GB each, under
+`/home/ecs-user/aad-artifacts/e7/`. Per-file sha256 recorded pod-side before
+transfer and re-verified locally; the session's 38-file artifact bundle verified
+with **zero hash problems** (37 `final_required` + 1 `mutable_snapshot`,
+`final_streams_quiescent: True`).
+
+| arm | extra stream | extra KD positions |
+| --- | --- | ---: |
+| `e7_fineweb_r1600k_sa` | FineWeb-Edu raw text | 1,801,503 |
+| `e7_fineweb_r1600k_sb` | FineWeb-Edu raw text | 1,801,503 |
+| `e7_control_r1600k_sa` | matched in-domain KD-only | 1,801,503 |
+| `e7_control_r1600k_sb` | matched in-domain KD-only | 1,801,503 |
+
+All four fork from the Stage 1 PCA init (`86fbba78…`), train the identical 1.60M
+rollout stream, and differ only in the extra stream's content. Retained
+evaluation artifacts: `artifacts/audit/three_mode/E7-*` (generations, forced
+per-sample, reports), `artifacts/audit/e7_general_text/` (six models incl. the
+retained arm A), `artifacts/audit/e7_per_prompt.jsonl` (900 scored records),
+`artifacts/audit/e7_movement/`.
+
+**Not on the relay.** Single-copy on the dev box. The E7 *inputs* (streams,
+disjointness proof, holdout) are on the relay under `e7_streams_20260809/`; the
+produced weights are not, and re-evaluating an arm without them would cost a
+retrain.

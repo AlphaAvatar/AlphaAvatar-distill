@@ -1838,3 +1838,47 @@
   CLI-level track record in this project", and the discipline that kept
   `--terminate-after` from being trusted for four experiments applies here too.
 - **Revisit when:** E7 is authorized, or a provider behaviour changes.
+
+## 2026-08-09 — E7: general language modelling is separable from the correctness ceiling
+
+- **Context:** the E1/P1 lineage improves held-out FineWeb NLL to ~6.2 by the
+  0.46M rung and then gives it back, ending ~9.5 at 1.60M, while autonomous
+  correctness never leaves 0.11–0.21. E7 asked whether the two are connected.
+- **Result — question 1, general-language restoration: YES, decisively.**
+  B recovers **−5.22 nats** against the retained baseline, both seeds, on a
+  metric whose between-seed spread in this lineage has been 0.23–1.34. Top-1 on
+  general text rises 9×, teacher KL falls 7.34 → 1.94.
+- **Result — questions 2 and 3, autonomous stability and correctness: NO.**
+  Every paired comparison is inside its registered floor. B vs A on usable
+  rollout is **+0.0000**. GSM8K correctness is 0.0000 on five of six arms.
+- **Decision — the recorded conclusion:** *FineWeb teacher KD restores general
+  language modelling and does not solve reasoning.* This is preregistered
+  outcome 2, fixed before the run. It must not be reported as a FineWeb success
+  on the strength of section 1 of the report.
+- **Decision — do not claim B vs C on correctness.** It is +0.0400 pooled and
+  seed-consistent (+0.06 / +0.02), which is the only comparison in E7 that
+  points anywhere — and it is **inside the 0.0600 floor**, so by the registered
+  rule it is a tie. Recorded, not claimed. One seed's CI touches zero.
+- **The mechanism finding, which was not anticipated:** arm C — in-domain
+  rollout text, KD-only, matched budget — recovers **−4.71 nats**, 90% of B's
+  gain. FineWeb's content adds only the remaining −0.51. **What restores general
+  language modelling is extra KD signal on unseen text, largely regardless of
+  which text.** Arm C was included to separate content from compute, and it
+  turned out to carry the finding rather than merely bound it.
+- **What this closes:** the hypothesis that the rollout recipe's destruction of
+  general language modelling *causes* the correctness ceiling. It does not. A
+  −5.22 nat swing moved the promotion criterion by zero.
+- **What this strengthens:** the promotion rule, past the point of argument. E6b
+  showed two objectives moving val CE identically while only one moved
+  behaviour; E7 shows a diagnostic moving five nats while behaviour moves none.
+- **Behavioural anchor unchanged: E1/P1 KD-heavy 2.96M.** No E7 arm displaces
+  it, and none was expected to — E7 trained at 1.60M by design.
+- **Alternatives considered:** reading B's diagnostic win as a partial success —
+  rejected, it is exactly the substitution the preregistration forbade;
+  attributing the restoration to FineWeb — rejected by arm C, which is why the
+  full design was worth its cost.
+- **Not decided here:** whether to try a 2.96M + FineWeb confirmation, a
+  contribution-guided initialization experiment, or anything else. Returned for
+  a separate decision.
+- **Revisit when:** an intervention is proposed that targets the correctness
+  bottleneck directly rather than through a diagnostic.

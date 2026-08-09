@@ -4652,3 +4652,131 @@ strictly more controllable than approximating E6b's duration live.
 
 **E7 B and C are not launched.** They require separate authorization for the
 $12.82 hard backstop and the $163.23 cumulative cap.
+
+---
+
+## 34. Experiment 7 — general language modelling restored; behaviour unmoved (2026-08-09, $10.49)
+
+**Objective.** Does adding general-text teacher KD, while preserving the 1.60M
+rollout trajectory exactly, restore general language modelling — and does any
+restoration transfer to autonomous rollout correctness?
+
+**Answer: yes to the first, no to the second.** This is preregistered outcome 2
+(`e7_preregistration.md` §7.4): *FineWeb preserves language modelling but does
+not solve reasoning.* Report [`e7_report.md`](e7_report.md), machine-readable
+[`e7_results.json`](e7_results.json), session evidence
+[`e7_session_evidence.json`](e7_session_evidence.json).
+
+### 34.1 The session
+
+Pod `spa2i4615a10wu`, L40S at $0.99/h, 12:41:50 → 23:17:21 UTC = **635.5 min =
+$10.49** against a $12.82 backstop and a $12.32 soft stop. Four arms trained,
+six models diagnosed, four evaluated on the frozen battery. The gate passed, the
+pod was deleted by the launcher, and the provider confirmed it gone.
+
+Preflight, the registered stop/go gate at the frozen `lambda_extra = 0.25`:
+
+| config | ‖∇(λ·KD_extra)‖ / ‖∇(rollout)‖ | band [0.05, 1.00] |
+| --- | ---: | --- |
+| B | **0.3613** | IN BAND |
+| C | **0.3876** | IN BAND |
+
+Both arms landed at nearly the same gradient scale, which is what makes the
+comparison about content rather than about one arm being pushed harder. **All
+four arms consumed exactly 1,801,503 extra KD positions** — `planned` at
+`run_start`, `extra_kd_positions` at `run_end`, matching to the token.
+
+### 34.2 General language modelling: restored, decisively
+
+On the 512×1024 held-out FineWeb stream, teacher `Qwen3-4B-Thinking-2507`:
+
+| arm | FineWeb NLL | teacher KL | top-1 | mean rank |
+| --- | ---: | ---: | ---: | ---: |
+| **A** retained baseline | 9.4847 / 9.4541 | 7.350 / 7.320 | 0.032 / 0.033 | 10178 / 7854 |
+| **B** FineWeb KD | **4.2664 / 4.2478** | 1.945 / 1.931 | 0.285 / 0.285 | 511 / 502 |
+| **C** matched control | 4.7713 / 4.7508 | 2.456 / 2.444 | 0.242 / 0.243 | 710 / 697 |
+
+**B − A = −5.22 nats**, both seeds, against a lineage whose between-seed
+`holdout_nll` spread has been 0.23–1.34. Top-1 on general text rises 9×.
+
+**The mechanism is mostly not FineWeb.** C — in-domain rollout text, KD-only —
+recovers **−4.71 nats**, 90% of B's gain. FineWeb's *content* adds the remaining
+**−0.51 nats** (B − C, seed-consistent). What restores general language
+modelling is extra KD signal on unseen text, largely regardless of which text.
+
+### 34.3 Autonomous behaviour: nothing moved
+
+| arm | usable | correct | correct \| usable | nat. term | ctx limit |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| A-Baseline | 0.7300 | 0.1867 | 0.2511 | 0.7600 | 0.2400 |
+| B-FineWeb | **0.7300** | 0.1900 | 0.2603 | 0.7567 | 0.2434 |
+| C-Control | 0.7500 | 0.1500 | 0.2000 | 0.7667 | 0.2334 |
+
+Paired on the shared 150-prompt mask, against the registered floors (usable
+0.0800, correct 0.0600):
+
+| comparison | usable Δ | verdict | correct Δ | verdict |
+| --- | ---: | --- | ---: | --- |
+| B vs A | **+0.0000** | tie | +0.0033 | tie |
+| C vs A | +0.0200 | tie | −0.0367 | tie |
+| B vs C | −0.0200 | tie | +0.0400 | tie |
+
+**Every comparison is inside its floor.** B vs A on usable rollout is +0.0000 —
+not "small", zero. GSM8K correctness is 0.0000 on five of six arms; the sixth is
+B-sa at 0.0789 (3 of 38) against B-sb's 0.0000, which is one seed of one arm and
+is not a signal.
+
+The one comparison that even points somewhere is **B vs C on correctness:
++0.0400 pooled, seed-consistent (+0.06 / +0.02)** — and it is **inside the 0.0600
+floor and therefore a tie**. It is recorded, not claimed. `sa`'s CI touches zero.
+
+### 34.4 What this settles
+
+**A −5.22 nat swing in general language modelling produced no measurable change
+in autonomous behaviour.** That is the largest diagnostic movement in the
+project's history, and it moved the promotion criterion by nothing at all.
+
+This closes the hypothesis that the rollout recipe's destruction of general
+language modelling *causes* the correctness ceiling. It does not. The two are
+separable, and E7 separated them.
+
+It also strengthens the standing promotion rule past the point of argument. E6b
+showed two objectives improving validation CE identically while only one moved
+behaviour; E7 shows a diagnostic improving by five nats while behaviour moves by
+zero. **Teacher-forced CE, NLL, KL and top-1 are training-health diagnostics.
+They may not select a checkpoint.**
+
+**The behavioural anchor is unchanged: E1/P1 KD-heavy 2.96M.** No E7 arm
+displaces it, and none was expected to — E7 trained at 1.60M by design.
+
+### 34.5 Exact reproduction
+
+Commit **`97cd963d692ebba628dc8a2d0ef262604a14fc34`**, preregistration sha256
+`e1d11b4bea6e31fc…`, inclusion mask `d6e24e0b09da1bcc…` asserted on all four
+arms after evaluation.
+
+```bash
+PYTHONPATH=src python scripts/pod/e7_launch.py --scr … \
+    --session-commit 97cd963d692ebba628dc8a2d0ef262604a14fc34 \
+    --bundle aad_e7_97cd963d.bundle --authorized-usd 12.82
+PYTHONPATH=src python scripts/evaluation/analyze_e7.py --bootstrap 10000
+```
+
+| identity | value |
+| --- | --- |
+| arms | `e7_{fineweb,control}_r1600k_{sa,sb}`, all from the Stage 1 PCA init |
+| objective | ce 0.25 / kd 1.0, τ 1.0, scope all — the E1/P1 KD-heavy lineage |
+| rung | 1,600,353 unique CE tokens · 4,801,059 cumulative · 1,761 steps |
+| extra stream | 1761 × 1024 dense, λ 0.25, 1 block every step, 1.0 exposures |
+| extra KD | 1,801,503 positions per arm, B and C identical |
+| streams | fineweb `b70beffac337ee37…`, control `4e54f8e18baf01dc…`, val `e4002bbbbadf1a91…` |
+| evaluation | 150 prompts, greedy, ctx 8192, vLLM, mask `d6e24e0b…` |
+| artifacts | 38 files, 37 `final_required` + 1 `mutable_snapshot`, all hash-verified |
+
+### 34.6 The infrastructure worked
+
+First full session on the post-E6b stack. The launcher never blocked; the
+watchdog polled throughout and was never needed; all four `train_log.jsonl`
+streams were relayed continuously **and** passed the `final_required` gate at
+teardown (quiescent, marker-backed, six completion markers matched). Setup ran
+58 min against 45 budgeted and the contingency absorbed it. Nothing was lost.

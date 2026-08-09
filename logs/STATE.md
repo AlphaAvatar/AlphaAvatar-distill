@@ -1,8 +1,55 @@
 **Updated:** 2026-08-09 · branch `main` · **no pods running, nothing billing.**
-**E6b is complete, accepted and CLOSED — not to be modified or rerun.**
-**The live control-plane canary PASSED 12/12 on its clean rerun**, unaided, for
-$0.033. **E7 IS AUTHORIZED — full B+C design, $12.82 hard backstop, cumulative cap
-$162.49.** **1,071 CPU tests pass**, 3 skipped.
+**E7 IS COMPLETE.** General language modelling was restored decisively
+(**−5.22 nats**) and **autonomous behaviour did not move at all** — every paired
+comparison inside its registered floor, B vs A usable rollout **+0.0000**.
+$10.49 of an authorized $12.82. **1,084 CPU tests pass**, 3 skipped.
+
+## E7 COMPLETE — RESTORED LANGUAGE MODELLING DOES NOT REACH BEHAVIOUR
+
+Preregistered outcome 2, fixed before the run: *FineWeb preserves language
+modelling but does not solve reasoning.* Report [`e7_report.md`](e7_report.md),
+record [`EXPERIMENTS.md`](EXPERIMENTS.md) §34, decision
+[`decisions.md`](decisions.md) 2026-08-09.
+
+**Question 1 — general-language restoration: YES.**
+
+| arm | FineWeb NLL | teacher KL | top-1 |
+| --- | ---: | ---: | ---: |
+| **A** retained baseline | 9.4847 / 9.4541 | 7.350 / 7.320 | 0.032 / 0.033 |
+| **B** FineWeb KD | **4.2664 / 4.2478** | 1.945 / 1.931 | 0.285 / 0.285 |
+| **C** matched control | 4.7713 / 4.7508 | 2.456 / 2.444 | 0.242 / 0.243 |
+
+**Questions 2 and 3 — autonomous stability and correctness: NO.**
+
+| arm | usable | correct | correct \| usable |
+| --- | ---: | ---: | ---: |
+| A-Baseline | 0.7300 | 0.1867 | 0.2511 |
+| B-FineWeb | **0.7300** | 0.1900 | 0.2603 |
+| C-Control | 0.7500 | 0.1500 | 0.2000 |
+
+Paired, against floors 0.0800 usable / 0.0600 correct: **B vs A +0.0000 / +0.0033
+· C vs A +0.0200 / −0.0367 · B vs C −0.0200 / +0.0400. All ties.** GSM8K
+correctness 0.0000 on five of six arms.
+
+**The one comparison pointing anywhere — B vs C on correctness, +0.0400 pooled,
+seed-consistent — is inside the floor and is NOT claimed.**
+
+**The mechanism, which was not anticipated.** Arm C — in-domain text, KD-only,
+matched budget — recovers **−4.71 nats**, 90% of B's gain. FineWeb's content adds
+only −0.51. **What restores general language modelling is extra KD signal on
+unseen text, largely regardless of which text.** The control carried the finding
+rather than merely bounding it.
+
+**What this closes:** lost general language modelling does **not** cause the
+correctness ceiling. A −5.22 nat swing moved the promotion criterion by zero —
+the strongest evidence yet for the standing rule that diagnostics may not select
+a checkpoint.
+
+**Behavioural anchor unchanged: E1/P1 KD-heavy 2.96M.** No E7 arm displaces it;
+none was expected to (E7 trained at 1.60M by design).
+
+**No follow-up is running or planned.** A 2.96M + FineWeb confirmation, an E8
+initialization experiment and anything else are returned for a separate decision.
 
 ## BUDGET ACCOUNTING — READ BEFORE PROPOSING ANY PAID RUN
 
@@ -13,7 +60,9 @@ actual cumulative spend:            $149.668  <-- the planning baseline
   canary run 1 (FAILED 9/10)           $0.045
   canary run 2 (PASSED 12/12)          $0.033
 temporary canary cap (spent, closed): $150.41
-**AUTHORIZED CUMULATIVE CAP:          $162.49**  = $149.668 + $12.82
+authorized cumulative cap:            $162.49
+  E7 actual                             $10.49
+**ACTUAL CUMULATIVE SPEND:            $160.158**  ($2.33 under the cap)
 ```
 
 **The cap is built from actual cumulative spend, never from unused room under a
