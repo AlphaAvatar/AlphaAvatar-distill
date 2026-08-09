@@ -24,16 +24,27 @@ tokens.** This is the strongest result in the project.
 **Stage 2/3 — no model has demonstrated passage of a prospectively defined
 behaviour-recovery gate.** The student can be trained to hold the teacher's
 protocol most of the time, and cannot yet be trained to hold it reliably. The best
-arm produces a well-formed, self-terminating rollout on **77%** of prompts. **The
-dominant failure is that the model does not stop:** the rest run to the
-8,192-token context limit, usually in a repetition loop.
+arm produces a well-formed, self-terminating rollout on **84%** of prompts. **The
+dominant failure is that the model does not stop:** most of the rest run to the
+8,192-token context limit, usually in a repetition loop, and about one prompt in
+eight is answered with nothing at all.
 
 **Behaviour responds to scale; reasoning does not respond to anything tried.**
-Autonomous rollout stability has moved 0.53 → 0.77 across the 0.86M → 1.60M token
-budgets, but correctness has stayed near 0.13–0.20 throughout, and
-`correct_given_usable` **falls** as stability rises (0.3258 → 0.2682 → 0.1652).
-Each intervention that makes more rollouts well-formed makes them well-formed
-*and wrong*.
+Autonomous rollout stability has moved 0.5333 → 0.7300 → **0.8400** across the
+0.86M → 1.60M → 2.96M token budgets and then stops (5.50M: 0.8500, a tie). Over
+the same range correctness never leaves 0.11–0.21, and `correct_given_usable`
+drifts *down* as stability rises (0.2511 → 0.2460 → 0.2039). Each intervention
+that makes more rollouts well-formed makes them well-formed *and wrong*. The
+sharpest single view: **GSM8K usable rollout climbs 0.71 → 0.92 while GSM8K
+correctness stays at 0.00–0.05.** The model learns to finish a maths problem, not
+to solve one.
+
+**That scaling gain belongs to one objective, not to the data.** Trained at the
+same 2.96M rung, the CE-heavy objective gains only +0.0267 where the KD-heavy one
+gains +0.1100 — an objective × scale interaction of −0.0833 on the primary axis.
+Both objectives improve teacher-native CE almost identically (1.31 → 1.17 against
+1.30 → 1.15) while only one moves behaviour, which is the cleanest evidence yet
+for the standing rule that **diagnostics may never select a checkpoint**.
 
 **What is not the problem.** The released `Qwen3-0.6B` — the student's exact
 geometry and parameter count — answers ~70% of GSM8K and ~74% of RAG on this
@@ -46,7 +57,7 @@ evidence separates them.
 **Current experiment:** [Qwen/Qwen3-4B-Thinking-2507](https://huggingface.co/Qwen/Qwen3-4B-Thinking-2507) → a 0.6B-class student (Qwen3-0.6B geometry, ~6.7× compression, INT8 deployment target).
 
 Full record: [`logs/EXPERIMENTS.md`](./logs/EXPERIMENTS.md). Current state and next
-actions: [`logs/STATE.md`](./logs/STATE.md). Total paid compute to date: **$138.52**.
+actions: [`logs/STATE.md`](./logs/STATE.md). Total paid compute to date: **$149.59**.
 
 ### How Stage 2/3 is measured
 
@@ -78,6 +89,9 @@ construction (a terse well-formed reply scores perfectly), and its components ar
 | Scaling 0.86M → 1.60M tokens | Stability **+0.2000** (both seeds, CIs exclude zero); correctness +0.0100, inside the floor. The gain belongs to scale, not to the objective — P1 gained equally. |
 | Student-prefix recovery continuation | **Worse than not continuing at all**: −0.087 usable rollout and −0.080 correctness against its own start point. Trained only on continuations, it never learns to stop. |
 | Teacher-prefix continuation | Ties the matched-CE anchor on behaviour (0.7667 vs 0.7333, inside the floor) and appears to **cost** correctness (0.1300 vs 0.2000, one seed's CI excluding zero). |
+| Scaling 1.60M → 2.96M tokens (KD-heavy) | Stability **+0.1100** (both seeds, above the floor); correctness +0.0200, inside it. Termination is what improves: context-limit hits fall 28/44 → 19/23 prompts. |
+| Scaling 2.96M → 5.50M tokens | **Saturated**: +0.0100, inside the floor, seeds disagreeing. Past 2.96M only the diagnostics keep moving. |
+| Scaling 1.60M → 2.96M tokens (CE-heavy) | **A tie**: +0.0267, inside the floor, seeds disagreeing. The same rung that buys the KD-heavy objective +0.1100 buys this one nothing. |
 
 Reducing KD's influence two independent ways cost teacher-distribution fidelity in
 proportion to the dose, so **reweighting the existing two loss terms is not the
@@ -297,7 +311,7 @@ AlphaAvatar-distill/
 ├── configs/                # stage recipes: stage0/ · stage1/ · stage3/recovery.json
 ├── data/                   # corpus manifests (jsonl gitignored, rebuildable)
 │   └── eval_behavior_v0/   #   76-prompt behavior set + manifest (both committed)
-├── tests/                  # 766 CPU tests, mirroring the source areas
+├── tests/                  # 879 CPU tests, mirroring the source areas
 ├── logs/                   # project memory — read STATE.md first
 │   ├── STATE.md            #   canonical handoff: a snapshot, not an archive
 │   ├── EXPERIMENTS.md      #   the consolidated record: what ran, results, cost

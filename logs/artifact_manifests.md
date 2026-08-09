@@ -773,3 +773,48 @@ a trained checkpoint.
 now have 150-example unrestricted-harness results (`three_mode/P1-1600k-{sa,sb}/`)
 comparable with every Stage 2/3 family, where before they had only 76-prompt
 behaviour-wave numbers taken with the degeneration stop active.
+
+## Experiment 6b outputs and checkpoints (2026-08-09)
+
+Session commit `6375e299815416dddc1bd0c12fd6fe273035a9e9`, pod
+`luy1txyjro2msz` (L40S, $0.99/h, 458 min).
+
+### Checkpoints — dev box only, NOT the relay
+
+The relay's private LFS quota has been at its limit since 2026-08-02 and
+deletion does not reclaim it, so these were never uploaded. Both were fetched
+from the pod before teardown and verified local-vs-pod.
+
+| arm | path | `model.safetensors` sha256 | verified |
+| --- | --- | --- | --- |
+| `e6b_p2_r2960k_sa` | `/home/ecs-user/aad-artifacts/e6b/e6b_p2_r2960k_sa/` | `89b14b839ff9b8a2e4651dbfaee63ab2703cd5737c11af9afb438dc2599497e7` | **matches pod manifest** |
+| `e6b_p2_r2960k_sb` | `/home/ecs-user/aad-artifacts/e6b/e6b_p2_r2960k_sb/` | `3c4709b51792c7e6e18c512c240bb20f6b55b0714e6d2c1264522e30633856f6` | **matches pod manifest** |
+
+5.6 GB each, `step_002916`, each carrying a full tokenizer (the trainer's
+`save_checkpoint` writes none) and dressed from the Stage 1 init
+`86fbba78…`. Pod-side manifest retained at
+`/home/ecs-user/aad-artifacts/e6b/e6b_ckpt_hashes.txt`.
+
+**Single-copy risk, recorded.** Neither arm exists anywhere but this dev box.
+Reproducing either costs ~200 min of L40S (~$3.30). The same class of loss took
+P0-assistant's weights permanently and all four E5 checkpoints.
+
+### Evaluation artifacts — retained and committed in summary form
+
+| artifact | where | note |
+| --- | --- | --- |
+| raw generations, both arms | `artifacts/audit/three_mode/P2-2.96M-{sa,sb}/` | gitignored; free + oracle + forced, 150 prompts each, mask `d6e24e0b…` |
+| retrieved bundle | `/home/ecs-user/aad-artifacts/e6b/e6b_artifacts.tar.gz` | sha256 `d96d63a97082af70…`, digest-verified before teardown |
+| driver console log | `/home/ecs-user/aad-artifacts/e6b/e6b_run.log` | 132 KB; carries the training curve, per-step times and final val CE |
+| summary + report | `logs/e6b_results.json`, `logs/e6b_report.md` | tracked; reproduce byte-identically from the generations |
+| per-prompt records | `artifacts/audit/e6b_per_prompt.jsonl` | 1,200 scored rows |
+
+### NOT retained — a P4 gap
+
+`train_log.jsonl` and `run_manifest.json` for **both** arms were never fetched:
+the pod-side bundling command's `$(ls -d …)` globs did not expand inside the ssh
+quoting, and the pod was deleted before it was noticed. The training curve,
+per-step timings and final validation CE survive in the driver console log, so
+the substance is recoverable; the machine-readable event stream required by
+AGENTS.md 3.7 is not. Fix the bundling to use an explicit file list before the
+next training session.
