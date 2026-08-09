@@ -1785,3 +1785,56 @@
   or accept criteria 1–8 plus the regression tests. That is the maintainer's
   call and is deliberately not pre-empted.
 - **Revisit when:** the maintainer rules on the re-run, or E7 is authorized.
+
+## 2026-08-09 — Artifact lifecycles: durability and completeness are different claims
+
+- **Context:** the bounded-read archive fixed the first canary's hash race by
+  capturing a byte boundary and hashing exactly what it wrote. That made a
+  growing training log **archivable** — and archivable must not be allowed to
+  mean **finished**.
+- **Decision:** every artifact class declares a lifecycle.
+  * `mutable_snapshot` — the writer may still be active; the archive records the
+    captured boundary. Claim: *these bytes are durable.* Not: *this file is
+    complete.*
+  * `final_required` — the producing process has finished, its terminal marker
+    exists, and the file is quiescent across a settle window. **The default**, so
+    a spec written without thinking gets the strict reading.
+- **Decision — normal E7 teardown requires `final_required`** for
+  `train_log.jsonl` and every required structured event stream. A bounded prefix
+  of a still-growing file must never satisfy it.
+- **Decision — emergency budget termination may keep a snapshot**, because an
+  unbounded bill is worse than a lost tail, but it must **name** the streams it
+  truncates and the decision records `THE FINAL EVENT STREAM IS INCOMPLETE` for
+  them. An unnamed truncation raises.
+- **Enforced in three places on purpose:** `build_manifest` (markers + settle
+  window), `create_archive` (refuses a grown `final_required` file), and the
+  gate (`final_streams_quiescent`, separate from `required_files_present`
+  because presence and completeness are different questions). One place would
+  have been a suggestion.
+- **Alternatives considered:** tolerating a size difference in `verify_archive` —
+  rejected, it re-opens the E6b hole where every check passed on an incomplete
+  bundle; requiring the trainer to stop before any collection — rejected, it
+  would forbid mid-run durability snapshots, which are the thing that made E6b's
+  loss survivable in the first place.
+- **Revisit when:** an artifact class appears that is neither — e.g. a file
+  rewritten in place rather than appended.
+
+## 2026-08-09 — The canary chain is verified; E7's remaining blocker is money
+
+- **Context:** run 1 failed 9/10 and needed a hand-launched watchdog. Run 2 was
+  authorized to prove the complete path unaided at a $0.12 backstop.
+- **Result: PASSED 12/12 from one launch command**, $0.033, pod
+  `3hvb5d4it6h6pb` gone and confirmed gone. Both artifact lifecycles exercised
+  live on the same file in one session.
+- **Decision:** the live provider/control-plane path is considered verified for
+  E7's purposes. The remaining E7 blockers are authorization and the cumulative
+  cap, not infrastructure.
+- **Decision — do not chase duration live.** Long-session watchdog and liveness
+  behaviour stays covered by deterministic local simulation against a fake
+  clock: it is free, strictly more controllable, and a multi-hour live test
+  would only approximate E6b rather than reproduce it.
+- **`podTerminate` has two live observations now.** It stays flagged
+  `verified_transport: false` in the journal schema — the flag means "no
+  CLI-level track record in this project", and the discipline that kept
+  `--terminate-after` from being trusted for four experiments applies here too.
+- **Revisit when:** E7 is authorized, or a provider behaviour changes.

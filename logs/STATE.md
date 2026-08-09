@@ -1,69 +1,73 @@
 **Updated:** 2026-08-09 · branch `main` · **no pods running, nothing billing.**
 **E6b is complete, accepted and CLOSED — not to be modified or rerun.**
-**The live control-plane canary RAN and FAILED** — 9 of 10 criteria passed,
-$0.045 of an authorized $0.82. **E7 is therefore NOT launched.**
-**1,060 CPU tests pass**, 3 skipped.
-
-## CANARY 2026-08-09 — FAILED (9/10), E7 NOT LAUNCHED
-
-Pod `bd83jug4g23qn0`, RTX 2000 Ada at **$0.240/h**, alive 11:35:03 → 11:46:10
-UTC = **11.12 min = $0.045**. Final state `exists=False · TERMINATED ·
-billing=False`; `runpodctl pod list` empty. Report:
-[`e7_canary_report.md`](e7_canary_report.md), evidence
-[`e7_canary_evidence.json`](e7_canary_evidence.json) and [`e7_canary/`](e7_canary/).
-
-**Passed:** detached launch (5.58 s against a 30-min job) · durable descriptor ·
-33 events relayed off-pod while the job kept running · watchdog saw the billing
-pod · watchdog crossed its own threshold (10.74 min under → **11.09 over**) ·
-**the GraphQL `podTerminate` fallback worked — first time ever exercised** ·
-termination journalled · disappearance confirmed by polling · nothing left
-running.
-
-**Failed:** artifact manifest + local hash verification. `train_log.jsonl` was
-2,166 bytes at manifest time and 2,230 in the archive — the job appended one
-event in the gap — so the gate blocked at `archive_contents_verified`. **The
-gate was right and the workflow was wrong**: an E7 session would have hit this
-every time, with nothing actually missing. Fixed by making `create_archive` hash
-the bytes it writes and rewrite the manifest to them.
-
-**Three defects found, two before any pod existed:**
-
-1. **RunPod 403s the default `Python-urllib` User-Agent** (found free, during
-   price quoting). Every watchdog poll would have failed on a live pod; because
-   an unanswered poll counts as billing, sessions would have ended in
-   `TERMINATION_FAILED` against pods that had actually died.
-2. **Manifest/archive non-atomicity** (found live, above).
-3. **`watchdog.py` had no `--runpodctl` flag** that `canary.py` passed it, so
-   the test watchdog died on argparse. It was added and the watchdog relaunched
-   by hand against the same live pod — so criteria 5–8 are genuine but **the
-   driver did not achieve them unaided**, and a clean end-to-end pass has not
-   been demonstrated.
-
-**Not established:** long-session behaviour (11 minutes exercises nothing like
-E6b's 434-minute block); `--terminate-after` still never observed to fire; the
-fixed artifact path is covered by tests but **not re-verified on a live pod**.
-
-```
-authorized temporary cumulative cap: $150.41
-actual cumulative spend:             $149.635
-remaining under the temporary cap:     $0.775
-```
+**The live control-plane canary PASSED 12/12 on its clean rerun**, unaided, for
+$0.033. **E7 is designed, implemented, preregistered in draft and costed — and
+still NOT authorized.** **1,071 CPU tests pass**, 3 skipped.
 
 ## BUDGET ACCOUNTING — READ BEFORE PROPOSING ANY PAID RUN
 
 ```
 previous authorized cumulative cap: $149.03   (EXCEEDED and CLOSED)
-actual cumulative spend:            $149.59   <-- the planning baseline
-recorded E6b overrun:                 $0.56
-currently available authorization:    $0.00
+actual cumulative spend:            $149.668  <-- the planning baseline
+  E6b overrun                          $0.56
+  canary run 1 (FAILED 9/10)           $0.045
+  canary run 2 (PASSED 12/12)          $0.033
+temporary cumulative cap:           $150.41   ($0.742 remaining)
 ```
 
 **The historical $149.03 authorization is not remaining balance and must never
-be treated as one.** All future planning uses **$149.59** as the actual
-cumulative-spend baseline; any new paid execution requires a new explicit
-increment above it. The historical cap is preserved as-is — it is not
-retroactively rewritten to conceal the deviation. Decision record:
-[`decisions.md`](decisions.md), 2026-08-09.
+be treated as one.** All future planning uses the **actual cumulative spend** as
+its baseline; any new paid execution requires a new explicit increment above it.
+The historical cap is preserved as-is, not retroactively rewritten. Decision
+record: [`decisions.md`](decisions.md), 2026-08-09.
+
+## CANARY — PASSED 12/12 on the clean rerun (2026-08-09)
+
+Pod `3hvb5d4it6h6pb`, RTX 2000 Ada at **$0.240/h**, alive 12:09:24 → 12:17:42
+UTC = **8.30 min = $0.033**. Final state `exists=False · TERMINATED ·
+billing=False`; `runpodctl pod list` empty. **One launch command, no manual
+watchdog restart, no ssh repair, no substitution.** Report:
+[`e7_canary_rerun_report.md`](e7_canary_rerun_report.md), evidence
+[`e7_canary_rerun_evidence.json`](e7_canary_rerun_evidence.json) and
+[`e7_canary_rerun/`](e7_canary_rerun/).
+
+Detached launch 5.46 s · durable descriptor · 27 events relayed **while the job
+was still `ALIVE`** · watchdog polled the billing pod 14 times · broken primary
+CLI failed as intended · **the same watchdog, on its first and only launch,
+crossed its own threshold (5 polls under, `hard_limit_reached` at 8.27 min) and
+invoked the GraphQL fallback itself** · disappearance confirmed by polling ·
+complete termination sequence journalled to disk · nothing left running.
+
+**Both artifact lifecycles exercised live in one session.** The same log:
+`mutable_snapshot` at 1,910 bytes while the writer was active — it grew 1,846 →
+1,910 during archiving, the exact race that failed run 1, and the bounded read
+captured, hashed and recorded it — then `final_required` at 3,190 bytes after
+the terminal marker, quiescent, marker-backed, full gate allowed.
+
+The **failed run 1** ($0.045) stands as the first live observation of the
+GraphQL transport and is recorded at [`e7_canary_report.md`](e7_canary_report.md).
+
+**Still not established:** long-session behaviour — the canary proves the
+control-plane path only, and multi-hour watchdog/liveness behaviour is covered
+by deterministic local simulation instead. `--terminate-after` remains never
+observed to fire and is not counted as a stop mechanism.
+
+## ARTIFACT LIFECYCLES — binding for every session from here
+
+**A bounded prefix of a growing file is a snapshot, never a final artifact.**
+
+* `mutable_snapshot` — the writer may still be active. The archive records the
+  captured byte boundary and hashes those bytes. Proves **durability**; claims
+  nothing about completeness.
+* `final_required` — the producer has finished, its terminal marker exists, and
+  the file is quiescent across a settle window. Only then is an entry a claim
+  about a **complete** artifact. **This is the default.**
+
+Normal E7 teardown requires `train_log.jsonl` and every required structured
+event stream to be `final_required`. Emergency budget termination may keep a
+`mutable_snapshot` instead, but must **name** the streams it truncates, and the
+decision records `THE FINAL EVENT STREAM IS INCOMPLETE` for them; an unnamed
+truncation raises.
 
 ## E7 — DESIGNED AND COSTED, AWAITING AUTHORIZATION
 
@@ -702,7 +706,7 @@ uncapped evals for 24 checkpoints — against the raised **$60** cap.
 
 ## 10. Implementation state (CPU-verified)
 
-**1,060 tests pass on CPU, 3 skipped** (`PYTHONPATH=src pytest tests/ -q`, ~60 s,
+**1,071 tests pass on CPU, 3 skipped** (`PYTHONPATH=src pytest tests/ -q`, ~60 s,
 no downloads; `uv run pytest tests/ -q` also works). The 3 skips are the
 deliberate frozen-record launcher exemptions in the `$(ls …)` lint.
 
@@ -889,12 +893,14 @@ dual-stream trainer implemented and tested, costs computed.
    FineWeb content from extra KD positions and compute, and given E6 the latter
    is a live alternative.
 
-**0d. The canary RAN and FAILED (9/10).** See the block at the top of this file
-and [`e7_canary_report.md`](e7_canary_report.md). All three defects it exposed
-are fixed with regression tests. **E7 remains not launched**, per the
-authorization's own terms. A clean end-to-end canary re-run (~$0.05, same shape)
-would need separate authorization; the maintainer may instead judge criteria 1–8
-sufficient and the fixed artifact path adequately covered by tests.
+**0d. The canary is DONE — run 1 failed 9/10, run 2 PASSED 12/12 unaided.**
+The live provider/control-plane path is verified: detached launch, durable
+descriptor, relay from a live writer, provider-only watchdog, forced primary
+failure, automatic GraphQL fallback, polled disappearance, both artifact
+lifecycles, nothing left running. Four defects found across the two runs, all
+fixed with regression tests. **E7 B and C are still not launched** — they need
+separate authorization for the $12.82 hard backstop and the $163.23 cumulative
+cap.
 
 **Fixed by the E6b conclusion and unchanged:** requested E7 training scale
 **remains 1.60M**; the default behavioural anchor is **E1/P1 KD-heavy 2.96M**;

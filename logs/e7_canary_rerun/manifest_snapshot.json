@@ -1,0 +1,51 @@
+{
+  "root": "/workspace",
+  "created_utc": "2026-08-09T12:14:13+00:00",
+  "ok": true,
+  "specs": [
+    {
+      "artifact_class": "event_stream",
+      "pattern": "canary/train_log.jsonl",
+      "required": true,
+      "min_matches": 1,
+      "min_bytes": 256,
+      "lifecycle": "mutable_snapshot"
+    },
+    {
+      "artifact_class": "job_descriptor",
+      "pattern": "jobs/*.job.json",
+      "required": true,
+      "min_matches": 1,
+      "min_bytes": 32,
+      "lifecycle": "final_required"
+    }
+  ],
+  "entries": [
+    {
+      "path": "canary/train_log.jsonl",
+      "artifact_class": "event_stream",
+      "size_bytes": 1910,
+      "sha256": "42c765f783c27a145a9dfc250003105904b500724084b62ee0a81d5ca81c8b95",
+      "lifecycle": "mutable_snapshot"
+    },
+    {
+      "path": "jobs/canary.job.json",
+      "artifact_class": "job_descriptor",
+      "size_bytes": 172,
+      "sha256": "3531906dc842142c004d7fc13787382372426a62cf12bea2dc69454d5cfe50a9",
+      "lifecycle": "final_required"
+    }
+  ],
+  "missing": [],
+  "appended_during_archive": [
+    {
+      "path": "canary/train_log.jsonl",
+      "manifest_bytes": 1846,
+      "archived_bytes": 1910
+    }
+  ],
+  "completion_markers": [],
+  "completion_marker_failures": [],
+  "still_being_written": [],
+  "final_streams_quiescent": true
+}

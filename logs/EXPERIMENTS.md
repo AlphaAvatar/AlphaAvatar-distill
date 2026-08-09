@@ -4566,3 +4566,89 @@ by design.
 Long-session behaviour — 11 minutes exercises nothing like E6b's 434-minute
 block. `--terminate-after`, still never observed to fire. And the fixed artifact
 path is covered by tests but **not re-verified on a live pod**.
+
+---
+
+## 33. Control-plane canary rerun — PASSED 12/12 (2026-08-09, $0.033)
+
+**Objective.** One run of the complete automated chain with no human repair,
+after run 1 (§32) failed 9/10 and needed a hand-launched watchdog to recover
+criteria 5–8. Authorized at a **$0.12** hard backstop; no cap increase.
+
+**Verdict: PASSED, all twelve criteria, from one launch command.** Report:
+[`e7_canary_rerun_report.md`](e7_canary_rerun_report.md).
+
+### 33.1 Provider record
+
+Pod **`3hvb5d4it6h6pb`**, NVIDIA RTX 2000 Ada at **$0.240/h**, created
+**12:09:24**, provider-confirmed terminated **12:17:42** — **8.30 min =
+$0.0332**. Final state `exists=False · TERMINATED · billing=False`;
+`runpodctl pod list` empty. `--terminate-after` at 12:39:23 was never reached.
+
+**The backstop was derived from the live quote**, not assumed: $0.12 at $0.240/h
+buys 30.0 min, which became the backstop and the RunPod deadline. Below 20 min
+the driver aborts and reports rather than widening it — the dollar figure is the
+ceiling and minutes are whatever fits inside it.
+
+### 33.2 The chain, unaided
+
+Detached launch **5.46 s** · descriptor readable over a later connection · **27
+events relayed while the job was still `ALIVE`** · watchdog polled the billing
+pod 14 times · the broken primary CLI failed exactly as intended
+(`FileNotFoundError`, `verified_transport=true`) · **the same watchdog, on its
+first and only launch, crossed its own threshold — five polls under the limit,
+then `hard_limit_reached` at 8.27 min — and invoked the GraphQL fallback
+itself** · `podTerminate` returned `{"data": {"podTerminate": null}}` · the
+first verify poll showed `exists=False · TERMINATED · billing=False` · the
+complete sequence `watchdog_start → poll ×6 → hard_limit_reached →
+terminate_attempt → terminate_verify → terminated → watchdog_end` is 2,840 bytes
+on disk · launches `{safety: 1, test: 1}`, `phase_2_invoked=False`.
+
+### 33.3 Both artifact lifecycles, live, on the same file
+
+| phase | lifecycle | bytes | grew during archive | gate |
+| --- | --- | ---: | --- | --- |
+| snapshot (writer live) | `mutable_snapshot` | 1,910 | **yes**, 1,846 → 1,910 | allowed |
+| final (after `MARKER:ALL_DONE`) | `final_required` | 3,190 | no | allowed |
+
+The snapshot phase **is run 1's failure, now passing**: the log grew by 64 bytes
+between manifest and archive, the bounded read captured the boundary, hashed
+what it wrote and recorded the growth, and local hashes matched. It proves
+durability and claims nothing more. The final phase — 6-second settle window,
+terminal-marker verification, no growth, no `still_being_written` — is the shape
+a normal E7 teardown uses, and is the only shape that can pass
+`final_streams_quiescent`.
+
+### 33.4 The correction that made the distinction safe
+
+The bounded read fixed run 1's hash race but made a growing log *archivable*,
+and archivable must not mean finished. Enforcement now sits in three places:
+`build_manifest` verifies completion markers and watches each `final_required`
+file across a settle window; `create_archive` refuses outright to archive a
+`final_required` file that grew under it; and the gate carries
+`final_streams_quiescent` separately from `required_files_present`, because
+presence and completeness are different questions. Emergency teardown may keep a
+snapshot but must **name** the streams it truncates — an unnamed truncation
+raises rather than passing quietly.
+
+### 33.5 Four defects across the two runs
+
+| defect | found | cost |
+| --- | --- | --- |
+| RunPod 403s the `Python-urllib` User-Agent | pre-flight, before any pod | $0 |
+| manifest/archive hash race on an appending file | run 1, live | $0.045 (that run) |
+| a bounded prefix could pass as a final artifact | the correction | $0 |
+| `watchdog.py` lacked a flag `canary.py` passed it | run 1, live | — |
+
+**1,071 tests pass, 3 skipped.** Total canary spend across both runs: **$0.078**.
+
+### 33.6 Deliberate limits
+
+The canary proves the provider/control-plane path and nothing about multi-hour
+sessions; long-session watchdog and liveness behaviour is covered by
+deterministic local simulation against a fake clock, which is cheaper and
+strictly more controllable than approximating E6b's duration live.
+`--terminate-after` is still never observed to fire and still does not count.
+
+**E7 B and C are not launched.** They require separate authorization for the
+$12.82 hard backstop and the $163.23 cumulative cap.

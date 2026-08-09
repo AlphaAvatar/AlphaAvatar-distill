@@ -1,0 +1,537 @@
+{
+  "criteria": {
+    "detached_launch_returns_promptly": {
+      "pass": true,
+      "detail": {
+        "seconds": 5.46,
+        "pid": 297,
+        "start_channel_closed": true,
+        "confirmed_by": "descriptor_probe"
+      }
+    },
+    "durable_job_descriptor": {
+      "pass": true,
+      "detail": {
+        "descriptor": "{\"job_id\":\"canary\",\"pid\":\"297\",\"workdir\":\"/workspace\",\"log_path\":\"/workspace/canary_run.log\",\"status_path\":\"/workspace/canary.status\",\"started_utc\":\"2026-08-09T12:12:48Z\"}",
+        "liveness": "ALIVE"
+      }
+    },
+    "structured_logs_relayed_while_process_active": {
+      "pass": true,
+      "detail": {
+        "events_synced": 27,
+        "job_liveness": "ALIVE",
+        "first": {
+          "time": "2026-08-09T12:12:48Z",
+          "event": "canary_tick",
+          "step": 0
+        },
+        "last": {
+          "time": "2026-08-09T12:14:06Z",
+          "event": "canary_tick",
+          "step": 26
+        }
+      }
+    },
+    "watchdog_starts_and_polls_live_billing_pod": {
+      "pass": true,
+      "detail": {
+        "polls": 14,
+        "last": {
+          "time": "2026-08-09T12:13:53Z",
+          "event": "poll",
+          "at_epoch": 1786277633.24,
+          "elapsed_minutes": 4.48,
+          "accrued_usd": 0.0179,
+          "pod_exists": true,
+          "pod_billing": true,
+          "desired_status": "RUNNING",
+          "poll_error": null,
+          "over_hard_limit": false,
+          "action": "none"
+        }
+      }
+    },
+    "mutable_snapshot_semantics_without_hash_races": {
+      "pass": true,
+      "detail": {
+        "phase": "snapshot",
+        "manifest_rc": 0,
+        "archive_rc": 0,
+        "verify_archive_rc": 0,
+        "pod_manifest_stdout": "2 file(s) across 2 class(es) -> /workspace/manifest_snapshot.json\n  final_required: 1 \u00b7 mutable_snapshot: 1 \u00b7 final_streams_quiescent: True",
+        "local_ok": true,
+        "manifest": {
+          "ok": true,
+          "final_streams_quiescent": true,
+          "final_entries": 1,
+          "snapshot_entries": 1,
+          "appended_during_archive": [
+            {
+              "path": "canary/train_log.jsonl",
+              "manifest_bytes": 1846,
+              "archived_bytes": 1910
+            }
+          ],
+          "still_being_written": [],
+          "completion_marker_failures": [],
+          "entries": [
+            {
+              "path": "canary/train_log.jsonl",
+              "lifecycle": "mutable_snapshot",
+              "size_bytes": 1910,
+              "sha256": "42c765f783c27a14\u2026"
+            },
+            {
+              "path": "jobs/canary.job.json",
+              "lifecycle": "final_required",
+              "size_bytes": 172,
+              "sha256": "3531906dc842142c\u2026"
+            }
+          ]
+        },
+        "gate": {
+          "allowed": true,
+          "emergency": false,
+          "failed_check": null,
+          "reason": "every teardown check passed",
+          "checks": {
+            "training_complete": true,
+            "evaluation_complete": true,
+            "artifact_manifest_created": true,
+            "required_files_present": true,
+            "final_streams_quiescent": true,
+            "archive_created": true,
+            "archive_contents_verified": true,
+            "transfer_complete": true,
+            "local_hashes_verified": true,
+            "checkpoint_hashes_matched": true,
+            "report_inputs_verified": true
+          },
+          "incomplete_event_streams": []
+        },
+        "local_problems": []
+      }
+    },
+    "final_artifact_and_hash_verification_under_declared_semantics": {
+      "pass": true,
+      "detail": {
+        "phase": "final",
+        "manifest_rc": 0,
+        "archive_rc": 0,
+        "verify_archive_rc": 0,
+        "pod_manifest_stdout": "2 file(s) across 2 class(es) -> /workspace/manifest_final.json\n  final_required: 2 \u00b7 mutable_snapshot: 0 \u00b7 final_streams_quiescent: True",
+        "local_ok": true,
+        "manifest": {
+          "ok": true,
+          "final_streams_quiescent": true,
+          "final_entries": 2,
+          "snapshot_entries": 0,
+          "appended_during_archive": [],
+          "still_being_written": [],
+          "completion_marker_failures": [],
+          "entries": [
+            {
+              "path": "canary/train_log.jsonl",
+              "lifecycle": "final_required",
+              "size_bytes": 3190,
+              "sha256": "f84b6ed98d583267\u2026"
+            },
+            {
+              "path": "jobs/canary.job.json",
+              "lifecycle": "final_required",
+              "size_bytes": 172,
+              "sha256": "3531906dc842142c\u2026"
+            }
+          ]
+        },
+        "gate": {
+          "allowed": true,
+          "emergency": false,
+          "failed_check": null,
+          "reason": "every teardown check passed",
+          "checks": {
+            "training_complete": true,
+            "evaluation_complete": true,
+            "artifact_manifest_created": true,
+            "required_files_present": true,
+            "final_streams_quiescent": true,
+            "archive_created": true,
+            "archive_contents_verified": true,
+            "transfer_complete": true,
+            "local_hashes_verified": true,
+            "checkpoint_hashes_matched": true,
+            "report_inputs_verified": true
+          },
+          "incomplete_event_streams": []
+        },
+        "local_problems": []
+      }
+    },
+    "broken_primary_runpodctl_fails_as_intended": {
+      "pass": true,
+      "detail": {
+        "attempts": [
+          {
+            "method": "runpodctl remove pod",
+            "verified_transport": true,
+            "ok": false,
+            "returncode": null,
+            "response": "",
+            "error": "FileNotFoundError: [Errno 2] No such file or directory: '/nonexistent/runpodctl-canary-forced-failure'"
+          }
+        ],
+        "path": "/nonexistent/runpodctl-canary-forced-failure",
+        "note": "no provider state altered; only this process's view of the CLI"
+      }
+    },
+    "graphql_fallback_invoked_automatically": {
+      "pass": true,
+      "detail": {
+        "attempts": [
+          {
+            "method": "graphql podTerminate",
+            "verified_transport": false,
+            "ok": true,
+            "returncode": null,
+            "response": "{\"data\": {\"podTerminate\": null}}",
+            "error": null
+          }
+        ],
+        "test_watchdog_launches": 1,
+        "polls_below_limit": 5,
+        "hard_limit_reached": {
+          "time": "2026-08-09T12:17:41Z",
+          "event": "hard_limit_reached",
+          "elapsed_minutes": 8.27,
+          "accrued_usd": 0.0331,
+          "hard_terminate_minutes": 8.047316559155782,
+          "authorized_usd": 0.12
+        }
+      }
+    },
+    "provider_polling_verifies_disappearance": {
+      "pass": true,
+      "detail": {
+        "verify_polls": 1,
+        "first_gone": {
+          "time": "2026-08-09T12:17:42Z",
+          "event": "terminate_verify",
+          "round": 1,
+          "poll": 1,
+          "pod_exists": false,
+          "desired_status": "TERMINATED",
+          "poll_error": null,
+          "billing": false
+        }
+      }
+    },
+    "journal_records_complete_termination_sequence": {
+      "pass": true,
+      "detail": {
+        "events": [
+          "watchdog_start",
+          "poll",
+          "poll",
+          "poll",
+          "poll",
+          "poll",
+          "poll",
+          "hard_limit_reached",
+          "terminate_attempt",
+          "terminate_verify",
+          "terminated",
+          "watchdog_end"
+        ],
+        "journal": "/home/ecs-user/aad-scratch/canary2_20260809_120920/watchdog_test.jsonl",
+        "bytes": 2840
+      }
+    },
+    "orchestration_completed_without_human_repair": {
+      "pass": true,
+      "detail": {
+        "watchdog_launches": {
+          "safety": 1,
+          "test": 1
+        },
+        "phase_2_invoked": false,
+        "note": "one launch command; no manual watchdog restart, ssh repair or substitution"
+      }
+    },
+    "no_pod_remains_running": {
+      "pass": true,
+      "detail": {
+        "exists": false,
+        "desired_status": "TERMINATED",
+        "billing": false,
+        "error": null
+      }
+    }
+  },
+  "timeline": [
+    {
+      "utc": "2026-08-09T12:09:21+00:00",
+      "elapsed_min": 0.0,
+      "msg": "  NVIDIA RTX A4000: securePrice $0.25/h, stock Low"
+    },
+    {
+      "utc": "2026-08-09T12:09:21+00:00",
+      "elapsed_min": 0.0,
+      "msg": "  NVIDIA RTX A4500: securePrice $0.25/h, stock Low"
+    },
+    {
+      "utc": "2026-08-09T12:09:22+00:00",
+      "elapsed_min": 0.0,
+      "msg": "  NVIDIA RTX 2000 Ada Generation: securePrice $0.24/h, stock Low"
+    },
+    {
+      "utc": "2026-08-09T12:09:22+00:00",
+      "elapsed_min": 0.0,
+      "msg": "  NVIDIA RTX A5000: securePrice $0.27/h, stock Low"
+    },
+    {
+      "utc": "2026-08-09T12:09:23+00:00",
+      "elapsed_min": 0.0,
+      "msg": "  NVIDIA RTX A6000: securePrice $0.53/h, stock Medium"
+    },
+    {
+      "utc": "2026-08-09T12:09:23+00:00",
+      "elapsed_min": 0.0,
+      "msg": "  NVIDIA GeForce RTX 4090: securePrice $0.74/h, stock High"
+    },
+    {
+      "utc": "2026-08-09T12:09:23+00:00",
+      "elapsed_min": 0.0,
+      "msg": "selected NVIDIA RTX 2000 Ada Generation at $0.24/h"
+    },
+    {
+      "utc": "2026-08-09T12:09:23+00:00",
+      "elapsed_min": 0.0,
+      "msg": "backstop 30.0 min = $0.120 (authorized $0.12); safety watchdog at 25.0 min"
+    },
+    {
+      "utc": "2026-08-09T12:09:24+00:00",
+      "elapsed_min": 0.0,
+      "msg": "created 3hvb5d4it6h6pb; --terminate-after 2026-08-09T12:39:23Z (redundant third layer, does not count toward PASS)"
+    },
+    {
+      "utc": "2026-08-09T12:09:24+00:00",
+      "elapsed_min": 0.0,
+      "msg": "watchdog[safety] detached (launch #1) \u2014 hard 25.0 min, runpodctl=real"
+    },
+    {
+      "utc": "2026-08-09T12:10:18+00:00",
+      "elapsed_min": 0.9,
+      "msg": "  starting (60s) \u2014 $0.00"
+    },
+    {
+      "utc": "2026-08-09T12:11:22+00:00",
+      "elapsed_min": 1.96,
+      "msg": "  starting (120s) \u2014 $0.01"
+    },
+    {
+      "utc": "2026-08-09T12:12:15+00:00",
+      "elapsed_min": 2.85,
+      "msg": "TCP 22 at 157.157.221.29:57058 after 2.9 min"
+    },
+    {
+      "utc": "2026-08-09T12:12:18+00:00",
+      "elapsed_min": 2.9,
+      "msg": "ssh reachable \u2014 $0.01"
+    },
+    {
+      "utc": "2026-08-09T12:12:51+00:00",
+      "elapsed_min": 3.45,
+      "msg": "  [PASS] detached_launch_returns_promptly: {'seconds': 5.46, 'pid': 297, 'start_channel_closed': True, 'confirmed_by': 'descriptor_probe'}"
+    },
+    {
+      "utc": "2026-08-09T12:12:57+00:00",
+      "elapsed_min": 3.54,
+      "msg": "  [PASS] durable_job_descriptor: {'descriptor': '{\"job_id\":\"canary\",\"pid\":\"297\",\"workdir\":\"/workspace\",\"log_path\":\"/workspace/canary_run.log\",\"status_path\":\"/workspace/canary.status\",\"started_utc\":\"2026-08-09T12:12:48Z\"}', 'liveness': 'ALIVE'}"
+    },
+    {
+      "utc": "2026-08-09T12:13:14+00:00",
+      "elapsed_min": 3.84,
+      "msg": "  relay cycle 1: {'synced_bytes': {'/workspace/canary/train_log.jsonl': 567}, 'errors': {}}"
+    },
+    {
+      "utc": "2026-08-09T12:13:32+00:00",
+      "elapsed_min": 4.13,
+      "msg": "  relay cycle 2: {'synced_bytes': {'/workspace/canary/train_log.jsonl': 383}, 'errors': {}}"
+    },
+    {
+      "utc": "2026-08-09T12:13:50+00:00",
+      "elapsed_min": 4.43,
+      "msg": "  relay cycle 3: {'synced_bytes': {'/workspace/canary/train_log.jsonl': 384}, 'errors': {}}"
+    },
+    {
+      "utc": "2026-08-09T12:14:07+00:00",
+      "elapsed_min": 4.72,
+      "msg": "  relay cycle 4: {'synced_bytes': {'/workspace/canary/train_log.jsonl': 384}, 'errors': {}}"
+    },
+    {
+      "utc": "2026-08-09T12:14:10+00:00",
+      "elapsed_min": 4.77,
+      "msg": "  [PASS] structured_logs_relayed_while_process_active: {'events_synced': 27, 'job_liveness': 'ALIVE', 'first': {'time': '2026-08-09T12:12:48Z', 'event': 'canary_tick', 'step': 0}, 'last': {'time': '2026-08-09T12:14:06Z', 'event': 'canary_tick', 'step': 26}}"
+    },
+    {
+      "utc": "2026-08-09T12:14:10+00:00",
+      "elapsed_min": 4.77,
+      "msg": "  [PASS] watchdog_starts_and_polls_live_billing_pod: {'polls': 14, 'last': {'time': '2026-08-09T12:13:53Z', 'event': 'poll', 'at_epoch': 1786277633.24, 'elapsed_minutes': 4.48, 'accrued_usd': 0.0179, 'pod_exists': True, 'pod_billing': True, 'desired_status': 'RUNNING', 'poll_error': None, 'over_hard_limit': False, 'action': 'none'}}"
+    },
+    {
+      "utc": "2026-08-09T12:14:13+00:00",
+      "elapsed_min": 4.81,
+      "msg": "  [snapshot] manifest rc=0 ::   final_required: 1 \u00b7 mutable_snapshot: 1 \u00b7 final_streams_quiescent: True"
+    },
+    {
+      "utc": "2026-08-09T12:14:25+00:00",
+      "elapsed_min": 5.01,
+      "msg": "  [PASS] mutable_snapshot_semantics_without_hash_races: {'phase': 'snapshot', 'manifest_rc': 0, 'archive_rc': 0, 'verify_archive_rc': 0, 'pod_manifest_stdout': '2 file(s) across 2 class(es) -> /workspace/manifest_snapshot.json\\n  final_required: 1 \u00b7 mutable_snapshot: 1 \u00b7 final_streams_quiescent: True', 'local_ok': True, 'manifest': {'ok': True, 'final_streams_quiescent': True, 'final_entries': 1, 'snapshot_entries': 1, 'appended_during_archive': [{'path': 'canary/train_log.jsonl', 'manifest_bytes': 1846, 'archived_bytes': 1910}], 'still_being_written': [], 'completion_marker_failures': [], 'entries': [{'path': 'canary/train_log.jsonl', 'lifecycle': 'mutable_snapshot', 'size_bytes': 1910, 'sha256': '42c765f783c27a14\u2026'}, {'path': 'jobs/canary.job.json', 'lifecycle': 'final_required', 'size_bytes': 172, 'sha256': '3531906dc842142c\u2026'}]}, 'gate': {'allowed': True, 'emergency': False, 'failed_check': None, 'reason': 'every teardown check passed', 'checks': {'training_complete': True, 'evaluation_complete': True, 'artifact_manifest_created': True, 'required_files_present': True, 'final_streams_quiescent': True, 'archive_created': True, 'archive_contents_verified': True, 'transfer_complete': True, 'local_hashes_verified': True, 'checkpoint_hashes_matched': True, 'report_inputs_verified': True}, 'incomplete_event_streams': ()}, 'local_problems': []}"
+    },
+    {
+      "utc": "2026-08-09T12:14:25+00:00",
+      "elapsed_min": 5.01,
+      "msg": "waiting for the job's terminal marker"
+    },
+    {
+      "utc": "2026-08-09T12:15:31+00:00",
+      "elapsed_min": 6.11,
+      "msg": "  terminal marker seen at 6.1 min"
+    },
+    {
+      "utc": "2026-08-09T12:15:45+00:00",
+      "elapsed_min": 6.36,
+      "msg": "  [final] manifest rc=0 ::   final_required: 2 \u00b7 mutable_snapshot: 0 \u00b7 final_streams_quiescent: True"
+    },
+    {
+      "utc": "2026-08-09T12:15:57+00:00",
+      "elapsed_min": 6.55,
+      "msg": "  [PASS] final_artifact_and_hash_verification_under_declared_semantics: {'phase': 'final', 'manifest_rc': 0, 'archive_rc': 0, 'verify_archive_rc': 0, 'pod_manifest_stdout': '2 file(s) across 2 class(es) -> /workspace/manifest_final.json\\n  final_required: 2 \u00b7 mutable_snapshot: 0 \u00b7 final_streams_quiescent: True', 'local_ok': True, 'manifest': {'ok': True, 'final_streams_quiescent': True, 'final_entries': 2, 'snapshot_entries': 0, 'appended_during_archive': [], 'still_being_written': [], 'completion_marker_failures': [], 'entries': [{'path': 'canary/train_log.jsonl', 'lifecycle': 'final_required', 'size_bytes': 3190, 'sha256': 'f84b6ed98d583267\u2026'}, {'path': 'jobs/canary.job.json', 'lifecycle': 'final_required', 'size_bytes': 172, 'sha256': '3531906dc842142c\u2026'}]}, 'gate': {'allowed': True, 'emergency': False, 'failed_check': None, 'reason': 'every teardown check passed', 'checks': {'training_complete': True, 'evaluation_complete': True, 'artifact_manifest_created': True, 'required_files_present': True, 'final_streams_quiescent': True, 'archive_created': True, 'archive_contents_verified': True, 'transfer_complete': True, 'local_hashes_verified': True, 'checkpoint_hashes_matched': True, 'report_inputs_verified': True}, 'incomplete_event_streams': ()}, 'local_problems': []}"
+    },
+    {
+      "utc": "2026-08-09T12:15:57+00:00",
+      "elapsed_min": 6.55,
+      "msg": "launching the test watchdog: threshold 8.05 min (now 6.55), CLI path forced to fail"
+    },
+    {
+      "utc": "2026-08-09T12:15:57+00:00",
+      "elapsed_min": 6.55,
+      "msg": "watchdog[test] detached (launch #1) \u2014 hard 8.0 min, runpodctl=/nonexistent/runpodctl-canary-forced-failure"
+    },
+    {
+      "utc": "2026-08-09T12:17:47+00:00",
+      "elapsed_min": 8.38,
+      "msg": "  [PASS] broken_primary_runpodctl_fails_as_intended: {'attempts': [{'method': 'runpodctl remove pod', 'verified_transport': True, 'ok': False, 'returncode': None, 'response': '', 'error': \"FileNotFoundError: [Errno 2] No such file or directory: '/nonexistent/runpodctl-canary-forced-failure'\"}], 'path': '/nonexistent/runpodctl-canary-forced-failure', 'note': \"no provider state altered; only this process's view of the CLI\"}"
+    },
+    {
+      "utc": "2026-08-09T12:17:47+00:00",
+      "elapsed_min": 8.38,
+      "msg": "  [PASS] graphql_fallback_invoked_automatically: {'attempts': [{'method': 'graphql podTerminate', 'verified_transport': False, 'ok': True, 'returncode': None, 'response': '{\"data\": {\"podTerminate\": null}}', 'error': None}], 'test_watchdog_launches': 1, 'polls_below_limit': 5, 'hard_limit_reached': {'time': '2026-08-09T12:17:41Z', 'event': 'hard_limit_reached', 'elapsed_minutes': 8.27, 'accrued_usd': 0.0331, 'hard_terminate_minutes': 8.047316559155782, 'authorized_usd': 0.12}}"
+    },
+    {
+      "utc": "2026-08-09T12:17:47+00:00",
+      "elapsed_min": 8.38,
+      "msg": "  [PASS] provider_polling_verifies_disappearance: {'verify_polls': 1, 'first_gone': {'time': '2026-08-09T12:17:42Z', 'event': 'terminate_verify', 'round': 1, 'poll': 1, 'pod_exists': False, 'desired_status': 'TERMINATED', 'poll_error': None, 'billing': False}}"
+    },
+    {
+      "utc": "2026-08-09T12:17:47+00:00",
+      "elapsed_min": 8.38,
+      "msg": "  [PASS] journal_records_complete_termination_sequence: {'events': ['watchdog_start', 'poll', 'poll', 'poll', 'poll', 'poll', 'poll', 'hard_limit_reached', 'terminate_attempt', 'terminate_verify', 'terminated', 'watchdog_end'], 'journal': '/home/ecs-user/aad-scratch/canary2_20260809_120920/watchdog_test.jsonl', 'bytes': 2840}"
+    },
+    {
+      "utc": "2026-08-09T12:17:47+00:00",
+      "elapsed_min": 8.39,
+      "msg": "  [PASS] orchestration_completed_without_human_repair: {'watchdog_launches': {'safety': 1, 'test': 1}, 'phase_2_invoked': False, 'note': 'one launch command; no manual watchdog restart, ssh repair or substitution'}"
+    },
+    {
+      "utc": "2026-08-09T12:17:47+00:00",
+      "elapsed_min": 8.39,
+      "msg": "  [PASS] no_pod_remains_running: {'exists': False, 'desired_status': 'TERMINATED', 'billing': False, 'error': None}"
+    }
+  ],
+  "cost": {
+    "price_per_hour": 0.24,
+    "backstop_minutes": 30.0,
+    "elapsed_minutes": 8.39,
+    "actual_usd": 0.0335,
+    "authorized_usd": 0.12,
+    "within_backstop": true
+  },
+  "quotes": [
+    {
+      "gpu": "NVIDIA RTX 2000 Ada Generation",
+      "secure_price_per_hour": 0.24,
+      "stock_status": "Low"
+    },
+    {
+      "gpu": "NVIDIA RTX A4000",
+      "secure_price_per_hour": 0.25,
+      "stock_status": "Low"
+    },
+    {
+      "gpu": "NVIDIA RTX A4500",
+      "secure_price_per_hour": 0.25,
+      "stock_status": "Low"
+    },
+    {
+      "gpu": "NVIDIA RTX A5000",
+      "secure_price_per_hour": 0.27,
+      "stock_status": "Low"
+    }
+  ],
+  "quoted_price_per_hour": 0.24,
+  "stock_status": "Low",
+  "backstop_minutes_fitted": 30.0,
+  "backstop_minutes": 30.0,
+  "worst_case_at_backstop_usd": 0.12,
+  "gpu": "NVIDIA RTX 2000 Ada Generation",
+  "actual_price_per_hour": 0.24,
+  "pod_id": "3hvb5d4it6h6pb",
+  "terminate_after_utc": "2026-08-09T12:39:23Z",
+  "watchdog_safety_journal": "/home/ecs-user/aad-scratch/canary2_20260809_120920/watchdog_safety.jsonl",
+  "relay_cycles": [
+    {
+      "cycle": 1,
+      "synced_bytes": {
+        "/workspace/canary/train_log.jsonl": 567
+      },
+      "errors": {}
+    },
+    {
+      "cycle": 2,
+      "synced_bytes": {
+        "/workspace/canary/train_log.jsonl": 383
+      },
+      "errors": {}
+    },
+    {
+      "cycle": 3,
+      "synced_bytes": {
+        "/workspace/canary/train_log.jsonl": 384
+      },
+      "errors": {}
+    },
+    {
+      "cycle": 4,
+      "synced_bytes": {
+        "/workspace/canary/train_log.jsonl": 384
+      },
+      "errors": {}
+    }
+  ],
+  "watchdog_test_journal": "/home/ecs-user/aad-scratch/canary2_20260809_120920/watchdog_test.jsonl",
+  "watchdog_test_reason": "terminated",
+  "watchdog_launches": {
+    "safety": 1,
+    "test": 1
+  },
+  "final_pod_state": {
+    "exists": false,
+    "desired_status": "TERMINATED",
+    "billing": false,
+    "error": null
+  },
+  "passed": true,
+  "finished_utc": "2026-08-09T12:17:47+00:00"
+}
