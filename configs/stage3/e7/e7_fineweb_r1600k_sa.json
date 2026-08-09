@@ -1,0 +1,73 @@
+{
+  "stage": "stage3_recovery",
+  "run_name": "e7_fineweb_r1600k_sa",
+  "_purpose": "E7 arm B \u2014 FineWeb-Edu raw-text teacher KD alongside the unchanged 1.60M rollout stream. Forked from the canonical Stage 1 PCA init, not from any trained checkpoint. Identical to configs/stage3/e1/e1_r1600k_sa_pca.json except for extra_stream and the identity fields.",
+  "student_path": "artifacts/stage1/qwen3_0p6b_init_v0/checkpoint",
+  "teacher": {
+    "model_id": "Qwen/Qwen3-4B-Thinking-2507",
+    "revision": "768f209d9ea81521153ed38c47d515654e938aea",
+    "dtype": "bfloat16"
+  },
+  "data_dir": "artifacts/stage3/ladder_uniform",
+  "groups": null,
+  "packing": "ladder",
+  "block_len": 8192,
+  "dtype": "float32",
+  "autocast_bf16": true,
+  "gradient_checkpointing": true,
+  "device": "auto",
+  "seed": 20260726,
+  "trainable_patterns": [
+    "\\.self_attn\\.(q_proj|k_proj|v_proj|o_proj|q_norm|k_norm)\\.",
+    "\\.mlp\\.(gate_proj|up_proj|down_proj)\\.",
+    "input_layernorm",
+    "post_attention_layernorm",
+    "model\\.norm\\."
+  ],
+  "loss": {
+    "ce_weight": 0.25,
+    "kd_weight": 1.0,
+    "kd_temperature": 1.0,
+    "kd_scope": "all"
+  },
+  "optim": {
+    "lr": 5e-05,
+    "weight_decay": 0.01,
+    "betas": [
+      0.9,
+      0.95
+    ],
+    "eps": 1e-08,
+    "grad_clip": 1.0
+  },
+  "schedule": {
+    "total_steps": 1761,
+    "warmup_steps": 88,
+    "min_lr_frac": 0.1
+  },
+  "batch": {
+    "blocks_per_step": 2,
+    "micro_blocks": 1
+  },
+  "checkpoint": {
+    "save_every": 880,
+    "keep_last": 1
+  },
+  "intervals": {
+    "log_every": 10,
+    "eval_every": 220,
+    "eval_blocks": 16
+  },
+  "out_dir": "artifacts/stage3/e7_fineweb_r1600k_sa",
+  "rung": 1600000,
+  "val_blocks": 16,
+  "extra_stream": {
+    "data_dir": "artifacts/stage3/e7_fineweb_kd",
+    "kind": "general_text_kd",
+    "lambda_extra": 0.25,
+    "blocks_per_step": 1,
+    "micro_blocks": 1,
+    "every_n_steps": 1,
+    "seed": 20260809
+  }
+}

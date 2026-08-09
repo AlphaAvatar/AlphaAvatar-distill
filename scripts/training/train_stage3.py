@@ -179,6 +179,31 @@ def main() -> None:
         num_parameters=sum(p.numel() for p in student.parameters()),
     )
 
+    # The second, KD-only stream (E7). Loaded here rather than inside Trainer so
+    # its manifest — the treatment's identity — is read once, hashed into the
+    # run manifest, and logged before a single step runs.
+    extra_stream_blocks = extra_stream_meta = None
+    if cfg.get("extra_stream") is not None:
+        from aadistill.data.extra_stream import load_extra_stream, stream_budget
+
+        extra_dir = REPO_ROOT / cfg["extra_stream"]["data_dir"]
+        print(f"loading extra KD stream from {extra_dir} ...")
+        e_ids, e_content, extra_stream_meta = load_extra_stream(extra_dir)
+        extra_stream_blocks = (e_ids, e_content)
+        budget = stream_budget(
+            int(e_ids.shape[0]), int(e_ids.shape[1]),
+            total_steps=cfg["schedule"]["total_steps"],
+            blocks_per_step=cfg["extra_stream"]["blocks_per_step"],
+            every_n_steps=cfg["extra_stream"]["every_n_steps"])
+        logger.log("extra_stream_loaded", data_dir=cfg["extra_stream"]["data_dir"],
+                   kind=cfg["extra_stream"]["kind"],
+                   lambda_extra=cfg["extra_stream"]["lambda_extra"],
+                   manifest_sha256=sha256_json(extra_stream_meta),
+                   source=extra_stream_meta.get("source"),
+                   budget=budget)
+        print(f"  {budget['kd_positions']:,} extra KD positions over "
+              f"{budget['active_steps']} steps ({budget['exposures']} exposures)")
+
     trainer = Trainer(
         cfg,
         student,
@@ -190,6 +215,7 @@ def main() -> None:
         logger=logger,
         extra_val_blocks=extra_val_blocks,
         think_ids=think_ids,
+        extra_stream_blocks=extra_stream_blocks,
     )
     if resume_ckpt is not None:
         trainer.restore(resume_ckpt)
@@ -236,6 +262,15 @@ def main() -> None:
             "lora": (trainer.lora_cfg.to_dict() if trainer.lora_cfg else None),
             "lora_modules": trainer.freeze_report.get("lora_modules"),
             "total_params": trainer.freeze_report["total_params"],
+            # The extra stream's full manifest, not a reference to it: this run
+            # is only reproducible if the exact FineWeb range, revision, content
+            # hashes and packing policy travel with the record (P4).
+            "extra_stream": (
+                {"config": cfg["extra_stream"],
+                 "manifest": extra_stream_meta,
+                 "manifest_sha256": sha256_json(extra_stream_meta),
+                 "planned_kd_positions": trainer.planned_extra_kd_positions()}
+                if extra_stream_meta is not None else None),
             "code_state": code_state(str(REPO_ROOT)),
             "hardware": hardware_report(),
         },

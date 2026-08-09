@@ -4368,3 +4368,122 @@ PYTHONPATH=src python scripts/pod/reconstruct_training_events.py \
 `plan_session` for its thresholds, `start_job.py` for its driver,
 `watchdog.py` beside the launcher, `LogRelay` for its event streams and
 `collect_artifacts.py` for its teardown.
+
+---
+
+## 31. Experiment 7 — design, implementation and preregistration (2026-08-09, CPU, $0)
+
+**Objective.** Prepare E7 — *FineWeb teacher-KD mixture at the fixed 1.60M
+rollout rung* — to the point where launching it is a budget decision and nothing
+else. No GPU was used. **Nothing has been trained or evaluated, and E7 is not
+authorized.**
+
+Full design: [`e7_preregistration.md`](e7_preregistration.md). Decision records:
+[`decisions.md`](decisions.md), 2026-08-09.
+
+### 31.1 The question, and the fact behind it
+
+Held-out FineWeb NLL across the E1/P1 KD-heavy lineage improves to **6.16** by
+the 0.46M rung and then **gives it back** — 8.88 at 0.86M, **9.71 / 9.48 at the
+1.60M rung this experiment trains at**, 10.40 / 9.79 at 2.96M — against a Stage 1
+init of 11.75. Over the same range autonomous correctness never leaves 0.11–0.21.
+E7 asks whether the two are connected, by adding a strictly additional general
+-text KD signal and holding everything else fixed.
+
+**A predicted null is a real outcome.** The design makes "general LM restored,
+behaviour unchanged" a clean answer rather than a failed run.
+
+### 31.2 What was verified from the loader, not assumed
+
+Reading `blocks[:1174]` of the canonical pack (`blocks.npz` sha256
+`6f324cb0f37bc0f0…`, matching `scripts/pod/hashes_ladder.txt`):
+
+| quantity | value |
+| --- | ---: |
+| CE targets per exposure | 1,600,353 |
+| **cumulative CE exposure (x3)** | **4,801,059** ✓ as specified |
+| KD positions per exposure (`scope: all`) | 2,660,125 |
+| cumulative rollout KD positions | 7,980,375 |
+| packing efficiency at this rung | 0.2767 |
+| 1,761 steps x 2 blocks | exactly 3.0 exposures |
+
+### 31.3 The design decisions that mattered
+
+**The extra text is a second stream, not a bigger pack.** Merging it would move
+every block boundary and every example's position against the LR schedule, and
+the arm could not be compared to the retained baseline at all. Instead a second
+cursor is consumed inside the same optimizer steps, with independent
+normalizers — which matters concretely, because a pooled mean would make each
+stream's effective weight depend on the other's packing efficiency and the
+rollout pack is 72% padding here.
+
+**Dense streams make the control exact.** Both extra streams are 1761 x 1024 with
+no padding, so KD positions are `n_blocks x (block_len - 1)` = **1,801,503** by
+construction, identical for B and C, as are forward tokens, CE positions (zero)
+and the microbatch schedule. **Compute matching is exact; there is no mismatch to
+report before training.**
+
+**Arm C is in-domain, and that is a stated limitation.** It draws content tokens
+from pack blocks `[1174, 1853)` — after the trained rung, before the validation
+tail — re-packed densely. E6 showed more in-domain data improves stability, so C
+is a *strong* control: if it matches B, the reading is "extra KD positions did
+it", not "FineWeb did nothing". Recorded in advance rather than discovered after.
+
+**One λ, no sweep.** `lambda_extra = 0.25`, chosen because rollout KD *falls*
+through training (E6b val_kd 10.60 → 1.04) while FineWeb KD stays high, so λ near
+1.0 would make general text the dominant late gradient. A **non-training**
+preflight measures the gradient-norm ratio against a registered [0.05, 1.00] band
+and stops if outside; tuning λ from that measurement is forbidden.
+
+### 31.4 The FineWeb holdout was too small, and is now larger without being replaced
+
+`holdout_v1` is 40 documents (~25k tokens) against between-seed `holdout_nll`
+spreads of 0.23 / 0.62 / 1.34 nats at the three top rungs. `e7_fineweb_val` is
+512 x 1024 = 524,288 tokens, **20x larger**, disjoint from everything.
+`holdout_v1` is preserved and still measured so the historical series stays
+continuous; the two are separate columns and are never merged.
+
+### 31.5 Disjointness, and an incidental finding in the frozen battery
+
+The proof covers index ranges **and** content hashes across the three E7 streams,
+`holdout_v1`, `warmup_v1`, the behaviour prompts and all seven `capability-v2`
+files. **Zero overlaps involving any E7 stream.**
+
+It also surfaced something that is not E7's: `rag.jsonl` and
+`answerability_paired.jsonl` share the SQuAD item
+`squad-val-57299021af94a219006aa50c` with byte-identical prompt text, ids
+differing only by a `pair-0118-safe:` prefix. Exactly 1 of 846 prompts, zero
+within-file duplicates. The frozen battery is **not** being rebuilt — the
+magnitude is negligible and rebuilding would break comparability with every
+result scored on it — but `rag` and `answerability_paired` are not fully
+independent subsets and per-subset comparisons must say so.
+
+### 31.6 Verification
+
+**1,029 tests pass, 3 skipped** (+43 over the post-hardening 986). New coverage:
+
+| file | tests | what it holds |
+| --- | ---: | --- |
+| `tests/training/test_dual_stream.py` | 19 | rollout block order, LR positions, step count, CE/KD terms and normalizers unchanged by the extra stream; zero extra CE; padding refused; B/C budgets matched on the **shipped** configs; both cursors reproduce on resume; planned budget == consumed budget |
+| `tests/data/test_e7_streams.py` | 14 | stream identity and pinning; reserved index ranges avoided; control avoids the trained rung and the validation tail; leakage check fails closed and is verified to bite on a planted overlap; a missing `train_log.jsonl` blocks teardown against E7's own artifact spec |
+| `tests/evaluation/test_general_text.py` | 10 | known-answer NLL/rank/KL, batching and chunking invariance, empty stream raises |
+
+### 31.7 Costs, and what is open
+
+Priced at 4.60 s/step (E6b's measured 4.15 + 10% for the extra stream), setup
+budgeted at 45 min rather than the warm-image 5–8.5:
+
+| | expected | soft stop | reserve | hard terminate |
+| --- | ---: | ---: | ---: | ---: |
+| live control-plane canary | $0.53 | $0.66 | $0.17 | **$0.82** |
+| **E7 full (B×2 + C×2)** | $11.20 | $12.32 | $0.49 | **$12.82** |
+| E7 reduced (B×2), attribution-incomplete | $6.07 | $6.68 | $0.49 | **$7.17** |
+
+**Open:** authorization and a cumulative-cap increment above the **$149.59**
+actual baseline (**$163.23** full, $157.59 reduced); the live provider control
+plane, still unverified ([`e7_canary_proposal.md`](e7_canary_proposal.md)); the λ
+preflight, implemented but needing a real teacher/student; arm A's general-text
+baseline on the new validation stream, priced into the session.
+
+**Verdict: preparation complete.** Nothing further can be learned about E7
+without spending money.

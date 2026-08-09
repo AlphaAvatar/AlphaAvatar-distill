@@ -868,3 +868,31 @@ events per arm, with a per-field provenance block. **Not** the original stream.
 (`scripts/pod/collect_artifacts.py`), the archive is built from the manifest
 rather than from a shell glob, and a missing required artifact class blocks
 teardown (EXPERIMENTS.md §30).
+
+## E7 extra-KD streams — built 2026-08-09, CPU, $0 (dev-box only, NOT yet on the relay)
+
+Gitignored under `artifacts/stage3/`; each carries `manifest.json` + `docs.jsonl`
+with per-document sha256. **They must be staged to the relay before any E7 pod
+session** — they are currently single-copy on the dev box.
+
+| stream | kind | blocks x len | KD positions | `blocks.npz` sha256 |
+| --- | --- | --- | ---: | --- |
+| `e7_fineweb_kd` | general-text KD (arm B) | 1761 x 1024 | 1,801,503 | `b70beffac337ee37b0280cef581fec7967a1d5d6a390a73272d75223aeb39633` |
+| `e7_control_kd` | matched in-domain KD control (arm C) | 1761 x 1024 | 1,801,503 | `4e54f8e18baf01dc44eee80ae044188e902fa5f2ce675723ccdc5bf3aa5c05ea` |
+| `e7_fineweb_val` | general-text validation | 512 x 1024 | 523,776 | `e4002bbbbadf1a9106f41e2531fffddcf9ce329b894232246211b9c5d665014e` |
+
+Sources. **FineWeb**: `HuggingFaceFW/fineweb-edu`, config `sample-10BT`, split
+`train`, revision `87f09149ef4734204d70ed1d046ddc9ca3f2b8f9`, ODC-By 1.0; train
+index range [30000, 31902), validation [20000, 20454); `doc_char_min` 500, no cap;
+raw text, no chat template, zero CE positions; `<|endoftext|>` document
+separator; partial tail dropped, so zero padding. **Control**: content tokens of
+canonical-pack blocks [1174, 1853) — after the 1.60M rung, before the validation
+tail at 2941 — re-packed densely under the identical boundary policy; pack
+`blocks.npz` sha256 `6f324cb0f37bc0f0…`.
+
+Disjointness: `artifacts/stage3/e7_disjointness.json` — index ranges **and**
+content hashes, against `holdout_v1`, `warmup_v1`, `eval_behavior_v0/prompts.jsonl`
+and all seven `capability-v2` files. Zero overlaps involving any E7 stream.
+
+Rebuild commands: [`e7_preregistration.md`](e7_preregistration.md) §11.
+

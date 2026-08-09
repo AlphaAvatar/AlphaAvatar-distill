@@ -156,6 +156,45 @@ def validate_train_config(cfg: dict) -> None:
             raise ValueError("extra_val must map val-set names to data dirs")
         if "val" in extra:
             raise ValueError("extra_val name 'val' collides with the primary val")
+    if cfg.get("extra_stream") is not None:
+        validate_extra_stream_config(cfg["extra_stream"])
+
+
+EXTRA_STREAM_KINDS = ("general_text_kd", "in_domain_kd_control")
+
+
+def validate_extra_stream_config(extra: dict) -> None:
+    """The second stream's contract, checked before anything loads.
+
+    Every field here is part of the treatment's identity and therefore of the
+    config hash. `kind` in particular is not decoration: the E7 comparison is
+    "general-text KD" against "the same number of KD positions from in-domain
+    text", and a config that cannot say which one it is cannot be the arm it
+    claims to be.
+    """
+    if not isinstance(extra, dict):
+        raise ValueError("config field 'extra_stream' must be an object")
+    for key in ("data_dir", "kind"):
+        if key not in extra or not isinstance(extra[key], str):
+            raise ValueError(f"extra_stream.{key} must be a string")
+    if extra["kind"] not in EXTRA_STREAM_KINDS:
+        raise ValueError(f"extra_stream.kind must be one of {EXTRA_STREAM_KINDS}")
+    lam = extra.get("lambda_extra")
+    if not isinstance(lam, (int, float)) or isinstance(lam, bool) or lam <= 0:
+        raise ValueError("extra_stream.lambda_extra must be a positive number")
+    for key in ("blocks_per_step", "every_n_steps", "seed", "micro_blocks"):
+        v = extra.get(key, 1)
+        if not isinstance(v, int) or isinstance(v, bool) or v < 1:
+            raise ValueError(f"extra_stream.{key} must be a positive int")
+    if "seed" not in extra:
+        raise ValueError("extra_stream.seed is required; the extra cursor's "
+                         "order must be pinned by the config, not by a default")
+    # A stream with a CE weight would not be a KD-only stream, and E7's whole
+    # claim is that the supervised trajectory is untouched.
+    if extra.get("ce_weight", 0) != 0:
+        raise ValueError(
+            "extra_stream carries no CE by construction; a nonzero ce_weight "
+            "would add supervised tokens the rollout budget does not account for")
 
 
 def build_blocks(
@@ -436,6 +475,103 @@ def stream_block_indices(n_blocks: int, seed: int, start: int, count: int) -> li
     return out
 
 
+def gradient_share(trainer, n_steps: int = 4) -> dict:
+    """Measure the extra stream's share of the gradient, without training.
+
+    E7 preregisters one `lambda_extra` and runs no sweep. That is only safe if
+    an obviously mis-scaled weight is caught *before* the run rather than
+    inferred from its results — the two are not the same thing, and the second
+    is a sweep wearing a disguise.
+
+    So: for a few steps, compute the rollout gradient and the weighted extra
+    gradient **separately**, and report the ratio of their norms. No optimizer
+    step is taken and the trainer's step counter does not move, so calling this
+    leaves the run bit-identical to one that never called it.
+
+    The number to read is `ratio_mean` = ‖∇(λ·KD_extra)‖ / ‖∇(rollout loss)‖.
+    A value near zero means the treatment cannot do anything; a value far above
+    one means the rollout objective has become the side term and the arm is a
+    different experiment from the one preregistered.
+    """
+    if trainer.extra_cfg is None:
+        raise ValueError("no extra stream configured; nothing to compare")
+    cfg = trainer.cfg
+    bps = cfg["batch"]["blocks_per_step"]
+    loss_cfg = cfg["loss"]
+    lam = float(trainer.extra_cfg["lambda_extra"])
+    rows = []
+
+    def _norm() -> float:
+        total = 0.0
+        for p in trainer.params:
+            if p.grad is not None:
+                total += float(p.grad.detach().double().pow(2).sum())
+        return total ** 0.5
+
+    was_training = trainer.student.training
+    trainer.student.train()
+    start_step = trainer.step
+    for k in range(n_steps):
+        step = start_step + k
+        idxs = stream_block_indices(
+            trainer.train_ids.shape[0], cfg["seed"], step * bps, bps)
+        ids, mask = trainer.train_ids[idxs], trainer.train_mask[idxs]
+        content = (None if trainer.train_content is None
+                   else trainer.train_content[idxs])
+        ce_total = int(mask[:, 1:].sum()) if loss_cfg["ce_weight"] > 0 else 0
+        kd_total = (
+            int(prediction_mask(mask, loss_cfg["kd_scope"], content,
+                                input_ids=ids, think_ids=trainer.think_ids).sum())
+            if trainer.teacher is not None and loss_cfg["kd_weight"] > 0 else 0)
+
+        trainer.opt.zero_grad(set_to_none=True)
+        ce_sum, _, kd_sum, _ = trainer._micro_losses(
+            ids.to(trainer.device), mask.to(trainer.device),
+            None if content is None else content.to(trainer.device))
+        loss = torch.zeros((), device=trainer.device)
+        if ce_total:
+            loss = loss + loss_cfg["ce_weight"] * ce_sum / ce_total
+        if kd_total:
+            loss = loss + loss_cfg["kd_weight"] * kd_sum / kd_total
+        if loss.requires_grad:
+            loss.backward()
+        rollout_norm = _norm()
+
+        trainer.opt.zero_grad(set_to_none=True)
+        e_idxs = stream_block_indices(
+            trainer.extra_ids.shape[0], int(trainer.extra_cfg["seed"]),
+            trainer.extra_cursor(step), int(trainer.extra_cfg["blocks_per_step"]))
+        e_ids = trainer.extra_ids[e_idxs].to(trainer.device)
+        e_total = int(e_ids.shape[0] * (e_ids.shape[1] - 1))
+        e_kd_sum, _ = trainer._extra_micro_kd(e_ids)
+        e_loss = lam * e_kd_sum / e_total
+        if e_loss.requires_grad:
+            e_loss.backward()
+        extra_norm = _norm()
+
+        rows.append({
+            "step": step,
+            "rollout_grad_norm": round(rollout_norm, 6),
+            "extra_grad_norm": round(extra_norm, 6),
+            "ratio": round(extra_norm / rollout_norm, 6) if rollout_norm else None,
+            "rollout_loss": round(float(loss.detach()), 6),
+            "extra_kd_mean": round(float(e_kd_sum.detach()) / e_total, 6),
+        })
+
+    trainer.opt.zero_grad(set_to_none=True)
+    if not was_training:
+        trainer.student.eval()
+    ratios = [r["ratio"] for r in rows if r["ratio"] is not None]
+    return {
+        "lambda_extra": lam,
+        "n_steps": n_steps,
+        "per_step": rows,
+        "ratio_mean": round(sum(ratios) / len(ratios), 6) if ratios else None,
+        "ratio_min": round(min(ratios), 6) if ratios else None,
+        "ratio_max": round(max(ratios), 6) if ratios else None,
+    }
+
+
 class JsonlLogger:
     """Append-only jsonl event log (AGENTS.md 3.7). Never overwrites."""
 
@@ -474,6 +610,7 @@ class Trainer:
         logger: JsonlLogger | None = None,
         extra_val_blocks: dict | None = None,
         think_ids: tuple[int, int] | None = None,
+        extra_stream_blocks: tuple | None = None,
     ):
         validate_train_config(cfg)
         loss_cfg = cfg["loss"]
@@ -580,6 +717,33 @@ class Trainer:
             )
         if self.extra_vals and self.val_ids is None:
             raise ValueError("extra_val_blocks given but no primary val_blocks")
+
+        # The second stream. Its cursor is a pure function of `step`, exactly
+        # like the rollout stream's, so resume restores both from the step
+        # counter alone and no dataloader state is ever written.
+        self.extra_cfg = cfg.get("extra_stream")
+        self.extra_ids = self.extra_content = None
+        if self.extra_cfg is not None:
+            if extra_stream_blocks is None:
+                raise ValueError(
+                    "config declares extra_stream but no blocks were passed; "
+                    "refusing to run the treatment arm as if it were the "
+                    "baseline")
+            if self.teacher is None:
+                raise ValueError("extra_stream is KD-only and needs a teacher")
+            self.extra_ids, self.extra_content = (
+                extra_stream_blocks[0], extra_stream_blocks[1])
+            if bool((~self.extra_content).any()):
+                raise ValueError(
+                    "extra stream contains padding; KD position counts would "
+                    "stop being exactly (n_blocks x (block_len - 1)) and the "
+                    "arms would no longer be budget-matched")
+        elif extra_stream_blocks is not None:
+            raise ValueError(
+                "extra stream blocks passed but the config declares none; the "
+                "config hash would not record the treatment")
+        self._extra_kd_positions = 0     # cumulative, for the run manifest
+        self._extra_forward_tokens = 0
         self.step = 0
 
     def _autocast(self):
@@ -637,6 +801,100 @@ class Trainer:
             )
         return ce_sum, ce_n, kd_sum, kd_n
 
+    def _extra_micro_kd(self, ids: torch.Tensor):
+        """Forward one extra-stream microbatch; returns (kd_sum, kd_n).
+
+        CE is not computed at all — not masked to zero, not weighted to zero,
+        not present. A zero-weight CE term would still build a graph, still cost
+        a softmax over a 150k vocabulary, and still leave a reader wondering
+        whether the supervised budget moved. It did not: this stream contributes
+        KD and nothing else.
+
+        The stream is dense, so `kd_n` is exactly `blocks * (block_len - 1)` and
+        needs no mask machinery.
+        """
+        with self._autocast():
+            s_logits = self.student(ids).logits
+        with torch.no_grad(), self._autocast():
+            t_logits = self.teacher(ids).logits
+        pos = torch.ones(ids.shape[0], ids.shape[1] - 1, dtype=torch.bool,
+                         device=ids.device)
+        kd_sum, kd_n = kd_forward_kl(
+            s_logits, t_logits, pos, self.cfg["loss"]["kd_temperature"])
+        self._extra_forward_tokens += int(ids.numel())
+        return kd_sum, kd_n
+
+    def extra_active(self, step: int) -> bool:
+        """Is the extra stream present on this optimizer step?
+
+        A pure function of the step index, so the cadence is auditable from the
+        config and reproduces exactly on resume.
+        """
+        if self.extra_cfg is None:
+            return False
+        return step % int(self.extra_cfg["every_n_steps"]) == 0
+
+    def extra_cursor(self, step: int) -> int:
+        """Position in the extra stream at the start of `step`.
+
+        Counts only the steps on which the stream was active, so a cadence
+        greater than one still consumes a contiguous prefix of the stream
+        rather than skipping through it.
+        """
+        extra = self.extra_cfg
+        return (step // int(extra["every_n_steps"])) * int(extra["blocks_per_step"])
+
+    def planned_extra_kd_positions(self) -> int:
+        """The exact extra-KD budget this config will consume, known at step 0.
+
+        Preregistration states this number; the run's `run_end` reports what it
+        actually consumed. They must agree, and a test asserts they do — a
+        budget that is only knowable afterwards is not a preregistered budget.
+        """
+        if self.extra_cfg is None:
+            return 0
+        extra = self.extra_cfg
+        total = int(self.cfg["schedule"]["total_steps"])
+        every = int(extra["every_n_steps"])
+        active = (total + every - 1) // every
+        return (active * int(extra["blocks_per_step"])
+                * (int(self.extra_ids.shape[1]) - 1))
+
+    def _extra_pass(self) -> dict:
+        """Accumulate the extra-KD gradient into the current step.
+
+        Called after the rollout microbatches and before `clip_grad_norm_`, so
+        the two contributions land in one update. **The normalizer is the extra
+        stream's own token count**, never a pooled one: a single global mean
+        over both streams would make each stream's effective weight depend on
+        the other's packing efficiency, and the rollout pack is 72% padding at
+        this rung. Two streams, two means, two declared weights.
+        """
+        extra = self.extra_cfg
+        bps = int(extra["blocks_per_step"])
+        micro = int(extra.get("micro_blocks", 1))
+        idxs = stream_block_indices(
+            self.extra_ids.shape[0], int(extra["seed"]),
+            self.extra_cursor(self.step), bps)
+        ids = self.extra_ids[idxs]
+        total = int(ids.shape[0] * (ids.shape[1] - 1))
+        acc = 0.0
+        for i in range(0, bps, micro):
+            mids = ids[i : i + micro].to(self.device)
+            kd_sum, _ = self._extra_micro_kd(mids)
+            loss = float(extra["lambda_extra"]) * kd_sum / total
+            if loss.requires_grad:
+                loss.backward()
+            acc += float(kd_sum.detach())
+        self._extra_kd_positions += total
+        return {
+            "extra_kd": round(acc / total, 6) if total else None,
+            "extra_kd_positions": total,
+            "extra_blocks": bps,
+            "extra_forward_tokens": int(ids.numel()),
+            "extra_block_indices": idxs,
+        }
+
     def step_once(self) -> dict:
         """One optimizer step over blocks_per_step blocks (grad accumulation)."""
         cfg = self.cfg
@@ -685,6 +943,13 @@ class Trainer:
                 loss.backward()
             ce_acc += float(ce_sum.detach())
             kd_acc += float(kd_sum.detach())
+        # The extra stream joins the *same* update. It is deliberately after the
+        # rollout microbatches and before the clip: the rollout stream's block
+        # selection, its normalizers and its position against the LR schedule
+        # are all already fixed by this point and cannot be functions of whether
+        # this branch runs.
+        extra_metrics = (self._extra_pass() if self.extra_active(self.step)
+                         else {})
         grad_norm = torch.nn.utils.clip_grad_norm_(
             self.params, cfg["optim"]["grad_clip"]
         )
@@ -701,11 +966,20 @@ class Trainer:
             )
             if m is not None
         )
+        # The reported `loss` is the rollout objective, unchanged in definition
+        # from every single-stream run, so the curve stays comparable across
+        # experiments. The extra term is reported beside it, never folded in.
+        if extra_metrics.get("extra_kd") is not None:
+            extra_metrics["extra_weighted"] = round(
+                float(self.extra_cfg["lambda_extra"]) * extra_metrics["extra_kd"], 6)
+            extra_metrics["lambda_extra"] = float(self.extra_cfg["lambda_extra"])
+        extra_metrics.pop("extra_block_indices", None)
         return {
             "step": self.step,
             "loss": round(total, 6),
             "ce": round(ce_mean, 6) if ce_mean is not None else None,
             "kd": round(kd_mean, 6) if kd_mean is not None else None,
+            **extra_metrics,
             "lr": lr,
             "grad_norm": round(float(grad_norm), 4),
             "ce_targets": ce_total,
@@ -901,6 +1175,12 @@ class Trainer:
                               "lora_trainable_params", "total_params")
                 },
                 lora_config=self.lora_cfg.to_dict() if self.lora_cfg else None,
+                extra_stream=(
+                    {**self.extra_cfg,
+                     "stream_blocks": int(self.extra_ids.shape[0]),
+                     "stream_block_len": int(self.extra_ids.shape[1]),
+                     "planned_kd_positions": self.planned_extra_kd_positions()}
+                    if self.extra_cfg else None),
             )
             if self.val_ids is not None:
                 self._eval_and_log(eval_blocks)
@@ -937,7 +1217,9 @@ class Trainer:
             final_eval = self._eval_and_log(eval_blocks, suffix=" (final)")
         ckpt_dir = self.save_checkpoint()
         self.logger.log(
-            "run_end", steps=self.step, seconds=round(time.time() - t_start, 1)
+            "run_end", steps=self.step, seconds=round(time.time() - t_start, 1),
+            extra_kd_positions=self._extra_kd_positions or None,
+            extra_forward_tokens=self._extra_forward_tokens or None,
         )
         return {
             "steps": self.step,

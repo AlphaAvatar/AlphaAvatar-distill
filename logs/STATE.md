@@ -1,12 +1,77 @@
 **Updated:** 2026-08-09 · branch `main` · **no pods running, nothing billing.**
-**Experiment 6b is complete and accepted; neither arm will be rerun.** Two paid
-events, **$7.68** against a $7.12 authorization — **an overrun of $0.56**;
-project total **$149.59** against a $149.03 cap. **Operational hardening after
-E6b is complete** (CPU, $0). **986 CPU tests pass**, 3 skipped.
+**E6b is complete, accepted and CLOSED — not to be modified or rerun.**
+**Operational hardening after E6b is complete** (CPU, $0). **E7 is designed,
+implemented, preregistered in draft and costed — and NOT authorized.**
+**1,029 CPU tests pass**, 3 skipped. Nothing paid has run since E6b.
 
-**Next billable run is gated on nothing further: the hardening is done.** E7's
-arms, FineWeb KD weighting, compute-matched control and budget are specified
-separately by the maintainer.
+## BUDGET ACCOUNTING — READ BEFORE PROPOSING ANY PAID RUN
+
+```
+previous authorized cumulative cap: $149.03   (EXCEEDED and CLOSED)
+actual cumulative spend:            $149.59   <-- the planning baseline
+recorded E6b overrun:                 $0.56
+currently available authorization:    $0.00
+```
+
+**The historical $149.03 authorization is not remaining balance and must never
+be treated as one.** All future planning uses **$149.59** as the actual
+cumulative-spend baseline; any new paid execution requires a new explicit
+increment above it. The historical cap is preserved as-is — it is not
+retroactively rewritten to conceal the deviation. Decision record:
+[`decisions.md`](decisions.md), 2026-08-09.
+
+## E7 — DESIGNED AND COSTED, AWAITING AUTHORIZATION
+
+**FineWeb teacher-KD mixture at the fixed 1.60M rollout rung.** Does adding
+general-text teacher KD, while preserving the rollout trajectory exactly, restore
+general language modelling — and does any restoration transfer to autonomous
+rollout correctness? Full draft: [`e7_preregistration.md`](e7_preregistration.md).
+
+**The motivating fact.** Held-out FineWeb NLL across the E1/P1 lineage improves
+to **6.16** by the 0.46M rung and then **gives it back**: 8.88 (0.86M) → **9.71 /
+9.48 (1.60M)** → 10.40 / 9.79 (2.96M). The Stage 1 init starts at 11.75. Over the
+same range correctness never leaves 0.11–0.21.
+
+| arm | what | trained | seeds |
+| --- | --- | --- | --- |
+| **A** | E1/P1 KD-heavy 1.60M — retained baseline, checkpoints on the relay | no | sa, sb |
+| **B** | A + FineWeb-Edu raw-text teacher KD | yes | sa, sb |
+| **C** | A + **matched** extra KD from unused in-domain rollout text | yes | sa, sb |
+
+**Preregistered treatment:** 1,761 dense blocks × 1,024, one block per optimizer
+step on **every** step, one exposure, **1,801,503 extra KD positions** (22.6% of
+rollout KD, 18.4% of all KD), **λ_extra = 0.25**. No sweep; a non-training
+preflight checks the gradient share against a registered [0.05, 1.00] band and
+**stops** if outside.
+
+**B and C are matched by construction** — same blocks×length, same KD positions,
+same forward tokens, zero CE, zero padding, same schedule. Compute matching is
+exact; there is no mismatch to report. **E1/P1-2.96M was rejected as the control**
+(it changes rollout data, CE exposure and trajectory).
+
+**Disjointness proven, fails closed** — index ranges *and* content hashes, across
+the three E7 streams, `holdout_v1`, `warmup_v1`, the behaviour prompts and all
+seven `capability-v2` files. Zero overlaps involving any E7 stream.
+
+**Costs** (measured E6b wall clock, 4.60 s/step, phases named separately):
+
+| | expected | soft stop | reserve | hard terminate |
+| --- | ---: | ---: | ---: | ---: |
+| live control-plane canary | $0.53 | $0.66 | $0.17 | **$0.82** |
+| **E7 full (B×2 + C×2)** | $11.20 | $12.32 | $0.49 | **$12.82** |
+| E7 reduced (B×2) — *attribution-incomplete* | $6.07 | $6.68 | $0.49 | **$7.17** |
+
+**Proposed cumulative caps from the $149.59 baseline:** **$163.23** (canary + E7
+full) or $157.59 (canary + E7 reduced). The reduced design must not be selected
+without a separate user decision — without arm C, a positive B result cannot
+distinguish FineWeb content from extra KD positions and compute.
+
+**Open blockers:** authorization; and the **live provider control plane is still
+unverified** — see [`e7_canary_proposal.md`](e7_canary_proposal.md). A 776-minute
+E7 must not be its first real test.
+
+**Retained external behavioural reference: E1/P1 KD-heavy 2.96M.** It is not the
+E7 training scale and does not replace the 1.60M condition.
 
 ## THE PROMOTION RULE — read this before selecting any checkpoint
 
@@ -592,7 +657,7 @@ uncapped evals for 24 checkpoints — against the raised **$60** cap.
 
 ## 10. Implementation state (CPU-verified)
 
-**986 tests pass on CPU, 3 skipped** (`PYTHONPATH=src pytest tests/ -q`, ~60 s,
+**1,029 tests pass on CPU, 3 skipped** (`PYTHONPATH=src pytest tests/ -q`, ~60 s,
 no downloads; `uv run pytest tests/ -q` also works). The 3 skips are the
 deliberate frozen-record launcher exemptions in the `$(ls …)` lint.
 
@@ -605,6 +670,13 @@ deliberate frozen-record launcher exemptions in the `$(ls …)` lint.
 | continuous log durability | `src/aadistill/infrastructure/log_relay.py` | incremental offset-resumable mirroring; never raises; 9 tests |
 | manifest-driven collection + teardown gate | `src/aadistill/infrastructure/artifact_gate.py` | Python glob expansion, archive from manifest, ordered gate, emergency override; 19 tests |
 | E6b failure replay | `tests/infrastructure/test_e6b_failure_simulation.py` | the whole 2026-08-08 sequence, 15 tests, no GPU |
+| dual-stream KD trainer (E7) | `src/aadistill/training/train.py` (`extra_stream`) | second cursor inside the same optimizer step, independent normalizers, zero CE, exact budget; 19 tests |
+| dense KD-only stream format | `src/aadistill/data/extra_stream.py` | no padding, explicit doc boundaries, `n_blocks x (block_len-1)` KD positions by construction |
+| general-text diagnostics | `src/aadistill/evaluation/general_text.py` | NLL / teacher KL / top-1 / rank / confidence; 10 known-answer tests |
+| FineWeb + matched-control builders | `scripts/data/build_{fineweb,control}_kd.py` | pinned revision, index ranges, per-doc hashes, exact budget match |
+| stream disjointness proof | `scripts/data/check_stream_disjointness.py` | index **and** content-hash separation; fails closed; 14 tests |
+| E7 arm guards | `scripts/training/{build_e7_configs,validate_e7_arms}.py` | the diff vs the retained baseline is exactly `{extra_stream, run_name, out_dir, _purpose}` |
+| four-threshold E7/canary pricing | `scripts/training/plan_e7_budget.py` | phase-wise, from measured E6b wall clock |
 | session rendering + system-grouped packing | `src/aadistill/data/sessions.py` | used in the built corpus |
 | shared assistant-mask helper | `src/aadistill/data/dataset.py` | `final_assistant_loss_mask` for turn expansion |
 | `min_p` + per-prompt completion budgets | `src/aadistill/rollout/engines.py` | threaded through all 5 adapters |
@@ -745,28 +817,44 @@ is the fully matched comparison.
 
 ## 11. Next actions
 
-**0. The cumulative cap is EXCEEDED. Nothing costing money is authorized.**
-$149.59 spent against a $149.03 cap — **over by $0.56**. There is no remaining
-balance to plan against; the next paid step needs a maintainer decision on the
-cap itself, not a plan that fits inside it. **Do not silently shrink an
-experiment to fit a shortfall** — report the shortfall specifically and ask.
-`budget.plan_session` now enforces this: it raises with the exact shortfall
-rather than trimming the run.
+**0. $0.00 is available. Nothing costing money is authorized.** See the budget
+accounting block at the top of this file: $149.59 actual spend, historical
+$149.03 cap exceeded and closed, no remaining balance. **Do not silently shrink
+an experiment to fit a shortfall** — report the shortfall specifically and ask.
+`budget.plan_session` enforces this: it raises with the exact shortfall rather
+than trimming the run.
 
-**0b. Operational hardening is COMPLETE** (2026-08-09, CPU, $0) — see the top of
-this file and [`EXPERIMENTS.md`](EXPERIMENTS.md) §30. The next billable run is no
-longer gated on it. Any launcher written from here must follow the session
-contract in [`scripts/pod/AGENTS.md`](../scripts/pod/AGENTS.md): detached start
-via `start_job.py`, `watchdog.py` running beside it, `LogRelay` mirroring the
-event stream, `collect_artifacts.py` gating teardown.
+**0b. Operational hardening is COMPLETE** (2026-08-09, CPU, $0) —
+[`EXPERIMENTS.md`](EXPERIMENTS.md) §30. Any launcher written from here must
+follow the session contract in [`scripts/pod/AGENTS.md`](../scripts/pod/AGENTS.md):
+detached start via `start_job.py`, `watchdog.py` running beside it, `LogRelay`
+mirroring the event stream, `collect_artifacts.py` gating teardown.
 
-**0c. E7 is not started, by instruction.** Its arms, FineWeb KD weighting,
-compute-matched control and budget are specified separately by the maintainer.
-What is already fixed: requested training scale **remains 1.60M**; the default
-behavioural anchor is **E1/P1 KD-heavy 2.96M**; the contribution-guided
-initialization experiment's final control is **current initialization + E1/P1
-KD-heavy 2.96M**; the **P2 lineage is no longer the preferred basis for scaling
-experiments**.
+**0c. E7 preparation is COMPLETE** (2026-08-09, CPU, $0) —
+[`EXPERIMENTS.md`](EXPERIMENTS.md) §31, draft
+[`e7_preregistration.md`](e7_preregistration.md). Streams built and proven
+disjoint, configs built and diff-verified against the retained baseline,
+dual-stream trainer implemented and tested, costs computed.
+**Awaiting authorization.** Two decisions are the maintainer's:
+
+1. a cumulative-cap increment above **$149.59** — **$163.23** for the canary plus
+   the full design, or $157.59 for the canary plus the reduced one;
+2. full vs reduced. The reduced design is **attribution-incomplete** and must not
+   be selected by default: without arm C, a positive B result cannot distinguish
+   FineWeb content from extra KD positions and compute, and given E6 the latter
+   is a live alternative.
+
+**0d. The live provider control plane is still unverified.** The hardening is
+proven against a simulator only, and the GraphQL `podTerminate` fallback has
+never run from this repo. [`e7_canary_proposal.md`](e7_canary_proposal.md) is a
+$0.82-backstop, 32-minute proposal to verify it on a disposable pod running a
+harmless process. Also unauthorized.
+
+**Fixed by the E6b conclusion and unchanged:** requested E7 training scale
+**remains 1.60M**; the default behavioural anchor is **E1/P1 KD-heavy 2.96M**;
+the contribution-guided initialization experiment's final control is **current
+initialization + E1/P1 KD-heavy 2.96M**; the **P2 lineage is no longer the
+preferred basis for scaling experiments**.
 
 **What the last three experiments settled.** D0 (§16) located the bottleneck;
 P0-assistant (§17) and P2-ceheavy (§18) each tried to fix it by reducing KD's

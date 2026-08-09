@@ -1635,3 +1635,119 @@
   present in `e3/e4/e5_launch.sh`. It was simply not this failure.
 - **Revisit when:** never; this is a record of a corrected attribution.
 
+## 2026-08-09 — Budget accounting: the historical cap is closed, $149.59 is the baseline
+
+- **Context:** E6b finished at $7.68 against a $7.12 authorization, taking
+  cumulative spend to $149.59 against a $149.03 cap. Planning for E7 needs one
+  unambiguous baseline, and there is a temptation to restate the old cap as
+  "$149.59 authorized" so the books balance.
+- **Decision — preserve the historical distinction, permanently:**
+  ```
+  previous authorized cumulative cap: $149.03
+  actual cumulative spend:            $149.59
+  recorded E6b overrun:                 $0.56
+  currently available authorization:    $0.00
+  ```
+  **Do not retroactively rewrite the historical authorized cap to conceal the
+  deviation.** The $149.03 figure stays as the authorization that was exceeded;
+  the $0.56 stays as an overrun, not as a retrospective allowance.
+- **For all future planning, $149.59 is the actual cumulative-spend baseline.**
+  Any new paid execution requires a new explicit increment **above** that
+  baseline. The historical $149.03 authorization is **not** remaining balance and
+  must never be treated as one — there is $0.00 available.
+- **Consequence for E7:** its proposed caps are stated as
+  `$149.59 + canary backstop + selected E7 backstop`, i.e. $163.23 (full) or
+  $157.59 (reduced). Both are requests, not derived entitlements.
+- **Alternatives considered:** restating the cap at $149.59 to zero the overrun —
+  rejected, it would erase the only durable record that a stop layer failed;
+  treating the $0.56 as borrowed against a future increment — rejected as the
+  same thing with extra steps.
+- **Risks:** none to the science; the cost is that every future request must be
+  argued from zero rather than from a residual. That is the intent.
+- **Revisit when:** the maintainer sets a new cumulative cap.
+
+## 2026-08-09 — E7 design: dual-stream KD, matched in-domain control, one preregistered lambda
+
+- **Context:** the E1/P1 KD-heavy lineage improves held-out FineWeb NLL to ~6.2
+  by the 0.46M rung and then **gives it back**, ending ~9.6 at 1.60M, while
+  autonomous correctness never leaves 0.11–0.21 anywhere. E7 asks whether adding
+  general-text teacher KD restores general language modelling, and whether any
+  restoration transfers to correctness.
+- **Decision — the design:**
+  * **Base lineage frozen** at the canonical Stage 1 PCA init, the 1.60M rung
+    (1,600,353 unique CE tokens, 4,801,059 cumulative — verified from the
+    loader), and the E1/P1 KD-heavy objective (ce 0.25 / kd 1.0). Not P2. Every
+    trained arm forks from the init, never from a trained checkpoint.
+  * **Three arms**: A retained baseline (not retrained), B FineWeb-Edu raw-text
+    teacher KD, C matched extra-KD control. Two seeds for each *new* arm.
+  * **The extra text is a second stream with its own cursor**, consumed inside
+    the same optimizer steps — never merged into the rollout pack, which would
+    move every block boundary and every example's position against the LR
+    schedule and destroy comparability with the retained baseline.
+  * **Independent normalizers.** Each term is a mean over its own positions;
+    there is no pooled mean whose weights would depend on padding or packing
+    efficiency. The rollout pack is 72% padding at this rung, so this is not a
+    theoretical concern.
+  * **The extra stream is present on every optimizer step**, not a subset: a
+    cadence of *k* makes one step in *k* structurally different and interacts
+    with the LR schedule. The budget is set by sequence length instead.
+- **Decision — the matched control, exactly.** Arm C draws from the **content
+  tokens of canonical-pack blocks [1174, 1853)** — after the trained rung, before
+  the validation tail — re-packed densely under the same boundary policy. Both
+  streams are 1761 x 1024 dense blocks, so extra KD positions (1,801,503),
+  forward tokens, CE positions (0), microbatch schedule and optimizer-step count
+  are **identical by construction**. Compute matching is exact; there is no
+  mismatch to report.
+  * **Rejected as the control: E1/P1-2.96M.** It changes unique rollout data, CE
+    exposure, blocks and the training trajectory — a different experiment.
+  * **Recorded caveat:** C is in-domain, and E6 showed more in-domain data
+    improves stability. C is therefore a *strong* control: if it matches B, the
+    honest reading is "extra KD positions did it", not "FineWeb did nothing".
+- **Decision — one preregistered `lambda_extra` = 0.25, and no sweep.** It gives
+  general text the weight the recipe already gives its secondary term against
+  rollout KD's 1.0. The scale argument decides it: rollout KD falls through
+  training (E6b val_kd 10.60 → 1.04) while FineWeb KD stays high, so λ near 1.0
+  would make general text the dominant late gradient and change the experiment.
+  A **non-training** preflight measures ‖∇(λ·KD_extra)‖/‖∇(rollout)‖ with a
+  registered acceptance band of [0.05, 1.00]; outside it the run **stops and
+  reports**. Tuning λ from that measurement is forbidden — it would be a sweep
+  selected on its own result.
+- **Decision — a larger FineWeb validation set, without retiring the old one.**
+  `holdout_v1` is 40 documents (~25k tokens) against between-seed `holdout_nll`
+  spreads of 0.23–1.34 nats. `e7_fineweb_val` is 512 x 1024 = 524,288 tokens,
+  20x larger and disjoint. `holdout_v1` is preserved and still measured so the
+  historical series stays continuous; the two are reported as separate columns
+  and never merged.
+- **Decision — general-text metrics are diagnostics.** NLL, teacher→student KL,
+  top-1, rank and confidence describe what happened to the distribution over
+  prose. Promotion remains the frozen autonomous rollout evaluation
+  (see the promotion-rule record of the same date).
+- **Risks:** two seeds per arm; a null result on behaviour is the *predicted*
+  outcome and the design is built so that it is publishable rather than a failed
+  run; the in-domain control may mask a real FineWeb content effect, which is
+  recorded in advance rather than discovered afterwards.
+- **Revisit when:** the preflight gradient share lands outside its band, or the
+  canary shows the live control plane behaves differently from the simulator.
+
+## 2026-08-09 — capability-v2 has one cross-subset duplicate (incidental finding)
+
+- **Context:** the E7 disjointness checker was pointed at every reserved artifact,
+  including the seven `capability-v2` battery files, to prove the FineWeb streams
+  touch none of them.
+- **Finding:** the streams are disjoint from everything. But the check also
+  reports one overlap **between two reserved artifacts**: `rag.jsonl` and
+  `answerability_paired.jsonl` share the SQuAD item
+  `squad-val-57299021af94a219006aa50c` with byte-identical prompt text. The ids
+  differ only by a `pair-0118-safe:` prefix, which is presumably why the
+  battery's own leakage machinery — scoped to train/eval split leakage — did not
+  see it. Exactly 1 of 846 prompts; zero within-file duplicates.
+- **Decision:** record it, do not rebuild the frozen battery. The magnitude is
+  negligible (1/100 rag, 1/120 answerability) and rebuilding a frozen evaluation
+  asset to fix one item would break comparability with every result scored on it.
+  **`rag` and `answerability_paired` are not fully independent subsets**, and any
+  per-subset comparison between those two must say so.
+- **Decision:** the checker treats reserved-vs-reserved overlaps as informational
+  and fails only on overlaps involving an E7 stream. Blocking E7 on a pre-existing
+  property of someone else's artifact would be failing closed on the wrong thing.
+- **Revisit when:** the battery is next rebuilt for another reason.
+

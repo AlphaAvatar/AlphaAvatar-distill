@@ -1,0 +1,158 @@
+{
+  "price_per_hour": 0.99,
+  "actual_cumulative_baseline_usd": 149.59,
+  "step_time": {
+    "seconds": 4.6,
+    "source": "E6b measured 4.15 s/step + 10% for the extra stream"
+  },
+  "steps_per_arm": 1761,
+  "canary": {
+    "price_per_hour": 0.99,
+    "authorized_usd": 1.0,
+    "expected_minutes": 32.0,
+    "soft_stop_minutes": 40.0,
+    "artifact_recovery_reserve_minutes": 10.0,
+    "hard_terminate_minutes": 50.0,
+    "step_time": {
+      "seconds": 4.6,
+      "source": "unused; the canary does not train",
+      "measured": true
+    },
+    "breakdown": [
+      {
+        "name": "setup",
+        "minutes": 12.0
+      },
+      {
+        "name": "train",
+        "minutes": 0.0
+      },
+      {
+        "name": "evaluate",
+        "minutes": 0.0
+      },
+      {
+        "name": "transfer",
+        "minutes": 0.0
+      },
+      {
+        "name": "detached_start_and_descriptor",
+        "minutes": 2.0
+      },
+      {
+        "name": "log_relay_cycles",
+        "minutes": 6.0
+      },
+      {
+        "name": "watchdog_threshold_and_termination",
+        "minutes": 8.0
+      },
+      {
+        "name": "artifact_manifest_and_hash_verify",
+        "minutes": 4.0
+      }
+    ],
+    "notes": [],
+    "expected_usd": 0.528,
+    "soft_stop_usd": 0.66,
+    "artifact_recovery_reserve_usd": 0.165,
+    "hard_terminate_usd": 0.825,
+    "label": "live control-plane canary"
+  },
+  "full": {
+    "price_per_hour": 0.99,
+    "authorized_usd": 13.0,
+    "expected_minutes": 679.04,
+    "soft_stop_minutes": 746.9440000000001,
+    "artifact_recovery_reserve_minutes": 30.0,
+    "hard_terminate_minutes": 776.9440000000001,
+    "step_time": {
+      "seconds": 4.6,
+      "source": "E6b measured 4.15 s/step + 10% for the extra stream",
+      "measured": true
+    },
+    "breakdown": [
+      {
+        "name": "setup",
+        "minutes": 45.0
+      },
+      {
+        "name": "train",
+        "minutes": 540.04
+      },
+      {
+        "name": "evaluate",
+        "minutes": 42.0
+      },
+      {
+        "name": "transfer",
+        "minutes": 40.0
+      },
+      {
+        "name": "arm_A_general_text_diagnostics",
+        "minutes": 4.0
+      },
+      {
+        "name": "artifact_manifest_and_verify",
+        "minutes": 8.0
+      }
+    ],
+    "notes": [],
+    "expected_usd": 11.2042,
+    "soft_stop_usd": 12.3246,
+    "artifact_recovery_reserve_usd": 0.495,
+    "hard_terminate_usd": 12.8196,
+    "label": "E7 full (B x2 + C x2)",
+    "n_trained_arms": 4,
+    "train_minutes": 540.0
+  },
+  "reduced": {
+    "price_per_hour": 0.99,
+    "authorized_usd": 7.25,
+    "expected_minutes": 368.02,
+    "soft_stop_minutes": 404.822,
+    "artifact_recovery_reserve_minutes": 30.0,
+    "hard_terminate_minutes": 434.822,
+    "step_time": {
+      "seconds": 4.6,
+      "source": "E6b measured 4.15 s/step + 10% for the extra stream",
+      "measured": true
+    },
+    "breakdown": [
+      {
+        "name": "setup",
+        "minutes": 45.0
+      },
+      {
+        "name": "train",
+        "minutes": 270.02
+      },
+      {
+        "name": "evaluate",
+        "minutes": 21.0
+      },
+      {
+        "name": "transfer",
+        "minutes": 20.0
+      },
+      {
+        "name": "arm_A_general_text_diagnostics",
+        "minutes": 4.0
+      },
+      {
+        "name": "artifact_manifest_and_verify",
+        "minutes": 8.0
+      }
+    ],
+    "notes": [],
+    "expected_usd": 6.0723,
+    "soft_stop_usd": 6.6796,
+    "artifact_recovery_reserve_usd": 0.495,
+    "hard_terminate_usd": 7.1746,
+    "label": "E7 reduced (B x2 only)",
+    "n_trained_arms": 2,
+    "train_minutes": 270.0
+  },
+  "full_proposed_cumulative_cap": 163.23,
+  "reduced_proposed_cumulative_cap": 157.59
+}

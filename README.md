@@ -304,7 +304,8 @@ AlphaAvatar-distill/
 │   ├── data/               #   mixture loader (schema, chat render, loss masks, packing),
 │   │                       #   session rendering + system-grouped packing (sessions.py),
 │   │                       #   diversity, per-slice correctness rules
-│   ├── training/           #   Stage 3 recovery trainer (CE+KD, freeze policy, resume)
+│   ├── training/           #   Stage 3 recovery trainer (CE+KD, freeze policy, resume,
+│   │                       #   optional second KD-only stream with its own cursor)
 │   ├── rollout/            #   engine adapters, in-stack generation, hashed rollout
 │   │                       #   snapshots + importance-ratio diagnostics
 │   ├── evaluation/         #   usable_rollout (Stage 2/3 primary metric), strict
@@ -326,7 +327,7 @@ AlphaAvatar-distill/
 ├── configs/                # stage recipes: stage0/ · stage1/ · stage3/recovery.json
 ├── data/                   # corpus manifests (jsonl gitignored, rebuildable)
 │   └── eval_behavior_v0/   #   76-prompt behavior set + manifest (both committed)
-├── tests/                  # 986 CPU tests, mirroring the source areas
+├── tests/                  # 1,029 CPU tests, mirroring the source areas
 ├── logs/                   # project memory — read STATE.md first
 │   ├── STATE.md            #   canonical handoff: a snapshot, not an archive
 │   ├── EXPERIMENTS.md      #   the consolidated record: what ran, results, cost

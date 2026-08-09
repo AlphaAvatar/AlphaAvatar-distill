@@ -1,0 +1,66 @@
+{
+  "e7_fineweb_r1600k_sa": {
+    "path": "configs/stage3/e7/e7_fineweb_r1600k_sa.json",
+    "config_sha256": "ec36810366cc7ae680c0f7b9aa762869dffffa5b14e0db3b81fb78756bcf2972",
+    "arm": "B",
+    "seed": 20260726,
+    "extra_budget": {
+      "active_steps": 1761,
+      "block_visits": 1761,
+      "exposures": 1.0,
+      "kd_positions": 1801503,
+      "forward_tokens": 1803264,
+      "stream_blocks": 1761,
+      "stream_block_len": 1024,
+      "stream_unique_kd_positions": 1801503
+    }
+  },
+  "e7_fineweb_r1600k_sb": {
+    "path": "configs/stage3/e7/e7_fineweb_r1600k_sb.json",
+    "config_sha256": "94d14b4d195e8eea0395497a01e6ac94cbc6588db10127995bfc7e5471fd308b",
+    "arm": "B",
+    "seed": 20260801,
+    "extra_budget": {
+      "active_steps": 1761,
+      "block_visits": 1761,
+      "exposures": 1.0,
+      "kd_positions": 1801503,
+      "forward_tokens": 1803264,
+      "stream_blocks": 1761,
+      "stream_block_len": 1024,
+      "stream_unique_kd_positions": 1801503
+    }
+  },
+  "e7_control_r1600k_sa": {
+    "path": "configs/stage3/e7/e7_control_r1600k_sa.json",
+    "config_sha256": "f723e3729bc16d09189caf2fb83d12ea3961571a6c15394d54a53caea88d9b07",
+    "arm": "C",
+    "seed": 20260726,
+    "extra_budget": {
+      "active_steps": 1761,
+      "block_visits": 1761,
+      "exposures": 1.0,
+      "kd_positions": 1801503,
+      "forward_tokens": 1803264,
+      "stream_blocks": 1761,
+      "stream_block_len": 1024,
+      "stream_unique_kd_positions": 1801503
+    }
+  },
+  "e7_control_r1600k_sb": {
+    "path": "configs/stage3/e7/e7_control_r1600k_sb.json",
+    "config_sha256": "0f6fc09b05dcd9cb58bb492cc7176160aac315b393a22ce6a613f2a0850296cb",
+    "arm": "C",
+    "seed": 20260801,
+    "extra_budget": {
+      "active_steps": 1761,
+      "block_visits": 1761,
+      "exposures": 1.0,
+      "kd_positions": 1801503,
+      "forward_tokens": 1803264,
+      "stream_blocks": 1761,
+      "stream_block_len": 1024,
+      "stream_unique_kd_positions": 1801503
+    }
+  }
+}
