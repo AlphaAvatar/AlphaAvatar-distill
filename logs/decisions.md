@@ -1500,3 +1500,138 @@
   fire is not made safer by being earlier.
 - **Revisit when:** `--terminate-after` is observed to actually terminate a pod,
   or the launcher's detachment is diagnosed. Until then, assume neither.
+
+## 2026-08-09 — Checkpoint promotion is decided by autonomous rollout, never by validation CE
+
+- **Context:** E6b is the cleanest instance yet of a dissociation this project has
+  seen repeatedly. Both objectives improved teacher-forced validation CE by
+  essentially the same amount — E1/P1 ≈ 1.30 → 1.15, P2 ≈ 1.31 → 1.17 — and only
+  E1/P1 converted the larger rung into a behaviour gain (+0.1100 usable rollout
+  against P2's +0.0267, a tie). Earlier instances: FineWeb NLL *reverses* by the
+  5.50M rung while PCA-vs-random behaviour stays 8x apart (§19); E6's 2.96M →
+  5.50M step, where only the diagnostics move.
+- **Decision — canonical, standing:** teacher-forced CE, FineWeb/held-out NLL,
+  teacher-forced top-1 and rank, and training loss are **training-health
+  diagnostics only**. Checkpoint promotion, arm selection and stage advancement
+  are decided on the **frozen autonomous rollout evaluation**. Do not infer
+  autonomous improvement from validation CE in any future experiment, and do not
+  present a CE improvement as evidence for a behaviour claim.
+- **Corollary already in force:** keep the metrics on separate scales and never
+  combine them (AGENTS.md 4.5). This record makes the *selection* consequence
+  explicit, which the earlier phrasing left implicit.
+- **Alternatives considered:** using CE as a cheap pre-filter before spending on
+  rollout evaluation — not adopted as a *selection* rule, though it remains
+  legitimate as a training-health check; E6b shows a CE improvement carries no
+  information about which of two objectives will behave better.
+- **Risks:** rollout evaluation is far more expensive than CE, so this makes
+  arm selection costlier. Accepted: the alternative is selecting on a metric
+  demonstrated not to track the objective.
+- **Revisit when:** a diagnostic is shown to *predict* frozen-battery behaviour
+  across at least three independent comparisons.
+
+## 2026-08-09 — E6b's canonical scientific conclusion, and the limits on it
+
+- **Context:** E6b completed with operational deviations
+  ([`e6b_protocol_deviations.md`](e6b_protocol_deviations.md)). The maintainer
+  accepted the result on 2026-08-09 — both arms completed the frozen schedule,
+  the final checkpoints were retrieved and hash-verified, and the frozen
+  evaluation artifacts are complete — and directed that neither arm be rerun.
+- **Decision — the canonical statements:**
+  * best existing evaluated checkpoint: **E1/P1 KD-heavy 2.96M**;
+  * best demonstrated objective at 2.96M: **E1/P1 KD-heavy**;
+  * E1/P1 scale trend: 1.60M → 2.96M materially improves autonomous rollout
+    stability; 2.96M → 5.50M plateaus under the registered thresholds;
+  * P2 scale trend: no demonstrated improvement from 1.60M → 2.96M;
+  * **P2-5.50M is not justified and must not be launched.**
+- **The interpretation, which must not be compressed:** at 2.96M, E1/P1 exceeds
+  P2 by exactly **+0.0800 usable on both seeds**, while correctness remains tied
+  under the registered floor and `correct_given_usable` is essentially identical
+  (0.2460 vs ≈0.2460). So KD-heavy converts the additional rung into **autonomous
+  generation stability**, not into better reasoning. **More generations terminate
+  and become judgeable; completed generations do not reason more accurately.**
+  Neither objective materially improves autonomous reasoning correctness.
+- **Scope limit on the interaction claim:** the pooled usable interaction is
+  −0.0833, and the per-seed values are −0.0133 (`sa`) and −0.1533 (`sb`). The
+  registered result stands, but −0.0833 must **not** be presented as a precise or
+  stable effect size. Correct wording: *there is evidence of objective-dependent
+  scaling — E1/P1 converts the larger rung into stability while P2 does not
+  demonstrate the same conversion; the exact interaction magnitude is
+  seed-sensitive.* The strongest evidence is the **same-scale** comparison,
+  P2-2.96M vs E1/P1-2.96M, at −0.0800 on `sa` and −0.0800 on `sb`.
+- **Consequences for what comes next:** default behavioural anchor is
+  **E1/P1 KD-heavy 2.96M**; the **P2 lineage is no longer the preferred basis for
+  scaling experiments**; E7's requested training scale **remains 1.60M** unless
+  separately changed; the contribution-guided initialization experiment's final
+  control is **current initialization + E1/P1 KD-heavy 2.96M**.
+- **Risks:** two seeds per cell. The same-scale result is seed-consistent and
+  both paired CIs exclude zero; the difference-in-differences stacks four single
+  draws and is treated accordingly.
+- **Revisit when:** a held-out battery exists, or an objective is proposed that
+  changes termination behaviour rather than token-level loss weighting.
+
+## 2026-08-09 — Operational hardening adopted; --terminate-after demoted
+
+- **Context:** E6b overran its authorization by $0.56 and lost both arms'
+  machine-readable event streams. Two independent stop layers were inert at once,
+  and the monitoring could not tell a blocked launcher from an idle session. The
+  maintainer directed that these be fixed at zero GPU cost before any further
+  billable run.
+- **Decision:** adopt `src/aadistill/infrastructure/{budget,provider,watchdog,remote,log_relay,artifact_gate}.py`
+  and the entry points `scripts/pod/{start_job,watchdog,collect_artifacts}.py` as
+  the required session contract. Specifically:
+  * a launcher **may not** depend on its driver-start ssh returning; it starts the
+    driver detached, takes a durable job descriptor, and resumes polling within a
+    bounded time;
+  * an **independent provider-level watchdog** runs beside the launcher, polls the
+    control plane directly, terminates on its own clock, and **verifies the pod
+    disappeared** — retrying and journalling every attempt and response;
+  * **`--terminate-after` is demoted** to a redundant third layer. It has never
+    been observed to fire and is no longer counted as a stop mechanism;
+  * a session declares **four** thresholds — expected, soft stop,
+    artifact-recovery reserve, hard terminate — and the reserve is held back
+    *inside* the authorization rather than the kill point being set at the cap;
+  * structured event streams are **mirrored off the pod continuously**; they may
+    not exist only inside an ephemeral pod until teardown;
+  * artifact collection is **manifest-driven**, expanded in Python, and teardown
+    is gated on an ordered checklist through local hash verification. A missing
+    required artifact blocks normal teardown; only the cost watchdog may override,
+    and it must record why and what was lost.
+- **Also decided:** `$(ls …)` inside a quoted ssh command is banned for new
+  launchers and lint-enforced. `e3/e4/e5_launch.sh` are exempted **by name** as
+  frozen records of completed runs, so a launcher derived from one of them is
+  caught rather than inheriting the exemption.
+- **Also decided:** no future launch may be estimated from E4's 3.625 s/step. The
+  budget planner enforces the measured 4.15 s/step floor and refuses the
+  superseded figure by name; a genuinely faster workload passes its own floor with
+  a recorded reason.
+- **Alternatives considered:** lowering the RunPod deadline to compensate —
+  rejected, a deadline that does not fire is not made safer by being earlier;
+  a short paid canary to validate provider behaviour — deferred, and may be
+  proposed later only with a separate explicit cost estimate and authorization.
+- **Risks:** the GraphQL `podTerminate` fallback has never been exercised against
+  the live endpoint and is journalled as unverified. The guarantee that does not
+  depend on it is the verification poll. The E6b blocking cause remains
+  undiagnosed; the fix removes the dependency rather than explaining it.
+- **Revisit when:** the first hardened session runs, or `--terminate-after` is
+  observed to actually terminate a pod.
+
+## 2026-08-09 — Correction: E6b's artifact loss was an inherited bundle list, not a glob
+
+- **Context:** the first E6b write-up attributed the lost `train_log.jsonl` /
+  `run_manifest.json` to "a bundling glob that did not expand inside ssh quoting".
+- **Correction:** the E6b bundling command at run commit `6375e29` contains **no
+  glob**. It names `artifacts/audit/three_mode` and two E6-specific JSON files,
+  inherited verbatim from E6 — a session that did not train — so the event streams
+  were **never listed at all**. Two of the three named paths do not exist in an
+  E6b session either; `2>/dev/null` swallowed the error and the `;`-chained
+  `sha256sum` ran anyway. Verified by `tar tzf` on the retrieved bundle, which
+  holds `artifacts/audit/three_mode/**` and nothing else.
+- **Why it matters:** the two causes imply different fixes. A quoting bug is fixed
+  by quoting; an inherited list is fixed only by **declaring what must survive and
+  checking for it**. Every downstream check passed on the incomplete bundle —
+  tar produced a file, digests matched, transfer verified — because none asked
+  whether everything required was present. That is what `artifact_gate` adds.
+- **Not retracted:** `$(ls -d …)` inside ssh **is** a real fragility and is
+  present in `e3/e4/e5_launch.sh`. It was simply not this failure.
+- **Revisit when:** never; this is a record of a corrected attribution.
+

@@ -845,10 +845,26 @@ P0-assistant's weights permanently and all four E5 checkpoints.
 
 ### NOT retained — a P4 gap
 
-`train_log.jsonl` and `run_manifest.json` for **both** arms were never fetched:
-the pod-side bundling command's `$(ls -d …)` globs did not expand inside the ssh
-quoting, and the pod was deleted before it was noticed. The training curve,
-per-step timings and final validation CE survive in the driver console log, so
-the substance is recoverable; the machine-readable event stream required by
-AGENTS.md 3.7 is not. Fix the bundling to use an explicit file list before the
-next training session.
+`train_log.jsonl` and `run_manifest.json` for **both** arms were never fetched.
+**Corrected attribution, 2026-08-09:** this entry previously blamed "the pod-side
+bundling command's `$(ls -d …)` globs [that] did not expand inside the ssh
+quoting". That is wrong — the E6b bundling command contains no glob. Its path
+list was inherited verbatim from E6, a session that did not train, so the event
+streams were **never listed**; `tar tzf` on the retrieved bundle confirms it
+holds `artifacts/audit/three_mode/**` and nothing else. Every downstream check
+then passed on the incomplete bundle. Full record:
+[`e6b_protocol_deviations.md`](e6b_protocol_deviations.md).
+
+The training curve, per-step timings and final validation CE survive in the
+driver console log, so the substance is recoverable; the machine-readable event
+stream required by AGENTS.md 3.7 is not.
+
+**Derived artifact:** `logs/e6b_reconstructed_training_events.json`
+(`provenance: reconstructed_from_driver_console`,
+`original_event_stream_available: false`) — 291 `train_step` + 10 `eval_result`
+events per arm, with a per-field provenance block. **Not** the original stream.
+
+**Fixed, 2026-08-09:** collection is now manifest-driven
+(`scripts/pod/collect_artifacts.py`), the archive is built from the manifest
+rather than from a shell glob, and a missing required artifact class blocks
+teardown (EXPERIMENTS.md §30).

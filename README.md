@@ -39,12 +39,23 @@ sharpest single view: **GSM8K usable rollout climbs 0.71 → 0.92 while GSM8K
 correctness stays at 0.00–0.05.** The model learns to finish a maths problem, not
 to solve one.
 
-**That scaling gain belongs to one objective, not to the data.** Trained at the
-same 2.96M rung, the CE-heavy objective gains only +0.0267 where the KD-heavy one
-gains +0.1100 — an objective × scale interaction of −0.0833 on the primary axis.
-Both objectives improve teacher-native CE almost identically (1.31 → 1.17 against
-1.30 → 1.15) while only one moves behaviour, which is the cleanest evidence yet
-for the standing rule that **diagnostics may never select a checkpoint**.
+**That scaling gain belongs to one objective, not to the data.** There is
+evidence of objective-dependent scaling: the KD-heavy objective converts the
+larger rung into stability (+0.1100) while the CE-heavy one does not demonstrate
+the same conversion (+0.0267). The pooled interaction is −0.0833, but its
+per-seed values are −0.0133 and −0.1533, so **the exact magnitude is
+seed-sensitive and is not quoted as an effect size.** The strongest evidence is
+the same-scale comparison at 2.96M: KD-heavy over CE-heavy by **−0.0800 usable on
+both seeds**, both paired CIs excluding zero.
+
+**And it is a gain in stability, not in reasoning.** At 2.96M the two objectives'
+correctness ties under the registered floor, and correctness *among usable
+rollouts* is essentially identical (0.2460 vs ≈0.2460). More generations
+terminate and become judgeable; completed generations do not reason more
+accurately. Both objectives also improve teacher-native CE almost identically
+(1.31 → 1.17 against 1.30 → 1.15) while only one moves behaviour — the cleanest
+evidence yet for the standing rule that **diagnostics may never select a
+checkpoint**.
 
 **What is not the problem.** The released `Qwen3-0.6B` — the student's exact
 geometry and parameter count — answers ~70% of GSM8K and ~74% of RAG on this
@@ -298,7 +309,10 @@ AlphaAvatar-distill/
 │   │                       #   snapshots + importance-ratio diagnostics
 │   ├── evaluation/         #   usable_rollout (Stage 2/3 primary metric), strict
 │   │                       #   answer/protocol scorers, degeneration, oracle prefix
-│   └── infrastructure/     #   env fingerprint, code-state hash, sha256 manifests
+│   └── infrastructure/     #   env fingerprint, code-state hash, sha256 manifests ·
+│                           #   session budget thresholds · provider control plane ·
+│                           #   cost watchdog · detached remote launch · log relay ·
+│                           #   manifest-driven artifact collection + teardown gate
 ├── scripts/                # entry points, one per responsibility
 │   ├── data/               #   mixture + eval-set builders · build_token_ladder ·
 │   │                       #   validate_corpus_gate
@@ -307,11 +321,12 @@ AlphaAvatar-distill/
 │   │                       #   degeneration · audit_prompt_rendering · exposure_report ·
 │   │                       #   consolidate_e1 · build_test_cases · plot_perf_trend
 │   ├── rollout/            #   teacher generation · build_recovery_corpus
-│   └── pod/                #   GPU session scripts + durable orchestrator (run_env.sh)
+│   └── pod/                #   GPU session scripts + durable orchestrator (run_env.sh) ·
+│                           #   start_job · watchdog · collect_artifacts (session contract)
 ├── configs/                # stage recipes: stage0/ · stage1/ · stage3/recovery.json
 ├── data/                   # corpus manifests (jsonl gitignored, rebuildable)
 │   └── eval_behavior_v0/   #   76-prompt behavior set + manifest (both committed)
-├── tests/                  # 879 CPU tests, mirroring the source areas
+├── tests/                  # 986 CPU tests, mirroring the source areas
 ├── logs/                   # project memory — read STATE.md first
 │   ├── STATE.md            #   canonical handoff: a snapshot, not an archive
 │   ├── EXPERIMENTS.md      #   the consolidated record: what ran, results, cost

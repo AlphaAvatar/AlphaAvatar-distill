@@ -5,10 +5,95 @@ longer hardcode a run; the session is declared in `run_env.sh` and everything
 else reads it. The previous single-run versions (`orchestrate_s2v1.sh`,
 `verify_and_report_s2v1.py`) are in git history at commit `f74e5ed`.
 
+---
+
+## Session contract (REQUIRED for every session after 2026-08-09)
+
+E6b overran its authorization by $0.56 and lost both arms' machine-readable
+training event streams. Four rules follow, and a new launcher that does not
+implement them is not compliant. Full account:
+[`logs/e6b_protocol_deviations.md`](../../logs/e6b_protocol_deviations.md);
+decision record 2026-08-09.
+
+**1. Never depend on the driver-start ssh returning.** E6b's launcher used the
+correct `setsid nohup … < /dev/null & disown` form and blocked for 434 minutes
+anyway — byte-identical to E6's, which returned in 74 s. Start the driver with:
+
+```bash
+JOB=$(python3 scripts/pod/start_job.py --host "$HOST" --port "$PORT" \
+        --job-id e7_driver --workdir /workspace/aad \
+        --log /workspace/e7_run.log --status /workspace/e7.status \
+        --env TEACHER_REVISION="$TEACHER_REVISION" \
+        --command "/opt/train/bin/python scripts/pod/e7_driver.py --stage all")
+```
+
+It returns within `start_timeout + verify` whether or not the channel closes,
+prints a durable job descriptor (pid, log, status, marker paths), and exits 3 —
+*do not proceed to poll* — if the job cannot be confirmed running.
+
+**2. Run the watchdog beside the launcher, detached from it.** Immediately after
+the pod is created:
+
+```bash
+setsid nohup python3 scripts/pod/watchdog.py \
+  --pod-id "$POD_ID" --session-start-epoch "$(cat "$SCR/pod_start_epoch")" \
+  --price-per-hour 0.99 --hard-minutes "$HARD_MINUTES" \
+  --authorized-usd "$AUTHORIZED_USD" --journal "$SCR/watchdog.jsonl" \
+  > "$SCR/watchdog.out" 2>&1 < /dev/null &
+```
+
+It touches only the provider control plane, so blocked SSH, a hung driver, a
+crashed trainer and a failed collection are all invisible to it and all
+irrelevant. **`--terminate-after` is a redundant third layer**: it has never been
+observed to fire and does not count as a stop mechanism. Keep setting it; never
+rely on it.
+
+**3. Poll the pod, not the log.** A blocked launcher writes no lines, and
+silence then looks exactly like an idle session — that is how seven hours and
+~$4 went unnoticed. `watchdog.SessionWatcher.assess` requires provider state and
+has no verdict named `IDLE`.
+
+**4. Collect artifacts from a declared manifest, and gate teardown on it.**
+
+```bash
+python3 scripts/pod/collect_artifacts.py manifest --root artifacts \
+  --spec configs/<session>/artifacts.json --out /workspace/manifest.json
+python3 scripts/pod/collect_artifacts.py archive --manifest … --out …
+python3 scripts/pod/collect_artifacts.py verify-archive --manifest … --archive …
+# … transfer …
+python3 scripts/pod/collect_artifacts.py verify-local --manifest … --root "$STORE"
+python3 scripts/pod/collect_artifacts.py gate --state "$SCR/gate.json"
+```
+
+The spec **must** declare `train_log.jsonl` and `run_manifest.json` as required
+for every training arm. A missing required artifact blocks teardown. Only the
+cost watchdog may override, and it must record the reason and what was lost.
+
+**Banned:** `$(ls …)` / backticks inside a quoted ssh command. A pattern that
+matches nothing yields an empty substitution and a silently shorter archive that
+still exits 0 and still hashes. Lint: `tests/pod/test_operational_hardening.py`.
+`e3/e4/e5_launch.sh` are exempted by name as frozen records.
+
+**Budget:** four thresholds, not one. Use
+`aadistill.infrastructure.budget.plan_session` — expected / soft stop /
+artifact-recovery reserve / hard terminate — and pass `hard_terminate_minutes`
+to the watchdog. **Price the step at 4.15 s (E6b measured), never at E4's
+3.625 s**; the planner refuses the superseded figure by name. Name evaluation
+and checkpointing as their own phases: wall clock per step was 4.21 s because
+they are not free.
+
+**Durability:** mirror `train_log.jsonl` off the pod continuously with
+`aadistill.infrastructure.log_relay.LogRelay` from the polling loop. A structured
+event stream may not exist only inside an ephemeral pod until teardown.
+
 ## Files
 
 | file | role |
 | --- | --- |
+| `start_job.py` | **required**: start the remote driver detached; prints a durable job descriptor; exit 3 = not confirmed, do not poll |
+| `watchdog.py` | **required**: independent provider-level cost backstop; polls, terminates, verifies the pod is gone, journals every attempt. `--simulate` rehearses thresholds with no pod |
+| `collect_artifacts.py` | **required**: manifest / archive / verify-archive / verify-local / gate — manifest-driven collection and the ordered teardown gate |
+| `reconstruct_training_events.py` | parses a driver console log into a **derived** event stream with explicit provenance; never a replacement for `train_log.jsonl` |
 | `run_env.sh` | **the only file to edit per session**: arms (name/config/step tag), reference checkpoints + revisions, transfer artifact names, eval settings |
 | `setup.sh` | env + repo bundle + data + cu128 torch + checkpoints + tests; markers `ENV_READY`→`CKPT_READY`→`TESTS_PASSED`→`SETUP_DONE` |
 | `score_refs.sh` | scores reference checkpoints on `eval_behavior_v0` **before training**, so every arm is comparable on one device and eval bugs surface in minutes, not after hours of training; marker `REFS_SCORED` |

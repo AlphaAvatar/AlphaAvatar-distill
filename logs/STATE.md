@@ -1,9 +1,133 @@
 **Updated:** 2026-08-09 · branch `main` · **no pods running, nothing billing.**
-**Experiment 6b is complete.** Two paid events, **$7.68** against a $7.12
-authorization — **an overrun of $0.56, recorded below**; project total
-**$149.59**. 879 CPU tests pass.
+**Experiment 6b is complete and accepted; neither arm will be rerun.** Two paid
+events, **$7.68** against a $7.12 authorization — **an overrun of $0.56**;
+project total **$149.59** against a $149.03 cap. **Operational hardening after
+E6b is complete** (CPU, $0). **986 CPU tests pass**, 3 skipped.
 
-## E6b COMPLETE — THE PLATEAU BELONGS TO THE OBJECTIVE, NOT THE DATA
+**Next billable run is gated on nothing further: the hardening is done.** E7's
+arms, FineWeb KD weighting, compute-matched control and budget are specified
+separately by the maintainer.
+
+## THE PROMOTION RULE — read this before selecting any checkpoint
+
+**Teacher-forced CE, held-out/FineWeb NLL, teacher-forced top-1 and rank, and
+training loss are training-health diagnostics only. Checkpoint promotion, arm
+selection and stage advancement are decided on the frozen autonomous rollout
+evaluation. Do not infer autonomous improvement from validation CE.**
+
+E6b is the cleanest demonstration: **both objectives improved validation CE by
+essentially the same amount** — E1/P1 ≈ 1.30 → 1.15, P2 ≈ 1.31 → 1.17 — and only
+E1/P1 moved on behaviour. Earlier instances agree: FineWeb NLL *reverses* by the
+5.50M rung while PCA-vs-random behaviour stays 8× apart (§19 below); E6's
+2.96M → 5.50M step moves only the diagnostics. Decision record
+[`decisions.md`](decisions.md), 2026-08-09.
+
+## E6b — CANONICAL CONCLUSION
+
+```
+Best existing evaluated checkpoint:  E1/P1 KD-heavy 2.96M
+Best demonstrated objective @2.96M:  E1/P1 KD-heavy
+E1/P1 scale trend:  1.60M → 2.96M materially improves autonomous rollout
+                    stability; 2.96M → 5.50M plateaus under the registered
+                    behavior thresholds
+P2 scale trend:     no demonstrated improvement from 1.60M → 2.96M
+P2-5.50M:           not justified and must not be launched
+```
+
+**What the advantage is, and what it is not.** At 2.96M, E1/P1 exceeds P2 by
+exactly **+0.0800 usable on both seeds**, while correctness stays tied under the
+registered floor and `correct_given_usable` is essentially identical —
+**E1/P1 0.2460, P2 ≈ 0.2460**. So KD-heavy converts the additional rung into
+**autonomous generation stability**, and CE-heavy does not demonstrate the same
+scaling behaviour. **Neither objective materially improves autonomous reasoning
+correctness.**
+
+Preserve the distinction: **more usable outputs** ≠ **higher correctness among
+usable outputs**. E1/P1's advantage is that more generations terminate and become
+judgeable, not that completed generations reason more accurately.
+
+**Scope limit on the interaction.** The pooled usable interaction is −0.0833; the
+per-seed values are **−0.0133 (`sa`) and −0.1533 (`sb`)**. The registered result
+stands, but −0.0833 is **not** a precise or stable effect-size estimate. Say
+instead: *there is evidence of objective-dependent scaling — E1/P1 converts the
+larger rung into stability while P2 does not demonstrate the same conversion; the
+exact interaction magnitude is seed-sensitive.* The strongest evidence is the
+**same-scale** comparison, P2-2.96M vs E1/P1-2.96M: **−0.0800 on `sa`, −0.0800 on
+`sb`**, both paired CIs excluding zero.
+
+**Consequences now in force.**
+
+```
+Default behavioral anchor:                    E1/P1 KD-heavy 2.96M
+E7 requested training scale:                  remains 1.60M unless separately changed
+P2 lineage:                                   no longer the preferred basis for scaling
+Contribution-guided init, final control:      current initialization + E1/P1 KD-heavy 2.96M
+```
+
+## E6b PROTOCOL DEVIATIONS — scientific endpoint valid, operational protocol noncompliant
+
+Both statements hold; neither cancels the other. Permanent record:
+[`e6b_protocol_deviations.md`](e6b_protocol_deviations.md).
+
+```
+Cost deviation:
+    authorized hard backstop: $7.12
+    actual E6b cost:          $7.68
+    overrun:                  $0.56
+
+Artifact deviation:
+    original machine-readable training event streams were lost
+    driver console logs survive
+    final checkpoints and evaluation artifacts survive and are verified
+```
+
+The result is accepted because both arms completed the frozen schedule, the final
+checkpoints were retrieved and hash-verified, and the frozen evaluation artifacts
+are complete.
+
+**Derived, not restored.**
+[`e6b_reconstructed_training_events.json`](e6b_reconstructed_training_events.json)
+is parsed from the surviving driver console log and carries
+`"provenance": "reconstructed_from_driver_console"`,
+`"original_event_stream_available": false`, and a per-field provenance block
+(exact / truncated / derived-from-config / bounded-only / unrecoverable). It
+recovers 291 `train_step` + 10 `eval_result` events per arm. **It is not the
+original event stream and must never be described as one** — `grad_norm`, the
+token accounting, `gpu_mem_gb` and the `run_start`/`teacher_loaded`/
+`checkpoint_saved`/`run_end` events were never printed and are gone.
+
+**Corrected attribution.** The earlier account blamed "a bundling glob that did
+not expand inside ssh quoting". Wrong: the E6b bundle command has no glob. Its
+path list was inherited verbatim from E6 — a session that did not train — so the
+event streams were **never listed**. Every downstream check then passed on the
+incomplete bundle. The fix is therefore *declare what must survive and check for
+it*, not *fix the quoting*.
+
+## OPERATIONAL HARDENING — COMPLETE 2026-08-09 (CPU, $0)
+
+Required session contract for every run from here:
+[`scripts/pod/AGENTS.md`](../scripts/pod/AGENTS.md); record
+[`EXPERIMENTS.md`](EXPERIMENTS.md) §30.
+
+| module | fixes |
+| --- | --- |
+| `infrastructure/remote.py` · `scripts/pod/start_job.py` | launcher no longer depends on the driver-start ssh returning: bounded start, durable pod-side job descriptor, out-of-band confirmation, exit 3 rather than polling for a job that never started |
+| `infrastructure/watchdog.py` · `scripts/pod/watchdog.py` | independent provider-level backstop: polls the control plane, terminates on its own clock, **verifies the pod disappeared**, retries, journals every attempt and response. Works with SSH blocked, driver hung, orchestrator silent, training crashed, collection failed |
+| `infrastructure/watchdog.SessionWatcher` | log silence can no longer produce an idle verdict — `assess` requires provider state and no verdict is named `IDLE` |
+| `infrastructure/budget.py` | four thresholds: expected / soft stop / artifact-recovery reserve / hard terminate. The reserve is held back *inside* the authorization. 4.15 s/step floor enforced; E4's 3.625 s/step refused by name |
+| `infrastructure/log_relay.py` | structured events mirrored off the pod continuously; already-synced events survive the pod's deletion |
+| `infrastructure/artifact_gate.py` · `scripts/pod/collect_artifacts.py` | declared spec expanded in Python, archive built from the manifest, ordered teardown gate through local hash verification, emergency override that records what was lost |
+
+**`--terminate-after` is demoted to a redundant third layer.** It has never been
+observed to fire in this project. Keep setting it; never count it as a stop
+mechanism.
+
+**Still open:** the E6b blocking cause is undiagnosed — the fix removes the
+dependency rather than explaining it. The GraphQL `podTerminate` fallback has
+never been exercised live and is journalled as `verified_transport: false`; the
+guarantee that does not depend on it is the verification poll.
+
+## E6b — the measurements behind the conclusion
 
 E6b trained P2 CE-heavy at the 2.96M rung, filling the missing cell of the
 objective × data-scale matrix. Both arms from the Stage 1 PCA init, the objective
@@ -55,30 +179,24 @@ argument for the standing rule that diagnostics may not select a checkpoint.
 
 **P2-5.50M is not justified** and was not initiated.
 
-### The overrun, and the part that matters more than the money
+### The overrun and the artifact loss — see the deviation record
 
-$7.68 against $7.12. The proximate cause was a **14% step-time miss** — 4.15 s
-measured against the 3.625 s priced from E4's comparable arms — which is ~$0.81
-of unbudgeted time and put the session over before any teardown decision existed.
+$7.68 against $7.12; both arms' machine-readable event streams lost. Causes,
+corrected attribution and remediation are in
+[`e6b_protocol_deviations.md`](e6b_protocol_deviations.md) and summarised at the
+top of this file. **Retained and hash-verified:** both checkpoints
+(`89b14b83…`, `3c4709b5…`), all four generation sets, the driver console log.
 
-The structural cause is that **two independent stop layers were inert at once**:
+**Step time, stated precisely** (from the reconstruction, which separates two
+quantities the single figure "4.15 s/step" conflated):
 
-* **RunPod's `--terminate-after` did not fire.** Deadline 00:28:47; pod still
-  `RUNNING` at 00:34. Documented as the last-resort layer since E4 and **never
-  once observed to fire** — always trusted, never tested.
-* **The launcher's driver-start ssh did not detach**, blocking for the whole
-  434-minute run, so the launcher never polled and could not tear down at
-  completion. Byte-identical invocation to E6's, which returned in 74 s.
+| measure | sa | sb |
+| --- | ---: | ---: |
+| printed per-step timing, mean of 291 samples | 4.1485 s | 4.1099 s |
+| wall clock per step, driver command → `TRAIN_DONE` | 4.211 s | 4.215 s |
 
-The monitoring gap is mine: the watcher tailed the orchestrator **log**, and a
-blocked launcher writes no lines, so seven hours of silence looked exactly like
-seven hours of nothing happening. **Poll the pod, not the log.**
-
-**Lost:** the structured `train_log.jsonl` and `run_manifest.json` for both arms —
-a bundling glob that did not expand inside ssh quoting, noticed after teardown.
-The training curve, per-step timings and final val CE survive in `e6b_run.log`;
-the machine-readable event stream does not. **Retained and hash-verified:** both
-checkpoints (`89b14b83…`, `3c4709b5…`), all four generation sets, driver log.
+Budget the **step** at 4.15 s and name evaluation and checkpointing as their own
+phases — the 0.06 s/step difference is them, and it is not free.
 
 **Disk, 2026-08-09:** Experiment 3's four checkpoints (19.6 GB) were deleted
 with maintainer approval — the approach was rejected and no live claim needs the
@@ -474,10 +592,19 @@ uncapped evals for 24 checkpoints — against the raised **$60** cap.
 
 ## 10. Implementation state (CPU-verified)
 
-**473 tests pass on CPU** (`uv run pytest tests/ -q`, ~12 s, no downloads).
+**986 tests pass on CPU, 3 skipped** (`PYTHONPATH=src pytest tests/ -q`, ~60 s,
+no downloads; `uv run pytest tests/ -q` also works). The 3 skips are the
+deliberate frozen-record launcher exemptions in the `$(ls …)` lint.
 
 | piece | file | state |
 |---|---|---|
+| four-threshold session budget | `src/aadistill/infrastructure/budget.py` | expected / soft stop / recovery reserve / hard terminate; 4.15 s/step floor; 11 tests |
+| provider control-plane client | `src/aadistill/infrastructure/provider.py` | GraphQL poll (verified by use), CLI-then-GraphQL terminate, in-memory simulator |
+| independent cost watchdog | `src/aadistill/infrastructure/watchdog.py` | terminate → **verify gone** → retry → journal; `SessionWatcher` cannot read silence as idle; 15 tests |
+| detached remote launch | `src/aadistill/infrastructure/remote.py` | bounded start, durable job descriptor, out-of-band confirmation; 9 tests incl. wall-clock bounds |
+| continuous log durability | `src/aadistill/infrastructure/log_relay.py` | incremental offset-resumable mirroring; never raises; 9 tests |
+| manifest-driven collection + teardown gate | `src/aadistill/infrastructure/artifact_gate.py` | Python glob expansion, archive from manifest, ordered gate, emergency override; 19 tests |
+| E6b failure replay | `tests/infrastructure/test_e6b_failure_simulation.py` | the whole 2026-08-08 sequence, 15 tests, no GPU |
 | session rendering + system-grouped packing | `src/aadistill/data/sessions.py` | used in the built corpus |
 | shared assistant-mask helper | `src/aadistill/data/dataset.py` | `final_assistant_loss_mask` for turn expansion |
 | `min_p` + per-prompt completion budgets | `src/aadistill/rollout/engines.py` | threaded through all 5 adapters |
@@ -618,14 +745,28 @@ is the fully matched comparison.
 
 ## 11. Next actions
 
-Ordered by expected value per dollar. **$2.94 remains and nothing is
-authorized.** Experiment 3 is complete (§20); the freeze-policy question is
-closed.
+**0. The cumulative cap is EXCEEDED. Nothing costing money is authorized.**
+$149.59 spent against a $149.03 cap — **over by $0.56**. There is no remaining
+balance to plan against; the next paid step needs a maintainer decision on the
+cap itself, not a plan that fits inside it. **Do not silently shrink an
+experiment to fit a shortfall** — report the shortfall specifically and ask.
+`budget.plan_session` now enforces this: it raises with the exact shortfall
+rather than trimming the run.
 
-**0. Nothing costing money is authorized.** The remaining $2.94 does not fund a
-two-seed arm at this rung (~$3 of training alone, before evaluation), so the next
-paid step needs a maintainer decision, not a plan. Do not silently shrink an
-experiment to fit it.
+**0b. Operational hardening is COMPLETE** (2026-08-09, CPU, $0) — see the top of
+this file and [`EXPERIMENTS.md`](EXPERIMENTS.md) §30. The next billable run is no
+longer gated on it. Any launcher written from here must follow the session
+contract in [`scripts/pod/AGENTS.md`](../scripts/pod/AGENTS.md): detached start
+via `start_job.py`, `watchdog.py` running beside it, `LogRelay` mirroring the
+event stream, `collect_artifacts.py` gating teardown.
+
+**0c. E7 is not started, by instruction.** Its arms, FineWeb KD weighting,
+compute-matched control and budget are specified separately by the maintainer.
+What is already fixed: requested training scale **remains 1.60M**; the default
+behavioural anchor is **E1/P1 KD-heavy 2.96M**; the contribution-guided
+initialization experiment's final control is **current initialization + E1/P1
+KD-heavy 2.96M**; the **P2 lineage is no longer the preferred basis for scaling
+experiments**.
 
 **What the last three experiments settled.** D0 (§16) located the bottleneck;
 P0-assistant (§17) and P2-ceheavy (§18) each tried to fix it by reducing KD's

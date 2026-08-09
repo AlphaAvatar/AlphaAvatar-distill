@@ -4177,11 +4177,43 @@ pod, not the log.**
 **Retained:** both checkpoints (5.6 GB each, sha256 `89b14b83…` / `3c4709b5…`,
 verified local-vs-pod), all four generation sets, the driver console log, and the
 pod-side hash manifests. **Lost:** the structured `train_log.jsonl` and
-`run_manifest.json` for both arms — the bundling command's `$(ls -d …)` globs did
-not expand inside the ssh quoting, and the pod was deleted before it was noticed.
-The training curve, per-step timings and final val CE survive in
-`e6b_run.log`; the machine-readable event stream (AGENTS.md 3.7) does not. A P4
-gap, recorded rather than papered over.
+`run_manifest.json` for both arms. The training curve, per-step timings and final
+val CE survive in `e6b_run.log`; the machine-readable event stream (AGENTS.md
+3.7) does not. A P4 gap, recorded rather than papered over.
+
+> **Correction, 2026-08-09.** The sentence that stood here attributed the loss to
+> "the bundling command's `$(ls -d …)` globs [that] did not expand inside the ssh
+> quoting". **That is wrong**, and the corrected cause changes the fix. The E6b
+> bundling command at `6375e29` contains no glob at all: it names
+> `artifacts/audit/three_mode` and two E6-specific JSON files, inherited verbatim
+> from E6 — a session that did not train — so `train_log.jsonl` and
+> `run_manifest.json` were **never listed**. Two of the three named paths do not
+> exist in an E6b session either; `2>/dev/null` swallowed the error and the
+> `;`-chained `sha256sum` ran anyway. `tar tzf` on the retrieved bundle confirms
+> it holds `artifacts/audit/three_mode/**` and nothing else. Every downstream
+> check then passed *on the incomplete bundle* — tar produced a file, the digests
+> matched, the transfer verified — because none of them asked whether everything
+> that had to survive was present. The `$(ls -d …)` construct is a real and
+> separate fragility, still present in `e3/e4/e5_launch.sh`, and is now banned
+> for new launchers by lint. Full record:
+> [`e6b_protocol_deviations.md`](e6b_protocol_deviations.md); remediation §30.
+
+**Derived replacement.** [`e6b_reconstructed_training_events.json`](e6b_reconstructed_training_events.json),
+parsed from the surviving console log by
+`scripts/pod/reconstruct_training_events.py`, carries
+`"provenance": "reconstructed_from_driver_console"` and
+`"original_event_stream_available": false` plus a per-field provenance block. It
+recovers 291 `train_step` and 10 `eval_result` events per arm and is **not** the
+original event stream — `grad_norm`, the token accounting, `gpu_mem_gb` and the
+`run_start`/`teacher_loaded`/`checkpoint_saved`/`run_end` events were never
+printed and are gone.
+
+It also separates two quantities that "4.15 s/step" conflated: the **printed
+per-step** timing means 4.1485 (sa) / 4.1099 (sb), while **wall clock per step**
+between the driver command and `TRAIN_DONE` is 4.211 / 4.215 — the difference
+being the ten periodic evaluations and the checkpoint writes. Future budgets
+price the step at 4.15 s and name evaluation and checkpointing as separate
+phases.
 
 ### 29.8 The $0.12 pod
 
@@ -4219,3 +4251,120 @@ PYTHONPATH=src python scripts/evaluation/analyze_e6b.py --bootstrap 10000
 | objective | ce 1.0 / kd 0.25, τ 1.0, scope all |
 | evaluation | mask `d6e24e0b…` on all 8 arms · 150 prompts · greedy · ctx 8192 · vLLM 0.26.0 |
 | artifacts | `logs/e6b_results.json`, `logs/e6b_report.md`, `artifacts/audit/e6b_per_prompt.jsonl` (1,200 records) |
+
+---
+
+## 30. Operational hardening after E6b (2026-08-09, CPU, $0)
+
+**Objective.** Fix the orchestration and artifact-retention failures that made
+E6b operationally noncompliant, before any further billable run. No GPU: this is
+control flow, and control flow does not need to be paid for.
+
+**Scope.** E6b's scientific endpoints are unchanged and neither arm was rerun.
+The deviations themselves are recorded permanently in
+[`e6b_protocol_deviations.md`](e6b_protocol_deviations.md).
+
+### 30.1 What failed, and what now catches it
+
+| E6b failure | layer that missed it | fix |
+| --- | --- | --- |
+| driver-start ssh blocked 434 min | none — the launcher *was* the orchestration | `remote.start_detached`: bounded start, durable pod-side job descriptor, out-of-band confirmation |
+| launcher never polled, never tore down | — | the launcher returns within `start_timeout + verify` regardless of the channel |
+| `--terminate-after` inert | it *was* the last-resort layer | `watchdog.Watchdog`: polls the provider, terminates, **verifies the pod is gone**, retries, journals |
+| seven hours of silence read as idle | watcher tailed the orchestrator log | `watchdog.SessionWatcher`: requires provider state; no verdict is reachable from markers alone |
+| authorization *was* the kill point | — | `budget.plan_session`: expected / soft stop / recovery reserve / hard terminate |
+| priced from a superseded 3.625 s/step | — | 4.15 s/step floor, enforced; a lower estimate needs a recorded reason |
+| event stream lived only on the pod | — | `log_relay.LogRelay`: continuous incremental mirroring |
+| bundle list inherited from a non-training session | tar exited 0, digests matched | `artifact_gate`: declared spec expanded in Python, archive built from the manifest, ordered teardown gate |
+
+### 30.2 The four budget thresholds
+
+E6b had one number. It now has four, and they answer different questions:
+
+| threshold | meaning |
+| --- | --- |
+| `expected` | what the session costs if nothing goes wrong — the number in an authorization request |
+| `soft_stop` | past this, no **new** phase may start; running work continues |
+| `artifact_recovery_reserve` | time held back *after* the soft stop for bundling, hashing, transfer and verification |
+| `hard_terminate` | `soft_stop + reserve`; the watchdog's kill point, which must land **at or under** the authorization |
+
+`may_start(elapsed, phase_minutes)` is the gate E6b lacked: its driver re-priced
+each arm against the *authorization*, so an arm that would finish just under the
+cap was allowed to start, leaving nothing for teardown.
+
+Priced at the measured 4.15 s/step, an E6b-shaped session (2 arms × 2,916 steps,
+25 min setup, 10 min/arm evaluation, 20 min transfer, 30 min reserve) terminates
+at **$9.00** — so `plan_session` **refuses** it at $7.12 and reports the shortfall
+rather than shrinking the run to fit. That refusal is the arithmetic that would
+have caught the overrun before launch.
+
+### 30.3 Verification
+
+All local, no GPU. **986 tests pass and 3 are skipped** (879 before this work,
+**+110 new**). The 3 skips are the deliberate frozen-record launcher exemptions
+in the `$(ls …)` lint.
+
+```bash
+PYTHONPATH=src pytest tests/ -q
+bash scripts/pod/simulate_pod_env.sh
+```
+
+New coverage:
+
+| file | tests | what it holds |
+| --- | ---: | --- |
+| `tests/infrastructure/test_remote_launch.py` | 9 | a 600-second job must not delay the launcher past 30 s, including when the start channel never closes |
+| `tests/infrastructure/test_watchdog.py` | 15 | terminate/verify/retry; an ignored termination is retried; silence never yields an idle verdict |
+| `tests/infrastructure/test_budget.py` | 11 | threshold ordering; the E6b plan is refused at its real step time; the superseded figure is refused by name |
+| `tests/infrastructure/test_log_relay.py` | 9 | the pod is deleted mid-run and 291 already-synced events remain readable |
+| `tests/infrastructure/test_artifact_gate.py` | 19 | a missing event stream blocks teardown; a short archive that self-verifies is detected against the full manifest |
+| `tests/infrastructure/test_e6b_failure_simulation.py` | 15 | the whole 2026-08-08 sequence replayed against the hardened stack |
+| `tests/pod/test_operational_hardening.py` | 23 | the entry points run; `$(ls …)`-in-ssh is banned for new launchers |
+| `tests/pod/test_reconstruct_training_events.py` | 9 | the derived artifact declares its provenance and classifies every original field |
+
+The simulation exercises, in one file: successful detached launch; a remote
+driver that dies at startup; blocked SSH; a silent orchestrator over a billing
+pod; watchdog termination; a provider that accepts a termination and ignores it;
+a provider that cannot terminate at all; partial transfer; hash mismatch; missing
+structured logs; safe teardown; and emergency budget teardown.
+
+Two behaviours are asserted by wall clock rather than by inspection, because
+those are the ones E6b got wrong: `start_detached` must return in under 30 s
+against a 600-second job, and must do so even when the start channel is made to
+hang.
+
+### 30.4 What is not covered
+
+* **RunPod's live control plane is untested here.** Polling uses the GraphQL
+  query every launcher since E2 has used, so its shape is confirmed by use.
+  Termination tries `runpodctl remove pod` first — the call every session in this
+  project has actually made — and falls back to a `podTerminate` mutation taken
+  from the public schema that **has never been exercised from this repo**; it is
+  journalled as `verified_transport: false`. The guarantee that does not depend
+  on either is the verification poll: termination means the pod is gone, not that
+  a request returned 200.
+* **`--terminate-after` is still not known to work.** It is retained as a
+  redundant third layer and is no longer counted as a stop mechanism.
+* **The E6b blocking cause is still not diagnosed.** The fix removes the
+  dependency rather than explaining it: the launcher no longer needs the channel
+  to close.
+
+### 30.5 Exact reproduction record
+
+```bash
+PYTHONPATH=src pytest tests/infrastructure tests/pod -q
+PYTHONPATH=src python scripts/pod/watchdog.py --pod-id sim-1 \
+  --session-start-epoch 0 --price-per-hour 0.99 --hard-minutes 1 \
+  --authorized-usd 9.00 --journal /tmp/wd.jsonl --once --simulate
+PYTHONPATH=src python scripts/pod/reconstruct_training_events.py \
+  --run-log /home/ecs-user/aad-artifacts/e6b/e6b_run.log \
+  --status  /home/ecs-user/aad-artifacts/e6b/e6b.status \
+  --config configs/stage3/e6b/e6b_p2_r2960k_sa.json \
+  --config configs/stage3/e6b/e6b_p2_r2960k_sb.json \
+  --out logs/e6b_reconstructed_training_events.json
+```
+
+**Verdict: complete.** The next billable run may be planned. It must use
+`plan_session` for its thresholds, `start_job.py` for its driver,
+`watchdog.py` beside the launcher, `LogRelay` for its event streams and
+`collect_artifacts.py` for its teardown.
