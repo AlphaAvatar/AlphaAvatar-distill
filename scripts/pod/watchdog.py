@@ -63,13 +63,19 @@ def main() -> int:
                          "the thresholds without creating a pod")
     ap.add_argument("--runpod-config",
                     default=os.path.expanduser("~/.runpod/config.toml"))
+    ap.add_argument("--runpodctl", default=None,
+                    help="path to the runpodctl binary. Point it at a path that "
+                         "does not exist to force the CLI termination path to "
+                         "fail locally, so terminate() falls through to the "
+                         "GraphQL mutation — how the canary exercises the "
+                         "unverified fallback WITHOUT altering provider state.")
     args = ap.parse_args()
 
     if args.simulate:
         provider = SimulatedProvider(args.pod_id)
     else:
         key = os.environ.get("RUNPOD_API_KEY") or read_api_key(args.runpod_config)
-        provider = RunPodProvider(key)
+        provider = RunPodProvider(key, runpodctl=args.runpodctl)
 
     policy = WatchdogPolicy(
         pod_id=args.pod_id,

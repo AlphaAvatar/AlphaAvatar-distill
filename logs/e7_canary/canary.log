@@ -1,0 +1,28 @@
+[11:35:00]   NVIDIA RTX A4000: securePrice $0.25/h, stock Low
+[11:35:00]   NVIDIA RTX A4500: securePrice $0.25/h, stock Low
+[11:35:01]   NVIDIA RTX 2000 Ada Generation: securePrice $0.24/h, stock Low
+[11:35:01]   NVIDIA RTX A5000: securePrice $0.27/h, stock Low
+[11:35:02]   NVIDIA RTX A6000: securePrice $0.53/h, stock Medium
+[11:35:02]   NVIDIA GeForce RTX 4090: securePrice $0.74/h, stock High
+[11:35:02] selected NVIDIA RTX 2000 Ada Generation at $0.24/h — worst case at the 50 min backstop $0.200 (authorized $0.82)
+[11:35:03] created bd83jug4g23qn0; --terminate-after 2026-08-09T12:25:02Z (redundant third layer, does not count toward PASS)
+[11:35:03] watchdog[safety] detached — hard 42.0 min, runpodctl=real
+[11:35:25] TCP 22 at 157.157.221.29:19141 after 0.4 min
+[11:35:28] ssh reachable — $0.00
+[11:35:55]   [PASS] detached_launch_returns_promptly: {'seconds': 5.58, 'pid': 231, 'start_channel_closed': True, 'confirmed_by': 'descriptor_probe'}
+[11:36:00]   [PASS] durable_job_descriptor: {'descriptor': '{"job_id":"canary","pid":"231","workdir":"/workspace","log_path":"/workspace/canary_run.log","status_path":"/workspace/canary.status","started_utc":"2026-08-09T11:35:52Z"}', 'liveness': 'ALIVE'}
+[11:36:23]   relay cycle 1: {'synced_bytes': {'/workspace/canary/train_log.jsonl': 694}, 'errors': {}}
+[11:36:45]   relay cycle 2: {'synced_bytes': {'/workspace/canary/train_log.jsonl': 448}, 'errors': {}}
+[11:37:08]   relay cycle 3: {'synced_bytes': {'/workspace/canary/train_log.jsonl': 512}, 'errors': {}}
+[11:37:31]   relay cycle 4: {'synced_bytes': {'/workspace/canary/train_log.jsonl': 448}, 'errors': {}}
+[11:37:31]   [PASS] structured_logs_off_pod_before_teardown: {'events_synced': 33, 'first': {'time': '2026-08-09T11:35:52Z', 'event': 'canary_tick', 'step': 0}, 'last': {'time': '2026-08-09T11:37:28Z', 'event': 'canary_tick', 'step': 32}, 'local_path': '/home/ecs-user/aad-scratch/canary_20260809_113459/relay/canary.train_log.jsonl'}
+[11:37:31]   [PASS] watchdog_sees_live_billing_pod: {'polls': 8, 'last': {'time': '2026-08-09T11:37:29Z', 'event': 'poll', 'at_epoch': 1786275448.403, 'elapsed_minutes': 2.41, 'accrued_usd': 0.0097, 'pod_exists': True, 'pod_billing': True, 'desired_status': 'RUNNING', 'poll_error': None, 'over_hard_limit': False, 'action': 'none'}}
+[11:37:36]   pod manifest rc=0 archive rc=0
+[11:37:45]   [FAIL] artifact_manifest_and_local_hash_verification: {'pod_manifest_rc': 0, 'pod_archive_rc': 0, 'pod_verify_archive_rc': 5, 'local_hashes_verified': False, 'gate': {'allowed': False, 'emergency': False, 'failed_check': 'archive_contents_verified', 'reason': "teardown blocked at 'archive_contents_verified'; the pod must not be deleted while a required artifact is only on it", 'checks': {'training_complete': True, 'evaluation_complete': True, 'artifact_manifest_created': True, 'required_files_present': True, 'archive_created': True, 'archive_contents_verified': False, 'transfer_complete': True, 'local_hashes_verified': False, 'checkpoint_hashes_matched': True, 'report_inputs_verified': True}}}
+[11:37:45] launching the test watchdog: threshold 4.20 min (now 2.70), CLI path forced to fail
+[11:37:45] watchdog[test] detached — hard 4.2 min, runpodctl=/nonexistent/runpodctl-canary-forced-failure
+[11:46:15]   [PASS] watchdog_crosses_threshold_without_launcher: {'polls_below_limit': 2, 'hard_limit_reached': {'time': '2026-08-09T11:46:09Z', 'event': 'hard_limit_reached', 'elapsed_minutes': 11.09, 'accrued_usd': 0.0444, 'hard_terminate_minutes': 11.0, 'authorized_usd': 0.82}}
+[11:46:15]   [PASS] graphql_fallback_transport_exercised: {'methods': ['runpodctl remove pod', 'graphql podTerminate'], 'cli_attempt': {'method': 'runpodctl remove pod', 'verified_transport': True, 'ok': False, 'returncode': None, 'response': '', 'error': "FileNotFoundError: [Errno 2] No such file or directory: '/nonexistent/runpodctl-canary-forced-failure'"}, 'graphql_attempt': {'method': 'graphql podTerminate', 'verified_transport': False, 'ok': True, 'returncode': None, 'response': '{"data": {"podTerminate": null}}', 'error': None}}
+[11:46:15]   [PASS] termination_issued_and_journaled: {'rounds': 1}
+[11:46:15]   [PASS] provider_polling_confirms_disappearance: {'verify_polls': 1, 'terminated': {'time': '2026-08-09T11:46:10Z', 'event': 'terminated', 'round': 1, 'polls': 1, 'desired_status': 'TERMINATED'}}
+[11:46:16]   [PASS] no_pod_remains_running: {'exists': False, 'desired_status': 'TERMINATED', 'billing': False, 'error': None}

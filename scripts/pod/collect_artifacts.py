@@ -75,7 +75,16 @@ def cmd_archive(args) -> int:
               "--allow-incomplete only when the loss is accepted and recorded")
         return 5
     out = create_archive(manifest, args.out)
+    # `create_archive` rewrites the entries to the bytes it actually archived.
+    # Persist that, or the dev box verifies the transfer against a description
+    # of bytes that no longer exist anywhere: the live canary on 2026-08-09 saw
+    # `train_log.jsonl` grow by one event between manifest and tar, and the
+    # teardown gate then blocked forever on `archive_contents_verified`.
+    manifest.write(args.manifest)
     print(f"{out} ({out.stat().st_size} bytes, {len(manifest.entries)} files)")
+    for row in manifest.appended_during_archive:
+        print(f"  appended during archive: {row['path']} "
+              f"{row['manifest_bytes']} -> {row['archived_bytes']} bytes")
     return 0
 
 

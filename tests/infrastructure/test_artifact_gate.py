@@ -222,3 +222,96 @@ def test_training_session_specs_always_require_the_event_stream():
     classes = {s.artifact_class: s for s in specs}
     assert classes["event_stream"].required is True
     assert classes["event_stream"].pattern == "stage3/e7_*/train_log.jsonl"
+
+
+# --------------------------------------------------------------------------
+# Live-canary regression: a file that is still being appended
+# --------------------------------------------------------------------------
+
+def test_a_log_that_grows_between_manifest_and_archive_still_verifies(tmp_path):
+    """The 2026-08-09 canary failure, reproduced.
+
+    `train_log.jsonl` was 2,166 bytes when the manifest hashed it and 2,230 when
+    tar read it — the job wrote one more event in the gap. The archive then
+    could not match the manifest, and the teardown gate blocked forever on
+    `archive_contents_verified` with nothing actually wrong.
+    """
+    root = tmp_path / "artifacts"
+    arm = root / "stage3" / "run"
+    arm.mkdir(parents=True)
+    log = arm / "train_log.jsonl"
+    log.write_text("".join(json.dumps({"event": "train_step", "step": i}) + "\n"
+                           for i in range(20)))
+    specs = (ArtifactSpec("event_stream", "stage3/*/train_log.jsonl"),)
+
+    manifest = build_manifest(root, specs)
+    at_manifest = manifest.entries[0].size_bytes
+
+    # The trainer keeps going, exactly as it does on a pod.
+    with open(log, "a") as f:
+        f.write(json.dumps({"event": "train_step", "step": 20}) + "\n")
+
+    archive = create_archive(manifest, tmp_path / "bundle.tar.gz")
+    assert not verify_archive(archive, manifest), (
+        "the manifest must describe what was archived, not what was hashed "
+        "a moment earlier")
+    assert manifest.entries[0].size_bytes > at_manifest
+    assert manifest.appended_during_archive == [
+        {"path": "stage3/run/train_log.jsonl",
+         "manifest_bytes": at_manifest,
+         "archived_bytes": manifest.entries[0].size_bytes}], (
+        "growth is normal for an append-only log and must be recorded, not "
+        "silently absorbed")
+
+    # And the whole gate now passes, which it could not before the fix.
+    local = tmp_path / "store"
+    with tarfile.open(archive) as tar:
+        tar.extractall(local, filter="data")
+    assert not verify_extracted(local, manifest)
+    assert evaluate_teardown({
+        "training_complete": True, "evaluation_complete": True,
+        "artifact_manifest_created": True, "required_files_present": manifest.ok,
+        "archive_created": True,
+        "archive_contents_verified": not verify_archive(archive, manifest),
+        "transfer_complete": True,
+        "local_hashes_verified": not verify_extracted(local, manifest),
+        "checkpoint_hashes_matched": True,
+        "report_inputs_verified": True}).allowed
+
+
+def test_the_archived_hash_is_of_the_bytes_actually_written(tmp_path):
+    root = tmp_path / "a"
+    root.mkdir()
+    f = root / "x.jsonl"
+    f.write_bytes(b"one\n")
+    manifest = build_manifest(root, (ArtifactSpec("event_stream", "x.jsonl"),))
+    with open(f, "ab") as fh:
+        fh.write(b"two\n")
+    create_archive(manifest, tmp_path / "b.tar.gz")
+    import hashlib
+    assert manifest.entries[0].sha256 == hashlib.sha256(b"one\ntwo\n").hexdigest()
+    assert manifest.entries[0].size_bytes == 8
+
+
+def test_a_truncated_file_is_an_error_not_a_shorter_entry(tmp_path):
+    """Growth is appending; shrinkage is data loss and must stop the archive."""
+    root = tmp_path / "a"
+    root.mkdir()
+    f = root / "x.jsonl"
+    f.write_bytes(b"0123456789")
+    manifest = build_manifest(root, (ArtifactSpec("event_stream", "x.jsonl"),))
+    f.write_bytes(b"012")
+    with pytest.raises(ArtifactError, match="shrank"):
+        create_archive(manifest, tmp_path / "b.tar.gz")
+
+
+def test_a_rewritten_manifest_round_trips(tmp_path):
+    root = tmp_path / "a"
+    root.mkdir()
+    (root / "x.jsonl").write_bytes(b"one\n")
+    manifest = build_manifest(root, (ArtifactSpec("event_stream", "x.jsonl"),))
+    create_archive(manifest, tmp_path / "b.tar.gz")
+    path = manifest.write(tmp_path / "manifest.json")
+    reloaded = ArtifactManifest.load(path)
+    assert reloaded.entries[0].sha256 == manifest.entries[0].sha256
+    assert reloaded.appended_during_archive == manifest.appended_during_archive

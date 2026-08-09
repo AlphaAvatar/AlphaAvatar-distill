@@ -1751,3 +1751,37 @@
   property of someone else's artifact would be failing closed on the wrong thing.
 - **Revisit when:** the battery is next rebuilt for another reason.
 
+## 2026-08-09 — The canary failed; E7 stays unlaunched, and that is the system working
+
+- **Context:** the live control-plane canary was authorized at a $0.82 backstop
+  to verify ten behaviours before E7 became their first real test. It ran for
+  11.12 minutes and cost $0.045.
+- **Result: FAILED, 9 of 10.** The failure was `archive_contents_verified` — the
+  pod-side manifest hashed a training log at 2,166 bytes and `tar` archived
+  2,230, because the job was still appending.
+- **Decision: E7 is not launched**, per the authorization's own terms. No B or C
+  arm was started.
+- **Decision on the fix — do not relax the size check.** The obvious remedy is to
+  tolerate a difference between manifest and archive. That would re-open exactly
+  the hole E6b fell through, where every downstream check passed on an incomplete
+  bundle. Instead the manifest is made to describe *what was archived*: read each
+  file once, cap at the size observed on open, hash the bytes actually written,
+  rewrite the entry. Growth is recorded; shrinkage is a hard error.
+- **Three defects found, and where.** The RunPod 403-on-`Python-urllib` was found
+  during price quoting, before any pod existed — free, and it would have made
+  every watchdog verification poll fail on a live pod. The manifest/archive race
+  was found live. The missing `--runpodctl` flag was a defect in the canary
+  driver itself, found live.
+- **Recorded honestly:** the flag bug was fixed and the test watchdog relaunched
+  by hand against the same live pod, so criteria 5–8 rest on real provider
+  evidence but **not on an unaided driver run**. A clean end-to-end pass has not
+  been demonstrated and is not claimed.
+- **`podTerminate` now has one live observation** and is no longer purely
+  theoretical. It stays flagged `verified_transport: false` in the journal
+  schema: that flag means "no CLI-level track record in this project", and one
+  observation does not retire it — the same discipline that kept
+  `--terminate-after` from being trusted for four experiments.
+- **Not decided here:** whether to re-run the canary (~$0.05) for a clean pass,
+  or accept criteria 1–8 plus the regression tests. That is the maintainer's
+  call and is deliberately not pre-empted.
+- **Revisit when:** the maintainer rules on the re-run, or E7 is authorized.

@@ -27,7 +27,7 @@ override, and only with a recorded reason.
 
 from __future__ import annotations
 
-import fnmatch
+import hashlib
 import json
 import tarfile
 from dataclasses import dataclass, asdict, field
@@ -88,6 +88,10 @@ class ArtifactManifest:
     specs: list[dict] = field(default_factory=list)
     missing: list[dict] = field(default_factory=list)
     created_utc: str = ""
+    # Files that grew between manifest and archive, recorded rather than
+    # silently absorbed: it is normal for an append-only training log and it is
+    # a red flag for anything else.
+    appended_during_archive: list[dict] = field(default_factory=list)
 
     @property
     def ok(self) -> bool:
@@ -107,6 +111,7 @@ class ArtifactManifest:
             "specs": self.specs,
             "entries": [asdict(e) for e in self.entries],
             "missing": self.missing,
+            "appended_during_archive": self.appended_during_archive,
         }
 
     def write(self, path: str | Path) -> Path:
@@ -124,6 +129,7 @@ class ArtifactManifest:
             specs=d.get("specs", []),
             missing=d.get("missing", []),
             created_utc=d.get("created_utc", ""),
+            appended_during_archive=d.get("appended_during_archive", []),
         )
 
 
@@ -166,16 +172,49 @@ def build_manifest(root: str | Path, specs: tuple[ArtifactSpec, ...], *,
     return manifest
 
 
-def create_archive(manifest: ArtifactManifest, out_path: str | Path) -> Path:
-    """Archive exactly the manifest's files. No globs, no shell.
+class _HashingLimitedReader:
+    """Feed tar exactly `limit` bytes, hashing them on the way through."""
 
-    A path in the manifest that has vanished between manifest and archive is an
-    error, not a silently smaller tarball — that difference is the entire E6b
-    artifact loss.
+    def __init__(self, fh, limit: int):
+        self._fh = fh
+        self._left = limit
+        self.digest = hashlib.sha256()
+
+    def read(self, size: int = -1) -> bytes:
+        if self._left <= 0:
+            return b""
+        want = self._left if size is None or size < 0 else min(size, self._left)
+        chunk = self._fh.read(want)
+        self._left -= len(chunk)
+        self.digest.update(chunk)
+        return chunk
+
+
+def create_archive(manifest: ArtifactManifest, out_path: str | Path) -> Path:
+    """Archive exactly the manifest's files, and make the manifest describe what
+    was actually archived.
+
+    A path in the manifest that has vanished is an error, not a silently smaller
+    tarball — that difference is the entire E6b artifact loss.
+
+    **The manifest is rewritten in place to the archived bytes**, and that is not
+    a convenience. `train_log.jsonl` is appended by the trainer for the whole
+    run, so between `build_manifest` hashing it and `tar` reading it, it grows.
+    The live canary on 2026-08-09 caught exactly this: 2,166 bytes at manifest
+    time, 2,230 in the archive, one event written in the gap — and the teardown
+    gate then blocked forever on `archive_contents_verified`, because the
+    manifest described bytes that no longer existed anywhere.
+
+    So each file is read **once**, capped at the size observed when it is
+    opened, hashed as it streams into the tar, and the entry updated to those
+    exact bytes. For an append-only jsonl a size-capped read is a valid prefix
+    (a torn final line is already tolerated by the relay's reader). A file that
+    has *shrunk* is an error — that is truncation, not appending.
     """
     root = Path(manifest.root)
     out_path = Path(out_path)
     out_path.parent.mkdir(parents=True, exist_ok=True)
+    grew: list[dict] = []
     with tarfile.open(out_path, "w:gz") as tar:
         for entry in manifest.entries:
             src = root / entry.path
@@ -183,7 +222,26 @@ def create_archive(manifest: ArtifactManifest, out_path: str | Path) -> Path:
                 raise ArtifactError(
                     f"{entry.path} was in the manifest and is not on disk; "
                     "refusing to write a short archive")
-            tar.add(src, arcname=entry.path)
+            size_now = src.stat().st_size
+            if size_now < entry.size_bytes:
+                raise ArtifactError(
+                    f"{entry.path} shrank from {entry.size_bytes} to {size_now} "
+                    "bytes between manifest and archive; that is truncation, "
+                    "not appending, and the file cannot be trusted")
+            info = tarfile.TarInfo(name=entry.path)
+            info.size = size_now
+            info.mtime = int(src.stat().st_mtime)
+            with open(src, "rb") as fh:
+                reader = _HashingLimitedReader(fh, size_now)
+                tar.addfile(info, reader)
+            if size_now != entry.size_bytes:
+                grew.append({"path": entry.path,
+                             "manifest_bytes": entry.size_bytes,
+                             "archived_bytes": size_now})
+            entry.size_bytes = size_now
+            entry.sha256 = reader.digest.hexdigest()
+    if grew:
+        manifest.appended_during_archive = grew
     return out_path
 
 

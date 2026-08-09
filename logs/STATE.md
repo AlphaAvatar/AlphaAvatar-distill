@@ -1,8 +1,53 @@
 **Updated:** 2026-08-09 · branch `main` · **no pods running, nothing billing.**
 **E6b is complete, accepted and CLOSED — not to be modified or rerun.**
-**Operational hardening after E6b is complete** (CPU, $0). **E7 is designed,
-implemented, preregistered in draft and costed — and NOT authorized.**
-**1,029 CPU tests pass**, 3 skipped. Nothing paid has run since E6b.
+**The live control-plane canary RAN and FAILED** — 9 of 10 criteria passed,
+$0.045 of an authorized $0.82. **E7 is therefore NOT launched.**
+**1,060 CPU tests pass**, 3 skipped.
+
+## CANARY 2026-08-09 — FAILED (9/10), E7 NOT LAUNCHED
+
+Pod `bd83jug4g23qn0`, RTX 2000 Ada at **$0.240/h**, alive 11:35:03 → 11:46:10
+UTC = **11.12 min = $0.045**. Final state `exists=False · TERMINATED ·
+billing=False`; `runpodctl pod list` empty. Report:
+[`e7_canary_report.md`](e7_canary_report.md), evidence
+[`e7_canary_evidence.json`](e7_canary_evidence.json) and [`e7_canary/`](e7_canary/).
+
+**Passed:** detached launch (5.58 s against a 30-min job) · durable descriptor ·
+33 events relayed off-pod while the job kept running · watchdog saw the billing
+pod · watchdog crossed its own threshold (10.74 min under → **11.09 over**) ·
+**the GraphQL `podTerminate` fallback worked — first time ever exercised** ·
+termination journalled · disappearance confirmed by polling · nothing left
+running.
+
+**Failed:** artifact manifest + local hash verification. `train_log.jsonl` was
+2,166 bytes at manifest time and 2,230 in the archive — the job appended one
+event in the gap — so the gate blocked at `archive_contents_verified`. **The
+gate was right and the workflow was wrong**: an E7 session would have hit this
+every time, with nothing actually missing. Fixed by making `create_archive` hash
+the bytes it writes and rewrite the manifest to them.
+
+**Three defects found, two before any pod existed:**
+
+1. **RunPod 403s the default `Python-urllib` User-Agent** (found free, during
+   price quoting). Every watchdog poll would have failed on a live pod; because
+   an unanswered poll counts as billing, sessions would have ended in
+   `TERMINATION_FAILED` against pods that had actually died.
+2. **Manifest/archive non-atomicity** (found live, above).
+3. **`watchdog.py` had no `--runpodctl` flag** that `canary.py` passed it, so
+   the test watchdog died on argparse. It was added and the watchdog relaunched
+   by hand against the same live pod — so criteria 5–8 are genuine but **the
+   driver did not achieve them unaided**, and a clean end-to-end pass has not
+   been demonstrated.
+
+**Not established:** long-session behaviour (11 minutes exercises nothing like
+E6b's 434-minute block); `--terminate-after` still never observed to fire; the
+fixed artifact path is covered by tests but **not re-verified on a live pod**.
+
+```
+authorized temporary cumulative cap: $150.41
+actual cumulative spend:             $149.635
+remaining under the temporary cap:     $0.775
+```
 
 ## BUDGET ACCOUNTING — READ BEFORE PROPOSING ANY PAID RUN
 
@@ -657,7 +702,7 @@ uncapped evals for 24 checkpoints — against the raised **$60** cap.
 
 ## 10. Implementation state (CPU-verified)
 
-**1,029 tests pass on CPU, 3 skipped** (`PYTHONPATH=src pytest tests/ -q`, ~60 s,
+**1,060 tests pass on CPU, 3 skipped** (`PYTHONPATH=src pytest tests/ -q`, ~60 s,
 no downloads; `uv run pytest tests/ -q` also works). The 3 skips are the
 deliberate frozen-record launcher exemptions in the `$(ls …)` lint.
 
@@ -844,11 +889,12 @@ dual-stream trainer implemented and tested, costs computed.
    FineWeb content from extra KD positions and compute, and given E6 the latter
    is a live alternative.
 
-**0d. The live provider control plane is still unverified.** The hardening is
-proven against a simulator only, and the GraphQL `podTerminate` fallback has
-never run from this repo. [`e7_canary_proposal.md`](e7_canary_proposal.md) is a
-$0.82-backstop, 32-minute proposal to verify it on a disposable pod running a
-harmless process. Also unauthorized.
+**0d. The canary RAN and FAILED (9/10).** See the block at the top of this file
+and [`e7_canary_report.md`](e7_canary_report.md). All three defects it exposed
+are fixed with regression tests. **E7 remains not launched**, per the
+authorization's own terms. A clean end-to-end canary re-run (~$0.05, same shape)
+would need separate authorization; the maintainer may instead judge criteria 1–8
+sufficient and the fixed artifact path adequately covered by tests.
 
 **Fixed by the E6b conclusion and unchanged:** requested E7 training scale
 **remains 1.60M**; the default behavioural anchor is **E1/P1 KD-heavy 2.96M**;

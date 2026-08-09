@@ -4487,3 +4487,82 @@ baseline on the new validation stream, priced into the session.
 
 **Verdict: preparation complete.** Nothing further can be learned about E7
 without spending money.
+
+---
+
+## 32. Live RunPod control-plane canary — FAILED 9/10 (2026-08-09, $0.045)
+
+**Objective.** Verify on a real disposable pod the ten control-plane behaviours
+the local simulator cannot, before a 776-minute E7 session became their first
+live test. Authorized at a $0.82 hard backstop, temporary cumulative cap
+$150.41.
+
+**Verdict: FAILED.** Nine criteria passed; artifact manifest + local hash
+verification failed on a real defect. Per the authorization, **E7 was not
+launched.** Full report: [`e7_canary_report.md`](e7_canary_report.md).
+
+### 32.1 Provider-level record
+
+Pod **`bd83jug4g23qn0`**, NVIDIA RTX 2000 Ada Generation at **$0.240/h** — the
+cheapest of six quoted candidates, chosen because the canary needs no GPU
+compute. Created **11:35:03 UTC**, provider-confirmed terminated **11:46:10
+UTC**: **11.12 min = $0.0445**. Final state `exists=False · TERMINATED ·
+billing=False`, `runpodctl pod list` empty. `--terminate-after` was set to
+12:25:02 and never reached — still never observed to fire, still not counted.
+
+### 32.2 The GraphQL fallback is no longer unverified
+
+Forced onto it by pointing the watchdog at a binary that does not exist — **no
+provider state altered**, only that process's view of the CLI:
+
+```
+runpodctl remove pod   ok=false  FileNotFoundError: '/nonexistent/runpodctl-canary-forced-failure'
+graphql podTerminate   ok=true   {"data": {"podTerminate": null}}
+terminate_verify       exists=false  desired_status=TERMINATED  billing=false
+```
+
+The threshold crossing was genuine: polls at 10.40 and 10.74 min under the
+limit, the poll at **11.09 min over it**. The *safety* watchdog — separate
+process, real CLI, own journal — independently observed the pod go from
+`RUNNING/billing` to `TERMINATED/not billing` and exited `pod_gone`.
+
+### 32.3 The failure, and why the fix is not "relax the check"
+
+The pod-side manifest hashed `canary/train_log.jsonl` at 2,166 bytes; `tar` read
+it at **2,230** a moment later, because the job was still appending. The gate
+blocked at `archive_contents_verified`.
+
+**The gate was right and the workflow was wrong.** A training log is appended for
+the whole run, so E7 would have hit this every time with nothing actually
+missing — and the tempting fix, tolerating a size difference, would have
+re-opened the exact hole E6b fell through. Instead `create_archive` now reads
+each file once, capped at the size seen when it opens, hashes the bytes it
+writes, and rewrites the manifest to them; growth is recorded in
+`appended_during_archive`, and a file that has *shrunk* is a hard error.
+
+### 32.4 Three defects, two caught before any pod existed
+
+1. **RunPod 403s the default `Python-urllib` User-Agent** — found while quoting
+   prices, at zero cost. Every watchdog poll would have failed on a live pod, and
+   since an unanswered poll counts as billing, every session would have ended in
+   `TERMINATION_FAILED` against a pod that had actually died.
+2. **Manifest/archive non-atomicity** — found live (§32.3).
+3. **`watchdog.py` lacked the `--runpodctl` flag `canary.py` passed it**, so the
+   test watchdog died on argparse before its first poll. Undetected, because the
+   launch is fire-and-detach. The flag was added and the watchdog relaunched by
+   hand against the same live pod inside the same budget: **criteria 5–8 are
+   genuine, but the driver did not achieve them unaided.**
+
+### 32.5 Verification
+
+**1,060 tests pass, 3 skipped** (+18). New regression coverage: the User-Agent
+and the full provider transport surface (13); the growing-log archive sequence
+reproduced end to end; and an assertion that **every flag `canary.py` passes to
+`watchdog.py` exists**, which is the class of bug that a detached launch hides
+by design.
+
+### 32.6 What is still unknown
+
+Long-session behaviour — 11 minutes exercises nothing like E6b's 434-minute
+block. `--terminate-after`, still never observed to fire. And the fixed artifact
+path is covered by tests but **not re-verified on a live pod**.

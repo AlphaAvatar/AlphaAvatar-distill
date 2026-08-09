@@ -202,3 +202,52 @@ def test_the_archive_step_refuses_an_incomplete_manifest(tmp_path):
                    str(manifest), "--out", str(tmp_path / "b.tar.gz")])
     assert blocked.returncode == 5
     assert "refusing to archive an incomplete manifest" in blocked.stdout
+
+
+# --------------------------------------------------------------------------
+# Live-canary regression: the flags one script passes another must exist
+# --------------------------------------------------------------------------
+
+def test_watchdog_accepts_runpodctl_override():
+    """The 2026-08-09 canary lost its test watchdog to a missing flag.
+
+    `canary.py` launched `watchdog.py --runpodctl <nonexistent>` to force the
+    CLI termination path to fail; `watchdog.py` had no such option, argparse
+    exited 2, and the process died before its first poll. Nothing detected it —
+    the launch is fire-and-detach, which is the whole point of detaching.
+    """
+    result = run([str(POD / "watchdog.py"), "--help"])
+    assert result.returncode == 0
+    assert "--runpodctl" in result.stdout, (
+        "the canary forces the GraphQL fallback through this flag; without it "
+        "the unverified transport is never exercised")
+
+
+def test_the_watchdog_honours_the_override_and_falls_through_to_graphql(tmp_path):
+    """End to end through the CLI, against the in-memory control plane."""
+    import sys as _sys
+    sys.path.insert(0, str(REPO / "src"))
+    from aadistill.infrastructure.provider import RunPodProvider
+    provider = RunPodProvider("k", runpodctl="/nonexistent/forced-failure")
+    attempt = provider._terminate_cli("pod-1")
+    assert attempt.ok is False and attempt.error
+    assert attempt.verified_transport is True
+    del _sys
+
+
+@pytest.mark.parametrize("flag", [
+    "--pod-id", "--session-start-epoch", "--price-per-hour", "--hard-minutes",
+    "--authorized-usd", "--journal", "--poll-seconds", "--terminate-rounds",
+    "--verify-polls", "--verify-delay-seconds", "--runpodctl",
+])
+def test_every_flag_the_canary_passes_to_the_watchdog_exists(flag):
+    """A detached process that dies on argparse looks exactly like one that is
+    quietly working."""
+    assert flag in run([str(POD / "watchdog.py"), "--help"]).stdout
+
+
+def test_the_canary_driver_is_runnable():
+    result = run([str(POD / "canary.py"), "--help"])
+    assert result.returncode == 0
+    assert "--broken-runpodctl" in result.stdout
+    assert "--authorized-usd" in result.stdout

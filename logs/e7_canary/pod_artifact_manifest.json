@@ -1,0 +1,36 @@
+{
+  "root": "/workspace",
+  "created_utc": "2026-08-09T11:37:34+00:00",
+  "ok": true,
+  "specs": [
+    {
+      "artifact_class": "event_stream",
+      "pattern": "canary/train_log.jsonl",
+      "required": true,
+      "min_matches": 1,
+      "min_bytes": 256
+    },
+    {
+      "artifact_class": "job_descriptor",
+      "pattern": "jobs/*.job.json",
+      "required": true,
+      "min_matches": 1,
+      "min_bytes": 32
+    }
+  ],
+  "entries": [
+    {
+      "path": "canary/train_log.jsonl",
+      "artifact_class": "event_stream",
+      "size_bytes": 2166,
+      "sha256": "88a3471be55ab31f8b1132fe3448cac8a2a64145bda16c058f159669cf1ba09f"
+    },
+    {
+      "path": "jobs/canary.job.json",
+      "artifact_class": "job_descriptor",
+      "size_bytes": 172,
+      "sha256": "f251d8e02f5382006c483fcd2e9509a166bfefbe9aa58444d96145b302ed1a89"
+    }
+  ],
+  "missing": []
+}

@@ -327,7 +327,7 @@ AlphaAvatar-distill/
 ├── configs/                # stage recipes: stage0/ · stage1/ · stage3/recovery.json
 ├── data/                   # corpus manifests (jsonl gitignored, rebuildable)
 │   └── eval_behavior_v0/   #   76-prompt behavior set + manifest (both committed)
-├── tests/                  # 1,029 CPU tests, mirroring the source areas
+├── tests/                  # 1,060 CPU tests, mirroring the source areas
 ├── logs/                   # project memory — read STATE.md first
 │   ├── STATE.md            #   canonical handoff: a snapshot, not an archive
 │   ├── EXPERIMENTS.md      #   the consolidated record: what ran, results, cost
