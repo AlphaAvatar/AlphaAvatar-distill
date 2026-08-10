@@ -141,12 +141,18 @@ class E8A:
             price_per_hour=self.a.max_price, authorized_usd=self.a.authorized_usd,
             arms=0, steps_per_arm=0,
             step_time=StepTime(4.15, "unused; pod A does not train"),
-            # 3 min, not 5: pod A's entire output is depth_map.json,
-            # depth_search.json, rounds.jsonl and the frozen map — under ~1 MB of
-            # JSON. The 5-minute figure was inherited from a session that moves
-            # GB-scale checkpoints. The 45-minute setup contingency and the
-            # 30-minute artifact-recovery reserve are deliberately untouched.
-            setup_minutes=45.0, transfer_minutes=3.0,
+            # 38 min, not 45, and for a reason that did not exist before today:
+            # the corrected tripwire's UV_MAX_S caps the uv phase at 25 min, and
+            # the rest of setup measured ~5 min on this image today (apt, bundle,
+            # calibration, teacher, RoPE, tests), so a single draw's setup is now
+            # *bounded* at ~30 min. The 45-minute figure existed because setup was
+            # unbounded — the same script has taken 150+ min. 38 keeps an 8-minute
+            # cushion above a provable ceiling rather than hoping for a warm host.
+            #
+            # 3 min transfer, not 5: pod A's entire output is depth_map.json,
+            # depth_search.json, rounds.jsonl and the frozen map — under ~1 MB.
+            # The 30-minute artifact-recovery reserve is untouched.
+            setup_minutes=38.0, transfer_minutes=3.0,
             other_phases=(
                 Phase("contribution_search_260_evaluations",
                       self.a.search_minutes),
@@ -615,7 +621,7 @@ def main() -> int:
     ap.add_argument("--image",
                     default="runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404")
     ap.add_argument("--max-price", type=float, default=0.99)
-    ap.add_argument("--authorized-usd", type=float, default=2.67)
+    ap.add_argument("--authorized-usd", type=float, default=2.54)
     ap.add_argument("--teacher-revision",
                     default="768f209d9ea81521153ed38c47d515654e938aea")
     ap.add_argument("--token-src",

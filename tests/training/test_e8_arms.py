@@ -111,9 +111,18 @@ def test_the_token_budget_the_arms_will_consume_is_what_the_pack_holds():
     assert int(mask.sum()) * 3 == 8_881_521
 
 
+@pytest.mark.skipif(
+    not (REPO / "artifacts/stage3/ladder_uniform_probe/blocks.npz").is_file(),
+    reason="canonical pack absent; the validator reads the budget from it")
 def test_the_validator_passes_its_config_checks_and_fails_closed_without_the_init(
         tmp_path):
-    """Both halves matter: the config gate passes now, the init gate does not."""
+    """Both halves matter: the config gate passes now, the init gate does not.
+
+    Guarded on the pack: `validate_e8_arms.py` re-derives the token budget from
+    it, so without the pack the validator cannot run at all. E8's search pod does
+    not stage the pack — it does not train — and this test failing there cost a
+    draw before the guard existed.
+    """
     env = {"PYTHONPATH": str(REPO / "src"), "PATH": "/usr/bin:/bin",
            "HOME": str(Path.home())}
     script = str(REPO / "scripts/training/validate_e8_arms.py")

@@ -112,8 +112,16 @@ def test_no_experiment3_freeze_policy_or_lora_leaked_in(seed):
         assert proj in joined, proj
 
 
+@pytest.mark.skipif(
+    not (REPO / "artifacts/stage1/qwen3_0p6b_init_v0/checkpoint/config.json").is_file(),
+    reason="Stage 1 init absent; not every pod session stages it")
 def test_trainable_policy_on_the_real_geometry():
-    """Full-rank attention + FFN + all norms; embeddings and lm_head frozen."""
+    """Full-rank attention + FFN + all norms; embeddings and lm_head frozen.
+
+    Needs the Stage 1 init's config for the real geometry. Guarded because a pod
+    that does not train — E8's search pod — has no reason to stage a student
+    checkpoint, and an unguarded test made its setup fail the gate.
+    """
     from transformers import AutoConfig, AutoModelForCausalLM
 
     init = REPO / "artifacts/stage1/qwen3_0p6b_init_v0/checkpoint"
