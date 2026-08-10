@@ -1,0 +1,146 @@
+{
+  "artifact": "e8_relay_input_manifest",
+  "created_utc": "2026-08-10T15:30:32+00:00",
+  "command": "scripts/data/stage_e8_inputs.py --verify-roundtrip",
+  "relay": "AlphaAvatar/aadistill-artifacts",
+  "prefix": "e8_inputs_20260810",
+  "purpose": "durability for every irreplaceable E8 input; the Stage 0 cache was lost once and must never be dev-box-only again",
+  "stage0_cache_sha256": "aaeb2e4c1ec67e6f6dd21ca40eceb0c193a9da5b010e8d12fcd5d24376cc47c1",
+  "stage0_cache_matches_canonical": true,
+  "staged": [
+    {
+      "local": "data/warmup/warmup_v1.jsonl",
+      "relay": "e8_inputs_20260810/warmup/warmup_v1.jsonl",
+      "bytes": 4338208,
+      "sha256": "ed5e6b9bd880c30b7d2154060c5a960133abc0267058bac8c00940ad99ef189d",
+      "roundtrip_verified": true,
+      "relay_sha256": "ed5e6b9bd880c30b7d2154060c5a960133abc0267058bac8c00940ad99ef189d"
+    },
+    {
+      "local": "data/warmup/warmup_v1.manifest.json",
+      "relay": "e8_inputs_20260810/warmup/warmup_v1.manifest.json",
+      "bytes": 2140,
+      "sha256": "ae901d3d6685754018a34dd3c8b2d038babbc5890babd34ee72e88ce9cfbe038",
+      "roundtrip_verified": true,
+      "relay_sha256": "ae901d3d6685754018a34dd3c8b2d038babbc5890babd34ee72e88ce9cfbe038"
+    },
+    {
+      "local": "data/warmup/holdout_v1.jsonl",
+      "relay": "e8_inputs_20260810/warmup/holdout_v1.jsonl",
+      "bytes": 103513,
+      "sha256": "2d49f637a711ae82510fd55a3af98e332314f972780841869508aebe7b3cd8e8",
+      "roundtrip_verified": true,
+      "relay_sha256": "2d49f637a711ae82510fd55a3af98e332314f972780841869508aebe7b3cd8e8"
+    },
+    {
+      "local": "data/warmup/holdout_v1.manifest.json",
+      "relay": "e8_inputs_20260810/warmup/holdout_v1.manifest.json",
+      "bytes": 700,
+      "sha256": "5308a3c8ebe1fb1c240c381de9527fae1ae5a9c9a7faaabb5e9ad4ac143cc5ee",
+      "roundtrip_verified": true,
+      "relay_sha256": "5308a3c8ebe1fb1c240c381de9527fae1ae5a9c9a7faaabb5e9ad4ac143cc5ee"
+    },
+    {
+      "local": "artifacts/stage1/e8_calibration_v1/items.jsonl",
+      "relay": "e8_inputs_20260810/calibration_v1/items.jsonl",
+      "bytes": 733975,
+      "sha256": "c7202338109e459b17b70456461e8f304fadea7929ea547accee21adbbe7fd0b",
+      "roundtrip_verified": true,
+      "relay_sha256": "c7202338109e459b17b70456461e8f304fadea7929ea547accee21adbbe7fd0b"
+    },
+    {
+      "local": "artifacts/stage1/e8_calibration_v1/docs.jsonl",
+      "relay": "e8_inputs_20260810/calibration_v1/docs.jsonl",
+      "bytes": 44248,
+      "sha256": "29452798eff6c88a3e9508ae73fd4b010c22303e50bf9ddc2d9b84dc4077fe2e",
+      "roundtrip_verified": true,
+      "relay_sha256": "29452798eff6c88a3e9508ae73fd4b010c22303e50bf9ddc2d9b84dc4077fe2e"
+    },
+    {
+      "local": "artifacts/stage1/e8_calibration_v1/general_docs.jsonl",
+      "relay": "e8_inputs_20260810/calibration_v1/general_docs.jsonl",
+      "bytes": 208212,
+      "sha256": "79e19ff45612cf99efeedf99e4761319eb6e911e2eb9d51587dcbdebb95393e0",
+      "roundtrip_verified": true,
+      "relay_sha256": "79e19ff45612cf99efeedf99e4761319eb6e911e2eb9d51587dcbdebb95393e0"
+    },
+    {
+      "local": "artifacts/stage1/e8_calibration_v1/general_docs.manifest.json",
+      "relay": "e8_inputs_20260810/calibration_v1/general_docs.manifest.json",
+      "bytes": 664,
+      "sha256": "c17c31e159842ebc23368fd5ded674294a52b67490dc8f233dcd00b11bf1253a",
+      "roundtrip_verified": true,
+      "relay_sha256": "c17c31e159842ebc23368fd5ded674294a52b67490dc8f233dcd00b11bf1253a"
+    },
+    {
+      "local": "artifacts/stage1/e8_calibration_v1/manifest.json",
+      "relay": "e8_inputs_20260810/calibration_v1/manifest.json",
+      "bytes": 5707,
+      "sha256": "6426a87935cb3e1eba3e46c31f5f26b0572d8165e5a6f9998ef1fb3d25b96745",
+      "roundtrip_verified": true,
+      "relay_sha256": "6426a87935cb3e1eba3e46c31f5f26b0572d8165e5a6f9998ef1fb3d25b96745"
+    },
+    {
+      "local": "artifacts/stage1/e8_calibration_v1/leakage.json",
+      "relay": "e8_inputs_20260810/calibration_v1/leakage.json",
+      "bytes": 1913,
+      "sha256": "d58c46475222abd4f1ca74dc5b3a1b5844992b67132dbdf8aa7bf97fcb7a0013",
+      "roundtrip_verified": true,
+      "relay_sha256": "d58c46475222abd4f1ca74dc5b3a1b5844992b67132dbdf8aa7bf97fcb7a0013"
+    },
+    {
+      "local": "artifacts/stage1/e8_calibration_v1/general_disjointness.json",
+      "relay": "e8_inputs_20260810/calibration_v1/general_disjointness.json",
+      "bytes": 1040,
+      "sha256": "e95d25ecaa6b0dd6071142c61af7b54b784855d2e63047a5c1e554c30ee23b69",
+      "roundtrip_verified": true,
+      "relay_sha256": "e95d25ecaa6b0dd6071142c61af7b54b784855d2e63047a5c1e554c30ee23b69"
+    },
+    {
+      "local": "artifacts/stage0/qwen3_4b_thinking_v1/manifest.json",
+      "relay": "e8_inputs_20260810/stage0/qwen3_4b_thinking_v1/manifest.json",
+      "bytes": 347311,
+      "sha256": "4442351e563f8457ff3ed6dcdb54092bbe29e5117c1ea7d00af08b5f9aa37957",
+      "roundtrip_verified": true,
+      "relay_sha256": "4442351e563f8457ff3ed6dcdb54092bbe29e5117c1ea7d00af08b5f9aa37957"
+    },
+    {
+      "local": "artifacts/stage0/qwen3_4b_thinking_v1/activation_stats.safetensors",
+      "relay": "e8_inputs_20260810/stage0/qwen3_4b_thinking_v1/activation_stats.safetensors",
+      "bytes": 1947442680,
+      "sha256": "aaeb2e4c1ec67e6f6dd21ca40eceb0c193a9da5b010e8d12fcd5d24376cc47c1",
+      "roundtrip_verified": true,
+      "relay_sha256": "aaeb2e4c1ec67e6f6dd21ca40eceb0c193a9da5b010e8d12fcd5d24376cc47c1"
+    }
+  ],
+  "already_present": [
+    {
+      "relay": "stage1/qwen3_0p6b_init_v0/checkpoint/model.safetensors",
+      "present": true,
+      "relay_sha256": "86fbba78e8a2a32481ca77e5ac362ed1f17a39dbc30bcbc952cabd5df2633e54",
+      "matches_record": true
+    },
+    {
+      "relay": "stage3_recovery_corpus_v2/ladder_uniform/blocks.npz",
+      "present": true
+    },
+    {
+      "relay": "stage3_recovery_corpus_v2/ladder_uniform/ladder.json",
+      "present": true
+    },
+    {
+      "relay": "stage3_recovery_corpus_v2/ladder_uniform/audit.jsonl",
+      "present": true
+    },
+    {
+      "relay": "e7_streams_20260809/e7_fineweb_val/blocks.npz",
+      "present": true
+    },
+    {
+      "relay": "e7_streams_20260809/e7_fineweb_val/manifest.json",
+      "present": true
+    }
+  ],
+  "failures": [],
+  "all_verified": true
+}

@@ -226,8 +226,16 @@ replaces" is answered rather than assumed.
 | prediction positions | **59,763** |
 | content sha256 | `d65c1f40e4837ea1bd5bcc33c68041a13b797c68f5be3c0686e0142ed761028f` |
 | manifest sha256 | `ecb72aa3b88818e93fb058d5d012e66274db9bc7b90234219501f0df86cef460` |
-| items.jsonl sha256 | `94d747c88012d969c32c2a614bab3b9db907faf5a6be1087df8b6b6be24d7a3f` |
+| items.jsonl sha256 | `c7202338109e459b17b70456461e8f304fadea7929ea547accee21adbbe7fd0b` |
 | tokenizer | teacher @ 768f209d, vocab sha256 `7781771acc3798ee…` |
+
+> **Corrected before launch (2026-08-10):** the `items.jsonl` row above first
+> carried `94d747c8…`, a hash transcribed from an intermediate build's console
+> output before the validation-slice exclusion (§5.1, finding 2) was applied. The
+> frozen artifact's hash is `c7202338…`, which is what its own manifest records
+> and what the pod verifies. A mis-transcribed hash identifies the wrong artifact,
+> so it is corrected rather than preserved; no design decision changed, and the
+> pod check now derives the file hash from the manifest instead of re-typing it.
 
 Per sub-type positions: `general` 8,287 · `rag_evidence` 8,619 · `multihop_qa`
 8,749 · `gsm8k` 8,472 · `openmath` 8,309 · `code` 8,622 · `tool_calling` 8,705.

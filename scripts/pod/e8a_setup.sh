@@ -95,16 +95,21 @@ from pathlib import Path
 d = Path('artifacts/stage1/e8_calibration_v1')
 man = json.loads((d / 'manifest.json').read_text())
 items_sha = hashlib.sha256((d / 'items.jsonl').read_bytes()).hexdigest()
+# Only two literals, both self-consistent inside the manifest. The file-level
+# hash is taken FROM the manifest rather than transcribed here: the first version
+# of this check pinned an items.jsonl hash copied from an intermediate build's
+# console output, which would have aborted the pod at DATA_READY after a
+# 45-minute setup. A hash that can be derived should never be re-typed.
 FROZEN = {
-    'items_sha256': '94d747c88012d969c32c2a614bab3b9db907faf5a6be1087df8b6b6be24d7a3f',
     'content_sha256': 'd65c1f40e4837ea1bd5bcc33c68041a13b797c68f5be3c0686e0142ed761028f',
     'manifest_sha256': 'ecb72aa3b88818e93fb058d5d012e66274db9bc7b90234219501f0df86cef460',
 }
-if items_sha != FROZEN['items_sha256']:
-    sys.exit(f'CALIBRATION items.jsonl MISMATCH: {items_sha}')
 for key in ('content_sha256', 'manifest_sha256'):
     if man.get(key) != FROZEN[key]:
         sys.exit(f'CALIBRATION {key} MISMATCH: {man.get(key)} != {FROZEN[key]}')
+declared_items = man['outputs']['items']['sha256']
+if items_sha != declared_items:
+    sys.exit(f'CALIBRATION items.jsonl MISMATCH: {items_sha} != {declared_items}')
 leak = json.loads((d / 'leakage.json').read_text())
 if not leak.get('clean'):
     sys.exit(f'CALIBRATION LEAKAGE NOT CLEAN: {leak.get("findings")}')
