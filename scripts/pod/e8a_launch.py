@@ -65,6 +65,39 @@ RUN_LOG = f"{WS}/e8a_run.log"
 SEARCH_OUT = "artifacts/stage1/e8_depth_search"
 
 
+def parse_setup_probe(stdout: str) -> dict:
+    """Read the setup probe by LABEL, never by line position.
+
+    This function exists because of a $0.19 misread. The probe used to be three
+    positional lines built from `grep -c X file || echo 0` — and `grep -c` prints
+    "0" *and* exits 1 when there are no matches, so the `|| echo 0` fires too and
+    that command emits **two** lines. With SETUP_DONE absent, everything shifted by
+    one: the launcher read the stray "0" as the HOST_COLD count, classified a
+    genuine cold host as a setup failure, and aborted the session instead of
+    redrawing. The tripwire had worked perfectly; the parse threw the result away.
+
+    So the probe now emits `KEY=value` lines and this reads them by key. Unknown or
+    missing keys default rather than shifting anything.
+    """
+    out = {"setup_done": "0", "host_cold": "0", "setup_rc": "", "tail": ""}
+    for line in stdout.splitlines():
+        key, _, value = line.partition("=")
+        k = key.strip().lower()
+        if k in out:
+            out[k] = value.strip()
+    return out
+
+
+PROBE_COMMAND = (
+    # `| tail -1` keeps grep's own "0" and drops nothing else; no `|| echo`, which
+    # is what duplicated a line and shifted the old positional parse.
+    "echo \"SETUP_DONE=$(grep -c 'MARKER:SETUP_DONE' {status} 2>/dev/null | tail -1)\"; "
+    "echo \"HOST_COLD=$(grep -c 'HOST_COLD' {status} 2>/dev/null | tail -1)\"; "
+    "echo \"SETUP_RC=$(grep -o 'SETUP_RC=[0-9]*' {log} 2>/dev/null | tail -1 | cut -d= -f2)\"; "
+    "echo \"TAIL=$(tail -1 {log} 2>/dev/null)\""
+)
+
+
 class E8A:
     def __init__(self, a):
         self.a = a
@@ -269,16 +302,15 @@ class E8A:
             f"bash {WS}/e8a_setup.sh > {WS}/e8a_setup.log 2>&1; "
             f"echo SETUP_RC=$? >> {WS}/e8a_setup.log",
             timeout=self.a.setup_timeout_s)
-        probe_out = target.run(
-            f"grep -c 'MARKER:SETUP_DONE' {STATUS} 2>/dev/null || echo 0; "
-            f"grep -c 'HOST_COLD' {STATUS} 2>/dev/null || echo 0; "
-            f"tail -1 {WS}/e8a_setup.log", timeout=120).stdout.splitlines()
-        done = probe_out[0].strip() if probe_out else "0"
-        cold = probe_out[1].strip() if len(probe_out) > 1 else "0"
+        probe = parse_setup_probe(target.run(
+            PROBE_COMMAND.format(status=STATUS, log=f"{WS}/e8a_setup.log"),
+            timeout=120).stdout)
+        done, cold = probe["setup_done"], probe["host_cold"]
         self.ev["stages"].setdefault("setup", []).append(
-            {"draw": draw, "setup_done": done, "host_cold": cold,
-             "tail": probe_out[-1] if probe_out else ""})
-        if cold not in ("", "0"):
+            {"draw": draw, **probe})
+        # Exit code 90 is the setup script's own cold-host signal, so it is
+        # authoritative even if the marker file was not reachable.
+        if cold not in ("", "0") or probe["setup_rc"] == "90":
             return "cold"
         if done in ("", "0"):
             tail = target.run(f"tail -40 {WS}/e8a_setup.log", timeout=120).stdout
