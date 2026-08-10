@@ -141,7 +141,12 @@ class E8A:
             price_per_hour=self.a.max_price, authorized_usd=self.a.authorized_usd,
             arms=0, steps_per_arm=0,
             step_time=StepTime(4.15, "unused; pod A does not train"),
-            setup_minutes=45.0, transfer_minutes=5.0,
+            # 3 min, not 5: pod A's entire output is depth_map.json,
+            # depth_search.json, rounds.jsonl and the frozen map — under ~1 MB of
+            # JSON. The 5-minute figure was inherited from a session that moves
+            # GB-scale checkpoints. The 45-minute setup contingency and the
+            # 30-minute artifact-recovery reserve are deliberately untouched.
+            setup_minutes=45.0, transfer_minutes=3.0,
             other_phases=(
                 Phase("contribution_search_260_evaluations",
                       self.a.search_minutes),
@@ -610,7 +615,7 @@ def main() -> int:
     ap.add_argument("--image",
                     default="runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404")
     ap.add_argument("--max-price", type=float, default=0.99)
-    ap.add_argument("--authorized-usd", type=float, default=2.71)
+    ap.add_argument("--authorized-usd", type=float, default=2.67)
     ap.add_argument("--teacher-revision",
                     default="768f209d9ea81521153ed38c47d515654e938aea")
     ap.add_argument("--token-src",
