@@ -221,6 +221,55 @@ def test_rope_guard_catches_the_transformers_4x_5x_skew():
         assert_rope_matches_config(model.to(torch.bfloat16), cfg, "skewed-bf16")
 
 
+def test_rope_can_be_checked_from_a_config_without_building_a_model():
+    """The cheap path, and the meta-tensor trap it exists to avoid.
+
+    E8 pod A died here: the setup script built the teacher under
+    `torch.device('meta')` to avoid materializing 16 GB, and the check went
+    looking for buffer values that a meta model does not have. It failed after
+    TEACHER_READY and the session self-terminated at $0.08 — cheap, but only
+    because the marker sequence stops on a non-zero setup.
+    """
+    from transformers import AutoConfig, AutoModelForCausalLM
+    from aadistill.models.student import (
+        assert_rope_from_config, assert_rope_matches_config,
+    )
+    cfg = AutoConfig.for_model(
+        "qwen3", vocab_size=128, hidden_size=32, num_hidden_layers=1,
+        num_attention_heads=4, num_key_value_heads=2, intermediate_size=48,
+        head_dim=8, rope_theta=5_000_000, max_position_embeddings=64)
+    base = assert_rope_from_config(cfg, "config-only")
+    assert abs(base - 5_000_000) / 5_000_000 < 1e-2
+    # Same answer as the model-based form, which is what makes it a substitute.
+    model = AutoModelForCausalLM.from_config(cfg)
+    assert base == pytest.approx(assert_rope_matches_config(model, cfg), rel=1e-9)
+
+    # The mechanism that catches the cross-version skew is `stored_rope_base`
+    # preferring the nested transformers-5 field: on a 4.x reader the flat
+    # `rope_theta` is the class default while the nested one holds the truth, so
+    # the two disagree and the check fires. That disagreement cannot be
+    # synthesized inside one library version — both sides would read the same
+    # field — so it is asserted here at the field-preference level and verified
+    # end-to-end against the real checkpoint in both venvs by the pod setup.
+    from aadistill.models.student import stored_rope_base
+    cfg.rope_parameters = {"rope_theta": 5_000_000, "rope_type": "default"}
+    cfg.rope_theta = 10_000
+    assert stored_rope_base(cfg) == 5_000_000
+
+
+def test_a_meta_model_is_refused_with_an_actionable_message():
+    from transformers import AutoConfig, AutoModelForCausalLM
+    from aadistill.models.student import assert_rope_matches_config
+    cfg = AutoConfig.for_model(
+        "qwen3", vocab_size=128, hidden_size=32, num_hidden_layers=1,
+        num_attention_heads=4, num_key_value_heads=2, intermediate_size=48,
+        head_dim=8, rope_theta=5_000_000, max_position_embeddings=64)
+    with torch.device("meta"):
+        model = AutoModelForCausalLM.from_config(cfg)
+    with pytest.raises(ValueError, match="assert_rope_from_config"):
+        assert_rope_matches_config(model, cfg, "meta-model")
+
+
 def test_manifest_records_the_library_that_decides_rope():
     from aadistill.infrastructure.env import hardware_report
     libs = hardware_report()["libraries"]

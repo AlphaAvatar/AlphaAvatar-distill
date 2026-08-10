@@ -211,19 +211,16 @@ def main() -> int:
                   treat_fp["model_sha256"] != base_fp["model_sha256"],
                   {"baseline": base_fp["model_sha256"],
                    "treatment": treat_fp["model_sha256"]})
-            import torch
-            from transformers import AutoConfig, AutoModelForCausalLM
+            from transformers import AutoConfig
 
-            from aadistill.models.student import assert_rope_matches_config
+            from aadistill.models.student import assert_rope_from_config
             ok_rope = True
             bases = {}
             for name, path in (("baseline", resolve(BASELINE_INIT)),
                                ("treatment", treat)):
                 cfg = AutoConfig.from_pretrained(str(path))
-                with torch.device("meta"):
-                    m = AutoModelForCausalLM.from_config(cfg)
                 try:
-                    bases[name] = assert_rope_matches_config(m, cfg, str(path))
+                    bases[name] = assert_rope_from_config(cfg, str(path))
                 except ValueError as exc:
                     ok_rope = False
                     bases[name] = str(exc)

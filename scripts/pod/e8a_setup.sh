@@ -183,15 +183,12 @@ say "checking the teacher's RoPE base resolves in /opt/train"
 /opt/train/bin/python -c "
 import os, sys, transformers
 sys.path.insert(0, '/workspace/aad/src')
-from transformers import AutoConfig, AutoModelForCausalLM
-from aadistill.models.student import assert_rope_matches_config, stored_rope_base
+from transformers import AutoConfig
+from aadistill.models.student import assert_rope_from_config, stored_rope_base
 rev = os.environ['TEACHER_REVISION']
 cfg = AutoConfig.from_pretrained('Qwen/Qwen3-4B-Thinking-2507', revision=rev)
 stored = stored_rope_base(cfg)
-import torch
-with torch.device('meta'):
-    m = AutoModelForCausalLM.from_config(cfg)
-base = assert_rope_matches_config(m, cfg, 'teacher')
+base = assert_rope_from_config(cfg, 'teacher')
 print(f'  transformers {transformers.__version__}: stored {stored:,.0f}, '
       f'runtime {base:,.0f} OK')
 if abs(stored - 5_000_000) > 1:

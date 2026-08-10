@@ -1,0 +1,184 @@
+{
+  "timeline": [
+    {
+      "utc": "2026-08-10T15:33:22+00:00",
+      "elapsed_min": 0.0,
+      "msg": "budget: expected 122 min $2.00 \u00b7 soft stop 134 min $2.21 \u00b7 hard 164 min $2.70 (authorized $2.71)"
+    },
+    {
+      "utc": "2026-08-10T15:33:23+00:00",
+      "elapsed_min": 0.0,
+      "msg": "NVIDIA L40S securePrice $0.99/h, stock None"
+    },
+    {
+      "utc": "2026-08-10T15:33:24+00:00",
+      "elapsed_min": 0.0,
+      "msg": "attempt 1: create failed \u2014 {\"error\":\"There are no longer any instances available with the requested specifications. Please refresh and try again.\"}\nUsage:\n  runpodctl pod create [flags]\n\nFlags:\n      --cloud-type string        "
+    },
+    {
+      "utc": "2026-08-10T15:38:25+00:00",
+      "elapsed_min": 0.0,
+      "msg": "attempt 2: create failed \u2014 {\"error\":\"There are no longer any instances available.\"}\nUsage:\n  runpodctl pod create [flags]\n\nFlags:\n      --cloud-type string          cloud type (SECURE or COMMUNITY) (default \"SECURE\")\n      --co"
+    },
+    {
+      "utc": "2026-08-10T15:43:25+00:00",
+      "elapsed_min": 0.0,
+      "msg": "attempt 3: create failed \u2014 {\"error\":\"There are no longer any instances available.\"}\nUsage:\n  runpodctl pod create [flags]\n\nFlags:\n      --cloud-type string          cloud type (SECURE or COMMUNITY) (default \"SECURE\")\n      --co"
+    },
+    {
+      "utc": "2026-08-10T15:48:26+00:00",
+      "elapsed_min": 0.0,
+      "msg": "attempt 4: create failed \u2014 {\"error\":\"There are no longer any instances available.\"}\nUsage:\n  runpodctl pod create [flags]\n\nFlags:\n      --cloud-type string          cloud type (SECURE or COMMUNITY) (default \"SECURE\")\n      --co"
+    },
+    {
+      "utc": "2026-08-10T15:53:27+00:00",
+      "elapsed_min": 0.0,
+      "msg": "attempt 5: create failed \u2014 {\"error\":\"There are no longer any instances available.\"}\nUsage:\n  runpodctl pod create [flags]\n\nFlags:\n      --cloud-type string          cloud type (SECURE or COMMUNITY) (default \"SECURE\")\n      --co"
+    },
+    {
+      "utc": "2026-08-10T15:58:27+00:00",
+      "elapsed_min": 0.0,
+      "msg": "attempt 6: create failed \u2014 {\"error\":\"There are no longer any instances available.\"}\nUsage:\n  runpodctl pod create [flags]\n\nFlags:\n      --cloud-type string          cloud type (SECURE or COMMUNITY) (default \"SECURE\")\n      --co"
+    },
+    {
+      "utc": "2026-08-10T16:03:28+00:00",
+      "elapsed_min": 0.0,
+      "msg": "attempt 7: create failed \u2014 {\"error\":\"There are no longer any instances available.\"}\nUsage:\n  runpodctl pod create [flags]\n\nFlags:\n      --cloud-type string          cloud type (SECURE or COMMUNITY) (default \"SECURE\")\n      --co"
+    },
+    {
+      "utc": "2026-08-10T16:08:30+00:00",
+      "elapsed_min": 0.0,
+      "msg": "created hq685pjg56q0q4 at $0.99/h; --terminate-after 2026-08-10T18:17:02Z (redundant layer)"
+    },
+    {
+      "utc": "2026-08-10T16:08:30+00:00",
+      "elapsed_min": 0.0,
+      "msg": "watchdog detached \u2014 hard 164 min = $2.70"
+    },
+    {
+      "utc": "2026-08-10T16:09:23+00:00",
+      "elapsed_min": 0.88,
+      "msg": "  starting (60s) \u2014 $0.01"
+    },
+    {
+      "utc": "2026-08-10T16:10:27+00:00",
+      "elapsed_min": 1.95,
+      "msg": "  starting (120s) \u2014 $0.03"
+    },
+    {
+      "utc": "2026-08-10T16:10:48+00:00",
+      "elapsed_min": 2.3,
+      "msg": "TCP 22 at 64.247.206.212:15338 after 2.3 min"
+    },
+    {
+      "utc": "2026-08-10T16:10:51+00:00",
+      "elapsed_min": 2.35,
+      "msg": "draw 1: ssh reachable \u2014 $0.04"
+    },
+    {
+      "utc": "2026-08-10T16:11:04+00:00",
+      "elapsed_min": 2.57,
+      "msg": "draw 1: running setup"
+    },
+    {
+      "utc": "2026-08-10T16:12:58+00:00",
+      "elapsed_min": 4.48,
+      "msg": "setup did not reach SETUP_DONE:\n + pygments==2.20.0\n + pyparsing==3.3.2\n + pytest==9.1.1\n + python-dateutil==2.9.0.post0\n + pyyaml==6.0.3\n + regex==2026.7.10\n + requests==2.34.2\n + rich==15.0.0\n + safetensors==0.8.0\n + setuptools==81.0.0\n + shellingham==1.5.4\n + six==1.17.0\n + sympy==1.14.0\n + tokenizers==0.22.2\n + torch==2.11.0+cu128\n + tqdm==4.68.4\n + transformers==5.13.1\n + triton==3.6.0\n + typer==0.26.8\n + typing-extensions==4.16.0\n + urllib3==2.7.0\n + xxhash==3.8.1\n + yarl==1.24.2\n[16:12:03] uv sync completed in 45s\ntrain torch 2.11.0+cu128 NVIDIA L40S | transformers 5.13.1\nMARKER:TRAIN_ENV\n[16:12:09] downloading the teacher at the pinned revision\n\nFetching 10 files:   0%|          | 0/10 [00:00<?, ?it/s]\nFetching 10 files:  20%|\u2588\u2588        | 2/10 [00:00<00:00, 19.02it/s]\nFetching 10 files:  60%|\u2588\u2588\u2588\u2588\u2588\u2588    | 6/10 [00:00<00:00, 28.98it/s]\nFetching 10 files:  80%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588  | 8/10 [00:20<00:00, 28.98it/s]\nFetching 10 files:  90%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588 | 9/10 [00:32<00:04,  4.79s/it]\nFetching 10 files: 100%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588| 10/10 [00:36<00:00,  4.67s/it]\nFetching 10 files: 100%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588| 10/10 [00:36<00:00,  3.67s/it]\nteacher downloaded at 768f209d9ea81521153ed38c47d515654e938aea\nMARKER:TEACHER_READY\n[16:12:46] checking the teacher's RoPE base resolves in /opt/train\nTraceback (most recent call last):\n  File \"<string>\", line 12, in <module>\n  File \"/workspace/aad/src/aadistill/models/student.py\", line 97, in assert_rope_matches_config\n    runtime = float(inv[index]) ** (-head_dim / (2.0 * index))\n              ^^^^^^^^^^^^^^^^^\n  File \"/opt/train/lib/python3.12/site-packages/torch/_meta_registrations.py\", line 8086, in meta_local_scalar_dense\n    raise RuntimeError(\"Tensor.item() cannot be called on meta tensors\")\nRuntimeError: Tensor.item() cannot be called on meta tensors\nSETUP_RC=1\n"
+    },
+    {
+      "utc": "2026-08-10T16:12:58+00:00",
+      "elapsed_min": 4.48,
+      "msg": "ABORT after draw 1: setup_failed"
+    },
+    {
+      "utc": "2026-08-10T16:12:58+00:00",
+      "elapsed_min": 4.48,
+      "msg": "deleting pod (setup setup_failed)"
+    },
+    {
+      "utc": "2026-08-10T16:13:09+00:00",
+      "elapsed_min": 4.66,
+      "msg": "pod deleted \u2014 4.7 min, $0.08"
+    }
+  ],
+  "stages": {
+    "setup": [
+      {
+        "draw": 1,
+        "setup_done": "0",
+        "host_cold": "0",
+        "tail": "SETUP_RC=1"
+      }
+    ]
+  },
+  "budget_plan": {
+    "price_per_hour": 0.99,
+    "authorized_usd": 2.71,
+    "expected_minutes": 121.5,
+    "soft_stop_minutes": 133.65,
+    "artifact_recovery_reserve_minutes": 30.0,
+    "hard_terminate_minutes": 163.65,
+    "step_time": {
+      "seconds": 4.15,
+      "source": "unused; pod A does not train",
+      "measured": true
+    },
+    "breakdown": [
+      {
+        "name": "setup",
+        "minutes": 45.0
+      },
+      {
+        "name": "train",
+        "minutes": 0.0
+      },
+      {
+        "name": "evaluate",
+        "minutes": 0.0
+      },
+      {
+        "name": "transfer",
+        "minutes": 5.0
+      },
+      {
+        "name": "contribution_search_260_evaluations",
+        "minutes": 59.5
+      },
+      {
+        "name": "self_consistency_and_positional_baseline",
+        "minutes": 4.0
+      },
+      {
+        "name": "artifact_manifest_and_verify",
+        "minutes": 8.0
+      }
+    ],
+    "notes": [],
+    "expected_usd": 2.0048,
+    "soft_stop_usd": 2.2052,
+    "artifact_recovery_reserve_usd": 0.495,
+    "hard_terminate_usd": 2.7002
+  },
+  "quoted_price_per_hour": 0.99,
+  "stock_status": null,
+  "pod_id": "hq685pjg56q0q4",
+  "actual_price_per_hour": 0.99,
+  "terminate_after_utc": "2026-08-10T18:17:02Z",
+  "watchdog_journals": [
+    "/home/ecs-user/aad-scratch/e8a_20260810_145643/watchdog.jsonl"
+  ],
+  "final_pod_state": {
+    "exists": false,
+    "desired_status": "TERMINATED",
+    "billing": false
+  },
+  "cost": {
+    "price_per_hour": 0.99,
+    "elapsed_minutes": 4.66,
+    "actual_usd": 0.0769,
+    "authorized_usd": 2.71,
+    "within_backstop": true
+  },
+  "passed": false,
+  "finished_utc": "2026-08-10T16:13:09+00:00"
+}

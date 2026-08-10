@@ -289,16 +289,14 @@ mark TEACHER_READY
 say "checking the RoPE base resolves correctly in both venvs"
 for PY in /opt/train/bin/python /opt/vllm/bin/python; do
   $PY -c "
-import sys, transformers, torch
+import sys, transformers
 sys.path.insert(0, '/workspace/aad/src')
-from transformers import AutoConfig, AutoModelForCausalLM
-from aadistill.models.student import assert_rope_matches_config, stored_rope_base
+from transformers import AutoConfig
+from aadistill.models.student import assert_rope_from_config, stored_rope_base
 for p in ('/workspace/aad/artifacts/stage1/qwen3_0p6b_init_v0/checkpoint',
           '/workspace/aad/artifacts/stage1/e8_contribution_init_v1/checkpoint'):
     cfg = AutoConfig.from_pretrained(p)
-    with torch.device('meta'):
-        m = AutoModelForCausalLM.from_config(cfg)
-    base = assert_rope_matches_config(m, cfg, p)
+    base = assert_rope_from_config(cfg, p)
     stored = stored_rope_base(cfg)
     print(f'  transformers {transformers.__version__}: {p.rsplit(chr(47),2)[-2]} '
           f'stored {stored:,.0f} runtime {base:,.0f} OK')

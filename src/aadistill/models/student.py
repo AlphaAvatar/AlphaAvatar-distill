@@ -58,6 +58,32 @@ def stored_rope_base(config) -> float | None:
     return None
 
 
+def assert_rope_from_config(config, path: str = "") -> float:
+    """The same check without a model: instantiate only the rotary embedding.
+
+    Built because the model-based form is awkward to call cheaply. A caller that
+    only wants to know "will this config produce the right positional basis?"
+    either has to materialize the whole model — 16 GB in fp32 for the teacher — or
+    build it on the `meta` device, where `inv_freq` has no values and the check
+    dies inside `Tensor.item()`. That is exactly what happened on E8 pod A: setup
+    failed after TEACHER_READY and the session self-terminated at $0.08.
+
+    The rotary module owns 128 buffer elements and no parameters, so this is the
+    cheap and correct way to ask the question.
+    """
+    stored = stored_rope_base(config)
+    if stored is None:
+        return float("nan")
+    if config.model_type != "qwen3":
+        raise ValueError(
+            f"assert_rope_from_config only knows Qwen3, got {config.model_type!r}; "
+            "use assert_rope_matches_config with a materialized model")
+    from transformers.models.qwen3.modeling_qwen3 import Qwen3RotaryEmbedding
+
+    return _rope_base_from_inv_freq(
+        Qwen3RotaryEmbedding(config).inv_freq, config, stored, path)
+
+
 def assert_rope_matches_config(model, config, path: str = "") -> float:
     """Fail if the loaded model's RoPE base is not the one the config stores.
 
@@ -86,7 +112,19 @@ def assert_rope_matches_config(model, config, path: str = "") -> float:
     if stored is None:
         return float("nan")
 
-    inv = model.model.rotary_emb.inv_freq.detach().double()
+    return _rope_base_from_inv_freq(
+        model.model.rotary_emb.inv_freq, config, stored, path)
+
+
+def _rope_base_from_inv_freq(inv, config, stored: float, path: str) -> float:
+    """Invert one `inv_freq` entry back to the base the model will actually use."""
+    if inv.is_meta:
+        raise ValueError(
+            f"RoPE check for {path or 'model'} was handed a meta tensor: a model "
+            "built under `torch.device('meta')` has no buffer values, so this "
+            "check cannot run. Use assert_rope_from_config(config), which builds "
+            "only the rotary embedding.")
+    inv = inv.detach().double()
     head_dim = getattr(config, "head_dim", None) or (
         config.hidden_size // config.num_attention_heads)
     n = inv.shape[0]

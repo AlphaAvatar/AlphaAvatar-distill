@@ -585,3 +585,28 @@ def test_the_checkpoint_tag_is_derived_not_hard_coded():
         "the tag must come from the feasibility report's measured step count"
     fetch = src[src.index("hashing checkpoints on the pod"):]
     assert "$STEP_TAG" in fetch, "the fetch must use the derived tag"
+
+
+@pytest.mark.parametrize("script", SCRIPTS, ids=lambda p: p.name)
+def test_no_pod_script_checks_rope_on_a_meta_model(script):
+    """A meta model has no buffer values, so the RoPE check cannot read them.
+
+    E8 pod A died exactly here. The setup script built the teacher under
+    `torch.device('meta')` to avoid materializing 16 GB in fp32, and
+    `assert_rope_matches_config` went looking for `inv_freq` values that a meta
+    tensor does not have. Setup exited 1 after TEACHER_READY and the session
+    self-terminated at $0.08.
+
+    The pod-environment simulation runs the *test suite*, not the setup script, so
+    nothing local exercised that snippet. This is the cheap standing check:
+    `assert_rope_from_config(config)` builds only the rotary embedding — 128 buffer
+    elements, no model — and is what these scripts must use.
+    """
+    text = script.read_text()
+    if "assert_rope_matches_config" not in text:
+        return
+    assert 'torch.device("meta")' not in text and "torch.device('meta')" not in text, (
+        f"{script.name}: combines a meta-device model with "
+        "assert_rope_matches_config, which cannot read a meta tensor. Use "
+        "assert_rope_from_config(config) instead."
+    )
