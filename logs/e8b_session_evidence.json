@@ -1,0 +1,199 @@
+{
+  "timeline": [
+    {
+      "utc": "2026-08-10T18:23:24+00:00",
+      "elapsed_min": 0.0,
+      "msg": "budget: expected 508 min $8.38 \u00b7 soft stop 559 min $9.22 \u00b7 hard 589 min $9.71 (authorized $9.75)"
+    },
+    {
+      "utc": "2026-08-10T18:23:24+00:00",
+      "elapsed_min": 0.0,
+      "msg": "NVIDIA L40S securePrice $0.99/h, stock Low"
+    },
+    {
+      "utc": "2026-08-10T18:23:25+00:00",
+      "elapsed_min": 0.0,
+      "msg": "relay precheck OK (5 files present)"
+    },
+    {
+      "utc": "2026-08-10T18:23:25+00:00",
+      "elapsed_min": 0.0,
+      "msg": "attempt 1: create failed \u2014 {\"error\":\"There are no longer any instances available.\"}\nUsage:\n  runpodctl pod create [flags]\n\nFlags:\n      --cloud-type string          cloud type (SECURE or COMMUNITY) (default \"SECURE\")\n      --co"
+    },
+    {
+      "utc": "2026-08-10T18:28:26+00:00",
+      "elapsed_min": 0.0,
+      "msg": "created vqrrkc8w6f5786 at $0.99/h; --terminate-after 2026-08-11T04:12:05Z (redundant layer)"
+    },
+    {
+      "utc": "2026-08-10T18:28:26+00:00",
+      "elapsed_min": 0.0,
+      "msg": "watchdog detached \u2014 hard 589 min = $9.71"
+    },
+    {
+      "utc": "2026-08-10T18:29:20+00:00",
+      "elapsed_min": 0.9,
+      "msg": "  starting (60s) \u2014 $0.01"
+    },
+    {
+      "utc": "2026-08-10T18:30:24+00:00",
+      "elapsed_min": 1.97,
+      "msg": "  starting (120s) \u2014 $0.03"
+    },
+    {
+      "utc": "2026-08-10T18:31:28+00:00",
+      "elapsed_min": 3.03,
+      "msg": "  starting (180s) \u2014 $0.05"
+    },
+    {
+      "utc": "2026-08-10T18:31:49+00:00",
+      "elapsed_min": 3.38,
+      "msg": "TCP 22 at 82.221.170.242:38617 after 3.4 min"
+    },
+    {
+      "utc": "2026-08-10T18:31:52+00:00",
+      "elapsed_min": 3.43,
+      "msg": "draw 1: ssh reachable \u2014 $0.06"
+    },
+    {
+      "utc": "2026-08-10T18:32:04+00:00",
+      "elapsed_min": 3.62,
+      "msg": "draw 1: running setup"
+    },
+    {
+      "utc": "2026-08-10T18:54:21+00:00",
+      "elapsed_min": 25.9,
+      "msg": "COLD HOST on draw 1 \u2014 abandoning vqrrkc8w6f5786 and redrawing (its watchdog will see the pod vanish and exit)"
+    },
+    {
+      "utc": "2026-08-10T18:54:22+00:00",
+      "elapsed_min": 25.93,
+      "msg": "created 1mm2j08s262wym at $0.99/h; --terminate-after 2026-08-11T04:43:01Z (redundant layer)"
+    },
+    {
+      "utc": "2026-08-10T18:54:22+00:00",
+      "elapsed_min": 25.93,
+      "msg": "watchdog detached \u2014 hard 589 min = $9.71"
+    },
+    {
+      "utc": "2026-08-10T18:54:44+00:00",
+      "elapsed_min": 26.3,
+      "msg": "TCP 22 at 82.221.170.242:38608 after 26.3 min"
+    },
+    {
+      "utc": "2026-08-10T18:54:47+00:00",
+      "elapsed_min": 26.34,
+      "msg": "draw 2: ssh reachable \u2014 $0.43"
+    },
+    {
+      "utc": "2026-08-10T18:54:58+00:00",
+      "elapsed_min": 26.53,
+      "msg": "draw 2: running setup"
+    },
+    {
+      "utc": "2026-08-10T19:11:01+00:00",
+      "elapsed_min": 42.57,
+      "msg": "COLD HOST on draw 2 \u2014 abandoning 1mm2j08s262wym and redrawing (its watchdog will see the pod vanish and exit)"
+    },
+    {
+      "utc": "2026-08-10T19:11:02+00:00",
+      "elapsed_min": 42.6,
+      "msg": "created d2nwf8995nd83j at $0.99/h; --terminate-after 2026-08-11T04:59:41Z (redundant layer)"
+    },
+    {
+      "utc": "2026-08-10T19:11:02+00:00",
+      "elapsed_min": 42.6,
+      "msg": "watchdog detached \u2014 hard 589 min = $9.71"
+    }
+  ],
+  "stages": {
+    "setup": [
+      {
+        "draw": 1,
+        "setup_done": "0",
+        "host_cold": "1",
+        "setup_rc": "90",
+        "tail": "SETUP_RC=90"
+      },
+      {
+        "draw": 2,
+        "setup_done": "0",
+        "host_cold": "1",
+        "setup_rc": "90",
+        "tail": "SETUP_RC=90"
+      }
+    ]
+  },
+  "budget_plan": {
+    "price_per_hour": 0.99,
+    "authorized_usd": 9.75,
+    "expected_minutes": 507.88000000000005,
+    "soft_stop_minutes": 558.6680000000001,
+    "artifact_recovery_reserve_minutes": 30.0,
+    "hard_terminate_minutes": 588.6680000000001,
+    "step_time": {
+      "seconds": 4.15,
+      "source": "E6b measured 4.15 s/step at block_len 8192; E8 trains the identical recipe",
+      "measured": true
+    },
+    "breakdown": [
+      {
+        "name": "setup",
+        "minutes": 45.0
+      },
+      {
+        "name": "train",
+        "minutes": 403.38000000000005
+      },
+      {
+        "name": "evaluate",
+        "minutes": 16.5
+      },
+      {
+        "name": "transfer",
+        "minutes": 20.0
+      },
+      {
+        "name": "init_nll_treatment",
+        "minutes": 6.0
+      },
+      {
+        "name": "init_nll_baseline_remeasured",
+        "minutes": 6.0
+      },
+      {
+        "name": "pretraining_gate_validate_e8_arms",
+        "minutes": 3.0
+      },
+      {
+        "name": "artifact_manifest_and_verify",
+        "minutes": 8.0
+      }
+    ],
+    "notes": [],
+    "expected_usd": 8.38,
+    "soft_stop_usd": 9.218,
+    "artifact_recovery_reserve_usd": 0.495,
+    "hard_terminate_usd": 9.713
+  },
+  "quoted_price_per_hour": 0.99,
+  "stock_status": "Low",
+  "relay_precheck": {
+    "needed": [
+      "e8_init_20260810/e8_contribution_init_v1/checkpoint/model.safetensors",
+      "e8_init_20260810/e8_contribution_init_v1/checkpoint/config.json",
+      "e8_init_20260810/e8_contribution_init_v1/manifest.json",
+      "e8_init_20260810/e8_frozen_depth_map.json",
+      "e8_inputs_20260810/warmup/holdout_v1.jsonl"
+    ],
+    "missing": []
+  },
+  "pod_id": "d2nwf8995nd83j",
+  "actual_price_per_hour": 0.99,
+  "terminate_after_utc": "2026-08-11T04:59:41Z",
+  "watchdog_journals": [
+    "/home/ecs-user/aad-scratch/e8b_20260810_182318/watchdog.jsonl",
+    "/home/ecs-user/aad-scratch/e8b_20260810_182318/watchdog.jsonl",
+    "/home/ecs-user/aad-scratch/e8b_20260810_182318/watchdog.jsonl"
+  ]
+}

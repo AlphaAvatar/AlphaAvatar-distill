@@ -334,9 +334,29 @@ for p in ('/workspace/aad/artifacts/stage1/qwen3_0p6b_init_v0/checkpoint',
 done
 mark ROPE_OK
 
-say "CPU test suite"
-cd "$REPO" && /opt/train/bin/python -m pytest tests/ -q \
-    --ignore=tests/data/test_recovery_corpus_pipeline.py 2>&1 | tail -4
+# Threads are capped, and the gate is time-boxed. Both because of one host:
+# E8 pod B drew a 128-vCPU machine, torch created 208 threads for tiny-model
+# tests, and the suite that runs in 70 s locally was still going after 66 minutes
+# with 39,252 involuntary context switches. It was progressing, so no tripwire
+# fired, and it silently consumed the session's budget for its second training
+# arm. Oversubscription on a wide host is a host-shape hazard, not a code bug —
+# so cap the threads, and if the suite still cannot finish, treat it as a bad draw
+# and let the launcher redraw rather than eat the session.
+say "CPU test suite (threads capped; wide hosts make torch oversubscribe)"
+cd "$REPO"
+set +e
+OMP_NUM_THREADS=8 MKL_NUM_THREADS=8 OPENBLAS_NUM_THREADS=8 \
+  timeout "${TESTS_MAX_S:-900}" /opt/train/bin/python -m pytest tests/ -q \
+  --ignore=tests/data/test_recovery_corpus_pipeline.py > /workspace/pytest.log 2>&1
+RC=$?
+set -e
+tail -4 /workspace/pytest.log
+if [ "$RC" -eq 124 ]; then
+  say "COLD HOST: the CPU test suite did not finish in ${TESTS_MAX_S:-900}s on $(nproc) vCPUs"
+  mark "HOST_COLD:tests:${TESTS_MAX_S:-900}s:$(nproc)vcpu"
+  exit 90
+fi
+[ "$RC" -eq 0 ] || { say "test suite failed rc=$RC"; exit 1; }
 mark TESTS_OK
 
 # The inclusion mask is rebuilt here, in this environment, from these staged
