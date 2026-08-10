@@ -1,132 +1,120 @@
 {
   "timeline": [
     {
-      "utc": "2026-08-10T18:23:24+00:00",
+      "utc": "2026-08-10T20:30:11+00:00",
       "elapsed_min": 0.0,
-      "msg": "budget: expected 508 min $8.38 \u00b7 soft stop 559 min $9.22 \u00b7 hard 589 min $9.71 (authorized $9.75)"
+      "msg": "budget: expected 508 min $8.38 \u00b7 soft stop 559 min $9.22 \u00b7 hard 589 min $9.71 (authorized $9.79)"
     },
     {
-      "utc": "2026-08-10T18:23:24+00:00",
+      "utc": "2026-08-10T20:30:12+00:00",
       "elapsed_min": 0.0,
       "msg": "NVIDIA L40S securePrice $0.99/h, stock Low"
     },
     {
-      "utc": "2026-08-10T18:23:25+00:00",
+      "utc": "2026-08-10T20:30:12+00:00",
       "elapsed_min": 0.0,
       "msg": "relay precheck OK (5 files present)"
     },
     {
-      "utc": "2026-08-10T18:23:25+00:00",
+      "utc": "2026-08-10T20:30:13+00:00",
       "elapsed_min": 0.0,
-      "msg": "attempt 1: create failed \u2014 {\"error\":\"There are no longer any instances available.\"}\nUsage:\n  runpodctl pod create [flags]\n\nFlags:\n      --cloud-type string          cloud type (SECURE or COMMUNITY) (default \"SECURE\")\n      --co"
+      "msg": "created n3gdd9yby5fx2m at $0.99/h; --terminate-after 2026-08-11T06:18:52Z (redundant layer)"
     },
     {
-      "utc": "2026-08-10T18:28:26+00:00",
-      "elapsed_min": 0.0,
-      "msg": "created vqrrkc8w6f5786 at $0.99/h; --terminate-after 2026-08-11T04:12:05Z (redundant layer)"
-    },
-    {
-      "utc": "2026-08-10T18:28:26+00:00",
+      "utc": "2026-08-10T20:30:13+00:00",
       "elapsed_min": 0.0,
       "msg": "watchdog detached \u2014 hard 589 min = $9.71"
     },
     {
-      "utc": "2026-08-10T18:29:20+00:00",
-      "elapsed_min": 0.9,
+      "utc": "2026-08-10T20:31:07+00:00",
+      "elapsed_min": 0.91,
       "msg": "  starting (60s) \u2014 $0.01"
     },
     {
-      "utc": "2026-08-10T18:30:24+00:00",
+      "utc": "2026-08-10T20:32:11+00:00",
       "elapsed_min": 1.97,
       "msg": "  starting (120s) \u2014 $0.03"
     },
     {
-      "utc": "2026-08-10T18:31:28+00:00",
-      "elapsed_min": 3.03,
-      "msg": "  starting (180s) \u2014 $0.05"
+      "utc": "2026-08-10T20:32:43+00:00",
+      "elapsed_min": 2.5,
+      "msg": "TCP 22 at 202.181.159.240:14367 after 2.5 min"
     },
     {
-      "utc": "2026-08-10T18:31:49+00:00",
-      "elapsed_min": 3.38,
-      "msg": "TCP 22 at 82.221.170.242:38617 after 3.4 min"
+      "utc": "2026-08-10T20:32:46+00:00",
+      "elapsed_min": 2.54,
+      "msg": "draw 1: ssh reachable \u2014 $0.04"
     },
     {
-      "utc": "2026-08-10T18:31:52+00:00",
-      "elapsed_min": 3.43,
-      "msg": "draw 1: ssh reachable \u2014 $0.06"
-    },
-    {
-      "utc": "2026-08-10T18:32:04+00:00",
-      "elapsed_min": 3.62,
+      "utc": "2026-08-10T20:32:56+00:00",
+      "elapsed_min": 2.72,
       "msg": "draw 1: running setup"
     },
     {
-      "utc": "2026-08-10T18:54:21+00:00",
-      "elapsed_min": 25.9,
-      "msg": "COLD HOST on draw 1 \u2014 abandoning vqrrkc8w6f5786 and redrawing (its watchdog will see the pod vanish and exit)"
+      "utc": "2026-08-10T20:39:41+00:00",
+      "elapsed_min": 9.47,
+      "msg": "draw 1: setup complete \u2014 $0.16"
     },
     {
-      "utc": "2026-08-10T18:54:22+00:00",
-      "elapsed_min": 25.93,
-      "msg": "created 1mm2j08s262wym at $0.99/h; --terminate-after 2026-08-11T04:43:01Z (redundant layer)"
+      "utc": "2026-08-10T20:39:47+00:00",
+      "elapsed_min": 9.56,
+      "msg": "driver detached, pid 2869, confirmed by descriptor_probe \u2014 $0.16"
     },
     {
-      "utc": "2026-08-10T18:54:22+00:00",
-      "elapsed_min": 25.93,
-      "msg": "watchdog detached \u2014 hard 589 min = $9.71"
+      "utc": "2026-08-10T20:41:59+00:00",
+      "elapsed_min": 11.77,
+      "msg": "  2026-08-10T20:41:09.547994+00:00 MARKER:INIT_NLL_DONE:e8-contribution-init \u2014 $0.19"
     },
     {
-      "utc": "2026-08-10T18:54:44+00:00",
-      "elapsed_min": 26.3,
-      "msg": "TCP 22 at 82.221.170.242:38608 after 26.3 min"
+      "utc": "2026-08-10T20:44:14+00:00",
+      "elapsed_min": 14.02,
+      "msg": "  2026-08-10T20:42:40.449680+00:00 MARKER:ALL_DONE \u2014 $0.23"
     },
     {
-      "utc": "2026-08-10T18:54:47+00:00",
-      "elapsed_min": 26.34,
-      "msg": "draw 2: ssh reachable \u2014 $0.43"
+      "utc": "2026-08-10T20:44:14+00:00",
+      "elapsed_min": 14.02,
+      "msg": "polling ended: ALL_DONE \u2014 $0.23"
     },
     {
-      "utc": "2026-08-10T18:54:58+00:00",
-      "elapsed_min": 26.53,
-      "msg": "draw 2: running setup"
+      "utc": "2026-08-10T20:46:09+00:00",
+      "elapsed_min": 15.94,
+      "msg": "  manifest rc=5\ntatus [final_required]: audit/e8b_session/e8b.status (the producing process has not signalled completion: audit/e8b_session/e8b.status does not contain 'MARKER:GATE_PASSED'; audit/e8b_session/e8b.status does not contain 'MARKER:TRAIN_DONE:E8-T-Contrib-sa'; audit/e8b_session/e8b.status does not contain 'MARKER:TRAIN_DONE:E8-T-Contrib-sb'; audit/e8b_session/e8b.status does not contain 'MARKER:EVAL_DONE')\n  NOT COMPLETE: audit/e8b_session/e8b.status does not contain 'MARKER:GATE_PASSED'\n  NOT COMPLETE: audit/e8b_session/e8b.status does not contain 'MARKER:TRAIN_DONE:E8-T-Contrib-sa'\n  NOT COMPLETE: audit/e8b_session/e8b.status does not contain 'MARKER:TRAIN_DONE:E8-T-Contrib-sb'\n  NOT COMPLETE: audit/e8b_session/e8b.status does not contain 'MARKER:EVAL_DONE'\nrequired artifacts are absent or unfinished; find them before teardown \u2014 this is the point in the session where that is still possible"
     },
     {
-      "utc": "2026-08-10T19:11:01+00:00",
-      "elapsed_min": 42.57,
-      "msg": "COLD HOST on draw 2 \u2014 abandoning 1mm2j08s262wym and redrawing (its watchdog will see the pod vanish and exit)"
+      "utc": "2026-08-10T20:46:30+00:00",
+      "elapsed_min": 16.28,
+      "msg": "  checkpoint e8_contrib_r2960k_sa: rc=1"
     },
     {
-      "utc": "2026-08-10T19:11:02+00:00",
-      "elapsed_min": 42.6,
-      "msg": "created d2nwf8995nd83j at $0.99/h; --terminate-after 2026-08-11T04:59:41Z (redundant layer)"
+      "utc": "2026-08-10T20:46:32+00:00",
+      "elapsed_min": 16.32,
+      "msg": "  checkpoint e8_contrib_r2960k_sb: rc=1"
     },
     {
-      "utc": "2026-08-10T19:11:02+00:00",
-      "elapsed_min": 42.6,
-      "msg": "watchdog detached \u2014 hard 589 min = $9.71"
+      "utc": "2026-08-10T20:46:32+00:00",
+      "elapsed_min": 16.32,
+      "msg": "teardown gate: allowed=False failed=required_files_present"
+    },
+    {
+      "utc": "2026-08-10T20:46:32+00:00",
+      "elapsed_min": 16.32,
+      "msg": "GATE BLOCKED \u2014 the pod is NOT being deleted by the launcher; the watchdog remains the backstop"
     }
   ],
   "stages": {
     "setup": [
       {
         "draw": 1,
-        "setup_done": "0",
-        "host_cold": "1",
-        "setup_rc": "90",
-        "tail": "SETUP_RC=90"
-      },
-      {
-        "draw": 2,
-        "setup_done": "0",
-        "host_cold": "1",
-        "setup_rc": "90",
-        "tail": "SETUP_RC=90"
+        "setup_done": "1",
+        "host_cold": "0",
+        "setup_rc": "0",
+        "tail": "SETUP_RC=0"
       }
     ]
   },
   "budget_plan": {
     "price_per_hour": 0.99,
-    "authorized_usd": 9.75,
+    "authorized_usd": 9.79,
     "expected_minutes": 507.88000000000005,
     "soft_stop_minutes": 558.6680000000001,
     "artifact_recovery_reserve_minutes": 30.0,
@@ -188,12 +176,59 @@
     ],
     "missing": []
   },
-  "pod_id": "d2nwf8995nd83j",
+  "pod_id": "n3gdd9yby5fx2m",
   "actual_price_per_hour": 0.99,
-  "terminate_after_utc": "2026-08-11T04:59:41Z",
+  "terminate_after_utc": "2026-08-11T06:18:52Z",
   "watchdog_journals": [
-    "/home/ecs-user/aad-scratch/e8b_20260810_182318/watchdog.jsonl",
-    "/home/ecs-user/aad-scratch/e8b_20260810_182318/watchdog.jsonl",
-    "/home/ecs-user/aad-scratch/e8b_20260810_182318/watchdog.jsonl"
-  ]
+    "/home/ecs-user/aad-scratch/e8b2_20260810_203004/watchdog.jsonl"
+  ],
+  "driver_job": {
+    "job_id": "e8b_driver",
+    "pid": 2869,
+    "workdir": "/workspace/aad",
+    "command": "/opt/train/bin/python scripts/pod/e8b_driver.py --stage all --spent-usd 0.156 --soft-stop-usd 9.22 --authorized-usd 9.71 --rate 0.99",
+    "log_path": "/workspace/e8b_run.log",
+    "status_path": "/workspace/e8b.status",
+    "pid_path": "/workspace/jobs/e8b_driver.pid",
+    "descriptor_path": "/workspace/jobs/e8b_driver.job.json",
+    "exit_path": "/workspace/jobs/e8b_driver.exit",
+    "started_utc": "2026-08-10T20:39:44Z",
+    "start_channel_closed": true,
+    "confirmed_by": "descriptor_probe"
+  },
+  "terminal": "ALL_DONE",
+  "local_verify_error": "FileNotFoundError: [Errno 2] No such file or directory: '/home/ecs-user/aad-scratch/e8b2_20260810_203004/store/e8b_artifacts.tar.gz'",
+  "checkpoints_fetched": [
+    {
+      "arm": "e8_contrib_r2960k_sa",
+      "rc": 1
+    },
+    {
+      "arm": "e8_contrib_r2960k_sb",
+      "rc": 1
+    }
+  ],
+  "teardown_gate": {
+    "allowed": false,
+    "emergency": false,
+    "failed_check": "required_files_present",
+    "reason": "teardown blocked at 'required_files_present'; the pod must not be deleted while a required artifact is only on it",
+    "checks": {
+      "training_complete": true,
+      "evaluation_complete": true,
+      "artifact_manifest_created": true,
+      "required_files_present": false,
+      "final_streams_quiescent": false,
+      "archive_created": false,
+      "archive_contents_verified": false,
+      "transfer_complete": false,
+      "local_hashes_verified": false,
+      "checkpoint_hashes_matched": false,
+      "report_inputs_verified": false
+    },
+    "incomplete_event_streams": []
+  },
+  "manifest_summary": null,
+  "passed": false,
+  "finished_utc": "2026-08-10T20:46:32+00:00"
 }

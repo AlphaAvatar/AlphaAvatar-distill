@@ -4886,3 +4886,88 @@ authorization leaves $2.33, so E8 needs **$10.08** more and a proposed cap of
 wider than any effect E8 could claim.
 
 1,138 tests pass on CPU in both environments, 3 skipped.
+
+---
+
+## 36. Experiment 8 — the contribution-guided map preserves the teacher 3.1× better and initializes 2.8 nats worse
+
+**Status: the search half is COMPLETE and the training half has NOT run**, blocked
+on $0.20. Full record: [`e8_step0_report.md`](e8_step0_report.md). Prospective
+record: [`e8_preregistration.md`](e8_preregistration.md), frozen before any GPU.
+
+### 36.1 The map
+
+260 subset evaluations, 17,688 forward passes, 1,300 s on one L40S, under the
+objective frozen before any map existed. `self_consistency` exactly **0.0**
+against a 1e-6 tolerance, so the ranking is not kernel noise.
+
+```
+contribution removes [2, 3, 15, 16, 20, 21, 26, 32]   order [2,16,3,32,20,26,15,21]
+positional   removes [5, 7, 9, 11, 13, 15, 17, 19]
+```
+
+One shared layer. The two blocks the causal measure gives up **first** are layers 2
+and 3, which the positional rule explicitly protects.
+
+Primary objective **0.620586 vs 1.932531 — 3.11×** lower. Lower on all five
+domains (2.65–3.33×) and on every diagnostic, none of which was allowed to select:
+assistant 3.46×, reasoning 3.34×, final answer 3.94×, `</think>` 3.67×, EOS 2.49×,
+and `</tool_call>` **0.0241 vs 10.3215, 428×**.
+
+### 36.2 The initialization goes the other way
+
+Both initializations measured on one device by one evaluator, each record
+hash-bound to its checkpoint, the control **remeasured** rather than inherited.
+Only the depth map differs between them: config hash, parameter count 596,049,920,
+projection energy 0.9323228843289764 and final-norm range are identical to the last
+digit.
+
+| series | contribution | positional | Δ |
+| --- | ---: | ---: | ---: |
+| `holdout_v1` NLL | 13.2624 | 11.7565 | **+1.5059** |
+| `fineweb_val_e7` NLL | 14.3913 | 11.5749 | **+2.8164** |
+| `teacher_native_val` NLL | 11.8027 | 10.9053 | **+0.8974** |
+
+Worse on every diagnostic, all three series, NLL and KL and top-1 and rank alike.
+
+### 36.3 The finding, so far
+
+**Teacher-ablation KL does not predict initialization quality after compression.**
+The same map is 3.11× better at preserving the teacher's output distribution when
+blocks are bypassed *in the teacher*, and 2.82 nats worse once the kept layers are
+projected into a student that also loses 60% of its width, 68% of its FFN and half
+its Q heads. The calibration objective never measured that interaction.
+
+Hypothesis for later testing, not a result: the contribution map removes three
+**adjacent** pairs (2–3, 15–16, 20–21), so a survivor's input can be two blocks of
+transformation away from what it saw in the teacher, while the positional map
+removes every *other* layer and is off by at most one. A full-width teacher with 34
+blocks left absorbs that; a 0.6B student may not.
+
+### 36.4 What is not decided
+
+None of the registered catastrophic-abort conditions fired. Per the
+preregistration a worse initialization NLL may not cancel E8, and two outcomes
+remain live: **outcome 3** (init worse, behaviour improves — initialization NLL
+again not a sufficient proxy) and **outcome 4** (both regress — reject the map).
+Only the two-seed 2.96M training separates them.
+
+E7 is directly relevant: a −5.22-nat NLL swing there moved autonomous behaviour by
+exactly +0.0000. A +2.82-nat swing is therefore **not** evidence for outcome 4 on
+this project's own record.
+
+### 36.5 Cost, and six defects
+
+$3.7253 total across two paid sessions. Pod A completed at $0.53 after four failed
+attempts ($0.9583); pod B's first attempt was stopped at $1.9520 rather than
+deliver a one-seed result, and its second reached both initialization measurements
+at $0.2850 before failing a gate check on an artifact it does not stage.
+
+Six defects found and fixed: a `meta`-device RoPE check (mine); three latent in the
+launcher E8 derived from, none of which had ever fired (a `grep -c … || echo 0`
+misparse that read a cold host as a setup failure, a non-starting pod aborting
+instead of redrawing, and uv progress measured under `/opt/train` while uv writes to
+`/root/.cache/uv`); torch thread oversubscription on a 128-vCPU host making a
+70-second test suite run past 66 minutes; and a gate check requiring the
+calibration manifest on a pod that does not search. None touched the selector, the
+calibration set, the map, the recipe or the evaluation.

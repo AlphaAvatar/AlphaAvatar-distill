@@ -280,6 +280,13 @@ import sys; sys.path.insert(0, '/workspace')
 from fetch import fetch
 fetch('e8_inputs_20260810/warmup', ['holdout_v1.jsonl', 'holdout_v1.manifest.json'],
       '/workspace/aad/data/warmup')
+# The calibration manifest and its leakage proof: `validate_e8_arms.py` checks
+# that the frozen map came from the frozen calibration set and that its leakage
+# report is clean. Pod B does not need the calibration *items* — it does not
+# search — but without these two small files that check cannot run, and it failed
+# the gate here once for exactly that reason. 30 KB to keep a real guarantee.
+fetch('e8_inputs_20260810/calibration_v1', ['manifest.json', 'leakage.json'],
+      '/workspace/aad/artifacts/stage1/e8_calibration_v1')
 fetch('e7_streams_20260809/e7_fineweb_val', ['blocks.npz', 'docs.jsonl', 'manifest.json'],
       '/workspace/aad/artifacts/stage3/e7_fineweb_val')
 "

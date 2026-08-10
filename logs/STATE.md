@@ -1,16 +1,16 @@
-**Updated:** 2026-08-10 · branch `main` · commit `864dd71` + E8 preparation ·
-working tree dirty
-**No pods running. Nothing billing.** **1,138 CPU tests pass**, 3 skipped.
+**Updated:** 2026-08-11 · branch `main` · working tree clean
+**No pods running. Nothing billing.** **1,208 CPU tests pass**, 6 skipped.
 
-**Experiment 7 is complete. Experiment 8 is prepared, preregistered and blocked
-on authorization** ([`e8_preregistration.md`](e8_preregistration.md)) — it needs
-**$10.08** above the current cap. Stage 3 remains open: no model has passed a
-prospectively defined behaviour-recovery gate, and **nothing yet moves autonomous
-reasoning correctness**.
+**Experiment 7 is complete. Experiment 8's search half is COMPLETE; its training
+half is blocked on $0.20** ([`e8_step0_report.md`](e8_step0_report.md)). Stage 3
+remains open: no model has passed a prospectively defined behaviour-recovery gate,
+and **nothing yet moves autonomous reasoning correctness**.
 
-**One dev-box job is running, free:** Stage 0 activation-statistics regeneration
-(`artifacts/stage0/regen_tf513.log`, ~7 h CPU). It is a **prerequisite for E8** —
-see §0.5.
+**E8's headline so far: the contribution-guided depth map preserves the teacher's
+output distribution 3.11× better and initializes 2.82 nats worse.** Teacher-ablation
+KL does not predict initialization quality after compression. Which of the two live
+preregistered outcomes holds is decided only by the two-seed training, which has
+not run.
 
 This file is a **snapshot of the current state**, not a history. Every completed
 experiment lives in [`EXPERIMENTS.md`](EXPERIMENTS.md) and every decision in
@@ -30,21 +30,19 @@ authorized cumulative cap:          $162.49
 ACTUAL CUMULATIVE SPEND:            $160.158
 remaining under the cap:              $2.33
 
-authorized cumulative cap (E8):     $172.57   granted 2026-08-10
-E8 authorized backstop:              $12.41
-E8 spent on failed pod A attempts:    $0.83   4 infrastructure defects, all fixed
-E8 remaining:                        $11.58
+authorized cumulative cap (E8):     $173.40   granted 2026-08-10, +$0.83
+E8 authorized backstop:              $13.2400
+E8 SPENT:                             $3.7253   pod A $0.53 + pod B $2.237 + $0.958 defects
+E8 remaining:                         $9.5147
 pod B hard threshold:                 $9.7130
-LEFT FOR POD A:                       $1.8670  -> its plan needs $2.7002
-E8 SHORTFALL, BLOCKING:               $0.83
+E8 SHORTFALL, BLOCKING:               $0.1983  -> proposed backstop $13.44, cap $173.60
 ```
 
-**E8 is stopped at a $0.83 shortfall.** Pod A has not yet run its search. Four
-launcher/setup defects were found and fixed at $0.83 total, each self-terminating
-within seconds; none touched the experiment's design. `plan_session` refuses every
-pod A authorization below $2.71, so the run cannot proceed without either a $0.83
-increment (proposed backstop $13.24, cap $173.40) or an explicit instruction to
-re-price pod A's 45-minute setup contingency.
+**E8's training half is stopped at a $0.20 shortfall.** Everything it needs is
+built, staged and verified — `validate_e8_arms.py --require-init` passes all 18
+checks. Six defects were found and fixed across the paid attempts (§0.6); none
+touched the experiment's design. At $9.7130 exactly there is no margin for a bad
+draw, so a larger increment would be worth more than the $0.20 minimum.
 
 **Plan from actual spend, never from unused room under a previous
 authorization.** The historical $149.03 is not a balance; it was exceeded by
@@ -118,6 +116,26 @@ is immune, which is what makes it easy to miss. No trained arm is affected — t
 pods already assert `ROPE_OK` — but the *measurement* path did not, and now does
 (`measure_init_nll.py`, `init_stage1.py`). Under 5.13.1 the historical value
 reproduces exactly: 11.748248 on 21,080 positions.
+
+### 0.6 Six operational defects found and fixed on 2026-08-10/11
+
+All in launcher/setup code, none in the experiment. Recorded because four were
+**latent in `e7_launch.py`**, which E8's launchers were derived from, and had never
+fired.
+
+| defect | how it failed | fix |
+| --- | --- | --- |
+| RoPE checked on a `meta`-device model | no buffer values; `Tensor.item()` died | `assert_rope_from_config` builds only the rotary embedding |
+| `grep -c X f \|\| echo 0` emits **two** lines | positional parse read a cold host as a setup failure and aborted instead of redrawing | labelled `KEY=value` probe, read by key; exit 90 also means cold |
+| a pod that never reaches TCP 22 | `no_endpoint` treated as fatal, throwing away remaining draws | redraw on `no_endpoint` as well as `cold` |
+| uv progress measured under `/opt/train` | uv writes to `/root/.cache/uv` first, so a host downloading at 5.5 MB/s read as stalled | sum both trees; grace renews while progressing, bounded by `UV_MAX_S` |
+| torch thread oversubscription | a 128-vCPU host gave 208 threads and a 70-second suite ran past 66 min, silently eating a session's second-arm budget | threads capped at 8; gate time-boxed, a timeout is a redraw |
+| a gate check needing an unstaged artifact | pod B has no reason to stage the calibration set | stage the 30 KB manifest + leakage proof and keep the check |
+
+**The pattern worth carrying:** `simulate_pod_env.sh` runs the *test suite*, never
+the setup scripts, and its hide set assumed "every pod session stages the pack and
+the Stage 1 init" — true until E8's search-only pod. Simulate the session's *actual*
+staged set, and run the setup's inline python locally before paying for it.
 
 ---
 
@@ -352,23 +370,30 @@ concatenated at token level (asserted exact), with the system block emitted once
 **Nothing costing money is authorized.** $2.33 remains under the $162.49 cap;
 E8's hard backstop is $12.41, so it needs **$10.08 more** and a cap of **$172.57**.
 
-**E8 is authorized, implemented, staged, and stopped at a $0.83 shortfall.**
+**E8's search half is done. Its training half is one pod, blocked on $0.20.**
 Ordered next actions:
 
-1. **Maintainer decision on the $0.83.** Pod A's plan needs $2.71 and $1.87
-   remains after pod B's reserved $9.7130. Nothing paid may start before it.
-2. `scripts/pod/e8a_launch.py --scr <new> --session-commit <HEAD> --bundle <new>
-   --authorized-usd 2.71 --host-draws 4`. All four fixes are in; a cold host or a
-   pod that never starts now redraws instead of aborting.
-3. Dev box, $0: `scripts/training/build_and_stage_e8_init.py --frozen-map <fetched>`
-   builds the treatment init, verifies it against the control, uploads it and
-   prints pod B's `--treatment-init-sha256`.
-4. `scripts/pod/e8b_launch.py … --treatment-init-sha256 <hash> --authorized-usd
-   <12.41 − actual pod A spend, asserted ≥ 9.7130>`.
-5. `scripts/evaluation/analyze_e8.py --bootstrap 10000`, then the records.
+1. **Maintainer decision on the shortfall.** $9.5147 remains; pod B's hard
+   threshold is $9.7130. Proposed: backstop $13.44, cap $173.60. A larger
+   increment buys margin against a bad draw, of which there is currently none.
+2. On authorization, one command — everything it needs is staged and verified:
+   ```
+   scripts/pod/e8b_launch.py --scr <new> --session-commit <HEAD> --bundle <new> \
+       --treatment-init-sha256 7a0694a5d5c59f8e0b0ebc9ac8648b1ec026bf93cab026d33c61ca8fc85d1edb \
+       --authorized-usd <available> --host-draws 5
+   ```
+   It measures both inits (~3 min, already proven), passes the 18-check gate,
+   trains `sa`+`sb` (403 min), runs the frozen battery, syncs.
+3. `PYTHONPATH=src python scripts/evaluation/analyze_e8.py --bootstrap 10000`. The
+   analysis already reproduces the retained control exactly (usable 0.8400, correct
+   0.2067 on mask `d6e24e0b…`) and refuses to read an outcome while an arm is
+   missing.
+4. Then the E8 record: outcome 3 vs outcome 4 per the preregistration.
 
 **Durability is done** (`logs/e8_relay_manifest.json`): 13/13 staged and
 roundtrip-verified, including the 1.95 GB Stage 0 cache and `warmup_v1`, its input.
+The treatment init and the full search trace are staged too
+(`logs/e8_init_stage_manifest.json`, 11/11 verified).
 
 **No other follow-up is running or planned.** A 2.96M + FineWeb confirmation, a
 FineWeb-ratio sweep, P2-5.50M, on-policy/GKD, a second contribution map and any E9
@@ -411,7 +436,8 @@ around the retired metric.
 | §31 | Experiment 7 design and preregistration | — |
 | §32–33 | control-plane canary, failed then passed 12/12 | live path verified |
 | **§34** | **Experiment 7 — general LM restored, behaviour unmoved** | **the ceiling is not a language-modelling problem** |
-| §35 | Experiment 8 design and preregistration — contribution-guided depth | prepared, blocked on $10.08 |
+| §35 | Experiment 8 design and preregistration — contribution-guided depth | executed in part |
+| **§36** | **Experiment 8 — map preserves the teacher 3.1× better, initializes 2.8 nats worse** | **training half blocked on $0.20** |
 
 Protocol deviations on record: [`e6b_protocol_deviations.md`](e6b_protocol_deviations.md)
 (cost overrun $0.56, lost event streams; scientific endpoint valid, operational

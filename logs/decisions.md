@@ -1972,3 +1972,41 @@
   acceptable, but it is a choice, not an oversight.
 - **Revisit when:** relay storage frees up, or Stage 0 is ever re-collected with a
   different warm-up set.
+
+## 2026-08-11 — Do not cancel E8 on a worse initialization NLL
+
+- **Context:** the contribution-guided map is 3.11× better than the positional map
+  under the frozen calibration objective, and its initialization is worse on every
+  step-0 diagnostic — `holdout_v1` +1.51, `fineweb_val_e7` +2.82, teacher-native
+  +0.90 nats, with top-1 and rank worse on both streams.
+- **Decision: proceed to the two-seed 2.96M training when funded.** The
+  preregistration fixed this before the numbers existed: an initialization NLL is
+  diagnostic and may neither promote nor cancel, absent a catastrophic validity
+  failure. All seven registered abort conditions were checked and none fired.
+- **Why this is not a rationalisation:** E7 measured a −5.22-nat NLL improvement
+  that moved autonomous behaviour by exactly +0.0000. On this project's own record
+  the general-LM diagnostic does not predict the endpoint, in either direction. If
+  a −5.22 improvement predicted nothing, a +2.82 regression cannot be treated as a
+  verdict.
+- **What the search actually established, and what it did not:** it established
+  that bypassing `[2,3,15,16,20,21,26,32]` in the *teacher* distorts its output
+  distribution 3.11× less than bypassing the positional set. It did **not**
+  establish anything about the compressed student, because the objective was
+  measured at full width — 2560 hidden, 9728 FFN, 32 Q heads — and the
+  initialization additionally compresses to 1024 / 3072 / 16. Depth choice
+  interacts with width and FFN compression and the objective never saw it.
+- **Alternatives considered:** treating the step-0 regression as outcome 4 and
+  rejecting the map — rejected, it is the substitution the preregistration
+  forbade and E7 refuted; re-running the search with the compression in the loop —
+  a different and much more expensive experiment, and it would be selecting a map
+  after seeing a downstream metric, which §12 forbids; adjusting the map by hand to
+  avoid adjacent removals — same objection, and it would not be the frozen
+  selector.
+- **Recorded hypothesis for a later, separately-registered experiment:** the
+  contribution map removes three adjacent pairs (2–3, 15–16, 20–21), so a surviving
+  layer's input can be two blocks of transformation from what it saw in the
+  teacher; the positional map is off by at most one. A full-width teacher absorbs
+  that, a 0.6B student may not. An adjacency-penalised or compression-aware
+  objective is the obvious follow-up and is **not** authorized.
+- **Revisit when:** the two-seed training completes and separates outcome 3 from
+  outcome 4.
