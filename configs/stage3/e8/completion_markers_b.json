@@ -1,0 +1,8 @@
+[
+  {"path": "audit/e8b_session/e8b.status", "contains": "MARKER:INIT_NLL_DONE"},
+  {"path": "audit/e8b_session/e8b.status", "contains": "MARKER:GATE_PASSED"},
+  {"path": "audit/e8b_session/e8b.status", "contains": "MARKER:TRAIN_DONE:E8-T-Contrib-sa"},
+  {"path": "audit/e8b_session/e8b.status", "contains": "MARKER:TRAIN_DONE:E8-T-Contrib-sb"},
+  {"path": "audit/e8b_session/e8b.status", "contains": "MARKER:EVAL_DONE"},
+  {"path": "audit/e8b_session/e8b.status", "contains": "MARKER:ALL_DONE"}
+]

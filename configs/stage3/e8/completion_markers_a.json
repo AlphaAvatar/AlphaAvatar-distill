@@ -1,0 +1,5 @@
+[
+  {"path": "audit/e8a_session/e8a.status", "contains": "MARKER:SEARCH_DONE"},
+  {"path": "audit/e8a_session/e8a.status", "contains": "MARKER:FREEZE_DONE"},
+  {"path": "audit/e8a_session/e8a.status", "contains": "MARKER:ALL_DONE"}
+]

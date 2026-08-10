@@ -1,0 +1,66 @@
+[
+  {
+    "artifact_class": "depth_map",
+    "pattern": "stage1/e8_depth_search/depth_map.json",
+    "required": true,
+    "min_matches": 1,
+    "min_bytes": 128,
+    "lifecycle": "final_required"
+  },
+  {
+    "artifact_class": "search_report",
+    "pattern": "stage1/e8_depth_search/depth_search.json",
+    "required": true,
+    "min_matches": 1,
+    "min_bytes": 4096,
+    "lifecycle": "final_required"
+  },
+  {
+    "artifact_class": "search_round_stream",
+    "pattern": "stage1/e8_depth_search/rounds.jsonl",
+    "required": true,
+    "min_matches": 1,
+    "min_bytes": 1024,
+    "lifecycle": "final_required"
+  },
+  {
+    "artifact_class": "frozen_depth_map",
+    "pattern": "audit/e8_frozen_depth_map.json",
+    "required": true,
+    "min_matches": 1,
+    "min_bytes": 256,
+    "lifecycle": "final_required"
+  },
+  {
+    "artifact_class": "calibration_manifest",
+    "pattern": "stage1/e8_calibration_v1/manifest.json",
+    "required": true,
+    "min_matches": 1,
+    "min_bytes": 256,
+    "lifecycle": "final_required"
+  },
+  {
+    "artifact_class": "calibration_leakage_proof",
+    "pattern": "stage1/e8_calibration_v1/leakage.json",
+    "required": true,
+    "min_matches": 1,
+    "min_bytes": 128,
+    "lifecycle": "final_required"
+  },
+  {
+    "artifact_class": "driver_console",
+    "pattern": "audit/e8a_session/e8a_run.log",
+    "required": false,
+    "min_matches": 1,
+    "min_bytes": 1,
+    "lifecycle": "mutable_snapshot"
+  },
+  {
+    "artifact_class": "session_status",
+    "pattern": "audit/e8a_session/e8a.status",
+    "required": true,
+    "min_matches": 1,
+    "min_bytes": 32,
+    "lifecycle": "final_required"
+  }
+]

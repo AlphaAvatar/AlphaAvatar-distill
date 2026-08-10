@@ -1,0 +1,203 @@
+#!/usr/bin/env bash
+# Setup for E8 pod A: the contribution-guided depth search.
+#
+# Deliberately much smaller than a training pod. The search needs the teacher and
+# the frozen calibration set and nothing else — no vLLM, no ladder pack, no
+# corpus, no student checkpoint — so setup is short and the session is cheap.
+#
+# What is fatal here rather than discovered later:
+#   * the calibration set not hashing to the frozen values in the committed relay
+#     manifest — a different calibration set is a different selector;
+#   * the teacher's RoPE base not resolving to 5,000,000 in /opt/train, which is
+#     the transformers 4.x/5.x `rope_parameters` skew that silently moves every
+#     number a session produces.
+#
+# Markers: ENV_READY -> REPO_READY -> DATA_READY -> TRAIN_ENV -> TEACHER_READY
+#          -> ROPE_OK -> TESTS_OK -> SETUP_DONE
+set -euo pipefail
+
+WS=/workspace
+REPO=$WS/aad
+STATUS=$WS/e8a.status
+mark() { echo "MARKER:$1"; echo "$(date -u +%FT%TZ) MARKER:$1" >>"$STATUS"; }
+say()  { echo "[$(date -u +%T)] $*"; }
+
+export HF_TOKEN="$(cat $WS/hf/token)"
+export HF_HOME=/root/.cache/huggingface
+
+say "apt: git, zstd"
+export DEBIAN_FRONTEND=noninteractive
+apt-get update -qq && apt-get install -y -qq git zstd >/dev/null
+mark ENV_READY
+
+say "installing huggingface_hub"
+python3 -m pip install -q --no-input --break-system-packages \
+    "huggingface_hub[hf_transfer]" 2>&1 | tail -3
+
+cat > /workspace/fetch.py <<'FETCHEOF'
+import os, shutil, sys, time
+from pathlib import Path
+from huggingface_hub import hf_hub_download
+REPO = "AlphaAvatar/aadistill-artifacts"
+TOKEN = os.environ["HF_TOKEN"]
+
+def fetch(prefix, names, dest, tries=5):
+    dest = Path(dest); dest.mkdir(parents=True, exist_ok=True)
+    for name in names:
+        last = None
+        for attempt in range(tries):
+            try:
+                p = hf_hub_download(REPO, f"{prefix}/{name}", repo_type="model",
+                                    token=TOKEN)
+                shutil.copy(p, dest / name)
+                break
+            except Exception as exc:                      # transient 5xx / CDN
+                last = exc
+                time.sleep(5 * (attempt + 1))
+        else:
+            sys.exit(f"FETCH FAILED {prefix}/{name}: {last}")
+        print(f"  {prefix}/{name}", flush=True)
+FETCHEOF
+
+say "fetching the repo bundle"
+python3 -c "
+import os, shutil
+from huggingface_hub import hf_hub_download
+name = os.environ['BUNDLE_NAME']
+p = hf_hub_download('AlphaAvatar/aadistill-artifacts', f'transfer/{name}',
+                    repo_type='model', token=os.environ['HF_TOKEN'])
+shutil.copy(p, f'/workspace/{name}')
+print('bundle at', p)
+"
+rm -rf "$REPO"
+git clone -q "$WS/$BUNDLE_NAME" "$REPO"
+cd "$REPO"
+git checkout -q "$SESSION_COMMIT"
+git rev-parse HEAD
+mark REPO_READY
+
+# The calibration set IS the selector. Fetch it, then verify every hash the
+# preregistration froze; a mismatch means the search would answer a different
+# question than the one that was registered.
+say "staging the frozen E8 calibration set"
+python3 -c "
+import sys; sys.path.insert(0, '/workspace')
+from fetch import fetch
+fetch('e8_inputs_20260810/calibration_v1',
+      ['items.jsonl', 'docs.jsonl', 'general_docs.jsonl',
+       'general_docs.manifest.json', 'manifest.json', 'leakage.json',
+       'general_disjointness.json'],
+      '/workspace/aad/artifacts/stage1/e8_calibration_v1')
+"
+cd "$REPO" && python3 - <<'PYEOF'
+import hashlib, json, sys
+from pathlib import Path
+d = Path('artifacts/stage1/e8_calibration_v1')
+man = json.loads((d / 'manifest.json').read_text())
+items_sha = hashlib.sha256((d / 'items.jsonl').read_bytes()).hexdigest()
+FROZEN = {
+    'items_sha256': '94d747c88012d969c32c2a614bab3b9db907faf5a6be1087df8b6b6be24d7a3f',
+    'content_sha256': 'd65c1f40e4837ea1bd5bcc33c68041a13b797c68f5be3c0686e0142ed761028f',
+    'manifest_sha256': 'ecb72aa3b88818e93fb058d5d012e66274db9bc7b90234219501f0df86cef460',
+}
+if items_sha != FROZEN['items_sha256']:
+    sys.exit(f'CALIBRATION items.jsonl MISMATCH: {items_sha}')
+for key in ('content_sha256', 'manifest_sha256'):
+    if man.get(key) != FROZEN[key]:
+        sys.exit(f'CALIBRATION {key} MISMATCH: {man.get(key)} != {FROZEN[key]}')
+leak = json.loads((d / 'leakage.json').read_text())
+if not leak.get('clean'):
+    sys.exit(f'CALIBRATION LEAKAGE NOT CLEAN: {leak.get("findings")}')
+dj = json.loads((d / 'general_disjointness.json').read_text())
+if not dj.get('disjoint'):
+    sys.exit('CALIBRATION GENERAL TEXT NOT DISJOINT')
+print(f'calibration verified: {man["totals"]["items"]} items, '
+      f'{man["totals"]["prediction_positions"]:,} positions, '
+      f'{len(man["design"]["domains"])} domains, leakage clean, disjoint')
+PYEOF
+mark DATA_READY
+
+say "training env via uv sync"
+command -v uv >/dev/null || { curl -LsSf https://astral.sh/uv/install.sh | sh; }
+export PATH="$HOME/.local/bin:$PATH"
+cd "$REPO"
+sed -i 's|url = "https://download.pytorch.org/whl/cpu"|url = "https://download.pytorch.org/whl/cu128"|' pyproject.toml
+sed -i 's|name = "pytorch-cpu"|name = "pytorch-cu128"|' pyproject.toml
+sed -i 's|torch = { index = "pytorch-cpu" }|torch = { index = "pytorch-cu128" }|' pyproject.toml
+export UV_PROJECT_ENVIRONMENT=/opt/train
+uv lock
+
+# Cold-host tripwire, carried unchanged: setup time on an identical image, script
+# and GPU has varied ~30x purely with how much the host had cached.
+TRIP_S=${UV_TRIP_S:-360}
+GRACE_S=${UV_GRACE_S:-180}
+uv sync --group dev &
+UV_PID=$!
+t0=$(date -u +%s); graced=0
+while kill -0 "$UV_PID" 2>/dev/null; do
+  sleep 15
+  el=$(( $(date -u +%s) - t0 ))
+  [ "$el" -lt "$TRIP_S" ] && continue
+  if [ "$graced" -eq 0 ] && [ -x /opt/train/bin/python ]; then
+    a=$(du -sb /opt/train 2>/dev/null | cut -f1 || echo 0); sleep 20
+    b=$(du -sb /opt/train 2>/dev/null | cut -f1 || echo 0)
+    if [ "$((b - a))" -gt 20000000 ]; then
+      say "uv sync past ${TRIP_S}s but linking ($(( (b-a)/1048576 )) MB/20s) — one ${GRACE_S}s grace"
+      graced=1; TRIP_S=$(( TRIP_S + GRACE_S )); continue
+    fi
+  fi
+  kill -9 "$UV_PID" 2>/dev/null || true
+  cache=$(du -sm /root/.cache/uv 2>/dev/null | cut -f1 || echo 0)
+  say "COLD HOST: uv sync unfinished after ${el}s (cache ${cache} MB). Abandoning."
+  mark "HOST_COLD:${el}s:${cache}MB"
+  exit 90                                        # the launcher redraws on 90
+done
+wait "$UV_PID" || { say "uv sync failed"; exit 1; }
+say "uv sync completed in $(( $(date -u +%s) - t0 ))s"
+/opt/train/bin/python -c "import torch, transformers; \
+  assert torch.cuda.is_available(); \
+  print('train torch', torch.__version__, torch.cuda.get_device_name(0), \
+        '| transformers', transformers.__version__)"
+mark TRAIN_ENV
+
+say "downloading the teacher at the pinned revision"
+python3 -c "
+import os
+from huggingface_hub import snapshot_download
+snapshot_download('Qwen/Qwen3-4B-Thinking-2507', revision=os.environ['TEACHER_REVISION'],
+                  token=os.environ['HF_TOKEN'],
+                  allow_patterns=['*.json','*.safetensors','*.jinja','*.txt'])
+print('teacher downloaded at', os.environ['TEACHER_REVISION'])
+"
+mark TEACHER_READY
+
+# A wrong positional basis would invalidate every KL this pod measures, and it
+# does not raise on its own. The search runs on the teacher, so the teacher is
+# what gets checked.
+say "checking the teacher's RoPE base resolves in /opt/train"
+/opt/train/bin/python -c "
+import os, sys, transformers
+sys.path.insert(0, '/workspace/aad/src')
+from transformers import AutoConfig, AutoModelForCausalLM
+from aadistill.models.student import assert_rope_matches_config, stored_rope_base
+rev = os.environ['TEACHER_REVISION']
+cfg = AutoConfig.from_pretrained('Qwen/Qwen3-4B-Thinking-2507', revision=rev)
+stored = stored_rope_base(cfg)
+import torch
+with torch.device('meta'):
+    m = AutoModelForCausalLM.from_config(cfg)
+base = assert_rope_matches_config(m, cfg, 'teacher')
+print(f'  transformers {transformers.__version__}: stored {stored:,.0f}, '
+      f'runtime {base:,.0f} OK')
+if abs(stored - 5_000_000) > 1:
+    sys.exit(f'teacher records RoPE base {stored}, expected 5,000,000')
+"
+mark ROPE_OK
+
+say "CPU test suite"
+cd "$REPO" && /opt/train/bin/python -m pytest tests/ -q \
+    --ignore=tests/data/test_recovery_corpus_pipeline.py 2>&1 | tail -4
+mark TESTS_OK
+
+nvidia-smi --query-gpu=name,memory.total,driver_version --format=csv,noheader
+mark SETUP_DONE

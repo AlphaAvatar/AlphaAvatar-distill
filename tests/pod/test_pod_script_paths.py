@@ -30,9 +30,21 @@ RELAY_PREFIXES = {
     "e1_scaling_20260801",
     "e5_start",
     "transfer",
+    "e7_streams_20260809",
+    # Created by scripts/data/stage_e8_inputs.py, roundtrip-verified there.
+    "e8_inputs_20260810",
+    # Created by the documented dev-box upload of the treatment initialization,
+    # which `e8b_launch.py` refuses to create a pod without.
+    "e8_init_20260810",
 }
 # Local trees inside the checked-out repo on the pod.
 LOCAL_PREFIXES = {
+    # The whole Stage 1 tree, not one checkpoint: E8 adds a calibration set, a
+    # depth search and a second initialization under it, and enumerating each new
+    # directory would make this a changelog rather than a guard against `stage4/`.
+    "artifacts/stage1",
+    "artifacts/eval",
+    "data/eval_behavior_v0",
     "artifacts/stage1/qwen3_0p6b_init_v0",
     "artifacts/stage3",
     "artifacts/audit",
@@ -42,8 +54,11 @@ LOCAL_PREFIXES = {
     "tests",
     "src",
 }
-SCRIPTS = (sorted(POD.glob("e[0-9]_setup.sh")) + sorted(POD.glob("e[0-9]_driver.py"))
-           + sorted(POD.glob("e[0-9]_pilot.py")))
+# `e[0-9]*` rather than `e[0-9]`: E8 splits into `e8a_*` and `e8b_*`, and the
+# narrower glob silently excluded them — a contract test that does not cover the
+# newest scripts is the failure mode it exists to prevent.
+SCRIPTS = (sorted(POD.glob("e[0-9]*_setup.sh")) + sorted(POD.glob("e[0-9]*_driver.py"))
+           + sorted(POD.glob("e[0-9]*_pilot.py")))
 
 # `stageN` names that are real. Anything else is almost certainly sed damage:
 # the project has stages 0-6 but only these directory families exist.
@@ -98,7 +113,8 @@ def test_pinned_hashes_are_full_length_sha256(script):
         assert len(value) == 64, f"{script.name}: {name} is {len(value)} chars, not 64"
 
 
-@pytest.mark.parametrize("prefix", sorted({f.name[:2] for f in POD.glob("e[0-9]_*")}))
+@pytest.mark.parametrize("prefix", sorted(
+    {f.name.split("_", 1)[0] for f in POD.glob("e[0-9]*_*")}))
 def test_setup_driver_and_launcher_agree_on_the_status_file(prefix):
     """All three components must name the SAME marker file.
 
@@ -112,13 +128,15 @@ def test_setup_driver_and_launcher_agree_on_the_status_file(prefix):
     paths = {}
     for name, pattern in (("setup", f"{prefix}_setup.sh"),
                           ("driver", f"{prefix}_driver.py"),
-                          ("launcher", f"{prefix}_launch.sh")):
+                          ("launcher", f"{prefix}_launch.sh"),
+                          ("launcher_py", f"{prefix}_launch.py")):
         f = POD / pattern
         if not f.is_file():
             continue
         text = f.read_text()
-        found = set(re.findall(r"/?workspace/(e\d+\.status)", text))
-        found |= set(re.findall(r"STATUS=\$WS/(e\d+\.status)", text))
+        found = set(re.findall(r"/?workspace/(e\d+[a-z]?\.status)", text))
+        found |= set(re.findall(r"STATUS=\$WS/(e\d+[a-z]?\.status)", text))
+        found |= set(re.findall(r'STATUS = f?"\{WS\}/(e\d+[a-z]?\.status)"', text))
         if found:
             paths[name] = found
     if len(paths) < 2:
