@@ -30,9 +30,21 @@ authorized cumulative cap:          $162.49
 ACTUAL CUMULATIVE SPEND:            $160.158
 remaining under the cap:              $2.33
 
-E8 expected / hard backstop:         $10.38 / $12.41
-ADDITIONAL AUTHORIZATION NEEDED:     $10.08   -> proposed cap $172.57
+authorized cumulative cap (E8):     $172.57   granted 2026-08-10
+E8 authorized backstop:              $12.41
+E8 spent on failed pod A attempts:    $0.83   4 infrastructure defects, all fixed
+E8 remaining:                        $11.58
+pod B hard threshold:                 $9.7130
+LEFT FOR POD A:                       $1.8670  -> its plan needs $2.7002
+E8 SHORTFALL, BLOCKING:               $0.83
 ```
+
+**E8 is stopped at a $0.83 shortfall.** Pod A has not yet run its search. Four
+launcher/setup defects were found and fixed at $0.83 total, each self-terminating
+within seconds; none touched the experiment's design. `plan_session` refuses every
+pod A authorization below $2.71, so the run cannot proceed without either a $0.83
+increment (proposed backstop $13.24, cap $173.40) or an explicit instruction to
+re-price pod A's 45-minute setup contingency.
 
 **Plan from actual spend, never from unused room under a previous
 authorization.** The historical $149.03 is not a balance; it was exceeded by
@@ -340,18 +352,23 @@ concatenated at token level (asserted exact), with the system block emitted once
 **Nothing costing money is authorized.** $2.33 remains under the $162.49 cap;
 E8's hard backstop is $12.41, so it needs **$10.08 more** and a cap of **$172.57**.
 
-**E8 is ready and stopped at the paid gate. Every free prerequisite is done and
-verified.** Ordered next actions:
+**E8 is authorized, implemented, staged, and stopped at a $0.83 shortfall.**
+Ordered next actions:
 
-1. **Maintainer decision on $10.08.** Nothing paid may start before it. The
-   estimate is no longer provisional: the Stage 0 / init hash gate passed, so no
-   control retraining is needed and the figure stands at $12.41 hard backstop.
-2. On authorization: write the two pod sessions (`e8a_*` search, `e8b_*` train),
-   the same pattern as `e7_{setup,driver,launch}` — deliberately **not** written
-   yet, matching E7's order, so a design change costs nothing.
-3. Pod A → depth map; dev box builds the treatment init at $0; pod B measures both
-   inits' NLL, passes `validate_e8_arms.py --require-init`, trains `sa`+`sb`,
-   evaluates, syncs.
+1. **Maintainer decision on the $0.83.** Pod A's plan needs $2.71 and $1.87
+   remains after pod B's reserved $9.7130. Nothing paid may start before it.
+2. `scripts/pod/e8a_launch.py --scr <new> --session-commit <HEAD> --bundle <new>
+   --authorized-usd 2.71 --host-draws 4`. All four fixes are in; a cold host or a
+   pod that never starts now redraws instead of aborting.
+3. Dev box, $0: `scripts/training/build_and_stage_e8_init.py --frozen-map <fetched>`
+   builds the treatment init, verifies it against the control, uploads it and
+   prints pod B's `--treatment-init-sha256`.
+4. `scripts/pod/e8b_launch.py … --treatment-init-sha256 <hash> --authorized-usd
+   <12.41 − actual pod A spend, asserted ≥ 9.7130>`.
+5. `scripts/evaluation/analyze_e8.py --bootstrap 10000`, then the records.
+
+**Durability is done** (`logs/e8_relay_manifest.json`): 13/13 staged and
+roundtrip-verified, including the 1.95 GB Stage 0 cache and `warmup_v1`, its input.
 
 **No other follow-up is running or planned.** A 2.96M + FineWeb confirmation, a
 FineWeb-ratio sweep, P2-5.50M, on-policy/GKD, a second contribution map and any E9
