@@ -81,6 +81,19 @@ def main() -> None:
     n_params = sum(p.numel() for p in student.parameters())
     print(f"Student: {n_params / 1e6:.1f}M params", flush=True)
 
+    # The student must inherit the teacher's positional basis. Checked against the
+    # runtime frequencies of both models rather than a config attribute, because
+    # the config attribute is exactly what the transformers 4.x/5.x
+    # `rope_parameters` skew gets wrong — silently, and by 500x on this teacher.
+    from aadistill.models.student import assert_rope_matches_config
+    student_rope = assert_rope_matches_config(student, student_cfg, "student")
+    teacher_rope = assert_rope_matches_config(teacher, teacher.config,
+                                              config["teacher_model_id"])
+    if abs(student_rope - teacher_rope) / teacher_rope > 1e-3:
+        raise RuntimeError(
+            f"student RoPE base {student_rope:,.0f} != teacher {teacher_rope:,.0f}")
+    print(f"RoPE base {student_rope:,.0f} matches the teacher", flush=True)
+
     baseline_record = None
     if config.get("save_random_baseline"):
         baseline_dir = output_dir / "random_baseline"
@@ -90,8 +103,31 @@ def main() -> None:
                            "seed": config["seed"]}
         print(f"Saved random baseline to {baseline_dir}", flush=True)
 
+    # The only E8 variable. When absent the positional pairwise-merge map is
+    # used, so every earlier Stage 1 config keeps its exact behaviour; when
+    # present it replaces the depth map and nothing else — the projection, the
+    # Q-head rule, the FFN neuron rule and the norm treatment below are reached
+    # identically either way (asserted in tests/init/test_contribution.py).
+    kept_layers = None
+    depth_map_record = None
+    if config.get("depth_map_path"):
+        dm_path = REPO_ROOT / config["depth_map_path"]
+        if not dm_path.is_file():
+            raise FileNotFoundError(f"depth map missing: {dm_path}")
+        depth_map_record = json.loads(dm_path.read_text())
+        kept_layers = list(depth_map_record["kept_teacher_layers"])
+        if depth_map_record.get("teacher", {}).get("revision") not in (
+                None, config.get("teacher_revision")):
+            raise ValueError(
+                f"depth map was searched against teacher revision "
+                f"{depth_map_record['teacher']['revision']} but this init uses "
+                f"{config.get('teacher_revision')}")
+        depth_map_record["depth_map_sha256"] = sha256_file(dm_path)
+        print(f"depth map from {config['depth_map_path']}: keeping {kept_layers}",
+              flush=True)
+
     started = time.time()
-    diagnostics = init_student(teacher, student, state)
+    diagnostics = init_student(teacher, student, state, kept_layers=kept_layers)
     init_seconds = time.time() - started
     print(f"Init done in {init_seconds:.0f}s; projection energy captured "
           f"{diagnostics['projection']['energy_captured_frac']:.4f}", flush=True)
@@ -146,8 +182,14 @@ def main() -> None:
             "config": student_cfg.to_diff_dict(),
             "num_parameters": n_params,
             "dtype": config["dtype"],
+            "resolved_rope_base": student_rope,
+        },
+        "environment": {
+            "transformers": __import__("transformers").__version__,
+            "torch": torch.__version__,
         },
         "init_diagnostics": diagnostics,
+        "depth_map_source_artifact": depth_map_record,
         "init_seconds": round(init_seconds, 1),
         "forward_smoke": smoke,
         "reload_check": reload_record,

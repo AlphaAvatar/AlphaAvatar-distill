@@ -1,9 +1,16 @@
-**Updated:** 2026-08-09 · branch `main` · commit `9c83a9c` · working tree clean
-**No pods running. Nothing billing.** **1,084 CPU tests pass**, 3 skipped.
+**Updated:** 2026-08-10 · branch `main` · commit `864dd71` + E8 preparation ·
+working tree dirty
+**No pods running. Nothing billing.** **1,138 CPU tests pass**, 3 skipped.
 
-**Experiment 7 is complete.** Stage 3 remains open: no model has passed a
+**Experiment 7 is complete. Experiment 8 is prepared, preregistered and blocked
+on authorization** ([`e8_preregistration.md`](e8_preregistration.md)) — it needs
+**$10.08** above the current cap. Stage 3 remains open: no model has passed a
 prospectively defined behaviour-recovery gate, and **nothing yet moves autonomous
 reasoning correctness**.
+
+**One dev-box job is running, free:** Stage 0 activation-statistics regeneration
+(`artifacts/stage0/regen_tf513.log`, ~7 h CPU). It is a **prerequisite for E8** —
+see §0.5.
 
 This file is a **snapshot of the current state**, not a history. Every completed
 experiment lives in [`EXPERIMENTS.md`](EXPERIMENTS.md) and every decision in
@@ -22,6 +29,9 @@ temporary canary cap:               $150.41   spent, closed
 authorized cumulative cap:          $162.49
 ACTUAL CUMULATIVE SPEND:            $160.158
 remaining under the cap:              $2.33
+
+E8 expected / hard backstop:         $10.38 / $12.41
+ADDITIONAL AUTHORIZATION NEEDED:     $10.08   -> proposed cap $172.57
 ```
 
 **Plan from actual spend, never from unused room under a previous
@@ -69,6 +79,27 @@ teardown. **`--terminate-after` is a redundant third layer and is not a stop
 mechanism** — it has never been observed to fire. Verified live end-to-end by the
 control-plane canary ([`e7_canary_rerun_report.md`](e7_canary_rerun_report.md),
 12/12) and exercised for 635 minutes by E7 without incident.
+
+### 0.5 Two prerequisite facts found on 2026-08-10, both binding
+
+**The Stage 0 activation cache was lost.**
+`artifacts/stage0/qwen3_4b_thinking_v1/activation_stats.safetensors` (1.95 GB,
+sha256 `aaeb2e4c…`) is not on the dev box and was **never on the relay** — its 780
+files contain no `stage0/` path. Stage 1 cannot construct *any* initialization
+without it. Regenerating at $0; E8 is gated on a rebuilt **positional** init
+hashing to `86fbba78…`, which is what proves a new init differs only in its depth
+map. If that hash does not match, stop and report — the projection can no longer
+be proven shared. [decisions](decisions.md) 2026-08-10.
+
+**The canonical environment for Stage 1 artifacts is transformers 5.13.1 / torch
+2.13.0** — the repo `.venv`, not the other venv on this box. The Stage 1
+checkpoint's config stores `rope_theta` in the transformers-5 `rope_parameters`
+dict; a **4.x** reader silently falls back to 10,000 (500× wrong) and reports
+holdout NLL **11.3953** instead of **11.7482**, with nothing raising. The teacher
+is immune, which is what makes it easy to miss. No trained arm is affected — the
+pods already assert `ROPE_OK` — but the *measurement* path did not, and now does
+(`measure_init_nll.py`, `init_stage1.py`). Under 5.13.1 the historical value
+reproduces exactly: 11.748248 on 21,080 positions.
 
 ---
 
@@ -251,6 +282,15 @@ deliberate frozen-record launcher exemptions in the `$(ls …)` lint.
 | D0↔D1 corpus audit | `scripts/data/audit_d1_corpus.py` | overlap, shares, budget, residual mismatch |
 | strict final-answer rule | `src/aadistill/evaluation/strict_answer.py` | replaces last-number GSM8K scoring; 17 tests |
 | offline GSM8K re-scoring | `scripts/evaluation/rescore_gsm8k.py` | re-scored all 25 E1 arms, $0 |
+| teacher block bypass + greedy contribution search (E8) | `src/aadistill/init/contribution.py` | module-list bypass verified against an identity-block path; 260-evaluation greedy; domain-balanced KL; 23 tests |
+| explicit depth map into Stage 1 init | `src/aadistill/init/sandwich.py` (`explicit_depth_map`, `kept_layers=`) | feeding it the positional map's own representatives reproduces that init **bitwise** |
+| depth-search driver + resume | `scripts/training/search_depth_map.py` | self-consistency gate, positional-map comparison, full per-round tables, auto cache fallback; 9 end-to-end CPU tests |
+| frozen E8 calibration mixture | `scripts/data/build_e8_calibration.py` | 67 items, 59,763 positions, 5 domains, `d65c1f40…`; excludes the rung, the val slice and prompt-content collisions |
+| calibration leakage proof | `scripts/data/check_e8_calibration_leakage.py` | six fail-closed checks; caught two real collisions |
+| mandatory hash-bound init NLL | `src/aadistill/init/nll_gate.py` + `scripts/evaluation/measure_init_nll.py` | an init is incomplete without its own NLL; inherited records rejected; 11 tests |
+| masked teacher-native held-out metrics | `src/aadistill/evaluation/init_nll.py` | assistant-target NLL/KL/top-1/rank on the pack's val slice |
+| E8 arm builder + pre-training gate | `scripts/training/{build_e8_configs,validate_e8_arms}.py` | realized diff exactly `{student_path, run_name, out_dir, _purpose}`; gate fails closed |
+| E8 four-threshold pricing | `scripts/training/plan_e8_budget.py` | two pods, search cost derived from forward-pass arithmetic |
 
 Chunked CE/KD was assessed and is **not** needed: `block_len` stays 8192, which
 the canonical recipe already runs.
@@ -291,13 +331,26 @@ concatenated at token level (asserted exact), with the system block emitted once
 
 ## 9. Next actions
 
-**Nothing costing money is authorized.** $2.33 remains under the $162.49 cap —
-not enough for any two-seed arm at this rung (~$2.2 of training alone, before
-evaluation). The next paid step needs a maintainer decision.
+**Nothing costing money is authorized.** $2.33 remains under the $162.49 cap;
+E8's hard backstop is $12.41, so it needs **$10.08 more** and a cap of **$172.57**.
 
-**No follow-up is running or planned.** A 2.96M + FineWeb confirmation, an E8
-contribution-guided initialization experiment, and anything else are **returned
-for a separate decision** and must not be launched on the strength of E7.
+**E8 is ready and stopped at the paid gate.** Ordered next actions:
+
+1. **Wait for the Stage 0 regeneration** (`artifacts/stage0/regen_tf513.log`), then
+   rebuild the *positional* init from it and check `model.safetensors` against
+   `86fbba78…`. This is free and it decides whether E8 is a single-variable
+   experiment (§0.5).
+2. **Maintainer decision on $10.08.** Nothing paid may start before it.
+3. On authorization: write the two pod sessions (`e8a_*` search, `e8b_*` train),
+   the same pattern as `e7_{setup,driver,launch}` — deliberately **not** written
+   yet, matching E7's order, so a design change costs nothing.
+4. Pod A → depth map; dev box builds the treatment init at $0; pod B measures both
+   inits' NLL, passes `validate_e8_arms.py --require-init`, trains `sa`+`sb`,
+   evaluates, syncs.
+
+**No other follow-up is running or planned.** A 2.96M + FineWeb confirmation, a
+FineWeb-ratio sweep, P2-5.50M, on-policy/GKD, a second contribution map and any E9
+combination are **out of scope** and must not be launched.
 
 **The open problem is correctness, and it is now better bounded than before.**
 Eleven interventions have moved behaviour or nothing; none has moved reasoning.
@@ -336,6 +389,7 @@ around the retired metric.
 | §31 | Experiment 7 design and preregistration | — |
 | §32–33 | control-plane canary, failed then passed 12/12 | live path verified |
 | **§34** | **Experiment 7 — general LM restored, behaviour unmoved** | **the ceiling is not a language-modelling problem** |
+| §35 | Experiment 8 design and preregistration — contribution-guided depth | prepared, blocked on $10.08 |
 
 Protocol deviations on record: [`e6b_protocol_deviations.md`](e6b_protocol_deviations.md)
 (cost overrun $0.56, lost event streams; scientific endpoint valid, operational

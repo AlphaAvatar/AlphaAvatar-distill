@@ -71,6 +71,38 @@ def depth_span_map(teacher_layers: int, student_layers: int) -> list[dict]:
     return spans
 
 
+def explicit_depth_map(kept: list[int], teacher_layers: int) -> list[dict]:
+    """Build the same span records from an externally chosen kept-layer list.
+
+    The positional map above *derives* which teacher layers survive; this takes
+    that decision as input so a contribution-guided search
+    (`aadistill.init.contribution`) can supply it without touching any other part
+    of the recipe. Student layer ``s`` represents teacher span
+    ``[kept[s], kept[s+1])`` with representative ``kept[s]`` — the identical
+    convention, which is why feeding this function the positional map's own
+    representatives reproduces that map exactly (asserted in tests).
+
+    Teacher layers before ``kept[0]`` belong to no span and are simply removed;
+    that is a legal outcome of a causal search and must not be silently
+    reinterpreted as an extra span on student layer 0.
+    """
+    if not kept:
+        raise ValueError("kept layer list is empty")
+    if len(set(kept)) != len(kept):
+        raise ValueError(f"kept layers contain duplicates: {kept}")
+    if list(kept) != sorted(kept):
+        raise ValueError(
+            f"kept layers must stay in strictly increasing teacher order: {kept}"
+        )
+    if kept[0] < 0 or kept[-1] >= teacher_layers:
+        raise ValueError(f"kept layers {kept} outside range(0, {teacher_layers})")
+    spans = []
+    for s, rep in enumerate(kept):
+        end = kept[s + 1] if s + 1 < len(kept) else teacher_layers
+        spans.append({"student": s, "teacher_span": [rep, end], "representative": rep})
+    return spans
+
+
 def select_q_heads(
     w_q: torch.Tensor, w_o: torch.Tensor,
     t_q_heads: int, t_kv_heads: int, s_q_heads: int, head_dim: int,
@@ -114,6 +146,7 @@ def _in_proj(w: torch.Tensor, norm_w: torch.Tensor, proj: torch.Tensor, scale: f
 def init_student(
     teacher, student, state: dict[str, torch.Tensor],
     proj_override: torch.Tensor | None = None,
+    kept_layers: list[int] | None = None,
 ) -> dict:
     """Initialize a student Qwen3-style model in place from the teacher.
 
@@ -123,6 +156,12 @@ def init_student(
     ``proj_override`` replaces the activation-PCA stream projection with a
     caller-supplied orthonormal basis; used by tests (identity projection at
     equal width must reproduce the teacher exactly) and future ablations.
+
+    ``kept_layers`` replaces the positional depth map with an explicit ordered
+    list of surviving teacher layers, and **only** that: the projection, the
+    Q-head rule, the FFN neuron rule, the norm treatment and the scale
+    compensation below are reached identically either way. That is what makes a
+    depth-map experiment a single-variable experiment.
     """
     t_cfg, s_cfg = teacher.config, student.config
     if s_cfg.num_key_value_heads != t_cfg.num_key_value_heads:
@@ -156,7 +195,17 @@ def init_student(
         proj, proj_diag = stream_projection(state, d_s, stream_points, point_weights)
         proj_diag["point_weights"] = point_weights
 
-    spans = depth_span_map(t_cfg.num_hidden_layers, s_cfg.num_hidden_layers)
+    if kept_layers is None:
+        spans = depth_span_map(t_cfg.num_hidden_layers, s_cfg.num_hidden_layers)
+        depth_source = "positional_pairwise_merge"
+    else:
+        if len(kept_layers) != s_cfg.num_hidden_layers:
+            raise ValueError(
+                f"kept_layers has {len(kept_layers)} entries but the student has "
+                f"{s_cfg.num_hidden_layers} layers"
+            )
+        spans = explicit_depth_map(list(kept_layers), t_cfg.num_hidden_layers)
+        depth_source = "explicit_kept_layers"
     t_layers, s_layers = teacher.model.layers, student.model.layers
     layer_records = []
     for span in spans:
@@ -215,6 +264,12 @@ def init_student(
     return {
         "projection": proj_diag,
         "scale_compensation": scale,
+        "depth_map_source": depth_source,
+        "kept_teacher_layers": [s["representative"] for s in spans],
+        "removed_teacher_layers": sorted(
+            set(range(t_cfg.num_hidden_layers))
+            - {s["representative"] for s in spans}
+        ),
         "depth_map": [
             {k: r[k] for k in ("student_layer", "teacher_span", "representative")}
             for r in layer_records

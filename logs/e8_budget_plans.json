@@ -1,0 +1,132 @@
+{
+  "price_per_hour": 0.99,
+  "actual_cumulative_baseline_usd": 160.158,
+  "current_authorized_cap_usd": 162.49,
+  "available_under_cap_usd": 2.33,
+  "pod_a": {
+    "price_per_hour": 0.99,
+    "authorized_usd": 2.75,
+    "expected_minutes": 121.5,
+    "soft_stop_minutes": 133.65,
+    "artifact_recovery_reserve_minutes": 30.0,
+    "hard_terminate_minutes": 163.65,
+    "step_time": {
+      "seconds": 4.15,
+      "source": "unused; pod A does not train",
+      "measured": true
+    },
+    "breakdown": [
+      {
+        "name": "setup",
+        "minutes": 45.0
+      },
+      {
+        "name": "train",
+        "minutes": 0.0
+      },
+      {
+        "name": "evaluate",
+        "minutes": 0.0
+      },
+      {
+        "name": "transfer",
+        "minutes": 0.0
+      },
+      {
+        "name": "contribution_search_260_evaluations",
+        "minutes": 59.5
+      },
+      {
+        "name": "self_consistency_and_positional_baseline",
+        "minutes": 4.0
+      },
+      {
+        "name": "artifact_manifest_and_verify",
+        "minutes": 8.0
+      },
+      {
+        "name": "artifact_synchronization",
+        "minutes": 5.0
+      }
+    ],
+    "notes": [],
+    "expected_usd": 2.0048,
+    "soft_stop_usd": 2.2052,
+    "artifact_recovery_reserve_usd": 0.495,
+    "hard_terminate_usd": 2.7002,
+    "label": "pod A \u2014 contribution search",
+    "search_cost_model": {
+      "forward_passes": 17487,
+      "tokens_per_item": 892.0,
+      "petaflops": 100.33,
+      "sustained_tflops_assumed": 45.0,
+      "overhead_factor": 1.6,
+      "unused": 59763.0
+    }
+  },
+  "pod_b": {
+    "price_per_hour": 0.99,
+    "authorized_usd": 9.75,
+    "expected_minutes": 507.88000000000005,
+    "soft_stop_minutes": 558.6680000000001,
+    "artifact_recovery_reserve_minutes": 30.0,
+    "hard_terminate_minutes": 588.6680000000001,
+    "step_time": {
+      "seconds": 4.15,
+      "source": "E6b measured 4.15 s/step at block_len 8192; E8 trains the identical recipe with no extra stream",
+      "measured": true
+    },
+    "breakdown": [
+      {
+        "name": "setup",
+        "minutes": 45.0
+      },
+      {
+        "name": "train",
+        "minutes": 403.38000000000005
+      },
+      {
+        "name": "evaluate",
+        "minutes": 16.5
+      },
+      {
+        "name": "transfer",
+        "minutes": 20.0
+      },
+      {
+        "name": "init_nll_treatment",
+        "minutes": 6.0
+      },
+      {
+        "name": "init_nll_baseline_remeasured",
+        "minutes": 6.0
+      },
+      {
+        "name": "pretraining_gate_validate_e8_arms",
+        "minutes": 3.0
+      },
+      {
+        "name": "artifact_manifest_and_verify",
+        "minutes": 8.0
+      }
+    ],
+    "notes": [],
+    "expected_usd": 8.38,
+    "soft_stop_usd": 9.218,
+    "artifact_recovery_reserve_usd": 0.495,
+    "hard_terminate_usd": 9.713,
+    "label": "pod B \u2014 init NLL + 2 x 2.96M recovery + evaluation",
+    "n_trained_arms": 2,
+    "train_minutes": 403.4
+  },
+  "e8_expected_usd": 10.38,
+  "e8_hard_backstop_usd": 12.41,
+  "additional_authorization_required_usd": 10.08,
+  "proposed_new_cumulative_cap_usd": 172.57,
+  "single_seed_not_offered_because": "the behaviour-metric seed noise floor is 0.1290, wider than any effect E8 could claim; a one-seed arm cannot be read",
+  "calibration": {
+    "items": 67,
+    "prediction_positions": 59763
+  },
+  "subset_evaluations": 260
+}

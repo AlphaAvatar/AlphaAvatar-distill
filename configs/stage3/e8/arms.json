@@ -1,0 +1,47 @@
+{
+  "treatment_init": "artifacts/stage1/e8_contribution_init_v1/checkpoint",
+  "allowed_diff": [
+    "_purpose",
+    "out_dir",
+    "run_name",
+    "student_path"
+  ],
+  "arms": [
+    {
+      "name": "e8_contrib_r2960k_sa",
+      "seed_alias": "sa",
+      "path": "configs/stage3/e8/e8_contrib_r2960k_sa.json",
+      "control": "configs/stage3/e1/e1_r2960k_sa_pca.json",
+      "config_sha256": "8ed52bdb0c9db98604919dee389404e86e7c4410952b9aa923b0571ae02982df",
+      "control_sha256": "c2e46e61b6b10ef0046acc2e1cf82c613991af113399568a5605fa819d6bd07c",
+      "seed": 20260726,
+      "rung": 2960000,
+      "total_steps": 2916,
+      "blocks_per_step": 2,
+      "loss": {
+        "ce_weight": 0.25,
+        "kd_weight": 1.0,
+        "kd_temperature": 1.0,
+        "kd_scope": "all"
+      }
+    },
+    {
+      "name": "e8_contrib_r2960k_sb",
+      "seed_alias": "sb",
+      "path": "configs/stage3/e8/e8_contrib_r2960k_sb.json",
+      "control": "configs/stage3/e1/e1_r2960k_sb_pca.json",
+      "config_sha256": "29f044fe0bac281710f1159d00e039c000d4953129f7389fd5ef64dedfbb58f5",
+      "control_sha256": "8b385927accb73dd24233b69d0bf70bffd026d1a22e943bc39a0e7cfdc585afe",
+      "seed": 20260801,
+      "rung": 2960000,
+      "total_steps": 2916,
+      "blocks_per_step": 2,
+      "loss": {
+        "ce_weight": 0.25,
+        "kd_weight": 1.0,
+        "kd_temperature": 1.0,
+        "kd_scope": "all"
+      }
+    }
+  ]
+}

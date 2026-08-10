@@ -4784,3 +4784,98 @@ watchdog polled throughout and was never needed; all four `train_log.jsonl`
 streams were relayed continuously **and** passed the `final_required` gate at
 teardown (quiescent, marker-backed, six completion markers matched). Setup ran
 58 min against 45 budgeted and the contingency absorbed it. Nothing was lost.
+
+---
+
+## 35. Experiment 8 — contribution-guided depth initialization: design and preregistration
+
+**Status: prepared, preregistered, NOT authorized.** No GPU has been used. The
+prospective record is [`e8_preregistration.md`](e8_preregistration.md) and is not
+to be edited to match any outcome.
+
+**Question.** Does position-based depth compression discard teacher blocks that
+are disproportionately important to the teacher's predictive function, and does a
+contribution-guided layer map produce a better student under the same downstream
+recipe?
+
+### 35.1 What the current map actually does
+
+`depth_span_map(36, 28)` keeps `[0,1,2,3,4,6,8,10,12,14,16,18,20…35]` and drops
+`{5,7,9,11,13,15,17,19}`. The band's *position* was chosen by a logged single-axis
+ablation (early band → holdout 10.48, middle band → 3.88). Which blocks die inside
+it was never measured: they are the odd ones because the merge steps by two.
+
+### 35.2 The selector, frozen before any map was seen
+
+Primary: forward `KL(teacher ‖ teacher-with-S-bypassed)` over all prediction
+positions, aggregated as an unweighted mean over 5 domains of the unweighted mean
+over each domain's sub-types. Iterative greedy removal, 8 rounds, **260** subset
+evaluations, full per-round table saved, ties on the lower layer index, no
+positional constraint. Bypass is literal module-list removal — the same operation
+the depth map performs — verified against an independent identity-block path.
+
+Diagnostics (`reasoning`, `final_answer`, `think_close`, `eos`, `tool_close`,
+`assistant`, CE delta) are recorded per candidate and **preregistered as unable to
+select**. The search refuses to run unless `KL(intact‖intact) ≤ 1e-6`, and it
+scores the positional map by the same objective for comparison.
+
+### 35.3 Calibration set — `artifacts/stage1/e8_calibration_v1`
+
+67 items, **59,763** prediction positions, 7 sub-types across 5 domains at
+8,287–8,749 positions each. Content sha256 `d65c1f40e4837ea1…`. General text is
+raw FineWeb-Edu [40000, 40040); the other six are teacher-native renders from the
+corpus tail **beyond the 5.50M rung**.
+
+**Two leakage collisions were caught and fixed**, both invisible to a session-id
+filter, and both mattering because the frozen 150-prompt battery is sampled from
+the 0.86M rung — a prefix of the rung the arms train on:
+
+1. `glaive-000749#t3` — a different source item with byte-identical prompt text to
+   a consumed session (tool-calling prompts are formulaic);
+2. `openmath-000712#t1` — a session inside the pack's own 16-block validation
+   slice, which lives in the same tail the calibration set is drawn from.
+
+Six independent checks now pass clean, plus content-hash and index-range
+disjointness against `holdout_v1`, `warmup_v1`, `eval_behavior_v0` and both E7
+streams.
+
+### 35.4 Two prerequisite findings, neither of which E8 went looking for
+
+* **The Stage 0 activation cache (1.95 GB, `aaeb2e4c…`) was lost** — not on the
+  dev box, never on the relay. Stage 1 cannot construct any initialization without
+  it. Regenerating at $0; E8 is gated on a rebuilt *positional* init hashing to
+  `86fbba78…`, which is what proves the treatment differs only in the depth map.
+  See [decisions](decisions.md), 2026-08-10.
+* **A silent 500× RoPE misread on the measurement path.** The Stage 1 checkpoint's
+  config stores `rope_theta` in the transformers-5 `rope_parameters` dict; a 4.x
+  reader falls back to 10,000 and reports holdout NLL 11.3953 instead of 11.7482
+  without raising. No trained arm is affected — the pods already asserted
+  `ROPE_OK` — but the measurement path did not. Now it does.
+
+### 35.5 The mandatory initialization NLL
+
+**An initialization checkpoint is not complete until its own NLL artifact
+exists.** Enforced in `src/aadistill/init/nll_gate.py`: the record is bound to the
+checkpoint's recomputed `model.safetensors` hash, every individual series carries
+that hash too, self-declared inherited records are rejected, and a missing series
+is a failure rather than a shorter report. Three series, never averaged:
+`holdout_v1`, `fineweb_val_e7`, `teacher_native_val`. The gate never looks at
+whether the NLL is *good* — a record with nll 99.0 passes, by test.
+
+### 35.6 Arms and identity
+
+Control: the retained `e1_r2960k_{sa,sb}_pca` (usable 0.8400, correct 0.2067), not
+retrained. Treatment: `e8_contrib_r2960k_{sa,sb}`, whose realized config diff
+against the control is exactly `{student_path, run_name, out_dir, _purpose}`.
+Loader-verified budget: 1,944 blocks, **2,960,507** unique CE targets, exactly
+**3.0** exposures, **8,881,521** cumulative.
+
+### 35.7 Cost and the blocker
+
+$10.38 expected, **$12.41** hard backstop across two pods (search; then init NLL +
+2 × 2.96M + evaluation). Actual cumulative spend $160.158 against a $162.49
+authorization leaves $2.33, so E8 needs **$10.08** more and a proposed cap of
+**$172.57**. Not reduced to one seed: the behaviour seed-noise floor is 0.1290,
+wider than any effect E8 could claim.
+
+1,138 tests pass on CPU in both environments, 3 skipped.

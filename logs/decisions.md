@@ -1882,3 +1882,66 @@
   a separate decision.
 - **Revisit when:** an intervention is proposed that targets the correctness
   bottleneck directly rather than through a diagnostic.
+
+## 2026-08-10 — Pin the Stage 1 environment, and fix a silent 500× RoPE misread on the measurement path
+
+- **Context:** preparing E8 needed a fresh initialization-time NLL for the pinned
+  Stage 1 checkpoint. Measured on this dev box it came out at **11.3953**; the
+  Stage 1 gate recorded **11.7482** on the same weights (sha256 `86fbba78…`), the
+  same 40 documents, the same 21,080 positions and the same protocol. The teacher
+  reproduced exactly (2.6265 vs 2.6264), so the evaluator and the data were fine.
+- **Cause:** the Stage 1 checkpoint's `config.json` was written by transformers
+  5.13.1 and stores `rope_theta: 5000000` inside the transformers-5
+  `rope_parameters` dict. A transformers **4.x** reader falls back to the class
+  default **10,000** — 500× wrong — and nothing raises. The teacher is immune
+  because its config predates the format change, which is what makes the skew
+  easy to miss.
+- **Decision:** the canonical environment for Stage 1 artifacts is **transformers
+  5.13.1 / torch 2.13.0** (the repo `.venv`), and `assert_rope_matches_config` is
+  now called on the *measurement* path too — `measure_init_nll.py` and
+  `init_stage1.py` both refuse to proceed and both record the resolved base.
+- **Scope of the damage: none to any trained arm.** The guard already existed and
+  `scripts/pod/*_setup.sh` already asserted `ROPE_OK` in both pod venvs before
+  training. What was missing was the same assertion where numbers are *read*,
+  which is the only reason a wrong number was ever produced.
+- **Alternatives considered:** rewriting the checkpoint's config into the 4.x
+  format — rejected, it would change the pinned checkpoint directory that every
+  logged run forks from; treating 11.3953 as a new baseline — rejected, it is an
+  artifact of a misread config.
+- **Consequence for E8:** the baseline initialization is **remeasured** on the
+  same device by the same evaluator as the treatment, and the historical 11.7482
+  is reported as a separately-labelled third number, never substituted.
+- **Revisit when:** the pod image's transformers major version changes, or a
+  checkpoint is saved by a different major version than the one that reads it.
+
+## 2026-08-10 — The Stage 0 activation cache was lost; regenerate it and prove the initialization is unchanged
+
+- **Context:** `artifacts/stage0/qwen3_4b_thinking_v1/activation_stats.safetensors`
+  (1.95 GB, sha256 `aaeb2e4c…`) is absent from the dev box and was never on the
+  relay — the relay's 780 files contain no `stage0/` path. Stage 1 cannot build
+  *any* initialization without it, so E8 was blocked on an artifact whose loss
+  nobody had noticed. Only the config survived.
+- **Decision:** regenerate it on the dev box CPU at $0 (the teacher is already
+  cached at the pinned revision; ~7 h), and gate E8 on two hashes: the
+  regenerated statistics against `aaeb2e4c…`, and a **rebuilt positional
+  initialization** against `86fbba78…`. The second is the one that matters — it
+  is what proves the treatment initialization differs from the control's in the
+  depth map and nothing else.
+- **Registered branch, fixed before the answer is known:** both hashes match →
+  proceed; statistics drift but the rebuilt init still matches → proceed and
+  record the drift; the rebuilt init does **not** match → stop and report, because
+  the projection can no longer be proven shared. Retraining the control from a
+  rebuilt positional init (+$6.7, 2 arms) would then be a maintainer decision.
+- **Also decided:** the statistics are **not** shipped to a pod. At 1.95 GB
+  against a 0.72 MB/s uplink and a relay holding 84.69 GB against a
+  private-storage limit it has already hit, the cheaper artifact is the 1.19 GB
+  initialized checkpoint — so the dev box builds the initialization (12 s of CPU)
+  and ships that. This is what splits E8 into two pods.
+- **Alternatives considered:** regenerating on a pod — rejected, the collector
+  accumulates float64 on the CPU, so it would be ~7 h of paid time; a reduced
+  sufficient-statistics artifact (~107 MB) — rejected as new code and a new format
+  for a one-off transfer problem; moving the collector to the GPU — rejected, it
+  would change the numerics and destroy the hash comparison that is the point.
+- **Revisit when:** any Stage 0 or Stage 1 artifact is deleted again. The real
+  lesson is that a 1.95 GB artifact on the critical path of every future
+  initialization had no manifest entry and no off-box copy.
