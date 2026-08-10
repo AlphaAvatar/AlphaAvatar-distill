@@ -188,6 +188,13 @@ fetch('stage1/qwen3_0p6b_init_v0/checkpoint',
       ['config.json', 'generation_config.json', 'model.safetensors',
        'tokenizer.json', 'tokenizer_config.json', 'chat_template.jinja'],
       '/workspace/aad/artifacts/stage1/qwen3_0p6b_init_v0/checkpoint')
+# The control's own manifest, so the step-0 comparison can name the control's
+# depth map from the record rather than inferring it from the geometry.
+fetch('e8_inputs_20260810/stage1', ['qwen3_0p6b_init_v0_manifest.json'],
+      '/workspace/aad/artifacts/stage1')
+import shutil
+shutil.move('/workspace/aad/artifacts/stage1/qwen3_0p6b_init_v0_manifest.json',
+            '/workspace/aad/artifacts/stage1/qwen3_0p6b_init_v0/manifest.json')
 "
 python3 -c "
 import hashlib, sys
@@ -231,15 +238,20 @@ a = json.load(open(base)); b = json.load(open(
 if json.dumps(a, sort_keys=True) != json.dumps(b, sort_keys=True):
     sys.exit('TREATMENT CONFIG DIFFERS FROM THE CONTROL — only the depth map may change')
 m = json.load(open('/workspace/aad/artifacts/stage1/e8_contribution_init_v1/manifest.json'))
-d = m['init_diagnostics']
-print('depth map source', d['depth_map_source'])
-print('kept   ', d['kept_teacher_layers'])
-print('removed', d['removed_teacher_layers'])
-if d['depth_map_source'] != 'explicit_kept_layers':
-    sys.exit('the treatment init was not built from an explicit depth map')
-if len(d['kept_teacher_layers']) != 28:
+d = m.get('init_diagnostics') or {}
+# .get, not [], on every one: a manifest written before these keys existed would
+# otherwise die with a bare KeyError on a billing pod instead of saying what is
+# wrong. The pinned control's manifest is exactly such a manifest.
+print('depth map source', d.get('depth_map_source'))
+print('kept   ', d.get('kept_teacher_layers'))
+print('removed', d.get('removed_teacher_layers'))
+if d.get('depth_map_source') != 'explicit_kept_layers':
+    sys.exit(f\"the treatment init records depth_map_source \"
+             f\"{d.get('depth_map_source')!r}, not 'explicit_kept_layers' — it was \"
+             f\"not built from a frozen depth map\")
+if len(d.get('kept_teacher_layers') or []) != 28:
     sys.exit('treatment init does not keep 28 teacher layers')
-if d['removed_teacher_layers'] == [5, 7, 9, 11, 13, 15, 17, 19]:
+if d.get('removed_teacher_layers') == [5, 7, 9, 11, 13, 15, 17, 19]:
     sys.exit('the treatment map IS the positional map; there is no treatment')
 print('treatment initialization verified')
 "

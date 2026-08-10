@@ -210,10 +210,22 @@ def main() -> int:
     if init_manifest.is_file():
         diag = (json.loads(init_manifest.read_text()).get("init_diagnostics")
                 or {})
+        kept = diag.get("kept_teacher_layers")
+        removed = diag.get("removed_teacher_layers")
+        # The pinned control's manifest predates these two keys but does record
+        # the per-layer spans, so derive them rather than reporting nulls for the
+        # arm the treatment is being compared against.
+        derived = False
+        if kept is None and diag.get("depth_map"):
+            kept = [d["representative"] for d in diag["depth_map"]]
+            n_teacher = max(max(d["teacher_span"]) for d in diag["depth_map"])
+            removed = sorted(set(range(n_teacher)) - set(kept))
+            derived = True
         depth_map = {
-            "source": diag.get("depth_map_source"),
-            "kept_teacher_layers": diag.get("kept_teacher_layers"),
-            "removed_teacher_layers": diag.get("removed_teacher_layers"),
+            "source": diag.get("depth_map_source")
+                      or ("derived_from_recorded_spans" if derived else None),
+            "kept_teacher_layers": kept,
+            "removed_teacher_layers": removed,
             "init_manifest_sha256": sha256_file(init_manifest),
         }
 
