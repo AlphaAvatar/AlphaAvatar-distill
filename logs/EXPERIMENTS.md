@@ -4843,14 +4843,21 @@ streams.
 
 * **The Stage 0 activation cache (1.95 GB, `aaeb2e4c…`) was lost** — not on the
   dev box, never on the relay. Stage 1 cannot construct any initialization without
-  it. Regenerating at $0; E8 is gated on a rebuilt *positional* init hashing to
-  `86fbba78…`, which is what proves the treatment differs only in the depth map.
-  See [decisions](decisions.md), 2026-08-10.
+  it. **Regenerated at $0 and recovered bit-exactly**: 4,972 s of CPU, 949,859
+  tokens (the historical count), hashing to `aaeb2e4c…`; rebuilding the positional
+  init from it gives `86fbba78…`, byte-identical to the pinned control, with every
+  projection diagnostic equal to the last digit. **E8 is a single-variable
+  experiment.** See [decisions](decisions.md), 2026-08-10.
 * **A silent 500× RoPE misread on the measurement path.** The Stage 1 checkpoint's
   config stores `rope_theta` in the transformers-5 `rope_parameters` dict; a 4.x
   reader falls back to 10,000 and reports holdout NLL 11.3953 instead of 11.7482
   without raising. No trained arm is affected — the pods already asserted
-  `ROPE_OK` — but the measurement path did not. Now it does.
+  `ROPE_OK` — but the measurement path did not. Now it does. Adding the assertion
+  there also exposed that the guard itself could not survive a bf16 rotary buffer,
+  which is what `build_student` produces: it recovered the base by inverting
+  `inv_freq[1]`, amplifying the buffer's error 64×. It now inverts the last entry
+  (exponent ≈1.016), which is exact on fp32, within 0.3% on bf16, and still four
+  orders of magnitude from missing the 500× skew.
 
 ### 35.5 The mandatory initialization NLL
 

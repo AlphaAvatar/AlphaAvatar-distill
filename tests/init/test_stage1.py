@@ -192,6 +192,13 @@ def test_rope_guard_accepts_a_consistent_model():
     model = AutoModelForCausalLM.from_config(cfg)
     base = assert_rope_matches_config(model, cfg)
     assert abs(base - 5_000_000) / 5_000_000 < 1e-3
+    # And on a bf16 module, which is what `build_student` produces: the whole
+    # module is cast, `inv_freq` included, so the guard has to survive a
+    # low-precision rotary buffer without either failing or going blind.
+    bf16 = AutoModelForCausalLM.from_config(cfg).to(torch.bfloat16)
+    assert bf16.model.rotary_emb.inv_freq.dtype is torch.bfloat16
+    base_bf16 = assert_rope_matches_config(bf16, cfg)
+    assert abs(base_bf16 - 5_000_000) / 5_000_000 < 1e-2
 
 
 def test_rope_guard_catches_the_transformers_4x_5x_skew():
@@ -208,6 +215,10 @@ def test_rope_guard_catches_the_transformers_4x_5x_skew():
     cfg.rope_parameters = {"rope_theta": 5_000_000, "rope_type": "default"}
     with pytest.raises(ValueError, match="RoPE base mismatch"):
         assert_rope_matches_config(model, cfg, "skewed-checkpoint")
+    # Still caught on a bf16 module: the 500x gap is four orders of magnitude
+    # outside the tolerance that a low-precision buffer needs.
+    with pytest.raises(ValueError, match="RoPE base mismatch"):
+        assert_rope_matches_config(model.to(torch.bfloat16), cfg, "skewed-bf16")
 
 
 def test_manifest_records_the_library_that_decides_rope():

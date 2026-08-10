@@ -1945,3 +1945,30 @@
 - **Revisit when:** any Stage 0 or Stage 1 artifact is deleted again. The real
   lesson is that a 1.95 GB artifact on the critical path of every future
   initialization had no manifest entry and no off-box copy.
+
+## 2026-08-10 — RESOLVED: the Stage 0 / initialization hash gate passed
+
+- **Result:** the regenerated statistics hash to `aaeb2e4c…` and a rebuilt
+  positional initialization hashes to `86fbba78…` — both bit-exact against
+  records written four weeks earlier, from the logged config alone.
+  `energy_captured_frac` 0.9323228843289764, `top_eigenvalue`
+  0.5261361586510566, `min_kept_eigenvalue` 6.677785428271654e-05,
+  `final_norm_weight_range` [-0.03870667333325841, 7.125069193436976], identical
+  kept-Q-head sets and depth map.
+- **Consequence:** E8 is a single-variable experiment; the treatment
+  initialization differs from the control's only in the depth map. No control
+  retraining is required, so the cost estimate stands at $12.41 hard backstop and
+  the ask stays $10.08.
+- **Also confirmed:** the `kept_layers` addition leaves the default path
+  untouched — it produced the pinned bytes with the new code in place.
+- **Benign detail, recorded so it is not rediscovered as a bug:** `build_student`
+  casts the whole module to bf16, `inv_freq` included, so the student's *runtime*
+  RoPE base reads 4,986,576 against a stored 5,000,000 (0.27%). The buffer is
+  non-persistent, so a reloaded checkpoint rebuilds it in fp32; the saved config
+  and the saved weights are unaffected and byte-identical to the pinned artifact.
+  Only the init-time smoke forward uses the degraded buffer.
+- **Still open:** the statistics have **no off-box copy**. The relay has no room,
+  so a future loss costs ~83 min of CPU rather than being unrecoverable — which is
+  acceptable, but it is a choice, not an oversight.
+- **Revisit when:** relay storage frees up, or Stage 0 is ever re-collected with a
+  different warm-up set.

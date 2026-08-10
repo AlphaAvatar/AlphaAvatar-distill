@@ -82,14 +82,20 @@ control-plane canary ([`e7_canary_rerun_report.md`](e7_canary_rerun_report.md),
 
 ### 0.5 Two prerequisite facts found on 2026-08-10, both binding
 
-**The Stage 0 activation cache was lost.**
+**The Stage 0 activation cache was lost — and has been recovered bit-exactly.**
 `artifacts/stage0/qwen3_4b_thinking_v1/activation_stats.safetensors` (1.95 GB,
-sha256 `aaeb2e4c…`) is not on the dev box and was **never on the relay** — its 780
+sha256 `aaeb2e4c…`) was not on the dev box and was **never on the relay** — its 780
 files contain no `stage0/` path. Stage 1 cannot construct *any* initialization
-without it. Regenerating at $0; E8 is gated on a rebuilt **positional** init
-hashing to `86fbba78…`, which is what proves a new init differs only in its depth
-map. If that hash does not match, stop and report — the projection can no longer
-be proven shared. [decisions](decisions.md) 2026-08-10.
+without it. Regenerated at $0 in 4,972 s of CPU (949,859 tokens, the historical
+count) and it hashes to **`aaeb2e4c…`**; rebuilding the **positional** init from it
+gives **`86fbba78…`**, byte-identical to the pinned control init, with every
+projection diagnostic equal to the last digit. **E8 is therefore a
+single-variable experiment.** [decisions](decisions.md) 2026-08-10.
+
+The recovery worked only because the pipeline is deterministic and the hash was
+logged. **A 1.95 GB artifact on the critical path of every future initialization
+still has no off-box copy** — the relay has no room for it, so any future loss
+costs another ~83 min of CPU rather than being unrecoverable.
 
 **The canonical environment for Stage 1 artifacts is transformers 5.13.1 / torch
 2.13.0** — the repo `.venv`, not the other venv on this box. The Stage 1
@@ -334,17 +340,16 @@ concatenated at token level (asserted exact), with the system block emitted once
 **Nothing costing money is authorized.** $2.33 remains under the $162.49 cap;
 E8's hard backstop is $12.41, so it needs **$10.08 more** and a cap of **$172.57**.
 
-**E8 is ready and stopped at the paid gate.** Ordered next actions:
+**E8 is ready and stopped at the paid gate. Every free prerequisite is done and
+verified.** Ordered next actions:
 
-1. **Wait for the Stage 0 regeneration** (`artifacts/stage0/regen_tf513.log`), then
-   rebuild the *positional* init from it and check `model.safetensors` against
-   `86fbba78…`. This is free and it decides whether E8 is a single-variable
-   experiment (§0.5).
-2. **Maintainer decision on $10.08.** Nothing paid may start before it.
-3. On authorization: write the two pod sessions (`e8a_*` search, `e8b_*` train),
+1. **Maintainer decision on $10.08.** Nothing paid may start before it. The
+   estimate is no longer provisional: the Stage 0 / init hash gate passed, so no
+   control retraining is needed and the figure stands at $12.41 hard backstop.
+2. On authorization: write the two pod sessions (`e8a_*` search, `e8b_*` train),
    the same pattern as `e7_{setup,driver,launch}` — deliberately **not** written
    yet, matching E7's order, so a design change costs nothing.
-4. Pod A → depth map; dev box builds the treatment init at $0; pod B measures both
+3. Pod A → depth map; dev box builds the treatment init at $0; pod B measures both
    inits' NLL, passes `validate_e8_arms.py --require-init`, trains `sa`+`sb`,
    evaluates, syncs.
 

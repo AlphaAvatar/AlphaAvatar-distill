@@ -85,16 +85,40 @@ initialization without it, so E8 was blocked on an artifact whose loss nobody ha
 noticed. It is recoverable only because the collection is deterministic and its
 hash was recorded in the init manifest (P4 working as intended).
 
-Regeneration is running on the dev box at **$0** (`collect_stage0.py`, teacher
-already cached at the pinned revision, ~7 h of CPU). Two hashes then decide how
-E8 proceeds, and both are registered here as a branch **before** the answer is
-known:
+Regeneration ran on the dev box at **$0** (`collect_stage0.py`, teacher already
+cached at the pinned revision, 4,972 s of CPU, 949,859 tokens — exactly the
+historical count). Two hashes then decide how E8 proceeds, and both were
+registered here as a branch **before** the answer was known:
 
 | outcome | reading | action |
 | --- | --- | --- |
 | rebuilt statistics hash `aaeb2e4c…` **and** a rebuilt positional init hashes `86fbba78…` | the projection, head rule, FFN rule and norm solve are bit-identical to the control's | proceed; E8 is a single-variable experiment |
 | statistics differ but a rebuilt positional init still hashes `86fbba78…` | float64 accumulation drifted, the bf16 cast absorbed it, the *initialization* is identical | proceed, and record the statistics drift |
 | a rebuilt positional init does **not** hash `86fbba78…` | the treatment init cannot be proven to share the control's projection | **stop and report.** Either the control is retrained from a rebuilt positional init (2 more arms, +$6.7) or E8 is blocked. Maintainer decision, not this document's |
+
+> **RESOLVED 2026-08-10, the first row. The branch is recorded above as it was
+> written, before the answer was known.**
+>
+> ```
+> regenerated activation_stats.safetensors  aaeb2e4c1ec67e6f6dd21ca40eceb0c193a9da5b010e8d12fcd5d24376cc47c1  == recorded
+> rebuilt positional init model.safetensors 86fbba78e8a2a32481ca77e5ac362ed1f17a39dbc30bcbc952cabd5df2633e54  == pinned control init
+> ```
+>
+> Both bit-exact, from the logged config alone, four weeks later. Every
+> projection diagnostic reproduces to the last digit — `energy_captured_frac`
+> 0.9323228843289764, `top_eigenvalue` 0.5261361586510566, `min_kept_eigenvalue`
+> 6.677785428271654e-05, `final_norm_weight_range`
+> [-0.03870667333325841, 7.125069193436976] — and the kept-Q-head sets and depth
+> map are identical objects.
+>
+> **E8 is therefore a single-variable experiment**: the treatment initialization
+> will differ from the control's only in the depth map. The rebuild also confirms
+> the `kept_layers` addition leaves the default path untouched, since it produced
+> the pinned bytes with the new code in place.
+>
+> Reproduce: `PYTHONPATH=src python scripts/training/init_stage1.py --config
+> artifacts/audit/e8_repro_stage1.json` (the canonical Stage 1 config with only
+> `output_dir` and `save_random_baseline` changed).
 
 The environment matters and is now pinned: **transformers 5.13.1 / torch 2.13.0**
 (the repo `.venv`), which is what produced the Stage 1 artifacts. See §10.

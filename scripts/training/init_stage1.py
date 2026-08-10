@@ -85,14 +85,25 @@ def main() -> None:
     # runtime frequencies of both models rather than a config attribute, because
     # the config attribute is exactly what the transformers 4.x/5.x
     # `rope_parameters` skew gets wrong — silently, and by 500x on this teacher.
-    from aadistill.models.student import assert_rope_matches_config
-    student_rope = assert_rope_matches_config(student, student_cfg, "student")
-    teacher_rope = assert_rope_matches_config(teacher, teacher.config,
-                                              config["teacher_model_id"])
-    if abs(student_rope - teacher_rope) / teacher_rope > 1e-3:
+    from aadistill.models.student import (
+        assert_rope_matches_config, stored_rope_base,
+    )
+    # Two different questions, and mixing them is a mistake worth naming: the
+    # *stored* bases must be exactly equal, because the student config inherits
+    # the teacher's; the *runtime* base of each model must match its own config,
+    # which is the version-skew guard. Comparing the two recovered runtime numbers
+    # to each other instead would compare an fp32 rotary buffer against the bf16
+    # one `build_student` produces, and fail on precision rather than on skew.
+    stored_student = stored_rope_base(student_cfg)
+    stored_teacher = stored_rope_base(teacher.config)
+    if stored_student != stored_teacher:
         raise RuntimeError(
-            f"student RoPE base {student_rope:,.0f} != teacher {teacher_rope:,.0f}")
-    print(f"RoPE base {student_rope:,.0f} matches the teacher", flush=True)
+            f"student config records RoPE base {stored_student} but the teacher "
+            f"records {stored_teacher}; the student must inherit it")
+    student_rope = assert_rope_matches_config(student, student_cfg, "student")
+    assert_rope_matches_config(teacher, teacher.config, config["teacher_model_id"])
+    print(f"RoPE base {stored_teacher:,.0f} inherited; student runtime "
+          f"{student_rope:,.0f}", flush=True)
 
     baseline_record = None
     if config.get("save_random_baseline"):

@@ -44,6 +44,20 @@ def build_student(config: Qwen3Config, dtype: torch.dtype, seed: int) -> Qwen3Fo
     return model
 
 
+def stored_rope_base(config) -> float | None:
+    """The RoPE base a config *records*, from either library's field layout.
+
+    Read the nested transformers-5 field first: when both are present the flat
+    `rope_theta` is the 4.x reader's class default, i.e. the wrong one.
+    """
+    params = getattr(config, "rope_parameters", None)
+    if isinstance(params, dict) and params.get("rope_theta") is not None:
+        return float(params["rope_theta"])
+    if getattr(config, "rope_theta", None) is not None:
+        return float(config.rope_theta)
+    return None
+
+
 def assert_rope_matches_config(model, config, path: str = "") -> float:
     """Fail if the loaded model's RoPE base is not the one the config stores.
 
@@ -54,24 +68,34 @@ def assert_rope_matches_config(model, config, path: str = "") -> float:
     warns, and the run looks normal.
 
     So the check is made against the *runtime* frequencies rather than any config
-    attribute: `inv_freq[1] == base ** (-2/head_dim)` inverts to the base the
+    attribute: `inv_freq[i] == base ** (-2i/head_dim)` inverts to the base the
     model will actually use. Returns it, and raises when it disagrees with what
     the checkpoint recorded.
+
+    **Which entry to invert matters.** Inverting `inv_freq[1]` needs the exponent
+    `-head_dim/2` — 64 here — which amplifies the buffer's relative error 64x. On
+    an fp32 buffer that is harmless (recovers 4,999,983 of 5,000,000), but
+    `build_student` casts the whole module to bf16, and a bf16 `inv_freq[1]`
+    recovers 5,282,142 — a 5.6% error that trips a 0.1% tolerance while nothing
+    is actually wrong. The **last** entry needs the exponent
+    `-head_dim/(head_dim-2)` ≈ 1.016, so error is barely amplified at all: the
+    same bf16 buffer recovers 4,986,576, and the 500x skew this function exists to
+    catch is still four orders of magnitude outside the tolerance.
     """
-    stored = None
-    params = getattr(config, "rope_parameters", None)
-    if isinstance(params, dict) and params.get("rope_theta") is not None:
-        stored = float(params["rope_theta"])
-    elif getattr(config, "rope_theta", None) is not None:
-        stored = float(config.rope_theta)
+    stored = stored_rope_base(config)
     if stored is None:
         return float("nan")
 
-    inv = model.model.rotary_emb.inv_freq
+    inv = model.model.rotary_emb.inv_freq.detach().double()
     head_dim = getattr(config, "head_dim", None) or (
         config.hidden_size // config.num_attention_heads)
-    runtime = float(inv[1]) ** (-head_dim / 2.0)
-    if abs(runtime - stored) / stored > 1e-3:
+    n = inv.shape[0]
+    if n < 2:
+        return float("nan")
+    # Highest index available, i.e. the smallest exponent to invert.
+    index = n - 1
+    runtime = float(inv[index]) ** (-head_dim / (2.0 * index))
+    if abs(runtime - stored) / stored > 1e-2:
         raise ValueError(
             f"RoPE base mismatch for {path or 'model'}: the checkpoint records "
             f"{stored:,.0f} but the model was built with {runtime:,.0f}. This is "
