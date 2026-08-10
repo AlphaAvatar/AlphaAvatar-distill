@@ -1,0 +1,157 @@
+{
+  "artifact": "e8_treatment_init_stage_manifest",
+  "created_utc": "2026-08-10T18:22:00+00:00",
+  "command": "scripts/training/build_and_stage_e8_init.py --frozen-map /home/ecs-user/aad-scratch/e8a5_20260810_173626/store/e8_frozen_depth_map.json --depth-map /home/ecs-user/aad-scratch/e8a5_20260810_173626/store/depth_map.json",
+  "frozen_map": {
+    "kept_teacher_layers": [
+      0,
+      1,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      17,
+      18,
+      19,
+      22,
+      23,
+      24,
+      25,
+      27,
+      28,
+      29,
+      30,
+      31,
+      33,
+      34,
+      35
+    ],
+    "removed_teacher_layers": [
+      2,
+      3,
+      15,
+      16,
+      20,
+      21,
+      26,
+      32
+    ],
+    "removal_order": [
+      2,
+      16,
+      3,
+      32,
+      20,
+      26,
+      15,
+      21
+    ],
+    "primary_kl": 0.6205857530294691,
+    "positional_baseline_primary_kl": 1.932530599237618,
+    "lower_kl_than_positional": true,
+    "depth_map_sha256": "69d7a2bd8ade5f5aee3681b5e92e2aa34111c2cfdf83a8920a1d72e873b7832e",
+    "search_report_sha256": "8056b231a32551a078c299ac5bd67db8c38f565455866bfe7848d1e966437873",
+    "calibration_content_sha256": "d65c1f40e4837ea1bd5bcc33c68041a13b797c68f5be3c0686e0142ed761028f"
+  },
+  "treatment_init": {
+    "path": "artifacts/stage1/e8_contribution_init_v1/checkpoint",
+    "model_sha256": "7a0694a5d5c59f8e0b0ebc9ac8648b1ec026bf93cab026d33c61ca8fc85d1edb",
+    "config_sha256": "15e63575bd90e5f445423ef62626c1ad7c54298ecc614d87c596892021c18978",
+    "num_parameters": 596049920,
+    "resolved_rope_base": 4986576.324138534,
+    "init_manifest_sha256": "8ead186e98571af3f843393827b43bc994c877c9d0417a05de250bde155f7520"
+  },
+  "control_init": {
+    "model_sha256": "86fbba78e8a2a32481ca77e5ac362ed1f17a39dbc30bcbc952cabd5df2633e54",
+    "config_sha256": "15e63575bd90e5f445423ef62626c1ad7c54298ecc614d87c596892021c18978"
+  },
+  "config_identical_to_control": true,
+  "relay_prefix": "e8_init_20260810",
+  "staged": [
+    {
+      "local": "artifacts/stage1/e8_contribution_init_v1/checkpoint/config.json",
+      "relay": "e8_init_20260810/e8_contribution_init_v1/checkpoint/config.json",
+      "sha256": "a7131bb092b38a078edc213961f0eb57eaead24f1396e25741f4887b1a694054",
+      "relay_sha256": "a7131bb092b38a078edc213961f0eb57eaead24f1396e25741f4887b1a694054",
+      "verified": true
+    },
+    {
+      "local": "artifacts/stage1/e8_contribution_init_v1/checkpoint/generation_config.json",
+      "relay": "e8_init_20260810/e8_contribution_init_v1/checkpoint/generation_config.json",
+      "sha256": "0019fccc989feeebf6d72934e1f6b917b320cc61f294dca1e562bce4c9cf5f83",
+      "relay_sha256": "0019fccc989feeebf6d72934e1f6b917b320cc61f294dca1e562bce4c9cf5f83",
+      "verified": true
+    },
+    {
+      "local": "artifacts/stage1/e8_contribution_init_v1/checkpoint/model.safetensors",
+      "relay": "e8_init_20260810/e8_contribution_init_v1/checkpoint/model.safetensors",
+      "sha256": "7a0694a5d5c59f8e0b0ebc9ac8648b1ec026bf93cab026d33c61ca8fc85d1edb",
+      "relay_sha256": "7a0694a5d5c59f8e0b0ebc9ac8648b1ec026bf93cab026d33c61ca8fc85d1edb",
+      "verified": true
+    },
+    {
+      "local": "artifacts/stage1/e8_contribution_init_v1/checkpoint/tokenizer.json",
+      "relay": "e8_init_20260810/e8_contribution_init_v1/checkpoint/tokenizer.json",
+      "sha256": "be75606093db2094d7cd20f3c2f385c212750648bd6ea4fb2bf507a6a4c55506",
+      "relay_sha256": "be75606093db2094d7cd20f3c2f385c212750648bd6ea4fb2bf507a6a4c55506",
+      "verified": true
+    },
+    {
+      "local": "artifacts/stage1/e8_contribution_init_v1/checkpoint/tokenizer_config.json",
+      "relay": "e8_init_20260810/e8_contribution_init_v1/checkpoint/tokenizer_config.json",
+      "sha256": "8fa82a4ba512c8bee7c1c5e82b9a71ddbef362e4665be5c8f7ce0afd78af129a",
+      "relay_sha256": "8fa82a4ba512c8bee7c1c5e82b9a71ddbef362e4665be5c8f7ce0afd78af129a",
+      "verified": true
+    },
+    {
+      "local": "artifacts/stage1/e8_contribution_init_v1/checkpoint/chat_template.jinja",
+      "relay": "e8_init_20260810/e8_contribution_init_v1/checkpoint/chat_template.jinja",
+      "sha256": "3802169b2a02b81e6adb7ab4f64f91ff02db753c8c3a64a01c35192d3a61d8d7",
+      "relay_sha256": "3802169b2a02b81e6adb7ab4f64f91ff02db753c8c3a64a01c35192d3a61d8d7",
+      "verified": true
+    },
+    {
+      "local": "artifacts/stage1/e8_contribution_init_v1/manifest.json",
+      "relay": "e8_init_20260810/e8_contribution_init_v1/manifest.json",
+      "sha256": "8ead186e98571af3f843393827b43bc994c877c9d0417a05de250bde155f7520",
+      "relay_sha256": "8ead186e98571af3f843393827b43bc994c877c9d0417a05de250bde155f7520",
+      "verified": true
+    },
+    {
+      "local": "artifacts/stage1/e8_depth_search/depth_map.json",
+      "relay": "e8_init_20260810/depth_map.json",
+      "sha256": "69d7a2bd8ade5f5aee3681b5e92e2aa34111c2cfdf83a8920a1d72e873b7832e",
+      "relay_sha256": "69d7a2bd8ade5f5aee3681b5e92e2aa34111c2cfdf83a8920a1d72e873b7832e",
+      "verified": true
+    },
+    {
+      "local": "artifacts/stage1/e8_depth_search/e8_frozen_depth_map.json",
+      "relay": "e8_init_20260810/e8_frozen_depth_map.json",
+      "sha256": "c3033d73f19772c9f814612e8707b679dd74da7280b726c400ab73ad927442d0",
+      "relay_sha256": "c3033d73f19772c9f814612e8707b679dd74da7280b726c400ab73ad927442d0",
+      "verified": true
+    },
+    {
+      "local": "artifacts/stage1/e8_depth_search/depth_search.json",
+      "relay": "e8_init_20260810/depth_search.json",
+      "sha256": "329ef7521b8e746d4bfd5480d2794d8d9d24ee6f1c6a7ac716e70708bfbcf950",
+      "relay_sha256": "329ef7521b8e746d4bfd5480d2794d8d9d24ee6f1c6a7ac716e70708bfbcf950",
+      "verified": true
+    },
+    {
+      "local": "artifacts/stage1/e8_depth_search/rounds.jsonl",
+      "relay": "e8_init_20260810/rounds.jsonl",
+      "sha256": "3e1961ae597f37999e6a877ad8d0c8d9eabe1ee2e554a33d932b42f59bf3579f",
+      "relay_sha256": "3e1961ae597f37999e6a877ad8d0c8d9eabe1ee2e554a33d932b42f59bf3579f",
+      "verified": true
+    }
+  ],
+  "all_verified": true
+}
