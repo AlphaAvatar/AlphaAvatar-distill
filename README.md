@@ -114,6 +114,8 @@ construction (a terse well-formed reply scores perfectly), and its components ar
 | Scaling 1.60M → 2.96M tokens (KD-heavy) | Stability **+0.1100** (both seeds, above the floor); correctness +0.0200, inside it. Termination is what improves: context-limit hits fall 28/44 → 19/23 prompts. |
 | Scaling 2.96M → 5.50M tokens | **Saturated**: +0.0100, inside the floor, seeds disagreeing. Past 2.96M only the diagnostics keep moving. |
 | Scaling 1.60M → 2.96M tokens (CE-heavy) | **A tie**: +0.0267, inside the floor, seeds disagreeing. The same rung that buys the KD-heavy objective +0.1100 buys this one nothing. |
+| **General-text teacher KD (FineWeb-Edu)** | **Restores general language modelling and nothing else.** Held-out FineWeb NLL −5.22 nats, teacher KL 7.34 → 1.94, top-1 up 9× — and usable rollout **+0.0000** against the baseline, every paired comparison inside its floor. |
+| **Matched extra in-domain KD (E7 control)** | Recovers **90%** of the same NLL gain from *in-domain* text, so the restoration is about extra KD signal on unseen text, not about general prose. Behaviour: a tie on every axis. |
 
 Reducing KD's influence two independent ways cost teacher-distribution fidelity in
 proportion to the dose, so **reweighting the existing two loss terms is not the
@@ -121,12 +123,14 @@ lever**. The token budget *was* the strongest lead and it delivered — on
 behaviour only. Scaling to 1.60M bought +0.20 usable rollout and nothing
 measurable in correctness, and neither continuation recipe beat it.
 
-**Six interventions have now moved behaviour and none has moved reasoning.** The
-remaining hypotheses are the ones no experiment has separated: the token budget
-beyond 1.60M, the data mixture, the initialization, and the possibility that
-Stage 3's teacher-forced offline objective cannot produce reasoning at this scale
-regardless of how it is weighted — which is what Stage 4/5 on-policy work exists
-to test.
+**Eleven interventions. Scale is the only one that has ever moved behaviour, and
+nothing has ever moved reasoning.** E7 also *removed* a candidate explanation:
+general language modelling can be restored almost completely with no behavioural
+effect at all, so the correctness ceiling is not a language-modelling problem.
+What remains unseparated is the token budget beyond 1.60M, the data mixture, the
+initialization, and the possibility that Stage 3's teacher-forced offline
+objective cannot produce reasoning at this scale regardless of how it is
+weighted — which is what Stage 4/5 on-policy work exists to test.
 
 <details>
 <summary><b>Experiment 1 — recovery-data scaling (24 arms + compute control, $61.5)</b></summary>
@@ -224,7 +228,7 @@ Every run records config hash, code state, dataset/tokenizer/teacher hashes, and
 
 ```bash
 uv sync                    # CPU torch by default; see pyproject.toml for a CUDA index
-uv run pytest tests/ -q    # 562 CPU tests, no downloads
+uv run pytest tests/ -q    # 1,084 CPU tests, no downloads
 ```
 
 The implemented pipeline runs end to end on CPU (GPU optional):
@@ -314,13 +318,15 @@ AlphaAvatar-distill/
 │   ├── init/               #   Stage 0/1: activation stats, projection, sandwich transplant
 │   ├── data/               #   mixture loader (schema, chat render, loss masks, packing),
 │   │                       #   session rendering + system-grouped packing (sessions.py),
-│   │                       #   diversity, per-slice correctness rules
+│   │                       #   diversity, per-slice correctness rules,
+│   │                       #   dense KD-only extra streams (extra_stream.py)
 │   ├── training/           #   Stage 3 recovery trainer (CE+KD, freeze policy, resume,
 │   │                       #   optional second KD-only stream with its own cursor)
 │   ├── rollout/            #   engine adapters, in-stack generation, hashed rollout
 │   │                       #   snapshots + importance-ratio diagnostics
 │   ├── evaluation/         #   usable_rollout (Stage 2/3 primary metric), strict
-│   │                       #   answer/protocol scorers, degeneration, oracle prefix
+│   │                       #   answer/protocol scorers, degeneration, oracle prefix,
+│   │                       #   general-text NLL/KL diagnostics (general_text.py)
 │   └── infrastructure/     #   env fingerprint, code-state hash, sha256 manifests ·
 │                           #   session budget thresholds · provider control plane ·
 │                           #   cost watchdog · detached remote launch · log relay ·
@@ -328,7 +334,8 @@ AlphaAvatar-distill/
 ├── scripts/                # entry points, one per responsibility
 │   ├── data/               #   mixture + eval-set builders · build_token_ladder ·
 │   │                       #   validate_corpus_gate
-│   ├── training/           #   collect_stage0 · init_stage1 · train_stage3
+│   ├── training/           #   collect_stage0 · init_stage1 · train_stage3 ·
+│   │                       #   build/validate arm configs · budget planning · preflight
 │   ├── evaluation/         #   eval_ppl · eval_behavior · uncapped_eval (P18, vLLM) ·
 │   │                       #   degeneration · audit_prompt_rendering · exposure_report ·
 │   │                       #   consolidate_e1 · build_test_cases · plot_perf_trend
@@ -338,7 +345,7 @@ AlphaAvatar-distill/
 ├── configs/                # stage recipes: stage0/ · stage1/ · stage3/recovery.json
 ├── data/                   # corpus manifests (jsonl gitignored, rebuildable)
 │   └── eval_behavior_v0/   #   76-prompt behavior set + manifest (both committed)
-├── tests/                  # 1,071 CPU tests, mirroring the source areas
+├── tests/                  # 1,084 CPU tests, mirroring the source areas
 ├── logs/                   # project memory — read STATE.md first
 │   ├── STATE.md            #   canonical handoff: a snapshot, not an archive
 │   ├── EXPERIMENTS.md      #   the consolidated record: what ran, results, cost

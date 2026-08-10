@@ -1,7 +1,21 @@
-# Experiment 7 — preregistration DRAFT
+# Experiment 7 — preregistration
 
-**Status: DRAFT. Not authorized. Nothing has been launched, trained or
-evaluated.** This document, the built data streams, the configs and the tests
+> **STATUS: EXECUTED 2026-08-09. This document is frozen as the prospective
+> record and is deliberately NOT edited to match the outcome.** It was written
+> before any E7 GPU time was spent; every threshold, floor, budget and outcome
+> interpretation below was fixed in advance. Figures that were forward-looking
+> when written (test counts, open blockers, the authorization state) are left as
+> they stood.
+>
+> The result is in [`EXPERIMENTS.md`](EXPERIMENTS.md) §34 and
+> [`e7_report.md`](e7_report.md): **preregistered outcome 2** — general language
+> modelling restored (−5.22 nats), autonomous behaviour unmoved (usable rollout
+> +0.0000, every comparison inside its floor). The maintainer authorized the
+> full B+C design at a $12.82 backstop and a $162.49 cumulative cap; the run
+> cost $10.49.
+
+**Status when written: DRAFT. Not authorized. Nothing has been launched, trained
+or evaluated.** This document, the built data streams, the configs and the tests
 exist; no GPU has been used for any of it. Authorization is a separate decision
 and requires a cumulative-cap increment (§10).
 

@@ -384,7 +384,7 @@ download-and-hash for the small ones.
 
 ---
 
-## 11. Experiment 1 — data-scaling matrix (LAUNCHED 2026-08-01, running)
+## 11. Experiment 1 — data-scaling matrix (COMPLETE 2026-08-02, 24 arms, $47.6)
 
 **Objective:** does the student's behavioural recovery scale with
 teacher-generated supervised tokens? Token count is the only variable; the
@@ -697,6 +697,10 @@ data-vs-compute control above is run.
 
 ## 13. Refactor equivalence audits and padding truncation (2026-08-04, CPU, $0)
 
+> Numbered 13 but filed before §12: the sections are numbered in the order the
+> work was *registered*, not the order it appears. Cross-references elsewhere
+> use the numbers, so they are left as they are.
+
 All local; no GPU time. Verdicts under `artifacts/audit/` (gitignored).
 
 ### 13.1 Degeneration replay — PASS
@@ -795,7 +799,7 @@ that decides this, so the skew was undetectable from any existing manifest); and
 model will really use and raises on disagreement — checking runtime frequencies
 rather than the config attribute, because the attribute is what lies.
 
-## 12. Experiment 2 — three sequential 0.86M diagnostics (phase 1 PREPARED, not launched)
+## 12. Experiment 2 — three sequential 0.86M diagnostics (phase 1 COMPLETE 2026-08-04; phases 2–3 unauthorized)
 
 **Design (maintainer, 2026-08-03).** Three sequential single-variable
 diagnostics, all at Experiment 1's **0.86M** rung, each reusing the previous
