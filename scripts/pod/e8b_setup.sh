@@ -142,6 +142,9 @@ uv lock
 # redraws. The grace clause spares a host that is genuinely linking.
 TRIP_S=${UV_TRIP_S:-360}
 GRACE_S=${UV_GRACE_S:-180}
+# Hard ceiling on renewed grace: a host still downloading after this
+# is not worth waiting for even if it is technically progressing.
+UV_MAX_S=${UV_MAX_S:-1500}
 uv sync --group dev &
 UV_PID=$!
 t0=$(date -u +%s); graced=0
@@ -149,12 +152,25 @@ while kill -0 "$UV_PID" 2>/dev/null; do
   sleep 15
   el=$(( $(date -u +%s) - t0 ))
   [ "$el" -lt "$TRIP_S" ] && continue
-  if [ "$graced" -eq 0 ] && [ -x /opt/train/bin/python ]; then
-    a=$(du -sb /opt/train 2>/dev/null | cut -f1 || echo 0); sleep 20
-    b=$(du -sb /opt/train 2>/dev/null | cut -f1 || echo 0)
-    if [ "$((b - a))" -gt 20000000 ]; then      # >20 MB in 20 s: still linking
-      say "uv sync past ${TRIP_S}s but linking ($(( (b-a)/1048576 )) MB/20s) — one ${GRACE_S}s grace"
-      graced=1; TRIP_S=$(( TRIP_S + GRACE_S )); continue
+  # Progress is measured across BOTH trees, and does not require the venv to
+  # exist yet. The original clause looked only at /opt/train and only once
+  # /opt/train/bin/python was present — but uv spends its first phase writing to
+  # /root/.cache/uv, so a host downloading wheels at 5.5 MB/s was classified
+  # cold. E8 pod A threw away two such hosts (1978 MB cached at 360s, which is
+  # progress, not a hang) before this was noticed.
+  #
+  # Grace now renews while progress continues, bounded by UV_MAX_S so a genuinely
+  # hung host still dies. The tripwire's purpose is to abandon *stalled* hosts,
+  # not slow ones.
+  if [ "$el" -lt "$UV_MAX_S" ]; then
+    a=$(( $(du -sb /opt/train 2>/dev/null | cut -f1 || echo 0) \
+        + $(du -sb /root/.cache/uv 2>/dev/null | cut -f1 || echo 0) )); sleep 20
+    b=$(( $(du -sb /opt/train 2>/dev/null | cut -f1 || echo 0) \
+        + $(du -sb /root/.cache/uv 2>/dev/null | cut -f1 || echo 0) ))
+    if [ "$((b - a))" -gt 20000000 ]; then
+      graced=$(( graced + 1 ))
+      say "uv sync past ${TRIP_S}s but progressing ($(( (b-a)/1048576 )) MB/20s, grace ${graced}) — extending ${GRACE_S}s"
+      TRIP_S=$(( TRIP_S + GRACE_S )); continue
     fi
   fi
   kill -9 "$UV_PID" 2>/dev/null || true

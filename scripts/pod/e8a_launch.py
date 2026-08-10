@@ -337,8 +337,16 @@ class E8A:
             outcome = self.setup_on_draw(draw)
             if outcome == "ok":
                 break
-            if outcome == "cold" and draw < self.a.host_draws:
-                self.say(f"COLD HOST on draw {draw} — abandoning {self.pod_id} "
+            # A pod that never reaches TCP 22 is the same situation as a cold
+            # host — a bad draw, not a broken experiment — and the recorded lesson
+            # is explicit: runtime still null at the startup bound means it is not
+            # starting, so delete and recreate in the launcher. Aborting the
+            # session instead throws away the remaining draws for a provider-side
+            # problem.
+            if outcome in ("cold", "no_endpoint") and draw < self.a.host_draws:
+                why = ("COLD HOST" if outcome == "cold"
+                       else f"NO ENDPOINT after {self.a.startup_limit_min:.0f} min")
+                self.say(f"{why} on draw {draw} — abandoning {self.pod_id} "
                          "and redrawing (its watchdog will see the pod vanish "
                          "and exit)")
                 subprocess.run([self.cli, "remove", "pod", self.pod_id],
@@ -350,7 +358,7 @@ class E8A:
                 self.teardown_now(f"setup {outcome}")
             return False
         else:
-            self.say(f"ABORT: {self.a.host_draws} consecutive cold hosts")
+            self.say(f"ABORT: {self.a.host_draws} consecutive unusable draws")
             return False
         host, port = self.endpoint
         target = SSHTarget(host, port)
