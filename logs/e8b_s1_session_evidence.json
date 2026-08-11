@@ -1,0 +1,196 @@
+{
+  "timeline": [
+    {
+      "utc": "2026-08-11T08:37:06+00:00",
+      "elapsed_min": 0.0,
+      "msg": "budget: expected 225 min $3.71 \u00b7 soft stop 248 min $4.08 \u00b7 hard 278 min $4.58 (authorized $4.58)"
+    },
+    {
+      "utc": "2026-08-11T08:37:07+00:00",
+      "elapsed_min": 0.0,
+      "msg": "NVIDIA L40S securePrice $0.99/h, stock Medium"
+    },
+    {
+      "utc": "2026-08-11T08:37:07+00:00",
+      "elapsed_min": 0.0,
+      "msg": "relay precheck OK (8 files present)"
+    },
+    {
+      "utc": "2026-08-11T08:37:08+00:00",
+      "elapsed_min": 0.0,
+      "msg": "created 0qkaj0xfm2qe4h at $0.99/h; --terminate-after 2026-08-11T13:14:37Z (redundant layer)"
+    },
+    {
+      "utc": "2026-08-11T08:37:08+00:00",
+      "elapsed_min": 0.0,
+      "msg": "watchdog detached \u2014 hard 278 min = $4.58"
+    },
+    {
+      "utc": "2026-08-11T08:38:02+00:00",
+      "elapsed_min": 0.9,
+      "msg": "  starting (60s) \u2014 $0.01"
+    },
+    {
+      "utc": "2026-08-11T08:39:06+00:00",
+      "elapsed_min": 1.97,
+      "msg": "  starting (120s) \u2014 $0.03"
+    },
+    {
+      "utc": "2026-08-11T08:39:38+00:00",
+      "elapsed_min": 2.5,
+      "msg": "TCP 22 at 202.181.159.234:14256 after 2.5 min"
+    },
+    {
+      "utc": "2026-08-11T08:39:40+00:00",
+      "elapsed_min": 2.54,
+      "msg": "draw 1: ssh reachable \u2014 $0.04"
+    },
+    {
+      "utc": "2026-08-11T08:39:51+00:00",
+      "elapsed_min": 2.72,
+      "msg": "draw 1: running setup"
+    },
+    {
+      "utc": "2026-08-11T08:44:53+00:00",
+      "elapsed_min": 7.75,
+      "msg": "setup did not reach SETUP_DONE:\n  e8_init_20260810/e8_contribution_init_v1/checkpoint/chat_template.jinja\n  e8_init_20260810/e8_contribution_init_v1/manifest.json\n  e8_init_20260810/depth_map.json\n  e8_init_20260810/e8_frozen_depth_map.json\n  e8_inputs_20260810/calibration_v1/manifest.json\n  e8_inputs_20260810/calibration_v1/leakage.json\n  qwen3_0p6b_init_v0 86fbba78e8a2a324\u2026\n  e8_contribution_init_v1 7a0694a5d5c59f8e\u2026\nFP and FC verified; identical student config\nMARKER:COMPRESSED_READY\n[08:42:56] building DP and DC from the pinned teacher (no transfer)\n  \"rope\": 5000000.241530586\n}\n-> /workspace/aad/artifacts/stage1/e8b_dp_init\n  \"rope\": 5000000.241530586\n}\n-> /workspace/aad/artifacts/stage1/e8b_dc_init\n  e8b_dp_init d4db65eb8f7ae6d8\u2026 params 3,215,021,568 bitwise-vs-ablated-teacher True\n  e8b_dc_init eb9e95481988b296\u2026 params 3,215,021,568 bitwise-vs-ablated-teacher True\nDP and DC verified; shared config 4e5b71040b0badb8\u2026\nMARKER:DEPTH_BUILT\n[08:44:42] staging holdout_v1 and the FineWeb validation stream\n  e8_inputs_20260810/warmup/holdout_v1.jsonl\n  e8_inputs_20260810/warmup/holdout_v1.manifest.json\n  e7_streams_20260809/e7_fineweb_val/blocks.npz\n  e7_streams_20260809/e7_fineweb_val/docs.jsonl\n  e7_streams_20260809/e7_fineweb_val/manifest.json\nholdout_v1 and the 512x1024 validation stream verified\nMARKER:HOLDOUT_READY\nMARKER:VALSTREAM_READY\n[08:44:45] downloading the teacher at the pinned revision\n\nFetching 10 files:   0%|          | 0/10 [00:00<?, ?it/s]\nFetching 10 files: 100%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588| 10/10 [00:00<00:00, 1864.63it/s]\nMARKER:TEACHER_READY\n[08:44:45] checking the RoPE base resolves in every venv, for every staged checkpoint\nTraceback (most recent call last):\n  File \"<string>\", line 10, in <module>\n  File \"/opt/train/lib/python3.12/site-packages/transformers/models/auto/configuration_auto.py\", line 421, in from_pretrained\n    raise ValueError(\nValueError: Unrecognized model in /workspace/aad/artifacts/stage1/e8_contribution_init_v1. Should have a `model_type` key in its config.json.\nSETUP_RC=1\n"
+    },
+    {
+      "utc": "2026-08-11T08:44:53+00:00",
+      "elapsed_min": 7.75,
+      "msg": "ABORT after draw 1: setup_failed"
+    },
+    {
+      "utc": "2026-08-11T08:44:53+00:00",
+      "elapsed_min": 7.75,
+      "msg": "deleting pod (setup setup_failed)"
+    },
+    {
+      "utc": "2026-08-11T08:45:04+00:00",
+      "elapsed_min": 7.93,
+      "msg": "pod deleted \u2014 7.9 min, $0.13"
+    }
+  ],
+  "stages": {
+    "setup": [
+      {
+        "draw": 1,
+        "setup_done": "0",
+        "host_cold": "0",
+        "setup_rc": "1",
+        "tail": "SETUP_RC=1"
+      }
+    ]
+  },
+  "budget_plan": {
+    "price_per_hour": 0.99,
+    "authorized_usd": 4.58,
+    "expected_minutes": 225.0,
+    "soft_stop_minutes": 247.50000000000003,
+    "artifact_recovery_reserve_minutes": 30.0,
+    "hard_terminate_minutes": 277.5,
+    "step_time": {
+      "seconds": 4.15,
+      "source": "unused; S1 does not train",
+      "measured": true
+    },
+    "breakdown": [
+      {
+        "name": "setup",
+        "minutes": 45.0
+      },
+      {
+        "name": "train",
+        "minutes": 0.0
+      },
+      {
+        "name": "evaluate",
+        "minutes": 0.0
+      },
+      {
+        "name": "transfer",
+        "minutes": 0.0
+      },
+      {
+        "name": "build_DP_DC_on_pod_and_assert_hashes",
+        "minutes": 12.0
+      },
+      {
+        "name": "init_nll_DP",
+        "minutes": 14.0
+      },
+      {
+        "name": "init_nll_DC",
+        "minutes": 14.0
+      },
+      {
+        "name": "init_nll_FP_remeasured",
+        "minutes": 7.0
+      },
+      {
+        "name": "init_nll_FC_remeasured",
+        "minutes": 7.0
+      },
+      {
+        "name": "step0_probe_DP",
+        "minutes": 55.0
+      },
+      {
+        "name": "step0_probe_DC",
+        "minutes": 55.0
+      },
+      {
+        "name": "publish_step0_records",
+        "minutes": 3.0
+      },
+      {
+        "name": "artifact_manifest_and_verify",
+        "minutes": 8.0
+      },
+      {
+        "name": "artifact_synchronization",
+        "minutes": 5.0
+      }
+    ],
+    "notes": [],
+    "expected_usd": 3.7125,
+    "soft_stop_usd": 4.0838,
+    "artifact_recovery_reserve_usd": 0.495,
+    "hard_terminate_usd": 4.5788
+  },
+  "quoted_price_per_hour": 0.99,
+  "stock_status": "Medium",
+  "relay_precheck": {
+    "needed": [
+      "e8_inputs_20260810/warmup/holdout_v1.jsonl",
+      "stage3_recovery_corpus_v2/ladder_uniform/blocks.npz",
+      "e7_streams_20260809/e7_fineweb_val/blocks.npz",
+      "e8_init_20260810/e8_contribution_init_v1/checkpoint/model.safetensors",
+      "e8_init_20260810/e8_contribution_init_v1/manifest.json",
+      "e8_inputs_20260810/stage1/qwen3_0p6b_init_v0_manifest.json",
+      "e8_inputs_20260810/calibration_v1/leakage.json",
+      "stage1/qwen3_0p6b_init_v0/checkpoint/model.safetensors"
+    ],
+    "missing": []
+  },
+  "pod_id": "0qkaj0xfm2qe4h",
+  "actual_price_per_hour": 0.99,
+  "terminate_after_utc": "2026-08-11T13:14:37Z",
+  "watchdog_journals": [
+    "/home/ecs-user/aad-scratch/e8b_s1_20260811_083458/watchdog.jsonl"
+  ],
+  "final_pod_state": {
+    "exists": false,
+    "desired_status": "TERMINATED",
+    "billing": false
+  },
+  "cost": {
+    "price_per_hour": 0.99,
+    "elapsed_minutes": 7.93,
+    "actual_usd": 0.1309,
+    "authorized_usd": 4.58,
+    "within_backstop": true
+  },
+  "passed": false,
+  "finished_utc": "2026-08-11T08:45:04+00:00"
+}

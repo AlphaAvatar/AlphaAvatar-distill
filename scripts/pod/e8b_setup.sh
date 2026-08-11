@@ -302,11 +302,16 @@ from aadistill.models.student import assert_rope_from_config, stored_rope_base
 paths = sorted(glob.glob('/workspace/aad/artifacts/stage1/*/checkpoint/config.json'))
 if not paths: sys.exit('no staged checkpoint to check')
 for p in paths:
-    d = p.rsplit('/', 2)[0]
+    # rsplit(1), not rsplit(2): AutoConfig needs the directory holding config.json,
+    # i.e. .../<init>/checkpoint. Stripping two components hands it .../<init>,
+    # which has no config.json, and transformers reports the confusing
+    # 'Unrecognized model ... should have a model_type key'. Cost one draw.
+    d = p.rsplit('/', 1)[0]
+    name = d.rsplit('/', 2)[-2]
     cfg = AutoConfig.from_pretrained(d)
     base = assert_rope_from_config(cfg, d)
     stored = stored_rope_base(cfg)
-    print(f'  transformers {transformers.__version__}: {d.rsplit(chr(47),1)[-1]} '
+    print(f'  transformers {transformers.__version__}: {name} '
           f'stored {stored:,.0f} runtime {base:,.0f} OK')
     if abs(stored - 5_000_000) > 1: sys.exit(f'{d} records RoPE base {stored}')
 "
