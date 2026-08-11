@@ -1,6 +1,13 @@
-**Updated:** 2026-08-11 (14:20 UTC) · branch `main` · commit `df954db1` · tree clean
-**ONE POD BILLING: `64fhzduqdwaurw` (E8b S2, A100 SXM 80 GB, $1.59/h, launched
-14:16 UTC, hard stop $18.7602 / 708 min).** Poller and marker monitor armed.
+**Updated:** 2026-08-11 (17:20 UTC) · branch `main` · commit `067775a` · tree clean
+**No pods running. Nothing billing.** **1,281 CPU tests pass**, 7 skipped.
+
+**E8b IS BLOCKED ON A MAINTAINER DECISION.** S2's registered 20-step gate fired: the
+3.22B depth-only arms **do not fit an 80 GB A100** (79.10 of 79.25 GiB in use, OOM on
+a 298 MiB allocation). Speed and cost passed comfortably — 4.83 s/step against a
+7.86 s ceiling — so this is a memory problem, not a budget or throughput one, and per
+the standing instruction a registered gate failure means **stop and re-price**, not
+adjust and continue. Two memory levers are documented and deliberately **not adopted**
+([§40](EXPERIMENTS.md), [`e8b_reprice_after_gate.json`](e8b_reprice_after_gate.json)).
 
 **E8b is RUNNING. S1 is complete and its headline reframes the experiment: the
 contribution-guided depth map reverses sign between compression regimes.** At full
@@ -55,19 +62,37 @@ E8b SPEND
                                                  cgroup misreads, then 3 of our tests
                                                  failed on a pod, then a CPU contract
                                                  test failed on GPU state (§39, §39.1)
-  S2 attempt 4 (A100)                   running, hard $18.7602
-  S3 DP-sb+DC-sb (A100)                 not started, hard $18.7602
-  S4 FC-sa+FC-sb (L40S)                 not started, hard $6.4011
-  E8b spent                             $8.3100
-  E8b remaining of $47.18               $38.8700
-  cumulative spend                     $172.1933 of the $211.07 cap
+  S2 attempt 4 (A100)                   $0.5500  gate fired on memory; no arm
+                                                 trained. Speed/cost PASSED (§40)
+  E8b spent                             $8.8600
+  E8b remaining of $47.18               $38.3200
+  cumulative spend                     $172.7433 of the $211.07 cap
+
+RE-PRICED from the gate's measured 4.83 s/step (was a derived 7.86):
+  S2 depth-only DP+DC sa                 hard $12.91   (was $18.76)
+  S3 depth-only DP+DC sb                 hard $12.91   (was $18.76)
+  S4 FC-sa+FC-sb (L40S)                  hard $6.4011  unchanged
+  total need                             hard $32.21
+  margin against the $38.32 left              $6.11   FITS, no new funds needed
 ```
 
-**The margin is now $0.84.** Expected S2+S3+S4 is $38.03 against $38.87 left, so the
-experiment fits only if **every** remaining session lands at or below expected. If S2
-reaches its soft stop ($17.97) instead of expected ($16.33), S3 and S4 no longer fit —
-short by ~$0.80. **Do not pre-shrink S3 or S4.** Stop after S2, state the exact
-shortfall, and ask.
+**The budget is no longer the binding constraint** — the re-pricing leaves $6.11 of
+margin. **Memory is.** The decision the maintainer owns:
+
+1. `PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True` — allocator segment mapping
+   only, no numerical effect, targets the 6.16 GiB that was reserved-but-unusable;
+2. KD `chunk` 512 -> 128 — ~0.9 GB less transient fp32 peak, **mathematically
+   identical but not bitwise** (float32 accumulation order, ~7e-8 relative). Apply to
+   **both arms of a pair or neither**; do NOT apply to S4, whose retained FP control
+   trained at chunk 512 and which needs only 23-27 GB on an L40S.
+
+Or a ≥94 GB card, which is a different re-pricing. **Do not prospectively benchmark
+H100** — and note an H100 SXM is also 80 GB, so it would not solve this.
+
+Whether the two levers suffice is **not known**: they target ~7 GB against a ~0.3 GB
+shortfall, so the headroom looks ample, but that is an inference from one OOM trace.
+The re-run's own gate would settle it and would finally report peak VRAM, which is
+still unmeasured.
 
 **Before any relaunch, run the suite the two ways the failed attempts did not:**
 
