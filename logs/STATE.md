@@ -50,18 +50,21 @@ E8b AUTHORIZED 2026-08-11: expected $40.54, hard $47.18 -> CAP $211.07
 
 E8b SPEND
   S1 step-0 (L40S)                      $5.2100  DONE, over its $3.25 plan
-  S2 DP-sa+DC-sa (A100)                 running, hard $18.7602
+  S2 attempt 1 (A100)                   $2.2700  ABORTED, 3 draws lost to our own
+                                                 setup gates; nothing trained (§39)
+  S2 attempt 2 (A100)                   running, hard $18.7602
   S3 DP-sb+DC-sb (A100)                 not started, hard $18.7602
   S4 FC-sa+FC-sb (L40S)                 not started, hard $6.4011
-  E8b spent                             $5.2100
-  E8b remaining of $47.18               $41.9700
-  cumulative spend                     $169.0933 of the $211.07 cap
+  E8b spent                             $7.4800
+  E8b remaining of $47.18               $39.7000
+  cumulative spend                     $171.3633 of the $211.07 cap
 ```
 
-**Sum of the three remaining hard backstops ($43.92) exceeds the $41.97 left**, by
-$1.95, because S1 overran on the DP probe. Expected costs still fit ($38.03, margin
-$3.94). **Do not pre-shrink S3 or S4 to close that gap** — check the actual spend
-after S2, and if a genuine shortfall materialises, report the exact figure and ask.
+**The remaining three hard backstops ($43.92) now exceed the $39.70 left by $4.22.**
+The expected path still fits — $38.03, margin $1.67 — but that margin is thin enough
+that one more lost session breaks it. **Do not pre-shrink S3 or S4.** Check actual
+spend after S2 completes; if the remainder cannot cover S3 and S4, report the exact
+shortfall and ask.
 
 Per-session `--authorized-usd` must be passed to **4 decimal places**: the plan's true
 S2 hard is $18.760145 and `plan_session` compares unrounded, so `18.76` fails with a

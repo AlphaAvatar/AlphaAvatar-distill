@@ -5131,3 +5131,63 @@ the 2×2 was built to answer.
 
 **Next.** S2 (DP-sa + DC-sa, A100, mandatory 20-step gate), S3 (seed sb), S4 (FC both
 seeds, L40S) against retained FP.
+
+## 39. E8b S2 attempt 1 — three draws lost to our own gates (2026-08-11, $2.27)
+
+**Date:** 2026-08-11 · **Commit:** `df954db1` · **Hardware:** NVIDIA A100 SXM 80 GB
+@ $1.59/h, three consecutive host draws · **Outcome:** ABORTED before any training
+
+No arm trained. All three draws were abandoned with `HOST_COLD`, and **no host was
+cold.** Two distinct defects in our own setup gates produce the same marker, which is
+why the first draw looked like ordinary bad luck.
+
+**Draw 1 — the uv tripwire kills on a single quiet window.** Killed at 26.4 min. The
+tripwire samples 20 s of disk growth across `/opt/train` + `/root/.cache/uv` and kills
+if growth is under 20 MB. uv writes nothing while it resolves or builds a wheel, so a
+working host is indistinguishable from a hung one when one sample decides. Worse,
+`--uv-max-s 3600` could not have protected it: `UV_MAX_S` never extended the deadline,
+it only stops the growth check from applying at all. That misreading is what made the
+flag look like a fix after S1.
+
+**Draws 2 and 3 — the test gate's 900 s box, and why the suite was slow.** Draw 2
+reached `VLLM_READY` in 4 minutes on a warm host, so uv was not involved; it died 24
+minutes later. Draw 3 reproduced it, and was caught in the act:
+
+```
+3000 1851 206s Rl 1338%CPU  search_depth_map.py --student-layers 4 --dtype float32 --device cpu
+1851 1850 742s Sl    2.1%   pytest tests/ -q      (wchan sigsuspend, 227 threads alive)
+```
+
+The subprocess that `tests/init/test_depth_search_driver.py` spawns was burning 900+ s
+at 1338% CPU on work that takes **7.4 s** on the dev box, while pytest waited. Cause:
+a container reports the **host's** cpu count — `nproc` said 128 — while the cgroup
+grants a fraction of it. The child sized its thread pools from 128 and thrashed.
+`OMP/MKL/OPENBLAS_NUM_THREADS=8` could not bound it because the child re-derives its
+own pool. The dev box has 16 real CPUs and no quota, which is exactly why the suite
+takes 88 s here and could not reproduce the failure locally.
+
+**Fixes** (`c9517bea`, 20 tests against the deployed script):
+
+* the tripwire needs **3 consecutive** quiet windows; progress resets the counter; the
+  marker carries the stall count so a hang is distinguishable from a slow mirror;
+* the cpu budget is read from the **cgroup quota** and enforced with `taskset`, whose
+  affinity children inherit across fork/exec — no library can ignore it;
+* thread caps follow that budget instead of a constant that could exceed it on a
+  4-cpu container;
+* both the visible and granted cpu counts are logged, since the discrepancy is the bug;
+* box raised to 2,700 s, and the suite's elapsed time recorded on success so it is
+  calibrated from measurement rather than guessed a third time.
+
+Verified locally against synthetic cgroups (4, 8, capped-32, unlimited, and a bare
+host with no cgroup files), and that a quiet-but-finishing host survives while a hung
+one still dies.
+
+**Cost.** $2.27. Nothing scientific was produced, and nothing scientific was
+corrupted: the abort happened before the throughput gate, so no arm trained from an
+unverified state.
+
+**Lesson for the next session.** A gate that fails closed is still a gate that can be
+wrong, and ours reported a host defect for a defect of our own. Both misfires were
+invisible on the dev box because the dev box has neither 128 visible CPUs nor a
+cgroup quota. Setup gates calibrated on one machine class need a synthetic test of the
+*other* class, which is what the 20 new tests now provide.
