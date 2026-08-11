@@ -22,8 +22,10 @@ NESTED inside the compression regime (DP/DC on A100, FP/FC on L40S), so a
 depth-map effect is within-hardware while the interaction is not.
 
 The `DC-DP` and `FC-FP` contrasts are each computed inside one regime and one
-hardware class. The interaction `(DC-DP) - (FC-FP)` is reported, but it carries the
-nesting and cannot on its own exclude a hardware x depth-map interaction.
+hardware class. The interaction is reported in the **registered** direction,
+`(FC-FP) - (DC-DP)` (`logs/e8b_preregistration.md` §8) — negative means the map does
+worse once compression is applied than at full width. It carries the nesting and
+cannot on its own exclude a hardware x depth-map interaction.
 """
 
 from __future__ import annotations
@@ -134,7 +136,8 @@ def contrasts(value, metrics) -> dict:
             "metric": label, "lower_is_better": lower,
             "DP": dp, "DC": dc, "FP": fp, "FC": fc,
             "DC_minus_DP": depth, "FC_minus_FP": full,
-            "interaction_nested": depth - full,
+            # Registered direction: compressed effect minus full-width effect.
+            "interaction_nested": full - depth,
             "contribution_better_depth_only": better(depth),
             "contribution_better_fully_compressed": better(full),
             "sign_reversal": better(depth) != better(full),

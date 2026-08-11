@@ -18,7 +18,12 @@ Two contrasts and one interaction:
 
     DC vs DP    the depth map at full width, within one hardware class
     FC vs FP    the depth map fully compressed, within one hardware class
-    (DC-DP) - (FC-FP)    whether the map's effect depends on the compression
+    (FC-FP) - (DC-DP)    whether the map's effect depends on the compression
+
+The interaction sign convention is the **registered** one
+(`logs/e8b_preregistration.md` §8): `(FC - FP) - (DC - DP)`. Negative means the map
+does worse once compression is applied than it does at full width. Reversing this is
+an easy and invisible way to invert a conclusion, so it is asserted in the tests.
 
 **Hardware is nested inside compression regime.** Each contrast is within one
 hardware class, so each is clean. The interaction is not hardware-controlled: it
@@ -173,7 +178,7 @@ def contrast(a_cell: str, b_cell: str, arms: dict, iterations: int) -> dict:
 
 
 def interaction(arms: dict, axis: str, iterations: int, seed: int = 20260811) -> dict:
-    """`(DC-DP) - (FC-FP)`, bootstrapped over the prompts all four cells share.
+    """`(FC-FP) - (DC-DP)` as registered, bootstrapped over the shared prompts.
 
     Resampling is joint: one draw of prompt ids is applied to all four arms, which
     is only valid because the frozen inclusion mask is identical across cells. A
@@ -194,7 +199,9 @@ def interaction(arms: dict, axis: str, iterations: int, seed: int = 20260811) ->
         def dd(sample: list[str]) -> float:
             def rate(c):
                 return statistics.fmean(float(bool(cells[c][i])) for i in sample)
-            return (rate("DC") - rate("DP")) - (rate("FC") - rate("FP"))
+            # Registered convention (preregistration §8): compressed effect minus
+            # full-width effect. Negative = the map degrades under compression.
+            return (rate("FC") - rate("FP")) - (rate("DC") - rate("DP"))
 
         point = dd(ids)
         rng = random.Random(seed)
@@ -219,6 +226,7 @@ def interaction(arms: dict, axis: str, iterations: int, seed: int = 20260811) ->
     out["seed_consistent"] = len({v > 0 for v in vals}) == 1
     out["both_cis_exclude_zero"] = all(
         out["per_seed"][s]["ci_excludes_zero"] for s in SEEDS)
+    out["definition"] = "(FC - FP) - (DC - DP), the registered convention"
     out["hardware_caveat"] = (
         "Hardware is NESTED in regime (DP/DC A100, FP/FC L40S). A nonzero "
         "interaction does not separate depth-map x compression from "

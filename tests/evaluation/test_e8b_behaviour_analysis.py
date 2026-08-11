@@ -1,7 +1,11 @@
 """E8b's level-3 analyzer: the double difference, and what may not be claimed.
 
-The interaction `(DC-DP) - (FC-FP)` is the one genuinely new statistic in E8b, and
-it is the easiest to get wrong. Two ways in particular:
+The interaction `(FC-FP) - (DC-DP)` is the one genuinely new statistic in E8b, and
+it is the easiest to get wrong. Three ways in particular:
+
+* reversing the sign. The preregistration (§8) fixes the direction as compressed
+  effect minus full-width effect; the opposite ordering is equally natural to write
+  and silently inverts the conclusion.
 
 * subtracting two independently-bootstrapped intervals, which is not a CI on the
   difference. The four cells answer the **same** frozen 150 prompts, so the
@@ -48,16 +52,29 @@ def arms_for(dp, dc, fp, fc) -> dict:
     return out
 
 
-def test_interaction_is_the_difference_of_the_two_paired_differences():
-    # depth-only: +0.20   fully compressed: -0.10   interaction: +0.30
+def test_interaction_uses_the_registered_sign_convention():
+    """`(FC-FP) - (DC-DP)`, per preregistration §8 — NOT the other way round.
+
+    depth-only +0.20, fully compressed -0.10, so the registered interaction is
+    -0.30: the map does worse once compression is applied than at full width.
+    Flipping this inverts the reported conclusion and nothing else would catch it.
+    """
     r = mod.interaction(arms_for(0.40, 0.60, 0.50, 0.40), "usable", iterations=200)
     for seed in mod.SEEDS:
         s = r["per_seed"][seed]
         assert s["depth_only_delta"] == pytest.approx(0.20, abs=1e-9)
         assert s["fully_compressed_delta"] == pytest.approx(-0.10, abs=1e-9)
-        assert s["interaction"] == pytest.approx(0.30, abs=1e-9)
-    assert r["pooled_interaction"] == pytest.approx(0.30, abs=1e-9)
+        assert s["interaction"] == pytest.approx(-0.30, abs=1e-9)
+    assert r["pooled_interaction"] == pytest.approx(-0.30, abs=1e-9)
     assert r["seed_consistent"] is True
+    assert r["definition"] == "(FC - FP) - (DC - DP), the registered convention"
+
+
+def test_registered_convention_matches_the_preregistration_text():
+    prereg = (REPO / "logs/e8b_preregistration.md").read_text()
+    # The document is the authority; the code must quote it, not paraphrase it.
+    assert "(FC \u2212 FP) \u2212 (DC \u2212 DP)" in prereg or \
+           "(FC - FP) - (DC - DP)" in prereg
 
 
 def test_a_map_that_helps_equally_in_both_regimes_has_no_interaction():
@@ -79,6 +96,12 @@ def test_interaction_refuses_on_a_missing_arm():
     r = mod.interaction(a, "usable", iterations=200)
     assert "incomplete" in r and "FC-sb" in r["incomplete"]
     assert "pooled_interaction" not in r
+
+
+def test_a_map_that_degrades_under_compression_gives_a_negative_interaction():
+    # helps at full width (+0.20), hurts compressed (-0.10) -> negative
+    r = mod.interaction(arms_for(0.40, 0.60, 0.50, 0.40), "usable", iterations=200)
+    assert r["pooled_interaction"] < 0
 
 
 def test_bootstrap_ci_brackets_the_point_estimate():

@@ -1,6 +1,6 @@
 {
-  "created_utc": "2026-08-11T14:09:35+00:00",
-  "command": "scripts/training/analyze_e8b.py --level both --out logs/e8b_analysis.json",
+  "created_utc": "2026-08-11T14:32:36+00:00",
+  "command": "scripts/training/analyze_e8b.py --level step0 --out logs/e8b_analysis.json",
   "design": {
     "regime": {
       "DP": "depth_only",
@@ -82,7 +82,7 @@
         "FC": 13.262411,
         "DC_minus_DP": -0.9642639999999996,
         "FC_minus_FP": 1.5059070000000006,
-        "interaction_nested": -2.470171,
+        "interaction_nested": 2.470171,
         "contribution_better_depth_only": true,
         "contribution_better_fully_compressed": false,
         "sign_reversal": true
@@ -96,7 +96,7 @@
         "FC": 14.3913,
         "DC_minus_DP": -0.8889449999999997,
         "FC_minus_FP": 2.816400999999999,
-        "interaction_nested": -3.7053459999999987,
+        "interaction_nested": 3.7053459999999987,
         "contribution_better_depth_only": true,
         "contribution_better_fully_compressed": false,
         "sign_reversal": true
@@ -110,7 +110,7 @@
         "FC": 0.007534,
         "DC_minus_DP": 0.09817799999999999,
         "FC_minus_FP": -0.015125,
-        "interaction_nested": 0.11330299999999999,
+        "interaction_nested": -0.11330299999999999,
         "contribution_better_depth_only": true,
         "contribution_better_fully_compressed": false,
         "sign_reversal": true
@@ -124,7 +124,7 @@
         "FC": 51875.2872,
         "DC_minus_DP": -185.62320000000003,
         "FC_minus_FP": 33731.010200000004,
-        "interaction_nested": -33916.633400000006,
+        "interaction_nested": 33916.633400000006,
         "contribution_better_depth_only": true,
         "contribution_better_fully_compressed": false,
         "sign_reversal": true
@@ -138,7 +138,7 @@
         "FC": 12.559814,
         "DC_minus_DP": -0.9554020000000001,
         "FC_minus_FP": 3.1410669999999996,
-        "interaction_nested": -4.096469,
+        "interaction_nested": 4.096469,
         "contribution_better_depth_only": true,
         "contribution_better_fully_compressed": false,
         "sign_reversal": true
@@ -152,7 +152,7 @@
         "FC": 11.802689,
         "DC_minus_DP": -1.176434,
         "FC_minus_FP": 0.8974050000000009,
-        "interaction_nested": -2.073839000000001,
+        "interaction_nested": 2.073839000000001,
         "contribution_better_depth_only": true,
         "contribution_better_fully_compressed": false,
         "sign_reversal": true
@@ -166,7 +166,7 @@
         "FC": 0.023019,
         "DC_minus_DP": 0.24912800000000002,
         "FC_minus_FP": -0.017734999999999997,
-        "interaction_nested": 0.266863,
+        "interaction_nested": -0.266863,
         "contribution_better_depth_only": true,
         "contribution_better_fully_compressed": false,
         "sign_reversal": true
@@ -180,7 +180,7 @@
         "FC": 19865.6441,
         "DC_minus_DP": -10.5302,
         "FC_minus_FP": 13125.767600000001,
-        "interaction_nested": -13136.2978,
+        "interaction_nested": 13136.2978,
         "contribution_better_depth_only": true,
         "contribution_better_fully_compressed": false,
         "sign_reversal": true
@@ -194,7 +194,7 @@
         "FC": 11.507465,
         "DC_minus_DP": -1.175268,
         "FC_minus_FP": 0.8742619999999999,
-        "interaction_nested": -2.04953,
+        "interaction_nested": 2.04953,
         "contribution_better_depth_only": true,
         "contribution_better_fully_compressed": false,
         "sign_reversal": true
