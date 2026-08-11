@@ -168,6 +168,34 @@ checked at all.**
 The three registered thresholds are untouched. Two checks are added, which is the
 opposite of widening.
 
+### Result — 200 steps, chunk 128, `expandable_segments:True` (PASSED)
+
+| quantity | measured | registered | |
+| --- | --- | --- | --- |
+| steps run | **200** | 200 | outlasts the step-110 failure |
+| seconds/step (median from step 101) | **4.975** | ≤ 7.86 | pass |
+| peak VRAM | **77.31 GiB** | ≤ 78.0 | pass |
+| $/step | **0.002197** | ≤ 0.003472 | pass |
+| VRAM drift over the final 50 steps | **0.000 GiB** | ≤ 0.05 | pass |
+| free margin vs real capacity 79.25 | **1.94 GiB** | ≥ 1.5 | pass |
+
+`violations: []`. The series is what a settled peak looks like, and why 20 steps could
+not have established it:
+
+```
+first: 61.75, 62.00, 62.00, 76.28, 76.28   <- lazy allocation still landing
+last:  77.31, 77.31, 77.31, 77.31, 77.31   <- flat
+```
+
+Steady state is **77.31 GiB**, held flat, against the failed run's 77.15 -> 77.37 ->
+77.60 climb. Chunk 128 moved the peak 0.29 GiB below the failure point and left
+**1.94 GiB of real headroom** where the failed run had ~0.3 GiB usable.
+
+**Remaining caveat:** steady state is demonstrated to step 200, not to 1,761.
+`save_every: 880` writes a checkpoint mid-run; that happens between steps at the
+54.8 GB steady state with ~24 GiB free, so it should be uneventful, but it lies outside
+what the gate measured.
+
 ## 7. The compressed pair is untouched
 
 FP/FC stay on their hardware-matched L40S path with the unmodified backend. The

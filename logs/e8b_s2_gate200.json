@@ -1,0 +1,42 @@
+{
+  "arm": "e8b_dp_r1600k_sa",
+  "steps_logged": 200,
+  "measured_on": 101,
+  "seconds_per_step_median": 4.975,
+  "peak_vram_gb": 77.31,
+  "usd_per_step": 0.002197,
+  "kd_chunk": 128,
+  "allocator_conf": "expandable_segments:True",
+  "vram_trend_gib_over_last_50_steps": 0.0,
+  "vram_trend_window_steps": 50,
+  "capacity_gib": 79.25,
+  "free_margin_gib": 1.94,
+  "vram_series_first_last": {
+    "first": [
+      61.75,
+      62.0,
+      62.0,
+      76.28,
+      76.28
+    ],
+    "last": [
+      77.31,
+      77.31,
+      77.31,
+      77.31,
+      77.31
+    ]
+  },
+  "registered": {
+    "max_seconds_per_step": 7.86,
+    "max_peak_vram_gb": 78.0,
+    "max_usd_per_step": 0.003472,
+    "gate_steps": 200,
+    "max_trend_gib": 0.05,
+    "min_free_margin_gib": 1.5
+  },
+  "rate_usd_per_hour": 1.59,
+  "projected_minutes_per_arm": 146.0,
+  "violations": [],
+  "passed": true
+}
