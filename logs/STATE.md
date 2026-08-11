@@ -40,7 +40,7 @@ E8 remaining:                         $9.5147
 pod B hard threshold:                 $9.7130   CANCELLED — 2.96M recovery withdrawn
 E8's unspent backstop:                $9.5147   NOT carried over to E8b
 
-E8b (pair-matched, 4 sessions):  expected $40.54, hard $47.18 -> cap $211.06
+E8b AUTHORIZED 2026-08-11: expected $40.54, hard $47.18 -> CAP $211.07
   DP/DC on A100 SXM 80GB $1.59/h   FP retained + FC on L40S $0.99/h
   CONDITIONAL hardware bridge, only on a material reversal: +$14.05 -> $225.11
 ```
@@ -381,7 +381,7 @@ E8's hard backstop is $12.41, so it needs **$10.08 more** and a cap of **$172.57
 **E8a is done. E8b's preflight is done. Nothing paid may start.** Ordered next
 actions:
 
-1. **Maintainer decision on $47.18** (cap $211.06) for the pair-matched E8b.
+1. **AUTHORIZED $47.18, cap $211.07.** Executing S1 -> S2 -> S3 -> S4.
 2. On authorization: write the four pod sessions — S1 L40S step-0, S2/S3 A100
    seed-paired depth-only, S4 L40S FC — deliberately **not** written yet, matching
    E7/E8a's order. S2 must carry the registered 20-step gate on s/step, peak VRAM

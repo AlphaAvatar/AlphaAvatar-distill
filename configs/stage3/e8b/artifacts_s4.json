@@ -1,0 +1,82 @@
+[
+  {
+    "artifact_class": "event_stream",
+    "pattern": "stage3/e8b_*_r1600k_*/train_log.jsonl",
+    "required": true,
+    "min_matches": 2,
+    "min_bytes": 1024,
+    "lifecycle": "final_required"
+  },
+  {
+    "artifact_class": "run_manifest",
+    "pattern": "stage3/e8b_*_r1600k_*/run_manifest*.json",
+    "required": true,
+    "min_matches": 2,
+    "min_bytes": 512,
+    "lifecycle": "final_required"
+  },
+  {
+    "artifact_class": "init_nll_record",
+    "pattern": "stage1/*/init_nll.json",
+    "required": true,
+    "min_matches": 2,
+    "min_bytes": 256,
+    "lifecycle": "final_required"
+  },
+  {
+    "artifact_class": "rollout_generations",
+    "pattern": "audit/three_mode/E8b-*/free.generations.jsonl",
+    "required": true,
+    "min_matches": 2,
+    "min_bytes": 1024,
+    "lifecycle": "final_required"
+  },
+  {
+    "artifact_class": "rollout_report",
+    "pattern": "audit/three_mode/E8b-*/report.json",
+    "required": true,
+    "min_matches": 2,
+    "min_bytes": 128,
+    "lifecycle": "final_required"
+  },
+  {
+    "artifact_class": "general_text",
+    "pattern": "audit/e8b_general_text/*.json",
+    "required": false,
+    "min_matches": 1,
+    "min_bytes": 64,
+    "lifecycle": "final_required"
+  },
+  {
+    "artifact_class": "checkpoint_metadata",
+    "pattern": "stage3/e8b_*_r1600k_*/checkpoints/step_001761/*.json",
+    "required": false,
+    "min_matches": 1,
+    "min_bytes": 1,
+    "lifecycle": "final_required"
+  },
+  {
+    "artifact_class": "session_status",
+    "pattern": "audit/e8b_s4_session/e8b_s4.status",
+    "required": true,
+    "min_matches": 1,
+    "min_bytes": 32,
+    "lifecycle": "final_required"
+  },
+  {
+    "artifact_class": "driver_console",
+    "pattern": "audit/e8b_s4_session/e8b_s4_run.log",
+    "required": false,
+    "min_matches": 1,
+    "min_bytes": 1,
+    "lifecycle": "mutable_snapshot"
+  },
+  {
+    "artifact_class": "session_preflight",
+    "pattern": "audit/e8b_s4_preflight*.json",
+    "required": true,
+    "min_matches": 1,
+    "min_bytes": 256,
+    "lifecycle": "final_required"
+  }
+]

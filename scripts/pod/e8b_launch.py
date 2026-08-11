@@ -57,12 +57,22 @@ from aadistill.infrastructure.watchdog import Journal  # noqa: E402
 
 WS = "/workspace"
 REPO = f"{WS}/aad"
-STATUS = f"{WS}/e8b.status"
-RUN_LOG = f"{WS}/e8b_run.log"
+STATUS = ""   # set from --session in main()
+RUN_LOG = ""  # set from --session in main()
 # Two treatment arms, two seeds, one initialization. The control is retained from
 # E1/P1 and is never retrained here.
-ARMS = ("e8_contrib_r2960k_sa", "e8_contrib_r2960k_sb")
-STEP = "step_002916"
+STEP = "step_001761"
+# session -> (gpu, max price, arm config names, checkpoint MB each)
+SESSIONS = {
+    "s1": ("NVIDIA L40S", 0.99, (), 0),
+    "s2": ("NVIDIA A100-SXM4-80GB", 1.59,
+           ("e8b_dp_r1600k_sa", "e8b_dc_r1600k_sa"), 6430),
+    "s3": ("NVIDIA A100-SXM4-80GB", 1.59,
+           ("e8b_dp_r1600k_sb", "e8b_dc_r1600k_sb"), 6430),
+    "s4": ("NVIDIA L40S", 0.99,
+           ("e8b_fc_r1600k_sa", "e8b_fc_r1600k_sb"), 1190),
+}
+ARMS = ()     # set from --session in main()
 
 
 def parse_setup_probe(stdout: str) -> dict:
@@ -137,19 +147,48 @@ class E8B:
 
     # -- 1. plan and price -------------------------------------------------
     def make_plan(self) -> bool:
+        sess = self.a.session
+        if sess == "s1":
+            phases = (Phase("build_DP_DC_on_pod_and_assert_hashes", 12.0),
+                      Phase("init_nll_DP", 14.0), Phase("init_nll_DC", 14.0),
+                      Phase("init_nll_FP_remeasured", 7.0),
+                      Phase("init_nll_FC_remeasured", 7.0),
+                      Phase("step0_probe_DP", 55.0), Phase("step0_probe_DC", 55.0),
+                      Phase("publish_step0_records", 3.0),
+                      Phase("artifact_manifest_and_verify", 8.0),
+                      Phase("artifact_synchronization", 5.0))
+            step = StepTime(4.15, "unused; S1 does not train")
+            kw = {}
+        elif sess in ("s2", "s3"):
+            # 7.86 s/step is derived, not measured; the 20-step gate on the first
+            # arm converts it to a measurement before the second arm is paid for.
+            step = StepTime(7.86, "derived from FLOPs and E6b's measured 4.15 "
+                                  "s/step; the first-arm gate settles it")
+            phases = (Phase("build_DP_DC_on_pod_and_assert_hashes", 12.0),
+                      Phase("throughput_vram_usd_per_step_gate", 3.0),
+                      Phase("pretraining_gate", 3.0),
+                      Phase("train_two_depth_only_arms",
+                            round(2 * 1761 * 7.86 / 60.0, 1)),
+                      Phase("evaluate_two_arms", 60.0),
+                      Phase("general_text_diagnostics", 6.0),
+                      Phase("artifact_manifest_and_verify", 8.0),
+                      Phase("artifact_synchronization",
+                            round(2 * 6430 / 720.0, 1)))
+            kw = {}
+        else:
+            step = StepTime(4.15, "E6b measured 4.15 s/step for this exact model, "
+                                  "rung and card")
+            phases = (Phase("pretraining_gate", 3.0),
+                      Phase("general_text_diagnostics", 6.0),
+                      Phase("artifact_manifest_and_verify", 8.0))
+            kw = {"arms": 2, "steps_per_arm": 1761, "eval_minutes_per_arm": 8.25,
+                  "transfer_minutes": round(2 * 1190 / 720.0, 1)}
         self.plan = plan_session(
             price_per_hour=self.a.max_price, authorized_usd=self.a.authorized_usd,
-            arms=2, steps_per_arm=2916,
-            step_time=StepTime(4.15, "E6b measured 4.15 s/step at block_len 8192; "
-                                     "E8 trains the identical recipe"),
-            setup_minutes=45.0, eval_minutes_per_arm=8.25,
-            transfer_minutes=20.0,
-            other_phases=(
-                Phase("init_nll_treatment", 6.0),
-                Phase("init_nll_baseline_remeasured", 6.0),
-                Phase("pretraining_gate_validate_e8_arms", 3.0),
-                Phase("artifact_manifest_and_verify", 8.0)),
-            contingency_fraction=0.10, artifact_recovery_reserve_minutes=30.0)
+            arms=kw.pop("arms", 0), steps_per_arm=kw.pop("steps_per_arm", 0),
+            step_time=step, setup_minutes=45.0, other_phases=phases,
+            contingency_fraction=0.10, artifact_recovery_reserve_minutes=30.0,
+            **kw)
         self.ev["budget_plan"] = self.plan.as_dict()
         self.say(f"budget: expected {self.plan.expected_minutes:.0f} min "
                  f"${self.plan.expected_usd:.2f} · soft stop "
@@ -184,13 +223,21 @@ class E8B:
         or landed under a different prefix — the pod would build both venvs,
         download the teacher, and only then discover it has nothing to train.
         """
-        need = [
-            "e8_init_20260810/e8_contribution_init_v1/checkpoint/model.safetensors",
-            "e8_init_20260810/e8_contribution_init_v1/checkpoint/config.json",
-            "e8_init_20260810/e8_contribution_init_v1/manifest.json",
-            "e8_init_20260810/e8_frozen_depth_map.json",
-            "e8_inputs_20260810/warmup/holdout_v1.jsonl",
-        ]
+        need = ["e8_inputs_20260810/warmup/holdout_v1.jsonl",
+                "stage3_recovery_corpus_v2/ladder_uniform/blocks.npz",
+                "e7_streams_20260809/e7_fineweb_val/blocks.npz"]
+        if self.a.session in ("s1", "s4"):
+            need += [
+                "e8_init_20260810/e8_contribution_init_v1/checkpoint/model.safetensors",
+                "e8_init_20260810/e8_contribution_init_v1/manifest.json",
+                "e8_inputs_20260810/stage1/qwen3_0p6b_init_v0_manifest.json",
+                "e8_inputs_20260810/calibration_v1/leakage.json",
+                "stage1/qwen3_0p6b_init_v0/checkpoint/model.safetensors"]
+        if self.a.session in ("s2", "s3", "s4"):
+            # S1 publishes these; a training session must not start without them.
+            need += [f"e8b_step0_20260811/{c}_init_nll.json"
+                     for c in (("DP", "DC") if self.a.session in ("s2", "s3")
+                               else ("FP", "FC"))]
         try:
             from huggingface_hub import HfApi
             present = set(HfApi().list_repo_files(
@@ -217,7 +264,7 @@ class E8B:
                  "--gpu-id", self.a.gpu, "--gpu-count", "1",
                  "--container-disk-in-gb", "150", "--volume-in-gb", "0",
                  "--min-cuda-version", "13.0", "--ports", "22/tcp",
-                 "--name", "aadistill-e8b",
+                 "--name", f"aadistill-e8b-{self.a.session}",
                  "--terminate-after", deadline.strftime("%Y-%m-%dT%H:%M:%SZ")],
                 capture_output=True, text=True, timeout=300)
             (self.scr / f"create_raw_{attempt}.txt").write_text(
@@ -332,12 +379,13 @@ class E8B:
             f"cd {WS} && SESSION_COMMIT={self.a.session_commit} "
             f"BUNDLE_NAME={self.a.bundle} "
             f"TEACHER_REVISION={self.a.teacher_revision} "
-            f"TREATMENT_INIT_SHA256={self.a.treatment_init_sha256} "
-            f"bash {WS}/e8b_setup.sh > {WS}/e8b_setup.log 2>&1; "
-            f"echo SETUP_RC=$? >> {WS}/e8b_setup.log",
+            f"E8B_SESSION={self.a.session} "
+            f"UV_MAX_S={self.a.uv_max_s} TESTS_MAX_S={self.a.tests_max_s} "
+            f"bash {WS}/e8b_setup.sh > {WS}/e8b_{self.a.session}_setup.log 2>&1; "
+            f"echo SETUP_RC=$? >> {WS}/e8b_{self.a.session}_setup.log",
             timeout=self.a.setup_timeout_s)
         probe = parse_setup_probe(target.run(
-            PROBE_COMMAND.format(status=STATUS, log=f"{WS}/e8b_setup.log"),
+            PROBE_COMMAND.format(status=STATUS, log=f"{WS}/e8b_{self.a.session}_setup.log"),
             timeout=120).stdout)
         done, cold = probe["setup_done"], probe["host_cold"]
         self.ev["stages"].setdefault("setup", []).append(
@@ -347,7 +395,7 @@ class E8B:
         if cold not in ("", "0") or probe["setup_rc"] == "90":
             return "cold"
         if done in ("", "0"):
-            tail = target.run(f"tail -40 {WS}/e8b_setup.log", timeout=120).stdout
+            tail = target.run(f"tail -40 {WS}/e8b_{self.a.session}_setup.log", timeout=120).stdout
             self.say(f"setup did not reach SETUP_DONE:\n{tail[-2000:]}")
             return "setup_failed"
         self.say(f"draw {draw}: setup complete — ${self.usd():.2f}")
@@ -409,7 +457,7 @@ class E8B:
                      f"--spent-usd {spent:.3f} "
                      f"--soft-stop-usd {self.plan.soft_stop_usd:.2f} "
                      f"--authorized-usd {self.plan.hard_terminate_usd:.2f} "
-                     f"--rate {self.price}"),
+                     f"--session {self.a.session} --rate {self.price}"),
             job_dir=f"{WS}/jobs", log_path=RUN_LOG, status_path=STATUS,
             env={"PYTHONPATH": f"{REPO}/src"}),
             start_timeout=120, verify_timeout=60)
@@ -422,8 +470,8 @@ class E8B:
         relay_specs = tuple(
             RelaySpec(f"{REPO}/artifacts/stage3/{a}/train_log.jsonl",
                       f"{a}.train_log.jsonl", required=False) for a in ARMS
-        ) + (RelaySpec(RUN_LOG, "e8b_run.log", required=False),
-             RelaySpec(STATUS, "e8b.status", required=False))
+        ) + (RelaySpec(RUN_LOG, f"e8b_{self.a.session}_run.log", required=False),
+             RelaySpec(STATUS, f"e8b_{self.a.session}.status", required=False))
         relay = LogRelay(target, relay_specs, self.scr / "relay")
         last = ""
         deadline = time.time() + self.a.poll_limit_min * 60
@@ -469,16 +517,16 @@ class E8B:
               "scripts/pod/collect_artifacts.py")
         # The session log and status live outside the artifacts tree; copy them
         # in so every spec pattern is a plain relative glob.
-        target.run(f"mkdir -p {REPO}/artifacts/audit/e8b_session && "
-                   f"cp {RUN_LOG} {STATUS} {REPO}/artifacts/audit/e8b_session/",
+        target.run(f"mkdir -p {REPO}/artifacts/audit/e8b_{self.a.session}_session && "
+                   f"cp {RUN_LOG} {STATUS} {REPO}/artifacts/audit/e8b_{self.a.session}_session/",
                    timeout=120)
-        man = f"{WS}/e8b_manifest.json"
-        arc = f"{WS}/e8b_artifacts.tar.gz"
+        man = f"{WS}/e8b_{self.a.session}_manifest.json"
+        arc = f"{WS}/e8b_{self.a.session}_artifacts.tar.gz"
         r_man = target.run(
             f"{cc} manifest --root {REPO}/artifacts "
-            f"--spec {REPO}/configs/stage3/e8/artifacts_b.json --out {man} "
+            f"--spec {REPO}/configs/stage3/e8b/artifacts_{self.a.session}.json --out {man} "
             f"--settle-seconds {self.a.settle_seconds} "
-            f"--completion-markers {REPO}/configs/stage3/e8/completion_markers_b.json",
+            f"--completion-markers {REPO}/configs/stage3/e8b/completion_markers_{self.a.session}.json",
             timeout=900)
         self.say(f"  manifest rc={r_man.returncode}\n{r_man.stdout.strip()[-900:]}")
         r_arc = target.run(f"{cc} archive --manifest {man} --out {arc}", timeout=1800)
@@ -487,7 +535,7 @@ class E8B:
         store = self.scr / "store"
         store.mkdir(exist_ok=True)
         for remote, local in ((man, store / "manifest.json"),
-                              (arc, store / "e8b_artifacts.tar.gz")):
+                              (arc, store / f"e8b_{self.a.session}_artifacts.tar.gz")):
             subprocess.run(scp + [f"root@{host}:{remote}", str(local)],
                            capture_output=True, timeout=1800)
 
@@ -497,7 +545,7 @@ class E8B:
             extract = store / "extracted"
             extract.mkdir(exist_ok=True)
             try:
-                with tarfile.open(store / "e8b_artifacts.tar.gz") as tar:
+                with tarfile.open(store / f"e8b_{self.a.session}_artifacts.tar.gz") as tar:
                     tar.extractall(extract, filter="data")
                 manifest = ArtifactManifest.load(store / "manifest.json")
                 problems = verify_extracted(extract, manifest)
@@ -509,7 +557,7 @@ class E8B:
         # Checkpoints: the only artifacts that cannot be regenerated without
         # paying again. Time-boxed, hashed pod-side first.
         ck = target.run(
-            f"cd {REPO}/artifacts/stage3 && find e8_contrib_r2960k_*/checkpoints/{STEP} "
+            f"cd {REPO}/artifacts/stage3 && find e8b_*_r1600k_*/checkpoints/{STEP} "
             f"-type f \\( -name '*.safetensors' -o -name '*.json' -o -name "
             f"'*.jinja' \\) | sort | xargs sha256sum", timeout=900)
         (store / "checkpoint_hashes.txt").write_text(ck.stdout)
@@ -549,7 +597,7 @@ class E8B:
                 manifest and manifest.final_streams_quiescent),
             "archive_created": r_arc.returncode == 0,
             "archive_contents_verified": r_ver.returncode == 0,
-            "transfer_complete": (store / "e8b_artifacts.tar.gz").is_file(),
+            "transfer_complete": (store / f"e8b_{self.a.session}_artifacts.tar.gz").is_file(),
             "local_hashes_verified": local_ok,
             "checkpoint_hashes_matched": all(f["rc"] == 0 for f in fetched),
             "report_inputs_verified": local_ok,
@@ -626,18 +674,18 @@ def main() -> int:
     ap.add_argument("--scr", required=True)
     ap.add_argument("--session-commit", required=True)
     ap.add_argument("--bundle", required=True)
-    ap.add_argument("--gpu", default="NVIDIA L40S")
+    
     ap.add_argument("--image",
                     default="runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404")
-    ap.add_argument("--max-price", type=float, default=0.99)
-    ap.add_argument("--authorized-usd", type=float, default=9.72)
+    
+    
     ap.add_argument("--teacher-revision",
                     default="768f209d9ea81521153ed38c47d515654e938aea")
     ap.add_argument("--token-src",
                     default=os.path.expanduser("~/.cache/huggingface/token"))
-    ap.add_argument("--treatment-init-sha256", required=True,
-                    help="model.safetensors sha256 of the treatment init built on "
-                         "the dev box; setup refuses a checkpoint that differs")
+    ap.add_argument("--session", required=True, choices=sorted(SESSIONS))
+    ap.add_argument("--uv-max-s", type=int, default=1500)
+    ap.add_argument("--tests-max-s", type=int, default=900)
     ap.add_argument("--ckpt-store", default="/home/ecs-user/aad-artifacts/e8")
     ap.add_argument("--ckpt-fetch-limit-min", type=int, default=25)
     ap.add_argument("--startup-limit-min", type=float, default=15.0)
@@ -651,7 +699,14 @@ def main() -> int:
     ap.add_argument("--runpod-config",
                     default=os.path.expanduser("~/.runpod/config.toml"))
     ap.add_argument("--out", default="logs/e8b_session_evidence.json")
+    ap.add_argument("--authorized-usd", type=float, required=True)
     args = ap.parse_args()
+    global STATUS, RUN_LOG, ARMS
+    gpu, price, arms, _ckpt_mb = SESSIONS[args.session]
+    args.gpu, args.max_price = gpu, price
+    ARMS = arms
+    STATUS = f"{WS}/e8b_{args.session}.status"
+    RUN_LOG = f"{WS}/e8b_{args.session}_run.log"
 
     session = E8B(args)
     ok = False

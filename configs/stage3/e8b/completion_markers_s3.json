@@ -1,0 +1,30 @@
+[
+  {
+    "path": "audit/e8b_s3_session/e8b_s3.status",
+    "contains": "MARKER:STEP0_FETCHED"
+  },
+  {
+    "path": "audit/e8b_s3_session/e8b_s3.status",
+    "contains": "MARKER:THROUGHPUT_GATE_PASSED"
+  },
+  {
+    "path": "audit/e8b_s3_session/e8b_s3.status",
+    "contains": "MARKER:GATE_PASSED"
+  },
+  {
+    "path": "audit/e8b_s3_session/e8b_s3.status",
+    "contains": "MARKER:TRAIN_DONE:E8b-DP-sb"
+  },
+  {
+    "path": "audit/e8b_s3_session/e8b_s3.status",
+    "contains": "MARKER:TRAIN_DONE:E8b-DC-sb"
+  },
+  {
+    "path": "audit/e8b_s3_session/e8b_s3.status",
+    "contains": "MARKER:EVAL_DONE"
+  },
+  {
+    "path": "audit/e8b_s3_session/e8b_s3.status",
+    "contains": "MARKER:ALL_DONE"
+  }
+]

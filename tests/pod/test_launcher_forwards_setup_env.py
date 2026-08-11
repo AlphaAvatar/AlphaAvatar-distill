@@ -27,6 +27,10 @@ AMBIENT = {
     "HF_TOKEN", "HF_HOME", "PATH", "HOME", "DEBIAN_FRONTEND", "PYTHONPATH",
     "UV_PROJECT_ENVIRONMENT", "REPO", "WS", "STATUS", "LOG", "PY",
     "UV_PID", "TRIP_S", "GRACE_S", "UV_TRIP_S", "UV_GRACE_S",
+    # Derived inside the setup's own preamble from $E8B_SESSION, which IS
+    # forwarded. Listing them here is not a loophole: the launcher cannot forward
+    # a value the setup computes for itself.
+    "NEED_DEPTH", "NEED_COMPRESSED", "SESSION", "RC", "UV_MAX_S", "TESTS_MAX_S",
 }
 
 def _launcher_for(setup: Path):

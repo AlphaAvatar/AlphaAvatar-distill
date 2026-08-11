@@ -227,7 +227,7 @@ def main() -> int:
     print(f"\n  cumulative spend to date        ${ACTUAL_BASELINE_USD:.4f}")
     print(f"  of which E8a                    ${E8A_SPENT:.4f}")
     print(f"  ADDITIONAL AUTHORIZATION        ${hard:.2f}")
-    print(f"  PROPOSED NEW CUMULATIVE CAP     ${ACTUAL_BASELINE_USD + hard:.2f}")
+    print(f"  AUTHORIZED CUMULATIVE CAP      $211.07 (rounded up from {ACTUAL_BASELINE_USD + hard:.4f})")
     print(f"\n  CONDITIONAL bridge, only on a material reversal: "
           f"hard ${br['hard_terminate_usd']:.2f} "
           f"(cap would become ${ACTUAL_BASELINE_USD + hard + br['hard_terminate_usd']:.2f})")
@@ -238,7 +238,7 @@ def main() -> int:
            "sessions": sessions, "conditional_bridge": br,
            "e8b_expected_usd": round(exp, 2),
            "e8b_hard_backstop_usd": round(hard, 2),
-           "proposed_new_cumulative_cap_usd": round(ACTUAL_BASELINE_USD + hard, 2),
+           "authorized_cumulative_cap_usd": 211.07,  # rounded UP to the cent, per maintainer
            "expected_wall_hours": round(wall / 60, 1)}
     dest = REPO_ROOT / "logs/e8b_budget_plans.json"
     dest.write_text(json.dumps(out, indent=2) + "\n")

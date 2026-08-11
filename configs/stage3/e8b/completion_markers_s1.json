@@ -1,0 +1,18 @@
+[
+  {
+    "path": "audit/e8b_s1_session/e8b_s1.status",
+    "contains": "MARKER:INIT_NLL_DONE"
+  },
+  {
+    "path": "audit/e8b_s1_session/e8b_s1.status",
+    "contains": "MARKER:STEP0_PROBE_DONE"
+  },
+  {
+    "path": "audit/e8b_s1_session/e8b_s1.status",
+    "contains": "MARKER:STEP0_PUBLISHED"
+  },
+  {
+    "path": "audit/e8b_s1_session/e8b_s1.status",
+    "contains": "MARKER:ALL_DONE"
+  }
+]

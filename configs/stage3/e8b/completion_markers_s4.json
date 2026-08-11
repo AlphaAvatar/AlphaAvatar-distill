@@ -1,0 +1,26 @@
+[
+  {
+    "path": "audit/e8b_s4_session/e8b_s4.status",
+    "contains": "MARKER:STEP0_FETCHED"
+  },
+  {
+    "path": "audit/e8b_s4_session/e8b_s4.status",
+    "contains": "MARKER:GATE_PASSED"
+  },
+  {
+    "path": "audit/e8b_s4_session/e8b_s4.status",
+    "contains": "MARKER:TRAIN_DONE:E8b-FC-sa"
+  },
+  {
+    "path": "audit/e8b_s4_session/e8b_s4.status",
+    "contains": "MARKER:TRAIN_DONE:E8b-FC-sb"
+  },
+  {
+    "path": "audit/e8b_s4_session/e8b_s4.status",
+    "contains": "MARKER:EVAL_DONE"
+  },
+  {
+    "path": "audit/e8b_s4_session/e8b_s4.status",
+    "contains": "MARKER:ALL_DONE"
+  }
+]

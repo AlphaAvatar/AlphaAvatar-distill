@@ -1,0 +1,58 @@
+[
+  {
+    "artifact_class": "init_nll_record",
+    "pattern": "stage1/*/init_nll.json",
+    "required": true,
+    "min_matches": 4,
+    "min_bytes": 256,
+    "lifecycle": "final_required"
+  },
+  {
+    "artifact_class": "depth_only_init_manifest",
+    "pattern": "stage1/e8b_d*_init/manifest.json",
+    "required": true,
+    "min_matches": 2,
+    "min_bytes": 512,
+    "lifecycle": "final_required"
+  },
+  {
+    "artifact_class": "step0_probe",
+    "pattern": "audit/e8b_step0_probe/*.json",
+    "required": true,
+    "min_matches": 2,
+    "min_bytes": 256,
+    "lifecycle": "final_required"
+  },
+  {
+    "artifact_class": "step0_published",
+    "pattern": "audit/e8b_step0_published.json",
+    "required": true,
+    "min_matches": 1,
+    "min_bytes": 32,
+    "lifecycle": "final_required"
+  },
+  {
+    "artifact_class": "session_status",
+    "pattern": "audit/e8b_s1_session/e8b_s1.status",
+    "required": true,
+    "min_matches": 1,
+    "min_bytes": 32,
+    "lifecycle": "final_required"
+  },
+  {
+    "artifact_class": "driver_console",
+    "pattern": "audit/e8b_s1_session/e8b_s1_run.log",
+    "required": false,
+    "min_matches": 1,
+    "min_bytes": 1,
+    "lifecycle": "mutable_snapshot"
+  },
+  {
+    "artifact_class": "session_preflight",
+    "pattern": "audit/e8b_s1_preflight*.json",
+    "required": true,
+    "min_matches": 1,
+    "min_bytes": 256,
+    "lifecycle": "final_required"
+  }
+]
