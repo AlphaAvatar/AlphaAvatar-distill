@@ -1,98 +1,103 @@
 {
   "timeline": [
     {
-      "utc": "2026-08-11T16:44:00+00:00",
+      "utc": "2026-08-11T17:44:51+00:00",
       "elapsed_min": 0.0,
       "msg": "budget: expected 616 min $16.33 \u00b7 soft stop 678 min $17.97 \u00b7 hard 708 min $18.76 (authorized $18.76)"
     },
     {
-      "utc": "2026-08-11T16:44:00+00:00",
+      "utc": "2026-08-11T17:44:52+00:00",
       "elapsed_min": 0.0,
       "msg": "NVIDIA A100-SXM4-80GB securePrice $1.59/h, stock Low"
     },
     {
-      "utc": "2026-08-11T16:44:01+00:00",
+      "utc": "2026-08-11T17:44:52+00:00",
       "elapsed_min": 0.0,
       "msg": "relay precheck OK (5 files present)"
     },
     {
-      "utc": "2026-08-11T16:44:02+00:00",
+      "utc": "2026-08-11T17:44:53+00:00",
       "elapsed_min": 0.0,
-      "msg": "created rfnomrxznmzznp at $1.59/h; --terminate-after 2026-08-12T04:31:57Z (redundant layer)"
+      "msg": "created igyljdhgg2hmzf at $1.59/h; --terminate-after 2026-08-12T05:32:48Z (redundant layer)"
     },
     {
-      "utc": "2026-08-11T16:44:02+00:00",
+      "utc": "2026-08-11T17:44:53+00:00",
       "elapsed_min": 0.0,
       "msg": "watchdog detached \u2014 hard 708 min = $18.76"
     },
     {
-      "utc": "2026-08-11T16:44:56+00:00",
-      "elapsed_min": 0.91,
+      "utc": "2026-08-11T17:45:46+00:00",
+      "elapsed_min": 0.89,
       "msg": "  starting (60s) \u2014 $0.02"
     },
     {
-      "utc": "2026-08-11T16:46:00+00:00",
-      "elapsed_min": 1.97,
-      "msg": "  starting (120s) \u2014 $0.05"
+      "utc": "2026-08-11T17:46:39+00:00",
+      "elapsed_min": 1.76,
+      "msg": "TCP 22 at 154.54.102.24:18994 after 1.8 min"
     },
     {
-      "utc": "2026-08-11T16:46:11+00:00",
-      "elapsed_min": 2.15,
-      "msg": "TCP 22 at 157.157.221.29:13722 after 2.1 min"
+      "utc": "2026-08-11T17:46:42+00:00",
+      "elapsed_min": 1.81,
+      "msg": "draw 1: ssh reachable \u2014 $0.05"
     },
     {
-      "utc": "2026-08-11T16:46:13+00:00",
-      "elapsed_min": 2.19,
-      "msg": "draw 1: ssh reachable \u2014 $0.06"
-    },
-    {
-      "utc": "2026-08-11T16:46:25+00:00",
-      "elapsed_min": 2.39,
+      "utc": "2026-08-11T17:46:56+00:00",
+      "elapsed_min": 2.06,
       "msg": "draw 1: running setup"
     },
     {
-      "utc": "2026-08-11T17:02:04+00:00",
-      "elapsed_min": 18.04,
-      "msg": "draw 1: setup complete \u2014 $0.48"
+      "utc": "2026-08-11T17:57:46+00:00",
+      "elapsed_min": 12.89,
+      "msg": "draw 1: setup complete \u2014 $0.34"
     },
     {
-      "utc": "2026-08-11T17:02:10+00:00",
-      "elapsed_min": 18.14,
-      "msg": "driver detached, pid 10036, confirmed by descriptor_probe \u2014 $0.48"
+      "utc": "2026-08-11T17:57:53+00:00",
+      "elapsed_min": 13.0,
+      "msg": "driver detached, pid 2697, confirmed by descriptor_probe \u2014 $0.34"
     },
     {
-      "utc": "2026-08-11T17:04:24+00:00",
-      "elapsed_min": 20.37,
-      "msg": "  2026-08-11T17:02:47.365588+00:00 MARKER:ALL_DONE \u2014 $0.54"
+      "utc": "2026-08-11T18:00:10+00:00",
+      "elapsed_min": 15.28,
+      "msg": "  2026-08-11T17:58:15.934355+00:00 MARKER:MEMORY_PROFILE_DONE \u2014 $0.40"
     },
     {
-      "utc": "2026-08-11T17:04:24+00:00",
-      "elapsed_min": 20.37,
-      "msg": "polling ended: ALL_DONE \u2014 $0.54"
+      "utc": "2026-08-11T18:02:30+00:00",
+      "elapsed_min": 17.62,
+      "msg": "  2026-08-11T18:01:33.840474+00:00 MARKER:GATE_PASSED \u2014 $0.47"
     },
     {
-      "utc": "2026-08-11T17:06:20+00:00",
-      "elapsed_min": 22.3,
-      "msg": "  manifest rc=5\non/e8b_s2.status does not contain 'MARKER:GATE_PASSED'; audit/e8b_s2_session/e8b_s2.status does not contain 'MARKER:TRAIN_DONE:E8b-DP-sa'; audit/e8b_s2_session/e8b_s2.status does not contain 'MARKER:TRAIN_DONE:E8b-DC-sa'; audit/e8b_s2_session/e8b_s2.status does not contain 'MARKER:EVAL_DONE')\n  NOT COMPLETE: audit/e8b_s2_session/e8b_s2.status does not contain 'MARKER:THROUGHPUT_GATE_PASSED'\n  NOT COMPLETE: audit/e8b_s2_session/e8b_s2.status does not contain 'MARKER:GATE_PASSED'\n  NOT COMPLETE: audit/e8b_s2_session/e8b_s2.status does not contain 'MARKER:TRAIN_DONE:E8b-DP-sa'\n  NOT COMPLETE: audit/e8b_s2_session/e8b_s2.status does not contain 'MARKER:TRAIN_DONE:E8b-DC-sa'\n  NOT COMPLETE: audit/e8b_s2_session/e8b_s2.status does not contain 'MARKER:EVAL_DONE'\nrequired artifacts are absent or unfinished; find them before teardown \u2014 this is the point in the session where that is still possible"
+      "utc": "2026-08-11T18:11:52+00:00",
+      "elapsed_min": 26.98,
+      "msg": "  2026-08-11T18:11:40.728797+00:00 MARKER:ALL_DONE \u2014 $0.71"
     },
     {
-      "utc": "2026-08-11T17:06:42+00:00",
-      "elapsed_min": 22.67,
+      "utc": "2026-08-11T18:11:52+00:00",
+      "elapsed_min": 26.98,
+      "msg": "polling ended: ALL_DONE \u2014 $0.71"
+    },
+    {
+      "utc": "2026-08-11T18:14:32+00:00",
+      "elapsed_min": 29.64,
+      "msg": "  manifest rc=5\ns not contain 'MARKER:TRAIN_DONE:E8b-DC-sa'; audit/e8b_s2_session/e8b_s2.status does not contain 'MARKER:EVAL_DONE')\n  MISSING session_preflight [final_required]: audit/e8b_s2_preflight*.json (the producing process has not signalled completion: audit/e8b_s2_session/e8b_s2.status does not contain 'MARKER:TRAIN_DONE:E8b-DP-sa'; audit/e8b_s2_session/e8b_s2.status does not contain 'MARKER:TRAIN_DONE:E8b-DC-sa'; audit/e8b_s2_session/e8b_s2.status does not contain 'MARKER:EVAL_DONE')\n  NOT COMPLETE: audit/e8b_s2_session/e8b_s2.status does not contain 'MARKER:TRAIN_DONE:E8b-DP-sa'\n  NOT COMPLETE: audit/e8b_s2_session/e8b_s2.status does not contain 'MARKER:TRAIN_DONE:E8b-DC-sa'\n  NOT COMPLETE: audit/e8b_s2_session/e8b_s2.status does not contain 'MARKER:EVAL_DONE'\nrequired artifacts are absent or unfinished; find them before teardown \u2014 this is the point in the session where that is still possible"
+    },
+    {
+      "utc": "2026-08-11T18:14:59+00:00",
+      "elapsed_min": 30.1,
       "msg": "  checkpoint e8b_dp_r1600k_sa: rc=1"
     },
     {
-      "utc": "2026-08-11T17:06:45+00:00",
-      "elapsed_min": 22.71,
+      "utc": "2026-08-11T18:15:02+00:00",
+      "elapsed_min": 30.16,
       "msg": "  checkpoint e8b_dc_r1600k_sa: rc=1"
     },
     {
-      "utc": "2026-08-11T17:06:45+00:00",
-      "elapsed_min": 22.71,
+      "utc": "2026-08-11T18:15:02+00:00",
+      "elapsed_min": 30.16,
       "msg": "teardown gate: allowed=False failed=required_files_present"
     },
     {
-      "utc": "2026-08-11T17:06:45+00:00",
-      "elapsed_min": 22.71,
+      "utc": "2026-08-11T18:15:02+00:00",
+      "elapsed_min": 30.16,
       "msg": "GATE BLOCKED \u2014 the pod is NOT being deleted by the launcher; the watchdog remains the backstop"
     }
   ],
@@ -187,28 +192,28 @@
     ],
     "missing": []
   },
-  "pod_id": "rfnomrxznmzznp",
+  "pod_id": "igyljdhgg2hmzf",
   "actual_price_per_hour": 1.59,
-  "terminate_after_utc": "2026-08-12T04:31:57Z",
+  "terminate_after_utc": "2026-08-12T05:32:48Z",
   "watchdog_journals": [
-    "/home/ecs-user/aad-scratch/e8b_s2d_20260812_004400/watchdog.jsonl"
+    "/home/ecs-user/aad-scratch/e8b_s2e_20260812_014451/watchdog.jsonl"
   ],
   "driver_job": {
     "job_id": "e8b_driver",
-    "pid": 10036,
+    "pid": 2697,
     "workdir": "/workspace/aad",
-    "command": "/opt/train/bin/python scripts/pod/e8b_driver.py --stage all --spent-usd 0.478 --soft-stop-usd 17.97 --authorized-usd 18.76 --session s2 --rate 1.59",
+    "command": "/opt/train/bin/python scripts/pod/e8b_driver.py --stage all --spent-usd 0.342 --soft-stop-usd 17.97 --authorized-usd 18.76 --session s2 --rate 1.59",
     "log_path": "/workspace/e8b_s2_run.log",
     "status_path": "/workspace/e8b_s2.status",
     "pid_path": "/workspace/jobs/e8b_driver.pid",
     "descriptor_path": "/workspace/jobs/e8b_driver.job.json",
     "exit_path": "/workspace/jobs/e8b_driver.exit",
-    "started_utc": "2026-08-11T17:02:07Z",
+    "started_utc": "2026-08-11T17:57:50Z",
     "start_channel_closed": true,
     "confirmed_by": "descriptor_probe"
   },
   "terminal": "ALL_DONE",
-  "local_verify_error": "FileNotFoundError: [Errno 2] No such file or directory: '/home/ecs-user/aad-scratch/e8b_s2d_20260812_004400/store/e8b_s2_artifacts.tar.gz'",
+  "local_verify_error": "FileNotFoundError: [Errno 2] No such file or directory: '/home/ecs-user/aad-scratch/e8b_s2e_20260812_014451/store/e8b_s2_artifacts.tar.gz'",
   "checkpoints_fetched": [
     {
       "arm": "e8b_dp_r1600k_sa",
@@ -241,5 +246,5 @@
   },
   "manifest_summary": null,
   "passed": false,
-  "finished_utc": "2026-08-11T17:06:45+00:00"
+  "finished_utc": "2026-08-11T18:15:02+00:00"
 }

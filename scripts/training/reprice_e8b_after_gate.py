@@ -77,7 +77,7 @@ PRICED_STEP_S = round(MEASURED_STEADY_S * CHUNK_ALLOWANCE, 2)
 
 # Measured on attempt 4: setup complete at 15.6 min on a warm host.
 SETUP_MIN = 20.0          # 15.6 measured, rounded up for a colder draw
-GATE_MIN = 6.0            # throughput gate + pre-training gate
+GATE_MIN = 22.0           # 200-step steady-state gate + pre-training gate
 EVAL_MIN_PER_ARM = 30.0
 GENERAL_TEXT_MIN = 6.0
 MANIFEST_MIN = 8.0
@@ -87,7 +87,8 @@ RESERVE_MIN = 30.0
 CONTINGENCY = 0.10
 
 SPENT = {"S1 step-0": 5.21, "S2 attempts 1-3 (setup)": 3.10,
-         "S2 attempt 4 (gate)": 0.55}
+         "S2 attempt 4 (gate OOM)": 0.55,
+         "S2 attempt 5 (step-110 OOM)": 0.75}
 E8B_BACKSTOP = 47.18
 S4_HARD_UNCHANGED = 6.4011
 
@@ -159,8 +160,10 @@ def main() -> int:
     fits = need <= remaining
     print(f"\n  {'FITS within the existing authorization' if fits else 'SHORTFALL'}"
           f": {'no additional funds required' if fits else f'needs ${need-remaining:.2f} more'}")
-    print("  The blocker is memory, not money. Nothing above is adopted; the two "
-          "memory levers are a maintainer decision because a registered gate failed.")
+    print("  The blocker is memory, not money. BOTH memory levers are now adopted: "
+          "the allocator, and — after it alone OOM'd at step 110 — the preregistered "
+          "KD chunk 128 across the whole depth-only regime. The 20-step gate is "
+          "falsified and replaced by a 200-step steady-state gate.")
 
     out = REPO_ROOT / "logs/e8b_reprice_after_gate.json"
     out.write_text(json.dumps({

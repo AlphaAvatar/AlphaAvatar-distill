@@ -67,7 +67,16 @@ STEP0_PREFIX = "e8b_step0_20260811"
 GATE_MAX_SECONDS_PER_STEP = 7.86
 GATE_MAX_PEAK_VRAM_GB = 78.0
 GATE_MAX_USD_PER_STEP = 0.003472
-GATE_STEPS = 20
+
+# 20 steps was FALSIFIED by the real run and is not a memory gate. The S2 arm passed a
+# 20-step gate at 77.15 GiB peak and then OOM'd at step ~110 of 1,761: peak allocated
+# had continued climbing to 77.37 GiB by step 70 and 77.60 GiB at the failure. A gate
+# must therefore outlast the observed failure point, and it must show the trend has
+# flattened rather than merely recording a maximum.
+GATE_STEPS = 200
+GATE_TREND_TAIL = 50          # steps at the end that must show no upward drift
+GATE_MAX_TREND_GIB = 0.05     # allowed rise across that tail
+GATE_MIN_FREE_MARGIN_GIB = 1.5  # required headroom below capacity, not below a constant
 
 INITS = {
     "DP": "artifacts/stage1/e8b_dp_init",
@@ -261,7 +270,25 @@ def stage_fetch_step0(args) -> None:
 
 
 def stage_throughput_gate(args) -> None:
-    """20 real training steps: s/step, peak VRAM, live $/step. Blocking."""
+    """A steady-state gate: 200 real steps, s/step, VRAM trend, $/step.
+
+    Blocking, and deliberately longer than the failure it exists to catch. The
+    previous 20-step form passed this exact arm and the run then died at step ~110,
+    because lazily-allocated state and block-to-block variation in masked-position
+    count keep the peak climbing well past step 20. So this gate now checks four
+    things, not three:
+
+      * seconds/step        <= GATE_MAX_SECONDS_PER_STEP   (registered, unchanged)
+      * $/step              <= GATE_MAX_USD_PER_STEP       (registered, unchanged)
+      * peak VRAM           <= GATE_MAX_PEAK_VRAM_GB       (registered, unchanged)
+      * peak still rising?  the last GATE_TREND_TAIL steps must not drift upward by
+                            more than GATE_MAX_TREND_GIB, and the peak must sit at
+                            least GATE_MIN_FREE_MARGIN_GIB below the card's real
+                            capacity
+
+    The threshold values are NOT relaxed. The horizon and the trend test are added,
+    which is the opposite of reinterpreting the earlier pass as a success.
+    """
     result = OUT / f"e8b_{args.session}_throughput_gate.json"
     if result.is_file():
         mark(args.session, "THROUGHPUT_GATE_PASSED")
@@ -272,6 +299,9 @@ def stage_throughput_gate(args) -> None:
     probe["run_name"] = f"{name}_gate"
     probe["out_dir"] = f"artifacts/stage3/{name}_gate"
     probe["schedule"] = {**cfg["schedule"], "total_steps": GATE_STEPS}
+    # log_every 1 so the trend has per-step resolution: the failed run logged every
+    # 10 steps, which is why its climb from 77.15 to 77.37 was only visible in coarse
+    # jumps.
     probe["intervals"] = {"log_every": 1, "eval_every": 0, "eval_blocks": 4}
     probe["checkpoint"] = {"save_every": 10_000, "keep_last": 1}
     probe["_purpose"] = (f"E8b {args.session} throughput/VRAM/$-per-step gate: "
@@ -283,23 +313,47 @@ def stage_throughput_gate(args) -> None:
     log = REPO / probe["out_dir"] / "train_log.jsonl"
     steps = [json.loads(l) for l in log.open() if l.strip()]
     steps = [s for s in steps if s.get("event") == "train_step"]
-    if len(steps) < GATE_STEPS // 2:
+    if len(steps) < int(GATE_STEPS * 0.9):
         mark(args.session, "THROUGHPUT_GATE_FAILED:too_few_steps")
         raise SystemExit(f"gate logged only {len(steps)} steps")
     # The first steps carry allocator warm-up and compile; the registered rate is
     # the steady-state median over the second half.
     tail = steps[len(steps) // 2:]
     sec = statistics.median(s["seconds"] for s in tail)
-    peak = max(s.get("gpu_mem_gb") or 0.0 for s in steps)
+    mem = [s.get("gpu_mem_gb") or 0.0 for s in steps]
+    peak = max(mem)
     usd = args.rate / 3600 * sec
+    # Trend: the maximum over the final window against the maximum over the window
+    # before it. A flat pair means the peak has settled; a rising pair means the gate
+    # simply has not run long enough yet, which is the failure mode being closed.
+    win = min(GATE_TREND_TAIL, max(1, len(mem) // 4))
+    last, prev = mem[-win:], mem[-2 * win:-win] or mem[:win]
+    trend = round(max(last) - max(prev), 4)
+    capacity = 0.0
+    try:
+        import torch
+        capacity = torch.cuda.get_device_properties(0).total_memory / 1024 ** 3
+    except Exception:                       # never fail the gate on a probe
+        pass
+    margin = round(capacity - peak, 3) if capacity else None
     verdict = {
         "arm": name, "steps_logged": len(steps), "measured_on": tail[0].get("step"),
         "seconds_per_step_median": round(sec, 3),
         "peak_vram_gb": round(peak, 2),
         "usd_per_step": round(usd, 6),
+        "kd_chunk": cfg["loss"].get("kd_chunk", 512),
+        "allocator_conf": ALLOC_CONF,
+        "vram_trend_gib_over_last_%d_steps" % win: trend,
+        "vram_trend_window_steps": win,
+        "capacity_gib": round(capacity, 3) if capacity else None,
+        "free_margin_gib": margin,
+        "vram_series_first_last": {"first": mem[:5], "last": mem[-5:]},
         "registered": {"max_seconds_per_step": GATE_MAX_SECONDS_PER_STEP,
                        "max_peak_vram_gb": GATE_MAX_PEAK_VRAM_GB,
-                       "max_usd_per_step": GATE_MAX_USD_PER_STEP},
+                       "max_usd_per_step": GATE_MAX_USD_PER_STEP,
+                       "gate_steps": GATE_STEPS,
+                       "max_trend_gib": GATE_MAX_TREND_GIB,
+                       "min_free_margin_gib": GATE_MIN_FREE_MARGIN_GIB},
         "rate_usd_per_hour": args.rate,
         "projected_minutes_per_arm": round(1761 * sec / 60, 1),
     }
@@ -307,7 +361,13 @@ def stage_throughput_gate(args) -> None:
         k for k, ok in (
             ("seconds_per_step", sec <= GATE_MAX_SECONDS_PER_STEP),
             ("peak_vram_gb", peak <= GATE_MAX_PEAK_VRAM_GB),
-            ("usd_per_step", usd <= GATE_MAX_USD_PER_STEP)) if not ok]
+            ("usd_per_step", usd <= GATE_MAX_USD_PER_STEP),
+            # The two additions. `vram_still_rising` is the check whose absence let a
+            # 20-step pass precede a step-110 OOM; `free_margin` refuses a peak that
+            # clears the registered constant but sits on the card's ceiling anyway.
+            ("vram_still_rising", trend <= GATE_MAX_TREND_GIB),
+            ("free_margin", margin is None
+             or margin >= GATE_MIN_FREE_MARGIN_GIB)) if not ok]
     verdict["passed"] = not verdict["violations"]
     result.parent.mkdir(parents=True, exist_ok=True)
     result.write_text(json.dumps(verdict, indent=2) + "\n")

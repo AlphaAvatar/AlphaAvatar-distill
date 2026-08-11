@@ -43,6 +43,15 @@ CELLS = {
     "fc": ("artifacts/stage1/e8_contribution_init_v1/checkpoint",
            "fully_compressed", "L40S_48GB"),
 }
+# The preregistered KD chunk fallback, applied to the WHOLE depth-only regime after
+# `expandable_segments:True` alone still OOM'd at step 110 of 1,761 (peak allocated had
+# grown 77.15 -> 77.37 GiB past the 20-step gate's measurement). It preserves the KD
+# objective exactly but NOT bit-identically: the loop accumulates one float32 scalar per
+# chunk, so the chunk count changes the reduction order (~7e-8 relative,
+# tests/training/test_kd_chunk_invariance.py). It therefore applies to DP-sa, DC-sa,
+# DP-sb and DC-sb together — never one arm or one seed — and NOT to FC, whose regime has
+# no memory problem (23-27 GB on an L40S) and whose retained FP control trained at 512.
+KD_CHUNK_BY_REGIME = {"depth_only": 128}
 DEPTH_MAP = {"dp": "positional", "dc": "contribution", "fc": "contribution"}
 SEEDS = {"sa": "e1_r1600k_sa_pca.json", "sb": "e1_r1600k_sb_pca.json"}
 RETAINED_FP = {
@@ -72,19 +81,28 @@ def main() -> int:
             cfg["student_path"] = init
             cfg["run_name"] = name
             cfg["out_dir"] = f"artifacts/stage3/{name}"
+            chunk = KD_CHUNK_BY_REGIME.get(regime)
+            if chunk is not None:
+                cfg["loss"] = {**control["loss"], "kd_chunk": chunk}
+            extra = ("" if chunk is None else
+                     f" loss.kd_chunk={chunk} is the preregistered memory fallback "
+                     "for this regime: identical KD objective, float32 reduction "
+                     "order not bit-identical, applied to every depth-only arm and "
+                     "both seeds.")
             cfg["_purpose"] = (
                 f"E8b cell {cell.upper()} ({regime}, {DEPTH_MAP[cell]} depth map), "
                 f"seed {seed}, on {hardware}. The canonical E1/P1 KD-heavy 1.60M "
                 f"recipe; differs from configs/stage3/e1/{control_name} only in "
                 "student_path (the intended causal variable), run_name, out_dir and "
-                "this note.")
+                f"this note.{extra}")
             ordered = {k: cfg[k] for k in control}
             realized = {k for k in ordered
                         if json.dumps(ordered[k], sort_keys=True)
                         != json.dumps(control.get(k), sort_keys=True)}
-            if realized != ALLOWED_DIFF:
+            allowed = ALLOWED_DIFF | ({"loss"} if chunk is not None else set())
+            if realized != allowed:
                 raise SystemExit(f"{name}: realized diff {sorted(realized)} != "
-                                 f"{sorted(ALLOWED_DIFF)}")
+                                 f"{sorted(allowed)}")
             path = OUT_DIR / f"{name}.json"
             path.write_text(json.dumps(ordered, indent=2) + "\n")
             written.append({

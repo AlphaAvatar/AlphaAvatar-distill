@@ -306,3 +306,46 @@ def test_no_test_drains_a_real_gpu():
 def _re_calls_timed(body: str) -> bool:
     # `timed()` synchronizes internally, so calling it is equivalent to draining.
     return bool(re.search(r"\btimed\s*\(", body))
+
+
+# --- fault 4: the 20-step memory gate that preceded a step-110 OOM ---------
+
+def test_the_memory_gate_outlasts_the_failure_it_exists_to_catch(setup_text):
+    """20 steps passed at 77.15 GiB and the arm died at step ~110.
+
+    Peak allocated was still climbing when the gate stopped looking — 77.15 through
+    step 60, 77.37 by step 70, 77.60 at the failure. A horizon shorter than the
+    observed failure point cannot establish a steady state, so the gate's step count
+    must exceed it. The three registered thresholds are deliberately NOT part of this
+    test: they were never the defect and must not be relaxed.
+    """
+    driver = (REPO / "scripts/pod/e8b_driver.py").read_text()
+    m = re.search(r"^GATE_STEPS = (\d+)", driver, re.M)
+    assert m, "GATE_STEPS not found"
+    assert int(m.group(1)) > 110, (
+        f"GATE_STEPS={m.group(1)} does not outlast the step-110 OOM")
+
+
+def test_the_registered_thresholds_are_unchanged(setup_text):
+    driver = (REPO / "scripts/pod/e8b_driver.py").read_text()
+    for name, want in (("GATE_MAX_SECONDS_PER_STEP", "7.86"),
+                       ("GATE_MAX_PEAK_VRAM_GB", "78.0"),
+                       ("GATE_MAX_USD_PER_STEP", "0.003472")):
+        assert re.search(rf"^{name} = {re.escape(want)}$", driver, re.M), (
+            f"{name} must remain {want} — a gate failure is re-priced, not widened")
+
+
+def test_the_gate_checks_the_trend_and_the_real_margin(setup_text):
+    driver = (REPO / "scripts/pod/e8b_driver.py").read_text()
+    # Recording a maximum is what the old gate did; it passed. The additions are a
+    # drift test and a margin against the card's capacity rather than a constant.
+    assert "vram_still_rising" in driver
+    assert "free_margin" in driver
+    assert "GATE_MAX_TREND_GIB" in driver and "GATE_MIN_FREE_MARGIN_GIB" in driver
+    assert "max_memory_reserved" in driver or "reserved" in driver
+
+
+def test_the_gate_logs_every_step(setup_text):
+    driver = (REPO / "scripts/pod/e8b_driver.py").read_text()
+    assert '"log_every": 1' in driver, (
+        "the failed run logged every 10 steps, which hid the climb")

@@ -113,6 +113,14 @@ def validate_train_config(cfg: dict) -> None:
         need(loss, key, (int, float), "loss.")
     if need(loss, "kd_scope", str, "loss.") not in KD_SCOPES:
         raise ValueError(f"loss.kd_scope must be one of {KD_SCOPES}")
+    # Optional. Absent means kd_forward_kl's own default (512), so every config
+    # written before this key existed keeps its exact behaviour. It is a
+    # memory/time knob: the objective is identical for any chunk, but the float32
+    # accumulation order is not, so it must be set per *regime* and never for one
+    # arm of a compared pair (see logs/e8b_backend_audit.md).
+    if "kd_chunk" in loss:
+        if not isinstance(loss["kd_chunk"], int) or loss["kd_chunk"] < 1:
+            raise ValueError("loss.kd_chunk must be a positive int")
     optim = need(cfg, "optim", dict)
     for key in ("lr", "weight_decay", "eps", "grad_clip"):
         need(optim, key, (int, float), "optim.")
@@ -798,6 +806,7 @@ class Trainer:
                 prediction_mask(mask, loss_cfg["kd_scope"], content,
                                 input_ids=ids, think_ids=self.think_ids),
                 loss_cfg["kd_temperature"],
+                chunk=loss_cfg.get("kd_chunk", 512),
             )
         return ce_sum, ce_n, kd_sum, kd_n
 
@@ -820,7 +829,8 @@ class Trainer:
         pos = torch.ones(ids.shape[0], ids.shape[1] - 1, dtype=torch.bool,
                          device=ids.device)
         kd_sum, kd_n = kd_forward_kl(
-            s_logits, t_logits, pos, self.cfg["loss"]["kd_temperature"])
+            s_logits, t_logits, pos, self.cfg["loss"]["kd_temperature"],
+            chunk=self.cfg["loss"].get("kd_chunk", 512))
         self._extra_forward_tokens += int(ids.numel())
         return kd_sum, kd_n
 

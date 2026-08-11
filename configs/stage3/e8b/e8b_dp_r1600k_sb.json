@@ -1,7 +1,7 @@
 {
   "stage": "stage3_recovery",
   "run_name": "e8b_dp_r1600k_sb",
-  "_purpose": "E8b cell DP (depth_only, positional depth map), seed sb, on A100_SXM_80GB. The canonical E1/P1 KD-heavy 1.60M recipe; differs from configs/stage3/e1/e1_r1600k_sb_pca.json only in student_path (the intended causal variable), run_name, out_dir and this note.",
+  "_purpose": "E8b cell DP (depth_only, positional depth map), seed sb, on A100_SXM_80GB. The canonical E1/P1 KD-heavy 1.60M recipe; differs from configs/stage3/e1/e1_r1600k_sb_pca.json only in student_path (the intended causal variable), run_name, out_dir and this note. loss.kd_chunk=128 is the preregistered memory fallback for this regime: identical KD objective, float32 reduction order not bit-identical, applied to every depth-only arm and both seeds.",
   "student_path": "artifacts/stage1/e8b_dp_init/checkpoint",
   "teacher": {
     "model_id": "Qwen/Qwen3-4B-Thinking-2507",
@@ -28,7 +28,8 @@
     "ce_weight": 0.25,
     "kd_weight": 1.0,
     "kd_temperature": 1.0,
-    "kd_scope": "all"
+    "kd_scope": "all",
+    "kd_chunk": 128
   },
   "optim": {
     "lr": 5e-05,

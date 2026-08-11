@@ -7,7 +7,15 @@ long 1.60M runs. **The scientific experiment is unchanged** — no change to
 architecture, loss definition, data, optimizer hyperparameters, trainable parameters,
 batch semantics, sequence length, or any comparison.
 
-**Outcome: one change adopted — the allocator. The gate then passed and E8b resumed.**
+**Outcome: two changes adopted — the allocator, then the preregistered KD chunk
+fallback. The 20-step gate is FALSIFIED and has been replaced.**
+
+The allocator alone was not sufficient. It passed a 20-step gate at 77.15 GiB and the
+real run then OOM'd at **step ~110 of 1,761**. `expandable_segments` did what it was
+adopted for — fragmentation fell from 6.16 GiB to **1.04 GiB** — but allocated memory
+itself kept climbing past the gate's measurement, to 77.37 GiB by step 70 and 77.60 GiB
+at the failure. **The 20-step horizon, not the allocator, was the defective part.** That
+earlier pass must not be read as a success: it measured a transient, not a steady state.
 
 ## 1. What the runtime actually uses
 
@@ -15,7 +23,7 @@ Established from the code and from the pod, not from config or imports.
 
 | component | actual implementation | evidence |
 | --- | --- | --- |
-| attention | **flash SDPA** | both models resolve `_attn_implementation: sdpa` (neither loader passes an override); the failed run's backward emitted `attention_backward.cu:124` *"Flash Attention defaults to a non-deterministic algorithm"*, which only the flash kernel produces. Re-confirmed on the pod: `{"student": "sdpa", "teacher": "sdpa"}` |
+| attention | **PyTorch SDPA, dispatching to its flash backend** | both models resolve `_attn_implementation: sdpa` (neither loader passes an override); the failed run's backward emitted `attention_backward.cu:124` *"Flash Attention defaults to a non-deterministic algorithm"*, which only the flash kernel produces. Re-confirmed on the pod: `{"student": "sdpa", "teacher": "sdpa"}` |
 | RMSNorm | `Qwen3RMSNorm`, unfused | fp32 upcast, `pow(2).mean`, `rsqrt`, multiply |
 | RoPE | `Qwen3RotaryEmbedding`, native | |
 | SwiGLU / MLP | `Qwen3MLP` + `SiLUActivation`, unfused | |
@@ -60,7 +68,7 @@ anything else: at vocab 151,936 a `chunk=512` fp32 buffer is
 | --- | --- |
 | **K0** current backend | reference; OOM'd |
 | **K1** `PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True` | **SELECTED.** The allocator was genuinely at its default, so this is a real change |
-| **K2** optimized attention | **already in use** — not tested, per the instruction to test only if the audit proves the current path is not already flash |
+| **K2** optimized attention | **already in use** — not tested, per the instruction to test only if the audit proves the current path is not already flash. Precisely: `torch.nn.functional.scaled_dot_product_attention` selecting its **flash backend**. This is *not* the separately packaged FlashAttention/FA2 library, and the two must not be equated; no attention-backend change is requested for E8b |
 | **K3** fused RMSNorm / RoPE / SwiGLU | **unavailable in the pinned runtime.** `kernels`, `flash_attn`, `apex`, `liger_kernel` all absent; `use_kernels` requires the hub-`kernels` package. Adding one is a dependency decision (P12), not a low-risk swap, so nothing was installed |
 | optimizer | unchanged. Already `foreach`; fused AdamW **not** adopted — it would change the update trajectory for speed alone |
 
@@ -78,11 +86,18 @@ At `block_len 8192` × vocab 151,936, every large transient is `[tokens, vocab]`
 | KD `tp` copy bf16 | 2,489 MB | full copy |
 | KD chunk concurrent peak | 933 MB | 3 × 311 MB fp32 |
 
-So reducing the KD chunk 512 → 128 would recover ~0.7 GB — **the smallest of the large
-contributors** — while the allocator recovered enough on its own. `masked_ce`
-(`train.py:370-372`) makes the same full-copy-then-fp32-upcast pattern as KD with no
-chunking at all, and is the single largest buffer. **The registered chunk-128 fallback
-was not needed and was not used.**
+So reducing the KD chunk 512 → 128 recovers ~0.7 GB — **the smallest of the large
+contributors**. `masked_ce` (`train.py:370-372`) makes the same
+full-copy-then-fp32-upcast pattern as KD with no chunking at all, and is the single
+largest buffer.
+
+**The registered chunk-128 fallback has now been adopted**, after the allocator alone
+proved insufficient at step 110. It is applied to the whole depth-only regime — DP-sa,
+DC-sa, DP-sb, DC-sb — via `loss.kd_chunk`, never to one arm or one seed, and **not** to
+FC. It preserves the KD objective exactly; it is **not bit-identical**, because the loop
+accumulates one float32 scalar per chunk so the chunk count changes the reduction order
+(~7e-8 relative, `tests/training/test_kd_chunk_invariance.py`). Its ~0.7 GB is a
+stopgap, not a fix: the full `[sequence, vocabulary]` tensors remain.
 
 ## 5. Numerical equivalence
 
@@ -100,31 +115,58 @@ Chosen on execution properties only — no validation loss or model behaviour wa
 consulted.
 
 ```
-attention            flash SDPA (transformers default, unchanged)
+attention            PyTorch SDPA, flash backend (transformers default, UNCHANGED)
+                     NOT the separately packaged FlashAttention/FA2 — that is a
+                     different implementation and no attention change is requested
 RMSNorm / RoPE / MLP  Qwen3 native, unfused (no fused package in the pinned runtime)
 optimizer            torch.optim.AdamW, foreach (unchanged)
-KD                   kd_forward_kl, chunk 512 (UNCHANGED — fallback not needed)
-allocator            PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True   <- the change
+KD                   kd_forward_kl, chunk 128   <- change 2, regime-wide (was 512)
+allocator            PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True   <- change 1
+gate                 200 real steps + no-upward-trend + free-margin (was 20 steps)
 ```
 
 Set once in `scripts/pod/e8b_driver.py` as `ALLOC_CONF`, so the profiler, the gate and
 the training run share one allocator configuration. **DP and DC, both seeds, use
 exactly this backend.**
 
-### Gate result on the frozen backend — DP-sa, 20 steps
+### The 20-step gate, and why it is falsified
 
-| quantity | measured | registered limit | |
+| quantity | measured at 20 steps | registered limit | |
 | --- | --- | --- | --- |
-| seconds/step (median of 11) | **4.815** | ≤ 7.86 | pass |
-| peak VRAM | **77.15 GB** | ≤ 78.0 | pass, margin **0.85 GB** |
-| $/step | **0.002127** | ≤ 0.003472 | pass |
+| seconds/step (median of 11) | 4.815 | ≤ 7.86 | pass |
+| peak VRAM | 77.15 | ≤ 78.0 | pass, margin 0.85 |
+| $/step | 0.002127 | ≤ 0.003472 | pass |
 
-`violations: []`, `projected_minutes_per_arm: 141.3`.
+`violations: []` — and the arm then died at step ~110. Trajectory from the real run
+(`logs/e8b_dp_sa_train_log_oom.jsonl`, logged every 10 steps):
 
-**The VRAM margin is 0.85 GB and that is thin.** The peak is per-microbatch rather
-than cumulative, so it should hold across 1,761 steps, and checkpointing at
-`save_every: 880` happens between steps when the transients are freed and the steady
-figure is 54.8 GB. Recorded as the residual risk of the session.
+| steps | `gpu_mem_gb` (GiB, `max_memory_allocated`) |
+| --- | --- |
+| 10–60 | 77.15 |
+| 70–110 | **77.37** |
+| ~110–120 | OOM: 77.60 allocated, 1.04 reserved-unallocated, 100.94 MiB free |
+
+The peak was still rising when the gate stopped looking. **The thresholds were not
+wrong and have not been relaxed; the horizon was too short and the trend was not
+checked at all.**
+
+### Replacement gate — registered before it runs
+
+* **200 real steps**, mechanically chosen to outlast the observed step-110 failure;
+* optimizer state and gradients fully materialized by construction (both appear on the
+  first step — the profiler shows 19.47 GiB at `trainer_built` rising to 51.07 GiB after
+  step 1);
+* `log_every: 1`, so the trend has per-step resolution rather than the coarse
+  ten-step jumps that hid the climb;
+* `max_memory_allocated` **and** `max_memory_reserved` tracked across the whole gate;
+* **no upward drift**: the maximum over the final 50 steps may exceed the maximum over
+  the preceding 50 by at most **0.05 GiB**;
+* **free margin**: the peak must sit at least **1.5 GiB** below the card's real
+  capacity, not merely below a constant;
+* seconds/step and $/step still inside the unchanged registered budget.
+
+The three registered thresholds are untouched. Two checks are added, which is the
+opposite of widening.
 
 ## 7. The compressed pair is untouched
 
@@ -138,22 +180,28 @@ change is applied to FC.**
 
 Recorded from this audit, not implemented:
 
-* **streaming/fused vocabulary KD is the real structural lever, and it is large.**
-  The measured ~10.9 GiB concurrent transient is almost entirely `[tokens, vocab]`
-  materialization. A fused kernel that consumes logits in place — computing
-  `log_softmax`, the KL term and the CE term without first building `sel`, `sp` and
-  `tp` full copies — would remove roughly 7.5 GB of the 10.9 GiB. That is a far better
-  return than shrinking the Python-level chunk repeatedly, which trades ~0.7 GB for
-  loop overhead. **Chunk reduction should be treated as a stopgap, not the answer.**
+* **the intended long-term direction is sparse Top-K distillation, not full-vocabulary
+  KL.** The measured ~10.9 GiB concurrent transient is almost entirely
+  `[sequence, vocabulary]` materialization, and the answer is to stop needing the full
+  vocabulary at all: distil on a sparse support such as
+  `TopK_teacher ∪ TopK_student`, with explicit residual/tail probability handling so
+  the mass outside the support is accounted for rather than dropped. Streaming or fused
+  computation is an **implementation technique** that may be used to obtain and process
+  those sparse logits without retaining full `[sequence, vocabulary]` tensors — it is
+  not itself the objective. **Full-vocabulary streaming KL is not the intended default.**
+  Either way, shrinking the Python-level chunk is a stopgap: it trades ~0.7 GB for loop
+  overhead while leaving the full-vocabulary tensors in place.
 * **`masked_ce` should be chunked like KD.** Its unchunked `sel.float()` at 4,978 MB is
   the largest single buffer in the step. Chunking it is the same transformation already
   applied to KD, with the same accumulation-order caveat.
 * **fused RMSNorm / RoPE / SwiGLU** would help throughput but not this bottleneck; the
   norms and MLP activations are small beside the vocabulary traffic. Worth considering
   only alongside a dependency decision, since nothing fused is installed.
-* **flash attention is already in use** and needs no work. Any future claim that adding
-  FlashAttention would speed this project up should be checked against this audit
-  first.
+* **PyTorch SDPA's flash backend is already in use** and needs no work. That is not the
+  same thing as the packaged FlashAttention/FA2 library; a future proposal to add FA2
+  would be a new dependency with its own numerics to gate, not the enabling of something
+  currently switched off. Check any "we should add FlashAttention" claim against this
+  audit first.
 * **fused optimizer** is a trajectory-level change, not a free speedup; the current
   `foreach` path is already the multi-tensor implementation.
 * **autocast caches a bf16 copy of each weight** — the embedding appears as both a

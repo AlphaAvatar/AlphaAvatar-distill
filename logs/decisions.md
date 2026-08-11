@@ -2018,7 +2018,8 @@
   and $/step had passed comfortably. A gate failure is a stop-and-re-price event, so an
   execution-backend audit was commissioned before resuming, with the scientific
   experiment held fixed.
-- **Decision:** freeze the backend as **flash SDPA (already in use) + native
+- **Decision:** freeze the backend as **PyTorch SDPA using its flash backend (already
+  in use; NOT the packaged FlashAttention/FA2, and no attention change requested) + native
   Qwen3 norms/RoPE/MLP + foreach AdamW + KD chunk 512 + one change:
   `PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True`.** DP and DC, both seeds, use
   exactly this. The registered KD chunk-128 fallback was **not** needed.
@@ -2047,8 +2048,12 @@
   two-thirds through. Recorded rather than mitigated, because mitigating it means
   changing the KD path.
 - **Revisit when:** a student larger than 3.2B, a longer block, or a bigger vocabulary
-  is proposed. At that point the fix is a streaming/fused vocabulary-KD kernel — the
-  measured ~10.9 GiB concurrent transient is almost entirely `[tokens, vocab]` copies,
-  of which `masked_ce`'s unchunked 4,978 MB fp32 upcast is the largest single buffer —
-  or FSDP/ZeRO for the 46.8 GB of fp32 master weights and Adam states. Not smaller
-  Python-level chunks.
+  is proposed. At that point the intended direction is **sparse Top-K distillation** on
+  a support such as `TopK_teacher ∪ TopK_student` with explicit residual/tail handling,
+  which removes the need for full `[sequence, vocabulary]` tensors rather than merely
+  streaming them; streaming/fused computation is an implementation technique for
+  obtaining those sparse logits, not the objective. The measured ~10.9 GiB concurrent
+  transient is almost entirely those full-vocabulary copies, of which `masked_ce`'s
+  unchunked 4,978 MB fp32 upcast is the largest single buffer. FSDP/ZeRO would address
+  the separate 46.8 GB of fp32 master weights and Adam states. Not smaller Python-level
+  chunks.

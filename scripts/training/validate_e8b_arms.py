@@ -40,6 +40,13 @@ from aadistill.init.nll_gate import (  # noqa: E402
 )
 
 ALLOWED_DIFF = {"student_path", "run_name", "out_dir", "_purpose"}
+# The depth-only regime additionally carries `loss.kd_chunk = 128`, the preregistered
+# memory fallback adopted after `expandable_segments:True` alone still OOM'd at step 110
+# of 1,761. It is regime-wide by construction — all four of DP-sa, DC-sa, DP-sb, DC-sb —
+# so DP-vs-DC remains a single-variable comparison, and FC is untouched so FP-vs-FC does
+# too. Without this entry the gate would reject the arms it is meant to protect.
+DEPTH_ONLY_EXTRA_DIFF = {"loss"}
+EXPECTED_KD_CHUNK = {"depth_only": 128, "fully_compressed": None}
 EXPECTED_UNIQUE_CE = 1_600_353
 EXPECTED_CUMULATIVE_CE = 4_801_059
 EXPECTED_EXPOSURES = 3.0
@@ -99,18 +106,36 @@ def main() -> int:
         realized = {k for k in set(cfg) | set(control)
                     if json.dumps(cfg.get(k), sort_keys=True)
                     != json.dumps(control.get(k), sort_keys=True)}
-        check(f"config_diff:{name}", realized == ALLOWED_DIFF,
+        regime = arm.get("regime", "")
+        expected_diff = ALLOWED_DIFF | (DEPTH_ONLY_EXTRA_DIFF
+                                        if regime == "depth_only" else set())
+        want_chunk = EXPECTED_KD_CHUNK.get(regime, None)
+        check(f"kd_chunk:{name}", cfg["loss"].get("kd_chunk") == want_chunk,
+              {"regime": regime, "measured": cfg["loss"].get("kd_chunk"),
+               "expected": want_chunk,
+               "note": "regime-wide by construction; one arm or one seed differing "
+                       "would break the pair's single-variable comparison"})
+        check(f"config_diff:{name}", realized == expected_diff,
               {"realized": sorted(realized), "config_sha256": sha256_json(cfg),
                "recorded_sha256": arm["config_sha256"],
+               "expected_diff": sorted(expected_diff),
                "matches_manifest": sha256_json(cfg) == arm["config_sha256"]})
+        # The OBJECTIVE must be the canonical one. `kd_chunk` is excluded here and
+        # checked separately above: it is a memory/time knob that leaves the objective
+        # identical, so folding it into this equality would make a memory decision look
+        # like a change of loss.
+        objective = {k: v for k, v in cfg["loss"].items() if k != "kd_chunk"}
         check(f"rung:{name}", cfg["rung"] == 1_600_000 and
               cfg["schedule"]["total_steps"] == 1761 and
-              cfg["loss"] == {"ce_weight": 0.25, "kd_weight": 1.0,
-                              "kd_temperature": 1.0, "kd_scope": "all"},
+              objective == {"ce_weight": 0.25, "kd_weight": 1.0,
+                            "kd_temperature": 1.0, "kd_scope": "all"},
               {"rung": cfg["rung"], "steps": cfg["schedule"]["total_steps"],
-               "loss": cfg["loss"], "save_every": cfg["checkpoint"]["save_every"]})
+               "objective": objective, "kd_chunk": cfg["loss"].get("kd_chunk"),
+               "save_every": cfg["checkpoint"]["save_every"]})
 
     # --- within-pair identity: the single-variable claim, per hardware class ---
+    # Still exactly the four keys, because the chunk is regime-wide: both members of
+    # each pair carry the same value, so it cancels inside the comparison.
     for pair in meta["within_cell_identity"]:
         check(f"pair_identity:{pair['pair']}",
               set(pair["diff"]) == ALLOWED_DIFF, pair)
