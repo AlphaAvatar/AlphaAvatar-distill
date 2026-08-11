@@ -5000,10 +5000,21 @@ statements about them and DC is expected to win the depth-only step-0 comparison
 cells. Selected from live pricing: A100 SXM 80GB @ $1.59/h, the cheapest ≥70 GB
 class at High stock, single device.
 
-**Cost:** RETAINED-FP $37.69 expected / $42.26 hard / 23.7 h; FULL $43.02 / $48.11 /
-30.3 h. No 3.2B step time has ever been measured here, so 7.86 s/step is derived from
-FLOPs and E6b's measured 4.15 s/step with a 1.15× safety factor, and a blocking
-throughput+memory gate on the first arm converts it to a measurement.
+**Design revised 2026-08-11 to pair-matched hardware** at the maintainer's
+direction: DP/DC on A100 SXM 80 GB, FP retained and FC trained on L40S, so each
+depth-map effect is measured within one hardware class. Hardware class is nested with
+compression regime; the interaction inherits the nesting and a **conditional bridge**
+($14.05, registered but not run) reruns FP/FC on the 80 GB card only if a material
+reversal actually occurs.
+
+**Cost:** four restartable sessions — S1 L40S step-0 for all four inits ($3.25 hard),
+S2/S3 A100 seed-paired depth-only ($18.76 each), S4 L40S FC ($6.40). Expected $40.54,
+hard **$47.18**, 28.5 h with the longest session 10.3 h against E7's proven 10.6 h.
+Hardware was chosen on **cost per completed step**: A100 SXM $0.003472/step is
+cheapest among High-stock ≥70 GB classes, though the spread to H100 SXM is only 3.5%
+and the relative-efficiency figures are assumptions — which is why S2 carries a
+registered 20-step gate on s/step, peak VRAM and live $/step that stops and re-prices
+rather than widening the budget.
 
 Recorded en route: `Qwen3ForCausalLM(cfg).to(bfloat16)` casts the rotary `inv_freq`
 buffer to bf16 while `from_pretrained` recomputes it in fp32 — a 0.78 logit

@@ -40,9 +40,9 @@ E8 remaining:                         $9.5147
 pod B hard threshold:                 $9.7130   CANCELLED — 2.96M recovery withdrawn
 E8's unspent backstop:                $9.5147   NOT carried over to E8b
 
-E8b RETAINED-FP  expected $37.69, hard backstop $42.26 -> cap $206.14
-E8b FULL         expected $43.02, hard backstop $48.11 -> cap $212.00
-GPU: A100 SXM 80GB @ $1.59/h (L40S ruled out: DP/DC need 72.9 GB)
+E8b (pair-matched, 4 sessions):  expected $40.54, hard $47.18 -> cap $211.06
+  DP/DC on A100 SXM 80GB $1.59/h   FP retained + FC on L40S $0.99/h
+  CONDITIONAL hardware bridge, only on a material reversal: +$14.05 -> $225.11
 ```
 
 **The old E8 2.96M recovery is cancelled and must not be launched.** E8b replaces
@@ -381,17 +381,15 @@ E8's hard backstop is $12.41, so it needs **$10.08 more** and a cap of **$172.57
 **E8a is done. E8b's preflight is done. Nothing paid may start.** Ordered next
 actions:
 
-1. **Maintainer decision: E8b RETAINED-FP ($42.26 backstop, cap $206.14) or FULL
-   ($48.11, cap $212.00).** FULL retrains FP on the same A100 so all four factorial
-   cells share hardware; RETAINED-FP reuses FP from an L40S and carries that as a
-   declared confound in the interaction term. FULL is recommended.
-2. On authorization: write the E8b pod session (one A100 SXM 80GB, single device),
-   deliberately **not** written yet — matching E7/E8a's order, so a design change
-   costs nothing. It must include the blocking throughput+memory gate on the first
-   arm (§6.3) because no 3.2B step time has ever been measured here.
-3. `analyze_e8b.py` for the three effects and the interaction, per seed and pooled.
-4. **Do not launch** the old 2.96M recovery, P2-5.50M, a FineWeb sweep, on-policy,
-   an operator-order search, or any E9 combination.
+1. **Maintainer decision on $47.18** (cap $211.06) for the pair-matched E8b.
+2. On authorization: write the four pod sessions — S1 L40S step-0, S2/S3 A100
+   seed-paired depth-only, S4 L40S FC — deliberately **not** written yet, matching
+   E7/E8a's order. S2 must carry the registered 20-step gate on s/step, peak VRAM
+   and $/step, because no 3.2B step time has ever been measured here.
+3. `analyze_e8b.py` for `DC-DP`, `FC-FP` and the interaction, per seed and pooled,
+   with the hardware nesting stated in the report.
+4. **Do not launch** the old 2.96M recovery, the hardware bridge (conditional only),
+   P2-5.50M, a FineWeb sweep, on-policy, an operator-order search, or any E9.
 
 **Durability is done** (`logs/e8_relay_manifest.json`): 13/13 staged and
 roundtrip-verified, including the 1.95 GB Stage 0 cache and `warmup_v1`, its input.
@@ -441,7 +439,7 @@ around the retired metric.
 | **§34** | **Experiment 7 — general LM restored, behaviour unmoved** | **the ceiling is not a language-modelling problem** |
 | §35 | Experiment 8 design and preregistration — contribution-guided depth | executed in part |
 | **§36** | **E8a — map preserves the teacher 3.1× better, initializes 2.8 nats worse** | **complete; 2.96M recovery cancelled** |
-| §37 | E8b — depth-map × compression interaction | preflight done, awaiting authorization |
+| §37 | E8b — depth-map × compression interaction, pair-matched hardware | preflight done, awaiting $47.18 |
 
 Protocol deviations on record: [`e6b_protocol_deviations.md`](e6b_protocol_deviations.md)
 (cost overrun $0.56, lost event streams; scientific endpoint valid, operational
