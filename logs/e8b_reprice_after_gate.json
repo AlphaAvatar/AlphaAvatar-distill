@@ -1,0 +1,129 @@
+{
+  "created_from": "S2 attempt 4 gate measurement, commit ccba0fbf",
+  "measured_steady_s_per_step": 4.83,
+  "derived_s_per_step": 7.86,
+  "priced_s_per_step": 5.07,
+  "chunk_time_allowance": 1.05,
+  "gate_verdict": {
+    "speed": "pass",
+    "usd_per_step": "pass",
+    "peak_vram": "not measured \u2014 OOM",
+    "blocking_failure": "CUDA OOM in kd_forward_kl"
+  },
+  "oom": {
+    "capacity_gib": 79.25,
+    "free_mib": 140.94,
+    "allocated_gib": 72.44,
+    "reserved_unallocated_gib": 6.16,
+    "failed_allocation_mib": 298.0,
+    "site": "kd_forward_kl log_softmax fp32 chunk",
+    "chunk_buffer_mb": 311.2
+  },
+  "memory_levers_not_adopted": [
+    {
+      "lever": "PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True",
+      "changes_numerics": false,
+      "rationale": "allocator segment mapping only; recovers the 6.16 GiB reserved-but-unallocated"
+    },
+    {
+      "lever": "kd_forward_kl chunk 512 -> 128",
+      "changes_numerics": "mathematically identical, NOT bitwise: float32 accumulation order changes with the chunk count",
+      "measured_relative_difference": 7e-08,
+      "verified": "identical position counts and agreement to <1e-6 relative across chunk 512/256/128/64/17/1; the last-bit difference is itself pinned by a test",
+      "scope_constraint": "apply to BOTH arms of a pair or neither. Not proposed for S4, whose retained FP control trained at chunk 512 and which has no memory problem.",
+      "rationale": "row-independent log_softmax summed; ~0.9 GB less transient fp32 peak, more loop iterations"
+    }
+  ],
+  "sessions": {
+    "s2": {
+      "label": "S2 depth-only DP+DC seed sa (re-priced)",
+      "expected_minutes": 415.5,
+      "expected_usd": 11.01075,
+      "soft_stop_usd": 12.111825000000001,
+      "hard_terminate_usd": 12.906825,
+      "hard_terminate_minutes": 487.05,
+      "usd_per_step": 0.002239,
+      "breakdown": [
+        [
+          "setup_and_build_DP_DC",
+          20.0
+        ],
+        [
+          "throughput_and_pretraining_gates",
+          6.0
+        ],
+        [
+          "train_two_depth_only_arms",
+          297.6
+        ],
+        [
+          "evaluate_two_arms",
+          60.0
+        ],
+        [
+          "general_text_diagnostics",
+          6.0
+        ],
+        [
+          "artifact_manifest_and_verify",
+          8.0
+        ],
+        [
+          "artifact_synchronization",
+          17.9
+        ]
+      ]
+    },
+    "s3": {
+      "label": "S3 depth-only DP+DC seed sb (re-priced)",
+      "expected_minutes": 415.5,
+      "expected_usd": 11.01075,
+      "soft_stop_usd": 12.111825000000001,
+      "hard_terminate_usd": 12.906825,
+      "hard_terminate_minutes": 487.05,
+      "usd_per_step": 0.002239,
+      "breakdown": [
+        [
+          "setup_and_build_DP_DC",
+          20.0
+        ],
+        [
+          "throughput_and_pretraining_gates",
+          6.0
+        ],
+        [
+          "train_two_depth_only_arms",
+          297.6
+        ],
+        [
+          "evaluate_two_arms",
+          60.0
+        ],
+        [
+          "general_text_diagnostics",
+          6.0
+        ],
+        [
+          "artifact_manifest_and_verify",
+          8.0
+        ],
+        [
+          "artifact_synchronization",
+          17.9
+        ]
+      ]
+    },
+    "s4_unchanged_hard_usd": 6.4011
+  },
+  "spent": {
+    "S1 step-0": 5.21,
+    "S2 attempts 1-3 (setup)": 3.1,
+    "S2 attempt 4 (gate)": 0.55
+  },
+  "spent_total": 8.86,
+  "e8b_backstop_usd": 47.18,
+  "remaining_usd": 38.32,
+  "reprice_need_usd": 32.2147,
+  "margin_usd": 6.1053,
+  "fits_existing_authorization": true
+}

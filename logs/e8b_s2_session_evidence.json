@@ -1,32 +1,112 @@
 {
   "timeline": [
     {
-      "utc": "2026-08-11T15:45:55+00:00",
+      "utc": "2026-08-11T16:44:00+00:00",
       "elapsed_min": 0.0,
       "msg": "budget: expected 616 min $16.33 \u00b7 soft stop 678 min $17.97 \u00b7 hard 708 min $18.76 (authorized $18.76)"
     },
     {
-      "utc": "2026-08-11T15:45:56+00:00",
+      "utc": "2026-08-11T16:44:00+00:00",
       "elapsed_min": 0.0,
       "msg": "NVIDIA A100-SXM4-80GB securePrice $1.59/h, stock Low"
     },
     {
-      "utc": "2026-08-11T15:45:56+00:00",
+      "utc": "2026-08-11T16:44:01+00:00",
       "elapsed_min": 0.0,
       "msg": "relay precheck OK (5 files present)"
     },
     {
-      "utc": "2026-08-11T15:45:57+00:00",
+      "utc": "2026-08-11T16:44:02+00:00",
       "elapsed_min": 0.0,
-      "msg": "created 98nmzq5a5oq4hb at $1.59/h; --terminate-after 2026-08-12T03:33:52Z (redundant layer)"
+      "msg": "created rfnomrxznmzznp at $1.59/h; --terminate-after 2026-08-12T04:31:57Z (redundant layer)"
     },
     {
-      "utc": "2026-08-11T15:45:57+00:00",
+      "utc": "2026-08-11T16:44:02+00:00",
       "elapsed_min": 0.0,
       "msg": "watchdog detached \u2014 hard 708 min = $18.76"
+    },
+    {
+      "utc": "2026-08-11T16:44:56+00:00",
+      "elapsed_min": 0.91,
+      "msg": "  starting (60s) \u2014 $0.02"
+    },
+    {
+      "utc": "2026-08-11T16:46:00+00:00",
+      "elapsed_min": 1.97,
+      "msg": "  starting (120s) \u2014 $0.05"
+    },
+    {
+      "utc": "2026-08-11T16:46:11+00:00",
+      "elapsed_min": 2.15,
+      "msg": "TCP 22 at 157.157.221.29:13722 after 2.1 min"
+    },
+    {
+      "utc": "2026-08-11T16:46:13+00:00",
+      "elapsed_min": 2.19,
+      "msg": "draw 1: ssh reachable \u2014 $0.06"
+    },
+    {
+      "utc": "2026-08-11T16:46:25+00:00",
+      "elapsed_min": 2.39,
+      "msg": "draw 1: running setup"
+    },
+    {
+      "utc": "2026-08-11T17:02:04+00:00",
+      "elapsed_min": 18.04,
+      "msg": "draw 1: setup complete \u2014 $0.48"
+    },
+    {
+      "utc": "2026-08-11T17:02:10+00:00",
+      "elapsed_min": 18.14,
+      "msg": "driver detached, pid 10036, confirmed by descriptor_probe \u2014 $0.48"
+    },
+    {
+      "utc": "2026-08-11T17:04:24+00:00",
+      "elapsed_min": 20.37,
+      "msg": "  2026-08-11T17:02:47.365588+00:00 MARKER:ALL_DONE \u2014 $0.54"
+    },
+    {
+      "utc": "2026-08-11T17:04:24+00:00",
+      "elapsed_min": 20.37,
+      "msg": "polling ended: ALL_DONE \u2014 $0.54"
+    },
+    {
+      "utc": "2026-08-11T17:06:20+00:00",
+      "elapsed_min": 22.3,
+      "msg": "  manifest rc=5\non/e8b_s2.status does not contain 'MARKER:GATE_PASSED'; audit/e8b_s2_session/e8b_s2.status does not contain 'MARKER:TRAIN_DONE:E8b-DP-sa'; audit/e8b_s2_session/e8b_s2.status does not contain 'MARKER:TRAIN_DONE:E8b-DC-sa'; audit/e8b_s2_session/e8b_s2.status does not contain 'MARKER:EVAL_DONE')\n  NOT COMPLETE: audit/e8b_s2_session/e8b_s2.status does not contain 'MARKER:THROUGHPUT_GATE_PASSED'\n  NOT COMPLETE: audit/e8b_s2_session/e8b_s2.status does not contain 'MARKER:GATE_PASSED'\n  NOT COMPLETE: audit/e8b_s2_session/e8b_s2.status does not contain 'MARKER:TRAIN_DONE:E8b-DP-sa'\n  NOT COMPLETE: audit/e8b_s2_session/e8b_s2.status does not contain 'MARKER:TRAIN_DONE:E8b-DC-sa'\n  NOT COMPLETE: audit/e8b_s2_session/e8b_s2.status does not contain 'MARKER:EVAL_DONE'\nrequired artifacts are absent or unfinished; find them before teardown \u2014 this is the point in the session where that is still possible"
+    },
+    {
+      "utc": "2026-08-11T17:06:42+00:00",
+      "elapsed_min": 22.67,
+      "msg": "  checkpoint e8b_dp_r1600k_sa: rc=1"
+    },
+    {
+      "utc": "2026-08-11T17:06:45+00:00",
+      "elapsed_min": 22.71,
+      "msg": "  checkpoint e8b_dc_r1600k_sa: rc=1"
+    },
+    {
+      "utc": "2026-08-11T17:06:45+00:00",
+      "elapsed_min": 22.71,
+      "msg": "teardown gate: allowed=False failed=required_files_present"
+    },
+    {
+      "utc": "2026-08-11T17:06:45+00:00",
+      "elapsed_min": 22.71,
+      "msg": "GATE BLOCKED \u2014 the pod is NOT being deleted by the launcher; the watchdog remains the backstop"
     }
   ],
-  "stages": {},
+  "stages": {
+    "setup": [
+      {
+        "draw": 1,
+        "setup_done": "1",
+        "host_cold": "0",
+        "setup_rc": "0",
+        "tail": "SETUP_RC=0"
+      }
+    ]
+  },
   "budget_plan": {
     "price_per_hour": 1.59,
     "authorized_usd": 18.7602,
@@ -107,10 +187,59 @@
     ],
     "missing": []
   },
-  "pod_id": "98nmzq5a5oq4hb",
+  "pod_id": "rfnomrxznmzznp",
   "actual_price_per_hour": 1.59,
-  "terminate_after_utc": "2026-08-12T03:33:52Z",
+  "terminate_after_utc": "2026-08-12T04:31:57Z",
   "watchdog_journals": [
-    "/home/ecs-user/aad-scratch/e8b_s2b_20260811_234555/watchdog.jsonl"
-  ]
+    "/home/ecs-user/aad-scratch/e8b_s2d_20260812_004400/watchdog.jsonl"
+  ],
+  "driver_job": {
+    "job_id": "e8b_driver",
+    "pid": 10036,
+    "workdir": "/workspace/aad",
+    "command": "/opt/train/bin/python scripts/pod/e8b_driver.py --stage all --spent-usd 0.478 --soft-stop-usd 17.97 --authorized-usd 18.76 --session s2 --rate 1.59",
+    "log_path": "/workspace/e8b_s2_run.log",
+    "status_path": "/workspace/e8b_s2.status",
+    "pid_path": "/workspace/jobs/e8b_driver.pid",
+    "descriptor_path": "/workspace/jobs/e8b_driver.job.json",
+    "exit_path": "/workspace/jobs/e8b_driver.exit",
+    "started_utc": "2026-08-11T17:02:07Z",
+    "start_channel_closed": true,
+    "confirmed_by": "descriptor_probe"
+  },
+  "terminal": "ALL_DONE",
+  "local_verify_error": "FileNotFoundError: [Errno 2] No such file or directory: '/home/ecs-user/aad-scratch/e8b_s2d_20260812_004400/store/e8b_s2_artifacts.tar.gz'",
+  "checkpoints_fetched": [
+    {
+      "arm": "e8b_dp_r1600k_sa",
+      "rc": 1
+    },
+    {
+      "arm": "e8b_dc_r1600k_sa",
+      "rc": 1
+    }
+  ],
+  "teardown_gate": {
+    "allowed": false,
+    "emergency": false,
+    "failed_check": "required_files_present",
+    "reason": "teardown blocked at 'required_files_present'; the pod must not be deleted while a required artifact is only on it",
+    "checks": {
+      "training_complete": true,
+      "evaluation_complete": true,
+      "artifact_manifest_created": true,
+      "required_files_present": false,
+      "final_streams_quiescent": false,
+      "archive_created": false,
+      "archive_contents_verified": false,
+      "transfer_complete": false,
+      "local_hashes_verified": false,
+      "checkpoint_hashes_matched": false,
+      "report_inputs_verified": false
+    },
+    "incomplete_event_streams": []
+  },
+  "manifest_summary": null,
+  "passed": false,
+  "finished_utc": "2026-08-11T17:06:45+00:00"
 }

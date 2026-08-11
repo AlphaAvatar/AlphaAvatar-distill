@@ -5234,3 +5234,70 @@ class is closed, not the instance patched, and an AST test keeps it closed.
 **Cumulative S2 setup cost: $3.10 across four attempts** ($2.27 + $0.42 + $0.41 +
 attempt 4). No arm has trained, and nothing scientific is affected: every abort
 happened before the throughput gate.
+
+## 40. E8b S2 — the registered gate fired: 3.22B does not fit an 80 GB A100 (2026-08-11, $0.55)
+
+**Date:** 2026-08-11 · **Commit:** `ccba0fbf` · **Hardware:** NVIDIA A100 SXM 80 GB
+(81,920 MiB, driver 580.159.04) @ $1.59/h · **Outcome:** STOPPED at the registered
+20-step gate. No arm trained. **This is the gate working, not failing.**
+
+Setup passed for the first time in five attempts — `TESTS_OK:106s`, `MASK_OK`,
+`ARMS_VALIDATED` — and `STEP0_FETCHED` confirms the relay-credential fix: S1's
+hash-bound DP and DC records were fetched and re-gated against the checkpoints this
+pod had rebuilt from the teacher.
+
+**What the gate measured, on the real trainer and the real DP-sa arm:**
+
+```
+eval step 0: val_ce 1.798891  val_ppl 6.0429  val_kd 1.602439
+step 1/20  loss 2.4162  ce 2.0587  kd 1.9015  5.39s
+step 2/20  loss 3.1120  ce 2.7506  kd 2.4244  4.87s
+step 3/20  loss 2.7408  ce 2.1802  kd 2.1957  4.80s
+torch.OutOfMemoryError: Tried to allocate 298.00 MiB.
+  79.25 GiB capacity, 140.94 MiB free.
+  72.44 GiB allocated by PyTorch, 6.16 GiB reserved but unallocated.
+  at kd_forward_kl: torch.log_softmax(tp[i:i+chunk].float() / temperature)
+```
+
+**Speed and cost passed; memory failed.** Steady step time is ~4.83 s against the
+registered ceiling of 7.86 s, so $/step is **$0.00212** against a $0.003472 limit. The
+derived figure was conservative rather than wrong: it modelled
+`(8·N_student + 2·N_teacher)` FLOPs against E6b's measured 4.15 s/step with a 1.6×
+A100 ratio and a 1.15 safety factor. Peak VRAM was never reported because the run died
+before the gate could summarise it — the third registered quantity is therefore
+**unmeasured**, and the memory sizing (63.41 GB expected, 72.92 GB at +15%) is
+falsified: actual in-use was 79.10 GB of 79.25 GB.
+
+**How close it was.** The failing allocation is 298 MiB while **6.16 GiB sat reserved
+and unusable**. At vocab 151,936, `chunk=512` makes each fp32 buffer
+512 × 151,936 × 4 B = 311 MB, which is exactly the allocation that failed.
+
+**Two memory levers, neither adopted** (a registered gate failed, so this is a
+re-pricing decision, not a tuning one — `scripts/training/reprice_e8b_after_gate.py`,
+`logs/e8b_reprice_after_gate.json`):
+
+1. `PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True` — allocator segment mapping
+   only, changes no numerics, and the torch error recommends it by name. Targets the
+   6.16 GiB of fragmentation directly.
+2. KD `chunk` 512 → 128 — ~0.9 GB less transient fp32 peak. **Mathematically
+   identical but NOT bitwise identical:** the loop accumulates one float32 scalar per
+   chunk, so the chunk count changes the summation order. Measured at ~7e-8 relative
+   (`tests/training/test_kd_chunk_invariance.py`). A first check appeared to show
+   bit-identity and was wrong — with 54 masked positions, chunks 512/256/128/64 were
+   all a single chunk and trivially equal. It must therefore be applied to **both arms
+   of a pair or neither**, and is **not** proposed for S4, whose retained FP control
+   trained at chunk 512 and which needs only 23–27 GB on an L40S.
+
+**Re-pricing, from the measurement.** Because 4.83 s/step is 39% below the derived
+7.86 s, each depth-only session drops from **$18.76 hard to $12.91**. Against $38.32
+remaining of the $47.18 backstop, re-priced S2 + S3 + S4 comes to **$32.21 hard,
+margin $6.11** — so the experiment fits the existing authorization with no further
+funds. **The blocker is memory, not money.**
+
+**What is not known.** Whether the two levers are sufficient. They target ~7 GB
+against a ~0.3 GB shortfall, so the headroom looks ample, but that is an inference
+from one OOM trace, not a measurement. The re-run's own gate would settle it and would
+also finally report peak VRAM.
+
+**Cost.** $0.55 for the session; $3.65 for all four S2 attempts. Nothing scientific is
+affected: no arm trained, and S1's step-0 table is untouched.
