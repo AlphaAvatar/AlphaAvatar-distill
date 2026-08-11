@@ -235,10 +235,39 @@ def test_sglang_refuses_a_build_without_output_ids():
         _raw(_sglang_stub([{"text": "hello", "meta_info": {}}]), [[1, 2]])
 
 
-def test_timed_returns_result_and_a_duration():
+def test_timed_returns_result_and_a_duration(monkeypatch):
+    """The return contract, held apart from GPU health on purpose.
+
+    `timed` calls `torch.cuda.synchronize()` when CUDA is present, and that call
+    re-raises any *earlier* async CUDA fault in the process as a sticky error. So
+    this assertion — which is about returning `(value, seconds)` for a pure-CPU
+    callable — used to fail on a GPU host for reasons that had nothing to do with
+    it, and passed on the dev box only because CUDA is absent there. It aborted an
+    E8b-S2 pod at $0.41 with `AcceleratorError` after 1,219 other tests had run.
+
+    The synchronize is correct and stays; it is covered by the test below.
+    """
+    monkeypatch.setattr(torch.cuda, "is_available", lambda: False)
     value, seconds = timed(lambda: 21 * 2)
     assert value == 42
     assert seconds >= 0.0
+
+
+def test_timed_drains_the_gpu_before_and_after(monkeypatch):
+    """The reason `timed` exists: without the drain a CUDA-async engine looks fast.
+
+    Asserted through a fake `torch.cuda`, so it holds on a CPU-only box and does
+    not depend on a healthy accelerator.
+    """
+    calls = []
+    monkeypatch.setattr(torch.cuda, "is_available", lambda: True)
+    monkeypatch.setattr(torch.cuda, "synchronize",
+                        lambda *a, **k: calls.append("sync"))
+    value, seconds = timed(lambda: (calls.append("work"), 42)[1])
+    assert value == 42
+    assert seconds >= 0.0
+    # Drain, run, drain — in that order, so the timing brackets the real work.
+    assert calls == ["sync", "work", "sync"], calls
 
 
 # --- the HTTP adapter, against a stub server -------------------------------

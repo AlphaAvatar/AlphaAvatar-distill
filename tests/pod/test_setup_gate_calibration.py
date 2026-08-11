@@ -270,3 +270,39 @@ def test_the_fallback_ignores_an_ambient_omp_num_threads(setup_text, tmp_path, m
     want = str(min(16, len(os.sched_getaffinity(0))))
     monkeypatch.setenv("OMP_NUM_THREADS", "2")
     assert run_budget(setup_text, tmp_path, None) == want
+
+
+# --- fault 3: a CPU contract test that depended on GPU health --------------
+
+def test_no_test_drains_a_real_gpu():
+    """`torch.cuda.synchronize()` re-raises earlier async faults as a sticky error.
+
+    So any test that reaches a real synchronize can fail for something another test
+    did 1,200 cases earlier — which is how `test_timed_returns_result_and_a_duration`
+    aborted an E8b-S2 pod at $0.41 with `AcceleratorError`, while passing on the dev
+    box because CUDA is absent there. The setup gate runs the whole suite on a GPU
+    host, so a test that drains the GPU puts a paid session at the mercy of the
+    accelerator's state.
+
+    Every call must therefore neutralise `torch.cuda.is_available` first. This is an
+    AST check rather than a grep so a call inside a helper or a nested function is
+    still attributed to the test that contains it.
+    """
+    import ast as _ast
+    offenders = []
+    for path in sorted((REPO / "tests").rglob("test_*.py")):
+        tree = _ast.parse(path.read_text())
+        for fn in (n for n in _ast.walk(tree)
+                   if isinstance(n, _ast.FunctionDef) and n.name.startswith("test_")):
+            body = _ast.unparse(fn)
+            drains = ("cuda.synchronize" in body
+                      or _re_calls_timed(body))
+            if drains and "monkeypatch" not in body:
+                offenders.append(f"{path.relative_to(REPO)}::{fn.name}")
+    assert not offenders, (
+        "these tests would drain a real GPU on the setup gate's host: " + repr(offenders))
+
+
+def _re_calls_timed(body: str) -> bool:
+    # `timed()` synchronizes internally, so calling it is equivalent to draining.
+    return bool(re.search(r"\btimed\s*\(", body))
