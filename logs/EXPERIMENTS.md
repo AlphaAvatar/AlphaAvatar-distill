@@ -5021,3 +5021,89 @@ buffer to bf16 while `from_pretrained` recomputes it in fp32 — a 0.78 logit
 difference from positional precision alone. The buffer is non-persistent so no saved
 checkpoint is affected, including every Stage 1 artifact, but an init-time in-memory
 forward is. It looks exactly like a construction bug and is not one.
+
+## 38. E8b S1 — the depth map reverses sign between compression regimes (2026-08-11, $5.21)
+
+**Date:** 2026-08-11 · **Agent:** Claude Opus 5 · **Commit:** `df954db1` (bundle
+`aad_e8b_df954db1.bundle`; the measurements themselves ran at `ae6dda30`, dirty,
+`uncommitted_state_sha256 9b8114fa…`) · **Hardware:** 1× NVIDIA L40S 48 GB @ $0.99/h
+
+**Objective.** Measure the true step-0 initialization NLL of all four E8b cells
+through **one** canonical `from_pretrained` reload path on one device, and run the
+step-0 autonomous probe, before any arm trains.
+
+**Result — the step-0 table.** Three held-out series, each measurement bound to the
+sha256 of the checkpoint it read:
+
+| cell | regime | depth map | holdout_v1 | fineweb NLL | fw top-1 | teacher-native NLL | tn top-1 | tn mean rank |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| DP | depth-only 3.22B | positional | 4.0049 | 3.9064 | 0.3052 | 1.9360 | 0.5156 | 12.51 |
+| DC | depth-only 3.22B | contribution | **3.0407** | **3.0175** | **0.4034** | **0.7596** | **0.7647** | **1.98** |
+| FP | fully compressed 596M | positional | **11.7565** | **11.5749** | **0.0227** | **10.9053** | **0.0408** | **6739.9** |
+| FC | fully compressed 596M | contribution | 13.2624 | 14.3913 | 0.0075 | 11.8027 | 0.0230 | 19865.6 |
+
+`DC − DP = −0.96 / −0.89 / −1.18` nats; `FC − FP = +1.51 / +2.82 / +0.90` nats. The
+contribution map is better at full width and worse fully compressed on **9 of 9
+metrics across three independent series** — a unanimous sign reversal. There is no
+single number for "is the contribution map better"; the answer depends on what else
+is compressed with it.
+
+FP re-measured to **11.756504**, digit-identical to the E8a session, so the reload
+path and evaluator are stable across sessions and pods.
+
+**Validity.** One device, one dtype, one environment (`torch 2.11.0+cu128`,
+`transformers 5.13.1`), identical source hashes, four distinct checkpoint hashes, and
+every series carries `measured_checkpoint_sha256` equal to the checkpoint it read.
+`resolved_rope_base` = 5000000.2415 on all four, so the 500× RoPE skew is excluded.
+Geometry is matched within each pair (`config_sha256` equal for DP/DC and for FP/FC),
+so within a pair only weights differ.
+
+**Interpretation, and what it is not.** This is evidence level 2 of 3. Level 1 (E8a)
+found the contribution map preserves the frozen teacher 3.11× better in KL at full
+width. Level 2 now confirms that advantage survives into a real reloaded checkpoint —
+**at full width** — and inverts under width/FFN/attention compression. Neither level
+can promote or cancel an arm: initialization NLL is diagnostic (decision 2026-08-05),
+and level 3, matched 1.60M recovery, is the registered endpoint.
+
+The reversal is consistent with the hypothesis that E8a's KL selects blocks whose
+*residual-stream geometry* the teacher depends on, and that this geometry is what the
+grouped-PCA width projection destroys — the map and the projection are not
+independent. It does not establish that; S2–S4 test it.
+
+**Deviations.**
+
+1. **DC's step-0 probe was not run.** DP's took 200 min against a 20 min estimate
+   ($3.31 of a $0.33 line item) and the per-probe budget gate refused the second:
+   `MARKER:ABORTED_AT_GATE:budget:4.03+0.91`. DP floored on every behaviour axis —
+   76/76 truncated at the 2048 cap, `terminated` 0.0, `think_closed` 0.0,
+   `format_ok` 0.0, `empty_answer` 1.0 — but **that does not predict DC**, whose
+   teacher-native top-1 is 0.76 against DP's 0.52. Recorded as deferred on budget
+   grounds, not as uninformative. Re-running it would cost $0.5–3.3 depending on
+   whether DC terminates naturally.
+2. **`publish_step0` failed** with `RepositoryNotFoundError`. Cause: the launcher
+   starts the driver detached with `env={"PYTHONPATH": …}`, so `HF_TOKEN` — exported
+   by the setup shell — was never inherited, and `upload_file(token=None)` on a
+   private repo cannot see the repo. The same line was in `stage_fetch_step0`, so S2
+   and S3 would have failed identically *after* paying A100 setup. Fixed: relay calls
+   resolve through `hf_token()`, which reads the staged `/workspace/hf/token` and
+   treats the environment as an override (`tests/pod/test_driver_relay_credentials.py`,
+   9 tests). The four records were fetched off the pod and published from the dev box,
+   so the training sessions still gate on them.
+3. **Three unusable host draws** cost $1.07 before the working pod: two cold hosts at
+   the 25-min uv ceiling (raised to 3600 s) and one genuine stall at 26.6 min.
+
+**Cost.** $1.07 (three draws) + $4.14 (251 min) = **$5.21** against a $3.25 plan. The
+overrun is entirely the DP probe. E8b remaining: $41.97 of $47.18.
+
+**Artifacts.** `logs/e8b_step0_records/{DP,DC,FP,FC}_init_nll.json` and
+`DP_step0_probe.json` (tracked); relay `e8b_step0_20260811/` (four records plus the
+probe's 1.3 MB generations); `logs/e8b_analysis.json`;
+`logs/e8b_s1_session_evidence.json`. Analysis: `scripts/training/analyze_e8b.py`.
+
+**Verdict.** Level 2 complete and internally consistent. The sign reversal is the
+finding that reframes E8b: the question is no longer "is the contribution map better"
+but "does it only fail once composed with width compression". That is exactly what
+the 2×2 was built to answer.
+
+**Next.** S2 (DP-sa + DC-sa, A100, mandatory 20-step gate), S3 (seed sb), S4 (FC both
+seeds, L40S) against retained FP.

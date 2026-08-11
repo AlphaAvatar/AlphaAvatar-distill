@@ -1,19 +1,23 @@
-**Updated:** 2026-08-11 · branch `main` · working tree clean
-**No pods running. Nothing billing.** **1,208 CPU tests pass**, 6 skipped.
+**Updated:** 2026-08-11 (14:20 UTC) · branch `main` · commit `df954db1` · tree clean
+**ONE POD BILLING: `64fhzduqdwaurw` (E8b S2, A100 SXM 80 GB, $1.59/h, launched
+14:16 UTC, hard stop $18.7602 / 708 min).** Poller and marker monitor armed.
 
-**E8a (contribution-guided depth search) is COMPLETE. The old E8 2.96M recovery is
-CANCELLED by the maintainer and replaced by E8b (depth-map × compression
-interaction), whose preflight is done and which awaits authorization**
-([`e8_step0_report.md`](e8_step0_report.md),
-[`e8b_preregistration.md`](e8b_preregistration.md)). Stage 3
-remains open: no model has passed a prospectively defined behaviour-recovery gate,
-and **nothing yet moves autonomous reasoning correctness**.
+**E8b is RUNNING. S1 is complete and its headline reframes the experiment: the
+contribution-guided depth map reverses sign between compression regimes.** At full
+width it initializes **0.89–1.18 nats better** than the positional map; fully
+compressed it is **0.90–2.82 nats worse** — a unanimous reversal on 9 of 9 metrics
+across three held-out series ([§38](EXPERIMENTS.md),
+[`e8b_step0_records/`](e8b_step0_records/)). So "is the contribution map better" has
+no single answer, and E8b's 2×2 is now testing whether the map only fails once it is
+composed with width/FFN/attention compression.
 
-**E8's headline so far: the contribution-guided depth map preserves the teacher's
-output distribution 3.11× better and initializes 2.82 nats worse.** Teacher-ablation
-KL does not predict initialization quality after compression. Which of the two live
-preregistered outcomes holds is decided only by the two-seed training, which has
-not run.
+Stage 3 remains open: no model has passed a prospectively defined behaviour-recovery
+gate, and **nothing yet moves autonomous reasoning correctness**.
+
+**E8a's earlier headline stands and is now better bounded:** the contribution map
+preserves the frozen teacher 3.11× better in KL at full width, and that advantage
+survives into a real reloaded checkpoint **only** at full width. Teacher-ablation KL
+does not predict initialization quality after compression.
 
 This file is a **snapshot of the current state**, not a history. Every completed
 experiment lives in [`EXPERIMENTS.md`](EXPERIMENTS.md) and every decision in
@@ -43,7 +47,25 @@ E8's unspent backstop:                $9.5147   NOT carried over to E8b
 E8b AUTHORIZED 2026-08-11: expected $40.54, hard $47.18 -> CAP $211.07
   DP/DC on A100 SXM 80GB $1.59/h   FP retained + FC on L40S $0.99/h
   CONDITIONAL hardware bridge, only on a material reversal: +$14.05 -> $225.11
+
+E8b SPEND
+  S1 step-0 (L40S)                      $5.2100  DONE, over its $3.25 plan
+  S2 DP-sa+DC-sa (A100)                 running, hard $18.7602
+  S3 DP-sb+DC-sb (A100)                 not started, hard $18.7602
+  S4 FC-sa+FC-sb (L40S)                 not started, hard $6.4011
+  E8b spent                             $5.2100
+  E8b remaining of $47.18               $41.9700
+  cumulative spend                     $169.0933 of the $211.07 cap
 ```
+
+**Sum of the three remaining hard backstops ($43.92) exceeds the $41.97 left**, by
+$1.95, because S1 overran on the DP probe. Expected costs still fit ($38.03, margin
+$3.94). **Do not pre-shrink S3 or S4 to close that gap** — check the actual spend
+after S2, and if a genuine shortfall materialises, report the exact figure and ask.
+
+Per-session `--authorized-usd` must be passed to **4 decimal places**: the plan's true
+S2 hard is $18.760145 and `plan_session` compares unrounded, so `18.76` fails with a
+"shortfall of $0.00".
 
 **The old E8 2.96M recovery is cancelled and must not be launched.** E8b replaces
 it at the 1.60M rung as a 2×2 factorial (depth-only vs fully compressed × positional
@@ -375,21 +397,30 @@ concatenated at token level (asserted exact), with the system block emitted once
 
 ## 9. Next actions
 
-**Nothing costing money is authorized.** $2.33 remains under the $162.49 cap;
-E8's hard backstop is $12.41, so it needs **$10.08 more** and a cap of **$172.57**.
+**E8b is authorized ($47.18, cap $211.07) and executing.** S1 is complete; S2 is
+running. Ordered next actions:
 
-**E8a is done. E8b's preflight is done. Nothing paid may start.** Ordered next
-actions:
-
-1. **AUTHORIZED $47.18, cap $211.07.** Executing S1 -> S2 -> S3 -> S4.
-2. On authorization: write the four pod sessions — S1 L40S step-0, S2/S3 A100
-   seed-paired depth-only, S4 L40S FC — deliberately **not** written yet, matching
-   E7/E8a's order. S2 must carry the registered 20-step gate on s/step, peak VRAM
-   and $/step, because no 3.2B step time has ever been measured here.
-3. `analyze_e8b.py` for `DC-DP`, `FC-FP` and the interaction, per seed and pooled,
-   with the hardware nesting stated in the report.
-4. **Do not launch** the old 2.96M recovery, the hardware bridge (conditional only),
-   P2-5.50M, a FineWeb sweep, on-policy, an operator-order search, or any E9.
+1. **S2 in flight** (`64fhzduqdwaurw`, A100, launched 14:16 UTC). Its **20-step gate
+   is blocking and comes before either arm trains**: s/step ≤ 7.86, peak VRAM
+   ≤ 78 GB, live $/step ≤ 0.003472. 7.86 is *derived*, not measured — from
+   `(8·N_student + 2·N_teacher)` FLOPs against E6b's measured 4.15 s/step, which
+   makes the depth-only/compressed ratio 2.64× rather than the 5.4× a
+   parameter-count-only estimate gives, because the teacher forward dominates the
+   596M reference. On violation the session **stops**; re-price, do not widen.
+2. **Check the actual spend after S2 before launching S3.** The three remaining hard
+   backstops sum to $1.95 more than the $41.97 left. Report the exact shortfall and
+   ask; never pre-shrink S3 or S4.
+3. **S3** (DP-sb + DC-sb, A100), then **S4** (FC-sa + FC-sb, L40S) against retained
+   FP-sa/sb.
+4. `analyze_e8b.py --level behaviour` once `logs/e8b_results.json` exists: `DC-DP`,
+   `FC-FP` and the nested interaction, per seed and pooled. The step-0 half is
+   already implemented and run.
+5. **DC's step-0 probe is deferred, not cancelled** ($0.5–3.3 depending on whether it
+   terminates). DP's floored at 76/76 truncated, but its teacher-native top-1 is 0.52
+   against DC's 0.76, so DP's floor does not predict DC's.
+6. **Do not launch** the old 2.96M recovery, the hardware bridge (conditional on a
+   material reversal only), P2-5.50M, a FineWeb sweep, on-policy, an operator-order
+   search, AutoInitializer work, or any E9.
 
 **Durability is done** (`logs/e8_relay_manifest.json`): 13/13 staged and
 roundtrip-verified, including the 1.95 GB Stage 0 cache and `warmup_v1`, its input.
