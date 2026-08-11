@@ -7,7 +7,8 @@
 Stage plans, and the order is the rule rather than a convenience:
 
     s1   init_nll(DP,DC,FP,FC) -> step0_probe(DP,DC) -> publish_step0
-    s2   fetch_step0 -> throughput_gate -> gate -> train -> general_text -> three_mode
+    s2   fetch_step0 -> memory_profile -> throughput_gate -> gate -> train
+         -> general_text -> three_mode
     s3   same as s2
     s4   fetch_step0 -> gate -> train -> general_text -> three_mode
 
@@ -17,11 +18,18 @@ relay; every training session fetches them and re-runs the gate against them, so
 arm trains from an unmeasured initialization even though the measurement happened in
 a different session.
 
-`throughput_gate` is mandatory on the depth-only sessions and blocking. No 3.2B step
-time has ever been measured in this project, so it runs 20 real training steps
-through the real trainer and checks the three registered quantities — wall-clock
-s/step <= 7.86, peak VRAM <= 78 GB, live $/step <= 0.003472. On violation it stops.
-It does not widen the budget, switch GPU, or change semantics.
+`throughput_gate` is mandatory on the depth-only sessions and blocking. It runs 20
+real training steps through the real trainer and checks the three registered
+quantities — wall-clock s/step <= 7.86, peak VRAM <= 78 GB, live $/step <= 0.003472.
+On violation it stops. It does not widen the budget, switch GPU, or change semantics.
+
+It has fired once: S2 attempt 4 OOM'd on an 80 GB A100 after three steps at 4.80-5.39
+s/step, so speed and cost passed and memory did not. `memory_profile` now runs first
+and attributes the peak to an operation, because the backend audit found the peak is
+`[tokens, vocab]` materialization rather than attention — attention is already flash
+SDPA, and no fused-kernel package exists in the pinned runtime. The single execution
+change adopted is `ALLOC_CONF`, which is an allocator setting and not a semantics
+change.
 """
 
 from __future__ import annotations
@@ -84,6 +92,16 @@ DEPTH_SESSIONS = ("s2", "s3")
 
 
 TOKEN_FILE = Path("/workspace/hf/token")
+
+
+# The one execution-backend change E8b adopts, and the audit's only available
+# candidate. `expandable_segments` alters how the caching allocator maps segments and
+# nothing else: no numerics, no token exposure, no schedule, no batch semantics. S2's
+# OOM had 6.16 GiB reserved-but-unallocated against a 298 MiB request, which is the
+# fragmentation this setting exists to remove. Set here rather than per-command so the
+# profiler and the gate and the training run all share one allocator configuration,
+# and recorded in every stage's artifact.
+ALLOC_CONF = "expandable_segments:True"
 
 
 def hf_token(path: Path = TOKEN_FILE) -> str:
@@ -303,6 +321,25 @@ def stage_throughput_gate(args) -> None:
     mark(args.session, "THROUGHPUT_GATE_PASSED")
 
 
+def stage_memory_profile(args) -> None:
+    """Attribute the peak to an operation before spending the gate's budget on it.
+
+    The audit established from code that attention is already flash SDPA and that no
+    fused-kernel package exists in the pinned runtime, so the only candidate left is
+    the allocator. This stage measures where the memory actually goes, so the claim
+    that `[tokens, vocab]` materialization dominates is a measurement rather than
+    arithmetic. Two steps is enough: the peak is per-microbatch, not cumulative.
+    """
+    out = OUT / "e8b_dp_memory_profile.json"
+    if out.is_file():
+        mark(args.session, "MEMORY_PROFILE_DONE")
+        return
+    run(["scripts/training/profile_dp_memory.py",
+         "--config", REPO / "configs/stage3/e8b/e8b_dp_r1600k_sa.json",
+         "--steps", 2, "--out", out])
+    mark(args.session, "MEMORY_PROFILE_DONE")
+
+
 def stage_gate(args) -> None:
     """The blocking pre-training gate, scoped to this session."""
     out = OUT / f"e8b_{args.session}_preflight.json"
@@ -390,6 +427,7 @@ STAGES = {
     "s1": (("init_nll", stage_init_nll), ("step0_probe", stage_step0_probe),
            ("publish_step0", stage_publish_step0)),
     "s2": (("fetch_step0", stage_fetch_step0),
+           ("memory_profile", stage_memory_profile),
            ("throughput_gate", stage_throughput_gate), ("gate", stage_gate),
            ("train", stage_train), ("general_text", stage_general_text),
            ("three_mode", stage_three_mode)),
@@ -421,6 +459,8 @@ def main() -> None:
     args = ap.parse_args()
     args.t0 = time.time()
     OUT.mkdir(parents=True, exist_ok=True)
+    os.environ["PYTORCH_CUDA_ALLOC_CONF"] = ALLOC_CONF
+    print(f"PYTORCH_CUDA_ALLOC_CONF={ALLOC_CONF}", flush=True)
     print(f"E8b {args.session}: spent ${args.spent_usd:.2f}, soft stop "
           f"${args.soft_stop_usd:.2f}, hard ${args.authorized_usd:.2f} "
           f"at ${args.rate}/h", flush=True)
