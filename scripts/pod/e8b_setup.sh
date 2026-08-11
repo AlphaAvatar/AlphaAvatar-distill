@@ -130,14 +130,22 @@ uv lock
 
 # Cold-host tripwire. Progress is summed across /opt/train AND /root/.cache/uv,
 # because uv writes to the cache first; measuring only the venv classified a host
-# downloading at 5.5 MB/s as stalled and cost E8a two draws. Grace renews while
-# progress continues, bounded by UV_MAX_S so a genuinely hung host still dies.
+# downloading at 5.5 MB/s as stalled and cost E8a two draws.
+#
+# A SINGLE quiet window is not evidence of a hung host. E8b-S2 draw 1 was killed at
+# 26.4 min on a host that was working: uv writes nothing to disk while it resolves or
+# builds a wheel, which is indistinguishable from a hang if one 20 s sample decides.
+# So a kill now needs STALL_LIMIT *consecutive* stalled windows, and any progress
+# resets the counter. `UV_MAX_S` is the separate absolute ceiling — note it never
+# extended the deadline, it only stops the growth check from applying, which is why
+# raising it did not protect draw 1.
 TRIP_S=${UV_TRIP_S:-360}
 GRACE_S=${UV_GRACE_S:-180}
 UV_MAX_S=${UV_MAX_S:-1500}
+STALL_LIMIT=${UV_STALL_LIMIT:-3}
 uv sync --group dev &
 UV_PID=$!
-t0=$(date -u +%s); graced=0
+t0=$(date -u +%s); graced=0; stalls=0
 while kill -0 "$UV_PID" 2>/dev/null; do
   sleep 15
   el=$(( $(date -u +%s) - t0 ))
@@ -148,15 +156,20 @@ while kill -0 "$UV_PID" 2>/dev/null; do
     b=$(( $(du -sb /opt/train 2>/dev/null | cut -f1 || echo 0) \
         + $(du -sb /root/.cache/uv 2>/dev/null | cut -f1 || echo 0) ))
     if [ "$((b - a))" -gt 20000000 ]; then
-      graced=$(( graced + 1 ))
+      graced=$(( graced + 1 )); stalls=0
       say "uv sync past ${TRIP_S}s but progressing ($(( (b-a)/1048576 )) MB/20s, grace ${graced}) — extending ${GRACE_S}s"
       TRIP_S=$(( TRIP_S + GRACE_S )); continue
+    fi
+    stalls=$(( stalls + 1 ))
+    if [ "$stalls" -lt "$STALL_LIMIT" ]; then
+      say "uv sync quiet window ${stalls}/${STALL_LIMIT} at ${el}s (no disk growth; a resolve or wheel build looks like this) — waiting"
+      continue
     fi
   fi
   kill -9 "$UV_PID" 2>/dev/null || true
   cache=$(du -sm /root/.cache/uv 2>/dev/null | cut -f1 || echo 0)
-  say "COLD HOST: uv sync unfinished after ${el}s (cache ${cache} MB). Abandoning."
-  mark "HOST_COLD:${el}s:${cache}MB"
+  say "COLD HOST: uv sync unfinished after ${el}s, ${stalls} consecutive quiet windows (cache ${cache} MB). Abandoning."
+  mark "HOST_COLD:${el}s:${cache}MB:stalls${stalls}"
   exit 90
 done
 wait "$UV_PID" || { say "uv sync failed"; exit 1; }
@@ -320,22 +333,60 @@ mark ROPE_OK
 
 # Threads capped and the gate time-boxed: a 128-vCPU host gave torch 208 threads and
 # a 70-second suite ran past 66 minutes, silently consuming an E8a session's budget.
-say "CPU test suite (threads capped; wide hosts make torch oversubscribe)"
+#
+# The env caps alone were NOT enough, and the reason is specific: a container reports
+# the HOST's cpu count while the cgroup grants a fraction of it. E8b-S2's pods showed
+# `nproc` 128; the subprocess that `test_depth_search_driver` spawns sized its pools
+# from that and burned 900+ s at 1338% CPU on work that takes 7.4 s on a 16-core dev
+# box, while the parent pytest sat in sigsuspend at 2% CPU. Env vars did not bound it
+# because the child re-derives its own pool.
+#
+# So the budget is read from the cgroup quota — the real limit — and enforced by the
+# kernel with `taskset`, whose affinity children inherit across fork/exec and no
+# library can ignore. The elapsed time is recorded on success so the box is calibrated
+# from measurements rather than guessed a third time.
+cpu_budget() {
+  local q p n=""
+  if [ -r /sys/fs/cgroup/cpu.max ]; then                    # cgroup v2
+    read -r q p < /sys/fs/cgroup/cpu.max || true
+    if [ "${q:-max}" != "max" ] && [ "${p:-0}" -gt 0 ] 2>/dev/null; then
+      n=$(( q / p ))
+    fi
+  elif [ -r /sys/fs/cgroup/cpu/cpu.cfs_quota_us ]; then     # cgroup v1
+    q=$(cat /sys/fs/cgroup/cpu/cpu.cfs_quota_us 2>/dev/null || echo -1)
+    p=$(cat /sys/fs/cgroup/cpu/cpu.cfs_period_us 2>/dev/null || echo 0)
+    if [ "$q" -gt 0 ] 2>/dev/null && [ "$p" -gt 0 ] 2>/dev/null; then
+      n=$(( q / p ))
+    fi
+  fi
+  # No quota (a bare host, like the dev box) means nproc is the truth.
+  if [ -z "$n" ] || [ "$n" -lt 1 ]; then n=$(nproc); fi
+  if [ "$n" -gt 16 ]; then n=16; fi                         # the suite needs no more
+  echo "$n"
+}
+NCPU=$(cpu_budget)
+CPUS=${TESTS_CPUS:-0-$(( NCPU - 1 ))}
+NTHREADS=$(( NCPU < 8 ? NCPU : 8 ))
+say "CPU test suite ($(nproc) vCPUs visible, cgroup budget ${NCPU}; pinned to cpu set ${CPUS}, ${NTHREADS} threads, box ${TESTS_MAX_S:-2700}s)"
 cd "$REPO"
 set +e
-OMP_NUM_THREADS=8 MKL_NUM_THREADS=8 OPENBLAS_NUM_THREADS=8 \
-  timeout "${TESTS_MAX_S:-900}" /opt/train/bin/python -m pytest tests/ -q \
+tt0=$(date -u +%s)
+OMP_NUM_THREADS=$NTHREADS MKL_NUM_THREADS=$NTHREADS OPENBLAS_NUM_THREADS=$NTHREADS \
+  taskset -c "$CPUS" \
+  timeout "${TESTS_MAX_S:-2700}" /opt/train/bin/python -m pytest tests/ -q \
   --ignore=tests/data/test_recovery_corpus_pipeline.py > /workspace/pytest.log 2>&1
 RC=$?
+tt=$(( $(date -u +%s) - tt0 ))
 set -e
 tail -4 /workspace/pytest.log
 if [ "$RC" -eq 124 ]; then
-  say "COLD HOST: the CPU test suite did not finish in ${TESTS_MAX_S:-900}s on $(nproc) vCPUs"
-  mark "HOST_COLD:tests:${TESTS_MAX_S:-900}s:$(nproc)vcpu"
+  say "COLD HOST: the CPU test suite did not finish in ${TESTS_MAX_S:-2700}s on $(nproc) vCPUs (cpu set ${CPUS})"
+  mark "HOST_COLD:tests:${TESTS_MAX_S:-2700}s:$(nproc)vcpu:cpuset${CPUS}"
   exit 90
 fi
 [ "$RC" -eq 0 ] || { say "test suite failed rc=$RC"; exit 1; }
-mark TESTS_OK
+say "test suite passed in ${tt}s on cpu set ${CPUS}"
+mark "TESTS_OK:${tt}s"
 
 say "rebuilding the inclusion mask in this environment"
 cd "$REPO" && PYTHONPATH=src /opt/train/bin/python - <<'PYEOF'

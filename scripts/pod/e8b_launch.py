@@ -685,7 +685,11 @@ def main() -> int:
                     default=os.path.expanduser("~/.cache/huggingface/token"))
     ap.add_argument("--session", required=True, choices=sorted(SESSIONS))
     ap.add_argument("--uv-max-s", type=int, default=1500)
-    ap.add_argument("--tests-max-s", type=int, default=900)
+    # 900 s was calibrated on a smaller suite and 596M-only artifacts; E8b-S2 draw 2
+    # exceeded it on a 128-vCPU A100 host against 88 s on the dev box. The setup
+    # script now also pins the suite to a kernel-enforced cpu set, since the
+    # OMP/MKL/OPENBLAS caps alone did not bound torch's thread pools.
+    ap.add_argument("--tests-max-s", type=int, default=2700)
     ap.add_argument("--ckpt-store", default="/home/ecs-user/aad-artifacts/e8")
     ap.add_argument("--ckpt-fetch-limit-min", type=int, default=25)
     ap.add_argument("--startup-limit-min", type=float, default=15.0)
