@@ -5301,3 +5301,47 @@ also finally report peak VRAM.
 
 **Cost.** $0.55 for the session; $3.65 for all four S2 attempts. Nothing scientific is
 affected: no arm trained, and S1's step-0 table is untouched.
+
+## 41. E8b S2 — DP-sa trained; DC-sa OOM'd; 80 GB is marginal, not sufficient (2026-08-11, $7.21)
+
+**Commit:** `6b9d441` · **A100 SXM 80 GB** · backend: SDPA flash + `kd_chunk 128` +
+`expandable_segments:True`, behind the 200-step steady-state gate.
+
+**The 200-step gate passed honestly and was still too short.** It measured 77.31 GiB
+with 0.000 GiB drift over its final 50 steps and 1.94 GiB of free margin. The full run
+then showed the peak climbing again *after* the gate ended:
+
+| step | peak allocated (GiB) |
+| --- | --- |
+| 10 | 76.50 |
+| 70 | 76.71 |
+| 120 | 77.23 |
+| 130 | **77.31** — the gate's figure, flat through step 200 |
+| **310** | **77.45** — true steady state, held to step 1760 |
+
+**DP-sa completed all 1,761 steps** at that 77.45 GiB peak — the first finished DP/DC
+arm. **DC-sa OOM'd at ~step 900** on a **74 MiB** request, with 77.37 GiB allocated and
+1.31 GiB reserved-unallocated. Both arms reached the identical 77.45 GiB maximum; one
+survived it and one did not.
+
+**What this establishes.** The configuration is *marginal* on an 80 GB card, not
+merely un-gated. At 77.45 GiB of 79.25 GiB capacity the nominal margin is 1.80 GiB, of
+which ~1.31 GiB is allocator slack — leaving well under a gigabyte usable, and a 74 MiB
+request failed. **DP-sa completing was luck, not headroom.** No longer gate can fix
+this: the peak is data-dependent, settling only around step 310, and the remaining
+margin is smaller than the run-to-run variation between two arms of the same shape.
+
+**Both memory levers are now exhausted.** `expandable_segments` cut fragmentation
+6.16 → 1.04 GiB; `kd_chunk 128` bought ~0.7 GB. Together they moved the failure from
+step 110 to step 900 without removing it.
+
+**Not a scientific result.** DC-sa has no checkpoint, so `DC − DP` does not exist. No
+conclusion about the depth map follows. S1's step-0 table is untouched.
+
+**DP-sa's checkpoint was not staged.** It is 12.9 GB of fp32 weights against an
+irreclaimable HF LFS quota, and it is only reusable if the eventual fix preserves both
+the backend *and* the hardware — which neither of the remaining options does. Its
+`train_log.jsonl` and `run_manifest.json` are kept
+(`logs/e8b_s2_dp_sa/`), along with DC-sa's partial trajectory.
+
+**Cost.** $7.21. E8b total **$16.82** of $47.18; **$30.36** remains.

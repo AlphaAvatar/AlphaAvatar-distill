@@ -1,0 +1,164 @@
+{
+  "created_utc": "2026-08-11T19:02:42.375844+00:00",
+  "command": "scripts/training/train_stage3.py --config /workspace/aad/configs/stage3/e8b/e8b_dp_r1600k_sa.json",
+  "config": {
+    "stage": "stage3_recovery",
+    "run_name": "e8b_dp_r1600k_sa",
+    "_purpose": "E8b cell DP (depth_only, positional depth map), seed sa, on A100_SXM_80GB. The canonical E1/P1 KD-heavy 1.60M recipe; differs from configs/stage3/e1/e1_r1600k_sa_pca.json only in student_path (the intended causal variable), run_name, out_dir and this note. loss.kd_chunk=128 is the preregistered memory fallback for this regime: identical KD objective, float32 reduction order not bit-identical, applied to every depth-only arm and both seeds.",
+    "student_path": "artifacts/stage1/e8b_dp_init/checkpoint",
+    "teacher": {
+      "model_id": "Qwen/Qwen3-4B-Thinking-2507",
+      "revision": "768f209d9ea81521153ed38c47d515654e938aea",
+      "dtype": "bfloat16"
+    },
+    "data_dir": "artifacts/stage3/ladder_uniform",
+    "groups": null,
+    "packing": "ladder",
+    "block_len": 8192,
+    "dtype": "float32",
+    "autocast_bf16": true,
+    "gradient_checkpointing": true,
+    "device": "auto",
+    "seed": 20260726,
+    "trainable_patterns": [
+      "\\.self_attn\\.(q_proj|k_proj|v_proj|o_proj|q_norm|k_norm)\\.",
+      "\\.mlp\\.(gate_proj|up_proj|down_proj)\\.",
+      "input_layernorm",
+      "post_attention_layernorm",
+      "model\\.norm\\."
+    ],
+    "loss": {
+      "ce_weight": 0.25,
+      "kd_weight": 1.0,
+      "kd_temperature": 1.0,
+      "kd_scope": "all",
+      "kd_chunk": 128
+    },
+    "optim": {
+      "lr": 5e-05,
+      "weight_decay": 0.01,
+      "betas": [
+        0.9,
+        0.95
+      ],
+      "eps": 1e-08,
+      "grad_clip": 1.0
+    },
+    "schedule": {
+      "total_steps": 1761,
+      "warmup_steps": 88,
+      "min_lr_frac": 0.1
+    },
+    "batch": {
+      "blocks_per_step": 2,
+      "micro_blocks": 1
+    },
+    "checkpoint": {
+      "save_every": 880,
+      "keep_last": 1
+    },
+    "intervals": {
+      "log_every": 10,
+      "eval_every": 220,
+      "eval_blocks": 16
+    },
+    "out_dir": "artifacts/stage3/e8b_dp_r1600k_sa",
+    "rung": 1600000,
+    "val_blocks": 16
+  },
+  "config_sha256": "51507fb8995628939a5cd1033c5a5cec6a10d367e16fcdb0004f37fba97ec638",
+  "resumed_from": null,
+  "device": "cuda",
+  "data_manifests": {},
+  "ladder": {
+    "source": "token_ladder",
+    "packed_dir": "/workspace/aad/artifacts/stage3/ladder_uniform",
+    "rung_target_supervised_tokens": 1600000,
+    "train_blocks": 1174,
+    "train_supervised_tokens": 1600353,
+    "train_token_mix": {
+      "code": 0.1656,
+      "gsm8k": 0.1665,
+      "multihop_qa": 0.1665,
+      "openmath": 0.1674,
+      "rag_evidence": 0.1669,
+      "tool_calling": 0.1672
+    },
+    "val_blocks": 16,
+    "val_supervised_tokens": 81195,
+    "val_token_mix": {
+      "code": 0.168,
+      "gsm8k": 0.1425,
+      "multihop_qa": 0.199,
+      "openmath": 0.1551,
+      "rag_evidence": 0.18,
+      "tool_calling": 0.1555
+    },
+    "val_disjoint_from_all_rungs": true,
+    "declared_mixture": {
+      "gsm8k": 0.1667,
+      "openmath": 0.1667,
+      "code": 0.1667,
+      "tool_calling": 0.1667,
+      "rag_evidence": 0.1666,
+      "multihop_qa": 0.1666
+    },
+    "block_len": 8192,
+    "pack_blocks": 3715,
+    "blocks_sha256": "6f324cb0f37bc0f07128e554ce8c161879419537478950496534f75fcecb249c",
+    "ladder_json_sha256": "d4941722a099754ef5ba82d529c0fe2274a6b97af61b2fa52519ed22b84201f0",
+    "audit_sha256": "15f16b7b22b229e9c0ae510b85b4c967948828e0e7d50fac15c3e516e3e911e6"
+  },
+  "tokenizer_sha256": "7781771acc3798ee454c1253c751f930eb1c18c1c3df62e2552cc6f1d394f654",
+  "teacher": {
+    "model_id": "Qwen/Qwen3-4B-Thinking-2507",
+    "revision": "768f209d9ea81521153ed38c47d515654e938aea",
+    "dtype": "bfloat16",
+    "device": "cuda",
+    "attn_implementation": "sdpa",
+    "num_parameters": 4022468096,
+    "architecture": [
+      "Qwen3ForCausalLM"
+    ],
+    "hidden_size": 2560,
+    "num_hidden_layers": 36,
+    "intermediate_size": 9728,
+    "vocab_size": 151936,
+    "tokenizer_sha256": "7781771acc3798ee454c1253c751f930eb1c18c1c3df62e2552cc6f1d394f654"
+  },
+  "student_source": "/workspace/aad/artifacts/stage1/e8b_dp_init/checkpoint",
+  "trainable_params": 2826065408,
+  "full_rank_trainable_params": 2826065408,
+  "lora_trainable_params": 0,
+  "lora": null,
+  "lora_modules": null,
+  "total_params": 3215021568,
+  "extra_stream": null,
+  "code_state": {
+    "git_commit": "6b9d44163b6d70f3311227876480ad53399d38cc",
+    "git_commit_source": "git",
+    "dirty": true,
+    "uncommitted_state_sha256": "55051ff618e0f0ce9f52ee4dab896c5382a355a3f5f5ebdefa0240e3dee172c0",
+    "untracked_files": [
+      "configs/stage3/e8b/e8b_dp_r1600k_sa_gate.json"
+    ]
+  },
+  "hardware": {
+    "platform": "Linux-6.8.0-100-generic-x86_64-with-glibc2.39",
+    "python": "3.12.3",
+    "torch": "2.11.0+cu128",
+    "cpu_count": 128,
+    "cuda_available": true,
+    "libraries": {
+      "transformers": "5.13.1",
+      "tokenizers": "0.22.2",
+      "safetensors": "0.8.0",
+      "numpy": "2.5.1",
+      "datasets": "5.0.0",
+      "vllm": null
+    },
+    "cuda_devices": [
+      "NVIDIA A100-SXM4-80GB"
+    ]
+  }
+}
