@@ -2010,3 +2010,45 @@
   objective is the obvious follow-up and is **not** authorized.
 - **Revisit when:** the two-seed training completes and separates outcome 3 from
   outcome 4.
+
+## 2026-08-11 — E8b execution backend: adopt the allocator setting, nothing else
+
+- **Context:** E8b-S2's registered 20-step gate OOM'd on an 80 GB A100 at 79.10/79.25
+  GiB, missing a 298 MiB allocation while 6.16 GiB sat reserved-but-unallocated. Speed
+  and $/step had passed comfortably. A gate failure is a stop-and-re-price event, so an
+  execution-backend audit was commissioned before resuming, with the scientific
+  experiment held fixed.
+- **Decision:** freeze the backend as **flash SDPA (already in use) + native
+  Qwen3 norms/RoPE/MLP + foreach AdamW + KD chunk 512 + one change:
+  `PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True`.** DP and DC, both seeds, use
+  exactly this. The registered KD chunk-128 fallback was **not** needed.
+  Full audit: [`e8b_backend_audit.md`](e8b_backend_audit.md).
+- **Alternatives considered:**
+  * *optimized attention* — rejected as already present. Both models resolve to `sdpa`
+    and the failed run's own backward emitted the flash-kernel warning from
+    `attention_backward.cu`. Testing it would have measured the status quo twice.
+  * *fused RMSNorm / RoPE / SwiGLU* — rejected as unavailable. `kernels`, `flash_attn`,
+    `apex` and `liger_kernel` are all absent from the pinned runtime, so this is a
+    dependency decision (P12), not a flag. It also would not address the bottleneck.
+  * *fused AdamW* — rejected. It changes the update trajectory, and the current path is
+    already `foreach`, so the gain would be speed alone against a numerical change.
+  * *KD chunk 512 → 128* — held in reserve and not used. It recovers ~0.7 GB, the
+    smallest of the large contributors, and is not bit-identical (float32 accumulation
+    order, ~7e-8 relative), so it would have to apply to both arms of a pair.
+  * *≥94 GB GPU* — not needed; would have been the next step had the allocator failed.
+- **Expected upside:** the measurement is the upside. Peak allocated fell to 62.00 GiB
+  with 67.31 GiB reserved in the profiler, and the gate then passed at **4.815 s/step,
+  77.15 GB peak VRAM, $0.002127/step** against limits of 7.86 / 78.0 / 0.003472. The
+  measured step time is 39% below the derived figure, which re-prices each depth-only
+  session from $18.76 hard to $12.91 and restores $6.11 of margin.
+- **Risks:** the VRAM margin is **0.85 GB**. The peak is per-microbatch rather than
+  cumulative and checkpointing happens between steps at the 54.8 GB steady state, so it
+  should hold for 1,761 steps — but a single unlucky allocation would end an arm
+  two-thirds through. Recorded rather than mitigated, because mitigating it means
+  changing the KD path.
+- **Revisit when:** a student larger than 3.2B, a longer block, or a bigger vocabulary
+  is proposed. At that point the fix is a streaming/fused vocabulary-KD kernel — the
+  measured ~10.9 GiB concurrent transient is almost entirely `[tokens, vocab]` copies,
+  of which `masked_ce`'s unchunked 4,978 MB fp32 upcast is the largest single buffer —
+  or FSDP/ZeRO for the 46.8 GB of fp32 master weights and Adam states. Not smaller
+  Python-level chunks.

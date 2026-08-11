@@ -1,0 +1,256 @@
+{
+  "created_utc": "2026-08-11T17:57:52+00:00",
+  "command": "scripts/training/profile_dp_memory.py --config /workspace/aad/configs/stage3/e8b/e8b_dp_r1600k_sa.json --steps 2 --out /workspace/aad/artifacts/audit/e8b_dp_memory_profile.json",
+  "cuda_available": true,
+  "config": "/workspace/aad/configs/stage3/e8b/e8b_dp_r1600k_sa.json",
+  "analytic": {
+    "note": "arithmetic, for cross-checking the measurement",
+    "block_len": 8192,
+    "micro_blocks": 1,
+    "vocab": 151936,
+    "student_logits_bf16_mb": 2489.3,
+    "teacher_logits_bf16_mb": 2489.3,
+    "masked_ce_sel_copy_bf16_mb": 2489.0,
+    "masked_ce_sel_float_fp32_mb": 4978.0,
+    "kd_sp_copy_bf16_mb": 2489.0,
+    "kd_tp_copy_bf16_mb": 2489.0,
+    "kd_chunk_buffer_fp32_mb": 311.2,
+    "kd_chunk_concurrent_peak_mb": 933.5,
+    "fixed_gb": {
+      "student_weights_fp32": 12.86,
+      "grads_fp32_trainable": 11.3,
+      "adamw_m_v_fp32": 22.61,
+      "teacher_bf16": 8.04,
+      "total": 54.82
+    }
+  },
+  "allocator_conf": "expandable_segments:True",
+  "device": "NVIDIA A100-SXM4-80GB",
+  "capacity_gib": 79.25,
+  "resolved_attn_implementation": {
+    "student": "sdpa",
+    "teacher": "sdpa"
+  },
+  "module_classes": {
+    "attention": "Qwen3Attention",
+    "norm": "Qwen3RMSNorm",
+    "mlp": "Qwen3MLP",
+    "rope": "Qwen3RotaryEmbedding"
+  },
+  "optimizer": {
+    "class": "AdamW",
+    "foreach": null,
+    "fused": null,
+    "n_trainable_tensors": 309,
+    "n_trainable_params": 2826065408
+  },
+  "teacher_frozen": {
+    "training_mode": false,
+    "any_param_requires_grad": false,
+    "use_cache": false
+  },
+  "student_setup": {
+    "use_cache": false,
+    "gradient_checkpointing": true,
+    "autocast_bf16": true,
+    "weight_dtype": "torch.float32"
+  },
+  "step_metrics": [
+    {
+      "step": 1,
+      "loss": 2.416181,
+      "ce": 2.058705,
+      "kd": 1.901504,
+      "lr": 5.681818181818182e-07,
+      "grad_norm": 57.0118,
+      "ce_targets": 3908,
+      "kd_positions": 8860,
+      "logical_block_tokens": 16384,
+      "executed_positions": 16384,
+      "executed_nonpad_tokens": 8862,
+      "supervised_tokens": 3908,
+      "truncate_padding": false
+    },
+    {
+      "step": 2,
+      "loss": 3.117447,
+      "ce": 2.756749,
+      "kd": 2.428259,
+      "lr": 1.1363636363636364e-06,
+      "grad_norm": 96.5363,
+      "ce_targets": 356,
+      "kd_positions": 943,
+      "logical_block_tokens": 16384,
+      "executed_positions": 16384,
+      "executed_nonpad_tokens": 945,
+      "supervised_tokens": 356,
+      "truncate_padding": false
+    }
+  ],
+  "peak": {
+    "max_allocated_gib": 62.001,
+    "max_reserved_gib": 67.314
+  },
+  "largest_live_tensors": [
+    {
+      "shape": [
+        151936,
+        2560
+      ],
+      "dtype": "torch.float32",
+      "mib": 1555.8,
+      "requires_grad": false
+    },
+    {
+      "shape": [
+        151936,
+        2560
+      ],
+      "dtype": "torch.bfloat16",
+      "mib": 777.9,
+      "requires_grad": false
+    },
+    {
+      "shape": [
+        9728,
+        2560
+      ],
+      "dtype": "torch.float32",
+      "mib": 99.6,
+      "requires_grad": false
+    },
+    {
+      "shape": [
+        9728,
+        2560
+      ],
+      "dtype": "torch.float32",
+      "mib": 99.6,
+      "requires_grad": false
+    },
+    {
+      "shape": [
+        2560,
+        9728
+      ],
+      "dtype": "torch.float32",
+      "mib": 99.6,
+      "requires_grad": false
+    },
+    {
+      "shape": [
+        9728,
+        2560
+      ],
+      "dtype": "torch.float32",
+      "mib": 99.6,
+      "requires_grad": false
+    },
+    {
+      "shape": [
+        9728,
+        2560
+      ],
+      "dtype": "torch.float32",
+      "mib": 99.6,
+      "requires_grad": false
+    },
+    {
+      "shape": [
+        2560,
+        9728
+      ],
+      "dtype": "torch.float32",
+      "mib": 99.6,
+      "requires_grad": false
+    },
+    {
+      "shape": [
+        9728,
+        2560
+      ],
+      "dtype": "torch.float32",
+      "mib": 99.6,
+      "requires_grad": false
+    },
+    {
+      "shape": [
+        9728,
+        2560
+      ],
+      "dtype": "torch.float32",
+      "mib": 99.6,
+      "requires_grad": false
+    },
+    {
+      "shape": [
+        2560,
+        9728
+      ],
+      "dtype": "torch.float32",
+      "mib": 99.6,
+      "requires_grad": false
+    },
+    {
+      "shape": [
+        9728,
+        2560
+      ],
+      "dtype": "torch.float32",
+      "mib": 99.6,
+      "requires_grad": false
+    }
+  ],
+  "phases": [
+    {
+      "phase": "start",
+      "allocated_gib": 0.0,
+      "reserved_gib": 0.0,
+      "max_allocated_gib": 0.0,
+      "max_reserved_gib": 0.0
+    },
+    {
+      "phase": "teacher_loaded",
+      "allocated_gib": 7.492,
+      "reserved_gib": 7.502,
+      "max_allocated_gib": 7.492,
+      "max_reserved_gib": 7.502
+    },
+    {
+      "phase": "student_loaded",
+      "allocated_gib": 7.492,
+      "reserved_gib": 7.502,
+      "max_allocated_gib": 7.492,
+      "max_reserved_gib": 7.502
+    },
+    {
+      "phase": "trainer_built",
+      "allocated_gib": 19.469,
+      "reserved_gib": 19.475,
+      "max_allocated_gib": 19.469,
+      "max_reserved_gib": 19.475
+    },
+    {
+      "phase": "before_step",
+      "allocated_gib": 19.469,
+      "reserved_gib": 19.475,
+      "max_allocated_gib": 19.469,
+      "max_reserved_gib": 19.475
+    },
+    {
+      "phase": "after_step_1",
+      "allocated_gib": 51.069,
+      "reserved_gib": 62.137,
+      "max_allocated_gib": 61.753,
+      "max_reserved_gib": 62.137
+    },
+    {
+      "phase": "after_step_2",
+      "allocated_gib": 51.069,
+      "reserved_gib": 67.314,
+      "max_allocated_gib": 62.001,
+      "max_reserved_gib": 67.314
+    }
+  ],
+  "memory_summary": "|===========================================================================|\n|                  PyTorch CUDA memory summary, device ID 0                 |\n|---------------------------------------------------------------------------|\n|            CUDA OOMs: 0            |        cudaMalloc retries: 0         |\n|===========================================================================|\n|        Metric         | Cur Usage  | Peak Usage | Tot Alloc  | Tot Freed  |\n|---------------------------------------------------------------------------|\n| Allocated memory      |  52294 MiB |  63488 MiB |   2063 GiB |   2012 GiB |\n|---------------------------------------------------------------------------|\n| Active memory         |  52294 MiB |  63488 MiB |   2063 GiB |   2012 GiB |\n|---------------------------------------------------------------------------|\n| Requested memory      |  52294 MiB |  63488 MiB |   2063 GiB |   2012 GiB |\n|---------------------------------------------------------------------------|\n| GPU reserved memory   |  68930 MiB |  68930 MiB |  68930 MiB |      0 B   |\n|---------------------------------------------------------------------------|\n| Non-releasable memory |      0 B   |      0 B   |      0 B   |      0 B   |\n|---------------------------------------------------------------------------|\n| Allocations           |    1641    |    1960    |   39778    |   38137    |\n|---------------------------------------------------------------------------|\n| Active allocs         |    1641    |    1960    |   39778    |   38137    |\n|---------------------------------------------------------------------------|\n| GPU reserved segments |       0    |       0    |       0    |       0    |\n|---------------------------------------------------------------------------|\n| Non-releasable allocs |       0    |       0    |       0    |       0    |\n|---------------------------------------------------------------------------|\n| Oversize allocations  |       0    |       0    |       0    |       0    |\n|---------------------------------------------------------------------------|\n| Oversize GPU segments |       0    |       0    |       0    |       0    |\n|===========================================================================|\n"
+}

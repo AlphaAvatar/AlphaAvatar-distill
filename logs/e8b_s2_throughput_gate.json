@@ -1,0 +1,17 @@
+{
+  "arm": "e8b_dp_r1600k_sa",
+  "steps_logged": 20,
+  "measured_on": 11,
+  "seconds_per_step_median": 4.815,
+  "peak_vram_gb": 77.15,
+  "usd_per_step": 0.002127,
+  "registered": {
+    "max_seconds_per_step": 7.86,
+    "max_peak_vram_gb": 78.0,
+    "max_usd_per_step": 0.003472
+  },
+  "rate_usd_per_hour": 1.59,
+  "projected_minutes_per_arm": 141.3,
+  "violations": [],
+  "passed": true
+}
