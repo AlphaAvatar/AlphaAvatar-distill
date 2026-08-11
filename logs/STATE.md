@@ -2,7 +2,22 @@
 **ONE POD BILLING: `5bd0szfrv57fw3`** (E8b S2, A100 SXM 80 GB, launched 18:26 UTC,
 hard stop $18.7602). **1,303 CPU tests pass**, 7 skipped.
 
-**E8b S2 has OOM'd twice and both memory levers are now adopted.** A backend audit
+**E8b IS STOPPED AND AWAITING A MAINTAINER DECISION. 80 GB is marginal for the
+depth-only arms — not fixable by a longer gate.** DP-sa trained all 1,761 steps;
+DC-sa OOM'd at ~step 900. Both peaked at the identical **77.45 GiB** of 79.25, with
+1.31 GiB of that allocator slack, so DP-sa completing was luck rather than headroom.
+The 200-step gate passed honestly at 77.31 GiB with 0.000 drift and was still too
+short: the peak climbed again at step 310. Both memory levers are exhausted — they
+moved the failure from step 110 to step 900 without removing it.
+
+**The choice ([§41](EXPERIMENTS.md)):** restructure CE/KD memory (recommended —
+`masked_ce`'s unchunked 4,978 MB fp32 upcast is the largest single buffer, and
+chunking it as KD already is frees ~7.5 GB, keeping DP/DC on the matched A100), or
+move to a ≥94 GB GPU (removes it outright, changes hardware class and re-prices).
+**Either way DP-sa must be retrained**, so its checkpoint was not staged against the
+irreclaimable HF LFS quota. **Do not pick one without the maintainer.**
+
+Prior context: A backend audit
 ([`e8b_backend_audit.md`](e8b_backend_audit.md)) found attention is already PyTorch
 SDPA on its flash backend and that no fused-kernel package exists in the pinned
 runtime, so the allocator was the only available candidate. It reduced fragmentation
@@ -74,10 +89,11 @@ E8b SPEND
                                                  test failed on GPU state (§39, §39.1)
   S2 attempt 4 (A100)                   $0.5500  20-step gate passed, no arm trained
   S2 attempt 5 (A100)                   $0.7500  OOM at step 110/1761 (§40)
-  S2 attempt 6 (A100)                   running, chunk 128 + 200-step gate
-  E8b spent                             $9.6100
-  E8b remaining of $47.18               $37.5700
-  cumulative spend                     $173.4933 of the $211.07 cap
+  S2 attempt 6 (A100)                   $7.2100  DP-sa TRAINED (1761 steps);
+                                                 DC-sa OOM at ~step 900 (§41)
+  E8b spent                            $16.8200
+  E8b remaining of $47.18              $30.3600
+  cumulative spend                    $180.7033 of the $211.07 cap
 
 RE-PRICED from the gate's measured 4.83 s/step (was a derived 7.86):
   S2 depth-only DP+DC sa                 hard $12.91   (was $18.76)
