@@ -1,8 +1,11 @@
 **Updated:** 2026-08-11 · branch `main` · working tree clean
 **No pods running. Nothing billing.** **1,208 CPU tests pass**, 6 skipped.
 
-**Experiment 7 is complete. Experiment 8's search half is COMPLETE; its training
-half is blocked on $0.20** ([`e8_step0_report.md`](e8_step0_report.md)). Stage 3
+**E8a (contribution-guided depth search) is COMPLETE. The old E8 2.96M recovery is
+CANCELLED by the maintainer and replaced by E8b (depth-map × compression
+interaction), whose preflight is done and which awaits authorization**
+([`e8_step0_report.md`](e8_step0_report.md),
+[`e8b_preregistration.md`](e8b_preregistration.md)). Stage 3
 remains open: no model has passed a prospectively defined behaviour-recovery gate,
 and **nothing yet moves autonomous reasoning correctness**.
 
@@ -34,15 +37,20 @@ authorized cumulative cap (E8):     $173.40   granted 2026-08-10, +$0.83
 E8 authorized backstop:              $13.2400
 E8 SPENT:                             $3.7253   pod A $0.53 + pod B $2.237 + $0.958 defects
 E8 remaining:                         $9.5147
-pod B hard threshold:                 $9.7130
-E8 SHORTFALL, BLOCKING:               $0.1983  -> proposed backstop $13.44, cap $173.60
+pod B hard threshold:                 $9.7130   CANCELLED — 2.96M recovery withdrawn
+E8's unspent backstop:                $9.5147   NOT carried over to E8b
+
+E8b RETAINED-FP  expected $37.69, hard backstop $42.26 -> cap $206.14
+E8b FULL         expected $43.02, hard backstop $48.11 -> cap $212.00
+GPU: A100 SXM 80GB @ $1.59/h (L40S ruled out: DP/DC need 72.9 GB)
 ```
 
-**E8's training half is stopped at a $0.20 shortfall.** Everything it needs is
-built, staged and verified — `validate_e8_arms.py --require-init` passes all 18
-checks. Six defects were found and fixed across the paid attempts (§0.6); none
-touched the experiment's design. At $9.7130 exactly there is no margin for a bad
-draw, so a larger increment would be worth more than the $0.20 minimum.
+**The old E8 2.96M recovery is cancelled and must not be launched.** E8b replaces
+it at the 1.60M rung as a 2×2 factorial (depth-only vs fully compressed × positional
+vs contribution). Its preflight is complete at $0: both depth-only initializations
+are built and **verified bitwise identical to the ablated teacher**, the memory
+sizing rules out the L40S, and the GPU is selected from live pricing. Six defects
+were found and fixed across E8a's paid attempts (§0.6).
 
 **Plan from actual spend, never from unused room under a previous
 authorization.** The historical $149.03 is not a balance; it was exceeded by
@@ -370,25 +378,20 @@ concatenated at token level (asserted exact), with the system block emitted once
 **Nothing costing money is authorized.** $2.33 remains under the $162.49 cap;
 E8's hard backstop is $12.41, so it needs **$10.08 more** and a cap of **$172.57**.
 
-**E8's search half is done. Its training half is one pod, blocked on $0.20.**
-Ordered next actions:
+**E8a is done. E8b's preflight is done. Nothing paid may start.** Ordered next
+actions:
 
-1. **Maintainer decision on the shortfall.** $9.5147 remains; pod B's hard
-   threshold is $9.7130. Proposed: backstop $13.44, cap $173.60. A larger
-   increment buys margin against a bad draw, of which there is currently none.
-2. On authorization, one command — everything it needs is staged and verified:
-   ```
-   scripts/pod/e8b_launch.py --scr <new> --session-commit <HEAD> --bundle <new> \
-       --treatment-init-sha256 7a0694a5d5c59f8e0b0ebc9ac8648b1ec026bf93cab026d33c61ca8fc85d1edb \
-       --authorized-usd <available> --host-draws 5
-   ```
-   It measures both inits (~3 min, already proven), passes the 18-check gate,
-   trains `sa`+`sb` (403 min), runs the frozen battery, syncs.
-3. `PYTHONPATH=src python scripts/evaluation/analyze_e8.py --bootstrap 10000`. The
-   analysis already reproduces the retained control exactly (usable 0.8400, correct
-   0.2067 on mask `d6e24e0b…`) and refuses to read an outcome while an arm is
-   missing.
-4. Then the E8 record: outcome 3 vs outcome 4 per the preregistration.
+1. **Maintainer decision: E8b RETAINED-FP ($42.26 backstop, cap $206.14) or FULL
+   ($48.11, cap $212.00).** FULL retrains FP on the same A100 so all four factorial
+   cells share hardware; RETAINED-FP reuses FP from an L40S and carries that as a
+   declared confound in the interaction term. FULL is recommended.
+2. On authorization: write the E8b pod session (one A100 SXM 80GB, single device),
+   deliberately **not** written yet — matching E7/E8a's order, so a design change
+   costs nothing. It must include the blocking throughput+memory gate on the first
+   arm (§6.3) because no 3.2B step time has ever been measured here.
+3. `analyze_e8b.py` for the three effects and the interaction, per seed and pooled.
+4. **Do not launch** the old 2.96M recovery, P2-5.50M, a FineWeb sweep, on-policy,
+   an operator-order search, or any E9 combination.
 
 **Durability is done** (`logs/e8_relay_manifest.json`): 13/13 staged and
 roundtrip-verified, including the 1.95 GB Stage 0 cache and `warmup_v1`, its input.
@@ -437,7 +440,8 @@ around the retired metric.
 | §32–33 | control-plane canary, failed then passed 12/12 | live path verified |
 | **§34** | **Experiment 7 — general LM restored, behaviour unmoved** | **the ceiling is not a language-modelling problem** |
 | §35 | Experiment 8 design and preregistration — contribution-guided depth | executed in part |
-| **§36** | **Experiment 8 — map preserves the teacher 3.1× better, initializes 2.8 nats worse** | **training half blocked on $0.20** |
+| **§36** | **E8a — map preserves the teacher 3.1× better, initializes 2.8 nats worse** | **complete; 2.96M recovery cancelled** |
+| §37 | E8b — depth-map × compression interaction | preflight done, awaiting authorization |
 
 Protocol deviations on record: [`e6b_protocol_deviations.md`](e6b_protocol_deviations.md)
 (cost overrun $0.56, lost event streams; scientific endpoint valid, operational

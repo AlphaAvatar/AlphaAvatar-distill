@@ -1,0 +1,40 @@
+{
+  "block_len": 8192,
+  "blocks_per_step": 2,
+  "micro_blocks": 1,
+  "vocab": 151936,
+  "precision": "float32 master weights, bf16 autocast, gradient checkpointing on",
+  "assumptions": [
+    "SDPA/flash attention: the O(L^2) score matrix is never materialized. An eager fallback would add 4 GB and break this.",
+    "embeddings and the tied lm_head are frozen, so they carry no gradient or optimizer state",
+    "one microbatch of one block at a time, as the canonical config sets"
+  ],
+  "arms": {
+    "DP/DC depth-only": {
+      "params_fp32_gb": 12.860086272,
+      "grads_fp32_gb": 11.304261632,
+      "adam_states_fp32_gb": 22.608523264,
+      "student_state_gb": 46.772871168,
+      "teacher_bf16_gb": 8.044936192,
+      "logits_gb": 4.978638848,
+      "kd_reduction_gb": 0.933494784,
+      "activations_gb": 2.675965952,
+      "expected_peak_gb": 63.405906944,
+      "peak_with_15pct_margin_gb": 72.9167929856,
+      "checkpoint_bf16_gb": 6.430043136
+    },
+    "FP/FC target": {
+      "params_fp32_gb": 2.38419968,
+      "grads_fp32_gb": 1.761869824,
+      "adam_states_fp32_gb": 3.523739648,
+      "student_state_gb": 7.669809152,
+      "teacher_bf16_gb": 8.044936192,
+      "logits_gb": 4.978638848,
+      "kd_reduction_gb": 0.933494784,
+      "activations_gb": 1.4680064,
+      "expected_peak_gb": 23.094885376,
+      "peak_with_15pct_margin_gb": 26.5591181824,
+      "checkpoint_bf16_gb": 1.19209984
+    }
+  }
+}

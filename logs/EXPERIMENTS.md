@@ -4971,3 +4971,42 @@ instead of redrawing, and uv progress measured under `/opt/train` while uv write
 70-second test suite run past 66 minutes; and a gate check requiring the
 calibration manifest on a pod that does not search. None touched the selector, the
 calibration set, the map, the recipe or the evaluation.
+
+---
+
+## 37. E8b — depth-map × compression interaction (preflight; not authorized)
+
+The old E8 2.96M recovery was **cancelled by the maintainer** and replaced by this,
+because of E8a's dissociation: the contribution map preserves the full-width teacher
+3.11× better and its fully-compressed initialization is 2.82 nats worse. E8b asks
+whether the map is good on its own and only breaks when composed with the existing
+width/FFN/attention compression.
+
+Full preflight: [`e8b_preregistration.md`](e8b_preregistration.md). **No GPU used.**
+
+2×2 at the **1.60M** rung: depth-only (DP/DC, teacher width, 3,215,021,568 params)
+× fully compressed (FP/FC, 596,049,920), positional × contribution, two seeds per
+new cell, FP retained or retrained.
+
+**DP and DC are built and verified at $0**, by verbatim `state_dict` copy of the
+kept blocks: `d4db65eb8f7ae6d8…` and `eb9e95481988b296…`, one shared config hash
+`4e5b7104…`, both **bitwise identical to `bypassed_blocks(teacher, removed)`** —
+max logit diff exactly 0.000. So DP and DC *are* the ablated teachers E8a scored,
+which means E8a's calibration KLs (1.932531 / 0.620586) are already step-0
+statements about them and DC is expected to win the depth-only step-0 comparison.
+
+**The L40S is ruled out.** Under the canonical semantics the depth-only arms peak at
+63.41 GB, 72.92 GB with the 15% margin, against 23.09/26.56 for the target-size
+cells. Selected from live pricing: A100 SXM 80GB @ $1.59/h, the cheapest ≥70 GB
+class at High stock, single device.
+
+**Cost:** RETAINED-FP $37.69 expected / $42.26 hard / 23.7 h; FULL $43.02 / $48.11 /
+30.3 h. No 3.2B step time has ever been measured here, so 7.86 s/step is derived from
+FLOPs and E6b's measured 4.15 s/step with a 1.15× safety factor, and a blocking
+throughput+memory gate on the first arm converts it to a measurement.
+
+Recorded en route: `Qwen3ForCausalLM(cfg).to(bfloat16)` casts the rotary `inv_freq`
+buffer to bf16 while `from_pretrained` recomputes it in fp32 — a 0.78 logit
+difference from positional precision alone. The buffer is non-persistent so no saved
+checkpoint is affected, including every Stage 1 artifact, but an init-time in-memory
+forward is. It looks exactly like a construction bug and is not one.

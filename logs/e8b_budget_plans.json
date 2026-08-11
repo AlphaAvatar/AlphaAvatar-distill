@@ -1,0 +1,220 @@
+{
+  "gpu": "NVIDIA A100-SXM4-80GB",
+  "price_per_hour": 1.59,
+  "vram_gb": 80,
+  "priced_utc_note": "RunPod secure pricing queried 2026-08-11; A100 SXM was the cheapest >=70 GB class at High stock",
+  "actual_cumulative_baseline_usd": 163.8853,
+  "e8a_spend_already_incurred_usd": 3.7253,
+  "retained_fp": {
+    "price_per_hour": 1.59,
+    "authorized_usd": 42.5,
+    "expected_minutes": 1422.3999999999999,
+    "soft_stop_minutes": 1564.6399999999999,
+    "artifact_recovery_reserve_minutes": 30.0,
+    "hard_terminate_minutes": 1594.6399999999999,
+    "step_time": {
+      "seconds": 7.860169429956094,
+      "source": "derived from FLOPs and E6b's measured 4.15 s/step; a throughput gate on the first arm converts it to a measurement",
+      "measured": true
+    },
+    "breakdown": [
+      {
+        "name": "setup",
+        "minutes": 45.0
+      },
+      {
+        "name": "train",
+        "minutes": 0.0
+      },
+      {
+        "name": "evaluate",
+        "minutes": 0.0
+      },
+      {
+        "name": "transfer",
+        "minutes": 0.0
+      },
+      {
+        "name": "init_nll_DP_DC",
+        "minutes": 20.0
+      },
+      {
+        "name": "init_nll_FP_FC",
+        "minutes": 12.0
+      },
+      {
+        "name": "step0_autonomous_probe_DP_DC",
+        "minutes": 40.0
+      },
+      {
+        "name": "pretraining_gates",
+        "minutes": 6.0
+      },
+      {
+        "name": "train_depth_only",
+        "minutes": 922.8
+      },
+      {
+        "name": "train_target_size",
+        "minutes": 175.1
+      },
+      {
+        "name": "evaluate_depth_only",
+        "minutes": 120.0
+      },
+      {
+        "name": "evaluate_target_size",
+        "minutes": 16.5
+      },
+      {
+        "name": "general_text_diagnostics",
+        "minutes": 18.0
+      },
+      {
+        "name": "artifact_manifest_and_verify",
+        "minutes": 8.0
+      },
+      {
+        "name": "artifact_synchronization",
+        "minutes": 39.0
+      }
+    ],
+    "notes": [],
+    "expected_usd": 37.6936,
+    "soft_stop_usd": 41.463,
+    "artifact_recovery_reserve_usd": 0.795,
+    "hard_terminate_usd": 42.258,
+    "label": "E8b RETAINED-FP \u2014 FP reused from L40S",
+    "gpu": "NVIDIA A100-SXM4-80GB",
+    "n_arms_depth": 4,
+    "n_arms_target": 2,
+    "depth_step_seconds": 7.86,
+    "target_step_seconds": 2.98,
+    "depth_step_derivation": {
+      "step_flops": 553207541530624,
+      "reference_flops": 209933689683968,
+      "l40s_effective_tflops": 50.6,
+      "a100_assumed_tflops": 80.9,
+      "raw_seconds": 6.83,
+      "with_safety": 7.86,
+      "safety_factor": 1.15
+    },
+    "target_step_derivation": {
+      "step_flops": 209933689683968,
+      "reference_flops": 209933689683968,
+      "l40s_effective_tflops": 50.6,
+      "a100_assumed_tflops": 80.9,
+      "raw_seconds": 2.59,
+      "with_safety": 2.98,
+      "safety_factor": 1.15
+    },
+    "checkpoint_transfer_mb": 28100,
+    "initializations_measured": 4
+  },
+  "full_factorial": {
+    "price_per_hour": 1.59,
+    "authorized_usd": 48.25,
+    "expected_minutes": 1623.3,
+    "soft_stop_minutes": 1785.63,
+    "artifact_recovery_reserve_minutes": 30.0,
+    "hard_terminate_minutes": 1815.63,
+    "step_time": {
+      "seconds": 7.860169429956094,
+      "source": "derived from FLOPs and E6b's measured 4.15 s/step; a throughput gate on the first arm converts it to a measurement",
+      "measured": true
+    },
+    "breakdown": [
+      {
+        "name": "setup",
+        "minutes": 45.0
+      },
+      {
+        "name": "train",
+        "minutes": 0.0
+      },
+      {
+        "name": "evaluate",
+        "minutes": 0.0
+      },
+      {
+        "name": "transfer",
+        "minutes": 0.0
+      },
+      {
+        "name": "init_nll_DP_DC",
+        "minutes": 20.0
+      },
+      {
+        "name": "init_nll_FP_FC",
+        "minutes": 12.0
+      },
+      {
+        "name": "step0_autonomous_probe_DP_DC",
+        "minutes": 40.0
+      },
+      {
+        "name": "pretraining_gates",
+        "minutes": 6.0
+      },
+      {
+        "name": "train_depth_only",
+        "minutes": 922.8
+      },
+      {
+        "name": "train_target_size",
+        "minutes": 350.2
+      },
+      {
+        "name": "evaluate_depth_only",
+        "minutes": 120.0
+      },
+      {
+        "name": "evaluate_target_size",
+        "minutes": 33.0
+      },
+      {
+        "name": "general_text_diagnostics",
+        "minutes": 24.0
+      },
+      {
+        "name": "artifact_manifest_and_verify",
+        "minutes": 8.0
+      },
+      {
+        "name": "artifact_synchronization",
+        "minutes": 42.3
+      }
+    ],
+    "notes": [],
+    "expected_usd": 43.0175,
+    "soft_stop_usd": 47.3192,
+    "artifact_recovery_reserve_usd": 0.795,
+    "hard_terminate_usd": 48.1142,
+    "label": "E8b FULL \u2014 DP/DC/FC/FP all trained, hardware-matched",
+    "gpu": "NVIDIA A100-SXM4-80GB",
+    "n_arms_depth": 4,
+    "n_arms_target": 4,
+    "depth_step_seconds": 7.86,
+    "target_step_seconds": 2.98,
+    "depth_step_derivation": {
+      "step_flops": 553207541530624,
+      "reference_flops": 209933689683968,
+      "l40s_effective_tflops": 50.6,
+      "a100_assumed_tflops": 80.9,
+      "raw_seconds": 6.83,
+      "with_safety": 7.86,
+      "safety_factor": 1.15
+    },
+    "target_step_derivation": {
+      "step_flops": 209933689683968,
+      "reference_flops": 209933689683968,
+      "l40s_effective_tflops": 50.6,
+      "a100_assumed_tflops": 80.9,
+      "raw_seconds": 2.59,
+      "with_safety": 2.98,
+      "safety_factor": 1.15
+    },
+    "checkpoint_transfer_mb": 30480,
+    "initializations_measured": 4
+  }
+}
