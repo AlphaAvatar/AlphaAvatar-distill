@@ -50,21 +50,37 @@ E8b AUTHORIZED 2026-08-11: expected $40.54, hard $47.18 -> CAP $211.07
 
 E8b SPEND
   S1 step-0 (L40S)                      $5.2100  DONE, over its $3.25 plan
-  S2 attempt 1 (A100)                   $2.2700  ABORTED, 3 draws lost to our own
-                                                 setup gates; nothing trained (§39)
-  S2 attempt 2 (A100)                   running, hard $18.7602
+  S2 attempts 1-3 (A100)                $3.1000  ABORTED in setup; nothing trained.
+                                                 3 draws lost to our own tripwire and
+                                                 cgroup misreads, then 3 of our tests
+                                                 failed on a pod, then a CPU contract
+                                                 test failed on GPU state (§39, §39.1)
+  S2 attempt 4 (A100)                   running, hard $18.7602
   S3 DP-sb+DC-sb (A100)                 not started, hard $18.7602
   S4 FC-sa+FC-sb (L40S)                 not started, hard $6.4011
-  E8b spent                             $7.4800
-  E8b remaining of $47.18               $39.7000
-  cumulative spend                     $171.3633 of the $211.07 cap
+  E8b spent                             $8.3100
+  E8b remaining of $47.18               $38.8700
+  cumulative spend                     $172.1933 of the $211.07 cap
 ```
 
-**The remaining three hard backstops ($43.92) now exceed the $39.70 left by $4.22.**
-The expected path still fits — $38.03, margin $1.67 — but that margin is thin enough
-that one more lost session breaks it. **Do not pre-shrink S3 or S4.** Check actual
-spend after S2 completes; if the remainder cannot cover S3 and S4, report the exact
-shortfall and ask.
+**The margin is now $0.84.** Expected S2+S3+S4 is $38.03 against $38.87 left, so the
+experiment fits only if **every** remaining session lands at or below expected. If S2
+reaches its soft stop ($17.97) instead of expected ($16.33), S3 and S4 no longer fit —
+short by ~$0.80. **Do not pre-shrink S3 or S4.** Stop after S2, state the exact
+shortfall, and ask.
+
+**Before any relaunch, run the suite the two ways the failed attempts did not:**
+
+```
+OMP_NUM_THREADS=8 taskset -c 0-12 python -m pytest tests -q        # the pod's 13 cpus
+HIDDEN_PATHS="...artifacts/stage1/qwen3_0p6b_init_v0
+artifacts/stage1/e8_contribution_init_v1" \
+  OMP_NUM_THREADS=8 taskset -c 0-12 bash scripts/pod/simulate_pod_env.sh
+```
+
+Together they would have caught four of the five defects for free. The fifth needed a
+GPU and is now structurally impossible: no test drains a real accelerator, enforced by
+an AST test.
 
 Per-session `--authorized-usd` must be passed to **4 decimal places**: the plan's true
 S2 hard is $18.760145 and `plan_session` compares unrounded, so `18.76` fails with a

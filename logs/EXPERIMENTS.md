@@ -5191,3 +5191,46 @@ wrong, and ours reported a host defect for a defect of our own. Both misfires we
 invisible on the dev box because the dev box has neither 128 visible CPUs nor a
 cgroup quota. Setup gates calibrated on one machine class need a synthetic test of the
 *other* class, which is what the 20 new tests now provide.
+
+### 39.1 Attempts 2 and 3 — the gate fix worked; the suite then failed on its own terms
+
+**Attempt 2 ($0.42, commit `c9517bea`).** The cgroup fix is confirmed by the pod's own
+log: `128 vCPUs visible, cgroup budget 13`, and the suite finished in **94 s** instead
+of exceeding 900. Three tests then failed and aborted setup, all three ours:
+
+* two new `cpu_budget` tests asserted the no-quota fallback equals the affinity mask,
+  but the suite runs with `OMP_NUM_THREADS` exported and **coreutils `nproc` honours
+  `OMP_NUM_THREADS`** — it returned 8 on a 13-cpu set. The production path read the
+  quota directly and was unaffected, but the fallback was genuinely fragile: it fed our
+  own thread cap back in as the cpu budget. It now reads the affinity mask, and a test
+  forbids bare `$(nproc)` inside that function;
+* an E8 test asserted one particular absence pattern. Its negative case needs the
+  treatment init absent **and** the baseline present; an s2 session stages neither
+  compressed init, and with the baseline gone `validate_e8_arms.py` exits 1 on a
+  missing checkpoint directory rather than 6 with a report. It now skips on both
+  unreachable states.
+
+Reproduced locally first — `taskset -c 0-12` gives the 16-core dev box exactly the
+pod's 13 cpus — then verified against a simulated s2 pod (1,247 passed, 19 skipped,
+71 s). `simulate_pod_env.sh` no longer claims `artifacts/stage1` is always staged;
+that assumption is what let a session-specific staging difference reach a paid pod.
+
+**Attempt 3 ($0.41, commit `ee20fa91`).** Aborted on
+`test_timed_returns_result_and_a_duration` with `AcceleratorError` after 1,219 tests
+passed. `timed()` calls `torch.cuda.synchronize()` — correctly, since without it a
+CUDA-async engine is timed as faster than it is — and `synchronize` re-raises any
+*earlier* async CUDA fault in the process as a sticky error. So an assertion about
+returning `(value, seconds)` for a pure-CPU lambda could fail for something another
+test did 1,200 cases earlier, and passed here only because the dev box has no CUDA. It
+passed on attempt 2's host and failed on attempt 3's: same code, different accelerator
+state.
+
+The synchronize stays and now has its own test asserting drain-run-drain ordering
+through a fake `torch.cuda`, so the behaviour is better covered while neither test
+depends on a healthy GPU. Auditing the suite found `test_engines.py` was the **only**
+real CUDA interaction — the one other match is a log line inside test data — so the
+class is closed, not the instance patched, and an AST test keeps it closed.
+
+**Cumulative S2 setup cost: $3.10 across four attempts** ($2.27 + $0.42 + $0.41 +
+attempt 4). No arm has trained, and nothing scientific is affected: every abort
+happened before the throughput gate.
