@@ -1,0 +1,207 @@
+{
+  "created_utc": "2026-08-11T14:09:35+00:00",
+  "command": "scripts/training/analyze_e8b.py --level both --out logs/e8b_analysis.json",
+  "design": {
+    "regime": {
+      "DP": "depth_only",
+      "DC": "depth_only",
+      "FP": "fully_compressed",
+      "FC": "fully_compressed"
+    },
+    "depth_map": {
+      "DP": "positional",
+      "DC": "contribution",
+      "FP": "positional",
+      "FC": "contribution"
+    },
+    "hardware": {
+      "DP": "A100_SXM_80GB",
+      "DC": "A100_SXM_80GB",
+      "FP": "L40S_48GB",
+      "FC": "L40S_48GB"
+    },
+    "hardware_nesting": "HARDWARE IS NESTED INSIDE REGIME. Each depth-map contrast is within one hardware class; the interaction is not hardware-controlled."
+  },
+  "level_1_e8a_full_width_kl": {
+    "teacher_vs_bypassed_kl": {
+      "positional": 1.932531,
+      "contribution": 0.620586
+    },
+    "ratio_positional_over_contribution": 3.1140422117160234,
+    "scope": "frozen teacher, 8 blocks bypassed, no student and no width or FFN compression \u2014 it bounds nothing about a compressed student"
+  },
+  "level_2_validity": {
+    "identical_evaluator": true,
+    "evaluator": {
+      "device": "cuda",
+      "dtype": "bfloat16",
+      "environment": {
+        "torch": "2.11.0+cu128",
+        "transformers": "5.13.1"
+      },
+      "sources": {
+        "fineweb_val_e7": {
+          "manifest_sha256": "79005c994ab989a4ab34d68329c4e40408501605891c8aa04638fd08ca40203b"
+        },
+        "holdout_v1": {
+          "sha256": "2d49f637a711ae82510fd55a3af98e332314f972780841869508aebe7b3cd8e8"
+        },
+        "teacher_native_val": {
+          "blocks_sha256": "6f324cb0f37bc0f07128e554ce8c161879419537478950496534f75fcecb249c",
+          "ladder_json_sha256": "d4941722a099754ef5ba82d529c0fe2274a6b97af61b2fa52519ed22b84201f0"
+        }
+      }
+    },
+    "distinct_checkpoints": true,
+    "checkpoint_sha256": {
+      "DP": "d4db65eb8f7ae6d8a847c2db9a9e5e307e449f50f3bd129e07a1b20f6ec5f3cd",
+      "DC": "eb9e95481988b296a77c30d7b4754069f1874330fca9ad198f4457029e11e182",
+      "FP": "86fbba78e8a2a32481ca77e5ac362ed1f17a39dbc30bcbc952cabd5df2633e54",
+      "FC": "7a0694a5d5c59f8e0b0ebc9ac8648b1ec026bf93cab026d33c61ca8fc85d1edb"
+    },
+    "every_series_bound_to_its_own_checkpoint": true,
+    "rope_base": {
+      "DP": 5000000.241530586,
+      "DC": 5000000.241530586,
+      "FP": 5000000.241530586,
+      "FC": 5000000.241530586
+    },
+    "geometry_matched": {
+      "DP_DC": true,
+      "FP_FC": true
+    }
+  },
+  "level_2_step0": {
+    "rows": [
+      {
+        "metric": "holdout_v1.nll",
+        "lower_is_better": true,
+        "DP": 4.004942,
+        "DC": 3.040678,
+        "FP": 11.756504,
+        "FC": 13.262411,
+        "DC_minus_DP": -0.9642639999999996,
+        "FC_minus_FP": 1.5059070000000006,
+        "interaction_nested": -2.470171,
+        "contribution_better_depth_only": true,
+        "contribution_better_fully_compressed": false,
+        "sign_reversal": true
+      },
+      {
+        "metric": "fineweb_val_e7.nll",
+        "lower_is_better": true,
+        "DP": 3.906449,
+        "DC": 3.017504,
+        "FP": 11.574899,
+        "FC": 14.3913,
+        "DC_minus_DP": -0.8889449999999997,
+        "FC_minus_FP": 2.816400999999999,
+        "interaction_nested": -3.7053459999999987,
+        "contribution_better_depth_only": true,
+        "contribution_better_fully_compressed": false,
+        "sign_reversal": true
+      },
+      {
+        "metric": "fineweb_val_e7.top1",
+        "lower_is_better": false,
+        "DP": 0.305193,
+        "DC": 0.403371,
+        "FP": 0.022659,
+        "FC": 0.007534,
+        "DC_minus_DP": 0.09817799999999999,
+        "FC_minus_FP": -0.015125,
+        "interaction_nested": 0.11330299999999999,
+        "contribution_better_depth_only": true,
+        "contribution_better_fully_compressed": false,
+        "sign_reversal": true
+      },
+      {
+        "metric": "fineweb_val_e7.mean_rank",
+        "lower_is_better": true,
+        "DP": 316.2436,
+        "DC": 130.6204,
+        "FP": 18144.277,
+        "FC": 51875.2872,
+        "DC_minus_DP": -185.62320000000003,
+        "FC_minus_FP": 33731.010200000004,
+        "interaction_nested": -33916.633400000006,
+        "contribution_better_depth_only": true,
+        "contribution_better_fully_compressed": false,
+        "sign_reversal": true
+      },
+      {
+        "metric": "fineweb_val_e7.kl",
+        "lower_is_better": true,
+        "DP": 1.559117,
+        "DC": 0.603715,
+        "FP": 9.418747,
+        "FC": 12.559814,
+        "DC_minus_DP": -0.9554020000000001,
+        "FC_minus_FP": 3.1410669999999996,
+        "interaction_nested": -4.096469,
+        "contribution_better_depth_only": true,
+        "contribution_better_fully_compressed": false,
+        "sign_reversal": true
+      },
+      {
+        "metric": "teacher_native_val.nll",
+        "lower_is_better": true,
+        "DP": 1.936004,
+        "DC": 0.75957,
+        "FP": 10.905284,
+        "FC": 11.802689,
+        "DC_minus_DP": -1.176434,
+        "FC_minus_FP": 0.8974050000000009,
+        "interaction_nested": -2.073839000000001,
+        "contribution_better_depth_only": true,
+        "contribution_better_fully_compressed": false,
+        "sign_reversal": true
+      },
+      {
+        "metric": "teacher_native_val.top1",
+        "lower_is_better": false,
+        "DP": 0.515574,
+        "DC": 0.764702,
+        "FP": 0.040754,
+        "FC": 0.023019,
+        "DC_minus_DP": 0.24912800000000002,
+        "FC_minus_FP": -0.017734999999999997,
+        "interaction_nested": 0.266863,
+        "contribution_better_depth_only": true,
+        "contribution_better_fully_compressed": false,
+        "sign_reversal": true
+      },
+      {
+        "metric": "teacher_native_val.mean_rank",
+        "lower_is_better": true,
+        "DP": 12.5097,
+        "DC": 1.9795,
+        "FP": 6739.8765,
+        "FC": 19865.6441,
+        "DC_minus_DP": -10.5302,
+        "FC_minus_FP": 13125.767600000001,
+        "interaction_nested": -13136.2978,
+        "contribution_better_depth_only": true,
+        "contribution_better_fully_compressed": false,
+        "sign_reversal": true
+      },
+      {
+        "metric": "teacher_native_val.kl",
+        "lower_is_better": true,
+        "DP": 1.678343,
+        "DC": 0.503075,
+        "FP": 10.633203,
+        "FC": 11.507465,
+        "DC_minus_DP": -1.175268,
+        "FC_minus_FP": 0.8742619999999999,
+        "interaction_nested": -2.04953,
+        "contribution_better_depth_only": true,
+        "contribution_better_fully_compressed": false,
+        "sign_reversal": true
+      }
+    ],
+    "reversal_count": 9,
+    "n_metrics": 9,
+    "unanimous_reversal": true
+  }
+}

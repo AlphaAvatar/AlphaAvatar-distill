@@ -1,0 +1,140 @@
+{
+  "artifact": "initialization_nll_record",
+  "label": "e8b-dc-depth-only-contribution",
+  "created_utc": "2026-08-11T10:24:44+00:00",
+  "command": "scripts/evaluation/measure_init_nll.py --checkpoint /workspace/aad/artifacts/stage1/e8b_dc_init/checkpoint --label e8b-dc-depth-only-contribution --holdout /workspace/aad/data/warmup/holdout_v1.jsonl --fineweb-val /workspace/aad/artifacts/stage3/e7_fineweb_val --pack /workspace/aad/artifacts/stage3/ladder_uniform_probe --rung 1600000 --teacher Qwen/Qwen3-4B-Thinking-2507 --teacher-revision 768f209d9ea81521153ed38c47d515654e938aea --dtype bfloat16 --device cuda --out /workspace/aad/artifacts/stage1/e8b_dc_init/init_nll.json",
+  "checkpoint": {
+    "path": "/workspace/aad/artifacts/stage1/e8b_dc_init/checkpoint",
+    "model_sha256": "eb9e95481988b296a77c30d7b4754069f1874330fca9ad198f4457029e11e182",
+    "config_sha256": "a07223f397ce83bdf678ec4586c1de4d7728d35e4563fb759a12e68c19b3f6bf",
+    "num_hidden_layers": 28,
+    "hidden_size": 2560,
+    "num_parameters": 3215021568,
+    "resolved_rope_base": 5000000.241530586
+  },
+  "depth_map": {
+    "source": null,
+    "kept_teacher_layers": null,
+    "removed_teacher_layers": null,
+    "init_manifest_sha256": "851a9663f710278de3c56023f8bcd91c6b6b2a11d1501c159143e5d2371c1558"
+  },
+  "dtype": "bfloat16",
+  "device": "cuda",
+  "environment": {
+    "transformers": "5.13.1",
+    "torch": "2.11.0+cu128"
+  },
+  "teacher": {
+    "model_id": "Qwen/Qwen3-4B-Thinking-2507",
+    "revision": "768f209d9ea81521153ed38c47d515654e938aea",
+    "dtype": "bfloat16",
+    "device": "cuda",
+    "attn_implementation": "sdpa",
+    "num_parameters": 4022468096,
+    "architecture": [
+      "Qwen3ForCausalLM"
+    ],
+    "hidden_size": 2560,
+    "num_hidden_layers": 36,
+    "intermediate_size": 9728,
+    "vocab_size": 151936,
+    "tokenizer_sha256": "7781771acc3798ee454c1253c751f930eb1c18c1c3df62e2552cc6f1d394f654"
+  },
+  "measurements": {
+    "holdout_v1": {
+      "nll": 3.040678,
+      "positions": 21080,
+      "samples": 40,
+      "max_seq_len": 1024,
+      "protocol": "eval_ppl.mean_nll, per-document truncation, batch 1",
+      "tokenizer_source": "checkpoint",
+      "seconds": 2.6,
+      "measured_checkpoint_sha256": "eb9e95481988b296a77c30d7b4754069f1874330fca9ad198f4457029e11e182"
+    },
+    "fineweb_val_e7": {
+      "blocks": 512,
+      "positions": 523776,
+      "nll": 3.017504,
+      "ppl": 20.4402,
+      "top1": 0.403371,
+      "mean_rank": 130.6204,
+      "mean_target_prob": 0.298067,
+      "mean_entropy": 2.580441,
+      "kl": 0.603715,
+      "seconds": 89.0,
+      "measured_checkpoint_sha256": "eb9e95481988b296a77c30d7b4754069f1874330fca9ad198f4457029e11e182"
+    },
+    "teacher_native_val": {
+      "blocks": 16,
+      "positions": 81195,
+      "nll": 0.75957,
+      "ppl": 2.1374,
+      "top1": 0.764702,
+      "mean_rank": 1.9795,
+      "position_scope": "assistant-target positions of the validation slice; NOT the rollout harness's reasoning top-1",
+      "kl": 0.503075,
+      "seconds": 27.6,
+      "measured_checkpoint_sha256": "eb9e95481988b296a77c30d7b4754069f1874330fca9ad198f4457029e11e182"
+    }
+  },
+  "sources": {
+    "holdout_v1": {
+      "path": "/workspace/aad/data/warmup/holdout_v1.jsonl",
+      "sha256": "2d49f637a711ae82510fd55a3af98e332314f972780841869508aebe7b3cd8e8"
+    },
+    "fineweb_val_e7": {
+      "path": "/workspace/aad/artifacts/stage3/e7_fineweb_val",
+      "manifest_sha256": "79005c994ab989a4ab34d68329c4e40408501605891c8aa04638fd08ca40203b",
+      "n_blocks": 512,
+      "block_len": 1024
+    },
+    "teacher_native_val": {
+      "pack": "/workspace/aad/artifacts/stage3/ladder_uniform_probe",
+      "rung": 1600000,
+      "val_blocks": 16,
+      "ladder_json_sha256": "d4941722a099754ef5ba82d529c0fe2274a6b97af61b2fa52519ed22b84201f0",
+      "blocks_sha256": "6f324cb0f37bc0f07128e554ce8c161879419537478950496534f75fcecb249c",
+      "val_token_mix": {
+        "code": 0.168,
+        "gsm8k": 0.1425,
+        "multihop_qa": 0.199,
+        "openmath": 0.1551,
+        "rag_evidence": 0.18,
+        "tool_calling": 0.1555
+      }
+    }
+  },
+  "metric_status": "DIAGNOSTIC ONLY \u2014 an initialization NLL may neither promote nor cancel an arm (decision record 2026-08-09); it exists so the step-0 state is known before recovery training obscures it",
+  "required_measurements": [
+    "holdout_v1",
+    "fineweb_val_e7",
+    "teacher_native_val"
+  ],
+  "complete": true,
+  "code_state": {
+    "git_commit": "ae6dda30960efc8e1d0c5dfbe98440ed117f14e4",
+    "git_commit_source": "git",
+    "dirty": true,
+    "uncommitted_state_sha256": "9b8114fa03760645622ee88ef32dcfa967583577f602ba8c32e4190c1bff873c",
+    "untracked_files": []
+  },
+  "hardware": {
+    "platform": "Linux-6.17.0-29-generic-x86_64-with-glibc2.39",
+    "python": "3.12.3",
+    "torch": "2.11.0+cu128",
+    "cpu_count": 128,
+    "cuda_available": true,
+    "libraries": {
+      "transformers": "5.13.1",
+      "tokenizers": "0.22.2",
+      "safetensors": "0.8.0",
+      "numpy": "2.5.1",
+      "datasets": "5.0.0",
+      "vllm": null
+    },
+    "cuda_devices": [
+      "NVIDIA L40S"
+    ]
+  },
+  "record_sha256": "00e18a8f188bff909beb4adb9d169aebbf5bc89c384f28599d6df9a4a305fb0f"
+}

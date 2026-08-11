@@ -353,6 +353,6 @@
   },
   "e8b_expected_usd": 40.54,
   "e8b_hard_backstop_usd": 47.18,
-  "proposed_new_cumulative_cap_usd": 211.06,
+  "authorized_cumulative_cap_usd": 211.07,
   "expected_wall_hours": 28.5
 }

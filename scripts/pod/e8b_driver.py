@@ -83,6 +83,30 @@ SESSION_ARMS = {
 DEPTH_SESSIONS = ("s2", "s3")
 
 
+TOKEN_FILE = Path("/workspace/hf/token")
+
+
+def hf_token(path: Path = TOKEN_FILE) -> str:
+    """The relay token, read from disk rather than inherited from the environment.
+
+    The driver is started detached with an explicit minimal env, so `HF_TOKEN` is
+    NOT inherited from the launcher's setup shell. E8b S1 lost its publish step to
+    exactly that: `HfApi().upload_file(token=None)` on a private repo raises
+    `RepositoryNotFoundError`, which reads like a missing repo rather than a
+    missing credential. Setup stages the token at `/workspace/hf/token`, so read
+    it there and treat the env var only as an override.
+    """
+    env = os.environ.get("HF_TOKEN")
+    if env:
+        return env
+    if path.is_file():
+        tok = path.read_text().strip()
+        if tok:
+            return tok
+    raise SystemExit(f"no relay token: HF_TOKEN unset and {path} absent or "
+                     "empty — publish and fetch cannot authenticate")
+
+
 def status_path(session: str) -> Path:
     return Path(f"/workspace/e8b_{session}.status")
 
@@ -194,7 +218,7 @@ def stage_publish_step0(args) -> None:
         api.upload_file(path_or_fileobj=str(rec),
                         path_in_repo=f"{STEP0_PREFIX}/{cell}_init_nll.json",
                         repo_id=RELAY, repo_type="model",
-                        token=os.environ.get("HF_TOKEN"))
+                        token=hf_token())
         published.append(cell)
         print(f"  published {cell}", flush=True)
     (OUT / "e8b_step0_published.json").write_text(json.dumps(
@@ -211,7 +235,7 @@ def stage_fetch_step0(args) -> None:
         if dest.is_file():
             continue
         p = hf_hub_download(RELAY, f"{STEP0_PREFIX}/{cell}_init_nll.json",
-                            repo_type="model", token=os.environ.get("HF_TOKEN"))
+                            repo_type="model", token=hf_token())
         dest.parent.mkdir(parents=True, exist_ok=True)
         shutil.copy(p, dest)
         print(f"  fetched {cell} step-0 record", flush=True)
