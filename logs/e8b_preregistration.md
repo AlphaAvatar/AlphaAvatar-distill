@@ -300,6 +300,33 @@ interaction — the caution E6b's interaction table already carries.
 occurs.** Adjacency penalties, compression-aware objectives and operator-order search
 are separate, separately-registered experiments.
 
+## 8.1 The seven questions the final report must answer
+
+Registered verbatim by the maintainer in the 2026-08-11 authorization, recorded here
+because chat history is not project memory (§3.1). The report answers these in order
+and does not substitute a different framing:
+
+1. Does DC beat DP after matched recovery?
+2. Does FC beat FP after matched recovery?
+3. Are the two depth-map effects in the same direction?
+4. Is there evidence of a depth-map × downstream-compression interaction?
+5. Does step-0 NLL predict either recovered comparison?
+6. Does the E8a full-width causal KL predict either recovered comparison?
+7. Is the hardware bridge trigger satisfied?
+
+Questions 5 and 6 are the ones the experiment is most likely to answer cleanly and
+are the reason the three evidence levels are kept separate rather than pooled. Both
+are answerable in the negative by a single regime — a proxy that gets the *sign*
+wrong in either regime has failed as a predictor there, whatever its magnitude.
+
+The interaction is reported as `(FC − FP) − (DC − DP)`, the maintainer's stated
+direction: negative means the depth map does worse once compression is applied than
+it does at full width.
+
+Absolute DP/DC performance is not compared with FP/FC as though model size were
+controlled (5.39× the parameters).
+
+
 ## 9. Conditional hardware-bridge rule — registered, not run
 
 **Trigger:** E8b produces a scientifically material sign reversal or interaction —
