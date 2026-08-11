@@ -5092,6 +5092,30 @@ independent. It does not establish that; S2–S4 test it.
 3. **Three unusable host draws** cost $1.07 before the working pod: two cold hosts at
    the 25-min uv ceiling (raised to 3600 s) and one genuine stall at 26.6 min.
 
+
+**Addendum — what DP's step-0 generations actually contain, and one blind metric.**
+The 76 capped generations are not noise. DP opens in the teacher's own reasoning
+register and stays on topic — "Okay, the user is asking for a love letter. I need to
+respond with a message that…" — then collapses into an exact repetition loop and never
+closes `<think>`. Measured on the reasoning text: max-3-gram share averages **0.1420**
+and reaches **0.8395**, with **70 of 76** samples above 5%. So a depth-only
+initialization with 8 teacher blocks deleted and no training at all retains fluent,
+topically-appropriate language modelling and loses only closure and progress. That is
+consistent with the reversal above: at full width the damage is behavioural, not
+linguistic.
+
+The probe's aggregate reports `rep_3gram 0.0`, and that figure must not be read as
+"no degeneration". `behavior.py:350` computes it as `repetition_rate(answer)`, and
+`answer` is empty for all 76 samples because `</think>` never closes — so the one
+field that could have shown the degeneration is structurally blind to it whenever the
+think block does not terminate. **E8b's endpoint is unaffected:**
+`run_three_mode_diagnostic.py:231` calls `degeneration.check(gen)` on the full
+generated token stream, and `usable_rollout.no_severe_repetition` reads that, so the
+frozen battery does see reasoning-block degeneration. The blind field belongs to the
+`eval_behavior_v0` diagnostic only. Left in place rather than changed, since
+`rep_3gram` feeds only the retired `behavior_score_v0` and E8b does not use it; noted
+here so no future reader cites it as evidence of clean output.
+
 **Cost.** $1.07 (three draws) + $4.14 (251 min) = **$5.21** against a $3.25 plan. The
 overrun is entirely the DP probe. E8b remaining: $41.97 of $47.18.
 
