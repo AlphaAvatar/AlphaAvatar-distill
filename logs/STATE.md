@@ -1,13 +1,23 @@
-**Updated:** 2026-08-11 (17:20 UTC) · branch `main` · commit `067775a` · tree clean
-**No pods running. Nothing billing.** **1,281 CPU tests pass**, 7 skipped.
+**Updated:** 2026-08-11 (18:45 UTC) · branch `main` · commit `6b9d441` · tree clean
+**ONE POD BILLING: `5bd0szfrv57fw3`** (E8b S2, A100 SXM 80 GB, launched 18:26 UTC,
+hard stop $18.7602). **1,303 CPU tests pass**, 7 skipped.
 
-**E8b IS BLOCKED ON A MAINTAINER DECISION.** S2's registered 20-step gate fired: the
-3.22B depth-only arms **do not fit an 80 GB A100** (79.10 of 79.25 GiB in use, OOM on
-a 298 MiB allocation). Speed and cost passed comfortably — 4.83 s/step against a
-7.86 s ceiling — so this is a memory problem, not a budget or throughput one, and per
-the standing instruction a registered gate failure means **stop and re-price**, not
-adjust and continue. Two memory levers are documented and deliberately **not adopted**
-([§40](EXPERIMENTS.md), [`e8b_reprice_after_gate.json`](e8b_reprice_after_gate.json)).
+**E8b S2 has OOM'd twice and both memory levers are now adopted.** A backend audit
+([`e8b_backend_audit.md`](e8b_backend_audit.md)) found attention is already PyTorch
+SDPA on its flash backend and that no fused-kernel package exists in the pinned
+runtime, so the allocator was the only available candidate. It reduced fragmentation
+6.16 -> 1.04 GiB but **allocated memory kept climbing past the 20-step gate** — 77.15
+GiB through step 60, 77.37 by step 70, 77.60 at an OOM on **step ~110 of 1,761**.
+
+**The 20-step gate is FALSIFIED, not a success.** Its three thresholds were never the
+defect and are unchanged; the horizon was too short and the trend was never checked.
+Now running: the preregistered **KD chunk 512 -> 128 across the whole depth-only
+regime** (DP-sa, DC-sa, DP-sb, DC-sb; never one arm, never FC) behind a **200-step
+steady-state gate** with `log_every 1`, a no-upward-drift test (<= 0.05 GiB over the
+final 50 steps) and a >= 1.5 GiB margin against real capacity.
+
+**No scientific conclusion follows from either OOM.** No valid trained DP/DC arm
+exists; S1's step-0 table is untouched.
 
 **E8b is RUNNING. S1 is complete and its headline reframes the experiment: the
 contribution-guided depth map reverses sign between compression regimes.** At full
@@ -62,18 +72,19 @@ E8b SPEND
                                                  cgroup misreads, then 3 of our tests
                                                  failed on a pod, then a CPU contract
                                                  test failed on GPU state (§39, §39.1)
-  S2 attempt 4 (A100)                   $0.5500  gate fired on memory; no arm
-                                                 trained. Speed/cost PASSED (§40)
-  E8b spent                             $8.8600
-  E8b remaining of $47.18               $38.3200
-  cumulative spend                     $172.7433 of the $211.07 cap
+  S2 attempt 4 (A100)                   $0.5500  20-step gate passed, no arm trained
+  S2 attempt 5 (A100)                   $0.7500  OOM at step 110/1761 (§40)
+  S2 attempt 6 (A100)                   running, chunk 128 + 200-step gate
+  E8b spent                             $9.6100
+  E8b remaining of $47.18               $37.5700
+  cumulative spend                     $173.4933 of the $211.07 cap
 
 RE-PRICED from the gate's measured 4.83 s/step (was a derived 7.86):
   S2 depth-only DP+DC sa                 hard $12.91   (was $18.76)
   S3 depth-only DP+DC sb                 hard $12.91   (was $18.76)
   S4 FC-sa+FC-sb (L40S)                  hard $6.4011  unchanged
-  total need                             hard $32.21
-  margin against the $38.32 left              $6.11   FITS, no new funds needed
+  total need                             hard $33.15  (incl. the 200-step gate)
+  margin against the $37.57 left              $4.42   FITS, no new funds needed
 ```
 
 **The budget is no longer the binding constraint** — the re-pricing leaves $6.11 of
