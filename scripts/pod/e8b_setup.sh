@@ -359,8 +359,14 @@ cpu_budget() {
       n=$(( q / p ))
     fi
   fi
-  # No quota (a bare host, like the dev box) means nproc is the truth.
-  if [ -z "$n" ] || [ "$n" -lt 1 ]; then n=$(nproc); fi
+  # No quota (a bare host, like the dev box) means the affinity mask is the truth.
+  # NOT `nproc`: coreutils documents that it honours OMP_NUM_THREADS, so once this
+  # script starts setting that variable `nproc` stops reporting the machine and
+  # starts reporting our own cap — it returned 8 on a 13-cpu set that way.
+  if [ -z "$n" ] || [ "$n" -lt 1 ]; then
+    n=$(python3 -c 'import os; print(len(os.sched_getaffinity(0)))' 2>/dev/null \
+        || nproc --all)
+  fi
   if [ "$n" -gt 16 ]; then n=16; fi                         # the suite needs no more
   echo "$n"
 }

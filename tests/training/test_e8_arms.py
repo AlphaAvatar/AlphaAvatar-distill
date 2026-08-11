@@ -137,12 +137,26 @@ def test_the_validator_passes_its_config_checks_and_fails_closed_without_the_ini
     gated = subprocess.run([sys.executable, script, "--require-init", "--out",
                             str(tmp_path / "gated.json")],
                            capture_output=True, text=True, env=env, cwd=REPO)
-    treatment_exists = (
-        REPO / "artifacts/stage1/e8_contribution_init_v1/checkpoint"
-        / "model.safetensors").is_file()
-    if treatment_exists:
+
+    def staged(name: str) -> bool:
+        return (REPO / "artifacts/stage1" / name / "checkpoint"
+                / "model.safetensors").is_file()
+
+    # The negative case needs a specific machine state: the treatment absent so
+    # there is something to fail on, AND the baseline present so the validator can
+    # get far enough to write a report. Two states make it unreachable, and both
+    # occur in practice — asserting through them broke a paid E8b-S2 pod.
+    if staged("e8_contribution_init_v1"):
         pytest.skip("the treatment initialization exists; the negative case is "
                     "no longer reachable from this machine's state")
+    if not staged("qwen3_0p6b_init_v0"):
+        # An E8b s2/s3 session stages neither compressed init (NEED_COMPRESSED=0).
+        # With the baseline gone the validator does not fail closed with a report at
+        # all — it exits 1 on "model.safetensors is missing; not a checkpoint
+        # directory", which is correct loud behaviour and simply not this test's
+        # subject.
+        pytest.skip("the baseline initialization is absent, so the validator exits "
+                    "1 before it can produce a gated report")
     assert gated.returncode == 6
     failed = json.loads((tmp_path / "gated.json").read_text())["failed"]
     assert "init_present:treatment" in failed

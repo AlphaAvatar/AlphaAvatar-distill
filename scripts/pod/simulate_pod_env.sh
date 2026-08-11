@@ -35,9 +35,27 @@ restore() {
 }
 trap restore EXIT INT TERM
 
-# Everything a pod does NOT get from the bundle. `artifacts/stage3/corpus_v2`,
-# `artifacts/stage3/ladder_uniform_probe` and `artifacts/stage1/...` are left in
-# place because every pod session stages those from the relay.
+# Everything a pod does NOT get from the bundle. `artifacts/stage3/corpus_v2` and
+# `artifacts/stage3/ladder_uniform_probe` are left in place because every pod
+# session stages those from the relay.
+#
+# `artifacts/stage1/...` is NOT a safe blanket exception, and assuming it was cost
+# a paid E8b-S2 pod on 2026-08-11. Sessions stage different initializations: an
+# E8b s2/s3 pod builds DP and DC only (`NEED_COMPRESSED=0`) and never sees the
+# compressed pair, so a test that assumed the compressed baseline was present ran
+# there for the first time and failed. Simulate the session you are about to launch
+# by hiding the initializations it does not stage, e.g. for s2/s3:
+#
+#   HIDDEN_PATHS="$(cat <<'EOS'
+#   artifacts/audit
+#   artifacts/stage3/ladder_uniform
+#   artifacts/stage1/qwen3_0p6b_init_v0
+#   artifacts/stage1/e8_contribution_init_v1
+#   EOS
+#   )" bash scripts/pod/simulate_pod_env.sh
+#
+# and pin the cpu set the pod will have (`taskset -c 0-12`), since the suite's
+# behaviour depends on it.
 HIDDEN_PATHS=${HIDDEN_PATHS:-"artifacts/audit
 artifacts/stage3/ladder_uniform
 artifacts/stage3/rescued

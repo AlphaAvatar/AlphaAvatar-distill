@@ -86,6 +86,20 @@ def test_the_budget_comes_from_the_cgroup_not_from_nproc(setup_text):
     assert "NCPU=$(cpu_budget)" in setup_text
 
 
+def test_the_fallback_does_not_use_bare_nproc(setup_text):
+    """`nproc` honours OMP_NUM_THREADS, so it reports our cap, not the machine.
+
+    This is documented coreutils behaviour and it is genuinely surprising: with
+    OMP_NUM_THREADS=8 exported, `nproc` printed 8 on a 13-cpu affinity set. Using it
+    as the no-quota fallback would feed our own thread cap back in as the cpu budget.
+    """
+    fn = _cpu_budget_fn(setup_text)
+    assert "sched_getaffinity" in fn, (
+        "the no-quota fallback must read the affinity mask")
+    bare = re.findall(r"\$\(nproc\)", fn)
+    assert not bare, f"bare $(nproc) in cpu_budget: {bare} — honours OMP_NUM_THREADS"
+
+
 def test_the_env_thread_caps_track_the_derived_budget(setup_text):
     # taskset bounds total parallelism; the env caps still stop each library from
     # spawning a pool sized to `nproc` inside that set — but they must follow the
@@ -230,7 +244,7 @@ def test_the_quota_decides_the_budget(setup_text, tmp_path, quota, want):
 
 
 @pytest.mark.skipif(shutil.which("bash") is None, reason="needs bash")
-def test_an_unlimited_quota_falls_back_to_the_visible_count(setup_text, tmp_path):
+def test_an_unlimited_quota_falls_back_to_the_affinity_mask(setup_text, tmp_path):
     import os
     want = str(min(16, len(os.sched_getaffinity(0))))
     assert run_budget(setup_text, tmp_path, "max 100000") == want
@@ -241,4 +255,18 @@ def test_a_bare_host_with_no_cgroup_files_still_works(setup_text, tmp_path):
     import os
     want = str(min(16, len(os.sched_getaffinity(0))))
     assert run_budget(setup_text, tmp_path, None) == want, (
-        "the dev box has no quota; the function must not return empty or 0 there")
+        "no quota means the affinity mask decides; it must not return empty or 0")
+
+
+@pytest.mark.skipif(shutil.which("bash") is None, reason="needs bash")
+def test_the_fallback_ignores_an_ambient_omp_num_threads(setup_text, tmp_path, monkeypatch):
+    """The regression that broke a paid pod: this test itself runs with the cap set.
+
+    The setup script exports OMP_NUM_THREADS for the suite, so any test asserting
+    on the budget runs in an environment where `nproc` lies. Pin that the budget is
+    unmoved by it.
+    """
+    import os
+    want = str(min(16, len(os.sched_getaffinity(0))))
+    monkeypatch.setenv("OMP_NUM_THREADS", "2")
+    assert run_budget(setup_text, tmp_path, None) == want
