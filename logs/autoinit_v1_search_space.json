@@ -1,0 +1,3870 @@
+{
+  "schema": "aadistill.autoinit.search_space/v1",
+  "generated_utc": "2026-08-12T09:57:43.212952+00:00",
+  "study": "4B -> 596M pilot",
+  "teacher": {
+    "model_id": "Qwen/Qwen3-4B-Thinking-2507",
+    "revision": "768f209d9ea81521153ed38c47d515654e938aea",
+    "spec": {
+      "head_dim": 128,
+      "hidden_size": 2560,
+      "intermediate_size": 9728,
+      "num_attention_heads": 32,
+      "num_hidden_layers": 36,
+      "num_key_value_heads": 8,
+      "tie_word_embeddings": true,
+      "vocab_size": 151936
+    },
+    "spec_hash": "69ac741e8d80c3ab7f42aea8d1be5c506a860d0f84a640b18dd310dab228e6dc",
+    "num_parameters": 4022468096
+  },
+  "target": {
+    "spec": {
+      "head_dim": 128,
+      "hidden_size": 1024,
+      "intermediate_size": 3072,
+      "num_attention_heads": 16,
+      "num_hidden_layers": 28,
+      "num_key_value_heads": 8,
+      "tie_word_embeddings": true,
+      "vocab_size": 151936
+    },
+    "spec_hash": "09147a5c08d8ad7ad5bb18131bade73548a5fff08f0e0f99d6dd6ede227606c4",
+    "num_parameters": 596049920,
+    "reference_checkpoint": "artifacts/stage1/qwen3_0p6b_init_v0/checkpoint",
+    "reference_sha256": "86fbba78e8a2a32481ca77e5ac362ed1f17a39dbc30bcbc952cabd5df2633e54"
+  },
+  "adapter": {
+    "family": "qwen3",
+    "adapter_version": "qwen3.dense_v1",
+    "capabilities": [
+      "activation_stats",
+      "attention.gqa",
+      "block_list",
+      "dense_ffn",
+      "logit_comparable",
+      "prenorm_blocks",
+      "residual_stream",
+      "rms_norm",
+      "tied_embeddings"
+    ],
+    "structural_fields": [
+      "hidden_size",
+      "num_hidden_layers",
+      "intermediate_size",
+      "num_attention_heads",
+      "num_key_value_heads",
+      "head_dim",
+      "vocab_size",
+      "tie_word_embeddings"
+    ]
+  },
+  "operator_registry": {
+    "schema": "aadistill.autoinit.operator_ledger/v1",
+    "kinds": {
+      "ATTENTION": {
+        "kind_id": "ATTENTION",
+        "dimension": "attention head structure",
+        "description": "Head counts and head grouping. Family-specific: an MHA, GQA, MLA or linear attention implementation registers separately under this kind."
+      },
+      "COMPOSITE_STAGE1": {
+        "kind_id": "COMPOSITE_STAGE1",
+        "dimension": "all four structural dimensions at once",
+        "description": "A single transformation from teacher to target that decides depth, residual width, FFN width and head structure jointly in one numerical pass. Exists so the incumbent recipe is a comparable member of the search space rather than an untested baseline outside it."
+      },
+      "DEPTH": {
+        "kind_id": "DEPTH",
+        "dimension": "block count",
+        "description": "Which teacher blocks survive. Changes the block list only; every surviving block keeps its own widths."
+      },
+      "FFN": {
+        "kind_id": "FFN",
+        "dimension": "feed-forward intermediate width",
+        "description": "The per-block feed-forward intermediate dimension."
+      },
+      "RESIDUAL_WIDTH": {
+        "kind_id": "RESIDUAL_WIDTH",
+        "dimension": "residual stream dimension",
+        "description": "The dimension of the residual stream every block reads and writes. Touches every stream-facing projection, the embedding and the final norm."
+      }
+    },
+    "implementations": {
+      "attention.weight_proxy_v0": {
+        "impl_id": "attention.weight_proxy_v0",
+        "kind": "ATTENTION",
+        "version": 0,
+        "required_capabilities": [
+          "attention.gqa",
+          "rms_norm"
+        ],
+        "modifies": [
+          "num_attention_heads"
+        ],
+        "preserves": [
+          "head_dim",
+          "hidden_size",
+          "intermediate_size",
+          "num_hidden_layers",
+          "num_key_value_heads",
+          "tie_word_embeddings",
+          "vocab_size"
+        ],
+        "calibration": "none",
+        "objective": "retained share of total head weight-proxy score",
+        "deterministic": true,
+        "requires_seed": false,
+        "produces": [
+          "kept_heads"
+        ],
+        "target_validation": "result num_attention_heads equals the target exactly and stays divisible by the unchanged KV head count",
+        "description": "Per-GQA-group query-head selection by ||W_q rows||_F * ||W_o columns||_F, with the preceding norm folded into W_q before scoring. KV heads, head_dim and grouping are preserved.",
+        "signature_hash": "479ff7b3ef15e7195f84b50acf558ff5d8dc831ffcf9ba594719582b31cb7078"
+      },
+      "composite.stage1_sandwich_v0": {
+        "impl_id": "composite.stage1_sandwich_v0",
+        "kind": "COMPOSITE_STAGE1",
+        "version": 0,
+        "required_capabilities": [
+          "activation_stats",
+          "attention.gqa",
+          "dense_ffn",
+          "prenorm_blocks",
+          "residual_stream",
+          "tied_embeddings"
+        ],
+        "modifies": [
+          "hidden_size",
+          "intermediate_size",
+          "num_attention_heads",
+          "num_hidden_layers"
+        ],
+        "preserves": [
+          "head_dim",
+          "num_key_value_heads",
+          "tie_word_embeddings",
+          "vocab_size"
+        ],
+        "calibration": "activation_stats",
+        "objective": "captured energy fraction (projection diagnostic)",
+        "deterministic": true,
+        "requires_seed": true,
+        "produces": [
+          "init_diagnostics",
+          "depth_map"
+        ],
+        "target_validation": "result spec must equal the target exactly in one step",
+        "description": "aadistill.init.sandwich.init_student verbatim: global activation-PCA stream projection, norm folding with sqrt(d_t/d_s) compensation, per-group query head selection, per-layer activation-importance FFN top-k, and either the positional depth map or an explicit kept-layer list. The recipe that produced qwen3_0p6b_init_v0 (86fbba78...) and e8_contribution_init_v1 (7a0694a5...).",
+        "signature_hash": "7ddeb8cfa81f0ba87eca038e61924faf4b32a47bdf999404fca410cb0ee428ac"
+      },
+      "depth.causal_kl_greedy_v1": {
+        "impl_id": "depth.causal_kl_greedy_v1",
+        "kind": "DEPTH",
+        "version": 1,
+        "required_capabilities": [
+          "block_list",
+          "logit_comparable",
+          "residual_stream"
+        ],
+        "modifies": [
+          "num_hidden_layers"
+        ],
+        "preserves": [
+          "head_dim",
+          "hidden_size",
+          "intermediate_size",
+          "num_attention_heads",
+          "num_key_value_heads",
+          "tie_word_embeddings",
+          "vocab_size"
+        ],
+        "calibration": "forward_logits",
+        "objective": "forward KL(parent || parent-with-S-bypassed), domain-balanced",
+        "deterministic": true,
+        "requires_seed": false,
+        "produces": [
+          "depth_map",
+          "search_rounds"
+        ],
+        "target_validation": "result num_hidden_layers equals the target exactly",
+        "description": "Iterative greedy block removal minimizing forward KL(parent || parent-with-S-bypassed) over real prediction positions, aggregated as the unweighted mean over domains of the unweighted mean over each domain's sub-types. Ties break to the lower layer index. E8a's algorithm, re-run against the checkpoint it is handed rather than always against the teacher.",
+        "signature_hash": "8106604694621d305dc20324d5ce65d2cefe5491ef2c2ab93a1b5fe8f16b5ca9"
+      },
+      "depth.positional_v0": {
+        "impl_id": "depth.positional_v0",
+        "kind": "DEPTH",
+        "version": 0,
+        "required_capabilities": [
+          "block_list"
+        ],
+        "modifies": [
+          "num_hidden_layers"
+        ],
+        "preserves": [
+          "head_dim",
+          "hidden_size",
+          "intermediate_size",
+          "num_attention_heads",
+          "num_key_value_heads",
+          "tie_word_embeddings",
+          "vocab_size"
+        ],
+        "calibration": "none",
+        "objective": "none (fixed positional heuristic; no measurement is taken)",
+        "deterministic": true,
+        "requires_seed": false,
+        "produces": [
+          "depth_map"
+        ],
+        "target_validation": "result num_hidden_layers equals the target exactly",
+        "description": "Positional pairwise merge in a middle band: ~1/5 of the surviving 1:1 layers stay before the band, the rest after, so both the earliest and the latest blocks map 1:1. The incumbent map behind qwen3_0p6b_init_v0.",
+        "signature_hash": "d97fb631c37f910a7a7e339d2ab0ba65d0652e95837882e203d6d1862969e98a"
+      },
+      "ffn.activation_importance_v0": {
+        "impl_id": "ffn.activation_importance_v0",
+        "kind": "FFN",
+        "version": 0,
+        "required_capabilities": [
+          "activation_stats",
+          "dense_ffn"
+        ],
+        "modifies": [
+          "intermediate_size"
+        ],
+        "preserves": [
+          "head_dim",
+          "hidden_size",
+          "num_attention_heads",
+          "num_hidden_layers",
+          "num_key_value_heads",
+          "tie_word_embeddings",
+          "vocab_size"
+        ],
+        "calibration": "activation_stats",
+        "objective": "retained share of total activation importance",
+        "deterministic": true,
+        "requires_seed": false,
+        "produces": [
+          "kept_neurons"
+        ],
+        "target_validation": "result intermediate_size equals the target exactly",
+        "description": "Per-block top-k intermediate neurons by E[|a|] * ||down column||, measured on the checkpoint being transformed. Rows of the gate and up projections and columns of the down projection are selected together, so the surviving neurons keep their own complete circuit.",
+        "signature_hash": "accb896294568f641a44f2550997306faa01c6600c1870534f326524ccbf7316"
+      },
+      "width.global_pca_v0": {
+        "impl_id": "width.global_pca_v0",
+        "kind": "RESIDUAL_WIDTH",
+        "version": 0,
+        "required_capabilities": [
+          "activation_stats",
+          "prenorm_blocks",
+          "residual_stream",
+          "rms_norm"
+        ],
+        "modifies": [
+          "hidden_size"
+        ],
+        "preserves": [
+          "head_dim",
+          "intermediate_size",
+          "num_attention_heads",
+          "num_hidden_layers",
+          "num_key_value_heads",
+          "tie_word_embeddings",
+          "vocab_size"
+        ],
+        "calibration": "activation_stats",
+        "objective": "captured energy fraction of the residual second moment",
+        "deterministic": true,
+        "requires_seed": false,
+        "produces": [
+          "projection_diagnostics"
+        ],
+        "target_validation": "result hidden_size equals the target exactly",
+        "description": "One global orthonormal projection from the trace-normalized average of the uncentered residual second moments, with the two stream end points (embedding output, post-final-norm) upweighted 9/8 because they are the worst-captured and are the interfaces the tied embedding reads.",
+        "signature_hash": "acb56886de907b717346483a0d6707552537d5b11415b6861995ec286f8198b6"
+      }
+    }
+  },
+  "calibration_profiles": [
+    {
+      "qualified_id": "calib.stage0_current@v1",
+      "materialized": false,
+      "token_budget": 949859,
+      "domains": [
+        "mixed"
+      ],
+      "profile_hash": "36a09847e0266141ebabbe8da28a1bff4ce205a7b502020eff254abe3cf997f5"
+    },
+    {
+      "qualified_id": "calib.domain_balanced@v1",
+      "materialized": true,
+      "token_budget": 59763,
+      "domains": [
+        "code",
+        "general",
+        "math",
+        "rag_multihop",
+        "tool"
+      ],
+      "profile_hash": "11f36a88bad4879f8ab0e3586ca1f0af035401e505dc97815bed8d47b9f32e9b"
+    },
+    {
+      "qualified_id": "calib.reasoning_heavy@v1",
+      "materialized": false,
+      "token_budget": 59763,
+      "domains": [
+        "code",
+        "general",
+        "math",
+        "rag_multihop",
+        "tool"
+      ],
+      "profile_hash": "f4d4ba673ffe3f8f86798321bb890e5ca7cc1ca8f11ae1c81869e2fade47b889"
+    }
+  ],
+  "beam_ranking_policy": {
+    "policy_id": "beam.pareto_multi_objective",
+    "version": 1,
+    "description": "Non-dominated sorting over original-teacher domain-balanced KL, critical-token KL and general NLL, with a total tie-break. NLL participates but cannot prune alone: a state that is worse on NLL and better on reasoning/domain fidelity is non-dominated and survives.",
+    "objectives": [
+      {
+        "key": "state.teacher_kl.equal_domain_mean",
+        "direction": "minimize",
+        "description": "equal-domain mean forward KL from the original teacher"
+      },
+      {
+        "key": "state.critical_token_kl",
+        "direction": "minimize",
+        "description": "unweighted mean KL over declared critical-token classes"
+      },
+      {
+        "key": "state.nll.general",
+        "direction": "minimize",
+        "description": "general-language NLL, a guardrail axis rather than the target"
+      }
+    ],
+    "tie_break": [
+      "state.teacher_kl.equal_domain_mean",
+      "state.critical_token_kl",
+      "state.nll.general",
+      "state_id"
+    ],
+    "guardrails": [
+      {
+        "name": "structurally_valid",
+        "description": "the state reached MEASURED through materialize -> reload -> hash -> validate"
+      }
+    ],
+    "required_metrics": [
+      "state.teacher_kl.equal_domain_mean",
+      "state.critical_token_kl",
+      "state.nll.general"
+    ],
+    "policy_hash": "e8c03856a946cdf9614e0951e87d6cfe4de142be336fa15a64b104f86341a9d3",
+    "metadata": {}
+  },
+  "calibration": {
+    "tokens": 59763,
+    "seq_len": 892,
+    "source": "E8a frozen 67-item mixture"
+  },
+  "search_space": {
+    "differing_fields": [
+      "hidden_size",
+      "intermediate_size",
+      "num_attention_heads",
+      "num_hidden_layers"
+    ],
+    "n_kinds": 4,
+    "implementations_per_field": {
+      "hidden_size": 1,
+      "intermediate_size": 1,
+      "num_attention_heads": 1,
+      "num_hidden_layers": 2
+    },
+    "n_calibration_profiles": 1,
+    "beam_width": 1,
+    "complete_paths_unbeamed": 48,
+    "complete_paths_geometry_only": 48,
+    "kind_orderings": 24,
+    "per_level": [
+      {
+        "level": 0,
+        "parents": 1,
+        "children_min": 5,
+        "children_max": 5
+      },
+      {
+        "level": 1,
+        "parents": 1,
+        "children_min": 3,
+        "children_max": 4
+      },
+      {
+        "level": 2,
+        "parents": 1,
+        "children_min": 2,
+        "children_max": 3
+      },
+      {
+        "level": 3,
+        "parents": 1,
+        "children_min": 1,
+        "children_max": 2
+      }
+    ],
+    "states_materialized_min": 12,
+    "states_materialized_max": 15,
+    "composite_leaves": 1,
+    "leaves_min": 2,
+    "leaves_max": 3
+  },
+  "sweep": [
+    {
+      "hardware": {
+        "name": "L40S",
+        "price_per_hour_usd": 0.99,
+        "effective_tflops": 88.83,
+        "vram_gb": 48.0,
+        "measured": true,
+        "source": "E8a: 260 subset evaluations over a 67-item / 59,763-position mixture in 1,300 s at 4.02B full width. This module's own accounting puts that workload at 1.1548e17 FLOPs, hence 88.83 TFLOP/s and ~24.5% of the 362 TFLOPS bf16 dense peak. Asserted round-trip in tests/autoinit."
+      },
+      "branching": {
+        "differing_fields": [
+          "hidden_size",
+          "intermediate_size",
+          "num_attention_heads",
+          "num_hidden_layers"
+        ],
+        "n_kinds": 4,
+        "implementations_per_field": {
+          "hidden_size": 1,
+          "intermediate_size": 1,
+          "num_attention_heads": 1,
+          "num_hidden_layers": 2
+        },
+        "n_calibration_profiles": 1,
+        "beam_width": 2,
+        "complete_paths_unbeamed": 48,
+        "complete_paths_geometry_only": 48,
+        "kind_orderings": 24,
+        "per_level": [
+          {
+            "level": 0,
+            "parents": 1,
+            "children_min": 5,
+            "children_max": 5
+          },
+          {
+            "level": 1,
+            "parents": 2,
+            "children_min": 6,
+            "children_max": 8
+          },
+          {
+            "level": 2,
+            "parents": 2,
+            "children_min": 4,
+            "children_max": 6
+          },
+          {
+            "level": 3,
+            "parents": 2,
+            "children_min": 2,
+            "children_max": 4
+          }
+        ],
+        "states_materialized_min": 18,
+        "states_materialized_max": 24,
+        "composite_leaves": 1,
+        "leaves_min": 3,
+        "leaves_max": 5
+      },
+      "seconds_low": 1796.016054239539,
+      "seconds_high": 5750.758414557442,
+      "hours_low": 0.4988933483998719,
+      "hours_high": 1.5974328929326227,
+      "usd_low": 0.4939,
+      "usd_high": 1.5815,
+      "peak_storage_gib_retained": 13.578611373901367,
+      "peak_storage_gib_working": 43.41012978553772,
+      "total_gib_written": 65.82901771832258,
+      "peak_resident_gib": 14.281736373901367,
+      "per_operator": [
+        {
+          "level": 0,
+          "children_min": 5,
+          "children_max": 5,
+          "mean_node_seconds_low": 169.02843351178336,
+          "mean_node_seconds_high": 322.64739011332574,
+          "max_node_seconds_high": 1304.5119783530342,
+          "implementations": [
+            "attention.weight_proxy_v0",
+            "depth.causal_kl_greedy_v1",
+            "depth.positional_v0",
+            "ffn.activation_importance_v0",
+            "width.global_pca_v0"
+          ]
+        },
+        {
+          "level": 1,
+          "children_min": 6,
+          "children_max": 8,
+          "mean_node_seconds_low": 106.03588094591332,
+          "mean_node_seconds_high": 260.4188217683743,
+          "max_node_seconds_high": 1167.0696855728374,
+          "implementations": [
+            "attention.weight_proxy_v0",
+            "depth.causal_kl_greedy_v1",
+            "depth.positional_v0",
+            "ffn.activation_importance_v0",
+            "width.global_pca_v0"
+          ]
+        },
+        {
+          "level": 2,
+          "children_min": 4,
+          "children_max": 6,
+          "mean_node_seconds_low": 60.7460635191621,
+          "mean_node_seconds_high": 215.74532688219904,
+          "max_node_seconds_high": 596.4509850083468,
+          "implementations": [
+            "attention.weight_proxy_v0",
+            "depth.causal_kl_greedy_v1",
+            "depth.positional_v0",
+            "ffn.activation_importance_v0",
+            "width.global_pca_v0"
+          ]
+        },
+        {
+          "level": 3,
+          "children_min": 2,
+          "children_max": 4,
+          "mean_node_seconds_low": 33.04258026524015,
+          "mean_node_seconds_high": 188.52743553815267,
+          "max_node_seconds_high": 313.69785819324136,
+          "implementations": [
+            "attention.weight_proxy_v0",
+            "depth.causal_kl_greedy_v1",
+            "depth.positional_v0",
+            "ffn.activation_importance_v0",
+            "width.global_pca_v0"
+          ]
+        }
+      ],
+      "notes": [
+        "hardware anchor: E8a: 260 subset evaluations over a 67-item / 59,763-position mixture in 1,300 s at 4.02B full width. This module's own accounting puts that workload at 1.1548e17 FLOPs, hence 88.83 TFLOP/s and ~24.5% of the 362 TFLOPS bf16 dense peak. Asserted round-trip in tests/autoinit.",
+        "statistics-pass cost is a range; the GPU/CPU split of the float64 accumulation has never been measured separately",
+        "storage: 'working' is the concurrent peak (a level's whole child set is on disk before ranking can start), 'written' is total I/O volume, 'retained' is what survives once pruned weights are released"
+      ],
+      "n_profiles": 1,
+      "beam_width": 2
+    },
+    {
+      "hardware": {
+        "name": "L40S",
+        "price_per_hour_usd": 0.99,
+        "effective_tflops": 88.83,
+        "vram_gb": 48.0,
+        "measured": true,
+        "source": "E8a: 260 subset evaluations over a 67-item / 59,763-position mixture in 1,300 s at 4.02B full width. This module's own accounting puts that workload at 1.1548e17 FLOPs, hence 88.83 TFLOP/s and ~24.5% of the 362 TFLOPS bf16 dense peak. Asserted round-trip in tests/autoinit."
+      },
+      "branching": {
+        "differing_fields": [
+          "hidden_size",
+          "intermediate_size",
+          "num_attention_heads",
+          "num_hidden_layers"
+        ],
+        "n_kinds": 4,
+        "implementations_per_field": {
+          "hidden_size": 1,
+          "intermediate_size": 1,
+          "num_attention_heads": 1,
+          "num_hidden_layers": 2
+        },
+        "n_calibration_profiles": 1,
+        "beam_width": 3,
+        "complete_paths_unbeamed": 48,
+        "complete_paths_geometry_only": 48,
+        "kind_orderings": 24,
+        "per_level": [
+          {
+            "level": 0,
+            "parents": 1,
+            "children_min": 5,
+            "children_max": 5
+          },
+          {
+            "level": 1,
+            "parents": 3,
+            "children_min": 9,
+            "children_max": 12
+          },
+          {
+            "level": 2,
+            "parents": 3,
+            "children_min": 6,
+            "children_max": 9
+          },
+          {
+            "level": 3,
+            "parents": 3,
+            "children_min": 3,
+            "children_max": 6
+          }
+        ],
+        "states_materialized_min": 24,
+        "states_materialized_max": 33,
+        "composite_leaves": 1,
+        "leaves_min": 4,
+        "leaves_max": 7
+      },
+      "seconds_low": 2268.658404380843,
+      "seconds_high": 7816.724553353842,
+      "hours_low": 0.6301828901057898,
+      "hours_high": 2.1713123759316226,
+      "usd_low": 0.6239,
+      "usd_high": 2.1496,
+      "peak_storage_gib_retained": 20.36791706085205,
+      "peak_storage_gib_working": 63.53204345703125,
+      "total_gib_written": 86.3438835144043,
+      "peak_resident_gib": 14.281736373901367,
+      "per_operator": [
+        {
+          "level": 0,
+          "children_min": 5,
+          "children_max": 5,
+          "mean_node_seconds_low": 169.02843351178336,
+          "mean_node_seconds_high": 322.64739011332574,
+          "max_node_seconds_high": 1304.5119783530342,
+          "implementations": [
+            "attention.weight_proxy_v0",
+            "depth.causal_kl_greedy_v1",
+            "depth.positional_v0",
+            "ffn.activation_importance_v0",
+            "width.global_pca_v0"
+          ]
+        },
+        {
+          "level": 1,
+          "children_min": 9,
+          "children_max": 12,
+          "mean_node_seconds_low": 106.03588094591332,
+          "mean_node_seconds_high": 260.4188217683743,
+          "max_node_seconds_high": 1167.0696855728374,
+          "implementations": [
+            "attention.weight_proxy_v0",
+            "depth.causal_kl_greedy_v1",
+            "depth.positional_v0",
+            "ffn.activation_importance_v0",
+            "width.global_pca_v0"
+          ]
+        },
+        {
+          "level": 2,
+          "children_min": 6,
+          "children_max": 9,
+          "mean_node_seconds_low": 60.7460635191621,
+          "mean_node_seconds_high": 215.74532688219904,
+          "max_node_seconds_high": 596.4509850083468,
+          "implementations": [
+            "attention.weight_proxy_v0",
+            "depth.causal_kl_greedy_v1",
+            "depth.positional_v0",
+            "ffn.activation_importance_v0",
+            "width.global_pca_v0"
+          ]
+        },
+        {
+          "level": 3,
+          "children_min": 3,
+          "children_max": 6,
+          "mean_node_seconds_low": 33.04258026524015,
+          "mean_node_seconds_high": 188.52743553815267,
+          "max_node_seconds_high": 313.69785819324136,
+          "implementations": [
+            "attention.weight_proxy_v0",
+            "depth.causal_kl_greedy_v1",
+            "depth.positional_v0",
+            "ffn.activation_importance_v0",
+            "width.global_pca_v0"
+          ]
+        }
+      ],
+      "notes": [
+        "hardware anchor: E8a: 260 subset evaluations over a 67-item / 59,763-position mixture in 1,300 s at 4.02B full width. This module's own accounting puts that workload at 1.1548e17 FLOPs, hence 88.83 TFLOP/s and ~24.5% of the 362 TFLOPS bf16 dense peak. Asserted round-trip in tests/autoinit.",
+        "statistics-pass cost is a range; the GPU/CPU split of the float64 accumulation has never been measured separately",
+        "storage: 'working' is the concurrent peak (a level's whole child set is on disk before ranking can start), 'written' is total I/O volume, 'retained' is what survives once pruned weights are released"
+      ],
+      "n_profiles": 1,
+      "beam_width": 3
+    },
+    {
+      "hardware": {
+        "name": "L40S",
+        "price_per_hour_usd": 0.99,
+        "effective_tflops": 88.83,
+        "vram_gb": 48.0,
+        "measured": true,
+        "source": "E8a: 260 subset evaluations over a 67-item / 59,763-position mixture in 1,300 s at 4.02B full width. This module's own accounting puts that workload at 1.1548e17 FLOPs, hence 88.83 TFLOP/s and ~24.5% of the 362 TFLOPS bf16 dense peak. Asserted round-trip in tests/autoinit."
+      },
+      "branching": {
+        "differing_fields": [
+          "hidden_size",
+          "intermediate_size",
+          "num_attention_heads",
+          "num_hidden_layers"
+        ],
+        "n_kinds": 4,
+        "implementations_per_field": {
+          "hidden_size": 1,
+          "intermediate_size": 1,
+          "num_attention_heads": 1,
+          "num_hidden_layers": 2
+        },
+        "n_calibration_profiles": 1,
+        "beam_width": 4,
+        "complete_paths_unbeamed": 48,
+        "complete_paths_geometry_only": 48,
+        "kind_orderings": 24,
+        "per_level": [
+          {
+            "level": 0,
+            "parents": 1,
+            "children_min": 5,
+            "children_max": 5
+          },
+          {
+            "level": 1,
+            "parents": 4,
+            "children_min": 12,
+            "children_max": 16
+          },
+          {
+            "level": 2,
+            "parents": 4,
+            "children_min": 8,
+            "children_max": 12
+          },
+          {
+            "level": 3,
+            "parents": 4,
+            "children_min": 4,
+            "children_max": 8
+          }
+        ],
+        "states_materialized_min": 30,
+        "states_materialized_max": 42,
+        "composite_leaves": 1,
+        "leaves_min": 5,
+        "leaves_max": 9
+      },
+      "seconds_low": 2741.3007545221476,
+      "seconds_high": 9882.690692150241,
+      "hours_low": 0.7614724318117077,
+      "hours_high": 2.745191858930623,
+      "usd_low": 0.7539,
+      "usd_high": 2.7177,
+      "peak_storage_gib_retained": 27.157222747802734,
+      "peak_storage_gib_working": 84.70939127542078,
+      "total_gib_written": 106.8587493095547,
+      "peak_resident_gib": 14.281736373901367,
+      "per_operator": [
+        {
+          "level": 0,
+          "children_min": 5,
+          "children_max": 5,
+          "mean_node_seconds_low": 169.02843351178336,
+          "mean_node_seconds_high": 322.64739011332574,
+          "max_node_seconds_high": 1304.5119783530342,
+          "implementations": [
+            "attention.weight_proxy_v0",
+            "depth.causal_kl_greedy_v1",
+            "depth.positional_v0",
+            "ffn.activation_importance_v0",
+            "width.global_pca_v0"
+          ]
+        },
+        {
+          "level": 1,
+          "children_min": 12,
+          "children_max": 16,
+          "mean_node_seconds_low": 106.03588094591332,
+          "mean_node_seconds_high": 260.4188217683743,
+          "max_node_seconds_high": 1167.0696855728374,
+          "implementations": [
+            "attention.weight_proxy_v0",
+            "depth.causal_kl_greedy_v1",
+            "depth.positional_v0",
+            "ffn.activation_importance_v0",
+            "width.global_pca_v0"
+          ]
+        },
+        {
+          "level": 2,
+          "children_min": 8,
+          "children_max": 12,
+          "mean_node_seconds_low": 60.7460635191621,
+          "mean_node_seconds_high": 215.74532688219904,
+          "max_node_seconds_high": 596.4509850083468,
+          "implementations": [
+            "attention.weight_proxy_v0",
+            "depth.causal_kl_greedy_v1",
+            "depth.positional_v0",
+            "ffn.activation_importance_v0",
+            "width.global_pca_v0"
+          ]
+        },
+        {
+          "level": 3,
+          "children_min": 4,
+          "children_max": 8,
+          "mean_node_seconds_low": 33.04258026524015,
+          "mean_node_seconds_high": 188.52743553815267,
+          "max_node_seconds_high": 313.69785819324136,
+          "implementations": [
+            "attention.weight_proxy_v0",
+            "depth.causal_kl_greedy_v1",
+            "depth.positional_v0",
+            "ffn.activation_importance_v0",
+            "width.global_pca_v0"
+          ]
+        }
+      ],
+      "notes": [
+        "hardware anchor: E8a: 260 subset evaluations over a 67-item / 59,763-position mixture in 1,300 s at 4.02B full width. This module's own accounting puts that workload at 1.1548e17 FLOPs, hence 88.83 TFLOP/s and ~24.5% of the 362 TFLOPS bf16 dense peak. Asserted round-trip in tests/autoinit.",
+        "statistics-pass cost is a range; the GPU/CPU split of the float64 accumulation has never been measured separately",
+        "storage: 'working' is the concurrent peak (a level's whole child set is on disk before ranking can start), 'written' is total I/O volume, 'retained' is what survives once pruned weights are released"
+      ],
+      "n_profiles": 1,
+      "beam_width": 4
+    },
+    {
+      "hardware": {
+        "name": "L40S",
+        "price_per_hour_usd": 0.99,
+        "effective_tflops": 88.83,
+        "vram_gb": 48.0,
+        "measured": true,
+        "source": "E8a: 260 subset evaluations over a 67-item / 59,763-position mixture in 1,300 s at 4.02B full width. This module's own accounting puts that workload at 1.1548e17 FLOPs, hence 88.83 TFLOP/s and ~24.5% of the 362 TFLOPS bf16 dense peak. Asserted round-trip in tests/autoinit."
+      },
+      "branching": {
+        "differing_fields": [
+          "hidden_size",
+          "intermediate_size",
+          "num_attention_heads",
+          "num_hidden_layers"
+        ],
+        "n_kinds": 4,
+        "implementations_per_field": {
+          "hidden_size": 1,
+          "intermediate_size": 1,
+          "num_attention_heads": 1,
+          "num_hidden_layers": 2
+        },
+        "n_calibration_profiles": 1,
+        "beam_width": 6,
+        "complete_paths_unbeamed": 48,
+        "complete_paths_geometry_only": 48,
+        "kind_orderings": 24,
+        "per_level": [
+          {
+            "level": 0,
+            "parents": 1,
+            "children_min": 5,
+            "children_max": 5
+          },
+          {
+            "level": 1,
+            "parents": 6,
+            "children_min": 18,
+            "children_max": 24
+          },
+          {
+            "level": 2,
+            "parents": 6,
+            "children_min": 12,
+            "children_max": 18
+          },
+          {
+            "level": 3,
+            "parents": 6,
+            "children_min": 6,
+            "children_max": 12
+          }
+        ],
+        "states_materialized_min": 42,
+        "states_materialized_max": 60,
+        "composite_leaves": 1,
+        "leaves_min": 7,
+        "leaves_max": 13
+      },
+      "seconds_low": 3686.5854548047564,
+      "seconds_high": 14014.62296974304,
+      "hours_low": 1.0240515152235434,
+      "hours_high": 3.8929508249286227,
+      "usd_low": 1.0138,
+      "usd_high": 3.854,
+      "peak_storage_gib_retained": 40.7358341217041,
+      "peak_storage_gib_working": 127.0640869140625,
+      "total_gib_written": 147.88848090171814,
+      "peak_resident_gib": 14.281736373901367,
+      "per_operator": [
+        {
+          "level": 0,
+          "children_min": 5,
+          "children_max": 5,
+          "mean_node_seconds_low": 169.02843351178336,
+          "mean_node_seconds_high": 322.64739011332574,
+          "max_node_seconds_high": 1304.5119783530342,
+          "implementations": [
+            "attention.weight_proxy_v0",
+            "depth.causal_kl_greedy_v1",
+            "depth.positional_v0",
+            "ffn.activation_importance_v0",
+            "width.global_pca_v0"
+          ]
+        },
+        {
+          "level": 1,
+          "children_min": 18,
+          "children_max": 24,
+          "mean_node_seconds_low": 106.03588094591332,
+          "mean_node_seconds_high": 260.4188217683743,
+          "max_node_seconds_high": 1167.0696855728374,
+          "implementations": [
+            "attention.weight_proxy_v0",
+            "depth.causal_kl_greedy_v1",
+            "depth.positional_v0",
+            "ffn.activation_importance_v0",
+            "width.global_pca_v0"
+          ]
+        },
+        {
+          "level": 2,
+          "children_min": 12,
+          "children_max": 18,
+          "mean_node_seconds_low": 60.7460635191621,
+          "mean_node_seconds_high": 215.74532688219904,
+          "max_node_seconds_high": 596.4509850083468,
+          "implementations": [
+            "attention.weight_proxy_v0",
+            "depth.causal_kl_greedy_v1",
+            "depth.positional_v0",
+            "ffn.activation_importance_v0",
+            "width.global_pca_v0"
+          ]
+        },
+        {
+          "level": 3,
+          "children_min": 6,
+          "children_max": 12,
+          "mean_node_seconds_low": 33.04258026524015,
+          "mean_node_seconds_high": 188.52743553815267,
+          "max_node_seconds_high": 313.69785819324136,
+          "implementations": [
+            "attention.weight_proxy_v0",
+            "depth.causal_kl_greedy_v1",
+            "depth.positional_v0",
+            "ffn.activation_importance_v0",
+            "width.global_pca_v0"
+          ]
+        }
+      ],
+      "notes": [
+        "hardware anchor: E8a: 260 subset evaluations over a 67-item / 59,763-position mixture in 1,300 s at 4.02B full width. This module's own accounting puts that workload at 1.1548e17 FLOPs, hence 88.83 TFLOP/s and ~24.5% of the 362 TFLOPS bf16 dense peak. Asserted round-trip in tests/autoinit.",
+        "statistics-pass cost is a range; the GPU/CPU split of the float64 accumulation has never been measured separately",
+        "storage: 'working' is the concurrent peak (a level's whole child set is on disk before ranking can start), 'written' is total I/O volume, 'retained' is what survives once pruned weights are released"
+      ],
+      "n_profiles": 1,
+      "beam_width": 6
+    },
+    {
+      "hardware": {
+        "name": "L40S",
+        "price_per_hour_usd": 0.99,
+        "effective_tflops": 88.83,
+        "vram_gb": 48.0,
+        "measured": true,
+        "source": "E8a: 260 subset evaluations over a 67-item / 59,763-position mixture in 1,300 s at 4.02B full width. This module's own accounting puts that workload at 1.1548e17 FLOPs, hence 88.83 TFLOP/s and ~24.5% of the 362 TFLOPS bf16 dense peak. Asserted round-trip in tests/autoinit."
+      },
+      "branching": {
+        "differing_fields": [
+          "hidden_size",
+          "intermediate_size",
+          "num_attention_heads",
+          "num_hidden_layers"
+        ],
+        "n_kinds": 4,
+        "implementations_per_field": {
+          "hidden_size": 1,
+          "intermediate_size": 1,
+          "num_attention_heads": 1,
+          "num_hidden_layers": 2
+        },
+        "n_calibration_profiles": 2,
+        "beam_width": 2,
+        "complete_paths_unbeamed": 768,
+        "complete_paths_geometry_only": 48,
+        "kind_orderings": 24,
+        "per_level": [
+          {
+            "level": 0,
+            "parents": 1,
+            "children_min": 10,
+            "children_max": 10
+          },
+          {
+            "level": 1,
+            "parents": 2,
+            "children_min": 12,
+            "children_max": 16
+          },
+          {
+            "level": 2,
+            "parents": 2,
+            "children_min": 8,
+            "children_max": 12
+          },
+          {
+            "level": 3,
+            "parents": 2,
+            "children_min": 4,
+            "children_max": 8
+          }
+        ],
+        "states_materialized_min": 36,
+        "states_materialized_max": 48,
+        "composite_leaves": 2,
+        "leaves_min": 6,
+        "leaves_max": 10
+      },
+      "seconds_low": 3586.4429220810644,
+      "seconds_high": 11495.927642716872,
+      "hours_low": 0.9962341450225178,
+      "hours_high": 3.19331323408802,
+      "usd_low": 0.9863,
+      "usd_high": 3.1614,
+      "peak_storage_gib_retained": 13.578611373901367,
+      "peak_storage_gib_working": 68.20941591262817,
+      "total_gib_written": 131.65803543664515,
+      "peak_resident_gib": 14.281736373901367,
+      "per_operator": [
+        {
+          "level": 0,
+          "children_min": 10,
+          "children_max": 10,
+          "mean_node_seconds_low": 169.02843351178336,
+          "mean_node_seconds_high": 322.64739011332574,
+          "max_node_seconds_high": 1304.5119783530342,
+          "implementations": [
+            "attention.weight_proxy_v0",
+            "depth.causal_kl_greedy_v1",
+            "depth.positional_v0",
+            "ffn.activation_importance_v0",
+            "width.global_pca_v0"
+          ]
+        },
+        {
+          "level": 1,
+          "children_min": 12,
+          "children_max": 16,
+          "mean_node_seconds_low": 106.03588094591332,
+          "mean_node_seconds_high": 260.4188217683743,
+          "max_node_seconds_high": 1167.0696855728374,
+          "implementations": [
+            "attention.weight_proxy_v0",
+            "depth.causal_kl_greedy_v1",
+            "depth.positional_v0",
+            "ffn.activation_importance_v0",
+            "width.global_pca_v0"
+          ]
+        },
+        {
+          "level": 2,
+          "children_min": 8,
+          "children_max": 12,
+          "mean_node_seconds_low": 60.7460635191621,
+          "mean_node_seconds_high": 215.74532688219904,
+          "max_node_seconds_high": 596.4509850083468,
+          "implementations": [
+            "attention.weight_proxy_v0",
+            "depth.causal_kl_greedy_v1",
+            "depth.positional_v0",
+            "ffn.activation_importance_v0",
+            "width.global_pca_v0"
+          ]
+        },
+        {
+          "level": 3,
+          "children_min": 4,
+          "children_max": 8,
+          "mean_node_seconds_low": 33.04258026524015,
+          "mean_node_seconds_high": 188.52743553815267,
+          "max_node_seconds_high": 313.69785819324136,
+          "implementations": [
+            "attention.weight_proxy_v0",
+            "depth.causal_kl_greedy_v1",
+            "depth.positional_v0",
+            "ffn.activation_importance_v0",
+            "width.global_pca_v0"
+          ]
+        }
+      ],
+      "notes": [
+        "hardware anchor: E8a: 260 subset evaluations over a 67-item / 59,763-position mixture in 1,300 s at 4.02B full width. This module's own accounting puts that workload at 1.1548e17 FLOPs, hence 88.83 TFLOP/s and ~24.5% of the 362 TFLOPS bf16 dense peak. Asserted round-trip in tests/autoinit.",
+        "statistics-pass cost is a range; the GPU/CPU split of the float64 accumulation has never been measured separately",
+        "storage: 'working' is the concurrent peak (a level's whole child set is on disk before ranking can start), 'written' is total I/O volume, 'retained' is what survives once pruned weights are released"
+      ],
+      "n_profiles": 2,
+      "beam_width": 2
+    },
+    {
+      "hardware": {
+        "name": "L40S",
+        "price_per_hour_usd": 0.99,
+        "effective_tflops": 88.83,
+        "vram_gb": 48.0,
+        "measured": true,
+        "source": "E8a: 260 subset evaluations over a 67-item / 59,763-position mixture in 1,300 s at 4.02B full width. This module's own accounting puts that workload at 1.1548e17 FLOPs, hence 88.83 TFLOP/s and ~24.5% of the 362 TFLOPS bf16 dense peak. Asserted round-trip in tests/autoinit."
+      },
+      "branching": {
+        "differing_fields": [
+          "hidden_size",
+          "intermediate_size",
+          "num_attention_heads",
+          "num_hidden_layers"
+        ],
+        "n_kinds": 4,
+        "implementations_per_field": {
+          "hidden_size": 1,
+          "intermediate_size": 1,
+          "num_attention_heads": 1,
+          "num_hidden_layers": 2
+        },
+        "n_calibration_profiles": 2,
+        "beam_width": 3,
+        "complete_paths_unbeamed": 768,
+        "complete_paths_geometry_only": 48,
+        "kind_orderings": 24,
+        "per_level": [
+          {
+            "level": 0,
+            "parents": 1,
+            "children_min": 10,
+            "children_max": 10
+          },
+          {
+            "level": 1,
+            "parents": 3,
+            "children_min": 18,
+            "children_max": 24
+          },
+          {
+            "level": 2,
+            "parents": 3,
+            "children_min": 12,
+            "children_max": 18
+          },
+          {
+            "level": 3,
+            "parents": 3,
+            "children_min": 6,
+            "children_max": 12
+          }
+        ],
+        "states_materialized_min": 48,
+        "states_materialized_max": 66,
+        "composite_leaves": 2,
+        "leaves_min": 8,
+        "leaves_max": 14
+      },
+      "seconds_low": 4531.727622363672,
+      "seconds_high": 15627.859920309671,
+      "hours_low": 1.2588132284343532,
+      "hours_high": 4.341072200086019,
+      "usd_low": 1.2462,
+      "usd_high": 4.2977,
+      "peak_storage_gib_retained": 20.36791706085205,
+      "peak_storage_gib_working": 101.2571964263916,
+      "total_gib_written": 172.6877670288086,
+      "peak_resident_gib": 14.281736373901367,
+      "per_operator": [
+        {
+          "level": 0,
+          "children_min": 10,
+          "children_max": 10,
+          "mean_node_seconds_low": 169.02843351178336,
+          "mean_node_seconds_high": 322.64739011332574,
+          "max_node_seconds_high": 1304.5119783530342,
+          "implementations": [
+            "attention.weight_proxy_v0",
+            "depth.causal_kl_greedy_v1",
+            "depth.positional_v0",
+            "ffn.activation_importance_v0",
+            "width.global_pca_v0"
+          ]
+        },
+        {
+          "level": 1,
+          "children_min": 18,
+          "children_max": 24,
+          "mean_node_seconds_low": 106.03588094591332,
+          "mean_node_seconds_high": 260.4188217683743,
+          "max_node_seconds_high": 1167.0696855728374,
+          "implementations": [
+            "attention.weight_proxy_v0",
+            "depth.causal_kl_greedy_v1",
+            "depth.positional_v0",
+            "ffn.activation_importance_v0",
+            "width.global_pca_v0"
+          ]
+        },
+        {
+          "level": 2,
+          "children_min": 12,
+          "children_max": 18,
+          "mean_node_seconds_low": 60.7460635191621,
+          "mean_node_seconds_high": 215.74532688219904,
+          "max_node_seconds_high": 596.4509850083468,
+          "implementations": [
+            "attention.weight_proxy_v0",
+            "depth.causal_kl_greedy_v1",
+            "depth.positional_v0",
+            "ffn.activation_importance_v0",
+            "width.global_pca_v0"
+          ]
+        },
+        {
+          "level": 3,
+          "children_min": 6,
+          "children_max": 12,
+          "mean_node_seconds_low": 33.04258026524015,
+          "mean_node_seconds_high": 188.52743553815267,
+          "max_node_seconds_high": 313.69785819324136,
+          "implementations": [
+            "attention.weight_proxy_v0",
+            "depth.causal_kl_greedy_v1",
+            "depth.positional_v0",
+            "ffn.activation_importance_v0",
+            "width.global_pca_v0"
+          ]
+        }
+      ],
+      "notes": [
+        "hardware anchor: E8a: 260 subset evaluations over a 67-item / 59,763-position mixture in 1,300 s at 4.02B full width. This module's own accounting puts that workload at 1.1548e17 FLOPs, hence 88.83 TFLOP/s and ~24.5% of the 362 TFLOPS bf16 dense peak. Asserted round-trip in tests/autoinit.",
+        "statistics-pass cost is a range; the GPU/CPU split of the float64 accumulation has never been measured separately",
+        "storage: 'working' is the concurrent peak (a level's whole child set is on disk before ranking can start), 'written' is total I/O volume, 'retained' is what survives once pruned weights are released"
+      ],
+      "n_profiles": 2,
+      "beam_width": 3
+    },
+    {
+      "hardware": {
+        "name": "L40S",
+        "price_per_hour_usd": 0.99,
+        "effective_tflops": 88.83,
+        "vram_gb": 48.0,
+        "measured": true,
+        "source": "E8a: 260 subset evaluations over a 67-item / 59,763-position mixture in 1,300 s at 4.02B full width. This module's own accounting puts that workload at 1.1548e17 FLOPs, hence 88.83 TFLOP/s and ~24.5% of the 362 TFLOPS bf16 dense peak. Asserted round-trip in tests/autoinit."
+      },
+      "branching": {
+        "differing_fields": [
+          "hidden_size",
+          "intermediate_size",
+          "num_attention_heads",
+          "num_hidden_layers"
+        ],
+        "n_kinds": 4,
+        "implementations_per_field": {
+          "hidden_size": 1,
+          "intermediate_size": 1,
+          "num_attention_heads": 1,
+          "num_hidden_layers": 2
+        },
+        "n_calibration_profiles": 2,
+        "beam_width": 4,
+        "complete_paths_unbeamed": 768,
+        "complete_paths_geometry_only": 48,
+        "kind_orderings": 24,
+        "per_level": [
+          {
+            "level": 0,
+            "parents": 1,
+            "children_min": 10,
+            "children_max": 10
+          },
+          {
+            "level": 1,
+            "parents": 4,
+            "children_min": 24,
+            "children_max": 32
+          },
+          {
+            "level": 2,
+            "parents": 4,
+            "children_min": 16,
+            "children_max": 24
+          },
+          {
+            "level": 3,
+            "parents": 4,
+            "children_min": 8,
+            "children_max": 16
+          }
+        ],
+        "states_materialized_min": 60,
+        "states_materialized_max": 84,
+        "composite_leaves": 2,
+        "leaves_min": 10,
+        "leaves_max": 18
+      },
+      "seconds_low": 5477.012322646281,
+      "seconds_high": 19759.79219790247,
+      "hours_low": 1.5213923118461892,
+      "hours_high": 5.488831166084019,
+      "usd_low": 1.5062,
+      "usd_high": 5.4339,
+      "peak_storage_gib_retained": 27.157222747802734,
+      "peak_storage_gib_working": 135.00959523487836,
+      "total_gib_written": 213.71749862004071,
+      "peak_resident_gib": 14.281736373901367,
+      "per_operator": [
+        {
+          "level": 0,
+          "children_min": 10,
+          "children_max": 10,
+          "mean_node_seconds_low": 169.02843351178336,
+          "mean_node_seconds_high": 322.64739011332574,
+          "max_node_seconds_high": 1304.5119783530342,
+          "implementations": [
+            "attention.weight_proxy_v0",
+            "depth.causal_kl_greedy_v1",
+            "depth.positional_v0",
+            "ffn.activation_importance_v0",
+            "width.global_pca_v0"
+          ]
+        },
+        {
+          "level": 1,
+          "children_min": 24,
+          "children_max": 32,
+          "mean_node_seconds_low": 106.03588094591332,
+          "mean_node_seconds_high": 260.4188217683743,
+          "max_node_seconds_high": 1167.0696855728374,
+          "implementations": [
+            "attention.weight_proxy_v0",
+            "depth.causal_kl_greedy_v1",
+            "depth.positional_v0",
+            "ffn.activation_importance_v0",
+            "width.global_pca_v0"
+          ]
+        },
+        {
+          "level": 2,
+          "children_min": 16,
+          "children_max": 24,
+          "mean_node_seconds_low": 60.7460635191621,
+          "mean_node_seconds_high": 215.74532688219904,
+          "max_node_seconds_high": 596.4509850083468,
+          "implementations": [
+            "attention.weight_proxy_v0",
+            "depth.causal_kl_greedy_v1",
+            "depth.positional_v0",
+            "ffn.activation_importance_v0",
+            "width.global_pca_v0"
+          ]
+        },
+        {
+          "level": 3,
+          "children_min": 8,
+          "children_max": 16,
+          "mean_node_seconds_low": 33.04258026524015,
+          "mean_node_seconds_high": 188.52743553815267,
+          "max_node_seconds_high": 313.69785819324136,
+          "implementations": [
+            "attention.weight_proxy_v0",
+            "depth.causal_kl_greedy_v1",
+            "depth.positional_v0",
+            "ffn.activation_importance_v0",
+            "width.global_pca_v0"
+          ]
+        }
+      ],
+      "notes": [
+        "hardware anchor: E8a: 260 subset evaluations over a 67-item / 59,763-position mixture in 1,300 s at 4.02B full width. This module's own accounting puts that workload at 1.1548e17 FLOPs, hence 88.83 TFLOP/s and ~24.5% of the 362 TFLOPS bf16 dense peak. Asserted round-trip in tests/autoinit.",
+        "statistics-pass cost is a range; the GPU/CPU split of the float64 accumulation has never been measured separately",
+        "storage: 'working' is the concurrent peak (a level's whole child set is on disk before ranking can start), 'written' is total I/O volume, 'retained' is what survives once pruned weights are released"
+      ],
+      "n_profiles": 2,
+      "beam_width": 4
+    },
+    {
+      "hardware": {
+        "name": "L40S",
+        "price_per_hour_usd": 0.99,
+        "effective_tflops": 88.83,
+        "vram_gb": 48.0,
+        "measured": true,
+        "source": "E8a: 260 subset evaluations over a 67-item / 59,763-position mixture in 1,300 s at 4.02B full width. This module's own accounting puts that workload at 1.1548e17 FLOPs, hence 88.83 TFLOP/s and ~24.5% of the 362 TFLOPS bf16 dense peak. Asserted round-trip in tests/autoinit."
+      },
+      "branching": {
+        "differing_fields": [
+          "hidden_size",
+          "intermediate_size",
+          "num_attention_heads",
+          "num_hidden_layers"
+        ],
+        "n_kinds": 4,
+        "implementations_per_field": {
+          "hidden_size": 1,
+          "intermediate_size": 1,
+          "num_attention_heads": 1,
+          "num_hidden_layers": 2
+        },
+        "n_calibration_profiles": 2,
+        "beam_width": 6,
+        "complete_paths_unbeamed": 768,
+        "complete_paths_geometry_only": 48,
+        "kind_orderings": 24,
+        "per_level": [
+          {
+            "level": 0,
+            "parents": 1,
+            "children_min": 10,
+            "children_max": 10
+          },
+          {
+            "level": 1,
+            "parents": 6,
+            "children_min": 36,
+            "children_max": 48
+          },
+          {
+            "level": 2,
+            "parents": 6,
+            "children_min": 24,
+            "children_max": 36
+          },
+          {
+            "level": 3,
+            "parents": 6,
+            "children_min": 12,
+            "children_max": 24
+          }
+        ],
+        "states_materialized_min": 84,
+        "states_materialized_max": 120,
+        "composite_leaves": 2,
+        "leaves_min": 14,
+        "leaves_max": 26
+      },
+      "seconds_low": 7367.581723211499,
+      "seconds_high": 28023.656753088067,
+      "hours_low": 2.046550478669861,
+      "hours_high": 7.7843490980800185,
+      "usd_low": 2.0261,
+      "usd_high": 7.7065,
+      "peak_storage_gib_retained": 40.7358341217041,
+      "peak_storage_gib_working": 202.5143928527832,
+      "total_gib_written": 295.7769618034363,
+      "peak_resident_gib": 14.281736373901367,
+      "per_operator": [
+        {
+          "level": 0,
+          "children_min": 10,
+          "children_max": 10,
+          "mean_node_seconds_low": 169.02843351178336,
+          "mean_node_seconds_high": 322.64739011332574,
+          "max_node_seconds_high": 1304.5119783530342,
+          "implementations": [
+            "attention.weight_proxy_v0",
+            "depth.causal_kl_greedy_v1",
+            "depth.positional_v0",
+            "ffn.activation_importance_v0",
+            "width.global_pca_v0"
+          ]
+        },
+        {
+          "level": 1,
+          "children_min": 36,
+          "children_max": 48,
+          "mean_node_seconds_low": 106.03588094591332,
+          "mean_node_seconds_high": 260.4188217683743,
+          "max_node_seconds_high": 1167.0696855728374,
+          "implementations": [
+            "attention.weight_proxy_v0",
+            "depth.causal_kl_greedy_v1",
+            "depth.positional_v0",
+            "ffn.activation_importance_v0",
+            "width.global_pca_v0"
+          ]
+        },
+        {
+          "level": 2,
+          "children_min": 24,
+          "children_max": 36,
+          "mean_node_seconds_low": 60.7460635191621,
+          "mean_node_seconds_high": 215.74532688219904,
+          "max_node_seconds_high": 596.4509850083468,
+          "implementations": [
+            "attention.weight_proxy_v0",
+            "depth.causal_kl_greedy_v1",
+            "depth.positional_v0",
+            "ffn.activation_importance_v0",
+            "width.global_pca_v0"
+          ]
+        },
+        {
+          "level": 3,
+          "children_min": 12,
+          "children_max": 24,
+          "mean_node_seconds_low": 33.04258026524015,
+          "mean_node_seconds_high": 188.52743553815267,
+          "max_node_seconds_high": 313.69785819324136,
+          "implementations": [
+            "attention.weight_proxy_v0",
+            "depth.causal_kl_greedy_v1",
+            "depth.positional_v0",
+            "ffn.activation_importance_v0",
+            "width.global_pca_v0"
+          ]
+        }
+      ],
+      "notes": [
+        "hardware anchor: E8a: 260 subset evaluations over a 67-item / 59,763-position mixture in 1,300 s at 4.02B full width. This module's own accounting puts that workload at 1.1548e17 FLOPs, hence 88.83 TFLOP/s and ~24.5% of the 362 TFLOPS bf16 dense peak. Asserted round-trip in tests/autoinit.",
+        "statistics-pass cost is a range; the GPU/CPU split of the float64 accumulation has never been measured separately",
+        "storage: 'working' is the concurrent peak (a level's whole child set is on disk before ranking can start), 'written' is total I/O volume, 'retained' is what survives once pruned weights are released"
+      ],
+      "n_profiles": 2,
+      "beam_width": 6
+    },
+    {
+      "hardware": {
+        "name": "L40S",
+        "price_per_hour_usd": 0.99,
+        "effective_tflops": 88.83,
+        "vram_gb": 48.0,
+        "measured": true,
+        "source": "E8a: 260 subset evaluations over a 67-item / 59,763-position mixture in 1,300 s at 4.02B full width. This module's own accounting puts that workload at 1.1548e17 FLOPs, hence 88.83 TFLOP/s and ~24.5% of the 362 TFLOPS bf16 dense peak. Asserted round-trip in tests/autoinit."
+      },
+      "branching": {
+        "differing_fields": [
+          "hidden_size",
+          "intermediate_size",
+          "num_attention_heads",
+          "num_hidden_layers"
+        ],
+        "n_kinds": 4,
+        "implementations_per_field": {
+          "hidden_size": 1,
+          "intermediate_size": 1,
+          "num_attention_heads": 1,
+          "num_hidden_layers": 2
+        },
+        "n_calibration_profiles": 3,
+        "beam_width": 2,
+        "complete_paths_unbeamed": 3888,
+        "complete_paths_geometry_only": 48,
+        "kind_orderings": 24,
+        "per_level": [
+          {
+            "level": 0,
+            "parents": 1,
+            "children_min": 15,
+            "children_max": 15
+          },
+          {
+            "level": 1,
+            "parents": 2,
+            "children_min": 18,
+            "children_max": 24
+          },
+          {
+            "level": 2,
+            "parents": 2,
+            "children_min": 12,
+            "children_max": 18
+          },
+          {
+            "level": 3,
+            "parents": 2,
+            "children_min": 6,
+            "children_max": 12
+          }
+        ],
+        "states_materialized_min": 54,
+        "states_materialized_max": 72,
+        "composite_leaves": 3,
+        "leaves_min": 9,
+        "leaves_max": 15
+      },
+      "seconds_low": 5376.869789922589,
+      "seconds_high": 17241.0968708763,
+      "hours_low": 1.4935749416451636,
+      "hours_high": 4.7891935752434165,
+      "usd_low": 1.4786,
+      "usd_high": 4.7413,
+      "peak_storage_gib_retained": 13.578611373901367,
+      "peak_storage_gib_working": 93.00870203971863,
+      "total_gib_written": 197.48705315589905,
+      "peak_resident_gib": 14.281736373901367,
+      "per_operator": [
+        {
+          "level": 0,
+          "children_min": 15,
+          "children_max": 15,
+          "mean_node_seconds_low": 169.02843351178336,
+          "mean_node_seconds_high": 322.64739011332574,
+          "max_node_seconds_high": 1304.5119783530342,
+          "implementations": [
+            "attention.weight_proxy_v0",
+            "depth.causal_kl_greedy_v1",
+            "depth.positional_v0",
+            "ffn.activation_importance_v0",
+            "width.global_pca_v0"
+          ]
+        },
+        {
+          "level": 1,
+          "children_min": 18,
+          "children_max": 24,
+          "mean_node_seconds_low": 106.03588094591332,
+          "mean_node_seconds_high": 260.4188217683743,
+          "max_node_seconds_high": 1167.0696855728374,
+          "implementations": [
+            "attention.weight_proxy_v0",
+            "depth.causal_kl_greedy_v1",
+            "depth.positional_v0",
+            "ffn.activation_importance_v0",
+            "width.global_pca_v0"
+          ]
+        },
+        {
+          "level": 2,
+          "children_min": 12,
+          "children_max": 18,
+          "mean_node_seconds_low": 60.7460635191621,
+          "mean_node_seconds_high": 215.74532688219904,
+          "max_node_seconds_high": 596.4509850083468,
+          "implementations": [
+            "attention.weight_proxy_v0",
+            "depth.causal_kl_greedy_v1",
+            "depth.positional_v0",
+            "ffn.activation_importance_v0",
+            "width.global_pca_v0"
+          ]
+        },
+        {
+          "level": 3,
+          "children_min": 6,
+          "children_max": 12,
+          "mean_node_seconds_low": 33.04258026524015,
+          "mean_node_seconds_high": 188.52743553815267,
+          "max_node_seconds_high": 313.69785819324136,
+          "implementations": [
+            "attention.weight_proxy_v0",
+            "depth.causal_kl_greedy_v1",
+            "depth.positional_v0",
+            "ffn.activation_importance_v0",
+            "width.global_pca_v0"
+          ]
+        }
+      ],
+      "notes": [
+        "hardware anchor: E8a: 260 subset evaluations over a 67-item / 59,763-position mixture in 1,300 s at 4.02B full width. This module's own accounting puts that workload at 1.1548e17 FLOPs, hence 88.83 TFLOP/s and ~24.5% of the 362 TFLOPS bf16 dense peak. Asserted round-trip in tests/autoinit.",
+        "statistics-pass cost is a range; the GPU/CPU split of the float64 accumulation has never been measured separately",
+        "storage: 'working' is the concurrent peak (a level's whole child set is on disk before ranking can start), 'written' is total I/O volume, 'retained' is what survives once pruned weights are released"
+      ],
+      "n_profiles": 3,
+      "beam_width": 2
+    },
+    {
+      "hardware": {
+        "name": "L40S",
+        "price_per_hour_usd": 0.99,
+        "effective_tflops": 88.83,
+        "vram_gb": 48.0,
+        "measured": true,
+        "source": "E8a: 260 subset evaluations over a 67-item / 59,763-position mixture in 1,300 s at 4.02B full width. This module's own accounting puts that workload at 1.1548e17 FLOPs, hence 88.83 TFLOP/s and ~24.5% of the 362 TFLOPS bf16 dense peak. Asserted round-trip in tests/autoinit."
+      },
+      "branching": {
+        "differing_fields": [
+          "hidden_size",
+          "intermediate_size",
+          "num_attention_heads",
+          "num_hidden_layers"
+        ],
+        "n_kinds": 4,
+        "implementations_per_field": {
+          "hidden_size": 1,
+          "intermediate_size": 1,
+          "num_attention_heads": 1,
+          "num_hidden_layers": 2
+        },
+        "n_calibration_profiles": 3,
+        "beam_width": 3,
+        "complete_paths_unbeamed": 3888,
+        "complete_paths_geometry_only": 48,
+        "kind_orderings": 24,
+        "per_level": [
+          {
+            "level": 0,
+            "parents": 1,
+            "children_min": 15,
+            "children_max": 15
+          },
+          {
+            "level": 1,
+            "parents": 3,
+            "children_min": 27,
+            "children_max": 36
+          },
+          {
+            "level": 2,
+            "parents": 3,
+            "children_min": 18,
+            "children_max": 27
+          },
+          {
+            "level": 3,
+            "parents": 3,
+            "children_min": 9,
+            "children_max": 18
+          }
+        ],
+        "states_materialized_min": 72,
+        "states_materialized_max": 99,
+        "composite_leaves": 3,
+        "leaves_min": 12,
+        "leaves_max": 21
+      },
+      "seconds_low": 6794.796840346503,
+      "seconds_high": 23438.995287265494,
+      "hours_low": 1.8874435667629175,
+      "hours_high": 6.510832024240415,
+      "usd_low": 1.8686,
+      "usd_high": 6.4457,
+      "peak_storage_gib_retained": 20.36791706085205,
+      "peak_storage_gib_working": 138.98234939575195,
+      "total_gib_written": 259.0316505432129,
+      "peak_resident_gib": 14.281736373901367,
+      "per_operator": [
+        {
+          "level": 0,
+          "children_min": 15,
+          "children_max": 15,
+          "mean_node_seconds_low": 169.02843351178336,
+          "mean_node_seconds_high": 322.64739011332574,
+          "max_node_seconds_high": 1304.5119783530342,
+          "implementations": [
+            "attention.weight_proxy_v0",
+            "depth.causal_kl_greedy_v1",
+            "depth.positional_v0",
+            "ffn.activation_importance_v0",
+            "width.global_pca_v0"
+          ]
+        },
+        {
+          "level": 1,
+          "children_min": 27,
+          "children_max": 36,
+          "mean_node_seconds_low": 106.03588094591332,
+          "mean_node_seconds_high": 260.4188217683743,
+          "max_node_seconds_high": 1167.0696855728374,
+          "implementations": [
+            "attention.weight_proxy_v0",
+            "depth.causal_kl_greedy_v1",
+            "depth.positional_v0",
+            "ffn.activation_importance_v0",
+            "width.global_pca_v0"
+          ]
+        },
+        {
+          "level": 2,
+          "children_min": 18,
+          "children_max": 27,
+          "mean_node_seconds_low": 60.7460635191621,
+          "mean_node_seconds_high": 215.74532688219904,
+          "max_node_seconds_high": 596.4509850083468,
+          "implementations": [
+            "attention.weight_proxy_v0",
+            "depth.causal_kl_greedy_v1",
+            "depth.positional_v0",
+            "ffn.activation_importance_v0",
+            "width.global_pca_v0"
+          ]
+        },
+        {
+          "level": 3,
+          "children_min": 9,
+          "children_max": 18,
+          "mean_node_seconds_low": 33.04258026524015,
+          "mean_node_seconds_high": 188.52743553815267,
+          "max_node_seconds_high": 313.69785819324136,
+          "implementations": [
+            "attention.weight_proxy_v0",
+            "depth.causal_kl_greedy_v1",
+            "depth.positional_v0",
+            "ffn.activation_importance_v0",
+            "width.global_pca_v0"
+          ]
+        }
+      ],
+      "notes": [
+        "hardware anchor: E8a: 260 subset evaluations over a 67-item / 59,763-position mixture in 1,300 s at 4.02B full width. This module's own accounting puts that workload at 1.1548e17 FLOPs, hence 88.83 TFLOP/s and ~24.5% of the 362 TFLOPS bf16 dense peak. Asserted round-trip in tests/autoinit.",
+        "statistics-pass cost is a range; the GPU/CPU split of the float64 accumulation has never been measured separately",
+        "storage: 'working' is the concurrent peak (a level's whole child set is on disk before ranking can start), 'written' is total I/O volume, 'retained' is what survives once pruned weights are released"
+      ],
+      "n_profiles": 3,
+      "beam_width": 3
+    },
+    {
+      "hardware": {
+        "name": "L40S",
+        "price_per_hour_usd": 0.99,
+        "effective_tflops": 88.83,
+        "vram_gb": 48.0,
+        "measured": true,
+        "source": "E8a: 260 subset evaluations over a 67-item / 59,763-position mixture in 1,300 s at 4.02B full width. This module's own accounting puts that workload at 1.1548e17 FLOPs, hence 88.83 TFLOP/s and ~24.5% of the 362 TFLOPS bf16 dense peak. Asserted round-trip in tests/autoinit."
+      },
+      "branching": {
+        "differing_fields": [
+          "hidden_size",
+          "intermediate_size",
+          "num_attention_heads",
+          "num_hidden_layers"
+        ],
+        "n_kinds": 4,
+        "implementations_per_field": {
+          "hidden_size": 1,
+          "intermediate_size": 1,
+          "num_attention_heads": 1,
+          "num_hidden_layers": 2
+        },
+        "n_calibration_profiles": 3,
+        "beam_width": 4,
+        "complete_paths_unbeamed": 3888,
+        "complete_paths_geometry_only": 48,
+        "kind_orderings": 24,
+        "per_level": [
+          {
+            "level": 0,
+            "parents": 1,
+            "children_min": 15,
+            "children_max": 15
+          },
+          {
+            "level": 1,
+            "parents": 4,
+            "children_min": 36,
+            "children_max": 48
+          },
+          {
+            "level": 2,
+            "parents": 4,
+            "children_min": 24,
+            "children_max": 36
+          },
+          {
+            "level": 3,
+            "parents": 4,
+            "children_min": 12,
+            "children_max": 24
+          }
+        ],
+        "states_materialized_min": 90,
+        "states_materialized_max": 126,
+        "composite_leaves": 3,
+        "leaves_min": 15,
+        "leaves_max": 27
+      },
+      "seconds_low": 8212.723890770416,
+      "seconds_high": 29636.893703654696,
+      "hours_low": 2.281312191880671,
+      "hours_high": 8.232470473237415,
+      "usd_low": 2.2585,
+      "usd_high": 8.1501,
+      "peak_storage_gib_retained": 27.157222747802734,
+      "peak_storage_gib_working": 185.30979919433594,
+      "total_gib_written": 320.57624793052673,
+      "peak_resident_gib": 14.281736373901367,
+      "per_operator": [
+        {
+          "level": 0,
+          "children_min": 15,
+          "children_max": 15,
+          "mean_node_seconds_low": 169.02843351178336,
+          "mean_node_seconds_high": 322.64739011332574,
+          "max_node_seconds_high": 1304.5119783530342,
+          "implementations": [
+            "attention.weight_proxy_v0",
+            "depth.causal_kl_greedy_v1",
+            "depth.positional_v0",
+            "ffn.activation_importance_v0",
+            "width.global_pca_v0"
+          ]
+        },
+        {
+          "level": 1,
+          "children_min": 36,
+          "children_max": 48,
+          "mean_node_seconds_low": 106.03588094591332,
+          "mean_node_seconds_high": 260.4188217683743,
+          "max_node_seconds_high": 1167.0696855728374,
+          "implementations": [
+            "attention.weight_proxy_v0",
+            "depth.causal_kl_greedy_v1",
+            "depth.positional_v0",
+            "ffn.activation_importance_v0",
+            "width.global_pca_v0"
+          ]
+        },
+        {
+          "level": 2,
+          "children_min": 24,
+          "children_max": 36,
+          "mean_node_seconds_low": 60.7460635191621,
+          "mean_node_seconds_high": 215.74532688219904,
+          "max_node_seconds_high": 596.4509850083468,
+          "implementations": [
+            "attention.weight_proxy_v0",
+            "depth.causal_kl_greedy_v1",
+            "depth.positional_v0",
+            "ffn.activation_importance_v0",
+            "width.global_pca_v0"
+          ]
+        },
+        {
+          "level": 3,
+          "children_min": 12,
+          "children_max": 24,
+          "mean_node_seconds_low": 33.04258026524015,
+          "mean_node_seconds_high": 188.52743553815267,
+          "max_node_seconds_high": 313.69785819324136,
+          "implementations": [
+            "attention.weight_proxy_v0",
+            "depth.causal_kl_greedy_v1",
+            "depth.positional_v0",
+            "ffn.activation_importance_v0",
+            "width.global_pca_v0"
+          ]
+        }
+      ],
+      "notes": [
+        "hardware anchor: E8a: 260 subset evaluations over a 67-item / 59,763-position mixture in 1,300 s at 4.02B full width. This module's own accounting puts that workload at 1.1548e17 FLOPs, hence 88.83 TFLOP/s and ~24.5% of the 362 TFLOPS bf16 dense peak. Asserted round-trip in tests/autoinit.",
+        "statistics-pass cost is a range; the GPU/CPU split of the float64 accumulation has never been measured separately",
+        "storage: 'working' is the concurrent peak (a level's whole child set is on disk before ranking can start), 'written' is total I/O volume, 'retained' is what survives once pruned weights are released"
+      ],
+      "n_profiles": 3,
+      "beam_width": 4
+    },
+    {
+      "hardware": {
+        "name": "L40S",
+        "price_per_hour_usd": 0.99,
+        "effective_tflops": 88.83,
+        "vram_gb": 48.0,
+        "measured": true,
+        "source": "E8a: 260 subset evaluations over a 67-item / 59,763-position mixture in 1,300 s at 4.02B full width. This module's own accounting puts that workload at 1.1548e17 FLOPs, hence 88.83 TFLOP/s and ~24.5% of the 362 TFLOPS bf16 dense peak. Asserted round-trip in tests/autoinit."
+      },
+      "branching": {
+        "differing_fields": [
+          "hidden_size",
+          "intermediate_size",
+          "num_attention_heads",
+          "num_hidden_layers"
+        ],
+        "n_kinds": 4,
+        "implementations_per_field": {
+          "hidden_size": 1,
+          "intermediate_size": 1,
+          "num_attention_heads": 1,
+          "num_hidden_layers": 2
+        },
+        "n_calibration_profiles": 3,
+        "beam_width": 6,
+        "complete_paths_unbeamed": 3888,
+        "complete_paths_geometry_only": 48,
+        "kind_orderings": 24,
+        "per_level": [
+          {
+            "level": 0,
+            "parents": 1,
+            "children_min": 15,
+            "children_max": 15
+          },
+          {
+            "level": 1,
+            "parents": 6,
+            "children_min": 54,
+            "children_max": 72
+          },
+          {
+            "level": 2,
+            "parents": 6,
+            "children_min": 36,
+            "children_max": 54
+          },
+          {
+            "level": 3,
+            "parents": 6,
+            "children_min": 18,
+            "children_max": 36
+          }
+        ],
+        "states_materialized_min": 126,
+        "states_materialized_max": 180,
+        "composite_leaves": 3,
+        "leaves_min": 21,
+        "leaves_max": 39
+      },
+      "seconds_low": 11048.577991618242,
+      "seconds_high": 42032.69053643309,
+      "hours_low": 3.0690494421161785,
+      "hours_high": 11.675747371231413,
+      "usd_low": 3.0384,
+      "usd_high": 11.559,
+      "peak_storage_gib_retained": 40.7358341217041,
+      "peak_storage_gib_working": 277.9646987915039,
+      "total_gib_written": 443.6654427051544,
+      "peak_resident_gib": 14.281736373901367,
+      "per_operator": [
+        {
+          "level": 0,
+          "children_min": 15,
+          "children_max": 15,
+          "mean_node_seconds_low": 169.02843351178336,
+          "mean_node_seconds_high": 322.64739011332574,
+          "max_node_seconds_high": 1304.5119783530342,
+          "implementations": [
+            "attention.weight_proxy_v0",
+            "depth.causal_kl_greedy_v1",
+            "depth.positional_v0",
+            "ffn.activation_importance_v0",
+            "width.global_pca_v0"
+          ]
+        },
+        {
+          "level": 1,
+          "children_min": 54,
+          "children_max": 72,
+          "mean_node_seconds_low": 106.03588094591332,
+          "mean_node_seconds_high": 260.4188217683743,
+          "max_node_seconds_high": 1167.0696855728374,
+          "implementations": [
+            "attention.weight_proxy_v0",
+            "depth.causal_kl_greedy_v1",
+            "depth.positional_v0",
+            "ffn.activation_importance_v0",
+            "width.global_pca_v0"
+          ]
+        },
+        {
+          "level": 2,
+          "children_min": 36,
+          "children_max": 54,
+          "mean_node_seconds_low": 60.7460635191621,
+          "mean_node_seconds_high": 215.74532688219904,
+          "max_node_seconds_high": 596.4509850083468,
+          "implementations": [
+            "attention.weight_proxy_v0",
+            "depth.causal_kl_greedy_v1",
+            "depth.positional_v0",
+            "ffn.activation_importance_v0",
+            "width.global_pca_v0"
+          ]
+        },
+        {
+          "level": 3,
+          "children_min": 18,
+          "children_max": 36,
+          "mean_node_seconds_low": 33.04258026524015,
+          "mean_node_seconds_high": 188.52743553815267,
+          "max_node_seconds_high": 313.69785819324136,
+          "implementations": [
+            "attention.weight_proxy_v0",
+            "depth.causal_kl_greedy_v1",
+            "depth.positional_v0",
+            "ffn.activation_importance_v0",
+            "width.global_pca_v0"
+          ]
+        }
+      ],
+      "notes": [
+        "hardware anchor: E8a: 260 subset evaluations over a 67-item / 59,763-position mixture in 1,300 s at 4.02B full width. This module's own accounting puts that workload at 1.1548e17 FLOPs, hence 88.83 TFLOP/s and ~24.5% of the 362 TFLOPS bf16 dense peak. Asserted round-trip in tests/autoinit.",
+        "statistics-pass cost is a range; the GPU/CPU split of the float64 accumulation has never been measured separately",
+        "storage: 'working' is the concurrent peak (a level's whole child set is on disk before ranking can start), 'written' is total I/O volume, 'retained' is what survives once pruned weights are released"
+      ],
+      "n_profiles": 3,
+      "beam_width": 6
+    },
+    {
+      "hardware": {
+        "name": "A100-SXM-80GB",
+        "price_per_hour_usd": 1.59,
+        "effective_tflops": 76.56,
+        "vram_gb": 80.0,
+        "measured": false,
+        "source": "ESTIMATED: the L40S's measured 88.83 scaled by the bf16 dense peak ratio 312/362. MFU is assumed to transfer across architectures; it has not been measured on this workload."
+      },
+      "branching": {
+        "differing_fields": [
+          "hidden_size",
+          "intermediate_size",
+          "num_attention_heads",
+          "num_hidden_layers"
+        ],
+        "n_kinds": 4,
+        "implementations_per_field": {
+          "hidden_size": 1,
+          "intermediate_size": 1,
+          "num_attention_heads": 1,
+          "num_hidden_layers": 2
+        },
+        "n_calibration_profiles": 1,
+        "beam_width": 2,
+        "complete_paths_unbeamed": 48,
+        "complete_paths_geometry_only": 48,
+        "kind_orderings": 24,
+        "per_level": [
+          {
+            "level": 0,
+            "parents": 1,
+            "children_min": 5,
+            "children_max": 5
+          },
+          {
+            "level": 1,
+            "parents": 2,
+            "children_min": 6,
+            "children_max": 8
+          },
+          {
+            "level": 2,
+            "parents": 2,
+            "children_min": 4,
+            "children_max": 6
+          },
+          {
+            "level": 3,
+            "parents": 2,
+            "children_min": 2,
+            "children_max": 4
+          }
+        ],
+        "states_materialized_min": 18,
+        "states_materialized_max": 24,
+        "composite_leaves": 1,
+        "leaves_min": 3,
+        "leaves_max": 5
+      },
+      "seconds_low": 2083.85718518937,
+      "seconds_high": 6095.851646759726,
+      "hours_low": 0.5788492181081583,
+      "hours_high": 1.6932921240999237,
+      "usd_low": 0.9204,
+      "usd_high": 2.6923,
+      "peak_storage_gib_retained": 13.578611373901367,
+      "peak_storage_gib_working": 43.41012978553772,
+      "total_gib_written": 65.82901771832258,
+      "peak_resident_gib": 14.281736373901367,
+      "per_operator": [
+        {
+          "level": 0,
+          "children_min": 5,
+          "children_max": 5,
+          "mean_node_seconds_low": 196.11802179795862,
+          "mean_node_seconds_high": 349.2890988468391,
+          "max_node_seconds_high": 1513.581492125131,
+          "implementations": [
+            "attention.weight_proxy_v0",
+            "depth.causal_kl_greedy_v1",
+            "depth.positional_v0",
+            "ffn.activation_importance_v0",
+            "width.global_pca_v0"
+          ]
+        },
+        {
+          "level": 1,
+          "children_min": 6,
+          "children_max": 8,
+          "mean_node_seconds_low": 123.02987597211956,
+          "mean_node_seconds_high": 277.08737828672866,
+          "max_node_seconds_high": 1354.1118099456,
+          "implementations": [
+            "attention.weight_proxy_v0",
+            "depth.causal_kl_greedy_v1",
+            "depth.positional_v0",
+            "ffn.activation_importance_v0",
+            "width.global_pca_v0"
+          ]
+        },
+        {
+          "level": 2,
+          "children_min": 4,
+          "children_max": 6,
+          "mean_node_seconds_low": 70.4816199373977,
+          "mean_node_seconds_high": 225.2542206229493,
+          "max_node_seconds_high": 692.042071555531,
+          "implementations": [
+            "attention.weight_proxy_v0",
+            "depth.causal_kl_greedy_v1",
+            "depth.positional_v0",
+            "ffn.activation_importance_v0",
+            "width.global_pca_v0"
+          ]
+        },
+        {
+          "level": 3,
+          "children_min": 2,
+          "children_max": 4,
+          "mean_node_seconds_low": 38.33819755696553,
+          "mean_node_seconds_high": 193.67421424766664,
+          "max_node_seconds_high": 313.8374115882987,
+          "implementations": [
+            "attention.weight_proxy_v0",
+            "depth.causal_kl_greedy_v1",
+            "depth.positional_v0",
+            "ffn.activation_importance_v0",
+            "width.global_pca_v0"
+          ]
+        }
+      ],
+      "notes": [
+        "hardware anchor: ESTIMATED: the L40S's measured 88.83 scaled by the bf16 dense peak ratio 312/362. MFU is assumed to transfer across architectures; it has not been measured on this workload.",
+        "statistics-pass cost is a range; the GPU/CPU split of the float64 accumulation has never been measured separately",
+        "storage: 'working' is the concurrent peak (a level's whole child set is on disk before ranking can start), 'written' is total I/O volume, 'retained' is what survives once pruned weights are released",
+        "A100-SXM-80GB throughput is ESTIMATED, not measured"
+      ],
+      "n_profiles": 1,
+      "beam_width": 2
+    },
+    {
+      "hardware": {
+        "name": "A100-SXM-80GB",
+        "price_per_hour_usd": 1.59,
+        "effective_tflops": 76.56,
+        "vram_gb": 80.0,
+        "measured": false,
+        "source": "ESTIMATED: the L40S's measured 88.83 scaled by the bf16 dense peak ratio 312/362. MFU is assumed to transfer across architectures; it has not been measured on this workload."
+      },
+      "branching": {
+        "differing_fields": [
+          "hidden_size",
+          "intermediate_size",
+          "num_attention_heads",
+          "num_hidden_layers"
+        ],
+        "n_kinds": 4,
+        "implementations_per_field": {
+          "hidden_size": 1,
+          "intermediate_size": 1,
+          "num_attention_heads": 1,
+          "num_hidden_layers": 2
+        },
+        "n_calibration_profiles": 1,
+        "beam_width": 3,
+        "complete_paths_unbeamed": 48,
+        "complete_paths_geometry_only": 48,
+        "kind_orderings": 24,
+        "per_level": [
+          {
+            "level": 0,
+            "parents": 1,
+            "children_min": 5,
+            "children_max": 5
+          },
+          {
+            "level": 1,
+            "parents": 3,
+            "children_min": 9,
+            "children_max": 12
+          },
+          {
+            "level": 2,
+            "parents": 3,
+            "children_min": 6,
+            "children_max": 9
+          },
+          {
+            "level": 3,
+            "parents": 3,
+            "children_min": 3,
+            "children_max": 6
+          }
+        ],
+        "states_materialized_min": 24,
+        "states_materialized_max": 33,
+        "composite_leaves": 1,
+        "leaves_min": 4,
+        "leaves_max": 7
+      },
+      "seconds_low": 2632.248250537489,
+      "seconds_high": 8267.312250270821,
+      "hours_low": 0.731180069593747,
+      "hours_high": 2.296475625075228,
+      "usd_low": 1.1626,
+      "usd_high": 3.6514,
+      "peak_storage_gib_retained": 20.36791706085205,
+      "peak_storage_gib_working": 63.53204345703125,
+      "total_gib_written": 86.3438835144043,
+      "peak_resident_gib": 14.281736373901367,
+      "per_operator": [
+        {
+          "level": 0,
+          "children_min": 5,
+          "children_max": 5,
+          "mean_node_seconds_low": 196.11802179795862,
+          "mean_node_seconds_high": 349.2890988468391,
+          "max_node_seconds_high": 1513.581492125131,
+          "implementations": [
+            "attention.weight_proxy_v0",
+            "depth.causal_kl_greedy_v1",
+            "depth.positional_v0",
+            "ffn.activation_importance_v0",
+            "width.global_pca_v0"
+          ]
+        },
+        {
+          "level": 1,
+          "children_min": 9,
+          "children_max": 12,
+          "mean_node_seconds_low": 123.02987597211956,
+          "mean_node_seconds_high": 277.08737828672866,
+          "max_node_seconds_high": 1354.1118099456,
+          "implementations": [
+            "attention.weight_proxy_v0",
+            "depth.causal_kl_greedy_v1",
+            "depth.positional_v0",
+            "ffn.activation_importance_v0",
+            "width.global_pca_v0"
+          ]
+        },
+        {
+          "level": 2,
+          "children_min": 6,
+          "children_max": 9,
+          "mean_node_seconds_low": 70.4816199373977,
+          "mean_node_seconds_high": 225.2542206229493,
+          "max_node_seconds_high": 692.042071555531,
+          "implementations": [
+            "attention.weight_proxy_v0",
+            "depth.causal_kl_greedy_v1",
+            "depth.positional_v0",
+            "ffn.activation_importance_v0",
+            "width.global_pca_v0"
+          ]
+        },
+        {
+          "level": 3,
+          "children_min": 3,
+          "children_max": 6,
+          "mean_node_seconds_low": 38.33819755696553,
+          "mean_node_seconds_high": 193.67421424766664,
+          "max_node_seconds_high": 313.8374115882987,
+          "implementations": [
+            "attention.weight_proxy_v0",
+            "depth.causal_kl_greedy_v1",
+            "depth.positional_v0",
+            "ffn.activation_importance_v0",
+            "width.global_pca_v0"
+          ]
+        }
+      ],
+      "notes": [
+        "hardware anchor: ESTIMATED: the L40S's measured 88.83 scaled by the bf16 dense peak ratio 312/362. MFU is assumed to transfer across architectures; it has not been measured on this workload.",
+        "statistics-pass cost is a range; the GPU/CPU split of the float64 accumulation has never been measured separately",
+        "storage: 'working' is the concurrent peak (a level's whole child set is on disk before ranking can start), 'written' is total I/O volume, 'retained' is what survives once pruned weights are released",
+        "A100-SXM-80GB throughput is ESTIMATED, not measured"
+      ],
+      "n_profiles": 1,
+      "beam_width": 3
+    },
+    {
+      "hardware": {
+        "name": "A100-SXM-80GB",
+        "price_per_hour_usd": 1.59,
+        "effective_tflops": 76.56,
+        "vram_gb": 80.0,
+        "measured": false,
+        "source": "ESTIMATED: the L40S's measured 88.83 scaled by the bf16 dense peak ratio 312/362. MFU is assumed to transfer across architectures; it has not been measured on this workload."
+      },
+      "branching": {
+        "differing_fields": [
+          "hidden_size",
+          "intermediate_size",
+          "num_attention_heads",
+          "num_hidden_layers"
+        ],
+        "n_kinds": 4,
+        "implementations_per_field": {
+          "hidden_size": 1,
+          "intermediate_size": 1,
+          "num_attention_heads": 1,
+          "num_hidden_layers": 2
+        },
+        "n_calibration_profiles": 1,
+        "beam_width": 4,
+        "complete_paths_unbeamed": 48,
+        "complete_paths_geometry_only": 48,
+        "kind_orderings": 24,
+        "per_level": [
+          {
+            "level": 0,
+            "parents": 1,
+            "children_min": 5,
+            "children_max": 5
+          },
+          {
+            "level": 1,
+            "parents": 4,
+            "children_min": 12,
+            "children_max": 16
+          },
+          {
+            "level": 2,
+            "parents": 4,
+            "children_min": 8,
+            "children_max": 12
+          },
+          {
+            "level": 3,
+            "parents": 4,
+            "children_min": 4,
+            "children_max": 8
+          }
+        ],
+        "states_materialized_min": 30,
+        "states_materialized_max": 42,
+        "composite_leaves": 1,
+        "leaves_min": 5,
+        "leaves_max": 9
+      },
+      "seconds_low": 3180.639315885609,
+      "seconds_high": 10438.772853781917,
+      "hours_low": 0.8835109210793358,
+      "hours_high": 2.8996591260505324,
+      "usd_low": 1.4048,
+      "usd_high": 4.6105,
+      "peak_storage_gib_retained": 27.157222747802734,
+      "peak_storage_gib_working": 84.70939127542078,
+      "total_gib_written": 106.8587493095547,
+      "peak_resident_gib": 14.281736373901367,
+      "per_operator": [
+        {
+          "level": 0,
+          "children_min": 5,
+          "children_max": 5,
+          "mean_node_seconds_low": 196.11802179795862,
+          "mean_node_seconds_high": 349.2890988468391,
+          "max_node_seconds_high": 1513.581492125131,
+          "implementations": [
+            "attention.weight_proxy_v0",
+            "depth.causal_kl_greedy_v1",
+            "depth.positional_v0",
+            "ffn.activation_importance_v0",
+            "width.global_pca_v0"
+          ]
+        },
+        {
+          "level": 1,
+          "children_min": 12,
+          "children_max": 16,
+          "mean_node_seconds_low": 123.02987597211956,
+          "mean_node_seconds_high": 277.08737828672866,
+          "max_node_seconds_high": 1354.1118099456,
+          "implementations": [
+            "attention.weight_proxy_v0",
+            "depth.causal_kl_greedy_v1",
+            "depth.positional_v0",
+            "ffn.activation_importance_v0",
+            "width.global_pca_v0"
+          ]
+        },
+        {
+          "level": 2,
+          "children_min": 8,
+          "children_max": 12,
+          "mean_node_seconds_low": 70.4816199373977,
+          "mean_node_seconds_high": 225.2542206229493,
+          "max_node_seconds_high": 692.042071555531,
+          "implementations": [
+            "attention.weight_proxy_v0",
+            "depth.causal_kl_greedy_v1",
+            "depth.positional_v0",
+            "ffn.activation_importance_v0",
+            "width.global_pca_v0"
+          ]
+        },
+        {
+          "level": 3,
+          "children_min": 4,
+          "children_max": 8,
+          "mean_node_seconds_low": 38.33819755696553,
+          "mean_node_seconds_high": 193.67421424766664,
+          "max_node_seconds_high": 313.8374115882987,
+          "implementations": [
+            "attention.weight_proxy_v0",
+            "depth.causal_kl_greedy_v1",
+            "depth.positional_v0",
+            "ffn.activation_importance_v0",
+            "width.global_pca_v0"
+          ]
+        }
+      ],
+      "notes": [
+        "hardware anchor: ESTIMATED: the L40S's measured 88.83 scaled by the bf16 dense peak ratio 312/362. MFU is assumed to transfer across architectures; it has not been measured on this workload.",
+        "statistics-pass cost is a range; the GPU/CPU split of the float64 accumulation has never been measured separately",
+        "storage: 'working' is the concurrent peak (a level's whole child set is on disk before ranking can start), 'written' is total I/O volume, 'retained' is what survives once pruned weights are released",
+        "A100-SXM-80GB throughput is ESTIMATED, not measured"
+      ],
+      "n_profiles": 1,
+      "beam_width": 4
+    },
+    {
+      "hardware": {
+        "name": "A100-SXM-80GB",
+        "price_per_hour_usd": 1.59,
+        "effective_tflops": 76.56,
+        "vram_gb": 80.0,
+        "measured": false,
+        "source": "ESTIMATED: the L40S's measured 88.83 scaled by the bf16 dense peak ratio 312/362. MFU is assumed to transfer across architectures; it has not been measured on this workload."
+      },
+      "branching": {
+        "differing_fields": [
+          "hidden_size",
+          "intermediate_size",
+          "num_attention_heads",
+          "num_hidden_layers"
+        ],
+        "n_kinds": 4,
+        "implementations_per_field": {
+          "hidden_size": 1,
+          "intermediate_size": 1,
+          "num_attention_heads": 1,
+          "num_hidden_layers": 2
+        },
+        "n_calibration_profiles": 1,
+        "beam_width": 6,
+        "complete_paths_unbeamed": 48,
+        "complete_paths_geometry_only": 48,
+        "kind_orderings": 24,
+        "per_level": [
+          {
+            "level": 0,
+            "parents": 1,
+            "children_min": 5,
+            "children_max": 5
+          },
+          {
+            "level": 1,
+            "parents": 6,
+            "children_min": 18,
+            "children_max": 24
+          },
+          {
+            "level": 2,
+            "parents": 6,
+            "children_min": 12,
+            "children_max": 18
+          },
+          {
+            "level": 3,
+            "parents": 6,
+            "children_min": 6,
+            "children_max": 12
+          }
+        ],
+        "states_materialized_min": 42,
+        "states_materialized_max": 60,
+        "composite_leaves": 1,
+        "leaves_min": 7,
+        "leaves_max": 13
+      },
+      "seconds_low": 4277.421446581849,
+      "seconds_high": 14781.69406080411,
+      "hours_low": 1.1881726240505135,
+      "hours_high": 4.106026128001141,
+      "usd_low": 1.8892,
+      "usd_high": 6.5286,
+      "peak_storage_gib_retained": 40.7358341217041,
+      "peak_storage_gib_working": 127.0640869140625,
+      "total_gib_written": 147.88848090171814,
+      "peak_resident_gib": 14.281736373901367,
+      "per_operator": [
+        {
+          "level": 0,
+          "children_min": 5,
+          "children_max": 5,
+          "mean_node_seconds_low": 196.11802179795862,
+          "mean_node_seconds_high": 349.2890988468391,
+          "max_node_seconds_high": 1513.581492125131,
+          "implementations": [
+            "attention.weight_proxy_v0",
+            "depth.causal_kl_greedy_v1",
+            "depth.positional_v0",
+            "ffn.activation_importance_v0",
+            "width.global_pca_v0"
+          ]
+        },
+        {
+          "level": 1,
+          "children_min": 18,
+          "children_max": 24,
+          "mean_node_seconds_low": 123.02987597211956,
+          "mean_node_seconds_high": 277.08737828672866,
+          "max_node_seconds_high": 1354.1118099456,
+          "implementations": [
+            "attention.weight_proxy_v0",
+            "depth.causal_kl_greedy_v1",
+            "depth.positional_v0",
+            "ffn.activation_importance_v0",
+            "width.global_pca_v0"
+          ]
+        },
+        {
+          "level": 2,
+          "children_min": 12,
+          "children_max": 18,
+          "mean_node_seconds_low": 70.4816199373977,
+          "mean_node_seconds_high": 225.2542206229493,
+          "max_node_seconds_high": 692.042071555531,
+          "implementations": [
+            "attention.weight_proxy_v0",
+            "depth.causal_kl_greedy_v1",
+            "depth.positional_v0",
+            "ffn.activation_importance_v0",
+            "width.global_pca_v0"
+          ]
+        },
+        {
+          "level": 3,
+          "children_min": 6,
+          "children_max": 12,
+          "mean_node_seconds_low": 38.33819755696553,
+          "mean_node_seconds_high": 193.67421424766664,
+          "max_node_seconds_high": 313.8374115882987,
+          "implementations": [
+            "attention.weight_proxy_v0",
+            "depth.causal_kl_greedy_v1",
+            "depth.positional_v0",
+            "ffn.activation_importance_v0",
+            "width.global_pca_v0"
+          ]
+        }
+      ],
+      "notes": [
+        "hardware anchor: ESTIMATED: the L40S's measured 88.83 scaled by the bf16 dense peak ratio 312/362. MFU is assumed to transfer across architectures; it has not been measured on this workload.",
+        "statistics-pass cost is a range; the GPU/CPU split of the float64 accumulation has never been measured separately",
+        "storage: 'working' is the concurrent peak (a level's whole child set is on disk before ranking can start), 'written' is total I/O volume, 'retained' is what survives once pruned weights are released",
+        "A100-SXM-80GB throughput is ESTIMATED, not measured"
+      ],
+      "n_profiles": 1,
+      "beam_width": 6
+    },
+    {
+      "hardware": {
+        "name": "A100-SXM-80GB",
+        "price_per_hour_usd": 1.59,
+        "effective_tflops": 76.56,
+        "vram_gb": 80.0,
+        "measured": false,
+        "source": "ESTIMATED: the L40S's measured 88.83 scaled by the bf16 dense peak ratio 312/362. MFU is assumed to transfer across architectures; it has not been measured on this workload."
+      },
+      "branching": {
+        "differing_fields": [
+          "hidden_size",
+          "intermediate_size",
+          "num_attention_heads",
+          "num_hidden_layers"
+        ],
+        "n_kinds": 4,
+        "implementations_per_field": {
+          "hidden_size": 1,
+          "intermediate_size": 1,
+          "num_attention_heads": 1,
+          "num_hidden_layers": 2
+        },
+        "n_calibration_profiles": 2,
+        "beam_width": 2,
+        "complete_paths_unbeamed": 768,
+        "complete_paths_geometry_only": 48,
+        "kind_orderings": 24,
+        "per_level": [
+          {
+            "level": 0,
+            "parents": 1,
+            "children_min": 10,
+            "children_max": 10
+          },
+          {
+            "level": 1,
+            "parents": 2,
+            "children_min": 12,
+            "children_max": 16
+          },
+          {
+            "level": 2,
+            "parents": 2,
+            "children_min": 8,
+            "children_max": 12
+          },
+          {
+            "level": 3,
+            "parents": 2,
+            "children_min": 4,
+            "children_max": 8
+          }
+        ],
+        "states_materialized_min": 36,
+        "states_materialized_max": 48,
+        "composite_leaves": 2,
+        "leaves_min": 6,
+        "leaves_max": 10
+      },
+      "seconds_low": 4161.229424875402,
+      "seconds_high": 12185.218348016113,
+      "hours_low": 1.1558970624653895,
+      "hours_high": 3.3847828744489203,
+      "usd_low": 1.8379,
+      "usd_high": 5.3818,
+      "peak_storage_gib_retained": 13.578611373901367,
+      "peak_storage_gib_working": 68.20941591262817,
+      "total_gib_written": 131.65803543664515,
+      "peak_resident_gib": 14.281736373901367,
+      "per_operator": [
+        {
+          "level": 0,
+          "children_min": 10,
+          "children_max": 10,
+          "mean_node_seconds_low": 196.11802179795862,
+          "mean_node_seconds_high": 349.2890988468391,
+          "max_node_seconds_high": 1513.581492125131,
+          "implementations": [
+            "attention.weight_proxy_v0",
+            "depth.causal_kl_greedy_v1",
+            "depth.positional_v0",
+            "ffn.activation_importance_v0",
+            "width.global_pca_v0"
+          ]
+        },
+        {
+          "level": 1,
+          "children_min": 12,
+          "children_max": 16,
+          "mean_node_seconds_low": 123.02987597211956,
+          "mean_node_seconds_high": 277.08737828672866,
+          "max_node_seconds_high": 1354.1118099456,
+          "implementations": [
+            "attention.weight_proxy_v0",
+            "depth.causal_kl_greedy_v1",
+            "depth.positional_v0",
+            "ffn.activation_importance_v0",
+            "width.global_pca_v0"
+          ]
+        },
+        {
+          "level": 2,
+          "children_min": 8,
+          "children_max": 12,
+          "mean_node_seconds_low": 70.4816199373977,
+          "mean_node_seconds_high": 225.2542206229493,
+          "max_node_seconds_high": 692.042071555531,
+          "implementations": [
+            "attention.weight_proxy_v0",
+            "depth.causal_kl_greedy_v1",
+            "depth.positional_v0",
+            "ffn.activation_importance_v0",
+            "width.global_pca_v0"
+          ]
+        },
+        {
+          "level": 3,
+          "children_min": 4,
+          "children_max": 8,
+          "mean_node_seconds_low": 38.33819755696553,
+          "mean_node_seconds_high": 193.67421424766664,
+          "max_node_seconds_high": 313.8374115882987,
+          "implementations": [
+            "attention.weight_proxy_v0",
+            "depth.causal_kl_greedy_v1",
+            "depth.positional_v0",
+            "ffn.activation_importance_v0",
+            "width.global_pca_v0"
+          ]
+        }
+      ],
+      "notes": [
+        "hardware anchor: ESTIMATED: the L40S's measured 88.83 scaled by the bf16 dense peak ratio 312/362. MFU is assumed to transfer across architectures; it has not been measured on this workload.",
+        "statistics-pass cost is a range; the GPU/CPU split of the float64 accumulation has never been measured separately",
+        "storage: 'working' is the concurrent peak (a level's whole child set is on disk before ranking can start), 'written' is total I/O volume, 'retained' is what survives once pruned weights are released",
+        "A100-SXM-80GB throughput is ESTIMATED, not measured"
+      ],
+      "n_profiles": 2,
+      "beam_width": 2
+    },
+    {
+      "hardware": {
+        "name": "A100-SXM-80GB",
+        "price_per_hour_usd": 1.59,
+        "effective_tflops": 76.56,
+        "vram_gb": 80.0,
+        "measured": false,
+        "source": "ESTIMATED: the L40S's measured 88.83 scaled by the bf16 dense peak ratio 312/362. MFU is assumed to transfer across architectures; it has not been measured on this workload."
+      },
+      "branching": {
+        "differing_fields": [
+          "hidden_size",
+          "intermediate_size",
+          "num_attention_heads",
+          "num_hidden_layers"
+        ],
+        "n_kinds": 4,
+        "implementations_per_field": {
+          "hidden_size": 1,
+          "intermediate_size": 1,
+          "num_attention_heads": 1,
+          "num_hidden_layers": 2
+        },
+        "n_calibration_profiles": 2,
+        "beam_width": 3,
+        "complete_paths_unbeamed": 768,
+        "complete_paths_geometry_only": 48,
+        "kind_orderings": 24,
+        "per_level": [
+          {
+            "level": 0,
+            "parents": 1,
+            "children_min": 10,
+            "children_max": 10
+          },
+          {
+            "level": 1,
+            "parents": 3,
+            "children_min": 18,
+            "children_max": 24
+          },
+          {
+            "level": 2,
+            "parents": 3,
+            "children_min": 12,
+            "children_max": 18
+          },
+          {
+            "level": 3,
+            "parents": 3,
+            "children_min": 6,
+            "children_max": 12
+          }
+        ],
+        "states_materialized_min": 48,
+        "states_materialized_max": 66,
+        "composite_leaves": 2,
+        "leaves_min": 8,
+        "leaves_max": 14
+      },
+      "seconds_low": 5258.011555571641,
+      "seconds_high": 16528.139555038302,
+      "hours_low": 1.460558765436567,
+      "hours_high": 4.591149876399529,
+      "usd_low": 2.3223,
+      "usd_high": 7.2999,
+      "peak_storage_gib_retained": 20.36791706085205,
+      "peak_storage_gib_working": 101.2571964263916,
+      "total_gib_written": 172.6877670288086,
+      "peak_resident_gib": 14.281736373901367,
+      "per_operator": [
+        {
+          "level": 0,
+          "children_min": 10,
+          "children_max": 10,
+          "mean_node_seconds_low": 196.11802179795862,
+          "mean_node_seconds_high": 349.2890988468391,
+          "max_node_seconds_high": 1513.581492125131,
+          "implementations": [
+            "attention.weight_proxy_v0",
+            "depth.causal_kl_greedy_v1",
+            "depth.positional_v0",
+            "ffn.activation_importance_v0",
+            "width.global_pca_v0"
+          ]
+        },
+        {
+          "level": 1,
+          "children_min": 18,
+          "children_max": 24,
+          "mean_node_seconds_low": 123.02987597211956,
+          "mean_node_seconds_high": 277.08737828672866,
+          "max_node_seconds_high": 1354.1118099456,
+          "implementations": [
+            "attention.weight_proxy_v0",
+            "depth.causal_kl_greedy_v1",
+            "depth.positional_v0",
+            "ffn.activation_importance_v0",
+            "width.global_pca_v0"
+          ]
+        },
+        {
+          "level": 2,
+          "children_min": 12,
+          "children_max": 18,
+          "mean_node_seconds_low": 70.4816199373977,
+          "mean_node_seconds_high": 225.2542206229493,
+          "max_node_seconds_high": 692.042071555531,
+          "implementations": [
+            "attention.weight_proxy_v0",
+            "depth.causal_kl_greedy_v1",
+            "depth.positional_v0",
+            "ffn.activation_importance_v0",
+            "width.global_pca_v0"
+          ]
+        },
+        {
+          "level": 3,
+          "children_min": 6,
+          "children_max": 12,
+          "mean_node_seconds_low": 38.33819755696553,
+          "mean_node_seconds_high": 193.67421424766664,
+          "max_node_seconds_high": 313.8374115882987,
+          "implementations": [
+            "attention.weight_proxy_v0",
+            "depth.causal_kl_greedy_v1",
+            "depth.positional_v0",
+            "ffn.activation_importance_v0",
+            "width.global_pca_v0"
+          ]
+        }
+      ],
+      "notes": [
+        "hardware anchor: ESTIMATED: the L40S's measured 88.83 scaled by the bf16 dense peak ratio 312/362. MFU is assumed to transfer across architectures; it has not been measured on this workload.",
+        "statistics-pass cost is a range; the GPU/CPU split of the float64 accumulation has never been measured separately",
+        "storage: 'working' is the concurrent peak (a level's whole child set is on disk before ranking can start), 'written' is total I/O volume, 'retained' is what survives once pruned weights are released",
+        "A100-SXM-80GB throughput is ESTIMATED, not measured"
+      ],
+      "n_profiles": 2,
+      "beam_width": 3
+    },
+    {
+      "hardware": {
+        "name": "A100-SXM-80GB",
+        "price_per_hour_usd": 1.59,
+        "effective_tflops": 76.56,
+        "vram_gb": 80.0,
+        "measured": false,
+        "source": "ESTIMATED: the L40S's measured 88.83 scaled by the bf16 dense peak ratio 312/362. MFU is assumed to transfer across architectures; it has not been measured on this workload."
+      },
+      "branching": {
+        "differing_fields": [
+          "hidden_size",
+          "intermediate_size",
+          "num_attention_heads",
+          "num_hidden_layers"
+        ],
+        "n_kinds": 4,
+        "implementations_per_field": {
+          "hidden_size": 1,
+          "intermediate_size": 1,
+          "num_attention_heads": 1,
+          "num_hidden_layers": 2
+        },
+        "n_calibration_profiles": 2,
+        "beam_width": 4,
+        "complete_paths_unbeamed": 768,
+        "complete_paths_geometry_only": 48,
+        "kind_orderings": 24,
+        "per_level": [
+          {
+            "level": 0,
+            "parents": 1,
+            "children_min": 10,
+            "children_max": 10
+          },
+          {
+            "level": 1,
+            "parents": 4,
+            "children_min": 24,
+            "children_max": 32
+          },
+          {
+            "level": 2,
+            "parents": 4,
+            "children_min": 16,
+            "children_max": 24
+          },
+          {
+            "level": 3,
+            "parents": 4,
+            "children_min": 8,
+            "children_max": 16
+          }
+        ],
+        "states_materialized_min": 60,
+        "states_materialized_max": 84,
+        "composite_leaves": 2,
+        "leaves_min": 10,
+        "leaves_max": 18
+      },
+      "seconds_low": 6354.793686267881,
+      "seconds_high": 20871.060762060493,
+      "hours_low": 1.7652204684077446,
+      "hours_high": 5.797516878350137,
+      "usd_low": 2.8067,
+      "usd_high": 9.2181,
+      "peak_storage_gib_retained": 27.157222747802734,
+      "peak_storage_gib_working": 135.00959523487836,
+      "total_gib_written": 213.71749862004071,
+      "peak_resident_gib": 14.281736373901367,
+      "per_operator": [
+        {
+          "level": 0,
+          "children_min": 10,
+          "children_max": 10,
+          "mean_node_seconds_low": 196.11802179795862,
+          "mean_node_seconds_high": 349.2890988468391,
+          "max_node_seconds_high": 1513.581492125131,
+          "implementations": [
+            "attention.weight_proxy_v0",
+            "depth.causal_kl_greedy_v1",
+            "depth.positional_v0",
+            "ffn.activation_importance_v0",
+            "width.global_pca_v0"
+          ]
+        },
+        {
+          "level": 1,
+          "children_min": 24,
+          "children_max": 32,
+          "mean_node_seconds_low": 123.02987597211956,
+          "mean_node_seconds_high": 277.08737828672866,
+          "max_node_seconds_high": 1354.1118099456,
+          "implementations": [
+            "attention.weight_proxy_v0",
+            "depth.causal_kl_greedy_v1",
+            "depth.positional_v0",
+            "ffn.activation_importance_v0",
+            "width.global_pca_v0"
+          ]
+        },
+        {
+          "level": 2,
+          "children_min": 16,
+          "children_max": 24,
+          "mean_node_seconds_low": 70.4816199373977,
+          "mean_node_seconds_high": 225.2542206229493,
+          "max_node_seconds_high": 692.042071555531,
+          "implementations": [
+            "attention.weight_proxy_v0",
+            "depth.causal_kl_greedy_v1",
+            "depth.positional_v0",
+            "ffn.activation_importance_v0",
+            "width.global_pca_v0"
+          ]
+        },
+        {
+          "level": 3,
+          "children_min": 8,
+          "children_max": 16,
+          "mean_node_seconds_low": 38.33819755696553,
+          "mean_node_seconds_high": 193.67421424766664,
+          "max_node_seconds_high": 313.8374115882987,
+          "implementations": [
+            "attention.weight_proxy_v0",
+            "depth.causal_kl_greedy_v1",
+            "depth.positional_v0",
+            "ffn.activation_importance_v0",
+            "width.global_pca_v0"
+          ]
+        }
+      ],
+      "notes": [
+        "hardware anchor: ESTIMATED: the L40S's measured 88.83 scaled by the bf16 dense peak ratio 312/362. MFU is assumed to transfer across architectures; it has not been measured on this workload.",
+        "statistics-pass cost is a range; the GPU/CPU split of the float64 accumulation has never been measured separately",
+        "storage: 'working' is the concurrent peak (a level's whole child set is on disk before ranking can start), 'written' is total I/O volume, 'retained' is what survives once pruned weights are released",
+        "A100-SXM-80GB throughput is ESTIMATED, not measured"
+      ],
+      "n_profiles": 2,
+      "beam_width": 4
+    },
+    {
+      "hardware": {
+        "name": "A100-SXM-80GB",
+        "price_per_hour_usd": 1.59,
+        "effective_tflops": 76.56,
+        "vram_gb": 80.0,
+        "measured": false,
+        "source": "ESTIMATED: the L40S's measured 88.83 scaled by the bf16 dense peak ratio 312/362. MFU is assumed to transfer across architectures; it has not been measured on this workload."
+      },
+      "branching": {
+        "differing_fields": [
+          "hidden_size",
+          "intermediate_size",
+          "num_attention_heads",
+          "num_hidden_layers"
+        ],
+        "n_kinds": 4,
+        "implementations_per_field": {
+          "hidden_size": 1,
+          "intermediate_size": 1,
+          "num_attention_heads": 1,
+          "num_hidden_layers": 2
+        },
+        "n_calibration_profiles": 2,
+        "beam_width": 6,
+        "complete_paths_unbeamed": 768,
+        "complete_paths_geometry_only": 48,
+        "kind_orderings": 24,
+        "per_level": [
+          {
+            "level": 0,
+            "parents": 1,
+            "children_min": 10,
+            "children_max": 10
+          },
+          {
+            "level": 1,
+            "parents": 6,
+            "children_min": 36,
+            "children_max": 48
+          },
+          {
+            "level": 2,
+            "parents": 6,
+            "children_min": 24,
+            "children_max": 36
+          },
+          {
+            "level": 3,
+            "parents": 6,
+            "children_min": 12,
+            "children_max": 24
+          }
+        ],
+        "states_materialized_min": 84,
+        "states_materialized_max": 120,
+        "composite_leaves": 2,
+        "leaves_min": 14,
+        "leaves_max": 26
+      },
+      "seconds_low": 8548.357947660359,
+      "seconds_high": 29556.90317610488,
+      "hours_low": 2.3745438743501,
+      "hours_high": 8.210250882251355,
+      "usd_low": 3.7755,
+      "usd_high": 13.0543,
+      "peak_storage_gib_retained": 40.7358341217041,
+      "peak_storage_gib_working": 202.5143928527832,
+      "total_gib_written": 295.7769618034363,
+      "peak_resident_gib": 14.281736373901367,
+      "per_operator": [
+        {
+          "level": 0,
+          "children_min": 10,
+          "children_max": 10,
+          "mean_node_seconds_low": 196.11802179795862,
+          "mean_node_seconds_high": 349.2890988468391,
+          "max_node_seconds_high": 1513.581492125131,
+          "implementations": [
+            "attention.weight_proxy_v0",
+            "depth.causal_kl_greedy_v1",
+            "depth.positional_v0",
+            "ffn.activation_importance_v0",
+            "width.global_pca_v0"
+          ]
+        },
+        {
+          "level": 1,
+          "children_min": 36,
+          "children_max": 48,
+          "mean_node_seconds_low": 123.02987597211956,
+          "mean_node_seconds_high": 277.08737828672866,
+          "max_node_seconds_high": 1354.1118099456,
+          "implementations": [
+            "attention.weight_proxy_v0",
+            "depth.causal_kl_greedy_v1",
+            "depth.positional_v0",
+            "ffn.activation_importance_v0",
+            "width.global_pca_v0"
+          ]
+        },
+        {
+          "level": 2,
+          "children_min": 24,
+          "children_max": 36,
+          "mean_node_seconds_low": 70.4816199373977,
+          "mean_node_seconds_high": 225.2542206229493,
+          "max_node_seconds_high": 692.042071555531,
+          "implementations": [
+            "attention.weight_proxy_v0",
+            "depth.causal_kl_greedy_v1",
+            "depth.positional_v0",
+            "ffn.activation_importance_v0",
+            "width.global_pca_v0"
+          ]
+        },
+        {
+          "level": 3,
+          "children_min": 12,
+          "children_max": 24,
+          "mean_node_seconds_low": 38.33819755696553,
+          "mean_node_seconds_high": 193.67421424766664,
+          "max_node_seconds_high": 313.8374115882987,
+          "implementations": [
+            "attention.weight_proxy_v0",
+            "depth.causal_kl_greedy_v1",
+            "depth.positional_v0",
+            "ffn.activation_importance_v0",
+            "width.global_pca_v0"
+          ]
+        }
+      ],
+      "notes": [
+        "hardware anchor: ESTIMATED: the L40S's measured 88.83 scaled by the bf16 dense peak ratio 312/362. MFU is assumed to transfer across architectures; it has not been measured on this workload.",
+        "statistics-pass cost is a range; the GPU/CPU split of the float64 accumulation has never been measured separately",
+        "storage: 'working' is the concurrent peak (a level's whole child set is on disk before ranking can start), 'written' is total I/O volume, 'retained' is what survives once pruned weights are released",
+        "A100-SXM-80GB throughput is ESTIMATED, not measured"
+      ],
+      "n_profiles": 2,
+      "beam_width": 6
+    },
+    {
+      "hardware": {
+        "name": "A100-SXM-80GB",
+        "price_per_hour_usd": 1.59,
+        "effective_tflops": 76.56,
+        "vram_gb": 80.0,
+        "measured": false,
+        "source": "ESTIMATED: the L40S's measured 88.83 scaled by the bf16 dense peak ratio 312/362. MFU is assumed to transfer across architectures; it has not been measured on this workload."
+      },
+      "branching": {
+        "differing_fields": [
+          "hidden_size",
+          "intermediate_size",
+          "num_attention_heads",
+          "num_hidden_layers"
+        ],
+        "n_kinds": 4,
+        "implementations_per_field": {
+          "hidden_size": 1,
+          "intermediate_size": 1,
+          "num_attention_heads": 1,
+          "num_hidden_layers": 2
+        },
+        "n_calibration_profiles": 3,
+        "beam_width": 2,
+        "complete_paths_unbeamed": 3888,
+        "complete_paths_geometry_only": 48,
+        "kind_orderings": 24,
+        "per_level": [
+          {
+            "level": 0,
+            "parents": 1,
+            "children_min": 15,
+            "children_max": 15
+          },
+          {
+            "level": 1,
+            "parents": 2,
+            "children_min": 18,
+            "children_max": 24
+          },
+          {
+            "level": 2,
+            "parents": 2,
+            "children_min": 12,
+            "children_max": 18
+          },
+          {
+            "level": 3,
+            "parents": 2,
+            "children_min": 6,
+            "children_max": 12
+          }
+        ],
+        "states_materialized_min": 54,
+        "states_materialized_max": 72,
+        "composite_leaves": 3,
+        "leaves_min": 9,
+        "leaves_max": 15
+      },
+      "seconds_low": 6238.6016645614345,
+      "seconds_high": 18274.5850492725,
+      "hours_low": 1.7329449068226206,
+      "hours_high": 5.076273624797917,
+      "usd_low": 2.7554,
+      "usd_high": 8.0713,
+      "peak_storage_gib_retained": 13.578611373901367,
+      "peak_storage_gib_working": 93.00870203971863,
+      "total_gib_written": 197.48705315589905,
+      "peak_resident_gib": 14.281736373901367,
+      "per_operator": [
+        {
+          "level": 0,
+          "children_min": 15,
+          "children_max": 15,
+          "mean_node_seconds_low": 196.11802179795862,
+          "mean_node_seconds_high": 349.2890988468391,
+          "max_node_seconds_high": 1513.581492125131,
+          "implementations": [
+            "attention.weight_proxy_v0",
+            "depth.causal_kl_greedy_v1",
+            "depth.positional_v0",
+            "ffn.activation_importance_v0",
+            "width.global_pca_v0"
+          ]
+        },
+        {
+          "level": 1,
+          "children_min": 18,
+          "children_max": 24,
+          "mean_node_seconds_low": 123.02987597211956,
+          "mean_node_seconds_high": 277.08737828672866,
+          "max_node_seconds_high": 1354.1118099456,
+          "implementations": [
+            "attention.weight_proxy_v0",
+            "depth.causal_kl_greedy_v1",
+            "depth.positional_v0",
+            "ffn.activation_importance_v0",
+            "width.global_pca_v0"
+          ]
+        },
+        {
+          "level": 2,
+          "children_min": 12,
+          "children_max": 18,
+          "mean_node_seconds_low": 70.4816199373977,
+          "mean_node_seconds_high": 225.2542206229493,
+          "max_node_seconds_high": 692.042071555531,
+          "implementations": [
+            "attention.weight_proxy_v0",
+            "depth.causal_kl_greedy_v1",
+            "depth.positional_v0",
+            "ffn.activation_importance_v0",
+            "width.global_pca_v0"
+          ]
+        },
+        {
+          "level": 3,
+          "children_min": 6,
+          "children_max": 12,
+          "mean_node_seconds_low": 38.33819755696553,
+          "mean_node_seconds_high": 193.67421424766664,
+          "max_node_seconds_high": 313.8374115882987,
+          "implementations": [
+            "attention.weight_proxy_v0",
+            "depth.causal_kl_greedy_v1",
+            "depth.positional_v0",
+            "ffn.activation_importance_v0",
+            "width.global_pca_v0"
+          ]
+        }
+      ],
+      "notes": [
+        "hardware anchor: ESTIMATED: the L40S's measured 88.83 scaled by the bf16 dense peak ratio 312/362. MFU is assumed to transfer across architectures; it has not been measured on this workload.",
+        "statistics-pass cost is a range; the GPU/CPU split of the float64 accumulation has never been measured separately",
+        "storage: 'working' is the concurrent peak (a level's whole child set is on disk before ranking can start), 'written' is total I/O volume, 'retained' is what survives once pruned weights are released",
+        "A100-SXM-80GB throughput is ESTIMATED, not measured"
+      ],
+      "n_profiles": 3,
+      "beam_width": 2
+    },
+    {
+      "hardware": {
+        "name": "A100-SXM-80GB",
+        "price_per_hour_usd": 1.59,
+        "effective_tflops": 76.56,
+        "vram_gb": 80.0,
+        "measured": false,
+        "source": "ESTIMATED: the L40S's measured 88.83 scaled by the bf16 dense peak ratio 312/362. MFU is assumed to transfer across architectures; it has not been measured on this workload."
+      },
+      "branching": {
+        "differing_fields": [
+          "hidden_size",
+          "intermediate_size",
+          "num_attention_heads",
+          "num_hidden_layers"
+        ],
+        "n_kinds": 4,
+        "implementations_per_field": {
+          "hidden_size": 1,
+          "intermediate_size": 1,
+          "num_attention_heads": 1,
+          "num_hidden_layers": 2
+        },
+        "n_calibration_profiles": 3,
+        "beam_width": 3,
+        "complete_paths_unbeamed": 3888,
+        "complete_paths_geometry_only": 48,
+        "kind_orderings": 24,
+        "per_level": [
+          {
+            "level": 0,
+            "parents": 1,
+            "children_min": 15,
+            "children_max": 15
+          },
+          {
+            "level": 1,
+            "parents": 3,
+            "children_min": 27,
+            "children_max": 36
+          },
+          {
+            "level": 2,
+            "parents": 3,
+            "children_min": 18,
+            "children_max": 27
+          },
+          {
+            "level": 3,
+            "parents": 3,
+            "children_min": 9,
+            "children_max": 18
+          }
+        ],
+        "states_materialized_min": 72,
+        "states_materialized_max": 99,
+        "composite_leaves": 3,
+        "leaves_min": 12,
+        "leaves_max": 21
+      },
+      "seconds_low": 7883.774860605793,
+      "seconds_high": 24788.966859805787,
+      "hours_low": 2.189937461279387,
+      "hours_high": 6.88582412772383,
+      "usd_low": 3.482,
+      "usd_high": 10.9485,
+      "peak_storage_gib_retained": 20.36791706085205,
+      "peak_storage_gib_working": 138.98234939575195,
+      "total_gib_written": 259.0316505432129,
+      "peak_resident_gib": 14.281736373901367,
+      "per_operator": [
+        {
+          "level": 0,
+          "children_min": 15,
+          "children_max": 15,
+          "mean_node_seconds_low": 196.11802179795862,
+          "mean_node_seconds_high": 349.2890988468391,
+          "max_node_seconds_high": 1513.581492125131,
+          "implementations": [
+            "attention.weight_proxy_v0",
+            "depth.causal_kl_greedy_v1",
+            "depth.positional_v0",
+            "ffn.activation_importance_v0",
+            "width.global_pca_v0"
+          ]
+        },
+        {
+          "level": 1,
+          "children_min": 27,
+          "children_max": 36,
+          "mean_node_seconds_low": 123.02987597211956,
+          "mean_node_seconds_high": 277.08737828672866,
+          "max_node_seconds_high": 1354.1118099456,
+          "implementations": [
+            "attention.weight_proxy_v0",
+            "depth.causal_kl_greedy_v1",
+            "depth.positional_v0",
+            "ffn.activation_importance_v0",
+            "width.global_pca_v0"
+          ]
+        },
+        {
+          "level": 2,
+          "children_min": 18,
+          "children_max": 27,
+          "mean_node_seconds_low": 70.4816199373977,
+          "mean_node_seconds_high": 225.2542206229493,
+          "max_node_seconds_high": 692.042071555531,
+          "implementations": [
+            "attention.weight_proxy_v0",
+            "depth.causal_kl_greedy_v1",
+            "depth.positional_v0",
+            "ffn.activation_importance_v0",
+            "width.global_pca_v0"
+          ]
+        },
+        {
+          "level": 3,
+          "children_min": 9,
+          "children_max": 18,
+          "mean_node_seconds_low": 38.33819755696553,
+          "mean_node_seconds_high": 193.67421424766664,
+          "max_node_seconds_high": 313.8374115882987,
+          "implementations": [
+            "attention.weight_proxy_v0",
+            "depth.causal_kl_greedy_v1",
+            "depth.positional_v0",
+            "ffn.activation_importance_v0",
+            "width.global_pca_v0"
+          ]
+        }
+      ],
+      "notes": [
+        "hardware anchor: ESTIMATED: the L40S's measured 88.83 scaled by the bf16 dense peak ratio 312/362. MFU is assumed to transfer across architectures; it has not been measured on this workload.",
+        "statistics-pass cost is a range; the GPU/CPU split of the float64 accumulation has never been measured separately",
+        "storage: 'working' is the concurrent peak (a level's whole child set is on disk before ranking can start), 'written' is total I/O volume, 'retained' is what survives once pruned weights are released",
+        "A100-SXM-80GB throughput is ESTIMATED, not measured"
+      ],
+      "n_profiles": 3,
+      "beam_width": 3
+    },
+    {
+      "hardware": {
+        "name": "A100-SXM-80GB",
+        "price_per_hour_usd": 1.59,
+        "effective_tflops": 76.56,
+        "vram_gb": 80.0,
+        "measured": false,
+        "source": "ESTIMATED: the L40S's measured 88.83 scaled by the bf16 dense peak ratio 312/362. MFU is assumed to transfer across architectures; it has not been measured on this workload."
+      },
+      "branching": {
+        "differing_fields": [
+          "hidden_size",
+          "intermediate_size",
+          "num_attention_heads",
+          "num_hidden_layers"
+        ],
+        "n_kinds": 4,
+        "implementations_per_field": {
+          "hidden_size": 1,
+          "intermediate_size": 1,
+          "num_attention_heads": 1,
+          "num_hidden_layers": 2
+        },
+        "n_calibration_profiles": 3,
+        "beam_width": 4,
+        "complete_paths_unbeamed": 3888,
+        "complete_paths_geometry_only": 48,
+        "kind_orderings": 24,
+        "per_level": [
+          {
+            "level": 0,
+            "parents": 1,
+            "children_min": 15,
+            "children_max": 15
+          },
+          {
+            "level": 1,
+            "parents": 4,
+            "children_min": 36,
+            "children_max": 48
+          },
+          {
+            "level": 2,
+            "parents": 4,
+            "children_min": 24,
+            "children_max": 36
+          },
+          {
+            "level": 3,
+            "parents": 4,
+            "children_min": 12,
+            "children_max": 24
+          }
+        ],
+        "states_materialized_min": 90,
+        "states_materialized_max": 126,
+        "composite_leaves": 3,
+        "leaves_min": 15,
+        "leaves_max": 27
+      },
+      "seconds_low": 9528.948056650152,
+      "seconds_high": 31303.348670339074,
+      "hours_low": 2.646930015736153,
+      "hours_high": 8.695374630649743,
+      "usd_low": 4.2086,
+      "usd_high": 13.8256,
+      "peak_storage_gib_retained": 27.157222747802734,
+      "peak_storage_gib_working": 185.30979919433594,
+      "total_gib_written": 320.57624793052673,
+      "peak_resident_gib": 14.281736373901367,
+      "per_operator": [
+        {
+          "level": 0,
+          "children_min": 15,
+          "children_max": 15,
+          "mean_node_seconds_low": 196.11802179795862,
+          "mean_node_seconds_high": 349.2890988468391,
+          "max_node_seconds_high": 1513.581492125131,
+          "implementations": [
+            "attention.weight_proxy_v0",
+            "depth.causal_kl_greedy_v1",
+            "depth.positional_v0",
+            "ffn.activation_importance_v0",
+            "width.global_pca_v0"
+          ]
+        },
+        {
+          "level": 1,
+          "children_min": 36,
+          "children_max": 48,
+          "mean_node_seconds_low": 123.02987597211956,
+          "mean_node_seconds_high": 277.08737828672866,
+          "max_node_seconds_high": 1354.1118099456,
+          "implementations": [
+            "attention.weight_proxy_v0",
+            "depth.causal_kl_greedy_v1",
+            "depth.positional_v0",
+            "ffn.activation_importance_v0",
+            "width.global_pca_v0"
+          ]
+        },
+        {
+          "level": 2,
+          "children_min": 24,
+          "children_max": 36,
+          "mean_node_seconds_low": 70.4816199373977,
+          "mean_node_seconds_high": 225.2542206229493,
+          "max_node_seconds_high": 692.042071555531,
+          "implementations": [
+            "attention.weight_proxy_v0",
+            "depth.causal_kl_greedy_v1",
+            "depth.positional_v0",
+            "ffn.activation_importance_v0",
+            "width.global_pca_v0"
+          ]
+        },
+        {
+          "level": 3,
+          "children_min": 12,
+          "children_max": 24,
+          "mean_node_seconds_low": 38.33819755696553,
+          "mean_node_seconds_high": 193.67421424766664,
+          "max_node_seconds_high": 313.8374115882987,
+          "implementations": [
+            "attention.weight_proxy_v0",
+            "depth.causal_kl_greedy_v1",
+            "depth.positional_v0",
+            "ffn.activation_importance_v0",
+            "width.global_pca_v0"
+          ]
+        }
+      ],
+      "notes": [
+        "hardware anchor: ESTIMATED: the L40S's measured 88.83 scaled by the bf16 dense peak ratio 312/362. MFU is assumed to transfer across architectures; it has not been measured on this workload.",
+        "statistics-pass cost is a range; the GPU/CPU split of the float64 accumulation has never been measured separately",
+        "storage: 'working' is the concurrent peak (a level's whole child set is on disk before ranking can start), 'written' is total I/O volume, 'retained' is what survives once pruned weights are released",
+        "A100-SXM-80GB throughput is ESTIMATED, not measured"
+      ],
+      "n_profiles": 3,
+      "beam_width": 4
+    },
+    {
+      "hardware": {
+        "name": "A100-SXM-80GB",
+        "price_per_hour_usd": 1.59,
+        "effective_tflops": 76.56,
+        "vram_gb": 80.0,
+        "measured": false,
+        "source": "ESTIMATED: the L40S's measured 88.83 scaled by the bf16 dense peak ratio 312/362. MFU is assumed to transfer across architectures; it has not been measured on this workload."
+      },
+      "branching": {
+        "differing_fields": [
+          "hidden_size",
+          "intermediate_size",
+          "num_attention_heads",
+          "num_hidden_layers"
+        ],
+        "n_kinds": 4,
+        "implementations_per_field": {
+          "hidden_size": 1,
+          "intermediate_size": 1,
+          "num_attention_heads": 1,
+          "num_hidden_layers": 2
+        },
+        "n_calibration_profiles": 3,
+        "beam_width": 6,
+        "complete_paths_unbeamed": 3888,
+        "complete_paths_geometry_only": 48,
+        "kind_orderings": 24,
+        "per_level": [
+          {
+            "level": 0,
+            "parents": 1,
+            "children_min": 15,
+            "children_max": 15
+          },
+          {
+            "level": 1,
+            "parents": 6,
+            "children_min": 54,
+            "children_max": 72
+          },
+          {
+            "level": 2,
+            "parents": 6,
+            "children_min": 36,
+            "children_max": 54
+          },
+          {
+            "level": 3,
+            "parents": 6,
+            "children_min": 18,
+            "children_max": 36
+          }
+        ],
+        "states_materialized_min": 126,
+        "states_materialized_max": 180,
+        "composite_leaves": 3,
+        "leaves_min": 21,
+        "leaves_max": 39
+      },
+      "seconds_low": 12819.294448738869,
+      "seconds_high": 44332.112291405654,
+      "hours_low": 3.5609151246496857,
+      "hours_high": 12.314475636501571,
+      "usd_low": 5.6619,
+      "usd_high": 19.58,
+      "peak_storage_gib_retained": 40.7358341217041,
+      "peak_storage_gib_working": 277.9646987915039,
+      "total_gib_written": 443.6654427051544,
+      "peak_resident_gib": 14.281736373901367,
+      "per_operator": [
+        {
+          "level": 0,
+          "children_min": 15,
+          "children_max": 15,
+          "mean_node_seconds_low": 196.11802179795862,
+          "mean_node_seconds_high": 349.2890988468391,
+          "max_node_seconds_high": 1513.581492125131,
+          "implementations": [
+            "attention.weight_proxy_v0",
+            "depth.causal_kl_greedy_v1",
+            "depth.positional_v0",
+            "ffn.activation_importance_v0",
+            "width.global_pca_v0"
+          ]
+        },
+        {
+          "level": 1,
+          "children_min": 54,
+          "children_max": 72,
+          "mean_node_seconds_low": 123.02987597211956,
+          "mean_node_seconds_high": 277.08737828672866,
+          "max_node_seconds_high": 1354.1118099456,
+          "implementations": [
+            "attention.weight_proxy_v0",
+            "depth.causal_kl_greedy_v1",
+            "depth.positional_v0",
+            "ffn.activation_importance_v0",
+            "width.global_pca_v0"
+          ]
+        },
+        {
+          "level": 2,
+          "children_min": 36,
+          "children_max": 54,
+          "mean_node_seconds_low": 70.4816199373977,
+          "mean_node_seconds_high": 225.2542206229493,
+          "max_node_seconds_high": 692.042071555531,
+          "implementations": [
+            "attention.weight_proxy_v0",
+            "depth.causal_kl_greedy_v1",
+            "depth.positional_v0",
+            "ffn.activation_importance_v0",
+            "width.global_pca_v0"
+          ]
+        },
+        {
+          "level": 3,
+          "children_min": 18,
+          "children_max": 36,
+          "mean_node_seconds_low": 38.33819755696553,
+          "mean_node_seconds_high": 193.67421424766664,
+          "max_node_seconds_high": 313.8374115882987,
+          "implementations": [
+            "attention.weight_proxy_v0",
+            "depth.causal_kl_greedy_v1",
+            "depth.positional_v0",
+            "ffn.activation_importance_v0",
+            "width.global_pca_v0"
+          ]
+        }
+      ],
+      "notes": [
+        "hardware anchor: ESTIMATED: the L40S's measured 88.83 scaled by the bf16 dense peak ratio 312/362. MFU is assumed to transfer across architectures; it has not been measured on this workload.",
+        "statistics-pass cost is a range; the GPU/CPU split of the float64 accumulation has never been measured separately",
+        "storage: 'working' is the concurrent peak (a level's whole child set is on disk before ranking can start), 'written' is total I/O volume, 'retained' is what survives once pruned weights are released",
+        "A100-SXM-80GB throughput is ESTIMATED, not measured"
+      ],
+      "n_profiles": 3,
+      "beam_width": 6
+    }
+  ],
+  "sizes": {
+    "teacher_ckpt_gib": 7.492430686950684,
+    "target_ckpt_gib": 1.1102294921875,
+    "depth_only_intermediate_gib": 5.9884443283081055,
+    "activation_stats_gib": 1.8129911422729492
+  },
+  "recovery": {
+    "recipe": {
+      "recipe_id": "e1_p1_kd_heavy@0.86M",
+      "ce_weight": 0.25,
+      "kd_weight": 1.0,
+      "temperature": 1.0,
+      "kd_scope": "all",
+      "tokens": 860000,
+      "pack": "artifacts/stage3/ladder_uniform_probe",
+      "pack_sha256": "6f324cb0f37bc0f07128e554ce8c161879419537478950496534f75fcecb249c",
+      "block_len": 8192,
+      "description": "The recovery recipe every E1 arm used, at the rung the frozen battery was sampled from. Held fixed so a difference between two probes is a difference between two initializations."
+    },
+    "anchors": {
+      "probe_steps": 1023,
+      "probe_steps_source": "configs/stage3/e1/e1_r0860k_sa_pca.json",
+      "seconds_per_step": 4.15,
+      "seconds_per_step_source": "E6b measured, 596M student + 4B teacher",
+      "battery_eval_usd": 0.236,
+      "battery_eval_source": "E6: $2.36 over 10 arms on the 150-prompt battery",
+      "overhead_factor": 1.2,
+      "overhead_status": "STATED, not measured"
+    },
+    "halving_options": [
+      {
+        "top_n": 3,
+        "survivors": 2,
+        "probes": 5,
+        "per_probe_usd": 1.637,
+        "total_usd": 8.185,
+        "total_hours": 7.076,
+        "note": "3 leaves on seed sa, then 2 survivors on seed sb; two seeds because the behaviour metric's seed-only spread is 0.1290"
+      },
+      {
+        "top_n": 4,
+        "survivors": 2,
+        "probes": 6,
+        "per_probe_usd": 1.637,
+        "total_usd": 9.822,
+        "total_hours": 8.491,
+        "note": "4 leaves on seed sa, then 2 survivors on seed sb; two seeds because the behaviour metric's seed-only spread is 0.1290"
+      },
+      {
+        "top_n": 6,
+        "survivors": 3,
+        "probes": 9,
+        "per_probe_usd": 1.637,
+        "total_usd": 14.733,
+        "total_hours": 12.736,
+        "note": "6 leaves on seed sa, then 3 survivors on seed sb; two seeds because the behaviour metric's seed-only spread is 0.1290"
+      },
+      {
+        "top_n": 8,
+        "survivors": 3,
+        "probes": 11,
+        "per_probe_usd": 1.637,
+        "total_usd": 18.007,
+        "total_hours": 15.567,
+        "note": "8 leaves on seed sa, then 3 survivors on seed sb; two seeds because the behaviour metric's seed-only spread is 0.1290"
+      }
+    ]
+  },
+  "caveats": [
+    "the statistics-pass GPU/CPU split has never been measured; every cost here is reported as a low/high range because of it",
+    "A100 throughput is scaled from the L40S measurement by peak bf16 ratio and is ESTIMATED",
+    "pod setup time has varied 30x across this project's sessions (5 to 150+ minutes) and is not included in any figure below",
+    "these are search costs only; the recovery probes are priced separately"
+  ]
+}

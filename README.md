@@ -20,10 +20,11 @@ hard-code layer counts, hidden or FFN sizes, head counts, or a target parameter 
 | current best behaviour | E1/P1 KD-heavy at the 2.96M rung (`e1_r2960k_sb_pca` lineage) |
 | frozen battery | 150 prompts, inclusion mask `d6e24e0b09da1bcc…`, sampled from the 0.86M rung |
 | retained reference on it | usable_rollout 0.7300 · correct_overall 0.1867 · correct_given_usable 0.2511 |
-| active work | **Teacher-Adaptive AutoInitializer** (design stage, no paid search authorized) |
+| active work | **Teacher-Adaptive AutoInitializer** — framework implemented at zero cost; no paid search authorized |
 | last completed experiment | **E8a** — contribution-guided depth search |
 | E8b | **strategically terminated; no valid recovered-behaviour comparison** |
 | actual cumulative spend | **$180.7033** against a $211.07 cap ([ledger](./logs/BUDGET_LEDGER.md)) |
+| proposed next paid step | AutoInitializer pilot, $16.00 expected / $19.00 hard — **unauthorized** ([proposal](./logs/autoinit_pilot_proposal.md)) |
 
 ### Repository map
 
@@ -37,6 +38,8 @@ hard-code layer counts, hidden or FFN sizes, head counts, or a target parameter 
 | what was deleted, and how to rebuild it | [`logs/checkpoint_tombstones.json`](./logs/checkpoint_tombstones.json) |
 | actual spend vs authorization | [`logs/BUDGET_LEDGER.md`](./logs/BUDGET_LEDGER.md) |
 | machine-readable state | [`logs/current_state.json`](./logs/current_state.json) |
+| the AutoInitializer search space and its cost | [`logs/autoinit_v1_search_space.json`](./logs/autoinit_v1_search_space.json) |
+| the proposed first paid pilot | [`logs/autoinit_pilot_proposal.md`](./logs/autoinit_pilot_proposal.md) |
 | superseded plans (provenance only) | [`logs/archive/`](./logs/archive/) |
 | per-session chronology | [`logs/EXPERIMENTS.md`](./logs/EXPERIMENTS.md) |
 
@@ -395,6 +398,10 @@ AlphaAvatar-distill/
 ├── src/aadistill/          # algorithm core — model-agnostic, config-driven
 │   ├── models/             #   teacher/student loading, INT8 fake-quant
 │   ├── init/               #   Stage 0/1: activation stats, projection, sandwich transplant
+│   ├── autoinit/           #   Teacher-Adaptive AutoInitializer: architecture adapters,
+│   │                       #   operator kind/implementation registry, versioned search
+│   │                       #   state, four-level metric taxonomy, Pareto beam ranking,
+│   │                       #   resumable beam search, search manifest, cost model
 │   ├── data/               #   mixture loader (schema, chat render, loss masks, packing),
 │   │                       #   session rendering + system-grouped packing (sessions.py),
 │   │                       #   diversity, per-slice correctness rules,
@@ -419,12 +426,14 @@ AlphaAvatar-distill/
 │   │                       #   degeneration · audit_prompt_rendering · exposure_report ·
 │   │                       #   consolidate_e1 · build_test_cases · plot_perf_trend
 │   ├── rollout/            #   teacher generation · build_recovery_corpus
+│   ├── autoinit/           #   plan_search (branching + cost) · dry_run_search (zero cost)
 │   └── pod/                #   GPU session scripts + durable orchestrator (run_env.sh) ·
 │                           #   start_job · watchdog · collect_artifacts (session contract)
 ├── configs/                # stage recipes: stage0/ · stage1/ · stage3/recovery.json
+│   └── autoinit/           #   frozen operator-implementation ledger (ids are immutable)
 ├── data/                   # corpus manifests (jsonl gitignored, rebuildable)
 │   └── eval_behavior_v0/   #   76-prompt behavior set + manifest (both committed)
-├── tests/                  # 1,084 CPU tests, mirroring the source areas
+├── tests/                  # 1,415 CPU tests, mirroring the source areas
 ├── logs/                   # project memory — read STATE.md first
 │   ├── STATE.md            #   canonical handoff: a snapshot, not an archive
 │   ├── EXPERIMENTS.md      #   the consolidated record: what ran, results, cost

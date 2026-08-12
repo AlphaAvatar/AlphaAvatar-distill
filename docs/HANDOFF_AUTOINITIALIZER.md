@@ -132,11 +132,27 @@ implement it, do not redesign it.
 18. **v1 reuses the existing frozen recovery KD** so initialization stays the
     experimental variable.
 
-### 5.2 What is NOT built
+### 5.2 Build status — updated 2026-08-12
 
-No operator API, registry, adapters, beam search, calibration profiles, metric
-definitions, or search manifests exist yet. Nothing was stubbed. Start from the
-constraints above.
+**The framework is built and CPU-verified.** `src/aadistill/autoinit/` implements
+every constraint in §5.1: the architecture-adapter layer (`arch.py`,
+`adapters/qwen3.py`), the operator kind/implementation registry with immutable
+versioned ids and a committed ledger (`operators/base.py`,
+`configs/autoinit/operator_ledger.json`), the five v1 operators wrapping the
+existing algorithms plus the incumbent recipe as a `COMPOSITE_STAGE1` operator,
+versioned calibration profiles (`calibration.py`), dataset-role isolation
+(`datasets.py`), the versioned search state with hash-bound metrics (`state.py`),
+the four-level metric taxonomy (`metrics.py`), the Pareto beam-ranking policy
+(`ranking.py`), the deterministic resumable beam search (`search.py`), the search
+manifest (`manifest.py`), the recovery orchestration interface (`recovery.py`) and
+the cost model (`cost.py`). 112 tests; an end-to-end dry run on real tiny
+checkpoints; the search core proven family-agnostic against a non-transformers MoE
+fixture.
+
+**What is still missing, and blocks a paid run:** the initializer-state evaluation
+suite, the recovery search battery, the `calib.reasoning_heavy@v1` mixture, a
+frozen halving preregistration, and one measurement of the statistics-pass GPU/CPU
+split. All zero cost. See [`../logs/autoinit_pilot_proposal.md`](../logs/autoinit_pilot_proposal.md) §3.
 
 ## 6. Budget
 
@@ -194,9 +210,18 @@ from unused room under a previous authorization.**
 
 ## 9. First task for the next session
 
-> Inspect the consolidated repository, then implement the AutoInitializer architecture
-> beginning from the already-decided operator abstraction in §5.1 — OperatorKind vs
-> OperatorImplementation, the registry, architecture adapters, versioned
-> InitializationState, the four-level metric taxonomy, and the BeamRankingPolicy — at
-> zero cost, with the tests listed in Phase 21 of the 2026-08-12 instruction.
+> The framework is built (§5.2). Complete the five zero-cost prerequisites in
+> [`../logs/autoinit_pilot_proposal.md`](../logs/autoinit_pilot_proposal.md) §3 —
+> the initializer-state evaluation suite, the recovery search battery, the
+> statistics-pass GPU/CPU measurement, `calib.reasoning_heavy@v1`, and the frozen
+> halving preregistration — then bring the pilot back for authorization.
 > **Do not reopen E8b. Do not launch paid compute without separate authorization.**
+
+### 9.1 One correction to carry
+
+An earlier reading of the record treated `d65c1f40…` as the sha256 of
+`artifacts/stage1/e8_calibration_v1/items.jsonl`. It is not. It is the mixture's
+**token-level content hash** — sha256 over `item_id:sha256(ids)[:16]` lines, as
+`scripts/data/build_e8_calibration.py` computes it. The items *file* hashes to
+`c7202338…`. Both are now pinned separately and the token-level one is re-derived
+from the loaded items rather than trusted.

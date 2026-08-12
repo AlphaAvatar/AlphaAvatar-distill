@@ -1,10 +1,10 @@
 {
   "schema": "aadistill.current_state/v1",
-  "generated_utc": "2026-08-12T08:38:26+00:00",
-  "current_phase": "E8 closed; consolidation complete; AutoInitializer NOT implemented",
+  "generated_utc": "2026-08-12T10:20:00+00:00",
+  "current_phase": "E8 closed; AutoInitializer framework IMPLEMENTED at zero cost and CPU-verified; no paid search authorized",
   "active_experiment": null,
   "paid_compute_running": false,
-  "next_work": "AutoInitializer Phase 22 step 8 onward \u2014 operator abstraction, registry, architecture adapters, versioned search state, four-level metric taxonomy, BeamRankingPolicy. Zero cost. Do not reopen E8b.",
+  "next_work": "Five zero-cost prerequisites before any paid AutoInitializer run: build+freeze the initializer-state evaluation suite; build the recovery search battery (must not reuse the promotion battery or the 0.86M rung's prompts); measure the statistics-pass GPU/CPU split; build calib.reasoning_heavy@v1; freeze the successive-halving preregistration. Then seek authorization for the pilot. Do not reopen E8b.",
   "teacher": {
     "model_id": "Qwen/Qwen3-4B-Thinking-2507",
     "revision": "768f209d9ea81521153ed38c47d515654e938aea",
@@ -63,11 +63,11 @@
   "documents": {
     "logs/STATE.md": {
       "path": "logs/STATE.md",
-      "sha256": "8bfeb7d2e107a8fea8b662b5c9ae0d4ff6adf6cb324c1fd5d4b306ac17a022b7"
+      "sha256": "a378da8ac49503494d866c5d0ab82920e2df9898b08e14a6a8df8634166a0b76"
     },
     "docs/HANDOFF_AUTOINITIALIZER.md": {
       "path": "docs/HANDOFF_AUTOINITIALIZER.md",
-      "sha256": "d0dcde5eb408eac45721ee6a94616a71ea5556d7c137c02110cd7ebe22983cc7"
+      "sha256": "a061cd9dd144a9f55e4ee0831af0afc97b4fcd7799be3ce3380759626e30877e"
     },
     "logs/EXPERIMENT_INDEX.md": {
       "path": "logs/EXPERIMENT_INDEX.md",
@@ -79,7 +79,7 @@
     },
     "logs/decisions.md": {
       "path": "logs/decisions.md",
-      "sha256": "9f313bcc4734b668dda3d6bd5b09037e44d74dd261076fda753b34fbf91dd4d7"
+      "sha256": "a7c90aad6ee01a880651dfb9ea1faa8157f5939f61e0c62a9a165364bee433f1"
     },
     "logs/checkpoint_registry.json": {
       "path": "logs/checkpoint_registry.json",
@@ -97,6 +97,7 @@
   "read_order": [
     "logs/STATE.md",
     "docs/HANDOFF_AUTOINITIALIZER.md",
+    "logs/autoinit_pilot_proposal.md",
     "logs/EXPERIMENT_INDEX.md",
     "logs/decisions.md",
     "logs/checkpoint_registry.json",
@@ -111,5 +112,54 @@
     "restricting attention updates",
     "student-prefix recovery",
     "E2 phases 2-3"
-  ]
+  ],
+  "autoinit": {
+    "status": "IMPLEMENTED_ZERO_COST_NOT_RUN_ON_REAL_MODELS",
+    "package": "src/aadistill/autoinit",
+    "tests": 112,
+    "operator_kinds": [
+      "ATTENTION",
+      "COMPOSITE_STAGE1",
+      "DEPTH",
+      "FFN",
+      "RESIDUAL_WIDTH"
+    ],
+    "operator_implementations": [
+      "attention.weight_proxy_v0",
+      "composite.stage1_sandwich_v0",
+      "depth.causal_kl_greedy_v1",
+      "depth.positional_v0",
+      "ffn.activation_importance_v0",
+      "width.global_pca_v0"
+    ],
+    "operator_ledger": "configs/autoinit/operator_ledger.json",
+    "beam_ranking_policy": "beam.pareto_multi_objective@v1",
+    "search_space": "logs/autoinit_v1_search_space.json",
+    "dry_run": "logs/autoinit_dryrun_summary.json",
+    "proposal": "logs/autoinit_pilot_proposal.md",
+    "blocking_prerequisites": [
+      "initializer-state evaluation suite (STATE_EVALUATION role) not built",
+      "recovery search battery (RECOVERY_BATTERY role) not built",
+      "calib.reasoning_heavy@v1 not built",
+      "successive-halving plan not frozen",
+      "statistics-pass GPU/CPU split not measured"
+    ]
+  },
+  "proposed_pilot": {
+    "authorized": false,
+    "beam_width": 4,
+    "top_n": 4,
+    "survivors": 2,
+    "expected_usd": 16.0,
+    "hard_backstop_usd": 19.0,
+    "fits_within_released_headroom": true
+  },
+  "tests": {
+    "passing": 1415,
+    "skipped": 7,
+    "venvs_verified": [
+      "repo .venv transformers 5.13.1",
+      "transformers 4.57.1"
+    ]
+  }
 }

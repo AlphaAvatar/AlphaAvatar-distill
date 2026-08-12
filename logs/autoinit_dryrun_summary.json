@@ -1,0 +1,214 @@
+{
+  "schema": "aadistill.autoinit.dryrun_summary/v1",
+  "generated_utc": "2026-08-12T09:59:11.667385+00:00",
+  "purpose": "zero-cost end-to-end validation of the mandatory materialize -> reload -> hash -> validate -> measure cycle",
+  "scope_limit": "a 32-wide teacher validates the pipeline, not the science; no initialization-quality claim follows from it",
+  "command": "PYTHONPATH=src python scripts/autoinit/dry_run_search.py",
+  "config_hash": "0538559a3b28370e5a9c4b1b11d72d40f6fa4888aae5b2fe7f47f82027b4bc20",
+  "manifest_hash": "37576b268afff1d910801cee7a111da7b9c73d9d6420d6271327b8d0584e7f29",
+  "manifest_verified": {
+    "manifest_hash_matches": true,
+    "recomputed_hash": "37576b268afff1d910801cee7a111da7b9c73d9d6420d6271327b8d0584e7f29",
+    "leaves_match_target": true,
+    "mismatched_leaves": [],
+    "n_states": 20,
+    "n_leaves": 3
+  },
+  "teacher_geometry": {
+    "hidden_size": 32,
+    "num_hidden_layers": 6,
+    "intermediate_size": 48,
+    "num_attention_heads": 4,
+    "num_key_value_heads": 2,
+    "head_dim": 8,
+    "vocab_size": 128,
+    "tie_word_embeddings": true
+  },
+  "target_geometry": {
+    "hidden_size": 16,
+    "num_hidden_layers": 4,
+    "intermediate_size": 24,
+    "num_attention_heads": 2,
+    "num_key_value_heads": 2,
+    "head_dim": 8,
+    "vocab_size": 128,
+    "tie_word_embeddings": true
+  },
+  "summary": {
+    "run_id": "autoinit_dryrun",
+    "config_hash": "0538559a3b28370e5a9c4b1b11d72d40f6fa4888aae5b2fe7f47f82027b4bc20",
+    "n_states": 20,
+    "n_levels": 4,
+    "n_complete_leaves": 3,
+    "n_pruned": 10,
+    "n_resumed": 9,
+    "finished_utc": "2026-08-12T09:59:11.655975+00:00"
+  },
+  "operator_registry_ledger_hashes": {
+    "attention.weight_proxy_v0": "479ff7b3ef15e7195f84b50acf558ff5d8dc831ffcf9ba594719582b31cb7078",
+    "composite.stage1_sandwich_v0": "7ddeb8cfa81f0ba87eca038e61924faf4b32a47bdf999404fca410cb0ee428ac",
+    "depth.causal_kl_greedy_v1": "8106604694621d305dc20324d5ce65d2cefe5491ef2c2ab93a1b5fe8f16b5ca9",
+    "depth.positional_v0": "d97fb631c37f910a7a7e339d2ab0ba65d0652e95837882e203d6d1862969e98a",
+    "ffn.activation_importance_v0": "accb896294568f641a44f2550997306faa01c6600c1870534f326524ccbf7316",
+    "width.global_pca_v0": "acb56886de907b717346483a0d6707552537d5b11415b6861995ec286f8198b6"
+  },
+  "beam_ranking_policy_hash": "e8c03856a946cdf9614e0951e87d6cfe4de142be336fa15a64b104f86341a9d3",
+  "leaves": [
+    {
+      "state_id": "3e6c5196940088d953528ff3e2ea5eed",
+      "path": "COMPOSITE_STAGE1(dryrun.stage0_current@v1)",
+      "impl_ids": [
+        "composite.stage1_sandwich_v0"
+      ],
+      "calibration_profiles": [
+        "dryrun.stage0_current@v1"
+      ],
+      "checkpoint_sha256": "1a01e551ed3053e00a78f584507aa14b592588a2b385444d668cc284782b5ddf",
+      "num_parameters": 10960,
+      "arch_spec_hash": "816b4f2fc9c362740daddc28fe6f1d08c51fec64f51ef7209bbeb10925dfb2f8",
+      "matches_target": true,
+      "metrics": {
+        "state.critical_token_kl": 0.005602357676252723,
+        "state.critical_token_kl.answer_like": 0.005602357676252723,
+        "state.nll.general": 4.865045381628948,
+        "state.nll.teacher_reference": 4.8669256127398945,
+        "state.nll_delta_vs_teacher": -0.0018802311109459918,
+        "state.reverse_kl.token_mean": 0.006308026449835818,
+        "state.teacher_kl.equal_domain_mean": 0.006324879987084347,
+        "state.teacher_kl.general": 0.006344147350477136,
+        "state.teacher_kl.math": 0.006305612623691559,
+        "state.teacher_kl.token_mean": 0.006324879987084348,
+        "state.top1_agreement": 0.717391304347826
+      }
+    },
+    {
+      "state_id": "adccb85adc4c1f7258fdcdc29fb81143",
+      "path": "FFN(dryrun.stage0_current@v1)->DEPTH(dryrun.stage0_current@v1)->ATTENTION(dryrun.stage0_current@v1)->RESIDUAL_WIDTH(dryrun.stage0_current@v1)",
+      "impl_ids": [
+        "ffn.activation_importance_v0",
+        "depth.causal_kl_greedy_v1",
+        "attention.weight_proxy_v0",
+        "width.global_pca_v0"
+      ],
+      "calibration_profiles": [
+        "dryrun.stage0_current@v1",
+        "dryrun.stage0_current@v1",
+        "dryrun.stage0_current@v1",
+        "dryrun.stage0_current@v1"
+      ],
+      "checkpoint_sha256": "5d1f4d88f52ea41775822cc9e648ee8be63e8af159a7efadbbc72800b03f5009",
+      "num_parameters": 10960,
+      "arch_spec_hash": "816b4f2fc9c362740daddc28fe6f1d08c51fec64f51ef7209bbeb10925dfb2f8",
+      "matches_target": true,
+      "metrics": {
+        "state.critical_token_kl": 0.006839910289272666,
+        "state.critical_token_kl.answer_like": 0.006839910289272666,
+        "state.nll.general": 4.871698462444803,
+        "state.nll.teacher_reference": 4.8669256127398945,
+        "state.nll_delta_vs_teacher": 0.004772849704908288,
+        "state.reverse_kl.token_mean": 0.006576840320359106,
+        "state.teacher_kl.equal_domain_mean": 0.006600838964400084,
+        "state.teacher_kl.general": 0.007150663953760396,
+        "state.teacher_kl.math": 0.006051013975039772,
+        "state.teacher_kl.token_mean": 0.0066008389644000845,
+        "state.top1_agreement": 0.7717391304347826
+      }
+    },
+    {
+      "state_id": "4e0889843ae7f989f3bac38008dad41b",
+      "path": "DEPTH(dryrun.stage0_current@v1)->FFN(dryrun.stage0_current@v1)->ATTENTION(dryrun.stage0_current@v1)->RESIDUAL_WIDTH(dryrun.stage0_current@v1)",
+      "impl_ids": [
+        "depth.causal_kl_greedy_v1",
+        "ffn.activation_importance_v0",
+        "attention.weight_proxy_v0",
+        "width.global_pca_v0"
+      ],
+      "calibration_profiles": [
+        "dryrun.stage0_current@v1",
+        "dryrun.stage0_current@v1",
+        "dryrun.stage0_current@v1",
+        "dryrun.stage0_current@v1"
+      ],
+      "checkpoint_sha256": "9fc3225a792d73f9f4fe0ba2c8583b505ee59b3dfd12f3eb397e7eded3ed87b8",
+      "num_parameters": 10960,
+      "arch_spec_hash": "816b4f2fc9c362740daddc28fe6f1d08c51fec64f51ef7209bbeb10925dfb2f8",
+      "matches_target": true,
+      "metrics": {
+        "state.critical_token_kl": 0.006916276994161308,
+        "state.critical_token_kl.answer_like": 0.006916276994161308,
+        "state.nll.general": 4.871369569197945,
+        "state.nll.teacher_reference": 4.8669256127398945,
+        "state.nll_delta_vs_teacher": 0.004443956458050272,
+        "state.reverse_kl.token_mean": 0.006591162603834401,
+        "state.teacher_kl.equal_domain_mean": 0.006614657361870226,
+        "state.teacher_kl.general": 0.007168272267217221,
+        "state.teacher_kl.math": 0.0060610424565232315,
+        "state.teacher_kl.token_mean": 0.006614657361870227,
+        "state.top1_agreement": 0.7608695652173914
+      }
+    }
+  ],
+  "pruned": [
+    {
+      "state_id": "260e4196d6e0e3d7bd2734daa3b21a51",
+      "path": "ATTENTION(dryrun.stage0_current@v1)",
+      "reason": "pruned: dominated (front 2) and the beam of 2 was already full",
+      "checkpoint_sha256": "d134ebc0b74a95e828f8a4e97b45b6c42ff24e629e1ef9b6e504175cfe47dbb8"
+    },
+    {
+      "state_id": "9eec72a3b1874aa52673951faa6519a4",
+      "path": "DEPTH(dryrun.stage0_current@v1)",
+      "reason": "pruned: dominated (front 1) and the beam of 2 was already full",
+      "checkpoint_sha256": "f33763a578a014eeeb39806e8fe0b62e6b7f5e8a80cdc030db1a6664ec50ce09"
+    },
+    {
+      "state_id": "8c0d5fb2b989612052a9e2bfebe2a9c4",
+      "path": "RESIDUAL_WIDTH(dryrun.stage0_current@v1)",
+      "reason": "pruned: dominated (front 1) and the beam of 2 was already full",
+      "checkpoint_sha256": "c06dad404ac2e5d26a38bfdf0dea3608446862f4f752bf885578af14b7611c7f"
+    },
+    {
+      "state_id": "e09d78447cedbf81e532d05b504792df",
+      "path": "FFN(dryrun.stage0_current@v1)->ATTENTION(dryrun.stage0_current@v1)",
+      "reason": "pruned: dominated (front 2) and the beam of 2 was already full",
+      "checkpoint_sha256": "48277bc336e268b0bff9c1127157e57e5bb750c4b2321c9a5d227dbd3d8fc3a0"
+    },
+    {
+      "state_id": "5080e497848ada706d3967ab5f9d7d10",
+      "path": "FFN(dryrun.stage0_current@v1)->DEPTH(dryrun.stage0_current@v1)",
+      "reason": "pruned: dominated (front 1) and the beam of 2 was already full",
+      "checkpoint_sha256": "44500034978da06172af58fa5d56888850904e62002b25565db4e29746a53943"
+    },
+    {
+      "state_id": "bbe36407ddec00868bae0ba06c568387",
+      "path": "FFN(dryrun.stage0_current@v1)->RESIDUAL_WIDTH(dryrun.stage0_current@v1)",
+      "reason": "pruned: dominated (front 1) and the beam of 2 was already full",
+      "checkpoint_sha256": "7ef566f43929ad74187d239cce731ba9512252d0c0f0aa2219ec65103fde389b"
+    },
+    {
+      "state_id": "4cd368010dbbde78d2e202b1086151ef",
+      "path": "DEPTH(dryrun.stage0_current@v1)->ATTENTION(dryrun.stage0_current@v1)",
+      "reason": "pruned: dominated (front 1) and the beam of 2 was already full",
+      "checkpoint_sha256": "d156293390678fe0012950c6f7be5f7890d88d470744d80755b656132c899dc4"
+    },
+    {
+      "state_id": "b2141b47b8a1539e8e820cdb0273e522",
+      "path": "DEPTH(dryrun.stage0_current@v1)->RESIDUAL_WIDTH(dryrun.stage0_current@v1)",
+      "reason": "pruned: non-dominated but ranked 3 in front 0 under the tie-break, beam 2",
+      "checkpoint_sha256": "9e98af0b0fbab5e83ce6c6780fee9e0f33188bb001e6d05ed0dafd465b008159"
+    },
+    {
+      "state_id": "3409ba7e4dab12d07a40f5be2597a889",
+      "path": "FFN(dryrun.stage0_current@v1)->DEPTH(dryrun.stage0_current@v1)->RESIDUAL_WIDTH(dryrun.stage0_current@v1)",
+      "reason": "pruned: non-dominated but ranked 3 in front 0 under the tie-break, beam 2",
+      "checkpoint_sha256": "065096204a5d18474ced51ab7028b8b252683671373ded5c92677783a88786a9"
+    },
+    {
+      "state_id": "a5aa4feb782cfabee575dc237d10f629",
+      "path": "DEPTH(dryrun.stage0_current@v1)->FFN(dryrun.stage0_current@v1)->RESIDUAL_WIDTH(dryrun.stage0_current@v1)",
+      "reason": "pruned: non-dominated but ranked 4 in front 0 under the tie-break, beam 2",
+      "checkpoint_sha256": "b9e934a758e77316c171e9c51eeaa269c64b05ab4c32ccfc6b6794e0088a4bc9"
+    }
+  ],
+  "full_manifest_path": "artifacts/autoinit/dryrun/search_manifest.json"
+}

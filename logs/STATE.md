@@ -1,5 +1,18 @@
 **Updated:** 2026-08-12 · branch `main` · working tree clean
-**No pods running. Nothing billing.** **1,303 CPU tests pass**, 7 skipped.
+**No pods running. Nothing billing.** **1,415 CPU tests pass**, 7 skipped — in
+*both* venvs (repo `.venv` transformers 5.13.1, and the transformers 4.57.1 venv).
+
+**The AutoInitializer framework is implemented at zero cost and not yet run on
+real models.** `src/aadistill/autoinit/` — operator kind/implementation registry
+with immutable versioned ids and a frozen ledger, a Qwen3 architecture adapter,
+the five existing algorithms wrapped as operators plus the incumbent recipe as a
+composite, versioned search state with hash-bound metrics, a Pareto beam-ranking
+policy, a deterministic resumable beam search, and the search manifest. 112 new
+tests. End-to-end dry run on real tiny checkpoints:
+[`autoinit_dryrun_summary.json`](autoinit_dryrun_summary.json). Search space,
+branching and costs: [`autoinit_v1_search_space.json`](autoinit_v1_search_space.json).
+**Proposed first paid pilot, unauthorized:**
+[`autoinit_pilot_proposal.md`](autoinit_pilot_proposal.md).
 
 **E8a: COMPLETE.** Contribution-guided depth search finished; the frozen contribution
 map removes teacher layers [2, 3, 15, 16, 20, 21, 26, 32]; full-width teacher-ablation
@@ -353,9 +366,13 @@ Record [`EXPERIMENTS.md`](EXPERIMENTS.md) §34 · report
 
 ## 7. Implementation state (CPU-verified)
 
-**1,084 tests pass on CPU, 3 skipped** (`PYTHONPATH=src pytest tests/ -q`, ~60 s,
-no downloads; `uv run pytest tests/ -q` also works). The 3 skips are the
-deliberate frozen-record launcher exemptions in the `$(ls …)` lint.
+**1,415 tests pass on CPU, 7 skipped** (`PYTHONPATH=src pytest tests/ -q`, ~120 s,
+no downloads; `uv run pytest tests/ -q` also works). Verified in **both** venvs —
+the repo `.venv` (transformers 5.13.1) and the transformers 4.57.1 venv — because
+the AutoInitializer builds its models in-process from a config, which is
+self-consistent under either library. **That portability does not extend to real
+Stage-1 checkpoints**: a 4.x reader still misreads their `rope_theta` by 500×
+(§0.5), so anything loading a real checkpoint stays on the repo `.venv`.
 
 | piece | file | state |
 |---|---|---|
@@ -402,6 +419,16 @@ deliberate frozen-record launcher exemptions in the `$(ls …)` lint.
 | masked teacher-native held-out metrics | `src/aadistill/evaluation/init_nll.py` | assistant-target NLL/KL/top-1/rank on the pack's val slice |
 | E8 arm builder + pre-training gate | `scripts/training/{build_e8_configs,validate_e8_arms}.py` | realized diff exactly `{student_path, run_name, out_dir, _purpose}`; gate fails closed |
 | E8 four-threshold pricing | `scripts/training/plan_e8_budget.py` | two pods, search cost derived from forward-pass arithmetic |
+| **AutoInitializer** — architecture adapters | `src/aadistill/autoinit/arch.py`, `adapters/qwen3.py` | family-tagged `ArchSpec`, capability dispatch, exact param arithmetic pinned to both frozen counts |
+| operator kind ≠ implementation, immutable ids | `src/aadistill/autoinit/operators/base.py` + `configs/autoinit/operator_ledger.json` | signature hashing, in-process rebinding refused, committed ledger checked by test |
+| the five v1 operators + the incumbent as a composite | `src/aadistill/autoinit/operators/{depth,width,ffn,attention,composite}.py` | wrap existing algorithms; composite bitwise-identical to `init_student` |
+| versioned search state, hash-bound metrics | `src/aadistill/autoinit/state.py` | no inherited NLL by construction; intermediates cannot enter recovery Top-N |
+| four-level metric taxonomy | `src/aadistill/autoinit/metrics.py` | `op.*` / `state.*` namespaces enforced; reuses E8a's `distortion` + domain-balanced aggregation |
+| Pareto beam-ranking policy | `src/aadistill/autoinit/ranking.py` | versioned, hashed, deterministic; single-objective needs an explicit acknowledgement |
+| deterministic resumable beam search | `src/aadistill/autoinit/search.py` | family-agnostic (proven against a fake MoE fixture); pruned states keep hash, metrics and reason |
+| search manifest + recovery orchestration | `src/aadistill/autoinit/{manifest,recovery}.py` | manifest hash-verified; halving plan frozen before the run it judges |
+| cost/branching model | `src/aadistill/autoinit/cost.py`, `scripts/autoinit/plan_search.py` | 88.83 TFLOP/s L40S anchor round-trips E8a's measured 1,300 s |
+| zero-cost end-to-end dry run | `scripts/autoinit/dry_run_search.py` | real checkpoints, real reload/hash/measure; found two config-derivation defects |
 
 Chunked CE/KD was assessed and is **not** needed: `block_len` stays 8192, which
 the canonical recipe already runs.
@@ -442,30 +469,38 @@ concatenated at token level (asserted exact), with the system block emitted once
 
 ## 9. Next actions
 
-**E8b is authorized ($47.18, cap $211.07) and executing.** S1 is complete; S2 is
-running. Ordered next actions:
+**E8b is TERMINATED. Nothing is authorized and nothing is running.** The project's
+active line is the **Teacher-Adaptive AutoInitializer**, implemented at zero cost
+and awaiting its prerequisites and a separate authorization. Ordered next actions,
+all zero cost:
 
-1. **S2 in flight** (`64fhzduqdwaurw`, A100, launched 14:16 UTC). Its **20-step gate
-   is blocking and comes before either arm trains**: s/step ≤ 7.86, peak VRAM
-   ≤ 78 GB, live $/step ≤ 0.003472. 7.86 is *derived*, not measured — from
-   `(8·N_student + 2·N_teacher)` FLOPs against E6b's measured 4.15 s/step, which
-   makes the depth-only/compressed ratio 2.64× rather than the 5.4× a
-   parameter-count-only estimate gives, because the teacher forward dominates the
-   596M reference. On violation the session **stops**; re-price, do not widen.
-2. **Check the actual spend after S2 before launching S3.** The three remaining hard
-   backstops sum to $1.95 more than the $41.97 left. Report the exact shortfall and
-   ask; never pre-shrink S3 or S4.
-3. **S3** (DP-sb + DC-sb, A100), then **S4** (FC-sa + FC-sb, L40S) against retained
-   FP-sa/sb.
-4. `analyze_e8b.py --level behaviour` once `logs/e8b_results.json` exists: `DC-DP`,
-   `FC-FP` and the nested interaction, per seed and pooled. The step-0 half is
-   already implemented and run.
-5. **DC's step-0 probe is deferred, not cancelled** ($0.5–3.3 depending on whether it
-   terminates). DP's floored at 76/76 truncated, but its teacher-native top-1 is 0.52
-   against DC's 0.76, so DP's floor does not predict DC's.
-6. **Do not launch** the old 2.96M recovery, the hardware bridge (conditional on a
-   material reversal only), P2-5.50M, a FineWeb sweep, on-policy, an operator-order
-   search, AutoInitializer work, or any E9.
+1. **Build and freeze the initializer-state evaluation suite.** It does not exist,
+   and the beam cannot rank without it. Role `STATE_EVALUATION`, five domains,
+   critical-token tags, leakage-checked against the promotion battery, the recovery
+   rung and the validation slice. `check_role_isolation` must report
+   `complete: true` — it now fails closed when two roles share no comparable
+   identity kind, which a prompt-hash-only check could never detect.
+2. **Build the recovery search battery.** Role `RECOVERY_BATTERY`. It must not be
+   the 150-prompt promotion battery, and must not reuse the 0.86M rung's prompts:
+   that battery's inclusion mask was sampled *using* an 0.86M checkpoint, so an
+   0.86M probe scored on it is not out-of-sample.
+3. **Measure the statistics-pass GPU/CPU split.** Every cost in the pilot proposal
+   is a range because of this single unmeasured quantity — the float64 `X^T X`
+   accumulation runs on the CPU while the model runs on the GPU, and only the
+   CPU-only end-to-end rate (5.24 ms/token) has ever been measured. One profile
+   collapses a 3.6× spread. Do it before booking a pod.
+4. **Build `calib.reasoning_heavy@v1`** if Phase B is wanted — a reweighted draw
+   from the same pool, zero cost. It is currently representable but not built, and
+   `resolve()` refuses it.
+5. **Freeze the halving plan and the ranking policy** into a preregistration
+   (`SuccessiveHalvingPlan.freeze` + `assert_preregistered`), before the run they
+   judge.
+6. Then, and only with explicit authorization, the pilot in
+   [`autoinit_pilot_proposal.md`](autoinit_pilot_proposal.md): beam 4, one profile,
+   Top-4 → 2 survivors → Top-1. Expected $16.00, hard backstop $19.00, inside the
+   $30.3667 that E8b's termination released.
+7. **Do not launch** the old 2.96M recovery, the E8b hardware bridge, P2-5.50M, a
+   FineWeb sweep, on-policy, full recovery of any Top-1 winner, or any E9.
 
 **Durability is done** (`logs/e8_relay_manifest.json`): 13/13 staged and
 roundtrip-verified, including the 1.95 GB Stage 0 cache and `warmup_v1`, its input.
