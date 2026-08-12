@@ -59,7 +59,7 @@
     "authorized_cap_usd": 211.07,
     "unused_uncommitted_usd": 30.3667
   },
-  "latest_commit": "80730b1e696fbac984734260628e6b9de9d3ce51",
+  "latest_commit": "4fe61d9034df1f1a9eba05aff8b54ae15ecefee6",
   "documents": {
     "logs/STATE.md": {
       "path": "logs/STATE.md",
@@ -83,11 +83,11 @@
     },
     "logs/checkpoint_registry.json": {
       "path": "logs/checkpoint_registry.json",
-      "sha256": "ebe0f9f88d50080cca7a18372dd87089bfcb880f4f90ca123612e5b478abb3c0"
+      "sha256": "7fbb7804c763dd6a8210be28268332f313890326b3d81f9312e16bcc512eaf78"
     },
     "logs/checkpoint_tombstones.json": {
       "path": "logs/checkpoint_tombstones.json",
-      "sha256": "e82ceb1efaa733ae24945ab7c7b01f745567624612b8c68dcdd1c4ddfd71fa25"
+      "sha256": "7dca24bbcda1c44984f59babf762e5892462f7eaebf6a1396991b45c2ac04ad4"
     },
     "AGENTS.md": {
       "path": "AGENTS.md",
