@@ -1,55 +1,29 @@
-**Updated:** 2026-08-11 (18:45 UTC) · branch `main` · commit `6b9d441` · tree clean
-**ONE POD BILLING: `5bd0szfrv57fw3`** (E8b S2, A100 SXM 80 GB, launched 18:26 UTC,
-hard stop $18.7602). **1,303 CPU tests pass**, 7 skipped.
+**Updated:** 2026-08-12 · branch `main` · working tree clean
+**No pods running. Nothing billing.** **1,303 CPU tests pass**, 7 skipped.
 
-**E8b IS STOPPED AND AWAITING A MAINTAINER DECISION. 80 GB is marginal for the
-depth-only arms — not fixable by a longer gate.** DP-sa trained all 1,761 steps;
-DC-sa OOM'd at ~step 900. Both peaked at the identical **77.45 GiB** of 79.25, with
-1.31 GiB of that allocator slack, so DP-sa completing was luck rather than headroom.
-The 200-step gate passed honestly at 77.31 GiB with 0.000 drift and was still too
-short: the peak climbed again at step 310. Both memory levers are exhausted — they
-moved the failure from step 110 to step 900 without removing it.
+**E8a: COMPLETE.** Contribution-guided depth search finished; the frozen contribution
+map removes teacher layers [2, 3, 15, 16, 20, 21, 26, 32]; full-width teacher-ablation
+KL 0.620586 vs 1.932531 = **3.11× lower**; hash-bound fully-compressed step-0
+measurements valid. **These results stand and must not be rewritten.**
 
-**The choice ([§41](EXPERIMENTS.md)):** restructure CE/KD memory (recommended —
-`masked_ce`'s unchunked 4,978 MB fp32 upcast is the largest single buffer, and
-chunking it as KD already is frees ~7.5 GB, keeping DP/DC on the matched A100), or
-move to a ≥94 GB GPU (removes it outright, changes hardware class and re-prices).
-**Either way DP-sa must be retrained**, so its checkpoint was not staged against the
-irreclaimable HF LFS quota. **Do not pick one without the maintainer.**
+**E8b: STRATEGICALLY TERMINATED — NO VALID RECOVERED-BEHAVIOR COMPARISON.**
+Its four step-0 initialization measurements are valid and preserved. DP-sa is an
+**infrastructure artifact, not a promotable scientific arm**; DC-sa did not complete;
+DP-sb, DC-sb, FC-sa and FC-sb were never run. **No DP-vs-DC or FP-vs-FC
+recovered-behaviour conclusion exists, and no depth × compression interaction may be
+claimed.** Behaviour must not be inferred from partial E8b training.
 
-Prior context: A backend audit
-([`e8b_backend_audit.md`](e8b_backend_audit.md)) found attention is already PyTorch
-SDPA on its flash backend and that no fused-kernel package exists in the pinned
-runtime, so the allocator was the only available candidate. It reduced fragmentation
-6.16 -> 1.04 GiB but **allocated memory kept climbing past the 20-step gate** — 77.15
-GiB through step 60, 77.37 by step 70, 77.60 at an OOM on **step ~110 of 1,761**.
+**The project is moving to a Teacher-Adaptive AutoInitializer** — from searching for one
+fixed Qwen-specific recipe to searching over initialization operators, operator order and
+calibration configuration, with conditional remeasurement after every operator. Motivated
+by E8a's demonstrated mismatch between a full-width depth-ablation proxy and the
+fully-compressed step-0 initializer.
 
-**The 20-step gate is FALSIFIED, not a success.** Its three thresholds were never the
-defect and are unchanged; the horizon was too short and the trend was never checked.
-Now running: the preregistered **KD chunk 512 -> 128 across the whole depth-only
-regime** (DP-sa, DC-sa, DP-sb, DC-sb; never one arm, never FC) behind a **200-step
-steady-state gate** with `log_every 1`, a no-upward-drift test (<= 0.05 GiB over the
-final 50 steps) and a >= 1.5 GiB margin against real capacity.
-
-**No scientific conclusion follows from either OOM.** No valid trained DP/DC arm
-exists; S1's step-0 table is untouched.
-
-**E8b is RUNNING. S1 is complete and its headline reframes the experiment: the
-contribution-guided depth map reverses sign between compression regimes.** At full
-width it initializes **0.89–1.18 nats better** than the positional map; fully
-compressed it is **0.90–2.82 nats worse** — a unanimous reversal on 9 of 9 metrics
-across three held-out series ([§38](EXPERIMENTS.md),
-[`e8b_step0_records/`](e8b_step0_records/)). So "is the contribution map better" has
-no single answer, and E8b's 2×2 is now testing whether the map only fails once it is
-composed with width/FFN/attention compression.
-
-Stage 3 remains open: no model has passed a prospectively defined behaviour-recovery
-gate, and **nothing yet moves autonomous reasoning correctness**.
-
-**E8a's earlier headline stands and is now better bounded:** the contribution map
-preserves the frozen teacher 3.11× better in KL at full width, and that advantage
-survives into a real reloaded checkpoint **only** at full width. Teacher-ablation KL
-does not predict initialization quality after compression.
+**Start here:** [`EXPERIMENT_INDEX.md`](EXPERIMENT_INDEX.md) — what every experiment
+proved and which checkpoints matter · [`BUDGET_LEDGER.md`](BUDGET_LEDGER.md) — actual
+spend $180.7033, cap $211.07, $30.37 unused and uncommitted ·
+[`checkpoint_registry.json`](checkpoint_registry.json) — 10 checkpoints, 18.98 GiB, each
+with a retention class · [`checkpoint_tombstones.json`](checkpoint_tombstones.json).
 
 This file is a **snapshot of the current state**, not a history. Every completed
 experiment lives in [`EXPERIMENTS.md`](EXPERIMENTS.md) and every decision in

@@ -1,0 +1,64 @@
+{
+  "note": "Every entry records the hash, the reason, and whether the artifact can be rebuilt. A tombstone is the condition for deletion, not an afterthought.",
+  "tombstones": [
+    {
+      "original_path": "artifacts/audit/e8_baseline_init_reproduction",
+      "canonical_name": "e8_baseline_init_reproduction",
+      "experiment": "E8a",
+      "role": "reproduction check of the control initialization",
+      "weights_sha256": "86fbba78e8a2a32481ca77e5ac362ed1f17a39dbc30bcbc952cabd5df2633e54",
+      "config_sha256": "a7131bb092b38a078edc213961f0eb57eaead24f1396e25741f4887b1a694054",
+      "architecture": {
+        "num_hidden_layers": 28,
+        "hidden_size": 1024,
+        "intermediate_size": 3072,
+        "num_attention_heads": 16,
+        "num_key_value_heads": 8,
+        "vocab_size": 151936
+      },
+      "size_human": "1.12 GiB",
+      "retention_at_deletion": "duplicate",
+      "reason": "byte-identical to artifacts/stage1/qwen3_0p6b_init_v0/checkpoint (both 86fbba78e8a2a32481ca77e5ac362ed1f17a39dbc30bcbc952cabd5df2633e54). Its scientific value was proving the rebuild path reproduces the control exactly, and that fact is the recorded hash match, not the bytes.",
+      "deterministically_reconstructable": true,
+      "reconstruction_recipe": "PYTHONPATH=src python scripts/init/build_stage1_init.py against the pinned Stage-0 activation cache aaeb2e4c\u2026 ; verified by hash equality with the control",
+      "referenced_by_at_deletion": [
+        "scripts/consolidate/build_checkpoint_registry.py"
+      ],
+      "deleted_utc": "2026-08-12T06:27:23+00:00"
+    },
+    {
+      "original_path": "artifacts/stage1/e8b_dc_init",
+      "canonical_name": "e8b_dc_init",
+      "experiment": "E8b",
+      "role": "depth-only contribution initialization (DC)",
+      "weights_sha256": "eb9e95481988b296a77c30d7b4754069f1874330fca9ad198f4457029e11e182",
+      "config_sha256": "8651f3349eb702d03fc72ee7ced9f182615973191a0c769a6203e2c9ff6afb2d",
+      "architecture": {
+        "num_hidden_layers": 28,
+        "hidden_size": 2560,
+        "intermediate_size": 9728,
+        "num_attention_heads": 32,
+        "num_key_value_heads": 8,
+        "vocab_size": 151936
+      },
+      "size_human": "6.00 GiB",
+      "retention_at_deletion": "reproducibility_required",
+      "reason": "E8b is strategically terminated and DC is no longer in the active lineage. The checkpoint is a deterministic function of the pinned teacher Qwen/Qwen3-4B-Thinking-2507@768f209d and the frozen contribution map, and its build is verified bitwise against bypassed_blocks(teacher, removed) on the reloaded checkpoint. Every consumer reference records the path and hash rather than needing the weights at rest.",
+      "deterministically_reconstructable": true,
+      "reconstruction_recipe": "PYTHONPATH=src python scripts/training/build_depth_only_init.py --map contribution --out artifacts/stage1/e8b_dc_init ; asserts sha256 eb9e95481988b296a77c30d7b4754069f1874330fca9ad198f4457029e11e182",
+      "referenced_by_at_deletion": [
+        "configs/stage3/e8b/arms.json",
+        "configs/stage3/e8b/e8b_dc_r1600k_sa.json",
+        "configs/stage3/e8b/e8b_dc_r1600k_sb.json",
+        "logs/e8b_preregistration.md",
+        "logs/e8b_step0_records/DC_init_nll.json",
+        "scripts/consolidate/build_checkpoint_registry.py",
+        "scripts/pod/e8b_driver.py",
+        "scripts/training/build_depth_only_init.py",
+        "scripts/training/build_e8b_configs.py",
+        "scripts/training/validate_e8b_arms.py"
+      ],
+      "deleted_utc": "2026-08-12T06:27:23+00:00"
+    }
+  ]
+}
