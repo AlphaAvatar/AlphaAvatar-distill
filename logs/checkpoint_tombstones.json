@@ -1,11 +1,36 @@
 {
-  "note": "Every entry records the hash, the reason, and whether the artifact can be rebuilt. A tombstone is the condition for deletion, not an afterthought.",
+  "schema": "aadistill.tombstone/v1",
+  "fields": [
+    "canonical_id",
+    "historical_paths",
+    "relay_path",
+    "retention_tier",
+    "experiment",
+    "seed",
+    "scientific_role",
+    "weights_sha256",
+    "config_sha256",
+    "architecture",
+    "size_human",
+    "reason_physical_weights_deleted",
+    "deterministic_reconstruction_possible",
+    "reconstruction_recipe",
+    "expected_reconstruction_cost",
+    "frozen_results_location",
+    "deleted_utc"
+  ],
+  "note": "A tombstone is the precondition for deletion. Every entry carries the hash, the reason, whether reconstruction is possible, the recipe and its cost, and where the frozen results live. A scientific conclusion must never depend on a file still happening to exist at some path.",
   "tombstones": [
     {
-      "original_path": "artifacts/audit/e8_baseline_init_reproduction",
-      "canonical_name": "e8_baseline_init_reproduction",
+      "canonical_id": "e8_baseline_init_reproduction",
+      "historical_paths": [
+        "artifacts/audit/e8_baseline_init_reproduction"
+      ],
+      "relay_path": null,
+      "retention_tier": "TIER_4_DISPOSABLE",
       "experiment": "E8a",
-      "role": "reproduction check of the control initialization",
+      "seed": null,
+      "scientific_role": "reproduction check of the control initialization",
       "weights_sha256": "86fbba78e8a2a32481ca77e5ac362ed1f17a39dbc30bcbc952cabd5df2633e54",
       "config_sha256": "a7131bb092b38a078edc213961f0eb57eaead24f1396e25741f4887b1a694054",
       "architecture": {
@@ -17,20 +42,23 @@
         "vocab_size": 151936
       },
       "size_human": "1.12 GiB",
-      "retention_at_deletion": "duplicate",
-      "reason": "byte-identical to artifacts/stage1/qwen3_0p6b_init_v0/checkpoint (both 86fbba78e8a2a32481ca77e5ac362ed1f17a39dbc30bcbc952cabd5df2633e54). Its scientific value was proving the rebuild path reproduces the control exactly, and that fact is the recorded hash match, not the bytes.",
-      "deterministically_reconstructable": true,
+      "reason_physical_weights_deleted": "byte-identical to artifacts/stage1/qwen3_0p6b_init_v0/checkpoint (both 86fbba78e8a2a32481ca77e5ac362ed1f17a39dbc30bcbc952cabd5df2633e54). Its scientific value was proving the rebuild path reproduces the control exactly, and that fact is the recorded hash match, not the bytes.",
+      "deterministic_reconstruction_possible": true,
       "reconstruction_recipe": "PYTHONPATH=src python scripts/init/build_stage1_init.py against the pinned Stage-0 activation cache aaeb2e4c\u2026 ; verified by hash equality with the control",
-      "referenced_by_at_deletion": [
-        "scripts/consolidate/build_checkpoint_registry.py"
-      ],
+      "expected_reconstruction_cost": "$0 (CPU)",
+      "frozen_results_location": "logs/EXPERIMENT_INDEX.md; logs/EXPERIMENTS.md",
       "deleted_utc": "2026-08-12T06:27:23+00:00"
     },
     {
-      "original_path": "artifacts/stage1/e8b_dc_init",
-      "canonical_name": "e8b_dc_init",
+      "canonical_id": "e8b_dc_init",
+      "historical_paths": [
+        "artifacts/stage1/e8b_dc_init"
+      ],
+      "relay_path": null,
+      "retention_tier": "TIER_3_RECORD_ONLY",
       "experiment": "E8b",
-      "role": "depth-only contribution initialization (DC)",
+      "seed": null,
+      "scientific_role": "depth-only contribution initialization (DC)",
       "weights_sha256": "eb9e95481988b296a77c30d7b4754069f1874330fca9ad198f4457029e11e182",
       "config_sha256": "8651f3349eb702d03fc72ee7ced9f182615973191a0c769a6203e2c9ff6afb2d",
       "architecture": {
@@ -42,23 +70,250 @@
         "vocab_size": 151936
       },
       "size_human": "6.00 GiB",
-      "retention_at_deletion": "reproducibility_required",
-      "reason": "E8b is strategically terminated and DC is no longer in the active lineage. The checkpoint is a deterministic function of the pinned teacher Qwen/Qwen3-4B-Thinking-2507@768f209d and the frozen contribution map, and its build is verified bitwise against bypassed_blocks(teacher, removed) on the reloaded checkpoint. Every consumer reference records the path and hash rather than needing the weights at rest.",
-      "deterministically_reconstructable": true,
+      "reason_physical_weights_deleted": "E8b is strategically terminated and DC is no longer in the active lineage. The checkpoint is a deterministic function of the pinned teacher Qwen/Qwen3-4B-Thinking-2507@768f209d and the frozen contribution map, and its build is verified bitwise against bypassed_blocks(teacher, removed) on the reloaded checkpoint. Every consumer reference records the path and hash rather than needing the weights at rest.",
+      "deterministic_reconstruction_possible": true,
       "reconstruction_recipe": "PYTHONPATH=src python scripts/training/build_depth_only_init.py --map contribution --out artifacts/stage1/e8b_dc_init ; asserts sha256 eb9e95481988b296a77c30d7b4754069f1874330fca9ad198f4457029e11e182",
-      "referenced_by_at_deletion": [
-        "configs/stage3/e8b/arms.json",
-        "configs/stage3/e8b/e8b_dc_r1600k_sa.json",
-        "configs/stage3/e8b/e8b_dc_r1600k_sb.json",
-        "logs/e8b_preregistration.md",
-        "logs/e8b_step0_records/DC_init_nll.json",
-        "scripts/consolidate/build_checkpoint_registry.py",
-        "scripts/pod/e8b_driver.py",
-        "scripts/training/build_depth_only_init.py",
-        "scripts/training/build_e8b_configs.py",
-        "scripts/training/validate_e8b_arms.py"
-      ],
+      "expected_reconstruction_cost": "$0 (CPU)",
+      "frozen_results_location": "logs/EXPERIMENT_INDEX.md; logs/EXPERIMENTS.md",
       "deleted_utc": "2026-08-12T06:27:23+00:00"
+    },
+    {
+      "canonical_id": "random_baseline",
+      "historical_paths": [
+        "artifacts/stage1/qwen3_0p6b_init_v0/random_baseline"
+      ],
+      "relay_path": "stage1/qwen3_0p6b_init_v0/random_baseline",
+      "retention_tier": "TIER_3_RECORD_ONLY",
+      "experiment": "E1",
+      "seed": null,
+      "scientific_role": "random-init baseline",
+      "weights_sha256": "0e2e2b28cfe5dc5b9cb014e3b317d0e7d1744249b3b39c49361df53bec6b8e91",
+      "config_sha256": "a7131bb092b38a078edc213961f0eb57eaead24f1396e25741f4887b1a694054",
+      "architecture": {
+        "num_hidden_layers": 28,
+        "hidden_size": 1024,
+        "intermediate_size": 3072,
+        "num_attention_heads": 16,
+        "num_key_value_heads": 8,
+        "vocab_size": 151936
+      },
+      "size_human": "1.12 GiB",
+      "reason_physical_weights_deleted": "E1's random-init control. Its result \u2014 PCA decisively beats random \u2014 is frozen in EXPERIMENT_INDEX.md and EXPERIMENTS.md \u00a711/\u00a728. A full copy is on the relay and the init is deterministic from its seed, so local weights add nothing.",
+      "deterministic_reconstruction_possible": true,
+      "reconstruction_recipe": "scripts/init/build_stage1_init.py with the random-init flag and the pinned seed",
+      "expected_reconstruction_cost": "$0 (CPU, minutes)",
+      "frozen_results_location": "logs/EXPERIMENT_INDEX.md; logs/EXPERIMENTS.md; logs/e6_results.json; logs/e1_test_cases.jsonl",
+      "deleted_utc": "2026-08-12T08:35:39+00:00"
+    },
+    {
+      "canonical_id": "e1_r0860k_sa_pca",
+      "historical_paths": [
+        "artifacts/stage3/rescued/e1_r0860k_sa_pca"
+      ],
+      "relay_path": "e1_scaling_20260801/e1_r0860k_sa_pca/step_001023",
+      "retention_tier": "TIER_3_RECORD_ONLY",
+      "experiment": "E1/E6",
+      "seed": "sa",
+      "scientific_role": "0.86M rung, seed sa",
+      "weights_sha256": "18ee10a10333481d3d6178d2fc5d4e0a705aca04d8a1d69a4ce83ac7f1e45b9c",
+      "config_sha256": "62d14acfb86e397e9449e0d39d5aba6c5a84facac372a86b85e9ac6915be9522",
+      "architecture": {
+        "num_hidden_layers": 28,
+        "hidden_size": 1024,
+        "intermediate_size": 3072,
+        "num_attention_heads": 16,
+        "num_key_value_heads": 8,
+        "vocab_size": 151936
+      },
+      "size_human": "2.23 GiB",
+      "reason_physical_weights_deleted": "0.86M probe rung, seed sa. Full copy on the relay. The frozen 150-prompt battery depends on the PROMPT SAMPLE (mask d6e24e0b09da1bcc\u2026), not on these weights.",
+      "deterministic_reconstruction_possible": true,
+      "reconstruction_recipe": "retrain from qwen3_0p6b_init_v0 with configs/stage3/e1/e1_r0860k_sa_pca.json",
+      "expected_reconstruction_cost": "~$2 on L40S",
+      "frozen_results_location": "logs/EXPERIMENT_INDEX.md; logs/EXPERIMENTS.md; logs/e6_results.json; logs/e1_test_cases.jsonl",
+      "deleted_utc": "2026-08-12T08:35:39+00:00"
+    },
+    {
+      "canonical_id": "e1_r0860k_sb_pca",
+      "historical_paths": [
+        "artifacts/stage3/rescued/e1_r0860k_sb_pca"
+      ],
+      "relay_path": "e1_scaling_20260801/e1_r0860k_sb_pca/step_001023",
+      "retention_tier": "TIER_3_RECORD_ONLY",
+      "experiment": "E1/E6",
+      "seed": "sb",
+      "scientific_role": "0.86M rung, seed sb",
+      "weights_sha256": "f66de5320b69aa34abf421a45b5d468bbbaf23d2a400750e3340873f20e40035",
+      "config_sha256": "62d14acfb86e397e9449e0d39d5aba6c5a84facac372a86b85e9ac6915be9522",
+      "architecture": {
+        "num_hidden_layers": 28,
+        "hidden_size": 1024,
+        "intermediate_size": 3072,
+        "num_attention_heads": 16,
+        "num_key_value_heads": 8,
+        "vocab_size": 151936
+      },
+      "size_human": "2.23 GiB",
+      "reason_physical_weights_deleted": "0.86M probe rung, seed sb. Full copy on the relay.",
+      "deterministic_reconstruction_possible": true,
+      "reconstruction_recipe": "retrain with configs/stage3/e1/e1_r0860k_sb_pca.json",
+      "expected_reconstruction_cost": "~$2 on L40S",
+      "frozen_results_location": "logs/EXPERIMENT_INDEX.md; logs/EXPERIMENTS.md; logs/e6_results.json; logs/e1_test_cases.jsonl",
+      "deleted_utc": "2026-08-12T08:35:39+00:00"
+    },
+    {
+      "canonical_id": "e1_r2960k_sb_rand",
+      "historical_paths": [
+        "artifacts/stage3/rescued/e1_r2960k_sb_rand"
+      ],
+      "relay_path": null,
+      "retention_tier": "TIER_3_RECORD_ONLY",
+      "experiment": "E1",
+      "seed": "sb",
+      "scientific_role": "2.96M rung from random init, seed sb",
+      "weights_sha256": "8ae1ba97f5146879d3f826512df57d6c9b815b7ac73ac720587cd00c0fe933b4",
+      "config_sha256": "62d14acfb86e397e9449e0d39d5aba6c5a84facac372a86b85e9ac6915be9522",
+      "architecture": {
+        "num_hidden_layers": 28,
+        "hidden_size": 1024,
+        "intermediate_size": 3072,
+        "num_attention_heads": 16,
+        "num_key_value_heads": 8,
+        "vocab_size": 151936
+      },
+      "size_human": "2.23 GiB",
+      "reason_physical_weights_deleted": "Random-init arm at 2.96M. The init-vs-random conclusion is closed and frozen; no planned experiment reuses these weights. SOLE COPY \u2014 deleted deliberately under the 2026-08-12 closeout, results retained.",
+      "deterministic_reconstruction_possible": true,
+      "reconstruction_recipe": "retrain from random_baseline with configs/stage3/e1/e1_r2960k_sb_rand.json",
+      "expected_reconstruction_cost": "~$7 on L40S",
+      "frozen_results_location": "logs/EXPERIMENT_INDEX.md; logs/EXPERIMENTS.md; logs/e6_results.json; logs/e1_test_cases.jsonl",
+      "deleted_utc": "2026-08-12T08:35:39+00:00"
+    },
+    {
+      "canonical_id": "e1_r5500k_sb_pca",
+      "historical_paths": [
+        "artifacts/stage3/rescued/e1_r5500k_sb_pca"
+      ],
+      "relay_path": null,
+      "retention_tier": "TIER_3_RECORD_ONLY",
+      "experiment": "E1/E6",
+      "seed": "sb",
+      "scientific_role": "5.50M rung, seed sb",
+      "weights_sha256": "bcb916cb3e544505770cddf021c680b0af6ded3ec7b5cfafe37eea5bb1541742",
+      "config_sha256": "62d14acfb86e397e9449e0d39d5aba6c5a84facac372a86b85e9ac6915be9522",
+      "architecture": {
+        "num_hidden_layers": 28,
+        "hidden_size": 1024,
+        "intermediate_size": 3072,
+        "num_attention_heads": 16,
+        "num_key_value_heads": 8,
+        "vocab_size": 151936
+      },
+      "size_human": "2.23 GiB",
+      "reason_physical_weights_deleted": "Highest E1 rung. Scientific result frozen; the AutoInitializer phase probes at 0.86M and confirms at 2.96M, so 5.50M weights are not required. SOLE COPY \u2014 deleted deliberately.",
+      "deterministic_reconstruction_possible": true,
+      "reconstruction_recipe": "retrain with configs/stage3/e1/e1_r5500k_sb_pca.json",
+      "expected_reconstruction_cost": "~$13 on L40S",
+      "frozen_results_location": "logs/EXPERIMENT_INDEX.md; logs/EXPERIMENTS.md; logs/e6_results.json; logs/e1_test_cases.jsonl",
+      "deleted_utc": "2026-08-12T08:35:39+00:00"
+    },
+    {
+      "canonical_id": "e1_r5500k_sb_rand",
+      "historical_paths": [
+        "artifacts/stage3/rescued/e1_r5500k_sb_rand"
+      ],
+      "relay_path": null,
+      "retention_tier": "TIER_3_RECORD_ONLY",
+      "experiment": "E1",
+      "seed": "sb",
+      "scientific_role": "5.50M rung from random init, seed sb",
+      "weights_sha256": "ec7cd43cd7ec5426b0171dc5d66d1306b8e2e67ae0398ff9af1c0f4d2957722d",
+      "config_sha256": "62d14acfb86e397e9449e0d39d5aba6c5a84facac372a86b85e9ac6915be9522",
+      "architecture": {
+        "num_hidden_layers": 28,
+        "hidden_size": 1024,
+        "intermediate_size": 3072,
+        "num_attention_heads": 16,
+        "num_key_value_heads": 8,
+        "vocab_size": 151936
+      },
+      "size_human": "2.23 GiB",
+      "reason_physical_weights_deleted": "Random-init arm at the highest rung; both its comparisons are closed. SOLE COPY \u2014 deleted deliberately.",
+      "deterministic_reconstruction_possible": true,
+      "reconstruction_recipe": "retrain with configs/stage3/e1/e1_r5500k_sb_rand.json",
+      "expected_reconstruction_cost": "~$13 on L40S",
+      "frozen_results_location": "logs/EXPERIMENT_INDEX.md; logs/EXPERIMENTS.md; logs/e6_results.json; logs/e1_test_cases.jsonl",
+      "deleted_utc": "2026-08-12T08:35:39+00:00"
+    },
+    {
+      "canonical_id": "e1_ctl_r0250k_sa_pca_stepmatched",
+      "historical_paths": [
+        "artifacts/stage3/rescued/e1_ctl_r0250k_sa_pca_stepmatched"
+      ],
+      "relay_path": null,
+      "retention_tier": "TIER_4_DISPOSABLE",
+      "experiment": "E1",
+      "seed": "sa",
+      "scientific_role": "0.25M step-matched control",
+      "weights_sha256": "bfdcb4436f51eb31deea810be45a20e1fd39f6614d4f4b78c60ab952529858e2",
+      "config_sha256": "62d14acfb86e397e9449e0d39d5aba6c5a84facac372a86b85e9ac6915be9522",
+      "architecture": {
+        "num_hidden_layers": 28,
+        "hidden_size": 1024,
+        "intermediate_size": 3072,
+        "num_attention_heads": 16,
+        "num_key_value_heads": 8,
+        "vocab_size": 151936
+      },
+      "size_human": "2.23 GiB",
+      "reason_physical_weights_deleted": "Step-matched 0.25M diagnostic control. Its conclusion is recorded and it is not part of any current lineage. It was previously retained only because ten documents mention its path; those references now resolve through the checkpoint registry.",
+      "deterministic_reconstruction_possible": true,
+      "reconstruction_recipe": "retrain with configs/stage3/e1/e1_ctl_r0250k_sa_pca_stepmatched.json",
+      "expected_reconstruction_cost": "~$7 on L40S",
+      "frozen_results_location": "logs/EXPERIMENT_INDEX.md; logs/EXPERIMENTS.md; logs/e6_results.json; logs/e1_test_cases.jsonl",
+      "deleted_utc": "2026-08-12T08:35:39+00:00"
+    },
+    {
+      "canonical_id": "stage0_probe_v513",
+      "historical_paths": [
+        "artifacts/audit/stage0_probe_v513"
+      ],
+      "relay_path": null,
+      "retention_tier": "TIER_4_DISPOSABLE",
+      "experiment": "E8a (RoPE skew diagnostic)",
+      "seed": null,
+      "scientific_role": "activation-cache reader probe, not a checkpoint",
+      "weights_sha256": "fa42904be1ce040b\u2026(truncated; full value in EXPERIMENTS.md \u00a736)",
+      "config_sha256": null,
+      "architecture": null,
+      "size_human": "1.81 GiB",
+      "reason_physical_weights_deleted": "transformers 5.13.1 probe of the Stage-0 activation cache, produced to diagnose the 4.x/5.x rope_parameters skew. The finding is recorded (EXPERIMENTS.md \u00a736, decisions.md) and the canonical cache aaeb2e4c\u2026 is retained locally and on the relay.",
+      "deterministic_reconstruction_possible": true,
+      "reconstruction_recipe": "re-run scripts/init/collect_stage0.py under the named transformers version against the pinned teacher",
+      "expected_reconstruction_cost": "$0 (CPU, ~1 h)",
+      "frozen_results_location": "logs/EXPERIMENTS.md \u00a736; logs/decisions.md",
+      "deleted_utc": "2026-08-12T08:36:45+00:00"
+    },
+    {
+      "canonical_id": "stage0_probe_v457",
+      "historical_paths": [
+        "artifacts/audit/stage0_probe_v457"
+      ],
+      "relay_path": null,
+      "retention_tier": "TIER_4_DISPOSABLE",
+      "experiment": "E8a (RoPE skew diagnostic)",
+      "seed": null,
+      "scientific_role": "activation-cache reader probe, not a checkpoint",
+      "weights_sha256": "274e6d6d42b64a02\u2026(truncated; full value in EXPERIMENTS.md \u00a736)",
+      "config_sha256": null,
+      "architecture": null,
+      "size_human": "1.81 GiB",
+      "reason_physical_weights_deleted": "transformers 4.57.1 probe of the same cache, same diagnostic. Its value was the hash DIFFERENCE it demonstrated, which is what the record preserves.",
+      "deterministic_reconstruction_possible": true,
+      "reconstruction_recipe": "re-run scripts/init/collect_stage0.py under the named transformers version against the pinned teacher",
+      "expected_reconstruction_cost": "$0 (CPU, ~1 h)",
+      "frozen_results_location": "logs/EXPERIMENTS.md \u00a736; logs/decisions.md",
+      "deleted_utc": "2026-08-12T08:36:45+00:00"
     }
   ]
 }

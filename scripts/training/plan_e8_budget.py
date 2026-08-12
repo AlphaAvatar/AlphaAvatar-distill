@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Price E8 through the four-threshold planner, phase by phase.
 
-Every figure in `logs/e8_preregistration.md` comes from here, so the proposal and
+Every figure in `logs/archive/e8_preregistration.md` comes from here, so the proposal and
 the arithmetic that would enforce it are the same code. Touches no GPU, creates
 no pod.
 

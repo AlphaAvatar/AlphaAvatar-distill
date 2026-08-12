@@ -71,7 +71,7 @@ def test_interaction_uses_the_registered_sign_convention():
 
 
 def test_registered_convention_matches_the_preregistration_text():
-    prereg = (REPO / "logs/e8b_preregistration.md").read_text()
+    prereg = (REPO / "logs/archive/e8b_preregistration.md").read_text()
     # The document is the authority; the code must quote it, not paraphrase it.
     assert "(FC \u2212 FP) \u2212 (DC \u2212 DP)" in prereg or \
            "(FC - FP) - (DC - DP)" in prereg

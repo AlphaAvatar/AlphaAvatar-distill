@@ -46,7 +46,7 @@ from analyze_e6 import (  # noqa: E402  — one scorer, shared by every experime
 
 AUDIT = REPO_ROOT / "artifacts/audit"
 THREE_MODE = AUDIT / "three_mode"
-REGISTRATION = REPO_ROOT / "logs/e8_preregistration.md"
+REGISTRATION = REPO_ROOT / "logs/archive/e8_preregistration.md"
 GENERAL_TEXT = AUDIT / "e8_general_text"
 STEP0 = AUDIT / "e8_step0_comparison.json"
 FROZEN_MAP = REPO_ROOT / "artifacts/stage1/e8_depth_search/e8_frozen_depth_map.json"

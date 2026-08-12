@@ -1,3 +1,9 @@
+> **ARCHIVED / HISTORICAL — 2026-08-12.** This document is no longer an active
+> plan. It is retained for provenance only. The current state is
+> [`STATE.md`](../STATE.md); the current plan is
+> [`../../docs/HANDOFF_AUTOINITIALIZER.md`](../../docs/HANDOFF_AUTOINITIALIZER.md).
+> Any 'next experiment' instruction below is superseded.
+
 # E8b — depth-map × compression interaction: pair-matched preflight and proposal
 
 **Status: PREFLIGHT COMPLETE, NOT AUTHORIZED. No GPU has been used for E8b.** Both

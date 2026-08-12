@@ -21,7 +21,7 @@ Two contrasts and one interaction:
     (FC-FP) - (DC-DP)    whether the map's effect depends on the compression
 
 The interaction sign convention is the **registered** one
-(`logs/e8b_preregistration.md` §8): `(FC - FP) - (DC - DP)`. Negative means the map
+(`logs/archive/e8b_preregistration.md` §8): `(FC - FP) - (DC - DP)`. Negative means the map
 does worse once compression is applied than it does at full width. Reversing this is
 an easy and invisible way to invert a conclusion, so it is asserted in the tests.
 

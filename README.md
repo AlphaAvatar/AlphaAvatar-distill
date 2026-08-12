@@ -25,6 +25,26 @@ hard-code layer counts, hidden or FFN sizes, head counts, or a target parameter 
 | E8b | **strategically terminated; no valid recovered-behaviour comparison** |
 | actual cumulative spend | **$180.7033** against a $211.07 cap ([ledger](./logs/BUDGET_LEDGER.md)) |
 
+### Repository map
+
+| you want | read |
+| --- | --- |
+| current state, in minutes | [`logs/STATE.md`](./logs/STATE.md) |
+| **the next session's brief** | [`docs/HANDOFF_AUTOINITIALIZER.md`](./docs/HANDOFF_AUTOINITIALIZER.md) |
+| what each experiment proved | [`logs/EXPERIMENT_INDEX.md`](./logs/EXPERIMENT_INDEX.md) |
+| decisions and their reasons | [`logs/decisions.md`](./logs/decisions.md) |
+| which checkpoints exist, and why | [`logs/checkpoint_registry.json`](./logs/checkpoint_registry.json) |
+| what was deleted, and how to rebuild it | [`logs/checkpoint_tombstones.json`](./logs/checkpoint_tombstones.json) |
+| actual spend vs authorization | [`logs/BUDGET_LEDGER.md`](./logs/BUDGET_LEDGER.md) |
+| machine-readable state | [`logs/current_state.json`](./logs/current_state.json) |
+| superseded plans (provenance only) | [`logs/archive/`](./logs/archive/) |
+| per-session chronology | [`logs/EXPERIMENTS.md`](./logs/EXPERIMENTS.md) |
+
+**Research transition.** The next phase is a **Teacher-Adaptive AutoInitializer** —
+search over initialization operators, operator order and calibration configuration, with
+conditional remeasurement after every operator. **It is not implemented yet**; the
+architecture is decided and recorded in the handoff.
+
 **One place for the experiment history: [`logs/EXPERIMENT_INDEX.md`](./logs/EXPERIMENT_INDEX.md)**
 — what each of E1–E8 asked, what it proved, what it does *not* support, and which
 checkpoints still matter. Chronology and per-session detail live in
@@ -358,7 +378,7 @@ The first dense-model compression experiment was kicked off with this instructio
 
 > Hi, have a look at the AlphaAvatar-distill repo and start from the teacher model https://huggingface.co/Qwen/Qwen3-4B-Thinking-2507. Let's kick off the first dense-model compression experiment.
 
-Everything under `src/`, `scripts/`, and `logs/` grew from that instruction, following the staged workflow in `AGENTS.md`. The working split is: agents act directly on local, reversible, CPU-scale work, and write a **costed proposal with pre-registered decision rules** for anything paid, long-running, or public-facing — the maintainer approves per session. The active proposal lives in [`logs/PROPOSAL.md`](./logs/PROPOSAL.md); current state and next actions in [`logs/STATE.md`](./logs/STATE.md).
+Everything under `src/`, `scripts/`, and `logs/` grew from that instruction, following the staged workflow in `AGENTS.md`. The working split is: agents act directly on local, reversible, CPU-scale work, and write a **costed proposal with pre-registered decision rules** for anything paid, long-running, or public-facing — the maintainer approves per session. The active proposal lives in [`logs/archive/PROPOSAL.md`](./logs/archive/PROPOSAL.md); current state and next actions in [`logs/STATE.md`](./logs/STATE.md).
 
 ---
 
@@ -417,7 +437,7 @@ AlphaAvatar-distill/
 
 The tree is abridged to the parts worth knowing about. New directories appear only when an implemented, verified milestone needs them — no empty placeholders. Model weights, activation caches and experiment artifacts are kept out of git (`.gitignore`); large checkpoints live in a private Hugging Face repo with hashes recorded in `logs/artifact_manifests.md`.
 
-On 2026-07-31 the 25 per-run experiment logs and 11 per-experiment proposals were consolidated into [`logs/EXPERIMENTS.md`](./logs/EXPERIMENTS.md) and [`logs/PROPOSAL.md`](./logs/PROPOSAL.md), and ~26 GB of superseded artifacts were removed. The originals remain in git history at commit `866dac2`.
+On 2026-07-31 the 25 per-run experiment logs and 11 per-experiment proposals were consolidated into [`logs/EXPERIMENTS.md`](./logs/EXPERIMENTS.md) and [`logs/archive/PROPOSAL.md`](./logs/archive/PROPOSAL.md), and ~26 GB of superseded artifacts were removed. The originals remain in git history at commit `866dac2`.
 
 **Checkpoint retention is uneven and tracked.** Weights live outside git, on the
 private relay or the dev box, with hashes in

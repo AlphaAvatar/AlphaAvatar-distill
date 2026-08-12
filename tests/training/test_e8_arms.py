@@ -160,7 +160,11 @@ def test_the_validator_passes_its_config_checks_and_fails_closed_without_the_ini
     assert gated.returncode == 6
     failed = json.loads((tmp_path / "gated.json").read_text())["failed"]
     assert "init_present:treatment" in failed
-    assert "init_nll_gate:baseline" in failed
+    # The BASELINE's own gate outcome is deliberately not asserted. An earlier version
+    # required `init_nll_gate:baseline` here, which was true only while the baseline
+    # happened to lack an NLL record; once E8b-S1 measured it the gate began passing —
+    # correctly — and the assertion failed for a reason unrelated to its subject. The
+    # property under test is that the gate FAILS CLOSED on the missing treatment.
 
 
 def test_the_positional_map_this_experiment_replaces_is_what_we_think_it_is():

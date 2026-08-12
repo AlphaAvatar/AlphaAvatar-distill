@@ -1,3 +1,9 @@
+> **ARCHIVED / HISTORICAL — 2026-08-12.** This document is no longer an active
+> plan. It is retained for provenance only. The current state is
+> [`STATE.md`](../STATE.md); the current plan is
+> [`../../docs/HANDOFF_AUTOINITIALIZER.md`](../../docs/HANDOFF_AUTOINITIALIZER.md).
+> Any 'next experiment' instruction below is superseded.
+
 # Experiment 8 — preregistration
 
 **Status: DRAFT. Not authorized. No GPU has been used for any of it.** The

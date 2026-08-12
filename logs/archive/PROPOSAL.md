@@ -1,3 +1,9 @@
+> **ARCHIVED / HISTORICAL — 2026-08-12.** This document is no longer an active
+> plan. It is retained for provenance only. The current state is
+> [`STATE.md`](../STATE.md); the current plan is
+> [`../../docs/HANDOFF_AUTOINITIALIZER.md`](../../docs/HANDOFF_AUTOINITIALIZER.md).
+> Any 'next experiment' instruction below is superseded.
+
 # Active proposal — Experiment 2: three sequential 0.86M diagnostics
 
 **Status 2026-08-03.** Experiment 1 is complete ([`EXPERIMENTS.md`](EXPERIMENTS.md)
