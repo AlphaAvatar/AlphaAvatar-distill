@@ -500,6 +500,80 @@ SCHEDULE_V1 = BeamSchedule(
     width=6,
 )
 
+@dataclass(frozen=True)
+class EpsilonResponseRule:
+    """What happens when the GPU repeatability measurement comes back.
+
+    Frozen **before** the measurement, because "we will reset epsilon from the
+    measured range" is not a rule — it is an intention, and it leaves the tolerance
+    that decides which search paths die to be chosen after seeing one profiling
+    run.
+
+    v1 takes the conservative branch deliberately. If the measured range reaches
+    the declared epsilon, the response is **not** to derive a new tolerance
+    automatically: a single profiling run is a poor basis for a scientific
+    tolerance, and a rule like ``max(1e-4, 2 * measured)`` would let one noisy
+    session widen the beam's notion of equivalence without anyone deciding that it
+    should. Instead the preflight is marked as requiring review and Phase A does
+    not start.
+
+    The measurement is defined here too, so the number the rule consumes cannot be
+    redefined afterwards.
+    """
+
+    declared_epsilon: float
+    rule_id: str = "conservative_review_gate"
+    version: int = 1
+    measurement: str = (
+        "one materialized checkpoint, scored N times through the full "
+        "materialize -> reload -> measure cycle on the frozen state-eval suite, "
+        "on the pilot's GPU backend; the statistic is max(max - min) across the "
+        "policy's objective metrics")
+    repeats: int = 10
+
+    def evaluate(self, measured_range: float) -> dict[str, Any]:
+        import math as _math
+
+        if not _math.isfinite(measured_range) or measured_range < 0:
+            raise RankingError(
+                f"measured repeatability range {measured_range!r} is not a "
+                "non-negative finite number")
+        passes = measured_range < self.declared_epsilon
+        return {
+            "rule_id": self.rule_id, "version": self.version,
+            "declared_epsilon": self.declared_epsilon,
+            "measured_range": measured_range,
+            "passes": passes,
+            "epsilon_final": self.declared_epsilon if passes else None,
+            "action": ("proceed: the measured range is below the declared epsilon, "
+                       "which stands unchanged"
+                       if passes else
+                       "STOP: the measured range reaches or exceeds the declared "
+                       "epsilon. Do NOT materialize a new epsilon automatically. "
+                       "Mark the preflight as requiring review and do not start "
+                       "Phase A; a beam tolerance derived from one profiling run "
+                       "is not a scientific tolerance."),
+            "requires_review": not passes,
+            "phase_a_blocked": not passes,
+        }
+
+    def as_dict(self) -> dict[str, Any]:
+        return {"rule_id": self.rule_id, "version": self.version,
+                "declared_epsilon": self.declared_epsilon,
+                "measurement_definition": self.measurement, "repeats": self.repeats,
+                "if_below": "epsilon stands unchanged",
+                "if_at_or_above": ("no automatic re-derivation; preflight requires "
+                                   "review and Phase A is blocked"),
+                "rejected_alternative": ("epsilon_final = max(1e-4, 2 * measured) "
+                                         "- rejected for v1 because it derives a "
+                                         "scientific tolerance from a single "
+                                         "profiling run")}
+
+
+#: Frozen against the shipped policy's smallest declared epsilon.
+EPSILON_RESPONSE_V1 = EpsilonResponseRule(
+    declared_epsilon=min(PARETO_V1.epsilon.values()))
+
 _POLICIES: dict[str, BeamRankingPolicy] = {PARETO_V1.qualified_id: PARETO_V1}
 
 

@@ -140,20 +140,63 @@ def load(name, config, split):
     return load_dataset(name, config, split=split)
 
 
-def cached_fingerprint(name: str) -> str | None:
-    """The cached dataset config hash — what actually pins the bytes offline.
+def cached_snapshot_identity(name: str) -> dict:
+    """An immutable identity for the cached snapshot the prompts came from.
 
-    ``load_dataset`` in offline mode reports revision ``0.0.0``; the directory
-    hash under ``~/.cache/huggingface/datasets`` is the only identifier available
-    that distinguishes one cached snapshot from another. Recorded as such, rather
-    than pretending an upstream revision was resolved.
+    ``load_dataset`` in offline mode cannot resolve an upstream revision, so
+    recording ``revision: unresolved-offline`` alone would leave the asset without
+    reproducible provenance. Two stronger identities are available locally and
+    both are recorded:
+
+    * the cache's own config-hash directory names, which distinguish one cached
+      snapshot from another;
+    * a **content digest** over the arrow/parquet payload files (name, size and
+      sha256 of each), which pins the bytes the prompts were actually read from
+      regardless of how the cache is labelled.
+
+    The content digest is what makes the frozen battery reproducible: given the
+    same digest, the same builder produces the same prompts.
     """
+    # The hub cache carries the real upstream commit as its snapshot directory
+    # name, which is a proper immutable revision and strictly better provenance
+    # than any local digest. Prefer it; fall back to a content digest only when
+    # no snapshot is present.
+    hub = (Path.home() / ".cache/huggingface/hub"
+           / f"datasets--{name.replace('/', '--')}" / "snapshots")
+    revisions = sorted(d.name for d in hub.iterdir()) if hub.is_dir() else []
+
     root = Path.home() / ".cache/huggingface/datasets" / name.replace("/", "___").lower()
     if not root.is_dir():
-        return None
-    hashes = sorted(p.name for p in root.rglob("*") if p.is_dir()
-                    and len(p.name) == 40 and all(c in "0123456789abcdef" for c in p.name))
-    return hashes[0] if hashes else None
+        return {"revision": revisions[0] if len(revisions) == 1 else None,
+                "revision_source": "hub snapshot commit" if revisions else None,
+                "all_cached_revisions": revisions, "cache_present": False}
+    config_hashes = sorted({d.name for d in root.rglob("*") if d.is_dir()
+                            and len(d.name) == 40
+                            and all(c in "0123456789abcdef" for c in d.name)})
+    payload = []
+    for f in sorted(root.rglob("*")):
+        if f.is_file() and f.suffix in (".arrow", ".parquet"):
+            payload.append({"file": str(f.relative_to(root)),
+                            "size": f.stat().st_size,
+                            "sha256": sha256_file(f)})
+    digest = hashlib.sha256("".join(
+        f"{e['file']}:{e['size']}:{e['sha256']}\n" for e in payload).encode()
+    ).hexdigest() if payload else None
+    return {
+        "revision": revisions[0] if len(revisions) == 1 else None,
+        "revision_source": ("hub snapshot commit" if len(revisions) == 1
+                            else "ambiguous: multiple cached snapshots"),
+        "all_cached_revisions": revisions,
+        "cache_present": True,
+        "cache_config_hashes": config_hashes,
+        "payload_files": len(payload),
+        "payload_bytes": sum(e["size"] for e in payload),
+        "content_digest": digest,
+        "content_digest_rule": ("sha256 over sorted 'relpath:size:sha256' lines of "
+                                "every .arrow/.parquet file in the cached dataset"),
+        "note": ("revision is the hub snapshot commit; the content digest "
+                 "independently pins the bytes the prompts were read from"),
+    }
 
 
 def take(rows, want, exclude_ids, exclude_hashes, make):
@@ -193,11 +236,8 @@ def main() -> None:
     built: dict[str, list[dict]] = {}
 
     def register(set_name, repo, config, split):
-        sources[set_name] = {
-            "repo": repo, "config": config, "split": split,
-            "cached_fingerprint": cached_fingerprint(repo),
-            "revision": "unresolved-offline",
-        }
+        sources[set_name] = {"repo": repo, "config": config, "split": split,
+                             **cached_snapshot_identity(repo)}
         return load(repo, config, split)
 
     # --- scorable sets ------------------------------------------------------

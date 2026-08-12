@@ -33,10 +33,16 @@ from aadistill.autoinit.cost import (  # noqa: E402
     price_search,
 )
 from aadistill.autoinit.operators import V1_IMPLEMENTATIONS, registry_ledger  # noqa: E402
-from aadistill.autoinit.ranking import PARETO_V1, SCHEDULE_V1  # noqa: E402
+from aadistill.autoinit.ranking import (  # noqa: E402
+    EPSILON_RESPONSE_V1,
+    PARETO_V1,
+    SCHEDULE_V1,
+)
 from aadistill.autoinit.recovery import (  # noqa: E402
+    CAPABILITY_SCHEMA_V1,
     CATASTROPHIC_V1,
     E1_KD_HEAVY_0860K,
+    FeasibilityRule,
     POOLED_COUNTS_V1,
     SEED_SA,
     SEED_SB,
@@ -105,7 +111,9 @@ def main() -> None:
         # second definition this rule exists to eliminate.
         equivalence=EquivalenceRule(
             n_pooled=battery["n_scorable_prompts"] * 2),
+        feasibility=FeasibilityRule(n_pooled=battery["n_prompts"] * 2),
         catastrophic=CATASTROPHIC_V1,
+        capability_schema=CAPABILITY_SCHEMA_V1,
         aggregation=POOLED_COUNTS_V1,
         survivor_rule=("rung 1: exclude searched leaves below the feasibility floor, "
                        "then take the top 2 by correct_overall; the canonical "
@@ -161,6 +169,7 @@ def main() -> None:
             "no_first_level_quality_pruning": SCHEDULE_V1.warmup_levels >= 1,
             "nll_status": "diagnostic only; not an objective, not a tie-break key",
             "epsilon_justification": thresholds["beam_epsilon"]["verdict"],
+            "epsilon_response_rule": EPSILON_RESPONSE_V1.as_dict(),
         },
 
         "state_evaluation": {
@@ -202,8 +211,8 @@ def main() -> None:
                           "secondary diagnostic (reported, never reorders)"],
                 "feasibility_metric": "usable_rollout_rate over ALL prompts",
                 "feasibility_floor": PENDING,
-                "feasibility_floor_rule": thresholds["recovery_thresholds"][
-                    "feasibility_floor"],
+                "feasibility_rule": plan.feasibility.as_dict(),
+                "capability_schema": plan.capability_schema.as_dict(),
                 "primary_metric": "correct_overall over SCORABLE prompts",
                 "secondary_metric": "correct_given_usable over SCORABLE prompts",
                 "equivalence_rule": plan.equivalence.as_dict(),
@@ -308,15 +317,33 @@ def main() -> None:
             (REPO_ROOT / "logs/autoinit_control_availability.json").read_text())
             if (REPO_ROOT / "logs/autoinit_control_availability.json").is_file()
             else "NOT VERIFIED",
+        "canonical_control_recipe_audit": (
+            lambda r: {"historical_controls_are_recipe_matched":
+                       r["historical_controls_are_recipe_matched"],
+                       "consequence": r["consequence"],
+                       "per_control": {k: v["comparison"] for k, v in
+                                       r["comparisons"].items()},
+                       "report_sha256": r["report_sha256"]}
+        )(json.loads((REPO_ROOT / "logs/autoinit_recovery_fingerprint_audit.json"
+                      ).read_text()))
+        if (REPO_ROOT / "logs/autoinit_recovery_fingerprint_audit.json").is_file()
+        else "NOT AUDITED",
         "tool_scoring_audit": json.loads(
             (REPO_ROOT / "logs/autoinit_tool_scoring_audit.json").read_text())
             if (REPO_ROOT / "logs/autoinit_tool_scoring_audit.json").is_file()
             else None,
         "pending_before_launch": [
-            "canonical control usable_rollout_rate on recovery_search_v1",
-            "canonical control correct_overall on recovery_search_v1",
-            "canonical control per-set usable rates",
-            "GPU state-evaluator repeatability (confirms or resets beam epsilon)",
+            "RERUN canonical sa/sb at 0.86M under the current frozen trainer -- the "
+            "historical checkpoints are NOT recipe-matched (trainer commit and torch "
+            "version differ; the historical tree was dirty and unreconstructable)",
+            "control pooled + per-seed usable_rollout_rate -> materializes the "
+            "feasibility floor",
+            "control pooled + per-seed correct_overall -> materializes the "
+            "equivalence interval",
+            "control per-capability usable rates -> the catastrophic rule's "
+            "reference values",
+            "GPU state-evaluator repeatability -> evaluated by the frozen "
+            "conservative response rule (no automatic epsilon re-derivation)",
             "activation-statistics GPU/CPU split (collapses the cost range)",
         ],
     }

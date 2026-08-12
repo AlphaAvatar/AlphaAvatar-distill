@@ -1,5 +1,5 @@
 **Updated:** 2026-08-12 · branch `main` · working tree clean
-**No pods running. Nothing billing.** **1,488 CPU tests pass**, 7 skipped — in
+**No pods running. Nothing billing.** **1,501 CPU tests pass**, 7 skipped — in
 *both* venvs (repo `.venv` transformers 5.13.1, and the transformers 4.57.1 venv).
 
 **The AutoInitializer framework is implemented at zero cost and not yet run on
@@ -11,8 +11,9 @@ policy, a deterministic resumable beam search, and the search manifest. 169 test
 **The two frozen search assets now exist**: `artifacts/stage1/state_eval_v1` (80
 items, 74,022 positions, five domains) and `artifacts/stage3/recovery_search_v1`
 (190 prompts, **170 scorable** after the tool-scoring audit). Role isolation
-passes across all five roles with 0 exact overlaps. **Both canonical 0.86M control
-checkpoints are verified on the relay** — no recovery retraining is needed.
+passes across all five roles with 0 exact overlaps. **The historical 0.86M controls hash-verify but are NOT recipe-matched**
+(trainer commit and torch version differ); the canonical control is rerun in the
+micro-preflight and those runs become the permanent Phase-A control probes.
 **A pre-GPU correction pass on 2026-08-12** fixed nine items a maintainer review of
 the implementation found — none of them visible at the dry run's scale. See
 [`decisions.md`](decisions.md) 2026-08-12. End-to-end dry run on real tiny checkpoints:
@@ -373,7 +374,7 @@ Record [`EXPERIMENTS.md`](EXPERIMENTS.md) §34 · report
 
 ## 7. Implementation state (CPU-verified)
 
-**1,488 tests pass on CPU, 7 skipped** (`PYTHONPATH=src pytest tests/ -q`, ~127 s,
+**1,501 tests pass on CPU, 7 skipped** (`PYTHONPATH=src pytest tests/ -q`, ~127 s,
 no downloads; `uv run pytest tests/ -q` also works). Verified in **both** venvs —
 the repo `.venv` (transformers 5.13.1) and the transformers 4.57.1 venv — because
 the AutoInitializer builds its models in-process from a config, which is

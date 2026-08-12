@@ -193,25 +193,42 @@ POOLED_COUNTS_V1 = SeedAggregation()
 
 @dataclass(frozen=True)
 class EquivalenceRule:
-    """The behaviour equivalence interval. **One definition, not two.**
+    """The behaviour equivalence interval. **One definition, and it is seed-aware.**
 
-    The formula is frozen before any candidate is searched; the numeric value is
-    materialized from the control characterization and then never changes. That
-    is still non-adaptive: nothing about a searched candidate enters it.
+    Prompt-level binomial uncertainty alone understates what this project has
+    measured. The behaviour metric moves **0.1290 on training seed alone**, and
+    340 prompts drawn from a *single* recovered checkpoint say nothing about that:
+    they estimate one checkpoint's rate precisely and the *recipe's* rate not at
+    all. An interval built only from the binomial term would call two
+    initializations different when a reseed of either would have crossed the gap.
 
-        interval = z * sqrt(p_control * (1 - p_control) / n_pooled)
+    So the frozen rule takes the larger of the two uncertainties:
 
-    ``p_control`` is the pooled ``correct_overall`` of the canonical control on the
-    frozen recovery-search battery. Until it is measured, ``value`` is ``None`` and
-    every selector that needs it raises rather than falling back to a prior — a
-    fallback would silently reintroduce the second definition this replaces.
+        binomial_se    = sqrt(p_pool * (1 - p_pool) / n_pooled)
+        seed_se_proxy  = |p_sa - p_sb| / 2
+        interval       = z * max(binomial_se, seed_se_proxy)
+
+    ``seed_se_proxy`` is a two-point range, which is a weak estimator of a
+    standard error — with n=2 it is the only one available, and it is used as a
+    *floor* on the interval rather than as an estimate in its own right. That is
+    the conservative direction: it can only widen the interval, so it can only
+    make the selector more willing to call a difference a tie.
+
+    The formula is frozen before any candidate is searched; the values are
+    materialized from the **control's own** per-seed rates and then never change.
+    Until then ``value`` is ``None`` and every selector that needs it raises — a
+    fallback to a prior would reintroduce the second definition this replaces.
     """
 
     n_pooled: int
-    rule_id: str = "two_binomial_se"
-    version: int = 1
+    rule_id: str = "seed_aware_max_binomial_seedrange"
+    version: int = 2
     z: float = 2.0
     p_control: float | None = None
+    p_sa: float | None = None
+    p_sb: float | None = None
+    binomial_se: float | None = None
+    seed_se_proxy: float | None = None
     value: float | None = None
 
     def __post_init__(self) -> None:
@@ -221,39 +238,115 @@ class EquivalenceRule:
             raise ValueError(
                 "value and p_control are materialized together or not at all")
 
-    def interval_for(self, p_control: float) -> float:
-        if not 0.0 <= p_control <= 1.0:
-            raise ValueError(f"p_control={p_control!r} is not a rate")
-        return self.z * math.sqrt(max(p_control * (1 - p_control), 0.0) / self.n_pooled)
+    def components(self, p_pool: float, p_sa: float, p_sb: float) -> dict[str, float]:
+        for name, value in (("p_pool", p_pool), ("p_sa", p_sa), ("p_sb", p_sb)):
+            if not 0.0 <= value <= 1.0:
+                raise ValueError(f"{name}={value!r} is not a rate")
+        binomial = math.sqrt(max(p_pool * (1 - p_pool), 0.0) / self.n_pooled)
+        seed = abs(p_sa - p_sb) / 2.0
+        return {"binomial_se": binomial, "seed_se_proxy": seed,
+                "value": self.z * max(binomial, seed)}
 
-    def materialize(self, p_control: float) -> "EquivalenceRule":
-        """Freeze the numeric value from the control's measured rate."""
+    def materialize(self, *, p_pool: float, p_sa: float, p_sb: float) -> "EquivalenceRule":
+        """Freeze the numeric value from the control's pooled and per-seed rates."""
         if self.value is not None:
             raise ValueError(
                 f"already materialized at {self.value}; the interval is frozen once "
                 "the control is characterized and does not move afterwards")
-        return EquivalenceRule(n_pooled=self.n_pooled, rule_id=self.rule_id,
-                               version=self.version, z=self.z, p_control=p_control,
-                               value=self.interval_for(p_control))
+        parts = self.components(p_pool, p_sa, p_sb)
+        return EquivalenceRule(
+            n_pooled=self.n_pooled, rule_id=self.rule_id, version=self.version,
+            z=self.z, p_control=p_pool, p_sa=p_sa, p_sb=p_sb,
+            binomial_se=parts["binomial_se"], seed_se_proxy=parts["seed_se_proxy"],
+            value=parts["value"])
 
     def require_value(self) -> float:
         if self.value is None:
             raise RecoveryAdmissionError(
                 "the equivalence interval is not materialized: the canonical "
                 "control has not been characterized on the recovery-search "
-                "battery. Measure it, materialize the rule, re-hash the plan, then "
-                "select. There is no prior to fall back to by design.")
+                "battery. Measure both seeds, materialize the rule, re-hash the "
+                "plan, then select. There is no prior to fall back to by design.")
         return self.value
 
     def as_dict(self) -> dict[str, Any]:
         return {"rule_id": self.rule_id, "version": self.version,
-                "formula": "z * sqrt(p_control * (1 - p_control) / n_pooled)",
+                "formula": ("z * max(sqrt(p_pool*(1-p_pool)/n_pooled), "
+                            "|p_sa - p_sb| / 2)"),
                 "z": self.z, "n_pooled": self.n_pooled,
-                "p_control": self.p_control, "value": self.value,
+                "p_control_pooled": self.p_control, "p_sa": self.p_sa,
+                "p_sb": self.p_sb, "binomial_se": self.binomial_se,
+                "seed_se_proxy": self.seed_se_proxy, "value": self.value,
+                "dominant_term": (None if self.value is None else
+                                  ("seed_range" if (self.seed_se_proxy or 0)
+                                   > (self.binomial_se or 0) else "binomial")),
                 "status": "materialized" if self.value is not None
                           else "PENDING_CONTROL_CHARACTERIZATION",
+                "seed_awareness": ("the two-point seed range is a floor on the "
+                                   "interval, not an estimate; it can only widen "
+                                   "it, which is the conservative direction"),
                 "non_adaptive": ("the formula is frozen before any candidate is "
-                                 "searched; only the control's own rate enters it")}
+                                 "searched; only the control's own rates enter it")}
+
+
+@dataclass(frozen=True)
+class FeasibilityRule:
+    """The usable-rollout floor. Seed-aware for the same reason.
+
+        binomial_se = sqrt(u_pool * (1 - u_pool) / n_pooled)
+        seed_proxy  = |u_sa - u_sb| / 2
+        floor       = max(absolute_floor, u_pool - k * max(binomial_se, seed_proxy))
+
+    The absolute floor guards "cannot hold a rollout at all" independently of how
+    the control happens to score. The relative term guards against a candidate
+    much less stable than the incumbent without demanding parity, which would turn
+    feasibility into a second ranking.
+    """
+
+    n_pooled: int
+    rule_id: str = "seed_aware_usable_floor"
+    version: int = 2
+    k: float = 3.0
+    absolute_floor: float = 0.30
+    u_pool: float | None = None
+    u_sa: float | None = None
+    u_sb: float | None = None
+    value: float | None = None
+
+    def components(self, u_pool: float, u_sa: float, u_sb: float) -> dict[str, float]:
+        binomial = math.sqrt(max(u_pool * (1 - u_pool), 0.0) / self.n_pooled)
+        seed = abs(u_sa - u_sb) / 2.0
+        uncertainty = max(binomial, seed)
+        return {"binomial_se": binomial, "seed_se_proxy": seed,
+                "uncertainty": uncertainty,
+                "value": max(self.absolute_floor, u_pool - self.k * uncertainty)}
+
+    def materialize(self, *, u_pool: float, u_sa: float, u_sb: float) -> "FeasibilityRule":
+        if self.value is not None:
+            raise ValueError(f"already materialized at {self.value}")
+        parts = self.components(u_pool, u_sa, u_sb)
+        return FeasibilityRule(
+            n_pooled=self.n_pooled, rule_id=self.rule_id, version=self.version,
+            k=self.k, absolute_floor=self.absolute_floor, u_pool=u_pool,
+            u_sa=u_sa, u_sb=u_sb, value=parts["value"])
+
+    def require_value(self) -> float:
+        if self.value is None:
+            raise RecoveryAdmissionError(
+                "the feasibility floor is not materialized: the canonical control "
+                "has not been characterized on both seeds. There is no prior to "
+                "fall back to by design.")
+        return self.value
+
+    def as_dict(self) -> dict[str, Any]:
+        return {"rule_id": self.rule_id, "version": self.version, "k": self.k,
+                "n_pooled": self.n_pooled, "absolute_floor": self.absolute_floor,
+                "formula": ("max(absolute_floor, u_pool - k * max(binomial_se, "
+                            "|u_sa - u_sb| / 2))"),
+                "u_pool": self.u_pool, "u_sa": self.u_sa, "u_sb": self.u_sb,
+                "value": self.value,
+                "status": "materialized" if self.value is not None
+                          else "PENDING_CONTROL_CHARACTERIZATION"}
 
 
 @dataclass(frozen=True)
@@ -306,6 +399,234 @@ class CatastrophicCapabilityRule:
 
 
 CATASTROPHIC_V1 = CatastrophicCapabilityRule()
+
+
+class CapabilitySchemaError(RecoveryAdmissionError):
+    """A recovery result does not carry the capability breakdown it must."""
+
+
+@dataclass(frozen=True)
+class CapabilitySchema:
+    """The capability breakdown every recovery result must carry. Fail closed.
+
+    The catastrophic rule can only exclude a candidate on a capability it can
+    *see*. If a scoring bug drops the `tool` breakdown, a naive rule silently
+    passes every candidate on tool — a data defect converted into a clean bill of
+    health. Defaults are worse still: "missing candidate usable -> 1.0" makes a
+    broken pipeline look like a perfect candidate, and "missing control usable ->
+    0.0" disables the rule entirely.
+
+    So the expected capability set is part of the frozen policy, and a result that
+    does not match it exactly raises. Missing capabilities, extra capabilities,
+    absent metrics, NaN, Inf and out-of-range rates are all errors, never
+    defaults.
+    """
+
+    expected: tuple[str, ...]
+    required_metrics: tuple[str, ...] = ("usable_rollout_rate",)
+    required_counts: tuple[str, ...] = ("n", "usable")
+    version: int = 1
+
+    def validate(self, result: Mapping[str, Any], *, label: str = "") -> None:
+        who = label or result.get("state_id") or "<unnamed>"
+        breakdown = result.get("per_capability")
+        if breakdown is None:
+            raise CapabilitySchemaError(
+                f"{who}: no per_capability breakdown. The catastrophic rule cannot "
+                "see what is not reported, and a missing breakdown must not read "
+                "as a pass.")
+        actual = set(breakdown)
+        expected = set(self.expected)
+        if actual != expected:
+            raise CapabilitySchemaError(
+                f"{who}: capability set {sorted(actual)} != expected "
+                f"{sorted(expected)}; missing {sorted(expected - actual)}, "
+                f"unexpected {sorted(actual - expected)}")
+        for capability in sorted(expected):
+            entry = breakdown[capability]
+            if not isinstance(entry, Mapping):
+                raise CapabilitySchemaError(
+                    f"{who}/{capability}: breakdown entry is not a mapping")
+            for metric in self.required_metrics:
+                if metric not in entry:
+                    raise CapabilitySchemaError(
+                        f"{who}/{capability}: missing {metric!r}")
+                value = entry[metric]
+                if isinstance(value, bool) or not isinstance(value, (int, float)):
+                    raise CapabilitySchemaError(
+                        f"{who}/{capability}: {metric}={value!r} is not numeric")
+                if not math.isfinite(float(value)):
+                    raise CapabilitySchemaError(
+                        f"{who}/{capability}: {metric} is {value!r}; NaN and Inf are "
+                        "scoring failures, not rates")
+                if not 0.0 <= float(value) <= 1.0:
+                    raise CapabilitySchemaError(
+                        f"{who}/{capability}: {metric}={value} is outside [0, 1]")
+            for count in self.required_counts:
+                if count not in entry:
+                    raise CapabilitySchemaError(
+                        f"{who}/{capability}: missing count {count!r}, which pooled "
+                        "aggregation needs")
+                value = entry[count]
+                if isinstance(value, bool) or not isinstance(value, int) or value < 0:
+                    raise CapabilitySchemaError(
+                        f"{who}/{capability}: {count}={value!r} is not a "
+                        "non-negative integer count")
+            if {"n", "usable"} <= set(self.required_counts):
+                if entry["usable"] > entry["n"]:
+                    raise CapabilitySchemaError(
+                        f"{who}/{capability}: usable={entry['usable']} exceeds "
+                        f"n={entry['n']}")
+
+    def validate_all(self, results: Sequence[Mapping[str, Any]]) -> None:
+        for result in results:
+            self.validate(result)
+
+    def as_dict(self) -> dict[str, Any]:
+        return {"version": self.version, "expected": list(self.expected),
+                "required_metrics": list(self.required_metrics),
+                "required_counts": list(self.required_counts),
+                "policy": ("exact set match; missing/extra capabilities, absent "
+                           "metrics, non-numeric values, NaN/Inf and out-of-range "
+                           "rates all raise. No defaults.")}
+
+
+#: The scorable capabilities of recovery_search_v1. `code` is behaviour-only and
+#: therefore not a capability the catastrophic rule can rank on.
+CAPABILITY_SCHEMA_V1 = CapabilitySchema(
+    expected=("gsm8k", "math_verified", "multihop", "rag", "knowledge", "tool"))
+
+
+@dataclass(frozen=True)
+class RecoveryRecipeFingerprint:
+    """Everything that can change a recovered checkpoint, except the seed.
+
+    Two probes with the same fingerprint and different seeds differ only by the
+    seed. Two probes with different fingerprints differ by something else as
+    well, and a comparison between them confounds the initialization with
+    whatever else moved — which is the entire reason the probes are supposed to
+    be identical.
+
+    The seed is deliberately **excluded** from the identity and recorded beside
+    it: it is the intended difference between ``sa`` and ``sb``.
+
+    Fields are grouped by what they can affect, and every group is included
+    because every group has bitten someone: data (which blocks, in what order),
+    objective, optimizer, schedule, batch semantics, numerical precision, the
+    trainable-parameter selection, the teacher and its attention implementation,
+    the student it started from, the tokenizer, and — the one most often left
+    out — the **trainer build**: the code that executed and the torch that ran
+    it. A recipe fingerprint that omits the trainer says two runs are matched
+    when one of them ran a different loss.
+    """
+
+    # data
+    pack: str
+    pack_blocks_sha256: str | None
+    rung: int
+    train_blocks: int | None
+    train_supervised_tokens: int | None
+    block_len: int
+    packing: str
+    val_blocks: int
+    block_ordering: str
+    # objective
+    ce_weight: float
+    kd_weight: float
+    kd_temperature: float
+    kd_scope: str
+    kd_chunk: int
+    # optimizer
+    optimizer: str
+    lr: float
+    weight_decay: float
+    betas: tuple[float, float]
+    eps: float
+    grad_clip: float
+    # schedule
+    total_steps: int
+    warmup_steps: int
+    min_lr_frac: float
+    lr_schedule: str
+    # batch semantics
+    blocks_per_step: int
+    micro_blocks: int
+    # numerics
+    dtype: str
+    autocast_bf16: bool
+    gradient_checkpointing: bool
+    # what is trained
+    trainable_patterns: tuple[str, ...]
+    trainable_params: int | None
+    # models
+    teacher_id: str
+    teacher_revision: str
+    teacher_dtype: str
+    teacher_attn: str | None
+    student_init_path: str
+    student_init_sha256: str | None
+    tokenizer_sha256: str | None
+    # the trainer build
+    trainer_git_commit: str | None
+    trainer_dirty: bool | None
+    trainer_uncommitted_sha256: str | None
+    torch_version: str | None
+    resume_semantics: str
+
+    #: Fields whose value could not be established for a historical run. Anything
+    #: listed here is compared as "unverifiable", never as "matched".
+    unverifiable: tuple[str, ...] = ()
+
+    def identity(self) -> dict[str, Any]:
+        d = {k: v for k, v in self.__dict__.items() if k != "unverifiable"}
+        d["betas"] = list(self.betas)
+        d["trainable_patterns"] = list(self.trainable_patterns)
+        return d
+
+    @property
+    def fingerprint(self) -> str:
+        return sha256_json(self.identity())
+
+    def compare(self, other: "RecoveryRecipeFingerprint") -> dict[str, Any]:
+        """Field-by-field, with three outcomes and no silent fourth."""
+        mine, theirs = self.identity(), other.identity()
+        unverifiable = set(self.unverifiable) | set(other.unverifiable)
+        matched, mismatched, unknown = [], [], []
+        for key in sorted(set(mine) | set(theirs)):
+            if key in unverifiable:
+                unknown.append({"field": key, "self": mine.get(key),
+                                "other": theirs.get(key)})
+            elif mine.get(key) == theirs.get(key):
+                matched.append(key)
+            else:
+                mismatched.append({"field": key, "self": mine.get(key),
+                                   "other": theirs.get(key)})
+        return {
+            "fingerprint_self": self.fingerprint,
+            "fingerprint_other": other.fingerprint,
+            "fingerprints_equal": self.fingerprint == other.fingerprint,
+            "matched_fields": matched,
+            "mismatched_fields": mismatched,
+            "unverifiable_fields": unknown,
+            "exactly_matched": (not mismatched and not unknown),
+            "verdict": (
+                "MATCHED CONTROL: every recipe field is established and equal; the "
+                "only intended difference is the seed."
+                if not mismatched and not unknown else
+                "NOT A MATCHED CONTROL: "
+                + (f"{len(mismatched)} field(s) differ" if mismatched else "")
+                + ("; " if mismatched and unknown else "")
+                + (f"{len(unknown)} field(s) cannot be established" if unknown else "")
+                + ". A comparison against probes trained under a different recipe "
+                  "confounds the initialization with the recipe."),
+        }
+
+    def as_dict(self) -> dict[str, Any]:
+        return {**self.identity(), "fingerprint": self.fingerprint,
+                "unverifiable": list(self.unverifiable),
+                "seed_excluded": ("the seed is the intended difference between "
+                                  "probes and is recorded beside the fingerprint, "
+                                  "not inside it")}
 
 
 class ScoringContractError(RuntimeError):
@@ -415,6 +736,16 @@ class SuccessiveHalvingPlan:
         default_factory=lambda: EquivalenceRule(n_pooled=300))
     #: Per-capability collapse gate, enforced at both rungs.
     catastrophic: CatastrophicCapabilityRule = CATASTROPHIC_V1
+    #: What every result must carry for that gate to be able to see anything.
+    #:
+    #: `None` means no per-capability contract is declared, in which case the
+    #: catastrophic rule is **disabled** rather than silently passing: a rule that
+    #: cannot see a capability must not report a verdict on it. Every selection
+    #: result records `capability_schema_enforced` so the difference is visible,
+    #: and the Phase-A plan always declares one.
+    capability_schema: CapabilitySchema | None = CAPABILITY_SCHEMA_V1
+    #: Seed-aware usable-rollout floor. Materialized from the control.
+    feasibility: FeasibilityRule | None = None
     #: How per-seed counts become one number. Part of the plan hash.
     aggregation: SeedAggregation = POOLED_COUNTS_V1
     survivor_rule: str = ""
@@ -470,7 +801,11 @@ class SuccessiveHalvingPlan:
             "probe_count": self.probe_count,
             "seed_aggregation": self.aggregation.as_dict(),
             "equivalence_rule": self.equivalence.as_dict(),
+            "feasibility_rule": (self.feasibility.as_dict() if self.feasibility
+                                 else {"status": "PENDING_CONTROL_CHARACTERIZATION"}),
             "catastrophic_capability_rule": self.catastrophic.as_dict(),
+            "capability_schema": (self.capability_schema.as_dict()
+                                  if self.capability_schema else None),
             "selection": {
                 "feasibility_metric": self.feasibility_metric,
                 "feasibility_min": self.feasibility_min,
@@ -500,13 +835,22 @@ class SuccessiveHalvingPlan:
     # winner list made the experiment asymmetric: it could confirm an
     # improvement and could never refute one.
 
+    def feasibility_floor(self) -> float:
+        """The materialized floor. Prefers the seed-aware rule when present."""
+        if self.feasibility is not None:
+            return self.feasibility.require_value()
+        return self.feasibility_min
+
     def _gate(self, results: Sequence[Mapping[str, Any]]) -> tuple[list, list]:
         """Global feasibility floor **and** the per-capability collapse rule.
 
-        Both are mechanical. The per-capability rule needs the control's own
-        per-capability rates, so it is skipped — loudly, in the report — when no
-        control row is present, rather than silently passing every candidate.
+        Both are mechanical, and the capability schema is validated first: a rule
+        that cannot see a capability must not report a pass on it.
         """
+        enforced = self.capability_schema is not None
+        if enforced:
+            self.capability_schema.validate_all(results)
+        floor = self.feasibility_floor()
         control = next((r for r in results if r.get("is_control")), None)
         feasible, excluded = [], []
         for row in results:
@@ -518,15 +862,15 @@ class SuccessiveHalvingPlan:
                 continue
 
             value = float(row.get(self.feasibility_metric, 0.0))
-            if value < self.feasibility_min:
+            if value < floor:
                 excluded.append({**dict(row), "exclusion": "feasibility_floor",
                                  "reason": (
                     f"{self.feasibility_metric}={value:.4f} below the preregistered "
-                    f"feasibility floor {self.feasibility_min:.4f}")})
+                    f"feasibility floor {floor:.4f}")})
                 continue
 
             violations = (self.catastrophic.violations(row, control)
-                          if control is not None else [])
+                          if (enforced and control is not None) else [])
             if violations:
                 excluded.append({**dict(row), "exclusion": "catastrophic_capability",
                                  "violations": violations,
@@ -571,6 +915,7 @@ class SuccessiveHalvingPlan:
                 e for e in excluded if e["exclusion"] == "catastrophic_capability"],
             "all_exclusions": excluded,
             "control_present": any(r.get("is_control") for r in results),
+            "capability_schema_enforced": self.capability_schema is not None,
             "rule": self.survivor_rule,
         }
 
@@ -636,6 +981,8 @@ class SuccessiveHalvingPlan:
                 e for e in excluded if e["exclusion"] == "catastrophic_capability"],
             "all_exclusions": excluded,
             "equivalence_interval": self.equivalence.require_value(),
+            "capability_schema_enforced": self.capability_schema is not None,
+            "control_present": any(r.get("is_control") for r in results),
             "tied_within_equivalence": tied,
             "needs_tie_break_seed": status == "tie_pending",
             "tie_break_candidates": tied if status == "tie_pending" else [],

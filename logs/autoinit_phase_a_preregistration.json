@@ -1,6 +1,6 @@
 {
   "schema": "aadistill.autoinit.phase_a_preregistration/v1",
-  "generated_utc": "2026-08-12T19:07:39.456733+00:00",
+  "generated_utc": "2026-08-12T19:33:56.444471+00:00",
   "status": "PREREGISTRATION DRAFT - NOT AUTHORIZED, NO COMPUTE LAUNCHED",
   "teacher": {
     "model_id": "Qwen/Qwen3-4B-Thinking-2507",
@@ -496,7 +496,27 @@
       "safely_above_measured_noise": true,
       "margin_factor": null,
       "conclusion": "CPU evaluation is bit-reproducible across the full materialize -> reload -> measure cycle, so 1e-4 is above the noise this path produces.",
-      "NOT_established": "GPU repeatability. The pilot's evaluation backend is a GPU, where reduction order is not guaranteed across launches and bf16/fp32 accumulation can move a KL in the last digits. This CPU result bounds the deterministic path only. The micro-preflight measures the same quantity on an L40S with the real teacher and the real suite, and epsilon is confirmed or reset from that number BEFORE any candidate is ranked."
+      "response_rule": {
+        "rule_id": "conservative_review_gate",
+        "version": 1,
+        "declared_epsilon": 0.0001,
+        "measurement_definition": "one materialized checkpoint, scored N times through the full materialize -> reload -> measure cycle on the frozen state-eval suite, on the pilot's GPU backend; the statistic is max(max - min) across the policy's objective metrics",
+        "repeats": 10,
+        "if_below": "epsilon stands unchanged",
+        "if_at_or_above": "no automatic re-derivation; preflight requires review and Phase A is blocked",
+        "rejected_alternative": "epsilon_final = max(1e-4, 2 * measured) - rejected for v1 because it derives a scientific tolerance from a single profiling run"
+      },
+      "NOT_established": "GPU repeatability. The pilot's evaluation backend is a GPU, where reduction order is not guaranteed across launches and bf16/fp32 accumulation can move a KL in the last digits. This CPU result bounds the deterministic path only. The micro-preflight measures the same quantity on an L40S with the real teacher and the real suite, and the FROZEN response rule above decides what happens: below the declared epsilon it stands; at or above it, no new epsilon is derived automatically, the preflight is marked as requiring review, and Phase A is blocked."
+    },
+    "epsilon_response_rule": {
+      "rule_id": "conservative_review_gate",
+      "version": 1,
+      "declared_epsilon": 0.0001,
+      "measurement_definition": "one materialized checkpoint, scored N times through the full materialize -> reload -> measure cycle on the frozen state-eval suite, on the pilot's GPU backend; the statistic is max(max - min) across the policy's objective metrics",
+      "repeats": 10,
+      "if_below": "epsilon stands unchanged",
+      "if_at_or_above": "no automatic re-derivation; preflight requires review and Phase A is blocked",
+      "rejected_alternative": "epsilon_final = max(1e-4, 2 * measured) - rejected for v1 because it derives a scientific tolerance from a single profiling run"
     }
   },
   "state_evaluation": {
@@ -577,15 +597,34 @@
         }
       },
       "equivalence_rule": {
-        "rule_id": "two_binomial_se",
-        "version": 1,
-        "formula": "z * sqrt(p_control * (1 - p_control) / n_pooled)",
+        "rule_id": "seed_aware_max_binomial_seedrange",
+        "version": 2,
+        "formula": "z * max(sqrt(p_pool*(1-p_pool)/n_pooled), |p_sa - p_sb| / 2)",
         "z": 2.0,
         "n_pooled": 340,
-        "p_control": null,
+        "p_control_pooled": null,
+        "p_sa": null,
+        "p_sb": null,
+        "binomial_se": null,
+        "seed_se_proxy": null,
         "value": null,
+        "dominant_term": null,
         "status": "PENDING_CONTROL_CHARACTERIZATION",
-        "non_adaptive": "the formula is frozen before any candidate is searched; only the control's own rate enters it"
+        "seed_awareness": "the two-point seed range is a floor on the interval, not an estimate; it can only widen it, which is the conservative direction",
+        "non_adaptive": "the formula is frozen before any candidate is searched; only the control's own rates enter it"
+      },
+      "feasibility_rule": {
+        "rule_id": "seed_aware_usable_floor",
+        "version": 2,
+        "k": 3.0,
+        "n_pooled": 380,
+        "absolute_floor": 0.3,
+        "formula": "max(absolute_floor, u_pool - k * max(binomial_se, |u_sa - u_sb| / 2))",
+        "u_pool": null,
+        "u_sa": null,
+        "u_sb": null,
+        "value": null,
+        "status": "PENDING_CONTROL_CHARACTERIZATION"
       },
       "catastrophic_capability_rule": {
         "rule_id": "per_capability_collapse",
@@ -598,6 +637,25 @@
           "rung1",
           "final"
         ]
+      },
+      "capability_schema": {
+        "version": 1,
+        "expected": [
+          "gsm8k",
+          "math_verified",
+          "multihop",
+          "rag",
+          "knowledge",
+          "tool"
+        ],
+        "required_metrics": [
+          "usable_rollout_rate"
+        ],
+        "required_counts": [
+          "n",
+          "usable"
+        ],
+        "policy": "exact set match; missing/extra capabilities, absent metrics, non-numeric values, NaN/Inf and out-of-range rates all raise. No defaults."
       },
       "selection": {
         "feasibility_metric": "usable_rollout_rate",
@@ -645,7 +703,7 @@
     "battery": {
       "asset": "artifacts/stage3/recovery_search_v1",
       "content_sha256": "a1b22778b00d95b6aba358c14a5af5b559fd807bb371c92131eacca59479f323",
-      "manifest_sha256": "1a8321c79e4ee9ad0128cb238cda37384ab60c31cb916d2acc000078dde767e6",
+      "manifest_sha256": "72d8c0535e7752faf704d9075b7835a47610fd3cd26866cf5be7d48eb7b40ad1",
       "n_prompts": 190,
       "n_scorable_prompts": 170,
       "scorable_sets": [
@@ -670,28 +728,56 @@
       ],
       "feasibility_metric": "usable_rollout_rate over ALL prompts",
       "feasibility_floor": "PENDING_MICRO_PREFLIGHT",
-      "feasibility_floor_rule": {
-        "rule": "max(absolute_floor, control_usable_pooled - 3 x SE), where SE is the binomial standard error of usable_rollout_rate on the pooled all-prompt denominator",
+      "feasibility_rule": {
+        "rule_id": "seed_aware_usable_floor",
+        "version": 2,
+        "k": 3.0,
+        "n_pooled": 380,
         "absolute_floor": 0.3,
-        "absolute_floor_rationale": "guards the 'cannot hold a rollout at all' case independently of how the control happens to score; a candidate below it cannot produce trajectories for Stage 5 regardless of correctness",
-        "relative_term_rationale": "guards against a candidate that is severely less stable than the incumbent without requiring parity, which would make feasibility a second ranking",
-        "free_input": "control usable_rollout_rate on the recovery-search battery",
-        "prior_value_used_for_sizing": 0.73,
-        "se_at_prior": 0.02277,
-        "floor_at_prior": 0.6617
+        "formula": "max(absolute_floor, u_pool - k * max(binomial_se, |u_sa - u_sb| / 2))",
+        "u_pool": null,
+        "u_sa": null,
+        "u_sb": null,
+        "value": null,
+        "status": "PENDING_CONTROL_CHARACTERIZATION"
+      },
+      "capability_schema": {
+        "version": 1,
+        "expected": [
+          "gsm8k",
+          "math_verified",
+          "multihop",
+          "rag",
+          "knowledge",
+          "tool"
+        ],
+        "required_metrics": [
+          "usable_rollout_rate"
+        ],
+        "required_counts": [
+          "n",
+          "usable"
+        ],
+        "policy": "exact set match; missing/extra capabilities, absent metrics, non-numeric values, NaN/Inf and out-of-range rates all raise. No defaults."
       },
       "primary_metric": "correct_overall over SCORABLE prompts",
       "secondary_metric": "correct_given_usable over SCORABLE prompts",
       "equivalence_rule": {
-        "rule_id": "two_binomial_se",
-        "version": 1,
-        "formula": "z * sqrt(p_control * (1 - p_control) / n_pooled)",
+        "rule_id": "seed_aware_max_binomial_seedrange",
+        "version": 2,
+        "formula": "z * max(sqrt(p_pool*(1-p_pool)/n_pooled), |p_sa - p_sb| / 2)",
         "z": 2.0,
         "n_pooled": 340,
-        "p_control": null,
+        "p_control_pooled": null,
+        "p_sa": null,
+        "p_sb": null,
+        "binomial_se": null,
+        "seed_se_proxy": null,
         "value": null,
+        "dominant_term": null,
         "status": "PENDING_CONTROL_CHARACTERIZATION",
-        "non_adaptive": "the formula is frozen before any candidate is searched; only the control's own rate enters it"
+        "seed_awareness": "the two-point seed range is a floor on the interval, not an estimate; it can only widen it, which is the conservative direction",
+        "non_adaptive": "the formula is frozen before any candidate is searched; only the control's own rates enter it"
       },
       "equivalence_interval": null,
       "catastrophic_capability_rule": {
@@ -903,6 +989,227 @@
     "consequence": "Both canonical 0.86M controls are retrievable and verified. The micro-preflight stays a profiling/evaluation job: no recovery retraining is needed, and the two-seed pooled control characterization can be produced by evaluating these checkpoints on recovery_search_v1.",
     "report_sha256": "1227a0e1a90df1f2efba19184c16582e87682174d0e47288233ecde4bc841070"
   },
+  "canonical_control_recipe_audit": {
+    "historical_controls_are_recipe_matched": false,
+    "consequence": "The historical checkpoints are NOT recipe-matched and must not be called matched controls. Rerun canonical sa/sb from qwen3_0p6b_init_v0 at 0.86M under the current frozen recovery trainer; those runs become the permanent Phase-A control probes and are retained, not disposable.",
+    "per_control": {
+      "e1_r0860k_sa_pca": {
+        "fingerprint_self": "3e282dcaab22681c8b0e962a593f3051a7bab72760402ffdb414885e8e11bcfd",
+        "fingerprint_other": "bf48fc0fe20506c8f339de931787cc9a51e70506b98938b9314a11d3a089b3b2",
+        "fingerprints_equal": false,
+        "matched_fields": [
+          "autocast_bf16",
+          "betas",
+          "block_len",
+          "block_ordering",
+          "blocks_per_step",
+          "ce_weight",
+          "dtype",
+          "eps",
+          "grad_clip",
+          "gradient_checkpointing",
+          "kd_scope",
+          "kd_temperature",
+          "kd_weight",
+          "lr",
+          "lr_schedule",
+          "micro_blocks",
+          "min_lr_frac",
+          "optimizer",
+          "pack_blocks_sha256",
+          "packing",
+          "rung",
+          "student_init_path",
+          "student_init_sha256",
+          "teacher_attn",
+          "teacher_dtype",
+          "teacher_id",
+          "teacher_revision",
+          "tokenizer_sha256",
+          "total_steps",
+          "train_blocks",
+          "train_supervised_tokens",
+          "trainable_params",
+          "trainable_patterns",
+          "trainer_dirty",
+          "val_blocks",
+          "warmup_steps",
+          "weight_decay"
+        ],
+        "mismatched_fields": [
+          {
+            "field": "pack",
+            "self": "ladder_uniform",
+            "other": "ladder_uniform_probe"
+          },
+          {
+            "field": "resume_semantics",
+            "self": "step counter + RNG state (no consumed-block accounting)",
+            "other": "step counter + RNG state + consumed-block position, asserted on restore"
+          },
+          {
+            "field": "torch_version",
+            "self": "2.11.0+cu128",
+            "other": "2.13.0+cpu"
+          },
+          {
+            "field": "trainer_git_commit",
+            "self": "69c3fe1f5f019c2130d8d3aaf18322fe948d17d7",
+            "other": "dc5d7597260a2e55a94082afc921896be57108e1"
+          }
+        ],
+        "unverifiable_fields": [
+          {
+            "field": "kd_chunk",
+            "self": 512,
+            "other": 512
+          },
+          {
+            "field": "trainer_uncommitted_sha256",
+            "self": "2e04f68349226a7efd1684d916441bb29c9e44f1126e066f7ab3fca05cdad2ca",
+            "other": "117d30ac1d55d54adc16bd27f87e87964b3c7e8d11d92cc83666ecfc365edf57"
+          }
+        ],
+        "exactly_matched": false,
+        "verdict": "NOT A MATCHED CONTROL: 4 field(s) differ; 2 field(s) cannot be established. A comparison against probes trained under a different recipe confounds the initialization with the recipe.",
+        "material_mismatches": [
+          {
+            "field": "torch_version",
+            "self": "2.11.0+cu128",
+            "other": "2.13.0+cpu"
+          },
+          {
+            "field": "trainer_git_commit",
+            "self": "69c3fe1f5f019c2130d8d3aaf18322fe948d17d7",
+            "other": "dc5d7597260a2e55a94082afc921896be57108e1"
+          }
+        ],
+        "benign_mismatches": [
+          {
+            "field": "pack",
+            "self": "ladder_uniform",
+            "other": "ladder_uniform_probe",
+            "why_benign": "a rename, not a different pack. Proved by hash: the relay holds the historical pack under its historical name at stage3_recovery_corpus_v2/ladder_uniform/blocks.npz, and its sha256 is 6f324cb0... - exactly the hash the frozen Phase-A recipe pins for ladder_uniform_probe. Derived quantities agree too (682 blocks, 864,750 supervised tokens, identical six-way mix)."
+          },
+          {
+            "field": "resume_semantics",
+            "self": "step counter + RNG state (no consumed-block accounting)",
+            "other": "step counter + RNG state + consumed-block position, asserted on restore",
+            "why_benign": "both historical runs recorded resumed_from=None, so the consumed-block accounting added since could not have affected them; it changes restore behaviour only"
+          }
+        ],
+        "blocking": true
+      },
+      "e1_r0860k_sb_pca": {
+        "fingerprint_self": "3e282dcaab22681c8b0e962a593f3051a7bab72760402ffdb414885e8e11bcfd",
+        "fingerprint_other": "bf48fc0fe20506c8f339de931787cc9a51e70506b98938b9314a11d3a089b3b2",
+        "fingerprints_equal": false,
+        "matched_fields": [
+          "autocast_bf16",
+          "betas",
+          "block_len",
+          "block_ordering",
+          "blocks_per_step",
+          "ce_weight",
+          "dtype",
+          "eps",
+          "grad_clip",
+          "gradient_checkpointing",
+          "kd_scope",
+          "kd_temperature",
+          "kd_weight",
+          "lr",
+          "lr_schedule",
+          "micro_blocks",
+          "min_lr_frac",
+          "optimizer",
+          "pack_blocks_sha256",
+          "packing",
+          "rung",
+          "student_init_path",
+          "student_init_sha256",
+          "teacher_attn",
+          "teacher_dtype",
+          "teacher_id",
+          "teacher_revision",
+          "tokenizer_sha256",
+          "total_steps",
+          "train_blocks",
+          "train_supervised_tokens",
+          "trainable_params",
+          "trainable_patterns",
+          "trainer_dirty",
+          "val_blocks",
+          "warmup_steps",
+          "weight_decay"
+        ],
+        "mismatched_fields": [
+          {
+            "field": "pack",
+            "self": "ladder_uniform",
+            "other": "ladder_uniform_probe"
+          },
+          {
+            "field": "resume_semantics",
+            "self": "step counter + RNG state (no consumed-block accounting)",
+            "other": "step counter + RNG state + consumed-block position, asserted on restore"
+          },
+          {
+            "field": "torch_version",
+            "self": "2.11.0+cu128",
+            "other": "2.13.0+cpu"
+          },
+          {
+            "field": "trainer_git_commit",
+            "self": "69c3fe1f5f019c2130d8d3aaf18322fe948d17d7",
+            "other": "dc5d7597260a2e55a94082afc921896be57108e1"
+          }
+        ],
+        "unverifiable_fields": [
+          {
+            "field": "kd_chunk",
+            "self": 512,
+            "other": 512
+          },
+          {
+            "field": "trainer_uncommitted_sha256",
+            "self": "2e04f68349226a7efd1684d916441bb29c9e44f1126e066f7ab3fca05cdad2ca",
+            "other": "117d30ac1d55d54adc16bd27f87e87964b3c7e8d11d92cc83666ecfc365edf57"
+          }
+        ],
+        "exactly_matched": false,
+        "verdict": "NOT A MATCHED CONTROL: 4 field(s) differ; 2 field(s) cannot be established. A comparison against probes trained under a different recipe confounds the initialization with the recipe.",
+        "material_mismatches": [
+          {
+            "field": "torch_version",
+            "self": "2.11.0+cu128",
+            "other": "2.13.0+cpu"
+          },
+          {
+            "field": "trainer_git_commit",
+            "self": "69c3fe1f5f019c2130d8d3aaf18322fe948d17d7",
+            "other": "dc5d7597260a2e55a94082afc921896be57108e1"
+          }
+        ],
+        "benign_mismatches": [
+          {
+            "field": "pack",
+            "self": "ladder_uniform",
+            "other": "ladder_uniform_probe",
+            "why_benign": "a rename, not a different pack. Proved by hash: the relay holds the historical pack under its historical name at stage3_recovery_corpus_v2/ladder_uniform/blocks.npz, and its sha256 is 6f324cb0... - exactly the hash the frozen Phase-A recipe pins for ladder_uniform_probe. Derived quantities agree too (682 blocks, 864,750 supervised tokens, identical six-way mix)."
+          },
+          {
+            "field": "resume_semantics",
+            "self": "step counter + RNG state (no consumed-block accounting)",
+            "other": "step counter + RNG state + consumed-block position, asserted on restore",
+            "why_benign": "both historical runs recorded resumed_from=None, so the consumed-block accounting added since could not have affected them; it changes restore behaviour only"
+          }
+        ],
+        "blocking": true
+      }
+    },
+    "report_sha256": "cb19ab4b08241a718dddb5ea8bf1746546b2dd72a19231337713fbd5c013773c"
+  },
   "tool_scoring_audit": {
     "scorer": "aadistill.evaluation.behavior.score_tool_call",
     "scorer_sha256": "c6f52721e8b86bc2d875683bfb9c35b4101379fa5d48de7a48db93959e2935c2",
@@ -976,11 +1283,12 @@
     "audit_sha256": "772f06ce2cb742e4272c543ae7dbb5f6e3a3521d9bcd6e0ca28e2e476a751ad6"
   },
   "pending_before_launch": [
-    "canonical control usable_rollout_rate on recovery_search_v1",
-    "canonical control correct_overall on recovery_search_v1",
-    "canonical control per-set usable rates",
-    "GPU state-evaluator repeatability (confirms or resets beam epsilon)",
+    "RERUN canonical sa/sb at 0.86M under the current frozen trainer -- the historical checkpoints are NOT recipe-matched (trainer commit and torch version differ; the historical tree was dirty and unreconstructable)",
+    "control pooled + per-seed usable_rollout_rate -> materializes the feasibility floor",
+    "control pooled + per-seed correct_overall -> materializes the equivalence interval",
+    "control per-capability usable rates -> the catastrophic rule's reference values",
+    "GPU state-evaluator repeatability -> evaluated by the frozen conservative response rule (no automatic epsilon re-derivation)",
     "activation-statistics GPU/CPU split (collapses the cost range)"
   ],
-  "preregistration_sha256": "4b01833129128252bf5e386230312f68130e342d16341c0e3ba6228239aea374"
+  "preregistration_sha256": "ccec9bd477e37e04c60b3eea6c0a8c39b40dc9806f943abfa19c2cf439f8bca8"
 }

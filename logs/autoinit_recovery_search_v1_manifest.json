@@ -2,7 +2,7 @@
   "artifact": "recovery_search_v1",
   "role": "RECOVERY_SEARCH",
   "purpose": "selecting among fixed 0.86M recovery probes; never a promotion asset, never training data, never a beam-ranking input",
-  "created_utc": "2026-08-12T19:04:11.418342+00:00",
+  "created_utc": "2026-08-12T19:32:21.133413+00:00",
   "command": "scripts/data/build_recovery_search_battery.py",
   "battery_id": "recovery_search",
   "version": 1,
@@ -105,50 +105,118 @@
       "repo": "openai/gsm8k",
       "config": "main",
       "split": "test",
-      "cached_fingerprint": "740312add88f781978c0658806c59bc2815b9866",
-      "revision": "unresolved-offline"
+      "revision": "740312add88f781978c0658806c59bc2815b9866",
+      "revision_source": "hub snapshot commit",
+      "all_cached_revisions": [
+        "740312add88f781978c0658806c59bc2815b9866"
+      ],
+      "cache_present": true,
+      "cache_config_hashes": [
+        "740312add88f781978c0658806c59bc2815b9866"
+      ],
+      "payload_files": 2,
+      "payload_bytes": 4680112,
+      "content_digest": "6a685053555f7bb1e48ce62ab88067b1bdb0ad5ec0c276525f434034bde95cfb",
+      "content_digest_rule": "sha256 over sorted 'relpath:size:sha256' lines of every .arrow/.parquet file in the cached dataset",
+      "note": "revision is the hub snapshot commit; the content digest independently pins the bytes the prompts were read from"
     },
     "math_verified": {
       "repo": "HuggingFaceH4/MATH-500",
       "config": null,
       "split": "test",
-      "cached_fingerprint": null,
-      "revision": "unresolved-offline"
+      "revision": "6e4ed1a2a79af7d8630a6b768ec859cb5af4d3be",
+      "revision_source": "hub snapshot commit",
+      "all_cached_revisions": [
+        "6e4ed1a2a79af7d8630a6b768ec859cb5af4d3be"
+      ],
+      "cache_present": false
     },
     "multihop": {
       "repo": "hotpotqa/hotpot_qa",
       "config": "distractor",
       "split": "validation",
-      "cached_fingerprint": "1908d6afbbead072334abe2965f91bd2709910ab",
-      "revision": "unresolved-offline"
+      "revision": "1908d6afbbead072334abe2965f91bd2709910ab",
+      "revision_source": "hub snapshot commit",
+      "all_cached_revisions": [
+        "1908d6afbbead072334abe2965f91bd2709910ab"
+      ],
+      "cache_present": true,
+      "cache_config_hashes": [
+        "1908d6afbbead072334abe2965f91bd2709910ab"
+      ],
+      "payload_files": 3,
+      "payload_bytes": 598777304,
+      "content_digest": "b0b2ecec03572419bbb0293b6584cfc4c9378beb867794706abcc15c0d28fd3d",
+      "content_digest_rule": "sha256 over sorted 'relpath:size:sha256' lines of every .arrow/.parquet file in the cached dataset",
+      "note": "revision is the hub snapshot commit; the content digest independently pins the bytes the prompts were read from"
     },
     "rag": {
       "repo": "rajpurkar/squad_v2",
       "config": null,
       "split": "validation",
-      "cached_fingerprint": "3ffb306f725f7d2ce8394bc1873b24868140c412",
-      "revision": "unresolved-offline"
+      "revision": "3ffb306f725f7d2ce8394bc1873b24868140c412",
+      "revision_source": "hub snapshot commit",
+      "all_cached_revisions": [
+        "3ffb306f725f7d2ce8394bc1873b24868140c412"
+      ],
+      "cache_present": true,
+      "cache_config_hashes": [
+        "3ffb306f725f7d2ce8394bc1873b24868140c412"
+      ],
+      "payload_files": 2,
+      "payload_bytes": 128489592,
+      "content_digest": "0d82650d88e7eee983c4bc7f9036680ff629b232b41c81fd2a31890223209736",
+      "content_digest_rule": "sha256 over sorted 'relpath:size:sha256' lines of every .arrow/.parquet file in the cached dataset",
+      "note": "revision is the hub snapshot commit; the content digest independently pins the bytes the prompts were read from"
     },
     "knowledge": {
       "repo": "mandarjoshi/trivia_qa",
       "config": "rc.nocontext",
       "split": "validation",
-      "cached_fingerprint": "0f7faf33a3908546c6fd5b73a660e0f8ff173c2f",
-      "revision": "unresolved-offline"
+      "revision": "0f7faf33a3908546c6fd5b73a660e0f8ff173c2f",
+      "revision_source": "hub snapshot commit",
+      "all_cached_revisions": [
+        "0f7faf33a3908546c6fd5b73a660e0f8ff173c2f"
+      ],
+      "cache_present": true,
+      "cache_config_hashes": [
+        "0f7faf33a3908546c6fd5b73a660e0f8ff173c2f"
+      ],
+      "payload_files": 3,
+      "payload_bytes": 125022856,
+      "content_digest": "6ecee52001820795380474b2e60859cb4c1f9e2f933531458f094fe44fc89c91",
+      "content_digest_rule": "sha256 over sorted 'relpath:size:sha256' lines of every .arrow/.parquet file in the cached dataset",
+      "note": "revision is the hub snapshot commit; the content digest independently pins the bytes the prompts were read from"
     },
     "code": {
       "repo": "google-research-datasets/mbpp",
       "config": "full",
       "split": "test",
-      "cached_fingerprint": "4bb6404fdc6cacfda99d4ac4205087b89d32030c",
-      "revision": "unresolved-offline"
+      "revision": "4bb6404fdc6cacfda99d4ac4205087b89d32030c",
+      "revision_source": "hub snapshot commit",
+      "all_cached_revisions": [
+        "4bb6404fdc6cacfda99d4ac4205087b89d32030c"
+      ],
+      "cache_present": true,
+      "cache_config_hashes": [
+        "4bb6404fdc6cacfda99d4ac4205087b89d32030c"
+      ],
+      "payload_files": 4,
+      "payload_bytes": 474200,
+      "content_digest": "0245b327bcddd89e730b8cd6d765e24ae72fd32ce79288c3d11999f295eff246",
+      "content_digest_rule": "sha256 over sorted 'relpath:size:sha256' lines of every .arrow/.parquet file in the cached dataset",
+      "note": "revision is the hub snapshot commit; the content digest independently pins the bytes the prompts were read from"
     },
     "tool": {
       "repo": "Salesforce/xlam-function-calling-60k",
       "config": null,
       "split": "train",
-      "cached_fingerprint": null,
-      "revision": "unresolved-offline"
+      "revision": "26d14ebfe18b1f7b524bd39b404b50af5dc97866",
+      "revision_source": "hub snapshot commit",
+      "all_cached_revisions": [
+        "26d14ebfe18b1f7b524bd39b404b50af5dc97866"
+      ],
+      "cache_present": false
     }
   },
   "sampling_rule": {
@@ -379,15 +447,15 @@
   },
   "content_sha256": "a1b22778b00d95b6aba358c14a5af5b559fd807bb371c92131eacca59479f323",
   "code_state": {
-    "git_commit": "748ef6f25a01bbc7b341e6d52faccb683eb96bd6",
+    "git_commit": "dc5d7597260a2e55a94082afc921896be57108e1",
     "git_commit_source": "git",
     "dirty": true,
-    "uncommitted_state_sha256": "fcdaf4918a4bb5b8aae084a7103d3613a238cce9e3bb02e5c80ee63c513aa68f",
+    "uncommitted_state_sha256": "2696333cf4aa5caa48095099975894863b2ccaa7261c76beb4147b16e7fa3085",
     "untracked_files": [
-      "logs/autoinit_tool_scoring_audit.json",
-      "scripts/autoinit/audit_tool_scoring.py"
+      "logs/autoinit_recovery_fingerprint_audit.json",
+      "scripts/autoinit/compare_recovery_fingerprints.py"
     ]
   },
-  "manifest_sha256": "1a8321c79e4ee9ad0128cb238cda37384ab60c31cb916d2acc000078dde767e6",
-  "_tracked_copy_note": "Tracked copy of the manifest inside the gitignored artifact directory. The payload is rebuildable from the committed builder and the pinned inputs; this manifest is the reproducibility record."
+  "manifest_sha256": "72d8c0535e7752faf704d9075b7835a47610fd3cd26866cf5be7d48eb7b40ad1",
+  "_tracked_copy_note": "Tracked copy of the manifest inside the gitignored artifact directory."
 }

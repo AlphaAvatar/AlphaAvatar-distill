@@ -39,7 +39,8 @@ sys.path.insert(0, str(REPO_ROOT / "src"))
 from aadistill.autoinit.arch import ArchSpec, get_adapter  # noqa: E402
 from aadistill.autoinit.artifact import identify_checkpoint  # noqa: E402
 from aadistill.autoinit.metrics import StateEvalSuite, StateEvaluator, SuiteItem  # noqa: E402
-from aadistill.autoinit.ranking import PARETO_V1  # noqa: E402
+from aadistill.autoinit.ranking import EPSILON_RESPONSE_V1, PARETO_V1  # noqa: E402
+from aadistill.autoinit.recovery import EquivalenceRule, FeasibilityRule  # noqa: E402
 from aadistill.infrastructure.env import hardware_report  # noqa: E402
 
 TEACHER_GEOMETRY = dict(hidden_size=64, num_hidden_layers=6, intermediate_size=128,
@@ -166,14 +167,17 @@ def main() -> None:
             "this path produces." if worst == 0.0 else
             "CPU evaluation is not bit-reproducible; epsilon must be set from the "
             "measured range."),
+        "response_rule": EPSILON_RESPONSE_V1.as_dict(),
         "NOT_established": (
             "GPU repeatability. The pilot's evaluation backend is a GPU, where "
             "reduction order is not guaranteed across launches and bf16/fp32 "
             "accumulation can move a KL in the last digits. This CPU result "
             "bounds the deterministic path only. The micro-preflight measures the "
             "same quantity on an L40S with the real teacher and the real suite, "
-            "and epsilon is confirmed or reset from that number BEFORE any "
-            "candidate is ranked."),
+            "and the FROZEN response rule above decides what happens: below the "
+            "declared epsilon it stands; at or above it, no new epsilon is derived "
+            "automatically, the preflight is marked as requiring review, and Phase "
+            "A is blocked."),
     }
 
     # Analytic parts of the recovery thresholds. n is known, the control's rate
@@ -187,7 +191,19 @@ def main() -> None:
     se_correct_prior = se(CONTROL_CORRECT_OLD_BATTERY, n_scorable)
     se_usable_prior = se(CONTROL_USABLE_OLD_BATTERY, n_all)
 
+    equivalence_rule = EquivalenceRule(n_pooled=n_scorable)
+    feasibility_rule = FeasibilityRule(n_pooled=n_all)
     recovery = {
+        "seed_awareness": (
+            "Both thresholds take max(prompt-level binomial SE, |sa - sb| / 2). "
+            "340 prompts from a single recovered checkpoint estimate that "
+            "checkpoint precisely and the recipe's rate not at all, and this "
+            "project has measured a 0.1290 behaviour swing on training seed alone. "
+            "The two-point seed range is used as a FLOOR on the uncertainty, not "
+            "as an estimate: with n=2 it is weak, and using it as a floor can only "
+            "widen the interval, which is the conservative direction."),
+        "equivalence_rule_frozen": equivalence_rule.as_dict(),
+        "feasibility_rule_frozen": feasibility_rule.as_dict(),
         "pooled_denominators": {
             "scorable_prompts_per_seed": args.scorable_prompts,
             "all_prompts_per_seed": args.all_prompts,
@@ -197,12 +213,13 @@ def main() -> None:
             "note": "pooled counts, per the frozen SeedAggregation",
         },
         "equivalence_interval": {
-            "SINGLE_DEFINITION": ("interval = 2 * sqrt(p_control * (1 - p_control) "
-                                  "/ n_pooled). The formula is frozen now; the "
-                                  "numeric value is materialized from the control "
-                                  "characterization and never changes afterwards. "
-                                  "There is no second, prior-derived constant."),
-            "rule_id": "two_binomial_se", "z": 2.0, "n_pooled": n_scorable,
+            "SINGLE_DEFINITION": ("interval = 2 * max(sqrt(p_pool*(1-p_pool)"
+                                  "/n_pooled), |p_sa - p_sb| / 2). The formula is "
+                                  "frozen now; the numeric value is materialized "
+                                  "from the control characterization and never "
+                                  "changes afterwards. There is no second, "
+                                  "prior-derived constant."),
+            "rule_id": equivalence_rule.rule_id, "z": 2.0, "n_pooled": n_scorable,
             "free_input": "control correct_overall on the recovery-search battery",
             "status": "PENDING_CONTROL_CHARACTERIZATION",
             "illustrative_only_at_historical_prior": {
@@ -220,9 +237,8 @@ def main() -> None:
                            "denominator can support"),
         },
         "feasibility_floor": {
-            "rule": ("max(absolute_floor, control_usable_pooled - 3 x SE), where SE "
-                     "is the binomial standard error of usable_rollout_rate on the "
-                     "pooled all-prompt denominator"),
+            "rule": ("max(absolute_floor, u_pool - 3 * max(binomial_se, "
+                     "|u_sa - u_sb| / 2)) on the pooled all-prompt denominator"),
             "absolute_floor": 0.30,
             "absolute_floor_rationale": (
                 "guards the 'cannot hold a rollout at all' case independently of "
@@ -232,11 +248,17 @@ def main() -> None:
                 "guards against a candidate that is severely less stable than the "
                 "incumbent without requiring parity, which would make feasibility a "
                 "second ranking"),
-            "free_input": "control usable_rollout_rate on the recovery-search battery",
-            "prior_value_used_for_sizing": CONTROL_USABLE_OLD_BATTERY,
-            "se_at_prior": round(se_usable_prior, 5),
-            "floor_at_prior": round(max(0.30, CONTROL_USABLE_OLD_BATTERY
-                                        - 3 * se_usable_prior), 4),
+            "free_inputs": ["control pooled usable_rollout_rate",
+                            "control per-seed usable rates (sa, sb)"],
+            "status": "PENDING_CONTROL_CHARACTERIZATION",
+            "illustrative_only_at_historical_prior": {
+                "u": CONTROL_USABLE_OLD_BATTERY,
+                "binomial_se": round(se_usable_prior, 5),
+                "floor_if_seeds_identical": round(
+                    max(0.30, CONTROL_USABLE_OLD_BATTERY - 3 * se_usable_prior), 4),
+                "WARNING": ("illustrative only; the seed term is unknown until both "
+                            "control seeds are measured and will usually dominate"),
+            },
         },
         "catastrophic_per_capability_floor": {
             "rule": ("a candidate is excluded if any scorable set's usable rate is "
@@ -275,8 +297,9 @@ def main() -> None:
         "declared_epsilon": declared,
         "safely_above_measured_noise": verdict["safely_above_measured_noise"],
         "equivalence_n_pooled": recovery["equivalence_interval"]["n_pooled"],
+        "epsilon_response_rule": EPSILON_RESPONSE_V1.rule_id,
         "equivalence_status": recovery["equivalence_interval"]["status"],
-        "feasibility_floor_at_prior": recovery["feasibility_floor"]["floor_at_prior"],
+        "feasibility_status": recovery["feasibility_floor"]["status"],
         "status": recovery["STATUS"],
     }, indent=2))
 

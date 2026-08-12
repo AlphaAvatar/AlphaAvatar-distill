@@ -157,7 +157,9 @@ def plan(**overrides):
     kwargs = dict(
         plan_id="autoinit.v1.pilot", recipe=E1_KD_HEAVY_0860K,
         searched_leaves=5, survivors=2, feasibility_min=0.50,
-        equivalence=EquivalenceRule(n_pooled=340).materialize(0.1867),
+        equivalence=EquivalenceRule(n_pooled=340).materialize(
+            p_pool=0.1867, p_sa=0.1867, p_sb=0.1867),
+        capability_schema=None,
         survivor_rule=("feasible by usable_rollout_rate >= 0.50, then top 2 searched "
                        "leaves by correct_overall; the control advances regardless"),
         winner_rule="top 1 by mean correct_overall over sa and sb among feasible",
@@ -203,14 +205,43 @@ def test_the_equivalence_interval_has_exactly_one_definition():
     with pytest.raises(RecoveryAdmissionError, match="not materialized"):
         pending.require_value()
 
-    frozen = pending.materialize(0.1867)
+    frozen = pending.materialize(p_pool=0.1867, p_sa=0.1867, p_sb=0.1867)
     assert frozen.value == pytest.approx(2 * (0.1867 * 0.8133 / 340) ** 0.5)
     assert frozen.require_value() == frozen.value
-    # Once materialized it does not move again.
     with pytest.raises(ValueError, match="already materialized"):
-        frozen.materialize(0.25)
-    # A different control rate gives a different interval, which is the point.
-    assert EquivalenceRule(n_pooled=340).materialize(0.30).value != frozen.value
+        frozen.materialize(p_pool=0.25, p_sa=0.25, p_sb=0.25)
+
+
+def test_the_equivalence_interval_is_seed_aware():
+    """340 prompts from one checkpoint say nothing about training-seed variation."""
+    rule = EquivalenceRule(n_pooled=340)
+    # Seeds agree: the binomial term governs.
+    tight = rule.components(0.19, 0.19, 0.19)
+    assert tight["seed_se_proxy"] == 0.0
+    assert tight["value"] == pytest.approx(2 * tight["binomial_se"])
+    # Seeds disagree by 0.10 -- the seed term dominates and widens the interval.
+    wide = rule.components(0.19, 0.14, 0.24)
+    assert wide["seed_se_proxy"] == pytest.approx(0.05)
+    assert wide["value"] == pytest.approx(0.10)
+    assert wide["value"] > tight["value"] * 2
+    # It is a floor, so it can only widen -- never narrow.
+    assert wide["value"] >= 2 * wide["binomial_se"]
+    materialized = rule.materialize(p_pool=0.19, p_sa=0.14, p_sb=0.24)
+    assert materialized.as_dict()["dominant_term"] == "seed_range"
+
+
+def test_the_feasibility_floor_is_seed_aware_and_has_an_absolute_guard():
+    from aadistill.autoinit.recovery import FeasibilityRule
+
+    rule = FeasibilityRule(n_pooled=380)
+    tight = rule.components(0.73, 0.73, 0.73)
+    wide = rule.components(0.73, 0.66, 0.80)
+    assert wide["value"] < tight["value"], "seed spread must lower the floor"
+    # The absolute floor binds when the control is itself weak.
+    weak = rule.components(0.32, 0.20, 0.44)
+    assert weak["value"] == pytest.approx(0.30)
+    with pytest.raises(RecoveryAdmissionError, match="not materialized"):
+        rule.require_value()
 
 
 def test_selection_refuses_to_run_before_the_control_is_characterized():
@@ -222,12 +253,82 @@ def test_selection_refuses_to_run_before_the_control_is_characterized():
         unmaterialized.select_final_winner(rows)
 
 
+# --- fail-closed capability schema ------------------------------------------
+
+
+def caps(**overrides):
+    from aadistill.autoinit.recovery import CAPABILITY_SCHEMA_V1
+
+    base = {c: {"usable_rollout_rate": 0.6, "n": 30, "usable": 18}
+            for c in CAPABILITY_SCHEMA_V1.expected}
+    base.update(overrides)
+    return base
+
+
+def test_a_missing_capability_breakdown_raises_rather_than_passing():
+    from aadistill.autoinit.recovery import CAPABILITY_SCHEMA_V1, CapabilitySchemaError
+
+    p = plan(capability_schema=CAPABILITY_SCHEMA_V1)
+    rows = [{"state_id": "c", "usable_rollout_rate": 0.8, "correct_overall": 0.2}]
+    with pytest.raises(CapabilitySchemaError, match="no per_capability breakdown"):
+        p.select_rung1_survivors(rows)
+
+
+@pytest.mark.parametrize("mutation,pattern", [
+    ({"tool": None}, "capability set"),
+    ({"tool": {"n": 30, "usable": 18}}, "missing 'usable_rollout_rate'"),
+    ({"tool": {"usable_rollout_rate": float("nan"), "n": 30, "usable": 18}},
+     "NaN and Inf"),
+    ({"tool": {"usable_rollout_rate": float("inf"), "n": 30, "usable": 18}},
+     "NaN and Inf"),
+    ({"tool": {"usable_rollout_rate": 1.5, "n": 30, "usable": 18}}, "outside"),
+    ({"tool": {"usable_rollout_rate": 0.6, "usable": 18}}, "missing count 'n'"),
+    ({"tool": {"usable_rollout_rate": 0.6, "n": 30, "usable": 40}}, "exceeds"),
+    ({"extra_capability": {"usable_rollout_rate": 0.6, "n": 30, "usable": 18}},
+     "capability set"),
+])
+def test_malformed_capability_metrics_fail_closed(mutation, pattern):
+    from aadistill.autoinit.recovery import CAPABILITY_SCHEMA_V1, CapabilitySchemaError
+
+    breakdown = caps()
+    for key, value in mutation.items():
+        if value is None:
+            breakdown.pop(key)
+        else:
+            breakdown[key] = value
+    p = plan(capability_schema=CAPABILITY_SCHEMA_V1)
+    rows = [{"state_id": "c", "usable_rollout_rate": 0.8, "correct_overall": 0.2,
+             "per_capability": breakdown}]
+    with pytest.raises(CapabilitySchemaError, match=pattern):
+        p.select_rung1_survivors(rows)
+
+
+def test_no_defaults_are_invented_for_missing_capability_values():
+    """'missing -> 1.0' or 'missing -> 0.0' would turn a data bug into a pass."""
+    from aadistill.autoinit.recovery import CAPABILITY_SCHEMA_V1
+
+    source = (REPO / "src/aadistill/autoinit/recovery.py").read_text()
+    body = source[source.index("    def validate(self, result"):
+                  source.index("    def validate_all(")]
+    # `.get(` is legitimate for reading the optional label and the breakdown
+    # itself; what must not appear is a defaulted *metric* read.
+    assert ".get(metric" not in body and ".get(count" not in body, (
+        "the validator defaults a metric read; a default is exactly what it "
+        "exists to prevent")
+    assert 'entry[metric]' in body and 'entry[count]' in body
+    assert CAPABILITY_SCHEMA_V1.expected == (
+        "gsm8k", "math_verified", "multihop", "rag", "knowledge", "tool")
+
+
 # --- catastrophic per-capability gate ---------------------------------------
 
 
 def test_the_catastrophic_capability_rule_is_enforced_at_both_rungs():
     """A candidate that collapses on one capability is excluded mechanically."""
-    p = plan()
+    from aadistill.autoinit.recovery import CapabilitySchema
+
+    p = plan(capability_schema=CapabilitySchema(expected=("tool", "gsm8k"),
+                                                required_counts=()))
     control = {"state_id": "control", "is_control": True,
                "usable_rollout_rate": 0.75, "correct_overall": 0.19,
                "per_capability": {"tool": {"usable_rollout_rate": 0.62},
@@ -252,15 +353,33 @@ def test_the_catastrophic_capability_rule_is_enforced_at_both_rungs():
         assert "catastrophic collapse on tool" in excluded[0]["reason"]
         # ... and it does not win despite leading the primary metric.
         assert "collapsed" not in [r["state_id"] for r in out["ranked"]]
+        assert out["capability_schema_enforced"] is True
 
     final = p.select_final_winner(rows)
     assert final["decision_status"] == "resolved"
     assert final["winner"] == "healthy"
 
 
+def test_without_a_capability_contract_the_rule_is_disabled_not_silently_passing():
+    """A rule that cannot see a capability must not report a verdict on it."""
+    p = plan(capability_schema=None)
+    collapsed = {"state_id": "collapsed", "usable_rollout_rate": 0.71,
+                 "correct_overall": 0.30,
+                 "per_capability": {"tool": {"usable_rollout_rate": 0.04}}}
+    control = {"state_id": "control", "is_control": True,
+               "usable_rollout_rate": 0.75, "correct_overall": 0.19,
+               "per_capability": {"tool": {"usable_rollout_rate": 0.62}}}
+    out = p.select_rung1_survivors([control, collapsed])
+    assert out["capability_schema_enforced"] is False
+    assert out["excluded_by_catastrophic_capability"] == []
+
+
 def test_the_catastrophic_rule_needs_the_control_to_fire():
     """No control row means no reference; the report says so rather than passing."""
-    p = plan()
+    from aadistill.autoinit.recovery import CapabilitySchema
+
+    p = plan(capability_schema=CapabilitySchema(expected=("tool",),
+                                                required_counts=()))
     collapsed = {"state_id": "collapsed", "usable_rollout_rate": 0.71,
                  "correct_overall": 0.30,
                  "per_capability": {"tool": {"usable_rollout_rate": 0.04}}}
@@ -271,7 +390,10 @@ def test_the_catastrophic_rule_needs_the_control_to_fire():
 
 def test_the_rule_does_not_fire_when_the_control_is_also_weak():
     """A capability the incumbent cannot do either is not the candidate's failure."""
-    p = plan()
+    from aadistill.autoinit.recovery import CapabilitySchema
+
+    p = plan(capability_schema=CapabilitySchema(expected=("tool",),
+                                                required_counts=()))
     control = {"state_id": "control", "is_control": True,
                "usable_rollout_rate": 0.75, "correct_overall": 0.19,
                "per_capability": {"tool": {"usable_rollout_rate": 0.20}}}
@@ -296,7 +418,8 @@ def test_the_catastrophic_rule_is_part_of_the_plan_hash():
 
 
 def test_a_tie_after_two_seeds_is_pending_not_a_winner():
-    p = plan(equivalence=EquivalenceRule(n_pooled=340).materialize(0.20))
+    p = plan(equivalence=EquivalenceRule(n_pooled=340).materialize(
+        p_pool=0.20, p_sa=0.20, p_sb=0.20))
     rows = [{"state_id": "control", "is_control": True, "usable_rollout_rate": 0.73,
              "correct_overall": 0.200, "seeds": [SEED_SA, SEED_SB]},
             {"state_id": "leaf", "usable_rollout_rate": 0.80,
@@ -311,7 +434,8 @@ def test_a_tie_after_two_seeds_is_pending_not_a_winner():
 
 def test_a_tie_that_survives_the_third_seed_is_unresolved_not_broken():
     """No fourth seed, and no state-id tie-break to manufacture a winner."""
-    p = plan(equivalence=EquivalenceRule(n_pooled=340).materialize(0.20))
+    p = plan(equivalence=EquivalenceRule(n_pooled=340).materialize(
+        p_pool=0.20, p_sa=0.20, p_sb=0.20))
     rows = [{"state_id": "control", "is_control": True, "usable_rollout_rate": 0.73,
              "correct_overall": 0.200, "seeds": [SEED_SA, SEED_SB, SEED_SC]},
             {"state_id": "leaf", "usable_rollout_rate": 0.80,
@@ -325,7 +449,8 @@ def test_a_tie_that_survives_the_third_seed_is_unresolved_not_broken():
 
 
 def test_a_clear_lead_resolves(teacher_spec, target_spec):
-    p = plan(equivalence=EquivalenceRule(n_pooled=340).materialize(0.20))
+    p = plan(equivalence=EquivalenceRule(n_pooled=340).materialize(
+        p_pool=0.20, p_sa=0.20, p_sb=0.20))
     rows = [{"state_id": "control", "is_control": True, "usable_rollout_rate": 0.73,
              "correct_overall": 0.10, "seeds": [SEED_SA, SEED_SB]},
             {"state_id": "leaf", "usable_rollout_rate": 0.80,
@@ -434,7 +559,8 @@ def test_the_canonical_control_can_win_the_final_comparison():
 
 
 def test_the_third_seed_is_offered_to_a_tied_control_too():
-    p = plan(equivalence=EquivalenceRule(n_pooled=340).materialize(0.20))
+    p = plan(equivalence=EquivalenceRule(n_pooled=340).materialize(
+        p_pool=0.20, p_sa=0.20, p_sb=0.20))
     close = [
         {"state_id": "control", "is_control": True, "seeds": [SEED_SA, SEED_SB],
          "usable_rollout_rate": 0.73, "correct_overall": 0.19},
@@ -526,7 +652,8 @@ def test_thresholds_cannot_move_after_freezing(tmp_path):
         assert_preregistered(plan(feasibility_min=0.40), frozen_path)
     with pytest.raises(RecoveryAdmissionError, match="after freezing"):
         assert_preregistered(
-            plan(equivalence=EquivalenceRule(n_pooled=340).materialize(0.25)),
+            plan(equivalence=EquivalenceRule(n_pooled=340).materialize(
+                p_pool=0.25, p_sa=0.25, p_sb=0.25)),
             frozen_path)
     with pytest.raises(RecoveryAdmissionError, match="no frozen plan"):
         assert_preregistered(original, tmp_path / "missing.json")

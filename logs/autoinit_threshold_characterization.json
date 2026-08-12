@@ -1,6 +1,6 @@
 {
   "schema": "aadistill.autoinit.threshold_characterization/v1",
-  "generated_utc": "2026-08-12T19:04:41.607521+00:00",
+  "generated_utc": "2026-08-12T19:33:29.982927+00:00",
   "command": "scripts/autoinit/characterize_thresholds.py",
   "beam_epsilon": {
     "repeatability": {
@@ -133,10 +133,51 @@
       "safely_above_measured_noise": true,
       "margin_factor": null,
       "conclusion": "CPU evaluation is bit-reproducible across the full materialize -> reload -> measure cycle, so 1e-4 is above the noise this path produces.",
-      "NOT_established": "GPU repeatability. The pilot's evaluation backend is a GPU, where reduction order is not guaranteed across launches and bf16/fp32 accumulation can move a KL in the last digits. This CPU result bounds the deterministic path only. The micro-preflight measures the same quantity on an L40S with the real teacher and the real suite, and epsilon is confirmed or reset from that number BEFORE any candidate is ranked."
+      "response_rule": {
+        "rule_id": "conservative_review_gate",
+        "version": 1,
+        "declared_epsilon": 0.0001,
+        "measurement_definition": "one materialized checkpoint, scored N times through the full materialize -> reload -> measure cycle on the frozen state-eval suite, on the pilot's GPU backend; the statistic is max(max - min) across the policy's objective metrics",
+        "repeats": 10,
+        "if_below": "epsilon stands unchanged",
+        "if_at_or_above": "no automatic re-derivation; preflight requires review and Phase A is blocked",
+        "rejected_alternative": "epsilon_final = max(1e-4, 2 * measured) - rejected for v1 because it derives a scientific tolerance from a single profiling run"
+      },
+      "NOT_established": "GPU repeatability. The pilot's evaluation backend is a GPU, where reduction order is not guaranteed across launches and bf16/fp32 accumulation can move a KL in the last digits. This CPU result bounds the deterministic path only. The micro-preflight measures the same quantity on an L40S with the real teacher and the real suite, and the FROZEN response rule above decides what happens: below the declared epsilon it stands; at or above it, no new epsilon is derived automatically, the preflight is marked as requiring review, and Phase A is blocked."
     }
   },
   "recovery_thresholds": {
+    "seed_awareness": "Both thresholds take max(prompt-level binomial SE, |sa - sb| / 2). 340 prompts from a single recovered checkpoint estimate that checkpoint precisely and the recipe's rate not at all, and this project has measured a 0.1290 behaviour swing on training seed alone. The two-point seed range is used as a FLOOR on the uncertainty, not as an estimate: with n=2 it is weak, and using it as a floor can only widen the interval, which is the conservative direction.",
+    "equivalence_rule_frozen": {
+      "rule_id": "seed_aware_max_binomial_seedrange",
+      "version": 2,
+      "formula": "z * max(sqrt(p_pool*(1-p_pool)/n_pooled), |p_sa - p_sb| / 2)",
+      "z": 2.0,
+      "n_pooled": 340,
+      "p_control_pooled": null,
+      "p_sa": null,
+      "p_sb": null,
+      "binomial_se": null,
+      "seed_se_proxy": null,
+      "value": null,
+      "dominant_term": null,
+      "status": "PENDING_CONTROL_CHARACTERIZATION",
+      "seed_awareness": "the two-point seed range is a floor on the interval, not an estimate; it can only widen it, which is the conservative direction",
+      "non_adaptive": "the formula is frozen before any candidate is searched; only the control's own rates enter it"
+    },
+    "feasibility_rule_frozen": {
+      "rule_id": "seed_aware_usable_floor",
+      "version": 2,
+      "k": 3.0,
+      "n_pooled": 380,
+      "absolute_floor": 0.3,
+      "formula": "max(absolute_floor, u_pool - k * max(binomial_se, |u_sa - u_sb| / 2))",
+      "u_pool": null,
+      "u_sa": null,
+      "u_sb": null,
+      "value": null,
+      "status": "PENDING_CONTROL_CHARACTERIZATION"
+    },
     "pooled_denominators": {
       "scorable_prompts_per_seed": 170,
       "all_prompts_per_seed": 190,
@@ -146,8 +187,8 @@
       "note": "pooled counts, per the frozen SeedAggregation"
     },
     "equivalence_interval": {
-      "SINGLE_DEFINITION": "interval = 2 * sqrt(p_control * (1 - p_control) / n_pooled). The formula is frozen now; the numeric value is materialized from the control characterization and never changes afterwards. There is no second, prior-derived constant.",
-      "rule_id": "two_binomial_se",
+      "SINGLE_DEFINITION": "interval = 2 * max(sqrt(p_pool*(1-p_pool)/n_pooled), |p_sa - p_sb| / 2). The formula is frozen now; the numeric value is materialized from the control characterization and never changes afterwards. There is no second, prior-derived constant.",
+      "rule_id": "seed_aware_max_binomial_seedrange",
       "z": 2.0,
       "n_pooled": 340,
       "free_input": "control correct_overall on the recovery-search battery",
@@ -162,14 +203,21 @@
       "why_two_se": "one SE would call a difference decisive that a rerun could reverse; two SE is the smallest interval this denominator can support"
     },
     "feasibility_floor": {
-      "rule": "max(absolute_floor, control_usable_pooled - 3 x SE), where SE is the binomial standard error of usable_rollout_rate on the pooled all-prompt denominator",
+      "rule": "max(absolute_floor, u_pool - 3 * max(binomial_se, |u_sa - u_sb| / 2)) on the pooled all-prompt denominator",
       "absolute_floor": 0.3,
       "absolute_floor_rationale": "guards the 'cannot hold a rollout at all' case independently of how the control happens to score; a candidate below it cannot produce trajectories for Stage 5 regardless of correctness",
       "relative_term_rationale": "guards against a candidate that is severely less stable than the incumbent without requiring parity, which would make feasibility a second ranking",
-      "free_input": "control usable_rollout_rate on the recovery-search battery",
-      "prior_value_used_for_sizing": 0.73,
-      "se_at_prior": 0.02277,
-      "floor_at_prior": 0.6617
+      "free_inputs": [
+        "control pooled usable_rollout_rate",
+        "control per-seed usable rates (sa, sb)"
+      ],
+      "status": "PENDING_CONTROL_CHARACTERIZATION",
+      "illustrative_only_at_historical_prior": {
+        "u": 0.73,
+        "binomial_se": 0.02277,
+        "floor_if_seeds_identical": 0.6617,
+        "WARNING": "illustrative only; the seed term is unknown until both control seeds are measured and will usually dominate"
+      }
     },
     "catastrophic_per_capability_floor": {
       "rule": "a candidate is excluded if any scorable set's usable rate is below 0.10 while the control's is above 0.40 on that set",

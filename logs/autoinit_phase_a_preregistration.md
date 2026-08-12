@@ -2,7 +2,7 @@
 
 **Status: DRAFT, NOT AUTHORIZED. No compute has been launched.** Machine-readable
 companion: [`autoinit_phase_a_preregistration.json`](autoinit_phase_a_preregistration.json),
-sha256 `4b01833129128252bf5e386230312f68130e342d16341c0e3ba6228239aea374`,
+sha256 `ccec9bd477e37e04c60b3eea6c0a8c39b40dc9806f943abfa19c2cf439f8bca8`,
 regenerable with `scripts/autoinit/write_preregistration.py`.
 
 Two numbers are deliberately **absent** and marked `PENDING_MICRO_PREFLIGHT`. The
@@ -191,6 +191,13 @@ is `tool_call_exact_match`.** Known strictness, recorded: exact match compares t
 emitted call list to the gold list in order, and 9 of 20 items are multi-call —
 this is the existing frozen semantics, not a new rule.
 
+Every source now carries its **upstream commit** (gsm8k `740312ad…`, MATH-500
+`6e4ed1a2…`, hotpot `1908d6af…`, squad_v2 `3ffb306f…`, trivia_qa `0f7faf33…`,
+mbpp `4bb6404f…`, xLAM `26d14ebf…`), taken from the hub snapshot directories,
+plus an independent content digest over the cached payload where one exists. No
+source is left at `unresolved-offline`, and the prompt content hash did not move —
+the audit found no provenance defect.
+
 Code has no frozen scorer and stays behaviour-only. **Recorded limitation: this
 battery cannot detect a candidate that trades code capability for math.**
 
@@ -198,32 +205,62 @@ battery cannot detect a candidate that trades code capability for math.**
 
 Derived in [`autoinit_threshold_characterization.json`](autoinit_threshold_characterization.json).
 
-**Equivalence interval — one definition, formula frozen, value pending.**
+**Equivalence interval — one definition, seed-aware, formula frozen, value pending.**
 
 ```
-interval = 2 * sqrt(p_control * (1 - p_control) / 340)
+binomial_se   = sqrt(p_pool * (1 - p_pool) / 340)
+seed_se_proxy = |p_sa - p_sb| / 2
+interval      = 2 * max(binomial_se, seed_se_proxy)
 ```
 
-where `p_control` is the pooled `correct_overall` of the canonical control on
-`recovery_search_v1`, and 340 = 170 scorable × 2 seeds. The formula is frozen
-before any candidate is searched, so it is non-adaptive; the numeric value is
-materialized once from the control's own measurement and never changes.
+340 = 170 scorable × 2 seeds. **The seed term matters more than the binomial one.**
+340 prompts from a single recovered checkpoint estimate *that checkpoint* precisely
+and the *recipe's* rate not at all, and this project has measured a 0.1290
+behaviour swing on training seed alone. An interval built from the binomial term
+alone would call two initializations different when a reseed of either would have
+crossed the gap. At a plausible ±0.05 seed spread the interval widens from 0.043
+to 0.100.
+
+The two-point seed range is a weak estimator of a standard error — with n=2 it is
+the only one available — so it is used as a **floor** on the interval rather than
+as an estimate. That can only widen the interval, which is the conservative
+direction.
 
 **There is no second, prior-derived constant.** `EquivalenceRule.require_value()`
-raises rather than falling back to a prior, and `select_final_winner` therefore
-refuses to run before the control is characterized. The historical prior appears
-in the characterization record only as `illustrative_only_at_historical_prior`,
-explicitly flagged as not the threshold.
+raises rather than falling back, and `select_final_winner` therefore refuses to run
+before the control is characterized. The historical prior appears only as
+`illustrative_only_at_historical_prior`, flagged as not the threshold.
 
-**Feasibility floor — rule frozen, number pending.**
-`max(0.30, control_usable_pooled − 3·SE)` on the pooled all-prompt denominator
-(190 × 2 = 380). The absolute term guards "cannot hold a rollout at all"; the
+**Feasibility floor — seed-aware, rule frozen, number pending.**
+
+```
+floor = max(0.30, u_pool - 3 * max(binomial_se, |u_sa - u_sb| / 2))
+```
+
+on the pooled all-prompt denominator (190 × 2 = 380). The absolute term guards
+"cannot hold a rollout at all" independently of how the control scores; the
 relative term guards against a candidate much less stable than the incumbent
-without requiring parity, which would make feasibility a second ranking. At the
-historical prior (0.7300) the floor would be **0.6617**; the actual control rate on
-*this* battery is unmeasured and is a preflight input.
+without demanding parity, which would make feasibility a second ranking. Both
+control seeds are preflight inputs.
 
-**Catastrophic per-capability floor — frozen AND executable.** A candidate is
+**Catastrophic per-capability floor — frozen, executable, and fail-closed.**
+
+The expected capability set is part of the frozen policy
+(`CapabilitySchema`: gsm8k, math_verified, multihop, rag, knowledge, tool). Every
+result used by recovery selection is validated before any gate runs: the actual
+capability set must equal the expected set exactly, and every capability must
+carry a finite in-range `usable_rollout_rate` plus the `n`/`usable` counts pooled
+aggregation needs. Missing capabilities, extra capabilities, absent metrics,
+non-numeric values, NaN, Inf, out-of-range rates and `usable > n` all raise.
+
+**No defaults.** "missing candidate usable → 1.0" would make a broken scoring
+pipeline look like a perfect candidate; "missing control usable → 0.0" would
+disable the rule entirely. Both turn a data bug into a silent pass. If no
+capability contract is declared at all the rule is *disabled* rather than passing,
+and every selection result reports `capability_schema_enforced` so the difference
+is visible.
+
+The rule itself: A candidate is
 excluded if any capability's usable rate is below 0.10 while the control's is
 above 0.40 on that capability. This is enforced mechanically in `_gate`, at
 **both** rungs, and the exclusion record names the capability and both measured
@@ -242,7 +279,7 @@ a third seed exists.
 | --- | --- | --- |
 | OPERATOR_CALIBRATION | `e8_calibration_v1` | content `d65c1f40…` |
 | INITIALIZER_STATE_EVAL | `state_eval_v1` | content `a1197205…` |
-| RECOVERY_SEARCH | `recovery_search_v1` | content `a1b22778…`, manifest `1a8321c7…` |
+| RECOVERY_SEARCH | `recovery_search_v1` | content `a1b22778…`, manifest `72d8c053…` |
 | FINAL_PROMOTION | `battery_v2` | mask `d6e24e0b…` — **isolated from the search** |
 | RECOVERY_TRAINING | `ladder_uniform_probe` @ 0.86M | pack `6f324cb0…` |
 
@@ -279,22 +316,39 @@ micro-preflight.
 
 ## 11. Pending before launch
 
-1. canonical control `usable_rollout_rate` on `recovery_search_v1`;
-2. canonical control `correct_overall` on `recovery_search_v1` → materializes the
+0. **rerun canonical sa/sb** under the current frozen trainer (§the control audit);
+1. control pooled **and per-seed** `usable_rollout_rate` → materializes the
+   seed-aware feasibility floor;
+2. control pooled **and per-seed** `correct_overall` → materializes the seed-aware
    equivalence interval;
-3. canonical control per-capability usable rates → the catastrophic rule's
-   reference values;
-4. GPU state-evaluator repeatability — confirms or resets beam ε;
+3. control per-capability usable rates → the catastrophic rule's reference values;
+4. GPU state-evaluator repeatability — evaluated by the **frozen**
+   `conservative_review_gate@v1`: below 1e-4 ε stands; at or above it no new ε is
+   derived automatically, the preflight requires review and Phase A is blocked;
 5. activation-statistics GPU/CPU split — collapses the cost range.
 
-**Both canonical control checkpoints are available and verified**
-([`autoinit_control_availability.json`](autoinit_control_availability.json)):
-`e1_r0860k_sa_pca` (`18ee10a1…`) and `e1_r0860k_sb_pca` (`f66de532…`) are on the
-relay, their LFS sha256 match their tombstones, their configs match, and their run
-manifests confirm the frozen protocol — same initialization, rung 860,000, seeds
-20260726/20260801, `ce 0.25 / kd 1.0 / T 1.0 / scope all`, 1,023 steps,
-`block_len` 8192. **No recovery retraining is needed for the control
-characterization.**
+**The historical control checkpoints exist, hash-verify, and are NOT
+recipe-matched.**
+([`autoinit_recovery_fingerprint_audit.json`](autoinit_recovery_fingerprint_audit.json))
+
+`RecoveryRecipeFingerprint` covers 43 fields — pack and its content hash, block
+ordering, objective incl. `kd_chunk`, optimizer type/lr/betas/eps/weight-decay/
+clipping, schedule, batch and accumulation semantics, precision, trainable
+selection, teacher and its attention implementation, student init, tokenizer,
+**trainer commit and dirty state, torch version**, and resume accounting. The seed
+is excluded by design and recorded beside it.
+
+37 fields match. Two are material mismatches — `trainer_git_commit`
+(`69c3fe1f`, dirty → current HEAD; `train.py` is +528/−30 since) and
+`torch_version` (2.11.0+cu128 → 2.13.0). One is unreconstructable
+(`trainer_uncommitted_sha256`). Two are benign and proved so: `pack` is a rename
+verified by hash, and `resume_semantics` could not have applied because neither run
+resumed.
+
+**Therefore the canonical control is rerun** from `qwen3_0p6b_init_v0` at 0.86M on
+both seeds under the current frozen trainer, in the micro-preflight. Those runs
+become the **permanent Phase-A control probes** — retained and reused at rung 2,
+not repeated. Phase A afterwards needs 7 probes rather than 9.
 
 All five are micro-preflight outputs. See
 [`autoinit_micro_preflight_plan.md`](autoinit_micro_preflight_plan.md).

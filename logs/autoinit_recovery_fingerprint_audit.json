@@ -1,0 +1,472 @@
+{
+  "schema": "aadistill.autoinit.recovery_fingerprint_audit/v1",
+  "generated_utc": "2026-08-12T19:29:09.508727+00:00",
+  "question": "are the historical 0.86M checkpoints recipe-matched to the Phase-A probes, i.e. do they differ only by seed?",
+  "unverifiable_reasons": {
+    "trainer_uncommitted_sha256": "code_state.dirty was true; the executed code is a commit plus an uncommitted diff identified only by its hash, which cannot be reconstructed",
+    "kd_chunk": "not present in the historical config; the trainer default at that commit was 512, same as now, but the run did not record it"
+  },
+  "comparisons": {
+    "e1_r0860k_sa_pca": {
+      "seed": 20260726,
+      "historical": {
+        "pack": "ladder_uniform",
+        "pack_blocks_sha256": "6f324cb0f37bc0f07128e554ce8c161879419537478950496534f75fcecb249c",
+        "rung": 860000,
+        "train_blocks": 682,
+        "train_supervised_tokens": 864750,
+        "block_len": 8192,
+        "packing": "ladder",
+        "val_blocks": 16,
+        "block_ordering": "ladder order, sequential, no shuffle",
+        "ce_weight": 0.25,
+        "kd_weight": 1.0,
+        "kd_temperature": 1.0,
+        "kd_scope": "all",
+        "kd_chunk": 512,
+        "optimizer": "AdamW",
+        "lr": 5e-05,
+        "weight_decay": 0.01,
+        "betas": [
+          0.9,
+          0.95
+        ],
+        "eps": 1e-08,
+        "grad_clip": 1.0,
+        "total_steps": 1023,
+        "warmup_steps": 51,
+        "min_lr_frac": 0.1,
+        "lr_schedule": "cosine to min_lr_frac",
+        "blocks_per_step": 2,
+        "micro_blocks": 1,
+        "dtype": "float32",
+        "autocast_bf16": true,
+        "gradient_checkpointing": true,
+        "trainable_patterns": [
+          "\\.self_attn\\.(q_proj|k_proj|v_proj|o_proj|q_norm|k_norm)\\.",
+          "\\.mlp\\.(gate_proj|up_proj|down_proj)\\.",
+          "input_layernorm",
+          "post_attention_layernorm",
+          "model\\.norm\\."
+        ],
+        "trainable_params": 440467456,
+        "teacher_id": "Qwen/Qwen3-4B-Thinking-2507",
+        "teacher_revision": "768f209d9ea81521153ed38c47d515654e938aea",
+        "teacher_dtype": "bfloat16",
+        "teacher_attn": "sdpa",
+        "student_init_path": "artifacts/stage1/qwen3_0p6b_init_v0/checkpoint",
+        "student_init_sha256": "86fbba78e8a2a32481ca77e5ac362ed1f17a39dbc30bcbc952cabd5df2633e54",
+        "tokenizer_sha256": "7781771acc3798ee454c1253c751f930eb1c18c1c3df62e2552cc6f1d394f654",
+        "trainer_git_commit": "69c3fe1f5f019c2130d8d3aaf18322fe948d17d7",
+        "trainer_dirty": true,
+        "trainer_uncommitted_sha256": "2e04f68349226a7efd1684d916441bb29c9e44f1126e066f7ab3fca05cdad2ca",
+        "torch_version": "2.11.0+cu128",
+        "resume_semantics": "step counter + RNG state (no consumed-block accounting)",
+        "fingerprint": "3e282dcaab22681c8b0e962a593f3051a7bab72760402ffdb414885e8e11bcfd",
+        "unverifiable": [
+          "trainer_uncommitted_sha256",
+          "kd_chunk"
+        ],
+        "seed_excluded": "the seed is the intended difference between probes and is recorded beside the fingerprint, not inside it"
+      },
+      "phase_a_today": {
+        "pack": "ladder_uniform_probe",
+        "pack_blocks_sha256": "6f324cb0f37bc0f07128e554ce8c161879419537478950496534f75fcecb249c",
+        "rung": 860000,
+        "train_blocks": 682,
+        "train_supervised_tokens": 864750,
+        "block_len": 8192,
+        "packing": "ladder",
+        "val_blocks": 16,
+        "block_ordering": "ladder order, sequential, no shuffle",
+        "ce_weight": 0.25,
+        "kd_weight": 1.0,
+        "kd_temperature": 1.0,
+        "kd_scope": "all",
+        "kd_chunk": 512,
+        "optimizer": "AdamW",
+        "lr": 5e-05,
+        "weight_decay": 0.01,
+        "betas": [
+          0.9,
+          0.95
+        ],
+        "eps": 1e-08,
+        "grad_clip": 1.0,
+        "total_steps": 1023,
+        "warmup_steps": 51,
+        "min_lr_frac": 0.1,
+        "lr_schedule": "cosine to min_lr_frac",
+        "blocks_per_step": 2,
+        "micro_blocks": 1,
+        "dtype": "float32",
+        "autocast_bf16": true,
+        "gradient_checkpointing": true,
+        "trainable_patterns": [
+          "\\.self_attn\\.(q_proj|k_proj|v_proj|o_proj|q_norm|k_norm)\\.",
+          "\\.mlp\\.(gate_proj|up_proj|down_proj)\\.",
+          "input_layernorm",
+          "post_attention_layernorm",
+          "model\\.norm\\."
+        ],
+        "trainable_params": 440467456,
+        "teacher_id": "Qwen/Qwen3-4B-Thinking-2507",
+        "teacher_revision": "768f209d9ea81521153ed38c47d515654e938aea",
+        "teacher_dtype": "bfloat16",
+        "teacher_attn": "sdpa",
+        "student_init_path": "artifacts/stage1/qwen3_0p6b_init_v0/checkpoint",
+        "student_init_sha256": "86fbba78e8a2a32481ca77e5ac362ed1f17a39dbc30bcbc952cabd5df2633e54",
+        "tokenizer_sha256": "7781771acc3798ee454c1253c751f930eb1c18c1c3df62e2552cc6f1d394f654",
+        "trainer_git_commit": "dc5d7597260a2e55a94082afc921896be57108e1",
+        "trainer_dirty": true,
+        "trainer_uncommitted_sha256": "117d30ac1d55d54adc16bd27f87e87964b3c7e8d11d92cc83666ecfc365edf57",
+        "torch_version": "2.13.0+cpu",
+        "resume_semantics": "step counter + RNG state + consumed-block position, asserted on restore",
+        "fingerprint": "bf48fc0fe20506c8f339de931787cc9a51e70506b98938b9314a11d3a089b3b2",
+        "unverifiable": [],
+        "seed_excluded": "the seed is the intended difference between probes and is recorded beside the fingerprint, not inside it"
+      },
+      "comparison": {
+        "fingerprint_self": "3e282dcaab22681c8b0e962a593f3051a7bab72760402ffdb414885e8e11bcfd",
+        "fingerprint_other": "bf48fc0fe20506c8f339de931787cc9a51e70506b98938b9314a11d3a089b3b2",
+        "fingerprints_equal": false,
+        "matched_fields": [
+          "autocast_bf16",
+          "betas",
+          "block_len",
+          "block_ordering",
+          "blocks_per_step",
+          "ce_weight",
+          "dtype",
+          "eps",
+          "grad_clip",
+          "gradient_checkpointing",
+          "kd_scope",
+          "kd_temperature",
+          "kd_weight",
+          "lr",
+          "lr_schedule",
+          "micro_blocks",
+          "min_lr_frac",
+          "optimizer",
+          "pack_blocks_sha256",
+          "packing",
+          "rung",
+          "student_init_path",
+          "student_init_sha256",
+          "teacher_attn",
+          "teacher_dtype",
+          "teacher_id",
+          "teacher_revision",
+          "tokenizer_sha256",
+          "total_steps",
+          "train_blocks",
+          "train_supervised_tokens",
+          "trainable_params",
+          "trainable_patterns",
+          "trainer_dirty",
+          "val_blocks",
+          "warmup_steps",
+          "weight_decay"
+        ],
+        "mismatched_fields": [
+          {
+            "field": "pack",
+            "self": "ladder_uniform",
+            "other": "ladder_uniform_probe"
+          },
+          {
+            "field": "resume_semantics",
+            "self": "step counter + RNG state (no consumed-block accounting)",
+            "other": "step counter + RNG state + consumed-block position, asserted on restore"
+          },
+          {
+            "field": "torch_version",
+            "self": "2.11.0+cu128",
+            "other": "2.13.0+cpu"
+          },
+          {
+            "field": "trainer_git_commit",
+            "self": "69c3fe1f5f019c2130d8d3aaf18322fe948d17d7",
+            "other": "dc5d7597260a2e55a94082afc921896be57108e1"
+          }
+        ],
+        "unverifiable_fields": [
+          {
+            "field": "kd_chunk",
+            "self": 512,
+            "other": 512
+          },
+          {
+            "field": "trainer_uncommitted_sha256",
+            "self": "2e04f68349226a7efd1684d916441bb29c9e44f1126e066f7ab3fca05cdad2ca",
+            "other": "117d30ac1d55d54adc16bd27f87e87964b3c7e8d11d92cc83666ecfc365edf57"
+          }
+        ],
+        "exactly_matched": false,
+        "verdict": "NOT A MATCHED CONTROL: 4 field(s) differ; 2 field(s) cannot be established. A comparison against probes trained under a different recipe confounds the initialization with the recipe.",
+        "material_mismatches": [
+          {
+            "field": "torch_version",
+            "self": "2.11.0+cu128",
+            "other": "2.13.0+cpu"
+          },
+          {
+            "field": "trainer_git_commit",
+            "self": "69c3fe1f5f019c2130d8d3aaf18322fe948d17d7",
+            "other": "dc5d7597260a2e55a94082afc921896be57108e1"
+          }
+        ],
+        "benign_mismatches": [
+          {
+            "field": "pack",
+            "self": "ladder_uniform",
+            "other": "ladder_uniform_probe",
+            "why_benign": "a rename, not a different pack. Proved by hash: the relay holds the historical pack under its historical name at stage3_recovery_corpus_v2/ladder_uniform/blocks.npz, and its sha256 is 6f324cb0... - exactly the hash the frozen Phase-A recipe pins for ladder_uniform_probe. Derived quantities agree too (682 blocks, 864,750 supervised tokens, identical six-way mix)."
+          },
+          {
+            "field": "resume_semantics",
+            "self": "step counter + RNG state (no consumed-block accounting)",
+            "other": "step counter + RNG state + consumed-block position, asserted on restore",
+            "why_benign": "both historical runs recorded resumed_from=None, so the consumed-block accounting added since could not have affected them; it changes restore behaviour only"
+          }
+        ],
+        "blocking": true
+      }
+    },
+    "e1_r0860k_sb_pca": {
+      "seed": 20260801,
+      "historical": {
+        "pack": "ladder_uniform",
+        "pack_blocks_sha256": "6f324cb0f37bc0f07128e554ce8c161879419537478950496534f75fcecb249c",
+        "rung": 860000,
+        "train_blocks": 682,
+        "train_supervised_tokens": 864750,
+        "block_len": 8192,
+        "packing": "ladder",
+        "val_blocks": 16,
+        "block_ordering": "ladder order, sequential, no shuffle",
+        "ce_weight": 0.25,
+        "kd_weight": 1.0,
+        "kd_temperature": 1.0,
+        "kd_scope": "all",
+        "kd_chunk": 512,
+        "optimizer": "AdamW",
+        "lr": 5e-05,
+        "weight_decay": 0.01,
+        "betas": [
+          0.9,
+          0.95
+        ],
+        "eps": 1e-08,
+        "grad_clip": 1.0,
+        "total_steps": 1023,
+        "warmup_steps": 51,
+        "min_lr_frac": 0.1,
+        "lr_schedule": "cosine to min_lr_frac",
+        "blocks_per_step": 2,
+        "micro_blocks": 1,
+        "dtype": "float32",
+        "autocast_bf16": true,
+        "gradient_checkpointing": true,
+        "trainable_patterns": [
+          "\\.self_attn\\.(q_proj|k_proj|v_proj|o_proj|q_norm|k_norm)\\.",
+          "\\.mlp\\.(gate_proj|up_proj|down_proj)\\.",
+          "input_layernorm",
+          "post_attention_layernorm",
+          "model\\.norm\\."
+        ],
+        "trainable_params": 440467456,
+        "teacher_id": "Qwen/Qwen3-4B-Thinking-2507",
+        "teacher_revision": "768f209d9ea81521153ed38c47d515654e938aea",
+        "teacher_dtype": "bfloat16",
+        "teacher_attn": "sdpa",
+        "student_init_path": "artifacts/stage1/qwen3_0p6b_init_v0/checkpoint",
+        "student_init_sha256": "86fbba78e8a2a32481ca77e5ac362ed1f17a39dbc30bcbc952cabd5df2633e54",
+        "tokenizer_sha256": "7781771acc3798ee454c1253c751f930eb1c18c1c3df62e2552cc6f1d394f654",
+        "trainer_git_commit": "69c3fe1f5f019c2130d8d3aaf18322fe948d17d7",
+        "trainer_dirty": true,
+        "trainer_uncommitted_sha256": "2e04f68349226a7efd1684d916441bb29c9e44f1126e066f7ab3fca05cdad2ca",
+        "torch_version": "2.11.0+cu128",
+        "resume_semantics": "step counter + RNG state (no consumed-block accounting)",
+        "fingerprint": "3e282dcaab22681c8b0e962a593f3051a7bab72760402ffdb414885e8e11bcfd",
+        "unverifiable": [
+          "trainer_uncommitted_sha256",
+          "kd_chunk"
+        ],
+        "seed_excluded": "the seed is the intended difference between probes and is recorded beside the fingerprint, not inside it"
+      },
+      "phase_a_today": {
+        "pack": "ladder_uniform_probe",
+        "pack_blocks_sha256": "6f324cb0f37bc0f07128e554ce8c161879419537478950496534f75fcecb249c",
+        "rung": 860000,
+        "train_blocks": 682,
+        "train_supervised_tokens": 864750,
+        "block_len": 8192,
+        "packing": "ladder",
+        "val_blocks": 16,
+        "block_ordering": "ladder order, sequential, no shuffle",
+        "ce_weight": 0.25,
+        "kd_weight": 1.0,
+        "kd_temperature": 1.0,
+        "kd_scope": "all",
+        "kd_chunk": 512,
+        "optimizer": "AdamW",
+        "lr": 5e-05,
+        "weight_decay": 0.01,
+        "betas": [
+          0.9,
+          0.95
+        ],
+        "eps": 1e-08,
+        "grad_clip": 1.0,
+        "total_steps": 1023,
+        "warmup_steps": 51,
+        "min_lr_frac": 0.1,
+        "lr_schedule": "cosine to min_lr_frac",
+        "blocks_per_step": 2,
+        "micro_blocks": 1,
+        "dtype": "float32",
+        "autocast_bf16": true,
+        "gradient_checkpointing": true,
+        "trainable_patterns": [
+          "\\.self_attn\\.(q_proj|k_proj|v_proj|o_proj|q_norm|k_norm)\\.",
+          "\\.mlp\\.(gate_proj|up_proj|down_proj)\\.",
+          "input_layernorm",
+          "post_attention_layernorm",
+          "model\\.norm\\."
+        ],
+        "trainable_params": 440467456,
+        "teacher_id": "Qwen/Qwen3-4B-Thinking-2507",
+        "teacher_revision": "768f209d9ea81521153ed38c47d515654e938aea",
+        "teacher_dtype": "bfloat16",
+        "teacher_attn": "sdpa",
+        "student_init_path": "artifacts/stage1/qwen3_0p6b_init_v0/checkpoint",
+        "student_init_sha256": "86fbba78e8a2a32481ca77e5ac362ed1f17a39dbc30bcbc952cabd5df2633e54",
+        "tokenizer_sha256": "7781771acc3798ee454c1253c751f930eb1c18c1c3df62e2552cc6f1d394f654",
+        "trainer_git_commit": "dc5d7597260a2e55a94082afc921896be57108e1",
+        "trainer_dirty": true,
+        "trainer_uncommitted_sha256": "117d30ac1d55d54adc16bd27f87e87964b3c7e8d11d92cc83666ecfc365edf57",
+        "torch_version": "2.13.0+cpu",
+        "resume_semantics": "step counter + RNG state + consumed-block position, asserted on restore",
+        "fingerprint": "bf48fc0fe20506c8f339de931787cc9a51e70506b98938b9314a11d3a089b3b2",
+        "unverifiable": [],
+        "seed_excluded": "the seed is the intended difference between probes and is recorded beside the fingerprint, not inside it"
+      },
+      "comparison": {
+        "fingerprint_self": "3e282dcaab22681c8b0e962a593f3051a7bab72760402ffdb414885e8e11bcfd",
+        "fingerprint_other": "bf48fc0fe20506c8f339de931787cc9a51e70506b98938b9314a11d3a089b3b2",
+        "fingerprints_equal": false,
+        "matched_fields": [
+          "autocast_bf16",
+          "betas",
+          "block_len",
+          "block_ordering",
+          "blocks_per_step",
+          "ce_weight",
+          "dtype",
+          "eps",
+          "grad_clip",
+          "gradient_checkpointing",
+          "kd_scope",
+          "kd_temperature",
+          "kd_weight",
+          "lr",
+          "lr_schedule",
+          "micro_blocks",
+          "min_lr_frac",
+          "optimizer",
+          "pack_blocks_sha256",
+          "packing",
+          "rung",
+          "student_init_path",
+          "student_init_sha256",
+          "teacher_attn",
+          "teacher_dtype",
+          "teacher_id",
+          "teacher_revision",
+          "tokenizer_sha256",
+          "total_steps",
+          "train_blocks",
+          "train_supervised_tokens",
+          "trainable_params",
+          "trainable_patterns",
+          "trainer_dirty",
+          "val_blocks",
+          "warmup_steps",
+          "weight_decay"
+        ],
+        "mismatched_fields": [
+          {
+            "field": "pack",
+            "self": "ladder_uniform",
+            "other": "ladder_uniform_probe"
+          },
+          {
+            "field": "resume_semantics",
+            "self": "step counter + RNG state (no consumed-block accounting)",
+            "other": "step counter + RNG state + consumed-block position, asserted on restore"
+          },
+          {
+            "field": "torch_version",
+            "self": "2.11.0+cu128",
+            "other": "2.13.0+cpu"
+          },
+          {
+            "field": "trainer_git_commit",
+            "self": "69c3fe1f5f019c2130d8d3aaf18322fe948d17d7",
+            "other": "dc5d7597260a2e55a94082afc921896be57108e1"
+          }
+        ],
+        "unverifiable_fields": [
+          {
+            "field": "kd_chunk",
+            "self": 512,
+            "other": 512
+          },
+          {
+            "field": "trainer_uncommitted_sha256",
+            "self": "2e04f68349226a7efd1684d916441bb29c9e44f1126e066f7ab3fca05cdad2ca",
+            "other": "117d30ac1d55d54adc16bd27f87e87964b3c7e8d11d92cc83666ecfc365edf57"
+          }
+        ],
+        "exactly_matched": false,
+        "verdict": "NOT A MATCHED CONTROL: 4 field(s) differ; 2 field(s) cannot be established. A comparison against probes trained under a different recipe confounds the initialization with the recipe.",
+        "material_mismatches": [
+          {
+            "field": "torch_version",
+            "self": "2.11.0+cu128",
+            "other": "2.13.0+cpu"
+          },
+          {
+            "field": "trainer_git_commit",
+            "self": "69c3fe1f5f019c2130d8d3aaf18322fe948d17d7",
+            "other": "dc5d7597260a2e55a94082afc921896be57108e1"
+          }
+        ],
+        "benign_mismatches": [
+          {
+            "field": "pack",
+            "self": "ladder_uniform",
+            "other": "ladder_uniform_probe",
+            "why_benign": "a rename, not a different pack. Proved by hash: the relay holds the historical pack under its historical name at stage3_recovery_corpus_v2/ladder_uniform/blocks.npz, and its sha256 is 6f324cb0... - exactly the hash the frozen Phase-A recipe pins for ladder_uniform_probe. Derived quantities agree too (682 blocks, 864,750 supervised tokens, identical six-way mix)."
+          },
+          {
+            "field": "resume_semantics",
+            "self": "step counter + RNG state (no consumed-block accounting)",
+            "other": "step counter + RNG state + consumed-block position, asserted on restore",
+            "why_benign": "both historical runs recorded resumed_from=None, so the consumed-block accounting added since could not have affected them; it changes restore behaviour only"
+          }
+        ],
+        "blocking": true
+      }
+    }
+  },
+  "benign_mismatch_policy": {
+    "pack": "a rename, not a different pack. Proved by hash: the relay holds the historical pack under its historical name at stage3_recovery_corpus_v2/ladder_uniform/blocks.npz, and its sha256 is 6f324cb0... - exactly the hash the frozen Phase-A recipe pins for ladder_uniform_probe. Derived quantities agree too (682 blocks, 864,750 supervised tokens, identical six-way mix).",
+    "resume_semantics": "both historical runs recorded resumed_from=None, so the consumed-block accounting added since could not have affected them; it changes restore behaviour only"
+  },
+  "historical_controls_are_recipe_matched": false,
+  "consequence": "The historical checkpoints are NOT recipe-matched and must not be called matched controls. Rerun canonical sa/sb from qwen3_0p6b_init_v0 at 0.86M under the current frozen recovery trainer; those runs become the permanent Phase-A control probes and are retained, not disposable.",
+  "report_sha256": "cb19ab4b08241a718dddb5ea8bf1746546b2dd72a19231337713fbd5c013773c"
+}
