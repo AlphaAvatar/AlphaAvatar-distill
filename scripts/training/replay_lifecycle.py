@@ -20,9 +20,17 @@ a worse block. Here every step resets peak stats and records
 
 Two phases, because DC-sa failed *after* the run had crossed the checkpoint/eval region:
 
-  A. `--steps` identical steps, clean, establishing whether the boundary baseline moves;
-  B. an eval and a checkpoint save, then more identical steps, comparing the boundary
-     baseline before and after those events.
+  A. `--steps` identical steps with **evaluation and checkpointing disabled**, long
+     enough to pass the ~900 failure point rather than only the ~310 observation. It
+     answers exactly one question: does the ordinary training loop retain live CUDA
+     memory across identical optimizer steps?
+  B. from a **clean, reinitialized** state: reach a materialized steady state, record
+     the stable boundary baseline, run the same eval + checkpoint + logging path the
+     real run executes near step 880, then continue identical steps and check whether
+     live allocation returns to the same band. No second thousand steps is needed.
+
+The decisive signal is the step-boundary live allocation **after `zero_grad`**, not any
+historical maximum.
 
 Architecture-generic on purpose: nothing here hard-codes the 4B teacher, the 596M
 target, layer counts, hidden/FFN/head sizes, or an operator order. It reads the config
@@ -70,10 +78,14 @@ def main() -> int:
     ap = argparse.ArgumentParser(
         description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--config", required=True)
-    ap.add_argument("--steps", type=int, default=400,
-                    help="identical steps in phase A; must cross the growth horizon "
-                         "observed in the real run (+0.14 GiB by step 310)")
+    ap.add_argument("--steps", type=int, default=1000,
+                    help="identical steps in phase A. Must pass the ~900 failure "
+                         "point, not merely the ~310 observation where the running "
+                         "maximum last moved")
     ap.add_argument("--post-event-steps", type=int, default=60)
+    ap.add_argument("--pre-event-steps", type=int, default=25,
+                    help="phase B steps before the eval/checkpoint event, to "
+                         "establish the baseline the event is compared against")
     ap.add_argument("--pin-step", type=int, default=133,
                     help="stream step whose blocks are replayed; 133 is the "
                          "worst joint transient in this pack, found by "
@@ -161,6 +173,24 @@ def main() -> int:
 
     T.masked_ce, T.kd_forward_kl = ce_probe, kd_probe
 
+    # Backward and the optimizer step are separate boundaries: a retained autograd
+    # graph and a growing optimizer state look identical if they are merged.
+    orig_step = trainer.opt.step
+
+    def step_probe(*a, **k):
+        cur["after_backward"] = list(snap())
+        out = orig_step(*a, **k)
+        cur["after_optimizer_step"] = list(snap())
+        return out
+
+    trainer.opt.step = step_probe
+
+    # Phase A must exercise the TRAINING loop only. Evaluation and checkpointing are
+    # phase B's subject, and leaving them on would confound the one question phase A
+    # exists to answer.
+    trainer.cfg["intervals"] = {**cfg["intervals"], "eval_every": 0}
+    trainer.cfg["checkpoint"] = {**cfg["checkpoint"], "save_every": 10 ** 9}
+
     def run_steps(n: int, phase: str) -> None:
         for _ in range(n):
             torch.cuda.reset_peak_memory_stats()
@@ -174,7 +204,7 @@ def main() -> int:
                 "phase": phase, "step": int(trainer.step),
                 "step_start": [a0, r0],
                 **{k: v for k, v in cur.items()},
-                "after_backward_and_optimizer": [a1, r1],
+                "after_step_once_returned": [a1, r1],
                 "after_zero_grad": [a2, r2],
                 "step_peak_allocated_gib": gib(torch.cuda.max_memory_allocated()),
                 "step_peak_reserved_gib": gib(torch.cuda.max_memory_reserved()),
@@ -185,7 +215,26 @@ def main() -> int:
     run_steps(args.steps, "A_identical")
     report["phase_A_steps"] = args.steps
 
-    # Phase B: the events the gate never ran. DC-sa died after crossing this region.
+    # --- Phase B: a CLEAN state, so phase A's thousand steps cannot colour the
+    # baseline the event is judged against. Rebuild the trainer, settle it, then run
+    # the real eval + checkpoint path and see whether the baseline comes back.
+    del trainer
+    import gc
+    gc.collect()
+    torch.cuda.empty_cache()
+    torch.cuda.reset_peak_memory_stats()
+    student = AutoModelForCausalLM.from_pretrained(
+        REPO_ROOT / cfg["student_path"], dtype=DTYPES[cfg["dtype"]])
+    trainer = T.Trainer(cfg, student, train_b, val_b, teacher=teacher, device="cuda")
+    orig_step = trainer.opt.step
+    trainer.opt.step = step_probe
+    trainer.cfg["intervals"] = {**cfg["intervals"], "eval_every": 0}
+    trainer.cfg["checkpoint"] = {**cfg["checkpoint"], "save_every": 10 ** 9}
+    a, r = snap()
+    report["phase_B_clean_state"] = [a, r]
+    run_steps(args.pre_event_steps, "B_pre_event")
+
+    # The events the gate never ran. DC-sa died after crossing this region.
     ev = {}
     a, r = snap()
     ev["before_events"] = [a, r]
@@ -221,14 +270,42 @@ def main() -> int:
                 "last_10_mean": round(sum(tail) / len(tail), 4),
                 "drift_gib": round(sum(tail) / len(tail) - sum(head) / len(head), 4),
                 "min": min(a), "max": max(a), "distinct": len(set(a))}
-    b_start = series("B_after_events", "step_start")
-    a_start = series("A_identical", "step_start")
-    if a_start and b_start:
+    # Phase B is judged against ITS OWN pre-event baseline, not phase A's: the two
+    # run in different processes' worth of allocator history and only the
+    # before/after-event pair isolates the event.
+    pre = series("B_pre_event", "after_zero_grad")
+    post = series("B_after_events", "after_zero_grad")
+    if pre and post:
+        pre_m = round(sum(pre[-10:]) / len(pre[-10:]), 4)
+        post_m = round(sum(post[-10:]) / len(post[-10:]), 4)
         verdict["baseline_returns_after_events"] = {
-            "phase_A_last_10_mean": round(sum(a_start[-10:]) / len(a_start[-10:]), 4),
-            "phase_B_last_10_mean": round(sum(b_start[-10:]) / len(b_start[-10:]), 4),
-            "delta_gib": round(sum(b_start[-10:]) / len(b_start[-10:])
-                               - sum(a_start[-10:]) / len(a_start[-10:]), 4)}
+            "pre_event_last_10_mean": pre_m, "post_event_last_10_mean": post_m,
+            "delta_gib": round(post_m - pre_m, 4),
+            "returns_to_band": abs(post_m - pre_m) <= 0.05}
+
+    # The three-way classification, computed rather than argued.
+    a_drift = (verdict.get("after_zero_grad") or {}).get("drift_gib")
+    b_delta = (verdict.get("baseline_returns_after_events") or {}).get("delta_gib")
+    TOL = 0.05
+    if a_drift is not None and a_drift > TOL:
+        cls = ("pure_loop_retention", "identical-step boundary allocation grew before "
+               "any eval or checkpoint event")
+    elif b_delta is not None and b_delta > TOL:
+        cls = ("lifecycle_retention", "the pure loop is stable, but eval/checkpoint/"
+               "logging raised the subsequent training baseline persistently")
+    elif a_drift is not None and b_delta is not None:
+        cls = ("no_retention", "live boundary allocation is stable across identical "
+               "steps and returns to baseline after the event; the late OOM is then a "
+               "narrow-margin allocator/workspace event, not a lifecycle defect")
+    else:
+        cls = ("inconclusive", "not enough steps in one or both phases")
+    verdict["classification"] = {"case": cls[0], "reason": cls[1],
+                                 "tolerance_gib": TOL,
+                                 "phase_A_drift_gib": a_drift,
+                                 "phase_B_delta_gib": b_delta,
+                                 "note": "only `no_retention` justifies treating this "
+                                         "as narrow-margin rather than a defect"}
+
     peaks = [b["step_peak_allocated_gib"] for b in boundaries]
     verdict["per_step_peak"] = {"min": min(peaks), "max": max(peaks),
                                 "first": peaks[0], "last": peaks[-1]}
