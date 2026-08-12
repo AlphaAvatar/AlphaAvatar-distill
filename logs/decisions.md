@@ -2057,3 +2057,43 @@
   unchunked 4,978 MB fp32 upcast is the largest single buffer. FSDP/ZeRO would address
   the separate 46.8 GB of fp32 master weights and Adam states. Not smaller Python-level
   chunks.
+
+## 2026-08-12 — Future direction: teacher-adaptive AutoInitializer, sparse Top-K KD
+
+Recorded as a **future architecture constraint only**. Nothing here is started, and
+E8b stays scientifically frozen. Its purpose is to stop new infrastructure from baking
+in assumptions that a later study would have to unpick.
+
+- **Context:** after the current 4B → ~600M study, the project intends to extend to
+  substantially larger compression settings, approximately **30B → 4.xB**.
+- **Intended architecture:** a **teacher-adaptive AutoInitializer**, not a fixed
+  Qwen-specific recipe. Its conceptual search is: teacher checkpoint → search over
+  initialization operators, operator order, calibration-data mixture and operator
+  configuration → intermediate partial checkpoints used **only** as search states and
+  re-measurement points → complete leaf candidates that all exactly match the requested
+  target student architecture → Beam Top-N → an identical low-budget recovery probe
+  (currently envisioned around 0.86M) → Top-1 → full recovery. Two leaves might be
+  `Depth → Attention → FFN → Width` and `Attention → FFN → Width → Depth`, with every
+  operator conditionally recomputed from the checkpoint the preceding operators
+  produced. **Intermediate checkpoints are not Top-N recovery candidates**; only
+  completed target-size leaves enter the probe.
+- **Consequence for runtime engineering, which is why it is recorded now:** in a
+  30B → 4.xB study the Top-N leaves are themselves ~4.xB models, so memory-efficient
+  recovery of *target-size* models becomes a first-class requirement rather than an
+  E8b-only inconvenience. E8b's memory findings should therefore be written in
+  architecture-generic terms.
+- **Do not hard-code** in new infrastructure: the current 4B teacher; the current 596M
+  target; fixed layer counts; fixed hidden/FFN/head sizes; a particular operator order.
+  `scripts/training/audit_stream_shapes.py` and `scripts/training/replay_lifecycle.py`
+  were written to this constraint — they read whatever config they are given.
+- **KD direction (corrected and to be preserved):** the intended distillation direction
+  is **sparse Top-K logit distillation**, not full-vocabulary KL as a permanent
+  interface. Candidate support may be `TopK_teacher ∪ TopK_student` with explicit
+  tail/residual probability treatment. Streaming/fused computation is an
+  **implementation technique** for obtaining sparse statistics efficiently, not itself
+  the desired objective.
+- **Attention naming (to be preserved):** the current path is **PyTorch SDPA
+  dispatching to its flash backend**. That is not the separately packaged
+  FlashAttention/FA2 implementation and must not be described as such.
+- **Revisit when:** the 4B → ~600M study completes. Not before; AutoInitializer, Top-K
+  KD, E9 and runtime redesign are all out of scope under the current task.

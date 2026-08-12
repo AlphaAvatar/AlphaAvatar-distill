@@ -21,7 +21,7 @@ set -euo pipefail
 
 WS=/workspace
 REPO=$WS/aad
-SESSION=${E8B_SESSION:?E8B_SESSION must be s1|s2|s3|s4}
+SESSION=${E8B_SESSION:?E8B_SESSION must be s1|s2|s3|s4|s5}
 STATUS=$WS/e8b_$SESSION.status
 mark() { echo "MARKER:$1"; echo "$(date -u +%FT%TZ) MARKER:$1" >>"$STATUS"; }
 say()  { echo "[$(date -u +%T)] $*"; }
@@ -29,6 +29,7 @@ say()  { echo "[$(date -u +%T)] $*"; }
 case "$SESSION" in
   s1)    NEED_DEPTH=1; NEED_COMPRESSED=1 ;;
   s2|s3) NEED_DEPTH=1; NEED_COMPRESSED=0 ;;
+  s5)    NEED_DEPTH=1; NEED_COMPRESSED=0 ;;   # lifecycle diagnostic
   s4)    NEED_DEPTH=0; NEED_COMPRESSED=1 ;;
   *) echo "unknown E8B_SESSION $SESSION"; exit 1 ;;
 esac

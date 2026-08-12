@@ -71,6 +71,8 @@ SESSIONS = {
            ("e8b_dp_r1600k_sb", "e8b_dc_r1600k_sb"), 6430),
     "s4": ("NVIDIA L40S", 0.99,
            ("e8b_fc_r1600k_sa", "e8b_fc_r1600k_sb"), 1190),
+    # Diagnostic only: no arms, so no training minutes and no checkpoints to move.
+    "s5": ("NVIDIA A100-SXM4-80GB", 1.59, (), 0),
 }
 ARMS = ()     # set from --session in main()
 
@@ -174,6 +176,18 @@ class E8B:
                       Phase("artifact_manifest_and_verify", 8.0),
                       Phase("artifact_synchronization",
                             round(2 * 6430 / 720.0, 1)))
+            kw = {}
+        elif sess == "s5":
+            # Diagnostic only. 400 identical worst-case steps plus 60 after the
+            # eval/checkpoint region, at the MEASURED 4.975 s/step from the 200-step
+            # gate. Nothing trains and nothing is promotable.
+            step = StepTime(4.975, "MEASURED on this arm and card by the 200-step gate")
+            phases = (Phase("build_DP_on_pod_and_assert_hash", 12.0),
+                      Phase("memory_profile", 4.0),
+                      Phase("lifecycle_replay_460_identical_steps",
+                            round(460 * 4.975 / 60.0, 1)),
+                      Phase("artifact_manifest_and_verify", 5.0),
+                      Phase("artifact_synchronization", 2.0))
             kw = {}
         else:
             step = StepTime(4.15, "E6b measured 4.15 s/step for this exact model, "

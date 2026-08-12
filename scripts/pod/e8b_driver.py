@@ -89,13 +89,14 @@ LABELS = {"DP": "e8b-dp-depth-only-positional",
           "FP": "e8b-fp-compressed-positional",
           "FC": "e8b-fc-compressed-contribution"}
 SESSION_INITS = {"s1": ("DP", "DC", "FP", "FC"), "s2": ("DP", "DC"),
-                 "s3": ("DP", "DC"), "s4": ("FP", "FC")}
+                 "s3": ("DP", "DC"), "s4": ("FP", "FC"), "s5": ("DP",)}
 # alias -> config name. Aliases are what the frozen battery records.
 SESSION_ARMS = {
     "s1": {},
     "s2": {"E8b-DP-sa": "e8b_dp_r1600k_sa", "E8b-DC-sa": "e8b_dc_r1600k_sa"},
     "s3": {"E8b-DP-sb": "e8b_dp_r1600k_sb", "E8b-DC-sb": "e8b_dc_r1600k_sb"},
     "s4": {"E8b-FC-sa": "e8b_fc_r1600k_sa", "E8b-FC-sb": "e8b_fc_r1600k_sb"},
+    "s5": {},
 }
 DEPTH_SESSIONS = ("s2", "s3")
 
@@ -400,6 +401,25 @@ def stage_memory_profile(args) -> None:
     mark(args.session, "MEMORY_PROFILE_DONE")
 
 
+def stage_lifecycle(args) -> None:
+    """Branch-B: does live allocation grow across identical steps? (diagnostic only)
+
+    Trains nothing and promotes nothing. It replays one pinned worst-case payload past
+    the horizon where the real run's running maximum last moved, recording
+    instantaneous allocated/reserved at each lifecycle boundary, then reproduces the
+    eval + checkpoint region separately because DC-sa died after crossing it.
+    """
+    out = OUT / "e8b_lifecycle_replay.json"
+    if out.is_file():
+        mark(args.session, "LIFECYCLE_DONE")
+        return
+    run(["scripts/training/replay_lifecycle.py",
+         "--config", REPO / "configs/stage3/e8b/e8b_dp_r1600k_sa.json",
+         "--steps", args.lifecycle_steps, "--post-event-steps", 60,
+         "--pin-step", 133, "--out", out])
+    mark(args.session, "LIFECYCLE_DONE")
+
+
 def stage_gate(args) -> None:
     """The blocking pre-training gate, scoped to this session."""
     out = OUT / f"e8b_{args.session}_preflight.json"
@@ -496,6 +516,9 @@ STAGES = {
            ("three_mode", stage_three_mode)),
 }
 STAGES["s3"] = STAGES["s2"]
+# A diagnostic session: no training, no arms, nothing promotable.
+STAGES["s5"] = (("memory_profile", stage_memory_profile),
+                ("lifecycle", stage_lifecycle))
 # A failure in any of these means nothing downstream is worth paying for.
 BLOCKING = {"init_nll", "fetch_step0", "throughput_gate", "gate", "train"}
 
@@ -516,6 +539,9 @@ def main() -> None:
                          "the formal endpoint is unrestricted (P18)")
     ap.add_argument("--per-arm-minutes", type=float, default=250.0)
     ap.add_argument("--per-eval-minutes", type=float, default=35.0)
+    ap.add_argument("--lifecycle-steps", type=int, default=400,
+                    help="identical steps in the Branch-B replay; must cross the "
+                         "step-310 horizon where the running maximum last moved")
     args = ap.parse_args()
     args.t0 = time.time()
     OUT.mkdir(parents=True, exist_ok=True)
