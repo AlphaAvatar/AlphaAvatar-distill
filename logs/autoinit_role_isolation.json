@@ -1,0 +1,360 @@
+{
+  "schema": "aadistill.autoinit.role_isolation/v1",
+  "generated_utc": "2026-08-12T18:06:08.089213+00:00",
+  "command": "scripts/data/check_autoinit_role_isolation.py",
+  "roles": {
+    "OPERATOR_CALIBRATION": {
+      "assets": [
+        {
+          "path": "artifacts/stage1/e8_calibration_v1",
+          "n_items": 67,
+          "items_sha256": "c7202338109e459b17b70456461e8f304fadea7929ea547accee21adbbe7fd0b",
+          "manifest_sha256": "ecb72aa3b88818e93fb058d5d012e66274db9bc7b90234219501f0df86cef460",
+          "representation": "token ids (+ source ids)"
+        },
+        {
+          "derived": "normalized_text resolved from source_id via the corpus",
+          "resolved_items": 51,
+          "why": "without this the pair against a prompt battery shares no identity type and the check cannot see a leak either way"
+        }
+      ],
+      "identity_kinds": {
+        "item_id": 67,
+        "normalized_text": 51,
+        "source_id": 51,
+        "token_content": 67
+      }
+    },
+    "INITIALIZER_STATE_EVAL": {
+      "assets": [
+        {
+          "path": "artifacts/stage1/state_eval_v1",
+          "n_items": 80,
+          "items_sha256": "2a4a1d3bf8ed165b4cfa881f75488bcbbdee5e74d34afddb91fecbf76d1e106d",
+          "manifest_sha256": "95204907efa7efc681ef334f223073da6ca35dbf889b029a7672f5817ab72b05",
+          "representation": "token ids (+ source ids)"
+        },
+        {
+          "derived": "normalized_text resolved from source_id via the corpus",
+          "resolved_items": 70,
+          "why": "without this the pair against a prompt battery shares no identity type and the check cannot see a leak either way"
+        }
+      ],
+      "identity_kinds": {
+        "item_id": 80,
+        "normalized_text": 70,
+        "source_id": 80,
+        "token_content": 80
+      }
+    },
+    "RECOVERY_SEARCH": {
+      "assets": [
+        {
+          "path": "artifacts/stage3/recovery_search_v1",
+          "n_items": 190,
+          "representation": "rendered prompt text"
+        }
+      ],
+      "identity_kinds": {
+        "item_id": 190,
+        "normalized_text": 190,
+        "source_id": 151
+      }
+    },
+    "FINAL_PROMOTION": {
+      "assets": [
+        {
+          "path": "artifacts/eval/battery_v2",
+          "n_items": 770,
+          "representation": "rendered prompt text"
+        }
+      ],
+      "identity_kinds": {
+        "item_id": 770,
+        "normalized_text": 769
+      }
+    },
+    "RECOVERY_TRAINING": {
+      "assets": [
+        {
+          "path": "artifacts/stage3/corpus_v2/sessions.jsonl",
+          "pack": "artifacts/stage3/ladder_uniform_probe",
+          "probe_rung": 860000,
+          "val_blocks": 16,
+          "blocks": 682,
+          "n_items": 1541,
+          "corpus_pool": 11174,
+          "sha256": "2b4edc2e2cc16cd56dae3d340345e1a17e2c4a8baa9837650a7bf5e340fa6fcd",
+          "representation": "chat sessions (prompt text + source ids)",
+          "note": "the sessions the 0.86M probes actually train on; the surrounding corpus pool is reported separately as an advisory"
+        }
+      ],
+      "identity_kinds": {
+        "item_id": 1541,
+        "normalized_text": 1527,
+        "source_id": 1519
+      }
+    }
+  },
+  "pairs_compared": [
+    {
+      "role_a": "OPERATOR_CALIBRATION",
+      "role_b": "INITIALIZER_STATE_EVAL",
+      "compared_on": [
+        "normalized_text",
+        "source_id",
+        "token_content"
+      ],
+      "exact_overlaps": []
+    },
+    {
+      "role_a": "OPERATOR_CALIBRATION",
+      "role_b": "RECOVERY_SEARCH",
+      "compared_on": [
+        "normalized_text",
+        "source_id"
+      ],
+      "exact_overlaps": []
+    },
+    {
+      "role_a": "OPERATOR_CALIBRATION",
+      "role_b": "FINAL_PROMOTION",
+      "compared_on": [
+        "normalized_text"
+      ],
+      "exact_overlaps": []
+    },
+    {
+      "role_a": "OPERATOR_CALIBRATION",
+      "role_b": "RECOVERY_TRAINING",
+      "compared_on": [
+        "normalized_text",
+        "source_id"
+      ],
+      "exact_overlaps": []
+    },
+    {
+      "role_a": "INITIALIZER_STATE_EVAL",
+      "role_b": "RECOVERY_SEARCH",
+      "compared_on": [
+        "normalized_text",
+        "source_id"
+      ],
+      "exact_overlaps": []
+    },
+    {
+      "role_a": "INITIALIZER_STATE_EVAL",
+      "role_b": "FINAL_PROMOTION",
+      "compared_on": [
+        "normalized_text"
+      ],
+      "exact_overlaps": []
+    },
+    {
+      "role_a": "INITIALIZER_STATE_EVAL",
+      "role_b": "RECOVERY_TRAINING",
+      "compared_on": [
+        "normalized_text",
+        "source_id"
+      ],
+      "exact_overlaps": []
+    },
+    {
+      "role_a": "RECOVERY_SEARCH",
+      "role_b": "FINAL_PROMOTION",
+      "compared_on": [
+        "normalized_text"
+      ],
+      "exact_overlaps": []
+    },
+    {
+      "role_a": "RECOVERY_SEARCH",
+      "role_b": "RECOVERY_TRAINING",
+      "compared_on": [
+        "normalized_text",
+        "source_id"
+      ],
+      "exact_overlaps": []
+    },
+    {
+      "role_a": "FINAL_PROMOTION",
+      "role_b": "RECOVERY_TRAINING",
+      "compared_on": [
+        "normalized_text"
+      ],
+      "exact_overlaps": []
+    }
+  ],
+  "exact_overlaps": [],
+  "uncomparable_role_pairs": [],
+  "near_duplicates": [
+    {
+      "role_a": "OPERATOR_CALIBRATION",
+      "role_b": "INITIALIZER_STATE_EVAL",
+      "item_id": "glaive-001193#t5",
+      "shingle_overlap_strict": 0.8182,
+      "shingle_overlap_scoped": 0.8182,
+      "long_enough_for_the_enforced_rule": true,
+      "flagged_by_enforced_rule": true
+    },
+    {
+      "role_a": "OPERATOR_CALIBRATION",
+      "role_b": "RECOVERY_TRAINING",
+      "item_id": "glaive-000204#t3",
+      "shingle_overlap_strict": 0.5238,
+      "shingle_overlap_scoped": 0.0,
+      "long_enough_for_the_enforced_rule": false,
+      "flagged_by_enforced_rule": false
+    },
+    {
+      "role_a": "OPERATOR_CALIBRATION",
+      "role_b": "RECOVERY_TRAINING",
+      "item_id": "glaive-000545#t4",
+      "shingle_overlap_strict": 0.8,
+      "shingle_overlap_scoped": 0.0,
+      "long_enough_for_the_enforced_rule": false,
+      "flagged_by_enforced_rule": false
+    },
+    {
+      "role_a": "OPERATOR_CALIBRATION",
+      "role_b": "RECOVERY_TRAINING",
+      "item_id": "glaive-000982#t3",
+      "shingle_overlap_strict": 0.5294,
+      "shingle_overlap_scoped": 0.0,
+      "long_enough_for_the_enforced_rule": false,
+      "flagged_by_enforced_rule": false
+    },
+    {
+      "role_a": "OPERATOR_CALIBRATION",
+      "role_b": "RECOVERY_TRAINING",
+      "item_id": "glaive-001193#t5",
+      "shingle_overlap_strict": 0.7045,
+      "shingle_overlap_scoped": 0.0909,
+      "long_enough_for_the_enforced_rule": true,
+      "flagged_by_enforced_rule": false
+    },
+    {
+      "role_a": "OPERATOR_CALIBRATION",
+      "role_b": "RECOVERY_TRAINING",
+      "item_id": "glaive-000132#t1",
+      "shingle_overlap_strict": 1.0,
+      "shingle_overlap_scoped": 0.0,
+      "long_enough_for_the_enforced_rule": false,
+      "flagged_by_enforced_rule": false
+    },
+    {
+      "role_a": "OPERATOR_CALIBRATION",
+      "role_b": "RECOVERY_TRAINING",
+      "item_id": "glaive-000957#t1",
+      "shingle_overlap_strict": 0.8889,
+      "shingle_overlap_scoped": 0.0,
+      "long_enough_for_the_enforced_rule": false,
+      "flagged_by_enforced_rule": false
+    },
+    {
+      "role_a": "OPERATOR_CALIBRATION",
+      "role_b": "RECOVERY_TRAINING",
+      "item_id": "glaive-000460#t3",
+      "shingle_overlap_strict": 0.5833,
+      "shingle_overlap_scoped": 0.0,
+      "long_enough_for_the_enforced_rule": false,
+      "flagged_by_enforced_rule": false
+    },
+    {
+      "role_a": "INITIALIZER_STATE_EVAL",
+      "role_b": "RECOVERY_TRAINING",
+      "item_id": "glaive-001075#t3",
+      "shingle_overlap_strict": 0.5185,
+      "shingle_overlap_scoped": 0.0,
+      "long_enough_for_the_enforced_rule": false,
+      "flagged_by_enforced_rule": false
+    },
+    {
+      "role_a": "INITIALIZER_STATE_EVAL",
+      "role_b": "RECOVERY_TRAINING",
+      "item_id": "glaive-000487#t1",
+      "shingle_overlap_strict": 1.0,
+      "shingle_overlap_scoped": 0.0,
+      "long_enough_for_the_enforced_rule": false,
+      "flagged_by_enforced_rule": false
+    },
+    {
+      "role_a": "INITIALIZER_STATE_EVAL",
+      "role_b": "RECOVERY_TRAINING",
+      "item_id": "glaive-000422#t1",
+      "shingle_overlap_strict": 1.0,
+      "shingle_overlap_scoped": 0.0,
+      "long_enough_for_the_enforced_rule": false,
+      "flagged_by_enforced_rule": false
+    },
+    {
+      "role_a": "INITIALIZER_STATE_EVAL",
+      "role_b": "RECOVERY_TRAINING",
+      "item_id": "glaive-000563#t1",
+      "shingle_overlap_strict": 0.9333,
+      "shingle_overlap_scoped": 0.0,
+      "long_enough_for_the_enforced_rule": false,
+      "flagged_by_enforced_rule": false
+    },
+    {
+      "role_a": "INITIALIZER_STATE_EVAL",
+      "role_b": "RECOVERY_TRAINING",
+      "item_id": "glaive-000979#t1",
+      "shingle_overlap_strict": 0.5676,
+      "shingle_overlap_scoped": 0.5676,
+      "long_enough_for_the_enforced_rule": true,
+      "flagged_by_enforced_rule": true
+    },
+    {
+      "role_a": "INITIALIZER_STATE_EVAL",
+      "role_b": "RECOVERY_TRAINING",
+      "item_id": "glaive-000536#t1",
+      "shingle_overlap_strict": 0.75,
+      "shingle_overlap_scoped": 0.0,
+      "long_enough_for_the_enforced_rule": false,
+      "flagged_by_enforced_rule": false
+    },
+    {
+      "role_a": "INITIALIZER_STATE_EVAL",
+      "role_b": "RECOVERY_TRAINING",
+      "item_id": "glaive-001258#t5",
+      "shingle_overlap_strict": 0.6591,
+      "shingle_overlap_scoped": 0.0455,
+      "long_enough_for_the_enforced_rule": true,
+      "flagged_by_enforced_rule": false
+    },
+    {
+      "role_a": "INITIALIZER_STATE_EVAL",
+      "role_b": "RECOVERY_TRAINING",
+      "item_id": "glaive-001254#t5",
+      "shingle_overlap_strict": 0.9643,
+      "shingle_overlap_scoped": 0.0,
+      "long_enough_for_the_enforced_rule": false,
+      "flagged_by_enforced_rule": false
+    },
+    {
+      "role_a": "INITIALIZER_STATE_EVAL",
+      "role_b": "RECOVERY_TRAINING",
+      "item_id": "glaive-000871#t3",
+      "shingle_overlap_strict": 0.6667,
+      "shingle_overlap_scoped": 0.0,
+      "long_enough_for_the_enforced_rule": false,
+      "flagged_by_enforced_rule": false
+    }
+  ],
+  "near_duplicate_counts": {
+    "strict": 17,
+    "flagged_by_enforced_rule": 2
+  },
+  "near_duplicate_rule": {
+    "method": "8-word shingle Jaccard-on-A",
+    "threshold": 0.5,
+    "min_words_for_enforced_rule": 40,
+    "scope": "role pairs where both sides carry prompt text",
+    "note": "strict ignores the word floor and will flag short formulaic prompts; the enforced rule is what the builders applied"
+  },
+  "allowed_sharing": {},
+  "complete": true,
+  "passed": true,
+  "report_sha256": "17fe815850943f2867c288963385858ed3b3738f8c9e0447fb9440d8980fd225"
+}

@@ -1,14 +1,14 @@
 {
   "schema": "aadistill.autoinit.dryrun_summary/v1",
-  "generated_utc": "2026-08-12T16:48:02.470716+00:00",
+  "generated_utc": "2026-08-12T17:50:04.841974+00:00",
   "purpose": "zero-cost end-to-end validation of the mandatory materialize -> reload -> hash -> validate -> measure cycle",
   "scope_limit": "a 32-wide teacher validates the pipeline, not the science; no initialization-quality claim follows from it",
   "command": "PYTHONPATH=src python scripts/autoinit/dry_run_search.py",
   "config_hash": "d3fbc5fcccfe2072a8d743bef79b5d9ed9099cf3b5b6cf7ff1fe9f7418509158",
-  "manifest_hash": "57a71a59496f7454ee4ddd55811107475e37e449977fcade22c10dac2f831b7c",
+  "manifest_hash": "de7736c9c6ae21024f8df56555079e10195eb1c5b4452614ee1501515ab83fae",
   "manifest_verified": {
     "manifest_hash_matches": true,
-    "recomputed_hash": "57a71a59496f7454ee4ddd55811107475e37e449977fcade22c10dac2f831b7c",
+    "recomputed_hash": "de7736c9c6ae21024f8df56555079e10195eb1c5b4452614ee1501515ab83fae",
     "leaves_match_target": true,
     "mismatched_leaves": [],
     "n_states": 45,
@@ -42,7 +42,7 @@
     "n_complete_leaves": 7,
     "n_pruned": 20,
     "n_resumed": 24,
-    "finished_utc": "2026-08-12T16:48:02.424805+00:00"
+    "finished_utc": "2026-08-12T17:50:04.796913+00:00"
   },
   "operator_registry_ledger_hashes": {
     "attention.weight_proxy_v0": "479ff7b3ef15e7195f84b50acf558ff5d8dc831ffcf9ba594719582b31cb7078",
@@ -479,5 +479,36 @@
       "checkpoint_sha256": "b02a7350f48e18468254920dfc05a4015eeef6b6beb4443ee4d1f198824460e7"
     }
   ],
-  "full_manifest_path": "artifacts/autoinit/dryrun/search_manifest.json"
+  "full_manifest_path": "artifacts/autoinit/dryrun/search_manifest.json",
+  "run_kind": "resume",
+  "resume_evidence": {
+    "n_resumed": 24,
+    "resumed_state_ids": [
+      "11502e3de4d158c6a628adfd51102cac",
+      "1e1a928d6f5c6aa7fea6371286b303f6",
+      "31d918986b520869752302dc7fcfc815",
+      "34c61e7015d4e45158e428adb781485f",
+      "3b35db55cb68ea09d5ea93094d1ff7a9",
+      "3e6c5196940088d953528ff3e2ea5eed",
+      "40824d0e9d1f2c752dceaa844aace8d1",
+      "41b7d2d483d956a4b28b6cfc4120920c",
+      "4fd85974482f658674166d7ffbf673a8",
+      "5fbb16596b557ee395617efbe1524271",
+      "69969572733eaad17f19c48feae62def",
+      "7009461fec8256dfef3f82fc89e7368f",
+      "8a5e677e8878e023ca4f74b20f099281",
+      "8b7ad1af3ef0dbfad5f2aaef46d36d08",
+      "8c0d5fb2b989612052a9e2bfebe2a9c4",
+      "8ca18d50347502dd151a71ef206993c5",
+      "8f91b0747193651e1894d8b75481d924",
+      "9f423ecc61beb70e6a244604543b0d6a",
+      "a839836750f3543a859d3e71e1908a28",
+      "b1f4f29565d90ee784b764c9624f5907",
+      "b880080329432b06f4d67f0d1ddf23e0",
+      "d48110aa4763db6932faefec3beebfe9",
+      "d5bc57d8e7dcb10afeb1a64ed7e3cf39",
+      "ff6b8579d06169fbfdaa0cec5a4a7968"
+    ],
+    "expected_resumed": "0 for a fresh run; a fresh run starts from an empty artifact directory"
+  }
 }

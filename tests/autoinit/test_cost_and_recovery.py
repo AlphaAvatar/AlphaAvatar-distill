@@ -192,20 +192,20 @@ def test_the_feasibility_constraint_and_the_objective_must_be_different_metrics(
     assert "No weighted combination" in p.as_dict()["selection"]["rule"]
 
 
-def test_selection_gates_on_stability_then_ranks_on_correctness():
+def test_rung1_gates_on_stability_then_ranks_on_correctness():
     """A stable-but-wrong candidate must not outrank a correct one.
 
     ``usable_rollout`` is blind to correctness by construction — a terse
     contentless reply scores perfectly — so it gates and never scores.
     """
-    p = plan()
+    p = plan(survivors=2)
     results = [
         {"state_id": "stable_wrong", "usable_rollout_rate": 0.95, "correct_overall": 0.05},
         {"state_id": "usable_right", "usable_rollout_rate": 0.60, "correct_overall": 0.25},
         {"state_id": "unstable", "usable_rollout_rate": 0.10, "correct_overall": 0.99},
     ]
-    out = p.select(results, k=2)
-    assert out["selected"] == ["usable_right", "stable_wrong"]
+    out = p.select_rung1_survivors(results)
+    assert out["selected_searched"] == ["usable_right", "stable_wrong"]
     # The high-correctness candidate that cannot hold a rollout is excluded by the
     # constraint, not silently averaged into a combined score.
     assert [e["state_id"] for e in out["excluded_by_feasibility"]] == ["unstable"]
@@ -213,35 +213,128 @@ def test_selection_gates_on_stability_then_ranks_on_correctness():
         out["excluded_by_feasibility"][0]["reason"]
 
 
-def test_the_control_survives_the_feasibility_gate_and_advances():
-    p = plan()
+def test_the_control_advances_from_rung1_without_consuming_a_slot():
+    p = plan(survivors=1)
     results = [
         {"state_id": "control", "is_control": True,
-         "usable_rollout_rate": 0.10, "correct_overall": 0.18},
-        {"state_id": "leaf", "usable_rollout_rate": 0.80, "correct_overall": 0.20},
+         "usable_rollout_rate": 0.10, "correct_overall": 0.99},
+        {"state_id": "leaf_a", "usable_rollout_rate": 0.80, "correct_overall": 0.20},
+        {"state_id": "leaf_b", "usable_rollout_rate": 0.80, "correct_overall": 0.10},
     ]
-    out = p.select(results, k=1)
+    out = p.select_rung1_survivors(results)
     assert not out["excluded_by_feasibility"], "the control must never be gated out"
-    assert "control" in [r["state_id"] for r in out["ranked"]]
-    # ... and it does not consume a searched-candidate slot.
-    assert out["selected"] == ["leaf"]
+    # It does not take a survivor slot even though it leads the primary metric.
+    assert out["selected_searched"] == ["leaf_a"]
+    assert out["auto_advanced_control"] == ["control"]
+    assert out["advancing"] == ["control", "leaf_a"]
 
 
-def test_candidates_inside_the_equivalence_interval_ask_for_a_third_seed():
+# --- the asymmetry fix ------------------------------------------------------
+
+
+def test_the_canonical_control_can_win_the_final_comparison():
+    """'AutoInitializer v1 did not improve on the incumbent' must be reachable.
+
+    A final selector that excluded the control could confirm an improvement and
+    could never refute one, which is not an experiment.
+    """
+    p = plan()
+    pooled = [
+        {"state_id": "control", "is_control": True,
+         "usable_rollout_rate": 0.73, "correct_overall": 0.1867},
+        {"state_id": "leaf_a", "usable_rollout_rate": 0.80, "correct_overall": 0.1500},
+        {"state_id": "leaf_b", "usable_rollout_rate": 0.78, "correct_overall": 0.1600},
+    ]
+    out = p.select_final_winner(pooled)
+    assert out["winner"] == "control"
+    assert out["winner_is_control"] is True
+
+    # And a searched leaf wins when it actually leads.
+    pooled[1]["correct_overall"] = 0.2400
+    better = p.select_final_winner(pooled)
+    assert better["winner"] == "leaf_a"
+    assert better["winner_is_control"] is False
+
+
+def test_the_third_seed_is_offered_to_a_tied_control_too():
     p = plan(equivalence_interval=0.03)
     close = [
-        {"state_id": "a", "usable_rollout_rate": 0.8, "correct_overall": 0.20},
-        {"state_id": "b", "usable_rollout_rate": 0.8, "correct_overall": 0.19},
+        {"state_id": "control", "is_control": True,
+         "usable_rollout_rate": 0.73, "correct_overall": 0.19},
+        {"state_id": "leaf_a", "usable_rollout_rate": 0.80, "correct_overall": 0.20},
     ]
-    out = p.select(close, k=2)
-    assert set(out["tied_within_equivalence"]) == {"a", "b"}
+    out = p.select_final_winner(close)
+    assert set(out["tied_within_equivalence"]) == {"control", "leaf_a"}
     assert out["needs_tie_break_seed"] is True
+    assert "control" in out["tie_break_candidates"]
 
     separated = [
-        {"state_id": "a", "usable_rollout_rate": 0.8, "correct_overall": 0.30},
-        {"state_id": "b", "usable_rollout_rate": 0.8, "correct_overall": 0.10},
+        {"state_id": "control", "is_control": True,
+         "usable_rollout_rate": 0.73, "correct_overall": 0.10},
+        {"state_id": "leaf_a", "usable_rollout_rate": 0.80, "correct_overall": 0.30},
     ]
-    assert p.select(separated, k=2)["needs_tie_break_seed"] is False
+    assert p.select_final_winner(separated)["needs_tie_break_seed"] is False
+
+
+# --- seed aggregation -------------------------------------------------------
+
+
+def test_pooled_counts_are_not_averaged_rates():
+    """The distortion the frozen definition exists to prevent."""
+    from aadistill.autoinit.recovery import POOLED_COUNTS_V1
+
+    per_seed = [
+        {"seed": SEED_SA, "n": 100, "usable": 30, "correct": 12},
+        {"seed": SEED_SB, "n": 100, "usable": 90, "correct": 18},
+    ]
+    pooled = POOLED_COUNTS_V1.pool(per_seed)
+    assert pooled["n"] == 200 and pooled["usable"] == 120 and pooled["correct"] == 30
+    assert pooled["correct_overall"] == pytest.approx(0.15)
+    assert pooled["usable_rollout_rate"] == pytest.approx(0.60)
+    assert pooled["correct_given_usable"] == pytest.approx(30 / 120)
+    # Averaging the per-seed conditional rates would report 0.30 — the seed with
+    # 30 usable rollouts weighted equally with the one that had 90.
+    averaged = (12 / 30 + 18 / 90) / 2
+    assert averaged == pytest.approx(0.30)
+    assert pooled["correct_given_usable"] != pytest.approx(averaged)
+
+
+def test_pooling_extends_to_a_third_seed_and_refuses_bad_input():
+    from aadistill.autoinit.recovery import SEED_SC, POOLED_COUNTS_V1
+
+    three = POOLED_COUNTS_V1.pool([
+        {"seed": SEED_SA, "n": 50, "usable": 25, "correct": 10},
+        {"seed": SEED_SB, "n": 50, "usable": 25, "correct": 10},
+        {"seed": SEED_SC, "n": 50, "usable": 50, "correct": 10},
+    ])
+    assert three["seeds"] == sorted([SEED_SA, SEED_SB, SEED_SC])
+    assert three["correct_given_usable"] == pytest.approx(30 / 100)
+
+    with pytest.raises(ValueError, match="duplicate seeds"):
+        POOLED_COUNTS_V1.pool([{"seed": 1, "n": 1, "usable": 1, "correct": 1}] * 2)
+    with pytest.raises(ValueError, match="not an integer count"):
+        POOLED_COUNTS_V1.pool([{"seed": 1, "n": 10, "usable": 0.8, "correct": 0.2}])
+    with pytest.raises(ValueError, match="cannot have been scored correct"):
+        POOLED_COUNTS_V1.pool([{"seed": 1, "n": 10, "usable": 2, "correct": 5}])
+
+
+def test_a_candidate_with_no_usable_rollouts_has_no_conditional_accuracy():
+    from aadistill.autoinit.recovery import POOLED_COUNTS_V1
+
+    pooled = POOLED_COUNTS_V1.pool([{"seed": SEED_SA, "n": 50, "usable": 0,
+                                     "correct": 0}])
+    assert pooled["correct_given_usable"] is None, (
+        "0.0 would make an unmeasured quantity look measured")
+
+
+def test_the_aggregation_is_part_of_the_frozen_plan_identity():
+    from aadistill.autoinit.recovery import SeedAggregation
+
+    base = plan()
+    other = plan(aggregation=SeedAggregation(aggregation_id="averaged_rates",
+                                             version=1, description="wrong"))
+    assert base.plan_hash != other.plan_hash
+    assert base.as_dict()["seed_aggregation"]["aggregation_id"] == "pooled_counts"
 
 
 def test_thresholds_cannot_move_after_freezing(tmp_path):

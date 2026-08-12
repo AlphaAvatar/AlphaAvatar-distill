@@ -110,6 +110,10 @@ def main() -> None:
     out = REPO_ROOT / args.out
     if out.exists() and not args.resume:
         shutil.rmtree(out)
+    if args.resume and not (out / "search" / "states.jsonl").is_file():
+        raise SystemExit(
+            f"--resume needs a journal at {out / 'search' / 'states.jsonl'}; run the "
+            "fresh pass first")
     adapter = get_adapter("qwen3")
     teacher = build_teacher(args.seed)
     target_spec = ArchSpec.of("qwen3", TARGET_GEOMETRY)
@@ -233,7 +237,22 @@ def main() -> None:
             for s in manifest["states"] if s["validity"] == "pruned"],
         "full_manifest_path": str((out / "search_manifest.json").relative_to(REPO_ROOT)),
     }
-    summary_path = REPO_ROOT / "logs/autoinit_dryrun_summary.json"
+    # Fresh and resume evidence are separate artifacts. Combining them produced a
+    # summary that described itself as a fresh run while carrying n_resumed=24,
+    # which is the sort of record that is worse than none.
+    summary["run_kind"] = "resume" if args.resume else "fresh"
+    summary["resume_evidence"] = {
+        "n_resumed": len(result.resumed),
+        "resumed_state_ids": sorted(result.resumed),
+        "expected_resumed": ("0 for a fresh run; a fresh run starts from an empty "
+                             "artifact directory"),
+    }
+    if not args.resume and result.resumed:
+        raise SystemExit(
+            f"a fresh run resumed {len(result.resumed)} states; the artifact "
+            "directory was not empty and this summary would misdescribe itself")
+    name = "autoinit_dryrun_resume.json" if args.resume else "autoinit_dryrun_fresh.json"
+    summary_path = REPO_ROOT / "logs" / name
     summary_path.write_text(json.dumps(summary, indent=2, default=str) + "\n")
 
     print(f"states {len(result.states)}  leaves {len(leaves)}  "

@@ -1,0 +1,342 @@
+{
+  "artifact": "state_eval_v1",
+  "role": "INITIALIZER_STATE_EVAL",
+  "purpose": "frozen step-0 evaluation of materialized search states against the ORIGINAL teacher, for beam ranking only; not training data, not a rollout battery, not a promotion asset",
+  "created_utc": "2026-08-12T18:05:32.033921+00:00",
+  "command": "scripts/data/build_state_eval_suite.py",
+  "suite_id": "state_eval",
+  "version": 1,
+  "reference_model": {
+    "role": "original_teacher",
+    "id": "Qwen/Qwen3-4B-Thinking-2507",
+    "revision": "768f209d9ea81521153ed38c47d515654e938aea",
+    "note": "the global reference for every state at every depth; never the parent state"
+  },
+  "tokenizer": {
+    "id": "Qwen/Qwen3-4B-Thinking-2507",
+    "revision": "768f209d9ea81521153ed38c47d515654e938aea",
+    "source_dir": "artifacts/stage1/qwen3_0p6b_init_v0/checkpoint",
+    "tokenizer_sha256": "be75606093db2094d7cd20f3c2f385c212750648bd6ea4fb2bf507a6a4c55506",
+    "tokenizer_config_sha256": "8fa82a4ba512c8bee7c1c5e82b9a71ddbef362e4665be5c8f7ce0afd78af129a",
+    "chat_template_sha256": "3802169b2a02b81e6adb7ab4f64f91ff02db753c8c3a64a01c35192d3a61d8d7",
+    "special_token_ids": {
+      "think_open": 151667,
+      "think_close": 151668,
+      "im_end": 151645,
+      "tool_call_close": 151658
+    }
+  },
+  "domains": {
+    "general": [
+      "general"
+    ],
+    "reasoning_math": [
+      "gsm8k",
+      "openmath"
+    ],
+    "rag_multihop": [
+      "rag_evidence",
+      "multihop_qa"
+    ],
+    "code": [
+      "code"
+    ],
+    "tool": [
+      "tool_calling"
+    ]
+  },
+  "critical_tags": [
+    "think_close",
+    "eos",
+    "final_answer",
+    "tool_close"
+  ],
+  "diagnostic_tags": [
+    "assistant",
+    "reasoning"
+  ],
+  "critical_tag_definitions": {
+    "think_close": "position predicting </think>; decides whether reasoning ends",
+    "eos": "position predicting <|im_end|> inside the assistant turn; natural termination",
+    "final_answer": "positions after </think> through the end of the turn",
+    "tool_close": "position predicting </tool_call>",
+    "assistant": "DIAGNOSTIC: every supervised assistant position",
+    "reasoning": "DIAGNOSTIC: positions strictly inside <think>...</think>"
+  },
+  "sampling_rule": {
+    "order": "recovery-corpus file order (seed-free stratified interleave)",
+    "budget": "8192 prediction positions per sub-type",
+    "session_token_window": [
+      256,
+      2048
+    ],
+    "general_doc_tokens": 1024,
+    "general_doc_char_min": 500,
+    "requires_a_critical_token": true,
+    "required_tag_by_subtype": {
+      "tool_calling": "tool_close"
+    },
+    "min_critical_positions": 25,
+    "min_items_by_subtype": {
+      "tool_calling": 28
+    },
+    "min_items_default": 5,
+    "near_duplicate_rejection": {
+      "against": "recovery-training rung prompts AND the operator calibration mixture",
+      "scope": "user turns only; the system block and tool schema are shared boilerplate and would reject every tool session",
+      "shingles": 8,
+      "threshold": 0.5,
+      "min_user_words": 40,
+      "limitation": "prompts shorter than the word floor are protected by exact content hashing only; the tool stratum is mostly in that regime"
+    },
+    "stopping_rule": "fill each sub-type until BOTH its position budget is met and its item floor is reached",
+    "deterministic": true,
+    "seed": null
+  },
+  "sources": {
+    "sessions": {
+      "path": "artifacts/stage3/corpus_v2/sessions.jsonl",
+      "sha256": "2b4edc2e2cc16cd56dae3d340345e1a17e2c4a8baa9837650a7bf5e340fa6fcd"
+    },
+    "general_docs": {
+      "path": "artifacts/stage1/e8_calibration_v1/general_docs.jsonl",
+      "sha256": "79e19ff45612cf99efeedf99e4761319eb6e911e2eb9d51587dcbdebb95393e0",
+      "manifest": "artifacts/stage1/e8_calibration_v1/general_docs.manifest.json",
+      "note": "same fetched FineWeb-Edu range as the operator calibration set, disjoint at document level; the indices used there are excluded here"
+    }
+  },
+  "counts": {
+    "n_items": 80,
+    "by_subtype": {
+      "general": 10,
+      "gsm8k": 9,
+      "openmath": 8,
+      "rag_evidence": 14,
+      "multihop_qa": 5,
+      "code": 6,
+      "tool_calling": 28
+    },
+    "positions_by_subtype": {
+      "general": 8213,
+      "gsm8k": 8596,
+      "openmath": 8936,
+      "rag_evidence": 8217,
+      "multihop_qa": 8787,
+      "code": 8996,
+      "tool_calling": 22277
+    },
+    "total_prediction_positions": 74022,
+    "tag_positions": {
+      "think_close": 70,
+      "eos": 70,
+      "final_answer": 10058,
+      "tool_close": 28,
+      "assistant": 45801,
+      "reasoning": 35603
+    },
+    "budget_unspent_by_subtype": {
+      "gsm8k": -404,
+      "openmath": -744,
+      "rag_evidence": -25,
+      "multihop_qa": -595,
+      "code": -804,
+      "tool_calling": -14085
+    },
+    "items_taken_by_subtype": {
+      "gsm8k": 9,
+      "openmath": 8,
+      "rag_evidence": 14,
+      "multihop_qa": 5,
+      "code": 6,
+      "tool_calling": 28
+    },
+    "skipped": {
+      "excluded_source": 561,
+      "excluded_prompt_content": 0,
+      "excluded_token_content": 0,
+      "length": 138,
+      "render_error": 0,
+      "no_tags": 0,
+      "missing_required_tag": 51,
+      "excluded_training_prompt_content": 8,
+      "excluded_training_near_duplicate": 9
+    }
+  },
+  "isolation": {
+    "excluded_roles": {
+      "recovery_training": {
+        "pack": "artifacts/stage3/ladder_uniform_probe",
+        "excluded_through_rung": 2960000,
+        "excluded_blocks": 1944,
+        "excluded_sessions": 4524,
+        "excluded_source_ids": 4354,
+        "note": "the 0.86M probe rung is a strict prefix of this, so the recovery-probe training set is excluded with margin",
+        "excluded_prompt_hashes": 4458,
+        "near_duplicate_rule": {
+          "shingles": 8,
+          "threshold": 0.5,
+          "sessions_hashed": 4524
+        }
+      },
+      "pack_validation_slice": {
+        "val_blocks": 16,
+        "excluded_sessions": 29
+      },
+      "operator_calibration": {
+        "asset": "artifacts/stage1/e8_calibration_v1",
+        "n_items": 67,
+        "excluded_item_ids": 67,
+        "excluded_token_hashes": 67,
+        "near_duplicate_sessions_resolved": 29,
+        "near_duplicate_rule": {
+          "shingles": 8,
+          "threshold": 0.5,
+          "min_user_words": 40
+        }
+      },
+      "final_promotion": {
+        "asset": "artifacts/eval/battery_v2",
+        "n_prompts": 770,
+        "excluded_prompt_hashes": 769
+      }
+    },
+    "excluded_source_ids": 4446,
+    "excluded_prompt_hashes": 769,
+    "excluded_calibration_item_ids": 67,
+    "general_indices_used": [
+      "40016",
+      "40017",
+      "40018",
+      "40019",
+      "40020",
+      "40021",
+      "40022",
+      "40023",
+      "40024",
+      "40025"
+    ],
+    "general_indices_excluded": [
+      "40000",
+      "40001",
+      "40002",
+      "40003",
+      "40004",
+      "40005",
+      "40006",
+      "40007",
+      "40008",
+      "40009",
+      "40010",
+      "40011",
+      "40012",
+      "40013",
+      "40014",
+      "40015"
+    ]
+  },
+  "outputs": {
+    "items": {
+      "path": "artifacts/stage1/state_eval_v1/items.jsonl",
+      "sha256": "2a4a1d3bf8ed165b4cfa881f75488bcbbdee5e74d34afddb91fecbf76d1e106d"
+    }
+  },
+  "content_sha256": "a1197205e43aad0e71c0e1bb436ee7babba3b5d8bb25b9c4d5c464f659db20fc",
+  "item_ids": [
+    "code/mbpp-000004#t1",
+    "code/mbpp-000005#t1",
+    "code/mbpp-000065#t1",
+    "code/mbpp-000074#t1",
+    "code/mbpp-000109#t1",
+    "code/mbpp-000188#t1",
+    "general/fineweb-40016",
+    "general/fineweb-40017",
+    "general/fineweb-40018",
+    "general/fineweb-40019",
+    "general/fineweb-40020",
+    "general/fineweb-40021",
+    "general/fineweb-40022",
+    "general/fineweb-40023",
+    "general/fineweb-40024",
+    "general/fineweb-40025",
+    "multihop_qa/hotpot-000001#t1",
+    "multihop_qa/hotpot-000042#t1",
+    "multihop_qa/hotpot-000071#t1",
+    "multihop_qa/hotpot-000083#t1",
+    "multihop_qa/hotpot-000090#t1",
+    "rag_evidence/squad_v2-000039#t1",
+    "rag_evidence/squad_v2-000041#t1",
+    "rag_evidence/squad_v2-000043#t1",
+    "rag_evidence/squad_v2-000045#t1",
+    "rag_evidence/squad_v2-000047#t1",
+    "rag_evidence/squad_v2-000050#t1",
+    "rag_evidence/squad_v2-000054#t1",
+    "rag_evidence/squad_v2-000056#t1",
+    "rag_evidence/squad_v2-000058#t1",
+    "rag_evidence/squad_v2-000060#t1",
+    "rag_evidence/squad_v2-000063#t1",
+    "rag_evidence/squad_v2-000067#t1",
+    "rag_evidence/squad_v2-000071#t1",
+    "rag_evidence/squad_v2-000073#t1",
+    "gsm8k/gsm8k-000000#t1",
+    "gsm8k/gsm8k-000017#t1",
+    "gsm8k/gsm8k-000026#t1",
+    "gsm8k/gsm8k-000030#t1",
+    "gsm8k/gsm8k-000065#t1",
+    "gsm8k/gsm8k-000069#t1",
+    "gsm8k/gsm8k-000113#t1",
+    "gsm8k/gsm8k-000121#t1",
+    "gsm8k/gsm8k-000127#t1",
+    "openmath/openmath-000000#t1",
+    "openmath/openmath-000245#t1",
+    "openmath/openmath-000329#t1",
+    "openmath/openmath-000350#t1",
+    "openmath/openmath-000366#t1",
+    "openmath/openmath-000562#t1",
+    "openmath/openmath-000641#t1",
+    "openmath/openmath-000712#t1",
+    "tool_calling/glaive-000064#t3",
+    "tool_calling/glaive-000096#t5",
+    "tool_calling/glaive-000162#t3",
+    "tool_calling/glaive-000179#t1",
+    "tool_calling/glaive-000216#t3",
+    "tool_calling/glaive-000257#t5",
+    "tool_calling/glaive-000346#t3",
+    "tool_calling/glaive-000422#t1",
+    "tool_calling/glaive-000487#t1",
+    "tool_calling/glaive-000536#t1",
+    "tool_calling/glaive-000549#t5",
+    "tool_calling/glaive-000563#t1",
+    "tool_calling/glaive-000631#t3",
+    "tool_calling/glaive-000803#t3",
+    "tool_calling/glaive-000831#t3",
+    "tool_calling/glaive-000844#t5",
+    "tool_calling/glaive-000859#t5",
+    "tool_calling/glaive-000871#t3",
+    "tool_calling/glaive-000905#t1",
+    "tool_calling/glaive-000969#t1",
+    "tool_calling/glaive-000979#t1",
+    "tool_calling/glaive-001058#t5",
+    "tool_calling/glaive-001075#t3",
+    "tool_calling/glaive-001156#t1",
+    "tool_calling/glaive-001217#t1",
+    "tool_calling/glaive-001218#t3",
+    "tool_calling/glaive-001254#t5",
+    "tool_calling/glaive-001258#t5"
+  ],
+  "code_state": {
+    "git_commit": "1f6f35f65e6307cad3acf93c116350f393aeb9db",
+    "git_commit_source": "git",
+    "dirty": true,
+    "uncommitted_state_sha256": "80aea42d2737f8cd6965cb4831de4d20ae0a57bc2acc6e9ef26046ebb75d8af9",
+    "untracked_files": [
+      "logs/autoinit_dryrun_fresh.json",
+      "logs/autoinit_dryrun_resume.json",
+      "logs/autoinit_role_isolation.json",
+      "scripts/data/build_recovery_search_battery.py",
+      "scripts/data/build_state_eval_suite.py",
+      "scripts/data/check_autoinit_role_isolation.py"
+    ]
+  },
+  "manifest_sha256": "95204907efa7efc681ef334f223073da6ca35dbf889b029a7672f5817ab72b05",
+  "_tracked_copy_note": "Tracked copy of the manifest inside the gitignored artifact directory. The payload (items/prompts) is rebuildable from the committed builder and the pinned inputs; this manifest is the reproducibility record."
+}

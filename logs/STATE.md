@@ -1,5 +1,5 @@
-**Updated:** 2026-08-13 · branch `main` · working tree clean
-**No pods running. Nothing billing.** **1,449 CPU tests pass**, 7 skipped — in
+**Updated:** 2026-08-12 · branch `main` · working tree clean
+**No pods running. Nothing billing.** **1,472 CPU tests pass**, 7 skipped — in
 *both* venvs (repo `.venv` transformers 5.13.1, and the transformers 4.57.1 venv).
 
 **The AutoInitializer framework is implemented at zero cost and not yet run on
@@ -7,10 +7,14 @@ real models.** `src/aadistill/autoinit/` — operator kind/implementation regist
 with immutable versioned ids and a frozen ledger, a Qwen3 architecture adapter,
 the five existing algorithms wrapped as operators plus the incumbent recipe as a
 composite, versioned search state with hash-bound metrics, a Pareto beam-ranking
-policy, a deterministic resumable beam search, and the search manifest. 146 tests.
-**A pre-GPU correction pass on 2026-08-13** fixed nine items a maintainer review of
+policy, a deterministic resumable beam search, and the search manifest. 169 tests.
+**The two frozen search assets now exist**: `artifacts/stage1/state_eval_v1` (80
+items, 74,022 positions, five domains) and `artifacts/stage3/recovery_search_v1`
+(190 prompts, 150 scorable). Role isolation passes across all five roles with 0
+exact overlaps.
+**A pre-GPU correction pass on 2026-08-12** fixed nine items a maintainer review of
 the implementation found — none of them visible at the dry run's scale. See
-[`decisions.md`](decisions.md) 2026-08-13. End-to-end dry run on real tiny checkpoints:
+[`decisions.md`](decisions.md) 2026-08-12. End-to-end dry run on real tiny checkpoints:
 [`autoinit_dryrun_summary.json`](autoinit_dryrun_summary.json). Search space,
 branching and costs: [`autoinit_v1_search_space.json`](autoinit_v1_search_space.json).
 **Proposed first paid pilot, unauthorized:**
@@ -368,7 +372,7 @@ Record [`EXPERIMENTS.md`](EXPERIMENTS.md) §34 · report
 
 ## 7. Implementation state (CPU-verified)
 
-**1,449 tests pass on CPU, 7 skipped** (`PYTHONPATH=src pytest tests/ -q`, ~127 s,
+**1,472 tests pass on CPU, 7 skipped** (`PYTHONPATH=src pytest tests/ -q`, ~127 s,
 no downloads; `uv run pytest tests/ -q` also works). Verified in **both** venvs —
 the repo `.venv` (transformers 5.13.1) and the transformers 4.57.1 venv — because
 the AutoInitializer builds its models in-process from a config, which is
@@ -478,13 +482,14 @@ active line is the **Teacher-Adaptive AutoInitializer**, implemented at zero cos
 and awaiting its prerequisites and a separate authorization. Ordered next actions,
 all zero cost:
 
-1. **Build and freeze the initializer-state evaluation suite.** It does not exist,
-   and the beam cannot rank without it. Role `STATE_EVALUATION`, five domains,
+1. ~~**Build and freeze the initializer-state evaluation suite.**~~ **DONE** —
+   `artifacts/stage1/state_eval_v1`, content `a1197205…`. Role `STATE_EVALUATION`, five domains,
    critical-token tags, leakage-checked against the promotion battery, the recovery
    rung and the validation slice. `check_role_isolation` must report
    `complete: true` — it now fails closed when two roles share no comparable
    identity kind, which a prompt-hash-only check could never detect.
-2. **Build the recovery search battery.** Role `RECOVERY_BATTERY`. It must not be
+2. ~~**Build the recovery search battery.**~~ **DONE** —
+   `artifacts/stage3/recovery_search_v1`, content `a1b22778…`. Role `RECOVERY_SEARCH`. It must not be
    the 150-prompt promotion battery, and must not reuse the 0.86M rung's prompts:
    that battery's inclusion mask was sampled *using* an 0.86M checkpoint, so an
    0.86M probe scored on it is not out-of-sample.
@@ -500,13 +505,18 @@ all zero cost:
 5. **Freeze the halving plan and the ranking policy** into a preregistration
    (`SuccessiveHalvingPlan.freeze` + `assert_preregistered`), before the run they
    judge.
-6. Then, and only with explicit authorization, the pilot in
+6. **Micro-preflight first** ([`autoinit_micro_preflight_plan.md`](autoinit_micro_preflight_plan.md)):
+   one ~55 min L40S session measuring the activation-statistics GPU/CPU split, GPU
+   evaluator repeatability, peak resident memory, the canonical control on the new
+   battery, and disk throughput. **Expected $1.10, maximum $4.00.** Then delete the
+   pod and stop — Phase A does not start automatically.
+7. Then, and only with explicit authorization, the pilot in
    [`autoinit_pilot_proposal.md`](autoinit_pilot_proposal.md): no pruning at level
    0 then beam 6, one profile; 5 searched leaves + the retained canonical control
    on seed sa, 2 survivors + the control on sb, a conditional third seed for ties.
    Expected $17.00, hard backstop $26.21 against the $30.3667 E8b released —
    **a margin of $4.16, which is thin.**
-7. **Do not launch** the old 2.96M recovery, the E8b hardware bridge, P2-5.50M, a
+8. **Do not launch** the old 2.96M recovery, the E8b hardware bridge, P2-5.50M, a
    FineWeb sweep, on-policy, full recovery of any Top-1 winner, or any E9.
 
 **Durability is done** (`logs/e8_relay_manifest.json`): 13/13 staged and

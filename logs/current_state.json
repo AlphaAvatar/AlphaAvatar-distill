@@ -1,6 +1,6 @@
 {
   "schema": "aadistill.current_state/v1",
-  "generated_utc": "2026-08-13T00:15:00+00:00",
+  "generated_utc": "2026-08-12T22:40:00+00:00",
   "current_phase": "E8 closed; AutoInitializer framework IMPLEMENTED at zero cost, pre-GPU correction pass applied; no paid search authorized",
   "active_experiment": null,
   "paid_compute_running": false,
@@ -116,7 +116,7 @@
   "autoinit": {
     "status": "IMPLEMENTED_ZERO_COST_NOT_RUN_ON_REAL_MODELS",
     "package": "src/aadistill/autoinit",
-    "tests": 146,
+    "tests": 169,
     "operator_kinds": [
       "ATTENTION",
       "COMPOSITE_STAGE1",
@@ -138,13 +138,10 @@
     "dry_run": "logs/autoinit_dryrun_summary.json",
     "proposal": "logs/autoinit_pilot_proposal.md",
     "blocking_prerequisites": [
-      "initializer-state evaluation suite (STATE_EVALUATION role) not built",
-      "recovery search battery (RECOVERY_BATTERY role) not built",
-      "calib.reasoning_heavy@v1 not built",
-      "successive-halving plan not frozen",
-      "statistics-pass GPU/CPU split not measured"
+      "micro-preflight measurements (5 items) - see logs/autoinit_micro_preflight_plan.md",
+      "calib.reasoning_heavy@v1 not built (Phase B only, independent trigger)"
     ],
-    "corrections_2026_08_13": [
+    "corrections_2026_08_12_review_pass": [
       "CalibrationNeed.NONE operators use a canonical calib.none@v1 sentinel; search space is 24 x (1+P) x P x P x 1 = 48/288/864, not 48 x P^4",
       "checkpoint identity is a shard-safe artifact digest; metrics bind to it",
       "the recovery control is the retained checkpoint injected by frozen hash, not a re-executed composite",
@@ -155,7 +152,30 @@
       "reference teacher logits recomputed per candidate (33.8 GiB avoided)",
       "resume rejects a journal record measured under a different eval suite"
     ],
-    "beam_schedule": "beam.delayed_prune@v1 (warmup 1, width 6)"
+    "beam_schedule": "beam.delayed_prune@v1 (warmup 1, width 6)",
+    "frozen_assets": {
+      "state_eval_v1": {
+        "path": "artifacts/stage1/state_eval_v1",
+        "role": "INITIALIZER_STATE_EVAL",
+        "n_items": 80,
+        "positions": 74022,
+        "content_sha256": "a1197205e43aad0e71c0e1bb436ee7babba3b5d8bb25b9c4d5c464f659db20fc"
+      },
+      "recovery_search_v1": {
+        "path": "artifacts/stage3/recovery_search_v1",
+        "role": "RECOVERY_SEARCH",
+        "n_prompts": 190,
+        "n_scorable": 150,
+        "content_sha256": "a1b22778b00d95b6aba358c14a5af5b559fd807bb371c92131eacca59479f323"
+      },
+      "role_isolation": {
+        "report": "logs/autoinit_role_isolation.json",
+        "passed": true,
+        "complete": true,
+        "exact_overlaps": 0
+      }
+    },
+    "preregistration": "logs/autoinit_phase_a_preregistration.md"
   },
   "proposed_pilot": {
     "authorized": false,
@@ -175,11 +195,18 @@
     "peak_working_storage_gib": 106
   },
   "tests": {
-    "passing": 1449,
+    "passing": 1472,
     "skipped": 7,
     "venvs_verified": [
       "repo .venv transformers 5.13.1",
       "transformers 4.57.1"
     ]
+  },
+  "proposed_micro_preflight": {
+    "authorized": false,
+    "expected_usd": 1.1,
+    "max_usd": 4.0,
+    "gpu": "1 x L40S",
+    "minutes": 55
   }
 }

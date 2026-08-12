@@ -98,6 +98,97 @@ E1_KD_HEAVY_0860K = RecoveryRecipe(
                  "probes is a difference between two initializations."),
 )
 
+@dataclass(frozen=True)
+class SeedAggregation:
+    """How per-seed probe results become one number. Executable, versioned, hashed.
+
+    **Pooled counts, not averaged rates.** For a conditional rate the two are not
+    the same thing: ``correct_given_usable`` averaged over seeds weights a seed
+    with 30 usable rollouts equally with one that had 120, so a probe that
+    happened to terminate rarely gets its conditional accuracy amplified. Pooling
+    the counts is the estimator that answers "of the rollouts this checkpoint
+    actually completed, what fraction were right?"
+
+        correct_overall      = (correct_sa + correct_sb) / (n_sa + n_sb)
+        usable_rollout_rate  = (usable_sa + usable_sb) / (n_sa + n_sb)
+        correct_given_usable = (correct_sa + correct_sb) / (usable_sa + usable_sb)
+
+    The same rule extends to a third seed: pool across **all completed seeds**
+    for the tied finalists, never a rate of rates.
+
+    This definition participates in the plan hash, so a run cannot silently
+    change how its seeds were combined.
+    """
+
+    aggregation_id: str = "pooled_counts"
+    version: int = 1
+    description: str = ("pooled numerator/denominator across all completed seeds; "
+                        "conditional rates are pooled, never averaged")
+
+    def as_dict(self) -> dict[str, Any]:
+        return {"aggregation_id": self.aggregation_id, "version": self.version,
+                "description": self.description,
+                "formulas": {
+                    "correct_overall": "sum(correct_s) / sum(n_s)",
+                    "usable_rollout_rate": "sum(usable_s) / sum(n_s)",
+                    "correct_given_usable": "sum(correct_s) / sum(usable_s)",
+                }}
+
+    def pool(self, per_seed: Sequence[Mapping[str, Any]]) -> dict[str, Any]:
+        """Combine one candidate's per-seed counts.
+
+        Each entry needs ``n``, ``usable`` and ``correct`` counts, and its
+        ``seed``. Rates are *derived* here and never read from the input, so a
+        caller cannot pass a pre-averaged rate and have it silently accepted.
+        """
+        if not per_seed:
+            raise ValueError("no seed results to pool")
+        seeds = [int(r["seed"]) for r in per_seed]
+        if len(set(seeds)) != len(seeds):
+            raise ValueError(f"duplicate seeds in {seeds}; each seed counts once")
+
+        def count(row, key) -> int:
+            value = row[key]
+            # Refuse a float outright rather than truncating it. `int(0.8) == 0`
+            # would silently turn a caller's rate into a count of zero, which is
+            # the exact confusion this whole definition exists to prevent.
+            if isinstance(value, bool) or not isinstance(value, int):
+                raise ValueError(
+                    f"seed {row.get('seed')}: {key}={value!r} is not an integer "
+                    "count. These are counts, not rates — pass the numerator and "
+                    "denominator, not a per-seed rate.")
+            if value < 0:
+                raise ValueError(f"seed {row.get('seed')}: {key} is negative")
+            return value
+
+        n = sum(count(r, "n") for r in per_seed)
+        usable = sum(count(r, "usable") for r in per_seed)
+        correct = sum(count(r, "correct") for r in per_seed)
+        if n <= 0:
+            raise ValueError("pooled n is zero")
+        if usable > n or correct > n:
+            raise ValueError(
+                f"pooled usable={usable} / correct={correct} exceed n={n}; these are "
+                "counts, not rates")
+        if correct > usable:
+            raise ValueError(
+                f"pooled correct={correct} exceeds usable={usable}; a rollout that is "
+                "not usable cannot have been scored correct")
+        return {
+            "seeds": sorted(seeds),
+            "n": n, "usable": usable, "correct": correct,
+            "usable_rollout_rate": usable / n,
+            "correct_overall": correct / n,
+            # Undefined rather than 0.0 when nothing was usable: a checkpoint that
+            # never produced a valid rollout has no conditional accuracy, and
+            # reporting 0.0 would make it look measured.
+            "correct_given_usable": (correct / usable) if usable else None,
+            "aggregation": f"{self.aggregation_id}@v{self.version}",
+        }
+
+
+POOLED_COUNTS_V1 = SeedAggregation()
+
 SEED_SA = 20260726
 SEED_SB = 20260801
 #: Tie-break seed. Used only for candidates that finish inside the preregistered
@@ -132,6 +223,8 @@ class SuccessiveHalvingPlan:
     #: Two candidates within this much of each other on the primary metric are
     #: not distinguished by two seeds and go to the tie-break seed.
     equivalence_interval: float = 0.0
+    #: How per-seed counts become one number. Part of the plan hash.
+    aggregation: SeedAggregation = POOLED_COUNTS_V1
     survivor_rule: str = ""
     winner_rule: str = ""
     battery_asset_id: str = ""
@@ -184,6 +277,7 @@ class SuccessiveHalvingPlan:
             "include_canonical_control": self.include_canonical_control,
             "rung1_probes": self.rung1_probes, "rung2_probes": self.rung2_probes,
             "probe_count": self.probe_count,
+            "seed_aggregation": self.aggregation.as_dict(),
             "selection": {
                 "feasibility_metric": self.feasibility_metric,
                 "feasibility_min": self.feasibility_min,
@@ -193,6 +287,8 @@ class SuccessiveHalvingPlan:
                 "rule": ("feasibility constraint, then primary objective among "
                          "feasible candidates; the secondary metric is reported and "
                          "never reorders. No weighted combination."),
+                "control_eligible_to_win": True,
+                "control_exempt_from_feasibility_gate": True,
             },
             "reported_components": list(self.reported_components),
             "survivor_rule": self.survivor_rule, "winner_rule": self.winner_rule,
@@ -200,19 +296,25 @@ class SuccessiveHalvingPlan:
             "notes": dict(self.notes),
         }
 
-    def select(self, results: Sequence[Mapping[str, Any]], k: int) -> dict[str, Any]:
-        """Constraint, then objective. Returns the ranking and every exclusion.
+    # --- selection: two different questions, two different functions ---------
+    #
+    # Rung 1 asks "which searched leaves are worth a second seed?" — the control
+    # is not competing for those slots, it advances on its own.
+    # The final asks "which initialization won?" — and the control is a
+    # candidate like any other, because **"the incumbent won, AutoInitializer v1
+    # did not improve recovered behaviour" has to be a reachable conclusion.**
+    # A single generic `select()` that always excluded the control from the
+    # winner list made the experiment asymmetric: it could confirm an
+    # improvement and could never refute one.
 
-        ``results`` are per-candidate dicts carrying at least the feasibility and
-        primary metrics plus ``state_id`` and ``is_control``. The control is never
-        excluded by the feasibility gate — a baseline that fails the gate is a
-        finding about the gate or the baseline, and dropping it would leave the
-        searched candidates with nothing to be compared against.
-        """
+    def _gate(self, results: Sequence[Mapping[str, Any]]) -> tuple[list, list]:
         feasible, excluded = [], []
         for row in results:
             value = float(row.get(self.feasibility_metric, 0.0))
             if row.get("is_control"):
+                # The control is never gated out. A baseline that fails the floor
+                # is a finding about the floor or the baseline, and dropping it
+                # would leave the searched candidates with nothing to beat.
                 feasible.append(row)
                 continue
             if value < self.feasibility_min:
@@ -221,20 +323,66 @@ class SuccessiveHalvingPlan:
                     f"feasibility floor {self.feasibility_min:.4f}")})
             else:
                 feasible.append(row)
+        return feasible, excluded
 
-        ranked = sorted(
-            feasible,
-            key=lambda r: (-float(r.get(self.primary_metric, 0.0)), str(r["state_id"])))
-        chosen = [r for r in ranked if not r.get("is_control")][:k]
-        best = float(chosen[0][self.primary_metric]) if chosen else None
-        tied = [r["state_id"] for r in chosen
-                if best is not None
-                and abs(float(r[self.primary_metric]) - best) <= self.equivalence_interval]
+    def _rank(self, rows: Sequence[Mapping[str, Any]]) -> list[dict[str, Any]]:
+        return sorted(rows, key=lambda r: (-float(r.get(self.primary_metric, 0.0)),
+                                           str(r["state_id"])))
+
+    def _tied_with_leader(self, ranked: Sequence[Mapping[str, Any]]) -> list[str]:
+        if not ranked:
+            return []
+        best = float(ranked[0][self.primary_metric])
+        return [r["state_id"] for r in ranked
+                if abs(float(r[self.primary_metric]) - best) <= self.equivalence_interval]
+
+    def select_rung1_survivors(self, results: Sequence[Mapping[str, Any]]) -> dict[str, Any]:
+        """Which **searched** leaves advance to seed sb.
+
+        The control is not eligible for these slots and does not consume one; it
+        advances unconditionally, which is what makes rung 2 a two-seed baseline
+        comparison rather than a ranking of survivors against each other.
+        """
+        feasible, excluded = self._gate(results)
+        ranked = self._rank(feasible)
+        searched = [r for r in ranked if not r.get("is_control")]
+        chosen = searched[:self.survivors]
+        control = [r["state_id"] for r in ranked if r.get("is_control")]
         return {
-            "ranked": ranked, "selected": [r["state_id"] for r in chosen],
+            "rung": 1,
+            "ranked": ranked,
+            "selected_searched": [r["state_id"] for r in chosen],
+            "auto_advanced_control": control,
+            "advancing": [*control, *(r["state_id"] for r in chosen)],
+            "excluded_by_feasibility": excluded,
+            "rule": self.survivor_rule,
+        }
+
+    def select_final_winner(self, results: Sequence[Mapping[str, Any]]) -> dict[str, Any]:
+        """Top-1 over the pooled seeds. **The control may win.**
+
+        ``results`` are pooled-count aggregates (see ``SeedAggregation``), one per
+        finalist, the control included. The winner is whichever finalist leads on
+        the primary metric among those clearing the feasibility floor — searched
+        or canonical, with no asymmetry between them.
+        """
+        feasible, excluded = self._gate(results)
+        ranked = self._rank(feasible)
+        tied = self._tied_with_leader(ranked)
+        winner = ranked[0] if ranked else None
+        return {
+            "rung": "final",
+            "ranked": ranked,
+            "winner": winner["state_id"] if winner else None,
+            "winner_is_control": bool(winner and winner.get("is_control")),
             "excluded_by_feasibility": excluded,
             "tied_within_equivalence": tied,
+            # The tie-break seed is offered to every tied finalist, the control
+            # included: a canonical checkpoint statistically level with a searched
+            # one is exactly the case a third seed exists to resolve.
             "needs_tie_break_seed": len(tied) > 1 and self.tie_break_seed is not None,
+            "tie_break_candidates": tied if len(tied) > 1 else [],
+            "rule": self.winner_rule,
         }
 
     @property

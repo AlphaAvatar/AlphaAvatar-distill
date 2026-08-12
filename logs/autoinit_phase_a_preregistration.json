@@ -1,0 +1,768 @@
+{
+  "schema": "aadistill.autoinit.phase_a_preregistration/v1",
+  "generated_utc": "2026-08-12T18:14:49.139768+00:00",
+  "status": "PREREGISTRATION DRAFT - NOT AUTHORIZED, NO COMPUTE LAUNCHED",
+  "teacher": {
+    "model_id": "Qwen/Qwen3-4B-Thinking-2507",
+    "revision": "768f209d9ea81521153ed38c47d515654e938aea",
+    "spec": {
+      "head_dim": 128,
+      "hidden_size": 2560,
+      "intermediate_size": 9728,
+      "num_attention_heads": 32,
+      "num_hidden_layers": 36,
+      "num_key_value_heads": 8,
+      "tie_word_embeddings": true,
+      "vocab_size": 151936
+    },
+    "spec_hash": "69ac741e8d80c3ab7f42aea8d1be5c506a860d0f84a640b18dd310dab228e6dc",
+    "num_parameters": 4022468096
+  },
+  "target_architecture": {
+    "spec": {
+      "head_dim": 128,
+      "hidden_size": 1024,
+      "intermediate_size": 3072,
+      "num_attention_heads": 16,
+      "num_hidden_layers": 28,
+      "num_key_value_heads": 8,
+      "tie_word_embeddings": true,
+      "vocab_size": 151936
+    },
+    "spec_hash": "09147a5c08d8ad7ad5bb18131bade73548a5fff08f0e0f99d6dd6ede227606c4",
+    "num_parameters": 596049920
+  },
+  "adapter": {
+    "family": "qwen3",
+    "adapter_version": "qwen3.dense_v1",
+    "capabilities": [
+      "activation_stats",
+      "attention.gqa",
+      "block_list",
+      "dense_ffn",
+      "logit_comparable",
+      "prenorm_blocks",
+      "residual_stream",
+      "rms_norm",
+      "tied_embeddings"
+    ],
+    "structural_fields": [
+      "hidden_size",
+      "num_hidden_layers",
+      "intermediate_size",
+      "num_attention_heads",
+      "num_key_value_heads",
+      "head_dim",
+      "vocab_size",
+      "tie_word_embeddings"
+    ]
+  },
+  "operator_ledger": {
+    "schema": "aadistill.autoinit.operator_ledger/v1",
+    "kinds": {
+      "ATTENTION": {
+        "kind_id": "ATTENTION",
+        "dimension": "attention head structure",
+        "description": "Head counts and head grouping. Family-specific: an MHA, GQA, MLA or linear attention implementation registers separately under this kind."
+      },
+      "COMPOSITE_STAGE1": {
+        "kind_id": "COMPOSITE_STAGE1",
+        "dimension": "all four structural dimensions at once",
+        "description": "A single transformation from teacher to target that decides depth, residual width, FFN width and head structure jointly in one numerical pass. Exists so the incumbent recipe is a comparable member of the search space rather than an untested baseline outside it."
+      },
+      "DEPTH": {
+        "kind_id": "DEPTH",
+        "dimension": "block count",
+        "description": "Which teacher blocks survive. Changes the block list only; every surviving block keeps its own widths."
+      },
+      "FFN": {
+        "kind_id": "FFN",
+        "dimension": "feed-forward intermediate width",
+        "description": "The per-block feed-forward intermediate dimension."
+      },
+      "RESIDUAL_WIDTH": {
+        "kind_id": "RESIDUAL_WIDTH",
+        "dimension": "residual stream dimension",
+        "description": "The dimension of the residual stream every block reads and writes. Touches every stream-facing projection, the embedding and the final norm."
+      }
+    },
+    "implementations": {
+      "attention.weight_proxy_v0": {
+        "impl_id": "attention.weight_proxy_v0",
+        "kind": "ATTENTION",
+        "version": 0,
+        "required_capabilities": [
+          "attention.gqa",
+          "rms_norm"
+        ],
+        "modifies": [
+          "num_attention_heads"
+        ],
+        "preserves": [
+          "head_dim",
+          "hidden_size",
+          "intermediate_size",
+          "num_hidden_layers",
+          "num_key_value_heads",
+          "tie_word_embeddings",
+          "vocab_size"
+        ],
+        "calibration": "none",
+        "objective": "retained share of total head weight-proxy score",
+        "deterministic": true,
+        "requires_seed": false,
+        "produces": [
+          "kept_heads"
+        ],
+        "target_validation": "result num_attention_heads equals the target exactly and stays divisible by the unchanged KV head count",
+        "description": "Per-GQA-group query-head selection by ||W_q rows||_F * ||W_o columns||_F, with the preceding norm folded into W_q before scoring. KV heads, head_dim and grouping are preserved.",
+        "signature_hash": "479ff7b3ef15e7195f84b50acf558ff5d8dc831ffcf9ba594719582b31cb7078"
+      },
+      "composite.stage1_sandwich_v0": {
+        "impl_id": "composite.stage1_sandwich_v0",
+        "kind": "COMPOSITE_STAGE1",
+        "version": 0,
+        "required_capabilities": [
+          "activation_stats",
+          "attention.gqa",
+          "dense_ffn",
+          "prenorm_blocks",
+          "residual_stream",
+          "tied_embeddings"
+        ],
+        "modifies": [
+          "hidden_size",
+          "intermediate_size",
+          "num_attention_heads",
+          "num_hidden_layers"
+        ],
+        "preserves": [
+          "head_dim",
+          "num_key_value_heads",
+          "tie_word_embeddings",
+          "vocab_size"
+        ],
+        "calibration": "activation_stats",
+        "objective": "captured energy fraction (projection diagnostic)",
+        "deterministic": true,
+        "requires_seed": true,
+        "produces": [
+          "init_diagnostics",
+          "depth_map"
+        ],
+        "target_validation": "result spec must equal the target exactly in one step",
+        "description": "aadistill.init.sandwich.init_student verbatim: global activation-PCA stream projection, norm folding with sqrt(d_t/d_s) compensation, per-group query head selection, per-layer activation-importance FFN top-k, and either the positional depth map or an explicit kept-layer list. The recipe that produced qwen3_0p6b_init_v0 (86fbba78...) and e8_contribution_init_v1 (7a0694a5...).",
+        "signature_hash": "7ddeb8cfa81f0ba87eca038e61924faf4b32a47bdf999404fca410cb0ee428ac"
+      },
+      "depth.causal_kl_greedy_v1": {
+        "impl_id": "depth.causal_kl_greedy_v1",
+        "kind": "DEPTH",
+        "version": 1,
+        "required_capabilities": [
+          "block_list",
+          "logit_comparable",
+          "residual_stream"
+        ],
+        "modifies": [
+          "num_hidden_layers"
+        ],
+        "preserves": [
+          "head_dim",
+          "hidden_size",
+          "intermediate_size",
+          "num_attention_heads",
+          "num_key_value_heads",
+          "tie_word_embeddings",
+          "vocab_size"
+        ],
+        "calibration": "forward_logits",
+        "objective": "forward KL(parent || parent-with-S-bypassed), domain-balanced",
+        "deterministic": true,
+        "requires_seed": false,
+        "produces": [
+          "depth_map",
+          "search_rounds"
+        ],
+        "target_validation": "result num_hidden_layers equals the target exactly",
+        "description": "Iterative greedy block removal minimizing forward KL(parent || parent-with-S-bypassed) over real prediction positions, aggregated as the unweighted mean over domains of the unweighted mean over each domain's sub-types. Ties break to the lower layer index. E8a's algorithm, re-run against the checkpoint it is handed rather than always against the teacher.",
+        "signature_hash": "8106604694621d305dc20324d5ce65d2cefe5491ef2c2ab93a1b5fe8f16b5ca9"
+      },
+      "depth.positional_v0": {
+        "impl_id": "depth.positional_v0",
+        "kind": "DEPTH",
+        "version": 0,
+        "required_capabilities": [
+          "block_list"
+        ],
+        "modifies": [
+          "num_hidden_layers"
+        ],
+        "preserves": [
+          "head_dim",
+          "hidden_size",
+          "intermediate_size",
+          "num_attention_heads",
+          "num_key_value_heads",
+          "tie_word_embeddings",
+          "vocab_size"
+        ],
+        "calibration": "none",
+        "objective": "none (fixed positional heuristic; no measurement is taken)",
+        "deterministic": true,
+        "requires_seed": false,
+        "produces": [
+          "depth_map"
+        ],
+        "target_validation": "result num_hidden_layers equals the target exactly",
+        "description": "Positional pairwise merge in a middle band: ~1/5 of the surviving 1:1 layers stay before the band, the rest after, so both the earliest and the latest blocks map 1:1. The incumbent map behind qwen3_0p6b_init_v0.",
+        "signature_hash": "d97fb631c37f910a7a7e339d2ab0ba65d0652e95837882e203d6d1862969e98a"
+      },
+      "ffn.activation_importance_v0": {
+        "impl_id": "ffn.activation_importance_v0",
+        "kind": "FFN",
+        "version": 0,
+        "required_capabilities": [
+          "activation_stats",
+          "dense_ffn"
+        ],
+        "modifies": [
+          "intermediate_size"
+        ],
+        "preserves": [
+          "head_dim",
+          "hidden_size",
+          "num_attention_heads",
+          "num_hidden_layers",
+          "num_key_value_heads",
+          "tie_word_embeddings",
+          "vocab_size"
+        ],
+        "calibration": "activation_stats",
+        "objective": "retained share of total activation importance",
+        "deterministic": true,
+        "requires_seed": false,
+        "produces": [
+          "kept_neurons"
+        ],
+        "target_validation": "result intermediate_size equals the target exactly",
+        "description": "Per-block top-k intermediate neurons by E[|a|] * ||down column||, measured on the checkpoint being transformed. Rows of the gate and up projections and columns of the down projection are selected together, so the surviving neurons keep their own complete circuit.",
+        "signature_hash": "accb896294568f641a44f2550997306faa01c6600c1870534f326524ccbf7316"
+      },
+      "width.global_pca_v0": {
+        "impl_id": "width.global_pca_v0",
+        "kind": "RESIDUAL_WIDTH",
+        "version": 0,
+        "required_capabilities": [
+          "activation_stats",
+          "prenorm_blocks",
+          "residual_stream",
+          "rms_norm"
+        ],
+        "modifies": [
+          "hidden_size"
+        ],
+        "preserves": [
+          "head_dim",
+          "intermediate_size",
+          "num_attention_heads",
+          "num_hidden_layers",
+          "num_key_value_heads",
+          "tie_word_embeddings",
+          "vocab_size"
+        ],
+        "calibration": "activation_stats",
+        "objective": "captured energy fraction of the residual second moment",
+        "deterministic": true,
+        "requires_seed": false,
+        "produces": [
+          "projection_diagnostics"
+        ],
+        "target_validation": "result hidden_size equals the target exactly",
+        "description": "One global orthonormal projection from the trace-normalized average of the uncentered residual second moments, with the two stream end points (embedding output, post-final-norm) upweighted 9/8 because they are the worst-captured and are the interfaces the tied embedding reads.",
+        "signature_hash": "acb56886de907b717346483a0d6707552537d5b11415b6861995ec286f8198b6"
+      }
+    }
+  },
+  "operator_ledger_file_sha256": "b7fb66fa04ec9ab345786cc46deb305f32edddaf5d408efa5f779c3a4a584a36",
+  "active_calibration_profile": {
+    "profile_id": "calib.domain_balanced",
+    "version": 1,
+    "sources": [
+      {
+        "dataset_id": "aadistill/e8_calibration_v1",
+        "revision": "2026-08-10",
+        "domain": "general",
+        "n_items": 0,
+        "content_sha256": null,
+        "license": null,
+        "note": "per-domain counts in the mixture manifest"
+      },
+      {
+        "dataset_id": "aadistill/e8_calibration_v1",
+        "revision": "2026-08-10",
+        "domain": "math",
+        "n_items": 0,
+        "content_sha256": null,
+        "license": null,
+        "note": "per-domain counts in the mixture manifest"
+      },
+      {
+        "dataset_id": "aadistill/e8_calibration_v1",
+        "revision": "2026-08-10",
+        "domain": "rag_multihop",
+        "n_items": 0,
+        "content_sha256": null,
+        "license": null,
+        "note": "per-domain counts in the mixture manifest"
+      },
+      {
+        "dataset_id": "aadistill/e8_calibration_v1",
+        "revision": "2026-08-10",
+        "domain": "code",
+        "n_items": 0,
+        "content_sha256": null,
+        "license": null,
+        "note": "per-domain counts in the mixture manifest"
+      },
+      {
+        "dataset_id": "aadistill/e8_calibration_v1",
+        "revision": "2026-08-10",
+        "domain": "tool",
+        "n_items": 0,
+        "content_sha256": null,
+        "license": null,
+        "note": "per-domain counts in the mixture manifest"
+      }
+    ],
+    "domain_weights": {
+      "code": 0.2,
+      "general": 0.2,
+      "math": 0.2,
+      "rag_multihop": 0.2,
+      "tool": 0.2
+    },
+    "token_budget": 59763,
+    "sample_rule": "frozen item list; unweighted mean over domains of the unweighted mean over each domain's sub-types",
+    "seed": 20260810,
+    "role": "operator_calibration",
+    "leakage_exclusions": [
+      "ladder_uniform_probe.rung",
+      "ladder_uniform_probe.val",
+      "prompt_content_collisions"
+    ],
+    "description": "E8a's frozen 67-item mixture: five domains, 59,763 prediction positions, leakage-checked against the recovery rung, the validation slice and prompt-content collisions. The only v1 profile that is already built.",
+    "materialized": true,
+    "items_path": "artifacts/stage1/e8_calibration_v1/items.jsonl",
+    "content_sha256": "d65c1f40e4837ea1bd5bcc33c68041a13b797c68f5be3c0686e0142ed761028f",
+    "items_file_sha256": "c7202338109e459b17b70456461e8f304fadea7929ea547accee21adbbe7fd0b",
+    "rendered_manifest_sha256": null,
+    "leakage_proof_path": "artifacts/stage1/e8_calibration_v1/leakage.json",
+    "profile_hash": "11f36a88bad4879f8ab0e3586ca1f0af035401e505dc97815bed8d47b9f32e9b",
+    "metadata": {
+      "manifest": "artifacts/stage1/e8_calibration_v1/manifest.json",
+      "frozen_by": "E8a"
+    }
+  },
+  "no_calibration_sentinel": "calib.none@v1",
+  "search_space": {
+    "formula": "24 orderings x (1+P) DEPTH x P WIDTH x P FFN x 1 ATTENTION",
+    "n_profiles": 1,
+    "decomposed_paths": 48,
+    "composite_kept_separate": {
+      "impl_id": "composite.stage1_sandwich_v0",
+      "note": "reaches the target in one step and does not compose with the four structural kinds; it is a searchable leaf, and is NOT the canonical control"
+    },
+    "invocations_per_field": {
+      "hidden_size": 1,
+      "intermediate_size": 1,
+      "num_attention_heads": 1,
+      "num_hidden_layers": 2
+    },
+    "states_materialized": [
+      39,
+      56
+    ],
+    "leaves": [
+      7,
+      13
+    ],
+    "per_level": [
+      {
+        "level": 0,
+        "parents_min": 1,
+        "parents_max": 1,
+        "parents": 1,
+        "pruned_here": false,
+        "children_min": 5,
+        "children_max": 5
+      },
+      {
+        "level": 1,
+        "parents_min": 5,
+        "parents_max": 5,
+        "parents": 5,
+        "pruned_here": true,
+        "children_min": 15,
+        "children_max": 20
+      },
+      {
+        "level": 2,
+        "parents_min": 6,
+        "parents_max": 6,
+        "parents": 6,
+        "pruned_here": true,
+        "children_min": 12,
+        "children_max": 18
+      },
+      {
+        "level": 3,
+        "parents_min": 6,
+        "parents_max": 6,
+        "parents": 6,
+        "pruned_here": true,
+        "children_min": 6,
+        "children_max": 12
+      }
+    ]
+  },
+  "beam": {
+    "schedule": {
+      "schedule_id": "beam.delayed_prune",
+      "version": 1,
+      "description": "no quality pruning at level 0; beam width 6 from level 1 onward",
+      "warmup_levels": 1,
+      "width": 6,
+      "schedule_hash": "9ff15b3c7ec4729ad1b57cbb3dea940a4a24d544783ab6f37d4a36d99a818c12"
+    },
+    "policy": {
+      "policy_id": "beam.pareto_multi_objective",
+      "version": 2,
+      "description": "epsilon-Pareto over original-teacher fidelity: equal-domain mean KL, worst-domain KL and critical-token KL. NLL is diagnostic and never prunes. Lineage diversity precedes the deterministic state-id tie-break.",
+      "objectives": [
+        {
+          "key": "state.teacher_kl.equal_domain_mean",
+          "direction": "minimize",
+          "description": "equal-domain mean forward KL from the original teacher"
+        },
+        {
+          "key": "state.teacher_kl.worst_domain",
+          "direction": "minimize",
+          "description": "the domain this state preserves least well"
+        },
+        {
+          "key": "state.critical_token_kl",
+          "direction": "minimize",
+          "description": "unweighted mean KL over declared critical-token classes"
+        }
+      ],
+      "tie_break": [
+        "state.teacher_kl.equal_domain_mean",
+        "state.teacher_kl.worst_domain",
+        "state.critical_token_kl",
+        "state_id"
+      ],
+      "guardrails": [
+        {
+          "name": "structurally_valid",
+          "description": "the state reached MEASURED through materialize -> reload -> hash -> validate"
+        }
+      ],
+      "epsilon": {
+        "state.critical_token_kl": 0.0001,
+        "state.teacher_kl.equal_domain_mean": 0.0001,
+        "state.teacher_kl.worst_domain": 0.0001
+      },
+      "diversity_key": "parent_path",
+      "required_metrics": [
+        "state.teacher_kl.equal_domain_mean",
+        "state.teacher_kl.worst_domain",
+        "state.critical_token_kl"
+      ],
+      "policy_hash": "30a5305bc06dd1e886ea285fa7a3f90ac4b32f61bcb62bae35668f28922bf2e4",
+      "metadata": {
+        "nll_status": "diagnostic only; recorded per domain, never an objective"
+      }
+    },
+    "no_first_level_quality_pruning": true,
+    "nll_status": "diagnostic only; not an objective, not a tie-break key",
+    "epsilon_justification": {
+      "declared_epsilon": {
+        "state.critical_token_kl": 0.0001,
+        "state.teacher_kl.equal_domain_mean": 0.0001,
+        "state.teacher_kl.worst_domain": 0.0001
+      },
+      "smallest_declared": 0.0001,
+      "measured_worst_objective_range_cpu": 0.0,
+      "safely_above_measured_noise": true,
+      "margin_factor": null,
+      "conclusion": "CPU evaluation is bit-reproducible across the full materialize -> reload -> measure cycle, so 1e-4 is above the noise this path produces.",
+      "NOT_established": "GPU repeatability. The pilot's evaluation backend is a GPU, where reduction order is not guaranteed across launches and bf16/fp32 accumulation can move a KL in the last digits. This CPU result bounds the deterministic path only. The micro-preflight measures the same quantity on an L40S with the real teacher and the real suite, and epsilon is confirmed or reset from that number BEFORE any candidate is ranked."
+    }
+  },
+  "state_evaluation": {
+    "asset": "artifacts/stage1/state_eval_v1",
+    "role": "INITIALIZER_STATE_EVAL",
+    "suite_id": "state_eval",
+    "version": 1,
+    "content_sha256": "a1197205e43aad0e71c0e1bb436ee7babba3b5d8bb25b9c4d5c464f659db20fc",
+    "manifest_sha256": "95204907efa7efc681ef334f223073da6ca35dbf889b029a7672f5817ab72b05",
+    "items_sha256": "2a4a1d3bf8ed165b4cfa881f75488bcbbdee5e74d34afddb91fecbf76d1e106d",
+    "domains": {
+      "general": [
+        "general"
+      ],
+      "reasoning_math": [
+        "gsm8k",
+        "openmath"
+      ],
+      "rag_multihop": [
+        "rag_evidence",
+        "multihop_qa"
+      ],
+      "code": [
+        "code"
+      ],
+      "tool": [
+        "tool_calling"
+      ]
+    },
+    "critical_tags": [
+      "think_close",
+      "eos",
+      "final_answer",
+      "tool_close"
+    ],
+    "n_items": 80,
+    "total_prediction_positions": 74022,
+    "reference": "original teacher, recomputed per candidate",
+    "reference_strategy": "RECOMPUTE",
+    "tokenizer_sha256": "be75606093db2094d7cd20f3c2f385c212750648bd6ea4fb2bf507a6a4c55506",
+    "chat_template_sha256": "3802169b2a02b81e6adb7ab4f64f91ff02db753c8c3a64a01c35192d3a61d8d7"
+  },
+  "recovery": {
+    "plan": {
+      "schema": "aadistill.autoinit.recovery_plan/v1",
+      "plan_id": "autoinit.v1.phase_a",
+      "recipe": {
+        "recipe_id": "e1_p1_kd_heavy@0.86M",
+        "ce_weight": 0.25,
+        "kd_weight": 1.0,
+        "temperature": 1.0,
+        "kd_scope": "all",
+        "tokens": 860000,
+        "pack": "artifacts/stage3/ladder_uniform_probe",
+        "pack_sha256": "6f324cb0f37bc0f07128e554ce8c161879419537478950496534f75fcecb249c",
+        "block_len": 8192,
+        "description": "The recovery recipe every E1 arm used, at the rung the frozen battery was sampled from. Held fixed so a difference between two probes is a difference between two initializations."
+      },
+      "searched_leaves": 5,
+      "survivors": 2,
+      "seeds": [
+        20260726,
+        20260801
+      ],
+      "tie_break_seed": 20260813,
+      "include_canonical_control": true,
+      "rung1_probes": 6,
+      "rung2_probes": 3,
+      "probe_count": 9,
+      "seed_aggregation": {
+        "aggregation_id": "pooled_counts",
+        "version": 1,
+        "description": "pooled numerator/denominator across all completed seeds; conditional rates are pooled, never averaged",
+        "formulas": {
+          "correct_overall": "sum(correct_s) / sum(n_s)",
+          "usable_rollout_rate": "sum(usable_s) / sum(n_s)",
+          "correct_given_usable": "sum(correct_s) / sum(usable_s)"
+        }
+      },
+      "selection": {
+        "feasibility_metric": "usable_rollout_rate",
+        "feasibility_min": -1.0,
+        "primary_metric": "correct_overall",
+        "secondary_metric": "correct_given_usable",
+        "equivalence_interval": 0.045,
+        "rule": "feasibility constraint, then primary objective among feasible candidates; the secondary metric is reported and never reorders. No weighted combination.",
+        "control_eligible_to_win": true,
+        "control_exempt_from_feasibility_gate": true
+      },
+      "reported_components": [
+        "non_empty",
+        "natural_termination",
+        "no_severe_repetition",
+        "no_context_limit",
+        "protocol_valid"
+      ],
+      "survivor_rule": "rung 1: exclude searched leaves below the feasibility floor, then take the top 2 by correct_overall; the canonical control advances unconditionally and consumes no slot",
+      "winner_rule": "final: pooled-count aggregate over sa and sb; among finalists clearing the feasibility floor, top 1 by correct_overall. The canonical control is eligible to win. Finalists inside the equivalence interval go to seed sc.",
+      "battery_asset_id": "recovery_search_v1",
+      "notes": {}
+    },
+    "seeds": {
+      "sa": 20260726,
+      "sb": 20260801,
+      "sc_conditional": 20260813
+    },
+    "seed_aggregation": {
+      "aggregation_id": "pooled_counts",
+      "version": 1,
+      "description": "pooled numerator/denominator across all completed seeds; conditional rates are pooled, never averaged",
+      "formulas": {
+        "correct_overall": "sum(correct_s) / sum(n_s)",
+        "usable_rollout_rate": "sum(usable_s) / sum(n_s)",
+        "correct_given_usable": "sum(correct_s) / sum(usable_s)"
+      }
+    },
+    "canonical_control": {
+      "path": "artifacts/stage1/qwen3_0p6b_init_v0/checkpoint",
+      "single_file_sha256": "86fbba78e8a2a32481ca77e5ac362ed1f17a39dbc30bcbc952cabd5df2633e54",
+      "num_parameters": 596049920,
+      "injection": "by frozen artifact hash via make_control_state; NOT a re-executed composite, which would be built from this run's calibration statistics rather than the original Stage-0 ones"
+    },
+    "battery": {
+      "asset": "artifacts/stage3/recovery_search_v1",
+      "content_sha256": "a1b22778b00d95b6aba358c14a5af5b559fd807bb371c92131eacca59479f323",
+      "manifest_sha256": "a3d3f54456c5771efaca5cdaaeb059ad06181eb84b4ff481ee8b5a184d2549bd",
+      "n_prompts": 190,
+      "n_scorable_prompts": 150,
+      "scorable_sets": [
+        "gsm8k",
+        "math_verified",
+        "multihop",
+        "rag",
+        "knowledge"
+      ],
+      "behaviour_only_sets": [
+        "code",
+        "tool"
+      ],
+      "scorer_sha256": "da1bc3b1069d927b6ab2cbf0eaaf6763bfa491d396189b3dcde95977e39d67ad",
+      "limitation": "code and tool have no frozen scorer; they contribute stability and failure diagnostics only. LIMITATION: this battery cannot detect a candidate that trades code or tool capability for math."
+    },
+    "selection_rules": {
+      "order": [
+        "feasibility constraint",
+        "capability objective",
+        "secondary diagnostic (reported, never reorders)"
+      ],
+      "feasibility_metric": "usable_rollout_rate over ALL prompts",
+      "feasibility_floor": "PENDING_MICRO_PREFLIGHT",
+      "feasibility_floor_rule": {
+        "rule": "max(absolute_floor, control_usable_pooled - 3 x SE), where SE is the binomial standard error of usable_rollout_rate on the pooled all-prompt denominator",
+        "absolute_floor": 0.3,
+        "absolute_floor_rationale": "guards the 'cannot hold a rollout at all' case independently of how the control happens to score; a candidate below it cannot produce trajectories for Stage 5 regardless of correctness",
+        "relative_term_rationale": "guards against a candidate that is severely less stable than the incumbent without requiring parity, which would make feasibility a second ranking",
+        "free_input": "control usable_rollout_rate on the recovery-search battery",
+        "prior_value_used_for_sizing": 0.73,
+        "se_at_prior": 0.02277,
+        "floor_at_prior": 0.6617
+      },
+      "primary_metric": "correct_overall over SCORABLE prompts",
+      "secondary_metric": "correct_given_usable over SCORABLE prompts",
+      "equivalence_interval": 0.045,
+      "equivalence_interval_rule": {
+        "rule": "2 x the binomial standard error of correct_overall at the control's pooled rate, on the pooled scorable denominator",
+        "free_input": "control correct_overall on the recovery-search battery",
+        "prior_value_used_for_sizing": 0.1867,
+        "prior_source": "retained reference on the 150-prompt promotion battery",
+        "se_at_prior": 0.0225,
+        "interval_at_prior": 0.045,
+        "why_two_se": "one SE would call a difference decisive that a rerun could reverse; two SE is the smallest interval this denominator can support"
+      },
+      "catastrophic_floor_rule": {
+        "rule": "a candidate is excluded if any scorable set's usable rate is below 0.10 while the control's is above 0.40 on that set",
+        "rationale": "a candidate that collapses on one capability while averaging acceptably is not a usable initialization, and the pooled rate can hide it",
+        "free_input": "control per-set usable rates",
+        "status": "rule frozen, thresholds analytic, control values pending"
+      },
+      "control_eligible_to_win": true,
+      "control_exempt_from_feasibility_gate": true,
+      "no_weighted_scalar": true
+    }
+  },
+  "data_hashes": {
+    "operator_calibration": {
+      "asset": "artifacts/stage1/e8_calibration_v1",
+      "content_sha256": "d65c1f40e4837ea1bd5bcc33c68041a13b797c68f5be3c0686e0142ed761028f",
+      "items_file_sha256": "c7202338109e459b17b70456461e8f304fadea7929ea547accee21adbbe7fd0b"
+    },
+    "initializer_state_eval": {
+      "asset": "artifacts/stage1/state_eval_v1",
+      "content_sha256": "a1197205e43aad0e71c0e1bb436ee7babba3b5d8bb25b9c4d5c464f659db20fc"
+    },
+    "recovery_search": {
+      "asset": "artifacts/stage3/recovery_search_v1",
+      "content_sha256": "a1b22778b00d95b6aba358c14a5af5b559fd807bb371c92131eacca59479f323"
+    },
+    "final_promotion": {
+      "asset": "artifacts/eval/battery_v2",
+      "inclusion_mask_sha256": "d6e24e0b09da1bcc692b1dc96d8236808d29551a9fc94a47d1d968fd3f73d6ba",
+      "status": "ISOLATED FROM THE ENTIRE SEARCH"
+    },
+    "recovery_training": {
+      "pack": "artifacts/stage3/ladder_uniform_probe",
+      "pack_sha256": "6f324cb0f37bc0f07128e554ce8c161879419537478950496534f75fcecb249c",
+      "rung": 860000
+    }
+  },
+  "role_isolation": {
+    "report": "logs/autoinit_role_isolation.json",
+    "report_sha256": "17fe815850943f2867c288963385858ed3b3738f8c9e0447fb9440d8980fd225",
+    "passed": true,
+    "complete": true,
+    "exact_overlaps": 0,
+    "near_duplicate_counts": {
+      "strict": 17,
+      "flagged_by_enforced_rule": 2
+    }
+  },
+  "artifact_identity_rules": {
+    "checkpoint_identity": "artifact digest over every sorted weight shard, the shard index, the config, the architecture signature and the tokenizer",
+    "metrics_bind_to": "artifact_digest",
+    "frozen_single_file_hashes": "still checkable via single_shard_sha256; a sharded rebuild is a different layout, not corruption",
+    "no_inherited_metrics": "attach_evaluation refuses an evaluation whose artifact digest is not the state's own"
+  },
+  "resume_rules": {
+    "state_identity": "sha256(root teacher, target spec, ordered steps)",
+    "restore_requires": [
+      "artifact re-derived from disk matches the journal",
+      "evaluation suite_hash matches this run's suite"
+    ],
+    "note": "a journal measured under a different suite is not adopted; state identity is the path and does not include the suite"
+  },
+  "budget": {
+    "search_usd_low": 0.9318,
+    "search_usd_high": 3.5747,
+    "search_hours": [
+      0.941,
+      3.611
+    ],
+    "hardware": {
+      "name": "L40S",
+      "price_per_hour_usd": 0.99,
+      "effective_tflops": 88.83,
+      "vram_gb": 48.0,
+      "measured": true,
+      "source": "E8a: 260 subset evaluations over a 67-item / 59,763-position mixture in 1,300 s at 4.02B full width. This module's own accounting puts that workload at 1.1548e17 FLOPs, hence 88.83 TFLOP/s and ~24.5% of the 362 TFLOPS bf16 dense peak. Asserted round-trip in tests/autoinit."
+    },
+    "note": "recovery probe cost is priced separately in the pilot proposal; these are search-only figures"
+  },
+  "storage": {
+    "peak_working_gib": 105.9,
+    "total_written_gib": 135.3,
+    "retained_gib": 40.7,
+    "peak_gpu_resident_gib": 14.3,
+    "teacher_ckpt_gib": 7.49,
+    "depth_only_intermediate_gib": 5.99,
+    "activation_stats_gib": 1.81,
+    "provision_at_least_gib": 150
+  },
+  "pending_before_launch": [
+    "canonical control usable_rollout_rate on recovery_search_v1",
+    "canonical control correct_overall on recovery_search_v1",
+    "canonical control per-set usable rates",
+    "GPU state-evaluator repeatability (confirms or resets beam epsilon)",
+    "activation-statistics GPU/CPU split (collapses the cost range)"
+  ],
+  "preregistration_sha256": "e6e674034eb957031584b8701d3721479e49cc5d78e2e18b622b85bb11421668"
+}

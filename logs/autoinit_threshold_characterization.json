@@ -1,0 +1,194 @@
+{
+  "schema": "aadistill.autoinit.threshold_characterization/v1",
+  "generated_utc": "2026-08-12T18:07:36.814661+00:00",
+  "command": "scripts/autoinit/characterize_thresholds.py",
+  "beam_epsilon": {
+    "repeatability": {
+      "repeats": 12,
+      "n_items": 8,
+      "device": "cpu",
+      "per_metric": {
+        "state.critical_token_kl": {
+          "mean": 0.022249583716921765,
+          "min": 0.022249583716921765,
+          "max": 0.022249583716921765,
+          "abs_range": 0.0,
+          "stdev": 0.0
+        },
+        "state.critical_token_kl.answer_like": {
+          "mean": 0.02046341654555551,
+          "min": 0.02046341654555551,
+          "max": 0.02046341654555551,
+          "abs_range": 0.0,
+          "stdev": 0.0
+        },
+        "state.critical_token_kl.eos_like": {
+          "mean": 0.02403575088828802,
+          "min": 0.02403575088828802,
+          "max": 0.02403575088828802,
+          "abs_range": 0.0,
+          "stdev": 0.0
+        },
+        "state.nll.general": {
+          "mean": 5.5614674886067705,
+          "min": 5.5614674886067705,
+          "max": 5.5614674886067705,
+          "abs_range": 0.0,
+          "stdev": 0.0
+        },
+        "state.nll.math": {
+          "mean": 5.549253433469741,
+          "min": 5.549253433469742,
+          "max": 5.549253433469742,
+          "abs_range": 0.0,
+          "stdev": 0.0
+        },
+        "state.nll.pooled_all_domains": {
+          "mean": 5.555360461038258,
+          "min": 5.555360461038257,
+          "max": 5.555360461038257,
+          "abs_range": 0.0,
+          "stdev": 0.0
+        },
+        "state.nll.teacher_reference_pooled": {
+          "mean": 5.555025130983384,
+          "min": 5.555025130983383,
+          "max": 5.555025130983383,
+          "abs_range": 0.0,
+          "stdev": 0.0
+        },
+        "state.nll_delta_vs_teacher_pooled": {
+          "mean": 0.0003353300548735118,
+          "min": 0.0003353300548735119,
+          "max": 0.0003353300548735119,
+          "abs_range": 0.0,
+          "stdev": 0.0
+        },
+        "state.reverse_kl.token_mean": {
+          "mean": 0.020086561640103657,
+          "min": 0.020086561640103657,
+          "max": 0.020086561640103657,
+          "abs_range": 0.0,
+          "stdev": 0.0
+        },
+        "state.teacher_kl.equal_domain_mean": {
+          "mean": 0.02013218402862549,
+          "min": 0.02013218402862549,
+          "max": 0.02013218402862549,
+          "abs_range": 0.0,
+          "stdev": 0.0
+        },
+        "state.teacher_kl.general": {
+          "mean": 0.020466078841497027,
+          "min": 0.020466078841497027,
+          "max": 0.020466078841497027,
+          "abs_range": 0.0,
+          "stdev": 0.0
+        },
+        "state.teacher_kl.math": {
+          "mean": 0.01979828921575395,
+          "min": 0.01979828921575395,
+          "max": 0.01979828921575395,
+          "abs_range": 0.0,
+          "stdev": 0.0
+        },
+        "state.teacher_kl.token_mean": {
+          "mean": 0.02013218402862549,
+          "min": 0.02013218402862549,
+          "max": 0.02013218402862549,
+          "abs_range": 0.0,
+          "stdev": 0.0
+        },
+        "state.teacher_kl.worst_domain": {
+          "mean": 0.020466078841497027,
+          "min": 0.020466078841497027,
+          "max": 0.020466078841497027,
+          "abs_range": 0.0,
+          "stdev": 0.0
+        },
+        "state.top1_agreement": {
+          "mean": 0.7222222222222222,
+          "min": 0.7222222222222222,
+          "max": 0.7222222222222222,
+          "abs_range": 0.0,
+          "stdev": 0.0
+        }
+      },
+      "worst_objective_abs_range": 0.0,
+      "objective_keys": [
+        "state.teacher_kl.equal_domain_mean",
+        "state.teacher_kl.worst_domain",
+        "state.critical_token_kl"
+      ],
+      "artifact_digest_stable": true
+    },
+    "verdict": {
+      "declared_epsilon": {
+        "state.critical_token_kl": 0.0001,
+        "state.teacher_kl.equal_domain_mean": 0.0001,
+        "state.teacher_kl.worst_domain": 0.0001
+      },
+      "smallest_declared": 0.0001,
+      "measured_worst_objective_range_cpu": 0.0,
+      "safely_above_measured_noise": true,
+      "margin_factor": null,
+      "conclusion": "CPU evaluation is bit-reproducible across the full materialize -> reload -> measure cycle, so 1e-4 is above the noise this path produces.",
+      "NOT_established": "GPU repeatability. The pilot's evaluation backend is a GPU, where reduction order is not guaranteed across launches and bf16/fp32 accumulation can move a KL in the last digits. This CPU result bounds the deterministic path only. The micro-preflight measures the same quantity on an L40S with the real teacher and the real suite, and epsilon is confirmed or reset from that number BEFORE any candidate is ranked."
+    }
+  },
+  "recovery_thresholds": {
+    "pooled_denominators": {
+      "scorable_prompts_per_seed": 150,
+      "all_prompts_per_seed": 190,
+      "seeds": 2,
+      "pooled_n_scorable": 300,
+      "pooled_n_all": 380,
+      "note": "pooled counts, per the frozen SeedAggregation"
+    },
+    "equivalence_interval": {
+      "rule": "2 x the binomial standard error of correct_overall at the control's pooled rate, on the pooled scorable denominator",
+      "free_input": "control correct_overall on the recovery-search battery",
+      "prior_value_used_for_sizing": 0.1867,
+      "prior_source": "retained reference on the 150-prompt promotion battery",
+      "se_at_prior": 0.0225,
+      "interval_at_prior": 0.045,
+      "why_two_se": "one SE would call a difference decisive that a rerun could reverse; two SE is the smallest interval this denominator can support"
+    },
+    "feasibility_floor": {
+      "rule": "max(absolute_floor, control_usable_pooled - 3 x SE), where SE is the binomial standard error of usable_rollout_rate on the pooled all-prompt denominator",
+      "absolute_floor": 0.3,
+      "absolute_floor_rationale": "guards the 'cannot hold a rollout at all' case independently of how the control happens to score; a candidate below it cannot produce trajectories for Stage 5 regardless of correctness",
+      "relative_term_rationale": "guards against a candidate that is severely less stable than the incumbent without requiring parity, which would make feasibility a second ranking",
+      "free_input": "control usable_rollout_rate on the recovery-search battery",
+      "prior_value_used_for_sizing": 0.73,
+      "se_at_prior": 0.02277,
+      "floor_at_prior": 0.6617
+    },
+    "catastrophic_per_capability_floor": {
+      "rule": "a candidate is excluded if any scorable set's usable rate is below 0.10 while the control's is above 0.40 on that set",
+      "rationale": "a candidate that collapses on one capability while averaging acceptably is not a usable initialization, and the pooled rate can hide it",
+      "free_input": "control per-set usable rates",
+      "status": "rule frozen, thresholds analytic, control values pending"
+    },
+    "seed_noise_context": {
+      "behaviour_metric_seed_spread": 0.129,
+      "implication": "far larger than the equivalence interval above, which is why two seeds are pooled rather than compared, and why a third seed exists for ties"
+    },
+    "STATUS": "RULES FROZEN, NUMBERS PENDING. The two free inputs are measured on the canonical control in the micro-preflight, before any searched candidate is probed."
+  },
+  "environment": {
+    "platform": "Linux-5.10.134-19.2.al8.x86_64-x86_64-with-glibc2.32",
+    "python": "3.14.2",
+    "torch": "2.13.0+cpu",
+    "cpu_count": 8,
+    "cuda_available": false,
+    "libraries": {
+      "transformers": "5.13.1",
+      "tokenizers": "0.22.2",
+      "safetensors": "0.8.0",
+      "numpy": "2.5.1",
+      "datasets": "5.0.0",
+      "vllm": null
+    }
+  }
+}

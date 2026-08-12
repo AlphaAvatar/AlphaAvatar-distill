@@ -503,3 +503,64 @@ def test_the_reference_cache_estimate_is_the_number_in_the_proposal():
 
     total = reference_cache_bytes([_Item(59_763)], 151_936)
     assert total / 2**30 == pytest.approx(33.8, rel=0.01)
+
+
+# --- resume fails closed on a changed suite ---------------------------------
+
+
+def test_resume_refuses_a_journal_measured_under_a_different_suite(
+        tmp_path, teacher, target_spec, suite_items, profile):
+    """State identity is the path and does not include the eval suite.
+
+    Without this check the beam would rank this run's states on last run's
+    questions, silently, and the manifest would report them as measured.
+    """
+    from aadistill.autoinit.metrics import StateEvalSuite
+    from test_search import make_search
+
+    suite_a = StateEvalSuite(
+        suite_id="suite", version=1, domains=("general", "math"),
+        subtypes={"general": ("text",), "math": ("arith",)},
+        critical_tags=("eos_like",), general_domain="general")
+    suite_b = StateEvalSuite(
+        suite_id="suite", version=2, domains=("general", "math"),
+        subtypes={"general": ("text",), "math": ("arith",)},
+        critical_tags=("eos_like",), general_domain="general")
+    assert suite_a.suite_hash != suite_b.suite_hash
+
+    first, _ = make_search(tmp_path, teacher, target_spec, suite_a, suite_items,
+                           [profile], run_id="suitechange")
+    first.run()
+
+    same, _ = make_search(tmp_path, teacher, target_spec, suite_a, suite_items,
+                          [profile], run_id="suitechange")
+    assert same.run().resumed, "an unchanged suite should resume"
+
+    changed, _ = make_search(tmp_path, teacher, target_spec, suite_b, suite_items,
+                             [profile], run_id="suitechange")
+    result = changed.run()
+    assert result.resumed == [], (
+        "a journal measured under a different suite must not be adopted")
+    for state in result.states.values():
+        if state.evaluation:
+            assert state.evaluation.suite_hash == suite_b.suite_hash
+
+
+def test_resume_refuses_a_journal_whose_artifact_no_longer_matches(
+        tmp_path, teacher, target_spec, eval_suite, suite_items, profile):
+    """Weights edited on disk must not be adopted along with their old metrics."""
+    from test_search import make_search
+
+    first, _ = make_search(tmp_path, teacher, target_spec, eval_suite, suite_items,
+                           [profile], run_id="tamper")
+    result = first.run()
+    victim = next(s for s in result.states.values()
+                  if s.checkpoint_path and s.evaluation)
+    shard = Path(victim.checkpoint_path) / victim.artifact.shards[0].filename
+    shard.write_bytes(shard.read_bytes() + b"tampered")
+
+    again, _ = make_search(tmp_path, teacher, target_spec, eval_suite, suite_items,
+                           [profile], run_id="tamper")
+    second = again.run()
+    assert victim.state_id not in second.resumed, (
+        "a checkpoint whose bytes changed was resumed with its stale metrics")
