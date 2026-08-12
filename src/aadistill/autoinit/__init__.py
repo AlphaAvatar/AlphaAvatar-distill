@@ -48,7 +48,14 @@ from .arch import (
     register_adapter,
     registered_families,
 )
-from .calibration import CalibrationProfile, CalibrationSource, V1_PROFILES, get_profile
+from .artifact import CheckpointIdentity, identify_checkpoint
+from .calibration import (
+    NO_CALIBRATION,
+    V1_PROFILES,
+    CalibrationProfile,
+    CalibrationSource,
+    get_profile,
+)
 from .cost import (
     A100_80GB_ESTIMATED,
     L40S_MEASURED,
@@ -61,18 +68,28 @@ from .manifest import build_manifest, verify_manifest, write_manifest
 from .metrics import (
     MetricLevel,
     OperatorLocalMetrics,
+    ReferenceStrategy,
     StateEvaluation,
     StateEvaluator,
     StateEvalSuite,
     SuiteItem,
 )
-from .ranking import PARETO_V1, BeamRankingPolicy, Objective
+from .ranking import PARETO_V1, SCHEDULE_V1, BeamRankingPolicy, BeamSchedule, Objective
 from .recovery import E1_KD_HEAVY_0860K, SuccessiveHalvingPlan, admit_leaves
+from .stats import DEFAULT_STATS_SPEC, StatsCache, StatsSpec, stats_cache_key
 from .search import BeamSearch, SearchConfig, SearchResult
-from .state import InitializationState, OperatorStep, StateValidity
+from .state import (
+    InitializationState,
+    OperatorStep,
+    StateValidity,
+    make_control_state,
+)
 
 __all__ = [
     "A100_80GB_ESTIMATED", "ArchSpec", "ArchitectureAdapter", "BeamRankingPolicy",
+    "BeamSchedule", "CheckpointIdentity", "DEFAULT_STATS_SPEC", "NO_CALIBRATION",
+    "ReferenceStrategy", "SCHEDULE_V1", "StatsCache", "StatsSpec",
+    "identify_checkpoint", "make_control_state", "stats_cache_key",
     "BeamSearch", "CalibrationProfile", "CalibrationSource", "Capability",
     "DatasetRole", "E1_KD_HEAVY_0860K", "HardwareProfile", "InitializationState",
     "L40S_MEASURED", "MetricLevel", "Objective", "OperatorLocalMetrics",

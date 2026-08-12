@@ -149,6 +149,17 @@ the cost model (`cost.py`). 112 tests; an end-to-end dry run on real tiny
 checkpoints; the search core proven family-agnostic against a non-transformers MoE
 fixture.
 
+**Corrected 2026-08-13** after a maintainer review of the implementation: the
+calibration branch identity (a `CalibrationNeed.NONE` operator no longer branches
+over profiles), shard-safe checkpoint identity, the canonical control injected by
+frozen hash rather than re-executed, `state.nll.general` computed from the general
+domain alone and demoted out of the beam objectives, delayed pruning with
+epsilon-dominance and lineage diversity, a constraint-then-objective recovery
+selector, an activation-statistics cache keyed on the parent artifact, and
+recompute-per-candidate reference logits. Nine items, each pinned by a test in
+`tests/autoinit/test_corrections.py`; see [`../logs/decisions.md`](../logs/decisions.md)
+2026-08-13.
+
 **What is still missing, and blocks a paid run:** the initializer-state evaluation
 suite, the recovery search battery, the `calib.reasoning_heavy@v1` mixture, a
 frozen halving preregistration, and one measurement of the statistics-pass GPU/CPU

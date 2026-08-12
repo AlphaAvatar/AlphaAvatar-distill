@@ -16,7 +16,7 @@ import aadistill.autoinit  # noqa: F401,E402
 from aadistill.autoinit.arch import ArchSpec, get_adapter  # noqa: E402
 from aadistill.autoinit.manifest import build_manifest, verify_manifest  # noqa: E402
 from aadistill.autoinit.metrics import StateEvaluation, StateEvaluator  # noqa: E402
-from aadistill.autoinit.ranking import PARETO_V1  # noqa: E402
+from aadistill.autoinit.ranking import PARETO_V1, SCHEDULE_V1, BeamSchedule  # noqa: E402
 from aadistill.autoinit.search import BeamSearch, SearchConfig  # noqa: E402
 from aadistill.autoinit.state import StateValidity  # noqa: E402
 from conftest import TARGET_GEOMETRY, TEACHER_GEOMETRY, build_tiny_model  # noqa: E402
@@ -25,7 +25,7 @@ ADAPTER = get_adapter("qwen3")
 
 
 def make_search(tmp_path, teacher, target_spec, eval_suite, suite_items, profiles,
-                beam_width=2, run_id="dryrun", **overrides):
+                schedule=None, run_id="dryrun", **overrides):
     evaluator = StateEvaluator(eval_suite, suite_items)
     evaluator.prime_reference(teacher)
 
@@ -33,7 +33,10 @@ def make_search(tmp_path, teacher, target_spec, eval_suite, suite_items, profile
     items = make_items()
 
     config = SearchConfig(
-        run_id=run_id, target_spec=target_spec, beam_width=beam_width, seed=4242,
+        run_id=run_id, target_spec=target_spec,
+        schedule=schedule or BeamSchedule("test.beam", 1, "test", warmup_levels=0,
+                                          width=2),
+        seed=4242,
         workdir=tmp_path / run_id, profiles=tuple(profiles), policy=PARETO_V1,
         suite=eval_suite, **overrides)
     return BeamSearch(
@@ -56,7 +59,8 @@ def dry_run(tmp_path_factory):
     suite = StateEvalSuite(
         suite_id="test.state_eval", version=1, domains=("general", "math"),
         subtypes={"general": ("text",), "math": ("arith",)},
-        critical_tags=("eos_like", "answer_like"), n_items=4)
+        critical_tags=("eos_like", "answer_like"), n_items=4,
+        general_domain="general")
     suite_items = [SuiteItem(item_id=i["item_id"], input_ids=i["input_ids"],
                              domain=i["domain"], subtype=i["subtype"], tags=i["tags"])
                    for i in make_items(seed=202)]
@@ -115,12 +119,12 @@ def test_every_measured_state_binds_its_metrics_to_its_own_weights(dry_run):
     measured = [s for s in dry_run["result"].states.values() if s.evaluation]
     assert len(measured) > 5
     for state in measured:
-        assert state.evaluation.checkpoint_sha256 == state.checkpoint_sha256
+        assert state.evaluation.artifact_digest == state.artifact_digest
         assert state.evaluation.suite_hash == dry_run["suite"].suite_hash
         assert state.evaluation.reference == "root_teacher"
     # No two distinct states share a weight hash, so no metric can have been
     # reused across states even by accident.
-    hashes = [s.checkpoint_sha256 for s in measured]
+    hashes = [s.artifact_digest for s in measured]
     assert len(set(hashes)) == len(hashes)
 
 
@@ -146,7 +150,7 @@ def test_pruned_states_keep_their_hash_metrics_and_reason(dry_run):
         assert state.evaluation is not None
         # Weights released, evidence retained.
         assert state.checkpoint_path is None
-        assert state.notes["weights_released"]["sha256"] == state.checkpoint_sha256
+        assert state.notes["weights_released"]["artifact_digest"] == state.artifact_digest
 
 
 def test_the_manifest_records_the_whole_search(dry_run):
@@ -171,7 +175,7 @@ def test_the_manifest_records_the_whole_search(dry_run):
     pruned_records = [s for s in manifest["states"] if s["validity"] == "pruned"]
     assert all(r["prune_reason"] for r in pruned_records)
     # And every leaf carries its checkpoint hash and metrics.
-    assert all(leaf["checkpoint_sha256"] and leaf["metrics"]
+    assert all(leaf["artifact_digest"] and leaf["metrics"]
                for leaf in manifest["leaf_set"])
     assert json.dumps(manifest, default=str)
 
@@ -269,15 +273,17 @@ def test_a_new_family_and_a_new_operator_kind_need_no_core_edit(tmp_path):
             with torch.no_grad():
                 logits = model(torch.arange(8).reshape(1, 8)).logits
             return StateEvaluation(
-                checkpoint_sha256=sha, suite_id="toy@v1", suite_hash="toy",
+                artifact_digest=sha, suite_id="toy@v1", suite_hash="toy",
                 reference="root_teacher", positions=8,
                 values={"state.teacher_kl.equal_domain_mean": float(logits.abs().mean()),
+                        "state.teacher_kl.worst_domain": float(logits.abs().max()),
                         "state.critical_token_kl": float(logits.std()),
                         "state.nll.general": float(-logits.log_softmax(-1).mean())})
 
         config = SearchConfig(
-            run_id="toy", target_spec=target, beam_width=2, seed=7,
-            workdir=tmp_path / "toy",
+            run_id="toy", target_spec=target,
+            schedule=BeamSchedule("toy.beam", 1, "toy", warmup_levels=0, width=2),
+            seed=7, workdir=tmp_path / "toy",
             profiles=(_toy_profile(),), policy=PARETO_V1, suite=_toy_suite(),
             allowed_impls=("moe.expert_set_topk_v1", "moe.expert_width_topk_v1"))
         search = BeamSearch(

@@ -117,10 +117,16 @@ class CalibrationProfile:
     leakage_exclusions: tuple[str, ...] = ()
     leakage_proof_path: str | None = None
     metadata: Mapping[str, Any] = field(default_factory=dict)
+    #: True only for the ``NO_CALIBRATION`` sentinel. A profile that describes no
+    #: mixture cannot satisfy the mixture invariants below, and exempting it is
+    #: cheaper than making every invariant optional.
+    is_null: bool = False
 
     def __post_init__(self) -> None:
         if not self.profile_id:
             raise CalibrationError("calibration profile needs an id")
+        if self.is_null:
+            return
         if self.version < 1:
             raise CalibrationError(f"{self.profile_id}: version must be >= 1")
         if not self.sources:
@@ -185,6 +191,10 @@ class CalibrationProfile:
             "metadata": dict(self.metadata),
         }
 
+    @property
+    def is_no_calibration(self) -> bool:
+        return self.is_null
+
     def resolve(self, repo_root: str | Path = ".") -> list[dict[str, Any]]:
         """Load the sampled items, or raise.
 
@@ -216,6 +226,52 @@ class CalibrationProfile:
                 f"{self.qualified_id}: the loaded mixture's token content hashes to "
                 f"{derived} but the profile pins {self.content_sha256}")
         return items
+
+
+#: The single canonical stand-in for "this operator reads no calibration data".
+#:
+#: An implementation declaring ``CalibrationNeed.NONE`` — ``depth.positional_v0``
+#: is a fixed positional heuristic, ``attention.weight_proxy_v0`` scores weights —
+#: has no mechanism by which a mixture could change its output. Branching it over
+#: the active profiles would manufacture states that are byte-identical, measure
+#: identically, and occupy beam slots that distinct hypotheses should hold. It
+#: would also inflate the search-space count by a factor that means nothing.
+#:
+#: So every such operator is invoked with this one sentinel, and because a state's
+#: identity is derived from its steps' profile hashes, the resulting states are
+#: automatically profile-independent rather than deduplicated after the fact.
+NO_CALIBRATION = CalibrationProfile(
+    profile_id="calib.none",
+    version=1,
+    description=("canonical sentinel for operators that consume no calibration "
+                 "data; never resolves to items"),
+    sources=(),
+    domain_weights={},
+    token_budget=0,
+    sample_rule="none",
+    seed=0,
+    materialized=False,
+    is_null=True,
+)
+
+
+def profile_for(implementation, profile: CalibrationProfile) -> CalibrationProfile:
+    """The profile an implementation is actually invoked with.
+
+    One place decides this, so the search engine, the cost model and the
+    branching estimate cannot disagree about how many states exist.
+    """
+    from .operators.base import CalibrationNeed
+
+    if implementation.calibration is CalibrationNeed.NONE:
+        return NO_CALIBRATION
+    return profile
+
+
+def consumes_calibration(implementation) -> bool:
+    from .operators.base import CalibrationNeed
+
+    return implementation.calibration is not CalibrationNeed.NONE
 
 
 # --- profile registry ------------------------------------------------------

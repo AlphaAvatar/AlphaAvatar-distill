@@ -1,18 +1,18 @@
 {
   "schema": "aadistill.autoinit.dryrun_summary/v1",
-  "generated_utc": "2026-08-12T09:59:11.667385+00:00",
+  "generated_utc": "2026-08-12T16:48:02.470716+00:00",
   "purpose": "zero-cost end-to-end validation of the mandatory materialize -> reload -> hash -> validate -> measure cycle",
   "scope_limit": "a 32-wide teacher validates the pipeline, not the science; no initialization-quality claim follows from it",
   "command": "PYTHONPATH=src python scripts/autoinit/dry_run_search.py",
-  "config_hash": "0538559a3b28370e5a9c4b1b11d72d40f6fa4888aae5b2fe7f47f82027b4bc20",
-  "manifest_hash": "37576b268afff1d910801cee7a111da7b9c73d9d6420d6271327b8d0584e7f29",
+  "config_hash": "d3fbc5fcccfe2072a8d743bef79b5d9ed9099cf3b5b6cf7ff1fe9f7418509158",
+  "manifest_hash": "57a71a59496f7454ee4ddd55811107475e37e449977fcade22c10dac2f831b7c",
   "manifest_verified": {
     "manifest_hash_matches": true,
-    "recomputed_hash": "37576b268afff1d910801cee7a111da7b9c73d9d6420d6271327b8d0584e7f29",
+    "recomputed_hash": "57a71a59496f7454ee4ddd55811107475e37e449977fcade22c10dac2f831b7c",
     "leaves_match_target": true,
     "mismatched_leaves": [],
-    "n_states": 20,
-    "n_leaves": 3
+    "n_states": 45,
+    "n_leaves": 7
   },
   "teacher_geometry": {
     "hidden_size": 32,
@@ -36,13 +36,13 @@
   },
   "summary": {
     "run_id": "autoinit_dryrun",
-    "config_hash": "0538559a3b28370e5a9c4b1b11d72d40f6fa4888aae5b2fe7f47f82027b4bc20",
-    "n_states": 20,
+    "config_hash": "d3fbc5fcccfe2072a8d743bef79b5d9ed9099cf3b5b6cf7ff1fe9f7418509158",
+    "n_states": 45,
     "n_levels": 4,
-    "n_complete_leaves": 3,
-    "n_pruned": 10,
-    "n_resumed": 9,
-    "finished_utc": "2026-08-12T09:59:11.655975+00:00"
+    "n_complete_leaves": 7,
+    "n_pruned": 20,
+    "n_resumed": 24,
+    "finished_utc": "2026-08-12T16:48:02.424805+00:00"
   },
   "operator_registry_ledger_hashes": {
     "attention.weight_proxy_v0": "479ff7b3ef15e7195f84b50acf558ff5d8dc831ffcf9ba594719582b31cb7078",
@@ -52,7 +52,42 @@
     "ffn.activation_importance_v0": "accb896294568f641a44f2550997306faa01c6600c1870534f326524ccbf7316",
     "width.global_pca_v0": "acb56886de907b717346483a0d6707552537d5b11415b6861995ec286f8198b6"
   },
-  "beam_ranking_policy_hash": "e8c03856a946cdf9614e0951e87d6cfe4de142be336fa15a64b104f86341a9d3",
+  "beam_ranking_policy_hash": "30a5305bc06dd1e886ea285fa7a3f90ac4b32f61bcb62bae35668f28922bf2e4",
+  "beam_schedule": {
+    "schedule_id": "dryrun.delayed_prune",
+    "version": 1,
+    "description": "mirrors SCHEDULE_V1: no pruning at level 0, then a fixed width",
+    "warmup_levels": 1,
+    "width": 6,
+    "schedule_hash": "6513b221bd1034dcea3bcd6372fe66a082ce3ec992f6b2db2f28f204bedf16c7"
+  },
+  "stats_cache": {
+    "hits": 0,
+    "misses": 9,
+    "passes_saved": 0,
+    "resident_entries": 1,
+    "stats_spec": {
+      "spec_id": "residual_moments_and_ffn_magnitude",
+      "version": 1,
+      "accumulation_dtype": "float64",
+      "quantities": [
+        "residual_sum",
+        "residual_sqsum",
+        "residual_count",
+        "ffn_abs_sum",
+        "ffn_sq_sum",
+        "token_counts"
+      ],
+      "spec_hash": "08b0dffbe900683e0bb81e8ec8d969f6783d07aa04427c0dcceba164e32c2e5b"
+    }
+  },
+  "control": {
+    "state_id": "control-dryrun_canonical",
+    "provenance": "retained_canonical",
+    "artifact_digest": "b6177daac649fc3cdb9e010ec678d07b8a473c6d703480f97c04451873b6cbc0",
+    "single_shard_sha256": "f33721ef605cb3eca279c01ed8fb36549962cdc38e74d398009b640064acc2a6",
+    "note": "injected by artifact; a re-executed composite is not the historical incumbent"
+  },
   "leaves": [
     {
       "state_id": "3e6c5196940088d953528ff3e2ea5eed",
@@ -63,27 +98,72 @@
       "calibration_profiles": [
         "dryrun.stage0_current@v1"
       ],
-      "checkpoint_sha256": "1a01e551ed3053e00a78f584507aa14b592588a2b385444d668cc284782b5ddf",
+      "provenance": "search",
+      "artifact_digest": "b622e4fc07e90b2529ae6aedb0f2768a30789d30afaeb5ee7a4c153830dc9c7c",
+      "single_shard_sha256": "1a01e551ed3053e00a78f584507aa14b592588a2b385444d668cc284782b5ddf",
+      "n_shards": 1,
       "num_parameters": 10960,
       "arch_spec_hash": "816b4f2fc9c362740daddc28fe6f1d08c51fec64f51ef7209bbeb10925dfb2f8",
       "matches_target": true,
       "metrics": {
         "state.critical_token_kl": 0.005602357676252723,
         "state.critical_token_kl.answer_like": 0.005602357676252723,
-        "state.nll.general": 4.865045381628948,
-        "state.nll.teacher_reference": 4.8669256127398945,
-        "state.nll_delta_vs_teacher": -0.0018802311109459918,
+        "state.nll.general": 4.858069378396739,
+        "state.nll.math": 4.872021384861158,
+        "state.nll.pooled_all_domains": 4.865045381628948,
+        "state.nll.teacher_reference_pooled": 4.8669256127398945,
+        "state.nll_delta_vs_teacher_pooled": -0.0018802311109459918,
         "state.reverse_kl.token_mean": 0.006308026449835818,
         "state.teacher_kl.equal_domain_mean": 0.006324879987084347,
         "state.teacher_kl.general": 0.006344147350477136,
         "state.teacher_kl.math": 0.006305612623691559,
         "state.teacher_kl.token_mean": 0.006324879987084348,
+        "state.teacher_kl.worst_domain": 0.006344147350477136,
         "state.top1_agreement": 0.717391304347826
       }
     },
     {
-      "state_id": "adccb85adc4c1f7258fdcdc29fb81143",
-      "path": "FFN(dryrun.stage0_current@v1)->DEPTH(dryrun.stage0_current@v1)->ATTENTION(dryrun.stage0_current@v1)->RESIDUAL_WIDTH(dryrun.stage0_current@v1)",
+      "state_id": "69969572733eaad17f19c48feae62def",
+      "path": "ATTENTION(calib.none@v1)->FFN(dryrun.stage0_current@v1)->DEPTH(dryrun.stage0_current@v1)->RESIDUAL_WIDTH(dryrun.stage0_current@v1)",
+      "impl_ids": [
+        "attention.weight_proxy_v0",
+        "ffn.activation_importance_v0",
+        "depth.causal_kl_greedy_v1",
+        "width.global_pca_v0"
+      ],
+      "calibration_profiles": [
+        "calib.none@v1",
+        "dryrun.stage0_current@v1",
+        "dryrun.stage0_current@v1",
+        "dryrun.stage0_current@v1"
+      ],
+      "provenance": "search",
+      "artifact_digest": "73571404357805a20e765990316f6e893ca62e5eeb85b52f11ca3821dea73b25",
+      "single_shard_sha256": "3b6020137781fdc1781b67925e1074979e1fe2815b873d6e054a0b9cba86c435",
+      "n_shards": 1,
+      "num_parameters": 10960,
+      "arch_spec_hash": "816b4f2fc9c362740daddc28fe6f1d08c51fec64f51ef7209bbeb10925dfb2f8",
+      "matches_target": true,
+      "metrics": {
+        "state.critical_token_kl": 0.006795057677663863,
+        "state.critical_token_kl.answer_like": 0.006795057677663863,
+        "state.nll.general": 4.875599073327106,
+        "state.nll.math": 4.868445354959239,
+        "state.nll.pooled_all_domains": 4.872022214143173,
+        "state.nll.teacher_reference_pooled": 4.8669256127398945,
+        "state.nll_delta_vs_teacher_pooled": 0.005096601403277853,
+        "state.reverse_kl.token_mean": 0.006604827616525733,
+        "state.teacher_kl.equal_domain_mean": 0.00662889266791551,
+        "state.teacher_kl.general": 0.007174102184565171,
+        "state.teacher_kl.math": 0.006083683151265849,
+        "state.teacher_kl.token_mean": 0.00662889266791551,
+        "state.teacher_kl.worst_domain": 0.007174102184565171,
+        "state.top1_agreement": 0.7717391304347826
+      }
+    },
+    {
+      "state_id": "d48110aa4763db6932faefec3beebfe9",
+      "path": "FFN(dryrun.stage0_current@v1)->DEPTH(dryrun.stage0_current@v1)->ATTENTION(calib.none@v1)->RESIDUAL_WIDTH(dryrun.stage0_current@v1)",
       "impl_ids": [
         "ffn.activation_importance_v0",
         "depth.causal_kl_greedy_v1",
@@ -93,30 +173,36 @@
       "calibration_profiles": [
         "dryrun.stage0_current@v1",
         "dryrun.stage0_current@v1",
-        "dryrun.stage0_current@v1",
+        "calib.none@v1",
         "dryrun.stage0_current@v1"
       ],
-      "checkpoint_sha256": "5d1f4d88f52ea41775822cc9e648ee8be63e8af159a7efadbbc72800b03f5009",
+      "provenance": "search",
+      "artifact_digest": "24c22618d90a733541a1c5dc66e2da6204dd9f7576a9d4bb363d930b16625d56",
+      "single_shard_sha256": "5d1f4d88f52ea41775822cc9e648ee8be63e8af159a7efadbbc72800b03f5009",
+      "n_shards": 1,
       "num_parameters": 10960,
       "arch_spec_hash": "816b4f2fc9c362740daddc28fe6f1d08c51fec64f51ef7209bbeb10925dfb2f8",
       "matches_target": true,
       "metrics": {
         "state.critical_token_kl": 0.006839910289272666,
         "state.critical_token_kl.answer_like": 0.006839910289272666,
-        "state.nll.general": 4.871698462444803,
-        "state.nll.teacher_reference": 4.8669256127398945,
-        "state.nll_delta_vs_teacher": 0.004772849704908288,
+        "state.nll.general": 4.87504013724949,
+        "state.nll.math": 4.868356787640115,
+        "state.nll.pooled_all_domains": 4.871698462444803,
+        "state.nll.teacher_reference_pooled": 4.8669256127398945,
+        "state.nll_delta_vs_teacher_pooled": 0.004772849704908288,
         "state.reverse_kl.token_mean": 0.006576840320359106,
         "state.teacher_kl.equal_domain_mean": 0.006600838964400084,
         "state.teacher_kl.general": 0.007150663953760396,
         "state.teacher_kl.math": 0.006051013975039772,
         "state.teacher_kl.token_mean": 0.0066008389644000845,
+        "state.teacher_kl.worst_domain": 0.007150663953760396,
         "state.top1_agreement": 0.7717391304347826
       }
     },
     {
-      "state_id": "4e0889843ae7f989f3bac38008dad41b",
-      "path": "DEPTH(dryrun.stage0_current@v1)->FFN(dryrun.stage0_current@v1)->ATTENTION(dryrun.stage0_current@v1)->RESIDUAL_WIDTH(dryrun.stage0_current@v1)",
+      "state_id": "ff6b8579d06169fbfdaa0cec5a4a7968",
+      "path": "DEPTH(dryrun.stage0_current@v1)->FFN(dryrun.stage0_current@v1)->ATTENTION(calib.none@v1)->RESIDUAL_WIDTH(dryrun.stage0_current@v1)",
       "impl_ids": [
         "depth.causal_kl_greedy_v1",
         "ffn.activation_importance_v0",
@@ -126,88 +212,271 @@
       "calibration_profiles": [
         "dryrun.stage0_current@v1",
         "dryrun.stage0_current@v1",
-        "dryrun.stage0_current@v1",
+        "calib.none@v1",
         "dryrun.stage0_current@v1"
       ],
-      "checkpoint_sha256": "9fc3225a792d73f9f4fe0ba2c8583b505ee59b3dfd12f3eb397e7eded3ed87b8",
+      "provenance": "search",
+      "artifact_digest": "314bff5a37824e3af5cb51e7121368ebe4550fa3df7d888c0f0ce5399e766ecf",
+      "single_shard_sha256": "9fc3225a792d73f9f4fe0ba2c8583b505ee59b3dfd12f3eb397e7eded3ed87b8",
+      "n_shards": 1,
       "num_parameters": 10960,
       "arch_spec_hash": "816b4f2fc9c362740daddc28fe6f1d08c51fec64f51ef7209bbeb10925dfb2f8",
       "matches_target": true,
       "metrics": {
         "state.critical_token_kl": 0.006916276994161308,
         "state.critical_token_kl.answer_like": 0.006916276994161308,
-        "state.nll.general": 4.871369569197945,
-        "state.nll.teacher_reference": 4.8669256127398945,
-        "state.nll_delta_vs_teacher": 0.004443956458050272,
+        "state.nll.general": 4.87485354879628,
+        "state.nll.math": 4.867885589599609,
+        "state.nll.pooled_all_domains": 4.871369569197945,
+        "state.nll.teacher_reference_pooled": 4.8669256127398945,
+        "state.nll_delta_vs_teacher_pooled": 0.004443956458050272,
         "state.reverse_kl.token_mean": 0.006591162603834401,
         "state.teacher_kl.equal_domain_mean": 0.006614657361870226,
         "state.teacher_kl.general": 0.007168272267217221,
         "state.teacher_kl.math": 0.0060610424565232315,
         "state.teacher_kl.token_mean": 0.006614657361870227,
+        "state.teacher_kl.worst_domain": 0.007168272267217221,
         "state.top1_agreement": 0.7608695652173914
+      }
+    },
+    {
+      "state_id": "8b7ad1af3ef0dbfad5f2aaef46d36d08",
+      "path": "FFN(dryrun.stage0_current@v1)->DEPTH(calib.none@v1)->ATTENTION(calib.none@v1)->RESIDUAL_WIDTH(dryrun.stage0_current@v1)",
+      "impl_ids": [
+        "ffn.activation_importance_v0",
+        "depth.positional_v0",
+        "attention.weight_proxy_v0",
+        "width.global_pca_v0"
+      ],
+      "calibration_profiles": [
+        "dryrun.stage0_current@v1",
+        "calib.none@v1",
+        "calib.none@v1",
+        "dryrun.stage0_current@v1"
+      ],
+      "provenance": "search",
+      "artifact_digest": "e93e620acfaf2008ebce6cf94dfab23802cf943edf61f25b22641d8ba20eeb00",
+      "single_shard_sha256": "4a27806073f1147c2d907016c65e16142e04c86a01cfc07bd123448f8119cd12",
+      "n_shards": 1,
+      "num_parameters": 10960,
+      "arch_spec_hash": "816b4f2fc9c362740daddc28fe6f1d08c51fec64f51ef7209bbeb10925dfb2f8",
+      "matches_target": true,
+      "metrics": {
+        "state.critical_token_kl": 0.0058988542295992374,
+        "state.critical_token_kl.answer_like": 0.0058988542295992374,
+        "state.nll.general": 4.857784934665846,
+        "state.nll.math": 4.873610289200492,
+        "state.nll.pooled_all_domains": 4.865697611933169,
+        "state.nll.teacher_reference_pooled": 4.8669256127398945,
+        "state.nll_delta_vs_teacher_pooled": -0.0012280008067255435,
+        "state.reverse_kl.token_mean": 0.006587761899699335,
+        "state.teacher_kl.equal_domain_mean": 0.0066105320077875385,
+        "state.teacher_kl.general": 0.006976065428360649,
+        "state.teacher_kl.math": 0.006244998587214429,
+        "state.teacher_kl.token_mean": 0.0066105320077875385,
+        "state.teacher_kl.worst_domain": 0.006976065428360649,
+        "state.top1_agreement": 0.717391304347826
+      }
+    },
+    {
+      "state_id": "34c61e7015d4e45158e428adb781485f",
+      "path": "DEPTH(calib.none@v1)->FFN(dryrun.stage0_current@v1)->ATTENTION(calib.none@v1)->RESIDUAL_WIDTH(dryrun.stage0_current@v1)",
+      "impl_ids": [
+        "depth.positional_v0",
+        "ffn.activation_importance_v0",
+        "attention.weight_proxy_v0",
+        "width.global_pca_v0"
+      ],
+      "calibration_profiles": [
+        "calib.none@v1",
+        "dryrun.stage0_current@v1",
+        "calib.none@v1",
+        "dryrun.stage0_current@v1"
+      ],
+      "provenance": "search",
+      "artifact_digest": "1748c724b003fb2fe4d85a8db5a9e7de271c51c3e66a75860cac3684b152004a",
+      "single_shard_sha256": "520b250e2ece531abe8ee10b5a8a0422a6b9ac3a80ac9688e715bd619cfabfe1",
+      "n_shards": 1,
+      "num_parameters": 10960,
+      "arch_spec_hash": "816b4f2fc9c362740daddc28fe6f1d08c51fec64f51ef7209bbeb10925dfb2f8",
+      "matches_target": true,
+      "metrics": {
+        "state.critical_token_kl": 0.005878232419490814,
+        "state.critical_token_kl.answer_like": 0.005878232419490814,
+        "state.nll.general": 4.857180553933849,
+        "state.nll.math": 4.87284983759341,
+        "state.nll.pooled_all_domains": 4.86501519576363,
+        "state.nll.teacher_reference_pooled": 4.8669256127398945,
+        "state.nll_delta_vs_teacher_pooled": -0.0019104169762652853,
+        "state.reverse_kl.token_mean": 0.006586534011623134,
+        "state.teacher_kl.equal_domain_mean": 0.006608649602402811,
+        "state.teacher_kl.general": 0.006971221255219501,
+        "state.teacher_kl.math": 0.006246077949586122,
+        "state.teacher_kl.token_mean": 0.006608649602402811,
+        "state.teacher_kl.worst_domain": 0.006971221255219501,
+        "state.top1_agreement": 0.717391304347826
+      }
+    },
+    {
+      "state_id": "11502e3de4d158c6a628adfd51102cac",
+      "path": "RESIDUAL_WIDTH(dryrun.stage0_current@v1)->FFN(dryrun.stage0_current@v1)->DEPTH(dryrun.stage0_current@v1)->ATTENTION(calib.none@v1)",
+      "impl_ids": [
+        "width.global_pca_v0",
+        "ffn.activation_importance_v0",
+        "depth.causal_kl_greedy_v1",
+        "attention.weight_proxy_v0"
+      ],
+      "calibration_profiles": [
+        "dryrun.stage0_current@v1",
+        "dryrun.stage0_current@v1",
+        "dryrun.stage0_current@v1",
+        "calib.none@v1"
+      ],
+      "provenance": "search",
+      "artifact_digest": "8ebb67a98dca11ec518be19b85cefd83ccdceb545df7472724abfbcc5ccb0f95",
+      "single_shard_sha256": "eaa797e7868f48e02af960c79f842cf6ece4618fbfdc32d36a1e01fe2934cd3c",
+      "n_shards": 1,
+      "num_parameters": 10960,
+      "arch_spec_hash": "816b4f2fc9c362740daddc28fe6f1d08c51fec64f51ef7209bbeb10925dfb2f8",
+      "matches_target": true,
+      "metrics": {
+        "state.critical_token_kl": 0.005889944382943213,
+        "state.critical_token_kl.answer_like": 0.005889944382943213,
+        "state.nll.general": 4.864997863769531,
+        "state.nll.math": 4.8709874360457714,
+        "state.nll.pooled_all_domains": 4.867992649907651,
+        "state.nll.teacher_reference_pooled": 4.8669256127398945,
+        "state.nll_delta_vs_teacher_pooled": 0.0010670371677564538,
+        "state.reverse_kl.token_mean": 0.006131148694649986,
+        "state.teacher_kl.equal_domain_mean": 0.006140523954578068,
+        "state.teacher_kl.general": 0.006117817824301513,
+        "state.teacher_kl.math": 0.006163230084854624,
+        "state.teacher_kl.token_mean": 0.006140523954578068,
+        "state.teacher_kl.worst_domain": 0.006163230084854624,
+        "state.top1_agreement": 0.7065217391304348
       }
     }
   ],
   "pruned": [
     {
-      "state_id": "260e4196d6e0e3d7bd2734daa3b21a51",
-      "path": "ATTENTION(dryrun.stage0_current@v1)",
-      "reason": "pruned: dominated (front 2) and the beam of 2 was already full",
-      "checkpoint_sha256": "d134ebc0b74a95e828f8a4e97b45b6c42ff24e629e1ef9b6e504175cfe47dbb8"
-    },
-    {
-      "state_id": "9eec72a3b1874aa52673951faa6519a4",
-      "path": "DEPTH(dryrun.stage0_current@v1)",
-      "reason": "pruned: dominated (front 1) and the beam of 2 was already full",
-      "checkpoint_sha256": "f33763a578a014eeeb39806e8fe0b62e6b7f5e8a80cdc030db1a6664ec50ce09"
-    },
-    {
-      "state_id": "8c0d5fb2b989612052a9e2bfebe2a9c4",
-      "path": "RESIDUAL_WIDTH(dryrun.stage0_current@v1)",
-      "reason": "pruned: dominated (front 1) and the beam of 2 was already full",
-      "checkpoint_sha256": "c06dad404ac2e5d26a38bfdf0dea3608446862f4f752bf885578af14b7611c7f"
-    },
-    {
-      "state_id": "e09d78447cedbf81e532d05b504792df",
-      "path": "FFN(dryrun.stage0_current@v1)->ATTENTION(dryrun.stage0_current@v1)",
-      "reason": "pruned: dominated (front 2) and the beam of 2 was already full",
+      "state_id": "13fed971119738c1a8718a170c68e585",
+      "path": "FFN(dryrun.stage0_current@v1)->ATTENTION(calib.none@v1)",
+      "reason": "pruned: epsilon-dominated (front 2) and the beam of 6 was already full",
       "checkpoint_sha256": "48277bc336e268b0bff9c1127157e57e5bb750c4b2321c9a5d227dbd3d8fc3a0"
-    },
-    {
-      "state_id": "5080e497848ada706d3967ab5f9d7d10",
-      "path": "FFN(dryrun.stage0_current@v1)->DEPTH(dryrun.stage0_current@v1)",
-      "reason": "pruned: dominated (front 1) and the beam of 2 was already full",
-      "checkpoint_sha256": "44500034978da06172af58fa5d56888850904e62002b25565db4e29746a53943"
     },
     {
       "state_id": "bbe36407ddec00868bae0ba06c568387",
       "path": "FFN(dryrun.stage0_current@v1)->RESIDUAL_WIDTH(dryrun.stage0_current@v1)",
-      "reason": "pruned: dominated (front 1) and the beam of 2 was already full",
+      "reason": "pruned: epsilon-dominated (front 6) and the beam of 6 was already full",
       "checkpoint_sha256": "7ef566f43929ad74187d239cce731ba9512252d0c0f0aa2219ec65103fde389b"
     },
     {
-      "state_id": "4cd368010dbbde78d2e202b1086151ef",
-      "path": "DEPTH(dryrun.stage0_current@v1)->ATTENTION(dryrun.stage0_current@v1)",
-      "reason": "pruned: dominated (front 1) and the beam of 2 was already full",
+      "state_id": "3b3cd08a791a2bc0d75731d1d46d3aa3",
+      "path": "DEPTH(dryrun.stage0_current@v1)->ATTENTION(calib.none@v1)",
+      "reason": "pruned: epsilon-dominated (front 3) and the beam of 6 was already full",
       "checkpoint_sha256": "d156293390678fe0012950c6f7be5f7890d88d470744d80755b656132c899dc4"
     },
     {
       "state_id": "b2141b47b8a1539e8e820cdb0273e522",
       "path": "DEPTH(dryrun.stage0_current@v1)->RESIDUAL_WIDTH(dryrun.stage0_current@v1)",
-      "reason": "pruned: non-dominated but ranked 3 in front 0 under the tie-break, beam 2",
+      "reason": "pruned: epsilon-dominated (front 5) and the beam of 6 was already full",
       "checkpoint_sha256": "9e98af0b0fbab5e83ce6c6780fee9e0f33188bb001e6d05ed0dafd465b008159"
+    },
+    {
+      "state_id": "4ad9a18840aaef105389812d34ad466e",
+      "path": "DEPTH(calib.none@v1)->ATTENTION(calib.none@v1)",
+      "reason": "pruned: epsilon-dominated (front 4) and the beam of 6 was already full",
+      "checkpoint_sha256": "cf3f0d780f90ebff916f785b50161271d8453442a5b0f22661cd60cc174f890d"
+    },
+    {
+      "state_id": "275dd0898cdbc9ee2ab733b24a8c83ca",
+      "path": "DEPTH(calib.none@v1)->RESIDUAL_WIDTH(dryrun.stage0_current@v1)",
+      "reason": "pruned: epsilon-dominated (front 8) and the beam of 6 was already full",
+      "checkpoint_sha256": "03fa71f7ee498e564b8027c815e38e2de4f2663e31691381489315c0adddb3d2"
+    },
+    {
+      "state_id": "94af39f41091f408e1456ce6444e67e1",
+      "path": "ATTENTION(calib.none@v1)->DEPTH(dryrun.stage0_current@v1)",
+      "reason": "pruned: epsilon-dominated (front 3) and the beam of 6 was already full",
+      "checkpoint_sha256": "d156293390678fe0012950c6f7be5f7890d88d470744d80755b656132c899dc4"
+    },
+    {
+      "state_id": "ed440557af206d4d01ec79a03cde75f1",
+      "path": "ATTENTION(calib.none@v1)->DEPTH(calib.none@v1)",
+      "reason": "pruned: epsilon-dominated (front 4) and the beam of 6 was already full",
+      "checkpoint_sha256": "cf3f0d780f90ebff916f785b50161271d8453442a5b0f22661cd60cc174f890d"
+    },
+    {
+      "state_id": "04909c93b7dbca98fc49662baa501a48",
+      "path": "ATTENTION(calib.none@v1)->RESIDUAL_WIDTH(dryrun.stage0_current@v1)",
+      "reason": "pruned: epsilon-dominated (front 8) and the beam of 6 was already full",
+      "checkpoint_sha256": "6515231a8d3452a7c4d89cc94a2b44716e781f41de99fc1f913e137dd1198a1f"
+    },
+    {
+      "state_id": "b8018446ddcadd556238e7b45597c262",
+      "path": "RESIDUAL_WIDTH(dryrun.stage0_current@v1)->ATTENTION(calib.none@v1)",
+      "reason": "pruned: epsilon-dominated (front 7) and the beam of 6 was already full",
+      "checkpoint_sha256": "3014a2a4149aa05614cef11fc47479db02e54f7a3388ae51c1621ce8cef0e578"
+    },
+    {
+      "state_id": "a5262079fcf7c9861bbb78a78af91171",
+      "path": "RESIDUAL_WIDTH(dryrun.stage0_current@v1)->DEPTH(dryrun.stage0_current@v1)",
+      "reason": "pruned: epsilon-dominated (front 5) and the beam of 6 was already full",
+      "checkpoint_sha256": "534b27ef58023e5c9abdd733a5f1bdd76e7f578237ab9db9e2976336d75533d9"
+    },
+    {
+      "state_id": "f943d1ad1ff068f2140aeecfb859d7e7",
+      "path": "RESIDUAL_WIDTH(dryrun.stage0_current@v1)->DEPTH(calib.none@v1)",
+      "reason": "pruned: epsilon-dominated (front 6) and the beam of 6 was already full",
+      "checkpoint_sha256": "d302ca1f75b5b83348cb855914b2535699d6a8b9a70e90c84f99e846a62c3fdb"
     },
     {
       "state_id": "3409ba7e4dab12d07a40f5be2597a889",
       "path": "FFN(dryrun.stage0_current@v1)->DEPTH(dryrun.stage0_current@v1)->RESIDUAL_WIDTH(dryrun.stage0_current@v1)",
-      "reason": "pruned: non-dominated but ranked 3 in front 0 under the tie-break, beam 2",
+      "reason": "pruned: epsilon-dominated (front 2) and the beam of 6 was already full",
       "checkpoint_sha256": "065096204a5d18474ced51ab7028b8b252683671373ded5c92677783a88786a9"
     },
     {
       "state_id": "a5aa4feb782cfabee575dc237d10f629",
       "path": "DEPTH(dryrun.stage0_current@v1)->FFN(dryrun.stage0_current@v1)->RESIDUAL_WIDTH(dryrun.stage0_current@v1)",
-      "reason": "pruned: non-dominated but ranked 4 in front 0 under the tie-break, beam 2",
+      "reason": "pruned: epsilon-dominated (front 2) and the beam of 6 was already full",
       "checkpoint_sha256": "b9e934a758e77316c171e9c51eeaa269c64b05ab4c32ccfc6b6794e0088a4bc9"
+    },
+    {
+      "state_id": "f799d4ee8045b9ae04bf97c638e533b0",
+      "path": "DEPTH(calib.none@v1)->FFN(dryrun.stage0_current@v1)->RESIDUAL_WIDTH(dryrun.stage0_current@v1)",
+      "reason": "pruned: epsilon-dominated (front 5) and the beam of 6 was already full",
+      "checkpoint_sha256": "c958a435a3bc40693ae0e5cd6d063e3aac827bc66026412a4716db46312a38f7"
+    },
+    {
+      "state_id": "844eb30e7b5919ad980ab5ef04a1a588",
+      "path": "ATTENTION(calib.none@v1)->FFN(dryrun.stage0_current@v1)->DEPTH(calib.none@v1)",
+      "reason": "pruned: epsilon-dominated (front 1) and the beam of 6 was already full",
+      "checkpoint_sha256": "881ff5c0a86758c9d331c9e2d2a8184241d60c8611f4e2244a81ab7d73751257"
+    },
+    {
+      "state_id": "9676c818fd2fb8d116b961ec5dd80330",
+      "path": "ATTENTION(calib.none@v1)->FFN(dryrun.stage0_current@v1)->RESIDUAL_WIDTH(dryrun.stage0_current@v1)",
+      "reason": "pruned: epsilon-dominated (front 5) and the beam of 6 was already full",
+      "checkpoint_sha256": "0414d17a7a7af062720077428fad6e99a3bd3b630d9418781bdf8f778847f50d"
+    },
+    {
+      "state_id": "112acc6bd2d20f3dca081c20e3abb2fa",
+      "path": "RESIDUAL_WIDTH(dryrun.stage0_current@v1)->FFN(dryrun.stage0_current@v1)->ATTENTION(calib.none@v1)",
+      "reason": "pruned: epsilon-dominated (front 4) and the beam of 6 was already full",
+      "checkpoint_sha256": "dc0b5f84a89e18074f0ea257605e05df89050e219bd2159b465b619adf6486f9"
+    },
+    {
+      "state_id": "2ac3022864452c529e9f73a7d35f6a06",
+      "path": "RESIDUAL_WIDTH(dryrun.stage0_current@v1)->FFN(dryrun.stage0_current@v1)->DEPTH(calib.none@v1)",
+      "reason": "pruned: epsilon-dominated (front 3) and the beam of 6 was already full",
+      "checkpoint_sha256": "bba68df57cd7ee16d7a1030b649fd04dfc5d8babdca32564af4c9e0cd4ed7510"
+    },
+    {
+      "state_id": "f821922d35c8570e853f2eaee87cf08d",
+      "path": "FFN(dryrun.stage0_current@v1)->DEPTH(calib.none@v1)->RESIDUAL_WIDTH(dryrun.stage0_current@v1)",
+      "reason": "pruned: epsilon-dominated (front 5) and the beam of 6 was already full",
+      "checkpoint_sha256": "b02a7350f48e18468254920dfc05a4015eeef6b6beb4443ee4d1f198824460e7"
     }
   ],
   "full_manifest_path": "artifacts/autoinit/dryrun/search_manifest.json"

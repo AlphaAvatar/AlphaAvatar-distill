@@ -22,10 +22,18 @@ raises on an unnamespaced key, and ``BeamRankingPolicy`` refuses any objective
 outside ``state.``.
 
 The second rule with teeth is hash binding. ``StateEvaluation`` carries the
-sha256 of the weights it was measured on, and ``InitializationState`` refuses an
-evaluation whose hash is not its own — which is what makes "no inherited NLL"
-mechanical rather than aspirational (E8's ``init/nll_gate.py`` established the
-same rule for initialization NLL).
+**artifact digest** of what it measured — every weight shard, the shard index,
+the config, the architecture signature and the tokenizer — and
+``InitializationState`` refuses an evaluation whose digest is not its own. That is
+what makes "no inherited NLL" mechanical rather than aspirational (E8's
+``init/nll_gate.py`` established the same rule for initialization NLL), and it
+survives a checkpoint being sharded, which a single-filename hash would not.
+
+A third rule is about naming. ``state.nll.general`` is computed from the general
+domain **alone**. The pooled-over-every-domain quantity exists too, under
+``state.nll.pooled_all_domains``, because a number averaged over reasoning, code
+and tool text is not general-language NLL by any reading and a policy that
+believed it was would be selecting on something other than what it named.
 """
 
 from __future__ import annotations
@@ -139,6 +147,11 @@ class StateEvalSuite:
     content_sha256: str | None = None
     n_items: int | None = None
     description: str = ""
+    #: Which declared domain, if any, is general language. `state.nll.general` is
+    #: computed from this domain alone; when it is absent the metric is not
+    #: emitted at all, rather than being silently backed by a pooled average over
+    #: reasoning, code and tool text that is not "general" by any reading.
+    general_domain: str | None = "general"
 
     def __post_init__(self) -> None:
         if not self.domains:
@@ -171,9 +184,9 @@ class StateEvalSuite:
         """
         return (
             "state.teacher_kl.equal_domain_mean",
+            "state.teacher_kl.worst_domain",
             *(f"state.teacher_kl.{d}" for d in self.domains),
             "state.critical_token_kl",
-            "state.nll.general",
             "state.top1_agreement",
         )
 
@@ -185,15 +198,21 @@ class StateEvalSuite:
             "critical_tags": list(self.critical_tags),
             "items_path": self.items_path, "content_sha256": self.content_sha256,
             "n_items": self.n_items, "description": self.description,
+            "general_domain": self.general_domain,
             "suite_hash": self.suite_hash,
         }
 
 
 @dataclass(frozen=True)
 class StateEvaluation:
-    """Global metrics for one checkpoint, bound to that checkpoint's hash."""
+    """Global metrics for one checkpoint, bound to its artifact digest.
 
-    checkpoint_sha256: str
+    The digest, not a single file's sha256: a sharded checkpoint has no single
+    file, and binding to one would either fail or — worse — bind to whichever
+    shard happened to be named first.
+    """
+
+    artifact_digest: str
     suite_id: str
     suite_hash: str
     reference: str
@@ -204,8 +223,8 @@ class StateEvaluation:
     runtime: Mapping[str, Any] = field(default_factory=dict)
 
     def __post_init__(self) -> None:
-        if not self.checkpoint_sha256:
-            raise MeasurementError("a state evaluation must name the weights it measured")
+        if not self.artifact_digest:
+            raise MeasurementError("a state evaluation must name the artifact it measured")
         for key in self.values:
             require_state_metric(key)
 
@@ -213,12 +232,12 @@ class StateEvaluation:
         missing = [k for k in keys if k not in self.values]
         if missing:
             raise MeasurementError(
-                f"evaluation of {self.checkpoint_sha256[:12]} is missing required "
+                f"evaluation of {self.artifact_digest[:12]} is missing required "
                 f"metrics {missing}; an incomplete evaluation may not be ranked")
 
     def as_dict(self) -> dict[str, Any]:
         return {
-            "checkpoint_sha256": self.checkpoint_sha256,
+            "artifact_digest": self.artifact_digest,
             "suite_id": self.suite_id, "suite_hash": self.suite_hash,
             "reference": self.reference,
             "values": dict(sorted(self.values.items())),
@@ -251,14 +270,46 @@ class SuiteItem:
     tags: Mapping[str, torch.Tensor] = field(default_factory=dict)
 
 
+class ReferenceStrategy(Enum):
+    """How the original teacher's reference logits are obtained per candidate.
+
+    ``RECOMPUTE`` is the default, and the arithmetic is not close. Caching the
+    reference for the intended 59,763-position suite at a 151,936 vocabulary is
+    **33.8 GiB** in float32 (16.9 GiB in float16, still with a numerical
+    tolerance to justify). Recomputing it costs one teacher forward over the
+    suite per candidate: 5.6 s on an L40S, or **3.9 minutes across a whole
+    42-candidate search**. Thirty-four gigabytes of RAM to save four minutes is
+    not a trade; it is a way to make the pilot fail on a memory limit that the
+    tiny dry run would never expose.
+
+    ``CACHE_IN_MEMORY`` remains available for small suites and is what the dry
+    run uses, but it refuses to allocate past an explicit byte budget instead of
+    discovering the limit at runtime.
+    """
+
+    RECOMPUTE = "recompute"
+    CACHE_IN_MEMORY = "cache_in_memory"
+
+
+#: Default ceiling for `CACHE_IN_MEMORY`. Deliberately small: anything that
+#: wants more should be recomputing.
+DEFAULT_REFERENCE_CACHE_BUDGET_BYTES = 2 * 2**30
+
+
+def reference_cache_bytes(items: Sequence["SuiteItem"], vocab_size: int,
+                          bytes_per_value: int = 4) -> int:
+    """What caching the reference logits for these items would cost."""
+    positions = sum(int(i.input_ids.shape[1]) - 1 for i in items)
+    return positions * vocab_size * bytes_per_value
+
+
 class StateEvaluator:
     """Scores a candidate checkpoint against the **original teacher**.
 
-    The root teacher's logits are computed once per item and reused for every
-    state in the search — they cannot change, and re-running a 4B forward for
-    every one of ~140 candidates would dominate the search cost. What is *never*
-    reused is the candidate's own forward: every checkpoint is measured on its
-    own weights, and the result is stamped with those weights' hash.
+    Every checkpoint is measured on its own weights and the result is stamped
+    with that artifact's digest. The teacher is the global reference for every
+    state, at every depth, which is what makes states from different paths
+    comparable at all.
     """
 
     def __init__(
@@ -268,6 +319,9 @@ class StateEvaluator:
         *,
         device: str = "cpu",
         chunk: int = 512,
+        reference_strategy: ReferenceStrategy = ReferenceStrategy.RECOMPUTE,
+        cache_budget_bytes: int = DEFAULT_REFERENCE_CACHE_BUDGET_BYTES,
+        vocab_size: int | None = None,
     ) -> None:
         if not items:
             raise MeasurementError(f"{suite.qualified_id}: no items to score")
@@ -286,34 +340,61 @@ class StateEvaluator:
         self.items = list(items)
         self.device = device
         self.chunk = chunk
+        self.reference_strategy = reference_strategy
+        self._teacher = None
         self._ref_logits: dict[str, torch.Tensor] = {}
         self._ref_ready = False
 
+        if reference_strategy is ReferenceStrategy.CACHE_IN_MEMORY:
+            if vocab_size is None:
+                raise MeasurementError(
+                    "CACHE_IN_MEMORY needs vocab_size to check its budget before "
+                    "allocating; a budget checked after the fact is an OOM")
+            needed = reference_cache_bytes(items, vocab_size)
+            if needed > cache_budget_bytes:
+                raise MeasurementError(
+                    f"caching the reference logits for this suite would take "
+                    f"{needed / 2**30:.1f} GiB, over the {cache_budget_bytes / 2**30:.1f} "
+                    "GiB budget. Use ReferenceStrategy.RECOMPUTE: one teacher forward "
+                    "per candidate is seconds, and it does not scale with vocabulary.")
+            self._cache_bytes = needed
+
     @torch.no_grad()
     def prime_reference(self, teacher) -> None:
-        """Cache the original teacher's logits for every suite item."""
-        for item in self.items:
-            ids = item.input_ids.to(self.device)
-            logits = teacher(ids).logits[0, :-1].float().cpu()
-            self._ref_logits[item.item_id] = logits
+        """Bind the original teacher, and cache its logits only if asked to."""
+        self._teacher = teacher
+        if self.reference_strategy is ReferenceStrategy.CACHE_IN_MEMORY:
+            for item in self.items:
+                ids = item.input_ids.to(self.device)
+                self._ref_logits[item.item_id] = teacher(ids).logits[0, :-1].float().cpu()
         self._ref_ready = True
 
     @torch.no_grad()
-    def evaluate(self, model, checkpoint_sha256: str, *, reference: str = "root_teacher",
+    def _reference_for(self, item: SuiteItem) -> torch.Tensor:
+        if self.reference_strategy is ReferenceStrategy.CACHE_IN_MEMORY:
+            return self._ref_logits[item.item_id]
+        ids = item.input_ids.to(self.device)
+        return self._teacher(ids).logits[0, :-1].float().cpu()
+
+    @torch.no_grad()
+    def evaluate(self, model, artifact_digest: str, *, reference: str = "root_teacher",
                  runtime: Mapping[str, Any] | None = None) -> StateEvaluation:
-        if not self._ref_ready:
+        if not self._ref_ready or self._teacher is None:
             raise MeasurementError(
-                "reference logits were never primed; a candidate cannot be scored "
+                "the reference teacher was never bound; a candidate cannot be scored "
                 "against a teacher that was not run")
-        if not checkpoint_sha256:
-            raise MeasurementError("refusing to measure without the checkpoint hash")
+        if not artifact_digest:
+            raise MeasurementError("refusing to measure without the artifact digest")
 
         per_subtype: dict[str, DistortionSums] = {}
         totals = DistortionSums()
         for item in self.items:
             ids = item.input_ids.to(self.device)
+            # One item's reference and candidate logits exist at a time. At the
+            # intended suite that is ~0.5 GiB each rather than 33.8 GiB held for
+            # the whole run.
+            ref = self._reference_for(item)
             cand = model(ids).logits[0, :-1].float().cpu()
-            ref = self._ref_logits[item.item_id]
             if cand.shape != ref.shape:
                 raise MeasurementError(
                     f"item {item.item_id}: candidate logits {tuple(cand.shape)} do not "
@@ -323,23 +404,38 @@ class StateEvaluator:
             sums = distortion(ref, cand, targets, tags=item.tags, chunk=self.chunk)
             per_subtype.setdefault(item.subtype, DistortionSums()).merge(sums)
             totals.merge(sums)
+            del ref, cand
 
         subtype_kl = {k: v.as_dict()["kl"] for k, v in per_subtype.items()}
-        primary, per_domain = domain_balanced_score(
-            subtype_kl, {d: list(self.suite.subtypes[d]) for d in self.suite.domains})
+        domain_map = {d: list(self.suite.subtypes[d]) for d in self.suite.domains}
+        primary, per_domain = domain_balanced_score(subtype_kl, domain_map)
 
         agg = totals.as_dict()
         values: dict[str, float] = {
             "state.teacher_kl.equal_domain_mean": float(primary),
+            "state.teacher_kl.worst_domain": float(max(per_domain.values())),
             "state.teacher_kl.token_mean": float(agg["kl"]),
             "state.reverse_kl.token_mean": float(agg["reverse_kl"]),
-            "state.nll.general": float(agg["abl_ce"]),
-            "state.nll.teacher_reference": float(agg["ref_ce"]),
-            "state.nll_delta_vs_teacher": float(agg["ce_delta"]),
+            # Pooled over every declared domain — reasoning, code and tool text
+            # included. Named for what it is; it is NOT "general NLL", and the
+            # earlier key that claimed to be was this quantity.
+            "state.nll.pooled_all_domains": float(agg["abl_ce"]),
+            "state.nll.teacher_reference_pooled": float(agg["ref_ce"]),
+            "state.nll_delta_vs_teacher_pooled": float(agg["ce_delta"]),
             "state.top1_agreement": float(agg["top1_agreement"]),
         }
         for domain, score in per_domain.items():
             values[f"state.teacher_kl.{domain}"] = float(score)
+
+        # Per-domain candidate NLL, and `state.nll.general` from the general
+        # domain alone. Omitted entirely when the suite declares no general
+        # domain, rather than falling back to the pooled number.
+        per_domain_ce = _per_domain_ce(per_subtype, domain_map)
+        for domain, ce in per_domain_ce.items():
+            values[f"state.nll.{domain}"] = float(ce)
+        general = self.suite.general_domain
+        if general and general in per_domain_ce:
+            values["state.nll.general"] = float(per_domain_ce[general])
 
         tagged = agg["tagged"]
         for tag, entry in tagged.items():
@@ -354,16 +450,34 @@ class StateEvaluator:
             values["state.critical_token_kl"] = float(sum(present) / len(present))
 
         return StateEvaluation(
-            checkpoint_sha256=checkpoint_sha256,
+            artifact_digest=artifact_digest,
             suite_id=self.suite.qualified_id,
             suite_hash=self.suite.suite_hash,
             reference=reference,
             values=values,
             positions=int(agg["positions"]),
             detail={"per_subtype_kl": subtype_kl, "per_domain_kl": per_domain,
-                    "tagged": tagged},
+                    "per_domain_nll": per_domain_ce, "tagged": tagged,
+                    "reference_strategy": self.reference_strategy.value},
             runtime=dict(runtime or {}),
         )
+
+
+def _per_domain_ce(per_subtype: Mapping[str, DistortionSums],
+                   domains: Mapping[str, Sequence[str]]) -> dict[str, float]:
+    """Equal-sub-type mean candidate CE per domain.
+
+    Same two-level unweighted aggregation as the KL, for the same reason: a
+    token-weighted domain mean is a mean over whichever sub-type tokenizes
+    longest.
+    """
+    out: dict[str, float] = {}
+    for domain, subtypes in domains.items():
+        values = [per_subtype[s].as_dict()["abl_ce"] for s in subtypes
+                  if s in per_subtype]
+        if len(values) == len(list(subtypes)) and values:
+            out[domain] = sum(values) / len(values)
+    return out
 
 
 def _jsonable(obj: Any) -> Any:

@@ -12,11 +12,18 @@ candidate**, and it is mechanical rather than documented:
 
 The second load-bearing rule is that **metrics never travel between
 checkpoints**. A state is created with no evaluation at all; ``attach_evaluation``
-refuses any evaluation whose ``checkpoint_sha256`` is not this state's own hash,
-and ``ready_for_ranking`` requires a present, matching, complete evaluation. A
-child cannot inherit its parent's NLL because there is no code path that would
-let it — the same guarantee ``init/nll_gate.py`` established for initialization
-NLL after E8, generalized to every node of the search.
+refuses any evaluation whose ``artifact_digest`` is not this state's own, and
+``ready_for_ranking`` requires a present, matching, complete evaluation. A child
+cannot inherit its parent's NLL because there is no code path that would let it —
+the same guarantee ``init/nll_gate.py`` established for initialization NLL after
+E8, generalized to every node of the search. The binding is to the *artifact*
+(every shard, the index, the config, the architecture signature, the tokenizer)
+rather than to one filename, so it survives a checkpoint being sharded.
+
+A third distinction: ``provenance``. Most states are ``search`` — an operator
+produced them. A ``retained_canonical`` state is a frozen checkpoint injected as a
+control (see ``make_control_state``); it has no operator steps because this search
+did not build it, and re-running its recipe would not reproduce it.
 
 State ids are content-derived: the sha256 of (root teacher, ordered
 (implementation, signature, calibration profile, operator config)) along the path.
@@ -35,6 +42,7 @@ from pathlib import Path
 from typing import Any
 
 from .arch import ArchSpec
+from .artifact import CheckpointIdentity
 from .metrics import MeasurementError, OperatorLocalMetrics, StateEvaluation
 
 SCHEMA = "aadistill.autoinit.state/v1"
@@ -128,9 +136,11 @@ class InitializationState:
     depth: int
     seed: int
     checkpoint_path: str | None = None
-    checkpoint_sha256: str | None = None
-    config_sha256: str | None = None
+    artifact: CheckpointIdentity | None = None
     validity: StateValidity = StateValidity.PLANNED
+    #: Where this state came from. `search` for anything an operator produced;
+    #: `retained_canonical` for a frozen checkpoint injected as a control.
+    provenance: str = "search"
     evaluation: StateEvaluation | None = None
     artifacts: dict[str, str] = field(default_factory=dict)
     prune_reason: str | None = None
@@ -165,13 +175,25 @@ class InitializationState:
 
     # --- lifecycle ---------------------------------------------------------
 
-    def mark_materialized(self, path: str, checkpoint_sha256: str,
-                          config_sha256: str) -> None:
-        if not checkpoint_sha256:
-            raise StateError(f"{self.state_id}: cannot materialize without a weight hash")
-        self.checkpoint_path = path
-        self.checkpoint_sha256 = checkpoint_sha256
-        self.config_sha256 = config_sha256
+    @property
+    def artifact_digest(self) -> str | None:
+        """The identity metrics bind to. None until the state is materialized."""
+        return self.artifact.artifact_digest if self.artifact else None
+
+    @property
+    def checkpoint_sha256(self) -> str | None:
+        """The lone shard's own sha256, when the checkpoint is unsharded.
+
+        Kept so a frozen single-file hash from the historical record stays
+        directly checkable. It is deliberately **not** what metrics bind to: a
+        sharded checkpoint has no such value, and a binding that silently became
+        None once a 30B teacher sharded would be worse than no binding at all.
+        """
+        return self.artifact.single_shard_sha256 if self.artifact else None
+
+    def mark_materialized(self, artifact: CheckpointIdentity) -> None:
+        self.checkpoint_path = artifact.path
+        self.artifact = artifact
         self.validity = StateValidity.MATERIALIZED
 
     def mark_validated(self) -> None:
@@ -199,16 +221,16 @@ class InitializationState:
         "inherit the parent's NLL to save a forward pass" is not an available
         shortcut at 2am on a paid pod.
         """
-        if self.checkpoint_sha256 is None:
+        if self.artifact is None:
             raise StateError(
                 f"{self.state_id}: cannot attach an evaluation before the checkpoint "
-                "is materialized and hashed")
-        if evaluation.checkpoint_sha256 != self.checkpoint_sha256:
+                "is materialized and identified")
+        if evaluation.artifact_digest != self.artifact_digest:
             raise MeasurementError(
-                f"{self.state_id}: evaluation was measured on "
-                f"{evaluation.checkpoint_sha256[:12]} but this state's weights hash to "
-                f"{self.checkpoint_sha256[:12]}. Metrics bind to weights; they are not "
-                "inherited, copied or interpolated.")
+                f"{self.state_id}: evaluation was measured on artifact "
+                f"{evaluation.artifact_digest[:12]} but this state's artifact digests "
+                f"to {self.artifact_digest[:12]}. Metrics bind to artifacts; they are "
+                "not inherited, copied or interpolated.")
         if self.validity not in (StateValidity.VALIDATED, StateValidity.MEASURED):
             raise StateError(
                 f"{self.state_id}: measure only after structural validation, not from "
@@ -223,9 +245,9 @@ class InitializationState:
             raise StateError(
                 f"{self.state_id} is {self.validity.value} and has no hash-bound "
                 "evaluation; an unmeasured state cannot enter beam ranking")
-        if self.evaluation.checkpoint_sha256 != self.checkpoint_sha256:
+        if self.evaluation.artifact_digest != self.artifact_digest:
             raise MeasurementError(
-                f"{self.state_id}: attached evaluation no longer matches the checkpoint")
+                f"{self.state_id}: attached evaluation no longer matches the artifact")
         self.evaluation.require(required_metrics)
 
     def require_recovery_admissible(self) -> None:
@@ -267,8 +289,10 @@ class InitializationState:
             "depth": self.depth,
             "seed": self.seed,
             "checkpoint_path": self.checkpoint_path,
+            "artifact": self.artifact.as_dict() if self.artifact else None,
+            "artifact_digest": self.artifact_digest,
             "checkpoint_sha256": self.checkpoint_sha256,
-            "config_sha256": self.config_sha256,
+            "provenance": self.provenance,
             "validity": self.validity.value,
             "evaluation": self.evaluation.as_dict() if self.evaluation else None,
             "artifacts": dict(self.artifacts),
@@ -280,7 +304,8 @@ class InitializationState:
 
 def make_root_state(*, root_teacher_id: str, root_teacher_sha256: str, spec: ArchSpec,
                     target_spec: ArchSpec, num_parameters: int, seed: int,
-                    checkpoint_path: str | None = None) -> InitializationState:
+                    checkpoint_path: str | None = None,
+                    artifact: CheckpointIdentity | None = None) -> InitializationState:
     state = InitializationState(
         state_id=compute_state_id(root_teacher_sha256, target_spec.spec_hash, ()),
         parent_id=None,
@@ -288,11 +313,60 @@ def make_root_state(*, root_teacher_id: str, root_teacher_sha256: str, spec: Arc
         root_teacher_sha256=root_teacher_sha256,
         spec=spec, target_spec=target_spec, steps=(),
         num_parameters=num_parameters, depth=0, seed=seed,
-        checkpoint_path=checkpoint_path,
+        checkpoint_path=checkpoint_path, artifact=artifact,
+        provenance="root_teacher",
     )
-    # The root is the teacher: already materialized, and its identity is its own
-    # published hash rather than something the search computed.
-    state.checkpoint_sha256 = root_teacher_sha256
+    # The root is the teacher: not produced by the search, identified by its own
+    # published revision hash. It is never ranked and never a recovery candidate,
+    # so it needs no artifact identity of its own unless a caller supplies one.
+    state.validity = StateValidity.VALIDATED
+    return state
+
+
+def make_control_state(*, control_id: str, artifact: CheckpointIdentity,
+                       spec: ArchSpec, target_spec: ArchSpec, num_parameters: int,
+                       root_teacher_id: str, root_teacher_sha256: str,
+                       description: str, expected_single_file_sha256: str | None = None,
+                       ) -> InitializationState:
+    """Inject a retained, frozen checkpoint as a recovery candidate.
+
+    This exists because **a re-executed composite is not the historical
+    incumbent.** ``composite.stage1_sandwich_v0`` running inside the search on
+    ``calib.domain_balanced@v1`` produces a checkpoint built from *that* mixture's
+    activation statistics; the canonical ``qwen3_0p6b_init_v0`` was built from the
+    original Stage-0 statistics over the 949,859-token warm-up mixture. Same
+    algorithm, different input, therefore different weights — and every existing
+    behaviour number in this project belongs to the latter.
+
+    So the recovery control is injected by artifact rather than regenerated. It
+    carries no operator steps (it was not produced by this search), it is marked
+    ``retained_canonical``, and it is measured on the same suite as everything
+    else so its step-0 metrics are comparable.
+    """
+    if expected_single_file_sha256 is not None:
+        actual = artifact.single_shard_sha256
+        if actual != expected_single_file_sha256:
+            raise StateError(
+                f"{control_id}: expected the frozen checkpoint {expected_single_file_sha256[:12]} "
+                f"but the artifact at {artifact.path} has "
+                f"{'shards' if artifact.is_sharded else actual[:12] if actual else 'no shard'}. "
+                "A control that is not the retained checkpoint is not a control.")
+    if not spec.matches(target_spec):
+        raise StateError(
+            f"{control_id}: a recovery control must already be at the target "
+            f"architecture; it is {spec.describe()}")
+    state = InitializationState(
+        state_id=f"control-{control_id}",
+        parent_id=None,
+        root_teacher_id=root_teacher_id,
+        root_teacher_sha256=root_teacher_sha256,
+        spec=spec, target_spec=target_spec, steps=(),
+        num_parameters=num_parameters, depth=0, seed=0,
+        checkpoint_path=artifact.path, artifact=artifact,
+        provenance="retained_canonical",
+        notes={"description": description,
+               "frozen_single_file_sha256": expected_single_file_sha256},
+    )
     state.validity = StateValidity.VALIDATED
     return state
 

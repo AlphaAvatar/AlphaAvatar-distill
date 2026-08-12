@@ -31,7 +31,7 @@ from ..infrastructure.manifest import sha256_json
 from .arch import ArchitectureAdapter
 from .calibration import CalibrationProfile
 from .operators.base import registry_ledger
-from .ranking import BeamRankingPolicy, RankingResult
+from .ranking import BeamRankingPolicy, BeamSchedule, RankingResult
 from .search import SearchResult
 from .state import StateValidity
 
@@ -45,6 +45,7 @@ def build_manifest(
     profiles: Sequence[CalibrationProfile],
     policy: BeamRankingPolicy,
     teacher: Mapping[str, Any],
+    control: Mapping[str, Any] | None = None,
     top_n: RankingResult | None = None,
     recovery_config: Mapping[str, Any] | None = None,
     cost: Mapping[str, Any] | None = None,
@@ -73,7 +74,9 @@ def build_manifest(
         "calibration_profiles": [p.as_dict() for p in profiles],
         "state_eval_suite": config.suite.as_dict(),
         "beam_ranking_policy": policy.as_dict(),
-        "beam_width": config.beam_width,
+        "beam_schedule": config.schedule.as_dict(),
+        "stats_spec": config.stats_spec.as_dict(),
+        "recovery_control": dict(control) if control else None,
         "seeds": {"search_seed": config.seed},
 
         "levels": [level.as_dict() for level in result.levels],
@@ -88,9 +91,11 @@ def build_manifest(
             "complete_leaves": [s.state_id for s in result.complete_leaves],
             "resumed": list(result.resumed),
         },
-        "checkpoint_hashes": {
-            sid: s.checkpoint_sha256 for sid, s in states.items()
-            if s.checkpoint_sha256
+        "artifact_digests": {
+            sid: s.artifact_digest for sid, s in states.items() if s.artifact_digest
+        },
+        "artifacts": {
+            sid: s.artifact.as_dict() for sid, s in states.items() if s.artifact
         },
         "leaf_set": [
             {
@@ -98,7 +103,10 @@ def build_manifest(
                 "path": s.path_label,
                 "impl_ids": list(s.impl_ids),
                 "calibration_profiles": list(s.profile_ids),
-                "checkpoint_sha256": s.checkpoint_sha256,
+                "provenance": s.provenance,
+                "artifact_digest": s.artifact_digest,
+                "single_shard_sha256": s.checkpoint_sha256,
+                "n_shards": len(s.artifact.shards) if s.artifact else 0,
                 "num_parameters": s.num_parameters,
                 "arch_spec_hash": s.spec.spec_hash,
                 "matches_target": s.is_complete_leaf(),

@@ -118,9 +118,9 @@ class CompositeStage1SandwichV0(OperatorImplementation):
 
         state = cfg.get("activation_state")
         if state is None:
-            state = collect_activation_stats(
+            state = ctx.cached_stats(lambda: collect_activation_stats(
                 adapter, parent, (i["input_ids"] for i in ctx.calibration_items),
-                ctx.device)
+                ctx.device))
 
         dtype = model_dtype(adapter, parent)
         student_config = adapter.build_config(parent.config, ctx.target_spec)

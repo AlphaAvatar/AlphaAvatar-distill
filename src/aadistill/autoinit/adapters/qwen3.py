@@ -15,6 +15,7 @@ pinned by test against the two counts this project has frozen — the teacher's
 
 from __future__ import annotations
 
+from pathlib import Path
 from typing import Any
 
 import torch
@@ -139,8 +140,11 @@ class Qwen3Adapter(ArchitectureAdapter):
 
         return build_student(config, dtype, seed)
 
-    def save(self, model: Any, path: str) -> None:
-        model.save_pretrained(path)
+    def save(self, model: Any, path: str, *, max_shard_size: str | int | None = None) -> None:
+        kwargs: dict[str, Any] = {}
+        if max_shard_size is not None:
+            kwargs["max_shard_size"] = max_shard_size
+        model.save_pretrained(path, **kwargs)
 
     def load(self, path: str, dtype: Any = None, device: str = "cpu") -> Any:
         from transformers import Qwen3ForCausalLM
@@ -151,8 +155,20 @@ class Qwen3Adapter(ArchitectureAdapter):
         model = Qwen3ForCausalLM.from_pretrained(path, **kwargs)
         return model.to(device).eval()
 
-    def weight_file(self, path: str) -> str:
-        return "model.safetensors"
+    def weight_files(self, path: str) -> list[str]:
+        """Every safetensors shard `save_pretrained` wrote.
+
+        Transformers writes `model.safetensors` when the state dict fits under
+        `max_shard_size` and `model-00001-of-000NN.safetensors` plus an index when
+        it does not. Globbing covers both without the caller having to know which
+        happened — and without a single-file assumption that would silently hash
+        nothing once a 30B teacher shards.
+        """
+        return sorted(p.name for p in Path(path).glob("*.safetensors"))
+
+    def index_file(self, path: str) -> str | None:
+        name = "model.safetensors.index.json"
+        return name if (Path(path) / name).is_file() else None
 
     # --- structure accessors ----------------------------------------------
 

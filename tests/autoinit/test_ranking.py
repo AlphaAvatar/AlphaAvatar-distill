@@ -17,39 +17,53 @@ from aadistill.autoinit.ranking import (  # noqa: E402
     Objective,
     RankingError,
 )
+from aadistill.autoinit.artifact import CheckpointIdentity, ShardRecord  # noqa: E402
 from aadistill.autoinit.state import OperatorStep, child_state, make_root_state  # noqa: E402
 
 KL = "state.teacher_kl.equal_domain_mean"
+WORST = "state.teacher_kl.worst_domain"
 CRIT = "state.critical_token_kl"
 NLL = "state.nll.general"
 
 
-def make_state(teacher_spec, target_spec, name, kl, crit, nll):
+def make_state(teacher_spec, target_spec, name, kl, crit, nll, worst=None,
+               parent_impl=None):
     parent = make_root_state(root_teacher_id="t", root_teacher_sha256="root",
                              spec=teacher_spec, target_spec=target_spec,
                              num_parameters=1, seed=1)
+    steps = []
+    if parent_impl:
+        steps.append(OperatorStep(
+            index=0, kind="DEPTH", impl_id=parent_impl, impl_signature_hash="s",
+            profile_id="p@v1", profile_hash="p", config_hash="c", seed=1,
+            result_spec_hash="r"))
+        parent = child_state(parent, steps[0], target_spec, 1, 1)
     state = child_state(parent, OperatorStep(
-        index=0, kind="DEPTH", impl_id="depth.positional_v0", impl_signature_hash="s",
-        profile_id=f"{name}@v1", profile_hash=name, config_hash="c", seed=1,
-        result_spec_hash="r"), target_spec, 1, 1)
-    sha = f"sha-{name}"
-    state.mark_materialized(f"/tmp/{name}", sha, "cfg")
+        index=len(steps), kind="FFN", impl_id="ffn.activation_importance_v0",
+        impl_signature_hash="s", profile_id=f"{name}@v1", profile_hash=name,
+        config_hash="c", seed=1, result_spec_hash="r"), target_spec, 1, 1)
+    art = CheckpointIdentity(
+        path=f"/tmp/{name}",
+        shards=(ShardRecord("model.safetensors", f"sha-{name}", 10),),
+        config_sha256="cfg", arch_signature="arch", num_parameters=1)
+    state.mark_materialized(art)
     state.mark_validated()
     state.attach_evaluation(StateEvaluation(
-        checkpoint_sha256=sha, suite_id="t@v1", suite_hash="h",
+        artifact_digest=art.artifact_digest, suite_id="t@v1", suite_hash="h",
         reference="root_teacher", positions=10,
-        values={KL: kl, CRIT: crit, NLL: nll}))
+        values={KL: kl, WORST: worst if worst is not None else kl,
+                CRIT: crit, NLL: nll}))
     return state
 
 
 def test_the_policy_hashes_and_is_versioned():
-    assert PARETO_V1.qualified_id == "beam.pareto_multi_objective@v1"
+    assert PARETO_V1.qualified_id == "beam.pareto_multi_objective@v2"
     assert len(PARETO_V1.policy_hash) == 64
     moved = BeamRankingPolicy(
         policy_id=PARETO_V1.policy_id, version=PARETO_V1.version,
         description=PARETO_V1.description,
         objectives=PARETO_V1.objectives[:2], tie_break=PARETO_V1.tie_break,
-        guardrails=PARETO_V1.guardrails)
+        guardrails=PARETO_V1.guardrails, epsilon={}, diversity_key="parent_path")
     assert moved.policy_hash != PARETO_V1.policy_hash
 
 
@@ -85,8 +99,8 @@ def test_nll_alone_cannot_prune_a_state_that_leads_on_fidelity(teacher_spec, tar
     non-dominated and survives.
     """
     states = [
-        make_state(teacher_spec, target_spec, "worst_nll", kl=0.10, crit=0.10, nll=9.9),
-        make_state(teacher_spec, target_spec, "best_nll", kl=0.90, crit=0.90, nll=2.0),
+        make_state(teacher_spec, target_spec, "worst_nll", kl=0.10, crit=0.90, nll=9.9),
+        make_state(teacher_spec, target_spec, "best_nll", kl=0.90, crit=0.10, nll=2.0),
     ]
     result = PARETO_V1.rank(states, beam_width=1)
     assert len(result.fronts[0]) == 2, "neither dominates the other"
@@ -98,6 +112,9 @@ def test_nll_alone_cannot_prune_a_state_that_leads_on_fidelity(teacher_spec, tar
         objectives=(Objective(NLL),), tie_break=(NLL, "state_id"),
         metadata={"single_objective_acknowledged": True})
     assert nll_only.rank(states, beam_width=1).selected[0].profile_ids == ("best_nll@v1",)
+    # ... and NLL is not an objective of the shipped v1 policy at all.
+    assert NLL not in {o.key for o in PARETO_V1.objectives}
+    assert NLL not in PARETO_V1.tie_break
 
 
 def test_dominated_states_are_pruned_and_non_dominated_ones_are_kept(
@@ -158,7 +175,7 @@ def test_a_state_missing_a_required_metric_is_rejected_not_defaulted(
         teacher_spec, target_spec):
     partial = make_state(teacher_spec, target_spec, "partial", 0.1, 0.1, 1.0)
     partial.attach_evaluation(StateEvaluation(
-        checkpoint_sha256=partial.checkpoint_sha256, suite_id="t@v1", suite_hash="h",
+        artifact_digest=partial.artifact_digest, suite_id="t@v1", suite_hash="h",
         reference="root_teacher", positions=10, values={KL: 0.1}))
     result = PARETO_V1.rank([partial], beam_width=1)
     assert result.selected_ids == ()

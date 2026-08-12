@@ -8,24 +8,38 @@ only way to make that checkable is to have an artifact that exists first.
 
 The schedule:
 
-    complete target-size leaves  ->  Top-N, identical 0.86M recovery, seed sa
-      ->  search-battery evaluation  ->  survivors (preregistered rule)
-      ->  seed sb  ->  Top-1  ->  full recovery
+    N searched leaves + the retained canonical control
+      ->  rung 1: identical 0.86M recovery on seed sa, all of them
+      ->  search-battery evaluation
+      ->  rung 2: the control (unconditionally) + the best S searched leaves, seed sb
+      ->  Top-1 from the two-seed result
+      ->  optional seed sc, for tied candidates only
+      ->  full recovery (separately authorized)
 
-Three rules the rest of the project already paid to learn:
+Rules the rest of the project already paid to learn:
 
-* **Selection here is on autonomous behaviour, not state NLL** (E7: a −5.22 nat
-  NLL swing moved behaviour by +0.0000; the best-NLL checkpoint of its trajectory
+* **Selection is on autonomous behaviour, not state NLL** (E7: a −5.22 nat NLL
+  swing moved behaviour by +0.0000; the best-NLL checkpoint of its trajectory
   produced zero protocol-valid generations).
-* **Two seeds, because one is unreadable.** The behaviour metric moves 0.1290 on
-  seed alone, so a single-seed ranking of close candidates is noise. Hence
-  survivors are re-run on ``sb`` rather than the Top-1 being taken from ``sa``.
+* **Selection is a constraint followed by an objective, never a weighted sum.**
+  ``usable_rollout`` is a *feasibility* gate — it is blind to correctness by
+  construction, so a terse contentless reply scores perfectly on it and a
+  weighted ``usable + correct`` score would let stability buy its way past a
+  capability failure. Feasible candidates are then ranked on ``correct_overall``,
+  with ``correct_given_usable`` reported as a diagnostic that explains *why* a
+  candidate ranks where it does without moving it.
+* **Two seeds minimum, because one is unreadable.** The behaviour metric moves
+  0.1290 on seed alone.
+* **The control advances to rung 2 regardless of its rung-1 result.** A baseline
+  eliminated at rung 1 gives a two-seed comparison with nothing to compare
+  against, and its variance is exactly what makes the searched candidates'
+  differences readable.
 * **Thresholds are preregistered, never chosen after seeing the table**
   (AGENTS.md 4.5). ``SuccessiveHalvingPlan.freeze`` writes the record and
   ``assert_preregistered`` refuses a selection whose plan hash does not match.
 
-``N`` is deliberately unset here. The cost model decides it, and the decision is
-the maintainer's.
+``N`` is deliberately unset here. The cost model informs it; the decision is the
+maintainer's.
 """
 
 from __future__ import annotations
@@ -86,6 +100,9 @@ E1_KD_HEAVY_0860K = RecoveryRecipe(
 
 SEED_SA = 20260726
 SEED_SB = 20260801
+#: Tie-break seed. Used only for candidates that finish inside the preregistered
+#: equivalence interval after two seeds — never as a third look at everything.
+SEED_SC = 20260813
 
 
 @dataclass(frozen=True)
@@ -94,52 +111,130 @@ class SuccessiveHalvingPlan:
 
     plan_id: str
     recipe: RecoveryRecipe
-    top_n: int
+    #: Searched leaves admitted at rung 1. The canonical control is additional.
+    searched_leaves: int
+    #: Searched leaves advancing to rung 2. The control advances unconditionally.
     survivors: int
     seeds: tuple[int, ...] = (SEED_SA, SEED_SB)
-    selection_metric: str = "usable_rollout_rate"
+    tie_break_seed: int | None = SEED_SC
+    include_canonical_control: bool = True
+    #: Feasibility constraint. Blind to correctness by construction, so it gates
+    #: rather than scores.
+    feasibility_metric: str = "usable_rollout_rate"
+    feasibility_min: float = 0.0
+    #: The capability objective, applied among feasible candidates only.
+    primary_metric: str = "correct_overall"
+    #: Reported to explain a ranking; never changes one.
+    secondary_metric: str = "correct_given_usable"
     reported_components: tuple[str, ...] = (
         "non_empty", "natural_termination", "no_severe_repetition",
         "no_context_limit", "protocol_valid")
-    secondary_metrics: tuple[str, ...] = ("correct_overall", "correct_given_usable")
+    #: Two candidates within this much of each other on the primary metric are
+    #: not distinguished by two seeds and go to the tie-break seed.
+    equivalence_interval: float = 0.0
     survivor_rule: str = ""
     winner_rule: str = ""
     battery_asset_id: str = ""
     notes: Mapping[str, Any] = field(default_factory=dict)
 
     def __post_init__(self) -> None:
-        if self.top_n < 2:
-            raise ValueError("successive halving needs at least 2 candidates")
-        if not 1 <= self.survivors < self.top_n:
+        if self.searched_leaves < 2:
+            raise ValueError("successive halving needs at least 2 searched leaves")
+        if not 1 <= self.survivors < self.searched_leaves:
             raise ValueError(
                 f"survivors ({self.survivors}) must be at least 1 and fewer than "
-                f"top_n ({self.top_n}); otherwise the first rung selects nothing")
+                f"searched_leaves ({self.searched_leaves}); otherwise rung 1 "
+                "selects nothing")
         if len(self.seeds) < 2:
             raise ValueError(
                 "one seed cannot rank close candidates: the behaviour metric's "
                 "seed-only spread is 0.1290")
+        if self.feasibility_metric == self.primary_metric:
+            raise ValueError(
+                "the feasibility constraint and the capability objective must be "
+                "different metrics; usable_rollout is blind to correctness by "
+                "construction, which is exactly why it gates rather than ranks")
+        if self.equivalence_interval < 0:
+            raise ValueError("equivalence_interval must be >= 0")
         if not self.survivor_rule or not self.winner_rule:
             raise ValueError(
                 "survivor_rule and winner_rule must be stated before the run; a rule "
                 "written after the table is a rule chosen on the outcome")
 
     @property
+    def rung1_probes(self) -> int:
+        return self.searched_leaves + (1 if self.include_canonical_control else 0)
+
+    @property
+    def rung2_probes(self) -> int:
+        return self.survivors + (1 if self.include_canonical_control else 0)
+
+    @property
     def probe_count(self) -> int:
-        """Total recovery probes: every leaf on sa, then survivors on sb."""
-        return self.top_n + self.survivors
+        """Probes excluding any tie-break rung, which is conditional."""
+        return self.rung1_probes + self.rung2_probes
 
     def as_dict(self) -> dict[str, Any]:
         return {
             "schema": SCHEMA, "plan_id": self.plan_id,
-            "recipe": self.recipe.as_dict(), "top_n": self.top_n,
+            "recipe": self.recipe.as_dict(),
+            "searched_leaves": self.searched_leaves,
             "survivors": self.survivors, "seeds": list(self.seeds),
+            "tie_break_seed": self.tie_break_seed,
+            "include_canonical_control": self.include_canonical_control,
+            "rung1_probes": self.rung1_probes, "rung2_probes": self.rung2_probes,
             "probe_count": self.probe_count,
-            "selection_metric": self.selection_metric,
+            "selection": {
+                "feasibility_metric": self.feasibility_metric,
+                "feasibility_min": self.feasibility_min,
+                "primary_metric": self.primary_metric,
+                "secondary_metric": self.secondary_metric,
+                "equivalence_interval": self.equivalence_interval,
+                "rule": ("feasibility constraint, then primary objective among "
+                         "feasible candidates; the secondary metric is reported and "
+                         "never reorders. No weighted combination."),
+            },
             "reported_components": list(self.reported_components),
-            "secondary_metrics": list(self.secondary_metrics),
             "survivor_rule": self.survivor_rule, "winner_rule": self.winner_rule,
             "battery_asset_id": self.battery_asset_id,
             "notes": dict(self.notes),
+        }
+
+    def select(self, results: Sequence[Mapping[str, Any]], k: int) -> dict[str, Any]:
+        """Constraint, then objective. Returns the ranking and every exclusion.
+
+        ``results`` are per-candidate dicts carrying at least the feasibility and
+        primary metrics plus ``state_id`` and ``is_control``. The control is never
+        excluded by the feasibility gate — a baseline that fails the gate is a
+        finding about the gate or the baseline, and dropping it would leave the
+        searched candidates with nothing to be compared against.
+        """
+        feasible, excluded = [], []
+        for row in results:
+            value = float(row.get(self.feasibility_metric, 0.0))
+            if row.get("is_control"):
+                feasible.append(row)
+                continue
+            if value < self.feasibility_min:
+                excluded.append({**dict(row), "reason": (
+                    f"{self.feasibility_metric}={value:.4f} below the preregistered "
+                    f"feasibility floor {self.feasibility_min:.4f}")})
+            else:
+                feasible.append(row)
+
+        ranked = sorted(
+            feasible,
+            key=lambda r: (-float(r.get(self.primary_metric, 0.0)), str(r["state_id"])))
+        chosen = [r for r in ranked if not r.get("is_control")][:k]
+        best = float(chosen[0][self.primary_metric]) if chosen else None
+        tied = [r["state_id"] for r in chosen
+                if best is not None
+                and abs(float(r[self.primary_metric]) - best) <= self.equivalence_interval]
+        return {
+            "ranked": ranked, "selected": [r["state_id"] for r in chosen],
+            "excluded_by_feasibility": excluded,
+            "tied_within_equivalence": tied,
+            "needs_tie_break_seed": len(tied) > 1 and self.tie_break_seed is not None,
         }
 
     @property
@@ -183,34 +278,48 @@ def admit_leaves(candidates: Sequence[InitializationState],
     compressed. An unguarded Top-N would fill up with states that cannot be
     deployed and whose ranking does not transfer.
     """
+    searched = [s for s in candidates if s.provenance != "retained_canonical"]
     for state in candidates:
         state.require_recovery_admissible()
-    if len(candidates) < plan.top_n:
+    if len(searched) < plan.searched_leaves:
         raise RecoveryAdmissionError(
-            f"plan asks for Top-{plan.top_n} but only {len(candidates)} admissible "
-            "leaves exist; report the shortfall rather than shrinking N")
+            f"plan asks for {plan.searched_leaves} searched leaves but only "
+            f"{len(searched)} admissible ones exist; report the shortfall rather "
+            "than shrinking N")
+    if plan.include_canonical_control and len(searched) == len(candidates):
+        raise RecoveryAdmissionError(
+            "the plan includes the canonical control but none was supplied; a "
+            "comparison whose baseline is a re-executed recipe rather than the "
+            "retained checkpoint is not the comparison the plan describes")
     return list(candidates)
 
 
 def probe_configs(selected: Sequence[InitializationState],
-                  plan: SuccessiveHalvingPlan) -> list[dict[str, Any]]:
-    """Rung-1 probe descriptors: identical recovery, one per leaf, seed sa.
+                  plan: SuccessiveHalvingPlan, *, rung: int = 1) -> list[dict[str, Any]]:
+    """Probe descriptors: identical recovery, one per candidate, one seed.
 
     Descriptors only — nothing here launches anything.
     """
-    sa = plan.seeds[0]
+    if rung < 1 or rung > len(plan.seeds):
+        raise RecoveryAdmissionError(
+            f"rung {rung} has no seed in {list(plan.seeds)}")
+    seed = plan.seeds[rung - 1]
+    suffix = f"s{'abc'[rung - 1]}"
     return [
         {
-            "probe_id": f"{plan.plan_id}.rung1.{state.state_id[:12]}.sa",
-            "rung": 1,
+            "probe_id": f"{plan.plan_id}.rung{rung}.{state.state_id[:12]}.{suffix}",
+            "rung": rung,
             "state_id": state.state_id,
             "path": state.path_label,
+            "is_control": state.provenance == "retained_canonical",
             "student_checkpoint": state.checkpoint_path,
-            "student_sha256": state.checkpoint_sha256,
+            "student_artifact_digest": state.artifact_digest,
+            "student_single_shard_sha256": state.checkpoint_sha256,
             "recipe": plan.recipe.recipe_id,
-            "seed": sa,
-            "selection_metric": plan.selection_metric,
-            "_purpose": ("identical recovery across leaves; the only intended "
+            "seed": seed,
+            "feasibility_metric": plan.feasibility_metric,
+            "primary_metric": plan.primary_metric,
+            "_purpose": ("identical recovery across candidates; the only intended "
                          "difference between probes is the initialization"),
         }
         for state in selected

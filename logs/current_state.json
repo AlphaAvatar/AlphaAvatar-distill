@@ -1,7 +1,7 @@
 {
   "schema": "aadistill.current_state/v1",
-  "generated_utc": "2026-08-12T10:20:00+00:00",
-  "current_phase": "E8 closed; AutoInitializer framework IMPLEMENTED at zero cost and CPU-verified; no paid search authorized",
+  "generated_utc": "2026-08-13T00:15:00+00:00",
+  "current_phase": "E8 closed; AutoInitializer framework IMPLEMENTED at zero cost, pre-GPU correction pass applied; no paid search authorized",
   "active_experiment": null,
   "paid_compute_running": false,
   "next_work": "Five zero-cost prerequisites before any paid AutoInitializer run: build+freeze the initializer-state evaluation suite; build the recovery search battery (must not reuse the promotion battery or the 0.86M rung's prompts); measure the statistics-pass GPU/CPU split; build calib.reasoning_heavy@v1; freeze the successive-halving preregistration. Then seek authorization for the pilot. Do not reopen E8b.",
@@ -63,7 +63,7 @@
   "documents": {
     "logs/STATE.md": {
       "path": "logs/STATE.md",
-      "sha256": "a378da8ac49503494d866c5d0ab82920e2df9898b08e14a6a8df8634166a0b76"
+      "sha256": "5f575ad170078ea0b4b8b9b51cbb7f3515f9c3fe60499bcacb5f482eed51df11"
     },
     "docs/HANDOFF_AUTOINITIALIZER.md": {
       "path": "docs/HANDOFF_AUTOINITIALIZER.md",
@@ -79,7 +79,7 @@
     },
     "logs/decisions.md": {
       "path": "logs/decisions.md",
-      "sha256": "a7c90aad6ee01a880651dfb9ea1faa8157f5939f61e0c62a9a165364bee433f1"
+      "sha256": "7af45723ff348c4b23cdd55a7183a256831a5ed27040d4bbf80695e42900bc85"
     },
     "logs/checkpoint_registry.json": {
       "path": "logs/checkpoint_registry.json",
@@ -116,7 +116,7 @@
   "autoinit": {
     "status": "IMPLEMENTED_ZERO_COST_NOT_RUN_ON_REAL_MODELS",
     "package": "src/aadistill/autoinit",
-    "tests": 112,
+    "tests": 146,
     "operator_kinds": [
       "ATTENTION",
       "COMPOSITE_STAGE1",
@@ -143,19 +143,39 @@
       "calib.reasoning_heavy@v1 not built",
       "successive-halving plan not frozen",
       "statistics-pass GPU/CPU split not measured"
-    ]
+    ],
+    "corrections_2026_08_13": [
+      "CalibrationNeed.NONE operators use a canonical calib.none@v1 sentinel; search space is 24 x (1+P) x P x P x 1 = 48/288/864, not 48 x P^4",
+      "checkpoint identity is a shard-safe artifact digest; metrics bind to it",
+      "the recovery control is the retained checkpoint injected by frozen hash, not a re-executed composite",
+      "state.nll.general is the general domain alone; NLL is not a beam objective",
+      "beam v1: no pruning at level 0, then width 6; epsilon-dominance; lineage diversity across fronts",
+      "recovery: 5 searched leaves + control on sa, 2 survivors + control on sb, conditional third seed; constraint-then-objective selection",
+      "activation-statistics cache keyed on parent artifact digest + profile + stat spec + adapter version + numerics",
+      "reference teacher logits recomputed per candidate (33.8 GiB avoided)",
+      "resume rejects a journal record measured under a different eval suite"
+    ],
+    "beam_schedule": "beam.delayed_prune@v1 (warmup 1, width 6)"
   },
   "proposed_pilot": {
     "authorized": false,
-    "beam_width": 4,
-    "top_n": 4,
+    "schedule": "no pruning at level 0, then beam width 6",
+    "n_profiles": 1,
+    "searched_leaves": 5,
+    "canonical_control": "artifacts/stage1/qwen3_0p6b_init_v0/checkpoint (injected by hash)",
     "survivors": 2,
-    "expected_usd": 16.0,
-    "hard_backstop_usd": 19.0,
-    "fits_within_released_headroom": true
+    "seeds": [
+      "sa",
+      "sb",
+      "sc (conditional)"
+    ],
+    "expected_usd": 17.0,
+    "hard_backstop_usd": 26.21,
+    "margin_against_released_headroom_usd": 4.16,
+    "peak_working_storage_gib": 106
   },
   "tests": {
-    "passing": 1415,
+    "passing": 1449,
     "skipped": 7,
     "venvs_verified": [
       "repo .venv transformers 5.13.1",

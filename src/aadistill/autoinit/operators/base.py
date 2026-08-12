@@ -133,6 +133,18 @@ class OperatorContext:
     root_teacher_loader: Any = None
     config: Mapping[str, Any] = field(default_factory=dict)
     tokenizer: Any = None
+    #: Shared activation-statistics cache and this invocation's key. Two operators
+    #: on the *same* parent under the *same* profile share one pass; the key
+    #: includes the parent's artifact digest, so reuse across parents is
+    #: impossible rather than merely discouraged. `None` disables sharing.
+    stats_cache: Any = None
+    stats_cache_key: str | None = None
+
+    def cached_stats(self, collect):
+        """Statistics for this parent under this profile, collected at most once."""
+        if self.stats_cache is None or self.stats_cache_key is None:
+            return collect()
+        return self.stats_cache.get_or_collect(self.stats_cache_key, collect)
 
 
 @dataclass(frozen=True)

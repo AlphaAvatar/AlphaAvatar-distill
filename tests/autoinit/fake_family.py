@@ -115,7 +115,8 @@ class ToyAdapter(ArchitectureAdapter):
         torch.manual_seed(seed)
         return ToyModel(config).to(dtype or torch.float32).eval()
 
-    def save(self, model: Any, path: str) -> None:
+    def save(self, model: Any, path: str, *,
+             max_shard_size: str | int | None = None) -> None:
         p = Path(path)
         p.mkdir(parents=True, exist_ok=True)
         save_file({k: v.detach().contiguous() for k, v in model.state_dict().items()},
@@ -129,8 +130,8 @@ class ToyAdapter(ArchitectureAdapter):
         model.load_state_dict(load_file(str(p / "model.safetensors")))
         return model.to(device).eval()
 
-    def weight_file(self, path: str) -> str:
-        return "model.safetensors"
+    def weight_files(self, path: str) -> list[str]:
+        return sorted(f.name for f in Path(path).glob("*.safetensors"))
 
 
 class ToyExpertSetReduction(OperatorImplementation):

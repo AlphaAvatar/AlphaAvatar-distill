@@ -76,8 +76,8 @@ class FFNActivationImportanceV0(OperatorImplementation):
         parent = ctx.model
         keep = ctx.target_spec[FFN_FIELD]
 
-        state = collect_activation_stats(
-            adapter, parent, (i["input_ids"] for i in ctx.calibration_items), ctx.device)
+        state = ctx.cached_stats(lambda: collect_activation_stats(
+            adapter, parent, (i["input_ids"] for i in ctx.calibration_items), ctx.device))
 
         new_spec = ctx.parent_spec.replace(**{FFN_FIELD: keep})
         builder = ChildBuilder(adapter, parent, new_spec, seed=ctx.seed)

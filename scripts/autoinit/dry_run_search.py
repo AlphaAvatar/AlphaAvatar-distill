@@ -18,6 +18,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import shutil
 import sys
 from pathlib import Path
 
@@ -31,7 +32,7 @@ from aadistill.autoinit.calibration import CalibrationProfile, CalibrationSource
 from aadistill.autoinit.cost import checkpoint_bytes  # noqa: E402
 from aadistill.autoinit.manifest import build_manifest, verify_manifest, write_manifest  # noqa: E402
 from aadistill.autoinit.metrics import StateEvalSuite, StateEvaluator, SuiteItem  # noqa: E402
-from aadistill.autoinit.ranking import PARETO_V1  # noqa: E402
+from aadistill.autoinit.ranking import PARETO_V1, SCHEDULE_V1, BeamSchedule  # noqa: E402
 from aadistill.autoinit.recovery import (  # noqa: E402
     E1_KD_HEAVY_0860K,
     SuccessiveHalvingPlan,
@@ -39,6 +40,8 @@ from aadistill.autoinit.recovery import (  # noqa: E402
     probe_configs,
 )
 from aadistill.autoinit.search import BeamSearch, SearchConfig  # noqa: E402
+from aadistill.autoinit.artifact import identify_checkpoint  # noqa: E402
+from aadistill.autoinit.state import make_control_state  # noqa: E402
 from aadistill.infrastructure.env import code_state, hardware_report  # noqa: E402
 
 TEACHER_GEOMETRY = dict(hidden_size=32, num_hidden_layers=6, intermediate_size=48,
@@ -93,15 +96,20 @@ def make_profiles(n: int):
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--out", default="artifacts/autoinit/dryrun")
-    parser.add_argument("--beam-width", type=int, default=2)
+    parser.add_argument("--beam-width", type=int, default=6)
+    parser.add_argument("--warmup-levels", type=int, default=1)
     parser.add_argument("--profiles", type=int, default=1, choices=(1, 2, 3))
     parser.add_argument("--seed", type=int, default=4242)
     parser.add_argument("--items", type=int, default=2)
     parser.add_argument("--seq-len", type=int, default=24)
-    parser.add_argument("--top-n", type=int, default=3)
+    parser.add_argument("--searched-leaves", type=int, default=5)
+    parser.add_argument("--resume", action="store_true",
+                        help="keep the previous journal instead of starting clean")
     args = parser.parse_args()
 
     out = REPO_ROOT / args.out
+    if out.exists() and not args.resume:
+        shutil.rmtree(out)
     adapter = get_adapter("qwen3")
     teacher = build_teacher(args.seed)
     target_spec = ArchSpec.of("qwen3", TARGET_GEOMETRY)
@@ -117,9 +125,13 @@ def main() -> None:
     evaluator.prime_reference(teacher)
     calibration = build_items(args.seed + 2, args.items, args.seq_len)
 
+    schedule = BeamSchedule(
+        schedule_id="dryrun.delayed_prune", version=1,
+        description="mirrors SCHEDULE_V1: no pruning at level 0, then a fixed width",
+        warmup_levels=args.warmup_levels, width=args.beam_width)
     config = SearchConfig(
         run_id="autoinit_dryrun", target_spec=target_spec,
-        beam_width=args.beam_width, seed=args.seed, workdir=out / "search",
+        schedule=schedule, seed=args.seed, workdir=out / "search",
         profiles=make_profiles(args.profiles), policy=PARETO_V1, suite=suite,
         notes={"purpose": "zero-cost end-to-end validation of the mandatory cycle"})
 
@@ -131,21 +143,54 @@ def main() -> None:
     result = search.run()
 
     leaves = result.complete_leaves
-    top_n = result.top_n(PARETO_V1, min(args.top_n, len(leaves)))
+
+    # The canonical control is *injected*, not regenerated: a composite re-executed
+    # inside the search is built from this run's calibration statistics, while the
+    # retained incumbent was built from the original Stage-0 statistics. Same
+    # algorithm, different input, different weights. Here the "retained" checkpoint
+    # is a stand-in built once outside the search, which is the same relationship.
+    control_dir = out / "canonical_control"
+    control_model = adapter.build_model(
+        adapter.build_config(teacher.config, target_spec), torch.float32, 4242)
+    adapter.save(control_model, str(control_dir))
+    control_artifact = identify_checkpoint(
+        control_dir, adapter=adapter, spec=target_spec,
+        num_parameters=adapter.param_count(target_spec))
+    control = make_control_state(
+        control_id="dryrun_canonical", artifact=control_artifact, spec=target_spec,
+        target_spec=target_spec, num_parameters=adapter.param_count(target_spec),
+        root_teacher_id="dryrun-tiny-teacher", root_teacher_sha256="0" * 64,
+        description="stand-in for artifacts/stage1/qwen3_0p6b_init_v0/checkpoint",
+        expected_single_file_sha256=control_artifact.single_shard_sha256)
+    control.attach_evaluation(
+        evaluator.evaluate(adapter.load(str(control_dir)),
+                           control_artifact.artifact_digest))
+
+    searched = min(args.searched_leaves, max(2, len(leaves)))
+    top_n = result.top_n(PARETO_V1, min(searched, len(leaves)))
 
     plan = SuccessiveHalvingPlan(
         plan_id="autoinit.dryrun", recipe=E1_KD_HEAVY_0860K,
-        top_n=min(args.top_n, len(leaves)), survivors=max(1, min(args.top_n, len(leaves)) - 1),
+        searched_leaves=min(searched, len(leaves)),
+        survivors=max(1, min(searched, len(leaves)) - 1),
+        feasibility_min=0.0,
         survivor_rule="dry run only; the paid plan is preregistered separately",
         winner_rule="dry run only; the paid plan is preregistered separately",
         battery_asset_id="recovery.search_battery")
-    probes = probe_configs(admit_leaves(list(top_n.selected), plan), plan)
+    admitted = admit_leaves([*top_n.selected, control], plan)
+    probes = probe_configs(admitted, plan, rung=1)
 
     manifest = build_manifest(
         result, adapter=adapter, profiles=list(config.profiles), policy=PARETO_V1,
         teacher={"model_id": "dryrun-tiny-teacher", "sha256": "0" * 64,
                  "geometry": TEACHER_GEOMETRY,
                  "num_parameters": adapter.param_count(adapter.spec_of(teacher))},
+        control={"state_id": control.state_id,
+                 "provenance": control.provenance,
+                 "artifact_digest": control.artifact_digest,
+                 "single_shard_sha256": control.checkpoint_sha256,
+                 "note": ("injected by artifact; a re-executed composite is not the "
+                          "historical incumbent")},
         top_n=top_n,
         recovery_config={"plan": plan.as_dict(), "probes": probes},
         cost={"usd": 0.0, "hardware": "CPU dev box", "note": "zero-cost dry run"},
@@ -178,6 +223,9 @@ def main() -> None:
             k: v["signature_hash"]
             for k, v in manifest["operator_registry"]["implementations"].items()},
         "beam_ranking_policy_hash": PARETO_V1.policy_hash,
+        "beam_schedule": schedule.as_dict(),
+        "stats_cache": search.stats_cache.report(),
+        "control": manifest["recovery_control"],
         "leaves": manifest["leaf_set"],
         "pruned": [
             {"state_id": s["state_id"], "path": s["path_label"],
@@ -189,15 +237,17 @@ def main() -> None:
     summary_path.write_text(json.dumps(summary, indent=2, default=str) + "\n")
 
     print(f"states {len(result.states)}  leaves {len(leaves)}  "
-          f"pruned {len(manifest['state_index']['pruned'])}")
+          f"pruned {len(manifest['state_index']['pruned'])}  "
+          f"stats-cache {search.stats_cache.report()}")
     print(f"manifest verified: {report}")
     print("\ncomplete leaves, ranked:")
     for rank, state in enumerate(top_n.selected, 1):
         values = state.evaluation.values
         print(f"  {rank}. {state.path_label}")
         print(f"     impls  {' -> '.join(state.impl_ids)}")
-        print(f"     sha256 {state.checkpoint_sha256[:16]}  params {state.num_parameters:,}"
-              f"  {checkpoint_bytes(state.spec, adapter) / 2**20:.2f} MiB")
+        print(f"     artifact {state.artifact_digest[:16]}  params {state.num_parameters:,}"
+              f"  {checkpoint_bytes(state.spec, adapter) / 2**20:.2f} MiB"
+              f"  shards {len(state.artifact.shards)}")
         print(f"     teacher_kl {values['state.teacher_kl.equal_domain_mean']:.4f}"
               f"  critical {values.get('state.critical_token_kl', float('nan')):.4f}"
               f"  nll {values['state.nll.general']:.4f}")

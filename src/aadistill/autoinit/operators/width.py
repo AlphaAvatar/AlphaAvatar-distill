@@ -82,8 +82,12 @@ class WidthGlobalPCAV0(OperatorImplementation):
         d_c = ctx.target_spec[WIDTH_FIELD]
         n_layers = ctx.parent_spec["num_hidden_layers"]
 
-        state = collect_activation_stats(
-            adapter, parent, (i["input_ids"] for i in ctx.calibration_items), ctx.device)
+        # Shared with `ffn.activation_importance_v0` when both expand the same
+        # parent under the same profile: one pass, two operators. Never shared
+        # across parents — the key includes the parent's artifact digest, and
+        # re-collecting per state is the point of the architecture.
+        state = ctx.cached_stats(lambda: collect_activation_stats(
+            adapter, parent, (i["input_ids"] for i in ctx.calibration_items), ctx.device))
 
         # Same point set and weights as the incumbent recipe: all pre-norm stream
         # states plus the post-final-norm point, ends upweighted 9/8.

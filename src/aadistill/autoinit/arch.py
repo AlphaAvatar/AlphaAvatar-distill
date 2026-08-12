@@ -186,16 +186,25 @@ class ArchitectureAdapter(ABC):
         """A fresh model at ``config``; deterministic given ``seed``."""
 
     @abstractmethod
-    def save(self, model: Any, path: str) -> None:
-        ...
+    def save(self, model: Any, path: str, *, max_shard_size: str | int | None = None) -> None:
+        """Write a checkpoint. ``max_shard_size`` is honoured when the format shards."""
 
     @abstractmethod
     def load(self, path: str, dtype: Any = None, device: str = "cpu") -> Any:
         """Canonical reload. The engine hashes and measures whatever this returns."""
 
     @abstractmethod
-    def weight_file(self, path: str) -> str:
-        """The file whose sha256 identifies a materialized checkpoint."""
+    def weight_files(self, path: str) -> list[str]:
+        """Every weight shard in the directory, as filenames relative to it.
+
+        A list rather than a single name because a 30B-class teacher is always
+        sharded and a depth-only 4B intermediate already can be. The caller sorts;
+        the adapter only has to find them.
+        """
+
+    def index_file(self, path: str) -> str | None:
+        """The shard index filename, when the format uses one."""
+        return None
 
     # --- structure accessors ----------------------------------------------
 

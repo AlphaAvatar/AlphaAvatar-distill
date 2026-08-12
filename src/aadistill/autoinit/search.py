@@ -41,8 +41,10 @@ import torch
 
 from ..infrastructure.manifest import sha256_file, sha256_json
 from .arch import ArchitectureAdapter, ArchSpec
-from .calibration import CalibrationProfile
+from .artifact import CheckpointIdentity, identify_checkpoint
+from .calibration import CalibrationProfile, consumes_calibration, profile_for
 from .metrics import StateEvalSuite, StateEvaluation
+from .stats import DEFAULT_STATS_SPEC, StatsCache, StatsSpec, stats_cache_key
 from .operators.base import (
     OperatorContext,
     OperatorImplementation,
@@ -50,7 +52,7 @@ from .operators.base import (
     get_implementation,
     rejected_implementations,
 )
-from .ranking import BeamRankingPolicy, RankingResult
+from .ranking import BeamRankingPolicy, BeamSchedule, RankingResult
 from .state import (
     InitializationState,
     OperatorStep,
@@ -75,12 +77,14 @@ class SearchConfig:
 
     run_id: str
     target_spec: ArchSpec
-    beam_width: int
+    schedule: BeamSchedule
     seed: int
     workdir: Path
     profiles: tuple[CalibrationProfile, ...]
     policy: BeamRankingPolicy
     suite: StateEvalSuite
+    stats_spec: StatsSpec = DEFAULT_STATS_SPEC
+    max_shard_size: str | int | None = None
     allowed_impls: tuple[str, ...] | None = None
     max_depth: int | None = None
     allow_kind_repeat: bool = False
@@ -98,7 +102,7 @@ class SearchConfig:
             "run_id": self.run_id,
             "target_spec": self.target_spec.as_dict(),
             "target_spec_hash": self.target_spec.spec_hash,
-            "beam_width": self.beam_width,
+            "schedule": self.schedule.as_dict(),
             "seed": self.seed,
             "profiles": [p.qualified_id for p in self.profiles],
             "profile_hashes": {p.qualified_id: p.profile_hash for p in self.profiles},
@@ -112,6 +116,8 @@ class SearchConfig:
             "device": self.device,
             "prune_weights": self.prune_weights,
             "keep_leaf_weights": self.keep_leaf_weights,
+            "stats_spec": self.stats_spec.as_dict(),
+            "max_shard_size": self.max_shard_size,
             "notes": dict(self.notes),
         }
 
@@ -176,6 +182,10 @@ class BeamSearch:
         self.resumed_ids: set[str] = set()
         self._calibration_cache: dict[str, Sequence[Mapping[str, Any]]] = {}
         self._journal: dict[str, dict[str, Any]] = {}
+        # One entry: the search expands a single parent at a time, and holding
+        # several 4B-class statistics sets would trade measured memory for a
+        # saving the access pattern does not produce.
+        self.stats_cache = StatsCache(stats_spec=config.stats_spec, max_entries=1)
 
         adapter.validate_target(config.target_spec)
 
@@ -247,22 +257,22 @@ class BeamSearch:
         """
         ckpt_dir = self.workdir / "states" / state.state_id
         ckpt_dir.mkdir(parents=True, exist_ok=True)
-        self.adapter.save(model, str(ckpt_dir))
+        self.adapter.save(model, str(ckpt_dir),
+                          max_shard_size=self.config.max_shard_size)
 
-        weight_path = ckpt_dir / self.adapter.weight_file(str(ckpt_dir))
-        if not weight_path.is_file():
-            raise SearchError(f"{state.state_id}: {weight_path} was not written")
-        digest = sha256_file(weight_path)
-        config_path = ckpt_dir / "config.json"
-        config_hash = sha256_json(json.loads(config_path.read_text())) if config_path.is_file() else ""
-        state.mark_materialized(str(ckpt_dir), digest, config_hash)
+        artifact = identify_checkpoint(
+            ckpt_dir, adapter=self.adapter, spec=planned_spec,
+            num_parameters=self.adapter.param_count(planned_spec))
+        state.mark_materialized(artifact)
 
         reloaded = self.adapter.load(str(ckpt_dir), device=self.config.device)
         checks = self._validate(state, model, reloaded, planned_spec)
+        checks["n_shards"] = len(artifact.shards)
+        checks["sharded"] = artifact.is_sharded
         state.notes["validation"] = checks
         state.mark_validated()
 
-        evaluation = self.measurer(reloaded, digest)
+        evaluation = self.measurer(reloaded, artifact.artifact_digest)
         state.attach_evaluation(evaluation)
         del reloaded
 
@@ -294,12 +304,25 @@ class BeamSearch:
     # --- expansion ---------------------------------------------------------
 
     def _candidate_expansions(self, parent: InitializationState):
-        """(implementation, profile) pairs for a parent, in deterministic order."""
+        """(implementation, profile) pairs for a parent, in deterministic order.
+
+        An implementation declaring ``CalibrationNeed.NONE`` is offered **once**,
+        against the canonical no-calibration sentinel, however many profiles are
+        active. ``depth.positional_v0`` is a fixed positional heuristic and
+        ``attention.weight_proxy_v0`` scores weights; neither has a mechanism by
+        which a mixture could change its output, so branching them over profiles
+        would manufacture byte-identical states, occupy beam slots that distinct
+        hypotheses should hold, and inflate the search-space count by a factor
+        that means nothing.
+        """
         exclude = () if self.config.allow_kind_repeat else tuple(sorted(set(parent.applied_kinds)))
         options = applicable_implementations(
             self.adapter, parent.spec, self.config.target_spec,
             exclude_kinds=exclude, allow_impls=self._allowed_impl_ids())
         for impl, _ in sorted(options, key=lambda pair: pair[0].impl_id):
+            if not consumes_calibration(impl):
+                yield impl, profile_for(impl, self.config.profiles[0])
+                continue
             for profile in sorted(self.config.profiles, key=lambda p: p.qualified_id):
                 yield impl, profile
 
@@ -328,7 +351,9 @@ class BeamSearch:
             target_spec=self.config.target_spec, profile=profile,
             calibration_items=self.calibration_for(profile), seed=self.config.seed,
             device=self.config.device, workdir=self.workdir,
-            config=dict(operator_config))
+            config=dict(operator_config),
+            stats_cache=self.stats_cache,
+            stats_cache_key=self._stats_key(parent, profile))
 
         started = time.time()
         outcome = impl.execute(ctx)
@@ -341,6 +366,26 @@ class BeamSearch:
         del outcome
         self.store.append(state)
         return state
+
+    def _stats_key(self, parent: InitializationState,
+                   profile: CalibrationProfile) -> str | None:
+        """Cache key for an activation pass on ``parent`` under ``profile``.
+
+        Returns ``None`` for the root, whose identity is a published revision
+        rather than an artifact this search computed — sharing a pass across the
+        root's children is legitimate, but it needs a digest to key on, and
+        inventing one would be exactly the cross-parent reuse the key exists to
+        prevent. The root simply pays for its own passes.
+        """
+        if parent.artifact_digest is None:
+            return None
+        return stats_cache_key(
+            parent_artifact_digest=parent.artifact_digest,
+            profile_hash=profile.profile_hash,
+            stats_spec=self.config.stats_spec,
+            adapter_version=self.adapter.adapter_version,
+            numerical_config={"device": self.config.device,
+                              "accumulation": self.config.stats_spec.accumulation_dtype})
 
     def _load_state_model(self, state: InitializationState) -> Any:
         if state.parent_id is None:
@@ -359,13 +404,31 @@ class BeamSearch:
         path = record.get("checkpoint_path")
         if not path or not Path(path).is_dir():
             return None
-        state.checkpoint_path = path
-        state.checkpoint_sha256 = record["checkpoint_sha256"]
-        state.config_sha256 = record.get("config_sha256")
-        state.validity = StateValidity.VALIDATED
+        artifact_record = record.get("artifact")
+        if not artifact_record:
+            return None
+        # Re-derive the identity from the files on disk rather than trusting the
+        # journal's copy: resume is exactly the moment a stale or truncated
+        # checkpoint would otherwise be adopted along with its old metrics.
+        try:
+            artifact = identify_checkpoint(
+                path, adapter=self.adapter, spec=state.spec,
+                num_parameters=self.adapter.param_count(state.spec))
+        except Exception:
+            return None
+        if artifact.artifact_digest != artifact_record.get("artifact_digest"):
+            return None
         eval_record = record.get("evaluation") or {}
+        # A state's identity is its path, which does not include the evaluation
+        # suite — so a journal written under a different suite would otherwise be
+        # adopted wholesale, and the beam would rank this run's states on last
+        # run's questions. Metrics bind to the artifact *and* to the suite.
+        if eval_record.get("suite_hash") != self.config.suite.suite_hash:
+            return None
+        state.mark_materialized(artifact)
+        state.validity = StateValidity.VALIDATED
         state.attach_evaluation(StateEvaluation(
-            checkpoint_sha256=eval_record["checkpoint_sha256"],
+            artifact_digest=eval_record["artifact_digest"],
             suite_id=eval_record["suite_id"], suite_hash=eval_record["suite_hash"],
             reference=eval_record["reference"], values=eval_record["values"],
             positions=eval_record["positions"], detail=eval_record.get("detail", {}),
@@ -419,7 +482,13 @@ class BeamSearch:
 
             ranking = None
             if partial:
-                ranking = self.config.policy.rank(partial, self.config.beam_width)
+                # `None` width means a warmup level: retain every child of the
+                # root so that no structural hypothesis dies on one step-0
+                # measurement. The distinction is carried into the record, so a
+                # level that pruned nothing by design is not confused with one
+                # that happened not to.
+                width = self.config.schedule.width_at(level)
+                ranking = self.config.policy.rank(partial, width)
                 kept = set(ranking.selected_ids)
                 for state in partial:
                     if state.state_id not in kept:
@@ -455,8 +524,10 @@ class BeamSearch:
         freed = sum(f.stat().st_size for f in path.rglob("*") if f.is_file())
         shutil.rmtree(path)
         state.notes["weights_released"] = {
-            "bytes": freed, "sha256": state.checkpoint_sha256,
-            "reason": "pruned from the beam; metrics and hash retained",
+            "bytes": freed, "artifact_digest": state.artifact_digest,
+            "single_shard_sha256": state.checkpoint_sha256,
+            "n_shards": len(state.artifact.shards) if state.artifact else 0,
+            "reason": "pruned from the beam; metrics and artifact identity retained",
         }
         state.checkpoint_path = None
 

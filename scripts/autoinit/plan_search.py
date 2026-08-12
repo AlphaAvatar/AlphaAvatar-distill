@@ -39,7 +39,7 @@ from aadistill.autoinit.cost import (  # noqa: E402
     price_search,
 )
 from aadistill.autoinit.operators import V1_IMPLEMENTATIONS, registry_ledger  # noqa: E402
-from aadistill.autoinit.ranking import PARETO_V1  # noqa: E402
+from aadistill.autoinit.ranking import PARETO_V1, SCHEDULE_V1  # noqa: E402
 from aadistill.autoinit.recovery import E1_KD_HEAVY_0860K  # noqa: E402
 
 ADAPTER = get_adapter("qwen3")
@@ -81,23 +81,33 @@ def probe_cost(price_per_hour: float) -> dict[str, float]:
     }
 
 
-def halving_cost(top_n: int, survivors: int, price_per_hour: float) -> dict:
+def halving_cost(searched: int, survivors: int, price_per_hour: float) -> dict:
+    """Cost of a rung-1 + rung-2 schedule, control included in both."""
     unit = probe_cost(price_per_hour)
-    probes = top_n + survivors
+    rung1 = searched + 1          # + the retained canonical control
+    rung2 = survivors + 1         # the control advances unconditionally
+    probes = rung1 + rung2
+    tie_break = (survivors + 1) * unit["total_usd"]
     return {
-        "top_n": top_n, "survivors": survivors, "probes": probes,
+        "searched_leaves": searched, "survivors": survivors,
+        "rung1_probes": rung1, "rung2_probes": rung2, "probes": probes,
         "per_probe_usd": round(unit["total_usd"], 4),
         "total_usd": round(probes * unit["total_usd"], 4),
         "total_hours": round(probes * unit["hours"], 3),
-        "note": (f"{top_n} leaves on seed sa, then {survivors} survivors on seed sb; "
-                 "two seeds because the behaviour metric's seed-only spread is 0.1290"),
+        "conditional_tie_break_usd": round(tie_break, 4),
+        "note": (f"rung 1: {searched} searched leaves + the canonical control on seed "
+                 f"sa; rung 2: {survivors} survivors + the control on seed sb. Two "
+                 "seeds because the behaviour metric's seed-only spread is 0.1290; a "
+                 "third seed runs only for candidates inside the preregistered "
+                 "equivalence interval."),
     }
 
 
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--out", default="logs/autoinit_v1_search_space.json")
-    parser.add_argument("--beam-widths", type=int, nargs="+", default=[2, 3, 4, 6])
+    parser.add_argument("--beam-widths", type=int, nargs="+", default=[4, 6, 8])
+    parser.add_argument("--warmup-levels", type=int, default=SCHEDULE_V1.warmup_levels)
     parser.add_argument("--profile-counts", type=int, nargs="+", default=[1, 2, 3])
     args = parser.parse_args()
 
@@ -111,6 +121,7 @@ def main() -> None:
                     suite_tokens=CALIBRATION_TOKENS,
                     seq_len=CALIBRATION_SEQ_LEN,
                     n_profiles=n_profiles, beam_width=beam_width,
+                    warmup_levels=args.warmup_levels,
                     hardware=hardware, composite=COMPOSITE)
                 row = estimate.as_dict()
                 row["n_profiles"] = n_profiles
@@ -120,6 +131,12 @@ def main() -> None:
     reference = branching_estimate(TEACHER, TARGET, ADAPTER, DECOMPOSED,
                                    n_profiles=1, beam_width=1,
                                    include_composite=COMPOSITE)
+    space_by_profiles = {
+        p: branching_estimate(TEACHER, TARGET, ADAPTER, DECOMPOSED, n_profiles=p,
+                              beam_width=SCHEDULE_V1.width,
+                              warmup_levels=args.warmup_levels,
+                              include_composite=COMPOSITE)["complete_paths_unbeamed"]
+        for p in (1, 2, 3)}
 
     manifest = {
         "schema": "aadistill.autoinit.search_space/v1",
@@ -142,6 +159,11 @@ def main() -> None:
         "operator_registry": registry_ledger(),
         "calibration_profiles": profile_summary(V1_PROFILES),
         "beam_ranking_policy": PARETO_V1.as_dict(),
+        "beam_schedule": SCHEDULE_V1.as_dict(),
+        "complete_paths_by_profile_count": space_by_profiles,
+        "search_space_formula": ("24 orderings x (1+P) DEPTH x P WIDTH x P FFN x 1 "
+                                 "ATTENTION; operators declaring CalibrationNeed.NONE "
+                                 "do not branch over profiles"),
         "calibration": {"tokens": CALIBRATION_TOKENS, "seq_len": CALIBRATION_SEQ_LEN,
                         "source": "E8a frozen 67-item mixture"},
         "search_space": reference,
@@ -167,7 +189,7 @@ def main() -> None:
             },
             "halving_options": [
                 halving_cost(n, s, L40S_MEASURED.price_per_hour_usd)
-                for n, s in ((3, 2), (4, 2), (6, 3), (8, 3))
+                for n, s in ((4, 2), (5, 2), (6, 3), (8, 3))
             ],
         },
         "caveats": [
@@ -190,6 +212,9 @@ def main() -> None:
     print(f"differing structural fields: {reference['differing_fields']}")
     print(f"kind orderings {reference['kind_orderings']}, "
           f"geometric paths {reference['complete_paths_geometry_only']}")
+    print(f"complete decomposed paths by profile count: {space_by_profiles}")
+    print(f"schedule: {SCHEDULE_V1.qualified_id} "
+          f"(warmup {SCHEDULE_V1.warmup_levels}, width {SCHEDULE_V1.width})")
     print()
     header = (f"{'hw':<16}{'prof':>5}{'beam':>6}{'states':>14}{'leaves':>12}"
               f"{'hours':>16}{'usd':>16}{'work GiB':>11}")
@@ -206,9 +231,10 @@ def main() -> None:
     print()
     print("recovery probes (L40S, $0.99/h):")
     for option in manifest["recovery"]["halving_options"]:
-        print(f"  Top-{option['top_n']} -> {option['survivors']} survivors: "
-              f"{option['probes']} probes, {option['total_hours']:.1f} h, "
-              f"${option['total_usd']:.2f}")
+        print(f"  {option['searched_leaves']} leaves + control -> "
+              f"{option['survivors']} survivors + control: {option['probes']} probes, "
+              f"{option['total_hours']:.1f} h, ${option['total_usd']:.2f} "
+              f"(+${option['conditional_tie_break_usd']:.2f} if a third seed is needed)")
     print(f"\nwrote {out.relative_to(REPO_ROOT)}")
 
 

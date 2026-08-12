@@ -7,10 +7,10 @@ pilot and a 30B -> 4.xB study with no edit.
 
 Anchors, and how good each one is:
 
-* **88.4 effective TFLOP/s on an L40S**, *measured*. E8a's depth search ran 260
+* **88.83 effective TFLOP/s on an L40S**, *measured*. E8a's depth search ran 260
   subset evaluations over a 67-item / 59,763-position mixture in 1,300 s at full
   4B width. The FLOP accounting below, applied to that exact workload, gives
-  1.150e17 FLOPs, hence 88.4 TFLOP/s and ~24% MFU. That is a real end-to-end
+  1.1548e17 FLOPs, hence 88.83 TFLOP/s and ~24.5% MFU. That is a real end-to-end
   number including the Python loop, not a spec sheet.
 * **Other accelerators are scaled by peak bf16 and marked ESTIMATED.** Scaling
   MFU across architectures is an assumption; it is labelled as one.
@@ -250,6 +250,25 @@ class PathNode:
     child_spec: ArchSpec
 
 
+def profile_multiplicity(impls: Sequence[OperatorImplementation],
+                         n_profiles: int) -> dict[str, int]:
+    """How many distinct invocations each implementation actually has.
+
+    An implementation declaring ``CalibrationNeed.NONE`` has **one**, whatever
+    ``n_profiles`` is: it consumes no mixture, so a per-profile branch would
+    produce byte-identical states. For the v1 library at ``P`` profiles that
+    makes the decomposed space
+
+        24 orderings x (1 + P) DEPTH x P WIDTH x P FFN x 1 ATTENTION
+
+    — 48 paths at P=1, 288 at P=2, 864 at P=3 — rather than the ``48 x P^4`` an
+    unconditional branch would claim.
+    """
+    from .calibration import consumes_calibration
+
+    return {i.impl_id: (n_profiles if consumes_calibration(i) else 1) for i in impls}
+
+
 def enumerate_paths(root_spec: ArchSpec, target_spec: ArchSpec,
                     adapter: ArchitectureAdapter,
                     impls: Sequence[OperatorImplementation]) -> list[list[PathNode]]:
@@ -257,7 +276,7 @@ def enumerate_paths(root_spec: ArchSpec, target_spec: ArchSpec,
 
     Calibration profiles are *not* multiplied in here — they do not change the
     geometry, so they multiply the node count without changing the per-node cost.
-    ``branching_estimate`` applies them.
+    ``branching_estimate`` applies them, per implementation.
     """
     differing = sorted(root_spec.diff(target_spec))
     by_field: dict[str, list[OperatorImplementation]] = {}
@@ -289,7 +308,7 @@ def enumerate_paths(root_spec: ArchSpec, target_spec: ArchSpec,
 def branching_estimate(root_spec: ArchSpec, target_spec: ArchSpec,
                        adapter: ArchitectureAdapter,
                        impls: Sequence[OperatorImplementation],
-                       *, n_profiles: int, beam_width: int,
+                       *, n_profiles: int, beam_width: int, warmup_levels: int = 0,
                        include_composite: Sequence[OperatorImplementation] = ()) -> dict[str, Any]:
     """How many states a beam of this width actually materializes.
 
@@ -301,38 +320,64 @@ def branching_estimate(root_spec: ArchSpec, target_spec: ArchSpec,
     paths = enumerate_paths(root_spec, target_spec, adapter, impls)
     differing = sorted(root_spec.diff(target_spec))
     n_kinds = len(differing)
+    multiplicity = profile_multiplicity(impls, n_profiles)
 
+    # Invocations per structural field: implementations for that field, each
+    # counted once per profile it actually consumes.
     by_field: dict[str, int] = {}
+    impls_per_field: dict[str, int] = {}
     for impl in impls:
-        if len(impl.modifies) == 1:
-            f = next(iter(impl.modifies))
-            if f in differing:
-                by_field[f] = by_field.get(f, 0) + 1
+        if len(impl.modifies) != 1:
+            continue
+        f = next(iter(impl.modifies))
+        if f in differing:
+            by_field[f] = by_field.get(f, 0) + multiplicity[impl.impl_id]
+            impls_per_field[f] = impls_per_field.get(f, 0) + 1
+
+    unbeamed = len(list(itertools.permutations(differing)))
+    for field_name in differing:
+        unbeamed *= by_field[field_name]
 
     per_level: list[dict[str, Any]] = []
     total_min = total_max = 0
     for level in range(n_kinds):
-        parents = 1 if level == 0 else beam_width
         remaining = n_kinds - level
         options = sorted(by_field.values())
         # Best case for branching width: the beam kept the parents that still
-        # have the most-implemented kinds available. Worst case: the opposite.
-        max_pairs = sum(options[-remaining:])
-        min_pairs = sum(options[:remaining])
-        lo, hi = parents * min_pairs * n_profiles, parents * max_pairs * n_profiles
-        per_level.append({"level": level, "parents": parents,
+        # have the most-branching kinds available. Worst case: the opposite.
+        max_inv = sum(options[-remaining:])
+        min_inv = sum(options[:remaining])
+        if level == 0:
+            parents_lo = parents_hi = 1
+        elif level <= warmup_levels:
+            # The preceding level was a warmup: nothing was pruned, so every
+            # child it generated is a parent here. This is what delayed pruning
+            # costs, and it is the widest point of the whole search.
+            parents_lo = per_level[-1]["children_min"]
+            parents_hi = per_level[-1]["children_max"]
+        else:
+            parents_lo = parents_hi = beam_width
+        lo, hi = parents_lo * min_inv, parents_hi * max_inv
+        per_level.append({"level": level, "parents_min": parents_lo,
+                          "parents_max": parents_hi, "parents": parents_hi,
+                          "pruned_here": level >= warmup_levels,
                           "children_min": lo, "children_max": hi})
         total_min += lo
         total_max += hi
 
-    composite_children = len(include_composite) * n_profiles
+    # The composite consumes calibration, so it does branch over profiles.
+    composite_children = sum(multiplicity.get(i.impl_id, n_profiles)
+                             for i in include_composite)
     return {
         "differing_fields": differing,
         "n_kinds": n_kinds,
-        "implementations_per_field": dict(sorted(by_field.items())),
+        "implementations_per_field": dict(sorted(impls_per_field.items())),
+        "invocations_per_field": dict(sorted(by_field.items())),
+        "profile_multiplicity": dict(sorted(multiplicity.items())),
         "n_calibration_profiles": n_profiles,
         "beam_width": beam_width,
-        "complete_paths_unbeamed": len(paths) * (n_profiles ** n_kinds),
+        "warmup_levels": warmup_levels,
+        "complete_paths_unbeamed": unbeamed,
         "complete_paths_geometry_only": len(paths),
         "kind_orderings": len(list(itertools.permutations(differing))),
         "per_level": per_level,
@@ -383,6 +428,7 @@ def price_search(root_spec: ArchSpec, target_spec: ArchSpec,
                  impls: Sequence[OperatorImplementation], *,
                  calibration_tokens: int, suite_tokens: int, seq_len: int,
                  n_profiles: int, beam_width: int, hardware: HardwareProfile,
+                 warmup_levels: int = 0,
                  composite: Sequence[OperatorImplementation] = ()) -> SearchCostEstimate:
     """Price the search by averaging real per-node costs over the enumerated paths.
 
@@ -395,6 +441,7 @@ def price_search(root_spec: ArchSpec, target_spec: ArchSpec,
     paths = enumerate_paths(root_spec, target_spec, adapter, impls)
     branching = branching_estimate(root_spec, target_spec, adapter, impls,
                                    n_profiles=n_profiles, beam_width=beam_width,
+                                   warmup_levels=warmup_levels,
                                    include_composite=composite)
     by_impl = {i.impl_id: i for i in impls}
 
@@ -456,7 +503,7 @@ def price_search(root_spec: ArchSpec, target_spec: ArchSpec,
             continue
         sizes = child_sizes[level]
         mean_child = sum(sizes) / len(sizes)
-        parents_resident = beam_width * max(
+        parents_resident = entry["parents_max"] * max(
             c.peak_resident_bytes - c.child_bytes for c in level_costs[level])
         peak_working = max(peak_working,
                            int(parents_resident + entry["children_max"] * mean_child))

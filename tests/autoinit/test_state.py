@@ -10,6 +10,7 @@ import pytest
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "src"))
 
 import aadistill.autoinit  # noqa: F401,E402
+from aadistill.autoinit.artifact import CheckpointIdentity, ShardRecord  # noqa: E402
 from aadistill.autoinit.metrics import MeasurementError, StateEvaluation  # noqa: E402
 from aadistill.autoinit.state import (  # noqa: E402
     InitializationState,
@@ -29,10 +30,18 @@ VALUES = {
 }
 
 
-def evaluation(sha: str, values=None) -> StateEvaluation:
-    return StateEvaluation(checkpoint_sha256=sha, suite_id="t@v1", suite_hash="h",
-                           reference="root_teacher", values=values or VALUES,
-                           positions=100)
+def artifact(digest_seed: str, path="/tmp/x", n_shards: int = 1) -> CheckpointIdentity:
+    return CheckpointIdentity(
+        path=path,
+        shards=tuple(ShardRecord(f"model-{i:05d}.safetensors", f"{digest_seed}{i}", 10)
+                     for i in range(n_shards)),
+        config_sha256="cfg", arch_signature="arch", num_parameters=1)
+
+
+def evaluation(art: CheckpointIdentity, values=None) -> StateEvaluation:
+    return StateEvaluation(artifact_digest=art.artifact_digest, suite_id="t@v1",
+                           suite_hash="h", reference="root_teacher",
+                           values=values or VALUES, positions=100)
 
 
 def step(index=0, kind="DEPTH", impl="depth.positional_v0", profile="p@v1",
@@ -51,9 +60,10 @@ def root(teacher_spec, target_spec) -> InitializationState:
 def measured_child(teacher_spec, target_spec, sha="childsha") -> InitializationState:
     parent = root(teacher_spec, target_spec)
     state = child_state(parent, step(), target_spec, 1, 1)
-    state.mark_materialized("/tmp/x", sha, "cfg")
+    art = artifact(sha)
+    state.mark_materialized(art)
     state.mark_validated()
-    state.attach_evaluation(evaluation(sha))
+    state.attach_evaluation(evaluation(art))
     return state
 
 
@@ -69,18 +79,19 @@ def test_a_parents_evaluation_cannot_be_attached_to_its_child(teacher_spec, targ
     """'Inherit the parent's NLL to save a forward pass' has no code path."""
     parent = measured_child(teacher_spec, target_spec, sha="parentsha")
     grandchild = child_state(parent, step(index=1, kind="FFN"), target_spec, 1, 1)
-    grandchild.mark_materialized("/tmp/y", "grandchildsha", "cfg")
+    gart = artifact("grandchildsha", path="/tmp/y")
+    grandchild.mark_materialized(gart)
     grandchild.mark_validated()
     with pytest.raises(MeasurementError, match="not inherited"):
         grandchild.attach_evaluation(parent.evaluation)
-    grandchild.attach_evaluation(evaluation("grandchildsha"))
-    assert grandchild.evaluation.checkpoint_sha256 == "grandchildsha"
+    grandchild.attach_evaluation(evaluation(gart))
+    assert grandchild.evaluation.artifact_digest == gart.artifact_digest
 
 
 def test_measuring_before_materializing_is_refused(teacher_spec, target_spec):
     state = child_state(root(teacher_spec, target_spec), step(), target_spec, 1, 1)
     with pytest.raises(StateError, match="before the checkpoint"):
-        state.attach_evaluation(evaluation("anything"))
+        state.attach_evaluation(evaluation(artifact("anything")))
 
 
 def test_ranking_requires_a_complete_measurement(teacher_spec, target_spec):
@@ -92,7 +103,7 @@ def test_ranking_requires_a_complete_measurement(teacher_spec, target_spec):
 
 def test_an_unmeasured_state_cannot_be_ranked(teacher_spec, target_spec):
     state = child_state(root(teacher_spec, target_spec), step(), target_spec, 1, 1)
-    state.mark_materialized("/tmp/z", "sha", "cfg")
+    state.mark_materialized(artifact("sha", path="/tmp/z"))
     with pytest.raises(StateError, match="no hash-bound evaluation"):
         state.ready_for_ranking(list(VALUES))
 
@@ -106,9 +117,10 @@ def test_an_intermediate_state_cannot_enter_recovery(teacher_spec, target_spec):
         num_hidden_layers=target_spec["num_hidden_layers"])
     parent = root(teacher_spec, target_spec)
     state = child_state(parent, step(), intermediate_spec, 999, 1)
-    state.mark_materialized("/tmp/i", "sha", "cfg")
+    art = artifact("sha", path="/tmp/i")
+    state.mark_materialized(art)
     state.mark_validated()
-    state.attach_evaluation(evaluation("sha"))
+    state.attach_evaluation(evaluation(art))
 
     assert not state.is_complete_leaf()
     assert state.remaining_differences() == {
@@ -120,12 +132,13 @@ def test_an_intermediate_state_cannot_enter_recovery(teacher_spec, target_spec):
 def test_a_complete_leaf_must_still_be_measured(teacher_spec, target_spec):
     parent = root(teacher_spec, target_spec)
     leaf = child_state(parent, step(), target_spec, 1, 1)
-    leaf.mark_materialized("/tmp/l", "sha", "cfg")
+    art = artifact("sha", path="/tmp/l")
+    leaf.mark_materialized(art)
     leaf.mark_validated()
     assert leaf.is_complete_leaf()
     with pytest.raises(StateError, match="hash-bound measurements"):
         leaf.require_recovery_admissible()
-    leaf.attach_evaluation(evaluation("sha"))
+    leaf.attach_evaluation(evaluation(art))
     leaf.require_recovery_admissible()
 
 
@@ -134,9 +147,10 @@ def test_a_leaf_matches_the_target_field_for_field(teacher_spec, target_spec):
     parent = root(teacher_spec, target_spec)
     almost = target_spec.replace(intermediate_size=target_spec["intermediate_size"] + 8)
     leaf = child_state(parent, step(), almost, 1, 1)
-    leaf.mark_materialized("/tmp/a", "sha", "cfg")
+    art = artifact("sha", path="/tmp/a")
+    leaf.mark_materialized(art)
     leaf.mark_validated()
-    leaf.attach_evaluation(evaluation("sha"))
+    leaf.attach_evaluation(evaluation(art))
     assert not leaf.is_complete_leaf()
     with pytest.raises(StateError, match="intermediate search state"):
         leaf.require_recovery_admissible()
@@ -198,6 +212,6 @@ def test_pruned_states_stay_auditable(tmp_path, teacher_spec, target_spec):
     assert "dominated" in latest["prune_reason"]
     # Its metrics and hash survive the pruning: the record still supports
     # re-deriving why it lost.
-    assert latest["checkpoint_sha256"] == "childsha"
+    assert latest["artifact_digest"] == state.artifact_digest
     assert latest["evaluation"]["values"] == VALUES
     assert len(store.records()) == 2

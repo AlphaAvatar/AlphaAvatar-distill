@@ -99,6 +99,7 @@ def eval_suite():
         subtypes={"general": ("text",), "math": ("arith",)},
         critical_tags=("eos_like", "answer_like"),
         n_items=4, description="tiny held-out suite for the CPU dry run",
+        general_domain="general",
     )
 
 
