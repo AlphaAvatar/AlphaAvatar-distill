@@ -6,6 +6,65 @@ AlphaAvatar-distill is an agent-guided model compression and distillation framew
 
 The goal is to make distillation reproducible and automated, producing efficient student models with long-context and multi-turn comprehension, strong reasoning and self-correction, and reliable accuracy across sustained interactions and long-running agentic workloads such as AlphaAvatar—including RAG, tool use, quantized inference, and low-latency deployment.
 
+**Positioning: teacher checkpoint → arbitrary requested target size.** The framework is
+not a fixed recipe for one teacher/student pair. It takes a teacher checkpoint, a target
+architecture, a calibration pool and a search budget, and produces an initialized student
+of exactly the requested size. The current study is 4B → ~596M; the same machinery is
+intended to carry a later ~30B → ~4.xB setting, so nothing in the search engine may
+hard-code layer counts, hidden or FFN sizes, head counts, or a target parameter count.
+
+### Current state
+
+| | |
+| --- | --- |
+| current best behaviour | E1/P1 KD-heavy at the 2.96M rung (`e1_r2960k_sb_pca` lineage) |
+| frozen battery | 150 prompts, inclusion mask `d6e24e0b09da1bcc…`, sampled from the 0.86M rung |
+| retained reference on it | usable_rollout 0.7300 · correct_overall 0.1867 · correct_given_usable 0.2511 |
+| active work | **Teacher-Adaptive AutoInitializer** (design stage, no paid search authorized) |
+| last completed experiment | **E8a** — contribution-guided depth search |
+| E8b | **strategically terminated; no valid recovered-behaviour comparison** |
+| actual cumulative spend | **$180.7033** against a $211.07 cap ([ledger](./logs/BUDGET_LEDGER.md)) |
+
+**One place for the experiment history: [`logs/EXPERIMENT_INDEX.md`](./logs/EXPERIMENT_INDEX.md)**
+— what each of E1–E8 asked, what it proved, what it does *not* support, and which
+checkpoints still matter. Chronology and per-session detail live in
+[`logs/EXPERIMENTS.md`](./logs/EXPERIMENTS.md); this README keeps only current state.
+
+### What E1–E8 established
+
+1. **PCA/structural initialization decisively beats random initialization** (E1).
+2. **Same-distribution scaling improved autonomous stability, not reasoning correctness** (E1, E6).
+3. **KD-heavy scales better than CE-heavy on autonomous stability** (E4, E6b).
+4. **Extra unseen-text KD (FineWeb-Edu) strongly recovers general language modelling
+   without solving autonomous reasoning** (E7).
+5. **General-language NLL is not a reliable promotion criterion** (E7).
+6. **A full-width depth-ablation proxy does not predict the fully-compressed step-0
+   initializer** (E8a) — the contribution map preserves the teacher 3.11× better at full
+   width and initializes 2.8 nats worse once composed with width/FFN/attention
+   compression.
+7. **E8b did not complete recovered behaviour** and must not be used to claim a
+   depth × compression interaction.
+
+### Why NLL and CE are diagnostics, not promotion criteria
+
+Promotion, arm selection and stage advancement are decided on the **frozen autonomous
+rollout evaluation**. Held-out NLL was retired as a selector after the checkpoint with the
+best NLL of its trajectory produced *zero* protocol-valid generations, and E7 then
+restored general language modelling substantially while behaviour did not move at all.
+NLL, CE, teacher KL, top-1 and rank remain useful for training health and for diagnosing
+initialization — never for choosing a checkpoint.
+
+### Why the project is moving to an AutoInitializer
+
+E8a produced the motivating result: a proxy measured on the *full-width* teacher ranks
+depth maps in the opposite order from the *fully compressed* step-0 initializer. A single
+fixed recipe cannot resolve that, because the right choice for one operator depends on
+which operators have already been applied. The successor system therefore searches over
+initialization **operators, operator order, and calibration configuration**, remeasuring
+the actual checkpoint after every operator, and admits only complete target-size
+candidates to a fixed low-budget recovery probe. Design constraints are recorded in
+[`logs/decisions.md`](./logs/decisions.md); **no paid search is authorized.**
+
 The methods are meant to be **model-family-agnostic**: the same activation-statistics initialization, recovery training and deployment-numerics gates should apply to dense LLMs, MoE, VLM and Omni-models alike. That is a design constraint on the algorithm core, not a claim — the run below is a dense text **baseline**, and no MoE, vision or audio model has been attempted or validated ([scope decision](./logs/decisions.md)).
 
 [![Experiment 1 recovery-data scaling](./assets/e1_scaling.svg)](./assets/e1_scaling.svg)
