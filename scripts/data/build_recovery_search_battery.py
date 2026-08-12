@@ -59,7 +59,11 @@ SETS = {
     "rag":            ("rag_multihop", 30, True),
     "knowledge":      ("general", 30, True),
     "code":           ("code", 20, False),
-    "tool":           ("tool", 20, False),
+    # Scorable as of the tool-scoring audit: `behavior.score_tool_call` consumes
+    # the battery after a mechanical envelope translation, distinguishes all six
+    # adversarial cases, and its exact-match verdict never depends on the one
+    # interpretive field. See logs/autoinit_tool_scoring_audit.json.
+    "tool":           ("tool", 20, True),
 }
 
 RAG_INSTRUCTION = ("Answer the question using only the provided context. If the "
@@ -296,11 +300,35 @@ def main() -> None:
         if not tools:
             return None
         text = f"{TOOL_INSTRUCTION}\n\nTools:\n{tools}\n\nRequest: {r['query']}"
+        # Stored in the shape `behavior.score_tool_call` consumes, alongside the
+        # raw xLAM fields. The translation is mechanical: wrap each entry in a
+        # `{"function": ...}` envelope. `required` is derived from the absence of a
+        # `default`, which is an interpretation of xLAM's convention — so it is
+        # recorded but feeds only the diagnostic `tool_args_schema_ok`, never
+        # correctness, which is `tool_call_exact_match`.
+        parsed_tools = json.loads(tools) if isinstance(tools, str) else tools
+        parsed_calls = json.loads(r["answers"]) if isinstance(r["answers"], str) \
+            else r["answers"]
+        if not parsed_calls:
+            return None
         return {"id": f"xlam-{r['id']}", "group": "tool", "source": "xlam_fc_60k",
                 "source_key": str(r["id"]), "prompt_text": text,
                 "messages": [{"role": "user", "content": text}],
-                "scorable": False,
-                "reference_calls": r.get("answers"), "tools": tools}
+                "scorable": True,
+                "correctness_field": "tool_call_exact_match",
+                "reference_calls": r.get("answers"), "tools": tools,
+                "scorer_tools": [
+                    {"function": {"name": t.get("name"),
+                                  "parameters": {
+                                      "properties": t.get("parameters") or {},
+                                      "required": [
+                                          n for n, spec in (t.get("parameters") or {}).items()
+                                          if isinstance(spec, dict) and "default" not in spec]}}}
+                    for t in parsed_tools],
+                "gold_tool_calls": [
+                    {"function": {"name": c.get("name"),
+                                  "arguments": c.get("arguments")}}
+                    for c in parsed_calls]}
 
     built["tool"] = take(list(ds), SETS["tool"][1], exclude_ids, exclude_hashes,
                          make_tool)
@@ -359,10 +387,18 @@ def main() -> None:
             "source": "src/aadistill/evaluation/capability.py",
             "sha256": sha256_file(REPO_ROOT / "src/aadistill/evaluation/capability.py"),
             "gsm8k": "strict_answer.score_numeric against gsm8k_answer",
+            "tool": ("behavior.score_tool_call, correctness = tool_call_exact_match "
+                     "against gold_tool_calls; tool_args_schema_ok is a diagnostic "
+                     "because its `required` list interprets xLAM's convention"),
+            "tool_audit": "logs/autoinit_tool_scoring_audit.json",
+            "tool_strictness": (
+                "exact match compares the emitted call list to the gold list in "
+                "order; 9 of 20 items are multi-call. This is the existing frozen "
+                "semantics, not a new rule."),
             "behaviour_only_note": (
-                "code and tool have no frozen scorer; they contribute stability and "
-                "failure diagnostics only. LIMITATION: this battery cannot detect a "
-                "candidate that trades code or tool capability for math."),
+                "code has no frozen scorer and contributes stability and failure "
+                "diagnostics only. LIMITATION: this battery cannot detect a "
+                "candidate that trades code capability for math."),
         },
         "sources": sources,
         "sampling_rule": {

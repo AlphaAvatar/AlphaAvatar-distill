@@ -1,0 +1,72 @@
+{
+  "scorer": "aadistill.evaluation.behavior.score_tool_call",
+  "scorer_sha256": "c6f52721e8b86bc2d875683bfb9c35b4101379fa5d48de7a48db93959e2935c2",
+  "n_items": 20,
+  "parse_failures": [],
+  "multi_call_items": 9,
+  "required_signal_counts": {
+    "has_default": 88,
+    "no_default": 18
+  },
+  "cases_run": [
+    "known_good",
+    "malformed_json",
+    "missing_required_args",
+    "protocol_invalid_no_wrapper",
+    "wrong_argument_values",
+    "wrong_tool_name"
+  ],
+  "disagreements": [],
+  "all_cases_behave_as_required": true,
+  "interpretation_sensitive_verdicts": 3,
+  "interpretation_affects_only_schema_field": true,
+  "examples_of_sensitivity": [
+    {
+      "id": "xlam-13",
+      "case": "missing_required_args",
+      "fields": [
+        "tool_args_schema_ok"
+      ],
+      "with_required": {
+        "tool_args_schema_ok": false
+      },
+      "without_required": {
+        "tool_args_schema_ok": true
+      }
+    },
+    {
+      "id": "xlam-18",
+      "case": "missing_required_args",
+      "fields": [
+        "tool_args_schema_ok"
+      ],
+      "with_required": {
+        "tool_args_schema_ok": false
+      },
+      "without_required": {
+        "tool_args_schema_ok": true
+      }
+    },
+    {
+      "id": "xlam-8",
+      "case": "missing_required_args",
+      "fields": [
+        "tool_args_schema_ok"
+      ],
+      "with_required": {
+        "tool_args_schema_ok": false
+      },
+      "without_required": {
+        "tool_args_schema_ok": true
+      }
+    }
+  ],
+  "connection_is_mechanical": true,
+  "decision": "MAKE TOOL SCORABLE on tool_call_exact_match: the envelope translation is mechanical, exact match never depends on the `required` interpretation, and every adversarial case is distinguished correctly.",
+  "correctness_field_if_scorable": "tool_call_exact_match",
+  "fields_not_used_for_correctness": [
+    "tool_args_schema_ok (depends on the `required` interpretation; reported as a diagnostic, never as correctness)"
+  ],
+  "generated_utc": "2026-08-12T19:04:42.108518+00:00",
+  "audit_sha256": "772f06ce2cb742e4272c543ae7dbb5f6e3a3521d9bcd6e0ca28e2e476a751ad6"
+}

@@ -2,7 +2,7 @@
   "artifact": "recovery_search_v1",
   "role": "RECOVERY_SEARCH",
   "purpose": "selecting among fixed 0.86M recovery probes; never a promotion asset, never training data, never a beam-ranking input",
-  "created_utc": "2026-08-12T18:06:05.011307+00:00",
+  "created_utc": "2026-08-12T19:04:11.418342+00:00",
   "command": "scripts/data/build_recovery_search_battery.py",
   "battery_id": "recovery_search",
   "version": 1,
@@ -52,9 +52,9 @@
     "tool": {
       "path": "artifacts/stage3/recovery_search_v1/tool.jsonl",
       "n": 20,
-      "sha256": "a12e690b1ba669c58ae69f44260cb05b3d05d2ccaa4bbde392f1e1a3a60ca789",
+      "sha256": "e02bf11732a7ddc33eddc43914ab0a49928a56a934937ed849da27592031c4a5",
       "domain": "tool",
-      "scorable": false
+      "scorable": true
     }
   },
   "domains": [
@@ -65,17 +65,17 @@
     "tool"
   ],
   "n_prompts": 190,
-  "n_scorable_prompts": 150,
+  "n_scorable_prompts": 170,
   "scorable_sets": [
     "gsm8k",
     "math_verified",
     "multihop",
     "rag",
-    "knowledge"
+    "knowledge",
+    "tool"
   ],
   "behaviour_only_sets": [
-    "code",
-    "tool"
+    "code"
   ],
   "metrics": {
     "feasibility": "usable_rollout_rate over ALL prompts",
@@ -95,7 +95,10 @@
     "source": "src/aadistill/evaluation/capability.py",
     "sha256": "da1bc3b1069d927b6ab2cbf0eaaf6763bfa491d396189b3dcde95977e39d67ad",
     "gsm8k": "strict_answer.score_numeric against gsm8k_answer",
-    "behaviour_only_note": "code and tool have no frozen scorer; they contribute stability and failure diagnostics only. LIMITATION: this battery cannot detect a candidate that trades code or tool capability for math."
+    "tool": "behavior.score_tool_call, correctness = tool_call_exact_match against gold_tool_calls; tool_args_schema_ok is a diagnostic because its `required` list interprets xLAM's convention",
+    "tool_audit": "logs/autoinit_tool_scoring_audit.json",
+    "tool_strictness": "exact match compares the emitted call list to the gold list in order; 9 of 20 items are multi-call. This is the existing frozen semantics, not a new rule.",
+    "behaviour_only_note": "code has no frozen scorer and contributes stability and failure diagnostics only. LIMITATION: this battery cannot detect a candidate that trades code capability for math."
   },
   "sources": {
     "gsm8k": {
@@ -376,19 +379,15 @@
   },
   "content_sha256": "a1b22778b00d95b6aba358c14a5af5b559fd807bb371c92131eacca59479f323",
   "code_state": {
-    "git_commit": "1f6f35f65e6307cad3acf93c116350f393aeb9db",
+    "git_commit": "748ef6f25a01bbc7b341e6d52faccb683eb96bd6",
     "git_commit_source": "git",
     "dirty": true,
-    "uncommitted_state_sha256": "80aea42d2737f8cd6965cb4831de4d20ae0a57bc2acc6e9ef26046ebb75d8af9",
+    "uncommitted_state_sha256": "fcdaf4918a4bb5b8aae084a7103d3613a238cce9e3bb02e5c80ee63c513aa68f",
     "untracked_files": [
-      "logs/autoinit_dryrun_fresh.json",
-      "logs/autoinit_dryrun_resume.json",
-      "logs/autoinit_role_isolation.json",
-      "scripts/data/build_recovery_search_battery.py",
-      "scripts/data/build_state_eval_suite.py",
-      "scripts/data/check_autoinit_role_isolation.py"
+      "logs/autoinit_tool_scoring_audit.json",
+      "scripts/autoinit/audit_tool_scoring.py"
     ]
   },
-  "manifest_sha256": "a3d3f54456c5771efaca5cdaaeb059ad06181eb84b4ff481ee8b5a184d2549bd",
-  "_tracked_copy_note": "Tracked copy of the manifest inside the gitignored artifact directory. The payload (items/prompts) is rebuildable from the committed builder and the pinned inputs; this manifest is the reproducibility record."
+  "manifest_sha256": "1a8321c79e4ee9ad0128cb238cda37384ab60c31cb916d2acc000078dde767e6",
+  "_tracked_copy_note": "Tracked copy of the manifest inside the gitignored artifact directory. The payload is rebuildable from the committed builder and the pinned inputs; this manifest is the reproducibility record."
 }

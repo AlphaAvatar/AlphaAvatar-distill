@@ -35,11 +35,13 @@ from aadistill.autoinit.cost import (  # noqa: E402
 from aadistill.autoinit.operators import V1_IMPLEMENTATIONS, registry_ledger  # noqa: E402
 from aadistill.autoinit.ranking import PARETO_V1, SCHEDULE_V1  # noqa: E402
 from aadistill.autoinit.recovery import (  # noqa: E402
+    CATASTROPHIC_V1,
     E1_KD_HEAVY_0860K,
     POOLED_COUNTS_V1,
     SEED_SA,
     SEED_SB,
     SEED_SC,
+    EquivalenceRule,
     SuccessiveHalvingPlan,
 )
 from aadistill.infrastructure.manifest import sha256_file, sha256_json  # noqa: E402
@@ -97,9 +99,13 @@ def main() -> None:
     plan = SuccessiveHalvingPlan(
         plan_id="autoinit.v1.phase_a", recipe=E1_KD_HEAVY_0860K,
         searched_leaves=5, survivors=2,
-        feasibility_min=-1.0,          # placeholder; see selection_rules below
-        equivalence_interval=thresholds["recovery_thresholds"][
-            "equivalence_interval"]["interval_at_prior"],
+        feasibility_min=-1.0,          # PENDING; see selection_rules below
+        # Formula frozen, value pending the control characterization. Deliberately
+        # NOT pre-filled from the historical prior: a fallback value would be the
+        # second definition this rule exists to eliminate.
+        equivalence=EquivalenceRule(
+            n_pooled=battery["n_scorable_prompts"] * 2),
+        catastrophic=CATASTROPHIC_V1,
         aggregation=POOLED_COUNTS_V1,
         survivor_rule=("rung 1: exclude searched leaves below the feasibility floor, "
                        "then take the top 2 by correct_overall; the canonical "
@@ -200,11 +206,14 @@ def main() -> None:
                     "feasibility_floor"],
                 "primary_metric": "correct_overall over SCORABLE prompts",
                 "secondary_metric": "correct_given_usable over SCORABLE prompts",
-                "equivalence_interval": plan.equivalence_interval,
-                "equivalence_interval_rule": thresholds["recovery_thresholds"][
-                    "equivalence_interval"],
-                "catastrophic_floor_rule": thresholds["recovery_thresholds"][
-                    "catastrophic_per_capability_floor"],
+                "equivalence_rule": plan.equivalence.as_dict(),
+                "equivalence_interval": plan.equivalence.value,
+                "catastrophic_capability_rule": plan.catastrophic.as_dict(),
+                "correctness_semantics": (
+                    "correct = correct IN A USABLE ROLLOUT. A rollout that answers "
+                    "correctly and then loops or hits the context limit is not "
+                    "counted correct; correct_but_unusable is reported separately "
+                    "so the gap is visible."),
                 "control_eligible_to_win": True,
                 "control_exempt_from_feasibility_gate": True,
                 "no_weighted_scalar": True,
@@ -285,6 +294,24 @@ def main() -> None:
             "activation_stats_gib": round(activation_stats_bytes(TEACHER) / 2**30, 2),
             "provision_at_least_gib": 150,
         },
+        "decision_statuses": {
+            "resolved": "one finalist leads by more than the equivalence interval",
+            "tie_pending": ("finalists equivalent after sa+sb; seed sc is owed and "
+                            "winner is None"),
+            "unresolved_equivalence": (
+                "finalists still equivalent after sc; winner is None and the result "
+                "is 'AutoInitializer v1 did not resolve a unique behavioural "
+                "winner'. No fourth seed, and no state-id tie-break is used to "
+                "manufacture a winner."),
+        },
+        "canonical_control_availability": json.loads(
+            (REPO_ROOT / "logs/autoinit_control_availability.json").read_text())
+            if (REPO_ROOT / "logs/autoinit_control_availability.json").is_file()
+            else "NOT VERIFIED",
+        "tool_scoring_audit": json.loads(
+            (REPO_ROOT / "logs/autoinit_tool_scoring_audit.json").read_text())
+            if (REPO_ROOT / "logs/autoinit_tool_scoring_audit.json").is_file()
+            else None,
         "pending_before_launch": [
             "canonical control usable_rollout_rate on recovery_search_v1",
             "canonical control correct_overall on recovery_search_v1",

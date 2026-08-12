@@ -30,9 +30,12 @@ from aadistill.autoinit.cost import (  # noqa: E402
 from aadistill.autoinit.metrics import StateEvaluation  # noqa: E402
 from aadistill.autoinit.operators import V1_IMPLEMENTATIONS  # noqa: E402
 from aadistill.autoinit.recovery import (  # noqa: E402
+    CATASTROPHIC_V1,
     E1_KD_HEAVY_0860K,
     SEED_SA,
     SEED_SB,
+    SEED_SC,
+    EquivalenceRule,
     RecoveryAdmissionError,
     SuccessiveHalvingPlan,
     admit_leaves,
@@ -154,7 +157,7 @@ def plan(**overrides):
     kwargs = dict(
         plan_id="autoinit.v1.pilot", recipe=E1_KD_HEAVY_0860K,
         searched_leaves=5, survivors=2, feasibility_min=0.50,
-        equivalence_interval=0.02,
+        equivalence=EquivalenceRule(n_pooled=340).materialize(0.1867),
         survivor_rule=("feasible by usable_rollout_rate >= 0.50, then top 2 searched "
                        "leaves by correct_overall; the control advances regardless"),
         winner_rule="top 1 by mean correct_overall over sa and sb among feasible",
@@ -190,6 +193,177 @@ def test_the_feasibility_constraint_and_the_objective_must_be_different_metrics(
     assert p.primary_metric == "correct_overall"
     assert p.secondary_metric == "correct_given_usable"
     assert "No weighted combination" in p.as_dict()["selection"]["rule"]
+
+
+def test_the_equivalence_interval_has_exactly_one_definition():
+    """Formula frozen now; value materialized from the control, then immutable."""
+    pending = EquivalenceRule(n_pooled=340)
+    assert pending.value is None
+    assert pending.as_dict()["status"] == "PENDING_CONTROL_CHARACTERIZATION"
+    with pytest.raises(RecoveryAdmissionError, match="not materialized"):
+        pending.require_value()
+
+    frozen = pending.materialize(0.1867)
+    assert frozen.value == pytest.approx(2 * (0.1867 * 0.8133 / 340) ** 0.5)
+    assert frozen.require_value() == frozen.value
+    # Once materialized it does not move again.
+    with pytest.raises(ValueError, match="already materialized"):
+        frozen.materialize(0.25)
+    # A different control rate gives a different interval, which is the point.
+    assert EquivalenceRule(n_pooled=340).materialize(0.30).value != frozen.value
+
+
+def test_selection_refuses_to_run_before_the_control_is_characterized():
+    """No prior fallback: a fallback would be the second definition again."""
+    unmaterialized = plan(equivalence=EquivalenceRule(n_pooled=340))
+    rows = [{"state_id": "a", "usable_rollout_rate": 0.8, "correct_overall": 0.2},
+            {"state_id": "b", "usable_rollout_rate": 0.8, "correct_overall": 0.1}]
+    with pytest.raises(RecoveryAdmissionError, match="not materialized"):
+        unmaterialized.select_final_winner(rows)
+
+
+# --- catastrophic per-capability gate ---------------------------------------
+
+
+def test_the_catastrophic_capability_rule_is_enforced_at_both_rungs():
+    """A candidate that collapses on one capability is excluded mechanically."""
+    p = plan()
+    control = {"state_id": "control", "is_control": True,
+               "usable_rollout_rate": 0.75, "correct_overall": 0.19,
+               "per_capability": {"tool": {"usable_rollout_rate": 0.62},
+                                  "gsm8k": {"usable_rollout_rate": 0.80}}}
+    collapsed = {"state_id": "collapsed", "usable_rollout_rate": 0.71,
+                 "correct_overall": 0.30,
+                 "per_capability": {"tool": {"usable_rollout_rate": 0.04},
+                                    "gsm8k": {"usable_rollout_rate": 0.90}}}
+    healthy = {"state_id": "healthy", "usable_rollout_rate": 0.70,
+               "correct_overall": 0.29,
+               "per_capability": {"tool": {"usable_rollout_rate": 0.55},
+                                  "gsm8k": {"usable_rollout_rate": 0.78}}}
+    rows = [control, collapsed, healthy]
+
+    for out in (p.select_rung1_survivors(rows), p.select_final_winner(rows)):
+        excluded = out["excluded_by_catastrophic_capability"]
+        assert [e["state_id"] for e in excluded] == ["collapsed"], out["rung"]
+        violation = excluded[0]["violations"][0]
+        assert violation["capability"] == "tool"
+        assert violation["candidate_value"] == pytest.approx(0.04)
+        assert violation["control_value"] == pytest.approx(0.62)
+        assert "catastrophic collapse on tool" in excluded[0]["reason"]
+        # ... and it does not win despite leading the primary metric.
+        assert "collapsed" not in [r["state_id"] for r in out["ranked"]]
+
+    final = p.select_final_winner(rows)
+    assert final["decision_status"] == "resolved"
+    assert final["winner"] == "healthy"
+
+
+def test_the_catastrophic_rule_needs_the_control_to_fire():
+    """No control row means no reference; the report says so rather than passing."""
+    p = plan()
+    collapsed = {"state_id": "collapsed", "usable_rollout_rate": 0.71,
+                 "correct_overall": 0.30,
+                 "per_capability": {"tool": {"usable_rollout_rate": 0.04}}}
+    out = p.select_rung1_survivors([collapsed])
+    assert out["control_present"] is False
+    assert out["excluded_by_catastrophic_capability"] == []
+
+
+def test_the_rule_does_not_fire_when_the_control_is_also_weak():
+    """A capability the incumbent cannot do either is not the candidate's failure."""
+    p = plan()
+    control = {"state_id": "control", "is_control": True,
+               "usable_rollout_rate": 0.75, "correct_overall": 0.19,
+               "per_capability": {"tool": {"usable_rollout_rate": 0.20}}}
+    candidate = {"state_id": "c", "usable_rollout_rate": 0.71, "correct_overall": 0.30,
+                 "per_capability": {"tool": {"usable_rollout_rate": 0.04}}}
+    out = p.select_final_winner([control, candidate])
+    assert out["excluded_by_catastrophic_capability"] == []
+    assert out["winner"] == "c"
+
+
+def test_the_catastrophic_rule_is_part_of_the_plan_hash():
+    from aadistill.autoinit.recovery import CatastrophicCapabilityRule
+
+    base = plan()
+    looser = plan(catastrophic=CatastrophicCapabilityRule(candidate_max=0.01))
+    assert base.plan_hash != looser.plan_hash
+    assert base.as_dict()["catastrophic_capability_rule"]["enforced_at"] == [
+        "rung1", "final"]
+
+
+# --- tie semantics ----------------------------------------------------------
+
+
+def test_a_tie_after_two_seeds_is_pending_not_a_winner():
+    p = plan(equivalence=EquivalenceRule(n_pooled=340).materialize(0.20))
+    rows = [{"state_id": "control", "is_control": True, "usable_rollout_rate": 0.73,
+             "correct_overall": 0.200, "seeds": [SEED_SA, SEED_SB]},
+            {"state_id": "leaf", "usable_rollout_rate": 0.80,
+             "correct_overall": 0.205, "seeds": [SEED_SA, SEED_SB]}]
+    out = p.select_final_winner(rows)
+    assert out["decision_status"] == "tie_pending"
+    assert out["winner"] is None
+    assert out["provisional_leader"] == "leaf"
+    assert out["needs_tie_break_seed"] is True
+    assert set(out["tie_break_candidates"]) == {"control", "leaf"}
+
+
+def test_a_tie_that_survives_the_third_seed_is_unresolved_not_broken():
+    """No fourth seed, and no state-id tie-break to manufacture a winner."""
+    p = plan(equivalence=EquivalenceRule(n_pooled=340).materialize(0.20))
+    rows = [{"state_id": "control", "is_control": True, "usable_rollout_rate": 0.73,
+             "correct_overall": 0.200, "seeds": [SEED_SA, SEED_SB, SEED_SC]},
+            {"state_id": "leaf", "usable_rollout_rate": 0.80,
+             "correct_overall": 0.205, "seeds": [SEED_SA, SEED_SB, SEED_SC]}]
+    out = p.select_final_winner(rows)
+    assert out["decision_status"] == "unresolved_equivalence"
+    assert out["winner"] is None
+    assert out["needs_tie_break_seed"] is False
+    assert out["tie_break_candidates"] == []
+    assert "did not resolve a unique behavioural winner" in out["interpretation"]
+
+
+def test_a_clear_lead_resolves(teacher_spec, target_spec):
+    p = plan(equivalence=EquivalenceRule(n_pooled=340).materialize(0.20))
+    rows = [{"state_id": "control", "is_control": True, "usable_rollout_rate": 0.73,
+             "correct_overall": 0.10, "seeds": [SEED_SA, SEED_SB]},
+            {"state_id": "leaf", "usable_rollout_rate": 0.80,
+             "correct_overall": 0.30, "seeds": [SEED_SA, SEED_SB]}]
+    out = p.select_final_winner(rows)
+    assert out["decision_status"] == "resolved"
+    assert out["winner"] == "leaf"
+    assert out["needs_tie_break_seed"] is False
+
+
+# --- correct => usable ------------------------------------------------------
+
+
+def test_correctness_is_defined_as_correct_in_a_usable_rollout():
+    from aadistill.autoinit.recovery import score_recovery_row
+
+    answered_then_looped = score_recovery_row(usable=False, scorer_correct=True)
+    assert answered_then_looped["correct"] is False
+    assert answered_then_looped["correct_but_unusable"] is True, (
+        "the gap between 'the scorer found an answer' and 'we counted it' must be "
+        "visible, not absorbed")
+    assert score_recovery_row(usable=True, scorer_correct=True)["correct"] is True
+    # A behaviour-only row can never be correct.
+    assert score_recovery_row(usable=True, scorer_correct=True,
+                              scorable=False)["correct"] is False
+
+
+def test_the_scoring_contract_names_the_offending_prompt():
+    from aadistill.autoinit.recovery import ScoringContractError, validate_scored_rows
+
+    good = [{"id": "a", "usable": True, "correct": True, "scorable": True}]
+    assert validate_scored_rows(good)["correct"] == 1
+    with pytest.raises(ScoringContractError, match="correct => usable"):
+        validate_scored_rows([{"id": "bad-1", "set": "gsm8k", "usable": False,
+                               "correct": True}])
+    with pytest.raises(ScoringContractError, match="behaviour-only"):
+        validate_scored_rows([{"id": "bad-2", "set": "code", "usable": True,
+                               "correct": True, "scorable": False}])
 
 
 def test_rung1_gates_on_stability_then_ranks_on_correctness():
@@ -240,38 +414,44 @@ def test_the_canonical_control_can_win_the_final_comparison():
     """
     p = plan()
     pooled = [
-        {"state_id": "control", "is_control": True,
-         "usable_rollout_rate": 0.73, "correct_overall": 0.1867},
-        {"state_id": "leaf_a", "usable_rollout_rate": 0.80, "correct_overall": 0.1500},
-        {"state_id": "leaf_b", "usable_rollout_rate": 0.78, "correct_overall": 0.1600},
+        {"state_id": "control", "is_control": True, "seeds": [SEED_SA, SEED_SB],
+         "usable_rollout_rate": 0.73, "correct_overall": 0.2600},
+        {"state_id": "leaf_a", "seeds": [SEED_SA, SEED_SB],
+         "usable_rollout_rate": 0.80, "correct_overall": 0.1500},
+        {"state_id": "leaf_b", "seeds": [SEED_SA, SEED_SB],
+         "usable_rollout_rate": 0.78, "correct_overall": 0.1600},
     ]
     out = p.select_final_winner(pooled)
+    assert out["decision_status"] == "resolved"
     assert out["winner"] == "control"
     assert out["winner_is_control"] is True
 
     # And a searched leaf wins when it actually leads.
-    pooled[1]["correct_overall"] = 0.2400
+    pooled[1]["correct_overall"] = 0.3600
     better = p.select_final_winner(pooled)
     assert better["winner"] == "leaf_a"
     assert better["winner_is_control"] is False
 
 
 def test_the_third_seed_is_offered_to_a_tied_control_too():
-    p = plan(equivalence_interval=0.03)
+    p = plan(equivalence=EquivalenceRule(n_pooled=340).materialize(0.20))
     close = [
-        {"state_id": "control", "is_control": True,
+        {"state_id": "control", "is_control": True, "seeds": [SEED_SA, SEED_SB],
          "usable_rollout_rate": 0.73, "correct_overall": 0.19},
-        {"state_id": "leaf_a", "usable_rollout_rate": 0.80, "correct_overall": 0.20},
+        {"state_id": "leaf_a", "seeds": [SEED_SA, SEED_SB],
+         "usable_rollout_rate": 0.80, "correct_overall": 0.20},
     ]
     out = p.select_final_winner(close)
     assert set(out["tied_within_equivalence"]) == {"control", "leaf_a"}
     assert out["needs_tie_break_seed"] is True
     assert "control" in out["tie_break_candidates"]
+    assert out["decision_status"] == "tie_pending" and out["winner"] is None
 
     separated = [
-        {"state_id": "control", "is_control": True,
+        {"state_id": "control", "is_control": True, "seeds": [SEED_SA, SEED_SB],
          "usable_rollout_rate": 0.73, "correct_overall": 0.10},
-        {"state_id": "leaf_a", "usable_rollout_rate": 0.80, "correct_overall": 0.30},
+        {"state_id": "leaf_a", "seeds": [SEED_SA, SEED_SB],
+         "usable_rollout_rate": 0.80, "correct_overall": 0.30},
     ]
     assert p.select_final_winner(separated)["needs_tie_break_seed"] is False
 
@@ -344,6 +524,10 @@ def test_thresholds_cannot_move_after_freezing(tmp_path):
     assert assert_preregistered(original, frozen_path)["plan_hash"] == original.plan_hash
     with pytest.raises(RecoveryAdmissionError, match="after freezing"):
         assert_preregistered(plan(feasibility_min=0.40), frozen_path)
+    with pytest.raises(RecoveryAdmissionError, match="after freezing"):
+        assert_preregistered(
+            plan(equivalence=EquivalenceRule(n_pooled=340).materialize(0.25)),
+            frozen_path)
     with pytest.raises(RecoveryAdmissionError, match="no frozen plan"):
         assert_preregistered(original, tmp_path / "missing.json")
 

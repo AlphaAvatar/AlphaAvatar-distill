@@ -1,6 +1,6 @@
 {
   "schema": "aadistill.autoinit.phase_a_preregistration/v1",
-  "generated_utc": "2026-08-12T18:14:49.139768+00:00",
+  "generated_utc": "2026-08-12T19:07:39.456733+00:00",
   "status": "PREREGISTRATION DRAFT - NOT AUTHORIZED, NO COMPUTE LAUNCHED",
   "teacher": {
     "model_id": "Qwen/Qwen3-4B-Thinking-2507",
@@ -576,12 +576,35 @@
           "correct_given_usable": "sum(correct_s) / sum(usable_s)"
         }
       },
+      "equivalence_rule": {
+        "rule_id": "two_binomial_se",
+        "version": 1,
+        "formula": "z * sqrt(p_control * (1 - p_control) / n_pooled)",
+        "z": 2.0,
+        "n_pooled": 340,
+        "p_control": null,
+        "value": null,
+        "status": "PENDING_CONTROL_CHARACTERIZATION",
+        "non_adaptive": "the formula is frozen before any candidate is searched; only the control's own rate enters it"
+      },
+      "catastrophic_capability_rule": {
+        "rule_id": "per_capability_collapse",
+        "version": 1,
+        "metric": "usable_rollout_rate",
+        "candidate_max": 0.1,
+        "control_min": 0.4,
+        "statement": "candidate usable_rollout_rate < 0.1 AND control usable_rollout_rate > 0.4 -> catastrophic failure, candidate excluded",
+        "enforced_at": [
+          "rung1",
+          "final"
+        ]
+      },
       "selection": {
         "feasibility_metric": "usable_rollout_rate",
         "feasibility_min": -1.0,
         "primary_metric": "correct_overall",
         "secondary_metric": "correct_given_usable",
-        "equivalence_interval": 0.045,
+        "equivalence_interval": null,
         "rule": "feasibility constraint, then primary objective among feasible candidates; the secondary metric is reported and never reorders. No weighted combination.",
         "control_eligible_to_win": true,
         "control_exempt_from_feasibility_gate": true
@@ -622,22 +645,22 @@
     "battery": {
       "asset": "artifacts/stage3/recovery_search_v1",
       "content_sha256": "a1b22778b00d95b6aba358c14a5af5b559fd807bb371c92131eacca59479f323",
-      "manifest_sha256": "a3d3f54456c5771efaca5cdaaeb059ad06181eb84b4ff481ee8b5a184d2549bd",
+      "manifest_sha256": "1a8321c79e4ee9ad0128cb238cda37384ab60c31cb916d2acc000078dde767e6",
       "n_prompts": 190,
-      "n_scorable_prompts": 150,
+      "n_scorable_prompts": 170,
       "scorable_sets": [
         "gsm8k",
         "math_verified",
         "multihop",
         "rag",
-        "knowledge"
-      ],
-      "behaviour_only_sets": [
-        "code",
+        "knowledge",
         "tool"
       ],
+      "behaviour_only_sets": [
+        "code"
+      ],
       "scorer_sha256": "da1bc3b1069d927b6ab2cbf0eaaf6763bfa491d396189b3dcde95977e39d67ad",
-      "limitation": "code and tool have no frozen scorer; they contribute stability and failure diagnostics only. LIMITATION: this battery cannot detect a candidate that trades code or tool capability for math."
+      "limitation": "code has no frozen scorer and contributes stability and failure diagnostics only. LIMITATION: this battery cannot detect a candidate that trades code capability for math."
     },
     "selection_rules": {
       "order": [
@@ -659,22 +682,31 @@
       },
       "primary_metric": "correct_overall over SCORABLE prompts",
       "secondary_metric": "correct_given_usable over SCORABLE prompts",
-      "equivalence_interval": 0.045,
-      "equivalence_interval_rule": {
-        "rule": "2 x the binomial standard error of correct_overall at the control's pooled rate, on the pooled scorable denominator",
-        "free_input": "control correct_overall on the recovery-search battery",
-        "prior_value_used_for_sizing": 0.1867,
-        "prior_source": "retained reference on the 150-prompt promotion battery",
-        "se_at_prior": 0.0225,
-        "interval_at_prior": 0.045,
-        "why_two_se": "one SE would call a difference decisive that a rerun could reverse; two SE is the smallest interval this denominator can support"
+      "equivalence_rule": {
+        "rule_id": "two_binomial_se",
+        "version": 1,
+        "formula": "z * sqrt(p_control * (1 - p_control) / n_pooled)",
+        "z": 2.0,
+        "n_pooled": 340,
+        "p_control": null,
+        "value": null,
+        "status": "PENDING_CONTROL_CHARACTERIZATION",
+        "non_adaptive": "the formula is frozen before any candidate is searched; only the control's own rate enters it"
       },
-      "catastrophic_floor_rule": {
-        "rule": "a candidate is excluded if any scorable set's usable rate is below 0.10 while the control's is above 0.40 on that set",
-        "rationale": "a candidate that collapses on one capability while averaging acceptably is not a usable initialization, and the pooled rate can hide it",
-        "free_input": "control per-set usable rates",
-        "status": "rule frozen, thresholds analytic, control values pending"
+      "equivalence_interval": null,
+      "catastrophic_capability_rule": {
+        "rule_id": "per_capability_collapse",
+        "version": 1,
+        "metric": "usable_rollout_rate",
+        "candidate_max": 0.1,
+        "control_min": 0.4,
+        "statement": "candidate usable_rollout_rate < 0.1 AND control usable_rollout_rate > 0.4 -> catastrophic failure, candidate excluded",
+        "enforced_at": [
+          "rung1",
+          "final"
+        ]
       },
+      "correctness_semantics": "correct = correct IN A USABLE ROLLOUT. A rollout that answers correctly and then loops or hits the context limit is not counted correct; correct_but_unusable is reported separately so the gap is visible.",
       "control_eligible_to_win": true,
       "control_exempt_from_feasibility_gate": true,
       "no_weighted_scalar": true
@@ -707,7 +739,7 @@
   },
   "role_isolation": {
     "report": "logs/autoinit_role_isolation.json",
-    "report_sha256": "17fe815850943f2867c288963385858ed3b3738f8c9e0447fb9440d8980fd225",
+    "report_sha256": "6e0f4a110a73ba92d89f20f52b52cc2d086abd5e9e6522156511a9149480579e",
     "passed": true,
     "complete": true,
     "exact_overlaps": 0,
@@ -757,6 +789,192 @@
     "activation_stats_gib": 1.81,
     "provision_at_least_gib": 150
   },
+  "decision_statuses": {
+    "resolved": "one finalist leads by more than the equivalence interval",
+    "tie_pending": "finalists equivalent after sa+sb; seed sc is owed and winner is None",
+    "unresolved_equivalence": "finalists still equivalent after sc; winner is None and the result is 'AutoInitializer v1 did not resolve a unique behavioural winner'. No fourth seed, and no state-id tie-break is used to manufacture a winner."
+  },
+  "canonical_control_availability": {
+    "schema": "aadistill.autoinit.control_availability/v1",
+    "generated_utc": "2026-08-12T19:07:23.070438+00:00",
+    "relay": "AlphaAvatar/aadistill-artifacts",
+    "controls": {
+      "e1_r0860k_sa_pca": {
+        "canonical_id": "e1_r0860k_sa_pca",
+        "seed": 20260726,
+        "present_on_dev_box": false,
+        "tombstoned": true,
+        "relay_path": "e1_scaling_20260801/e1_r0860k_sa_pca/step_001023/model/model.safetensors",
+        "present_on_relay": true,
+        "expected_weights_sha256": "18ee10a10333481d3d6178d2fc5d4e0a705aca04d8a1d69a4ce83ac7f1e45b9c",
+        "expected_config_sha256": "62d14acfb86e397e9449e0d39d5aba6c5a84facac372a86b85e9ac6915be9522",
+        "architecture": {
+          "num_hidden_layers": 28,
+          "hidden_size": 1024,
+          "intermediate_size": 3072,
+          "num_attention_heads": 16,
+          "num_key_value_heads": 8,
+          "vocab_size": 151936
+        },
+        "actual_weights_sha256": "18ee10a10333481d3d6178d2fc5d4e0a705aca04d8a1d69a4ce83ac7f1e45b9c",
+        "weights_hash_match": true,
+        "size_bytes": 2384234968,
+        "actual_config_sha256": "62d14acfb86e397e9449e0d39d5aba6c5a84facac372a86b85e9ac6915be9522",
+        "config_hash_match": true,
+        "lineage": {
+          "student_path": "artifacts/stage1/qwen3_0p6b_init_v0/checkpoint",
+          "rung": 860000,
+          "seed": 20260726,
+          "loss": {
+            "ce_weight": 0.25,
+            "kd_weight": 1.0,
+            "kd_temperature": 1.0,
+            "kd_scope": "all"
+          },
+          "total_steps": 1023,
+          "block_len": 8192
+        },
+        "lineage_checks": {
+          "descends_from_canonical_init": true,
+          "rung_is_0860k": true,
+          "seed_matches": true,
+          "ce_weight": true,
+          "kd_weight": true,
+          "kd_temperature": true,
+          "kd_scope": true,
+          "block_len": true
+        },
+        "lineage_valid": true,
+        "matches_intended_control_protocol": true
+      },
+      "e1_r0860k_sb_pca": {
+        "canonical_id": "e1_r0860k_sb_pca",
+        "seed": 20260801,
+        "present_on_dev_box": false,
+        "tombstoned": true,
+        "relay_path": "e1_scaling_20260801/e1_r0860k_sb_pca/step_001023/model/model.safetensors",
+        "present_on_relay": true,
+        "expected_weights_sha256": "f66de5320b69aa34abf421a45b5d468bbbaf23d2a400750e3340873f20e40035",
+        "expected_config_sha256": "62d14acfb86e397e9449e0d39d5aba6c5a84facac372a86b85e9ac6915be9522",
+        "architecture": {
+          "num_hidden_layers": 28,
+          "hidden_size": 1024,
+          "intermediate_size": 3072,
+          "num_attention_heads": 16,
+          "num_key_value_heads": 8,
+          "vocab_size": 151936
+        },
+        "actual_weights_sha256": "f66de5320b69aa34abf421a45b5d468bbbaf23d2a400750e3340873f20e40035",
+        "weights_hash_match": true,
+        "size_bytes": 2384234968,
+        "actual_config_sha256": "62d14acfb86e397e9449e0d39d5aba6c5a84facac372a86b85e9ac6915be9522",
+        "config_hash_match": true,
+        "lineage": {
+          "student_path": "artifacts/stage1/qwen3_0p6b_init_v0/checkpoint",
+          "rung": 860000,
+          "seed": 20260801,
+          "loss": {
+            "ce_weight": 0.25,
+            "kd_weight": 1.0,
+            "kd_temperature": 1.0,
+            "kd_scope": "all"
+          },
+          "total_steps": 1023,
+          "block_len": 8192
+        },
+        "lineage_checks": {
+          "descends_from_canonical_init": true,
+          "rung_is_0860k": true,
+          "seed_matches": true,
+          "ce_weight": true,
+          "kd_weight": true,
+          "kd_temperature": true,
+          "kd_scope": true,
+          "block_len": true
+        },
+        "lineage_valid": true,
+        "matches_intended_control_protocol": true
+      }
+    },
+    "config_hash_convention": "raw file bytes (build_checkpoint_registry.py)",
+    "relay_reachable": true,
+    "both_controls_available": true,
+    "retrieval_bytes": 4768469936,
+    "consequence": "Both canonical 0.86M controls are retrievable and verified. The micro-preflight stays a profiling/evaluation job: no recovery retraining is needed, and the two-seed pooled control characterization can be produced by evaluating these checkpoints on recovery_search_v1.",
+    "report_sha256": "1227a0e1a90df1f2efba19184c16582e87682174d0e47288233ecde4bc841070"
+  },
+  "tool_scoring_audit": {
+    "scorer": "aadistill.evaluation.behavior.score_tool_call",
+    "scorer_sha256": "c6f52721e8b86bc2d875683bfb9c35b4101379fa5d48de7a48db93959e2935c2",
+    "n_items": 20,
+    "parse_failures": [],
+    "multi_call_items": 9,
+    "required_signal_counts": {
+      "has_default": 88,
+      "no_default": 18
+    },
+    "cases_run": [
+      "known_good",
+      "malformed_json",
+      "missing_required_args",
+      "protocol_invalid_no_wrapper",
+      "wrong_argument_values",
+      "wrong_tool_name"
+    ],
+    "disagreements": [],
+    "all_cases_behave_as_required": true,
+    "interpretation_sensitive_verdicts": 3,
+    "interpretation_affects_only_schema_field": true,
+    "examples_of_sensitivity": [
+      {
+        "id": "xlam-13",
+        "case": "missing_required_args",
+        "fields": [
+          "tool_args_schema_ok"
+        ],
+        "with_required": {
+          "tool_args_schema_ok": false
+        },
+        "without_required": {
+          "tool_args_schema_ok": true
+        }
+      },
+      {
+        "id": "xlam-18",
+        "case": "missing_required_args",
+        "fields": [
+          "tool_args_schema_ok"
+        ],
+        "with_required": {
+          "tool_args_schema_ok": false
+        },
+        "without_required": {
+          "tool_args_schema_ok": true
+        }
+      },
+      {
+        "id": "xlam-8",
+        "case": "missing_required_args",
+        "fields": [
+          "tool_args_schema_ok"
+        ],
+        "with_required": {
+          "tool_args_schema_ok": false
+        },
+        "without_required": {
+          "tool_args_schema_ok": true
+        }
+      }
+    ],
+    "connection_is_mechanical": true,
+    "decision": "MAKE TOOL SCORABLE on tool_call_exact_match: the envelope translation is mechanical, exact match never depends on the `required` interpretation, and every adversarial case is distinguished correctly.",
+    "correctness_field_if_scorable": "tool_call_exact_match",
+    "fields_not_used_for_correctness": [
+      "tool_args_schema_ok (depends on the `required` interpretation; reported as a diagnostic, never as correctness)"
+    ],
+    "generated_utc": "2026-08-12T19:04:42.108518+00:00",
+    "audit_sha256": "772f06ce2cb742e4272c543ae7dbb5f6e3a3521d9bcd6e0ca28e2e476a751ad6"
+  },
   "pending_before_launch": [
     "canonical control usable_rollout_rate on recovery_search_v1",
     "canonical control correct_overall on recovery_search_v1",
@@ -764,5 +982,5 @@
     "GPU state-evaluator repeatability (confirms or resets beam epsilon)",
     "activation-statistics GPU/CPU split (collapses the cost range)"
   ],
-  "preregistration_sha256": "e6e674034eb957031584b8701d3721479e49cc5d78e2e18b622b85bb11421668"
+  "preregistration_sha256": "4b01833129128252bf5e386230312f68130e342d16341c0e3ba6228239aea374"
 }

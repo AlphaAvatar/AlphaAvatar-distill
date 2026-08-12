@@ -142,13 +142,76 @@ def test_correctness_is_computed_only_over_sets_with_a_frozen_scorer():
     assert scorable and behaviour_only
     assert not scorable & behaviour_only
     for name in scorable:
-        assert name in SCORERS or name == "gsm8k", (
+        assert name in SCORERS or name in ("gsm8k", "tool"), (
             f"{name} is marked scorable but has no frozen scorer")
-    # Code and tool are behaviour-only, and the limitation is recorded rather
-    # than left for a reader to infer.
-    assert behaviour_only == {"code", "tool"}
-    assert "cannot detect a candidate that trades code or tool capability" in \
+    # Code stays behaviour-only; tool became scorable after the audit.
+    assert behaviour_only == {"code"}
+    assert "trades code capability for math" in \
         manifest["scorers"]["behaviour_only_note"]
+    assert manifest["n_scorable_prompts"] == 170
+
+
+def test_tool_items_carry_what_the_frozen_scorer_consumes():
+    """The battery stores the scorer's shape, not a shape it has to guess."""
+    from aadistill.evaluation.behavior import score_tool_call
+
+    rows = items(RECOVERY_SEARCH, "tool.jsonl")
+    assert rows and all(r["scorable"] for r in rows)
+    for row in rows:
+        assert row["correctness_field"] == "tool_call_exact_match"
+        assert row["scorer_tools"] and row["gold_tool_calls"]
+        for tool in row["scorer_tools"]:
+            assert "function" in tool and "name" in tool["function"]
+        for call in row["gold_tool_calls"]:
+            assert set(call["function"]) == {"name", "arguments"}
+    # The gold calls, replayed, score as an exact match through the real scorer.
+    import json as _json
+    row = rows[0]
+    answer = "".join(
+        f"<tool_call>{_json.dumps({'name': c['function']['name'], 'arguments': c['function']['arguments']})}</tool_call>"
+        for c in row["gold_tool_calls"])
+    verdict = score_tool_call(answer, row["scorer_tools"], row["gold_tool_calls"])
+    assert verdict["tool_call_exact_match"] is True
+    assert verdict["tool_name_valid"] is True
+
+
+def test_the_tool_scoring_audit_backs_the_scorable_decision():
+    audit = load(REPO / "logs/autoinit_tool_scoring_audit.json")
+    assert audit["all_cases_behave_as_required"]
+    assert audit["connection_is_mechanical"]
+    assert audit["correctness_field_if_scorable"] == "tool_call_exact_match"
+    # The one interpretive field is excluded from correctness.
+    assert any("tool_args_schema_ok" in f
+               for f in audit["fields_not_used_for_correctness"])
+    assert set(audit["cases_run"]) == {
+        "known_good", "malformed_json", "wrong_tool_name",
+        "missing_required_args", "wrong_argument_values",
+        "protocol_invalid_no_wrapper"}
+
+
+# --- canonical control availability -----------------------------------------
+
+
+def test_both_canonical_controls_are_available_and_lineage_valid():
+    report = load(REPO / "logs/autoinit_control_availability.json")
+    assert report["relay_reachable"]
+    assert report["both_controls_available"], report["consequence"]
+    for name, entry in report["controls"].items():
+        assert entry["present_on_relay"], name
+        assert entry["weights_hash_match"], name
+        assert entry["config_hash_match"], name
+        assert entry["lineage_valid"], (name, entry.get("lineage_checks"))
+        # Lineage means the control really is the frozen 0.86M protocol.
+        checks = entry["lineage_checks"]
+        assert checks["descends_from_canonical_init"]
+        assert checks["rung_is_0860k"] and checks["seed_matches"]
+        assert checks["ce_weight"] and checks["kd_weight"] and checks["kd_scope"]
+
+
+def test_the_control_record_says_what_to_do_if_they_were_missing():
+    report = load(REPO / "logs/autoinit_control_availability.json")
+    assert "not redefine the threshold to one seed" in report["consequence"].lower() \
+        or "profiling/evaluation job" in report["consequence"]
 
 
 def test_the_battery_declares_no_weighted_scalar():
@@ -177,6 +240,18 @@ def test_battery_ids_are_reproducible_not_process_dependent():
 
 
 # --- isolation --------------------------------------------------------------
+
+
+def test_the_equivalence_denominator_matches_the_battery():
+    """The interval's n_pooled must track the scorable count, not a stale constant."""
+    manifest = load(RECOVERY_SEARCH / "manifest.json")
+    prereg = load(REPO / "logs/autoinit_phase_a_preregistration.json")
+    rule = prereg["recovery"]["selection_rules"]["equivalence_rule"]
+    assert rule["n_pooled"] == manifest["n_scorable_prompts"] * 2
+    assert rule["status"] == "PENDING_CONTROL_CHARACTERIZATION"
+    assert rule["value"] is None, (
+        "the interval must not be pre-filled from a prior; that would be the "
+        "second definition again")
 
 
 def test_the_five_roles_are_isolated_and_the_check_was_complete():

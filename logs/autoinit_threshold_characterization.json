@@ -1,6 +1,6 @@
 {
   "schema": "aadistill.autoinit.threshold_characterization/v1",
-  "generated_utc": "2026-08-12T18:07:36.814661+00:00",
+  "generated_utc": "2026-08-12T19:04:41.607521+00:00",
   "command": "scripts/autoinit/characterize_thresholds.py",
   "beam_epsilon": {
     "repeatability": {
@@ -138,20 +138,27 @@
   },
   "recovery_thresholds": {
     "pooled_denominators": {
-      "scorable_prompts_per_seed": 150,
+      "scorable_prompts_per_seed": 170,
       "all_prompts_per_seed": 190,
       "seeds": 2,
-      "pooled_n_scorable": 300,
+      "pooled_n_scorable": 340,
       "pooled_n_all": 380,
       "note": "pooled counts, per the frozen SeedAggregation"
     },
     "equivalence_interval": {
-      "rule": "2 x the binomial standard error of correct_overall at the control's pooled rate, on the pooled scorable denominator",
+      "SINGLE_DEFINITION": "interval = 2 * sqrt(p_control * (1 - p_control) / n_pooled). The formula is frozen now; the numeric value is materialized from the control characterization and never changes afterwards. There is no second, prior-derived constant.",
+      "rule_id": "two_binomial_se",
+      "z": 2.0,
+      "n_pooled": 340,
       "free_input": "control correct_overall on the recovery-search battery",
-      "prior_value_used_for_sizing": 0.1867,
-      "prior_source": "retained reference on the 150-prompt promotion battery",
-      "se_at_prior": 0.0225,
-      "interval_at_prior": 0.045,
+      "status": "PENDING_CONTROL_CHARACTERIZATION",
+      "illustrative_only_at_historical_prior": {
+        "p": 0.1867,
+        "source": "retained reference on the 150-prompt promotion battery",
+        "se": 0.02113,
+        "interval": 0.0423,
+        "WARNING": "illustrative sizing only. This value is NOT the threshold and must not be used for selection; the materialized value comes from the control's own measurement on recovery_search_v1."
+      },
       "why_two_se": "one SE would call a difference decisive that a rerun could reverse; two SE is the smallest interval this denominator can support"
     },
     "feasibility_floor": {

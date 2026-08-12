@@ -45,6 +45,7 @@ maintainer's.
 from __future__ import annotations
 
 import json
+import math
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
@@ -189,6 +190,194 @@ class SeedAggregation:
 
 POOLED_COUNTS_V1 = SeedAggregation()
 
+
+@dataclass(frozen=True)
+class EquivalenceRule:
+    """The behaviour equivalence interval. **One definition, not two.**
+
+    The formula is frozen before any candidate is searched; the numeric value is
+    materialized from the control characterization and then never changes. That
+    is still non-adaptive: nothing about a searched candidate enters it.
+
+        interval = z * sqrt(p_control * (1 - p_control) / n_pooled)
+
+    ``p_control`` is the pooled ``correct_overall`` of the canonical control on the
+    frozen recovery-search battery. Until it is measured, ``value`` is ``None`` and
+    every selector that needs it raises rather than falling back to a prior — a
+    fallback would silently reintroduce the second definition this replaces.
+    """
+
+    n_pooled: int
+    rule_id: str = "two_binomial_se"
+    version: int = 1
+    z: float = 2.0
+    p_control: float | None = None
+    value: float | None = None
+
+    def __post_init__(self) -> None:
+        if self.n_pooled <= 0:
+            raise ValueError("n_pooled must be positive")
+        if (self.value is None) != (self.p_control is None):
+            raise ValueError(
+                "value and p_control are materialized together or not at all")
+
+    def interval_for(self, p_control: float) -> float:
+        if not 0.0 <= p_control <= 1.0:
+            raise ValueError(f"p_control={p_control!r} is not a rate")
+        return self.z * math.sqrt(max(p_control * (1 - p_control), 0.0) / self.n_pooled)
+
+    def materialize(self, p_control: float) -> "EquivalenceRule":
+        """Freeze the numeric value from the control's measured rate."""
+        if self.value is not None:
+            raise ValueError(
+                f"already materialized at {self.value}; the interval is frozen once "
+                "the control is characterized and does not move afterwards")
+        return EquivalenceRule(n_pooled=self.n_pooled, rule_id=self.rule_id,
+                               version=self.version, z=self.z, p_control=p_control,
+                               value=self.interval_for(p_control))
+
+    def require_value(self) -> float:
+        if self.value is None:
+            raise RecoveryAdmissionError(
+                "the equivalence interval is not materialized: the canonical "
+                "control has not been characterized on the recovery-search "
+                "battery. Measure it, materialize the rule, re-hash the plan, then "
+                "select. There is no prior to fall back to by design.")
+        return self.value
+
+    def as_dict(self) -> dict[str, Any]:
+        return {"rule_id": self.rule_id, "version": self.version,
+                "formula": "z * sqrt(p_control * (1 - p_control) / n_pooled)",
+                "z": self.z, "n_pooled": self.n_pooled,
+                "p_control": self.p_control, "value": self.value,
+                "status": "materialized" if self.value is not None
+                          else "PENDING_CONTROL_CHARACTERIZATION",
+                "non_adaptive": ("the formula is frozen before any candidate is "
+                                 "searched; only the control's own rate enters it")}
+
+
+@dataclass(frozen=True)
+class CatastrophicCapabilityRule:
+    """Excludes a candidate that collapses on one capability.
+
+    The pooled feasibility rate can hide a total collapse: a candidate that never
+    produces a usable tool rollout can still clear a global floor on the strength
+    of its maths. Enforced mechanically at **both** rungs, with the capability
+    name and both measured values in the exclusion reason — a rule that needs a
+    human to notice it is not a rule.
+    """
+
+    candidate_max: float = 0.10
+    control_min: float = 0.40
+    metric: str = "usable_rollout_rate"
+    rule_id: str = "per_capability_collapse"
+    version: int = 1
+
+    def violations(self, candidate: Mapping[str, Any],
+                   control: Mapping[str, Any]) -> list[dict[str, Any]]:
+        """Capabilities on which this candidate has collapsed relative to control."""
+        cand = dict(candidate.get("per_capability") or {})
+        ctrl = dict(control.get("per_capability") or {}) if control else {}
+        out = []
+        for capability in sorted(set(cand) & set(ctrl)):
+            c_val = float(cand[capability].get(self.metric, 1.0))
+            k_val = float(ctrl[capability].get(self.metric, 0.0))
+            if c_val < self.candidate_max and k_val > self.control_min:
+                out.append({
+                    "capability": capability, "metric": self.metric,
+                    "candidate_value": c_val, "control_value": k_val,
+                    "candidate_max": self.candidate_max,
+                    "control_min": self.control_min,
+                    "reason": (f"catastrophic collapse on {capability}: candidate "
+                               f"{self.metric}={c_val:.4f} < {self.candidate_max} "
+                               f"while the control has {k_val:.4f} > "
+                               f"{self.control_min}"),
+                })
+        return out
+
+    def as_dict(self) -> dict[str, Any]:
+        return {"rule_id": self.rule_id, "version": self.version,
+                "metric": self.metric, "candidate_max": self.candidate_max,
+                "control_min": self.control_min,
+                "statement": (f"candidate {self.metric} < {self.candidate_max} AND "
+                              f"control {self.metric} > {self.control_min} "
+                              "-> catastrophic failure, candidate excluded"),
+                "enforced_at": ["rung1", "final"]}
+
+
+CATASTROPHIC_V1 = CatastrophicCapabilityRule()
+
+
+class ScoringContractError(RuntimeError):
+    """A scored recovery row violates the metric contract."""
+
+
+def score_recovery_row(*, usable: bool, scorer_correct: bool,
+                       scorable: bool = True) -> dict[str, bool]:
+    """One scored rollout, with ``correct => usable`` true **by construction**.
+
+    The semantic question is real and is resolved here rather than left for the
+    aggregator to trip over. A rollout can contain an extractable correct answer
+    and still be unusable: it can hit the context limit after answering, or fall
+    into a repetition loop, or break protocol. So a scorer alone *can* say
+    "correct" about a rollout the behaviour metric calls unusable.
+
+    **This battery defines ``correct`` as "correct in a usable rollout".** A
+    checkpoint that emits the right answer and then loops forever cannot produce
+    trajectories for Stage 5, and counting it as correct would let the primary
+    metric reward the exact failure that dominates this project — ~31% of rollouts
+    hitting the context limit. `correct_given_usable` then means what it says, and
+    `correct_overall` means "answered correctly, in a rollout we could actually
+    use".
+
+    The rejected alternative is recorded: scoring correctness independently of
+    usability would make `correct_overall` a measure of latent capability rather
+    than of deployable behaviour, and would break `correct <= usable` in the
+    aggregate.
+    """
+    correct = bool(scorable and usable and scorer_correct)
+    return {
+        "usable": bool(usable),
+        "scorer_correct": bool(scorer_correct),
+        "scorable": bool(scorable),
+        "correct": correct,
+        # Recorded so the gap between "the scorer found an answer" and "we counted
+        # it" is visible rather than silently absorbed.
+        "correct_but_unusable": bool(scorable and scorer_correct and not usable),
+    }
+
+
+def validate_scored_rows(rows: Sequence[Mapping[str, Any]]) -> dict[str, Any]:
+    """Enforce the contract on scored rows **before** they are aggregated.
+
+    `SeedAggregation.pool` also refuses `correct > usable`, but by then the
+    offending row is invisible — the counts are already summed. This runs on rows,
+    so a violation names the prompt.
+    """
+    violations = []
+    counts = {"n": 0, "usable": 0, "correct": 0, "scorable": 0,
+              "correct_but_unusable": 0}
+    for row in rows:
+        counts["n"] += 1
+        counts["usable"] += bool(row.get("usable"))
+        counts["correct"] += bool(row.get("correct"))
+        counts["scorable"] += bool(row.get("scorable", True))
+        counts["correct_but_unusable"] += bool(row.get("correct_but_unusable"))
+        if row.get("correct") and not row.get("usable"):
+            violations.append({
+                "id": row.get("id"), "set": row.get("set"),
+                "reason": ("correct=True with usable=False; this battery defines "
+                           "correct as 'correct in a usable rollout'")})
+        if row.get("correct") and not row.get("scorable", True):
+            violations.append({
+                "id": row.get("id"), "set": row.get("set"),
+                "reason": "correct=True on a behaviour-only row"})
+    if violations:
+        raise ScoringContractError(
+            f"{len(violations)} scored rows violate correct => usable: "
+            f"{violations[:3]}")
+    return counts
+
 SEED_SA = 20260726
 SEED_SB = 20260801
 #: Tie-break seed. Used only for candidates that finish inside the preregistered
@@ -220,9 +409,12 @@ class SuccessiveHalvingPlan:
     reported_components: tuple[str, ...] = (
         "non_empty", "natural_termination", "no_severe_repetition",
         "no_context_limit", "protocol_valid")
-    #: Two candidates within this much of each other on the primary metric are
-    #: not distinguished by two seeds and go to the tie-break seed.
-    equivalence_interval: float = 0.0
+    #: The behaviour equivalence interval. A rule, not a constant: the formula is
+    #: frozen now, the numeric value comes from the control characterization.
+    equivalence: EquivalenceRule = field(
+        default_factory=lambda: EquivalenceRule(n_pooled=300))
+    #: Per-capability collapse gate, enforced at both rungs.
+    catastrophic: CatastrophicCapabilityRule = CATASTROPHIC_V1
     #: How per-seed counts become one number. Part of the plan hash.
     aggregation: SeedAggregation = POOLED_COUNTS_V1
     survivor_rule: str = ""
@@ -247,8 +439,7 @@ class SuccessiveHalvingPlan:
                 "the feasibility constraint and the capability objective must be "
                 "different metrics; usable_rollout is blind to correctness by "
                 "construction, which is exactly why it gates rather than ranks")
-        if self.equivalence_interval < 0:
-            raise ValueError("equivalence_interval must be >= 0")
+
         if not self.survivor_rule or not self.winner_rule:
             raise ValueError(
                 "survivor_rule and winner_rule must be stated before the run; a rule "
@@ -278,12 +469,14 @@ class SuccessiveHalvingPlan:
             "rung1_probes": self.rung1_probes, "rung2_probes": self.rung2_probes,
             "probe_count": self.probe_count,
             "seed_aggregation": self.aggregation.as_dict(),
+            "equivalence_rule": self.equivalence.as_dict(),
+            "catastrophic_capability_rule": self.catastrophic.as_dict(),
             "selection": {
                 "feasibility_metric": self.feasibility_metric,
                 "feasibility_min": self.feasibility_min,
                 "primary_metric": self.primary_metric,
                 "secondary_metric": self.secondary_metric,
-                "equivalence_interval": self.equivalence_interval,
+                "equivalence_interval": self.equivalence.value,
                 "rule": ("feasibility constraint, then primary objective among "
                          "feasible candidates; the secondary metric is reported and "
                          "never reorders. No weighted combination."),
@@ -308,21 +501,38 @@ class SuccessiveHalvingPlan:
     # improvement and could never refute one.
 
     def _gate(self, results: Sequence[Mapping[str, Any]]) -> tuple[list, list]:
+        """Global feasibility floor **and** the per-capability collapse rule.
+
+        Both are mechanical. The per-capability rule needs the control's own
+        per-capability rates, so it is skipped — loudly, in the report — when no
+        control row is present, rather than silently passing every candidate.
+        """
+        control = next((r for r in results if r.get("is_control")), None)
         feasible, excluded = [], []
         for row in results:
-            value = float(row.get(self.feasibility_metric, 0.0))
             if row.get("is_control"):
                 # The control is never gated out. A baseline that fails the floor
                 # is a finding about the floor or the baseline, and dropping it
                 # would leave the searched candidates with nothing to beat.
                 feasible.append(row)
                 continue
+
+            value = float(row.get(self.feasibility_metric, 0.0))
             if value < self.feasibility_min:
-                excluded.append({**dict(row), "reason": (
+                excluded.append({**dict(row), "exclusion": "feasibility_floor",
+                                 "reason": (
                     f"{self.feasibility_metric}={value:.4f} below the preregistered "
                     f"feasibility floor {self.feasibility_min:.4f}")})
-            else:
-                feasible.append(row)
+                continue
+
+            violations = (self.catastrophic.violations(row, control)
+                          if control is not None else [])
+            if violations:
+                excluded.append({**dict(row), "exclusion": "catastrophic_capability",
+                                 "violations": violations,
+                                 "reason": "; ".join(v["reason"] for v in violations)})
+                continue
+            feasible.append(row)
         return feasible, excluded
 
     def _rank(self, rows: Sequence[Mapping[str, Any]]) -> list[dict[str, Any]]:
@@ -332,9 +542,10 @@ class SuccessiveHalvingPlan:
     def _tied_with_leader(self, ranked: Sequence[Mapping[str, Any]]) -> list[str]:
         if not ranked:
             return []
+        interval = self.equivalence.require_value()
         best = float(ranked[0][self.primary_metric])
         return [r["state_id"] for r in ranked
-                if abs(float(r[self.primary_metric]) - best) <= self.equivalence_interval]
+                if abs(float(r[self.primary_metric]) - best) <= interval]
 
     def select_rung1_survivors(self, results: Sequence[Mapping[str, Any]]) -> dict[str, Any]:
         """Which **searched** leaves advance to seed sb.
@@ -354,34 +565,86 @@ class SuccessiveHalvingPlan:
             "selected_searched": [r["state_id"] for r in chosen],
             "auto_advanced_control": control,
             "advancing": [*control, *(r["state_id"] for r in chosen)],
-            "excluded_by_feasibility": excluded,
+            "excluded_by_feasibility": [e for e in excluded
+                                        if e["exclusion"] == "feasibility_floor"],
+            "excluded_by_catastrophic_capability": [
+                e for e in excluded if e["exclusion"] == "catastrophic_capability"],
+            "all_exclusions": excluded,
+            "control_present": any(r.get("is_control") for r in results),
             "rule": self.survivor_rule,
         }
 
-    def select_final_winner(self, results: Sequence[Mapping[str, Any]]) -> dict[str, Any]:
-        """Top-1 over the pooled seeds. **The control may win.**
+    def select_final_winner(self, results: Sequence[Mapping[str, Any]], *,
+                            tie_break_completed: bool | None = None) -> dict[str, Any]:
+        """Top-1 over the pooled seeds — or an explicit "no winner".
 
         ``results`` are pooled-count aggregates (see ``SeedAggregation``), one per
         finalist, the control included. The winner is whichever finalist leads on
-        the primary metric among those clearing the feasibility floor — searched
-        or canonical, with no asymmetry between them.
+        the primary metric among those clearing the gates — searched or canonical,
+        with no asymmetry between them.
+
+        **A tie is not a winner.** Three outcomes, and only one of them names a
+        checkpoint:
+
+        ``resolved``               one finalist leads by more than the interval.
+        ``tie_pending``            finalists are equivalent after sa+sb; seed sc is
+                                   owed, and ``winner`` is ``None``.
+        ``unresolved_equivalence`` finalists are *still* equivalent after sc.
+                                   ``winner`` is ``None``, and that is the result:
+                                   **AutoInitializer v1 did not resolve a unique
+                                   behavioural winner.**
+
+        No fourth seed is requested, and the deterministic state-id ordering is
+        *not* used to break a scientific tie — it orders the report, nothing more.
+        Manufacturing a winner from a lexicographic id would dress a null result
+        as a finding.
         """
         feasible, excluded = self._gate(results)
         ranked = self._rank(feasible)
         tied = self._tied_with_leader(ranked)
-        winner = ranked[0] if ranked else None
+        leader = ranked[0] if ranked else None
+
+        if tie_break_completed is None:
+            # Derived from the data when the caller does not say: every tied
+            # finalist having the tie-break seed in its pooled seed list means sc
+            # has already run for them.
+            seeds_seen = [set(r.get("seeds") or []) for r in ranked
+                          if r["state_id"] in tied]
+            tie_break_completed = bool(seeds_seen) and all(
+                self.tie_break_seed in s for s in seeds_seen)
+
+        is_tie = len(tied) > 1
+        if not is_tie:
+            status = "resolved"
+        elif not tie_break_completed and self.tie_break_seed is not None:
+            status = "tie_pending"
+        else:
+            status = "unresolved_equivalence"
+
         return {
             "rung": "final",
             "ranked": ranked,
-            "winner": winner["state_id"] if winner else None,
-            "winner_is_control": bool(winner and winner.get("is_control")),
-            "excluded_by_feasibility": excluded,
+            "decision_status": status,
+            "winner": leader["state_id"] if (leader and status == "resolved") else None,
+            "winner_is_control": bool(leader and status == "resolved"
+                                      and leader.get("is_control")),
+            "provisional_leader": leader["state_id"] if leader else None,
+            "provisional_leader_is_control": bool(leader and leader.get("is_control")),
+            "excluded_by_feasibility": [e for e in excluded
+                                        if e["exclusion"] == "feasibility_floor"],
+            "excluded_by_catastrophic_capability": [
+                e for e in excluded if e["exclusion"] == "catastrophic_capability"],
+            "all_exclusions": excluded,
+            "equivalence_interval": self.equivalence.require_value(),
             "tied_within_equivalence": tied,
-            # The tie-break seed is offered to every tied finalist, the control
-            # included: a canonical checkpoint statistically level with a searched
-            # one is exactly the case a third seed exists to resolve.
-            "needs_tie_break_seed": len(tied) > 1 and self.tie_break_seed is not None,
-            "tie_break_candidates": tied if len(tied) > 1 else [],
+            "needs_tie_break_seed": status == "tie_pending",
+            "tie_break_candidates": tied if status == "tie_pending" else [],
+            "tie_break_completed": tie_break_completed,
+            "interpretation": (
+                "AutoInitializer v1 did not resolve a unique behavioural winner; "
+                "whether to full-recover both tied candidates is a separate "
+                "decision and a separate authorization."
+                if status == "unresolved_equivalence" else None),
             "rule": self.winner_rule,
         }
 

@@ -1,0 +1,109 @@
+{
+  "schema": "aadistill.autoinit.control_availability/v1",
+  "generated_utc": "2026-08-12T19:07:23.070438+00:00",
+  "relay": "AlphaAvatar/aadistill-artifacts",
+  "controls": {
+    "e1_r0860k_sa_pca": {
+      "canonical_id": "e1_r0860k_sa_pca",
+      "seed": 20260726,
+      "present_on_dev_box": false,
+      "tombstoned": true,
+      "relay_path": "e1_scaling_20260801/e1_r0860k_sa_pca/step_001023/model/model.safetensors",
+      "present_on_relay": true,
+      "expected_weights_sha256": "18ee10a10333481d3d6178d2fc5d4e0a705aca04d8a1d69a4ce83ac7f1e45b9c",
+      "expected_config_sha256": "62d14acfb86e397e9449e0d39d5aba6c5a84facac372a86b85e9ac6915be9522",
+      "architecture": {
+        "num_hidden_layers": 28,
+        "hidden_size": 1024,
+        "intermediate_size": 3072,
+        "num_attention_heads": 16,
+        "num_key_value_heads": 8,
+        "vocab_size": 151936
+      },
+      "actual_weights_sha256": "18ee10a10333481d3d6178d2fc5d4e0a705aca04d8a1d69a4ce83ac7f1e45b9c",
+      "weights_hash_match": true,
+      "size_bytes": 2384234968,
+      "actual_config_sha256": "62d14acfb86e397e9449e0d39d5aba6c5a84facac372a86b85e9ac6915be9522",
+      "config_hash_match": true,
+      "lineage": {
+        "student_path": "artifacts/stage1/qwen3_0p6b_init_v0/checkpoint",
+        "rung": 860000,
+        "seed": 20260726,
+        "loss": {
+          "ce_weight": 0.25,
+          "kd_weight": 1.0,
+          "kd_temperature": 1.0,
+          "kd_scope": "all"
+        },
+        "total_steps": 1023,
+        "block_len": 8192
+      },
+      "lineage_checks": {
+        "descends_from_canonical_init": true,
+        "rung_is_0860k": true,
+        "seed_matches": true,
+        "ce_weight": true,
+        "kd_weight": true,
+        "kd_temperature": true,
+        "kd_scope": true,
+        "block_len": true
+      },
+      "lineage_valid": true,
+      "matches_intended_control_protocol": true
+    },
+    "e1_r0860k_sb_pca": {
+      "canonical_id": "e1_r0860k_sb_pca",
+      "seed": 20260801,
+      "present_on_dev_box": false,
+      "tombstoned": true,
+      "relay_path": "e1_scaling_20260801/e1_r0860k_sb_pca/step_001023/model/model.safetensors",
+      "present_on_relay": true,
+      "expected_weights_sha256": "f66de5320b69aa34abf421a45b5d468bbbaf23d2a400750e3340873f20e40035",
+      "expected_config_sha256": "62d14acfb86e397e9449e0d39d5aba6c5a84facac372a86b85e9ac6915be9522",
+      "architecture": {
+        "num_hidden_layers": 28,
+        "hidden_size": 1024,
+        "intermediate_size": 3072,
+        "num_attention_heads": 16,
+        "num_key_value_heads": 8,
+        "vocab_size": 151936
+      },
+      "actual_weights_sha256": "f66de5320b69aa34abf421a45b5d468bbbaf23d2a400750e3340873f20e40035",
+      "weights_hash_match": true,
+      "size_bytes": 2384234968,
+      "actual_config_sha256": "62d14acfb86e397e9449e0d39d5aba6c5a84facac372a86b85e9ac6915be9522",
+      "config_hash_match": true,
+      "lineage": {
+        "student_path": "artifacts/stage1/qwen3_0p6b_init_v0/checkpoint",
+        "rung": 860000,
+        "seed": 20260801,
+        "loss": {
+          "ce_weight": 0.25,
+          "kd_weight": 1.0,
+          "kd_temperature": 1.0,
+          "kd_scope": "all"
+        },
+        "total_steps": 1023,
+        "block_len": 8192
+      },
+      "lineage_checks": {
+        "descends_from_canonical_init": true,
+        "rung_is_0860k": true,
+        "seed_matches": true,
+        "ce_weight": true,
+        "kd_weight": true,
+        "kd_temperature": true,
+        "kd_scope": true,
+        "block_len": true
+      },
+      "lineage_valid": true,
+      "matches_intended_control_protocol": true
+    }
+  },
+  "config_hash_convention": "raw file bytes (build_checkpoint_registry.py)",
+  "relay_reachable": true,
+  "both_controls_available": true,
+  "retrieval_bytes": 4768469936,
+  "consequence": "Both canonical 0.86M controls are retrievable and verified. The micro-preflight stays a profiling/evaluation job: no recovery retraining is needed, and the two-seed pooled control characterization can be produced by evaluating these checkpoints on recovery_search_v1.",
+  "report_sha256": "1227a0e1a90df1f2efba19184c16582e87682174d0e47288233ecde4bc841070"
+}

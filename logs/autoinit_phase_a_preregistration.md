@@ -2,7 +2,7 @@
 
 **Status: DRAFT, NOT AUTHORIZED. No compute has been launched.** Machine-readable
 companion: [`autoinit_phase_a_preregistration.json`](autoinit_phase_a_preregistration.json),
-sha256 `e6e674034eb957031584b8701d3721479e49cc5d78e2e18b622b85bb11421668`,
+sha256 `4b01833129128252bf5e386230312f68130e342d16341c0e3ba6228239aea374`,
 regenerable with `scripts/autoinit/write_preregistration.py`.
 
 Two numbers are deliberately **absent** and marked `PENDING_MICRO_PREFLIGHT`. The
@@ -103,11 +103,39 @@ different weights — and every existing behaviour number in this project belong
 the latter.
 
 * The control **advances to rung 2 unconditionally** and consumes no survivor slot.
-* The control is **exempt from the feasibility gate** — a baseline that fails the
-  floor is a finding about the floor or the baseline, not a reason to delete the
-  comparison.
+* The control is **exempt from both gates** — a baseline that fails a floor is a
+  finding about the floor or the baseline, not a reason to delete the comparison.
 * The control is **eligible to win** the final.
 * The third seed is offered to **every** tied finalist, control included.
+
+### A tie is not a winner
+
+| `decision_status` | `winner` | meaning |
+| --- | --- | --- |
+| `resolved` | the leader | one finalist leads by more than the interval |
+| `tie_pending` | **None** | equivalent after sa+sb; seed sc is owed |
+| `unresolved_equivalence` | **None** | *still* equivalent after sc |
+
+`unresolved_equivalence` is reported as: **AutoInitializer v1 did not resolve a
+unique behavioural winner.** No fourth seed is requested, and the deterministic
+state-id ordering is *not* used to break a scientific tie — it orders the report
+and nothing more. Whether to full-recover both tied candidates is a separate
+decision and a separate authorization.
+
+### Correctness semantics: `correct ⇒ usable`
+
+A rollout can answer correctly and then loop, or hit the context limit, or break
+protocol — so a scorer alone *can* call an unusable rollout correct. **This battery
+defines `correct` as "correct in a usable rollout".** `score_recovery_row` makes
+the implication true by construction and records `correct_but_unusable` separately
+so the gap stays visible; `validate_scored_rows` enforces it per row, before
+aggregation, so a violation names the prompt rather than surfacing as a summed
+count.
+
+The rejected alternative is recorded: scoring correctness independently of
+usability would make `correct_overall` a measure of latent capability rather than
+of deployable behaviour, and would reward the exact failure that dominates this
+project — ~31% of rollouts hitting the context limit.
 
 ### Selection: constraint, then objective, never a weighted sum
 
@@ -145,23 +173,47 @@ extends to `sc` across all completed seeds.
 | multihop | rag_multihop | 30 | yes |
 | rag | rag_multihop | 30 | yes |
 | knowledge | general | 30 | yes |
+| tool | tool | 20 | **yes** (added after the audit) |
 | code | code | 20 | **behaviour only** |
-| tool | tool | 20 | **behaviour only** |
 
-Code and tool have no frozen scorer, so they contribute stability and failure
-diagnostics and are excluded from correctness by construction. Inventing an
-unvalidated code executor or call matcher would put an untested scorer on the
-selection path. **Recorded limitation: this battery cannot detect a candidate that
-trades code or tool capability for math.**
+**190 prompts, 170 scorable.**
+
+**Tool is scorable.** The compatibility audit
+([`autoinit_tool_scoring_audit.json`](autoinit_tool_scoring_audit.json)) ran the
+existing frozen `behavior.score_tool_call` against all 20 battery items and six
+adversarial cases — known-good, malformed JSON, wrong tool name, missing required
+args, wrong argument values, and protocol-invalid output with no `<tool_call>`
+wrapper. Every case was distinguished correctly, with no parse failures. The
+xLAM → OpenAI envelope translation is mechanical; the only interpretive step is
+deriving `required` from the absence of a `default`, and that affects **only**
+`tool_args_schema_ok`, which is reported as a diagnostic. **Correctness for tool
+is `tool_call_exact_match`.** Known strictness, recorded: exact match compares the
+emitted call list to the gold list in order, and 9 of 20 items are multi-call —
+this is the existing frozen semantics, not a new rule.
+
+Code has no frozen scorer and stays behaviour-only. **Recorded limitation: this
+battery cannot detect a candidate that trades code capability for math.**
 
 ## 7. Preregistered thresholds
 
 Derived in [`autoinit_threshold_characterization.json`](autoinit_threshold_characterization.json).
 
-**Equivalence interval — 0.045.** Two binomial standard errors of
-`correct_overall` at the control's historical rate (0.1867) on the pooled scorable
-denominator (150 × 2 = 300). One SE would call a difference decisive that a rerun
-could reverse; two SE is the smallest interval this denominator supports.
+**Equivalence interval — one definition, formula frozen, value pending.**
+
+```
+interval = 2 * sqrt(p_control * (1 - p_control) / 340)
+```
+
+where `p_control` is the pooled `correct_overall` of the canonical control on
+`recovery_search_v1`, and 340 = 170 scorable × 2 seeds. The formula is frozen
+before any candidate is searched, so it is non-adaptive; the numeric value is
+materialized once from the control's own measurement and never changes.
+
+**There is no second, prior-derived constant.** `EquivalenceRule.require_value()`
+raises rather than falling back to a prior, and `select_final_winner` therefore
+refuses to run before the control is characterized. The historical prior appears
+in the characterization record only as `illustrative_only_at_historical_prior`,
+explicitly flagged as not the threshold.
 
 **Feasibility floor — rule frozen, number pending.**
 `max(0.30, control_usable_pooled − 3·SE)` on the pooled all-prompt denominator
@@ -171,9 +223,14 @@ without requiring parity, which would make feasibility a second ranking. At the
 historical prior (0.7300) the floor would be **0.6617**; the actual control rate on
 *this* battery is unmeasured and is a preflight input.
 
-**Catastrophic per-capability floor — rule frozen.** A candidate is excluded if any
-scorable set's usable rate is below 0.10 while the control's is above 0.40 on that
-set. The pooled rate can hide a total collapse on one capability.
+**Catastrophic per-capability floor — frozen AND executable.** A candidate is
+excluded if any capability's usable rate is below 0.10 while the control's is
+above 0.40 on that capability. This is enforced mechanically in `_gate`, at
+**both** rungs, and the exclusion record names the capability and both measured
+values. It is not a post-hoc human judgement. It does not fire when the control is
+also weak on that capability — a capability the incumbent cannot do either is not
+the candidate's failure. With no control row present it cannot fire, and the
+report says `control_present: false` rather than silently passing everything.
 
 Context: the behaviour metric's seed-only spread is **0.1290**, far larger than the
 equivalence interval — which is why seeds are pooled rather than compared, and why
@@ -185,7 +242,7 @@ a third seed exists.
 | --- | --- | --- |
 | OPERATOR_CALIBRATION | `e8_calibration_v1` | content `d65c1f40…` |
 | INITIALIZER_STATE_EVAL | `state_eval_v1` | content `a1197205…` |
-| RECOVERY_SEARCH | `recovery_search_v1` | content `a1b22778…` |
+| RECOVERY_SEARCH | `recovery_search_v1` | content `a1b22778…`, manifest `1a8321c7…` |
 | FINAL_PROMOTION | `battery_v2` | mask `d6e24e0b…` — **isolated from the search** |
 | RECOVERY_TRAINING | `ladder_uniform_probe` @ 0.86M | pack `6f324cb0…` |
 
@@ -223,10 +280,21 @@ micro-preflight.
 ## 11. Pending before launch
 
 1. canonical control `usable_rollout_rate` on `recovery_search_v1`;
-2. canonical control `correct_overall` on `recovery_search_v1`;
-3. canonical control per-set usable rates;
+2. canonical control `correct_overall` on `recovery_search_v1` → materializes the
+   equivalence interval;
+3. canonical control per-capability usable rates → the catastrophic rule's
+   reference values;
 4. GPU state-evaluator repeatability — confirms or resets beam ε;
 5. activation-statistics GPU/CPU split — collapses the cost range.
+
+**Both canonical control checkpoints are available and verified**
+([`autoinit_control_availability.json`](autoinit_control_availability.json)):
+`e1_r0860k_sa_pca` (`18ee10a1…`) and `e1_r0860k_sb_pca` (`f66de532…`) are on the
+relay, their LFS sha256 match their tombstones, their configs match, and their run
+manifests confirm the frozen protocol — same initialization, rung 860,000, seeds
+20260726/20260801, `ce 0.25 / kd 1.0 / T 1.0 / scope all`, 1,023 steps,
+`block_len` 8192. **No recovery retraining is needed for the control
+characterization.**
 
 All five are micro-preflight outputs. See
 [`autoinit_micro_preflight_plan.md`](autoinit_micro_preflight_plan.md).

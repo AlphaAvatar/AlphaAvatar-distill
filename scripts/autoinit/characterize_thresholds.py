@@ -142,7 +142,7 @@ def main() -> None:
     ap.add_argument("--items", type=int, default=4)
     ap.add_argument("--seq-len", type=int, default=64)
     ap.add_argument("--seed", type=int, default=4242)
-    ap.add_argument("--scorable-prompts", type=int, default=150)
+    ap.add_argument("--scorable-prompts", type=int, default=170)
     ap.add_argument("--all-prompts", type=int, default=190)
     args = ap.parse_args()
 
@@ -197,13 +197,24 @@ def main() -> None:
             "note": "pooled counts, per the frozen SeedAggregation",
         },
         "equivalence_interval": {
-            "rule": ("2 x the binomial standard error of correct_overall at the "
-                     "control's pooled rate, on the pooled scorable denominator"),
+            "SINGLE_DEFINITION": ("interval = 2 * sqrt(p_control * (1 - p_control) "
+                                  "/ n_pooled). The formula is frozen now; the "
+                                  "numeric value is materialized from the control "
+                                  "characterization and never changes afterwards. "
+                                  "There is no second, prior-derived constant."),
+            "rule_id": "two_binomial_se", "z": 2.0, "n_pooled": n_scorable,
             "free_input": "control correct_overall on the recovery-search battery",
-            "prior_value_used_for_sizing": CONTROL_CORRECT_OLD_BATTERY,
-            "prior_source": "retained reference on the 150-prompt promotion battery",
-            "se_at_prior": round(se_correct_prior, 5),
-            "interval_at_prior": round(2 * se_correct_prior, 4),
+            "status": "PENDING_CONTROL_CHARACTERIZATION",
+            "illustrative_only_at_historical_prior": {
+                "p": CONTROL_CORRECT_OLD_BATTERY,
+                "source": "retained reference on the 150-prompt promotion battery",
+                "se": round(se_correct_prior, 5),
+                "interval": round(2 * se_correct_prior, 4),
+                "WARNING": ("illustrative sizing only. This value is NOT the "
+                            "threshold and must not be used for selection; the "
+                            "materialized value comes from the control's own "
+                            "measurement on recovery_search_v1."),
+            },
             "why_two_se": ("one SE would call a difference decisive that a rerun "
                            "could reverse; two SE is the smallest interval this "
                            "denominator can support"),
@@ -263,8 +274,8 @@ def main() -> None:
         "measured_worst_objective_range_cpu": worst,
         "declared_epsilon": declared,
         "safely_above_measured_noise": verdict["safely_above_measured_noise"],
-        "equivalence_interval_at_prior": recovery["equivalence_interval"][
-            "interval_at_prior"],
+        "equivalence_n_pooled": recovery["equivalence_interval"]["n_pooled"],
+        "equivalence_status": recovery["equivalence_interval"]["status"],
         "feasibility_floor_at_prior": recovery["feasibility_floor"]["floor_at_prior"],
         "status": recovery["STATUS"],
     }, indent=2))

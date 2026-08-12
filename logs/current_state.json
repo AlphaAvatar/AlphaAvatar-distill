@@ -1,6 +1,6 @@
 {
   "schema": "aadistill.current_state/v1",
-  "generated_utc": "2026-08-12T22:40:00+00:00",
+  "generated_utc": "2026-08-12T23:55:00+00:00",
   "current_phase": "E8 closed; AutoInitializer framework IMPLEMENTED at zero cost, pre-GPU correction pass applied; no paid search authorized",
   "active_experiment": null,
   "paid_compute_running": false,
@@ -116,7 +116,7 @@
   "autoinit": {
     "status": "IMPLEMENTED_ZERO_COST_NOT_RUN_ON_REAL_MODELS",
     "package": "src/aadistill/autoinit",
-    "tests": 169,
+    "tests": 185,
     "operator_kinds": [
       "ATTENTION",
       "COMPOSITE_STAGE1",
@@ -165,17 +165,27 @@
         "path": "artifacts/stage3/recovery_search_v1",
         "role": "RECOVERY_SEARCH",
         "n_prompts": 190,
-        "n_scorable": 150,
-        "content_sha256": "a1b22778b00d95b6aba358c14a5af5b559fd807bb371c92131eacca59479f323"
+        "n_scorable": 170,
+        "content_sha256": "a1b22778b00d95b6aba358c14a5af5b559fd807bb371c92131eacca59479f323",
+        "manifest_sha256": "1a8321c79e4ee9ad0128cb238cda37384ab60c31cb916d2acc000078dde767e6"
       },
       "role_isolation": {
         "report": "logs/autoinit_role_isolation.json",
         "passed": true,
         "complete": true,
         "exact_overlaps": 0
+      },
+      "canonical_controls": {
+        "e1_r0860k_sa_pca": "18ee10a10333481d3d6178d2fc5d4e0a705aca04d8a1d69a4ce83ac7f1e45b9c",
+        "e1_r0860k_sb_pca": "f66de5320b69aa34abf421a45b5d468bbbaf23d2a400750e3340873f20e40035",
+        "location": "relay AlphaAvatar/aadistill-artifacts e1_scaling_20260801/",
+        "verified": true,
+        "retraining_needed": false,
+        "record": "logs/autoinit_control_availability.json"
       }
     },
-    "preregistration": "logs/autoinit_phase_a_preregistration.md"
+    "preregistration": "logs/autoinit_phase_a_preregistration.md",
+    "preregistration_sha256": "4b01833129128252bf5e386230312f68130e342d16341c0e3ba6228239aea374"
   },
   "proposed_pilot": {
     "authorized": false,
@@ -195,7 +205,7 @@
     "peak_working_storage_gib": 106
   },
   "tests": {
-    "passing": 1472,
+    "passing": 1488,
     "skipped": 7,
     "venvs_verified": [
       "repo .venv transformers 5.13.1",
@@ -204,9 +214,10 @@
   },
   "proposed_micro_preflight": {
     "authorized": false,
-    "expected_usd": 1.1,
-    "max_usd": 4.0,
+    "expected_usd": 1.55,
+    "max_usd": 4.5,
     "gpu": "1 x L40S",
-    "minutes": 55
+    "minutes": 55,
+    "control_seeds": 2
   }
 }
