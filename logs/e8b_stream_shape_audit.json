@@ -1,0 +1,266 @@
+{
+  "created_utc": "2026-08-12T05:12:38+00:00",
+  "command": "scripts/training/audit_stream_shapes.py --arms DP-sa,DC-sa --out logs/e8b_stream_shape_audit.json",
+  "vocab": 151936,
+  "gpu_mem_metric_note": "the logged gpu_mem_gb is torch.cuda.max_memory_allocated(), a running maximum that is never reset, so a non-decreasing series is guaranteed by construction and is NOT evidence of a leak",
+  "summaries": {
+    "DP-sa": {
+      "arm": "DP-sa",
+      "seed": 20260726,
+      "kd_chunk": 128,
+      "microbatches": 3522,
+      "ce_targets": {
+        "min": 71,
+        "mean": 1363.2,
+        "p90": 5166,
+        "p99": 7374,
+        "max": 7756,
+        "distinct_values": 544
+      },
+      "kd_positions": {
+        "min": 219,
+        "mean": 2265.9,
+        "p90": 8191,
+        "p99": 8191,
+        "max": 8191,
+        "distinct_values": 561
+      },
+      "executed_extent": {
+        "min": 8192,
+        "mean": 8192.0,
+        "p90": 8192,
+        "p99": 8192,
+        "max": 8192,
+        "distinct_values": 1
+      },
+      "nonpad_tokens": {
+        "min": 220,
+        "mean": 2266.9,
+        "p90": 8192,
+        "p99": 8192,
+        "max": 8192,
+        "distinct_values": 561
+      },
+      "worst_ce_targets": {
+        "step": 133,
+        "blocks": [
+          1033
+        ],
+        "value": 7756
+      },
+      "worst_kd_positions": {
+        "step": 0,
+        "blocks": [
+          350
+        ],
+        "value": 8191
+      },
+      "worst_executed_extent": {
+        "step": 0,
+        "blocks": [
+          1111
+        ],
+        "value": 8192
+      },
+      "worst_joint_transient": {
+        "step": 133,
+        "blocks": [
+          1033
+        ],
+        "estimated_transient_mb": 17260.5,
+        "ce_targets": 7756,
+        "kd_positions": 8191
+      },
+      "windows": {
+        "first_20": {
+          "steps": [
+            0,
+            20
+          ],
+          "n": 40,
+          "max_ce_targets": 6882,
+          "max_kd_positions": 8191,
+          "max_executed_extent": 8192,
+          "max_estimated_transient_mb": 16463.7
+        },
+        "first_200": {
+          "steps": [
+            0,
+            200
+          ],
+          "n": 400,
+          "max_ce_targets": 7756,
+          "max_kd_positions": 8191,
+          "max_executed_extent": 8192,
+          "max_estimated_transient_mb": 17260.5
+        },
+        "first_310": {
+          "steps": [
+            0,
+            310
+          ],
+          "n": 620,
+          "max_ce_targets": 7756,
+          "max_kd_positions": 8191,
+          "max_executed_extent": 8192,
+          "max_estimated_transient_mb": 17260.5
+        },
+        "around_dc_oom_850_950": {
+          "steps": [
+            850,
+            950
+          ],
+          "n": 200,
+          "max_ce_targets": 7732,
+          "max_kd_positions": 8191,
+          "max_executed_extent": 8192,
+          "max_estimated_transient_mb": 17238.6
+        },
+        "full_stream": {
+          "steps": [
+            0,
+            null
+          ],
+          "n": 3522,
+          "max_ce_targets": 7756,
+          "max_kd_positions": 8191,
+          "max_executed_extent": 8192,
+          "max_estimated_transient_mb": 17260.5
+        }
+      }
+    },
+    "DC-sa": {
+      "arm": "DC-sa",
+      "seed": 20260726,
+      "kd_chunk": 128,
+      "microbatches": 3522,
+      "ce_targets": {
+        "min": 71,
+        "mean": 1363.2,
+        "p90": 5166,
+        "p99": 7374,
+        "max": 7756,
+        "distinct_values": 544
+      },
+      "kd_positions": {
+        "min": 219,
+        "mean": 2265.9,
+        "p90": 8191,
+        "p99": 8191,
+        "max": 8191,
+        "distinct_values": 561
+      },
+      "executed_extent": {
+        "min": 8192,
+        "mean": 8192.0,
+        "p90": 8192,
+        "p99": 8192,
+        "max": 8192,
+        "distinct_values": 1
+      },
+      "nonpad_tokens": {
+        "min": 220,
+        "mean": 2266.9,
+        "p90": 8192,
+        "p99": 8192,
+        "max": 8192,
+        "distinct_values": 561
+      },
+      "worst_ce_targets": {
+        "step": 133,
+        "blocks": [
+          1033
+        ],
+        "value": 7756
+      },
+      "worst_kd_positions": {
+        "step": 0,
+        "blocks": [
+          350
+        ],
+        "value": 8191
+      },
+      "worst_executed_extent": {
+        "step": 0,
+        "blocks": [
+          1111
+        ],
+        "value": 8192
+      },
+      "worst_joint_transient": {
+        "step": 133,
+        "blocks": [
+          1033
+        ],
+        "estimated_transient_mb": 17260.5,
+        "ce_targets": 7756,
+        "kd_positions": 8191
+      },
+      "windows": {
+        "first_20": {
+          "steps": [
+            0,
+            20
+          ],
+          "n": 40,
+          "max_ce_targets": 6882,
+          "max_kd_positions": 8191,
+          "max_executed_extent": 8192,
+          "max_estimated_transient_mb": 16463.7
+        },
+        "first_200": {
+          "steps": [
+            0,
+            200
+          ],
+          "n": 400,
+          "max_ce_targets": 7756,
+          "max_kd_positions": 8191,
+          "max_executed_extent": 8192,
+          "max_estimated_transient_mb": 17260.5
+        },
+        "first_310": {
+          "steps": [
+            0,
+            310
+          ],
+          "n": 620,
+          "max_ce_targets": 7756,
+          "max_kd_positions": 8191,
+          "max_executed_extent": 8192,
+          "max_estimated_transient_mb": 17260.5
+        },
+        "around_dc_oom_850_950": {
+          "steps": [
+            850,
+            950
+          ],
+          "n": 200,
+          "max_ce_targets": 7732,
+          "max_kd_positions": 8191,
+          "max_executed_extent": 8192,
+          "max_estimated_transient_mb": 17238.6
+        },
+        "full_stream": {
+          "steps": [
+            0,
+            null
+          ],
+          "n": 3522,
+          "max_ce_targets": 7756,
+          "max_kd_positions": 8191,
+          "max_executed_extent": 8192,
+          "max_estimated_transient_mb": 17260.5
+        }
+      }
+    }
+  },
+  "pair_shape_identity": {
+    "DP-sa_vs_DC-sa": {
+      "identical": true,
+      "n_microbatches": 3522,
+      "first_differing_indices": [],
+      "note": "same architecture, pack, seed, masks and order \u2014 a difference here would be a bug, not a workload property"
+    }
+  }
+}

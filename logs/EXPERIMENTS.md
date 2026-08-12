@@ -5345,3 +5345,71 @@ the backend *and* the hardware — which neither of the remaining options does. 
 (`logs/e8b_s2_dp_sa/`), along with DC-sa's partial trajectory.
 
 **Cost.** $7.21. E8b total **$16.82** of $47.18; **$30.36** remains.
+
+## 42. E8b full-stream shape audit — the OOM is NOT explained by data-dependent shapes (2026-08-12, $0)
+
+Zero GPU cost. `scripts/training/audit_stream_shapes.py` reconstructs the exact
+deterministic stream — `stream_block_indices(n_blocks, seed, step*bps, bps)` is a pure
+function of seed and step — using the real pack (`blocks.npz`
+sha256 `6f324cb0…`, the hash the pod verifies), the real masks and the real seed
+derivation. 3,522 microbatches per arm.
+
+**First, a metric correction that reframes everything.** The logged `gpu_mem_gb` is
+`torch.cuda.max_memory_allocated()`, a **running maximum that is never reset**. Its rise
+from 76.50 to 77.45 is non-decreasing *by construction*. My earlier description of it as
+the peak "climbing" implied creep; a running max reaching a plateau is equally
+consistent with simply having encountered the worst block.
+
+**Shapes do vary — substantially.**
+
+| quantity | min | mean | p90 | p99 | max | distinct |
+| --- | --- | --- | --- | --- | --- | --- |
+| `ce_targets` | 71 | 1363.2 | 5166 | 7374 | **7756** | 544 |
+| `kd_positions` | 219 | 2265.9 | 8191 | 8191 | **8191** | 561 |
+| executed extent | 8192 | 8192 | 8192 | 8192 | 8192 | **1** |
+
+So a fixed `seq_len` really does not imply a fixed memory workload: CE selection varies
+by two orders of magnitude. **But that is not what caused the OOM.**
+
+**The worst block is step 133, inside the gate's window.**
+
+| window | max ce | max kd | max estimated transient |
+| --- | --- | --- | --- |
+| first 20 | 6882 | 8191 | 16,463.7 MB |
+| **first 200** | **7756** | **8191** | **17,260.5 MB** |
+| first 310 | 7756 | 8191 | 17,260.5 MB |
+| around the DC OOM (850–950) | 7732 | 8191 | 17,238.6 MB |
+| **full stream** | **7756** | **8191** | **17,260.5 MB** |
+
+`first_200` max **equals** `full_stream` max. The 200-step gate sampled the
+worst-case shapes in the entire run, and the region where DC-sa died is *less*
+demanding than what the gate had already measured at 77.31 GiB.
+
+**DP-sa and DC-sa are shape-identical** across all 3,522 microbatches — step index,
+block indices, `ce_targets`, `kd_positions`, executed extent and non-padding counts all
+match exactly. No bug there.
+
+**Two further candidates eliminated at zero cost.** The gate config disables evaluation
+(`eval_every: 0`, `eval_blocks: 4`) while the real run evaluates every 220 steps over 16
+blocks and checkpoints at 880 — so the gate's workload was genuinely unrepresentative.
+But the validation blocks do **not** exceed the training worst case (ce 7,684 vs 7,756;
+kd equal at 8,191) and `_eval_blocks` runs under `@torch.no_grad()`, so evaluation
+allocates strictly less than a training step. Evaluation does not explain the residual.
+
+**Classification: lifecycle-suspect, not shape-explained.** The rise to 77.31 GiB is
+fully accounted for by the worst training block at step 133. The residual **+0.14 GiB**
+appearing at step 310, and DC-sa's failure at ~step 900 on shapes smaller than the gate
+had already survived, are **not** explained by the workload. That is Branch B.
+
+**The supported statement, and the one to use:** *under the present implementation,
+DP/DC operate within a very small A100 memory margin and have produced late-step OOMs
+whose relationship to data-dependent tensor shape versus memory lifecycle is now
+partially resolved — shapes are excluded as the cause.* It is **not** established that
+DP/DC require more than 80 GB, and §41's framing of "80 GB is marginal" should be read
+with that correction.
+
+**Recommendation: do not buy a larger GPU yet.** The next step is the Branch B
+same-block replay — one exact block repeated past the growth horizon, recording
+allocated memory at every phase boundary and reserved memory alongside, with CUDA
+allocation snapshots if the boundary value grows. A ≥94 GB card would hide exactly the
+defect this would find.
