@@ -57,17 +57,35 @@ def gold_answer(set_name: str, sample: dict) -> str:
     if set_name == "rag":
         return f"The context states: \"{sample['gold']}\". Answer: {sample['gold']}."
     if set_name == "tool":
-        calls = sample["reference_calls"]
-        if isinstance(calls, str):
-            calls = json.loads(calls)
-        emitted = "\n".join(
-            "<tool_call>\n"
-            + json.dumps({"name": c.get("name") or c.get("function", {}).get("name"),
-                          "arguments": c.get("arguments")
-                          or c.get("function", {}).get("arguments") or {}})
-            + "\n</tool_call>" for c in calls)
-        return emitted
+        return tool_call_text(sample)
     return "def solve():\n    return 1\n"
+
+
+def reference_calls(sample: dict) -> list[dict]:
+    calls = sample["reference_calls"]
+    return json.loads(calls) if isinstance(calls, str) else calls
+
+
+def tool_call_text(sample: dict, *, name=None, arguments=None,
+                   malformed: bool = False) -> str:
+    """A `<tool_call>` envelope, optionally corrupted in one specific way.
+
+    `name` / `arguments` are callables over the gold call, so each policy varies
+    exactly one property of an otherwise perfect invocation.
+    """
+    blocks = []
+    for call in reference_calls(sample):
+        got_name = call.get("name") or call.get("function", {}).get("name")
+        got_args = call.get("arguments") or call.get("function", {}).get("arguments") or {}
+        if name is not None:
+            got_name = name(got_name)
+        if arguments is not None:
+            got_args = arguments(got_args)
+        payload = json.dumps({"name": got_name, "arguments": got_args})
+        if malformed:
+            payload = payload[:-1] + ",,"          # valid envelope, invalid JSON
+        blocks.append(f"<tool_call>\n{payload}\n</tool_call>")
+    return "\n".join(blocks)
 
 
 POLICIES = {
@@ -81,6 +99,29 @@ POLICIES = {
                   context_limit=True),
     "degenerate": dict(answer=lambda s, x: "the the the " * 200, terminates=False,
                        degenerate=True, context_limit=False),
+    # --- tool-specific policies. Each varies ONE property of a perfect call, so
+    # the resulting verdict isolates exactly one rung of the structural gate.
+    # Non-tool sets keep the oracle answer, so any movement in an aggregate is
+    # attributable to `tool` alone.
+    "tool_malformed_json": dict(
+        answer=lambda s, x: (tool_call_text(x, malformed=True) if s == "tool"
+                             else gold_answer(s, x)),
+        terminates=True, degenerate=False, context_limit=False),
+    "tool_undeclared_name": dict(
+        answer=lambda s, x: (tool_call_text(x, name=lambda n: f"{n}_not_declared")
+                             if s == "tool" else gold_answer(s, x)),
+        terminates=True, degenerate=False, context_limit=False),
+    "tool_wrong_arguments": dict(
+        answer=lambda s, x: (
+            tool_call_text(x, arguments=lambda a: {k: "WRONG" for k in a} or {})
+            if s == "tool" else gold_answer(s, x)),
+        terminates=True, degenerate=False, context_limit=False),
+    # A tool call emitted on prompts that never offered tools: the generic rule
+    # must still reject it, which is what keeps the relaxation scoped.
+    "unprompted_tool_call": dict(
+        answer=lambda s, x: ('<tool_call>\n{"name": "get_weather", "arguments": '
+                             '{"city": "Paris"}}\n</tool_call>'),
+        terminates=True, degenerate=False, context_limit=False),
 }
 
 
@@ -142,13 +183,24 @@ def scored(tmp_path_factory) -> dict:
 def test_a_contentless_policy_is_behaviourally_perfect_and_almost_never_correct(scored):
     """The whole reason correctness is a separate axis."""
     result = scored["contentless_perfect"]
-    assert result["usable_rollout_rate"] == 1.0
     for component in ("non_empty", "natural_termination", "no_severe_repetition",
                       "no_context_limit", "protocol_valid"):
         assert result[component] == 1.0, component
+    # Every generic capability: behaviourally perfect, and useless.
+    for name in ("gsm8k", "math_verified", "multihop", "rag", "knowledge"):
+        assert result["per_capability"][name]["usable_rollout_rate"] == 1.0, name
+    assert result["per_set"]["code"]["usable_rollout_rate"] == 1.0
     assert result["correct_overall"] < 0.10, (
         "a two-word contentless answer is scoring as correct; the correctness "
         "axis is measuring format, not content")
+    # `tool` is the one capability where "42" is not a usable rollout, and that
+    # is the gate working: a reply that emits no call cannot drive a runtime, so
+    # no Stage-5 trajectory comes out of it.
+    tool = result["per_capability"]["tool"]
+    assert tool["protocol_valid"] == 1.0
+    assert tool["tool_call_emitted"] == 0.0
+    assert tool["usable_rollout_rate"] == 0.0
+    assert result["usable_rollout_rate"] == round(170 / 190, 4)
 
 
 def test_correct_implies_usable_by_construction(scored):
@@ -162,7 +214,7 @@ def test_correct_implies_usable_by_construction(scored):
         "reporting 0.0 would make it look measured")
     # The scorer did find the answer — that is what makes this a real check
     # rather than a tautology about an empty output.
-    assert loop["scoring_contract"]["correct_but_unusable"] > 0
+    assert loop["row_contract"]["correct_but_unusable"] > 0
     for result in scored.values():
         assert result["correct"] <= result["usable"], result["label"]
 
@@ -226,6 +278,78 @@ def test_a_short_set_is_refused_rather_than_inflating_a_rate(tmp_path):
              "HOME": str(tmp_path)})
     assert rc.returncode != 0
     assert "have no generation" in rc.stdout + rc.stderr
+
+
+def test_the_tool_usable_gate_separates_executability_from_correctness(scored):
+    """The four cases, on the real 20 frozen tool prompts.
+
+        malformed JSON            -> unusable, incorrect
+        undeclared tool name      -> unusable, incorrect
+        well-formed, wrong args   -> USABLE, incorrect
+        exact invocation          -> usable, correct
+
+    `usable` here means an agent runtime could execute the call, which is what
+    Stage 5 needs from a trajectory. It deliberately stops short of argument
+    correctness: a model that drives the runtime correctly and chooses the wrong
+    city is stable and wrong, not unstable.
+    """
+    cases = {
+        "tool_malformed_json": (0.0, 0.0),
+        "tool_undeclared_name": (0.0, 0.0),
+        "tool_wrong_arguments": (1.0, 0.0),
+        "oracle": (1.0, None),          # correctness asserted separately, > 0.5
+    }
+    for policy, (want_usable, want_correct) in cases.items():
+        tool = scored[policy]["per_capability"]["tool"]
+        assert tool["usable_rollout_rate"] == want_usable, (policy, tool)
+        if want_correct is not None:
+            assert tool["correct_overall"] == want_correct, (policy, tool)
+    assert scored["oracle"]["per_capability"]["tool"]["correct_overall"] > 0.5
+
+    # Which rung failed is recorded, not just that something did.
+    malformed = scored["tool_malformed_json"]["per_capability"]["tool"]
+    assert malformed["tool_call_emitted"] == 1.0
+    assert malformed["tool_call_parsed"] == 0.0
+    undeclared = scored["tool_undeclared_name"]["per_capability"]["tool"]
+    assert undeclared["tool_call_parsed"] == 1.0
+    assert undeclared["tool_name_valid"] == 0.0
+    # Wrong arguments clear every structural rung; only correctness moves.
+    wrong = scored["tool_wrong_arguments"]["per_capability"]["tool"]
+    assert wrong["tool_structurally_executable"] == 1.0
+    assert wrong["protocol_valid"] == 1.0
+
+    # And the generic components are untouched: the tool gate must not leak into
+    # the other five capabilities.
+    for policy in cases:
+        for name in ("gsm8k", "math_verified", "multihop", "rag", "knowledge"):
+            assert scored[policy]["per_capability"][name][
+                "usable_rollout_rate"] == 1.0, (policy, name)
+
+
+def test_an_argument_schema_failure_is_not_a_usability_failure(scored):
+    """`tool_args_schema_ok` stays diagnostic, by explicit decision."""
+    from aadistill.autoinit.recovery import recovery_scoring_contract  # noqa: F401
+
+    import json as _json
+    gate = _json.loads(_json.dumps(
+        scored["oracle"]["tool_usable_gate"]))
+    assert gate["definition"].startswith("generic usable_rollout AND ")
+    assert "tool_args_schema_ok" not in gate["definition"]
+    assert "tool_call_exact_match" not in gate["definition"]
+    assert set(gate["excluded"]) == {"tool_args_schema_ok", "tool_call_exact_match"}
+
+
+def test_an_unprompted_tool_call_policy_is_protocol_invalid_everywhere(scored):
+    """The relaxation is scoped to prompts that declared tools."""
+    result = scored["unprompted_tool_call"]
+    for name in ("gsm8k", "math_verified", "multihop", "rag", "knowledge"):
+        cap = result["per_capability"][name]
+        assert cap["protocol_valid"] == 0.0, name
+        assert cap["usable_rollout_rate"] == 0.0, name
+    assert result["per_set"]["code"]["protocol_valid"] == 0.0
+    # On the tool set the same text IS allowed, because those prompts offer tools.
+    assert result["per_capability"]["tool"]["protocol_valid"] == 1.0
+    assert result["first_failure"]["protocol_valid"] > 0
 
 
 def test_a_correct_tool_call_is_a_usable_rollout(scored):

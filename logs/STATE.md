@@ -1,18 +1,21 @@
 **Updated:** 2026-08-13 · branch `main` · working tree clean
-**No pods running. Nothing billing.** **1,531 CPU tests pass**, 7 skipped — in
+**No pods running. Nothing billing.** **1,536 CPU tests pass**, 7 skipped — in
 *both* venvs (repo `.venv` transformers 5.13.1, and the transformers 4.57.1 venv).
 
-**The micro-preflight is authorized but HELD at $0 on a scoring blocker found
-while wiring it.** `protocol_valid` rejected a `<tool_call>` in the answer as
-`unexpected_tool_call` even when the prompt declared tools, so every well-formed
-tool call was an invalid rollout and — through `correct => usable` — incorrect
-too. On the real frozen battery with a perfect-oracle policy: **tool usable rate
-0.0000 → 1.0000, overall 0.8947 → 1.0000.** That is 20 of 190 prompts and one of
-six capabilities the catastrophic rule ranks on, and Stage 3 *materializes the
-frozen thresholds* from these rates. The fix is committed and zero-cost —
-`protocol_valid(..., tools_offered=False)`, strictly additive, historical default
-unchanged — but it changes a preregistered metric definition, so the session waits
-for confirmation rather than launching. See [`decisions.md`](decisions.md)
+**Recovery-search scoring is now `recovery_search_scoring@v2`** (digest
+`f76008d5…`), superseding @v1 **before any paid measurement**. @v1 pinned the
+metric by a single hash of `capability.py` and so could not see a defect in the
+*composition*: `protocol_valid` rejected a prompted `<tool_call>` as
+`unexpected_tool_call`, `usable_rollout` inherited it, and `correct => usable`
+propagated it, so the `tool` capability read a structural **0.0000 for every arm**
+while `capability.py` was unchanged and its hash matched. Corrected additively
+(`protocol_valid(..., tools_offered=False)` default preserves historical scoring)
+plus a `tool` structural-executability gate — `tool_call_emitted AND
+tool_call_parsed AND tool_name_valid`, deliberately *not* `tool_args_schema_ok`
+(interpretive) or `tool_call_exact_match` (that is correctness). Validated at $0
+over nine policies × 190 frozen prompts:
+[`autoinit_recovery_scoring_validation.json`](autoinit_recovery_scoring_validation.json).
+Prompt content unchanged (`a1b22778…`). See [`decisions.md`](decisions.md)
 2026-08-13.
 
 **The AutoInitializer framework is implemented at zero cost and not yet run on

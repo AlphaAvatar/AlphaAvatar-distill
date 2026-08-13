@@ -498,6 +498,79 @@ CAPABILITY_SCHEMA_V1 = CapabilitySchema(
     expected=("gsm8k", "math_verified", "multihop", "rag", "knowledge", "tool"))
 
 
+#: Every implementation that materially defines the frozen recovery-search
+#: metrics. One aggregate digest, not a single historical scorer-file hash.
+#:
+#: The v1 contract recorded `capability.py`'s hash alone, which is why a defect
+#: living in the *composition* — `protocol_valid` rejecting a prompted tool call,
+#: `usable_rollout` inheriting that, `correct => usable` propagating it — was
+#: invisible to the identity that was supposed to pin the metric. A scoring
+#: contract must cover everything that can move a number, including the rule that
+#: relates two numbers to each other.
+RECOVERY_SCORING_FILES_V2: tuple[str, ...] = (
+    "scripts/autoinit/score_recovery_search.py",  # the recovery-search contract
+    "src/aadistill/evaluation/usable_rollout.py",  # the five behaviour components
+    "src/aadistill/evaluation/strict_answer.py",   # protocol validity, extraction
+    "src/aadistill/evaluation/behavior.py",        # split, tool-call diagnostics
+    "src/aadistill/evaluation/capability.py",      # per-set correctness scorers
+    "src/aadistill/autoinit/recovery.py",          # correct=>usable, capability
+                                                   # schema, pooled aggregation,
+                                                   # thresholds
+)
+RECOVERY_SCORING_CONTRACT_ID = "recovery_search_scoring"
+RECOVERY_SCORING_CONTRACT_VERSION = 2
+
+
+def recovery_scoring_contract(repo_root: str | Path = ".", *,
+                              files: Sequence[str] | None = None,
+                              ) -> dict[str, Any]:
+    """The aggregate scoring-contract digest a result binds to.
+
+    Same shape and same failure mode as ``trainer_source_digest``: a missing
+    declared file raises rather than yielding a digest over a smaller contract.
+    """
+    root = Path(repo_root)
+    declared = tuple(files) if files is not None else RECOVERY_SCORING_FILES_V2
+    entries = []
+    for rel in sorted(declared):
+        path = root / rel
+        if not path.is_file():
+            raise RecoveryAdmissionError(
+                f"declared recovery-scoring source {rel!r} is missing; refusing "
+                "to produce a contract digest that silently describes a smaller "
+                "scorer than the one that runs")
+        entries.append({"path": rel, "sha256": sha256_file(path),
+                        "bytes": path.stat().st_size})
+    digest = hashlib.sha256(
+        "".join(f"{e['path']}:{e['sha256']}\n" for e in entries).encode()).hexdigest()
+    return {
+        "contract": f"{RECOVERY_SCORING_CONTRACT_ID}@v{RECOVERY_SCORING_CONTRACT_VERSION}",
+        "contract_id": RECOVERY_SCORING_CONTRACT_ID,
+        "version": RECOVERY_SCORING_CONTRACT_VERSION,
+        "digest": digest,
+        "files": entries,
+        "rule": ("sha256 over sorted 'path:sha256' lines of the declared "
+                 "recovery-scoring source set"),
+        "covers": ["usable_rollout components and their composition",
+                   "protocol validity, including the tools_offered relaxation",
+                   "the tool structural-executability gate",
+                   "per-set correctness scorers",
+                   "correct => usable",
+                   "capability schema and aggregation",
+                   "pooled_counts seed aggregation",
+                   "the threshold formulas materialized from control data"],
+        "supersedes": {
+            "contract": f"{RECOVERY_SCORING_CONTRACT_ID}@v1",
+            "identity_was": ("a single hash of "
+                             "src/aadistill/evaluation/capability.py"),
+            "why": ("v1 could not see a defect in the composition. A prompted "
+                    "tool call was rejected as unexpected_tool_call, so the tool "
+                    "capability read a structural 0.0000 for every arm while "
+                    "capability.py itself was unchanged and its hash matched."),
+        },
+    }
+
+
 #: Source files whose contents can change what a recovery run produces.
 #:
 #: Explicit and versioned, because whole-repository ``git HEAD`` is the wrong

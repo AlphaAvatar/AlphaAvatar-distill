@@ -830,6 +830,62 @@ def test_a_docs_only_change_does_not_move_the_trainer_digest():
         "control")
 
 
+def test_the_scoring_contract_covers_the_composition_not_one_scorer_file():
+    """v1 pinned `capability.py` alone, which is how the defect hid."""
+    from aadistill.autoinit.recovery import (
+        RECOVERY_SCORING_FILES_V2, recovery_scoring_contract)
+
+    contract = recovery_scoring_contract(REPO)
+    assert contract["contract"] == "recovery_search_scoring@v2"
+    assert len(contract["digest"]) == 64
+    covered = {e["path"] for e in contract["files"]}
+    for required in ("scripts/autoinit/score_recovery_search.py",
+                     "src/aadistill/evaluation/usable_rollout.py",
+                     "src/aadistill/evaluation/strict_answer.py",
+                     "src/aadistill/evaluation/behavior.py",
+                     "src/aadistill/evaluation/capability.py",
+                     # the rule relating two numbers is part of the metric
+                     "src/aadistill/autoinit/recovery.py"):
+        assert required in covered, required
+    assert covered == set(RECOVERY_SCORING_FILES_V2)
+    assert contract["supersedes"]["contract"] == "recovery_search_scoring@v1"
+    # Same failure mode as the trainer digest: never a smaller contract.
+    with pytest.raises(RecoveryAdmissionError, match="is missing"):
+        recovery_scoring_contract(
+            REPO, files=("src/aadistill/evaluation/capability.py",
+                         "src/aadistill/evaluation/does_not_exist.py"))
+    # A change anywhere in the set moves the digest.
+    subset = recovery_scoring_contract(
+        REPO, files=tuple(f for f in RECOVERY_SCORING_FILES_V2
+                          if not f.endswith("recovery.py")))
+    assert subset["digest"] != contract["digest"]
+
+
+def test_the_preregistration_binds_the_scoring_contract_and_supersession():
+    path = REPO / "logs/autoinit_phase_a_preregistration.json"
+    if not path.is_file():
+        pytest.skip("preregistration not present")
+    from aadistill.autoinit.recovery import recovery_scoring_contract
+
+    prereg = json.loads(path.read_text())
+    contract = prereg["recovery_scoring_contract"]
+    assert contract["digest"] == recovery_scoring_contract(REPO)["digest"], (
+        "the preregistration is bound to a scoring contract that no longer "
+        "matches the code; re-emit it")
+    sup = contract["supersession"]
+    assert sup["superseded"] == "recovery_search_scoring@v1"
+    assert "before any paid measurement" in sup["statement"]
+    assert "NOT an adaptive response" in sup["classification"]
+    assert sup["prompt_content_unchanged"] is True
+    assert sup["evidence"]["tool_usable_rate"] == {"before": 0.0, "after": 1.0}
+    assert contract["validation"]["all_checks_pass"] is True
+    gate = contract["tool_usable_gate"]
+    assert "tool_args_schema_ok" not in gate["definition"]
+    assert "tool_call_exact_match" not in gate["definition"]
+    assert gate["worked_examples"][
+        "well-formed declared call, wrong arguments"] == "usable, incorrect"
+
+
 def test_a_missing_trainer_source_file_raises_rather_than_shrinking_the_digest():
     from aadistill.autoinit.recovery import trainer_source_digest
 

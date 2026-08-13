@@ -46,6 +46,7 @@ from aadistill.autoinit.recovery import (  # noqa: E402
     TRAINER_SOURCE_FILES_V1,
     FeasibilityRule,
     RecoveryProtocolFingerprint,
+    recovery_scoring_contract,
     RuntimeEnvironmentFingerprint,
     trainer_source_digest,
     POOLED_COUNTS_V1,
@@ -77,6 +78,11 @@ CANONICAL_CONTROL = {
                   "calibration statistics rather than the original Stage-0 ones"),
 }
 PENDING = "PENDING_MICRO_PREFLIGHT"
+#: The frozen recovery-search battery's content hash. Pinned here so the
+#: supersession statement can assert, mechanically, that the *prompts* did not
+#: change when the *scoring* did.
+BATTERY_CONTENT_SHA256 = ("a1b22778b00d95b6aba358c14a5af5b559fd807bb371c92131e"
+                          "acca59479f323")
 
 
 def main() -> None:
@@ -377,6 +383,67 @@ def main() -> None:
                 "stage_2_compares_against": ("the Stage-0 attested protocol hash, "
                                              "via RecoveryProbeIdentity."
                                              "require_attested()"),
+            },
+        },
+        "recovery_scoring_contract": {
+            **recovery_scoring_contract(REPO_ROOT),
+            "validation": json.loads(
+                (REPO_ROOT / "logs/autoinit_recovery_scoring_validation.json"
+                 ).read_text())
+            if (REPO_ROOT / "logs/autoinit_recovery_scoring_validation.json"
+                ).is_file() else "NOT VALIDATED",
+            "tool_usable_gate": {
+                "definition": ("generic usable_rollout AND tool_call_emitted AND "
+                               "tool_call_parsed AND tool_name_valid"),
+                "meaning": ("structurally executable by an agent runtime, which "
+                            "is what a Stage-5 trajectory requires; NOT argument "
+                            "correctness"),
+                "excluded": {
+                    "tool_args_schema_ok": ("the xLAM `required` list is "
+                                            "reconstructed from missing defaults, "
+                                            "an interpretive step; stays "
+                                            "diagnostic by decision"),
+                    "tool_call_exact_match": ("that is correctness; folding it "
+                                              "into usability would collapse the "
+                                              "two axes this battery separates"),
+                },
+                "multi_call": ("the frozen scorer's own all-calls semantics "
+                               "(`parsed` and `tool_name_valid` are all(...) over "
+                               "the emitted calls); no second interpretation"),
+                "worked_examples": {
+                    "malformed JSON tool call": "unusable, incorrect",
+                    "undeclared tool name": "unusable, incorrect",
+                    "well-formed declared call, wrong arguments": "usable, incorrect",
+                    "exact correct invocation": "usable, correct",
+                    "tool call on a prompt offering no tools": "protocol invalid",
+                },
+            },
+            "supersession": {
+                "superseded": "recovery_search_scoring@v1",
+                "when": "2026-08-13, BEFORE any paid measurement",
+                "statement": (
+                    "The earlier recovery-search scoring contract was superseded "
+                    "before any paid measurement or candidate evaluation because "
+                    "oracle validation demonstrated that tool-enabled prompts had "
+                    "a structural zero in usable_rollout under the old generic "
+                    "protocol-validity rule."),
+                "classification": (
+                    "pre-measurement metric defect correction, NOT an adaptive "
+                    "response to experimental results: no control, no candidate "
+                    "and no searched leaf had been measured when it was made"),
+                "evidence": {
+                    "policy": "perfect oracle on all 190 frozen prompts",
+                    "tool_usable_rate": {"before": 0.0000, "after": 1.0000},
+                    "overall_usable_rate": {"before": 0.8947, "after": 1.0000},
+                    "prompts_affected": 20,
+                    "capabilities_affected": ["tool"],
+                    "of_capabilities_in_catastrophic_gate": 6,
+                },
+                "prompt_content_unchanged": True,
+                "battery_content_sha256": BATTERY_CONTENT_SHA256,
+                "history": ("both records are kept; logs/decisions.md carries the "
+                            "v1 decision and the supersession as separate dated "
+                            "entries"),
             },
         },
         "micro_preflight_plan": PREFLIGHT_PLAN_V1.as_dict(),

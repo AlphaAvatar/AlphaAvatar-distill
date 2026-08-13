@@ -192,7 +192,7 @@
       }
     },
     "preregistration": "logs/autoinit_phase_a_preregistration.md",
-    "preregistration_sha256": "55f02bff2abcfc8db08ad4b717b4a754cdb0eb3416b2f31b7a671487ba7c35e5",
+    "preregistration_sha256": "9b4229c85062de44dfc568f9a883451d75e2d12a718a75b16caeb6112a873429",
     "recovery_identity": {
       "protocol_fingerprint_excludes": [
         "student initialization artifact",
@@ -211,6 +211,15 @@
       "attested_protocol_artifact": "logs/autoinit_phase_a_protocol_attested.json",
       "attested_by": "scripts/autoinit/attest_protocol.py (preflight Stage 0)",
       "stage_2_compares_against": "the Stage-0 attested protocol hash, not the preregistration (runtime_digest is null there)"
+    },
+    "recovery_scoring_contract": {
+      "contract": "recovery_search_scoring@v2",
+      "digest": "f76008d5459c781cdfd0f11e39fc379c74af641f7567a168c10bf48e6a3e66fb",
+      "supersedes": "recovery_search_scoring@v1",
+      "superseded_before_any_paid_measurement": true,
+      "classification": "pre-measurement metric defect correction, not adaptive",
+      "prompt_content_unchanged": true,
+      "validation": "logs/autoinit_recovery_scoring_validation.json"
     }
   },
   "proposed_pilot": {
@@ -231,7 +240,7 @@
     "peak_working_storage_gib": 106
   },
   "tests": {
-    "passing": 1531,
+    "passing": 1536,
     "skipped": 7,
     "venvs_verified": [
       "repo .venv transformers 5.13.1",
@@ -257,8 +266,8 @@
     "note": "the $2.80 rerun produces the permanent Phase-A control probes, so Phase A needs 7 probes instead of 9",
     "preflight_plan_hash": "37dbd7b22e3e884eff9d55f95c5ce25a212f823d2f396691c30d47930076f8ab",
     "blocker_before_phase_a": "the preregistration must be re-emitted with the attested protocol fingerprint; until Stage 0 runs, runtime_digest is null and no Phase-A comparison is eligible for MATCHED",
-    "held": true,
-    "held_reason": "scoring blocker found while wiring Stage 3: protocol_valid rejected a <tool_call> as unexpected even when the prompt declared tools, so the tool capability was structurally 0 for every arm (oracle policy: tool usable 0.0000 -> 1.0000, overall 0.8947 -> 1.0000). Fixed at zero cost, but it changes a preregistered metric definition on 1 of 6 capabilities, so the launch waits for maintainer confirmation. Nothing spent.",
+    "held": false,
+    "held_reason": "RESOLVED 2026-08-13: the tool scoring defect is corrected under recovery_search_scoring@v2 and validated at zero cost; the maintainer approved the correction and re-authorized the preflight at $4.20 expected / $8.60 hard.",
     "spent_usd": 0.0
   }
 }

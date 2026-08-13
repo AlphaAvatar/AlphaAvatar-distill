@@ -53,6 +53,7 @@ from audit_tool_scoring import as_openai_calls, as_openai_tools  # noqa: E402
 
 from aadistill.autoinit.recovery import (  # noqa: E402
     CAPABILITY_SCHEMA_V1,
+    recovery_scoring_contract,
     score_recovery_row,
     validate_scored_rows,
 )
@@ -75,6 +76,35 @@ BATTERY = "artifacts/stage3/recovery_search_v1"
 #: self-consistently, and records the file hash separately as provenance.
 BATTERY_MANIFEST_SHA256 = "72d8c0535e7752faf704d9075b7835a47610fd3cd26866cf5be7d48eb7b40ad1"
 BATTERY_CONTENT_SHA256 = "a1b22778b00d95b6aba358c14a5af5b559fd807bb371c92131eacca59479f323"
+
+
+#: The tool-call diagnostics that must hold for a generation to be **structurally
+#: executable** by an agent runtime. This is the `tool` capability's extra usable
+#: condition, on top of the generic five-component rollout check.
+#:
+#: `tools_offered=True` only says the tool-call *envelope* is allowed here — it
+#: deliberately does not inspect the call. A reply containing `<tool_call>` and
+#: then unparseable bytes satisfies generic protocol validity and is not something
+#: any runtime can execute, so counting it as a usable rollout would say Stage 5
+#: could collect a trajectory from it. It could not.
+#:
+#: Deliberately **excluded**:
+#:
+#: * `tool_args_schema_ok` — the xLAM `required` list is reconstructed from
+#:   missing defaults, which is an interpretive step; the audit
+#:   (logs/autoinit_tool_scoring_audit.json) showed no verdict depends on that
+#:   interpretation, and the field stays diagnostic rather than becoming a gate;
+#: * `tool_call_exact_match` — that is *correctness*, and folding it into
+#:   usability would collapse the two axes this battery exists to keep apart.
+#:
+#: So a well-formed call on a declared tool with the wrong argument values is
+#: **usable and incorrect** — the model can drive the runtime, it just chose
+#: wrongly, which is exactly the distinction between stability and capability.
+#:
+#: Multi-call samples take the frozen scorer's own semantics: `parsed` and
+#: `tool_name_valid` are `all(...)` over the emitted calls, so one bad call in a
+#: pair makes the sample unusable. No second interpretation is invented here.
+TOOL_STRUCTURAL_GATE = ("tool_call_emitted", "tool_call_parsed", "tool_name_valid")
 
 
 def scorer_correct(set_name: str, record: dict, sample: dict) -> tuple[bool, dict]:
@@ -187,10 +217,20 @@ def main() -> None:
             is_usable = all(components.values())
             correct, verdict = ((False, {"scorable": False}) if not scorable
                                 else scorer_correct(name, record, sample))
+            # The tool capability's extra usable condition: structurally
+            # executable, not merely "a tool call was allowed here". Applied in
+            # this scoring path only — `protocol_valid` stays generic.
+            structural = None
+            if name == "tool":
+                structural = {k: bool(verdict.get(k)) for k in TOOL_STRUCTURAL_GATE}
+                is_usable = is_usable and all(structural.values())
             row = score_recovery_row(usable=is_usable, scorer_correct=correct,
                                      scorable=scorable)
             row.update({"set": name, "id": record["id"],
                         "domain": spec["domain"], **components})
+            if structural is not None:
+                row["tool_structurally_executable"] = all(structural.values())
+                row.update(structural)
             set_rows.append(row)
             rows.append(row)
             if args.per_sample is not None:
@@ -230,18 +270,27 @@ def main() -> None:
                     "content_sha256": manifest["content_sha256"],
                     "n_prompts": manifest["n_prompts"],
                     "n_scorable_prompts": manifest["n_scorable_prompts"]},
-        "scorer_sources": {
-            "capability": sha256_file(
-                REPO_ROOT / "src/aadistill/evaluation/capability.py"),
-            "behavior": sha256_file(
-                REPO_ROOT / "src/aadistill/evaluation/behavior.py"),
-            "usable_rollout": sha256_file(
-                REPO_ROOT / "src/aadistill/evaluation/usable_rollout.py"),
-            "strict_answer": sha256_file(
-                REPO_ROOT / "src/aadistill/evaluation/strict_answer.py"),
+        # One aggregate contract digest, which is what a control and a candidate
+        # bind to. Per-file hashes are inside it as provenance; a single scorer
+        # file's hash is NOT the metric identity — that is precisely how the
+        # composition defect stayed invisible under v1.
+        "scoring_contract": recovery_scoring_contract(REPO_ROOT),
+        "tool_usable_gate": {
+            "definition": ("generic usable_rollout AND " +
+                           " AND ".join(TOOL_STRUCTURAL_GATE)),
+            "excluded": {
+                "tool_args_schema_ok": ("the xLAM `required` reconstruction is "
+                                        "interpretive; kept diagnostic"),
+                "tool_call_exact_match": ("that is correctness; folding it in "
+                                          "would collapse the two axes"),
+            },
+            "multi_call": ("the frozen scorer's own all-calls semantics; no "
+                           "second interpretation is defined here"),
         },
         "missing_sets": sorted(missing_sets),
-        "scoring_contract": contract,
+        # Per-row enforcement counts from validate_scored_rows: distinct from
+        # `scoring_contract`, which is the identity of the code that produced them.
+        "row_contract": contract,
         **summarize(rows, scorable=None),
         "per_set": per_set,
         "per_domain": group(rows, "domain"),
@@ -312,9 +361,18 @@ def summarize(rows: list[dict], *, scorable: bool | None) -> dict:
     for row in rows:
         if row["usable"]:
             continue
-        first = next(c for c in usable_rollout.COMPONENTS if not row[c])
+        # A tool row can fail only the structural gate, with all five generic
+        # components passing. Attribute it rather than letting `next()` raise.
+        first = next((c for c in usable_rollout.COMPONENTS if not row[c]),
+                     "tool_not_structurally_executable")
         census[first] = census.get(first, 0) + 1
     out["first_failure"] = dict(sorted(census.items(), key=lambda kv: -kv[1]))
+    gated = [r for r in rows if "tool_structurally_executable" in r]
+    if gated:
+        out["tool_structurally_executable"] = round(
+            sum(r["tool_structurally_executable"] for r in gated) / len(gated), 4)
+        for field in TOOL_STRUCTURAL_GATE:
+            out[field] = round(sum(r[field] for r in gated) / len(gated), 4)
     return out
 
 

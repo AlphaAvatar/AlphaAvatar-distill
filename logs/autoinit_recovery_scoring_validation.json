@@ -1,0 +1,407 @@
+{
+  "schema": "aadistill.autoinit.recovery_scoring_validation/v1",
+  "generated_utc": "2026-08-13T08:48:57.490177+00:00",
+  "battery": "artifacts/stage3/recovery_search_v1",
+  "n_prompts": 190,
+  "scoring_contract": {
+    "contract": "recovery_search_scoring@v2",
+    "contract_id": "recovery_search_scoring",
+    "version": 2,
+    "digest": "f76008d5459c781cdfd0f11e39fc379c74af641f7567a168c10bf48e6a3e66fb",
+    "files": [
+      {
+        "path": "scripts/autoinit/score_recovery_search.py",
+        "sha256": "b72440390bc030f62b00097a79b1083b53a06f270e6d26104ca19d4a16b32ab8",
+        "bytes": 20311
+      },
+      {
+        "path": "src/aadistill/autoinit/recovery.py",
+        "sha256": "9d1950b6bd5cffacc6e3d9ff60b0607080c5ed831ee3337e8fcb132156156b5c",
+        "bytes": 74779
+      },
+      {
+        "path": "src/aadistill/evaluation/behavior.py",
+        "sha256": "c6f52721e8b86bc2d875683bfb9c35b4101379fa5d48de7a48db93959e2935c2",
+        "bytes": 19983
+      },
+      {
+        "path": "src/aadistill/evaluation/capability.py",
+        "sha256": "da1bc3b1069d927b6ab2cbf0eaaf6763bfa491d396189b3dcde95977e39d67ad",
+        "bytes": 19568
+      },
+      {
+        "path": "src/aadistill/evaluation/strict_answer.py",
+        "sha256": "ecb4356a89d3563214ea11ade2307b0d106588bb7ff59f6b8c5e3b9c98d380e3",
+        "bytes": 7628
+      },
+      {
+        "path": "src/aadistill/evaluation/usable_rollout.py",
+        "sha256": "8159acdd7a0a6953dfefac7acf4f6fb4706f69a7264b625e9f9b7ff1a74826ca",
+        "bytes": 6155
+      }
+    ],
+    "rule": "sha256 over sorted 'path:sha256' lines of the declared recovery-scoring source set",
+    "covers": [
+      "usable_rollout components and their composition",
+      "protocol validity, including the tools_offered relaxation",
+      "the tool structural-executability gate",
+      "per-set correctness scorers",
+      "correct => usable",
+      "capability schema and aggregation",
+      "pooled_counts seed aggregation",
+      "the threshold formulas materialized from control data"
+    ],
+    "supersedes": {
+      "contract": "recovery_search_scoring@v1",
+      "identity_was": "a single hash of src/aadistill/evaluation/capability.py",
+      "why": "v1 could not see a defect in the composition. A prompted tool call was rejected as unexpected_tool_call, so the tool capability read a structural 0.0000 for every arm while capability.py itself was unchanged and its hash matched."
+    }
+  },
+  "expectations": {
+    "oracle": "every capability usable 1.0; correctness high; nothing capped",
+    "contentless_perfect": "behaviourally perfect and useless; tool unusable because no call was emitted",
+    "oracle_then_loop": "scorer finds the answer; correct still 0",
+    "empty": "every component fails",
+    "degenerate": "repetition stop; no_severe_repetition 0",
+    "tool_malformed_json": "tool unusable (parse), incorrect",
+    "tool_undeclared_name": "tool unusable (name), incorrect",
+    "tool_wrong_arguments": "tool USABLE, incorrect",
+    "unprompted_tool_call": "protocol invalid on every set that offers no tools"
+  },
+  "policies": {
+    "contentless_perfect": {
+      "expectation": "behaviourally perfect and useless; tool unusable because no call was emitted",
+      "usable_rollout_rate": 0.8947,
+      "correct_overall": 0.0,
+      "correct_given_usable": 0.0,
+      "correct_le_usable": true,
+      "per_capability_usable": {
+        "gsm8k": 1.0,
+        "math_verified": 1.0,
+        "multihop": 1.0,
+        "rag": 1.0,
+        "knowledge": 1.0,
+        "tool": 0.0
+      },
+      "per_capability_correct": {
+        "gsm8k": 0.0,
+        "math_verified": 0.0,
+        "multihop": 0.0,
+        "rag": 0.0,
+        "knowledge": 0.0,
+        "tool": 0.0
+      },
+      "tool": {
+        "protocol_valid": 1.0,
+        "tool_call_emitted": 0.0,
+        "tool_call_parsed": 0.0,
+        "tool_name_valid": 0.0,
+        "tool_structurally_executable": 0.0,
+        "usable_rollout_rate": 0.0,
+        "correct_overall": 0.0
+      },
+      "protocol_valid": 1.0,
+      "first_failure": {
+        "tool_not_structurally_executable": 20
+      }
+    },
+    "oracle": {
+      "expectation": "every capability usable 1.0; correctness high; nothing capped",
+      "usable_rollout_rate": 1.0,
+      "correct_overall": 0.9647,
+      "correct_given_usable": 0.9647,
+      "correct_le_usable": true,
+      "per_capability_usable": {
+        "gsm8k": 1.0,
+        "math_verified": 1.0,
+        "multihop": 1.0,
+        "rag": 1.0,
+        "knowledge": 1.0,
+        "tool": 1.0
+      },
+      "per_capability_correct": {
+        "gsm8k": 1.0,
+        "math_verified": 1.0,
+        "multihop": 0.8333,
+        "rag": 1.0,
+        "knowledge": 0.9667,
+        "tool": 1.0
+      },
+      "tool": {
+        "protocol_valid": 1.0,
+        "tool_call_emitted": 1.0,
+        "tool_call_parsed": 1.0,
+        "tool_name_valid": 1.0,
+        "tool_structurally_executable": 1.0,
+        "usable_rollout_rate": 1.0,
+        "correct_overall": 1.0
+      },
+      "protocol_valid": 1.0,
+      "first_failure": {}
+    },
+    "oracle_then_loop": {
+      "expectation": "scorer finds the answer; correct still 0",
+      "usable_rollout_rate": 0.0,
+      "correct_overall": 0.0,
+      "correct_given_usable": null,
+      "correct_le_usable": true,
+      "per_capability_usable": {
+        "gsm8k": 0.0,
+        "math_verified": 0.0,
+        "multihop": 0.0,
+        "rag": 0.0,
+        "knowledge": 0.0,
+        "tool": 0.0
+      },
+      "per_capability_correct": {
+        "gsm8k": 0.0,
+        "math_verified": 0.0,
+        "multihop": 0.0,
+        "rag": 0.0,
+        "knowledge": 0.0,
+        "tool": 0.0
+      },
+      "tool": {
+        "protocol_valid": 0.0,
+        "tool_call_emitted": 1.0,
+        "tool_call_parsed": 1.0,
+        "tool_name_valid": 1.0,
+        "tool_structurally_executable": 1.0,
+        "usable_rollout_rate": 0.0,
+        "correct_overall": 0.0
+      },
+      "protocol_valid": 0.0,
+      "first_failure": {
+        "natural_termination": 190
+      }
+    },
+    "empty": {
+      "expectation": "every component fails",
+      "usable_rollout_rate": 0.0,
+      "correct_overall": 0.0,
+      "correct_given_usable": null,
+      "correct_le_usable": true,
+      "per_capability_usable": {
+        "gsm8k": 0.0,
+        "math_verified": 0.0,
+        "multihop": 0.0,
+        "rag": 0.0,
+        "knowledge": 0.0,
+        "tool": 0.0
+      },
+      "per_capability_correct": {
+        "gsm8k": 0.0,
+        "math_verified": 0.0,
+        "multihop": 0.0,
+        "rag": 0.0,
+        "knowledge": 0.0,
+        "tool": 0.0
+      },
+      "tool": {
+        "protocol_valid": 0.0,
+        "tool_call_emitted": 0.0,
+        "tool_call_parsed": 0.0,
+        "tool_name_valid": 0.0,
+        "tool_structurally_executable": 0.0,
+        "usable_rollout_rate": 0.0,
+        "correct_overall": 0.0
+      },
+      "protocol_valid": 0.0,
+      "first_failure": {
+        "non_empty": 190
+      }
+    },
+    "degenerate": {
+      "expectation": "repetition stop; no_severe_repetition 0",
+      "usable_rollout_rate": 0.0,
+      "correct_overall": 0.0,
+      "correct_given_usable": null,
+      "correct_le_usable": true,
+      "per_capability_usable": {
+        "gsm8k": 0.0,
+        "math_verified": 0.0,
+        "multihop": 0.0,
+        "rag": 0.0,
+        "knowledge": 0.0,
+        "tool": 0.0
+      },
+      "per_capability_correct": {
+        "gsm8k": 0.0,
+        "math_verified": 0.0,
+        "multihop": 0.0,
+        "rag": 0.0,
+        "knowledge": 0.0,
+        "tool": 0.0
+      },
+      "tool": {
+        "protocol_valid": 0.0,
+        "tool_call_emitted": 0.0,
+        "tool_call_parsed": 0.0,
+        "tool_name_valid": 0.0,
+        "tool_structurally_executable": 0.0,
+        "usable_rollout_rate": 0.0,
+        "correct_overall": 0.0
+      },
+      "protocol_valid": 0.0,
+      "first_failure": {
+        "natural_termination": 190
+      }
+    },
+    "tool_malformed_json": {
+      "expectation": "tool unusable (parse), incorrect",
+      "usable_rollout_rate": 0.8947,
+      "correct_overall": 0.8471,
+      "correct_given_usable": 0.96,
+      "correct_le_usable": true,
+      "per_capability_usable": {
+        "gsm8k": 1.0,
+        "math_verified": 1.0,
+        "multihop": 1.0,
+        "rag": 1.0,
+        "knowledge": 1.0,
+        "tool": 0.0
+      },
+      "per_capability_correct": {
+        "gsm8k": 1.0,
+        "math_verified": 1.0,
+        "multihop": 0.8333,
+        "rag": 1.0,
+        "knowledge": 0.9667,
+        "tool": 0.0
+      },
+      "tool": {
+        "protocol_valid": 1.0,
+        "tool_call_emitted": 1.0,
+        "tool_call_parsed": 0.0,
+        "tool_name_valid": 0.0,
+        "tool_structurally_executable": 0.0,
+        "usable_rollout_rate": 0.0,
+        "correct_overall": 0.0
+      },
+      "protocol_valid": 1.0,
+      "first_failure": {
+        "tool_not_structurally_executable": 20
+      }
+    },
+    "tool_undeclared_name": {
+      "expectation": "tool unusable (name), incorrect",
+      "usable_rollout_rate": 0.8947,
+      "correct_overall": 0.8471,
+      "correct_given_usable": 0.96,
+      "correct_le_usable": true,
+      "per_capability_usable": {
+        "gsm8k": 1.0,
+        "math_verified": 1.0,
+        "multihop": 1.0,
+        "rag": 1.0,
+        "knowledge": 1.0,
+        "tool": 0.0
+      },
+      "per_capability_correct": {
+        "gsm8k": 1.0,
+        "math_verified": 1.0,
+        "multihop": 0.8333,
+        "rag": 1.0,
+        "knowledge": 0.9667,
+        "tool": 0.0
+      },
+      "tool": {
+        "protocol_valid": 1.0,
+        "tool_call_emitted": 1.0,
+        "tool_call_parsed": 1.0,
+        "tool_name_valid": 0.0,
+        "tool_structurally_executable": 0.0,
+        "usable_rollout_rate": 0.0,
+        "correct_overall": 0.0
+      },
+      "protocol_valid": 1.0,
+      "first_failure": {
+        "tool_not_structurally_executable": 20
+      }
+    },
+    "tool_wrong_arguments": {
+      "expectation": "tool USABLE, incorrect",
+      "usable_rollout_rate": 1.0,
+      "correct_overall": 0.8471,
+      "correct_given_usable": 0.8471,
+      "correct_le_usable": true,
+      "per_capability_usable": {
+        "gsm8k": 1.0,
+        "math_verified": 1.0,
+        "multihop": 1.0,
+        "rag": 1.0,
+        "knowledge": 1.0,
+        "tool": 1.0
+      },
+      "per_capability_correct": {
+        "gsm8k": 1.0,
+        "math_verified": 1.0,
+        "multihop": 0.8333,
+        "rag": 1.0,
+        "knowledge": 0.9667,
+        "tool": 0.0
+      },
+      "tool": {
+        "protocol_valid": 1.0,
+        "tool_call_emitted": 1.0,
+        "tool_call_parsed": 1.0,
+        "tool_name_valid": 1.0,
+        "tool_structurally_executable": 1.0,
+        "usable_rollout_rate": 1.0,
+        "correct_overall": 0.0
+      },
+      "protocol_valid": 1.0,
+      "first_failure": {}
+    },
+    "unprompted_tool_call": {
+      "expectation": "protocol invalid on every set that offers no tools",
+      "usable_rollout_rate": 0.0,
+      "correct_overall": 0.0,
+      "correct_given_usable": null,
+      "correct_le_usable": true,
+      "per_capability_usable": {
+        "gsm8k": 0.0,
+        "math_verified": 0.0,
+        "multihop": 0.0,
+        "rag": 0.0,
+        "knowledge": 0.0,
+        "tool": 0.0
+      },
+      "per_capability_correct": {
+        "gsm8k": 0.0,
+        "math_verified": 0.0,
+        "multihop": 0.0,
+        "rag": 0.0,
+        "knowledge": 0.0,
+        "tool": 0.0
+      },
+      "tool": {
+        "protocol_valid": 1.0,
+        "tool_call_emitted": 1.0,
+        "tool_call_parsed": 1.0,
+        "tool_name_valid": 0.0,
+        "tool_structurally_executable": 0.0,
+        "usable_rollout_rate": 0.0,
+        "correct_overall": 0.0
+      },
+      "protocol_valid": 0.1053,
+      "first_failure": {
+        "protocol_valid": 170,
+        "tool_not_structurally_executable": 20
+      }
+    }
+  },
+  "checks": {
+    "oracle_no_capability_capped": true,
+    "oracle_correctness_high": true,
+    "malformed_tool_unusable": true,
+    "undeclared_tool_name_unusable": true,
+    "wrong_arguments_usable_but_incorrect": true,
+    "unprompted_tool_call_protocol_invalid": true,
+    "unprompted_tool_call_allowed_where_tools_offered": true,
+    "correct_implies_usable_everywhere": true,
+    "contentless_is_behaviourally_perfect_and_useless": true
+  },
+  "all_checks_pass": true,
+  "report_sha256": "fb4c041ee2c0007148ab15942863a3602695cee7f03a2e8de2ab3bc3aca51e6b"
+}
