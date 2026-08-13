@@ -7,31 +7,46 @@ estimates with numbers and produces the canonical control probes, so the Phase A
 authorization rests on measurement rather than on a range. **Phase A must not
 start automatically when it finishes.**
 
+| | |
+| --- | --- |
+| preflight plan hash | `37dbd7b22e3e884eff9d55f95c5ce25a212f823d2f396691c30d47930076f8ab` |
+| preregistration (pre-attestation) | `55f02bff2abcfc8db08ad4b717b4a754cdb0eb3416b2f31b7a671487ba7c35e5` |
+| trainer source digest | `054dd6d60b40e023408c055bb2f9bfd9d7953c5a42d1602042db97197458633a` |
+| attested protocol hash | **produced by Stage 0** — does not exist yet |
+
 ---
 
 ## 1. What changed, and why it now costs more
 
 The recipe-fingerprint audit answered a question that had only been half-asked.
 The historical `e1_r0860k_sa_pca` / `e1_r0860k_sb_pca` checkpoints **exist, hash-
-verify, and are not recipe-matched to the Phase-A probes.**
+verify, pass the legacy lineage subset, and are not recipe-matched to the Phase-A
+probes.**
 
-37 of 43 recipe fields match exactly. What does not:
+Under the split identity, 34 protocol fields match exactly and **nothing is a
+material mismatch**. What blocks them is that the identity-bearing fields were
+never recorded:
 
-| field | historical | Phase A today | verdict |
+| field | historical | Phase A | verdict |
 | --- | --- | --- | --- |
-| `trainer_git_commit` | `69c3fe1f`, **dirty** | current HEAD | **material** |
-| `torch_version` | 2.11.0+cu128 | 2.13.0 | **material** |
-| `trainer_uncommitted_sha256` | `2e04f683…` | — | **unreconstructable** |
-| `kd_chunk` | not recorded | 512 | unverifiable |
+| `trainer_source_digest` | never recorded (a whole-repo commit, tree **dirty**) | `054dd6d6…` | **unverifiable** |
+| `trainer_source_set_version` | no source set declared | 1 | **unverifiable** |
+| `runtime_digest` | no image digest; only torch 2.11.0+cu128 | attested at Stage 0 | **unverifiable** |
+| `kd_chunk` | not in the historical config | 512 | unverifiable |
 | `pack` | `ladder_uniform` | `ladder_uniform_probe` | benign — *same bytes* |
 | `resume_semantics` | no consumed-block accounting | present | benign — neither run resumed |
 
-`src/aadistill/training/train.py` is **+528 / −30** lines since that commit. The
-added machinery (extra stream, LoRA, gradient-share diagnostics) is inactive for
-this recipe, and the ladder loader is untouched — but "probably inactive" is not
-"identical", and the historical tree was dirty in a way that cannot be
-reconstructed. A control trained by a different trainer build on a different torch
-confounds the initialization with the trainer.
+That is a more accurate verdict than the pre-split one, not a softer one:
+`src/aadistill/training/train.py` is **+528 / −30** lines since `69c3fe1f` and the
+historical tree carried an uncommitted diff identified only by
+`2e04f683…`, so the material trainer identity cannot be reconstructed — it cannot
+be compared, rather than being known to differ. Either way a control trained by an
+unknown trainer build on an unknown runtime confounds the initialization with the
+environment.
+
+Two `unverifiable`s never become a match: `require_materialized()` refuses a
+MATCHED verdict while any of `trainer_source_digest`,
+`trainer_source_set_version` or `runtime_digest` is unknown on either side.
 
 **So the canonical control is rerun under the current frozen trainer**, and those
 two runs become the **permanent Phase-A control probes** — retained, reused at
@@ -54,11 +69,40 @@ spending $2.80 on controls that would immediately stop being matched.
 `PreflightPlan.advance_to()` enforces this: a stage cannot start until every
 blocking earlier stage has recorded a pass.
 
+### Stage 0 → protocol freeze → Stage 2
+
+The preregistered protocol necessarily carries `runtime_digest: null`, because the
+image is chosen when the pod is created — after the preregistration is written.
+Two nulls compare equal in Python, so comparing a control against that object
+would accept a control trained under *any* runtime. Stage 0 therefore materializes
+the protocol and freezes it:
+
+```
+scripts/autoinit/attest_protocol.py --image-digest sha256:...
+    → logs/autoinit_phase_a_protocol_attested.json
+    → attested_protocol_fingerprint
+```
+
+Stage 2 compares each control against **that** hash, via
+`RecoveryProbeIdentity.require_attested()`, which first calls
+`require_materialized()` — so an unpinned control is refused before its
+fingerprint is even compared. If the attestation contradicts a value that *was*
+preregistered, `materialized()` raises: that is protocol drift, and the session
+stops before Stage 2.
+
+This is not adaptive modification. Stage 0 fills preregistered *environment*
+fields at a point where no candidate and no search result exists to fill them
+toward.
+
 ```
 Stage 0  runtime attestation            BLOCKING
          image digest, RuntimeEnvironmentFingerprint,
          trainer_source_digest + declared file set,
          input artifact hashes (init, pack, suite, battery)
+              ↓
+         materialize RecoveryProtocolFingerprint
+              ↓
+         freeze logs/autoinit_phase_a_protocol_attested.json
               ↓
 Stage 1  cheap machine gates            BLOCKING
          activation-stat GPU/CPU split, GPU evaluator repeatability,
@@ -66,7 +110,8 @@ Stage 1  cheap machine gates            BLOCKING
               ↓   (any failure → STOP, no controls trained, return for review)
 Stage 2  permanent canonical controls   BLOCKING
          canonical init → 0.86M sa, canonical init → 0.86M sb
-         verify protocol fingerprint, probe identity, artifact hash
+         verify against the STAGE-0 ATTESTED protocol hash,
+         probe identity, artifact hash
               ↓
 Stage 3  control characterization
          sa, sb → recovery_search_v1, pooled_counts@v1
@@ -167,8 +212,9 @@ profiling run.
 3. **Peak memory** → confirms or replaces the 14.3 GiB arithmetic and the "L40S is
    sufficient" claim.
 4. **Two recipe-matched control checkpoints** → permanent Phase-A control probes,
-   retained with hashes and a run manifest carrying a complete
-   `RecoveryRecipeFingerprint` (so this audit never has to be reconstructed again).
+   retained with hashes and a run manifest carrying a complete, materialized
+   `RecoveryProtocolFingerprint` and `RecoveryProbeIdentity` (so this audit never
+   has to be reconstructed again).
 5. **Control characterization, pooled and per-seed** → materializes three frozen
    rules: the seed-aware equivalence interval
    `2 · max(binomial_se, |p_sa − p_sb|/2)`, the seed-aware feasibility floor

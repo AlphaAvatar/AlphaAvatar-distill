@@ -1,6 +1,6 @@
 {
   "schema": "aadistill.autoinit.control_availability/v1",
-  "generated_utc": "2026-08-12T19:07:23.070438+00:00",
+  "generated_utc": "2026-08-13T06:06:11.452169+00:00",
   "relay": "AlphaAvatar/aadistill-artifacts",
   "controls": {
     "e1_r0860k_sa_pca": {
@@ -49,7 +49,11 @@
         "block_len": true
       },
       "lineage_valid": true,
-      "matches_intended_control_protocol": true
+      "artifact_available": true,
+      "hash_verified": true,
+      "passes_legacy_lineage_subset": true,
+      "recipe_matched_control": false,
+      "recipe_matched_control_decided_by": "logs/autoinit_recovery_fingerprint_audit.json"
     },
     "e1_r0860k_sb_pca": {
       "canonical_id": "e1_r0860k_sb_pca",
@@ -97,13 +101,24 @@
         "block_len": true
       },
       "lineage_valid": true,
-      "matches_intended_control_protocol": true
+      "artifact_available": true,
+      "hash_verified": true,
+      "passes_legacy_lineage_subset": true,
+      "recipe_matched_control": false,
+      "recipe_matched_control_decided_by": "logs/autoinit_recovery_fingerprint_audit.json"
     }
   },
   "config_hash_convention": "raw file bytes (build_checkpoint_registry.py)",
   "relay_reachable": true,
-  "both_controls_available": true,
+  "both_pass_legacy_lineage_subset": true,
+  "any_recipe_matched_control": false,
   "retrieval_bytes": 4768469936,
-  "consequence": "Both canonical 0.86M controls are retrievable and verified. The micro-preflight stays a profiling/evaluation job: no recovery retraining is needed, and the two-seed pooled control characterization can be produced by evaluating these checkpoints on recovery_search_v1.",
-  "report_sha256": "1227a0e1a90df1f2efba19184c16582e87682174d0e47288233ecde4bc841070"
+  "consequence": "Both historical 0.86M checkpoints are retrievable and their bytes and lineage verify, so they remain useful LINEAGE REFERENCES. They are NOT Phase-A matched controls: the protocol audit found their trainer and runtime identity was never recorded, so it cannot be compared. Rerun canonical sa/sb from qwen3_0p6b_init_v0 at 0.86M under the attested runtime and frozen trainer; those runs become the permanent Phase-A control probes and are retained, not disposable setup work.",
+  "status_field_meanings": {
+    "artifact_available": "the file exists on the relay",
+    "hash_verified": "its payload and config match the tombstone hashes",
+    "passes_legacy_lineage_subset": "it descends from the canonical init at the right rung, seed and objective \u2014 a lineage reference, not a protocol match",
+    "recipe_matched_control": "always false here; a matched control requires the full protocol comparison, which these runs fail on unrecorded trainer/runtime identity"
+  },
+  "report_sha256": "cd0614efa3c9ff7c8ddef939208f6252f844a8bf7430970576811fd4767c57e0"
 }

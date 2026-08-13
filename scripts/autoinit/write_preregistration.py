@@ -45,6 +45,7 @@ from aadistill.autoinit.recovery import (  # noqa: E402
     PREFLIGHT_PLAN_V1,
     TRAINER_SOURCE_FILES_V1,
     FeasibilityRule,
+    RecoveryProtocolFingerprint,
     RuntimeEnvironmentFingerprint,
     trainer_source_digest,
     POOLED_COUNTS_V1,
@@ -329,7 +330,8 @@ def main() -> None:
                     "a protocol identity containing either would make every "
                     "comparable pair of arms differ by construction"),
             "matched_pair_predicate": (
-                "protocol_identical AND same_seed AND initializations_differ"),
+                "both_materialized AND protocol_identical AND same_seed AND "
+                "initializations_differ"),
             "trainer_source_digest": {
                 **trainer_source_digest(REPO_ROOT),
                 "policy": ("material identity is the declared source set, not "
@@ -349,6 +351,33 @@ def main() -> None:
                     "execute under the same frozen image digest; it is attested at "
                     "preflight Stage 0 and required before a control is trained"),
             },
+            "materialization_requirement": {
+                "required_fields": list(
+                    RecoveryProtocolFingerprint.MATERIALIZATION_REQUIRED),
+                "rule": ("a protocol whose required fields are not all non-null "
+                         "cannot take part in a MATCHED comparison; "
+                         "require_materialized() raises and matched_against() "
+                         "returns is_single_variable_comparison: false"),
+                "semantics": {
+                    "unknown vs unknown": "unverifiable — NOT eligible for MATCHED",
+                    "verified X vs verified X": "matched",
+                },
+                "why": ("None == None is True in Python and is not the claim "
+                        "'verified identical'; without this gate a control trained "
+                        "under an unrecorded runtime would compare as matched — "
+                        "the exact defect that disqualified the historical runs"),
+                "status_now": ("runtime_digest is null in this preregistration "
+                               "because the image is chosen at pod creation. The "
+                               "Phase-A protocol fingerprint is therefore NOT final "
+                               "here; Stage 0 materializes it and this "
+                               "preregistration must be re-emitted with the "
+                               "attested digest before Phase A is authorized."),
+                "attested_artifact": "logs/autoinit_phase_a_protocol_attested.json",
+                "attested_by": "scripts/autoinit/attest_protocol.py",
+                "stage_2_compares_against": ("the Stage-0 attested protocol hash, "
+                                             "via RecoveryProbeIdentity."
+                                             "require_attested()"),
+            },
         },
         "micro_preflight_plan": PREFLIGHT_PLAN_V1.as_dict(),
         "canonical_control_recipe_audit": (
@@ -362,7 +391,7 @@ def main() -> None:
                                             **v["comparison"]}
                                        for k, v in r["comparisons"].items()},
                        "intended_phase_a_comparison":
-                           r.get("intended_phase_a_comparison", {}).get("check"),
+                           r.get("intended_phase_a_comparison"),
                        "report_sha256": r["report_sha256"]}
         )(json.loads((REPO_ROOT / "logs/autoinit_recovery_fingerprint_audit.json"
                       ).read_text()))
@@ -373,9 +402,13 @@ def main() -> None:
             if (REPO_ROOT / "logs/autoinit_tool_scoring_audit.json").is_file()
             else None,
         "pending_before_launch": [
-            "RERUN canonical sa/sb at 0.86M under the current frozen trainer -- the "
-            "historical checkpoints are NOT recipe-matched (trainer commit and torch "
-            "version differ; the historical tree was dirty and unreconstructable)",
+            "ATTEST the runtime at preflight Stage 0 and RE-EMIT this "
+            "preregistration with the attested protocol fingerprint -- until then "
+            "runtime_digest is null and no comparison here is eligible for MATCHED",
+            "RERUN canonical sa/sb at 0.86M under the attested runtime and the "
+            "frozen trainer source set -- the historical checkpoints are NOT "
+            "recipe-matched (their trainer and runtime identity was never recorded, "
+            "and the historical tree was dirty and unreconstructable)",
             "control pooled + per-seed usable_rollout_rate -> materializes the "
             "feasibility floor",
             "control pooled + per-seed correct_overall -> materializes the "

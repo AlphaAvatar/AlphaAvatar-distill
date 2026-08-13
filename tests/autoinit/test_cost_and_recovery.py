@@ -32,6 +32,7 @@ from aadistill.autoinit.operators import V1_IMPLEMENTATIONS  # noqa: E402
 from aadistill.autoinit.recovery import (  # noqa: E402
     CATASTROPHIC_V1,
     E1_KD_HEAVY_0860K,
+    PREFLIGHT_PLAN_V1,
     SEED_SA,
     SEED_SB,
     SEED_SC,
@@ -907,6 +908,167 @@ def test_the_historical_controls_are_not_labelled_as_valid_controls():
         assert "matches_intended_control_protocol" not in entry, name
         assert entry["comparison"]["unverifiable_fields"], (
             "the mismatch report must stay attached to the status")
-    # And the intended Phase-A pair is demonstrably single-variable.
-    check = audit["intended_phase_a_comparison"]["check"]
-    assert check["is_single_variable_comparison"]
+    # The intended Phase-A pair is NOT claimed matched while the runtime is
+    # unknown, and IS matched once the environment fields carry real values.
+    intended = audit["intended_phase_a_comparison"]
+    pending = intended["pending_materialization"]["check"]
+    assert pending["is_single_variable_comparison"] is False, (
+        "the preregistration claims a MATCHED comparison while runtime_digest is "
+        "still null on both sides")
+    assert "runtime_digest" in pending["unmaterialized_fields"]
+    assert intended["after_stage_0_attestation"]["check"][
+        "is_single_variable_comparison"]
+
+
+def test_the_availability_report_does_not_claim_a_matched_control():
+    """Lineage verification is a strict subset of protocol matching."""
+    path = REPO / "logs/autoinit_control_availability.json"
+    if not path.is_file():
+        pytest.skip("availability report not present")
+    report = json.loads(path.read_text())
+    assert report["any_recipe_matched_control"] is False
+    for name, entry in report["controls"].items():
+        assert "matches_intended_control_protocol" not in entry, name
+        assert entry["recipe_matched_control"] is False, name
+        assert entry["artifact_available"] is True, name
+        assert entry["hash_verified"] is True, name
+        assert entry["passes_legacy_lineage_subset"] is True, name
+    blob = json.dumps(report).lower()
+    assert "no recovery retraining is needed" not in blob, (
+        "stale prose still says the historical checkpoints make retraining "
+        "unnecessary")
+
+
+# --- materialization: unknown is not identical ------------------------------
+
+
+def test_unknown_on_both_sides_is_never_reported_as_matched():
+    """`None == None` is True in Python and false as a scientific claim."""
+    unknown_a = _protocol(runtime_digest=None)
+    unknown_b = _protocol(runtime_digest=None)
+    comparison = unknown_a.compare(unknown_b)
+    assert "runtime_digest" not in comparison["matched_fields"]
+    assert comparison["unmaterialized_fields"] == ["runtime_digest"]
+    assert comparison["both_materialized"] is False
+    assert not comparison["protocol_identical"]
+    assert any(u["field"] == "runtime_digest"
+               for u in comparison["unverifiable_fields"])
+    # Verified identical digests, by contrast, do match.
+    known = _protocol(runtime_digest="rt-1").compare(_protocol(runtime_digest="rt-1"))
+    assert "runtime_digest" in known["matched_fields"]
+    assert known["both_materialized"] and known["protocol_identical"]
+
+
+@pytest.mark.parametrize("missing", [
+    "trainer_source_digest", "trainer_source_set_version", "runtime_digest"])
+def test_an_unmaterialized_protocol_cannot_produce_a_matched_pair(missing):
+    from aadistill.autoinit.recovery import RecoveryProbeIdentity
+
+    protocol = _protocol(**{missing: None})
+    assert protocol.is_materialized is False
+    assert missing in protocol.unmaterialized_fields()
+    with pytest.raises(RecoveryAdmissionError, match="not materialized"):
+        protocol.require_materialized()
+
+    control = RecoveryProbeIdentity(protocol=protocol,
+                                    initialization_artifact_digest="canonical",
+                                    seed=SEED_SA, label="control-sa")
+    searched = RecoveryProbeIdentity(protocol=protocol,
+                                     initialization_artifact_digest="searched-A",
+                                     seed=SEED_SA, label="searched-A-sa")
+    verdict = control.matched_against(searched)
+    # Everything else about the pair is right; materialization alone blocks it.
+    assert verdict["same_seed"] and verdict["initializations_differ"]
+    assert verdict["protocols_materialized"] is False
+    assert verdict["is_single_variable_comparison"] is False
+    assert "NOT ELIGIBLE FOR MATCHED" in verdict["verdict"]
+    assert missing in verdict["verdict"]
+
+
+def test_materialization_fills_only_what_was_unknown_and_refuses_drift():
+    from aadistill.autoinit.recovery import RuntimeEnvironmentFingerprint
+
+    runtime = RuntimeEnvironmentFingerprint.observe(image_digest="sha256:aa")
+    trainer = {"digest": "trainer-1", "set_version": 1}
+    blank = _protocol(runtime_digest=None, trainer_source_digest=None,
+                      trainer_source_set_version=None)
+    attested = blank.materialized(runtime=runtime, trainer_source=trainer)
+    assert attested.is_materialized
+    assert attested.runtime_digest == runtime.digest
+    assert attested.trainer_source_digest == "trainer-1"
+    attested.require_materialized()
+
+    # Idempotent under the same attestation.
+    assert attested.materialized(runtime=runtime,
+                                 trainer_source=trainer).fingerprint == \
+        attested.fingerprint
+    # A contradicting attestation is protocol drift, not an overwrite.
+    with pytest.raises(RecoveryAdmissionError, match="contradicts the preregistered"):
+        attested.materialized(runtime=runtime,
+                              trainer_source={"digest": "trainer-2", "set_version": 1})
+    # An unpinned runtime cannot materialize anything.
+    with pytest.raises(RecoveryAdmissionError, match="image digest"):
+        blank.materialized(runtime=RuntimeEnvironmentFingerprint.observe(),
+                           trainer_source=trainer)
+
+
+def test_stage_2_compares_against_the_attested_hash_not_the_preregistered_one():
+    from aadistill.autoinit.recovery import (
+        RecoveryProbeIdentity, RuntimeEnvironmentFingerprint)
+
+    preregistered = _protocol(runtime_digest=None)
+    attested = preregistered.materialized(
+        runtime=RuntimeEnvironmentFingerprint.observe(image_digest="sha256:aa"),
+        trainer_source={"digest": "abc123", "set_version": 1})
+
+    ran_attested = RecoveryProbeIdentity(
+        protocol=attested, initialization_artifact_digest="canonical",
+        seed=SEED_SA, label="control-sa")
+    ran_attested.require_attested(attested.fingerprint)
+
+    # A control trained under an unpinned runtime is refused even though its
+    # non-environment fields are identical to the preregistered protocol.
+    ran_unpinned = RecoveryProbeIdentity(
+        protocol=preregistered, initialization_artifact_digest="canonical",
+        seed=SEED_SA, label="control-sa-unpinned")
+    with pytest.raises(RecoveryAdmissionError, match="not materialized"):
+        ran_unpinned.require_attested(attested.fingerprint)
+
+    # A control that ran a different protocol is refused.
+    other = attested.materialized  # noqa: F841  (keep the attested one in scope)
+    drifted = RecoveryProbeIdentity(
+        protocol=_protocol(lr=1e-4, runtime_digest=attested.runtime_digest),
+        initialization_artifact_digest="canonical", seed=SEED_SA, label="drifted")
+    with pytest.raises(RecoveryAdmissionError, match="attested Phase-A protocol"):
+        drifted.require_attested(attested.fingerprint)
+
+
+def test_stage_0_produces_the_frozen_protocol_artifact_before_controls():
+    """The handshake is in the plan, not only in prose."""
+    from aadistill.autoinit.recovery import PREFLIGHT_PLAN_V1
+
+    stage0 = PREFLIGHT_PLAN_V1.stages[0]
+    produced = " ".join(stage0.produces)
+    assert "materialized RecoveryProtocolFingerprint" in produced
+    assert "autoinit_phase_a_protocol_attested.json" in produced
+    stage2 = PREFLIGHT_PLAN_V1.stages[2]
+    conditions = " ".join(stage2.stop_conditions)
+    assert "ATTESTED" in conditions and "not materialized" in conditions
+
+
+def test_every_preflight_stop_condition_is_a_whole_string():
+    """A missing trailing comma serializes as one entry per character."""
+    from aadistill.autoinit.recovery import PreflightStage
+
+    stage3 = PREFLIGHT_PLAN_V1.stages[3].as_dict()
+    assert len(stage3["stop_conditions"]) == 1
+    assert stage3["stop_conditions"] == [
+        "capability schema validation fails -> scoring defect, STOP"]
+    for stage in PREFLIGHT_PLAN_V1.as_dict()["stages"]:
+        for group in ("produces", "stop_conditions"):
+            for item in stage[group]:
+                assert len(item) > 1, (stage["name"], group, item)
+    # And the shape is refused at construction, so it cannot recur.
+    with pytest.raises(TypeError, match="trailing comma"):
+        PreflightStage(stage=9, name="x", purpose="y", produces=("a",),
+                       blocking=False, stop_conditions="one condition")

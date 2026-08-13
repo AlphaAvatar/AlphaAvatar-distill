@@ -4,7 +4,7 @@
 
 Zero cost: reads the historical run manifests from the relay (small JSON, no LFS
 payload) and the frozen Phase-A probe config from this checkout, builds a
-`RecoveryRecipeFingerprint` for each, and compares them field by field.
+`RecoveryProtocolFingerprint` for each, and compares them field by field.
 
 The question is not "do the obvious fields agree" — they do. It is whether
 **every** field that can change a recovered checkpoint is established and equal.
@@ -231,22 +231,48 @@ def main() -> None:
         all_matched = all_matched and not comparison["blocking"]
 
     report["benign_mismatch_policy"] = BENIGN_MISMATCHES
-    # Demonstrate that the *intended* Phase-A comparison is single-variable under
-    # the split identity: same protocol, same seed, different initialization.
+    # The *intended* Phase-A comparison, in the two states it passes through.
+    #
+    # Today the protocol is not materialized: the image digest does not exist
+    # until Stage 0 attests it on the pod. So the pair is reported as NOT ELIGIBLE
+    # FOR MATCHED, not as matched — two `None`s are unknown on both sides, which is
+    # a different statement from verified identical.
     phase_a = phase_a_protocol(REPO_ROOT / "configs/stage3/e1/e1_r0860k_sa_pca.json")
-    control_probe = RecoveryProbeIdentity(
-        protocol=phase_a, initialization_artifact_digest=CANONICAL_INIT_SHA,
-        seed=20260726, label="phase_a:control-sa")
-    searched_probe = RecoveryProbeIdentity(
-        protocol=phase_a,
-        initialization_artifact_digest="<searched-leaf-artifact-digest>",
-        seed=20260726, label="phase_a:searched-A-sa")
+
+    def pair(protocol) -> dict:
+        control = RecoveryProbeIdentity(
+            protocol=protocol, initialization_artifact_digest=CANONICAL_INIT_SHA,
+            seed=20260726, label="phase_a:control-sa")
+        searched = RecoveryProbeIdentity(
+            protocol=protocol,
+            initialization_artifact_digest="<searched-leaf-artifact-digest>",
+            seed=20260726, label="phase_a:searched-A-sa")
+        return {"control": control.probe_id, "searched": searched.probe_id,
+                "check": control.matched_against(searched)}
+
+    # Illustrative post-attestation state: the *shape* Stage 0 produces, using a
+    # placeholder image digest. It is not an attestation and confers nothing; the
+    # real one is written to logs/autoinit_phase_a_protocol_attested.json on the
+    # pod by scripts/autoinit/attest_protocol.py.
+    demo_runtime = RuntimeEnvironmentFingerprint.observe(
+        image_digest="sha256:<attested-at-preflight-stage-0>")
+    after = phase_a.materialized(runtime=demo_runtime,
+                                 trainer_source=trainer_source_digest(REPO_ROOT))
     report["intended_phase_a_comparison"] = {
-        "control": control_probe.as_dict()["probe_id"],
-        "searched": searched_probe.as_dict()["probe_id"],
-        "check": control_probe.matched_against(searched_probe),
-        "note": ("illustrative: the searched digest is a placeholder, but the "
-                 "predicate is the one the real run uses"),
+        "pending_materialization": {
+            **pair(phase_a),
+            "note": ("CURRENT STATE. runtime_digest is unknown on both sides "
+                     "because the image is chosen at pod creation. Not eligible "
+                     "for MATCHED until preflight Stage 0 attests it."),
+        },
+        "after_stage_0_attestation": {
+            **pair(after),
+            "note": ("ILLUSTRATIVE ONLY, with a placeholder image digest — shows "
+                     "that the predicate resolves to MATCHED once the environment "
+                     "fields carry real values. Confers no attestation."),
+        },
+        "predicate": ("both_materialized AND protocol_identical AND same_seed AND "
+                      "initializations_differ"),
     }
     report["historical_controls_are_recipe_matched"] = all_matched
     report["status_field_meanings"] = {

@@ -48,10 +48,10 @@ import hashlib
 import json
 import math
 from collections.abc import Mapping, Sequence
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any
+from typing import Any, ClassVar
 
 from ..infrastructure.manifest import sha256_file, sha256_json
 from .state import InitializationState
@@ -678,6 +678,61 @@ class RecoveryProtocolFingerprint:
     #: matched.
     unverifiable: tuple[str, ...] = ()
 
+    #: Fields that must carry a real value before this protocol can take part in a
+    #: MATCHED comparison. ``None`` on both sides means *unknown on both sides*,
+    #: which is not the same statement as *verified identical* — and comparing two
+    #: ``None``s with ``==`` silently turns the first into the second.
+    MATERIALIZATION_REQUIRED: ClassVar[tuple[str, ...]] = (
+        "trainer_source_digest", "trainer_source_set_version", "runtime_digest")
+
+    def unmaterialized_fields(self) -> tuple[str, ...]:
+        return tuple(f for f in self.MATERIALIZATION_REQUIRED
+                     if getattr(self, f) is None)
+
+    @property
+    def is_materialized(self) -> bool:
+        return not self.unmaterialized_fields()
+
+    def require_materialized(self, *, context: str = "") -> None:
+        """Raise unless every identity-bearing field carries a real value.
+
+        Gate for *future* runs. A historical audit may still report fields as
+        unverifiable and is unaffected: "never recorded" is a permanent property
+        of a past run, while "not yet attested" is a stage the preflight passes
+        through and must not be trained under.
+        """
+        missing = self.unmaterialized_fields()
+        if missing:
+            where = f" ({context})" if context else ""
+            raise RecoveryAdmissionError(
+                f"protocol is not materialized{where}: {', '.join(missing)} "
+                "is unknown. Unknown on both sides is not verified identical; "
+                "attest the runtime and trainer source at preflight Stage 0 "
+                "before declaring any protocol matched.")
+
+    def materialized(self, *, runtime: "RuntimeEnvironmentFingerprint",
+                     trainer_source: Mapping[str, Any],
+                     ) -> "RecoveryProtocolFingerprint":
+        """Fill the environment fields from a Stage-0 attestation.
+
+        Only fills what was unknown. If a field is already set and the
+        attestation disagrees, that is protocol drift between preregistration and
+        execution, and it raises rather than being overwritten.
+        """
+        runtime.require_pinned()
+        proposed = {"trainer_source_digest": trainer_source["digest"],
+                    "trainer_source_set_version": trainer_source["set_version"],
+                    "runtime_digest": runtime.digest}
+        for key, value in proposed.items():
+            current = getattr(self, key)
+            if current is not None and current != value:
+                raise RecoveryAdmissionError(
+                    f"attested {key} ({value!r}) contradicts the preregistered "
+                    f"value ({current!r}). This is protocol drift between what "
+                    "was preregistered and what is about to execute; resolve it "
+                    "rather than overwriting the preregistration.")
+        return replace(self, **proposed)
+
     def identity(self) -> dict[str, Any]:
         d = {k: v for k, v in self.__dict__.items() if k != "unverifiable"}
         d["betas"] = list(self.betas)
@@ -690,7 +745,12 @@ class RecoveryProtocolFingerprint:
 
     def compare(self, other: "RecoveryProtocolFingerprint") -> dict[str, Any]:
         mine, theirs = self.identity(), other.identity()
-        unverifiable = set(self.unverifiable) | set(other.unverifiable)
+        # An unmaterialized required field is unknown, on whichever side it is
+        # unknown — so `None == None` can never be reported as a matched field.
+        unmaterialized = sorted(set(self.unmaterialized_fields())
+                                | set(other.unmaterialized_fields()))
+        unverifiable = (set(self.unverifiable) | set(other.unverifiable)
+                        | set(unmaterialized))
         matched, mismatched, unknown = [], [], []
         for key in sorted(set(mine) | set(theirs)):
             if key in unverifiable:
@@ -708,12 +768,17 @@ class RecoveryProtocolFingerprint:
             "matched_fields": matched,
             "mismatched_fields": mismatched,
             "unverifiable_fields": unknown,
+            "unmaterialized_fields": unmaterialized,
+            "both_materialized": (self.is_materialized and other.is_materialized),
             "protocol_identical": (not mismatched and not unknown),
         }
 
     def as_dict(self) -> dict[str, Any]:
         return {**self.identity(), "protocol_fingerprint": self.fingerprint,
                 "unverifiable": list(self.unverifiable),
+                "is_materialized": self.is_materialized,
+                "unmaterialized_fields": list(self.unmaterialized_fields()),
+                "materialization_required": list(self.MATERIALIZATION_REQUIRED),
                 "excluded_by_design": ["student initialization artifact", "seed"],
                 "why_excluded": ("initialization is the treatment variable and the "
                                  "seed is the intended replicate; including either "
@@ -743,13 +808,20 @@ class RecoveryProbeIdentity:
 
     def matched_against(self, other: "RecoveryProbeIdentity") -> dict[str, Any]:
         protocol = self.protocol.compare(other.protocol)
+        materialized = protocol["both_materialized"]
         same_seed = self.seed == other.seed
         different_init = (self.initialization_artifact_digest
                           != other.initialization_artifact_digest)
-        ok = protocol["protocol_identical"] and same_seed and different_init
+        # Materialization is a precondition, not one vote among several. Two
+        # protocols that are both unknown in the same place are *unverifiable*,
+        # and an unverifiable pair is never MATCHED.
+        ok = (materialized and protocol["protocol_identical"]
+              and same_seed and different_init)
         return {
             "self": self.label or self.probe_id[:12],
             "other": other.label or other.probe_id[:12],
+            "protocols_materialized": materialized,
+            "unmaterialized_fields": protocol["unmaterialized_fields"],
             "protocol_identical": protocol["protocol_identical"],
             "same_seed": same_seed,
             "initializations_differ": different_init,
@@ -759,6 +831,11 @@ class RecoveryProbeIdentity:
                 "MATCHED: same protocol, same seed, different initialization — the "
                 "only difference is the treatment."
                 if ok else
+                "NOT ELIGIBLE FOR MATCHED: protocol is not materialized ("
+                + ", ".join(protocol["unmaterialized_fields"])
+                + " unknown on one or both sides). Unknown on both sides is not "
+                  "verified identical; attest at preflight Stage 0 first."
+                if not materialized else
                 "NOT MATCHED: "
                 + ("; ".join(filter(None, [
                     None if protocol["protocol_identical"] else "protocol differs",
@@ -766,6 +843,23 @@ class RecoveryProbeIdentity:
                     None if different_init else
                     "initializations are identical, so there is no treatment"])))),
         }
+
+    def require_attested(self, attested_protocol_fingerprint: str) -> None:
+        """Raise unless this probe ran the attested protocol, byte for byte.
+
+        Stage 2's check. The comparison target is the fingerprint frozen *after*
+        Stage 0 attestation, not the preregistered object that still carries
+        ``runtime_digest: null`` — comparing against the latter would accept a
+        control trained under an unpinned runtime.
+        """
+        self.protocol.require_materialized(context=f"probe {self.label or self.probe_id[:12]}")
+        actual = self.protocol.fingerprint
+        if actual != attested_protocol_fingerprint:
+            raise RecoveryAdmissionError(
+                f"probe {self.label or self.probe_id[:12]} ran protocol {actual} "
+                f"but the attested Phase-A protocol is "
+                f"{attested_protocol_fingerprint}. A control that did not run the "
+                "attested protocol is not a control.")
 
     def as_dict(self) -> dict[str, Any]:
         return {"probe_id": self.probe_id, "label": self.label, "seed": self.seed,
@@ -819,6 +913,18 @@ class PreflightStage:
     produces: tuple[str, ...]
     blocking: bool
     stop_conditions: tuple[str, ...] = ()
+
+    def __post_init__(self) -> None:
+        # `("one item")` is a string, not a 1-tuple, and `list()` of it serializes
+        # as one entry per character. Caught once in the real plan; refused here so
+        # a missing comma is a construction error rather than a silent 47-condition
+        # stage in a frozen artifact.
+        for name in ("produces", "stop_conditions"):
+            if isinstance(getattr(self, name), str):
+                raise TypeError(
+                    f"PreflightStage.{name} must be a tuple of strings, not a "
+                    f"single string — a missing trailing comma serializes as a "
+                    f"list of characters")
 
     def as_dict(self) -> dict[str, Any]:
         return {"stage": self.stage, "name": self.name, "purpose": self.purpose,
@@ -885,10 +991,15 @@ PREFLIGHT_PLAN_V1 = PreflightPlan(stages=(
                  "before any of it happens"),
         produces=("image digest", "RuntimeEnvironmentFingerprint",
                   "trainer_source_digest + declared file set",
-                  "input artifact hashes (canonical init, pack, suite, battery)"),
+                  "input artifact hashes (canonical init, pack, suite, battery)",
+                  "materialized RecoveryProtocolFingerprint",
+                  "frozen attested protocol artifact: "
+                  "logs/autoinit_phase_a_protocol_attested.json"),
         stop_conditions=("image digest unavailable",
                          "any input artifact hash mismatches its pin",
-                         "trainer source file missing from the declared set")),
+                         "trainer source file missing from the declared set",
+                         "attested trainer digest or runtime contradicts a "
+                         "preregistered value -> protocol drift, STOP")),
     PreflightStage(
         stage=1, name="cheap machine gates", blocking=True,
         purpose="find out whether this machine and runtime are usable at all",
@@ -910,7 +1021,10 @@ PREFLIGHT_PLAN_V1 = PreflightPlan(stages=(
                   "per-run RecoveryProtocolFingerprint and RecoveryProbeIdentity",
                   "checkpoint artifact digests"),
         stop_conditions=(
-            "a run's protocol fingerprint differs from the preregistered one",
+            "a run's protocol fingerprint differs from the Stage-0 ATTESTED "
+            "protocol hash (not the preregistered object, which still carries "
+            "runtime_digest: null)",
+            "a run's protocol is not materialized",
             "step time diverges from the priced 4.15 s/step by more than 25%")),
     PreflightStage(
         stage=3, name="control characterization", blocking=False,
@@ -920,7 +1034,7 @@ PREFLIGHT_PLAN_V1 = PreflightPlan(stages=(
                   "materialized equivalence interval",
                   "materialized feasibility floor",
                   "per-capability control baselines"),
-        stop_conditions=("capability schema validation fails -> scoring defect, STOP")),
+        stop_conditions=("capability schema validation fails -> scoring defect, STOP",)),
 ))
 
 

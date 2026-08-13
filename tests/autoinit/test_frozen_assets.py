@@ -192,26 +192,36 @@ def test_the_tool_scoring_audit_backs_the_scorable_decision():
 # --- canonical control availability -----------------------------------------
 
 
-def test_both_canonical_controls_are_available_and_lineage_valid():
+def test_both_historical_checkpoints_are_available_and_lineage_valid():
+    """Lineage only. Whether they may serve as controls is decided elsewhere."""
     report = load(REPO / "logs/autoinit_control_availability.json")
     assert report["relay_reachable"]
-    assert report["both_controls_available"], report["consequence"]
+    assert report["both_pass_legacy_lineage_subset"], report["consequence"]
     for name, entry in report["controls"].items():
         assert entry["present_on_relay"], name
+        assert entry["artifact_available"] and entry["hash_verified"], name
         assert entry["weights_hash_match"], name
         assert entry["config_hash_match"], name
         assert entry["lineage_valid"], (name, entry.get("lineage_checks"))
-        # Lineage means the control really is the frozen 0.86M protocol.
+        # Lineage means it descends from the frozen 0.86M protocol's inputs.
         checks = entry["lineage_checks"]
         assert checks["descends_from_canonical_init"]
         assert checks["rung_is_0860k"] and checks["seed_matches"]
         assert checks["ce_weight"] and checks["kd_weight"] and checks["kd_scope"]
 
 
-def test_the_control_record_says_what_to_do_if_they_were_missing():
+def test_the_control_record_does_not_claim_they_are_phase_a_controls():
     report = load(REPO / "logs/autoinit_control_availability.json")
-    assert "not redefine the threshold to one seed" in report["consequence"].lower() \
-        or "profiling/evaluation job" in report["consequence"]
+    assert report["any_recipe_matched_control"] is False
+    consequence = report["consequence"]
+    assert "NOT Phase-A matched controls" in consequence
+    assert "Rerun canonical sa/sb" in consequence
+    # The superseded claim must not come back.
+    assert "profiling/evaluation job" not in consequence
+    assert "no recovery retraining is needed" not in consequence
+    assert report["controls"]["e1_r0860k_sa_pca"][
+        "recipe_matched_control_decided_by"].endswith(
+            "autoinit_recovery_fingerprint_audit.json")
 
 
 def test_the_battery_declares_no_weighted_scalar():

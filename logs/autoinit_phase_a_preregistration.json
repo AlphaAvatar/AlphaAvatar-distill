@@ -1,6 +1,6 @@
 {
   "schema": "aadistill.autoinit.phase_a_preregistration/v1",
-  "generated_utc": "2026-08-13T05:41:00.421673+00:00",
+  "generated_utc": "2026-08-13T06:09:33.225820+00:00",
   "status": "PREREGISTRATION DRAFT - NOT AUTHORIZED, NO COMPUTE LAUNCHED",
   "teacher": {
     "model_id": "Qwen/Qwen3-4B-Thinking-2507",
@@ -882,7 +882,7 @@
   },
   "canonical_control_availability": {
     "schema": "aadistill.autoinit.control_availability/v1",
-    "generated_utc": "2026-08-12T19:07:23.070438+00:00",
+    "generated_utc": "2026-08-13T06:06:11.452169+00:00",
     "relay": "AlphaAvatar/aadistill-artifacts",
     "controls": {
       "e1_r0860k_sa_pca": {
@@ -931,7 +931,11 @@
           "block_len": true
         },
         "lineage_valid": true,
-        "matches_intended_control_protocol": true
+        "artifact_available": true,
+        "hash_verified": true,
+        "passes_legacy_lineage_subset": true,
+        "recipe_matched_control": false,
+        "recipe_matched_control_decided_by": "logs/autoinit_recovery_fingerprint_audit.json"
       },
       "e1_r0860k_sb_pca": {
         "canonical_id": "e1_r0860k_sb_pca",
@@ -979,15 +983,26 @@
           "block_len": true
         },
         "lineage_valid": true,
-        "matches_intended_control_protocol": true
+        "artifact_available": true,
+        "hash_verified": true,
+        "passes_legacy_lineage_subset": true,
+        "recipe_matched_control": false,
+        "recipe_matched_control_decided_by": "logs/autoinit_recovery_fingerprint_audit.json"
       }
     },
     "config_hash_convention": "raw file bytes (build_checkpoint_registry.py)",
     "relay_reachable": true,
-    "both_controls_available": true,
+    "both_pass_legacy_lineage_subset": true,
+    "any_recipe_matched_control": false,
     "retrieval_bytes": 4768469936,
-    "consequence": "Both canonical 0.86M controls are retrievable and verified. The micro-preflight stays a profiling/evaluation job: no recovery retraining is needed, and the two-seed pooled control characterization can be produced by evaluating these checkpoints on recovery_search_v1.",
-    "report_sha256": "1227a0e1a90df1f2efba19184c16582e87682174d0e47288233ecde4bc841070"
+    "consequence": "Both historical 0.86M checkpoints are retrievable and their bytes and lineage verify, so they remain useful LINEAGE REFERENCES. They are NOT Phase-A matched controls: the protocol audit found their trainer and runtime identity was never recorded, so it cannot be compared. Rerun canonical sa/sb from qwen3_0p6b_init_v0 at 0.86M under the attested runtime and frozen trainer; those runs become the permanent Phase-A control probes and are retained, not disposable setup work.",
+    "status_field_meanings": {
+      "artifact_available": "the file exists on the relay",
+      "hash_verified": "its payload and config match the tombstone hashes",
+      "passes_legacy_lineage_subset": "it descends from the canonical init at the right rung, seed and objective \u2014 a lineage reference, not a protocol match",
+      "recipe_matched_control": "always false here; a matched control requires the full protocol comparison, which these runs fail on unrecorded trainer/runtime identity"
+    },
+    "report_sha256": "cd0614efa3c9ff7c8ddef939208f6252f844a8bf7430970576811fd4767c57e0"
   },
   "recovery_identity": {
     "model": "RecoveryProtocolFingerprint (what must be identical) + initialization artifact digest + seed = RecoveryProbeIdentity",
@@ -996,7 +1011,7 @@
       "seed"
     ],
     "why": "initialization is the treatment and the seed is the replicate; a protocol identity containing either would make every comparable pair of arms differ by construction",
-    "matched_pair_predicate": "protocol_identical AND same_seed AND initializations_differ",
+    "matched_pair_predicate": "both_materialized AND protocol_identical AND same_seed AND initializations_differ",
     "trainer_source_digest": {
       "digest": "054dd6d60b40e023408c055bb2f9bfd9d7953c5a42d1602042db97197458633a",
       "set_version": 1,
@@ -1068,12 +1083,29 @@
         "attention_backend": "sdpa"
       },
       "binding_invariant": "the permanent controls and the later searched probes must execute under the same frozen image digest; it is attested at preflight Stage 0 and required before a control is trained"
+    },
+    "materialization_requirement": {
+      "required_fields": [
+        "trainer_source_digest",
+        "trainer_source_set_version",
+        "runtime_digest"
+      ],
+      "rule": "a protocol whose required fields are not all non-null cannot take part in a MATCHED comparison; require_materialized() raises and matched_against() returns is_single_variable_comparison: false",
+      "semantics": {
+        "unknown vs unknown": "unverifiable \u2014 NOT eligible for MATCHED",
+        "verified X vs verified X": "matched"
+      },
+      "why": "None == None is True in Python and is not the claim 'verified identical'; without this gate a control trained under an unrecorded runtime would compare as matched \u2014 the exact defect that disqualified the historical runs",
+      "status_now": "runtime_digest is null in this preregistration because the image is chosen at pod creation. The Phase-A protocol fingerprint is therefore NOT final here; Stage 0 materializes it and this preregistration must be re-emitted with the attested digest before Phase A is authorized.",
+      "attested_artifact": "logs/autoinit_phase_a_protocol_attested.json",
+      "attested_by": "scripts/autoinit/attest_protocol.py",
+      "stage_2_compares_against": "the Stage-0 attested protocol hash, via RecoveryProbeIdentity.require_attested()"
     }
   },
   "micro_preflight_plan": {
     "plan_id": "autoinit.micro_preflight",
     "version": 1,
-    "plan_hash": "6089971229df796439b6fc7a3850368656f83af305b9772d64b5bedd554c52a7",
+    "plan_hash": "37dbd7b22e3e884eff9d55f95c5ce25a212f823d2f396691c30d47930076f8ab",
     "stages": [
       {
         "stage": 0,
@@ -1083,13 +1115,16 @@
           "image digest",
           "RuntimeEnvironmentFingerprint",
           "trainer_source_digest + declared file set",
-          "input artifact hashes (canonical init, pack, suite, battery)"
+          "input artifact hashes (canonical init, pack, suite, battery)",
+          "materialized RecoveryProtocolFingerprint",
+          "frozen attested protocol artifact: logs/autoinit_phase_a_protocol_attested.json"
         ],
         "blocking": true,
         "stop_conditions": [
           "image digest unavailable",
           "any input artifact hash mismatches its pin",
-          "trainer source file missing from the declared set"
+          "trainer source file missing from the declared set",
+          "attested trainer digest or runtime contradicts a preregistered value -> protocol drift, STOP"
         ]
       },
       {
@@ -1121,7 +1156,8 @@
         ],
         "blocking": true,
         "stop_conditions": [
-          "a run's protocol fingerprint differs from the preregistered one",
+          "a run's protocol fingerprint differs from the Stage-0 ATTESTED protocol hash (not the preregistered object, which still carries runtime_digest: null)",
+          "a run's protocol is not materialized",
           "step time diverges from the priced 4.15 s/step by more than 25%"
         ]
       },
@@ -1138,64 +1174,7 @@
         ],
         "blocking": false,
         "stop_conditions": [
-          "c",
-          "a",
-          "p",
-          "a",
-          "b",
-          "i",
-          "l",
-          "i",
-          "t",
-          "y",
-          " ",
-          "s",
-          "c",
-          "h",
-          "e",
-          "m",
-          "a",
-          " ",
-          "v",
-          "a",
-          "l",
-          "i",
-          "d",
-          "a",
-          "t",
-          "i",
-          "o",
-          "n",
-          " ",
-          "f",
-          "a",
-          "i",
-          "l",
-          "s",
-          " ",
-          "-",
-          ">",
-          " ",
-          "s",
-          "c",
-          "o",
-          "r",
-          "i",
-          "n",
-          "g",
-          " ",
-          "d",
-          "e",
-          "f",
-          "e",
-          "c",
-          "t",
-          ",",
-          " ",
-          "S",
-          "T",
-          "O",
-          "P"
+          "capability schema validation fails -> scoring defect, STOP"
         ]
       }
     ],
@@ -1281,6 +1260,12 @@
             "other": 1
           }
         ],
+        "unmaterialized_fields": [
+          "runtime_digest",
+          "trainer_source_digest",
+          "trainer_source_set_version"
+        ],
+        "both_materialized": false,
         "protocol_identical": false,
         "material_mismatches": [],
         "benign_mismatches": [
@@ -1375,6 +1360,12 @@
             "other": 1
           }
         ],
+        "unmaterialized_fields": [
+          "runtime_digest",
+          "trainer_source_digest",
+          "trainer_source_set_version"
+        ],
+        "both_materialized": false,
         "protocol_identical": false,
         "material_mismatches": [],
         "benign_mismatches": [
@@ -1395,65 +1386,154 @@
       }
     },
     "intended_phase_a_comparison": {
-      "self": "phase_a:control-sa",
-      "other": "phase_a:searched-A-sa",
-      "protocol_identical": true,
-      "same_seed": true,
-      "initializations_differ": true,
-      "is_single_variable_comparison": true,
-      "protocol_comparison": {
-        "fingerprint_self": "33a100f142a3f197e24c02dfffc7aeac54ef864748a96b069bc8a9b7c4b51d46",
-        "fingerprint_other": "33a100f142a3f197e24c02dfffc7aeac54ef864748a96b069bc8a9b7c4b51d46",
-        "fingerprints_equal": true,
-        "matched_fields": [
-          "autocast_bf16",
-          "betas",
-          "block_len",
-          "block_ordering",
-          "blocks_per_step",
-          "ce_weight",
-          "dtype",
-          "eps",
-          "grad_clip",
-          "gradient_checkpointing",
-          "kd_chunk",
-          "kd_scope",
-          "kd_temperature",
-          "kd_weight",
-          "lr",
-          "lr_schedule",
-          "micro_blocks",
-          "min_lr_frac",
-          "optimizer",
-          "pack",
-          "pack_blocks_sha256",
-          "packing",
-          "resume_semantics",
-          "rung",
-          "runtime_digest",
-          "teacher_attn",
-          "teacher_dtype",
-          "teacher_id",
-          "teacher_revision",
-          "tokenizer_sha256",
-          "total_steps",
-          "train_blocks",
-          "train_supervised_tokens",
-          "trainable_params",
-          "trainable_patterns",
-          "trainer_source_digest",
-          "trainer_source_set_version",
-          "val_blocks",
-          "warmup_steps",
-          "weight_decay"
-        ],
-        "mismatched_fields": [],
-        "unverifiable_fields": [],
-        "protocol_identical": true
+      "pending_materialization": {
+        "control": "562341b6544e6eb272b0c2886ca028c3bc5717cc587cc988c24aec8858d2c372",
+        "searched": "a3ef4719f1b4145f080b013fd02924f91725b95eaa610ad1aab4d3de17582132",
+        "check": {
+          "self": "phase_a:control-sa",
+          "other": "phase_a:searched-A-sa",
+          "protocols_materialized": false,
+          "unmaterialized_fields": [
+            "runtime_digest"
+          ],
+          "protocol_identical": false,
+          "same_seed": true,
+          "initializations_differ": true,
+          "is_single_variable_comparison": false,
+          "protocol_comparison": {
+            "fingerprint_self": "33a100f142a3f197e24c02dfffc7aeac54ef864748a96b069bc8a9b7c4b51d46",
+            "fingerprint_other": "33a100f142a3f197e24c02dfffc7aeac54ef864748a96b069bc8a9b7c4b51d46",
+            "fingerprints_equal": true,
+            "matched_fields": [
+              "autocast_bf16",
+              "betas",
+              "block_len",
+              "block_ordering",
+              "blocks_per_step",
+              "ce_weight",
+              "dtype",
+              "eps",
+              "grad_clip",
+              "gradient_checkpointing",
+              "kd_chunk",
+              "kd_scope",
+              "kd_temperature",
+              "kd_weight",
+              "lr",
+              "lr_schedule",
+              "micro_blocks",
+              "min_lr_frac",
+              "optimizer",
+              "pack",
+              "pack_blocks_sha256",
+              "packing",
+              "resume_semantics",
+              "rung",
+              "teacher_attn",
+              "teacher_dtype",
+              "teacher_id",
+              "teacher_revision",
+              "tokenizer_sha256",
+              "total_steps",
+              "train_blocks",
+              "train_supervised_tokens",
+              "trainable_params",
+              "trainable_patterns",
+              "trainer_source_digest",
+              "trainer_source_set_version",
+              "val_blocks",
+              "warmup_steps",
+              "weight_decay"
+            ],
+            "mismatched_fields": [],
+            "unverifiable_fields": [
+              {
+                "field": "runtime_digest",
+                "self": null,
+                "other": null
+              }
+            ],
+            "unmaterialized_fields": [
+              "runtime_digest"
+            ],
+            "both_materialized": false,
+            "protocol_identical": false
+          },
+          "verdict": "NOT ELIGIBLE FOR MATCHED: protocol is not materialized (runtime_digest unknown on one or both sides). Unknown on both sides is not verified identical; attest at preflight Stage 0 first."
+        },
+        "note": "CURRENT STATE. runtime_digest is unknown on both sides because the image is chosen at pod creation. Not eligible for MATCHED until preflight Stage 0 attests it."
       },
-      "verdict": "MATCHED: same protocol, same seed, different initialization \u2014 the only difference is the treatment."
+      "after_stage_0_attestation": {
+        "control": "5754305eb8aff123a2106e570c53f7c29f9a4b65ff1db38c81042fe87e022358",
+        "searched": "c9354345c4aa32e2883443349427afba163f1724f7668b6e2862aea9db522fc1",
+        "check": {
+          "self": "phase_a:control-sa",
+          "other": "phase_a:searched-A-sa",
+          "protocols_materialized": true,
+          "unmaterialized_fields": [],
+          "protocol_identical": true,
+          "same_seed": true,
+          "initializations_differ": true,
+          "is_single_variable_comparison": true,
+          "protocol_comparison": {
+            "fingerprint_self": "68071cafee0e8e1b5f59e013b315ee212e0ee564020b7b76b18e5778339f560f",
+            "fingerprint_other": "68071cafee0e8e1b5f59e013b315ee212e0ee564020b7b76b18e5778339f560f",
+            "fingerprints_equal": true,
+            "matched_fields": [
+              "autocast_bf16",
+              "betas",
+              "block_len",
+              "block_ordering",
+              "blocks_per_step",
+              "ce_weight",
+              "dtype",
+              "eps",
+              "grad_clip",
+              "gradient_checkpointing",
+              "kd_chunk",
+              "kd_scope",
+              "kd_temperature",
+              "kd_weight",
+              "lr",
+              "lr_schedule",
+              "micro_blocks",
+              "min_lr_frac",
+              "optimizer",
+              "pack",
+              "pack_blocks_sha256",
+              "packing",
+              "resume_semantics",
+              "rung",
+              "runtime_digest",
+              "teacher_attn",
+              "teacher_dtype",
+              "teacher_id",
+              "teacher_revision",
+              "tokenizer_sha256",
+              "total_steps",
+              "train_blocks",
+              "train_supervised_tokens",
+              "trainable_params",
+              "trainable_patterns",
+              "trainer_source_digest",
+              "trainer_source_set_version",
+              "val_blocks",
+              "warmup_steps",
+              "weight_decay"
+            ],
+            "mismatched_fields": [],
+            "unverifiable_fields": [],
+            "unmaterialized_fields": [],
+            "both_materialized": true,
+            "protocol_identical": true
+          },
+          "verdict": "MATCHED: same protocol, same seed, different initialization \u2014 the only difference is the treatment."
+        },
+        "note": "ILLUSTRATIVE ONLY, with a placeholder image digest \u2014 shows that the predicate resolves to MATCHED once the environment fields carry real values. Confers no attestation."
+      },
+      "predicate": "both_materialized AND protocol_identical AND same_seed AND initializations_differ"
     },
-    "report_sha256": "941829f317b326c126efb5d95c092be4e8ae78c0cd43035cee61f712e26feed9"
+    "report_sha256": "972a5e23281f9b61aae76aac5f8955b01cae838e3a42dcb8981b118a7f60b37a"
   },
   "tool_scoring_audit": {
     "scorer": "aadistill.evaluation.behavior.score_tool_call",
@@ -1528,12 +1608,13 @@
     "audit_sha256": "772f06ce2cb742e4272c543ae7dbb5f6e3a3521d9bcd6e0ca28e2e476a751ad6"
   },
   "pending_before_launch": [
-    "RERUN canonical sa/sb at 0.86M under the current frozen trainer -- the historical checkpoints are NOT recipe-matched (trainer commit and torch version differ; the historical tree was dirty and unreconstructable)",
+    "ATTEST the runtime at preflight Stage 0 and RE-EMIT this preregistration with the attested protocol fingerprint -- until then runtime_digest is null and no comparison here is eligible for MATCHED",
+    "RERUN canonical sa/sb at 0.86M under the attested runtime and the frozen trainer source set -- the historical checkpoints are NOT recipe-matched (their trainer and runtime identity was never recorded, and the historical tree was dirty and unreconstructable)",
     "control pooled + per-seed usable_rollout_rate -> materializes the feasibility floor",
     "control pooled + per-seed correct_overall -> materializes the equivalence interval",
     "control per-capability usable rates -> the catastrophic rule's reference values",
     "GPU state-evaluator repeatability -> evaluated by the frozen conservative response rule (no automatic epsilon re-derivation)",
     "activation-statistics GPU/CPU split (collapses the cost range)"
   ],
-  "preregistration_sha256": "c81ea31c5a3039a5c8adc5f4a092b34e29f3d22f7d0731b5808c0e0d875d659f"
+  "preregistration_sha256": "55f02bff2abcfc8db08ad4b717b4a754cdb0eb3416b2f31b7a671487ba7c35e5"
 }

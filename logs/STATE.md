@@ -1,5 +1,5 @@
-**Updated:** 2026-08-12 · branch `main` · working tree clean
-**No pods running. Nothing billing.** **1,512 CPU tests pass**, 7 skipped — in
+**Updated:** 2026-08-13 · branch `main` · working tree clean
+**No pods running. Nothing billing.** **1,521 CPU tests pass**, 7 skipped — in
 *both* venvs (repo `.venv` transformers 5.13.1, and the transformers 4.57.1 venv).
 
 **The AutoInitializer framework is implemented at zero cost and not yet run on
@@ -11,9 +11,21 @@ policy, a deterministic resumable beam search, and the search manifest. 169 test
 **The two frozen search assets now exist**: `artifacts/stage1/state_eval_v1` (80
 items, 74,022 positions, five domains) and `artifacts/stage3/recovery_search_v1`
 (190 prompts, **170 scorable** after the tool-scoring audit). Role isolation
-passes across all five roles with 0 exact overlaps. **The historical 0.86M controls hash-verify but are NOT recipe-matched**
-(trainer commit and torch version differ); the canonical control is rerun in the
+passes across all five roles with 0 exact overlaps. **The historical 0.86M checkpoints hash-verify and pass the legacy lineage
+subset, but are NOT recipe-matched controls** — their trainer and runtime identity
+was never recorded, so it cannot be compared; the canonical control is rerun in the
 micro-preflight and those runs become the permanent Phase-A control probes.
+**Recovery identity is split** into `RecoveryProtocolFingerprint` (what must be
+identical; excludes the initialization and the seed) and `RecoveryProbeIdentity`
+(protocol + init digest + seed), with the trainer identified by a digest over seven
+declared source files and the runtime by an image digest. A protocol whose
+`trainer_source_digest`, `trainer_source_set_version` or `runtime_digest` is
+unknown **cannot be declared MATCHED** — unknown on both sides is unverifiable, not
+identical. The image digest is a preflight **Stage 0** output, so the Phase-A
+protocol is materialized and frozen there
+(`scripts/autoinit/attest_protocol.py` → `autoinit_phase_a_protocol_attested.json`)
+and Stage 2 compares every control against *that* hash, not against the
+preregistration.
 **A pre-GPU correction pass on 2026-08-12** fixed nine items a maintainer review of
 the implementation found — none of them visible at the dry run's scale. See
 [`decisions.md`](decisions.md) 2026-08-12. End-to-end dry run on real tiny checkpoints:
@@ -508,10 +520,14 @@ all zero cost:
    (`SuccessiveHalvingPlan.freeze` + `assert_preregistered`), before the run they
    judge.
 6. **Micro-preflight first** ([`autoinit_micro_preflight_plan.md`](autoinit_micro_preflight_plan.md)):
-   one ~55 min L40S session measuring the activation-statistics GPU/CPU split, GPU
-   evaluator repeatability, peak resident memory, the canonical control on the new
-   battery, and disk throughput. **Expected $1.10, maximum $4.00.** Then delete the
-   pod and stop — Phase A does not start automatically.
+   one ~3.5 h L40S session, staged and fail-closed — Stage 0 runtime attestation
+   and protocol freeze, Stage 1 cheap machine gates (statistics GPU/CPU split, GPU
+   evaluator repeatability, peak resident memory, disk throughput), Stage 2 the two
+   **permanent** canonical sa/sb control runs *only if* Stages 0–1 pass, Stage 3
+   control characterization on the new battery. **Expected $4.20, maximum $8.60.**
+   Then delete the pod, verify it is gone, and stop — Phase A does not start
+   automatically, and the preregistration must be re-emitted with the attested
+   protocol hash before it is authorized.
 7. Then, and only with explicit authorization, the pilot in
    [`autoinit_pilot_proposal.md`](autoinit_pilot_proposal.md): no pruning at level
    0 then beam 6, one profile; 5 searched leaves + the retained canonical control
