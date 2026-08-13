@@ -1,75 +1,168 @@
 {
   "schema": "aadistill.autoinit.recovery_fingerprint_audit/v1",
-  "generated_utc": "2026-08-12T19:29:09.508727+00:00",
+  "generated_utc": "2026-08-13T05:39:10.041659+00:00",
   "question": "are the historical 0.86M checkpoints recipe-matched to the Phase-A probes, i.e. do they differ only by seed?",
   "unverifiable_reasons": {
-    "trainer_uncommitted_sha256": "code_state.dirty was true; the executed code is a commit plus an uncommitted diff identified only by its hash, which cannot be reconstructed",
+    "trainer_source_digest": "the historical run recorded a whole-repository commit and a dirty flag, not a digest over the trainer source set; and the tree was dirty, so the material trainer identity cannot be reconstructed",
+    "trainer_source_set_version": "part of the same unrecorded trainer identity: the historical run declared no source set",
+    "runtime_digest": "no image digest was recorded; only torch 2.11.0+cu128 was captured, which does not pin the runtime",
+    "legacy_trainer_uncommitted_sha256": "code_state.dirty was true; the executed code is a commit plus an uncommitted diff identified only by its hash, which cannot be reconstructed",
     "kd_chunk": "not present in the historical config; the trainer default at that commit was 512, same as now, but the run did not record it"
   },
   "comparisons": {
     "e1_r0860k_sa_pca": {
       "seed": 20260726,
-      "historical": {
-        "pack": "ladder_uniform",
-        "pack_blocks_sha256": "6f324cb0f37bc0f07128e554ce8c161879419537478950496534f75fcecb249c",
-        "rung": 860000,
-        "train_blocks": 682,
-        "train_supervised_tokens": 864750,
-        "block_len": 8192,
-        "packing": "ladder",
-        "val_blocks": 16,
-        "block_ordering": "ladder order, sequential, no shuffle",
-        "ce_weight": 0.25,
-        "kd_weight": 1.0,
-        "kd_temperature": 1.0,
-        "kd_scope": "all",
-        "kd_chunk": 512,
-        "optimizer": "AdamW",
-        "lr": 5e-05,
-        "weight_decay": 0.01,
-        "betas": [
-          0.9,
-          0.95
-        ],
-        "eps": 1e-08,
-        "grad_clip": 1.0,
-        "total_steps": 1023,
-        "warmup_steps": 51,
-        "min_lr_frac": 0.1,
-        "lr_schedule": "cosine to min_lr_frac",
-        "blocks_per_step": 2,
-        "micro_blocks": 1,
-        "dtype": "float32",
-        "autocast_bf16": true,
-        "gradient_checkpointing": true,
-        "trainable_patterns": [
-          "\\.self_attn\\.(q_proj|k_proj|v_proj|o_proj|q_norm|k_norm)\\.",
-          "\\.mlp\\.(gate_proj|up_proj|down_proj)\\.",
-          "input_layernorm",
-          "post_attention_layernorm",
-          "model\\.norm\\."
-        ],
-        "trainable_params": 440467456,
-        "teacher_id": "Qwen/Qwen3-4B-Thinking-2507",
-        "teacher_revision": "768f209d9ea81521153ed38c47d515654e938aea",
-        "teacher_dtype": "bfloat16",
-        "teacher_attn": "sdpa",
-        "student_init_path": "artifacts/stage1/qwen3_0p6b_init_v0/checkpoint",
-        "student_init_sha256": "86fbba78e8a2a32481ca77e5ac362ed1f17a39dbc30bcbc952cabd5df2633e54",
-        "tokenizer_sha256": "7781771acc3798ee454c1253c751f930eb1c18c1c3df62e2552cc6f1d394f654",
-        "trainer_git_commit": "69c3fe1f5f019c2130d8d3aaf18322fe948d17d7",
-        "trainer_dirty": true,
-        "trainer_uncommitted_sha256": "2e04f68349226a7efd1684d916441bb29c9e44f1126e066f7ab3fca05cdad2ca",
-        "torch_version": "2.11.0+cu128",
-        "resume_semantics": "step counter + RNG state (no consumed-block accounting)",
-        "fingerprint": "3e282dcaab22681c8b0e962a593f3051a7bab72760402ffdb414885e8e11bcfd",
-        "unverifiable": [
-          "trainer_uncommitted_sha256",
-          "kd_chunk"
-        ],
-        "seed_excluded": "the seed is the intended difference between probes and is recorded beside the fingerprint, not inside it"
+      "historical_run_audit": {
+        "run_id": "e1_r0860k_sa_pca",
+        "seed": 20260726,
+        "initialization_artifact_digest": "86fbba78e8a2a32481ca77e5ac362ed1f17a39dbc30bcbc952cabd5df2633e54",
+        "weights_sha256": null,
+        "protocol": {
+          "pack": "ladder_uniform",
+          "pack_blocks_sha256": "6f324cb0f37bc0f07128e554ce8c161879419537478950496534f75fcecb249c",
+          "rung": 860000,
+          "train_blocks": 682,
+          "train_supervised_tokens": 864750,
+          "block_len": 8192,
+          "packing": "ladder",
+          "val_blocks": 16,
+          "block_ordering": "ladder order, sequential, no shuffle",
+          "ce_weight": 0.25,
+          "kd_weight": 1.0,
+          "kd_temperature": 1.0,
+          "kd_scope": "all",
+          "kd_chunk": 512,
+          "optimizer": "AdamW",
+          "lr": 5e-05,
+          "weight_decay": 0.01,
+          "betas": [
+            0.9,
+            0.95
+          ],
+          "eps": 1e-08,
+          "grad_clip": 1.0,
+          "total_steps": 1023,
+          "warmup_steps": 51,
+          "min_lr_frac": 0.1,
+          "lr_schedule": "cosine to min_lr_frac",
+          "blocks_per_step": 2,
+          "micro_blocks": 1,
+          "dtype": "float32",
+          "autocast_bf16": true,
+          "gradient_checkpointing": true,
+          "trainable_patterns": [
+            "\\.self_attn\\.(q_proj|k_proj|v_proj|o_proj|q_norm|k_norm)\\.",
+            "\\.mlp\\.(gate_proj|up_proj|down_proj)\\.",
+            "input_layernorm",
+            "post_attention_layernorm",
+            "model\\.norm\\."
+          ],
+          "trainable_params": 440467456,
+          "teacher_id": "Qwen/Qwen3-4B-Thinking-2507",
+          "teacher_revision": "768f209d9ea81521153ed38c47d515654e938aea",
+          "teacher_dtype": "bfloat16",
+          "teacher_attn": "sdpa",
+          "tokenizer_sha256": "7781771acc3798ee454c1253c751f930eb1c18c1c3df62e2552cc6f1d394f654",
+          "resume_semantics": "step counter + RNG state (no consumed-block accounting)",
+          "trainer_source_digest": null,
+          "trainer_source_set_version": null,
+          "runtime_digest": null,
+          "protocol_fingerprint": "e6e4b97b3b9d8b57fd1dc241489d91c84156dbea5b39e1114d69423e1e78efb6",
+          "unverifiable": [
+            "trainer_source_digest",
+            "trainer_source_set_version",
+            "runtime_digest",
+            "legacy_trainer_uncommitted_sha256",
+            "kd_chunk"
+          ],
+          "excluded_by_design": [
+            "student initialization artifact",
+            "seed"
+          ],
+          "why_excluded": "initialization is the treatment variable and the seed is the intended replicate; including either would make every comparable pair of arms differ"
+        },
+        "provenance_only": {
+          "repo_git_commit": "69c3fe1f5f019c2130d8d3aaf18322fe948d17d7",
+          "repo_dirty": true,
+          "repo_uncommitted_sha256": "2e04f68349226a7efd1684d916441bb29c9e44f1126e066f7ab3fca05cdad2ca",
+          "note": "whole-repository state is provenance, never the material trainer identity; a docs-only commit must not invalidate a control"
+        },
+        "notes": {
+          "torch_version_observed": "2.11.0+cu128"
+        }
       },
-      "phase_a_today": {
+      "historical_probe_identity": {
+        "probe_id": "2b15cd416bcfd06adcad2f041ce707858d52c93578b09e1639dc0d290db95d8d",
+        "label": "historical:e1_r0860k_sa_pca",
+        "seed": 20260726,
+        "initialization_artifact_digest": "86fbba78e8a2a32481ca77e5ac362ed1f17a39dbc30bcbc952cabd5df2633e54",
+        "protocol_fingerprint": "e6e4b97b3b9d8b57fd1dc241489d91c84156dbea5b39e1114d69423e1e78efb6",
+        "protocol": {
+          "pack": "ladder_uniform",
+          "pack_blocks_sha256": "6f324cb0f37bc0f07128e554ce8c161879419537478950496534f75fcecb249c",
+          "rung": 860000,
+          "train_blocks": 682,
+          "train_supervised_tokens": 864750,
+          "block_len": 8192,
+          "packing": "ladder",
+          "val_blocks": 16,
+          "block_ordering": "ladder order, sequential, no shuffle",
+          "ce_weight": 0.25,
+          "kd_weight": 1.0,
+          "kd_temperature": 1.0,
+          "kd_scope": "all",
+          "kd_chunk": 512,
+          "optimizer": "AdamW",
+          "lr": 5e-05,
+          "weight_decay": 0.01,
+          "betas": [
+            0.9,
+            0.95
+          ],
+          "eps": 1e-08,
+          "grad_clip": 1.0,
+          "total_steps": 1023,
+          "warmup_steps": 51,
+          "min_lr_frac": 0.1,
+          "lr_schedule": "cosine to min_lr_frac",
+          "blocks_per_step": 2,
+          "micro_blocks": 1,
+          "dtype": "float32",
+          "autocast_bf16": true,
+          "gradient_checkpointing": true,
+          "trainable_patterns": [
+            "\\.self_attn\\.(q_proj|k_proj|v_proj|o_proj|q_norm|k_norm)\\.",
+            "\\.mlp\\.(gate_proj|up_proj|down_proj)\\.",
+            "input_layernorm",
+            "post_attention_layernorm",
+            "model\\.norm\\."
+          ],
+          "trainable_params": 440467456,
+          "teacher_id": "Qwen/Qwen3-4B-Thinking-2507",
+          "teacher_revision": "768f209d9ea81521153ed38c47d515654e938aea",
+          "teacher_dtype": "bfloat16",
+          "teacher_attn": "sdpa",
+          "tokenizer_sha256": "7781771acc3798ee454c1253c751f930eb1c18c1c3df62e2552cc6f1d394f654",
+          "resume_semantics": "step counter + RNG state (no consumed-block accounting)",
+          "trainer_source_digest": null,
+          "trainer_source_set_version": null,
+          "runtime_digest": null,
+          "protocol_fingerprint": "e6e4b97b3b9d8b57fd1dc241489d91c84156dbea5b39e1114d69423e1e78efb6",
+          "unverifiable": [
+            "trainer_source_digest",
+            "trainer_source_set_version",
+            "runtime_digest",
+            "legacy_trainer_uncommitted_sha256",
+            "kd_chunk"
+          ],
+          "excluded_by_design": [
+            "student initialization artifact",
+            "seed"
+          ],
+          "why_excluded": "initialization is the treatment variable and the seed is the intended replicate; including either would make every comparable pair of arms differ"
+        }
+      },
+      "phase_a_protocol_today": {
         "pack": "ladder_uniform_probe",
         "pack_blocks_sha256": "6f324cb0f37bc0f07128e554ce8c161879419537478950496534f75fcecb249c",
         "rung": 860000,
@@ -114,21 +207,22 @@
         "teacher_revision": "768f209d9ea81521153ed38c47d515654e938aea",
         "teacher_dtype": "bfloat16",
         "teacher_attn": "sdpa",
-        "student_init_path": "artifacts/stage1/qwen3_0p6b_init_v0/checkpoint",
-        "student_init_sha256": "86fbba78e8a2a32481ca77e5ac362ed1f17a39dbc30bcbc952cabd5df2633e54",
         "tokenizer_sha256": "7781771acc3798ee454c1253c751f930eb1c18c1c3df62e2552cc6f1d394f654",
-        "trainer_git_commit": "dc5d7597260a2e55a94082afc921896be57108e1",
-        "trainer_dirty": true,
-        "trainer_uncommitted_sha256": "117d30ac1d55d54adc16bd27f87e87964b3c7e8d11d92cc83666ecfc365edf57",
-        "torch_version": "2.13.0+cpu",
         "resume_semantics": "step counter + RNG state + consumed-block position, asserted on restore",
-        "fingerprint": "bf48fc0fe20506c8f339de931787cc9a51e70506b98938b9314a11d3a089b3b2",
+        "trainer_source_digest": "054dd6d60b40e023408c055bb2f9bfd9d7953c5a42d1602042db97197458633a",
+        "trainer_source_set_version": 1,
+        "runtime_digest": null,
+        "protocol_fingerprint": "33a100f142a3f197e24c02dfffc7aeac54ef864748a96b069bc8a9b7c4b51d46",
         "unverifiable": [],
-        "seed_excluded": "the seed is the intended difference between probes and is recorded beside the fingerprint, not inside it"
+        "excluded_by_design": [
+          "student initialization artifact",
+          "seed"
+        ],
+        "why_excluded": "initialization is the treatment variable and the seed is the intended replicate; including either would make every comparable pair of arms differ"
       },
       "comparison": {
-        "fingerprint_self": "3e282dcaab22681c8b0e962a593f3051a7bab72760402ffdb414885e8e11bcfd",
-        "fingerprint_other": "bf48fc0fe20506c8f339de931787cc9a51e70506b98938b9314a11d3a089b3b2",
+        "fingerprint_self": "e6e4b97b3b9d8b57fd1dc241489d91c84156dbea5b39e1114d69423e1e78efb6",
+        "fingerprint_other": "33a100f142a3f197e24c02dfffc7aeac54ef864748a96b069bc8a9b7c4b51d46",
         "fingerprints_equal": false,
         "matched_fields": [
           "autocast_bf16",
@@ -152,8 +246,6 @@
           "pack_blocks_sha256",
           "packing",
           "rung",
-          "student_init_path",
-          "student_init_sha256",
           "teacher_attn",
           "teacher_dtype",
           "teacher_id",
@@ -164,7 +256,6 @@
           "train_supervised_tokens",
           "trainable_params",
           "trainable_patterns",
-          "trainer_dirty",
           "val_blocks",
           "warmup_steps",
           "weight_decay"
@@ -179,16 +270,6 @@
             "field": "resume_semantics",
             "self": "step counter + RNG state (no consumed-block accounting)",
             "other": "step counter + RNG state + consumed-block position, asserted on restore"
-          },
-          {
-            "field": "torch_version",
-            "self": "2.11.0+cu128",
-            "other": "2.13.0+cpu"
-          },
-          {
-            "field": "trainer_git_commit",
-            "self": "69c3fe1f5f019c2130d8d3aaf18322fe948d17d7",
-            "other": "dc5d7597260a2e55a94082afc921896be57108e1"
           }
         ],
         "unverifiable_fields": [
@@ -198,25 +279,23 @@
             "other": 512
           },
           {
-            "field": "trainer_uncommitted_sha256",
-            "self": "2e04f68349226a7efd1684d916441bb29c9e44f1126e066f7ab3fca05cdad2ca",
-            "other": "117d30ac1d55d54adc16bd27f87e87964b3c7e8d11d92cc83666ecfc365edf57"
-          }
-        ],
-        "exactly_matched": false,
-        "verdict": "NOT A MATCHED CONTROL: 4 field(s) differ; 2 field(s) cannot be established. A comparison against probes trained under a different recipe confounds the initialization with the recipe.",
-        "material_mismatches": [
-          {
-            "field": "torch_version",
-            "self": "2.11.0+cu128",
-            "other": "2.13.0+cpu"
+            "field": "runtime_digest",
+            "self": null,
+            "other": null
           },
           {
-            "field": "trainer_git_commit",
-            "self": "69c3fe1f5f019c2130d8d3aaf18322fe948d17d7",
-            "other": "dc5d7597260a2e55a94082afc921896be57108e1"
+            "field": "trainer_source_digest",
+            "self": null,
+            "other": "054dd6d60b40e023408c055bb2f9bfd9d7953c5a42d1602042db97197458633a"
+          },
+          {
+            "field": "trainer_source_set_version",
+            "self": null,
+            "other": 1
           }
         ],
+        "protocol_identical": false,
+        "material_mismatches": [],
         "benign_mismatches": [
           {
             "field": "pack",
@@ -232,71 +311,163 @@
           }
         ],
         "blocking": true
-      }
+      },
+      "passes_legacy_lineage_subset": true,
+      "recipe_matched_control": false
     },
     "e1_r0860k_sb_pca": {
       "seed": 20260801,
-      "historical": {
-        "pack": "ladder_uniform",
-        "pack_blocks_sha256": "6f324cb0f37bc0f07128e554ce8c161879419537478950496534f75fcecb249c",
-        "rung": 860000,
-        "train_blocks": 682,
-        "train_supervised_tokens": 864750,
-        "block_len": 8192,
-        "packing": "ladder",
-        "val_blocks": 16,
-        "block_ordering": "ladder order, sequential, no shuffle",
-        "ce_weight": 0.25,
-        "kd_weight": 1.0,
-        "kd_temperature": 1.0,
-        "kd_scope": "all",
-        "kd_chunk": 512,
-        "optimizer": "AdamW",
-        "lr": 5e-05,
-        "weight_decay": 0.01,
-        "betas": [
-          0.9,
-          0.95
-        ],
-        "eps": 1e-08,
-        "grad_clip": 1.0,
-        "total_steps": 1023,
-        "warmup_steps": 51,
-        "min_lr_frac": 0.1,
-        "lr_schedule": "cosine to min_lr_frac",
-        "blocks_per_step": 2,
-        "micro_blocks": 1,
-        "dtype": "float32",
-        "autocast_bf16": true,
-        "gradient_checkpointing": true,
-        "trainable_patterns": [
-          "\\.self_attn\\.(q_proj|k_proj|v_proj|o_proj|q_norm|k_norm)\\.",
-          "\\.mlp\\.(gate_proj|up_proj|down_proj)\\.",
-          "input_layernorm",
-          "post_attention_layernorm",
-          "model\\.norm\\."
-        ],
-        "trainable_params": 440467456,
-        "teacher_id": "Qwen/Qwen3-4B-Thinking-2507",
-        "teacher_revision": "768f209d9ea81521153ed38c47d515654e938aea",
-        "teacher_dtype": "bfloat16",
-        "teacher_attn": "sdpa",
-        "student_init_path": "artifacts/stage1/qwen3_0p6b_init_v0/checkpoint",
-        "student_init_sha256": "86fbba78e8a2a32481ca77e5ac362ed1f17a39dbc30bcbc952cabd5df2633e54",
-        "tokenizer_sha256": "7781771acc3798ee454c1253c751f930eb1c18c1c3df62e2552cc6f1d394f654",
-        "trainer_git_commit": "69c3fe1f5f019c2130d8d3aaf18322fe948d17d7",
-        "trainer_dirty": true,
-        "trainer_uncommitted_sha256": "2e04f68349226a7efd1684d916441bb29c9e44f1126e066f7ab3fca05cdad2ca",
-        "torch_version": "2.11.0+cu128",
-        "resume_semantics": "step counter + RNG state (no consumed-block accounting)",
-        "fingerprint": "3e282dcaab22681c8b0e962a593f3051a7bab72760402ffdb414885e8e11bcfd",
-        "unverifiable": [
-          "trainer_uncommitted_sha256",
-          "kd_chunk"
-        ],
-        "seed_excluded": "the seed is the intended difference between probes and is recorded beside the fingerprint, not inside it"
+      "historical_run_audit": {
+        "run_id": "e1_r0860k_sb_pca",
+        "seed": 20260801,
+        "initialization_artifact_digest": "86fbba78e8a2a32481ca77e5ac362ed1f17a39dbc30bcbc952cabd5df2633e54",
+        "weights_sha256": null,
+        "protocol": {
+          "pack": "ladder_uniform",
+          "pack_blocks_sha256": "6f324cb0f37bc0f07128e554ce8c161879419537478950496534f75fcecb249c",
+          "rung": 860000,
+          "train_blocks": 682,
+          "train_supervised_tokens": 864750,
+          "block_len": 8192,
+          "packing": "ladder",
+          "val_blocks": 16,
+          "block_ordering": "ladder order, sequential, no shuffle",
+          "ce_weight": 0.25,
+          "kd_weight": 1.0,
+          "kd_temperature": 1.0,
+          "kd_scope": "all",
+          "kd_chunk": 512,
+          "optimizer": "AdamW",
+          "lr": 5e-05,
+          "weight_decay": 0.01,
+          "betas": [
+            0.9,
+            0.95
+          ],
+          "eps": 1e-08,
+          "grad_clip": 1.0,
+          "total_steps": 1023,
+          "warmup_steps": 51,
+          "min_lr_frac": 0.1,
+          "lr_schedule": "cosine to min_lr_frac",
+          "blocks_per_step": 2,
+          "micro_blocks": 1,
+          "dtype": "float32",
+          "autocast_bf16": true,
+          "gradient_checkpointing": true,
+          "trainable_patterns": [
+            "\\.self_attn\\.(q_proj|k_proj|v_proj|o_proj|q_norm|k_norm)\\.",
+            "\\.mlp\\.(gate_proj|up_proj|down_proj)\\.",
+            "input_layernorm",
+            "post_attention_layernorm",
+            "model\\.norm\\."
+          ],
+          "trainable_params": 440467456,
+          "teacher_id": "Qwen/Qwen3-4B-Thinking-2507",
+          "teacher_revision": "768f209d9ea81521153ed38c47d515654e938aea",
+          "teacher_dtype": "bfloat16",
+          "teacher_attn": "sdpa",
+          "tokenizer_sha256": "7781771acc3798ee454c1253c751f930eb1c18c1c3df62e2552cc6f1d394f654",
+          "resume_semantics": "step counter + RNG state (no consumed-block accounting)",
+          "trainer_source_digest": null,
+          "trainer_source_set_version": null,
+          "runtime_digest": null,
+          "protocol_fingerprint": "e6e4b97b3b9d8b57fd1dc241489d91c84156dbea5b39e1114d69423e1e78efb6",
+          "unverifiable": [
+            "trainer_source_digest",
+            "trainer_source_set_version",
+            "runtime_digest",
+            "legacy_trainer_uncommitted_sha256",
+            "kd_chunk"
+          ],
+          "excluded_by_design": [
+            "student initialization artifact",
+            "seed"
+          ],
+          "why_excluded": "initialization is the treatment variable and the seed is the intended replicate; including either would make every comparable pair of arms differ"
+        },
+        "provenance_only": {
+          "repo_git_commit": "69c3fe1f5f019c2130d8d3aaf18322fe948d17d7",
+          "repo_dirty": true,
+          "repo_uncommitted_sha256": "2e04f68349226a7efd1684d916441bb29c9e44f1126e066f7ab3fca05cdad2ca",
+          "note": "whole-repository state is provenance, never the material trainer identity; a docs-only commit must not invalidate a control"
+        },
+        "notes": {
+          "torch_version_observed": "2.11.0+cu128"
+        }
       },
-      "phase_a_today": {
+      "historical_probe_identity": {
+        "probe_id": "55dfa9026f1dd93be6ba36033b16e28cb1f81b69c49c7991ac3442874816e708",
+        "label": "historical:e1_r0860k_sb_pca",
+        "seed": 20260801,
+        "initialization_artifact_digest": "86fbba78e8a2a32481ca77e5ac362ed1f17a39dbc30bcbc952cabd5df2633e54",
+        "protocol_fingerprint": "e6e4b97b3b9d8b57fd1dc241489d91c84156dbea5b39e1114d69423e1e78efb6",
+        "protocol": {
+          "pack": "ladder_uniform",
+          "pack_blocks_sha256": "6f324cb0f37bc0f07128e554ce8c161879419537478950496534f75fcecb249c",
+          "rung": 860000,
+          "train_blocks": 682,
+          "train_supervised_tokens": 864750,
+          "block_len": 8192,
+          "packing": "ladder",
+          "val_blocks": 16,
+          "block_ordering": "ladder order, sequential, no shuffle",
+          "ce_weight": 0.25,
+          "kd_weight": 1.0,
+          "kd_temperature": 1.0,
+          "kd_scope": "all",
+          "kd_chunk": 512,
+          "optimizer": "AdamW",
+          "lr": 5e-05,
+          "weight_decay": 0.01,
+          "betas": [
+            0.9,
+            0.95
+          ],
+          "eps": 1e-08,
+          "grad_clip": 1.0,
+          "total_steps": 1023,
+          "warmup_steps": 51,
+          "min_lr_frac": 0.1,
+          "lr_schedule": "cosine to min_lr_frac",
+          "blocks_per_step": 2,
+          "micro_blocks": 1,
+          "dtype": "float32",
+          "autocast_bf16": true,
+          "gradient_checkpointing": true,
+          "trainable_patterns": [
+            "\\.self_attn\\.(q_proj|k_proj|v_proj|o_proj|q_norm|k_norm)\\.",
+            "\\.mlp\\.(gate_proj|up_proj|down_proj)\\.",
+            "input_layernorm",
+            "post_attention_layernorm",
+            "model\\.norm\\."
+          ],
+          "trainable_params": 440467456,
+          "teacher_id": "Qwen/Qwen3-4B-Thinking-2507",
+          "teacher_revision": "768f209d9ea81521153ed38c47d515654e938aea",
+          "teacher_dtype": "bfloat16",
+          "teacher_attn": "sdpa",
+          "tokenizer_sha256": "7781771acc3798ee454c1253c751f930eb1c18c1c3df62e2552cc6f1d394f654",
+          "resume_semantics": "step counter + RNG state (no consumed-block accounting)",
+          "trainer_source_digest": null,
+          "trainer_source_set_version": null,
+          "runtime_digest": null,
+          "protocol_fingerprint": "e6e4b97b3b9d8b57fd1dc241489d91c84156dbea5b39e1114d69423e1e78efb6",
+          "unverifiable": [
+            "trainer_source_digest",
+            "trainer_source_set_version",
+            "runtime_digest",
+            "legacy_trainer_uncommitted_sha256",
+            "kd_chunk"
+          ],
+          "excluded_by_design": [
+            "student initialization artifact",
+            "seed"
+          ],
+          "why_excluded": "initialization is the treatment variable and the seed is the intended replicate; including either would make every comparable pair of arms differ"
+        }
+      },
+      "phase_a_protocol_today": {
         "pack": "ladder_uniform_probe",
         "pack_blocks_sha256": "6f324cb0f37bc0f07128e554ce8c161879419537478950496534f75fcecb249c",
         "rung": 860000,
@@ -341,21 +512,22 @@
         "teacher_revision": "768f209d9ea81521153ed38c47d515654e938aea",
         "teacher_dtype": "bfloat16",
         "teacher_attn": "sdpa",
-        "student_init_path": "artifacts/stage1/qwen3_0p6b_init_v0/checkpoint",
-        "student_init_sha256": "86fbba78e8a2a32481ca77e5ac362ed1f17a39dbc30bcbc952cabd5df2633e54",
         "tokenizer_sha256": "7781771acc3798ee454c1253c751f930eb1c18c1c3df62e2552cc6f1d394f654",
-        "trainer_git_commit": "dc5d7597260a2e55a94082afc921896be57108e1",
-        "trainer_dirty": true,
-        "trainer_uncommitted_sha256": "117d30ac1d55d54adc16bd27f87e87964b3c7e8d11d92cc83666ecfc365edf57",
-        "torch_version": "2.13.0+cpu",
         "resume_semantics": "step counter + RNG state + consumed-block position, asserted on restore",
-        "fingerprint": "bf48fc0fe20506c8f339de931787cc9a51e70506b98938b9314a11d3a089b3b2",
+        "trainer_source_digest": "054dd6d60b40e023408c055bb2f9bfd9d7953c5a42d1602042db97197458633a",
+        "trainer_source_set_version": 1,
+        "runtime_digest": null,
+        "protocol_fingerprint": "33a100f142a3f197e24c02dfffc7aeac54ef864748a96b069bc8a9b7c4b51d46",
         "unverifiable": [],
-        "seed_excluded": "the seed is the intended difference between probes and is recorded beside the fingerprint, not inside it"
+        "excluded_by_design": [
+          "student initialization artifact",
+          "seed"
+        ],
+        "why_excluded": "initialization is the treatment variable and the seed is the intended replicate; including either would make every comparable pair of arms differ"
       },
       "comparison": {
-        "fingerprint_self": "3e282dcaab22681c8b0e962a593f3051a7bab72760402ffdb414885e8e11bcfd",
-        "fingerprint_other": "bf48fc0fe20506c8f339de931787cc9a51e70506b98938b9314a11d3a089b3b2",
+        "fingerprint_self": "e6e4b97b3b9d8b57fd1dc241489d91c84156dbea5b39e1114d69423e1e78efb6",
+        "fingerprint_other": "33a100f142a3f197e24c02dfffc7aeac54ef864748a96b069bc8a9b7c4b51d46",
         "fingerprints_equal": false,
         "matched_fields": [
           "autocast_bf16",
@@ -379,8 +551,6 @@
           "pack_blocks_sha256",
           "packing",
           "rung",
-          "student_init_path",
-          "student_init_sha256",
           "teacher_attn",
           "teacher_dtype",
           "teacher_id",
@@ -391,7 +561,6 @@
           "train_supervised_tokens",
           "trainable_params",
           "trainable_patterns",
-          "trainer_dirty",
           "val_blocks",
           "warmup_steps",
           "weight_decay"
@@ -406,16 +575,6 @@
             "field": "resume_semantics",
             "self": "step counter + RNG state (no consumed-block accounting)",
             "other": "step counter + RNG state + consumed-block position, asserted on restore"
-          },
-          {
-            "field": "torch_version",
-            "self": "2.11.0+cu128",
-            "other": "2.13.0+cpu"
-          },
-          {
-            "field": "trainer_git_commit",
-            "self": "69c3fe1f5f019c2130d8d3aaf18322fe948d17d7",
-            "other": "dc5d7597260a2e55a94082afc921896be57108e1"
           }
         ],
         "unverifiable_fields": [
@@ -425,25 +584,23 @@
             "other": 512
           },
           {
-            "field": "trainer_uncommitted_sha256",
-            "self": "2e04f68349226a7efd1684d916441bb29c9e44f1126e066f7ab3fca05cdad2ca",
-            "other": "117d30ac1d55d54adc16bd27f87e87964b3c7e8d11d92cc83666ecfc365edf57"
-          }
-        ],
-        "exactly_matched": false,
-        "verdict": "NOT A MATCHED CONTROL: 4 field(s) differ; 2 field(s) cannot be established. A comparison against probes trained under a different recipe confounds the initialization with the recipe.",
-        "material_mismatches": [
-          {
-            "field": "torch_version",
-            "self": "2.11.0+cu128",
-            "other": "2.13.0+cpu"
+            "field": "runtime_digest",
+            "self": null,
+            "other": null
           },
           {
-            "field": "trainer_git_commit",
-            "self": "69c3fe1f5f019c2130d8d3aaf18322fe948d17d7",
-            "other": "dc5d7597260a2e55a94082afc921896be57108e1"
+            "field": "trainer_source_digest",
+            "self": null,
+            "other": "054dd6d60b40e023408c055bb2f9bfd9d7953c5a42d1602042db97197458633a"
+          },
+          {
+            "field": "trainer_source_set_version",
+            "self": null,
+            "other": 1
           }
         ],
+        "protocol_identical": false,
+        "material_mismatches": [],
         "benign_mismatches": [
           {
             "field": "pack",
@@ -459,14 +616,84 @@
           }
         ],
         "blocking": true
-      }
+      },
+      "passes_legacy_lineage_subset": true,
+      "recipe_matched_control": false
     }
   },
   "benign_mismatch_policy": {
     "pack": "a rename, not a different pack. Proved by hash: the relay holds the historical pack under its historical name at stage3_recovery_corpus_v2/ladder_uniform/blocks.npz, and its sha256 is 6f324cb0... - exactly the hash the frozen Phase-A recipe pins for ladder_uniform_probe. Derived quantities agree too (682 blocks, 864,750 supervised tokens, identical six-way mix).",
     "resume_semantics": "both historical runs recorded resumed_from=None, so the consumed-block accounting added since could not have affected them; it changes restore behaviour only"
   },
+  "intended_phase_a_comparison": {
+    "control": "562341b6544e6eb272b0c2886ca028c3bc5717cc587cc988c24aec8858d2c372",
+    "searched": "a3ef4719f1b4145f080b013fd02924f91725b95eaa610ad1aab4d3de17582132",
+    "check": {
+      "self": "phase_a:control-sa",
+      "other": "phase_a:searched-A-sa",
+      "protocol_identical": true,
+      "same_seed": true,
+      "initializations_differ": true,
+      "is_single_variable_comparison": true,
+      "protocol_comparison": {
+        "fingerprint_self": "33a100f142a3f197e24c02dfffc7aeac54ef864748a96b069bc8a9b7c4b51d46",
+        "fingerprint_other": "33a100f142a3f197e24c02dfffc7aeac54ef864748a96b069bc8a9b7c4b51d46",
+        "fingerprints_equal": true,
+        "matched_fields": [
+          "autocast_bf16",
+          "betas",
+          "block_len",
+          "block_ordering",
+          "blocks_per_step",
+          "ce_weight",
+          "dtype",
+          "eps",
+          "grad_clip",
+          "gradient_checkpointing",
+          "kd_chunk",
+          "kd_scope",
+          "kd_temperature",
+          "kd_weight",
+          "lr",
+          "lr_schedule",
+          "micro_blocks",
+          "min_lr_frac",
+          "optimizer",
+          "pack",
+          "pack_blocks_sha256",
+          "packing",
+          "resume_semantics",
+          "rung",
+          "runtime_digest",
+          "teacher_attn",
+          "teacher_dtype",
+          "teacher_id",
+          "teacher_revision",
+          "tokenizer_sha256",
+          "total_steps",
+          "train_blocks",
+          "train_supervised_tokens",
+          "trainable_params",
+          "trainable_patterns",
+          "trainer_source_digest",
+          "trainer_source_set_version",
+          "val_blocks",
+          "warmup_steps",
+          "weight_decay"
+        ],
+        "mismatched_fields": [],
+        "unverifiable_fields": [],
+        "protocol_identical": true
+      },
+      "verdict": "MATCHED: same protocol, same seed, different initialization \u2014 the only difference is the treatment."
+    },
+    "note": "illustrative: the searched digest is a placeholder, but the predicate is the one the real run uses"
+  },
   "historical_controls_are_recipe_matched": false,
+  "status_field_meanings": {
+    "passes_legacy_lineage_subset": "the historical run descends from the canonical init at the right rung with the right seed and objective \u2014 a useful lineage reference",
+    "recipe_matched_control": "the run may serve as a Phase-A matched control, i.e. its protocol fingerprint equals the Phase-A protocol with every field established"
+  },
   "consequence": "The historical checkpoints are NOT recipe-matched and must not be called matched controls. Rerun canonical sa/sb from qwen3_0p6b_init_v0 at 0.86M under the current frozen recovery trainer; those runs become the permanent Phase-A control probes and are retained, not disposable.",
-  "report_sha256": "cb19ab4b08241a718dddb5ea8bf1746546b2dd72a19231337713fbd5c013773c"
+  "report_sha256": "941829f317b326c126efb5d95c092be4e8ae78c0cd43035cee61f712e26feed9"
 }

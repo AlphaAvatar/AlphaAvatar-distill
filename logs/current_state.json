@@ -1,6 +1,6 @@
 {
   "schema": "aadistill.current_state/v1",
-  "generated_utc": "2026-08-13T01:30:00+00:00",
+  "generated_utc": "2026-08-13T03:10:00+00:00",
   "current_phase": "E8 closed; AutoInitializer framework IMPLEMENTED at zero cost, pre-GPU correction pass applied; no paid search authorized",
   "active_experiment": null,
   "paid_compute_running": false,
@@ -116,7 +116,7 @@
   "autoinit": {
     "status": "IMPLEMENTED_ZERO_COST_NOT_RUN_ON_REAL_MODELS",
     "package": "src/aadistill/autoinit",
-    "tests": 198,
+    "tests": 209,
     "operator_kinds": [
       "ATTENTION",
       "COMPOSITE_STAGE1",
@@ -179,19 +179,30 @@
         "historical_checkpoints_exist": true,
         "historical_hashes_verify": true,
         "recipe_matched": false,
-        "material_mismatches": [
-          "trainer_git_commit",
-          "torch_version"
-        ],
-        "unreconstructable": [
-          "trainer_uncommitted_sha256"
-        ],
         "consequence": "rerun canonical sa/sb under the current frozen trainer in the micro-preflight; those become the permanent Phase-A control probes",
-        "audit": "logs/autoinit_recovery_fingerprint_audit.json"
+        "audit": "logs/autoinit_recovery_fingerprint_audit.json",
+        "passes_legacy_lineage_subset": true,
+        "recipe_matched_control": false,
+        "unverifiable": [
+          "trainer_source_digest",
+          "trainer_source_set_version",
+          "runtime_digest",
+          "kd_chunk"
+        ]
       }
     },
     "preregistration": "logs/autoinit_phase_a_preregistration.md",
-    "preregistration_sha256": "ccec9bd477e37e04c60b3eea6c0a8c39b40dc9806f943abfa19c2cf439f8bca8"
+    "preregistration_sha256": "c81ea31c5a3039a5c8adc5f4a092b34e29f3d22f7d0731b5808c0e0d875d659f",
+    "recovery_identity": {
+      "protocol_fingerprint_excludes": [
+        "student initialization artifact",
+        "seed"
+      ],
+      "probe_identity": "protocol + initialization_artifact_digest + seed",
+      "matched_pair_predicate": "protocol_identical AND same_seed AND initializations_differ",
+      "trainer_identity": "trainer_source_digest over 7 declared files; repo commit is provenance only",
+      "runtime_identity": "RuntimeEnvironmentFingerprint incl. image digest, required before a control is trained"
+    }
   },
   "proposed_pilot": {
     "authorized": false,
@@ -211,7 +222,7 @@
     "peak_working_storage_gib": 106
   },
   "tests": {
-    "passing": 1501,
+    "passing": 1512,
     "skipped": 7,
     "venvs_verified": [
       "repo .venv transformers 5.13.1",
@@ -224,8 +235,16 @@
     "max_usd": 8.6,
     "gpu": "1 x L40S",
     "hours": 3.5,
+    "staged": true,
+    "stages": [
+      "0 runtime attestation",
+      "1 cheap machine gates",
+      "2 permanent canonical controls",
+      "3 control characterization"
+    ],
+    "fail_closed": "controls are not trained unless stages 0 and 1 pass",
     "includes_control_rerun": true,
     "control_seeds": 2,
-    "note": "the $2.80 rerun is not disposable setup: it produces the permanent Phase-A control probes, so Phase A needs 7 probes instead of 9"
+    "note": "the $2.80 rerun produces the permanent Phase-A control probes, so Phase A needs 7 probes instead of 9"
   }
 }

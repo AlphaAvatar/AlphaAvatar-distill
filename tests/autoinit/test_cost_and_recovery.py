@@ -730,3 +730,183 @@ def test_probe_descriptors_are_identical_except_for_the_initialization(teacher_s
 
     rung2 = probe_configs(candidates[:3], plan(), rung=2)
     assert {c["seed"] for c in rung2} == {SEED_SB}
+
+
+# --- recovery identity: protocol vs probe -----------------------------------
+
+
+def _protocol(**overrides):
+    from aadistill.autoinit.recovery import RecoveryProtocolFingerprint
+
+    base = dict(
+        pack="ladder_uniform_probe", pack_blocks_sha256="6f324cb0", rung=860_000,
+        train_blocks=682, train_supervised_tokens=864_750, block_len=8192,
+        packing="ladder", val_blocks=16, block_ordering="ladder order",
+        ce_weight=0.25, kd_weight=1.0, kd_temperature=1.0, kd_scope="all",
+        kd_chunk=512, optimizer="AdamW", lr=5e-5, weight_decay=0.01,
+        betas=(0.9, 0.95), eps=1e-8, grad_clip=1.0, total_steps=1023,
+        warmup_steps=51, min_lr_frac=0.1, lr_schedule="cosine",
+        blocks_per_step=2, micro_blocks=1, dtype="float32", autocast_bf16=True,
+        gradient_checkpointing=True, trainable_patterns=("a",),
+        trainable_params=440_467_456, teacher_id="Qwen/Qwen3-4B-Thinking-2507",
+        teacher_revision="768f209d", teacher_dtype="bfloat16", teacher_attn="sdpa",
+        tokenizer_sha256="7781771a", resume_semantics="v2",
+        trainer_source_digest="abc123", trainer_source_set_version=1,
+        runtime_digest="rt-1")
+    base.update(overrides)
+    return RecoveryProtocolFingerprint(**base)
+
+
+def test_the_protocol_identity_excludes_the_treatment_and_the_replicate():
+    """Initialization and seed are variables, not part of what must be identical."""
+    protocol = _protocol()
+    fields = set(protocol.identity())
+    for excluded in ("student_init_path", "student_init_sha256", "seed",
+                     "initialization_artifact_digest"):
+        assert excluded not in fields, (
+            f"{excluded} is in the protocol identity; every comparable pair of arms "
+            "would then be 'mismatched' by construction")
+    assert protocol.as_dict()["excluded_by_design"] == [
+        "student initialization artifact", "seed"]
+
+
+def test_a_matched_pair_is_same_protocol_same_seed_different_init():
+    from aadistill.autoinit.recovery import RecoveryProbeIdentity
+
+    protocol = _protocol()
+    control = RecoveryProbeIdentity(protocol=protocol,
+                                    initialization_artifact_digest="canonical",
+                                    seed=SEED_SA, label="control-sa")
+    searched = RecoveryProbeIdentity(protocol=protocol,
+                                     initialization_artifact_digest="searched-A",
+                                     seed=SEED_SA, label="searched-A-sa")
+    verdict = control.matched_against(searched)
+    assert verdict["is_single_variable_comparison"]
+    assert verdict["protocol_identical"] and verdict["same_seed"]
+    assert verdict["initializations_differ"]
+    assert control.probe_id != searched.probe_id
+
+
+@pytest.mark.parametrize("mutation,reason", [
+    ({"seed": SEED_SB}, "seeds differ"),
+    ({"init": "canonical"}, "initializations are identical"),
+    ({"protocol": "different"}, "protocol differs"),
+])
+def test_a_pair_that_is_not_single_variable_is_refused(mutation, reason):
+    from aadistill.autoinit.recovery import RecoveryProbeIdentity
+
+    protocol = _protocol()
+    control = RecoveryProbeIdentity(protocol=protocol,
+                                    initialization_artifact_digest="canonical",
+                                    seed=SEED_SA, label="control-sa")
+    other = RecoveryProbeIdentity(
+        protocol=_protocol(lr=1e-4) if mutation.get("protocol") else protocol,
+        initialization_artifact_digest=mutation.get("init", "searched-A"),
+        seed=mutation.get("seed", SEED_SA), label="other")
+    verdict = control.matched_against(other)
+    assert not verdict["is_single_variable_comparison"]
+    assert reason in verdict["verdict"]
+
+
+# --- trainer source digest --------------------------------------------------
+
+
+def test_a_docs_only_change_does_not_move_the_trainer_digest():
+    """Whole-repo HEAD must not be the material identity."""
+    from aadistill.autoinit.recovery import (
+        TRAINER_SOURCE_FILES_V1, trainer_source_digest)
+
+    first = trainer_source_digest(REPO)
+    second = trainer_source_digest(REPO)
+    assert first["digest"] == second["digest"]
+    assert len(first["files"]) == len(TRAINER_SOURCE_FILES_V1)
+    # The declared set is the trainer, not the repository.
+    covered = {e["path"] for e in first["files"]}
+    assert "src/aadistill/training/train.py" in covered
+    assert "src/aadistill/data/ladder.py" in covered
+    assert not any(p.startswith("logs/") or p.startswith("docs/") for p in covered), (
+        "documentation is in the trainer digest; a docs commit would invalidate a "
+        "control")
+
+
+def test_a_missing_trainer_source_file_raises_rather_than_shrinking_the_digest():
+    from aadistill.autoinit.recovery import trainer_source_digest
+
+    with pytest.raises(RecoveryAdmissionError, match="is missing"):
+        trainer_source_digest(REPO, files=("src/aadistill/training/train.py",
+                                           "src/aadistill/does_not_exist.py"))
+
+
+# --- runtime environment ----------------------------------------------------
+
+
+def test_the_runtime_fingerprint_needs_more_than_a_torch_version():
+    from aadistill.autoinit.recovery import RuntimeEnvironmentFingerprint
+
+    rt = RuntimeEnvironmentFingerprint.observe(image_digest="sha256:deadbeef")
+    payload = rt.as_dict()
+    for field in ("image_digest", "python_version", "torch_version",
+                  "transformers_version", "cuda_runtime", "attention_backend"):
+        assert field in payload
+    assert len(rt.digest) == 64
+    # An unpinned runtime cannot back a permanent control.
+    with pytest.raises(RecoveryAdmissionError, match="image digest"):
+        RuntimeEnvironmentFingerprint.observe().require_pinned()
+    # A different image is a different runtime.
+    other = RuntimeEnvironmentFingerprint.observe(image_digest="sha256:0000")
+    assert other.digest != rt.digest
+
+
+# --- staged preflight -------------------------------------------------------
+
+
+def test_permanent_controls_cannot_be_trained_before_the_gates_pass():
+    """The ordering exists so a failed gate does not cost $2.80 of dead controls."""
+    from aadistill.autoinit.recovery import PREFLIGHT_PLAN_V1
+
+    plan_ = PREFLIGHT_PLAN_V1
+    assert [s.stage for s in plan_.stages] == [0, 1, 2, 3]
+    assert [s.blocking for s in plan_.stages] == [True, True, True, False]
+
+    with pytest.raises(RecoveryAdmissionError, match="no recorded result"):
+        plan_.advance_to(2, {0: {"passed": True}})
+    with pytest.raises(RecoveryAdmissionError, match="did not pass"):
+        plan_.advance_to(2, {0: {"passed": True},
+                             1: {"passed": False, "reason": "peak memory 46 GiB"}})
+    plan_.advance_to(2, {0: {"passed": True}, 1: {"passed": True}})
+    # Characterization additionally needs the controls to exist.
+    with pytest.raises(RecoveryAdmissionError, match="stage 2"):
+        plan_.advance_to(3, {0: {"passed": True}, 1: {"passed": True},
+                             2: {"passed": False, "reason": "fingerprint mismatch"}})
+
+
+def test_the_preflight_plan_is_hashable_and_orders_money_last():
+    from aadistill.autoinit.recovery import PREFLIGHT_PLAN_V1
+
+    assert len(PREFLIGHT_PLAN_V1.plan_hash) == 64
+    names = [s.name for s in PREFLIGHT_PLAN_V1.stages]
+    assert names.index("runtime attestation") < names.index("cheap machine gates")
+    assert names.index("cheap machine gates") < names.index(
+        "permanent canonical controls")
+    assert "epsilon" in " ".join(PREFLIGHT_PLAN_V1.stages[1].stop_conditions)
+
+
+# --- legacy control status --------------------------------------------------
+
+
+def test_the_historical_controls_are_not_labelled_as_valid_controls():
+    audit_path = REPO / "logs/autoinit_recovery_fingerprint_audit.json"
+    if not audit_path.is_file():
+        pytest.skip("fingerprint audit not present")
+    audit = json.loads(audit_path.read_text())
+    assert audit["historical_controls_are_recipe_matched"] is False
+    for name, entry in audit["comparisons"].items():
+        assert entry["recipe_matched_control"] is False, name
+        assert entry["passes_legacy_lineage_subset"] is True, name
+        # The misreadable field is gone.
+        assert "matches_intended_control_protocol" not in entry, name
+        assert entry["comparison"]["unverifiable_fields"], (
+            "the mismatch report must stay attached to the status")
+    # And the intended Phase-A pair is demonstrably single-variable.
+    check = audit["intended_phase_a_comparison"]["check"]
+    assert check["is_single_variable_comparison"]

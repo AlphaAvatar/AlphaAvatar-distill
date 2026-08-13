@@ -1,5 +1,5 @@
 **Updated:** 2026-08-12 · branch `main` · working tree clean
-**No pods running. Nothing billing.** **1,501 CPU tests pass**, 7 skipped — in
+**No pods running. Nothing billing.** **1,512 CPU tests pass**, 7 skipped — in
 *both* venvs (repo `.venv` transformers 5.13.1, and the transformers 4.57.1 venv).
 
 **The AutoInitializer framework is implemented at zero cost and not yet run on
@@ -374,7 +374,7 @@ Record [`EXPERIMENTS.md`](EXPERIMENTS.md) §34 · report
 
 ## 7. Implementation state (CPU-verified)
 
-**1,501 tests pass on CPU, 7 skipped** (`PYTHONPATH=src pytest tests/ -q`, ~127 s,
+**1,512 tests pass on CPU, 7 skipped** (`PYTHONPATH=src pytest tests/ -q`, ~127 s,
 no downloads; `uv run pytest tests/ -q` also works). Verified in **both** venvs —
 the repo `.venv` (transformers 5.13.1) and the transformers 4.57.1 venv — because
 the AutoInitializer builds its models in-process from a config, which is

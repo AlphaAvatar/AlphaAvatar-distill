@@ -2,7 +2,7 @@
 
 **Status: DRAFT, NOT AUTHORIZED. No compute has been launched.** Machine-readable
 companion: [`autoinit_phase_a_preregistration.json`](autoinit_phase_a_preregistration.json),
-sha256 `ccec9bd477e37e04c60b3eea6c0a8c39b40dc9806f943abfa19c2cf439f8bca8`,
+sha256 `c81ea31c5a3039a5c8adc5f4a092b34e29f3d22f7d0731b5808c0e0d875d659f`,
 regenerable with `scripts/autoinit/write_preregistration.py`.
 
 Two numbers are deliberately **absent** and marked `PENDING_MICRO_PREFLIGHT`. The
@@ -316,7 +316,8 @@ micro-preflight.
 
 ## 11. Pending before launch
 
-0. **rerun canonical sa/sb** under the current frozen trainer (§the control audit);
+0. **preflight Stages 0–2**: attest the runtime, pass the cheap machine gates,
+   then rerun canonical sa/sb — in that order, fail-closed;
 1. control pooled **and per-seed** `usable_rollout_rate` → materializes the
    seed-aware feasibility floor;
 2. control pooled **and per-seed** `correct_overall` → materializes the seed-aware
@@ -327,28 +328,73 @@ micro-preflight.
    derived automatically, the preflight requires review and Phase A is blocked;
 5. activation-statistics GPU/CPU split — collapses the cost range.
 
-**The historical control checkpoints exist, hash-verify, and are NOT
-recipe-matched.**
+### Recovery identity: protocol vs probe
+
+Two identities, because they answer different questions.
+
+**`RecoveryProtocolFingerprint`** — everything that must be *identical* across the
+control and every searched leaf: pack + content hash, packing and block ordering,
+rung, block length, CE/KD weights, temperature, KD scope, `kd_chunk`, optimizer
+type/lr/betas/eps/weight-decay/clipping, scheduler and warmup, microbatch and
+accumulation semantics, precision and autocast, gradient checkpointing,
+trainable-parameter policy, teacher checkpoint and attention backend, tokenizer,
+resume accounting, **trainer source digest** and **runtime digest**.
+
+It **excludes the student initialization artifact and the seed** — those are the
+treatment and the replicate. A protocol identity containing either would make
+every comparable pair of arms differ by construction and be useless for its job.
+
+**`RecoveryProbeIdentity` = protocol + initialization artifact digest + seed.** The
+matched-comparison predicate is mechanical:
+
+```
+control-sa      protocol = X, seed = sa, init = canonical
+searched-A-sa   protocol = X, seed = sa, init = searched-A
+                → protocol identical, seed equal, initialization different
+```
+
+verified by `matched_against()`, and asserted for the intended Phase-A pair in the
+audit record.
+
+**Trainer identity is a source digest, not repository HEAD.** `trainer_source_digest`
+covers seven declared files — the entry point, the training loop and its loss/KD,
+the LoRA/freeze policy behind trainable selection, the deterministic block
+ordering, the packing/mask helpers, and teacher/student construction. A
+documentation or STATE commit therefore leaves a control matched; a change to the
+loss or the ordering does not. `repo_git_commit` and `repo_dirty` are recorded as
+**provenance only** and are never the equality predicate.
+
+**Runtime identity is more than a torch version.** `RuntimeEnvironmentFingerprint`
+carries image digest, Python, torch, transformers, CUDA runtime and attention
+backend. The image digest is required before a permanent control may be trained:
+the controls and the later searched probes must execute under the same frozen
+runtime, which is precisely the confound that disqualified the historical
+checkpoints.
+
+### The historical checkpoints: lineage reference, not control
+
 ([`autoinit_recovery_fingerprint_audit.json`](autoinit_recovery_fingerprint_audit.json))
 
-`RecoveryRecipeFingerprint` covers 43 fields — pack and its content hash, block
-ordering, objective incl. `kd_chunk`, optimizer type/lr/betas/eps/weight-decay/
-clipping, schedule, batch and accumulation semantics, precision, trainable
-selection, teacher and its attention implementation, student init, tokenizer,
-**trainer commit and dirty state, torch version**, and resume accounting. The seed
-is excluded by design and recorded beside it.
+```
+passes_legacy_lineage_subset : true
+recipe_matched_control       : false
+```
 
-37 fields match. Two are material mismatches — `trainer_git_commit`
-(`69c3fe1f`, dirty → current HEAD; `train.py` is +528/−30 since) and
-`torch_version` (2.11.0+cu128 → 2.13.0). One is unreconstructable
-(`trainer_uncommitted_sha256`). Two are benign and proved so: `pack` is a rename
-verified by hash, and `resume_semantics` could not have applied because neither run
-resumed.
+34 protocol fields match. Two mismatches are benign and *proved*: `pack` is a
+rename — the relay holds the historical pack under its historical name and its
+`blocks.npz` hashes to `6f324cb0…`, exactly what the frozen recipe pins — and
+`resume_semantics` could not have applied because both runs recorded
+`resumed_from: None`. Four fields are **unverifiable**: `trainer_source_digest`,
+`trainer_source_set_version`, `runtime_digest` and `kd_chunk` were never recorded,
+and the historical tree was dirty (`2e04f683…`) in a way that cannot be
+reconstructed. `train.py` is +528/−30 since that commit and torch was 2.11.0+cu128
+against today's 2.13.0.
 
 **Therefore the canonical control is rerun** from `qwen3_0p6b_init_v0` at 0.86M on
-both seeds under the current frozen trainer, in the micro-preflight. Those runs
-become the **permanent Phase-A control probes** — retained and reused at rung 2,
-not repeated. Phase A afterwards needs 7 probes rather than 9.
+both seeds under the attested runtime and the current trainer source digest, in the
+micro-preflight. Those runs become the **permanent Phase-A control probes** —
+retained and reused at rung 2, not repeated. Phase A afterwards needs 7 probes
+rather than 9.
 
 All five are micro-preflight outputs. See
 [`autoinit_micro_preflight_plan.md`](autoinit_micro_preflight_plan.md).

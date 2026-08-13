@@ -42,7 +42,11 @@ from aadistill.autoinit.recovery import (  # noqa: E402
     CAPABILITY_SCHEMA_V1,
     CATASTROPHIC_V1,
     E1_KD_HEAVY_0860K,
+    PREFLIGHT_PLAN_V1,
+    TRAINER_SOURCE_FILES_V1,
     FeasibilityRule,
+    RuntimeEnvironmentFingerprint,
+    trainer_source_digest,
     POOLED_COUNTS_V1,
     SEED_SA,
     SEED_SB,
@@ -317,12 +321,48 @@ def main() -> None:
             (REPO_ROOT / "logs/autoinit_control_availability.json").read_text())
             if (REPO_ROOT / "logs/autoinit_control_availability.json").is_file()
             else "NOT VERIFIED",
+        "recovery_identity": {
+            "model": ("RecoveryProtocolFingerprint (what must be identical) + "
+                      "initialization artifact digest + seed = RecoveryProbeIdentity"),
+            "protocol_excludes": ["student initialization artifact", "seed"],
+            "why": ("initialization is the treatment and the seed is the replicate; "
+                    "a protocol identity containing either would make every "
+                    "comparable pair of arms differ by construction"),
+            "matched_pair_predicate": (
+                "protocol_identical AND same_seed AND initializations_differ"),
+            "trainer_source_digest": {
+                **trainer_source_digest(REPO_ROOT),
+                "policy": ("material identity is the declared source set, not "
+                           "whole-repository git HEAD; repo commit and dirty flag "
+                           "are recorded as provenance only, so a docs-only commit "
+                           "leaves a control matched"),
+                "declared_set": list(TRAINER_SOURCE_FILES_V1),
+            },
+            "runtime_environment": {
+                "fields": ["image_digest", "python_version", "torch_version",
+                           "transformers_version", "cuda_runtime",
+                           "attention_backend"],
+                "dev_box_observation_only": RuntimeEnvironmentFingerprint.observe(
+                    image_digest=None).as_dict(),
+                "binding_invariant": (
+                    "the permanent controls and the later searched probes must "
+                    "execute under the same frozen image digest; it is attested at "
+                    "preflight Stage 0 and required before a control is trained"),
+            },
+        },
+        "micro_preflight_plan": PREFLIGHT_PLAN_V1.as_dict(),
         "canonical_control_recipe_audit": (
             lambda r: {"historical_controls_are_recipe_matched":
                        r["historical_controls_are_recipe_matched"],
                        "consequence": r["consequence"],
-                       "per_control": {k: v["comparison"] for k, v in
-                                       r["comparisons"].items()},
+                       "per_control": {k: {"recipe_matched_control":
+                                            v["recipe_matched_control"],
+                                            "passes_legacy_lineage_subset":
+                                            v["passes_legacy_lineage_subset"],
+                                            **v["comparison"]}
+                                       for k, v in r["comparisons"].items()},
+                       "intended_phase_a_comparison":
+                           r.get("intended_phase_a_comparison", {}).get("check"),
                        "report_sha256": r["report_sha256"]}
         )(json.loads((REPO_ROOT / "logs/autoinit_recovery_fingerprint_audit.json"
                       ).read_text()))

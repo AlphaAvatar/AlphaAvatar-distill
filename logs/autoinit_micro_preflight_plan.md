@@ -43,7 +43,42 @@ holds the historical pack under its historical name, and
 exactly what the frozen recipe pins for `ladder_uniform_probe`. A rename, proved
 by hash.
 
-## 2. What is measured or produced
+## 2. Execution order — staged and fail-closed
+
+The controls are the expensive artifact **and** the one whose validity depends on
+the runtime staying fixed. So they are produced last, and only after the runtime is
+attested and the machine has passed its gates. If Stage 1 says the hardware,
+evaluator tolerance or storage plan must change, the session stops **before**
+spending $2.80 on controls that would immediately stop being matched.
+
+`PreflightPlan.advance_to()` enforces this: a stage cannot start until every
+blocking earlier stage has recorded a pass.
+
+```
+Stage 0  runtime attestation            BLOCKING
+         image digest, RuntimeEnvironmentFingerprint,
+         trainer_source_digest + declared file set,
+         input artifact hashes (init, pack, suite, battery)
+              ↓
+Stage 1  cheap machine gates            BLOCKING
+         activation-stat GPU/CPU split, GPU evaluator repeatability,
+         peak GPU memory, disk throughput
+              ↓   (any failure → STOP, no controls trained, return for review)
+Stage 2  permanent canonical controls   BLOCKING
+         canonical init → 0.86M sa, canonical init → 0.86M sb
+         verify protocol fingerprint, probe identity, artifact hash
+              ↓
+Stage 3  control characterization
+         sa, sb → recovery_search_v1, pooled_counts@v1
+         materialize equivalence interval, feasibility floor,
+         per-capability control baselines
+              ↓
+         delete the pod, verify it is gone, STOP
+```
+
+**Phase A does not start automatically.**
+
+## 3. What is measured or produced
 
 | # | item | why it cannot be done at $0 |
 | --- | --- | --- |
@@ -58,14 +93,14 @@ Both rerun inputs are on the relay and hash-verified: the canonical init
 (`86fbba78…`, 1.11 GiB) and the pack (`6f324cb0…`, 13.7 MiB). Nothing needs to be
 uploaded from the dev box, whose uplink is 0.72 MB/s.
 
-## 3. What is explicitly **not** done
+## 4. What is explicitly **not** done
 
 * no beam search, no operator search, no Phase A;
 * no searched candidate is created, scored or ranked;
 * no threshold is chosen with a candidate in view — items 1–3 and 6 are properties
   of the machinery, and 4–5 are properties of the incumbent.
 
-## 4. Hardware
+## 5. Hardware
 
 | | |
 | --- | --- |
@@ -73,7 +108,7 @@ uploaded from the dev box, whose uplink is 0.72 MB/s.
 | container disk | ≥ 60 GiB |
 | expected wall clock | ~3.5 h including setup and both reruns |
 
-## 5. Cost
+## 6. Cost
 
 | item | expected | hard |
 | --- | ---: | ---: |
@@ -103,7 +138,7 @@ this micro-preflight, maximum            $8.60
 remaining for Phase A afterwards        $21.7667
 ```
 
-## 6. Stop rules
+## 7. Stop rules
 
 The session **stops and reports** rather than continuing if:
 
@@ -123,7 +158,7 @@ blocked**. The rejected alternative, `epsilon_final = max(1e-4, 2 × measured)`,
 recorded in the rule: it would derive a scientific beam tolerance from a single
 profiling run.
 
-## 7. Outputs, and what they change
+## 8. Outputs, and what they change
 
 1. **Statistics-pass split** → collapses the Phase A search cost from $0.93–3.57
    to a point estimate.
@@ -143,13 +178,13 @@ profiling run.
 
 Then: **delete the pod, verify it is gone, and stop for review.**
 
-## 8. What the preflight does not decide
+## 9. What the preflight does not decide
 
 It measures the machinery and characterizes the incumbent. It produces no searched
 candidate, so no threshold it materializes can have been chosen with a candidate in
 view. That ordering is the entire reason it is a separate session.
 
-## 9. Session contract
+## 10. Session contract
 
 [`scripts/pod/AGENTS.md`](../scripts/pod/AGENTS.md) applies unchanged: detached
 start via `start_job.py`, `watchdog.py` beside the launcher from creation,
@@ -163,7 +198,8 @@ OMP_NUM_THREADS=8 taskset -c 0-12 python -m pytest tests -q
 HIDDEN_PATHS="..." OMP_NUM_THREADS=8 taskset -c 0-12 bash scripts/pod/simulate_pod_env.sh
 ```
 
-The control reruns additionally record a full `RecoveryRecipeFingerprint` in their
-run manifests, including the pack content hash, `kd_chunk`, the trainer commit and
-dirty state, and the torch version — the four things the historical runs did not,
-which is why this audit was necessary at all.
+The control reruns additionally record a full `RecoveryProtocolFingerprint` and
+`RecoveryProbeIdentity` in their run manifests — including the pack content hash,
+`kd_chunk`, the **trainer source digest** with its declared file set, and the
+**runtime fingerprint** with its image digest. Those are exactly what the
+historical runs did not record, which is why this audit was necessary at all.

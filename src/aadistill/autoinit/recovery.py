@@ -44,6 +44,7 @@ maintainer's.
 
 from __future__ import annotations
 
+import hashlib
 import json
 import math
 from collections.abc import Mapping, Sequence
@@ -52,7 +53,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
-from ..infrastructure.manifest import sha256_json
+from ..infrastructure.manifest import sha256_file, sha256_json
 from .state import InitializationState
 
 SCHEMA = "aadistill.autoinit.recovery_plan/v1"
@@ -497,27 +498,130 @@ CAPABILITY_SCHEMA_V1 = CapabilitySchema(
     expected=("gsm8k", "math_verified", "multihop", "rag", "knowledge", "tool"))
 
 
+#: Source files whose contents can change what a recovery run produces.
+#:
+#: Explicit and versioned, because whole-repository ``git HEAD`` is the wrong
+#: material identity: a docs-only commit would invalidate a control checkpoint
+#: whose trainer never moved. Derived from what the recovery entry point actually
+#: imports — the training loop and its loss/KD, the deterministic block ordering,
+#: the packing helpers, model construction, and the LoRA/freeze policy the
+#: trainable-parameter selection goes through — not from a guess.
+TRAINER_SOURCE_FILES_V1: tuple[str, ...] = (
+    "scripts/training/train_stage3.py",      # entry point, config -> run semantics
+    "src/aadistill/training/train.py",       # loop, loss/KD, optimizer, resume
+    "src/aadistill/training/lora.py",        # trainable-parameter selection policy
+    "src/aadistill/data/ladder.py",          # deterministic block ordering
+    "src/aadistill/data/dataset.py",         # packing, masks, encoding
+    "src/aadistill/models/teacher.py",       # teacher load + dtype/attn selection
+    "src/aadistill/models/student.py",       # student load + RoPE guard
+)
+TRAINER_SOURCE_SET_VERSION = 1
+
+
+def trainer_source_digest(repo_root: str | Path = ".",
+                          files: Sequence[str] = TRAINER_SOURCE_FILES_V1) -> dict[str, Any]:
+    """A material identity for the trainer, independent of unrelated commits.
+
+    Hashes the declared source set and nothing else. A documentation or STATE
+    commit therefore leaves this unchanged and a control checkpoint stays matched;
+    a change to the loss, the loop, the ordering or the optimizer construction
+    changes it and the control stops being matched, which is the intent.
+
+    The whole-repository commit is recorded separately as provenance
+    (``repo_git_commit`` / ``repo_dirty``) and is never the equality predicate.
+    """
+    root = Path(repo_root)
+    entries = []
+    for rel in files:
+        path = root / rel
+        if not path.is_file():
+            raise RecoveryAdmissionError(
+                f"declared trainer source {rel} is missing; the digest would "
+                "silently describe a smaller trainer than the one that runs")
+        entries.append({"path": rel, "sha256": sha256_file(path),
+                        "bytes": path.stat().st_size})
+    digest = hashlib.sha256(
+        "".join(f"{e['path']}:{e['sha256']}\n" for e in entries).encode()).hexdigest()
+    return {"digest": digest, "set_version": TRAINER_SOURCE_SET_VERSION,
+            "files": entries,
+            "rule": ("sha256 over sorted 'path:sha256' lines of the declared "
+                     "trainer source set; whole-repo commit is provenance only")}
+
+
 @dataclass(frozen=True)
-class RecoveryRecipeFingerprint:
-    """Everything that can change a recovered checkpoint, except the seed.
+class RuntimeEnvironmentFingerprint:
+    """The runtime a recovery run executes under.
 
-    Two probes with the same fingerprint and different seeds differ only by the
-    seed. Two probes with different fingerprints differ by something else as
-    well, and a comparison between them confounds the initialization with
-    whatever else moved — which is the entire reason the probes are supposed to
-    be identical.
+    ``torch_version`` alone is not enough. The permanent controls generated during
+    the preflight and the searched-leaf probes that are later compared against them
+    must execute under the *same* frozen runtime, or the comparison carries a
+    runtime difference alongside the initialization difference — which is exactly
+    the confound that disqualified the historical controls.
 
-    The seed is deliberately **excluded** from the identity and recorded beside
-    it: it is the intended difference between ``sa`` and ``sb``.
+    ``image_digest`` is the strongest field and the one that actually pins the
+    rest; it is required for a run to be recorded as protocol-matched. The
+    individual versions are recorded too so a mismatch says *what* moved.
+    """
 
-    Fields are grouped by what they can affect, and every group is included
-    because every group has bitten someone: data (which blocks, in what order),
-    objective, optimizer, schedule, batch semantics, numerical precision, the
-    trainable-parameter selection, the teacher and its attention implementation,
-    the student it started from, the tokenizer, and — the one most often left
-    out — the **trainer build**: the code that executed and the torch that ran
-    it. A recipe fingerprint that omits the trainer says two runs are matched
-    when one of them ran a different loss.
+    image_digest: str | None
+    python_version: str
+    torch_version: str
+    transformers_version: str
+    cuda_runtime: str | None
+    attention_backend: str
+    version: int = 1
+
+    @classmethod
+    def observe(cls, *, image_digest: str | None = None,
+                attention_backend: str = "sdpa") -> "RuntimeEnvironmentFingerprint":
+        import platform
+
+        import torch
+        import transformers
+
+        return cls(
+            image_digest=image_digest,
+            python_version=platform.python_version(),
+            torch_version=torch.__version__,
+            transformers_version=transformers.__version__,
+            cuda_runtime=getattr(torch.version, "cuda", None),
+            attention_backend=attention_backend,
+        )
+
+    @property
+    def digest(self) -> str:
+        return sha256_json(self.as_dict())
+
+    def as_dict(self) -> dict[str, Any]:
+        return {"version": self.version, "image_digest": self.image_digest,
+                "python_version": self.python_version,
+                "torch_version": self.torch_version,
+                "transformers_version": self.transformers_version,
+                "cuda_runtime": self.cuda_runtime,
+                "attention_backend": self.attention_backend}
+
+    def require_pinned(self) -> None:
+        if not self.image_digest:
+            raise RecoveryAdmissionError(
+                "the runtime fingerprint has no image digest. The permanent "
+                "controls and the later searched probes must execute under the "
+                "same frozen image; without a digest that cannot be asserted.")
+
+
+@dataclass(frozen=True)
+class RecoveryProtocolFingerprint:
+    """Everything that must be **identical** across control and searched leaves.
+
+    Deliberately excludes the student initialization artifact and the seed. Those
+    are the variables:
+
+        control-sa     protocol = X, seed = sa, init = canonical
+        searched-A-sa  protocol = X, seed = sa, init = searched-A
+
+    which is the single-variable comparison the whole experiment is about. Putting
+    the initialization inside the protocol identity would make every pair of arms
+    "mismatched" by construction and make the equality predicate useless for its
+    actual job.
     """
 
     # data
@@ -555,26 +659,23 @@ class RecoveryRecipeFingerprint:
     dtype: str
     autocast_bf16: bool
     gradient_checkpointing: bool
-    # what is trained
+    # trainable-parameter policy
     trainable_patterns: tuple[str, ...]
     trainable_params: int | None
-    # models
+    # teacher + tokenizer
     teacher_id: str
     teacher_revision: str
     teacher_dtype: str
     teacher_attn: str | None
-    student_init_path: str
-    student_init_sha256: str | None
     tokenizer_sha256: str | None
-    # the trainer build
-    trainer_git_commit: str | None
-    trainer_dirty: bool | None
-    trainer_uncommitted_sha256: str | None
-    torch_version: str | None
+    # execution
     resume_semantics: str
+    trainer_source_digest: str | None
+    trainer_source_set_version: int | None
+    runtime_digest: str | None
 
-    #: Fields whose value could not be established for a historical run. Anything
-    #: listed here is compared as "unverifiable", never as "matched".
+    #: Fields that could not be established. Compared as unverifiable, never as
+    #: matched.
     unverifiable: tuple[str, ...] = ()
 
     def identity(self) -> dict[str, Any]:
@@ -587,8 +688,7 @@ class RecoveryRecipeFingerprint:
     def fingerprint(self) -> str:
         return sha256_json(self.identity())
 
-    def compare(self, other: "RecoveryRecipeFingerprint") -> dict[str, Any]:
-        """Field-by-field, with three outcomes and no silent fourth."""
+    def compare(self, other: "RecoveryProtocolFingerprint") -> dict[str, Any]:
         mine, theirs = self.identity(), other.identity()
         unverifiable = set(self.unverifiable) | set(other.unverifiable)
         matched, mismatched, unknown = [], [], []
@@ -608,25 +708,220 @@ class RecoveryRecipeFingerprint:
             "matched_fields": matched,
             "mismatched_fields": mismatched,
             "unverifiable_fields": unknown,
-            "exactly_matched": (not mismatched and not unknown),
-            "verdict": (
-                "MATCHED CONTROL: every recipe field is established and equal; the "
-                "only intended difference is the seed."
-                if not mismatched and not unknown else
-                "NOT A MATCHED CONTROL: "
-                + (f"{len(mismatched)} field(s) differ" if mismatched else "")
-                + ("; " if mismatched and unknown else "")
-                + (f"{len(unknown)} field(s) cannot be established" if unknown else "")
-                + ". A comparison against probes trained under a different recipe "
-                  "confounds the initialization with the recipe."),
+            "protocol_identical": (not mismatched and not unknown),
         }
 
     def as_dict(self) -> dict[str, Any]:
-        return {**self.identity(), "fingerprint": self.fingerprint,
+        return {**self.identity(), "protocol_fingerprint": self.fingerprint,
                 "unverifiable": list(self.unverifiable),
-                "seed_excluded": ("the seed is the intended difference between "
-                                  "probes and is recorded beside the fingerprint, "
-                                  "not inside it")}
+                "excluded_by_design": ["student initialization artifact", "seed"],
+                "why_excluded": ("initialization is the treatment variable and the "
+                                 "seed is the intended replicate; including either "
+                                 "would make every comparable pair of arms differ")}
+
+
+@dataclass(frozen=True)
+class RecoveryProbeIdentity:
+    """One probe: a protocol, an initialization, and a seed.
+
+    ``matched_against`` is the operational question — two probes are a valid
+    single-variable comparison when their protocols and seeds agree and their
+    initializations differ.
+    """
+
+    protocol: RecoveryProtocolFingerprint
+    initialization_artifact_digest: str
+    seed: int
+    label: str = ""
+
+    @property
+    def probe_id(self) -> str:
+        return sha256_json({
+            "protocol": self.protocol.fingerprint,
+            "init": self.initialization_artifact_digest,
+            "seed": self.seed})
+
+    def matched_against(self, other: "RecoveryProbeIdentity") -> dict[str, Any]:
+        protocol = self.protocol.compare(other.protocol)
+        same_seed = self.seed == other.seed
+        different_init = (self.initialization_artifact_digest
+                          != other.initialization_artifact_digest)
+        ok = protocol["protocol_identical"] and same_seed and different_init
+        return {
+            "self": self.label or self.probe_id[:12],
+            "other": other.label or other.probe_id[:12],
+            "protocol_identical": protocol["protocol_identical"],
+            "same_seed": same_seed,
+            "initializations_differ": different_init,
+            "is_single_variable_comparison": ok,
+            "protocol_comparison": protocol,
+            "verdict": (
+                "MATCHED: same protocol, same seed, different initialization — the "
+                "only difference is the treatment."
+                if ok else
+                "NOT MATCHED: "
+                + ("; ".join(filter(None, [
+                    None if protocol["protocol_identical"] else "protocol differs",
+                    None if same_seed else "seeds differ",
+                    None if different_init else
+                    "initializations are identical, so there is no treatment"])))),
+        }
+
+    def as_dict(self) -> dict[str, Any]:
+        return {"probe_id": self.probe_id, "label": self.label, "seed": self.seed,
+                "initialization_artifact_digest": self.initialization_artifact_digest,
+                "protocol_fingerprint": self.protocol.fingerprint,
+                "protocol": self.protocol.as_dict()}
+
+
+@dataclass(frozen=True)
+class HistoricalRunAudit:
+    """The complete record of a past run, **including** init and seed.
+
+    Kept separate from the protocol identity on purpose. This is what you use to
+    ask "what exactly was that run?"; it is never the equality predicate for
+    matched arms.
+    """
+
+    run_id: str
+    protocol: RecoveryProtocolFingerprint
+    initialization_artifact_digest: str
+    seed: int
+    repo_git_commit: str | None
+    repo_dirty: bool | None
+    repo_uncommitted_sha256: str | None
+    weights_sha256: str | None = None
+    notes: Mapping[str, Any] = field(default_factory=dict)
+
+    def as_dict(self) -> dict[str, Any]:
+        return {
+            "run_id": self.run_id, "seed": self.seed,
+            "initialization_artifact_digest": self.initialization_artifact_digest,
+            "weights_sha256": self.weights_sha256,
+            "protocol": self.protocol.as_dict(),
+            "provenance_only": {
+                "repo_git_commit": self.repo_git_commit,
+                "repo_dirty": self.repo_dirty,
+                "repo_uncommitted_sha256": self.repo_uncommitted_sha256,
+                "note": ("whole-repository state is provenance, never the material "
+                         "trainer identity; a docs-only commit must not invalidate "
+                         "a control"),
+            },
+            "notes": dict(self.notes),
+        }
+
+
+@dataclass(frozen=True)
+class PreflightStage:
+    stage: int
+    name: str
+    purpose: str
+    produces: tuple[str, ...]
+    blocking: bool
+    stop_conditions: tuple[str, ...] = ()
+
+    def as_dict(self) -> dict[str, Any]:
+        return {"stage": self.stage, "name": self.name, "purpose": self.purpose,
+                "produces": list(self.produces), "blocking": self.blocking,
+                "stop_conditions": list(self.stop_conditions)}
+
+
+@dataclass(frozen=True)
+class PreflightPlan:
+    """Staged, fail-closed, and ordered so money is spent last.
+
+    The ordering is the whole point. The permanent control checkpoints are the
+    expensive artifact and the one whose value depends on the runtime staying
+    fixed — so they are trained **only after** the runtime is attested and the
+    cheap machine gates have passed. If Stage 1 says the hardware, evaluator
+    tolerance or storage plan has to change, the session stops before spending
+    anything on controls that would immediately stop being matched.
+
+    ``advance_to`` is the executable form: a stage cannot start until every
+    blocking stage before it has passed.
+    """
+
+    stages: tuple[PreflightStage, ...]
+    plan_id: str = "autoinit.micro_preflight"
+    version: int = 1
+
+    @property
+    def plan_hash(self) -> str:
+        return sha256_json({"plan_id": self.plan_id, "version": self.version,
+                            "stages": [s.as_dict() for s in self.stages]})
+
+    def advance_to(self, stage: int, results: Mapping[int, Mapping[str, Any]]) -> None:
+        """Raise unless every blocking earlier stage has recorded a pass."""
+        for earlier in self.stages:
+            if earlier.stage >= stage or not earlier.blocking:
+                continue
+            outcome = results.get(earlier.stage)
+            if outcome is None:
+                raise RecoveryAdmissionError(
+                    f"stage {stage} cannot start: blocking stage {earlier.stage} "
+                    f"({earlier.name}) has no recorded result")
+            if not outcome.get("passed"):
+                raise RecoveryAdmissionError(
+                    f"stage {stage} cannot start: blocking stage {earlier.stage} "
+                    f"({earlier.name}) did not pass "
+                    f"({outcome.get('reason', 'no reason recorded')}). "
+                    "Do not train permanent controls under a runtime or hardware "
+                    "configuration that is about to change.")
+
+    def as_dict(self) -> dict[str, Any]:
+        return {"plan_id": self.plan_id, "version": self.version,
+                "plan_hash": self.plan_hash,
+                "stages": [s.as_dict() for s in self.stages],
+                "ordering_rationale": (
+                    "controls are the expensive artifact and the one whose validity "
+                    "depends on a fixed runtime, so they are produced only after "
+                    "the runtime is attested and the cheap gates pass")}
+
+
+PREFLIGHT_PLAN_V1 = PreflightPlan(stages=(
+    PreflightStage(
+        stage=0, name="runtime attestation", blocking=True,
+        purpose=("pin what everything else will be measured and trained under, "
+                 "before any of it happens"),
+        produces=("image digest", "RuntimeEnvironmentFingerprint",
+                  "trainer_source_digest + declared file set",
+                  "input artifact hashes (canonical init, pack, suite, battery)"),
+        stop_conditions=("image digest unavailable",
+                         "any input artifact hash mismatches its pin",
+                         "trainer source file missing from the declared set")),
+    PreflightStage(
+        stage=1, name="cheap machine gates", blocking=True,
+        purpose="find out whether this machine and runtime are usable at all",
+        produces=("activation-statistics GPU/CPU split",
+                  "GPU state-evaluator repeatability range",
+                  "peak GPU resident memory on the widest operator",
+                  "checkpoint write/read throughput"),
+        stop_conditions=(
+            "evaluator repeatability range >= declared epsilon -> "
+            "conservative_review_gate fires, Phase A blocked, STOP",
+            "peak resident memory > 40 GiB on an L40S -> hardware plan wrong, STOP",
+            "disk throughput implies the working set is not feasible -> STOP")),
+    PreflightStage(
+        stage=2, name="permanent canonical controls", blocking=True,
+        purpose=("produce the two matched control probes that Phase A will reuse "
+                 "at rung 2"),
+        produces=("canonical init -> 0.86M seed sa",
+                  "canonical init -> 0.86M seed sb",
+                  "per-run RecoveryProtocolFingerprint and RecoveryProbeIdentity",
+                  "checkpoint artifact digests"),
+        stop_conditions=(
+            "a run's protocol fingerprint differs from the preregistered one",
+            "step time diverges from the priced 4.15 s/step by more than 25%")),
+    PreflightStage(
+        stage=3, name="control characterization", blocking=False,
+        purpose="materialize the frozen threshold formulas from control data only",
+        produces=("sa and sb on recovery_search_v1",
+                  "pooled_counts@v1 aggregate + per-seed rates",
+                  "materialized equivalence interval",
+                  "materialized feasibility floor",
+                  "per-capability control baselines"),
+        stop_conditions=("capability schema validation fails -> scoring defect, STOP")),
+))
 
 
 class ScoringContractError(RuntimeError):

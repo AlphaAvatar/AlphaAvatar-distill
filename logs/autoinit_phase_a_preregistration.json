@@ -1,6 +1,6 @@
 {
   "schema": "aadistill.autoinit.phase_a_preregistration/v1",
-  "generated_utc": "2026-08-12T19:33:56.444471+00:00",
+  "generated_utc": "2026-08-13T05:41:00.421673+00:00",
   "status": "PREREGISTRATION DRAFT - NOT AUTHORIZED, NO COMPUTE LAUNCHED",
   "teacher": {
     "model_id": "Qwen/Qwen3-4B-Thinking-2507",
@@ -989,13 +989,227 @@
     "consequence": "Both canonical 0.86M controls are retrievable and verified. The micro-preflight stays a profiling/evaluation job: no recovery retraining is needed, and the two-seed pooled control characterization can be produced by evaluating these checkpoints on recovery_search_v1.",
     "report_sha256": "1227a0e1a90df1f2efba19184c16582e87682174d0e47288233ecde4bc841070"
   },
+  "recovery_identity": {
+    "model": "RecoveryProtocolFingerprint (what must be identical) + initialization artifact digest + seed = RecoveryProbeIdentity",
+    "protocol_excludes": [
+      "student initialization artifact",
+      "seed"
+    ],
+    "why": "initialization is the treatment and the seed is the replicate; a protocol identity containing either would make every comparable pair of arms differ by construction",
+    "matched_pair_predicate": "protocol_identical AND same_seed AND initializations_differ",
+    "trainer_source_digest": {
+      "digest": "054dd6d60b40e023408c055bb2f9bfd9d7953c5a42d1602042db97197458633a",
+      "set_version": 1,
+      "files": [
+        {
+          "path": "scripts/training/train_stage3.py",
+          "sha256": "b8ecff1c03c6b7917ce4162929da892c7338cf7f237408eb178c44c47be635e2",
+          "bytes": 11953
+        },
+        {
+          "path": "src/aadistill/training/train.py",
+          "sha256": "22d142e910327d38dc63cd3ed2b58f8656b084c3fe7565e920467c838a43808d",
+          "bytes": 57502
+        },
+        {
+          "path": "src/aadistill/training/lora.py",
+          "sha256": "991609f6793beb0ed14331070da9f54f7c13f55a7d3cb46cf24823a1bd71d333",
+          "bytes": 10657
+        },
+        {
+          "path": "src/aadistill/data/ladder.py",
+          "sha256": "ed4744f42ee9e920f7b52a269067ef1cd7e2da0e621aca07a6ce6cecd09070ca",
+          "bytes": 7055
+        },
+        {
+          "path": "src/aadistill/data/dataset.py",
+          "sha256": "82c361f8b5614a7324b25dffb48733f5d1b92b903daeb0f098e13d9d16421a66",
+          "bytes": 18533
+        },
+        {
+          "path": "src/aadistill/models/teacher.py",
+          "sha256": "d8d070850dad37cb53d6db4cb548a48af08a5a705eb86bb7990d054125a525da",
+          "bytes": 3567
+        },
+        {
+          "path": "src/aadistill/models/student.py",
+          "sha256": "90f60257f51d9bb1e3f51ddb5c70719cad09a43f5663cb68a73dbf4fec6e5e44",
+          "bytes": 6651
+        }
+      ],
+      "rule": "sha256 over sorted 'path:sha256' lines of the declared trainer source set; whole-repo commit is provenance only",
+      "policy": "material identity is the declared source set, not whole-repository git HEAD; repo commit and dirty flag are recorded as provenance only, so a docs-only commit leaves a control matched",
+      "declared_set": [
+        "scripts/training/train_stage3.py",
+        "src/aadistill/training/train.py",
+        "src/aadistill/training/lora.py",
+        "src/aadistill/data/ladder.py",
+        "src/aadistill/data/dataset.py",
+        "src/aadistill/models/teacher.py",
+        "src/aadistill/models/student.py"
+      ]
+    },
+    "runtime_environment": {
+      "fields": [
+        "image_digest",
+        "python_version",
+        "torch_version",
+        "transformers_version",
+        "cuda_runtime",
+        "attention_backend"
+      ],
+      "dev_box_observation_only": {
+        "version": 1,
+        "image_digest": null,
+        "python_version": "3.14.2",
+        "torch_version": "2.13.0+cpu",
+        "transformers_version": "5.13.1",
+        "cuda_runtime": null,
+        "attention_backend": "sdpa"
+      },
+      "binding_invariant": "the permanent controls and the later searched probes must execute under the same frozen image digest; it is attested at preflight Stage 0 and required before a control is trained"
+    }
+  },
+  "micro_preflight_plan": {
+    "plan_id": "autoinit.micro_preflight",
+    "version": 1,
+    "plan_hash": "6089971229df796439b6fc7a3850368656f83af305b9772d64b5bedd554c52a7",
+    "stages": [
+      {
+        "stage": 0,
+        "name": "runtime attestation",
+        "purpose": "pin what everything else will be measured and trained under, before any of it happens",
+        "produces": [
+          "image digest",
+          "RuntimeEnvironmentFingerprint",
+          "trainer_source_digest + declared file set",
+          "input artifact hashes (canonical init, pack, suite, battery)"
+        ],
+        "blocking": true,
+        "stop_conditions": [
+          "image digest unavailable",
+          "any input artifact hash mismatches its pin",
+          "trainer source file missing from the declared set"
+        ]
+      },
+      {
+        "stage": 1,
+        "name": "cheap machine gates",
+        "purpose": "find out whether this machine and runtime are usable at all",
+        "produces": [
+          "activation-statistics GPU/CPU split",
+          "GPU state-evaluator repeatability range",
+          "peak GPU resident memory on the widest operator",
+          "checkpoint write/read throughput"
+        ],
+        "blocking": true,
+        "stop_conditions": [
+          "evaluator repeatability range >= declared epsilon -> conservative_review_gate fires, Phase A blocked, STOP",
+          "peak resident memory > 40 GiB on an L40S -> hardware plan wrong, STOP",
+          "disk throughput implies the working set is not feasible -> STOP"
+        ]
+      },
+      {
+        "stage": 2,
+        "name": "permanent canonical controls",
+        "purpose": "produce the two matched control probes that Phase A will reuse at rung 2",
+        "produces": [
+          "canonical init -> 0.86M seed sa",
+          "canonical init -> 0.86M seed sb",
+          "per-run RecoveryProtocolFingerprint and RecoveryProbeIdentity",
+          "checkpoint artifact digests"
+        ],
+        "blocking": true,
+        "stop_conditions": [
+          "a run's protocol fingerprint differs from the preregistered one",
+          "step time diverges from the priced 4.15 s/step by more than 25%"
+        ]
+      },
+      {
+        "stage": 3,
+        "name": "control characterization",
+        "purpose": "materialize the frozen threshold formulas from control data only",
+        "produces": [
+          "sa and sb on recovery_search_v1",
+          "pooled_counts@v1 aggregate + per-seed rates",
+          "materialized equivalence interval",
+          "materialized feasibility floor",
+          "per-capability control baselines"
+        ],
+        "blocking": false,
+        "stop_conditions": [
+          "c",
+          "a",
+          "p",
+          "a",
+          "b",
+          "i",
+          "l",
+          "i",
+          "t",
+          "y",
+          " ",
+          "s",
+          "c",
+          "h",
+          "e",
+          "m",
+          "a",
+          " ",
+          "v",
+          "a",
+          "l",
+          "i",
+          "d",
+          "a",
+          "t",
+          "i",
+          "o",
+          "n",
+          " ",
+          "f",
+          "a",
+          "i",
+          "l",
+          "s",
+          " ",
+          "-",
+          ">",
+          " ",
+          "s",
+          "c",
+          "o",
+          "r",
+          "i",
+          "n",
+          "g",
+          " ",
+          "d",
+          "e",
+          "f",
+          "e",
+          "c",
+          "t",
+          ",",
+          " ",
+          "S",
+          "T",
+          "O",
+          "P"
+        ]
+      }
+    ],
+    "ordering_rationale": "controls are the expensive artifact and the one whose validity depends on a fixed runtime, so they are produced only after the runtime is attested and the cheap gates pass"
+  },
   "canonical_control_recipe_audit": {
     "historical_controls_are_recipe_matched": false,
     "consequence": "The historical checkpoints are NOT recipe-matched and must not be called matched controls. Rerun canonical sa/sb from qwen3_0p6b_init_v0 at 0.86M under the current frozen recovery trainer; those runs become the permanent Phase-A control probes and are retained, not disposable.",
     "per_control": {
       "e1_r0860k_sa_pca": {
-        "fingerprint_self": "3e282dcaab22681c8b0e962a593f3051a7bab72760402ffdb414885e8e11bcfd",
-        "fingerprint_other": "bf48fc0fe20506c8f339de931787cc9a51e70506b98938b9314a11d3a089b3b2",
+        "recipe_matched_control": false,
+        "passes_legacy_lineage_subset": true,
+        "fingerprint_self": "e6e4b97b3b9d8b57fd1dc241489d91c84156dbea5b39e1114d69423e1e78efb6",
+        "fingerprint_other": "33a100f142a3f197e24c02dfffc7aeac54ef864748a96b069bc8a9b7c4b51d46",
         "fingerprints_equal": false,
         "matched_fields": [
           "autocast_bf16",
@@ -1019,8 +1233,6 @@
           "pack_blocks_sha256",
           "packing",
           "rung",
-          "student_init_path",
-          "student_init_sha256",
           "teacher_attn",
           "teacher_dtype",
           "teacher_id",
@@ -1031,7 +1243,6 @@
           "train_supervised_tokens",
           "trainable_params",
           "trainable_patterns",
-          "trainer_dirty",
           "val_blocks",
           "warmup_steps",
           "weight_decay"
@@ -1046,16 +1257,6 @@
             "field": "resume_semantics",
             "self": "step counter + RNG state (no consumed-block accounting)",
             "other": "step counter + RNG state + consumed-block position, asserted on restore"
-          },
-          {
-            "field": "torch_version",
-            "self": "2.11.0+cu128",
-            "other": "2.13.0+cpu"
-          },
-          {
-            "field": "trainer_git_commit",
-            "self": "69c3fe1f5f019c2130d8d3aaf18322fe948d17d7",
-            "other": "dc5d7597260a2e55a94082afc921896be57108e1"
           }
         ],
         "unverifiable_fields": [
@@ -1065,25 +1266,23 @@
             "other": 512
           },
           {
-            "field": "trainer_uncommitted_sha256",
-            "self": "2e04f68349226a7efd1684d916441bb29c9e44f1126e066f7ab3fca05cdad2ca",
-            "other": "117d30ac1d55d54adc16bd27f87e87964b3c7e8d11d92cc83666ecfc365edf57"
-          }
-        ],
-        "exactly_matched": false,
-        "verdict": "NOT A MATCHED CONTROL: 4 field(s) differ; 2 field(s) cannot be established. A comparison against probes trained under a different recipe confounds the initialization with the recipe.",
-        "material_mismatches": [
-          {
-            "field": "torch_version",
-            "self": "2.11.0+cu128",
-            "other": "2.13.0+cpu"
+            "field": "runtime_digest",
+            "self": null,
+            "other": null
           },
           {
-            "field": "trainer_git_commit",
-            "self": "69c3fe1f5f019c2130d8d3aaf18322fe948d17d7",
-            "other": "dc5d7597260a2e55a94082afc921896be57108e1"
+            "field": "trainer_source_digest",
+            "self": null,
+            "other": "054dd6d60b40e023408c055bb2f9bfd9d7953c5a42d1602042db97197458633a"
+          },
+          {
+            "field": "trainer_source_set_version",
+            "self": null,
+            "other": 1
           }
         ],
+        "protocol_identical": false,
+        "material_mismatches": [],
         "benign_mismatches": [
           {
             "field": "pack",
@@ -1101,8 +1300,10 @@
         "blocking": true
       },
       "e1_r0860k_sb_pca": {
-        "fingerprint_self": "3e282dcaab22681c8b0e962a593f3051a7bab72760402ffdb414885e8e11bcfd",
-        "fingerprint_other": "bf48fc0fe20506c8f339de931787cc9a51e70506b98938b9314a11d3a089b3b2",
+        "recipe_matched_control": false,
+        "passes_legacy_lineage_subset": true,
+        "fingerprint_self": "e6e4b97b3b9d8b57fd1dc241489d91c84156dbea5b39e1114d69423e1e78efb6",
+        "fingerprint_other": "33a100f142a3f197e24c02dfffc7aeac54ef864748a96b069bc8a9b7c4b51d46",
         "fingerprints_equal": false,
         "matched_fields": [
           "autocast_bf16",
@@ -1126,8 +1327,6 @@
           "pack_blocks_sha256",
           "packing",
           "rung",
-          "student_init_path",
-          "student_init_sha256",
           "teacher_attn",
           "teacher_dtype",
           "teacher_id",
@@ -1138,7 +1337,6 @@
           "train_supervised_tokens",
           "trainable_params",
           "trainable_patterns",
-          "trainer_dirty",
           "val_blocks",
           "warmup_steps",
           "weight_decay"
@@ -1153,16 +1351,6 @@
             "field": "resume_semantics",
             "self": "step counter + RNG state (no consumed-block accounting)",
             "other": "step counter + RNG state + consumed-block position, asserted on restore"
-          },
-          {
-            "field": "torch_version",
-            "self": "2.11.0+cu128",
-            "other": "2.13.0+cpu"
-          },
-          {
-            "field": "trainer_git_commit",
-            "self": "69c3fe1f5f019c2130d8d3aaf18322fe948d17d7",
-            "other": "dc5d7597260a2e55a94082afc921896be57108e1"
           }
         ],
         "unverifiable_fields": [
@@ -1172,25 +1360,23 @@
             "other": 512
           },
           {
-            "field": "trainer_uncommitted_sha256",
-            "self": "2e04f68349226a7efd1684d916441bb29c9e44f1126e066f7ab3fca05cdad2ca",
-            "other": "117d30ac1d55d54adc16bd27f87e87964b3c7e8d11d92cc83666ecfc365edf57"
-          }
-        ],
-        "exactly_matched": false,
-        "verdict": "NOT A MATCHED CONTROL: 4 field(s) differ; 2 field(s) cannot be established. A comparison against probes trained under a different recipe confounds the initialization with the recipe.",
-        "material_mismatches": [
-          {
-            "field": "torch_version",
-            "self": "2.11.0+cu128",
-            "other": "2.13.0+cpu"
+            "field": "runtime_digest",
+            "self": null,
+            "other": null
           },
           {
-            "field": "trainer_git_commit",
-            "self": "69c3fe1f5f019c2130d8d3aaf18322fe948d17d7",
-            "other": "dc5d7597260a2e55a94082afc921896be57108e1"
+            "field": "trainer_source_digest",
+            "self": null,
+            "other": "054dd6d60b40e023408c055bb2f9bfd9d7953c5a42d1602042db97197458633a"
+          },
+          {
+            "field": "trainer_source_set_version",
+            "self": null,
+            "other": 1
           }
         ],
+        "protocol_identical": false,
+        "material_mismatches": [],
         "benign_mismatches": [
           {
             "field": "pack",
@@ -1208,7 +1394,66 @@
         "blocking": true
       }
     },
-    "report_sha256": "cb19ab4b08241a718dddb5ea8bf1746546b2dd72a19231337713fbd5c013773c"
+    "intended_phase_a_comparison": {
+      "self": "phase_a:control-sa",
+      "other": "phase_a:searched-A-sa",
+      "protocol_identical": true,
+      "same_seed": true,
+      "initializations_differ": true,
+      "is_single_variable_comparison": true,
+      "protocol_comparison": {
+        "fingerprint_self": "33a100f142a3f197e24c02dfffc7aeac54ef864748a96b069bc8a9b7c4b51d46",
+        "fingerprint_other": "33a100f142a3f197e24c02dfffc7aeac54ef864748a96b069bc8a9b7c4b51d46",
+        "fingerprints_equal": true,
+        "matched_fields": [
+          "autocast_bf16",
+          "betas",
+          "block_len",
+          "block_ordering",
+          "blocks_per_step",
+          "ce_weight",
+          "dtype",
+          "eps",
+          "grad_clip",
+          "gradient_checkpointing",
+          "kd_chunk",
+          "kd_scope",
+          "kd_temperature",
+          "kd_weight",
+          "lr",
+          "lr_schedule",
+          "micro_blocks",
+          "min_lr_frac",
+          "optimizer",
+          "pack",
+          "pack_blocks_sha256",
+          "packing",
+          "resume_semantics",
+          "rung",
+          "runtime_digest",
+          "teacher_attn",
+          "teacher_dtype",
+          "teacher_id",
+          "teacher_revision",
+          "tokenizer_sha256",
+          "total_steps",
+          "train_blocks",
+          "train_supervised_tokens",
+          "trainable_params",
+          "trainable_patterns",
+          "trainer_source_digest",
+          "trainer_source_set_version",
+          "val_blocks",
+          "warmup_steps",
+          "weight_decay"
+        ],
+        "mismatched_fields": [],
+        "unverifiable_fields": [],
+        "protocol_identical": true
+      },
+      "verdict": "MATCHED: same protocol, same seed, different initialization \u2014 the only difference is the treatment."
+    },
+    "report_sha256": "941829f317b326c126efb5d95c092be4e8ae78c0cd43035cee61f712e26feed9"
   },
   "tool_scoring_audit": {
     "scorer": "aadistill.evaluation.behavior.score_tool_call",
@@ -1290,5 +1535,5 @@
     "GPU state-evaluator repeatability -> evaluated by the frozen conservative response rule (no automatic epsilon re-derivation)",
     "activation-statistics GPU/CPU split (collapses the cost range)"
   ],
-  "preregistration_sha256": "ccec9bd477e37e04c60b3eea6c0a8c39b40dc9806f943abfa19c2cf439f8bca8"
+  "preregistration_sha256": "c81ea31c5a3039a5c8adc5f4a092b34e29f3d22f7d0731b5808c0e0d875d659f"
 }
