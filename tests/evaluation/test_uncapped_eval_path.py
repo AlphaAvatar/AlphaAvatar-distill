@@ -267,5 +267,12 @@ def test_detokenization_is_disabled():
 def test_sampling_semantics_are_unchanged():
     """Greedy, uncapped within the effective context, native stop ids."""
     src = (REPO_ROOT / "scripts/evaluation/uncapped_eval.py").read_text()
-    assert "temperature=0.0" in src and "top_p=1.0" in src and "top_k=-1" in src
+    # The parameters now live in one dict used both to build SamplingParams and
+    # to describe the run in its summary, so the two cannot disagree. The
+    # semantics they encode are unchanged and still asserted here.
+    assert '"temperature": 0.0' in src and '"top_p": 1.0' in src
+    assert '"top_k": -1' in src and '"detokenize": False' in src
     assert "max_tokens=allowance" in src and "stop_token_ids=stop_ids" in src
+    assert src.count("SAMPLING = {") == 1, "two copies of the sampling parameters"
+    assert src.count("**SAMPLING") == 2, (
+        "the summary must be built from the same dict the engine call uses")

@@ -102,14 +102,17 @@ for path, sha in want.items():
     got = hashlib.sha256(open(path, "rb").read()).hexdigest()
     if got != sha: sys.exit(f"FROZEN ASSET MISMATCH {path}: {got}")
     print(f"  {path.rsplit('/', 2)[-2]}/{path.rsplit('/', 1)[-1]} {got[:16]}...")
-for asset, key in (("artifacts/stage3/recovery_search_v1",
-                    "a1b22778b00d95b6aba358c14a5af5b559fd807bb371c92131eacca59479f323"),
-                   ("artifacts/stage1/state_eval_v1", None)):
-    m = json.load(open(f"{asset}/manifest.json"))
-    if key and m["content_sha256"] != key:
-        sys.exit(f"{asset}: content hash {m['content_sha256']}")
-    print(f"  {asset} content {m['content_sha256'][:16]}... OK")
 VERIFYEOF
+
+# The frozen search assets are checked against PREREGISTERED constants, not
+# against hashes read out of their own manifests -- the latter proves only that a
+# file is self-consistent. All three state_eval identities (content, canonical
+# manifest, raw items) and recovery_search's content + manifest + scoring
+# contract are verified. A mismatch blocks before any scientific measurement.
+cd "$REPO" && PYTHONPATH=src /opt/train/bin/python \
+    scripts/autoinit/verify_frozen_assets.py \
+  || { say "FROZEN ASSET IDENTITY MISMATCH -- not the preregistered assets"; \
+       mark "FROZEN_ASSETS_FAILED"; exit 91; }
 mark ASSETS_READY
 
 say "training env via uv sync"

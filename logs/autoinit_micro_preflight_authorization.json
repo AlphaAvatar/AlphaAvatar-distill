@@ -24,8 +24,8 @@
   "scope_note": "micro-preflight only. If Stage 0/1 indicates that hardware, runtime, storage strategy, trainer semantics, evaluation semantics or any frozen identity must change, stop before permanent controls and return for review. Phase A remains separately unauthorized and must not start automatically.",
   "phase_a_authorized": false,
   "automatic_phase_a_start": false,
-  "authorized_session_commit": "5281525528fee2532af1c5d65c3b2bb489affc4d",
-  "harness_source_digest": "a9f620467f897c96406bb0af5305d49289a72c7f1cadc5f757a10ab088215720",
+  "authorized_session_commit": "a1403d317b1f972e03f9821c00a07ca4f6056497",
+  "harness_source_digest": "b7cf28d4224b45d8831b0d51928fbd81c0e7fbdef018dcdcaaf4062011888c3c",
   "harness_source_files": [
     "scripts/pod/autoinit_preflight_launch.py",
     "scripts/pod/autoinit_preflight_driver.py",
@@ -36,7 +36,7 @@
     "src/aadistill/autoinit/authorization.py",
     "src/aadistill/autoinit/generation.py"
   ],
-  "provenance_commit": "5281525528fee2532af1c5d65c3b2bb489affc4d+dirty",
+  "provenance_commit": "a1403d317b1f972e03f9821c00a07ca4f6056497+dirty",
   "enforcement": "the launcher loads this artifact and refuses to create a pod whose priced hard threshold exceeds hard_cap_usd, refuses a stage not in authorized_stages, and has no code path to Phase A",
-  "authorization_sha256": "c145be51e0b02bde0de7190fef62e0848bf55250d8e5c577db55e829e7b4feff"
+  "authorization_sha256": "6cc778607220d450f32390dddc5ade66ed8336bb7d83a881023e85c1c00dc969"
 }

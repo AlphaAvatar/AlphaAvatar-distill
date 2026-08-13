@@ -32,6 +32,13 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO_ROOT / "src"))
 
 
+#: The sampling parameters, defined once and used both to build SamplingParams
+#: and to describe the run in its summary. Two copies could disagree, and a
+#: summary that disagrees with the call is worse than one that omits the field:
+#: a protocol reconstructed from it would be confidently wrong.
+SAMPLING = {"temperature": 0.0, "top_p": 1.0, "top_k": -1, "detokenize": False}
+
+
 def resolve_context(cfg, override: int | None, trained_context: int | None) -> dict:
     """Resolve the effective context and return the derivation, not just a number.
 
@@ -259,9 +266,8 @@ def main() -> int:
             # `detokenize=False` skips vLLM's incremental detokenization, which
             # this evaluator never reads — the record is decoded once from the
             # final token ids. It changes no sampling semantics.
-            params = SamplingParams(temperature=0.0, top_p=1.0, top_k=-1,
-                                    max_tokens=allowance, stop_token_ids=stop_ids,
-                                    detokenize=False)
+            params = SamplingParams(max_tokens=allowance, stop_token_ids=stop_ids,
+                                    **SAMPLING)
             eng.add_request(rid, {"prompt_token_ids": p_ids}, params)
             pending[rid] = {"sample": s, "p_ids": p_ids, "allowance": allowance,
                             "system_source": ("sample" if has_system
@@ -377,6 +383,15 @@ def main() -> int:
             "thinking_mode": template_kwargs.get(
                 "enable_thinking",
                 "template-default (not overridden)"),
+            # The sampling parameters actually passed to SamplingParams. Recorded
+            # rather than assumed: they are material to whether two rollouts are
+            # comparable, and a reader reconstructing the generation protocol from
+            # this summary must not have to infer them from the source. Purely
+            # additive -- nothing about generation changes.
+            "sampling": {**SAMPLING,
+                         "max_tokens_rule": ("per sample: context - prompt; P18 "
+                                             "unrestricted, never a chosen budget"),
+                         "degeneration_check_every": args.check_every},
             "libraries": library_versions(),
             "degeneration_stop": not args.no_degeneration_stop,
             "wave_seconds": wave_seconds,
