@@ -30,15 +30,28 @@ def main() -> None:
     ap.add_argument("--seq-len", type=int, default=892)
     ap.add_argument("--repeats", type=int, default=3)
     ap.add_argument("--device", default="cuda")
+    #: Test-only override, recorded in the output. See
+    #: measure_state_repeatability.py for why it exists.
+    ap.add_argument("--teacher", default=TEACHER)
     ap.add_argument("--out", required=True)
     args = ap.parse_args()
 
     import torch
     from transformers import AutoModelForCausalLM
 
+    def sync() -> None:
+        # The split this measures is GPU-forward vs CPU-accumulate, so on CPU
+        # there is nothing to synchronize and the numbers are a smoke run, not
+        # the gate. Guarded rather than assumed: an unguarded
+        # `torch.cuda.synchronize()` makes the script unrunnable anywhere it
+        # could have been tested for free.
+        if str(args.device).startswith("cuda"):
+            torch.cuda.synchronize()
+
+    kwargs = {"revision": REVISION} if args.teacher == TEACHER else {}
     model = AutoModelForCausalLM.from_pretrained(
-        TEACHER, revision=REVISION, dtype=torch.bfloat16,
-        output_hidden_states=True).to(args.device).eval()
+        args.teacher, dtype=torch.bfloat16,
+        output_hidden_states=True, **kwargs).to(args.device).eval()
     hidden = model.config.hidden_size
     n_seq = max(1, args.tokens // args.seq_len)
 
@@ -50,11 +63,11 @@ def main() -> None:
         for _ in range(n_seq):
             ids = torch.randint(0, model.config.vocab_size, (1, args.seq_len),
                                 device=args.device)
-            torch.cuda.synchronize()
+            sync()
             t = time.time()
             with torch.no_grad():
                 states = model(ids).hidden_states[-1][0].float()
-            torch.cuda.synchronize()
+            sync()
             g += time.time() - t
             host = states.cpu().double()
             t = time.time()
@@ -67,7 +80,10 @@ def main() -> None:
     out = {
         "schema": "aadistill.autoinit.statistics_split/v1",
         "generated_utc": datetime.now(timezone.utc).isoformat(),
-        "teacher": TEACHER, "revision": REVISION, "device": args.device,
+        "teacher": args.teacher, "revision": REVISION, "device": args.device,
+        "is_real_teacher": args.teacher == TEACHER,
+        "is_gate_measurement": (args.teacher == TEACHER
+                                and str(args.device).startswith("cuda")),
         "tokens": args.tokens, "seq_len": args.seq_len, "sequences": n_seq,
         "hidden_size": hidden, "repeats": args.repeats,
         "gpu_forward_seconds": [round(x, 3) for x in gpu_s],

@@ -1,0 +1,49 @@
+{
+  "schema": "aadistill.autoinit.evaluator_repeatability/v1",
+  "generated_utc": "2026-08-13T16:15:54.361057+00:00",
+  "checkpoint": "artifacts/stage1/qwen3_0p6b_init_v0/checkpoint",
+  "artifact_digest": "dc9500d3871a0f31214d55fa2b47b82e196f4f4630c607f43a24d16ed76d83bf",
+  "suite": "state_eval@v1",
+  "suite_hash": "6421fa4cf12ee2a16f452557c486aa95beb37e4aac4f7c7fd72d380993b39833",
+  "device": "cpu",
+  "repeats": 1,
+  "teacher": "Qwen/Qwen3-4B-Thinking-2507",
+  "is_real_teacher": true,
+  "objectives": [
+    "state.teacher_kl.equal_domain_mean",
+    "state.teacher_kl.worst_domain",
+    "state.critical_token_kl"
+  ],
+  "runs": [
+    {
+      "repeat": 0,
+      "state.teacher_kl.equal_domain_mean": 10.778467243512043,
+      "state.teacher_kl.worst_domain": 12.06828946545687,
+      "state.critical_token_kl": 18.279022692932383
+    }
+  ],
+  "per_objective": {
+    "state.teacher_kl.equal_domain_mean": {
+      "min": 10.778467243512043,
+      "max": 10.778467243512043,
+      "range": 0.0,
+      "n": 1
+    },
+    "state.teacher_kl.worst_domain": {
+      "min": 12.06828946545687,
+      "max": 12.06828946545687,
+      "range": 0.0,
+      "n": 1
+    },
+    "state.critical_token_kl": {
+      "min": 18.279022692932383,
+      "max": 18.279022692932383,
+      "range": 0.0,
+      "n": 1
+    }
+  },
+  "max_objective_range": 0.0,
+  "declared_epsilon": 0.0001,
+  "response_rule": "conservative_review_gate@v1; the response is frozen before this measurement and no epsilon is re-derived from it",
+  "report_sha256": "f1126b6aa2e1ce3c270691b036c676c481917b01188e6a628571cba04b4b3d3a"
+}

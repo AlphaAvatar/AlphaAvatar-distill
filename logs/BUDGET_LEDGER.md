@@ -44,8 +44,14 @@ AutoInit micro-preflight attempt 1 (L40S, 1.5 min)           $  0.0300
     /opt/train/bin/python before `uv sync` created it. Pod
     deleted by the launcher, provider confirmed gone. No
     stage ran; nothing was trained or measured.
+AutoInit micro-preflight attempt 2 (L40S, 17.4 min)          $  0.2869
+    setup passed; Stage 0 attested both protocol identities;
+    Stage 1's evaluator-repeatability gate raised and the
+    session stopped there. The permanent controls were NOT
+    trained, which is the staging working as designed. Pod
+    deleted, provider confirmed gone.
 
-ACTUAL CUMULATIVE SPEND                                      $180.7333
+ACTUAL CUMULATIVE SPEND                                      $181.0202
 ```
 
 The pre-E8b baseline `$163.8833` is the figure every E8/E8b planner was built on
@@ -78,8 +84,8 @@ $211.07   +$47.18 E8b hard backstop (2026-08-11), rounded up from $211.0633
 
 ```
 authorized cumulative cap                                    $211.07
-actual cumulative spend                                      $180.7333
-unused authorization remaining                               $ 30.3367
+actual cumulative spend                                      $181.0202
+unused authorization remaining                               $ 30.0498
 of which was earmarked for E8b completion                    $ 30.36
 paid compute currently running                                NONE
 ```

@@ -1,11 +1,32 @@
 {
   "spec": "aadistill.artifact_spec/v1",
   "session": "autoinit_micro_preflight_failed",
-  "note": "reduced spec for a blocking Stage-0/1 failure. The controls do NOT exist and must not be demanded: a gate that blocks teardown on artifacts the run correctly refused to produce would keep a failed pod billing. Evidence still required.",
+  "note": "reduced spec for a blocking Stage-0/1 failure. The controls do NOT exist and must not be demanded: a gate that blocks teardown on artifacts the run correctly refused to produce would keep a failed pod billing. Evidence still required. Gate logs are included: the 2026-08-13 attempt kept only a 300-character prefix of a failure and the pod was deleted before anyone could read the rest.",
   "entries": [
-    {"pattern": "audit/autoinit_preflight/preflight_evidence.json", "required": true, "final": true},
-    {"pattern": "audit/autoinit_preflight/attested_protocol.json", "required": false, "final": true},
-    {"pattern": "audit/autoinit_preflight/*.json", "required": false, "final": true},
-    {"pattern": "audit/autoinit_preflight/session/*", "required": false, "final": true}
+    {
+      "pattern": "audit/autoinit_preflight/preflight_evidence.json",
+      "required": true,
+      "final": true
+    },
+    {
+      "pattern": "audit/autoinit_preflight/attested_protocol.json",
+      "required": false,
+      "final": true
+    },
+    {
+      "pattern": "audit/autoinit_preflight/*.log",
+      "required": false,
+      "final": true
+    },
+    {
+      "pattern": "audit/autoinit_preflight/*.json",
+      "required": false,
+      "final": true
+    },
+    {
+      "pattern": "audit/autoinit_preflight/session/*",
+      "required": false,
+      "final": true
+    }
   ]
 }

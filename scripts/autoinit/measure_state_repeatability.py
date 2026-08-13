@@ -40,6 +40,12 @@ def main() -> None:
     ap.add_argument("--suite", default="artifacts/stage1/state_eval_v1")
     ap.add_argument("--repeats", type=int, default=10)
     ap.add_argument("--device", default="cuda")
+    #: Overridable ONLY so the script itself can be executed end to end in a
+    #: test against tiny models. The gate always runs the real teacher; a run
+    #: that overrode it records the override, and the repeatability number it
+    #: produces is about whatever model it was pointed at.
+    ap.add_argument("--teacher", default=TEACHER)
+    ap.add_argument("--teacher-revision", default=REVISION)
     ap.add_argument("--out", required=True)
     args = ap.parse_args()
 
@@ -48,8 +54,10 @@ def main() -> None:
 
     suite, items, manifest = load(REPO / args.suite)
     adapter = get_adapter("qwen3")
+    teacher_kwargs = ({"revision": args.teacher_revision}
+                      if args.teacher == TEACHER else {})
     teacher = AutoModelForCausalLM.from_pretrained(
-        TEACHER, revision=REVISION, dtype=torch.bfloat16).to(args.device).eval()
+        args.teacher, dtype=torch.bfloat16, **teacher_kwargs).to(args.device).eval()
     model = AutoModelForCausalLM.from_pretrained(
         args.checkpoint, dtype=torch.bfloat16).to(args.device).eval()
     cfg = AutoConfig.from_pretrained(args.checkpoint)
@@ -64,8 +72,22 @@ def main() -> None:
     runs = []
     for i in range(args.repeats):
         result = evaluator.evaluate(model, identity.artifact_digest)
-        row = result.as_dict()["metrics"]
-        runs.append({"repeat": i, **{k: row[k] for k in objectives if k in row}})
+        # `values`, not `metrics`: `StateEvaluation.as_dict()` has never had a
+        # `metrics` key. This line had never executed against a real
+        # `StateEvaluation` — the toy path in `characterize_thresholds.py` does
+        # not go through it — and it cost a $0.29 pod on 2026-08-13, dying with
+        # `KeyError: 'metrics'` after both models had loaded and a full
+        # evaluation pass had completed. `tests/autoinit/test_ranking.py::
+        # test_the_repeatability_probe_reads_the_evaluation_it_is_given` now
+        # runs it on a fake model.
+        row = result.as_dict()["values"]
+        missing = [k for k in objectives if k not in row]
+        if missing:
+            raise SystemExit(
+                f"the evaluation carries no {missing}; the beam ranks on those "
+                "objectives, so a repeatability range over what is left would "
+                "describe a different question than the one asked")
+        runs.append({"repeat": i, **{k: row[k] for k in objectives}})
         print(f"  repeat {i}: " + " ".join(
             f"{k}={runs[-1].get(k)}" for k in objectives), flush=True)
 
@@ -81,6 +103,8 @@ def main() -> None:
         "artifact_digest": identity.artifact_digest,
         "suite": suite.qualified_id, "suite_hash": suite.suite_hash,
         "device": args.device, "repeats": args.repeats,
+        "teacher": args.teacher,
+        "is_real_teacher": args.teacher == TEACHER,
         "objectives": objectives, "runs": runs, "per_objective": ranges,
         "max_objective_range": max(v["range"] for v in ranges.values()),
         "declared_epsilon": min(PARETO_V1.epsilon.values()),

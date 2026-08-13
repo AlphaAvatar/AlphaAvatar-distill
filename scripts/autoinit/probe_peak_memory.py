@@ -28,17 +28,23 @@ def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--seq-len", type=int, default=892)
     ap.add_argument("--device", default="cuda")
+    #: Test-only override, recorded in the output. See
+    #: measure_state_repeatability.py for why it exists.
+    ap.add_argument("--teacher", default=TEACHER)
     ap.add_argument("--out", required=True)
     args = ap.parse_args()
 
     import torch
     from transformers import AutoConfig, AutoModelForCausalLM
 
-    torch.cuda.reset_peak_memory_stats()
+    on_cuda = str(args.device).startswith("cuda")
+    if on_cuda:
+        torch.cuda.reset_peak_memory_stats()
     adapter = get_adapter("qwen3")
+    kwargs = {"revision": REVISION} if args.teacher == TEACHER else {}
     teacher = AutoModelForCausalLM.from_pretrained(
-        TEACHER, revision=REVISION, dtype=torch.bfloat16).to(args.device).eval()
-    base = AutoConfig.from_pretrained(TEACHER, revision=REVISION)
+        args.teacher, dtype=torch.bfloat16, **kwargs).to(args.device).eval()
+    base = AutoConfig.from_pretrained(args.teacher, **kwargs)
     spec = adapter.spec_from_config(base).replace(
         num_hidden_layers=DEPTH_ONLY_LAYERS)
     child_cfg = adapter.build_config(base, spec)
@@ -49,10 +55,20 @@ def main() -> None:
     with torch.no_grad():
         teacher(ids)
         child(ids)
-    torch.cuda.synchronize()
-    peak = torch.cuda.max_memory_allocated()
-    reserved = torch.cuda.max_memory_reserved()
-    props = torch.cuda.get_device_properties(0)
+    # There is no accelerator peak to read on CPU. Rather than making the script
+    # unrunnable off a GPU — which is what kept its one real defect hidden until
+    # a paid pod — a CPU run executes every other step and records nulls, marked
+    # so it can never be mistaken for the gate measurement.
+    if on_cuda:
+        torch.cuda.synchronize()
+        peak = torch.cuda.max_memory_allocated()
+        reserved = torch.cuda.max_memory_reserved()
+        device_name = torch.cuda.get_device_properties(0).name
+        device_total = round(
+            torch.cuda.get_device_properties(0).total_memory / 2**30, 1)
+    else:
+        peak = reserved = None
+        device_name, device_total = "cpu", None
 
     out = {
         "schema": "aadistill.autoinit.peak_memory/v1",
@@ -62,9 +78,12 @@ def main() -> None:
         "child_layers": DEPTH_ONLY_LAYERS,
         "seq_len": args.seq_len, "dtype": "bfloat16",
         "peak_allocated_bytes": peak, "peak_reserved_bytes": reserved,
-        "peak_gib": round(peak / 2**30, 2),
-        "peak_reserved_gib": round(reserved / 2**30, 2),
-        "device": props.name, "device_total_gib": round(props.total_memory / 2**30, 1),
+        "peak_gib": None if peak is None else round(peak / 2**30, 2),
+        "peak_reserved_gib": (None if reserved is None
+                              else round(reserved / 2**30, 2)),
+        "device": device_name, "device_total_gib": device_total,
+        "is_real_teacher": args.teacher == TEACHER,
+        "is_gate_measurement": on_cuda and args.teacher == TEACHER,
         "derived_estimate_gib": 14.3,
         "gate": "fails Stage 1 above 40 GiB on a 48 GB L40S",
     }

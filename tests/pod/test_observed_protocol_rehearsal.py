@@ -635,3 +635,33 @@ def test_6b_setup_blocks_on_the_frozen_asset_gate_before_stage_1():
     assert "verify_frozen_assets.py" in setup
     assert "exit 91" in setup and "FROZEN_ASSETS_FAILED" in setup
     assert setup.index("verify_frozen_assets.py") < setup.index("mark ASSETS_READY")
+
+
+def test_the_derived_control_config_overrides_exactly_three_fields(tmp_path):
+    """Stage 2's first action, and it had never executed either."""
+    import importlib.util
+
+    spec = importlib.util.spec_from_file_location(
+        "preflight_driver_cfg", DRIVER_PATH)
+    mod = importlib.util.module_from_spec(spec)
+    sys.modules["preflight_driver_cfg"] = mod
+    spec.loader.exec_module(mod)
+    mod.AUDIT = tmp_path / "audit"
+
+    driver = mod.Driver.__new__(mod.Driver)
+    name, seed, frozen_rel = mod.CONTROLS[0]
+    path = mod.Driver.control_config(driver, name, frozen_rel)
+
+    frozen = json.loads((REPO / frozen_rel).read_text())
+    derived = json.loads(path.read_text())
+    changed = {k for k in set(frozen) | set(derived)
+               if frozen.get(k) != derived.get(k)}
+    assert changed == {"out_dir", "data_dir", "run_name", "_purpose"}
+    assert derived["out_dir"] == f"artifacts/stage3/{name}"
+    # The pack path the preregistration and the attested protocol both pin.
+    assert derived["data_dir"] == "artifacts/stage3/ladder_uniform_probe"
+    assert derived["seed"] == seed
+    # Everything that defines the recovery is untouched.
+    for key in ("loss", "optim", "schedule", "batch", "rung", "block_len",
+                "trainable_patterns", "teacher", "student_path", "dtype"):
+        assert derived[key] == frozen[key], key

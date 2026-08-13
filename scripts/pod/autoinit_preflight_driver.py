@@ -205,7 +205,7 @@ class Driver:
         try:
             observed = self.observe_engine()
         except Exception as exc:                                  # noqa: BLE001
-            return self.record(0, False, f"engine probe failed: {exc!r}"[:300],
+            return self.record(0, False, f"engine probe failed: {exc}"[-1500:],
                                pinned_inputs=inputs)
         gen = gen.materialized(**observed)
         try:
@@ -307,7 +307,7 @@ class Driver:
             gates["peak_memory"] = self.peak_memory()
             gates["disk_throughput"] = self.disk_throughput()
         except Exception as exc:                                  # noqa: BLE001
-            return self.record(1, False, f"gate raised: {exc!r}"[:300], gates=gates)
+            return self.record(1, False, f"gate raised: {exc}"[-1500:], gates=gates)
 
         # The declared epsilon is the smallest across the beam's objectives: a
         # measured range at or above ANY objective's tolerance fires the gate.
@@ -315,12 +315,23 @@ class Driver:
         rep = gates["evaluator_repeatability"]["max_objective_range"]
         peak = gates["peak_memory"]["peak_gib"]
         failures = []
+        # A smoke run is not a measurement. Both probes can execute on CPU or
+        # against a stand-in model so that they are testable at all; an artifact
+        # produced that way must never satisfy the gate it exists to inform.
+        for gate_name, key in (("peak_memory", "is_gate_measurement"),
+                               ("evaluator_repeatability", "is_real_teacher")):
+            if not gates[gate_name].get(key):
+                failures.append(
+                    f"{gate_name} did not produce a gate measurement "
+                    f"({key} is not true); this is a smoke artifact")
+        if peak is None:
+            failures.append("peak memory was not measured (peak_gib is null)")
         if rep >= declared_epsilon:
             failures.append(
                 f"evaluator repeatability range {rep:.3g} >= declared epsilon "
                 f"{declared_epsilon:.3g}: {EPSILON_RESPONSE_V1.rule_id} fires, no "
                 "epsilon is re-derived, Phase A is blocked pending review")
-        if peak > 40.0:
+        if peak is not None and peak > 40.0:
             failures.append(f"peak resident {peak:.1f} GiB > 40 GiB")
         if gates["disk_throughput"]["write_mb_s"] < 50:
             failures.append(
@@ -328,44 +339,52 @@ class Driver:
                 "makes the working-set plan infeasible")
         return self.record(1, not failures, "; ".join(failures), gates=gates)
 
+    def gate(self, name: str, script: str, extra: list[str], *,
+             timeout: float) -> dict:
+        """Run one Stage-1 measurement, keeping its whole output as an artifact.
+
+        The 2026-08-13 attempt learned this the expensive way. A gate raised,
+        the exception carried the last 600 characters of the subprocess output,
+        and the stage record then truncated *that* to its first 300 — which is
+        the progress bars. The pod was deleted before anyone could look, and the
+        session's only account of why it stopped was "Loading weights: 100%".
+
+        So the full stdout and stderr go to a file the artifact spec collects,
+        and the in-record excerpt is the **tail**: the end of a traceback is the
+        part that says what happened.
+        """
+        log = AUDIT / f"{name}.log"
+        out = subprocess.run(
+            ["/opt/train/bin/python", str(REPO / script), *extra],
+            capture_output=True, text=True, timeout=timeout, env=self.child_env())
+        log.write_text(f"$ {script} {' '.join(extra)}\n"
+                       f"rc={out.returncode}\n--- stdout ---\n{out.stdout}\n"
+                       f"--- stderr ---\n{out.stderr}\n")
+        if out.returncode != 0:
+            raise RuntimeError(
+                f"{name} rc={out.returncode}; full output in "
+                f"{log.relative_to(REPO)}; tail: "
+                f"...{(out.stdout + out.stderr).rstrip()[-1200:]}")
+        return json.loads((AUDIT / f"{name}.json").read_text())
+
     def repeatability(self) -> dict:
         """Score one checkpoint N times on the frozen suite; report the range."""
-        from aadistill.autoinit.metrics import StateEvaluation  # noqa: F401
-        out = subprocess.run(
-            ["/opt/train/bin/python",
-             str(REPO / "scripts/autoinit/measure_state_repeatability.py"),
-             "--checkpoint", str(CANONICAL_INIT), "--repeats", str(self.a.repeats),
+        return self.gate(
+            "evaluator_repeatability",
+            "scripts/autoinit/measure_state_repeatability.py",
+            ["--checkpoint", str(CANONICAL_INIT), "--repeats", str(self.a.repeats),
              "--out", str(AUDIT / "evaluator_repeatability.json")],
-            capture_output=True, text=True, timeout=5400,
-            env={**os.environ, "PYTHONPATH": f"{REPO}/src"})
-        if out.returncode != 0:
-            raise RuntimeError(f"repeatability rc={out.returncode}: "
-                               f"{(out.stdout + out.stderr)[-600:]}")
-        return json.loads((AUDIT / "evaluator_repeatability.json").read_text())
+            timeout=5400)
 
     def stats_split(self) -> dict:
-        out = subprocess.run(
-            ["/opt/train/bin/python",
-             str(REPO / "scripts/autoinit/profile_statistics_pass.py"),
-             "--out", str(AUDIT / "statistics_split.json")],
-            capture_output=True, text=True, timeout=5400,
-            env={**os.environ, "PYTHONPATH": f"{REPO}/src"})
-        if out.returncode != 0:
-            raise RuntimeError(f"statistics profile rc={out.returncode}: "
-                               f"{(out.stdout + out.stderr)[-600:]}")
-        return json.loads((AUDIT / "statistics_split.json").read_text())
+        return self.gate(
+            "statistics_split", "scripts/autoinit/profile_statistics_pass.py",
+            ["--out", str(AUDIT / "statistics_split.json")], timeout=5400)
 
     def peak_memory(self) -> dict:
-        out = subprocess.run(
-            ["/opt/train/bin/python",
-             str(REPO / "scripts/autoinit/probe_peak_memory.py"),
-             "--out", str(AUDIT / "peak_memory.json")],
-            capture_output=True, text=True, timeout=3600,
-            env={**os.environ, "PYTHONPATH": f"{REPO}/src"})
-        if out.returncode != 0:
-            raise RuntimeError(f"peak memory rc={out.returncode}: "
-                               f"{(out.stdout + out.stderr)[-600:]}")
-        return json.loads((AUDIT / "peak_memory.json").read_text())
+        return self.gate(
+            "peak_memory", "scripts/autoinit/probe_peak_memory.py",
+            ["--out", str(AUDIT / "peak_memory.json")], timeout=3600)
 
     def disk_throughput(self) -> dict:
         """Write and re-read a real intermediate-sized file, not a synthetic loop."""
@@ -669,7 +688,7 @@ class Driver:
             try:
                 report, gen_protocols[name] = self.observed_generation(gen_dir, name)
             except GenerationProtocolError as exc:
-                return self.record(3, False, f"{name}: {exc}"[:600],
+                return self.record(3, False, f"{name}: {exc}"[-1500:],
                                    generation=generation)
             generation[name] = {**report,
                                 "tokenizer_files_installed": tokenizer_files}
@@ -706,7 +725,7 @@ class Driver:
                 observed_eval.require_comparable(self.evaluation_protocol,
                                                  context=f"{name} characterization")
             except GenerationProtocolError as exc:
-                return self.record(3, False, f"{name}: {exc}"[:600],
+                return self.record(3, False, f"{name}: {exc}"[-1500:],
                                    generation=generation)
             generation[name]["evaluation_protocol_hash"] = \
                 observed_eval.evaluation_protocol_hash
@@ -788,7 +807,8 @@ class Driver:
                 self.record(stage, False, f"refused: {exc}")
                 ok = False
             except Exception as exc:                              # noqa: BLE001
-                self.record(stage, False, f"{type(exc).__name__}: {exc}"[:400])
+                self.record(stage, False,
+                            f"{type(exc).__name__}: {exc}"[-1500:])
                 ok = False
             if not ok:
                 blocking = {s.stage for s in PREFLIGHT_PLAN_V1.stages if s.blocking}
