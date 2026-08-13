@@ -389,15 +389,24 @@ class Driver:
         smoke_dir = REPO / "artifacts/eval/preflight/_generation_smoke"
         smoke_dir.mkdir(parents=True, exist_ok=True)
         battery = json.loads((BATTERY / "manifest.json").read_text())
-        first_set = sorted(battery["sets"])[0]
-        subset = smoke_dir / f"{first_set}.jsonl"
-        lines = (BATTERY / f"{first_set}.jsonl").read_text().splitlines()
-        subset.write_text("\n".join(lines[:2]) + "\n")
+        # The HARDEST set, not the alphabetically first. On 2026-08-13 this took
+        # `sorted(sets)[0]` = `code`, the one set that declares no tools, and the
+        # smoke passed while Stage 3 then died rendering a tool prompt. A smoke
+        # that avoids the awkward input is a smoke that agrees with you.
+        sets = sorted(battery["sets"])
+        chosen = [s for s in ("tool", "rag") if s in sets] or sets[:1]
+        subsets = []
+        for name in chosen:
+            subset = smoke_dir / f"{name}.jsonl"
+            lines = (BATTERY / f"{name}.jsonl").read_text().splitlines()
+            subset.write_text("\n".join(lines[:2]) + "\n")
+            subsets.append(subset)
+        first_set = chosen[0]
 
         out = subprocess.run(
             ["/opt/vllm/bin/python", str(REPO / "scripts/evaluation/uncapped_eval.py"),
              "--model", str(CANONICAL_INIT), "--label", "_generation_smoke",
-             "--prompts", str(subset), "--out-dir", str(smoke_dir),
+             "--prompts", *[str(x) for x in subsets], "--out-dir", str(smoke_dir),
              "--diagnostics"],
             capture_output=True, text=True, timeout=2700, env=self.child_env())
         (AUDIT / "generation_smoke.log").write_text(
@@ -414,7 +423,7 @@ class Driver:
                      if not p.name.endswith(".generations.jsonl")]
         observed = observe_generation_protocol(summaries, strict=True)
         comparison = observed.protocol.compare(self.evaluation_protocol.generation)
-        report = {"sets": [first_set], "prompts": 2,
+        report = {"sets": chosen, "prompts": 2 * len(chosen),
                   "model": "canonical init (not a control)",
                   "observed_generation_fingerprint": observed.protocol.fingerprint,
                   "attested_generation_fingerprint":

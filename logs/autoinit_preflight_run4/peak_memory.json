@@ -1,0 +1,20 @@
+{
+  "schema": "aadistill.autoinit.peak_memory/v1",
+  "generated_utc": "2026-08-13T20:25:17.851973+00:00",
+  "operator": "DEPTH at full width (teacher + full-width child resident)",
+  "teacher_layers": 36,
+  "child_layers": 28,
+  "seq_len": 892,
+  "dtype": "bfloat16",
+  "peak_allocated_bytes": 15015071744,
+  "peak_reserved_bytes": 15135145984,
+  "peak_gib": 13.98,
+  "peak_reserved_gib": 14.1,
+  "device": "NVIDIA L40S",
+  "device_total_gib": 44.4,
+  "is_real_teacher": true,
+  "is_gate_measurement": true,
+  "derived_estimate_gib": 14.3,
+  "gate": "fails Stage 1 above 40 GiB on a 48 GB L40S",
+  "report_sha256": "aaf04a8b5cde0bb368722f86a7aeca4f2a6cec9aa61f6fad6a4595d62c74162f"
+}

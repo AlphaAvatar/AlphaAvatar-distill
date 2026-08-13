@@ -1,0 +1,391 @@
+{
+  "root": "/workspace/aad/artifacts",
+  "created_utc": "2026-08-13T22:37:17+00:00",
+  "ok": true,
+  "specs": [
+    {
+      "artifact_class": "preflight_evidence",
+      "pattern": "audit/autoinit_preflight/preflight_evidence.json",
+      "required": true,
+      "min_matches": 1,
+      "min_bytes": 1,
+      "lifecycle": "final_required"
+    },
+    {
+      "artifact_class": "attested_protocol",
+      "pattern": "audit/autoinit_preflight/attested_protocol.json",
+      "required": false,
+      "min_matches": 0,
+      "min_bytes": 1,
+      "lifecycle": "final_required"
+    },
+    {
+      "artifact_class": "gate_log",
+      "pattern": "audit/autoinit_preflight/*.log",
+      "required": false,
+      "min_matches": 0,
+      "min_bytes": 1,
+      "lifecycle": "final_required"
+    },
+    {
+      "artifact_class": "generation_smoke",
+      "pattern": "audit/autoinit_preflight/generation_smoke.json",
+      "required": false,
+      "min_matches": 0,
+      "min_bytes": 1,
+      "lifecycle": "final_required"
+    },
+    {
+      "artifact_class": "audit_json",
+      "pattern": "audit/autoinit_preflight/*.json",
+      "required": false,
+      "min_matches": 0,
+      "min_bytes": 1,
+      "lifecycle": "final_required"
+    },
+    {
+      "artifact_class": "control_config",
+      "pattern": "audit/autoinit_preflight/configs/*.json",
+      "required": false,
+      "min_matches": 0,
+      "min_bytes": 1,
+      "lifecycle": "final_required"
+    },
+    {
+      "artifact_class": "session_evidence",
+      "pattern": "audit/autoinit_preflight/session/*",
+      "required": false,
+      "min_matches": 0,
+      "min_bytes": 1,
+      "lifecycle": "final_required"
+    },
+    {
+      "artifact_class": "event_stream",
+      "pattern": "stage3/preflight_ctl_r0860k_s*/train_log.jsonl",
+      "required": false,
+      "min_matches": 0,
+      "min_bytes": 1,
+      "lifecycle": "final_required"
+    },
+    {
+      "artifact_class": "run_manifest",
+      "pattern": "stage3/preflight_ctl_r0860k_s*/run_manifest.json",
+      "required": false,
+      "min_matches": 0,
+      "min_bytes": 1,
+      "lifecycle": "final_required"
+    },
+    {
+      "artifact_class": "run_completion",
+      "pattern": "stage3/preflight_ctl_r0860k_s*/run_completion.json",
+      "required": false,
+      "min_matches": 0,
+      "min_bytes": 1,
+      "lifecycle": "final_required"
+    },
+    {
+      "artifact_class": "generations",
+      "pattern": "eval/preflight/preflight_ctl_r0860k_s*/*.generations.jsonl",
+      "required": false,
+      "min_matches": 0,
+      "min_bytes": 1,
+      "lifecycle": "final_required"
+    },
+    {
+      "artifact_class": "generation_summary",
+      "pattern": "eval/preflight/preflight_ctl_r0860k_s*/*.json",
+      "required": false,
+      "min_matches": 0,
+      "min_bytes": 1,
+      "lifecycle": "final_required"
+    }
+  ],
+  "entries": [
+    {
+      "path": "audit/autoinit_preflight/preflight_evidence.json",
+      "artifact_class": "preflight_evidence",
+      "size_bytes": 45362,
+      "sha256": "b39bc39e590883c4f21414c6f5ff02ae2aee2ade6015c7627f7a098245cf0f55",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "audit/autoinit_preflight/attested_protocol.json",
+      "artifact_class": "attested_protocol",
+      "size_bytes": 8668,
+      "sha256": "a3fc781152a98c4ada817e75e9fbed9317b5f825d45797b82b1628cc84de079e",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "audit/autoinit_preflight/evaluator_repeatability.log",
+      "artifact_class": "gate_log",
+      "size_bytes": 2335,
+      "sha256": "87bccd3ab2fb8e2c5c3806338a0ddfed9cc97f2a44f4de2d8ee990e6b666b0f4",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "audit/autoinit_preflight/generation_smoke.log",
+      "artifact_class": "gate_log",
+      "size_bytes": 11827,
+      "sha256": "accbeff059fce87ff8ccfe8e319e5385c6527b30a9295abb2b8bbb4352a74c89",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "audit/autoinit_preflight/peak_memory.log",
+      "artifact_class": "gate_log",
+      "size_bytes": 377,
+      "sha256": "290c4a5af557c123b579d5e6f957a887c3bb02e40b008012601551ee1d53ce50",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "audit/autoinit_preflight/preflight_ctl_r0860k_sa_generation_tail.log",
+      "artifact_class": "gate_log",
+      "size_bytes": 2180,
+      "sha256": "642c2854fb62df86a8a0f792c1ff32e91983b342470ecae1fb90f705125105f4",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "audit/autoinit_preflight/preflight_ctl_r0860k_sa_train_tail.log",
+      "artifact_class": "gate_log",
+      "size_bytes": 1686,
+      "sha256": "17007fa9f4f41d6404a7065a6435f382f64ba57d22e2fb01b771988ae611d0bb",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "audit/autoinit_preflight/preflight_ctl_r0860k_sb_train_tail.log",
+      "artifact_class": "gate_log",
+      "size_bytes": 1682,
+      "sha256": "737ea99626b329ab151ddbe503f7ef339273caa4260de60da71a8ce96672a0c8",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "audit/autoinit_preflight/statistics_split.log",
+      "artifact_class": "gate_log",
+      "size_bytes": 530,
+      "sha256": "2bed1a7521c5478d60cbf178febd59b34486a82fe75627c385b05aeef96e1b80",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "audit/autoinit_preflight/generation_smoke.json",
+      "artifact_class": "generation_smoke",
+      "size_bytes": 387,
+      "sha256": "63918811d3830901f95efde999a0cc3909d45959beda6a21260a176713863d3e",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "audit/autoinit_preflight/engine_probe.json",
+      "artifact_class": "audit_json",
+      "size_bytes": 1779,
+      "sha256": "b8d6ebdca2c6976571952f13bfc6fba0aafa9bf4bdae53f6bec7dd8ac0ae9f2c",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "audit/autoinit_preflight/evaluator_repeatability.json",
+      "artifact_class": "audit_json",
+      "size_bytes": 3471,
+      "sha256": "51ee0a1f64b23007b60e82ba59521b77b5af01b0b93a587d02225364d6f2f8ad",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "audit/autoinit_preflight/frozen_asset_verification.json",
+      "artifact_class": "audit_json",
+      "size_bytes": 2711,
+      "sha256": "877a05664dab3d81cc8adf1f96341740bb5678b5b1c895dcdf6c147e57ebdbbe",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "audit/autoinit_preflight/peak_memory.json",
+      "artifact_class": "audit_json",
+      "size_bytes": 684,
+      "sha256": "839ceabd8cf33d77b552fb8aba7c839b135511e8ca359c11f90cead9950d0180",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "audit/autoinit_preflight/preflight_ctl_r0860k_sa_probe_identity.json",
+      "artifact_class": "audit_json",
+      "size_bytes": 13120,
+      "sha256": "a870a6e4275ea0b6cb71a0d8a28e8c2031cfba6824c19c31f00324d50e32cb8c",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "audit/autoinit_preflight/preflight_ctl_r0860k_sb_probe_identity.json",
+      "artifact_class": "audit_json",
+      "size_bytes": 13120,
+      "sha256": "883c8c4ae1dad400f6cde4546b1629f05d97bc60fc6b06ce0c33d3c7a1a34799",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "audit/autoinit_preflight/statistics_split.json",
+      "artifact_class": "audit_json",
+      "size_bytes": 870,
+      "sha256": "60bdf9198c0fec222c642f604838ac9c22d8491142b03b3cc4b68e8b0704ecfe",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "audit/autoinit_preflight/configs/preflight_ctl_r0860k_sa.json",
+      "artifact_class": "control_config",
+      "size_bytes": 1668,
+      "sha256": "3b7cbfbbf8a2142e33affbd5fdbd5bce6bbc4bddf4f9623e1ed255089370f031",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "audit/autoinit_preflight/configs/preflight_ctl_r0860k_sb.json",
+      "artifact_class": "control_config",
+      "size_bytes": 1668,
+      "sha256": "24b1cef4129b751a29d11400a3137cd5143d0c0c57c19d62ed40570e9a4e253e",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "audit/autoinit_preflight/session/autoinit_preflight.status",
+      "artifact_class": "session_evidence",
+      "size_bytes": 1048,
+      "sha256": "97e51ea5e2e1c0f1ba8bb7540f65733f205afebf4d37733e4bf87a5cdcea183d",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "audit/autoinit_preflight/session/autoinit_preflight_run.log",
+      "artifact_class": "session_evidence",
+      "size_bytes": 934,
+      "sha256": "426c7a7267b4b1daf43176ea57a9289fb6cdaf4920ce083fbae2279eb6a1e9ca",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "audit/autoinit_preflight/session/setup.log",
+      "artifact_class": "session_evidence",
+      "size_bytes": 8583,
+      "sha256": "f15c6b0544f01c2b47f4e2602e8bb87da2106d4bc21f83139e132cb3ca472ebd",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "stage3/preflight_ctl_r0860k_sa/train_log.jsonl",
+      "artifact_class": "event_stream",
+      "size_bytes": 48076,
+      "sha256": "a51712d75efd9d39375e8796e7b0c5fe973680115d2a5cece4c945f756772f23",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "stage3/preflight_ctl_r0860k_sb/train_log.jsonl",
+      "artifact_class": "event_stream",
+      "size_bytes": 48062,
+      "sha256": "a8040d76f18d63b332d85a34e4d12f71c1e776f46ac07bd761f44664ebbb4bff",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "stage3/preflight_ctl_r0860k_sa/run_manifest.json",
+      "artifact_class": "run_manifest",
+      "size_bytes": 8283,
+      "sha256": "bceefe86bceb639ff902940dc1561191299b80f72b5d680fd7187a566ead386b",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "stage3/preflight_ctl_r0860k_sb/run_manifest.json",
+      "artifact_class": "run_manifest",
+      "size_bytes": 8283,
+      "sha256": "b027e32f74d63afd8ffeb72957027844da8ef154d1f3b5a92251efe0414607f5",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "stage3/preflight_ctl_r0860k_sa/run_completion.json",
+      "artifact_class": "run_completion",
+      "size_bytes": 1811,
+      "sha256": "5c7aab0d77988ea28aadaab4388c37dbd74ca70d7f82ae44eb31839c7f5fd769",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "stage3/preflight_ctl_r0860k_sb/run_completion.json",
+      "artifact_class": "run_completion",
+      "size_bytes": 1810,
+      "sha256": "fd8b6ab55b834f5a03320fbe46e5b49fba31134993f47e9694bf93e70e2ab0bc",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "eval/preflight/preflight_ctl_r0860k_sa/code.generations.jsonl",
+      "artifact_class": "generations",
+      "size_bytes": 50644,
+      "sha256": "e6ea986ea68ca15d166d84f1d8245bd434767a6bc992576090db3e75b3fc30c8",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "eval/preflight/preflight_ctl_r0860k_sa/gsm8k.generations.jsonl",
+      "artifact_class": "generations",
+      "size_bytes": 99631,
+      "sha256": "32d5eb151b361dba28eaf817a0010eac3dd1e8017d1235f4270583015e5a633a",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "eval/preflight/preflight_ctl_r0860k_sa/knowledge.generations.jsonl",
+      "artifact_class": "generations",
+      "size_bytes": 61017,
+      "sha256": "0a9afa7d529780c3b326f6a54dcc739e5282aacf98975441e4f4200819b0ea91",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "eval/preflight/preflight_ctl_r0860k_sa/math_verified.generations.jsonl",
+      "artifact_class": "generations",
+      "size_bytes": 80390,
+      "sha256": "342dcec2bcd95ef839618aac6c6704646601dae5f20bc67dca4ee9a4522ad2a7",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "eval/preflight/preflight_ctl_r0860k_sa/multihop.generations.jsonl",
+      "artifact_class": "generations",
+      "size_bytes": 133725,
+      "sha256": "bad4192f7d408ecfbb09ca91b4f2c58a42df5c690ee578a51c2b8fe950de6582",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "eval/preflight/preflight_ctl_r0860k_sa/rag.generations.jsonl",
+      "artifact_class": "generations",
+      "size_bytes": 100027,
+      "sha256": "c57eed3a0cb57106e0664062658c8b4fbea72826e50444c35e9eb2c7abde4898",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "eval/preflight/preflight_ctl_r0860k_sa/code.json",
+      "artifact_class": "generation_summary",
+      "size_bytes": 13415,
+      "sha256": "47569b3bd5f60482c11df751fb56e05cb70b39e42aa3f4a389eb44900f200ce4",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "eval/preflight/preflight_ctl_r0860k_sa/gsm8k.json",
+      "artifact_class": "generation_summary",
+      "size_bytes": 13500,
+      "sha256": "924ca5e9ee743ba816575f12b9b18aec070d839cb974ca782f0e6403a1e6068e",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "eval/preflight/preflight_ctl_r0860k_sa/knowledge.json",
+      "artifact_class": "generation_summary",
+      "size_bytes": 13437,
+      "sha256": "507934a6eecbe1a6e60124a0c3f8b87052d28a5f205acb40913ed9314cb755a9",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "eval/preflight/preflight_ctl_r0860k_sa/math_verified.json",
+      "artifact_class": "generation_summary",
+      "size_bytes": 13427,
+      "sha256": "86fed4bec739baa9a4a72b196e491215465a82ee9855c1656303b69fe47486d4",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "eval/preflight/preflight_ctl_r0860k_sa/multihop.json",
+      "artifact_class": "generation_summary",
+      "size_bytes": 12464,
+      "sha256": "db08886112cffe044bfe62b0e1614a994e7c0cd57080aaa9b673c34488575add",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "eval/preflight/preflight_ctl_r0860k_sa/rag.json",
+      "artifact_class": "generation_summary",
+      "size_bytes": 13222,
+      "sha256": "7c10161b26289e976adee283f38726cc9fd832023596499530e3965187e9cbd2",
+      "lifecycle": "final_required"
+    }
+  ],
+  "missing": [],
+  "appended_during_archive": [],
+  "completion_markers": [],
+  "completion_marker_failures": [],
+  "still_being_written": [],
+  "final_streams_quiescent": true
+}

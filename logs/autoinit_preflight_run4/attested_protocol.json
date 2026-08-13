@@ -1,0 +1,200 @@
+{
+  "schema": "aadistill.autoinit.attested_protocol/v1",
+  "generated_utc": "2026-08-13T19:55:17.639487+00:00",
+  "preflight_plan_hash": "37dbd7b22e3e884eff9d55f95c5ce25a212f823d2f396691c30d47930076f8ab",
+  "runtime": {
+    "version": 1,
+    "image_digest": "runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@580.126.09",
+    "python_version": "3.12.3",
+    "torch_version": "2.11.0+cu128",
+    "transformers_version": "5.13.1",
+    "cuda_runtime": "12.8",
+    "attention_backend": "sdpa"
+  },
+  "trainer_source": {
+    "digest": "729bc9e6a374701716258f013ef12561c24d6b7b7d5a4cace868ecabf99d6f77",
+    "set_version": 1,
+    "files": [
+      {
+        "path": "scripts/training/train_stage3.py",
+        "sha256": "1c4be309e52798e73e79c46e9a53866f0edca91517d149c8288f1a6fc878854d",
+        "bytes": 14309
+      },
+      {
+        "path": "src/aadistill/training/train.py",
+        "sha256": "4d409b161b244ab5cc388f1615a87de5ce7481c3a2a3e8349b78822878508313",
+        "bytes": 62990
+      },
+      {
+        "path": "src/aadistill/training/lora.py",
+        "sha256": "991609f6793beb0ed14331070da9f54f7c13f55a7d3cb46cf24823a1bd71d333",
+        "bytes": 10657
+      },
+      {
+        "path": "src/aadistill/data/ladder.py",
+        "sha256": "ed4744f42ee9e920f7b52a269067ef1cd7e2da0e621aca07a6ce6cecd09070ca",
+        "bytes": 7055
+      },
+      {
+        "path": "src/aadistill/data/dataset.py",
+        "sha256": "82c361f8b5614a7324b25dffb48733f5d1b92b903daeb0f098e13d9d16421a66",
+        "bytes": 18533
+      },
+      {
+        "path": "src/aadistill/models/teacher.py",
+        "sha256": "d8d070850dad37cb53d6db4cb548a48af08a5a705eb86bb7990d054125a525da",
+        "bytes": 3567
+      },
+      {
+        "path": "src/aadistill/models/student.py",
+        "sha256": "90f60257f51d9bb1e3f51ddb5c70719cad09a43f5663cb68a73dbf4fec6e5e44",
+        "bytes": 6651
+      }
+    ],
+    "rule": "sha256 over sorted 'path:sha256' lines of the declared trainer source set; whole-repo commit is provenance only"
+  },
+  "pinned_inputs": {
+    "canonical_init_weights": {
+      "path": "artifacts/stage1/qwen3_0p6b_init_v0/checkpoint/model.safetensors",
+      "pinned_sha256": "86fbba78e8a2a32481ca77e5ac362ed1f17a39dbc30bcbc952cabd5df2633e54",
+      "actual_sha256": "86fbba78e8a2a32481ca77e5ac362ed1f17a39dbc30bcbc952cabd5df2633e54",
+      "present": true,
+      "match": true
+    },
+    "recovery_pack_blocks": {
+      "path": "artifacts/stage3/ladder_uniform_probe/blocks.npz",
+      "pinned_sha256": "6f324cb0f37bc0f07128e554ce8c161879419537478950496534f75fcecb249c",
+      "actual_sha256": "6f324cb0f37bc0f07128e554ce8c161879419537478950496534f75fcecb249c",
+      "present": true,
+      "match": true
+    }
+  },
+  "battery_content_verified": true,
+  "attested_protocol": {
+    "pack": "ladder_uniform_probe",
+    "pack_blocks_sha256": "6f324cb0f37bc0f07128e554ce8c161879419537478950496534f75fcecb249c",
+    "rung": 860000,
+    "train_blocks": 682,
+    "train_supervised_tokens": 864750,
+    "block_len": 8192,
+    "packing": "ladder",
+    "val_blocks": 16,
+    "block_ordering": "per-epoch torch.randperm(n_blocks, seed*1000003 + epoch) over the rung's blocks, walked by the global consumed-block counter",
+    "ce_weight": 0.25,
+    "kd_weight": 1.0,
+    "kd_temperature": 1.0,
+    "kd_scope": "all",
+    "kd_chunk": 512,
+    "optimizer": "AdamW",
+    "lr": 5e-05,
+    "weight_decay": 0.01,
+    "betas": [
+      0.9,
+      0.95
+    ],
+    "eps": 1e-08,
+    "grad_clip": 1.0,
+    "total_steps": 1023,
+    "warmup_steps": 51,
+    "min_lr_frac": 0.1,
+    "lr_schedule": "cosine to min_lr_frac",
+    "blocks_per_step": 2,
+    "micro_blocks": 1,
+    "dtype": "float32",
+    "autocast_bf16": true,
+    "gradient_checkpointing": true,
+    "trainable_patterns": [
+      "\\.self_attn\\.(q_proj|k_proj|v_proj|o_proj|q_norm|k_norm)\\.",
+      "\\.mlp\\.(gate_proj|up_proj|down_proj)\\.",
+      "input_layernorm",
+      "post_attention_layernorm",
+      "model\\.norm\\."
+    ],
+    "trainable_params": 440467456,
+    "teacher_id": "Qwen/Qwen3-4B-Thinking-2507",
+    "teacher_revision": "768f209d9ea81521153ed38c47d515654e938aea",
+    "teacher_dtype": "bfloat16",
+    "teacher_attn": "sdpa",
+    "tokenizer_sha256": "7781771acc3798ee454c1253c751f930eb1c18c1c3df62e2552cc6f1d394f654",
+    "resume_semantics": "step counter + RNG state + consumed-block position, asserted on restore",
+    "trainer_source_digest": "729bc9e6a374701716258f013ef12561c24d6b7b7d5a4cace868ecabf99d6f77",
+    "trainer_source_set_version": 1,
+    "runtime_digest": "1c13c9ecccd9689aa15f99011e64c8a5a8e5bdf0a7310b9dfa826999f0465bc2",
+    "protocol_fingerprint": "aad75fee8a897d9ce6efd6205829a2a0af997fa3f8548fbc56c4879dfd97e8b7",
+    "unverifiable": [],
+    "is_materialized": true,
+    "unmaterialized_fields": [],
+    "materialization_required": [
+      "trainer_source_digest",
+      "trainer_source_set_version",
+      "runtime_digest"
+    ],
+    "excluded_by_design": [
+      "student initialization artifact",
+      "seed"
+    ],
+    "why_excluded": "initialization is the treatment variable and the seed is the intended replicate; including either would make every comparable pair of arms differ"
+  },
+  "attested_protocol_fingerprint": "aad75fee8a897d9ce6efd6205829a2a0af997fa3f8548fbc56c4879dfd97e8b7",
+  "evaluation_protocol": {
+    "evaluation_protocol_hash": "dfc3d9198131adc1523f3c338f2fc97bf5ad130be55102e4674a466c439ea2ba",
+    "generation": {
+      "generation_source_digest": "a1b51736d6a6b1276322a04d44855d7b574011e165e77d6d23c3e31b3036f743",
+      "generation_source_set_version": 1,
+      "vllm_version": "0.27.1",
+      "transformers_version": "5.15.0",
+      "torch_version": "2.13.0+cu130",
+      "dtype": "bfloat16",
+      "gpu_memory_utilization": 0.9,
+      "max_num_seqs": 256,
+      "max_num_batched_tokens": 8192,
+      "enforce_eager": false,
+      "tokenizer_source": "the evaluated checkpoint",
+      "tokenizer_sha256": "c1db93c8164f3e3ba2dbc8c6943fb574273a5efa87da4556ef9f460b5c0893b7",
+      "chat_template_sha256": "3802169b2a02b81e6adb7ab4f64f91ff02db753c8c3a64a01c35192d3a61d8d7",
+      "protocol": "project",
+      "system_message": "You are a helpful Assistant.",
+      "system_injection_rule": "injected only when the sample carries no system turn and protocol == project; a sample's own system prompt is preserved",
+      "chat_template_kwargs_json": "{}",
+      "thinking_mode": "template-default (not overridden)",
+      "trained_context": 8192,
+      "context_len_override": null,
+      "resolved_context": 8192,
+      "context_source": "trained_block_len",
+      "context_resolution_rule": "min(trained_context, architectural context); the effective context is the TRAINED context and this is not a 262K-context evaluation",
+      "temperature": 0.0,
+      "top_p": 1.0,
+      "top_k": -1,
+      "detokenize": false,
+      "max_tokens_rule": "per sample: resolved_context - len(prompt_ids); P18 unrestricted, never a chosen token budget",
+      "stop_token_ids": [
+        151645
+      ],
+      "stop_id_derivation_rule": "sorted union of config.eos_token_id, generation_config.eos_token_id, <|im_end|> and tokenizer.eos_token_id",
+      "degeneration_stop": true,
+      "degeneration_check_every": 256,
+      "degeneration_source_digest": "793540820d4fc0f42d0c855e0d79eb879b94efa451e06030b2a14c55683f4961",
+      "runtime_digest": "f0db1b430df37c766e9117ac24c0cbd1a4c89420a089b846884776a24d1594b6",
+      "protocol_id": "recovery_generation",
+      "version": 1,
+      "generation_protocol_fingerprint": "d07d1296e62fbd4fed50add28476aa334b47d1d7a0849a14ccb6d6bfefaafffb",
+      "is_materialized": true,
+      "unmaterialized_fields": [],
+      "excluded_by_design": [
+        "the checkpoint being generated from"
+      ],
+      "why_excluded": "the checkpoint is the treatment; a generation identity containing it would mark every pair of arms as mismatched"
+    },
+    "scoring_contract": "recovery_search_scoring@v2",
+    "scoring_digest": "69591aab8626c8300fb485fdfa82d52aa434eb9576fae39d36281f8bf40a9f8a",
+    "battery": {
+      "artifact": "recovery_search_v1",
+      "manifest_sha256": "72d8c0535e7752faf704d9075b7835a47610fd3cd26866cf5be7d48eb7b40ad1",
+      "content_sha256": "a1b22778b00d95b6aba358c14a5af5b559fd807bb371c92131eacca59479f323"
+    },
+    "binding": "every control and every searched recovery probe must bind to this exact hash; a probe measured under a different one is not comparable to the thresholds materialized from these controls",
+    "notes": {}
+  },
+  "evaluation_protocol_hash": "dfc3d9198131adc1523f3c338f2fc97bf5ad130be55102e4674a466c439ea2ba",
+  "report_sha256": "9f449caacb4c1afdb6413c3464e17ca52ed01e4a404bb0ec5b73734a8f5f4a7b"
+}

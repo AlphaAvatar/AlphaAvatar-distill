@@ -2,120 +2,232 @@
   "schema": "aadistill.autoinit.preflight_session/v1",
   "timeline": [
     {
-      "utc": "2026-08-13T16:20:31+00:00",
+      "utc": "2026-08-13T19:21:49+00:00",
       "elapsed_min": 0.0,
       "msg": "budget: expected 273 min $4.50 \u00b7 soft $4.95 \u00b7 hard $5.44 (authorized $8.60)"
     },
     {
-      "utc": "2026-08-13T16:20:32+00:00",
+      "utc": "2026-08-13T19:21:50+00:00",
       "elapsed_min": 0.0,
       "msg": "NVIDIA L40S $0.99/h, stock Low"
     },
     {
-      "utc": "2026-08-13T16:20:33+00:00",
+      "utc": "2026-08-13T19:21:50+00:00",
       "elapsed_min": 0.0,
       "msg": "precheck OK: 2 relay inputs, 2 local assets"
     },
     {
-      "utc": "2026-08-13T16:20:34+00:00",
+      "utc": "2026-08-13T19:21:51+00:00",
       "elapsed_min": 0.0,
-      "msg": "created 6xrudht3i7wc62 at $0.99/h"
+      "msg": "created yfr80fbbgl3q9m at $0.99/h"
     },
     {
-      "utc": "2026-08-13T16:20:34+00:00",
+      "utc": "2026-08-13T19:21:51+00:00",
       "elapsed_min": 0.0,
       "msg": "watchdog detached \u2014 hard 330 min = $5.44"
     },
     {
-      "utc": "2026-08-13T16:21:07+00:00",
-      "elapsed_min": 0.55,
-      "msg": "TCP 22 at 202.181.159.228:16805 after 0.6 min"
+      "utc": "2026-08-13T19:22:45+00:00",
+      "elapsed_min": 0.9,
+      "msg": "  starting (60s) \u2014 $0.01"
     },
     {
-      "utc": "2026-08-13T16:21:09+00:00",
-      "elapsed_min": 0.59,
-      "msg": "draw 1: ssh reachable \u2014 $0.01"
+      "utc": "2026-08-13T19:23:50+00:00",
+      "elapsed_min": 1.98,
+      "msg": "  starting (120s) \u2014 $0.03"
     },
     {
-      "utc": "2026-08-13T16:21:35+00:00",
-      "elapsed_min": 1.02,
-      "msg": "draw 1: image identity runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@580.126.09"
+      "utc": "2026-08-13T19:24:54+00:00",
+      "elapsed_min": 3.04,
+      "msg": "  starting (180s) \u2014 $0.05"
     },
     {
-      "utc": "2026-08-13T16:21:35+00:00",
-      "elapsed_min": 1.02,
+      "utc": "2026-08-13T19:25:58+00:00",
+      "elapsed_min": 4.1,
+      "msg": "  starting (240s) \u2014 $0.07"
+    },
+    {
+      "utc": "2026-08-13T19:27:01+00:00",
+      "elapsed_min": 5.17,
+      "msg": "  starting (300s) \u2014 $0.09"
+    },
+    {
+      "utc": "2026-08-13T19:28:05+00:00",
+      "elapsed_min": 6.23,
+      "msg": "  starting (360s) \u2014 $0.10"
+    },
+    {
+      "utc": "2026-08-13T19:29:09+00:00",
+      "elapsed_min": 7.29,
+      "msg": "  starting (420s) \u2014 $0.12"
+    },
+    {
+      "utc": "2026-08-13T19:30:13+00:00",
+      "elapsed_min": 8.36,
+      "msg": "  starting (480s) \u2014 $0.14"
+    },
+    {
+      "utc": "2026-08-13T19:31:18+00:00",
+      "elapsed_min": 9.44,
+      "msg": "  starting (540s) \u2014 $0.16"
+    },
+    {
+      "utc": "2026-08-13T19:32:21+00:00",
+      "elapsed_min": 10.5,
+      "msg": "  starting (600s) \u2014 $0.17"
+    },
+    {
+      "utc": "2026-08-13T19:33:25+00:00",
+      "elapsed_min": 11.56,
+      "msg": "  starting (660s) \u2014 $0.19"
+    },
+    {
+      "utc": "2026-08-13T19:34:29+00:00",
+      "elapsed_min": 12.63,
+      "msg": "  starting (720s) \u2014 $0.21"
+    },
+    {
+      "utc": "2026-08-13T19:34:40+00:00",
+      "elapsed_min": 12.81,
+      "msg": "TCP 22 at 82.221.170.242:38799 after 12.8 min"
+    },
+    {
+      "utc": "2026-08-13T19:34:42+00:00",
+      "elapsed_min": 12.85,
+      "msg": "draw 1: ssh reachable \u2014 $0.21"
+    },
+    {
+      "utc": "2026-08-13T19:36:45+00:00",
+      "elapsed_min": 14.89,
+      "msg": "draw 1: image identity runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@580.159.03"
+    },
+    {
+      "utc": "2026-08-13T19:36:45+00:00",
+      "elapsed_min": 14.89,
       "msg": "draw 1: running setup"
     },
     {
-      "utc": "2026-08-13T16:27:08+00:00",
-      "elapsed_min": 6.58,
-      "msg": "draw 1: setup complete \u2014 $0.11"
+      "utc": "2026-08-13T19:47:06+00:00",
+      "elapsed_min": 25.25,
+      "msg": "COLD on draw 1 \u2014 abandoning yfr80fbbgl3q9m and redrawing"
     },
     {
-      "utc": "2026-08-13T16:27:13+00:00",
-      "elapsed_min": 6.66,
-      "msg": "driver detached, pid 3258, confirmed by descriptor_probe \u2014 $0.11"
+      "utc": "2026-08-13T19:47:08+00:00",
+      "elapsed_min": 25.27,
+      "msg": "created hwyay7b9df9e77 at $0.99/h"
     },
     {
-      "utc": "2026-08-13T16:29:29+00:00",
-      "elapsed_min": 8.92,
-      "msg": "  2026-08-13T16:28:59Z MARKER:STAGE_START:1 \u2014 $0.15"
+      "utc": "2026-08-13T19:47:08+00:00",
+      "elapsed_min": 25.27,
+      "msg": "watchdog detached \u2014 hard 330 min = $5.44"
     },
     {
-      "utc": "2026-08-13T16:59:30+00:00",
-      "elapsed_min": 38.93,
-      "msg": "  2026-08-13T16:58:38Z MARKER:STAGE_START:2 \u2014 $0.64"
+      "utc": "2026-08-13T19:47:30+00:00",
+      "elapsed_min": 25.64,
+      "msg": "TCP 22 at 202.181.159.228:14790 after 25.6 min"
     },
     {
-      "utc": "2026-08-13T18:01:37+00:00",
-      "elapsed_min": 101.06,
-      "msg": "  2026-08-13T18:00:18Z MARKER:TRAIN_DONE:preflight_ctl_r0860k_sa \u2014 $1.67"
+      "utc": "2026-08-13T19:47:32+00:00",
+      "elapsed_min": 25.68,
+      "msg": "draw 2: ssh reachable \u2014 $0.42"
     },
     {
-      "utc": "2026-08-13T19:03:45+00:00",
-      "elapsed_min": 163.19,
-      "msg": "  2026-08-13T19:01:54Z MARKER:STAGE_START:3 \u2014 $2.69"
+      "utc": "2026-08-13T19:47:58+00:00",
+      "elapsed_min": 26.11,
+      "msg": "draw 2: image identity runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@580.126.09"
     },
     {
-      "utc": "2026-08-13T19:10:39+00:00",
-      "elapsed_min": 170.08,
-      "msg": "  2026-08-13T19:09:22Z MARKER:PREFLIGHT_INCOMPLETE \u2014 $2.81"
+      "utc": "2026-08-13T19:47:58+00:00",
+      "elapsed_min": 26.11,
+      "msg": "draw 2: running setup"
     },
     {
-      "utc": "2026-08-13T19:10:39+00:00",
-      "elapsed_min": 170.08,
+      "utc": "2026-08-13T19:53:25+00:00",
+      "elapsed_min": 31.56,
+      "msg": "draw 2: setup complete \u2014 $0.52"
+    },
+    {
+      "utc": "2026-08-13T19:53:30+00:00",
+      "elapsed_min": 31.64,
+      "msg": "driver detached, pid 3252, confirmed by descriptor_probe \u2014 $0.52"
+    },
+    {
+      "utc": "2026-08-13T19:55:45+00:00",
+      "elapsed_min": 33.9,
+      "msg": "  2026-08-13T19:55:17Z MARKER:STAGE_START:1 \u2014 $0.56"
+    },
+    {
+      "utc": "2026-08-13T20:25:49+00:00",
+      "elapsed_min": 63.96,
+      "msg": "  2026-08-13T20:25:28Z MARKER:STAGE_START:2 \u2014 $1.06"
+    },
+    {
+      "utc": "2026-08-13T21:27:59+00:00",
+      "elapsed_min": 126.12,
+      "msg": "  2026-08-13T21:27:08Z MARKER:TRAIN_DONE:preflight_ctl_r0860k_sa \u2014 $2.08"
+    },
+    {
+      "utc": "2026-08-13T22:30:06+00:00",
+      "elapsed_min": 188.24,
+      "msg": "  2026-08-13T22:28:37Z MARKER:STAGE_START:3 \u2014 $3.11"
+    },
+    {
+      "utc": "2026-08-13T22:37:00+00:00",
+      "elapsed_min": 195.14,
+      "msg": "  2026-08-13T22:35:45Z MARKER:PREFLIGHT_INCOMPLETE \u2014 $3.22"
+    },
+    {
+      "utc": "2026-08-13T22:37:00+00:00",
+      "elapsed_min": 195.14,
       "msg": "a blocking stage failed \u2014 collecting evidence, then tearing down. Permanent controls were not trained under a configuration that has to change."
     },
     {
-      "utc": "2026-08-13T19:10:39+00:00",
-      "elapsed_min": 170.08,
-      "msg": "polling ended: PREFLIGHT_INCOMPLETE \u2014 $2.81"
+      "utc": "2026-08-13T22:37:00+00:00",
+      "elapsed_min": 195.14,
+      "msg": "polling ended: PREFLIGHT_INCOMPLETE \u2014 $3.22"
     },
     {
-      "utc": "2026-08-13T19:10:56+00:00",
-      "elapsed_min": 170.37,
-      "msg": "  manifest rc=1\n"
+      "utc": "2026-08-13T22:41:18+00:00",
+      "elapsed_min": 199.44,
+      "msg": "  manifest rc=0\n40 file(s) across 12 class(es) -> /workspace/manifest.json\n  final_required: 40 \u00b7 mutable_snapshot: 0 \u00b7 final_streams_quiescent: True"
     },
     {
-      "utc": "2026-08-13T19:11:14+00:00",
-      "elapsed_min": 170.68,
+      "utc": "2026-08-13T22:50:29+00:00",
+      "elapsed_min": 208.62,
+      "msg": "  checkpoint preflight_ctl_r0860k_sa: rc=0, 5.51 GiB -> /home/ecs-user/aad-artifacts/autoinit/preflight_ctl_r0860k_sa"
+    },
+    {
+      "utc": "2026-08-13T22:59:27+00:00",
+      "elapsed_min": 217.6,
+      "msg": "  checkpoint preflight_ctl_r0860k_sb: rc=0, 5.50 GiB -> /home/ecs-user/aad-artifacts/autoinit/preflight_ctl_r0860k_sb"
+    },
+    {
+      "utc": "2026-08-13T22:59:36+00:00",
+      "elapsed_min": 217.74,
       "msg": "teardown gate: allowed=True failed=training_complete"
     },
     {
-      "utc": "2026-08-13T19:11:14+00:00",
-      "elapsed_min": 170.68,
+      "utc": "2026-08-13T22:59:36+00:00",
+      "elapsed_min": 217.74,
       "msg": "deleting pod (gate passed after PREFLIGHT_INCOMPLETE)"
     },
     {
-      "utc": "2026-08-13T19:11:25+00:00",
-      "elapsed_min": 170.86,
-      "msg": "pod deleted \u2014 170.9 min, $2.82; provider confirms gone: True"
+      "utc": "2026-08-13T22:59:47+00:00",
+      "elapsed_min": 217.92,
+      "msg": "pod deleted \u2014 217.9 min, $3.60; provider confirms gone: True"
     }
   ],
   "stages": {
     "setup": [
       {
         "draw": 1,
+        "setup_done": "0",
+        "host_cold": "1",
+        "setup_rc": "90",
+        "tail": "SETUP_RC=90"
+      },
+      {
+        "draw": 2,
         "setup_done": "1",
         "host_cold": "0",
         "setup_rc": "0",
@@ -149,8 +261,8 @@
     "scope_note": "micro-preflight only. If Stage 0/1 indicates that hardware, runtime, storage strategy, trainer semantics, evaluation semantics or any frozen identity must change, stop before permanent controls and return for review. Phase A remains separately unauthorized and must not start automatically.",
     "phase_a_authorized": false,
     "automatic_phase_a_start": false,
-    "authorized_session_commit": "40189ea20f2eb8d4f3f8f646e682b115c8a5ff1d",
-    "harness_source_digest": "b58834cb528f6b67598a7ab39bf5c929bf9043eed8e481a086746a8e0d274862",
+    "authorized_session_commit": "043071bfc588fe71e3b947d1f630aa0d10eb69aa",
+    "harness_source_digest": "c2c15154b061fa1cb90c5cc42e1d2d5c35c19eb5c00feadff2a0b91c077f5133",
     "harness_source_files": [
       "scripts/pod/autoinit_preflight_launch.py",
       "scripts/pod/autoinit_preflight_driver.py",
@@ -161,12 +273,12 @@
       "src/aadistill/autoinit/authorization.py",
       "src/aadistill/autoinit/generation.py"
     ],
-    "provenance_commit": "40189ea20f2eb8d4f3f8f646e682b115c8a5ff1d",
+    "provenance_commit": "043071bfc588fe71e3b947d1f630aa0d10eb69aa",
     "enforcement": "the launcher loads this artifact and refuses to create a pod whose priced hard threshold exceeds hard_cap_usd, refuses a stage not in authorized_stages, and has no code path to Phase A",
-    "authorization_sha256": "b8b8c717fbe6871476817dd8985bb2b9921f90c71c1c6745f101023004eb5e2f"
+    "authorization_sha256": "11186ccaeb4de35d08e9fbeb857006ab96abf759fda5a21d68b08bff608e9ea2"
   },
   "preflight_plan_hash": "37dbd7b22e3e884eff9d55f95c5ce25a212f823d2f396691c30d47930076f8ab",
-  "harness_source_digest": "b58834cb528f6b67598a7ab39bf5c929bf9043eed8e481a086746a8e0d274862",
+  "harness_source_digest": "c2c15154b061fa1cb90c5cc42e1d2d5c35c19eb5c00feadff2a0b91c077f5133",
   "harness_source_files": [
     "scripts/pod/autoinit_engine_probe.py",
     "scripts/pod/autoinit_preflight_driver.py",
@@ -249,11 +361,12 @@
     ],
     "local_missing": []
   },
-  "pod_id": "6xrudht3i7wc62",
+  "pod_id": "hwyay7b9df9e77",
   "actual_price_per_hour": 0.99,
-  "terminate_after_utc": "2026-08-13T21:50:19Z",
+  "terminate_after_utc": "2026-08-14T01:16:53Z",
   "watchdog_journals": [
-    "/home/ecs-user/aad-scratch/autoinit_pf3_20260813_162012/watchdog.jsonl"
+    "/home/ecs-user/aad-scratch/autoinit_pf4_20260813_192141/watchdog.jsonl",
+    "/home/ecs-user/aad-scratch/autoinit_pf4_20260813_192141/watchdog.jsonl"
   ],
   "image_identity": {
     "image_name": "runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404",
@@ -264,20 +377,34 @@
   },
   "driver_job": {
     "job_id": "autoinit_preflight_driver",
-    "pid": 3258,
+    "pid": 3252,
     "workdir": "/workspace/aad",
-    "command": "/opt/train/bin/python scripts/pod/autoinit_preflight_driver.py --stage all --image-digest 'runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@580.126.09' --rate 0.99 --spent-usd 0.109 --soft-stop-usd 4.95 --authorized-usd 5.44",
+    "command": "/opt/train/bin/python scripts/pod/autoinit_preflight_driver.py --stage all --image-digest 'runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@580.126.09' --rate 0.99 --spent-usd 0.521 --soft-stop-usd 4.95 --authorized-usd 5.44",
     "log_path": "/workspace/autoinit_preflight_run.log",
     "status_path": "/workspace/autoinit_preflight.status",
     "pid_path": "/workspace/jobs/autoinit_preflight_driver.pid",
     "descriptor_path": "/workspace/jobs/autoinit_preflight_driver.job.json",
     "exit_path": "/workspace/jobs/autoinit_preflight_driver.exit",
-    "started_utc": "2026-08-13T16:27:11Z",
+    "started_utc": "2026-08-13T19:53:28Z",
     "start_channel_closed": true,
     "confirmed_by": "descriptor_probe"
   },
   "terminal": "PREFLIGHT_INCOMPLETE",
-  "checkpoints_fetched": [],
+  "local_hash_problems": [],
+  "checkpoints_fetched": [
+    {
+      "control": "preflight_ctl_r0860k_sa",
+      "rc": 0,
+      "bytes": 5919687519,
+      "dest": "/home/ecs-user/aad-artifacts/autoinit/preflight_ctl_r0860k_sa"
+    },
+    {
+      "control": "preflight_ctl_r0860k_sb",
+      "rc": 0,
+      "bytes": 5908260126,
+      "dest": "/home/ecs-user/aad-artifacts/autoinit/preflight_ctl_r0860k_sb"
+    }
+  ],
   "fetched_reports": [
     "preflight_evidence.json",
     "attested_protocol.json"
@@ -286,26 +413,31 @@
     "allowed": true,
     "emergency": true,
     "failed_check": "training_complete",
-    "reason": "EMERGENCY budget teardown over a failed gate (training_complete): a blocking stage failed (PREFLIGHT_INCOMPLETE); the controls do not exist and must not be demanded. Evidence is collected under the reduced spec and the pod is torn down.. Artifacts for the remaining checks ['training_complete', 'evaluation_complete', 'artifact_manifest_created', 'required_files_present', 'final_streams_quiescent', 'archive_created', 'archive_contents_verified', 'transfer_complete', 'local_hashes_verified', 'report_inputs_verified'] are LOST. THE FINAL EVENT STREAM IS INCOMPLETE for ['artifacts/stage3/preflight_ctl_r0860k_sa/train_log.jsonl', 'artifacts/stage3/preflight_ctl_r0860k_sb/train_log.jsonl']: only a mutable_snapshot survives and its tail is lost.",
+    "reason": "EMERGENCY budget teardown over a failed gate (training_complete): a blocking stage failed (PREFLIGHT_INCOMPLETE); the controls do not exist and must not be demanded. Evidence is collected under the reduced spec and the pod is torn down.. Artifacts for the remaining checks ['training_complete', 'evaluation_complete'] are LOST.",
     "checks": {
       "training_complete": false,
       "evaluation_complete": false,
-      "artifact_manifest_created": false,
-      "required_files_present": false,
-      "final_streams_quiescent": false,
-      "archive_created": false,
-      "archive_contents_verified": false,
-      "transfer_complete": false,
-      "local_hashes_verified": false,
+      "artifact_manifest_created": true,
+      "required_files_present": true,
+      "final_streams_quiescent": true,
+      "archive_created": true,
+      "archive_contents_verified": true,
+      "transfer_complete": true,
+      "local_hashes_verified": true,
       "checkpoint_hashes_matched": true,
-      "report_inputs_verified": false
+      "report_inputs_verified": true
     },
     "incomplete_event_streams": [
       "artifacts/stage3/preflight_ctl_r0860k_sa/train_log.jsonl",
       "artifacts/stage3/preflight_ctl_r0860k_sb/train_log.jsonl"
     ]
   },
-  "manifest_summary": null,
+  "manifest_summary": {
+    "ok": true,
+    "entries": 40,
+    "missing": [],
+    "still_being_written": []
+  },
   "final_pod_state": {
     "exists": false,
     "desired_status": "TERMINATED",
@@ -314,11 +446,11 @@
   "provider_confirms_gone": true,
   "cost": {
     "price_per_hour": 0.99,
-    "elapsed_minutes": 170.86,
-    "actual_usd": 2.8192,
+    "elapsed_minutes": 217.92,
+    "actual_usd": 3.5957,
     "authorized_usd": 8.6,
     "within_authorization": true
   },
   "passed": false,
-  "finished_utc": "2026-08-13T19:11:25+00:00"
+  "finished_utc": "2026-08-13T22:59:47+00:00"
 }

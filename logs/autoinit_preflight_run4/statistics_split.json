@@ -1,0 +1,33 @@
+{
+  "schema": "aadistill.autoinit.statistics_split/v1",
+  "generated_utc": "2026-08-13T20:23:49.250476+00:00",
+  "teacher": "Qwen/Qwen3-4B-Thinking-2507",
+  "revision": "768f209d9ea81521153ed38c47d515654e938aea",
+  "device": "cuda",
+  "is_real_teacher": true,
+  "is_gate_measurement": true,
+  "tokens": 59763,
+  "seq_len": 892,
+  "sequences": 66,
+  "hidden_size": 2560,
+  "repeats": 3,
+  "gpu_forward_seconds": [
+    4.184,
+    4.097,
+    4.177
+  ],
+  "cpu_float64_accumulate_seconds": [
+    3.978,
+    3.805,
+    3.821
+  ],
+  "total_seconds": [
+    8.162,
+    7.902,
+    7.999
+  ],
+  "gpu_fraction": 0.5177,
+  "seconds_per_1k_tokens": 0.1362,
+  "note": "one statistics pass over the real mixture; the CPU term does not shrink with a faster GPU, which is what the range was about",
+  "report_sha256": "86b9e26557d31ce5694627312567fc61a073c9efe883774f1df2aa96db47b042"
+}

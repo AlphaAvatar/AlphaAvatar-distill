@@ -1,68 +1,88 @@
 **Updated:** 2026-08-14 · branch `main` · working tree clean
-**No pods running. Nothing billing.** **1,572 CPU tests pass**, 7 skipped.
+**No pods running. Nothing billing.** **1,576 CPU tests pass**, 7 skipped.
 
-**Two micro-preflight attempts ran and both stopped early, for $0.3169 total. No
-scientific artifact was produced, and none was corrupted.** Attempt 1 ($0.03)
-died in setup: the frozen-asset gate invoked `/opt/train/bin/python` before `uv
-sync` creates it, and reported the missing interpreter as an asset mismatch.
-Attempt 2 ($0.29) passed setup and **Stage 0** — runtime attested, both protocol
-identities materialized and frozen (attested recovery protocol `6b9b3da9…`,
-evaluation protocol `b90ae5e6…`), vLLM booted and reported its real settings —
-then **Stage 1 raised** and the session stopped. The two permanent controls were
-**not** trained, which is the staging working exactly as designed. Both pods were
-deleted and the provider confirmed gone.
+## The two permanent canonical controls EXIST and are hash-verified
 
-**The finding worth carrying: the three Stage-1 measurement scripts had never
-been executed.** They were reviewed, wired into the driver and rehearsed
-*around* — every harness test stubbed them out — so a one-line
-`result.as_dict()["metrics"]` (the key is `values`) survived a 1,565-test suite
-and cost a pod. All three now run end to end in the suite against a tiny
-stand-in teacher, each records whether it is a real measurement, and Stage 1
-fails closed on a smoke artifact. Gate output is kept as a collected log and
-truncated reasons keep their tail — attempt 2's only account of its failure was
-`Loading weights: 100%`. See [`decisions.md`](decisions.md) 2026-08-14.
+`/home/ecs-user/aad-artifacts/autoinit/preflight_ctl_r0860k_{sa,sb}` — 5.51 and
+5.50 GiB, weights `573847a730c1a499…` and `4c6adcf861871690…`, **re-hashed
+locally after transfer against the values recorded on the pod**. Evidence in
+[`autoinit_preflight_run4/`](autoinit_preflight_run4/).
 
-**The micro-preflight harness is otherwise complete and rehearsed at $0.**
-`scripts/pod/autoinit_preflight_{setup.sh,driver.py,launch.py}` plus
-`autoinit_engine_probe.py`, three Stage-1 measurement scripts, and two artifact
-specs. 22 rehearsal scenarios in
-[`tests/pod/test_autoinit_preflight_rehearsal.py`](../tests/pod/test_autoinit_preflight_rehearsal.py)
-drive the real driver through every blocking path and prove that a Stage-0/1
-failure never reaches the permanent controls, that evidence survives, and that
-the success path cannot fall through to Phase A.
+Both were trained under, and **verified against**, the Stage-0 attested protocol:
+1023/1023 steps, **40/40 material protocol fields reconstructed from each run's
+own artifacts**, 0 mismatched, 0 unknown, pack hash recomputed from the pack each
+run read, initialization independently hashed to the pinned `86fbba78…`, seeds
+observed as 20260726 / 20260801. Observed protocol `aad75fee8a897d9c…`; probe ids
+`799bd5ac…` / `793f786a…`. They are **not yet characterized** — Stage 3 is blocked
+(below) — so they are not yet usable as Phase-A control probes.
 
-**Execution verification is closed: the harness proves what *ran*, not what the
-driver intended.** Stage 2 reconstructs the protocol from the run's own artifacts
+**Weight hashes are not reproducible across sessions and are not expected to be.**
+Attempt 3 produced the same protocol, initialization and seeds with different
+weights. GPU training is not bitwise reproducible; selection is on measured
+behaviour.
+
+## Stage 3 is blocked on tool rendering — a protocol decision, not a bug fix
+
+`uncapped_eval.py` passes the frozen battery's `tools` straight to
+`apply_chat_template`, and **transformers 5.15** raises `ValueError: Tools should
+either be a JSON schema, or a callable function…`. The battery stores tools as a
+**JSON string** of xLAM objects whose `parameters` is a flat name→spec dict.
+Historical E1-E7 tool evaluations ran under transformers 4.x, which accepted it.
+
+Normalizing changes what the model sees in every tool prompt — which changes the
+`tool` capability that `recovery_search_scoring@v2` exists to measure, and makes
+new numbers incomparable to the historical ones. **Open for the maintainer:**
+normalize at the generator, normalize in the frozen asset, or pin the evaluation
+transformers version. See [`decisions.md`](decisions.md) 2026-08-14.
+
+## Micro-preflight: four attempts, $6.7369 of $8.60. STOP.
+
+$1.8631 remains, which is less than a session costs (~$3.2). Nothing further is
+launched without a new increment.
+
+| # | cost | reached | why it stopped |
+| --- | --- | --- | --- |
+| 1 | $0.0300 | setup | frozen-asset gate invoked `/opt/train/bin/python` before `uv sync` creates it |
+| 2 | $0.2869 | Stage 1 | `measure_state_repeatability.py` read `as_dict()["metrics"]`; the key is `values` |
+| 3 | $2.8200 | Stage 3 | controls trained and verified, then **deleted unfetched**; collection had never worked |
+| 4 | $3.6000 | Stage 3 | controls **retrieved**; generation blocked on tool rendering |
+
+**Every failure was in code that had never executed** — an interpreter path, three
+measurement scripts, an artifact spec, a fetch condition, a chat-template call.
+The suite was large and the harness heavily rehearsed, but rehearsal that stubs
+the thing being rehearsed proves the caller, not the callee. What changed: the
+three Stage-1 probes now run for real in the suite against a tiny teacher; both
+artifact specs are loaded by a test; the generation path is smoke-run on the
+**hardest** sets inside Stage 1 before any control is trained; gate output is kept
+as a collected log and truncated reasons keep their tail.
+
+## Stage-1 measurements (real, from attempt 4)
+
+| gate | value |
+| --- | --- |
+| evaluator repeatability, 10 repeats, real teacher + suite | **0.0** vs declared epsilon 1e-4 — `conservative_review_gate@v1` does not fire |
+| peak GPU resident, widest operator | **13.98 GiB** on an L40S, gate 40 GiB, derived estimate 14.3 |
+| activation-statistics GPU/CPU split | **gpu_fraction 0.5177** (0.5609 on the other host), 0.141 s/1k tokens — collapses the 3.6× cost range in the pilot proposal |
+| disk | write 1351 MB/s, read 1692 MB/s |
+| step time | **3.15 s/step**, against a priced 4.15 — a control finishes in 61.6 min, not 85 |
+
+The wall-clock gate is enforced **slow-side only**: at −27.5% drift the symmetric
+form would have rejected two good controls for finishing early.
+
+## Execution verification is closed
+
+Stage 2 reconstructs the protocol from the run's own artifacts
 (`RecoveryProtocolFingerprint.from_run_artifacts` / `observe_recovery_protocol`)
-— nothing defaulted, nothing inherited from the preregistration,
-`pack_blocks_sha256` **recomputed** from the pack the run read, step accounting
-required — and compares *that* to the Stage-0 attestation before a control is
-bound by (observed protocol, probe id, weights sha256). Stage 3 reconstructs the
-generation protocol from the stored rollout summaries (`from_run_summaries`),
-requires every set to agree, compares it to the attested fingerprint **before
-scoring**, and binds each sa/sb result to an observed
-`RecoveryEvaluationProtocol`. Six targeted failure scenarios in
+— nothing defaulted, nothing inherited from the preregistration, pack hash
+recomputed, step accounting required — and compares *that* to the Stage-0
+attestation before binding a control by (observed protocol, probe id, weights
+sha256). Stage 3 reconstructs the generation protocol from the stored rollout
+summaries (`from_run_summaries`), requires every set to agree, and compares it to
+the attested fingerprint **before scoring**. Six targeted failure scenarios in
 [`tests/pod/test_observed_protocol_rehearsal.py`](../tests/pod/test_observed_protocol_rehearsal.py),
-two of which drive the **real trainer** end to end. Details:
-[`autoinit_preflight_remaining_gates.md`](autoinit_preflight_remaining_gates.md).
-
-**Defects this work found before they could cost anything:** the driver passed
-`train_stage3.py --out-dir`, which that script does not accept; Stage 3 would
-have generated from a **vocab-size-1** tokenizer, because `save_pretrained`
-writes none and `AutoTokenizer` returns a degenerate one instead of raising; and
-four tests read gitignored artifacts the preflight does not stage, so the setup
-test gate would have failed after `uv sync`, the vLLM install and the teacher
-download.
-
-Two identities beyond the training protocol: `RecoveryGenerationProtocolFingerprint`
-(declared `f4ac7448…`, unchanged; materialized at Stage 0 **from the vLLM
-environment**, not the training venv — the earlier fill described a stack that
-never generates a token) and `RecoveryEvaluationProtocol` = generation +
-`recovery_search_scoring@v2` + battery identity. Spend is bound by
-[`autoinit_micro_preflight_authorization.json`](autoinit_micro_preflight_authorization.json)
-($4.20 expected / $8.60 hard, stages 0-3, `phase_a_authorized: false`), re-issued
-against the harness after every change, which the launcher loads before a pod
-can exist.
+two of which drive the real trainer end to end. The attestation demonstrably
+tracks the host: attempt 2 attested a different runtime on the same image tag
+with a different NVIDIA driver.
 
 **Recovery-search scoring is now `recovery_search_scoring@v2`** (digest
 `69591aab…`, re-pinned from `f76008d5…` on 2026-08-13 when `recovery.py` gained

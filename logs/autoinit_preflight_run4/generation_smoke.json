@@ -1,0 +1,13 @@
+{
+  "sets": [
+    "code"
+  ],
+  "prompts": 2,
+  "model": "canonical init (not a control)",
+  "observed_generation_fingerprint": "d07d1296e62fbd4fed50add28476aa334b47d1d7a0849a14ccb6d6bfefaafffb",
+  "attested_generation_fingerprint": "d07d1296e62fbd4fed50add28476aa334b47d1d7a0849a14ccb6d6bfefaafffb",
+  "identical": true,
+  "mismatched": [],
+  "unknown": [],
+  "is_measurement": false
+}

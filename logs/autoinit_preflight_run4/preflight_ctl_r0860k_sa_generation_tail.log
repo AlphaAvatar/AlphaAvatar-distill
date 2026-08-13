@@ -1,0 +1,28 @@
+ 35.94it/s]
+Capturing CUDA graphs (PIECEWISE):  59%|█████▉    | 30/51 [00:00<00:00, 28.64it/s]
+Capturing CUDA graphs (PIECEWISE):  67%|██████▋   | 34/51 [00:01<00:00, 29.62it/s]
+Capturing CUDA graphs (PIECEWISE):  76%|███████▋  | 39/51 [00:01<00:00, 34.16it/s]
+Capturing CUDA graphs (PIECEWISE):  86%|████████▋ | 44/51 [00:01<00:00, 37.71it/s]
+Capturing CUDA graphs (PIECEWISE):  96%|█████████▌| 49/51 [00:01<00:00, 40.49it/s]
+Capturing CUDA graphs (PIECEWISE): 100%|██████████| 51/51 [00:01<00:00, 36.63it/s]
+(EngineCore pid=13412) 
+Capturing CUDA graphs (FULL):   0%|          | 0/35 [00:00<?, ?it/s]
+Capturing CUDA graphs (FULL):  17%|█▋        | 6/35 [00:00<00:00, 53.44it/s]
+Capturing CUDA graphs (FULL):  37%|███▋      | 13/35 [00:00<00:00, 57.57it/s]
+Capturing CUDA graphs (FULL):  57%|█████▋    | 20/35 [00:00<00:00, 59.65it/s]
+Capturing CUDA graphs (FULL):  77%|███████▋  | 27/35 [00:00<00:00, 61.16it/s]
+Capturing CUDA graphs (FULL):  97%|█████████▋| 34/35 [00:00<00:00, 61.32it/s]
+Capturing CUDA graphs (FULL): 100%|██████████| 35/35 [00:00<00:00, 60.41it/s]
+Traceback (most recent call last):
+  File "/workspace/aad/scripts/evaluation/uncapped_eval.py", line 547, in <module>
+    raise SystemExit(main())
+                     ^^^^^^
+  File "/workspace/aad/scripts/evaluation/uncapped_eval.py", line 321, in main
+    prompt = tok.apply_chat_template(turns, tools=s.get("tools"),
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/vllm/lib/python3.12/site-packages/transformers/tokenization_utils_base.py", line 3108, in apply_chat_template
+    rendered_chat, generation_indices = render_jinja_template(
+                                        ^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/vllm/lib/python3.12/site-packages/transformers/utils/chat_template_utils.py", line 525, in render_jinja_template
+    raise ValueError(
+ValueError: Tools should either be a JSON schema, or a callable function with type hints and a docstring suitable for auto-conversion to a schema.

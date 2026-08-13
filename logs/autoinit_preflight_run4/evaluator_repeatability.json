@@ -1,0 +1,103 @@
+{
+  "schema": "aadistill.autoinit.evaluator_repeatability/v1",
+  "generated_utc": "2026-08-13T20:23:19.565269+00:00",
+  "checkpoint": "/workspace/aad/artifacts/stage1/qwen3_0p6b_init_v0/checkpoint",
+  "artifact_digest": "dc9500d3871a0f31214d55fa2b47b82e196f4f4630c607f43a24d16ed76d83bf",
+  "suite": "state_eval@v1",
+  "suite_hash": "6421fa4cf12ee2a16f452557c486aa95beb37e4aac4f7c7fd72d380993b39833",
+  "device": "cuda",
+  "repeats": 10,
+  "teacher": "Qwen/Qwen3-4B-Thinking-2507",
+  "is_real_teacher": true,
+  "objectives": [
+    "state.teacher_kl.equal_domain_mean",
+    "state.teacher_kl.worst_domain",
+    "state.critical_token_kl"
+  ],
+  "runs": [
+    {
+      "repeat": 0,
+      "state.teacher_kl.equal_domain_mean": 10.763046289627521,
+      "state.teacher_kl.worst_domain": 12.035581080740746,
+      "state.critical_token_kl": 18.207580485302415
+    },
+    {
+      "repeat": 1,
+      "state.teacher_kl.equal_domain_mean": 10.763046289627521,
+      "state.teacher_kl.worst_domain": 12.035581080740746,
+      "state.critical_token_kl": 18.207580485302415
+    },
+    {
+      "repeat": 2,
+      "state.teacher_kl.equal_domain_mean": 10.763046289627521,
+      "state.teacher_kl.worst_domain": 12.035581080740746,
+      "state.critical_token_kl": 18.207580485302415
+    },
+    {
+      "repeat": 3,
+      "state.teacher_kl.equal_domain_mean": 10.763046289627521,
+      "state.teacher_kl.worst_domain": 12.035581080740746,
+      "state.critical_token_kl": 18.207580485302415
+    },
+    {
+      "repeat": 4,
+      "state.teacher_kl.equal_domain_mean": 10.763046289627521,
+      "state.teacher_kl.worst_domain": 12.035581080740746,
+      "state.critical_token_kl": 18.207580485302415
+    },
+    {
+      "repeat": 5,
+      "state.teacher_kl.equal_domain_mean": 10.763046289627521,
+      "state.teacher_kl.worst_domain": 12.035581080740746,
+      "state.critical_token_kl": 18.207580485302415
+    },
+    {
+      "repeat": 6,
+      "state.teacher_kl.equal_domain_mean": 10.763046289627521,
+      "state.teacher_kl.worst_domain": 12.035581080740746,
+      "state.critical_token_kl": 18.207580485302415
+    },
+    {
+      "repeat": 7,
+      "state.teacher_kl.equal_domain_mean": 10.763046289627521,
+      "state.teacher_kl.worst_domain": 12.035581080740746,
+      "state.critical_token_kl": 18.207580485302415
+    },
+    {
+      "repeat": 8,
+      "state.teacher_kl.equal_domain_mean": 10.763046289627521,
+      "state.teacher_kl.worst_domain": 12.035581080740746,
+      "state.critical_token_kl": 18.207580485302415
+    },
+    {
+      "repeat": 9,
+      "state.teacher_kl.equal_domain_mean": 10.763046289627521,
+      "state.teacher_kl.worst_domain": 12.035581080740746,
+      "state.critical_token_kl": 18.207580485302415
+    }
+  ],
+  "per_objective": {
+    "state.teacher_kl.equal_domain_mean": {
+      "min": 10.763046289627521,
+      "max": 10.763046289627521,
+      "range": 0.0,
+      "n": 10
+    },
+    "state.teacher_kl.worst_domain": {
+      "min": 12.035581080740746,
+      "max": 12.035581080740746,
+      "range": 0.0,
+      "n": 10
+    },
+    "state.critical_token_kl": {
+      "min": 18.207580485302415,
+      "max": 18.207580485302415,
+      "range": 0.0,
+      "n": 10
+    }
+  },
+  "max_objective_range": 0.0,
+  "declared_epsilon": 0.0001,
+  "response_rule": "conservative_review_gate@v1; the response is frozen before this measurement and no epsilon is re-derived from it",
+  "report_sha256": "a23e414f410a4f03a7365cac288edad145eed7e8e666f38a0e6a133eda93a179"
+}
