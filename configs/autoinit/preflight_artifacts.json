@@ -1,0 +1,22 @@
+{
+  "spec": "aadistill.artifact_spec/v1",
+  "session": "autoinit_micro_preflight",
+  "note": "success spec: every permanent artifact the preflight must not lose",
+  "entries": [
+    {"pattern": "audit/autoinit_preflight/preflight_evidence.json", "required": true, "final": true},
+    {"pattern": "audit/autoinit_preflight/attested_protocol.json", "required": true, "final": true},
+    {"pattern": "audit/autoinit_preflight/materialized_thresholds.json", "required": true, "final": true},
+    {"pattern": "audit/autoinit_preflight/engine_probe.json", "required": true, "final": true},
+    {"pattern": "audit/autoinit_preflight/evaluator_repeatability.json", "required": true, "final": true},
+    {"pattern": "audit/autoinit_preflight/statistics_split.json", "required": true, "final": true},
+    {"pattern": "audit/autoinit_preflight/peak_memory.json", "required": true, "final": true},
+    {"pattern": "audit/autoinit_preflight/preflight_ctl_r0860k_s*_probe_identity.json", "required": true, "final": true},
+    {"pattern": "audit/autoinit_preflight/preflight_ctl_r0860k_s*_recovery_search.json", "required": true, "final": true},
+    {"pattern": "audit/autoinit_preflight/preflight_ctl_r0860k_s*_per_sample.jsonl", "required": true, "final": true},
+    {"pattern": "audit/autoinit_preflight/session/*", "required": false, "final": true},
+    {"pattern": "stage3/preflight_ctl_r0860k_s*/train_log.jsonl", "required": true, "final": true},
+    {"pattern": "stage3/preflight_ctl_r0860k_s*/run_manifest.json", "required": true, "final": true},
+    {"pattern": "eval/preflight/preflight_ctl_r0860k_s*/*.generations.jsonl", "required": true, "final": true},
+    {"pattern": "eval/preflight/preflight_ctl_r0860k_s*/*.json", "required": false, "final": true}
+  ]
+}

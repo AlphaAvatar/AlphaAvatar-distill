@@ -1,6 +1,23 @@
 **Updated:** 2026-08-13 · branch `main` · working tree clean
-**No pods running. Nothing billing.** **1,536 CPU tests pass**, 7 skipped — in
+**No pods running. Nothing billing.** **1,558 CPU tests pass**, 7 skipped — in
 *both* venvs (repo `.venv` transformers 5.13.1, and the transformers 4.57.1 venv).
+
+**The micro-preflight harness is built and rehearsed at $0; the pod has not been
+launched.** `scripts/pod/autoinit_preflight_{setup.sh,driver.py,launch.py}` plus
+`autoinit_engine_probe.py`, three Stage-1 measurement scripts, and two artifact
+specs. 18 rehearsal scenarios in
+[`tests/pod/test_autoinit_preflight_rehearsal.py`](../tests/pod/test_autoinit_preflight_rehearsal.py)
+drive the real driver through every blocking path and prove that a Stage-0/1
+failure never reaches the permanent controls, that evidence survives, and that
+the success path cannot fall through to Phase A. The rehearsal found one real
+defect: a non-blocking Stage-3 failure emitted `ALL_DONE`, so the launcher would
+have reported a complete preflight; it now emits `PREFLIGHT_INCOMPLETE`.
+Two new identities: `RecoveryGenerationProtocolFingerprint` (declared
+`f4ac7448…`, materialized at Stage 0) and `RecoveryEvaluationProtocol` =
+generation + `recovery_search_scoring@v2` + battery identity. Spend is bound by
+[`autoinit_micro_preflight_authorization.json`](autoinit_micro_preflight_authorization.json)
+(`94b6c5d2…`, $4.20 expected / $8.60 hard, stages 0-3, `phase_a_authorized:
+false`), which the launcher loads before a pod exists.
 
 **Recovery-search scoring is now `recovery_search_scoring@v2`** (digest
 `f76008d5…`), superseding @v1 **before any paid measurement**. @v1 pinned the

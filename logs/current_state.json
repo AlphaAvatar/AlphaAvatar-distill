@@ -220,6 +220,12 @@
       "classification": "pre-measurement metric defect correction, not adaptive",
       "prompt_content_unchanged": true,
       "validation": "logs/autoinit_recovery_scoring_validation.json"
+    },
+    "generation_protocol": {
+      "declared_fingerprint": "f4ac744867af5818826ab6e8da85213556ef90b1759374211d94854c3c780c73",
+      "source_digest": "baf232a18123aa22f2a107bbd51c93c638ca7f466fbe0aac451137fc19a4abbe",
+      "materialized_at": "preflight Stage 0",
+      "evaluation_protocol": "generation + recovery_search_scoring@v2 + recovery_search_v1"
     }
   },
   "proposed_pilot": {
@@ -240,7 +246,7 @@
     "peak_working_storage_gib": 106
   },
   "tests": {
-    "passing": 1536,
+    "passing": 1558,
     "skipped": 7,
     "venvs_verified": [
       "repo .venv transformers 5.13.1",
@@ -268,6 +274,17 @@
     "blocker_before_phase_a": "the preregistration must be re-emitted with the attested protocol fingerprint; until Stage 0 runs, runtime_digest is null and no Phase-A comparison is eligible for MATCHED",
     "held": false,
     "held_reason": "RESOLVED 2026-08-13: the tool scoring defect is corrected under recovery_search_scoring@v2 and validated at zero cost; the maintainer approved the correction and re-authorized the preflight at $4.20 expected / $8.60 hard.",
-    "spent_usd": 0.0
+    "spent_usd": 0.0,
+    "authorization_artifact": "logs/autoinit_micro_preflight_authorization.json",
+    "authorization_sha256": "94b6c5d2167b7248ac4ba67fee15cdd97f20512a164fcb045b69bd330916d8fe",
+    "harness": {
+      "setup": "scripts/pod/autoinit_preflight_setup.sh",
+      "driver": "scripts/pod/autoinit_preflight_driver.py",
+      "launcher": "scripts/pod/autoinit_preflight_launch.py",
+      "rehearsal": "tests/pod/test_autoinit_preflight_rehearsal.py",
+      "rehearsal_scenarios": 18,
+      "rehearsed": true,
+      "launched": false
+    }
   }
 }
