@@ -465,6 +465,42 @@ def test_the_success_path_completes_and_cannot_reach_phase_a(tmp_path):
     assert thresholds["pooled"]["aggregation"] == "pooled_counts@v1"
 
 
+def test_setup_never_invokes_an_interpreter_it_has_not_built_yet():
+    """A gate that cannot run is not a gate — and it lied about why.
+
+    The frozen-asset check was placed before `uv sync` and invoked
+    `/opt/train/bin/python`, which that step creates. The `||` branch then
+    reported "FROZEN ASSET IDENTITY MISMATCH" for what was really a missing
+    interpreter: a $0.03 pod on 2026-08-13, and a message that would have sent
+    the next reader to look for a corrupted asset.
+
+    This is a whole class of ordering bug, so it is checked as one: no line may
+    use a venv interpreter before the line that builds that venv.
+    """
+    setup = (REPO / "scripts/pod/autoinit_preflight_setup.sh").read_text()
+    lines = setup.splitlines()
+
+    def first(pattern: str) -> int:
+        return next((i for i, line in enumerate(lines) if pattern in line), -1)
+
+    for interpreter, builder in (("/opt/train/bin/python", "uv sync --group dev"),
+                                 ("/opt/vllm/bin/python", "python3 -m venv /opt/vllm")):
+        built_at = first(builder)
+        assert built_at >= 0, f"{builder!r} is no longer in setup"
+        used_at = first(interpreter)
+        assert used_at > built_at, (
+            f"{interpreter} is used on line {used_at + 1}, before "
+            f"{builder!r} creates it on line {built_at + 1}")
+
+    # And the gate still blocks before the driver: it runs inside setup, and
+    # setup's success marker is what the launcher gates the driver on.
+    assert first("verify_frozen_assets.py") < first("mark SETUP_DONE")
+    assert "exit 91" in setup and "FROZEN_ASSETS_FAILED" in setup
+    # The failure must print what actually happened rather than asserting a
+    # cause it did not establish.
+    assert "output follows verbatim" in setup
+
+
 def test_phase_a_is_not_expressible_in_the_driver_or_the_launcher():
     driver = DRIVER_PATH.read_text()
     launch = LAUNCH_PATH.read_text()

@@ -10,8 +10,9 @@
 # for ~$3.10 of pods abandoned in setup and one 66-minute test suite on a
 # 128-vCPU host that reported `nproc` 128 while the cgroup granted a fraction.
 #
-# Markers: ENV_READY -> REPO_READY -> ASSETS_READY -> TRAIN_ENV -> VLLM_READY
-#          -> TEACHER_READY -> ROPE_OK -> TESTS_OK -> SETUP_DONE
+# Markers: ENV_READY -> REPO_READY -> ASSETS_STAGED -> TRAIN_ENV -> ASSETS_READY
+#          -> VLLM_READY -> TEACHER_READY -> ROPE_OK -> TESTS_OK
+#          -> AUTHORIZATION_OK -> SETUP_DONE
 
 set -euo pipefail
 
@@ -104,16 +105,7 @@ for path, sha in want.items():
     print(f"  {path.rsplit('/', 2)[-2]}/{path.rsplit('/', 1)[-1]} {got[:16]}...")
 VERIFYEOF
 
-# The frozen search assets are checked against PREREGISTERED constants, not
-# against hashes read out of their own manifests -- the latter proves only that a
-# file is self-consistent. All three state_eval identities (content, canonical
-# manifest, raw items) and recovery_search's content + manifest + scoring
-# contract are verified. A mismatch blocks before any scientific measurement.
-cd "$REPO" && PYTHONPATH=src /opt/train/bin/python \
-    scripts/autoinit/verify_frozen_assets.py \
-  || { say "FROZEN ASSET IDENTITY MISMATCH -- not the preregistered assets"; \
-       mark "FROZEN_ASSETS_FAILED"; exit 91; }
-mark ASSETS_READY
+mark ASSETS_STAGED
 
 say "training env via uv sync"
 command -v uv >/dev/null || { curl -LsSf https://astral.sh/uv/install.sh | sh; }
@@ -176,6 +168,34 @@ say "uv sync completed in $(( $(date -u +%s) - t0 ))s"
   print('train torch', torch.__version__, torch.cuda.get_device_name(0), \
         '| transformers', transformers.__version__)"
 mark TRAIN_ENV
+
+# The frozen search assets are checked against PREREGISTERED constants, not
+# against hashes read out of their own manifests -- the latter proves only that a
+# file is self-consistent. All three state_eval identities (content, canonical
+# manifest, raw items) and recovery_search's content + manifest + scoring
+# contract are verified. A mismatch blocks before any scientific measurement.
+#
+# It runs HERE, after `uv sync`, and not beside the asset staging above, because
+# it needs `/opt/train`: the scoring-contract digest comes from
+# `aadistill.autoinit.recovery`, and importing that package imports torch. Placed
+# earlier it invoked an interpreter that does not exist yet, and the `||` branch
+# reported the missing interpreter as an identity mismatch -- which cost a $0.03
+# pod on 2026-08-13 and, worse, would have read as a corrupted asset. The gate is
+# still well before Stage 0: the driver has not started.
+say "verifying the frozen assets against the preregistered constants"
+FROZEN_RC=0
+FROZEN_OUT=$(cd "$REPO" && PYTHONPATH=src /opt/train/bin/python \
+    scripts/autoinit/verify_frozen_assets.py 2>&1) || FROZEN_RC=$?
+if [ "$FROZEN_RC" -ne 0 ]; then
+  say "FROZEN ASSET GATE FAILED -- output follows verbatim, because 'the "
+  say "verifier could not run' and 'these are not the preregistered assets' are "
+  say "different findings and must not be reported as the same one:"
+  echo "$FROZEN_OUT" | tail -25
+  mark "FROZEN_ASSETS_FAILED"
+  exit 91
+fi
+echo "$FROZEN_OUT" | tail -5
+mark ASSETS_READY
 
 say "vLLM venv on the container disk"
 python3 -m venv /opt/vllm

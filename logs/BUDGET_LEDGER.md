@@ -39,8 +39,13 @@ E8b S2 attempt 4, 20-step gate then OOM                      $  0.5500
 E8b S2 attempt 5, OOM at step 110                            $  0.7500
 E8b S2 attempt 6, DP-sa trained, DC-sa OOM at ~step 900      $  7.2100
 --- E8b total ---------------------------------------------- $ 16.8200
+AutoInit micro-preflight attempt 1 (L40S, 1.5 min)           $  0.0300
+    setup aborted at the frozen-asset gate: it invoked
+    /opt/train/bin/python before `uv sync` created it. Pod
+    deleted by the launcher, provider confirmed gone. No
+    stage ran; nothing was trained or measured.
 
-ACTUAL CUMULATIVE SPEND                                      $180.7033
+ACTUAL CUMULATIVE SPEND                                      $180.7333
 ```
 
 The pre-E8b baseline `$163.8833` is the figure every E8/E8b planner was built on
@@ -73,8 +78,8 @@ $211.07   +$47.18 E8b hard backstop (2026-08-11), rounded up from $211.0633
 
 ```
 authorized cumulative cap                                    $211.07
-actual cumulative spend                                      $180.7033
-unused authorization remaining                               $ 30.3667
+actual cumulative spend                                      $180.7333
+unused authorization remaining                               $ 30.3367
 of which was earmarked for E8b completion                    $ 30.36
 paid compute currently running                                NONE
 ```
