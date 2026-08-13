@@ -1,6 +1,6 @@
 {
   "schema": "aadistill.autoinit.phase_a_preregistration/v1",
-  "generated_utc": "2026-08-13T08:49:43.530654+00:00",
+  "generated_utc": "2026-08-13T15:16:32.145593+00:00",
   "status": "PREREGISTRATION DRAFT - NOT AUTHORIZED, NO COMPUTE LAUNCHED",
   "teacher": {
     "model_id": "Qwen/Qwen3-4B-Thinking-2507",
@@ -1013,18 +1013,18 @@
     "why": "initialization is the treatment and the seed is the replicate; a protocol identity containing either would make every comparable pair of arms differ by construction",
     "matched_pair_predicate": "both_materialized AND protocol_identical AND same_seed AND initializations_differ",
     "trainer_source_digest": {
-      "digest": "054dd6d60b40e023408c055bb2f9bfd9d7953c5a42d1602042db97197458633a",
+      "digest": "729bc9e6a374701716258f013ef12561c24d6b7b7d5a4cace868ecabf99d6f77",
       "set_version": 1,
       "files": [
         {
           "path": "scripts/training/train_stage3.py",
-          "sha256": "b8ecff1c03c6b7917ce4162929da892c7338cf7f237408eb178c44c47be635e2",
-          "bytes": 11953
+          "sha256": "1c4be309e52798e73e79c46e9a53866f0edca91517d149c8288f1a6fc878854d",
+          "bytes": 14309
         },
         {
           "path": "src/aadistill/training/train.py",
-          "sha256": "22d142e910327d38dc63cd3ed2b58f8656b084c3fe7565e920467c838a43808d",
-          "bytes": 57502
+          "sha256": "4d409b161b244ab5cc388f1615a87de5ce7481c3a2a3e8349b78822878508313",
+          "bytes": 62990
         },
         {
           "path": "src/aadistill/training/lora.py",
@@ -1106,7 +1106,7 @@
     "contract": "recovery_search_scoring@v2",
     "contract_id": "recovery_search_scoring",
     "version": 2,
-    "digest": "f76008d5459c781cdfd0f11e39fc379c74af641f7567a168c10bf48e6a3e66fb",
+    "digest": "69591aab8626c8300fb485fdfa82d52aa434eb9576fae39d36281f8bf40a9f8a",
     "files": [
       {
         "path": "scripts/autoinit/score_recovery_search.py",
@@ -1115,8 +1115,8 @@
       },
       {
         "path": "src/aadistill/autoinit/recovery.py",
-        "sha256": "9d1950b6bd5cffacc6e3d9ff60b0607080c5ed831ee3337e8fcb132156156b5c",
-        "bytes": 74779
+        "sha256": "792dae68c93a0c00d513eb3e644939954dc109c15b517ee9587d3b65b2943402",
+        "bytes": 94826
       },
       {
         "path": "src/aadistill/evaluation/behavior.py",
@@ -1157,14 +1157,14 @@
     },
     "validation": {
       "schema": "aadistill.autoinit.recovery_scoring_validation/v1",
-      "generated_utc": "2026-08-13T08:48:57.490177+00:00",
+      "generated_utc": "2026-08-13T15:15:43.755206+00:00",
       "battery": "artifacts/stage3/recovery_search_v1",
       "n_prompts": 190,
       "scoring_contract": {
         "contract": "recovery_search_scoring@v2",
         "contract_id": "recovery_search_scoring",
         "version": 2,
-        "digest": "f76008d5459c781cdfd0f11e39fc379c74af641f7567a168c10bf48e6a3e66fb",
+        "digest": "69591aab8626c8300fb485fdfa82d52aa434eb9576fae39d36281f8bf40a9f8a",
         "files": [
           {
             "path": "scripts/autoinit/score_recovery_search.py",
@@ -1173,8 +1173,8 @@
           },
           {
             "path": "src/aadistill/autoinit/recovery.py",
-            "sha256": "9d1950b6bd5cffacc6e3d9ff60b0607080c5ed831ee3337e8fcb132156156b5c",
-            "bytes": 74779
+            "sha256": "792dae68c93a0c00d513eb3e644939954dc109c15b517ee9587d3b65b2943402",
+            "bytes": 94826
           },
           {
             "path": "src/aadistill/evaluation/behavior.py",
@@ -1560,7 +1560,7 @@
         "contentless_is_behaviourally_perfect_and_useless": true
       },
       "all_checks_pass": true,
-      "report_sha256": "fb4c041ee2c0007148ab15942863a3602695cee7f03a2e8de2ab3bc3aca51e6b"
+      "report_sha256": "bc37772ae374d4d713513c6c7751db1edf030877aad201e7a035ada92b3e11ce"
     },
     "tool_usable_gate": {
       "definition": "generic usable_rollout AND tool_call_emitted AND tool_call_parsed AND tool_name_valid",
@@ -2118,5 +2118,5 @@
     "GPU state-evaluator repeatability -> evaluated by the frozen conservative response rule (no automatic epsilon re-derivation)",
     "activation-statistics GPU/CPU split (collapses the cost range)"
   ],
-  "preregistration_sha256": "9b4229c85062de44dfc568f9a883451d75e2d12a718a75b16caeb6112a873429"
+  "preregistration_sha256": "1d70a91addfd70242c593b1765605aee1db1cb724e271decf6f50b3bf6dd76b2"
 }

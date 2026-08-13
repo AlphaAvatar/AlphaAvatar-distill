@@ -36,6 +36,15 @@ from aadistill.autoinit.datasets import (  # noqa: E402
 )
 
 
+#: The E8a calibration mixture is a gitignored artifact. A pod session that does
+#: not stage it (the micro-preflight does not) must skip these rather than fail
+#: its setup test gate on inputs it was never given.
+CALIB_ITEMS = REPO / "artifacts/stage1/e8_calibration_v1/items.jsonl"
+needs_calibration = pytest.mark.skipif(
+    not CALIB_ITEMS.is_file(),
+    reason="E8a calibration mixture is a local artifact, not tracked in git")
+
+
 def source(domain="general", n=1):
     return CalibrationSource("d", "rev", domain, n)
 
@@ -128,6 +137,7 @@ def test_an_unreadable_item_shape_raises_instead_of_hashing_the_empty_string(tmp
         unregister_asset("t.weird")
 
 
+@needs_calibration
 def test_the_real_e8a_calibration_mixture_is_still_where_the_record_says():
     asset = aadistill.autoinit.datasets.get_asset("calib.e8a_domain_balanced_67")
     items = asset.load_items(REPO)
@@ -199,6 +209,7 @@ def test_an_unbuilt_profile_refuses_to_resolve():
         REASONING_HEAVY_V1.resolve(REPO)
 
 
+@needs_calibration
 def test_the_built_profile_resolves_and_re_derives_the_frozen_mixture_hash():
     """The E8a mixture identity is recomputed from the tokens, not trusted."""
     from aadistill.autoinit.calibration import mixture_content_sha256
@@ -212,6 +223,7 @@ def test_the_built_profile_resolves_and_re_derives_the_frozen_mixture_hash():
     assert DOMAIN_BALANCED_V1.items_file_sha256 != DOMAIN_BALANCED_V1.content_sha256
 
 
+@needs_calibration
 def test_a_tampered_mixture_is_rejected_even_at_the_right_file_hash():
     from aadistill.autoinit.calibration import CalibrationError, mixture_content_sha256
 

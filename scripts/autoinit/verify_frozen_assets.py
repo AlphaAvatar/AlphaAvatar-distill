@@ -35,8 +35,9 @@ sys.path.insert(0, str(REPO_ROOT / "src"))
 from aadistill.autoinit.recovery import recovery_scoring_contract  # noqa: E402
 from aadistill.infrastructure.manifest import sha256_file, sha256_json  # noqa: E402
 
-#: Frozen at preregistration 9b4229c8..., transcribed here as constants so the
-#: check cannot be satisfied by whatever file happens to be on the pod.
+#: Frozen at preregistration 1d70a91a... (9b4229c8 before the 2026-08-13
+#: re-emission, which moved identity digests only), transcribed here as constants
+#: so the check cannot be satisfied by whatever file happens to be on the pod.
 FROZEN = {
     "state_eval_v1": {
         "root": "artifacts/stage1/state_eval_v1",
@@ -52,8 +53,17 @@ FROZEN = {
     },
 }
 FROZEN_SCORING_CONTRACT = "recovery_search_scoring@v2"
-FROZEN_SCORING_DIGEST = ("f76008d5459c781cdfd0f11e39fc379c74af641f7567a168c10bf"
-                         "48e6a3e66fb")
+#: Re-pinned 2026-08-13 from `f76008d5…`, still **@v2**: the contract is a digest
+#: over whole files, and `src/aadistill/autoinit/recovery.py` gained the strict
+#: observed-protocol reconstruction (`observe_recovery_protocol`,
+#: `from_run_artifacts`) that the Stage-2 verification needs. No scoring function
+#: changed, and that is not asserted but measured: re-running
+#: `validate_recovery_scoring.py` over nine policies x 190 frozen prompts
+#: reproduces every number of the `f76008d5…` record exactly
+#: (`logs/autoinit_recovery_scoring_validation.json`). The version stays at 2
+#: because the metric did not move; bumping it would falsely signal that it had.
+FROZEN_SCORING_DIGEST = ("69591aab8626c8300fb485fdfa82d52aa434eb9576fae39d3628"
+                         "1f8bf40a9f8a")
 
 
 def canonical_manifest_sha256(path: Path) -> str:

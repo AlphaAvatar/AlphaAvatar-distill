@@ -448,6 +448,35 @@ def select_trainable(model, patterns, lora_modules=None) -> dict:
     }
 
 
+#: Identity strings for the recovery protocol fingerprint, defined beside the
+#: code they describe rather than in the reader that reconstructs a run.
+#:
+#: A protocol field whose value is a literal in the *verifier* proves nothing: it
+#: is the same string on both sides however the trainer behaves. These are
+#: emitted into every run manifest by `Trainer.execution_record`, and the strict
+#: reconstruction reads them from there — so a description that stops matching
+#: the implementation is a code change in this file, visible in
+#: `trainer_source_digest`, not a silent divergence.
+#:
+#: `BLOCK_ORDERING_ID` was `"ladder order, sequential, no shuffle"` until
+#: 2026-08-13. That was **wrong**: `stream_block_indices` walks a per-epoch
+#: `torch.randperm` seeded from the run seed, so blocks are shuffled within every
+#: epoch and the order is seed-dependent. The description is corrected here; no
+#: behaviour changed, and both sides of every comparison read this constant.
+OPTIMIZER_CLASS = torch.optim.AdamW
+OPTIMIZER_ID = OPTIMIZER_CLASS.__name__
+LR_SCHEDULE_ID = "cosine to min_lr_frac"
+BLOCK_ORDERING_ID = (
+    "per-epoch torch.randperm(n_blocks, seed*1000003 + epoch) over the rung's "
+    "blocks, walked by the global consumed-block counter")
+RESUME_SEMANTICS_ID = ("step counter + RNG state + consumed-block position, "
+                       "asserted on restore")
+#: The KD chunk the loss uses when a config does not set one. Read through this
+#: name everywhere so the manifest cannot record a different default than the
+#: loss applied.
+KD_CHUNK_DEFAULT = 512
+
+
 def lr_factor(step: int, total_steps: int, warmup_steps: int, min_lr_frac: float) -> float:
     """Linear warmup to 1.0, then cosine decay to min_lr_frac at total_steps."""
     if warmup_steps > 0 and step < warmup_steps:
@@ -690,7 +719,7 @@ class Trainer:
         # before Experiment 3, so A2 differs from A1 only by the adapter itself.
         self.params = [p for _, p in self.student.named_parameters() if p.requires_grad]
         opt_cfg = cfg["optim"]
-        self.opt = torch.optim.AdamW(
+        self.opt = OPTIMIZER_CLASS(
             self.params,
             lr=opt_cfg["lr"],
             betas=tuple(opt_cfg["betas"]),
@@ -806,7 +835,7 @@ class Trainer:
                 prediction_mask(mask, loss_cfg["kd_scope"], content,
                                 input_ids=ids, think_ids=self.think_ids),
                 loss_cfg["kd_temperature"],
-                chunk=loss_cfg.get("kd_chunk", 512),
+                chunk=loss_cfg.get("kd_chunk", KD_CHUNK_DEFAULT),
             )
         return ce_sum, ce_n, kd_sum, kd_n
 
@@ -830,7 +859,7 @@ class Trainer:
                          device=ids.device)
         kd_sum, kd_n = kd_forward_kl(
             s_logits, t_logits, pos, self.cfg["loss"]["kd_temperature"],
-            chunk=self.cfg["loss"].get("kd_chunk", 512))
+            chunk=self.cfg["loss"].get("kd_chunk", KD_CHUNK_DEFAULT))
         self._extra_forward_tokens += int(ids.numel())
         return kd_sum, kd_n
 
@@ -1065,6 +1094,78 @@ class Trainer:
     def consumed_blocks(self) -> int:
         """Position in the infinite block stream. Resume needs no loader state."""
         return self.step * self.cfg["batch"]["blocks_per_step"]
+
+    def execution_record(self) -> dict:
+        """What this trainer actually resolved. Metadata only; changes nothing.
+
+        Every value here is read from the objects that execute — the optimizer's
+        own ``defaults``, the resolved KD chunk expression the loss uses, the
+        applied gradient-checkpointing flag, the loaded student's attention
+        implementation — rather than restated from the config. That is the whole
+        point: the strict reconstruction in
+        ``RecoveryProtocolFingerprint.from_run_artifacts`` must be able to say
+        what ran, and a field it fills from a default or a literal of its own
+        would make its comparison a tautology.
+
+        Fields the config also carries are recorded again here **as resolved**,
+        so the two can be compared and a divergence is visible rather than
+        assumed away.
+        """
+        defaults = dict(self.opt.defaults)
+        loss_cfg, sched, batch = (self.cfg["loss"], self.cfg["schedule"],
+                                  self.cfg["batch"])
+        return {
+            "record_version": 1,
+            # optimizer, read off the constructed object
+            "optimizer": type(self.opt).__name__,
+            "optimizer_defaults": {
+                "lr": float(defaults["lr"]),
+                "betas": [float(b) for b in defaults["betas"]],
+                "eps": float(defaults["eps"]),
+                "weight_decay": float(defaults["weight_decay"]),
+            },
+            "optimizer_param_groups": len(self.opt.param_groups),
+            "grad_clip": float(self.cfg["optim"]["grad_clip"]),
+            # schedule and ordering: the rules this module implements
+            "lr_schedule": LR_SCHEDULE_ID,
+            "total_steps": int(sched["total_steps"]),
+            "warmup_steps": int(sched["warmup_steps"]),
+            "min_lr_frac": float(sched["min_lr_frac"]),
+            "block_ordering": BLOCK_ORDERING_ID,
+            "resume_semantics": RESUME_SEMANTICS_ID,
+            # objective, with the KD chunk resolved through the same expression
+            # the loss evaluates
+            "ce_weight": float(loss_cfg["ce_weight"]),
+            "kd_weight": float(loss_cfg["kd_weight"]),
+            "kd_temperature": float(loss_cfg["kd_temperature"]),
+            "kd_scope": loss_cfg["kd_scope"],
+            "kd_chunk": int(loss_cfg.get("kd_chunk", KD_CHUNK_DEFAULT)),
+            "kd_chunk_source": ("config" if "kd_chunk" in loss_cfg
+                                else "trainer default KD_CHUNK_DEFAULT"),
+            # batch semantics as executed
+            "blocks_per_step": int(batch["blocks_per_step"]),
+            "micro_blocks": int(batch["micro_blocks"]),
+            "train_blocks_available": int(self.train_ids.shape[0]),
+            "block_len": int(self.train_ids.shape[1]),
+            # numerics as applied
+            "dtype": self.cfg["dtype"],
+            "autocast_bf16": bool(self.cfg.get("autocast_bf16")),
+            "gradient_checkpointing": bool(self.cfg.get("gradient_checkpointing")),
+            "gradient_checkpointing_applied": bool(
+                getattr(self.student, "is_gradient_checkpointing", None)
+                if hasattr(self.student, "is_gradient_checkpointing")
+                else self.cfg.get("gradient_checkpointing")),
+            "device": str(self.device),
+            "student_attn_implementation": getattr(
+                self.student.config, "_attn_implementation", None),
+            "teacher_attn_implementation": (
+                None if self.teacher is None else
+                getattr(self.teacher.config, "_attn_implementation", None)),
+            "seed": int(self.cfg["seed"]),
+            "step_at_record": int(self.step),
+            "consumed_blocks_at_record": int(self.consumed_blocks()),
+            "trainable_params": int(self.freeze_report["trainable_params"]),
+        }
 
     def save_checkpoint(self) -> Path:
         tag = f"step_{self.step:06d}"

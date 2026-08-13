@@ -26,12 +26,25 @@ sys.path.insert(0, str(REPO_ROOT / "src"))
 
 from aadistill.autoinit.recovery import (  # noqa: E402
     HistoricalRunAudit,
+    normalize_trainable_patterns,
     RecoveryProbeIdentity,
     RecoveryProtocolFingerprint,
     RuntimeEnvironmentFingerprint,
     trainer_source_digest,
 )
 from aadistill.infrastructure.manifest import sha256_json  # noqa: E402
+
+# The protocol's descriptive fields come from the module that implements them,
+# not from literals here. A literal in the verifier is the same string on both
+# sides however the trainer behaves; importing the constant means a description
+# that stops matching the code is a change to the trainer source digest.
+from aadistill.training.train import (  # noqa: E402
+    BLOCK_ORDERING_ID,
+    KD_CHUNK_DEFAULT,
+    LR_SCHEDULE_ID,
+    OPTIMIZER_ID,
+    RESUME_SEMANTICS_ID,
+)
 
 RELAY = "AlphaAvatar/aadistill-artifacts"
 HISTORICAL = {
@@ -97,19 +110,19 @@ def historical_protocol(manifest: dict) -> RecoveryProtocolFingerprint:
         train_supervised_tokens=ladder.get("train_supervised_tokens"),
         block_len=cfg["block_len"], packing=cfg["packing"],
         val_blocks=cfg["val_blocks"],
-        block_ordering="ladder order, sequential, no shuffle",
+        block_ordering=BLOCK_ORDERING_ID,
         ce_weight=loss["ce_weight"], kd_weight=loss["kd_weight"],
         kd_temperature=loss["kd_temperature"], kd_scope=loss["kd_scope"],
-        kd_chunk=loss.get("kd_chunk", 512),
-        optimizer="AdamW", lr=optim["lr"], weight_decay=optim["weight_decay"],
+        kd_chunk=loss.get("kd_chunk", KD_CHUNK_DEFAULT),
+        optimizer=OPTIMIZER_ID, lr=optim["lr"], weight_decay=optim["weight_decay"],
         betas=tuple(optim["betas"]), eps=optim["eps"],
         grad_clip=optim["grad_clip"],
         total_steps=sched["total_steps"], warmup_steps=sched["warmup_steps"],
-        min_lr_frac=sched["min_lr_frac"], lr_schedule="cosine to min_lr_frac",
+        min_lr_frac=sched["min_lr_frac"], lr_schedule=LR_SCHEDULE_ID,
         blocks_per_step=batch["blocks_per_step"], micro_blocks=batch["micro_blocks"],
         dtype=cfg["dtype"], autocast_bf16=cfg["autocast_bf16"],
         gradient_checkpointing=cfg["gradient_checkpointing"],
-        trainable_patterns=tuple(cfg["trainable_patterns"]),
+        trainable_patterns=normalize_trainable_patterns(cfg["trainable_patterns"]),
         trainable_params=manifest.get("trainable_params"),
         teacher_id=teacher.get("model_id"), teacher_revision=teacher.get("revision"),
         teacher_dtype=teacher.get("dtype"),
@@ -144,26 +157,25 @@ def phase_a_protocol(config_path: Path) -> RecoveryProtocolFingerprint:
         train_supervised_tokens=rung["actual_supervised_tokens"],
         block_len=cfg["block_len"], packing=cfg["packing"],
         val_blocks=cfg["val_blocks"],
-        block_ordering="ladder order, sequential, no shuffle",
+        block_ordering=BLOCK_ORDERING_ID,
         ce_weight=loss["ce_weight"], kd_weight=loss["kd_weight"],
         kd_temperature=loss["kd_temperature"], kd_scope=loss["kd_scope"],
-        kd_chunk=loss.get("kd_chunk", 512),
-        optimizer="AdamW", lr=optim["lr"], weight_decay=optim["weight_decay"],
+        kd_chunk=loss.get("kd_chunk", KD_CHUNK_DEFAULT),
+        optimizer=OPTIMIZER_ID, lr=optim["lr"], weight_decay=optim["weight_decay"],
         betas=tuple(optim["betas"]), eps=optim["eps"],
         grad_clip=optim["grad_clip"],
         total_steps=sched["total_steps"], warmup_steps=sched["warmup_steps"],
-        min_lr_frac=sched["min_lr_frac"], lr_schedule="cosine to min_lr_frac",
+        min_lr_frac=sched["min_lr_frac"], lr_schedule=LR_SCHEDULE_ID,
         blocks_per_step=batch["blocks_per_step"], micro_blocks=batch["micro_blocks"],
         dtype=cfg["dtype"], autocast_bf16=cfg["autocast_bf16"],
         gradient_checkpointing=cfg["gradient_checkpointing"],
-        trainable_patterns=tuple(cfg["trainable_patterns"]),
+        trainable_patterns=normalize_trainable_patterns(cfg["trainable_patterns"]),
         trainable_params=440_467_456,
         teacher_id=cfg["teacher"]["model_id"],
         teacher_revision=cfg["teacher"]["revision"],
         teacher_dtype=cfg["teacher"]["dtype"], teacher_attn="sdpa",
         tokenizer_sha256="7781771acc3798ee454c1253c751f930eb1c18c1c3df62e2552cc6f1d394f654",
-        resume_semantics=("step counter + RNG state + consumed-block position, "
-                          "asserted on restore"),
+        resume_semantics=RESUME_SEMANTICS_ID,
         trainer_source_digest=trainer_source_digest(REPO_ROOT)["digest"],
         trainer_source_set_version=1,
         # Left unpinned here: the image the preflight will actually run is chosen

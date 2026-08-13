@@ -75,11 +75,19 @@ def test_the_trainer_defaults_to_512_when_the_key_is_absent():
     """An absent key must mean the historical behaviour, not an error or a new value."""
     import inspect
 
-    from aadistill.training.train import kd_forward_kl
+    from aadistill.training.train import KD_CHUNK_DEFAULT, kd_forward_kl
     assert inspect.signature(kd_forward_kl).parameters["chunk"].default == 512
+    # The two call sites read the config through one named default, which the
+    # run manifest's execution record also reports. Named rather than repeated
+    # so a manifest cannot claim a chunk the loss did not use; the value it
+    # names is still 512, which is the historical behaviour this pins.
+    assert KD_CHUNK_DEFAULT == 512
     src = (REPO / "src/aadistill/training/train.py").read_text()
-    assert src.count('get("kd_chunk", 512)') == 2, (
-        "both kd_forward_kl call sites must read the config with a 512 default")
+    assert src.count('chunk=loss_cfg.get("kd_chunk", KD_CHUNK_DEFAULT)') == 1
+    assert src.count('chunk=self.cfg["loss"].get("kd_chunk", KD_CHUNK_DEFAULT)') == 1
+    # The execution record resolves it through the same expression, so a run
+    # manifest cannot report a chunk the loss did not use.
+    assert src.count('"kd_chunk": int(loss_cfg.get("kd_chunk", KD_CHUNK_DEFAULT))') == 1
 
 
 def test_a_bad_chunk_is_rejected_by_config_validation():

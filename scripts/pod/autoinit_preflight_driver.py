@@ -43,9 +43,11 @@ from aadistill.autoinit.authorization import (  # noqa: E402
     AuthorizationError, SpendAuthorization,
 )
 from aadistill.autoinit.generation import (  # noqa: E402
+    GenerationProtocolError,
     RecoveryEvaluationProtocol,
     declared_generation_protocol,
     generation_source_digest,
+    observe_generation_protocol,
 )
 from aadistill.autoinit.ranking import EPSILON_RESPONSE_V1, PARETO_V1  # noqa: E402
 from aadistill.autoinit.recovery import (  # noqa: E402
@@ -56,9 +58,11 @@ from aadistill.autoinit.recovery import (  # noqa: E402
     SEED_SB,
     EquivalenceRule,
     FeasibilityRule,
+    ObservedProtocolError,
     RecoveryAdmissionError,
     RecoveryProbeIdentity,
     RuntimeEnvironmentFingerprint,
+    observe_recovery_protocol,
     recovery_scoring_contract,
     trainer_source_digest,
 )
@@ -187,14 +191,15 @@ class Driver:
                                pinned_inputs=inputs)
         self.attested = attested
 
-        # Generation protocol: everything except the engine's own scheduler
-        # defaults can be read without a GPU; those need a live engine, so the
-        # engine is booted here rather than discovered after two control runs.
+        # Generation protocol. The implementation digests are repo facts; every
+        # engine and runtime field comes from the live engine probe, which runs
+        # in the vLLM environment. It must: generation happens there, and the
+        # training venv's torch and transformers versions describe a stack that
+        # never produces a token. Booting the engine here rather than at first
+        # use also turns "the engine works on this image" into a Stage-0 gate,
+        # ahead of $2.80 of permanent controls.
         gen = declared_generation_protocol().materialized(
             generation_source_digest=generation_source_digest(REPO)["digest"],
-            transformers_version=runtime.transformers_version,
-            torch_version=runtime.torch_version,
-            runtime_digest=runtime.digest,
             degeneration_source_digest=sha256_file(
                 REPO / "src/aadistill/evaluation/degeneration.py"))
         try:
@@ -244,17 +249,29 @@ class Driver:
             pinned_inputs=inputs)
 
     def observe_engine(self) -> dict:
-        """Boot vLLM once on the canonical init and read what it actually uses."""
+        """Boot vLLM once on the canonical init and read what it actually uses.
+
+        `dtype` and `gpu_memory_utilization` are already declared, so passing
+        them through `materialized()` is a *check*: it raises if the engine was
+        given something other than what the protocol declares, rather than
+        quietly recording the engine's value.
+        """
         out = subprocess.run(
             ["/opt/vllm/bin/python", str(REPO / "scripts/pod/autoinit_engine_probe.py"),
-             "--model", str(CANONICAL_INIT), "--out", str(AUDIT / "engine_probe.json")],
+             "--model", str(CANONICAL_INIT), "--out", str(AUDIT / "engine_probe.json"),
+             "--image-digest", self.a.image_digest],
             capture_output=True, text=True, timeout=1800,
-            env={**os.environ, "PYTHONPATH": f"{REPO}/src"})
+            env=self.child_env())
         if out.returncode != 0:
             raise RuntimeError(f"engine probe rc={out.returncode}: "
                                f"{(out.stdout + out.stderr)[-600:]}")
         probe = json.loads((AUDIT / "engine_probe.json").read_text())
         return {"vllm_version": probe["vllm_version"],
+                "transformers_version": probe["transformers_version"],
+                "torch_version": probe["torch_version"],
+                "runtime_digest": probe["runtime_digest"],
+                "dtype": probe["dtype"],
+                "gpu_memory_utilization": probe["gpu_memory_utilization"],
                 "max_num_seqs": probe["max_num_seqs"],
                 "max_num_batched_tokens": probe["max_num_batched_tokens"],
                 "enforce_eager": probe["enforce_eager"],
@@ -263,6 +280,18 @@ class Driver:
                 "resolved_context": probe["resolved_context"],
                 "context_source": probe["context_source"],
                 "stop_token_ids": tuple(probe["stop_token_ids"])}
+
+    def child_env(self) -> dict:
+        """Environment for every child that must record the session's identity.
+
+        The image digest cannot be observed inside the container, so the trainer
+        and the evaluator receive it here — the same launcher-supplied value
+        Stage 0 attests. A child that does not get it records a null image
+        digest, and the strict reconstruction then fails closed rather than
+        accepting an unpinned runtime.
+        """
+        return {**os.environ, "PYTHONPATH": f"{REPO}/src",
+                "AADISTILL_IMAGE_DIGEST": self.a.image_digest}
 
     # -- stage 1 ---------------------------------------------------------
     def stage1(self) -> bool:
@@ -367,6 +396,44 @@ class Driver:
                 "note": "read follows an fsync and a cache drop attempt"}
 
     # -- stage 2 ---------------------------------------------------------
+    def control_config(self, name: str, config: str) -> Path:
+        """Materialize the run config for one control, from the frozen recipe.
+
+        Two fields are overridden and nothing else: `out_dir`, so the two
+        preflight controls do not collide with the historical E1 run directories
+        the frozen configs name, and `data_dir`, so the run reads the pack under
+        its canonical `ladder_uniform_probe` path — the path the preregistration
+        and the attested protocol both pin. Setup stages the identical bytes
+        under both names and verifies the hash of each, so this changes which
+        path is read and not what is read.
+
+        The realized diff is recorded, and anything else differing raises. That
+        is the same guard `validate_e{7,8}_arms.py` applies to an experiment's
+        arms: a config edited into a run is a config nobody reviewed.
+        """
+        allowed = {"data_dir", "out_dir", "run_name", "_purpose"}
+        frozen = json.loads((REPO / config).read_text())
+        derived = {**frozen,
+                   "out_dir": f"artifacts/stage3/{name}",
+                   "data_dir": "artifacts/stage3/ladder_uniform_probe",
+                   "run_name": name,
+                   "_purpose": (
+                       "AutoInitializer micro-preflight: a PERMANENT canonical "
+                       "control probe at the 0.86M rung, re-executed under the "
+                       f"attested runtime. Derived from {config} by overriding "
+                       "only run identity and the pack path.")}
+        diff = sorted(k for k in set(frozen) | set(derived)
+                      if frozen.get(k) != derived.get(k))
+        if not set(diff) <= allowed:
+            raise RecoveryAdmissionError(
+                f"{name}: the derived control config differs from the frozen "
+                f"recipe in {sorted(set(diff) - allowed)}, which is outside the "
+                f"allowed override set {sorted(allowed)}")
+        path = AUDIT / "configs" / f"{name}.json"
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(json.dumps(derived, indent=2) + "\n")
+        return path
+
     def stage2(self) -> bool:
         self.enter(2)
         arms = {}
@@ -375,13 +442,13 @@ class Driver:
             if not self.afford(minutes, f"control {name}"):
                 return self.record(2, False, f"insufficient budget for {name}",
                                    arms=arms)
+            run_config = self.control_config(name, config)
             t = time.time()
             rc = subprocess.run(
                 ["/opt/train/bin/python", str(REPO / "scripts/training/train_stage3.py"),
-                 "--config", str(REPO / config), "--out-dir",
-                 str(REPO / f"artifacts/stage3/{name}")],
+                 "--config", str(run_config)],
                 capture_output=True, text=True, timeout=int(minutes * 60 * 2),
-                env={**os.environ, "PYTHONPATH": f"{REPO}/src"})
+                env=self.child_env())
             elapsed = (time.time() - t) / 60
             tail = (rc.stdout + rc.stderr)[-1500:]
             (AUDIT / f"{name}_train_tail.log").write_text(tail)
@@ -391,63 +458,195 @@ class Driver:
                 mark(f"TRAIN_FAILED:{name}")
                 return self.record(2, False, f"{name} failed rc={rc.returncode}",
                                    arms=arms)
-            arm = self.verify_control(name, seed, config, elapsed)
+            arm = self.verify_control(name, seed, run_config, elapsed)
             arms[name] = arm
             if not arm["protocol_verified"]:
                 return self.record(2, False, f"{name}: {arm['problem']}", arms=arms)
             mark(f"TRAIN_DONE:{name}")
         return self.record(2, True, arms=arms)
 
-    def verify_control(self, name: str, seed: int, config: str,
+    def verify_control(self, name: str, seed: int, config: Path,
                        minutes: float) -> dict:
-        """A control that did not run the attested protocol is not a control."""
+        """A control that did not run the attested protocol is not a control.
+
+        The protocol is **reconstructed from the run's own artifacts** and then
+        compared to the Stage-0 attestation. It is not built from the attested
+        object: doing that compares the attestation to itself, which passes
+        whatever the trainer did.
+        """
         out_dir = REPO / f"artifacts/stage3/{name}"
-        ckpt = sorted(out_dir.glob("checkpoints/step_*"))[-1]
-        weights = ckpt / "model" / "model.safetensors"
-        digest = sha256_file(weights)
-        probe = RecoveryProbeIdentity(
-            protocol=self.attested,
-            initialization_artifact_digest=PINNED["canonical_init_weights"][1],
-            seed=seed, label=name)
         problem = ""
+        observed = None
+        comparison: dict = {}
         try:
-            probe.require_attested(self.attested.fingerprint)
-        except RecoveryAdmissionError as exc:
-            problem = str(exc)
+            observed = observe_recovery_protocol(out_dir, repo_root=REPO,
+                                                 strict=True)
+        except (ObservedProtocolError, RecoveryAdmissionError) as exc:
+            problem = f"observed protocol could not be established: {exc}"
+
+        probe = None
+        digest = init_digest = None
+        ckpts = sorted(out_dir.glob("checkpoints/step_*"))
+        ckpt = ckpts[-1] if ckpts else None
+        if ckpt is not None:
+            weights = ckpt / "model" / "model.safetensors"
+            digest = sha256_file(weights) if weights.is_file() else None
+        elif not problem:
+            problem = "no checkpoint was written"
+
+        if observed is not None:
+            comparison = observed.protocol.compare(self.attested)
+            if not comparison["protocol_identical"] and not problem:
+                problem = (
+                    "the run's OBSERVED protocol differs from the Stage-0 "
+                    "attested protocol: mismatched "
+                    f"{[m['field'] for m in comparison['mismatched_fields']]}, "
+                    f"unverifiable {[u['field'] for u in comparison['unverifiable_fields']]}")
+            if observed.seed != seed and not problem:
+                problem = (f"the run recorded seed {observed.seed}, not the "
+                           f"{seed} this control is supposed to be")
+            # The initialization is not part of the protocol — it is the
+            # treatment — so it is established separately, by hashing the
+            # weights the run actually read.
+            init = Path(observed.initialization_source or "")
+            init_weights = (init if init.is_absolute() else REPO / init) / "model.safetensors"
+            init_digest = sha256_file(init_weights) if init_weights.is_file() else None
+            if init_digest != PINNED["canonical_init_weights"][1] and not problem:
+                problem = (f"the run started from {observed.initialization_source} "
+                           f"(weights {init_digest}), not the pinned canonical "
+                           f"init {PINNED['canonical_init_weights'][1]}")
+            if not problem:
+                probe = RecoveryProbeIdentity(
+                    protocol=observed.protocol,
+                    initialization_artifact_digest=init_digest,
+                    seed=observed.seed, label=name)
+                try:
+                    probe.require_attested(self.attested.fingerprint)
+                except RecoveryAdmissionError as exc:
+                    problem = str(exc)
+
         manifest = out_dir / "run_manifest.json"
         train_log = out_dir / "train_log.jsonl"
+        completion = out_dir / "run_completion.json"
         required = {"run_manifest.json": manifest.is_file(),
+                    "run_completion.json": completion.is_file(),
                     "train_log.jsonl": train_log.is_file()}
         if not all(required.values()):
             problem = problem or f"missing required artifacts: {required}"
+        # The plan's stop condition is written symmetrically ("diverges by more
+        # than 25%"); it is enforced on the SLOW side only, and the fast side is
+        # recorded. A run faster than priced is not a machine we mispriced in
+        # any way that matters: it costs less, the budget machinery already
+        # refuses an arm that cannot finish, and the step accounting above
+        # separately proves the run completed every declared step. Failing a
+        # completed permanent control for finishing early would destroy the
+        # session's only expensive artifact over good news.
         expected = self.a.control_minutes
-        drift = abs(minutes - expected) / expected if expected else 0.0
+        drift = (minutes - expected) / expected if expected else 0.0
         if drift > 0.25:
             problem = problem or (
                 f"step time diverged: {minutes:.1f} min vs priced "
-                f"{expected:.1f} min ({drift:.0%})")
+                f"{expected:.1f} min (+{drift:.0%})")
+        def rel(path: Path | None) -> str | None:
+            if path is None:
+                return None
+            return str(path.relative_to(REPO)) if path.is_relative_to(REPO) \
+                else str(path)
+
         record = {
             "trained": True, "seed": seed, "minutes": round(minutes, 1),
-            "checkpoint": str(ckpt.relative_to(REPO)),
+            "priced_minutes": expected,
+            "wall_clock_drift": round(drift, 4),
+            "faster_than_priced": drift < -0.25,
+            "run_config": rel(config),
+            "checkpoint": rel(ckpt),
             "weights_sha256": digest,
-            "probe_identity": probe.as_dict(),
-            "probe_id": probe.probe_id,
+            "initialization_artifact_digest": init_digest,
+            "observed_protocol": (observed.as_dict() if observed else None),
+            "observed_vs_attested": comparison,
+            "probe_identity": probe.as_dict() if probe else None,
+            "probe_id": probe.probe_id if probe else None,
             "attested_protocol_fingerprint": self.attested.fingerprint,
             "required_artifacts": required,
             "protocol_verified": not problem, "problem": problem,
+            # The three hashes a permanent control is bound by. A checkpoint
+            # whose protocol was never established is not a control, so this is
+            # only complete when the verification passed.
+            "control_binding": ({
+                "observed_protocol_fingerprint": observed.protocol.fingerprint,
+                "probe_id": probe.probe_id,
+                "checkpoint_weights_sha256": digest,
+            } if (probe and observed and not problem) else None),
         }
         (AUDIT / f"{name}_probe_identity.json").write_text(
-            json.dumps(record, indent=2) + "\n")
+            json.dumps(record, indent=2, default=str) + "\n")
         return record
 
     # -- stage 3 ---------------------------------------------------------
+    def stage_tokenizer(self, model_dir: Path) -> dict:
+        """`save_pretrained` writes no tokenizer; install the canonical one.
+
+        Loading a checkpoint directory without tokenizer files does **not**
+        fail: `AutoTokenizer.from_pretrained` builds a degenerate tokenizer from
+        the config and every prompt encodes to nothing. A silent-wrong failure,
+        and it would also make the observed `tokenizer_sha256` disagree with the
+        Stage-0 attestation — which is the check that would catch it.
+
+        The tokenizer is a project constant, verified against its pinned hash at
+        setup, so this restores a file that should have been written beside the
+        weights rather than changing anything about the checkpoint.
+        """
+        import shutil
+        installed = {}
+        for fname in ("tokenizer.json", "tokenizer_config.json",
+                      "chat_template.jinja"):
+            src, dst = CANONICAL_INIT / fname, model_dir / fname
+            if src.is_file() and not dst.is_file():
+                shutil.copy(src, dst)
+            installed[fname] = dst.is_file()
+        if not all(installed.values()):
+            raise RecoveryAdmissionError(
+                f"tokenizer files are not complete in {model_dir}: {installed}")
+        return installed
+
+    def observed_generation(self, gen_dir: Path, label: str) -> tuple[dict, Any]:
+        """Reconstruct the generation protocol from the summaries just written.
+
+        Returns the JSON-safe report and the fingerprint object. Raises when the
+        rollouts were produced under anything other than the attested protocol —
+        before they are scored, because a characterization of generations made
+        under some other protocol materializes thresholds nothing can be
+        compared against later.
+        """
+        summaries = []
+        for path in sorted(gen_dir.glob("*.json")):
+            if path.name.endswith(".generations.jsonl"):
+                continue
+            summaries.append(json.loads(path.read_text()))
+        observed = observe_generation_protocol(summaries, strict=True)
+        comparison = observed.protocol.compare(self.evaluation_protocol.generation)
+        report = {"label": label, **observed.as_dict(),
+                  "observed_vs_attested": comparison,
+                  "attested_generation_fingerprint":
+                      self.evaluation_protocol.generation.fingerprint}
+        (AUDIT / f"{label}_observed_generation.json").write_text(
+            json.dumps(report, indent=2, default=str) + "\n")
+        if not comparison["identical"]:
+            raise GenerationProtocolError(
+                f"{label}: the stored rollouts were produced under a different "
+                "generation protocol than Stage 0 attested — mismatched "
+                f"{[m['field'] for m in comparison['mismatched_fields']]}, "
+                f"unknown {[u['field'] for u in comparison['unverifiable_fields']]}")
+        return report, observed.protocol
+
     def stage3(self) -> bool:
         self.enter(3)
-        per_seed, results = [], {}
+        per_seed, results, generation, gen_protocols = [], {}, {}, {}
         for name, seed, _ in CONTROLS:
             if not self.afford(self.a.characterization_minutes, f"characterize {name}"):
                 return self.record(3, False, f"insufficient budget for {name}")
             ckpt = REPO / self.ev["stages"]["2"]["arms"][name]["checkpoint"] / "model"
+            tokenizer_files = self.stage_tokenizer(ckpt)
             gen_dir = REPO / f"artifacts/eval/preflight/{name}"
             gen_dir.mkdir(parents=True, exist_ok=True)
             sets = [str(BATTERY / f"{s}.jsonl") for s in
@@ -458,11 +657,22 @@ class Driver:
                  "--out-dir", str(gen_dir), "--diagnostics"],
                 capture_output=True, text=True,
                 timeout=int(self.a.characterization_minutes * 60 * 2),
-                env={**os.environ, "PYTHONPATH": f"{REPO}/src"})
+                env=self.child_env())
             if rc.returncode != 0:
                 (AUDIT / f"{name}_generation_tail.log").write_text(
                     (rc.stdout + rc.stderr)[-2000:])
                 return self.record(3, False, f"{name} generation rc={rc.returncode}")
+            # Before anything is scored: were these rollouts produced under the
+            # protocol Stage 0 attested? A characterization of generations made
+            # under some other protocol would materialize thresholds that no
+            # later probe can be compared against.
+            try:
+                report, gen_protocols[name] = self.observed_generation(gen_dir, name)
+            except GenerationProtocolError as exc:
+                return self.record(3, False, f"{name}: {exc}"[:600],
+                                   generation=generation)
+            generation[name] = {**report,
+                                "tokenizer_files_installed": tokenizer_files}
             scored = AUDIT / f"{name}_recovery_search.json"
             rc = subprocess.run(
                 ["/opt/train/bin/python",
@@ -480,6 +690,37 @@ class Driver:
                     self.evaluation_protocol.scoring_digest:
                 return self.record(3, False, f"{name} scored under a different "
                                              "scoring contract than Stage 0 froze")
+            # The evaluation protocol this arm's numbers were actually produced
+            # under: its own observed generation fingerprint, its own scoring
+            # contract digest, and the battery identity the scorer recorded.
+            # Built from the result, then required to be comparable with the
+            # Stage-0 attestation — not copied from it.
+            observed_eval = RecoveryEvaluationProtocol(
+                generation=gen_protocols[name],
+                scoring_contract=result["scoring_contract"]["contract"],
+                scoring_digest=result["scoring_contract"]["digest"],
+                battery_artifact=result["battery"]["artifact"],
+                battery_manifest_sha256=result["battery"]["manifest_sha256"],
+                battery_content_sha256=result["battery"]["content_sha256"])
+            try:
+                observed_eval.require_comparable(self.evaluation_protocol,
+                                                 context=f"{name} characterization")
+            except GenerationProtocolError as exc:
+                return self.record(3, False, f"{name}: {exc}"[:600],
+                                   generation=generation)
+            generation[name]["evaluation_protocol_hash"] = \
+                observed_eval.evaluation_protocol_hash
+            result["evaluation_protocol_hash"] = observed_eval.evaluation_protocol_hash
+            result["bound_to"] = {
+                "evaluation_protocol_hash": observed_eval.evaluation_protocol_hash,
+                "observed_generation_fingerprint":
+                    observed_eval.generation.fingerprint,
+                "checkpoint": self.ev["stages"]["2"]["arms"][name]["checkpoint"],
+                "probe_id": self.ev["stages"]["2"]["arms"][name].get("probe_id"),
+                "rule": ("this result is comparable only to results carrying the "
+                         "same evaluation_protocol_hash"),
+            }
+            scored.write_text(json.dumps(result, indent=2) + "\n")
             results[name] = result
             per_seed.append({"seed": seed, "n": result["n"],
                              "usable": result["usable"], "correct": result["correct"]})
@@ -507,6 +748,16 @@ class Driver:
             "generated_utc": datetime.now(timezone.utc).isoformat(),
             "evaluation_protocol_hash":
                 self.evaluation_protocol.evaluation_protocol_hash,
+            # Every control's numbers were produced under a protocol
+            # reconstructed from its own rollouts and verified identical to the
+            # attestation. The thresholds inherit that binding: a later probe
+            # measured under a different hash is not comparable to them.
+            "observed_evaluation_protocol_hash_per_control": {
+                name: gen.get("evaluation_protocol_hash")
+                for name, gen in generation.items()},
+            "observed_generation_fingerprint_per_control": {
+                name: gen.get("observed_generation_fingerprint")
+                for name, gen in generation.items()},
             "aggregation": POOLED_COUNTS_V1.as_dict(),
             "pooled": pooled, "per_seed": per_seed,
             "equivalence_interval": equivalence,
@@ -518,7 +769,7 @@ class Driver:
         thresholds["report_sha256"] = sha256_json(thresholds)
         (AUDIT / "materialized_thresholds.json").write_text(
             json.dumps(thresholds, indent=2) + "\n")
-        return self.record(3, True, thresholds=thresholds,
+        return self.record(3, True, thresholds=thresholds, generation=generation,
                            per_control={k: {m: v[m] for m in
                                             ("usable_rollout_rate", "correct_overall",
                                              "correct_given_usable", "n")}

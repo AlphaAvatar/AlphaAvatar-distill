@@ -806,10 +806,48 @@ class RecoveryProtocolFingerprint:
                     "rather than overwriting the preregistration.")
         return replace(self, **proposed)
 
+    @classmethod
+    def from_run_artifacts(cls, run_dir: str | Path, *,
+                           repo_root: str | Path | None = None,
+                           pack_root: str | Path | None = None,
+                           strict: bool = True) -> "RecoveryProtocolFingerprint":
+        """Reconstruct the protocol a run **actually executed**, from its own files.
+
+        The counterpart of ``phase_a_protocol()`` and the opposite of
+        ``compare_recovery_fingerprints.historical_protocol()``. That helper is a
+        forensic tool for runs whose evidence no longer exists, and it is
+        deliberately permissive: it defaults ``kd_chunk`` to 512, hard-codes
+        ``optimizer="AdamW"`` and the schedule and ordering literals, and fills
+        ``pack_blocks_sha256`` from the *expected* frozen constant. Every one of
+        those is a value the verifier supplies to itself, which is precisely the
+        backfill that turns a paid control's verification into a tautology.
+
+        Under ``strict=True`` nothing is defaulted, nothing is inherited from a
+        preregistration, and the pack hash is **recomputed from the pack the run
+        read**. A material field with no evidence raises
+        :class:`ObservedProtocolError`; a run that cannot prove what it did is
+        not a control.
+
+        ``strict=False`` returns the same object with the unestablished fields
+        listed in ``unverifiable``, where ``compare`` reports them as unknown —
+        never as matched.
+
+        The parameters an earlier sketch took — ``runtime=`` and
+        ``trainer_source=`` — are deliberately **absent**. Passing them in would
+        mean the caller supplying the two fields the comparison most needs to
+        establish; they are read from the run's own execution record instead.
+        """
+        return observe_recovery_protocol(
+            run_dir, repo_root=repo_root, pack_root=pack_root,
+            strict=strict).protocol
+
     def identity(self) -> dict[str, Any]:
         d = {k: v for k, v in self.__dict__.items() if k != "unverifiable"}
-        d["betas"] = list(self.betas)
-        d["trainable_patterns"] = list(self.trainable_patterns)
+        # None-safe: a non-strict reconstruction of a run that established
+        # neither field must still be describable and comparable — as unknown.
+        d["betas"] = list(self.betas) if self.betas is not None else None
+        d["trainable_patterns"] = (list(self.trainable_patterns)
+                                   if self.trainable_patterns is not None else None)
         return d
 
     @property
@@ -856,6 +894,354 @@ class RecoveryProtocolFingerprint:
                 "why_excluded": ("initialization is the treatment variable and the "
                                  "seed is the intended replicate; including either "
                                  "would make every comparable pair of arms differ")}
+
+
+class ObservedProtocolError(RecoveryAdmissionError):
+    """A run's own artifacts do not establish a material protocol field."""
+
+
+def normalize_trainable_patterns(value: Any) -> tuple[str, ...] | None:
+    """`"all"` is one pattern, not three characters.
+
+    `tuple("all")` is `('a', 'l', 'l')`, so a config using the string form would
+    fingerprint differently depending on which side of the comparison built it.
+    Every construction site goes through this.
+    """
+    if value is None:
+        return None
+    if isinstance(value, str):
+        return (value,)
+    return tuple(value)
+
+
+class _Observation:
+    """Collects observed values and the fields nothing established.
+
+    Every read goes through here so a missing field is *recorded* rather than
+    silently becoming a default. Reads are collected and reported together: one
+    exception naming eight missing fields is a diagnosis, eight exceptions in
+    sequence are a scavenger hunt.
+    """
+
+    def __init__(self) -> None:
+        self.missing: list[str] = []
+        self.problems: list[str] = []
+        self.sources: dict[str, str] = {}
+
+    def need(self, root: Mapping[str, Any] | None, path: str, *, field: str,
+             cast=None) -> Any:
+        """Read ``path`` (dotted) out of ``root``; record it as missing if absent."""
+        node: Any = root
+        for part in path.split("."):
+            if not isinstance(node, Mapping) or part not in node:
+                node = None
+                break
+            node = node[part]
+        if node is None:
+            self.missing.append(f"{field} (no evidence at {path})")
+            return None
+        self.sources[field] = path
+        return cast(node) if cast is not None else node
+
+    def agree(self, field: str, observed: Any, declared: Any, *,
+              what: str = "config") -> None:
+        """Cross-check a resolved value against the value the run declared."""
+        if observed is None or declared is None:
+            return
+        if observed != declared:
+            self.problems.append(
+                f"{field}: the run executed {observed!r} but its {what} says "
+                f"{declared!r}; the run's own artifacts disagree about what ran")
+
+
+@dataclass(frozen=True)
+class ObservedRecoveryProtocol:
+    """A protocol reconstructed from one run's artifacts, with its evidence."""
+
+    protocol: "RecoveryProtocolFingerprint"
+    seed: int | None
+    initialization_source: str | None
+    evidence: dict[str, Any]
+
+    @property
+    def is_strict(self) -> bool:
+        return not self.protocol.unverifiable
+
+    def as_dict(self) -> dict[str, Any]:
+        return {"observed_protocol": self.protocol.as_dict(),
+                "observed_protocol_fingerprint": self.protocol.fingerprint,
+                "seed": self.seed,
+                "initialization_source": self.initialization_source,
+                "evidence": self.evidence}
+
+
+def observe_recovery_protocol(run_dir: str | Path, *,
+                              repo_root: str | Path | None = None,
+                              pack_root: str | Path | None = None,
+                              strict: bool = True) -> ObservedRecoveryProtocol:
+    """Read a completed run's artifacts and reconstruct what it executed.
+
+    Evidence, in order of authority:
+
+    ``run_manifest.json``      the config as emitted, the ladder stats with the
+                               pack hashes computed **at read time on the pod**,
+                               the teacher identity resolved from the hub, the
+                               tokenizer hash, the trainable-parameter count, and
+                               the ``execution`` block the trainer wrote off its
+                               own objects (optimizer, resolved KD chunk,
+                               schedule and ordering rules, runtime, trainer
+                               source digest).
+    ``run_completion.json``    step and consumed-block accounting after the loop
+                               returned. The manifest is written before the first
+                               step, so on its own it describes an intention.
+    the pack on disk           ``blocks.npz`` is re-hashed here and must equal
+                               what the run recorded. A pinned constant is not
+                               evidence that *this* run read *that* pack.
+    """
+    run = Path(run_dir)
+    manifest_path = run / "run_manifest.json"
+    completion_path = run / "run_completion.json"
+    obs = _Observation()
+
+    if not manifest_path.is_file():
+        raise ObservedProtocolError(
+            f"{manifest_path} does not exist; there is no evidence of what this "
+            "run executed. A control is its artifacts, not its intention.")
+    manifest = json.loads(manifest_path.read_text())
+    completion = (json.loads(completion_path.read_text())
+                  if completion_path.is_file() else None)
+    if completion is None:
+        obs.missing.append("run completion record (run_completion.json)")
+
+    cfg = manifest.get("config") or {}
+    execution = manifest.get("execution") or {}
+    ladder = manifest.get("ladder") or {}
+    if not execution:
+        obs.missing.append(
+            "execution record (run_manifest.execution) — this run was produced "
+            "by a trainer that records no execution evidence")
+
+    # -- data ------------------------------------------------------------
+    data_dir = obs.need(cfg, "data_dir", field="pack")
+    pack = Path(data_dir).name if data_dir else None
+    packing = obs.need(cfg, "packing", field="packing")
+    if packing is not None and packing != "ladder":
+        obs.problems.append(
+            f"packing is {packing!r}; the pack identity this protocol pins "
+            "(blocks.npz) exists only for a ladder run")
+    rung = obs.need(cfg, "rung", field="rung", cast=int)
+    val_blocks = obs.need(cfg, "val_blocks", field="val_blocks", cast=int)
+    train_blocks = obs.need(ladder, "train_blocks", field="train_blocks", cast=int)
+    train_tokens = obs.need(ladder, "train_supervised_tokens",
+                            field="train_supervised_tokens", cast=int)
+    recorded_pack_sha = obs.need(ladder, "blocks_sha256",
+                                 field="pack_blocks_sha256")
+    obs.agree("rung", rung, ladder.get("rung_target_supervised_tokens"),
+              what="ladder stats")
+
+    # The pack hash is RECOMPUTED from the pack the run named. A value copied
+    # from the frozen pin would prove only that the pin exists.
+    pack_sha = None
+    root = Path(pack_root) if pack_root is not None else (
+        Path(repo_root) if repo_root is not None else None)
+    if data_dir is not None:
+        if root is None:
+            obs.missing.append(
+                "pack_blocks_sha256 (no repo_root given, so the pack the run "
+                "consumed cannot be re-hashed)")
+        else:
+            blocks = root / data_dir / "blocks.npz"
+            if not blocks.is_file():
+                obs.missing.append(
+                    f"pack_blocks_sha256 (the consumed pack {blocks} is not on "
+                    "this machine, so it cannot be re-hashed)")
+            else:
+                pack_sha = sha256_file(blocks)
+                if recorded_pack_sha is not None and pack_sha != recorded_pack_sha:
+                    obs.problems.append(
+                        f"pack_blocks_sha256: the pack on disk hashes to "
+                        f"{pack_sha} but the run recorded {recorded_pack_sha}; "
+                        "the pack changed after the run read it, or this is not "
+                        "the pack it read")
+
+    # -- objective, optimizer, schedule, batch, numerics: from the run's own
+    # execution record, cross-checked against the config it was given ------
+    ce = obs.need(execution, "ce_weight", field="ce_weight", cast=float)
+    kd = obs.need(execution, "kd_weight", field="kd_weight", cast=float)
+    kd_t = obs.need(execution, "kd_temperature", field="kd_temperature", cast=float)
+    kd_scope = obs.need(execution, "kd_scope", field="kd_scope")
+    kd_chunk = obs.need(execution, "kd_chunk", field="kd_chunk", cast=int)
+    loss_cfg = cfg.get("loss") or {}
+    for name, value in (("ce_weight", ce), ("kd_weight", kd),
+                        ("kd_temperature", kd_t), ("kd_scope", kd_scope)):
+        obs.agree(name, value, loss_cfg.get(name))
+
+    optimizer = obs.need(execution, "optimizer", field="optimizer")
+    lr = obs.need(execution, "optimizer_defaults.lr", field="lr", cast=float)
+    weight_decay = obs.need(execution, "optimizer_defaults.weight_decay",
+                            field="weight_decay", cast=float)
+    betas = obs.need(execution, "optimizer_defaults.betas", field="betas",
+                     cast=lambda b: tuple(float(x) for x in b))
+    eps = obs.need(execution, "optimizer_defaults.eps", field="eps", cast=float)
+    grad_clip = obs.need(execution, "grad_clip", field="grad_clip", cast=float)
+    optim_cfg = cfg.get("optim") or {}
+    obs.agree("lr", lr, optim_cfg.get("lr"))
+    obs.agree("weight_decay", weight_decay, optim_cfg.get("weight_decay"))
+    obs.agree("eps", eps, optim_cfg.get("eps"))
+    obs.agree("betas", betas, (tuple(optim_cfg["betas"])
+                               if optim_cfg.get("betas") else None))
+
+    total_steps = obs.need(execution, "total_steps", field="total_steps", cast=int)
+    warmup = obs.need(execution, "warmup_steps", field="warmup_steps", cast=int)
+    min_lr_frac = obs.need(execution, "min_lr_frac", field="min_lr_frac", cast=float)
+    lr_schedule = obs.need(execution, "lr_schedule", field="lr_schedule")
+    block_ordering = obs.need(execution, "block_ordering", field="block_ordering")
+    resume_semantics = obs.need(execution, "resume_semantics",
+                                field="resume_semantics")
+    blocks_per_step = obs.need(execution, "blocks_per_step",
+                               field="blocks_per_step", cast=int)
+    micro_blocks = obs.need(execution, "micro_blocks", field="micro_blocks", cast=int)
+    block_len = obs.need(execution, "block_len", field="block_len", cast=int)
+    obs.agree("block_len", block_len, cfg.get("block_len"))
+    obs.agree("block_len", block_len, ladder.get("block_len"), what="ladder stats")
+
+    dtype = obs.need(execution, "dtype", field="dtype")
+    autocast = obs.need(execution, "autocast_bf16", field="autocast_bf16", cast=bool)
+    grad_ckpt = obs.need(execution, "gradient_checkpointing",
+                         field="gradient_checkpointing", cast=bool)
+
+    patterns = obs.need(cfg, "trainable_patterns", field="trainable_patterns",
+                        cast=normalize_trainable_patterns)
+    trainable_params = obs.need(manifest, "trainable_params",
+                                field="trainable_params", cast=int)
+    obs.agree("trainable_params", trainable_params,
+              execution.get("trainable_params"), what="execution record")
+
+    # -- teacher, tokenizer ----------------------------------------------
+    teacher_id = obs.need(manifest, "teacher.model_id", field="teacher_id")
+    teacher_rev = obs.need(manifest, "teacher.revision", field="teacher_revision")
+    teacher_dtype = obs.need(manifest, "teacher.dtype", field="teacher_dtype")
+    teacher_attn = obs.need(manifest, "teacher.attn_implementation",
+                            field="teacher_attn")
+    tokenizer_sha = obs.need(manifest, "tokenizer_sha256", field="tokenizer_sha256")
+
+    # -- execution identity ----------------------------------------------
+    trainer_digest = obs.need(execution, "trainer_source.digest",
+                              field="trainer_source_digest")
+    trainer_set_version = obs.need(execution, "trainer_source.set_version",
+                                   field="trainer_source_set_version", cast=int)
+    runtime_digest = obs.need(execution, "runtime_digest", field="runtime_digest")
+    image_digest = obs.need(execution, "runtime.image_digest",
+                            field="runtime.image_digest")
+    if runtime_digest is not None and image_digest is None:
+        obs.problems.append(
+            "the run recorded a runtime digest with no image digest; the "
+            "runtime is not pinned, so two runs cannot be asserted to share it")
+
+    # -- accounting: did the run finish what it declared? ------------------
+    accounting: dict[str, Any] = {"present": completion is not None}
+    if completion is not None:
+        final_step = completion.get("final_step")
+        planned = completion.get("planned_total_steps")
+        consumed = completion.get("consumed_blocks")
+        accounting.update({
+            "final_step": final_step, "planned_total_steps": planned,
+            "completed_all_steps": completion.get("completed_all_steps"),
+            "consumed_blocks": consumed,
+        })
+        if not completion.get("completed_all_steps"):
+            obs.problems.append(
+                f"the run stopped at step {final_step} of {planned}; a partially "
+                "trained control is not the control the protocol describes")
+        if total_steps is not None and planned is not None and planned != total_steps:
+            obs.problems.append(
+                f"completion record plans {planned} steps but the execution "
+                f"record says {total_steps}")
+        if (consumed is not None and final_step is not None
+                and blocks_per_step is not None
+                and consumed != final_step * blocks_per_step):
+            obs.problems.append(
+                f"consumed blocks {consumed} != final step {final_step} x "
+                f"blocks_per_step {blocks_per_step}; block accounting is broken")
+        if completion.get("config_sha256") != manifest.get("config_sha256"):
+            obs.problems.append(
+                "the completion record was written under a different config hash "
+                "than the manifest; these artifacts are not from one run")
+
+    resumed_from = manifest.get("resumed_from")
+    if resumed_from:
+        obs.problems.append(
+            f"this run resumed from {resumed_from}; its protocol evidence spans "
+            "several manifests and is not reconstructed here. Refusing rather "
+            "than reconstructing half of it.")
+
+    seed = cfg.get("seed")
+    obs.agree("seed", execution.get("seed"), seed, what="config")
+
+    if obs.problems and strict:
+        raise ObservedProtocolError(
+            f"{run}: the run's artifacts are inconsistent with each other or "
+            f"with the pack on disk:\n  - " + "\n  - ".join(obs.problems))
+    if obs.missing and strict:
+        raise ObservedProtocolError(
+            f"{run}: {len(obs.missing)} material protocol field(s) have no "
+            "evidence in the run's own artifacts, so this run's protocol cannot "
+            "be established:\n  - " + "\n  - ".join(obs.missing)
+            + "\n\nA value filled from the preregistration would make the "
+              "comparison a tautology. Fail closed instead.")
+
+    unverifiable = tuple(sorted(m.split(" (")[0] for m in obs.missing))
+    protocol = RecoveryProtocolFingerprint(
+        pack=pack, pack_blocks_sha256=pack_sha, rung=rung,
+        train_blocks=train_blocks, train_supervised_tokens=train_tokens,
+        block_len=block_len, packing=packing, val_blocks=val_blocks,
+        block_ordering=block_ordering,
+        ce_weight=ce, kd_weight=kd, kd_temperature=kd_t, kd_scope=kd_scope,
+        kd_chunk=kd_chunk,
+        optimizer=optimizer, lr=lr, weight_decay=weight_decay, betas=betas,
+        eps=eps, grad_clip=grad_clip,
+        total_steps=total_steps, warmup_steps=warmup, min_lr_frac=min_lr_frac,
+        lr_schedule=lr_schedule,
+        blocks_per_step=blocks_per_step, micro_blocks=micro_blocks,
+        dtype=dtype, autocast_bf16=autocast, gradient_checkpointing=grad_ckpt,
+        trainable_patterns=patterns, trainable_params=trainable_params,
+        teacher_id=teacher_id, teacher_revision=teacher_rev,
+        teacher_dtype=teacher_dtype, teacher_attn=teacher_attn,
+        tokenizer_sha256=tokenizer_sha,
+        resume_semantics=resume_semantics,
+        trainer_source_digest=trainer_digest,
+        trainer_source_set_version=trainer_set_version,
+        runtime_digest=runtime_digest,
+        unverifiable=unverifiable,
+    )
+    return ObservedRecoveryProtocol(
+        protocol=protocol,
+        seed=int(seed) if seed is not None else None,
+        initialization_source=manifest.get("student_source"),
+        evidence={
+            "strict": strict,
+            "run_dir": str(run),
+            "run_manifest_sha256": sha256_file(manifest_path),
+            "run_completion_sha256": (sha256_file(completion_path)
+                                      if completion_path.is_file() else None),
+            "config_sha256": manifest.get("config_sha256"),
+            "command": manifest.get("command"),
+            "resumed_from": resumed_from,
+            "pack_blocks_sha256_recorded_by_run": recorded_pack_sha,
+            "pack_blocks_sha256_recomputed": pack_sha,
+            "pack_recompute_path": (str(root / data_dir / "blocks.npz")
+                                    if (root is not None and data_dir) else None),
+            "step_accounting": accounting,
+            "image_digest": image_digest,
+            "runtime": execution.get("runtime"),
+            "trainer_source_files": (execution.get("trainer_source") or {}).get("files"),
+            "field_sources": obs.sources,
+            "missing_fields": obs.missing,
+            "internal_inconsistencies": obs.problems,
+            "rule": ("every material field is read from the run's own artifacts; "
+                     "the pack hash is recomputed from the pack the run named; "
+                     "nothing is defaulted or inherited from a preregistration"),
+        })
 
 
 @dataclass(frozen=True)

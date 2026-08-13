@@ -24,6 +24,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import os
 import sys
 import time
 from pathlib import Path
@@ -31,12 +32,40 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO_ROOT / "src"))
 
+from aadistill.autoinit.generation import (  # noqa: E402
+    CONTEXT_RESOLUTION_RULE,
+    GENERATION_DTYPE,
+    MAX_TOKENS_RULE,
+    STOP_ID_DERIVATION_RULE,
+    SYSTEM_INJECTION_RULE,
+    TOKENIZER_SOURCE_CHECKPOINT,
+    generation_runtime_fingerprint,
+    generation_source_digest,
+)
 
 #: The sampling parameters, defined once and used both to build SamplingParams
 #: and to describe the run in its summary. Two copies could disagree, and a
 #: summary that disagrees with the call is worse than one that omits the field:
 #: a protocol reconstructed from it would be confidently wrong.
 SAMPLING = {"temperature": 0.0, "top_p": 1.0, "top_k": -1, "detokenize": False}
+
+
+def tokenizer_files_sha256(source: str) -> str | None:
+    """Hash the tokenizer files of a local checkpoint directory.
+
+    Same convention as `scripts/pod/autoinit_engine_probe.py`: the concatenated
+    bytes of the sorted `tokenizer*.json` files. Defined here so the Stage-0
+    probe and every evaluation wave produce a comparable value; a hub id (rather
+    than a directory) has no local files and yields `None`, which the strict
+    reconstruction then treats as no evidence.
+    """
+    directory = Path(source)
+    if not directory.is_dir():
+        return None
+    files = sorted(directory.glob("tokenizer*.json"))
+    if not files:
+        return None
+    return hashlib.sha256(b"".join(p.read_bytes() for p in files)).hexdigest()
 
 
 def resolve_context(cfg, override: int | None, trained_context: int | None) -> dict:
@@ -68,6 +97,11 @@ def resolve_context(cfg, override: int | None, trained_context: int | None) -> d
             "rope_scaling_factor": (scaling or {}).get("factor"),
             "architectural_context": arch_ctx,
             "trained_context": trained_context,
+            # Recorded so the resolution can be reconstructed from a summary
+            # rather than inferred: `rule` is the shared constant the protocol
+            # identity compares, and the override is explicit even when unused.
+            "context_len_override": int(override) if override else None,
+            "rule": CONTEXT_RESOLUTION_RULE,
             "note": ("effective context is the TRAINED context; this is not a "
                      "262K-context evaluation")
             if source == "trained_block_len" else None}
@@ -104,6 +138,11 @@ def engine_config(llm, ctx: int, gpu_mem_util: float) -> dict:
     sequences because the scheduler said so".
     """
     out = {"max_model_len": ctx, "gpu_memory_utilization": gpu_mem_util,
+           # The dtype the engine was ASKED for, through the one name the
+           # protocol identity also uses. `dtype_engine` below is what the live
+           # engine reports, kept as evidence beside it rather than in place of
+           # it: `str(torch.bfloat16)` is not the string a protocol declares.
+           "dtype": GENERATION_DTYPE, "dtype_engine": None,
            "max_num_seqs": None, "max_num_batched_tokens": None,
            "vllm_version": None, "enforce_eager": None}
     try:
@@ -134,6 +173,8 @@ def engine_config(llm, ctx: int, gpu_mem_util: float) -> dict:
                 break
         if obj is not None:
             out["enforce_eager"] = getattr(obj, "enforce_eager", None)
+            dtype = getattr(obj, "dtype", None)
+            out["dtype_engine"] = None if dtype is None else str(dtype)
             break
     return out
 
@@ -223,8 +264,36 @@ def main() -> int:
           f"{ctx_info['architectural_context']}); stop ids {stop_ids}", flush=True)
 
     template_kwargs = json.loads(args.chat_template_kwargs)
+
+    # The generation protocol's own identity, recorded once and written into
+    # every summary. Purely additive: nothing here changes what is generated.
+    # It exists so the protocol these rollouts were produced under can be
+    # RECONSTRUCTED from the rollouts, instead of being asserted by whoever
+    # reads them — see RecoveryGenerationProtocolFingerprint.from_run_summaries.
+    #
+    # `image_digest` is not observable inside a container; it arrives through
+    # AADISTILL_IMAGE_DIGEST, the same launcher-supplied value the preflight's
+    # Stage-0 attestation uses. Absent, the runtime is unpinned and the strict
+    # reconstruction fails closed rather than assuming a pod.
+    gen_runtime = generation_runtime_fingerprint(
+        os.environ.get("AADISTILL_IMAGE_DIGEST") or None)
+    identity = {
+        "generation_source_digest": generation_source_digest(REPO_ROOT)["digest"],
+        "generation_source_set_version": 1,
+        "degeneration_source_digest": hashlib.sha256(
+            (REPO_ROOT / "src/aadistill/evaluation/degeneration.py").read_bytes()
+        ).hexdigest(),
+        "runtime": gen_runtime.as_dict(),
+        "runtime_digest": gen_runtime.digest,
+        "system_injection_rule": SYSTEM_INJECTION_RULE,
+        "stop_id_derivation_rule": STOP_ID_DERIVATION_RULE,
+        "chat_template_kwargs_json": json.dumps(template_kwargs, sort_keys=True),
+        "image_digest_source": ("env AADISTILL_IMAGE_DIGEST"
+                                if os.environ.get("AADISTILL_IMAGE_DIGEST")
+                                else "ABSENT — runtime is not pinned"),
+    }
     t_init = time.time()
-    llm = LLM(model=args.model, dtype="bfloat16", max_model_len=ctx,
+    llm = LLM(model=args.model, dtype=GENERATION_DTYPE, max_model_len=ctx,
               gpu_memory_utilization=args.gpu_mem_util,
               **({"revision": args.revision} if args.revision else {}))
     eng = llm.llm_engine
@@ -378,6 +447,14 @@ def main() -> int:
             "chat_template_kwargs": template_kwargs,
             "model_revision": args.revision,
             "tokenizer_source": args.tokenizer or args.model,
+            # The *rule*, not the path: the path names the checkpoint being
+            # evaluated, which differs between every arm by construction and is
+            # therefore unusable as a shared protocol identity.
+            "tokenizer_source_rule": (
+                TOKENIZER_SOURCE_CHECKPOINT if not args.tokenizer
+                else f"external: {args.tokenizer}"),
+            "tokenizer_sha256": tokenizer_files_sha256(args.tokenizer or args.model),
+            "identity": identity,
             "chat_template_sha256": hashlib.sha256(
                 (tok.chat_template or "").encode()).hexdigest(),
             "thinking_mode": template_kwargs.get(
@@ -389,8 +466,7 @@ def main() -> int:
             # this summary must not have to infer them from the source. Purely
             # additive -- nothing about generation changes.
             "sampling": {**SAMPLING,
-                         "max_tokens_rule": ("per sample: context - prompt; P18 "
-                                             "unrestricted, never a chosen budget"),
+                         "max_tokens_rule": MAX_TOKENS_RULE,
                          "degeneration_check_every": args.check_every},
             "libraries": library_versions(),
             "degeneration_stop": not args.no_degeneration_stop,

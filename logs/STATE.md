@@ -1,26 +1,55 @@
 **Updated:** 2026-08-13 · branch `main` · working tree clean
-**No pods running. Nothing billing.** **1,558 CPU tests pass**, 7 skipped — in
-*both* venvs (repo `.venv` transformers 5.13.1, and the transformers 4.57.1 venv).
+**No pods running. Nothing billing.** **1,565 CPU tests pass**, 7 skipped (30
+skipped under the pod's staged set).
 
-**The micro-preflight harness is built and rehearsed at $0; the pod has not been
-launched.** `scripts/pod/autoinit_preflight_{setup.sh,driver.py,launch.py}` plus
-`autoinit_engine_probe.py`, three Stage-1 measurement scripts, and two artifact
-specs. 18 rehearsal scenarios in
+**The micro-preflight harness is complete and rehearsed at $0; the pod has not
+been launched.** `scripts/pod/autoinit_preflight_{setup.sh,driver.py,launch.py}`
+plus `autoinit_engine_probe.py`, three Stage-1 measurement scripts, and two
+artifact specs. 21 rehearsal scenarios in
 [`tests/pod/test_autoinit_preflight_rehearsal.py`](../tests/pod/test_autoinit_preflight_rehearsal.py)
 drive the real driver through every blocking path and prove that a Stage-0/1
 failure never reaches the permanent controls, that evidence survives, and that
-the success path cannot fall through to Phase A. The rehearsal found one real
-defect: a non-blocking Stage-3 failure emitted `ALL_DONE`, so the launcher would
-have reported a complete preflight; it now emits `PREFLIGHT_INCOMPLETE`.
-Two new identities: `RecoveryGenerationProtocolFingerprint` (declared
-`f4ac7448…`, materialized at Stage 0) and `RecoveryEvaluationProtocol` =
-generation + `recovery_search_scoring@v2` + battery identity. Spend is bound by
+the success path cannot fall through to Phase A.
+
+**Execution verification is closed: the harness now proves what *ran*, not what
+the driver intended.** Stage 2 reconstructs the protocol from the run's own
+artifacts (`RecoveryProtocolFingerprint.from_run_artifacts` /
+`observe_recovery_protocol`) — nothing defaulted, nothing inherited from the
+preregistration, `pack_blocks_sha256` **recomputed** from the pack the run read,
+step accounting required — and compares *that* to the Stage-0 attestation before
+a control is bound by (observed protocol, probe id, weights sha256). Stage 3
+reconstructs the generation protocol from the stored rollout summaries
+(`from_run_summaries`), requires every set to agree, compares it to the attested
+fingerprint **before scoring**, and binds each sa/sb result to an observed
+`RecoveryEvaluationProtocol`. Six targeted failure scenarios in
+[`tests/pod/test_observed_protocol_rehearsal.py`](../tests/pod/test_observed_protocol_rehearsal.py),
+two of which drive the **real trainer** end to end. Details:
+[`autoinit_preflight_remaining_gates.md`](autoinit_preflight_remaining_gates.md),
+[`decisions.md`](decisions.md) 2026-08-13.
+
+**Three defects this found, all of which would have fired on a paid pod:** the
+driver passed `train_stage3.py --out-dir`, which that script does not accept;
+Stage 3 would have generated from a **vocab-size-1** tokenizer, because
+`save_pretrained` writes none and `AutoTokenizer` returns a degenerate one
+instead of raising; and four tests read gitignored artifacts the preflight does
+not stage, so the setup test gate would have failed after `uv sync`, the vLLM
+install and the teacher download.
+
+Two identities beyond the training protocol: `RecoveryGenerationProtocolFingerprint`
+(declared `f4ac7448…`, unchanged; materialized at Stage 0 **from the vLLM
+environment**, not the training venv — the earlier fill described a stack that
+never generates a token) and `RecoveryEvaluationProtocol` = generation +
+`recovery_search_scoring@v2` + battery identity. Spend is bound by
 [`autoinit_micro_preflight_authorization.json`](autoinit_micro_preflight_authorization.json)
-(`94b6c5d2…`, $4.20 expected / $8.60 hard, stages 0-3, `phase_a_authorized:
-false`), which the launcher loads before a pod exists.
+($4.20 expected / $8.60 hard, stages 0-3, `phase_a_authorized: false`), re-issued
+against the final harness, which the launcher loads before a pod exists.
 
 **Recovery-search scoring is now `recovery_search_scoring@v2`** (digest
-`f76008d5…`), superseding @v1 **before any paid measurement**. @v1 pinned the
+`69591aab…`, re-pinned from `f76008d5…` on 2026-08-13 when `recovery.py` gained
+the observed-protocol reconstruction; the metric itself did not move — nine
+policies × 190 frozen prompts reproduce every number of the earlier record, and
+the version stays at 2 because bumping it would falsely signal a metric change),
+superseding @v1 **before any paid measurement**. @v1 pinned the
 metric by a single hash of `capability.py` and so could not see a defect in the
 *composition*: `protocol_valid` rejected a prompted `<tool_call>` as
 `unexpected_tool_call`, `usable_rollout` inherited it, and `correct => usable`

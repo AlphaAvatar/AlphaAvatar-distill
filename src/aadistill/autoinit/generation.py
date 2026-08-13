@@ -35,6 +35,7 @@ every control and every later probe binds to.
 from __future__ import annotations
 
 import hashlib
+from collections.abc import Mapping, Sequence
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
@@ -50,6 +51,36 @@ GENERATION_SOURCE_FILES_V1: tuple[str, ...] = (
 )
 GENERATION_PROTOCOL_ID = "recovery_generation"
 GENERATION_PROTOCOL_VERSION = 1
+
+#: The protocol's descriptive fields, defined once and emitted by the generator
+#: into every summary it writes.
+#:
+#: These used to be literals here only, restated in prose inside
+#: `uncapped_eval.py` — and the two had already drifted: this module declared the
+#: max-tokens rule as "per sample: resolved_context - len(prompt_ids); P18
+#: unrestricted, never a chosen token budget" while the generator wrote "per
+#: sample: context - prompt; P18 unrestricted, never a chosen budget". Two
+#: sentences describing the same behaviour, and an observed-vs-declared
+#: comparison would have called them a protocol mismatch. One definition, used by
+#: both sides.
+SYSTEM_INJECTION_RULE = ("injected only when the sample carries no system turn "
+                         "and protocol == project; a sample's own system prompt "
+                         "is preserved")
+CONTEXT_RESOLUTION_RULE = ("min(trained_context, architectural context); the "
+                           "effective context is the TRAINED context and this "
+                           "is not a 262K-context evaluation")
+MAX_TOKENS_RULE = ("per sample: resolved_context - len(prompt_ids); P18 "
+                   "unrestricted, never a chosen token budget")
+STOP_ID_DERIVATION_RULE = ("sorted union of config.eos_token_id, "
+                           "generation_config.eos_token_id, <|im_end|> and "
+                           "tokenizer.eos_token_id")
+#: The rollout dtype, passed to the engine and recorded. One name, so the
+#: summary cannot describe a dtype the engine was not asked for.
+GENERATION_DTYPE = "bfloat16"
+#: What `tokenizer_source` means when the evaluator was given no `--tokenizer`.
+#: The raw path is *not* usable as an identity: it contains the checkpoint being
+#: evaluated, which differs between every arm by construction.
+TOKENIZER_SOURCE_CHECKPOINT = "the evaluated checkpoint"
 
 
 class GenerationProtocolError(RuntimeError):
@@ -222,6 +253,25 @@ class RecoveryGenerationProtocolFingerprint:
                     "update")
         return replace(self, **observations)
 
+    @classmethod
+    def from_run_summaries(cls, summaries: Sequence[Mapping[str, Any]], *,
+                           strict: bool = True,
+                           ) -> "RecoveryGenerationProtocolFingerprint":
+        """Reconstruct the protocol the stored rollouts were **actually** made under.
+
+        Reads `uncapped_eval.py`'s per-set summaries and nothing else: not the
+        attested fingerprint, not this module's declared defaults. Every material
+        field must be present in every summary, and every summary of one
+        evaluation must agree with the others field by field — a wave that
+        changed engine settings between sets did not measure one protocol.
+
+        A missing field raises rather than being taken from the expected
+        fingerprint. That substitution is the failure this exists to prevent: it
+        would make the comparison pass by construction, and the passing
+        comparison is what the thresholds are then materialized under.
+        """
+        return observe_generation_protocol(summaries, strict=strict).protocol
+
     def as_dict(self) -> dict[str, Any]:
         return {**self.identity(),
                 "generation_protocol_fingerprint": self.fingerprint,
@@ -241,29 +291,22 @@ GENERATION_V1_DECLARED = dict(
     generation_source_digest=None,
     generation_source_set_version=1,
     vllm_version=None, transformers_version=None, torch_version=None,
-    dtype="bfloat16", gpu_memory_utilization=0.90,
+    dtype=GENERATION_DTYPE, gpu_memory_utilization=0.90,
     max_num_seqs=None, max_num_batched_tokens=None, enforce_eager=None,
-    tokenizer_source="the evaluated checkpoint",
+    tokenizer_source=TOKENIZER_SOURCE_CHECKPOINT,
     tokenizer_sha256=None, chat_template_sha256=None,
     protocol="project",
     system_message="You are a helpful Assistant.",
-    system_injection_rule=("injected only when the sample carries no system turn "
-                           "and protocol == project; a sample's own system prompt "
-                           "is preserved"),
+    system_injection_rule=SYSTEM_INJECTION_RULE,
     chat_template_kwargs_json="{}",
     thinking_mode="template-default (not overridden)",
     trained_context=8192, context_len_override=None,
     resolved_context=None, context_source=None,
-    context_resolution_rule=("min(trained_context, architectural context); the "
-                             "effective context is the TRAINED context and this "
-                             "is not a 262K-context evaluation"),
+    context_resolution_rule=CONTEXT_RESOLUTION_RULE,
     temperature=0.0, top_p=1.0, top_k=-1, detokenize=False,
-    max_tokens_rule=("per sample: resolved_context - len(prompt_ids); P18 "
-                     "unrestricted, never a chosen token budget"),
+    max_tokens_rule=MAX_TOKENS_RULE,
     stop_token_ids=None,
-    stop_id_derivation_rule=("sorted union of config.eos_token_id, "
-                             "generation_config.eos_token_id, <|im_end|> and "
-                             "tokenizer.eos_token_id"),
+    stop_id_derivation_rule=STOP_ID_DERIVATION_RULE,
     degeneration_stop=True, degeneration_check_every=256,
     degeneration_source_digest=None,
     runtime_digest=None,
@@ -272,6 +315,198 @@ GENERATION_V1_DECLARED = dict(
 
 def declared_generation_protocol() -> RecoveryGenerationProtocolFingerprint:
     return RecoveryGenerationProtocolFingerprint(**GENERATION_V1_DECLARED)
+
+
+def generation_runtime_fingerprint(image_digest: str | None):
+    """The runtime the **rollouts** execute under, observed in this process.
+
+    Not the trainer's runtime. Generation runs in the vLLM environment, which is
+    a different interpreter with different torch and transformers versions from
+    the training environment on the same pod — so filling this side of the
+    identity from the training venv, as Stage 0 originally did, describes a stack
+    that never generated a token. Both the Stage-0 engine probe and every
+    evaluation wave call this function, in that environment, and the digests are
+    therefore comparable.
+
+    `image_digest` cannot be observed from inside a container; it comes from the
+    launcher via `AADISTILL_IMAGE_DIGEST`, the same source Stage 0 uses.
+    """
+    import os
+
+    from .recovery import RuntimeEnvironmentFingerprint
+
+    return RuntimeEnvironmentFingerprint.observe(
+        image_digest=image_digest,
+        attention_backend=f"vllm:{os.environ.get('VLLM_ATTENTION_BACKEND', 'default')}")
+
+
+class ObservedGenerationError(GenerationProtocolError):
+    """The stored rollouts do not establish the protocol they were made under."""
+
+
+#: Where each material field lives in a summary written by `uncapped_eval.py`.
+#: Dotted paths, resolved against the summary itself. Everything the fingerprint
+#: compares is here: a field that is part of the identity and *not* required from
+#: the evidence would be a field the observed side is free to invent.
+SUMMARY_FIELD_PATHS: dict[str, str] = {
+    "generation_source_digest": "identity.generation_source_digest",
+    "generation_source_set_version": "identity.generation_source_set_version",
+    "degeneration_source_digest": "identity.degeneration_source_digest",
+    "runtime_digest": "identity.runtime_digest",
+    "vllm_version": "engine.vllm_version",
+    "transformers_version": "identity.runtime.transformers_version",
+    "torch_version": "identity.runtime.torch_version",
+    "dtype": "engine.dtype",
+    "gpu_memory_utilization": "engine.gpu_memory_utilization",
+    "max_num_seqs": "engine.max_num_seqs",
+    "max_num_batched_tokens": "engine.max_num_batched_tokens",
+    "enforce_eager": "engine.enforce_eager",
+    "tokenizer_source": "tokenizer_source_rule",
+    "tokenizer_sha256": "tokenizer_sha256",
+    "chat_template_sha256": "chat_template_sha256",
+    "protocol": "protocol",
+    "system_injection_rule": "identity.system_injection_rule",
+    "chat_template_kwargs_json": "identity.chat_template_kwargs_json",
+    "thinking_mode": "thinking_mode",
+    "trained_context": "context_resolution.trained_context",
+    "resolved_context": "context_resolution.resolved_context",
+    "context_source": "context_resolution.context_source",
+    "context_resolution_rule": "context_resolution.rule",
+    "temperature": "sampling.temperature",
+    "top_p": "sampling.top_p",
+    "top_k": "sampling.top_k",
+    "detokenize": "sampling.detokenize",
+    "max_tokens_rule": "sampling.max_tokens_rule",
+    "stop_token_ids": "stop_ids",
+    "stop_id_derivation_rule": "identity.stop_id_derivation_rule",
+    "degeneration_stop": "degeneration_stop",
+    "degeneration_check_every": "sampling.degeneration_check_every",
+}
+
+#: Material fields that are legitimately null-valued rather than absent.
+#: `context_len_override` is `None` whenever the context was not overridden,
+#: which is the case the whole protocol assumes; it is required to be *present*
+#: and is allowed to be null.
+NULLABLE_SUMMARY_FIELDS = {
+    "context_len_override": "context_resolution.context_len_override",
+    # `--protocol native` legitimately records no system message. Required to be
+    # present, allowed to be null: the *comparison* should then say "the system
+    # message differs from the attested protocol", which is the accurate
+    # diagnosis, rather than "no evidence".
+    "system_message": "system_message",
+}
+
+
+def _dig(summary: Mapping[str, Any], path: str) -> tuple[bool, Any]:
+    node: Any = summary
+    for part in path.split("."):
+        if not isinstance(node, Mapping) or part not in node:
+            return False, None
+        node = node[part]
+    return True, node
+
+
+@dataclass(frozen=True)
+class ObservedGenerationProtocol:
+    protocol: RecoveryGenerationProtocolFingerprint
+    evidence: dict[str, Any]
+
+    def as_dict(self) -> dict[str, Any]:
+        return {"observed_generation_protocol": self.protocol.as_dict(),
+                "observed_generation_fingerprint": self.protocol.fingerprint,
+                "evidence": self.evidence}
+
+
+def observe_generation_protocol(summaries: Sequence[Mapping[str, Any]], *,
+                                strict: bool = True) -> ObservedGenerationProtocol:
+    """Rebuild one generation protocol from the summaries of one evaluation run."""
+    if not summaries:
+        raise ObservedGenerationError(
+            "no rollout summaries; there is no evidence of how these "
+            "generations were produced")
+
+    missing: list[str] = []
+    disagreements: list[dict[str, Any]] = []
+    values: dict[str, Any] = {}
+    labels = [s.get("label") for s in summaries]
+    sets = [s.get("prompts") for s in summaries]
+
+    paths = {**SUMMARY_FIELD_PATHS, **NULLABLE_SUMMARY_FIELDS}
+    for field_name, path in paths.items():
+        seen: list[tuple[Any, Any]] = []
+        for summary in summaries:
+            present, value = _dig(summary, path)
+            if not present:
+                missing.append(
+                    f"{field_name} (summary {summary.get('prompts') or '?'} has "
+                    f"no {path})")
+                continue
+            if value is None and field_name not in NULLABLE_SUMMARY_FIELDS:
+                missing.append(
+                    f"{field_name} (summary {summary.get('prompts') or '?'} "
+                    f"records {path} as null)")
+                continue
+            if field_name == "stop_token_ids":
+                value = tuple(value)
+            seen.append((summary.get("prompts"), value))
+        if not seen:
+            continue
+        distinct = {json_key(v) for _, v in seen}
+        if len(distinct) > 1:
+            disagreements.append({
+                "field": field_name,
+                "values": {str(where): value for where, value in seen}})
+        values[field_name] = seen[0][1]
+
+    if strict and missing:
+        raise ObservedGenerationError(
+            f"{len(missing)} material generation field(s) are not established by "
+            "the stored rollouts, so the protocol they were produced under "
+            "cannot be reconstructed:\n  - " + "\n  - ".join(missing)
+            + "\n\nFilling any of them from the attested fingerprint would make "
+              "the comparison pass by construction. Fail closed instead.")
+    if strict and disagreements:
+        raise ObservedGenerationError(
+            "the sets of this evaluation were not generated under one protocol: "
+            + "; ".join(f"{d['field']} differs across sets ({d['values']})"
+                        for d in disagreements))
+
+    declared = dict(GENERATION_V1_DECLARED)
+    unknown = sorted({m.split(" (")[0] for m in missing})
+    observed = {k: v for k, v in values.items()}
+    for key in unknown:
+        observed.pop(key, None)
+        declared[key] = None
+    protocol = RecoveryGenerationProtocolFingerprint(
+        **{**{k: None for k in declared}, **observed,
+           # Version fields are structural, not observed; they identify which
+           # fingerprint schema this object is, not what the run did.
+           "protocol_id": GENERATION_PROTOCOL_ID,
+           "version": GENERATION_PROTOCOL_VERSION})
+    return ObservedGenerationProtocol(
+        protocol=protocol,
+        evidence={
+            "strict": strict,
+            "n_summaries": len(summaries),
+            "labels": sorted({str(x) for x in labels}),
+            "sets": [str(x) for x in sets],
+            "field_paths": paths,
+            "missing_fields": missing,
+            "cross_set_disagreements": disagreements,
+            "rule": ("every material field is read from the rollout summaries "
+                     "themselves; all sets of one evaluation must agree; nothing "
+                     "is taken from the declared or attested fingerprint"),
+        })
+
+
+def json_key(value: Any) -> str:
+    """A comparable key for heterogeneous summary values (lists included)."""
+    import json as _json
+
+    try:
+        return _json.dumps(value, sort_keys=True, default=str)
+    except TypeError:
+        return repr(value)
 
 
 @dataclass(frozen=True)

@@ -29,11 +29,17 @@ def main() -> None:
     ap.add_argument("--out", required=True)
     ap.add_argument("--gpu-mem-util", type=float, default=0.90)
     ap.add_argument("--trained-context", type=int, default=8192)
+    ap.add_argument("--image-digest", default=None,
+                    help="the pod image digest; defaults to AADISTILL_IMAGE_DIGEST")
     args = ap.parse_args()
+
+    import os
 
     import vllm
     from transformers import AutoConfig, AutoTokenizer
     from vllm import LLM
+
+    from aadistill.autoinit.generation import generation_runtime_fingerprint
 
     from uncapped_eval import engine_config, resolve_context, resolve_stop_ids
 
@@ -49,7 +55,19 @@ def main() -> None:
     tok_files = sorted(Path(args.model).glob("tokenizer*.json"))
     tok_hash = hashlib.sha256(
         b"".join(p.read_bytes() for p in tok_files)).hexdigest() if tok_files else None
+    # The runtime the ROLLOUTS execute under — this interpreter, not the
+    # trainer's. Stage 0 used to fill the generation protocol's torch and
+    # transformers versions from the training venv, which describes a stack that
+    # never generates a token and could never match what an evaluation wave
+    # observes.
+    runtime = generation_runtime_fingerprint(
+        args.image_digest or os.environ.get("AADISTILL_IMAGE_DIGEST") or None)
     out = {
+        "runtime": runtime.as_dict(),
+        "runtime_digest": runtime.digest,
+        "torch_version": runtime.torch_version,
+        "transformers_version": runtime.transformers_version,
+        "dtype": engine.get("dtype"),
         "vllm_version": getattr(vllm, "__version__", None) or engine.get("vllm_version"),
         "max_num_seqs": engine.get("max_num_seqs"),
         "max_num_batched_tokens": engine.get("max_num_batched_tokens"),

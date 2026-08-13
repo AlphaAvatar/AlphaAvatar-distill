@@ -1,13 +1,13 @@
 {
   "schema": "aadistill.autoinit.recovery_scoring_validation/v1",
-  "generated_utc": "2026-08-13T08:48:57.490177+00:00",
+  "generated_utc": "2026-08-13T15:15:43.755206+00:00",
   "battery": "artifacts/stage3/recovery_search_v1",
   "n_prompts": 190,
   "scoring_contract": {
     "contract": "recovery_search_scoring@v2",
     "contract_id": "recovery_search_scoring",
     "version": 2,
-    "digest": "f76008d5459c781cdfd0f11e39fc379c74af641f7567a168c10bf48e6a3e66fb",
+    "digest": "69591aab8626c8300fb485fdfa82d52aa434eb9576fae39d36281f8bf40a9f8a",
     "files": [
       {
         "path": "scripts/autoinit/score_recovery_search.py",
@@ -16,8 +16,8 @@
       },
       {
         "path": "src/aadistill/autoinit/recovery.py",
-        "sha256": "9d1950b6bd5cffacc6e3d9ff60b0607080c5ed831ee3337e8fcb132156156b5c",
-        "bytes": 74779
+        "sha256": "792dae68c93a0c00d513eb3e644939954dc109c15b517ee9587d3b65b2943402",
+        "bytes": 94826
       },
       {
         "path": "src/aadistill/evaluation/behavior.py",
@@ -403,5 +403,5 @@
     "contentless_is_behaviourally_perfect_and_useless": true
   },
   "all_checks_pass": true,
-  "report_sha256": "fb4c041ee2c0007148ab15942863a3602695cee7f03a2e8de2ab3bc3aca51e6b"
+  "report_sha256": "bc37772ae374d4d713513c6c7751db1edf030877aad201e7a035ada92b3e11ce"
 }

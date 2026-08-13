@@ -18,6 +18,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import sys
 from datetime import datetime, timezone
 from pathlib import Path
@@ -27,6 +28,10 @@ sys.path.insert(0, str(REPO_ROOT / "src"))
 
 import torch
 
+from aadistill.autoinit.recovery import (
+    RuntimeEnvironmentFingerprint,
+    trainer_source_digest,
+)
 from aadistill.infrastructure.env import code_state, hardware_report, set_determinism
 from aadistill.infrastructure.manifest import sha256_file, sha256_json, write_manifest
 from aadistill.models.teacher import DTYPES, load_teacher, tokenizer_hash
@@ -225,6 +230,8 @@ def main() -> None:
         if resume_ckpt is None
         else f"run_manifest_resume_step{trainer.step:06d}.json"
     )
+    image_digest = os.environ.get("AADISTILL_IMAGE_DIGEST") or None
+    runtime = RuntimeEnvironmentFingerprint.observe(image_digest=image_digest)
     write_manifest(
         out_dir / manifest_name,
         {
@@ -271,6 +278,25 @@ def main() -> None:
                  "manifest_sha256": sha256_json(extra_stream_meta),
                  "planned_kd_positions": trainer.planned_extra_kd_positions()}
                 if extra_stream_meta is not None else None),
+            # What actually ran, read off the executing objects. This block is
+            # what makes a run's protocol *reconstructable from its own
+            # artifacts* instead of restated from the config a verifier already
+            # holds — see RecoveryProtocolFingerprint.from_run_artifacts.
+            #
+            # `image_digest` cannot be observed from inside a container; it is
+            # supplied by the launcher through AADISTILL_IMAGE_DIGEST, the same
+            # source the preflight's Stage-0 attestation uses. Absent, it stays
+            # null and the strict reconstruction fails closed rather than
+            # accepting an unpinned runtime.
+            "execution": {
+                **trainer.execution_record(),
+                "trainer_source": trainer_source_digest(REPO_ROOT),
+                "runtime": runtime.as_dict(),
+                "runtime_digest": runtime.digest,
+                "image_digest_source": (
+                    "env AADISTILL_IMAGE_DIGEST" if image_digest
+                    else "ABSENT — runtime is not pinned"),
+            },
             "code_state": code_state(str(REPO_ROOT)),
             "hardware": hardware_report(),
         },
@@ -279,6 +305,26 @@ def main() -> None:
 
     summary = trainer.run()
     print(json.dumps(summary, indent=2))
+
+    # The run's own completion evidence. `run_manifest.json` is written before
+    # the first step, so it can only say what was *about* to run; a control that
+    # stopped early would still have a perfect manifest. Step and consumed-block
+    # accounting are therefore recorded after `run()` returns, and the strict
+    # reconstruction requires them.
+    write_manifest(
+        out_dir / ("run_completion.json" if resume_ckpt is None
+                   else f"run_completion_resume_step{trainer.step:06d}.json"),
+        {
+            "finished_utc": datetime.now(timezone.utc).isoformat(),
+            "config_sha256": sha256_json(cfg),
+            "summary": summary,
+            "final_step": trainer.step,
+            "planned_total_steps": cfg["schedule"]["total_steps"],
+            "completed_all_steps": trainer.step >= cfg["schedule"]["total_steps"],
+            "consumed_blocks": trainer.consumed_blocks(),
+            "execution": trainer.execution_record(),
+        },
+    )
 
 
 if __name__ == "__main__":

@@ -51,6 +51,10 @@ TARGET_596M = ArchSpec.of("qwen3", dict(
     vocab_size=151936, tie_word_embeddings=True))
 
 
+@pytest.mark.skipif(
+    not (REPO / "artifacts/stage1/qwen3_0p6b_init_v0/manifest.json").is_file(),
+    reason="the init manifest is a gitignored artifact; a pod stages the "
+           "checkpoint files, not the manifest")
 def test_parameter_arithmetic_matches_both_frozen_counts():
     """The cost model prices states it never builds; the arithmetic must be exact."""
     assert ADAPTER.param_count(TEACHER_36) == 4_022_468_096
@@ -61,6 +65,8 @@ def test_parameter_arithmetic_matches_both_frozen_counts():
     assert manifest["student"]["num_parameters"] == ADAPTER.param_count(TARGET_596M)
 
 
+@pytest.mark.skipif(not (E8A_DIR / "e8_frozen_depth_map.json").is_file(),
+                    reason="E8a frozen depth map not present")
 def test_the_positional_map_still_removes_the_layers_the_record_says():
     frozen = json.loads((E8A_DIR / "e8_frozen_depth_map.json").read_text())
     kept = [s["representative"] for s in depth_span_map(36, 28)]
