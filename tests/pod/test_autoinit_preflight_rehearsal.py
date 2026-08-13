@@ -514,3 +514,50 @@ def test_phase_a_is_not_expressible_in_the_driver_or_the_launcher():
                           "SuccessiveHalvingPlan", "run_phase_a", "start_phase_a"):
             assert forbidden not in source, f"the {who} can reach {forbidden}"
     assert "PARETO_V1" not in launch
+
+
+def test_both_artifact_specs_actually_load():
+    """A spec no consumer can parse is not a spec.
+
+    Both preflight specs were written as documents with an `entries` list whose
+    items carried a `final` key. `load_specs` iterated the document (yielding its
+    *keys*) and `ArtifactSpec` has no `final` field, so **every** preflight
+    collection failed at load with `manifest rc=1`. The session then kept only
+    the two files the launcher scp's by name, and on 2026-08-13 that lost the run
+    manifests, completion records, train logs, probe-identity records and the
+    Stage-3 generation tail of a $2.82 session.
+    """
+    import importlib.util
+
+    spec_mod = importlib.util.spec_from_file_location(
+        "collect_artifacts_mod", REPO / "scripts/pod/collect_artifacts.py")
+    collect = importlib.util.module_from_spec(spec_mod)
+    sys.modules["collect_artifacts_mod"] = collect
+    spec_mod.loader.exec_module(collect)
+
+    for name in ("preflight_artifacts.json", "preflight_artifacts_failed.json"):
+        specs = collect.load_specs(str(REPO / "configs/autoinit" / name))
+        assert specs, f"{name} loaded no specs"
+        for entry in specs:
+            assert entry.artifact_class and entry.pattern
+    # The success spec must demand what the session exists to produce.
+    success = {e.pattern for e in
+               collect.load_specs(str(REPO / "configs/autoinit/preflight_artifacts.json"))}
+    for needed in ("stage3/preflight_ctl_r0860k_s*/run_completion.json",
+                   "audit/autoinit_preflight/preflight_ctl_r0860k_s*_probe_identity.json",
+                   "audit/autoinit_preflight/materialized_thresholds.json",
+                   "audit/autoinit_preflight/*.log"):
+        assert needed in success, needed
+
+
+def test_the_controls_are_fetched_whenever_they_exist():
+    """Stage 3 is non-blocking *because* the controls are kept. Keep them."""
+    launch = LAUNCH_PATH.read_text()
+    assert 'if terminal == "ALL_DONE":\n            for name in CONTROLS' not in launch, (
+        "the checkpoint fetch is gated on total success; a non-blocking Stage-3 "
+        "failure would delete the permanent controls, which is what happened "
+        "on 2026-08-13")
+    assert "stage2_passed" in launch
+    assert '"PREFLIGHT_INCOMPLETE"' in launch
+    # And the fetch is verified by size, not by return code alone.
+    assert '"bytes": size' in launch

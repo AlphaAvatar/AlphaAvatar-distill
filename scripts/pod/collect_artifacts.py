@@ -46,8 +46,27 @@ from aadistill.infrastructure.artifact_gate import (  # noqa: E402
 
 
 def load_specs(path: str) -> tuple[ArtifactSpec, ...]:
+    """Accept a bare list of specs **or** a document with an ``entries`` list.
+
+    Both preflight artifact specs are documents — they carry `spec`, `session`
+    and a `note` alongside their entries — and this function only ever handled
+    the bare-list form. Iterating a dict yields its *keys*, so every preflight
+    collection died with `ArtifactSpec() argument after ** must be a mapping,
+    not str`, and the session kept only the two files the launcher scp's by
+    name. On 2026-08-13 that cost the run manifests, completion records, train
+    logs, probe-identity records and the Stage-3 generation tail of a $2.82
+    session. A spec shape that no consumer accepts is not a spec.
+    """
     raw = json.loads(Path(path).read_text())
-    return tuple(ArtifactSpec(**item) for item in raw)
+    entries = raw["entries"] if isinstance(raw, dict) else raw
+    if not isinstance(entries, list):
+        raise SystemExit(
+            f"{path}: expected a list of artifact specs, or a document with an "
+            f"'entries' list; got {type(entries).__name__}")
+    bad = [e for e in entries if not isinstance(e, dict)]
+    if bad:
+        raise SystemExit(f"{path}: {len(bad)} spec entr(ies) are not objects")
+    return tuple(ArtifactSpec(**item) for item in entries)
 
 
 def load_markers(path: str) -> tuple[CompletionMarker, ...]:

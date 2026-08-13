@@ -1,32 +1,90 @@
 {
   "spec": "aadistill.artifact_spec/v1",
   "session": "autoinit_micro_preflight_failed",
-  "note": "reduced spec for a blocking Stage-0/1 failure. The controls do NOT exist and must not be demanded: a gate that blocks teardown on artifacts the run correctly refused to produce would keep a failed pod billing. Evidence still required. Gate logs are included: the 2026-08-13 attempt kept only a 300-character prefix of a failure and the pod was deleted before anyone could read the rest.",
+  "note": "reduced spec for a session that did not reach ALL_DONE. Nothing is required beyond the evidence file: a gate that blocks teardown on artifacts the run correctly refused to produce keeps a failed pod billing. Everything else is collected if present \u2014 including the gate logs, which is what the 2026-08-13 sessions needed and did not have.",
   "entries": [
     {
+      "artifact_class": "preflight_evidence",
       "pattern": "audit/autoinit_preflight/preflight_evidence.json",
       "required": true,
-      "final": true
+      "lifecycle": "final_required"
     },
     {
+      "artifact_class": "attested_protocol",
       "pattern": "audit/autoinit_preflight/attested_protocol.json",
       "required": false,
-      "final": true
+      "lifecycle": "final_required",
+      "min_matches": 0
     },
     {
+      "artifact_class": "gate_log",
       "pattern": "audit/autoinit_preflight/*.log",
       "required": false,
-      "final": true
+      "lifecycle": "final_required",
+      "min_matches": 0
     },
     {
+      "artifact_class": "generation_smoke",
+      "pattern": "audit/autoinit_preflight/generation_smoke.json",
+      "required": false,
+      "lifecycle": "final_required",
+      "min_matches": 0
+    },
+    {
+      "artifact_class": "audit_json",
       "pattern": "audit/autoinit_preflight/*.json",
       "required": false,
-      "final": true
+      "lifecycle": "final_required",
+      "min_matches": 0
     },
     {
+      "artifact_class": "control_config",
+      "pattern": "audit/autoinit_preflight/configs/*.json",
+      "required": false,
+      "lifecycle": "final_required",
+      "min_matches": 0
+    },
+    {
+      "artifact_class": "session_evidence",
       "pattern": "audit/autoinit_preflight/session/*",
       "required": false,
-      "final": true
+      "lifecycle": "final_required",
+      "min_matches": 0
+    },
+    {
+      "artifact_class": "event_stream",
+      "pattern": "stage3/preflight_ctl_r0860k_s*/train_log.jsonl",
+      "required": false,
+      "lifecycle": "final_required",
+      "min_matches": 0
+    },
+    {
+      "artifact_class": "run_manifest",
+      "pattern": "stage3/preflight_ctl_r0860k_s*/run_manifest.json",
+      "required": false,
+      "lifecycle": "final_required",
+      "min_matches": 0
+    },
+    {
+      "artifact_class": "run_completion",
+      "pattern": "stage3/preflight_ctl_r0860k_s*/run_completion.json",
+      "required": false,
+      "lifecycle": "final_required",
+      "min_matches": 0
+    },
+    {
+      "artifact_class": "generations",
+      "pattern": "eval/preflight/preflight_ctl_r0860k_s*/*.generations.jsonl",
+      "required": false,
+      "lifecycle": "final_required",
+      "min_matches": 0
+    },
+    {
+      "artifact_class": "generation_summary",
+      "pattern": "eval/preflight/preflight_ctl_r0860k_s*/*.json",
+      "required": false,
+      "lifecycle": "final_required",
+      "min_matches": 0
     }
   ]
 }

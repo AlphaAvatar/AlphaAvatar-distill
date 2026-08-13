@@ -665,3 +665,28 @@ def test_the_derived_control_config_overrides_exactly_three_fields(tmp_path):
     for key in ("loss", "optim", "schedule", "batch", "rung", "block_len",
                 "trainable_patterns", "teacher", "student_path", "dtype"):
         assert derived[key] == frozen[key], key
+
+
+def test_the_generation_path_is_smoke_tested_before_any_control_is_trained():
+    """Stage 3's path cannot be rehearsed on CPU, so it is rehearsed on the pod.
+
+    The 2026-08-13 session trained both permanent controls and *then* discovered
+    that generation failed. The evaluator needs vLLM and a GPU, so no test here
+    can execute it; the substitute is a two-prompt run of the whole path — the
+    evaluator, its summaries, the observed-protocol reconstruction and the
+    comparison against the attestation — inside Stage 1, where a failure costs
+    minutes instead of two control runs.
+    """
+    driver = DRIVER_PATH.read_text()
+    assert "def generation_smoke" in driver
+    stage1 = driver[driver.index("def stage1"):driver.index("def generation_smoke")]
+    assert "self.generation_smoke()" in stage1
+    # In Stage 1, i.e. before Stage 2 can start.
+    assert driver.index('gates["generation_smoke"]') < driver.index("def stage2")
+    smoke = driver[driver.index("def generation_smoke"):driver.index("def repeatability")]
+    # It must run the real evaluator and the real reconstruction, not a stub.
+    assert "uncapped_eval.py" in smoke
+    assert "observe_generation_protocol(summaries, strict=True)" in smoke
+    assert "self.evaluation_protocol.generation" in smoke
+    # And it must never be mistaken for a measurement.
+    assert '"is_measurement": False' in smoke

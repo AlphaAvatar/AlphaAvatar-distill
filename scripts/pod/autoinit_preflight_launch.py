@@ -514,9 +514,21 @@ class Preflight:
                 self.ev["local_verify_error"] = f"{type(exc).__name__}: {exc}"
 
         # The permanent controls are the only artifacts that cannot be
-        # regenerated without paying again.
+        # regenerated without paying again — so they are fetched whenever they
+        # EXIST, which is whenever Stage 2 passed, not only when the whole
+        # session succeeded.
+        #
+        # This was `if terminal == "ALL_DONE"` on 2026-08-13, and it destroyed
+        # both controls of a $2.82 session: Stage 3's generation failed, which
+        # is non-blocking by design precisely because "the controls still exist
+        # and are kept" — and then the launcher skipped the fetch and deleted
+        # the pod. `PREFLIGHT_INCOMPLETE` means Stages 0-2 passed. The comment
+        # above was already right; the condition did not implement it.
         fetched = []
-        if terminal == "ALL_DONE":
+        stage2_passed = bool(
+            (self.ev.get("driver_stages") or {}).get("2")
+            or terminal in ("ALL_DONE", "PREFLIGHT_INCOMPLETE"))
+        if stage2_passed:
             for name in CONTROLS:
                 dest = Path(self.a.ckpt_store) / name
                 dest.parent.mkdir(parents=True, exist_ok=True)
@@ -526,8 +538,12 @@ class Preflight:
                      "-o", "UserKnownHostsFile=/dev/null",
                      f"root@{host}:{REPO}/artifacts/stage3/{name}/checkpoints",
                      str(dest)], capture_output=True, timeout=None)
-                fetched.append({"control": name, "rc": rc.returncode})
-                self.say(f"  checkpoint {name}: rc={rc.returncode}")
+                size = sum(f.stat().st_size for f in dest.rglob("*")
+                           if f.is_file()) if dest.exists() else 0
+                fetched.append({"control": name, "rc": rc.returncode,
+                                "bytes": size, "dest": str(dest)})
+                self.say(f"  checkpoint {name}: rc={rc.returncode}, "
+                         f"{size / 2**30:.2f} GiB -> {dest}")
         self.ev["checkpoints_fetched"] = fetched
         for name in ("preflight_evidence.json", "attested_protocol.json",
                      "materialized_thresholds.json"):

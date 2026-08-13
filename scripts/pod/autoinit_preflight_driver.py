@@ -302,6 +302,7 @@ class Driver:
         try:
             gates["engine_probe"] = json.loads(
                 (AUDIT / "engine_probe.json").read_text())
+            gates["generation_smoke"] = self.generation_smoke()
             gates["evaluator_repeatability"] = self.repeatability()
             gates["activation_statistics"] = self.stats_split()
             gates["peak_memory"] = self.peak_memory()
@@ -366,6 +367,72 @@ class Driver:
                 f"{log.relative_to(REPO)}; tail: "
                 f"...{(out.stdout + out.stderr).rstrip()[-1200:]}")
         return json.loads((AUDIT / f"{name}.json").read_text())
+
+    def generation_smoke(self) -> dict:
+        """Run the WHOLE Stage-3 generation path once, on two prompts, for pennies.
+
+        Stage 3 failed on 2026-08-13 after $2.69 of permanent controls had been
+        trained, and its cause could not be recovered. The generation path — the
+        evaluator, the summaries it writes, and the observed-protocol
+        reconstruction that reads them — has no cheap rehearsal anywhere else:
+        it needs vLLM and a GPU, so no CPU test can execute it.
+
+        So it executes here, against the canonical init, on a two-prompt slice of
+        the frozen battery, before any money goes into a control. It exercises
+        exactly what Stage 3 does: `uncapped_eval.py` end to end, a summary per
+        set, `observe_generation_protocol`, and the comparison against the
+        Stage-0 attested fingerprint. A failure costs profiling minutes.
+
+        It is a *path* check, not a measurement: the prompts are a subset and the
+        model is the initializer, so nothing here is scored or retained.
+        """
+        smoke_dir = REPO / "artifacts/eval/preflight/_generation_smoke"
+        smoke_dir.mkdir(parents=True, exist_ok=True)
+        battery = json.loads((BATTERY / "manifest.json").read_text())
+        first_set = sorted(battery["sets"])[0]
+        subset = smoke_dir / f"{first_set}.jsonl"
+        lines = (BATTERY / f"{first_set}.jsonl").read_text().splitlines()
+        subset.write_text("\n".join(lines[:2]) + "\n")
+
+        out = subprocess.run(
+            ["/opt/vllm/bin/python", str(REPO / "scripts/evaluation/uncapped_eval.py"),
+             "--model", str(CANONICAL_INIT), "--label", "_generation_smoke",
+             "--prompts", str(subset), "--out-dir", str(smoke_dir),
+             "--diagnostics"],
+            capture_output=True, text=True, timeout=2700, env=self.child_env())
+        (AUDIT / "generation_smoke.log").write_text(
+            f"rc={out.returncode}\n--- stdout ---\n{out.stdout}\n"
+            f"--- stderr ---\n{out.stderr}\n")
+        if out.returncode != 0:
+            raise RuntimeError(
+                f"generation smoke rc={out.returncode}; full output in "
+                f"{(AUDIT / 'generation_smoke.log').relative_to(REPO)}; tail: "
+                f"...{(out.stdout + out.stderr).rstrip()[-1200:]}")
+
+        summaries = [json.loads(p.read_text())
+                     for p in sorted(smoke_dir.glob("*.json"))
+                     if not p.name.endswith(".generations.jsonl")]
+        observed = observe_generation_protocol(summaries, strict=True)
+        comparison = observed.protocol.compare(self.evaluation_protocol.generation)
+        report = {"sets": [first_set], "prompts": 2,
+                  "model": "canonical init (not a control)",
+                  "observed_generation_fingerprint": observed.protocol.fingerprint,
+                  "attested_generation_fingerprint":
+                      self.evaluation_protocol.generation.fingerprint,
+                  "identical": comparison["identical"],
+                  "mismatched": comparison["mismatched_fields"],
+                  "unknown": comparison["unverifiable_fields"],
+                  "is_measurement": False}
+        (AUDIT / "generation_smoke.json").write_text(
+            json.dumps(report, indent=2, default=str) + "\n")
+        if not comparison["identical"]:
+            raise RuntimeError(
+                "generation smoke: the rollouts this evaluator produces do not "
+                "reconstruct the attested generation protocol — mismatched "
+                f"{[m['field'] for m in comparison['mismatched_fields']]}, "
+                f"unknown {[u['field'] for u in comparison['unverifiable_fields']]}. "
+                "Stage 3 would reject its own characterization.")
+        return report
 
     def repeatability(self) -> dict:
         """Score one checkpoint N times on the frozen suite; report the range."""

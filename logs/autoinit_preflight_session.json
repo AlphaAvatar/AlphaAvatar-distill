@@ -2,99 +2,114 @@
   "schema": "aadistill.autoinit.preflight_session/v1",
   "timeline": [
     {
-      "utc": "2026-08-13T15:42:49+00:00",
+      "utc": "2026-08-13T16:20:31+00:00",
       "elapsed_min": 0.0,
       "msg": "budget: expected 273 min $4.50 \u00b7 soft $4.95 \u00b7 hard $5.44 (authorized $8.60)"
     },
     {
-      "utc": "2026-08-13T15:42:49+00:00",
+      "utc": "2026-08-13T16:20:32+00:00",
       "elapsed_min": 0.0,
       "msg": "NVIDIA L40S $0.99/h, stock Low"
     },
     {
-      "utc": "2026-08-13T15:42:50+00:00",
+      "utc": "2026-08-13T16:20:33+00:00",
       "elapsed_min": 0.0,
       "msg": "precheck OK: 2 relay inputs, 2 local assets"
     },
     {
-      "utc": "2026-08-13T15:42:51+00:00",
+      "utc": "2026-08-13T16:20:34+00:00",
       "elapsed_min": 0.0,
-      "msg": "created 6ex6mpu1uha1xg at $0.99/h"
+      "msg": "created 6xrudht3i7wc62 at $0.99/h"
     },
     {
-      "utc": "2026-08-13T15:42:51+00:00",
+      "utc": "2026-08-13T16:20:34+00:00",
       "elapsed_min": 0.0,
       "msg": "watchdog detached \u2014 hard 330 min = $5.44"
     },
     {
-      "utc": "2026-08-13T15:43:02+00:00",
-      "elapsed_min": 0.18,
-      "msg": "TCP 22 at 64.247.206.217:16041 after 0.2 min"
+      "utc": "2026-08-13T16:21:07+00:00",
+      "elapsed_min": 0.55,
+      "msg": "TCP 22 at 202.181.159.228:16805 after 0.6 min"
     },
     {
-      "utc": "2026-08-13T15:43:05+00:00",
-      "elapsed_min": 0.23,
-      "msg": "draw 1: ssh reachable \u2014 $0.00"
+      "utc": "2026-08-13T16:21:09+00:00",
+      "elapsed_min": 0.59,
+      "msg": "draw 1: ssh reachable \u2014 $0.01"
     },
     {
-      "utc": "2026-08-13T15:43:35+00:00",
-      "elapsed_min": 0.72,
-      "msg": "draw 1: image identity runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@580.159.03"
+      "utc": "2026-08-13T16:21:35+00:00",
+      "elapsed_min": 1.02,
+      "msg": "draw 1: image identity runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@580.126.09"
     },
     {
-      "utc": "2026-08-13T15:43:35+00:00",
-      "elapsed_min": 0.72,
+      "utc": "2026-08-13T16:21:35+00:00",
+      "elapsed_min": 1.02,
       "msg": "draw 1: running setup"
     },
     {
-      "utc": "2026-08-13T15:49:47+00:00",
-      "elapsed_min": 6.93,
+      "utc": "2026-08-13T16:27:08+00:00",
+      "elapsed_min": 6.58,
       "msg": "draw 1: setup complete \u2014 $0.11"
     },
     {
-      "utc": "2026-08-13T15:49:53+00:00",
-      "elapsed_min": 7.03,
-      "msg": "driver detached, pid 3238, confirmed by descriptor_probe \u2014 $0.12"
+      "utc": "2026-08-13T16:27:13+00:00",
+      "elapsed_min": 6.66,
+      "msg": "driver detached, pid 3258, confirmed by descriptor_probe \u2014 $0.11"
     },
     {
-      "utc": "2026-08-13T15:52:12+00:00",
-      "elapsed_min": 9.35,
-      "msg": "  2026-08-13T15:51:51Z MARKER:STAGE_START:1 \u2014 $0.15"
+      "utc": "2026-08-13T16:29:29+00:00",
+      "elapsed_min": 8.92,
+      "msg": "  2026-08-13T16:28:59Z MARKER:STAGE_START:1 \u2014 $0.15"
     },
     {
-      "utc": "2026-08-13T15:59:20+00:00",
-      "elapsed_min": 16.47,
-      "msg": "  2026-08-13T15:57:16Z MARKER:PREFLIGHT_FAILED \u2014 $0.27"
+      "utc": "2026-08-13T16:59:30+00:00",
+      "elapsed_min": 38.93,
+      "msg": "  2026-08-13T16:58:38Z MARKER:STAGE_START:2 \u2014 $0.64"
     },
     {
-      "utc": "2026-08-13T15:59:20+00:00",
-      "elapsed_min": 16.47,
+      "utc": "2026-08-13T18:01:37+00:00",
+      "elapsed_min": 101.06,
+      "msg": "  2026-08-13T18:00:18Z MARKER:TRAIN_DONE:preflight_ctl_r0860k_sa \u2014 $1.67"
+    },
+    {
+      "utc": "2026-08-13T19:03:45+00:00",
+      "elapsed_min": 163.19,
+      "msg": "  2026-08-13T19:01:54Z MARKER:STAGE_START:3 \u2014 $2.69"
+    },
+    {
+      "utc": "2026-08-13T19:10:39+00:00",
+      "elapsed_min": 170.08,
+      "msg": "  2026-08-13T19:09:22Z MARKER:PREFLIGHT_INCOMPLETE \u2014 $2.81"
+    },
+    {
+      "utc": "2026-08-13T19:10:39+00:00",
+      "elapsed_min": 170.08,
       "msg": "a blocking stage failed \u2014 collecting evidence, then tearing down. Permanent controls were not trained under a configuration that has to change."
     },
     {
-      "utc": "2026-08-13T15:59:20+00:00",
-      "elapsed_min": 16.47,
-      "msg": "polling ended: PREFLIGHT_FAILED \u2014 $0.27"
+      "utc": "2026-08-13T19:10:39+00:00",
+      "elapsed_min": 170.08,
+      "msg": "polling ended: PREFLIGHT_INCOMPLETE \u2014 $2.81"
     },
     {
-      "utc": "2026-08-13T15:59:41+00:00",
-      "elapsed_min": 16.82,
+      "utc": "2026-08-13T19:10:56+00:00",
+      "elapsed_min": 170.37,
       "msg": "  manifest rc=1\n"
     },
     {
-      "utc": "2026-08-13T16:00:04+00:00",
-      "elapsed_min": 17.2,
+      "utc": "2026-08-13T19:11:14+00:00",
+      "elapsed_min": 170.68,
       "msg": "teardown gate: allowed=True failed=training_complete"
     },
     {
-      "utc": "2026-08-13T16:00:04+00:00",
-      "elapsed_min": 17.2,
-      "msg": "deleting pod (gate passed after PREFLIGHT_FAILED)"
+      "utc": "2026-08-13T19:11:14+00:00",
+      "elapsed_min": 170.68,
+      "msg": "deleting pod (gate passed after PREFLIGHT_INCOMPLETE)"
     },
     {
-      "utc": "2026-08-13T16:00:15+00:00",
-      "elapsed_min": 17.39,
-      "msg": "pod deleted \u2014 17.4 min, $0.29; provider confirms gone: True"
+      "utc": "2026-08-13T19:11:25+00:00",
+      "elapsed_min": 170.86,
+      "msg": "pod deleted \u2014 170.9 min, $2.82; provider confirms gone: True"
     }
   ],
   "stages": {
@@ -134,8 +149,8 @@
     "scope_note": "micro-preflight only. If Stage 0/1 indicates that hardware, runtime, storage strategy, trainer semantics, evaluation semantics or any frozen identity must change, stop before permanent controls and return for review. Phase A remains separately unauthorized and must not start automatically.",
     "phase_a_authorized": false,
     "automatic_phase_a_start": false,
-    "authorized_session_commit": "624ba1dbdedeef6477c0d9c13790f0972fb2c106",
-    "harness_source_digest": "34fceeca0a37049b602d4f3603d90ae66a334b3883860df97ae2dea06b87eba3",
+    "authorized_session_commit": "40189ea20f2eb8d4f3f8f646e682b115c8a5ff1d",
+    "harness_source_digest": "b58834cb528f6b67598a7ab39bf5c929bf9043eed8e481a086746a8e0d274862",
     "harness_source_files": [
       "scripts/pod/autoinit_preflight_launch.py",
       "scripts/pod/autoinit_preflight_driver.py",
@@ -146,12 +161,12 @@
       "src/aadistill/autoinit/authorization.py",
       "src/aadistill/autoinit/generation.py"
     ],
-    "provenance_commit": "624ba1dbdedeef6477c0d9c13790f0972fb2c106",
+    "provenance_commit": "40189ea20f2eb8d4f3f8f646e682b115c8a5ff1d",
     "enforcement": "the launcher loads this artifact and refuses to create a pod whose priced hard threshold exceeds hard_cap_usd, refuses a stage not in authorized_stages, and has no code path to Phase A",
-    "authorization_sha256": "89533063a40fa376ca116a4778c32c47a8e56b11ba2796d3ca3bd607decb9762"
+    "authorization_sha256": "b8b8c717fbe6871476817dd8985bb2b9921f90c71c1c6745f101023004eb5e2f"
   },
   "preflight_plan_hash": "37dbd7b22e3e884eff9d55f95c5ce25a212f823d2f396691c30d47930076f8ab",
-  "harness_source_digest": "34fceeca0a37049b602d4f3603d90ae66a334b3883860df97ae2dea06b87eba3",
+  "harness_source_digest": "b58834cb528f6b67598a7ab39bf5c929bf9043eed8e481a086746a8e0d274862",
   "harness_source_files": [
     "scripts/pod/autoinit_engine_probe.py",
     "scripts/pod/autoinit_preflight_driver.py",
@@ -234,34 +249,34 @@
     ],
     "local_missing": []
   },
-  "pod_id": "6ex6mpu1uha1xg",
+  "pod_id": "6xrudht3i7wc62",
   "actual_price_per_hour": 0.99,
-  "terminate_after_utc": "2026-08-13T21:12:36Z",
+  "terminate_after_utc": "2026-08-13T21:50:19Z",
   "watchdog_journals": [
-    "/home/ecs-user/aad-scratch/autoinit_pf2_20260813_154226/watchdog.jsonl"
+    "/home/ecs-user/aad-scratch/autoinit_pf3_20260813_162012/watchdog.jsonl"
   ],
   "image_identity": {
     "image_name": "runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404",
     "observed": [
-      "580.159.03"
+      "580.126.09"
     ],
-    "digest": "runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@580.159.03"
+    "digest": "runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@580.126.09"
   },
   "driver_job": {
     "job_id": "autoinit_preflight_driver",
-    "pid": 3238,
+    "pid": 3258,
     "workdir": "/workspace/aad",
-    "command": "/opt/train/bin/python scripts/pod/autoinit_preflight_driver.py --stage all --image-digest 'runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@580.159.03' --rate 0.99 --spent-usd 0.114 --soft-stop-usd 4.95 --authorized-usd 5.44",
+    "command": "/opt/train/bin/python scripts/pod/autoinit_preflight_driver.py --stage all --image-digest 'runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@580.126.09' --rate 0.99 --spent-usd 0.109 --soft-stop-usd 4.95 --authorized-usd 5.44",
     "log_path": "/workspace/autoinit_preflight_run.log",
     "status_path": "/workspace/autoinit_preflight.status",
     "pid_path": "/workspace/jobs/autoinit_preflight_driver.pid",
     "descriptor_path": "/workspace/jobs/autoinit_preflight_driver.job.json",
     "exit_path": "/workspace/jobs/autoinit_preflight_driver.exit",
-    "started_utc": "2026-08-13T15:49:50Z",
+    "started_utc": "2026-08-13T16:27:11Z",
     "start_channel_closed": true,
     "confirmed_by": "descriptor_probe"
   },
-  "terminal": "PREFLIGHT_FAILED",
+  "terminal": "PREFLIGHT_INCOMPLETE",
   "checkpoints_fetched": [],
   "fetched_reports": [
     "preflight_evidence.json",
@@ -271,7 +286,7 @@
     "allowed": true,
     "emergency": true,
     "failed_check": "training_complete",
-    "reason": "EMERGENCY budget teardown over a failed gate (training_complete): a blocking stage failed (PREFLIGHT_FAILED); the controls do not exist and must not be demanded. Evidence is collected under the reduced spec and the pod is torn down.. Artifacts for the remaining checks ['training_complete', 'evaluation_complete', 'artifact_manifest_created', 'required_files_present', 'final_streams_quiescent', 'archive_created', 'archive_contents_verified', 'transfer_complete', 'local_hashes_verified', 'report_inputs_verified'] are LOST. THE FINAL EVENT STREAM IS INCOMPLETE for ['artifacts/stage3/preflight_ctl_r0860k_sa/train_log.jsonl', 'artifacts/stage3/preflight_ctl_r0860k_sb/train_log.jsonl']: only a mutable_snapshot survives and its tail is lost.",
+    "reason": "EMERGENCY budget teardown over a failed gate (training_complete): a blocking stage failed (PREFLIGHT_INCOMPLETE); the controls do not exist and must not be demanded. Evidence is collected under the reduced spec and the pod is torn down.. Artifacts for the remaining checks ['training_complete', 'evaluation_complete', 'artifact_manifest_created', 'required_files_present', 'final_streams_quiescent', 'archive_created', 'archive_contents_verified', 'transfer_complete', 'local_hashes_verified', 'report_inputs_verified'] are LOST. THE FINAL EVENT STREAM IS INCOMPLETE for ['artifacts/stage3/preflight_ctl_r0860k_sa/train_log.jsonl', 'artifacts/stage3/preflight_ctl_r0860k_sb/train_log.jsonl']: only a mutable_snapshot survives and its tail is lost.",
     "checks": {
       "training_complete": false,
       "evaluation_complete": false,
@@ -299,11 +314,11 @@
   "provider_confirms_gone": true,
   "cost": {
     "price_per_hour": 0.99,
-    "elapsed_minutes": 17.39,
-    "actual_usd": 0.2869,
+    "elapsed_minutes": 170.86,
+    "actual_usd": 2.8192,
     "authorized_usd": 8.6,
     "within_authorization": true
   },
   "passed": false,
-  "finished_utc": "2026-08-13T16:00:15+00:00"
+  "finished_utc": "2026-08-13T19:11:25+00:00"
 }

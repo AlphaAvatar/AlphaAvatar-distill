@@ -51,7 +51,14 @@ AutoInit micro-preflight attempt 2 (L40S, 17.4 min)          $  0.2869
     trained, which is the staging working as designed. Pod
     deleted, provider confirmed gone.
 
-ACTUAL CUMULATIVE SPEND                                      $181.0202
+AutoInit micro-preflight attempt 3 (L40S, 170.9 min)         $  2.8200
+    Stages 0-2 passed; both permanent controls trained and
+    strictly verified, then DELETED unfetched by a launcher
+    condition gated on total success. Stage 3 generation
+    failed and its cause was lost with the pod, because no
+    preflight artifact spec had ever been loadable.
+
+ACTUAL CUMULATIVE SPEND                                      $183.8402
 ```
 
 The pre-E8b baseline `$163.8833` is the figure every E8/E8b planner was built on
@@ -84,8 +91,9 @@ $211.07   +$47.18 E8b hard backstop (2026-08-11), rounded up from $211.0633
 
 ```
 authorized cumulative cap                                    $211.07
-actual cumulative spend                                      $181.0202
-unused authorization remaining                               $ 30.0498
+actual cumulative spend                                      $183.8402
+unused authorization remaining                               $ 27.2298
+micro-preflight spent of its $8.60 authorization             $  3.1369
 of which was earmarked for E8b completion                    $ 30.36
 paid compute currently running                                NONE
 ```

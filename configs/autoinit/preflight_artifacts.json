@@ -1,26 +1,146 @@
 {
   "spec": "aadistill.artifact_spec/v1",
   "session": "autoinit_micro_preflight",
-  "note": "success spec: every permanent artifact the preflight must not lose",
+  "note": "success spec: every permanent artifact the preflight must not lose. Entries are ArtifactSpec kwargs \u2014 artifact_class, pattern, required, min_matches, min_bytes, lifecycle \u2014 and are loaded by scripts/pod/collect_artifacts.py. A key this dataclass does not take makes the whole collection fail at load.",
   "entries": [
-    {"pattern": "audit/autoinit_preflight/preflight_evidence.json", "required": true, "final": true},
-    {"pattern": "audit/autoinit_preflight/attested_protocol.json", "required": true, "final": true},
-    {"pattern": "audit/autoinit_preflight/materialized_thresholds.json", "required": true, "final": true},
-    {"pattern": "audit/autoinit_preflight/engine_probe.json", "required": true, "final": true},
-    {"pattern": "audit/autoinit_preflight/evaluator_repeatability.json", "required": true, "final": true},
-    {"pattern": "audit/autoinit_preflight/statistics_split.json", "required": true, "final": true},
-    {"pattern": "audit/autoinit_preflight/peak_memory.json", "required": true, "final": true},
-    {"pattern": "audit/autoinit_preflight/frozen_asset_verification.json", "required": true, "final": true},
-    {"pattern": "audit/autoinit_preflight/configs/preflight_ctl_r0860k_s*.json", "required": true, "final": true},
-    {"pattern": "audit/autoinit_preflight/preflight_ctl_r0860k_s*_probe_identity.json", "required": true, "final": true},
-    {"pattern": "audit/autoinit_preflight/preflight_ctl_r0860k_s*_observed_generation.json", "required": true, "final": true},
-    {"pattern": "audit/autoinit_preflight/preflight_ctl_r0860k_s*_recovery_search.json", "required": true, "final": true},
-    {"pattern": "audit/autoinit_preflight/preflight_ctl_r0860k_s*_per_sample.jsonl", "required": true, "final": true},
-    {"pattern": "audit/autoinit_preflight/session/*", "required": false, "final": true},
-    {"pattern": "stage3/preflight_ctl_r0860k_s*/train_log.jsonl", "required": true, "final": true},
-    {"pattern": "stage3/preflight_ctl_r0860k_s*/run_manifest.json", "required": true, "final": true},
-    {"pattern": "stage3/preflight_ctl_r0860k_s*/run_completion.json", "required": true, "final": true},
-    {"pattern": "eval/preflight/preflight_ctl_r0860k_s*/*.generations.jsonl", "required": true, "final": true},
-    {"pattern": "eval/preflight/preflight_ctl_r0860k_s*/*.json", "required": false, "final": true}
+    {
+      "artifact_class": "preflight_evidence",
+      "pattern": "audit/autoinit_preflight/preflight_evidence.json",
+      "required": true,
+      "lifecycle": "final_required"
+    },
+    {
+      "artifact_class": "attested_protocol",
+      "pattern": "audit/autoinit_preflight/attested_protocol.json",
+      "required": true,
+      "lifecycle": "final_required"
+    },
+    {
+      "artifact_class": "materialized_thresholds",
+      "pattern": "audit/autoinit_preflight/materialized_thresholds.json",
+      "required": true,
+      "lifecycle": "final_required"
+    },
+    {
+      "artifact_class": "frozen_asset_verification",
+      "pattern": "audit/autoinit_preflight/frozen_asset_verification.json",
+      "required": true,
+      "lifecycle": "final_required"
+    },
+    {
+      "artifact_class": "stage1_measurement",
+      "pattern": "audit/autoinit_preflight/engine_probe.json",
+      "required": true,
+      "lifecycle": "final_required"
+    },
+    {
+      "artifact_class": "generation_smoke",
+      "pattern": "audit/autoinit_preflight/generation_smoke.json",
+      "required": true,
+      "lifecycle": "final_required",
+      "min_matches": 1
+    },
+    {
+      "artifact_class": "stage1_measurement",
+      "pattern": "audit/autoinit_preflight/evaluator_repeatability.json",
+      "required": true,
+      "lifecycle": "final_required"
+    },
+    {
+      "artifact_class": "stage1_measurement",
+      "pattern": "audit/autoinit_preflight/statistics_split.json",
+      "required": true,
+      "lifecycle": "final_required"
+    },
+    {
+      "artifact_class": "stage1_measurement",
+      "pattern": "audit/autoinit_preflight/peak_memory.json",
+      "required": true,
+      "lifecycle": "final_required"
+    },
+    {
+      "artifact_class": "gate_log",
+      "pattern": "audit/autoinit_preflight/*.log",
+      "required": false,
+      "lifecycle": "final_required",
+      "min_matches": 0
+    },
+    {
+      "artifact_class": "control_config",
+      "pattern": "audit/autoinit_preflight/configs/*.json",
+      "required": true,
+      "lifecycle": "final_required",
+      "min_matches": 2
+    },
+    {
+      "artifact_class": "probe_identity",
+      "pattern": "audit/autoinit_preflight/preflight_ctl_r0860k_s*_probe_identity.json",
+      "required": true,
+      "lifecycle": "final_required",
+      "min_matches": 2
+    },
+    {
+      "artifact_class": "observed_generation",
+      "pattern": "audit/autoinit_preflight/preflight_ctl_r0860k_s*_observed_generation.json",
+      "required": true,
+      "lifecycle": "final_required",
+      "min_matches": 2
+    },
+    {
+      "artifact_class": "recovery_search_result",
+      "pattern": "audit/autoinit_preflight/preflight_ctl_r0860k_s*_recovery_search.json",
+      "required": true,
+      "lifecycle": "final_required",
+      "min_matches": 2
+    },
+    {
+      "artifact_class": "per_sample",
+      "pattern": "audit/autoinit_preflight/preflight_ctl_r0860k_s*_per_sample.jsonl",
+      "required": true,
+      "lifecycle": "final_required",
+      "min_matches": 2
+    },
+    {
+      "artifact_class": "session_evidence",
+      "pattern": "audit/autoinit_preflight/session/*",
+      "required": false,
+      "lifecycle": "final_required",
+      "min_matches": 0
+    },
+    {
+      "artifact_class": "event_stream",
+      "pattern": "stage3/preflight_ctl_r0860k_s*/train_log.jsonl",
+      "required": true,
+      "lifecycle": "final_required",
+      "min_matches": 2
+    },
+    {
+      "artifact_class": "run_manifest",
+      "pattern": "stage3/preflight_ctl_r0860k_s*/run_manifest.json",
+      "required": true,
+      "lifecycle": "final_required",
+      "min_matches": 2
+    },
+    {
+      "artifact_class": "run_completion",
+      "pattern": "stage3/preflight_ctl_r0860k_s*/run_completion.json",
+      "required": true,
+      "lifecycle": "final_required",
+      "min_matches": 2
+    },
+    {
+      "artifact_class": "generations",
+      "pattern": "eval/preflight/preflight_ctl_r0860k_s*/*.generations.jsonl",
+      "required": true,
+      "lifecycle": "final_required",
+      "min_matches": 2
+    },
+    {
+      "artifact_class": "generation_summary",
+      "pattern": "eval/preflight/preflight_ctl_r0860k_s*/*.json",
+      "required": false,
+      "lifecycle": "final_required",
+      "min_matches": 0
+    }
   ]
 }
