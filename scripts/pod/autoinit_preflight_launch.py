@@ -91,6 +91,11 @@ class Preflight:
         self.scr.mkdir(parents=True, exist_ok=True)
         self.auth = SpendAuthorization.load(REPO_ROOT / AUTH_PATH)
         self.auth.require_plan(PREFLIGHT_PLAN_V1.plan_hash)
+        # Before a pod can exist: the harness on disk must be the one this
+        # authorization was granted against. An edited launcher, driver, setup
+        # script or watchdog is an unrehearsed harness, and a paid run that
+        # produces permanent artifacts must not be executed by one.
+        self.harness = self.auth.require_harness(REPO_ROOT)
         self.key = os.environ.get("RUNPOD_API_KEY") or read_api_key(a.runpod_config)
         self.provider = RunPodProvider(self.key)
         self.cli = shutil.which("runpodctl") or os.path.expanduser(
@@ -101,6 +106,9 @@ class Preflight:
                          "timeline": [], "stages": {},
                          "authorization": self.auth.as_dict(),
                          "preflight_plan_hash": PREFLIGHT_PLAN_V1.plan_hash,
+                         "harness_source_digest": self.harness["digest"],
+                         "harness_source_files": [f["path"] for f in
+                                                  self.harness["files"]],
                          "phase_a_launched": False,
                          "phase_a_reachable_from_this_launcher": False}
         self.pod_id = ""

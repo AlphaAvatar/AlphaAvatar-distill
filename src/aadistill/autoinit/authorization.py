@@ -18,16 +18,52 @@ backstop rather than to completion.
 
 from __future__ import annotations
 
+import hashlib
 import json
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
-from ..infrastructure.manifest import sha256_json
+from ..infrastructure.manifest import sha256_file, sha256_json
 
 
 class AuthorizationError(RuntimeError):
     """An action exceeds or falls outside what was authorized."""
+
+
+#: The executable harness this authorization is granted against. Same rule and
+#: same failure mode as the trainer and scoring source sets: a missing declared
+#: file raises rather than yielding a digest over a smaller harness.
+HARNESS_SOURCE_FILES_V1: tuple[str, ...] = (
+    "scripts/pod/autoinit_preflight_launch.py",
+    "scripts/pod/autoinit_preflight_driver.py",
+    "scripts/pod/autoinit_preflight_setup.sh",
+    "scripts/pod/autoinit_engine_probe.py",
+    "scripts/pod/watchdog.py",
+    "scripts/pod/collect_artifacts.py",
+    "src/aadistill/autoinit/authorization.py",
+    "src/aadistill/autoinit/generation.py",
+)
+HARNESS_SOURCE_SET_VERSION = 1
+
+
+def harness_source_digest(repo_root: str | Path = ".", *,
+                          files: tuple[str, ...] | None = None) -> dict[str, Any]:
+    root = Path(repo_root)
+    declared = tuple(files) if files is not None else HARNESS_SOURCE_FILES_V1
+    entries = []
+    for rel in sorted(declared):
+        path = root / rel
+        if not path.is_file():
+            raise AuthorizationError(
+                f"declared harness source {rel!r} is missing; refusing to "
+                "authorize a digest over a smaller harness than the one that runs")
+        entries.append({"path": rel, "sha256": sha256_file(path),
+                        "bytes": path.stat().st_size})
+    digest = hashlib.sha256(
+        "".join(f"{e['path']}:{e['sha256']}\n" for e in entries).encode()).hexdigest()
+    return {"digest": digest, "set_version": HARNESS_SOURCE_SET_VERSION,
+            "files": entries}
 
 
 @dataclass(frozen=True)
@@ -44,7 +80,14 @@ class SpendAuthorization:
     authorized_stages: tuple[int, ...]
     stage_conditions: dict[str, str]
     scope_note: str
-    consuming_commit: str | None = None
+    #: The executable identity permitted to consume this authorization. Not
+    #: provenance: the launcher refuses to create a pod when the harness on disk
+    #: does not match. An authorization granted against a rehearsed harness does
+    #: not extend to an edited one.
+    authorized_session_commit: str | None = None
+    harness_source_digest: str | None = None
+    #: Provenance only, never enforced.
+    provenance_commit: str | None = None
     version: int = 1
 
     #: Not a field. Phase A is separately unauthorized and this artifact cannot
@@ -73,7 +116,10 @@ class SpendAuthorization:
             "scope_note": self.scope_note,
             "phase_a_authorized": self.allows_phase_a,
             "automatic_phase_a_start": self.automatic_phase_a_start,
-            "consuming_commit": self.consuming_commit,
+            "authorized_session_commit": self.authorized_session_commit,
+            "harness_source_digest": self.harness_source_digest,
+            "harness_source_files": list(HARNESS_SOURCE_FILES_V1),
+            "provenance_commit": self.provenance_commit,
             "enforcement": (
                 "the launcher loads this artifact and refuses to create a pod "
                 "whose priced hard threshold exceeds hard_cap_usd, refuses a "
@@ -101,6 +147,29 @@ class SpendAuthorization:
             raise AuthorizationError(
                 f"{what or 'projected spend'} ${projected_usd:.2f} exceeds the "
                 f"authorized hard cap ${self.hard_cap_usd:.2f}")
+
+    def require_harness(self, repo_root: str | Path = ".") -> dict[str, Any]:
+        """Refuse to run a harness this authorization was not granted against.
+
+        A paid run that produces permanent artifacts must be executed by the code
+        that was rehearsed. Whole-repository HEAD is the wrong identity here for
+        the same reason it is wrong for the trainer — a docs commit would revoke a
+        valid authorization — so this digests the declared harness set.
+        """
+        observed = harness_source_digest(repo_root)
+        if self.harness_source_digest is None:
+            raise AuthorizationError(
+                "this authorization declares no harness_source_digest, so it "
+                "cannot authorize any executable. Re-issue it against the "
+                f"rehearsed harness (observed {observed['digest']}).")
+        if observed["digest"] != self.harness_source_digest:
+            raise AuthorizationError(
+                f"the harness on disk digests to {observed['digest']} but this "
+                f"authorization was granted against {self.harness_source_digest}. "
+                "The rehearsed harness and the executable harness differ; "
+                "re-rehearse and re-issue rather than running an unrehearsed "
+                "harness against a paid authorization.")
+        return observed
 
     def refuse_phase_a(self) -> None:
         raise AuthorizationError(
@@ -130,7 +199,9 @@ class SpendAuthorization:
             authorized_stages=tuple(raw["authorized_stages"]),
             stage_conditions=dict(raw["stage_conditions"]),
             scope_note=raw["scope_note"],
-            consuming_commit=raw.get("consuming_commit"),
+            authorized_session_commit=raw.get("authorized_session_commit"),
+            harness_source_digest=raw.get("harness_source_digest"),
+            provenance_commit=raw.get("provenance_commit"),
             version=int(raw.get("version", 1)))
 
 
@@ -150,6 +221,10 @@ MICRO_PREFLIGHT_AUTHORIZATION = SpendAuthorization(
         "3": "control characterization; materializes the frozen thresholds",
         "teardown": "delete the pod, verify from the provider that it is gone, STOP",
     },
+    # Filled by scripts/autoinit/issue_authorization.py at issue time, against
+    # the rehearsed harness.
+    authorized_session_commit=None,
+    harness_source_digest=None,
     scope_note=(
         "micro-preflight only. If Stage 0/1 indicates that hardware, runtime, "
         "storage strategy, trainer semantics, evaluation semantics or any frozen "

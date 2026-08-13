@@ -141,11 +141,20 @@ class RecoveryGenerationProtocolFingerprint:
     #: Fields that must carry a real value before two protocols may be called
     #: identical. Everything here is an *observation*, not a choice, which is why
     #: it cannot be filled in from the config alone.
+    #: Every field declared material to comparability that is only knowable once
+    #: the live engine starts. A field cannot be both "part of the comparison"
+    #: and "allowed to stay null": that is the `None == None` hole, and it is the
+    #: reason the tool capability read a structural zero for every arm once
+    #: already. If a vLLM version genuinely cannot expose one of these, the
+    #: choice is explicit — Stage 0 fails closed, or the field is formally
+    #: removed from the comparable protocol in a new fingerprint version with the
+    #: reason recorded. Silently accepting None on both sides is not an option.
     MATERIALIZATION_REQUIRED: tuple[str, ...] = (
         "generation_source_digest", "vllm_version", "transformers_version",
         "torch_version", "tokenizer_sha256", "chat_template_sha256",
-        "resolved_context", "stop_token_ids", "degeneration_source_digest",
-        "runtime_digest", "max_num_seqs")
+        "resolved_context", "context_source", "stop_token_ids",
+        "degeneration_source_digest", "runtime_digest",
+        "max_num_seqs", "max_num_batched_tokens", "enforce_eager")
 
     def identity(self) -> dict[str, Any]:
         out = {k: v for k, v in self.__dict__.items()

@@ -340,6 +340,46 @@ def test_the_authorization_bounds_the_session(tmp_path):
     assert auth.automatic_phase_a_start is False
 
 
+def test_an_unrehearsed_harness_cannot_consume_the_authorization(tmp_path):
+    """The executable identity is enforced, not merely recorded."""
+    from aadistill.autoinit.authorization import harness_source_digest
+
+    auth = SpendAuthorization.load(AUTH_PATH)
+    observed = auth.require_harness(REPO)          # the committed harness passes
+    assert observed["digest"] == auth.harness_source_digest
+    assert auth.authorized_session_commit
+
+    # An edited harness is a different harness.
+    from dataclasses import replace
+    edited = replace(auth, harness_source_digest="0" * 64)
+    with pytest.raises(AuthorizationError, match="differ"):
+        edited.require_harness(REPO)
+    # An authorization that names no harness cannot authorize an executable.
+    with pytest.raises(AuthorizationError, match="no harness_source_digest"):
+        replace(auth, harness_source_digest=None).require_harness(REPO)
+    # A missing declared file raises rather than shrinking the digest.
+    with pytest.raises(AuthorizationError, match="is missing"):
+        harness_source_digest(REPO, files=("scripts/pod/watchdog.py",
+                                           "scripts/pod/does_not_exist.py"))
+
+
+def test_the_launcher_checks_the_harness_before_a_pod_can_exist():
+    source = LAUNCH_PATH.read_text()
+    assert "self.auth.require_harness(REPO_ROOT)" in source
+    # In __init__, i.e. before make_plan/create are ever called.
+    assert source.index("require_harness") < source.index("def make_plan")
+
+
+def test_every_engine_observed_generation_field_is_required():
+    """A field cannot be part of the comparison and allowed to stay null."""
+    from aadistill.autoinit.generation import declared_generation_protocol
+
+    required = declared_generation_protocol().MATERIALIZATION_REQUIRED
+    for field in ("max_num_seqs", "max_num_batched_tokens", "enforce_eager",
+                  "context_source", "vllm_version", "stop_token_ids"):
+        assert field in required, field
+
+
 def test_an_authorization_bound_to_a_different_plan_is_refused():
     auth = SpendAuthorization.load(AUTH_PATH)
     with pytest.raises(AuthorizationError, match="does not transfer"):
