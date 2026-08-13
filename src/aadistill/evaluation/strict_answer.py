@@ -90,12 +90,29 @@ def extract_final_answer(answer: str) -> tuple[str | None, str]:
     return None, "no_final_answer"
 
 
-def protocol_valid(raw: str, *, think_preopened: bool = True) -> tuple[bool, str]:
+def protocol_valid(raw: str, *, think_preopened: bool = True,
+                   tools_offered: bool = False) -> tuple[bool, str]:
     """Structural validity of the generation, independent of its content.
 
     `think_preopened` is the assistant-prefix state the active chat template
     created; see `behavior.split_generation`. The default matches the teacher's
     template, so every existing caller keeps its exact behaviour.
+
+    `tools_offered` is the same kind of parameter for the *prompt*: whether it
+    declared tools. The `unexpected_tool_call` rule is about a model inventing a
+    tool call when none was offered — a real protocol violation. When the prompt
+    **did** declare tools, a `<tool_call>` block is the correct answer form, and
+    rejecting it makes every well-formed tool call structurally invalid.
+
+    That is not hypothetical. Composing this rule with `usable_rollout` scored a
+    correct, well-terminated tool call as unusable, which in turn forced its
+    correctness to 0 through `correct => usable` — so the tool capability would
+    have been structurally zero for every candidate *and* every control in the
+    Stage-3 characterization that materializes the frozen thresholds.
+
+    The default is `False`, so every historical result and every caller that does
+    not know the prompt's tool state is scored exactly as before. Only a caller
+    that can see the prompt may relax it.
     """
     if IM_END not in raw:
         return False, "not_terminated"
@@ -106,7 +123,7 @@ def protocol_valid(raw: str, *, think_preopened: bool = True) -> tuple[bool, str
         return False, "stray_marker"
     if not parts["answer"].strip():
         return False, "empty_answer"
-    if "<tool_call>" in parts["answer"]:
+    if "<tool_call>" in parts["answer"] and not tools_offered:
         return False, "unexpected_tool_call"
     return True, "ok"
 

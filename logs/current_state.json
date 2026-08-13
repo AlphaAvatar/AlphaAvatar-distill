@@ -231,7 +231,7 @@
     "peak_working_storage_gib": 106
   },
   "tests": {
-    "passing": 1521,
+    "passing": 1531,
     "skipped": 7,
     "venvs_verified": [
       "repo .venv transformers 5.13.1",
@@ -256,6 +256,9 @@
     "control_seeds": 2,
     "note": "the $2.80 rerun produces the permanent Phase-A control probes, so Phase A needs 7 probes instead of 9",
     "preflight_plan_hash": "37dbd7b22e3e884eff9d55f95c5ce25a212f823d2f396691c30d47930076f8ab",
-    "blocker_before_phase_a": "the preregistration must be re-emitted with the attested protocol fingerprint; until Stage 0 runs, runtime_digest is null and no Phase-A comparison is eligible for MATCHED"
+    "blocker_before_phase_a": "the preregistration must be re-emitted with the attested protocol fingerprint; until Stage 0 runs, runtime_digest is null and no Phase-A comparison is eligible for MATCHED",
+    "held": true,
+    "held_reason": "scoring blocker found while wiring Stage 3: protocol_valid rejected a <tool_call> as unexpected even when the prompt declared tools, so the tool capability was structurally 0 for every arm (oracle policy: tool usable 0.0000 -> 1.0000, overall 0.8947 -> 1.0000). Fixed at zero cost, but it changes a preregistered metric definition on 1 of 6 capabilities, so the launch waits for maintainer confirmation. Nothing spent.",
+    "spent_usd": 0.0
   }
 }

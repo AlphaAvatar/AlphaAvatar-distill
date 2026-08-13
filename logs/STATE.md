@@ -1,6 +1,19 @@
 **Updated:** 2026-08-13 · branch `main` · working tree clean
-**No pods running. Nothing billing.** **1,521 CPU tests pass**, 7 skipped — in
+**No pods running. Nothing billing.** **1,531 CPU tests pass**, 7 skipped — in
 *both* venvs (repo `.venv` transformers 5.13.1, and the transformers 4.57.1 venv).
+
+**The micro-preflight is authorized but HELD at $0 on a scoring blocker found
+while wiring it.** `protocol_valid` rejected a `<tool_call>` in the answer as
+`unexpected_tool_call` even when the prompt declared tools, so every well-formed
+tool call was an invalid rollout and — through `correct => usable` — incorrect
+too. On the real frozen battery with a perfect-oracle policy: **tool usable rate
+0.0000 → 1.0000, overall 0.8947 → 1.0000.** That is 20 of 190 prompts and one of
+six capabilities the catastrophic rule ranks on, and Stage 3 *materializes the
+frozen thresholds* from these rates. The fix is committed and zero-cost —
+`protocol_valid(..., tools_offered=False)`, strictly additive, historical default
+unchanged — but it changes a preregistered metric definition, so the session waits
+for confirmation rather than launching. See [`decisions.md`](decisions.md)
+2026-08-13.
 
 **The AutoInitializer framework is implemented at zero cost and not yet run on
 real models.** `src/aadistill/autoinit/` — operator kind/implementation registry

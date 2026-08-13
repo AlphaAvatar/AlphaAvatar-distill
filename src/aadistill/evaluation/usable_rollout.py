@@ -57,9 +57,11 @@ def _from_three_mode(rec: dict, *, think_preopened: bool) -> dict:
     }
 
 
-def _from_behavior_v0(rec: dict, *, think_preopened: bool) -> dict:
+def _from_behavior_v0(rec: dict, *, think_preopened: bool,
+                      tools_offered: bool = False) -> dict:
     raw = rec.get("raw") or ""
-    valid, _ = protocol_valid(raw, think_preopened=think_preopened)
+    valid, _ = protocol_valid(raw, think_preopened=think_preopened,
+                              tools_offered=tools_offered)
     answer = split_generation(raw, think_preopened=think_preopened)["answer"]
     return {
         "non_empty": bool(answer.strip()),
@@ -83,13 +85,23 @@ def detect_schema(rec: dict) -> str:
 
 
 def components(rec: dict, *, think_preopened: bool = True,
-               schema: str | None = None) -> dict:
-    """The five component booleans for one generation record."""
+               schema: str | None = None, tools_offered: bool = False) -> dict:
+    """The five component booleans for one generation record.
+
+    `tools_offered` says whether the *prompt* declared tools. It defaults to
+    False, which is the historical behaviour: a `<tool_call>` in the answer is a
+    protocol violation unless the caller can see that tools were offered. A
+    caller scoring a tool-calling set must pass it, or every correct tool call is
+    recorded as an invalid rollout — and, through `correct => usable`, as
+    incorrect too. The `three_mode` schema carries its own `protocol_valid` and
+    is unaffected.
+    """
     schema = schema or detect_schema(rec)
     if schema == "three_mode":
         out = _from_three_mode(rec, think_preopened=think_preopened)
     elif schema == "behavior_v0":
-        out = _from_behavior_v0(rec, think_preopened=think_preopened)
+        out = _from_behavior_v0(rec, think_preopened=think_preopened,
+                                tools_offered=tools_offered)
     else:
         raise ValueError(f"unknown schema {schema!r}")
     assert set(out) == set(COMPONENTS), sorted(out)
@@ -97,10 +109,10 @@ def components(rec: dict, *, think_preopened: bool = True,
 
 
 def usable(rec: dict, *, think_preopened: bool = True,
-           schema: str | None = None) -> bool:
+           schema: str | None = None, tools_offered: bool = False) -> bool:
     """True only when every component holds."""
-    return all(components(rec, think_preopened=think_preopened,
-                          schema=schema).values())
+    return all(components(rec, think_preopened=think_preopened, schema=schema,
+                          tools_offered=tools_offered).values())
 
 
 def summarize(records: list[dict], *, think_preopened: bool = True) -> dict:
