@@ -110,7 +110,7 @@ VERIFYEOF
 
 mark ASSETS_STAGED
 
-say "training env via uv sync"
+say "training env: offline install from the relay wheelhouse"
 # uv is PINNED. The cache and resolver behaviour must be the one the wheelhouse
 # was built against, and `install.sh` without a version installs whatever is
 # latest that day.
@@ -121,7 +121,6 @@ cd "$REPO"
 sed -i 's|url = "https://download.pytorch.org/whl/cpu"|url = "https://download.pytorch.org/whl/cu128"|' pyproject.toml
 sed -i 's|name = "pytorch-cpu"|name = "pytorch-cu128"|' pyproject.toml
 sed -i 's|torch = { index = "pytorch-cpu" }|torch = { index = "pytorch-cu128" }|' pyproject.toml
-export UV_PROJECT_ENVIRONMENT=/opt/train
 
 # --- offline dependency materialization -------------------------------------
 # Four of five host draws on 2026-08-14 died here, every one in the uv-sync
@@ -155,9 +154,8 @@ mkdir -p "$WHEELHOUSE"
 cp /workspace/wh/transfer/wheelhouse_cu128_cp312/*.whl "$WHEELHOUSE"/ 2>/dev/null || true
 NWHL=$(ls "$WHEELHOUSE"/*.whl 2>/dev/null | wc -l)
 say "wheelhouse: ${NWHL} wheels, $(du -sh "$WHEELHOUSE" | cut -f1)"
-[ "$NWHL" -ge 80 ] || { say "WHEELHOUSE TOO SMALL (${NWHL} wheels)"; \
+[ "$NWHL" -ge 91 ] || { say "WHEELHOUSE TOO SMALL (${NWHL} wheels)"; \
   mark "WHEELHOUSE_INCOMPLETE:${NWHL}"; exit 92; }
-cp "$REPO/uv-cu128.lock" "$REPO/uv.lock"
 
 # No tripwire here any more, because there is nothing left to stall on: the
 # wheels are local, `--offline --no-index` forbids a network round trip, and
@@ -167,17 +165,37 @@ cp "$REPO/uv-cu128.lock" "$REPO/uv.lock"
 #
 # It is deliberately NOT kept as a fallback: a fallback to the network would
 # reinstate the exact failure mode this removes, and would do it silently.
+# `uv pip install`, NOT `uv sync`. Attempt 3 died here in 4 minutes: `uv sync
+# --frozen` installs each package from the source recorded in the LOCK, and
+# torch's entry is `registry = "https://download.pytorch.org/whl/cu128"`.
+# `--find-links` adds a source; it does not override a registry-pinned one, so
+# with `--no-index` uv had no way to obtain torch and said so. `uv pip install`
+# against exported pins treats every package as a plain requirement, which
+# `--find-links` can satisfy.
+#
 # The interpreter is PINNED to 3.12 and uv may not download one. The wheelhouse
 # is cp312 — built for the 3.12.3 this pod image actually ran, read off a real
 # run's recorded runtime fingerprint — and uv left to choose picks the newest it
 # can find: on the dev box that was 3.14, against which every cp312 wheel is
 # unusable. `UV_PYTHON_DOWNLOADS=never` also keeps a python build off the wire.
 t0=$(date -u +%s)
-UV_PYTHON_DOWNLOADS=never uv sync --group dev --frozen --offline --no-index \
-  --python 3.12 --find-links "$WHEELHOUSE" \
-  || { say "OFFLINE UV SYNC FAILED — the wheelhouse does not satisfy the lock"
+export UV_PYTHON_DOWNLOADS=never
+uv venv /opt/train --python 3.12 \
+  || { say "COULD NOT CREATE /opt/train ON PYTHON 3.12"; mark "PY312_MISSING"; exit 94; }
+uv pip install --python /opt/train/bin/python --offline --no-index \
+  --find-links "$WHEELHOUSE" -r "$REPO/requirements-cu128.txt" \
+  || { say "OFFLINE INSTALL FAILED — the wheelhouse does not satisfy the pins"
        mark "WHEELHOUSE_UNSATISFIED"; exit 93; }
-say "uv sync completed in $(( $(date -u +%s) - t0 ))s"
+# The project itself is local source, so it needs no index and no dependency
+# resolution: everything it depends on was just installed from the wheelhouse.
+# It IS built, though — hatchling and its chain (editables, pathspec, pluggy,
+# trove-classifiers, packaging, tomlkit) are in the wheelhouse for exactly that,
+# so build isolation resolves offline too. Installing the project rather than
+# leaning on PYTHONPATH keeps `import aadistill` meaning what it meant before.
+uv pip install --python /opt/train/bin/python --offline --no-index \
+  --find-links "$WHEELHOUSE" --no-deps -e "$REPO" \
+  || { say "PROJECT INSTALL FAILED"; mark "PROJECT_INSTALL_FAILED"; exit 95; }
+say "offline install completed in $(( $(date -u +%s) - t0 ))s"
 /opt/train/bin/python -c "import torch, transformers, sympy; \
   assert torch.cuda.is_available(); \
   print('train torch', torch.__version__, torch.cuda.get_device_name(0), \
@@ -190,7 +208,7 @@ mark TRAIN_ENV
 # manifest, raw items) and recovery_search's content + manifest + scoring
 # contract are verified. A mismatch blocks before any scientific measurement.
 #
-# It runs HERE, after `uv sync`, and not beside the asset staging above, because
+# It runs HERE, after the train venv exists, and not beside the asset staging above, because
 # it needs `/opt/train`: the scoring-contract digest comes from
 # `aadistill.autoinit.recovery`, and importing that package imports torch. Placed
 # earlier it invoked an interpreter that does not exist yet, and the `||` branch

@@ -942,15 +942,26 @@ def test_the_paid_setup_contains_no_pypi_on_its_critical_path():
     """
     setup = (REPO / "scripts/pod/autoinit_preflight_setup.sh").read_text()
 
-    # The install is offline, index-less, frozen, and on a pinned interpreter:
-    # the wheelhouse is cp312 and uv left to choose picks the newest python it
-    # can find, against which every cp312 wheel is unusable.
-    assert "uv sync --group dev --frozen --offline --no-index" in setup
-    assert "--python 3.12 --find-links" in setup
+    # `uv pip install`, not `uv sync`: attempt 3 proved `uv sync --frozen`
+    # installs from the source recorded in the LOCK, and torch's is the pytorch
+    # registry, which `--find-links` does not override. Both the dependency
+    # install and the project build must be offline and index-less.
+    assert "uv pip install --python /opt/train/bin/python --offline --no-index" in setup
+    assert "-r \"$REPO/requirements-cu128.txt\"" in setup
+    assert "--find-links \"$WHEELHOUSE\" --no-deps -e \"$REPO\"" in setup
+    # Absent as COMMANDS. The comments still explain why `uv sync` cannot work
+    # here, and deleting that explanation to satisfy a substring match would
+    # throw away the reason attempt 3 died.
+    code = "\n".join(l for l in setup.splitlines()
+                     if not l.lstrip().startswith("#"))
+    assert "uv sync" not in code, "uv sync cannot install a registry-pinned wheel offline"
+    assert "uv lock" not in code
+    # A pinned interpreter, and uv may not fetch one.
+    assert "uv venv /opt/train --python 3.12" in setup
     assert "UV_PYTHON_DOWNLOADS=never" in setup
     # `uv lock` no longer runs on the pod: the resolution is committed.
-    assert "\nuv lock" not in setup
     assert (REPO / "uv-cu128.lock").is_file()
+    assert (REPO / "requirements-cu128.txt").is_file()
     # No fallback that would go back to PyPI when the wheelhouse is unusable.
     assert "WHEELHOUSE_UNSATISFIED" in setup
     for fallback in ("|| uv sync --group dev\n", "--offline || ", "; uv sync --group dev"):
