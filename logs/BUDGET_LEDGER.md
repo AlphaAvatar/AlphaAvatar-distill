@@ -73,7 +73,15 @@ AutoInit characterization continuation, attempt 1 (L40S,      $  0.6312
     stopped staging. Pod deleted, provider-confirmed gone.
     Both causes fixed and locked by tests before relaunch.
 
-ACTUAL CUMULATIVE SPEND                                      $188.0714
+AutoInit characterization continuation, attempt 2 (L40S,      $  0.6367
+    38.59 min). PRODUCED NOTHING. All THREE host draws tripped
+    HOST_COLD in the uv-sync window; the launcher abandoned and
+    deleted each, then aborted. Pod deleted, provider-confirmed
+    gone. The test-gate defect that killed attempt 1 was fixed
+    and verified under the pod simulator before this launch, so
+    this failure is a different, infrastructure one.
+
+ACTUAL CUMULATIVE SPEND                                      $188.7081
 ```
 
 The pre-E8b baseline `$163.8833` is the figure every E8/E8b planner was built on
@@ -113,13 +121,19 @@ $2.30   RAISED 2026-08-14 with maintainer approval, after attempt 1 spent
 | DC's step-0 probe deferred, never run | — | §38, declared |
 | the 20-step memory gate was falsified by the real run | — | §41–§42 |
 | continuation attempt 1 bought nothing: cold host + a test gate reading an unstaged battery | $0.6312 | `decisions.md` 2026-08-14, `STATE.md` |
+| continuation attempt 2 bought nothing: three consecutive cold hosts, all in the uv-sync window | $0.6367 | `decisions.md` 2026-08-14 |
+| **continuation total: $1.2712 spent, zero driver stages reached** | $1.2712 | four cold hosts in five draws |
 
 ## Current position
 
 ```
 authorized cumulative cap                                    $211.07
-actual cumulative spend                                      $188.0714
-unused authorization remaining                               $ 22.9986
+actual cumulative spend                                      $188.7081
+unused authorization remaining                               $ 22.3619
+continuation spent of its $2.30 authorization                $  1.2712
+continuation remaining under that authorization              $  1.0288
+    LESS THAN ONE ATTEMPT COSTS ($1.6352 hard). Nothing further
+    is launched without both a new increment AND the uv-sync fix.
 micro-preflight spent of its $8.60 authorization             $  6.7369
 micro-preflight remaining under that authorization           $  1.8631
     LESS THAN A SESSION COSTS (~$3.2). Nothing further is

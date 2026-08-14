@@ -1,5 +1,5 @@
 **Updated:** 2026-08-14 · branch `main` · working tree clean
-**No pods running. Nothing billing.** **1,621 CPU tests pass**, 7 skipped.
+**No pods running. Nothing billing.** **1,622 CPU tests pass**, 7 skipped; 1,598 under the pod simulator.
 
 ## The two permanent canonical controls EXIST and are hash-verified
 
@@ -62,76 +62,93 @@ every item. Input is now normalized through `normalize_tools`, which reads eithe
 representation and fails closed. **Semantics unchanged and measured:** nine
 policies × 190 prompts reproduce every number of the pre-migration record.
 
-## The continuation is frozen and executable (2026-08-14)
+## The continuation is executable and BLOCKED ON HOST QUALITY (2026-08-14)
 
-**Executable identity, verified from inside the bundle the pod actually fetches**
-(cloned, checked out, re-digested — not asserted from the dev box):
+**Two paid attempts, $1.2712, zero driver stages reached. Nothing is running.**
+Both pods were torn down with provider confirmation; `LIVE PODS: NONE`.
+
+**Executable identity, verified from inside the bundle the pod fetches** (cloned,
+checked out, re-digested — not asserted from the dev box):
 
 | what | value |
 | --- | --- |
-| session commit | `1e7f347bdea203c39a16c7e0448a1656b7157cac` |
-| continuation harness digest | `060b6053…` over its **own** ten files |
-| authorization | `938078e5…`, `autoinit.control_characterization.2026-08-14` |
+| session commit | `6ba7cce9872e32603a69ab7fbf24fe94ac804ec8` |
+| continuation harness digest | `a76f7416…` over its **own** ten files |
+| authorization | `dfb09243…`, `autoinit.control_characterization.2026-08-14` |
 | plan | `CONTINUATION_PLAN_V1` = `c7754ca5…` |
-| relay bundle | `transfer/aad_autoinit_1e7f347b.bundle`, sha `4bd34264…` |
-| budget | expected **$1.34**, hard cap **$1.75**, stages 0-3, `phase_a_authorized: false` |
+| relay bundle | `transfer/aad_autoinit_6ba7cce9.bundle`, sha `b407dd84…` |
+| budget | expected **$1.97**, cap **$2.30** (raised from $1.75 with approval), one session still self-limits at soft $1.4702 / hard $1.6352 |
+| spent / remaining | **$1.2712 / $1.0288** — less than one attempt's hard threshold |
 
-**Five defects were found by EXECUTING the launcher rather than reading it**, and
-every one was reachable only on a paid pod
-([`decisions.md`](decisions.md), 2026-08-14):
+### What blocks it: the host pool, not the harness
+
+Five draws, four cold — every trip in the **`uv sync`** window, never the test
+timeout. The one healthy host completed the same sync in **45 seconds**; the
+others were killed at 8, 14 and 28 minutes. ~2 GB of wheels are resolved and
+downloaded from PyPI on **every run**, so a cold host is indistinguishable from a
+slow one until the setup is already paid for. Full table and the fix options —
+baked image, relay wheelhouse, different pool — in
+[`decisions.md`](decisions.md). **Do not draw again before `uv sync` is off the
+paid critical path**; at ~$0.25 per abandoned draw and a ~20% observed win rate,
+a further attempt is buying lottery tickets.
+
+### Five harness defects were found by EXECUTING it, and are fixed
+
+None was visible in a source read; each was reachable only on a paid pod
+([`decisions.md`](decisions.md)):
 
 1. `make_plan` raised `BudgetError` on its own arguments — **every** launch would
-   have died there, before a pod could exist. No test had ever called it.
+   have died before a pod could exist. No test had called it.
 2. `require_harness` digested the **preflight's** file set, so the continuation
    launcher, driver and plan module were outside the authorization.
 3. `relay_precheck` never looked for the staged controls — this session's entire
    input — so an unstaged control surfaced only after paid setup.
 4. Collection was preflight-shaped: a **successful** continuation would have
-   failed its own artifact manifest, **blocked teardown**, and billed to the hard
-   threshold. The poll loop also watched `PREFLIGHT_*` while the driver emits
+   failed its own manifest, **blocked teardown**, and billed to the hard
+   threshold. The poll loop watched `PREFLIGHT_*` while the driver emits
    `CONTINUATION_*`.
-5. The relay transport read `os.environ['HF_TOKEN']` over a fresh ssh session.
-   `HF_TOKEN` is exported inside `setup.sh` and dies with it, so the only
-   transport this session uses would have raised `KeyError` after paying for
-   setup.
+5. The relay transport read `os.environ['HF_TOKEN']` in a fresh ssh session,
+   where setup's exported token does not exist.
 
-A session's identity — audit dir, evidence name, archive name, artifact specs,
-terminal markers, reports and products to fetch, event streams — is now
-overridable hooks on the base launcher, defaulting to the preflight's own values.
-`verify_session_commit` additionally proves at **$0** that the commit the pod will
+Plus `verify_session_commit`, which proves at **$0** that the commit the pod will
 check out digests to the authorized harness and carries the exact authorization
-the driver loads. **1,621 tests pass.**
+the driver loads — `authorized_session_commit` was previously recorded and never
+enforced.
 
-**The $8.60 stages-0-3 authorization is retired.** Editing the preflight launcher
-moved its harness digest, so the artifact that permits *training* controls no
-longer validates. It is deliberately **not** re-issued: that would silently
-restore permission to retrain. A test asserts it stays refused.
+**And one that cost $0.63 to learn:** `tests/autoinit/test_frozen_assets.py` and
+`tests/autoinit/test_recovery_search_scoring.py` still read
+`recovery_search_v1`, which the v2 migration stopped staging. The dev box has v1
+on disk, so the suite passed here and **could not** pass on a pod, whose blocking
+test gate failed seven tests. Both now read v2;
+`simulate_pod_env.sh` hides v1 by default, with the rule written down: **when an
+asset stops being staged, add it to the simulator in the same commit.**
 
-**Repriced from the harness, not from prose.** The `$0.88` sketch omitted the
-transfer phase and used the optimistic column for four other rows. The launcher
-prices the session at **69.0 min → $1.1385** at the historical 18 min/control
-guess; the per-control battery cost has **never been measured**, so the budget is
-**24 min/control** — expected $1.3365, hard **$1.6352**, inside the unchanged
-$1.75 cap. Shrinking to hit $0.90 would have set a soft stop that refuses `sb`
-whenever `sa` overruns, forfeiting the one number this session exists to produce.
+**1,622 tests pass locally; 1,598 pass under the pod-layout simulator running the
+pod's exact command.** Stage 3's aggregation is now rehearsed against the real
+scorer's output — that consumer had never run, because the preflight never
+reached Stage 3.
 
-**Transport: relay, and staging is unpaid dev-box uplink.** `sa` is uploaded and
-**round-trip verified** — re-downloaded and re-hashed to
-`573847a730c1a4997a2f…`, 47.8 min at 0.793 MB/s. `sb` is uploading. Nothing is
-launched until `stage_controls_report.json` reports `all_verified: true`.
-No deletion was needed: 81.85 GiB billed against ~93.1 GiB usable
-([`autoinit_relay_capacity.md`](autoinit_relay_capacity.md)).
+**The $8.60 stages-0-3 authorization is retired** and deliberately not re-issued:
+re-issuing would silently restore permission to retrain the controls.
+
+**The controls are untouched, trained, verified, and staged.** `sa`
+`573847a730c1a4997a2f…` and `sb` `4c6adcf8618716902d76…` are on the relay under
+`permanent_controls/`, each re-downloaded and re-hashed after upload
+(`all_verified: true`). Characterization remains **outstanding**.
 
 ## What remains before Stage 3 can run
 
-1. **`sb` staging must finish and round-trip verify** to
-   `4c6adcf861871690…`. This is the last unpaid gate; at $0 GPU spend.
-2. Then launch: `--transport relay`, `--session-commit 1e7f347b…`,
-   `--bundle aad_autoinit_1e7f347b.bundle`. The launcher refuses to create a pod
-   unless the authorization, the harness digest, the session commit and the
-   staged inputs all check out first.
-3. Phase A stays unauthorized. Its `$13.02 / $21.01` remains **provisional** and
-   must be repriced from the real per-control battery cost this session measures.
+1. **Take `uv sync` off the paid critical path** — bake the venvs into an image,
+   or stage a wheelhouse on the relay for `uv sync --offline`. This is the only
+   thing standing between the current harness and a completed characterization.
+2. **A budget increment**, since $1.0288 remains against a $1.6352 hard
+   threshold. Reprice with a cold-draw reserve (~$0.25 per expected abandoned
+   draw) that the current plan lacks.
+3. Then relaunch: `--transport relay`, `--session-commit 6ba7cce9…`,
+   `--bundle aad_autoinit_6ba7cce9.bundle`. Every $0 gate already passes.
+4. Phase A stays unauthorized. Its `$13.02 / $21.01` remains **provisional** and
+   still cannot be repriced: the per-control battery cost this session existed to
+   measure was never reached.
 
 ## Phase A is repriced, and both statistics measurements are kept
 
