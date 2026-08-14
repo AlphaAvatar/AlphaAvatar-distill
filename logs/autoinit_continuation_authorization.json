@@ -6,8 +6,8 @@
   "granted_by": "maintainer (session authorization)",
   "plan_id": "autoinit.control_characterization_continuation",
   "preflight_plan_hash": "c7754ca5e8aa913b7690a0f4d7dbf6ed0062cf00da5b4b527c806a3d7798b0e8",
-  "expected_usd": 1.34,
-  "hard_cap_usd": 1.75,
+  "expected_usd": 1.97,
+  "hard_cap_usd": 2.3,
   "authorized_stages": [
     0,
     1,
@@ -24,8 +24,8 @@
   "scope_note": "characterization of two ALREADY TRAINED permanent controls. This authorization does not permit training, retraining, or re-initializing any control: the driver has no training stage and the launcher materializes existing artifacts. A failed characterization is collected and torn down and remains a FAILED continuation; it does not authorize a retry that trains. Phase A remains separately unauthorized.",
   "phase_a_authorized": false,
   "automatic_phase_a_start": false,
-  "authorized_session_commit": "d9b2fd67cc683090ab1c9dec8b67a8d7ded4d129",
-  "harness_source_digest": "060b60533080ffba7616bd2532dd70b366c54f34d326844520bdd818d3d18fe6",
+  "authorized_session_commit": "2f96753d22687031144ae2375c796f4a8329e749",
+  "harness_source_digest": "a76f7416c94a9ae5ff0fa0111d54ed11f18a103ad4b6119ec7a924f0c917f840",
   "harness_source_files": [
     "scripts/pod/autoinit_continuation_launch.py",
     "scripts/pod/autoinit_continuation_driver.py",
@@ -38,7 +38,7 @@
     "src/aadistill/autoinit/continuation.py",
     "src/aadistill/autoinit/generation.py"
   ],
-  "provenance_commit": "d9b2fd67cc683090ab1c9dec8b67a8d7ded4d129",
+  "provenance_commit": "2f96753d22687031144ae2375c796f4a8329e749",
   "enforcement": "the launcher loads this artifact and refuses to create a pod whose priced hard threshold exceeds hard_cap_usd, refuses a stage not in authorized_stages, and has no code path to Phase A",
-  "authorization_sha256": "938078e5c74773751c4de9b590111de088c9b0f1486cd88e664aae004b3e42d4"
+  "authorization_sha256": "dfb092433beb9456960f8ba726671496820e34a6d097f49aa134d0c51e928d22"
 }
