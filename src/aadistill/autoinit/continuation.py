@@ -370,11 +370,19 @@ CONTINUATION_AUTHORIZATION = SpendAuthorization(
     # in autoinit_phase_a_repricing.md omitted the transfer phase and used the
     # optimistic column for four other rows. This is a conservative CEILING on
     # the estimate, not a prediction: the pod is torn down on completion, so a
-    # run that finishes in an hour costs about $1.00. The hard threshold it
-    # yields is $1.6352, inside the maintainer's $1.75 cap — which is unchanged
-    # and remains the only enforced figure.
-    expected_usd=1.34,
-    hard_cap_usd=1.75,
+    # run that finishes in an hour costs about $1.00.
+    #
+    # Raised 2026-08-14 from $1.34/$1.75 with maintainer approval. Attempt 1
+    # spent **$0.6312** and produced nothing: a cold host burned 29 min, and the
+    # redraw then failed the pod's blocking test gate on seven tests that read
+    # `recovery_search_v1`, which the v2 migration stopped staging. Both are
+    # fixed and locked by tests. The cap now covers the WHOLE continuation —
+    # that sunk $0.6312 plus one full attempt at its $1.6352 hard threshold.
+    # Raising the cap does not loosen the session: `make_plan` still prices a
+    # single run at soft $1.4702 / hard $1.6352, so one launch cannot spend the
+    # headroom of two.
+    expected_usd=1.97,
+    hard_cap_usd=2.30,
     authorized_stages=(0, 1, 2, 3),
     stage_conditions={
         "0": "strict import of the two existing permanent controls; no training",

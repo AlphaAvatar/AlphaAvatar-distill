@@ -555,8 +555,11 @@ def test_make_plan_actually_prices_and_stays_inside_the_authorization():
     assert obj.make_plan() is True
     plan = obj.plan
     # The authorized bound is the HARD threshold; that is what the launcher
-    # enforces before a pod can exist, and what the maintainer set at $1.75.
-    assert plan.hard_terminate_usd <= 1.75 + 1e-9, plan.as_dict()
+    # enforces before a pod can exist. Raising the cap to $2.30 to cover a
+    # failed attempt must NOT loosen a single session: its own hard threshold
+    # stays at $1.6352, so one launch cannot spend two launches' headroom.
+    assert plan.hard_terminate_usd <= 1.64, plan.as_dict()
+    assert plan.hard_terminate_usd < CONTINUATION_AUTHORIZATION.hard_cap_usd
     # The expected figure is the harness's own conservative ceiling — $1.34 at
     # the 24 min/control budget — not the $0.88 sketch in the repricing note,
     # which left out the transfer phase and used the optimistic column for four
@@ -747,11 +750,14 @@ def test_the_continuation_authorization_is_narrow_and_cannot_train():
     from aadistill.autoinit.authorization import AuthorizationError
     from aadistill.autoinit.continuation import CONTINUATION_AUTHORIZATION as auth
 
-    assert (auth.expected_usd, auth.hard_cap_usd) == (1.34, 1.75)
+    # Raised 2026-08-14 with maintainer approval after attempt 1 spent $0.6312
+    # on a cold host and a pod-only test-gate failure. The cap covers the whole
+    # continuation; a single session still self-limits at its own $1.6352.
+    assert (auth.expected_usd, auth.hard_cap_usd) == (1.97, 2.30)
     assert auth.plan_hash == CONTINUATION_PLAN_V1.plan_hash
     assert auth.allows_phase_a is False and auth.automatic_phase_a_start is False
     with pytest.raises(AuthorizationError):
-        auth.require_within_cap(1.76, what="session")
+        auth.require_within_cap(2.31, what="session")
     with pytest.raises(AuthorizationError):
         auth.require_stage(4)
     with pytest.raises(AuthorizationError, match="separately unauthorized"):
