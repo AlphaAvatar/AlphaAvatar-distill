@@ -21,19 +21,51 @@ Attempt 3 produced the same protocol, initialization and seeds with different
 weights. GPU training is not bitwise reproducible; selection is on measured
 behaviour.
 
-## Stage 3 is blocked on tool rendering — a protocol decision, not a bug fix
+## Stage 3 is blocked: a protocol decision the maintainer owns
 
-`uncapped_eval.py` passes the frozen battery's `tools` straight to
-`apply_chat_template`, and **transformers 5.15** raises `ValueError: Tools should
-either be a JSON schema, or a callable function…`. The battery stores tools as a
-**JSON string** of xLAM objects whose `parameters` is a flat name→spec dict.
-Historical E1-E7 tool evaluations ran under transformers 4.x, which accepted it.
+`uncapped_eval.py` passes the frozen battery's `tools` to `apply_chat_template`
+and transformers raises `ValueError: Tools should either be a JSON schema…`.
+The $0 full-subset audit (`scripts/autoinit/audit_tool_rendering.py`, all 20
+items, artifact [`autoinit_tool_rendering_audit_tf5.json`](autoinit_tool_rendering_audit_tf5.json))
+establishes:
 
-Normalizing changes what the model sees in every tool prompt — which changes the
-`tool` capability that `recovery_search_scoring@v2` exists to measure, and makes
-new numbers incomparable to the historical ones. **Open for the maintainer:**
-normalize at the generator, normalize in the frozen asset, or pin the evaluation
-transformers version. See [`decisions.md`](decisions.md) 2026-08-14.
+* the stored value renders **0/20** under transformers 5.13.1 — the same failure
+  as the pod's 5.15.0, so it is not version-specific within 5.x;
+* `json.loads` → xLAM list renders 20/20; converted to the project's OpenAI-style
+  form renders 20/20; **the two share 0/20 token-id hashes** (272 vs 296 tokens
+  on the first item), so they are different inputs to the model;
+* **transformers 4.57.1 cannot load this checkpoint's tokenizer at all**
+  (`AttributeError` in `_set_model_specific_special_tokens`) — a second 4.x
+  incompatibility beyond the RoPE misreading in §0.5;
+* **no historical evaluation ran under 4.x**: `e6_results.json` records
+  transformers **5.14.1** for every E6 arm. An earlier statement in this file
+  that historical tool evaluations ran under 4.x was an inference and is
+  **withdrawn**;
+* `recovery_search_v1` is the **only** tool asset here storing `tools` as a JSON
+  string of xLAM objects; every `data/stage2*/…/tool_calling.jsonl` stores a list
+  of OpenAI-style entries. Its tool prompts have never been rendered by anything.
+
+So there is no historical rendering to be equivalent *to*, and the choice — parse
+only, parse and convert, or rebuild the asset — changes what the model is shown
+in every tool prompt and therefore the `tool` capability. **Recorded, not
+decided:** [`autoinit_tool_rendering_migration.md`](autoinit_tool_rendering_migration.md),
+[`decisions.md`](decisions.md) 2026-08-14. Pinning the evaluator to 4.x and
+editing the frozen asset in place are both ruled out.
+
+Whichever option is chosen changes `uncapped_eval.py` and therefore
+`generation_source_digest`, so the generation protocol is **re-attested at Stage 0
+before Stage 3**. That does not touch the Stage-2 controls: recovery identity and
+generation identity are separate by construction.
+
+## Phase A is repriced, and both statistics measurements are kept
+
+$13.02 expected / $21.01 hard, from measured values, against the superseded
+$17.00 / $26.21 — see [`autoinit_phase_a_repricing.md`](autoinit_phase_a_repricing.md).
+`gpu_fraction` **0.5609** (attempt 3) and **0.5177** (attempt 4) are both valid
+measurements of different hosts under identical configuration; they are kept as a
+range with a pooled 0.5397, and repricing uses the *total* pass time
+(8.02–8.30 s), not the fraction. Against $23.63 of unused authorization the
+repriced hard backstop leaves **$2.62**.
 
 ## Micro-preflight: four attempts, $6.7369 of $8.60. STOP.
 

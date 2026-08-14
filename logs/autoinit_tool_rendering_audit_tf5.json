@@ -1,0 +1,656 @@
+{
+ "schema": "aadistill.autoinit.tool_rendering_audit/v1",
+ "transformers": "5.13.1",
+ "python": "3.14.2",
+ "tokenizer": "artifacts/stage1/qwen3_0p6b_init_v0/checkpoint",
+ "chat_template_sha256": "3802169b2a02b81e6adb7ab4f64f91ff02db753c8c3a64a01c35192d3a61d8d7",
+ "battery": "artifacts/stage3/recovery_search_v1/tool.jsonl",
+ "n_items": 20,
+ "loads_model_config": false,
+ "items": {
+  "xlam-0": {
+   "stored_type": "str",
+   "parse_error": null,
+   "n_tools": 1,
+   "arms": {
+    "raw_string": {
+     "ok": false,
+     "error": "ValueError: Tools should either be a JSON schema, or a callable function with type hints and a docstring suitable for auto-conversion to a schema."
+    },
+    "no_tools": {
+     "ok": true,
+     "text_sha256": "63df9f914749c34cfabddaafa53644881ae553f98c2af8936a798b51de878b08",
+     "n_chars": 549,
+     "ids_sha256": "d30e1a5693cee47a7fb25bcc57d480aeb98a57271628993bfc5964d30ebdff4a",
+     "n_tokens": 126,
+     "text": "<|im_start|>system\nYou are a helpful Assistant.<|im_end|>\n<|im_start|>user\nYou have access to the following tools. Call the tool that answers the user's request.\n\nTools:\n[{\"name\": \"live_giveaways_by_type\", \"description\": \"Retrieve live giveaways from the GamerPower API based on the specified type.\", \"parameters\": {\"type\": {\"description\": \"The type of giveaways to retrieve (e.g., game, loot, beta).\", \"type\": \"str\", \"default\": \"game\"}}}]\n\nRequest: Where can I find live giveaways for beta access and games?<|im_end|>\n<|im_start|>assistant\n<think>\n  …[truncated for the record]"
+    },
+    "parsed_list": {
+     "ok": true,
+     "text_sha256": "6028fbb864544d0e3fbfd152d8de233e08d89fe6ba4e43daba30345ab1612639",
+     "n_chars": 1190,
+     "ids_sha256": "bd9e69d1924c7e7e294e2b23da5c7f2e53c2839bf053b16b6a8618683fc914b2",
+     "n_tokens": 272,
+     "text": "<|im_start|>system\nYou are a helpful Assistant.\n\n# Tools\n\nYou may call one or more functions to assist with the user query.\n\nYou are provided with function signatures within <tools></tools> XML tags:\n<tools>\n{\"name\": \"live_giveaways_by_type\", \"description\": \"Retrieve live giveaways from the GamerPower API based on the specified type.\", \"parameters\": {\"type\": {\"description\": \"The type of giveaways to retrieve (e.g., game, loot, beta).\", \"type\": \"str\", \"default\": \"game\"}}}\n</tools>\n\nFor each function call, return a json object with function name and arguments within <tool_call></tool_call> XML tags:\n<tool_call>\n{\"name\": <function-name>, \"arguments\": <args-json-object>}\n</tool_call><|im_end|>\n<|im_start|>user\nYou have access to the following tools. Call the tool that answers the user's request.\n\nTools:\n[{\"name\": \"live_giveaways_by_type\", \"description\": \"Retrieve live giveaways from the GamerPower API based on the specified type.\", \"parameters\": {\"type\": {\"description\": \"The type of giveaways to retrieve (e.g., game, loot, beta).\", \"type\": \"str\", \"default\": \"game\"}}}]\n\nRequest: Where can I find live giveaways for beta access and games?<|im_end|>\n<|im_start|>assistant\n<think>\n  …[truncated for the record]"
+    },
+    "openai_schema": {
+     "ok": true,
+     "text_sha256": "567ac231d4929324cbde3ae71482f021ddc3bac2bc9a745316d6136f246d29f0",
+     "n_chars": 1274,
+     "ids_sha256": "0f97a328c671f20df9d10a99bf979a44f00a0ac790e5a0846671a11acd033419",
+     "n_tokens": 296,
+     "text": "<|im_start|>system\nYou are a helpful Assistant.\n\n# Tools\n\nYou may call one or more functions to assist with the user query.\n\nYou are provided with function signatures within <tools></tools> XML tags:\n<tools>\n{\"type\": \"function\", \"function\": {\"name\": \"live_giveaways_by_type\", \"description\": \"Retrieve live giveaways from the GamerPower API based on the specified type.\", \"parameters\": {\"type\": \"object\", \"properties\": {\"type\": {\"description\": \"The type of giveaways to retrieve (e.g., game, loot, beta).\", \"type\": \"str\", \"default\": \"game\"}}, \"required\": []}}}\n</tools>\n\nFor each function call, return a json object with function name and arguments within <tool_call></tool_call> XML tags:\n<tool_call>\n{\"name\": <function-name>, \"arguments\": <args-json-object>}\n</tool_call><|im_end|>\n<|im_start|>user\nYou have access to the following tools. Call the tool that answers the user's request.\n\nTools:\n[{\"name\": \"live_giveaways_by_type\", \"description\": \"Retrieve live giveaways from the GamerPower API based on the specified type.\", \"parameters\": {\"type\": {\"description\": \"The type of giveaways to retrieve (e.g., game, loot, beta).\", \"type\": \"str\", \"default\": \"game\"}}}]\n\nRequest: Where can I find live giv  …[truncated for the record]"
+    }
+   }
+  },
+  "xlam-1": {
+   "stored_type": "str",
+   "parse_error": null,
+   "n_tools": 2,
+   "arms": {
+    "raw_string": {
+     "ok": false,
+     "error": "ValueError: Tools should either be a JSON schema, or a callable function with type hints and a docstring suitable for auto-conversion to a schema."
+    },
+    "no_tools": {
+     "ok": true,
+     "text_sha256": "3450136e83021862f60e6b80fc9c42ae50930e7cbb92e996695bbb541a4e0fc9",
+     "n_chars": 781,
+     "ids_sha256": "c6fcce4873db2020384e1bf864b0ce2540bfc700c8b5171af669e3fb3e49b755",
+     "n_tokens": 179
+    },
+    "parsed_list": {
+     "ok": true,
+     "text_sha256": "e24d0e66115c79d9c9702859d1f76007e469bc0d28cbd5841a83d3081b41b2c8",
+     "n_chars": 1579,
+     "ids_sha256": "0191d3192fe1f0b3a89b6973ba8af1efd418d67e2273ad24df6d42707ecd3ce2",
+     "n_tokens": 366
+    },
+    "openai_schema": {
+     "ok": true,
+     "text_sha256": "5cba8aaf3d2fc43369f97cc3b9ddee3d031b0f00e00b85aa5b09bb636d1f2cec",
+     "n_chars": 1747,
+     "ids_sha256": "9aa3360ac3fb82af73a5797d4ce28090134af747d475f2e2465b01db17179b77",
+     "n_tokens": 413
+    }
+   }
+  },
+  "xlam-10": {
+   "stored_type": "str",
+   "parse_error": null,
+   "n_tools": 5,
+   "arms": {
+    "raw_string": {
+     "ok": false,
+     "error": "ValueError: Tools should either be a JSON schema, or a callable function with type hints and a docstring suitable for auto-conversion to a schema."
+    },
+    "no_tools": {
+     "ok": true,
+     "text_sha256": "5da9ab5dbed976c2693db3b0a923533fb9ad24893e66690a92679bf916814509",
+     "n_chars": 2275,
+     "ids_sha256": "94e9dba2f6ba83e98cae60ec480ee492783810abf280b64a8f79ee8e075bc966",
+     "n_tokens": 574
+    },
+    "parsed_list": {
+     "ok": true,
+     "text_sha256": "66ce3393b4d47edeb22e0c560d390b5f094541365fe0b394d1e343d2e49864cc",
+     "n_chars": 4556,
+     "ids_sha256": "ceb1b2102835763fafa7502ac33a1a47a866d87c2c1036a04788446e64ff9bc9",
+     "n_tokens": 1150
+    },
+    "openai_schema": {
+     "ok": true,
+     "text_sha256": "7800c15414b2bb21ffdd12109bcf93fde3dd9004323661ed8c8d51481f24dff0",
+     "n_chars": 4976,
+     "ids_sha256": "616817cc64aa664984ed72c64f661973769b83bfc4df36cb08e96e7a417870b3",
+     "n_tokens": 1268
+    }
+   }
+  },
+  "xlam-11": {
+   "stored_type": "str",
+   "parse_error": null,
+   "n_tools": 2,
+   "arms": {
+    "raw_string": {
+     "ok": false,
+     "error": "ValueError: Tools should either be a JSON schema, or a callable function with type hints and a docstring suitable for auto-conversion to a schema."
+    },
+    "no_tools": {
+     "ok": true,
+     "text_sha256": "2ba2e244f5e84c695f69ad91273a7204ab17c8c3f7f35e344554619a163b3670",
+     "n_chars": 852,
+     "ids_sha256": "19cff1b91ec2aa60874acb3be86e0fc6b7f30339ed86251b1065d26eafa1a9d7",
+     "n_tokens": 191
+    },
+    "parsed_list": {
+     "ok": true,
+     "text_sha256": "5c3376487a2c06f62ced9917816a34bc8d1a4ad8d9b31ae74acb2461f14458f8",
+     "n_chars": 1759,
+     "ids_sha256": "9019c50f44142c72506f73fa7500051255b2a27f01f36c0d8327c477d556f398",
+     "n_tokens": 392
+    },
+    "openai_schema": {
+     "ok": true,
+     "text_sha256": "f7a83da90bb0d495ad414ca689461e5c9f5ed2a37d30573ab6ba73392a5204a7",
+     "n_chars": 1927,
+     "ids_sha256": "a03c21ddb060eb09e87fda9444fb133fa7005cd3e6b2a84638e31ce57621d2a1",
+     "n_tokens": 440
+    }
+   }
+  },
+  "xlam-12": {
+   "stored_type": "str",
+   "parse_error": null,
+   "n_tools": 1,
+   "arms": {
+    "raw_string": {
+     "ok": false,
+     "error": "ValueError: Tools should either be a JSON schema, or a callable function with type hints and a docstring suitable for auto-conversion to a schema."
+    },
+    "no_tools": {
+     "ok": true,
+     "text_sha256": "80ab6f94297218a0819842d32f1a035fc7ed459dc1622c7c7f5f0c9327e50071",
+     "n_chars": 858,
+     "ids_sha256": "c7f96c5d3f984a478fe8d787aa6484f7f2e5d999301e2aa6de5d01d22e49050e",
+     "n_tokens": 223
+    },
+    "parsed_list": {
+     "ok": true,
+     "text_sha256": "57d2505155ff2b33152b4dbbabeaadd00c3bc51e0a046ffc2f63e2d35da656a2",
+     "n_chars": 1803,
+     "ids_sha256": "55eb90bfab969f41a46c9cb548e5fa17dcd2a0d63052cd9a132c00ceecfdd9ad",
+     "n_tokens": 460
+    },
+    "openai_schema": {
+     "ok": true,
+     "text_sha256": "b284a7e72559e508e39f4a67546c0efd3121445e0298e0415e0f9a6ae9cad32b",
+     "n_chars": 1887,
+     "ids_sha256": "e372f1615fea6ecf5504c6ac92744c0ff2805c7e9ad99bc47d48afa59ae0b34c",
+     "n_tokens": 483
+    }
+   }
+  },
+  "xlam-13": {
+   "stored_type": "str",
+   "parse_error": null,
+   "n_tools": 5,
+   "arms": {
+    "raw_string": {
+     "ok": false,
+     "error": "ValueError: Tools should either be a JSON schema, or a callable function with type hints and a docstring suitable for auto-conversion to a schema."
+    },
+    "no_tools": {
+     "ok": true,
+     "text_sha256": "ad9ff35b60690ab39a2fb6ff4baba881e71d32b140423720bd7d5dd14351d553",
+     "n_chars": 2450,
+     "ids_sha256": "6091ec4750670c0a90b3ddd30a3f8d3d6fa8eca2fdc5f55e301bdc9ce1bd5833",
+     "n_tokens": 602
+    },
+    "parsed_list": {
+     "ok": true,
+     "text_sha256": "6f072524a04bf0d692fcc0cc02cb0991e51647f8a600aab1de81241de283d794",
+     "n_chars": 4935,
+     "ids_sha256": "35981d596053a085ab409477e2b80d2e198f7e327d5ff2df06131c75e1f01ef9",
+     "n_tokens": 1204
+    },
+    "openai_schema": {
+     "ok": true,
+     "text_sha256": "0b0d115cbe3dad901ae4f5a31a948b97fe3316998b4c9379f3f56eeeba80dce1",
+     "n_chars": 5512,
+     "ids_sha256": "558e4ceb29a43a3139db154bd3b8b00c3cf1771c2f15733754f96521d4467b2b",
+     "n_tokens": 1367
+    }
+   }
+  },
+  "xlam-14": {
+   "stored_type": "str",
+   "parse_error": null,
+   "n_tools": 1,
+   "arms": {
+    "raw_string": {
+     "ok": false,
+     "error": "ValueError: Tools should either be a JSON schema, or a callable function with type hints and a docstring suitable for auto-conversion to a schema."
+    },
+    "no_tools": {
+     "ok": true,
+     "text_sha256": "d1dbc8465a539b38d2f06d5cf770d20d7a8873e76c8b9c68f7c0b99b2f88c681",
+     "n_chars": 631,
+     "ids_sha256": "ae661319752a664df46aaea8bcebfa00ba38cb9ac0e41909f493fea4e9759b66",
+     "n_tokens": 147
+    },
+    "parsed_list": {
+     "ok": true,
+     "text_sha256": "21aee08c665fba7ae7f45506ffa0e316ef8f4cad7d0bbc52f10ab3cddf511193",
+     "n_chars": 1242,
+     "ids_sha256": "e2cd72071d4832ea5c6e954c905106fe32575168df91374250b8f0b081ac0787",
+     "n_tokens": 285
+    },
+    "openai_schema": {
+     "ok": true,
+     "text_sha256": "79a4799ecd99307f12532aa4872bc0a16ccd1d8667e6acb43170da4e0a68ff67",
+     "n_chars": 1326,
+     "ids_sha256": "1de1fa19a2dd5cefdbbc29ba72ce62635127931bc200db6a271a77890fb4c5ec",
+     "n_tokens": 309
+    }
+   }
+  },
+  "xlam-15": {
+   "stored_type": "str",
+   "parse_error": null,
+   "n_tools": 2,
+   "arms": {
+    "raw_string": {
+     "ok": false,
+     "error": "ValueError: Tools should either be a JSON schema, or a callable function with type hints and a docstring suitable for auto-conversion to a schema."
+    },
+    "no_tools": {
+     "ok": true,
+     "text_sha256": "d40c3a8ce2956fa8aa759e6d890ea1d582f645d2183dba793ef1d0deb4e994d0",
+     "n_chars": 1300,
+     "ids_sha256": "b9dae0f8ec19227d133d5773d7bba7a3c5a00a04f8143b1f65dada20817d4f3b",
+     "n_tokens": 321
+    },
+    "parsed_list": {
+     "ok": true,
+     "text_sha256": "c09f6e32835ec365c787c55154194aefe13a018f81808a11753a4a7fdf710b7c",
+     "n_chars": 2609,
+     "ids_sha256": "d5beee0555ddf9fcef26283a16263e4071cd7a44a2694c1186dfcf61ca83a4a5",
+     "n_tokens": 629
+    },
+    "openai_schema": {
+     "ok": true,
+     "text_sha256": "9cd63c52f87aeb5adc6a8419fe5e151428f3b2a508f10aef8ae535f61e617884",
+     "n_chars": 2777,
+     "ids_sha256": "fa9fdc1888615ee0f9a8a08758dbae1ef91942bbf31f3a94087028d09036830b",
+     "n_tokens": 675
+    }
+   }
+  },
+  "xlam-16": {
+   "stored_type": "str",
+   "parse_error": null,
+   "n_tools": 1,
+   "arms": {
+    "raw_string": {
+     "ok": false,
+     "error": "ValueError: Tools should either be a JSON schema, or a callable function with type hints and a docstring suitable for auto-conversion to a schema."
+    },
+    "no_tools": {
+     "ok": true,
+     "text_sha256": "2ef0b0c46071a8db9e442bf0e2498e7426f1067716dd97818e18486becd57938",
+     "n_chars": 814,
+     "ids_sha256": "0cd0ce5268fb76f42fb0ff525f98695634a243253a2863615645a9b06907596f",
+     "n_tokens": 200
+    },
+    "parsed_list": {
+     "ok": true,
+     "text_sha256": "5d6744cbc56b519e67531f20d751fcf156ac871e6f12ef1b8e41b576ef8864fd",
+     "n_chars": 1689,
+     "ids_sha256": "3bfd520d299ad8c62c56b27ec538bd921439532cb87c79c127358a45a4726fde",
+     "n_tokens": 413
+    },
+    "openai_schema": {
+     "ok": true,
+     "text_sha256": "5981b8e8ef572909e532821bd71a3db1770415c2932aaf0ba7e88463ce8db528",
+     "n_chars": 1773,
+     "ids_sha256": "97d08b419b530dc8cfcd30f9ab0f11029d632025c4d1ad09f40cc113811688ee",
+     "n_tokens": 437
+    }
+   }
+  },
+  "xlam-17": {
+   "stored_type": "str",
+   "parse_error": null,
+   "n_tools": 2,
+   "arms": {
+    "raw_string": {
+     "ok": false,
+     "error": "ValueError: Tools should either be a JSON schema, or a callable function with type hints and a docstring suitable for auto-conversion to a schema."
+    },
+    "no_tools": {
+     "ok": true,
+     "text_sha256": "48246e147fb8e2dc8b2fc185fb2ee9695473c7b35101c3538f447ac0f30f25ef",
+     "n_chars": 885,
+     "ids_sha256": "1a41de8a82dd420e7f18673e059f2ae7508a6f93647020d75e71ed2d5cf2cdd9",
+     "n_tokens": 226
+    },
+    "parsed_list": {
+     "ok": true,
+     "text_sha256": "93e182eca7c4476ea16613f0f90373344e787e3bd6578245a13f4dab39a9e9e1",
+     "n_chars": 1811,
+     "ids_sha256": "0351ee292b8ff1ff58d2d84a3221511cbd3cc42d03b6067c5b7875ea40abee37",
+     "n_tokens": 460
+    },
+    "openai_schema": {
+     "ok": true,
+     "text_sha256": "7eed5e4ed45b3d1e6e66f8f0ac390537c24a1647be8f53f8bfbb147657250817",
+     "n_chars": 1979,
+     "ids_sha256": "aefb717dbf79f888a63b55ec6a381b9c5682c6d526f39795ee267b6dc6845657",
+     "n_tokens": 508
+    }
+   }
+  },
+  "xlam-18": {
+   "stored_type": "str",
+   "parse_error": null,
+   "n_tools": 2,
+   "arms": {
+    "raw_string": {
+     "ok": false,
+     "error": "ValueError: Tools should either be a JSON schema, or a callable function with type hints and a docstring suitable for auto-conversion to a schema."
+    },
+    "no_tools": {
+     "ok": true,
+     "text_sha256": "6ba699cfddb637e13fa23fff6b1948d8f99beb175dad08afabc2abbacdca7706",
+     "n_chars": 976,
+     "ids_sha256": "82018f14da0e494ff72596beaa362a1fed98878c25d7501ad69559f817d5dc78",
+     "n_tokens": 234
+    },
+    "parsed_list": {
+     "ok": true,
+     "text_sha256": "351f9be034c37b09f03f0bff7997d511f8139ebef16e6def39f7e30e2cc74549",
+     "n_chars": 2054,
+     "ids_sha256": "40ec1ad3ab126843f16cf3499f927d43106e16649e8f24128100e9e112f1644d",
+     "n_tokens": 482
+    },
+    "openai_schema": {
+     "ok": true,
+     "text_sha256": "bfd4ecba3cb81cf686941d22ad7ea59ea663b7a7e062bd98f88d9ac341de6bdd",
+     "n_chars": 2279,
+     "ids_sha256": "b6fc256fa8070c0526b10de9673de3bf3a1e250a847a50e79f28b5312230e2b8",
+     "n_tokens": 543
+    }
+   }
+  },
+  "xlam-19": {
+   "stored_type": "str",
+   "parse_error": null,
+   "n_tools": 1,
+   "arms": {
+    "raw_string": {
+     "ok": false,
+     "error": "ValueError: Tools should either be a JSON schema, or a callable function with type hints and a docstring suitable for auto-conversion to a schema."
+    },
+    "no_tools": {
+     "ok": true,
+     "text_sha256": "68bd6db769a752ab8e90af4ae330cbef4e3d6ae80c35d091eabac2bd93c39993",
+     "n_chars": 1352,
+     "ids_sha256": "1f6e8518e86fbbc6c1b2e638af6f9ead6e3fc07c7eb8414b80055ac59757a482",
+     "n_tokens": 382
+    },
+    "parsed_list": {
+     "ok": true,
+     "text_sha256": "da01077cd122eee671a86712ac74205cbce05afd573cf77c1ade6a45dd481918",
+     "n_chars": 2752,
+     "ids_sha256": "47d75b56a5b4d44df65ac4a3c4669701e6ce5470844da532043d537da6101067",
+     "n_tokens": 761
+    },
+    "openai_schema": {
+     "ok": true,
+     "text_sha256": "c9023dbc8fc734177915ff759f402da1ef71bc56f9ddf217795dddaca6295322",
+     "n_chars": 2836,
+     "ids_sha256": "3d6ed9dba190ac597578f30025de947073bda42dbfbbdb0a5096746aaa6778a7",
+     "n_tokens": 785
+    }
+   }
+  },
+  "xlam-2": {
+   "stored_type": "str",
+   "parse_error": null,
+   "n_tools": 2,
+   "arms": {
+    "raw_string": {
+     "ok": false,
+     "error": "ValueError: Tools should either be a JSON schema, or a callable function with type hints and a docstring suitable for auto-conversion to a schema."
+    },
+    "no_tools": {
+     "ok": true,
+     "text_sha256": "1e9ad97f06c9f779dc5a58d0b20dc3e314e6c270d81bb2f870758554ac7812c7",
+     "n_chars": 1962,
+     "ids_sha256": "40a62dc286ee49380bacf0cff6320cf921ab1d79a4cee4ec0c8383f06f18a194",
+     "n_tokens": 542
+    },
+    "parsed_list": {
+     "ok": true,
+     "text_sha256": "4f12075051301cb881edd1000ca266c7b49fbdd8087dc8236ffb86652912cf29",
+     "n_chars": 3998,
+     "ids_sha256": "47faaace6ed87a9bb2925969344df2950482b351972819c4ab937552d5f51c94",
+     "n_tokens": 1089
+    },
+    "openai_schema": {
+     "ok": true,
+     "text_sha256": "928e0b2f27a22564e9eebcfb6e3beec7e2d4ddb5914326ee2ff76467dc64bdc9",
+     "n_chars": 4166,
+     "ids_sha256": "3f5b568e578f2093c547dad4a505c4848930c9ef34f95ab3647ede5110f03a3e",
+     "n_tokens": 1136
+    }
+   }
+  },
+  "xlam-3": {
+   "stored_type": "str",
+   "parse_error": null,
+   "n_tools": 2,
+   "arms": {
+    "raw_string": {
+     "ok": false,
+     "error": "ValueError: Tools should either be a JSON schema, or a callable function with type hints and a docstring suitable for auto-conversion to a schema."
+    },
+    "no_tools": {
+     "ok": true,
+     "text_sha256": "5918ffc63217b05ce01503f39c83c378aa4373663d7fb90ddb60e88f4f5b9c5a",
+     "n_chars": 4873,
+     "ids_sha256": "df70f8fcc7fe9336a3bdbe573ee2634527c94cb0c230076423163537f3064e2a",
+     "n_tokens": 1264
+    },
+    "parsed_list": {
+     "ok": true,
+     "text_sha256": "ed6cc5487a0229548f08770282633ca34102612528f4f8bf1636c5ffaa18c449",
+     "n_chars": 9777,
+     "ids_sha256": "a1522f3262f0d33f8146b7585d55ef7ddf306b628672405dff662609e30a252c",
+     "n_tokens": 2531
+    },
+    "openai_schema": {
+     "ok": true,
+     "text_sha256": "8d26b62f1182d22e179340732c2cb8e312acef11980a2a8cb9b4d08bbdcc93de",
+     "n_chars": 9945,
+     "ids_sha256": "13db003a7b648e51b65dbf6bc68ff5f5993d35d0feb0bb3d9c79887e1ad9cb5d",
+     "n_tokens": 2578
+    }
+   }
+  },
+  "xlam-4": {
+   "stored_type": "str",
+   "parse_error": null,
+   "n_tools": 1,
+   "arms": {
+    "raw_string": {
+     "ok": false,
+     "error": "ValueError: Tools should either be a JSON schema, or a callable function with type hints and a docstring suitable for auto-conversion to a schema."
+    },
+    "no_tools": {
+     "ok": true,
+     "text_sha256": "70e390dda34b297a52ade0eb1dc52b7673038152d9bff7f1ba63be1519974cbb",
+     "n_chars": 585,
+     "ids_sha256": "08f223c85c6118742bc37da1250756b1cf19f2d0c32ea37cd12d15f2a4fbda3a",
+     "n_tokens": 132
+    },
+    "parsed_list": {
+     "ok": true,
+     "text_sha256": "d8babb6c03517b090ebe373f9068c4a4e4948dc7676b76a1f44ad122ca940d2d",
+     "n_chars": 1250,
+     "ids_sha256": "3a59b2610026fa2654f6afa839fd1a7705cfa8bb965ed325b81d37336d3e5b1e",
+     "n_tokens": 281
+    },
+    "openai_schema": {
+     "ok": true,
+     "text_sha256": "709e9a310e7f27f8094b67e78a30750bf5e01c3ef90c4d49eb9c3d14f46556f6",
+     "n_chars": 1334,
+     "ids_sha256": "09633fd077983ad286b0e0aad6f35c983359dd09822b2259e9aeccbde4196575",
+     "n_tokens": 304
+    }
+   }
+  },
+  "xlam-5": {
+   "stored_type": "str",
+   "parse_error": null,
+   "n_tools": 2,
+   "arms": {
+    "raw_string": {
+     "ok": false,
+     "error": "ValueError: Tools should either be a JSON schema, or a callable function with type hints and a docstring suitable for auto-conversion to a schema."
+    },
+    "no_tools": {
+     "ok": true,
+     "text_sha256": "eaa39b359a70676db12d2585fd1202a0f5c5b161a6db69cce868ba1ba25157f7",
+     "n_chars": 1148,
+     "ids_sha256": "44152b0aff4ef3242f2fd6e780129f04e89c6531a760f7ecf7daf807092b2858",
+     "n_tokens": 295
+    },
+    "parsed_list": {
+     "ok": true,
+     "text_sha256": "343c884859b1026cad6e79d61ae151687e819cecd3a00080ab44440aa0ad5214",
+     "n_chars": 2392,
+     "ids_sha256": "970f791b304c6f7291e7168eb2ad4969a41a879d2ac749ca6f74833a147fd146",
+     "n_tokens": 606
+    },
+    "openai_schema": {
+     "ok": true,
+     "text_sha256": "a001d93d9e5aa001a80176ff7a1d9daa4b350d8d2a3e4d21a40168e9ac794a68",
+     "n_chars": 2560,
+     "ids_sha256": "343d04b60d0593880c630280e73ac311a218cee6f0527355cbefbb3fc1cc91e5",
+     "n_tokens": 652
+    }
+   }
+  },
+  "xlam-6": {
+   "stored_type": "str",
+   "parse_error": null,
+   "n_tools": 3,
+   "arms": {
+    "raw_string": {
+     "ok": false,
+     "error": "ValueError: Tools should either be a JSON schema, or a callable function with type hints and a docstring suitable for auto-conversion to a schema."
+    },
+    "no_tools": {
+     "ok": true,
+     "text_sha256": "db2df2786421e9e27113674dff69882983368c95966858d1990380495ae81a58",
+     "n_chars": 1351,
+     "ids_sha256": "9137fe56949fb948204dd6eb61e7bfb7407d542fff683413ffe77d12d016a791",
+     "n_tokens": 336
+    },
+    "parsed_list": {
+     "ok": true,
+     "text_sha256": "e6cbebe050d6ea193cb1d20a534b34df06733a61dfa5e7909417f522bf2fc137",
+     "n_chars": 2778,
+     "ids_sha256": "63352054e84530c3284548d4626c0c9b8c759834a6e39151b27b34e727718e36",
+     "n_tokens": 687
+    },
+    "openai_schema": {
+     "ok": true,
+     "text_sha256": "63398ad459f78074664e28e2c55590b74607ded2171aaedd04c6b8075366c790",
+     "n_chars": 3030,
+     "ids_sha256": "757cdfc82d8586920a53de764c5a9fb2fc6c50f92875e1faedb541df716da4ab",
+     "n_tokens": 759
+    }
+   }
+  },
+  "xlam-7": {
+   "stored_type": "str",
+   "parse_error": null,
+   "n_tools": 1,
+   "arms": {
+    "raw_string": {
+     "ok": false,
+     "error": "ValueError: Tools should either be a JSON schema, or a callable function with type hints and a docstring suitable for auto-conversion to a schema."
+    },
+    "no_tools": {
+     "ok": true,
+     "text_sha256": "e8c90443df1a5bfd1872d965d0f432a828c3eaa957c66a0da9fb38c07fdf0c37",
+     "n_chars": 583,
+     "ids_sha256": "be9a7e3c19b3599e0ebd4841859a33a2b9043d7cf7deb8a93f02052c25c610e4",
+     "n_tokens": 143
+    },
+    "parsed_list": {
+     "ok": true,
+     "text_sha256": "91b40e0d046f20c0c701524aee1553a0872636b2f2dbb3ad5786d8cf3d27e75f",
+     "n_chars": 1210,
+     "ids_sha256": "f9ae60597dcee74d1a0614f39bb9e65c27ae42aabc47d3f9ac5838e998fa8db4",
+     "n_tokens": 282
+    },
+    "openai_schema": {
+     "ok": true,
+     "text_sha256": "f69bfa05cb38d7b106777e12dbae93fe3446b9b4b268cbe90f9cbe3fd60cab0c",
+     "n_chars": 1294,
+     "ids_sha256": "53cf9d05511ab5f094dfce54d2d96343367ffc76a4f405afd6b62b330a214bb4",
+     "n_tokens": 305
+    }
+   }
+  },
+  "xlam-8": {
+   "stored_type": "str",
+   "parse_error": null,
+   "n_tools": 2,
+   "arms": {
+    "raw_string": {
+     "ok": false,
+     "error": "ValueError: Tools should either be a JSON schema, or a callable function with type hints and a docstring suitable for auto-conversion to a schema."
+    },
+    "no_tools": {
+     "ok": true,
+     "text_sha256": "2c1617a38a847ad3f7018aca707f4d23ae21475f408a5c23816807042e553ddb",
+     "n_chars": 940,
+     "ids_sha256": "7bd2c2b9bab1cb567e2ded08fa7808d0975085140ff3a68732150fb677e5ff29",
+     "n_tokens": 257
+    },
+    "parsed_list": {
+     "ok": true,
+     "text_sha256": "1bd4f2e4a65c4882cd5700cfd99c09ce4a3e2722f8d9c265bc9b78bf212a27e0",
+     "n_chars": 1928,
+     "ids_sha256": "85d06559d6a826969b60103dc821d7ad2c6c482ae17c27778db659e47383f945",
+     "n_tokens": 509
+    },
+    "openai_schema": {
+     "ok": true,
+     "text_sha256": "ec16bea8b84b9d6de6855c6784a5148868599bc6ea439a48e8bbd7df19a00ad2",
+     "n_chars": 2102,
+     "ids_sha256": "1086a983062622bf4a6432f9d52d684d8d40660636c4dc732205c3a00df17113",
+     "n_tokens": 558
+    }
+   }
+  },
+  "xlam-9": {
+   "stored_type": "str",
+   "parse_error": null,
+   "n_tools": 1,
+   "arms": {
+    "raw_string": {
+     "ok": false,
+     "error": "ValueError: Tools should either be a JSON schema, or a callable function with type hints and a docstring suitable for auto-conversion to a schema."
+    },
+    "no_tools": {
+     "ok": true,
+     "text_sha256": "3d750f89637c5b20801c19adc68c57cf3938da872ef6afa12d98a9d0ce3ba20b",
+     "n_chars": 987,
+     "ids_sha256": "bfb0947920395a656930921633902d2a2624fbd3d278226d034efdb50fff730e",
+     "n_tokens": 251
+    },
+    "parsed_list": {
+     "ok": true,
+     "text_sha256": "491b23dbb5ae942c02062ffe7e796faab4fef43bdc6a03d8783d7c8dda7734bc",
+     "n_chars": 2043,
+     "ids_sha256": "efe54029cf5315f619f09e6d9a1ca97d637da534353fabc1f42dba9fa46ea1a3",
+     "n_tokens": 510
+    },
+    "openai_schema": {
+     "ok": true,
+     "text_sha256": "0d0a8288749886ac3747adaf64ed86d446dfef2c320fe130d412b49d41187247",
+     "n_chars": 2127,
+     "ids_sha256": "2b1a14a8ac7a14b58e99c5595b08123fcc46186364a79d7b5e52766000d5a67b",
+     "n_tokens": 533
+    }
+   }
+  }
+ },
+ "note": "full-subset audit: all 20 frozen tool items rendered under every candidate form. Prompt bodies are kept only for the first item; every item retains its text and token-id hashes, which is what the equivalence question is decided on."
+}

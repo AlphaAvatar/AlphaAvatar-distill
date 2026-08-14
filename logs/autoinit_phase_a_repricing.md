@@ -1,0 +1,106 @@
+# Phase A repricing from measured Stage-1/Stage-2 values
+
+Supersedes the cost table in
+[`autoinit_pilot_proposal.md`](autoinit_pilot_proposal.md) §5, whose ranges came
+from an unmeasured statistics-pass split and a **stated, not measured** 1.20
+overhead factor. Both are now measured. L40S at $0.99/h throughout.
+
+## The two `gpu_fraction` measurements: both valid, both kept
+
+They are **not** a correction of one another. Same script, same frozen mixture
+(59,763 tokens, 892 seq_len, 66 sequences, 3 repeats), same device class, same
+image tag and driver (`@580.126.09`), identical peak memory (13.98 GiB) — two
+different physical hosts.
+
+| | attempt 3 (`6xrudht3i7wc62`) | attempt 4 (`hwyay7b9df9e77`) | pooled |
+| --- | ---: | ---: | ---: |
+| GPU forward, mean | 4.657 s | 4.153 s | 4.405 s |
+| CPU float64 accumulate, mean | 3.645 s | 3.868 s | 3.757 s |
+| total per pass | 8.303 s | 8.021 s | 8.162 s |
+| **`gpu_fraction`** | **0.5609** | **0.5177** | **0.5397** |
+| s / 1k tokens | 0.1389 | 0.1342 | 0.1366 |
+
+The *split* varies by 4.3 points across hosts while the *total* varies by 3.5%.
+The faster-GPU host spent proportionally more time on the CPU term, which is the
+behaviour the measurement was commissioned to expose: **the CPU term does not
+shrink with a faster GPU.**
+
+**For repricing, use the total (8.02–8.30 s per pass, pooled 8.16 s), not the
+fraction.** The fraction is reported as a **range, 0.5177–0.5609**, and is what
+answers the design question "would a faster accelerator help" — answer: at most
+about half of this pass, and the observed spread already spans much of the
+plausible gain. Neither figure replaces the other and neither is an average of
+record; both are in
+[`autoinit_preflight_run4/`](autoinit_preflight_run4/preflight_evidence.json) and
+attempt 3's session store.
+
+## Measured inputs now available
+
+| quantity | old basis | measured | source |
+| --- | --- | --- | --- |
+| 0.86M recovery probe, end to end | 1023 × 4.15 s × 1.20 = 84.9 min | **61.55 min** (61.6 / 61.5, two arms) | attempt 4 Stage 2 |
+| training step time | 4.15 s (E6b) | **3.15 s** in-loop | attempt 4 train logs |
+| activation-statistics pass | unmeasured, drove a 3.6× range | **8.02–8.30 s** per 59,763-token mixture | attempts 3 and 4 |
+| state evaluation on `state_eval_v1` | unmeasured | **≈2.6 min** (10 evaluations inside a 30.2 min Stage 1) | attempts 3 and 4 |
+| peak GPU resident, widest operator | 14.3 GiB derived | **13.98 GiB** | attempts 3 and 4 |
+| battery evaluation of one checkpoint | $0.236 (E6, different battery) | **still unmeasured** — Stage 3 has never completed | — |
+| operator build (SVD/PCA/selection) compute | inside the old range | **still unmeasured** | — |
+
+The 1.20 overhead factor is retired: the 61.55 min figure is wall clock including
+periodic evaluation and checkpointing, measured twice on the arms this prices.
+
+## Repriced
+
+| item | expected | hard |
+| --- | ---: | ---: |
+| Phase A search (beam 6, warmup 1, 1 profile, 39–56 states) | $1.76 | $3.00 |
+| Recovery rungs 1+2 (9 probes) | $11.26 | $11.26 |
+| Conditional third seed (3 probes) | $0.00 | $3.75 |
+| Setup / redraw reserve | $0.00 | $3.00 |
+| **total** | **$13.02** | **$21.01** |
+
+Probe price is now 61.55 min × $0.99/h = $1.0156, plus $0.236 per battery
+evaluation carried unchanged from E6 **and still unmeasured for this battery**.
+Search cost is 39–56 states × (≈2.6 min evaluation + ≈8 s statistics) with the
+operator build unmeasured and covered by the gap to the hard column. The reserve
+stays at $3.00: three of this week's four sessions hit an infrastructure event
+(a cold draw cost $0.41 by itself), and setup has varied 30× historically.
+
+Against the old **$17.00 / $26.21**, this is **$13.02 / $21.01** — the reduction
+is almost entirely the probe, which is 27% cheaper than priced because it runs at
+3.15 s/step rather than 4.15.
+
+## Budget position
+
+```
+authorized cumulative cap                       $211.07
+actual cumulative spend                         $187.4402
+unused                                          $ 23.6298
+Phase A hard backstop, repriced                 $ 21.01     fits, margin $2.62
+Stage-3 completion of the existing controls     not included below; see the plan
+```
+
+**The margin is thin and Phase A is not authorized.** A Phase-A authorization
+should be decided against this table, not against the superseded one, and should
+account separately for finishing Stage 3 on the two existing controls.
+
+## Finishing Stage 3 on the existing controls: what it costs
+
+The controls are on the dev box (`/home/ecs-user/aad-artifacts/autoinit/`,
+2.3 GB of weights each). They must reach a pod, and the dev-box uplink is
+0.72 MB/s, so the transfer is ~53 min **per checkpoint** — free if it happens to
+the relay before a pod exists, paid pod time if it happens while one is running.
+
+    stage the two `model/` directories to the relay   $0.00, ~1.8 h of uplink
+    pod: setup                                        ~$0.11 warm, $0.52 observed
+    pod: pull both checkpoints from the relay         ~$0.05
+    pod: Stage-0 re-attestation of generation only    ~$0.05
+    pod: two generation waves + scoring               ~$0.35, UNMEASURED
+    reserve for one redraw                            ~$0.50
+    ------------------------------------------------------------------
+    expected ~$0.6, hard ~$1.6
+
+This is the only spend that should be considered until the tool-rendering
+migration question in
+[`autoinit_tool_rendering_migration.md`](autoinit_tool_rendering_migration.md) is
+decided, because generation cannot run before it is.

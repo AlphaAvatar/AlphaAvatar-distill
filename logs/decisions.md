@@ -1,5 +1,25 @@
 # Decision records
 
+## 2026-08-14 — Tool rendering: the historical arm does not exist; STOPPED for a decision
+
+The $0 full-subset audit ran (`scripts/autoinit/audit_tool_rendering.py`, all 20 frozen tool items, both libraries). It did not answer the question it was set, because **the question's first arm cannot be constructed**, and that is the finding.
+
+- **transformers 4.57.1 cannot load this checkpoint's tokenizer at all** — `AttributeError: 'list' object has no attribute 'keys'` in `_set_model_specific_special_tokens`. A second 4.x incompatibility, independent of the known RoPE misreading. No 4.x rendering of anything is obtainable here.
+- **No historical evaluation ran under 4.x.** `logs/e6_results.json` records `transformers 5.14.1` for every E6 arm. My earlier statement that historical tool evaluations ran under 4.x was an inference from older runs working, and it is **wrong**; it is corrected in STATE and in the migration note.
+- **This battery's tool prompts have never been rendered.** `recovery_search_v1` was built 2026-08-12 and its first evaluation attempt crashed on the first tool prompt. There are no historical tool scores from it to preserve comparability with.
+- **Measured, all 20 items, transformers 5.13.1:** the stored value renders **0/20** (`ValueError: Tools should either be a JSON schema…`, the same failure as the pod's 5.15.0); `json.loads` → xLAM list renders 20/20; converted to the project's OpenAI-style form renders 20/20; **the two renderable forms share 0/20 token-id hashes** (272 vs 296 tokens on the first item).
+- **Root cause is the asset, not the library.** `recovery_search_v1` is the only tool asset in this repository storing `tools` as a JSON string of xLAM objects; every `data/stage2*/…/tool_calling.jsonl` stores a list of OpenAI-style entries. The builder copied the upstream column verbatim.
+- **Decision: none taken.** The equivalence test that would have authorised a silent compatibility adapter cannot be satisfied by any option, because there is nothing to be equivalent *to*. What remains is a choice about what the model is shown in every tool prompt, which moves the `tool` capability that `recovery_search_scoring@v2` exists to measure. Options A (parse only — literal to the asset, diverges from the training distribution), B (parse and convert — matches training and every other asset, adds a documented transformation and a `required` judgement), C (rebuild the asset — changes `content_sha256 a1b22778…`, needs the preregistration, setup gate and scoring contract re-emitted). Recorded in [`autoinit_tool_rendering_migration.md`](autoinit_tool_rendering_migration.md) and left to the maintainer.
+- **Ruled out:** pinning the evaluator to 4.x (cannot load the tokenizer, misreads RoPE 500×, and `transformers_version` is material generation identity) and editing the frozen asset in place to satisfy an API.
+- **The Stage-2 controls are untouched by any of this** and must not be retrained. Whichever option is chosen changes `uncapped_eval.py` and therefore `generation_source_digest`, so the generation protocol is re-attested at Stage 0 before Stage 3 — a Stage-0/3 re-attestation, not a Stage-2 invalidation.
+
+## 2026-08-14 — Both `gpu_fraction` measurements are kept; Phase A repriced
+
+- **`0.5609` (attempt 3) and `0.5177` (attempt 4) are both valid.** Same script, same frozen mixture and parameters, same image tag and driver, identical peak memory — two different physical hosts. The *split* moves 4.3 points while the *total pass* moves 3.5% (8.303 s vs 8.021 s), and the faster-GPU host spent proportionally more time on the CPU term. Neither replaces the other; the pair is recorded as a **range** with its pooled value (0.5397), and repricing uses the **total**, not the fraction. [`autoinit_phase_a_repricing.md`](autoinit_phase_a_repricing.md).
+- **Phase A repriced from measured values: $13.02 expected / $21.01 hard**, against the superseded $17.00 / $26.21. The reduction is almost entirely the probe: 61.55 min measured end-to-end (twice) against a priced 84.9 min, because the arm runs at 3.15 s/step rather than 4.15. The 1.20 overhead factor is retired — the measurement subsumes it.
+- **Still unmeasured and labelled as such:** the battery evaluation cost for *this* battery (Stage 3 has never completed; the $0.236 carried from E6 is a different battery) and operator build compute. Both are covered by the gap to the hard column, not hidden in the expected one.
+- **Against $23.6298 of unused authorization the repriced hard backstop leaves $2.62.** Thin. Phase A remains unauthorized and should be decided against this table.
+
 ## 2026-08-14 — Attempt 4: controls retrieved and verified; Stage 3 blocked on tool rendering
 
 **Both permanent controls now exist on the dev box, hash-verified.** Pod `hwyay7b9df9e77`, 217.9 min, $3.60, deleted and provider-confirmed gone. The retention fixes worked: `manifest rc=0` for the first time in this project's preflight history (40 files, 12 classes), and both checkpoints transferred at 5.51 and 5.50 GiB with `rc=0`.
