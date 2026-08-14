@@ -8,3 +8,5 @@ f3e8ae01ce027763bba65408183520e35e96646e149d24cb120f80b0a0cf340f  transfer/aad_a
 ace19d0b89185d310bce6251d4ed997c79face1eaed3e8ef8354e3e5392d3d19  transfer/aad_autoinit_d217977d.bundle  # continuation session, commit d217977d2a7250eb4eeb389e04a0da291500a5a0
 25d2ad0567496ae2fe49ec18ca53a0cbeb3667b46b36d767e802d6af8ddbc322  transfer/aad_autoinit_001f069f.bundle  # continuation session FINAL, commit 001f069f7cb9590506e25ca1167ed7b8213bd21d (carries the authorization)
 4bd3426487d25cb165c379803976132082cce932bdb143eeef439e8f1e7f55db  transfer/aad_autoinit_1e7f347b.bundle  # continuation session FINAL, commit 1e7f347bdea203c39a16c7e0448a1656b7157cac, harness 060b6053…, auth 938078e5…
+c308943689d1244265195919f04522257b9840d5cee81f7ee23cf9d7d083a4ea  transfer/aad_autoinit_94cdcd26.bundle  # continuation attempt 3, session checkout commit 94cdcd2665b29734d92f2bdd4337fc1e7b346ad8, harness e177840d…, auth f1dc6896…, pooled_counts@v2, offline wheelhouse
+3.82 GiB / 85 wheels  transfer/wheelhouse_cu128_cp312/  # cp312 manylinux x86_64 from uv-cu128.lock; verified byte-for-byte on the relay 2026-08-15
