@@ -995,6 +995,109 @@ def test_the_paid_setup_contains_no_pypi_on_its_critical_path():
     assert "UV_STALL_LIMIT" not in setup
 
 
+def test_the_vllm_wheelhouse_is_frozen_by_bytes_not_only_by_version():
+    """A version pin names a file; it does not fix the file's contents.
+
+    The relay is a mutable path. A pin says `vllm==0.27.1`; it does not say
+    which bytes the pod installed, and the run that matters produces permanent
+    canonical artifacts. It is also the concrete failure already seen: the quota
+    stopped the upload at 175 of 196 wheels, and a wheelhouse that is merely
+    *short* installs nothing at all only if something counts it.
+
+    So the manifest is committed and the pod verifies every wheel against it
+    before the venv exists. Asserted here in the order it must run, because a
+    check after the install would be checking bytes that had already executed.
+    """
+    import hashlib
+    import json
+    import re
+
+    manifest = json.loads((REPO / "wheelhouse_vllm_sha256.json").read_text())
+    wheels = manifest["wheels"]
+    pins = [m.group(1).lower().replace("_", "-") for m in re.finditer(
+        r"(?m)^([A-Za-z0-9._-]+)==", (REPO / "requirements-vllm.txt").read_text())]
+    assert len(wheels) == len(pins) == 196
+    # Every pin is covered, and nothing beyond them is: an extra wheel on the
+    # relay is an unreviewed input, not a harmless spare.
+    named = {w["file"].split("-")[0].lower().replace("_", "-") for w in wheels}
+    assert named == set(pins)
+    for w in wheels:
+        assert w["file"].endswith(".whl")
+        assert re.fullmatch(r"[0-9a-f]{64}", w["sha256"])
+        assert w["bytes"] > 0
+
+    # The manifest is self-describing: an edit to it is detectable without
+    # re-downloading 3.6 GiB. The formula is recorded IN the file, because the
+    # first version of this hash could not be reproduced by any formula — a
+    # pinned hash whose input is unrecorded pins nothing.
+    from aadistill.infrastructure.manifest import sha256_json
+    assert "sha256_json" in manifest["hash_formula"]
+    body = {k: v for k, v in manifest.items()
+            if k not in ("manifest_sha256", "hash_formula")}
+    assert manifest["manifest_sha256"] == sha256_json(body)
+
+    setup = (REPO / "scripts/pod/autoinit_preflight_setup.sh").read_text()
+    assert "wheelhouse_vllm_sha256.json" in setup
+    # Before the environment is built from those bytes, not after.
+    assert setup.index("VLLM_WHEELHOUSE_HASH_MISMATCH") < setup.index(
+        "uv venv /opt/vllm"), "verification must precede the install it guards"
+
+    # And it is EXECUTED here, not pattern-matched. The guard is extracted from
+    # the real script and run under the same `set -euo pipefail` the pod uses,
+    # against a synthetic two-wheel house: this caught the guard sitting after
+    # the heredoc, where `set -e` killed the script at the python call and the
+    # marker the launcher classifies by was never written.
+    import subprocess
+    import tempfile
+    lines = setup.splitlines(True)
+    start = next(i for i, l in enumerate(lines)
+                 if l.startswith('python3 - "$WH_VLLM"'))
+    end = next(i for i, l in enumerate(lines) if l.rstrip() == "VERIFYWHEELEOF")
+    harness = ('set -euo pipefail\n'
+               'say() { echo "  $*"; }\n'
+               'mark() { echo "$*" >> "$REPO/logs/markers"; }\n'
+               'WH_VLLM="$1"; REPO="$2"\n'
+               + "".join(lines[start:end + 1]) + 'say REACHED_THE_INSTALL\n')
+
+    with tempfile.TemporaryDirectory() as tmp:
+        root = Path(tmp)
+        (root / "wh").mkdir()
+        (root / "repo" / "logs").mkdir(parents=True)
+        blobs = {n: n.encode() * 64 for n in ("alpha-1.0-py3-none-any.whl",
+                                              "beta-2.0-py3-none-any.whl")}
+        for name, blob in blobs.items():
+            (root / "wh" / name).write_bytes(blob)
+        tiny = {"n_wheels": len(blobs),
+                "wheels": [{"file": n,
+                            "sha256": hashlib.sha256(b).hexdigest(),
+                            "bytes": len(b)} for n, b in sorted(blobs.items())]}
+        (root / "repo" / "wheelhouse_vllm_sha256.json").write_text(
+            json.dumps(tiny))
+        (root / "run.sh").write_text(harness)
+
+        def run() -> subprocess.CompletedProcess:
+            return subprocess.run(["bash", str(root / "run.sh"),
+                                   str(root / "wh"), str(root / "repo")],
+                                  capture_output=True, text=True)
+
+        ok = run()
+        assert ok.returncode == 0, ok.stdout + ok.stderr
+        assert "REACHED_THE_INSTALL" in ok.stdout
+
+        # A truncated wheel: the install must not be reached, the exit code must
+        # be the one the launcher expects, and the marker must exist.
+        (root / "wh" / "beta-2.0-py3-none-any.whl").write_bytes(b"x")
+        bad = run()
+        assert bad.returncode == 96, f"rc={bad.returncode}: {bad.stdout}"
+        assert "REACHED_THE_INSTALL" not in bad.stdout
+        assert (root / "repo" / "logs" / "markers").read_text().strip() == (
+            "VLLM_WHEELHOUSE_HASH_MISMATCH")
+
+        # A missing wheel: the exact shape the relay quota produced at 175/196.
+        (root / "wh" / "beta-2.0-py3-none-any.whl").unlink()
+        assert run().returncode == 96
+
+
 def test_the_committed_cu128_lock_is_the_one_the_pods_actually_ran():
     """The lock is reviewed, not resolved on the pod. Its pins are the observed ones."""
     import tomllib

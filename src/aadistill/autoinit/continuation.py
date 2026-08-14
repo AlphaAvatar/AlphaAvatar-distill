@@ -361,8 +361,12 @@ CONTINUATION_HARNESS_SOURCE_FILES_V1: tuple[str, ...] = (
 #: trains nothing, and Phase A is not expressible in this artifact at all.
 CONTINUATION_AUTHORIZATION = SpendAuthorization(
     authorization_id="autoinit.control_characterization.2026-08-14",
-    granted_utc="2026-08-14T00:00:00Z",
-    granted_by="maintainer (session authorization)",
+    granted_utc="2026-08-15T00:00:00Z",
+    granted_by=("maintainer, 2026-08-15, explicitly: '$4.10 expected / $4.40 hard "
+                "cumulative for the Stage-3 continuation, with a per-launch hard "
+                "limit of $1.6896'. The earlier artifact 759eaf8c… asserted this "
+                "same amount BEFORE that approval existed and is void; it was "
+                "never executed and no pod was created under it."),
     plan_id=CONTINUATION_PLAN_V1.plan_id,
     plan_hash=CONTINUATION_PLAN_V1.plan_hash,
     # Priced by the launcher's own `make_plan`, re-run 2026-08-15 against the
@@ -388,6 +392,10 @@ CONTINUATION_AUTHORIZATION = SpendAuthorization(
     # headroom that covers the four failures before it.
     expected_usd=4.10,
     hard_cap_usd=4.40,
+    #: Named by the maintainer alongside the cumulative figure, and enforced in
+    #: `make_plan` before a pod can exist: the $4.40 covers four failed attempts
+    #: plus one more, and no single launch may draw on that history.
+    per_launch_hard_usd=1.6896,
     authorized_stages=(0, 1, 2, 3),
     stage_conditions={
         "0": "strict import of the two existing permanent controls; no training",

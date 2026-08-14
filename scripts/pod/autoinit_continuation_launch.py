@@ -148,6 +148,8 @@ class Continuation(_preflight.Preflight):
         try:
             self.auth.require_within_cap(self.plan.hard_terminate_usd,
                                          what="planned hard threshold")
+            self.auth.require_within_launch_limit(self.plan.hard_terminate_usd,
+                                                  what="planned hard threshold")
         except _preflight.AuthorizationError as exc:
             self.say(f"ABORT: {exc}")
             return False

@@ -270,8 +270,45 @@ mkdir -p "$WH_VLLM"
 cp /workspace/whv/transfer/wheelhouse_vllm_cp312/*.whl "$WH_VLLM"/ 2>/dev/null || true
 NWHLV=$(ls "$WH_VLLM"/*.whl 2>/dev/null | wc -l)
 say "vllm wheelhouse: ${NWHLV} wheels, $(du -sh "$WH_VLLM" | cut -f1)"
-[ "$NWHLV" -ge 196 ] || { say "VLLM WHEELHOUSE TOO SMALL (${NWHLV} wheels)"; \
-  mark "VLLM_WHEELHOUSE_INCOMPLETE:${NWHLV}"; exit 96; }
+# Count, then BYTES. A version pin says which release; the manifest says which
+# file. Verified before the install, so a truncated, re-uploaded or partial
+# wheelhouse cannot reach a paid run — the 175/196 partial that the relay quota
+# produced is exactly the state this refuses.
+# `|| { ... }` on the command line, not `[ $? -eq 0 ]` after the heredoc: this
+# script runs under `set -e`, so a failing python3 would kill it at this line
+# and the marker below would never be written. The launcher classifies by
+# marker, so that would have reported an unclassified death instead of a
+# wheelhouse mismatch.
+# The guard is one logical line: the heredoc body starts at the first
+# unescaped newline, so a `{ ... }` group broken across two lines would have
+# its closing brace read as python source, and the file would not parse at all.
+python3 - "$WH_VLLM" "$REPO/wheelhouse_vllm_sha256.json" <<'VERIFYWHEELEOF' \
+  || { say "VLLM WHEELHOUSE DOES NOT MATCH ITS FROZEN HASHES"; mark "VLLM_WHEELHOUSE_HASH_MISMATCH"; exit 96; }
+import hashlib, json, pathlib, sys
+wh, man = pathlib.Path(sys.argv[1]), json.load(open(sys.argv[2]))
+problems, checked = [], 0
+for row in man["wheels"]:
+    p = wh / row["file"]
+    if not p.is_file():
+        problems.append(f"MISSING {row['file']}"); continue
+    if p.stat().st_size != row["bytes"]:
+        problems.append(f"SIZE {row['file']}"); continue
+    h = hashlib.sha256()
+    with p.open("rb") as f:
+        for b in iter(lambda: f.read(1 << 24), b""):
+            h.update(b)
+    if h.hexdigest() != row["sha256"]:
+        problems.append(f"SHA256 {row['file']}")
+    checked += 1
+extra = sorted({p.name for p in wh.glob("*.whl")} - {r["file"] for r in man["wheels"]})
+print(f"wheelhouse verified {checked}/{man['n_wheels']} against "
+      f"{sys.argv[2].rsplit('/', 1)[-1]}", flush=True)
+if extra:
+    problems.append(f"UNDECLARED {extra[:5]}")
+if problems:
+    print("WHEELHOUSE VERIFICATION FAILED:", *problems[:10], sep="\n  ", flush=True)
+    sys.exit(1)
+VERIFYWHEELEOF
 tv0=$(date -u +%s)
 uv venv /opt/vllm --python 3.12 \
   || { say "COULD NOT CREATE /opt/vllm ON PYTHON 3.12"; mark "PY312_MISSING"; exit 94; }

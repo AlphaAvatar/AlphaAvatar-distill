@@ -92,6 +92,10 @@ class SpendAuthorization:
     #: preflight's files and happily admit an edited continuation driver. The
     #: default keeps every existing artifact byte-identical.
     harness_source_files: tuple[str, ...] = HARNESS_SOURCE_FILES_V1
+    #: A ceiling on ONE launch, separate from the cumulative cap. The cumulative
+    #: cap covers an effort that has already failed several times; without this,
+    #: a single run could spend the whole of it. Named by the maintainer.
+    per_launch_hard_usd: float | None = None
     #: Provenance only, never enforced.
     provenance_commit: str | None = None
     version: int = 1
@@ -125,6 +129,7 @@ class SpendAuthorization:
             "authorized_session_commit": self.authorized_session_commit,
             "harness_source_digest": self.harness_source_digest,
             "harness_source_files": list(self.harness_source_files),
+            "per_launch_hard_usd": self.per_launch_hard_usd,
             "provenance_commit": self.provenance_commit,
             "enforcement": (
                 "the launcher loads this artifact and refuses to create a pod "
@@ -177,6 +182,17 @@ class SpendAuthorization:
                 "harness against a paid authorization.")
         return observed
 
+    def require_within_launch_limit(self, hard_usd: float, *, what: str = "") -> None:
+        """One launch may not spend the cumulative allowance of several."""
+        if self.per_launch_hard_usd is None:
+            return
+        if hard_usd > self.per_launch_hard_usd:
+            raise AuthorizationError(
+                f"{what or 'planned hard threshold'} ${hard_usd:.4f} exceeds the "
+                f"per-launch limit ${self.per_launch_hard_usd:.4f}. The "
+                f"cumulative cap ${self.hard_cap_usd:.2f} covers an effort that "
+                "has already failed several times; it is not one run's budget.")
+
     def refuse_phase_a(self) -> None:
         raise AuthorizationError(
             "Phase A is separately unauthorized and is not reachable from the "
@@ -209,6 +225,7 @@ class SpendAuthorization:
             harness_source_digest=raw.get("harness_source_digest"),
             harness_source_files=tuple(raw.get("harness_source_files")
                                        or HARNESS_SOURCE_FILES_V1),
+            per_launch_hard_usd=raw.get("per_launch_hard_usd"),
             provenance_commit=raw.get("provenance_commit"),
             version=int(raw.get("version", 1)))
 
