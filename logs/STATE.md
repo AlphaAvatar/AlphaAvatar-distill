@@ -1,5 +1,5 @@
-**Updated:** 2026-08-14 · branch `main` · working tree clean
-**No pods running. Nothing billing.** **1,622 CPU tests pass**, 7 skipped; 1,598 under the pod simulator.
+**Updated:** 2026-08-15 · branch `main` · working tree clean
+**No pods running. Nothing billing.** **1,630 CPU tests pass**, 7 skipped; 1,606 under the pod simulator.
 
 ## The two permanent canonical controls EXIST and are hash-verified
 
@@ -62,93 +62,87 @@ every item. Input is now normalized through `normalize_tools`, which reads eithe
 representation and fails closed. **Semantics unchanged and measured:** nine
 policies × 190 prompts reproduce every number of the pre-migration record.
 
-## The continuation is executable and BLOCKED ON HOST QUALITY (2026-08-14)
+## Ready to run, BLOCKED ON RELAY STORAGE (2026-08-15)
 
-**Two paid attempts, $1.2712, zero driver stages reached. Nothing is running.**
-Both pods were torn down with provider confirmation; `LIVE PODS: NONE`.
+**Nothing running, nothing billing.** Four paid attempts, **$2.7051**, zero
+driver stages. Every pod torn down with provider confirmation.
 
-**Executable identity, verified from inside the bundle the pod fetches** (cloned,
-checked out, re-digested — not asserted from the dev box):
+### The offline setup works — measured on hardware, not estimated
 
-| what | value |
+| | |
 | --- | --- |
-| session commit | `6ba7cce9872e32603a69ab7fbf24fe94ac804ec8` |
-| continuation harness digest | `a76f7416…` over its **own** ten files |
-| authorization | `dfb09243…`, `autoinit.control_characterization.2026-08-14` |
-| plan | `CONTINUATION_PLAN_V1` = `c7754ca5…` |
-| relay bundle | `transfer/aad_autoinit_6ba7cce9.bundle`, sha `b407dd84…` |
-| budget | expected **$1.97**, cap **$2.30** (raised from $1.75 with approval), one session still self-limits at soft $1.4702 / hard $1.6352 |
-| spent / remaining | **$1.2712 / $1.0288** — less than one attempt's hard threshold |
+| train env, offline, **on the pod** | **11 s** (attempt 4) vs 45 s best-case online vs 8-28 min cold trips |
+| vLLM env, offline, on the dev box | **33 s** for 196 packages |
+| vLLM versions installed | `torch 2.13.0+cu130`, `transformers 5.15.0`, `vllm 0.27.1` — **byte-for-byte what the 2026-08-14 pod observed** |
 
-### What blocks it: the host pool, not the harness
+Both environments are pinned and installed `--offline --no-index`:
+`uv-cu128.lock` + `requirements-cu128.txt` for `/opt/train`,
+`requirements-vllm.txt` (196 pins from `uv pip compile vllm==0.27.1`) for
+`/opt/vllm`. They stay **separate**, which the pins now make explicit. Every
+network install is gone from setup: `uv lock`, `uv sync`, `pip install vllm`,
+`pip install --upgrade pip`. **Pinning does not replace observing** — the engine
+probe still reports the vLLM/torch/dtype/context/stop-token values that actually
+loaded, and the driver still attests the observed generation protocol.
 
-Five draws, four cold — every trip in the **`uv sync`** window, never the test
-timeout. The one healthy host completed the same sync in **45 seconds**; the
-others were killed at 8, 14 and 28 minutes. ~2 GB of wheels are resolved and
-downloaded from PyPI on **every run**, so a cold host is indistinguishable from a
-slow one until the setup is already paid for. Full table and the fix options —
-baked image, relay wheelhouse, different pool — in
-[`decisions.md`](decisions.md). **Do not draw again before `uv sync` is off the
-paid critical path**; at ~$0.25 per abandoned draw and a ~20% observed win rate,
-a further attempt is buying lottery tickets.
+### What blocks the next run: the relay is full
 
-### Five harness defects were found by EXECUTING it, and are fixed
+**The provider says so directly** — not an inference any more:
+`Private repository storage limit reached, please upgrade your plan`.
 
-None was visible in a source read; each was reachable only on a paid pod
-([`decisions.md`](decisions.md)):
+```
+relay tracked            93.22 GiB   (the ~93.13 GiB ceiling is now CONFIRMED)
+vLLM wheels landed      175 of 196   2.55 GiB
+still needed             21 wheels   1.07 GiB  — torch, vllm, triton among them
+SHORT BY                             1.15 GiB
+```
 
-1. `make_plan` raised `BudgetError` on its own arguments — **every** launch would
-   have died before a pod could exist. No test had called it.
-2. `require_harness` digested the **preflight's** file set, so the continuation
-   launcher, driver and plan module were outside the authorization.
-3. `relay_precheck` never looked for the staged controls — this session's entire
-   input — so an unstaged control surfaced only after paid setup.
-4. Collection was preflight-shaped: a **successful** continuation would have
-   failed its own manifest, **blocked teardown**, and billed to the hard
-   threshold. The poll loop watched `PREFLIGHT_*` while the driver emits
-   `CONTINUATION_*`.
-5. The relay transport read `os.environ['HF_TOKEN']` in a fresh ssh session,
-   where setup's exported token does not exist.
+Merging the two wheelhouses does not help: they share **32 files, 0.02 GiB** —
+different CUDA majors, different torch, different transformers. The setup's
+`>= 196` guard means the partial wheelhouse fails **loudly**, never silently.
 
-Plus `verify_session_commit`, which proves at **$0** that the commit the pod will
-check out digests to the authorized harness and carries the exact authorization
-the driver loads — `authorized_session_commit` was previously recorded and never
-enforced.
+Reclaim candidates are visible and each is larger than the shortfall — several
+2.23 GiB historical stage3 checkpoints (`s2v1_*`, `kdconf_*`, `e1_scaling_*`).
+**Nothing was deleted:** removing project artifacts is the maintainer's call.
 
-**And one that cost $0.63 to learn:** `tests/autoinit/test_frozen_assets.py` and
-`tests/autoinit/test_recovery_search_scoring.py` still read
-`recovery_search_v1`, which the v2 migration stopped staging. The dev box has v1
-on disk, so the suite passed here and **could not** pass on a pod, whose blocking
-test gate failed seven tests. Both now read v2;
-`simulate_pod_env.sh` hides v1 by default, with the rule written down: **when an
-asset stops being staged, add it to the simulator in the same commit.**
+### Frozen and ready the moment storage is resolved
 
-**1,622 tests pass locally; 1,598 pass under the pod-layout simulator running the
-pod's exact command.** Stage 3's aggregation is now rehearsed against the real
-scorer's output — that consumer had never run, because the preflight never
-reached Stage 3.
+| identity | value |
+| --- | --- |
+| session **checkout** commit (what the pod clones) | `13c3a69b6a1287bfbf0f964008e5851243f53a9c` |
+| `authorized_session_commit` (parent; the artifact is written before it is committed) | `6a1e7b7…` |
+| authorized **harness digest** (stable across both) | `648a6b6c…` |
+| authorization | `759eaf8c…` |
+| plan | `79da6d7a…` |
+| bundle | `transfer/aad_autoinit_13c3a69b.bundle`, sha `fb1ee411…` |
+| aggregation | `pooled_counts@v2` |
 
-**The $8.60 stages-0-3 authorization is retired** and deliberately not re-issued:
-re-issuing would silently restore permission to retrain the controls.
+Verified by cloning that bundle and re-deriving everything inside it.
 
-**The controls are untouched, trained, verified, and staged.** `sa`
-`573847a730c1a4997a2f…` and `sb` `4c6adcf8618716902d76…` are on the relay under
-`permanent_controls/`, each re-downloaded and re-hashed after upload
-(`all_verified: true`). Characterization remains **outstanding**.
+### Budget
+
+```
+project cumulative                                   $190.1453
+remaining under the $211.07 cap                      $ 20.9247
+one newly-priced attempt   expected $1.3860 · soft $1.5246 · hard $1.6896
+requested CUMULATIVE continuation authorization      $   4.40
+    = $2.7051 already spent + one hard attempt.  NOT GRANTED YET.
+```
+
+**Phase A no longer fits and this is now a real gate.** Its provisional hard
+`$21.01` already exceeds the `$20.9247` remaining, before another continuation
+attempt. After one, ~`$19.24` would remain. Phase A must be re-priced from the
+**measured** battery wall time that Stage 3 has still never produced, and the
+result has to fit the remaining project budget — or the project cap has to move.
+Both are maintainer decisions.
 
 ## What remains before Stage 3 can run
 
-1. **Take `uv sync` off the paid critical path** — bake the venvs into an image,
-   or stage a wheelhouse on the relay for `uv sync --offline`. This is the only
-   thing standing between the current harness and a completed characterization.
-2. **A budget increment**, since $1.0288 remains against a $1.6352 hard
-   threshold. Reprice with a cold-draw reserve (~$0.25 per expected abandoned
-   draw) that the current plan lacks.
-3. Then relaunch: `--transport relay`, `--session-commit 6ba7cce9…`,
-   `--bundle aad_autoinit_6ba7cce9.bundle`. Every $0 gate already passes.
-4. Phase A stays unauthorized. Its `$13.02 / $21.01` remains **provisional** and
-   still cannot be repriced: the per-control battery cost this session existed to
-   measure was never reached.
+1. **Free ~1.15 GiB on the relay** (or raise its storage), so the last 21 vLLM
+   wheels can land. Everything else is done.
+2. **Grant the $4.40 cumulative continuation authorization.**
+3. Then launch: `--transport relay`, `--session-commit 13c3a69b…`,
+   `--bundle aad_autoinit_13c3a69b.bundle`. Every $0 gate already passes.
+4. Phase A stays unauthorized and unpriced until Stage 3 measures the battery.
 
 ## Phase A is repriced, and both statistics measurements are kept
 

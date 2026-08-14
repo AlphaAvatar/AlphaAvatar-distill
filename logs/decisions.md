@@ -2431,3 +2431,69 @@ in assumptions that a later study would have to unpick.
   and of Phase A — must include one, at ~$0.25 per expected abandoned draw.
 - **Revisit when:** the venv is off the critical path. Until then, a further
   attempt is buying lottery tickets at ~$0.25 each with a ~20% observed win rate.
+
+## 2026-08-15 — The vLLM environment is pinned and offline; the relay is full
+
+- **Context:** attempt 4 proved the offline principle on hardware — the train env
+  installed in **11 seconds** on the pod — and then hung **76 minutes / $1.37** on
+  `pip install vllm`, the unpinned network install named as the remaining exposure
+  in the commit that introduced the offline path. The failure moved to the
+  adjacent step rather than being eliminated.
+- **Decision:** apply the same treatment to the whole vLLM environment, not one
+  wheel. `requirements-vllm.txt` is 196 exact pins from
+  `uv pip compile vllm==0.27.1`; every wheel is staged on the relay and verified
+  against its PyPI sha256; the install is `uv venv` + `uv pip install --offline
+  --no-index --find-links`. `pip install --upgrade pip` is deleted as a second,
+  unpinned network call. The two environments stay separate and the pins make
+  that explicit: `/opt/train` torch 2.11.0+cu128 / transformers 5.13.1,
+  `/opt/vllm` torch 2.13.0+cu130 / transformers 5.15.0.
+- **Verified for real, not by dry run.** The previous session's `--dry-run` check
+  passed against a warm uv cache and hid a defect that cost $0.07 to discover on
+  a pod. This time: cache cleared, real venv, real install, 196 packages in 33 s,
+  and `torch 2.13.0+cu130 / transformers 5.15.0 / vllm 0.27.1` — **byte-for-byte
+  the versions the 2026-08-14 pod observed.** The pins reproduce the environment
+  that ran rather than inventing one.
+- **Pinning is not observing, and both are kept.** The engine probe still reports
+  the vLLM version, torch version, dtype, resolved context and stop tokens that
+  actually loaded, and the driver still attests the observed generation protocol
+  against them. Nothing in that path was touched.
+- **Blocked, and by a confirmed fact rather than an inference:** the relay
+  returned `Private repository storage limit reached`. 175 of 196 wheels landed;
+  the repo is at **93.22 GiB**, so the long-inferred ~93.13 GiB ceiling is now
+  measured. The remaining 21 wheels — torch, vllm and triton among them — need
+  **1.07 GiB** against **0 GiB** of headroom: short **1.15 GiB**.
+- **Merging the wheelhouses was evaluated and rejected on measurement:** the two
+  sets share 32 files totalling 0.02 GiB, because they differ in CUDA major,
+  torch and transformers. It buys nothing.
+- **Nothing was deleted.** Reclaim candidates are recorded (several 2.23 GiB
+  historical stage3 checkpoints, each individually larger than the shortfall),
+  but removing project artifacts is the maintainer's call, as is raising the
+  storage plan.
+- **Risks:** the partial wheelhouse is unusable, and deliberately so — setup
+  requires `>= 196` wheels and aborts loudly at `VLLM_WHEELHOUSE_INCOMPLETE`
+  rather than falling back to the network.
+- **Revisit when:** storage is resolved. No further code work is required first.
+
+## 2026-08-15 — Continuation re-priced from measurement; Phase A no longer fits
+
+- **Context:** the maintainer required the continuation planner re-run against the
+  new offline setup and the exact cumulative spend before any further request.
+- **Setup is now measured, not estimated:** create->ssh 2.0 min, ENV_READY..
+  ASSETS_READY 3.2 min (containing the 11 s train install), vLLM fetch ~1.5 min +
+  33 s install, teacher+rope 0.7 min, CPU suite 2.4 min = **~10.4 min**, priced at
+  **11** so the figure is not the optimistic one.
+- **One session:** expected **$1.3860**, soft **$1.5246**, hard **$1.6896**.
+- **Cumulative continuation authorization requested: $4.10 expected / $4.40 hard**
+  = $2.7051 already spent (four attempts, zero driver stages) + one hard attempt.
+  A single launch still self-limits at $1.6896.
+- **Ledger arithmetic corrected:** the "continuation total $1.2712" line
+  double-counted a rounded launcher print; the per-attempt entries were always
+  right. The true cumulative is **$190.1453**, leaving **$20.9247** — which
+  matches the maintainer's independent figure exactly.
+- **The material consequence:** Phase A's provisional hard **$21.01 already
+  exceeds the $20.9247 remaining**, before another continuation attempt; after
+  one, ~$19.24 remains. Phase A therefore cannot be authorized on the current
+  estimate at all. Its price must be re-derived from the battery wall time Stage 3
+  has still never measured, and must then fit the remaining budget — or the
+  project cap must move. Both are maintainer decisions and neither is taken here.
+- **Revisit when:** Stage 3 completes and reports a real per-control battery cost.

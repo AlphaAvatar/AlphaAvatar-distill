@@ -81,7 +81,21 @@ AutoInit characterization continuation, attempt 2 (L40S,      $  0.6367
     and verified under the pod simulator before this launch, so
     this failure is a different, infrastructure one.
 
-ACTUAL CUMULATIVE SPEND                                      $188.7081
+AutoInit characterization continuation, attempt 3 (L40S,      $  0.0700
+    4.3 min). PRODUCED NOTHING, but failed FAST and loudly:
+    `uv sync --frozen` installs from the source recorded in the
+    lock, and torch's is the pytorch registry, which
+    `--find-links` does not override. The offline gate caught it
+    in 4 minutes instead of a 28-minute burn.
+
+AutoInit characterization continuation, attempt 4 (L40S,      $  1.3672
+    82.9 min). The train env installed OFFLINE IN 11 SECONDS —
+    the fix works on hardware. Then `pip install vllm`, still
+    unpinned and still going to PyPI, hung 76 min on the same
+    host that had failed three cold draws. Torn down manually
+    once the outcome was determined; provider-confirmed gone.
+
+ACTUAL CUMULATIVE SPEND                                      $190.1453
 ```
 
 The pre-E8b baseline `$163.8833` is the figure every E8/E8b planner was built on
@@ -122,18 +136,21 @@ $2.30   RAISED 2026-08-14 with maintainer approval, after attempt 1 spent
 | the 20-step memory gate was falsified by the real run | — | §41–§42 |
 | continuation attempt 1 bought nothing: cold host + a test gate reading an unstaged battery | $0.6312 | `decisions.md` 2026-08-14, `STATE.md` |
 | continuation attempt 2 bought nothing: three consecutive cold hosts, all in the uv-sync window | $0.6367 | `decisions.md` 2026-08-14 |
-| **continuation total: $1.2712 spent, zero driver stages reached** | $1.2712 | four cold hosts in five draws |
+| continuation attempt 3 bought nothing, but failed in 4 min | $0.0700 | `uv sync` cannot install a registry-pinned wheel offline |
+| continuation attempt 4: train env offline in 11 s, then `pip install vllm` hung 76 min | $1.3672 | the exposure named in the offline commit |
+| **continuation total: $2.7051 spent, zero driver stages reached** | $2.7051 | arithmetic corrected: the earlier $1.2712 line double-counted a rounded print; the per-attempt entries were always right |
 
 ## Current position
 
 ```
 authorized cumulative cap                                    $211.07
-actual cumulative spend                                      $188.7081
-unused authorization remaining                               $ 22.3619
-continuation spent of its $2.30 authorization                $  1.2712
-continuation remaining under that authorization              $  1.0288
-    LESS THAN ONE ATTEMPT COSTS ($1.6352 hard). Nothing further
-    is launched without both a new increment AND the uv-sync fix.
+actual cumulative spend                                      $190.1453
+unused authorization remaining                               $ 20.9247
+continuation spent across four attempts                      $  2.7051
+    0.6312 + 0.6367 + 0.0700 + 1.3672; zero driver stages reached
+requested cumulative continuation authorization              $  4.40
+    = $2.7051 spent + one newly-priced hard attempt ($1.6896).
+    NOT YET GRANTED. No pod is created until it is.
 micro-preflight spent of its $8.60 authorization             $  6.7369
 micro-preflight remaining under that authorization           $  1.8631
     LESS THAN A SESSION COSTS (~$3.2). Nothing further is
