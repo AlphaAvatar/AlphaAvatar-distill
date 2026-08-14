@@ -89,3 +89,48 @@ the dev box's uplink is ~1.8 h of *paid* pod time, about **$1.80** — which alo
 exceeds the whole continuation's expected cost. That is the trade: ~4.45 GiB of
 permanent, irreclaimable relay quota, or ~$1.80 of pod time per attempt, every
 attempt.
+
+
+## Transport decision, 2026-08-14 — BLOCKED on one input
+
+Both routes are quantified. **Neither can be selected without the maintainer**,
+and the authorization is therefore not issued.
+
+| route | transfer time for 4.45 GiB | cost of the transfer | continuation total |
+| --- | --- | --- | --- |
+| **relay**, pre-staged before a pod exists | 1.8–5.4 h of **unpaid** dev-box uplink | **$0.00** | **$0.90 / $1.75** unchanged |
+| **scp**, while the pod bills | same wall time, on the clock | **$1.82–$5.61** | **$2.72–$6.51 expected** |
+
+The uplink is the second uncertain number: **0.72 MB/s** is this project's
+recorded figure, while today's 3.7 MB bundle upload moved at ~**0.23 MB/s** —
+small enough that overhead may dominate, so the true sustained rate is somewhere
+in that range. It does not change the ranking, only the size of the penalty.
+
+**scp is not viable under the current pricing**, and repricing it has a
+consequence beyond this session: a $3.60 continuation would leave **$20.03** of
+the project cap against a **$21.01** provisional Phase-A hard bound — Phase A
+would no longer fit at all. Paying for transport twice (once now, once for any
+future session that needs these controls) is how a $4.45 GiB storage decision
+turns into a Phase-A cancellation.
+
+### The three options, none taken here
+
+1. **Confirm the quota → relay.** One number from the account's storage/billing
+   page. If headroom ≥ ~4.5 GiB plus a reserve, pre-stage before any pod exists,
+   keep $0.90 / $1.75, and every future session that needs these controls pulls
+   them at ~$0.05 instead of paying transport again.
+2. **Reprice for scp.** ~$2.72 expected / ~$3.60 hard at the optimistic rate,
+   worse at the pessimistic one, and it costs Phase A its remaining headroom.
+3. **Publish the two checkpoints to a public HF repo.** Public storage is not
+   charged against the private quota, which dissolves the constraint entirely —
+   but publishing model weights is a **release decision** (AGENTS.md P12/P15),
+   not an operational one, and it is not mine to make.
+
+### One further item, whichever route is chosen
+
+The pod does not clone from GitHub: `autoinit_preflight_setup.sh` fetches a **git
+bundle** from the relay and checks out `SESSION_COMMIT`. So "the remote the pod
+checks out" is the bundle, and a bundle at `6428c39` does not exist yet. It is
+3.7 MB — negligible against the quota — but it must be built and uploaded from
+the *final* commit, which is why it is deliberately not done before the transport
+and pricing are fixed.

@@ -62,6 +62,26 @@ every item. Input is now normalized through `normalize_tools`, which reads eithe
 representation and fails closed. **Semantics unchanged and measured:** nine
 policies × 190 prompts reproduce every number of the pre-migration record.
 
+## Remote and transport status (2026-08-14)
+
+**The executable commit is on the public remote.** Working tree clean; local
+`HEAD` = `origin/main` = **`6428c39`**; verified by an independent shallow clone
+of `https://github.com/AlphaAvatar/AlphaAvatar-distill.git` that yields
+`6428c39` with the continuation driver present. The 20 commits pushed carry no
+credentials; the ephemeral pod endpoints they contain match what earlier
+sessions already published.
+
+**Transport is BLOCKED on the relay quota, and the authorization is not issued.**
+relay pre-staging costs $0 of paid time and keeps the $0.90 / $1.75 bound; `scp`
+while the pod bills costs **$1.82–$5.61** on top, i.e. $2.72–$6.51 expected, and
+a $3.60 continuation would leave **$20.03** against a $21.01 Phase-A bound —
+Phase A would no longer fit. Three options, none taken:
+[`autoinit_relay_capacity.md`](autoinit_relay_capacity.md).
+
+Note the pod fetches a **git bundle** from the relay, not GitHub, so a bundle at
+the final commit must be built and uploaded (3.7 MB) once transport and pricing
+are fixed.
+
 ## What remains before Stage 3 can run
 
 1. **A Stage-3-only entry does not exist yet.** `PreflightPlan.advance_to(3, …)`
