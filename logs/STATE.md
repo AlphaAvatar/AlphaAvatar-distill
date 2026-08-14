@@ -21,41 +21,73 @@ Attempt 3 produced the same protocol, initialization and seeds with different
 weights. GPU training is not bitwise reproducible; selection is on measured
 behaviour.
 
-## Stage 3 is blocked: a protocol decision the maintainer owns
+## Stage 3 is unblocked: `recovery_search_v2` replaces an INVALID v1
 
-`uncapped_eval.py` passes the frozen battery's `tools` to `apply_chat_template`
-and transformers raises `ValueError: Tools should either be a JSON schema…`.
-The $0 full-subset audit (`scripts/autoinit/audit_tool_rendering.py`, all 20
-items, artifact [`autoinit_tool_rendering_audit_tf5.json`](autoinit_tool_rendering_audit_tf5.json))
-establishes:
+**`recovery_search_v1` is INVALID before first use and never produced a valid
+rollout.** Its `tools` retained the xLAM source serialization — a JSON string —
+so `apply_chat_template` rendered **0/20** tool prompts, which is what stopped
+Stage 3 on 2026-08-13. It is preserved unmodified with a sibling
+`SUPERSEDED.md`. **No historical recovery-search result is rewritten, because no
+valid v1 tool characterization ever existed.**
 
-* the stored value renders **0/20** under transformers 5.13.1 — the same failure
-  as the pod's 5.15.0, so it is not version-specific within 5.x;
-* `json.loads` → xLAM list renders 20/20; converted to the project's OpenAI-style
-  form renders 20/20; **the two share 0/20 token-id hashes** (272 vs 296 tokens
-  on the first item), so they are different inputs to the model;
-* **transformers 4.57.1 cannot load this checkpoint's tokenizer at all**
-  (`AttributeError` in `_set_model_specific_special_tokens`) — a second 4.x
-  incompatibility beyond the RoPE misreading in §0.5;
-* **no historical evaluation ran under 4.x**: `e6_results.json` records
-  transformers **5.14.1** for every E6 arm. An earlier statement in this file
-  that historical tool evaluations ran under 4.x was an inference and is
-  **withdrawn**;
-* `recovery_search_v1` is the **only** tool asset here storing `tools` as a JSON
-  string of xLAM objects; every `data/stage2*/…/tool_calling.jsonl` stores a list
-  of OpenAI-style entries. Its tool prompts have never been rendered by anything.
+**`artifacts/stage3/recovery_search_v2`** is the semantic successor. Identical
+membership, ordering, ids, messages, prompts, tool names, descriptions, parameter
+maps, gold calls, scorer inputs and non-tool items; identical
+`recovery_search_scoring@v2`. Only the materialized `tools` value changes, via
+`aadistill.data.tools.xlam_tools_to_canonical` — the converter
+`build_stage2_v1.build_xlam` already used, now one function with two callers, so
+the battery shows the model the tool form the student was trained on.
 
-So there is no historical rendering to be equivalent *to*, and the choice — parse
-only, parse and convert, or rebuild the asset — changes what the model is shown
-in every tool prompt and therefore the `tool` capability. **Recorded, not
-decided:** [`autoinit_tool_rendering_migration.md`](autoinit_tool_rendering_migration.md),
-[`decisions.md`](decisions.md) 2026-08-14. Pinning the evaluator to 4.x and
-editing the frozen asset in place are both ruled out.
+| identity | value |
+| --- | --- |
+| `content_sha256` | `a1b22778…` — **identical to v1**, asserted at build time. It hashes `id:prompt_sha256`, so equality is the proof prompts and membership were untouched |
+| `tools_materialization_sha256` | `3016f1c4…` — what distinguishes the two assets |
+| `manifest_sha256` | `72d8c053…` → `58ae5c6d…` |
+| scoring contract | `recovery_search_scoring@v2`, digest `69591aab…` → `799398e7…` |
+| preflight plan hash | `37dbd7b2…` → `afd08be7…` (the plan's Stage-3 text names the battery) |
 
-Whichever option is chosen changes `uncapped_eval.py` and therefore
-`generation_source_digest`, so the generation protocol is **re-attested at Stage 0
-before Stage 3**. That does not touch the Stage-2 controls: recovery identity and
-generation identity are separate by construction.
+Full $0 audit over all 20 items
+([`autoinit_recovery_search_v2_audit.json`](autoinit_recovery_search_v2_audit.json)):
+count, names in order, descriptions, whole parameter maps, **parameter order**,
+types, defaults and the derived required semantics all preserved; six non-tool
+sets byte-identical; **20/20 render**, with model-visible prompt and token-id
+hashes frozen. It **rejected the first v2 build**, where `sort_keys=True` had
+alphabetised the keys inside `tools` — invisible to dict equality, visible in the
+rendered `<tools>` blob.
+
+**The migration exposed a real scoring defect**, and only then was the scorer
+touched: `as_openai_tools` reads xLAM-shaped entries, so under the canonical
+envelope every tool name resolved to `None` and `tool_name_valid` was 0.0 for
+every item. Input is now normalized through `normalize_tools`, which reads either
+representation and fails closed. **Semantics unchanged and measured:** nine
+policies × 190 prompts reproduce every number of the pre-migration record.
+
+## What remains before Stage 3 can run
+
+1. **A Stage-3-only entry does not exist yet.** `PreflightPlan.advance_to(3, …)`
+   refuses to start Stage 3 unless blocking Stages 0–2 recorded a pass in *this*
+   session, and the controls already exist, so re-running Stage 2 is exactly what
+   must not happen. This needs a deliberate design — a plan variant that admits
+   already-verified controls as evidence, binding them by their recorded
+   `control_binding` hashes — **not an ad-hoc relaxation of the gate.** It is the
+   next session's first task and it is a gate change, so it deserves its own
+   review.
+2. **The narrow authorization is therefore not issued.** The current artifact
+   still authorizes the full stages 0–3 at $4.20/$8.60 against the new plan and
+   harness. A characterization-only authorization should be issued *after* the
+   Stage-3-only entry exists, priced at roughly **$0.6 expected / $1.6 hard**
+   ([`autoinit_phase_a_repricing.md`](autoinit_phase_a_repricing.md)).
+3. **Staging the controls to the relay is a quota decision.** The two `model/`
+   directories are 2.3 GB each; the relay already holds **82.36 GiB** and its
+   LFS storage is **irreclaimable by deletion** (history keeps the objects). The
+   uplink is 0.72 MB/s, so ~53 min per checkpoint — free if it happens before a
+   pod exists, paid pod time if not. Not started: it permanently consumes ~4.6 GB
+   of a constrained quota and that is the maintainer's call.
+4. On-pod, in the next session: the Stage-1 smoke now runs the **`tool` and
+   `rag`** sets of v2 (not `sorted(sets)[0]`, which was `code` and has no tools —
+   that is why the smoke passed while Stage 3 failed), and the observed
+   generation-protocol reconstruction is verified against the new Stage-0
+   attestation.
 
 ## Phase A is repriced, and both statistics measurements are kept
 
