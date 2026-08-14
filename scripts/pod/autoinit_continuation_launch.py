@@ -73,10 +73,13 @@ CKPT_STORE = "/home/ecs-user/aad-artifacts/autoinit"
 #: a whole second paid session; an unused leash costs nothing, because the pod
 #: is torn down on completion rather than at the threshold.
 CHARACTERIZATION_MINUTES = 24.0
-#: Setup allowance. 10, not 8: the wheelhouse is 3.82 GiB fetched from the relay
-#: before the install. That ADDS about a minute and REMOVES the 8-28 min cold
-#: tail that lost four of five draws — a worse mean for a far better tail.
-SETUP_MINUTES = 10.0
+#: Setup allowance, now derived from MEASUREMENT rather than estimate. From the
+#: 2026-08-14 runs: create->ssh 2.0 min, ENV_READY..ASSETS_READY 3.2 min (which
+#: contains the 11-second offline train install), teacher+rope 0.7 min, CPU
+#: suite 2.4 min; plus the vLLM wheelhouse fetch (~1.5 min for 3.62 GiB) and its
+#: 33-second offline install. That totals ~10.4 min, priced at 11 so the number
+#: is not the optimistic one.
+SETUP_MINUTES = 11.0
 
 
 class Continuation(_preflight.Preflight):

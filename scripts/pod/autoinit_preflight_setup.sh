@@ -230,10 +230,56 @@ fi
 echo "$FROZEN_OUT" | tail -5
 mark ASSETS_READY
 
-say "vLLM venv on the container disk"
-python3 -m venv /opt/vllm
-/opt/vllm/bin/pip install -q --upgrade pip
-/opt/vllm/bin/pip install -q vllm
+# --- the vLLM environment, offline and pinned ------------------------------
+# This step hung for 76 minutes on 2026-08-14 and cost $1.37: `pip install vllm`
+# was UNPINNED and went to PyPI, on a host whose network had already failed
+# three cold draws. The train venv beside it installed offline in 11 seconds.
+#
+# So the same treatment, and the whole environment rather than one wheel:
+# `requirements-vllm.txt` is 196 exact pins from `uv pip compile vllm==0.27.1`,
+# every wheel is staged on the relay, and the install is `--offline --no-index`.
+# `pip install --upgrade pip` is gone too — it was a second network call, and an
+# unpinned one.
+#
+# The two environments stay SEPARATE: /opt/train is torch 2.11.0+cu128 with
+# transformers 5.13.1, /opt/vllm is torch 2.13.0 with transformers 5.15.0. That
+# split is real and is what the RoPE check below verifies in both venvs.
+#
+# Pinning does NOT replace observation: the engine probe still reports the vLLM
+# version, torch version, dtype, context and stop tokens that actually loaded,
+# and the driver still attests the observed generation protocol against them.
+say "vLLM venv, offline from the relay wheelhouse"
+WH_VLLM=${WH_VLLM:-/workspace/wheelhouse_vllm}
+python3 - <<'VLLMWHEELEOF'
+import os, sys, time
+from huggingface_hub import snapshot_download
+for attempt in range(4):
+    try:
+        snapshot_download("AlphaAvatar/aadistill-artifacts", repo_type="model",
+                          allow_patterns=["transfer/wheelhouse_vllm_cp312/*"],
+                          local_dir="/workspace/whv",
+                          token=os.environ["HF_TOKEN"])
+        break
+    except Exception as exc:
+        print(f"  vllm wheelhouse attempt {attempt + 1} failed: {exc}", flush=True)
+        time.sleep(10 * (attempt + 1))
+else:
+    sys.exit("VLLM WHEELHOUSE FETCH FAILED")
+VLLMWHEELEOF
+mkdir -p "$WH_VLLM"
+cp /workspace/whv/transfer/wheelhouse_vllm_cp312/*.whl "$WH_VLLM"/ 2>/dev/null || true
+NWHLV=$(ls "$WH_VLLM"/*.whl 2>/dev/null | wc -l)
+say "vllm wheelhouse: ${NWHLV} wheels, $(du -sh "$WH_VLLM" | cut -f1)"
+[ "$NWHLV" -ge 196 ] || { say "VLLM WHEELHOUSE TOO SMALL (${NWHLV} wheels)"; \
+  mark "VLLM_WHEELHOUSE_INCOMPLETE:${NWHLV}"; exit 96; }
+tv0=$(date -u +%s)
+uv venv /opt/vllm --python 3.12 \
+  || { say "COULD NOT CREATE /opt/vllm ON PYTHON 3.12"; mark "PY312_MISSING"; exit 94; }
+uv pip install --python /opt/vllm/bin/python --offline --no-index \
+  --find-links "$WH_VLLM" -r "$REPO/requirements-vllm.txt" \
+  || { say "OFFLINE VLLM INSTALL FAILED — the wheelhouse does not satisfy the pins"
+       mark "VLLM_WHEELHOUSE_UNSATISFIED"; exit 97; }
+say "vllm offline install completed in $(( $(date -u +%s) - tv0 ))s"
 /opt/vllm/bin/python -c "import vllm, torch; \
   print('vllm', vllm.__version__, '| torch', torch.__version__, torch.cuda.is_available())"
 mark VLLM_READY

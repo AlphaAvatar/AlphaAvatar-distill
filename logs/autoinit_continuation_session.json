@@ -2,84 +2,84 @@
   "schema": "aadistill.autoinit.continuation_session/v1",
   "timeline": [
     {
-      "utc": "2026-08-14T16:17:07+00:00",
+      "utc": "2026-08-14T16:43:09+00:00",
       "elapsed_min": 0.0,
       "msg": "budget: expected 83 min $1.37 \u00b7 soft $1.51 \u00b7 hard $1.67 (authorized $2.95)"
     },
     {
-      "utc": "2026-08-14T16:17:07+00:00",
+      "utc": "2026-08-14T16:43:10+00:00",
       "elapsed_min": 0.0,
       "msg": "NVIDIA L40S $0.99/h, stock Medium"
     },
     {
-      "utc": "2026-08-14T16:17:07+00:00",
+      "utc": "2026-08-14T16:43:10+00:00",
       "elapsed_min": 0.0,
-      "msg": "session commit 94cdcd2665b2 verified: harness digests to e177840d3878\u2026 and carries the authorization"
+      "msg": "session commit fe455abb5e56 verified: harness digests to 4ca9a31f9fa0\u2026 and carries the authorization"
     },
     {
-      "utc": "2026-08-14T16:17:08+00:00",
+      "utc": "2026-08-14T16:43:11+00:00",
       "elapsed_min": 0.0,
       "msg": "precheck OK: 4 relay inputs including the staged controls, 3 local assets"
     },
     {
-      "utc": "2026-08-14T16:17:09+00:00",
+      "utc": "2026-08-14T16:43:12+00:00",
       "elapsed_min": 0.0,
-      "msg": "created bu7j1vlcjge9qj at $0.99/h"
+      "msg": "created hcgt3z021psyrz at $0.99/h"
     },
     {
-      "utc": "2026-08-14T16:17:09+00:00",
+      "utc": "2026-08-14T16:43:12+00:00",
       "elapsed_min": 0.0,
       "msg": "watchdog detached \u2014 hard 101 min = $1.67"
     },
     {
-      "utc": "2026-08-14T16:17:42+00:00",
-      "elapsed_min": 0.55,
-      "msg": "TCP 22 at 202.181.159.228:16402 after 0.6 min"
+      "utc": "2026-08-14T16:43:34+00:00",
+      "elapsed_min": 0.38,
+      "msg": "TCP 22 at 82.221.170.242:37212 after 0.4 min"
     },
     {
-      "utc": "2026-08-14T16:17:45+00:00",
-      "elapsed_min": 0.6,
+      "utc": "2026-08-14T16:43:38+00:00",
+      "elapsed_min": 0.44,
       "msg": "draw 1: ssh reachable \u2014 $0.01"
     },
     {
-      "utc": "2026-08-14T16:18:16+00:00",
-      "elapsed_min": 1.11,
-      "msg": "draw 1: image identity runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@580.126.09"
+      "utc": "2026-08-14T16:45:12+00:00",
+      "elapsed_min": 2.0,
+      "msg": "draw 1: image identity runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@580.159.03"
     },
     {
-      "utc": "2026-08-14T16:18:16+00:00",
-      "elapsed_min": 1.11,
+      "utc": "2026-08-14T16:45:12+00:00",
+      "elapsed_min": 2.0,
       "msg": "draw 1: running setup"
     },
     {
-      "utc": "2026-08-14T16:21:18+00:00",
-      "elapsed_min": 4.14,
-      "msg": "setup did not reach SETUP_DONE:\niles:  75%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258c  | 64/85 [00:49<00:10,  1.96it/s]\nFetching 85 files:  76%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258b  | 65/85 [00:49<00:08,  2.23it/s]\nFetching 85 files:  78%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258a  | 66/85 [00:49<00:06,  2.73it/s]\nFetching 85 files:  80%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588  | 68/85 [00:50<00:04,  4.21it/s]\nFetching 85 files:  81%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588  | 69/85 [00:51<00:06,  2.31it/s]\nFetching 85 files:  82%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258f | 70/85 [00:51<00:08,  1.81it/s]\nFetching 85 files:  84%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258e | 71/85 [00:52<00:08,  1.73it/s]\nFetching 85 files:  85%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258d | 72/85 [00:54<00:11,  1.11it/s]\nFetching 85 files:  86%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258c | 73/85 [00:55<00:11,  1.05it/s]\nFetching 85 files:  87%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258b | 74/85 [00:55<00:08,  1.34it/s]\nFetching 85 files:  88%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258a | 75/85 [00:55<00:05,  1.78it/s]\nFetching 85 files:  91%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588 | 77/85 [00:56<00:04,  1.84it/s]\nFetching 85 files:  92%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258f| 78/85 [00:57<00:03,  2.00it/s]\nFetching 85 files:  93%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258e| 79/85 [00:57<00:02,  2.08it/s]\nFetching 85 files:  94%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258d| 80/85 [00:59<00:03,  1.36it/s]\nFetching 85 files:  95%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258c| 81/85 [01:01<00:05,  1.36s/it]\nFetching 85 files:  96%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258b| 82/85 [01:02<00:03,  1.05s/it]\nFetching 85 files:  98%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258a| 83/85 [01:22<00:13,  6.62s/it]\nFetching 85 files:  99%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2589| 84/85 [01:39<00:09,  9.65s/it]\nFetching 85 files: 100%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588| 85/85 [01:48<00:00,  9.36s/it]\nFetching 85 files: 100%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588| 85/85 [01:48<00:00,  1.27s/it]\n[16:21:12] wheelhouse: 85 wheels, 3.9G\nUsing CPython 3.12.3 interpreter at: /usr/local/bin/python\nCreating virtual environment at: /opt/train\n  \u00d7 Failed to download `torch==2.11.0+cu128`\n  \u2570\u2500\u25b6 Network connectivity is disabled, but the\n      requested data wasn't found in the cache for:\n      `https://download-r2.pytorch.org/whl/cu128/torch-2.11.0%2Bcu128-cp312-cp312-manylinux_2_28_x86_64.whl`\n\nhint: `torch` (v2.11.0+cu128) was included because `aadistill` (v0.0.1) depends on `torch`[16:21:12] OFFLINE UV SYNC FAILED \u2014 the wheelhouse does not satisfy the lock\nMARKER:WHEELHOUSE_UNSATISFIED\nSETUP_RC=93\n"
+      "utc": "2026-08-14T18:05:52+00:00",
+      "elapsed_min": 82.68,
+      "msg": "setup did not reach SETUP_DONE:\n"
     },
     {
-      "utc": "2026-08-14T16:21:18+00:00",
-      "elapsed_min": 4.14,
+      "utc": "2026-08-14T18:05:52+00:00",
+      "elapsed_min": 82.68,
       "msg": "ABORT after draw 1: setup_failed"
     },
     {
-      "utc": "2026-08-14T16:21:18+00:00",
-      "elapsed_min": 4.14,
+      "utc": "2026-08-14T18:05:52+00:00",
+      "elapsed_min": 82.68,
       "msg": "deleting pod (setup setup_failed)"
     },
     {
-      "utc": "2026-08-14T16:21:29+00:00",
-      "elapsed_min": 4.32,
-      "msg": "pod deleted \u2014 4.3 min, $0.07; provider confirms gone: True"
+      "utc": "2026-08-14T18:06:03+00:00",
+      "elapsed_min": 82.86,
+      "msg": "pod deleted \u2014 82.9 min, $1.37; provider confirms gone: True"
     }
   ],
   "stages": {
     "setup": [
       {
         "draw": 1,
-        "setup_done": "",
-        "host_cold": "",
-        "setup_rc": "93",
-        "tail": "SETUP_RC=93"
+        "setup_done": "0",
+        "host_cold": "0",
+        "setup_rc": "",
+        "tail": ""
       }
     ]
   },
@@ -109,8 +109,8 @@
     "scope_note": "characterization of two ALREADY TRAINED permanent controls. This authorization does not permit training, retraining, or re-initializing any control: the driver has no training stage and the launcher materializes existing artifacts. A failed characterization is collected and torn down and remains a FAILED continuation; it does not authorize a retry that trains. Phase A remains separately unauthorized.",
     "phase_a_authorized": false,
     "automatic_phase_a_start": false,
-    "authorized_session_commit": "841d4ca6f72ae47cf192b1981d9228d45deac10e",
-    "harness_source_digest": "e177840d3878c140532074c93e97cbe2a7da0b109dd2c71289d896c548afb02e",
+    "authorized_session_commit": "fd87e3d98f9bfff6e5e855aa5bf97e5083f01103",
+    "harness_source_digest": "4ca9a31f9fa0abf2a6478e4888a0263722de20bb1e1504a09634d0c9c01ac77b",
     "harness_source_files": [
       "scripts/pod/autoinit_continuation_launch.py",
       "scripts/pod/autoinit_continuation_driver.py",
@@ -123,12 +123,12 @@
       "src/aadistill/autoinit/continuation.py",
       "src/aadistill/autoinit/generation.py"
     ],
-    "provenance_commit": "841d4ca6f72ae47cf192b1981d9228d45deac10e",
+    "provenance_commit": "fd87e3d98f9bfff6e5e855aa5bf97e5083f01103",
     "enforcement": "the launcher loads this artifact and refuses to create a pod whose priced hard threshold exceeds hard_cap_usd, refuses a stage not in authorized_stages, and has no code path to Phase A",
-    "authorization_sha256": "f1dc68967c4a33367ee9ed7d0786b1e02760c7799da3637fe415f3276c9299d9"
+    "authorization_sha256": "d12600a28e48e094bd10fc688be4c3942873f63d52a4b16b24532e426be47118"
   },
   "preflight_plan_hash": "79da6d7af9295ca510cc5721cb25d915b3aae224bfb6a1147476186a6f8a195d",
-  "harness_source_digest": "e177840d3878c140532074c93e97cbe2a7da0b109dd2c71289d896c548afb02e",
+  "harness_source_digest": "4ca9a31f9fa0abf2a6478e4888a0263722de20bb1e1504a09634d0c9c01ac77b",
   "harness_source_files": [
     "scripts/pod/autoinit_continuation_driver.py",
     "scripts/pod/autoinit_continuation_launch.py",
@@ -227,10 +227,10 @@
   "quoted_price_per_hour": 0.99,
   "stock_status": "Medium",
   "session_commit_check": {
-    "session_commit": "94cdcd2665b29734d92f2bdd4337fc1e7b346ad8",
-    "authorized_session_commit": "841d4ca6f72ae47cf192b1981d9228d45deac10e",
-    "harness_digest_at_commit": "e177840d3878c140532074c93e97cbe2a7da0b109dd2c71289d896c548afb02e",
-    "authorized_harness_digest": "e177840d3878c140532074c93e97cbe2a7da0b109dd2c71289d896c548afb02e",
+    "session_commit": "fe455abb5e56e14d165bb3f514880708d52c7f51",
+    "authorized_session_commit": "fd87e3d98f9bfff6e5e855aa5bf97e5083f01103",
+    "harness_digest_at_commit": "4ca9a31f9fa0abf2a6478e4888a0263722de20bb1e1504a09634d0c9c01ac77b",
+    "authorized_harness_digest": "4ca9a31f9fa0abf2a6478e4888a0263722de20bb1e1504a09634d0c9c01ac77b",
     "harness_matches": true,
     "commit_carries_this_authorization": true,
     "rule": "the pod checks out this commit from a bundle; its harness must digest to the authorized value and it must carry the authorization the driver will load"
@@ -251,18 +251,18 @@
     ],
     "local_missing": []
   },
-  "pod_id": "bu7j1vlcjge9qj",
+  "pod_id": "hcgt3z021psyrz",
   "actual_price_per_hour": 0.99,
-  "terminate_after_utc": "2026-08-14T17:58:26Z",
+  "terminate_after_utc": "2026-08-14T18:24:29Z",
   "watchdog_journals": [
-    "/home/ecs-user/aad-scratch/cont3_20260814_161706/watchdog.jsonl"
+    "/home/ecs-user/aad-scratch/cont4_20260814_164309/watchdog.jsonl"
   ],
   "image_identity": {
     "image_name": "runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404",
     "observed": [
-      "580.126.09"
+      "580.159.03"
     ],
-    "digest": "runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@580.126.09"
+    "digest": "runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@580.159.03"
   },
   "final_pod_state": {
     "exists": false,
@@ -272,13 +272,13 @@
   "provider_confirms_gone": true,
   "cost": {
     "price_per_hour": 0.99,
-    "elapsed_minutes": 4.32,
-    "actual_usd": 0.0713,
+    "elapsed_minutes": 82.86,
+    "actual_usd": 1.3672,
     "authorized_usd": 2.95,
     "within_authorization": true
   },
   "passed": false,
   "continuation_successful": false,
   "cleanup_is_not_success": "artifacts are collected and the pod is torn down on every path; the session outcome is decided by the driver's terminal marker alone",
-  "finished_utc": "2026-08-14T16:21:29+00:00"
+  "finished_utc": "2026-08-14T18:06:03+00:00"
 }

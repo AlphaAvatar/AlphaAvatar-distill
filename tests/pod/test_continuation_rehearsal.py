@@ -558,14 +558,15 @@ def test_make_plan_actually_prices_and_stays_inside_the_authorization():
     # The authorized bound is the HARD threshold; that is what the launcher
     # enforces before a pod can exist. Raising the cap to $2.30 to cover a
     # failed attempt must NOT loosen a single session: its own hard threshold
-    # stays at $1.6715, so one launch cannot spend two launches' headroom.
-    assert plan.hard_terminate_usd <= 1.68, plan.as_dict()
+    # stays at $1.6896, so one launch cannot spend five launches' headroom.
+    assert plan.hard_terminate_usd <= 1.69, plan.as_dict()
     assert plan.hard_terminate_usd < CONTINUATION_AUTHORIZATION.hard_cap_usd
     # The expected figure is the harness's own conservative ceiling for ONE
-    # session — $1.37 at 24 min/control and a 10 min setup; the authorization's
-    # $2.64 additionally carries the two attempts that bought nothing. Asserted
+    # session — $1.39 at 24 min/control and a measured 11 min setup; the
+    # authorization's $4.10 additionally carries the four attempts that bought
+    # nothing. Asserted
     # so the plan and the authorization cannot drift apart unnoticed.
-    assert 1.34 <= plan.expected_usd <= 1.40, plan.as_dict()
+    assert 1.35 <= plan.expected_usd <= 1.40, plan.as_dict()
     # And the leash is long enough to characterize BOTH controls even if the
     # unmeasured per-control cost is a third over the historical guess.
     assert obj.a.characterization_minutes >= 24.0
@@ -754,11 +755,11 @@ def test_the_continuation_authorization_is_narrow_and_cannot_train():
     # Raised 2026-08-14 with maintainer approval after attempt 1 spent $0.6312
     # on a cold host and a pod-only test-gate failure. The cap covers the whole
     # continuation; a single session still self-limits at its own $1.6352.
-    assert (auth.expected_usd, auth.hard_cap_usd) == (2.64, 2.95)
+    assert (auth.expected_usd, auth.hard_cap_usd) == (4.10, 4.40)
     assert auth.plan_hash == CONTINUATION_PLAN_V1.plan_hash
     assert auth.allows_phase_a is False and auth.automatic_phase_a_start is False
     with pytest.raises(AuthorizationError):
-        auth.require_within_cap(2.96, what="session")
+        auth.require_within_cap(4.41, what="session")
     with pytest.raises(AuthorizationError):
         auth.require_stage(4)
     with pytest.raises(AuthorizationError, match="separately unauthorized"):
@@ -941,6 +942,11 @@ def test_the_paid_setup_contains_no_pypi_on_its_critical_path():
     silently, so its absence is asserted too.
     """
     setup = (REPO / "scripts/pod/autoinit_preflight_setup.sh").read_text()
+    #: Executable lines only. The comments still explain why `uv sync` and the
+    #: unpinned pip installs cannot work here, and deleting that explanation to
+    #: satisfy a substring match would throw away why two attempts died.
+    code = "\n".join(l for l in setup.splitlines()
+                     if not l.lstrip().startswith("#"))
 
     # `uv pip install`, not `uv sync`: attempt 3 proved `uv sync --frozen`
     # installs from the source recorded in the LOCK, and torch's is the pytorch
@@ -949,11 +955,26 @@ def test_the_paid_setup_contains_no_pypi_on_its_critical_path():
     assert "uv pip install --python /opt/train/bin/python --offline --no-index" in setup
     assert "-r \"$REPO/requirements-cu128.txt\"" in setup
     assert "--find-links \"$WHEELHOUSE\" --no-deps -e \"$REPO\"" in setup
+    # The vLLM environment gets the same treatment, and the whole environment
+    # rather than one wheel: it hung 76 min on an unpinned `pip install vllm`.
+    assert "uv pip install --python /opt/vllm/bin/python --offline --no-index" in setup
+    assert '-r "$REPO/requirements-vllm.txt"' in setup
+    assert "uv venv /opt/vllm --python 3.12" in setup
+    assert (REPO / "requirements-vllm.txt").is_file()
+    # Both network installs are gone: the unpinned vllm, and the pip upgrade.
+    assert "pip install -q vllm" not in code
+    assert "upgrade pip" not in code
+    assert "python3 -m venv /opt/vllm" not in code
+    # The environments stay separate — two venvs, two wheelhouses, two pin sets.
+    assert "$WH_VLLM" in setup and "$WHEELHOUSE" in setup
+    assert "wheelhouse_vllm_cp312" in setup and "wheelhouse_cu128_cp312" in setup
+    # And pinning does not replace observing what actually ran.
+    assert "autoinit_engine_probe.py" in (
+        REPO / "scripts/pod/autoinit_continuation_driver.py").read_text()
+
     # Absent as COMMANDS. The comments still explain why `uv sync` cannot work
     # here, and deleting that explanation to satisfy a substring match would
     # throw away the reason attempt 3 died.
-    code = "\n".join(l for l in setup.splitlines()
-                     if not l.lstrip().startswith("#"))
     assert "uv sync" not in code, "uv sync cannot install a registry-pinned wheel offline"
     assert "uv lock" not in code
     # A pinned interpreter, and uv may not fetch one.

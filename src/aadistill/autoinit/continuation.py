@@ -365,23 +365,29 @@ CONTINUATION_AUTHORIZATION = SpendAuthorization(
     granted_by="maintainer (session authorization)",
     plan_id=CONTINUATION_PLAN_V1.plan_id,
     plan_hash=CONTINUATION_PLAN_V1.plan_hash,
-    # Priced by the launcher's own `make_plan`, not by prose. Re-priced
-    # 2026-08-15 after the offline dependency change, as the maintainer
-    # required: this cap covers the ALREADY-SPENT $1.2712 plus one complete
-    # newly-priced hard attempt, so the continuation as a whole is bounded
-    # rather than each retry being bounded separately.
+    # Priced by the launcher's own `make_plan`, re-run 2026-08-15 against the
+    # fully offline setup and a MEASURED setup allowance (11 min; see
+    # SETUP_MINUTES). One session: expected $1.3860, soft $1.5246, hard $1.6896.
     #
-    #   sunk, two attempts that reached no driver stage      $1.2712
-    #   one new attempt, hard threshold at 10 min setup      $1.6715
-    #                                                        -------
-    #   cumulative hard                                      $2.9427 -> $2.95
-    #   cumulative expected  = 1.2712 + 1.3695             =  $2.6407 -> $2.64
+    # The cap is CUMULATIVE across the continuation, as the maintainer requires,
+    # so the whole effort is bounded rather than each retry separately:
     #
-    # Raising the cap does NOT loosen the session: `make_plan` still prices one
-    # run at soft $1.5065 / hard $1.6715, so a single launch cannot spend the
-    # headroom that covers the failures preceding it.
-    expected_usd=2.64,
-    hard_cap_usd=2.95,
+    #   attempt 1  cold host + a test gate reading an unstaged battery  $0.6312
+    #   attempt 2  three consecutive cold hosts                         $0.6367
+    #   attempt 3  uv sync cannot install a registry-pinned wheel       $0.0700
+    #   attempt 4  train env offline in 11 s; vLLM hung 76 min on PyPI  $1.3672
+    #              ------------------------------------------------------------
+    #   spent, zero driver stages reached                               $2.7051
+    #   one newly-priced hard attempt                                   $1.6896
+    #                                                                   =======
+    #   cumulative hard                                                 $4.3947 -> $4.40
+    #   cumulative expected = 2.7051 + 1.3860                         =  $4.0911 -> $4.10
+    #
+    # Raising the cap does not loosen the session: `make_plan` still prices one
+    # run at soft $1.5246 / hard $1.6896, so a single launch cannot spend the
+    # headroom that covers the four failures before it.
+    expected_usd=4.10,
+    hard_cap_usd=4.40,
     authorized_stages=(0, 1, 2, 3),
     stage_conditions={
         "0": "strict import of the two existing permanent controls; no training",

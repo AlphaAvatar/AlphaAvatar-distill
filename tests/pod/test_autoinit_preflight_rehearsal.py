@@ -512,7 +512,7 @@ def test_setup_never_invokes_an_interpreter_it_has_not_built_yet():
         return next((i for i, line in enumerate(lines) if pattern in line), -1)
 
     for interpreter, builder in (("/opt/train/bin/python", "uv venv /opt/train"),
-                                 ("/opt/vllm/bin/python", "python3 -m venv /opt/vllm")):
+                                 ("/opt/vllm/bin/python", "uv venv /opt/vllm")):
         built_at = first(builder)
         assert built_at >= 0, f"{builder!r} is no longer in setup"
         used_at = first(interpreter)

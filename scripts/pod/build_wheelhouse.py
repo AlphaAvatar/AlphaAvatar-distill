@@ -91,6 +91,50 @@ def compatible(filename: str) -> bool:
     return any(py_ok(t) for t in pytag.split("."))
 
 
+def select_from_pins(requirements: Path) -> list[dict]:
+    """One wheel per pin, resolved from PyPI. For the vLLM environment.
+
+    The train environment comes from a uv lock, which records URLs and hashes.
+    vLLM's set has no lock in this repo — it is `uv pip compile`'d to exact pins
+    (`requirements-vllm.txt`) — so the URL and hash come from the PyPI API for
+    the pinned version. Same guarantees either way: exact version, exact file,
+    hash verified after download, and a missing wheel raises rather than leaving
+    the pod to reach the network for the remainder.
+    """
+    import json
+    import re
+
+    pins = []
+    for line in requirements.read_text().splitlines():
+        line = line.split("#")[0].strip()
+        m = re.match(r"^([A-Za-z0-9._-]+)==([^\s;]+)", line)
+        if m:
+            pins.append((m.group(1), m.group(2)))
+    chosen, missing = [], []
+    for name, version in pins:
+        url = f"https://pypi.org/pypi/{name}/{version}/json"
+        req = urllib.request.Request(
+            url, headers={"User-Agent": "aadistill-wheelhouse/1.0"})
+        with urllib.request.urlopen(req, timeout=120) as r:
+            meta = json.load(r)
+        cands = [f for f in meta["urls"]
+                 if f["filename"].endswith(".whl") and compatible(f["filename"])]
+        if not cands:
+            missing.append(f"{name}=={version}")
+            continue
+        w = cands[0]
+        chosen.append({"name": name, "version": version, "url": w["url"],
+                       "hash": f"sha256:{w['digests']['sha256']}"})
+    if missing:
+        raise SystemExit(
+            f"no cp{POD_PYTHON[0]}{POD_PYTHON[1]}/manylinux wheel on PyPI for "
+            f"{missing}. Refusing to build a wheelhouse that would send the pod "
+            "back to PyPI for the remainder.")
+    if len(chosen) != len(pins):
+        raise SystemExit(f"resolved {len(chosen)} of {len(pins)} pins")
+    return sorted(chosen, key=lambda c: c["name"])
+
+
 def select(lock_path: Path, requirements: Path) -> list[dict]:
     """One wheel per required package, chosen from the lock. Fails closed."""
     lock = tomllib.load(lock_path.open("rb"))
@@ -156,18 +200,24 @@ def fetch(entry: dict, out: Path) -> tuple[Path, int]:
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--lock", default="uv-cu128.lock",
-                    help="the frozen cu128 resolution")
+                    help="the frozen cu128 resolution; ignored with --from-pins")
+    ap.add_argument("--from-pins", action="store_true",
+                    help="resolve exact pins from PyPI instead of a uv lock "
+                         "(the vLLM environment, which is uv-pip-compile'd)")
     ap.add_argument("--requirements", default=None,
                     help="exported requirements; derived from the lock if absent")
     ap.add_argument("--out", required=True)
     ap.add_argument("--upload", action="store_true",
                     help="push the wheelhouse to the relay after building")
+    ap.add_argument("--relay-path", default=RELAY_PATH)
     args = ap.parse_args()
 
     out = Path(args.out)
     out.mkdir(parents=True, exist_ok=True)
     lock = REPO_ROOT / args.lock
-    if args.requirements:
+    if args.from_pins:
+        reqs = Path(args.requirements)
+    elif args.requirements:
         reqs = Path(args.requirements)
     else:
         reqs = out / "requirements.txt"
@@ -178,7 +228,7 @@ def main() -> int:
             check=True, cwd=REPO_ROOT,
             env={**__import__("os").environ, "UV_LOCKFILE": str(lock)})
 
-    entries = select(lock, reqs)
+    entries = select_from_pins(reqs) if args.from_pins else select(lock, reqs)
     total = 0
     for i, entry in enumerate(entries, 1):
         path, size = fetch(entry, out)
@@ -193,9 +243,9 @@ def main() -> int:
         api = HfApi(token=open(os.path.expanduser(
             "~/.cache/huggingface/token")).read().strip())
         api.upload_folder(folder_path=str(out), repo_id=RELAY_REPO,
-                          repo_type="model", path_in_repo=RELAY_PATH,
-                          allow_patterns=["*.whl", "requirements.txt"])
-        print(f"uploaded to {RELAY_REPO}:{RELAY_PATH}")
+                          repo_type="model", path_in_repo=args.relay_path,
+                          allow_patterns=["*.whl"])
+        print(f"uploaded to {RELAY_REPO}:{args.relay_path}")
     return 0
 
 
