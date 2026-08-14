@@ -327,7 +327,7 @@ CONTINUATION_PLAN_V1 = PreflightPlan(
                      "controls, under the current evaluation identity"),
             produces=("sa and sb on recovery_search_v2",
                       "observed generation reconstruction per control",
-                      "pooled_counts@v1 aggregate + per-seed rates",
+                      "pooled_counts@v2 aggregate + per-seed counts and rates",
                       "materialized equivalence interval and feasibility floor",
                       "per-capability control baselines",
                       "measured battery-evaluation cost for Phase-A repricing"),

@@ -79,8 +79,13 @@ FROZEN_SCORING_CONTRACT = "recovery_search_scoring@v2"
 #: reproduces every number of the `f76008d5…` record exactly
 #: (`logs/autoinit_recovery_scoring_validation.json`). The version stays at 2
 #: because the metric did not move; bumping it would falsely signal that it had.
-FROZEN_SCORING_DIGEST = ("799398e716a429ab3cabef4372ea5aa9b40bc1ae34a015fc7e65a"
-                         "2afa3dc80f6")
+#: Re-pinned 2026-08-14 for `pooled_counts@v2`: the scorer now emits
+#: `usable_scorable`, and `recovery.py` — which is in the scoring source set —
+#: carries the corrected pooled aggregation. `validate_recovery_scoring.py`
+#: reproduces **every** number of the `799398e7…` record, so the metric again did
+#: not move and the contract version stays at 2.
+FROZEN_SCORING_DIGEST = ("808080a7c5d88d5a66760fd0d7eeabc5451c096ad0819f8c5663a"
+                         "0b8224660be")
 
 
 def canonical_manifest_sha256(path: Path) -> str:

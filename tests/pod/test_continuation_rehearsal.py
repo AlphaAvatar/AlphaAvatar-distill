@@ -872,7 +872,7 @@ def test_stage3_aggregation_consumes_what_the_real_scorer_emits(tmp_path):
     import subprocess
 
     from aadistill.autoinit.recovery import (
-        EquivalenceRule, FeasibilityRule, POOLED_COUNTS_V1,
+        EquivalenceRule, FeasibilityRule, POOLED_COUNTS_V2,
     )
 
     spec = importlib.util.spec_from_file_location(
@@ -896,17 +896,23 @@ def test_stage3_aggregation_consumes_what_the_real_scorer_emits(tmp_path):
         assert rc.returncode == 0, rc.stdout[-800:] + rc.stderr[-800:]
         result = json.loads(out.read_text())
         results[seed] = result
-        per_seed.append({"seed": seed, "n": result["n"],
-                         "usable": result["usable"], "correct": result["correct"]})
+        per_seed.append({"seed": seed,
+                         **{k: result[k] for k in POOLED_COUNTS_V2.required_counts}})
 
     sa, sb = results[20260726], results[20260801]
-    pooled = POOLED_COUNTS_V1.pool(per_seed)
-    assert pooled["n"] == sa["n"] + sb["n"]
+    pooled = POOLED_COUNTS_V2.pool(per_seed)
+    assert pooled["n"] == sa["n"] + sb["n"] == 380
+    # The point of v2: correctness is pooled over the SCORABLE denominator, so
+    # 340, not 380. The scorer never divided a seed by 190 either.
+    assert pooled["n_scorable"] == sa["n_scorable"] + sb["n_scorable"] == 340
+    assert pooled["correct_overall"] == pytest.approx(
+        (sa["correct"] + sb["correct"]) / 340)
+    assert pooled["usable_scorable"] == sa["usable_scorable"] + sb["usable_scorable"]
 
-    EquivalenceRule(n_pooled=sa["n_scorable"] + sb["n_scorable"]).materialize(
+    EquivalenceRule(n_pooled=pooled["n_scorable"]).materialize(
         p_pool=pooled["correct_overall"], p_sa=sa["correct_overall"],
         p_sb=sb["correct_overall"]).as_dict()
-    FeasibilityRule(n_pooled=sa["n"] + sb["n"]).materialize(
+    FeasibilityRule(n_pooled=pooled["n"]).materialize(
         u_pool=pooled["usable_rollout_rate"], u_sa=sa["usable_rollout_rate"],
         u_sb=sb["usable_rollout_rate"]).as_dict()
     for cap in sa["per_capability"]:

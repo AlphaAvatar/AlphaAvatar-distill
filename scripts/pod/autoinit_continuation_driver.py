@@ -54,7 +54,7 @@ from aadistill.autoinit.generation import (  # noqa: E402
     observe_generation_protocol,
 )
 from aadistill.autoinit.recovery import (  # noqa: E402
-    CATASTROPHIC_V1, POOLED_COUNTS_V1, EquivalenceRule, FeasibilityRule,
+    CATASTROPHIC_V1, POOLED_COUNTS_V2, EquivalenceRule, FeasibilityRule,
     RecoveryAdmissionError, RuntimeEnvironmentFingerprint,
     recovery_scoring_contract,
 )
@@ -409,12 +409,15 @@ class ContinuationDriver:
             }
             scored.write_text(json.dumps(result, indent=2) + "\n")
             results[name] = result
-            per_seed.append({"seed": control.seed, "n": result["n"],
-                             "usable": result["usable"],
-                             "correct": result["correct"]})
+            # Every denominator the per-seed rates were computed over.
+            # `pooled_counts@v2` refuses a row that omits one, because pooling
+            # correctness over `n` divides 340 scorable prompts by 380.
+            per_seed.append({"seed": control.seed,
+                             **{k: result[k] for k in
+                                POOLED_COUNTS_V2.required_counts}})
             mark(f"CHARACTERIZED:{name}")
 
-        pooled = POOLED_COUNTS_V1.pool(per_seed)
+        pooled = POOLED_COUNTS_V2.pool(per_seed)
         sa, sb = (results[c[0]] for c in CONTROLS)
         thresholds = {
             "schema": "aadistill.autoinit.materialized_thresholds/v2",
@@ -424,14 +427,16 @@ class ContinuationDriver:
             "battery": "recovery_search_v2",
             "from_imported_controls": {n: c.probe_id
                                        for n, c in self.imported.items()},
-            "aggregation": POOLED_COUNTS_V1.as_dict(),
+            "aggregation": POOLED_COUNTS_V2.as_dict(),
             "pooled": pooled, "per_seed": per_seed,
+            # n_pooled and p_pool now describe the SAME population: pooled
+            # correct_overall is over sum(n_scorable), which is this denominator.
             "equivalence_interval": EquivalenceRule(
-                n_pooled=sa["n_scorable"] + sb["n_scorable"]).materialize(
+                n_pooled=pooled["n_scorable"]).materialize(
                     p_pool=pooled["correct_overall"], p_sa=sa["correct_overall"],
                     p_sb=sb["correct_overall"]).as_dict(),
             "feasibility_floor": FeasibilityRule(
-                n_pooled=sa["n"] + sb["n"]).materialize(
+                n_pooled=pooled["n"]).materialize(
                     u_pool=pooled["usable_rollout_rate"],
                     u_sa=sa["usable_rollout_rate"],
                     u_sb=sb["usable_rollout_rate"]).as_dict(),

@@ -49,7 +49,7 @@ from aadistill.autoinit.recovery import (  # noqa: E402
     recovery_scoring_contract,
     RuntimeEnvironmentFingerprint,
     trainer_source_digest,
-    POOLED_COUNTS_V1,
+    POOLED_COUNTS_V2,
     SEED_SA,
     SEED_SB,
     SEED_SC,
@@ -125,7 +125,7 @@ def main() -> None:
         feasibility=FeasibilityRule(n_pooled=battery["n_prompts"] * 2),
         catastrophic=CATASTROPHIC_V1,
         capability_schema=CAPABILITY_SCHEMA_V1,
-        aggregation=POOLED_COUNTS_V1,
+        aggregation=POOLED_COUNTS_V2,
         survivor_rule=("rung 1: exclude searched leaves below the feasibility floor, "
                        "then take the top 2 by correct_overall; the canonical "
                        "control advances unconditionally and consumes no slot"),
@@ -204,7 +204,7 @@ def main() -> None:
         "recovery": {
             "plan": plan.as_dict(),
             "seeds": {"sa": SEED_SA, "sb": SEED_SB, "sc_conditional": SEED_SC},
-            "seed_aggregation": POOLED_COUNTS_V1.as_dict(),
+            "seed_aggregation": POOLED_COUNTS_V2.as_dict(),
             "canonical_control": CANONICAL_CONTROL,
             "battery": {
                 "asset": args.recovery_search,

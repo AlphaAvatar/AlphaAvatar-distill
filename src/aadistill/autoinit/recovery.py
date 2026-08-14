@@ -193,6 +193,145 @@ POOLED_COUNTS_V1 = SeedAggregation()
 
 
 @dataclass(frozen=True)
+class ScorableAwareSeedAggregation:
+    """Pooled counts that obey the scorer's own denominators. **Use this one.**
+
+    `pooled_counts@v1` pools `correct` over `n` and over `usable`. The scorer has
+    never computed correctness that way, and cannot: of the battery's 190 prompts
+    only **170 are correctness-scorable**, because the 20 `code` items have no
+    correctness oracle and counting them wrong would depress every candidate
+    identically. Per seed the scorer therefore reports
+
+        usable_rollout_rate  = usable / n                 (behaviour: all 190)
+        correct_overall      = correct / n_scorable       (correctness: 170)
+        correct_given_usable = correct / usable_scorable  (usable AND scorable)
+
+    Pooling two seeds under v1 divided by **380** instead of 340, understating
+    `correct_overall` by ~12%, and divided `correct_given_usable` by every usable
+    rollout including the 20 unscorable `code` ones. The equivalence rule then
+    declared `n_pooled = sa.n_scorable + sb.n_scorable` = 340, so `p` and `n`
+    described different populations — an interval computed from a probability and
+    a denominator that do not belong together.
+
+    v2 pools each numerator over **its own** denominator:
+
+        usable_rollout_rate  = sum(usable_s)  / sum(n_s)
+        correct_overall      = sum(correct_s) / sum(n_scorable_s)
+        correct_given_usable = sum(correct_s) / sum(usable_scorable_s)
+
+    This is an implementation correction, not new science: it makes the pooled
+    numbers mean what the already-frozen per-seed scorer semantics say they mean.
+    v1 is preserved unmodified because artifacts were written under it.
+    """
+
+    aggregation_id: str = "pooled_counts"
+    version: int = 2
+    description: str = ("pooled numerator/denominator across all completed seeds, "
+                        "each rate over its own denominator: behaviour over all "
+                        "prompts, correctness over scorable prompts only")
+
+    #: Every count a caller must supply. `n_scorable` and `usable_scorable` are
+    #: what v1 lacked, which is why it had to reuse `n` and `usable`.
+    required_counts: tuple[str, ...] = ("n", "usable", "n_scorable",
+                                        "usable_scorable", "correct")
+
+    def as_dict(self) -> dict[str, Any]:
+        return {"aggregation_id": self.aggregation_id, "version": self.version,
+                "description": self.description,
+                "required_counts": list(self.required_counts),
+                "formulas": {
+                    "usable_rollout_rate": "sum(usable_s) / sum(n_s)",
+                    "correct_overall": "sum(correct_s) / sum(n_scorable_s)",
+                    "correct_given_usable":
+                        "sum(correct_s) / sum(usable_scorable_s)",
+                },
+                "supersedes": {
+                    "aggregation": f"{self.aggregation_id}@v1",
+                    "defect": ("v1 pooled correct over n and over usable, but the "
+                               "scorer computes correctness over n_scorable and "
+                               "usable_scorable; two seeds divided by 380 instead "
+                               "of 340 and mixed unscorable code rollouts into the "
+                               "conditional denominator"),
+                }}
+
+    def pool(self, per_seed: Sequence[Mapping[str, Any]]) -> dict[str, Any]:
+        """Combine one candidate's per-seed counts. Rates are derived, never read.
+
+        Refuses a caller that omits a denominator: passing only `n`/`usable`/
+        `correct` is exactly the v1 call site this replaces, and defaulting the
+        missing denominators to `n` and `usable` would silently reintroduce the
+        defect.
+        """
+        if not per_seed:
+            raise ValueError("no seed results to pool")
+        seeds = [int(r["seed"]) for r in per_seed]
+        if len(set(seeds)) != len(seeds):
+            raise ValueError(f"duplicate seeds in {seeds}; each seed counts once")
+
+        def count(row, key) -> int:
+            if key not in row:
+                raise ValueError(
+                    f"seed {row.get('seed')}: {key} is missing. "
+                    f"{self.aggregation_id}@v{self.version} needs "
+                    f"{list(self.required_counts)}; a correctness rate cannot be "
+                    "pooled without the scorable denominator it was computed over.")
+            value = row[key]
+            # Refuse a float outright rather than truncating it. `int(0.8) == 0`
+            # would silently turn a caller's rate into a count of zero, which is
+            # the exact confusion this whole definition exists to prevent.
+            if isinstance(value, bool) or not isinstance(value, int):
+                raise ValueError(
+                    f"seed {row.get('seed')}: {key}={value!r} is not an integer "
+                    "count. These are counts, not rates — pass the numerator and "
+                    "denominator, not a per-seed rate.")
+            if value < 0:
+                raise ValueError(f"seed {row.get('seed')}: {key} is negative")
+            return value
+
+        totals = {k: sum(count(r, k) for r in per_seed)
+                  for k in self.required_counts}
+        n, usable = totals["n"], totals["usable"]
+        n_scorable, usable_scorable = totals["n_scorable"], totals["usable_scorable"]
+        correct = totals["correct"]
+        if n <= 0:
+            raise ValueError("pooled n is zero")
+        if usable > n:
+            raise ValueError(f"pooled usable={usable} exceeds n={n}")
+        if n_scorable > n:
+            raise ValueError(
+                f"pooled n_scorable={n_scorable} exceeds n={n}; the scorable set "
+                "is a subset of the battery")
+        if usable_scorable > min(usable, n_scorable):
+            raise ValueError(
+                f"pooled usable_scorable={usable_scorable} exceeds usable={usable} "
+                f"or n_scorable={n_scorable}; it is their intersection")
+        # `correct => usable AND scorable` holds by construction in
+        # `score_recovery_row`; if it fails here the row scorer changed.
+        if correct > usable_scorable:
+            raise ValueError(
+                f"pooled correct={correct} exceeds usable_scorable="
+                f"{usable_scorable}; correctness is defined as correct IN a "
+                "usable rollout on a scorable prompt")
+        return {
+            "seeds": sorted(seeds),
+            "n": n, "usable": usable, "correct": correct,
+            "n_scorable": n_scorable, "usable_scorable": usable_scorable,
+            "usable_rollout_rate": usable / n,
+            # Over the scorable denominator, which is what the scorer used.
+            "correct_overall": (correct / n_scorable) if n_scorable else None,
+            # Undefined rather than 0.0 when nothing scorable was usable: a
+            # checkpoint that never produced a valid rollout has no conditional
+            # accuracy, and reporting 0.0 would make it look measured.
+            "correct_given_usable": (correct / usable_scorable
+                                     if usable_scorable else None),
+            "aggregation": f"{self.aggregation_id}@v{self.version}",
+        }
+
+
+POOLED_COUNTS_V2 = ScorableAwareSeedAggregation()
+
+
+@dataclass(frozen=True)
 class EquivalenceRule:
     """The behaviour equivalence interval. **One definition, and it is seed-aware.**
 
@@ -1489,7 +1628,7 @@ PREFLIGHT_PLAN_V1 = PreflightPlan(stages=(
         stage=3, name="control characterization", blocking=False,
         purpose="materialize the frozen threshold formulas from control data only",
         produces=("sa and sb on recovery_search_v2",
-                  "pooled_counts@v1 aggregate + per-seed rates",
+                  "pooled_counts@v2 aggregate + per-seed counts and rates",
                   "materialized equivalence interval",
                   "materialized feasibility floor",
                   "per-capability control baselines"),
@@ -1614,8 +1753,11 @@ class SuccessiveHalvingPlan:
     capability_schema: CapabilitySchema | None = CAPABILITY_SCHEMA_V1
     #: Seed-aware usable-rollout floor. Materialized from the control.
     feasibility: FeasibilityRule | None = None
-    #: How per-seed counts become one number. Part of the plan hash.
-    aggregation: SeedAggregation = POOLED_COUNTS_V1
+    #: How per-seed counts become one number. Part of the plan hash. Defaults to
+    #: v2: v1 pooled correctness over the wrong denominator, and a default that
+    #: still selected it would put the defect back into every plan that does not
+    #: name an aggregation explicitly. v1 remains importable for provenance.
+    aggregation: SeedAggregation | ScorableAwareSeedAggregation = POOLED_COUNTS_V2
     survivor_rule: str = ""
     winner_rule: str = ""
     battery_asset_id: str = ""

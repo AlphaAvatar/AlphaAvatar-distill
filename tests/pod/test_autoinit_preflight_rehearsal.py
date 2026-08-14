@@ -92,6 +92,7 @@ def fake_result(usable_rate: float, correct_rate: float, seed: int) -> dict:
     n = 190
     usable = int(round(n * usable_rate))
     return {"n": n, "usable": usable, "n_scorable": 170,
+            "usable_scorable": int(round(170 * usable_rate)),
             "correct": int(round(170 * usable_rate * correct_rate)),
             "usable_rollout_rate": usable_rate,
             "correct_overall": round(usable_rate * correct_rate, 4),
@@ -178,14 +179,14 @@ def build(tmp_path, *, stage0=True, gates=None, controls_ok=True,
         if stage3 == "contract_drift":
             return d.record(3, False, "scored under a different scoring contract")
         from aadistill.autoinit.recovery import (
-            CATASTROPHIC_V1, POOLED_COUNTS_V1, EquivalenceRule, FeasibilityRule)
+            CATASTROPHIC_V1, POOLED_COUNTS_V2, EquivalenceRule, FeasibilityRule)
         sa, sb = fake_result(0.62, 0.31, mod.SEED_SA), fake_result(0.58, 0.29, mod.SEED_SB)
-        pooled = POOLED_COUNTS_V1.pool([
-            {"seed": mod.SEED_SA, "n": sa["n"], "usable": sa["usable"],
-             "correct": sa["correct"]},
-            {"seed": mod.SEED_SB, "n": sb["n"], "usable": sb["usable"],
-             "correct": sb["correct"]}])
-        eq = EquivalenceRule(n_pooled=340).materialize(
+        pooled = POOLED_COUNTS_V2.pool([
+            {"seed": mod.SEED_SA,
+             **{k: sa[k] for k in POOLED_COUNTS_V2.required_counts}},
+            {"seed": mod.SEED_SB,
+             **{k: sb[k] for k in POOLED_COUNTS_V2.required_counts}}])
+        eq = EquivalenceRule(n_pooled=pooled["n_scorable"]).materialize(
             p_pool=pooled["correct_overall"], p_sa=sa["correct_overall"],
             p_sb=sb["correct_overall"]).as_dict()
         fl = FeasibilityRule(n_pooled=380).materialize(
@@ -327,7 +328,11 @@ def test_the_soft_stop_refuses_a_control_it_cannot_finish(tmp_path):
 
 def test_the_authorization_bounds_the_session(tmp_path):
     auth = SpendAuthorization.load(AUTH_PATH)
-    auth.require_plan(PREFLIGHT_PLAN_V1.plan_hash)
+    # Its plan hash no longer matches either: the preflight's Stage-3 text names
+    # the aggregation it produces, and that moved to `pooled_counts@v2`. Asserted
+    # rather than repaired — see the retirement test below.
+    with pytest.raises(AuthorizationError, match="does not transfer"):
+        auth.require_plan(PREFLIGHT_PLAN_V1.plan_hash)
     assert auth.hard_cap_usd == 8.60 and auth.expected_usd == 4.20
     assert auth.authorized_stages == (0, 1, 2, 3)
     with pytest.raises(AuthorizationError):
@@ -344,7 +349,8 @@ def test_the_micro_preflight_authorization_is_retired_by_its_own_gate():
     """It cannot be spent again, and the mechanism is what retired it.
 
     The preflight is finished: its two permanent controls exist and must not be
-    retrained. Its launcher was then edited — to give a session's identity
+    retrained. TWO independent gates now refuse it: the harness digest and the
+    plan hash. Its launcher was edited — to give a session's identity
     (audit directory, terminal markers, artifact spec, products to fetch) its
     own overridable hooks, so the continuation could stop inheriting the
     preflight's — which changed the harness digest. That is exactly the event
@@ -357,6 +363,8 @@ def test_the_micro_preflight_authorization_is_retired_by_its_own_gate():
     auth = SpendAuthorization.load(AUTH_PATH)
     with pytest.raises(AuthorizationError, match="differ"):
         auth.require_harness(REPO)
+    with pytest.raises(AuthorizationError, match="does not transfer"):
+        auth.require_plan(PREFLIGHT_PLAN_V1.plan_hash)
 
 
 def test_an_unrehearsed_harness_cannot_consume_the_authorization(tmp_path):
@@ -479,7 +487,10 @@ def test_the_success_path_completes_and_cannot_reach_phase_a(tmp_path):
     assert thresholds["equivalence_interval"]["value"] > 0
     assert thresholds["feasibility_floor"]["value"] >= 0.30
     assert set(thresholds["per_capability_control_baseline"]) == set(CAP)
-    assert thresholds["pooled"]["aggregation"] == "pooled_counts@v1"
+    assert thresholds["pooled"]["aggregation"] == "pooled_counts@v2"
+    # The interval's denominator is the population its probability came from.
+    assert thresholds["equivalence_interval"]["n_pooled"] == \
+        thresholds["pooled"]["n_scorable"]
 
 
 def test_setup_never_invokes_an_interpreter_it_has_not_built_yet():

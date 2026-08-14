@@ -339,6 +339,7 @@ def main() -> None:
         "correct_overall": result["correct_overall"],
         "correct_given_usable": result["correct_given_usable"],
         "n_scorable": result["n_scorable"],
+        "usable_scorable": result["usable_scorable"],
         "per_capability_usable": {k: v["usable_rollout_rate"]
                                   for k, v in result["per_capability"].items()},
     }, indent=2))
@@ -355,6 +356,11 @@ def summarize(rows: list[dict], *, scorable: bool | None) -> dict:
     out = {
         "n": n, "usable": usable, "correct": correct,
         "n_scorable": n_scorable,
+        # Emitted, not just used locally: pooling two seeds needs every
+        # denominator the per-seed rates were computed over. Without this,
+        # `correct_given_usable` can only be pooled over `usable`, which mixes in
+        # the unscorable `code` rollouts — the defect `pooled_counts@v2` fixes.
+        "usable_scorable": usable_scorable,
         # `usable_rollout_rate` is over ALL prompts (behaviour is measurable
         # everywhere); `correct_overall` is over SCORABLE prompts only, because
         # the 20 `code` prompts have no correctness oracle and counting them as

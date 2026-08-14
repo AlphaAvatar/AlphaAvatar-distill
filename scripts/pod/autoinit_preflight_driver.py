@@ -52,7 +52,7 @@ from aadistill.autoinit.generation import (  # noqa: E402
 from aadistill.autoinit.ranking import EPSILON_RESPONSE_V1, PARETO_V1  # noqa: E402
 from aadistill.autoinit.recovery import (  # noqa: E402
     CATASTROPHIC_V1,
-    POOLED_COUNTS_V1,
+    POOLED_COUNTS_V2,
     PREFLIGHT_PLAN_V1,
     SEED_SA,
     SEED_SB,
@@ -817,16 +817,19 @@ class Driver:
             }
             scored.write_text(json.dumps(result, indent=2) + "\n")
             results[name] = result
-            per_seed.append({"seed": seed, "n": result["n"],
-                             "usable": result["usable"], "correct": result["correct"]})
+            # Every denominator the per-seed rates were computed over;
+            # `pooled_counts@v2` refuses a row that omits one.
+            per_seed.append({"seed": seed,
+                             **{k: result[k]
+                                for k in POOLED_COUNTS_V2.required_counts}})
 
-        pooled = POOLED_COUNTS_V1.pool(per_seed)
+        pooled = POOLED_COUNTS_V2.pool(per_seed)
         sa, sb = (results[c[0]] for c in CONTROLS)
         equivalence = EquivalenceRule(
-            n_pooled=sa["n_scorable"] + sb["n_scorable"]).materialize(
+            n_pooled=pooled["n_scorable"]).materialize(
                 p_pool=pooled["correct_overall"], p_sa=sa["correct_overall"],
                 p_sb=sb["correct_overall"]).as_dict()
-        feasibility = FeasibilityRule(n_pooled=sa["n"] + sb["n"]).materialize(
+        feasibility = FeasibilityRule(n_pooled=pooled["n"]).materialize(
             u_pool=pooled["usable_rollout_rate"], u_sa=sa["usable_rollout_rate"],
             u_sb=sb["usable_rollout_rate"]).as_dict()
         capabilities = {
@@ -853,7 +856,7 @@ class Driver:
             "observed_generation_fingerprint_per_control": {
                 name: gen.get("observed_generation_fingerprint")
                 for name, gen in generation.items()},
-            "aggregation": POOLED_COUNTS_V1.as_dict(),
+            "aggregation": POOLED_COUNTS_V2.as_dict(),
             "pooled": pooled, "per_seed": per_seed,
             "equivalence_interval": equivalence,
             "feasibility_floor": feasibility,

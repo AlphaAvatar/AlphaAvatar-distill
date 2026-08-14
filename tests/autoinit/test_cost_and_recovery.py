@@ -1128,3 +1128,94 @@ def test_every_preflight_stop_condition_is_a_whole_string():
     with pytest.raises(TypeError, match="trailing comma"):
         PreflightStage(stage=9, name="x", purpose="y", produces=("a",),
                        blocking=False, stop_conditions="one condition")
+
+
+# --- seed aggregation v2: correctness over the scorable denominator ----------
+
+
+def test_v1_pooled_correctness_over_the_wrong_denominator():
+    """The defect, stated as a test so it cannot be reintroduced quietly.
+
+    The battery is 190 prompts of which 170 are correctness-scorable; the 20
+    `code` items have no oracle. v1 pools `correct` over `n`, so two seeds are
+    divided by 380 when the scorer divided each seed by 170.
+    """
+    from aadistill.autoinit.recovery import POOLED_COUNTS_V1, POOLED_COUNTS_V2
+
+    per_seed_v1 = [
+        {"seed": SEED_SA, "n": 190, "usable": 120, "correct": 60},
+        {"seed": SEED_SB, "n": 190, "usable": 130, "correct": 70},
+    ]
+    v1 = POOLED_COUNTS_V1.pool(per_seed_v1)
+    assert v1["correct_overall"] == pytest.approx(130 / 380)
+
+    per_seed_v2 = [
+        {**row, "n_scorable": 170, "usable_scorable": usable_scorable}
+        for row, usable_scorable in zip(per_seed_v1, (108, 117))
+    ]
+    v2 = POOLED_COUNTS_V2.pool(per_seed_v2)
+    assert v2["correct_overall"] == pytest.approx(130 / 340)
+    assert v2["n_scorable"] == 340
+    # ~12% understatement, which is the size of the 20 unscorable code prompts.
+    assert v1["correct_overall"] < v2["correct_overall"]
+    assert v2["correct_overall"] / v1["correct_overall"] == pytest.approx(380 / 340)
+    # Behaviour is unaffected: it was always over all 190.
+    assert v2["usable_rollout_rate"] == pytest.approx(v1["usable_rollout_rate"])
+    # And the conditional stops counting unscorable code rollouts.
+    assert v2["correct_given_usable"] == pytest.approx(130 / 225)
+    assert v1["correct_given_usable"] == pytest.approx(130 / 250)
+
+
+def test_v2_refuses_a_row_that_omits_a_denominator():
+    """A v1-shaped call must fail loudly, not default to `n` and `usable`."""
+    from aadistill.autoinit.recovery import POOLED_COUNTS_V2
+
+    with pytest.raises(ValueError, match="n_scorable is missing"):
+        POOLED_COUNTS_V2.pool([{"seed": SEED_SA, "n": 190, "usable": 120,
+                                "correct": 60}])
+    with pytest.raises(ValueError, match="usable_scorable is missing"):
+        POOLED_COUNTS_V2.pool([{"seed": SEED_SA, "n": 190, "usable": 120,
+                                "correct": 60, "n_scorable": 170}])
+
+
+def test_v2_enforces_the_subset_relationships_between_denominators():
+    from aadistill.autoinit.recovery import POOLED_COUNTS_V2
+
+    def pool(**over):
+        row = {"seed": SEED_SA, "n": 190, "usable": 120, "n_scorable": 170,
+               "usable_scorable": 108, "correct": 60}
+        return POOLED_COUNTS_V2.pool([{**row, **over}])
+
+    assert pool()["correct_overall"] == pytest.approx(60 / 170)
+    with pytest.raises(ValueError, match="n_scorable=200 exceeds n"):
+        pool(n_scorable=200)
+    with pytest.raises(ValueError, match="usable_scorable=130 exceeds"):
+        pool(usable_scorable=130)
+    with pytest.raises(ValueError, match="correct=109 exceeds usable_scorable"):
+        pool(correct=109)
+    with pytest.raises(ValueError, match="not an integer count"):
+        pool(usable_scorable=0.8)
+
+
+def test_v2_leaves_a_candidate_with_no_scorable_usable_rollouts_undefined():
+    from aadistill.autoinit.recovery import POOLED_COUNTS_V2
+
+    pooled = POOLED_COUNTS_V2.pool([{"seed": SEED_SA, "n": 190, "usable": 20,
+                                     "n_scorable": 170, "usable_scorable": 0,
+                                     "correct": 0}])
+    assert pooled["correct_given_usable"] is None
+    assert pooled["correct_overall"] == pytest.approx(0.0)
+    assert pooled["usable_rollout_rate"] == pytest.approx(20 / 190)
+
+
+def test_v1_is_preserved_unmodified_for_provenance():
+    """Artifacts were written under v1; it stays readable and stays wrong."""
+    from aadistill.autoinit.recovery import POOLED_COUNTS_V1, POOLED_COUNTS_V2
+
+    assert POOLED_COUNTS_V1.version == 1 and POOLED_COUNTS_V2.version == 2
+    assert POOLED_COUNTS_V1.as_dict()["formulas"]["correct_overall"] == \
+        "sum(correct_s) / sum(n_s)"
+    assert POOLED_COUNTS_V2.as_dict()["formulas"]["correct_overall"] == \
+        "sum(correct_s) / sum(n_scorable_s)"
+    assert POOLED_COUNTS_V2.as_dict()["supersedes"]["aggregation"] == \
+        "pooled_counts@v1"
