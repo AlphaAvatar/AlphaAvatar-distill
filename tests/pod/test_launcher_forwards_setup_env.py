@@ -115,6 +115,15 @@ def test_launcher_forwards_every_variable_the_setup_reads(launch, setup):
 def test_forwarded_variables_have_a_launcher_side_default(launch, setup):
     """Forwarding an unset variable forwards an empty string, which is worse."""
     needed = required_env(setup.read_text())
+    # ...unless the setup itself refuses an empty one. `${VAR:?msg}` exits
+    # before the value is ever consumed, which is a stronger guarantee than a
+    # launcher-side default rather than a weaker one: the failure is immediate
+    # and named, instead of an empty string flowing into a command. The unset
+    # cases are executed, not assumed, in
+    # tests/pod/test_continuation_rehearsal.py.
+    # `test_launcher_forwards_every_variable_the_setup_reads` still requires the
+    # launcher to forward these; only the default requirement is lifted.
+    needed -= set(re.findall(r"\$\{([A-Z][A-Z0-9_]+):\?", setup.read_text()))
     launch_text = launch.read_text()
     if launch.suffix == ".py":
         undefaulted = sorted(v for v in needed

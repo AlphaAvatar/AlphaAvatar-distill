@@ -386,6 +386,22 @@ class Preflight:
         return digest
 
     # -- 3. setup ----------------------------------------------------------
+    # -- which authorization the SETUP script must check ------------------
+    def session_auth_path(self) -> str:
+        """The authorization of the session that is invoking setup.
+
+        Setup used to hardcode the micro-preflight artifact and the preflight
+        plan. That is a cross-session binding: on 2026-08-14 the continuation
+        died in setup ($0.1369) because `PREFLIGHT_PLAN_V1.plan_hash` had moved
+        under `pooled_counts@v2` and an unrelated historical artifact no longer
+        matched it. The guard was right; the binding was wrong. Each session now
+        names its own.
+        """
+        return AUTH_PATH
+
+    def session_plan_hash(self) -> str:
+        return PREFLIGHT_PLAN_V1.plan_hash
+
     def setup_on_draw(self, draw: int) -> str:
         ep = self.wait_endpoint()
         if not ep:
@@ -424,6 +440,8 @@ class Preflight:
         target.run(
             f"cd {WS} && SESSION_COMMIT={self.a.session_commit} "
             f"BUNDLE_NAME={self.a.bundle} "
+            f"SESSION_AUTH_PATH={self.session_auth_path()} "
+            f"SESSION_PLAN_HASH={self.session_plan_hash()} "
             f"TEACHER_REVISION={self.a.teacher_revision} "
             f"UV_MAX_S={self.a.uv_max_s} TESTS_MAX_S={self.a.tests_max_s} "
             f"bash {WS}/autoinit_preflight_setup.sh > {WS}/setup.log 2>&1; "

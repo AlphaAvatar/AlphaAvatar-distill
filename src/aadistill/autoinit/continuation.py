@@ -360,13 +360,19 @@ CONTINUATION_HARNESS_SOURCE_FILES_V1: tuple[str, ...] = (
 #: The narrow authorization this session runs under. Characterization only: it
 #: trains nothing, and Phase A is not expressible in this artifact at all.
 CONTINUATION_AUTHORIZATION = SpendAuthorization(
-    authorization_id="autoinit.control_characterization.2026-08-14T1953Z",
-    granted_utc="2026-08-14T19:53:39Z",
-    granted_by=("maintainer, 2026-08-15, explicitly: '$4.10 expected / $4.40 hard "
-                "cumulative for the Stage-3 continuation, with a per-launch hard "
-                "limit of $1.6896'. The earlier artifact 759eaf8c… asserted this "
-                "same amount BEFORE that approval existed and is void; it was "
-                "never executed and no pod was created under it."),
+    authorization_id="autoinit.control_characterization.2026-08-14T2039Z",
+    granted_utc="2026-08-14T20:39:13Z",
+    granted_by=("maintainer, after the attempt-5 review: '$4.23 expected / $4.54 "
+                "hard cumulative, with the per-launch hard limit remaining "
+                "$1.6896'. Cumulative because $2.8420 is already spent across "
+                "five attempts; one more launch prices at $1.3860 expected / "
+                "$1.6896 hard, giving $4.2280 / $4.5316, which these figures "
+                "cover. THREE earlier artifacts are void and must not be "
+                "reused: 759eaf8c… (asserted amounts before the approval "
+                "existed), dc770f36… (granted_utc ~4h in the future when "
+                "committed), and e4854818… (CONSUMED by the attempt-5 "
+                "invocation, which terminated INCOMPLETE at $0.1369). This "
+                "grant is likewise for ONE launcher invocation."),
     plan_id=CONTINUATION_PLAN_V1.plan_id,
     plan_hash=CONTINUATION_PLAN_V1.plan_hash,
     # Priced by the launcher's own `make_plan`, re-run 2026-08-15 against the
@@ -390,8 +396,8 @@ CONTINUATION_AUTHORIZATION = SpendAuthorization(
     # Raising the cap does not loosen the session: `make_plan` still prices one
     # run at soft $1.5246 / hard $1.6896, so a single launch cannot spend the
     # headroom that covers the four failures before it.
-    expected_usd=4.10,
-    hard_cap_usd=4.40,
+    expected_usd=4.23,
+    hard_cap_usd=4.54,
     #: Named by the maintainer alongside the cumulative figure, and enforced in
     #: `make_plan` before a pod can exist: the $4.40 covers four failed attempts
     #: plus one more, and no single launch may draw on that history.

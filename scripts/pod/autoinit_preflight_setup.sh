@@ -404,16 +404,26 @@ mark "TESTS_OK:${tt}s"
 # The authorization must be loadable and bound to the live plan BEFORE the
 # driver starts, so a tampered or stale artifact fails at $0.30 rather than
 # after a stage has run.
-say "verifying the spend authorization binds to this plan"
-cd "$REPO" && PYTHONPATH=src /opt/train/bin/python -c "
+#
+# It is THIS SESSION's authorization, passed in by the launcher. Hardcoding the
+# micro-preflight artifact and the preflight plan made every session depend on
+# an unrelated one: on 2026-08-14 the continuation died here ($0.1369) because
+# the preflight plan hash had moved under `pooled_counts@v2` and a historical
+# artifact no longer matched it. Re-issuing that artifact would only postpone
+# the same failure to the next time either plan moves.
+: "${SESSION_AUTH_PATH:?the launcher must name this session's authorization}"
+: "${SESSION_PLAN_HASH:?the launcher must name this session's plan hash}"
+say "verifying $SESSION_AUTH_PATH binds to this session's plan"
+cd "$REPO" && PYTHONPATH=src SESSION_AUTH_PATH="$SESSION_AUTH_PATH" \
+  SESSION_PLAN_HASH="$SESSION_PLAN_HASH" /opt/train/bin/python -c "
+import os
 from aadistill.autoinit.authorization import SpendAuthorization
-from aadistill.autoinit.recovery import PREFLIGHT_PLAN_V1
-a = SpendAuthorization.load('logs/autoinit_micro_preflight_authorization.json')
-a.require_plan(PREFLIGHT_PLAN_V1.plan_hash)
-assert a.allows_phase_a is False
+a = SpendAuthorization.load(os.environ['SESSION_AUTH_PATH'])
+a.require_plan(os.environ['SESSION_PLAN_HASH'])
+assert a.allows_phase_a is False, 'this artifact claims Phase A authorization'
 print(f'  {a.authorization_id}: stages {list(a.authorized_stages)}, '
       f'hard \${a.hard_cap_usd:.2f}, phase A {a.allows_phase_a}')
-"
+" || { say "THE SESSION AUTHORIZATION DOES NOT BIND TO THIS SESSION'S PLAN"; mark "AUTHORIZATION_MISMATCH"; exit 98; }
 mark AUTHORIZATION_OK
 
 nvidia-smi --query-gpu=name,memory.total,driver_version --format=csv,noheader

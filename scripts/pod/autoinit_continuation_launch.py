@@ -120,6 +120,16 @@ class Continuation(_preflight.Preflight):
         because it created them; creating nothing, this fetches nothing."""
         return []
 
+    # -- this session's own authorization, named explicitly ---------------
+    def session_auth_path(self) -> str:
+        """Not the inherited constant. The base module's `AUTH_PATH` is
+        retargeted at startup, but a setup gate that decides what may run
+        should not depend on a monkeypatch holding."""
+        return AUTH_PATH
+
+    def session_plan_hash(self) -> str:
+        return CONTINUATION_PLAN_V1.plan_hash
+
     # -- budget: no training phase, so the shape is different -------------
     def make_plan(self) -> bool:
         phases = (Phase("import_verification", 2.0),

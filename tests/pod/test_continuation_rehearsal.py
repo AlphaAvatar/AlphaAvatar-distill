@@ -19,6 +19,7 @@ than on a fixture built to satisfy it.
 
 from __future__ import annotations
 
+import os
 import json
 import shutil
 import sys
@@ -752,14 +753,19 @@ def test_the_continuation_authorization_is_narrow_and_cannot_train():
     from aadistill.autoinit.authorization import AuthorizationError
     from aadistill.autoinit.continuation import CONTINUATION_AUTHORIZATION as auth
 
-    # Raised 2026-08-14 with maintainer approval after attempt 1 spent $0.6312
-    # on a cold host and a pod-only test-gate failure. The cap covers the whole
-    # continuation; a single session still self-limits at its own $1.6352.
-    assert (auth.expected_usd, auth.hard_cap_usd) == (4.10, 4.40)
+    # Raised to $4.23/$4.54 after the attempt-5 review. The cap is CUMULATIVE
+    # over the continuation -- $2.8420 spent across five attempts plus one more
+    # launch at $1.3860 expected / $1.6896 hard = $4.2280 / $4.5316 -- and a
+    # single launch is bound separately by per_launch_hard_usd, enforced in
+    # make_plan. The cumulative figure is not one run's budget.
+    assert (auth.expected_usd, auth.hard_cap_usd) == (4.23, 4.54)
+    assert auth.per_launch_hard_usd == 1.6896
+    assert 2.8420 + 1.3860 <= auth.expected_usd
+    assert 2.8420 + 1.6896 <= auth.hard_cap_usd
     assert auth.plan_hash == CONTINUATION_PLAN_V1.plan_hash
     assert auth.allows_phase_a is False and auth.automatic_phase_a_start is False
     with pytest.raises(AuthorizationError):
-        auth.require_within_cap(4.41, what="session")
+        auth.require_within_cap(4.55, what="session")
     with pytest.raises(AuthorizationError):
         auth.require_stage(4)
     with pytest.raises(AuthorizationError, match="separately unauthorized"):
@@ -1096,6 +1102,106 @@ def test_the_vllm_wheelhouse_is_frozen_by_bytes_not_only_by_version():
         # A missing wheel: the exact shape the relay quota produced at 175/196.
         (root / "wh" / "beta-2.0-py3-none-any.whl").unlink()
         assert run().returncode == 96
+
+
+def test_setup_verifies_THIS_sessions_authorization_and_fails_closed():
+    """Extracted from the real script and executed, not pattern-matched.
+
+    Attempt 5 died here ($0.1369): setup hardcoded the micro-preflight artifact
+    and the preflight plan, so the continuation was gated on an unrelated
+    session's binding, which had gone stale when `pooled_counts@v2` moved that
+    plan's hash. The guard was correct and the binding was wrong.
+
+    The only substitution is the interpreter path — `/opt/train/bin/python`
+    exists on the pod, not here. Everything else is the shipped text.
+    """
+    import subprocess
+    import sys
+    import tempfile
+
+    from aadistill.autoinit.continuation import CONTINUATION_PLAN_V1
+
+    setup = (REPO / "scripts/pod/autoinit_preflight_setup.sh").read_text()
+    lines = setup.splitlines(True)
+    start = next(i for i, l in enumerate(lines)
+                 if l.startswith(': "${SESSION_AUTH_PATH'))
+    end = next(i for i, l in enumerate(lines)
+               if l.rstrip() == "mark AUTHORIZATION_OK")
+    block = "".join(lines[start:end + 1]).replace("/opt/train/bin/python",
+                                                  sys.executable)
+
+    with tempfile.TemporaryDirectory() as tmp:
+        markers = Path(tmp) / "markers"
+        script = Path(tmp) / "gate.sh"
+        script.write_text(
+            'set -euo pipefail\n'
+            'say() { echo "  $*"; }\n'
+            f'mark() {{ echo "$*" >> "{markers}"; }}\n'
+            f'REPO="{REPO}"\n' + block + 'echo REACHED_THE_DRIVER\n')
+
+        def run(auth: str | None, plan: str | None):
+            env = dict(os.environ)
+            env.pop("SESSION_AUTH_PATH", None)
+            env.pop("SESSION_PLAN_HASH", None)
+            if auth is not None:
+                env["SESSION_AUTH_PATH"] = auth
+            if plan is not None:
+                env["SESSION_PLAN_HASH"] = plan
+            markers.write_text("")
+            r = subprocess.run(["bash", str(script)], capture_output=True,
+                               text=True, env=env, cwd=str(REPO))
+            return r, markers.read_text()
+
+        # This session's own authorization and plan: must reach the driver.
+        ok, marks = run("logs/autoinit_continuation_authorization.json",
+                        CONTINUATION_PLAN_V1.plan_hash)
+        assert ok.returncode == 0, ok.stdout + ok.stderr
+        assert "REACHED_THE_DRIVER" in ok.stdout
+        assert marks.strip() == "AUTHORIZATION_OK"
+
+        # A plan that is not this session's: fail closed, classified, no driver.
+        bad, marks = run("logs/autoinit_continuation_authorization.json", "0" * 64)
+        assert bad.returncode == 98, f"rc={bad.returncode}: {bad.stdout}{bad.stderr}"
+        assert "REACHED_THE_DRIVER" not in bad.stdout
+        assert marks.strip() == "AUTHORIZATION_MISMATCH"
+
+        # The exact attempt-5 failure: an unrelated session's artifact. It must
+        # still be refused -- the fix is that we no longer ASK it, not that it
+        # would now pass.
+        stale, marks = run("logs/autoinit_micro_preflight_authorization.json",
+                           CONTINUATION_PLAN_V1.plan_hash)
+        assert stale.returncode == 98
+        assert marks.strip() == "AUTHORIZATION_MISMATCH"
+
+        # And the launcher must name them: an unset variable cannot silently
+        # skip the gate.
+        for auth, plan in ((None, CONTINUATION_PLAN_V1.plan_hash),
+                           ("logs/autoinit_continuation_authorization.json", None)):
+            missing, marks = run(auth, plan)
+            assert missing.returncode != 0
+            assert "REACHED_THE_DRIVER" not in missing.stdout
+            assert "AUTHORIZATION_OK" not in marks
+
+
+def test_each_launcher_names_its_own_authorization_to_setup():
+    """The preflight and the continuation must not share a binding."""
+    sys.path.insert(0, str(REPO / "scripts/pod"))
+    import autoinit_continuation_launch as C
+    from aadistill.autoinit.continuation import CONTINUATION_PLAN_V1
+
+    c = object.__new__(C.Continuation)
+    assert c.session_auth_path() == "logs/autoinit_continuation_authorization.json"
+    assert c.session_plan_hash() == CONTINUATION_PLAN_V1.plan_hash
+
+    p = object.__new__(C._preflight.Preflight)
+    assert p.session_auth_path() == "logs/autoinit_micro_preflight_authorization.json"
+    assert p.session_plan_hash() != CONTINUATION_PLAN_V1.plan_hash
+
+    # And setup_on_draw actually ships them.
+    import inspect
+    src = inspect.getsource(C._preflight.Preflight.setup_on_draw)
+    assert "SESSION_AUTH_PATH={self.session_auth_path()}" in src
+    assert "SESSION_PLAN_HASH={self.session_plan_hash()}" in src
 
 
 def test_the_committed_cu128_lock_is_the_one_the_pods_actually_ran():
