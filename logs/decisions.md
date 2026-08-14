@@ -2384,3 +2384,50 @@ in assumptions that a later study would have to unpick.
 - **Expected actual spend** is nearer $0.95–1.10; $1.34 is a ceiling on the estimate.
 - **Revisit when:** this session reports the real per-control battery cost. Phase A
   must then be repriced from that number rather than from 18 min/control.
+
+## 2026-08-14 — Four cold hosts in five draws: stop retrying, change the spec
+
+- **Context:** the characterization continuation ran twice against a repaired,
+  pod-simulated harness and never reached its driver. Five host draws, five
+  outcomes:
+
+  | attempt | draw | pod | outcome | setup time |
+  | --- | --- | --- | --- | --- |
+  | 1 | 1 | `3uwvkx3zyria8z` | **COLD** | 28 min |
+  | 1 | 2 | `setwv2mt3gx4hz` | uv sync **45 s**, died on the test gate | 6.3 min |
+  | 2 | 1 | `uzahazwqsh2r9a` | **COLD** | 8 min |
+  | 2 | 2 | `ud7ycof0pnqu43` | **COLD** | 14 min |
+  | 2 | 3 | `dqw79h3twudxzt` | **COLD** | 8 min |
+
+  Four of five draws tripped `HOST_COLD` from `scripts/pod/autoinit_preflight_setup.sh`,
+  every one of them in the **`uv sync` window** — never the 2700 s test timeout.
+  The one healthy host finished the same `uv sync` in **45 seconds**. The spread
+  is ~40x on identical image, identical command, identical GPU type.
+- **Diagnosis:** the critical path resolves and downloads ~2 GB of wheels
+  (torch 2.11+cu128, nvidia-* CUDA libs, transformers, vllm) from PyPI **on every
+  single run**, over whatever network the drawn host happens to have. That makes
+  a cold host indistinguishable from a slow one until 8-28 min of billed setup
+  has already been spent, and it is the single dominant failure mode of this
+  session: **$1.2712 spent, zero driver stages reached.**
+- **Decision:** STOP retrying. Two identical infrastructure failures already mean
+  "change the spec, not try again"; four is not ambiguous. The next attempt must
+  remove `uv sync` from the paid critical path. Options, cheapest first:
+  1. **bake the venvs into an image** — build `/opt/train` and `/opt/vllm` once,
+     push to a registry, and let the pod pull a warm image. Setup then costs an
+     image pull, which the provider caches per host.
+  2. **stage a wheelhouse on the relay** — `uv sync --offline` against a
+     downloaded wheel set. The relay is already an input path and is fast from
+     the pods; this reuses machinery that exists.
+  3. draw from a different GPU type or price tier to reach a different host pool.
+     Cheapest to try, but it treats the symptom and the variance would remain.
+- **Not the diagnosis:** the harness. Every gate behaved correctly — cold hosts
+  were abandoned and deleted, the launcher aborted after three, both pods were
+  torn down with provider confirmation, and cumulative spend stayed inside the
+  authorized cap at every point.
+- **Also measured, and worth keeping:** the cold-trip fires *faster* than the
+  budget assumes (8-14 min typical, 28 min worst), so an abandoned draw costs
+  $0.13-$0.48. The continuation plan carries **no cold-draw reserve**; the
+  repricing note's hard column did (25 min). Any future pricing of this session —
+  and of Phase A — must include one, at ~$0.25 per expected abandoned draw.
+- **Revisit when:** the venv is off the critical path. Until then, a further
+  attempt is buying lottery tickets at ~$0.25 each with a ~20% observed win rate.

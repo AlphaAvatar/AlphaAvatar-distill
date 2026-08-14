@@ -30,9 +30,148 @@
       "utc": "2026-08-14T14:26:49+00:00",
       "elapsed_min": 0.0,
       "msg": "watchdog detached \u2014 hard 99 min = $1.64"
+    },
+    {
+      "utc": "2026-08-14T14:27:43+00:00",
+      "elapsed_min": 0.9,
+      "msg": "  starting (60s) \u2014 $0.01"
+    },
+    {
+      "utc": "2026-08-14T14:28:47+00:00",
+      "elapsed_min": 1.96,
+      "msg": "  starting (120s) \u2014 $0.03"
+    },
+    {
+      "utc": "2026-08-14T14:29:19+00:00",
+      "elapsed_min": 2.5,
+      "msg": "TCP 22 at 82.221.170.242:38241 after 2.5 min"
+    },
+    {
+      "utc": "2026-08-14T14:29:22+00:00",
+      "elapsed_min": 2.54,
+      "msg": "draw 1: ssh reachable \u2014 $0.04"
+    },
+    {
+      "utc": "2026-08-14T14:30:06+00:00",
+      "elapsed_min": 3.28,
+      "msg": "draw 1: image identity runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@580.159.03"
+    },
+    {
+      "utc": "2026-08-14T14:30:06+00:00",
+      "elapsed_min": 3.28,
+      "msg": "draw 1: running setup"
+    },
+    {
+      "utc": "2026-08-14T14:38:18+00:00",
+      "elapsed_min": 11.49,
+      "msg": "COLD on draw 1 \u2014 abandoning uzahazwqsh2r9a and redrawing"
+    },
+    {
+      "utc": "2026-08-14T14:38:20+00:00",
+      "elapsed_min": 11.51,
+      "msg": "created ud7ycof0pnqu43 at $0.99/h"
+    },
+    {
+      "utc": "2026-08-14T14:38:20+00:00",
+      "elapsed_min": 11.51,
+      "msg": "watchdog detached \u2014 hard 99 min = $1.64"
+    },
+    {
+      "utc": "2026-08-14T14:38:53+00:00",
+      "elapsed_min": 12.06,
+      "msg": "TCP 22 at 82.221.170.242:38011 after 12.1 min"
+    },
+    {
+      "utc": "2026-08-14T14:38:56+00:00",
+      "elapsed_min": 12.11,
+      "msg": "draw 2: ssh reachable \u2014 $0.20"
+    },
+    {
+      "utc": "2026-08-14T14:40:41+00:00",
+      "elapsed_min": 13.86,
+      "msg": "draw 2: image identity runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@580.159.03"
+    },
+    {
+      "utc": "2026-08-14T14:40:41+00:00",
+      "elapsed_min": 13.86,
+      "msg": "draw 2: running setup"
+    },
+    {
+      "utc": "2026-08-14T14:55:49+00:00",
+      "elapsed_min": 29.0,
+      "msg": "COLD on draw 2 \u2014 abandoning ud7ycof0pnqu43 and redrawing"
+    },
+    {
+      "utc": "2026-08-14T14:55:51+00:00",
+      "elapsed_min": 29.03,
+      "msg": "created dqw79h3twudxzt at $0.99/h"
+    },
+    {
+      "utc": "2026-08-14T14:55:51+00:00",
+      "elapsed_min": 29.03,
+      "msg": "watchdog detached \u2014 hard 99 min = $1.64"
+    },
+    {
+      "utc": "2026-08-14T14:56:25+00:00",
+      "elapsed_min": 29.59,
+      "msg": "TCP 22 at 82.221.170.242:38059 after 29.6 min"
+    },
+    {
+      "utc": "2026-08-14T14:56:27+00:00",
+      "elapsed_min": 29.63,
+      "msg": "draw 3: ssh reachable \u2014 $0.49"
+    },
+    {
+      "utc": "2026-08-14T14:56:59+00:00",
+      "elapsed_min": 30.17,
+      "msg": "draw 3: image identity runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@580.159.03"
+    },
+    {
+      "utc": "2026-08-14T14:56:59+00:00",
+      "elapsed_min": 30.17,
+      "msg": "draw 3: running setup"
+    },
+    {
+      "utc": "2026-08-14T15:05:13+00:00",
+      "elapsed_min": 38.4,
+      "msg": "ABORT after draw 3: cold"
+    },
+    {
+      "utc": "2026-08-14T15:05:13+00:00",
+      "elapsed_min": 38.4,
+      "msg": "deleting pod (setup cold)"
+    },
+    {
+      "utc": "2026-08-14T15:05:24+00:00",
+      "elapsed_min": 38.59,
+      "msg": "pod deleted \u2014 38.6 min, $0.64; provider confirms gone: True"
     }
   ],
-  "stages": {},
+  "stages": {
+    "setup": [
+      {
+        "draw": 1,
+        "setup_done": "",
+        "host_cold": "",
+        "setup_rc": "90",
+        "tail": "SETUP_RC=90"
+      },
+      {
+        "draw": 2,
+        "setup_done": "",
+        "host_cold": "",
+        "setup_rc": "90",
+        "tail": "SETUP_RC=90"
+      },
+      {
+        "draw": 3,
+        "setup_done": "",
+        "host_cold": "",
+        "setup_rc": "90",
+        "tail": "SETUP_RC=90"
+      }
+    ]
+  },
   "authorization": {
     "schema": "aadistill.autoinit.spend_authorization/v1",
     "authorization_id": "autoinit.control_characterization.2026-08-14",
@@ -201,10 +340,36 @@
     ],
     "local_missing": []
   },
-  "pod_id": "uzahazwqsh2r9a",
+  "pod_id": "dqw79h3twudxzt",
   "actual_price_per_hour": 0.99,
-  "terminate_after_utc": "2026-08-14T16:05:54Z",
+  "terminate_after_utc": "2026-08-14T16:34:56Z",
   "watchdog_journals": [
+    "/home/ecs-user/aad-scratch/cont2_20260814_142646/watchdog.jsonl",
+    "/home/ecs-user/aad-scratch/cont2_20260814_142646/watchdog.jsonl",
     "/home/ecs-user/aad-scratch/cont2_20260814_142646/watchdog.jsonl"
-  ]
+  ],
+  "image_identity": {
+    "image_name": "runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404",
+    "observed": [
+      "580.159.03"
+    ],
+    "digest": "runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@580.159.03"
+  },
+  "final_pod_state": {
+    "exists": false,
+    "desired_status": "TERMINATED",
+    "billing": false
+  },
+  "provider_confirms_gone": true,
+  "cost": {
+    "price_per_hour": 0.99,
+    "elapsed_minutes": 38.59,
+    "actual_usd": 0.6367,
+    "authorized_usd": 2.3,
+    "within_authorization": true
+  },
+  "passed": false,
+  "continuation_successful": false,
+  "cleanup_is_not_success": "artifacts are collected and the pod is torn down on every path; the session outcome is decided by the driver's terminal marker alone",
+  "finished_utc": "2026-08-14T15:05:24+00:00"
 }
