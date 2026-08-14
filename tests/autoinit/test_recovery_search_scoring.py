@@ -33,12 +33,17 @@ from pathlib import Path
 import pytest
 
 REPO = Path(__file__).resolve().parents[2]
-BATTERY = REPO / "artifacts/stage3/recovery_search_v1"
+#: v2, because validating the scorer against v1 validates an asset that is
+#: INVALID before first use and that no session evaluates. This module's skipif
+#: meant the substitution was silent: on a pod, where only v2 is staged, the
+#: whole file SKIPPED rather than failing, so the scorer went unvalidated in the
+#: one environment that was about to spend money on it.
+BATTERY = REPO / "artifacts/stage3/recovery_search_v2"
 sys.path.insert(0, str(REPO / "src"))
 
 pytestmark = pytest.mark.skipif(
     not (BATTERY / "manifest.json").is_file(),
-    reason="recovery_search_v1 is a local artifact, not tracked in git")
+    reason="recovery_search_v2 is a local artifact, not tracked in git")
 
 
 def gold_answer(set_name: str, sample: dict) -> str:

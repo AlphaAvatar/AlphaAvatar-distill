@@ -22,11 +22,19 @@ from aadistill.autoinit.calibration import mixture_content_sha256  # noqa: E402
 from aadistill.autoinit.metrics import StateEvalSuite  # noqa: E402
 
 STATE_EVAL = REPO / "artifacts/stage1/state_eval_v1"
-RECOVERY_SEARCH = REPO / "artifacts/stage3/recovery_search_v1"
+#: The battery that is actually staged to a pod and actually evaluated. It was
+#: still `recovery_search_v1` after the v2 migration — v1 is INVALID before first
+#: use and is no longer staged anywhere, so these tests passed on the dev box,
+#: where v1 remains on disk, and died on the pod's test gate, which is a blocking
+#: setup step. That cost $0.63 and a full setup cycle on 2026-08-14.
+RECOVERY_SEARCH = REPO / "artifacts/stage3/recovery_search_v2"
 ISOLATION = REPO / "logs/autoinit_role_isolation.json"
 
+#: Both assets are gitignored, so a checkout that staged neither must SKIP rather
+#: than error. Guarding only on STATE_EVAL let a missing battery raise instead.
 pytestmark = pytest.mark.skipif(
-    not (STATE_EVAL / "manifest.json").is_file(),
+    not (STATE_EVAL / "manifest.json").is_file()
+    or not (RECOVERY_SEARCH / "manifest.json").is_file(),
     reason="frozen search assets not built in this checkout")
 
 

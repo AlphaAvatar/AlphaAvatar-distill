@@ -39,6 +39,12 @@ trap restore EXIT INT TERM
 # `artifacts/stage3/ladder_uniform_probe` are left in place because every pod
 # session stages those from the relay.
 #
+# `recovery_search_v1` joined this list on 2026-08-14: the v2 migration stopped
+# staging it, but `tests/autoinit/test_frozen_assets.py` still pointed at it, so
+# seven tests read an artifact no pod possesses. The dev box had it, the suite
+# passed here, and the pod's blocking test gate failed 7 minutes into a paid
+# setup. **When an asset stops being staged, add it here in the same commit.**
+#
 # `artifacts/stage1/...` is NOT a safe blanket exception, and assuming it was cost
 # a paid E8b-S2 pod on 2026-08-11. Sessions stage different initializations: an
 # E8b s2/s3 pod builds DP and DC only (`NEED_COMPRESSED=0`) and never sees the
@@ -58,6 +64,7 @@ trap restore EXIT INT TERM
 # behaviour depends on it.
 HIDDEN_PATHS=${HIDDEN_PATHS:-"artifacts/audit
 artifacts/stage3/ladder_uniform
+artifacts/stage3/recovery_search_v1
 artifacts/stage3/rescued
 artifacts/stage3/e1_results.json
 artifacts/stage3/e1_consolidated.json

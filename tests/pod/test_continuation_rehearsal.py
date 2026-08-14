@@ -791,13 +791,17 @@ def test_the_session_commit_is_verified_against_the_authorization():
         # be running unauthorized code.
         assert check["harness_matches"] is True, check
 
-    # An old commit's harness is not this one, and is refused by digest.
-    old = subprocess.run(["git", "rev-parse", "HEAD~3"], capture_output=True,
-                         text=True, cwd=REPO).stdout.strip()
-    stale = bare_launcher(mod, session_commit=old)
+    # An old commit's harness is not this one, and is refused by digest. Pinned,
+    # not `HEAD~3`: relative references drift, and after two more commits HEAD~3
+    # WAS the authorized commit, so this assertion passed a valid commit off as
+    # a stale one and proved nothing.
+    stale_commit = "a54591011aa4527b679c5c62912b7df8d7e74255"   # pre-continuation
+    stale = bare_launcher(mod, session_commit=stale_commit)
     stale.auth = auth
     assert stale.verify_session_commit() is False
     assert any("ABORT at $0" in s for s in stale.said)
+    assert stale.ev["session_commit_check"]["harness_digest_at_commit"] != \
+        auth.harness_source_digest
 
 
 def test_the_relay_transport_does_not_depend_on_an_unexported_env_var(tmp_path):
@@ -846,6 +850,9 @@ def test_the_relay_transport_does_not_depend_on_an_unexported_env_var(tmp_path):
                obj.ev["transport_detail"]["controls"].values())
 
 
+@pytest.mark.skipif(
+    not (REPO / "artifacts/stage3/recovery_search_v2/manifest.json").is_file(),
+    reason="the battery is a local artifact, not tracked in git")
 def test_stage3_aggregation_consumes_what_the_real_scorer_emits(tmp_path):
     """The writer was validated; this consumer never ran on its output.
 
