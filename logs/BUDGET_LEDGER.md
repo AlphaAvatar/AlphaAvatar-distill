@@ -148,9 +148,20 @@ actual cumulative spend                                      $190.1453
 unused authorization remaining                               $ 20.9247
 continuation spent across four attempts                      $  2.7051
     0.6312 + 0.6367 + 0.0700 + 1.3672; zero driver stages reached
-requested cumulative continuation authorization              $  4.40
+GRANTED cumulative continuation authorization                $  4.40
+    expected $4.10, granted by the maintainer 2026-08-15.
     = $2.7051 spent + one newly-priced hard attempt ($1.6896).
-    NOT YET GRANTED. No pod is created until it is.
+    PER-LAUNCH HARD LIMIT                                    $  1.6896
+    Named by the maintainer and now ENFORCED in code
+    (`SpendAuthorization.per_launch_hard_usd`, checked in
+    `make_plan` before a pod can be created). Previously only
+    the plan's own arithmetic self-limited, so the cumulative
+    figure was reachable by a single run.
+    The re-priced plan is expected 84.0 min / $1.3860, soft
+    $1.5246, hard $1.6896 — the limit binds exactly.
+    The earlier artifact `759eaf8c…` asserted these amounts
+    BEFORE the approval existed. It is void and must not be
+    reused; no pod was created under it.
 micro-preflight spent of its $8.60 authorization             $  6.7369
 micro-preflight remaining under that authorization           $  1.8631
     LESS THAN A SESSION COSTS (~$3.2). Nothing further is

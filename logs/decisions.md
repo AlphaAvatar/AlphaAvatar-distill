@@ -2497,3 +2497,54 @@ in assumptions that a later study would have to unpick.
   has still never measured, and must then fit the remaining budget — or the
   project cap must move. Both are maintainer decisions and neither is taken here.
 - **Revisit when:** Stage 3 completes and reports a real per-control battery cost.
+
+## 2026-08-15 — The relay deletion reclaimed nothing, and the wheelhouse is blocked on it
+
+- Context: the vLLM wheelhouse needs 1.0697 GiB more on the relay (21 of 196
+  wheels: torch 502 MiB, vllm 298 MiB, triton 189 MiB, and 18 small ones). The
+  relay is at its private-storage limit. Under maintainer approval, exactly one
+  non-protected historical checkpoint was deleted —
+  `e1_scaling_20260801/e1_r0860k_sa_pca/step_001023`, TIER_3_RECORD_ONLY,
+  hash-bound, deterministically reconstructible. Its relay LFS sha256 was
+  confirmed identical to the tombstone (`18ee10a10333481d…`) *before* deleting,
+  and the tombstone was updated first so it no longer claims a surviving relay
+  copy.
+- Measurement: the deletion removed 2.2324 GiB from the tracked tree
+  (93.2200 → 90.9876 GiB). Billed `usedStorage` did **not** move: 92.6730 GiB,
+  headroom 0.4570 GiB, unchanged across 25+ minutes of five-minute polling.
+  **The space was not reclaimed, so nothing was uploaded.**
+- Why: Hugging Face bills LFS storage including history. Deleting a file in a new
+  commit leaves the object referenced by earlier commits. This was already
+  measured on this exact repo on 2026-08-02, when deleting 19.07 GB of
+  superseded weights freed nothing. The current result is that finding
+  reproducing, not a new one — and it should have been raised *before* the
+  deletion rather than after it. The checkpoint is gone and bought nothing.
+  The loss is bounded: TIER_3_RECORD_ONLY, no manifest depends on it, and the
+  tombstone carries the reconstruction recipe.
+- Decision: **stop and report rather than route around the quota.** The approval
+  was explicitly conditioned on proving reclaim before uploading anything else;
+  that condition failed, so a second artifact store is a different plan and is
+  not taken unilaterally.
+- Verified, so the options can be judged: **no project artifact pins a relay
+  commit sha.** Every relay-backed artifact is pinned by content sha256, which
+  survives any history operation. The `768f209d…` revisions in the configs are
+  the teacher model's, not the relay's.
+- Options, for the maintainer:
+  1. `super_squash_history` on the relay — the only operation that actually
+     frees the objects. Would reclaim ~1.6854 GiB (billed 92.6730 → tracked
+     90.9876), giving 2.1424 GiB headroom, enough for the 1.0697 GiB. Breaks no
+     project pin. Irreversible: it destroys relay commit history, so anything
+     deleted in the past — including the checkpoint above and the 19.07 GB
+     removed on 2026-08-02 — becomes unrecoverable from the relay.
+  2. A second private repo for the 21 wheels. Probed and confirmed feasible: a
+     1 MiB write to a different private repo succeeded, so the limit binds
+     per-repo, not account-wide. Non-destructive and reversible. Costs a second
+     fetch path in setup; identity is unaffected, because the gate verifies the
+     merged directory against one manifest. (A leftover probe repo,
+     `AlphaAvatar/aadistill-quota-probe`, holds a 1 MiB `probe.bin` and should
+     be deleted.)
+  3. Let the pod fetch those 21 from PyPI. Rejected: it reinstates the network
+     on the paid critical path, which is the failure that cost $2.07 across
+     attempts 2 and 4.
+- Revisit when: the maintainer picks 1 or 2. The wheel bytes are frozen and
+  committed either way, so the choice is transport only.
