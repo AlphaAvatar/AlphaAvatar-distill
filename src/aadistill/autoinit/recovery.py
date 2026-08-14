@@ -492,7 +492,7 @@ class CapabilitySchema:
                            "rates all raise. No defaults.")}
 
 
-#: The scorable capabilities of recovery_search_v1. `code` is behaviour-only and
+#: The scorable capabilities of recovery_search_v2 (unchanged from v1). `code` is behaviour-only and
 #: therefore not a capability the catastrophic rule can rank on.
 CAPABILITY_SCHEMA_V1 = CapabilitySchema(
     expected=("gsm8k", "math_verified", "multihop", "rag", "knowledge", "tool"))
@@ -1488,7 +1488,7 @@ PREFLIGHT_PLAN_V1 = PreflightPlan(stages=(
     PreflightStage(
         stage=3, name="control characterization", blocking=False,
         purpose="materialize the frozen threshold formulas from control data only",
-        produces=("sa and sb on recovery_search_v1",
+        produces=("sa and sb on recovery_search_v2",
                   "pooled_counts@v1 aggregate + per-seed rates",
                   "materialized equivalence interval",
                   "materialized feasibility floor",

@@ -44,6 +44,7 @@ sys.path.insert(0, str(REPO_ROOT / "src"))
 sys.path.insert(0, str(REPO_ROOT / "scripts" / "data"))
 
 import build_stage2_v0 as v0
+from aadistill.data.tools import xlam_tools_to_canonical  # noqa: E402
 from aadistill.data.dataset import GROUPS, load_jsonl, validate_sample
 from aadistill.infrastructure.env import code_state
 from aadistill.infrastructure.manifest import sha256_file, write_manifest
@@ -285,12 +286,8 @@ def build_xlam(rows, sink):
         except (json.JSONDecodeError, TypeError):
             sink.note("parse_failures")
             continue
-        tools = [{"type": "function",
-                  "function": {"name": t["name"],
-                               "description": t.get("description", ""),
-                               "parameters": t.get("parameters", {})}}
-                 for t in tools_raw
-                 if isinstance(t, dict) and isinstance(t.get("name"), str)]
+        # One converter, shared with the recovery-search battery builder.
+        tools = xlam_tools_to_canonical(tools_raw)
         calls = [{"type": "function",
                   "function": {"name": a["name"],
                                "arguments": a.get("arguments", {})}}

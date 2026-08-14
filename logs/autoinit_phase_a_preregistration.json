@@ -1,6 +1,6 @@
 {
   "schema": "aadistill.autoinit.phase_a_preregistration/v1",
-  "generated_utc": "2026-08-13T15:16:32.145593+00:00",
+  "generated_utc": "2026-08-14T05:58:27.198642+00:00",
   "status": "PREREGISTRATION DRAFT - NOT AUTHORIZED, NO COMPUTE LAUNCHED",
   "teacher": {
     "model_id": "Qwen/Qwen3-4B-Thinking-2507",
@@ -676,7 +676,7 @@
       ],
       "survivor_rule": "rung 1: exclude searched leaves below the feasibility floor, then take the top 2 by correct_overall; the canonical control advances unconditionally and consumes no slot",
       "winner_rule": "final: pooled-count aggregate over sa and sb; among finalists clearing the feasibility floor, top 1 by correct_overall. The canonical control is eligible to win. Finalists inside the equivalence interval go to seed sc.",
-      "battery_asset_id": "recovery_search_v1",
+      "battery_asset_id": "recovery_search_v2",
       "notes": {}
     },
     "seeds": {
@@ -701,9 +701,9 @@
       "injection": "by frozen artifact hash via make_control_state; NOT a re-executed composite, which would be built from this run's calibration statistics rather than the original Stage-0 ones"
     },
     "battery": {
-      "asset": "artifacts/stage3/recovery_search_v1",
+      "asset": "artifacts/stage3/recovery_search_v2",
       "content_sha256": "a1b22778b00d95b6aba358c14a5af5b559fd807bb371c92131eacca59479f323",
-      "manifest_sha256": "72d8c0535e7752faf704d9075b7835a47610fd3cd26866cf5be7d48eb7b40ad1",
+      "manifest_sha256": "58ae5c6dcbe32eb28c343a66830d7224a14537362deeeff2ce8219d0a31679d6",
       "n_prompts": 190,
       "n_scorable_prompts": 170,
       "scorable_sets": [
@@ -809,7 +809,7 @@
       "content_sha256": "a1197205e43aad0e71c0e1bb436ee7babba3b5d8bb25b9c4d5c464f659db20fc"
     },
     "recovery_search": {
-      "asset": "artifacts/stage3/recovery_search_v1",
+      "asset": "artifacts/stage3/recovery_search_v2",
       "content_sha256": "a1b22778b00d95b6aba358c14a5af5b559fd807bb371c92131eacca59479f323"
     },
     "final_promotion": {
@@ -1106,17 +1106,17 @@
     "contract": "recovery_search_scoring@v2",
     "contract_id": "recovery_search_scoring",
     "version": 2,
-    "digest": "69591aab8626c8300fb485fdfa82d52aa434eb9576fae39d36281f8bf40a9f8a",
+    "digest": "799398e716a429ab3cabef4372ea5aa9b40bc1ae34a015fc7e65a2afa3dc80f6",
     "files": [
       {
         "path": "scripts/autoinit/score_recovery_search.py",
-        "sha256": "b72440390bc030f62b00097a79b1083b53a06f270e6d26104ca19d4a16b32ab8",
-        "bytes": 20311
+        "sha256": "eb98c92bb339e0f854450dc310d91ba78b0e8781fedacb12b7f8ae12ed705ab3",
+        "bytes": 21109
       },
       {
         "path": "src/aadistill/autoinit/recovery.py",
-        "sha256": "792dae68c93a0c00d513eb3e644939954dc109c15b517ee9587d3b65b2943402",
-        "bytes": 94826
+        "sha256": "dd243284b0f21ad5ccb9deefa8c55910e2b56c8d2cf8d2dfa5752681de71ea52",
+        "bytes": 94846
       },
       {
         "path": "src/aadistill/evaluation/behavior.py",
@@ -1157,24 +1157,24 @@
     },
     "validation": {
       "schema": "aadistill.autoinit.recovery_scoring_validation/v1",
-      "generated_utc": "2026-08-13T15:15:43.755206+00:00",
+      "generated_utc": "2026-08-14T05:54:48.554959+00:00",
       "battery": "artifacts/stage3/recovery_search_v1",
       "n_prompts": 190,
       "scoring_contract": {
         "contract": "recovery_search_scoring@v2",
         "contract_id": "recovery_search_scoring",
         "version": 2,
-        "digest": "69591aab8626c8300fb485fdfa82d52aa434eb9576fae39d36281f8bf40a9f8a",
+        "digest": "799398e716a429ab3cabef4372ea5aa9b40bc1ae34a015fc7e65a2afa3dc80f6",
         "files": [
           {
             "path": "scripts/autoinit/score_recovery_search.py",
-            "sha256": "b72440390bc030f62b00097a79b1083b53a06f270e6d26104ca19d4a16b32ab8",
-            "bytes": 20311
+            "sha256": "eb98c92bb339e0f854450dc310d91ba78b0e8781fedacb12b7f8ae12ed705ab3",
+            "bytes": 21109
           },
           {
             "path": "src/aadistill/autoinit/recovery.py",
-            "sha256": "792dae68c93a0c00d513eb3e644939954dc109c15b517ee9587d3b65b2943402",
-            "bytes": 94826
+            "sha256": "dd243284b0f21ad5ccb9deefa8c55910e2b56c8d2cf8d2dfa5752681de71ea52",
+            "bytes": 94846
           },
           {
             "path": "src/aadistill/evaluation/behavior.py",
@@ -1560,7 +1560,7 @@
         "contentless_is_behaviourally_perfect_and_useless": true
       },
       "all_checks_pass": true,
-      "report_sha256": "bc37772ae374d4d713513c6c7751db1edf030877aad201e7a035ada92b3e11ce"
+      "report_sha256": "2b6029031c2a5f5664360f97ec0ba7e44a146c71a3959e1a3d4eb5ea51c70239"
     },
     "tool_usable_gate": {
       "definition": "generic usable_rollout AND tool_call_emitted AND tool_call_parsed AND tool_name_valid",
@@ -1607,7 +1607,7 @@
   "micro_preflight_plan": {
     "plan_id": "autoinit.micro_preflight",
     "version": 1,
-    "plan_hash": "37dbd7b22e3e884eff9d55f95c5ce25a212f823d2f396691c30d47930076f8ab",
+    "plan_hash": "afd08be777e1f84e29350ff6c65daaf9b8f72d8f7ea593ca92f0129572264295",
     "stages": [
       {
         "stage": 0,
@@ -1668,7 +1668,7 @@
         "name": "control characterization",
         "purpose": "materialize the frozen threshold formulas from control data only",
         "produces": [
-          "sa and sb on recovery_search_v1",
+          "sa and sb on recovery_search_v2",
           "pooled_counts@v1 aggregate + per-seed rates",
           "materialized equivalence interval",
           "materialized feasibility floor",
@@ -2118,5 +2118,5 @@
     "GPU state-evaluator repeatability -> evaluated by the frozen conservative response rule (no automatic epsilon re-derivation)",
     "activation-statistics GPU/CPU split (collapses the cost range)"
   ],
-  "preregistration_sha256": "1d70a91addfd70242c593b1765605aee1db1cb724e271decf6f50b3bf6dd76b2"
+  "preregistration_sha256": "d9f6dc2adb7dd408aa87a97809d159f38fe43e40ce5ffe71d647e7bf049d1e2e"
 }

@@ -190,7 +190,7 @@ def main() -> None:
     ap.add_argument("--out", default="logs/autoinit_role_isolation.json")
     ap.add_argument("--calibration", default="artifacts/stage1/e8_calibration_v1")
     ap.add_argument("--state-eval", default="artifacts/stage1/state_eval_v1")
-    ap.add_argument("--recovery-search", default="artifacts/stage3/recovery_search_v1")
+    ap.add_argument("--recovery-search", default="artifacts/stage3/recovery_search_v2")
     ap.add_argument("--battery", default="artifacts/eval/battery_v2")
     ap.add_argument("--sessions", default="artifacts/stage3/corpus_v2/sessions.jsonl")
     ap.add_argument("--pack", default="artifacts/stage3/ladder_uniform_probe")

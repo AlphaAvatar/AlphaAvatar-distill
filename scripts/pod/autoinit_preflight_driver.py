@@ -71,7 +71,7 @@ from aadistill.infrastructure.manifest import sha256_file, sha256_json  # noqa: 
 WS = Path("/workspace")
 STATUS = WS / "autoinit_preflight.status"
 AUDIT = REPO / "artifacts/audit/autoinit_preflight"
-BATTERY = REPO / "artifacts/stage3/recovery_search_v1"
+BATTERY = REPO / "artifacts/stage3/recovery_search_v2"
 CANONICAL_INIT = REPO / "artifacts/stage1/qwen3_0p6b_init_v0/checkpoint"
 CONTROLS = (("preflight_ctl_r0860k_sa", SEED_SA,
              "configs/stage3/e1/e1_r0860k_sa_pca.json"),

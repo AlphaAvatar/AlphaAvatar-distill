@@ -46,7 +46,7 @@ LAUNCH_PATH = REPO / "scripts/pod/autoinit_preflight_launch.py"
 AUTH_PATH = REPO / "logs/autoinit_micro_preflight_authorization.json"
 
 pytestmark = pytest.mark.skipif(
-    not (REPO / "artifacts/stage3/recovery_search_v1/manifest.json").is_file(),
+    not (REPO / "artifacts/stage3/recovery_search_v2/manifest.json").is_file(),
     reason="frozen assets are local artifacts, not tracked in git")
 
 

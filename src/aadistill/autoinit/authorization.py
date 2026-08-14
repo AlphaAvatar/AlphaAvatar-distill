@@ -210,7 +210,11 @@ MICRO_PREFLIGHT_AUTHORIZATION = SpendAuthorization(
     granted_utc="2026-08-13T00:00:00Z",
     granted_by="maintainer (session authorization)",
     plan_id="autoinit.micro_preflight",
-    plan_hash="37dbd7b22e3e884eff9d55f95c5ce25a212f823d2f396691c30d47930076f8ab",
+    # Moved 2026-08-14 with the recovery_search_v2 migration: the plan's
+    # Stage-3 description names the battery, so the battery change moves the
+    # plan hash. The stages, their order and their stop conditions are
+    # unchanged.
+    plan_hash="afd08be777e1f84e29350ff6c65daaf9b8f72d8f7ea593ca92f0129572264295",
     expected_usd=4.20,
     hard_cap_usd=8.60,
     authorized_stages=(0, 1, 2, 3),

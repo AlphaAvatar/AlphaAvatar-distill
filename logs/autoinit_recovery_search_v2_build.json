@@ -1,0 +1,178 @@
+{
+  "schema": "aadistill.autoinit.recovery_search_v2_build/v1",
+  "generated_utc": "2026-08-14T05:51:07.474420+00:00",
+  "converted_items": 20,
+  "sets_copied_unchanged": [
+    "code",
+    "gsm8k",
+    "knowledge",
+    "math_verified",
+    "multihop",
+    "rag"
+  ],
+  "content_sha256": "a1b22778b00d95b6aba358c14a5af5b559fd807bb371c92131eacca59479f323",
+  "content_sha256_equals_v1": true,
+  "tools_materialization_sha256": "3016f1c421a705cf72ce852a76f26ad6ef6dcaf84021a80de9c130bf224befdf",
+  "manifest_sha256": "58ae5c6dcbe32eb28c343a66830d7224a14537362deeeff2ce8219d0a31679d6",
+  "per_item": {
+    "xlam-0": {
+      "n_tools": 1,
+      "names": [
+        "live_giveaways_by_type"
+      ],
+      "meaning_preserved": true
+    },
+    "xlam-1": {
+      "n_tools": 2,
+      "names": [
+        "peers",
+        "web_chain_details"
+      ],
+      "meaning_preserved": true
+    },
+    "xlam-10": {
+      "n_tools": 5,
+      "names": [
+        "poor_backlinks",
+        "get_random_user",
+        "company_search",
+        "album_tracks",
+        "qrcode"
+      ],
+      "meaning_preserved": true
+    },
+    "xlam-11": {
+      "n_tools": 2,
+      "names": [
+        "auto_complete_deprecating",
+        "auto_complete"
+      ],
+      "meaning_preserved": true
+    },
+    "xlam-12": {
+      "n_tools": 1,
+      "names": [
+        "matchschedules"
+      ],
+      "meaning_preserved": true
+    },
+    "xlam-13": {
+      "n_tools": 5,
+      "names": [
+        "get_ip_location",
+        "structural_analysis",
+        "reserve_hotel_room",
+        "simulate_query_database",
+        "place_safeway_order"
+      ],
+      "meaning_preserved": true
+    },
+    "xlam-14": {
+      "n_tools": 1,
+      "names": [
+        "get_search_user"
+      ],
+      "meaning_preserved": true
+    },
+    "xlam-15": {
+      "n_tools": 2,
+      "names": [
+        "get_post",
+        "hashtag_feed_video_posts_v2"
+      ],
+      "meaning_preserved": true
+    },
+    "xlam-16": {
+      "n_tools": 1,
+      "names": [
+        "get_meta_data"
+      ],
+      "meaning_preserved": true
+    },
+    "xlam-17": {
+      "n_tools": 2,
+      "names": [
+        "get_highlight_item",
+        "channel_shorts"
+      ],
+      "meaning_preserved": true
+    },
+    "xlam-18": {
+      "n_tools": 2,
+      "names": [
+        "calculate_standard_deviation",
+        "future_investment_value"
+      ],
+      "meaning_preserved": true
+    },
+    "xlam-19": {
+      "n_tools": 1,
+      "names": [
+        "get_all_bodies_positions"
+      ],
+      "meaning_preserved": true
+    },
+    "xlam-2": {
+      "n_tools": 2,
+      "names": [
+        "t3ma",
+        "stock_v2_get_profile"
+      ],
+      "meaning_preserved": true
+    },
+    "xlam-3": {
+      "n_tools": 2,
+      "names": [
+        "get_animes",
+        "list_titles"
+      ],
+      "meaning_preserved": true
+    },
+    "xlam-4": {
+      "n_tools": 1,
+      "names": [
+        "stagecompetitorstandings"
+      ],
+      "meaning_preserved": true
+    },
+    "xlam-5": {
+      "n_tools": 2,
+      "names": [
+        "get_product",
+        "product_id"
+      ],
+      "meaning_preserved": true
+    },
+    "xlam-6": {
+      "n_tools": 3,
+      "names": [
+        "get_id",
+        "search_torrents",
+        "basic_info"
+      ],
+      "meaning_preserved": true
+    },
+    "xlam-7": {
+      "n_tools": 1,
+      "names": [
+        "time_zone_api"
+      ],
+      "meaning_preserved": true
+    },
+    "xlam-8": {
+      "n_tools": 2,
+      "names": [
+        "find_peak_element",
+        "light_travel_time"
+      ],
+      "meaning_preserved": true
+    },
+    "xlam-9": {
+      "n_tools": 1,
+      "names": [
+        "availability"
+      ],
+      "meaning_preserved": true
+    }
+  }
+}

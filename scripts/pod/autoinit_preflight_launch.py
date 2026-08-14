@@ -63,7 +63,7 @@ RUN_LOG = f"{WS}/autoinit_preflight_run.log"
 AUTH_PATH = "logs/autoinit_micro_preflight_authorization.json"
 #: Dev-box-only artifacts the pod cannot fetch from the relay (~1.6 MB).
 LOCAL_ASSETS = ("artifacts/stage1/state_eval_v1",
-                "artifacts/stage3/recovery_search_v1")
+                "artifacts/stage3/recovery_search_v2")
 CONTROLS = ("preflight_ctl_r0860k_sa", "preflight_ctl_r0860k_sb")
 
 PROBE_COMMAND = (

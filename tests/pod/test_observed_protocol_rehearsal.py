@@ -506,7 +506,7 @@ def test_4d_the_declared_protocol_and_the_generator_share_one_definition():
 # --- scenarios 5 and 6: the frozen assets -----------------------------------
 
 
-FROZEN_PRESENT = (REPO / "artifacts/stage3/recovery_search_v1/manifest.json").is_file()
+FROZEN_PRESENT = (REPO / "artifacts/stage3/recovery_search_v2/manifest.json").is_file()
 frozen_only = pytest.mark.skipif(
     not FROZEN_PRESENT, reason="frozen assets are local artifacts, not tracked in git")
 
@@ -518,8 +518,8 @@ def frozen_repo(tmp_path: Path) -> Path:
     (repo / "artifacts/stage3").mkdir(parents=True)
     shutil.copytree(REPO / "artifacts/stage1/state_eval_v1",
                     repo / "artifacts/stage1/state_eval_v1")
-    shutil.copytree(REPO / "artifacts/stage3/recovery_search_v1",
-                    repo / "artifacts/stage3/recovery_search_v1")
+    shutil.copytree(REPO / "artifacts/stage3/recovery_search_v2",
+                    repo / "artifacts/stage3/recovery_search_v2")
     from aadistill.autoinit.recovery import RECOVERY_SCORING_FILES_V2
     for rel in RECOVERY_SCORING_FILES_V2:
         dst = repo / rel
@@ -581,7 +581,7 @@ def test_5b_a_manifest_edited_to_match_itself_is_still_caught(tmp_path):
 @frozen_only
 def test_6_a_recovery_search_or_scoring_drift_blocks_characterization(tmp_path):
     repo = frozen_repo(tmp_path)
-    battery = repo / "artifacts/stage3/recovery_search_v1"
+    battery = repo / "artifacts/stage3/recovery_search_v2"
     lines = (battery / "gsm8k.jsonl").read_text().splitlines()
     lines[0] = json.dumps({**json.loads(lines[0]), "answer": "tampered"})
     (battery / "gsm8k.jsonl").write_text("\n".join(lines) + "\n")
@@ -590,7 +590,7 @@ def test_6_a_recovery_search_or_scoring_drift_blocks_characterization(tmp_path):
     (battery / "manifest.json").write_text(json.dumps(manifest, indent=2))
     rc, report = verify_frozen(repo)
     assert rc == 1
-    assert any("recovery_search_v1.content_sha256" in p for p in report["problems"])
+    assert any("recovery_search_v2.content_sha256" in p for p in report["problems"])
 
     # Separately: the scoring contract. A changed scorer with untouched prompts
     # is the failure @v1 could not see.

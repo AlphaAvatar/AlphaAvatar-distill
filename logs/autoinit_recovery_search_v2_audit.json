@@ -1,0 +1,512 @@
+{
+  "schema": "aadistill.autoinit.recovery_search_v2_audit/v1",
+  "generated_utc": "2026-08-14T05:51:10.019082+00:00",
+  "transformers": "5.13.1",
+  "tokenizer": "artifacts/stage1/qwen3_0p6b_init_v0/checkpoint",
+  "chat_template_sha256": "3802169b2a02b81e6adb7ab4f64f91ff02db753c8c3a64a01c35192d3a61d8d7",
+  "v1": {
+    "content_sha256": "a1b22778b00d95b6aba358c14a5af5b559fd807bb371c92131eacca59479f323",
+    "manifest_sha256": "72d8c0535e7752faf704d9075b7835a47610fd3cd26866cf5be7d48eb7b40ad1"
+  },
+  "v2": {
+    "content_sha256": "a1b22778b00d95b6aba358c14a5af5b559fd807bb371c92131eacca59479f323",
+    "manifest_sha256": "58ae5c6dcbe32eb28c343a66830d7224a14537362deeeff2ce8219d0a31679d6",
+    "tools_materialization_sha256": "3016f1c421a705cf72ce852a76f26ad6ef6dcaf84021a80de9c130bf224befdf"
+  },
+  "membership": {
+    "code": {
+      "n_v1": 20,
+      "n_v2": 20,
+      "ids_identical": true,
+      "file_byte_identical": true
+    },
+    "gsm8k": {
+      "n_v1": 30,
+      "n_v2": 30,
+      "ids_identical": true,
+      "file_byte_identical": true
+    },
+    "knowledge": {
+      "n_v1": 30,
+      "n_v2": 30,
+      "ids_identical": true,
+      "file_byte_identical": true
+    },
+    "math_verified": {
+      "n_v1": 30,
+      "n_v2": 30,
+      "ids_identical": true,
+      "file_byte_identical": true
+    },
+    "multihop": {
+      "n_v1": 30,
+      "n_v2": 30,
+      "ids_identical": true,
+      "file_byte_identical": true
+    },
+    "rag": {
+      "n_v1": 30,
+      "n_v2": 30,
+      "ids_identical": true,
+      "file_byte_identical": true
+    },
+    "tool": {
+      "n_v1": 20,
+      "n_v2": 20,
+      "ids_identical": true,
+      "every_field_except_tools_identical": true
+    }
+  },
+  "tool_items": {
+    "xlam-0": {
+      "n_tools": 1,
+      "checks": {
+        "count": true,
+        "names_in_order": true,
+        "descriptions": true,
+        "parameters_deep_equal": true,
+        "parameter_order_preserved": true,
+        "envelope_is_canonical": true,
+        "parameter_names_preserved": true,
+        "defaults_preserved": true,
+        "types_preserved": true
+      },
+      "all_preserved": true
+    },
+    "xlam-1": {
+      "n_tools": 2,
+      "checks": {
+        "count": true,
+        "names_in_order": true,
+        "descriptions": true,
+        "parameters_deep_equal": true,
+        "parameter_order_preserved": true,
+        "envelope_is_canonical": true,
+        "parameter_names_preserved": true,
+        "defaults_preserved": true,
+        "types_preserved": true
+      },
+      "all_preserved": true
+    },
+    "xlam-10": {
+      "n_tools": 5,
+      "checks": {
+        "count": true,
+        "names_in_order": true,
+        "descriptions": true,
+        "parameters_deep_equal": true,
+        "parameter_order_preserved": true,
+        "envelope_is_canonical": true,
+        "parameter_names_preserved": true,
+        "defaults_preserved": true,
+        "types_preserved": true
+      },
+      "all_preserved": true
+    },
+    "xlam-11": {
+      "n_tools": 2,
+      "checks": {
+        "count": true,
+        "names_in_order": true,
+        "descriptions": true,
+        "parameters_deep_equal": true,
+        "parameter_order_preserved": true,
+        "envelope_is_canonical": true,
+        "parameter_names_preserved": true,
+        "defaults_preserved": true,
+        "types_preserved": true
+      },
+      "all_preserved": true
+    },
+    "xlam-12": {
+      "n_tools": 1,
+      "checks": {
+        "count": true,
+        "names_in_order": true,
+        "descriptions": true,
+        "parameters_deep_equal": true,
+        "parameter_order_preserved": true,
+        "envelope_is_canonical": true,
+        "parameter_names_preserved": true,
+        "defaults_preserved": true,
+        "types_preserved": true
+      },
+      "all_preserved": true
+    },
+    "xlam-13": {
+      "n_tools": 5,
+      "checks": {
+        "count": true,
+        "names_in_order": true,
+        "descriptions": true,
+        "parameters_deep_equal": true,
+        "parameter_order_preserved": true,
+        "envelope_is_canonical": true,
+        "parameter_names_preserved": true,
+        "defaults_preserved": true,
+        "types_preserved": true
+      },
+      "all_preserved": true
+    },
+    "xlam-14": {
+      "n_tools": 1,
+      "checks": {
+        "count": true,
+        "names_in_order": true,
+        "descriptions": true,
+        "parameters_deep_equal": true,
+        "parameter_order_preserved": true,
+        "envelope_is_canonical": true,
+        "parameter_names_preserved": true,
+        "defaults_preserved": true,
+        "types_preserved": true
+      },
+      "all_preserved": true
+    },
+    "xlam-15": {
+      "n_tools": 2,
+      "checks": {
+        "count": true,
+        "names_in_order": true,
+        "descriptions": true,
+        "parameters_deep_equal": true,
+        "parameter_order_preserved": true,
+        "envelope_is_canonical": true,
+        "parameter_names_preserved": true,
+        "defaults_preserved": true,
+        "types_preserved": true
+      },
+      "all_preserved": true
+    },
+    "xlam-16": {
+      "n_tools": 1,
+      "checks": {
+        "count": true,
+        "names_in_order": true,
+        "descriptions": true,
+        "parameters_deep_equal": true,
+        "parameter_order_preserved": true,
+        "envelope_is_canonical": true,
+        "parameter_names_preserved": true,
+        "defaults_preserved": true,
+        "types_preserved": true
+      },
+      "all_preserved": true
+    },
+    "xlam-17": {
+      "n_tools": 2,
+      "checks": {
+        "count": true,
+        "names_in_order": true,
+        "descriptions": true,
+        "parameters_deep_equal": true,
+        "parameter_order_preserved": true,
+        "envelope_is_canonical": true,
+        "parameter_names_preserved": true,
+        "defaults_preserved": true,
+        "types_preserved": true
+      },
+      "all_preserved": true
+    },
+    "xlam-18": {
+      "n_tools": 2,
+      "checks": {
+        "count": true,
+        "names_in_order": true,
+        "descriptions": true,
+        "parameters_deep_equal": true,
+        "parameter_order_preserved": true,
+        "envelope_is_canonical": true,
+        "parameter_names_preserved": true,
+        "defaults_preserved": true,
+        "types_preserved": true
+      },
+      "all_preserved": true
+    },
+    "xlam-19": {
+      "n_tools": 1,
+      "checks": {
+        "count": true,
+        "names_in_order": true,
+        "descriptions": true,
+        "parameters_deep_equal": true,
+        "parameter_order_preserved": true,
+        "envelope_is_canonical": true,
+        "parameter_names_preserved": true,
+        "defaults_preserved": true,
+        "types_preserved": true
+      },
+      "all_preserved": true
+    },
+    "xlam-2": {
+      "n_tools": 2,
+      "checks": {
+        "count": true,
+        "names_in_order": true,
+        "descriptions": true,
+        "parameters_deep_equal": true,
+        "parameter_order_preserved": true,
+        "envelope_is_canonical": true,
+        "parameter_names_preserved": true,
+        "defaults_preserved": true,
+        "types_preserved": true
+      },
+      "all_preserved": true
+    },
+    "xlam-3": {
+      "n_tools": 2,
+      "checks": {
+        "count": true,
+        "names_in_order": true,
+        "descriptions": true,
+        "parameters_deep_equal": true,
+        "parameter_order_preserved": true,
+        "envelope_is_canonical": true,
+        "parameter_names_preserved": true,
+        "defaults_preserved": true,
+        "types_preserved": true
+      },
+      "all_preserved": true
+    },
+    "xlam-4": {
+      "n_tools": 1,
+      "checks": {
+        "count": true,
+        "names_in_order": true,
+        "descriptions": true,
+        "parameters_deep_equal": true,
+        "parameter_order_preserved": true,
+        "envelope_is_canonical": true,
+        "parameter_names_preserved": true,
+        "defaults_preserved": true,
+        "types_preserved": true
+      },
+      "all_preserved": true
+    },
+    "xlam-5": {
+      "n_tools": 2,
+      "checks": {
+        "count": true,
+        "names_in_order": true,
+        "descriptions": true,
+        "parameters_deep_equal": true,
+        "parameter_order_preserved": true,
+        "envelope_is_canonical": true,
+        "parameter_names_preserved": true,
+        "defaults_preserved": true,
+        "types_preserved": true
+      },
+      "all_preserved": true
+    },
+    "xlam-6": {
+      "n_tools": 3,
+      "checks": {
+        "count": true,
+        "names_in_order": true,
+        "descriptions": true,
+        "parameters_deep_equal": true,
+        "parameter_order_preserved": true,
+        "envelope_is_canonical": true,
+        "parameter_names_preserved": true,
+        "defaults_preserved": true,
+        "types_preserved": true
+      },
+      "all_preserved": true
+    },
+    "xlam-7": {
+      "n_tools": 1,
+      "checks": {
+        "count": true,
+        "names_in_order": true,
+        "descriptions": true,
+        "parameters_deep_equal": true,
+        "parameter_order_preserved": true,
+        "envelope_is_canonical": true,
+        "parameter_names_preserved": true,
+        "defaults_preserved": true,
+        "types_preserved": true
+      },
+      "all_preserved": true
+    },
+    "xlam-8": {
+      "n_tools": 2,
+      "checks": {
+        "count": true,
+        "names_in_order": true,
+        "descriptions": true,
+        "parameters_deep_equal": true,
+        "parameter_order_preserved": true,
+        "envelope_is_canonical": true,
+        "parameter_names_preserved": true,
+        "defaults_preserved": true,
+        "types_preserved": true
+      },
+      "all_preserved": true
+    },
+    "xlam-9": {
+      "n_tools": 1,
+      "checks": {
+        "count": true,
+        "names_in_order": true,
+        "descriptions": true,
+        "parameters_deep_equal": true,
+        "parameter_order_preserved": true,
+        "envelope_is_canonical": true,
+        "parameter_names_preserved": true,
+        "defaults_preserved": true,
+        "types_preserved": true
+      },
+      "all_preserved": true
+    }
+  },
+  "rendering": {
+    "rendered": 20,
+    "of": 20,
+    "note": "model-visible prompt and token-id hashes, frozen here. They are a property of (asset, tokenizer, chat template, transformers version) and are recorded with all four.",
+    "per_item": {
+      "xlam-0": {
+        "ok": true,
+        "prompt_sha256": "e9b3cb280a6a39c43ec3894ff13f31a660c4f1992470a6095a954f52e6b9a147",
+        "token_ids_sha256": "645cd7530ffcf97a1b83bbe1d9a8b01d130e3e023b97a0b313df046f77baf5dc",
+        "n_tokens": 281,
+        "n_chars": 1224
+      },
+      "xlam-1": {
+        "ok": true,
+        "prompt_sha256": "ae44da963af262c345dd01b4ac1cc20d92546ac0a7a8ddee7c21d2fb284f6813",
+        "token_ids_sha256": "5727088d132685a230da2a81c6d883f01f70d2f928caf8a4ce58533e4b88adc4",
+        "n_tokens": 384,
+        "n_chars": 1647
+      },
+      "xlam-10": {
+        "ok": true,
+        "prompt_sha256": "fbae0d753a93ea0383d83c2bd32f51d511bea8f936024b6e3de68893f41028e7",
+        "token_ids_sha256": "8bbed35b305feca5e425d8bfaa25b9f1aec63df2b0ab299ed72000072012de64",
+        "n_tokens": 1195,
+        "n_chars": 4726
+      },
+      "xlam-11": {
+        "ok": true,
+        "prompt_sha256": "b86a6dc5996d194c8a4932951f75e89f31d723d891df76f48e5bc063197f0df7",
+        "token_ids_sha256": "dfe4a06318ea107cf9853adfbc3bc62ede564ecb8495bc9d82c269916fe024de",
+        "n_tokens": 410,
+        "n_chars": 1827
+      },
+      "xlam-12": {
+        "ok": true,
+        "prompt_sha256": "a740660e74f3af654543bd7730b8339f7183699ad71d1e8ef7a3a17478503196",
+        "token_ids_sha256": "4f5db786df9b5d09a6f31378128d4a4d7c13006d17e1259e2e44ca7c22ee9ed9",
+        "n_tokens": 469,
+        "n_chars": 1837
+      },
+      "xlam-13": {
+        "ok": true,
+        "prompt_sha256": "079b8ca831f6dc2d06fd0c56307282d676fed7185aa35ec59e440d0f823e9cf7",
+        "token_ids_sha256": "a0b3b3fa8ef7b492f766ef6dc5d667e032190b37b5b8e1b736a5f0457e1d9ba9",
+        "n_tokens": 1249,
+        "n_chars": 5105
+      },
+      "xlam-14": {
+        "ok": true,
+        "prompt_sha256": "9f5f86c29f9078a2c5f505707cbb0b1fc01441db665a4ed8779750875d439d78",
+        "token_ids_sha256": "3963fec8906db539e2ce6d712502f157ad8f1204eaadea048b4afd28003ec47f",
+        "n_tokens": 294,
+        "n_chars": 1276
+      },
+      "xlam-15": {
+        "ok": true,
+        "prompt_sha256": "c16075876e8fa93f4761cf549423ff79be805ef66fdc8e1497f3619cfc776a30",
+        "token_ids_sha256": "e644673bf4ad1f2012fba8360e792dfe0fa6cd5e5563c692067d95259afcf5f7",
+        "n_tokens": 647,
+        "n_chars": 2677
+      },
+      "xlam-16": {
+        "ok": true,
+        "prompt_sha256": "347562cadd9edd39f5a819a794195e0296a22e29013b9e11649b50342bce0ae4",
+        "token_ids_sha256": "fcf3f7a2ee58c0c279eecdce122c038b9c0e4e27020097d2cd85ec7fdfbb343d",
+        "n_tokens": 422,
+        "n_chars": 1723
+      },
+      "xlam-17": {
+        "ok": true,
+        "prompt_sha256": "9a9885e6cfd74afb38236b18953d5e53878437cb7146d85b1c6ac799a3c706bf",
+        "token_ids_sha256": "74ba501fb5d2ded1516e8316da5f617ade36041afdcbf385b64e4b89be6690b1",
+        "n_tokens": 478,
+        "n_chars": 1879
+      },
+      "xlam-18": {
+        "ok": true,
+        "prompt_sha256": "fc1048be493d52e7aa98505c8033f64a475d27e84ae249698fbdf4db69c33512",
+        "token_ids_sha256": "629e8deabc75b7c2ab09a8d8665fd006b3f7b395eee30cbd94affffbd3c2dae0",
+        "n_tokens": 500,
+        "n_chars": 2122
+      },
+      "xlam-19": {
+        "ok": true,
+        "prompt_sha256": "a8b7a9eaa67bf9a4a7fc06ba606201547d220ebcd35ea14569252219c3b813b5",
+        "token_ids_sha256": "33130571fd841ee59f8a9de071804e6020b2bacff25b1630337f5461e5912a75",
+        "n_tokens": 770,
+        "n_chars": 2786
+      },
+      "xlam-2": {
+        "ok": true,
+        "prompt_sha256": "884748d1715886a0567dae87ecd513a5febff796045fdc5a43d60c8e9c6d7c34",
+        "token_ids_sha256": "77c13a5f7b89267f7602e4b8e07f0bf6d16f8a6408d076f17c42fe2ef9873cc2",
+        "n_tokens": 1107,
+        "n_chars": 4066
+      },
+      "xlam-3": {
+        "ok": true,
+        "prompt_sha256": "f4ee535cda553713f33b7dfd96b50b55d68c92c16e175e32a7145260814a3030",
+        "token_ids_sha256": "c0de1aed9c7b95c1e19ceb30672c3da0077cd6827b7be28ccb3500944a80e562",
+        "n_tokens": 2549,
+        "n_chars": 9845
+      },
+      "xlam-4": {
+        "ok": true,
+        "prompt_sha256": "d6982bf45a6c408ba183ec635c5f57cb652240cdb43815b7d6ee4a14b6804675",
+        "token_ids_sha256": "a330bea4f73f904f478c3a9fdbd16d2b19a6bd01459657e1cf4600c8531537db",
+        "n_tokens": 290,
+        "n_chars": 1284
+      },
+      "xlam-5": {
+        "ok": true,
+        "prompt_sha256": "cc2411fd817a836f8cfd409068db62001c5a6ea683355b5094c92138e7553c41",
+        "token_ids_sha256": "ce207a1adaef92c8f6540a3055f8782232c459b613a10bd8e65f07c1efc3be06",
+        "n_tokens": 624,
+        "n_chars": 2460
+      },
+      "xlam-6": {
+        "ok": true,
+        "prompt_sha256": "5d5a7e6b457b6bd8925bd1137038fb879dc773f487e2cefd8701dcd801880782",
+        "token_ids_sha256": "4a3e8827521051b4e64bfe44b70bebeeeb563d7c28f4930335d0fb8d9314e5b2",
+        "n_tokens": 714,
+        "n_chars": 2880
+      },
+      "xlam-7": {
+        "ok": true,
+        "prompt_sha256": "fa5d025f3d7c10f125327f38c2e3e4eea08ef87f2347262c4830decd744a9ac3",
+        "token_ids_sha256": "6ea4346b6cd7530081a34768f5c62ce6c801804a45e5fd8ddf3fa1142f69efc8",
+        "n_tokens": 291,
+        "n_chars": 1244
+      },
+      "xlam-8": {
+        "ok": true,
+        "prompt_sha256": "8030b152928a5342a931a995ad265cb6b832fe9094ec620c56881ac8f73b7f18",
+        "token_ids_sha256": "522e4cd31577d1fd2a725ca0fe940a24f324d52152f42900cd5aa7f5759a41bb",
+        "n_tokens": 527,
+        "n_chars": 1996
+      },
+      "xlam-9": {
+        "ok": true,
+        "prompt_sha256": "6a8b6bc9be9d2eaf07f0c129377bfc435196e29d1f89264000ccc67c2ac7158e",
+        "token_ids_sha256": "aa3620dd6191d70d2b0b52e2aff8eaacf6164a6a4a6c1b1fbd86c2e9981afc8a",
+        "n_tokens": 519,
+        "n_chars": 2077
+      }
+    }
+  },
+  "problems": [],
+  "passed": true,
+  "report_sha256": "138dade59d31ffade4e19bc34f1a7100273eabcdf4d50499e6e9d867e693127c"
+}

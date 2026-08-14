@@ -522,7 +522,7 @@ class RecoveryEvaluationProtocol:
     generation: RecoveryGenerationProtocolFingerprint
     scoring_contract: str          # e.g. "recovery_search_scoring@v2"
     scoring_digest: str
-    battery_artifact: str          # "recovery_search_v1"
+    battery_artifact: str          # "recovery_search_v2"
     battery_manifest_sha256: str
     battery_content_sha256: str
     notes: dict[str, Any] = field(default_factory=dict)

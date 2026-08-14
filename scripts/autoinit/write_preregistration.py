@@ -89,7 +89,7 @@ def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--out", default="logs/autoinit_phase_a_preregistration.json")
     ap.add_argument("--state-eval", default="artifacts/stage1/state_eval_v1")
-    ap.add_argument("--recovery-search", default="artifacts/stage3/recovery_search_v1")
+    ap.add_argument("--recovery-search", default="artifacts/stage3/recovery_search_v2")
     args = ap.parse_args()
 
     state_eval = json.loads((REPO_ROOT / args.state_eval / "manifest.json").read_text())
@@ -133,7 +133,7 @@ def main() -> None:
                      "clearing the feasibility floor, top 1 by correct_overall. The "
                      "canonical control is eligible to win. Finalists inside the "
                      "equivalence interval go to seed sc."),
-        battery_asset_id="recovery_search_v1")
+        battery_asset_id="recovery_search_v2")
 
     prereg = {
         "schema": "aadistill.autoinit.phase_a_preregistration/v1",

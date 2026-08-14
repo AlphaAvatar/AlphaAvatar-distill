@@ -88,7 +88,7 @@ FETCHEOF
 say "installing and verifying the frozen search assets"
 mkdir -p "$REPO/artifacts/stage1" "$REPO/artifacts/stage3"
 cp -r "$WS/assets/state_eval_v1" "$REPO/artifacts/stage1/"
-cp -r "$WS/assets/recovery_search_v1" "$REPO/artifacts/stage3/"
+cp -r "$WS/assets/recovery_search_v2" "$REPO/artifacts/stage3/"
 cd "$REPO" && PYTHONPATH=src python3 - <<'VERIFYEOF'
 import hashlib, json, sys
 want = {

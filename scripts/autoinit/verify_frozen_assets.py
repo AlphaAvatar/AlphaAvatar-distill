@@ -24,6 +24,7 @@ Any mismatch is a setup blocker: record it, do not enter Stage 1, tear down.
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import sys
 from datetime import datetime, timezone
@@ -45,15 +46,31 @@ FROZEN = {
         "manifest_sha256": "95204907efa7efc681ef334f223073da6ca35dbf889b029a7672f5817ab72b05",
         "items_sha256": "2a4a1d3bf8ed165b4cfa881f75488bcbbdee5e74d34afddb91fecbf76d1e106d",
     },
-    "recovery_search_v1": {
-        "root": "artifacts/stage3/recovery_search_v1",
+    # v2 supersedes v1, which was INVALID before first use: its `tools` kept the
+    # xLAM source serialization and rendered 0/20. `content_sha256` is unchanged
+    # by construction — it hashes id:prompt_sha256 pairs, so its equality is the
+    # proof that the migration touched only the tools representation.
+    "recovery_search_v2": {
+        "root": "artifacts/stage3/recovery_search_v2",
         "content_sha256": "a1b22778b00d95b6aba358c14a5af5b559fd807bb371c92131eacca59479f323",
-        "manifest_sha256": "72d8c0535e7752faf704d9075b7835a47610fd3cd26866cf5be7d48eb7b40ad1",
+        "manifest_sha256": "58ae5c6dcbe32eb28c343a66830d7224a14537362deeeff2ce8219d0a31679d6",
+        "tools_materialization_sha256": "3016f1c421a705cf72ce852a76f26ad6ef6dcaf84021a80de9c130bf224befdf",
         "items_sha256": None,          # this asset is seven per-set files
     },
 }
 FROZEN_SCORING_CONTRACT = "recovery_search_scoring@v2"
-#: Re-pinned 2026-08-13 from `f76008d5…`, still **@v2**: the contract is a digest
+#: Re-pinned 2026-08-14 from `69591aab…` (itself re-pinned from `f76008d5…`),
+#: still **@v2**. The recovery_search_v2 migration exposed a real scoring defect
+#: — `as_openai_tools` reads xLAM-shaped entries, so under the canonical envelope
+#: every declared tool name resolved to None and `tool_name_valid` was 0.0 for
+#: every item — and the scorer's input is now normalized through
+#: `aadistill.data.tools.normalize_tools`, which reads either representation and
+#: still fails closed. The scoring *semantics* are unchanged, and that is
+#: measured, not asserted: `validate_recovery_scoring.py` over nine policies x
+#: 190 prompts reproduces **every number** of the pre-migration record. The
+#: version stays at 2 because the metric did not move.
+#:
+#: Earlier note, still true: the contract is a digest
 #: over whole files, and `src/aadistill/autoinit/recovery.py` gained the strict
 #: observed-protocol reconstruction (`observe_recovery_protocol`,
 #: `from_run_artifacts`) that the Stage-2 verification needs. No scoring function
@@ -62,8 +79,8 @@ FROZEN_SCORING_CONTRACT = "recovery_search_scoring@v2"
 #: reproduces every number of the `f76008d5…` record exactly
 #: (`logs/autoinit_recovery_scoring_validation.json`). The version stays at 2
 #: because the metric did not move; bumping it would falsely signal that it had.
-FROZEN_SCORING_DIGEST = ("69591aab8626c8300fb485fdfa82d52aa434eb9576fae39d3628"
-                         "1f8bf40a9f8a")
+FROZEN_SCORING_DIGEST = ("799398e716a429ab3cabef4372ea5aa9b40bc1ae34a015fc7e65a"
+                         "2afa3dc80f6")
 
 
 def canonical_manifest_sha256(path: Path) -> str:
@@ -100,8 +117,19 @@ def main() -> int:
             "content_sha256": manifest.get("content_sha256"),
             "manifest_sha256": canonical_manifest_sha256(manifest_path),
         }
-        if frozen["items_sha256"] is not None:
+        if frozen.get("items_sha256") is not None:
             observed["items_sha256"] = sha256_file(root / "items.jsonl")
+        if frozen.get("tools_materialization_sha256") is not None:
+            # Recomputed from the items, not read from the manifest: the
+            # manifest is what is being checked. This is the hash that
+            # distinguishes v2 from the INVALID v1, since `content_sha256`
+            # covers prompts only and is identical in both by construction.
+            tool_rows = [json.loads(line) for line in
+                         (root / "tool.jsonl").read_text().splitlines()
+                         if line.strip()]
+            observed["tools_materialization_sha256"] = hashlib.sha256(
+                "".join(f"{r['id']}:{json.dumps(r['tools'], sort_keys=True)}\n"
+                        for r in tool_rows).encode()).hexdigest()
 
         for key, expected in frozen.items():
             if key == "root" or expected is None:

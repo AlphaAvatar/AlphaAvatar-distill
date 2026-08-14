@@ -1,4 +1,4 @@
-"""Score stored generations against the frozen `recovery_search_v1` battery.
+"""Score stored generations against the frozen `recovery_search_v2` battery.
 
     PYTHONPATH=src python scripts/autoinit/score_recovery_search.py \
         --generations artifacts/eval/preflight/<label> --label <label> \
@@ -10,7 +10,7 @@ evaluator be corrected after the fact without re-running a checkpoint.
 
 **Why this exists rather than `scripts/evaluation/score_battery.py`.** That script
 requires `manifest["battery_version"] == capability-v2` and iterates *its* set
-list. `recovery_search_v1` is a different asset with a different manifest schema
+list. `recovery_search_v2` is a different asset with a different manifest schema
 (`battery_id` / `version`), a different set list (it adds `gsm8k`, `code` and
 `tool` and drops the paired refusal sets), and a different metric contract —
 `usable_rollout_rate` over ALL prompts, `correct_overall` over SCORABLE prompts
@@ -58,12 +58,13 @@ from aadistill.autoinit.recovery import (  # noqa: E402
     validate_scored_rows,
 )
 from aadistill.evaluation import usable_rollout  # noqa: E402
+from aadistill.data.tools import normalize_tools  # noqa: E402
 from aadistill.evaluation.behavior import score_tool_call, split_generation  # noqa: E402
 from aadistill.evaluation.capability import SCORERS  # noqa: E402
 from aadistill.evaluation.strict_answer import score_numeric  # noqa: E402
 from aadistill.infrastructure.manifest import sha256_file, sha256_json  # noqa: E402
 
-BATTERY = "artifacts/stage3/recovery_search_v1"
+BATTERY = "artifacts/stage3/recovery_search_v2"
 #: Frozen pins. The battery this scores is an immutable asset; if either moves,
 #: the result is not comparable to anything else scored under this name.
 #:
@@ -74,7 +75,7 @@ BATTERY = "artifacts/stage3/recovery_search_v1"
 #: produces a mismatch that looks like corruption and is not; it has already cost
 #: this project a false alarm once. This pins the canonicalized value, verifies it
 #: self-consistently, and records the file hash separately as provenance.
-BATTERY_MANIFEST_SHA256 = "72d8c0535e7752faf704d9075b7835a47610fd3cd26866cf5be7d48eb7b40ad1"
+BATTERY_MANIFEST_SHA256 = "58ae5c6dcbe32eb28c343a66830d7224a14537362deeeff2ce8219d0a31679d6"
 BATTERY_CONTENT_SHA256 = "a1b22778b00d95b6aba358c14a5af5b559fd807bb371c92131eacca59479f323"
 
 
@@ -118,10 +119,19 @@ def scorer_correct(set_name: str, record: dict, sample: dict) -> tuple[bool, dic
         # audited over 20 items x 6 adversarial cases
         # (logs/autoinit_tool_scoring_audit.json): no verdict depends on how the
         # `required` list is interpreted.
-        tools = sample["tools"]
+        # `as_openai_tools` reads xLAM-shaped entries (`t["name"]`). The battery
+        # may store either that bare form (v1) or the canonical envelope where
+        # the name lives at `t["function"]["name"]` (v2), so the tools are
+        # normalized to their MEANING first. Without this, every declared name
+        # resolved to None under v2 and `tool_name_valid` was 0.0 for every
+        # item — the whole tool capability structurally zero, which is the
+        # defect `validate_recovery_scoring.py` refused to launch on.
+        #
+        # `as_openai_tools`'s own semantics, including the
+        # required-from-missing-default rule the tool-scoring audit validated,
+        # are unchanged: it receives exactly the meaning it received before.
+        tools = normalize_tools(sample["tools"], where=str(sample.get("id")))
         gold = sample["reference_calls"]
-        if isinstance(tools, str):
-            tools = json.loads(tools)
         if isinstance(gold, str):
             gold = json.loads(gold)
         think_preopened = bool(record.get("think_preopened", True))
