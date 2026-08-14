@@ -62,10 +62,12 @@ every item. Input is now normalized through `normalize_tools`, which reads eithe
 representation and fails closed. **Semantics unchanged and measured:** nine
 policies × 190 prompts reproduce every number of the pre-migration record.
 
-## Ready to run, BLOCKED ON RELAY STORAGE (2026-08-15)
+## READY TO LAUNCH — awaiting the maintainer's go (2026-08-14 UTC)
 
 **Nothing running, nothing billing.** Four paid attempts, **$2.7051**, zero
-driver stages. Every pod torn down with provider confirmation.
+driver stages. Every pod torn down with provider confirmation. Every $0 gate now
+passes and the relay is complete; **no pod is created until the maintainer says
+so.**
 
 ### The offline setup works — measured on hardware, not estimated
 
@@ -77,94 +79,73 @@ driver stages. Every pod torn down with provider confirmation.
 
 Both environments are pinned and installed `--offline --no-index`:
 `uv-cu128.lock` + `requirements-cu128.txt` for `/opt/train`,
-`requirements-vllm.txt` (196 pins from `uv pip compile vllm==0.27.1`) for
-`/opt/vllm`. They stay **separate**, which the pins now make explicit. Every
-network install is gone from setup: `uv lock`, `uv sync`, `pip install vllm`,
-`pip install --upgrade pip`. **Pinning does not replace observing** — the engine
-probe still reports the vLLM/torch/dtype/context/stop-token values that actually
-loaded, and the driver still attests the observed generation protocol.
+`requirements-vllm.txt` (196 pins) for `/opt/vllm`. They stay **separate**. Every
+network install is gone from setup except the small `huggingface_hub` bootstrap
+that must precede the bundle fetch: `uv lock`, `uv sync`, `pip install vllm` and
+`pip install --upgrade pip` are all deleted. **Pinning does not replace
+observing** — the engine probe still reports the vLLM/torch/dtype/context/
+stop-token values that actually loaded, and the driver still attests the observed
+generation protocol.
 
-### The wheel BYTES are frozen, not only the versions
+### The wheel BYTES are frozen, and the relay is verified 196/196
 
 `wheelhouse_vllm_sha256.json` pins all 196 wheels by sha256 and size (3.62 GiB,
-manifest `f9c0e814…`, formula and build command recorded **in** the file). The
-pod verifies every wheel against it **before** `/opt/vllm` exists and exits 96
-with `VLLM_WHEELHOUSE_HASH_MISMATCH` on any MISSING / SIZE / SHA256 / UNDECLARED
-entry. The relay is a mutable path feeding a run that produces permanent
-artifacts; a version pin names a release, not which bytes arrive.
+manifest `f9c0e814…`, formula and build command recorded **in** the file). The pod
+verifies every wheel **before** `/opt/vllm` exists and exits 96 with
+`VLLM_WHEELHOUSE_HASH_MISMATCH` on any MISSING / SIZE / SHA256 / UNDECLARED entry.
 
-Two defects were found by **executing** that gate rather than reading it:
+**A fresh relay fetch passes 196/196**, checked with the pod's own gate extracted
+from the setup script.
 
-* the first `manifest_sha256` could not be reproduced by any formula tried, so it
-  pinned nothing. The 196 wheel entries were re-read from disk and reproduced
-  exactly, so only the self-hash was wrong;
-* the guard sat **after** the heredoc as `[ $? -eq 0 ] || …`. Setup runs under
-  `set -e`, so a mismatch killed the script at the python call: exit 1, and the
-  marker the launcher classifies by was never written. Moving it onto the command
-  line then hit a second edge — a `{ … }` group split across the heredoc's first
-  newline has its closing brace read as python source, and the file stops
-  parsing.
+Two defects were found by **executing** that gate rather than reading it: the
+first `manifest_sha256` could not be reproduced by any formula, so it pinned
+nothing; and the guard sat *after* the heredoc, where `set -e` killed the script
+at the python call — exit 1, and the marker the launcher classifies by was never
+written. A test now extracts the block from the real script and runs it under the
+same `set -euo pipefail`, asserting rc=96, the marker, and that the install is not
+reached.
 
-A test extracts the block from the real script and runs it under the same
-`set -euo pipefail`, asserting rc=96, the marker, and that the install is not
-reached — including against the exact 175/196 partial the quota produced.
-
-### What blocks the next run: the relay is full, and deletion did not help
-
-**The approved deletion reclaimed nothing.**
-`e1_scaling_20260801/e1_r0860k_sa_pca/step_001023` was deleted after confirming
-its relay LFS sha256 matched the tombstone, and after updating the tombstone to
-stop claiming a surviving relay copy.
+### Storage: pointer deletion reclaims nothing; targeted LFS deletion does
 
 ```
-relay tracked tree       93.2200 -> 90.9876 GiB   (-2.2324, the deletion)
-billed usedStorage       92.6730 -> 92.6730 GiB   (unchanged, 25+ min polled)
-headroom                  0.4570 GiB
-vLLM wheels landed      175 of 196   2.55 GiB
-still needed             21 wheels   1.0697 GiB  — torch 502, vllm 298, triton 189 MiB
+before                     billed 92.6730 GiB   inventory 288 obj / 92.6730 GiB
+pointer-deleted from HEAD  billed 92.6730 GiB   tracked tree fell 2.2324 GiB, NO reclaim
+targeted LFS delete        billed 92.6730 (cached)  inventory 287 obj / 90.4525 GiB
+after uploading 21 wheels  billed 91.5219 GiB   inventory 302 obj / 91.5219 GiB
 ```
 
-HF bills LFS **including history**, so deleting a file in a new commit leaves the
-object referenced by earlier commits. This reproduces a 2026-08-02 measurement on
-this same repo, where deleting 19.07 GB freed nothing. That prior finding should
-have been raised before the deletion, not after. The checkpoint is gone and
-bought nothing; the loss is bounded — TIER_3_RECORD_ONLY, no manifest depends on
-it, and the tombstone carries the reconstruction recipe.
+91.5219 = 90.4525 + 1.0694: the reclaim is exactly the deleted object's bytes.
+**Ordinary deletion from HEAD is not a reclaim mechanism on this relay** — HF
+bills LFS including history — and no further scientific artifact may be deleted
+that way. The supported operation is
+`permanently_delete_lfs_files(rewrite_history=True)` against an exact `file_oid`,
+one object, never a directory prefix. The tombstoned sha256 is the object's
+**`file_oid`**, not its `oid`; matching on `oid` returns zero hits.
 
-**Nothing was uploaded**, because the approval was conditioned on proving reclaim
-first. Options are in [`decisions.md`](decisions.md) 2026-08-15. The fact that
-makes them judgeable: **no project artifact pins a relay commit sha** — every
-relay-backed artifact is pinned by content sha256 — so a history operation would
-break no pin. `super_squash_history` would reclaim ~1.6854 GiB (headroom 2.1424
-GiB, enough) but destroys relay history irreversibly; a second private repo is
-non-destructive and was probed to work, since the limit binds per-repo rather
-than per-account. **A leftover probe repo `AlphaAvatar/aadistill-quota-probe`
-(1 MiB `probe.bin`) exists and should be deleted.**
+`super_squash_history` was **not** used. Details in
+[`decisions.md`](decisions.md) 2026-08-14/15.
 
-### Frozen and ready, pending only transport
+### The final identity chain
 
 | identity | value |
 | --- | --- |
-| session **checkout** commit (what the pod clones) | `f59f57a2c16c0544a17457dfa9d4c5031e30d045` |
-| `authorized_session_commit` (parent; the artifact is written before it is committed) | `61160fb3…` |
-| authorized **harness digest** (10 continuation files) | `d01e001b…` |
-| authorization | `dc770f36…`, id `autoinit.control_characterization.2026-08-15` |
-| plan | `79da6d7a…` |
-| bundle (built, **not yet uploaded**) | `aad_autoinit_f59f57a2.bundle`, 3.99 MB, sha `8ce466a3…` |
-| vLLM wheel manifest | `f9c0e814…`, 196 wheels |
+| session **checkout** commit (what the pod clones) | `40c3d53a7ffe754db0e13435b6dcd522460756f8` |
+| `authorized_session_commit` (parent; the artifact is written before it is committed) | `cc1ad8ca…` |
+| authorized **harness digest** (10 continuation files) | `a1d1f3fc…` |
+| authorization | `e4854818…`, id `autoinit.control_characterization.2026-08-14T1953Z` |
+| plan (**unchanged** — no setup source changed) | `79da6d7a…` |
+| bundle, uploaded and re-fetched byte-identical | `transfer/aad_autoinit_40c3d53a.bundle`, sha `a18f22a5…` |
+| vLLM wheel manifest | `f9c0e814…`, 196 wheels, relay-verified |
 | aggregation | `pooled_counts@v2` |
 
 Verified by cloning that bundle, checking out that commit, and re-deriving every
-binding inside it.
+binding inside it. Both launcher $0 gates pass: `verify_session_commit` and
+`relay_precheck` (4 relay inputs including the staged controls, 3 local assets).
 
-**`759eaf8c…` is VOID.** It asserted $4.10/$4.40 with `granted_by: maintainer`
-before the increment was approved. No pod was created under it, so no execution
-violation occurred, but it must not be reused. The live artifact carries a
-distinct id so the two differ by more than their hash.
-
-**If a second private repo is chosen for transport, the setup script changes and
-this whole chain must be rebuilt** — digest, bundle, authorization. If the relay
-is squashed instead, the chain above is final.
+**Two authorizations are VOID and must not be reused:** `759eaf8c…`, which
+asserted $4.10/$4.40 before the increment was approved, and `dc770f36…`, whose
+`granted_utc` was ~4 h in the future when committed. Neither was executed. Grant
+ids now carry the UTC timestamp, so no two can collide.
 
 ### Budget
 
@@ -176,27 +157,22 @@ PER-LAUNCH HARD LIMIT                                $  1.6896  ENFORCED in code
 re-priced plan   expected 84.0 min $1.3860 · soft $1.5246 · hard $1.6896
 ```
 
-The per-launch limit binds the plan **exactly**. It is enforced by
-`SpendAuthorization.per_launch_hard_usd`, checked in `make_plan` before a pod can
-be created; previously only the plan's own arithmetic self-limited, so a single
-run could have drawn on the whole cumulative figure.
+The per-launch limit binds the plan **exactly**, and is enforced by
+`SpendAuthorization.per_launch_hard_usd` in `make_plan` before a pod can exist;
+previously only the plan's own arithmetic self-limited.
 
 **Phase A no longer fits and this is now a real gate.** Its provisional hard
-`$21.01` already exceeds the `$20.9247` remaining, before another continuation
-attempt. After one, ~`$19.24` would remain. Phase A must be re-priced from the
-**measured** battery wall time that Stage 3 has still never produced, and the
-result has to fit the remaining project budget — or the project cap has to move.
-Both are maintainer decisions.
+`$21.01` already exceeds the `$20.9247` remaining. After one continuation attempt
+~`$19.24` would remain. Phase A must be re-priced from the **measured** battery
+wall time that Stage 3 has still never produced, and the result has to fit the
+remaining project budget — or the cap has to move. Both are maintainer decisions.
 
 ## What remains before Stage 3 can run
 
-1. **Decide transport for the last 21 vLLM wheels** — squash the relay, or a
-   second private repo. Deletion is not an option: it reclaims nothing.
-2. Upload the bundle and the remaining wheels; verify the merged wheelhouse
-   196/196 against `wheelhouse_vllm_sha256.json`.
-3. Launch: `--transport relay`, `--session-commit f59f57a2…`,
-   `--bundle aad_autoinit_f59f57a2.bundle`. Every $0 gate already passes.
-4. Phase A stays unauthorized and unpriced until Stage 3 measures the battery.
+1. **Maintainer go-ahead.** Nothing else is outstanding.
+2. Launch: `--transport relay --session-commit 40c3d53a…
+   --bundle aad_autoinit_40c3d53a.bundle`.
+3. Phase A stays unauthorized and unpriced until Stage 3 measures the battery.
 
 ## Phase A is repriced, and both statistics measurements are kept
 

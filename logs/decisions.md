@@ -2548,3 +2548,36 @@ in assumptions that a later study would have to unpick.
      attempts 2 and 4.
 - Revisit when: the maintainer picks 1 or 2. The wheel bytes are frozen and
   committed either way, so the choice is transport only.
+
+## 2026-08-14 (UTC) — Targeted LFS deletion reclaimed the space; the relay is 196/196
+
+- Outcome of the entry above. Neither listed option was used. The maintainer
+  named a narrower operation: HF's LFS inventory/permanent-delete API, targeting
+  one already-retired object rather than squashing the whole relay.
+- Selection was by **exact identity, never by prefix**. `list_lfs_files` returned
+  288 objects; exactly one matched `file_oid`
+  `18ee10a10333481d…` — `e1_scaling_20260801/e1_r0860k_sa_pca/step_001023/model/
+  model.safetensors`, 2384234968 bytes (2.2205 GiB), ref `refs/heads/main`,
+  pushed 2026-08-01. The same script asserted, before deleting: exactly one
+  match, the exact expected filename, size in the 2.20-2.30 GiB band, no
+  protected control name in the path, and that the path was already absent from
+  the current revision.
+- **Note the field**: the tombstoned sha256 is the object's `file_oid`, not its
+  `oid`. Matching on `oid` returns zero hits and would look like "not found".
+- Measured, before/after:
+
+  | | billed usedStorage | LFS inventory |
+  | --- | --- | --- |
+  | before | 92.6730 GiB | 288 objects, 92.6730 GiB |
+  | after targeted deletion | 92.6730 GiB (cached) | 287 objects, **90.4525 GiB** |
+  | after uploading 21 wheels | **91.5219 GiB** | 302 objects, 91.5219 GiB |
+
+  91.5219 = 90.4525 + 1.0694. The reclaim is exactly the object's bytes, and the
+  billed figure caught up once new data was written — it lags, it does not lie.
+- The paid gate is met: the 21 wheels uploaded (5 s), and a **fresh relay fetch
+  verified 196/196** against the frozen byte manifest using the pod's own gate
+  extracted from the setup script.
+- Setup source did not change, so the plan hash `79da6d7a…` is unchanged. The
+  harness digest did move to `a1d1f3fc…`, because `granted_utc` lives in
+  `continuation.py`, which is inside the harness set.
+- `AlphaAvatar/aadistill-quota-probe` and its `probe.bin` are deleted.

@@ -136,7 +136,18 @@
       "relay_copy_deleted_reason": "relay copy deleted 2026-08-15 to reclaim 2.23 GiB for the vLLM offline wheelhouse, on explicit maintainer instruction naming this checkpoint. NO copy survives anywhere: not on the dev box, not on the relay. The identity below (weights/config sha256) remains the binding record, and the recovery path is deterministic reconstruction from the recipe.",
       "surviving_copies": [],
       "relay_path_status": "DELETED \u2014 the path no longer resolves",
-      "recovery": "deterministic reconstruction only: retrain from qwen3_0p6b_init_v0 with configs/stage3/e1/e1_r0860k_sa_pca.json (~$2 on L40S), then verify against weights_sha256 above"
+      "recovery": "deterministic reconstruction only: retrain from qwen3_0p6b_init_v0 with configs/stage3/e1/e1_r0860k_sa_pca.json (~$2 on L40S), then verify against weights_sha256 above",
+      "relay_lfs_object_permanently_deleted": {
+        "utc": "2026-08-14T19:47Z",
+        "method": "HfApi.permanently_delete_lfs_files(rewrite_history=True)",
+        "selected_by": "exact LFS file_oid, one object, never by directory prefix",
+        "file_oid": "18ee10a10333481d3d6178d2fc5d4e0a705aca04d8a1d69a4ce83ac7f1e45b9c",
+        "filename": "e1_scaling_20260801/e1_r0860k_sa_pca/step_001023/model/model.safetensors",
+        "bytes": 2384234968,
+        "reclaimed_gib": 2.2205,
+        "note": "Ordinary pointer deletion from HEAD on 2026-08-14 removed 2.2324 GiB from the tracked tree and reclaimed NOTHING: billed usedStorage stayed at 92.6730 GiB across 45 min. The targeted permanent LFS deletion with history rewrite reclaimed the object's exact bytes: LFS inventory 288 -> 287 objects, 92.6730 -> 90.4525 GiB. Historical git references to this one object were rewritten; no other object was touched and no other artifact was affected."
+      },
+      "recoverable": false
     },
     {
       "canonical_id": "e1_r0860k_sb_pca",
