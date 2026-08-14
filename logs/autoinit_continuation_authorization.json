@@ -1,6 +1,6 @@
 {
   "schema": "aadistill.autoinit.spend_authorization/v1",
-  "authorization_id": "autoinit.control_characterization.2026-08-14",
+  "authorization_id": "autoinit.control_characterization.2026-08-15",
   "version": 1,
   "granted_utc": "2026-08-15T00:00:00Z",
   "granted_by": "maintainer, 2026-08-15, explicitly: '$4.10 expected / $4.40 hard cumulative for the Stage-3 continuation, with a per-launch hard limit of $1.6896'. The earlier artifact 759eaf8c\u2026 asserted this same amount BEFORE that approval existed and is void; it was never executed and no pod was created under it.",
@@ -24,8 +24,8 @@
   "scope_note": "characterization of two ALREADY TRAINED permanent controls. This authorization does not permit training, retraining, or re-initializing any control: the driver has no training stage and the launcher materializes existing artifacts. A failed characterization is collected and torn down and remains a FAILED continuation; it does not authorize a retry that trains. Phase A remains separately unauthorized.",
   "phase_a_authorized": false,
   "automatic_phase_a_start": false,
-  "authorized_session_commit": "2c14800230605f534264f98a2162da2e9396ebd1",
-  "harness_source_digest": "2c0db10df013030d79c4bfb32ea2d7ca61b58fc225398a7d9181c16f94fa128c",
+  "authorized_session_commit": "61160fb34f4cacabb720671ed5151355a26930ea",
+  "harness_source_digest": "d01e001b5b0889053075a5609daf9581e287fb9b9ccd20e1d69d207e75f57940",
   "harness_source_files": [
     "scripts/pod/autoinit_continuation_launch.py",
     "scripts/pod/autoinit_continuation_driver.py",
@@ -39,7 +39,7 @@
     "src/aadistill/autoinit/generation.py"
   ],
   "per_launch_hard_usd": 1.6896,
-  "provenance_commit": "2c14800230605f534264f98a2162da2e9396ebd1",
+  "provenance_commit": "61160fb34f4cacabb720671ed5151355a26930ea",
   "enforcement": "the launcher loads this artifact and refuses to create a pod whose priced hard threshold exceeds hard_cap_usd, refuses a stage not in authorized_stages, and has no code path to Phase A",
-  "authorization_sha256": "a22325c333f70f8e81f8971ceafe1a62a165bcf8a546fd15028f2c234ea603f0"
+  "authorization_sha256": "dc770f36009348ac95b6a78cf5d499260a265a677cad97e2a4d2db16f1a1b99d"
 }
