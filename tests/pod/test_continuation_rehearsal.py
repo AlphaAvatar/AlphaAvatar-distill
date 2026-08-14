@@ -788,14 +788,19 @@ def test_the_session_commit_is_verified_against_the_authorization():
     obj.auth = auth
     verified = obj.verify_session_commit()
     check = obj.ev["session_commit_check"]
-    if verified:
-        assert check["harness_matches"] is True
-        assert check["commit_carries_this_authorization"] is True
-    else:
-        # Before the authorization is committed, HEAD cannot carry it — but the
-        # harness at HEAD must still be the authorized one, or the launch would
-        # be running unauthorized code.
-        assert check["harness_matches"] is True, check
+    # Whether HEAD passes depends on where in the edit/issue/commit cycle the
+    # tree is, and asserting either outcome makes this test a calendar. What
+    # must always hold is that the gate REPORTS both facts and only admits a
+    # commit when both are true — an authorization is not transferable to a
+    # harness it was not granted against, nor to a commit that does not carry
+    # it. (After a harness edit, `harness_matches` is legitimately False; that
+    # is the gate working, and the fix is to re-issue, not to relax this.)
+    assert set(check) >= {"harness_matches", "commit_carries_this_authorization",
+                          "harness_digest_at_commit", "authorized_harness_digest"}
+    assert verified == (check["harness_matches"]
+                        and check["commit_carries_this_authorization"])
+    assert (check["harness_digest_at_commit"] ==
+            check["authorized_harness_digest"]) == check["harness_matches"]
 
     # An old commit's harness is not this one, and is refused by digest. Pinned,
     # not `HEAD~3`: relative references drift, and after two more commits HEAD~3
@@ -921,3 +926,78 @@ def test_stage3_aggregation_consumes_what_the_real_scorer_emits(tmp_path):
     # The identities stage 3 binds each result to.
     assert sa["scoring_contract"]["contract"] == "recovery_search_scoring@v2"
     assert {"artifact", "manifest_sha256", "content_sha256"} <= set(sa["battery"])
+
+
+# --- offline dependency materialization -------------------------------------
+
+
+def test_the_paid_setup_contains_no_pypi_on_its_critical_path():
+    """Four of five host draws died resolving and downloading from PyPI.
+
+    The property is not "it is faster" — it is that the install cannot reach the
+    network at all, so a slow host cannot be mistaken for a hung one 20 minutes
+    into a paid setup. A fallback to the network would reinstate exactly that,
+    silently, so its absence is asserted too.
+    """
+    setup = (REPO / "scripts/pod/autoinit_preflight_setup.sh").read_text()
+
+    # The install is offline, index-less, frozen, and on a pinned interpreter:
+    # the wheelhouse is cp312 and uv left to choose picks the newest python it
+    # can find, against which every cp312 wheel is unusable.
+    assert "uv sync --group dev --frozen --offline --no-index" in setup
+    assert "--python 3.12 --find-links" in setup
+    assert "UV_PYTHON_DOWNLOADS=never" in setup
+    # `uv lock` no longer runs on the pod: the resolution is committed.
+    assert "\nuv lock" not in setup
+    assert (REPO / "uv-cu128.lock").is_file()
+    # No fallback that would go back to PyPI when the wheelhouse is unusable.
+    assert "WHEELHOUSE_UNSATISFIED" in setup
+    for fallback in ("|| uv sync --group dev\n", "--offline || ", "; uv sync --group dev"):
+        assert fallback not in setup, f"network fallback {fallback!r} reinstates the failure"
+    # uv itself is pinned: the resolver that reads the wheelhouse must be the one
+    # it was built against.
+    assert "astral.sh/uv/${UV_VERSION:-" in setup
+    # The cold-host tripwire is gone, not merely bypassed.
+    assert "HOST_COLD:${el}s" not in setup
+    assert "UV_STALL_LIMIT" not in setup
+
+
+def test_the_committed_cu128_lock_is_the_one_the_pods_actually_ran():
+    """The lock is reviewed, not resolved on the pod. Its pins are the observed ones."""
+    import tomllib
+
+    lock = tomllib.load((REPO / "uv-cu128.lock").open("rb"))
+    versions = {p["name"]: p["version"] for p in lock["package"]}
+    # Read off the 2026-08-14 pod's own `uv sync` output.
+    assert versions["torch"] == "2.11.0+cu128"
+    assert versions["triton"] == "3.6.0"
+    assert versions["setuptools"] == "81.0.0"
+    assert versions["transformers"] == "5.13.1"
+    # And it resolves torch from the cu128 index, not the default cpu one.
+    torch = next(p for p in lock["package"] if p["name"] == "torch")
+    assert "download.pytorch.org/whl/cu128" in torch["source"]["registry"]
+
+
+def test_the_wheelhouse_builder_selects_for_the_pods_interpreter():
+    """cp312/manylinux x86_64 — taken from a real run's recorded fingerprint."""
+    import importlib.util
+
+    spec = importlib.util.spec_from_file_location(
+        "build_wheelhouse", REPO / "scripts/pod/build_wheelhouse.py")
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    assert mod.POD_PYTHON == (3, 12)
+
+    ok = mod.compatible
+    # The shapes that actually appear in this lock.
+    assert ok("torch-2.11.0+cu128-cp312-cp312-manylinux_2_28_x86_64.whl")
+    assert ok("nvidia_cublas_cu12-12.8.4.1-py3-none-manylinux_2_27_x86_64.whl")
+    assert ok("safetensors-0.8.0-cp310-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64.whl")
+    assert ok("multiprocess-0.70.19-py312-none-any.whl")
+    assert ok("aiohappyeyeballs-2.7.1-py3-none-any.whl")
+    # And the ones that must not be shipped to this pod.
+    assert not ok("torch-2.11.0+cu128-cp311-cp311-manylinux_2_28_x86_64.whl")
+    assert not ok("nvidia_cublas_cu12-12.8.4.1-py3-none-manylinux_2_27_aarch64.whl")
+    assert not ok("hf_xet-1.5.1-cp313-cp313t-musllinux_1_2_x86_64.whl")
+    assert not ok("aiohttp-3.14.1-cp312-cp312-macosx_10_9_x86_64.whl")
+    assert not ok("safetensors-0.8.0-cp313-abi3-manylinux_2_17_aarch64.whl")

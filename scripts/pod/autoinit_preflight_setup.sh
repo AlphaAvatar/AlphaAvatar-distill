@@ -5,10 +5,13 @@
 # pack, the frozen state-eval and recovery-search assets, the teacher, both
 # venvs, and the CPU suite. No E8 initializations, no depth builds, no corpus.
 #
-# The uv cold-host tripwire and the cgroup CPU-budget function below are copied
-# verbatim from e8b_setup.sh. They are not cosmetic: between them they account
-# for ~$3.10 of pods abandoned in setup and one 66-minute test suite on a
-# 128-vCPU host that reported `nproc` 128 while the cgroup granted a fraction.
+# The uv cold-host tripwire is GONE as of 2026-08-14, replaced by an offline
+# install from a relay wheelhouse: it existed to tell "slow PyPI" from "hung
+# host", could only do so by spending 8-28 min of paid setup, and still lost
+# four of five host draws. The cgroup CPU-budget function below is copied
+# verbatim from e8b_setup.sh and stays: it is what kept a 66-minute test suite
+# off a 128-vCPU host that reported `nproc` 128 while the cgroup granted a
+# fraction.
 #
 # Markers: ENV_READY -> REPO_READY -> ASSETS_STAGED -> TRAIN_ENV -> ASSETS_READY
 #          -> VLLM_READY -> TEACHER_READY -> ROPE_OK -> TESTS_OK
@@ -108,60 +111,72 @@ VERIFYEOF
 mark ASSETS_STAGED
 
 say "training env via uv sync"
-command -v uv >/dev/null || { curl -LsSf https://astral.sh/uv/install.sh | sh; }
+# uv is PINNED. The cache and resolver behaviour must be the one the wheelhouse
+# was built against, and `install.sh` without a version installs whatever is
+# latest that day.
+command -v uv >/dev/null || {
+  curl -LsSf "https://astral.sh/uv/${UV_VERSION:-0.11.11}/install.sh" | sh; }
 export PATH="$HOME/.local/bin:$PATH"
 cd "$REPO"
 sed -i 's|url = "https://download.pytorch.org/whl/cpu"|url = "https://download.pytorch.org/whl/cu128"|' pyproject.toml
 sed -i 's|name = "pytorch-cpu"|name = "pytorch-cu128"|' pyproject.toml
 sed -i 's|torch = { index = "pytorch-cpu" }|torch = { index = "pytorch-cu128" }|' pyproject.toml
 export UV_PROJECT_ENVIRONMENT=/opt/train
-uv lock
 
-# Cold-host tripwire. Progress is summed across /opt/train AND /root/.cache/uv,
-# because uv writes to the cache first; measuring only the venv classified a host
-# downloading at 5.5 MB/s as stalled and cost E8a two draws.
+# --- offline dependency materialization -------------------------------------
+# Four of five host draws on 2026-08-14 died here, every one in the uv-sync
+# window, resolving and pulling ~3.8 GiB from PyPI over the drawn host's
+# network. The one healthy host did it in 45 s. The wheels now come from the
+# relay, which pods read fast, and the install runs `--offline --no-index`, so
+# the paid critical path contains no PyPI at all.
 #
-# A SINGLE quiet window is not evidence of a hung host. E8b-S2 draw 1 was killed at
-# 26.4 min on a host that was working: uv writes nothing to disk while it resolves or
-# builds a wheel, which is indistinguishable from a hang if one 20 s sample decides.
-# So a kill now needs STALL_LIMIT *consecutive* stalled windows, and any progress
-# resets the counter. `UV_MAX_S` is the separate absolute ceiling — note it never
-# extended the deadline, it only stops the growth check from applying, which is why
-# raising it did not protect draw 1.
-TRIP_S=${UV_TRIP_S:-360}
-GRACE_S=${UV_GRACE_S:-180}
-UV_MAX_S=${UV_MAX_S:-1500}
-STALL_LIMIT=${UV_STALL_LIMIT:-3}
-uv sync --group dev &
-UV_PID=$!
-t0=$(date -u +%s); graced=0; stalls=0
-while kill -0 "$UV_PID" 2>/dev/null; do
-  sleep 15
-  el=$(( $(date -u +%s) - t0 ))
-  [ "$el" -lt "$TRIP_S" ] && continue
-  if [ "$el" -lt "$UV_MAX_S" ]; then
-    a=$(( $(du -sb /opt/train 2>/dev/null | cut -f1 || echo 0) \
-        + $(du -sb /root/.cache/uv 2>/dev/null | cut -f1 || echo 0) )); sleep 20
-    b=$(( $(du -sb /opt/train 2>/dev/null | cut -f1 || echo 0) \
-        + $(du -sb /root/.cache/uv 2>/dev/null | cut -f1 || echo 0) ))
-    if [ "$((b - a))" -gt 20000000 ]; then
-      graced=$(( graced + 1 )); stalls=0
-      say "uv sync past ${TRIP_S}s but progressing ($(( (b-a)/1048576 )) MB/20s, grace ${graced}) — extending ${GRACE_S}s"
-      TRIP_S=$(( TRIP_S + GRACE_S )); continue
-    fi
-    stalls=$(( stalls + 1 ))
-    if [ "$stalls" -lt "$STALL_LIMIT" ]; then
-      say "uv sync quiet window ${stalls}/${STALL_LIMIT} at ${el}s (no disk growth; a resolve or wheel build looks like this) — waiting"
-      continue
-    fi
-  fi
-  kill -9 "$UV_PID" 2>/dev/null || true
-  cache=$(du -sm /root/.cache/uv 2>/dev/null | cut -f1 || echo 0)
-  say "COLD HOST: uv sync unfinished after ${el}s, ${stalls} consecutive quiet windows (cache ${cache} MB). Abandoning."
-  mark "HOST_COLD:${el}s:${cache}MB:stalls${stalls}"
-  exit 90
-done
-wait "$UV_PID" || { say "uv sync failed"; exit 1; }
+# `uv lock` is gone from the pod: `uv-cu128.lock` is that resolution, committed
+# and reviewed, and `--frozen` forbids re-resolving it. A resolve on the pod was
+# both a network round trip and a resolution nobody had seen.
+WHEELHOUSE=${WHEELHOUSE:-/workspace/wheelhouse}
+say "fetching the wheelhouse from the relay"
+python3 - <<'WHEELEOF'
+import os, sys, time
+from huggingface_hub import snapshot_download
+for attempt in range(4):
+    try:
+        p = snapshot_download("AlphaAvatar/aadistill-artifacts", repo_type="model",
+                              allow_patterns=["transfer/wheelhouse_cu128_cp312/*"],
+                              local_dir="/workspace/wh",
+                              token=os.environ["HF_TOKEN"])
+        break
+    except Exception as exc:
+        print(f"  wheelhouse attempt {attempt + 1} failed: {exc}", flush=True)
+        time.sleep(10 * (attempt + 1))
+else:
+    sys.exit("WHEELHOUSE FETCH FAILED")
+WHEELEOF
+mkdir -p "$WHEELHOUSE"
+cp /workspace/wh/transfer/wheelhouse_cu128_cp312/*.whl "$WHEELHOUSE"/ 2>/dev/null || true
+NWHL=$(ls "$WHEELHOUSE"/*.whl 2>/dev/null | wc -l)
+say "wheelhouse: ${NWHL} wheels, $(du -sh "$WHEELHOUSE" | cut -f1)"
+[ "$NWHL" -ge 80 ] || { say "WHEELHOUSE TOO SMALL (${NWHL} wheels)"; \
+  mark "WHEELHOUSE_INCOMPLETE:${NWHL}"; exit 92; }
+cp "$REPO/uv-cu128.lock" "$REPO/uv.lock"
+
+# No tripwire here any more, because there is nothing left to stall on: the
+# wheels are local, `--offline --no-index` forbids a network round trip, and
+# `--frozen` forbids a resolve. The cold-host detector existed to tell "slow
+# PyPI" from "hung host" and could only do it by burning 8-28 min of paid setup
+# first. An install that reads local files either works or fails immediately.
+#
+# It is deliberately NOT kept as a fallback: a fallback to the network would
+# reinstate the exact failure mode this removes, and would do it silently.
+# The interpreter is PINNED to 3.12 and uv may not download one. The wheelhouse
+# is cp312 — built for the 3.12.3 this pod image actually ran, read off a real
+# run's recorded runtime fingerprint — and uv left to choose picks the newest it
+# can find: on the dev box that was 3.14, against which every cp312 wheel is
+# unusable. `UV_PYTHON_DOWNLOADS=never` also keeps a python build off the wire.
+t0=$(date -u +%s)
+UV_PYTHON_DOWNLOADS=never uv sync --group dev --frozen --offline --no-index \
+  --python 3.12 --find-links "$WHEELHOUSE" \
+  || { say "OFFLINE UV SYNC FAILED — the wheelhouse does not satisfy the lock"
+       mark "WHEELHOUSE_UNSATISFIED"; exit 93; }
 say "uv sync completed in $(( $(date -u +%s) - t0 ))s"
 /opt/train/bin/python -c "import torch, transformers, sympy; \
   assert torch.cuda.is_available(); \
