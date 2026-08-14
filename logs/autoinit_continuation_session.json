@@ -2,134 +2,37 @@
   "schema": "aadistill.autoinit.continuation_session/v1",
   "timeline": [
     {
-      "utc": "2026-08-14T11:17:09+00:00",
+      "utc": "2026-08-14T14:26:47+00:00",
       "elapsed_min": 0.0,
-      "msg": "budget: expected 81 min $1.34 \u00b7 soft $1.47 \u00b7 hard $1.64 (authorized $1.75)"
+      "msg": "budget: expected 81 min $1.34 \u00b7 soft $1.47 \u00b7 hard $1.64 (authorized $2.30)"
     },
     {
-      "utc": "2026-08-14T11:17:10+00:00",
+      "utc": "2026-08-14T14:26:47+00:00",
       "elapsed_min": 0.0,
-      "msg": "NVIDIA L40S $0.99/h, stock Low"
+      "msg": "NVIDIA L40S $0.99/h, stock Medium"
     },
     {
-      "utc": "2026-08-14T11:17:10+00:00",
+      "utc": "2026-08-14T14:26:47+00:00",
       "elapsed_min": 0.0,
-      "msg": "session commit 1e7f347bdea2 verified: harness digests to 060b60533080\u2026 and carries the authorization"
+      "msg": "session commit 6ba7cce9872e verified: harness digests to a76f7416c94a\u2026 and carries the authorization"
     },
     {
-      "utc": "2026-08-14T11:17:11+00:00",
+      "utc": "2026-08-14T14:26:48+00:00",
       "elapsed_min": 0.0,
       "msg": "precheck OK: 4 relay inputs including the staged controls, 3 local assets"
     },
     {
-      "utc": "2026-08-14T11:17:12+00:00",
+      "utc": "2026-08-14T14:26:49+00:00",
       "elapsed_min": 0.0,
-      "msg": "created 3uwvkx3zyria8z at $0.99/h"
+      "msg": "created uzahazwqsh2r9a at $0.99/h"
     },
     {
-      "utc": "2026-08-14T11:17:12+00:00",
+      "utc": "2026-08-14T14:26:49+00:00",
       "elapsed_min": 0.0,
       "msg": "watchdog detached \u2014 hard 99 min = $1.64"
-    },
-    {
-      "utc": "2026-08-14T11:17:23+00:00",
-      "elapsed_min": 0.19,
-      "msg": "TCP 22 at 82.221.170.242:37120 after 0.2 min"
-    },
-    {
-      "utc": "2026-08-14T11:17:26+00:00",
-      "elapsed_min": 0.24,
-      "msg": "draw 1: ssh reachable \u2014 $0.00"
-    },
-    {
-      "utc": "2026-08-14T11:18:16+00:00",
-      "elapsed_min": 1.07,
-      "msg": "draw 1: image identity runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@580.159.03"
-    },
-    {
-      "utc": "2026-08-14T11:18:16+00:00",
-      "elapsed_min": 1.07,
-      "msg": "draw 1: running setup"
-    },
-    {
-      "utc": "2026-08-14T11:46:17+00:00",
-      "elapsed_min": 29.09,
-      "msg": "COLD on draw 1 \u2014 abandoning 3uwvkx3zyria8z and redrawing"
-    },
-    {
-      "utc": "2026-08-14T11:46:19+00:00",
-      "elapsed_min": 29.12,
-      "msg": "created setwv2mt3gx4hz at $0.99/h"
-    },
-    {
-      "utc": "2026-08-14T11:46:19+00:00",
-      "elapsed_min": 29.12,
-      "msg": "watchdog detached \u2014 hard 99 min = $1.64"
-    },
-    {
-      "utc": "2026-08-14T11:47:12+00:00",
-      "elapsed_min": 30.0,
-      "msg": "  starting (60s) \u2014 $0.50"
-    },
-    {
-      "utc": "2026-08-14T11:48:15+00:00",
-      "elapsed_min": 31.05,
-      "msg": "TCP 22 at 64.247.206.216:17568 after 31.1 min"
-    },
-    {
-      "utc": "2026-08-14T11:48:18+00:00",
-      "elapsed_min": 31.1,
-      "msg": "draw 2: ssh reachable \u2014 $0.51"
-    },
-    {
-      "utc": "2026-08-14T11:48:55+00:00",
-      "elapsed_min": 31.72,
-      "msg": "draw 2: image identity runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@580.159.03"
-    },
-    {
-      "utc": "2026-08-14T11:48:55+00:00",
-      "elapsed_min": 31.72,
-      "msg": "draw 2: running setup"
-    },
-    {
-      "utc": "2026-08-14T11:55:16+00:00",
-      "elapsed_min": 38.07,
-      "msg": "setup did not reach SETUP_DONE:\n + setuptools==81.0.0\n + shellingham==1.5.4\n + six==1.17.0\n + sympy==1.14.0\n + tokenizers==0.22.2\n + torch==2.11.0+cu128\n + tqdm==4.68.4\n + transformers==5.13.1\n + triton==3.6.0\n + typer==0.26.8\n + typing-extensions==4.16.0\n + urllib3==2.7.0\n + xxhash==3.8.1\n + yarl==1.24.2\n[11:50:14] uv sync completed in 45s\ntrain torch 2.11.0+cu128 NVIDIA L40S | transformers 5.13.1\nMARKER:TRAIN_ENV\n[11:50:22] verifying the frozen assets against the preregistered constants\n{\n  \"passed\": true,\n  \"problems\": []\n}\nMARKER:ASSETS_READY\n[11:50:23] vLLM venv on the container disk\nvllm 0.27.1 | torch 2.13.0+cu130 True\nMARKER:VLLM_READY\n[11:52:08] downloading the teacher at the pinned revision\n\nFetching 10 files:   0%|          | 0/10 [00:00<?, ?it/s]\nFetching 10 files:  30%|\u2588\u2588\u2588       | 3/10 [00:00<00:00, 24.52it/s]\nFetching 10 files:  70%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588   | 7/10 [00:01<00:00,  6.23it/s]\nFetching 10 files:  80%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588  | 8/10 [00:20<00:00,  6.23it/s]\nFetching 10 files:  90%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588 | 9/10 [00:27<00:04,  4.31s/it]\nFetching 10 files: 100%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588| 10/10 [00:27<00:00,  3.61s/it]\nFetching 10 files: 100%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588| 10/10 [00:27<00:00,  2.79s/it]\nMARKER:TEACHER_READY\n[11:52:37] checking the RoPE base resolves in every venv\n  transformers 5.13.1: qwen3_0p6b_init_v0 stored 5,000,000 runtime 5,000,000 OK\n  transformers 5.15.0: qwen3_0p6b_init_v0 stored 5,000,000 runtime 5,000,000 OK\nMARKER:ROPE_OK\n[11:52:46] CPU test suite (256 vCPUs visible, cgroup budget 16; cpu set 0-15)\nFAILED tests/autoinit/test_frozen_assets.py::test_battery_prompts_are_unique_and_hash_indexed\nFAILED tests/autoinit/test_frozen_assets.py::test_battery_ids_are_reproducible_not_process_dependent\nFAILED tests/autoinit/test_frozen_assets.py::test_the_equivalence_denominator_matches_the_battery\n7 failed, 1534 passed, 74 skipped in 141.80s (0:02:21)\n[11:55:10] test suite failed rc=1\nSETUP_RC=1\n"
-    },
-    {
-      "utc": "2026-08-14T11:55:16+00:00",
-      "elapsed_min": 38.07,
-      "msg": "ABORT after draw 2: setup_failed"
-    },
-    {
-      "utc": "2026-08-14T11:55:16+00:00",
-      "elapsed_min": 38.07,
-      "msg": "deleting pod (setup setup_failed)"
-    },
-    {
-      "utc": "2026-08-14T11:55:27+00:00",
-      "elapsed_min": 38.25,
-      "msg": "pod deleted \u2014 38.3 min, $0.63; provider confirms gone: True"
     }
   ],
-  "stages": {
-    "setup": [
-      {
-        "draw": 1,
-        "setup_done": "",
-        "host_cold": "",
-        "setup_rc": "90",
-        "tail": "SETUP_RC=90"
-      },
-      {
-        "draw": 2,
-        "setup_done": "",
-        "host_cold": "",
-        "setup_rc": "1",
-        "tail": "SETUP_RC=1"
-      }
-    ]
-  },
+  "stages": {},
   "authorization": {
     "schema": "aadistill.autoinit.spend_authorization/v1",
     "authorization_id": "autoinit.control_characterization.2026-08-14",
@@ -138,8 +41,8 @@
     "granted_by": "maintainer (session authorization)",
     "plan_id": "autoinit.control_characterization_continuation",
     "preflight_plan_hash": "c7754ca5e8aa913b7690a0f4d7dbf6ed0062cf00da5b4b527c806a3d7798b0e8",
-    "expected_usd": 1.34,
-    "hard_cap_usd": 1.75,
+    "expected_usd": 1.97,
+    "hard_cap_usd": 2.3,
     "authorized_stages": [
       0,
       1,
@@ -156,8 +59,8 @@
     "scope_note": "characterization of two ALREADY TRAINED permanent controls. This authorization does not permit training, retraining, or re-initializing any control: the driver has no training stage and the launcher materializes existing artifacts. A failed characterization is collected and torn down and remains a FAILED continuation; it does not authorize a retry that trains. Phase A remains separately unauthorized.",
     "phase_a_authorized": false,
     "automatic_phase_a_start": false,
-    "authorized_session_commit": "d9b2fd67cc683090ab1c9dec8b67a8d7ded4d129",
-    "harness_source_digest": "060b60533080ffba7616bd2532dd70b366c54f34d326844520bdd818d3d18fe6",
+    "authorized_session_commit": "2f96753d22687031144ae2375c796f4a8329e749",
+    "harness_source_digest": "a76f7416c94a9ae5ff0fa0111d54ed11f18a103ad4b6119ec7a924f0c917f840",
     "harness_source_files": [
       "scripts/pod/autoinit_continuation_launch.py",
       "scripts/pod/autoinit_continuation_driver.py",
@@ -170,12 +73,12 @@
       "src/aadistill/autoinit/continuation.py",
       "src/aadistill/autoinit/generation.py"
     ],
-    "provenance_commit": "d9b2fd67cc683090ab1c9dec8b67a8d7ded4d129",
+    "provenance_commit": "2f96753d22687031144ae2375c796f4a8329e749",
     "enforcement": "the launcher loads this artifact and refuses to create a pod whose priced hard threshold exceeds hard_cap_usd, refuses a stage not in authorized_stages, and has no code path to Phase A",
-    "authorization_sha256": "938078e5c74773751c4de9b590111de088c9b0f1486cd88e664aae004b3e42d4"
+    "authorization_sha256": "dfb092433beb9456960f8ba726671496820e34a6d097f49aa134d0c51e928d22"
   },
   "preflight_plan_hash": "c7754ca5e8aa913b7690a0f4d7dbf6ed0062cf00da5b4b527c806a3d7798b0e8",
-  "harness_source_digest": "060b60533080ffba7616bd2532dd70b366c54f34d326844520bdd818d3d18fe6",
+  "harness_source_digest": "a76f7416c94a9ae5ff0fa0111d54ed11f18a103ad4b6119ec7a924f0c917f840",
   "harness_source_files": [
     "scripts/pod/autoinit_continuation_driver.py",
     "scripts/pod/autoinit_continuation_launch.py",
@@ -211,7 +114,7 @@
   "transport": "relay",
   "budget_plan": {
     "price_per_hour": 0.99,
-    "authorized_usd": 1.75,
+    "authorized_usd": 2.3,
     "expected_minutes": 81.0,
     "soft_stop_minutes": 89.10000000000001,
     "artifact_recovery_reserve_minutes": 10.0,
@@ -272,12 +175,12 @@
     "hard_terminate_usd": 1.6352
   },
   "quoted_price_per_hour": 0.99,
-  "stock_status": "Low",
+  "stock_status": "Medium",
   "session_commit_check": {
-    "session_commit": "1e7f347bdea203c39a16c7e0448a1656b7157cac",
-    "authorized_session_commit": "d9b2fd67cc683090ab1c9dec8b67a8d7ded4d129",
-    "harness_digest_at_commit": "060b60533080ffba7616bd2532dd70b366c54f34d326844520bdd818d3d18fe6",
-    "authorized_harness_digest": "060b60533080ffba7616bd2532dd70b366c54f34d326844520bdd818d3d18fe6",
+    "session_commit": "6ba7cce9872e32603a69ab7fbf24fe94ac804ec8",
+    "authorized_session_commit": "2f96753d22687031144ae2375c796f4a8329e749",
+    "harness_digest_at_commit": "a76f7416c94a9ae5ff0fa0111d54ed11f18a103ad4b6119ec7a924f0c917f840",
+    "authorized_harness_digest": "a76f7416c94a9ae5ff0fa0111d54ed11f18a103ad4b6119ec7a924f0c917f840",
     "harness_matches": true,
     "commit_carries_this_authorization": true,
     "rule": "the pod checks out this commit from a bundle; its harness must digest to the authorized value and it must carry the authorization the driver will load"
@@ -298,35 +201,10 @@
     ],
     "local_missing": []
   },
-  "pod_id": "setwv2mt3gx4hz",
+  "pod_id": "uzahazwqsh2r9a",
   "actual_price_per_hour": 0.99,
-  "terminate_after_utc": "2026-08-14T13:25:24Z",
+  "terminate_after_utc": "2026-08-14T16:05:54Z",
   "watchdog_journals": [
-    "/home/ecs-user/aad-scratch/cont_20260814_111709/watchdog.jsonl",
-    "/home/ecs-user/aad-scratch/cont_20260814_111709/watchdog.jsonl"
-  ],
-  "image_identity": {
-    "image_name": "runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404",
-    "observed": [
-      "580.159.03"
-    ],
-    "digest": "runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@580.159.03"
-  },
-  "final_pod_state": {
-    "exists": false,
-    "desired_status": "TERMINATED",
-    "billing": false
-  },
-  "provider_confirms_gone": true,
-  "cost": {
-    "price_per_hour": 0.99,
-    "elapsed_minutes": 38.25,
-    "actual_usd": 0.6312,
-    "authorized_usd": 1.75,
-    "within_authorization": true
-  },
-  "passed": false,
-  "continuation_successful": false,
-  "cleanup_is_not_success": "artifacts are collected and the pod is torn down on every path; the session outcome is decided by the driver's terminal marker alone",
-  "finished_utc": "2026-08-14T11:55:27+00:00"
+    "/home/ecs-user/aad-scratch/cont2_20260814_142646/watchdog.jsonl"
+  ]
 }

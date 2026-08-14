@@ -65,7 +65,15 @@ AutoInit micro-preflight attempt 4 (L40S, 217.9 min)         $  3.6000
     under transformers 5.15. ~$0.41 of it was a cold first
     draw, abandoned and deleted by the launcher.
 
-ACTUAL CUMULATIVE SPEND                                      $187.4402
+AutoInit characterization continuation, attempt 1 (L40S,      $  0.6312
+    38.25 min). PRODUCED NOTHING. 29 min of it was a cold
+    host, abandoned and deleted by the launcher; the redraw
+    then failed the pod's blocking test gate on seven tests
+    that read `recovery_search_v1`, which the v2 migration
+    stopped staging. Pod deleted, provider-confirmed gone.
+    Both causes fixed and locked by tests before relaunch.
+
+ACTUAL CUMULATIVE SPEND                                      $188.0714
 ```
 
 The pre-E8b baseline `$163.8833` is the figure every E8/E8b planner was built on
@@ -84,6 +92,17 @@ $173.40   +$0.83 increment
 $211.07   +$47.18 E8b hard backstop (2026-08-11), rounded up from $211.0633
 ```
 
+Within that project cap, the characterization continuation carries its own bound:
+
+```
+$1.75   continuation cap as handed off (expected $0.90)
+$2.30   RAISED 2026-08-14 with maintainer approval, after attempt 1 spent
+        $0.6312 and produced nothing. Covers that sunk cost plus one full
+        attempt at its $1.6352 hard threshold. Expected $1.97.
+        Raising the cap does NOT loosen a session: `make_plan` still prices
+        one run at soft $1.4702 / hard $1.6352.
+```
+
 ## Protocol deviations and overruns
 
 | what | figure | recorded |
@@ -93,13 +112,14 @@ $211.07   +$47.18 E8b hard backstop (2026-08-11), rounded up from $211.0633
 | E8b-S2 spent $11.06 on six attempts, five of them infrastructure | — | §39–§41 |
 | DC's step-0 probe deferred, never run | — | §38, declared |
 | the 20-step memory gate was falsified by the real run | — | §41–§42 |
+| continuation attempt 1 bought nothing: cold host + a test gate reading an unstaged battery | $0.6312 | `decisions.md` 2026-08-14, `STATE.md` |
 
 ## Current position
 
 ```
 authorized cumulative cap                                    $211.07
-actual cumulative spend                                      $187.4402
-unused authorization remaining                               $ 23.6298
+actual cumulative spend                                      $188.0714
+unused authorization remaining                               $ 22.9986
 micro-preflight spent of its $8.60 authorization             $  6.7369
 micro-preflight remaining under that authorization           $  1.8631
     LESS THAN A SESSION COSTS (~$3.2). Nothing further is
