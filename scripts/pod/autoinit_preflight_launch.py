@@ -167,6 +167,10 @@ class Preflight:
                  f"${self.plan.hard_terminate_usd:.2f} "
                  f"(authorized ${self.auth.hard_cap_usd:.2f})")
 
+        return self.check_gpu_offered()
+
+    def check_gpu_offered(self) -> bool:
+        """Is the GPU offered at or below the priced rate? Shared with subclasses."""
         d = self.provider._gql(
             'query { gpuTypes(input:{id:"%s"}) { id securePrice '
             'lowestPrice(input:{gpuCount:1}) { stockStatus } } }' % self.a.gpu)
@@ -181,6 +185,20 @@ class Preflight:
         if self.price is None or self.price > self.a.max_price:
             self.say(f"ABORT: ${self.price}/h above the priced ${self.a.max_price}/h")
             return False
+        return True
+
+    #: The detached job's id, and the command it runs. Subclasses override.
+    job_id = "autoinit_preflight_driver"
+
+    def driver_command(self) -> str:
+        return (f"/opt/train/bin/python scripts/pod/autoinit_preflight_driver.py "
+                f"--stage all --image-digest '{self.image_digest}' "
+                f"--rate {self.price} --spent-usd {self.usd():.3f} "
+                f"--soft-stop-usd {self.plan.soft_stop_usd:.2f} "
+                f"--authorized-usd {self.plan.hard_terminate_usd:.2f}")
+
+    def materialize_inputs(self, target, host: str, scp: list) -> bool:
+        """Inputs the driver consumes but does not fetch. Nothing, by default."""
         return True
 
     def relay_precheck(self) -> bool:
@@ -401,13 +419,15 @@ class Preflight:
         scp = ["scp", "-P", port, "-o", "StrictHostKeyChecking=no",
                "-o", "UserKnownHostsFile=/dev/null"]
 
+        # Inputs the driver needs but does not fetch itself. Empty for the
+        # preflight, which trains its own; the continuation materializes two
+        # existing controls here, by whichever transport it was told to use.
+        if not self.materialize_inputs(target, host, scp):
+            self.teardown_now("inputs did not materialize")
+            return False
+
         job = start_detached(target, JobSpec(
-            job_id="autoinit_preflight_driver", workdir=REPO,
-            command=(f"/opt/train/bin/python scripts/pod/autoinit_preflight_driver.py "
-                     f"--stage all --image-digest '{self.image_digest}' "
-                     f"--rate {self.price} --spent-usd {self.usd():.3f} "
-                     f"--soft-stop-usd {self.plan.soft_stop_usd:.2f} "
-                     f"--authorized-usd {self.plan.hard_terminate_usd:.2f}"),
+            job_id=self.job_id, workdir=REPO, command=self.driver_command(),
             job_dir=f"{WS}/jobs", log_path=RUN_LOG, status_path=STATUS,
             env={"PYTHONPATH": f"{REPO}/src"}),
             start_timeout=120, verify_timeout=60)

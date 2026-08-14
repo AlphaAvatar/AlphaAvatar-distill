@@ -292,3 +292,195 @@ def test_advance_to_was_not_weakened():
     with pytest.raises(RecoveryAdmissionError, match="did not pass"):
         PREFLIGHT_PLAN_V1.advance_to(
             2, {0: {"passed": True}, 1: {"passed": False, "reason": "peak memory"}})
+
+
+# --- full lifecycle ---------------------------------------------------------
+
+
+def load_continuation_driver(tmp_path: Path):
+    """Import the continuation driver with its pod paths redirected."""
+    import importlib.util
+
+    spec = importlib.util.spec_from_file_location(
+        "continuation_driver", REPO / "scripts/pod/autoinit_continuation_driver.py")
+    mod = importlib.util.module_from_spec(spec)
+    sys.modules["continuation_driver"] = mod
+    spec.loader.exec_module(mod)
+    mod.WS = tmp_path
+    mod.STATUS = tmp_path / "continuation.status"
+    mod.AUDIT = tmp_path / "audit"
+    mod.AUDIT.mkdir(parents=True, exist_ok=True)
+    return mod
+
+
+class ContArgs:
+    stage = "all"
+    image_digest = "sha256:rehearsal"
+    rate = 0.99
+    spent_usd = 0.15
+    soft_stop_usd = 1.50
+    authorized_usd = 1.75
+    characterization_minutes = 18.0
+
+
+def build_continuation(tmp_path, *, import_ok=True, attest_ok=True,
+                       smoke_ok=True, characterize_ok=True):
+    """The real driver with every paid call replaced by a scripted outcome."""
+    mod = load_continuation_driver(tmp_path)
+    d = mod.ContinuationDriver.__new__(mod.ContinuationDriver)
+    d.a = ContArgs()
+    d.t0 = __import__("time").time()
+    d.results, d.imported, d.ev = {}, {}, {"stages": {}}
+    d.evaluation_protocol = None
+    d.mod = mod
+
+    class Auth:
+        hard_cap_usd = 1.75
+        def require_stage(self, s): pass
+        def require_within_cap(self, usd, what=""): pass
+        def as_dict(self): return {"authorization_id": "rehearsal"}
+    d.auth = Auth()
+
+    def stage0():
+        d.enter(0)
+        if not import_ok:
+            return d.record(0, False, "weights sha256 does not match the record")
+        d.imported = {n: object() for n, _ in mod.CONTROLS}
+        return d.record(0, True, **{"import": {"controls": list(d.imported)}})
+
+    def stage1():
+        d.enter(1)
+        if not attest_ok:
+            return d.record(1, False, "the battery does not verify")
+        class E:
+            evaluation_protocol_hash = "EVAL"
+        d.evaluation_protocol = E()
+        return d.record(1, True, evaluation_protocol_hash="EVAL")
+
+    def stage2():
+        d.enter(2)
+        if not smoke_ok:
+            return d.record(2, False, "smoke: the tool prompt did not render")
+        return d.record(2, True, smoke={"sets": ["tool", "rag"],
+                                        "covers_tool_set": True})
+
+    def stage3():
+        d.enter(3)
+        if not characterize_ok:
+            return d.record(3, False, "preflight_ctl_r0860k_sa scoring rc=1")
+        return d.record(3, True, thresholds={"battery": "recovery_search_v2"})
+
+    d.stage0, d.stage1, d.stage2, d.stage3 = stage0, stage1, stage2, stage3
+    for name in ("enter", "record", "usd", "afford", "save", "run", "finish"):
+        setattr(d, name, getattr(mod.ContinuationDriver, name).__get__(d))
+    return d, mod
+
+
+def markers_of(mod) -> list[str]:
+    if not mod.STATUS.is_file():
+        return []
+    return [ln.split("MARKER:")[1] for ln in mod.STATUS.read_text().splitlines()
+            if "MARKER:" in ln]
+
+
+def test_the_success_lifecycle_completes_and_trains_nothing(tmp_path):
+    d, mod = build_continuation(tmp_path)
+    assert d.run() == 0
+    assert sorted(d.results) == [0, 1, 2, 3]
+    assert all(r["passed"] for r in d.results.values())
+    assert "ALL_DONE" in markers_of(mod)
+    ev = json.loads((mod.AUDIT / "continuation_evidence.json").read_text())
+    assert ev["continuation_successful"] is True
+    assert ev["outcome"] == "SUCCESS"
+    assert ev["trains_anything"] is False
+    assert ev["phase_a_started"] is False
+    assert ev["phase_a_reachable_from_this_driver"] is False
+
+
+def test_characterization_failure_still_collects_and_tears_down_but_FAILS(tmp_path):
+    """The semantics the maintainer locked: cleanup is not success.
+
+        import PASS -> attestation PASS -> smoke PASS -> characterization FAIL
+        -> evidence collected -> teardown -> outcome FAILED
+    """
+    d, mod = build_continuation(tmp_path, characterize_ok=False)
+    rc = d.run()
+
+    # Everything before characterization passed, and characterization did not.
+    assert [d.results[i]["passed"] for i in (0, 1, 2)] == [True, True, True]
+    assert d.results[3]["passed"] is False
+    assert rc == 23 and rc != 0
+
+    # The evidence exists — collection is not blocked by the failure.
+    evidence = mod.AUDIT / "continuation_evidence.json"
+    assert evidence.is_file(), "a failed characterization suppressed the evidence"
+    ev = json.loads(evidence.read_text())
+    assert ev["stages"]["3"]["passed"] is False
+    assert ev["stages"]["3"]["reason"]
+
+    # And the outcome is a failure, whatever cleanup did afterwards.
+    assert ev["continuation_successful"] is False
+    assert ev["outcome"] in ("FAILED", "INCOMPLETE")
+    assert ev["failed_stages"] == [3]
+    assert "cleanup" in ev["cleanup_is_not_success"]
+
+    # The marker the launcher reads is NOT the success marker.
+    marks = markers_of(mod)
+    assert "CONTINUATION_INCOMPLETE" in marks
+    assert "ALL_DONE" not in marks, (
+        "a failed characterization emitted the success marker; the launcher "
+        "gates teardown and the session verdict on it")
+    # Non-blocking means cleanup proceeds, not that the stage passed.
+    assert "STAGE_NONBLOCKING_FAIL" in marks
+    assert ev["phase_a_started"] is False
+
+
+@pytest.mark.parametrize("kwargs,stage", [
+    (dict(import_ok=False), 0),
+    (dict(attest_ok=False), 1),
+    (dict(smoke_ok=False), 2),
+])
+def test_a_blocking_failure_stops_before_characterization(tmp_path, kwargs, stage):
+    d, mod = build_continuation(tmp_path, **kwargs)
+    assert d.run() == 20 + stage
+    assert 3 not in d.results, "the controls were characterized after a blocking failure"
+    marks = markers_of(mod)
+    assert "CONTINUATION_FAILED" in marks and "ALL_DONE" not in marks
+    ev = json.loads((mod.AUDIT / "continuation_evidence.json").read_text())
+    assert ev["continuation_successful"] is False
+    assert ev["stages"][str(stage)]["reason"]
+
+
+def test_the_launcher_reports_failure_when_the_driver_does():
+    """`collect PASS + teardown PASS` must not become a successful session."""
+    launch = (REPO / "scripts/pod/autoinit_continuation_launch.py").read_text()
+    assert 'session.ev["continuation_successful"] = bool(ok)' in launch
+    assert "cleanup_is_not_success" in launch
+    assert "return 0 if ok else 11" in launch
+    # `ok` comes from the inherited collect_and_teardown, which returns `done`.
+    preflight = (REPO / "scripts/pod/autoinit_preflight_launch.py").read_text()
+    tail = preflight[preflight.index("def collect_and_teardown"):]
+    assert "return done" in tail
+    assert 'done = terminal == "ALL_DONE"' in tail or "done" in tail
+
+
+def test_transport_is_separate_from_identity():
+    """The driver imports a local artifact; how it arrived is not its business."""
+    driver = (REPO / "scripts/pod/autoinit_continuation_driver.py").read_text()
+    for forbidden in ("snapshot_download", "hf_hub_download", "scp", "relay"):
+        assert forbidden not in driver.split('"""')[2], (
+            f"the driver mentions {forbidden}: transport has leaked into the "
+            "component that decides what a control IS")
+    assert "CONTROL_ROOT" in driver
+    launch = (REPO / "scripts/pod/autoinit_continuation_launch.py").read_text()
+    assert "def materialize_controls" in launch
+    assert '"relay"' in launch and '"scp"' in launch
+    assert "--transport" in launch
+
+
+def test_the_continuation_driver_cannot_train_or_reach_phase_a():
+    driver = (REPO / "scripts/pod/autoinit_continuation_driver.py").read_text()
+    for forbidden in ("train_stage3.py", "Trainer(", "BeamSearch", "admit_leaves",
+                      "probe_configs", "SuccessiveHalvingPlan", "run_phase_a"):
+        assert forbidden not in driver, f"the continuation driver can reach {forbidden}"
+    assert 'choices=("all",)' in driver, "a stage outside the plan is expressible"

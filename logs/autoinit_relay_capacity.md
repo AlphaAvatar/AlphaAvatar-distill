@@ -43,16 +43,27 @@ uncommitted headroom after reserve                 1.87 GiB
 ```
 
 **Phase-A's relay requirement is not established, and I decline to invent it.**
+
+**`k` is a storage decision only.** The scientific design is frozen and is not
+in question: **5 searched leaves + the exact canonical control**, two seeds, the
+preregistered halving schedule. `k` is *how many leaf checkpoints need
+simultaneous relay retention or long-term physical storage* — nothing else. The
+number of searched or recovery candidates must never be reduced to solve a
+storage problem; if storage is short, the answer is to retain fewer *checkpoints*
+after the fact, or to store them elsewhere, not to search less.
+
 The search and its recovery probes run on one pod, so intermediates never need
-the relay; what would need it is the retention of target-size leaves after the
-session ends — *k* leaves at ~2.15 GiB each, where *k* is a retention decision
-nobody has made. At k=2 that is 4.3 GiB, which does not fit the 1.87 GiB left
-above; at k=0 (retain nothing but metrics) it is free. **This has to be decided
-before Phase A, not discovered during it.**
+the relay. What needs it is retention after the session ends: *k* leaves at
+~2.15 GiB each. At k=2 that is 4.3 GiB, which does not fit the 1.87 GiB left
+above; at k=0 (retain metrics and hashes only, rebuild a leaf from its recorded
+recipe if it is ever needed again) it is free. **This has to be decided before
+Phase A, not discovered during it** — and it is a decision about what is kept,
+not about what is run.
 
 ## Recommendation
 
-**Do not stage yet.** The accounting is dominated by an inferred quota, and the
+**STAGING IS ON HOLD** at the maintainer's direction until the real quota
+is confirmed. **Do not stage yet.** The accounting is dominated by an inferred quota, and the
 margin under it is ~1.87 GiB after a single re-upload reserve — thin enough that
 one mistake is unrecoverable, because deletion does not reclaim.
 
