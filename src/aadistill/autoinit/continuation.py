@@ -360,7 +360,7 @@ CONTINUATION_HARNESS_SOURCE_FILES_V1: tuple[str, ...] = (
 #: The narrow authorization this session runs under. Characterization only: it
 #: trains nothing, and Phase A is not expressible in this artifact at all.
 CONTINUATION_AUTHORIZATION = SpendAuthorization(
-    authorization_id="autoinit.control_characterization.2026-08-14",
+    authorization_id="autoinit.control_characterization.2026-08-15",
     granted_utc="2026-08-15T00:00:00Z",
     granted_by=("maintainer, 2026-08-15, explicitly: '$4.10 expected / $4.40 hard "
                 "cumulative for the Stage-3 continuation, with a per-launch hard "
