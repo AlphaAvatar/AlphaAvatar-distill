@@ -2614,3 +2614,32 @@ in assumptions that a later study would have to unpick.
   hardcoded cross-session binding will keep breaking every time either plan
   moves.
 - Revisit when: the maintainer decides on re-authorization and on that question.
+
+## 2026-08-14 (UTC) — Attempt 6: the design fix worked; the launcher misread a clean setup
+
+- The session-scoped authorization gate **passed on the pod**:
+  `verifying logs/autoinit_continuation_authorization.json binds to this
+  session's plan` → `AUTHORIZATION_OK` → `SETUP_DONE` → `SETUP_RC=0`. Attempt 5's
+  failure is closed.
+- The launcher then reported `setup_failed`. The shared setup wrote its markers
+  to a hardcoded `$WS/autoinit_preflight.status`; the continuation launcher
+  probes `$WS/autoinit_continuation.status`. `setup_done` was empty while
+  `setup_rc` was `0` — the record contained both, and only one was consulted.
+  Attempt 5 had the same empty `setup_done`, masked by a genuine `setup_rc=1`.
+- Same class as attempt 5, one layer down: a **shared** script hardcoding a
+  preflight-specific name while the continuation assumes its own. Fixed the same
+  way — `SESSION_STATUS`, forwarded from the *same expression* the launcher
+  probes with, so the two cannot drift.
+- Sweep: no third instance. Every other marker read already goes through that
+  `STATUS`; the continuation driver's own hardcoded path agrees, and that
+  agreement is now pinned by a test rather than left to coincidence.
+- Found unpaid while fixing it: `STATUS=${SESSION_STATUS:?…session's status file}`
+  — an unquoted `${v:?word}` expands its word, so the apostrophe opened a quote,
+  and **`bash -n` still passed** because it paired with a later one. Caught by
+  executing the line, not linting it.
+- Cost $0.1324, 8.0 min, pod deleted, provider confirms `TERMINATED`, account has
+  no pods. `f21b4038…` is consumed. Not retried, per instruction.
+- **Budget consequence requiring a decision:** continuation spend is now
+  $2.9744. Another launch at $1.6896 hard needs a cumulative $4.6640, which
+  exceeds the granted $4.54. A further attempt needs a new cumulative figure as
+  well as a new one-use artifact.

@@ -1183,6 +1183,67 @@ def test_setup_verifies_THIS_sessions_authorization_and_fails_closed():
             assert "AUTHORIZATION_OK" not in marks
 
 
+def test_setup_writes_its_markers_where_the_launcher_looks():
+    """The contract that cost $0.1324, executed.
+
+    The continuation's setup ran to SETUP_DONE with SETUP_RC=0. It wrote its
+    markers to the hardcoded `autoinit_preflight.status`; the launcher grepped
+    `autoinit_continuation.status`, found no SETUP_DONE, and reported
+    `setup_failed` on a session that had succeeded. Nothing compared the two
+    names, because each side was individually correct.
+    """
+    import re
+    import subprocess
+    import tempfile
+
+    setup = (REPO / "scripts/pod/autoinit_preflight_setup.sh").read_text()
+    # No session-specific filename may be baked into the shared script.
+    assert "autoinit_preflight.status" not in setup
+    assert "SESSION_STATUS" in setup
+
+    # The launcher must forward the SAME expression it probes with.
+    launch = (REPO / "scripts/pod/autoinit_preflight_launch.py").read_text()
+    assert "SESSION_STATUS={STATUS}" in launch
+    assert "PROBE_COMMAND.format(status=STATUS" in launch
+
+    # And `mark` must actually land in the named file. Take the two real lines.
+    lines = setup.splitlines(True)
+    status_line = next(l for l in lines if l.startswith('STATUS="${SESSION_STATUS'))
+    mark_line = next(l for l in lines if l.startswith("mark() {"))
+    with tempfile.TemporaryDirectory() as tmp:
+        named = Path(tmp) / "some_session.status"
+        script = Path(tmp) / "m.sh"
+        script.write_text(f'set -euo pipefail\nWS="{tmp}"\n'
+                          + status_line + mark_line + 'mark SETUP_DONE\n')
+        env = {**os.environ, "SESSION_STATUS": str(named)}
+        r = subprocess.run(["bash", str(script)], capture_output=True, text=True,
+                           env=env)
+        assert r.returncode == 0, r.stdout + r.stderr
+        assert named.is_file(), "mark did not write to the file the launcher named"
+        assert "MARKER:SETUP_DONE" in named.read_text()
+
+        # The probe the launcher actually runs must find it there.
+        mod = load_continuation_launcher()
+        probe = mod._preflight.PROBE_COMMAND.format(status=str(named),
+                                                    log="/dev/null")
+        out = subprocess.run(["bash", "-c", probe], capture_output=True,
+                             text=True).stdout
+        assert mod._preflight.parse_setup_probe(out)["setup_done"] not in ("", "0")
+
+        # Unset: fail closed rather than write markers to an empty path.
+        env.pop("SESSION_STATUS")
+        assert subprocess.run(["bash", str(script)], capture_output=True,
+                              text=True, env=env).returncode != 0
+
+    # The driver still hardcodes its own status path. It agrees with the
+    # launcher today, and agreement by coincidence is what cost $0.1324, so the
+    # equality is pinned rather than assumed.
+    driver = (REPO / "scripts/pod/autoinit_continuation_driver.py").read_text()
+    named = re.search(r'STATUS = WS / "([^"]+)"', driver).group(1)
+    assert mod.STATUS.endswith("/" + named), (
+        f"the driver writes {named} but the launcher probes {mod.STATUS}")
+
+
 def test_each_launcher_names_its_own_authorization_to_setup():
     """The preflight and the continuation must not share a binding."""
     sys.path.insert(0, str(REPO / "scripts/pod"))

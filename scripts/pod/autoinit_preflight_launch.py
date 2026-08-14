@@ -440,6 +440,7 @@ class Preflight:
         target.run(
             f"cd {WS} && SESSION_COMMIT={self.a.session_commit} "
             f"BUNDLE_NAME={self.a.bundle} "
+            f"SESSION_STATUS={STATUS} "
             f"SESSION_AUTH_PATH={self.session_auth_path()} "
             f"SESSION_PLAN_HASH={self.session_plan_hash()} "
             f"TEACHER_REVISION={self.a.teacher_revision} "

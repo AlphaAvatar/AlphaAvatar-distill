@@ -1,0 +1,65 @@
+[20:53:21] budget: expected 84 min $1.39 · soft $1.52 · hard $1.69 (authorized $4.54)
+[20:53:22] NVIDIA L40S $0.99/h, stock Low
+[20:53:22] session commit db8bf1f78ea9 verified: harness digests to a1234f01f542… and carries the authorization
+[20:53:22] precheck OK: 4 relay inputs including the staged controls, 3 local assets
+[20:53:23] created z9so5ftbsokybz at $0.99/h
+[20:53:23] watchdog detached — hard 102 min = $1.69
+[20:54:17]   starting (60s) — $0.01
+[20:55:10] TCP 22 at 64.247.206.218:15300 after 1.8 min
+[20:55:13] draw 1: ssh reachable — $0.03
+[20:55:50] draw 1: image identity runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@580.159.03
+[20:55:50] draw 1: running setup
+[21:01:14] setup did not reach SETUP_DONE:
+ + tqdm==4.70.0
+ + transformers==5.15.0
+ + triton==3.7.1
+ + truststore==0.10.4
+ + typer==0.27.1
+ + typing-extensions==4.16.0
+ + typing-inspection==0.4.4
+ + urllib3==2.7.0
+ + uvicorn==0.52.3
+ + uvloop==0.22.1
+ + vllm==0.27.1
+ + watchfiles==1.2.0
+ + websockets==17.0.1
+ + xgrammar==0.2.3
+ + yarl==1.24.5
+ + z3-solver==4.15.4.0
+[20:57:33] vllm offline install completed in 9s
+vllm 0.27.1 | torch 2.13.0+cu130 True
+MARKER:VLLM_READY
+[20:57:44] downloading the teacher at the pinned revision
+
+Fetching 10 files:   0%|          | 0/10 [00:00<?, ?it/s]
+Fetching 10 files:  20%|██        | 2/10 [00:00<00:00, 16.08it/s]
+Fetching 10 files:  60%|██████    | 6/10 [00:00<00:00, 27.76it/s]
+Fetching 10 files:  80%|████████  | 8/10 [00:20<00:00, 27.76it/s]
+Fetching 10 files:  90%|█████████ | 9/10 [00:21<00:03,  3.19s/it]
+Fetching 10 files: 100%|██████████| 10/10 [00:23<00:00,  2.86s/it]
+Fetching 10 files: 100%|██████████| 10/10 [00:23<00:00,  2.30s/it]
+MARKER:TEACHER_READY
+[20:58:08] checking the RoPE base resolves in every venv
+  transformers 5.13.1: qwen3_0p6b_init_v0 stored 5,000,000 runtime 5,000,000 OK
+  transformers 5.15.0: qwen3_0p6b_init_v0 stored 5,000,000 runtime 5,000,000 OK
+MARKER:ROPE_OK
+[20:58:19] CPU test suite (256 vCPUs visible, cgroup budget 16; cpu set 0-15)
+........................................................................ [ 92%]
+........................................................................ [ 97%]
+...........................................                              [100%]
+1566 passed, 61 skipped in 165.24s (0:02:45)
+[21:01:06] test suite passed in 167s on cpu set 0-15
+MARKER:TESTS_OK:167s
+[21:01:06] verifying logs/autoinit_continuation_authorization.json binds to this session's plan
+  autoinit.control_characterization.2026-08-14T2039Z: stages [0, 1, 2, 3], hard $4.54, phase A False
+MARKER:AUTHORIZATION_OK
+NVIDIA L40S, 46068 MiB, 580.159.03
+MARKER:SETUP_DONE
+[21:01:07] setup complete
+SETUP_RC=0
+
+[21:01:14] ABORT after draw 1: setup_failed
+[21:01:14] deleting pod (setup setup_failed)
+[21:01:25] pod deleted — 8.0 min, $0.13; provider confirms gone: True
+
+continuation INCOMPLETE — /home/ecs-user/AlphaAvatar-distill/logs/autoinit_continuation_session.json. Nothing trained. Phase A NOT launched.

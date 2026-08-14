@@ -88,6 +88,7 @@ AutoInit characterization continuation, attempt 3 (L40S,      $  0.0700
     `--find-links` does not override. The offline gate caught it
     in 4 minutes instead of a 28-minute burn.
 
+AutoInit characterization continuation, attempt 6 (L40S, 8.0 min)  $  0.1324
 AutoInit characterization continuation, attempt 5 (L40S, 8.3 min)  $  0.1369
 AutoInit characterization continuation, attempt 4 (L40S,      $  1.3672
     82.9 min). The train env installed OFFLINE IN 11 SECONDS —
@@ -96,7 +97,7 @@ AutoInit characterization continuation, attempt 4 (L40S,      $  1.3672
     host that had failed three cold draws. Torn down manually
     once the outcome was determined; provider-confirmed gone.
 
-ACTUAL CUMULATIVE SPEND                                      $190.2822
+ACTUAL CUMULATIVE SPEND                                      $190.4146
 ```
 
 The pre-E8b baseline `$163.8833` is the figure every E8/E8b planner was built on
@@ -140,22 +141,26 @@ $2.30   RAISED 2026-08-14 with maintainer approval, after attempt 1 spent
 | continuation attempt 3 bought nothing, but failed in 4 min | $0.0700 | `uv sync` cannot install a registry-pinned wheel offline |
 | continuation attempt 4: train env offline in 11 s, then `pip install vllm` hung 76 min | $1.3672 | the exposure named in the offline commit |
 | continuation attempt 5: every offline fix worked on hardware; died on the LAST line of setup, a stale binding to the micro-preflight authorization | $0.1369 | `autoinit_continuation_attempt5/` |
-| **continuation total: $2.8420 spent, zero driver stages reached** | $2.8420 | arithmetic corrected: the earlier $1.2712 line double-counted a rounded print; the per-attempt entries were always right |
+| continuation attempt 6: the session-scoped authorization gate PASSED on the pod; setup finished with SETUP_RC=0 and the launcher misread it as setup_failed, because the shared setup wrote markers to the preflight's status filename | $0.1324 | `autoinit_continuation_attempt6/` |
+| **continuation total: $2.9744 spent, zero driver stages reached** | $2.9744 | arithmetic corrected: the earlier $1.2712 line double-counted a rounded print; the per-attempt entries were always right |
 
 ## Current position
 
 ```
 authorized cumulative cap                                    $211.07
-actual cumulative spend                                      $190.2822
-unused authorization remaining                               $ 20.7878
-continuation spent across five attempts                      $  2.8420
-    0.6312 + 0.6367 + 0.0700 + 1.3672 + 0.1369; zero driver stages
-GRANTED cumulative continuation authorization                $  4.40
-    CONSUMED 2026-08-14: authorization e4854818… was granted for ONE
-    launcher invocation. That invocation terminated (INCOMPLETE,
-    $0.1369, provider-confirmed teardown). It must not be reused.
-    Remaining headroom under the $4.40 figure is $1.5580, but no
-    artifact currently authorizes spending it.
+actual cumulative spend                                      $190.4146
+unused authorization remaining                               $ 20.6554
+continuation spent across six attempts                       $  2.9744
+    0.6312 + 0.6367 + 0.0700 + 1.3672 + 0.1369 + 0.1324; zero driver stages
+GRANTED cumulative continuation authorization                $  4.54
+    expected $4.23. BOTH issued artifacts are now CONSUMED, each
+    having been granted for ONE launcher invocation:
+      e4854818…  attempt 5, INCOMPLETE, $0.1369
+      f21b4038…  attempt 6, INCOMPLETE, $0.1324
+    Headroom under the $4.54 figure is $1.5656 — enough for one more
+    launch at $1.6896 hard? NO: $2.9744 + $1.6896 = $4.6640 > $4.54.
+    A further launch needs a new cumulative figure as well as a new
+    artifact. Nothing authorizes any spend right now.
     expected $4.10, granted by the maintainer 2026-08-15.
     = $2.7051 spent + one newly-priced hard attempt ($1.6896).
     PER-LAUNCH HARD LIMIT                                    $  1.6896

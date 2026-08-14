@@ -1,5 +1,5 @@
-**Updated:** 2026-08-14 20:16 UTC · branch `main` · working tree clean
-**No pods running. Nothing billing.** **1,631 CPU tests pass**, 7 skipped; 1,607 under the pod simulator.
+**Updated:** 2026-08-14 21:05 UTC · branch `main` · working tree clean
+**No pods running. Nothing billing.** **1,634 CPU tests pass**, 7 skipped; 1,610 under the pod simulator.
 
 ## The two permanent canonical controls EXIST and are hash-verified
 
@@ -62,89 +62,81 @@ every item. Input is now normalized through `normalize_tools`, which reads eithe
 representation and fails closed. **Semantics unchanged and measured:** nine
 policies × 190 prompts reproduce every number of the pre-migration record.
 
-## Attempt 5 ran and FAILED in setup — INCOMPLETE (2026-08-14 20:16 UTC)
+## Attempts 5 and 6 both INCOMPLETE — the gate is fixed, the readback was not (2026-08-14 21:05 UTC)
 
-**Nothing running, nothing billing.** Pod `2vpbiz5p2al1kj` deleted at 8.3 min,
-`$0.1369`, provider confirms `TERMINATED`; the account has no pods. Five paid
-attempts, **$2.8420**, still zero driver stages. Evidence:
-[`autoinit_continuation_attempt5/`](autoinit_continuation_attempt5/).
+**Nothing running, nothing billing.** Both pods deleted, provider confirms
+`TERMINATED`, account has no pods. Six paid attempts, **$2.9744**, still zero
+driver stages. Evidence: [`autoinit_continuation_attempt5/`](autoinit_continuation_attempt5/),
+[`autoinit_continuation_attempt6/`](autoinit_continuation_attempt6/).
 
-**The authorization `e4854818…` is CONSUMED** — it was granted for one launcher
-invocation, and that invocation terminated. It must not be reused.
+**Both issued authorizations are CONSUMED** — each was granted for one launcher
+invocation: `e4854818…` (attempt 5, $0.1369) and `f21b4038…` (attempt 6,
+$0.1324). Neither may be reused.
 
-### Everything the offline work was for did work, on hardware
+### Attempt 6 got further, and the failure was a misread
+
+```
+MARKER:AUTHORIZATION_OK      <- the session-scoped gate PASSED on the pod
+MARKER:SETUP_DONE
+[21:01:07] setup complete
+SETUP_RC=0
+[21:01:14] ABORT after draw 1: setup_failed
+```
+
+Setup succeeded. The shared script wrote its markers to a hardcoded
+`$WS/autoinit_preflight.status`; the continuation launcher probes
+`$WS/autoinit_continuation.status`. `setup_done` was empty while `setup_rc` was
+`0` — the session record held both, and only one was consulted. Attempt 5 had the
+same empty `setup_done`, masked by a real `setup_rc=1`.
+
+**Both failures are the same class**: a shared script hardcoding a
+preflight-specific name while the continuation assumes its own. Both are now
+fixed the same way — the launcher tells setup which authorization, which plan
+hash, and which status file, and for the status it forwards *the same expression
+it probes with*, so they cannot drift.
+
+A sweep found no third instance. The continuation driver's own hardcoded status
+path agrees with the launcher's, and that agreement is now pinned by a test.
+
+Found unpaid while fixing it: an unquoted `${v:?word}` expands its word, so
+`…this session's status file` opened a quote — and **`bash -n` still passed**,
+because it paired with a later apostrophe.
+
+### What is fixed and verified at $0
 
 | | |
 | --- | --- |
-| ssh reachable | 1.8 min — warm host, no cold draw |
-| offline train env | installed, no PyPI resolve on the critical path |
-| **offline vLLM env, 196/196 hash-verified on the pod** | the wheel-byte gate passed |
-| RoPE base in both venvs | 5,000,000 stored = runtime, transformers 5.13.1 **and** 5.15.0 |
-| CPU suite on the pod | 1564 passed, 61 skipped, 163 s |
+| setup verifies **this session's** authorization + plan | executed from the real script: passes, and fails closed (rc 98, `AUTHORIZATION_MISMATCH`) on a wrong plan, on the stale micro-preflight artifact, and on either variable unset |
+| setup markers land where the launcher probes | executed: `mark` writes to the named file, and the launcher's own `PROBE_COMMAND` + `parse_setup_probe` read `setup_done` from it |
+| driver/launcher status paths agree | pinned by test |
+| full suite / pod simulator | 1634 passed · 1610 passed |
 
-### What killed it: a stale binding in the SHARED setup script
+**Everything the offline work targeted keeps passing on hardware**: warm hosts,
+offline train env, **offline vLLM env verified 196/196 against the frozen byte
+manifest on the pod**, RoPE correct in both venvs, ~1566 pod-side tests.
 
-The last line of setup, after the tests:
-
-```
-a = SpendAuthorization.load('logs/autoinit_micro_preflight_authorization.json')
-a.require_plan(PREFLIGHT_PLAN_V1.plan_hash)
-AuthorizationError: bound to afd08be7… but the plan about to run hashes to 83218ddd…
-```
-
-**The guard is correct; the binding is stale.** `autoinit_preflight_setup.sh` is
-shared, and its final gate hardcodes the *micro-preflight* authorization and the
-*preflight* plan. `PREFLIGHT_PLAN_V1.plan_hash` moved `afd08be7…` → `83218ddd…`
-when `pooled_counts@v2` changed that plan's description string in `recovery.py`;
-the historical micro-preflight artifact was never re-issued against it. A session
-unrelated to that authorization died on it.
-
-The continuation's own binding was correct and was verified at $0 before the pod
-existed: `CONTINUATION_PLAN_V1.plan_hash` == `79da6d7a…` == its authorization's.
-
-**Third time an unexecuted line in this one script has cost money** ($0.07,
-$1.3672, $0.1369). `simulate_pod_env.sh` runs the test suite the pod runs; nothing
-executes setup's authorization block. The wheelhouse gate got a test that
-*extracts and runs* the block — this one did not.
-
-### Not retried
-
-Per the maintainer's instruction: preserve evidence, teardown, report INCOMPLETE,
-do not retry without review. The fix is small, but "patch and relaunch" is what
-the last five attempts were, and the authorization is consumed.
-
-### The identity that ran
-
-| identity | value |
-| --- | --- |
-| checkout commit | `40c3d53a7ffe754db0e13435b6dcd522460756f8` |
-| harness digest | `a1d1f3fc…` (verified on the pod) |
-| authorization | `e4854818…` — **CONSUMED** |
-| plan | `79da6d7a…` |
-| bundle | `transfer/aad_autoinit_40c3d53a.bundle`, `a18f22a5…` |
-| vLLM wheel manifest | `f9c0e814…`, 196 wheels, **relay-verified on the pod** |
-
-### Budget
+### Budget — a further attempt needs a new figure, not just a new artifact
 
 ```
-project cumulative                                   $190.2822
-remaining under the $211.07 cap                      $ 20.7878
-continuation spent, five attempts                    $  2.8420
-headroom under the $4.40 continuation figure         $  1.5580
-    but e4854818… is consumed; no artifact authorizes spending it
+project cumulative                                   $190.4146
+remaining under the $211.07 cap                      $ 20.6554
+continuation spent, six attempts                     $  2.9744
+granted cumulative continuation figure               $  4.54   (expected $4.23)
+one more launch, priced                    expected $1.3860 · hard $1.6896
+    $2.9744 + $1.6896 = $4.6640  >  $4.54
 ```
+
+So the granted cumulative figure **no longer covers another launch**. That is a
+maintainer decision; no artifact currently authorizes any spend.
 
 **Phase A remains unauthorized and unpriced** — Stage 3 has still never produced
-a measured battery wall time, so it cannot be re-priced. Its provisional hard
-`$21.01` still exceeds the `$20.7878` remaining.
+a measured battery wall time.
 
 ## What remains before Stage 3 can run
 
-1. **Maintainer review of the attempt-5 failure**, and a decision on whether to
-   re-issue an authorization.
-2. The fix itself is one stale binding. Whether the shared setup script should
-   assert a *session-appropriate* authorization rather than a hardcoded one is a
-   design question, not a patch, and is the maintainer's call.
+1. **Maintainer review** of attempt 6, and a decision on the cumulative figure.
+2. The fixes are committed and rehearsed at $0. A new one-use authorization and a
+   rebuilt bundle would be needed for any further launch.
 3. Phase A stays unauthorized and unpriced until Stage 3 measures the battery.
 
 ## Phase A is repriced, and both statistics measurements are kept

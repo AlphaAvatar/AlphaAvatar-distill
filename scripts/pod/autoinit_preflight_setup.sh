@@ -21,7 +21,15 @@ set -euo pipefail
 
 WS=/workspace
 REPO=$WS/aad
-STATUS=$WS/autoinit_preflight.status
+# The launcher probes this file to decide whether setup succeeded, so it must
+# be the file the launcher names. Hardcoding the preflight's filename cost
+# $0.1324: the continuation's setup ran to SETUP_DONE with SETUP_RC=0, wrote its
+# markers here, and the launcher grepped autoinit_continuation.status, found no
+# SETUP_DONE, and reported setup_failed on a session that had succeeded.
+# Double-quoted, and no apostrophe in the message: an unquoted `${v:?...}`
+# word is expanded, so a bare ' opens a quote that swallows whatever
+# follows until the next one. `bash -n` still passed on it.
+STATUS="${SESSION_STATUS:?the launcher must name the session status file}"
 mark() { echo "MARKER:$1"; echo "$(date -u +%FT%TZ) MARKER:$1" >>"$STATUS"; }
 say()  { echo "[$(date -u +%T)] $*"; }
 
@@ -411,8 +419,8 @@ mark "TESTS_OK:${tt}s"
 # the preflight plan hash had moved under `pooled_counts@v2` and a historical
 # artifact no longer matched it. Re-issuing that artifact would only postpone
 # the same failure to the next time either plan moves.
-: "${SESSION_AUTH_PATH:?the launcher must name this session's authorization}"
-: "${SESSION_PLAN_HASH:?the launcher must name this session's plan hash}"
+: "${SESSION_AUTH_PATH:?the launcher must name the session authorization}"
+: "${SESSION_PLAN_HASH:?the launcher must name the session plan hash}"
 say "verifying $SESSION_AUTH_PATH binds to this session's plan"
 cd "$REPO" && PYTHONPATH=src SESSION_AUTH_PATH="$SESSION_AUTH_PATH" \
   SESSION_PLAN_HASH="$SESSION_PLAN_HASH" /opt/train/bin/python -c "
