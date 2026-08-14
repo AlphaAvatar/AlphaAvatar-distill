@@ -201,13 +201,26 @@ def test_the_tool_scoring_audit_backs_the_scorable_decision():
 
 
 def test_both_historical_checkpoints_are_available_and_lineage_valid():
-    """Lineage only. Whether they may serve as controls is decided elsewhere."""
+    """Lineage only. Whether they may serve as controls is decided elsewhere.
+
+    An entry whose bytes no longer exist is allowed — one relay copy was deleted
+    on 2026-08-15 by maintainer instruction to reclaim space — but only if it
+    SAYS so. A record that quietly reports availability for an artifact that is
+    gone is the failure this guards against, so a deleted entry must carry its
+    deletion provenance and keep the hashes that remain its identity.
+    """
     report = load(REPO / "logs/autoinit_control_availability.json")
     assert report["relay_reachable"]
     assert report["both_pass_legacy_lineage_subset"], report["consequence"]
     for name, entry in report["controls"].items():
-        assert entry["present_on_relay"], name
-        assert entry["artifact_available"] and entry["hash_verified"], name
+        if not entry["present_on_relay"]:
+            assert entry["artifact_available"] is False, name
+            assert entry["hash_verified"] is False, name
+            assert entry["relay_copy_deleted_utc"], name
+            assert "DELETED" in entry["relay_path_status"], name
+            assert entry["expected_weights_sha256"], name
+        else:
+            assert entry["artifact_available"] and entry["hash_verified"], name
         assert entry["weights_hash_match"], name
         assert entry["config_hash_match"], name
         assert entry["lineage_valid"], (name, entry.get("lineage_checks"))

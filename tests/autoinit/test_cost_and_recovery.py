@@ -986,8 +986,13 @@ def test_the_availability_report_does_not_claim_a_matched_control():
     for name, entry in report["controls"].items():
         assert "matches_intended_control_protocol" not in entry, name
         assert entry["recipe_matched_control"] is False, name
-        assert entry["artifact_available"] is True, name
-        assert entry["hash_verified"] is True, name
+        # Availability is no longer universal: one relay copy was deleted on
+        # 2026-08-15 to reclaim space. A gone artifact must report itself gone.
+        if entry["artifact_available"]:
+            assert entry["hash_verified"] is True, name
+        else:
+            assert entry["hash_verified"] is False, name
+            assert entry["relay_copy_deleted_utc"], name
         assert entry["passes_legacy_lineage_subset"] is True, name
     blob = json.dumps(report).lower()
     assert "no recovery retraining is needed" not in blob, (
