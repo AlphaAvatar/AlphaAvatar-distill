@@ -365,24 +365,23 @@ CONTINUATION_AUTHORIZATION = SpendAuthorization(
     granted_by="maintainer (session authorization)",
     plan_id=CONTINUATION_PLAN_V1.plan_id,
     plan_hash=CONTINUATION_PLAN_V1.plan_hash,
-    # Priced by the launcher's own `make_plan`, not by prose: 81.0 min at
-    # $0.99/h with 24 min/control of characterization budget. The $0.88 sketch
-    # in autoinit_phase_a_repricing.md omitted the transfer phase and used the
-    # optimistic column for four other rows. This is a conservative CEILING on
-    # the estimate, not a prediction: the pod is torn down on completion, so a
-    # run that finishes in an hour costs about $1.00.
+    # Priced by the launcher's own `make_plan`, not by prose. Re-priced
+    # 2026-08-15 after the offline dependency change, as the maintainer
+    # required: this cap covers the ALREADY-SPENT $1.2712 plus one complete
+    # newly-priced hard attempt, so the continuation as a whole is bounded
+    # rather than each retry being bounded separately.
     #
-    # Raised 2026-08-14 from $1.34/$1.75 with maintainer approval. Attempt 1
-    # spent **$0.6312** and produced nothing: a cold host burned 29 min, and the
-    # redraw then failed the pod's blocking test gate on seven tests that read
-    # `recovery_search_v1`, which the v2 migration stopped staging. Both are
-    # fixed and locked by tests. The cap now covers the WHOLE continuation —
-    # that sunk $0.6312 plus one full attempt at its $1.6352 hard threshold.
-    # Raising the cap does not loosen the session: `make_plan` still prices a
-    # single run at soft $1.4702 / hard $1.6352, so one launch cannot spend the
-    # headroom of two.
-    expected_usd=1.97,
-    hard_cap_usd=2.30,
+    #   sunk, two attempts that reached no driver stage      $1.2712
+    #   one new attempt, hard threshold at 10 min setup      $1.6715
+    #                                                        -------
+    #   cumulative hard                                      $2.9427 -> $2.95
+    #   cumulative expected  = 1.2712 + 1.3695             =  $2.6407 -> $2.64
+    #
+    # Raising the cap does NOT loosen the session: `make_plan` still prices one
+    # run at soft $1.5065 / hard $1.6715, so a single launch cannot spend the
+    # headroom that covers the failures preceding it.
+    expected_usd=2.64,
+    hard_cap_usd=2.95,
     authorized_stages=(0, 1, 2, 3),
     stage_conditions={
         "0": "strict import of the two existing permanent controls; no training",

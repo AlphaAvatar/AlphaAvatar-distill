@@ -73,6 +73,10 @@ CKPT_STORE = "/home/ecs-user/aad-artifacts/autoinit"
 #: a whole second paid session; an unused leash costs nothing, because the pod
 #: is torn down on completion rather than at the threshold.
 CHARACTERIZATION_MINUTES = 24.0
+#: Setup allowance. 10, not 8: the wheelhouse is 3.82 GiB fetched from the relay
+#: before the install. That ADDS about a minute and REMOVES the 8-28 min cold
+#: tail that lost four of five draws — a worse mean for a far better tail.
+SETUP_MINUTES = 10.0
 
 
 class Continuation(_preflight.Preflight):
@@ -364,7 +368,7 @@ def main() -> int:
     ap.add_argument("--disk-gb", type=int, default=120)
     ap.add_argument("--characterization-minutes", type=float,
                     default=CHARACTERIZATION_MINUTES)
-    ap.add_argument("--setup-minutes", type=float, default=8.0)
+    ap.add_argument("--setup-minutes", type=float, default=SETUP_MINUTES)
     ap.add_argument("--transfer-minutes", type=float, default=4.0)
     ap.add_argument("--teacher-revision",
                     default="768f209d9ea81521153ed38c47d515654e938aea")
