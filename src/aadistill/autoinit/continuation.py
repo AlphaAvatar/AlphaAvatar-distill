@@ -39,6 +39,7 @@ from pathlib import Path
 from typing import Any
 
 from ..infrastructure.manifest import sha256_file, sha256_json
+from .authorization import SpendAuthorization
 from .recovery import (
     PreflightPlan,
     PreflightStage,
@@ -335,6 +336,62 @@ CONTINUATION_PLAN_V1 = PreflightPlan(
                 "a result's evaluation protocol is not comparable to the "
                 "attestation -> STOP")),
     ))
+
+
+#: The executable that actually runs this session. It is NOT the preflight set:
+#: the continuation has its own launcher, its own driver and its own plan
+#: module, and an authorization that digested the preflight's files would admit
+#: an edited continuation driver without noticing. The shared infrastructure —
+#: setup script, engine probe, watchdog, collector, authorization, generation —
+#: is in both sets because both sessions execute it.
+CONTINUATION_HARNESS_SOURCE_FILES_V1: tuple[str, ...] = (
+    "scripts/pod/autoinit_continuation_launch.py",
+    "scripts/pod/autoinit_continuation_driver.py",
+    "scripts/pod/autoinit_preflight_launch.py",   # the launcher it subclasses
+    "scripts/pod/autoinit_preflight_setup.sh",
+    "scripts/pod/autoinit_engine_probe.py",
+    "scripts/pod/watchdog.py",
+    "scripts/pod/collect_artifacts.py",
+    "src/aadistill/autoinit/authorization.py",
+    "src/aadistill/autoinit/continuation.py",
+    "src/aadistill/autoinit/generation.py",
+)
+
+#: The narrow authorization this session runs under. Characterization only: it
+#: trains nothing, and Phase A is not expressible in this artifact at all.
+CONTINUATION_AUTHORIZATION = SpendAuthorization(
+    authorization_id="autoinit.control_characterization.2026-08-14",
+    granted_utc="2026-08-14T00:00:00Z",
+    granted_by="maintainer (session authorization)",
+    plan_id=CONTINUATION_PLAN_V1.plan_id,
+    plan_hash=CONTINUATION_PLAN_V1.plan_hash,
+    # Priced by the launcher's own `make_plan`, not by prose: 81.0 min at
+    # $0.99/h with 24 min/control of characterization budget. The $0.88 sketch
+    # in autoinit_phase_a_repricing.md omitted the transfer phase and used the
+    # optimistic column for four other rows. This is a conservative CEILING on
+    # the estimate, not a prediction: the pod is torn down on completion, so a
+    # run that finishes in an hour costs about $1.00. The hard threshold it
+    # yields is $1.6352, inside the maintainer's $1.75 cap — which is unchanged
+    # and remains the only enforced figure.
+    expected_usd=1.34,
+    hard_cap_usd=1.75,
+    authorized_stages=(0, 1, 2, 3),
+    stage_conditions={
+        "0": "strict import of the two existing permanent controls; no training",
+        "1": "current generation and evaluation attestation over recovery_search_v2",
+        "2": "real v2 tool and RAG generation smoke",
+        "3": "characterize the imported controls; the only paid measurement",
+        "teardown": "collect, delete the pod, confirm from the provider, STOP",
+    },
+    scope_note=(
+        "characterization of two ALREADY TRAINED permanent controls. This "
+        "authorization does not permit training, retraining, or re-initializing "
+        "any control: the driver has no training stage and the launcher "
+        "materializes existing artifacts. A failed characterization is collected "
+        "and torn down and remains a FAILED continuation; it does not authorize "
+        "a retry that trains. Phase A remains separately unauthorized."),
+    harness_source_files=CONTINUATION_HARNESS_SOURCE_FILES_V1,
+)
 
 
 @dataclass(frozen=True)

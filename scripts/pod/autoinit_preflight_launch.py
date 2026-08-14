@@ -85,6 +85,62 @@ def parse_setup_probe(stdout: str) -> dict:
 
 
 class Preflight:
+    #: Everything below names something a *session* owns rather than something
+    #: the orchestration does: where the driver writes, which markers it can end
+    #: on, which artifacts must survive, and what it produced that has to be
+    #: fetched. A subclass that runs a different driver overrides these; the
+    #: mechanism around them — detached start, watchdog, relay, budget,
+    #: artifact gate, provider-confirmed teardown — is inherited untouched.
+    #: The defaults are the preflight's own values, so its behaviour is
+    #: unchanged by their existence.
+    audit_dirname = "autoinit_preflight"
+    evidence_filename = "preflight_evidence.json"
+    archive_basename = "preflight_artifacts.tar.gz"
+    spec_success = "configs/autoinit/preflight_artifacts.json"
+    spec_failed = "configs/autoinit/preflight_artifacts_failed.json"
+    #: Terminal markers other than ALL_DONE. `incomplete_markers` are the ones
+    #: that mean the blocking stages passed, so whatever they produced exists
+    #: and must be fetched (2026-08-13: `if terminal == "ALL_DONE"` deleted
+    #: $2.82 of verified checkpoints).
+    failure_markers = ("PREFLIGHT_FAILED", "PREFLIGHT_INCOMPLETE")
+    incomplete_markers = ("PREFLIGHT_INCOMPLETE",)
+    failure_note = ("a blocking stage failed — collecting evidence, then "
+                    "tearing down. Permanent controls were not trained under "
+                    "a configuration that has to change.")
+    report_names = ("preflight_evidence.json", "attested_protocol.json",
+                    "materialized_thresholds.json")
+
+    def event_streams(self) -> tuple[str, ...]:
+        """Append-only streams a torn-down session may have left mid-write."""
+        return tuple(f"artifacts/stage3/{c}/train_log.jsonl" for c in CONTROLS)
+
+    def fetch_products(self, host: str, target, stage2_passed: bool) -> list:
+        """Fetch what this session PRODUCED and cannot regenerate for free.
+
+        The preflight trains two permanent controls; they are the only such
+        artifact, and they are fetched whenever they exist rather than only on
+        a fully successful session.
+        """
+        fetched: list = []
+        if not stage2_passed:
+            return fetched
+        for name in CONTROLS:
+            dest = Path(self.a.ckpt_store) / name
+            dest.parent.mkdir(parents=True, exist_ok=True)
+            rc = subprocess.run(
+                ["timeout", f"{self.a.ckpt_fetch_limit_min}m", "scp", "-r",
+                 "-P", str(target.port), "-o", "StrictHostKeyChecking=no",
+                 "-o", "UserKnownHostsFile=/dev/null",
+                 f"root@{host}:{REPO}/artifacts/stage3/{name}/checkpoints",
+                 str(dest)], capture_output=True, timeout=None)
+            size = sum(f.stat().st_size for f in dest.rglob("*")
+                       if f.is_file()) if dest.exists() else 0
+            fetched.append({"control": name, "rc": rc.returncode,
+                            "bytes": size, "dest": str(dest)})
+            self.say(f"  checkpoint {name}: rc={rc.returncode}, "
+                     f"{size / 2**30:.2f} GiB -> {dest}")
+        return fetched
+
     def __init__(self, a):
         self.a = a
         self.scr = Path(a.scr)
@@ -439,8 +495,8 @@ class Preflight:
         relay = LogRelay(target, (
             RelaySpec(RUN_LOG, "preflight_run.log", required=False),
             RelaySpec(STATUS, "preflight.status", required=False),
-            RelaySpec(f"{REPO}/artifacts/audit/autoinit_preflight/"
-                      "preflight_evidence.json", "preflight_evidence.json",
+            RelaySpec(f"{REPO}/artifacts/audit/{self.audit_dirname}/"
+                      f"{self.evidence_filename}", self.evidence_filename,
                       required=False),
         ) + tuple(
             RelaySpec(f"{REPO}/artifacts/stage3/{c}/train_log.jsonl",
@@ -461,13 +517,10 @@ class Preflight:
             if "MARKER:ALL_DONE" in st:
                 terminal = "ALL_DONE"
                 break
-            if "MARKER:PREFLIGHT_FAILED" in st or "MARKER:PREFLIGHT_INCOMPLETE" in st:
-                terminal = ("PREFLIGHT_INCOMPLETE"
-                            if "MARKER:PREFLIGHT_INCOMPLETE" in st
-                            else "PREFLIGHT_FAILED")
-                self.say("a blocking stage failed — collecting evidence, then "
-                         "tearing down. Permanent controls were not trained under "
-                         "a configuration that has to change.")
+            hit = [m for m in self.failure_markers if f"MARKER:{m}" in st]
+            if hit:
+                terminal = hit[0]
+                self.say(self.failure_note)
                 break
             state = self.provider.get(self.pod_id)
             if not state.billing:
@@ -493,17 +546,16 @@ class Preflight:
     def collect_and_teardown(self, target, host, scp, terminal: str) -> bool:
         cc = (f"cd {REPO} && PYTHONPATH={REPO}/src /opt/train/bin/python "
               "scripts/pod/collect_artifacts.py")
-        target.run(f"mkdir -p {REPO}/artifacts/audit/autoinit_preflight/session && "
+        audit = f"{REPO}/artifacts/audit/{self.audit_dirname}"
+        target.run(f"mkdir -p {audit}/session && "
                    f"cp {RUN_LOG} {STATUS} {WS}/setup.log "
-                   f"{REPO}/artifacts/audit/autoinit_preflight/session/ 2>/dev/null "
+                   f"{audit}/session/ 2>/dev/null "
                    "|| true", timeout=120)
         # A blocking failure has a smaller required set: the controls do not
         # exist, and demanding them would block teardown on artifacts the run
         # correctly refused to produce.
-        spec = ("configs/autoinit/preflight_artifacts_failed.json"
-                if terminal != "ALL_DONE"
-                else "configs/autoinit/preflight_artifacts.json")
-        man, arc = f"{WS}/manifest.json", f"{WS}/preflight_artifacts.tar.gz"
+        spec = self.spec_failed if terminal != "ALL_DONE" else self.spec_success
+        man, arc = f"{WS}/manifest.json", f"{WS}/{self.archive_basename}"
         r_man = target.run(
             f"{cc} manifest --root {REPO}/artifacts --spec {REPO}/{spec} "
             f"--out {man} --settle-seconds {self.a.settle_seconds}", timeout=900)
@@ -514,7 +566,7 @@ class Preflight:
         store = self.scr / "store"
         store.mkdir(exist_ok=True)
         for remote, local in ((man, store / "manifest.json"),
-                              (arc, store / "preflight_artifacts.tar.gz")):
+                              (arc, store / self.archive_basename)):
             subprocess.run(scp + [f"root@{host}:{remote}", str(local)],
                            capture_output=True, timeout=1800)
 
@@ -524,7 +576,7 @@ class Preflight:
             extract = store / "extracted"
             extract.mkdir(exist_ok=True)
             try:
-                with tarfile.open(store / "preflight_artifacts.tar.gz") as tar:
+                with tarfile.open(store / self.archive_basename) as tar:
                     tar.extractall(extract, filter="data")
                 manifest = ArtifactManifest.load(store / "manifest.json")
                 problems = verify_extracted(extract, manifest)
@@ -544,31 +596,14 @@ class Preflight:
         # and are kept" — and then the launcher skipped the fetch and deleted
         # the pod. `PREFLIGHT_INCOMPLETE` means Stages 0-2 passed. The comment
         # above was already right; the condition did not implement it.
-        fetched = []
         stage2_passed = bool(
             (self.ev.get("driver_stages") or {}).get("2")
-            or terminal in ("ALL_DONE", "PREFLIGHT_INCOMPLETE"))
-        if stage2_passed:
-            for name in CONTROLS:
-                dest = Path(self.a.ckpt_store) / name
-                dest.parent.mkdir(parents=True, exist_ok=True)
-                rc = subprocess.run(
-                    ["timeout", f"{self.a.ckpt_fetch_limit_min}m", "scp", "-r",
-                     "-P", str(target.port), "-o", "StrictHostKeyChecking=no",
-                     "-o", "UserKnownHostsFile=/dev/null",
-                     f"root@{host}:{REPO}/artifacts/stage3/{name}/checkpoints",
-                     str(dest)], capture_output=True, timeout=None)
-                size = sum(f.stat().st_size for f in dest.rglob("*")
-                           if f.is_file()) if dest.exists() else 0
-                fetched.append({"control": name, "rc": rc.returncode,
-                                "bytes": size, "dest": str(dest)})
-                self.say(f"  checkpoint {name}: rc={rc.returncode}, "
-                         f"{size / 2**30:.2f} GiB -> {dest}")
+            or terminal in ("ALL_DONE", *self.incomplete_markers))
+        fetched = self.fetch_products(host, target, stage2_passed)
         self.ev["checkpoints_fetched"] = fetched
-        for name in ("preflight_evidence.json", "attested_protocol.json",
-                     "materialized_thresholds.json"):
+        for name in self.report_names:
             subprocess.run(scp + [
-                f"root@{host}:{REPO}/artifacts/audit/autoinit_preflight/{name}",
+                f"root@{host}:{audit}/{name}",
                 str(store / name)], capture_output=True, timeout=600)
             if (store / name).is_file():
                 self.ev.setdefault("fetched_reports", []).append(name)
@@ -582,7 +617,7 @@ class Preflight:
             "final_streams_quiescent": bool(manifest and manifest.final_streams_quiescent),
             "archive_created": r_arc.returncode == 0,
             "archive_contents_verified": r_ver.returncode == 0,
-            "transfer_complete": (store / "preflight_artifacts.tar.gz").is_file(),
+            "transfer_complete": (store / self.archive_basename).is_file(),
             "local_hashes_verified": local_ok,
             "checkpoint_hashes_matched": all(f["rc"] == 0 for f in fetched),
             "report_inputs_verified": local_ok,
@@ -595,8 +630,7 @@ class Preflight:
                 f"a blocking stage failed ({terminal}); the controls do not exist "
                 "and must not be demanded. Evidence is collected under the "
                 "reduced spec and the pod is torn down."),
-            incomplete_event_streams=() if done else tuple(
-                f"artifacts/stage3/{c}/train_log.jsonl" for c in CONTROLS))
+            incomplete_event_streams=() if done else self.event_streams())
         self.ev["teardown_gate"] = decision.as_dict()
         self.ev["manifest_summary"] = (
             {"ok": manifest.ok, "entries": len(manifest.entries),
@@ -626,8 +660,7 @@ class Preflight:
             emergency_reason=(f"the watchdog terminated the pod at the hard "
                               f"threshold ({self.plan.hard_terminate_minutes:.0f} "
                               f"min / ${self.plan.hard_terminate_usd:.2f})"),
-            incomplete_event_streams=tuple(
-                f"artifacts/stage3/{c}/train_log.jsonl" for c in CONTROLS))
+            incomplete_event_streams=self.event_streams())
         self.ev["teardown_gate"] = decision.as_dict()
         self.ev["relayed_events"] = events
         self.say(f"EMERGENCY: only relayed snapshots survive — {events}")

@@ -340,13 +340,30 @@ def test_the_authorization_bounds_the_session(tmp_path):
     assert auth.automatic_phase_a_start is False
 
 
+def test_the_micro_preflight_authorization_is_retired_by_its_own_gate():
+    """It cannot be spent again, and the mechanism is what retired it.
+
+    The preflight is finished: its two permanent controls exist and must not be
+    retrained. Its launcher was then edited — to give a session's identity
+    (audit directory, terminal markers, artifact spec, products to fetch) its
+    own overridable hooks, so the continuation could stop inheriting the
+    preflight's — which changed the harness digest. That is exactly the event
+    `require_harness` exists to catch, so this $8.60 stages-0-3 authorization,
+    the one that would train controls, now refuses to run.
+
+    Re-issuing it is deliberately NOT done here: it would silently restore
+    permission to train, which the current instruction withdraws.
+    """
+    auth = SpendAuthorization.load(AUTH_PATH)
+    with pytest.raises(AuthorizationError, match="differ"):
+        auth.require_harness(REPO)
+
+
 def test_an_unrehearsed_harness_cannot_consume_the_authorization(tmp_path):
     """The executable identity is enforced, not merely recorded."""
     from aadistill.autoinit.authorization import harness_source_digest
 
     auth = SpendAuthorization.load(AUTH_PATH)
-    observed = auth.require_harness(REPO)          # the committed harness passes
-    assert observed["digest"] == auth.harness_source_digest
     assert auth.authorized_session_commit
 
     # An edited harness is a different harness.

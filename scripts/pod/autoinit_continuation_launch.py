@@ -64,6 +64,14 @@ LOCAL_ASSETS = ("artifacts/stage1/state_eval_v1",
                 "artifacts/stage3/recovery_search_v2",
                 "logs/autoinit_permanent_controls")
 CKPT_STORE = "/home/ecs-user/aad-artifacts/autoinit"
+#: Per-control characterization budget. 18 min was the historical GUESS;
+#: characterizing one checkpoint on this battery has never been measured, and
+#: measuring it is why this session exists. 24 keeps BOTH controls affordable if
+#: the true cost is a third over the guess, and still prices the hard threshold
+#: at $1.6352 — inside the $1.75 cap. Losing sb to a tight soft stop would cost
+#: a whole second paid session; an unused leash costs nothing, because the pod
+#: is torn down on completion rather than at the threshold.
+CHARACTERIZATION_MINUTES = 24.0
 
 
 class Continuation(_preflight.Preflight):
@@ -76,6 +84,33 @@ class Continuation(_preflight.Preflight):
         self.ev["scope"] = CONTINUATION_SCOPE.as_dict()
         self.ev["trains_anything"] = False
         self.ev["transport"] = a.transport
+
+    # -- what this session owns, as distinct from how it is orchestrated ---
+    audit_dirname = "autoinit_continuation"
+    evidence_filename = "continuation_evidence.json"
+    archive_basename = "continuation_artifacts.tar.gz"
+    spec_success = "configs/autoinit/continuation_artifacts.json"
+    spec_failed = "configs/autoinit/continuation_artifacts_failed.json"
+    failure_markers = ("CONTINUATION_FAILED", "CONTINUATION_INCOMPLETE")
+    incomplete_markers = ("CONTINUATION_INCOMPLETE",)
+    failure_note = ("the continuation did not complete — collecting evidence, "
+                    "then tearing down. The permanent controls are inputs here "
+                    "and are untouched; nothing was trained.")
+    report_names = ("continuation_evidence.json", "imported_controls.json",
+                    "attested_evaluation_protocol.json",
+                    "materialized_thresholds.json")
+
+    def event_streams(self) -> tuple[str, ...]:
+        """None: this session appends to no training stream because it trains
+        nothing. Naming the preflight's train logs here would make every
+        teardown wait on files that cannot exist."""
+        return ()
+
+    def fetch_products(self, host: str, target, stage2_passed: bool) -> list:
+        """Nothing to fetch back: the controls are INPUTS, and the measurements
+        travel in the artifact archive. The preflight fetches checkpoints
+        because it created them; creating nothing, this fetches nothing."""
+        return []
 
     # -- budget: no training phase, so the shape is different -------------
     def make_plan(self) -> bool:
@@ -93,6 +128,11 @@ class Continuation(_preflight.Preflight):
             arms=0, steps_per_arm=0,
             step_time=StepTime(3.15, "measured, and not used here: this session "
                                      "trains nothing"),
+            below_floor_reason=(
+                "no step is taken: arms=0 and steps_per_arm=0, so the step-time "
+                "model contributes zero minutes to this plan. The floor exists "
+                "to stop a TRAINING session being priced from an optimistic "
+                "step time; there is no training here to misprice."),
             setup_minutes=self.a.setup_minutes, other_phases=phases,
             eval_minutes_per_arm=0.0, transfer_minutes=self.a.transfer_minutes,
             contingency_fraction=0.10, artifact_recovery_reserve_minutes=10.0)
@@ -109,6 +149,59 @@ class Continuation(_preflight.Preflight):
                  f"${self.plan.hard_terminate_usd:.2f} "
                  f"(authorized ${self.auth.hard_cap_usd:.2f})")
         return self.check_gpu_offered()
+
+    # -- precheck: the inputs THIS session needs, checked at $0 ------------
+    def relay_precheck(self) -> bool:
+        """Fail before a pod exists, on the inputs this session actually reads.
+
+        The preflight's precheck names the training pack, which nothing here
+        touches, and does not name the staged controls, which are the whole
+        input. Under `--transport relay` an unstaged control is discovered by
+        `materialize_controls` — after setup has been paid for.
+        """
+        try:
+            from huggingface_hub import HfApi
+            present = set(HfApi().list_repo_files(self.a.relay_repo,
+                                                  repo_type="model"))
+        except Exception as exc:                                  # noqa: BLE001
+            self.say(f"ABORT: cannot list the relay: {exc!r}"[:200])
+            return False
+        # The pack is not training input here — nothing trains — but the strict
+        # import gate RECOMPUTES each control's pack hash from `blocks.npz`
+        # rather than trusting the value its run recorded, so Stage 0 reads it.
+        need = ["stage1/qwen3_0p6b_init_v0/checkpoint/model.safetensors",
+                "stage3_recovery_corpus_v2/ladder_uniform/blocks.npz"]
+        if self.a.transport == "relay":
+            need += [f"permanent_controls/{c}/model/model.safetensors"
+                     for c in CONTROLS]
+        missing = [f for f in need if f not in present]
+        local_missing = [p for p in LOCAL_ASSETS
+                         if not (REPO_ROOT / p).is_dir()]
+        local_missing += [
+            str(p) for c in CONTROLS
+            for p in (REPO_ROOT / "logs/autoinit_permanent_controls"
+                      / f"{c}_probe_identity.json",
+                      REPO_ROOT / "logs/autoinit_permanent_controls"
+                      / f"{c}_run_manifest.json",
+                      REPO_ROOT / "logs/autoinit_permanent_controls"
+                      / f"{c}_run_completion.json")
+            if not p.is_file()]
+        if self.a.transport == "scp":
+            local_missing += [
+                str(p) for c in CONTROLS
+                for p in (Path(self.a.ckpt_store) / c / "step_001023/model",)
+                if not p.is_dir()]
+        self.ev["precheck"] = {"transport": self.a.transport,
+                               "relay_needed": need, "relay_missing": missing,
+                               "local_assets": list(LOCAL_ASSETS),
+                               "local_missing": local_missing}
+        if missing or local_missing:
+            self.say(f"ABORT at $0: relay missing {missing}, "
+                     f"local missing {local_missing}")
+            return False
+        self.say(f"precheck OK: {len(need)} relay inputs including the staged "
+                 f"controls, {len(LOCAL_ASSETS)} local assets")
+        return True
 
     # -- transport: the only part that knows how bytes arrive -------------
     def materialize_controls(self, target, host: str, scp: list) -> bool:
@@ -197,7 +290,8 @@ def main() -> int:
     ap.add_argument("--gpu", default="NVIDIA L40S")
     ap.add_argument("--max-price", type=float, default=0.99)
     ap.add_argument("--disk-gb", type=int, default=120)
-    ap.add_argument("--characterization-minutes", type=float, default=18.0)
+    ap.add_argument("--characterization-minutes", type=float,
+                    default=CHARACTERIZATION_MINUTES)
     ap.add_argument("--setup-minutes", type=float, default=8.0)
     ap.add_argument("--transfer-minutes", type=float, default=4.0)
     ap.add_argument("--teacher-revision",

@@ -1,0 +1,55 @@
+{
+  "spec": "aadistill.artifact_spec/v1",
+  "session": "autoinit_control_characterization_continuation_failed",
+  "note": "reduced spec for a continuation that did not reach ALL_DONE. Only the evidence file is required: a gate that blocks teardown on artifacts the run correctly refused to produce keeps a failed pod billing. Everything else — gate logs above all, which is what a failure needs read afterwards — is collected if present.",
+  "entries": [
+    {
+      "artifact_class": "continuation_evidence",
+      "pattern": "audit/autoinit_continuation/continuation_evidence.json",
+      "required": true,
+      "lifecycle": "final_required"
+    },
+    {
+      "artifact_class": "gate_log",
+      "pattern": "audit/autoinit_continuation/*.log",
+      "required": false,
+      "lifecycle": "final_required",
+      "min_matches": 0
+    },
+    {
+      "artifact_class": "audit_json",
+      "pattern": "audit/autoinit_continuation/*.json",
+      "required": false,
+      "lifecycle": "final_required",
+      "min_matches": 0
+    },
+    {
+      "artifact_class": "per_sample",
+      "pattern": "audit/autoinit_continuation/preflight_ctl_r0860k_s*_per_sample.jsonl",
+      "required": false,
+      "lifecycle": "final_required",
+      "min_matches": 0
+    },
+    {
+      "artifact_class": "generations",
+      "pattern": "eval/continuation/*/*.generations.jsonl",
+      "required": false,
+      "lifecycle": "final_required",
+      "min_matches": 0
+    },
+    {
+      "artifact_class": "generation_summary",
+      "pattern": "eval/continuation/*/*.json",
+      "required": false,
+      "lifecycle": "final_required",
+      "min_matches": 0
+    },
+    {
+      "artifact_class": "session_evidence",
+      "pattern": "audit/autoinit_continuation/session/*",
+      "required": false,
+      "lifecycle": "final_required",
+      "min_matches": 0
+    }
+  ]
+}

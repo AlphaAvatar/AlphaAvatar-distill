@@ -2308,3 +2308,79 @@ in assumptions that a later study would have to unpick.
   FlashAttention/FA2 implementation and must not be described as such.
 - **Revisit when:** the 4B → ~600M study completes. Not before; AutoInitializer, Top-K
   KD, E9 and runtime redesign are all out of scope under the current task.
+
+## 2026-08-14 — The continuation harness could not have run, and its authorization did not bind it
+
+- **Context:** the two permanent controls exist and only need characterizing, so a
+  continuation launcher/driver was written as a subclass of the micro-preflight
+  harness and reviewed at source level. Before issuing the paid authorization this
+  session *executed* the launcher's own methods for the first time. Four defects
+  surfaced, none of them visible in a source read, every one of them reachable only
+  on a paid pod:
+  1. `Continuation.make_plan` passed `StepTime(3.15)` with no `below_floor_reason`,
+     which `plan_session` refuses. `run()` calls `make_plan` first, so **every**
+     launch would have died there. No test had ever called it; the existing
+     rehearsal stopped at the driver.
+  2. The authorization's `require_harness` digested `HARNESS_SOURCE_FILES_V1` — the
+     *preflight's* files. The continuation launcher, driver and plan module were
+     outside it, so an edited continuation driver would have consumed the
+     authorization unnoticed. The digest named an executable that does not run.
+  3. `relay_precheck` required the training pack but never looked for the staged
+     controls, which are this session's entire input. An unstaged control would have
+     been discovered by `materialize_controls`, i.e. after paying for setup.
+  4. Collection was preflight-shaped: the success spec required
+     `preflight_evidence.json`, per-control `train_log.jsonl`, `run_manifest.json`
+     and checkpoints — none of which a session that trains nothing produces. Since
+     `required_files_present` is a teardown-gate check, a **successful**
+     continuation would have failed its own manifest, **blocked teardown**, and
+     billed on to the hard threshold. The poll loop also watched for `PREFLIGHT_*`
+     markers while the driver emits `CONTINUATION_*`.
+- **Decision:** give a *session's* identity — audit directory, evidence filename,
+  archive name, artifact specs, terminal markers, reports to fetch, products to
+  fetch, event streams to wait on — overridable hooks on the base launcher, with the
+  preflight's own values as defaults, and override them in `Continuation`. Let a
+  `SpendAuthorization` declare the file set its digest covers, defaulting to
+  `HARNESS_SOURCE_FILES_V1` so every existing artifact stays byte-identical. Add
+  `configs/autoinit/continuation_artifacts{,_failed}.json`.
+- **Alternatives considered:** overriding `collect_and_teardown` wholesale in the
+  subclass. Rejected: it duplicates ~100 lines of the most safety-critical method in
+  the harness, and the two copies would drift.
+- **Consequence, recorded rather than repaired:** editing the preflight launcher
+  moved its harness digest, so
+  `logs/autoinit_micro_preflight_authorization.json` — $8.60, stages 0-3, the one
+  that permits *training* controls — no longer validates and cannot be spent. It is
+  deliberately **not** re-issued: re-issuing would silently restore permission to
+  retrain the controls, which the current instruction withdraws. The gate did
+  exactly what it exists to do.
+- **Expected upside:** the paid session can actually start, fails at $0 when an
+  input is missing, and cannot lose the measurements it paid for.
+- **Risks:** the hooks are a new seam in a launcher that four paid sessions depend
+  on. Mitigated by asserting the preflight defaults are unchanged, and by the full
+  suite (1,619 passed).
+- **Revisit when:** a third session type subclasses this launcher. If the hook list
+  keeps growing, the launcher wants a `SessionProfile` object instead of class
+  attributes.
+
+## 2026-08-14 — Repricing the continuation: $1.34 expected / $1.75 hard, 24 min/control
+
+- **Context:** the working price was `$0.90 expected / $1.75 hard`, from a sketch in
+  `autoinit_phase_a_repricing.md` that totalled 53.2 min → $0.88. Running the
+  launcher's own `make_plan` prices the same session at **69.0 min → $1.1385** at
+  18 min/control. The sketch omitted the transfer phase entirely and used its
+  optimistic column for four other rows; the harness's estimator is the conservative
+  one and is what the launcher enforces.
+- **Decision:** raise the per-control characterization budget from the historical
+  **guess** of 18 min to **24 min**, giving expected $1.3365 and a hard threshold of
+  **$1.6352**, inside the maintainer's **$1.75 cap, which is unchanged and remains
+  the only enforced figure**. `CHARACTERIZATION_MINUTES` is one constant, read by
+  both the argparse default and the rehearsal.
+- **Why not shrink instead:** trimming characterization to 12 min/control would have
+  hit $0.94 expected and matched the original figure. It would also have set a 24 min
+  per-control timeout and a soft stop that refuses `sb` whenever `sa` overruns —
+  forfeiting the one quantity this session exists to measure, on a battery whose
+  per-checkpoint cost has **never** been measured. Losing `sb` costs a second paid
+  session; an unused leash costs nothing, because the pod is torn down on completion,
+  not at the threshold.
+- **Expected actual spend** is nearer $0.95–1.10; $1.34 is a ceiling on the estimate.
+- **Revisit when:** this session reports the real per-control battery cost. Phase A
+  must then be repriced from that number rather than from 18 min/control.

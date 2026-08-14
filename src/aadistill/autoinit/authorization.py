@@ -86,6 +86,12 @@ class SpendAuthorization:
     #: not extend to an edited one.
     authorized_session_commit: str | None = None
     harness_source_digest: str | None = None
+    #: WHICH files that digest covers. A session that runs a different
+    #: executable — the continuation runs its own launcher, driver and plan
+    #: module — must declare them here, or `require_harness` would digest the
+    #: preflight's files and happily admit an edited continuation driver. The
+    #: default keeps every existing artifact byte-identical.
+    harness_source_files: tuple[str, ...] = HARNESS_SOURCE_FILES_V1
     #: Provenance only, never enforced.
     provenance_commit: str | None = None
     version: int = 1
@@ -118,7 +124,7 @@ class SpendAuthorization:
             "automatic_phase_a_start": self.automatic_phase_a_start,
             "authorized_session_commit": self.authorized_session_commit,
             "harness_source_digest": self.harness_source_digest,
-            "harness_source_files": list(HARNESS_SOURCE_FILES_V1),
+            "harness_source_files": list(self.harness_source_files),
             "provenance_commit": self.provenance_commit,
             "enforcement": (
                 "the launcher loads this artifact and refuses to create a pod "
@@ -156,7 +162,7 @@ class SpendAuthorization:
         the same reason it is wrong for the trainer — a docs commit would revoke a
         valid authorization — so this digests the declared harness set.
         """
-        observed = harness_source_digest(repo_root)
+        observed = harness_source_digest(repo_root, files=self.harness_source_files)
         if self.harness_source_digest is None:
             raise AuthorizationError(
                 "this authorization declares no harness_source_digest, so it "
@@ -201,6 +207,8 @@ class SpendAuthorization:
             scope_note=raw["scope_note"],
             authorized_session_commit=raw.get("authorized_session_commit"),
             harness_source_digest=raw.get("harness_source_digest"),
+            harness_source_files=tuple(raw.get("harness_source_files")
+                                       or HARNESS_SOURCE_FILES_V1),
             provenance_commit=raw.get("provenance_commit"),
             version=int(raw.get("version", 1)))
 

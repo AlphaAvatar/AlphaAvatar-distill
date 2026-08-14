@@ -30,6 +30,7 @@ REPO = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO / "src"))
 
 from aadistill.autoinit.continuation import (  # noqa: E402
+    CONTINUATION_AUTHORIZATION,
     CONTINUATION_PLAN_V1,
     CONTINUATION_SCOPE,
     IMPORT_REQUIRED_FIELDS,
@@ -484,3 +485,271 @@ def test_the_continuation_driver_cannot_train_or_reach_phase_a():
                       "probe_configs", "SuccessiveHalvingPlan", "run_phase_a"):
         assert forbidden not in driver, f"the continuation driver can reach {forbidden}"
     assert 'choices=("all",)' in driver, "a stage outside the plan is expressible"
+
+
+# --- the launcher paths that had never been executed ------------------------
+#
+# Everything below was found by *running* the launcher's own methods rather than
+# reading them. Each test corresponds to a defect that a source-level review had
+# already passed over, and that would have surfaced only on a paid pod.
+
+
+def load_continuation_launcher():
+    """Import the real launcher module (it subclasses the preflight one)."""
+    import importlib.util
+
+    spec = importlib.util.spec_from_file_location(
+        "continuation_launch", REPO / "scripts/pod/autoinit_continuation_launch.py")
+    mod = importlib.util.module_from_spec(spec)
+    sys.modules["continuation_launch"] = mod
+    spec.loader.exec_module(mod)
+    return mod
+
+
+class LaunchArgs:
+    """The launcher's real defaults, as `main()` would parse them."""
+
+    scr = "/tmp/unused"
+    transport = "relay"
+    relay_repo = "AlphaAvatar/aadistill-artifacts"
+    max_price = 0.99
+    characterization_minutes = None      # filled from the launcher's own default
+    setup_minutes = 8.0
+    transfer_minutes = 4.0
+    ckpt_store = "/home/ecs-user/aad-artifacts/autoinit"
+    ckpt_fetch_limit_min = 25
+
+
+def bare_launcher(mod, **overrides):
+    """A launcher instance with no provider, no ssh and no pod — real methods."""
+    obj = mod.Continuation.__new__(mod.Continuation)
+    args = LaunchArgs()
+    # Take the budget from the launcher itself, so a change there cannot pass
+    # these tests by leaving a copied constant behind.
+    args.characterization_minutes = mod.CHARACTERIZATION_MINUTES
+    for k, v in overrides.items():
+        setattr(args, k, v)
+    obj.a = args
+    obj.ev = {}
+    obj.plan = None
+    obj.said: list[str] = []
+    obj.say = obj.said.append
+    from aadistill.autoinit.continuation import CONTINUATION_AUTHORIZATION
+    obj.auth = CONTINUATION_AUTHORIZATION
+    return obj
+
+
+def test_make_plan_actually_prices_and_stays_inside_the_authorization():
+    """It raised `BudgetError` before a pod could exist and nothing caught it.
+
+    `make_plan` passed a 3.15 s/step `StepTime` with no `below_floor_reason`,
+    which `plan_session` refuses. The continuation could never have launched:
+    `run()` calls this first, and the exception is not a `BudgetError` the
+    launcher handles. Nothing executed it, because every rehearsal stopped at
+    the driver.
+    """
+    mod = load_continuation_launcher()
+    obj = bare_launcher(mod)
+    obj.check_gpu_offered = lambda: True          # the one real provider query
+    assert obj.make_plan() is True
+    plan = obj.plan
+    # The authorized bound is the HARD threshold; that is what the launcher
+    # enforces before a pod can exist, and what the maintainer set at $1.75.
+    assert plan.hard_terminate_usd <= 1.75 + 1e-9, plan.as_dict()
+    # The expected figure is the harness's own conservative ceiling — $1.34 at
+    # the 24 min/control budget — not the $0.88 sketch in the repricing note,
+    # which left out the transfer phase and used the optimistic column for four
+    # others. Asserted so the two numbers cannot drift apart again unnoticed.
+    assert 1.30 <= plan.expected_usd <= 1.40, plan.as_dict()
+    # And the leash is long enough to characterize BOTH controls even if the
+    # unmeasured per-control cost is a third over the historical guess.
+    assert obj.a.characterization_minutes >= 24.0
+    assert plan.expected_usd <= CONTINUATION_AUTHORIZATION.expected_usd + 1e-9
+    assert obj.ev["budget_plan"]["expected_usd"] == pytest.approx(
+        plan.expected_usd, abs=1e-4)
+    # The floor waiver is recorded in the plan, not hidden in a comment.
+    assert any("below-floor" in n for n in plan.as_dict()["notes"])
+
+
+def test_the_precheck_fails_at_zero_when_a_control_is_not_staged():
+    """The staged controls are this session's whole input, so $0 is where an
+    unstaged one must be discovered — not after a paid setup."""
+    mod = load_continuation_launcher()
+    staged = {f"permanent_controls/{c}/model/model.safetensors" for c in mod.CONTROLS}
+    init = "stage1/qwen3_0p6b_init_v0/checkpoint/model.safetensors"
+    pack = "stage3_recovery_corpus_v2/ladder_uniform/blocks.npz"
+
+    class FakeApi:
+        def __init__(self, files):
+            self.files = files
+
+        def list_repo_files(self, repo, repo_type=None):
+            return sorted(self.files)
+
+    import huggingface_hub
+
+    def with_files(files, **overrides):
+        obj = bare_launcher(mod, **overrides)
+        original = huggingface_hub.HfApi
+        huggingface_hub.HfApi = lambda *a, **k: FakeApi(files)
+        try:
+            return obj.relay_precheck(), obj
+        finally:
+            huggingface_hub.HfApi = original
+
+    ok, obj = with_files({init, pack, *staged})
+    assert ok is True
+    assert all(f"permanent_controls/{c}/model/model.safetensors"
+               in obj.ev["precheck"]["relay_needed"] for c in mod.CONTROLS)
+    # The pack stays required: Stage 0 recomputes each control's pack hash from
+    # it rather than trusting what the training run recorded.
+    assert pack in obj.ev["precheck"]["relay_needed"]
+
+    # One control staged, the other not: the old precheck said OK.
+    ok, obj = with_files({init, pack, sorted(staged)[0]})
+    assert ok is False
+    assert obj.ev["precheck"]["relay_missing"]
+    assert any("ABORT at $0" in s for s in obj.said)
+
+    # Over scp the relay need not hold the controls at all.
+    ok, obj = with_files({init, pack}, transport="scp")
+    assert obj.ev["precheck"]["transport"] == "scp"
+    assert not [m for m in obj.ev["precheck"]["relay_missing"]
+                if "permanent_controls" in m]
+
+
+def continuation_output_tree(root: Path) -> None:
+    """Exactly what the continuation driver writes on a successful session."""
+    audit = root / "audit/autoinit_continuation"
+    (audit / "session").mkdir(parents=True)
+    for name in ("continuation_evidence.json", "imported_controls.json",
+                 "attested_evaluation_protocol.json",
+                 "materialized_thresholds.json", "engine_probe.json",
+                 "generation_smoke.json"):
+        (audit / name).write_text('{"rehearsal": true}\n')
+    (audit / "engine_probe.log").write_text("rc=0\n")
+    for ctl in ("preflight_ctl_r0860k_sa", "preflight_ctl_r0860k_sb"):
+        (audit / f"{ctl}_recovery_search.json").write_text('{"n": 190}\n')
+        (audit / f"{ctl}_per_sample.jsonl").write_text('{"id": "x"}\n')
+        gen = root / "eval/continuation" / ctl
+        gen.mkdir(parents=True)
+        (gen / f"{ctl}.generations.jsonl").write_text('{"text": "y"}\n')
+        (gen / f"{ctl}.json").write_text('{"summary": true}\n')
+
+
+def test_the_success_spec_accepts_what_the_driver_writes(tmp_path):
+    """A successful continuation must not fail its own artifact manifest.
+
+    It would have: the inherited spec required `preflight_evidence.json`,
+    per-control `train_log.jsonl`, `run_manifest.json` and checkpoints — none of
+    which a session that trains nothing produces. `required_files_present` is a
+    teardown-gate check, so the failure mode was: characterize both controls,
+    fail the manifest, BLOCK teardown, and keep billing to the hard threshold.
+    """
+    sys.path.insert(0, str(REPO / "scripts/pod"))
+    import importlib.util
+
+    spec = importlib.util.spec_from_file_location(
+        "collect_artifacts", REPO / "scripts/pod/collect_artifacts.py")
+    collect = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(collect)
+    from aadistill.infrastructure.artifact_gate import build_manifest
+
+    root = tmp_path / "artifacts"
+    root.mkdir()
+    continuation_output_tree(root)
+
+    good = build_manifest(root, collect.load_specs(
+        str(REPO / "configs/autoinit/continuation_artifacts.json")))
+    assert good.ok, good.missing
+
+    # The same tree under the preflight's success spec: this is the bug.
+    bad = build_manifest(root, collect.load_specs(
+        str(REPO / "configs/autoinit/preflight_artifacts.json")))
+    assert not bad.ok
+    assert any(m["artifact_class"] == "preflight_evidence" for m in bad.missing)
+    assert any("train_log" in m["pattern"] for m in bad.missing)
+
+    # And the reduced spec still accepts a session that produced almost nothing.
+    sparse = tmp_path / "sparse"
+    (sparse / "audit/autoinit_continuation").mkdir(parents=True)
+    (sparse / "audit/autoinit_continuation/continuation_evidence.json").write_text("{}\n")
+    reduced = build_manifest(sparse, collect.load_specs(
+        str(REPO / "configs/autoinit/continuation_artifacts_failed.json")))
+    assert reduced.ok, reduced.missing
+
+
+def test_the_launcher_recognises_the_markers_its_own_driver_emits():
+    """The poll loop watched for PREFLIGHT_* while the driver emits CONTINUATION_*."""
+    mod = load_continuation_launcher()
+    driver = (REPO / "scripts/pod/autoinit_continuation_driver.py").read_text()
+    import re
+
+    emitted = set(re.findall(r'mark\("([A-Z_]+)"\)', driver))
+    terminal = {m for m in emitted if m in {"ALL_DONE", "CONTINUATION_FAILED",
+                                            "CONTINUATION_INCOMPLETE"}}
+    assert terminal == {"ALL_DONE", "CONTINUATION_FAILED", "CONTINUATION_INCOMPLETE"}
+    recognised = {"ALL_DONE", *mod.Continuation.failure_markers}
+    assert terminal <= recognised, terminal - recognised
+    # INCOMPLETE means the blocking stages passed, so products still exist.
+    assert mod.Continuation.incomplete_markers == ("CONTINUATION_INCOMPLETE",)
+
+
+def test_the_continuation_fetches_no_checkpoints_and_waits_on_no_train_log():
+    """It creates neither, and demanding either would block its teardown."""
+    mod = load_continuation_launcher()
+    obj = bare_launcher(mod)
+    assert obj.fetch_products("host", None, stage2_passed=True) == []
+    assert obj.event_streams() == ()
+    assert obj.audit_dirname == "autoinit_continuation"
+    assert obj.spec_success.endswith("continuation_artifacts.json")
+
+    # The preflight's own defaults are untouched by the hooks it gained.
+    pre = mod._preflight.Preflight
+    assert pre.audit_dirname == "autoinit_preflight"
+    assert pre.failure_markers == ("PREFLIGHT_FAILED", "PREFLIGHT_INCOMPLETE")
+    assert pre.spec_success == "configs/autoinit/preflight_artifacts.json"
+    assert pre.report_names[0] == "preflight_evidence.json"
+
+
+def test_the_authorization_binds_the_code_that_actually_runs():
+    """It digested the preflight's files, so an edited continuation driver —
+    the executable that spends the money — passed the gate unnoticed."""
+    from aadistill.autoinit.authorization import (
+        HARNESS_SOURCE_FILES_V1, harness_source_digest,
+    )
+    from aadistill.autoinit.continuation import (
+        CONTINUATION_AUTHORIZATION, CONTINUATION_HARNESS_SOURCE_FILES_V1,
+    )
+
+    files = set(CONTINUATION_HARNESS_SOURCE_FILES_V1)
+    for executable in ("scripts/pod/autoinit_continuation_launch.py",
+                       "scripts/pod/autoinit_continuation_driver.py",
+                       "src/aadistill/autoinit/continuation.py"):
+        assert executable in files
+        assert executable not in HARNESS_SOURCE_FILES_V1   # the gap that existed
+    assert CONTINUATION_AUTHORIZATION.harness_source_files == \
+        CONTINUATION_HARNESS_SOURCE_FILES_V1
+    assert CONTINUATION_AUTHORIZATION.as_dict()["harness_source_files"] == \
+        list(CONTINUATION_HARNESS_SOURCE_FILES_V1)
+
+    # The digest is over the continuation set, and it differs from the
+    # preflight's — the two authorizations cannot be confused for each other.
+    observed = harness_source_digest(REPO, files=CONTINUATION_HARNESS_SOURCE_FILES_V1)
+    assert observed["digest"] != harness_source_digest(REPO)["digest"]
+
+
+def test_the_continuation_authorization_is_narrow_and_cannot_train():
+    from aadistill.autoinit.authorization import AuthorizationError
+    from aadistill.autoinit.continuation import CONTINUATION_AUTHORIZATION as auth
+
+    assert (auth.expected_usd, auth.hard_cap_usd) == (1.34, 1.75)
+    assert auth.plan_hash == CONTINUATION_PLAN_V1.plan_hash
+    assert auth.allows_phase_a is False and auth.automatic_phase_a_start is False
+    with pytest.raises(AuthorizationError):
+        auth.require_within_cap(1.76, what="session")
+    with pytest.raises(AuthorizationError):
+        auth.require_stage(4)
+    with pytest.raises(AuthorizationError, match="separately unauthorized"):
+        auth.refuse_phase_a()
+    assert "does not permit training" in auth.scope_note

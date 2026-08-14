@@ -1,0 +1,92 @@
+{
+  "spec": "aadistill.artifact_spec/v1",
+  "session": "autoinit_control_characterization_continuation",
+  "note": "success spec for the characterization continuation. This session TRAINS NOTHING, so it requires no checkpoint, no train_log and no run_manifest: its permanent products are the measurements. Requiring the preflight's training artifacts here would fail the manifest of a successful run, block teardown, and leave the pod billing. Entries are ArtifactSpec kwargs — artifact_class, pattern, required, min_matches, min_bytes, lifecycle.",
+  "entries": [
+    {
+      "artifact_class": "continuation_evidence",
+      "pattern": "audit/autoinit_continuation/continuation_evidence.json",
+      "required": true,
+      "lifecycle": "final_required"
+    },
+    {
+      "artifact_class": "imported_controls",
+      "pattern": "audit/autoinit_continuation/imported_controls.json",
+      "required": true,
+      "lifecycle": "final_required"
+    },
+    {
+      "artifact_class": "attested_protocol",
+      "pattern": "audit/autoinit_continuation/attested_evaluation_protocol.json",
+      "required": true,
+      "lifecycle": "final_required"
+    },
+    {
+      "artifact_class": "materialized_thresholds",
+      "pattern": "audit/autoinit_continuation/materialized_thresholds.json",
+      "required": true,
+      "lifecycle": "final_required"
+    },
+    {
+      "artifact_class": "stage1_measurement",
+      "pattern": "audit/autoinit_continuation/engine_probe.json",
+      "required": true,
+      "lifecycle": "final_required"
+    },
+    {
+      "artifact_class": "generation_smoke",
+      "pattern": "audit/autoinit_continuation/generation_smoke.json",
+      "required": true,
+      "lifecycle": "final_required"
+    },
+    {
+      "artifact_class": "recovery_search_result",
+      "pattern": "audit/autoinit_continuation/preflight_ctl_r0860k_s*_recovery_search.json",
+      "required": true,
+      "lifecycle": "final_required",
+      "min_matches": 2
+    },
+    {
+      "artifact_class": "per_sample",
+      "pattern": "audit/autoinit_continuation/preflight_ctl_r0860k_s*_per_sample.jsonl",
+      "required": true,
+      "lifecycle": "final_required",
+      "min_matches": 2
+    },
+    {
+      "artifact_class": "generations",
+      "pattern": "eval/continuation/preflight_ctl_r0860k_s*/*.generations.jsonl",
+      "required": true,
+      "lifecycle": "final_required",
+      "min_matches": 2
+    },
+    {
+      "artifact_class": "generation_summary",
+      "pattern": "eval/continuation/preflight_ctl_r0860k_s*/*.json",
+      "required": false,
+      "lifecycle": "final_required",
+      "min_matches": 0
+    },
+    {
+      "artifact_class": "smoke_generations",
+      "pattern": "eval/continuation/_smoke/*",
+      "required": false,
+      "lifecycle": "final_required",
+      "min_matches": 0
+    },
+    {
+      "artifact_class": "gate_log",
+      "pattern": "audit/autoinit_continuation/*.log",
+      "required": false,
+      "lifecycle": "final_required",
+      "min_matches": 0
+    },
+    {
+      "artifact_class": "session_evidence",
+      "pattern": "audit/autoinit_continuation/session/*",
+      "required": false,
+      "lifecycle": "final_required",
+      "min_matches": 0
+    }
+  ]
+}
