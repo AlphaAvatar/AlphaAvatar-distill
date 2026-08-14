@@ -1,0 +1,54 @@
+[20:07:57] budget: expected 84 min $1.39 · soft $1.52 · hard $1.69 (authorized $4.40)
+[20:07:58] NVIDIA L40S $0.99/h, stock Low
+[20:07:58] session commit 40c3d53a7ffe verified: harness digests to a1d1f3fc4d34… and carries the authorization
+[20:07:59] precheck OK: 4 relay inputs including the staged controls, 3 local assets
+[20:08:00] created 2vpbiz5p2al1kj at $0.99/h
+[20:08:00] watchdog detached — hard 102 min = $1.69
+[20:08:53]   starting (60s) — $0.01
+[20:09:45] TCP 22 at 64.247.206.218:17391 after 1.8 min
+[20:09:48] draw 1: ssh reachable — $0.03
+[20:10:25] draw 1: image identity runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@580.159.03
+[20:10:25] draw 1: running setup
+[20:16:06] setup did not reach SETUP_DONE:
+tchfiles==1.2.0
+ + websockets==17.0.1
+ + xgrammar==0.2.3
+ + yarl==1.24.5
+ + z3-solver==4.15.4.0
+[20:12:22] vllm offline install completed in 8s
+vllm 0.27.1 | torch 2.13.0+cu130 True
+MARKER:VLLM_READY
+[20:12:33] downloading the teacher at the pinned revision
+
+Fetching 10 files:   0%|          | 0/10 [00:00<?, ?it/s]
+Fetching 10 files:  20%|██        | 2/10 [00:00<00:00, 18.47it/s]
+Fetching 10 files:  70%|███████   | 7/10 [00:00<00:00,  7.70it/s]
+Fetching 10 files:  80%|████████  | 8/10 [00:20<00:00,  7.70it/s]
+Fetching 10 files:  90%|█████████ | 9/10 [00:28<00:04,  4.29s/it]
+Fetching 10 files: 100%|██████████| 10/10 [00:31<00:00,  4.12s/it]
+Fetching 10 files: 100%|██████████| 10/10 [00:31<00:00,  3.15s/it]
+MARKER:TEACHER_READY
+[20:13:05] checking the RoPE base resolves in every venv
+  transformers 5.13.1: qwen3_0p6b_init_v0 stored 5,000,000 runtime 5,000,000 OK
+  transformers 5.15.0: qwen3_0p6b_init_v0 stored 5,000,000 runtime 5,000,000 OK
+MARKER:ROPE_OK
+[20:13:16] CPU test suite (256 vCPUs visible, cgroup budget 16; cpu set 0-15)
+........................................................................ [ 93%]
+........................................................................ [ 97%]
+.........................................                                [100%]
+1564 passed, 61 skipped in 160.91s (0:02:40)
+[20:15:59] test suite passed in 163s on cpu set 0-15
+MARKER:TESTS_OK:163s
+[20:15:59] verifying the spend authorization binds to this plan
+Traceback (most recent call last):
+  File "<string>", line 5, in <module>
+  File "/workspace/aad/src/aadistill/autoinit/authorization.py", line 145, in require_plan
+    raise AuthorizationError(
+aadistill.autoinit.authorization.AuthorizationError: this authorization is bound to preflight plan afd08be777e1f84e29350ff6c65daaf9b8f72d8f7ea593ca92f0129572264295 but the plan about to run hashes to 83218ddd283c961f42f4ec5852542192487d5fc10a3a34e7b7fe6b62e84cc604. An authorization does not transfer to a plan that changed.
+SETUP_RC=1
+
+[20:16:06] ABORT after draw 1: setup_failed
+[20:16:06] deleting pod (setup setup_failed)
+[20:16:18] pod deleted — 8.3 min, $0.14; provider confirms gone: True
+
+continuation INCOMPLETE — /home/ecs-user/AlphaAvatar-distill/logs/autoinit_continuation_session.json. Nothing trained. Phase A NOT launched.

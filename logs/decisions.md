@@ -2581,3 +2581,36 @@ in assumptions that a later study would have to unpick.
   harness digest did move to `a1d1f3fc…`, because `granted_utc` lives in
   `continuation.py`, which is inside the harness set.
 - `AlphaAvatar/aadistill-quota-probe` and its `probe.bin` are deleted.
+
+## 2026-08-14 (UTC) — Attempt 5: INCOMPLETE on a stale authorization binding
+
+- Context: launched under the maintainer's GO at the frozen identity (checkout
+  `40c3d53a…`, bundle `a18f22a5…`, relay transport, authorization `e4854818…`,
+  plan `79da6d7a…`, harness `a1d1f3fc…`). One invocation only; that authorization
+  is now consumed.
+- Result: **INCOMPLETE**, `$0.1369`, 8.3 min, pod deleted, provider confirms
+  `TERMINATED`, account has no pods. Zero driver stages.
+- Everything the offline work targeted worked on hardware: warm host at 1.8 min,
+  offline train env, **offline vLLM env verified 196/196 against the frozen byte
+  manifest on the pod**, RoPE base correct in both venvs, 1564 CPU tests passing.
+- Cause: the shared `autoinit_preflight_setup.sh` ends by loading the
+  **micro-preflight** authorization and asserting it against
+  `PREFLIGHT_PLAN_V1.plan_hash`. That plan hash moved `afd08be7…` → `83218ddd…`
+  when `pooled_counts@v2` edited the plan's description string in `recovery.py`,
+  and the historical micro-preflight artifact was never re-issued. The guard did
+  exactly what it should; the binding was stale. The continuation's own binding
+  was correct and had been verified at $0.
+- Why it was not caught: `simulate_pod_env.sh` runs the pod's test suite, not
+  setup's authorization block. **Third time an unexecuted line in this script has
+  cost money** — $0.07 (`uv sync` offline), $1.3672 (`pip install vllm`), $0.1369
+  (this). Hours earlier the same session found two defects in the wheelhouse gate
+  by extracting and executing it; that lesson was applied to one block and not to
+  the script as a whole.
+- Decision: **not retried**, per instruction. Evidence preserved in
+  `logs/autoinit_continuation_attempt5/`.
+- Open design question for the maintainer, not a patch to apply unilaterally:
+  should the shared setup assert a *session-appropriate* authorization — the one
+  the launcher passed in — instead of a hardcoded micro-preflight path? A
+  hardcoded cross-session binding will keep breaking every time either plan
+  moves.
+- Revisit when: the maintainer decides on re-authorization and on that question.

@@ -1,4 +1,4 @@
-**Updated:** 2026-08-15 · branch `main` · working tree clean
+**Updated:** 2026-08-14 20:16 UTC · branch `main` · working tree clean
 **No pods running. Nothing billing.** **1,631 CPU tests pass**, 7 skipped; 1,607 under the pod simulator.
 
 ## The two permanent canonical controls EXIST and are hash-verified
@@ -62,116 +62,89 @@ every item. Input is now normalized through `normalize_tools`, which reads eithe
 representation and fails closed. **Semantics unchanged and measured:** nine
 policies × 190 prompts reproduce every number of the pre-migration record.
 
-## READY TO LAUNCH — awaiting the maintainer's go (2026-08-14 UTC)
+## Attempt 5 ran and FAILED in setup — INCOMPLETE (2026-08-14 20:16 UTC)
 
-**Nothing running, nothing billing.** Four paid attempts, **$2.7051**, zero
-driver stages. Every pod torn down with provider confirmation. Every $0 gate now
-passes and the relay is complete; **no pod is created until the maintainer says
-so.**
+**Nothing running, nothing billing.** Pod `2vpbiz5p2al1kj` deleted at 8.3 min,
+`$0.1369`, provider confirms `TERMINATED`; the account has no pods. Five paid
+attempts, **$2.8420**, still zero driver stages. Evidence:
+[`autoinit_continuation_attempt5/`](autoinit_continuation_attempt5/).
 
-### The offline setup works — measured on hardware, not estimated
+**The authorization `e4854818…` is CONSUMED** — it was granted for one launcher
+invocation, and that invocation terminated. It must not be reused.
+
+### Everything the offline work was for did work, on hardware
 
 | | |
 | --- | --- |
-| train env, offline, **on the pod** | **11 s** (attempt 4) vs 45 s best-case online vs 8-28 min cold trips |
-| vLLM env, offline, on the dev box | **33 s** for 196 packages |
-| vLLM versions installed | `torch 2.13.0+cu130`, `transformers 5.15.0`, `vllm 0.27.1` — **byte-for-byte what the 2026-08-14 pod observed** |
+| ssh reachable | 1.8 min — warm host, no cold draw |
+| offline train env | installed, no PyPI resolve on the critical path |
+| **offline vLLM env, 196/196 hash-verified on the pod** | the wheel-byte gate passed |
+| RoPE base in both venvs | 5,000,000 stored = runtime, transformers 5.13.1 **and** 5.15.0 |
+| CPU suite on the pod | 1564 passed, 61 skipped, 163 s |
 
-Both environments are pinned and installed `--offline --no-index`:
-`uv-cu128.lock` + `requirements-cu128.txt` for `/opt/train`,
-`requirements-vllm.txt` (196 pins) for `/opt/vllm`. They stay **separate**. Every
-network install is gone from setup except the small `huggingface_hub` bootstrap
-that must precede the bundle fetch: `uv lock`, `uv sync`, `pip install vllm` and
-`pip install --upgrade pip` are all deleted. **Pinning does not replace
-observing** — the engine probe still reports the vLLM/torch/dtype/context/
-stop-token values that actually loaded, and the driver still attests the observed
-generation protocol.
+### What killed it: a stale binding in the SHARED setup script
 
-### The wheel BYTES are frozen, and the relay is verified 196/196
-
-`wheelhouse_vllm_sha256.json` pins all 196 wheels by sha256 and size (3.62 GiB,
-manifest `f9c0e814…`, formula and build command recorded **in** the file). The pod
-verifies every wheel **before** `/opt/vllm` exists and exits 96 with
-`VLLM_WHEELHOUSE_HASH_MISMATCH` on any MISSING / SIZE / SHA256 / UNDECLARED entry.
-
-**A fresh relay fetch passes 196/196**, checked with the pod's own gate extracted
-from the setup script.
-
-Two defects were found by **executing** that gate rather than reading it: the
-first `manifest_sha256` could not be reproduced by any formula, so it pinned
-nothing; and the guard sat *after* the heredoc, where `set -e` killed the script
-at the python call — exit 1, and the marker the launcher classifies by was never
-written. A test now extracts the block from the real script and runs it under the
-same `set -euo pipefail`, asserting rc=96, the marker, and that the install is not
-reached.
-
-### Storage: pointer deletion reclaims nothing; targeted LFS deletion does
+The last line of setup, after the tests:
 
 ```
-before                     billed 92.6730 GiB   inventory 288 obj / 92.6730 GiB
-pointer-deleted from HEAD  billed 92.6730 GiB   tracked tree fell 2.2324 GiB, NO reclaim
-targeted LFS delete        billed 92.6730 (cached)  inventory 287 obj / 90.4525 GiB
-after uploading 21 wheels  billed 91.5219 GiB   inventory 302 obj / 91.5219 GiB
+a = SpendAuthorization.load('logs/autoinit_micro_preflight_authorization.json')
+a.require_plan(PREFLIGHT_PLAN_V1.plan_hash)
+AuthorizationError: bound to afd08be7… but the plan about to run hashes to 83218ddd…
 ```
 
-91.5219 = 90.4525 + 1.0694: the reclaim is exactly the deleted object's bytes.
-**Ordinary deletion from HEAD is not a reclaim mechanism on this relay** — HF
-bills LFS including history — and no further scientific artifact may be deleted
-that way. The supported operation is
-`permanently_delete_lfs_files(rewrite_history=True)` against an exact `file_oid`,
-one object, never a directory prefix. The tombstoned sha256 is the object's
-**`file_oid`**, not its `oid`; matching on `oid` returns zero hits.
+**The guard is correct; the binding is stale.** `autoinit_preflight_setup.sh` is
+shared, and its final gate hardcodes the *micro-preflight* authorization and the
+*preflight* plan. `PREFLIGHT_PLAN_V1.plan_hash` moved `afd08be7…` → `83218ddd…`
+when `pooled_counts@v2` changed that plan's description string in `recovery.py`;
+the historical micro-preflight artifact was never re-issued against it. A session
+unrelated to that authorization died on it.
 
-`super_squash_history` was **not** used. Details in
-[`decisions.md`](decisions.md) 2026-08-14/15.
+The continuation's own binding was correct and was verified at $0 before the pod
+existed: `CONTINUATION_PLAN_V1.plan_hash` == `79da6d7a…` == its authorization's.
 
-### The final identity chain
+**Third time an unexecuted line in this one script has cost money** ($0.07,
+$1.3672, $0.1369). `simulate_pod_env.sh` runs the test suite the pod runs; nothing
+executes setup's authorization block. The wheelhouse gate got a test that
+*extracts and runs* the block — this one did not.
+
+### Not retried
+
+Per the maintainer's instruction: preserve evidence, teardown, report INCOMPLETE,
+do not retry without review. The fix is small, but "patch and relaunch" is what
+the last five attempts were, and the authorization is consumed.
+
+### The identity that ran
 
 | identity | value |
 | --- | --- |
-| session **checkout** commit (what the pod clones) | `40c3d53a7ffe754db0e13435b6dcd522460756f8` |
-| `authorized_session_commit` (parent; the artifact is written before it is committed) | `cc1ad8ca…` |
-| authorized **harness digest** (10 continuation files) | `a1d1f3fc…` |
-| authorization | `e4854818…`, id `autoinit.control_characterization.2026-08-14T1953Z` |
-| plan (**unchanged** — no setup source changed) | `79da6d7a…` |
-| bundle, uploaded and re-fetched byte-identical | `transfer/aad_autoinit_40c3d53a.bundle`, sha `a18f22a5…` |
-| vLLM wheel manifest | `f9c0e814…`, 196 wheels, relay-verified |
-| aggregation | `pooled_counts@v2` |
-
-Verified by cloning that bundle, checking out that commit, and re-deriving every
-binding inside it. Both launcher $0 gates pass: `verify_session_commit` and
-`relay_precheck` (4 relay inputs including the staged controls, 3 local assets).
-
-**Two authorizations are VOID and must not be reused:** `759eaf8c…`, which
-asserted $4.10/$4.40 before the increment was approved, and `dc770f36…`, whose
-`granted_utc` was ~4 h in the future when committed. Neither was executed. Grant
-ids now carry the UTC timestamp, so no two can collide.
+| checkout commit | `40c3d53a7ffe754db0e13435b6dcd522460756f8` |
+| harness digest | `a1d1f3fc…` (verified on the pod) |
+| authorization | `e4854818…` — **CONSUMED** |
+| plan | `79da6d7a…` |
+| bundle | `transfer/aad_autoinit_40c3d53a.bundle`, `a18f22a5…` |
+| vLLM wheel manifest | `f9c0e814…`, 196 wheels, **relay-verified on the pod** |
 
 ### Budget
 
 ```
-project cumulative                                   $190.1453
-remaining under the $211.07 cap                      $ 20.9247
-GRANTED cumulative continuation authorization        $   4.40  (expected $4.10)
-PER-LAUNCH HARD LIMIT                                $  1.6896  ENFORCED in code
-re-priced plan   expected 84.0 min $1.3860 · soft $1.5246 · hard $1.6896
+project cumulative                                   $190.2822
+remaining under the $211.07 cap                      $ 20.7878
+continuation spent, five attempts                    $  2.8420
+headroom under the $4.40 continuation figure         $  1.5580
+    but e4854818… is consumed; no artifact authorizes spending it
 ```
 
-The per-launch limit binds the plan **exactly**, and is enforced by
-`SpendAuthorization.per_launch_hard_usd` in `make_plan` before a pod can exist;
-previously only the plan's own arithmetic self-limited.
-
-**Phase A no longer fits and this is now a real gate.** Its provisional hard
-`$21.01` already exceeds the `$20.9247` remaining. After one continuation attempt
-~`$19.24` would remain. Phase A must be re-priced from the **measured** battery
-wall time that Stage 3 has still never produced, and the result has to fit the
-remaining project budget — or the cap has to move. Both are maintainer decisions.
+**Phase A remains unauthorized and unpriced** — Stage 3 has still never produced
+a measured battery wall time, so it cannot be re-priced. Its provisional hard
+`$21.01` still exceeds the `$20.7878` remaining.
 
 ## What remains before Stage 3 can run
 
-1. **Maintainer go-ahead.** Nothing else is outstanding.
-2. Launch: `--transport relay --session-commit 40c3d53a…
-   --bundle aad_autoinit_40c3d53a.bundle`.
+1. **Maintainer review of the attempt-5 failure**, and a decision on whether to
+   re-issue an authorization.
+2. The fix itself is one stale binding. Whether the shared setup script should
+   assert a *session-appropriate* authorization rather than a hardcoded one is a
+   design question, not a patch, and is the maintainer's call.
 3. Phase A stays unauthorized and unpriced until Stage 3 measures the battery.
 
 ## Phase A is repriced, and both statistics measurements are kept
