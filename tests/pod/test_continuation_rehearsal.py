@@ -844,3 +844,61 @@ def test_the_relay_transport_does_not_depend_on_an_unexported_env_var(tmp_path):
     assert obj.ev["transport_detail"]["route"] == "relay"
     assert all(c["materialized"] for c in
                obj.ev["transport_detail"]["controls"].values())
+
+
+def test_stage3_aggregation_consumes_what_the_real_scorer_emits(tmp_path):
+    """The writer was validated; this consumer never ran on its output.
+
+    `score_recovery_search.py` was checked against nine policies over 190
+    prompts. Stage 3's aggregation — pooling, the equivalence interval, the
+    feasibility floor, the per-capability baseline — reads that output, and the
+    preflight never reached Stage 3, so the two had never met. A missing key
+    here would crash AFTER both controls had been generated and paid for.
+    """
+    import importlib.util
+    import subprocess
+
+    from aadistill.autoinit.recovery import (
+        EquivalenceRule, FeasibilityRule, POOLED_COUNTS_V1,
+    )
+
+    spec = importlib.util.spec_from_file_location(
+        "rs_tests", REPO / "tests/autoinit/test_recovery_search_scoring.py")
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+
+    results, per_seed = {}, []
+    for policy, seed in (("oracle", 20260726), ("oracle_then_loop", 20260801)):
+        gen = tmp_path / f"{policy}_{seed}"
+        mod.write_generations(gen, policy)
+        out = tmp_path / f"{policy}_{seed}.json"
+        rc = subprocess.run(
+            [sys.executable,
+             str(REPO / "scripts/autoinit/score_recovery_search.py"),
+             "--generations", str(gen), "--label", f"ctl_{seed}",
+             "--seed", str(seed), "--out", str(out)],
+            capture_output=True, text=True, cwd=REPO,
+            env={"PYTHONPATH": str(REPO / "src"), "PATH": "/usr/bin:/bin",
+                 "HOME": str(tmp_path)})
+        assert rc.returncode == 0, rc.stdout[-800:] + rc.stderr[-800:]
+        result = json.loads(out.read_text())
+        results[seed] = result
+        per_seed.append({"seed": seed, "n": result["n"],
+                         "usable": result["usable"], "correct": result["correct"]})
+
+    sa, sb = results[20260726], results[20260801]
+    pooled = POOLED_COUNTS_V1.pool(per_seed)
+    assert pooled["n"] == sa["n"] + sb["n"]
+
+    EquivalenceRule(n_pooled=sa["n_scorable"] + sb["n_scorable"]).materialize(
+        p_pool=pooled["correct_overall"], p_sa=sa["correct_overall"],
+        p_sb=sb["correct_overall"]).as_dict()
+    FeasibilityRule(n_pooled=sa["n"] + sb["n"]).materialize(
+        u_pool=pooled["usable_rollout_rate"], u_sa=sa["usable_rollout_rate"],
+        u_sb=sb["usable_rollout_rate"]).as_dict()
+    for cap in sa["per_capability"]:
+        assert {"usable", "n", "usable_rollout_rate"} <= set(sa["per_capability"][cap])
+        assert cap in sb["per_capability"]
+    # The identities stage 3 binds each result to.
+    assert sa["scoring_contract"]["contract"] == "recovery_search_scoring@v2"
+    assert {"artifact", "manifest_sha256", "content_sha256"} <= set(sa["battery"])
