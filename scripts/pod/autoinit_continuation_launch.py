@@ -283,8 +283,14 @@ class Continuation(_preflight.Preflight):
             dest = f"{REPO}/artifacts/controls/{name}"
             target.run(f"mkdir -p {dest}", timeout=60)
             if route == "relay":
+                # `HF_TOKEN` is exported inside setup.sh and dies with it. This
+                # runs in a FRESH ssh session, which inherits none of that, so
+                # the token is read from the file the launcher already staged —
+                # reading `os.environ['HF_TOKEN']` here raises KeyError, after
+                # the setup it would have paid for.
                 rc = target.run(
-                    f"cd {REPO} && PYTHONPATH=src python3 -c \""
+                    f"cd {REPO} && HF_TOKEN=\"$(cat {WS}/hf/token)\" "
+                    "PYTHONPATH=src python3 -c \""
                     "import os;from huggingface_hub import snapshot_download;"
                     f"snapshot_download('{self.a.relay_repo}', repo_type='model',"
                     f" allow_patterns=['permanent_controls/{name}/*'],"

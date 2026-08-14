@@ -798,3 +798,49 @@ def test_the_session_commit_is_verified_against_the_authorization():
     stale.auth = auth
     assert stale.verify_session_commit() is False
     assert any("ABORT at $0" in s for s in stale.said)
+
+
+def test_the_relay_transport_does_not_depend_on_an_unexported_env_var(tmp_path):
+    """`HF_TOKEN` is exported inside setup.sh and dies with that shell.
+
+    `materialize_controls` runs over a FRESH ssh session, which inherits none of
+    setup's environment, so `os.environ['HF_TOKEN']` raises KeyError — after the
+    session has already paid for setup, and for the only transport this
+    continuation actually uses. The token has to come from the staged file.
+    """
+    mod = load_continuation_launcher()
+    obj = bare_launcher(mod)
+    obj.save = lambda: None
+
+    class FakeResult:
+        returncode = 0
+        stdout = "PRESENT=1"
+
+    class FakeTarget:
+        def __init__(self):
+            self.commands: list[str] = []
+
+        def run(self, cmd, timeout=None):
+            self.commands.append(cmd)
+            return FakeResult()
+
+    target = FakeTarget()
+    # scp of the two record files is a real subprocess; point it at /bin/true.
+    import subprocess as sp
+    original = sp.run
+    sp.run = lambda *a, **k: FakeResult()
+    try:
+        assert obj.materialize_controls(target, "1.2.3.4", ["scp"]) is True
+    finally:
+        sp.run = original
+
+    relay = [c for c in target.commands if "snapshot_download" in c]
+    assert len(relay) == len(mod.CONTROLS)
+    for cmd in relay:
+        assert 'HF_TOKEN="$(cat /workspace/hf/token)"' in cmd, cmd
+        # The token must reach the child through the environment it sets here,
+        # not through one it hopes to inherit.
+        assert cmd.index("HF_TOKEN=") < cmd.index("python3")
+    assert obj.ev["transport_detail"]["route"] == "relay"
+    assert all(c["materialized"] for c in
+               obj.ev["transport_detail"]["controls"].values())
