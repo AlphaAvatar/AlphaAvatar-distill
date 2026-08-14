@@ -9,7 +9,7 @@
       "present_on_dev_box": false,
       "tombstoned": true,
       "relay_path": "e1_scaling_20260801/e1_r0860k_sa_pca/step_001023/model/model.safetensors",
-      "present_on_relay": true,
+      "present_on_relay": false,
       "expected_weights_sha256": "18ee10a10333481d3d6178d2fc5d4e0a705aca04d8a1d69a4ce83ac7f1e45b9c",
       "expected_config_sha256": "62d14acfb86e397e9449e0d39d5aba6c5a84facac372a86b85e9ac6915be9522",
       "architecture": {
@@ -49,11 +49,15 @@
         "block_len": true
       },
       "lineage_valid": true,
-      "artifact_available": true,
-      "hash_verified": true,
+      "artifact_available": false,
+      "hash_verified": false,
       "passes_legacy_lineage_subset": true,
       "recipe_matched_control": false,
-      "recipe_matched_control_decided_by": "logs/autoinit_recovery_fingerprint_audit.json"
+      "recipe_matched_control_decided_by": "logs/autoinit_recovery_fingerprint_audit.json",
+      "relay_copy_deleted_utc": "2026-08-15T00:00:00+00:00",
+      "relay_copy_deleted_reason": "relay copy deleted 2026-08-15 to reclaim 2.23 GiB for the vLLM offline wheelhouse, on explicit maintainer instruction naming this checkpoint. NO copy survives anywhere: not on the dev box, not on the relay. The identity below (weights/config sha256) remains the binding record, and the recovery path is deterministic reconstruction from the recipe.",
+      "relay_path_status": "DELETED \u2014 the path no longer resolves",
+      "hash_verification_note": "verified True against the relay copy on 2026-08-13 and again immediately before deletion on 2026-08-15 (relay LFS sha256 == 18ee10a1\u2026); it cannot be re-verified now because no copy exists"
     },
     "e1_r0860k_sb_pca": {
       "canonical_id": "e1_r0860k_sb_pca",

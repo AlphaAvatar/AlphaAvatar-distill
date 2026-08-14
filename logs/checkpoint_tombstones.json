@@ -126,12 +126,17 @@
         "vocab_size": 151936
       },
       "size_human": "2.23 GiB",
-      "reason_physical_weights_deleted": "0.86M probe rung, seed sa. Full copy on the relay. The frozen 150-prompt battery depends on the PROMPT SAMPLE (mask d6e24e0b09da1bcc\u2026), not on these weights.",
+      "reason_physical_weights_deleted": "0.86M probe rung, seed sa. The frozen 150-prompt battery depends on the PROMPT SAMPLE (mask d6e24e0b09da1bcc\u2026), not on these weights.",
       "deterministic_reconstruction_possible": true,
       "reconstruction_recipe": "retrain from qwen3_0p6b_init_v0 with configs/stage3/e1/e1_r0860k_sa_pca.json",
       "expected_reconstruction_cost": "~$2 on L40S",
       "frozen_results_location": "logs/EXPERIMENT_INDEX.md; logs/EXPERIMENTS.md; logs/e6_results.json; logs/e1_test_cases.jsonl",
-      "deleted_utc": "2026-08-12T08:35:39+00:00"
+      "deleted_utc": "2026-08-12T08:35:39+00:00",
+      "relay_copy_deleted_utc": "2026-08-15T00:00:00+00:00",
+      "relay_copy_deleted_reason": "relay copy deleted 2026-08-15 to reclaim 2.23 GiB for the vLLM offline wheelhouse, on explicit maintainer instruction naming this checkpoint. NO copy survives anywhere: not on the dev box, not on the relay. The identity below (weights/config sha256) remains the binding record, and the recovery path is deterministic reconstruction from the recipe.",
+      "surviving_copies": [],
+      "relay_path_status": "DELETED \u2014 the path no longer resolves",
+      "recovery": "deterministic reconstruction only: retrain from qwen3_0p6b_init_v0 with configs/stage3/e1/e1_r0860k_sa_pca.json (~$2 on L40S), then verify against weights_sha256 above"
     },
     {
       "canonical_id": "e1_r0860k_sb_pca",
