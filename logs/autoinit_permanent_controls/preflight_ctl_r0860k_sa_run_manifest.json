@@ -1,0 +1,256 @@
+{
+  "created_utc": "2026-08-13T20:25:36.187148+00:00",
+  "command": "/workspace/aad/scripts/training/train_stage3.py --config /workspace/aad/artifacts/audit/autoinit_preflight/configs/preflight_ctl_r0860k_sa.json",
+  "config": {
+    "stage": "stage3_recovery",
+    "run_name": "preflight_ctl_r0860k_sa",
+    "_purpose": "AutoInitializer micro-preflight: a PERMANENT canonical control probe at the 0.86M rung, re-executed under the attested runtime. Derived from configs/stage3/e1/e1_r0860k_sa_pca.json by overriding only run identity and the pack path.",
+    "student_path": "artifacts/stage1/qwen3_0p6b_init_v0/checkpoint",
+    "teacher": {
+      "model_id": "Qwen/Qwen3-4B-Thinking-2507",
+      "revision": "768f209d9ea81521153ed38c47d515654e938aea",
+      "dtype": "bfloat16"
+    },
+    "data_dir": "artifacts/stage3/ladder_uniform_probe",
+    "groups": null,
+    "packing": "ladder",
+    "block_len": 8192,
+    "dtype": "float32",
+    "autocast_bf16": true,
+    "gradient_checkpointing": true,
+    "device": "auto",
+    "seed": 20260726,
+    "trainable_patterns": [
+      "\\.self_attn\\.(q_proj|k_proj|v_proj|o_proj|q_norm|k_norm)\\.",
+      "\\.mlp\\.(gate_proj|up_proj|down_proj)\\.",
+      "input_layernorm",
+      "post_attention_layernorm",
+      "model\\.norm\\."
+    ],
+    "loss": {
+      "ce_weight": 0.25,
+      "kd_weight": 1.0,
+      "kd_temperature": 1.0,
+      "kd_scope": "all"
+    },
+    "optim": {
+      "lr": 5e-05,
+      "weight_decay": 0.01,
+      "betas": [
+        0.9,
+        0.95
+      ],
+      "eps": 1e-08,
+      "grad_clip": 1.0
+    },
+    "schedule": {
+      "total_steps": 1023,
+      "warmup_steps": 51,
+      "min_lr_frac": 0.1
+    },
+    "batch": {
+      "blocks_per_step": 2,
+      "micro_blocks": 1
+    },
+    "checkpoint": {
+      "save_every": 511,
+      "keep_last": 1
+    },
+    "intervals": {
+      "log_every": 10,
+      "eval_every": 127,
+      "eval_blocks": 16
+    },
+    "out_dir": "artifacts/stage3/preflight_ctl_r0860k_sa",
+    "rung": 860000,
+    "val_blocks": 16
+  },
+  "config_sha256": "c965126b4e3bc0892cbb0d2fb2f1e56e14d37ffeee94a1fad16269827881864b",
+  "resumed_from": null,
+  "device": "cuda",
+  "data_manifests": {},
+  "ladder": {
+    "source": "token_ladder",
+    "packed_dir": "/workspace/aad/artifacts/stage3/ladder_uniform_probe",
+    "rung_target_supervised_tokens": 860000,
+    "train_blocks": 682,
+    "train_supervised_tokens": 864750,
+    "train_token_mix": {
+      "code": 0.1666,
+      "gsm8k": 0.1664,
+      "multihop_qa": 0.167,
+      "openmath": 0.1673,
+      "rag_evidence": 0.1669,
+      "tool_calling": 0.1658
+    },
+    "val_blocks": 16,
+    "val_supervised_tokens": 81195,
+    "val_token_mix": {
+      "code": 0.168,
+      "gsm8k": 0.1425,
+      "multihop_qa": 0.199,
+      "openmath": 0.1551,
+      "rag_evidence": 0.18,
+      "tool_calling": 0.1555
+    },
+    "val_disjoint_from_all_rungs": true,
+    "declared_mixture": {
+      "gsm8k": 0.1667,
+      "openmath": 0.1667,
+      "code": 0.1667,
+      "tool_calling": 0.1667,
+      "rag_evidence": 0.1666,
+      "multihop_qa": 0.1666
+    },
+    "block_len": 8192,
+    "pack_blocks": 3715,
+    "blocks_sha256": "6f324cb0f37bc0f07128e554ce8c161879419537478950496534f75fcecb249c",
+    "ladder_json_sha256": "d4941722a099754ef5ba82d529c0fe2274a6b97af61b2fa52519ed22b84201f0",
+    "audit_sha256": "15f16b7b22b229e9c0ae510b85b4c967948828e0e7d50fac15c3e516e3e911e6"
+  },
+  "tokenizer_sha256": "7781771acc3798ee454c1253c751f930eb1c18c1c3df62e2552cc6f1d394f654",
+  "teacher": {
+    "model_id": "Qwen/Qwen3-4B-Thinking-2507",
+    "revision": "768f209d9ea81521153ed38c47d515654e938aea",
+    "dtype": "bfloat16",
+    "device": "cuda",
+    "attn_implementation": "sdpa",
+    "num_parameters": 4022468096,
+    "architecture": [
+      "Qwen3ForCausalLM"
+    ],
+    "hidden_size": 2560,
+    "num_hidden_layers": 36,
+    "intermediate_size": 9728,
+    "vocab_size": 151936,
+    "tokenizer_sha256": "7781771acc3798ee454c1253c751f930eb1c18c1c3df62e2552cc6f1d394f654"
+  },
+  "student_source": "/workspace/aad/artifacts/stage1/qwen3_0p6b_init_v0/checkpoint",
+  "trainable_params": 440467456,
+  "full_rank_trainable_params": 440467456,
+  "lora_trainable_params": 0,
+  "lora": null,
+  "lora_modules": null,
+  "total_params": 596049920,
+  "extra_stream": null,
+  "execution": {
+    "record_version": 1,
+    "optimizer": "AdamW",
+    "optimizer_defaults": {
+      "lr": 5e-05,
+      "betas": [
+        0.9,
+        0.95
+      ],
+      "eps": 1e-08,
+      "weight_decay": 0.01
+    },
+    "optimizer_param_groups": 1,
+    "grad_clip": 1.0,
+    "lr_schedule": "cosine to min_lr_frac",
+    "total_steps": 1023,
+    "warmup_steps": 51,
+    "min_lr_frac": 0.1,
+    "block_ordering": "per-epoch torch.randperm(n_blocks, seed*1000003 + epoch) over the rung's blocks, walked by the global consumed-block counter",
+    "resume_semantics": "step counter + RNG state + consumed-block position, asserted on restore",
+    "ce_weight": 0.25,
+    "kd_weight": 1.0,
+    "kd_temperature": 1.0,
+    "kd_scope": "all",
+    "kd_chunk": 512,
+    "kd_chunk_source": "trainer default KD_CHUNK_DEFAULT",
+    "blocks_per_step": 2,
+    "micro_blocks": 1,
+    "train_blocks_available": 682,
+    "block_len": 8192,
+    "dtype": "float32",
+    "autocast_bf16": true,
+    "gradient_checkpointing": true,
+    "gradient_checkpointing_applied": true,
+    "device": "cuda",
+    "student_attn_implementation": "sdpa",
+    "teacher_attn_implementation": "sdpa",
+    "seed": 20260726,
+    "step_at_record": 0,
+    "consumed_blocks_at_record": 0,
+    "trainable_params": 440467456,
+    "trainer_source": {
+      "digest": "729bc9e6a374701716258f013ef12561c24d6b7b7d5a4cace868ecabf99d6f77",
+      "set_version": 1,
+      "files": [
+        {
+          "path": "scripts/training/train_stage3.py",
+          "sha256": "1c4be309e52798e73e79c46e9a53866f0edca91517d149c8288f1a6fc878854d",
+          "bytes": 14309
+        },
+        {
+          "path": "src/aadistill/training/train.py",
+          "sha256": "4d409b161b244ab5cc388f1615a87de5ce7481c3a2a3e8349b78822878508313",
+          "bytes": 62990
+        },
+        {
+          "path": "src/aadistill/training/lora.py",
+          "sha256": "991609f6793beb0ed14331070da9f54f7c13f55a7d3cb46cf24823a1bd71d333",
+          "bytes": 10657
+        },
+        {
+          "path": "src/aadistill/data/ladder.py",
+          "sha256": "ed4744f42ee9e920f7b52a269067ef1cd7e2da0e621aca07a6ce6cecd09070ca",
+          "bytes": 7055
+        },
+        {
+          "path": "src/aadistill/data/dataset.py",
+          "sha256": "82c361f8b5614a7324b25dffb48733f5d1b92b903daeb0f098e13d9d16421a66",
+          "bytes": 18533
+        },
+        {
+          "path": "src/aadistill/models/teacher.py",
+          "sha256": "d8d070850dad37cb53d6db4cb548a48af08a5a705eb86bb7990d054125a525da",
+          "bytes": 3567
+        },
+        {
+          "path": "src/aadistill/models/student.py",
+          "sha256": "90f60257f51d9bb1e3f51ddb5c70719cad09a43f5663cb68a73dbf4fec6e5e44",
+          "bytes": 6651
+        }
+      ],
+      "rule": "sha256 over sorted 'path:sha256' lines of the declared trainer source set; whole-repo commit is provenance only"
+    },
+    "runtime": {
+      "version": 1,
+      "image_digest": "runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@580.126.09",
+      "python_version": "3.12.3",
+      "torch_version": "2.11.0+cu128",
+      "transformers_version": "5.13.1",
+      "cuda_runtime": "12.8",
+      "attention_backend": "sdpa"
+    },
+    "runtime_digest": "1c13c9ecccd9689aa15f99011e64c8a5a8e5bdf0a7310b9dfa826999f0465bc2",
+    "image_digest_source": "env AADISTILL_IMAGE_DIGEST"
+  },
+  "code_state": {
+    "git_commit": "ab09c7069a7f044120cd18078ef946e52b9a108a",
+    "git_commit_source": "git",
+    "dirty": true,
+    "uncommitted_state_sha256": "9b8114fa03760645622ee88ef32dcfa967583577f602ba8c32e4190c1bff873c",
+    "untracked_files": []
+  },
+  "hardware": {
+    "platform": "Linux-6.8.0-110-generic-x86_64-with-glibc2.39",
+    "python": "3.12.3",
+    "torch": "2.11.0+cu128",
+    "cpu_count": 64,
+    "cuda_available": true,
+    "libraries": {
+      "transformers": "5.13.1",
+      "tokenizers": "0.22.2",
+      "safetensors": "0.8.0",
+      "numpy": "2.5.1",
+      "datasets": "5.0.0",
+      "vllm": null
+    },
+    "cuda_devices": [
+      "NVIDIA L40S"
+    ]
+  }
+}

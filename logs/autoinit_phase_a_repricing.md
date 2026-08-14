@@ -104,3 +104,50 @@ This is the only spend that should be considered until the tool-rendering
 migration question in
 [`autoinit_tool_rendering_migration.md`](autoinit_tool_rendering_migration.md) is
 decided, because generation cannot run before it is.
+
+
+## Continuation session: repriced for the WHOLE session
+
+The `$0.6 expected / $1.6 hard` sketch covered the characterization calls and
+little else. Priced item by item, from this project's own measurements:
+
+| item | expected | hard | basis |
+| --- | ---: | ---: | --- |
+| pod setup | 6.2 min | 6.2 min | measured twice (5.6, 6.2) |
+| cold-draw redraw reserve | 0.0 | 25.0 min | observed once; abandoned and deleted correctly |
+| stage 0, import verification | 1.0 | 2.0 min | CPU, local files |
+| stage 1, attestation + engine probe | 2.0 | 3.0 min | measured (Stage 0 took 2.0 min) |
+| stage 2, v2 tool + RAG smoke | 4.0 | 6.0 min | measured (~4 min for two sets) |
+| stage 3, characterize both controls | 36.0 | 50.0 min | **UNMEASURED**, priced at the old 18 min/control |
+| collection + verification | 3.5 | 6.0 min | measured (3.5 min in run 4) |
+| teardown + provider check | 0.5 | 1.0 min | measured (0.4 min) |
+| **total** | **53.2 min → $0.88** | **99.2 min → $1.64** | at $0.99/h |
+
+**So `$0.6` was too low — the whole session is `$0.88` expected — while `$1.60`
+happens to be about right at `$1.64`.** Proposed authorization: **$0.90 expected
+/ $1.75 hard**, which keeps a little room above the priced hard threshold without
+inviting drift.
+
+The dominant term is the one thing nobody has measured: characterization of one
+control on this battery. Everything else in the table is a measurement from the
+last four sessions. That is exactly what the session is for, and it is why Phase A
+must be repriced again afterwards rather than now.
+
+### Effect on the project cap
+
+```
+project cap                                      $211.07
+spent                                            $187.4402
+remaining                                        $ 23.6298
+continuation at its hard bound                   $  1.75
+                                                 ---------
+remaining after a worst-case continuation        $ 21.8798
+Phase A hard bound, provisional                  $ 21.01
+                                                 ---------
+cushion                                          $  0.87
+```
+
+**That cushion is too thin to authorize Phase A**, which is the same conclusion
+as before and is unchanged by this repricing. Phase A stays unauthorized until
+the continuation returns a measured battery-evaluation cost and the bound is
+recomputed from it.

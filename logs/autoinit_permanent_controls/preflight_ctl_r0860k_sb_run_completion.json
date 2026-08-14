@@ -1,0 +1,60 @@
+{
+  "finished_utc": "2026-08-13T22:28:34.568503+00:00",
+  "config_sha256": "8367137ae97ae4dcc5c938e47996d5cf0c467d05bf41da7bca67b4cc1743b70f",
+  "summary": {
+    "steps": 1023,
+    "final_eval": {
+      "val_blocks": 16,
+      "val_ce": 1.500963,
+      "val_ppl": 4.486,
+      "val_kd": 1.29708
+    },
+    "checkpoint": "/workspace/aad/artifacts/stage3/preflight_ctl_r0860k_sb/checkpoints/step_001023"
+  },
+  "final_step": 1023,
+  "planned_total_steps": 1023,
+  "completed_all_steps": true,
+  "consumed_blocks": 2046,
+  "execution": {
+    "record_version": 1,
+    "optimizer": "AdamW",
+    "optimizer_defaults": {
+      "lr": 5e-05,
+      "betas": [
+        0.9,
+        0.95
+      ],
+      "eps": 1e-08,
+      "weight_decay": 0.01
+    },
+    "optimizer_param_groups": 1,
+    "grad_clip": 1.0,
+    "lr_schedule": "cosine to min_lr_frac",
+    "total_steps": 1023,
+    "warmup_steps": 51,
+    "min_lr_frac": 0.1,
+    "block_ordering": "per-epoch torch.randperm(n_blocks, seed*1000003 + epoch) over the rung's blocks, walked by the global consumed-block counter",
+    "resume_semantics": "step counter + RNG state + consumed-block position, asserted on restore",
+    "ce_weight": 0.25,
+    "kd_weight": 1.0,
+    "kd_temperature": 1.0,
+    "kd_scope": "all",
+    "kd_chunk": 512,
+    "kd_chunk_source": "trainer default KD_CHUNK_DEFAULT",
+    "blocks_per_step": 2,
+    "micro_blocks": 1,
+    "train_blocks_available": 682,
+    "block_len": 8192,
+    "dtype": "float32",
+    "autocast_bf16": true,
+    "gradient_checkpointing": true,
+    "gradient_checkpointing_applied": true,
+    "device": "cuda",
+    "student_attn_implementation": "sdpa",
+    "teacher_attn_implementation": "sdpa",
+    "seed": 20260801,
+    "step_at_record": 1023,
+    "consumed_blocks_at_record": 2046,
+    "trainable_params": 440467456
+  }
+}
