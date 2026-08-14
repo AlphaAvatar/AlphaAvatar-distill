@@ -62,25 +62,33 @@ every item. Input is now normalized through `normalize_tools`, which reads eithe
 representation and fails closed. **Semantics unchanged and measured:** nine
 policies × 190 prompts reproduce every number of the pre-migration record.
 
-## Remote and transport status (2026-08-14)
+## Remote, transport and staging (2026-08-14)
 
-**The executable commit is on the public remote.** Working tree clean; local
-`HEAD` = `origin/main` = **`6428c39`**; verified by an independent shallow clone
-of `https://github.com/AlphaAvatar/AlphaAvatar-distill.git` that yields
-`6428c39` with the continuation driver present. The 20 commits pushed carry no
-credentials; the ephemeral pod endpoints they contain match what earlier
-sessions already published.
+**Executable commit is public and independently fetchable.** Tree clean; local
+`HEAD` = `origin/main` = **`a545910`**, verified by a fresh shallow clone. The
+pod's actual source is a git bundle, and `transfer/aad_autoinit_a5459101.bundle`
+(sha `f3e8ae01…`) containing exactly `a545910` is on the relay.
 
-**Transport is BLOCKED on the relay quota, and the authorization is not issued.**
-relay pre-staging costs $0 of paid time and keeps the $0.90 / $1.75 bound; `scp`
-while the pod bills costs **$1.82–$5.61** on top, i.e. $2.72–$6.51 expected, and
-a $3.60 continuation would leave **$20.03** against a $21.01 Phase-A bound —
-Phase A would no longer fit. Three options, none taken:
+**Transport: relay, and no deletion was needed.** `usedStorage` is measurable
+via the REST API (`?expand[]=usedStorage`): **81.85 GiB billed** against a
+82.36 GiB tree — so billed storage tracks the current tree, **not** tree plus
+history, and the 2026-08-02 belief that deletion reclaims nothing is not
+reproduced. Headroom 11.28 GiB against 4.45 GiB needed leaves a 6.83 GiB
+reserve, so **nothing was deleted**:
 [`autoinit_relay_capacity.md`](autoinit_relay_capacity.md).
 
-Note the pod fetches a **git bundle** from the relay, not GitHub, so a bundle at
-the final commit must be built and uploaded (3.7 MB) once transport and pricing
-are fixed.
+**sa/sb pre-staging is running, unpaid**, on the dev box before any pod exists
+(`aad-scratch/stage_controls.py`, ~1.8–5.4 h at the observed uplink). It uploads
+each control's `model/` plus its run evidence to
+`permanent_controls/<name>/`, then **re-downloads and re-hashes** the weights —
+an upload reporting success and a payload round-tripping are different claims.
+Report: `aad-scratch/stage_controls_report.json`.
+
+**Next, in order:** verify that report (`all_verified: true`, hashes
+`573847a7…` / `4c6adcf8…`) → compute the final harness digest → issue the narrow
+**$0.90 / $1.75** authorization against `CONTINUATION_PLAN_V1` (`c7754ca5…`) and
+that session/harness identity → launch with `--transport relay`. Phase A stays
+unauthorized.
 
 ## What remains before Stage 3 can run
 

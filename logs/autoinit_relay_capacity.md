@@ -134,3 +134,45 @@ checks out" is the bundle, and a bundle at `6428c39` does not exist yet. It is
 3.7 MB — negligible against the quota — but it must be built and uploaded from
 the *final* commit, which is why it is deliberately not done before the transport
 and pricing are fixed.
+
+
+## RESOLVED 2026-08-14: the quota was measurable after all, and nothing was deleted
+
+`usedStorage` **is** exposed — via the REST API's `?expand[]=usedStorage`, which
+`HfApi.repo_info(expand=[...])` did not surface. It reports **81.85 GiB billed**
+against a current tree of 82.36 GiB.
+
+**That corrects a standing belief in this project.** Billed storage tracks the
+**current tree**, not tree-plus-history: if history were billed, the 19.07 GB
+deleted on 2026-08-01 would still be counted and `usedStorage` would exceed the
+tree by that much. It does not. The 2026-08-02 conclusion that "deletion
+reclaimed nothing" is not reproduced by this measurement, and the approved
+history-squash is **not needed**.
+
+```
+billed (measured)                                81.85 GiB
+limit, 100 GB decimal (still inferred)           93.13 GiB
+                                                 ---------
+headroom                                         11.28 GiB
+sa + sb                                           4.45 GiB
+final bundle                                      0.004 GiB
+                                                 ---------
+reserve after staging                             6.83 GiB
+```
+
+**No relay artifacts were deleted.** The cleanup authorization was conditional on
+the allowance being insufficient, and it is sufficient — with a reserve larger
+than a full re-upload of both controls. Deleting scientific evidence to free
+space nobody needs would be pure downside.
+
+Recorded for a future session, *if* headroom ever becomes short: the clearly
+reclaimable groups are `transfer/` (0.17 GiB of superseded git bundles, all
+reproducible from git) and duplicate checkpoint copies under
+`e1_scaling_20260801/` (44.62 GiB, the largest group) — but only after checking
+each against `checkpoint_registry.json` and `checkpoint_tombstones.json`, and
+only after re-confirming that deletion reclaims, which is now a one-line
+measurement rather than an assumption.
+
+The remaining inference is the **limit** itself (100 GB), not the usage. It is
+consistent with the 2026-08-01 event and with uploads currently succeeding, and
+the staging either completes inside it or fails loudly on quota.
