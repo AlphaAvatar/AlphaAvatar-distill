@@ -29,6 +29,7 @@ still tears down — and still reports a failed continuation.
 from __future__ import annotations
 
 import argparse
+import hashlib
 import importlib.util
 import json
 import os
@@ -150,6 +151,69 @@ class Continuation(_preflight.Preflight):
                  f"(authorized ${self.auth.hard_cap_usd:.2f})")
         return self.check_gpu_offered()
 
+    # -- the commit the pod will actually run ------------------------------
+    def verify_session_commit(self) -> bool:
+        """`authorized_session_commit` was recorded and never enforced.
+
+        The pod does not run the dev box's working tree: it clones a bundle and
+        checks out `--session-commit`. Nothing checked that this commit is the
+        one the authorization was granted against, so the harness gate — which
+        reads local files — could pass while the pod ran different code.
+
+        Rather than compare the two hashes (which cannot be equal: the
+        authorization artifact is written before it is committed, so the commit
+        that CONTAINS it is always later than the one it names), this asks the
+        question that matters: do the harness files AT THAT COMMIT digest to the
+        authorized value, and does that commit carry this exact authorization?
+        """
+        commit = self.a.session_commit
+        files = list(self.auth.harness_source_files)
+        entries, missing = [], []
+        for rel in sorted(files):
+            blob = subprocess.run(["git", "show", f"{commit}:{rel}"],
+                                  capture_output=True, cwd=REPO_ROOT)
+            if blob.returncode != 0:
+                missing.append(rel)
+                continue
+            entries.append({"path": rel,
+                            "sha256": hashlib.sha256(blob.stdout).hexdigest()})
+        if missing:
+            self.say(f"ABORT at $0: {commit} does not contain {missing}")
+            return False
+        digest = hashlib.sha256(
+            "".join(f"{e['path']}:{e['sha256']}\n" for e in entries).encode()
+        ).hexdigest()
+        auth_blob = subprocess.run(
+            ["git", "show", f"{commit}:{AUTH_PATH}"],
+            capture_output=True, cwd=REPO_ROOT)
+        local = (REPO_ROOT / AUTH_PATH).read_bytes()
+        carries_auth = (auth_blob.returncode == 0
+                        and auth_blob.stdout == local)
+        self.ev["session_commit_check"] = {
+            "session_commit": commit,
+            "authorized_session_commit": self.auth.authorized_session_commit,
+            "harness_digest_at_commit": digest,
+            "authorized_harness_digest": self.auth.harness_source_digest,
+            "harness_matches": digest == self.auth.harness_source_digest,
+            "commit_carries_this_authorization": carries_auth,
+            "rule": ("the pod checks out this commit from a bundle; its harness "
+                     "must digest to the authorized value and it must carry the "
+                     "authorization the driver will load"),
+        }
+        if digest != self.auth.harness_source_digest:
+            self.say(f"ABORT at $0: the harness at {commit} digests to {digest}, "
+                     f"authorized {self.auth.harness_source_digest}. The pod "
+                     "would run code this authorization was not granted against.")
+            return False
+        if not carries_auth:
+            self.say(f"ABORT at $0: {commit} does not carry this exact "
+                     f"{AUTH_PATH}; the driver would load a different "
+                     "authorization, or none.")
+            return False
+        self.say(f"session commit {commit[:12]} verified: harness digests to "
+                 f"{digest[:12]}… and carries the authorization")
+        return True
+
     # -- precheck: the inputs THIS session needs, checked at $0 ------------
     def relay_precheck(self) -> bool:
         """Fail before a pod exists, on the inputs this session actually reads.
@@ -159,6 +223,8 @@ class Continuation(_preflight.Preflight):
         input. Under `--transport relay` an unstaged control is discovered by
         `materialize_controls` — after setup has been paid for.
         """
+        if not self.verify_session_commit():
+            return False
         try:
             from huggingface_hub import HfApi
             present = set(HfApi().list_repo_files(self.a.relay_repo,

@@ -510,6 +510,7 @@ class LaunchArgs:
     """The launcher's real defaults, as `main()` would parse them."""
 
     scr = "/tmp/unused"
+    session_commit = "HEAD"
     transport = "relay"
     relay_repo = "AlphaAvatar/aadistill-artifacts"
     max_price = 0.99
@@ -590,6 +591,9 @@ def test_the_precheck_fails_at_zero_when_a_control_is_not_staged():
 
     def with_files(files, **overrides):
         obj = bare_launcher(mod, **overrides)
+        # The commit gate runs first and has its own test; this one is about
+        # the inputs.
+        obj.verify_session_commit = lambda: True
         original = huggingface_hub.HfApi
         huggingface_hub.HfApi = lambda *a, **k: FakeApi(files)
         try:
@@ -753,3 +757,44 @@ def test_the_continuation_authorization_is_narrow_and_cannot_train():
     with pytest.raises(AuthorizationError, match="separately unauthorized"):
         auth.refuse_phase_a()
     assert "does not permit training" in auth.scope_note
+
+
+def test_the_session_commit_is_verified_against_the_authorization():
+    """`authorized_session_commit` was recorded and never enforced.
+
+    The pod clones a bundle and checks out `--session-commit`; the harness gate
+    reads the dev box's working tree. Nothing connected the two, so the pod
+    could have run a commit the authorization never covered.
+    """
+    import subprocess
+
+    mod = load_continuation_launcher()
+    auth_path = REPO / "logs/autoinit_continuation_authorization.json"
+    if not auth_path.is_file():
+        pytest.skip("no continuation authorization has been issued yet")
+
+    from aadistill.autoinit.authorization import SpendAuthorization
+    auth = SpendAuthorization.load(auth_path)
+    head = subprocess.run(["git", "rev-parse", "HEAD"], capture_output=True,
+                          text=True, cwd=REPO).stdout.strip()
+
+    obj = bare_launcher(mod, session_commit=head)
+    obj.auth = auth
+    verified = obj.verify_session_commit()
+    check = obj.ev["session_commit_check"]
+    if verified:
+        assert check["harness_matches"] is True
+        assert check["commit_carries_this_authorization"] is True
+    else:
+        # Before the authorization is committed, HEAD cannot carry it — but the
+        # harness at HEAD must still be the authorized one, or the launch would
+        # be running unauthorized code.
+        assert check["harness_matches"] is True, check
+
+    # An old commit's harness is not this one, and is refused by digest.
+    old = subprocess.run(["git", "rev-parse", "HEAD~3"], capture_output=True,
+                         text=True, cwd=REPO).stdout.strip()
+    stale = bare_launcher(mod, session_commit=old)
+    stale.auth = auth
+    assert stale.verify_session_commit() is False
+    assert any("ABORT at $0" in s for s in stale.said)

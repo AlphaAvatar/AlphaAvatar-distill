@@ -1,0 +1,44 @@
+{
+  "schema": "aadistill.autoinit.spend_authorization/v1",
+  "authorization_id": "autoinit.control_characterization.2026-08-14",
+  "version": 1,
+  "granted_utc": "2026-08-14T00:00:00Z",
+  "granted_by": "maintainer (session authorization)",
+  "plan_id": "autoinit.control_characterization_continuation",
+  "preflight_plan_hash": "c7754ca5e8aa913b7690a0f4d7dbf6ed0062cf00da5b4b527c806a3d7798b0e8",
+  "expected_usd": 1.34,
+  "hard_cap_usd": 1.75,
+  "authorized_stages": [
+    0,
+    1,
+    2,
+    3
+  ],
+  "stage_conditions": {
+    "0": "strict import of the two existing permanent controls; no training",
+    "1": "current generation and evaluation attestation over recovery_search_v2",
+    "2": "real v2 tool and RAG generation smoke",
+    "3": "characterize the imported controls; the only paid measurement",
+    "teardown": "collect, delete the pod, confirm from the provider, STOP"
+  },
+  "scope_note": "characterization of two ALREADY TRAINED permanent controls. This authorization does not permit training, retraining, or re-initializing any control: the driver has no training stage and the launcher materializes existing artifacts. A failed characterization is collected and torn down and remains a FAILED continuation; it does not authorize a retry that trains. Phase A remains separately unauthorized.",
+  "phase_a_authorized": false,
+  "automatic_phase_a_start": false,
+  "authorized_session_commit": "d217977d2a7250eb4eeb389e04a0da291500a5a0",
+  "harness_source_digest": "b36eda183f9558cec35dfdfd577005ad164cfc9acc767551592abcdc11d9abf5",
+  "harness_source_files": [
+    "scripts/pod/autoinit_continuation_launch.py",
+    "scripts/pod/autoinit_continuation_driver.py",
+    "scripts/pod/autoinit_preflight_launch.py",
+    "scripts/pod/autoinit_preflight_setup.sh",
+    "scripts/pod/autoinit_engine_probe.py",
+    "scripts/pod/watchdog.py",
+    "scripts/pod/collect_artifacts.py",
+    "src/aadistill/autoinit/authorization.py",
+    "src/aadistill/autoinit/continuation.py",
+    "src/aadistill/autoinit/generation.py"
+  ],
+  "provenance_commit": "d217977d2a7250eb4eeb389e04a0da291500a5a0+dirty",
+  "enforcement": "the launcher loads this artifact and refuses to create a pod whose priced hard threshold exceeds hard_cap_usd, refuses a stage not in authorized_stages, and has no code path to Phase A",
+  "authorization_sha256": "dfb5e82f508f91b068e30ce1a57e0c85425567592a94757aaec783a34ffefffd"
+}
