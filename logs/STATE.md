@@ -1,5 +1,5 @@
 **Updated:** 2026-08-14 · branch `main` · working tree clean
-**No pods running. Nothing billing.** **1,576 CPU tests pass**, 7 skipped.
+**No pods running. Nothing billing.** **1,621 CPU tests pass**, 7 skipped.
 
 ## The two permanent canonical controls EXIST and are hash-verified
 
@@ -62,60 +62,76 @@ every item. Input is now normalized through `normalize_tools`, which reads eithe
 representation and fails closed. **Semantics unchanged and measured:** nine
 policies × 190 prompts reproduce every number of the pre-migration record.
 
-## Remote, transport and staging (2026-08-14)
+## The continuation is frozen and executable (2026-08-14)
 
-**Executable commit is public and independently fetchable.** Tree clean; local
-`HEAD` = `origin/main` = **`a545910`**, verified by a fresh shallow clone. The
-pod's actual source is a git bundle, and `transfer/aad_autoinit_a5459101.bundle`
-(sha `f3e8ae01…`) containing exactly `a545910` is on the relay.
+**Executable identity, verified from inside the bundle the pod actually fetches**
+(cloned, checked out, re-digested — not asserted from the dev box):
 
-**Transport: relay, and no deletion was needed.** `usedStorage` is measurable
-via the REST API (`?expand[]=usedStorage`): **81.85 GiB billed** against a
-82.36 GiB tree — so billed storage tracks the current tree, **not** tree plus
-history, and the 2026-08-02 belief that deletion reclaims nothing is not
-reproduced. Headroom 11.28 GiB against 4.45 GiB needed leaves a 6.83 GiB
-reserve, so **nothing was deleted**:
-[`autoinit_relay_capacity.md`](autoinit_relay_capacity.md).
+| what | value |
+| --- | --- |
+| session commit | `1e7f347bdea203c39a16c7e0448a1656b7157cac` |
+| continuation harness digest | `060b6053…` over its **own** ten files |
+| authorization | `938078e5…`, `autoinit.control_characterization.2026-08-14` |
+| plan | `CONTINUATION_PLAN_V1` = `c7754ca5…` |
+| relay bundle | `transfer/aad_autoinit_1e7f347b.bundle`, sha `4bd34264…` |
+| budget | expected **$1.34**, hard cap **$1.75**, stages 0-3, `phase_a_authorized: false` |
 
-**sa/sb pre-staging is running, unpaid**, on the dev box before any pod exists
-(`aad-scratch/stage_controls.py`, ~1.8–5.4 h at the observed uplink). It uploads
-each control's `model/` plus its run evidence to
-`permanent_controls/<name>/`, then **re-downloads and re-hashes** the weights —
-an upload reporting success and a payload round-tripping are different claims.
-Report: `aad-scratch/stage_controls_report.json`.
+**Five defects were found by EXECUTING the launcher rather than reading it**, and
+every one was reachable only on a paid pod
+([`decisions.md`](decisions.md), 2026-08-14):
 
-**Next, in order:** verify that report (`all_verified: true`, hashes
-`573847a7…` / `4c6adcf8…`) → compute the final harness digest → issue the narrow
-**$0.90 / $1.75** authorization against `CONTINUATION_PLAN_V1` (`c7754ca5…`) and
-that session/harness identity → launch with `--transport relay`. Phase A stays
-unauthorized.
+1. `make_plan` raised `BudgetError` on its own arguments — **every** launch would
+   have died there, before a pod could exist. No test had ever called it.
+2. `require_harness` digested the **preflight's** file set, so the continuation
+   launcher, driver and plan module were outside the authorization.
+3. `relay_precheck` never looked for the staged controls — this session's entire
+   input — so an unstaged control surfaced only after paid setup.
+4. Collection was preflight-shaped: a **successful** continuation would have
+   failed its own artifact manifest, **blocked teardown**, and billed to the hard
+   threshold. The poll loop also watched `PREFLIGHT_*` while the driver emits
+   `CONTINUATION_*`.
+5. The relay transport read `os.environ['HF_TOKEN']` over a fresh ssh session.
+   `HF_TOKEN` is exported inside `setup.sh` and dies with it, so the only
+   transport this session uses would have raised `KeyError` after paying for
+   setup.
+
+A session's identity — audit dir, evidence name, archive name, artifact specs,
+terminal markers, reports and products to fetch, event streams — is now
+overridable hooks on the base launcher, defaulting to the preflight's own values.
+`verify_session_commit` additionally proves at **$0** that the commit the pod will
+check out digests to the authorized harness and carries the exact authorization
+the driver loads. **1,621 tests pass.**
+
+**The $8.60 stages-0-3 authorization is retired.** Editing the preflight launcher
+moved its harness digest, so the artifact that permits *training* controls no
+longer validates. It is deliberately **not** re-issued: that would silently
+restore permission to retrain. A test asserts it stays refused.
+
+**Repriced from the harness, not from prose.** The `$0.88` sketch omitted the
+transfer phase and used the optimistic column for four other rows. The launcher
+prices the session at **69.0 min → $1.1385** at the historical 18 min/control
+guess; the per-control battery cost has **never been measured**, so the budget is
+**24 min/control** — expected $1.3365, hard **$1.6352**, inside the unchanged
+$1.75 cap. Shrinking to hit $0.90 would have set a soft stop that refuses `sb`
+whenever `sa` overruns, forfeiting the one number this session exists to produce.
+
+**Transport: relay, and staging is unpaid dev-box uplink.** `sa` is uploaded and
+**round-trip verified** — re-downloaded and re-hashed to
+`573847a730c1a4997a2f…`, 47.8 min at 0.793 MB/s. `sb` is uploading. Nothing is
+launched until `stage_controls_report.json` reports `all_verified: true`.
+No deletion was needed: 81.85 GiB billed against ~93.1 GiB usable
+([`autoinit_relay_capacity.md`](autoinit_relay_capacity.md)).
 
 ## What remains before Stage 3 can run
 
-1. **A Stage-3-only entry does not exist yet.** `PreflightPlan.advance_to(3, …)`
-   refuses to start Stage 3 unless blocking Stages 0–2 recorded a pass in *this*
-   session, and the controls already exist, so re-running Stage 2 is exactly what
-   must not happen. This needs a deliberate design — a plan variant that admits
-   already-verified controls as evidence, binding them by their recorded
-   `control_binding` hashes — **not an ad-hoc relaxation of the gate.** It is the
-   next session's first task and it is a gate change, so it deserves its own
-   review.
-2. **The narrow authorization is therefore not issued.** The current artifact
-   still authorizes the full stages 0–3 at $4.20/$8.60 against the new plan and
-   harness. A characterization-only authorization should be issued *after* the
-   Stage-3-only entry exists, priced at roughly **$0.6 expected / $1.6 hard**
-   ([`autoinit_phase_a_repricing.md`](autoinit_phase_a_repricing.md)).
-3. **Staging the controls to the relay is a quota decision.** The two `model/`
-   directories are 2.3 GB each; the relay already holds **82.36 GiB** and its
-   LFS storage is **irreclaimable by deletion** (history keeps the objects). The
-   uplink is 0.72 MB/s, so ~53 min per checkpoint — free if it happens before a
-   pod exists, paid pod time if not. Not started: it permanently consumes ~4.6 GB
-   of a constrained quota and that is the maintainer's call.
-4. On-pod, in the next session: the Stage-1 smoke now runs the **`tool` and
-   `rag`** sets of v2 (not `sorted(sets)[0]`, which was `code` and has no tools —
-   that is why the smoke passed while Stage 3 failed), and the observed
-   generation-protocol reconstruction is verified against the new Stage-0
-   attestation.
+1. **`sb` staging must finish and round-trip verify** to
+   `4c6adcf861871690…`. This is the last unpaid gate; at $0 GPU spend.
+2. Then launch: `--transport relay`, `--session-commit 1e7f347b…`,
+   `--bundle aad_autoinit_1e7f347b.bundle`. The launcher refuses to create a pod
+   unless the authorization, the harness digest, the session commit and the
+   staged inputs all check out first.
+3. Phase A stays unauthorized. Its `$13.02 / $21.01` remains **provisional** and
+   must be repriced from the real per-control battery cost this session measures.
 
 ## Phase A is repriced, and both statistics measurements are kept
 
