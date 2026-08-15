@@ -90,6 +90,17 @@ AutoInit characterization continuation, attempt 3 (L40S,      $  0.0700
 
 AutoInit Stage-3 continuation, attempt 8 COMPLETE (L40S, 41.3 min) $  0.6816
 Phase A attempt 1 (L40S, 6.5 min) SETUP GATE FAILED, NOTHING RAN $  0.1075
+Phase A attempt 2 (L40S, 28.3 min) STAGE-0 GATE FAILED, NOTHING RAN $  0.4665
+    Setup PASSED this time: the SESSION_KIND test fix held, so the
+    pod's blocking CPU suite cleared and the driver detached. It then
+    died ONE SECOND later in stage 0. The driver's engine-probe call
+    omitted `--model`, which autoinit_engine_probe.py marks
+    required=True, so argparse exited rc=2 before vLLM ever loaded.
+    A defect in the Phase-A driver, not in any gate: the stage-0 gate
+    refused correctly and the session failed closed. The rehearsal
+    SCRIPTED stage 0 rather than building its argv, so that line had
+    never executed anywhere. Pod deleted, provider confirms gone;
+    no stage passed, nothing was trained, no permanent artifact touched.
     The pod's blocking CPU test suite failed one test:
     test_setup_verifies_THIS_sessions_authorization_and_fails_closed.
     The setup gate itself behaved CORRECTLY. The launcher exports
@@ -111,7 +122,7 @@ AutoInit characterization continuation, attempt 4 (L40S,      $  1.3672
     host that had failed three cold draws. Torn down manually
     once the outcome was determined; provider-confirmed gone.
 
-ACTUAL CUMULATIVE SPEND                                      $191.6537
+ACTUAL CUMULATIVE SPEND                                      $192.1202
 ```
 
 The pre-E8b baseline `$163.8833` is the figure every E8/E8b planner was built on
@@ -206,8 +217,8 @@ $2.30   RAISED 2026-08-14 with maintainer approval, after attempt 1 spent
 
 ```
 authorized cumulative cap                                    $213.00
-actual cumulative spend                                      $191.6537
-unused authorization remaining                               $ 21.3463
+actual cumulative spend                                      $192.1202
+unused authorization remaining                               $ 20.8798
 Phase A hard threshold, from the launcher's own make_plan     $ 20.0126
 margin after a worst-case Phase A                            $  1.4412
 GRANTED Phase-A authorization, 2026-08-15T12:32:08Z          $ 20.0126

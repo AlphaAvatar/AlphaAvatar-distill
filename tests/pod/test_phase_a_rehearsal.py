@@ -886,6 +886,51 @@ def test_a_non_auth_path_changed_after_the_authorized_base_is_refused(tmp_path):
         mod.REPO_ROOT, mod.AUTH_PATH = saved_root, saved_auth
 
 
+def test_every_script_the_driver_invokes_gets_its_required_arguments():
+    """The class of defect that killed attempt 2 at $0.47.
+
+    The driver builds argv for five external scripts. Stage 0's engine-probe
+    call omitted `--model`, which that script marks `required=True`, so the
+    driver died one second after detaching — the rehearsal scripted stage 0
+    rather than building the argv, so the line had never executed.
+
+    Checked against each script's REAL parser rather than a transcription: the
+    required flags are read from the callee, the passed flags from the caller.
+    """
+    import re
+
+    driver_src = (REPO / "scripts/pod/autoinit_phase_a_driver.py").read_text()
+
+    def required_of(script: str) -> list[str]:
+        src = (REPO / script).read_text()
+        return [f for f, rest in
+                re.findall(r'add_argument\(\s*"(--[a-z0-9-]+)"([^)]*)\)', src, re.S)
+                if "required=True" in rest]
+
+    def passed_in(script: str) -> list[str]:
+        """Flags appearing in the driver's argv list for this script."""
+        i = driver_src.index(script)
+        # the argv list ends at the closing bracket of the call
+        window = driver_src[i:i + 900]
+        end = window.find("],")
+        return re.findall(r'"(--[a-z0-9-]+)"', window[:end if end > 0 else 900])
+
+    invoked = ["scripts/pod/autoinit_engine_probe.py",
+               "scripts/training/train_stage3.py",
+               "scripts/evaluation/uncapped_eval.py",
+               "scripts/autoinit/score_recovery_search.py",
+               "scripts/autoinit/verify_frozen_assets.py"]
+    problems = {}
+    for script in invoked:
+        assert script in driver_src, f"{script} is not invoked by the driver"
+        missing = [f for f in required_of(script) if f not in passed_in(script)]
+        if missing:
+            problems[script] = missing
+    assert not problems, (
+        f"the driver omits required arguments: {problems}. Each one is a pod "
+        "that dies in a line no local run executed.")
+
+
 def test_the_launcher_polls_for_the_markers_its_own_driver_emits():
     """The poll loop watched for PREFLIGHT_* while the driver emitted its own."""
     mod = load_launcher()

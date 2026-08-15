@@ -72,6 +72,10 @@ AUDIT = REPO / "artifacts/audit/autoinit_phase_a"
 SEARCH_WORKDIR = REPO / "artifacts/autoinit/phase_a_search"
 BATTERY = REPO / "artifacts/stage3/recovery_search_v2"
 STATE_EVAL = REPO / "artifacts/stage1/state_eval_v1"
+#: The engine probe's target at stage 0. The canonical initialization is the only
+#: target-architecture checkpoint that exists before the search runs, and it is
+#: what the continuation probed, so the generation identity stays comparable.
+CANONICAL_INIT = REPO / "artifacts/stage1/qwen3_0p6b_init_v0/checkpoint"
 FROZEN_PLAN = REPO / "logs/autoinit_phase_a_recovery_plan_frozen.json"
 FROZEN_RECIPE = REPO / "configs/stage3/e1/e1_r0860k_sa_pca.json"
 PACK_DIR = "artifacts/stage3/ladder_uniform_probe"
@@ -222,9 +226,16 @@ class PhaseADriver:
         except RecoveryAdmissionError as exc:
             return self.record(0, False, f"thresholds not materialized: {exc}")
 
+        # `--model` and `--image-digest` are NOT optional: the probe requires the
+        # first and records the second into the generation identity. Omitting
+        # `--model` cost attempt 2 a $0.47 pod, dying one second after the driver
+        # detached, because the rehearsal scripted stage 0 instead of building
+        # this argv.
         engine = self.gate("engine_probe",
                            [str(REPO / "scripts/pod/autoinit_engine_probe.py"),
-                            "--out", str(AUDIT / "engine_probe.json")],
+                            "--model", str(CANONICAL_INIT),
+                            "--out", str(AUDIT / "engine_probe.json"),
+                            "--image-digest", self.a.image_digest],
                            timeout=1800, python="/opt/vllm/bin/python")
         if engine.returncode != 0:
             return self.record(0, False,

@@ -1,10 +1,10 @@
 {
  "schema": "aadistill.current_state/v1",
  "generated_utc": "2026-08-15T12:40:00+00:00",
- "current_phase": "Phase A attempt 1 FAILED CLOSED in setup at $0.1075; the driver never started and nothing was trained. Cause fixed (a test read ambient SESSION_KIND). Harness digest UNCHANGED at ea2f360b, so the authorization still covers the same executable \u2014 but its scope is 'one launcher invocation' and that is spent, so attempt 2 needs a fresh grant.",
+ "current_phase": "Phase A attempt 2 FAILED CLOSED in the driver's stage 0 at $0.4665. Setup passed (the SESSION_KIND fix held); the engine-probe call omitted a required --model. Fixed and regression-locked. The fix moves the harness digest, so autoinit.phase_a.2026-08-15T1610Z is VOID and attempt 3 needs a fresh commit, digest, authorization and bundle. Not self-authorized.",
  "active_experiment": null,
  "paid_compute_running": false,
- "next_work": "Maintainer decision: reissue a Phase-A authorization for attempt 2. The harness is unchanged and still digests to ea2f360b; only tests/ and logs/ moved, so a reissue binds the same executable at a new session commit, and a new bundle must be built and uploaded at that commit.",
+ "next_work": "Maintainer decision on a third Phase-A authorization. The science and both plan hashes are unchanged; only the driver moved.",
  "teacher": {
   "model_id": "Qwen/Qwen3-4B-Thinking-2507",
   "revision": "768f209d9ea81521153ed38c47d515654e938aea",
@@ -55,11 +55,11 @@
   "dp_sa": "infrastructure artifact, not a promotable arm"
  },
  "budget": {
-  "actual_cumulative_spend_usd": 191.6537,
+  "actual_cumulative_spend_usd": 192.1202,
   "authorized_cap_usd": 213.0,
   "cap_raised_utc": "2026-08-15",
   "cap_raise_note": "maintainer approved 'e.g. $213-214'; $213.00 selected from that range. Nothing spent against it.",
-  "remaining_usd": 21.3463,
+  "remaining_usd": 20.8798,
   "phase_a_priced_by_launcher": {
    "expected_usd": 17.8933,
    "expected_without_tie_break_usd": 14.3604,
@@ -87,11 +87,11 @@
   },
   "logs/BUDGET_LEDGER.md": {
    "path": "logs/BUDGET_LEDGER.md",
-   "sha256": "a5172b32081846e92c7f15132a3021da9d322561f80ef680f0d0b3fbd0fde903"
+   "sha256": "cb021a6fb093c6d31311606b558bf47dd50f2256668daae978142adc87eb8cd0"
   },
   "logs/decisions.md": {
    "path": "logs/decisions.md",
-   "sha256": "7fdb132b96cc18dccad75d800192f5264ee18895c95288bcbf21b18ac0004819"
+   "sha256": "59352fc279a689991d5b2d5568ffc2b12bc8772050d13e041567817ce210a67a"
   },
   "logs/checkpoint_registry.json": {
    "path": "logs/checkpoint_registry.json",
@@ -158,7 +158,7 @@
   "dry_run": "logs/autoinit_dryrun_summary.json",
   "proposal": "logs/autoinit_pilot_proposal.md",
   "blocking_prerequisites": [
-   "a fresh PhaseAAuthorization for attempt 2 (the harness digest is unchanged at ea2f360b; only the session commit and bundle move)",
+   "a fresh PhaseAAuthorization for attempt 3 (new harness digest; both plan hashes unchanged)",
    "a new bundle built and uploaded at that commit",
    "calib.reasoning_heavy@v1 not built (Phase B only, independent trigger)"
   ],
@@ -304,7 +304,8 @@
      5
     ],
     "issued_is_not_launched": "the artifact authorizes spend and stages; the maintainer's instruction that requested it also says 'Do not launch Phase A yet'",
-    "scope_consumed": "one launcher invocation, and it has occurred; attempt 2 needs a fresh grant"
+    "scope_consumed": "one launcher invocation, and it has occurred; attempt 2 needs a fresh grant",
+    "status": "VOID - the harness digest moved after the fix"
    },
    "attempt_1": {
     "pod_id": "ky8j0kbft9mp61",
@@ -319,6 +320,23 @@
     "gate_behaved_correctly": true,
     "fix": "the test now pops SESSION_KIND as it already popped the other two",
     "harness_digest_unchanged": true
+   },
+   "attempt_2": {
+    "pod_id": "fa2sgl62t3l8q0",
+    "minutes": 28.27,
+    "usd": 0.4665,
+    "outcome": "STAGE_0_GATE_FAILED_CLOSED",
+    "setup_passed": true,
+    "driver_started": true,
+    "stages_passed": 0,
+    "trained_anything": false,
+    "provider_confirms_gone": true,
+    "cause": "the driver's engine-probe invocation omitted --model, which autoinit_engine_probe.py marks required=True; argparse exited rc=2 one second after the driver detached",
+    "gate_behaved_correctly": true,
+    "fix": "pass --model CANONICAL_INIT and --image-digest, as the continuation does",
+    "regression": "one test checking every required flag of all five scripts the driver invokes, read from each callee's real parser",
+    "harness_digest_moved": true,
+    "voids_authorization": "autoinit.phase_a.2026-08-15T1610Z / d7fa15f3"
    }
   }
  },
@@ -340,7 +358,7 @@
   "peak_working_storage_gib": 106
  },
  "tests": {
-  "passing": 1694,
+  "passing": 1696,
   "skipped": 7,
   "note": "1637 before this session; +51 Phase-A rehearsal, +6 real toy-scale search execution",
   "venvs_verified": [

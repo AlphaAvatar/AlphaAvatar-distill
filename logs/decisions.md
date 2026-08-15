@@ -2922,3 +2922,47 @@ should not be reached for by a future session.
   not simulate the *environment*, so it cannot catch this class. Running the
   suite under the launcher's own setup environment is what would have.
 - **Revisit when:** a fresh authorization is issued for attempt 2.
+
+## 2026-08-15 — Phase A attempt 2: stage-0 gate failed closed at $0.4665
+
+- **Outcome:** pod `fa2sgl62t3l8q0`, L40S, 28.27 min, **$0.4665**. Terminal
+  `PHASE_A_FAILED`, pod deleted, provider confirms gone. No stage passed, nothing
+  was trained, no permanent artifact was touched.
+- **Setup PASSED.** The `SESSION_KIND` fix from attempt 1 held: the pod's
+  blocking CPU test suite cleared at 16:43:57 and the driver detached at
+  16:44:05, confirmed by descriptor probe. Attempt 1's failure mode is closed.
+- **The driver then died one second later, in its own stage 0.** The
+  engine-probe invocation omitted `--model`, which
+  `scripts/pod/autoinit_engine_probe.py` marks `required=True`; argparse exited
+  rc=2 before vLLM loaded anything. The continuation driver passes
+  `--model CANONICAL_INIT --out … --image-digest …`; the Phase-A driver was
+  written with only `--out`.
+- **No gate misbehaved.** Stage 0 refused a non-zero return code exactly as
+  written, the session failed closed, the artifact gate collected under the
+  reduced spec, and teardown was provider-confirmed. The defect is mine, in the
+  driver.
+- **Why nothing caught it.** `tests/pod/test_phase_a_rehearsal.py` drives the
+  driver's full lifecycle with every stage **scripted** — `stage0()` in the
+  rehearsal returns a canned pass and never builds the real argv. So the line
+  had never executed anywhere: not locally, not in the simulator, not under
+  `SESSION_KIND=phase_a`. This is the same class as the `KeyError: 'metrics'`
+  that cost $0.29 in the micro-preflight, and it is the fourth time this project
+  has paid for a never-executed line.
+- **Fix:** pass `--model CANONICAL_INIT` and `--image-digest`, matching the
+  continuation's working call.
+- **Regression:** one test that reads each callee's REAL parser for
+  `required=True` flags and each caller's argv, across **all five** scripts the
+  driver invokes — not just the one that broke. Audited at the time: the other
+  four (`train_stage3`, `uncapped_eval`, `score_recovery_search`,
+  `verify_frozen_assets`) already supply every required argument, so this was the
+  only defect of its class. Mutation-verified by re-removing `--model`.
+- **Consequence for the grant:** the driver is inside
+  `PHASE_A_HARNESS_SOURCE_FILES_V1`, so this fix moves the harness digest and
+  **voids** `autoinit.phase_a.2026-08-15T1610Z` (`d7fa15f3…`). A third attempt
+  needs a fresh commit, digest, authorization and bundle. Not self-authorized;
+  stopped at the boundary and reported.
+- **Standing lesson, now paid for four times:** a rehearsal that scripts a stage
+  proves the *lifecycle*, not the *stage*. Any external command a driver builds
+  must have its argv checked against the callee's own parser, because the
+  cheapest place to discover a missing required flag is a unit test and the most
+  expensive is a GPU.
