@@ -2880,3 +2880,45 @@ Genuinely reclaimable: **~0.19 GiB**, not 7.66. The conclusion is unchanged and
 in fact firmer — reclaiming everything reclaimable still leaves ~1.79 GiB against
 5.61 GiB of leaves — but the escape hatch recorded above does not exist and
 should not be reached for by a future session.
+
+## 2026-08-15 — Phase A attempt 1: setup gate failed closed at $0.1075, nothing ran
+
+- **Outcome:** pod `ky8j0kbft9mp61`, L40S, 6.51 min, **$0.1075**. Aborted after
+  draw 1, pod deleted, provider confirms gone. The driver never started, no
+  stage ran, nothing was trained, and no permanent artifact was touched.
+- **Cause:** the pod's blocking CPU test suite failed exactly one test,
+  `test_setup_verifies_THIS_sessions_authorization_and_fails_closed`.
+- **The setup gate was RIGHT; the test's environment was not controlled.** The
+  launcher invokes setup as `SESSION_KIND=phase_a bash autoinit_preflight_setup.sh`,
+  which puts that variable in setup's environment and therefore in every child's
+  — including the pytest gate. That test extracts setup's authorization block and
+  executes it, popping `SESSION_AUTH_PATH` and `SESSION_PLAN_HASH` from the
+  environment but not `SESSION_KIND`. So on a Phase-A pod it ran the block's
+  `phase_a` branch against the **continuation's** `SpendAuthorization` artifact,
+  which `PhaseAAuthorization.load` correctly refuses with exit 98. The refusal is
+  the designed behaviour; the test asserted `returncode == 0`.
+- **Why nothing local could catch it.** With `SESSION_KIND` unset the test takes
+  the `spend` branch and passes. It passed in the full suite (1694), under the
+  pod simulator (1670, zero failures), and standalone. It fails **only** when a
+  Phase-A launcher supplies the variable — i.e. only on a real Phase-A pod.
+  Reproduced on the dev box afterwards with `SESSION_KIND=phase_a pytest ...`,
+  and a full suite under that environment isolates the blast radius to this one
+  test: 1693 passed, 1 failed.
+- **Fix:** one line — the test pops `SESSION_KIND` alongside the two session
+  variables it already controls. Verified passing both with the variable set and
+  unset.
+- **The harness digest is UNCHANGED.** `tests/` is not in
+  `PHASE_A_HARNESS_SOURCE_FILES_V1`, so the fix leaves the digest at
+  `ea2f360b…` — the authorization still covers byte-identically the same
+  executable, and no reissue is needed on identity grounds.
+- **But the authorization is spent on scope.** Its own `scope_note` reads "Phase
+  A only, **one launcher invocation**", and that invocation has occurred. A
+  relaunch is a second invocation and needs a fresh grant, exactly as the eight
+  continuation attempts each did. Stopping here is the authorization boundary the
+  maintainer named, not a judgement call.
+- **The generalisable lesson**, which this project has now paid for three times
+  in different costumes: a test that reads ambient environment is a test whose
+  result depends on who invoked it. The pod simulator hides *artifacts* and does
+  not simulate the *environment*, so it cannot catch this class. Running the
+  suite under the launcher's own setup environment is what would have.
+- **Revisit when:** a fresh authorization is issued for attempt 2.

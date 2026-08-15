@@ -89,6 +89,18 @@ AutoInit characterization continuation, attempt 3 (L40S,      $  0.0700
     in 4 minutes instead of a 28-minute burn.
 
 AutoInit Stage-3 continuation, attempt 8 COMPLETE (L40S, 41.3 min) $  0.6816
+Phase A attempt 1 (L40S, 6.5 min) SETUP GATE FAILED, NOTHING RAN $  0.1075
+    The pod's blocking CPU test suite failed one test:
+    test_setup_verifies_THIS_sessions_authorization_and_fails_closed.
+    The setup gate itself behaved CORRECTLY. The launcher exports
+    SESSION_KIND=phase_a into setup.sh, which exports it to the test
+    gate; that test extracts setup's authorization block and ran its
+    phase_a branch against the CONTINUATION's artifact, which is
+    correctly refused with exit 98. The test controlled two session
+    variables and not the third. It passed on the dev box and under the
+    pod simulator, and could only fail on a real Phase-A pod.
+    Failed CLOSED: aborted after draw 1, pod deleted, provider confirms
+    gone, driver never started, no stage ran, nothing trained.
 AutoInit characterization continuation, attempt 7 (L40S, 27.0 min) $  0.4500
 AutoInit characterization continuation, attempt 6 (L40S, 8.0 min)  $  0.1324
 AutoInit characterization continuation, attempt 5 (L40S, 8.3 min)  $  0.1369
@@ -99,7 +111,7 @@ AutoInit characterization continuation, attempt 4 (L40S,      $  1.3672
     host that had failed three cold draws. Torn down manually
     once the outcome was determined; provider-confirmed gone.
 
-ACTUAL CUMULATIVE SPEND                                      $191.5462
+ACTUAL CUMULATIVE SPEND                                      $191.6537
 ```
 
 The pre-E8b baseline `$163.8833` is the figure every E8/E8b planner was built on
@@ -194,8 +206,8 @@ $2.30   RAISED 2026-08-14 with maintainer approval, after attempt 1 spent
 
 ```
 authorized cumulative cap                                    $213.00
-actual cumulative spend                                      $191.5462
-unused authorization remaining                               $ 21.4538
+actual cumulative spend                                      $191.6537
+unused authorization remaining                               $ 21.3463
 Phase A hard threshold, from the launcher's own make_plan     $ 20.0126
 margin after a worst-case Phase A                            $  1.4412
 GRANTED Phase-A authorization, 2026-08-15T12:32:08Z          $ 20.0126
@@ -257,3 +269,21 @@ and none should be.
   `18.76` fails against a plan of `$18.760145`.
 * Budget every session for **1–2 abandoned host draws**; the observed rate across E8 was
   nine abandoned draws in six launches.
+
+## Provenance note on the $213.00 cap (recorded post-run, 2026-08-15)
+
+The Phase-A authorization's `granted_by` field says the cap was raised on "the
+maintainer's own words 'Raise it further, e.g. $213-214'". **That attribution is
+imprecise and is corrected here rather than in the artifact.**
+
+What actually happened: the assistant presented four budget options; that
+sentence was the *option label the assistant authored*, and the maintainer
+**selected** it. The approval is explicit and substantively valid — the
+maintainer chose to raise the cap into $213–214 over three alternatives, and
+$213.00 is the conservative end of that range. What the maintainer did not do is
+type that sentence.
+
+The artifact is **not** edited: `granted_by` is inside `authorization_sha256`,
+and `phase_a.py` is inside the harness digest, so correcting the wording would
+move both and force a rebuild and reissue for an attribution nuance that is not
+an authorization defect. Recorded in prose, at the maintainer's direction.

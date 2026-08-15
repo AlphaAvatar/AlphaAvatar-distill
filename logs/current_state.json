@@ -1,10 +1,10 @@
 {
  "schema": "aadistill.current_state/v1",
  "generated_utc": "2026-08-15T12:40:00+00:00",
- "current_phase": "Phase-A harness built, rehearsed and COMMITTED; searched-leaf durability resolved from measurement; PhaseAAuthorization ISSUED (autoinit.phase_a.2026-08-15T1232Z). Phase A is NOT launched and no paid compute has run against the grant.",
+ "current_phase": "Phase A attempt 1 FAILED CLOSED in setup at $0.1075; the driver never started and nothing was trained. Cause fixed (a test read ambient SESSION_KIND). Harness digest UNCHANGED at ea2f360b, so the authorization still covers the same executable \u2014 but its scope is 'one launcher invocation' and that is spent, so attempt 2 needs a fresh grant.",
  "active_experiment": null,
  "paid_compute_running": false,
- "next_work": "Maintainer decision on whether to issue a PhaseAAuthorization. It must bind the session plan hash, the science plan hash 02be33b9a7a8e26bc8bfb75795351e8cdc9ffd441b47066cc81887cfc511b55c, the rehearsed harness digest and a real UTC grant timestamp. Also unresolved: the searched-leaf storage plan (5 x ~2.3 GB; relay capacity not confirmed). Do not retrain the permanent controls, do not reopen the frozen search/recovery design, do not launch paid compute without that authorization.",
+ "next_work": "Maintainer decision: reissue a Phase-A authorization for attempt 2. The harness is unchanged and still digests to ea2f360b; only tests/ and logs/ moved, so a reissue binds the same executable at a new session commit, and a new bundle must be built and uploaded at that commit.",
  "teacher": {
   "model_id": "Qwen/Qwen3-4B-Thinking-2507",
   "revision": "768f209d9ea81521153ed38c47d515654e938aea",
@@ -55,11 +55,11 @@
   "dp_sa": "infrastructure artifact, not a promotable arm"
  },
  "budget": {
-  "actual_cumulative_spend_usd": 191.5462,
+  "actual_cumulative_spend_usd": 191.6537,
   "authorized_cap_usd": 213.0,
   "cap_raised_utc": "2026-08-15",
   "cap_raise_note": "maintainer approved 'e.g. $213-214'; $213.00 selected from that range. Nothing spent against it.",
-  "remaining_usd": 21.4538,
+  "remaining_usd": 21.3463,
   "phase_a_priced_by_launcher": {
    "expected_usd": 17.8933,
    "expected_without_tie_break_usd": 14.3604,
@@ -87,11 +87,11 @@
   },
   "logs/BUDGET_LEDGER.md": {
    "path": "logs/BUDGET_LEDGER.md",
-   "sha256": "6f1a3e2635df977b148fe5386ad252b5debe31c512bbf0c295eabea5d35f2e20"
+   "sha256": "a5172b32081846e92c7f15132a3021da9d322561f80ef680f0d0b3fbd0fde903"
   },
   "logs/decisions.md": {
    "path": "logs/decisions.md",
-   "sha256": "3e450f0eb876d7b8d7d4c03f7b01a502a7e7be3c0b4aad33c6e93bd40ae721f8"
+   "sha256": "7fdb132b96cc18dccad75d800192f5264ee18895c95288bcbf21b18ac0004819"
   },
   "logs/checkpoint_registry.json": {
    "path": "logs/checkpoint_registry.json",
@@ -111,7 +111,7 @@
   },
   "logs/autoinit_phase_a_storage.md": {
    "path": "logs/autoinit_phase_a_storage.md",
-   "sha256": "967bfdc3eb92343c39dc6cfea02906d94774379b9bd447a2deea89196348ed7d"
+   "sha256": "2c8af2f69402bb53b6f75653c54bbcd6948de67f045372c747725b79f7f8fc95"
   }
  },
  "read_order": [
@@ -158,8 +158,8 @@
   "dry_run": "logs/autoinit_dryrun_summary.json",
   "proposal": "logs/autoinit_pilot_proposal.md",
   "blocking_prerequisites": [
-   "an explicit instruction to launch; the authorization exists and the run does not",
-   "the session git bundle uploaded to the relay at the final commit (~3.7 MB) \u2014 setup fetches it and would fail on the pod without it",
+   "a fresh PhaseAAuthorization for attempt 2 (the harness digest is unchanged at ea2f360b; only the session commit and bundle move)",
+   "a new bundle built and uploaded at that commit",
    "calib.reasoning_heavy@v1 not built (Phase B only, independent trigger)"
   ],
   "corrections_2026_08_12_review_pass": [
@@ -270,7 +270,7 @@
    },
    "spend_authorization_unchanged": true,
    "authorization_issued": true,
-   "launched": false,
+   "launched": true,
    "open_question": "RESOLVED 2026-08-15: see logs/autoinit_phase_a_storage.md",
    "leaf_durability": {
     "status": "RESOLVED",
@@ -303,7 +303,22 @@
      4,
      5
     ],
-    "issued_is_not_launched": "the artifact authorizes spend and stages; the maintainer's instruction that requested it also says 'Do not launch Phase A yet'"
+    "issued_is_not_launched": "the artifact authorizes spend and stages; the maintainer's instruction that requested it also says 'Do not launch Phase A yet'",
+    "scope_consumed": "one launcher invocation, and it has occurred; attempt 2 needs a fresh grant"
+   },
+   "attempt_1": {
+    "pod_id": "ky8j0kbft9mp61",
+    "minutes": 6.51,
+    "usd": 0.1075,
+    "outcome": "SETUP_GATE_FAILED_CLOSED",
+    "driver_started": false,
+    "stages_run": 0,
+    "trained_anything": false,
+    "provider_confirms_gone": true,
+    "cause": "the pod test gate ran test_setup_verifies_THIS_sessions_authorization_and_fails_closed, which reads ambient SESSION_KIND; on a Phase-A pod it exercised setup's phase_a branch against the continuation's artifact and was correctly refused with 98",
+    "gate_behaved_correctly": true,
+    "fix": "the test now pops SESSION_KIND as it already popped the other two",
+    "harness_digest_unchanged": true
    }
   }
  },

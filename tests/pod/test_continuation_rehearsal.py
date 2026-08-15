@@ -1144,6 +1144,17 @@ def test_setup_verifies_THIS_sessions_authorization_and_fails_closed():
             env = dict(os.environ)
             env.pop("SESSION_AUTH_PATH", None)
             env.pop("SESSION_PLAN_HASH", None)
+            # SESSION_KIND is the third session variable the block reads, and it
+            # must be controlled here for the same reason as the other two.
+            # The launcher invokes setup as `SESSION_KIND=phase_a bash setup.sh`,
+            # so on a Phase-A pod it is exported into the test gate — and this
+            # test would then run the block's phase_a branch against the
+            # CONTINUATION's authorization, which is correctly refused with 98.
+            # Leaving it inherited makes the result depend on who invoked
+            # pytest: it passed on the dev box and failed on the pod, which cost
+            # a $0.11 setup abort on 2026-08-15 to discover. The gate was right;
+            # the test's environment was not controlled.
+            env.pop("SESSION_KIND", None)
             if auth is not None:
                 env["SESSION_AUTH_PATH"] = auth
             if plan is not None:
