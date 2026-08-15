@@ -753,19 +753,19 @@ def test_the_continuation_authorization_is_narrow_and_cannot_train():
     from aadistill.autoinit.authorization import AuthorizationError
     from aadistill.autoinit.continuation import CONTINUATION_AUTHORIZATION as auth
 
-    # Raised to $4.23/$4.54 after the attempt-5 review. The cap is CUMULATIVE
-    # over the continuation -- $2.8420 spent across five attempts plus one more
-    # launch at $1.3860 expected / $1.6896 hard = $4.2280 / $4.5316 -- and a
+    # Raised to $4.37/$4.67 after the attempt-6 review. The cap is CUMULATIVE
+    # over the continuation -- $2.9744 spent across six attempts plus one more
+    # launch at $1.3860 expected / $1.6896 hard = $4.3604 / $4.6640 -- and a
     # single launch is bound separately by per_launch_hard_usd, enforced in
     # make_plan. The cumulative figure is not one run's budget.
-    assert (auth.expected_usd, auth.hard_cap_usd) == (4.23, 4.54)
+    assert (auth.expected_usd, auth.hard_cap_usd) == (4.37, 4.67)
     assert auth.per_launch_hard_usd == 1.6896
-    assert 2.8420 + 1.3860 <= auth.expected_usd
-    assert 2.8420 + 1.6896 <= auth.hard_cap_usd
+    assert 2.9744 + 1.3860 <= auth.expected_usd
+    assert 2.9744 + 1.6896 <= auth.hard_cap_usd
     assert auth.plan_hash == CONTINUATION_PLAN_V1.plan_hash
     assert auth.allows_phase_a is False and auth.automatic_phase_a_start is False
     with pytest.raises(AuthorizationError):
-        auth.require_within_cap(4.55, what="session")
+        auth.require_within_cap(4.68, what="session")
     with pytest.raises(AuthorizationError):
         auth.require_stage(4)
     with pytest.raises(AuthorizationError, match="separately unauthorized"):
