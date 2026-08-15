@@ -67,15 +67,30 @@ maintainer's stated allowance, and nothing broader is taken from it.
 
 ## What is NOT done here
 
+* **`transfer/` is not the reclaim opportunity it was in August.** The
+  2026-08-14 analysis recorded it as 0.17 GiB of superseded git bundles. It is
+  now 7.66 GiB, and the growth is **not** bundles:
+
+  | group | size | reclaimable? |
+  | --- | ---: | --- |
+  | `transfer/wheelhouse_cu128_cp312` | 3.821 GiB | **no** — the offline train environment |
+  | `transfer/wheelhouse_vllm_cp312` | 3.620 GiB | **no** — the offline vLLM environment |
+  | loose files (85, mostly `*.bundle`) | 0.219 GiB | mostly yes, ~0.19 GiB |
+
+  The two wheelhouses are what keep PyPI off the paid setup's critical path —
+  four of five host draws once died resolving and downloading from it — so
+  deleting them would break every future pod and cost dev-box uplink to restore.
+  **The genuinely reclaimable amount is ~0.19 GiB of superseded bundles, not
+  7.66 GiB.** That does not change the conclusion, it removes a false escape
+  hatch: even reclaiming all of it leaves ~1.79 GiB, still far short of 5.61.
+
 * **Nothing is deleted.** Rejected leaves are not fetched; the pod is destroyed
   at teardown either way. No relay artifact, checkpoint, log or record is
   removed, and the experiment is not shrunk — it is still 5 searched leaves, the
   canonical control, sa → best 2 + control → sb, and the conditional sc.
-* **`transfer/` is not reclaimed.** It is 7.66 GiB of superseded git bundles,
-  every one reproducible from git, and it is the obvious place to find headroom
-  if the relay is ever needed for this. Reclaiming it is a deletion and therefore
-  a maintainer decision (AGENTS.md P12); Phase A does not need it, so it is
-  recorded and left alone.
+
+* **The session bundle does fit.** `aad_autoinit_*.bundle` runs ~4 MiB against
+  1.60 GiB of headroom, so staging one for a launch is not in question.
 * **The 100 GB limit is still inferred.** Phase A no longer depends on it — the
   plan adds 0 GiB to the relay — so confirming it is no longer blocking. It
   would still be worth one look at the billing page before any future staging.

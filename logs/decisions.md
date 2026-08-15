@@ -2858,3 +2858,25 @@ in assumptions that a later study would have to unpick.
   result, so it now fetches the finalists.
 - **Revisit when:** the relay limit is confirmed from the billing page, or a
   future session actually needs leaf checkpoints off-pod.
+
+### Correction, same day: `transfer/` is not 7.66 GiB of reclaimable bundles
+
+The entry above recorded `transfer/` as "7.66 GiB of superseded git bundles, all
+reproducible from git" and named it the obvious reclaim option. **That inherited
+the 2026-08-14 characterization, when the group really was 0.17 GiB of bundles,
+and it is wrong now.** Measured today:
+
+```
+transfer/wheelhouse_cu128_cp312    3.821 GiB   91 files   offline train env
+transfer/wheelhouse_vllm_cp312     3.620 GiB  196 files   offline vLLM env
+loose files (mostly *.bundle)      0.219 GiB   85 files   ~0.19 GiB reclaimable
+```
+
+The wheelhouses are what keep PyPI off the paid setup's critical path — four of
+five host draws once died resolving and downloading from it. Deleting them would
+break every future pod and cost dev-box uplink to restore.
+
+Genuinely reclaimable: **~0.19 GiB**, not 7.66. The conclusion is unchanged and
+in fact firmer — reclaiming everything reclaimable still leaves ~1.79 GiB against
+5.61 GiB of leaves — but the escape hatch recorded above does not exist and
+should not be reached for by a future session.

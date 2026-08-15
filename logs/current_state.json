@@ -91,7 +91,7 @@
   },
   "logs/decisions.md": {
    "path": "logs/decisions.md",
-   "sha256": "0a723005bb66a61c4e707ecfb1d0fefeed62af139fef5e336d156664f8fc931d"
+   "sha256": "3e450f0eb876d7b8d7d4c03f7b01a502a7e7be3c0b4aad33c6e93bd40ae721f8"
   },
   "logs/checkpoint_registry.json": {
    "path": "logs/checkpoint_registry.json",
@@ -111,7 +111,7 @@
   },
   "logs/autoinit_phase_a_storage.md": {
    "path": "logs/autoinit_phase_a_storage.md",
-   "sha256": "0a9372cd165b03bf3c94a7c93ed01585241b70d4693d977871f460c882d47b5b"
+   "sha256": "967bfdc3eb92343c39dc6cfea02906d94774379b9bd447a2deea89196348ed7d"
   }
  },
  "read_order": [
@@ -284,7 +284,7 @@
     "rejected_leaves": "leaf_retention.json keeps digest, lineage, sa evidence and rejection reason; the checkpoint is not retained and is not deleted either",
     "nothing_deleted": true,
     "experiment_unchanged": true,
-    "reclaim_option_not_taken": "transfer/ = 7.66 GiB of reproducible git bundles"
+    "reclaim_option_not_taken": "CORRECTED: transfer/ is 7.44 GiB of load-bearing offline wheelhouses plus only ~0.19 GiB of superseded git bundles. Reclaiming everything reclaimable still leaves ~1.79 GiB against 5.61 GiB of leaves."
    },
    "authorization": {
     "artifact": "logs/autoinit_phase_a_authorization.json",
