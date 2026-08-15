@@ -1,13 +1,13 @@
 {
   "schema": "aadistill.autoinit.spend_authorization/v1",
-  "authorization_id": "autoinit.control_characterization.2026-08-15T0658Z",
+  "authorization_id": "autoinit.control_characterization.2026-08-15T0823Z",
   "version": 1,
-  "granted_utc": "2026-08-15T06:58:38Z",
-  "granted_by": "maintainer, after the attempt-6 review: '$4.37 expected / $4.67 hard cumulative, per-launch hard limit still exactly $1.6896'. Cumulative because $2.9744 is already spent across six attempts; one more launch prices at $1.3860 expected / $1.6896 hard, giving $4.3604 / $4.6640, which these figures cover. FOUR earlier artifacts are void and must not be reused: 759eaf8c\u2026 (asserted amounts before the approval existed), dc770f36\u2026 (granted_utc in the future when committed), e4854818\u2026 (CONSUMED by attempt 5, INCOMPLETE at $0.1369), and f21b4038\u2026 (CONSUMED by attempt 6, INCOMPLETE at $0.1324). This grant is likewise for ONE launcher invocation.",
+  "granted_utc": "2026-08-15T08:23:33Z",
+  "granted_by": "maintainer, after the attempt-7 review: '$4.82 expected / $5.12 hard cumulative, $1.6896 per-launch hard'. Cumulative because $3.4244 is already spent across seven attempts; one more launch prices at $1.3860 expected / $1.6896 hard, giving $4.8104 / $5.1140, which these figures cover. Attempt 7 reached the driver: stages 0-2 passed and sa was characterized, and the sb packaging repair that followed changed no weights. FIVE earlier artifacts are void and must not be reused: 759eaf8c\u2026, dc770f36\u2026, e4854818\u2026 (attempt 5), f21b4038\u2026 (attempt 6) and c398850b\u2026 (attempt 7). This grant is likewise for ONE launcher invocation.",
   "plan_id": "autoinit.control_characterization_continuation",
   "preflight_plan_hash": "79da6d7af9295ca510cc5721cb25d915b3aae224bfb6a1147476186a6f8a195d",
-  "expected_usd": 4.37,
-  "hard_cap_usd": 4.67,
+  "expected_usd": 4.82,
+  "hard_cap_usd": 5.12,
   "authorized_stages": [
     0,
     1,
@@ -24,8 +24,8 @@
   "scope_note": "characterization of two ALREADY TRAINED permanent controls. This authorization does not permit training, retraining, or re-initializing any control: the driver has no training stage and the launcher materializes existing artifacts. A failed characterization is collected and torn down and remains a FAILED continuation; it does not authorize a retry that trains. Phase A remains separately unauthorized.",
   "phase_a_authorized": false,
   "automatic_phase_a_start": false,
-  "authorized_session_commit": "4e84a5f69a06f227929641214ea38379ade77acb",
-  "harness_source_digest": "a00dce7f6c44661cf691c782477b39bac25151183d38ce6b6a27888b834727dd",
+  "authorized_session_commit": "77002e63e47d2d25ebadd26a5ebbc04a3dbeae68",
+  "harness_source_digest": "818fddd792b1a354ebd77589f682bd9bf992446a800ad16bf05ae6a03cab67a2",
   "harness_source_files": [
     "scripts/pod/autoinit_continuation_launch.py",
     "scripts/pod/autoinit_continuation_driver.py",
@@ -39,7 +39,7 @@
     "src/aadistill/autoinit/generation.py"
   ],
   "per_launch_hard_usd": 1.6896,
-  "provenance_commit": "4e84a5f69a06f227929641214ea38379ade77acb",
+  "provenance_commit": "77002e63e47d2d25ebadd26a5ebbc04a3dbeae68",
   "enforcement": "the launcher loads this artifact and refuses to create a pod whose priced hard threshold exceeds hard_cap_usd, refuses a stage not in authorized_stages, and has no code path to Phase A",
-  "authorization_sha256": "c398850b0396393b6b82117a0bbfbda554c5e803eb5c058f05f652c7a5b02b56"
+  "authorization_sha256": "4785cf4e9ceb4c6c6c83d2a7ae6d14e1c146820b8a51584c1ba2a8e6edb67f81"
 }
