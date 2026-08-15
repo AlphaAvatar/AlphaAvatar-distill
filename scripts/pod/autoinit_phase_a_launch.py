@@ -90,6 +90,66 @@ SEARCH_MINUTES = 180.0
 SETUP_MINUTES = 11.0
 
 
+def lineage_from_authorized_base(repo_root, base: str | None, commit: str,
+                                 auth_path: str) -> dict:
+    """Is `commit` the authorized base plus the authorization artifact, and nothing else?
+
+    The harness digest proves the *declared harness files* did not move, and the
+    auth-blob check proves the driver will load this exact grant. Neither says
+    anything about the rest of the tree. `authorized_session_commit` is
+    necessarily issued against the clean PRE-authorization HEAD — the artifact
+    cannot be committed before it exists — so the commit the pod actually checks
+    out is always a later one, and until now nothing constrained what else rode
+    along in that gap.
+
+    Closing it needs two facts, both from git:
+
+    * the final commit **descends from** the authorized base, so it is not some
+      unrelated tip that happens to carry a matching harness;
+    * the only path that differs between them is the authorization artifact.
+
+    Returns a record rather than a bool so the launcher can log exactly what it
+    saw, including on the paths that refuse.
+    """
+    out = {"authorized_base": base, "session_commit": commit,
+           "descends_from_base": None, "changed_paths": None,
+           "unexpected_paths": None, "ok": False, "reason": ""}
+    if not base:
+        out["reason"] = ("the authorization declares no authorized_session_commit, "
+                         "so there is no base to constrain the tree against")
+        return out
+    known = subprocess.run(["git", "cat-file", "-e", f"{base}^{{commit}}"],
+                           capture_output=True, cwd=repo_root)
+    if known.returncode != 0:
+        out["reason"] = f"the authorized base {base} is not a commit in this repository"
+        return out
+    anc = subprocess.run(["git", "merge-base", "--is-ancestor", base, commit],
+                         capture_output=True, cwd=repo_root)
+    out["descends_from_base"] = anc.returncode == 0
+    if not out["descends_from_base"]:
+        out["reason"] = (f"{commit} does not descend from the authorized base "
+                         f"{base}; it is a different line of history")
+        return out
+    diff = subprocess.run(["git", "diff", "--name-only", base, commit],
+                          capture_output=True, text=True, cwd=repo_root)
+    if diff.returncode != 0:
+        out["reason"] = f"could not diff {base}..{commit}: {diff.stderr.strip()[:200]}"
+        return out
+    changed = [p for p in diff.stdout.split("\n") if p.strip()]
+    out["changed_paths"] = changed
+    out["unexpected_paths"] = [p for p in changed if p != auth_path]
+    if out["unexpected_paths"]:
+        out["reason"] = (
+            f"{len(out['unexpected_paths'])} path(s) other than {auth_path} "
+            f"changed between the authorized base and the session commit: "
+            f"{out['unexpected_paths'][:8]}")
+        return out
+    out["ok"] = True
+    out["reason"] = (f"only {auth_path} differs from the authorized base"
+                     if changed else "identical to the authorized base")
+    return out
+
+
 class PhaseA(_preflight.Preflight):
     """The preflight launcher, retargeted at the search it was built to precede."""
 
@@ -253,6 +313,8 @@ class PhaseA(_preflight.Preflight):
                                    capture_output=True, cwd=REPO_ROOT)
         carries_auth = (auth_blob.returncode == 0
                         and auth_blob.stdout == (REPO_ROOT / AUTH_PATH).read_bytes())
+        lineage = lineage_from_authorized_base(
+            REPO_ROOT, self.auth.authorized_session_commit, commit, AUTH_PATH)
         self.ev["session_commit_check"] = {
             "session_commit": commit,
             "authorized_session_commit": self.auth.authorized_session_commit,
@@ -260,6 +322,7 @@ class PhaseA(_preflight.Preflight):
             "authorized_harness_digest": self.auth.harness_source_digest,
             "harness_matches": digest == self.auth.harness_source_digest,
             "commit_carries_this_authorization": carries_auth,
+            "lineage": lineage,
         }
         if digest != self.auth.harness_source_digest:
             self.say(f"ABORT at $0: the harness at {commit} digests to {digest}, "
@@ -271,8 +334,16 @@ class PhaseA(_preflight.Preflight):
                      f"{AUTH_PATH}; the driver would load a different "
                      "authorization, or none.")
             return False
+        # The two checks above cover the declared harness and the grant itself.
+        # Neither constrains the REST of the tree between the authorized base
+        # and the commit the pod checks out, and that gap is real: the base is
+        # necessarily the clean pre-authorization HEAD, so the bundle commit is
+        # always later. Anything else that rode along would run unreviewed.
+        if not lineage["ok"]:
+            self.say(f"ABORT at $0: {lineage['reason']}")
+            return False
         self.say(f"session commit {commit[:12]} verified: harness digests to "
-                 f"{digest[:12]}… and carries the authorization")
+                 f"{digest[:12]}…, carries the authorization, and {lineage['reason']}")
         return True
 
     # -- precheck: everything this session reads, checked at $0 ------------

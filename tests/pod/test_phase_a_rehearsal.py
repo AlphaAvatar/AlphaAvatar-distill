@@ -767,6 +767,125 @@ def test_the_authorization_constant_still_carries_its_placeholders():
     assert A.harness_source_digest is None
 
 
+def test_a_non_auth_path_changed_after_the_authorized_base_is_refused(tmp_path):
+    """The gap the harness digest and the auth-blob check both miss.
+
+    `authorized_session_commit` is necessarily the clean PRE-authorization HEAD,
+    because the artifact cannot be committed before it exists — so the commit the
+    pod checks out is always later. Both existing checks pass on such a commit
+    even if arbitrary other paths changed in the gap: the declared harness files
+    are untouched, and the auth blob is exact. Only lineage catches it.
+
+    Built on a real git repository, not a mock, because the predicate IS git.
+    """
+    import subprocess
+
+    # Loaded through the same helper the other launcher tests use, not by a bare
+    # `from phase_a_launch import ...` — that only resolves if some earlier test
+    # happened to put the module in sys.modules, so the test passed in the full
+    # suite and failed in isolation.
+    mod = load_launcher()
+    lineage_from_authorized_base = mod.lineage_from_authorized_base
+
+    AUTH = "logs/autoinit_phase_a_authorization.json"
+    repo = tmp_path / "repo"
+    (repo / "logs").mkdir(parents=True)
+    (repo / "scripts").mkdir()
+
+    def git(*a):
+        return subprocess.run(["git", *a], cwd=repo, capture_output=True, text=True)
+
+    git("init", "-q")
+    git("config", "user.email", "t@t"); git("config", "user.name", "t")
+    (repo / "scripts" / "harness.py").write_text("harness v1\n")
+    (repo / "unrelated.txt").write_text("before\n")
+    git("add", "-A"); git("commit", "-q", "-m", "base")
+    base = git("rev-parse", "HEAD").stdout.strip()
+
+    # (a) the legitimate shape: only the authorization artifact is added.
+    (repo / AUTH).write_text('{"grant": 1}\n')
+    git("add", "-A"); git("commit", "-q", "-m", "authorization")
+    good = git("rev-parse", "HEAD").stdout.strip()
+    ok = lineage_from_authorized_base(repo, base, good, AUTH)
+    assert ok["ok"] is True, ok["reason"]
+    assert ok["changed_paths"] == [AUTH]
+
+    # (b) the gap: same harness, exact auth blob, but something else moved too.
+    (repo / "unrelated.txt").write_text("after\n")
+    git("add", "-A"); git("commit", "-q", "-m", "a path that was never authorized")
+    bad = git("rev-parse", "HEAD").stdout.strip()
+    # The harness file is byte-identical and the auth blob is still exact...
+    assert git("show", f"{bad}:scripts/harness.py").stdout == "harness v1\n"
+    assert git("show", f"{bad}:{AUTH}").stdout == '{"grant": 1}\n'
+    # ...and it is refused anyway, naming the path.
+    refused = lineage_from_authorized_base(repo, base, bad, AUTH)
+    assert refused["ok"] is False
+    assert refused["unexpected_paths"] == ["unrelated.txt"]
+    assert "unrelated.txt" in refused["reason"]
+
+    # (c) an unrelated line of history is refused as not descending.
+    git("checkout", "-q", "--orphan", "other")
+    (repo / "scripts" / "harness.py").write_text("harness v1\n")
+    (repo / AUTH).write_text('{"grant": 1}\n')
+    git("add", "-A"); git("commit", "-q", "-m", "orphan")
+    orphan = git("rev-parse", "HEAD").stdout.strip()
+    off = lineage_from_authorized_base(repo, base, orphan, AUTH)
+    assert off["ok"] is False and off["descends_from_base"] is False
+
+    # (d) no declared base cannot silently mean "anything goes".
+    none = lineage_from_authorized_base(repo, None, good, AUTH)
+    assert none["ok"] is False and "no authorized_session_commit" in none["reason"]
+
+    # (e) THE WIRING. The helper being correct is worthless if the launcher does
+    # not consult it — verified by mutation: deleting the refusal from
+    # `verify_session_commit` left every other test green. So drive the real
+    # method against this repository, with the harness digest and the auth blob
+    # both deliberately VALID, and confirm the commit is still refused.
+    import argparse
+    import hashlib
+
+    harness_files = ("scripts/harness.py",)
+
+    def digest_at(ref):
+        rows = []
+        for rel in sorted(harness_files):
+            blob = subprocess.run(["git", "show", f"{ref}:{rel}"],
+                                  cwd=repo, capture_output=True).stdout
+            rows.append(f"{rel}:{hashlib.sha256(blob).hexdigest()}\n")
+        return hashlib.sha256("".join(rows).encode()).hexdigest()
+
+    class _Auth:
+        harness_source_files = harness_files
+        harness_source_digest = digest_at(good)     # valid at BOTH commits
+        authorized_session_commit = base
+
+    saved_root, saved_auth = mod.REPO_ROOT, mod.AUTH_PATH
+    try:
+        mod.REPO_ROOT, mod.AUTH_PATH = repo, AUTH
+        session = mod.PhaseA.__new__(mod.PhaseA)
+        session.auth = _Auth()
+        session.ev = {}
+        session.say = lambda m: None
+
+        session.a = argparse.Namespace(session_commit=good)
+        assert mod.PhaseA.verify_session_commit(session) is True, (
+            "the legitimate shape must still pass")
+
+        session.a = argparse.Namespace(session_commit=bad)
+        session.ev = {}
+        assert mod.PhaseA.verify_session_commit(session) is False, (
+            "a commit whose harness digest and auth blob are both valid, but "
+            "which changed a non-auth path after the authorized base, must be "
+            "refused before a pod can exist")
+        check = session.ev["session_commit_check"]
+        # ...and refused for the RIGHT reason: the other two gates passed.
+        assert check["harness_matches"] is True
+        assert check["commit_carries_this_authorization"] is True
+        assert check["lineage"]["unexpected_paths"] == ["unrelated.txt"]
+    finally:
+        mod.REPO_ROOT, mod.AUTH_PATH = saved_root, saved_auth
+
+
 def test_the_launcher_polls_for_the_markers_its_own_driver_emits():
     """The poll loop watched for PREFLIGHT_* while the driver emitted its own."""
     mod = load_launcher()
