@@ -64,7 +64,7 @@ from aadistill.autoinit.recovery import (  # noqa: E402
     POOLED_COUNTS_V2, RecoveryAdmissionError, RuntimeEnvironmentFingerprint,
     admit_leaves, assert_preregistered, probe_configs, recovery_scoring_contract,
 )
-from aadistill.infrastructure.manifest import sha256_json  # noqa: E402
+from aadistill.infrastructure.manifest import sha256_file, sha256_json  # noqa: E402
 
 WS = Path("/workspace")
 STATUS = WS / "autoinit_phase_a.status"
@@ -77,6 +77,12 @@ STATE_EVAL = REPO / "artifacts/stage1/state_eval_v1"
 #: what the continuation probed, so the generation identity stays comparable.
 CANONICAL_INIT = REPO / "artifacts/stage1/qwen3_0p6b_init_v0/checkpoint"
 FROZEN_PLAN = REPO / "logs/autoinit_phase_a_recovery_plan_frozen.json"
+#: The Stage-3 controls materialized this run's equivalence interval and
+#: feasibility floor under ONE evaluation protocol. Phase A must measure
+#: under the same one or the thresholds do not describe its candidates.
+STAGE3_THRESHOLDS = REPO / "logs/autoinit_stage3_complete/materialized_thresholds.json"
+STAGE3_EVALUATION_PROTOCOL_HASH = (
+    "250f72efbd43b86a475e8dda293b45f07ee61a4d858e147f4a5bd7681c32c2e4")
 FROZEN_RECIPE = REPO / "configs/stage3/e1/e1_r0860k_sa_pca.json"
 PACK_DIR = "artifacts/stage3/ladder_uniform_probe"
 BATTERY_CONTENT = "a1b22778b00d95b6aba358c14a5af5b559fd807bb371c92131eacca59479f323"
@@ -242,22 +248,85 @@ class PhaseADriver:
                                f"engine probe rc={engine.returncode}; tail: "
                                f"...{(engine.stdout + engine.stderr)[-1200:]}")
 
+        # Ported verbatim in shape from the continuation's stage 1, which has run
+        # green on hardware. Attempt 3 died here because this driver invented a
+        # signature: `declared_generation_protocol()` takes no arguments, and the
+        # protocol is built by materializing twice — first the source digests,
+        # then the engine-observed fields — before `require_materialized`.
+        observed = json.loads((AUDIT / "engine_probe.json").read_text())
+        try:
+            gen = declared_generation_protocol().materialized(
+                generation_source_digest=generation_source_digest(REPO)["digest"],
+                degeneration_source_digest=sha256_file(
+                    REPO / "src/aadistill/evaluation/degeneration.py"))
+            gen = gen.materialized(
+                vllm_version=observed["vllm_version"],
+                transformers_version=observed["transformers_version"],
+                torch_version=observed["torch_version"],
+                runtime_digest=observed["runtime_digest"],
+                dtype=observed["dtype"],
+                gpu_memory_utilization=observed["gpu_memory_utilization"],
+                max_num_seqs=observed["max_num_seqs"],
+                max_num_batched_tokens=observed["max_num_batched_tokens"],
+                enforce_eager=observed["enforce_eager"],
+                tokenizer_sha256=observed["tokenizer_sha256"],
+                chat_template_sha256=observed["chat_template_sha256"],
+                resolved_context=observed["resolved_context"],
+                context_source=observed["context_source"],
+                stop_token_ids=tuple(observed["stop_token_ids"]))
+            gen.require_materialized(context="phase A stage 0")
+        except Exception as exc:                                  # noqa: BLE001
+            return self.record(0, False,
+                               f"generation protocol: {type(exc).__name__}: "
+                               f"{exc}"[-1500:])
+
+        battery_manifest = json.loads((BATTERY / "manifest.json").read_text())
+        if battery_manifest.get("content_sha256") != BATTERY_CONTENT:
+            return self.record(0, False, "the battery does not verify")
+
         self.evaluation_protocol = RecoveryEvaluationProtocol(
-            generation=declared_generation_protocol(
-                json.loads((AUDIT / "engine_probe.json").read_text())),
+            generation=gen,
             scoring_contract=scoring["contract"], scoring_digest=scoring["digest"],
-            battery_artifact=str(BATTERY.relative_to(REPO)),
-            battery_manifest_sha256=json.loads(
-                (BATTERY / "manifest.json").read_text())["manifest_sha256"],
-            battery_content_sha256=BATTERY_CONTENT)
+            battery_artifact=battery_manifest["artifact"],
+            battery_manifest_sha256=battery_manifest["manifest_sha256"],
+            battery_content_sha256=battery_manifest["content_sha256"])
+
+        # THE SCIENTIFIC BINDING. The selection thresholds this run applies were
+        # materialized by the Stage-3 controls under one specific evaluation
+        # protocol. Candidates being mutually consistent with *this* session's
+        # attestation is NOT sufficient: the equivalence interval and the
+        # feasibility floor are numbers that came from those controls, so a
+        # candidate measured under any other protocol is being judged against
+        # thresholds that do not describe it.
+        stage3 = json.loads(STAGE3_THRESHOLDS.read_text())
+        stage3_hash = stage3.get("evaluation_protocol_hash")
+        if stage3_hash != STAGE3_EVALUATION_PROTOCOL_HASH:
+            return self.record(
+                0, False,
+                f"the Stage-3 thresholds artifact declares evaluation protocol "
+                f"{stage3_hash}, not the pinned "
+                f"{STAGE3_EVALUATION_PROTOCOL_HASH}; the thresholds this run "
+                "would select against are not the ones that were characterized")
+        observed_hash = self.evaluation_protocol.evaluation_protocol_hash
+        if observed_hash != stage3_hash:
+            return self.record(
+                0, False,
+                f"evaluation protocol {observed_hash} does not match the "
+                f"Stage-3 protocol {stage3_hash} under which the equivalence "
+                f"interval {interval!r} and feasibility floor {floor!r} were "
+                "materialized. Selecting candidates measured under a different "
+                "protocol against those thresholds is not a valid comparison.")
+
         attested = {
             "schema": "aadistill.autoinit.phase_a_attested_protocol/v1",
             "generated_utc": datetime.now(timezone.utc).isoformat(),
             "runtime": runtime.as_dict(),
             "generation_source_digest": generation_source_digest(REPO),
             "scoring_contract": scoring,
-            "evaluation_protocol_hash":
-                self.evaluation_protocol.evaluation_protocol_hash,
+            "evaluation_protocol": self.evaluation_protocol.as_dict(),
+            "evaluation_protocol_hash": observed_hash,
+            "stage3_evaluation_protocol_hash": stage3_hash,
+            "bound_to_stage3_thresholds": True,
             "science_plan_hash": self.plan.plan_hash,
             "equivalence_interval": interval,
             "feasibility_floor": floor,
