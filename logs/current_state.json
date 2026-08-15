@@ -1,10 +1,10 @@
 {
  "schema": "aadistill.current_state/v1",
  "generated_utc": "2026-08-15T12:40:00+00:00",
- "current_phase": "Stage 0's REAL body now executes locally at $0 and passes, including a new fail-closed binding to the Stage-3 evaluation protocol 250f72ef. Awaiting the Attempt-4 authorization chain; nothing is authorized or running.",
+ "current_phase": "Phase A attempt 4 refused at the Stage-3 protocol binding at $0.2052. Not a code defect: stage 0's real body ran and the binding fired as designed. The sole difference is image_digest, whose suffix is the HOST NVIDIA DRIVER version \u2014 a host lottery, not a generation-semantics difference. Stopped at the boundary; no attempt 5 authorized or prepared.",
  "active_experiment": null,
  "paid_compute_running": false,
- "next_work": "Issue the Attempt-4 authorization chain against the new harness digest. Attempt 4 fits the cap at $20.6695 remaining vs a $20.0126 hard bound ($0.6569 margin) and is the last funded attempt.",
+ "next_work": "Maintainer decision on the runtime-identity question: whether image_digest should carry the host driver version at all, or whether the Stage-3 evaluation protocol should be re-materialized under a currently-drawable runtime. Both are scientific/infrastructure calls, not patches.",
  "teacher": {
   "model_id": "Qwen/Qwen3-4B-Thinking-2507",
   "revision": "768f209d9ea81521153ed38c47d515654e938aea",
@@ -55,11 +55,11 @@
   "dp_sa": "infrastructure artifact, not a promotable arm"
  },
  "budget": {
-  "actual_cumulative_spend_usd": 192.3305,
+  "actual_cumulative_spend_usd": 192.5357,
   "authorized_cap_usd": 213.0,
   "cap_raised_utc": "2026-08-15",
   "cap_raise_note": "maintainer approved 'e.g. $213-214'; $213.00 selected from that range. Nothing spent against it.",
-  "remaining_usd": 20.6695,
+  "remaining_usd": 20.4643,
   "phase_a_priced_by_launcher": {
    "expected_usd": 17.8933,
    "expected_without_tie_break_usd": 14.3604,
@@ -67,12 +67,12 @@
    "soft_stop_usd": 19.6826,
    "hard_terminate_usd": 20.0126,
    "fits_remaining": true,
-   "margin_usd": 0.6569,
+   "margin_usd": 0.4517,
    "note": "supersedes the $12.36/$20.13 in autoinit_phase_a_repricing.md, which priced search and probes but not setup, attestation, selection, collection, contingency or the recovery reserve",
    "margin_note": "not a retry reserve; no attempt 4 is pre-authorized"
   }
  },
- "latest_commit": "9c78fcbdd6f8ab67d8f90411a55b6e267305a94b",
+ "latest_commit": "c611812c5d87c7929c6118de7f67f29bda9b941e",
  "documents": {
   "logs/STATE.md": {
    "path": "logs/STATE.md",
@@ -88,11 +88,11 @@
   },
   "logs/BUDGET_LEDGER.md": {
    "path": "logs/BUDGET_LEDGER.md",
-   "sha256": "099ca13a56016dea524042d8a6e447b51fc1b3a49c75f92b9f38bc70285becf4"
+   "sha256": "73a8ab152ec917df08e0c7d10c8667614fc0c6546ecf63d15df716fa0d3ebf6f"
   },
   "logs/decisions.md": {
    "path": "logs/decisions.md",
-   "sha256": "d6954a915d273edbd176c3408ef73abc9dc72279ffefb423c20a42bf6efcf713"
+   "sha256": "183403189291033e4e4b3817f468cc6b039205855a3a201da1a152eb48ee27c1"
   },
   "logs/checkpoint_registry.json": {
    "path": "logs/checkpoint_registry.json",
@@ -159,8 +159,8 @@
   "dry_run": "logs/autoinit_dryrun_summary.json",
   "proposal": "logs/autoinit_pilot_proposal.md",
   "blocking_prerequisites": [
-   "maintainer decision on whether/how to make stage 0 executable before a fourth paid attempt",
-   "a fresh PhaseAAuthorization if a fourth attempt is authorized",
+   "maintainer decision: should image_digest carry the host NVIDIA driver version, or should the Stage-3 protocol be re-materialized under a currently-drawable runtime?",
+   "no attempt 5 is authorized",
    "calib.reasoning_heavy@v1 not built (Phase B only, independent trigger)"
   ],
   "corrections_2026_08_12_review_pass": [
@@ -355,13 +355,12 @@
     "voids_authorization": "autoinit.phase_a.2026-08-15T1734Z / 43a04ec5"
    },
    "attempts_summary": {
-    "n": 3,
-    "total_usd": 0.7843,
+    "n": 4,
+    "total_usd": 0.9895,
     "stages_passed": 0,
     "trained_anything": false,
-    "all_failures_in": "setup or stage 0; none in the science",
-    "root_cause": "tests/pod/test_phase_a_rehearsal.py scripts all six driver stages, so the real stage-0 body has never executed locally, under the pod simulator, or under SESSION_KIND=phase_a",
-    "static_audit_after_attempt_3": "1 arity mismatch across 10 imported callables; a LOWER BOUND, since arity cannot see wrong types or a missing .materialized() chain"
+    "attempts_1_to_3": "code defects in setup/stage 0, all now closed",
+    "attempt_4": "not a defect: the Stage-3 binding refused a host whose driver version differs from the Stage-3 host"
    },
    "stage0_real_body_rehearsal": {
     "file": "tests/pod/test_phase_a_stage0_executes.py",
@@ -384,6 +383,32 @@
     "rule": "stage 0 fails closed unless its materialized evaluation_protocol_hash equals the Stage-3 hash, AND the Stage-3 artifact still declares the pinned value",
     "why": "the equivalence interval and feasibility floor are numbers that came from the Stage-3 controls; a candidate measured under a different protocol is judged against thresholds that do not describe it",
     "reproducible_today": true
+   },
+   "attempt_4": {
+    "pod_id": "vt3qm7j9vpct6c",
+    "minutes": 12.44,
+    "usd": 0.2052,
+    "outcome": "STAGE3_PROTOCOL_BINDING_REFUSED",
+    "code_defect": false,
+    "stage0_body_executed": true,
+    "stages_passed": 0,
+    "trained_anything": false,
+    "provider_confirms_gone": true,
+    "observed_protocol": "17218f7c635ee5f2e62f698f75d8731aa8eebc0e5475bf833673277f714e9ccc",
+    "pinned_stage3_protocol": "250f72efbd43b86a475e8dda293b45f07ee61a4d858e147f4a5bd7681c32c2e4",
+    "sole_differing_field": "runtime_digest -> runtime.image_digest",
+    "detail": {
+     "stage3": "...ubuntu2404@580.159.03",
+     "attempt4": "...ubuntu2404@580.126.09",
+     "suffix_is": "host NVIDIA driver version appended by read_image_digest"
+    },
+    "generation_semantics_identical": true,
+    "drivers_drawn_across_attempts": [
+     "580.159.03",
+     "580.126.09",
+     "580.126.09",
+     "580.126.09"
+    ]
    }
   }
  },

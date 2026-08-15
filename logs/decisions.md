@@ -3010,3 +3010,45 @@ that is a **lower bound**, not an all-clear.
 - **Not self-authorized.** Stopped at the boundary and reported, as instructed.
 - **Budget:** $192.3305 spent, $20.6695 remaining against a $20.0126 hard bound
   — **$0.6569** of margin. A fourth attempt fits only if it is the last one.
+
+## 2026-08-15 — Phase A attempt 4: the Stage-3 binding refused, and it was right to
+
+- **Outcome:** pod `vt3qm7j9vpct6c`, 12.44 min, **$0.2052**. `PHASE_A_FAILED`,
+  deleted, provider confirms gone. No stage passed, nothing trained.
+- **This is not a fifth code defect.** Stage 0's real body ran end to end — the
+  ported protocol construction, verified at $0, held — and the **new Stage-3
+  binding then refused**, exactly as designed. Observed protocol `17218f7c…`
+  against the pinned `250f72ef…`.
+- **The cause is one field.** Every observation that governs generation
+  semantics matched exactly: vLLM 0.27.1, transformers 5.15.0, torch
+  2.13.0+cu130, bfloat16, `gpu_memory_utilization` 0.9, `max_num_seqs` 256,
+  `max_num_batched_tokens` 8192, `enforce_eager` False, `tokenizer_sha256`,
+  `chat_template_sha256`, `resolved_context` 8192, `context_source`,
+  `stop_token_ids`. Only `runtime_digest` differed — and inside the runtime,
+  only `image_digest`:
+
+```
+stage 3    runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@580.159.03
+attempt 4  runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@580.126.09
+```
+
+  Same image tag. The suffix is the **host NVIDIA driver version**, appended by
+  `Preflight.read_image_digest` (`nvidia-smi --query-gpu=driver_version` when
+  `/etc/podinfo/image_digest` is absent).
+
+- **So the binding is currently gated on a host lottery.** RunPod assigns
+  whatever host is free. Across four attempts the drawn drivers were
+  `580.159.03`, `580.126.09`, `580.126.09`, `580.126.09`; Stage 3 ran on
+  `580.159.03`. Attempt 2 would have matched. This is not a property the science
+  requires — the driver version does not enter generation semantics — but it is
+  transitively inside the protocol hash.
+- **The gate is not wrong, and it is not being softened here.** It is enforcing
+  precisely what was specified: candidates must be measured under the protocol
+  the selection thresholds came from. Whether `image_digest` should carry the
+  host driver, or whether the Stage-3 protocol should be re-materialized under a
+  currently-drawable runtime, is a **scientific/infrastructure decision for the
+  maintainer**, not something to patch mid-effort.
+- **Stopped at the boundary.** No attempt 5 is authorized, implied, or prepared.
+- **Position:** $192.5357 spent, $20.4643 remaining, **$0.4517** of margin
+  against a $20.0126 hard bound. Four attempts have cost **$0.9895** with zero
+  stages passed.

@@ -92,6 +92,24 @@ AutoInit Stage-3 continuation, attempt 8 COMPLETE (L40S, 41.3 min) $  0.6816
 Phase A attempt 1 (L40S, 6.5 min) SETUP GATE FAILED, NOTHING RAN $  0.1075
 Phase A attempt 2 (L40S, 28.3 min) STAGE-0 GATE FAILED, NOTHING RAN $  0.4665
 Phase A attempt 3 (L40S, 12.8 min) STAGE-0 GATE FAILED, NOTHING RAN $  0.2103
+Phase A attempt 4 (L40S, 12.4 min) STAGE-3 BINDING REFUSED       $  0.2052
+    NOT a code defect. Stage 0's real body ran end to end -- the fix
+    verified at $0 held -- and the NEW Stage-3 protocol binding then
+    refused, as designed: the pod's evaluation protocol hashed to
+    17218f7c, not the pinned 250f72ef under which the equivalence
+    interval and feasibility floor were materialized.
+    The cause is ONE field. Every observation governing generation
+    semantics matched exactly (vLLM 0.27.1, transformers 5.15.0, torch
+    2.13.0+cu130, bfloat16, gpu_mem 0.9, max_num_seqs 256,
+    max_num_batched_tokens 8192, enforce_eager False, tokenizer sha,
+    chat-template sha, resolved_context 8192, context_source,
+    stop_token_ids). Only runtime_digest differed, and within the
+    runtime only image_digest, whose suffix is the HOST NVIDIA DRIVER
+    version appended by read_image_digest:
+        stage 3   ...ubuntu2404@580.159.03
+        attempt 4 ...ubuntu2404@580.126.09
+    Pod deleted, provider confirms gone, no stage passed, nothing
+    trained.
     Setup passed in 5.2 min (warm image). The driver detached and died
     ~2 min into stage 0, AFTER the engine probe ran: the driver called
     declared_generation_protocol(engine_probe_json) but that function
@@ -132,7 +150,7 @@ AutoInit characterization continuation, attempt 4 (L40S,      $  1.3672
     host that had failed three cold draws. Torn down manually
     once the outcome was determined; provider-confirmed gone.
 
-ACTUAL CUMULATIVE SPEND                                      $192.3305
+ACTUAL CUMULATIVE SPEND                                      $192.5357
 ```
 
 The pre-E8b baseline `$163.8833` is the figure every E8/E8b planner was built on
@@ -227,10 +245,10 @@ $2.30   RAISED 2026-08-14 with maintainer approval, after attempt 1 spent
 
 ```
 authorized cumulative cap                                    $213.00
-actual cumulative spend                                      $192.3305
-unused authorization remaining                               $ 20.6695
+actual cumulative spend                                      $192.5357
+unused authorization remaining                               $ 20.4643
 Phase A hard threshold, from the launcher's own make_plan     $ 20.0126
-margin after a worst-case Phase A                            $  0.6569
+margin after a worst-case Phase A                            $  0.4517
     NOT a retry reserve. No attempt 4 is pre-authorized.
 GRANTED Phase-A authorization, 2026-08-15T12:32:08Z          $ 20.0126
     `autoinit.phase_a.2026-08-15T1232Z`, sha256 14360ef4…
