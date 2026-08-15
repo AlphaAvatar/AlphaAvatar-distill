@@ -2966,3 +2966,47 @@ should not be reached for by a future session.
   must have its argv checked against the callee's own parser, because the
   cheapest place to discover a missing required flag is a unit test and the most
   expensive is a GPU.
+
+## 2026-08-15 — Phase A attempt 3: stage-0 gate failed closed at $0.2103
+
+- **Outcome:** pod `6mzp8m92qksalv`, 12.75 min, **$0.2103**. `PHASE_A_FAILED`,
+  pod deleted, provider confirms gone. No stage passed, nothing trained.
+- **Setup passed in 5.2 min** (warm image, against 21 min on attempt 2 — the 30×
+  setup variance again). Driver detached, confirmed by descriptor probe.
+- **Cause:** `TypeError: declared_generation_protocol() takes 0 positional
+  arguments but 1 was given`. The driver passed it the engine-probe JSON; the
+  function takes none. The continuation's working form is
+  `declared_generation_protocol().materialized(generation_source_digest=…,
+  degeneration_source_digest=…)`. I invented a signature.
+- **No gate misbehaved**, again. Stage 0 refused, the session failed closed, the
+  artifact gate collected 7 files under the reduced spec, teardown was
+  provider-confirmed.
+
+### The pattern is now unambiguous, and it is not bad luck
+
+Three attempts, three defects, **all in setup or stage 0, none in the science**:
+
+| attempt | cost | defect | class |
+| --- | ---: | --- | --- |
+| 1 | $0.1075 | a test read ambient `SESSION_KIND` | environment |
+| 2 | $0.4665 | engine-probe argv missing `--model` | external argv |
+| 3 | $0.2103 | `declared_generation_protocol()` called with an argument | in-process call |
+
+Total **$0.7843** for zero stages passed. Every one was found on a paid pod, and
+every one is the same root cause: **`tests/pod/test_phase_a_rehearsal.py` drives
+the driver's lifecycle with all six stages SCRIPTED.** Its `stage0()` returns a
+canned pass. The real `stage0()` body — the engine probe invocation, the
+protocol construction, the `assert_preregistered` binding, the threshold
+materialization — has never executed anywhere: not locally, not under the pod
+simulator, not under `SESSION_KIND=phase_a`.
+
+The attempt-2 regression fixed the *symptom class* it had just seen (argv for
+external scripts) rather than the cause. A static signature audit run after
+attempt 3 finds exactly one arity mismatch across the ten imported callables the
+driver invokes — but arity cannot see a wrong-typed argument, a missing
+`.materialized(...)`, or a protocol comparison built the wrong way round, so
+that is a **lower bound**, not an all-clear.
+
+- **Not self-authorized.** Stopped at the boundary and reported, as instructed.
+- **Budget:** $192.3305 spent, $20.6695 remaining against a $20.0126 hard bound
+  — **$0.6569** of margin. A fourth attempt fits only if it is the last one.

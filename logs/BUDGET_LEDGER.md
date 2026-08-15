@@ -91,6 +91,16 @@ AutoInit characterization continuation, attempt 3 (L40S,      $  0.0700
 AutoInit Stage-3 continuation, attempt 8 COMPLETE (L40S, 41.3 min) $  0.6816
 Phase A attempt 1 (L40S, 6.5 min) SETUP GATE FAILED, NOTHING RAN $  0.1075
 Phase A attempt 2 (L40S, 28.3 min) STAGE-0 GATE FAILED, NOTHING RAN $  0.4665
+Phase A attempt 3 (L40S, 12.8 min) STAGE-0 GATE FAILED, NOTHING RAN $  0.2103
+    Setup passed in 5.2 min (warm image). The driver detached and died
+    ~2 min into stage 0, AFTER the engine probe ran: the driver called
+    declared_generation_protocol(engine_probe_json) but that function
+    takes no positional arguments. The continuation's working form is
+    declared_generation_protocol().materialized(...). A second defect
+    in the same never-executed stage 0, of a class the attempt-2
+    regression did not cover: that one checked argv for external
+    SCRIPTS, this is an in-process CALL. Failed closed, pod deleted,
+    provider confirms gone, no stage passed, nothing trained.
     Setup PASSED this time: the SESSION_KIND test fix held, so the
     pod's blocking CPU suite cleared and the driver detached. It then
     died ONE SECOND later in stage 0. The driver's engine-probe call
@@ -122,7 +132,7 @@ AutoInit characterization continuation, attempt 4 (L40S,      $  1.3672
     host that had failed three cold draws. Torn down manually
     once the outcome was determined; provider-confirmed gone.
 
-ACTUAL CUMULATIVE SPEND                                      $192.1202
+ACTUAL CUMULATIVE SPEND                                      $192.3305
 ```
 
 The pre-E8b baseline `$163.8833` is the figure every E8/E8b planner was built on
@@ -217,10 +227,10 @@ $2.30   RAISED 2026-08-14 with maintainer approval, after attempt 1 spent
 
 ```
 authorized cumulative cap                                    $213.00
-actual cumulative spend                                      $192.1202
-unused authorization remaining                               $ 20.8798
+actual cumulative spend                                      $192.3305
+unused authorization remaining                               $ 20.6695
 Phase A hard threshold, from the launcher's own make_plan     $ 20.0126
-margin after a worst-case Phase A                            $  0.8672
+margin after a worst-case Phase A                            $  0.6569
     NOT a retry reserve. No attempt 4 is pre-authorized.
 GRANTED Phase-A authorization, 2026-08-15T12:32:08Z          $ 20.0126
     `autoinit.phase_a.2026-08-15T1232Z`, sha256 14360ef4…
