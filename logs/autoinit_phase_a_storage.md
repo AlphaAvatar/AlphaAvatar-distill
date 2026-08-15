@@ -23,7 +23,8 @@ invalidate a digest already issued.
 | **five searched leaves** | **5.61 GiB** | 5 × 1.121 |
 
 The relay grew 81.85 → 91.54 GiB since 2026-08-14, mostly the two permanent
-controls (4.46 GiB) and `transfer/` (0.17 → 7.66 GiB of git bundles).
+controls (4.46 GiB) and `transfer/` (0.17 → 7.66 GiB — almost entirely the
+two offline wheelhouses, not bundles; see the correction below).
 
 **Five leaves do not fit in 1.60 GiB. Neither do two (2.24 GiB). One barely
 does.** Relay staging is therefore not the mechanism, and no amount of arranging
