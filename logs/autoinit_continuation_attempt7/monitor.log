@@ -1,0 +1,6 @@
+07:06:27 LAUNCHER_UP pod=dltht42ifojgwo exists=True status=RUNNING BILLING=True | [07:05:39]   starting (60s) — $0.01
+07:11:27 LAUNCHER_UP pod=dltht42ifojgwo exists=True status=RUNNING BILLING=True | [07:07:18] draw 1: running setup
+07:16:28 LAUNCHER_UP pod=dltht42ifojgwo exists=True status=RUNNING BILLING=True | [07:14:32] driver detached, pid 4725, confirmed by descriptor_probe — $0.16
+07:21:28 LAUNCHER_UP pod=dltht42ifojgwo exists=True status=RUNNING BILLING=True | [07:19:09]   2026-08-15T07:19:01Z MARKER:STAGE_START:3 — $0.24
+07:26:29 LAUNCHER_UP pod=dltht42ifojgwo exists=True status=RUNNING BILLING=True | [07:19:09]   2026-08-15T07:19:01Z MARKER:STAGE_START:3 — $0.24
+07:31:30 LAUNCHER_UP pod=dltht42ifojgwo exists=True status=RUNNING BILLING=True |   final_required: 33 · mutable_snapshot: 0 · final_streams_quiescent: True

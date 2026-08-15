@@ -1,0 +1,28 @@
+[07:04:43] budget: expected 84 min $1.39 · soft $1.52 · hard $1.69 (authorized $4.67)
+[07:04:44] NVIDIA L40S $0.99/h, stock Medium
+[07:04:44] session commit 05157d296ab0 verified: harness digests to a00dce7f6c44… and carries the authorization
+[07:04:44] precheck OK: 4 relay inputs including the staged controls, 3 local assets
+[07:04:46] created dltht42ifojgwo at $0.99/h
+[07:04:46] watchdog detached — hard 102 min = $1.69
+[07:05:39]   starting (60s) — $0.01
+[07:06:42] TCP 22 at 195.26.232.139:33114 after 1.9 min
+[07:06:44] draw 1: ssh reachable — $0.03
+[07:07:18] draw 1: image identity runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@580.178.04
+[07:07:18] draw 1: running setup
+[07:13:42] draw 1: setup complete — $0.15
+[07:14:04]   preflight_ctl_r0860k_sa: relay rc_ok=True present=True
+[07:14:26]   preflight_ctl_r0860k_sb: relay rc_ok=True present=True
+[07:14:32] driver detached, pid 4725, confirmed by descriptor_probe — $0.16
+[07:16:49]   2026-08-15T07:14:35Z MARKER:STAGE_START:1 — $0.20
+[07:19:09]   2026-08-15T07:19:01Z MARKER:STAGE_START:3 — $0.24
+[07:28:30]   2026-08-15T07:28:28Z MARKER:CONTINUATION_INCOMPLETE — $0.39
+[07:28:30] the continuation did not complete — collecting evidence, then tearing down. The permanent controls are inputs here and are untouched; nothing was trained.
+[07:28:30] polling ended: CONTINUATION_INCOMPLETE — $0.39
+[07:31:10]   manifest rc=0
+33 file(s) across 7 class(es) -> /workspace/manifest.json
+  final_required: 33 · mutable_snapshot: 0 · final_streams_quiescent: True
+[07:31:35] teardown gate: allowed=True failed=training_complete
+[07:31:35] deleting pod (gate passed after CONTINUATION_INCOMPLETE)
+[07:31:46] pod deleted — 27.0 min, $0.45; provider confirms gone: True
+
+continuation INCOMPLETE — /home/ecs-user/AlphaAvatar-distill/logs/autoinit_continuation_session.json. Nothing trained. Phase A NOT launched.

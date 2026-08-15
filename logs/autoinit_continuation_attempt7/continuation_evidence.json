@@ -1,0 +1,460 @@
+{
+  "schema": "aadistill.autoinit.continuation_evidence/v1",
+  "started_utc": "2026-08-15T07:14:31.185897+00:00",
+  "continuation": {
+    "plan": {
+      "plan_id": "autoinit.control_characterization_continuation",
+      "version": 1,
+      "plan_hash": "79da6d7af9295ca510cc5721cb25d915b3aae224bfb6a1147476186a6f8a195d",
+      "stages": [
+        {
+          "stage": 0,
+          "name": "import the permanent controls",
+          "purpose": "bind the staged bytes back to the recorded permanent identity before anything is measured against them",
+          "produces": [
+            "per-control weights sha256 verified against the record and the control_binding",
+            "strict RecoveryProtocolFingerprint reconstruction from the imported run evidence",
+            "probe id, seed and initialization digest re-established",
+            "import evidence artifact"
+          ],
+          "blocking": true,
+          "stop_conditions": [
+            "a staged weights hash differs from the record -> STOP",
+            "the control_binding disagrees with the record -> STOP",
+            "a material identity field is missing from the record -> STOP",
+            "the imported run evidence does not reconstruct the recorded protocol fingerprint -> STOP",
+            "no run evidence was staged -> STOP: the protocol cannot be re-derived from a sidecar summary alone"
+          ]
+        },
+        {
+          "stage": 1,
+          "name": "current evaluation attestation",
+          "purpose": "recovery_search_v2, the scoring digest and the generation source have all moved since these controls were trained, so characterization binds to the protocol attested now",
+          "produces": [
+            "runtime fingerprint",
+            "generation source digest",
+            "engine-observed generation fields",
+            "materialized RecoveryGenerationProtocolFingerprint",
+            "RecoveryEvaluationProtocol over recovery_search_v2",
+            "frozen attested protocol artifact"
+          ],
+          "blocking": true,
+          "stop_conditions": [
+            "the frozen assets do not match their preregistered constants",
+            "a generation field cannot be materialized -> STOP",
+            "the scoring contract digest differs from the pinned one"
+          ]
+        },
+        {
+          "stage": 2,
+          "name": "v2 tool and RAG generation smoke",
+          "purpose": "execute the real generation path on the sets that broke it before any permanent control is touched",
+          "produces": [
+            "rollouts for the tool and rag sets of recovery_search_v2",
+            "observed generation fingerprint reconstructed from them",
+            "comparison against the Stage-1 attestation"
+          ],
+          "blocking": true,
+          "stop_conditions": [
+            "generation raises -> STOP, and the full output is kept",
+            "the observed generation protocol differs from the attested one -> STOP: characterization would not be comparable",
+            "the smoke must cover the tool set; a smoke that renders no tool prompt is the failure mode this stage exists for"
+          ]
+        },
+        {
+          "stage": 3,
+          "name": "characterize the imported controls",
+          "purpose": "materialize the frozen thresholds from the two permanent controls, under the current evaluation identity",
+          "produces": [
+            "sa and sb on recovery_search_v2",
+            "observed generation reconstruction per control",
+            "pooled_counts@v2 aggregate + per-seed counts and rates",
+            "materialized equivalence interval and feasibility floor",
+            "per-capability control baselines",
+            "measured battery-evaluation cost for Phase-A repricing"
+          ],
+          "blocking": false,
+          "stop_conditions": [
+            "capability schema validation fails -> scoring defect, STOP",
+            "a result's evaluation protocol is not comparable to the attestation -> STOP"
+          ]
+        }
+      ],
+      "ordering_rationale": "controls are the expensive artifact and the one whose validity depends on a fixed runtime, so they are produced only after the runtime is attested and the cheap gates pass"
+    },
+    "scope": {
+      "trains_anything": false,
+      "retrains_controls": false,
+      "reaches_phase_a": false,
+      "controls": [
+        "preflight_ctl_r0860k_sa",
+        "preflight_ctl_r0860k_sb"
+      ],
+      "battery": "recovery_search_v2",
+      "notes": {
+        "recovery_identity": "imported, never re-attested: a control's protocol was established when it was trained",
+        "evaluation_identity": "attested fresh this session: the battery, the scoring digest and the generation source have all moved",
+        "why_not_the_preflight_plan": "PreflightPlan.advance_to(3) requires same-session predecessors and is right to; a session that imports a checkpoint did not train it"
+      },
+      "plan_hash": "79da6d7af9295ca510cc5721cb25d915b3aae224bfb6a1147476186a6f8a195d"
+    },
+    "import_required_fields": [
+      "weights_sha256",
+      "probe_id",
+      "control_binding",
+      "observed_protocol_fingerprint",
+      "seed",
+      "initialization_artifact_digest"
+    ],
+    "manifest_sha256": "c9bae5577a2b2c060f848856be9ce4e407b523b3989d2cb1c3430fc5f19bcc4f"
+  },
+  "scope": {
+    "trains_anything": false,
+    "retrains_controls": false,
+    "reaches_phase_a": false,
+    "controls": [
+      "preflight_ctl_r0860k_sa",
+      "preflight_ctl_r0860k_sb"
+    ],
+    "battery": "recovery_search_v2",
+    "notes": {
+      "recovery_identity": "imported, never re-attested: a control's protocol was established when it was trained",
+      "evaluation_identity": "attested fresh this session: the battery, the scoring digest and the generation source have all moved",
+      "why_not_the_preflight_plan": "PreflightPlan.advance_to(3) requires same-session predecessors and is right to; a session that imports a checkpoint did not train it"
+    },
+    "plan_hash": "79da6d7af9295ca510cc5721cb25d915b3aae224bfb6a1147476186a6f8a195d"
+  },
+  "trains_anything": false,
+  "phase_a_started": false,
+  "phase_a_reachable_from_this_driver": false,
+  "stages": {
+    "0": {
+      "passed": true,
+      "reason": "",
+      "finished_utc": "2026-08-15T07:14:35.371631+00:00",
+      "spend_usd": 0.1609,
+      "import": {
+        "controls": {
+          "preflight_ctl_r0860k_sa": {
+            "name": "preflight_ctl_r0860k_sa",
+            "checkpoint_dir": "/workspace/aad/artifacts/controls/preflight_ctl_r0860k_sa/model",
+            "weights_sha256": "573847a730c1a4997a2fa4554ac2fe45d72633b1d8f3234c6ca72aac2ec4468f",
+            "probe_id": "799bd5acc30ff3a0aed105a751504e58b24862c6d383dade7aa1d832a8448ecd",
+            "observed_protocol_fingerprint": "aad75fee8a897d9ce6efd6205829a2a0af997fa3f8548fbc56c4879dfd97e8b7",
+            "seed": 20260726,
+            "initialization_artifact_digest": "86fbba78e8a2a32481ca77e5ac362ed1f17a39dbc30bcbc952cabd5df2633e54",
+            "control_binding": {
+              "observed_protocol_fingerprint": "aad75fee8a897d9ce6efd6205829a2a0af997fa3f8548fbc56c4879dfd97e8b7",
+              "probe_id": "799bd5acc30ff3a0aed105a751504e58b24862c6d383dade7aa1d832a8448ecd",
+              "checkpoint_weights_sha256": "573847a730c1a4997a2fa4554ac2fe45d72633b1d8f3234c6ca72aac2ec4468f"
+            },
+            "reconstructed_from_run_evidence": true,
+            "evidence": {
+              "record": "/workspace/aad/logs/autoinit_permanent_controls/preflight_ctl_r0860k_sa_probe_identity.json",
+              "record_sha256": "a870a6e4275ea0b6cb71a0d8a28e8c2031cfba6824c19c31f00324d50e32cb8c",
+              "weights": "/workspace/aad/artifacts/controls/preflight_ctl_r0860k_sa/model/model.safetensors",
+              "weights_verified_against": [
+                "record",
+                "control_binding"
+              ],
+              "reconstruction": {
+                "attempted": true,
+                "fingerprint": "aad75fee8a897d9ce6efd6205829a2a0af997fa3f8548fbc56c4879dfd97e8b7",
+                "seed": 20260726,
+                "initialization_source": "/workspace/aad/artifacts/stage1/qwen3_0p6b_init_v0/checkpoint",
+                "pack_recomputed": "6f324cb0f37bc0f07128e554ce8c161879419537478950496534f75fcecb249c",
+                "step_accounting": {
+                  "present": true,
+                  "final_step": 1023,
+                  "planned_total_steps": 1023,
+                  "completed_all_steps": true,
+                  "consumed_blocks": 2046
+                },
+                "missing_fields": []
+              },
+              "rule": "every field in IMPORT_REQUIRED_FIELDS is checked; where run evidence exists the strict reconstruction is re-run and must reproduce the recorded fingerprint"
+            }
+          },
+          "preflight_ctl_r0860k_sb": {
+            "name": "preflight_ctl_r0860k_sb",
+            "checkpoint_dir": "/workspace/aad/artifacts/controls/preflight_ctl_r0860k_sb/model",
+            "weights_sha256": "4c6adcf8618716902d763c00a1e64db1d9a6fdcb77472d3f8a0fd5ff157a7629",
+            "probe_id": "793f786adde9cbf01e386f827dbd79e64f9afc2b6938c5ffa4f902e14b5275bd",
+            "observed_protocol_fingerprint": "aad75fee8a897d9ce6efd6205829a2a0af997fa3f8548fbc56c4879dfd97e8b7",
+            "seed": 20260801,
+            "initialization_artifact_digest": "86fbba78e8a2a32481ca77e5ac362ed1f17a39dbc30bcbc952cabd5df2633e54",
+            "control_binding": {
+              "observed_protocol_fingerprint": "aad75fee8a897d9ce6efd6205829a2a0af997fa3f8548fbc56c4879dfd97e8b7",
+              "probe_id": "793f786adde9cbf01e386f827dbd79e64f9afc2b6938c5ffa4f902e14b5275bd",
+              "checkpoint_weights_sha256": "4c6adcf8618716902d763c00a1e64db1d9a6fdcb77472d3f8a0fd5ff157a7629"
+            },
+            "reconstructed_from_run_evidence": true,
+            "evidence": {
+              "record": "/workspace/aad/logs/autoinit_permanent_controls/preflight_ctl_r0860k_sb_probe_identity.json",
+              "record_sha256": "883c8c4ae1dad400f6cde4546b1629f05d97bc60fc6b06ce0c33d3c7a1a34799",
+              "weights": "/workspace/aad/artifacts/controls/preflight_ctl_r0860k_sb/model/model.safetensors",
+              "weights_verified_against": [
+                "record",
+                "control_binding"
+              ],
+              "reconstruction": {
+                "attempted": true,
+                "fingerprint": "aad75fee8a897d9ce6efd6205829a2a0af997fa3f8548fbc56c4879dfd97e8b7",
+                "seed": 20260801,
+                "initialization_source": "/workspace/aad/artifacts/stage1/qwen3_0p6b_init_v0/checkpoint",
+                "pack_recomputed": "6f324cb0f37bc0f07128e554ce8c161879419537478950496534f75fcecb249c",
+                "step_accounting": {
+                  "present": true,
+                  "final_step": 1023,
+                  "planned_total_steps": 1023,
+                  "completed_all_steps": true,
+                  "consumed_blocks": 2046
+                },
+                "missing_fields": []
+              },
+              "rule": "every field in IMPORT_REQUIRED_FIELDS is checked; where run evidence exists the strict reconstruction is re-run and must reproduce the recorded fingerprint"
+            }
+          }
+        },
+        "shared_protocol_fingerprint": "aad75fee8a897d9ce6efd6205829a2a0af997fa3f8548fbc56c4879dfd97e8b7",
+        "seeds": [
+          20260726,
+          20260801
+        ],
+        "trained_this_session": false
+      }
+    },
+    "1": {
+      "passed": true,
+      "reason": "",
+      "finished_utc": "2026-08-15T07:17:23.170225+00:00",
+      "spend_usd": 0.207,
+      "evaluation_protocol_hash": "7327e880645492ec308fce62054b4845dce3de12e3079bb17a32e7d22898411a",
+      "generation_fingerprint": "1e5031c2b7debcccb6ab8f92d9863fb2a8381aefd534d5267cb0b519e6192206",
+      "runtime_digest": "b6ae9603527229d9c909aba8a37299e2efbe0fece3f935e3afed48fb85bb3174"
+    },
+    "2": {
+      "passed": true,
+      "reason": "",
+      "finished_utc": "2026-08-15T07:19:01.023267+00:00",
+      "spend_usd": 0.2339,
+      "smoke": {
+        "label": "_smoke",
+        "observed_generation_protocol": {
+          "generation_source_digest": "a1b51736d6a6b1276322a04d44855d7b574011e165e77d6d23c3e31b3036f743",
+          "generation_source_set_version": 1,
+          "vllm_version": "0.27.1",
+          "transformers_version": "5.15.0",
+          "torch_version": "2.13.0+cu130",
+          "dtype": "bfloat16",
+          "gpu_memory_utilization": 0.9,
+          "max_num_seqs": 256,
+          "max_num_batched_tokens": 8192,
+          "enforce_eager": false,
+          "tokenizer_source": "the evaluated checkpoint",
+          "tokenizer_sha256": "c1db93c8164f3e3ba2dbc8c6943fb574273a5efa87da4556ef9f460b5c0893b7",
+          "chat_template_sha256": "3802169b2a02b81e6adb7ab4f64f91ff02db753c8c3a64a01c35192d3a61d8d7",
+          "protocol": "project",
+          "system_message": "You are a helpful Assistant.",
+          "system_injection_rule": "injected only when the sample carries no system turn and protocol == project; a sample's own system prompt is preserved",
+          "chat_template_kwargs_json": "{}",
+          "thinking_mode": "template-default (not overridden)",
+          "trained_context": 8192,
+          "context_len_override": null,
+          "resolved_context": 8192,
+          "context_source": "trained_block_len",
+          "context_resolution_rule": "min(trained_context, architectural context); the effective context is the TRAINED context and this is not a 262K-context evaluation",
+          "temperature": 0.0,
+          "top_p": 1.0,
+          "top_k": -1,
+          "detokenize": false,
+          "max_tokens_rule": "per sample: resolved_context - len(prompt_ids); P18 unrestricted, never a chosen token budget",
+          "stop_token_ids": [
+            151645
+          ],
+          "stop_id_derivation_rule": "sorted union of config.eos_token_id, generation_config.eos_token_id, <|im_end|> and tokenizer.eos_token_id",
+          "degeneration_stop": true,
+          "degeneration_check_every": 256,
+          "degeneration_source_digest": "793540820d4fc0f42d0c855e0d79eb879b94efa451e06030b2a14c55683f4961",
+          "runtime_digest": "85a14f8b455db08b4bf19a1a3fa783df0974813cf6a5f34cdf270b5b6c03834e",
+          "protocol_id": "recovery_generation",
+          "version": 1,
+          "generation_protocol_fingerprint": "1e5031c2b7debcccb6ab8f92d9863fb2a8381aefd534d5267cb0b519e6192206",
+          "is_materialized": true,
+          "unmaterialized_fields": [],
+          "excluded_by_design": [
+            "the checkpoint being generated from"
+          ],
+          "why_excluded": "the checkpoint is the treatment; a generation identity containing it would mark every pair of arms as mismatched"
+        },
+        "observed_generation_fingerprint": "1e5031c2b7debcccb6ab8f92d9863fb2a8381aefd534d5267cb0b519e6192206",
+        "evidence": {
+          "strict": true,
+          "n_summaries": 2,
+          "labels": [
+            "_smoke"
+          ],
+          "sets": [
+            "/workspace/aad/artifacts/eval/continuation/_smoke/rag.jsonl",
+            "/workspace/aad/artifacts/eval/continuation/_smoke/tool.jsonl"
+          ],
+          "field_paths": {
+            "generation_source_digest": "identity.generation_source_digest",
+            "generation_source_set_version": "identity.generation_source_set_version",
+            "degeneration_source_digest": "identity.degeneration_source_digest",
+            "runtime_digest": "identity.runtime_digest",
+            "vllm_version": "engine.vllm_version",
+            "transformers_version": "identity.runtime.transformers_version",
+            "torch_version": "identity.runtime.torch_version",
+            "dtype": "engine.dtype",
+            "gpu_memory_utilization": "engine.gpu_memory_utilization",
+            "max_num_seqs": "engine.max_num_seqs",
+            "max_num_batched_tokens": "engine.max_num_batched_tokens",
+            "enforce_eager": "engine.enforce_eager",
+            "tokenizer_source": "tokenizer_source_rule",
+            "tokenizer_sha256": "tokenizer_sha256",
+            "chat_template_sha256": "chat_template_sha256",
+            "protocol": "protocol",
+            "system_injection_rule": "identity.system_injection_rule",
+            "chat_template_kwargs_json": "identity.chat_template_kwargs_json",
+            "thinking_mode": "thinking_mode",
+            "trained_context": "context_resolution.trained_context",
+            "resolved_context": "context_resolution.resolved_context",
+            "context_source": "context_resolution.context_source",
+            "context_resolution_rule": "context_resolution.rule",
+            "temperature": "sampling.temperature",
+            "top_p": "sampling.top_p",
+            "top_k": "sampling.top_k",
+            "detokenize": "sampling.detokenize",
+            "max_tokens_rule": "sampling.max_tokens_rule",
+            "stop_token_ids": "stop_ids",
+            "stop_id_derivation_rule": "identity.stop_id_derivation_rule",
+            "degeneration_stop": "degeneration_stop",
+            "degeneration_check_every": "sampling.degeneration_check_every",
+            "context_len_override": "context_resolution.context_len_override",
+            "system_message": "system_message"
+          },
+          "missing_fields": [],
+          "cross_set_disagreements": [],
+          "rule": "every material field is read from the rollout summaries themselves; all sets of one evaluation must agree; nothing is taken from the declared or attested fingerprint"
+        },
+        "observed_vs_attested": {
+          "fingerprint_self": "1e5031c2b7debcccb6ab8f92d9863fb2a8381aefd534d5267cb0b519e6192206",
+          "fingerprint_other": "1e5031c2b7debcccb6ab8f92d9863fb2a8381aefd534d5267cb0b519e6192206",
+          "matched_fields": [
+            "chat_template_kwargs_json",
+            "chat_template_sha256",
+            "context_len_override",
+            "context_resolution_rule",
+            "context_source",
+            "degeneration_check_every",
+            "degeneration_source_digest",
+            "degeneration_stop",
+            "detokenize",
+            "dtype",
+            "enforce_eager",
+            "generation_source_digest",
+            "generation_source_set_version",
+            "gpu_memory_utilization",
+            "max_num_batched_tokens",
+            "max_num_seqs",
+            "max_tokens_rule",
+            "protocol",
+            "protocol_id",
+            "resolved_context",
+            "runtime_digest",
+            "stop_id_derivation_rule",
+            "stop_token_ids",
+            "system_injection_rule",
+            "system_message",
+            "temperature",
+            "thinking_mode",
+            "tokenizer_sha256",
+            "tokenizer_source",
+            "top_k",
+            "top_p",
+            "torch_version",
+            "trained_context",
+            "transformers_version",
+            "version",
+            "vllm_version"
+          ],
+          "mismatched_fields": [],
+          "unverifiable_fields": [],
+          "unmaterialized_fields": [],
+          "both_materialized": true,
+          "identical": true
+        },
+        "attested_generation_fingerprint": "1e5031c2b7debcccb6ab8f92d9863fb2a8381aefd534d5267cb0b519e6192206",
+        "sets": [
+          "tool",
+          "rag"
+        ],
+        "covers_tool_set": true
+      }
+    },
+    "3": {
+      "passed": false,
+      "reason": "preflight_ctl_r0860k_sb generation rc=1; tail: ...[00:00<00:00, 41.73it/s]\nCapturing CUDA graphs (FULL): 100%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588| 35/35 [00:00<00:00, 41.01it/s]\nTraceback (most recent call last):\n  File \"/workspace/aad/scripts/evaluation/uncapped_eval.py\", line 547, in <module>\n    raise SystemExit(main())\n                     ^^^^^^\n  File \"/workspace/aad/scripts/evaluation/uncapped_eval.py\", line 321, in main\n    prompt = tok.apply_chat_template(turns, tools=s.get(\"tools\"),\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/opt/vllm/lib/python3.12/site-packages/transformers/tokenization_utils_base.py\", line 3085, in apply_chat_template\n    chat_template = self.get_chat_template(chat_template, tools)\n                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/opt/vllm/lib/python3.12/site-packages/transformers/tokenization_utils_base.py\", line 3270, in get_chat_template\n    raise ValueError(\nValueError: Cannot use chat template functions because tokenizer.chat_template is not set and no template argument was passed! For information about writing templates and setting the tokenizer.chat_template attribute, please see the documentation at https://huggingface.co/docs/transformers/main/en/chat_templating\n",
+      "finished_utc": "2026-08-15T07:28:28.297137+00:00",
+      "spend_usd": 0.3899,
+      "characterized": [
+        "preflight_ctl_r0860k_sa"
+      ]
+    }
+  },
+  "authorization": {
+    "schema": "aadistill.autoinit.spend_authorization/v1",
+    "authorization_id": "autoinit.control_characterization.2026-08-15T0658Z",
+    "version": 1,
+    "granted_utc": "2026-08-15T06:58:38Z",
+    "granted_by": "maintainer, after the attempt-6 review: '$4.37 expected / $4.67 hard cumulative, per-launch hard limit still exactly $1.6896'. Cumulative because $2.9744 is already spent across six attempts; one more launch prices at $1.3860 expected / $1.6896 hard, giving $4.3604 / $4.6640, which these figures cover. FOUR earlier artifacts are void and must not be reused: 759eaf8c\u2026 (asserted amounts before the approval existed), dc770f36\u2026 (granted_utc in the future when committed), e4854818\u2026 (CONSUMED by attempt 5, INCOMPLETE at $0.1369), and f21b4038\u2026 (CONSUMED by attempt 6, INCOMPLETE at $0.1324). This grant is likewise for ONE launcher invocation.",
+    "plan_id": "autoinit.control_characterization_continuation",
+    "preflight_plan_hash": "79da6d7af9295ca510cc5721cb25d915b3aae224bfb6a1147476186a6f8a195d",
+    "expected_usd": 4.37,
+    "hard_cap_usd": 4.67,
+    "authorized_stages": [
+      0,
+      1,
+      2,
+      3
+    ],
+    "stage_conditions": {
+      "0": "strict import of the two existing permanent controls; no training",
+      "1": "current generation and evaluation attestation over recovery_search_v2",
+      "2": "real v2 tool and RAG generation smoke",
+      "3": "characterize the imported controls; the only paid measurement",
+      "teardown": "collect, delete the pod, confirm from the provider, STOP"
+    },
+    "scope_note": "characterization of two ALREADY TRAINED permanent controls. This authorization does not permit training, retraining, or re-initializing any control: the driver has no training stage and the launcher materializes existing artifacts. A failed characterization is collected and torn down and remains a FAILED continuation; it does not authorize a retry that trains. Phase A remains separately unauthorized.",
+    "phase_a_authorized": false,
+    "automatic_phase_a_start": false,
+    "authorized_session_commit": "4e84a5f69a06f227929641214ea38379ade77acb",
+    "harness_source_digest": "a00dce7f6c44661cf691c782477b39bac25151183d38ce6b6a27888b834727dd",
+    "harness_source_files": [
+      "scripts/pod/autoinit_continuation_launch.py",
+      "scripts/pod/autoinit_continuation_driver.py",
+      "scripts/pod/autoinit_preflight_launch.py",
+      "scripts/pod/autoinit_preflight_setup.sh",
+      "scripts/pod/autoinit_engine_probe.py",
+      "scripts/pod/watchdog.py",
+      "scripts/pod/collect_artifacts.py",
+      "src/aadistill/autoinit/authorization.py",
+      "src/aadistill/autoinit/continuation.py",
+      "src/aadistill/autoinit/generation.py"
+    ],
+    "per_launch_hard_usd": 1.6896,
+    "provenance_commit": "4e84a5f69a06f227929641214ea38379ade77acb",
+    "enforcement": "the launcher loads this artifact and refuses to create a pod whose priced hard threshold exceeds hard_cap_usd, refuses a stage not in authorized_stages, and has no code path to Phase A",
+    "authorization_sha256": "c398850b0396393b6b82117a0bbfbda554c5e803eb5c058f05f652c7a5b02b56"
+  },
+  "elapsed_min": 13.95,
+  "spend_usd": 0.3899,
+  "continuation_successful": false,
+  "failed_stages": [
+    3
+  ],
+  "outcome": "INCOMPLETE",
+  "cleanup_is_not_success": "collection and teardown run regardless of the characterization outcome; they are cleanup, and a clean cleanup does not make a failed characterization a successful continuation",
+  "retrained_controls": false
+}

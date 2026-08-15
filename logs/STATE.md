@@ -1,5 +1,5 @@
-**Updated:** 2026-08-14 21:05 UTC · branch `main` · working tree clean
-**No pods running. Nothing billing.** **1,634 CPU tests pass**, 7 skipped; 1,610 under the pod simulator.
+**Updated:** 2026-08-15 07:31 UTC · branch `main` · working tree clean
+**No pods running. Nothing billing.** **1,636 CPU tests pass**, 7 skipped; 1,612 under the pod simulator.
 
 ## The two permanent canonical controls EXIST and are hash-verified
 
@@ -62,82 +62,92 @@ every item. Input is now normalized through `normalize_tools`, which reads eithe
 representation and fails closed. **Semantics unchanged and measured:** nine
 policies × 190 prompts reproduce every number of the pre-migration record.
 
-## Attempts 5 and 6 both INCOMPLETE — the gate is fixed, the readback was not (2026-08-14 21:05 UTC)
+## Attempt 7: the driver RAN. Stages 0-2 passed; sb has no tokenizer (2026-08-15 07:31 UTC)
 
-**Nothing running, nothing billing.** Both pods deleted, provider confirms
-`TERMINATED`, account has no pods. Six paid attempts, **$2.9744**, still zero
-driver stages. Evidence: [`autoinit_continuation_attempt5/`](autoinit_continuation_attempt5/),
-[`autoinit_continuation_attempt6/`](autoinit_continuation_attempt6/).
+**Nothing running, nothing billing.** Pod deleted, provider confirms
+`TERMINATED`, account has no pods. Seven attempts, **$3.4244**. Evidence:
+[`autoinit_continuation_attempt7/`](autoinit_continuation_attempt7/).
 
-**Both issued authorizations are CONSUMED** — each was granted for one launcher
-invocation: `e4854818…` (attempt 5, $0.1369) and `f21b4038…` (attempt 6,
-$0.1324). Neither may be reused.
+**All three issued authorizations are CONSUMED** (one invocation each):
+`e4854818…` attempt 5 $0.1369, `f21b4038…` attempt 6 $0.1324, `c398850b…`
+attempt 7 $0.4500.
 
-### Attempt 6 got further, and the failure was a misread
+### The orchestration is fixed and stayed fixed
 
-```
-MARKER:AUTHORIZATION_OK      <- the session-scoped gate PASSED on the pod
-MARKER:SETUP_DONE
-[21:01:07] setup complete
-SETUP_RC=0
-[21:01:14] ABORT after draw 1: setup_failed
-```
+| stage | wall | cumulative | verdict |
+| --- | --- | --- | --- |
+| setup (whole script) | 6.4 min | $0.15 | complete, read correctly by the launcher |
+| 0 — strict import of both controls | 0.07 min | $0.1609 | **passed** |
+| 1 — generation/evaluation attestation | 2.80 min | $0.2070 | **passed** |
+| 2 — real v2 tool+RAG smoke | 1.63 min | $0.2339 | **passed** |
+| 3 — sa/sb characterization | 9.45 min | $0.3899 | **FAILED on sb** |
 
-Setup succeeded. The shared script wrote its markers to a hardcoded
-`$WS/autoinit_preflight.status`; the continuation launcher probes
-`$WS/autoinit_continuation.status`. `setup_done` was empty while `setup_rc` was
-`0` — the session record held both, and only one was consulted. Attempt 5 had the
-same empty `setup_done`, masked by a real `setup_rc=1`.
+The whole-setup rehearsal did its job: no orchestration defect appeared. Stage 0
+re-ran the strict reconstruction for both controls and reproduced
+`aad75fee8a897d9c…` with `completed_all_steps: true` at step 1023. Engine
+observed: `vllm 0.27.1`, `torch 2.13.0+cu130`, `transformers 5.15.0`, bfloat16,
+context 8192 from `trained_block_len`, runtime digest `85a14f8b…`.
 
-**Both failures are the same class**: a shared script hardcoding a
-preflight-specific name while the continuation assumes its own. Both are now
-fixed the same way — the launcher tells setup which authorization, which plan
-hash, and which status file, and for the status it forwards *the same expression
-it probes with*, so they cannot drift.
+### What failed: an artifact defect in a permanent control
 
-A sweep found no third instance. The continuation driver's own hardcoded status
-path agrees with the launcher's, and that agreement is now pinned by a test.
+`preflight_ctl_r0860k_sb` could not render a prompt —
+`tokenizer.chat_template is not set`. Its stored checkpoint is missing
+`chat_template.jinja`, `tokenizer.json` and `tokenizer_config.json`; `sa` has all
+three. Stage 0 passed because it verifies weights, protocol and probe identity,
+not tokenizer assets.
 
-Found unpaid while fixing it: an unquoted `${v:?word}` expands its word, so
-`…this session's status file` opened a quote — and **`bash -n` still passed**,
-because it paired with a later apostrophe.
+The three files are **byte-identical between `sa` and the canonical
+initialization** (`3802169b…`, `be756060…`, `8fa82a4b…`) — tokenizer assets of
+the shared init, not seed-dependent — and the engine probe independently recorded
+`chat_template_sha256: 3802169b…` for the run that worked. **Repair needs no
+retraining and no weight change**, but it modifies a permanent control artifact,
+so it is a maintainer decision. **Nothing was changed.**
 
-### What is fixed and verified at $0
+### sa's characterization is real, and is not a Stage-3 verdict
 
-| | |
-| --- | --- |
-| setup verifies **this session's** authorization + plan | executed from the real script: passes, and fails closed (rc 98, `AUTHORIZATION_MISMATCH`) on a wrong plan, on the stale micro-preflight artifact, and on either variable unset |
-| setup markers land where the launcher probes | executed: `mark` writes to the named file, and the launcher's own `PROBE_COMMAND` + `parse_setup_probe` read `setup_done` from it |
-| driver/launcher status paths agree | pinned by test |
-| full suite / pod simulator | 1634 passed · 1610 passed |
-
-**Everything the offline work targeted keeps passing on hardware**: warm hosts,
-offline train env, **offline vLLM env verified 196/196 against the frozen byte
-manifest on the pod**, RoPE correct in both venvs, ~1566 pod-side tests.
-
-### Budget — a further attempt needs a new figure, not just a new artifact
+Scored by `scripts/autoinit/score_recovery_search.py` against frozen
+`recovery_search_v2`, `pooled_counts@v2` denominators:
 
 ```
-project cumulative                                   $190.4146
-remaining under the $211.07 cap                      $ 20.6554
-continuation spent, six attempts                     $  2.9744
-granted cumulative continuation figure               $  4.54   (expected $4.23)
+n 190 · usable 79 · usable_rollout_rate 0.4158
+n_scorable 170 · correct 3 · correct_overall 0.0176 · correct_given_usable 0.0380
+per-capability usable: rag 0.8667 · gsm8k 0.5000 · multihop 0.5000
+                       tool 0.4500 · math_verified 0.4000 · knowledge 0.0667
+```
+
+`code` (20 items) has no oracle — the 190 vs 170 difference. **Single seed.** The
+design is sa+sb and the threshold was registered against the pair.
+
+### Battery wall time — a bound
+
+Stage 3's 9.45 min contains sa's engine load, sa's full 190-prompt battery, sb's
+engine load and sb's failure. One control is therefore **under ~8 min** against a
+24 min/control allowance. Enough to say the allowance is ~3x conservative; not a
+clean per-control measurement.
+
+### Budget — a further attempt needs a new figure
+
+```
+project cumulative                                   $190.8646
+remaining under the $211.07 cap                      $ 20.2054
+continuation spent, seven attempts                   $  3.4244
+granted cumulative continuation figure               $  4.67
 one more launch, priced                    expected $1.3860 · hard $1.6896
-    $2.9744 + $1.6896 = $4.6640  >  $4.54
+    $3.4244 + $1.6896 = $5.1140  >  $4.67
 ```
 
-So the granted cumulative figure **no longer covers another launch**. That is a
-maintainer decision; no artifact currently authorizes any spend.
+**Phase A remains unauthorized.** With ~$20.21 remaining and the bound above, a
+re-price is now possible for the first time, but it needs a completed sa+sb
+characterization to be worth anything.
 
-**Phase A remains unauthorized and unpriced** — Stage 3 has still never produced
-a measured battery wall time.
+## What remains before Stage 3 can complete
 
-## What remains before Stage 3 can run
-
-1. **Maintainer review** of attempt 6, and a decision on the cumulative figure.
-2. The fixes are committed and rehearsed at $0. A new one-use authorization and a
-   rebuilt bundle would be needed for any further launch.
-3. Phase A stays unauthorized and unpriced until Stage 3 measures the battery.
+1. **Maintainer decision on repairing `sb`'s tokenizer assets** — a copy of three
+   files that are byte-identical to `sa`'s and to the init, no retraining, no
+   weight change.
+2. A new cumulative continuation figure and a new one-use authorization.
+3. Optionally, extend the Stage-0 import gate to require the tokenizer assets a
+   control needs to be evaluable. It would not have saved this run.
 
 ## Phase A is repriced, and both statistics measurements are kept
 

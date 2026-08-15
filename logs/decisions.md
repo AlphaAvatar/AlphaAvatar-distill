@@ -2643,3 +2643,43 @@ in assumptions that a later study would have to unpick.
   $2.9744. Another launch at $1.6896 hard needs a cumulative $4.6640, which
   exceeds the granted $4.54. A further attempt needs a new cumulative figure as
   well as a new one-use artifact.
+
+## 2026-08-15 (UTC) — Attempt 7: the driver ran. Stages 0-2 passed; sb has no tokenizer
+
+- First attempt to reach a driver stage. `$0.4500`, 27.0 min, pod deleted,
+  provider confirms `TERMINATED`. Evidence in
+  `logs/autoinit_continuation_attempt7/`.
+- The whole-setup rehearsal held: setup completed in 6.4 min and the launcher
+  read it correctly. No orchestration defect appeared.
+- **Stage 0** strictly imported both controls — weights sha256, probe id,
+  observed protocol fingerprint, seed, initialization digest, and a re-run of the
+  strict reconstruction reproducing `aad75fee8a897d9c…` with
+  `completed_all_steps: true` at step 1023. **Stage 1** attested the live
+  generation/evaluation protocol. **Stage 2** ran the real v2 tool+RAG smoke.
+- **Stage 3 failed on `preflight_ctl_r0860k_sb`**: `tokenizer.chat_template is
+  not set`. Its stored checkpoint is missing `chat_template.jinja`,
+  `tokenizer.json` and `tokenizer_config.json`, all three of which `sa` has.
+- This is an **artifact defect in a permanent control**, not a Stage-3 scientific
+  result and not orchestration. The Stage-0 gate passed because it verifies
+  weights, protocol and probe identity — not tokenizer assets. That gap is worth
+  closing, but closing it would not have made this run succeed.
+- The three files are **byte-identical between `sa` and the canonical
+  initialization** (`3802169b…`, `be756060…`, `8fa82a4b…`), so they are tokenizer
+  assets of the shared init and are not seed-dependent. The engine probe
+  independently recorded `chat_template_sha256: 3802169b…` for the run that
+  worked. Repair therefore needs **no retraining and no weight change** — but it
+  modifies a permanent control artifact, so it is a maintainer decision. Nothing
+  was changed.
+- **`sa` was characterized**, and its result is real: `usable_rollout_rate`
+  0.4158 (79/190), `correct_overall` 0.0176 (3/170), `correct_given_usable`
+  0.0380; per-capability usable rag 0.8667, gsm8k 0.5000, multihop 0.5000, tool
+  0.4500, math_verified 0.4000, knowledge 0.0667. Single seed; the design is
+  sa+sb and the threshold was registered against the pair, so this is **not** a
+  Stage-3 verdict.
+- Battery wall time: Stage 3's 9.45 min contains sa's engine load, sa's full
+  battery, sb's engine load and sb's failure, so one control is **under ~8 min**
+  against a 24 min/control allowance. An upper bound, not a clean per-control
+  measurement.
+- Budget: continuation spend is $3.4244. Headroom under the $4.67 figure is
+  $1.2456, less than one hard launch ($1.6896). A further attempt needs a new
+  cumulative figure as well as a new artifact.
