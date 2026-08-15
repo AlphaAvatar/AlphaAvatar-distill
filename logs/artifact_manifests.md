@@ -160,7 +160,7 @@ Two reading notes:
   top_k off (not the official preset) and **effectively n=1** — 92.7% of
   candidate pairs are byte-identical because the serving engine seeded per
   request, not per candidate. Retained as labelled auxiliary data only
-  ([`PROPOSAL.md`](PROPOSAL.md) §2); the 4,096-token cap censored 19.9% of
+  ([`PROPOSAL.md`](archive/PROPOSAL.md) §2); the 4,096-token cap censored 19.9% of
   rollouts (69.7% of `openmath`).
 - **License/provenance:** as the corpus v2 entry above.
 - **Related logs:** [`EXPERIMENTS.md`](EXPERIMENTS.md) §5, §6.
@@ -376,10 +376,10 @@ the experiment (P5), not a re-derivable procedure.
   sha256 `3ec3c124…`, chat template `3802169b…` — both reproduced exactly on the
   dev box under transformers 5.13.1 against the corpus's 5.14.1.
 - **Status: prepared, NOT trained on.** Awaiting launch approval
-  ([`PROPOSAL.md`](PROPOSAL.md)).
+  ([`PROPOSAL.md`](archive/PROPOSAL.md)).
 - **License/provenance:** derived from corpus v2; same constraints. No new
   generation, no new sources.
-- **Related logs:** [`PROPOSAL.md`](PROPOSAL.md) §3–§4,
+- **Related logs:** [`PROPOSAL.md`](archive/PROPOSAL.md) §3–§4,
   [`EXPERIMENTS.md`](EXPERIMENTS.md) §12.
 
 ## e1_r0860k_s{a,b}_pca run records — recovered from the relay
@@ -395,7 +395,7 @@ the experiment (P5), not a re-derivable procedure.
   (`config_sha256` `08264ef1…` and `9048173d…`, both reproduced).
 - **Also on the relay, unchanged:** `step_001023/model/` for both arms — the D0
   weights Experiment 2 will re-evaluate on any new capability set.
-- **Related logs:** [`PROPOSAL.md`](PROPOSAL.md) §2,
+- **Related logs:** [`PROPOSAL.md`](archive/PROPOSAL.md) §2,
   [`EXPERIMENTS.md`](EXPERIMENTS.md) §12.2.
 
 ## battery_v2 — the frozen Experiment 2 capability battery
@@ -438,7 +438,7 @@ the experiment (P5), not a re-derivable procedure.
 - **Status: frozen.** Changing any rule requires bumping `BATTERY_VERSION`.
 - **License/provenance:** derived from the public sources above; no teacher
   generations, no user data.
-- **Related logs:** [`PROPOSAL.md`](PROPOSAL.md) §6–§7,
+- **Related logs:** [`PROPOSAL.md`](archive/PROPOSAL.md) §6–§7,
   [`EXPERIMENTS.md`](EXPERIMENTS.md) §12.7–§12.8.
 
 ## checkpoint_inventory — both stores, 2026-08-03
@@ -457,7 +457,7 @@ the experiment (P5), not a re-derivable procedure.
 - **Relay: 0 bytes reclaimed and no file touched.** Ordinary deletion does not
   free LFS quota there; the operations that would all invalidate existing
   revisions and are reported for separate approval.
-- **Related logs:** [`PROPOSAL.md`](PROPOSAL.md) §9.
+- **Related logs:** [`PROPOSAL.md`](archive/PROPOSAL.md) §9.
 
 ## Experiment 2 phase 1 outputs (2026-08-04)
 

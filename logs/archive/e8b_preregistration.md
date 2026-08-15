@@ -12,8 +12,8 @@ and identity-checked, hardware is selected on cost per completed step, and the
 sessions are priced. Nothing paid launches without separate authorization.
 
 **E8a is closed and not reopened** — its frozen map, its 3.11× result and its step-0
-dissociation stand as recorded in [`e8_step0_report.md`](e8_step0_report.md) and
-[`EXPERIMENTS.md`](EXPERIMENTS.md) §36. **The old E8 2.96M recovery is cancelled and
+dissociation stand as recorded in [`e8_step0_report.md`](../e8_step0_report.md) and
+[`EXPERIMENTS.md`](../EXPERIMENTS.md) §36. **The old E8 2.96M recovery is cancelled and
 must not be launched.**
 
 **Question.** Is the contribution-guided depth map better when depth is the only

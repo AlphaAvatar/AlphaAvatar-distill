@@ -53,10 +53,12 @@ LAUNCH = REPO / "scripts/pod/autoinit_preflight_launch.py"
 #: The byte gate needs the real wheels. They are ~3.6 GiB and are not in the
 #: repo, so the location is overridable and the test skips without them rather
 #: than pretending to have checked.
+#: A stable path, deliberately not a session scratchpad: the default used to
+#: point at one, which would have made this test silently skip in the next
+#: session -- the exact rot the rehearsal exists to prevent.
 WHEELHOUSE_VLLM = Path(os.environ.get(
     "AAD_VLLM_WHEELHOUSE",
-    "/tmp/claude-1000/-home-ecs-user-AlphaAvatar-distill/"
-    "93637de9-9b3b-4968-90b5-8b9a0308ff99/scratchpad/wh_vllm"))
+    os.path.expanduser("~/aad-artifacts/wheelhouse_vllm_cp312")))
 
 STUB_HF = '''\
 """Serves every Hub fetch from a local fixture tree, so the script's real

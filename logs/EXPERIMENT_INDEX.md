@@ -140,6 +140,34 @@ teacher KL, top-1 and rank are diagnostics (decision 2026-08-05 / 2026-08-09).
 
 ---
 
+## AutoInit-Stage3 — permanent-control characterization
+
+| field | value |
+| --- | --- |
+| kind | `infrastructure` — it produces the reference the AutoInitializer search is measured against; it makes no scientific claim about a method |
+| ran | 2026-08-15, `ALL_DONE`, 41.3 min |
+| controls | `preflight_ctl_r0860k_{sa,sb}`, trained 2026-08-14, **imported not retrained**; weights `573847a7…` / `4c6adcf8…`, shared protocol `aad75fee…` |
+| battery | `recovery_search_v2` (190 prompts, 170 scorable), aggregation `pooled_counts@v2` |
+| pooled result | `usable_rollout_rate` **0.3711** (141/380) · `correct_overall` **0.0118** (4/340) · `correct_given_usable` **0.0286** |
+| per seed | sa 0.3895 · sb 0.3526 |
+| components | `no_context_limit` **1.0000 both** (nothing right-censored); `protocol_valid` 0.4316 / 0.3895 is the binding one |
+| capability floors | rag 0.6833 · multihop 0.5000 · tool 0.4750 · gsm8k 0.4333 · math_verified 0.2333 · knowledge 0.1667 |
+| thresholds materialized | equivalence interval **0.011695** (`seed_aware_max_binomial_seedrange@v2`); feasibility floor **0.3000** (`seed_aware_usable_floor@v2`, absolute floor binds) |
+| measured for the first time | battery wall time — 19.65 min for both controls, 8.43 min marginal per warm checkpoint |
+| cost | $0.6816 for the completing run; **$4.1060** across eight attempts, four of which died in unexecuted lines of one setup script |
+| artifacts | `logs/autoinit_stage3_complete/`, failures in `logs/autoinit_continuation_attempts/` |
+| in current lineage | **yes** — Phase A cannot start without these thresholds |
+
+Two notes that matter for whoever uses these numbers. **Correctness sits at the
+floor** (4/340) and that is a property of these 0.86M-step controls, not a
+defect: `usable_rollout` is blind to correctness by construction, so the two axes
+stay separate and neither substitutes for the other. And **`gsm8k` and
+`math_verified` disagree strongly across seeds** (0.5667 vs 0.3000; 0.4000 vs
+0.0667) — the seed-aware rules exist for that, and a candidate is compared
+against the pooled figure, never a single seed.
+
+---
+
 ## Project-level conclusions carried forward
 
 1. **PCA/structural initialization decisively beats random initialization** (E1).

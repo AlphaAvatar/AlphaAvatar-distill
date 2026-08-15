@@ -88,7 +88,7 @@ frozen 846-prompt capability battery (`capability-v2`) with deterministic
 scorers and no LLM judge, validated at 112 evaluator tests. Experiment 2 phases
 2 (loss) and 3 (learning rate) are **specified but unauthorized**, and phase 3
 should not run as written — it was built around the metric phase 1 retired
-([`PROPOSAL.md`](PROPOSAL.md) §12).
+([`PROPOSAL.md`](archive/PROPOSAL.md) §12).
 
 **Deployment target:** INT8. Every recovery gate already re-evaluates under INT8
 weight fake-quantization at two scopes.

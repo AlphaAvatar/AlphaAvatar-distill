@@ -7,7 +7,7 @@
     "summary": "the stored checkpoint package was missing the tokenizer and chat-template assets the frozen evaluator requires, so no prompt could be rendered",
     "observed": "ValueError: Cannot use chat template functions because tokenizer.chat_template is not set",
     "found_by": "attempt 7, Stage 3, 2026-08-15, $0.4500 — sa characterized, sb failed",
-    "evidence": "logs/autoinit_continuation_attempt7/",
+    "evidence": "logs/autoinit_continuation_attempts/attempt7/",
     "why_the_gate_passed": "Stage 0 verifies weights sha256, probe id, observed protocol fingerprint, seed, initialization digest and re-runs the strict reconstruction. None of that reads tokenizer assets, so a checkpoint can be fully identity-verified and still be impossible to evaluate.",
     "missing_files": ["chat_template.jinja", "tokenizer.json", "tokenizer_config.json"]
   },

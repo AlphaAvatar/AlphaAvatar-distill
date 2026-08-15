@@ -2607,7 +2607,7 @@ in assumptions that a later study would have to unpick.
   by extracting and executing it; that lesson was applied to one block and not to
   the script as a whole.
 - Decision: **not retried**, per instruction. Evidence preserved in
-  `logs/autoinit_continuation_attempt5/`.
+  `logs/autoinit_continuation_attempts/attempt5/`.
 - Open design question for the maintainer, not a patch to apply unilaterally:
   should the shared setup assert a *session-appropriate* authorization — the one
   the launcher passed in — instead of a hardcoded micro-preflight path? A
@@ -2648,7 +2648,7 @@ in assumptions that a later study would have to unpick.
 
 - First attempt to reach a driver stage. `$0.4500`, 27.0 min, pod deleted,
   provider confirms `TERMINATED`. Evidence in
-  `logs/autoinit_continuation_attempt7/`.
+  `logs/autoinit_continuation_attempts/attempt7/`.
 - The whole-setup rehearsal held: setup completed in 6.4 min and the launcher
   read it correctly. No orchestration defect appeared.
 - **Stage 0** strictly imported both controls — weights sha256, probe id,

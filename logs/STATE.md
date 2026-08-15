@@ -271,7 +271,7 @@ preregistration.
 **A pre-GPU correction pass on 2026-08-12** fixed nine items a maintainer review of
 the implementation found — none of them visible at the dry run's scale. See
 [`decisions.md`](decisions.md) 2026-08-12. End-to-end dry run on real tiny checkpoints:
-[`autoinit_dryrun_summary.json`](autoinit_dryrun_summary.json). Search space,
+[`autoinit_dryrun_fresh.json`](autoinit_dryrun_fresh.json) and [`autoinit_dryrun_resume.json`](autoinit_dryrun_resume.json). Search space,
 branching and costs: [`autoinit_v1_search_space.json`](autoinit_v1_search_space.json).
 **Proposed first paid pilot, unauthorized:**
 [`autoinit_pilot_proposal.md`](autoinit_pilot_proposal.md).

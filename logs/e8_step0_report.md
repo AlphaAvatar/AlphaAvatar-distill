@@ -4,7 +4,7 @@
 map is frozen, both initializations are built and measured, and the formal
 two-seed comparison is blocked on $0.20 of authorization (§5).
 
-Preregistration: [`e8_preregistration.md`](e8_preregistration.md). Every threshold,
+Preregistration: [`e8_preregistration.md`](archive/e8_preregistration.md). Every threshold,
 the selector, the calibration set and the four outcome readings were fixed before
 any GPU was used.
 

@@ -6,7 +6,7 @@
 
 # Active proposal — Experiment 2: three sequential 0.86M diagnostics
 
-**Status 2026-08-03.** Experiment 1 is complete ([`EXPERIMENTS.md`](EXPERIMENTS.md)
+**Status 2026-08-03.** Experiment 1 is complete ([`EXPERIMENTS.md`](../EXPERIMENTS.md)
 §11). Experiment 2 is **three sequential single-variable diagnostics, all at
 Experiment 1's 0.86M rung**, each reusing the previous phase's winner as its
 control:
@@ -992,7 +992,7 @@ reduced evaluation set to fit a budget.
 Phase 1 ran exactly as registered: same rung, same two seeds, both arms forked
 from the Stage 1 init with the hash verified on the pod, byte-identical trainer,
 no shortened run, no one-seed substitution, no reduced evaluation set. Result and
-full numbers in [`EXPERIMENTS.md`](EXPERIMENTS.md) §12.15.
+full numbers in [`EXPERIMENTS.md`](../EXPERIMENTS.md) §12.15.
 
 **What the pre-registration got right.**
 
@@ -1255,7 +1255,7 @@ leaned on hardest, and it was circular.
 comparisons it is already used for — P1 vs P0-assistant vs P2 — because those
 share teacher distribution, architecture, initialization and evaluation set. It
 is a **within-family controlled-comparison metric**. It must not be promoted into
-a cross-model capacity scale. See [`decisions.md`](decisions.md), 2026-08-05.
+a cross-model capacity scale. See [`decisions.md`](../decisions.md), 2026-08-05.
 
 **The capacity question needs no anchor.** It is already answered by the
 completed capability battery (`EXPERIMENTS.md` §14.2, rescored §15.1): the

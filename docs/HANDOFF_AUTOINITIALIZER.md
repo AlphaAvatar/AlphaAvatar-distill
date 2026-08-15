@@ -55,6 +55,10 @@ none moved reasoning.
 | frozen promotion battery | 150 prompts, inclusion mask `d6e24e0b09da1bcc692b1dc96d8236808d29551a9fc94a47d1d968fd3f73d6ba`, sampled from the 0.86M rung |
 | retained reference on it | usable_rollout **0.7300** · correct_overall **0.1867** · correct_given_usable **0.2511** |
 | E8a calibration mixture | 67 items, content sha256 `d65c1f40e4837ea1bd5bcc33c68041a13b797c68f5be3c0686e0142ed761028f`, leakage-checked |
+| **permanent controls** | `preflight_ctl_r0860k_{sa,sb}` — weights `573847a730c1a499…` / `4c6adcf861871690…`, shared observed protocol `aad75fee8a897d9c…`, probe ids `799bd5ac…` / `793f786a…`. On the relay at `permanent_controls/`, and in `~/aad-artifacts/autoinit/`. **Never retrain these.** |
+| **recovery-search battery** | `artifacts/stage3/recovery_search_v2` — 190 prompts, 170 scorable, content `a1b22778…`, scoring contract `recovery_search_scoring@v2` digest `808080a7…`. v1 is INVALID (rendered 0/20 tool prompts) and is kept only with a `SUPERSEDED.md`. |
+| **materialized thresholds** | `logs/autoinit_stage3_complete/materialized_thresholds.json` — equivalence interval **0.011695**, feasibility floor **0.3000**, from pooled control rates. Phase A cannot start without these. |
+| control reference on `recovery_search_v2` | pooled `usable_rollout_rate` **0.3711** · `correct_overall` **0.0118** · `correct_given_usable` **0.0286** (380 prompts, seeds sa+sb) |
 
 Every deleted checkpoint has a tombstone in
 [`../logs/checkpoint_tombstones.json`](../logs/checkpoint_tombstones.json) with hash,
@@ -168,13 +172,19 @@ split. All zero cost. See [`../logs/autoinit_pilot_proposal.md`](../logs/autoini
 ## 6. Budget
 
 ```
-actual cumulative spend        $180.7033
+actual cumulative spend        $191.5462
 authorized cumulative cap      $211.07
-unused, uncommitted            $ 30.3667
+unused, uncommitted            $ 19.5238
 paid compute running           NONE
 ```
 
-E8b's termination released its $30.36 earmark. Full reconciliation, including the
+**Phase A does not fit.** Repriced from the measured battery on 2026-08-15 it is
+**$12.36 expected / $20.13 hard**; the hard bound exceeds the $19.5238 remaining
+by $0.61. That is a maintainer decision, not an accounting one — the options and
+what each costs are in
+[`../logs/autoinit_phase_a_repricing.md`](../logs/autoinit_phase_a_repricing.md).
+
+E8b's termination released its earmark. Full reconciliation, including the
 E6b $0.56 overrun and the limit of the evidence-file record, is in
 [`../logs/BUDGET_LEDGER.md`](../logs/BUDGET_LEDGER.md). **Plan from actual spend, never
 from unused room under a previous authorization.**
@@ -221,12 +231,43 @@ from unused room under a previous authorization.**
 
 ## 9. First task for the next session
 
-> The framework is built (§5.2). Complete the five zero-cost prerequisites in
-> [`../logs/autoinit_pilot_proposal.md`](../logs/autoinit_pilot_proposal.md) §3 —
-> the initializer-state evaluation suite, the recovery search battery, the
-> statistics-pass GPU/CPU measurement, `calib.reasoning_heavy@v1`, and the frozen
-> halving preregistration — then bring the pilot back for authorization.
-> **Do not reopen E8b. Do not launch paid compute without separate authorization.**
+**Updated 2026-08-15.** The five zero-cost prerequisites are done, and Stage 3 is
+**complete**: both permanent controls are characterized and the thresholds are
+materialized (§3). The framework is built and the orchestration path works end to
+end — attempt 8 ran setup, Stages 0–3, artifact collection and provider-confirmed
+teardown without an infrastructure defect.
+
+> **Nothing is authorized.** The next paid step is Phase A, and it **does not fit
+> the remaining budget** (§6): $20.13 hard against $19.5238. Bring the maintainer
+> a decision on that — raise the cap, drop the conditional third seed, or trim the
+> reserve — before designing anything. Do not launch paid compute without separate
+> authorization. Do not retrain the permanent controls. Do not reopen the frozen
+> AutoInitializer search/recovery design, or E8b.
+
+What is worth reading first, in this order: [`../logs/STATE.md`](../logs/STATE.md)
+for the position, [`../logs/autoinit_stage3_complete/`](../logs/autoinit_stage3_complete/)
+for what Stage 3 produced, and
+[`../logs/autoinit_continuation_attempts/`](../logs/autoinit_continuation_attempts/)
+for what eight attempts cost and why.
+
+### 9.0 The infrastructure lesson, because it cost $2.3 of the $4.1
+
+Four of the seven failed attempts died on lines in
+`scripts/pod/autoinit_preflight_setup.sh` that no rehearsal had ever executed —
+an offline-install flag, an unpinned `pip install`, a cross-session authorization
+binding, and a status filename the launcher did not probe. Each was found by
+paying for the next one.
+
+`tests/pod/test_setup_end_to_end.py` now runs the **real** setup script from entry
+to `SETUP_DONE` inside bubblewrap and reads the result back through the launcher's
+own `PROBE_COMMAND` and `parse_setup_probe`, stubbing only the expensive external
+operations. It needs the 196-wheel vLLM wheelhouse at
+`~/aad-artifacts/wheelhouse_vllm_cp312` (or `AAD_VLLM_WHEELHOUSE`); without it the
+test **skips**, so check it ran. Rebuild with
+`scripts/pod/build_wheelhouse.py --from-pins --requirements requirements-vllm.txt`.
+
+Before any paid run: the full suite, `scripts/pod/simulate_pod_env.sh`, and that
+end-to-end rehearsal.
 
 ### 9.1 One correction to carry
 

@@ -810,7 +810,7 @@ selection moves to **median-length survivor**, and Experiment 2 gets a **$30.00*
 incremental budget (new cumulative cap **$126.02**).
 
 Full pre-registration, arm table, gates, costing and storage plan:
-[`PROPOSAL.md`](PROPOSAL.md).
+[`PROPOSAL.md`](archive/PROPOSAL.md).
 
 ### 12.1 Why 0.86M
 
@@ -1019,7 +1019,7 @@ absorbed. Two things moved it from $22.92/$36.01: the battery grew 746 → 846 w
 the safety set was added, and the checkpoint counts were corrected from an
 assumed collapse to the measured fact.
 
-**Phase 1 itemized** (full table in [`PROPOSAL.md`](PROPOSAL.md) §8.2). Training
+**Phase 1 itemized** (full table in [`PROPOSAL.md`](archive/PROPOSAL.md) §8.2). Training
 alone is $2.03; **$9.26 of the remaining $10.27 is capability-battery generation
 on 10 checkpoints**, and everything else — in-run evals, checkpoint writes,
 transfer, hashing and pod idle — is $1.01 combined.
@@ -4790,7 +4790,7 @@ teardown (quiescent, marker-backed, six completion markers matched). Setup ran
 ## 35. Experiment 8 — contribution-guided depth initialization: design and preregistration
 
 **Status: prepared, preregistered, NOT authorized.** No GPU has been used. The
-prospective record is [`e8_preregistration.md`](e8_preregistration.md) and is not
+prospective record is [`e8_preregistration.md`](archive/e8_preregistration.md) and is not
 to be edited to match any outcome.
 
 **Question.** Does position-based depth compression discard teacher blocks that
@@ -4893,7 +4893,7 @@ wider than any effect E8 could claim.
 
 **Status: the search half is COMPLETE and the training half has NOT run**, blocked
 on $0.20. Full record: [`e8_step0_report.md`](e8_step0_report.md). Prospective
-record: [`e8_preregistration.md`](e8_preregistration.md), frozen before any GPU.
+record: [`e8_preregistration.md`](archive/e8_preregistration.md), frozen before any GPU.
 
 ### 36.1 The map
 
@@ -4982,7 +4982,7 @@ because of E8a's dissociation: the contribution map preserves the full-width tea
 whether the map is good on its own and only breaks when composed with the existing
 width/FFN/attention compression.
 
-Full preflight: [`e8b_preregistration.md`](e8b_preregistration.md). **No GPU used.**
+Full preflight: [`e8b_preregistration.md`](archive/e8b_preregistration.md). **No GPU used.**
 
 2×2 at the **1.60M** rung: depth-only (DP/DC, teacher width, 3,215,021,568 params)
 × fully compressed (FP/FC, 596,049,920), positional × contribution, two seeds per

@@ -1,290 +1,332 @@
 {
-  "schema": "aadistill.current_state/v1",
-  "generated_utc": "2026-08-13T03:10:00+00:00",
-  "current_phase": "E8 closed; AutoInitializer framework IMPLEMENTED at zero cost, pre-GPU correction pass applied; no paid search authorized",
-  "active_experiment": null,
-  "paid_compute_running": false,
-  "next_work": "Five zero-cost prerequisites before any paid AutoInitializer run: build+freeze the initializer-state evaluation suite; build the recovery search battery (must not reuse the promotion battery or the 0.86M rung's prompts); measure the statistics-pass GPU/CPU split; build calib.reasoning_heavy@v1; freeze the successive-halving preregistration. Then seek authorization for the pilot. Do not reopen E8b.",
-  "teacher": {
-    "model_id": "Qwen/Qwen3-4B-Thinking-2507",
-    "revision": "768f209d9ea81521153ed38c47d515654e938aea",
-    "num_parameters": 4022468096
-  },
-  "canonical_init": {
-    "path": "artifacts/stage1/qwen3_0p6b_init_v0/checkpoint",
-    "weights_sha256": "86fbba78e8a2a32481ca77e5ac362ed1f17a39dbc30bcbc952cabd5df2633e54",
-    "num_parameters": 596049920,
-    "tier": "TIER_1_ACTIVE_CANONICAL"
-  },
-  "best_checkpoint": {
-    "name": "e1_r2960k_sb_pca",
-    "path": "artifacts/stage3/rescued/e1_r2960k_sb_pca",
-    "recipe": "E1/P1 KD-heavy, 2.96M rung, seed sb (20260801)",
-    "tier": "TIER_1_ACTIVE_CANONICAL",
-    "sole_copy_not_on_relay": true,
-    "frozen_battery_reference": {
-      "usable_rollout_rate": 0.73,
-      "correct_overall": 0.1867,
-      "correct_given_usable": 0.2511,
-      "inclusion_mask_sha256": "d6e24e0b09da1bcc692b1dc96d8236808d29551a9fc94a47d1d968fd3f73d6ba"
-    }
-  },
-  "e8a_result": {
-    "status": "COMPLETE",
-    "depth_map_removed": [
-      2,
-      3,
-      15,
-      16,
-      20,
-      21,
-      26,
-      32
-    ],
-    "full_width_kl": {
-      "contribution": 0.620586,
-      "positional": 1.932531,
-      "ratio": 3.11
-    },
-    "contribution_init_sha256": "7a0694a5d5c59f8e0b0ebc9ac8648b1ec026bf93cab026d33c61ca8fc85d1edb"
-  },
-  "e8b_result": {
-    "status": "STRATEGICALLY_TERMINATED",
-    "valid": "four step-0 initialization measurements only",
-    "invalid": "no DP-vs-DC, no FP-vs-FC, no depth x compression interaction",
-    "dp_sa": "infrastructure artifact, not a promotable arm"
-  },
-  "budget": {
-    "actual_cumulative_spend_usd": 180.7033,
-    "authorized_cap_usd": 211.07,
-    "unused_uncommitted_usd": 30.3667
-  },
-  "latest_commit": "4fe61d9034df1f1a9eba05aff8b54ae15ecefee6",
-  "documents": {
-    "logs/STATE.md": {
-      "path": "logs/STATE.md",
-      "sha256": "5f575ad170078ea0b4b8b9b51cbb7f3515f9c3fe60499bcacb5f482eed51df11"
-    },
-    "docs/HANDOFF_AUTOINITIALIZER.md": {
-      "path": "docs/HANDOFF_AUTOINITIALIZER.md",
-      "sha256": "a061cd9dd144a9f55e4ee0831af0afc97b4fcd7799be3ce3380759626e30877e"
-    },
-    "logs/EXPERIMENT_INDEX.md": {
-      "path": "logs/EXPERIMENT_INDEX.md",
-      "sha256": "066d3e81766cd4462168b4d32cb44660a7b4435fb3485c07c30b29290dbdcc3c"
-    },
-    "logs/BUDGET_LEDGER.md": {
-      "path": "logs/BUDGET_LEDGER.md",
-      "sha256": "f9353c77083a26ec3f0a099cd963ab810817d47b29de1eccf7cbc3687803c676"
-    },
-    "logs/decisions.md": {
-      "path": "logs/decisions.md",
-      "sha256": "7af45723ff348c4b23cdd55a7183a256831a5ed27040d4bbf80695e42900bc85"
-    },
-    "logs/checkpoint_registry.json": {
-      "path": "logs/checkpoint_registry.json",
-      "sha256": "7fbb7804c763dd6a8210be28268332f313890326b3d81f9312e16bcc512eaf78"
-    },
-    "logs/checkpoint_tombstones.json": {
-      "path": "logs/checkpoint_tombstones.json",
-      "sha256": "7dca24bbcda1c44984f59babf762e5892462f7eaebf6a1396991b45c2ac04ad4"
-    },
-    "AGENTS.md": {
-      "path": "AGENTS.md",
-      "sha256": "8ebc254f270e382033a9c9bb8707745c9736dac4f5798f0825c511974cd593e6"
-    }
-  },
-  "read_order": [
-    "logs/STATE.md",
-    "docs/HANDOFF_AUTOINITIALIZER.md",
-    "logs/autoinit_pilot_proposal.md",
-    "logs/EXPERIMENT_INDEX.md",
-    "logs/decisions.md",
-    "logs/checkpoint_registry.json",
-    "logs/e8b_backend_audit.md",
-    "AGENTS.md"
-  ],
-  "closed_paths": [
-    "E8b completion",
-    "P2/CE-heavy expansion incl. P2-5.50M",
-    "FineWeb ratio sweeps",
-    "selecting on held-out NLL",
-    "restricting attention updates",
-    "student-prefix recovery",
-    "E2 phases 2-3"
-  ],
-  "autoinit": {
-    "status": "IMPLEMENTED_ZERO_COST_NOT_RUN_ON_REAL_MODELS",
-    "package": "src/aadistill/autoinit",
-    "tests": 209,
-    "operator_kinds": [
-      "ATTENTION",
-      "COMPOSITE_STAGE1",
-      "DEPTH",
-      "FFN",
-      "RESIDUAL_WIDTH"
-    ],
-    "operator_implementations": [
-      "attention.weight_proxy_v0",
-      "composite.stage1_sandwich_v0",
-      "depth.causal_kl_greedy_v1",
-      "depth.positional_v0",
-      "ffn.activation_importance_v0",
-      "width.global_pca_v0"
-    ],
-    "operator_ledger": "configs/autoinit/operator_ledger.json",
-    "beam_ranking_policy": "beam.pareto_multi_objective@v1",
-    "search_space": "logs/autoinit_v1_search_space.json",
-    "dry_run": "logs/autoinit_dryrun_summary.json",
-    "proposal": "logs/autoinit_pilot_proposal.md",
-    "blocking_prerequisites": [
-      "micro-preflight measurements (5 items) - see logs/autoinit_micro_preflight_plan.md",
-      "calib.reasoning_heavy@v1 not built (Phase B only, independent trigger)"
-    ],
-    "corrections_2026_08_12_review_pass": [
-      "CalibrationNeed.NONE operators use a canonical calib.none@v1 sentinel; search space is 24 x (1+P) x P x P x 1 = 48/288/864, not 48 x P^4",
-      "checkpoint identity is a shard-safe artifact digest; metrics bind to it",
-      "the recovery control is the retained checkpoint injected by frozen hash, not a re-executed composite",
-      "state.nll.general is the general domain alone; NLL is not a beam objective",
-      "beam v1: no pruning at level 0, then width 6; epsilon-dominance; lineage diversity across fronts",
-      "recovery: 5 searched leaves + control on sa, 2 survivors + control on sb, conditional third seed; constraint-then-objective selection",
-      "activation-statistics cache keyed on parent artifact digest + profile + stat spec + adapter version + numerics",
-      "reference teacher logits recomputed per candidate (33.8 GiB avoided)",
-      "resume rejects a journal record measured under a different eval suite"
-    ],
-    "beam_schedule": "beam.delayed_prune@v1 (warmup 1, width 6)",
-    "frozen_assets": {
-      "state_eval_v1": {
-        "path": "artifacts/stage1/state_eval_v1",
-        "role": "INITIALIZER_STATE_EVAL",
-        "n_items": 80,
-        "positions": 74022,
-        "content_sha256": "a1197205e43aad0e71c0e1bb436ee7babba3b5d8bb25b9c4d5c464f659db20fc"
-      },
-      "recovery_search_v1": {
-        "path": "artifacts/stage3/recovery_search_v1",
-        "role": "RECOVERY_SEARCH",
-        "n_prompts": 190,
-        "n_scorable": 170,
-        "content_sha256": "a1b22778b00d95b6aba358c14a5af5b559fd807bb371c92131eacca59479f323",
-        "manifest_sha256": "72d8c0535e7752faf704d9075b7835a47610fd3cd26866cf5be7d48eb7b40ad1"
-      },
-      "role_isolation": {
-        "report": "logs/autoinit_role_isolation.json",
-        "passed": true,
-        "complete": true,
-        "exact_overlaps": 0
-      },
-      "canonical_controls": {
-        "historical_checkpoints_exist": true,
-        "historical_hashes_verify": true,
-        "recipe_matched": false,
-        "consequence": "rerun canonical sa/sb under the current frozen trainer in the micro-preflight; those become the permanent Phase-A control probes",
-        "audit": "logs/autoinit_recovery_fingerprint_audit.json",
-        "passes_legacy_lineage_subset": true,
-        "recipe_matched_control": false,
-        "unverifiable": [
-          "trainer_source_digest",
-          "trainer_source_set_version",
-          "runtime_digest",
-          "kd_chunk"
-        ]
-      }
-    },
-    "preregistration": "logs/autoinit_phase_a_preregistration.md",
-    "preregistration_sha256": "9b4229c85062de44dfc568f9a883451d75e2d12a718a75b16caeb6112a873429",
-    "recovery_identity": {
-      "protocol_fingerprint_excludes": [
-        "student initialization artifact",
-        "seed"
-      ],
-      "probe_identity": "protocol + initialization_artifact_digest + seed",
-      "matched_pair_predicate": "both_materialized AND protocol_identical AND same_seed AND initializations_differ",
-      "trainer_identity": "trainer_source_digest over 7 declared files; repo commit is provenance only",
-      "runtime_identity": "RuntimeEnvironmentFingerprint incl. image digest, required before a control is trained",
-      "materialization_required": [
-        "trainer_source_digest",
-        "trainer_source_set_version",
-        "runtime_digest"
-      ],
-      "materialization_rule": "unknown vs unknown is unverifiable and NOT eligible for MATCHED; only verified-identical values match",
-      "attested_protocol_artifact": "logs/autoinit_phase_a_protocol_attested.json",
-      "attested_by": "scripts/autoinit/attest_protocol.py (preflight Stage 0)",
-      "stage_2_compares_against": "the Stage-0 attested protocol hash, not the preregistration (runtime_digest is null there)"
-    },
-    "recovery_scoring_contract": {
-      "contract": "recovery_search_scoring@v2",
-      "digest": "f76008d5459c781cdfd0f11e39fc379c74af641f7567a168c10bf48e6a3e66fb",
-      "supersedes": "recovery_search_scoring@v1",
-      "superseded_before_any_paid_measurement": true,
-      "classification": "pre-measurement metric defect correction, not adaptive",
-      "prompt_content_unchanged": true,
-      "validation": "logs/autoinit_recovery_scoring_validation.json"
-    },
-    "generation_protocol": {
-      "declared_fingerprint": "f4ac744867af5818826ab6e8da85213556ef90b1759374211d94854c3c780c73",
-      "source_digest": "baf232a18123aa22f2a107bbd51c93c638ca7f466fbe0aac451137fc19a4abbe",
-      "materialized_at": "preflight Stage 0",
-      "evaluation_protocol": "generation + recovery_search_scoring@v2 + recovery_search_v1"
-    }
-  },
-  "proposed_pilot": {
-    "authorized": false,
-    "schedule": "no pruning at level 0, then beam width 6",
-    "n_profiles": 1,
-    "searched_leaves": 5,
-    "canonical_control": "artifacts/stage1/qwen3_0p6b_init_v0/checkpoint (injected by hash)",
-    "survivors": 2,
-    "seeds": [
-      "sa",
-      "sb",
-      "sc (conditional)"
-    ],
-    "expected_usd": 17.0,
-    "hard_backstop_usd": 26.21,
-    "margin_against_released_headroom_usd": 4.16,
-    "peak_working_storage_gib": 106
-  },
-  "tests": {
-    "passing": 1558,
-    "skipped": 7,
-    "venvs_verified": [
-      "repo .venv transformers 5.13.1",
-      "transformers 4.57.1"
-    ]
-  },
-  "proposed_micro_preflight": {
-    "authorized": false,
-    "expected_usd": 4.2,
-    "max_usd": 8.6,
-    "gpu": "1 x L40S",
-    "hours": 3.5,
-    "staged": true,
-    "stages": [
-      "0 runtime attestation + protocol materialization/freeze",
-      "1 cheap machine gates",
-      "2 permanent canonical controls",
-      "3 control characterization"
-    ],
-    "fail_closed": "controls are not trained unless stages 0 and 1 pass",
-    "includes_control_rerun": true,
-    "control_seeds": 2,
-    "note": "the $2.80 rerun produces the permanent Phase-A control probes, so Phase A needs 7 probes instead of 9",
-    "preflight_plan_hash": "37dbd7b22e3e884eff9d55f95c5ce25a212f823d2f396691c30d47930076f8ab",
-    "blocker_before_phase_a": "the preregistration must be re-emitted with the attested protocol fingerprint; until Stage 0 runs, runtime_digest is null and no Phase-A comparison is eligible for MATCHED",
-    "held": false,
-    "held_reason": "RESOLVED 2026-08-13: the tool scoring defect is corrected under recovery_search_scoring@v2 and validated at zero cost; the maintainer approved the correction and re-authorized the preflight at $4.20 expected / $8.60 hard.",
-    "spent_usd": 0.0,
-    "authorization_artifact": "logs/autoinit_micro_preflight_authorization.json",
-    "authorization_sha256": "94b6c5d2167b7248ac4ba67fee15cdd97f20512a164fcb045b69bd330916d8fe",
-    "harness": {
-      "setup": "scripts/pod/autoinit_preflight_setup.sh",
-      "driver": "scripts/pod/autoinit_preflight_driver.py",
-      "launcher": "scripts/pod/autoinit_preflight_launch.py",
-      "rehearsal": "tests/pod/test_autoinit_preflight_rehearsal.py",
-      "rehearsal_scenarios": 18,
-      "rehearsed": true,
-      "launched": false
-    }
+ "schema": "aadistill.current_state/v1",
+ "generated_utc": "2026-08-15T09:10:00+00:00",
+ "current_phase": "AutoInitializer Stage 3 COMPLETE: both permanent controls characterized and thresholds materialized. Phase A search not authorized and does not fit the remaining budget.",
+ "active_experiment": null,
+ "paid_compute_running": false,
+ "next_work": "Maintainer decision on the Phase-A budget shape: repriced from the measured battery it is $12.36 expected / $20.13 hard against $19.5238 remaining, short $0.61. Options and their costs are in logs/autoinit_phase_a_repricing.md. Do not retrain the permanent controls, do not reopen the frozen search/recovery design, do not launch paid compute without separate authorization.",
+ "teacher": {
+  "model_id": "Qwen/Qwen3-4B-Thinking-2507",
+  "revision": "768f209d9ea81521153ed38c47d515654e938aea",
+  "num_parameters": 4022468096
+ },
+ "canonical_init": {
+  "path": "artifacts/stage1/qwen3_0p6b_init_v0/checkpoint",
+  "weights_sha256": "86fbba78e8a2a32481ca77e5ac362ed1f17a39dbc30bcbc952cabd5df2633e54",
+  "num_parameters": 596049920,
+  "tier": "TIER_1_ACTIVE_CANONICAL"
+ },
+ "best_checkpoint": {
+  "name": "e1_r2960k_sb_pca",
+  "path": "artifacts/stage3/rescued/e1_r2960k_sb_pca",
+  "recipe": "E1/P1 KD-heavy, 2.96M rung, seed sb (20260801)",
+  "tier": "TIER_1_ACTIVE_CANONICAL",
+  "sole_copy_not_on_relay": true,
+  "frozen_battery_reference": {
+   "usable_rollout_rate": 0.73,
+   "correct_overall": 0.1867,
+   "correct_given_usable": 0.2511,
+   "inclusion_mask_sha256": "d6e24e0b09da1bcc692b1dc96d8236808d29551a9fc94a47d1d968fd3f73d6ba"
   }
+ },
+ "e8a_result": {
+  "status": "COMPLETE",
+  "depth_map_removed": [
+   2,
+   3,
+   15,
+   16,
+   20,
+   21,
+   26,
+   32
+  ],
+  "full_width_kl": {
+   "contribution": 0.620586,
+   "positional": 1.932531,
+   "ratio": 3.11
+  },
+  "contribution_init_sha256": "7a0694a5d5c59f8e0b0ebc9ac8648b1ec026bf93cab026d33c61ca8fc85d1edb"
+ },
+ "e8b_result": {
+  "status": "STRATEGICALLY_TERMINATED",
+  "valid": "four step-0 initialization measurements only",
+  "invalid": "no DP-vs-DC, no FP-vs-FC, no depth x compression interaction",
+  "dp_sa": "infrastructure artifact, not a promotable arm"
+ },
+ "budget": {
+  "actual_cumulative_spend_usd": 191.5462,
+  "authorized_cap_usd": 211.07,
+  "remaining_usd": 19.5238,
+  "phase_a_repriced": {
+   "expected_usd": 12.36,
+   "hard_usd": 20.13,
+   "fits_remaining": false,
+   "shortfall_usd": 0.61
+  }
+ },
+ "latest_commit": "4fe61d9034df1f1a9eba05aff8b54ae15ecefee6",
+ "documents": {
+  "logs/STATE.md": {
+   "path": "logs/STATE.md",
+   "sha256": "5f575ad170078ea0b4b8b9b51cbb7f3515f9c3fe60499bcacb5f482eed51df11"
+  },
+  "docs/HANDOFF_AUTOINITIALIZER.md": {
+   "path": "docs/HANDOFF_AUTOINITIALIZER.md",
+   "sha256": "a061cd9dd144a9f55e4ee0831af0afc97b4fcd7799be3ce3380759626e30877e"
+  },
+  "logs/EXPERIMENT_INDEX.md": {
+   "path": "logs/EXPERIMENT_INDEX.md",
+   "sha256": "066d3e81766cd4462168b4d32cb44660a7b4435fb3485c07c30b29290dbdcc3c"
+  },
+  "logs/BUDGET_LEDGER.md": {
+   "path": "logs/BUDGET_LEDGER.md",
+   "sha256": "f9353c77083a26ec3f0a099cd963ab810817d47b29de1eccf7cbc3687803c676"
+  },
+  "logs/decisions.md": {
+   "path": "logs/decisions.md",
+   "sha256": "7af45723ff348c4b23cdd55a7183a256831a5ed27040d4bbf80695e42900bc85"
+  },
+  "logs/checkpoint_registry.json": {
+   "path": "logs/checkpoint_registry.json",
+   "sha256": "7fbb7804c763dd6a8210be28268332f313890326b3d81f9312e16bcc512eaf78"
+  },
+  "logs/checkpoint_tombstones.json": {
+   "path": "logs/checkpoint_tombstones.json",
+   "sha256": "7dca24bbcda1c44984f59babf762e5892462f7eaebf6a1396991b45c2ac04ad4"
+  },
+  "AGENTS.md": {
+   "path": "AGENTS.md",
+   "sha256": "8ebc254f270e382033a9c9bb8707745c9736dac4f5798f0825c511974cd593e6"
+  }
+ },
+ "read_order": [
+  "logs/STATE.md",
+  "docs/HANDOFF_AUTOINITIALIZER.md",
+  "logs/autoinit_pilot_proposal.md",
+  "logs/EXPERIMENT_INDEX.md",
+  "logs/decisions.md",
+  "logs/checkpoint_registry.json",
+  "logs/e8b_backend_audit.md",
+  "AGENTS.md"
+ ],
+ "closed_paths": [
+  "E8b completion",
+  "P2/CE-heavy expansion incl. P2-5.50M",
+  "FineWeb ratio sweeps",
+  "selecting on held-out NLL",
+  "restricting attention updates",
+  "student-prefix recovery",
+  "E2 phases 2-3"
+ ],
+ "autoinit": {
+  "status": "IMPLEMENTED_ZERO_COST_NOT_RUN_ON_REAL_MODELS",
+  "package": "src/aadistill/autoinit",
+  "tests": 209,
+  "operator_kinds": [
+   "ATTENTION",
+   "COMPOSITE_STAGE1",
+   "DEPTH",
+   "FFN",
+   "RESIDUAL_WIDTH"
+  ],
+  "operator_implementations": [
+   "attention.weight_proxy_v0",
+   "composite.stage1_sandwich_v0",
+   "depth.causal_kl_greedy_v1",
+   "depth.positional_v0",
+   "ffn.activation_importance_v0",
+   "width.global_pca_v0"
+  ],
+  "operator_ledger": "configs/autoinit/operator_ledger.json",
+  "beam_ranking_policy": "beam.pareto_multi_objective@v1",
+  "search_space": "logs/autoinit_v1_search_space.json",
+  "dry_run": "logs/autoinit_dryrun_summary.json",
+  "proposal": "logs/autoinit_pilot_proposal.md",
+  "blocking_prerequisites": [
+   "micro-preflight measurements (5 items) - see logs/autoinit_micro_preflight_plan.md",
+   "calib.reasoning_heavy@v1 not built (Phase B only, independent trigger)"
+  ],
+  "corrections_2026_08_12_review_pass": [
+   "CalibrationNeed.NONE operators use a canonical calib.none@v1 sentinel; search space is 24 x (1+P) x P x P x 1 = 48/288/864, not 48 x P^4",
+   "checkpoint identity is a shard-safe artifact digest; metrics bind to it",
+   "the recovery control is the retained checkpoint injected by frozen hash, not a re-executed composite",
+   "state.nll.general is the general domain alone; NLL is not a beam objective",
+   "beam v1: no pruning at level 0, then width 6; epsilon-dominance; lineage diversity across fronts",
+   "recovery: 5 searched leaves + control on sa, 2 survivors + control on sb, conditional third seed; constraint-then-objective selection",
+   "activation-statistics cache keyed on parent artifact digest + profile + stat spec + adapter version + numerics",
+   "reference teacher logits recomputed per candidate (33.8 GiB avoided)",
+   "resume rejects a journal record measured under a different eval suite"
+  ],
+  "beam_schedule": "beam.delayed_prune@v1 (warmup 1, width 6)",
+  "frozen_assets": {
+   "state_eval_v1": {
+    "path": "artifacts/stage1/state_eval_v1",
+    "role": "INITIALIZER_STATE_EVAL",
+    "n_items": 80,
+    "positions": 74022,
+    "content_sha256": "a1197205e43aad0e71c0e1bb436ee7babba3b5d8bb25b9c4d5c464f659db20fc"
+   },
+   "recovery_search_v1": {
+    "path": "artifacts/stage3/recovery_search_v1",
+    "role": "RECOVERY_SEARCH",
+    "n_prompts": 190,
+    "n_scorable": 170,
+    "content_sha256": "a1b22778b00d95b6aba358c14a5af5b559fd807bb371c92131eacca59479f323",
+    "manifest_sha256": "72d8c0535e7752faf704d9075b7835a47610fd3cd26866cf5be7d48eb7b40ad1"
+   },
+   "role_isolation": {
+    "report": "logs/autoinit_role_isolation.json",
+    "passed": true,
+    "complete": true,
+    "exact_overlaps": 0
+   },
+   "canonical_controls": {
+    "historical_checkpoints_exist": true,
+    "historical_hashes_verify": true,
+    "recipe_matched": false,
+    "consequence": "rerun canonical sa/sb under the current frozen trainer in the micro-preflight; those become the permanent Phase-A control probes",
+    "audit": "logs/autoinit_recovery_fingerprint_audit.json",
+    "passes_legacy_lineage_subset": true,
+    "recipe_matched_control": false,
+    "unverifiable": [
+     "trainer_source_digest",
+     "trainer_source_set_version",
+     "runtime_digest",
+     "kd_chunk"
+    ]
+   }
+  },
+  "preregistration": "logs/autoinit_phase_a_preregistration.md",
+  "preregistration_sha256": "9b4229c85062de44dfc568f9a883451d75e2d12a718a75b16caeb6112a873429",
+  "recovery_identity": {
+   "protocol_fingerprint_excludes": [
+    "student initialization artifact",
+    "seed"
+   ],
+   "probe_identity": "protocol + initialization_artifact_digest + seed",
+   "matched_pair_predicate": "both_materialized AND protocol_identical AND same_seed AND initializations_differ",
+   "trainer_identity": "trainer_source_digest over 7 declared files; repo commit is provenance only",
+   "runtime_identity": "RuntimeEnvironmentFingerprint incl. image digest, required before a control is trained",
+   "materialization_required": [
+    "trainer_source_digest",
+    "trainer_source_set_version",
+    "runtime_digest"
+   ],
+   "materialization_rule": "unknown vs unknown is unverifiable and NOT eligible for MATCHED; only verified-identical values match",
+   "attested_protocol_artifact": "logs/autoinit_phase_a_protocol_attested.json",
+   "attested_by": "scripts/autoinit/attest_protocol.py (preflight Stage 0)",
+   "stage_2_compares_against": "the Stage-0 attested protocol hash, not the preregistration (runtime_digest is null there)"
+  },
+  "recovery_scoring_contract": {
+   "contract": "recovery_search_scoring@v2",
+   "digest": "f76008d5459c781cdfd0f11e39fc379c74af641f7567a168c10bf48e6a3e66fb",
+   "supersedes": "recovery_search_scoring@v1",
+   "superseded_before_any_paid_measurement": true,
+   "classification": "pre-measurement metric defect correction, not adaptive",
+   "prompt_content_unchanged": true,
+   "validation": "logs/autoinit_recovery_scoring_validation.json"
+  },
+  "generation_protocol": {
+   "declared_fingerprint": "f4ac744867af5818826ab6e8da85213556ef90b1759374211d94854c3c780c73",
+   "source_digest": "baf232a18123aa22f2a107bbd51c93c638ca7f466fbe0aac451137fc19a4abbe",
+   "materialized_at": "preflight Stage 0",
+   "evaluation_protocol": "generation + recovery_search_scoring@v2 + recovery_search_v1"
+  }
+ },
+ "proposed_pilot": {
+  "authorized": false,
+  "schedule": "no pruning at level 0, then beam width 6",
+  "n_profiles": 1,
+  "searched_leaves": 5,
+  "canonical_control": "artifacts/stage1/qwen3_0p6b_init_v0/checkpoint (injected by hash)",
+  "survivors": 2,
+  "seeds": [
+   "sa",
+   "sb",
+   "sc (conditional)"
+  ],
+  "expected_usd": 17.0,
+  "hard_backstop_usd": 26.21,
+  "margin_against_released_headroom_usd": 4.16,
+  "peak_working_storage_gib": 106
+ },
+ "tests": {
+  "passing": 1558,
+  "skipped": 7,
+  "venvs_verified": [
+   "repo .venv transformers 5.13.1",
+   "transformers 4.57.1"
+  ]
+ },
+ "proposed_micro_preflight": {
+  "authorized": false,
+  "expected_usd": 4.2,
+  "max_usd": 8.6,
+  "gpu": "1 x L40S",
+  "hours": 3.5,
+  "staged": true,
+  "stages": [
+   "0 runtime attestation + protocol materialization/freeze",
+   "1 cheap machine gates",
+   "2 permanent canonical controls",
+   "3 control characterization"
+  ],
+  "fail_closed": "controls are not trained unless stages 0 and 1 pass",
+  "includes_control_rerun": true,
+  "control_seeds": 2,
+  "note": "the $2.80 rerun produces the permanent Phase-A control probes, so Phase A needs 7 probes instead of 9",
+  "preflight_plan_hash": "37dbd7b22e3e884eff9d55f95c5ce25a212f823d2f396691c30d47930076f8ab",
+  "blocker_before_phase_a": "the preregistration must be re-emitted with the attested protocol fingerprint; until Stage 0 runs, runtime_digest is null and no Phase-A comparison is eligible for MATCHED",
+  "held": false,
+  "held_reason": "RESOLVED 2026-08-13: the tool scoring defect is corrected under recovery_search_scoring@v2 and validated at zero cost; the maintainer approved the correction and re-authorized the preflight at $4.20 expected / $8.60 hard.",
+  "spent_usd": 0.0,
+  "authorization_artifact": "logs/autoinit_micro_preflight_authorization.json",
+  "authorization_sha256": "94b6c5d2167b7248ac4ba67fee15cdd97f20512a164fcb045b69bd330916d8fe",
+  "harness": {
+   "setup": "scripts/pod/autoinit_preflight_setup.sh",
+   "driver": "scripts/pod/autoinit_preflight_driver.py",
+   "launcher": "scripts/pod/autoinit_preflight_launch.py",
+   "rehearsal": "tests/pod/test_autoinit_preflight_rehearsal.py",
+   "rehearsal_scenarios": 18,
+   "rehearsed": true,
+   "launched": false
+  }
+ },
+ "stage3_control_characterization": {
+  "status": "COMPLETE",
+  "utc": "2026-08-15T09:04:30Z",
+  "battery": "recovery_search_v2",
+  "aggregation": "pooled_counts@v2",
+  "controls": [
+   "preflight_ctl_r0860k_sa",
+   "preflight_ctl_r0860k_sb"
+  ],
+  "pooled": {
+   "n": 380,
+   "usable": 141,
+   "usable_rollout_rate": 0.37105263157894736,
+   "n_scorable": 340,
+   "correct": 4,
+   "correct_overall": 0.011764705882352941,
+   "correct_given_usable": 0.02857142857142857
+  },
+  "per_seed_usable_rollout_rate": {
+   "sa": 0.3895,
+   "sb": 0.3526
+  },
+  "thresholds": {
+   "equivalence_interval": 0.011695296982299022,
+   "feasibility_floor": 0.3
+  },
+  "no_context_limit": {
+   "sa": 1.0,
+   "sb": 1.0
+  },
+  "battery_wall_time_min": {
+   "both_controls": 19.65,
+   "marginal_per_checkpoint": 8.43
+  },
+  "products": "logs/autoinit_stage3_complete/"
+ }
 }

@@ -630,7 +630,7 @@ PYTHONPATH=src python scripts/training/validate_e8_arms.py --require-init \
 
 ## 15. Operational contract
 
-[`scripts/pod/AGENTS.md`](../scripts/pod/AGENTS.md) is binding for both pods:
+[`scripts/pod/AGENTS.md`](../../scripts/pod/AGENTS.md) is binding for both pods:
 detached start via `start_job.py`; `watchdog.py` beside the launcher from pod
 creation; `LogRelay` mirroring event streams continuously;
 `collect_artifacts.py` gating teardown with `final_required` semantics; hash

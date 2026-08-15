@@ -142,9 +142,9 @@ $2.30   RAISED 2026-08-14 with maintainer approval, after attempt 1 spent
 | continuation attempt 2 bought nothing: three consecutive cold hosts, all in the uv-sync window | $0.6367 | `decisions.md` 2026-08-14 |
 | continuation attempt 3 bought nothing, but failed in 4 min | $0.0700 | `uv sync` cannot install a registry-pinned wheel offline |
 | continuation attempt 4: train env offline in 11 s, then `pip install vllm` hung 76 min | $1.3672 | the exposure named in the offline commit |
-| continuation attempt 5: every offline fix worked on hardware; died on the LAST line of setup, a stale binding to the micro-preflight authorization | $0.1369 | `autoinit_continuation_attempt5/` |
-| continuation attempt 6: the session-scoped authorization gate PASSED on the pod; setup finished with SETUP_RC=0 and the launcher misread it as setup_failed, because the shared setup wrote markers to the preflight's status filename | $0.1324 | `autoinit_continuation_attempt6/` |
-| continuation attempt 7: **the driver ran.** Stages 0/1/2 passed; Stage 3 characterized sa and failed on sb, whose checkpoint has no tokenizer files | $0.4500 | `autoinit_continuation_attempt7/` |
+| continuation attempt 5: every offline fix worked on hardware; died on the LAST line of setup, a stale binding to the micro-preflight authorization | $0.1369 | `autoinit_continuation_attempts/attempt5/` |
+| continuation attempt 6: the session-scoped authorization gate PASSED on the pod; setup finished with SETUP_RC=0 and the launcher misread it as setup_failed, because the shared setup wrote markers to the preflight's status filename | $0.1324 | `autoinit_continuation_attempts/attempt6/` |
+| continuation attempt 7: **the driver ran.** Stages 0/1/2 passed; Stage 3 characterized sa and failed on sb, whose checkpoint has no tokenizer files | $0.4500 | `autoinit_continuation_attempts/attempt7/` |
 | continuation attempt 8: **COMPLETE.** ALL_DONE, both controls characterized, thresholds materialized | $0.6816 | `autoinit_stage3_complete/` |
 | **continuation total: $4.1060 spent across eight attempts; Stage 3 COMPLETE** | $4.1060 | arithmetic corrected: the earlier $1.2712 line double-counted a rounded print; the per-attempt entries were always right |
 
