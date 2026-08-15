@@ -2711,3 +2711,150 @@ in assumptions that a later study would have to unpick.
   against $13.02 / $21.02. With $19.5238 remaining, expected fits and **hard does
   not, by $0.61**. Phase A remains unauthorized; the options and their costs are
   in `autoinit_phase_a_repricing.md`. Not decided here.
+
+---
+
+## 2026-08-15 — The Phase-A harness did not exist; it is now built and rehearsed
+
+- **Context:** the session handoff asked for a fresh Phase-A authorization bound
+  to "the actual harness digest". Investigation found there was no Phase-A
+  harness to digest. The *science* was implemented and frozen as a library —
+  `BeamSearch`, ε-Pareto ranking, `select_rung1_survivors`, `select_final_winner`
+  with `unresolved_equivalence`, the catastrophic per-capability gate — but the
+  orchestration that runs it on paid hardware had never been written.
+  `BeamSearch(` was instantiated only in `dry_run_search.py` and tests;
+  `probe_configs`/`admit_leaves` had no consumer outside the same two places, and
+  `recovery.py:2068` says so outright: *"Descriptors only — nothing here launches
+  anything."* `run_phase_a` existed only as a **forbidden string** in two
+  rehearsal tests.
+- **Decision:** build the harness rather than redesign anything. Nothing frozen
+  was touched: 48 decomposed P=1 paths, warmup 1 then beam 6, 5 searched leaves +
+  the injected canonical control on sa, best 2 + control on sb, the conditional
+  sc rung, ε-Pareto with NLL diagnostic-only, and the selection rules are all
+  unchanged.
+- **`PhaseAAuthorization` is a separate type, not a relaxation.**
+  `SpendAuthorization.allows_phase_a` is still a hard `False` and its `load()`
+  still refuses an artifact claiming Phase A — verified by test in **both**
+  directions: a spend artifact cannot load as a Phase-A grant (refused by
+  schema), and a Phase-A artifact cannot load as a spend one (refused by the
+  pre-existing guard, which was not edited). `autoinit_preflight_setup.sh` keeps
+  `assert a.allows_phase_a is False` literally intact for every non-Phase-A
+  session; only `SESSION_KIND=phase_a` routes to the type that can say yes.
+- **The search runs in the driver's process, not as a subprocess.**
+  `InitializationState` has no `from_dict` — the journal is append-only evidence
+  — so a driver that shelled out would have to rebuild candidates from JSON and
+  would lose `admit_leaves`, the gate that refuses an intermediate which cannot
+  be a recovery candidate at all.
+- **The tie-break rung is built in the driver, not in `recovery.py`.**
+  `probe_configs` indexes `plan.seeds` and refuses rung 3. Extending it would
+  mean editing `recovery.py`, which is inside the frozen
+  `recovery_search_scoring@v2` source set, moving a digest pinned in the
+  preregistration and in the attested protocol.
+- **Resume is per probe.** Nine probes at ~71 min each, on infrastructure that
+  has failed four of the last eight attempts. A probe is restored only when the
+  student artifact digest, the seed and the evaluation protocol hash all still
+  match — the same binding rule `BeamSearch._restore` applies to search states.
+  Mutation-tested: relaxing the seed check makes the suite fail.
+- **Rehearsed, not inspected.** `tests/pod/test_phase_a_rehearsal.py` (40 tests)
+  drives the driver's full lifecycle, and `tests/pod/test_phase_a_search_executes.py`
+  (6 tests) executes the real `run_phase_a_search` at toy scale on CPU —
+  real operators, real checkpoints, real reload, real hashing, real measurement,
+  real control injection, and a real resume that proves the second pass
+  re-measures nothing.
+- **Two defects were caught by validating rather than assuming.** `ArtifactSpec`
+  takes no `note` kwarg, so the first artifact specs would have died on the pod
+  after the run finished, exactly as collection did once before; and
+  `test_launcher_forwards_setup_env.py` correctly flagged a new setup variable
+  the preflight launcher does not forward. The second was fixed by removing the
+  variable: setup had no executing plan to compare a science hash against, so
+  the check could only compare two strings the launcher supplied. The driver's
+  Stage 0 binds the **rebuilt** plan instead, which is strictly stronger.
+- **A test that used its own subject as its oracle was found and fixed.** The
+  probe-override test asserted `changed <= mod.PROBE_OVERRIDES`; widening that
+  constant to admit `loss` kept it green. It now asserts a literal set, and the
+  mutation fails as it should.
+- **Alternatives considered:** relaxing `SpendAuthorization` (rejected: weakens a
+  fail-closed gate protecting two other session types); a standalone search
+  script (rejected: loses `admit_leaves`); extending `probe_configs` for rung 3
+  (rejected: moves a pinned digest); pricing only 9 probes (rejected: the
+  watchdog would kill a legitimate tie-break mid-probe).
+- **Risks:** the operator-build compute is still the one unmeasured term in the
+  search, covered by the 180-minute allowance rather than by measurement. The
+  searched-leaf storage plan is unresolved and is flagged, not decided.
+- **Revisit when:** Phase A is authorized and run, or the operator build is
+  measured.
+
+## 2026-08-15 — Project cap raised to $213.00 for Phase A
+
+- **Context:** Phase A did not fit under `$211.07`. Repriced from the measured
+  Stage-3 battery it was `$12.36 expected / $20.13 hard` against `$19.5238`
+  remaining — short by `$0.61`.
+- **Decision:** the maintainer approved raising the cap, stating "e.g. $213-214".
+  `$213.00` was selected from that range as the conservative end and recorded in
+  `BUDGET_LEDGER.md`. Nothing has been spent against it.
+- **Alternatives considered and declined:** dropping the conditional third seed
+  (hard would fall to `$16.60`, but Stage 3 measured real seed disagreement —
+  GSM8K 0.5667 vs 0.3000, math_verified 0.4000 vs 0.0667 — and sc is the escape
+  hatch for exactly that, so this is a design change, not an accounting one);
+  cutting the `$3.00` infrastructure reserve (four of eight continuation attempts
+  hit an infrastructure event).
+- **The binding price is the launcher's, not the document's.**
+  `logs/autoinit_phase_a_repricing.md` priced search and probes but not the
+  session around them. `make_plan` prices setup, attestation, selection,
+  manifest, synchronization, transfer, a 10% contingency and a 20-minute
+  artifact-recovery reserve, and computes **expected $17.8933 / soft $19.6826 /
+  hard $20.0126**, of which `$3.5328` is the conditional tie-break rung. Expected
+  cost of a Phase A that resolves after two seeds is **$14.3604**. Margin after a
+  worst-case run: `$1.4412`.
+- **Phase A is prepared, not authorized.** No `PhaseAAuthorization` artifact has
+  been issued; the launcher refuses to create a pod without one, and the raised
+  cap does not by itself authorize a launch.
+- **Revisit when:** an authorization is issued, or the operator-build measurement
+  moves the search allowance.
+
+## 2026-08-15 — Searched-leaf durability: measured, and it needs no relay growth
+
+- **Context:** the last open item before a Phase-A authorization. Settled before
+  the harness digest is computed, because the retention rule lives in the
+  launcher and driver — deciding it afterwards would invalidate an issued digest.
+- **Measured, not inferred:** relay `usedStorage` **91.54 GiB**
+  (98,287,134,179 B via `?expand[]=usedStorage`; LFS inventory sum 92.03 GiB over
+  1,143 files) against the still-inferred 100 GB / 93.13 GiB limit — **1.60 GiB
+  of headroom**. A 596M bf16 initialization is **1.121 GiB**
+  (`stage1/qwen3_0p6b_init_v0/checkpoint`, corroborated by the 1.12 GiB
+  `size_human` already in `checkpoint_tombstones.json`), so five leaves are
+  **5.61 GiB**. They do not fit; neither do two.
+- **Decision:** relay staging of searched leaves is **off**. The requirement is
+  met on the pod's 200 GB container disk instead. All five leaves stay
+  materialized through rung 1 and the materialization of the sa survivor
+  decision; the two survivors and the control stay through rung 2 and any
+  conditional rung 3; only the finalists are pulled to the dev box.
+- **This is a property of the frozen search, not new machinery.**
+  `BeamSearch._release_weights` fires only for states pruned from the beam,
+  inside the `if partial:` branch; a complete leaf is appended to `self.leaves`
+  and never released (`keep_leaf_weights=True`). Verified at the call site.
+- **What a rejected leaf keeps:** `audit/autoinit_phase_a/leaf_retention.json`,
+  written the moment the rung-1 selection materializes, in the shape
+  `checkpoint_tombstones.json` uses — artifact digest, weights sha256, search
+  lineage, sa probe id, sa result, sa evaluation-protocol hash, selection rule
+  and rejection reason, for **all five** leaves and the control. It loses its
+  bytes and keeps its accountability.
+- **Nothing is deleted and nothing is shrunk.** Rejected leaves are simply not
+  fetched; the pod is destroyed at teardown either way. The design is unchanged:
+  5 searched leaves, the canonical control, sa → best 2 + control → sb,
+  conditional sc, no fourth seed.
+- **`transfer/` is left alone.** It is 7.66 GiB of superseded git bundles, all
+  reproducible from git, and the obvious place to find headroom if the relay is
+  ever needed for this. Reclaiming it is a deletion and therefore a maintainer
+  decision (P12); Phase A does not need it, so it is recorded and untouched.
+- **Exposure accepted, stated plainly:** off-pod durability *during* the run is
+  not provided. A pod lost before teardown loses the leaves, and since weight
+  hashes are not reproducible across sessions a relaunch re-searches rather than
+  resumes. That is a cost exposure bounded by the session's hard threshold, not a
+  scientific-integrity one — and the alternative costs 5.61 GiB of permanent,
+  irreclaimable quota that does not exist.
+- **Also corrected:** the launcher previously fetched only a *winner*. An
+  `unresolved_equivalence` outcome has no winner and both tied candidates are the
+  result, so it now fetches the finalists.
+- **Revisit when:** the relay limit is confirmed from the billing page, or a
+  future session actually needs leaf checkpoints off-pod.

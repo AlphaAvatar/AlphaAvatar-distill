@@ -1,0 +1,90 @@
+{
+  "spec": "aadistill.artifact_spec/v1",
+  "session": "autoinit_phase_a_failed",
+  "note": "reduced spec for a Phase-A run that did not reach ALL_DONE. Only the evidence file is required: a gate that blocks teardown on artifacts the run correctly refused to produce keeps a failed pod billing, and this session is the most expensive in the project to leave running. Everything else is collected if present \u2014 above all the probe journal, because a run that died at hour eleven with six completed probes must come home with those six, and the gate logs, which are what a failure needs read afterwards.",
+  "entries": [
+    {
+      "artifact_class": "phase_a_evidence",
+      "pattern": "audit/autoinit_phase_a/phase_a_evidence.json",
+      "required": true,
+      "lifecycle": "final_required"
+    },
+    {
+      "artifact_class": "leaf_retention",
+      "pattern": "audit/autoinit_phase_a/leaf_retention.json",
+      "required": false,
+      "lifecycle": "final_required",
+      "min_matches": 0
+    },
+    {
+      "artifact_class": "probe_journal",
+      "pattern": "audit/autoinit_phase_a/probes/*.json",
+      "required": false,
+      "lifecycle": "final_required",
+      "min_matches": 0
+    },
+    {
+      "artifact_class": "search_journal",
+      "pattern": "autoinit/phase_a_search/states.jsonl",
+      "required": false,
+      "lifecycle": "final_required",
+      "min_matches": 0
+    },
+    {
+      "artifact_class": "gate_log",
+      "pattern": "audit/autoinit_phase_a/*.log",
+      "required": false,
+      "lifecycle": "final_required",
+      "min_matches": 0
+    },
+    {
+      "artifact_class": "audit_json",
+      "pattern": "audit/autoinit_phase_a/*.json",
+      "required": false,
+      "lifecycle": "final_required",
+      "min_matches": 0
+    },
+    {
+      "artifact_class": "probe_config",
+      "pattern": "audit/autoinit_phase_a/configs/*.json",
+      "required": false,
+      "lifecycle": "final_required",
+      "min_matches": 0
+    },
+    {
+      "artifact_class": "per_sample",
+      "pattern": "audit/autoinit_phase_a/*_per_sample.jsonl",
+      "required": false,
+      "lifecycle": "final_required",
+      "min_matches": 0
+    },
+    {
+      "artifact_class": "generations",
+      "pattern": "eval/phase_a/*/*.generations.jsonl",
+      "required": false,
+      "lifecycle": "final_required",
+      "min_matches": 0
+    },
+    {
+      "artifact_class": "generation_summary",
+      "pattern": "eval/phase_a/*/*.json",
+      "required": false,
+      "lifecycle": "final_required",
+      "min_matches": 0
+    },
+    {
+      "artifact_class": "probe_train_log",
+      "pattern": "stage3/phase_a/*/train_log.jsonl",
+      "required": false,
+      "lifecycle": "final_required",
+      "min_matches": 0
+    },
+    {
+      "artifact_class": "session_evidence",
+      "pattern": "audit/autoinit_phase_a/session/*",
+      "required": false,
+      "lifecycle": "final_required",
+      "min_matches": 0
+    }
+  ]
+}

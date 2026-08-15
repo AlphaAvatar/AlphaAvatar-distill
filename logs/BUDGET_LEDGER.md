@@ -116,7 +116,49 @@ $162.49   E8 baseline cap
 $172.57   +$10.08 for E8 (2026-08-11)
 $173.40   +$0.83 increment
 $211.07   +$47.18 E8b hard backstop (2026-08-11), rounded up from $211.0633
+$213.00   +$1.93 for Phase A (2026-08-15). The maintainer approved raising the
+          cap "e.g. $213-214" after being shown that Phase A did not fit;
+          $213.00 was selected from that range as the conservative end and is
+          the figure recorded here. Nothing has been spent against it.
 ```
+
+### Why the cap moved, and by how much
+
+Phase A did not fit under `$211.07`. Repriced from the measured Stage-3 battery
+it was `$12.36 expected / $20.13 hard` against `$19.5238` remaining — short by
+`$0.61`. The alternatives were dropping the conditional third seed (a design
+change, and Stage 3 showed real seed disagreement) or cutting the `$3.00`
+infrastructure reserve (four of eight continuation attempts hit an
+infrastructure event). Raising the cap preserves the frozen design.
+
+**The launcher's own model prices it higher than the repricing document did**,
+and the launcher's figure is the one that binds, because it is what
+`plan_session` computes before a pod can exist:
+
+```
+                                    repricing doc     launcher make_plan
+search                                    $1.76        180 min allowance
+9 probes (rung 1 + rung 2)               $10.60        priced per step
+conditional seed-sc rung (3 probes)       $3.53        priced as headroom
+setup, attestation, selection,
+  manifest, sync, transfer                  --         48 min
+contingency 10% + 20 min reserve            --         included
+-------------------------------------------------------------------------
+expected                                 $12.36        $17.8933
+  of which conditional tie-break              --        $3.5328
+  expected without the tie-break              --       $14.3604
+soft                                        --         $19.6826
+hard                                     $20.13        $20.0126
+```
+
+The document priced search and probes; it did not price the session around
+them. The `$14.3604` figure is the honest expected cost of a Phase A that
+resolves after two seeds.
+
+The conditional rung is **priced as headroom, not as an expectation**: if it were
+left out, a legitimately triggered seed-sc rung would be killed by the watchdog
+mid-probe. An unused leash costs nothing, because the pod is torn down on
+completion rather than at the threshold.
 
 Within that project cap, the characterization continuation carries its own bound:
 
@@ -151,9 +193,14 @@ $2.30   RAISED 2026-08-14 with maintainer approval, after attempt 1 spent
 ## Current position
 
 ```
-authorized cumulative cap                                    $211.07
+authorized cumulative cap                                    $213.00
 actual cumulative spend                                      $191.5462
-unused authorization remaining                               $ 19.5238
+unused authorization remaining                               $ 21.4538
+Phase A hard threshold, from the launcher's own make_plan     $ 20.0126
+margin after a worst-case Phase A                            $  1.4412
+    Phase A is PREPARED but NOT AUTHORIZED: no
+    PhaseAAuthorization artifact has been issued, and the
+    launcher refuses to create a pod without one.
 continuation spent across eight attempts                     $  4.1060
     0.6312 + 0.6367 + 0.0700 + 1.3672 + 0.1369 + 0.1324 + 0.4500
     + 0.6816.  STAGE 3 IS COMPLETE: attempt 8 returned ALL_DONE,

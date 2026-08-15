@@ -421,9 +421,36 @@ mark "TESTS_OK:${tt}s"
 # the same failure to the next time either plan moves.
 : "${SESSION_AUTH_PATH:?the launcher must name the session authorization}"
 : "${SESSION_PLAN_HASH:?the launcher must name the session plan hash}"
-say "verifying $SESSION_AUTH_PATH binds to this session's plan"
-cd "$REPO" && PYTHONPATH=src SESSION_AUTH_PATH="$SESSION_AUTH_PATH" \
-  SESSION_PLAN_HASH="$SESSION_PLAN_HASH" /opt/train/bin/python -c "
+# Which artifact TYPE this session's authorization is. The default is the narrow
+# `SpendAuthorization`, whose `allows_phase_a` is a hard False — so the assertion
+# guarding the preflight and the continuation is unchanged, and a Phase-A
+# artifact still cannot be loaded by them (its `phase_a_authorized` trips
+# `SpendAuthorization.load`). Only a session that explicitly declares
+# SESSION_KIND=phase_a gets the type that can say yes, and that type refuses
+# anything not issued under the Phase-A schema.
+SESSION_KIND="${SESSION_KIND:-spend}"
+say "verifying $SESSION_AUTH_PATH binds to this session's plan (kind=$SESSION_KIND)"
+if [ "$SESSION_KIND" = "phase_a" ]; then
+  # Deliberately NOT checked here: the science plan. Setup has no executing plan
+  # to compare against, so a check here could only compare two strings the
+  # launcher supplied. The driver's Stage 0 rebuilds the plan and calls
+  # `require_science_plan` on the rebuilt object, which is strictly stronger, and
+  # it also runs `assert_preregistered` against the frozen artifact.
+  cd "$REPO" && PYTHONPATH=src SESSION_AUTH_PATH="$SESSION_AUTH_PATH" \
+    SESSION_PLAN_HASH="$SESSION_PLAN_HASH" /opt/train/bin/python -c "
+import os
+from aadistill.autoinit.phase_a import PhaseAAuthorization
+a = PhaseAAuthorization.load(os.environ['SESSION_AUTH_PATH'])
+a.require_plan(os.environ['SESSION_PLAN_HASH'])
+assert a.allows_phase_a is True, 'a Phase-A session needs a Phase-A authorization'
+assert a.automatic_followon_start is False, 'nothing chains off Phase A'
+print(f'  {a.authorization_id}: stages {list(a.authorized_stages)}, '
+      f'hard \${a.hard_cap_usd:.2f}, phase A {a.allows_phase_a}, '
+      f'followon {a.automatic_followon_start}')
+" || { say "THE SESSION AUTHORIZATION DOES NOT BIND TO THIS SESSION'S PLAN"; mark "AUTHORIZATION_MISMATCH"; exit 98; }
+else
+  cd "$REPO" && PYTHONPATH=src SESSION_AUTH_PATH="$SESSION_AUTH_PATH" \
+    SESSION_PLAN_HASH="$SESSION_PLAN_HASH" /opt/train/bin/python -c "
 import os
 from aadistill.autoinit.authorization import SpendAuthorization
 a = SpendAuthorization.load(os.environ['SESSION_AUTH_PATH'])
@@ -432,6 +459,7 @@ assert a.allows_phase_a is False, 'this artifact claims Phase A authorization'
 print(f'  {a.authorization_id}: stages {list(a.authorized_stages)}, '
       f'hard \${a.hard_cap_usd:.2f}, phase A {a.allows_phase_a}')
 " || { say "THE SESSION AUTHORIZATION DOES NOT BIND TO THIS SESSION'S PLAN"; mark "AUTHORIZATION_MISMATCH"; exit 98; }
+fi
 mark AUTHORIZATION_OK
 
 nvidia-smi --query-gpu=name,memory.total,driver_version --format=csv,noheader

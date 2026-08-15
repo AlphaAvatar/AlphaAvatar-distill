@@ -17,6 +17,7 @@ from __future__ import annotations
 import argparse
 import json
 import sys
+from dataclasses import replace
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -78,18 +79,140 @@ CANONICAL_CONTROL = {
                   "calibration statistics rather than the original Stage-0 ones"),
 }
 PENDING = "PENDING_MICRO_PREFLIGHT"
+#: The pre-measurement draft. Preserved, never rewritten.
+DRAFT_PREREGISTRATION = "logs/autoinit_phase_a_preregistration.json"
+MATERIALIZED_PREREGISTRATION = (
+    "logs/autoinit_phase_a_preregistration_materialized.json")
+#: The frozen *science* plan, in the shape `assert_preregistered` reads. The
+#: preregistration document above is prose-and-evidence around it; this is the
+#: file the driver binds the executing SuccessiveHalvingPlan against, and until
+#: now it had never been written — `plan.freeze` was only ever called into a
+#: dry-run scratch directory and in tests.
+FROZEN_RECOVERY_PLAN = "logs/autoinit_phase_a_recovery_plan_frozen.json"
 #: The frozen recovery-search battery's content hash. Pinned here so the
 #: supersession statement can assert, mechanically, that the *prompts* did not
 #: change when the *scoring* did.
 BATTERY_CONTENT_SHA256 = ("a1b22778b00d95b6aba358c14a5af5b559fd807bb371c92131e"
                           "acca59479f323")
+#: The two rules are re-derived from the control's recorded per-seed rates rather
+#: than copied. Anything looser would let a transcription error become the
+#: threshold the whole selection runs against.
+THRESHOLD_REPRODUCTION_TOLERANCE = 1e-12
+
+
+def _load_json(path: Path):
+    return json.loads(path.read_text()) if path.is_file() else None
+
+
+def build_plan(battery: dict) -> SuccessiveHalvingPlan:
+    """The Phase-A science plan, with its two thresholds still PENDING.
+
+    Extracted so the driver can rebuild the *identical* object rather than
+    transcribing it. `assert_preregistered` compares hashes, so a driver that
+    constructed its own near-copy would fail the gate for a reason that looks
+    like tampering; and one that constructed a matching copy by hand would be a
+    second definition waiting to drift.
+    """
+    return SuccessiveHalvingPlan(
+        plan_id="autoinit.v1.phase_a", recipe=E1_KD_HEAVY_0860K,
+        searched_leaves=5, survivors=2,
+        feasibility_min=-1.0,          # PENDING; see selection_rules below
+        # Formula frozen, value pending the control characterization. Deliberately
+        # NOT pre-filled from the historical prior: a fallback value would be the
+        # second definition this rule exists to eliminate.
+        equivalence=EquivalenceRule(n_pooled=battery["n_scorable_prompts"] * 2),
+        feasibility=FeasibilityRule(n_pooled=battery["n_prompts"] * 2),
+        catastrophic=CATASTROPHIC_V1,
+        capability_schema=CAPABILITY_SCHEMA_V1,
+        aggregation=POOLED_COUNTS_V2,
+        survivor_rule=("rung 1: exclude searched leaves below the feasibility floor, "
+                       "then take the top 2 by correct_overall; the canonical "
+                       "control advances unconditionally and consumes no slot"),
+        winner_rule=("final: pooled-count aggregate over sa and sb; among finalists "
+                     "clearing the feasibility floor, top 1 by correct_overall. The "
+                     "canonical control is eligible to win. Finalists inside the "
+                     "equivalence interval go to seed sc."),
+        battery_asset_id="recovery_search_v2")
+
+
+def build_frozen_plan(repo_root: str | Path = REPO_ROOT, *,
+                      recovery_search: str = "artifacts/stage3/recovery_search_v2",
+                      stage3: str = "logs/autoinit_stage3_complete",
+                      ) -> SuccessiveHalvingPlan:
+    """The executing plan: built, then materialized from the control's own rates.
+
+    This is what the Phase-A driver binds against `assert_preregistered`, so it
+    must reproduce the frozen artifact exactly — including the thresholds, which
+    are re-derived through the frozen formulas rather than read back.
+    """
+    root = Path(repo_root)
+    battery = json.loads((root / recovery_search / "manifest.json").read_text())
+    plan = build_plan(battery)
+    materialized = _load_json(root / stage3 / "materialized_thresholds.json")
+    if materialized is None:
+        raise SystemExit(
+            f"no materialized thresholds under {stage3}; the executing plan "
+            "cannot be built with PENDING rules, because every selector that "
+            "needs them raises by design")
+    return materialize_from_control(plan, materialized)
+
+
+def materialize_from_control(plan: SuccessiveHalvingPlan,
+                             thresholds: dict) -> SuccessiveHalvingPlan:
+    """Freeze the two PENDING rules from the completed control characterization.
+
+    The values are **re-derived** through the frozen formulas from the control's
+    own recorded rates, then checked against what Stage 3 recorded. Copying the
+    numbers across would make this function a transcription step, and a
+    transcription error here silently redefines the interval every candidate is
+    judged by. A mismatch raises.
+    """
+    eq_rec, fe_rec = thresholds["equivalence_interval"], thresholds["feasibility_floor"]
+
+    equivalence = plan.equivalence.materialize(
+        p_pool=eq_rec["p_control_pooled"], p_sa=eq_rec["p_sa"], p_sb=eq_rec["p_sb"])
+    feasibility = plan.feasibility.materialize(
+        u_pool=fe_rec["u_pool"], u_sa=fe_rec["u_sa"], u_sb=fe_rec["u_sb"])
+
+    for name, derived, recorded in (
+            ("equivalence interval", equivalence.value, eq_rec["value"]),
+            ("feasibility floor", feasibility.value, fe_rec["value"])):
+        if abs(derived - recorded) > THRESHOLD_REPRODUCTION_TOLERANCE:
+            raise SystemExit(
+                f"the {name} re-derived from the control's recorded rates is "
+                f"{derived!r}, but Stage 3 recorded {recorded!r}. The frozen "
+                "formula and the materialized artifact disagree; do not select "
+                "against either until that is resolved.")
+    for name, derived, recorded in (
+            ("equivalence n_pooled", equivalence.n_pooled, eq_rec["n_pooled"]),
+            ("feasibility n_pooled", feasibility.n_pooled, fe_rec["n_pooled"])):
+        if derived != recorded:
+            raise SystemExit(
+                f"{name} is {derived} in the plan and {recorded} in the Stage-3 "
+                "artifact; the denominators must be the same or the rule is not "
+                "the one that was characterized.")
+    return replace(plan, equivalence=equivalence, feasibility=feasibility)
 
 
 def main() -> None:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--out", default="logs/autoinit_phase_a_preregistration.json")
+    ap.add_argument("--out", default=MATERIALIZED_PREREGISTRATION)
     ap.add_argument("--state-eval", default="artifacts/stage1/state_eval_v1")
     ap.add_argument("--recovery-search", default="artifacts/stage3/recovery_search_v2")
+    ap.add_argument(
+        "--stage3", default="logs/autoinit_stage3_complete",
+        help="Completed control-characterization products. When this directory "
+             "carries materialized thresholds, the two PENDING rules are frozen "
+             "from the control's own rates and the preregistration is re-emitted "
+             "as materialized. An absent path emits the unmaterialized shape — "
+             "not a byte-reproduction of the historical draft, because the "
+             "repeatability and statistics-split items are measured now and are "
+             "reported as satisfied whatever this flag says.")
+    ap.add_argument(
+        "--freeze-plan", default=FROZEN_RECOVERY_PLAN,
+        help="Where to freeze the executing SuccessiveHalvingPlan, in the shape "
+             "assert_preregistered reads. Only written when the thresholds are "
+             "materialized. Pass an empty string to skip.")
     args = ap.parse_args()
 
     state_eval = json.loads((REPO_ROOT / args.state_eval / "manifest.json").read_text())
@@ -98,6 +221,18 @@ def main() -> None:
     isolation = json.loads((REPO_ROOT / "logs/autoinit_role_isolation.json").read_text())
     thresholds = json.loads(
         (REPO_ROOT / "logs/autoinit_threshold_characterization.json").read_text())
+
+    # --- Stage-3 products, when the characterization has actually completed ---
+    stage3_dir = REPO_ROOT / args.stage3
+    materialized = _load_json(stage3_dir / "materialized_thresholds.json")
+    attested = _load_json(stage3_dir / "attested_evaluation_protocol.json")
+    if materialized is not None and Path(args.out) == Path(DRAFT_PREREGISTRATION):
+        raise SystemExit(
+            f"refusing to overwrite {DRAFT_PREREGISTRATION} with a materialized "
+            "preregistration. That file is the record that the selection rules "
+            "were frozen while the thresholds were still pending, and it cannot "
+            f"demonstrate that once rewritten. Write to "
+            f"{MATERIALIZED_PREREGISTRATION} instead.")
 
     decomposed = [i for i in V1_IMPLEMENTATIONS if len(i.modifies) == 1]
     composite = [i for i in V1_IMPLEMENTATIONS if len(i.modifies) > 1]
@@ -113,32 +248,23 @@ def main() -> None:
         warmup_levels=SCHEDULE_V1.warmup_levels, hardware=L40S_MEASURED,
         composite=composite)
 
-    plan = SuccessiveHalvingPlan(
-        plan_id="autoinit.v1.phase_a", recipe=E1_KD_HEAVY_0860K,
-        searched_leaves=5, survivors=2,
-        feasibility_min=-1.0,          # PENDING; see selection_rules below
-        # Formula frozen, value pending the control characterization. Deliberately
-        # NOT pre-filled from the historical prior: a fallback value would be the
-        # second definition this rule exists to eliminate.
-        equivalence=EquivalenceRule(
-            n_pooled=battery["n_scorable_prompts"] * 2),
-        feasibility=FeasibilityRule(n_pooled=battery["n_prompts"] * 2),
-        catastrophic=CATASTROPHIC_V1,
-        capability_schema=CAPABILITY_SCHEMA_V1,
-        aggregation=POOLED_COUNTS_V2,
-        survivor_rule=("rung 1: exclude searched leaves below the feasibility floor, "
-                       "then take the top 2 by correct_overall; the canonical "
-                       "control advances unconditionally and consumes no slot"),
-        winner_rule=("final: pooled-count aggregate over sa and sb; among finalists "
-                     "clearing the feasibility floor, top 1 by correct_overall. The "
-                     "canonical control is eligible to win. Finalists inside the "
-                     "equivalence interval go to seed sc."),
-        battery_asset_id="recovery_search_v2")
+    plan = build_plan(battery)
+
+    # The formulas above are frozen before any candidate is searched. Stage 3
+    # supplied the control's own rates on 2026-08-15, so the two values are now
+    # frozen too — and the plan hash moves with them, which is exactly why
+    # `assert_preregistered` compares hashes rather than field-by-field.
+    if materialized is not None:
+        plan = materialize_from_control(plan, materialized)
+    floor = PENDING if plan.feasibility.value is None else plan.feasibility.value
 
     prereg = {
         "schema": "aadistill.autoinit.phase_a_preregistration/v1",
         "generated_utc": datetime.now(timezone.utc).isoformat(),
-        "status": "PREREGISTRATION DRAFT - NOT AUTHORIZED, NO COMPUTE LAUNCHED",
+        "status": ("PREREGISTRATION, THRESHOLDS MATERIALIZED - NOT AUTHORIZED, "
+                   "NO COMPUTE LAUNCHED"
+                   if materialized is not None else
+                   "PREREGISTRATION DRAFT - NOT AUTHORIZED, NO COMPUTE LAUNCHED"),
 
         "teacher": {
             "model_id": "Qwen/Qwen3-4B-Thinking-2507",
@@ -221,7 +347,7 @@ def main() -> None:
                 "order": ["feasibility constraint", "capability objective",
                           "secondary diagnostic (reported, never reorders)"],
                 "feasibility_metric": "usable_rollout_rate over ALL prompts",
-                "feasibility_floor": PENDING,
+                "feasibility_floor": floor,
                 "feasibility_rule": plan.feasibility.as_dict(),
                 "capability_schema": plan.capability_schema.as_dict(),
                 "primary_metric": "correct_overall over SCORABLE prompts",
@@ -468,28 +594,105 @@ def main() -> None:
             (REPO_ROOT / "logs/autoinit_tool_scoring_audit.json").read_text())
             if (REPO_ROOT / "logs/autoinit_tool_scoring_audit.json").is_file()
             else None,
+        # The draft is NOT overwritten. Its whole evidential value is that it
+        # shows the formulas frozen while the thresholds were still PENDING; an
+        # artifact that only ever existed in its materialized form cannot
+        # demonstrate that the rules preceded the measurement. Same convention as
+        # recovery_search_v1, which is preserved beside its successor.
+        "supersedes": (
+            {"artifact": DRAFT_PREREGISTRATION,
+             "preregistration_sha256": json.loads(
+                 (REPO_ROOT / DRAFT_PREREGISTRATION).read_text()
+             )["preregistration_sha256"],
+             "difference": ("the equivalence interval and feasibility floor were "
+                            "PENDING_CONTROL_CHARACTERIZATION there and are "
+                            "materialized here; no rule, seed, count or selection "
+                            "order differs"),
+             "why_preserved": ("it is the record that the formulas were frozen "
+                               "before the control was characterized")}
+            if materialized is not None
+            and (REPO_ROOT / DRAFT_PREREGISTRATION).is_file()
+            and Path(args.out) != Path(DRAFT_PREREGISTRATION) else None),
+        "stage3_control_characterization": (
+            {
+                "status": "COMPLETE",
+                "source": args.stage3,
+                "battery": materialized["battery"],
+                "aggregation": materialized["aggregation"]["aggregation_id"]
+                               + "@v" + str(materialized["aggregation"]["version"]),
+                "from_imported_controls": materialized["from_imported_controls"],
+                "pooled": materialized["pooled"],
+                "per_seed": materialized["per_seed"],
+                "equivalence_interval": plan.equivalence.value,
+                "feasibility_floor": plan.feasibility.value,
+                "thresholds_re_derived_not_copied": True,
+                "per_capability_control_baseline":
+                    materialized.get("per_capability_control_baseline"),
+                "attested_evaluation_protocol": attested,
+                "note": ("the two rules were frozen by re-running the frozen "
+                         "formulas over the control's recorded per-seed rates and "
+                         "asserting the result against the Stage-3 artifact"),
+            }
+            if materialized is not None else "NOT CHARACTERIZED"),
         "pending_before_launch": [
-            "ATTEST the runtime at preflight Stage 0 and RE-EMIT this "
-            "preregistration with the attested protocol fingerprint -- until then "
-            "runtime_digest is null and no comparison here is eligible for MATCHED",
-            "RERUN canonical sa/sb at 0.86M under the attested runtime and the "
-            "frozen trainer source set -- the historical checkpoints are NOT "
-            "recipe-matched (their trainer and runtime identity was never recorded, "
-            "and the historical tree was dirty and unreconstructable)",
-            "control pooled + per-seed usable_rollout_rate -> materializes the "
-            "feasibility floor",
-            "control pooled + per-seed correct_overall -> materializes the "
-            "equivalence interval",
-            "control per-capability usable rates -> the catastrophic rule's "
-            "reference values",
-            "GPU state-evaluator repeatability -> evaluated by the frozen "
-            "conservative response rule (no automatic epsilon re-derivation)",
-            "activation-statistics GPU/CPU split (collapses the cost range)",
+            item for item, satisfied in (
+                ("ATTEST the runtime and RE-EMIT this preregistration with the "
+                 "attested protocol fingerprint -- until then runtime_digest is "
+                 "null and no comparison here is eligible for MATCHED",
+                 attested is not None),
+                ("RERUN canonical sa/sb at 0.86M under the attested runtime and "
+                 "the frozen trainer source set -- the historical checkpoints are "
+                 "NOT recipe-matched",
+                 materialized is not None),
+                ("control pooled + per-seed usable_rollout_rate -> materializes "
+                 "the feasibility floor", plan.feasibility.value is not None),
+                ("control pooled + per-seed correct_overall -> materializes the "
+                 "equivalence interval", plan.equivalence.value is not None),
+                ("control per-capability usable rates -> the catastrophic rule's "
+                 "reference values",
+                 bool((materialized or {}).get("per_capability_control_baseline"))),
+                ("GPU state-evaluator repeatability -> evaluated by the frozen "
+                 "conservative response rule (no automatic epsilon re-derivation)",
+                 True),
+                ("activation-statistics GPU/CPU split (collapses the cost range)",
+                 True),
+                # Not satisfiable by measurement: these are the acts that turn a
+                # preregistration into a run, and they stay listed until they
+                # happen.
+                # An act, not a measurement: it stays listed until it happens.
+                ("a PhaseAAuthorization artifact issued against the rehearsed "
+                 "harness digest and the hash of THIS preregistration",
+                 (REPO_ROOT / "logs/autoinit_phase_a_authorization.json").is_file()),
+                ("the Phase-A harness rehearsed end to end at toy scale before "
+                 "any pod exists",
+                 all((REPO_ROOT / p).is_file() for p in (
+                     "tests/pod/test_phase_a_rehearsal.py",
+                     "tests/pod/test_phase_a_search_executes.py",
+                     "scripts/pod/autoinit_phase_a_launch.py",
+                     "scripts/pod/autoinit_phase_a_driver.py"))),
+            ) if not satisfied
+        ],
+        "satisfied_before_launch": [
+            "state-evaluator repeatability: max_objective_range 0.0 across 10 GPU "
+            "repeats against the real teacher, far inside the declared epsilon "
+            "1e-4, so the conservative response rule does not gate Phase A "
+            "(logs/autoinit_preflight_run4/preflight_evidence.json)",
+            "activation-statistics GPU/CPU split measured on two hosts: "
+            "gpu_fraction 0.5177-0.5609, total 8.02-8.30 s per pass "
+            "(logs/autoinit_phase_a_repricing.md)",
         ],
     }
     prereg["preregistration_sha256"] = sha256_json(prereg)
     out = REPO_ROOT / args.out
     out.write_text(json.dumps(prereg, indent=2, default=str) + "\n")
+
+    # Only a materialized plan is frozen. Freezing one whose thresholds are still
+    # PENDING would produce a file `assert_preregistered` happily matches and
+    # `require_value` then refuses — a gate that passes and a run that cannot
+    # select.
+    frozen_plan_path = None
+    if materialized is not None and args.freeze_plan:
+        frozen_plan_path = plan.freeze(REPO_ROOT / args.freeze_plan)
     print(json.dumps({
         "decomposed_paths": prereg["search_space"]["decomposed_paths"],
         "states": prereg["search_space"]["states_materialized"],
@@ -500,6 +703,13 @@ def main() -> None:
         "state_eval_positions": prereg["state_evaluation"][
             "total_prediction_positions"],
         "pending": len(prereg["pending_before_launch"]),
+        # The value a PhaseAAuthorization binds to via `require_science_plan`,
+        # and the value `assert_preregistered` compares the executing plan against.
+        "science_plan_hash": plan.plan_hash,
+        "equivalence_interval": plan.equivalence.value,
+        "feasibility_floor": plan.feasibility.value,
+        "frozen_recovery_plan": (str(frozen_plan_path.relative_to(REPO_ROOT))
+                                 if frozen_plan_path else None),
         "preregistration_sha256": prereg["preregistration_sha256"],
     }, indent=2))
 

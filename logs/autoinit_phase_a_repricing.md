@@ -207,3 +207,39 @@ the gap. **Phase A cannot be authorized against the current cap** without one of
 Recommendation: the second option is the cheapest honest one, but it changes what
 Phase A can do when its two seeds disagree, so it is a design decision rather than
 an accounting one. Nothing is decided here.
+
+---
+
+## 2026-08-15 — SUPERSEDED by the launcher's own plan
+
+**Do not price a Phase-A authorization from the table above.** Everything in this
+document is search-and-probes only; it never priced the session around them. The
+Phase-A launcher now exists (`scripts/pod/autoinit_phase_a_launch.py`), and its
+`make_plan` is what `plan_session` computes before a pod can be created — so that
+is the figure an authorization must be granted against.
+
+| | this document | `PhaseA.make_plan` |
+| --- | ---: | ---: |
+| search | $1.76 | 180 min allowance |
+| 9 probes (rungs 1 + 2) | $10.60 | priced through the step-time model |
+| conditional seed-sc rung | $3.53 (hard only) | priced as headroom |
+| setup, Stage-0 attestation, selection, manifest, sync, transfer | — | 48 min |
+| 10% contingency + 20 min artifact-recovery reserve | — | included |
+| **expected** | **$12.36** | **$17.8933** |
+| expected if it resolves after two seeds | — | **$14.3604** |
+| soft | — | $19.6826 |
+| **hard** | **$20.13** | **$20.0126** |
+
+The hard bounds nearly agree by coincidence: this document added a flat $3.00
+setup/redraw reserve, while the plan derives session overhead and contingency
+from measured phase times. The *expected* figures differ by $2.00 because the
+session overhead here was simply absent.
+
+Two things this document got right and the plan keeps: the probe price comes from
+the measured 61.55 min end-to-end (not the 3.15 s/step in-loop figure, which
+would under-book each probe by ~8 min), and the battery uses the **conservative**
+9.82 min rather than the 8.43 min marginal.
+
+Against the cap raised to `$213.00` on 2026-08-15, remaining is `$21.4538` and
+the hard bound fits with `$1.4412` of margin. See
+[`BUDGET_LEDGER.md`](BUDGET_LEDGER.md).

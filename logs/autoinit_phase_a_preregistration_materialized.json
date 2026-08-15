@@ -1,0 +1,2313 @@
+{
+  "schema": "aadistill.autoinit.phase_a_preregistration/v1",
+  "generated_utc": "2026-08-15T11:08:40.298506+00:00",
+  "status": "PREREGISTRATION, THRESHOLDS MATERIALIZED - NOT AUTHORIZED, NO COMPUTE LAUNCHED",
+  "teacher": {
+    "model_id": "Qwen/Qwen3-4B-Thinking-2507",
+    "revision": "768f209d9ea81521153ed38c47d515654e938aea",
+    "spec": {
+      "head_dim": 128,
+      "hidden_size": 2560,
+      "intermediate_size": 9728,
+      "num_attention_heads": 32,
+      "num_hidden_layers": 36,
+      "num_key_value_heads": 8,
+      "tie_word_embeddings": true,
+      "vocab_size": 151936
+    },
+    "spec_hash": "69ac741e8d80c3ab7f42aea8d1be5c506a860d0f84a640b18dd310dab228e6dc",
+    "num_parameters": 4022468096
+  },
+  "target_architecture": {
+    "spec": {
+      "head_dim": 128,
+      "hidden_size": 1024,
+      "intermediate_size": 3072,
+      "num_attention_heads": 16,
+      "num_hidden_layers": 28,
+      "num_key_value_heads": 8,
+      "tie_word_embeddings": true,
+      "vocab_size": 151936
+    },
+    "spec_hash": "09147a5c08d8ad7ad5bb18131bade73548a5fff08f0e0f99d6dd6ede227606c4",
+    "num_parameters": 596049920
+  },
+  "adapter": {
+    "family": "qwen3",
+    "adapter_version": "qwen3.dense_v1",
+    "capabilities": [
+      "activation_stats",
+      "attention.gqa",
+      "block_list",
+      "dense_ffn",
+      "logit_comparable",
+      "prenorm_blocks",
+      "residual_stream",
+      "rms_norm",
+      "tied_embeddings"
+    ],
+    "structural_fields": [
+      "hidden_size",
+      "num_hidden_layers",
+      "intermediate_size",
+      "num_attention_heads",
+      "num_key_value_heads",
+      "head_dim",
+      "vocab_size",
+      "tie_word_embeddings"
+    ]
+  },
+  "operator_ledger": {
+    "schema": "aadistill.autoinit.operator_ledger/v1",
+    "kinds": {
+      "ATTENTION": {
+        "kind_id": "ATTENTION",
+        "dimension": "attention head structure",
+        "description": "Head counts and head grouping. Family-specific: an MHA, GQA, MLA or linear attention implementation registers separately under this kind."
+      },
+      "COMPOSITE_STAGE1": {
+        "kind_id": "COMPOSITE_STAGE1",
+        "dimension": "all four structural dimensions at once",
+        "description": "A single transformation from teacher to target that decides depth, residual width, FFN width and head structure jointly in one numerical pass. Exists so the incumbent recipe is a comparable member of the search space rather than an untested baseline outside it."
+      },
+      "DEPTH": {
+        "kind_id": "DEPTH",
+        "dimension": "block count",
+        "description": "Which teacher blocks survive. Changes the block list only; every surviving block keeps its own widths."
+      },
+      "FFN": {
+        "kind_id": "FFN",
+        "dimension": "feed-forward intermediate width",
+        "description": "The per-block feed-forward intermediate dimension."
+      },
+      "RESIDUAL_WIDTH": {
+        "kind_id": "RESIDUAL_WIDTH",
+        "dimension": "residual stream dimension",
+        "description": "The dimension of the residual stream every block reads and writes. Touches every stream-facing projection, the embedding and the final norm."
+      }
+    },
+    "implementations": {
+      "attention.weight_proxy_v0": {
+        "impl_id": "attention.weight_proxy_v0",
+        "kind": "ATTENTION",
+        "version": 0,
+        "required_capabilities": [
+          "attention.gqa",
+          "rms_norm"
+        ],
+        "modifies": [
+          "num_attention_heads"
+        ],
+        "preserves": [
+          "head_dim",
+          "hidden_size",
+          "intermediate_size",
+          "num_hidden_layers",
+          "num_key_value_heads",
+          "tie_word_embeddings",
+          "vocab_size"
+        ],
+        "calibration": "none",
+        "objective": "retained share of total head weight-proxy score",
+        "deterministic": true,
+        "requires_seed": false,
+        "produces": [
+          "kept_heads"
+        ],
+        "target_validation": "result num_attention_heads equals the target exactly and stays divisible by the unchanged KV head count",
+        "description": "Per-GQA-group query-head selection by ||W_q rows||_F * ||W_o columns||_F, with the preceding norm folded into W_q before scoring. KV heads, head_dim and grouping are preserved.",
+        "signature_hash": "479ff7b3ef15e7195f84b50acf558ff5d8dc831ffcf9ba594719582b31cb7078"
+      },
+      "composite.stage1_sandwich_v0": {
+        "impl_id": "composite.stage1_sandwich_v0",
+        "kind": "COMPOSITE_STAGE1",
+        "version": 0,
+        "required_capabilities": [
+          "activation_stats",
+          "attention.gqa",
+          "dense_ffn",
+          "prenorm_blocks",
+          "residual_stream",
+          "tied_embeddings"
+        ],
+        "modifies": [
+          "hidden_size",
+          "intermediate_size",
+          "num_attention_heads",
+          "num_hidden_layers"
+        ],
+        "preserves": [
+          "head_dim",
+          "num_key_value_heads",
+          "tie_word_embeddings",
+          "vocab_size"
+        ],
+        "calibration": "activation_stats",
+        "objective": "captured energy fraction (projection diagnostic)",
+        "deterministic": true,
+        "requires_seed": true,
+        "produces": [
+          "init_diagnostics",
+          "depth_map"
+        ],
+        "target_validation": "result spec must equal the target exactly in one step",
+        "description": "aadistill.init.sandwich.init_student verbatim: global activation-PCA stream projection, norm folding with sqrt(d_t/d_s) compensation, per-group query head selection, per-layer activation-importance FFN top-k, and either the positional depth map or an explicit kept-layer list. The recipe that produced qwen3_0p6b_init_v0 (86fbba78...) and e8_contribution_init_v1 (7a0694a5...).",
+        "signature_hash": "7ddeb8cfa81f0ba87eca038e61924faf4b32a47bdf999404fca410cb0ee428ac"
+      },
+      "depth.causal_kl_greedy_v1": {
+        "impl_id": "depth.causal_kl_greedy_v1",
+        "kind": "DEPTH",
+        "version": 1,
+        "required_capabilities": [
+          "block_list",
+          "logit_comparable",
+          "residual_stream"
+        ],
+        "modifies": [
+          "num_hidden_layers"
+        ],
+        "preserves": [
+          "head_dim",
+          "hidden_size",
+          "intermediate_size",
+          "num_attention_heads",
+          "num_key_value_heads",
+          "tie_word_embeddings",
+          "vocab_size"
+        ],
+        "calibration": "forward_logits",
+        "objective": "forward KL(parent || parent-with-S-bypassed), domain-balanced",
+        "deterministic": true,
+        "requires_seed": false,
+        "produces": [
+          "depth_map",
+          "search_rounds"
+        ],
+        "target_validation": "result num_hidden_layers equals the target exactly",
+        "description": "Iterative greedy block removal minimizing forward KL(parent || parent-with-S-bypassed) over real prediction positions, aggregated as the unweighted mean over domains of the unweighted mean over each domain's sub-types. Ties break to the lower layer index. E8a's algorithm, re-run against the checkpoint it is handed rather than always against the teacher.",
+        "signature_hash": "8106604694621d305dc20324d5ce65d2cefe5491ef2c2ab93a1b5fe8f16b5ca9"
+      },
+      "depth.positional_v0": {
+        "impl_id": "depth.positional_v0",
+        "kind": "DEPTH",
+        "version": 0,
+        "required_capabilities": [
+          "block_list"
+        ],
+        "modifies": [
+          "num_hidden_layers"
+        ],
+        "preserves": [
+          "head_dim",
+          "hidden_size",
+          "intermediate_size",
+          "num_attention_heads",
+          "num_key_value_heads",
+          "tie_word_embeddings",
+          "vocab_size"
+        ],
+        "calibration": "none",
+        "objective": "none (fixed positional heuristic; no measurement is taken)",
+        "deterministic": true,
+        "requires_seed": false,
+        "produces": [
+          "depth_map"
+        ],
+        "target_validation": "result num_hidden_layers equals the target exactly",
+        "description": "Positional pairwise merge in a middle band: ~1/5 of the surviving 1:1 layers stay before the band, the rest after, so both the earliest and the latest blocks map 1:1. The incumbent map behind qwen3_0p6b_init_v0.",
+        "signature_hash": "d97fb631c37f910a7a7e339d2ab0ba65d0652e95837882e203d6d1862969e98a"
+      },
+      "ffn.activation_importance_v0": {
+        "impl_id": "ffn.activation_importance_v0",
+        "kind": "FFN",
+        "version": 0,
+        "required_capabilities": [
+          "activation_stats",
+          "dense_ffn"
+        ],
+        "modifies": [
+          "intermediate_size"
+        ],
+        "preserves": [
+          "head_dim",
+          "hidden_size",
+          "num_attention_heads",
+          "num_hidden_layers",
+          "num_key_value_heads",
+          "tie_word_embeddings",
+          "vocab_size"
+        ],
+        "calibration": "activation_stats",
+        "objective": "retained share of total activation importance",
+        "deterministic": true,
+        "requires_seed": false,
+        "produces": [
+          "kept_neurons"
+        ],
+        "target_validation": "result intermediate_size equals the target exactly",
+        "description": "Per-block top-k intermediate neurons by E[|a|] * ||down column||, measured on the checkpoint being transformed. Rows of the gate and up projections and columns of the down projection are selected together, so the surviving neurons keep their own complete circuit.",
+        "signature_hash": "accb896294568f641a44f2550997306faa01c6600c1870534f326524ccbf7316"
+      },
+      "width.global_pca_v0": {
+        "impl_id": "width.global_pca_v0",
+        "kind": "RESIDUAL_WIDTH",
+        "version": 0,
+        "required_capabilities": [
+          "activation_stats",
+          "prenorm_blocks",
+          "residual_stream",
+          "rms_norm"
+        ],
+        "modifies": [
+          "hidden_size"
+        ],
+        "preserves": [
+          "head_dim",
+          "intermediate_size",
+          "num_attention_heads",
+          "num_hidden_layers",
+          "num_key_value_heads",
+          "tie_word_embeddings",
+          "vocab_size"
+        ],
+        "calibration": "activation_stats",
+        "objective": "captured energy fraction of the residual second moment",
+        "deterministic": true,
+        "requires_seed": false,
+        "produces": [
+          "projection_diagnostics"
+        ],
+        "target_validation": "result hidden_size equals the target exactly",
+        "description": "One global orthonormal projection from the trace-normalized average of the uncentered residual second moments, with the two stream end points (embedding output, post-final-norm) upweighted 9/8 because they are the worst-captured and are the interfaces the tied embedding reads.",
+        "signature_hash": "acb56886de907b717346483a0d6707552537d5b11415b6861995ec286f8198b6"
+      }
+    }
+  },
+  "operator_ledger_file_sha256": "b7fb66fa04ec9ab345786cc46deb305f32edddaf5d408efa5f779c3a4a584a36",
+  "active_calibration_profile": {
+    "profile_id": "calib.domain_balanced",
+    "version": 1,
+    "sources": [
+      {
+        "dataset_id": "aadistill/e8_calibration_v1",
+        "revision": "2026-08-10",
+        "domain": "general",
+        "n_items": 0,
+        "content_sha256": null,
+        "license": null,
+        "note": "per-domain counts in the mixture manifest"
+      },
+      {
+        "dataset_id": "aadistill/e8_calibration_v1",
+        "revision": "2026-08-10",
+        "domain": "math",
+        "n_items": 0,
+        "content_sha256": null,
+        "license": null,
+        "note": "per-domain counts in the mixture manifest"
+      },
+      {
+        "dataset_id": "aadistill/e8_calibration_v1",
+        "revision": "2026-08-10",
+        "domain": "rag_multihop",
+        "n_items": 0,
+        "content_sha256": null,
+        "license": null,
+        "note": "per-domain counts in the mixture manifest"
+      },
+      {
+        "dataset_id": "aadistill/e8_calibration_v1",
+        "revision": "2026-08-10",
+        "domain": "code",
+        "n_items": 0,
+        "content_sha256": null,
+        "license": null,
+        "note": "per-domain counts in the mixture manifest"
+      },
+      {
+        "dataset_id": "aadistill/e8_calibration_v1",
+        "revision": "2026-08-10",
+        "domain": "tool",
+        "n_items": 0,
+        "content_sha256": null,
+        "license": null,
+        "note": "per-domain counts in the mixture manifest"
+      }
+    ],
+    "domain_weights": {
+      "code": 0.2,
+      "general": 0.2,
+      "math": 0.2,
+      "rag_multihop": 0.2,
+      "tool": 0.2
+    },
+    "token_budget": 59763,
+    "sample_rule": "frozen item list; unweighted mean over domains of the unweighted mean over each domain's sub-types",
+    "seed": 20260810,
+    "role": "operator_calibration",
+    "leakage_exclusions": [
+      "ladder_uniform_probe.rung",
+      "ladder_uniform_probe.val",
+      "prompt_content_collisions"
+    ],
+    "description": "E8a's frozen 67-item mixture: five domains, 59,763 prediction positions, leakage-checked against the recovery rung, the validation slice and prompt-content collisions. The only v1 profile that is already built.",
+    "materialized": true,
+    "items_path": "artifacts/stage1/e8_calibration_v1/items.jsonl",
+    "content_sha256": "d65c1f40e4837ea1bd5bcc33c68041a13b797c68f5be3c0686e0142ed761028f",
+    "items_file_sha256": "c7202338109e459b17b70456461e8f304fadea7929ea547accee21adbbe7fd0b",
+    "rendered_manifest_sha256": null,
+    "leakage_proof_path": "artifacts/stage1/e8_calibration_v1/leakage.json",
+    "profile_hash": "11f36a88bad4879f8ab0e3586ca1f0af035401e505dc97815bed8d47b9f32e9b",
+    "metadata": {
+      "manifest": "artifacts/stage1/e8_calibration_v1/manifest.json",
+      "frozen_by": "E8a"
+    }
+  },
+  "no_calibration_sentinel": "calib.none@v1",
+  "search_space": {
+    "formula": "24 orderings x (1+P) DEPTH x P WIDTH x P FFN x 1 ATTENTION",
+    "n_profiles": 1,
+    "decomposed_paths": 48,
+    "composite_kept_separate": {
+      "impl_id": "composite.stage1_sandwich_v0",
+      "note": "reaches the target in one step and does not compose with the four structural kinds; it is a searchable leaf, and is NOT the canonical control"
+    },
+    "invocations_per_field": {
+      "hidden_size": 1,
+      "intermediate_size": 1,
+      "num_attention_heads": 1,
+      "num_hidden_layers": 2
+    },
+    "states_materialized": [
+      39,
+      56
+    ],
+    "leaves": [
+      7,
+      13
+    ],
+    "per_level": [
+      {
+        "level": 0,
+        "parents_min": 1,
+        "parents_max": 1,
+        "parents": 1,
+        "pruned_here": false,
+        "children_min": 5,
+        "children_max": 5
+      },
+      {
+        "level": 1,
+        "parents_min": 5,
+        "parents_max": 5,
+        "parents": 5,
+        "pruned_here": true,
+        "children_min": 15,
+        "children_max": 20
+      },
+      {
+        "level": 2,
+        "parents_min": 6,
+        "parents_max": 6,
+        "parents": 6,
+        "pruned_here": true,
+        "children_min": 12,
+        "children_max": 18
+      },
+      {
+        "level": 3,
+        "parents_min": 6,
+        "parents_max": 6,
+        "parents": 6,
+        "pruned_here": true,
+        "children_min": 6,
+        "children_max": 12
+      }
+    ]
+  },
+  "beam": {
+    "schedule": {
+      "schedule_id": "beam.delayed_prune",
+      "version": 1,
+      "description": "no quality pruning at level 0; beam width 6 from level 1 onward",
+      "warmup_levels": 1,
+      "width": 6,
+      "schedule_hash": "9ff15b3c7ec4729ad1b57cbb3dea940a4a24d544783ab6f37d4a36d99a818c12"
+    },
+    "policy": {
+      "policy_id": "beam.pareto_multi_objective",
+      "version": 2,
+      "description": "epsilon-Pareto over original-teacher fidelity: equal-domain mean KL, worst-domain KL and critical-token KL. NLL is diagnostic and never prunes. Lineage diversity precedes the deterministic state-id tie-break.",
+      "objectives": [
+        {
+          "key": "state.teacher_kl.equal_domain_mean",
+          "direction": "minimize",
+          "description": "equal-domain mean forward KL from the original teacher"
+        },
+        {
+          "key": "state.teacher_kl.worst_domain",
+          "direction": "minimize",
+          "description": "the domain this state preserves least well"
+        },
+        {
+          "key": "state.critical_token_kl",
+          "direction": "minimize",
+          "description": "unweighted mean KL over declared critical-token classes"
+        }
+      ],
+      "tie_break": [
+        "state.teacher_kl.equal_domain_mean",
+        "state.teacher_kl.worst_domain",
+        "state.critical_token_kl",
+        "state_id"
+      ],
+      "guardrails": [
+        {
+          "name": "structurally_valid",
+          "description": "the state reached MEASURED through materialize -> reload -> hash -> validate"
+        }
+      ],
+      "epsilon": {
+        "state.critical_token_kl": 0.0001,
+        "state.teacher_kl.equal_domain_mean": 0.0001,
+        "state.teacher_kl.worst_domain": 0.0001
+      },
+      "diversity_key": "parent_path",
+      "required_metrics": [
+        "state.teacher_kl.equal_domain_mean",
+        "state.teacher_kl.worst_domain",
+        "state.critical_token_kl"
+      ],
+      "policy_hash": "30a5305bc06dd1e886ea285fa7a3f90ac4b32f61bcb62bae35668f28922bf2e4",
+      "metadata": {
+        "nll_status": "diagnostic only; recorded per domain, never an objective"
+      }
+    },
+    "no_first_level_quality_pruning": true,
+    "nll_status": "diagnostic only; not an objective, not a tie-break key",
+    "epsilon_justification": {
+      "declared_epsilon": {
+        "state.critical_token_kl": 0.0001,
+        "state.teacher_kl.equal_domain_mean": 0.0001,
+        "state.teacher_kl.worst_domain": 0.0001
+      },
+      "smallest_declared": 0.0001,
+      "measured_worst_objective_range_cpu": 0.0,
+      "safely_above_measured_noise": true,
+      "margin_factor": null,
+      "conclusion": "CPU evaluation is bit-reproducible across the full materialize -> reload -> measure cycle, so 1e-4 is above the noise this path produces.",
+      "response_rule": {
+        "rule_id": "conservative_review_gate",
+        "version": 1,
+        "declared_epsilon": 0.0001,
+        "measurement_definition": "one materialized checkpoint, scored N times through the full materialize -> reload -> measure cycle on the frozen state-eval suite, on the pilot's GPU backend; the statistic is max(max - min) across the policy's objective metrics",
+        "repeats": 10,
+        "if_below": "epsilon stands unchanged",
+        "if_at_or_above": "no automatic re-derivation; preflight requires review and Phase A is blocked",
+        "rejected_alternative": "epsilon_final = max(1e-4, 2 * measured) - rejected for v1 because it derives a scientific tolerance from a single profiling run"
+      },
+      "NOT_established": "GPU repeatability. The pilot's evaluation backend is a GPU, where reduction order is not guaranteed across launches and bf16/fp32 accumulation can move a KL in the last digits. This CPU result bounds the deterministic path only. The micro-preflight measures the same quantity on an L40S with the real teacher and the real suite, and the FROZEN response rule above decides what happens: below the declared epsilon it stands; at or above it, no new epsilon is derived automatically, the preflight is marked as requiring review, and Phase A is blocked."
+    },
+    "epsilon_response_rule": {
+      "rule_id": "conservative_review_gate",
+      "version": 1,
+      "declared_epsilon": 0.0001,
+      "measurement_definition": "one materialized checkpoint, scored N times through the full materialize -> reload -> measure cycle on the frozen state-eval suite, on the pilot's GPU backend; the statistic is max(max - min) across the policy's objective metrics",
+      "repeats": 10,
+      "if_below": "epsilon stands unchanged",
+      "if_at_or_above": "no automatic re-derivation; preflight requires review and Phase A is blocked",
+      "rejected_alternative": "epsilon_final = max(1e-4, 2 * measured) - rejected for v1 because it derives a scientific tolerance from a single profiling run"
+    }
+  },
+  "state_evaluation": {
+    "asset": "artifacts/stage1/state_eval_v1",
+    "role": "INITIALIZER_STATE_EVAL",
+    "suite_id": "state_eval",
+    "version": 1,
+    "content_sha256": "a1197205e43aad0e71c0e1bb436ee7babba3b5d8bb25b9c4d5c464f659db20fc",
+    "manifest_sha256": "95204907efa7efc681ef334f223073da6ca35dbf889b029a7672f5817ab72b05",
+    "items_sha256": "2a4a1d3bf8ed165b4cfa881f75488bcbbdee5e74d34afddb91fecbf76d1e106d",
+    "domains": {
+      "general": [
+        "general"
+      ],
+      "reasoning_math": [
+        "gsm8k",
+        "openmath"
+      ],
+      "rag_multihop": [
+        "rag_evidence",
+        "multihop_qa"
+      ],
+      "code": [
+        "code"
+      ],
+      "tool": [
+        "tool_calling"
+      ]
+    },
+    "critical_tags": [
+      "think_close",
+      "eos",
+      "final_answer",
+      "tool_close"
+    ],
+    "n_items": 80,
+    "total_prediction_positions": 74022,
+    "reference": "original teacher, recomputed per candidate",
+    "reference_strategy": "RECOMPUTE",
+    "tokenizer_sha256": "be75606093db2094d7cd20f3c2f385c212750648bd6ea4fb2bf507a6a4c55506",
+    "chat_template_sha256": "3802169b2a02b81e6adb7ab4f64f91ff02db753c8c3a64a01c35192d3a61d8d7"
+  },
+  "recovery": {
+    "plan": {
+      "schema": "aadistill.autoinit.recovery_plan/v1",
+      "plan_id": "autoinit.v1.phase_a",
+      "recipe": {
+        "recipe_id": "e1_p1_kd_heavy@0.86M",
+        "ce_weight": 0.25,
+        "kd_weight": 1.0,
+        "temperature": 1.0,
+        "kd_scope": "all",
+        "tokens": 860000,
+        "pack": "artifacts/stage3/ladder_uniform_probe",
+        "pack_sha256": "6f324cb0f37bc0f07128e554ce8c161879419537478950496534f75fcecb249c",
+        "block_len": 8192,
+        "description": "The recovery recipe every E1 arm used, at the rung the frozen battery was sampled from. Held fixed so a difference between two probes is a difference between two initializations."
+      },
+      "searched_leaves": 5,
+      "survivors": 2,
+      "seeds": [
+        20260726,
+        20260801
+      ],
+      "tie_break_seed": 20260813,
+      "include_canonical_control": true,
+      "rung1_probes": 6,
+      "rung2_probes": 3,
+      "probe_count": 9,
+      "seed_aggregation": {
+        "aggregation_id": "pooled_counts",
+        "version": 2,
+        "description": "pooled numerator/denominator across all completed seeds, each rate over its own denominator: behaviour over all prompts, correctness over scorable prompts only",
+        "required_counts": [
+          "n",
+          "usable",
+          "n_scorable",
+          "usable_scorable",
+          "correct"
+        ],
+        "formulas": {
+          "usable_rollout_rate": "sum(usable_s) / sum(n_s)",
+          "correct_overall": "sum(correct_s) / sum(n_scorable_s)",
+          "correct_given_usable": "sum(correct_s) / sum(usable_scorable_s)"
+        },
+        "supersedes": {
+          "aggregation": "pooled_counts@v1",
+          "defect": "v1 pooled correct over n and over usable, but the scorer computes correctness over n_scorable and usable_scorable; two seeds divided by 380 instead of 340 and mixed unscorable code rollouts into the conditional denominator"
+        }
+      },
+      "equivalence_rule": {
+        "rule_id": "seed_aware_max_binomial_seedrange",
+        "version": 2,
+        "formula": "z * max(sqrt(p_pool*(1-p_pool)/n_pooled), |p_sa - p_sb| / 2)",
+        "z": 2.0,
+        "n_pooled": 340,
+        "p_control_pooled": 0.011764705882352941,
+        "p_sa": 0.0118,
+        "p_sb": 0.0118,
+        "binomial_se": 0.005847648491149511,
+        "seed_se_proxy": 0.0,
+        "value": 0.011695296982299022,
+        "dominant_term": "binomial",
+        "status": "materialized",
+        "seed_awareness": "the two-point seed range is a floor on the interval, not an estimate; it can only widen it, which is the conservative direction",
+        "non_adaptive": "the formula is frozen before any candidate is searched; only the control's own rates enter it"
+      },
+      "feasibility_rule": {
+        "rule_id": "seed_aware_usable_floor",
+        "version": 2,
+        "k": 3.0,
+        "n_pooled": 380,
+        "absolute_floor": 0.3,
+        "formula": "max(absolute_floor, u_pool - k * max(binomial_se, |u_sa - u_sb| / 2))",
+        "u_pool": 0.37105263157894736,
+        "u_sa": 0.3895,
+        "u_sb": 0.3526,
+        "value": 0.3,
+        "status": "materialized"
+      },
+      "catastrophic_capability_rule": {
+        "rule_id": "per_capability_collapse",
+        "version": 1,
+        "metric": "usable_rollout_rate",
+        "candidate_max": 0.1,
+        "control_min": 0.4,
+        "statement": "candidate usable_rollout_rate < 0.1 AND control usable_rollout_rate > 0.4 -> catastrophic failure, candidate excluded",
+        "enforced_at": [
+          "rung1",
+          "final"
+        ]
+      },
+      "capability_schema": {
+        "version": 1,
+        "expected": [
+          "gsm8k",
+          "math_verified",
+          "multihop",
+          "rag",
+          "knowledge",
+          "tool"
+        ],
+        "required_metrics": [
+          "usable_rollout_rate"
+        ],
+        "required_counts": [
+          "n",
+          "usable"
+        ],
+        "policy": "exact set match; missing/extra capabilities, absent metrics, non-numeric values, NaN/Inf and out-of-range rates all raise. No defaults."
+      },
+      "selection": {
+        "feasibility_metric": "usable_rollout_rate",
+        "feasibility_min": -1.0,
+        "primary_metric": "correct_overall",
+        "secondary_metric": "correct_given_usable",
+        "equivalence_interval": 0.011695296982299022,
+        "rule": "feasibility constraint, then primary objective among feasible candidates; the secondary metric is reported and never reorders. No weighted combination.",
+        "control_eligible_to_win": true,
+        "control_exempt_from_feasibility_gate": true
+      },
+      "reported_components": [
+        "non_empty",
+        "natural_termination",
+        "no_severe_repetition",
+        "no_context_limit",
+        "protocol_valid"
+      ],
+      "survivor_rule": "rung 1: exclude searched leaves below the feasibility floor, then take the top 2 by correct_overall; the canonical control advances unconditionally and consumes no slot",
+      "winner_rule": "final: pooled-count aggregate over sa and sb; among finalists clearing the feasibility floor, top 1 by correct_overall. The canonical control is eligible to win. Finalists inside the equivalence interval go to seed sc.",
+      "battery_asset_id": "recovery_search_v2",
+      "notes": {}
+    },
+    "seeds": {
+      "sa": 20260726,
+      "sb": 20260801,
+      "sc_conditional": 20260813
+    },
+    "seed_aggregation": {
+      "aggregation_id": "pooled_counts",
+      "version": 2,
+      "description": "pooled numerator/denominator across all completed seeds, each rate over its own denominator: behaviour over all prompts, correctness over scorable prompts only",
+      "required_counts": [
+        "n",
+        "usable",
+        "n_scorable",
+        "usable_scorable",
+        "correct"
+      ],
+      "formulas": {
+        "usable_rollout_rate": "sum(usable_s) / sum(n_s)",
+        "correct_overall": "sum(correct_s) / sum(n_scorable_s)",
+        "correct_given_usable": "sum(correct_s) / sum(usable_scorable_s)"
+      },
+      "supersedes": {
+        "aggregation": "pooled_counts@v1",
+        "defect": "v1 pooled correct over n and over usable, but the scorer computes correctness over n_scorable and usable_scorable; two seeds divided by 380 instead of 340 and mixed unscorable code rollouts into the conditional denominator"
+      }
+    },
+    "canonical_control": {
+      "path": "artifacts/stage1/qwen3_0p6b_init_v0/checkpoint",
+      "single_file_sha256": "86fbba78e8a2a32481ca77e5ac362ed1f17a39dbc30bcbc952cabd5df2633e54",
+      "num_parameters": 596049920,
+      "injection": "by frozen artifact hash via make_control_state; NOT a re-executed composite, which would be built from this run's calibration statistics rather than the original Stage-0 ones"
+    },
+    "battery": {
+      "asset": "artifacts/stage3/recovery_search_v2",
+      "content_sha256": "a1b22778b00d95b6aba358c14a5af5b559fd807bb371c92131eacca59479f323",
+      "manifest_sha256": "58ae5c6dcbe32eb28c343a66830d7224a14537362deeeff2ce8219d0a31679d6",
+      "n_prompts": 190,
+      "n_scorable_prompts": 170,
+      "scorable_sets": [
+        "gsm8k",
+        "math_verified",
+        "multihop",
+        "rag",
+        "knowledge",
+        "tool"
+      ],
+      "behaviour_only_sets": [
+        "code"
+      ],
+      "scorer_sha256": "da1bc3b1069d927b6ab2cbf0eaaf6763bfa491d396189b3dcde95977e39d67ad",
+      "limitation": "code has no frozen scorer and contributes stability and failure diagnostics only. LIMITATION: this battery cannot detect a candidate that trades code capability for math."
+    },
+    "selection_rules": {
+      "order": [
+        "feasibility constraint",
+        "capability objective",
+        "secondary diagnostic (reported, never reorders)"
+      ],
+      "feasibility_metric": "usable_rollout_rate over ALL prompts",
+      "feasibility_floor": 0.3,
+      "feasibility_rule": {
+        "rule_id": "seed_aware_usable_floor",
+        "version": 2,
+        "k": 3.0,
+        "n_pooled": 380,
+        "absolute_floor": 0.3,
+        "formula": "max(absolute_floor, u_pool - k * max(binomial_se, |u_sa - u_sb| / 2))",
+        "u_pool": 0.37105263157894736,
+        "u_sa": 0.3895,
+        "u_sb": 0.3526,
+        "value": 0.3,
+        "status": "materialized"
+      },
+      "capability_schema": {
+        "version": 1,
+        "expected": [
+          "gsm8k",
+          "math_verified",
+          "multihop",
+          "rag",
+          "knowledge",
+          "tool"
+        ],
+        "required_metrics": [
+          "usable_rollout_rate"
+        ],
+        "required_counts": [
+          "n",
+          "usable"
+        ],
+        "policy": "exact set match; missing/extra capabilities, absent metrics, non-numeric values, NaN/Inf and out-of-range rates all raise. No defaults."
+      },
+      "primary_metric": "correct_overall over SCORABLE prompts",
+      "secondary_metric": "correct_given_usable over SCORABLE prompts",
+      "equivalence_rule": {
+        "rule_id": "seed_aware_max_binomial_seedrange",
+        "version": 2,
+        "formula": "z * max(sqrt(p_pool*(1-p_pool)/n_pooled), |p_sa - p_sb| / 2)",
+        "z": 2.0,
+        "n_pooled": 340,
+        "p_control_pooled": 0.011764705882352941,
+        "p_sa": 0.0118,
+        "p_sb": 0.0118,
+        "binomial_se": 0.005847648491149511,
+        "seed_se_proxy": 0.0,
+        "value": 0.011695296982299022,
+        "dominant_term": "binomial",
+        "status": "materialized",
+        "seed_awareness": "the two-point seed range is a floor on the interval, not an estimate; it can only widen it, which is the conservative direction",
+        "non_adaptive": "the formula is frozen before any candidate is searched; only the control's own rates enter it"
+      },
+      "equivalence_interval": 0.011695296982299022,
+      "catastrophic_capability_rule": {
+        "rule_id": "per_capability_collapse",
+        "version": 1,
+        "metric": "usable_rollout_rate",
+        "candidate_max": 0.1,
+        "control_min": 0.4,
+        "statement": "candidate usable_rollout_rate < 0.1 AND control usable_rollout_rate > 0.4 -> catastrophic failure, candidate excluded",
+        "enforced_at": [
+          "rung1",
+          "final"
+        ]
+      },
+      "correctness_semantics": "correct = correct IN A USABLE ROLLOUT. A rollout that answers correctly and then loops or hits the context limit is not counted correct; correct_but_unusable is reported separately so the gap is visible.",
+      "control_eligible_to_win": true,
+      "control_exempt_from_feasibility_gate": true,
+      "no_weighted_scalar": true
+    }
+  },
+  "data_hashes": {
+    "operator_calibration": {
+      "asset": "artifacts/stage1/e8_calibration_v1",
+      "content_sha256": "d65c1f40e4837ea1bd5bcc33c68041a13b797c68f5be3c0686e0142ed761028f",
+      "items_file_sha256": "c7202338109e459b17b70456461e8f304fadea7929ea547accee21adbbe7fd0b"
+    },
+    "initializer_state_eval": {
+      "asset": "artifacts/stage1/state_eval_v1",
+      "content_sha256": "a1197205e43aad0e71c0e1bb436ee7babba3b5d8bb25b9c4d5c464f659db20fc"
+    },
+    "recovery_search": {
+      "asset": "artifacts/stage3/recovery_search_v2",
+      "content_sha256": "a1b22778b00d95b6aba358c14a5af5b559fd807bb371c92131eacca59479f323"
+    },
+    "final_promotion": {
+      "asset": "artifacts/eval/battery_v2",
+      "inclusion_mask_sha256": "d6e24e0b09da1bcc692b1dc96d8236808d29551a9fc94a47d1d968fd3f73d6ba",
+      "status": "ISOLATED FROM THE ENTIRE SEARCH"
+    },
+    "recovery_training": {
+      "pack": "artifacts/stage3/ladder_uniform_probe",
+      "pack_sha256": "6f324cb0f37bc0f07128e554ce8c161879419537478950496534f75fcecb249c",
+      "rung": 860000
+    }
+  },
+  "role_isolation": {
+    "report": "logs/autoinit_role_isolation.json",
+    "report_sha256": "6e0f4a110a73ba92d89f20f52b52cc2d086abd5e9e6522156511a9149480579e",
+    "passed": true,
+    "complete": true,
+    "exact_overlaps": 0,
+    "near_duplicate_counts": {
+      "strict": 17,
+      "flagged_by_enforced_rule": 2
+    }
+  },
+  "artifact_identity_rules": {
+    "checkpoint_identity": "artifact digest over every sorted weight shard, the shard index, the config, the architecture signature and the tokenizer",
+    "metrics_bind_to": "artifact_digest",
+    "frozen_single_file_hashes": "still checkable via single_shard_sha256; a sharded rebuild is a different layout, not corruption",
+    "no_inherited_metrics": "attach_evaluation refuses an evaluation whose artifact digest is not the state's own"
+  },
+  "resume_rules": {
+    "state_identity": "sha256(root teacher, target spec, ordered steps)",
+    "restore_requires": [
+      "artifact re-derived from disk matches the journal",
+      "evaluation suite_hash matches this run's suite"
+    ],
+    "note": "a journal measured under a different suite is not adopted; state identity is the path and does not include the suite"
+  },
+  "budget": {
+    "search_usd_low": 0.9318,
+    "search_usd_high": 3.5747,
+    "search_hours": [
+      0.941,
+      3.611
+    ],
+    "hardware": {
+      "name": "L40S",
+      "price_per_hour_usd": 0.99,
+      "effective_tflops": 88.83,
+      "vram_gb": 48.0,
+      "measured": true,
+      "source": "E8a: 260 subset evaluations over a 67-item / 59,763-position mixture in 1,300 s at 4.02B full width. This module's own accounting puts that workload at 1.1548e17 FLOPs, hence 88.83 TFLOP/s and ~24.5% of the 362 TFLOPS bf16 dense peak. Asserted round-trip in tests/autoinit."
+    },
+    "note": "recovery probe cost is priced separately in the pilot proposal; these are search-only figures"
+  },
+  "storage": {
+    "peak_working_gib": 105.9,
+    "total_written_gib": 135.3,
+    "retained_gib": 40.7,
+    "peak_gpu_resident_gib": 14.3,
+    "teacher_ckpt_gib": 7.49,
+    "depth_only_intermediate_gib": 5.99,
+    "activation_stats_gib": 1.81,
+    "provision_at_least_gib": 150
+  },
+  "decision_statuses": {
+    "resolved": "one finalist leads by more than the equivalence interval",
+    "tie_pending": "finalists equivalent after sa+sb; seed sc is owed and winner is None",
+    "unresolved_equivalence": "finalists still equivalent after sc; winner is None and the result is 'AutoInitializer v1 did not resolve a unique behavioural winner'. No fourth seed, and no state-id tie-break is used to manufacture a winner."
+  },
+  "canonical_control_availability": {
+    "schema": "aadistill.autoinit.control_availability/v1",
+    "generated_utc": "2026-08-13T06:06:11.452169+00:00",
+    "relay": "AlphaAvatar/aadistill-artifacts",
+    "controls": {
+      "e1_r0860k_sa_pca": {
+        "canonical_id": "e1_r0860k_sa_pca",
+        "seed": 20260726,
+        "present_on_dev_box": false,
+        "tombstoned": true,
+        "relay_path": "e1_scaling_20260801/e1_r0860k_sa_pca/step_001023/model/model.safetensors",
+        "present_on_relay": false,
+        "expected_weights_sha256": "18ee10a10333481d3d6178d2fc5d4e0a705aca04d8a1d69a4ce83ac7f1e45b9c",
+        "expected_config_sha256": "62d14acfb86e397e9449e0d39d5aba6c5a84facac372a86b85e9ac6915be9522",
+        "architecture": {
+          "num_hidden_layers": 28,
+          "hidden_size": 1024,
+          "intermediate_size": 3072,
+          "num_attention_heads": 16,
+          "num_key_value_heads": 8,
+          "vocab_size": 151936
+        },
+        "actual_weights_sha256": "18ee10a10333481d3d6178d2fc5d4e0a705aca04d8a1d69a4ce83ac7f1e45b9c",
+        "weights_hash_match": true,
+        "size_bytes": 2384234968,
+        "actual_config_sha256": "62d14acfb86e397e9449e0d39d5aba6c5a84facac372a86b85e9ac6915be9522",
+        "config_hash_match": true,
+        "lineage": {
+          "student_path": "artifacts/stage1/qwen3_0p6b_init_v0/checkpoint",
+          "rung": 860000,
+          "seed": 20260726,
+          "loss": {
+            "ce_weight": 0.25,
+            "kd_weight": 1.0,
+            "kd_temperature": 1.0,
+            "kd_scope": "all"
+          },
+          "total_steps": 1023,
+          "block_len": 8192
+        },
+        "lineage_checks": {
+          "descends_from_canonical_init": true,
+          "rung_is_0860k": true,
+          "seed_matches": true,
+          "ce_weight": true,
+          "kd_weight": true,
+          "kd_temperature": true,
+          "kd_scope": true,
+          "block_len": true
+        },
+        "lineage_valid": true,
+        "artifact_available": false,
+        "hash_verified": false,
+        "passes_legacy_lineage_subset": true,
+        "recipe_matched_control": false,
+        "recipe_matched_control_decided_by": "logs/autoinit_recovery_fingerprint_audit.json",
+        "relay_copy_deleted_utc": "2026-08-15T00:00:00+00:00",
+        "relay_copy_deleted_reason": "relay copy deleted 2026-08-15 to reclaim 2.23 GiB for the vLLM offline wheelhouse, on explicit maintainer instruction naming this checkpoint. NO copy survives anywhere: not on the dev box, not on the relay. The identity below (weights/config sha256) remains the binding record, and the recovery path is deterministic reconstruction from the recipe.",
+        "relay_path_status": "DELETED \u2014 the path no longer resolves",
+        "hash_verification_note": "verified True against the relay copy on 2026-08-13 and again immediately before deletion on 2026-08-15 (relay LFS sha256 == 18ee10a1\u2026); it cannot be re-verified now because no copy exists"
+      },
+      "e1_r0860k_sb_pca": {
+        "canonical_id": "e1_r0860k_sb_pca",
+        "seed": 20260801,
+        "present_on_dev_box": false,
+        "tombstoned": true,
+        "relay_path": "e1_scaling_20260801/e1_r0860k_sb_pca/step_001023/model/model.safetensors",
+        "present_on_relay": true,
+        "expected_weights_sha256": "f66de5320b69aa34abf421a45b5d468bbbaf23d2a400750e3340873f20e40035",
+        "expected_config_sha256": "62d14acfb86e397e9449e0d39d5aba6c5a84facac372a86b85e9ac6915be9522",
+        "architecture": {
+          "num_hidden_layers": 28,
+          "hidden_size": 1024,
+          "intermediate_size": 3072,
+          "num_attention_heads": 16,
+          "num_key_value_heads": 8,
+          "vocab_size": 151936
+        },
+        "actual_weights_sha256": "f66de5320b69aa34abf421a45b5d468bbbaf23d2a400750e3340873f20e40035",
+        "weights_hash_match": true,
+        "size_bytes": 2384234968,
+        "actual_config_sha256": "62d14acfb86e397e9449e0d39d5aba6c5a84facac372a86b85e9ac6915be9522",
+        "config_hash_match": true,
+        "lineage": {
+          "student_path": "artifacts/stage1/qwen3_0p6b_init_v0/checkpoint",
+          "rung": 860000,
+          "seed": 20260801,
+          "loss": {
+            "ce_weight": 0.25,
+            "kd_weight": 1.0,
+            "kd_temperature": 1.0,
+            "kd_scope": "all"
+          },
+          "total_steps": 1023,
+          "block_len": 8192
+        },
+        "lineage_checks": {
+          "descends_from_canonical_init": true,
+          "rung_is_0860k": true,
+          "seed_matches": true,
+          "ce_weight": true,
+          "kd_weight": true,
+          "kd_temperature": true,
+          "kd_scope": true,
+          "block_len": true
+        },
+        "lineage_valid": true,
+        "artifact_available": true,
+        "hash_verified": true,
+        "passes_legacy_lineage_subset": true,
+        "recipe_matched_control": false,
+        "recipe_matched_control_decided_by": "logs/autoinit_recovery_fingerprint_audit.json"
+      }
+    },
+    "config_hash_convention": "raw file bytes (build_checkpoint_registry.py)",
+    "relay_reachable": true,
+    "both_pass_legacy_lineage_subset": true,
+    "any_recipe_matched_control": false,
+    "retrieval_bytes": 4768469936,
+    "consequence": "Both historical 0.86M checkpoints are retrievable and their bytes and lineage verify, so they remain useful LINEAGE REFERENCES. They are NOT Phase-A matched controls: the protocol audit found their trainer and runtime identity was never recorded, so it cannot be compared. Rerun canonical sa/sb from qwen3_0p6b_init_v0 at 0.86M under the attested runtime and frozen trainer; those runs become the permanent Phase-A control probes and are retained, not disposable setup work.",
+    "status_field_meanings": {
+      "artifact_available": "the file exists on the relay",
+      "hash_verified": "its payload and config match the tombstone hashes",
+      "passes_legacy_lineage_subset": "it descends from the canonical init at the right rung, seed and objective \u2014 a lineage reference, not a protocol match",
+      "recipe_matched_control": "always false here; a matched control requires the full protocol comparison, which these runs fail on unrecorded trainer/runtime identity"
+    },
+    "report_sha256": "cd0614efa3c9ff7c8ddef939208f6252f844a8bf7430970576811fd4767c57e0"
+  },
+  "recovery_identity": {
+    "model": "RecoveryProtocolFingerprint (what must be identical) + initialization artifact digest + seed = RecoveryProbeIdentity",
+    "protocol_excludes": [
+      "student initialization artifact",
+      "seed"
+    ],
+    "why": "initialization is the treatment and the seed is the replicate; a protocol identity containing either would make every comparable pair of arms differ by construction",
+    "matched_pair_predicate": "both_materialized AND protocol_identical AND same_seed AND initializations_differ",
+    "trainer_source_digest": {
+      "digest": "729bc9e6a374701716258f013ef12561c24d6b7b7d5a4cace868ecabf99d6f77",
+      "set_version": 1,
+      "files": [
+        {
+          "path": "scripts/training/train_stage3.py",
+          "sha256": "1c4be309e52798e73e79c46e9a53866f0edca91517d149c8288f1a6fc878854d",
+          "bytes": 14309
+        },
+        {
+          "path": "src/aadistill/training/train.py",
+          "sha256": "4d409b161b244ab5cc388f1615a87de5ce7481c3a2a3e8349b78822878508313",
+          "bytes": 62990
+        },
+        {
+          "path": "src/aadistill/training/lora.py",
+          "sha256": "991609f6793beb0ed14331070da9f54f7c13f55a7d3cb46cf24823a1bd71d333",
+          "bytes": 10657
+        },
+        {
+          "path": "src/aadistill/data/ladder.py",
+          "sha256": "ed4744f42ee9e920f7b52a269067ef1cd7e2da0e621aca07a6ce6cecd09070ca",
+          "bytes": 7055
+        },
+        {
+          "path": "src/aadistill/data/dataset.py",
+          "sha256": "82c361f8b5614a7324b25dffb48733f5d1b92b903daeb0f098e13d9d16421a66",
+          "bytes": 18533
+        },
+        {
+          "path": "src/aadistill/models/teacher.py",
+          "sha256": "d8d070850dad37cb53d6db4cb548a48af08a5a705eb86bb7990d054125a525da",
+          "bytes": 3567
+        },
+        {
+          "path": "src/aadistill/models/student.py",
+          "sha256": "90f60257f51d9bb1e3f51ddb5c70719cad09a43f5663cb68a73dbf4fec6e5e44",
+          "bytes": 6651
+        }
+      ],
+      "rule": "sha256 over sorted 'path:sha256' lines of the declared trainer source set; whole-repo commit is provenance only",
+      "policy": "material identity is the declared source set, not whole-repository git HEAD; repo commit and dirty flag are recorded as provenance only, so a docs-only commit leaves a control matched",
+      "declared_set": [
+        "scripts/training/train_stage3.py",
+        "src/aadistill/training/train.py",
+        "src/aadistill/training/lora.py",
+        "src/aadistill/data/ladder.py",
+        "src/aadistill/data/dataset.py",
+        "src/aadistill/models/teacher.py",
+        "src/aadistill/models/student.py"
+      ]
+    },
+    "runtime_environment": {
+      "fields": [
+        "image_digest",
+        "python_version",
+        "torch_version",
+        "transformers_version",
+        "cuda_runtime",
+        "attention_backend"
+      ],
+      "dev_box_observation_only": {
+        "version": 1,
+        "image_digest": null,
+        "python_version": "3.14.2",
+        "torch_version": "2.13.0+cpu",
+        "transformers_version": "5.13.1",
+        "cuda_runtime": null,
+        "attention_backend": "sdpa"
+      },
+      "binding_invariant": "the permanent controls and the later searched probes must execute under the same frozen image digest; it is attested at preflight Stage 0 and required before a control is trained"
+    },
+    "materialization_requirement": {
+      "required_fields": [
+        "trainer_source_digest",
+        "trainer_source_set_version",
+        "runtime_digest"
+      ],
+      "rule": "a protocol whose required fields are not all non-null cannot take part in a MATCHED comparison; require_materialized() raises and matched_against() returns is_single_variable_comparison: false",
+      "semantics": {
+        "unknown vs unknown": "unverifiable \u2014 NOT eligible for MATCHED",
+        "verified X vs verified X": "matched"
+      },
+      "why": "None == None is True in Python and is not the claim 'verified identical'; without this gate a control trained under an unrecorded runtime would compare as matched \u2014 the exact defect that disqualified the historical runs",
+      "status_now": "runtime_digest is null in this preregistration because the image is chosen at pod creation. The Phase-A protocol fingerprint is therefore NOT final here; Stage 0 materializes it and this preregistration must be re-emitted with the attested digest before Phase A is authorized.",
+      "attested_artifact": "logs/autoinit_phase_a_protocol_attested.json",
+      "attested_by": "scripts/autoinit/attest_protocol.py",
+      "stage_2_compares_against": "the Stage-0 attested protocol hash, via RecoveryProbeIdentity.require_attested()"
+    }
+  },
+  "recovery_scoring_contract": {
+    "contract": "recovery_search_scoring@v2",
+    "contract_id": "recovery_search_scoring",
+    "version": 2,
+    "digest": "808080a7c5d88d5a66760fd0d7eeabc5451c096ad0819f8c5663a0b8224660be",
+    "files": [
+      {
+        "path": "scripts/autoinit/score_recovery_search.py",
+        "sha256": "b19eba4c2c5f555aeb141811439ad5e5417a3222c3b57b78bad3f497eb90dba3",
+        "bytes": 21518
+      },
+      {
+        "path": "src/aadistill/autoinit/recovery.py",
+        "sha256": "39d6598e210b9619d56463f6ba3000d47e1a97f7121e7db25b97213d4d6c799e",
+        "bytes": 102452
+      },
+      {
+        "path": "src/aadistill/evaluation/behavior.py",
+        "sha256": "c6f52721e8b86bc2d875683bfb9c35b4101379fa5d48de7a48db93959e2935c2",
+        "bytes": 19983
+      },
+      {
+        "path": "src/aadistill/evaluation/capability.py",
+        "sha256": "da1bc3b1069d927b6ab2cbf0eaaf6763bfa491d396189b3dcde95977e39d67ad",
+        "bytes": 19568
+      },
+      {
+        "path": "src/aadistill/evaluation/strict_answer.py",
+        "sha256": "ecb4356a89d3563214ea11ade2307b0d106588bb7ff59f6b8c5e3b9c98d380e3",
+        "bytes": 7628
+      },
+      {
+        "path": "src/aadistill/evaluation/usable_rollout.py",
+        "sha256": "8159acdd7a0a6953dfefac7acf4f6fb4706f69a7264b625e9f9b7ff1a74826ca",
+        "bytes": 6155
+      }
+    ],
+    "rule": "sha256 over sorted 'path:sha256' lines of the declared recovery-scoring source set",
+    "covers": [
+      "usable_rollout components and their composition",
+      "protocol validity, including the tools_offered relaxation",
+      "the tool structural-executability gate",
+      "per-set correctness scorers",
+      "correct => usable",
+      "capability schema and aggregation",
+      "pooled_counts seed aggregation",
+      "the threshold formulas materialized from control data"
+    ],
+    "supersedes": {
+      "contract": "recovery_search_scoring@v1",
+      "identity_was": "a single hash of src/aadistill/evaluation/capability.py",
+      "why": "v1 could not see a defect in the composition. A prompted tool call was rejected as unexpected_tool_call, so the tool capability read a structural 0.0000 for every arm while capability.py itself was unchanged and its hash matched."
+    },
+    "validation": {
+      "schema": "aadistill.autoinit.recovery_scoring_validation/v1",
+      "generated_utc": "2026-08-14T15:28:31.982365+00:00",
+      "battery": "artifacts/stage3/recovery_search_v1",
+      "n_prompts": 190,
+      "scoring_contract": {
+        "contract": "recovery_search_scoring@v2",
+        "contract_id": "recovery_search_scoring",
+        "version": 2,
+        "digest": "808080a7c5d88d5a66760fd0d7eeabc5451c096ad0819f8c5663a0b8224660be",
+        "files": [
+          {
+            "path": "scripts/autoinit/score_recovery_search.py",
+            "sha256": "b19eba4c2c5f555aeb141811439ad5e5417a3222c3b57b78bad3f497eb90dba3",
+            "bytes": 21518
+          },
+          {
+            "path": "src/aadistill/autoinit/recovery.py",
+            "sha256": "39d6598e210b9619d56463f6ba3000d47e1a97f7121e7db25b97213d4d6c799e",
+            "bytes": 102452
+          },
+          {
+            "path": "src/aadistill/evaluation/behavior.py",
+            "sha256": "c6f52721e8b86bc2d875683bfb9c35b4101379fa5d48de7a48db93959e2935c2",
+            "bytes": 19983
+          },
+          {
+            "path": "src/aadistill/evaluation/capability.py",
+            "sha256": "da1bc3b1069d927b6ab2cbf0eaaf6763bfa491d396189b3dcde95977e39d67ad",
+            "bytes": 19568
+          },
+          {
+            "path": "src/aadistill/evaluation/strict_answer.py",
+            "sha256": "ecb4356a89d3563214ea11ade2307b0d106588bb7ff59f6b8c5e3b9c98d380e3",
+            "bytes": 7628
+          },
+          {
+            "path": "src/aadistill/evaluation/usable_rollout.py",
+            "sha256": "8159acdd7a0a6953dfefac7acf4f6fb4706f69a7264b625e9f9b7ff1a74826ca",
+            "bytes": 6155
+          }
+        ],
+        "rule": "sha256 over sorted 'path:sha256' lines of the declared recovery-scoring source set",
+        "covers": [
+          "usable_rollout components and their composition",
+          "protocol validity, including the tools_offered relaxation",
+          "the tool structural-executability gate",
+          "per-set correctness scorers",
+          "correct => usable",
+          "capability schema and aggregation",
+          "pooled_counts seed aggregation",
+          "the threshold formulas materialized from control data"
+        ],
+        "supersedes": {
+          "contract": "recovery_search_scoring@v1",
+          "identity_was": "a single hash of src/aadistill/evaluation/capability.py",
+          "why": "v1 could not see a defect in the composition. A prompted tool call was rejected as unexpected_tool_call, so the tool capability read a structural 0.0000 for every arm while capability.py itself was unchanged and its hash matched."
+        }
+      },
+      "expectations": {
+        "oracle": "every capability usable 1.0; correctness high; nothing capped",
+        "contentless_perfect": "behaviourally perfect and useless; tool unusable because no call was emitted",
+        "oracle_then_loop": "scorer finds the answer; correct still 0",
+        "empty": "every component fails",
+        "degenerate": "repetition stop; no_severe_repetition 0",
+        "tool_malformed_json": "tool unusable (parse), incorrect",
+        "tool_undeclared_name": "tool unusable (name), incorrect",
+        "tool_wrong_arguments": "tool USABLE, incorrect",
+        "unprompted_tool_call": "protocol invalid on every set that offers no tools"
+      },
+      "policies": {
+        "contentless_perfect": {
+          "expectation": "behaviourally perfect and useless; tool unusable because no call was emitted",
+          "usable_rollout_rate": 0.8947,
+          "correct_overall": 0.0,
+          "correct_given_usable": 0.0,
+          "correct_le_usable": true,
+          "per_capability_usable": {
+            "gsm8k": 1.0,
+            "math_verified": 1.0,
+            "multihop": 1.0,
+            "rag": 1.0,
+            "knowledge": 1.0,
+            "tool": 0.0
+          },
+          "per_capability_correct": {
+            "gsm8k": 0.0,
+            "math_verified": 0.0,
+            "multihop": 0.0,
+            "rag": 0.0,
+            "knowledge": 0.0,
+            "tool": 0.0
+          },
+          "tool": {
+            "protocol_valid": 1.0,
+            "tool_call_emitted": 0.0,
+            "tool_call_parsed": 0.0,
+            "tool_name_valid": 0.0,
+            "tool_structurally_executable": 0.0,
+            "usable_rollout_rate": 0.0,
+            "correct_overall": 0.0
+          },
+          "protocol_valid": 1.0,
+          "first_failure": {
+            "tool_not_structurally_executable": 20
+          }
+        },
+        "oracle": {
+          "expectation": "every capability usable 1.0; correctness high; nothing capped",
+          "usable_rollout_rate": 1.0,
+          "correct_overall": 0.9647,
+          "correct_given_usable": 0.9647,
+          "correct_le_usable": true,
+          "per_capability_usable": {
+            "gsm8k": 1.0,
+            "math_verified": 1.0,
+            "multihop": 1.0,
+            "rag": 1.0,
+            "knowledge": 1.0,
+            "tool": 1.0
+          },
+          "per_capability_correct": {
+            "gsm8k": 1.0,
+            "math_verified": 1.0,
+            "multihop": 0.8333,
+            "rag": 1.0,
+            "knowledge": 0.9667,
+            "tool": 1.0
+          },
+          "tool": {
+            "protocol_valid": 1.0,
+            "tool_call_emitted": 1.0,
+            "tool_call_parsed": 1.0,
+            "tool_name_valid": 1.0,
+            "tool_structurally_executable": 1.0,
+            "usable_rollout_rate": 1.0,
+            "correct_overall": 1.0
+          },
+          "protocol_valid": 1.0,
+          "first_failure": {}
+        },
+        "oracle_then_loop": {
+          "expectation": "scorer finds the answer; correct still 0",
+          "usable_rollout_rate": 0.0,
+          "correct_overall": 0.0,
+          "correct_given_usable": null,
+          "correct_le_usable": true,
+          "per_capability_usable": {
+            "gsm8k": 0.0,
+            "math_verified": 0.0,
+            "multihop": 0.0,
+            "rag": 0.0,
+            "knowledge": 0.0,
+            "tool": 0.0
+          },
+          "per_capability_correct": {
+            "gsm8k": 0.0,
+            "math_verified": 0.0,
+            "multihop": 0.0,
+            "rag": 0.0,
+            "knowledge": 0.0,
+            "tool": 0.0
+          },
+          "tool": {
+            "protocol_valid": 0.0,
+            "tool_call_emitted": 1.0,
+            "tool_call_parsed": 1.0,
+            "tool_name_valid": 1.0,
+            "tool_structurally_executable": 1.0,
+            "usable_rollout_rate": 0.0,
+            "correct_overall": 0.0
+          },
+          "protocol_valid": 0.0,
+          "first_failure": {
+            "natural_termination": 190
+          }
+        },
+        "empty": {
+          "expectation": "every component fails",
+          "usable_rollout_rate": 0.0,
+          "correct_overall": 0.0,
+          "correct_given_usable": null,
+          "correct_le_usable": true,
+          "per_capability_usable": {
+            "gsm8k": 0.0,
+            "math_verified": 0.0,
+            "multihop": 0.0,
+            "rag": 0.0,
+            "knowledge": 0.0,
+            "tool": 0.0
+          },
+          "per_capability_correct": {
+            "gsm8k": 0.0,
+            "math_verified": 0.0,
+            "multihop": 0.0,
+            "rag": 0.0,
+            "knowledge": 0.0,
+            "tool": 0.0
+          },
+          "tool": {
+            "protocol_valid": 0.0,
+            "tool_call_emitted": 0.0,
+            "tool_call_parsed": 0.0,
+            "tool_name_valid": 0.0,
+            "tool_structurally_executable": 0.0,
+            "usable_rollout_rate": 0.0,
+            "correct_overall": 0.0
+          },
+          "protocol_valid": 0.0,
+          "first_failure": {
+            "non_empty": 190
+          }
+        },
+        "degenerate": {
+          "expectation": "repetition stop; no_severe_repetition 0",
+          "usable_rollout_rate": 0.0,
+          "correct_overall": 0.0,
+          "correct_given_usable": null,
+          "correct_le_usable": true,
+          "per_capability_usable": {
+            "gsm8k": 0.0,
+            "math_verified": 0.0,
+            "multihop": 0.0,
+            "rag": 0.0,
+            "knowledge": 0.0,
+            "tool": 0.0
+          },
+          "per_capability_correct": {
+            "gsm8k": 0.0,
+            "math_verified": 0.0,
+            "multihop": 0.0,
+            "rag": 0.0,
+            "knowledge": 0.0,
+            "tool": 0.0
+          },
+          "tool": {
+            "protocol_valid": 0.0,
+            "tool_call_emitted": 0.0,
+            "tool_call_parsed": 0.0,
+            "tool_name_valid": 0.0,
+            "tool_structurally_executable": 0.0,
+            "usable_rollout_rate": 0.0,
+            "correct_overall": 0.0
+          },
+          "protocol_valid": 0.0,
+          "first_failure": {
+            "natural_termination": 190
+          }
+        },
+        "tool_malformed_json": {
+          "expectation": "tool unusable (parse), incorrect",
+          "usable_rollout_rate": 0.8947,
+          "correct_overall": 0.8471,
+          "correct_given_usable": 0.96,
+          "correct_le_usable": true,
+          "per_capability_usable": {
+            "gsm8k": 1.0,
+            "math_verified": 1.0,
+            "multihop": 1.0,
+            "rag": 1.0,
+            "knowledge": 1.0,
+            "tool": 0.0
+          },
+          "per_capability_correct": {
+            "gsm8k": 1.0,
+            "math_verified": 1.0,
+            "multihop": 0.8333,
+            "rag": 1.0,
+            "knowledge": 0.9667,
+            "tool": 0.0
+          },
+          "tool": {
+            "protocol_valid": 1.0,
+            "tool_call_emitted": 1.0,
+            "tool_call_parsed": 0.0,
+            "tool_name_valid": 0.0,
+            "tool_structurally_executable": 0.0,
+            "usable_rollout_rate": 0.0,
+            "correct_overall": 0.0
+          },
+          "protocol_valid": 1.0,
+          "first_failure": {
+            "tool_not_structurally_executable": 20
+          }
+        },
+        "tool_undeclared_name": {
+          "expectation": "tool unusable (name), incorrect",
+          "usable_rollout_rate": 0.8947,
+          "correct_overall": 0.8471,
+          "correct_given_usable": 0.96,
+          "correct_le_usable": true,
+          "per_capability_usable": {
+            "gsm8k": 1.0,
+            "math_verified": 1.0,
+            "multihop": 1.0,
+            "rag": 1.0,
+            "knowledge": 1.0,
+            "tool": 0.0
+          },
+          "per_capability_correct": {
+            "gsm8k": 1.0,
+            "math_verified": 1.0,
+            "multihop": 0.8333,
+            "rag": 1.0,
+            "knowledge": 0.9667,
+            "tool": 0.0
+          },
+          "tool": {
+            "protocol_valid": 1.0,
+            "tool_call_emitted": 1.0,
+            "tool_call_parsed": 1.0,
+            "tool_name_valid": 0.0,
+            "tool_structurally_executable": 0.0,
+            "usable_rollout_rate": 0.0,
+            "correct_overall": 0.0
+          },
+          "protocol_valid": 1.0,
+          "first_failure": {
+            "tool_not_structurally_executable": 20
+          }
+        },
+        "tool_wrong_arguments": {
+          "expectation": "tool USABLE, incorrect",
+          "usable_rollout_rate": 1.0,
+          "correct_overall": 0.8471,
+          "correct_given_usable": 0.8471,
+          "correct_le_usable": true,
+          "per_capability_usable": {
+            "gsm8k": 1.0,
+            "math_verified": 1.0,
+            "multihop": 1.0,
+            "rag": 1.0,
+            "knowledge": 1.0,
+            "tool": 1.0
+          },
+          "per_capability_correct": {
+            "gsm8k": 1.0,
+            "math_verified": 1.0,
+            "multihop": 0.8333,
+            "rag": 1.0,
+            "knowledge": 0.9667,
+            "tool": 0.0
+          },
+          "tool": {
+            "protocol_valid": 1.0,
+            "tool_call_emitted": 1.0,
+            "tool_call_parsed": 1.0,
+            "tool_name_valid": 1.0,
+            "tool_structurally_executable": 1.0,
+            "usable_rollout_rate": 1.0,
+            "correct_overall": 0.0
+          },
+          "protocol_valid": 1.0,
+          "first_failure": {}
+        },
+        "unprompted_tool_call": {
+          "expectation": "protocol invalid on every set that offers no tools",
+          "usable_rollout_rate": 0.0,
+          "correct_overall": 0.0,
+          "correct_given_usable": null,
+          "correct_le_usable": true,
+          "per_capability_usable": {
+            "gsm8k": 0.0,
+            "math_verified": 0.0,
+            "multihop": 0.0,
+            "rag": 0.0,
+            "knowledge": 0.0,
+            "tool": 0.0
+          },
+          "per_capability_correct": {
+            "gsm8k": 0.0,
+            "math_verified": 0.0,
+            "multihop": 0.0,
+            "rag": 0.0,
+            "knowledge": 0.0,
+            "tool": 0.0
+          },
+          "tool": {
+            "protocol_valid": 1.0,
+            "tool_call_emitted": 1.0,
+            "tool_call_parsed": 1.0,
+            "tool_name_valid": 0.0,
+            "tool_structurally_executable": 0.0,
+            "usable_rollout_rate": 0.0,
+            "correct_overall": 0.0
+          },
+          "protocol_valid": 0.1053,
+          "first_failure": {
+            "protocol_valid": 170,
+            "tool_not_structurally_executable": 20
+          }
+        }
+      },
+      "checks": {
+        "oracle_no_capability_capped": true,
+        "oracle_correctness_high": true,
+        "malformed_tool_unusable": true,
+        "undeclared_tool_name_unusable": true,
+        "wrong_arguments_usable_but_incorrect": true,
+        "unprompted_tool_call_protocol_invalid": true,
+        "unprompted_tool_call_allowed_where_tools_offered": true,
+        "correct_implies_usable_everywhere": true,
+        "contentless_is_behaviourally_perfect_and_useless": true
+      },
+      "all_checks_pass": true,
+      "report_sha256": "649fc370db34bd38fd58f921a3094b96259d3aa3303fa58763b12e46a16272a4"
+    },
+    "tool_usable_gate": {
+      "definition": "generic usable_rollout AND tool_call_emitted AND tool_call_parsed AND tool_name_valid",
+      "meaning": "structurally executable by an agent runtime, which is what a Stage-5 trajectory requires; NOT argument correctness",
+      "excluded": {
+        "tool_args_schema_ok": "the xLAM `required` list is reconstructed from missing defaults, an interpretive step; stays diagnostic by decision",
+        "tool_call_exact_match": "that is correctness; folding it into usability would collapse the two axes this battery separates"
+      },
+      "multi_call": "the frozen scorer's own all-calls semantics (`parsed` and `tool_name_valid` are all(...) over the emitted calls); no second interpretation",
+      "worked_examples": {
+        "malformed JSON tool call": "unusable, incorrect",
+        "undeclared tool name": "unusable, incorrect",
+        "well-formed declared call, wrong arguments": "usable, incorrect",
+        "exact correct invocation": "usable, correct",
+        "tool call on a prompt offering no tools": "protocol invalid"
+      }
+    },
+    "supersession": {
+      "superseded": "recovery_search_scoring@v1",
+      "when": "2026-08-13, BEFORE any paid measurement",
+      "statement": "The earlier recovery-search scoring contract was superseded before any paid measurement or candidate evaluation because oracle validation demonstrated that tool-enabled prompts had a structural zero in usable_rollout under the old generic protocol-validity rule.",
+      "classification": "pre-measurement metric defect correction, NOT an adaptive response to experimental results: no control, no candidate and no searched leaf had been measured when it was made",
+      "evidence": {
+        "policy": "perfect oracle on all 190 frozen prompts",
+        "tool_usable_rate": {
+          "before": 0.0,
+          "after": 1.0
+        },
+        "overall_usable_rate": {
+          "before": 0.8947,
+          "after": 1.0
+        },
+        "prompts_affected": 20,
+        "capabilities_affected": [
+          "tool"
+        ],
+        "of_capabilities_in_catastrophic_gate": 6
+      },
+      "prompt_content_unchanged": true,
+      "battery_content_sha256": "a1b22778b00d95b6aba358c14a5af5b559fd807bb371c92131eacca59479f323",
+      "history": "both records are kept; logs/decisions.md carries the v1 decision and the supersession as separate dated entries"
+    }
+  },
+  "micro_preflight_plan": {
+    "plan_id": "autoinit.micro_preflight",
+    "version": 1,
+    "plan_hash": "83218ddd283c961f42f4ec5852542192487d5fc10a3a34e7b7fe6b62e84cc604",
+    "stages": [
+      {
+        "stage": 0,
+        "name": "runtime attestation",
+        "purpose": "pin what everything else will be measured and trained under, before any of it happens",
+        "produces": [
+          "image digest",
+          "RuntimeEnvironmentFingerprint",
+          "trainer_source_digest + declared file set",
+          "input artifact hashes (canonical init, pack, suite, battery)",
+          "materialized RecoveryProtocolFingerprint",
+          "frozen attested protocol artifact: logs/autoinit_phase_a_protocol_attested.json"
+        ],
+        "blocking": true,
+        "stop_conditions": [
+          "image digest unavailable",
+          "any input artifact hash mismatches its pin",
+          "trainer source file missing from the declared set",
+          "attested trainer digest or runtime contradicts a preregistered value -> protocol drift, STOP"
+        ]
+      },
+      {
+        "stage": 1,
+        "name": "cheap machine gates",
+        "purpose": "find out whether this machine and runtime are usable at all",
+        "produces": [
+          "activation-statistics GPU/CPU split",
+          "GPU state-evaluator repeatability range",
+          "peak GPU resident memory on the widest operator",
+          "checkpoint write/read throughput"
+        ],
+        "blocking": true,
+        "stop_conditions": [
+          "evaluator repeatability range >= declared epsilon -> conservative_review_gate fires, Phase A blocked, STOP",
+          "peak resident memory > 40 GiB on an L40S -> hardware plan wrong, STOP",
+          "disk throughput implies the working set is not feasible -> STOP"
+        ]
+      },
+      {
+        "stage": 2,
+        "name": "permanent canonical controls",
+        "purpose": "produce the two matched control probes that Phase A will reuse at rung 2",
+        "produces": [
+          "canonical init -> 0.86M seed sa",
+          "canonical init -> 0.86M seed sb",
+          "per-run RecoveryProtocolFingerprint and RecoveryProbeIdentity",
+          "checkpoint artifact digests"
+        ],
+        "blocking": true,
+        "stop_conditions": [
+          "a run's protocol fingerprint differs from the Stage-0 ATTESTED protocol hash (not the preregistered object, which still carries runtime_digest: null)",
+          "a run's protocol is not materialized",
+          "step time diverges from the priced 4.15 s/step by more than 25%"
+        ]
+      },
+      {
+        "stage": 3,
+        "name": "control characterization",
+        "purpose": "materialize the frozen threshold formulas from control data only",
+        "produces": [
+          "sa and sb on recovery_search_v2",
+          "pooled_counts@v2 aggregate + per-seed counts and rates",
+          "materialized equivalence interval",
+          "materialized feasibility floor",
+          "per-capability control baselines"
+        ],
+        "blocking": false,
+        "stop_conditions": [
+          "capability schema validation fails -> scoring defect, STOP"
+        ]
+      }
+    ],
+    "ordering_rationale": "controls are the expensive artifact and the one whose validity depends on a fixed runtime, so they are produced only after the runtime is attested and the cheap gates pass"
+  },
+  "canonical_control_recipe_audit": {
+    "historical_controls_are_recipe_matched": false,
+    "consequence": "The historical checkpoints are NOT recipe-matched and must not be called matched controls. Rerun canonical sa/sb from qwen3_0p6b_init_v0 at 0.86M under the current frozen recovery trainer; those runs become the permanent Phase-A control probes and are retained, not disposable.",
+    "per_control": {
+      "e1_r0860k_sa_pca": {
+        "recipe_matched_control": false,
+        "passes_legacy_lineage_subset": true,
+        "fingerprint_self": "e6e4b97b3b9d8b57fd1dc241489d91c84156dbea5b39e1114d69423e1e78efb6",
+        "fingerprint_other": "33a100f142a3f197e24c02dfffc7aeac54ef864748a96b069bc8a9b7c4b51d46",
+        "fingerprints_equal": false,
+        "matched_fields": [
+          "autocast_bf16",
+          "betas",
+          "block_len",
+          "block_ordering",
+          "blocks_per_step",
+          "ce_weight",
+          "dtype",
+          "eps",
+          "grad_clip",
+          "gradient_checkpointing",
+          "kd_scope",
+          "kd_temperature",
+          "kd_weight",
+          "lr",
+          "lr_schedule",
+          "micro_blocks",
+          "min_lr_frac",
+          "optimizer",
+          "pack_blocks_sha256",
+          "packing",
+          "rung",
+          "teacher_attn",
+          "teacher_dtype",
+          "teacher_id",
+          "teacher_revision",
+          "tokenizer_sha256",
+          "total_steps",
+          "train_blocks",
+          "train_supervised_tokens",
+          "trainable_params",
+          "trainable_patterns",
+          "val_blocks",
+          "warmup_steps",
+          "weight_decay"
+        ],
+        "mismatched_fields": [
+          {
+            "field": "pack",
+            "self": "ladder_uniform",
+            "other": "ladder_uniform_probe"
+          },
+          {
+            "field": "resume_semantics",
+            "self": "step counter + RNG state (no consumed-block accounting)",
+            "other": "step counter + RNG state + consumed-block position, asserted on restore"
+          }
+        ],
+        "unverifiable_fields": [
+          {
+            "field": "kd_chunk",
+            "self": 512,
+            "other": 512
+          },
+          {
+            "field": "runtime_digest",
+            "self": null,
+            "other": null
+          },
+          {
+            "field": "trainer_source_digest",
+            "self": null,
+            "other": "054dd6d60b40e023408c055bb2f9bfd9d7953c5a42d1602042db97197458633a"
+          },
+          {
+            "field": "trainer_source_set_version",
+            "self": null,
+            "other": 1
+          }
+        ],
+        "unmaterialized_fields": [
+          "runtime_digest",
+          "trainer_source_digest",
+          "trainer_source_set_version"
+        ],
+        "both_materialized": false,
+        "protocol_identical": false,
+        "material_mismatches": [],
+        "benign_mismatches": [
+          {
+            "field": "pack",
+            "self": "ladder_uniform",
+            "other": "ladder_uniform_probe",
+            "why_benign": "a rename, not a different pack. Proved by hash: the relay holds the historical pack under its historical name at stage3_recovery_corpus_v2/ladder_uniform/blocks.npz, and its sha256 is 6f324cb0... - exactly the hash the frozen Phase-A recipe pins for ladder_uniform_probe. Derived quantities agree too (682 blocks, 864,750 supervised tokens, identical six-way mix)."
+          },
+          {
+            "field": "resume_semantics",
+            "self": "step counter + RNG state (no consumed-block accounting)",
+            "other": "step counter + RNG state + consumed-block position, asserted on restore",
+            "why_benign": "both historical runs recorded resumed_from=None, so the consumed-block accounting added since could not have affected them; it changes restore behaviour only"
+          }
+        ],
+        "blocking": true
+      },
+      "e1_r0860k_sb_pca": {
+        "recipe_matched_control": false,
+        "passes_legacy_lineage_subset": true,
+        "fingerprint_self": "e6e4b97b3b9d8b57fd1dc241489d91c84156dbea5b39e1114d69423e1e78efb6",
+        "fingerprint_other": "33a100f142a3f197e24c02dfffc7aeac54ef864748a96b069bc8a9b7c4b51d46",
+        "fingerprints_equal": false,
+        "matched_fields": [
+          "autocast_bf16",
+          "betas",
+          "block_len",
+          "block_ordering",
+          "blocks_per_step",
+          "ce_weight",
+          "dtype",
+          "eps",
+          "grad_clip",
+          "gradient_checkpointing",
+          "kd_scope",
+          "kd_temperature",
+          "kd_weight",
+          "lr",
+          "lr_schedule",
+          "micro_blocks",
+          "min_lr_frac",
+          "optimizer",
+          "pack_blocks_sha256",
+          "packing",
+          "rung",
+          "teacher_attn",
+          "teacher_dtype",
+          "teacher_id",
+          "teacher_revision",
+          "tokenizer_sha256",
+          "total_steps",
+          "train_blocks",
+          "train_supervised_tokens",
+          "trainable_params",
+          "trainable_patterns",
+          "val_blocks",
+          "warmup_steps",
+          "weight_decay"
+        ],
+        "mismatched_fields": [
+          {
+            "field": "pack",
+            "self": "ladder_uniform",
+            "other": "ladder_uniform_probe"
+          },
+          {
+            "field": "resume_semantics",
+            "self": "step counter + RNG state (no consumed-block accounting)",
+            "other": "step counter + RNG state + consumed-block position, asserted on restore"
+          }
+        ],
+        "unverifiable_fields": [
+          {
+            "field": "kd_chunk",
+            "self": 512,
+            "other": 512
+          },
+          {
+            "field": "runtime_digest",
+            "self": null,
+            "other": null
+          },
+          {
+            "field": "trainer_source_digest",
+            "self": null,
+            "other": "054dd6d60b40e023408c055bb2f9bfd9d7953c5a42d1602042db97197458633a"
+          },
+          {
+            "field": "trainer_source_set_version",
+            "self": null,
+            "other": 1
+          }
+        ],
+        "unmaterialized_fields": [
+          "runtime_digest",
+          "trainer_source_digest",
+          "trainer_source_set_version"
+        ],
+        "both_materialized": false,
+        "protocol_identical": false,
+        "material_mismatches": [],
+        "benign_mismatches": [
+          {
+            "field": "pack",
+            "self": "ladder_uniform",
+            "other": "ladder_uniform_probe",
+            "why_benign": "a rename, not a different pack. Proved by hash: the relay holds the historical pack under its historical name at stage3_recovery_corpus_v2/ladder_uniform/blocks.npz, and its sha256 is 6f324cb0... - exactly the hash the frozen Phase-A recipe pins for ladder_uniform_probe. Derived quantities agree too (682 blocks, 864,750 supervised tokens, identical six-way mix)."
+          },
+          {
+            "field": "resume_semantics",
+            "self": "step counter + RNG state (no consumed-block accounting)",
+            "other": "step counter + RNG state + consumed-block position, asserted on restore",
+            "why_benign": "both historical runs recorded resumed_from=None, so the consumed-block accounting added since could not have affected them; it changes restore behaviour only"
+          }
+        ],
+        "blocking": true
+      }
+    },
+    "intended_phase_a_comparison": {
+      "pending_materialization": {
+        "control": "562341b6544e6eb272b0c2886ca028c3bc5717cc587cc988c24aec8858d2c372",
+        "searched": "a3ef4719f1b4145f080b013fd02924f91725b95eaa610ad1aab4d3de17582132",
+        "check": {
+          "self": "phase_a:control-sa",
+          "other": "phase_a:searched-A-sa",
+          "protocols_materialized": false,
+          "unmaterialized_fields": [
+            "runtime_digest"
+          ],
+          "protocol_identical": false,
+          "same_seed": true,
+          "initializations_differ": true,
+          "is_single_variable_comparison": false,
+          "protocol_comparison": {
+            "fingerprint_self": "33a100f142a3f197e24c02dfffc7aeac54ef864748a96b069bc8a9b7c4b51d46",
+            "fingerprint_other": "33a100f142a3f197e24c02dfffc7aeac54ef864748a96b069bc8a9b7c4b51d46",
+            "fingerprints_equal": true,
+            "matched_fields": [
+              "autocast_bf16",
+              "betas",
+              "block_len",
+              "block_ordering",
+              "blocks_per_step",
+              "ce_weight",
+              "dtype",
+              "eps",
+              "grad_clip",
+              "gradient_checkpointing",
+              "kd_chunk",
+              "kd_scope",
+              "kd_temperature",
+              "kd_weight",
+              "lr",
+              "lr_schedule",
+              "micro_blocks",
+              "min_lr_frac",
+              "optimizer",
+              "pack",
+              "pack_blocks_sha256",
+              "packing",
+              "resume_semantics",
+              "rung",
+              "teacher_attn",
+              "teacher_dtype",
+              "teacher_id",
+              "teacher_revision",
+              "tokenizer_sha256",
+              "total_steps",
+              "train_blocks",
+              "train_supervised_tokens",
+              "trainable_params",
+              "trainable_patterns",
+              "trainer_source_digest",
+              "trainer_source_set_version",
+              "val_blocks",
+              "warmup_steps",
+              "weight_decay"
+            ],
+            "mismatched_fields": [],
+            "unverifiable_fields": [
+              {
+                "field": "runtime_digest",
+                "self": null,
+                "other": null
+              }
+            ],
+            "unmaterialized_fields": [
+              "runtime_digest"
+            ],
+            "both_materialized": false,
+            "protocol_identical": false
+          },
+          "verdict": "NOT ELIGIBLE FOR MATCHED: protocol is not materialized (runtime_digest unknown on one or both sides). Unknown on both sides is not verified identical; attest at preflight Stage 0 first."
+        },
+        "note": "CURRENT STATE. runtime_digest is unknown on both sides because the image is chosen at pod creation. Not eligible for MATCHED until preflight Stage 0 attests it."
+      },
+      "after_stage_0_attestation": {
+        "control": "5754305eb8aff123a2106e570c53f7c29f9a4b65ff1db38c81042fe87e022358",
+        "searched": "c9354345c4aa32e2883443349427afba163f1724f7668b6e2862aea9db522fc1",
+        "check": {
+          "self": "phase_a:control-sa",
+          "other": "phase_a:searched-A-sa",
+          "protocols_materialized": true,
+          "unmaterialized_fields": [],
+          "protocol_identical": true,
+          "same_seed": true,
+          "initializations_differ": true,
+          "is_single_variable_comparison": true,
+          "protocol_comparison": {
+            "fingerprint_self": "68071cafee0e8e1b5f59e013b315ee212e0ee564020b7b76b18e5778339f560f",
+            "fingerprint_other": "68071cafee0e8e1b5f59e013b315ee212e0ee564020b7b76b18e5778339f560f",
+            "fingerprints_equal": true,
+            "matched_fields": [
+              "autocast_bf16",
+              "betas",
+              "block_len",
+              "block_ordering",
+              "blocks_per_step",
+              "ce_weight",
+              "dtype",
+              "eps",
+              "grad_clip",
+              "gradient_checkpointing",
+              "kd_chunk",
+              "kd_scope",
+              "kd_temperature",
+              "kd_weight",
+              "lr",
+              "lr_schedule",
+              "micro_blocks",
+              "min_lr_frac",
+              "optimizer",
+              "pack",
+              "pack_blocks_sha256",
+              "packing",
+              "resume_semantics",
+              "rung",
+              "runtime_digest",
+              "teacher_attn",
+              "teacher_dtype",
+              "teacher_id",
+              "teacher_revision",
+              "tokenizer_sha256",
+              "total_steps",
+              "train_blocks",
+              "train_supervised_tokens",
+              "trainable_params",
+              "trainable_patterns",
+              "trainer_source_digest",
+              "trainer_source_set_version",
+              "val_blocks",
+              "warmup_steps",
+              "weight_decay"
+            ],
+            "mismatched_fields": [],
+            "unverifiable_fields": [],
+            "unmaterialized_fields": [],
+            "both_materialized": true,
+            "protocol_identical": true
+          },
+          "verdict": "MATCHED: same protocol, same seed, different initialization \u2014 the only difference is the treatment."
+        },
+        "note": "ILLUSTRATIVE ONLY, with a placeholder image digest \u2014 shows that the predicate resolves to MATCHED once the environment fields carry real values. Confers no attestation."
+      },
+      "predicate": "both_materialized AND protocol_identical AND same_seed AND initializations_differ"
+    },
+    "report_sha256": "972a5e23281f9b61aae76aac5f8955b01cae838e3a42dcb8981b118a7f60b37a"
+  },
+  "tool_scoring_audit": {
+    "scorer": "aadistill.evaluation.behavior.score_tool_call",
+    "scorer_sha256": "c6f52721e8b86bc2d875683bfb9c35b4101379fa5d48de7a48db93959e2935c2",
+    "n_items": 20,
+    "parse_failures": [],
+    "multi_call_items": 9,
+    "required_signal_counts": {
+      "has_default": 88,
+      "no_default": 18
+    },
+    "cases_run": [
+      "known_good",
+      "malformed_json",
+      "missing_required_args",
+      "protocol_invalid_no_wrapper",
+      "wrong_argument_values",
+      "wrong_tool_name"
+    ],
+    "disagreements": [],
+    "all_cases_behave_as_required": true,
+    "interpretation_sensitive_verdicts": 3,
+    "interpretation_affects_only_schema_field": true,
+    "examples_of_sensitivity": [
+      {
+        "id": "xlam-13",
+        "case": "missing_required_args",
+        "fields": [
+          "tool_args_schema_ok"
+        ],
+        "with_required": {
+          "tool_args_schema_ok": false
+        },
+        "without_required": {
+          "tool_args_schema_ok": true
+        }
+      },
+      {
+        "id": "xlam-18",
+        "case": "missing_required_args",
+        "fields": [
+          "tool_args_schema_ok"
+        ],
+        "with_required": {
+          "tool_args_schema_ok": false
+        },
+        "without_required": {
+          "tool_args_schema_ok": true
+        }
+      },
+      {
+        "id": "xlam-8",
+        "case": "missing_required_args",
+        "fields": [
+          "tool_args_schema_ok"
+        ],
+        "with_required": {
+          "tool_args_schema_ok": false
+        },
+        "without_required": {
+          "tool_args_schema_ok": true
+        }
+      }
+    ],
+    "connection_is_mechanical": true,
+    "decision": "MAKE TOOL SCORABLE on tool_call_exact_match: the envelope translation is mechanical, exact match never depends on the `required` interpretation, and every adversarial case is distinguished correctly.",
+    "correctness_field_if_scorable": "tool_call_exact_match",
+    "fields_not_used_for_correctness": [
+      "tool_args_schema_ok (depends on the `required` interpretation; reported as a diagnostic, never as correctness)"
+    ],
+    "generated_utc": "2026-08-12T19:04:42.108518+00:00",
+    "audit_sha256": "772f06ce2cb742e4272c543ae7dbb5f6e3a3521d9bcd6e0ca28e2e476a751ad6"
+  },
+  "supersedes": {
+    "artifact": "logs/autoinit_phase_a_preregistration.json",
+    "preregistration_sha256": "df75f7dcc8b7619971c892b51f8cd9021a1dd79735ba00dddeed258686b27fc3",
+    "difference": "the equivalence interval and feasibility floor were PENDING_CONTROL_CHARACTERIZATION there and are materialized here; no rule, seed, count or selection order differs",
+    "why_preserved": "it is the record that the formulas were frozen before the control was characterized"
+  },
+  "stage3_control_characterization": {
+    "status": "COMPLETE",
+    "source": "logs/autoinit_stage3_complete",
+    "battery": "recovery_search_v2",
+    "aggregation": "pooled_counts@v2",
+    "from_imported_controls": {
+      "preflight_ctl_r0860k_sa": "799bd5acc30ff3a0aed105a751504e58b24862c6d383dade7aa1d832a8448ecd",
+      "preflight_ctl_r0860k_sb": "793f786adde9cbf01e386f827dbd79e64f9afc2b6938c5ffa4f902e14b5275bd"
+    },
+    "pooled": {
+      "seeds": [
+        20260726,
+        20260801
+      ],
+      "n": 380,
+      "usable": 141,
+      "correct": 4,
+      "n_scorable": 340,
+      "usable_scorable": 140,
+      "usable_rollout_rate": 0.37105263157894736,
+      "correct_overall": 0.011764705882352941,
+      "correct_given_usable": 0.02857142857142857,
+      "aggregation": "pooled_counts@v2"
+    },
+    "per_seed": [
+      {
+        "seed": 20260726,
+        "n": 190,
+        "usable": 74,
+        "n_scorable": 170,
+        "usable_scorable": 74,
+        "correct": 2
+      },
+      {
+        "seed": 20260801,
+        "n": 190,
+        "usable": 67,
+        "n_scorable": 170,
+        "usable_scorable": 66,
+        "correct": 2
+      }
+    ],
+    "equivalence_interval": 0.011695296982299022,
+    "feasibility_floor": 0.3,
+    "thresholds_re_derived_not_copied": true,
+    "per_capability_control_baseline": {
+      "gsm8k": {
+        "pooled_usable_rate": 0.4333,
+        "sa": 0.5667,
+        "sb": 0.3
+      },
+      "math_verified": {
+        "pooled_usable_rate": 0.2333,
+        "sa": 0.4,
+        "sb": 0.0667
+      },
+      "multihop": {
+        "pooled_usable_rate": 0.5,
+        "sa": 0.5,
+        "sb": 0.5
+      },
+      "rag": {
+        "pooled_usable_rate": 0.6833,
+        "sa": 0.6333,
+        "sb": 0.7333
+      },
+      "knowledge": {
+        "pooled_usable_rate": 0.1667,
+        "sa": 0.0667,
+        "sb": 0.2667
+      },
+      "tool": {
+        "pooled_usable_rate": 0.475,
+        "sa": 0.45,
+        "sb": 0.5
+      }
+    },
+    "attested_evaluation_protocol": {
+      "schema": "aadistill.autoinit.continuation_attestation/v1",
+      "generated_utc": "2026-08-15T08:43:22.685787+00:00",
+      "continuation_plan_hash": "79da6d7af9295ca510cc5721cb25d915b3aae224bfb6a1147476186a6f8a195d",
+      "runtime": {
+        "version": 1,
+        "image_digest": "runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@580.159.03",
+        "python_version": "3.12.3",
+        "torch_version": "2.11.0+cu128",
+        "transformers_version": "5.13.1",
+        "cuda_runtime": "12.8",
+        "attention_backend": "sdpa"
+      },
+      "evaluation_protocol": {
+        "evaluation_protocol_hash": "250f72efbd43b86a475e8dda293b45f07ee61a4d858e147f4a5bd7681c32c2e4",
+        "generation": {
+          "generation_source_digest": "a1b51736d6a6b1276322a04d44855d7b574011e165e77d6d23c3e31b3036f743",
+          "generation_source_set_version": 1,
+          "vllm_version": "0.27.1",
+          "transformers_version": "5.15.0",
+          "torch_version": "2.13.0+cu130",
+          "dtype": "bfloat16",
+          "gpu_memory_utilization": 0.9,
+          "max_num_seqs": 256,
+          "max_num_batched_tokens": 8192,
+          "enforce_eager": false,
+          "tokenizer_source": "the evaluated checkpoint",
+          "tokenizer_sha256": "c1db93c8164f3e3ba2dbc8c6943fb574273a5efa87da4556ef9f460b5c0893b7",
+          "chat_template_sha256": "3802169b2a02b81e6adb7ab4f64f91ff02db753c8c3a64a01c35192d3a61d8d7",
+          "protocol": "project",
+          "system_message": "You are a helpful Assistant.",
+          "system_injection_rule": "injected only when the sample carries no system turn and protocol == project; a sample's own system prompt is preserved",
+          "chat_template_kwargs_json": "{}",
+          "thinking_mode": "template-default (not overridden)",
+          "trained_context": 8192,
+          "context_len_override": null,
+          "resolved_context": 8192,
+          "context_source": "trained_block_len",
+          "context_resolution_rule": "min(trained_context, architectural context); the effective context is the TRAINED context and this is not a 262K-context evaluation",
+          "temperature": 0.0,
+          "top_p": 1.0,
+          "top_k": -1,
+          "detokenize": false,
+          "max_tokens_rule": "per sample: resolved_context - len(prompt_ids); P18 unrestricted, never a chosen token budget",
+          "stop_token_ids": [
+            151645
+          ],
+          "stop_id_derivation_rule": "sorted union of config.eos_token_id, generation_config.eos_token_id, <|im_end|> and tokenizer.eos_token_id",
+          "degeneration_stop": true,
+          "degeneration_check_every": 256,
+          "degeneration_source_digest": "793540820d4fc0f42d0c855e0d79eb879b94efa451e06030b2a14c55683f4961",
+          "runtime_digest": "2db007528a37f4d02113265d225531aec441a483e03e626556e0e6049a7af101",
+          "protocol_id": "recovery_generation",
+          "version": 1,
+          "generation_protocol_fingerprint": "714237c516afc0a8421126ca30ec4a2b657689d4c81f8973834a42bceb11a3bb",
+          "is_materialized": true,
+          "unmaterialized_fields": [],
+          "excluded_by_design": [
+            "the checkpoint being generated from"
+          ],
+          "why_excluded": "the checkpoint is the treatment; a generation identity containing it would mark every pair of arms as mismatched"
+        },
+        "scoring_contract": "recovery_search_scoring@v2",
+        "scoring_digest": "808080a7c5d88d5a66760fd0d7eeabc5451c096ad0819f8c5663a0b8224660be",
+        "battery": {
+          "artifact": "recovery_search_v2",
+          "manifest_sha256": "58ae5c6dcbe32eb28c343a66830d7224a14537362deeeff2ce8219d0a31679d6",
+          "content_sha256": "a1b22778b00d95b6aba358c14a5af5b559fd807bb371c92131eacca59479f323"
+        },
+        "binding": "every control and every searched recovery probe must bind to this exact hash; a probe measured under a different one is not comparable to the thresholds materialized from these controls",
+        "notes": {}
+      },
+      "evaluation_protocol_hash": "250f72efbd43b86a475e8dda293b45f07ee61a4d858e147f4a5bd7681c32c2e4",
+      "battery": {
+        "artifact": "recovery_search_v2",
+        "manifest_sha256": "58ae5c6dcbe32eb28c343a66830d7224a14537362deeeff2ce8219d0a31679d6",
+        "content_sha256": "a1b22778b00d95b6aba358c14a5af5b559fd807bb371c92131eacca59479f323",
+        "tools_materialization_sha256": "3016f1c421a705cf72ce852a76f26ad6ef6dcaf84021a80de9c130bf224befdf"
+      },
+      "note": "the controls' RECOVERY identity is imported and is not re-attested here; this attests the EVALUATION identity, which has moved since they were trained",
+      "report_sha256": "2fff9645b010d2edc26b22392a56f1b3568c8386ceff033d9f074f0ab740bf80"
+    },
+    "note": "the two rules were frozen by re-running the frozen formulas over the control's recorded per-seed rates and asserting the result against the Stage-3 artifact"
+  },
+  "pending_before_launch": [
+    "a PhaseAAuthorization artifact issued against the rehearsed harness digest and the hash of THIS preregistration"
+  ],
+  "satisfied_before_launch": [
+    "state-evaluator repeatability: max_objective_range 0.0 across 10 GPU repeats against the real teacher, far inside the declared epsilon 1e-4, so the conservative response rule does not gate Phase A (logs/autoinit_preflight_run4/preflight_evidence.json)",
+    "activation-statistics GPU/CPU split measured on two hosts: gpu_fraction 0.5177-0.5609, total 8.02-8.30 s per pass (logs/autoinit_phase_a_repricing.md)"
+  ],
+  "preregistration_sha256": "c13235e111a273bc835666d6615bd6b38927170025e0de59da39c0685095faa1"
+}

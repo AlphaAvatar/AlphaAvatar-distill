@@ -402,6 +402,17 @@ class Preflight:
     def session_plan_hash(self) -> str:
         return PREFLIGHT_PLAN_V1.plan_hash
 
+    def setup_env(self) -> dict[str, str]:
+        """Extra environment the SETUP script needs for this session kind.
+
+        Empty for the preflight and the continuation, which both authorize
+        through `SpendAuthorization` and need nothing beyond the path and the
+        plan hash. A session whose authorization is a different TYPE declares it
+        here, so setup can load the right one without the launcher having to
+        reimplement the whole setup step to add two variables.
+        """
+        return {}
+
     def setup_on_draw(self, draw: int) -> str:
         ep = self.wait_endpoint()
         if not ep:
@@ -437,12 +448,14 @@ class Preflight:
         self.image_digest = self.read_image_digest(target)
         self.say(f"draw {draw}: image identity {self.image_digest}")
         self.say(f"draw {draw}: running setup")
+        extra = "".join(f"{k}={v} " for k, v in sorted(self.setup_env().items()))
         target.run(
             f"cd {WS} && SESSION_COMMIT={self.a.session_commit} "
             f"BUNDLE_NAME={self.a.bundle} "
             f"SESSION_STATUS={STATUS} "
             f"SESSION_AUTH_PATH={self.session_auth_path()} "
             f"SESSION_PLAN_HASH={self.session_plan_hash()} "
+            f"{extra}"
             f"TEACHER_REVISION={self.a.teacher_revision} "
             f"UV_MAX_S={self.a.uv_max_s} TESTS_MAX_S={self.a.tests_max_s} "
             f"bash {WS}/autoinit_preflight_setup.sh > {WS}/setup.log 2>&1; "

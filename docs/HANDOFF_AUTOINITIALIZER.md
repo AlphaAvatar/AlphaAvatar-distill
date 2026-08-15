@@ -237,12 +237,20 @@ materialized (§3). The framework is built and the orchestration path works end 
 end — attempt 8 ran setup, Stages 0–3, artifact collection and provider-confirmed
 teardown without an infrastructure defect.
 
-> **Nothing is authorized.** The next paid step is Phase A, and it **does not fit
-> the remaining budget** (§6): $20.13 hard against $19.5238. Bring the maintainer
-> a decision on that — raise the cap, drop the conditional third seed, or trim the
-> reserve — before designing anything. Do not launch paid compute without separate
-> authorization. Do not retrain the permanent controls. Do not reopen the frozen
-> AutoInitializer search/recovery design, or E8b.
+> **Nothing is authorized.** The cap was raised to **$213.00** on 2026-08-15 and
+> the Phase-A harness — which did not exist until then — is now built and
+> rehearsed, so Phase A now *fits* ($20.0126 hard against $21.4538 remaining).
+> **Fitting is not authorization.** No `PhaseAAuthorization` artifact has been
+> issued, and `scripts/pod/autoinit_phase_a_launch.py` refuses to create a pod
+> without one. Do not launch paid compute without issuing one. Do not retrain the
+> permanent controls. Do not reopen the frozen AutoInitializer search/recovery
+> design, or E8b.
+>
+> Two things are still open: the searched-leaf **storage plan** (weight hashes
+> are not reproducible across sessions, so a lost leaf can only be re-searched;
+> relay capacity for 5 × ~2.3 GB is unconfirmed), and the **operator-build
+> compute**, the one term in the search still covered by an allowance rather than
+> a measurement.
 
 What is worth reading first, in this order: [`../logs/STATE.md`](../logs/STATE.md)
 for the position, [`../logs/autoinit_stage3_complete/`](../logs/autoinit_stage3_complete/)

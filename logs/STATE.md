@@ -142,28 +142,80 @@ rendered 0/20 is behind us.
 8.43 min marginal for one checkpoint once the engine is warm. Against the 24
 min/control allowance, ~2.4× conservative.
 
-### Phase A: repriced from measurement, and it still does not fit
+### Phase A: harness BUILT and rehearsed, cap raised, still NOT AUTHORIZED
+
+**The Phase-A harness did not exist before 2026-08-15.** The science was
+implemented and frozen as a library, but nothing drove it on hardware:
+`BeamSearch(` was instantiated only in `dry_run_search.py` and tests, and
+`recovery.py:2068` says of the rung descriptors *"nothing here launches
+anything."* `run_phase_a` existed only as a forbidden string in two rehearsal
+tests. It is now built:
+
+| file | role |
+| --- | --- |
+| `src/aadistill/autoinit/phase_a.py` | session plan, scope, `PhaseAAuthorization` |
+| `scripts/pod/autoinit_phase_a_launch.py` | launcher, a `Preflight` subclass |
+| `scripts/pod/autoinit_phase_a_driver.py` | six stages, per-probe resume |
+| `scripts/autoinit/phase_a_search.py` | the beam search, imported not shelled out |
+| `configs/autoinit/phase_a_artifacts{,_failed}.json` | collection specs |
+| `logs/autoinit_phase_a_recovery_plan_frozen.json` | **the frozen science plan; it had never been written** |
+| `logs/autoinit_phase_a_preregistration_materialized.json` | thresholds materialized; the draft is preserved |
+
+Nothing frozen moved: 48 decomposed P=1 paths, warmup 1 then beam 6, 5 searched
+leaves + injected canonical control on sa, best 2 + control on sb, conditional
+sc, ε-Pareto with NLL diagnostic-only, and the selection rules are unchanged.
+`SpendAuthorization` was **not** edited — its `allows_phase_a` is still a hard
+`False`, and the setup script's `assert a.allows_phase_a is False` is intact for
+every non-Phase-A session.
 
 ```
 project cumulative                              $191.5462
-remaining under the $211.07 cap                 $ 19.5238
-Phase A expected, repriced                      $ 12.36     fits, margin $7.16
-Phase A hard, repriced                          $ 20.13     SHORT BY $0.61
+cap RAISED 2026-08-15                           $213.00
+remaining                                       $ 21.4538
+Phase A expected (launcher make_plan)           $ 17.8933
+  of which the conditional sc rung              $  3.5328
+  expected if it resolves after two seeds       $ 14.3604
+Phase A soft                                    $ 19.6826
+Phase A hard                                    $ 20.0126   margin $1.4412
 ```
 
-Details in [`autoinit_phase_a_repricing.md`](autoinit_phase_a_repricing.md). The
-reprice moved the hard bound $21.02 → $20.13 and did not close the gap. **Phase A
-remains unauthorized** and cannot be authorized under the current cap without a
-maintainer decision: raise the cap ~$1, or drop the conditional third seed
-($3.53, giving hard $16.60 with $2.92 margin) at the cost of the
-seed-disagreement escape hatch, or cut the $3.00 infrastructure reserve — which
-this week argues against.
+The launcher's price is higher than
+[`autoinit_phase_a_repricing.md`](autoinit_phase_a_repricing.md)'s $12.36/$20.13
+because that document priced search and probes but not the session around them —
+setup, attestation, selection, manifest, synchronization, transfer, contingency
+and the artifact-recovery reserve. **The launcher's figure is the binding one**,
+because `plan_session` computes it before a pod can exist.
+
+**Phase A is PREPARED, not AUTHORIZED.** No `PhaseAAuthorization` artifact has
+been issued and the launcher refuses to create a pod without one. Raising the cap
+did not authorize a launch.
 
 ## What remains
 
-1. **Maintainer decision on the Phase-A budget shape.** Stage 3 has delivered
-   everything it owed: thresholds, floors, tool usability and battery wall time.
-2. Phase A stays unauthorized until that decision.
+1. **Issue a `PhaseAAuthorization`**, if and when the maintainer wants Phase A
+   run: bound to the session plan hash, the science plan hash
+   `02be33b9a7a8e26bc8bfb75795351e8cdc9ffd441b47066cc81887cfc511b55c`, the
+   rehearsed harness digest, and a real UTC grant timestamp.
+2. Phase A stays unauthorized until 1 happens.
+
+### Searched-leaf durability: RESOLVED 2026-08-15, needs no relay growth
+
+Measured: relay `usedStorage` **91.54 GiB** against the inferred 100 GB
+(93.13 GiB) limit — **1.60 GiB headroom** — and a 596M bf16 initialization is
+**1.121 GiB**, so five leaves are **5.61 GiB**. They do not fit, so relay staging
+is **off**.
+
+The requirement is met on the pod's 200 GB container disk: all five leaves stay
+materialized through rung 1 and the materialization of the sa survivor decision,
+the two survivors and the control stay through rung 2 and any conditional rung 3,
+and only the finalists are pulled to the dev box. This is a property of the
+frozen search — `_release_weights` fires only on pruned *intermediates* — not new
+machinery. Rejected leaves keep `leaf_retention.json` (digest, lineage, sa
+evidence, rejection reason) and lose only their bytes. **Nothing is deleted and
+the experiment is unchanged.** Full accounting in
+[`autoinit_phase_a_storage.md`](autoinit_phase_a_storage.md); `transfer/`
+(7.66 GiB of reproducible git bundles) is recorded as the reclaim option and
+deliberately left alone.
 
 ## Phase A is repriced, and both statistics measurements are kept
 

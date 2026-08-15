@@ -20,12 +20,12 @@ hard-code layer counts, hidden or FFN sizes, head counts, or a target parameter 
 | current best behaviour | E1/P1 KD-heavy at the 2.96M rung (`e1_r2960k_sb_pca` lineage) |
 | frozen battery | 150 prompts, inclusion mask `d6e24e0b09da1bcc…`, sampled from the 0.86M rung |
 | retained reference on it | usable_rollout 0.7300 · correct_overall 0.1867 · correct_given_usable 0.2511 |
-| active work | **Teacher-Adaptive AutoInitializer** — Stage 3 control characterization **complete**; Phase A search not authorized |
+| active work | **Teacher-Adaptive AutoInitializer** — Stage 3 characterization **complete**; the Phase-A harness is **built and rehearsed**; the search itself is **not authorized** |
 | last completed experiment | **AutoInit-Stage3** — both permanent controls characterized, thresholds materialized ([products](./logs/autoinit_stage3_complete/)) |
 | control reference on `recovery_search_v2` | pooled `usable_rollout_rate` 0.3711 · `correct_overall` 0.0118 · `correct_given_usable` 0.0286 (380 prompts, two seeds) |
 | E8b | **strategically terminated; no valid recovered-behaviour comparison** |
-| actual cumulative spend | **$191.5462** against a $211.07 cap ([ledger](./logs/BUDGET_LEDGER.md)) |
-| proposed next paid step | AutoInitializer Phase A, $12.36 expected / $20.13 hard — **unauthorized, and the hard bound does not fit the $19.52 remaining** ([reprice](./logs/autoinit_phase_a_repricing.md)) |
+| actual cumulative spend | **$191.5462** against a $213.00 cap ([ledger](./logs/BUDGET_LEDGER.md)) |
+| proposed next paid step | AutoInitializer Phase A, $17.89 expected / $20.01 hard from the launcher's own plan — fits the $21.45 remaining, and is **still unauthorized**: no `PhaseAAuthorization` artifact exists and the launcher refuses to create a pod without one ([ledger](./logs/BUDGET_LEDGER.md)) |
 
 The two behaviour numbers above are **not comparable and neither is a
 regression**: 0.7300 is the E1 2.96M-rung checkpoint on the 150-prompt frozen

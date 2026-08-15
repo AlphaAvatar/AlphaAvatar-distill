@@ -1,10 +1,10 @@
 {
  "schema": "aadistill.current_state/v1",
- "generated_utc": "2026-08-15T09:10:00+00:00",
- "current_phase": "AutoInitializer Stage 3 COMPLETE: both permanent controls characterized and thresholds materialized. Phase A search not authorized and does not fit the remaining budget.",
+ "generated_utc": "2026-08-15T12:40:00+00:00",
+ "current_phase": "AutoInitializer Stage 3 COMPLETE. The Phase-A harness \u2014 which did not exist \u2014 is now BUILT and REHEARSED, the thresholds are materialized into a frozen science plan, and the project cap is raised to $213.00. Phase A is PREPARED but NOT AUTHORIZED: no PhaseAAuthorization artifact has been issued and the launcher refuses to create a pod without one.",
  "active_experiment": null,
  "paid_compute_running": false,
- "next_work": "Maintainer decision on the Phase-A budget shape: repriced from the measured battery it is $12.36 expected / $20.13 hard against $19.5238 remaining, short $0.61. Options and their costs are in logs/autoinit_phase_a_repricing.md. Do not retrain the permanent controls, do not reopen the frozen search/recovery design, do not launch paid compute without separate authorization.",
+ "next_work": "Maintainer decision on whether to issue a PhaseAAuthorization. It must bind the session plan hash, the science plan hash 02be33b9a7a8e26bc8bfb75795351e8cdc9ffd441b47066cc81887cfc511b55c, the rehearsed harness digest and a real UTC grant timestamp. Also unresolved: the searched-leaf storage plan (5 x ~2.3 GB; relay capacity not confirmed). Do not retrain the permanent controls, do not reopen the frozen search/recovery design, do not launch paid compute without that authorization.",
  "teacher": {
   "model_id": "Qwen/Qwen3-4B-Thinking-2507",
   "revision": "768f209d9ea81521153ed38c47d515654e938aea",
@@ -56,36 +56,42 @@
  },
  "budget": {
   "actual_cumulative_spend_usd": 191.5462,
-  "authorized_cap_usd": 211.07,
-  "remaining_usd": 19.5238,
-  "phase_a_repriced": {
-   "expected_usd": 12.36,
-   "hard_usd": 20.13,
-   "fits_remaining": false,
-   "shortfall_usd": 0.61
+  "authorized_cap_usd": 213.0,
+  "cap_raised_utc": "2026-08-15",
+  "cap_raise_note": "maintainer approved 'e.g. $213-214'; $213.00 selected from that range. Nothing spent against it.",
+  "remaining_usd": 21.4538,
+  "phase_a_priced_by_launcher": {
+   "expected_usd": 17.8933,
+   "expected_without_tie_break_usd": 14.3604,
+   "conditional_tie_break_usd": 3.5328,
+   "soft_stop_usd": 19.6826,
+   "hard_terminate_usd": 20.0126,
+   "fits_remaining": true,
+   "margin_usd": 1.4412,
+   "note": "supersedes the $12.36/$20.13 in autoinit_phase_a_repricing.md, which priced search and probes but not setup, attestation, selection, collection, contingency or the recovery reserve"
   }
  },
- "latest_commit": "4fe61d9034df1f1a9eba05aff8b54ae15ecefee6",
+ "latest_commit": "205e9aa98f7402054eb0c7f2f6a4b55035f4a419",
  "documents": {
   "logs/STATE.md": {
    "path": "logs/STATE.md",
-   "sha256": "5f575ad170078ea0b4b8b9b51cbb7f3515f9c3fe60499bcacb5f482eed51df11"
+   "sha256": "6815e24b999741241ec32f495f7bff1a559f22806cab30850286548fc184cf27"
   },
   "docs/HANDOFF_AUTOINITIALIZER.md": {
    "path": "docs/HANDOFF_AUTOINITIALIZER.md",
-   "sha256": "a061cd9dd144a9f55e4ee0831af0afc97b4fcd7799be3ce3380759626e30877e"
+   "sha256": "c6a6059dee1502967207eab8a644c94699070df1670856685bd5b8aa83d944e5"
   },
   "logs/EXPERIMENT_INDEX.md": {
    "path": "logs/EXPERIMENT_INDEX.md",
-   "sha256": "066d3e81766cd4462168b4d32cb44660a7b4435fb3485c07c30b29290dbdcc3c"
+   "sha256": "e4cbca88d105f162397759ce419f1918722947b2eb39a4d1756ef15a921da31b"
   },
   "logs/BUDGET_LEDGER.md": {
    "path": "logs/BUDGET_LEDGER.md",
-   "sha256": "f9353c77083a26ec3f0a099cd963ab810817d47b29de1eccf7cbc3687803c676"
+   "sha256": "4511e90c65b7b4857a3fcfaf8bc4314e5f432af2994529f38d4934674d278e26"
   },
   "logs/decisions.md": {
    "path": "logs/decisions.md",
-   "sha256": "7af45723ff348c4b23cdd55a7183a256831a5ed27040d4bbf80695e42900bc85"
+   "sha256": "0a723005bb66a61c4e707ecfb1d0fefeed62af139fef5e336d156664f8fc931d"
   },
   "logs/checkpoint_registry.json": {
    "path": "logs/checkpoint_registry.json",
@@ -93,11 +99,19 @@
   },
   "logs/checkpoint_tombstones.json": {
    "path": "logs/checkpoint_tombstones.json",
-   "sha256": "7dca24bbcda1c44984f59babf762e5892462f7eaebf6a1396991b45c2ac04ad4"
+   "sha256": "78d078d1203534b77578db44cd3c44ef4c1720e0beb322952182ccba594523a6"
   },
   "AGENTS.md": {
    "path": "AGENTS.md",
    "sha256": "8ebc254f270e382033a9c9bb8707745c9736dac4f5798f0825c511974cd593e6"
+  },
+  "logs/autoinit_phase_a_recovery_plan_frozen.json": {
+   "path": "logs/autoinit_phase_a_recovery_plan_frozen.json",
+   "sha256": "508b900606226cd2fe8c8f4455266cfcd9e9bfe300fbc8b04926ef92f785ab76"
+  },
+  "logs/autoinit_phase_a_storage.md": {
+   "path": "logs/autoinit_phase_a_storage.md",
+   "sha256": "0a9372cd165b03bf3c94a7c93ed01585241b70d4693d977871f460c882d47b5b"
   }
  },
  "read_order": [
@@ -120,7 +134,7 @@
   "E2 phases 2-3"
  ],
  "autoinit": {
-  "status": "IMPLEMENTED_ZERO_COST_NOT_RUN_ON_REAL_MODELS",
+  "status": "HARNESS_BUILT_AND_REHEARSED_NOT_AUTHORIZED_NOT_RUN",
   "package": "src/aadistill/autoinit",
   "tests": 209,
   "operator_kinds": [
@@ -144,7 +158,7 @@
   "dry_run": "logs/autoinit_dryrun_summary.json",
   "proposal": "logs/autoinit_pilot_proposal.md",
   "blocking_prerequisites": [
-   "micro-preflight measurements (5 items) - see logs/autoinit_micro_preflight_plan.md",
+   "a PhaseAAuthorization artifact issued against the rehearsed harness digest",
    "calib.reasoning_heavy@v1 not built (Phase B only, independent trigger)"
   ],
   "corrections_2026_08_12_review_pass": [
@@ -232,6 +246,45 @@
    "source_digest": "baf232a18123aa22f2a107bbd51c93c638ca7f466fbe0aac451137fc19a4abbe",
    "materialized_at": "preflight Stage 0",
    "evaluation_protocol": "generation + recovery_search_scoring@v2 + recovery_search_v1"
+  },
+  "phase_a_harness": {
+   "existed_before_2026_08_15": false,
+   "evidence_it_did_not": "BeamSearch was instantiated only in dry_run_search.py and tests; probe_configs/admit_leaves had no consumer outside those; run_phase_a existed only as a forbidden string in two rehearsal tests",
+   "session_plan_hash": "9377a2dc61f21790dd111d72a5de0e039ea1d31afef2d09e18c98a0b0cc2a0aa",
+   "science_plan_hash": "02be33b9a7a8e26bc8bfb75795351e8cdc9ffd441b47066cc81887cfc511b55c",
+   "frozen_science_plan": "logs/autoinit_phase_a_recovery_plan_frozen.json",
+   "materialized_preregistration": "logs/autoinit_phase_a_preregistration_materialized.json",
+   "draft_preregistration_preserved": "logs/autoinit_phase_a_preregistration.json",
+   "launcher": "scripts/pod/autoinit_phase_a_launch.py",
+   "driver": "scripts/pod/autoinit_phase_a_driver.py",
+   "search": "scripts/autoinit/phase_a_search.py",
+   "authorization_type": "src/aadistill/autoinit/phase_a.py::PhaseAAuthorization",
+   "artifact_specs": [
+    "configs/autoinit/phase_a_artifacts.json",
+    "configs/autoinit/phase_a_artifacts_failed.json"
+   ],
+   "rehearsals": {
+    "tests/pod/test_phase_a_rehearsal.py": 40,
+    "tests/pod/test_phase_a_search_executes.py": 6
+   },
+   "spend_authorization_unchanged": true,
+   "authorization_issued": false,
+   "launched": false,
+   "open_question": "RESOLVED 2026-08-15: see logs/autoinit_phase_a_storage.md",
+   "leaf_durability": {
+    "status": "RESOLVED",
+    "relay_used_storage_gib": 91.54,
+    "relay_inferred_limit_gib": 93.13,
+    "relay_headroom_gib": 1.6,
+    "leaf_size_gib_bf16": 1.121,
+    "five_leaves_gib": 5.61,
+    "relay_staging": false,
+    "mechanism": "all five leaves stay on the pod's 200 GB container disk through rung 1 and the materialization of the sa survivor decision; survivors and control through rung 2 and any conditional rung 3; only finalists are pulled to the dev box",
+    "rejected_leaves": "leaf_retention.json keeps digest, lineage, sa evidence and rejection reason; the checkpoint is not retained and is not deleted either",
+    "nothing_deleted": true,
+    "experiment_unchanged": true,
+    "reclaim_option_not_taken": "transfer/ = 7.66 GiB of reproducible git bundles"
+   }
   }
  },
  "proposed_pilot": {
@@ -252,8 +305,9 @@
   "peak_working_storage_gib": 106
  },
  "tests": {
-  "passing": 1558,
+  "passing": 1694,
   "skipped": 7,
+  "note": "1637 before this session; +51 Phase-A rehearsal, +6 real toy-scale search execution",
   "venvs_verified": [
    "repo .venv transformers 5.13.1",
    "transformers 4.57.1"
