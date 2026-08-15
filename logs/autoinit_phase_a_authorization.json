@@ -1,8 +1,8 @@
 {
   "schema": "aadistill.autoinit.phase_a_authorization/v1",
-  "authorization_id": "autoinit.phase_a.2026-08-15T1232Z",
+  "authorization_id": "autoinit.phase_a.2026-08-15T1610Z",
   "version": 1,
-  "granted_utc": "2026-08-15T12:32:08Z",
+  "granted_utc": "2026-08-15T16:10:56Z",
   "granted_by": "maintainer, 2026-08-15, in two explicit steps. (1) The project cap was raised on the maintainer's own words 'Raise it further, e.g. $213-214'; $213.00 was selected from that stated range as the conservative end and recorded in BUDGET_LEDGER.md, leaving $21.4538 against a spend of $191.5462. (2) The maintainer then instructed: 'Only then issue a fresh PhaseAAuthorization with a real UTC grant timestamp against those final identities', after the searched-leaf durability item was resolved and the implementation committed. Figures below are the launcher's priced plan, not a transcription.",
   "plan_id": "autoinit.v1.phase_a_session",
   "phase_a_session_plan_hash": "9377a2dc61f21790dd111d72a5de0e039ea1d31afef2d09e18c98a0b0cc2a0aa",
@@ -29,8 +29,8 @@
   "scope_note": "Phase A only, one launcher invocation. This artifact authorizes the SPEND and the STAGES; it is not by itself an instruction to launch. The maintainer's 2026-08-15 message that requested it also says 'Do not launch Phase A yet', so the run waits for a separate explicit go. Nothing here permits retraining the permanent controls, changing the frozen search or recovery design, a fourth seed, or any follow-on experiment: Phase A is a terminus and stops for review on every path, including unresolved_equivalence.",
   "phase_a_authorized": true,
   "automatic_followon_start": false,
-  "authorized_session_commit": "9b05a058dec2c0ca36ac5b2a1c777a01dcd7dd60",
-  "harness_source_digest": "ea2f360bf7a308445f56728cacb63c8eaf94f340a698859fed56a0f06d09aff5",
+  "authorized_session_commit": "31c6704c7c7e234beebe33df680a60631f8e960a",
+  "harness_source_digest": "1187d977e2fe34e7d44278b5b32d9b23902ab9f63a2a879c3239997a30bd926e",
   "harness_source_files": [
     "scripts/pod/autoinit_phase_a_launch.py",
     "scripts/pod/autoinit_phase_a_driver.py",
@@ -46,7 +46,7 @@
     "src/aadistill/autoinit/generation.py"
   ],
   "per_launch_hard_usd": 20.0126,
-  "provenance_commit": "9b05a058dec2c0ca36ac5b2a1c777a01dcd7dd60",
+  "provenance_commit": "31c6704c7c7e234beebe33df680a60631f8e960a",
   "enforcement": "the launcher loads this artifact and refuses to create a pod whose priced hard threshold exceeds hard_cap_usd or per_launch_hard_usd, refuses a stage not in authorized_stages, refuses a harness that does not digest to the authorized value, and has no code path to any experiment after Phase A",
-  "authorization_sha256": "14360ef4563708ed96b3e5f6ee00b87590f83b2e92c36db38f6371ca165d050f"
+  "authorization_sha256": "d7fa15f33913835302f7b9c923d3f0aa7aac4cd6a8d0fc897c9f1ca2c5c72d4a"
 }
