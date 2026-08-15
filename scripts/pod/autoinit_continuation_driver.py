@@ -46,6 +46,7 @@ from aadistill.autoinit.authorization import (  # noqa: E402
 )
 from aadistill.autoinit.continuation import (  # noqa: E402
     CONTINUATION_PLAN_V1, CONTINUATION_SCOPE, ControlImportError,
+    EvaluationReadinessError, check_evaluation_ready,
     continuation_manifest, import_permanent_control,
 )
 from aadistill.autoinit.generation import (  # noqa: E402
@@ -193,6 +194,23 @@ class ContinuationDriver:
             return self.record(0, False,
                                "the imported controls do not share one protocol "
                                f"fingerprint: {sorted(fingerprints)}")
+        # A SEPARATE gate, after identity and before any battery. Identity
+        # answers "is this the correct trained control"; this answers "can the
+        # frozen evaluator use this package at all". Attempt 7 showed the two
+        # are independent: sb passed every identity check above and then could
+        # not render one prompt.
+        readiness = {}
+        for name, control in imported.items():
+            try:
+                readiness[name] = check_evaluation_ready(control.checkpoint_dir)
+            except EvaluationReadinessError as exc:
+                return self.record(0, False, f"{name}: {exc}"[-1500:],
+                                   **{"import": {"controls": {
+                                       k: v.as_dict() for k, v in imported.items()}},
+                                      "evaluation_readiness": readiness})
+            say(f"{name} is evaluation-ready: "
+                f"{len(readiness[name]['assets'])} canonical assets verified")
+
         self.imported = imported
         report = {"controls": {k: v.as_dict() for k, v in imported.items()},
                   "shared_protocol_fingerprint": fingerprints.pop(),
@@ -200,7 +218,8 @@ class ContinuationDriver:
                   "trained_this_session": False}
         (AUDIT / "imported_controls.json").write_text(
             json.dumps(report, indent=2, default=str) + "\n")
-        return self.record(0, True, **{"import": report})
+        return self.record(0, True, **{"import": report,
+                                       "evaluation_readiness": readiness})
 
     # -- stage 1: current evaluation attestation --------------------------
     def stage1(self) -> bool:

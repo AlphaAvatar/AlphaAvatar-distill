@@ -1,0 +1,45 @@
+{
+  "schema": "aadistill.autoinit.packaging_repair/v1",
+  "utc": "2026-08-15T08:00:00Z",
+  "control": "preflight_ctl_r0860k_sb",
+  "classification": "PACKAGING REPAIR, NOT A CONTROL MODIFICATION",
+  "what_was_wrong": {
+    "summary": "the stored checkpoint package was missing the tokenizer and chat-template assets the frozen evaluator requires, so no prompt could be rendered",
+    "observed": "ValueError: Cannot use chat template functions because tokenizer.chat_template is not set",
+    "found_by": "attempt 7, Stage 3, 2026-08-15, $0.4500 — sa characterized, sb failed",
+    "evidence": "logs/autoinit_continuation_attempt7/",
+    "why_the_gate_passed": "Stage 0 verifies weights sha256, probe id, observed protocol fingerprint, seed, initialization digest and re-runs the strict reconstruction. None of that reads tokenizer assets, so a checkpoint can be fully identity-verified and still be impossible to evaluate.",
+    "missing_files": ["chat_template.jinja", "tokenizer.json", "tokenizer_config.json"]
+  },
+  "source_of_truth": {
+    "path": "artifacts/stage1/qwen3_0p6b_init_v0/checkpoint",
+    "what": "the canonical initialization both controls were trained from",
+    "why_not_sa": "sa is byte-identical for these three files, but the canonical initialization is the origin; copying from a sibling control would make one control's package depend on another's."
+  },
+  "assets_restored": [
+    {"file": "chat_template.jinja", "sha256": "3802169b2a02b81e6adb7ab4f64f91ff02db753c8c3a64a01c35192d3a61d8d7", "bytes": 4049},
+    {"file": "tokenizer.json", "sha256": "be75606093db2094d7cd20f3c2f385c212750648bd6ea4fb2bf507a6a4c55506", "bytes": 11422650},
+    {"file": "tokenizer_config.json", "sha256": "8fa82a4ba512c8bee7c1c5e82b9a71ddbef362e4665be5c8f7ce0afd78af129a", "bytes": 694}
+  ],
+  "verified": {
+    "source_hashes_checked_before_copy": true,
+    "destination_hashes_checked_after_copy": true,
+    "relay_hashes_checked_by_re_download": true,
+    "destinations": [
+      "/home/ecs-user/aad-artifacts/autoinit/preflight_ctl_r0860k_sb/step_001023/model",
+      "AlphaAvatar/aadistill-artifacts:permanent_controls/preflight_ctl_r0860k_sb/model"
+    ],
+    "identical_to_sa": "yes for all three files; independently corroborated by the attempt-7 engine probe, which recorded chat_template_sha256 3802169b… for the run that worked"
+  },
+  "control_identity_unchanged": {
+    "model_safetensors_sha256_before": "4c6adcf8618716902d763c00a1e64db1d9a6fdcb77472d3f8a0fd5ff157a7629",
+    "model_safetensors_sha256_after": "4c6adcf8618716902d763c00a1e64db1d9a6fdcb77472d3f8a0fd5ff157a7629",
+    "retrained": false,
+    "weights_changed": false,
+    "seed_changed": false,
+    "recovery_protocol_changed": false,
+    "probe_or_control_binding_changed": false,
+    "observed_protocol_fingerprint": "aad75fee8a897d9ce6efd6205829a2a0af997fa3f8548fbc56c4879dfd97e8b7"
+  },
+  "note": "sa needed no repair; its package already carried all three assets with these exact hashes. Attempt 7's sa result remains valid partial evidence and must not be combined with a later sb result: the next successful continuation runs the complete path again, fresh sa and fresh sb."
+}

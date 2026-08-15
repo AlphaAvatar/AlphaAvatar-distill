@@ -23,6 +23,7 @@ import os
 import json
 import shutil
 import sys
+import tempfile
 from pathlib import Path
 
 import pytest
@@ -1242,6 +1243,55 @@ def test_setup_writes_its_markers_where_the_launcher_looks():
     named = re.search(r'STATUS = WS / "([^"]+)"', driver).group(1)
     assert mod.STATUS.endswith("/" + named), (
         f"the driver writes {named} but the launcher probes {mod.STATUS}")
+
+
+def test_stage0_checks_evaluation_readiness_separately_from_identity():
+    """Attempt 7 cost $0.4500 proving these are different questions.
+
+    `preflight_ctl_r0860k_sb` passed every identity check -- weights, seed, probe
+    id, protocol fingerprint, and a re-run of the strict reconstruction -- and
+    then could not render one prompt, because its package was missing the
+    tokenizer and chat template. The two checks must stay separate: identity says
+    which control this is, readiness says whether the frozen evaluator can use
+    the package.
+    """
+    from aadistill.autoinit.continuation import (
+        EVALUATION_READY_ASSETS_V1, EvaluationReadinessError,
+        check_evaluation_ready)
+
+    assert set(EVALUATION_READY_ASSETS_V1) == {
+        "chat_template.jinja", "tokenizer.json", "tokenizer_config.json"}
+    # Pinned to the canonical initialization, which is the source of truth.
+    init = REPO / "artifacts/stage1/qwen3_0p6b_init_v0/checkpoint"
+    if init.is_dir():
+        from aadistill.infrastructure.manifest import sha256_file
+        for name, want in EVALUATION_READY_ASSETS_V1.items():
+            assert sha256_file(init / name) == want, (
+                f"{name} no longer matches the canonical initialization")
+        assert check_evaluation_ready(init)["assets"]
+
+    with tempfile.TemporaryDirectory() as tmp:
+        root = Path(tmp)
+        # Missing entirely -- sb's state before the repair.
+        with pytest.raises(EvaluationReadinessError, match="MISSING"):
+            check_evaluation_ready(root)
+        # Present but WRONG is also refused: a different chat template would
+        # render prompts the controls were never trained to answer, and would
+        # produce numbers rather than crash.
+        for name in EVALUATION_READY_ASSETS_V1:
+            (root / name).write_text("not the canonical asset")
+        with pytest.raises(EvaluationReadinessError, match="expected"):
+            check_evaluation_ready(root)
+
+    # And the driver runs it in stage 0, after the import and before any battery.
+    driver = (REPO / "scripts/pod/autoinit_continuation_driver.py").read_text()
+    assert "check_evaluation_ready" in driver
+    assert driver.index("check_evaluation_ready(control.checkpoint_dir)") < \
+        driver.index("def stage1"), "readiness must be gated in stage 0"
+    # Kept out of the recovery identity, not folded into it.
+    from aadistill.autoinit.continuation import ImportedControl
+    assert not any("chat_template" in f or "tokenizer" in f
+                   for f in ImportedControl.__dataclass_fields__)
 
 
 def test_each_launcher_names_its_own_authorization_to_setup():

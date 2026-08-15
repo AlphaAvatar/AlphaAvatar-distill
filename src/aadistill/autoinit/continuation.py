@@ -66,6 +66,67 @@ IMPORT_REQUIRED_FIELDS: tuple[str, ...] = (
 )
 
 
+class EvaluationReadinessError(ControlImportError):
+    """The package is the right control, and still cannot be evaluated."""
+
+
+#: The assets the FROZEN EVALUATOR needs before it can render a single prompt,
+#: pinned to the canonical initialization both controls were trained from.
+#:
+#: Deliberately NOT part of recovery identity, and the two must not be merged:
+#: recovery identity answers "is this the correct trained control", and is
+#: proved by weights, seed, probe id, protocol fingerprint and a re-run of the
+#: strict reconstruction. This answers a different question — "can the frozen
+#: evaluator use this package at all" — and nothing here says anything about
+#: which control it is.
+#:
+#: Attempt 7 proved the gap is material, at $0.4500: `preflight_ctl_r0860k_sb`
+#: passed every identity check and then could not render one prompt, because its
+#: package was missing all three of these files. `sa` had them and was
+#: characterized. Restored by a packaging repair on 2026-08-15 —
+#: `logs/autoinit_control_sb_packaging_repair.json` — with no retraining and no
+#: weight change.
+EVALUATION_READY_ASSETS_V1: dict[str, str] = {
+    "chat_template.jinja":
+        "3802169b2a02b81e6adb7ab4f64f91ff02db753c8c3a64a01c35192d3a61d8d7",
+    "tokenizer.json":
+        "be75606093db2094d7cd20f3c2f385c212750648bd6ea4fb2bf507a6a4c55506",
+    "tokenizer_config.json":
+        "8fa82a4ba512c8bee7c1c5e82b9a71ddbef362e4665be5c8f7ce0afd78af129a",
+}
+
+
+def check_evaluation_ready(checkpoint_dir: str | Path, *,
+                           assets: dict[str, str] | None = None) -> dict[str, Any]:
+    """Refuse to start a battery against a package the evaluator cannot use.
+
+    Fails on a missing file and on a wrong one alike: a chat template that is
+    present but different would render prompts the controls were never trained
+    to answer, which is worse than the crash it replaces because it would
+    produce numbers.
+    """
+    want = dict(assets if assets is not None else EVALUATION_READY_ASSETS_V1)
+    root = Path(checkpoint_dir)
+    observed, problems = {}, []
+    for name, expected in sorted(want.items()):
+        path = root / name
+        if not path.is_file():
+            problems.append(f"MISSING {name}")
+            continue
+        got = sha256_file(path)
+        observed[name] = got
+        if got != expected:
+            problems.append(f"{name} is {got[:16]}…, expected {expected[:16]}…")
+    if problems:
+        raise EvaluationReadinessError(
+            f"{root} is not evaluation-ready: " + "; ".join(problems) +
+            ". This is a packaging fault, not an identity fault: the control "
+            "may be the correct one and still be unusable by the frozen "
+            "evaluator.")
+    return {"checkpoint_dir": str(root), "assets": observed,
+            "asset_set_version": 1}
+
+
 @dataclass(frozen=True)
 class ImportedControl:
     """One permanent control, re-established from its record and its bytes."""
