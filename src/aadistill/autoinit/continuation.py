@@ -421,19 +421,19 @@ CONTINUATION_HARNESS_SOURCE_FILES_V1: tuple[str, ...] = (
 #: The narrow authorization this session runs under. Characterization only: it
 #: trains nothing, and Phase A is not expressible in this artifact at all.
 CONTINUATION_AUTHORIZATION = SpendAuthorization(
-    authorization_id="autoinit.control_characterization.2026-08-15T0658Z",
-    granted_utc="2026-08-15T06:58:38Z",
-    granted_by=("maintainer, after the attempt-6 review: '$4.37 expected / $4.67 "
-                "hard cumulative, per-launch hard limit still exactly $1.6896'. "
-                "Cumulative because $2.9744 is already spent across six "
-                "attempts; one more launch prices at $1.3860 expected / $1.6896 "
-                "hard, giving $4.3604 / $4.6640, which these figures cover. "
-                "FOUR earlier artifacts are void and must not be reused: "
-                "759eaf8c… (asserted amounts before the approval existed), "
-                "dc770f36… (granted_utc in the future when committed), "
-                "e4854818… (CONSUMED by attempt 5, INCOMPLETE at $0.1369), and "
-                "f21b4038… (CONSUMED by attempt 6, INCOMPLETE at $0.1324). This "
-                "grant is likewise for ONE launcher invocation."),
+    authorization_id="autoinit.control_characterization.2026-08-15T0823Z",
+    granted_utc="2026-08-15T08:23:33Z",
+    granted_by=("maintainer, after the attempt-7 review: '$4.82 expected / $5.12 "
+                "hard cumulative, $1.6896 per-launch hard'. Cumulative because "
+                "$3.4244 is already spent across seven attempts; one more launch "
+                "prices at $1.3860 expected / $1.6896 hard, giving $4.8104 / "
+                "$5.1140, which these figures cover. Attempt 7 reached the "
+                "driver: stages 0-2 passed and sa was characterized, and the "
+                "sb packaging repair that followed changed no weights. FIVE "
+                "earlier artifacts are void and must not be reused: 759eaf8c…, "
+                "dc770f36…, e4854818… (attempt 5), f21b4038… (attempt 6) and "
+                "c398850b… (attempt 7). This grant is likewise for ONE launcher "
+                "invocation."),
     plan_id=CONTINUATION_PLAN_V1.plan_id,
     plan_hash=CONTINUATION_PLAN_V1.plan_hash,
     # Priced by the launcher's own `make_plan`, re-run 2026-08-15 against the
@@ -457,8 +457,8 @@ CONTINUATION_AUTHORIZATION = SpendAuthorization(
     # Raising the cap does not loosen the session: `make_plan` still prices one
     # run at soft $1.5246 / hard $1.6896, so a single launch cannot spend the
     # headroom that covers the four failures before it.
-    expected_usd=4.37,
-    hard_cap_usd=4.67,
+    expected_usd=4.82,
+    hard_cap_usd=5.12,
     #: Named by the maintainer alongside the cumulative figure, and enforced in
     #: `make_plan` before a pod can exist: the $4.40 covers four failed attempts
     #: plus one more, and no single launch may draw on that history.
