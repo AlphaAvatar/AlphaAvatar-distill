@@ -88,6 +88,7 @@ AutoInit characterization continuation, attempt 3 (L40S,      $  0.0700
     `--find-links` does not override. The offline gate caught it
     in 4 minutes instead of a 28-minute burn.
 
+AutoInit Stage-3 continuation, attempt 8 COMPLETE (L40S, 41.3 min) $  0.6816
 AutoInit characterization continuation, attempt 7 (L40S, 27.0 min) $  0.4500
 AutoInit characterization continuation, attempt 6 (L40S, 8.0 min)  $  0.1324
 AutoInit characterization continuation, attempt 5 (L40S, 8.3 min)  $  0.1369
@@ -98,7 +99,7 @@ AutoInit characterization continuation, attempt 4 (L40S,      $  1.3672
     host that had failed three cold draws. Torn down manually
     once the outcome was determined; provider-confirmed gone.
 
-ACTUAL CUMULATIVE SPEND                                      $190.8646
+ACTUAL CUMULATIVE SPEND                                      $191.5462
 ```
 
 The pre-E8b baseline `$163.8833` is the figure every E8/E8b planner was built on
@@ -144,18 +145,19 @@ $2.30   RAISED 2026-08-14 with maintainer approval, after attempt 1 spent
 | continuation attempt 5: every offline fix worked on hardware; died on the LAST line of setup, a stale binding to the micro-preflight authorization | $0.1369 | `autoinit_continuation_attempt5/` |
 | continuation attempt 6: the session-scoped authorization gate PASSED on the pod; setup finished with SETUP_RC=0 and the launcher misread it as setup_failed, because the shared setup wrote markers to the preflight's status filename | $0.1324 | `autoinit_continuation_attempt6/` |
 | continuation attempt 7: **the driver ran.** Stages 0/1/2 passed; Stage 3 characterized sa and failed on sb, whose checkpoint has no tokenizer files | $0.4500 | `autoinit_continuation_attempt7/` |
-| **continuation total: $3.4244 spent; stages 0-2 passed, one control characterized** | $3.4244 | arithmetic corrected: the earlier $1.2712 line double-counted a rounded print; the per-attempt entries were always right |
+| continuation attempt 8: **COMPLETE.** ALL_DONE, both controls characterized, thresholds materialized | $0.6816 | `autoinit_stage3_complete/` |
+| **continuation total: $4.1060 spent across eight attempts; Stage 3 COMPLETE** | $4.1060 | arithmetic corrected: the earlier $1.2712 line double-counted a rounded print; the per-attempt entries were always right |
 
 ## Current position
 
 ```
 authorized cumulative cap                                    $211.07
-actual cumulative spend                                      $190.8646
-unused authorization remaining                               $ 20.2054
-continuation spent across seven attempts                     $  3.4244
+actual cumulative spend                                      $191.5462
+unused authorization remaining                               $ 19.5238
+continuation spent across eight attempts                     $  4.1060
     0.6312 + 0.6367 + 0.0700 + 1.3672 + 0.1369 + 0.1324 + 0.4500
-    Attempt 7 reached the driver: stages 0/1/2 passed and one of
-    the two controls was characterized.
+    + 0.6816.  STAGE 3 IS COMPLETE: attempt 8 returned ALL_DONE,
+    characterized both controls and materialized the thresholds.
 GRANTED cumulative continuation authorization                $  4.54
     expected $4.23. BOTH issued artifacts are now CONSUMED, each
     having been granted for ONE launcher invocation:

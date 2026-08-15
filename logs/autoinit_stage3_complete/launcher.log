@@ -1,0 +1,29 @@
+[08:28:47] budget: expected 84 min $1.39 · soft $1.52 · hard $1.69 (authorized $5.12)
+[08:28:47] NVIDIA L40S $0.99/h, stock Medium
+[08:28:47] session commit d64ac6ba166b verified: harness digests to 818fddd792b1… and carries the authorization
+[08:28:48] precheck OK: 4 relay inputs including the staged controls, 3 local assets
+[08:28:49] created 1xwqb7os4ue9rz at $0.99/h
+[08:28:49] watchdog detached — hard 102 min = $1.69
+[08:29:42]   starting (60s) — $0.01
+[08:30:45]   starting (120s) — $0.03
+[08:31:38] TCP 22 at 64.247.206.221:17291 after 2.8 min
+[08:31:41] draw 1: ssh reachable — $0.05
+[08:32:57] draw 1: image identity runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@580.159.03
+[08:32:57] draw 1: running setup
+[08:40:16] draw 1: setup complete — $0.19
+[08:40:42]   preflight_ctl_r0860k_sa: relay rc_ok=True present=True
+[08:41:08]   preflight_ctl_r0860k_sb: relay rc_ok=True present=True
+[08:41:15] driver detached, pid 5119, confirmed by descriptor_probe — $0.21
+[08:43:33]   2026-08-15T08:43:22Z MARKER:STAGE_START:2 — $0.24
+[08:45:55]   2026-08-15T08:44:51Z MARKER:STAGE_START:3 — $0.28
+[08:55:21]   2026-08-15T08:53:17Z MARKER:CHARACTERIZED:preflight_ctl_r0860k_sa — $0.44
+[09:04:47]   2026-08-15T09:04:30Z MARKER:ALL_DONE — $0.59
+[09:04:47] polling ended: ALL_DONE — $0.59
+[09:09:28]   manifest rc=0
+53 file(s) across 13 class(es) -> /workspace/manifest.json
+  final_required: 53 · mutable_snapshot: 0 · final_streams_quiescent: True
+[09:09:56] teardown gate: allowed=True failed=None
+[09:09:56] deleting pod (gate passed)
+[09:10:08] pod deleted — 41.3 min, $0.68; provider confirms gone: True
+
+continuation COMPLETE — /home/ecs-user/AlphaAvatar-distill/logs/autoinit_continuation_session.json. Nothing trained. Phase A NOT launched.

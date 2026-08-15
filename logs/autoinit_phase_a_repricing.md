@@ -151,3 +151,59 @@ cushion                                          $  0.87
 as before and is unchanged by this repricing. Phase A stays unauthorized until
 the continuation returns a measured battery-evaluation cost and the bound is
 recomputed from it.
+
+---
+
+## 2026-08-15 — repriced again, from the completed Stage 3
+
+The one line that said **"still unmeasured — Stage 3 has never completed"** is now
+measured. Stage 3 completed on 2026-08-15 (`ALL_DONE`, $0.6816, 41.3 min):
+
+| item | previously | measured 2026-08-15 |
+| --- | --- | --- |
+| battery evaluation of one checkpoint | $0.236, carried from E6 on a different battery | **8.43 min marginal / 9.82 min conservative = $0.1391 / $0.1621** |
+| whole Stage 3, two controls | 48 min allowed (24/control) | **19.65 min**, both batteries + both scorings + threshold materialization |
+| stage 0 strict import, two controls | — | 0.06 min |
+| stage 1 attestation | — | 2.10 min |
+| stage 2 real v2 tool+RAG smoke | — | 1.48 min |
+
+The conservative figure — half of the whole stage, so it carries engine load,
+scoring and materialization — is used below. The marginal 8.43 min is what one
+additional battery actually costs once the engine is warm.
+
+| item | expected | hard |
+| --- | ---: | ---: |
+| Phase A search (unchanged) | $1.76 | $3.00 |
+| Recovery rungs 1+2 (9 probes @ $1.1777) | $10.60 | $10.60 |
+| Conditional third seed (3 probes) | $0.00 | $3.53 |
+| Setup / redraw reserve (unchanged) | $0.00 | $3.00 |
+| **total** | **$12.36** | **$20.13** |
+
+Probe price is `61.55 min × $0.99/h = $1.0156` plus `$0.1621` per battery, so
+`$1.1777` per probe against `$1.2516` before. Every input is now measured except
+the operator build, which remains covered by the gap to the hard column.
+
+## It still does not fit
+
+```
+authorized cumulative cap                       $211.07
+actual cumulative spend                         $191.5462
+remaining                                       $ 19.5238
+Phase A expected, repriced                      $ 12.36     fits, margin $7.16
+Phase A hard, repriced                          $ 20.13     DOES NOT FIT, short $0.61
+```
+
+Repricing from measurement moved the hard bound $21.02 → $20.13 and did not close
+the gap. **Phase A cannot be authorized against the current cap** without one of:
+
+* raising the project cap by at least $0.61 (a cap change is a maintainer
+  decision, and $1.00 would leave a real margin);
+* dropping the conditional third seed from the hard bound, which is $3.53 and is
+  conditional by construction — that would give hard $16.60, fitting with $2.92
+  margin, but it removes the seed-disagreement escape hatch;
+* reducing the $3.00 setup/redraw reserve, which this week's history argues
+  against: four of eight continuation attempts hit an infrastructure event.
+
+Recommendation: the second option is the cheapest honest one, but it changes what
+Phase A can do when its two seeds disagree, so it is a design decision rather than
+an accounting one. Nothing is decided here.

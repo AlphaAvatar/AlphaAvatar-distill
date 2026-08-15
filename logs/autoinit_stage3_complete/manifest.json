@@ -1,0 +1,490 @@
+{
+  "root": "/workspace/aad/artifacts",
+  "created_utc": "2026-08-15T09:05:08+00:00",
+  "ok": true,
+  "specs": [
+    {
+      "artifact_class": "continuation_evidence",
+      "pattern": "audit/autoinit_continuation/continuation_evidence.json",
+      "required": true,
+      "min_matches": 1,
+      "min_bytes": 1,
+      "lifecycle": "final_required"
+    },
+    {
+      "artifact_class": "imported_controls",
+      "pattern": "audit/autoinit_continuation/imported_controls.json",
+      "required": true,
+      "min_matches": 1,
+      "min_bytes": 1,
+      "lifecycle": "final_required"
+    },
+    {
+      "artifact_class": "attested_protocol",
+      "pattern": "audit/autoinit_continuation/attested_evaluation_protocol.json",
+      "required": true,
+      "min_matches": 1,
+      "min_bytes": 1,
+      "lifecycle": "final_required"
+    },
+    {
+      "artifact_class": "materialized_thresholds",
+      "pattern": "audit/autoinit_continuation/materialized_thresholds.json",
+      "required": true,
+      "min_matches": 1,
+      "min_bytes": 1,
+      "lifecycle": "final_required"
+    },
+    {
+      "artifact_class": "stage1_measurement",
+      "pattern": "audit/autoinit_continuation/engine_probe.json",
+      "required": true,
+      "min_matches": 1,
+      "min_bytes": 1,
+      "lifecycle": "final_required"
+    },
+    {
+      "artifact_class": "generation_smoke",
+      "pattern": "audit/autoinit_continuation/generation_smoke.json",
+      "required": true,
+      "min_matches": 1,
+      "min_bytes": 1,
+      "lifecycle": "final_required"
+    },
+    {
+      "artifact_class": "recovery_search_result",
+      "pattern": "audit/autoinit_continuation/preflight_ctl_r0860k_s*_recovery_search.json",
+      "required": true,
+      "min_matches": 2,
+      "min_bytes": 1,
+      "lifecycle": "final_required"
+    },
+    {
+      "artifact_class": "per_sample",
+      "pattern": "audit/autoinit_continuation/preflight_ctl_r0860k_s*_per_sample.jsonl",
+      "required": true,
+      "min_matches": 2,
+      "min_bytes": 1,
+      "lifecycle": "final_required"
+    },
+    {
+      "artifact_class": "generations",
+      "pattern": "eval/continuation/preflight_ctl_r0860k_s*/*.generations.jsonl",
+      "required": true,
+      "min_matches": 2,
+      "min_bytes": 1,
+      "lifecycle": "final_required"
+    },
+    {
+      "artifact_class": "generation_summary",
+      "pattern": "eval/continuation/preflight_ctl_r0860k_s*/*.json",
+      "required": false,
+      "min_matches": 0,
+      "min_bytes": 1,
+      "lifecycle": "final_required"
+    },
+    {
+      "artifact_class": "smoke_generations",
+      "pattern": "eval/continuation/_smoke/*",
+      "required": false,
+      "min_matches": 0,
+      "min_bytes": 1,
+      "lifecycle": "final_required"
+    },
+    {
+      "artifact_class": "gate_log",
+      "pattern": "audit/autoinit_continuation/*.log",
+      "required": false,
+      "min_matches": 0,
+      "min_bytes": 1,
+      "lifecycle": "final_required"
+    },
+    {
+      "artifact_class": "session_evidence",
+      "pattern": "audit/autoinit_continuation/session/*",
+      "required": false,
+      "min_matches": 0,
+      "min_bytes": 1,
+      "lifecycle": "final_required"
+    }
+  ],
+  "entries": [
+    {
+      "path": "audit/autoinit_continuation/continuation_evidence.json",
+      "artifact_class": "continuation_evidence",
+      "size_bytes": 46211,
+      "sha256": "5ea92bd5e707f728518641a04689d7a94fda641871ea82e6c58569306f074853",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "audit/autoinit_continuation/imported_controls.json",
+      "artifact_class": "imported_controls",
+      "size_bytes": 4646,
+      "sha256": "db5bb0cb33ed5bd6bd66dd287cff03092f2fdc30a6dceb43fb5bd191a76e9a3b",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "audit/autoinit_continuation/attested_evaluation_protocol.json",
+      "artifact_class": "attested_protocol",
+      "size_bytes": 4413,
+      "sha256": "708603a79901b272bd670b381c1b4c19d7e753ec61a75afbd40a477322ff735a",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "audit/autoinit_continuation/materialized_thresholds.json",
+      "artifact_class": "materialized_thresholds",
+      "size_bytes": 4555,
+      "sha256": "47201a9868c81cfefd64791a47465893e2aeed103208471e05fdb10604e06eb4",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "audit/autoinit_continuation/engine_probe.json",
+      "artifact_class": "stage1_measurement",
+      "size_bytes": 1779,
+      "sha256": "49593edb8bdf3047ee4feccd4bb59d0f954124b9ca3c894460b6be0dece8d431",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "audit/autoinit_continuation/generation_smoke.json",
+      "artifact_class": "generation_smoke",
+      "size_bytes": 6414,
+      "sha256": "f00106ee9656816f302feab0ab6cc733d7cdd427eb74dfed9221992973e39ef0",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "audit/autoinit_continuation/preflight_ctl_r0860k_sa_recovery_search.json",
+      "artifact_class": "recovery_search_result",
+      "size_bytes": 16709,
+      "sha256": "6d2889825225deb24ae800056f077c82a359dca937264d581d2c62379db67ae6",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "audit/autoinit_continuation/preflight_ctl_r0860k_sb_recovery_search.json",
+      "artifact_class": "recovery_search_result",
+      "size_bytes": 16678,
+      "sha256": "ff4cbdb0ff1ea3968b321a41041861b0e0f4229d4bdbd0201a48e68b169b47f6",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "audit/autoinit_continuation/preflight_ctl_r0860k_sa_per_sample.jsonl",
+      "artifact_class": "per_sample",
+      "size_bytes": 169342,
+      "sha256": "6d7453e84a17bf76fd86b6c56750cf8a986da5ba77f0f736ab6b9b5f362a3069",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "audit/autoinit_continuation/preflight_ctl_r0860k_sb_per_sample.jsonl",
+      "artifact_class": "per_sample",
+      "size_bytes": 186070,
+      "sha256": "6993d1a40d84de6020f3e849844dd9ac905a61d7b5a670da9e0742d3c2606530",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "eval/continuation/preflight_ctl_r0860k_sa/code.generations.jsonl",
+      "artifact_class": "generations",
+      "size_bytes": 50649,
+      "sha256": "676e294c1afdee62259ce6f713ffcb7aa93ea4cdacb93d8341f2587f6e3f4923",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "eval/continuation/preflight_ctl_r0860k_sa/gsm8k.generations.jsonl",
+      "artifact_class": "generations",
+      "size_bytes": 96467,
+      "sha256": "4b18746711b5428898c3cb740adf01254e40e53e2b7cb3e09205c48b9ad3cf78",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "eval/continuation/preflight_ctl_r0860k_sa/knowledge.generations.jsonl",
+      "artifact_class": "generations",
+      "size_bytes": 61988,
+      "sha256": "314bf072f8bf1d81bffcc1cef88b7aa3a73909af077f06bc29270d0e80fdb621",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "eval/continuation/preflight_ctl_r0860k_sa/math_verified.generations.jsonl",
+      "artifact_class": "generations",
+      "size_bytes": 80389,
+      "sha256": "991c025730153995a7c5792ef9f6f95c143f392bc5a7b7ebc91de3961c0cff4c",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "eval/continuation/preflight_ctl_r0860k_sa/multihop.generations.jsonl",
+      "artifact_class": "generations",
+      "size_bytes": 133725,
+      "sha256": "5ba93d9e80c2792c4e344f5fc6cd4e12a790f62e974ccae06147ea2cd3636471",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "eval/continuation/preflight_ctl_r0860k_sa/rag.generations.jsonl",
+      "artifact_class": "generations",
+      "size_bytes": 122495,
+      "sha256": "f49df95cb586cdb2c48affbc8cc0d995ce3d2dc006a46f52853aa42f0f1e30d1",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "eval/continuation/preflight_ctl_r0860k_sa/tool.generations.jsonl",
+      "artifact_class": "generations",
+      "size_bytes": 46259,
+      "sha256": "b91d71674455d40a6720d810000db99a192ba08856800bdf3a005aeaf350aa2d",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "eval/continuation/preflight_ctl_r0860k_sb/code.generations.jsonl",
+      "artifact_class": "generations",
+      "size_bytes": 104030,
+      "sha256": "e5c9da5c61d86c3d8e286d25cae6b3a00ca46ce0df0ae93cbffe87a87d0dcb21",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "eval/continuation/preflight_ctl_r0860k_sb/gsm8k.generations.jsonl",
+      "artifact_class": "generations",
+      "size_bytes": 114363,
+      "sha256": "93a6fc4b47b35ac7110a1e4ec1d66f166d7c80e375992be37a9f424a69217c84",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "eval/continuation/preflight_ctl_r0860k_sb/knowledge.generations.jsonl",
+      "artifact_class": "generations",
+      "size_bytes": 75547,
+      "sha256": "7c693d14846bf3ee0253501d7e84e5fc880a211fdb015f681c8932ce80c82e42",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "eval/continuation/preflight_ctl_r0860k_sb/math_verified.generations.jsonl",
+      "artifact_class": "generations",
+      "size_bytes": 93497,
+      "sha256": "1bcf43d1a4d8e54d2bb89cb69ad97e2e534cb5b2563097ebfac1e9122e91f050",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "eval/continuation/preflight_ctl_r0860k_sb/multihop.generations.jsonl",
+      "artifact_class": "generations",
+      "size_bytes": 143166,
+      "sha256": "861bb0d5c5b3cd260fbf21d2eeefdc94da7c47122bd1d41ffa214d211232a39a",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "eval/continuation/preflight_ctl_r0860k_sb/rag.generations.jsonl",
+      "artifact_class": "generations",
+      "size_bytes": 120917,
+      "sha256": "c1ddcfcb179bc1432a7bf4179f4152acf4afbba8789c1b8f27780a3bcf884f00",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "eval/continuation/preflight_ctl_r0860k_sb/tool.generations.jsonl",
+      "artifact_class": "generations",
+      "size_bytes": 43685,
+      "sha256": "cc9fd3d6c0014b7b8804fbe7938a2a58ba0e9ae5c2bb0f58d973c876fee45acb",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "eval/continuation/preflight_ctl_r0860k_sa/code.json",
+      "artifact_class": "generation_summary",
+      "size_bytes": 13378,
+      "sha256": "1e22400fe29b4064d5209bf1152224f6466b0c94facd214c0e4c18ae26285d10",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "eval/continuation/preflight_ctl_r0860k_sa/gsm8k.json",
+      "artifact_class": "generation_summary",
+      "size_bytes": 13462,
+      "sha256": "794f6f050f3f71519c464c448eadcabce32c02a5887d386fd16d58d9de60c986",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "eval/continuation/preflight_ctl_r0860k_sa/knowledge.json",
+      "artifact_class": "generation_summary",
+      "size_bytes": 13378,
+      "sha256": "efc7fad887dad0f6aad87f1e1d0a3642a570bffc010403f6f187f8363ef4f4dc",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "eval/continuation/preflight_ctl_r0860k_sa/math_verified.json",
+      "artifact_class": "generation_summary",
+      "size_bytes": 13383,
+      "sha256": "da9ad2767d6d3cbe4d771a582b207dbc6ddab778335d63ffa52a62a04298f23b",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "eval/continuation/preflight_ctl_r0860k_sa/multihop.json",
+      "artifact_class": "generation_summary",
+      "size_bytes": 12417,
+      "sha256": "0fa6857ba88f96d0c0429a9426d3bd56b22b3bf51542171314f714780103cec9",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "eval/continuation/preflight_ctl_r0860k_sa/rag.json",
+      "artifact_class": "generation_summary",
+      "size_bytes": 13391,
+      "sha256": "917ef515d1a78d78b9464457e9d2729d0cff607f15a07ae33a2420b4d6559e03",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "eval/continuation/preflight_ctl_r0860k_sa/tool.json",
+      "artifact_class": "generation_summary",
+      "size_bytes": 12946,
+      "sha256": "c468bc3e9957d3e1167339b3703d2d9000a658f09bc609369c54526d93d1d0f2",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "eval/continuation/preflight_ctl_r0860k_sb/code.json",
+      "artifact_class": "generation_summary",
+      "size_bytes": 13375,
+      "sha256": "4d4a4e6e26f0a18c06bc3b4bff1d369443dfe476fcf552851b3434a99a8ae2ed",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "eval/continuation/preflight_ctl_r0860k_sb/gsm8k.json",
+      "artifact_class": "generation_summary",
+      "size_bytes": 13467,
+      "sha256": "29391c46c615105db9a50548048230e4e6da85adcb4ef08443b49d057c759e9d",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "eval/continuation/preflight_ctl_r0860k_sb/knowledge.json",
+      "artifact_class": "generation_summary",
+      "size_bytes": 13390,
+      "sha256": "99b53c6fdd51c7f43bd1b82651338acd7178c3ef104f8c9eba2611e7ae239426",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "eval/continuation/preflight_ctl_r0860k_sb/math_verified.json",
+      "artifact_class": "generation_summary",
+      "size_bytes": 13430,
+      "sha256": "5cb557c87723469b9225cce3765d0e092e0fd285b4ce751905ce187983bb4ba0",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "eval/continuation/preflight_ctl_r0860k_sb/multihop.json",
+      "artifact_class": "generation_summary",
+      "size_bytes": 12414,
+      "sha256": "f036540bfdffffe8f0c29dfdd982c34fc36d65d1d4a6bb0682dad2c725f1f693",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "eval/continuation/preflight_ctl_r0860k_sb/rag.json",
+      "artifact_class": "generation_summary",
+      "size_bytes": 13180,
+      "sha256": "07ee7620eca92c2e47facc45fe80775b0b9ded430e2e37c157f60144099af4a2",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "eval/continuation/preflight_ctl_r0860k_sb/tool.json",
+      "artifact_class": "generation_summary",
+      "size_bytes": 13152,
+      "sha256": "b064ba9153ce7eb98017aa84c9751bf358d8a6d65d7c0822ec32e467cc88f11a",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "eval/continuation/_smoke/rag.generations.jsonl",
+      "artifact_class": "smoke_generations",
+      "size_bytes": 3985,
+      "sha256": "ce6546a52b313e72706413f5686b18f68d05d43778987592701492d047a67ad9",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "eval/continuation/_smoke/rag.json",
+      "artifact_class": "smoke_generations",
+      "size_bytes": 13063,
+      "sha256": "20631f533e594c0973b2539bc133a2d5c96c1ed7d791640c5cd5ccde0126e0ea",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "eval/continuation/_smoke/rag.jsonl",
+      "artifact_class": "smoke_generations",
+      "size_bytes": 6017,
+      "sha256": "70dffc2142818b330d505d396ee3ca1ae6302115e1371026eb2f0842faf4a792",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "eval/continuation/_smoke/tool.generations.jsonl",
+      "artifact_class": "smoke_generations",
+      "size_bytes": 3707,
+      "sha256": "04f8d2d44cb5232bd5a703d4469199231ef19bca714134678aab8c2318ec17c9",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "eval/continuation/_smoke/tool.json",
+      "artifact_class": "smoke_generations",
+      "size_bytes": 13068,
+      "sha256": "85628b8f3085ea0cf82632be12912757c2fdd45652c10b6be134d6231431804c",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "eval/continuation/_smoke/tool.jsonl",
+      "artifact_class": "smoke_generations",
+      "size_bytes": 5014,
+      "sha256": "ae5eb2c2847493a7ec79621f84f36e6c5e67c2348001238532b26a5b0befc680",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "audit/autoinit_continuation/engine_probe.log",
+      "artifact_class": "gate_log",
+      "size_bytes": 12247,
+      "sha256": "03279b09a26470f2785468123150777d3a78942b9270741f1199e20beb42961b",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "audit/autoinit_continuation/generation_smoke.log",
+      "artifact_class": "gate_log",
+      "size_bytes": 12235,
+      "sha256": "8a306c43d65db678722ad24f7d5e84740dc9912792140a94272c89446131dc6c",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "audit/autoinit_continuation/preflight_ctl_r0860k_sa_generation.log",
+      "artifact_class": "gate_log",
+      "size_bytes": 13886,
+      "sha256": "4fb5286442978a0048ddab6baf3154df16f486e3e46d30a741fd3c8dca18ff0a",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "audit/autoinit_continuation/preflight_ctl_r0860k_sa_scoring.log",
+      "artifact_class": "gate_log",
+      "size_bytes": 845,
+      "sha256": "63fe8185201d202cf26f3e244d26c4bbd12a1b5a57a102e7ee97909e2ed88929",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "audit/autoinit_continuation/preflight_ctl_r0860k_sb_generation.log",
+      "artifact_class": "gate_log",
+      "size_bytes": 13997,
+      "sha256": "893608742f2bdd26ac8bbdbbe0fb7a84b53f3f350f42cc143adef4dfc9f2dd69",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "audit/autoinit_continuation/preflight_ctl_r0860k_sb_scoring.log",
+      "artifact_class": "gate_log",
+      "size_bytes": 845,
+      "sha256": "d901279d27405f369968d0b46985d3d2b4932f535a1b5046d054571126f7ac0d",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "audit/autoinit_continuation/session/autoinit_continuation.status",
+      "artifact_class": "session_evidence",
+      "size_bytes": 991,
+      "sha256": "5e0144fb071a1b9e03658f3727378f42b67f1d57e997f333880edf553e9fe087",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "audit/autoinit_continuation/session/autoinit_continuation_run.log",
+      "artifact_class": "session_evidence",
+      "size_bytes": 1122,
+      "sha256": "242ca6150e2fd90b1fb9e05bb618d86db1dfe3a558f6a1309fd22124b692e2f2",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "audit/autoinit_continuation/session/setup.log",
+      "artifact_class": "session_evidence",
+      "size_bytes": 26001,
+      "sha256": "f4464e4ce7d7018e004cc24ae6031358603f0b8908f97111b21a47d8f5406949",
+      "lifecycle": "final_required"
+    }
+  ],
+  "missing": [],
+  "appended_during_archive": [],
+  "completion_markers": [],
+  "completion_marker_failures": [],
+  "still_being_written": [],
+  "final_streams_quiescent": true
+}

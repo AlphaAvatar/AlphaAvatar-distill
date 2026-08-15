@@ -1,0 +1,147 @@
+{
+  "schema": "aadistill.autoinit.materialized_thresholds/v2",
+  "generated_utc": "2026-08-15T09:04:30.467505+00:00",
+  "evaluation_protocol_hash": "250f72efbd43b86a475e8dda293b45f07ee61a4d858e147f4a5bd7681c32c2e4",
+  "battery": "recovery_search_v2",
+  "from_imported_controls": {
+    "preflight_ctl_r0860k_sa": "799bd5acc30ff3a0aed105a751504e58b24862c6d383dade7aa1d832a8448ecd",
+    "preflight_ctl_r0860k_sb": "793f786adde9cbf01e386f827dbd79e64f9afc2b6938c5ffa4f902e14b5275bd"
+  },
+  "aggregation": {
+    "aggregation_id": "pooled_counts",
+    "version": 2,
+    "description": "pooled numerator/denominator across all completed seeds, each rate over its own denominator: behaviour over all prompts, correctness over scorable prompts only",
+    "required_counts": [
+      "n",
+      "usable",
+      "n_scorable",
+      "usable_scorable",
+      "correct"
+    ],
+    "formulas": {
+      "usable_rollout_rate": "sum(usable_s) / sum(n_s)",
+      "correct_overall": "sum(correct_s) / sum(n_scorable_s)",
+      "correct_given_usable": "sum(correct_s) / sum(usable_scorable_s)"
+    },
+    "supersedes": {
+      "aggregation": "pooled_counts@v1",
+      "defect": "v1 pooled correct over n and over usable, but the scorer computes correctness over n_scorable and usable_scorable; two seeds divided by 380 instead of 340 and mixed unscorable code rollouts into the conditional denominator"
+    }
+  },
+  "pooled": {
+    "seeds": [
+      20260726,
+      20260801
+    ],
+    "n": 380,
+    "usable": 141,
+    "correct": 4,
+    "n_scorable": 340,
+    "usable_scorable": 140,
+    "usable_rollout_rate": 0.37105263157894736,
+    "correct_overall": 0.011764705882352941,
+    "correct_given_usable": 0.02857142857142857,
+    "aggregation": "pooled_counts@v2"
+  },
+  "per_seed": [
+    {
+      "seed": 20260726,
+      "n": 190,
+      "usable": 74,
+      "n_scorable": 170,
+      "usable_scorable": 74,
+      "correct": 2
+    },
+    {
+      "seed": 20260801,
+      "n": 190,
+      "usable": 67,
+      "n_scorable": 170,
+      "usable_scorable": 66,
+      "correct": 2
+    }
+  ],
+  "equivalence_interval": {
+    "rule_id": "seed_aware_max_binomial_seedrange",
+    "version": 2,
+    "formula": "z * max(sqrt(p_pool*(1-p_pool)/n_pooled), |p_sa - p_sb| / 2)",
+    "z": 2.0,
+    "n_pooled": 340,
+    "p_control_pooled": 0.011764705882352941,
+    "p_sa": 0.0118,
+    "p_sb": 0.0118,
+    "binomial_se": 0.005847648491149511,
+    "seed_se_proxy": 0.0,
+    "value": 0.011695296982299022,
+    "dominant_term": "binomial",
+    "status": "materialized",
+    "seed_awareness": "the two-point seed range is a floor on the interval, not an estimate; it can only widen it, which is the conservative direction",
+    "non_adaptive": "the formula is frozen before any candidate is searched; only the control's own rates enter it"
+  },
+  "feasibility_floor": {
+    "rule_id": "seed_aware_usable_floor",
+    "version": 2,
+    "k": 3.0,
+    "n_pooled": 380,
+    "absolute_floor": 0.3,
+    "formula": "max(absolute_floor, u_pool - k * max(binomial_se, |u_sa - u_sb| / 2))",
+    "u_pool": 0.37105263157894736,
+    "u_sa": 0.3895,
+    "u_sb": 0.3526,
+    "value": 0.3,
+    "status": "materialized"
+  },
+  "per_capability_control_baseline": {
+    "gsm8k": {
+      "pooled_usable_rate": 0.4333,
+      "sa": 0.5667,
+      "sb": 0.3
+    },
+    "math_verified": {
+      "pooled_usable_rate": 0.2333,
+      "sa": 0.4,
+      "sb": 0.0667
+    },
+    "multihop": {
+      "pooled_usable_rate": 0.5,
+      "sa": 0.5,
+      "sb": 0.5
+    },
+    "rag": {
+      "pooled_usable_rate": 0.6833,
+      "sa": 0.6333,
+      "sb": 0.7333
+    },
+    "knowledge": {
+      "pooled_usable_rate": 0.1667,
+      "sa": 0.0667,
+      "sb": 0.2667
+    },
+    "tool": {
+      "pooled_usable_rate": 0.475,
+      "sa": 0.45,
+      "sb": 0.5
+    }
+  },
+  "catastrophic_rule": {
+    "rule_id": "per_capability_collapse",
+    "version": 1,
+    "metric": "usable_rollout_rate",
+    "candidate_max": 0.1,
+    "control_min": 0.4,
+    "statement": "candidate usable_rollout_rate < 0.1 AND control usable_rollout_rate > 0.4 -> catastrophic failure, candidate excluded",
+    "enforced_at": [
+      "rung1",
+      "final"
+    ]
+  },
+  "measured_cost": {
+    "generation_minutes_per_control": {
+      "preflight_ctl_r0860k_sa": 8.4,
+      "preflight_ctl_r0860k_sb": 11.2
+    },
+    "note": "the number Phase A must be repriced from; it had never been measured for this battery"
+  },
+  "materialized_from": "two imported permanent controls; nothing trained",
+  "report_sha256": "cda2ad037a86c92493260f33fb5c66fc9c8710565c95d1ca5e83420e244f1471"
+}

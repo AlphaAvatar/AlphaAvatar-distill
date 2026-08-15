@@ -2683,3 +2683,31 @@ in assumptions that a later study would have to unpick.
 - Budget: continuation spend is $3.4244. Headroom under the $4.67 figure is
   $1.2456, less than one hard launch ($1.6896). A further attempt needs a new
   cumulative figure as well as a new artifact.
+
+## 2026-08-15 (UTC) — Stage 3 COMPLETE
+
+- Attempt 8 returned `ALL_DONE` at `$0.6816` / 41.3 min. Pod deleted, provider
+  confirms `TERMINATED`. Products in `logs/autoinit_stage3_complete/`.
+- The sb packaging repair worked: sb rendered and completed its battery. Stage 0
+  ran the new evaluation-readiness gate on both controls before any generation.
+- Pooled over both seeds, `pooled_counts@v2`: `usable_rollout_rate` **0.3711**
+  (141/380), `correct_overall` **0.0118** (4/340), `correct_given_usable`
+  **0.0286** (4/140). Per seed: sa 0.3895, sb 0.3526.
+- `no_context_limit` is **1.0000 for both controls** — no right-censored samples.
+- Thresholds materialized: equivalence interval **0.011695**
+  (`seed_aware_max_binomial_seedrange@v2`, binomial term dominant, seed proxy
+  0.0); feasibility floor **0.3000** (`seed_aware_usable_floor@v2`, the absolute
+  floor binds).
+- Capability floors show a real seed disagreement on `gsm8k` (0.5667 vs 0.3000)
+  and `math_verified` (0.4000 vs 0.0667). The seed-aware rules exist for this;
+  the pooled figures are the ones a candidate is compared against.
+- Correctness sits near the floor (4/340). That is a property of these controls,
+  not a defect: `usable_rollout` is blind to correctness by construction and the
+  two axes are reported separately, as the contract requires.
+- Battery wall time measured at last: **19.65 min for both controls** including
+  scoring and threshold materialization, **8.43 min marginal** for one warm
+  checkpoint, against a 24 min/control allowance.
+- **Phase A repriced from that measurement: $12.36 expected / $20.13 hard**,
+  against $13.02 / $21.02. With $19.5238 remaining, expected fits and **hard does
+  not, by $0.61**. Phase A remains unauthorized; the options and their costs are
+  in `autoinit_phase_a_repricing.md`. Not decided here.

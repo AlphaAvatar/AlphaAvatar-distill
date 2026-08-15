@@ -1,5 +1,5 @@
-**Updated:** 2026-08-15 07:31 UTC · branch `main` · working tree clean
-**No pods running. Nothing billing.** **1,636 CPU tests pass**, 7 skipped; 1,612 under the pod simulator.
+**Updated:** 2026-08-15 09:10 UTC · branch `main` · working tree clean
+**No pods running. Nothing billing.** **Stage 3 is COMPLETE.** 1,637 CPU tests pass, 7 skipped; 1,613 under the pod simulator.
 
 ## The two permanent canonical controls EXIST and are hash-verified
 
@@ -62,92 +62,108 @@ every item. Input is now normalized through `normalize_tools`, which reads eithe
 representation and fails closed. **Semantics unchanged and measured:** nine
 policies × 190 prompts reproduce every number of the pre-migration record.
 
-## Attempt 7: the driver RAN. Stages 0-2 passed; sb has no tokenizer (2026-08-15 07:31 UTC)
+## STAGE 3 IS COMPLETE (2026-08-15 09:10 UTC)
 
-**Nothing running, nothing billing.** Pod deleted, provider confirms
-`TERMINATED`, account has no pods. Seven attempts, **$3.4244**. Evidence:
-[`autoinit_continuation_attempt7/`](autoinit_continuation_attempt7/).
+**Nothing running, nothing billing.** `ALL_DONE`, `$0.6816`, 41.3 min. Pod
+deleted, provider confirms `TERMINATED`, account has no pods. Eight attempts,
+**$4.1060** total. Products:
+[`autoinit_stage3_complete/`](autoinit_stage3_complete/).
 
-**All three issued authorizations are CONSUMED** (one invocation each):
-`e4854818…` attempt 5 $0.1369, `f21b4038…` attempt 6 $0.1324, `c398850b…`
-attempt 7 $0.4500.
+Nothing was trained; the controls are inputs. Phase A was not launched.
 
-### The orchestration is fixed and stayed fixed
+| stage | wall | verdict |
+| --- | --- | --- |
+| setup (whole script) | 7.3 min | complete |
+| 0 — strict import + **evaluation-readiness** of both controls | 0.06 min | passed |
+| 1 — generation/evaluation attestation | 2.10 min | passed |
+| 2 — real v2 tool+RAG smoke | 1.48 min | passed |
+| 3 — sa and sb characterization | 19.65 min | **passed** |
 
-| stage | wall | cumulative | verdict |
-| --- | --- | --- | --- |
-| setup (whole script) | 6.4 min | $0.15 | complete, read correctly by the launcher |
-| 0 — strict import of both controls | 0.07 min | $0.1609 | **passed** |
-| 1 — generation/evaluation attestation | 2.80 min | $0.2070 | **passed** |
-| 2 — real v2 tool+RAG smoke | 1.63 min | $0.2339 | **passed** |
-| 3 — sa/sb characterization | 9.45 min | $0.3899 | **FAILED on sb** |
+### Per-seed results — `recovery_search_v2`, `pooled_counts@v2`
 
-The whole-setup rehearsal did its job: no orchestration defect appeared. Stage 0
-re-ran the strict reconstruction for both controls and reproduced
-`aad75fee8a897d9c…` with `completed_all_steps: true` at step 1023. Engine
-observed: `vllm 0.27.1`, `torch 2.13.0+cu130`, `transformers 5.15.0`, bfloat16,
-context 8192 from `trained_block_len`, runtime digest `85a14f8b…`.
+| | n | usable | rate | n_scorable | correct | correct_overall | correct\|usable |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| **sa** (20260726) | 190 | 74 | 0.3895 | 170 | 2 | 0.0118 | 0.0270 |
+| **sb** (20260801) | 190 | 67 | 0.3526 | 170 | 2 | 0.0118 | 0.0303 |
+| **pooled** | 380 | 141 | **0.3711** | 340 | 4 | **0.0118** | **0.0286** |
 
-### What failed: an artifact defect in a permanent control
+Component rates, reported alongside the conjunction as required — they are not
+independent, and `protocol_valid` is the binding one:
 
-`preflight_ctl_r0860k_sb` could not render a prompt —
-`tokenizer.chat_template is not set`. Its stored checkpoint is missing
-`chat_template.jinja`, `tokenizer.json` and `tokenizer_config.json`; `sa` has all
-three. Stage 0 passed because it verifies weights, protocol and probe identity,
-not tokenizer assets.
+| | non_empty | natural_term | no_severe_rep | no_context_limit | protocol_valid |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| sa | 0.7737 | 0.7211 | 0.7211 | 1.0000 | 0.4316 |
+| sb | 0.6526 | 0.5421 | 0.5421 | 1.0000 | 0.3895 |
 
-The three files are **byte-identical between `sa` and the canonical
-initialization** (`3802169b…`, `be756060…`, `8fa82a4b…`) — tokenizer assets of
-the shared init, not seed-dependent — and the engine probe independently recorded
-`chat_template_sha256: 3802169b…` for the run that worked. **Repair needs no
-retraining and no weight change**, but it modifies a permanent control artifact,
-so it is a maintainer decision. **Nothing was changed.**
+**No sample hit the context limit** in either control: `no_context_limit` is
+1.0000 for both, so nothing is right-censored and P18's censoring analysis is
+moot here.
 
-### sa's characterization is real, and is not a Stage-3 verdict
+### Capability floors (pooled usable rate | sa | sb)
 
-Scored by `scripts/autoinit/score_recovery_search.py` against frozen
-`recovery_search_v2`, `pooled_counts@v2` denominators:
+| capability | pooled | sa | sb |
+| --- | ---: | ---: | ---: |
+| rag | 0.6833 | 0.6333 | 0.7333 |
+| multihop | 0.5000 | 0.5000 | 0.5000 |
+| tool | 0.4750 | 0.4500 | 0.5000 |
+| gsm8k | 0.4333 | 0.5667 | 0.3000 |
+| math_verified | 0.2333 | 0.4000 | 0.0667 |
+| knowledge | 0.1667 | 0.0667 | 0.2667 |
 
-```
-n 190 · usable 79 · usable_rollout_rate 0.4158
-n_scorable 170 · correct 3 · correct_overall 0.0176 · correct_given_usable 0.0380
-per-capability usable: rag 0.8667 · gsm8k 0.5000 · multihop 0.5000
-                       tool 0.4500 · math_verified 0.4000 · knowledge 0.0667
-```
+`gsm8k` and `math_verified` disagree strongly across seeds (0.5667 vs 0.3000;
+0.4000 vs 0.0667) — the seed-aware rules exist for exactly this.
 
-`code` (20 items) has no oracle — the 190 vs 170 difference. **Single seed.** The
-design is sa+sb and the threshold was registered against the pair.
-
-### Battery wall time — a bound
-
-Stage 3's 9.45 min contains sa's engine load, sa's full 190-prompt battery, sb's
-engine load and sb's failure. One control is therefore **under ~8 min** against a
-24 min/control allowance. Enough to say the allowance is ~3x conservative; not a
-clean per-control measurement.
-
-### Budget — a further attempt needs a new figure
+### Materialized thresholds
 
 ```
-project cumulative                                   $190.8646
-remaining under the $211.07 cap                      $ 20.2054
-continuation spent, seven attempts                   $  3.4244
-granted cumulative continuation figure               $  4.67
-one more launch, priced                    expected $1.3860 · hard $1.6896
-    $3.4244 + $1.6896 = $5.1140  >  $4.67
+equivalence_interval  seed_aware_max_binomial_seedrange@v2
+                      z=2.0, n_pooled=340, p_pool=0.011765
+                      binomial_se 0.005848, seed_se_proxy 0.0
+                      value 0.011695  (dominant term: binomial)
+feasibility_floor     seed_aware_usable_floor@v2
+                      k=3.0, n_pooled=380, u_pool=0.371053
+                      value 0.3000  (the absolute floor binds)
 ```
 
-**Phase A remains unauthorized.** With ~$20.21 remaining and the bound above, a
-re-price is now possible for the first time, but it needs a completed sa+sb
-characterization to be worth anything.
+Both `status: materialized`, from imported probe ids `799bd5ac…` / `793f786a…`,
+evaluation protocol hash `250f72ef…`.
 
-## What remains before Stage 3 can complete
+**Tool usability is real**: the v2 battery renders all 20 tool prompts and the
+controls reach 0.475 pooled usable on them — the `recovery_search_v1` defect that
+rendered 0/20 is behind us.
 
-1. **Maintainer decision on repairing `sb`'s tokenizer assets** — a copy of three
-   files that are byte-identical to `sa`'s and to the init, no retraining, no
-   weight change.
-2. A new cumulative continuation figure and a new one-use authorization.
-3. Optionally, extend the Stage-0 import gate to require the tokenizer assets a
-   control needs to be evaluable. It would not have saved this run.
+**Correctness is near the floor** — 4 of 340 pooled. That is a fact about these
+0.86M-step controls, not a defect: they are recovery *controls*, and
+`usable_rollout` is blind to correctness by construction.
+
+### Battery wall time, measured
+
+19.65 min for both controls including scoring and threshold materialization;
+8.43 min marginal for one checkpoint once the engine is warm. Against the 24
+min/control allowance, ~2.4× conservative.
+
+### Phase A: repriced from measurement, and it still does not fit
+
+```
+project cumulative                              $191.5462
+remaining under the $211.07 cap                 $ 19.5238
+Phase A expected, repriced                      $ 12.36     fits, margin $7.16
+Phase A hard, repriced                          $ 20.13     SHORT BY $0.61
+```
+
+Details in [`autoinit_phase_a_repricing.md`](autoinit_phase_a_repricing.md). The
+reprice moved the hard bound $21.02 → $20.13 and did not close the gap. **Phase A
+remains unauthorized** and cannot be authorized under the current cap without a
+maintainer decision: raise the cap ~$1, or drop the conditional third seed
+($3.53, giving hard $16.60 with $2.92 margin) at the cost of the
+seed-disagreement escape hatch, or cut the $3.00 infrastructure reserve — which
+this week argues against.
+
+## What remains
+
+1. **Maintainer decision on the Phase-A budget shape.** Stage 3 has delivered
+   everything it owed: thresholds, floors, tool usability and battery wall time.
+2. Phase A stays unauthorized until that decision.
 
 ## Phase A is repriced, and both statistics measurements are kept
 
