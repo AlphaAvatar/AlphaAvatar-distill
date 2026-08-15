@@ -67,15 +67,16 @@
    "soft_stop_usd": 19.6826,
    "hard_terminate_usd": 20.0126,
    "fits_remaining": true,
-   "margin_usd": 1.4412,
-   "note": "supersedes the $12.36/$20.13 in autoinit_phase_a_repricing.md, which priced search and probes but not setup, attestation, selection, collection, contingency or the recovery reserve"
+   "margin_usd": 0.8672,
+   "note": "supersedes the $12.36/$20.13 in autoinit_phase_a_repricing.md, which priced search and probes but not setup, attestation, selection, collection, contingency or the recovery reserve",
+   "margin_note": "not a retry reserve; no attempt 4 is pre-authorized"
   }
  },
- "latest_commit": "205e9aa98f7402054eb0c7f2f6a4b55035f4a419",
+ "latest_commit": "9648c6bbe51039dfffd9b64e69f3f1bbafba5943",
  "documents": {
   "logs/STATE.md": {
    "path": "logs/STATE.md",
-   "sha256": "6815e24b999741241ec32f495f7bff1a559f22806cab30850286548fc184cf27"
+   "sha256": "512687d8dbb47862d8da93b2c92253fd76e6fcd62ba2b062d032039732d62d16"
   },
   "docs/HANDOFF_AUTOINITIALIZER.md": {
    "path": "docs/HANDOFF_AUTOINITIALIZER.md",
@@ -87,7 +88,7 @@
   },
   "logs/BUDGET_LEDGER.md": {
    "path": "logs/BUDGET_LEDGER.md",
-   "sha256": "cb021a6fb093c6d31311606b558bf47dd50f2256668daae978142adc87eb8cd0"
+   "sha256": "8d38ddf2379633b9659e123a286f52b24933d304c63922701f10bbe436cd4dfb"
   },
   "logs/decisions.md": {
    "path": "logs/decisions.md",

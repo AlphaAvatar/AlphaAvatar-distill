@@ -220,7 +220,8 @@ authorized cumulative cap                                    $213.00
 actual cumulative spend                                      $192.1202
 unused authorization remaining                               $ 20.8798
 Phase A hard threshold, from the launcher's own make_plan     $ 20.0126
-margin after a worst-case Phase A                            $  1.4412
+margin after a worst-case Phase A                            $  0.8672
+    NOT a retry reserve. No attempt 4 is pre-authorized.
 GRANTED Phase-A authorization, 2026-08-15T12:32:08Z          $ 20.0126
     `autoinit.phase_a.2026-08-15T1232Z`, sha256 14360ef4…
     expected $17.8933 ($14.3604 if it resolves after two

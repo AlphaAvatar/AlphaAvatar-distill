@@ -1,5 +1,8 @@
-**Updated:** 2026-08-15 09:10 UTC · branch `main` · working tree clean
-**No pods running. Nothing billing.** **Stage 3 is COMPLETE.** 1,637 CPU tests pass, 7 skipped; 1,613 under the pod simulator.
+**Updated:** 2026-08-15 17:05 UTC · branch `main` · working tree clean
+**No pods running. Nothing billing.** **Stage 3 is COMPLETE.** Phase A has been
+attempted twice and failed closed both times without training anything
+($0.1075 + $0.4665); attempt 3 is being prepared. 1,696 CPU tests pass, 7
+skipped, in both the dev-box and `SESSION_KIND=phase_a` environments.
 
 ## The two permanent canonical controls EXIST and are hash-verified
 
@@ -169,14 +172,15 @@ sc, ε-Pareto with NLL diagnostic-only, and the selection rules are unchanged.
 every non-Phase-A session.
 
 ```
-project cumulative                              $191.5462
+project cumulative                              $192.1202
 cap RAISED 2026-08-15                           $213.00
-remaining                                       $ 21.4538
+remaining                                       $ 20.8798
+  (two failed attempts: $0.1075 + $0.4665, nothing trained)
 Phase A expected (launcher make_plan)           $ 17.8933
   of which the conditional sc rung              $  3.5328
   expected if it resolves after two seeds       $ 14.3604
 Phase A soft                                    $ 19.6826
-Phase A hard                                    $ 20.0126   margin $1.4412
+Phase A hard                                    $ 20.0126   margin $0.8672
 ```
 
 The launcher's price is higher than

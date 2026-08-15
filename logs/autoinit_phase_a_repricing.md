@@ -243,3 +243,10 @@ would under-book each probe by ~8 min), and the battery uses the **conservative*
 Against the cap raised to `$213.00` on 2026-08-15, remaining is `$21.4538` and
 the hard bound fits with `$1.4412` of margin. See
 [`BUDGET_LEDGER.md`](BUDGET_LEDGER.md).
+
+**Correction, later on 2026-08-15.** The `$21.4538 remaining / $1.4412 margin`
+above was true when written. Two attempts have since failed closed without
+training anything — $0.1075 (setup test gate) and $0.4665 (driver stage 0) — so
+cumulative spend is **$192.1202** and remaining is **$20.8798**, leaving
+**$0.8672** against the unchanged $20.0126 hard bound. That margin is not a retry
+reserve.
