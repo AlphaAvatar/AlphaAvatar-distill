@@ -1,0 +1,52 @@
+{
+  "schema": "aadistill.autoinit.phase_a_authorization/v1",
+  "authorization_id": "autoinit.phase_a.2026-08-15T1232Z",
+  "version": 1,
+  "granted_utc": "2026-08-15T12:32:08Z",
+  "granted_by": "maintainer, 2026-08-15, in two explicit steps. (1) The project cap was raised on the maintainer's own words 'Raise it further, e.g. $213-214'; $213.00 was selected from that stated range as the conservative end and recorded in BUDGET_LEDGER.md, leaving $21.4538 against a spend of $191.5462. (2) The maintainer then instructed: 'Only then issue a fresh PhaseAAuthorization with a real UTC grant timestamp against those final identities', after the searched-leaf durability item was resolved and the implementation committed. Figures below are the launcher's priced plan, not a transcription.",
+  "plan_id": "autoinit.v1.phase_a_session",
+  "phase_a_session_plan_hash": "9377a2dc61f21790dd111d72a5de0e039ea1d31afef2d09e18c98a0b0cc2a0aa",
+  "phase_a_science_plan_hash": "02be33b9a7a8e26bc8bfb75795351e8cdc9ffd441b47066cc81887cfc511b55c",
+  "expected_usd": 17.8933,
+  "hard_cap_usd": 20.0126,
+  "authorized_stages": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5
+  ],
+  "stage_conditions": {
+    "0": "attestation; frozen assets; assert_preregistered against the frozen science plan; both thresholds must be materialized",
+    "1": "beam search; 5 admissible leaves or STOP and report the shortfall",
+    "2": "recovery rung 1 on seed sa: 5 searched leaves + the injected canonical control, then the survivor selection and the leaf retention record",
+    "3": "recovery rung 2 on seed sb: 2 survivors + the control",
+    "4": "conditional tie-break on seed sc, ONLY for finalists inside the preregistered equivalence interval; no fourth seed",
+    "5": "selection and report; unresolved_equivalence is a RESULT",
+    "teardown": "collect, fetch the finalists, delete the pod, confirm from the provider, STOP for review"
+  },
+  "scope_note": "Phase A only, one launcher invocation. This artifact authorizes the SPEND and the STAGES; it is not by itself an instruction to launch. The maintainer's 2026-08-15 message that requested it also says 'Do not launch Phase A yet', so the run waits for a separate explicit go. Nothing here permits retraining the permanent controls, changing the frozen search or recovery design, a fourth seed, or any follow-on experiment: Phase A is a terminus and stops for review on every path, including unresolved_equivalence.",
+  "phase_a_authorized": true,
+  "automatic_followon_start": false,
+  "authorized_session_commit": "9b05a058dec2c0ca36ac5b2a1c777a01dcd7dd60",
+  "harness_source_digest": "ea2f360bf7a308445f56728cacb63c8eaf94f340a698859fed56a0f06d09aff5",
+  "harness_source_files": [
+    "scripts/pod/autoinit_phase_a_launch.py",
+    "scripts/pod/autoinit_phase_a_driver.py",
+    "scripts/pod/autoinit_preflight_launch.py",
+    "scripts/pod/autoinit_preflight_setup.sh",
+    "scripts/pod/autoinit_engine_probe.py",
+    "scripts/pod/watchdog.py",
+    "scripts/pod/collect_artifacts.py",
+    "scripts/autoinit/phase_a_search.py",
+    "scripts/autoinit/write_preregistration.py",
+    "src/aadistill/autoinit/authorization.py",
+    "src/aadistill/autoinit/phase_a.py",
+    "src/aadistill/autoinit/generation.py"
+  ],
+  "per_launch_hard_usd": 20.0126,
+  "provenance_commit": "9b05a058dec2c0ca36ac5b2a1c777a01dcd7dd60",
+  "enforcement": "the launcher loads this artifact and refuses to create a pod whose priced hard threshold exceeds hard_cap_usd or per_launch_hard_usd, refuses a stage not in authorized_stages, refuses a harness that does not digest to the authorized value, and has no code path to any experiment after Phase A",
+  "authorization_sha256": "14360ef4563708ed96b3e5f6ee00b87590f83b2e92c36db38f6371ca165d050f"
+}

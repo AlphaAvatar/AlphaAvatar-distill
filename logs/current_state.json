@@ -1,7 +1,7 @@
 {
  "schema": "aadistill.current_state/v1",
  "generated_utc": "2026-08-15T12:40:00+00:00",
- "current_phase": "AutoInitializer Stage 3 COMPLETE. The Phase-A harness \u2014 which did not exist \u2014 is now BUILT and REHEARSED, the thresholds are materialized into a frozen science plan, and the project cap is raised to $213.00. Phase A is PREPARED but NOT AUTHORIZED: no PhaseAAuthorization artifact has been issued and the launcher refuses to create a pod without one.",
+ "current_phase": "Phase-A harness built, rehearsed and COMMITTED; searched-leaf durability resolved from measurement; PhaseAAuthorization ISSUED (autoinit.phase_a.2026-08-15T1232Z). Phase A is NOT launched and no paid compute has run against the grant.",
  "active_experiment": null,
  "paid_compute_running": false,
  "next_work": "Maintainer decision on whether to issue a PhaseAAuthorization. It must bind the session plan hash, the science plan hash 02be33b9a7a8e26bc8bfb75795351e8cdc9ffd441b47066cc81887cfc511b55c, the rehearsed harness digest and a real UTC grant timestamp. Also unresolved: the searched-leaf storage plan (5 x ~2.3 GB; relay capacity not confirmed). Do not retrain the permanent controls, do not reopen the frozen search/recovery design, do not launch paid compute without that authorization.",
@@ -87,7 +87,7 @@
   },
   "logs/BUDGET_LEDGER.md": {
    "path": "logs/BUDGET_LEDGER.md",
-   "sha256": "4511e90c65b7b4857a3fcfaf8bc4314e5f432af2994529f38d4934674d278e26"
+   "sha256": "6f1a3e2635df977b148fe5386ad252b5debe31c512bbf0c295eabea5d35f2e20"
   },
   "logs/decisions.md": {
    "path": "logs/decisions.md",
@@ -158,7 +158,8 @@
   "dry_run": "logs/autoinit_dryrun_summary.json",
   "proposal": "logs/autoinit_pilot_proposal.md",
   "blocking_prerequisites": [
-   "a PhaseAAuthorization artifact issued against the rehearsed harness digest",
+   "an explicit instruction to launch; the authorization exists and the run does not",
+   "the session git bundle uploaded to the relay at the final commit (~3.7 MB) \u2014 setup fetches it and would fail on the pod without it",
    "calib.reasoning_heavy@v1 not built (Phase B only, independent trigger)"
   ],
   "corrections_2026_08_12_review_pass": [
@@ -268,7 +269,7 @@
     "tests/pod/test_phase_a_search_executes.py": 6
    },
    "spend_authorization_unchanged": true,
-   "authorization_issued": false,
+   "authorization_issued": true,
    "launched": false,
    "open_question": "RESOLVED 2026-08-15: see logs/autoinit_phase_a_storage.md",
    "leaf_durability": {
@@ -284,6 +285,25 @@
     "nothing_deleted": true,
     "experiment_unchanged": true,
     "reclaim_option_not_taken": "transfer/ = 7.66 GiB of reproducible git bundles"
+   },
+   "authorization": {
+    "artifact": "logs/autoinit_phase_a_authorization.json",
+    "authorization_id": "autoinit.phase_a.2026-08-15T1232Z",
+    "granted_utc": "2026-08-15T12:32:08Z",
+    "authorization_sha256": "14360ef4563708ed96b3e5f6ee00b87590f83b2e92c36db38f6371ca165d050f",
+    "harness_source_digest": "ea2f360bf7a308445f56728cacb63c8eaf94f340a698859fed56a0f06d09aff5",
+    "authorized_session_commit": "9b05a058dec2c0ca36ac5b2a1c777a01dcd7dd60",
+    "expected_usd": 17.8933,
+    "hard_cap_usd": 20.0126,
+    "authorized_stages": [
+     0,
+     1,
+     2,
+     3,
+     4,
+     5
+    ],
+    "issued_is_not_launched": "the artifact authorizes spend and stages; the maintainer's instruction that requested it also says 'Do not launch Phase A yet'"
    }
   }
  },

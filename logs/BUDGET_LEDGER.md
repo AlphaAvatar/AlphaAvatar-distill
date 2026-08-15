@@ -198,9 +198,18 @@ actual cumulative spend                                      $191.5462
 unused authorization remaining                               $ 21.4538
 Phase A hard threshold, from the launcher's own make_plan     $ 20.0126
 margin after a worst-case Phase A                            $  1.4412
-    Phase A is PREPARED but NOT AUTHORIZED: no
-    PhaseAAuthorization artifact has been issued, and the
-    launcher refuses to create a pod without one.
+GRANTED Phase-A authorization, 2026-08-15T12:32:08Z          $ 20.0126
+    `autoinit.phase_a.2026-08-15T1232Z`, sha256 14360ef4…
+    expected $17.8933 ($14.3604 if it resolves after two
+    seeds); per-launch hard equals the cap because this is
+    ONE session. Bound to session plan 9377a2dc…, science
+    plan 02be33b9…, harness digest ea2f360b… and commit
+    9b05a058…. Stages 0-5. Nothing spent against it.
+
+    **ISSUED IS NOT LAUNCHED.** The artifact authorizes the
+    spend and the stages; the maintainer's instruction that
+    requested it also says "Do not launch Phase A yet", so
+    the run waits for a separate explicit go.
 continuation spent across eight attempts                     $  4.1060
     0.6312 + 0.6367 + 0.0700 + 1.3672 + 0.1369 + 0.1324 + 0.4500
     + 0.6816.  STAGE 3 IS COMPLETE: attempt 8 returned ALL_DONE,
