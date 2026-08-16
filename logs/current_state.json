@@ -1,10 +1,10 @@
 {
  "schema": "aadistill.current_state/v1",
  "generated_utc": "2026-08-15T12:40:00+00:00",
- "current_phase": "Phase A attempt 4 refused at the Stage-3 protocol binding at $0.2052. Not a code defect: stage 0's real body ran and the binding fired as designed. The sole difference is image_digest, whose suffix is the HOST NVIDIA DRIVER version \u2014 a host lottery, not a generation-semantics difference. Stopped at the boundary; no attempt 5 authorized or prepared.",
+ "current_phase": "Attempt 5: STAGE 0 PASSED for the first time (v2 comparability held; attestation written, protocol 250f72ef, comparable identity 70a26e0b). Stage 1 then failed on its first real execution: the calibration mixture items.jsonl is staged nowhere. Budget now SHORT of a full attempt by $0.1909, so a sixth run needs a cap decision, not just an authorization.",
  "active_experiment": null,
  "paid_compute_running": false,
- "next_work": "Maintainer decision on the runtime-identity question: whether image_digest should carry the host driver version at all, or whether the Stage-3 evaluation protocol should be re-materialized under a currently-drawable runtime. Both are scientific/infrastructure calls, not patches.",
+ "next_work": "Maintainer decision. (1) The stage-1 fix is staging + $0 precheck: fetch e8_inputs_20260810/calibration_v1/ from the relay and require it before a pod exists. (2) Phase A no longer fits the $213.00 cap: $19.8217 remains against a $20.0126 hard bound.",
  "teacher": {
   "model_id": "Qwen/Qwen3-4B-Thinking-2507",
   "revision": "768f209d9ea81521153ed38c47d515654e938aea",
@@ -55,24 +55,24 @@
   "dp_sa": "infrastructure artifact, not a promotable arm"
  },
  "budget": {
-  "actual_cumulative_spend_usd": 192.5357,
+  "actual_cumulative_spend_usd": 193.1783,
   "authorized_cap_usd": 213.0,
   "cap_raised_utc": "2026-08-15",
   "cap_raise_note": "maintainer approved 'e.g. $213-214'; $213.00 selected from that range. Nothing spent against it.",
-  "remaining_usd": 20.4643,
+  "remaining_usd": 19.8217,
   "phase_a_priced_by_launcher": {
    "expected_usd": 17.8933,
    "expected_without_tie_break_usd": 14.3604,
    "conditional_tie_break_usd": 3.5328,
    "soft_stop_usd": 19.6826,
    "hard_terminate_usd": 20.0126,
-   "fits_remaining": true,
-   "margin_usd": 0.4517,
+   "fits_remaining": false,
+   "margin_usd": -0.1909,
    "note": "supersedes the $12.36/$20.13 in autoinit_phase_a_repricing.md, which priced search and probes but not setup, attestation, selection, collection, contingency or the recovery reserve",
    "margin_note": "not a retry reserve; no attempt 4 is pre-authorized"
   }
  },
- "latest_commit": "c611812c5d87c7929c6118de7f67f29bda9b941e",
+ "latest_commit": "925eebc0c8b6739bbc5ebed67aad36946e78a908",
  "documents": {
   "logs/STATE.md": {
    "path": "logs/STATE.md",
@@ -88,11 +88,11 @@
   },
   "logs/BUDGET_LEDGER.md": {
    "path": "logs/BUDGET_LEDGER.md",
-   "sha256": "73a8ab152ec917df08e0c7d10c8667614fc0c6546ecf63d15df716fa0d3ebf6f"
+   "sha256": "9e63ee3defb57f1496a0f5542bbb629e5ccdcd8779d606f4abe23939a7209980"
   },
   "logs/decisions.md": {
    "path": "logs/decisions.md",
-   "sha256": "183403189291033e4e4b3817f468cc6b039205855a3a201da1a152eb48ee27c1"
+   "sha256": "78a273ea36446e26309e34605824550ede065c36be3263786319aaaeb44036af"
   },
   "logs/checkpoint_registry.json": {
    "path": "logs/checkpoint_registry.json",
@@ -159,8 +159,8 @@
   "dry_run": "logs/autoinit_dryrun_summary.json",
   "proposal": "logs/autoinit_pilot_proposal.md",
   "blocking_prerequisites": [
-   "maintainer decision: should image_digest carry the host NVIDIA driver version, or should the Stage-3 protocol be re-materialized under a currently-drawable runtime?",
-   "no attempt 5 is authorized",
+   "cap decision: Phase A no longer fits ($19.8217 remaining vs $20.0126 hard)",
+   "stage the calibration mixture from the relay and gate it at $0",
    "calib.reasoning_heavy@v1 not built (Phase B only, independent trigger)"
   ],
   "corrections_2026_08_12_review_pass": [
@@ -355,12 +355,10 @@
     "voids_authorization": "autoinit.phase_a.2026-08-15T1734Z / 43a04ec5"
    },
    "attempts_summary": {
-    "n": 4,
-    "total_usd": 0.9895,
-    "stages_passed": 0,
-    "trained_anything": false,
-    "attempts_1_to_3": "code defects in setup/stage 0, all now closed",
-    "attempt_4": "not a defect: the Stage-3 binding refused a host whose driver version differs from the Stage-3 host"
+    "n": 5,
+    "total_usd": 1.6321,
+    "stages_passed": 1,
+    "trained_anything": false
    },
    "stage0_real_body_rehearsal": {
     "file": "tests/pod/test_phase_a_stage0_executes.py",
@@ -409,6 +407,26 @@
      "580.126.09",
      "580.126.09"
     ]
+   },
+   "attempt_5": {
+    "pod_id": "s797g6xphdibms",
+    "minutes": 38.94,
+    "usd": 0.6426,
+    "outcome": "STAGE_1_FAILED_ON_UNSTAGED_INPUT",
+    "stage0_passed": true,
+    "stages_passed": 1,
+    "trained_anything": false,
+    "provider_confirms_gone": true,
+    "stage0_attestation": {
+     "evaluation_protocol_hash": "250f72efbd43b86a475e8dda293b45f07ee61a4d858e147f4a5bd7681c32c2e4",
+     "comparable_identity": "70a26e0b43df20e469385115b49683b50936919e02986088b76d3c30ffd87103",
+     "live_driver": "580.159.03",
+     "historical_driver": "580.159.03",
+     "driver_patch_differs": false,
+     "caveat": "this host matched Stage 3's driver, so v1 would also have passed; not on-pod validation of v2"
+    },
+    "stage1_cause": "calib.domain_balanced@v1 items.jsonl missing: required by phase_a_search.py:124, absent from LOCAL_ASSETS and from the relay precheck, incomplete on the dev box, present on the relay at e8_inputs_20260810/calibration_v1/",
+    "fix_class": "staging + $0 precheck, not science"
    }
   }
  },
@@ -430,7 +448,7 @@
   "peak_working_storage_gib": 106
  },
  "tests": {
-  "passing": 1707,
+  "passing": 1732,
   "skipped": 7,
   "note": "1637 before this session; +51 Phase-A rehearsal, +6 real toy-scale search execution",
   "venvs_verified": [

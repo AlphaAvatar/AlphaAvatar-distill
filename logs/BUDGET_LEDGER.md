@@ -93,6 +93,23 @@ Phase A attempt 1 (L40S, 6.5 min) SETUP GATE FAILED, NOTHING RAN $  0.1075
 Phase A attempt 2 (L40S, 28.3 min) STAGE-0 GATE FAILED, NOTHING RAN $  0.4665
 Phase A attempt 3 (L40S, 12.8 min) STAGE-0 GATE FAILED, NOTHING RAN $  0.2103
 Phase A attempt 4 (L40S, 12.4 min) STAGE-3 BINDING REFUSED       $  0.2052
+Phase A attempt 5 (L40S, 38.9 min) STAGE 0 PASSED, STAGE 1 FAILED $  0.6426
+    FIRST TIME STAGE 0 PASSED. The v2 comparability migration held on
+    hardware: attestation written, protocol 250f72ef, comparable
+    identity 70a26e0b. Caveat: this pod drew driver 580.159.03, the
+    SAME as Stage 3, so v1 would also have passed here -- v2 was not
+    the deciding factor on this particular host.
+    Stage 1 then failed on its first real execution:
+      CalibrationError: calib.domain_balanced@v1:
+      artifacts/stage1/e8_calibration_v1/items.jsonl is missing
+    phase_a_search.py:124 calls DOMAIN_BALANCED_V1.resolve(), which
+    reads that file. It is NOT in the launcher's LOCAL_ASSETS, NOT in
+    the relay precheck's `need` list, and is INCOMPLETE on the dev box
+    (only docs.jsonl + general_disjointness.json). It IS on the relay
+    at e8_inputs_20260810/calibration_v1/. A required Phase-A input
+    that nothing stages and no $0 gate checks for.
+    38.9 min includes a redrawn host (vvsohv60cuuokx -> s797g6xphdibms).
+    Pod deleted, provider confirms gone; nothing trained.
     NOT a code defect. Stage 0's real body ran end to end -- the fix
     verified at $0 held -- and the NEW Stage-3 protocol binding then
     refused, as designed: the pod's evaluation protocol hashed to
@@ -150,7 +167,7 @@ AutoInit characterization continuation, attempt 4 (L40S,      $  1.3672
     host that had failed three cold draws. Torn down manually
     once the outcome was determined; provider-confirmed gone.
 
-ACTUAL CUMULATIVE SPEND                                      $192.5357
+ACTUAL CUMULATIVE SPEND                                      $193.1783
 ```
 
 The pre-E8b baseline `$163.8833` is the figure every E8/E8b planner was built on
@@ -245,10 +262,13 @@ $2.30   RAISED 2026-08-14 with maintainer approval, after attempt 1 spent
 
 ```
 authorized cumulative cap                                    $213.00
-actual cumulative spend                                      $192.5357
+actual cumulative spend                                      $193.1783
 unused authorization remaining                               $ 20.4643
 Phase A hard threshold, from the launcher's own make_plan     $ 20.0126
-margin after a worst-case Phase A                            $  0.4517
+margin after a worst-case Phase A                            $ -0.1909  <-- NEGATIVE
+    PHASE A NO LONGER FITS THE $213.00 CAP. Remaining $19.8217
+    against a $20.0126 hard bound: short by $0.1909. A further
+    attempt requires a cap decision, not just an authorization.
     NOT a retry reserve. No attempt 4 is pre-authorized.
 GRANTED Phase-A authorization, 2026-08-15T12:32:08Z          $ 20.0126
     `autoinit.phase_a.2026-08-15T1232Z`, sha256 14360ef4…

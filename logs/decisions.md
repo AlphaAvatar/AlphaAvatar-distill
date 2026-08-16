@@ -3116,3 +3116,39 @@ affected; `artifacts/` is gitignored.
 `PHASE_A_HARNESS_SOURCE_FILES_V1` (13 files), while remaining outside both
 historical digests — verified: generation `a1b51736…` and scoring `808080a7…` are
 unchanged.
+
+## 2026-08-16 — Attempt 5: stage 0 PASSED at last; stage 1 failed on an unstaged input
+
+- **Outcome:** pod `s797g6xphdibms`, 38.94 min, **$0.6426**. `PHASE_A_FAILED` at
+  stage 1. Pod deleted, provider confirms gone, nothing trained. The 38.9 min
+  includes a redrawn host (`vvsohv60cuuokx` was abandoned).
+- **Stage 0 passed — the first time in five attempts.** The attestation was
+  written with `evaluation_protocol_hash` `250f72ef…`, comparable identity
+  `70a26e0b…`, and the Stage-3 binding satisfied. The real-body rehearsal and the
+  v2 migration did what they were built to do.
+- **Honest caveat:** this pod drew driver **580.159.03**, the *same* as Stage 3,
+  so `driver_patch_differs` was `False` and the old v1 exact-equality rule would
+  have passed here too. v2 is still correct and is proven at $0 against
+  attempt-4's 580.126.09 evidence, but on hardware it has not yet been the thing
+  that made the difference. Do not cite this run as v2's on-pod validation.
+- **Stage 1 failed on its first real execution:**
+
+```
+CalibrationError: calib.domain_balanced@v1:
+  /workspace/aad/artifacts/stage1/e8_calibration_v1/items.jsonl is missing
+```
+
+  `scripts/autoinit/phase_a_search.py:124` calls `DOMAIN_BALANCED_V1.resolve()`,
+  which reads that file. It is **not** in the launcher's `LOCAL_ASSETS`, **not**
+  in the relay precheck's `need` list, and **incomplete on the dev box** (only
+  `docs.jsonl` and `general_disjointness.json` are present). It *is* on the relay
+  at `e8_inputs_20260810/calibration_v1/items.jsonl`.
+- **This is the predicted class.** Stages 1–5 are scripted in the lifecycle
+  rehearsal, so stage 1's body had never executed. The fix is a staging and
+  precheck change, not science: fetch the calibration from the relay and add it
+  to the $0 precheck so a missing required input fails before a pod exists.
+- **The budget no longer fits.** $193.1783 spent, $19.8217 remaining against a
+  $20.0126 hard bound — **short by $0.1909**. Five attempts have cost $1.6321
+  with one stage passed. A sixth attempt needs a cap decision, not merely an
+  authorization, and neither is in hand.
+- Stopped at the boundary. No attempt 6 authorized, implied, or prepared.

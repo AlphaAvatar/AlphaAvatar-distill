@@ -2,105 +2,190 @@
   "schema": "aadistill.autoinit.phase_a_session/v1",
   "timeline": [
     {
-      "utc": "2026-08-15T18:59:59+00:00",
+      "utc": "2026-08-16T07:41:49+00:00",
       "elapsed_min": 0.0,
       "msg": "budget: expected 1084 min $17.89 \u00b7 soft $19.68 \u00b7 hard $20.01 (authorized $20.01)"
     },
     {
-      "utc": "2026-08-15T19:00:00+00:00",
+      "utc": "2026-08-16T07:41:49+00:00",
       "elapsed_min": 0.0,
       "msg": "NVIDIA L40S $0.99/h, stock Medium"
     },
     {
-      "utc": "2026-08-15T19:00:00+00:00",
+      "utc": "2026-08-16T07:41:49+00:00",
       "elapsed_min": 0.0,
-      "msg": "session commit c611812c5d87 verified: harness digests to 364dba1c624e\u2026, carries the authorization, and only logs/autoinit_phase_a_authorization.json differs from the authorized base"
+      "msg": "session commit 925eebc0c8b6 verified: harness digests to e2b2514aa2f3\u2026, carries the authorization, and only logs/autoinit_phase_a_authorization.json differs from the authorized base"
     },
     {
-      "utc": "2026-08-15T19:00:01+00:00",
+      "utc": "2026-08-16T07:41:50+00:00",
       "elapsed_min": 0.0,
       "msg": "precheck OK: 2 relay inputs, 2 local assets, frozen plan 02be33b9a7a8\u2026"
     },
     {
-      "utc": "2026-08-15T19:00:02+00:00",
+      "utc": "2026-08-16T07:41:51+00:00",
       "elapsed_min": 0.0,
-      "msg": "created vt3qm7j9vpct6c at $0.99/h"
+      "msg": "created vvsohv60cuuokx at $0.99/h"
     },
     {
-      "utc": "2026-08-15T19:00:02+00:00",
+      "utc": "2026-08-16T07:41:51+00:00",
       "elapsed_min": 0.0,
       "msg": "watchdog detached \u2014 hard 1213 min = $20.01"
     },
     {
-      "utc": "2026-08-15T19:00:35+00:00",
-      "elapsed_min": 0.55,
-      "msg": "TCP 22 at 202.181.159.228:11750 after 0.5 min"
+      "utc": "2026-08-16T07:42:52+00:00",
+      "elapsed_min": 1.01,
+      "msg": "  starting (60s) \u2014 $0.02"
     },
     {
-      "utc": "2026-08-15T19:00:39+00:00",
-      "elapsed_min": 0.61,
-      "msg": "draw 1: ssh reachable \u2014 $0.01"
+      "utc": "2026-08-16T07:44:01+00:00",
+      "elapsed_min": 2.16,
+      "msg": "  starting (120s) \u2014 $0.04"
     },
     {
-      "utc": "2026-08-15T19:01:23+00:00",
-      "elapsed_min": 1.34,
-      "msg": "draw 1: image identity runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@580.126.09"
+      "utc": "2026-08-16T07:45:09+00:00",
+      "elapsed_min": 3.29,
+      "msg": "  starting (180s) \u2014 $0.05"
     },
     {
-      "utc": "2026-08-15T19:01:23+00:00",
-      "elapsed_min": 1.34,
-      "msg": "draw 1: running setup"
+      "utc": "2026-08-16T07:46:14+00:00",
+      "elapsed_min": 4.37,
+      "msg": "  starting (240s) \u2014 $0.07"
     },
     {
-      "utc": "2026-08-15T19:07:20+00:00",
-      "elapsed_min": 7.29,
-      "msg": "draw 1: setup complete \u2014 $0.12"
+      "utc": "2026-08-16T07:47:19+00:00",
+      "elapsed_min": 5.46,
+      "msg": "  starting (300s) \u2014 $0.09"
     },
     {
-      "utc": "2026-08-15T19:07:27+00:00",
-      "elapsed_min": 7.42,
-      "msg": "driver detached, pid 6007, confirmed by descriptor_probe \u2014 $0.12"
+      "utc": "2026-08-16T07:48:24+00:00",
+      "elapsed_min": 6.55,
+      "msg": "  starting (360s) \u2014 $0.11"
     },
     {
-      "utc": "2026-08-15T19:09:50+00:00",
-      "elapsed_min": 9.79,
-      "msg": "  2026-08-15T19:09:16Z MARKER:PHASE_A_FAILED \u2014 $0.16"
+      "utc": "2026-08-16T07:49:31+00:00",
+      "elapsed_min": 7.66,
+      "msg": "  starting (420s) \u2014 $0.13"
     },
     {
-      "utc": "2026-08-15T19:09:50+00:00",
-      "elapsed_min": 9.79,
+      "utc": "2026-08-16T07:50:40+00:00",
+      "elapsed_min": 8.82,
+      "msg": "  starting (480s) \u2014 $0.15"
+    },
+    {
+      "utc": "2026-08-16T07:51:45+00:00",
+      "elapsed_min": 9.9,
+      "msg": "  starting (540s) \u2014 $0.16"
+    },
+    {
+      "utc": "2026-08-16T07:52:51+00:00",
+      "elapsed_min": 10.99,
+      "msg": "  starting (600s) \u2014 $0.18"
+    },
+    {
+      "utc": "2026-08-16T07:53:56+00:00",
+      "elapsed_min": 12.07,
+      "msg": "  starting (660s) \u2014 $0.20"
+    },
+    {
+      "utc": "2026-08-16T07:55:00+00:00",
+      "elapsed_min": 13.14,
+      "msg": "  starting (720s) \u2014 $0.22"
+    },
+    {
+      "utc": "2026-08-16T07:56:05+00:00",
+      "elapsed_min": 14.23,
+      "msg": "  starting (780s) \u2014 $0.23"
+    },
+    {
+      "utc": "2026-08-16T07:56:52+00:00",
+      "elapsed_min": 15.01,
+      "msg": "NO_ENDPOINT on draw 1 \u2014 abandoning vvsohv60cuuokx and redrawing"
+    },
+    {
+      "utc": "2026-08-16T07:56:54+00:00",
+      "elapsed_min": 15.04,
+      "msg": "created s797g6xphdibms at $0.99/h"
+    },
+    {
+      "utc": "2026-08-16T07:56:54+00:00",
+      "elapsed_min": 15.04,
+      "msg": "watchdog detached \u2014 hard 1213 min = $20.01"
+    },
+    {
+      "utc": "2026-08-16T07:57:26+00:00",
+      "elapsed_min": 15.58,
+      "msg": "TCP 22 at 82.221.170.242:37159 after 15.6 min"
+    },
+    {
+      "utc": "2026-08-16T07:57:29+00:00",
+      "elapsed_min": 15.63,
+      "msg": "draw 2: ssh reachable \u2014 $0.26"
+    },
+    {
+      "utc": "2026-08-16T07:58:00+00:00",
+      "elapsed_min": 16.15,
+      "msg": "draw 2: image identity runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@580.159.03"
+    },
+    {
+      "utc": "2026-08-16T07:58:00+00:00",
+      "elapsed_min": 16.15,
+      "msg": "draw 2: running setup"
+    },
+    {
+      "utc": "2026-08-16T08:13:36+00:00",
+      "elapsed_min": 31.74,
+      "msg": "draw 2: setup complete \u2014 $0.52"
+    },
+    {
+      "utc": "2026-08-16T08:13:41+00:00",
+      "elapsed_min": 31.83,
+      "msg": "driver detached, pid 6779, confirmed by descriptor_probe \u2014 $0.53"
+    },
+    {
+      "utc": "2026-08-16T08:15:58+00:00",
+      "elapsed_min": 34.12,
+      "msg": "  2026-08-16T08:13:40Z MARKER:STAGE_START:0 \u2014 $0.56"
+    },
+    {
+      "utc": "2026-08-16T08:18:19+00:00",
+      "elapsed_min": 36.45,
+      "msg": "  2026-08-16T08:16:43Z MARKER:PHASE_A_FAILED \u2014 $0.60"
+    },
+    {
+      "utc": "2026-08-16T08:18:19+00:00",
+      "elapsed_min": 36.45,
       "msg": "a blocking stage failed \u2014 collecting evidence, then tearing down. Completed probes are journalled and the permanent controls are inputs here and untouched."
     },
     {
-      "utc": "2026-08-15T19:09:50+00:00",
-      "elapsed_min": 9.79,
-      "msg": "polling ended: PHASE_A_FAILED \u2014 $0.16"
+      "utc": "2026-08-16T08:18:19+00:00",
+      "elapsed_min": 36.45,
+      "msg": "polling ended: PHASE_A_FAILED \u2014 $0.60"
     },
     {
-      "utc": "2026-08-15T19:11:35+00:00",
-      "elapsed_min": 11.54,
-      "msg": "  manifest rc=0\n7 file(s) across 4 class(es) -> /workspace/manifest.json\n  final_required: 7 \u00b7 mutable_snapshot: 0 \u00b7 final_streams_quiescent: True"
+      "utc": "2026-08-16T08:19:59+00:00",
+      "elapsed_min": 38.13,
+      "msg": "  manifest rc=0\n8 file(s) across 4 class(es) -> /workspace/manifest.json\n  final_required: 8 \u00b7 mutable_snapshot: 0 \u00b7 final_streams_quiescent: True"
     },
     {
-      "utc": "2026-08-15T19:12:17+00:00",
-      "elapsed_min": 12.25,
+      "utc": "2026-08-16T08:20:37+00:00",
+      "elapsed_min": 38.76,
       "msg": "teardown gate: allowed=True failed=training_complete"
     },
     {
-      "utc": "2026-08-15T19:12:17+00:00",
-      "elapsed_min": 12.25,
+      "utc": "2026-08-16T08:20:37+00:00",
+      "elapsed_min": 38.76,
       "msg": "deleting pod (gate passed after PHASE_A_FAILED)"
     },
     {
-      "utc": "2026-08-15T19:12:28+00:00",
-      "elapsed_min": 12.44,
-      "msg": "pod deleted \u2014 12.4 min, $0.21; provider confirms gone: True"
+      "utc": "2026-08-16T08:20:48+00:00",
+      "elapsed_min": 38.94,
+      "msg": "pod deleted \u2014 38.9 min, $0.64; provider confirms gone: True"
     }
   ],
   "stages": {
     "setup": [
       {
-        "draw": 1,
+        "draw": 2,
         "setup_done": "1",
         "host_cold": "0",
         "setup_rc": "0",
@@ -110,9 +195,9 @@
   },
   "authorization": {
     "schema": "aadistill.autoinit.phase_a_authorization/v1",
-    "authorization_id": "autoinit.phase_a.2026-08-15T1858Z",
+    "authorization_id": "autoinit.phase_a.2026-08-16T0717Z",
     "version": 1,
-    "granted_utc": "2026-08-15T18:58:35Z",
+    "granted_utc": "2026-08-16T07:17:55Z",
     "granted_by": "maintainer, 2026-08-15, in two explicit steps. (1) The project cap was raised on the maintainer's own words 'Raise it further, e.g. $213-214'; $213.00 was selected from that stated range as the conservative end and recorded in BUDGET_LEDGER.md, leaving $21.4538 against a spend of $191.5462. (2) The maintainer then instructed: 'Only then issue a fresh PhaseAAuthorization with a real UTC grant timestamp against those final identities', after the searched-leaf durability item was resolved and the implementation committed. Figures below are the launcher's priced plan, not a transcription.",
     "plan_id": "autoinit.v1.phase_a_session",
     "phase_a_session_plan_hash": "9377a2dc61f21790dd111d72a5de0e039ea1d31afef2d09e18c98a0b0cc2a0aa",
@@ -139,8 +224,8 @@
     "scope_note": "Phase A only, one launcher invocation. This artifact authorizes the SPEND and the STAGES; it is not by itself an instruction to launch. The maintainer's 2026-08-15 message that requested it also says 'Do not launch Phase A yet', so the run waits for a separate explicit go. Nothing here permits retraining the permanent controls, changing the frozen search or recovery design, a fourth seed, or any follow-on experiment: Phase A is a terminus and stops for review on every path, including unresolved_equivalence.",
     "phase_a_authorized": true,
     "automatic_followon_start": false,
-    "authorized_session_commit": "651140b6eff59d8096f0a2d25302804bb55018ed",
-    "harness_source_digest": "364dba1c624e747a6deeac96f2fb0ab22a6ca6c9888f12205927c61e5ee1d8b1",
+    "authorized_session_commit": "565026a769ff0b9a5e16f3fec0a25e640c55a358",
+    "harness_source_digest": "e2b2514aa2f390501d76ea8821c4994f79df8080d7ecb6f5118e6e2aa09e57ab",
     "harness_source_files": [
       "scripts/pod/autoinit_phase_a_launch.py",
       "scripts/pod/autoinit_phase_a_driver.py",
@@ -152,16 +237,17 @@
       "scripts/autoinit/phase_a_search.py",
       "scripts/autoinit/write_preregistration.py",
       "src/aadistill/autoinit/authorization.py",
+      "src/aadistill/autoinit/generation_compat.py",
       "src/aadistill/autoinit/phase_a.py",
       "src/aadistill/autoinit/generation.py"
     ],
     "per_launch_hard_usd": 20.0126,
-    "provenance_commit": "651140b6eff59d8096f0a2d25302804bb55018ed",
+    "provenance_commit": "565026a769ff0b9a5e16f3fec0a25e640c55a358",
     "enforcement": "the launcher loads this artifact and refuses to create a pod whose priced hard threshold exceeds hard_cap_usd or per_launch_hard_usd, refuses a stage not in authorized_stages, refuses a harness that does not digest to the authorized value, and has no code path to any experiment after Phase A",
-    "authorization_sha256": "7922bd3ea2eaaf46d4f717b6746ee8c33524fc4699c708c26a34d7cefb7c1387"
+    "authorization_sha256": "d2e05cb02bb417479f0bf8a41fb50f38bdf02f10fdb1c6bf3797d1448e14f65b"
   },
   "preflight_plan_hash": "9377a2dc61f21790dd111d72a5de0e039ea1d31afef2d09e18c98a0b0cc2a0aa",
-  "harness_source_digest": "364dba1c624e747a6deeac96f2fb0ab22a6ca6c9888f12205927c61e5ee1d8b1",
+  "harness_source_digest": "e2b2514aa2f390501d76ea8821c4994f79df8080d7ecb6f5118e6e2aa09e57ab",
   "harness_source_files": [
     "scripts/autoinit/phase_a_search.py",
     "scripts/autoinit/write_preregistration.py",
@@ -174,6 +260,7 @@
     "scripts/pod/watchdog.py",
     "src/aadistill/autoinit/authorization.py",
     "src/aadistill/autoinit/generation.py",
+    "src/aadistill/autoinit/generation_compat.py",
     "src/aadistill/autoinit/phase_a.py"
   ],
   "phase_a_session_plan_hash": "9377a2dc61f21790dd111d72a5de0e039ea1d31afef2d09e18c98a0b0cc2a0aa",
@@ -272,15 +359,15 @@
   "quoted_price_per_hour": 0.99,
   "stock_status": "Medium",
   "session_commit_check": {
-    "session_commit": "c611812c5d87c7929c6118de7f67f29bda9b941e",
-    "authorized_session_commit": "651140b6eff59d8096f0a2d25302804bb55018ed",
-    "harness_digest_at_commit": "364dba1c624e747a6deeac96f2fb0ab22a6ca6c9888f12205927c61e5ee1d8b1",
-    "authorized_harness_digest": "364dba1c624e747a6deeac96f2fb0ab22a6ca6c9888f12205927c61e5ee1d8b1",
+    "session_commit": "925eebc0c8b6739bbc5ebed67aad36946e78a908",
+    "authorized_session_commit": "565026a769ff0b9a5e16f3fec0a25e640c55a358",
+    "harness_digest_at_commit": "e2b2514aa2f390501d76ea8821c4994f79df8080d7ecb6f5118e6e2aa09e57ab",
+    "authorized_harness_digest": "e2b2514aa2f390501d76ea8821c4994f79df8080d7ecb6f5118e6e2aa09e57ab",
     "harness_matches": true,
     "commit_carries_this_authorization": true,
     "lineage": {
-      "authorized_base": "651140b6eff59d8096f0a2d25302804bb55018ed",
-      "session_commit": "c611812c5d87c7929c6118de7f67f29bda9b941e",
+      "authorized_base": "565026a769ff0b9a5e16f3fec0a25e640c55a358",
+      "session_commit": "925eebc0c8b6739bbc5ebed67aad36946e78a908",
       "descends_from_base": true,
       "changed_paths": [
         "logs/autoinit_phase_a_authorization.json"
@@ -303,30 +390,31 @@
     "local_missing": [],
     "frozen_plan_hash": "02be33b9a7a8e26bc8bfb75795351e8cdc9ffd441b47066cc81887cfc511b55c"
   },
-  "pod_id": "vt3qm7j9vpct6c",
+  "pod_id": "s797g6xphdibms",
   "actual_price_per_hour": 0.99,
-  "terminate_after_utc": "2026-08-16T15:12:54Z",
+  "terminate_after_utc": "2026-08-17T04:09:46Z",
   "watchdog_journals": [
-    "/home/ecs-user/aad-scratch/phase_a4_20260815/watchdog.jsonl"
+    "/home/ecs-user/aad-scratch/phase_a5_20260816/watchdog.jsonl",
+    "/home/ecs-user/aad-scratch/phase_a5_20260816/watchdog.jsonl"
   ],
   "image_identity": {
     "image_name": "runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404",
     "observed": [
-      "580.126.09"
+      "580.159.03"
     ],
-    "digest": "runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@580.126.09"
+    "digest": "runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@580.159.03"
   },
   "driver_job": {
     "job_id": "autoinit_phase_a_driver",
-    "pid": 6007,
+    "pid": 6779,
     "workdir": "/workspace/aad",
-    "command": "/opt/train/bin/python /workspace/aad/scripts/pod/autoinit_phase_a_driver.py --stage all --image-digest 'runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@580.126.09' --rate 0.99 --spent-usd 0.1203 --soft-stop-usd 19.6826 --authorized-usd 20.0126 --search-minutes 180.0 --probe-train-minutes 61.55 --probe-battery-minutes 9.82",
+    "command": "/opt/train/bin/python /workspace/aad/scripts/pod/autoinit_phase_a_driver.py --stage all --image-digest 'runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@580.159.03' --rate 0.99 --spent-usd 0.5237 --soft-stop-usd 19.6826 --authorized-usd 20.0126 --search-minutes 180.0 --probe-train-minutes 61.55 --probe-battery-minutes 9.82",
     "log_path": "/workspace/autoinit_phase_a_run.log",
     "status_path": "/workspace/autoinit_phase_a.status",
     "pid_path": "/workspace/jobs/autoinit_phase_a_driver.pid",
     "descriptor_path": "/workspace/jobs/autoinit_phase_a_driver.job.json",
     "exit_path": "/workspace/jobs/autoinit_phase_a_driver.exit",
-    "started_utc": "2026-08-15T19:07:24Z",
+    "started_utc": "2026-08-16T08:13:39Z",
     "start_channel_closed": true,
     "confirmed_by": "descriptor_probe"
   },
@@ -334,7 +422,8 @@
   "local_hash_problems": [],
   "checkpoints_fetched": [],
   "fetched_reports": [
-    "phase_a_evidence.json"
+    "phase_a_evidence.json",
+    "attested_evaluation_protocol.json"
   ],
   "teardown_gate": {
     "allowed": true,
@@ -358,7 +447,7 @@
   },
   "manifest_summary": {
     "ok": true,
-    "entries": 7,
+    "entries": 8,
     "missing": [],
     "still_being_written": []
   },
@@ -370,13 +459,13 @@
   "provider_confirms_gone": true,
   "cost": {
     "price_per_hour": 0.99,
-    "elapsed_minutes": 12.44,
-    "actual_usd": 0.2052,
+    "elapsed_minutes": 38.94,
+    "actual_usd": 0.6426,
     "authorized_usd": 20.0126,
     "within_authorization": true
   },
   "passed": false,
   "phase_a_successful": false,
   "cleanup_is_not_success": "artifacts are collected and the pod is torn down on every path; the session outcome is decided by the driver's terminal marker alone",
-  "finished_utc": "2026-08-15T19:12:28+00:00"
+  "finished_utc": "2026-08-16T08:20:48+00:00"
 }
