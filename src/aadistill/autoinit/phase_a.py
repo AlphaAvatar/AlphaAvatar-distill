@@ -382,7 +382,11 @@ PHASE_A_AUTHORIZATION = PhaseAAuthorization(
     authorization_id="autoinit.phase_a.PLACEHOLDER",
     granted_utc="PLACEHOLDER",
     granted_by=(
-        "maintainer, 2026-08-17. The cumulative project cap was raised to "
+        "maintainer. The grant instant is `granted_utc` and nothing here "
+        "restates it: the maintainer's LOCAL date was 2026-08-17 while the "
+        "machine's UTC clock was still 2026-08-16, and a prose date next to a "
+        "UTC field is how a grant comes to look back-dated. The cumulative "
+        "project cap was raised to "
         "$217.00 in the maintainer's own words — 'My recommended new cumulative "
         "project cap is $217.00' — and then formally approved in the same "
         "sequence: 'Record this approval in the ledger and machine-readable "
