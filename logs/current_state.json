@@ -1,529 +1,567 @@
 {
- "schema": "aadistill.current_state/v1",
- "generated_utc": "2026-08-15T12:40:00+00:00",
- "current_phase": "Attempt 5: STAGE 0 PASSED for the first time (v2 comparability held; attestation written, protocol 250f72ef, comparable identity 70a26e0b). Stage 1 then failed on its first real execution: the calibration mixture items.jsonl is staged nowhere. Budget now SHORT of a full attempt by $0.1909, so a sixth run needs a cap decision, not just an authorization.",
- "active_experiment": null,
- "paid_compute_running": false,
- "next_work": "Maintainer decision. (1) The stage-1 fix is staging + $0 precheck: fetch e8_inputs_20260810/calibration_v1/ from the relay and require it before a pod exists. (2) Phase A no longer fits the $213.00 cap: $19.8217 remains against a $20.0126 hard bound.",
- "teacher": {
-  "model_id": "Qwen/Qwen3-4B-Thinking-2507",
-  "revision": "768f209d9ea81521153ed38c47d515654e938aea",
-  "num_parameters": 4022468096
- },
- "canonical_init": {
-  "path": "artifacts/stage1/qwen3_0p6b_init_v0/checkpoint",
-  "weights_sha256": "86fbba78e8a2a32481ca77e5ac362ed1f17a39dbc30bcbc952cabd5df2633e54",
-  "num_parameters": 596049920,
-  "tier": "TIER_1_ACTIVE_CANONICAL"
- },
- "best_checkpoint": {
-  "name": "e1_r2960k_sb_pca",
-  "path": "artifacts/stage3/rescued/e1_r2960k_sb_pca",
-  "recipe": "E1/P1 KD-heavy, 2.96M rung, seed sb (20260801)",
-  "tier": "TIER_1_ACTIVE_CANONICAL",
-  "sole_copy_not_on_relay": true,
-  "frozen_battery_reference": {
-   "usable_rollout_rate": 0.73,
-   "correct_overall": 0.1867,
-   "correct_given_usable": 0.2511,
-   "inclusion_mask_sha256": "d6e24e0b09da1bcc692b1dc96d8236808d29551a9fc94a47d1d968fd3f73d6ba"
-  }
- },
- "e8a_result": {
-  "status": "COMPLETE",
-  "depth_map_removed": [
-   2,
-   3,
-   15,
-   16,
-   20,
-   21,
-   26,
-   32
-  ],
-  "full_width_kl": {
-   "contribution": 0.620586,
-   "positional": 1.932531,
-   "ratio": 3.11
+  "schema": "aadistill.current_state/v1",
+  "generated_utc": "2026-08-16T18:46:02+00:00",
+  "current_phase": "Attempt 6 AUTHORIZED AND LAUNCHING. Stages 0-5 of the driver were executed for real at $0 on 2026-08-16, which found three pod-fatal defects in never-executed code (ids/input_ids, a KeyError on manifest['suite_hash'] after the whole GPU search, and a 33.8 GiB unconditional reference cache). All fixed. The reference-cache fallback was then runtime-audited and the hard bound repriced to $23.0483 with both reserves before the soft stop; the project cap was raised to $217.00 and approved on 2026-08-17.",
+  "active_experiment": null,
+  "paid_compute_running": false,
+  "next_work": "Attempt 6 is running or has just ended. Read logs/autoinit_phase_a_session.json for the terminal marker and the teardown gate. If it fails closed: STOP. No Attempt 7 is authorized, funded or implied - it would need a new cap decision AND a new authorization.",
+  "teacher": {
+    "model_id": "Qwen/Qwen3-4B-Thinking-2507",
+    "revision": "768f209d9ea81521153ed38c47d515654e938aea",
+    "num_parameters": 4022468096
   },
-  "contribution_init_sha256": "7a0694a5d5c59f8e0b0ebc9ac8648b1ec026bf93cab026d33c61ca8fc85d1edb"
- },
- "e8b_result": {
-  "status": "STRATEGICALLY_TERMINATED",
-  "valid": "four step-0 initialization measurements only",
-  "invalid": "no DP-vs-DC, no FP-vs-FC, no depth x compression interaction",
-  "dp_sa": "infrastructure artifact, not a promotable arm"
- },
- "budget": {
-  "actual_cumulative_spend_usd": 193.1783,
-  "authorized_cap_usd": 213.0,
-  "cap_raised_utc": "2026-08-15",
-  "cap_raise_note": "maintainer approved 'e.g. $213-214'; $213.00 selected from that range. Nothing spent against it.",
-  "remaining_usd": 19.8217,
-  "phase_a_priced_by_launcher": {
-   "expected_usd": 17.8933,
-   "expected_without_tie_break_usd": 14.3604,
-   "conditional_tie_break_usd": 3.5328,
-   "soft_stop_usd": 19.6826,
-   "hard_terminate_usd": 20.0126,
-   "fits_remaining": false,
-   "margin_usd": -0.1909,
-   "note": "supersedes the $12.36/$20.13 in autoinit_phase_a_repricing.md, which priced search and probes but not setup, attestation, selection, collection, contingency or the recovery reserve",
-   "margin_note": "not a retry reserve; no attempt 4 is pre-authorized"
-  }
- },
- "latest_commit": "925eebc0c8b6739bbc5ebed67aad36946e78a908",
- "documents": {
-  "logs/STATE.md": {
-   "path": "logs/STATE.md",
-   "sha256": "512687d8dbb47862d8da93b2c92253fd76e6fcd62ba2b062d032039732d62d16"
+  "canonical_init": {
+    "path": "artifacts/stage1/qwen3_0p6b_init_v0/checkpoint",
+    "weights_sha256": "86fbba78e8a2a32481ca77e5ac362ed1f17a39dbc30bcbc952cabd5df2633e54",
+    "num_parameters": 596049920,
+    "tier": "TIER_1_ACTIVE_CANONICAL"
   },
-  "docs/HANDOFF_AUTOINITIALIZER.md": {
-   "path": "docs/HANDOFF_AUTOINITIALIZER.md",
-   "sha256": "c6a6059dee1502967207eab8a644c94699070df1670856685bd5b8aa83d944e5"
+  "best_checkpoint": {
+    "name": "e1_r2960k_sb_pca",
+    "path": "artifacts/stage3/rescued/e1_r2960k_sb_pca",
+    "recipe": "E1/P1 KD-heavy, 2.96M rung, seed sb (20260801)",
+    "tier": "TIER_1_ACTIVE_CANONICAL",
+    "sole_copy_not_on_relay": true,
+    "frozen_battery_reference": {
+      "usable_rollout_rate": 0.73,
+      "correct_overall": 0.1867,
+      "correct_given_usable": 0.2511,
+      "inclusion_mask_sha256": "d6e24e0b09da1bcc692b1dc96d8236808d29551a9fc94a47d1d968fd3f73d6ba"
+    }
   },
-  "logs/EXPERIMENT_INDEX.md": {
-   "path": "logs/EXPERIMENT_INDEX.md",
-   "sha256": "e4cbca88d105f162397759ce419f1918722947b2eb39a4d1756ef15a921da31b"
-  },
-  "logs/BUDGET_LEDGER.md": {
-   "path": "logs/BUDGET_LEDGER.md",
-   "sha256": "9e63ee3defb57f1496a0f5542bbb629e5ccdcd8779d606f4abe23939a7209980"
-  },
-  "logs/decisions.md": {
-   "path": "logs/decisions.md",
-   "sha256": "78a273ea36446e26309e34605824550ede065c36be3263786319aaaeb44036af"
-  },
-  "logs/checkpoint_registry.json": {
-   "path": "logs/checkpoint_registry.json",
-   "sha256": "7fbb7804c763dd6a8210be28268332f313890326b3d81f9312e16bcc512eaf78"
-  },
-  "logs/checkpoint_tombstones.json": {
-   "path": "logs/checkpoint_tombstones.json",
-   "sha256": "78d078d1203534b77578db44cd3c44ef4c1720e0beb322952182ccba594523a6"
-  },
-  "AGENTS.md": {
-   "path": "AGENTS.md",
-   "sha256": "8ebc254f270e382033a9c9bb8707745c9736dac4f5798f0825c511974cd593e6"
-  },
-  "logs/autoinit_phase_a_recovery_plan_frozen.json": {
-   "path": "logs/autoinit_phase_a_recovery_plan_frozen.json",
-   "sha256": "508b900606226cd2fe8c8f4455266cfcd9e9bfe300fbc8b04926ef92f785ab76"
-  },
-  "logs/autoinit_phase_a_storage.md": {
-   "path": "logs/autoinit_phase_a_storage.md",
-   "sha256": "2c8af2f69402bb53b6f75653c54bbcd6948de67f045372c747725b79f7f8fc95"
-  }
- },
- "read_order": [
-  "logs/STATE.md",
-  "docs/HANDOFF_AUTOINITIALIZER.md",
-  "logs/autoinit_pilot_proposal.md",
-  "logs/EXPERIMENT_INDEX.md",
-  "logs/decisions.md",
-  "logs/checkpoint_registry.json",
-  "logs/e8b_backend_audit.md",
-  "AGENTS.md"
- ],
- "closed_paths": [
-  "E8b completion",
-  "P2/CE-heavy expansion incl. P2-5.50M",
-  "FineWeb ratio sweeps",
-  "selecting on held-out NLL",
-  "restricting attention updates",
-  "student-prefix recovery",
-  "E2 phases 2-3"
- ],
- "autoinit": {
-  "status": "HARNESS_BUILT_AND_REHEARSED_NOT_AUTHORIZED_NOT_RUN",
-  "package": "src/aadistill/autoinit",
-  "tests": 209,
-  "operator_kinds": [
-   "ATTENTION",
-   "COMPOSITE_STAGE1",
-   "DEPTH",
-   "FFN",
-   "RESIDUAL_WIDTH"
-  ],
-  "operator_implementations": [
-   "attention.weight_proxy_v0",
-   "composite.stage1_sandwich_v0",
-   "depth.causal_kl_greedy_v1",
-   "depth.positional_v0",
-   "ffn.activation_importance_v0",
-   "width.global_pca_v0"
-  ],
-  "operator_ledger": "configs/autoinit/operator_ledger.json",
-  "beam_ranking_policy": "beam.pareto_multi_objective@v1",
-  "search_space": "logs/autoinit_v1_search_space.json",
-  "dry_run": "logs/autoinit_dryrun_summary.json",
-  "proposal": "logs/autoinit_pilot_proposal.md",
-  "blocking_prerequisites": [
-   "cap decision: Phase A no longer fits ($19.8217 remaining vs $20.0126 hard)",
-   "stage the calibration mixture from the relay and gate it at $0",
-   "calib.reasoning_heavy@v1 not built (Phase B only, independent trigger)"
-  ],
-  "corrections_2026_08_12_review_pass": [
-   "CalibrationNeed.NONE operators use a canonical calib.none@v1 sentinel; search space is 24 x (1+P) x P x P x 1 = 48/288/864, not 48 x P^4",
-   "checkpoint identity is a shard-safe artifact digest; metrics bind to it",
-   "the recovery control is the retained checkpoint injected by frozen hash, not a re-executed composite",
-   "state.nll.general is the general domain alone; NLL is not a beam objective",
-   "beam v1: no pruning at level 0, then width 6; epsilon-dominance; lineage diversity across fronts",
-   "recovery: 5 searched leaves + control on sa, 2 survivors + control on sb, conditional third seed; constraint-then-objective selection",
-   "activation-statistics cache keyed on parent artifact digest + profile + stat spec + adapter version + numerics",
-   "reference teacher logits recomputed per candidate (33.8 GiB avoided)",
-   "resume rejects a journal record measured under a different eval suite"
-  ],
-  "beam_schedule": "beam.delayed_prune@v1 (warmup 1, width 6)",
-  "frozen_assets": {
-   "state_eval_v1": {
-    "path": "artifacts/stage1/state_eval_v1",
-    "role": "INITIALIZER_STATE_EVAL",
-    "n_items": 80,
-    "positions": 74022,
-    "content_sha256": "a1197205e43aad0e71c0e1bb436ee7babba3b5d8bb25b9c4d5c464f659db20fc"
-   },
-   "recovery_search_v1": {
-    "path": "artifacts/stage3/recovery_search_v1",
-    "role": "RECOVERY_SEARCH",
-    "n_prompts": 190,
-    "n_scorable": 170,
-    "content_sha256": "a1b22778b00d95b6aba358c14a5af5b559fd807bb371c92131eacca59479f323",
-    "manifest_sha256": "72d8c0535e7752faf704d9075b7835a47610fd3cd26866cf5be7d48eb7b40ad1"
-   },
-   "role_isolation": {
-    "report": "logs/autoinit_role_isolation.json",
-    "passed": true,
-    "complete": true,
-    "exact_overlaps": 0
-   },
-   "canonical_controls": {
-    "historical_checkpoints_exist": true,
-    "historical_hashes_verify": true,
-    "recipe_matched": false,
-    "consequence": "rerun canonical sa/sb under the current frozen trainer in the micro-preflight; those become the permanent Phase-A control probes",
-    "audit": "logs/autoinit_recovery_fingerprint_audit.json",
-    "passes_legacy_lineage_subset": true,
-    "recipe_matched_control": false,
-    "unverifiable": [
-     "trainer_source_digest",
-     "trainer_source_set_version",
-     "runtime_digest",
-     "kd_chunk"
-    ]
-   }
-  },
-  "preregistration": "logs/autoinit_phase_a_preregistration.md",
-  "preregistration_sha256": "9b4229c85062de44dfc568f9a883451d75e2d12a718a75b16caeb6112a873429",
-  "recovery_identity": {
-   "protocol_fingerprint_excludes": [
-    "student initialization artifact",
-    "seed"
-   ],
-   "probe_identity": "protocol + initialization_artifact_digest + seed",
-   "matched_pair_predicate": "both_materialized AND protocol_identical AND same_seed AND initializations_differ",
-   "trainer_identity": "trainer_source_digest over 7 declared files; repo commit is provenance only",
-   "runtime_identity": "RuntimeEnvironmentFingerprint incl. image digest, required before a control is trained",
-   "materialization_required": [
-    "trainer_source_digest",
-    "trainer_source_set_version",
-    "runtime_digest"
-   ],
-   "materialization_rule": "unknown vs unknown is unverifiable and NOT eligible for MATCHED; only verified-identical values match",
-   "attested_protocol_artifact": "logs/autoinit_phase_a_protocol_attested.json",
-   "attested_by": "scripts/autoinit/attest_protocol.py (preflight Stage 0)",
-   "stage_2_compares_against": "the Stage-0 attested protocol hash, not the preregistration (runtime_digest is null there)"
-  },
-  "recovery_scoring_contract": {
-   "contract": "recovery_search_scoring@v2",
-   "digest": "f76008d5459c781cdfd0f11e39fc379c74af641f7567a168c10bf48e6a3e66fb",
-   "supersedes": "recovery_search_scoring@v1",
-   "superseded_before_any_paid_measurement": true,
-   "classification": "pre-measurement metric defect correction, not adaptive",
-   "prompt_content_unchanged": true,
-   "validation": "logs/autoinit_recovery_scoring_validation.json"
-  },
-  "generation_protocol": {
-   "declared_fingerprint": "f4ac744867af5818826ab6e8da85213556ef90b1759374211d94854c3c780c73",
-   "source_digest": "baf232a18123aa22f2a107bbd51c93c638ca7f466fbe0aac451137fc19a4abbe",
-   "materialized_at": "preflight Stage 0",
-   "evaluation_protocol": "generation + recovery_search_scoring@v2 + recovery_search_v1"
-  },
-  "phase_a_harness": {
-   "existed_before_2026_08_15": false,
-   "evidence_it_did_not": "BeamSearch was instantiated only in dry_run_search.py and tests; probe_configs/admit_leaves had no consumer outside those; run_phase_a existed only as a forbidden string in two rehearsal tests",
-   "session_plan_hash": "9377a2dc61f21790dd111d72a5de0e039ea1d31afef2d09e18c98a0b0cc2a0aa",
-   "science_plan_hash": "02be33b9a7a8e26bc8bfb75795351e8cdc9ffd441b47066cc81887cfc511b55c",
-   "frozen_science_plan": "logs/autoinit_phase_a_recovery_plan_frozen.json",
-   "materialized_preregistration": "logs/autoinit_phase_a_preregistration_materialized.json",
-   "draft_preregistration_preserved": "logs/autoinit_phase_a_preregistration.json",
-   "launcher": "scripts/pod/autoinit_phase_a_launch.py",
-   "driver": "scripts/pod/autoinit_phase_a_driver.py",
-   "search": "scripts/autoinit/phase_a_search.py",
-   "authorization_type": "src/aadistill/autoinit/phase_a.py::PhaseAAuthorization",
-   "artifact_specs": [
-    "configs/autoinit/phase_a_artifacts.json",
-    "configs/autoinit/phase_a_artifacts_failed.json"
-   ],
-   "rehearsals": {
-    "tests/pod/test_phase_a_rehearsal.py": 40,
-    "tests/pod/test_phase_a_search_executes.py": 6
-   },
-   "spend_authorization_unchanged": true,
-   "authorization_issued": true,
-   "launched": true,
-   "open_question": "RESOLVED 2026-08-15: see logs/autoinit_phase_a_storage.md",
-   "leaf_durability": {
-    "status": "RESOLVED",
-    "relay_used_storage_gib": 91.54,
-    "relay_inferred_limit_gib": 93.13,
-    "relay_headroom_gib": 1.6,
-    "leaf_size_gib_bf16": 1.121,
-    "five_leaves_gib": 5.61,
-    "relay_staging": false,
-    "mechanism": "all five leaves stay on the pod's 200 GB container disk through rung 1 and the materialization of the sa survivor decision; survivors and control through rung 2 and any conditional rung 3; only finalists are pulled to the dev box",
-    "rejected_leaves": "leaf_retention.json keeps digest, lineage, sa evidence and rejection reason; the checkpoint is not retained and is not deleted either",
-    "nothing_deleted": true,
-    "experiment_unchanged": true,
-    "reclaim_option_not_taken": "CORRECTED: transfer/ is 7.44 GiB of load-bearing offline wheelhouses plus only ~0.19 GiB of superseded git bundles. Reclaiming everything reclaimable still leaves ~1.79 GiB against 5.61 GiB of leaves."
-   },
-   "authorization": {
-    "artifact": "logs/autoinit_phase_a_authorization.json",
-    "authorization_id": "autoinit.phase_a.2026-08-15T1232Z",
-    "granted_utc": "2026-08-15T12:32:08Z",
-    "authorization_sha256": "14360ef4563708ed96b3e5f6ee00b87590f83b2e92c36db38f6371ca165d050f",
-    "harness_source_digest": "ea2f360bf7a308445f56728cacb63c8eaf94f340a698859fed56a0f06d09aff5",
-    "authorized_session_commit": "9b05a058dec2c0ca36ac5b2a1c777a01dcd7dd60",
-    "expected_usd": 17.8933,
-    "hard_cap_usd": 20.0126,
-    "authorized_stages": [
-     0,
-     1,
-     2,
-     3,
-     4,
-     5
+  "e8a_result": {
+    "status": "COMPLETE",
+    "depth_map_removed": [
+      2,
+      3,
+      15,
+      16,
+      20,
+      21,
+      26,
+      32
     ],
-    "issued_is_not_launched": "the artifact authorizes spend and stages; the maintainer's instruction that requested it also says 'Do not launch Phase A yet'",
-    "scope_consumed": "one launcher invocation, and it has occurred; attempt 2 needs a fresh grant",
-    "status": "CONSUMED by attempt 3; a fix would also move the digest"
-   },
-   "attempt_1": {
-    "pod_id": "ky8j0kbft9mp61",
-    "minutes": 6.51,
-    "usd": 0.1075,
-    "outcome": "SETUP_GATE_FAILED_CLOSED",
-    "driver_started": false,
-    "stages_run": 0,
-    "trained_anything": false,
-    "provider_confirms_gone": true,
-    "cause": "the pod test gate ran test_setup_verifies_THIS_sessions_authorization_and_fails_closed, which reads ambient SESSION_KIND; on a Phase-A pod it exercised setup's phase_a branch against the continuation's artifact and was correctly refused with 98",
-    "gate_behaved_correctly": true,
-    "fix": "the test now pops SESSION_KIND as it already popped the other two",
-    "harness_digest_unchanged": true
-   },
-   "attempt_2": {
-    "pod_id": "fa2sgl62t3l8q0",
-    "minutes": 28.27,
-    "usd": 0.4665,
-    "outcome": "STAGE_0_GATE_FAILED_CLOSED",
-    "setup_passed": true,
-    "driver_started": true,
-    "stages_passed": 0,
-    "trained_anything": false,
-    "provider_confirms_gone": true,
-    "cause": "the driver's engine-probe invocation omitted --model, which autoinit_engine_probe.py marks required=True; argparse exited rc=2 one second after the driver detached",
-    "gate_behaved_correctly": true,
-    "fix": "pass --model CANONICAL_INIT and --image-digest, as the continuation does",
-    "regression": "one test checking every required flag of all five scripts the driver invokes, read from each callee's real parser",
-    "harness_digest_moved": true,
-    "voids_authorization": "autoinit.phase_a.2026-08-15T1610Z / d7fa15f3"
-   },
-   "attempt_3": {
-    "pod_id": "6mzp8m92qksalv",
-    "minutes": 12.75,
-    "usd": 0.2103,
-    "outcome": "STAGE_0_GATE_FAILED_CLOSED",
-    "setup_passed": true,
-    "setup_minutes": 5.2,
-    "driver_started": true,
-    "stages_passed": 0,
-    "trained_anything": false,
-    "provider_confirms_gone": true,
-    "cause": "declared_generation_protocol() takes 0 positional arguments; the driver passed it the engine-probe JSON. Correct form is declared_generation_protocol().materialized(...)",
-    "gate_behaved_correctly": true,
-    "voids_authorization": "autoinit.phase_a.2026-08-15T1734Z / 43a04ec5"
-   },
-   "attempts_summary": {
-    "n": 5,
-    "total_usd": 1.6321,
-    "stages_passed": 1,
-    "trained_anything": false
-   },
-   "stage0_real_body_rehearsal": {
-    "file": "tests/pod/test_phase_a_stage0_executes.py",
-    "tests": 11,
-    "executes": "the real PhaseADriver.stage0(): real authorization, frozen plan, assert_preregistered, thresholds, generation-protocol construction, RecoveryEvaluationProtocol, Stage-3 binding and attestation write",
-    "substitutions": [
-     "interpreter path (/opt/train/bin/python is pod-only)",
-     "the vLLM engine probe, replaced by the Stage-3 session's recorded engine_probe.json"
+    "full_width_kl": {
+      "contribution": 0.620586,
+      "positional": 1.932531,
+      "ratio": 3.11
+    },
+    "contribution_init_sha256": "7a0694a5d5c59f8e0b0ebc9ac8648b1ec026bf93cab026d33c61ca8fc85d1edb"
+  },
+  "e8b_result": {
+    "status": "STRATEGICALLY_TERMINATED",
+    "valid": "four step-0 initialization measurements only",
+    "invalid": "no DP-vs-DC, no FP-vs-FC, no depth x compression interaction",
+    "dp_sa": "infrastructure artifact, not a promotable arm"
+  },
+  "budget": {
+    "actual_cumulative_spend_usd": 193.1783,
+    "authorized_cap_usd": 217.0,
+    "cap_raised_utc": "2026-08-17",
+    "cap_approved": true,
+    "cap_raise_note": "maintainer, 2026-08-17: 'My recommended new cumulative project cap is $217.00', then 'Record this approval in the ledger and machine-readable state ... and issue one fresh PhaseAAuthorization.' Raised to cover the hard bound repriced by the reference-cache fallback audit and the beam-6 pricing correction. FUNDS ONE ATTEMPT: 'This funds one attempt only and does not imply Attempt 7.'",
+    "remaining_usd": 23.8217,
+    "previous_caps": [
+      {
+        "cap_usd": 213.0,
+        "raised_utc": "2026-08-15",
+        "superseded_because": "Phase A repriced above it"
+      }
     ],
-    "scope": "stage 0 only; stages 1-5 remain scripted in the lifecycle rehearsal",
-    "mutations_caught": [
-     "the attempt-3 declared_generation_protocol(observed) form",
-     "dropping require_materialized",
-     "removing the Stage-3 protocol binding"
-    ]
-   },
-   "stage3_protocol_binding": {
-    "pinned_hash": "250f72efbd43b86a475e8dda293b45f07ee61a4d858e147f4a5bd7681c32c2e4",
-    "source": "logs/autoinit_stage3_complete/materialized_thresholds.json",
-    "rule": "stage 0 fails closed unless its materialized evaluation_protocol_hash equals the Stage-3 hash, AND the Stage-3 artifact still declares the pinned value",
-    "why": "the equivalence interval and feasibility floor are numbers that came from the Stage-3 controls; a candidate measured under a different protocol is judged against thresholds that do not describe it",
-    "reproducible_today": true
-   },
-   "attempt_4": {
-    "pod_id": "vt3qm7j9vpct6c",
-    "minutes": 12.44,
-    "usd": 0.2052,
-    "outcome": "STAGE3_PROTOCOL_BINDING_REFUSED",
-    "code_defect": false,
-    "stage0_body_executed": true,
-    "stages_passed": 0,
-    "trained_anything": false,
-    "provider_confirms_gone": true,
-    "observed_protocol": "17218f7c635ee5f2e62f698f75d8731aa8eebc0e5475bf833673277f714e9ccc",
-    "pinned_stage3_protocol": "250f72efbd43b86a475e8dda293b45f07ee61a4d858e147f4a5bd7681c32c2e4",
-    "sole_differing_field": "runtime_digest -> runtime.image_digest",
-    "detail": {
-     "stage3": "...ubuntu2404@580.159.03",
-     "attempt4": "...ubuntu2404@580.126.09",
-     "suffix_is": "host NVIDIA driver version appended by read_image_digest"
+    "phase_a_priced_by_launcher": {
+      "expected_usd": 17.8933,
+      "expected_minutes": 1084.44,
+      "soft_stop_usd": 22.7183,
+      "soft_stop_minutes": 1376.8681,
+      "hard_terminate_usd": 23.0483,
+      "hard_terminate_minutes": 1396.8681,
+      "authorization_hard_cap_usd": 23.0484,
+      "authorization_cap_rounding": "4-dp CEILING of the priced $23.048325: require_within_cap refuses `projected > cap`, so a cap rounded down would make the launcher refuse its own plan by 2.5e-5 dollars",
+      "soft_stop_reserves": [
+        {
+          "name": "stage1_reference_cache_fallback",
+          "minutes": 147.76833333333335,
+          "why": "worst case 16 depth.causal_kl_greedy_v1 invocations recomputing the reference instead of caching 16.91 GiB; numerically identical, ~2.10x the forward work"
+        },
+        {
+          "name": "beam6_search_pricing_correction",
+          "minutes": 36.21579471115908,
+          "why": "SEARCH_MINUTES=180 came from the cost model's beam-4 row; the frozen schedule is beam 6, whose row is 216.22 min"
+        }
+      ],
+      "reserves_placed": "before the soft stop, not after it",
+      "why_before_the_soft_stop": "the fallback is consumed inside stage 1 and PhaseADriver.afford() gates on the SOFT stop, so a hard-only reserve would have truncated the conditional seed-sc rung to pay for an infrastructure risk",
+      "artifact_recovery_reserve_minutes": 20.0,
+      "fits_remaining": true,
+      "margin_usd": 0.7734,
+      "margin_note": "not a retry reserve; no attempt 7 is pre-authorized or implied",
+      "derivation": "logs/autoinit_phase_a_fallback_audit.json",
+      "superseded": [
+        {
+          "hard_terminate_usd": 20.0126,
+          "why": "no fallback reserve and no beam-6 correction"
+        },
+        {
+          "hard_terminate_usd": 22.4508,
+          "why": "fallback reserve placed after the soft stop"
+        }
+      ]
+    }
+  },
+  "latest_commit": "f6ee8909ee772a09e0a85728810fe8da08f0560f",
+  "documents": {
+    "logs/STATE.md": {
+      "path": "logs/STATE.md",
+      "sha256": "512687d8dbb47862d8da93b2c92253fd76e6fcd62ba2b062d032039732d62d16"
     },
-    "generation_semantics_identical": true,
-    "drivers_drawn_across_attempts": [
-     "580.159.03",
-     "580.126.09",
-     "580.126.09",
-     "580.126.09"
-    ]
-   },
-   "attempt_5": {
-    "pod_id": "s797g6xphdibms",
-    "minutes": 38.94,
-    "usd": 0.6426,
-    "outcome": "STAGE_1_FAILED_ON_UNSTAGED_INPUT",
-    "stage0_passed": true,
-    "stages_passed": 1,
-    "trained_anything": false,
-    "provider_confirms_gone": true,
-    "stage0_attestation": {
-     "evaluation_protocol_hash": "250f72efbd43b86a475e8dda293b45f07ee61a4d858e147f4a5bd7681c32c2e4",
-     "comparable_identity": "70a26e0b43df20e469385115b49683b50936919e02986088b76d3c30ffd87103",
-     "live_driver": "580.159.03",
-     "historical_driver": "580.159.03",
-     "driver_patch_differs": false,
-     "caveat": "this host matched Stage 3's driver, so v1 would also have passed; not on-pod validation of v2"
+    "docs/HANDOFF_AUTOINITIALIZER.md": {
+      "path": "docs/HANDOFF_AUTOINITIALIZER.md",
+      "sha256": "c6a6059dee1502967207eab8a644c94699070df1670856685bd5b8aa83d944e5"
     },
-    "stage1_cause": "calib.domain_balanced@v1 items.jsonl missing: required by phase_a_search.py:124, absent from LOCAL_ASSETS and from the relay precheck, incomplete on the dev box, present on the relay at e8_inputs_20260810/calibration_v1/",
-    "fix_class": "staging + $0 precheck, not science"
-   }
-  }
- },
- "proposed_pilot": {
-  "authorized": false,
-  "schedule": "no pruning at level 0, then beam width 6",
-  "n_profiles": 1,
-  "searched_leaves": 5,
-  "canonical_control": "artifacts/stage1/qwen3_0p6b_init_v0/checkpoint (injected by hash)",
-  "survivors": 2,
-  "seeds": [
-   "sa",
-   "sb",
-   "sc (conditional)"
+    "logs/EXPERIMENT_INDEX.md": {
+      "path": "logs/EXPERIMENT_INDEX.md",
+      "sha256": "e4cbca88d105f162397759ce419f1918722947b2eb39a4d1756ef15a921da31b"
+    },
+    "logs/BUDGET_LEDGER.md": {
+      "path": "logs/BUDGET_LEDGER.md",
+      "sha256": "9e63ee3defb57f1496a0f5542bbb629e5ccdcd8779d606f4abe23939a7209980"
+    },
+    "logs/decisions.md": {
+      "path": "logs/decisions.md",
+      "sha256": "78a273ea36446e26309e34605824550ede065c36be3263786319aaaeb44036af"
+    },
+    "logs/checkpoint_registry.json": {
+      "path": "logs/checkpoint_registry.json",
+      "sha256": "7fbb7804c763dd6a8210be28268332f313890326b3d81f9312e16bcc512eaf78"
+    },
+    "logs/checkpoint_tombstones.json": {
+      "path": "logs/checkpoint_tombstones.json",
+      "sha256": "78d078d1203534b77578db44cd3c44ef4c1720e0beb322952182ccba594523a6"
+    },
+    "AGENTS.md": {
+      "path": "AGENTS.md",
+      "sha256": "8ebc254f270e382033a9c9bb8707745c9736dac4f5798f0825c511974cd593e6"
+    },
+    "logs/autoinit_phase_a_recovery_plan_frozen.json": {
+      "path": "logs/autoinit_phase_a_recovery_plan_frozen.json",
+      "sha256": "508b900606226cd2fe8c8f4455266cfcd9e9bfe300fbc8b04926ef92f785ab76"
+    },
+    "logs/autoinit_phase_a_storage.md": {
+      "path": "logs/autoinit_phase_a_storage.md",
+      "sha256": "2c8af2f69402bb53b6f75653c54bbcd6948de67f045372c747725b79f7f8fc95"
+    }
+  },
+  "read_order": [
+    "logs/STATE.md",
+    "docs/HANDOFF_AUTOINITIALIZER.md",
+    "logs/autoinit_pilot_proposal.md",
+    "logs/EXPERIMENT_INDEX.md",
+    "logs/decisions.md",
+    "logs/checkpoint_registry.json",
+    "logs/e8b_backend_audit.md",
+    "AGENTS.md"
   ],
-  "expected_usd": 17.0,
-  "hard_backstop_usd": 26.21,
-  "margin_against_released_headroom_usd": 4.16,
-  "peak_working_storage_gib": 106
- },
- "tests": {
-  "passing": 1732,
-  "skipped": 7,
-  "note": "1637 before this session; +51 Phase-A rehearsal, +6 real toy-scale search execution",
-  "venvs_verified": [
-   "repo .venv transformers 5.13.1",
-   "transformers 4.57.1"
-  ]
- },
- "proposed_micro_preflight": {
-  "authorized": false,
-  "expected_usd": 4.2,
-  "max_usd": 8.6,
-  "gpu": "1 x L40S",
-  "hours": 3.5,
-  "staged": true,
-  "stages": [
-   "0 runtime attestation + protocol materialization/freeze",
-   "1 cheap machine gates",
-   "2 permanent canonical controls",
-   "3 control characterization"
+  "closed_paths": [
+    "E8b completion",
+    "P2/CE-heavy expansion incl. P2-5.50M",
+    "FineWeb ratio sweeps",
+    "selecting on held-out NLL",
+    "restricting attention updates",
+    "student-prefix recovery",
+    "E2 phases 2-3"
   ],
-  "fail_closed": "controls are not trained unless stages 0 and 1 pass",
-  "includes_control_rerun": true,
-  "control_seeds": 2,
-  "note": "the $2.80 rerun produces the permanent Phase-A control probes, so Phase A needs 7 probes instead of 9",
-  "preflight_plan_hash": "37dbd7b22e3e884eff9d55f95c5ce25a212f823d2f396691c30d47930076f8ab",
-  "blocker_before_phase_a": "the preregistration must be re-emitted with the attested protocol fingerprint; until Stage 0 runs, runtime_digest is null and no Phase-A comparison is eligible for MATCHED",
-  "held": false,
-  "held_reason": "RESOLVED 2026-08-13: the tool scoring defect is corrected under recovery_search_scoring@v2 and validated at zero cost; the maintainer approved the correction and re-authorized the preflight at $4.20 expected / $8.60 hard.",
-  "spent_usd": 0.0,
-  "authorization_artifact": "logs/autoinit_micro_preflight_authorization.json",
-  "authorization_sha256": "94b6c5d2167b7248ac4ba67fee15cdd97f20512a164fcb045b69bd330916d8fe",
-  "harness": {
-   "setup": "scripts/pod/autoinit_preflight_setup.sh",
-   "driver": "scripts/pod/autoinit_preflight_driver.py",
-   "launcher": "scripts/pod/autoinit_preflight_launch.py",
-   "rehearsal": "tests/pod/test_autoinit_preflight_rehearsal.py",
-   "rehearsal_scenarios": 18,
-   "rehearsed": true,
-   "launched": false
-  }
- },
- "stage3_control_characterization": {
-  "status": "COMPLETE",
-  "utc": "2026-08-15T09:04:30Z",
-  "battery": "recovery_search_v2",
-  "aggregation": "pooled_counts@v2",
-  "controls": [
-   "preflight_ctl_r0860k_sa",
-   "preflight_ctl_r0860k_sb"
-  ],
-  "pooled": {
-   "n": 380,
-   "usable": 141,
-   "usable_rollout_rate": 0.37105263157894736,
-   "n_scorable": 340,
-   "correct": 4,
-   "correct_overall": 0.011764705882352941,
-   "correct_given_usable": 0.02857142857142857
+  "autoinit": {
+    "status": "AUTHORIZED_ATTEMPT_6",
+    "package": "src/aadistill/autoinit",
+    "tests": 209,
+    "operator_kinds": [
+      "ATTENTION",
+      "COMPOSITE_STAGE1",
+      "DEPTH",
+      "FFN",
+      "RESIDUAL_WIDTH"
+    ],
+    "operator_implementations": [
+      "attention.weight_proxy_v0",
+      "composite.stage1_sandwich_v0",
+      "depth.causal_kl_greedy_v1",
+      "depth.positional_v0",
+      "ffn.activation_importance_v0",
+      "width.global_pca_v0"
+    ],
+    "operator_ledger": "configs/autoinit/operator_ledger.json",
+    "beam_ranking_policy": "beam.pareto_multi_objective@v1",
+    "search_space": "logs/autoinit_v1_search_space.json",
+    "dry_run": "logs/autoinit_dryrun_summary.json",
+    "proposal": "logs/autoinit_pilot_proposal.md",
+    "blocking_prerequisites": [
+      "cap decision: Phase A no longer fits ($19.8217 remaining vs $20.0126 hard)",
+      "stage the calibration mixture from the relay and gate it at $0",
+      "calib.reasoning_heavy@v1 not built (Phase B only, independent trigger)"
+    ],
+    "corrections_2026_08_12_review_pass": [
+      "CalibrationNeed.NONE operators use a canonical calib.none@v1 sentinel; search space is 24 x (1+P) x P x P x 1 = 48/288/864, not 48 x P^4",
+      "checkpoint identity is a shard-safe artifact digest; metrics bind to it",
+      "the recovery control is the retained checkpoint injected by frozen hash, not a re-executed composite",
+      "state.nll.general is the general domain alone; NLL is not a beam objective",
+      "beam v1: no pruning at level 0, then width 6; epsilon-dominance; lineage diversity across fronts",
+      "recovery: 5 searched leaves + control on sa, 2 survivors + control on sb, conditional third seed; constraint-then-objective selection",
+      "activation-statistics cache keyed on parent artifact digest + profile + stat spec + adapter version + numerics",
+      "reference teacher logits recomputed per candidate (33.8 GiB avoided)",
+      "resume rejects a journal record measured under a different eval suite"
+    ],
+    "beam_schedule": "beam.delayed_prune@v1 (warmup 1, width 6)",
+    "frozen_assets": {
+      "state_eval_v1": {
+        "path": "artifacts/stage1/state_eval_v1",
+        "role": "INITIALIZER_STATE_EVAL",
+        "n_items": 80,
+        "positions": 74022,
+        "content_sha256": "a1197205e43aad0e71c0e1bb436ee7babba3b5d8bb25b9c4d5c464f659db20fc"
+      },
+      "recovery_search_v1": {
+        "path": "artifacts/stage3/recovery_search_v1",
+        "role": "RECOVERY_SEARCH",
+        "n_prompts": 190,
+        "n_scorable": 170,
+        "content_sha256": "a1b22778b00d95b6aba358c14a5af5b559fd807bb371c92131eacca59479f323",
+        "manifest_sha256": "72d8c0535e7752faf704d9075b7835a47610fd3cd26866cf5be7d48eb7b40ad1"
+      },
+      "role_isolation": {
+        "report": "logs/autoinit_role_isolation.json",
+        "passed": true,
+        "complete": true,
+        "exact_overlaps": 0
+      },
+      "canonical_controls": {
+        "historical_checkpoints_exist": true,
+        "historical_hashes_verify": true,
+        "recipe_matched": false,
+        "consequence": "rerun canonical sa/sb under the current frozen trainer in the micro-preflight; those become the permanent Phase-A control probes",
+        "audit": "logs/autoinit_recovery_fingerprint_audit.json",
+        "passes_legacy_lineage_subset": true,
+        "recipe_matched_control": false,
+        "unverifiable": [
+          "trainer_source_digest",
+          "trainer_source_set_version",
+          "runtime_digest",
+          "kd_chunk"
+        ]
+      }
+    },
+    "preregistration": "logs/autoinit_phase_a_preregistration.md",
+    "preregistration_sha256": "9b4229c85062de44dfc568f9a883451d75e2d12a718a75b16caeb6112a873429",
+    "recovery_identity": {
+      "protocol_fingerprint_excludes": [
+        "student initialization artifact",
+        "seed"
+      ],
+      "probe_identity": "protocol + initialization_artifact_digest + seed",
+      "matched_pair_predicate": "both_materialized AND protocol_identical AND same_seed AND initializations_differ",
+      "trainer_identity": "trainer_source_digest over 7 declared files; repo commit is provenance only",
+      "runtime_identity": "RuntimeEnvironmentFingerprint incl. image digest, required before a control is trained",
+      "materialization_required": [
+        "trainer_source_digest",
+        "trainer_source_set_version",
+        "runtime_digest"
+      ],
+      "materialization_rule": "unknown vs unknown is unverifiable and NOT eligible for MATCHED; only verified-identical values match",
+      "attested_protocol_artifact": "logs/autoinit_phase_a_protocol_attested.json",
+      "attested_by": "scripts/autoinit/attest_protocol.py (preflight Stage 0)",
+      "stage_2_compares_against": "the Stage-0 attested protocol hash, not the preregistration (runtime_digest is null there)"
+    },
+    "recovery_scoring_contract": {
+      "contract": "recovery_search_scoring@v2",
+      "digest": "f76008d5459c781cdfd0f11e39fc379c74af641f7567a168c10bf48e6a3e66fb",
+      "supersedes": "recovery_search_scoring@v1",
+      "superseded_before_any_paid_measurement": true,
+      "classification": "pre-measurement metric defect correction, not adaptive",
+      "prompt_content_unchanged": true,
+      "validation": "logs/autoinit_recovery_scoring_validation.json"
+    },
+    "generation_protocol": {
+      "declared_fingerprint": "f4ac744867af5818826ab6e8da85213556ef90b1759374211d94854c3c780c73",
+      "source_digest": "baf232a18123aa22f2a107bbd51c93c638ca7f466fbe0aac451137fc19a4abbe",
+      "materialized_at": "preflight Stage 0",
+      "evaluation_protocol": "generation + recovery_search_scoring@v2 + recovery_search_v1"
+    },
+    "phase_a_harness": {
+      "existed_before_2026_08_15": false,
+      "evidence_it_did_not": "BeamSearch was instantiated only in dry_run_search.py and tests; probe_configs/admit_leaves had no consumer outside those; run_phase_a existed only as a forbidden string in two rehearsal tests",
+      "session_plan_hash": "9377a2dc61f21790dd111d72a5de0e039ea1d31afef2d09e18c98a0b0cc2a0aa",
+      "science_plan_hash": "02be33b9a7a8e26bc8bfb75795351e8cdc9ffd441b47066cc81887cfc511b55c",
+      "frozen_science_plan": "logs/autoinit_phase_a_recovery_plan_frozen.json",
+      "materialized_preregistration": "logs/autoinit_phase_a_preregistration_materialized.json",
+      "draft_preregistration_preserved": "logs/autoinit_phase_a_preregistration.json",
+      "launcher": "scripts/pod/autoinit_phase_a_launch.py",
+      "driver": "scripts/pod/autoinit_phase_a_driver.py",
+      "search": "scripts/autoinit/phase_a_search.py",
+      "authorization_type": "src/aadistill/autoinit/phase_a.py::PhaseAAuthorization",
+      "artifact_specs": [
+        "configs/autoinit/phase_a_artifacts.json",
+        "configs/autoinit/phase_a_artifacts_failed.json"
+      ],
+      "rehearsals": {
+        "tests/pod/test_phase_a_rehearsal.py": 40,
+        "tests/pod/test_phase_a_search_executes.py": 6
+      },
+      "spend_authorization_unchanged": true,
+      "authorization_issued": true,
+      "launched": true,
+      "open_question": "RESOLVED 2026-08-15: see logs/autoinit_phase_a_storage.md",
+      "leaf_durability": {
+        "status": "RESOLVED",
+        "relay_used_storage_gib": 91.54,
+        "relay_inferred_limit_gib": 93.13,
+        "relay_headroom_gib": 1.6,
+        "leaf_size_gib_bf16": 1.121,
+        "five_leaves_gib": 5.61,
+        "relay_staging": false,
+        "mechanism": "all five leaves stay on the pod's 200 GB container disk through rung 1 and the materialization of the sa survivor decision; survivors and control through rung 2 and any conditional rung 3; only finalists are pulled to the dev box",
+        "rejected_leaves": "leaf_retention.json keeps digest, lineage, sa evidence and rejection reason; the checkpoint is not retained and is not deleted either",
+        "nothing_deleted": true,
+        "experiment_unchanged": true,
+        "reclaim_option_not_taken": "CORRECTED: transfer/ is 7.44 GiB of load-bearing offline wheelhouses plus only ~0.19 GiB of superseded git bundles. Reclaiming everything reclaimable still leaves ~1.79 GiB against 5.61 GiB of leaves."
+      },
+      "authorization": {
+        "artifact": "logs/autoinit_phase_a_authorization.json",
+        "authorization_id": "autoinit.phase_a.2026-08-15T1232Z",
+        "granted_utc": "2026-08-15T12:32:08Z",
+        "authorization_sha256": "14360ef4563708ed96b3e5f6ee00b87590f83b2e92c36db38f6371ca165d050f",
+        "harness_source_digest": "ea2f360bf7a308445f56728cacb63c8eaf94f340a698859fed56a0f06d09aff5",
+        "authorized_session_commit": "9b05a058dec2c0ca36ac5b2a1c777a01dcd7dd60",
+        "expected_usd": 17.8933,
+        "hard_cap_usd": 20.0126,
+        "authorized_stages": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5
+        ],
+        "issued_is_not_launched": "the artifact authorizes spend and stages; the maintainer's instruction that requested it also says 'Do not launch Phase A yet'",
+        "scope_consumed": "one launcher invocation, and it has occurred; attempt 2 needs a fresh grant",
+        "status": "CONSUMED by attempt 3; a fix would also move the digest"
+      },
+      "attempt_1": {
+        "pod_id": "ky8j0kbft9mp61",
+        "minutes": 6.51,
+        "usd": 0.1075,
+        "outcome": "SETUP_GATE_FAILED_CLOSED",
+        "driver_started": false,
+        "stages_run": 0,
+        "trained_anything": false,
+        "provider_confirms_gone": true,
+        "cause": "the pod test gate ran test_setup_verifies_THIS_sessions_authorization_and_fails_closed, which reads ambient SESSION_KIND; on a Phase-A pod it exercised setup's phase_a branch against the continuation's artifact and was correctly refused with 98",
+        "gate_behaved_correctly": true,
+        "fix": "the test now pops SESSION_KIND as it already popped the other two",
+        "harness_digest_unchanged": true
+      },
+      "attempt_2": {
+        "pod_id": "fa2sgl62t3l8q0",
+        "minutes": 28.27,
+        "usd": 0.4665,
+        "outcome": "STAGE_0_GATE_FAILED_CLOSED",
+        "setup_passed": true,
+        "driver_started": true,
+        "stages_passed": 0,
+        "trained_anything": false,
+        "provider_confirms_gone": true,
+        "cause": "the driver's engine-probe invocation omitted --model, which autoinit_engine_probe.py marks required=True; argparse exited rc=2 one second after the driver detached",
+        "gate_behaved_correctly": true,
+        "fix": "pass --model CANONICAL_INIT and --image-digest, as the continuation does",
+        "regression": "one test checking every required flag of all five scripts the driver invokes, read from each callee's real parser",
+        "harness_digest_moved": true,
+        "voids_authorization": "autoinit.phase_a.2026-08-15T1610Z / d7fa15f3"
+      },
+      "attempt_3": {
+        "pod_id": "6mzp8m92qksalv",
+        "minutes": 12.75,
+        "usd": 0.2103,
+        "outcome": "STAGE_0_GATE_FAILED_CLOSED",
+        "setup_passed": true,
+        "setup_minutes": 5.2,
+        "driver_started": true,
+        "stages_passed": 0,
+        "trained_anything": false,
+        "provider_confirms_gone": true,
+        "cause": "declared_generation_protocol() takes 0 positional arguments; the driver passed it the engine-probe JSON. Correct form is declared_generation_protocol().materialized(...)",
+        "gate_behaved_correctly": true,
+        "voids_authorization": "autoinit.phase_a.2026-08-15T1734Z / 43a04ec5"
+      },
+      "attempts_summary": {
+        "n": 5,
+        "total_usd": 1.6321,
+        "stages_passed": 1,
+        "trained_anything": false
+      },
+      "stage0_real_body_rehearsal": {
+        "file": "tests/pod/test_phase_a_stage0_executes.py",
+        "tests": 11,
+        "executes": "the real PhaseADriver.stage0(): real authorization, frozen plan, assert_preregistered, thresholds, generation-protocol construction, RecoveryEvaluationProtocol, Stage-3 binding and attestation write",
+        "substitutions": [
+          "interpreter path (/opt/train/bin/python is pod-only)",
+          "the vLLM engine probe, replaced by the Stage-3 session's recorded engine_probe.json"
+        ],
+        "scope": "stage 0 only; stages 1-5 remain scripted in the lifecycle rehearsal",
+        "mutations_caught": [
+          "the attempt-3 declared_generation_protocol(observed) form",
+          "dropping require_materialized",
+          "removing the Stage-3 protocol binding"
+        ]
+      },
+      "stage3_protocol_binding": {
+        "pinned_hash": "250f72efbd43b86a475e8dda293b45f07ee61a4d858e147f4a5bd7681c32c2e4",
+        "source": "logs/autoinit_stage3_complete/materialized_thresholds.json",
+        "rule": "stage 0 fails closed unless its materialized evaluation_protocol_hash equals the Stage-3 hash, AND the Stage-3 artifact still declares the pinned value",
+        "why": "the equivalence interval and feasibility floor are numbers that came from the Stage-3 controls; a candidate measured under a different protocol is judged against thresholds that do not describe it",
+        "reproducible_today": true
+      },
+      "attempt_4": {
+        "pod_id": "vt3qm7j9vpct6c",
+        "minutes": 12.44,
+        "usd": 0.2052,
+        "outcome": "STAGE3_PROTOCOL_BINDING_REFUSED",
+        "code_defect": false,
+        "stage0_body_executed": true,
+        "stages_passed": 0,
+        "trained_anything": false,
+        "provider_confirms_gone": true,
+        "observed_protocol": "17218f7c635ee5f2e62f698f75d8731aa8eebc0e5475bf833673277f714e9ccc",
+        "pinned_stage3_protocol": "250f72efbd43b86a475e8dda293b45f07ee61a4d858e147f4a5bd7681c32c2e4",
+        "sole_differing_field": "runtime_digest -> runtime.image_digest",
+        "detail": {
+          "stage3": "...ubuntu2404@580.159.03",
+          "attempt4": "...ubuntu2404@580.126.09",
+          "suffix_is": "host NVIDIA driver version appended by read_image_digest"
+        },
+        "generation_semantics_identical": true,
+        "drivers_drawn_across_attempts": [
+          "580.159.03",
+          "580.126.09",
+          "580.126.09",
+          "580.126.09"
+        ]
+      },
+      "attempt_5": {
+        "pod_id": "s797g6xphdibms",
+        "minutes": 38.94,
+        "usd": 0.6426,
+        "outcome": "STAGE_1_FAILED_ON_UNSTAGED_INPUT",
+        "stage0_passed": true,
+        "stages_passed": 1,
+        "trained_anything": false,
+        "provider_confirms_gone": true,
+        "stage0_attestation": {
+          "evaluation_protocol_hash": "250f72efbd43b86a475e8dda293b45f07ee61a4d858e147f4a5bd7681c32c2e4",
+          "comparable_identity": "70a26e0b43df20e469385115b49683b50936919e02986088b76d3c30ffd87103",
+          "live_driver": "580.159.03",
+          "historical_driver": "580.159.03",
+          "driver_patch_differs": false,
+          "caveat": "this host matched Stage 3's driver, so v1 would also have passed; not on-pod validation of v2"
+        },
+        "stage1_cause": "calib.domain_balanced@v1 items.jsonl missing: required by phase_a_search.py:124, absent from LOCAL_ASSETS and from the relay precheck, incomplete on the dev box, present on the relay at e8_inputs_20260810/calibration_v1/",
+        "fix_class": "staging + $0 precheck, not science"
+      },
+      "harness_source_digest": "SET_AT_ISSUE_TIME",
+      "digest_note": "the authoritative value is in logs/autoinit_phase_a_authorization.json, written by scripts/autoinit/issue_phase_a_authorization.py from the committed tree. Recording a second copy here would be a second source of truth that can drift."
+    }
   },
-  "per_seed_usable_rollout_rate": {
-   "sa": 0.3895,
-   "sb": 0.3526
+  "proposed_pilot": {
+    "authorized": false,
+    "schedule": "no pruning at level 0, then beam width 6",
+    "n_profiles": 1,
+    "searched_leaves": 5,
+    "canonical_control": "artifacts/stage1/qwen3_0p6b_init_v0/checkpoint (injected by hash)",
+    "survivors": 2,
+    "seeds": [
+      "sa",
+      "sb",
+      "sc (conditional)"
+    ],
+    "expected_usd": 17.0,
+    "hard_backstop_usd": 26.21,
+    "margin_against_released_headroom_usd": 4.16,
+    "peak_working_storage_gib": 106
   },
-  "thresholds": {
-   "equivalence_interval": 0.011695296982299022,
-   "feasibility_floor": 0.3
+  "tests": {
+    "passing": 1765,
+    "skipped": 7,
+    "note": "dev box. Under the pod simulator, 1725 passed / 18 skipped in 4m17s \u2014 the ~20-minute pre-flight rehearsal tests/pod/test_phase_a_stages1_5_execute.py is --ignore'd in BOTH the pod gate and the simulator, and the two ignore lists are pinned equal",
+    "venvs_verified": [
+      "repo .venv transformers 5.13.1"
+    ]
   },
-  "no_context_limit": {
-   "sa": 1.0,
-   "sb": 1.0
+  "proposed_micro_preflight": {
+    "authorized": false,
+    "expected_usd": 4.2,
+    "max_usd": 8.6,
+    "gpu": "1 x L40S",
+    "hours": 3.5,
+    "staged": true,
+    "stages": [
+      "0 runtime attestation + protocol materialization/freeze",
+      "1 cheap machine gates",
+      "2 permanent canonical controls",
+      "3 control characterization"
+    ],
+    "fail_closed": "controls are not trained unless stages 0 and 1 pass",
+    "includes_control_rerun": true,
+    "control_seeds": 2,
+    "note": "the $2.80 rerun produces the permanent Phase-A control probes, so Phase A needs 7 probes instead of 9",
+    "preflight_plan_hash": "37dbd7b22e3e884eff9d55f95c5ce25a212f823d2f396691c30d47930076f8ab",
+    "blocker_before_phase_a": "the preregistration must be re-emitted with the attested protocol fingerprint; until Stage 0 runs, runtime_digest is null and no Phase-A comparison is eligible for MATCHED",
+    "held": false,
+    "held_reason": "RESOLVED 2026-08-13: the tool scoring defect is corrected under recovery_search_scoring@v2 and validated at zero cost; the maintainer approved the correction and re-authorized the preflight at $4.20 expected / $8.60 hard.",
+    "spent_usd": 0.0,
+    "authorization_artifact": "logs/autoinit_micro_preflight_authorization.json",
+    "authorization_sha256": "94b6c5d2167b7248ac4ba67fee15cdd97f20512a164fcb045b69bd330916d8fe",
+    "harness": {
+      "setup": "scripts/pod/autoinit_preflight_setup.sh",
+      "driver": "scripts/pod/autoinit_preflight_driver.py",
+      "launcher": "scripts/pod/autoinit_preflight_launch.py",
+      "rehearsal": "tests/pod/test_autoinit_preflight_rehearsal.py",
+      "rehearsal_scenarios": 18,
+      "rehearsed": true,
+      "launched": false
+    }
   },
-  "battery_wall_time_min": {
-   "both_controls": 19.65,
-   "marginal_per_checkpoint": 8.43
+  "stage3_control_characterization": {
+    "status": "COMPLETE",
+    "utc": "2026-08-15T09:04:30Z",
+    "battery": "recovery_search_v2",
+    "aggregation": "pooled_counts@v2",
+    "controls": [
+      "preflight_ctl_r0860k_sa",
+      "preflight_ctl_r0860k_sb"
+    ],
+    "pooled": {
+      "n": 380,
+      "usable": 141,
+      "usable_rollout_rate": 0.37105263157894736,
+      "n_scorable": 340,
+      "correct": 4,
+      "correct_overall": 0.011764705882352941,
+      "correct_given_usable": 0.02857142857142857
+    },
+    "per_seed_usable_rollout_rate": {
+      "sa": 0.3895,
+      "sb": 0.3526
+    },
+    "thresholds": {
+      "equivalence_interval": 0.011695296982299022,
+      "feasibility_floor": 0.3
+    },
+    "no_context_limit": {
+      "sa": 1.0,
+      "sb": 1.0
+    },
+    "battery_wall_time_min": {
+      "both_controls": 19.65,
+      "marginal_per_checkpoint": 8.43
+    },
+    "products": "logs/autoinit_stage3_complete/"
   },
-  "products": "logs/autoinit_stage3_complete/"
- }
+  "latest_commit_note": "the commit that existed when this file was written. Two commits follow in sequence: the pre-authorization base (this content), then an AUTHORIZATION-ONLY commit carrying logs/autoinit_phase_a_authorization.json and nothing else, because `lineage_from_authorized_base` refuses any other changed path between the authorized base and the commit the pod checks out."
 }

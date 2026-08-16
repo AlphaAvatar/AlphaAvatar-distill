@@ -382,13 +382,21 @@ PHASE_A_AUTHORIZATION = PhaseAAuthorization(
     authorization_id="autoinit.phase_a.PLACEHOLDER",
     granted_utc="PLACEHOLDER",
     granted_by=(
-        "PLACEHOLDER. The figures below are the launcher's priced plan, not a "
-        "transcription, and they require a cumulative project cap of at least "
-        "$216.2266 against a spend of $193.1783. The maintainer RECOMMENDED "
-        "$217.00 on 2026-08-17; that cap has NOT been formally approved or "
-        "recorded in BUDGET_LEDGER.md, and until it is, this template must not "
-        "be issued. The superseded $20.0126 grant basis (project cap $213.00) "
-        "is recorded in autoinit_phase_a_fallback_audit.json."),
+        "maintainer, 2026-08-17. The cumulative project cap was raised to "
+        "$217.00 in the maintainer's own words — 'My recommended new cumulative "
+        "project cap is $217.00' — and then formally approved in the same "
+        "sequence: 'Record this approval in the ledger and machine-readable "
+        "state ... and issue one fresh PhaseAAuthorization.' Against a spend of "
+        "$193.1783 that leaves $23.8217, and the launcher's priced hard "
+        "threshold is $23.048325, so the margin is $0.7734. It funds ONE "
+        "attempt; the maintainer stated 'This funds one attempt only and does "
+        "not imply Attempt 7', and 'If it fails closed, stop; no Attempt 7 is "
+        "implied.' The figures below are the launcher's own make_plan output at "
+        "$0, not a transcription. Two superseded bases are recorded in "
+        "BUDGET_LEDGER.md and autoinit_phase_a_fallback_audit.json: $20.0126 "
+        "(no fallback reserve, no beam-6 correction) and $22.4508 (fallback "
+        "reserve placed after the soft stop, which would have truncated the "
+        "conditional seed-sc rung)."),
     plan_id=PHASE_A_PLAN_V1.plan_id,
     plan_hash=PHASE_A_PLAN_V1.plan_hash,
     # Filled at issue time from the frozen plan on disk, so a threshold that

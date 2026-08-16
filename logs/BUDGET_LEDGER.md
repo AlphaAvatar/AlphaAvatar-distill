@@ -187,7 +187,16 @@ $211.07   +$47.18 E8b hard backstop (2026-08-11), rounded up from $211.0633
 $213.00   +$1.93 for Phase A (2026-08-15). The maintainer approved raising the
           cap "e.g. $213-214" after being shown that Phase A did not fit;
           $213.00 was selected from that range as the conservative end and is
-          the figure recorded here. Nothing has been spent against it.
+          the figure recorded here. Nothing was spent against it.
+$217.00   +$4.00 for Phase A attempt 6 (2026-08-17). APPROVED. The maintainer's
+          words: "My recommended new cumulative project cap is $217.00",
+          followed by "Record this approval in the ledger and machine-readable
+          state ... and issue one fresh PhaseAAuthorization." The raise covers
+          the repriced hard bound after the reference-cache fallback audit and
+          the beam-6 pricing correction: $23.048325 against $19.8217 remaining
+          under $213.00. Against $193.1783 spent it leaves $23.8217, a margin of
+          $0.7734 over one complete attempt. FUNDS ONE ATTEMPT: "This funds one
+          attempt only and does not imply Attempt 7."
 ```
 
 ### Why the cap moved, and by how much
@@ -261,20 +270,17 @@ $2.30   RAISED 2026-08-14 with maintainer approval, after attempt 1 spent
 ## Current position
 
 ```
-authorized cumulative cap                                    $213.00
+authorized cumulative cap                                    $217.00
+    RAISED AND APPROVED 2026-08-17. See the caps list above.
 actual cumulative spend                                      $193.1783
-unused authorization remaining                               $ 19.8217
+unused authorization remaining                               $ 23.8217
 Phase A hard threshold, from the launcher's own make_plan     $ 23.0483
-margin after a worst-case Phase A                            $ -3.2266  <-- NEGATIVE
-    PHASE A DOES NOT FIT THE $213.00 CAP. Remaining $19.8217
-    against a $23.0483 hard bound: short by $3.2266. A further
-    attempt requires a cap decision, not just an authorization.
-    NOT a retry reserve. No attempt 6 is pre-authorized.
-
-    Minimum cumulative cap for one complete attempt   $216.2267
-    Maintainer's RECOMMENDED cap (2026-08-17)         $217.00
-        NOT APPROVED and NOT recorded below. Until it is, no
-        Attempt-6 authorization may be issued.
+margin after a worst-case Phase A                            $  0.7734
+    ONE ATTEMPT. The margin is not a retry reserve: the
+    maintainer stated "This funds one attempt only and does not
+    imply Attempt 7" and "If it fails closed, stop". A seventh
+    attempt would need a new cap decision AND a new
+    authorization, neither of which exists.
 
     SUPERSEDED Phase-A pricing, kept because a threshold that
     moved silently is how E6b overran:

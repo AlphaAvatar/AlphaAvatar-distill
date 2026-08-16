@@ -271,28 +271,27 @@ own plan.
 
 ```
 cumulative spend                 $193.1783
-authorized cap                   $213.00
-remaining                        $ 19.8217
+authorized cap                   $217.00     approved 2026-08-17
+remaining                        $ 23.8217
 Phase A hard bound               $ 23.0483
                                  ---------
-SHORT BY                         $  3.2266
+margin                           $  0.7734
 ```
 
-Minimum cumulative cap: **$216.2267**. Maintainer's **recommended** cap:
-**$217.00** — *not approved, not recorded in* [`BUDGET_LEDGER.md`](BUDGET_LEDGER.md).
-No Attempt-6 authorization until it is.
+**The cap was raised to $217.00 and APPROVED on 2026-08-17**, recorded in
+[`BUDGET_LEDGER.md`](BUDGET_LEDGER.md) and `current_state.json`. Against
+$193.1783 spent that leaves **$23.8217**, a margin of **$0.7734** over the
+$23.048325 hard bound. It funds **one** attempt: the maintainer stated "This
+funds one attempt only and does not imply Attempt 7" and "If it fails closed,
+stop". The margin is not a retry reserve.
 
 ## What remains
 
-1. **Approve and record a cap** covering one complete attempt — $216.2267
-   minimum, $217.00 recommended — or decide not to run Phase A.
-2. **Issue a `PhaseAAuthorization`**, if and when the maintainer wants Phase A
-   run: bound to the session plan hash, the science plan hash
-   `02be33b9a7a8e26bc8bfb75795351e8cdc9ffd441b47066cc81887cfc511b55c`, the
-   harness digest of the session commit being authorized, and a real UTC grant
-   timestamp. The existing authorization is **spent** and its lineage gate
-   refuses the current commit by construction.
-3. Phase A stays unauthorized until 1 and 2 happen.
+1. **Attempt 6 is authorized and launched.** Read
+   [`autoinit_phase_a_session.json`](autoinit_phase_a_session.json) for the
+   terminal marker, the artifact gate and the provider-confirmed teardown.
+2. **If it fails closed, STOP.** No Attempt 7 is authorized, funded or implied;
+   it would need a new cap decision *and* a new authorization.
 
 ### Searched-leaf durability: RESOLVED 2026-08-15, needs no relay growth
 
