@@ -18,19 +18,76 @@
 # The hidden set is deliberately a superset of what any one experiment stages.
 # If a future session stages more, the check is still sound — it just skips more
 # than it needs to, which errs toward catching problems rather than missing them.
+#
+# TWO DEFECTS, both of which corrupted this repository on 2026-08-15 and cost a
+# diagnosis that briefly read as data loss:
+#
+#   1. `restore` used `mv "$saved" "$dest"`. When the test run RECREATED the
+#      destination -- `artifacts/audit` is recreated by any driver rehearsal --
+#      `mv` moves the saved directory INSIDE the recreated one instead of
+#      replacing it. It happened twice, burying the real `artifacts/audit` at
+#      `artifacts/audit/artifacts@audit/artifacts@audit/` and silently turning
+#      11 tests into skips. A skip is not a failure, so the suite still read
+#      green.
+#   2. Nothing prevented two sweeps overlapping. The second's `restore` walks
+#      `$HIDE` and adopts the first's saved paths, so the two interleave.
+#
+# Fixed here: restore reproduces the EXACT pre-simulation state (a recreated
+# destination is quarantined, never nested and never silently deleted), and a
+# lock makes a concurrent sweep fail loudly instead of racing.
 set -u
-cd "$(dirname "$0")/../.." || exit 1
+PODSIM_ROOT=${PODSIM_ROOT:-"$(cd "$(dirname "$0")/../.." && pwd)"}
+cd "$PODSIM_ROOT" || exit 1
 HIDE=${HIDE_DIR:-/home/ecs-user/aad-scratch/podsim_hidden}
+LOCK=${PODSIM_LOCK:-"${HIDE}.lock"}
+QUAR="${HIDE}.recreated"
+
+# Single-instance exclusion. `mkdir` is atomic, so exactly one sweep wins; the
+# loser exits WITHOUT running and WITHOUT restoring, because the files under
+# $HIDE belong to the holder.
+if ! mkdir "$LOCK" 2>/dev/null; then
+  echo "REFUSING: another pod simulation holds $LOCK." >&2
+  echo "  Simulator sweeps must not overlap: the loser would restore the" >&2
+  echo "  winner's saved paths. If no sweep is running, remove $LOCK." >&2
+  exit 3
+fi
+HELD_LOCK=1
+
+# A non-empty $HIDE at startup means a previous sweep died before restoring.
+# Adopting those files would restore them under THIS run's assumptions; refuse
+# and let a human look.
+if [ -d "$HIDE" ] && [ -n "$(ls -A "$HIDE" 2>/dev/null)" ]; then
+  echo "REFUSING: $HIDE is not empty, so a previous sweep did not restore:" >&2
+  ls -A "$HIDE" | sed 's/^/    /' >&2
+  echo "  Restore those by hand before simulating again." >&2
+  rmdir "$LOCK" 2>/dev/null
+  exit 4
+fi
 mkdir -p "$HIDE"
 
+# The trap is armed HERE, after the lock is held and after the leftover check --
+# never before. That ordering is what stops a losing sweep from restoring the
+# winner's saved paths: a loser exits at the lock check with no trap installed,
+# so `restore` cannot run for it at all. An in-function "am I the holder?" guard
+# was tried and removed: it was unreachable, and an unreachable safeguard invites
+# exactly the false confidence this script has already cost once.
 restore() {
   for p in "$HIDE"/*; do
     [ -e "$p" ] || continue
     n=$(basename "$p" | tr '@' '/')
     mkdir -p "$(dirname "$n")"
+    if [ -e "$n" ]; then
+      # The run recreated this path. It did not exist before the simulation, so
+      # it must not survive it -- but quarantine rather than delete, because
+      # deleting on a restore path is how a bug becomes data loss.
+      mkdir -p "$QUAR"
+      mv "$n" "$QUAR/$(basename "$p").recreated.$$" 2>/dev/null
+      echo "  quarantined a recreated $n -> $QUAR"
+    fi
     mv "$p" "$n"
   done
   rmdir "$HIDE" 2>/dev/null
+  rmdir "$LOCK" 2>/dev/null
   echo "restored the hidden artifacts"
 }
 trap restore EXIT INT TERM
@@ -79,4 +136,5 @@ while IFS= read -r p; do
 done <<< "$HIDDEN_PATHS"
 echo "hid $n path(s) a pod session does not receive"
 
-uv run pytest tests/ -q --ignore=tests/data/test_recovery_corpus_pipeline.py 2>&1 | tail -12
+PODSIM_CMD=${PODSIM_CMD:-"uv run pytest tests/ -q --ignore=tests/data/test_recovery_corpus_pipeline.py"}
+eval "$PODSIM_CMD" 2>&1 | tail -12

@@ -1,0 +1,90 @@
+{
+  "schema": "aadistill.autoinit.generation_runtime_compat/v2",
+  "generated_utc": "2026-08-15T19:41:02.535585+00:00",
+  "purpose": "supersede the comparability RULE applied to the Stage-3 evaluation protocol, without altering the protocol, the thresholds, or any historical artifact",
+  "rule": {
+    "rule_id": "generation_runtime_comparability",
+    "version": 2,
+    "qualified_id": "generation_runtime_comparability@v2",
+    "driver_branch_must_match": true,
+    "material": {
+      "image": "the real container image digest when the host exposes one; otherwise the image ref/tag alone",
+      "user_space_stack": [
+        "python_version",
+        "torch_version",
+        "transformers_version",
+        "cuda_runtime",
+        "attention_backend"
+      ],
+      "generation": "every field the protocol already declares except ['runtime_digest', 'evaluation_protocol_hash', 'generation_protocol_fingerprint']",
+      "also": "scoring contract + digest, and battery identity"
+    },
+    "recorded_not_material": [
+      "nvidia_driver_version",
+      "host_provenance"
+    ],
+    "supersedes": "exact equality over the fused imageName@driver field, which made comparability a host lottery"
+  },
+  "bound_to_historical_protocol": {
+    "evaluation_protocol_hash": "250f72efbd43b86a475e8dda293b45f07ee61a4d858e147f4a5bd7681c32c2e4",
+    "attested_artifact": "logs/autoinit_stage3_complete/attested_evaluation_protocol.json",
+    "attested_report_sha256": "2fff9645b010d2edc26b22392a56f1b3568c8386ceff033d9f074f0ab740bf80",
+    "engine_probe": "logs/autoinit_stage3_complete/engine_probe.json"
+  },
+  "historical_artifacts_unmodified": {
+    "note": "read and hashed here, never written. These hashes are the evidence that the migration changed nothing historical.",
+    "attested_evaluation_protocol.json": "708603a79901b272bd670b381c1b4c19d7e753ec61a75afbd40a477322ff735a",
+    "materialized_thresholds.json": "47201a9868c81cfefd64791a47465893e2aeed103208471e05fdb10604e06eb4",
+    "engine_probe.json": "49593edb8bdf3047ee4feccd4bb59d0f954124b9ca3c894460b6be0dece8d431"
+  },
+  "evidence": {
+    "historical": {
+      "source": "logs/autoinit_stage3_complete/engine_probe.json",
+      "image": {
+        "image_ref": "runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404",
+        "container_image_digest": null,
+        "nvidia_driver_version": "580.159.03",
+        "form": "ref_plus_driver"
+      },
+      "v1_evaluation_protocol_hash": "250f72efbd43b86a475e8dda293b45f07ee61a4d858e147f4a5bd7681c32c2e4",
+      "v2_comparable_identity": "70a26e0b43df20e469385115b49683b50936919e02986088b76d3c30ffd87103"
+    },
+    "attempt_4": {
+      "source": "logs/autoinit_phase_a_attempts/attempt4/engine_probe.json",
+      "image": {
+        "image_ref": "runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404",
+        "container_image_digest": null,
+        "nvidia_driver_version": "580.126.09",
+        "form": "ref_plus_driver"
+      },
+      "v1_evaluation_protocol_hash": "17218f7c635ee5f2e62f698f75d8731aa8eebc0e5475bf833673277f714e9ccc",
+      "v2_comparable_identity": "70a26e0b43df20e469385115b49683b50936919e02986088b76d3c30ffd87103",
+      "reconstructed_independently": true
+    }
+  },
+  "result": {
+    "v1_hashes_differ": true,
+    "v2_identities_equal": true,
+    "comparable_identity": "70a26e0b43df20e469385115b49683b50936919e02986088b76d3c30ffd87103",
+    "driver_branch_equal": true,
+    "driver_patch_differs": true,
+    "sole_formerly_material_difference": "the exact NVIDIA driver patch, reached through runtime_digest -> runtime.image_digest, whose suffix is the host driver version rather than a container image digest",
+    "comparison": {
+      "rule": "generation_runtime_comparability@v2",
+      "live_identity": "70a26e0b43df20e469385115b49683b50936919e02986088b76d3c30ffd87103",
+      "historical_identity": "70a26e0b43df20e469385115b49683b50936919e02986088b76d3c30ffd87103",
+      "identities_equal": true,
+      "live_driver": "580.126.09",
+      "historical_driver": "580.159.03",
+      "driver_branch_equal": true,
+      "driver_patch_differs": true
+    }
+  },
+  "what_this_does_not_claim": [
+    "that NVIDIA drivers are universally irrelevant to generation",
+    "that a driver BRANCH change is inert -- it still fails closed",
+    "that the Stage-3 thresholds, pooled_counts@v2, the search, the recovery design, the seeds or the science plan change in any way"
+  ],
+  "phase_a_stage0_requirement": "BOTH: the thresholds artifact still declares the untouched 250f72efbd43b86a475e8dda293b45f07ee61a4d858e147f4a5bd7681c32c2e4, AND the live protocol is comparable to that historical protocol under generation_runtime_comparability@v2",
+  "report_sha256": "3239e01e78fd0b3511bea353dca8fab9e22d29f4998a62306c432f086d021f72"
+}

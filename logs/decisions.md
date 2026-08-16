@@ -3052,3 +3052,67 @@ attempt 4  runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@580.126.09
 - **Position:** $192.5357 spent, $20.4643 remaining, **$0.4517** of margin
   against a $20.0126 hard bound. Four attempts have cost **$0.9895** with zero
   stages passed.
+
+## 2026-08-15 — Runtime comparability v2, and the verification tool that corrupted the tree
+
+**generation_runtime_comparability@v2** (`src/aadistill/autoinit/generation_compat.py`,
+new module, deliberately outside `generation_source_digest` and the scoring
+contract so `250f72ef…` does not move). It splits the field named `image_digest`,
+which in the fallback path is really `imageName@nvidia_driver_version`: a real
+container digest is material in full; otherwise the image ref is material and the
+driver is recorded as provenance, under an explicit **same-580-branch**
+constraint. This is not a claim that drivers are irrelevant — a branch change
+still fails closed.
+
+Reconstructed independently at $0 from the two saved engine probes:
+
+```
+                       v1 exact hash    v2 comparable identity
+stage 3   (580.159.03)   250f72ef…          70a26e0b…
+attempt 4 (580.126.09)   17218f7c…          70a26e0b…   converge
+```
+
+Sole formerly-material difference: the driver patch. Stage 0 now requires BOTH
+that the thresholds still bind to the untouched `250f72ef…` and that the live
+protocol is v2-comparable to it. Stage-3 artifacts are byte-identical, hashed
+into `logs/autoinit_phase_a_protocol_compat_v2.json` as evidence.
+
+Four mutations caught: dropping the branch constraint, demoting the image,
+demoting the user-space stack, mishandling a real content digest. The last one
+initially passed — no live evidence exercises the content-digest branch — and is
+now covered directly.
+
+### The verification tool was corrupting the repository
+
+`simulate_pod_env.sh` restored with `mv "$saved" "$dest"`. When the run had
+RECREATED the destination — `artifacts/audit` is recreated by any driver
+rehearsal — `mv` nested the saved directory inside the recreation. It happened
+twice on 2026-08-15, burying the real `artifacts/audit` at
+`artifacts/audit/artifacts@audit/artifacts@audit/` and turning 11 tests into
+**skips**. Skips are not failures, so the suite read green at "1714 passed, 18
+skipped"; it was caught only because the skip COUNT looked wrong. Cause: two
+sweeps overlapping, which nothing prevented.
+
+Repaired: restore reproduces the exact pre-simulation state and quarantines a
+recreated destination rather than nesting or deleting it; a `mkdir` lock makes a
+concurrent sweep exit 3 without running or restoring; a non-empty `$HIDE` at
+startup exits 4 rather than adopting a dead sweep's files. The anti-race property
+is the trap being armed only AFTER the lock — an in-function holder guard was
+written, found unreachable by mutation, and removed rather than left as
+decoration that invites false confidence.
+
+Verified on the real thing: the sweep hit the exact bug condition (`quarantined a
+recreated artifacts/audit`), the artifact-tree fingerprint is identical before
+and after (`670e17cf…`, 72 entries under `artifacts/audit`), the hide dir is
+empty and the lock released. Normal suite back to **1732 passed / 7 skipped**.
+
+`artifacts/audit` was repaired non-destructively (backup at
+`artifacts/_audit_nested_bak`, holding only regenerated
+`frozen_asset_verification.json` copies) and `artifacts/stage3/ladder_uniform`
+re-fetched from the relay. Nothing tracked, scientific, or on the relay was
+affected; `artifacts/` is gitignored.
+
+`generation_compat.py` is imported by the paid Stage-0 path and is therefore in
+`PHASE_A_HARNESS_SOURCE_FILES_V1` (13 files), while remaining outside both
+historical digests — verified: generation `a1b51736…` and scoring `808080a7…` are
+unchanged.

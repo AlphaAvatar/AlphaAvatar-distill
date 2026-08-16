@@ -57,6 +57,9 @@ from aadistill.autoinit.generation import (  # noqa: E402
     RecoveryEvaluationProtocol, declared_generation_protocol,
     generation_source_digest, observe_generation_protocol,
 )
+from aadistill.autoinit.generation_compat import (  # noqa: E402
+    ComparabilityError, comparable_generation_identity, require_comparable,
+)
 from aadistill.autoinit.phase_a import (  # noqa: E402
     PHASE_A_PLAN_V1, PHASE_A_SCOPE, PhaseAAuthorization, phase_a_manifest,
 )
@@ -83,6 +86,10 @@ FROZEN_PLAN = REPO / "logs/autoinit_phase_a_recovery_plan_frozen.json"
 STAGE3_THRESHOLDS = REPO / "logs/autoinit_stage3_complete/materialized_thresholds.json"
 STAGE3_EVALUATION_PROTOCOL_HASH = (
     "250f72efbd43b86a475e8dda293b45f07ee61a4d858e147f4a5bd7681c32c2e4")
+STAGE3_ATTESTATION = REPO / "logs/autoinit_stage3_complete/attested_evaluation_protocol.json"
+STAGE3_PROBE = REPO / "logs/autoinit_stage3_complete/engine_probe.json"
+#: The versioned comparability relation the live protocol is judged under.
+COMPAT_V2 = REPO / "logs/autoinit_phase_a_protocol_compat_v2.json"
 FROZEN_RECIPE = REPO / "configs/stage3/e1/e1_r0860k_sa_pca.json"
 PACK_DIR = "artifacts/stage3/ladder_uniform_probe"
 BATTERY_CONTENT = "a1b22778b00d95b6aba358c14a5af5b559fd807bb371c92131eacca59479f323"
@@ -308,14 +315,48 @@ class PhaseADriver:
                 f"{STAGE3_EVALUATION_PROTOCOL_HASH}; the thresholds this run "
                 "would select against are not the ones that were characterized")
         observed_hash = self.evaluation_protocol.evaluation_protocol_hash
-        if observed_hash != stage3_hash:
+
+        # Comparability is decided under generation_runtime_comparability@v2,
+        # not by exact equality of the v1 protocol hash. v1 fused the container
+        # image with the HOST NVIDIA DRIVER inside `runtime_digest`, so exact
+        # equality made this a host lottery: attempt 4 was refused at $0.2052
+        # with every generation-semantic field identical and only the driver
+        # patch different. v2 keeps every one of those fields material, demotes
+        # the driver patch to recorded provenance, and still fails closed on a
+        # driver BRANCH change. The historical protocol is NOT rewritten — it is
+        # loaded from the untouched Stage-3 attestation and compared against.
+        compat = json.loads(COMPAT_V2.read_text())
+        if compat["bound_to_historical_protocol"]["evaluation_protocol_hash"] \
+                != stage3_hash:
             return self.record(
                 0, False,
-                f"evaluation protocol {observed_hash} does not match the "
-                f"Stage-3 protocol {stage3_hash} under which the equivalence "
-                f"interval {interval!r} and feasibility floor {floor!r} were "
-                "materialized. Selecting candidates measured under a different "
-                "protocol against those thresholds is not a valid comparison.")
+                "the v2 compatibility artifact is bound to "
+                f"{compat['bound_to_historical_protocol']['evaluation_protocol_hash']}, "
+                f"not to the Stage-3 protocol {stage3_hash} the thresholds came "
+                "from")
+        s3_att = json.loads(STAGE3_ATTESTATION.read_text())
+        if s3_att["evaluation_protocol_hash"] != stage3_hash:
+            return self.record(
+                0, False,
+                f"the Stage-3 attestation declares "
+                f"{s3_att['evaluation_protocol_hash']}, not {stage3_hash}")
+        try:
+            historical = comparable_generation_identity(
+                protocol=s3_att["evaluation_protocol"],
+                runtime=json.loads(STAGE3_PROBE.read_text())["runtime"])
+            live = comparable_generation_identity(
+                protocol=self.evaluation_protocol.as_dict(),
+                runtime=observed["runtime"],
+                host_provenance={"image_digest_arg": self.a.image_digest})
+            comparison = require_comparable(
+                live, historical, context="phase A stage 0")
+        except ComparabilityError as exc:
+            return self.record(
+                0, False,
+                f"{exc} The equivalence interval {interval!r} and feasibility "
+                f"floor {floor!r} were materialized under the Stage-3 protocol "
+                f"{stage3_hash}; candidates measured under a protocol that is "
+                "not comparable to it cannot be judged against them."[-1500:])
 
         attested = {
             "schema": "aadistill.autoinit.phase_a_attested_protocol/v1",
@@ -327,6 +368,8 @@ class PhaseADriver:
             "evaluation_protocol_hash": observed_hash,
             "stage3_evaluation_protocol_hash": stage3_hash,
             "bound_to_stage3_thresholds": True,
+            "comparability": comparison,
+            "comparable_identity": live["comparable_identity"],
             "science_plan_hash": self.plan.plan_hash,
             "equivalence_interval": interval,
             "feasibility_floor": floor,

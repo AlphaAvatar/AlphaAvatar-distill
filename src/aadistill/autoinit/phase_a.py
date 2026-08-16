@@ -68,6 +68,7 @@ PHASE_A_HARNESS_SOURCE_FILES_V1: tuple[str, ...] = (
     "scripts/autoinit/phase_a_search.py",
     "scripts/autoinit/write_preregistration.py",
     "src/aadistill/autoinit/authorization.py",
+    "src/aadistill/autoinit/generation_compat.py",
     "src/aadistill/autoinit/phase_a.py",
     "src/aadistill/autoinit/generation.py",
 )

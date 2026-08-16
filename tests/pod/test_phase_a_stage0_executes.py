@@ -75,7 +75,8 @@ class Args:
     probe_battery_minutes = 9.82
 
 
-def build(tmp_path, *, probe_override=None, probe_missing=None):
+def build(tmp_path, *, probe_override=None, probe_missing=None,
+          runtime_override=None):
     """The real driver, with only the two boundaries substituted."""
     mod = load_driver(tmp_path)
     d = mod.PhaseADriver.__new__(mod.PhaseADriver)
@@ -95,6 +96,8 @@ def build(tmp_path, *, probe_override=None, probe_missing=None):
             observed = json.loads(STAGE3_PROBE.read_text())
             if probe_override:
                 observed.update(probe_override)
+            if runtime_override:
+                observed["runtime"] = {**observed["runtime"], **runtime_override}
             for key in (probe_missing or ()):
                 observed.pop(key, None)
             (mod.AUDIT / "engine_probe.json").write_text(json.dumps(observed))
@@ -152,7 +155,8 @@ def test_a_protocol_that_is_not_the_stage3_one_is_refused(tmp_path):
     d, mod = build(tmp_path, probe_override={"vllm_version": "0.0.0-not-stage3"})
     assert mod.PhaseADriver.stage0(d) is False
     reason = d.ev["stages"]["0"]["reason"]
-    assert "does not match the Stage-3 protocol" in reason
+    assert "not comparable" in reason
+    assert "generation_runtime_comparability@v2" in reason
     assert STAGE3_HASH in reason
     assert not (mod.AUDIT / "attested_evaluation_protocol.json").is_file(), (
         "a refused stage 0 must not leave an attestation behind")
@@ -164,7 +168,7 @@ def test_any_changed_engine_observation_breaks_the_binding(tmp_path, field):
     """Every observed field enters the protocol hash; none is cosmetic."""
     d, mod = build(tmp_path, probe_override={field: "changed"})
     assert mod.PhaseADriver.stage0(d) is False
-    assert "Stage-3 protocol" in d.ev["stages"]["0"]["reason"]
+    assert "not comparable" in d.ev["stages"]["0"]["reason"]
 
 
 def test_an_unmaterialized_protocol_is_refused(tmp_path):
@@ -236,3 +240,155 @@ def test_stage0_builds_the_engine_probe_argv_with_every_required_flag(tmp_path):
         assert flag in argv, f"the engine probe argv omits {flag}"
     assert seen["python"] == "/opt/vllm/bin/python", (
         "the probe must run in the vLLM environment, not the train one")
+
+
+# --- generation_runtime_comparability@v2 ------------------------------------
+#
+# The rule that closed attempt 4: a driver PATCH within a branch is provenance,
+# a driver BRANCH change is a real runtime event, and every generation-semantic
+# field stays material.
+
+ATTEMPT4_IMAGE = "runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@580.126.09"
+STAGE3_IMAGE = "runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@580.159.03"
+
+
+def test_the_attempt4_driver_patch_now_passes(tmp_path):
+    """The exact host that refused attempt 4 at $0.2052 must now be comparable.
+
+    Same image tag, same user-space stack, same engine semantics -- only the
+    NVIDIA driver patch differs, within the 580 branch.
+    """
+    d, mod = build(tmp_path, runtime_override={"image_digest": ATTEMPT4_IMAGE})
+    assert mod.PhaseADriver.stage0(d) is True, d.ev["stages"]["0"].get("reason")
+    att = json.loads((mod.AUDIT / "attested_evaluation_protocol.json").read_text())
+    c = att["comparability"]
+    assert c["identities_equal"] is True
+    assert c["driver_branch_equal"] is True
+    assert c["driver_patch_differs"] is True
+    assert c["live_driver"] == "580.126.09"
+    assert c["historical_driver"] == "580.159.03"
+    # The thresholds still bind to the UNTOUCHED historical protocol.
+    assert att["stage3_evaluation_protocol_hash"] == STAGE3_HASH
+
+
+def test_a_driver_branch_change_still_fails_closed(tmp_path):
+    """Not a claim that drivers are universally irrelevant."""
+    d, mod = build(tmp_path, runtime_override={
+        "image_digest": "runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@600.10.01"})
+    assert mod.PhaseADriver.stage0(d) is False
+    reason = d.ev["stages"]["0"]["reason"]
+    assert "driver branch moved" in reason and "580" in reason and "600" in reason
+
+
+def test_a_different_image_ref_still_fails_closed(tmp_path):
+    """The image ref is material even when the digest form is the fallback."""
+    d, mod = build(tmp_path, runtime_override={
+        "image_digest": "runpod/pytorch:9.9.9-someother-image@580.159.03"})
+    assert mod.PhaseADriver.stage0(d) is False
+    assert "not comparable" in d.ev["stages"]["0"]["reason"]
+
+
+@pytest.mark.parametrize("field,value", [
+    ("torch_version", "2.99.0+cu130"),
+    ("transformers_version", "9.9.9"),
+    ("python_version", "3.13.0"),
+    ("cuda_runtime", "12.1"),
+    ("attention_backend", "flash"),
+])
+def test_a_user_space_stack_change_still_fails_closed(tmp_path, field, value):
+    d, mod = build(tmp_path, runtime_override={field: value})
+    assert mod.PhaseADriver.stage0(d) is False
+    assert "not comparable" in d.ev["stages"]["0"]["reason"]
+
+
+@pytest.mark.parametrize("field,value", [
+    ("dtype", "float16"),
+    ("gpu_memory_utilization", 0.5),
+    ("max_num_seqs", 64),
+    ("max_num_batched_tokens", 4096),
+    ("enforce_eager", True),
+    ("resolved_context", 4096),
+    ("context_source", "architectural"),
+])
+def test_an_engine_semantics_change_still_fails_closed(tmp_path, field, value):
+    """Fails closed by one of TWO gates, and either is correct.
+
+    Fields the protocol *declares* (dtype, gpu_memory_utilization) are refused
+    earlier still, by `materialized()`, as generation-protocol drift -- an
+    observation contradicting a declaration. Fields that are purely observed
+    reach the v2 comparability check and are refused there. What must never
+    happen is that an engine-semantics change passes.
+    """
+    d, mod = build(tmp_path, probe_override={field: value})
+    assert mod.PhaseADriver.stage0(d) is False
+    reason = d.ev["stages"]["0"]["reason"]
+    assert ("not comparable" in reason
+            or "generation-protocol drift" in reason), reason
+
+
+def test_the_compat_artifact_must_bind_to_the_stage3_protocol(tmp_path, monkeypatch):
+    """A compatibility artifact pointing at some other protocol cannot license
+    this comparison."""
+    d, mod = build(tmp_path)
+    doctored = tmp_path / "compat.json"
+    payload = json.loads(mod.COMPAT_V2.read_text())
+    payload["bound_to_historical_protocol"]["evaluation_protocol_hash"] = "0" * 64
+    doctored.write_text(json.dumps(payload))
+    monkeypatch.setattr(mod, "COMPAT_V2", doctored)
+    assert mod.PhaseADriver.stage0(d) is False
+    assert "v2 compatibility artifact is bound to" in d.ev["stages"]["0"]["reason"]
+
+
+def test_the_historical_attestation_is_read_not_rewritten():
+    """250f72ef is historical fact. The migration must not have touched it."""
+    import subprocess
+    for rel in ("logs/autoinit_stage3_complete/attested_evaluation_protocol.json",
+                "logs/autoinit_stage3_complete/materialized_thresholds.json",
+                "logs/autoinit_stage3_complete/engine_probe.json"):
+        diff = subprocess.run(["git", "diff", "--", rel], cwd=REPO,
+                              capture_output=True, text=True).stdout
+        assert diff == "", f"{rel} was modified; it is historical evidence"
+    att = json.loads((REPO / "logs/autoinit_stage3_complete"
+                      / "attested_evaluation_protocol.json").read_text())
+    assert att["evaluation_protocol_hash"] == STAGE3_HASH
+
+
+def test_a_real_content_digest_is_material_in_full(tmp_path):
+    """The other half of the rule, which no live evidence exercises yet.
+
+    Every saved probe uses the `ref@driver` fallback because RunPod hosts do not
+    expose `/etc/podinfo/image_digest`. The rule also says a REAL container image
+    digest is material in full when it is available -- and a mutation making that
+    branch treat `sha256:...` as a driver went undetected, because nothing ran
+    it. Exercised directly here rather than waiting for a host that provides one.
+    """
+    from aadistill.autoinit.generation_compat import (
+        ComparabilityError, comparable_generation_identity,
+        require_comparable, split_image_identity,
+    )
+
+    a = split_image_identity("runpod/pytorch:1.0@sha256:" + "a" * 64)
+    assert a["container_image_digest"] == "sha256:" + "a" * 64
+    assert a["nvidia_driver_version"] is None
+    assert a["form"] == "content_digest"
+
+    protocol = json.loads(
+        (REPO / "logs/autoinit_stage3_complete/attested_evaluation_protocol.json")
+        .read_text())["evaluation_protocol"]
+    base_runtime = json.loads(STAGE3_PROBE.read_text())["runtime"]
+
+    def ident(image):
+        return comparable_generation_identity(
+            protocol=protocol, runtime={**base_runtime, "image_digest": image})
+
+    one = ident("runpod/pytorch:1.0@sha256:" + "a" * 64)
+    same = ident("runpod/pytorch:1.0@sha256:" + "a" * 64)
+    other = ident("runpod/pytorch:1.0@sha256:" + "b" * 64)
+
+    assert one["comparable_identity"] == same["comparable_identity"]
+    # Two different CONTENT digests are two different images: not comparable.
+    with pytest.raises(ComparabilityError):
+        require_comparable(other, one, context="content digest")
+    # And a content digest is not interchangeable with the fallback form.
+    with pytest.raises(ComparabilityError):
+        require_comparable(ident(STAGE3_IMAGE), one, context="form mismatch")
