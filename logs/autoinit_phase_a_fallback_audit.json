@@ -1,0 +1,353 @@
+{
+  "schema": "aadistill.autoinit.phase_a_fallback_audit/v1",
+  "generated_utc": "2026-08-16T12:29:19.890754+00:00",
+  "git_commit": "e45529b6bdd7f03f7516ca8af8cd34c329742bf1",
+  "question": "If the pod's cgroup headroom cannot take the depth.causal_kl_greedy_v1 reference cache, how many extra search minutes does the numerically-identical recompute fallback cost, worst case, and does that fit inside the 180-minute search allowance and the session hard contingency?",
+  "method": "derived at $0; no pod was created and host RAM was not measured",
+  "part_1_topology": {
+    "source": "the FROZEN schedule: SCHEDULE_V1 width 6, warmup 1, 1 calibration profile",
+    "argument": "A state is the ordered prefix of kinds applied. Only a parent that has NOT yet applied DEPTH can invoke a DEPTH operator. At each level the worst case is that every beam slot is held by a depth-less parent, and when the beam cannot hold them all, that it holds the most expensive ones. Level 0 and 1 are unpruned (warmup 1), so every state there is a parent.",
+    "per_level": {
+      "0": 1,
+      "1": 3,
+      "2": 6,
+      "3": 6
+    },
+    "max_depth_causal_invocations": 16,
+    "cross_check": "consistent with the preregistration's states_materialized 39-56 and leaves 7-13 under the same schedule"
+  },
+  "part_2_cost": {
+    "anchor": "L40S_MEASURED, 88.83 effective TFLOP/s, calibrated on E8a's MEASURED 1,300 s for 260 subset evaluations over this exact 67-item / 59,763-position mixture at 4.02B full width. The model reproduces that 1,300 s for the level-0 invocation, which is the round-trip.",
+    "why_the_ratio_is_not_2x": "the recompute path performs one INTACT, FULL-DEPTH forward per candidate evaluation instead of one shared intact pass. The ablated forwards it replaces run at the mean 31.66 surviving blocks, so the extra work is MORE than the work it parallels: 2.10x rather than 1.99x.",
+    "per_invocation": [
+      {
+        "level": 0,
+        "already_applied": [
+          "(teacher)"
+        ],
+        "parent": {
+          "hidden_size": 2560,
+          "intermediate_size": 9728,
+          "num_attention_heads": 32,
+          "num_hidden_layers": 36
+        },
+        "cached_seconds": 1300.0,
+        "extra_seconds_if_recomputing": 1447.6,
+        "flops_ratio": 2.1135
+      },
+      {
+        "level": 1,
+        "already_applied": [
+          "ATTENTION"
+        ],
+        "parent": {
+          "hidden_size": 2560,
+          "intermediate_size": 9728,
+          "num_attention_heads": 16,
+          "num_hidden_layers": 36
+        },
+        "cached_seconds": 1163.1,
+        "extra_seconds_if_recomputing": 1293.1,
+        "flops_ratio": 2.1118
+      },
+      {
+        "level": 1,
+        "already_applied": [
+          "FFN"
+        ],
+        "parent": {
+          "hidden_size": 2560,
+          "intermediate_size": 3072,
+          "num_attention_heads": 32,
+          "num_hidden_layers": 36
+        },
+        "cached_seconds": 731.4,
+        "extra_seconds_if_recomputing": 806.3,
+        "flops_ratio": 2.1024
+      },
+      {
+        "level": 1,
+        "already_applied": [
+          "WIDTH"
+        ],
+        "parent": {
+          "hidden_size": 1024,
+          "intermediate_size": 9728,
+          "num_attention_heads": 32,
+          "num_hidden_layers": 36
+        },
+        "cached_seconds": 544.4,
+        "extra_seconds_if_recomputing": 606.5,
+        "flops_ratio": 2.1141
+      },
+      {
+        "level": 2,
+        "already_applied": [
+          "ATTENTION",
+          "FFN"
+        ],
+        "parent": {
+          "hidden_size": 2560,
+          "intermediate_size": 3072,
+          "num_attention_heads": 16,
+          "num_hidden_layers": 36
+        },
+        "cached_seconds": 594.4,
+        "extra_seconds_if_recomputing": 651.8,
+        "flops_ratio": 2.0966
+      },
+      {
+        "level": 2,
+        "already_applied": [
+          "FFN",
+          "ATTENTION"
+        ],
+        "parent": {
+          "hidden_size": 2560,
+          "intermediate_size": 3072,
+          "num_attention_heads": 16,
+          "num_hidden_layers": 36
+        },
+        "cached_seconds": 594.4,
+        "extra_seconds_if_recomputing": 651.8,
+        "flops_ratio": 2.0966
+      },
+      {
+        "level": 2,
+        "already_applied": [
+          "ATTENTION",
+          "WIDTH"
+        ],
+        "parent": {
+          "hidden_size": 1024,
+          "intermediate_size": 9728,
+          "num_attention_heads": 16,
+          "num_hidden_layers": 36
+        },
+        "cached_seconds": 477.4,
+        "extra_seconds_if_recomputing": 531.0,
+        "flops_ratio": 2.1122
+      },
+      {
+        "level": 2,
+        "already_applied": [
+          "WIDTH",
+          "ATTENTION"
+        ],
+        "parent": {
+          "hidden_size": 1024,
+          "intermediate_size": 9728,
+          "num_attention_heads": 16,
+          "num_hidden_layers": 36
+        },
+        "cached_seconds": 477.4,
+        "extra_seconds_if_recomputing": 531.0,
+        "flops_ratio": 2.1122
+      },
+      {
+        "level": 2,
+        "already_applied": [
+          "FFN",
+          "WIDTH"
+        ],
+        "parent": {
+          "hidden_size": 1024,
+          "intermediate_size": 3072,
+          "num_attention_heads": 32,
+          "num_hidden_layers": 36
+        },
+        "cached_seconds": 316.9,
+        "extra_seconds_if_recomputing": 350.0,
+        "flops_ratio": 2.1044
+      },
+      {
+        "level": 2,
+        "already_applied": [
+          "WIDTH",
+          "FFN"
+        ],
+        "parent": {
+          "hidden_size": 1024,
+          "intermediate_size": 3072,
+          "num_attention_heads": 32,
+          "num_hidden_layers": 36
+        },
+        "cached_seconds": 316.9,
+        "extra_seconds_if_recomputing": 350.0,
+        "flops_ratio": 2.1044
+      },
+      {
+        "level": 3,
+        "already_applied": [
+          "ATTENTION",
+          "FFN",
+          "WIDTH"
+        ],
+        "parent": {
+          "hidden_size": 1024,
+          "intermediate_size": 3072,
+          "num_attention_heads": 16,
+          "num_hidden_layers": 36
+        },
+        "cached_seconds": 249.9,
+        "extra_seconds_if_recomputing": 274.5,
+        "flops_ratio": 2.0981
+      },
+      {
+        "level": 3,
+        "already_applied": [
+          "ATTENTION",
+          "WIDTH",
+          "FFN"
+        ],
+        "parent": {
+          "hidden_size": 1024,
+          "intermediate_size": 3072,
+          "num_attention_heads": 16,
+          "num_hidden_layers": 36
+        },
+        "cached_seconds": 249.9,
+        "extra_seconds_if_recomputing": 274.5,
+        "flops_ratio": 2.0981
+      },
+      {
+        "level": 3,
+        "already_applied": [
+          "FFN",
+          "ATTENTION",
+          "WIDTH"
+        ],
+        "parent": {
+          "hidden_size": 1024,
+          "intermediate_size": 3072,
+          "num_attention_heads": 16,
+          "num_hidden_layers": 36
+        },
+        "cached_seconds": 249.9,
+        "extra_seconds_if_recomputing": 274.5,
+        "flops_ratio": 2.0981
+      },
+      {
+        "level": 3,
+        "already_applied": [
+          "FFN",
+          "WIDTH",
+          "ATTENTION"
+        ],
+        "parent": {
+          "hidden_size": 1024,
+          "intermediate_size": 3072,
+          "num_attention_heads": 16,
+          "num_hidden_layers": 36
+        },
+        "cached_seconds": 249.9,
+        "extra_seconds_if_recomputing": 274.5,
+        "flops_ratio": 2.0981
+      },
+      {
+        "level": 3,
+        "already_applied": [
+          "WIDTH",
+          "ATTENTION",
+          "FFN"
+        ],
+        "parent": {
+          "hidden_size": 1024,
+          "intermediate_size": 3072,
+          "num_attention_heads": 16,
+          "num_hidden_layers": 36
+        },
+        "cached_seconds": 249.9,
+        "extra_seconds_if_recomputing": 274.5,
+        "flops_ratio": 2.0981
+      },
+      {
+        "level": 3,
+        "already_applied": [
+          "WIDTH",
+          "FFN",
+          "ATTENTION"
+        ],
+        "parent": {
+          "hidden_size": 1024,
+          "intermediate_size": 3072,
+          "num_attention_heads": 16,
+          "num_hidden_layers": 36
+        },
+        "cached_seconds": 249.9,
+        "extra_seconds_if_recomputing": 274.5,
+        "flops_ratio": 2.0981
+      }
+    ],
+    "depth_causal_cached_minutes_worst_case": 133.59,
+    "depth_causal_fallback_extra_minutes": 147.77,
+    "binary_by_construction": "the cache size is positions x vocab x itemsize and does NOT depend on the parent's width, so it is 16.91 GiB (bf16) at every level. Either all 16 invocations cache or none do; there is no partial case to price."
+  },
+  "part_3_measurement": {
+    "purpose": "confirm on REAL calibration items that the two paths agree and that the fallback behaves as modelled. It does NOT set the ratio used above.",
+    "why_not": "at the toy width the cost is dominated by the 151,936-wide lm_head and the float32 `distortion` reduction, which BOTH paths pay per (item, candidate) and which therefore cancel out of the difference. At 2560 hidden x 36 layers the per-layer transformer work dominates instead, so the FLOP model governs. The measured 1.18x is a lower bound on a shape that is not the pod's.",
+    "measured": {
+      "n_items": 12,
+      "positions": 5995,
+      "evals": 6,
+      "cached_seconds": 26.08,
+      "cached_peak_rss_gib": 6.09,
+      "recompute_seconds": 30.88,
+      "recompute_peak_rss_gib": 3.2,
+      "measured_ratio": 1.1842,
+      "forward_count_model_ratio": 1.7143,
+      "cached_forwards": 84,
+      "recompute_forwards": 144,
+      "identical_removal_order": true,
+      "identical_tables": true
+    }
+  },
+  "part_4_verdict": {
+    "search_allowance_minutes": 180.0,
+    "fits_the_allowance": false,
+    "session_hard_contingency_minutes_before": 1212.88,
+    "worst_case_session_minutes": 1360.6,
+    "fits_the_hard_contingency": false,
+    "repriced": {
+      "expected_usd": 17.8933,
+      "soft_stop_usd": 19.6826,
+      "hard_terminate_usd_before": 20.0126,
+      "hard_terminate_usd_after": 22.4508,
+      "increment_usd": 2.4382,
+      "how": "the fallback minutes are added as an explicit reserve on the HARD bound only, the same way the 20-minute artifact-recovery reserve is. The expected and soft figures describe the cached path and do not move, because the cached path is what is expected.",
+      "consequence_if_the_fallback_engages": "the soft stop is unchanged, so a fallback run spends its extra 147.77 minutes in the search and then soft-stops ~0.55 probe earlier than planned. Rungs 1 and 2 (9 probes) still fit; the CONDITIONAL tie-break rung would be truncated. Raising the soft stop as well to protect the full 12-probe design costs $22.6947 hard instead of $22.4508."
+    }
+  },
+  "separate_finding_not_repriced_here": {
+    "what": "the 180-minute search allowance predates a measured operator-build term. autoinit_phase_a_repricing.md states the search is priced as '39-56 states x (~2.6 min evaluation + ~8 s statistics) with the operator build UNMEASURED and covered by the gap to the hard column'. This audit now puts one operator's build alone -- depth.causal_kl_greedy_v1, CACHED -- at 133.59 min, i.e. 74% of the whole allowance before any evaluation, statistics or other operator is counted.",
+    "project_model_for_the_frozen_configuration": {
+      "row": "L40S, 1 profile, beam 6",
+      "seconds_low": 3368,
+      "seconds_high": 12973,
+      "minutes_high": 216.22,
+      "allowance_minutes": 180.0,
+      "gap_minutes": 36.22,
+      "note": "the 180 figure appears to have been taken from the beam-4 row (182.07 min); the frozen schedule is beam 6. seconds_high uses the CPU statistics upper bound, which attempt 4's measured gpu_fraction has since narrowed, so 216.22 is itself an upper bound."
+    },
+    "if_folded_in_as_well": {
+      "hard_terminate_usd": 23.0483,
+      "minimum_cumulative_cap": 216.2266
+    },
+    "status": "reported for a maintainer decision; NOT included in the reprice above"
+  },
+  "minimum_cumulative_cap": {
+    "spent": 193.1783,
+    "with_fallback_reserve": 215.6291,
+    "with_fallback_and_beam6_gap": 216.2266,
+    "previously_reported": 213.1909
+  },
+  "not_changed": [
+    "the search",
+    "the schedule",
+    "the seeds",
+    "the thresholds",
+    "the recovery design",
+    "the required host RAM draw"
+  ],
+  "record_sha256": "f5ee0c176af2e11f308c4ad17509653a4d4fa3829428eabc4c1d64cf45862253"
+}

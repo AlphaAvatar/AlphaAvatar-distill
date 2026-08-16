@@ -3233,3 +3233,73 @@ CalibrationError: calib.domain_balanced@v1:
   costs ~2× its forward passes and the search may exceed its allowance; the run
   now says which path it took instead of failing silently.
 - **Revisit when:** the first pod records a `reference_cache` decision.
+
+## 2026-08-16 — Reference-cache fallback audit: the hard bound is repriced to $22.4508
+
+- **Context:** the cgroup-aware cache decision plus a numerically-identical
+  recompute fallback is sufficient for memory *safety*. What was not established
+  was **runtime coverage**: how much extra search time the fallback costs if the
+  pod's cgroup cannot take the 16.91 GiB (bf16) reference cache. Derived at $0;
+  no pod was created and host RAM was not measured.
+- **Topology.** Under the frozen schedule (width 6, warmup 1, one profile), a
+  DEPTH operator can only be invoked by a parent that has not yet applied DEPTH.
+  Worst case every beam slot holds such a parent: **1 + 3 + 6 + 6 = 16**
+  `depth.causal_kl_greedy_v1` invocations. Consistent with the preregistration's
+  39–56 states / 7–13 leaves.
+- **Cost.** Priced on `L40S_MEASURED`, whose 88.83 effective TFLOP/s is
+  calibrated on E8a's **measured** 1,300 s for 260 subset evaluations over this
+  exact mixture — and the model reproduces that 1,300 s for the level-0
+  invocation, which is the round trip. Worst case: **133.59 min cached**,
+  **+147.77 min** if every invocation falls back. The overhead is **2.10×**, not
+  2×, because the recompute path performs a full-depth intact forward per
+  candidate evaluation while the ablated forwards it parallels run at the mean
+  31.66 surviving blocks.
+- **It is binary.** The cache size is `positions × vocab × itemsize` and does not
+  depend on the parent's width, so it is 16.91 GiB at every level: either all 16
+  invocations cache or none do.
+- **Measured, and deliberately not used as the ratio.** The same operator on 12
+  real calibration items: cached 26.08 s / 6.09 GiB peak, recompute 30.88 s /
+  3.20 GiB peak, **identical removal order and identical candidate score
+  tables**. The 1.18× there is not the pod's ratio — at toy width the cost is
+  dominated by the 151,936-wide lm_head and the float32 `distortion` reduction,
+  which both paths pay per (item, candidate) and which cancel out of the
+  difference. The measurement establishes agreement and behaviour, the FLOP
+  model establishes the ratio.
+- **Verdict: it does not fit.** 147.77 min exceeds the 180-minute search
+  allowance's headroom and pushes the session past its 1,212.88-minute hard
+  contingency.
+- **Decision:** add the fallback minutes as an explicit reserve on the **hard
+  bound only**, the way the 20-minute artifact-recovery reserve is added.
+  Expected and soft describe the cached path and do not move.
+
+  | | before | after |
+  | --- | ---: | ---: |
+  | expected | $17.8933 | $17.8933 |
+  | soft stop | $19.6826 | $19.6826 |
+  | **hard terminate** | **$20.0126** | **$22.4508** |
+
+  Minimum cumulative cap for one complete attempt: **$215.6291**.
+- **Consequence if the fallback engages.** With the soft stop unchanged, the run
+  spends the extra 147.77 min in the search and then soft-stops ~0.55 probe
+  early. Rungs 1 and 2 (9 probes) still fit; the **conditional** tie-break rung
+  would be truncated. Protecting the full 12-probe design under the fallback
+  costs $22.6947 hard instead.
+- **Alternatives considered:** buy a pod to measure the cgroup grant (forbidden,
+  and it would price one host draw rather than the class); require a host RAM
+  minimum (a host lottery, and the same mistake the v1 image-digest rule made);
+  cache only as many items as fit (strictly better and numerically identical,
+  but an implementation change that was not requested and would need its own
+  validation — recorded as available, not taken).
+- **Separate finding, NOT folded into the reprice.** The 180-minute allowance
+  predates any measured operator-build term:
+  `autoinit_phase_a_repricing.md` prices the search as "39–56 states × (≈2.6 min
+  evaluation + ≈8 s statistics) with the operator build **unmeasured** and
+  covered by the gap to the hard column". This audit puts one operator's build
+  alone, **cached**, at 133.59 min — 74% of the whole allowance before any
+  evaluation, statistics or other operator. The project's own model for the
+  frozen configuration (`L40S, 1 profile, beam 6`) gives 56.1–216.2 min against
+  the 180 priced; the 180 appears to come from the **beam-4** row (182.07 min).
+  Folding that in as well would put the hard bound at $23.0483 and the minimum
+  cap at $216.2266. Reported for a maintainer decision.
+- **Revisit when:** a pod records its `reference_cache` decision and its actual
+  stage-1 wall clock.

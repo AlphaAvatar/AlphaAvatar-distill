@@ -1,4 +1,4 @@
-**Updated:** 2026-08-16 21:20 UTC · branch `main`
+**Updated:** 2026-08-16 23:05 UTC · branch `main`
 **No pods running. Nothing billing.** **Stage 3 is COMPLETE.** Phase A has been
 attempted **five** times for **$1.6321**, with **one stage passed** (stage 0, on
 attempt 5). Nothing has been trained and no permanent artifact has been touched.
@@ -238,27 +238,50 @@ because `plan_session` computes it before a pod can exist.
 been issued and the launcher refuses to create a pod without one. Raising the cap
 did not authorize a launch.
 
-## Phase A: the cap gap
+## Phase A: repriced, and the cap gap
 
-Phase A prices at **$17.8933 expected / $19.6826 soft / $20.0126 hard**,
-unchanged by the 2026-08-16 fixes (nothing that feeds the price moved).
+The reference-cache fallback audit
+([`autoinit_phase_a_fallback_audit.json`](autoinit_phase_a_fallback_audit.json))
+**repriced the hard bound**. Worst case the frozen schedule reaches **16**
+`depth.causal_kl_greedy_v1` invocations (1+3+6+6); at 133.59 min cached, a
+fallback to the numerically-identical recompute path costs **+147.77 min** —
+past both the 180-minute search allowance and the session's hard contingency.
+Those minutes are now an explicit reserve on the **hard bound only**, since
+expected and soft describe the cached path.
+
+| | before | after |
+| --- | ---: | ---: |
+| expected | $17.8933 | $17.8933 |
+| soft stop | $19.6826 | $19.6826 |
+| **hard terminate** | **$20.0126** | **$22.4508** |
 
 ```
 cumulative spend                 $193.1783
 authorized cap                   $213.00
 remaining                        $ 19.8217
-Phase A hard bound               $ 20.0126
+Phase A hard bound (repriced)    $ 22.4508
                                  ---------
-SHORT BY                         $  0.1909
+SHORT BY                         $  2.6291
 ```
 
-A sixth attempt therefore needs a **cap decision**, not merely an authorization.
-The minimum cumulative cap that covers one complete attempt on the present
-numbers is **$213.1909**.
+Minimum cumulative cap for one complete attempt: **$215.6291**.
+
+Two things the maintainer decides, not me:
+
+* the **conditional tie-break** is what a fallback run would truncate (the soft
+  stop is unchanged, so it soft-stops ~0.55 probe early). Protecting the full
+  12-probe design under the fallback is **$22.6947** hard instead.
+* the 180-minute search allowance **predates any measured operator-build term** —
+  the repricing document says so explicitly — and this audit puts one operator's
+  build alone, cached, at 133.59 min. The project's own model for the frozen
+  beam-6 configuration gives up to 216.2 min against the 180 priced; the 180
+  appears to come from the **beam-4** row. Folding that in too: **$23.0483**
+  hard, minimum cap **$216.2266**. Reported, not applied.
 
 ## What remains
 
-1. **Raise the cap** to cover one complete attempt, or decide not to run Phase A.
+1. **Raise the cap** to cover one complete attempt ($215.6291 minimum on the
+   repriced hard bound), or decide not to run Phase A.
 2. **Issue a `PhaseAAuthorization`**, if and when the maintainer wants Phase A
    run: bound to the session plan hash, the science plan hash
    `02be33b9a7a8e26bc8bfb75795351e8cdc9ffd441b47066cc81887cfc511b55c`, the
