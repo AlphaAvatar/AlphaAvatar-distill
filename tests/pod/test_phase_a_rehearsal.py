@@ -715,8 +715,8 @@ def test_make_plan_prices_and_stays_inside_the_authorization():
     session.check_gpu_offered = lambda: True
 
     class Auth:
-        hard_cap_usd = 21.4538
-        per_launch_hard_usd = 21.4538
+        hard_cap_usd = 23.0484
+        per_launch_hard_usd = 23.0484
         def require_within_cap(self, usd, what=""):
             if usd > self.hard_cap_usd:
                 raise AuthorizationError(f"{usd} over {self.hard_cap_usd}")
@@ -729,7 +729,7 @@ def test_make_plan_prices_and_stays_inside_the_authorization():
     # 12 priced probes: rung 1's 6, rung 2's 3, and headroom for the conditional
     # tie-break so the watchdog cannot kill a legitimately triggered one.
     assert session.ev["priced_probes"]["total_priced"] == 12
-    assert plan.hard_terminate_usd <= 21.4538, "does not fit the raised cap"
+    assert plan.hard_terminate_usd <= 23.0484, "does not fit the repriced cap"
     assert plan.expected_usd < plan.soft_stop_usd < plan.hard_terminate_usd
 
 
@@ -751,8 +751,19 @@ def test_the_authorization_constant_matches_what_make_plan_prices():
         "the granted cap does not cover the plan the launcher prices")
     assert session.plan.hard_terminate_usd <= A.hard_cap_usd
     assert session.plan.hard_terminate_usd <= A.per_launch_hard_usd
-    # And it fits the raised project cap with real margin.
-    assert A.hard_cap_usd <= 213.00 - 191.5462
+    # The cap is the priced figure rounded UP at 4 dp, not a loose grant: a cap
+    # rounded down would make `require_within_cap` refuse the launcher's own
+    # plan by 2.5e-5 dollars, and a generous one would authorize slack nobody
+    # derived.
+    assert 0 <= A.hard_cap_usd - session.plan.hard_terminate_usd < 1e-4
+    # It does NOT fit the currently recorded $213.00 project cap. That is the
+    # point: attempt 6 needs a cap decision, and $217.00 is RECOMMENDED, not
+    # approved. This asserts the recommendation would cover it, not that it was
+    # granted -- the launcher still refuses until an artifact carrying this cap
+    # exists.
+    assert 193.1783 + A.hard_cap_usd > 213.00, (
+        "the repriced plan would fit the old cap; the reprice did not land")
+    assert 193.1783 + A.hard_cap_usd <= 217.00
 
 
 def test_the_authorization_constant_still_carries_its_placeholders():
@@ -1064,3 +1075,112 @@ def test_the_failed_spec_requires_only_the_evidence(tmp_path):
         REPO / "configs/autoinit/phase_a_artifacts_failed.json"),
         created_utc="2026-08-15T00:00:00Z", settle_seconds=0)
     assert manifest.ok, f"missing {manifest.missing}"
+
+
+def test_make_plan_reproduces_the_repriced_thresholds_exactly():
+    """The $0 plan must reproduce the figures the authorization will carry.
+
+    These three numbers are what the driver's `afford()`, the watchdog's kill
+    time and `require_within_cap` all read. If `make_plan` and the authorization
+    disagree, the disagreement is discovered at launch on a billing pod.
+    """
+    mod = load_launcher()
+    a = launcher_defaults(mod)
+    a.max_price = 0.99
+
+    session = mod.PhaseA.__new__(mod.PhaseA)
+    session.a, session.ev, session.plan = a, {}, None
+    session.say = lambda m: None
+    session.check_gpu_offered = lambda: True
+
+    class Auth:
+        hard_cap_usd = per_launch_hard_usd = 23.0484
+        def require_within_cap(self, usd, what=""): pass
+        def require_within_launch_limit(self, usd, what=""): pass
+    session.auth = Auth()
+
+    assert mod.PhaseA.make_plan(session) is True
+    plan = session.plan
+    assert plan.expected_usd == pytest.approx(17.8933, abs=5e-5)
+    assert plan.soft_stop_usd == pytest.approx(22.7183, abs=5e-5)
+    assert plan.hard_terminate_usd == pytest.approx(23.0483, abs=5e-5)
+
+
+def test_the_two_soft_stop_reserves_are_named_and_carry_their_derived_minutes():
+    """Named, because a session record that says only "+184 min" cannot be
+    checked against the derivation that produced it."""
+    import json
+
+    mod = load_launcher()
+    a = launcher_defaults(mod)
+    a.max_price = 0.99
+    session = mod.PhaseA.__new__(mod.PhaseA)
+    session.a, session.ev, session.plan = a, {}, None
+    session.say = lambda m: None
+    session.check_gpu_offered = lambda: True
+
+    class Auth:
+        hard_cap_usd = per_launch_hard_usd = 23.0484
+        def require_within_cap(self, usd, what=""): pass
+        def require_within_launch_limit(self, usd, what=""): pass
+    session.auth = Auth()
+    assert mod.PhaseA.make_plan(session) is True
+
+    reserves = {r.name: r.minutes for r in session.plan.soft_stop_reserves}
+    assert set(reserves) == {"stage1_reference_cache_fallback",
+                             "beam6_search_pricing_correction"}
+
+    # Each one against the artifact it was derived from, not against itself.
+    audit = json.loads((REPO / "logs/autoinit_phase_a_fallback_audit.json").read_text())
+    extra_s = sum(r["extra_seconds_if_recomputing"]
+                  for r in audit["part_2_cost"]["per_invocation"])
+    assert reserves["stage1_reference_cache_fallback"] == pytest.approx(extra_s / 60)
+    assert audit["part_1_topology"]["max_depth_causal_invocations"] == 16
+
+    sweep = json.loads((REPO / "logs/autoinit_v1_search_space.json").read_text())["sweep"]
+    beam6 = next(r for r in sweep if r["hardware"]["name"] == "L40S"
+                 and r["n_profiles"] == 1 and r["beam_width"] == 6)
+    assert reserves["beam6_search_pricing_correction"] == pytest.approx(
+        beam6["seconds_high"] / 60 - mod.SEARCH_MINUTES)
+
+    # And the reserves land before the soft stop, which is what makes the
+    # conditional seed-sc rung survive a stage-1 fallback.
+    assert session.plan.soft_stop_minutes == pytest.approx(
+        session.plan.expected_minutes * 1.10 + sum(reserves.values()))
+    assert (session.plan.hard_terminate_minutes
+            - session.plan.soft_stop_minutes) == pytest.approx(20.0)
+
+
+def test_the_conditional_third_seed_still_fits_under_a_full_fallback():
+    """The reason the reserve is where it is.
+
+    Simulate the worst case: the search consumes its 180-minute allowance plus
+    the whole fallback, then all 12 probes run. That must stay inside the soft
+    stop, or `afford()` would refuse a legitimately triggered seed-sc rung.
+    """
+    mod = load_launcher()
+    a = launcher_defaults(mod)
+    a.max_price = 0.99
+    session = mod.PhaseA.__new__(mod.PhaseA)
+    session.a, session.ev, session.plan = a, {}, None
+    session.say = lambda m: None
+    session.check_gpu_offered = lambda: True
+
+    class Auth:
+        hard_cap_usd = per_launch_hard_usd = 23.0484
+        def require_within_cap(self, usd, what=""): pass
+        def require_within_launch_limit(self, usd, what=""): pass
+    session.auth = Auth()
+    assert mod.PhaseA.make_plan(session) is True
+
+    worst = (session.plan.expected_minutes
+             + mod.FALLBACK_RESERVE_MINUTES
+             + mod.BEAM6_SEARCH_CORRECTION_MINUTES)
+    assert worst <= session.plan.soft_stop_minutes, (
+        f"a full fallback needs {worst:.1f} min but the soft stop is at "
+        f"{session.plan.soft_stop_minutes:.1f}; the conditional seed-sc rung "
+        "would be refused by afford()")
+    # The 10% contingency is still intact on top of it, not consumed by the
+    # reserves.
+    assert session.plan.soft_stop_minutes - worst == pytest.approx(
+        session.plan.expected_minutes * 0.10)

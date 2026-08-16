@@ -3303,3 +3303,57 @@ CalibrationError: calib.domain_balanced@v1:
   cap at $216.2266. Reported for a maintainer decision.
 - **Revisit when:** a pod records its `reference_cache` decision and its actual
   stage-1 wall clock.
+
+## 2026-08-17 — Budget-semantics correction: both reserves move BEFORE the soft stop
+
+- **Context:** yesterday's reprice put the 147.77-minute fallback reserve on the
+  hard bound only, and left the beam-6 pricing gap out entirely. The maintainer
+  rejected both halves.
+- **Why hard-only was wrong.** The fallback is consumed *entirely inside
+  stage 1*, and `PhaseADriver.afford()` refuses to **start** work that would
+  cross the **soft** stop. A reserve after the soft stop therefore moves only
+  the watchdog's kill time: it protects the pod and not the experiment. The
+  search would have spent its extra 147.77 min and then `afford()` would have
+  refused later probes — including a legitimately triggered conditional seed-sc
+  rung. The frozen design retains the full third-seed path, so that trade is not
+  available.
+- **Why the beam-6 gap is now folded in.** `SEARCH_MINUTES = 180` was taken from
+  the cost model's **beam-4** row (182.07 min). The frozen schedule is **beam 6**,
+  whose row is 12,972.95 s = 216.22 min. A 36.22-minute difference between the
+  priced allowance and the model's own figure for the configuration actually
+  frozen is a **pricing defect**, not an unmeasured contingency, and defects are
+  corrected rather than reserved against.
+- **Decision.** `plan_session` gains `soft_stop_reserves`: named reserves added
+  **after** the contingency multiplier and **before** the soft stop. Placement is
+  the whole point and is asserted in `tests/infrastructure/test_budget.py` — a
+  reserve folded into `expected` would be multiplied by the contingency and
+  would inflate the figure an authorization request quotes; one added after the
+  soft stop would not protect the work.
+
+  ```
+  expected  = 1084.4400 min = $17.8933   (cached path, unchanged)
+  soft      = expected x 1.10
+              + 147.7683  stage1_reference_cache_fallback
+              +  36.2158  beam6_search_pricing_correction
+            = 1376.8681 min = $22.7183
+  hard      = soft + 20.0 artifact recovery
+            = 1396.8681 min = $23.0483
+  ```
+
+  Reproduced by `PhaseA.make_plan` at $0 and pinned in
+  `tests/pod/test_phase_a_rehearsal.py`, which also asserts that the worst case
+  — the full 180-minute search allowance plus **both** reserves plus all 12
+  probes — lands inside the soft stop with the entire 10% contingency still
+  intact. That is the property that keeps seed sc reachable.
+- **Authorization cap `$23.0484`, not `$23.0483`.** The priced figure is
+  `$23.048325` and `require_within_cap` refuses `projected > cap`, so the cap is
+  the 4-dp **ceiling**; rounded down, the launcher would refuse its own plan by
+  2.5e-5 dollars. Pinned to within 1e-4 of the priced value so it cannot drift
+  into a loose grant either.
+- **Cap position.** Minimum cumulative cap **$216.2267** against $193.1783 spent.
+  The maintainer **recommends $217.00**; it is **not approved and not recorded**
+  in `BUDGET_LEDGER.md`, and no Attempt-6 authorization is issued until it is.
+  All three pricing bases ($20.0126, $22.4508, $23.0483) are recorded there as
+  superseded, because a threshold that moves silently is how E6b overran.
+- **Not changed:** the search, the schedule, the seeds, the thresholds, the
+  recovery design, the science. No partial caching. No rehearsal expansion.

@@ -263,13 +263,36 @@ $2.30   RAISED 2026-08-14 with maintainer approval, after attempt 1 spent
 ```
 authorized cumulative cap                                    $213.00
 actual cumulative spend                                      $193.1783
-unused authorization remaining                               $ 20.4643
-Phase A hard threshold, from the launcher's own make_plan     $ 20.0126
-margin after a worst-case Phase A                            $ -0.1909  <-- NEGATIVE
-    PHASE A NO LONGER FITS THE $213.00 CAP. Remaining $19.8217
-    against a $20.0126 hard bound: short by $0.1909. A further
+unused authorization remaining                               $ 19.8217
+Phase A hard threshold, from the launcher's own make_plan     $ 23.0483
+margin after a worst-case Phase A                            $ -3.2266  <-- NEGATIVE
+    PHASE A DOES NOT FIT THE $213.00 CAP. Remaining $19.8217
+    against a $23.0483 hard bound: short by $3.2266. A further
     attempt requires a cap decision, not just an authorization.
-    NOT a retry reserve. No attempt 4 is pre-authorized.
+    NOT a retry reserve. No attempt 6 is pre-authorized.
+
+    Minimum cumulative cap for one complete attempt   $216.2267
+    Maintainer's RECOMMENDED cap (2026-08-17)         $217.00
+        NOT APPROVED and NOT recorded below. Until it is, no
+        Attempt-6 authorization may be issued.
+
+    SUPERSEDED Phase-A pricing, kept because a threshold that
+    moved silently is how E6b overran:
+      $20.0126 hard  no fallback reserve, no beam-6 correction
+      $22.4508 hard  fallback reserve placed AFTER the soft stop.
+                     Wrong: the fallback is consumed inside
+                     stage 1, and `afford()` gates on the SOFT
+                     stop, so it would have truncated the
+                     conditional seed-sc rung to pay for an
+                     infrastructure risk.
+      $23.0483 hard  CURRENT. Both reserves before the soft stop:
+                     +147.7683 min reference-cache fallback and
+                     +36.2158 min beam-6 search correction, on a
+                     $17.8933 expected and a $22.7183 soft stop,
+                     plus the 20-minute artifact-recovery reserve.
+                     Authorization cap is the 4-dp ceiling,
+                     $23.0484. Derivation in
+                     `autoinit_phase_a_fallback_audit.json`.
 GRANTED Phase-A authorization, 2026-08-15T12:32:08Z          $ 20.0126
     `autoinit.phase_a.2026-08-15T1232Z`, sha256 14360ef4…
     expected $17.8933 ($14.3604 if it resolves after two

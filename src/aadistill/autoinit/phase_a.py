@@ -382,15 +382,13 @@ PHASE_A_AUTHORIZATION = PhaseAAuthorization(
     authorization_id="autoinit.phase_a.PLACEHOLDER",
     granted_utc="PLACEHOLDER",
     granted_by=(
-        "maintainer, 2026-08-15, in two explicit steps. (1) The project cap was "
-        "raised on the maintainer's own words 'Raise it further, e.g. $213-214'; "
-        "$213.00 was selected from that stated range as the conservative end and "
-        "recorded in BUDGET_LEDGER.md, leaving $21.4538 against a spend of "
-        "$191.5462. (2) The maintainer then instructed: 'Only then issue a fresh "
-        "PhaseAAuthorization with a real UTC grant timestamp against those final "
-        "identities', after the searched-leaf durability item was resolved and "
-        "the implementation committed. Figures below are the launcher's priced "
-        "plan, not a transcription."),
+        "PLACEHOLDER. The figures below are the launcher's priced plan, not a "
+        "transcription, and they require a cumulative project cap of at least "
+        "$216.2266 against a spend of $193.1783. The maintainer RECOMMENDED "
+        "$217.00 on 2026-08-17; that cap has NOT been formally approved or "
+        "recorded in BUDGET_LEDGER.md, and until it is, this template must not "
+        "be issued. The superseded $20.0126 grant basis (project cap $213.00) "
+        "is recorded in autoinit_phase_a_fallback_audit.json."),
     plan_id=PHASE_A_PLAN_V1.plan_id,
     plan_hash=PHASE_A_PLAN_V1.plan_hash,
     # Filled at issue time from the frozen plan on disk, so a threshold that
@@ -401,12 +399,20 @@ PHASE_A_AUTHORIZATION = PhaseAAuthorization(
     #: one), 1023 steps each at the measured 61.55 min end-to-end, plus setup,
     #: attestation, selection, collection, a 10% contingency and a 20-minute
     #: artifact-recovery reserve.
+    #: plus two named SOFT-STOP reserves: 147.7683 min for the reference-cache
+    #: fallback and 36.2158 min for the beam-6 search pricing correction. They
+    #: sit before the soft stop, not after it, because the fallback is consumed
+    #: inside stage 1 and a hard-only reserve would leave `afford()` refusing the
+    #: conditional seed-sc rung. Derivation: autoinit_phase_a_fallback_audit.json.
+    #: $23.048325 is the priced figure; the cap is the 4-dp CEILING of it,
+    #: because `require_within_cap` refuses `projected > cap` and a cap rounded
+    #: down would make the launcher refuse its own plan by 2.5e-5 dollars.
     expected_usd=17.8933,
-    hard_cap_usd=20.0126,
+    hard_cap_usd=23.0484,
     #: One session, so the per-launch limit IS the cap. Stated anyway: it is the
     #: check that stopped a single continuation run from spending the cumulative
     #: allowance of five.
-    per_launch_hard_usd=20.0126,
+    per_launch_hard_usd=23.0484,
     authorized_stages=(0, 1, 2, 3, 4, 5),
     stage_conditions={
         "0": "attestation; frozen assets; assert_preregistered against the "

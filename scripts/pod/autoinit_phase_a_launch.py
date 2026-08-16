@@ -82,9 +82,36 @@ PROBE_TRAIN_MINUTES = 61.55
 #: from the marginal figure would under-book the first one.
 PROBE_BATTERY_MINUTES = 9.82
 #: The search: 39-56 states at ~2.6 min evaluation + ~8 s statistics each, plus
-#: the operator build, which is the one term still unmeasured and is why this is
-#: generous rather than tight.
+#: the operator build. This is the CACHED-path expected figure and it is left
+#: alone, because the expected figure is what an authorization request quotes.
+#: The two risks it does not cover are carried as named soft-stop reserves below
+#: rather than folded in here, where the 10% contingency would multiply them.
 SEARCH_MINUTES = 180.0
+#: Reserve 1 — the reference-cache fallback.
+#:
+#: `depth.causal_kl_greedy_v1` caches the unbypassed parent's logits for the
+#: whole calibration mixture; at 59,763 positions x 151,936 vocabulary that is
+#: 16.91 GiB in bf16. When the cgroup cannot take it the operator recomputes the
+#: reference per candidate — numerically identical, ~2.10x the forward work.
+#: Worst case the frozen schedule reaches 16 invocations (1+3+6+6) and the extra
+#: is 8,866.1 s. Derived in `logs/autoinit_phase_a_fallback_audit.json`; priced
+#: on `L40S_MEASURED`, whose TFLOP/s is calibrated on E8a's measured 1,300 s for
+#: this exact workload.
+#:
+#: It is a SOFT-STOP reserve, not a hard-only one. The fallback is consumed
+#: entirely inside stage 1, so a reserve placed after the soft stop would leave
+#: `PhaseADriver.afford()` refusing later probes — including a legitimately
+#: triggered conditional seed-sc rung. That would truncate the frozen design to
+#: pay for an infrastructure risk.
+FALLBACK_RESERVE_MINUTES = 8866.1 / 60.0                      # 147.7683
+#: Reserve 2 — the beam-6 search pricing correction.
+#:
+#: `SEARCH_MINUTES` was taken from the cost model's beam-4 row (182.07 min). The
+#: frozen schedule is beam 6, whose row in `logs/autoinit_v1_search_space.json`
+#: (L40S, 1 profile) is 12,972.95 s = 216.22 min. The 36.22-minute difference is
+#: a known pricing defect, not an unmeasured contingency, and it is carried
+#: explicitly rather than left to the gap between expected and hard.
+BEAM6_SEARCH_CORRECTION_MINUTES = 12972.947682669545 / 60.0 - SEARCH_MINUTES
 #: Setup allowance, measured across the 2026-08-14/15 runs at ~10.4 min and
 #: priced at 11 so the number is not the optimistic one.
 SETUP_MINUTES = 11.0
@@ -248,7 +275,15 @@ class PhaseA(_preflight.Preflight):
             setup_minutes=self.a.setup_minutes, other_phases=phases,
             eval_minutes_per_arm=self.a.probe_battery_minutes,
             transfer_minutes=self.a.transfer_minutes,
-            contingency_fraction=0.10, artifact_recovery_reserve_minutes=20.0)
+            contingency_fraction=0.10,
+            # Before the soft stop, so the conditional seed-sc rung survives a
+            # risk that materializes in stage 1. See the constants' provenance.
+            soft_stop_reserves=(
+                Phase("stage1_reference_cache_fallback",
+                      self.a.fallback_reserve_minutes),
+                Phase("beam6_search_pricing_correction",
+                      self.a.beam6_correction_minutes)),
+            artifact_recovery_reserve_minutes=20.0)
         self.ev["budget_plan"] = self.plan.as_dict()
         self.ev["priced_probes"] = {
             "rung1": self.a.rung1_probes, "rung2": self.a.rung2_probes,
@@ -503,6 +538,12 @@ def main() -> int:
     ap.add_argument("--tie-break-probes", type=int, default=3)
     ap.add_argument("--search-minutes", type=float, default=SEARCH_MINUTES)
     ap.add_argument("--probe-train-minutes", type=float, default=PROBE_TRAIN_MINUTES)
+    ap.add_argument("--fallback-reserve-minutes", type=float,
+                    default=FALLBACK_RESERVE_MINUTES,
+                    help="soft-stop reserve for the reference-cache fallback")
+    ap.add_argument("--beam6-correction-minutes", type=float,
+                    default=BEAM6_SEARCH_CORRECTION_MINUTES,
+                    help="soft-stop reserve for the beam-6 search pricing defect")
     ap.add_argument("--probe-battery-minutes", type=float,
                     default=PROBE_BATTERY_MINUTES)
     ap.add_argument("--setup-minutes", type=float, default=SETUP_MINUTES)

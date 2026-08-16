@@ -96,6 +96,10 @@ class BudgetPlan:
     hard_terminate_minutes: float
     step_time: StepTime
     breakdown: tuple[Phase, ...] = field(default_factory=tuple)
+    #: Named reserves folded into the soft stop after the contingency multiplier.
+    #: Kept as named entries rather than one number so a session record says what
+    #: each one is for and a reader can check it against its derivation.
+    soft_stop_reserves: tuple[Phase, ...] = field(default_factory=tuple)
     notes: tuple[str, ...] = field(default_factory=tuple)
 
     def usd_at(self, minutes: float) -> float:
@@ -145,6 +149,9 @@ class BudgetPlan:
     def as_dict(self) -> dict:
         d = asdict(self)
         d["breakdown"] = [asdict(p) for p in self.breakdown]
+        d["soft_stop_reserves"] = [asdict(r) for r in self.soft_stop_reserves]
+        d["soft_stop_reserve_minutes"] = sum(r.minutes
+                                             for r in self.soft_stop_reserves)
         d["step_time"] = asdict(self.step_time)
         d["expected_usd"] = round(self.expected_usd, 4)
         d["soft_stop_usd"] = round(self.soft_stop_usd, 4)
@@ -166,6 +173,7 @@ def plan_session(
     transfer_minutes: float = 0.0,
     other_phases: tuple[Phase, ...] = (),
     contingency_fraction: float = 0.10,
+    soft_stop_reserves: tuple[Phase, ...] = (),
     artifact_recovery_reserve_minutes: float = 30.0,
     step_time_floor: float = MEASURED_STEP_SECONDS,
     below_floor_reason: str = "",
@@ -223,7 +231,21 @@ def plan_session(
         *other_phases,
     ]
     expected = sum(p.minutes for p in phases)
-    soft_stop = expected * (1.0 + contingency_fraction)
+    # Reserves for identified, bounded risks that are NOT part of the expected
+    # path, added AFTER the contingency multiplier and BEFORE the soft stop.
+    #
+    # The placement is the point. A reserve added as a phase would inflate the
+    # expected figure and be multiplied by the contingency, and one added after
+    # the soft stop would not protect the work at all: the driver's `afford()`
+    # refuses to START anything that would cross the soft stop, so a risk that
+    # materializes EARLY in a session — Phase A's reference-cache fallback is
+    # consumed entirely inside stage 1 — would be paid for out of the later
+    # stages' budget and silently truncate them. A reserve that only moves the
+    # watchdog's kill time protects the pod, not the experiment.
+    reserve_minutes = sum(r.minutes for r in soft_stop_reserves)
+    if any(r.minutes < 0 for r in soft_stop_reserves):
+        raise BudgetError("a soft-stop reserve cannot be negative")
+    soft_stop = expected * (1.0 + contingency_fraction) + reserve_minutes
     hard = soft_stop + artifact_recovery_reserve_minutes
 
     plan = BudgetPlan(
@@ -235,6 +257,7 @@ def plan_session(
         hard_terminate_minutes=hard,
         step_time=step_time,
         breakdown=tuple(phases),
+        soft_stop_reserves=tuple(soft_stop_reserves),
         notes=tuple(notes),
     )
     if plan.hard_terminate_usd > authorized_usd:

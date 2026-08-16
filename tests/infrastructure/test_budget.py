@@ -117,3 +117,64 @@ def test_the_plan_serializes_for_the_session_record():
                 "hard_terminate_usd", "step_time", "breakdown"):
         assert key in d
     assert d["step_time"]["source"].startswith("E6b")
+
+
+def test_a_soft_stop_reserve_lands_before_the_soft_stop_not_after_it():
+    """Placement is the whole point, so it is asserted rather than assumed.
+
+    A reserve added as a phase would be multiplied by the contingency and would
+    inflate the expected figure an authorization request quotes. A reserve added
+    after the soft stop moves only the watchdog's kill time, which protects the
+    pod and not the experiment: a driver's `afford()` refuses to START anything
+    that would cross the SOFT stop, so a risk that materializes early is paid
+    for out of the later stages' budget.
+    """
+    from aadistill.infrastructure.budget import Phase, StepTime, plan_session
+
+    common = dict(price_per_hour=1.0, authorized_usd=1e6, arms=0, steps_per_arm=0,
+                  step_time=StepTime(4.15, "measured"), setup_minutes=10.0,
+                  other_phases=(Phase("work", 90.0),),
+                  contingency_fraction=0.10,
+                  artifact_recovery_reserve_minutes=20.0)
+    bare = plan_session(**common)
+    with_reserve = plan_session(**common,
+                                soft_stop_reserves=(Phase("risk", 30.0),))
+
+    assert with_reserve.expected_minutes == bare.expected_minutes, (
+        "the reserve inflated the expected figure; it would then also be "
+        "multiplied by the contingency")
+    assert with_reserve.soft_stop_minutes == bare.soft_stop_minutes + 30.0
+    assert with_reserve.hard_terminate_minutes == bare.hard_terminate_minutes + 30.0
+    # The reserve is *between* expected and soft, not between soft and hard.
+    assert (with_reserve.hard_terminate_minutes
+            - with_reserve.soft_stop_minutes) == pytest.approx(20.0), (
+        "the artifact-recovery reserve changed size; the new reserve was added "
+        "after the soft stop instead of before it")
+
+
+def test_soft_stop_reserves_are_named_in_the_record():
+    from aadistill.infrastructure.budget import Phase, StepTime, plan_session
+
+    plan = plan_session(
+        price_per_hour=1.0, authorized_usd=1e6, arms=0, steps_per_arm=0,
+        step_time=StepTime(4.15, "measured"), setup_minutes=10.0,
+        soft_stop_reserves=(Phase("fallback", 12.0), Phase("correction", 8.0)),
+        artifact_recovery_reserve_minutes=20.0)
+    d = plan.as_dict()
+    assert [r["name"] for r in d["soft_stop_reserves"]] == ["fallback", "correction"]
+    assert d["soft_stop_reserve_minutes"] == 20.0
+    assert plan.soft_stop_minutes == pytest.approx(10.0 * 1.10 + 20.0)
+
+
+def test_a_negative_soft_stop_reserve_is_refused():
+    """A negative reserve would buy budget by asserting a risk is impossible."""
+    from aadistill.infrastructure.budget import (
+        BudgetError, Phase, StepTime, plan_session,
+    )
+
+    with pytest.raises(BudgetError, match="cannot be negative"):
+        plan_session(price_per_hour=1.0, authorized_usd=1e6, arms=0,
+                     steps_per_arm=0, step_time=StepTime(4.15, "measured"),
+                     setup_minutes=10.0,
+                     soft_stop_reserves=(Phase("wishful", -30.0),),
+                     artifact_recovery_reserve_minutes=20.0)

@@ -315,7 +315,13 @@
       "hard_terminate_usd_after": 22.4508,
       "increment_usd": 2.4382,
       "how": "the fallback minutes are added as an explicit reserve on the HARD bound only, the same way the 20-minute artifact-recovery reserve is. The expected and soft figures describe the cached path and do not move, because the cached path is what is expected.",
-      "consequence_if_the_fallback_engages": "the soft stop is unchanged, so a fallback run spends its extra 147.77 minutes in the search and then soft-stops ~0.55 probe earlier than planned. Rungs 1 and 2 (9 probes) still fit; the CONDITIONAL tie-break rung would be truncated. Raising the soft stop as well to protect the full 12-probe design costs $22.6947 hard instead of $22.4508."
+      "consequence_if_the_fallback_engages": "the soft stop is unchanged, so a fallback run spends its extra 147.77 minutes in the search and then soft-stops ~0.55 probe earlier than planned. Rungs 1 and 2 (9 probes) still fit; the CONDITIONAL tie-break rung would be truncated. Raising the soft stop as well to protect the full 12-probe design costs $22.6947 hard instead of $22.4508.",
+      "SUPERSEDED": {
+        "on": "2026-08-17",
+        "what_was_wrong": "the reserve was placed on the HARD bound only. That is budget-semantically wrong for this risk: the fallback is consumed entirely inside stage 1, and `PhaseADriver.afford()` refuses to START work that would cross the SOFT stop. A hard-only reserve therefore protects the pod and not the experiment -- it would have let the search spend the extra minutes and then had afford() refuse later probes, including a legitimately triggered conditional seed-sc rung. The frozen design retains the full third-seed path, so the reserve must sit before the soft stop.",
+        "also_folded_in": "the beam-6 search pricing correction, previously reported as a separate finding and left out. The frozen schedule is beam 6 and the project's own model gives 216.22 min against the 180-minute allowance; the 36.22-minute difference is a known pricing DEFECT, not an unmeasured contingency.",
+        "replaced_by": "part_5_reprice_v2"
+      }
     }
   },
   "separate_finding_not_repriced_here": {
@@ -349,5 +355,65 @@
     "the recovery design",
     "the required host RAM draw"
   ],
-  "record_sha256": "f5ee0c176af2e11f308c4ad17509653a4d4fa3829428eabc4c1d64cf45862253"
+  "part_5_reprice_v2": {
+    "decided": "2026-08-17, by the maintainer",
+    "composition": {
+      "expected_minutes": 1084.44,
+      "contingency_fraction": 0.1,
+      "soft_stop_reserves": [
+        {
+          "name": "stage1_reference_cache_fallback",
+          "minutes": 147.76833333333335,
+          "derivation": "part_2_cost: 8,866.1 s over a maximum of 16 invocations"
+        },
+        {
+          "name": "beam6_search_pricing_correction",
+          "minutes": 36.21579471115908,
+          "derivation": "autoinit_v1_search_space.json, L40S / 1 profile / beam 6: 12,972.95 s = 216.2158 min, minus the 180.0 allowance"
+        }
+      ],
+      "artifact_recovery_reserve_minutes": 20.0,
+      "formula": "soft = expected x (1 + contingency) + sum(soft_stop_reserves); hard = soft + artifact_recovery_reserve"
+    },
+    "thresholds": {
+      "expected_usd": 17.8933,
+      "expected_minutes": 1084.44,
+      "soft_stop_usd": 22.7183,
+      "soft_stop_minutes": 1376.8681,
+      "hard_terminate_usd": 23.0483,
+      "hard_terminate_minutes": 1396.8681,
+      "authorization_hard_cap_usd": 23.0484,
+      "cap_rounding": "the cap is the 4-dp CEILING of the priced $23.048325. require_within_cap refuses `projected > cap`, so a cap rounded DOWN would make the launcher refuse its own plan by 2.5e-5 dollars."
+    },
+    "reproduced_by": "PhaseA.make_plan at $0; pinned in tests/pod/test_phase_a_rehearsal.py",
+    "conditional_seed_sc_survives": {
+      "worst_case_minutes": 1268.4241280444926,
+      "soft_stop_minutes": 1376.8681,
+      "margin_minutes": "the full 10% contingency, 108.444 min, is still intact"
+    },
+    "cumulative_cap": {
+      "spend": 193.1783,
+      "minimum": 216.2267,
+      "recommended": 217.0,
+      "approved": false,
+      "note": "$217.00 is the maintainer's RECOMMENDATION. It is not recorded in BUDGET_LEDGER.md as an authorized cap and no Attempt-6 authorization may be issued until it is."
+    },
+    "superseded_pricing": [
+      {
+        "basis": "project cap $213.00",
+        "expected_usd": 17.8933,
+        "soft_stop_usd": 19.6826,
+        "hard_terminate_usd": 20.0126,
+        "why": "no fallback reserve and no beam-6 correction"
+      },
+      {
+        "basis": "hard-only fallback reserve",
+        "expected_usd": 17.8933,
+        "soft_stop_usd": 19.6826,
+        "hard_terminate_usd": 22.4508,
+        "why": "wrong placement; would have truncated the conditional sc rung"
+      }
+    ]
+  },
+  "record_sha256": "dec65154420548e9fe61e9f473a1d13b63e67b7dce5b2a07bea0647f61769b4c"
 }
