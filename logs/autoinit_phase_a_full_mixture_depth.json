@@ -1,0 +1,62 @@
+{
+  "schema": "aadistill.autoinit.full_mixture_depth_probe/v1",
+  "generated_utc": "2026-08-16T09:58:29.008051+00:00",
+  "purpose": "Execute depth.causal_kl_greedy_v1 once against the COMPLETE frozen calib.domain_balanced@v1 mixture, at $0 on CPU. This is the invocation the OOM killer terminated during the Phase-A stage-1 rehearsal on 2026-08-16, and the case the committed test subsets for cost.",
+  "git_commit_at_run": "b42f86d06d8b018c810889b97b891dfbac76219c",
+  "defect": {
+    "where": "src/aadistill/autoinit/operators/depth.py",
+    "what": "_reference_pass materialized the unbypassed reference logits for EVERY calibration item before the greedy search, unconditionally, widened to float32 on the host: 59,763 prediction positions x 151,936 vocabulary x 4 B = 33.83 GiB of host RAM per operator invocation.",
+    "why_never_seen": "the operator had never been executed against the real mixture. Every zero-cost run used a toy mixture with a small vocabulary, Phase-A attempt 5 died earlier at the missing calibration file, and the search itself has never run on a pod.",
+    "regression_from": "scripts/training/search_depth_map.py (E8a), whose algorithm this operator declares it re-runs. E8a sizes the cache, compares it against device headroom, and falls back to recomputing per candidate. The port dropped the check and also widened bf16 to float32, doubling the footprint."
+  },
+  "fix": {
+    "what": "_ReferenceLogits: size the cache, compare against the memory that actually binds, cache when it fits and recompute per candidate when it does not. Kept in the model's own dtype; distortion() upcasts to float32 in chunks internally, so no reduced value changes.",
+    "headroom_source": "the HOST's available memory always, because the cache is `.cpu()` by construction: the cgroup v2/v1 grant intersected with /proc/meminfo MemAvailable. E8a probed `torch.cuda.mem_get_info` because ITS cache lived on the accelerator; carried over unchanged that probe would have compared a 16.9 GiB host allocation against ~38 GiB of free L40S VRAM.",
+    "budget_fraction": 0.66,
+    "numerics": "verified identical, not assumed - see tests/autoinit",
+    "operator_ledger": "unchanged; signature_hash 8106604694621d305d... is the preregistered value and declared semantics did not move",
+    "cost_when_the_fallback_engages": "2 * evals * n_items forward passes instead of (evals + 1) * n_items, i.e. about 2x for this operator. Recorded in the operator trace under reference_cache so a run that took the slow path says so."
+  },
+  "measured": {
+    "mixture": "calib.domain_balanced@v1",
+    "items": 67,
+    "prediction_positions": 59763,
+    "vocab_size": 151936,
+    "model": "toy Qwen3, hidden 16 / 6 layers, float32, CPU (the cost is vocabulary x positions, not model size)",
+    "depth": "6 -> 5 layers, 6 subset evaluations",
+    "float32_cache_that_would_have_been_held_gib": 33.826,
+    "elapsed_seconds": 349.0,
+    "peak_rss_gib": 4.36,
+    "reference_cache_decision": {
+      "cached": false,
+      "estimate_bytes": 36320604672,
+      "estimate_gib": 33.826,
+      "available_bytes": 22776819712,
+      "budget_fraction": 0.66,
+      "headroom_source": "proc.meminfo",
+      "fallback": "recompute per candidate: identical numbers, ~2x forward passes"
+    },
+    "removal_order": [
+      5
+    ],
+    "kept_layers": [
+      0,
+      1,
+      2,
+      3,
+      4
+    ],
+    "host": "CPU-only dev box, 30 GiB RAM, 22.78 GiB available at probe time"
+  },
+  "implication_for_the_paid_pod": {
+    "estimate_on_pod_bytes": 18160302336,
+    "estimate_on_pod_gib": 16.913,
+    "note": "the pod loads the teacher in bfloat16, so the cache is 16.91 GiB there, not 33.83. RunPod advertises 94 GB host memory at the 1x L40S price point, so the cached path -- the one the 180-minute search budget is priced from -- is expected to be taken. This has NOT been measured on a pod; the operator now records which path it took.",
+    "unmeasured": "the pod's actual cgroup memory grant"
+  },
+  "artifacts": {
+    "operator": "src/aadistill/autoinit/operators/depth.py",
+    "probe_script": "not committed; a one-off, reproduced by the recipe above"
+  },
+  "record_sha256": "c4e91f6fec972409bb6fe4bf84126ed173b40bc1e5f0754f3dbd9d87bdadb667"
+}

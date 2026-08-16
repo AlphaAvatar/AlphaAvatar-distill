@@ -136,5 +136,14 @@ while IFS= read -r p; do
 done <<< "$HIDDEN_PATHS"
 echo "hid $n path(s) a pod session does not receive"
 
-PODSIM_CMD=${PODSIM_CMD:-"uv run pytest tests/ -q --ignore=tests/data/test_recovery_corpus_pipeline.py"}
+# Must stay byte-identical in its ignore list to the pod gate in
+# `autoinit_preflight_setup.sh`, or this simulates a command the pod does
+# not run. `tests/pod/test_phase_a_stages1_5_execute.py` is a PRE-flight
+# rehearsal: it exists to execute the driver before a pod is created, it
+# takes ~20 minutes, and on the pod it would spend a large share of the
+# 2700 s gate re-proving what the dev box already proved -- against a
+# timeout whose exit 90 kills the session.
+PODSIM_CMD=${PODSIM_CMD:-"uv run pytest tests/ -q \
+  --ignore=tests/data/test_recovery_corpus_pipeline.py \
+  --ignore=tests/pod/test_phase_a_stages1_5_execute.py"}
 eval "$PODSIM_CMD" 2>&1 | tail -12

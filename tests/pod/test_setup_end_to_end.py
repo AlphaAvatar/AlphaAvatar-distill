@@ -179,6 +179,12 @@ def _build(tmp: Path) -> dict:
     lad = fixtures / "stage3_recovery_corpus_v2/ladder_uniform"
     lad.parent.mkdir(parents=True, exist_ok=True)
     lad.symlink_to(REPO / "artifacts/stage3/ladder_uniform_probe")
+    # The frozen calibration mixture. Real, not a stand-in: setup verifies its
+    # sha256 against a pinned value, so a placeholder would fail the gate for
+    # the wrong reason. Its absence is what Phase-A attempt 5 died of.
+    cal = fixtures / "e8_inputs_20260810/calibration_v1"
+    cal.parent.mkdir(parents=True, exist_ok=True)
+    cal.symlink_to(REPO / "artifacts/stage1/e8_calibration_v1")
     # The cu128 wheelhouse is COUNT-checked only (>= 91), so empty files are a
     # faithful stand-in. The vLLM one is BYTE-checked, so it is bind-mounted
     # real below.

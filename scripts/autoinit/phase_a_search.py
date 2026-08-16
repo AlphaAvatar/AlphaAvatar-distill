@@ -60,6 +60,35 @@ CANONICAL_INIT_SHA256 = (
 SEARCH_SEED = 20260815
 
 
+def as_operator_items(resolved):
+    """Adapt `CalibrationProfile.resolve()` output to what the operators consume.
+
+    The frozen mixture stores each item's tokens under **`ids`**, a plain list --
+    that is the form `mixture_content_sha256` hashes and the form the pinned
+    `d65c1f40...` content identity is derived from, so it is not changed. The
+    operators call `i["input_ids"]` and pass it straight to
+    `collector.process(ids.to(device))`, i.e. they want a `[1, T]` LongTensor.
+
+    `dry_run_search.py` builds its own items already in the operator shape, so
+    the mismatch was invisible to every zero-cost run and only appeared the first
+    time the REAL profile reached an operator -- which was Phase-A attempt 5,
+    on a paid pod. The adaptation is here rather than in `calibration.py` because
+    the stored form is what the frozen content hash is defined over.
+    """
+    import torch
+
+    out = []
+    for item in resolved:
+        ids = item.get("ids")
+        if ids is None:
+            raise KeyError(
+                f"calibration item {item.get('item_id')!r} has no 'ids'; the "
+                "frozen mixture stores tokens under that key")
+        out.append({**item,
+                    "input_ids": torch.tensor([ids], dtype=torch.long)})
+    return out
+
+
 @dataclass
 class PhaseASearch:
     """What the rungs need, as live objects plus a serializable summary."""
@@ -121,7 +150,7 @@ def run_phase_a_search(*, workdir: Path, state_eval: Path, top_n: int,
     # operator's statistics without changing any recorded identity.
     active_profile = profile or DOMAIN_BALANCED_V1
     calibration = (calibration_items if calibration_items is not None
-                   else DOMAIN_BALANCED_V1.resolve(repo_root))
+                   else as_operator_items(DOMAIN_BALANCED_V1.resolve(repo_root)))
 
     config = SearchConfig(
         run_id="autoinit.v1.phase_a", target_spec=target_spec,

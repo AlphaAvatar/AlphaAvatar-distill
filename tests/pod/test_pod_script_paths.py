@@ -610,3 +610,30 @@ def test_no_pod_script_checks_rope_on_a_meta_model(script):
         "assert_rope_matches_config, which cannot read a meta tensor. Use "
         "assert_rope_from_config(config) instead."
     )
+
+
+def test_the_simulator_and_the_pod_gate_ignore_the_same_files():
+    """The simulator is only evidence if it runs the pod's command.
+
+    `simulate_pod_env.sh` exists to answer "would this suite pass on a pod?".
+    An ignore list that differs from the pod's turns a green simulation into a
+    statement about a command nobody runs. `--ignore` is the one place the two
+    are allowed to be long, so it is the one place they are pinned.
+    """
+    import re
+
+    def ignores(path):
+        # Stops at shell quoting so the trailing `"}` of a ${VAR:-"..."}
+        # default is not captured as part of the path.
+        return sorted(re.findall(r"--ignore=([^\s\"']+)",
+                                 (REPO / path).read_text().replace("\\\n", " ")))
+
+    pod = ignores("scripts/pod/autoinit_preflight_setup.sh")
+    sim = ignores("scripts/pod/simulate_pod_env.sh")
+    assert pod, "the pod gate ignores nothing; the extractor is not matching"
+    assert pod == sim, (
+        f"the pod gate ignores {pod} but the simulator ignores {sim}; the "
+        "simulation would not describe the pod's run")
+    assert "tests/pod/test_phase_a_stages1_5_execute.py" in pod, (
+        "the ~20-minute pre-flight rehearsal is back in the pod's 2700 s gate, "
+        "whose timeout exits 90 and kills a paid session")

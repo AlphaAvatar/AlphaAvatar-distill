@@ -3152,3 +3152,84 @@ CalibrationError: calib.domain_balanced@v1:
   with one stage passed. A sixth attempt needs a cap decision, not merely an
   authorization, and neither is in hand.
 - Stopped at the boundary. No attempt 6 authorized, implied, or prepared.
+
+## 2026-08-16 — Stages 1–5 executed for real at $0; two pod-fatal defects fixed
+
+- **Context:** attempt 5 passed stage 0 and died in stage 1 on the un-staged
+  calibration mixture. Stages 1–5 were still *scripted* in the lifecycle
+  rehearsal, so their bodies had still never executed anywhere. The maintainer
+  authorized one final rehearsal expansion: stage the frozen
+  `calib.domain_balanced@v1` input, execute the real `stage1()` at toy scale
+  with the production calibration dependency, then execute the real
+  `stage2()`–`stage5()` orchestration with only training/generation stubbed.
+- **Decision:** execute them, and fix what execution found.
+
+  [`tests/pod/test_phase_a_stages1_5_execute.py`](../tests/pod/test_phase_a_stages1_5_execute.py)
+  runs the real `PhaseADriver` stages **0 → 5** end to end on CPU. Substituted:
+  the teacher/target geometry (32-wide/6-layer teacher, 16-wide/4-layer target,
+  at the **real** 151,936 vocabulary so production calibration token ids are
+  valid), the item counts, the vLLM engine probe, and the probe training
+  subprocess + generation battery. `run_probe`'s journal and resume binding,
+  `probe_config`'s `PROBE_OVERRIDES` derivation, pooling, both selections, leaf
+  retention, both stage-4 branches and the final report all run for real. The
+  battery stub's shape is copied from a real
+  `preflight_ctl_r0860k_sa_recovery_search.json` rather than invented.
+
+- **Three defects, all in never-executed code, all pod-fatal:**
+
+  1. **`ids` vs `input_ids`.** The frozen mixture stores tokens under `ids` (a
+     list); every operator reads `i["input_ids"]` (a `[1, T]` LongTensor).
+     `dry_run_search.py` built its own items already in the operator shape, so
+     no zero-cost run had ever handed a real one to an operator. Adapted in
+     `phase_a_search.as_operator_items`, deliberately **not** in
+     `calibration.py`: the stored form is what `mixture_content_sha256` and the
+     pinned `d65c1f40…` are defined over.
+  2. **`stage1` read `manifest["suite_hash"]`.** That key does not exist in
+     `state_eval_v1/manifest.json` and never has. The `KeyError` would have been
+     raised *after* the full GPU beam search — the most expensive point in the
+     session. Replaced with two pinned bindings: the preregistered
+     `content_sha256` `a1197205…` (what `verify_frozen_assets.py` re-derives)
+     and the structural suite hash `6421fa4c…` (what the ranking reads). Pinned
+     rather than re-read from the staged manifest, because a check that loads
+     both sides from the same directory verifies nothing.
+  3. **`depth.causal_kl_greedy_v1` held 33.8 GiB of reference logits.** It
+     cached the unbypassed parent's logits for the whole mixture,
+     unconditionally, widened to float32 on the host: 59,763 positions ×
+     151,936 vocabulary × 4 B, per invocation. The first execution against the
+     real mixture was killed by the OOM killer.
+
+- **Alternatives considered for (3):** raise the pod's host memory (leaves an
+  unquantified failure mode and cannot run the rehearsal at all); store the
+  cache in float16 (changes nothing about the missing budget check); reorder
+  `greedy_removal` to item-outermost (touches `contribution.py`, which E8a also
+  uses). Chosen instead: **restore the policy E8a already shipped and the port
+  dropped** — size the cache, check it against the memory that binds, cache when
+  it fits, recompute per candidate when it does not, and say so loudly.
+  Recomputing is numerically identical, asserted rather than assumed: identical
+  removal order, identical kept layers and identical candidate score tables in
+  [`tests/autoinit/test_depth_reference_cache.py`](../tests/autoinit/test_depth_reference_cache.py).
+  The headroom is read from the **host** (cgroup grant ∩ `/proc/meminfo`), not
+  from `torch.cuda.mem_get_info`: E8a's cache lived on the accelerator, this one
+  is `.cpu()`, and copying the probe would have compared a host allocation
+  against free VRAM. The decision is recorded in `artifacts`, not `trace`,
+  because `trace` is compared field-for-field between two invocations and which
+  path ran depends on the host.
+- **Not changed:** the operator ledger (`ok: True`, no `changed`), the
+  preregistered `signature_hash` `81066046…`, the objective, the equivalence
+  interval, the feasibility floor, the seeds, the search space, the recovery
+  design, and the price. Declared semantics did not move; only the memory path.
+- **Also fixed:** `leaf_retention.json` counted the control inside `n_advancing`
+  next to `n_leaves: 5`, so stage 2 logged "3 leaves advance" for two leaves.
+  Now `n_advancing + n_rejected == n_leaves`, with `n_control_advancing`
+  separate.
+- **Measured:** one depth invocation over the **complete** 59,763-position
+  mixture now peaks at **4.36 GiB** instead of 33.8, in 349 s
+  ([`autoinit_phase_a_full_mixture_depth.json`](autoinit_phase_a_full_mixture_depth.json)).
+- **Risk that remains, unmeasured:** on the pod the model is bf16, so the cache
+  is **16.91 GiB** and needs ≳25.6 GiB of host headroom to be taken. RunPod
+  advertises 94 GB at the 1×L40S price point, so the cached path — the one the
+  180-minute search allowance is priced from — is *expected*. The pod's actual
+  cgroup grant has never been measured. If the fallback engages, that operator
+  costs ~2× its forward passes and the search may exceed its allowance; the run
+  now says which path it took instead of failing silently.
+- **Revisit when:** the first pod records a `reference_cache` decision.

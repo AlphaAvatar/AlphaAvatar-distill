@@ -91,6 +91,22 @@ STAGE3_PROBE = REPO / "logs/autoinit_stage3_complete/engine_probe.json"
 #: The versioned comparability relation the live protocol is judged under.
 COMPAT_V2 = REPO / "logs/autoinit_phase_a_protocol_compat_v2.json"
 FROZEN_RECIPE = REPO / "configs/stage3/e1/e1_r0860k_sa_pca.json"
+#: The preregistered `state_eval@v1` identity, as two hashes that bind two
+#: different things. The manifest carries only the first.
+#:
+#:   * `content_sha256` — the ITEMS. This is what the preregistration pins under
+#:     `data_hashes.initializer_state_eval`, and `verify_frozen_assets.py`
+#:     re-derives it from the loaded items at stage 0.
+#:   * the STRUCTURAL suite hash — suite_id/version/domains/subtypes/critical_tags,
+#:     which is what `StateEvalSuite.required_metrics()` and therefore the beam
+#:     ranking read. This is the value `run_phase_a_search` reports.
+#:
+#: They are pinned rather than re-read from the staged manifest because a check
+#: that loads both sides from the same directory verifies nothing.
+STATE_EVAL_CONTENT_SHA256 = (
+    "a1197205e43aad0e71c0e1bb436ee7babba3b5d8bb25b9c4d5c464f659db20fc")
+STATE_EVAL_SUITE_HASH = (
+    "6421fa4cf12ee2a16f452557c486aa95beb37e4aac4f7c7fd72d380993b39833")
 PACK_DIR = "artifacts/stage3/ladder_uniform_probe"
 BATTERY_CONTENT = "a1b22778b00d95b6aba358c14a5af5b559fd807bb371c92131eacca59479f323"
 
@@ -401,14 +417,27 @@ class PhaseADriver:
         (AUDIT / "search_result.json").write_text(
             json.dumps(found.summary, indent=2, default=str) + "\n")
 
-        attested_suite = json.loads(
-            (STATE_EVAL / "manifest.json").read_text())["suite_hash"]
-        if found.summary["suite_hash"] != attested_suite:
+        # This read used to be `manifest["suite_hash"]`. That key does not exist
+        # in `state_eval_v1/manifest.json` and never has, so the line was a
+        # guaranteed `KeyError` — raised AFTER the whole GPU beam search had
+        # completed, which is the most expensive place in the session to fail.
+        # It had never executed: every rehearsal scripted stage 1.
+        staged = json.loads((STATE_EVAL / "manifest.json").read_text())
+        if staged.get("content_sha256") != STATE_EVAL_CONTENT_SHA256:
             return self.record(
                 1, False,
-                f"the search ranked on suite {found.summary['suite_hash'][:12]}… "
-                f"but this session attested {attested_suite[:12]}…; the beam "
-                "would be ranking on a different suite's questions")
+                f"the staged state_eval declares content "
+                f"{str(staged.get('content_sha256'))[:12]}… but the "
+                f"preregistration pins {STATE_EVAL_CONTENT_SHA256[:12]}…; the "
+                "beam would be ranking on a different suite's questions")
+        if found.summary["suite_hash"] != STATE_EVAL_SUITE_HASH:
+            return self.record(
+                1, False,
+                f"the search ranked on suite structure "
+                f"{found.summary['suite_hash'][:12]}… but the preregistered "
+                f"state_eval@v1 is {STATE_EVAL_SUITE_HASH[:12]}…; the domains, "
+                "sub-types or critical tags the ranking reads are not the "
+                "attested ones")
 
         self.leaves = found.leaves
         self.control_state = found.control
@@ -647,8 +676,8 @@ class PhaseADriver:
             json.dumps(self.rung1, indent=2, default=str) + "\n")
         retention = self.emit_leaf_retention(records)
         say(f"rung 1: advancing {self.rung1['advancing']}")
-        say(f"retention: {retention['n_advancing']} leaves advance, "
-            f"{retention['n_rejected']} tombstoned")
+        say(f"retention: {retention['n_advancing']}/{retention['n_leaves']} leaves "
+            f"advance plus the control, {retention['n_rejected']} tombstoned")
         return self.record(2, True, selection=self.rung1,
                            n_probes=len(records), retention=retention)
 
@@ -710,8 +739,14 @@ class PhaseADriver:
             "generated_utc": datetime.now(timezone.utc).isoformat(),
             "rung1_selection_materialized": True,
             "n_leaves": len(self.leaves),
-            "n_advancing": sum(1 for e in entries
-                               if e["advanced_to_rung2"]),
+            # Counted over the SEARCHED leaves only, so that
+            # n_advancing + n_rejected == n_leaves. The control advances
+            # unconditionally and is not one of the five; folding it in made
+            # "3 leaves advance" the stage-2 log line for two leaves.
+            "n_advancing": sum(1 for e in entries if not e["is_control"]
+                               and e["advanced_to_rung2"]),
+            "n_control_advancing": sum(1 for e in entries if e["is_control"]
+                                       and e["advanced_to_rung2"]),
             "n_rejected": sum(1 for e in entries if not e["is_control"]
                               and not e["advanced_to_rung2"]),
             "entries": entries,

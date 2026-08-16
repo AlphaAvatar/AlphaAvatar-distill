@@ -369,8 +369,13 @@ class PhaseA(_preflight.Preflight):
         except Exception as exc:                                  # noqa: BLE001
             self.say(f"ABORT: cannot list the relay: {exc!r}"[:200])
             return False
+        # Every relay object a Phase-A session reads, checked at $0. The
+        # calibration joined this list after attempt 5 died on it at $0.6426:
+        # stage 1 calls DOMAIN_BALANCED_V1.resolve(), and nothing staged or
+        # checked the file it reads.
         need = ["stage1/qwen3_0p6b_init_v0/checkpoint/model.safetensors",
-                "stage3_recovery_corpus_v2/ladder_uniform/blocks.npz"]
+                "stage3_recovery_corpus_v2/ladder_uniform/blocks.npz",
+                "e8_inputs_20260810/calibration_v1/items.jsonl"]
         missing = [f for f in need if f not in present]
         local_missing = [p for p in LOCAL_ASSETS if not (REPO_ROOT / p).is_dir()]
         self.ev["precheck"] = {"relay_needed": need, "relay_missing": missing,

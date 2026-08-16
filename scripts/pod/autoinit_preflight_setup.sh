@@ -90,6 +90,14 @@ fetch("stage3_recovery_corpus_v2/ladder_uniform",
 src = Path("/workspace/aad/artifacts/stage3/ladder_uniform_probe")
 dst = Path("/workspace/aad/artifacts/stage3/ladder_uniform"); dst.mkdir(parents=True, exist_ok=True)
 for f in src.iterdir(): shutil.copy(f, dst / f.name)
+
+# The operator calibration mixture. Phase-A stage 1 calls
+# DOMAIN_BALANCED_V1.resolve(), which reads this exact file and verifies both
+# its byte hash and its derived token-content hash. Attempt 5 died here at
+# $0.6426 because nothing staged it: it is not a dev-box asset the launcher
+# scp's, and it was absent from this fetch and from the $0 precheck.
+fetch("e8_inputs_20260810/calibration_v1", ["items.jsonl"],
+      "/workspace/aad/artifacts/stage1/e8_calibration_v1")
 FETCHEOF
 
 # The two frozen search assets are dev-box artifacts (untracked, ~1.6 MB total),
@@ -109,6 +117,11 @@ want = {
    "6f324cb0f37bc0f07128e554ce8c161879419537478950496534f75fcecb249c",
  "artifacts/stage3/ladder_uniform/blocks.npz":
    "6f324cb0f37bc0f07128e554ce8c161879419537478950496534f75fcecb249c",
+ # calib.domain_balanced@v1's items_file_sha256, as the profile pins it. The
+ # derived token-content hash d65c1f40... is checked by resolve() itself at
+ # stage 1; this is the file-bytes pin.
+ "artifacts/stage1/e8_calibration_v1/items.jsonl":
+   "c7202338109e459b17b70456461e8f304fadea7929ea547accee21adbbe7fd0b",
 }
 for path, sha in want.items():
     got = hashlib.sha256(open(path, "rb").read()).hexdigest()
@@ -395,7 +408,8 @@ tt0=$(date -u +%s)
 OMP_NUM_THREADS=$NTHREADS MKL_NUM_THREADS=$NTHREADS OPENBLAS_NUM_THREADS=$NTHREADS \
   taskset -c "$CPUS" \
   timeout "${TESTS_MAX_S:-2700}" /opt/train/bin/python -m pytest tests/ -q \
-  --ignore=tests/data/test_recovery_corpus_pipeline.py > /workspace/pytest.log 2>&1
+  --ignore=tests/data/test_recovery_corpus_pipeline.py \
+  --ignore=tests/pod/test_phase_a_stages1_5_execute.py > /workspace/pytest.log 2>&1
 RC=$?
 tt=$(( $(date -u +%s) - tt0 ))
 set -e

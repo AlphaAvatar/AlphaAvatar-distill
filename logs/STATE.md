@@ -1,8 +1,52 @@
-**Updated:** 2026-08-15 17:05 UTC · branch `main` · working tree clean
+**Updated:** 2026-08-16 21:20 UTC · branch `main`
 **No pods running. Nothing billing.** **Stage 3 is COMPLETE.** Phase A has been
-attempted twice and failed closed both times without training anything
-($0.1075 + $0.4665); attempt 3 is being prepared. 1,696 CPU tests pass, 7
-skipped, in both the dev-box and `SESSION_KIND=phase_a` environments.
+attempted **five** times for **$1.6321**, with **one stage passed** (stage 0, on
+attempt 5). Nothing has been trained and no permanent artifact has been touched.
+**No attempt 6 is authorized, prepared, or implied**, and the cumulative cap does
+not currently cover one — see *Phase A: the cap gap* below.
+
+## Phase A stages 0–5 now execute for real at $0 (2026-08-16)
+
+The final authorized rehearsal expansion is done.
+[`tests/pod/test_phase_a_stages1_5_execute.py`](../tests/pod/test_phase_a_stages1_5_execute.py)
+drives the real `PhaseADriver` **stages 0 → 5** end to end on CPU, with the
+**production** calibration dependency: `run_phase_a_search` calls
+`DOMAIN_BALANCED_V1.resolve(REPO)` against the frozen items file, both hash
+checks live. Substituted only at the expensive boundaries — teacher/target
+geometry (at the **real** 151,936 vocabulary), item counts, the vLLM engine
+probe, and the probe training subprocess + generation battery (shape copied from
+a real scored artifact, not invented). Everything else runs: `run_probe`'s
+journal and resume binding, `probe_config`'s `PROBE_OVERRIDES` derivation,
+pooling, rung-1 and rung-2 selection, leaf retention, **both** stage-4 branches,
+and the final report.
+
+**It found three defects, every one in never-executed code and every one fatal
+on a paid pod.** Full account in [`decisions.md`](decisions.md):
+
+| # | defect | where it would have fired |
+| --- | --- | --- |
+| 1 | the frozen mixture stores tokens under `ids`; operators read `input_ids` | first operator of the search |
+| 2 | `stage1` read `manifest["suite_hash"]`, a key that does not exist | **after** the full GPU beam search |
+| 3 | `depth.causal_kl_greedy_v1` held **33.8 GiB** of float32 reference logits | first depth invocation; OOM killer |
+
+(3) was a regression against `scripts/training/search_depth_map.py` (E8a), whose
+budget check and automatic recompute-fallback the port had dropped. Restored;
+recomputing is **numerically identical** (identical removal order, kept layers
+and candidate score tables — asserted, in
+[`tests/autoinit/test_depth_reference_cache.py`](../tests/autoinit/test_depth_reference_cache.py)),
+headroom read from the **host** cgroup grant because the cache is `.cpu()`. One
+invocation over the complete 59,763-position mixture now peaks at **4.36 GiB**
+in 349 s ([`autoinit_phase_a_full_mixture_depth.json`](autoinit_phase_a_full_mixture_depth.json)).
+The operator ledger, the preregistered `signature_hash`, the objective, the
+thresholds, the seeds, the search space, the recovery design and the price are
+**unchanged**.
+
+**Unmeasured risk to carry:** on the pod the model is bf16, so that cache is
+16.91 GiB and needs ≳25.6 GiB of host headroom to be taken. RunPod advertises
+94 GB at the 1×L40S price point, so the cached path — the one the 180-minute
+search allowance is priced from — is *expected*, but the pod's actual cgroup
+grant has never been measured. A run that falls back costs ~2× the forward
+passes for that operator and now records which path it took.
 
 ## The two permanent canonical controls EXIST and are hash-verified
 
@@ -194,13 +238,34 @@ because `plan_session` computes it before a pod can exist.
 been issued and the launcher refuses to create a pod without one. Raising the cap
 did not authorize a launch.
 
+## Phase A: the cap gap
+
+Phase A prices at **$17.8933 expected / $19.6826 soft / $20.0126 hard**,
+unchanged by the 2026-08-16 fixes (nothing that feeds the price moved).
+
+```
+cumulative spend                 $193.1783
+authorized cap                   $213.00
+remaining                        $ 19.8217
+Phase A hard bound               $ 20.0126
+                                 ---------
+SHORT BY                         $  0.1909
+```
+
+A sixth attempt therefore needs a **cap decision**, not merely an authorization.
+The minimum cumulative cap that covers one complete attempt on the present
+numbers is **$213.1909**.
+
 ## What remains
 
-1. **Issue a `PhaseAAuthorization`**, if and when the maintainer wants Phase A
+1. **Raise the cap** to cover one complete attempt, or decide not to run Phase A.
+2. **Issue a `PhaseAAuthorization`**, if and when the maintainer wants Phase A
    run: bound to the session plan hash, the science plan hash
    `02be33b9a7a8e26bc8bfb75795351e8cdc9ffd441b47066cc81887cfc511b55c`, the
-   rehearsed harness digest, and a real UTC grant timestamp.
-2. Phase A stays unauthorized until 1 happens.
+   harness digest of the session commit being authorized, and a real UTC grant
+   timestamp. The existing authorization is **spent** and its lineage gate
+   refuses the current commit by construction.
+3. Phase A stays unauthorized until 1 and 2 happen.
 
 ### Searched-leaf durability: RESOLVED 2026-08-15, needs no relay growth
 
