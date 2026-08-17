@@ -1,0 +1,8 @@
+2026-08-17T08:52:10Z elapsed=0min approx=$0.0000 launcher=1 pods=[n2kfqhyoya4zzj:RUNNING] status=[]
+2026-08-17T08:57:11Z elapsed=5min approx=$0.0825 launcher=1 pods=[n2kfqhyoya4zzj:RUNNING] status=[]
+2026-08-17T09:02:13Z elapsed=10min approx=$0.1650 launcher=1 pods=[n2kfqhyoya4zzj:RUNNING] status=[]
+2026-08-17T09:07:14Z elapsed=15min approx=$0.2475 launcher=1 pods=[n2kfqhyoya4zzj:RUNNING] status=[]
+2026-08-17T09:12:16Z elapsed=20min approx=$0.3300 launcher=1 pods=[n2kfqhyoya4zzj:RUNNING] status=[]
+2026-08-17T09:17:17Z elapsed=25min approx=$0.4125 launcher=0 pods=[NONE] status=[]
+2026-08-17T09:22:18Z elapsed=30min approx=$0.4950 launcher=0 pods=[NONE] status=[]
+2026-08-17T09:22:18Z POD GONE (2 polls) - poller stopping

@@ -1,10 +1,10 @@
 {
   "schema": "aadistill.current_state/v1",
-  "generated_utc": "2026-08-17T08:46:42+00:00",
-  "current_phase": "Attempt 7 AUTHORIZED and launching, under the unchanged $217.00 cap. The attempt-6 device-placement defect is fixed at the materialize/reload boundary and unexpected in-process driver exceptions now keep their full traceback. Stage 0 has passed twice; attempt 6 reached stage 1.",
+  "generated_utc": "2026-08-17T09:26:37+00:00",
+  "current_phase": "Attempt 7 FAILED CLOSED in stage 1 at $0.3955. Stage 0 passed for the third time and the attempt-6 device fix HELD - one state was materialized, reloaded, validated and measured on a GPU. Stage 1 then hit a SECOND device bug of the same class in different code: ActivationCollector allocates its accumulators without a device, so a CUDA activation is added into a CPU tensor. init/collect.py is Stage-0 code whose only prior execution was on the CPU-only dev box.",
   "active_experiment": null,
   "paid_compute_running": false,
-  "next_work": "Attempt 7 is running or has just ended. Read logs/autoinit_phase_a_session.json for the terminal marker and the teardown gate. If it fails closed: STOP and report. No attempt 8 is implied.",
+  "next_work": "STOPPED. No attempt 8 is authorized, funded, prepared or implied, and no fix has been implemented. The pattern now has three instances: a CPU-only $0 path certifying GPU-only code. A device-placement audit of every tensor the search touches on a GPU is a larger and different piece of work than fixing whichever site the last pod happened to reach; that is a decision for the maintainer, not an inference from the unused balance.",
   "teacher": {
     "model_id": "Qwen/Qwen3-4B-Thinking-2507",
     "revision": "768f209d9ea81521153ed38c47d515654e938aea",
@@ -55,12 +55,12 @@
     "dp_sa": "infrastructure artifact, not a promotable arm"
   },
   "budget": {
-    "actual_cumulative_spend_usd": 193.5335,
+    "actual_cumulative_spend_usd": 193.929,
     "authorized_cap_usd": 217.0,
     "cap_raised_utc": "2026-08-17",
     "cap_approved": true,
     "cap_raise_note": "maintainer, 2026-08-17: 'My recommended new cumulative project cap is $217.00', then 'Record this approval in the ledger and machine-readable state ... and issue one fresh PhaseAAuthorization.' Raised to cover the hard bound repriced by the reference-cache fallback audit and the beam-6 pricing correction. FUNDS ONE ATTEMPT: 'This funds one attempt only and does not imply Attempt 7.'",
-    "remaining_usd": 23.4665,
+    "remaining_usd": 23.071,
     "previous_caps": [
       {
         "cap_usd": 213.0,
@@ -107,8 +107,8 @@
         }
       ]
     },
-    "remaining_note": "Attempt 7 is authorized (2026-08-17) under the EXISTING $217.00 cap; the cap is not raised. Exactly one Phase-A launcher invocation, at most the $23.0484 per-launch hard authorization, leaving about $0.4181 of cumulative-cap margin at the full hard bound. Does not authorize attempt 8, any cap increase, or any change to the frozen search, recovery, seeds, thresholds, runtime-comparability rules, or the science/session plans.",
-    "attempt_7_authorized": true,
+    "remaining_note": "NOT permission. The attempt-7 authorization covered exactly one launcher invocation, is spent, and its lineage gate refuses every later commit. No attempt 8 is authorized, funded, prepared or implied.",
+    "attempt_7_authorized": "SPENT",
     "attempt_7_per_launch_hard_usd": 23.0484,
     "attempt_7_cap_margin_usd": 0.4181
   },
@@ -175,7 +175,7 @@
     "E2 phases 2-3"
   ],
   "autoinit": {
-    "status": "ATTEMPT_7_AUTHORIZED",
+    "status": "ATTEMPT_7_FAILED_CLOSED_IN_STAGE_1_STOPPED",
     "package": "src/aadistill/autoinit",
     "tests": 209,
     "operator_kinds": [
@@ -594,5 +594,25 @@
       "regression_fails_under_old_assumption": true,
       "traceback_preservation": "PhaseADriver.preserve_traceback writes the full frame to AUDIT/stage{n}_traceback.log and into the evidence JSON for unexpected in-process exceptions; the short reason is unchanged"
     }
+  },
+  "attempt_7": {
+    "pod_id": "n2kfqhyoya4zzj",
+    "terminal": "PHASE_A_FAILED",
+    "failed_stage": 1,
+    "elapsed_minutes": 23.97,
+    "actual_usd": 0.3955,
+    "authorized_usd": 23.0484,
+    "within_authorization": true,
+    "provider_confirms_gone": true,
+    "trained_anything": false,
+    "permanent_controls_touched": false,
+    "stage0": "PASSED (third time), 3.0 min",
+    "progress": "the attempt-6 fix HELD: one state (attention.weight_proxy_v0) was materialized, canonically reloaded, validated and MEASURED on a GPU. Stage 1 ran 5.7 min vs attempt 6's 1.0 min and failed strictly later, in a different operator.",
+    "stage1_error": "RuntimeError: Expected all tensors to be on the same device, but found at least two devices, cuda:0 and cpu!",
+    "root_cause": "ActivationCollector.__init__ (src/aadistill/init/collect.py) allocates res_sum, res_sqsum, ffn_abs_sum, ffn_sq_sum and token_counts with torch.zeros(...) and no device=, so they are on the host while the model runs on cuda:0; the down_proj forward-pre-hook then adds a CUDA activation into a CPU accumulator",
+    "why_never_fired": "init/collect.py is Stage-0 code and its only previous execution was the Stage-0 regeneration on the CPU-only dev box (DEVBOX_CPU_MEASURED), where the model and the accumulators share a device by accident. Phase A is its first GPU execution.",
+    "traceback": "logs/autoinit_phase_a_attempt7/stage1_traceback.log",
+    "note": "the traceback preservation added before this run gave the exact frame with no guessing, on its first use",
+    "evidence": "logs/autoinit_phase_a_attempt7/"
   }
 }

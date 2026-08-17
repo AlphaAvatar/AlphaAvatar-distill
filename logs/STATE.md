@@ -1,10 +1,44 @@
-**Updated:** 2026-08-16 21:40 UTC · branch `main`
+**Updated:** 2026-08-17 09:30 UTC · branch `main`
 **No pods running. Nothing billing.** **Stage 3 is COMPLETE.** Phase A has been
-attempted **six** times for **$1.9873**. Attempt 6 reached **stage 1** — stage 0
-passed for the second time and every 2026-08-16 fix held — and failed closed on a
-device-placement bug that no zero-cost run can see. Nothing has been trained and
-no permanent artifact has been touched. **STOPPED: no Attempt 7 is authorized,
-funded or implied.**
+attempted **seven** times for **$2.3828**. Attempt 7 got further than any before
+it — stage 0 passed, and one state was materialized, reloaded, validated and
+**measured on a GPU** — then failed closed on a **second** device-placement bug
+of the same class in different code. **STOPPED: no Attempt 8 is authorized,
+funded, prepared or implied, and no fix has been implemented.**
+
+## Attempt 7 (2026-08-17, $0.3955): the attempt-6 fix held; a second device bug
+
+Pod `n2kfqhyoya4zzj`, 24.0 min, deleted with provider confirmation.
+
+* **Stage 0 passed for the third time**, 3.0 min.
+* **The attempt-6 fix held.** One state — `attention.weight_proxy_v0` — was
+  materialized, canonically reloaded, validated and **measured**, journalled at
+  `validity: measured`. Stage 1 ran 5.7 min against attempt 6's 1.0 and failed
+  strictly later, in a different operator.
+* **The failure**, in `composite.stage1_sandwich_v0` ->
+  `collect_activation_stats` -> `ActivationCollector`:
+
+  ```
+  init/collect.py:67   self.ffn_abs_sum[idx] += a.abs().sum(0)
+  RuntimeError: ... found at least two devices, cuda:0 and cpu!
+  ```
+
+  `ActivationCollector.__init__` allocates every accumulator with
+  `torch.zeros(...)` and no `device=`, so they sit on the host while the model
+  runs on `cuda:0`.
+* **Why it had never fired.** `init/collect.py` is Stage-0 code, and its only
+  prior execution is the Stage-0 regeneration on the **CPU-only dev box**, where
+  model and accumulators share a device by accident. Phase A is its first GPU
+  execution.
+* **The traceback preservation added before this run paid for itself
+  immediately** — the whole frame, no guessing:
+  [`autoinit_phase_a_attempt7/stage1_traceback.log`](autoinit_phase_a_attempt7/stage1_traceback.log).
+
+**Three instances now** of the same pattern: a CPU-only $0 path certifying
+GPU-only code. Fixing whichever site the last pod reached only reveals the next.
+A device-placement audit of every tensor the search touches on a GPU is a larger,
+different piece of work — and a maintainer decision, not an inference from the
+$23.0710 that remains.
 
 ## Attempt 6 (2026-08-16, $0.3552): stage 0 passed, stage 1 died on device placement
 
@@ -305,9 +339,9 @@ refuses `projected > cap`, so a cap rounded down makes the launcher refuse its
 own plan.
 
 ```
-cumulative spend                 $193.5335   incl. attempt 6's $0.3552
-authorized cap                   $217.00     approved 2026-08-17
-remaining                        $ 23.4665   NOT permission
+cumulative spend                 $193.9290   incl. attempts 6+7 ($0.7507)
+authorized cap                   $217.00     unchanged
+remaining                        $ 23.0710   NOT permission
 Phase A hard bound               $ 23.0483
                                  ---------
 margin                           $  0.7734
@@ -322,16 +356,13 @@ stop". The margin is not a retry reserve.
 
 ## What remains
 
-1. **Attempt 7 is authorized and launched**, under the **unchanged** $217.00
-   cap: one launcher invocation, at most the $23.0484 per-launch hard
-   authorization, leaving about $0.4181 of cumulative-cap margin at the full
-   hard bound. Read
-   [`autoinit_phase_a_session.json`](autoinit_phase_a_session.json) for the
-   terminal marker, the artifact gate and the provider-confirmed teardown.
-2. **If it fails closed, STOP and report.** No Attempt 8 is implied, and the
-   authorization does not permit a cap increase or any change to the frozen
-   search, recovery, seeds, thresholds, runtime-comparability rules, or the
-   science/session plans.
+1. **Nothing.** Attempt 7 failed closed and is reported. Its authorization
+   covered one launcher invocation, is spent, and its lineage gate refuses every
+   later commit by construction. The remaining $23.0710 under the $217.00 cap is
+   **not** permission.
+2. A maintainer decision is open: whether to audit device placement across every
+   tensor the search touches on a GPU, rather than fixing sites one paid pod at
+   a time. No Attempt 8 is authorized, funded, prepared or implied.
 
 ### Searched-leaf durability: RESOLVED 2026-08-15, needs no relay growth
 

@@ -1,0 +1,420 @@
+{
+  "schema": "aadistill.autoinit.phase_a_evidence/v1",
+  "started_utc": "2026-08-17T09:04:05.119809+00:00",
+  "phase_a": {
+    "plan": {
+      "plan_id": "autoinit.v1.phase_a_session",
+      "version": 1,
+      "plan_hash": "9377a2dc61f21790dd111d72a5de0e039ea1d31afef2d09e18c98a0b0cc2a0aa",
+      "stages": [
+        {
+          "stage": 0,
+          "name": "attestation and preregistration binding",
+          "purpose": "re-establish the runtime and evaluation identity this session measures under, and refuse to proceed unless the science plan is the frozen one",
+          "produces": [
+            "runtime fingerprint including image digest",
+            "attested evaluation protocol over recovery_search_v2",
+            "frozen-asset verification for state_eval_v1 and recovery_search_v2",
+            "assert_preregistered against the frozen Phase-A plan",
+            "the materialized thresholds this run will select against"
+          ],
+          "blocking": true,
+          "stop_conditions": [
+            "a frozen asset does not match its preregistered constant -> STOP",
+            "the executing science plan does not hash to the frozen one -> STOP: a threshold moved after freezing",
+            "the equivalence interval or feasibility floor is not materialized -> STOP: selection has no rule to apply",
+            "the scoring contract digest differs from the pinned one -> STOP"
+          ]
+        },
+        {
+          "stage": 1,
+          "name": "beam search over initialization paths",
+          "purpose": "materialize and measure the reachable initialization states, and produce the searched leaves the recovery rungs will probe",
+          "produces": [
+            "one measured, hash-bound state per expansion",
+            "level records including every prune reason",
+            "the epsilon-Pareto ranking at each pruned level",
+            "5 admissible complete leaves",
+            "the search journal, resumable by content-derived state id"
+          ],
+          "blocking": true,
+          "stop_conditions": [
+            "fewer than 5 admissible complete leaves exist -> STOP and report the shortfall rather than shrinking N",
+            "a materialized state fails canonical reload, spec match, parameter count or finiteness -> STOP",
+            "the state evaluation suite hash differs from the attested one -> STOP: the beam would rank on a different suite's questions"
+          ]
+        },
+        {
+          "stage": 2,
+          "name": "recovery rung 1 on seed sa",
+          "purpose": "probe the 5 searched leaves and the retained canonical control under one identical recovery recipe",
+          "produces": [
+            "6 probes at 1023 steps each on seed sa",
+            "recovery_search_v2 battery result per probe",
+            "the rung-1 survivor selection under the frozen rule",
+            "per-probe journal entries, resumable"
+          ],
+          "blocking": true,
+          "stop_conditions": [
+            "the canonical control is absent -> STOP: a comparison without the retained baseline is not the comparison the plan describes",
+            "capability schema validation fails -> scoring defect, STOP",
+            "a probe's evaluation protocol is not comparable to the attestation -> STOP"
+          ]
+        },
+        {
+          "stage": 3,
+          "name": "recovery rung 2 on seed sb",
+          "purpose": "second seed for the 2 survivors and the control, because the behaviour metric's seed-only spread is 0.1290",
+          "produces": [
+            "3 probes at 1023 steps each on seed sb",
+            "pooled_counts@v2 aggregates over sa and sb",
+            "the final selection, or an explicit tie"
+          ],
+          "blocking": true,
+          "stop_conditions": [
+            "the control did not advance -> STOP: it advances unconditionally",
+            "capability schema validation fails -> STOP"
+          ]
+        },
+        {
+          "stage": 4,
+          "name": "conditional tie-break on seed sc",
+          "purpose": "resolve finalists that finished inside the preregistered equivalence interval after two seeds \u2014 and only those",
+          "produces": [
+            "probes on seed sc for the tied finalists only",
+            "pooled aggregates over sa, sb and sc",
+            "the resolved winner, or unresolved_equivalence"
+          ],
+          "blocking": false,
+          "stop_conditions": [
+            "the rung-2 selection did not request a tie-break -> this stage does not run, which is not a failure",
+            "no fourth seed is requested under any outcome"
+          ]
+        },
+        {
+          "stage": 5,
+          "name": "selection and report",
+          "purpose": "record which initializer won, that the canonical control won, or that v1 resolved no unique behavioural winner",
+          "produces": [
+            "the final selection record with every exclusion",
+            "feasibility and catastrophic-gate outcomes per candidate",
+            "behaviour and correctness reported on separate axes",
+            "the Phase-A result artifact"
+          ],
+          "blocking": false,
+          "stop_conditions": [
+            "a tie surviving seed sc is reported as unresolved_equivalence and is a RESULT, not a failure",
+            "no follow-on experiment starts from this session"
+          ]
+        }
+      ],
+      "ordering_rationale": "controls are the expensive artifact and the one whose validity depends on a fixed runtime, so they are produced only after the runtime is attested and the cheap gates pass"
+    },
+    "scope": {
+      "trains_anything": true,
+      "retrains_permanent_controls": false,
+      "reaches_any_followon": false,
+      "control_is_injected_by_hash": true,
+      "searched_leaves": 5,
+      "survivors": 2,
+      "seeds": [
+        20260726,
+        20260801
+      ],
+      "conditional_tie_break_seed": 20260813,
+      "battery": "recovery_search_v2",
+      "state_eval_suite": "state_eval_v1",
+      "notes": {
+        "what_training_means_here": "Phase A trains 9 recovery probes (12 if the tie-break rung runs) at 1023 steps each. It does NOT retrain the two permanent controls, which were trained once and are injected by frozen hash",
+        "control_may_win": "'the incumbent won, AutoInitializer v1 did not improve recovered behaviour' is a reachable conclusion, and the selection is symmetric so that it stays reachable",
+        "no_winner_is_a_result": "unresolved_equivalence after seed sc is the finding, not a failure to be resolved by a fourth seed or a lexicographic tie-break",
+        "terminus": "Phase A stops for review. No follow-on experiment, full recovery of a winner, or Phase B starts from this session"
+      },
+      "session_plan_hash": "9377a2dc61f21790dd111d72a5de0e039ea1d31afef2d09e18c98a0b0cc2a0aa"
+    },
+    "harness_source_files": [
+      "scripts/pod/autoinit_phase_a_launch.py",
+      "scripts/pod/autoinit_phase_a_driver.py",
+      "scripts/pod/autoinit_preflight_launch.py",
+      "scripts/pod/autoinit_preflight_setup.sh",
+      "scripts/pod/autoinit_engine_probe.py",
+      "scripts/pod/watchdog.py",
+      "scripts/pod/collect_artifacts.py",
+      "scripts/autoinit/phase_a_search.py",
+      "scripts/autoinit/write_preregistration.py",
+      "src/aadistill/autoinit/authorization.py",
+      "src/aadistill/autoinit/generation_compat.py",
+      "src/aadistill/autoinit/phase_a.py",
+      "src/aadistill/autoinit/generation.py"
+    ],
+    "manifest_sha256": "e3d9e6f5b3a94720254b96742af833b8348e6c208d7ccdb59ef41727fd968df7"
+  },
+  "scope": {
+    "trains_anything": true,
+    "retrains_permanent_controls": false,
+    "reaches_any_followon": false,
+    "control_is_injected_by_hash": true,
+    "searched_leaves": 5,
+    "survivors": 2,
+    "seeds": [
+      20260726,
+      20260801
+    ],
+    "conditional_tie_break_seed": 20260813,
+    "battery": "recovery_search_v2",
+    "state_eval_suite": "state_eval_v1",
+    "notes": {
+      "what_training_means_here": "Phase A trains 9 recovery probes (12 if the tie-break rung runs) at 1023 steps each. It does NOT retrain the two permanent controls, which were trained once and are injected by frozen hash",
+      "control_may_win": "'the incumbent won, AutoInitializer v1 did not improve recovered behaviour' is a reachable conclusion, and the selection is symmetric so that it stays reachable",
+      "no_winner_is_a_result": "unresolved_equivalence after seed sc is the finding, not a failure to be resolved by a fourth seed or a lexicographic tie-break",
+      "terminus": "Phase A stops for review. No follow-on experiment, full recovery of a winner, or Phase B starts from this session"
+    },
+    "session_plan_hash": "9377a2dc61f21790dd111d72a5de0e039ea1d31afef2d09e18c98a0b0cc2a0aa"
+  },
+  "retrains_permanent_controls": false,
+  "followon_started": false,
+  "followon_reachable_from_this_driver": false,
+  "stages": {
+    "0": {
+      "passed": true,
+      "reason": "",
+      "finished_utc": "2026-08-17T09:07:05.301816+00:00",
+      "spend_usd": 0.2449,
+      "attested": {
+        "schema": "aadistill.autoinit.phase_a_attested_protocol/v1",
+        "generated_utc": "2026-08-17T09:07:05.299777+00:00",
+        "runtime": {
+          "version": 1,
+          "image_digest": "runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@580.159.03",
+          "python_version": "3.12.3",
+          "torch_version": "2.11.0+cu128",
+          "transformers_version": "5.13.1",
+          "cuda_runtime": "12.8",
+          "attention_backend": "sdpa"
+        },
+        "generation_source_digest": {
+          "digest": "a1b51736d6a6b1276322a04d44855d7b574011e165e77d6d23c3e31b3036f743",
+          "files": [
+            {
+              "path": "scripts/evaluation/uncapped_eval.py",
+              "sha256": "120e92dc08a49ae4e3ed74fbbc6537054c011382755cdec6418c11b341f780d4",
+              "bytes": 28667
+            },
+            {
+              "path": "src/aadistill/evaluation/behavior.py",
+              "sha256": "c6f52721e8b86bc2d875683bfb9c35b4101379fa5d48de7a48db93959e2935c2",
+              "bytes": 19983
+            },
+            {
+              "path": "src/aadistill/evaluation/degeneration.py",
+              "sha256": "793540820d4fc0f42d0c855e0d79eb879b94efa451e06030b2a14c55683f4961",
+              "bytes": 5245
+            }
+          ],
+          "rule": "sha256 over sorted 'path:sha256' lines of the declared set"
+        },
+        "scoring_contract": {
+          "contract": "recovery_search_scoring@v2",
+          "contract_id": "recovery_search_scoring",
+          "version": 2,
+          "digest": "808080a7c5d88d5a66760fd0d7eeabc5451c096ad0819f8c5663a0b8224660be",
+          "files": [
+            {
+              "path": "scripts/autoinit/score_recovery_search.py",
+              "sha256": "b19eba4c2c5f555aeb141811439ad5e5417a3222c3b57b78bad3f497eb90dba3",
+              "bytes": 21518
+            },
+            {
+              "path": "src/aadistill/autoinit/recovery.py",
+              "sha256": "39d6598e210b9619d56463f6ba3000d47e1a97f7121e7db25b97213d4d6c799e",
+              "bytes": 102452
+            },
+            {
+              "path": "src/aadistill/evaluation/behavior.py",
+              "sha256": "c6f52721e8b86bc2d875683bfb9c35b4101379fa5d48de7a48db93959e2935c2",
+              "bytes": 19983
+            },
+            {
+              "path": "src/aadistill/evaluation/capability.py",
+              "sha256": "da1bc3b1069d927b6ab2cbf0eaaf6763bfa491d396189b3dcde95977e39d67ad",
+              "bytes": 19568
+            },
+            {
+              "path": "src/aadistill/evaluation/strict_answer.py",
+              "sha256": "ecb4356a89d3563214ea11ade2307b0d106588bb7ff59f6b8c5e3b9c98d380e3",
+              "bytes": 7628
+            },
+            {
+              "path": "src/aadistill/evaluation/usable_rollout.py",
+              "sha256": "8159acdd7a0a6953dfefac7acf4f6fb4706f69a7264b625e9f9b7ff1a74826ca",
+              "bytes": 6155
+            }
+          ],
+          "rule": "sha256 over sorted 'path:sha256' lines of the declared recovery-scoring source set",
+          "covers": [
+            "usable_rollout components and their composition",
+            "protocol validity, including the tools_offered relaxation",
+            "the tool structural-executability gate",
+            "per-set correctness scorers",
+            "correct => usable",
+            "capability schema and aggregation",
+            "pooled_counts seed aggregation",
+            "the threshold formulas materialized from control data"
+          ],
+          "supersedes": {
+            "contract": "recovery_search_scoring@v1",
+            "identity_was": "a single hash of src/aadistill/evaluation/capability.py",
+            "why": "v1 could not see a defect in the composition. A prompted tool call was rejected as unexpected_tool_call, so the tool capability read a structural 0.0000 for every arm while capability.py itself was unchanged and its hash matched."
+          }
+        },
+        "evaluation_protocol": {
+          "evaluation_protocol_hash": "250f72efbd43b86a475e8dda293b45f07ee61a4d858e147f4a5bd7681c32c2e4",
+          "generation": {
+            "generation_source_digest": "a1b51736d6a6b1276322a04d44855d7b574011e165e77d6d23c3e31b3036f743",
+            "generation_source_set_version": 1,
+            "vllm_version": "0.27.1",
+            "transformers_version": "5.15.0",
+            "torch_version": "2.13.0+cu130",
+            "dtype": "bfloat16",
+            "gpu_memory_utilization": 0.9,
+            "max_num_seqs": 256,
+            "max_num_batched_tokens": 8192,
+            "enforce_eager": false,
+            "tokenizer_source": "the evaluated checkpoint",
+            "tokenizer_sha256": "c1db93c8164f3e3ba2dbc8c6943fb574273a5efa87da4556ef9f460b5c0893b7",
+            "chat_template_sha256": "3802169b2a02b81e6adb7ab4f64f91ff02db753c8c3a64a01c35192d3a61d8d7",
+            "protocol": "project",
+            "system_message": "You are a helpful Assistant.",
+            "system_injection_rule": "injected only when the sample carries no system turn and protocol == project; a sample's own system prompt is preserved",
+            "chat_template_kwargs_json": "{}",
+            "thinking_mode": "template-default (not overridden)",
+            "trained_context": 8192,
+            "context_len_override": null,
+            "resolved_context": 8192,
+            "context_source": "trained_block_len",
+            "context_resolution_rule": "min(trained_context, architectural context); the effective context is the TRAINED context and this is not a 262K-context evaluation",
+            "temperature": 0.0,
+            "top_p": 1.0,
+            "top_k": -1,
+            "detokenize": false,
+            "max_tokens_rule": "per sample: resolved_context - len(prompt_ids); P18 unrestricted, never a chosen token budget",
+            "stop_token_ids": [
+              151645
+            ],
+            "stop_id_derivation_rule": "sorted union of config.eos_token_id, generation_config.eos_token_id, <|im_end|> and tokenizer.eos_token_id",
+            "degeneration_stop": true,
+            "degeneration_check_every": 256,
+            "degeneration_source_digest": "793540820d4fc0f42d0c855e0d79eb879b94efa451e06030b2a14c55683f4961",
+            "runtime_digest": "2db007528a37f4d02113265d225531aec441a483e03e626556e0e6049a7af101",
+            "protocol_id": "recovery_generation",
+            "version": 1,
+            "generation_protocol_fingerprint": "714237c516afc0a8421126ca30ec4a2b657689d4c81f8973834a42bceb11a3bb",
+            "is_materialized": true,
+            "unmaterialized_fields": [],
+            "excluded_by_design": [
+              "the checkpoint being generated from"
+            ],
+            "why_excluded": "the checkpoint is the treatment; a generation identity containing it would mark every pair of arms as mismatched"
+          },
+          "scoring_contract": "recovery_search_scoring@v2",
+          "scoring_digest": "808080a7c5d88d5a66760fd0d7eeabc5451c096ad0819f8c5663a0b8224660be",
+          "battery": {
+            "artifact": "recovery_search_v2",
+            "manifest_sha256": "58ae5c6dcbe32eb28c343a66830d7224a14537362deeeff2ce8219d0a31679d6",
+            "content_sha256": "a1b22778b00d95b6aba358c14a5af5b559fd807bb371c92131eacca59479f323"
+          },
+          "binding": "every control and every searched recovery probe must bind to this exact hash; a probe measured under a different one is not comparable to the thresholds materialized from these controls",
+          "notes": {}
+        },
+        "evaluation_protocol_hash": "250f72efbd43b86a475e8dda293b45f07ee61a4d858e147f4a5bd7681c32c2e4",
+        "stage3_evaluation_protocol_hash": "250f72efbd43b86a475e8dda293b45f07ee61a4d858e147f4a5bd7681c32c2e4",
+        "bound_to_stage3_thresholds": true,
+        "comparability": {
+          "rule": "generation_runtime_comparability@v2",
+          "live_identity": "70a26e0b43df20e469385115b49683b50936919e02986088b76d3c30ffd87103",
+          "historical_identity": "70a26e0b43df20e469385115b49683b50936919e02986088b76d3c30ffd87103",
+          "identities_equal": true,
+          "live_driver": "580.159.03",
+          "historical_driver": "580.159.03",
+          "driver_branch_equal": true,
+          "driver_patch_differs": false
+        },
+        "comparable_identity": "70a26e0b43df20e469385115b49683b50936919e02986088b76d3c30ffd87103",
+        "science_plan_hash": "02be33b9a7a8e26bc8bfb75795351e8cdc9ffd441b47066cc81887cfc511b55c",
+        "equivalence_interval": 0.011695296982299022,
+        "feasibility_floor": 0.3,
+        "report_sha256": "3e11801af0791402c844a36f6cfb5219b8e391ee397821d3e0e8ea136393f539"
+      },
+      "frozen_plan_hash": "02be33b9a7a8e26bc8bfb75795351e8cdc9ffd441b47066cc81887cfc511b55c"
+    },
+    "1": {
+      "passed": false,
+      "reason": "RuntimeError: Expected all tensors to be on the same device, but found at least two devices, cuda:0 and cpu!",
+      "finished_utc": "2026-08-17T09:12:48.316880+00:00",
+      "spend_usd": 0.3392,
+      "traceback": "            ^^^^^^^^^^^^\n  File \"/workspace/aad/src/aadistill/autoinit/search.py\", line 521, in run\n    child = self._expand_one(parent, impl, profile)\n            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspace/aad/src/aadistill/autoinit/search.py\", line 406, in _expand_one\n    outcome = impl.execute(ctx)\n              ^^^^^^^^^^^^^^^^^\n  File \"/workspace/aad/src/aadistill/autoinit/operators/base.py\", line 278, in execute\n    outcome = self.apply(ctx)\n              ^^^^^^^^^^^^^^^\n  File \"/opt/train/lib/python3.12/site-packages/torch/utils/_contextlib.py\", line 124, in decorate_context\n    return func(*args, **kwargs)\n           ^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspace/aad/src/aadistill/autoinit/operators/composite.py\", line 121, in apply\n    state = ctx.cached_stats(lambda: collect_activation_stats(\n            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspace/aad/src/aadistill/autoinit/operators/base.py\", line 146, in cached_stats\n    return collect()\n           ^^^^^^^^^\n  File \"/workspace/aad/src/aadistill/autoinit/operators/composite.py\", line 121, in <lambda>\n    state = ctx.cached_stats(lambda: collect_activation_stats(\n                                     ^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/opt/train/lib/python3.12/site-packages/torch/utils/_contextlib.py\", line 124, in decorate_context\n    return func(*args, **kwargs)\n           ^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspace/aad/src/aadistill/autoinit/operators/_common.py\", line 127, in collect_activation_stats\n    collector.process(ids.to(device))\n  File \"/opt/train/lib/python3.12/site-packages/torch/utils/_contextlib.py\", line 124, in decorate_context\n    return func(*args, **kwargs)\n           ^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspace/aad/src/aadistill/init/collect.py\", line 76, in process\n    out = self.model(input_ids.to(self.model.device), output_hidden_states=True)\n          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/opt/train/lib/python3.12/site-packages/torch/nn/modules/module.py\", line 1779, in _wrapped_call_impl\n    return self._call_impl(*args, **kwargs)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/opt/train/lib/python3.12/site-packages/torch/nn/modules/module.py\", line 1790, in _call_impl\n    return forward_call(*args, **kwargs)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/opt/train/lib/python3.12/site-packages/transformers/utils/generic.py\", line 911, in wrapper\n    output = func(self, *args, **kwargs)\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/opt/train/lib/python3.12/site-packages/transformers/models/qwen3/modeling_qwen3.py\", line 492, in forward\n    outputs: BaseModelOutputWithPast = self.model(\n                                       ^^^^^^^^^^^\n  File \"/opt/train/lib/python3.12/site-packages/torch/nn/modules/module.py\", line 1779, in _wrapped_call_impl\n    return self._call_impl(*args, **kwargs)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/opt/train/lib/python3.12/site-packages/torch/nn/modules/module.py\", line 1790, in _call_impl\n    return forward_call(*args, **kwargs)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/opt/train/lib/python3.12/site-packages/transformers/utils/generic.py\", line 1040, in wrapper\n    output = func(self, *args, **kwargs)\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/opt/train/lib/python3.12/site-packages/transformers/utils/output_capturing.py\", line 252, in wrapper\n    outputs = func(self, *args, **kwargs)\n              ^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/opt/train/lib/python3.12/site-packages/transformers/models/qwen3/modeling_qwen3.py\", line 424, in forward\n    hidden_states = decoder_layer(\n                    ^^^^^^^^^^^^^^\n  File \"/opt/train/lib/python3.12/site-packages/transformers/modeling_layers.py\", line 93, in __call__\n    return super().__call__(*args, **kwargs)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/opt/train/lib/python3.12/site-packages/torch/nn/modules/module.py\", line 1779, in _wrapped_call_impl\n    return self._call_impl(*args, **kwargs)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/opt/train/lib/python3.12/site-packages/torch/nn/modules/module.py\", line 1885, in _call_impl\n    return inner()\n           ^^^^^^^\n  File \"/opt/train/lib/python3.12/site-packages/torch/nn/modules/module.py\", line 1833, in inner\n    result = forward_call(*args, **kwargs)\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/opt/train/lib/python3.12/site-packages/transformers/models/qwen3/modeling_qwen3.py\", line 332, in forward\n    hidden_states = self.mlp(hidden_states)\n                    ^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/opt/train/lib/python3.12/site-packages/torch/nn/modules/module.py\", line 1779, in _wrapped_call_impl\n    return self._call_impl(*args, **kwargs)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/opt/train/lib/python3.12/site-packages/torch/nn/modules/module.py\", line 1790, in _call_impl\n    return forward_call(*args, **kwargs)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/opt/train/lib/python3.12/site-packages/transformers/models/qwen3/modeling_qwen3.py\", line 82, in forward\n    down_proj = self.down_proj(self.act_fn(self.gate_proj(x)) * self.up_proj(x))\n                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/opt/train/lib/python3.12/site-packages/torch/nn/modules/module.py\", line 1779, in _wrapped_call_impl\n    return self._call_impl(*args, **kwargs)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/opt/train/lib/python3.12/site-packages/torch/nn/modules/module.py\", line 1885, in _call_impl\n    return inner()\n           ^^^^^^^\n  File \"/opt/train/lib/python3.12/site-packages/torch/nn/modules/module.py\", line 1822, in inner\n    args_result = hook(self, args)\n                  ^^^^^^^^^^^^^^^^\n  File \"/workspace/aad/src/aadistill/init/collect.py\", line 67, in hook\n    self.ffn_abs_sum[idx] += a.abs().sum(0)\nRuntimeError: Expected all tensors to be on the same device, but found at least two devices, cuda:0 and cpu!\n",
+      "traceback_file": "stage1_traceback.log"
+    }
+  },
+  "authorization": {
+    "schema": "aadistill.autoinit.phase_a_authorization/v1",
+    "authorization_id": "autoinit.phase_a.2026-08-17T0850Z",
+    "version": 1,
+    "granted_utc": "2026-08-17T08:50:49Z",
+    "granted_by": "maintainer. The grant instant is `granted_utc` and nothing here restates it: at approval the maintainer's LOCAL date ran ahead of the machine's UTC clock, and a prose date beside a UTC field is how a grant comes to look back-dated.\n\nThis grant authorizes ONE additional Phase-A attempt -- attempt 7 -- under the EXISTING cumulative project cap of $217.00, approved earlier and recorded in BUDGET_LEDGER.md. The cap is not raised. Cumulative spend at approval was $193.5335. Attempt 7 may use at most the existing per-launch hard authorization of $23.0484, leaving about $0.4181 of cumulative-cap margin at the full hard bound.\n\nIt covers exactly one Phase-A launcher invocation. It does not authorize attempt 8, any increase above the $217.00 cumulative cap, or any change to the frozen search, recovery, seeds, thresholds, runtime-comparability rules, or the science and session plans.\n\nAttempt 6 spent $0.3552 and failed closed in stage 1 on a device-placement defect at the materialize/reload boundary, fixed on this base. The figures below are the launcher's own make_plan output at $0, not a transcription. Two superseded pricing bases are recorded in BUDGET_LEDGER.md and autoinit_phase_a_fallback_audit.json: $20.0126 (no fallback reserve, no beam-6 correction) and $22.4508 (fallback reserve placed after the soft stop, which would have truncated the conditional seed-sc rung).",
+    "plan_id": "autoinit.v1.phase_a_session",
+    "phase_a_session_plan_hash": "9377a2dc61f21790dd111d72a5de0e039ea1d31afef2d09e18c98a0b0cc2a0aa",
+    "phase_a_science_plan_hash": "02be33b9a7a8e26bc8bfb75795351e8cdc9ffd441b47066cc81887cfc511b55c",
+    "expected_usd": 17.8933,
+    "hard_cap_usd": 23.0484,
+    "authorized_stages": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5
+    ],
+    "stage_conditions": {
+      "0": "attestation; frozen assets; assert_preregistered against the frozen science plan; both thresholds must be materialized",
+      "1": "beam search; 5 admissible leaves or STOP and report the shortfall",
+      "2": "recovery rung 1 on seed sa: 5 searched leaves + the injected canonical control, then the survivor selection and the leaf retention record",
+      "3": "recovery rung 2 on seed sb: 2 survivors + the control",
+      "4": "conditional tie-break on seed sc, ONLY for finalists inside the preregistered equivalence interval; no fourth seed",
+      "5": "selection and report; unresolved_equivalence is a RESULT",
+      "teardown": "collect, fetch the finalists, delete the pod, confirm from the provider, STOP for review"
+    },
+    "scope_note": "Phase A only, one launcher invocation. This artifact authorizes the SPEND and the STAGES; it is not by itself an instruction to launch. The maintainer's 2026-08-15 message that requested it also says 'Do not launch Phase A yet', so the run waits for a separate explicit go. Nothing here permits retraining the permanent controls, changing the frozen search or recovery design, a fourth seed, or any follow-on experiment: Phase A is a terminus and stops for review on every path, including unresolved_equivalence.",
+    "phase_a_authorized": true,
+    "automatic_followon_start": false,
+    "authorized_session_commit": "f105cc8947a7ff0d9a327ddc6b63ce455ab613f7",
+    "harness_source_digest": "437fc7bc8c8eba701715fbb27cecf6903c8d721b855bc61a2d762becc03edca4",
+    "harness_source_files": [
+      "scripts/pod/autoinit_phase_a_launch.py",
+      "scripts/pod/autoinit_phase_a_driver.py",
+      "scripts/pod/autoinit_preflight_launch.py",
+      "scripts/pod/autoinit_preflight_setup.sh",
+      "scripts/pod/autoinit_engine_probe.py",
+      "scripts/pod/watchdog.py",
+      "scripts/pod/collect_artifacts.py",
+      "scripts/autoinit/phase_a_search.py",
+      "scripts/autoinit/write_preregistration.py",
+      "src/aadistill/autoinit/authorization.py",
+      "src/aadistill/autoinit/generation_compat.py",
+      "src/aadistill/autoinit/phase_a.py",
+      "src/aadistill/autoinit/generation.py"
+    ],
+    "per_launch_hard_usd": 23.0484,
+    "provenance_commit": "f105cc8947a7ff0d9a327ddc6b63ce455ab613f7",
+    "enforcement": "the launcher loads this artifact and refuses to create a pod whose priced hard threshold exceeds hard_cap_usd or per_launch_hard_usd, refuses a stage not in authorized_stages, refuses a harness that does not digest to the authorized value, and has no code path to any experiment after Phase A",
+    "authorization_sha256": "d88a27e316ff31e26a104585e1dac2842e7c2db5b7951b63fa06aa111d48b7d2"
+  },
+  "elapsed_min": 8.72,
+  "spend_usd": 0.3393,
+  "phase_a_successful": false,
+  "failed_stages": [
+    1
+  ],
+  "outcome": "FAILED",
+  "cleanup_is_not_success": "collection and teardown run regardless of the outcome; a clean cleanup does not make a failed search a successful Phase A"
+}

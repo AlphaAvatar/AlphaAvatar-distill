@@ -2,104 +2,109 @@
   "schema": "aadistill.autoinit.phase_a_session/v1",
   "timeline": [
     {
-      "utc": "2026-08-16T19:14:15+00:00",
+      "utc": "2026-08-17T08:52:07+00:00",
       "elapsed_min": 0.0,
       "msg": "budget: expected 1084 min $17.89 \u00b7 soft $22.72 \u00b7 hard $23.05 (authorized $23.05)"
     },
     {
-      "utc": "2026-08-16T19:14:15+00:00",
+      "utc": "2026-08-17T08:52:07+00:00",
       "elapsed_min": 0.0,
       "msg": "NVIDIA L40S $0.99/h, stock Medium"
     },
     {
-      "utc": "2026-08-16T19:14:15+00:00",
+      "utc": "2026-08-17T08:52:07+00:00",
       "elapsed_min": 0.0,
-      "msg": "session commit fcf119fe1b9b verified: harness digests to e690a7d9972b\u2026, carries the authorization, and only logs/autoinit_phase_a_authorization.json differs from the authorized base"
+      "msg": "session commit 289c213cfac7 verified: harness digests to 437fc7bc8c8e\u2026, carries the authorization, and only logs/autoinit_phase_a_authorization.json differs from the authorized base"
     },
     {
-      "utc": "2026-08-16T19:14:16+00:00",
+      "utc": "2026-08-17T08:52:08+00:00",
       "elapsed_min": 0.0,
       "msg": "precheck OK: 3 relay inputs, 2 local assets, frozen plan 02be33b9a7a8\u2026"
     },
     {
-      "utc": "2026-08-16T19:14:17+00:00",
+      "utc": "2026-08-17T08:52:09+00:00",
       "elapsed_min": 0.0,
-      "msg": "created wgm2tamw8nu9f5 at $0.99/h"
+      "msg": "created n2kfqhyoya4zzj at $0.99/h"
     },
     {
-      "utc": "2026-08-16T19:14:17+00:00",
+      "utc": "2026-08-17T08:52:09+00:00",
       "elapsed_min": 0.0,
       "msg": "watchdog detached \u2014 hard 1397 min = $23.05"
     },
     {
-      "utc": "2026-08-16T19:15:00+00:00",
-      "elapsed_min": 0.72,
-      "msg": "TCP 22 at 82.221.170.242:37104 after 0.7 min"
+      "utc": "2026-08-17T08:52:31+00:00",
+      "elapsed_min": 0.37,
+      "msg": "TCP 22 at 82.221.170.242:37261 after 0.4 min"
     },
     {
-      "utc": "2026-08-16T19:15:04+00:00",
-      "elapsed_min": 0.79,
+      "utc": "2026-08-17T08:52:34+00:00",
+      "elapsed_min": 0.41,
       "msg": "draw 1: ssh reachable \u2014 $0.01"
     },
     {
-      "utc": "2026-08-16T19:16:42+00:00",
-      "elapsed_min": 2.42,
+      "utc": "2026-08-17T08:54:02+00:00",
+      "elapsed_min": 1.88,
       "msg": "draw 1: image identity runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@580.159.03"
     },
     {
-      "utc": "2026-08-16T19:16:42+00:00",
-      "elapsed_min": 2.42,
+      "utc": "2026-08-17T08:54:02+00:00",
+      "elapsed_min": 1.88,
       "msg": "draw 1: running setup"
     },
     {
-      "utc": "2026-08-16T19:28:39+00:00",
-      "elapsed_min": 14.36,
-      "msg": "draw 1: setup complete \u2014 $0.24"
+      "utc": "2026-08-17T09:03:59+00:00",
+      "elapsed_min": 11.84,
+      "msg": "draw 1: setup complete \u2014 $0.20"
     },
     {
-      "utc": "2026-08-16T19:28:44+00:00",
-      "elapsed_min": 14.46,
-      "msg": "driver detached, pid 6300, confirmed by descriptor_probe \u2014 $0.24"
+      "utc": "2026-08-17T09:04:06+00:00",
+      "elapsed_min": 11.94,
+      "msg": "driver detached, pid 6265, confirmed by descriptor_probe \u2014 $0.20"
     },
     {
-      "utc": "2026-08-16T19:31:02+00:00",
-      "elapsed_min": 16.74,
-      "msg": "  2026-08-16T19:28:44Z MARKER:STAGE_START:0 \u2014 $0.28"
+      "utc": "2026-08-17T09:06:22+00:00",
+      "elapsed_min": 14.22,
+      "msg": "  2026-08-17T09:04:05Z MARKER:STAGE_START:0 \u2014 $0.23"
     },
     {
-      "utc": "2026-08-16T19:33:23+00:00",
-      "elapsed_min": 19.11,
-      "msg": "  2026-08-16T19:32:50Z MARKER:PHASE_A_FAILED \u2014 $0.32"
+      "utc": "2026-08-17T09:08:43+00:00",
+      "elapsed_min": 16.56,
+      "msg": "  2026-08-17T09:07:05Z MARKER:STAGE_START:1 \u2014 $0.27"
     },
     {
-      "utc": "2026-08-16T19:33:23+00:00",
-      "elapsed_min": 19.11,
+      "utc": "2026-08-17T09:13:24+00:00",
+      "elapsed_min": 21.24,
+      "msg": "  2026-08-17T09:12:48Z MARKER:PHASE_A_FAILED \u2014 $0.35"
+    },
+    {
+      "utc": "2026-08-17T09:13:24+00:00",
+      "elapsed_min": 21.24,
       "msg": "a blocking stage failed \u2014 collecting evidence, then tearing down. Completed probes are journalled and the permanent controls are inputs here and untouched."
     },
     {
-      "utc": "2026-08-16T19:33:23+00:00",
-      "elapsed_min": 19.11,
-      "msg": "polling ended: PHASE_A_FAILED \u2014 $0.32"
+      "utc": "2026-08-17T09:13:24+00:00",
+      "elapsed_min": 21.24,
+      "msg": "polling ended: PHASE_A_FAILED \u2014 $0.35"
     },
     {
-      "utc": "2026-08-16T19:35:04+00:00",
-      "elapsed_min": 20.78,
-      "msg": "  manifest rc=0\n8 file(s) across 4 class(es) -> /workspace/manifest.json\n  final_required: 8 \u00b7 mutable_snapshot: 0 \u00b7 final_streams_quiescent: True"
+      "utc": "2026-08-17T09:15:24+00:00",
+      "elapsed_min": 23.24,
+      "msg": "  manifest rc=0\n10 file(s) across 5 class(es) -> /workspace/manifest.json\n  final_required: 10 \u00b7 mutable_snapshot: 0 \u00b7 final_streams_quiescent: True"
     },
     {
-      "utc": "2026-08-16T19:35:37+00:00",
-      "elapsed_min": 21.34,
+      "utc": "2026-08-17T09:15:56+00:00",
+      "elapsed_min": 23.78,
       "msg": "teardown gate: allowed=True failed=training_complete"
     },
     {
-      "utc": "2026-08-16T19:35:37+00:00",
-      "elapsed_min": 21.34,
+      "utc": "2026-08-17T09:15:56+00:00",
+      "elapsed_min": 23.78,
       "msg": "deleting pod (gate passed after PHASE_A_FAILED)"
     },
     {
-      "utc": "2026-08-16T19:35:49+00:00",
-      "elapsed_min": 21.53,
-      "msg": "pod deleted \u2014 21.5 min, $0.36; provider confirms gone: True"
+      "utc": "2026-08-17T09:16:07+00:00",
+      "elapsed_min": 23.97,
+      "msg": "pod deleted \u2014 24.0 min, $0.40; provider confirms gone: True"
     }
   ],
   "stages": {
@@ -115,10 +120,10 @@
   },
   "authorization": {
     "schema": "aadistill.autoinit.phase_a_authorization/v1",
-    "authorization_id": "autoinit.phase_a.2026-08-16T1912Z",
+    "authorization_id": "autoinit.phase_a.2026-08-17T0850Z",
     "version": 1,
-    "granted_utc": "2026-08-16T19:12:05Z",
-    "granted_by": "maintainer. The grant instant is `granted_utc` and nothing here restates it: the maintainer's LOCAL date was 2026-08-17 while the machine's UTC clock was still 2026-08-16, and a prose date next to a UTC field is how a grant comes to look back-dated. The cumulative project cap was raised to $217.00 in the maintainer's own words \u2014 'My recommended new cumulative project cap is $217.00' \u2014 and then formally approved in the same sequence: 'Record this approval in the ledger and machine-readable state ... and issue one fresh PhaseAAuthorization.' Against a spend of $193.1783 that leaves $23.8217, and the launcher's priced hard threshold is $23.048325, so the margin is $0.7734. It funds ONE attempt; the maintainer stated 'This funds one attempt only and does not imply Attempt 7', and 'If it fails closed, stop; no Attempt 7 is implied.' The figures below are the launcher's own make_plan output at $0, not a transcription. Two superseded bases are recorded in BUDGET_LEDGER.md and autoinit_phase_a_fallback_audit.json: $20.0126 (no fallback reserve, no beam-6 correction) and $22.4508 (fallback reserve placed after the soft stop, which would have truncated the conditional seed-sc rung).",
+    "granted_utc": "2026-08-17T08:50:49Z",
+    "granted_by": "maintainer. The grant instant is `granted_utc` and nothing here restates it: at approval the maintainer's LOCAL date ran ahead of the machine's UTC clock, and a prose date beside a UTC field is how a grant comes to look back-dated.\n\nThis grant authorizes ONE additional Phase-A attempt -- attempt 7 -- under the EXISTING cumulative project cap of $217.00, approved earlier and recorded in BUDGET_LEDGER.md. The cap is not raised. Cumulative spend at approval was $193.5335. Attempt 7 may use at most the existing per-launch hard authorization of $23.0484, leaving about $0.4181 of cumulative-cap margin at the full hard bound.\n\nIt covers exactly one Phase-A launcher invocation. It does not authorize attempt 8, any increase above the $217.00 cumulative cap, or any change to the frozen search, recovery, seeds, thresholds, runtime-comparability rules, or the science and session plans.\n\nAttempt 6 spent $0.3552 and failed closed in stage 1 on a device-placement defect at the materialize/reload boundary, fixed on this base. The figures below are the launcher's own make_plan output at $0, not a transcription. Two superseded pricing bases are recorded in BUDGET_LEDGER.md and autoinit_phase_a_fallback_audit.json: $20.0126 (no fallback reserve, no beam-6 correction) and $22.4508 (fallback reserve placed after the soft stop, which would have truncated the conditional seed-sc rung).",
     "plan_id": "autoinit.v1.phase_a_session",
     "phase_a_session_plan_hash": "9377a2dc61f21790dd111d72a5de0e039ea1d31afef2d09e18c98a0b0cc2a0aa",
     "phase_a_science_plan_hash": "02be33b9a7a8e26bc8bfb75795351e8cdc9ffd441b47066cc81887cfc511b55c",
@@ -144,8 +149,8 @@
     "scope_note": "Phase A only, one launcher invocation. This artifact authorizes the SPEND and the STAGES; it is not by itself an instruction to launch. The maintainer's 2026-08-15 message that requested it also says 'Do not launch Phase A yet', so the run waits for a separate explicit go. Nothing here permits retraining the permanent controls, changing the frozen search or recovery design, a fourth seed, or any follow-on experiment: Phase A is a terminus and stops for review on every path, including unresolved_equivalence.",
     "phase_a_authorized": true,
     "automatic_followon_start": false,
-    "authorized_session_commit": "9e09824aff85ac4aadd99e1635cd73292a3eacc8",
-    "harness_source_digest": "e690a7d9972b9d98c5db20139e72613af4231d70bf5b0599065029314eef4fec",
+    "authorized_session_commit": "f105cc8947a7ff0d9a327ddc6b63ce455ab613f7",
+    "harness_source_digest": "437fc7bc8c8eba701715fbb27cecf6903c8d721b855bc61a2d762becc03edca4",
     "harness_source_files": [
       "scripts/pod/autoinit_phase_a_launch.py",
       "scripts/pod/autoinit_phase_a_driver.py",
@@ -162,12 +167,12 @@
       "src/aadistill/autoinit/generation.py"
     ],
     "per_launch_hard_usd": 23.0484,
-    "provenance_commit": "9e09824aff85ac4aadd99e1635cd73292a3eacc8",
+    "provenance_commit": "f105cc8947a7ff0d9a327ddc6b63ce455ab613f7",
     "enforcement": "the launcher loads this artifact and refuses to create a pod whose priced hard threshold exceeds hard_cap_usd or per_launch_hard_usd, refuses a stage not in authorized_stages, refuses a harness that does not digest to the authorized value, and has no code path to any experiment after Phase A",
-    "authorization_sha256": "49ed7e5a59d5ca81ab8b38e43876167fa4cf60ec94824b6ee779c43b13332619"
+    "authorization_sha256": "d88a27e316ff31e26a104585e1dac2842e7c2db5b7951b63fa06aa111d48b7d2"
   },
   "preflight_plan_hash": "9377a2dc61f21790dd111d72a5de0e039ea1d31afef2d09e18c98a0b0cc2a0aa",
-  "harness_source_digest": "e690a7d9972b9d98c5db20139e72613af4231d70bf5b0599065029314eef4fec",
+  "harness_source_digest": "437fc7bc8c8eba701715fbb27cecf6903c8d721b855bc61a2d762becc03edca4",
   "harness_source_files": [
     "scripts/autoinit/phase_a_search.py",
     "scripts/autoinit/write_preregistration.py",
@@ -290,15 +295,15 @@
   "quoted_price_per_hour": 0.99,
   "stock_status": "Medium",
   "session_commit_check": {
-    "session_commit": "fcf119fe1b9b7c60235a94433c4824325a5fa754",
-    "authorized_session_commit": "9e09824aff85ac4aadd99e1635cd73292a3eacc8",
-    "harness_digest_at_commit": "e690a7d9972b9d98c5db20139e72613af4231d70bf5b0599065029314eef4fec",
-    "authorized_harness_digest": "e690a7d9972b9d98c5db20139e72613af4231d70bf5b0599065029314eef4fec",
+    "session_commit": "289c213cfac72b1306043d3550b34d9a4b8d6451",
+    "authorized_session_commit": "f105cc8947a7ff0d9a327ddc6b63ce455ab613f7",
+    "harness_digest_at_commit": "437fc7bc8c8eba701715fbb27cecf6903c8d721b855bc61a2d762becc03edca4",
+    "authorized_harness_digest": "437fc7bc8c8eba701715fbb27cecf6903c8d721b855bc61a2d762becc03edca4",
     "harness_matches": true,
     "commit_carries_this_authorization": true,
     "lineage": {
-      "authorized_base": "9e09824aff85ac4aadd99e1635cd73292a3eacc8",
-      "session_commit": "fcf119fe1b9b7c60235a94433c4824325a5fa754",
+      "authorized_base": "f105cc8947a7ff0d9a327ddc6b63ce455ab613f7",
+      "session_commit": "289c213cfac72b1306043d3550b34d9a4b8d6451",
       "descends_from_base": true,
       "changed_paths": [
         "logs/autoinit_phase_a_authorization.json"
@@ -322,11 +327,11 @@
     "local_missing": [],
     "frozen_plan_hash": "02be33b9a7a8e26bc8bfb75795351e8cdc9ffd441b47066cc81887cfc511b55c"
   },
-  "pod_id": "wgm2tamw8nu9f5",
+  "pod_id": "n2kfqhyoya4zzj",
   "actual_price_per_hour": 0.99,
-  "terminate_after_utc": "2026-08-17T18:31:08Z",
+  "terminate_after_utc": "2026-08-18T08:09:00Z",
   "watchdog_journals": [
-    "/home/ecs-user/aad-scratch/phase_a6_20260816/watchdog.jsonl"
+    "/home/ecs-user/aad-scratch/phase_a7_20260817/watchdog.jsonl"
   ],
   "image_identity": {
     "image_name": "runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404",
@@ -337,15 +342,15 @@
   },
   "driver_job": {
     "job_id": "autoinit_phase_a_driver",
-    "pid": 6300,
+    "pid": 6265,
     "workdir": "/workspace/aad",
-    "command": "/opt/train/bin/python /workspace/aad/scripts/pod/autoinit_phase_a_driver.py --stage all --image-digest 'runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@580.159.03' --rate 0.99 --spent-usd 0.2369 --soft-stop-usd 22.7183 --authorized-usd 23.0484 --search-minutes 180.0 --probe-train-minutes 61.55 --probe-battery-minutes 9.82",
+    "command": "/opt/train/bin/python /workspace/aad/scripts/pod/autoinit_phase_a_driver.py --stage all --image-digest 'runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@580.159.03' --rate 0.99 --spent-usd 0.1953 --soft-stop-usd 22.7183 --authorized-usd 23.0484 --search-minutes 180.0 --probe-train-minutes 61.55 --probe-battery-minutes 9.82",
     "log_path": "/workspace/autoinit_phase_a_run.log",
     "status_path": "/workspace/autoinit_phase_a.status",
     "pid_path": "/workspace/jobs/autoinit_phase_a_driver.pid",
     "descriptor_path": "/workspace/jobs/autoinit_phase_a_driver.job.json",
     "exit_path": "/workspace/jobs/autoinit_phase_a_driver.exit",
-    "started_utc": "2026-08-16T19:28:42Z",
+    "started_utc": "2026-08-17T09:04:03Z",
     "start_channel_closed": true,
     "confirmed_by": "descriptor_probe"
   },
@@ -378,7 +383,7 @@
   },
   "manifest_summary": {
     "ok": true,
-    "entries": 8,
+    "entries": 10,
     "missing": [],
     "still_being_written": []
   },
@@ -390,13 +395,13 @@
   "provider_confirms_gone": true,
   "cost": {
     "price_per_hour": 0.99,
-    "elapsed_minutes": 21.53,
-    "actual_usd": 0.3552,
+    "elapsed_minutes": 23.97,
+    "actual_usd": 0.3955,
     "authorized_usd": 23.0484,
     "within_authorization": true
   },
   "passed": false,
   "phase_a_successful": false,
   "cleanup_is_not_success": "artifacts are collected and the pod is torn down on every path; the session outcome is decided by the driver's terminal marker alone",
-  "finished_utc": "2026-08-16T19:35:49+00:00"
+  "finished_utc": "2026-08-17T09:16:07+00:00"
 }

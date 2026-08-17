@@ -272,12 +272,18 @@ $2.30   RAISED 2026-08-14 with maintainer approval, after attempt 1 spent
 ```
 authorized cumulative cap                                    $217.00
     RAISED AND APPROVED 2026-08-17. See the caps list above.
-actual cumulative spend                                      $193.5335
-    = $193.1783 + $0.3552 for Phase A attempt 6
-unused authorization remaining                               $ 23.4665
+actual cumulative spend                                      $193.9290
+    = $193.1783 + $0.3552 attempt 6 + $0.3955 attempt 7
+unused authorization remaining                               $ 23.0710
+    NOT PERMISSION. Attempt 7's authorization
+    `autoinit.phase_a.2026-08-17T0850Z` covered exactly ONE
+    launcher invocation, is SPENT, and its lineage gate refuses
+    every later commit by construction. No attempt 8 is
+    authorized, funded, prepared or implied.
+--- the attempt-7 grant, now spent -------------------------------------------
 Phase A attempt-7 per-launch hard authorization              $ 23.0484
 cumulative-cap margin at the full hard bound                 $  0.4181
-    ATTEMPT 7 IS AUTHORIZED (2026-08-17), under the EXISTING
+    ATTEMPT 7 WAS AUTHORIZED (2026-08-17), under the EXISTING
     $217.00 cap. The cap is NOT raised. The authorization covers
     exactly one Phase-A launcher invocation and does not authorize
     attempt 8, any increase above $217.00, or any change to the
@@ -286,8 +292,9 @@ cumulative-cap margin at the full hard bound                 $  0.4181
     The attempt-6 authorization `autoinit.phase_a.2026-08-16T1912Z`
     is SPENT; its lineage gate refuses every later commit by
     construction, so attempt 7 runs under a freshly issued one.
-paid compute currently running                                see logs/autoinit_phase_a_session.json
-    attempt 6's pod wgm2tamw8nu9f5 deleted, provider confirms gone
+paid compute currently running                                NONE
+    attempt 6 pod wgm2tamw8nu9f5 and attempt 7 pod n2kfqhyoya4zzj
+    both deleted; provider confirms gone for both
 
     SUPERSEDED Phase-A pricing, kept because a threshold that
     moved silently is how E6b overran:

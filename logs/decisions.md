@@ -3474,3 +3474,53 @@ cuda:0, different from other tensors on cpu
   harness file set, or the cumulative cap.
 - **Status: STOPPED for a fresh one-use Attempt-7 authorization decision.** The
   previous approval stopped at attempt 6; the unused $23.4665 is not permission.
+
+## 2026-08-17 — Attempt 7: further into stage 1, a SECOND device bug ($0.3955)
+
+- **Result:** `PHASE_A_FAILED`, blocking stage 1. Pod `n2kfqhyoya4zzj` deleted,
+  provider confirms gone, 24.0 min, **$0.3955** of the $23.0484 per-launch
+  authorization. Nothing trained; the permanent controls are inputs and are
+  untouched. Cumulative spend **$193.9290**; **$23.0710** remains under the
+  unchanged $217.00 cap.
+- **Stage 0 passed for the third time**, in 3.0 min.
+- **The attempt-6 fix held.** The search materialized, canonically reloaded,
+  validated and MEASURED one state — `attention.weight_proxy_v0`, journalled at
+  `validity: measured` — so `_materialize_and_measure` / `_validate` now work on
+  a GPU. Stage 1 ran 5.7 min against attempt 6's 1.0 min and failed strictly
+  later, in a different operator.
+- **The traceback preservation paid for itself on its first run.** The whole
+  frame is in
+  [`autoinit_phase_a_attempt7/stage1_traceback.log`](autoinit_phase_a_attempt7/stage1_traceback.log),
+  collected as a fifth artifact class. No guessing was required this time.
+
+```
+composite.stage1_sandwich_v0
+  -> collect_activation_stats            operators/_common.py:127
+  -> ActivationCollector.process         init/collect.py:76
+  -> down_proj forward-pre-hook          init/collect.py:67
+        self.ffn_abs_sum[idx] += a.abs().sum(0)
+RuntimeError: Expected all tensors to be on the same device, but found at least
+two devices, cuda:0 and cpu!
+```
+
+- **Cause.** `ActivationCollector.__init__` allocates every accumulator with
+  `torch.zeros(...)` and no `device=`: `res_sum`, `res_sqsum`, `ffn_abs_sum`,
+  `ffn_sq_sum`, `token_counts` are all on the host. The model runs on `cuda:0`,
+  so the forward hook receives a CUDA activation and adds it into a CPU
+  accumulator.
+- **Why this had never fired.** `init/collect.py` is Stage-0 code. Its only
+  previous execution is the Stage-0 regeneration recorded in
+  `DEVBOX_CPU_MEASURED` — "949,859 tokens of 4.02B forward + float64 X^T X
+  accumulation in 4,972 s" — **on the CPU-only dev box**, where the model and
+  the accumulators are on the same device by accident. Phase A is its first GPU
+  execution.
+- **Same class as attempt 6, different site.** Both are "the model and this
+  tensor are on the same device", true on CPU and false on GPU. Fixing the one
+  the pod happened to reach first only revealed the next one. This is the third
+  time a CPU-only $0 path has certified GPU-only code, and it is now clear that
+  a *device-placement audit of every tensor the search touches on a GPU* is a
+  different and larger piece of work than fixing whatever the last pod hit.
+- **Status: STOPPED.** The authorization covered exactly one launcher
+  invocation, it is spent, and its lineage gate refuses every later commit by
+  construction. **No Attempt 8 is authorized, funded, prepared or implied.** The
+  remaining $23.0710 is not permission. No fix has been implemented.
