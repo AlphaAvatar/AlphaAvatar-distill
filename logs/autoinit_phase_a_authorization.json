@@ -1,9 +1,9 @@
 {
   "schema": "aadistill.autoinit.phase_a_authorization/v1",
-  "authorization_id": "autoinit.phase_a.2026-08-16T1912Z",
+  "authorization_id": "autoinit.phase_a.2026-08-17T0850Z",
   "version": 1,
-  "granted_utc": "2026-08-16T19:12:05Z",
-  "granted_by": "maintainer. The grant instant is `granted_utc` and nothing here restates it: the maintainer's LOCAL date was 2026-08-17 while the machine's UTC clock was still 2026-08-16, and a prose date next to a UTC field is how a grant comes to look back-dated. The cumulative project cap was raised to $217.00 in the maintainer's own words \u2014 'My recommended new cumulative project cap is $217.00' \u2014 and then formally approved in the same sequence: 'Record this approval in the ledger and machine-readable state ... and issue one fresh PhaseAAuthorization.' Against a spend of $193.1783 that leaves $23.8217, and the launcher's priced hard threshold is $23.048325, so the margin is $0.7734. It funds ONE attempt; the maintainer stated 'This funds one attempt only and does not imply Attempt 7', and 'If it fails closed, stop; no Attempt 7 is implied.' The figures below are the launcher's own make_plan output at $0, not a transcription. Two superseded bases are recorded in BUDGET_LEDGER.md and autoinit_phase_a_fallback_audit.json: $20.0126 (no fallback reserve, no beam-6 correction) and $22.4508 (fallback reserve placed after the soft stop, which would have truncated the conditional seed-sc rung).",
+  "granted_utc": "2026-08-17T08:50:49Z",
+  "granted_by": "maintainer. The grant instant is `granted_utc` and nothing here restates it: at approval the maintainer's LOCAL date ran ahead of the machine's UTC clock, and a prose date beside a UTC field is how a grant comes to look back-dated.\n\nThis grant authorizes ONE additional Phase-A attempt -- attempt 7 -- under the EXISTING cumulative project cap of $217.00, approved earlier and recorded in BUDGET_LEDGER.md. The cap is not raised. Cumulative spend at approval was $193.5335. Attempt 7 may use at most the existing per-launch hard authorization of $23.0484, leaving about $0.4181 of cumulative-cap margin at the full hard bound.\n\nIt covers exactly one Phase-A launcher invocation. It does not authorize attempt 8, any increase above the $217.00 cumulative cap, or any change to the frozen search, recovery, seeds, thresholds, runtime-comparability rules, or the science and session plans.\n\nAttempt 6 spent $0.3552 and failed closed in stage 1 on a device-placement defect at the materialize/reload boundary, fixed on this base. The figures below are the launcher's own make_plan output at $0, not a transcription. Two superseded pricing bases are recorded in BUDGET_LEDGER.md and autoinit_phase_a_fallback_audit.json: $20.0126 (no fallback reserve, no beam-6 correction) and $22.4508 (fallback reserve placed after the soft stop, which would have truncated the conditional seed-sc rung).",
   "plan_id": "autoinit.v1.phase_a_session",
   "phase_a_session_plan_hash": "9377a2dc61f21790dd111d72a5de0e039ea1d31afef2d09e18c98a0b0cc2a0aa",
   "phase_a_science_plan_hash": "02be33b9a7a8e26bc8bfb75795351e8cdc9ffd441b47066cc81887cfc511b55c",
@@ -29,8 +29,8 @@
   "scope_note": "Phase A only, one launcher invocation. This artifact authorizes the SPEND and the STAGES; it is not by itself an instruction to launch. The maintainer's 2026-08-15 message that requested it also says 'Do not launch Phase A yet', so the run waits for a separate explicit go. Nothing here permits retraining the permanent controls, changing the frozen search or recovery design, a fourth seed, or any follow-on experiment: Phase A is a terminus and stops for review on every path, including unresolved_equivalence.",
   "phase_a_authorized": true,
   "automatic_followon_start": false,
-  "authorized_session_commit": "9e09824aff85ac4aadd99e1635cd73292a3eacc8",
-  "harness_source_digest": "e690a7d9972b9d98c5db20139e72613af4231d70bf5b0599065029314eef4fec",
+  "authorized_session_commit": "f105cc8947a7ff0d9a327ddc6b63ce455ab613f7",
+  "harness_source_digest": "437fc7bc8c8eba701715fbb27cecf6903c8d721b855bc61a2d762becc03edca4",
   "harness_source_files": [
     "scripts/pod/autoinit_phase_a_launch.py",
     "scripts/pod/autoinit_phase_a_driver.py",
@@ -47,7 +47,7 @@
     "src/aadistill/autoinit/generation.py"
   ],
   "per_launch_hard_usd": 23.0484,
-  "provenance_commit": "9e09824aff85ac4aadd99e1635cd73292a3eacc8",
+  "provenance_commit": "f105cc8947a7ff0d9a327ddc6b63ce455ab613f7",
   "enforcement": "the launcher loads this artifact and refuses to create a pod whose priced hard threshold exceeds hard_cap_usd or per_launch_hard_usd, refuses a stage not in authorized_stages, refuses a harness that does not digest to the authorized value, and has no code path to any experiment after Phase A",
-  "authorization_sha256": "49ed7e5a59d5ca81ab8b38e43876167fa4cf60ec94824b6ee779c43b13332619"
+  "authorization_sha256": "d88a27e316ff31e26a104585e1dac2842e7c2db5b7951b63fa06aa111d48b7d2"
 }
