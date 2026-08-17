@@ -43,6 +43,18 @@ Also frozen: recovery design, selection rules, pooled_counts@v2, Stage-3 artifac
 * the Stage-1 device audit (autoinit.stage1_device_contract@v1)
 * Stage 0 on hardware, passed three times
 
+## Latest verification
+
+After the log and checkpoint-storage cleanup, CPU only — no checkpoint was
+loaded and no metric measured:
+
+* full suite **1798 passed, 9 skipped, 5 errors**. The five are a transformers
+  4.57.1 incompatibility in the sibling AlphaAvatar venv, raised on a toy
+  tokenizer written into `tmp_path`; the same file is 19/19 under the repo venv,
+  and this session touched none of that code.
+* pod simulator **1763 passed, 20 skipped**, restored exactly.
+* frozen-asset verifier **passed**, no problems.
+
 ## What failed, and why
 
 | run | cost | died at | cause |

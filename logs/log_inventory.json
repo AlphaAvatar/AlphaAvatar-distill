@@ -1,6 +1,6 @@
 {
   "schema": "aadistill.log_inventory/v1",
-  "created_utc": "2026-08-17T19:45:07+00:00",
+  "created_utc": "2026-08-17T20:28:56+00:00",
   "command": "scripts/consolidate/build_log_inventory.py",
   "roots": [
     "logs",
@@ -11,7 +11,7 @@
   "rule": "nothing is deleted before it appears here with a disposition and a reason. A duplicate's canonical copy is derived from who references it, not chosen by hand, except where CANONICAL_OVERRIDES states otherwise and says why.",
   "totals": {
     "files": 217,
-    "bytes": 5451803,
+    "bytes": 5411444,
     "by_disposition": {
       "keep_canonical": 10,
       "keep_immutable": 116,
@@ -547,6 +547,7 @@
         "README.md",
         "docs/REPO_LAYOUT.md",
         "logs/STATE.md",
+        "logs/artifact_manifests.md",
         "logs/checkpoint_registry.json",
         "logs/decisions.md",
         "logs/log_inventory.json",
@@ -571,6 +572,7 @@
         "logs/artifact_manifests.md",
         "logs/checkpoint_tombstones.json",
         "logs/current_state.json",
+        "logs/decisions.md",
         "logs/log_inventory.json",
         "tests/docs/test_repository_structure.py"
       ],
@@ -726,8 +728,8 @@
     },
     {
       "path": "logs/STATE.md",
-      "size_bytes": 5198,
-      "sha256": "dd3d283a430607f56b92aba3afdf68a50fb8410f7ef54b1671c76e16e6acfb25",
+      "size_bytes": 6049,
+      "sha256": "b9b910272ff855cab91e7ccd2c9869ae5808872be75f7422fcbc0c01cf82212d",
       "category": "living_state",
       "in_paid_attempt_chain": false,
       "referenced_by": [
@@ -830,8 +832,8 @@
     },
     {
       "path": "logs/artifact_manifests.md",
-      "size_bytes": 53117,
-      "sha256": "c379693199a0a11fc4c30bff4209bc90c99f9ea23408012520ec188ec598d886",
+      "size_bytes": 54629,
+      "sha256": "ff1877d0eb9f9357b9cd4c8e3e412a754119371f5f4cfe9795bd0f35e29a76ee",
       "category": "index",
       "in_paid_attempt_chain": false,
       "referenced_by": [
@@ -1551,7 +1553,6 @@
       "in_paid_attempt_chain": false,
       "referenced_by": [
         "logs/autoinit_state_eval_v1_manifest.json",
-        "logs/checkpoint_registry.json",
         "logs/checkpoint_tombstones.json",
         "logs/log_inventory.json",
         "scripts/consolidate/build_checkpoint_registry.py"
@@ -1571,7 +1572,6 @@
       "in_paid_attempt_chain": false,
       "referenced_by": [
         "logs/autoinit_state_eval_v1_manifest.json",
-        "logs/checkpoint_registry.json",
         "logs/checkpoint_tombstones.json",
         "logs/log_inventory.json"
       ],
@@ -2087,7 +2087,6 @@
       "in_paid_attempt_chain": false,
       "referenced_by": [
         "logs/autoinit_phase_a_preregistration_materialized.json",
-        "logs/checkpoint_registry.json",
         "logs/checkpoint_tombstones.json",
         "logs/log_inventory.json",
         "scripts/autoinit/write_preregistration.py",
@@ -2128,7 +2127,6 @@
       "in_paid_attempt_chain": false,
       "referenced_by": [
         "logs/autoinit_permanent_controls/README.md",
-        "logs/checkpoint_registry.json",
         "logs/checkpoint_tombstones.json",
         "logs/log_inventory.json",
         "scripts/autoinit/write_preregistration.py"
@@ -2169,7 +2167,6 @@
       "category": "immutable_record",
       "in_paid_attempt_chain": false,
       "referenced_by": [
-        "logs/checkpoint_registry.json",
         "logs/checkpoint_tombstones.json",
         "logs/log_inventory.json",
         "scripts/autoinit/issue_phase_a_authorization.py",
@@ -2242,7 +2239,6 @@
       "category": "narrative",
       "in_paid_attempt_chain": false,
       "referenced_by": [
-        "logs/checkpoint_registry.json",
         "logs/checkpoint_tombstones.json",
         "logs/log_inventory.json",
         "scripts/pod/autoinit_phase_a_launch.py"
@@ -2928,8 +2924,8 @@
     },
     {
       "path": "logs/checkpoint_registry.json",
-      "size_bytes": 337719,
-      "sha256": "2d445985bfb19c8f95d1934d5354a9d7b2afc2636b8107c2335f851543bfda91",
+      "size_bytes": 286060,
+      "sha256": "76a3aecde56448d293a1a229ecfe51ebcdff0df754f92d4971938d706b1815f7",
       "category": "index",
       "in_paid_attempt_chain": false,
       "referenced_by": [
@@ -2987,8 +2983,8 @@
     },
     {
       "path": "logs/current_state.json",
-      "size_bytes": 5302,
-      "sha256": "c177996503ea08c733d53fa67a7189aee132b76acc49c11fad1a319649f270df",
+      "size_bytes": 5890,
+      "sha256": "66e4118b369bd15584bd2bfeacacbb22cbee77b314c390736f1f3d65f2e852f0",
       "category": "living_state",
       "in_paid_attempt_chain": false,
       "referenced_by": [
@@ -2998,6 +2994,7 @@
         "docs/archive/HANDOFF_AUTOINITIALIZER_20260812.md",
         "logs/CATALOG.md",
         "logs/archive/README.md",
+        "logs/decisions.md",
         "logs/log_inventory.json",
         "scripts/consolidate/build_log_inventory.py",
         "tests/docs/test_repository_structure.py"
@@ -3012,14 +3009,15 @@
     },
     {
       "path": "logs/decisions.md",
-      "size_bytes": 461247,
-      "sha256": "9e288f75575a4e20b384030f88cadae5e0637aa5b6362cc309ca667929464b9a",
+      "size_bytes": 465980,
+      "sha256": "8b66f98bd698c562492aadd8cbcc02ea4b21994caee15fa2ed7c582801dd1b0a",
       "category": "narrative",
       "in_paid_attempt_chain": false,
       "referenced_by": [
         "README.md",
         "docs/AUTOINIT_REFERENCE.md",
         "docs/archive/HANDOFF_AUTOINITIALIZER_20260812.md",
+        "logs/artifact_manifests.md",
         "logs/autoinit_phase_a_preregistration.json",
         "logs/autoinit_phase_a_preregistration_materialized.json",
         "logs/checkpoint_registry.json",
@@ -4090,7 +4088,6 @@
       "in_paid_attempt_chain": false,
       "referenced_by": [
         "docs/POD_SCRIPTS.md",
-        "logs/checkpoint_registry.json",
         "logs/checkpoint_tombstones.json",
         "logs/log_inventory.json",
         "scripts/consolidate/build_checkpoint_registry.py",
@@ -4106,8 +4103,8 @@
     },
     {
       "path": "logs/storage_measurements.json",
-      "size_bytes": 2030,
-      "sha256": "66688d03a76d3d5db9fc0405b1130704b4b208c553eb99211bdc265ecf652aff",
+      "size_bytes": 5646,
+      "sha256": "bddf82da7188daeaf22cf655d39730fb92061ab5df2dd17a2b761020dcf64842",
       "category": "index",
       "in_paid_attempt_chain": false,
       "referenced_by": [

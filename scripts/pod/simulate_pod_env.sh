@@ -35,6 +35,15 @@
 # Fixed here: restore reproduces the EXACT pre-simulation state (a recreated
 # destination is quarantined, never nested and never silently deleted), and a
 # lock makes a concurrent sweep fail loudly instead of racing.
+#
+# CONSEQUENCE, and it is intended: `$HIDE.recreated` ACCUMULATES. Every sweep
+# that recreates `artifacts/audit` leaves a quarantined copy there, and nothing
+# prunes it, because "never delete a recreated destination" is the property
+# that fixed the 2026-08-15 scare. Its contents are regenerated files -- the
+# frozen-asset verifier rewrites `frozen_asset_verification.json` on every run
+# -- so the directory is safe to remove by hand at any time. It is recurring
+# scratch, not a retained artifact: see the WITHDRAWN `podsim_quarantine_residue`
+# entry in `logs/checkpoint_tombstones.json` for why it must not be tombstoned.
 set -u
 PODSIM_ROOT=${PODSIM_ROOT:-"$(cd "$(dirname "$0")/../.." && pwd)"}
 cd "$PODSIM_ROOT" || exit 1

@@ -230,7 +230,10 @@ BULK_DUPLICATE_NOTES = {
         "residue of the 2026-08-15 pod-simulator nesting defect: two copies of "
         "artifacts/audit/autoinit_preflight/frozen_asset_verification.json saved "
         "while the real audit tree was being recovered. The verifier regenerates "
-        "that file on every run"),
+        "that file on every run. NOTE: the simulator quarantines a recreated "
+        "artifacts/audit on every sweep by design — never deleting is what fixed "
+        "the 2026-08-15 data-loss scare — so this residue REGENERATES. Retiring "
+        "it is recurring housekeeping, not a one-time repair"),
 }
 
 

@@ -97,6 +97,54 @@
           "files": 656
         }
       }
+    },
+    {
+      "label": "after-verification",
+      "measured_utc": "2026-08-17T20:28:49+00:00",
+      "commit": "b4f28a0789bd0f15a56097e4d9d854b8c5a116ba",
+      "note": "after the full suite, the pod simulator and the frozen-asset verifier; these runs regenerate artifacts/audit and the simulator's quarantine, so this is what the tree costs to verify",
+      "areas": {
+        "repository_working_tree": {
+          "definition": "the tree excluding .git, .venv, artifacts/ and caches",
+          "bytes": 150996896,
+          "files": 781,
+          "of_which_logs_bytes": 5385196,
+          "of_which_logs_files": 211,
+          "of_which_data_bytes": 139121268,
+          "of_which_data_files": 70,
+          "git_tracked_bytes": 12077384,
+          "git_tracked_files": 718,
+          "git_dir_bytes": 33850076
+        },
+        "local_artifact_storage": {
+          "definition": "artifacts/ in the tree PLUS the out-of-tree store, both generated and gitignored",
+          "bytes": 96215580358,
+          "files": 1418,
+          "in_tree": {
+            "path": "artifacts",
+            "bytes": 7390054345,
+            "files": 976
+          },
+          "out_of_tree": {
+            "path": "/home/ecs-user/aad-artifacts",
+            "bytes": 88825526013,
+            "files": 442
+          }
+        },
+        "relay_lfs_storage": {
+          "repo": "AlphaAvatar/aadistill-artifacts",
+          "bytes": 98913220067,
+          "files": 1152,
+          "source": "logs/checkpoint_registry.json (cached listing)",
+          "queried_utc": "2026-08-17T19:05:45+00:00"
+        },
+        "scratch_session_directories": {
+          "definition": "per-session working directories, bundles, poller output and pod-simulator quarantine",
+          "path": "/home/ecs-user/aad-scratch",
+          "bytes": 61178042,
+          "files": 657
+        }
+      }
     }
   ]
 }

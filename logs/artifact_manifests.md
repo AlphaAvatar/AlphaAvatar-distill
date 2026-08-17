@@ -924,3 +924,26 @@ retained arm A), `artifacts/audit/e7_per_prompt.jsonl` (900 scored records),
 disjointness proof, holdout) are on the relay under `e7_streams_20260809/`; the
 produced weights are not, and re-evaluating an arm without them would cost a
 retrain.
+
+## vLLM wheelhouse — built 2026-08-15, local copy retired 2026-08-18
+
+- **Artifact:** `AlphaAvatar/aadistill-artifacts`, prefix
+  `transfer/wheelhouse_vllm_cp312/`. 196 wheels, 3,886,432,359 bytes.
+- **Manifest:** `wheelhouse_vllm_sha256.json` in the repository root — tracked,
+  and it freezes the wheel **bytes**, not only the pinned versions:
+  `manifest_sha256 f9c0e814b4b93323…`, `n_wheels 196`, one sha256 per file. The
+  pod verifies every entry after fetching and refuses to install on any
+  mismatch, so a silently re-uploaded or truncated wheel cannot reach a paid run.
+- **Creation command:** `scripts/pod/build_wheelhouse.py --from-pins
+  --requirements requirements-vllm.txt`; each wheel was verified against the
+  PyPI sha256 for its pinned version at download time.
+- **Interpreter/platform:** cp312 / manylinux x86_64.
+- **Licenses:** the wheels' own, unmodified; nothing is repackaged.
+- **Local copy:** was `/home/ecs-user/aad-artifacts/wheelhouse_vllm_cp312`
+  (3.620 GiB), the staging copy left after upload. **Retired 2026-08-18** —
+  tombstone `wheelhouse_vllm_cp312_local_cache`. All 196 files were verified
+  byte-identical to the relay first: 123 by LFS oid, 73 downloaded and hashed,
+  recorded in [`relay_mirror_verification.json`](relay_mirror_verification.json).
+  Pods fetch from the relay, never from the dev box, whose uplink is 0.72 MB/s.
+- **Related:** `logs/decisions.md` 2026-08-18 (cleanup);
+  `requirements-vllm.txt`; `docs/POD_SCRIPTS.md` (`build_wheelhouse.py`).

@@ -132,12 +132,26 @@ def test_every_tombstone_carries_what_makes_it_a_tombstone():
 
 
 def test_no_tombstoned_path_is_still_on_disk():
+    """A tombstone asserts something stopped existing. This found a real defect
+    on the day it was written: the pod simulator recreates its quarantine on
+    every sweep by design, so a tombstone for it was wrong — withdrawn, with the
+    reason kept."""
     for t in load(TOMBSTONES)["tombstones"]:
+        if t.get("withdrawn"):
+            continue
         for p in t["historical_paths"]:
             path = Path(p) if Path(p).is_absolute() else REPO / p
             assert not path.exists(), (
                 f"{t['canonical_id']} has a tombstone but {p} still exists — "
                 "either the deletion did not happen or the tombstone is wrong")
+
+
+def test_a_withdrawn_tombstone_says_why_it_was_wrong():
+    for t in load(TOMBSTONES)["tombstones"]:
+        if t.get("withdrawn"):
+            assert t.get("withdrawn_reason"), (
+                f"{t['canonical_id']} is withdrawn with no reason; the reason a "
+                "tombstone was wrong is the part worth keeping")
 
 
 def test_tombstone_ids_are_unique():
