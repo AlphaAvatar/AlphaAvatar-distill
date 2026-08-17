@@ -44,7 +44,7 @@ from .arch import ArchitectureAdapter, ArchSpec
 from .artifact import CheckpointIdentity, identify_checkpoint
 from .calibration import CalibrationProfile, consumes_calibration, profile_for
 from .metrics import StateEvalSuite, StateEvaluation
-from .device import model_device  # noqa: F401  (re-exported; the search's own boundary uses it)
+from .device import model_device
 from .stats import DEFAULT_STATS_SPEC, StatsCache, StatsSpec, stats_cache_key
 from .operators.base import (
     OperatorContext,

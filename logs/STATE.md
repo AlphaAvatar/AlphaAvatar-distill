@@ -1,37 +1,108 @@
-**Updated:** 2026-08-17 16:20 UTC · branch `main`
-**No pods running. Nothing billing.** Cumulative spend **$194.0530** of the
-approved **$219.00** cap. **The device canary has consumed both authorized
-sessions ($0.1240) without ever running.** Attempt 1 died on the launcher's
-inherited argument contract; the retry died on the shared setup's asset
-contract. Nothing is known about device placement on real CUDA. **No further
-canary retry is authorized, Attempt 8 remains unauthorized, and nothing is
-prepared.**
+**Updated:** 2026-08-18 · branch `main` · maintenance baseline
 
-## Device canary: two sessions, zero canary runs ($0.1240)
+# Handoff
 
-| | attempt 1 | retry |
-| --- | --- | --- |
-| spend | $0.0603 | $0.0637 |
-| died at | `self.a.teacher_revision` | `cp: cannot stat $WS/assets/state_eval_v1` |
-| reached | before setup | inside setup, after the bundle and all four relay inputs |
+**Nothing is running. Nothing is billing. Nothing is authorized. Nothing is
+prepared for launch.** This is a clean maintenance baseline; the last action was
+a repository cleanup, not an experiment.
 
-The argument fix worked — the retry got 90 seconds further and staged
-everything, including the calibration mixture — and then hit the next thing the
-shared machinery requires and the wrapper had declared it did not want:
-`autoinit_preflight_setup.sh` unconditionally copies `state_eval_v1` and
-`recovery_search_v2` out of `$WS/assets`, and the canary set `LOCAL_ASSETS = ()`
-because it needs neither.
+## Budget
 
-**The same structural mistake twice, mine both times.** I reasoned from what the
-canary *needs* when the operative question is what the inherited machinery
-*requires*, and the $0 check I built after attempt 1 closed one surface because
-I generalized from the symptom rather than the cause. Reusing proven machinery
-means satisfying its contract in full, and that contract is not visible from the
-subclass.
+```
+cumulative spend      $194.0530
+approved cap          $219.00      (raised 2026-08-17; see BUDGET_LEDGER.md)
+remaining             $ 24.9470    NOT permission
+```
 
-The remaining gap is one line — declare `LOCAL_ASSETS` as every other session
-does; the assets are 1.6 MB and stage in ~1 s — and **it has not been made**,
-because no retry is authorized.
+Every authorization issued so far is **consumed**. A new paid action needs a new
+authorization artifact; the remaining balance authorizes nothing by itself.
+
+## What is FROZEN — do not change without an explicit decision
+
+| | identity |
+| --- | --- |
+| science plan | `02be33b9a7a8e26bc8bfb75795351e8cdc9ffd441b47066cc81887cfc511b55c` |
+| session plan | `9377a2dc61f21790dd111d72a5de0e039ea1d31afef2d09e18c98a0b0cc2a0aa` |
+| Stage-3 evaluation protocol | `250f72efbd43b86a475e8dda293b45f07ee61a4d858e147f4a5bd7681c32c2e4` |
+| equivalence interval | `0.011695296982299022` |
+| feasibility floor | `0.3000` |
+| seeds | sa `20260726`, sb `20260801`, sc `20260813` (conditional); **no fourth** |
+| search | 48 decomposed P=1 paths, warmup 1, beam 6, 5 leaves + injected canonical control |
+| calibration | `calib.domain_balanced@v1`, 67 items / 59,763 positions |
+| runtime comparability | `generation_runtime_comparability@v2` |
+
+Also frozen: the recovery design, the selection rules, `pooled_counts@v2`, the
+Stage-3 artifacts and thresholds, and the operator ledger's declared semantics.
+
+## What is COMPLETE
+
+* **Stage 3** — both permanent canonical controls trained, characterized and
+  hash-verified; thresholds materialized. `logs/autoinit_stage3_complete/`.
+* **The Phase-A harness** — built, and stages 0–5 execute for real at $0.
+* **The Stage-1 device audit** — `autoinit.stage1_device_contract@v1`, four
+  categories, five sites fixed, five mutation classes caught.
+* **Stage 0 on hardware** — passed three times.
+
+## What FAILED, and why
+
+| run | cost | died at | cause |
+| --- | ---: | --- | --- |
+| Phase A 1–5 | $1.6321 | setup / stage 0 | five distinct fail-closed gates; all fixed |
+| Phase A 6 | $0.3552 | stage 1 | `_validate` probe built on `config.device`, child on the host |
+| Phase A 7 | $0.3955 | stage 1 | `ActivationStatsCollector` accumulators unplaced |
+| canary 1 | $0.0603 | before setup | wrapper missing 3 inherited `self.a` attributes |
+| canary 2 | $0.0637 | in setup | wrapper set `LOCAL_ASSETS = ()`; shared setup copies them |
+
+Full diagnoses in [`decisions.md`](decisions.md); per-run evidence in
+`autoinit_phase_a_attempt{6,7}/` and `autoinit_device_canary_attempt{1,2}/`.
+
+**The pattern worth carrying:** every one of these was code no $0 path could
+execute — a GPU-only device, or a contract owned by inherited machinery. Twice I
+generalized from the symptom instead of the cause and paid again.
+
+## Infrastructure fixes that are now CANONICAL
+
+* `autoinit.stage1_device_contract@v1` (`src/aadistill/autoinit/device.py`) —
+  model device read from the weights; statistics cache **host-resident** with
+  explicit per-invocation transfers; ephemeral indices on the parameter's
+  device; validate on the produced model's device, measure on the search device.
+* Unexpected in-process driver exceptions keep their **full traceback**
+  (`AUDIT/stage{n}_traceback.log` + the evidence JSON).
+* `soft_stop_reserves` in `plan_session` — named reserves **before** the soft
+  stop, so a risk that materializes early cannot truncate later stages.
+* The pre-flight rehearsal is `--ignore`d in **both** the pod gate and the
+  simulator, and the two ignore lists are pinned equal.
+* The pod simulator restores exactly and refuses concurrent sweeps.
+
+## ABANDONED / not to be revived
+
+* `recovery_search_v1` — INVALID before first use (0/20 tool prompts rendered).
+  Preserved unmodified with a sibling `SUPERSEDED.md`.
+* Two superseded Phase-A pricing bases, $20.0126 and $22.4508 — recorded in
+  `BUDGET_LEDGER.md`, not to be re-used.
+* Student-prefix recovery (E5) — prefix-conditioned targets teach continuation,
+  not closure.
+* No fourth seed, ever. `unresolved_equivalence` is a RESULT.
+
+## The exact next implementation starting point
+
+Two options are open and **neither is authorized**. The maintainer chooses.
+
+1. **Fix the canary wrapper and run it** — one line: declare `LOCAL_ASSETS`
+   exactly as the other sessions do in
+   `scripts/pod/autoinit_device_canary_launch.py`. Before launching, enumerate
+   the *whole* inherited contract, not just the surface that last broke: `self.a`
+   attribute reads (a regression already covers these), files the shared setup
+   copies unconditionally, env vars it requires, markers the launcher polls for,
+   paths the collector globs. Price: $1.0197 hard.
+2. **Skip the canary and go to Attempt 8** — Phase A exercises the same
+   operators on real CUDA anyway, stage 0 has passed three times, and stage-1
+   failures now come home with a full traceback. Price: $23.0484 hard.
+
+Either needs a fresh authorization chain: pre-authorization base commit → issue
+→ auth-only commit → bundle upload → round-trip verify → launch.
+
+---
 
 ## Stage-1 device contract and audit (2026-08-17)
 
@@ -433,16 +504,6 @@ $23.048325 hard bound. It funds **one** attempt: the maintainer stated "This
 funds one attempt only and does not imply Attempt 7" and "If it fails closed,
 stop". The margin is not a retry reserve.
 
-## What remains
-
-1. **Nothing.** Attempt 7 failed closed and is reported. Its authorization
-   covered one launcher invocation, is spent, and its lineage gate refuses every
-   later commit by construction. The remaining $23.0710 under the $217.00 cap is
-   **not** permission.
-2. A maintainer decision is open: a cumulative cap of at least **$217.9971**
-   would cover the $1.0197 canary plus one complete $23.0484 Attempt 8. Neither
-   is authorized, and the canary still has no launcher.
-
 ### Searched-leaf durability: RESOLVED 2026-08-15, needs no relay growth
 
 Measured: relay `usedStorage` **91.54 GiB** against the inferred 100 GB
@@ -461,16 +522,6 @@ the experiment is unchanged.** Full accounting in
 [`autoinit_phase_a_storage.md`](autoinit_phase_a_storage.md); `transfer/`
 (7.66 GiB of reproducible git bundles) is recorded as the reclaim option and
 deliberately left alone.
-
-## Phase A is repriced, and both statistics measurements are kept
-
-$13.02 expected / $21.01 hard, from measured values, against the superseded
-$17.00 / $26.21 — see [`autoinit_phase_a_repricing.md`](autoinit_phase_a_repricing.md).
-`gpu_fraction` **0.5609** (attempt 3) and **0.5177** (attempt 4) are both valid
-measurements of different hosts under identical configuration; they are kept as a
-range with a pooled 0.5397, and repricing uses the *total* pass time
-(8.02–8.30 s), not the fraction. Against $23.63 of unused authorization the
-repriced hard backstop leaves **$2.62**.
 
 ## Micro-preflight: four attempts, $6.7369 of $8.60. STOP.
 

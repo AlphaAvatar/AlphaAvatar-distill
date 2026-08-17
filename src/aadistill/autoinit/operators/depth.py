@@ -33,6 +33,7 @@ from ...init.contribution import (
     expected_evaluations,
     greedy_removal,
 )
+from ..device import model_device
 from ...init.sandwich import depth_span_map
 from ..arch import ArchitectureAdapter, ArchSpec, Capability
 from ..metrics import OperatorLocalMetrics
@@ -162,7 +163,12 @@ class DepthCausalKLGreedyV1(OperatorImplementation):
 
         domains = _domain_map(items)
         targets = [item["input_ids"][0, 1:].cpu() for item in items]
-        reference = _ReferenceLogits(model, items, ctx.device)
+        # From the weights, not from `ctx.device`: category 1 of the device
+        # contract. The two agree on every path the search takes, so this
+        # changes no behaviour — it removes the last operator that read the
+        # intent instead of the fact.
+        compute = model_device(model)
+        reference = _ReferenceLogits(model, items, compute)
 
         def score(skip: frozenset[int]) -> float:
             per_subtype: dict[str, list[float]] = {}
@@ -170,7 +176,7 @@ class DepthCausalKLGreedyV1(OperatorImplementation):
                 # Order matters: the reference is the UNBYPASSED parent, so when
                 # it is being recomputed it must not be taken inside the bypass.
                 ref = reference.get(item)
-                abl = _forward_logits(model, item, ctx.device, skip)
+                abl = _forward_logits(model, item, compute, skip)
                 sums = distortion(ref, abl, tgt, chunk=512).as_dict()
                 per_subtype.setdefault(item["subtype"], []).append(sums["kl"])
                 del abl

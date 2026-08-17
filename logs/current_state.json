@@ -1,10 +1,10 @@
 {
   "schema": "aadistill.current_state/v1",
-  "generated_utc": "2026-08-17T16:14:10+00:00",
-  "current_phase": "The device canary has now consumed both authorized sessions ($0.1240 total) without ever running: attempt 1 died on the launcher's argument contract, the retry on the shared setup's asset contract. Nothing is known about device placement on real CUDA. No further canary retry is authorized and Attempt 8 remains unauthorized.",
+  "generated_utc": "2026-08-17T16:55:19+00:00",
+  "current_phase": "Clean maintenance baseline. Nothing running, nothing billing, nothing authorized, nothing prepared for launch. Every authorization issued so far is consumed.",
   "active_experiment": null,
   "paid_compute_running": false,
-  "next_work": "A maintainer decision. The canary is one line from running - declare LOCAL_ASSETS as the other sessions do - but no retry is authorized and I have not made the change. The honest question is whether a third canary session is worth $1.0197 given that two wrapper defects have cost $0.1240 and taught nothing about CUDA, or whether the device audit's $0 evidence plus Attempt 8's own failure mode is the better next step. No Attempt 8, no Attempt 9, nothing prepared.",
+  "next_work": "Maintainer choice between the two options in handoff.next_starting_point. Nothing is authorized; the remaining $24.9470 authorizes nothing by itself.",
   "teacher": {
     "model_id": "Qwen/Qwen3-4B-Thinking-2507",
     "revision": "768f209d9ea81521153ed38c47d515654e938aea",
@@ -185,7 +185,7 @@
     "E2 phases 2-3"
   ],
   "autoinit": {
-    "status": "CANARY_RETRY_FAILED_IN_SETUP_STOPPED",
+    "status": "MAINTENANCE_BASELINE_NOTHING_AUTHORIZED",
     "package": "src/aadistill/autoinit",
     "tests": 209,
     "operator_kinds": [
@@ -698,5 +698,87 @@
     "fixed": false,
     "retried": false,
     "evidence": "logs/autoinit_device_canary_attempt2/"
+  },
+  "handoff": {
+    "frozen": {
+      "science_plan_hash": "02be33b9a7a8e26bc8bfb75795351e8cdc9ffd441b47066cc81887cfc511b55c",
+      "session_plan_hash": "9377a2dc61f21790dd111d72a5de0e039ea1d31afef2d09e18c98a0b0cc2a0aa",
+      "stage3_evaluation_protocol_hash": "250f72efbd43b86a475e8dda293b45f07ee61a4d858e147f4a5bd7681c32c2e4",
+      "equivalence_interval": 0.011695296982299022,
+      "feasibility_floor": 0.3,
+      "seeds": {
+        "sa": 20260726,
+        "sb": 20260801,
+        "sc_conditional": 20260813,
+        "fourth_seed": "never"
+      },
+      "calibration": "calib.domain_balanced@v1 (67 items, 59,763 positions)",
+      "runtime_comparability": "generation_runtime_comparability@v2",
+      "also": [
+        "recovery design",
+        "selection rules",
+        "pooled_counts@v2",
+        "Stage-3 artifacts and thresholds",
+        "the operator ledger's declared semantics"
+      ]
+    },
+    "complete": [
+      "Stage 3 (both permanent controls, thresholds materialized)",
+      "the Phase-A harness, stages 0-5 executing for real at $0",
+      "the Stage-1 device audit (autoinit.stage1_device_contract@v1)",
+      "Stage 0 on hardware, passed three times"
+    ],
+    "failed": [
+      {
+        "run": "Phase A 1-5",
+        "usd": 1.6321,
+        "where": "setup / stage 0",
+        "cause": "five distinct fail-closed gates; all fixed"
+      },
+      {
+        "run": "Phase A 6",
+        "usd": 0.3552,
+        "where": "stage 1",
+        "cause": "_validate probe on config.device, child on the host"
+      },
+      {
+        "run": "Phase A 7",
+        "usd": 0.3955,
+        "where": "stage 1",
+        "cause": "ActivationStatsCollector accumulators unplaced"
+      },
+      {
+        "run": "canary 1",
+        "usd": 0.0603,
+        "where": "before setup",
+        "cause": "wrapper missing 3 inherited self.a attributes"
+      },
+      {
+        "run": "canary 2",
+        "usd": 0.0637,
+        "where": "in setup",
+        "cause": "wrapper set LOCAL_ASSETS = (); shared setup copies them"
+      }
+    ],
+    "failure_pattern": "every one was code no $0 path could execute: a GPU-only device, or a contract owned by inherited machinery",
+    "canonical_infrastructure_fixes": [
+      "autoinit.stage1_device_contract@v1",
+      "full tracebacks for unexpected in-process driver exceptions",
+      "plan_session soft_stop_reserves, applied BEFORE the soft stop",
+      "the pre-flight rehearsal ignored in both the pod gate and the simulator, with the ignore lists pinned equal",
+      "the pod simulator restores exactly and refuses concurrent sweeps"
+    ],
+    "abandoned": [
+      "recovery_search_v1 (INVALID before first use)",
+      "Phase-A pricing bases $20.0126 and $22.4508",
+      "student-prefix recovery (E5)",
+      "any fourth seed"
+    ],
+    "authorized_now": "NOTHING",
+    "next_starting_point": {
+      "option_1": "fix the canary wrapper (declare LOCAL_ASSETS as the other sessions do) and enumerate the WHOLE inherited contract before launching; $1.0197 hard",
+      "option_2": "skip the canary and go to Attempt 8; Phase A exercises the same operators on CUDA anyway and stage-1 failures now come home with a traceback; $23.0484 hard",
+      "either_requires": "a fresh authorization chain: pre-auth base commit -> issue -> auth-only commit -> bundle upload -> round-trip verify -> launch"
+    }
   }
 }

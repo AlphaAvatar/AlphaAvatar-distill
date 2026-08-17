@@ -38,7 +38,8 @@ import aadistill.autoinit  # noqa: F401,E402
 from aadistill.autoinit.arch import ArchSpec  # noqa: E402
 from aadistill.autoinit.metrics import StateEvaluation  # noqa: E402
 from aadistill.autoinit.ranking import PARETO_V1, BeamSchedule  # noqa: E402
-from aadistill.autoinit.search import BeamSearch, SearchConfig, model_device  # noqa: E402
+from aadistill.autoinit.device import model_device  # noqa: E402
+from aadistill.autoinit.search import BeamSearch, SearchConfig  # noqa: E402
 from aadistill.autoinit.state import StateValidity  # noqa: E402
 # `fake_family` is imported INSIDE the helpers below, never at module scope.
 # Importing it registers the toy kinds globally, and

@@ -3678,3 +3678,53 @@ two devices, cuda:0 and cpu!
 - **Status: STOPPED.** Cumulative spend **$194.0530**; **$24.9470** remains under
   the $219.00 cap. The canary has still never run, so Attempt 8 remains
   unauthorized. No Attempt 9.
+
+## 2026-08-18 — Maintenance baseline: cleanup, consolidation, handoff
+
+- **Scope:** maintenance only. No pod, no authorization, no science change, no
+  prepared launch.
+- **Consolidated, behaviour-preserving.** `model_device` had two import paths —
+  its home in `autoinit/device.py` and a re-export from `search.py`; the
+  re-export is gone and callers import the contract module. `depth.py` now reads
+  the compute device from the weights (`model_device(model)`) instead of
+  `ctx.device`, which makes it the last operator to obey category 1 of the
+  contract. The two agree on every path the search takes, so no behaviour moves;
+  what goes away is an operator reading the *intent* rather than the *fact*.
+- **Deliberately NOT consolidated:** `init/collect.py` keeps its own
+  `next(model.parameters()).device`. Importing `autoinit.device` from `init`
+  would invert the layering — `autoinit.operators` already depends on `init` —
+  to save one line. A comment points at the contract instead.
+- **Tests: nothing removed.** Reviewed for redundancy and found none that a
+  stronger replacement has superseded. `test_phase_a_rehearsal.py` covers the
+  plan/lifecycle contract that `test_phase_a_stages1_5_execute.py` does not;
+  `test_search_materialize_device_boundary.py` and
+  `test_search_operator_device_split.py` cover different halves of the device
+  contract; `test_phase_a_search_executes.py` covers resume and the frozen-hash
+  control injection that the stage-1 execution does not. Every paid failure
+  class keeps its regression. Removing anything here would have cost coverage to
+  look tidy.
+- **Historical experiment machinery RETAINED.** `scripts/pod/` still carries
+  d0diag, e2diag, e2p1, e3–e8b, p0asst and p2. They are the implementations that
+  produced recorded results, and P4 makes reproducing the implementation part of
+  reproducing the result. Deleting them would make E7's $10.49 unreproducible
+  from HEAD.
+- **STATE.md restructured.** Two sections dropped as superseded and duplicated:
+  an old Phase-A repricing ($13.02/$21.01, replaced twice since) and a "What
+  remains" narrative that the new handoff replaces. Both sets of facts survive —
+  the repricing figures and both `gpu_fraction` measurements are in
+  `autoinit_phase_a_repricing.md`, and the per-attempt narratives are in this
+  file and in `autoinit_phase_a_attempt{6,7}/`. A new **Handoff** section at the
+  top answers, unambiguously: what is frozen, what is complete, what failed and
+  why, which infrastructure fixes are canonical, what is abandoned, the spend and
+  cap, that nothing is authorized, and the exact next starting point.
+  `current_state.json` carries the same under a `handoff` key.
+- **Residue: only the byte-regenerable.** `__pycache__`, `.pytest_cache`, nine
+  local git-bundle copies (each is a `git bundle create` of a commit on
+  origin/main, and the ones a pod consumed are on the relay), and other sessions'
+  scratchpads — 365 MB.
+- **Residue RETAINED on purpose:** all 42 session directories under
+  `aad-scratch/` (launcher logs, poll logs, collected stores) and the 87 GB of
+  permanent controls under `aad-artifacts/`. Those carry accountability, and
+  P12 puts deleting them behind explicit approval.
+- **Verification:** 1780 passed / 7 skipped on the dev box; 1740 passed / 18
+  skipped under the pod simulator in 4m13s; `verify_frozen_assets.py` passed.
