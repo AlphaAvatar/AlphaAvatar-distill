@@ -40,8 +40,11 @@ overview and links here instead. A structural test enforces this.
 | `decisions.md` | why things are the way they are — append-only in practice |
 | `EXPERIMENT_INDEX.md` | what each experiment proved, and what it does not support |
 | `EXPERIMENTS.md` | per-session chronology |
-| `checkpoint_registry.json` | which checkpoints exist and why |
+| `checkpoint_registry.json` | every checkpoint and weight artifact in all three storage areas — repo `artifacts/`, the out-of-tree store `/home/ecs-user/aad-artifacts`, and the relay — with hash, references, relay correspondence and proposed disposition |
 | `checkpoint_tombstones.json` | what was deleted and how to rebuild it |
+| `log_inventory.json` | every documentary file with its hash, class and disposition, the byte-identical duplicate groups and which copy is canonical, and the record of copies already removed |
+| `storage_measurements.json` | storage in the four areas, before and after each cleanup, measured the same way |
+| `relay_mirror_verification.json` | file-by-file proof that a local tree is byte-identical to its relay copy, and by which method each file was checked. The evidence a "stale local cache" deletion stands on |
 | `supported_models.md` | the supported-model table (AGENTS.md §3.4) |
 | `artifact_manifests.md` | external artifact manifests |
 | `CATALOG.md` | this file |

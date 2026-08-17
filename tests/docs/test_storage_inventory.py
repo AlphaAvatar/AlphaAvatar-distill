@@ -1,0 +1,145 @@
+"""The inventories have to stay true, or a deletion pass acts on a fiction.
+
+These are cheap structural checks over `logs/checkpoint_registry.json`,
+`logs/log_inventory.json` and `logs/checkpoint_tombstones.json`. They exist
+because the failure mode of a cleanup is not "the script crashed" — it is a
+registry that still describes the tree of three days ago, a tombstone pointing at
+a survivor that did not survive, or a `delete` proposal against something the
+retention rule protects. Each of those reads as fine and is not.
+"""
+
+from __future__ import annotations
+
+import json
+from pathlib import Path
+
+import pytest
+
+REPO = Path(__file__).resolve().parents[2]
+REGISTRY = REPO / "logs/checkpoint_registry.json"
+LOG_INVENTORY = REPO / "logs/log_inventory.json"
+TOMBSTONES = REPO / "logs/checkpoint_tombstones.json"
+
+
+def load(p: Path) -> dict:
+    return json.loads(p.read_text())
+
+
+# --- the checkpoint registry -----------------------------------------------
+
+def test_nothing_protected_is_proposed_for_deletion():
+    for e in load(REGISTRY)["checkpoints"]:
+        if e["disposition"] == "delete":
+            assert not e["protected"], (
+                f"{e['path_local']} is proposed for deletion and is protected "
+                f"({e['retention']}): {e['retention_reason']}")
+            assert not e["never_delete_clause"], (
+                f"{e['path_local']} is proposed for deletion under a never-delete "
+                f"clause: {e['never_delete_clause']}")
+
+
+def test_every_delete_proposal_states_how_to_get_it_back():
+    for e in load(REGISTRY)["checkpoints"]:
+        if e["disposition"] == "delete":
+            assert e["reconstructable"] and e["reconstruction_recipe"], (
+                f"{e['path_local']} is proposed for deletion with no "
+                "reconstruction recipe")
+
+
+def test_a_delete_that_leans_on_the_relay_carries_the_verification():
+    """"There is a copy on the relay" is only a reason to delete if somebody
+    checked the bytes. Single files are checked by LFS oid in the registry;
+    whole trees are checked by verify_relay_mirror.py."""
+    for e in load(REGISTRY)["checkpoints"]:
+        if e["disposition"] != "delete" or e["canonical_location"] != "relay + local":
+            continue
+        mirror = e.get("relay_mirror_verification") or {}
+        assert e["relay_verified"] or mirror.get("verified"), (
+            f"{e['path_local']} is proposed for deletion on the strength of a "
+            "relay copy that has not been hash-verified")
+
+
+def test_no_weight_artifact_is_committed_to_git():
+    """AGENTS.md 2.5. The registry checks it; this makes the check run."""
+    visible = load(REGISTRY)["repository_visible"]
+    assert visible["violations"] == 0, (
+        f"weight artifacts are tracked by git: "
+        f"{visible['tracked_weight_artifacts'][:5]}")
+
+
+def test_the_registry_covers_the_out_of_tree_store():
+    """The first version of the registry saw only `artifacts/` and reported 4.47
+    GiB while 81 GiB sat in /home/ecs-user/aad-artifacts. If that store exists,
+    the registry must be looking at it."""
+    external = Path("/home/ecs-user/aad-artifacts")
+    if not external.is_dir():
+        pytest.skip("no out-of-tree store on this machine")
+    stores = load(REGISTRY)["local"]["by_store"]
+    assert "external_store" in stores and stores["external_store"]["units"] > 0, (
+        "the out-of-tree artifact store exists but the registry inventories "
+        "nothing in it")
+
+
+# --- the log inventory -----------------------------------------------------
+
+def test_every_duplicate_names_a_survivor_that_exists():
+    inv = load(LOG_INVENTORY)
+    for r in inv["files"]:
+        if r["disposition"] == "delete_duplicate":
+            assert r["duplicate_of"], f"{r['path']} has no canonical copy named"
+            assert (REPO / r["duplicate_of"]).is_file(), (
+                f"{r['path']} defers to {r['duplicate_of']}, which is not there")
+
+
+def test_removed_copies_still_name_a_survivor_and_keep_their_hash():
+    inv = load(LOG_INVENTORY)
+    for r in inv.get("removed", []):
+        assert len(r["sha256"]) == 64, f"{r['path']} lost its hash"
+        survivor = r.get("canonical_survivor")
+        if survivor:
+            assert (REPO / survivor).is_file(), (
+                f"{r['path']} was removed in favour of {survivor}, which is gone")
+
+
+def test_each_duplicate_group_decided_its_canonical_copy():
+    for g in load(LOG_INVENTORY)["duplicate_groups"]:
+        assert g["decided_by"] != "none", (
+            f"duplicate group {g['sha256'][:12]} has no rule or override deciding "
+            f"which of {g['members']} is canonical")
+
+
+def test_declared_living_state_snapshots_really_are_in_history():
+    for s in load(LOG_INVENTORY)["living_state_snapshots"]:
+        if s["present_on_disk"]:
+            assert s["verified_identical"], (
+                f"{s['path']} is declared a snapshot of a file in git history, "
+                f"but the bytes differ from {s['git_reference']}")
+        else:
+            assert s["sha256_in_history"], (
+                f"{s['path']} was removed as a snapshot, but "
+                f"{s['git_reference']} does not resolve")
+
+
+# --- tombstones ------------------------------------------------------------
+
+def test_every_tombstone_carries_what_makes_it_a_tombstone():
+    doc = load(TOMBSTONES)
+    required = {"canonical_id", "historical_paths", "scientific_role",
+                "reason_physical_weights_deleted", "deleted_utc"}
+    for t in doc["tombstones"]:
+        missing = required - set(t)
+        assert not missing, f"{t.get('canonical_id')} is missing {sorted(missing)}"
+
+
+def test_no_tombstoned_path_is_still_on_disk():
+    for t in load(TOMBSTONES)["tombstones"]:
+        for p in t["historical_paths"]:
+            path = Path(p) if Path(p).is_absolute() else REPO / p
+            assert not path.exists(), (
+                f"{t['canonical_id']} has a tombstone but {p} still exists — "
+                "either the deletion did not happen or the tombstone is wrong")
+
+
+def test_tombstone_ids_are_unique():
+    ids = [t["canonical_id"] for t in load(TOMBSTONES)["tombstones"]]
+    assert len(ids) == len(set(ids)), "duplicate canonical_id in the tombstones"

@@ -1,0 +1,54 @@
+{
+  "schema": "aadistill.storage_measurements/v1",
+  "rule": "before and after are measured with the same definitions, in the same four areas, or the difference means nothing",
+  "readings": [
+    {
+      "label": "before-cleanup",
+      "measured_utc": "2026-08-17T19:24:30+00:00",
+      "commit": "8c4b1f31faa09079150f59e75d27cc8b0b28e2a5",
+      "note": "baseline for the log and checkpoint-storage cleanup; nothing deleted yet. Local artifact storage counts both artifacts/ and the out-of-tree store.",
+      "areas": {
+        "repository_working_tree": {
+          "definition": "the tree excluding .git, .venv, artifacts/ and caches",
+          "bytes": 151039643,
+          "files": 782,
+          "of_which_logs_bytes": 5433165,
+          "of_which_logs_files": 212,
+          "of_which_data_bytes": 139121268,
+          "of_which_data_files": 70,
+          "git_tracked_bytes": 11840219,
+          "git_tracked_files": 712,
+          "git_dir_bytes": 33223721
+        },
+        "local_artifact_storage": {
+          "definition": "artifacts/ in the tree PLUS the out-of-tree store, both generated and gitignored",
+          "bytes": 100145014120,
+          "files": 1697,
+          "in_tree": {
+            "path": "artifacts",
+            "bytes": 7433055748,
+            "files": 1059
+          },
+          "out_of_tree": {
+            "path": "/home/ecs-user/aad-artifacts",
+            "bytes": 92711958372,
+            "files": 638
+          }
+        },
+        "relay_lfs_storage": {
+          "repo": "AlphaAvatar/aadistill-artifacts",
+          "bytes": 98913220067,
+          "files": 1152,
+          "source": "logs/checkpoint_registry.json (cached listing)",
+          "queried_utc": "2026-08-17T19:05:45+00:00"
+        },
+        "scratch_session_directories": {
+          "definition": "per-session working directories, bundles, poller output and pod-simulator quarantine",
+          "path": "/home/ecs-user/aad-scratch",
+          "bytes": 61192882,
+          "files": 662
+        }
+      }
+    }
+  ]
+}

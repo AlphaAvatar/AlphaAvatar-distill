@@ -24,6 +24,21 @@ no longer exists.
 | `data/` | corpora; the large files are gitignored |
 | `artifacts/` | generated locally, gitignored, never committed |
 
+## Storage that is not in the tree
+
+Most of the project's bytes are not under this directory, and a reader who
+assumes otherwise will mis-plan a cleanup. There are four areas; sizes are
+measured into [`logs/storage_measurements.json`](../logs/storage_measurements.json)
+and their contents inventoried in
+[`logs/checkpoint_registry.json`](../logs/checkpoint_registry.json).
+
+| area | where | what it holds |
+| --- | --- | --- |
+| repository working tree | this directory | code, configs, logs, manifests |
+| local artifact storage | `artifacts/` **and `/home/ecs-user/aad-artifacts/`** | run outputs; the out-of-tree store is where pod sessions collect checkpoints and optimizer states, and it is the larger of the two by two orders of magnitude |
+| relay / LFS | the **AlphaAvatar/aadistill-artifacts** repository | the artifact store pods fetch from and push to; manifests in [`logs/artifact_manifests.md`](../logs/artifact_manifests.md) |
+| scratch / session | `/home/ecs-user/aad-scratch/` | per-session working directories, bundles, poller output, pod-simulator quarantine |
+
 ## `src/aadistill/` — the algorithm core
 
 | path | responsibility |
