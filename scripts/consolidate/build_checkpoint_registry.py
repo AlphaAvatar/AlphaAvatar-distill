@@ -32,6 +32,13 @@ Retention classes, from the consolidation brief:
 A checkpoint is `deletable` only when it is none of the protective classes, its
 scientific status is captured elsewhere, and its hash survives in this registry.
 
+**Deleting from the relay is not a way to reclaim relay storage**, and this
+script never proposes it. On a Hugging Face repository at its LFS limit, removing
+a file from the current revision frees nothing — the object stays referenced by
+history — and the operations that would free it are exactly the ones that must
+not run unattended. `by_prefix` in the relay section is therefore a map for a
+human decision, not a deletion plan.
+
 **A hash-verified relay copy does not by itself make a local copy deletable.** A
 canonical initialization, a permanent control, a finalist, an artifact the
 experiment index or a living recovery path names, and anything unique stays local

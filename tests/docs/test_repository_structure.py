@@ -204,3 +204,22 @@ def test_the_obsolete_handoff_is_archived_and_bannered():
         "the superseded handoff is still in the live docs directory")
     head = archived.read_text()[:400]
     assert "ARCHIVED" in head and "Do not act on this document" in head
+
+
+def test_no_markdown_link_points_at_a_file_that_is_not_there():
+    """Cross-references are what replaces a duplicated copy, so a broken one is
+    a lost fact rather than a cosmetic defect. Two whole classes of these existed
+    until 2026-08-18: docs/AUTOINIT_REFERENCE.md linked to `logs/` files as if
+    they were siblings, and the handoff kept `../logs/…` after being moved a
+    directory deeper."""
+    broken = []
+    for md in sorted(REPO.rglob("*.md")):
+        if any(part in (".git", ".venv", "__pycache__") for part in md.parts):
+            continue
+        for m in re.finditer(r"\[[^\]]*\]\(([^)]+)\)", md.read_text(errors="ignore")):
+            target = m.group(1).split("#")[0].strip()
+            if not target or target.startswith(("http://", "https://", "mailto:")):
+                continue
+            if not (md.parent / target).exists():
+                broken.append(f"{md.relative_to(REPO)} -> {target}")
+    assert not broken, f"markdown links pointing nowhere: {broken}"

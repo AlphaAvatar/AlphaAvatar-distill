@@ -82,3 +82,14 @@ failure shares the window.
 ## Not retried
 
 Per the maintainer's instruction. `c398850b…` is consumed.
+
+## Not stored here
+
+| file | sha256 | the copy that is kept |
+| --- | --- | --- |
+| `imported_controls.json` | `db5bb0cb33ed…` (full hash in [`../../log_inventory.json`](../../log_inventory.json)) | [`../../autoinit_stage3_complete/imported_controls.json`](../../autoinit_stage3_complete/imported_controls.json) |
+
+The same control import served this attempt and the completed attempt 8, and the
+two files were byte-identical. The kept copy sits with the run whose products
+are the frozen Stage-3 artifacts, so a reader following the accepted result finds
+it in place.

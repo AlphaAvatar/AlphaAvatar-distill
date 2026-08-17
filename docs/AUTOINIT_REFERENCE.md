@@ -146,7 +146,7 @@ must **name** the streams it truncates; an unnamed truncation raises.
 `LogRelay` mirroring event streams continuously; `collect_artifacts.py` gating
 teardown. **`--terminate-after` is a redundant third layer and is not a stop
 mechanism** — it has never been observed to fire. Verified live end-to-end by the
-control-plane canary ([`e7_canary_rerun_report.md`](e7_canary_rerun_report.md),
+control-plane canary ([`e7_canary_rerun_report.md`](../logs/e7_canary_rerun_report.md),
 12/12) and exercised for 635 minutes by E7 without incident.
 
 ### 0.5 Two prerequisite facts found on 2026-08-10, both binding
@@ -159,7 +159,7 @@ without it. Regenerated at $0 in 4,972 s of CPU (949,859 tokens, the historical
 count) and it hashes to **`aaeb2e4c…`**; rebuilding the **positional** init from it
 gives **`86fbba78…`**, byte-identical to the pinned control init, with every
 projection diagnostic equal to the last digit. **E8 is therefore a
-single-variable experiment.** [decisions](decisions.md) 2026-08-10.
+single-variable experiment.** [decisions](../logs/decisions.md) 2026-08-10.
 
 The recovery worked only because the pipeline is deterministic and the hash was
 logged. **A 1.95 GB artifact on the critical path of every future initialization
@@ -244,7 +244,7 @@ every arm ever evaluated, and GSM8K correctness is 0.00–0.08 everywhere.
 
 **Closed by E7:** lost general language modelling is **not** the cause. It can be
 restored almost completely (−5.22 nats, top-1 up 9×) with no behavioural effect
-whatsoever. See [`EXPERIMENTS.md`](EXPERIMENTS.md) §34.
+whatsoever. See [`EXPERIMENTS.md`](../logs/EXPERIMENTS.md) §34.
 
 **Closed earlier:** reweighting the two existing loss terms (both directions
 tried, §17/§18); selecting on held-out NLL (retired, §12.15); the capacity
@@ -276,10 +276,10 @@ Every paired comparison inside its registered floor (usable 0.0800, correct
 what restores general text is *extra KD signal on unseen text*, largely
 regardless of which text.
 
-Record [`EXPERIMENTS.md`](EXPERIMENTS.md) §34 · report
-[`e7_report.md`](e7_report.md) · preregistration
-[`e7_preregistration.md`](e7_preregistration.md) · decision
-[`decisions.md`](decisions.md) 2026-08-09.
+Record [`EXPERIMENTS.md`](../logs/EXPERIMENTS.md) §34 · report
+[`e7_report.md`](../logs/e7_report.md) · preregistration
+[`e7_preregistration.md`](../logs/e7_preregistration.md) · decision
+[`decisions.md`](../logs/decisions.md) 2026-08-09.
 
 ## 4. Protocol requirements (binding)
 
@@ -330,7 +330,7 @@ Record [`EXPERIMENTS.md`](EXPERIMENTS.md) §34 · report
 > run. Deleting the superseded `tt2x2`/`ttb` weights (19.07 GB, approved) dropped
 > the tree to 80.31 GB but reclaimed **nothing** — HF bills LFS storage including
 > history. The maintainer approved squashing history to reclaim it (see
-> [decisions](decisions.md), 2026-08-02); until that runs, **four arms are
+> [decisions](../logs/decisions.md), 2026-08-02); until that runs, **four arms are
 > dev-box-only**: `e1_r2960k_sb_pca`, `e1_r5500k_sb_pca`, `e1_r2960k_sb_rand`,
 > `e1_r5500k_sb_rand`, each hash-verified under
 > `artifacts/stage3/rescued/`.
@@ -470,7 +470,7 @@ all zero cost:
 5. **Freeze the halving plan and the ranking policy** into a preregistration
    (`SuccessiveHalvingPlan.freeze` + `assert_preregistered`), before the run they
    judge.
-6. **Micro-preflight first** ([`autoinit_micro_preflight_plan.md`](autoinit_micro_preflight_plan.md)):
+6. **Micro-preflight first** ([`autoinit_micro_preflight_plan.md`](../logs/autoinit_micro_preflight_plan.md)):
    one ~3.5 h L40S session, staged and fail-closed — Stage 0 runtime attestation
    and protocol freeze, Stage 1 cheap machine gates (statistics GPU/CPU split, GPU
    evaluator repeatability, peak resident memory, disk throughput), Stage 2 the two
@@ -480,7 +480,7 @@ all zero cost:
    automatically, and the preregistration must be re-emitted with the attested
    protocol hash before it is authorized.
 7. Then, and only with explicit authorization, the pilot in
-   [`autoinit_pilot_proposal.md`](autoinit_pilot_proposal.md): no pruning at level
+   [`autoinit_pilot_proposal.md`](../logs/autoinit_pilot_proposal.md): no pruning at level
    0 then beam 6, one profile; 5 searched leaves + the retained canonical control
    on seed sa, 2 survivors + the control on sb, a conditional third seed for ties.
    Expected $17.00, hard backstop $26.21 against the $30.3667 E8b released —
@@ -538,6 +538,6 @@ around the retired metric.
 | **§36** | **E8a — map preserves the teacher 3.1× better, initializes 2.8 nats worse** | **complete; 2.96M recovery cancelled** |
 | §37 | E8b — depth-map × compression interaction, pair-matched hardware | preflight done, awaiting $47.18 |
 
-Protocol deviations on record: [`e6b_protocol_deviations.md`](e6b_protocol_deviations.md)
+Protocol deviations on record: [`e6b_protocol_deviations.md`](../logs/e6b_protocol_deviations.md)
 (cost overrun $0.56, lost event streams; scientific endpoint valid, operational
 protocol noncompliant).

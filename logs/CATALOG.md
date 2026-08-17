@@ -114,7 +114,7 @@ $0 audits and measurements, each the evidence behind a decision that cites it:
 | file | superseded by |
 | --- | --- |
 | `archive/` | earlier proposals and preregistrations; see its own README |
-| `archive/current_state_20260817_full.json` | the minimal `current_state.json`; this is the pre-normalization copy |
+| `archive/current_state_20260817_full.json` | **removed 2026-08-18.** It was a snapshot of a living-state file, byte-identical to `git show 3261f6b6…:logs/current_state.json`; that reference replaces it, and the equivalence is verified on every inventory run |
 | `autoinit_phase_a_repricing.md` | superseded **twice** — $20.0126, then $22.4508, now $23.0483. Kept because the `gpu_fraction` measurements in it are not recorded anywhere else |
 | `autoinit_recovery_search_v1_manifest.json` | `recovery_search_v2`. v1 was INVALID before first use — 0/20 tool prompts rendered |
 | `autoinit_pilot_proposal.md`, `autoinit_micro_preflight_plan.md`, `autoinit_preflight_remaining_gates.md` | executed and closed; the sessions' own evidence is authoritative |
@@ -128,6 +128,19 @@ $0 audits and measurements, each the evidence behind a decision that cites it:
 | **E8b** | strategically terminated; no valid recovered-behaviour comparison |
 | **student-prefix recovery (E5)** | prefix-conditioned targets teach continuation, not closure |
 | **`recovery_search_v1`** | invalid before first use; preserved unmodified with a sibling `SUPERSEDED.md` |
+
+## One copy of every raw artifact
+
+A run's evidence directory holds what that run produced. When two runs produced
+**byte-identical** bytes — the same engine probe, the same control import, the
+same session record written to a second name — one copy is kept and the others
+are replaced by a `README.md` in the directory that lost the file, naming the
+survivor and carrying the sha256. The evidence chain stays complete by reference,
+and the hash is the part that was ever load-bearing.
+
+Six such copies were removed on 2026-08-18 (76.7 KiB). Which file, which hash and
+which survivor is in [`log_inventory.json`](log_inventory.json) under `removed`,
+which survives regeneration by design.
 
 ## Adding a log
 

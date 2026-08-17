@@ -52,6 +52,11 @@ validated.
 
 ### What E1–E8 established
 
+The public summary. [`logs/EXPERIMENT_INDEX.md`](./logs/EXPERIMENT_INDEX.md)
+owns the per-experiment detail — question, arms, what each result does **not**
+support, and which checkpoints still matter — and is the file to correct if one
+of these lines and the record ever disagree.
+
 1. **PCA/structural initialization decisively beats random initialization** (E1).
 2. **Same-distribution scaling improved autonomous stability, not reasoning correctness** (E1, E6).
 3. **KD-heavy scales better than CE-heavy on autonomous stability** (E4, E6b).

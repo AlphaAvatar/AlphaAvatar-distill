@@ -1,6 +1,6 @@
 {
   "schema": "aadistill.log_inventory/v1",
-  "created_utc": "2026-08-17T19:38:01+00:00",
+  "created_utc": "2026-08-17T19:41:41+00:00",
   "command": "scripts/consolidate/build_log_inventory.py",
   "roots": [
     "logs",
@@ -10,100 +10,108 @@
   ],
   "rule": "nothing is deleted before it appears here with a disposition and a reason. A duplicate's canonical copy is derived from who references it, not chosen by hand, except where CANONICAL_OVERRIDES states otherwise and says why.",
   "totals": {
-    "files": 219,
-    "bytes": 5465901,
+    "files": 217,
+    "bytes": 5359456,
     "by_disposition": {
-      "delete_duplicate": 6,
-      "keep_canonical": 16,
-      "keep_immutable": 111,
-      "keep_referenced": 79,
+      "keep_canonical": 10,
+      "keep_immutable": 116,
+      "keep_referenced": 84,
       "keep_unique_evidence": 7
     },
     "by_category": {
       "derived_summary": 6,
-      "immutable_record": 101,
+      "immutable_record": 97,
       "index": 7,
       "living_state": 2,
-      "narrative": 28,
-      "raw_execution_artifact": 68,
+      "narrative": 33,
+      "raw_execution_artifact": 65,
       "scratch_debug": 7
     },
-    "duplicate_groups": 5,
-    "reclaimable_bytes": 78515,
-    "removed_previously": 0
+    "duplicate_groups": 0,
+    "reclaimable_bytes": 0,
+    "removed_previously": 7
   },
-  "removed": [],
-  "duplicate_groups": [
+  "removed": [
     {
-      "sha256": "b39bc39e590883c4f21414c6f5ff02ae2aee2ade6015c7627f7a098245cf0f55",
-      "size_bytes": 45362,
-      "members": [
-        "logs/autoinit_permanent_controls/session_evidence.json",
-        "logs/autoinit_preflight_run4/preflight_evidence.json"
-      ],
-      "canonical": "logs/autoinit_preflight_run4/preflight_evidence.json",
-      "canonical_reason": "one session wrote one evidence file. `write_preregistration.py` and the materialized preregistration both cite this path; the copy under autoinit_permanent_controls/ is that file under a second name.",
-      "reclaimable_bytes": 45362,
-      "decided_by": "override"
+      "path": "logs/archive/current_state_20260817_full.json",
+      "sha256": "4a4ed901b088f987cbf92a66a8c1e89027697110db7393a5c6fd281079eea417",
+      "size_bytes": 37871,
+      "category": "immutable_record",
+      "was": "keep_referenced",
+      "canonical_survivor": null,
+      "reason": "named by scripts/consolidate/build_log_inventory.py",
+      "recorded_utc": "2026-08-17T19:41:41+00:00"
     },
     {
-      "sha256": "9d7b5caa60c690d66171c72f6722bff06561b13eb994ffff0bf27517acd2b8a2",
-      "size_bytes": 14967,
-      "members": [
-        "logs/autoinit_continuation_session.json",
-        "logs/autoinit_stage3_complete/session.json"
-      ],
-      "canonical": "logs/autoinit_continuation_session.json",
-      "canonical_reason": "the only copy executable code or a test names; the others are copies of it",
-      "reclaimable_bytes": 14967,
-      "decided_by": "executable reference"
-    },
-    {
-      "sha256": "e75b2c5dcce6a4b0285d5c366dc3dc143b17fafefa80e5eee6841a290092aa2c",
-      "size_bytes": 9982,
-      "members": [
-        "logs/autoinit_device_canary_attempt2/session.json",
-        "logs/autoinit_device_canary_session.json"
-      ],
-      "canonical": "logs/autoinit_device_canary_session.json",
-      "canonical_reason": "the only copy executable code or a test names; the others are copies of it",
-      "reclaimable_bytes": 9982,
-      "decided_by": "executable reference"
-    },
-    {
+      "path": "logs/autoinit_continuation_attempts/attempt7/imported_controls.json",
       "sha256": "db5bb0cb33ed5bd6bd66dd287cff03092f2fdc30a6dceb43fb5bd191a76e9a3b",
       "size_bytes": 4646,
-      "members": [
-        "logs/autoinit_continuation_attempts/attempt7/imported_controls.json",
-        "logs/autoinit_stage3_complete/imported_controls.json"
-      ],
-      "canonical": "logs/autoinit_stage3_complete/imported_controls.json",
-      "canonical_reason": "the same control import served attempt 7 and the completed attempt 8. The completed run owns it: its products are the frozen Stage-3 artifacts, so a reader following the accepted result finds the file in place.",
-      "reclaimable_bytes": 4646,
-      "decided_by": "override"
+      "category": "immutable_record",
+      "was": "delete_duplicate",
+      "canonical_survivor": "logs/autoinit_stage3_complete/imported_controls.json",
+      "reason": "byte-identical to logs/autoinit_stage3_complete/imported_controls.json, which survives: the same control import served attempt 7 and the completed attempt 8. The completed run owns it: its products are the frozen Stage-3 artifacts, so a reader following the accepted result finds the file in place.",
+      "recorded_utc": "2026-08-17T19:41:41+00:00"
     },
     {
+      "path": "logs/autoinit_device_canary_attempt2/session.json",
+      "sha256": "e75b2c5dcce6a4b0285d5c366dc3dc143b17fafefa80e5eee6841a290092aa2c",
+      "size_bytes": 9982,
+      "category": "raw_execution_artifact",
+      "was": "delete_duplicate",
+      "canonical_survivor": "logs/autoinit_device_canary_session.json",
+      "reason": "byte-identical to logs/autoinit_device_canary_session.json, which survives: the only copy executable code or a test names; the others are copies of it",
+      "recorded_utc": "2026-08-17T19:41:41+00:00"
+    },
+    {
+      "path": "logs/autoinit_permanent_controls/session_evidence.json",
+      "sha256": "b39bc39e590883c4f21414c6f5ff02ae2aee2ade6015c7627f7a098245cf0f55",
+      "size_bytes": 45362,
+      "category": "raw_execution_artifact",
+      "was": "delete_duplicate",
+      "canonical_survivor": "logs/autoinit_preflight_run4/preflight_evidence.json",
+      "reason": "byte-identical to logs/autoinit_preflight_run4/preflight_evidence.json, which survives: one session wrote one evidence file. `write_preregistration.py` and the materialized preregistration both cite this path; the copy under autoinit_permanent_controls/ is that file under a second name.",
+      "recorded_utc": "2026-08-17T19:41:41+00:00"
+    },
+    {
+      "path": "logs/autoinit_phase_a_attempt6/engine_probe.json",
       "sha256": "49593edb8bdf3047ee4feccd4bb59d0f954124b9ca3c894460b6be0dece8d431",
       "size_bytes": 1779,
-      "members": [
-        "logs/autoinit_phase_a_attempt6/engine_probe.json",
-        "logs/autoinit_phase_a_attempt7/engine_probe.json",
-        "logs/autoinit_stage3_complete/engine_probe.json"
-      ],
-      "canonical": "logs/autoinit_stage3_complete/engine_probe.json",
-      "canonical_reason": "the only copy executable code or a test names; the others are copies of it",
-      "reclaimable_bytes": 3558,
-      "decided_by": "executable reference"
+      "category": "immutable_record",
+      "was": "delete_duplicate",
+      "canonical_survivor": "logs/autoinit_stage3_complete/engine_probe.json",
+      "reason": "byte-identical to logs/autoinit_stage3_complete/engine_probe.json, which survives: the only copy executable code or a test names; the others are copies of it",
+      "recorded_utc": "2026-08-17T19:41:41+00:00"
+    },
+    {
+      "path": "logs/autoinit_phase_a_attempt7/engine_probe.json",
+      "sha256": "49593edb8bdf3047ee4feccd4bb59d0f954124b9ca3c894460b6be0dece8d431",
+      "size_bytes": 1779,
+      "category": "immutable_record",
+      "was": "delete_duplicate",
+      "canonical_survivor": "logs/autoinit_stage3_complete/engine_probe.json",
+      "reason": "byte-identical to logs/autoinit_stage3_complete/engine_probe.json, which survives: the only copy executable code or a test names; the others are copies of it",
+      "recorded_utc": "2026-08-17T19:41:41+00:00"
+    },
+    {
+      "path": "logs/autoinit_stage3_complete/session.json",
+      "sha256": "9d7b5caa60c690d66171c72f6722bff06561b13eb994ffff0bf27517acd2b8a2",
+      "size_bytes": 14967,
+      "category": "raw_execution_artifact",
+      "was": "delete_duplicate",
+      "canonical_survivor": "logs/autoinit_continuation_session.json",
+      "reason": "byte-identical to logs/autoinit_continuation_session.json, which survives: the only copy executable code or a test names; the others are copies of it",
+      "recorded_utc": "2026-08-17T19:41:41+00:00"
     }
   ],
+  "duplicate_groups": [],
   "living_state_snapshots": [
     {
       "path": "logs/archive/current_state_20260817_full.json",
-      "present_on_disk": true,
+      "present_on_disk": false,
       "git_reference": "git show 3261f6b67e513a9c7c4260e3a7ccc91c847dc127:logs/current_state.json",
-      "sha256_on_disk": "4a4ed901b088f987cbf92a66a8c1e89027697110db7393a5c6fd281079eea417",
+      "sha256_on_disk": null,
       "sha256_in_history": "4a4ed901b088f987cbf92a66a8c1e89027697110db7393a5c6fd281079eea417",
-      "verified_identical": true,
+      "verified_identical": false,
       "note": "a snapshot of a living-state file. Git already holds these exact bytes at the reference above, which is a stabler citation than a second file that can drift"
     }
   ],
@@ -133,7 +141,7 @@
       ]
     },
     {
-      "sentence": "> [`../../docs/HANDOFF_AUTOINITIALIZER.md`](../../docs/HANDOFF_AUTOINITIALIZER.md).",
+      "sentence": "> [`../../docs/HANDOFF_AUTOINITIALIZER.md`](../../docs/archive/HANDOFF_AUTOINITIALIZER_20260812.md).",
       "files": [
         "logs/archive/PROPOSAL.md",
         "logs/archive/e8_preregistration.md",
@@ -316,6 +324,13 @@
       ]
     },
     {
+      "sentence": "session record is [`../autoinit_phase_a_session.json`](../autoinit_phase_a_session.json).",
+      "files": [
+        "logs/autoinit_phase_a_attempt6/README.md",
+        "logs/autoinit_phase_a_attempt7/README.md"
+      ]
+    },
+    {
       "sentence": "true` \u2014 it now fails closed when two roles share no comparable",
       "files": [
         "docs/AUTOINIT_REFERENCE.md",
@@ -341,6 +356,13 @@
       "files": [
         "logs/archive/e8_preregistration.md",
         "logs/e7_preregistration.md"
+      ]
+    },
+    {
+      "sentence": "| `engine_probe.json` | `49593edb8bdf3047ee4feccd4bb59d0f954124b9ca3c894460b6be0dece8d431` | [`../autoinit_stage3_complete/engine_probe.json`](../autoinit_stage3_complete/engine_probe.json) |",
+      "files": [
+        "logs/autoinit_phase_a_attempt6/README.md",
+        "logs/autoinit_phase_a_attempt7/README.md"
       ]
     },
     {
@@ -374,7 +396,6 @@
         "logs/CATALOG.md",
         "logs/EXPERIMENTS.md",
         "logs/STATE.md",
-        "logs/archive/current_state_20260817_full.json",
         "logs/archive/e8_preregistration.md",
         "logs/artifact_manifests.md",
         "logs/autoinit_continuation_attempts/README.md",
@@ -465,14 +486,15 @@
     },
     {
       "path": "README.md",
-      "size_bytes": 44956,
-      "sha256": "e2e0df158b774ad4523d319d3da53134a2af3931f012566c00825ca42e54e92e",
+      "size_bytes": 45242,
+      "sha256": "d8be48d2030bfc3aea38a4dd20f14f7eaf7e0181a995eba27194881e1be72d7d",
       "category": "narrative",
       "in_paid_attempt_chain": false,
       "referenced_by": [
         "AGENTS.md",
         "docs/REPO_LAYOUT.md",
         "logs/CATALOG.md",
+        "logs/autoinit_stage3_complete/README.md",
         "logs/checkpoint_registry.json",
         "logs/log_inventory.json",
         "scripts/consolidate/build_checkpoint_registry.py",
@@ -494,8 +516,8 @@
     },
     {
       "path": "docs/AUTOINIT_REFERENCE.md",
-      "size_bytes": 36891,
-      "sha256": "2d60c6f2a71e0f0eb2e417b64c6009f3539e2fa13b21a6a401159531cf3780a4",
+      "size_bytes": 36979,
+      "sha256": "7357513bd6717df7d5b17efaa7268bd0d6af62b305624da31eda5dde657f4d31",
       "category": "narrative",
       "in_paid_attempt_chain": false,
       "referenced_by": [
@@ -504,17 +526,20 @@
         "logs/STATE.md",
         "logs/checkpoint_registry.json",
         "logs/decisions.md",
-        "logs/log_inventory.json"
+        "logs/log_inventory.json",
+        "tests/docs/test_repository_structure.py"
       ],
-      "referenced_by_executable": [],
+      "referenced_by_executable": [
+        "tests/docs/test_repository_structure.py"
+      ],
       "duplicate_of": null,
-      "disposition": "keep_canonical",
-      "disposition_reason": "sole copy, no superseding owner"
+      "disposition": "keep_referenced",
+      "disposition_reason": "named by tests/docs/test_repository_structure.py"
     },
     {
       "path": "docs/POD_SCRIPTS.md",
-      "size_bytes": 5461,
-      "sha256": "2cbf91cb13a627e2e757f44c0bf199b4dc75eb60e806a49a34eb330ff2f4867e",
+      "size_bytes": 5930,
+      "sha256": "851f82d10388f9abbb83d35fad29a1fea5cff3503fb0939c9047f2bbfe5e5216",
       "category": "narrative",
       "in_paid_attempt_chain": false,
       "referenced_by": [
@@ -564,6 +589,7 @@
         "README.md",
         "docs/REPO_LAYOUT.md",
         "logs/STATE.md",
+        "logs/autoinit_device_canary_attempt2/README.md",
         "logs/current_state.json",
         "logs/decisions.md",
         "logs/log_inventory.json"
@@ -575,11 +601,15 @@
     },
     {
       "path": "docs/archive/HANDOFF_AUTOINITIALIZER_20260812.md",
-      "size_bytes": 18439,
-      "sha256": "7d5e451f8a392504feea3832c37933659357a64a0520611c55e2fb7dfe37f794",
+      "size_bytes": 18947,
+      "sha256": "ca93dd29b15a0f2fcd35fbf664f22ebc62f992472c60371d7c715a52fac30d59",
       "category": "immutable_record",
       "in_paid_attempt_chain": false,
       "referenced_by": [
+        "logs/archive/PROPOSAL.md",
+        "logs/archive/README.md",
+        "logs/archive/e8_preregistration.md",
+        "logs/archive/e8b_preregistration.md",
         "logs/checkpoint_registry.json",
         "logs/log_inventory.json",
         "tests/docs/test_repository_structure.py"
@@ -601,7 +631,6 @@
         "README.md",
         "docs/AUTOINIT_REFERENCE.md",
         "docs/archive/HANDOFF_AUTOINITIALIZER_20260812.md",
-        "logs/archive/current_state_20260817_full.json",
         "logs/current_state.json",
         "logs/log_inventory.json",
         "tests/docs/test_repository_structure.py"
@@ -615,8 +644,8 @@
     },
     {
       "path": "logs/CATALOG.md",
-      "size_bytes": 8512,
-      "sha256": "d6955b63cb7d47d5be35333e3c3bfdf44ab9509a480ec77d37c13e0e76ffa32d",
+      "size_bytes": 9352,
+      "sha256": "43d41ef8eb2811ffe2add56bf49c67f63201877c76563382e31542e781feabb0",
       "category": "index",
       "in_paid_attempt_chain": false,
       "referenced_by": [
@@ -643,6 +672,7 @@
       "in_paid_attempt_chain": false,
       "referenced_by": [
         "README.md",
+        "docs/AUTOINIT_REFERENCE.md",
         "logs/checkpoint_registry.json",
         "logs/checkpoint_tombstones.json",
         "logs/log_inventory.json",
@@ -682,7 +712,6 @@
       "referenced_by": [
         "README.md",
         "docs/archive/HANDOFF_AUTOINITIALIZER_20260812.md",
-        "logs/archive/current_state_20260817_full.json",
         "logs/checkpoint_registry.json",
         "logs/checkpoint_tombstones.json",
         "logs/log_inventory.json"
@@ -704,7 +733,6 @@
         "docs/AUTOINIT_REFERENCE.md",
         "docs/POD_SCRIPTS.md",
         "docs/archive/HANDOFF_AUTOINITIALIZER_20260812.md",
-        "logs/archive/current_state_20260817_full.json",
         "logs/current_state.json",
         "logs/decisions.md",
         "logs/log_inventory.json",
@@ -721,8 +749,8 @@
     },
     {
       "path": "logs/archive/PROPOSAL.md",
-      "size_bytes": 68050,
-      "sha256": "b455ce430a63dbea6e8e325985e917ec0298215e02e1e1516d8a1a692203c8e7",
+      "size_bytes": 68067,
+      "sha256": "5331e6e8b80aa7da13574ab64e1927cd4982f864e0e4d7c25860abb6f8939dac",
       "category": "immutable_record",
       "in_paid_attempt_chain": false,
       "referenced_by": [
@@ -742,8 +770,8 @@
     },
     {
       "path": "logs/archive/README.md",
-      "size_bytes": 721,
-      "sha256": "b0a17a116c0d1937fce179b5a447294d64443c87fe04c1c04a79fb0fc96079ce",
+      "size_bytes": 1508,
+      "sha256": "33cf6b39b47141970f356da901dbdfcbad89b0d891d291edc4dde3fea7720dee",
       "category": "immutable_record",
       "in_paid_attempt_chain": false,
       "referenced_by": [
@@ -755,27 +783,9 @@
       "disposition_reason": "evidence of something that happened; AGENTS.md P11 and the CATALOG's HISTORICAL class forbid rewriting it"
     },
     {
-      "path": "logs/archive/current_state_20260817_full.json",
-      "size_bytes": 37871,
-      "sha256": "4a4ed901b088f987cbf92a66a8c1e89027697110db7393a5c6fd281079eea417",
-      "category": "immutable_record",
-      "in_paid_attempt_chain": false,
-      "referenced_by": [
-        "logs/checkpoint_registry.json",
-        "logs/log_inventory.json",
-        "scripts/consolidate/build_log_inventory.py"
-      ],
-      "referenced_by_executable": [
-        "scripts/consolidate/build_log_inventory.py"
-      ],
-      "duplicate_of": null,
-      "disposition": "keep_referenced",
-      "disposition_reason": "named by scripts/consolidate/build_log_inventory.py"
-    },
-    {
       "path": "logs/archive/e8_preregistration.md",
-      "size_bytes": 30943,
-      "sha256": "e1382627a058be305e7027cfbba32d0bb1f2b2d5eb5162fc4e6192522fc06e7b",
+      "size_bytes": 30960,
+      "sha256": "0069e7e546dc1c1d2ca39d013629f1ba448eb316601155d84a12940e7a2fb2d9",
       "category": "immutable_record",
       "in_paid_attempt_chain": false,
       "referenced_by": [
@@ -794,8 +804,8 @@
     },
     {
       "path": "logs/archive/e8b_preregistration.md",
-      "size_bytes": 22721,
-      "sha256": "7679216b29dfcbfcd2a621e721ad2ed92e9b64dc69711bac4d826a537457ad94",
+      "size_bytes": 22738,
+      "sha256": "126c08933b19e0949162885d5a6ccd51c2b0ebe29a74b650437fff9bc96b52ab",
       "category": "immutable_record",
       "in_paid_attempt_chain": false,
       "referenced_by": [
@@ -987,8 +997,8 @@
     },
     {
       "path": "logs/autoinit_continuation_attempts/attempt7/README.md",
-      "size_bytes": 3876,
-      "sha256": "157b7d2ffc46926ea111734dc09314851be57fee4016f435dc20ef6ba7f17dfc",
+      "size_bytes": 4448,
+      "sha256": "53730bf1f9bf693b068a1335cdd17745ab075674c454b10414977d454e2461dd",
       "category": "narrative",
       "in_paid_attempt_chain": true,
       "referenced_by": [
@@ -1040,20 +1050,6 @@
       "duplicate_of": null,
       "disposition": "keep_immutable",
       "disposition_reason": "evidence of something that happened; AGENTS.md P11 and the CATALOG's HISTORICAL class forbid rewriting it"
-    },
-    {
-      "path": "logs/autoinit_continuation_attempts/attempt7/imported_controls.json",
-      "size_bytes": 4646,
-      "sha256": "db5bb0cb33ed5bd6bd66dd287cff03092f2fdc30a6dceb43fb5bd191a76e9a3b",
-      "category": "immutable_record",
-      "in_paid_attempt_chain": true,
-      "referenced_by": [
-        "logs/log_inventory.json"
-      ],
-      "referenced_by_executable": [],
-      "duplicate_of": "logs/autoinit_stage3_complete/imported_controls.json",
-      "disposition": "delete_duplicate",
-      "disposition_reason": "byte-identical to logs/autoinit_stage3_complete/imported_controls.json, which survives: the same control import served attempt 7 and the completed attempt 8. The completed run owns it: its products are the frozen Stage-3 artifacts, so a reader following the accepted result finds the file in place."
     },
     {
       "path": "logs/autoinit_continuation_attempts/attempt7/launcher.log",
@@ -1370,6 +1366,7 @@
       "category": "raw_execution_artifact",
       "in_paid_attempt_chain": false,
       "referenced_by": [
+        "logs/autoinit_stage3_complete/README.md",
         "logs/log_inventory.json",
         "scripts/pod/autoinit_continuation_launch.py"
       ],
@@ -1377,8 +1374,8 @@
         "scripts/pod/autoinit_continuation_launch.py"
       ],
       "duplicate_of": null,
-      "disposition": "keep_canonical",
-      "disposition_reason": "the only copy executable code or a test names; the others are copies of it"
+      "disposition": "keep_referenced",
+      "disposition_reason": "named by scripts/pod/autoinit_continuation_launch.py"
     },
     {
       "path": "logs/autoinit_control_availability.json",
@@ -1463,6 +1460,18 @@
       "disposition_reason": "evidence of something that happened; AGENTS.md P11 and the CATALOG's HISTORICAL class forbid rewriting it"
     },
     {
+      "path": "logs/autoinit_device_canary_attempt2/README.md",
+      "size_bytes": 1623,
+      "sha256": "51676f844862f09b4964037155d1092ab3efeb11c0a7575f876499efd5d01d2e",
+      "category": "narrative",
+      "in_paid_attempt_chain": true,
+      "referenced_by": [],
+      "referenced_by_executable": [],
+      "duplicate_of": null,
+      "disposition": "keep_immutable",
+      "disposition_reason": "evidence of something that happened; AGENTS.md P11 and the CATALOG's HISTORICAL class forbid rewriting it"
+    },
+    {
       "path": "logs/autoinit_device_canary_attempt2/launcher.out",
       "size_bytes": 2610,
       "sha256": "69b65ed55913dfb52c325419e6b9eeb9bd19efb258c4986ecafaadb71a81afbb",
@@ -1491,20 +1500,6 @@
       "disposition_reason": "the only record of the pod id, the observed pod lifetime and the accrued spend of a paid attempt; the session record carries the final figure, not the trajectory"
     },
     {
-      "path": "logs/autoinit_device_canary_attempt2/session.json",
-      "size_bytes": 9982,
-      "sha256": "e75b2c5dcce6a4b0285d5c366dc3dc143b17fafefa80e5eee6841a290092aa2c",
-      "category": "raw_execution_artifact",
-      "in_paid_attempt_chain": true,
-      "referenced_by": [
-        "logs/log_inventory.json"
-      ],
-      "referenced_by_executable": [],
-      "duplicate_of": "logs/autoinit_device_canary_session.json",
-      "disposition": "delete_duplicate",
-      "disposition_reason": "byte-identical to logs/autoinit_device_canary_session.json, which survives: the only copy executable code or a test names; the others are copies of it"
-    },
-    {
       "path": "logs/autoinit_device_canary_authorization.json",
       "size_bytes": 2851,
       "sha256": "46ac8f5b6c0b206892d4a68d1791d6f0f340590bfae1a0478ac9ed74e9db975f",
@@ -1530,6 +1525,7 @@
       "category": "raw_execution_artifact",
       "in_paid_attempt_chain": true,
       "referenced_by": [
+        "logs/autoinit_device_canary_attempt2/README.md",
         "logs/log_inventory.json",
         "scripts/pod/autoinit_device_canary_launch.py"
       ],
@@ -1537,8 +1533,8 @@
         "scripts/pod/autoinit_device_canary_launch.py"
       ],
       "duplicate_of": null,
-      "disposition": "keep_canonical",
-      "disposition_reason": "the only copy executable code or a test names; the others are copies of it"
+      "disposition": "keep_referenced",
+      "disposition_reason": "named by scripts/pod/autoinit_device_canary_launch.py"
     },
     {
       "path": "logs/autoinit_dryrun_fresh.json",
@@ -1582,7 +1578,6 @@
       "category": "immutable_record",
       "in_paid_attempt_chain": false,
       "referenced_by": [
-        "logs/archive/current_state_20260817_full.json",
         "logs/autoinit_continuation_attempts/attempt5/README.md",
         "logs/decisions.md",
         "logs/log_inventory.json",
@@ -1610,12 +1605,25 @@
       "category": "narrative",
       "in_paid_attempt_chain": false,
       "referenced_by": [
+        "docs/AUTOINIT_REFERENCE.md",
         "logs/log_inventory.json"
       ],
       "referenced_by_executable": [],
       "duplicate_of": null,
       "disposition": "keep_canonical",
       "disposition_reason": "sole copy, no superseding owner"
+    },
+    {
+      "path": "logs/autoinit_permanent_controls/README.md",
+      "size_bytes": 1174,
+      "sha256": "74df442396c673f5672bb2afbb676d2b760b34cdd55dddff4ae54ebb97665464",
+      "category": "narrative",
+      "in_paid_attempt_chain": true,
+      "referenced_by": [],
+      "referenced_by_executable": [],
+      "duplicate_of": null,
+      "disposition": "keep_immutable",
+      "disposition_reason": "evidence of something that happened; AGENTS.md P11 and the CATALOG's HISTORICAL class forbid rewriting it"
     },
     {
       "path": "logs/autoinit_permanent_controls/preflight_ctl_r0860k_sa_probe_identity.json",
@@ -1625,7 +1633,6 @@
       "in_paid_attempt_chain": true,
       "referenced_by": [
         "logs/autoinit_continuation_attempts/attempt7/continuation_evidence.json",
-        "logs/autoinit_continuation_attempts/attempt7/imported_controls.json",
         "logs/autoinit_stage3_complete/continuation_evidence.json",
         "logs/autoinit_stage3_complete/imported_controls.json",
         "logs/log_inventory.json"
@@ -1671,7 +1678,6 @@
       "in_paid_attempt_chain": true,
       "referenced_by": [
         "logs/autoinit_continuation_attempts/attempt7/continuation_evidence.json",
-        "logs/autoinit_continuation_attempts/attempt7/imported_controls.json",
         "logs/autoinit_stage3_complete/continuation_evidence.json",
         "logs/autoinit_stage3_complete/imported_controls.json",
         "logs/log_inventory.json"
@@ -1710,18 +1716,16 @@
       "disposition_reason": "evidence of something that happened; AGENTS.md P11 and the CATALOG's HISTORICAL class forbid rewriting it"
     },
     {
-      "path": "logs/autoinit_permanent_controls/session_evidence.json",
-      "size_bytes": 45362,
-      "sha256": "b39bc39e590883c4f21414c6f5ff02ae2aee2ade6015c7627f7a098245cf0f55",
-      "category": "raw_execution_artifact",
+      "path": "logs/autoinit_phase_a_attempt6/README.md",
+      "size_bytes": 1055,
+      "sha256": "45cee09a5290f59dd340bbbde08cf746438198e392f59170749adf097f7cbeb8",
+      "category": "narrative",
       "in_paid_attempt_chain": true,
-      "referenced_by": [
-        "logs/log_inventory.json"
-      ],
+      "referenced_by": [],
       "referenced_by_executable": [],
-      "duplicate_of": "logs/autoinit_preflight_run4/preflight_evidence.json",
-      "disposition": "delete_duplicate",
-      "disposition_reason": "byte-identical to logs/autoinit_preflight_run4/preflight_evidence.json, which survives: one session wrote one evidence file. `write_preregistration.py` and the materialized preregistration both cite this path; the copy under autoinit_permanent_controls/ is that file under a second name."
+      "duplicate_of": null,
+      "disposition": "keep_immutable",
+      "disposition_reason": "evidence of something that happened; AGENTS.md P11 and the CATALOG's HISTORICAL class forbid rewriting it"
     },
     {
       "path": "logs/autoinit_phase_a_attempt6/attested_evaluation_protocol.json",
@@ -1750,20 +1754,6 @@
       "duplicate_of": null,
       "disposition": "keep_immutable",
       "disposition_reason": "evidence of something that happened; AGENTS.md P11 and the CATALOG's HISTORICAL class forbid rewriting it"
-    },
-    {
-      "path": "logs/autoinit_phase_a_attempt6/engine_probe.json",
-      "size_bytes": 1779,
-      "sha256": "49593edb8bdf3047ee4feccd4bb59d0f954124b9ca3c894460b6be0dece8d431",
-      "category": "immutable_record",
-      "in_paid_attempt_chain": true,
-      "referenced_by": [
-        "logs/log_inventory.json"
-      ],
-      "referenced_by_executable": [],
-      "duplicate_of": "logs/autoinit_stage3_complete/engine_probe.json",
-      "disposition": "delete_duplicate",
-      "disposition_reason": "byte-identical to logs/autoinit_stage3_complete/engine_probe.json, which survives: the only copy executable code or a test names; the others are copies of it"
     },
     {
       "path": "logs/autoinit_phase_a_attempt6/launcher.out",
@@ -1822,6 +1812,18 @@
       "disposition_reason": "the only record of the pod id, the observed pod lifetime and the accrued spend of a paid attempt; the session record carries the final figure, not the trajectory"
     },
     {
+      "path": "logs/autoinit_phase_a_attempt7/README.md",
+      "size_bytes": 1036,
+      "sha256": "b9ab0c454fe7c4df6b6974b19cea831ff609e90ecfe01602d1bb2ddb85230017",
+      "category": "narrative",
+      "in_paid_attempt_chain": true,
+      "referenced_by": [],
+      "referenced_by_executable": [],
+      "duplicate_of": null,
+      "disposition": "keep_immutable",
+      "disposition_reason": "evidence of something that happened; AGENTS.md P11 and the CATALOG's HISTORICAL class forbid rewriting it"
+    },
+    {
       "path": "logs/autoinit_phase_a_attempt7/attested_evaluation_protocol.json",
       "size_bytes": 7657,
       "sha256": "9d4254bc0f0d3e6e3c2f3d5ef1c767321d3b8913227746ca8e863572e38aec8f",
@@ -1848,20 +1850,6 @@
       "duplicate_of": null,
       "disposition": "keep_immutable",
       "disposition_reason": "evidence of something that happened; AGENTS.md P11 and the CATALOG's HISTORICAL class forbid rewriting it"
-    },
-    {
-      "path": "logs/autoinit_phase_a_attempt7/engine_probe.json",
-      "size_bytes": 1779,
-      "sha256": "49593edb8bdf3047ee4feccd4bb59d0f954124b9ca3c894460b6be0dece8d431",
-      "category": "immutable_record",
-      "in_paid_attempt_chain": true,
-      "referenced_by": [
-        "logs/log_inventory.json"
-      ],
-      "referenced_by_executable": [],
-      "duplicate_of": "logs/autoinit_stage3_complete/engine_probe.json",
-      "disposition": "delete_duplicate",
-      "disposition_reason": "byte-identical to logs/autoinit_stage3_complete/engine_probe.json, which survives: the only copy executable code or a test names; the others are copies of it"
     },
     {
       "path": "logs/autoinit_phase_a_attempt7/launcher.out",
@@ -1926,7 +1914,6 @@
       "category": "raw_execution_artifact",
       "in_paid_attempt_chain": true,
       "referenced_by": [
-        "logs/archive/current_state_20260817_full.json",
         "logs/log_inventory.json"
       ],
       "referenced_by_executable": [],
@@ -2012,7 +1999,6 @@
       "category": "immutable_record",
       "in_paid_attempt_chain": false,
       "referenced_by": [
-        "logs/archive/current_state_20260817_full.json",
         "logs/autoinit_phase_a_session.json",
         "logs/log_inventory.json",
         "scripts/autoinit/issue_phase_a_authorization.py",
@@ -2043,7 +2029,6 @@
       "category": "immutable_record",
       "in_paid_attempt_chain": false,
       "referenced_by": [
-        "logs/archive/current_state_20260817_full.json",
         "logs/log_inventory.json",
         "scripts/pod/autoinit_phase_a_launch.py",
         "tests/pod/test_phase_a_rehearsal.py"
@@ -2082,7 +2067,6 @@
       "category": "immutable_record",
       "in_paid_attempt_chain": false,
       "referenced_by": [
-        "logs/archive/current_state_20260817_full.json",
         "logs/autoinit_phase_a_preregistration_materialized.json",
         "logs/checkpoint_registry.json",
         "logs/log_inventory.json",
@@ -2106,7 +2090,6 @@
       "category": "narrative",
       "in_paid_attempt_chain": false,
       "referenced_by": [
-        "logs/archive/current_state_20260817_full.json",
         "logs/log_inventory.json",
         "scripts/autoinit/write_preregistration.py"
       ],
@@ -2124,7 +2107,7 @@
       "category": "immutable_record",
       "in_paid_attempt_chain": false,
       "referenced_by": [
-        "logs/archive/current_state_20260817_full.json",
+        "logs/autoinit_permanent_controls/README.md",
         "logs/checkpoint_registry.json",
         "logs/log_inventory.json",
         "scripts/autoinit/write_preregistration.py"
@@ -2143,6 +2126,8 @@
       "category": "immutable_record",
       "in_paid_attempt_chain": false,
       "referenced_by": [
+        "logs/autoinit_phase_a_attempt6/README.md",
+        "logs/autoinit_stage3_complete/README.md",
         "logs/decisions.md",
         "logs/log_inventory.json",
         "scripts/autoinit/emit_protocol_compat_v2.py",
@@ -2163,7 +2148,6 @@
       "category": "immutable_record",
       "in_paid_attempt_chain": false,
       "referenced_by": [
-        "logs/archive/current_state_20260817_full.json",
         "logs/checkpoint_registry.json",
         "logs/log_inventory.json",
         "scripts/autoinit/issue_phase_a_authorization.py",
@@ -2219,7 +2203,6 @@
       "category": "raw_execution_artifact",
       "in_paid_attempt_chain": false,
       "referenced_by": [
-        "logs/archive/current_state_20260817_full.json",
         "logs/log_inventory.json",
         "scripts/pod/autoinit_phase_a_launch.py"
       ],
@@ -2237,7 +2220,6 @@
       "category": "narrative",
       "in_paid_attempt_chain": false,
       "referenced_by": [
-        "logs/archive/current_state_20260817_full.json",
         "logs/checkpoint_registry.json",
         "logs/log_inventory.json",
         "scripts/pod/autoinit_phase_a_launch.py"
@@ -2256,8 +2238,8 @@
       "category": "narrative",
       "in_paid_attempt_chain": false,
       "referenced_by": [
+        "docs/AUTOINIT_REFERENCE.md",
         "docs/archive/HANDOFF_AUTOINITIALIZER_20260812.md",
-        "logs/archive/current_state_20260817_full.json",
         "logs/log_inventory.json"
       ],
       "referenced_by_executable": [],
@@ -2380,8 +2362,8 @@
         "scripts/consolidate/build_log_inventory.py"
       ],
       "duplicate_of": null,
-      "disposition": "keep_canonical",
-      "disposition_reason": "one session wrote one evidence file. `write_preregistration.py` and the materialized preregistration both cite this path; the copy under autoinit_permanent_controls/ is that file under a second name."
+      "disposition": "keep_referenced",
+      "disposition_reason": "named by scripts/autoinit/write_preregistration.py, scripts/consolidate/build_log_inventory.py"
     },
     {
       "path": "logs/autoinit_preflight_run4/statistics_split.json",
@@ -2421,7 +2403,6 @@
       "category": "immutable_record",
       "in_paid_attempt_chain": false,
       "referenced_by": [
-        "logs/archive/current_state_20260817_full.json",
         "logs/autoinit_control_availability.json",
         "logs/autoinit_phase_a_preregistration.json",
         "logs/autoinit_phase_a_preregistration_materialized.json",
@@ -2449,7 +2430,6 @@
       "category": "immutable_record",
       "in_paid_attempt_chain": false,
       "referenced_by": [
-        "logs/archive/current_state_20260817_full.json",
         "logs/decisions.md",
         "logs/log_inventory.json",
         "scripts/autoinit/validate_recovery_scoring.py",
@@ -2548,7 +2528,6 @@
       "category": "immutable_record",
       "in_paid_attempt_chain": false,
       "referenced_by": [
-        "logs/archive/current_state_20260817_full.json",
         "logs/autoinit_phase_a_preregistration.json",
         "logs/autoinit_phase_a_preregistration_materialized.json",
         "logs/autoinit_state_eval_v1_manifest.json",
@@ -2573,7 +2552,6 @@
       "category": "immutable_record",
       "in_paid_attempt_chain": false,
       "referenced_by": [
-        "logs/archive/current_state_20260817_full.json",
         "logs/log_inventory.json",
         "scripts/pod/autoinit_device_canary_launch.py"
       ],
@@ -2583,6 +2561,18 @@
       "duplicate_of": null,
       "disposition": "keep_referenced",
       "disposition_reason": "named by scripts/pod/autoinit_device_canary_launch.py"
+    },
+    {
+      "path": "logs/autoinit_stage3_complete/README.md",
+      "size_bytes": 1452,
+      "sha256": "4b04c443b767ac858232b76484baf1daa8a39e548c6fbe7804e04e3cbbe7e2fe",
+      "category": "narrative",
+      "in_paid_attempt_chain": true,
+      "referenced_by": [],
+      "referenced_by_executable": [],
+      "duplicate_of": null,
+      "disposition": "keep_immutable",
+      "disposition_reason": "evidence of something that happened; AGENTS.md P11 and the CATALOG's HISTORICAL class forbid rewriting it"
     },
     {
       "path": "logs/autoinit_stage3_complete/attested_evaluation_protocol.json",
@@ -2637,8 +2627,8 @@
         "tests/pod/test_phase_a_stages1_5_execute.py"
       ],
       "duplicate_of": null,
-      "disposition": "keep_canonical",
-      "disposition_reason": "the only copy executable code or a test names; the others are copies of it"
+      "disposition": "keep_referenced",
+      "disposition_reason": "named by scripts/pod/autoinit_phase_a_driver.py, tests/pod/test_phase_a_stage0_executes.py, tests/pod/test_phase_a_stages1_5_execute.py"
     },
     {
       "path": "logs/autoinit_stage3_complete/generation_smoke.json",
@@ -2668,8 +2658,8 @@
         "scripts/consolidate/build_log_inventory.py"
       ],
       "duplicate_of": null,
-      "disposition": "keep_canonical",
-      "disposition_reason": "the same control import served attempt 7 and the completed attempt 8. The completed run owns it: its products are the frozen Stage-3 artifacts, so a reader following the accepted result finds the file in place."
+      "disposition": "keep_referenced",
+      "disposition_reason": "named by scripts/consolidate/build_log_inventory.py"
     },
     {
       "path": "logs/autoinit_stage3_complete/launcher.log",
@@ -2707,7 +2697,6 @@
       "in_paid_attempt_chain": true,
       "referenced_by": [
         "docs/archive/HANDOFF_AUTOINITIALIZER_20260812.md",
-        "logs/archive/current_state_20260817_full.json",
         "logs/log_inventory.json",
         "scripts/pod/autoinit_phase_a_driver.py",
         "tests/pod/test_phase_a_stage0_executes.py"
@@ -2789,20 +2778,6 @@
       "duplicate_of": null,
       "disposition": "keep_immutable",
       "disposition_reason": "evidence of something that happened; AGENTS.md P11 and the CATALOG's HISTORICAL class forbid rewriting it"
-    },
-    {
-      "path": "logs/autoinit_stage3_complete/session.json",
-      "size_bytes": 14967,
-      "sha256": "9d7b5caa60c690d66171c72f6722bff06561b13eb994ffff0bf27517acd2b8a2",
-      "category": "raw_execution_artifact",
-      "in_paid_attempt_chain": true,
-      "referenced_by": [
-        "logs/log_inventory.json"
-      ],
-      "referenced_by_executable": [],
-      "duplicate_of": "logs/autoinit_continuation_session.json",
-      "disposition": "delete_duplicate",
-      "disposition_reason": "byte-identical to logs/autoinit_continuation_session.json, which survives: the only copy executable code or a test names; the others are copies of it"
     },
     {
       "path": "logs/autoinit_stage3_complete/watchdog.jsonl",
@@ -2912,7 +2887,6 @@
       "category": "immutable_record",
       "in_paid_attempt_chain": false,
       "referenced_by": [
-        "logs/archive/current_state_20260817_full.json",
         "logs/log_inventory.json",
         "scripts/autoinit/plan_search.py",
         "scripts/pod/autoinit_phase_a_launch.py",
@@ -2937,7 +2911,6 @@
         "README.md",
         "docs/REPO_LAYOUT.md",
         "docs/archive/HANDOFF_AUTOINITIALIZER_20260812.md",
-        "logs/archive/current_state_20260817_full.json",
         "logs/log_inventory.json",
         "logs/relay_mirror_verification.json",
         "logs/storage_measurements.json",
@@ -2967,7 +2940,6 @@
       "referenced_by": [
         "README.md",
         "docs/archive/HANDOFF_AUTOINITIALIZER_20260812.md",
-        "logs/archive/current_state_20260817_full.json",
         "logs/checkpoint_registry.json",
         "logs/log_inventory.json",
         "scripts/autoinit/verify_control_checkpoints.py",
@@ -2998,6 +2970,8 @@
         "docs/AUTOINIT_REFERENCE.md",
         "docs/REPO_LAYOUT.md",
         "docs/archive/HANDOFF_AUTOINITIALIZER_20260812.md",
+        "logs/CATALOG.md",
+        "logs/archive/README.md",
         "logs/log_inventory.json",
         "scripts/consolidate/build_log_inventory.py",
         "tests/docs/test_repository_structure.py"
@@ -3018,8 +2992,8 @@
       "in_paid_attempt_chain": false,
       "referenced_by": [
         "README.md",
+        "docs/AUTOINIT_REFERENCE.md",
         "docs/archive/HANDOFF_AUTOINITIALIZER_20260812.md",
-        "logs/archive/current_state_20260817_full.json",
         "logs/autoinit_phase_a_preregistration.json",
         "logs/autoinit_phase_a_preregistration_materialized.json",
         "logs/checkpoint_registry.json",
@@ -3239,6 +3213,7 @@
       "category": "narrative",
       "in_paid_attempt_chain": false,
       "referenced_by": [
+        "docs/AUTOINIT_REFERENCE.md",
         "logs/log_inventory.json",
         "scripts/pod/AGENTS.md"
       ],
@@ -3573,6 +3548,7 @@
       "category": "derived_summary",
       "in_paid_attempt_chain": true,
       "referenced_by": [
+        "docs/AUTOINIT_REFERENCE.md",
         "logs/log_inventory.json"
       ],
       "referenced_by_executable": [],
@@ -3587,6 +3563,7 @@
       "category": "narrative",
       "in_paid_attempt_chain": false,
       "referenced_by": [
+        "docs/AUTOINIT_REFERENCE.md",
         "logs/EXPERIMENT_INDEX.md",
         "logs/e7_results.json",
         "logs/log_inventory.json",
@@ -3625,6 +3602,7 @@
       "category": "derived_summary",
       "in_paid_attempt_chain": false,
       "referenced_by": [
+        "docs/AUTOINIT_REFERENCE.md",
         "logs/log_inventory.json",
         "scripts/evaluation/analyze_e7.py"
       ],
@@ -3782,7 +3760,6 @@
       "in_paid_attempt_chain": false,
       "referenced_by": [
         "docs/archive/HANDOFF_AUTOINITIALIZER_20260812.md",
-        "logs/archive/current_state_20260817_full.json",
         "logs/log_inventory.json",
         "src/aadistill/training/train.py"
       ],
@@ -4086,7 +4063,9 @@
       "category": "immutable_record",
       "in_paid_attempt_chain": false,
       "referenced_by": [
+        "docs/POD_SCRIPTS.md",
         "logs/checkpoint_registry.json",
+        "logs/log_inventory.json",
         "scripts/consolidate/build_checkpoint_registry.py",
         "scripts/consolidate/verify_relay_mirror.py"
       ],

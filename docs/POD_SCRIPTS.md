@@ -30,7 +30,7 @@ to appear below.
 | `watchdog.py` | the independent provider-side kill switch |
 | `collect_artifacts.py` | artifact manifest, gate and collection |
 | `simulate_pod_env.sh` | runs the pod's exact test command locally with pod-absent artifacts hidden |
-| `retain_checkpoints.py`, `checkpoint_inventory.py` | checkpoint retention and inventory |
+| `retain_checkpoints.py` | per-run checkpoint retention: derives the keep set from a run's own log |
 | `start_job.py`, `run_env.sh` | detached start with a durable descriptor |
 
 ## DIAGNOSTIC
@@ -102,6 +102,7 @@ Transfer manifests recorded by those sessions: `hashes_ckpt.txt`,
 | `setup.sh` | the per-experiment setup scripts, then `autoinit_preflight_setup.sh` |
 | `orchestrate.sh` | the Python launchers |
 | `train.sh` | `scripts/training/train_stage3.py` |
+| `checkpoint_inventory.py` | `scripts/consolidate/build_checkpoint_registry.py`. Both inventory both stores; this one's `REQUIRED` set is written around Experiment 2 and has not moved since, and two inventories with different stale opinions is worse than one. Its LFS insight — that removing a file from a Hugging Face repo's current revision reclaims no quota — is preserved in the replacement's docstring and in `logs/relay_mirror_verification.json` |
 
 ## Local notes
 
