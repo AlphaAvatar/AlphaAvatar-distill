@@ -1,10 +1,10 @@
 {
   "schema": "aadistill.current_state/v1",
-  "generated_utc": "2026-08-17T15:52:40+00:00",
-  "current_phase": "Device canary attempt 1 died in the one-use wrapper at $0.0603, before the canary ran. Not a canary result. The grant covered one launcher invocation and is consumed; the three missing base-class arguments are enumerated but NOT fixed. Attempt 8 stays unauthorized because the canary has not run.",
+  "generated_utc": "2026-08-17T16:14:10+00:00",
+  "current_phase": "The device canary has now consumed both authorized sessions ($0.1240 total) without ever running: attempt 1 died on the launcher's argument contract, the retry on the shared setup's asset contract. Nothing is known about device placement on real CUDA. No further canary retry is authorized and Attempt 8 remains unauthorized.",
   "active_experiment": null,
   "paid_compute_running": false,
-  "next_work": "A maintainer decision: whether to authorize one canary retry at the same $1.0197 hard bound. The fix is adding three argparse entries (--teacher-revision, --ckpt-store, --ckpt-fetch-limit-min) that the base reads and a canary does not conceptually need. Nothing is authorized and nothing is prepared. No Attempt 8, no Attempt 9.",
+  "next_work": "A maintainer decision. The canary is one line from running - declare LOCAL_ASSETS as the other sessions do - but no retry is authorized and I have not made the change. The honest question is whether a third canary session is worth $1.0197 given that two wrapper defects have cost $0.1240 and taught nothing about CUDA, or whether the device audit's $0 evidence plus Attempt 8's own failure mode is the better next step. No Attempt 8, no Attempt 9, nothing prepared.",
   "teacher": {
     "model_id": "Qwen/Qwen3-4B-Thinking-2507",
     "revision": "768f209d9ea81521153ed38c47d515654e938aea",
@@ -55,12 +55,12 @@
     "dp_sa": "infrastructure artifact, not a promotable arm"
   },
   "budget": {
-    "actual_cumulative_spend_usd": 193.9893,
+    "actual_cumulative_spend_usd": 194.053,
     "authorized_cap_usd": 219.0,
     "cap_raised_utc": "2026-08-17",
     "cap_approved": true,
     "cap_raise_note": "maintainer, 2026-08-17: raised $217.00 -> $219.00. Funds AT MOST one infrastructure-only Stage-1 GPU device canary (hard $1.0197) and, ONLY if that canary passes and tears down cleanly, one complete Phase-A Attempt 8 (hard $23.0484). Does not authorize a canary retry, Attempt 9, or any change to the frozen science.",
-    "remaining_usd": 25.0107,
+    "remaining_usd": 24.947,
     "previous_caps": [
       {
         "cap_usd": 213.0,
@@ -185,7 +185,7 @@
     "E2 phases 2-3"
   ],
   "autoinit": {
-    "status": "CANARY_ATTEMPT_1_LAUNCHER_ERROR_STOPPED",
+    "status": "CANARY_RETRY_FAILED_IN_SETUP_STOPPED",
     "package": "src/aadistill/autoinit",
     "tests": 209,
     "operator_kinds": [
@@ -675,5 +675,28 @@
     "gap_note": "enumerated by scanning every self.a attribute the base reads (21 of them), so a retry is one edit rather than three discoveries. NOT fixed: the grant covered one invocation.",
     "why_the_zero_cost_check_missed_it": "make_plan, relay_precheck, driver_command, event_streams, fetch_products and the artifact spec were all executed at $0 and all passed. run_setup needs a live host and could not be.",
     "evidence": "logs/autoinit_device_canary_attempt1/"
+  },
+  "device_canary_attempt_2": {
+    "pod_id": "ibj7s7fxuj9ttl",
+    "elapsed_minutes": 3.86,
+    "actual_usd": 0.0637,
+    "authorized_usd": 1.0197,
+    "within_authorization": true,
+    "provider_confirms_gone": true,
+    "outcome": "SETUP FAILURE, not a canary result",
+    "error": "cp: cannot stat '/workspace/assets/state_eval_v1' -> SETUP_RC=1",
+    "progress_over_attempt_1": "the argument-contract fix worked: setup was reached and ran apt, the repo bundle at the right commit, and the relay staging of all four inputs including the calibration mixture",
+    "cause": "autoinit_preflight_setup.sh unconditionally copies state_eval_v1 and recovery_search_v2 out of $WS/assets, which the launcher scp's from LOCAL_ASSETS. The canary set LOCAL_ASSETS = () because it needs neither.",
+    "the_repeated_mistake": "twice now I reasoned from what the canary NEEDS when the operative question is what the inherited machinery REQUIRES. Attempt 1: arguments the subclass never mentions. Attempt 2: assets the subclass declared it did not want. The $0 check built after attempt 1 closed one surface because I generalized from the symptom, not the cause.",
+    "remaining_contract": {
+      "shared_setup_requires": [
+        "$WS/assets/state_eval_v1",
+        "$WS/assets/recovery_search_v2"
+      ],
+      "how_a_canary_would_satisfy_it": "declare LOCAL_ASSETS exactly as the other sessions do; the assets are 1.6 MB and stage in ~1 s. NOT by editing the shared setup script, which is inside the Phase-A harness digest."
+    },
+    "fixed": false,
+    "retried": false,
+    "evidence": "logs/autoinit_device_canary_attempt2/"
   }
 }

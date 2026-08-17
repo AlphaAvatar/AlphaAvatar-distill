@@ -1,32 +1,37 @@
-**Updated:** 2026-08-17 16:00 UTC · branch `main`
-**No pods running. Nothing billing.** **Stage 3 is COMPLETE.** Cumulative spend
-**$193.9893** of the approved **$219.00** cap. The Stage-1 device audit is done
-at $0; the device canary's first launch **died in its own wrapper at $0.0603
-before the canary ran**, so nothing is yet known about device placement on real
-CUDA. **Nothing is authorized:** the canary grant covered one invocation and is
-consumed, and Attempt 8 stays conditional on a canary that has not run.
+**Updated:** 2026-08-17 16:20 UTC · branch `main`
+**No pods running. Nothing billing.** Cumulative spend **$194.0530** of the
+approved **$219.00** cap. **The device canary has consumed both authorized
+sessions ($0.1240) without ever running.** Attempt 1 died on the launcher's
+inherited argument contract; the retry died on the shared setup's asset
+contract. Nothing is known about device placement on real CUDA. **No further
+canary retry is authorized, Attempt 8 remains unauthorized, and nothing is
+prepared.**
 
-## Device canary attempt 1 (2026-08-17, $0.0603): the wrapper, not the canary
+## Device canary: two sessions, zero canary runs ($0.1240)
 
-`LAUNCHER ERROR: AttributeError: 'Namespace' object has no attribute
-'teacher_revision'`. Pod `qhrir27ixfu8kt` deleted 11 s later, provider confirms
-gone.
+| | attempt 1 | retry |
+| --- | --- | --- |
+| spend | $0.0603 | $0.0637 |
+| died at | `self.a.teacher_revision` | `cp: cannot stat $WS/assets/state_eval_v1` |
+| reached | before setup | inside setup, after the bundle and all four relay inputs |
 
-The session died between "ssh reachable" and "running setup" — in the one-use
-wrapper, before the canary script was invoked. **This is not a canary result.**
-`Preflight.run_setup` passes `--teacher-revision` from `self.a`; reusing the base
-class means inheriting its *argument contract*, and the wrapper inherited the
-methods without it.
+The argument fix worked — the retry got 90 seconds further and staged
+everything, including the calibration mixture — and then hit the next thing the
+shared machinery requires and the wrapper had declared it did not want:
+`autoinit_preflight_setup.sh` unconditionally copies `state_eval_v1` and
+`recovery_search_v2` out of `$WS/assets`, and the canary set `LOCAL_ASSETS = ()`
+because it needs neither.
 
-Enumerated rather than discovered one pod at a time: the base reads 21
-attributes off `self.a` and three were undefined — `--teacher-revision`,
-`--ckpt-store`, `--ckpt-fetch-limit-min`. A retry is one edit. **Not fixed and
-not retried**: the grant covered one launcher invocation.
+**The same structural mistake twice, mine both times.** I reasoned from what the
+canary *needs* when the operative question is what the inherited machinery
+*requires*, and the $0 check I built after attempt 1 closed one surface because
+I generalized from the symptom rather than the cause. Reusing proven machinery
+means satisfying its contract in full, and that contract is not visible from the
+subclass.
 
-The $0 gate check executed `make_plan`, `relay_precheck`, `driver_command`,
-`event_streams`, `fetch_products` and the artifact spec before spending, and all
-passed. `run_setup` needs a live host and could not be checked — the same shape
-as every other failure here: a boundary the $0 path cannot cross.
+The remaining gap is one line — declare `LOCAL_ASSETS` as every other session
+does; the assets are 1.6 MB and stage in ~1 s — and **it has not been made**,
+because no retry is authorized.
 
 ## Stage-1 device contract and audit (2026-08-17)
 

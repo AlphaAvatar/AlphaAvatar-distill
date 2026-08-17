@@ -280,17 +280,19 @@ authorized cumulative cap                                    $219.00
     RAISED AND APPROVED 2026-08-17. See the caps list above.
     Funds the $1.0197 canary and, conditionally, one $23.0484
     Attempt 8. Not a retry reserve; no Attempt 9.
-actual cumulative spend                                      $193.9893
+actual cumulative spend                                      $194.0530
     = $193.1783 + $0.3552 attempt 6 + $0.3955 attempt 7
-      + $0.0603 device canary attempt 1 (launcher error; the
-      canary itself never ran)
-unused authorization remaining                               $ 25.0107
-    = $219.00 - $193.9893. Committed against it:
+      + $0.0603 device canary attempt 1 (launcher argument
+      contract) + $0.0637 canary retry (shared setup asset
+      contract). The canary script has never run.
+unused authorization remaining                               $ 24.9470
+    = $219.00 - $194.0530. Committed against it:
       device canary hard                                       $  1.0197
-        SPENT $0.0603 on attempt 1, which died in the one-use
-        wrapper before the canary ran. NOT a canary result and
-        NOT a retry authorization: the grant covered one
-        launcher invocation and is consumed.
+        SPENT $0.1240 across two sessions, NEITHER of which ran
+        the canary script: attempt 1 died on the launcher's
+        argument contract, the retry on the shared setup's asset
+        contract. Both grants are consumed and the retry was
+        explicitly the only one authorized. NOT canary results.
       Attempt 8 hard, CONDITIONAL on the canary passing        $ 23.0484
         The canary has not run, so Attempt 8 is not authorized.
       remaining after a canary retry and Attempt 8             $  0.9426

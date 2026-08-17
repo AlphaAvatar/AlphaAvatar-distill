@@ -1,0 +1,41 @@
+[16:07:57] budget: expected 38 min $0.63 · soft $0.69 · hard $1.02 (authorized $1.02)
+[16:07:58] precheck OK: 2 relay inputs, no local assets
+[16:07:59] created ibj7s7fxuj9ttl at $0.99/h
+[16:07:59] watchdog detached — hard 62 min = $1.02
+[16:08:52]   starting (60s) — $0.01
+[16:09:55]   starting (120s) — $0.03
+[16:10:47] TCP 22 at 195.26.232.186:58911 after 2.8 min
+[16:10:50] draw 1: ssh reachable — $0.05
+[16:11:05] draw 1: image identity runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@580.126.09
+[16:11:05] draw 1: running setup
+[16:11:39] setup did not reach SETUP_DONE:
+[16:11:08] apt: git, ninja, zstd
+W: https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2404/x86_64/InRelease: Key is stored in legacy trusted.gpg keyring (/etc/apt/trusted.gpg), see the DEPRECATION section in apt-key(8) for details.
+debconf: delaying package configuration, since apt-utils is not installed
+MARKER:ENV_READY
+WARNING: huggingface-hub 1.27.0 does not provide the extra 'hf-transfer'
+WARNING: Running pip as the 'root' user can result in broken permissions and conflicting behaviour with the system package manager, possibly rendering your system unusable. It is recommended to use a virtual environment instead: https://pip.pypa.io/warnings/venv. Use the --root-user-action option if you know what you are doing and want to suppress this warning.
+[16:11:16] fetching the repo bundle
+warning: remote HEAD refers to nonexistent ref, unable to checkout
+32f51ce4235fd86d168f30ff3e1618ae5ca76f83
+MARKER:REPO_READY
+[16:11:18] staging the canonical init and the recovery pack from the relay
+  stage1/qwen3_0p6b_init_v0/checkpoint/config.json
+  stage1/qwen3_0p6b_init_v0/checkpoint/generation_config.json
+  stage1/qwen3_0p6b_init_v0/checkpoint/model.safetensors
+  stage1/qwen3_0p6b_init_v0/checkpoint/tokenizer.json
+  stage1/qwen3_0p6b_init_v0/checkpoint/tokenizer_config.json
+  stage1/qwen3_0p6b_init_v0/checkpoint/chat_template.jinja
+  stage3_recovery_corpus_v2/ladder_uniform/blocks.npz
+  stage3_recovery_corpus_v2/ladder_uniform/ladder.json
+  stage3_recovery_corpus_v2/ladder_uniform/audit.jsonl
+  e8_inputs_20260810/calibration_v1/items.jsonl
+[16:11:34] installing and verifying the frozen search assets
+cp: cannot stat '/workspace/assets/state_eval_v1': No such file or directory
+SETUP_RC=1
+
+[16:11:39] ABORT after draw 1: setup_failed
+[16:11:39] deleting pod (setup setup_failed)
+[16:11:50] pod deleted — 3.9 min, $0.06; provider confirms gone: True
+
+Device canary FAILED — /home/ecs-user/AlphaAvatar-distill/logs/autoinit_device_canary_session.json. STOP for review; nothing else was started.

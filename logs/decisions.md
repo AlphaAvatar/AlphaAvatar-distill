@@ -3640,3 +3640,41 @@ two devices, cuda:0 and cpu!
   yet run, so it is **not** authorized. No Attempt 9.
 - **What a retry would cost:** the same $1.0197 hard bound. The $0.0603 already
   spent is sunk and does not reduce it.
+
+## 2026-08-17 — Canary retry: the wrapper again, at a different shared contract ($0.0637)
+
+- **Result:** `cp: cannot stat '/workspace/assets/state_eval_v1'` → `SETUP_RC=1`
+  → `ABORT after draw 1: setup_failed`. Pod `ibj7s7fxuj9ttl` deleted 11 s later,
+  provider confirms gone, 3.9 min, **$0.0637** of the $1.0197 grant.
+- **Again not a canary result.** The canary script was never invoked. Nothing is
+  known about device placement on real CUDA.
+- **The argument-contract fix worked.** Setup was reached and ran: apt, the repo
+  bundle at the right commit, the relay staging of all four inputs including the
+  calibration mixture. It got 90 seconds further than attempt 1 and died at the
+  next line that assumes something the canary did not supply.
+- **Cause.** `autoinit_preflight_setup.sh` unconditionally copies two frozen
+  search assets out of `$WS/assets`, which the launcher scp's from
+  `LOCAL_ASSETS`. I set `LOCAL_ASSETS = ()` because the canary needs neither
+  `state_eval_v1` nor `recovery_search_v2` — it builds its own two-item suite —
+  and the shared setup does not care what the session needs.
+- **This is the same structural mistake twice, and I made it twice.** Attempt 1:
+  the base reads arguments the subclass never mentions. Attempt 2: the shared
+  setup reads assets the subclass declared it did not want. Both times I reasoned
+  from *what the canary needs* when the operative question was *what the
+  inherited machinery requires*. Reusing proven machinery means satisfying its
+  contract in full, and the contract is not visible from the subclass. The $0
+  check I built after attempt 1 closed exactly one of the two surfaces, because
+  I generalized from the symptom rather than from the cause.
+- **The remaining contract, enumerated rather than discovered.**
+  `autoinit_preflight_setup.sh` requires, beyond the arguments:
+  `$WS/assets/state_eval_v1` and `$WS/assets/recovery_search_v2`, both copied
+  unconditionally at line 109-110 and then content-verified. A canary would
+  satisfy it by declaring `LOCAL_ASSETS` exactly as the other sessions do —
+  the assets are 1.6 MB and are staged in ~1 s — rather than by editing the
+  shared script, which is in the Phase-A harness digest and must not move.
+- **Not fixed and not retried.** The grant was retry 1 of 1 and is consumed:
+  "If the canary fails at any boundary, tear down and stop; no second canary
+  retry is authorized." No change has been made.
+- **Status: STOPPED.** Cumulative spend **$194.0530**; **$24.9470** remains under
+  the $219.00 cap. The canary has still never run, so Attempt 8 remains
+  unauthorized. No Attempt 9.
