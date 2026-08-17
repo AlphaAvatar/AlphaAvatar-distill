@@ -1,0 +1,16 @@
+[15:46:27] budget: expected 38 min $0.63 · soft $0.69 · hard $1.02 (authorized $1.02)
+[15:46:27] precheck OK: 2 relay inputs, no local assets
+[15:46:28] created qhrir27ixfu8kt at $0.99/h
+[15:46:28] watchdog detached — hard 62 min = $1.02
+[15:47:22]   starting (60s) — $0.01
+[15:48:25]   starting (120s) — $0.03
+[15:49:28]   starting (180s) — $0.05
+[15:49:39] TCP 22 at 195.26.232.152:19168 after 3.2 min
+[15:49:41] draw 1: ssh reachable — $0.05
+[15:49:57] draw 1: image identity runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@580.126.20
+[15:49:57] draw 1: running setup
+[15:49:57] LAUNCHER ERROR: AttributeError: 'Namespace' object has no attribute 'teacher_revision'
+[15:49:57] deleting pod (launcher error)
+[15:50:08] pod deleted — 3.7 min, $0.06; provider confirms gone: True
+
+Device canary FAILED — /home/ecs-user/AlphaAvatar-distill/logs/autoinit_device_canary_session.json. STOP for review; nothing else was started.

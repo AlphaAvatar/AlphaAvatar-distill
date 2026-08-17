@@ -3603,3 +3603,40 @@ two devices, cuda:0 and cpu!
   nothing is authorized: **no paid canary and no Attempt 8.**
 - **Not changed:** search, objectives, seeds, thresholds, recovery, pricing, the
   science and session plans. Stage 2–5 rehearsal was not expanded.
+
+## 2026-08-17 — Device canary: the canary never ran; my wrapper did not ($0.0603)
+
+- **Result:** `LAUNCHER ERROR: AttributeError: 'Namespace' object has no
+  attribute 'teacher_revision'`. Pod `qhrir27ixfu8kt` deleted 11 s later,
+  provider confirms gone, 3.7 min, **$0.0603** of the $1.0197 grant.
+- **This is not a canary result.** The session died in the one-use wrapper I
+  wrote, between "ssh reachable" and "running setup", before the canary script
+  was ever invoked. Nothing was learned about device placement on CUDA, and
+  nothing about the audit is confirmed or refuted.
+- **Cause.** `Preflight.run_setup` passes `--teacher-revision` through to the
+  setup script from `self.a.teacher_revision`. The Phase-A launcher defines that
+  argument; my wrapper's argparse did not. Reusing a base class means inheriting
+  its **argument contract**, and I inherited the methods without it.
+- **Why the $0 gate check missed it.** I executed `make_plan`,
+  `relay_precheck`, `driver_command`, `event_streams`, `fetch_products` and the
+  artifact spec before spending — and every one passed. `run_setup` was not
+  among them, because it needs a live host. The check covered what could be
+  checked and the gap was exactly the part that could not be, which is the same
+  shape as every other failure in this project: a boundary the $0 path cannot
+  cross.
+- **The full gap, enumerated rather than discovered one pod at a time.** The
+  base reads 21 attributes off `self.a`. Three were undefined:
+  `--teacher-revision`, `--ckpt-store`, `--ckpt-fetch-limit-min`. All three are
+  defined by the Phase-A launcher; none is conceptually needed by a canary that
+  downloads no teacher and fetches no checkpoint, which is precisely why they
+  were not written. **A future retry needs one edit, not three discoveries.**
+- **Not fixed, not retried.** The grant covered one launcher invocation and
+  explicitly did not authorize a retry. The three missing arguments are recorded
+  above; adding them is a two-line change that I have **not** made, because
+  making it would only be useful under a new authorization and would otherwise
+  read as preparation for one.
+- **Status: STOPPED.** Cumulative spend **$193.9893**; **$25.0107** remains
+  under the $219.00 cap. Attempt 8 remains conditional on a canary that has not
+  yet run, so it is **not** authorized. No Attempt 9.
+- **What a retry would cost:** the same $1.0197 hard bound. The $0.0603 already
+  spent is sunk and does not reduce it.

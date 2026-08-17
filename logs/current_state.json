@@ -1,10 +1,10 @@
 {
   "schema": "aadistill.current_state/v1",
-  "generated_utc": "2026-08-17T15:43:58+00:00",
-  "current_phase": "Cap raised to $219.00 and approved. The Stage-1 device canary is authorized and is the next thing to run; Attempt 8 is authorized only if the canary passes and tears down cleanly.",
+  "generated_utc": "2026-08-17T15:52:40+00:00",
+  "current_phase": "Device canary attempt 1 died in the one-use wrapper at $0.0603, before the canary ran. Not a canary result. The grant covered one launcher invocation and is consumed; the three missing base-class arguments are enumerated but NOT fixed. Attempt 8 stays unauthorized because the canary has not run.",
   "active_experiment": null,
   "paid_compute_running": false,
-  "next_work": "Run the device canary. If it fails: STOP and report, no retry and no Attempt 8. If it passes: report spend and evidence, then prepare the fresh Attempt-8 PhaseAAuthorization chain. No Attempt 9 is implied.",
+  "next_work": "A maintainer decision: whether to authorize one canary retry at the same $1.0197 hard bound. The fix is adding three argparse entries (--teacher-revision, --ckpt-store, --ckpt-fetch-limit-min) that the base reads and a canary does not conceptually need. Nothing is authorized and nothing is prepared. No Attempt 8, no Attempt 9.",
   "teacher": {
     "model_id": "Qwen/Qwen3-4B-Thinking-2507",
     "revision": "768f209d9ea81521153ed38c47d515654e938aea",
@@ -55,12 +55,12 @@
     "dp_sa": "infrastructure artifact, not a promotable arm"
   },
   "budget": {
-    "actual_cumulative_spend_usd": 193.929,
+    "actual_cumulative_spend_usd": 193.9893,
     "authorized_cap_usd": 219.0,
     "cap_raised_utc": "2026-08-17",
     "cap_approved": true,
     "cap_raise_note": "maintainer, 2026-08-17: raised $217.00 -> $219.00. Funds AT MOST one infrastructure-only Stage-1 GPU device canary (hard $1.0197) and, ONLY if that canary passes and tears down cleanly, one complete Phase-A Attempt 8 (hard $23.0484). Does not authorize a canary retry, Attempt 9, or any change to the frozen science.",
-    "remaining_usd": 25.071,
+    "remaining_usd": 25.0107,
     "previous_caps": [
       {
         "cap_usd": 213.0,
@@ -185,7 +185,7 @@
     "E2 phases 2-3"
   ],
   "autoinit": {
-    "status": "CANARY_AUTHORIZED_ATTEMPT_8_CONDITIONAL",
+    "status": "CANARY_ATTEMPT_1_LAUNCHER_ERROR_STOPPED",
     "package": "src/aadistill/autoinit",
     "tests": 209,
     "operator_kinds": [
@@ -655,5 +655,25 @@
       "hard_terminate_usd": 1.0197
     },
     "cap_required_for_canary_plus_attempt_8": 217.9971
+  },
+  "device_canary_attempt_1": {
+    "pod_id": "qhrir27ixfu8kt",
+    "elapsed_minutes": 3.66,
+    "actual_usd": 0.0603,
+    "authorized_usd": 1.0197,
+    "within_authorization": true,
+    "provider_confirms_gone": true,
+    "outcome": "LAUNCHER ERROR, not a canary result",
+    "error": "AttributeError: 'Namespace' object has no attribute 'teacher_revision'",
+    "where": "Preflight.run_setup, between 'ssh reachable' and 'running setup'. The canary script was never invoked and nothing was learned about device placement on CUDA.",
+    "cause": "reusing the base launcher means inheriting its ARGUMENT contract; the wrapper inherited the methods without it",
+    "full_gap": [
+      "--teacher-revision",
+      "--ckpt-store",
+      "--ckpt-fetch-limit-min"
+    ],
+    "gap_note": "enumerated by scanning every self.a attribute the base reads (21 of them), so a retry is one edit rather than three discoveries. NOT fixed: the grant covered one invocation.",
+    "why_the_zero_cost_check_missed_it": "make_plan, relay_precheck, driver_command, event_streams, fetch_products and the artifact spec were all executed at $0 and all passed. run_setup needs a live host and could not be.",
+    "evidence": "logs/autoinit_device_canary_attempt1/"
   }
 }

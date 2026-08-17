@@ -280,13 +280,20 @@ authorized cumulative cap                                    $219.00
     RAISED AND APPROVED 2026-08-17. See the caps list above.
     Funds the $1.0197 canary and, conditionally, one $23.0484
     Attempt 8. Not a retry reserve; no Attempt 9.
-actual cumulative spend                                      $193.9290
+actual cumulative spend                                      $193.9893
     = $193.1783 + $0.3552 attempt 6 + $0.3955 attempt 7
-unused authorization remaining                               $ 25.0710
-    = $219.00 - $193.9290. Committed against it:
+      + $0.0603 device canary attempt 1 (launcher error; the
+      canary itself never ran)
+unused authorization remaining                               $ 25.0107
+    = $219.00 - $193.9893. Committed against it:
       device canary hard                                       $  1.0197
+        SPENT $0.0603 on attempt 1, which died in the one-use
+        wrapper before the canary ran. NOT a canary result and
+        NOT a retry authorization: the grant covered one
+        launcher invocation and is consumed.
       Attempt 8 hard, CONDITIONAL on the canary passing        $ 23.0484
-      remaining after both                                     $  1.0029
+        The canary has not run, so Attempt 8 is not authorized.
+      remaining after a canary retry and Attempt 8             $  0.9426
     Attempt 7's authorization
     `autoinit.phase_a.2026-08-17T0850Z` covered exactly ONE
     launcher invocation, is SPENT, and its lineage gate refuses

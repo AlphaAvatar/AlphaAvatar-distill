@@ -1,0 +1,221 @@
+{
+  "schema": "aadistill.autoinit.device_canary_session/v1",
+  "timeline": [
+    {
+      "utc": "2026-08-17T15:46:27+00:00",
+      "elapsed_min": 0.0,
+      "msg": "budget: expected 38 min $0.63 \u00b7 soft $0.69 \u00b7 hard $1.02 (authorized $1.02)"
+    },
+    {
+      "utc": "2026-08-17T15:46:27+00:00",
+      "elapsed_min": 0.0,
+      "msg": "precheck OK: 2 relay inputs, no local assets"
+    },
+    {
+      "utc": "2026-08-17T15:46:28+00:00",
+      "elapsed_min": 0.0,
+      "msg": "created qhrir27ixfu8kt at $0.99/h"
+    },
+    {
+      "utc": "2026-08-17T15:46:28+00:00",
+      "elapsed_min": 0.0,
+      "msg": "watchdog detached \u2014 hard 62 min = $1.02"
+    },
+    {
+      "utc": "2026-08-17T15:47:22+00:00",
+      "elapsed_min": 0.89,
+      "msg": "  starting (60s) \u2014 $0.01"
+    },
+    {
+      "utc": "2026-08-17T15:48:25+00:00",
+      "elapsed_min": 1.94,
+      "msg": "  starting (120s) \u2014 $0.03"
+    },
+    {
+      "utc": "2026-08-17T15:49:28+00:00",
+      "elapsed_min": 2.99,
+      "msg": "  starting (180s) \u2014 $0.05"
+    },
+    {
+      "utc": "2026-08-17T15:49:39+00:00",
+      "elapsed_min": 3.17,
+      "msg": "TCP 22 at 195.26.232.152:19168 after 3.2 min"
+    },
+    {
+      "utc": "2026-08-17T15:49:41+00:00",
+      "elapsed_min": 3.21,
+      "msg": "draw 1: ssh reachable \u2014 $0.05"
+    },
+    {
+      "utc": "2026-08-17T15:49:57+00:00",
+      "elapsed_min": 3.47,
+      "msg": "draw 1: image identity runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@580.126.20"
+    },
+    {
+      "utc": "2026-08-17T15:49:57+00:00",
+      "elapsed_min": 3.47,
+      "msg": "draw 1: running setup"
+    },
+    {
+      "utc": "2026-08-17T15:49:57+00:00",
+      "elapsed_min": 3.47,
+      "msg": "LAUNCHER ERROR: AttributeError: 'Namespace' object has no attribute 'teacher_revision'"
+    },
+    {
+      "utc": "2026-08-17T15:49:57+00:00",
+      "elapsed_min": 3.47,
+      "msg": "deleting pod (launcher error)"
+    },
+    {
+      "utc": "2026-08-17T15:50:08+00:00",
+      "elapsed_min": 3.66,
+      "msg": "pod deleted \u2014 3.7 min, $0.06; provider confirms gone: True"
+    }
+  ],
+  "stages": {},
+  "authorization": {
+    "schema": "aadistill.autoinit.spend_authorization/v1",
+    "authorization_id": "autoinit.device_canary.2026-08-17T1544Z",
+    "version": 1,
+    "granted_utc": "2026-08-17T15:44:44Z",
+    "granted_by": "maintainer. Stated, not quoted. The cumulative project cap was raised from $217.00 to $219.00 to fund at most two things: this infrastructure-only Stage-1 GPU device canary, hard cap $1.0197, and -- only if it passes and tears down cleanly -- one complete Phase-A Attempt 8 under the existing $23.0484 per-launch hard bound. This grant covers the canary ONLY. It does not authorize a canary retry, Attempt 8 (which needs its own PhaseAAuthorization), Attempt 9, or any change to the frozen science. Cumulative spend at issue: $193.9290.",
+    "plan_id": "autoinit.device_canary",
+    "preflight_plan_hash": "e4a5086ea083cf60529f4c71ecd36e0f606a059cc69703a00d0922562d1aac24",
+    "expected_usd": 0.627,
+    "hard_cap_usd": 1.0197,
+    "authorized_stages": [
+      0
+    ],
+    "stage_conditions": {
+      "0": "one invocation of each of the six frozen operator implementations on real CUDA, each followed by the production materialize -> canonical reload -> validate -> measure lifecycle. No beam search, no recovery training, no battery, no ranking, no selection.",
+      "teardown": "delete the pod, verify from the provider that it is gone, STOP"
+    },
+    "scope_note": "Infrastructure only. Nothing this session produces may enter scientific selection, a README record, or any comparison: its checkpoints are compressions of the canonical student toward a geometry chosen to make every operator do work, and they die with the pod. If any operator fails, that failure is the finding and the session stops; it is not retried. Phase A remains separately unauthorized and cannot be started from this launcher, whose authorization type answers allows_phase_a = False by construction.",
+    "phase_a_authorized": false,
+    "automatic_phase_a_start": false,
+    "authorized_session_commit": "aca1a26544fc2ac19f33fe3c2ed5167d19d0eca5",
+    "harness_source_digest": "b34bcd247a3ebcef8cd9d877a46a9865302ce0f67995b74e3d5fb5f75cc1acff",
+    "harness_source_files": [
+      "scripts/pod/autoinit_device_canary_launch.py",
+      "scripts/pod/autoinit_device_canary.py",
+      "scripts/pod/autoinit_preflight_launch.py",
+      "scripts/pod/autoinit_preflight_setup.sh",
+      "scripts/pod/watchdog.py",
+      "scripts/pod/collect_artifacts.py",
+      "src/aadistill/autoinit/authorization.py"
+    ],
+    "per_launch_hard_usd": 1.0197,
+    "provenance_commit": "aca1a26544fc2ac19f33fe3c2ed5167d19d0eca5",
+    "enforcement": "the launcher loads this artifact and refuses to create a pod whose priced hard threshold exceeds hard_cap_usd, refuses a stage not in authorized_stages, and has no code path to Phase A",
+    "authorization_sha256": "44ed01f1722e8a24bcc5945c5e81482854c4abcaac9280c9fbd2b1ab4c7195b0"
+  },
+  "preflight_plan_hash": "e4a5086ea083cf60529f4c71ecd36e0f606a059cc69703a00d0922562d1aac24",
+  "harness_source_digest": "b34bcd247a3ebcef8cd9d877a46a9865302ce0f67995b74e3d5fb5f75cc1acff",
+  "harness_source_files": [
+    "scripts/pod/autoinit_device_canary.py",
+    "scripts/pod/autoinit_device_canary_launch.py",
+    "scripts/pod/autoinit_preflight_launch.py",
+    "scripts/pod/autoinit_preflight_setup.sh",
+    "scripts/pod/collect_artifacts.py",
+    "scripts/pod/watchdog.py",
+    "src/aadistill/autoinit/authorization.py"
+  ],
+  "phase_a_launched": false,
+  "phase_a_reachable_from_this_launcher": false,
+  "scientific_use": false,
+  "trains_anything": false,
+  "retrains_permanent_controls": false,
+  "budget_plan": {
+    "price_per_hour": 0.99,
+    "authorized_usd": 1.0197,
+    "expected_minutes": 38.0,
+    "soft_stop_minutes": 41.800000000000004,
+    "artifact_recovery_reserve_minutes": 20.0,
+    "hard_terminate_minutes": 61.800000000000004,
+    "step_time": {
+      "seconds": 4.15,
+      "source": "unused; the canary trains nothing",
+      "measured": true
+    },
+    "breakdown": [
+      {
+        "name": "setup",
+        "minutes": 11.0
+      },
+      {
+        "name": "train",
+        "minutes": 0.0
+      },
+      {
+        "name": "evaluate",
+        "minutes": 0.0
+      },
+      {
+        "name": "transfer",
+        "minutes": 6.0
+      },
+      {
+        "name": "parent_load_and_calibration",
+        "minutes": 3.0
+      },
+      {
+        "name": "six_operator_invocations_and_lifecycles",
+        "minutes": 8.0
+      },
+      {
+        "name": "artifact_manifest_and_verify",
+        "minutes": 5.0
+      },
+      {
+        "name": "artifact_synchronization",
+        "minutes": 5.0
+      }
+    ],
+    "soft_stop_reserves": [],
+    "notes": [],
+    "soft_stop_reserve_minutes": 0,
+    "expected_usd": 0.627,
+    "soft_stop_usd": 0.6897,
+    "artifact_recovery_reserve_usd": 0.33,
+    "hard_terminate_usd": 1.0197
+  },
+  "priced_note": "the compute is ~1 s by the project's own cost model; this price is session overhead",
+  "precheck": {
+    "relay_needed": [
+      "stage1/qwen3_0p6b_init_v0/checkpoint/model.safetensors",
+      "e8_inputs_20260810/calibration_v1/items.jsonl"
+    ],
+    "relay_missing": [],
+    "local_assets": [],
+    "local_missing": []
+  },
+  "pod_id": "qhrir27ixfu8kt",
+  "actual_price_per_hour": 0.99,
+  "terminate_after_utc": "2026-08-17T16:48:15Z",
+  "watchdog_journals": [
+    "/home/ecs-user/aad-scratch/canary_20260817/watchdog.jsonl"
+  ],
+  "image_identity": {
+    "image_name": "runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404",
+    "observed": [
+      "580.126.20"
+    ],
+    "digest": "runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@580.126.20"
+  },
+  "launcher_error": "AttributeError: 'Namespace' object has no attribute 'teacher_revision'",
+  "final_pod_state": {
+    "exists": false,
+    "desired_status": "TERMINATED",
+    "billing": false
+  },
+  "provider_confirms_gone": true,
+  "cost": {
+    "price_per_hour": 0.99,
+    "elapsed_minutes": 3.66,
+    "actual_usd": 0.0603,
+    "authorized_usd": 1.0197,
+    "within_authorization": true
+  },
+  "passed": false,
+  "followon_started": false
+}
