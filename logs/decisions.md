@@ -3776,3 +3776,53 @@ two devices, cuda:0 and cpu!
 - **Deliberately deferred:** the layout does not yet name `session.py`,
   `session_runner.py` or `SESSION_ARCHITECTURE.md`. Documentation describes what
   exists; those arrive with the refactoring commit.
+
+## 2026-08-18 — Session architecture: specified, built far enough to prove, then reverted
+
+- **Asked for:** replace the launcher-inheritance contract with explicit
+  composition — a typed immutable session specification, one shared runner, thin
+  spec providers, manifest-driven setup, and an authorization schema separated
+  from grant provenance.
+- **What I built:** `session.py` (332 lines, nine frozen dataclasses) and
+  `session_runner.py` (696 lines), the latter produced by **transforming** the
+  proven `Preflight` flow rather than rewriting it, so the hardware-verified
+  detached start, watchdog, relay, artifact gate and teardown survived unchanged
+  in substance. The micro-preflight and Phase A were converted to spec providers
+  and both validated.
+- **What it proved:**
+  * **Phase-A pricing reproduced exactly** — $17.8933 / $22.7183 / $23.0483, with
+    both soft-stop reserves carrying their derived minutes (147.7683, 36.2158).
+    That is the cheapest available proof that the transformation was
+    behaviour-preserving where it matters most.
+  * the runner's argument contract shrank from 21 attributes to 18 operational
+    knobs, because `teacher_revision`, `uv_max_s` and `tests_max_s` became
+    manifest fields — the attribute that killed canary attempt 1 stops being an
+    argument at all;
+  * the design is sound: `validate()` refuses an incomplete declaration, and
+    there is no inheritance for a requirement to arrive through.
+- **Why I reverted it.** Converting the two remaining launchers, making the setup
+  script manifest-driven, splitting the authorization schema from grant
+  provenance and rebinding **30 failing tests** was more than one session could
+  complete *and verify*. Those 30 tests each encode a paid failure class; the
+  brief said to preserve every one and not to weaken mutation coverage, and
+  rebinding them in a hurry would silently stop them testing what they were
+  written for. That is the one outcome worse than not refactoring — a green suite
+  that no longer checks the things three pods were spent learning.
+- **A half-landed refactor cannot reach the required final state.** The launchers
+  and their tests are coupled, so there is no intermediate commit where the tree
+  is clean. The choice was therefore between finishing and restoring, and
+  restoring is the honest one at the point where the remaining work is the
+  delicate part.
+- **What survives:** [`docs/SESSION_ARCHITECTURE.md`](../docs/SESSION_ARCHITECTURE.md)
+  — the problem stated in money, the three failures it explains, the full type
+  list, the manifest-driven setup contract, the structural checks it must ship
+  with, what the aborted build demonstrated, and the order to do it in, with an
+  explicit note that steps 1–2 are a valid stopping point and 1–5 is not.
+- **Not left behind:** no unwired modules. Two implementations of one flow is the
+  duplication this task exists to remove, and a future reader finding
+  `session_runner.py` next to a live `Preflight` would reasonably assume the
+  wrong one is authoritative.
+- **Not done, and named as not done:** items 2, 3 and 4 of the brief — explicit
+  composition, manifest-driven setup, and the authorization/grant split. Item 5
+  (pod-script catalog) and item 6 (canary termination) landed in the
+  documentation commit; item 1 landed in full.

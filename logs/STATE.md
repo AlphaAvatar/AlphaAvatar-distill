@@ -76,12 +76,13 @@ instead of the cause, and it was paid for twice. Full diagnoses in
 
 ## Next starting point
 
-Two options, **neither authorized and neither prepared**. The maintainer chooses.
+Three options, **none authorized and none prepared**. The maintainer chooses.
 
-1. fix the canary wrapper (declare LOCAL_ASSETS as the other sessions do) and enumerate the WHOLE inherited contract before launching; $1.0197 hard
-2. skip the canary and go to Attempt 8; Phase A exercises the same operators on CUDA anyway and stage-1 failures now come home with a traceback; $23.0484 hard
+1. **implement the SPECIFIED session architecture in docs/SESSION_ARCHITECTURE.md, in the order it lists. Zero cost. It removes the defect class that has cost three paid pods, and steps 1-2 are a valid stopping point because the Phase-A price reproducing exactly is the proof the transformation preserved behaviour.**
+2. fix the canary wrapper (declare LOCAL_ASSETS as the other sessions do) and enumerate the WHOLE inherited contract before launching; $1.0197 hard. Note that the architecture work in option 1 is what makes that enumeration mechanical rather than a matter of remembering.
+3. skip the canary and go to Attempt 8; Phase A exercises the same operators on CUDA anyway and stage-1 failures now come home with a traceback; $23.0484 hard.
 
-A fresh authorization chain: pre-auth base commit -> issue -> auth-only commit -> bundle upload -> round-trip verify -> launch.
+Either paid option requires a fresh authorization chain: pre-auth base commit -> issue -> auth-only commit -> bundle upload -> round-trip verify -> launch.
 
 ## Where else to look
 

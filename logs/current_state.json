@@ -99,9 +99,10 @@
     "the paid device-canary session path: STRATEGICALLY TERMINATED 2026-08-18. Two authorized sessions, $0.1240, zero canary runs; both died in the wrapper's inherited contracts. Its evidence and its generic lesson are kept; no further canary is prepared."
   ],
   "next_starting_point": {
-    "option_1": "fix the canary wrapper (declare LOCAL_ASSETS as the other sessions do) and enumerate the WHOLE inherited contract before launching; $1.0197 hard",
-    "option_2": "skip the canary and go to Attempt 8; Phase A exercises the same operators on CUDA anyway and stage-1 failures now come home with a traceback; $23.0484 hard",
-    "either_requires": "a fresh authorization chain: pre-auth base commit -> issue -> auth-only commit -> bundle upload -> round-trip verify -> launch"
+    "option_1": "implement the SPECIFIED session architecture in docs/SESSION_ARCHITECTURE.md, in the order it lists. Zero cost. It removes the defect class that has cost three paid pods, and steps 1-2 are a valid stopping point because the Phase-A price reproducing exactly is the proof the transformation preserved behaviour.",
+    "option_2": "fix the canary wrapper (declare LOCAL_ASSETS as the other sessions do) and enumerate the WHOLE inherited contract before launching; $1.0197 hard. Note that the architecture work in option 1 is what makes that enumeration mechanical rather than a matter of remembering.",
+    "option_3": "skip the canary and go to Attempt 8; Phase A exercises the same operators on CUDA anyway and stage-1 failures now come home with a traceback; $23.0484 hard.",
+    "either_paid_option_requires": "a fresh authorization chain: pre-auth base commit -> issue -> auth-only commit -> bundle upload -> round-trip verify -> launch"
   },
   "read_order": [
     "logs/STATE.md \u2014 the human view of this file",

@@ -61,6 +61,7 @@ no longer exists.
 | file | contents |
 | --- | --- |
 | `docs/REPO_LAYOUT.md` | this file |
+| `docs/SESSION_ARCHITECTURE.md` | how a paid session is specified and run: the inheritance problem, and the SPECIFIED replacement |
 | `docs/POD_SCRIPTS.md` | every pod script, classified |
 | `docs/AUTOINIT_REFERENCE.md` | AutoInitializer binding rules, pinned assets, protocol requirements |
 | `docs/archive/` | superseded documents, kept for provenance and clearly bannered |

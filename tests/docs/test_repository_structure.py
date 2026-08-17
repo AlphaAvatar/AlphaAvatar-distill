@@ -176,7 +176,7 @@ def test_every_log_is_classified_in_the_catalog():
 def test_every_pod_script_is_classified():
     named = backticked(POD_SCRIPTS)
     unclassified = [p.name for p in sorted((REPO / "scripts/pod").iterdir())
-                    if p.name not in named]
+                    if p.name not in named and p.name != "__pycache__"]
     assert not unclassified, (
         f"scripts/pod entries with no class in POD_SCRIPTS.md: {unclassified}")
 

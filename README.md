@@ -27,6 +27,7 @@ has exactly one owner:
 | spend, caps, authorizations | [`logs/BUDGET_LEDGER.md`](./logs/BUDGET_LEDGER.md) |
 | which log owns which fact | [`logs/CATALOG.md`](./logs/CATALOG.md) |
 | where code lives | [`docs/REPO_LAYOUT.md`](./docs/REPO_LAYOUT.md) |
+| how a paid session is specified and run | [`docs/SESSION_ARCHITECTURE.md`](./docs/SESSION_ARCHITECTURE.md) |
 | which pod script is live, historical or terminated | [`docs/POD_SCRIPTS.md`](./docs/POD_SCRIPTS.md) |
 | AutoInitializer binding rules and pinned assets | [`docs/AUTOINIT_REFERENCE.md`](./docs/AUTOINIT_REFERENCE.md) |
 | what each experiment proved | [`logs/EXPERIMENT_INDEX.md`](./logs/EXPERIMENT_INDEX.md) |
