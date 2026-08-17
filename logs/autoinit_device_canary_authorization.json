@@ -1,9 +1,9 @@
 {
   "schema": "aadistill.autoinit.spend_authorization/v1",
-  "authorization_id": "autoinit.device_canary.2026-08-17T1544Z",
+  "authorization_id": "autoinit.device_canary.2026-08-17T1606Z",
   "version": 1,
-  "granted_utc": "2026-08-17T15:44:44Z",
-  "granted_by": "maintainer. Stated, not quoted. The cumulative project cap was raised from $217.00 to $219.00 to fund at most two things: this infrastructure-only Stage-1 GPU device canary, hard cap $1.0197, and -- only if it passes and tears down cleanly -- one complete Phase-A Attempt 8 under the existing $23.0484 per-launch hard bound. This grant covers the canary ONLY. It does not authorize a canary retry, Attempt 8 (which needs its own PhaseAAuthorization), Attempt 9, or any change to the frozen science. Cumulative spend at issue: $193.9290.",
+  "granted_utc": "2026-08-17T16:06:29Z",
+  "granted_by": "maintainer. Stated, not quoted. Exactly ONE additional GPU device-canary retry, under the existing $219.00 cumulative cap and the same $1.0197 canary hard bound. The $0.0603 spent by attempt 1 is not a canary result -- the canary script never ran, so it neither confirms nor refutes the Stage-1 device audit -- and it does not reduce this bound. If the canary fails at any boundary: tear down and stop; no second retry is authorized. If it passes: tear down and report; Phase-A Attempt 8 is NOT launched automatically and needs its own separate PhaseAAuthorization decision. No Attempt 9. Cumulative spend at issue: $193.9893.",
   "plan_id": "autoinit.device_canary",
   "preflight_plan_hash": "e4a5086ea083cf60529f4c71ecd36e0f606a059cc69703a00d0922562d1aac24",
   "expected_usd": 0.627,
@@ -12,14 +12,14 @@
     0
   ],
   "stage_conditions": {
-    "0": "one invocation of each of the six frozen operator implementations on real CUDA, each followed by the production materialize -> canonical reload -> validate -> measure lifecycle. No beam search, no recovery training, no battery, no ranking, no selection.",
+    "0": "one invocation of each of the six frozen operator implementations on real CUDA, each followed by the production materialize -> canonical reload -> validate -> measure lifecycle. No beam search, no recovery training, no battery, no ranking, no selection. The workload is unchanged from the authorization attempt 1 consumed.",
     "teardown": "delete the pod, verify from the provider that it is gone, STOP"
   },
-  "scope_note": "Infrastructure only. Nothing this session produces may enter scientific selection, a README record, or any comparison: its checkpoints are compressions of the canonical student toward a geometry chosen to make every operator do work, and they die with the pod. If any operator fails, that failure is the finding and the session stops; it is not retried. Phase A remains separately unauthorized and cannot be started from this launcher, whose authorization type answers allows_phase_a = False by construction.",
+  "scope_note": "Infrastructure only, retry 1 of 1. Nothing this session produces may enter scientific selection, a README record, or any comparison. If any operator fails, that failure is the finding and the session stops. Phase A remains separately unauthorized and cannot be started from this launcher, whose authorization type answers allows_phase_a = False by construction.",
   "phase_a_authorized": false,
   "automatic_phase_a_start": false,
-  "authorized_session_commit": "aca1a26544fc2ac19f33fe3c2ed5167d19d0eca5",
-  "harness_source_digest": "b34bcd247a3ebcef8cd9d877a46a9865302ce0f67995b74e3d5fb5f75cc1acff",
+  "authorized_session_commit": "3e781510f35139272c72e7e36af060d066af6f8a",
+  "harness_source_digest": "88aa73a69b16557b286975bdcd9a496289c20d4cbd0fb216dbc0961412631a73",
   "harness_source_files": [
     "scripts/pod/autoinit_device_canary_launch.py",
     "scripts/pod/autoinit_device_canary.py",
@@ -30,7 +30,7 @@
     "src/aadistill/autoinit/authorization.py"
   ],
   "per_launch_hard_usd": 1.0197,
-  "provenance_commit": "aca1a26544fc2ac19f33fe3c2ed5167d19d0eca5",
+  "provenance_commit": "3e781510f35139272c72e7e36af060d066af6f8a",
   "enforcement": "the launcher loads this artifact and refuses to create a pod whose priced hard threshold exceeds hard_cap_usd, refuses a stage not in authorized_stages, and has no code path to Phase A",
-  "authorization_sha256": "44ed01f1722e8a24bcc5945c5e81482854c4abcaac9280c9fbd2b1ab4c7195b0"
+  "authorization_sha256": "da94e3166ab2e32e5f00927d7d94e209c09a33b8ef724c886bee7425e5a4da64"
 }
