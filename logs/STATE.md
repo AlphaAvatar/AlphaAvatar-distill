@@ -1,4 +1,4 @@
-**Updated:** 2026-08-16 21:15 UTC · branch `main`
+**Updated:** 2026-08-16 21:40 UTC · branch `main`
 **No pods running. Nothing billing.** **Stage 3 is COMPLETE.** Phase A has been
 attempted **six** times for **$1.9873**. Attempt 6 reached **stage 1** — stage 0
 passed for the second time and every 2026-08-16 fix held — and failed closed on a
@@ -38,7 +38,7 @@ assumption. **Unexpected in-process driver exceptions now keep their full
 traceback** in `AUDIT/stage{n}_traceback.log` and in the evidence JSON; the
 short reason is unchanged. Full account in [`decisions.md`](decisions.md).
 
-**Nothing is authorized.** The previous approval stopped at attempt 6.
+**Attempt 7 is authorized** (2026-08-17) under the unchanged $217.00 cap.
 
 ## Phase A stages 0–5 now execute for real at $0 (2026-08-16)
 
@@ -322,13 +322,16 @@ stop". The margin is not a retry reserve.
 
 ## What remains
 
-1. **A fresh one-use Attempt-7 authorization decision.** The device fix and the
-   traceback preservation are committed and verified. The cap does **not** need
-   to increase: $217.00 - $193.5335 = $23.4665 covers one $23.0484 hard-bound
-   session with $0.4181 margin. But the previous approval explicitly stopped at
-   attempt 6, so the unused balance is **not** permission — a new authorization
-   must be issued against the current base.
-2. No Attempt 8 is implied.
+1. **Attempt 7 is authorized and launched**, under the **unchanged** $217.00
+   cap: one launcher invocation, at most the $23.0484 per-launch hard
+   authorization, leaving about $0.4181 of cumulative-cap margin at the full
+   hard bound. Read
+   [`autoinit_phase_a_session.json`](autoinit_phase_a_session.json) for the
+   terminal marker, the artifact gate and the provider-confirmed teardown.
+2. **If it fails closed, STOP and report.** No Attempt 8 is implied, and the
+   authorization does not permit a cap increase or any change to the frozen
+   search, recovery, seeds, thresholds, runtime-comparability rules, or the
+   science/session plans.
 
 ### Searched-leaf durability: RESOLVED 2026-08-15, needs no relay growth
 

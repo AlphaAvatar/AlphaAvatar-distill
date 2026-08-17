@@ -382,21 +382,28 @@ PHASE_A_AUTHORIZATION = PhaseAAuthorization(
     authorization_id="autoinit.phase_a.PLACEHOLDER",
     granted_utc="PLACEHOLDER",
     granted_by=(
+        # Stated, not quoted. An earlier revision of this field attributed a
+        # sentence to the maintainer that came from a different message about a
+        # different cap; presenting a paraphrase as verbatim is how a grant's
+        # provenance stops being evidence. Nothing below is in quotation marks.
         "maintainer. The grant instant is `granted_utc` and nothing here "
-        "restates it: the maintainer's LOCAL date was 2026-08-17 while the "
-        "machine's UTC clock was still 2026-08-16, and a prose date next to a "
-        "UTC field is how a grant comes to look back-dated. The cumulative "
-        "project cap was raised to "
-        "$217.00 in the maintainer's own words — 'My recommended new cumulative "
-        "project cap is $217.00' — and then formally approved in the same "
-        "sequence: 'Record this approval in the ledger and machine-readable "
-        "state ... and issue one fresh PhaseAAuthorization.' Against a spend of "
-        "$193.1783 that leaves $23.8217, and the launcher's priced hard "
-        "threshold is $23.048325, so the margin is $0.7734. It funds ONE "
-        "attempt; the maintainer stated 'This funds one attempt only and does "
-        "not imply Attempt 7', and 'If it fails closed, stop; no Attempt 7 is "
-        "implied.' The figures below are the launcher's own make_plan output at "
-        "$0, not a transcription. Two superseded bases are recorded in "
+        "restates it: at approval the maintainer's LOCAL date ran ahead of the "
+        "machine's UTC clock, and a prose date beside a UTC field is how a grant "
+        "comes to look back-dated.\n\n"
+        "This grant authorizes ONE additional Phase-A attempt -- attempt 7 -- "
+        "under the EXISTING cumulative project cap of $217.00, approved earlier "
+        "and recorded in BUDGET_LEDGER.md. The cap is not raised. Cumulative "
+        "spend at approval was $193.5335. Attempt 7 may use at most the existing "
+        "per-launch hard authorization of $23.0484, leaving about $0.4181 of "
+        "cumulative-cap margin at the full hard bound.\n\n"
+        "It covers exactly one Phase-A launcher invocation. It does not "
+        "authorize attempt 8, any increase above the $217.00 cumulative cap, or "
+        "any change to the frozen search, recovery, seeds, thresholds, "
+        "runtime-comparability rules, or the science and session plans.\n\n"
+        "Attempt 6 spent $0.3552 and failed closed in stage 1 on a "
+        "device-placement defect at the materialize/reload boundary, fixed on "
+        "this base. The figures below are the launcher's own make_plan output at "
+        "$0, not a transcription. Two superseded pricing bases are recorded in "
         "BUDGET_LEDGER.md and autoinit_phase_a_fallback_audit.json: $20.0126 "
         "(no fallback reserve, no beam-6 correction) and $22.4508 (fallback "
         "reserve placed after the soft stop, which would have truncated the "

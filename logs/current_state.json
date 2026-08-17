@@ -1,10 +1,10 @@
 {
   "schema": "aadistill.current_state/v1",
-  "generated_utc": "2026-08-17T06:19:31+00:00",
-  "current_phase": "Attempt 6 FAILED CLOSED in stage 1 at $0.3552. Stage 0 passed for the second time in 3.1 min and the three defects fixed on 2026-08-16 all held - the calibration mixture staged (precheck reported 3 relay inputs, where every earlier attempt reported 2). Stage 1 died in BeamSearch._validate: the operator's in-memory child is built by build_student, which does .to(dtype) but never .to(device), so on a GPU it indexes CPU embedding weights with a CUDA index. Every $0 execution passes device='cpu', where both sides are on CPU and the check succeeds - the one substitution the rehearsal makes is the one that erases the bug.",
+  "generated_utc": "2026-08-17T08:46:42+00:00",
+  "current_phase": "Attempt 7 AUTHORIZED and launching, under the unchanged $217.00 cap. The attempt-6 device-placement defect is fixed at the materialize/reload boundary and unexpected in-process driver exceptions now keep their full traceback. Stage 0 has passed twice; attempt 6 reached stage 1.",
   "active_experiment": null,
   "paid_compute_running": false,
-  "next_work": "A fresh ONE-USE Attempt-7 authorization decision. The cap does not need to increase ($217.00 - $193.5335 = $23.4665 against a $23.0484 hard bound, $0.4181 margin), but the previous approval stopped at attempt 6, so the unused balance is NOT permission. Nothing is authorized. No attempt 8 is implied.",
+  "next_work": "Attempt 7 is running or has just ended. Read logs/autoinit_phase_a_session.json for the terminal marker and the teardown gate. If it fails closed: STOP and report. No attempt 8 is implied.",
   "teacher": {
     "model_id": "Qwen/Qwen3-4B-Thinking-2507",
     "revision": "768f209d9ea81521153ed38c47d515654e938aea",
@@ -107,7 +107,10 @@
         }
       ]
     },
-    "remaining_note": "NOT permission. The attempt-6 authorization is spent and the cap funded one attempt. A seventh needs a new cap decision AND a new authorization."
+    "remaining_note": "Attempt 7 is authorized (2026-08-17) under the EXISTING $217.00 cap; the cap is not raised. Exactly one Phase-A launcher invocation, at most the $23.0484 per-launch hard authorization, leaving about $0.4181 of cumulative-cap margin at the full hard bound. Does not authorize attempt 8, any cap increase, or any change to the frozen search, recovery, seeds, thresholds, runtime-comparability rules, or the science/session plans.",
+    "attempt_7_authorized": true,
+    "attempt_7_per_launch_hard_usd": 23.0484,
+    "attempt_7_cap_margin_usd": 0.4181
   },
   "latest_commit": "f6ee8909ee772a09e0a85728810fe8da08f0560f",
   "documents": {
@@ -172,7 +175,7 @@
     "E2 phases 2-3"
   ],
   "autoinit": {
-    "status": "ATTEMPT_6_DEFECTS_FIXED_AWAITING_ATTEMPT_7_AUTHORIZATION",
+    "status": "ATTEMPT_7_AUTHORIZED",
     "package": "src/aadistill/autoinit",
     "tests": 209,
     "operator_kinds": [

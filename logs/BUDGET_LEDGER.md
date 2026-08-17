@@ -275,15 +275,19 @@ authorized cumulative cap                                    $217.00
 actual cumulative spend                                      $193.5335
     = $193.1783 + $0.3552 for Phase A attempt 6
 unused authorization remaining                               $ 23.4665
-    NOT PERMISSION. The attempt-6 authorization
-    `autoinit.phase_a.2026-08-16T1912Z` is SPENT and its lineage
-    gate refuses any later commit by construction. The cap funded
-    ONE attempt: "This funds one attempt only and does not imply
-    Attempt 7"; "If it fails closed, stop." It failed closed. A
-    seventh attempt needs a new cap decision AND a new
-    authorization, neither of which exists.
-paid compute currently running                                NONE
-    pod wgm2tamw8nu9f5 deleted, provider confirms gone
+Phase A attempt-7 per-launch hard authorization              $ 23.0484
+cumulative-cap margin at the full hard bound                 $  0.4181
+    ATTEMPT 7 IS AUTHORIZED (2026-08-17), under the EXISTING
+    $217.00 cap. The cap is NOT raised. The authorization covers
+    exactly one Phase-A launcher invocation and does not authorize
+    attempt 8, any increase above $217.00, or any change to the
+    frozen search, recovery, seeds, thresholds,
+    runtime-comparability rules, or the science/session plans.
+    The attempt-6 authorization `autoinit.phase_a.2026-08-16T1912Z`
+    is SPENT; its lineage gate refuses every later commit by
+    construction, so attempt 7 runs under a freshly issued one.
+paid compute currently running                                see logs/autoinit_phase_a_session.json
+    attempt 6's pod wgm2tamw8nu9f5 deleted, provider confirms gone
 
     SUPERSEDED Phase-A pricing, kept because a threshold that
     moved silently is how E6b overran:
