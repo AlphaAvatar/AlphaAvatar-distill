@@ -3826,3 +3826,70 @@ two devices, cuda:0 and cpu!
   composition, manifest-driven setup, and the authorization/grant split. Item 5
   (pod-script catalog) and item 6 (canary termination) landed in the
   documentation commit; item 1 landed in full.
+
+## 2026-08-18 — Log and checkpoint-storage cleanup: inventory first, then seven retirements
+
+- **Context:** the brief asked for a dedicated cleanup phase that is not directory
+  renaming, with a complete inventory before any deletion, tombstones for every
+  deleted checkpoint, and before/after storage measured in four areas separately.
+- **The inventory moved the numbers before it justified anything.**
+  `checkpoint_registry.json` said "3 checkpoints, 4.47 GiB" because it globbed
+  `model.safetensors` under `artifacts/` and nothing else. The project's
+  checkpoints are collected into `/home/ecs-user/aad-artifacts` — out of tree,
+  named in no document, **86.3 GiB**. Local artifact storage was 93.27 GiB, not
+  6.92. `docs/REPO_LAYOUT.md` now names all four storage areas so this is not
+  rediscovered a third time.
+- **Decision — the five deletion criteria are the only warrant, and they are
+  enforced by a tool rather than by care.** `scripts/consolidate/retire_artifact.py`
+  refuses a path the registry marks protected, refuses a `verified_stale_cache`
+  claim without `--relay-verified`, refuses a `--canonical` survivor that is not
+  on disk, and writes the tombstone before it deletes. Its guards are
+  mutation-verified.
+- **Retired: 3.660 GiB in seven units,** each with a tombstone carrying location,
+  size, per-file hashes, experiment, role, references at deletion, criterion,
+  reason, timestamp, reconstruction recipe and cost, and the surviving evidence.
+  The wheelhouse (3.620 GiB) is the bulk; the rest are two byte-identical ladder
+  packs, the toy dry-run materializations, the simulator's nesting-defect backup
+  and its quarantine.
+- **"There is a copy on the relay" was made into a measurement.**
+  `verify_relay_mirror.py` checks file by file and records which method covered
+  which file, because a Hugging Face repository does not expose a sha256 for
+  everything: an LFS oid **is** the content sha256 and verifies without transfer,
+  while a smaller file's `blob_id` is a git sha1 over a different byte string and
+  proves nothing. The wheelhouse: 123 by oid, 73 downloaded and hashed, 196/196.
+- **Decision — a hash-verified relay copy does NOT by itself retire a local
+  copy.** `qwen3_0p6b_init_v0`, `e8_contribution_init_v1`, the Stage-0 activation
+  cache and `p2_ceheavy` are all mirrored and all stay: canonical
+  initializations, a living recovery path, artifacts the experiment index names.
+  The registry records the eligibility **and** the clause that overrides it, so
+  the tension is visible rather than resolved silently.
+- **Not deleted, and the largest thing that could be: 39.38 GiB of
+  `trainer_state.pt`.** It matches none of the five criteria — the runs
+  completed, the bytes are unique, the relay has no copy, and reproducing them
+  costs a paid GPU. `scripts/pod/retain_checkpoints.py` already argues optimizer
+  state exists to resume a run rather than to analyse one, which is the precedent
+  a maintainer would decide on; it is surfaced as `review` with that argument
+  attached. Same for E2p1's five intermediate step checkpoints (11.1 GiB) of a
+  closed diagnostic.
+- **Logs: seven files, 116,386 bytes, no facts.** Six were byte-identical to a
+  copy that survives; the canonical one was *derived* from who references it, not
+  chosen. Each directory that lost a file gained a README naming the survivor and
+  its sha256 — attempts 6 and 7 having a probe byte-identical to the Stage-3
+  run's IS the evidence they ran the preregistered engine, and that evidence is
+  the hash, not a third copy of it. The seventh was a snapshot of a living-state
+  file, byte-identical to `git show 3261f6b6…:logs/current_state.json`, verified
+  on every inventory run.
+- **32 broken links, both classes created by the previous reorganization.** A
+  cross-reference is what replaces a deleted copy, so this had to be fixed in the
+  same pass and gated: a broken relative link anywhere now fails a test.
+- **A hung process, seven days old.** `fetch_fineweb_docs.py` finished its work on
+  2026-08-10 — output written, manifest written, sha256 recorded — and never
+  exited, holding 504 MB. Killed. It held no handle on its output.
+- **Risks:** the retired wheelhouse and ladder pack must be refetched before the
+  next vLLM or training pod session; both recipes are in their tombstones and
+  both are what the setup scripts already do. Nothing scientific, frozen or
+  paid-for was touched.
+- **Revisit when:** a maintainer decides on the 39.38 GiB of optimizer state and
+  the 11.1 GiB of E2p1 intermediates, or when relay storage (92.12 GiB) becomes
+  the binding constraint — noting that deleting from a Hugging Face repo's current
+  revision reclaims no quota.

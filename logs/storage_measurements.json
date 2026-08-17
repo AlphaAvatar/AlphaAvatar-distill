@@ -49,6 +49,54 @@
           "files": 662
         }
       }
+    },
+    {
+      "label": "after-cleanup",
+      "measured_utc": "2026-08-17T19:51:58+00:00",
+      "commit": "fe3c2b3169964ae4884c3946124ba914ae64a556",
+      "note": "after the log normalization and the seven tombstoned retirements",
+      "areas": {
+        "repository_working_tree": {
+          "definition": "the tree excluding .git, .venv, artifacts/ and caches",
+          "bytes": 150992246,
+          "files": 781,
+          "of_which_logs_bytes": 5380823,
+          "of_which_logs_files": 211,
+          "of_which_data_bytes": 139121268,
+          "of_which_data_files": 70,
+          "git_tracked_bytes": 12062160,
+          "git_tracked_files": 717,
+          "git_dir_bytes": 33521594
+        },
+        "local_artifact_storage": {
+          "definition": "artifacts/ in the tree PLUS the out-of-tree store, both generated and gitignored",
+          "bytes": 96215580358,
+          "files": 1418,
+          "in_tree": {
+            "path": "artifacts",
+            "bytes": 7390054345,
+            "files": 976
+          },
+          "out_of_tree": {
+            "path": "/home/ecs-user/aad-artifacts",
+            "bytes": 88825526013,
+            "files": 442
+          }
+        },
+        "relay_lfs_storage": {
+          "repo": "AlphaAvatar/aadistill-artifacts",
+          "bytes": 98913220067,
+          "files": 1152,
+          "source": "logs/checkpoint_registry.json (cached listing)",
+          "queried_utc": "2026-08-17T19:05:45+00:00"
+        },
+        "scratch_session_directories": {
+          "definition": "per-session working directories, bundles, poller output and pod-simulator quarantine",
+          "path": "/home/ecs-user/aad-scratch",
+          "bytes": 61175074,
+          "files": 656
+        }
+      }
     }
   ]
 }

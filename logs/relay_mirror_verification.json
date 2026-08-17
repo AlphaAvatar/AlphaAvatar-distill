@@ -1391,6 +1391,47 @@
           "match": true
         }
       ]
+    },
+    {
+      "schema": "aadistill.relay_mirror_verification/v1",
+      "generated_utc": "2026-08-17T19:42:51+00:00",
+      "command": "scripts/consolidate/verify_relay_mirror.py --local artifacts/stage3/ladder_uniform --relay-prefix stage3_recovery_corpus_v2/ladder_uniform",
+      "local_tree": "artifacts/stage3/ladder_uniform",
+      "relay": "AlphaAvatar/aadistill-artifacts",
+      "relay_prefix": "stage3_recovery_corpus_v2/ladder_uniform",
+      "n_local_files": 3,
+      "local_bytes": 20343307,
+      "verified_by_lfs_oid": 1,
+      "verified_by_download": 2,
+      "downloaded_bytes": 5954660,
+      "missing_on_relay": [],
+      "mismatched": [],
+      "verified": true,
+      "method_note": "an LFS oid IS the content sha256, so those files are verified without transfer. A non-LFS file's blob_id is a git sha1 over a different byte string and proves nothing, so those are downloaded and hashed.",
+      "meaning": "verified=true means every local file has a byte-identical copy at the relay prefix. It does NOT mean the local copy is safe to delete: that also requires the retention rule in logs/checkpoint_registry.json to permit it.",
+      "files": [
+        {
+          "file": "audit.jsonl",
+          "method": "downloaded_and_hashed",
+          "local_sha256": "15f16b7b22b229e9c0ae510b85b4c967948828e0e7d50fac15c3e516e3e911e6",
+          "remote_sha256": "15f16b7b22b229e9c0ae510b85b4c967948828e0e7d50fac15c3e516e3e911e6",
+          "match": true
+        },
+        {
+          "file": "blocks.npz",
+          "method": "lfs_oid",
+          "local_sha256": "6f324cb0f37bc0f07128e554ce8c161879419537478950496534f75fcecb249c",
+          "remote_sha256": "6f324cb0f37bc0f07128e554ce8c161879419537478950496534f75fcecb249c",
+          "match": true
+        },
+        {
+          "file": "ladder.json",
+          "method": "downloaded_and_hashed",
+          "local_sha256": "d4941722a099754ef5ba82d529c0fe2274a6b97af61b2fa52519ed22b84201f0",
+          "remote_sha256": "d4941722a099754ef5ba82d529c0fe2274a6b97af61b2fa52519ed22b84201f0",
+          "match": true
+        }
+      ]
     }
   ]
 }

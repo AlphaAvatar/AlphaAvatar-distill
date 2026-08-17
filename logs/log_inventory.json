@@ -1,6 +1,6 @@
 {
   "schema": "aadistill.log_inventory/v1",
-  "created_utc": "2026-08-17T19:41:41+00:00",
+  "created_utc": "2026-08-17T19:45:07+00:00",
   "command": "scripts/consolidate/build_log_inventory.py",
   "roots": [
     "logs",
@@ -11,7 +11,7 @@
   "rule": "nothing is deleted before it appears here with a disposition and a reason. A duplicate's canonical copy is derived from who references it, not chosen by hand, except where CANONICAL_OVERRIDES states otherwise and says why.",
   "totals": {
     "files": 217,
-    "bytes": 5359456,
+    "bytes": 5451803,
     "by_disposition": {
       "keep_canonical": 10,
       "keep_immutable": 116,
@@ -525,6 +525,7 @@
         "docs/REPO_LAYOUT.md",
         "logs/STATE.md",
         "logs/checkpoint_registry.json",
+        "logs/checkpoint_tombstones.json",
         "logs/decisions.md",
         "logs/log_inventory.json",
         "tests/docs/test_repository_structure.py"
@@ -568,6 +569,7 @@
         "README.md",
         "logs/STATE.md",
         "logs/artifact_manifests.md",
+        "logs/checkpoint_tombstones.json",
         "logs/current_state.json",
         "logs/log_inventory.json",
         "tests/docs/test_repository_structure.py"
@@ -611,6 +613,7 @@
         "logs/archive/e8_preregistration.md",
         "logs/archive/e8b_preregistration.md",
         "logs/checkpoint_registry.json",
+        "logs/checkpoint_tombstones.json",
         "logs/log_inventory.json",
         "tests/docs/test_repository_structure.py"
       ],
@@ -756,6 +759,7 @@
       "referenced_by": [
         "README.md",
         "logs/checkpoint_registry.json",
+        "logs/checkpoint_tombstones.json",
         "logs/log_inventory.json",
         "scripts/data/build_stage3_pilot.py",
         "scripts/evaluation/probe_think_close.py"
@@ -809,6 +813,7 @@
       "category": "immutable_record",
       "in_paid_attempt_chain": false,
       "referenced_by": [
+        "logs/checkpoint_tombstones.json",
         "logs/log_inventory.json",
         "scripts/evaluation/analyze_e8b_behaviour.py",
         "scripts/training/analyze_e8b.py",
@@ -1465,7 +1470,9 @@
       "sha256": "51676f844862f09b4964037155d1092ab3efeb11c0a7575f876499efd5d01d2e",
       "category": "narrative",
       "in_paid_attempt_chain": true,
-      "referenced_by": [],
+      "referenced_by": [
+        "logs/log_inventory.json"
+      ],
       "referenced_by_executable": [],
       "duplicate_of": null,
       "disposition": "keep_immutable",
@@ -1545,6 +1552,7 @@
       "referenced_by": [
         "logs/autoinit_state_eval_v1_manifest.json",
         "logs/checkpoint_registry.json",
+        "logs/checkpoint_tombstones.json",
         "logs/log_inventory.json",
         "scripts/consolidate/build_checkpoint_registry.py"
       ],
@@ -1564,6 +1572,7 @@
       "referenced_by": [
         "logs/autoinit_state_eval_v1_manifest.json",
         "logs/checkpoint_registry.json",
+        "logs/checkpoint_tombstones.json",
         "logs/log_inventory.json"
       ],
       "referenced_by_executable": [],
@@ -1619,7 +1628,9 @@
       "sha256": "74df442396c673f5672bb2afbb676d2b760b34cdd55dddff4ae54ebb97665464",
       "category": "narrative",
       "in_paid_attempt_chain": true,
-      "referenced_by": [],
+      "referenced_by": [
+        "logs/log_inventory.json"
+      ],
       "referenced_by_executable": [],
       "duplicate_of": null,
       "disposition": "keep_immutable",
@@ -1721,7 +1732,9 @@
       "sha256": "45cee09a5290f59dd340bbbde08cf746438198e392f59170749adf097f7cbeb8",
       "category": "narrative",
       "in_paid_attempt_chain": true,
-      "referenced_by": [],
+      "referenced_by": [
+        "logs/log_inventory.json"
+      ],
       "referenced_by_executable": [],
       "duplicate_of": null,
       "disposition": "keep_immutable",
@@ -1776,6 +1789,7 @@
       "category": "raw_execution_artifact",
       "in_paid_attempt_chain": true,
       "referenced_by": [
+        "logs/checkpoint_tombstones.json",
         "logs/log_inventory.json"
       ],
       "referenced_by_executable": [],
@@ -1790,6 +1804,7 @@
       "category": "raw_execution_artifact",
       "in_paid_attempt_chain": true,
       "referenced_by": [
+        "logs/checkpoint_tombstones.json",
         "logs/log_inventory.json"
       ],
       "referenced_by_executable": [],
@@ -1817,7 +1832,9 @@
       "sha256": "b9ab0c454fe7c4df6b6974b19cea831ff609e90ecfe01602d1bb2ddb85230017",
       "category": "narrative",
       "in_paid_attempt_chain": true,
-      "referenced_by": [],
+      "referenced_by": [
+        "logs/log_inventory.json"
+      ],
       "referenced_by_executable": [],
       "duplicate_of": null,
       "disposition": "keep_immutable",
@@ -1872,6 +1889,7 @@
       "category": "raw_execution_artifact",
       "in_paid_attempt_chain": true,
       "referenced_by": [
+        "logs/checkpoint_tombstones.json",
         "logs/log_inventory.json"
       ],
       "referenced_by_executable": [],
@@ -1886,6 +1904,7 @@
       "category": "raw_execution_artifact",
       "in_paid_attempt_chain": true,
       "referenced_by": [
+        "logs/checkpoint_tombstones.json",
         "logs/log_inventory.json"
       ],
       "referenced_by_executable": [],
@@ -2069,6 +2088,7 @@
       "referenced_by": [
         "logs/autoinit_phase_a_preregistration_materialized.json",
         "logs/checkpoint_registry.json",
+        "logs/checkpoint_tombstones.json",
         "logs/log_inventory.json",
         "scripts/autoinit/write_preregistration.py",
         "tests/autoinit/test_cost_and_recovery.py",
@@ -2109,6 +2129,7 @@
       "referenced_by": [
         "logs/autoinit_permanent_controls/README.md",
         "logs/checkpoint_registry.json",
+        "logs/checkpoint_tombstones.json",
         "logs/log_inventory.json",
         "scripts/autoinit/write_preregistration.py"
       ],
@@ -2149,6 +2170,7 @@
       "in_paid_attempt_chain": false,
       "referenced_by": [
         "logs/checkpoint_registry.json",
+        "logs/checkpoint_tombstones.json",
         "logs/log_inventory.json",
         "scripts/autoinit/issue_phase_a_authorization.py",
         "scripts/autoinit/write_preregistration.py",
@@ -2221,6 +2243,7 @@
       "in_paid_attempt_chain": false,
       "referenced_by": [
         "logs/checkpoint_registry.json",
+        "logs/checkpoint_tombstones.json",
         "logs/log_inventory.json",
         "scripts/pod/autoinit_phase_a_launch.py"
       ],
@@ -2568,7 +2591,9 @@
       "sha256": "4b04c443b767ac858232b76484baf1daa8a39e548c6fbe7804e04e3cbbe7e2fe",
       "category": "narrative",
       "in_paid_attempt_chain": true,
-      "referenced_by": [],
+      "referenced_by": [
+        "logs/log_inventory.json"
+      ],
       "referenced_by_executable": [],
       "duplicate_of": null,
       "disposition": "keep_immutable",
@@ -2911,6 +2936,7 @@
         "README.md",
         "docs/REPO_LAYOUT.md",
         "docs/archive/HANDOFF_AUTOINITIALIZER_20260812.md",
+        "logs/checkpoint_tombstones.json",
         "logs/log_inventory.json",
         "logs/relay_mirror_verification.json",
         "logs/storage_measurements.json",
@@ -2933,8 +2959,8 @@
     },
     {
       "path": "logs/checkpoint_tombstones.json",
-      "size_bytes": 17772,
-      "sha256": "78d078d1203534b77578db44cd3c44ef4c1720e0beb322952182ccba594523a6",
+      "size_bytes": 108018,
+      "sha256": "17bfe01346203734ea13302766c442d345f4a2fc8c52fa53b7b268dbb99941ea",
       "category": "index",
       "in_paid_attempt_chain": false,
       "referenced_by": [
@@ -4058,13 +4084,14 @@
     },
     {
       "path": "logs/relay_mirror_verification.json",
-      "size_bytes": 69182,
-      "sha256": "a044b7c5e9098a2bc24bef3cd6c0727a82eae11d117680e1dcc08309279c5301",
+      "size_bytes": 71283,
+      "sha256": "56fadf5eac5edafa2154e3f7125a85089db16dd3f85682cea5d73ada08ebd11b",
       "category": "immutable_record",
       "in_paid_attempt_chain": false,
       "referenced_by": [
         "docs/POD_SCRIPTS.md",
         "logs/checkpoint_registry.json",
+        "logs/checkpoint_tombstones.json",
         "logs/log_inventory.json",
         "scripts/consolidate/build_checkpoint_registry.py",
         "scripts/consolidate/verify_relay_mirror.py"

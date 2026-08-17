@@ -2,7 +2,7 @@
   "schema": "aadistill.current_state/v2",
   "generated_utc": "2026-08-17T18:03:06+00:00",
   "_contract": "The minimal machine-readable CURRENT snapshot. It owns live facts and nothing else: no history, no per-attempt detail, no narrative. History lives in logs/decisions.md and the per-run directories; the human view of THIS file is logs/STATE.md and the two must agree. README owns no live facts at all. Ownership rules: logs/CATALOG.md.",
-  "baseline_commit": "3261f6b67e513a9c7c4260e3a7ccc91c847dc127",
+  "baseline_commit": "fe3c2b3169964ae4884c3946124ba914ae64a556",
   "running": {
     "paid_compute": false,
     "pods": 0,

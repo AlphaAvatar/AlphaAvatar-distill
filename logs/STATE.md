@@ -89,6 +89,9 @@ Either paid option requires a fresh authorization chain: pre-auth base commit ->
 | you want | read |
 | --- | --- |
 | which log owns which fact | [`CATALOG.md`](CATALOG.md) |
+| what storage exists, where, and how much | [`storage_measurements.json`](storage_measurements.json) |
+| which checkpoints exist, in which of the three stores | [`checkpoint_registry.json`](checkpoint_registry.json) |
+| what was deleted, and how to get it back | [`checkpoint_tombstones.json`](checkpoint_tombstones.json) |
 | where code lives | [`../docs/REPO_LAYOUT.md`](../docs/REPO_LAYOUT.md) |
 | how a pod session is specified and run | [`../docs/SESSION_ARCHITECTURE.md`](../docs/SESSION_ARCHITECTURE.md) |
 | which pod script is live, historical or terminated | [`../docs/POD_SCRIPTS.md`](../docs/POD_SCRIPTS.md) |
