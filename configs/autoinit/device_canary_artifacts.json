@@ -1,0 +1,20 @@
+{
+  "spec": "aadistill.artifact_spec/v1",
+  "session": "autoinit_device_canary",
+  "note": "The canary produces one report and nothing else worth keeping. Its checkpoints are deliberately disposable — they are compressions of the canonical student toward a geometry chosen to make every operator do work, not toward any recipe, and `scientific_use: false` is written into the record. The same spec serves success and failure: on failure the report still carries the per-operator tracebacks, which is the entire reason the session exists.",
+  "entries": [
+    {
+      "artifact_class": "canary_report",
+      "pattern": "audit/autoinit_device_canary/result.json",
+      "required": true,
+      "lifecycle": "final_required"
+    },
+    {
+      "artifact_class": "canary_session_logs",
+      "pattern": "audit/autoinit_device_canary/session/*",
+      "required": false,
+      "lifecycle": "final_required",
+      "min_matches": 0
+    }
+  ]
+}

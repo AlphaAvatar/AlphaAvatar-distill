@@ -1,10 +1,10 @@
 {
   "schema": "aadistill.current_state/v1",
-  "generated_utc": "2026-08-17T10:19:02+00:00",
-  "current_phase": "Attempt 7 FAILED CLOSED in stage 1 at $0.3955. Stage 0 passed for the third time and the attempt-6 device fix HELD - one state was materialized, reloaded, validated and measured on a GPU. Stage 1 then hit a SECOND device bug of the same class in different code: ActivationCollector allocates its accumulators without a device, so a CUDA activation is added into a CPU tensor. init/collect.py is Stage-0 code whose only prior execution was on the CPU-only dev box.",
+  "generated_utc": "2026-08-17T15:43:58+00:00",
+  "current_phase": "Cap raised to $219.00 and approved. The Stage-1 device canary is authorized and is the next thing to run; Attempt 8 is authorized only if the canary passes and tears down cleanly.",
   "active_experiment": null,
   "paid_compute_running": false,
-  "next_work": "A maintainer cap decision. $217.9971 is the minimum cumulative cap covering the $1.0197 canary plus one complete $23.0484 Attempt 8, against the current $217.00. NOTHING is authorized - no paid canary and no Attempt 8 - and the canary has no launcher.",
+  "next_work": "Run the device canary. If it fails: STOP and report, no retry and no Attempt 8. If it passes: report spend and evidence, then prepare the fresh Attempt-8 PhaseAAuthorization chain. No Attempt 9 is implied.",
   "teacher": {
     "model_id": "Qwen/Qwen3-4B-Thinking-2507",
     "revision": "768f209d9ea81521153ed38c47d515654e938aea",
@@ -56,16 +56,21 @@
   },
   "budget": {
     "actual_cumulative_spend_usd": 193.929,
-    "authorized_cap_usd": 217.0,
+    "authorized_cap_usd": 219.0,
     "cap_raised_utc": "2026-08-17",
     "cap_approved": true,
-    "cap_raise_note": "maintainer, 2026-08-17: 'My recommended new cumulative project cap is $217.00', then 'Record this approval in the ledger and machine-readable state ... and issue one fresh PhaseAAuthorization.' Raised to cover the hard bound repriced by the reference-cache fallback audit and the beam-6 pricing correction. FUNDS ONE ATTEMPT: 'This funds one attempt only and does not imply Attempt 7.'",
-    "remaining_usd": 23.071,
+    "cap_raise_note": "maintainer, 2026-08-17: raised $217.00 -> $219.00. Funds AT MOST one infrastructure-only Stage-1 GPU device canary (hard $1.0197) and, ONLY if that canary passes and tears down cleanly, one complete Phase-A Attempt 8 (hard $23.0484). Does not authorize a canary retry, Attempt 9, or any change to the frozen science.",
+    "remaining_usd": 25.071,
     "previous_caps": [
       {
         "cap_usd": 213.0,
         "raised_utc": "2026-08-15",
         "superseded_because": "Phase A repriced above it"
+      },
+      {
+        "cap_usd": 217.0,
+        "raised_utc": "2026-08-17",
+        "superseded_because": "did not cover the device canary plus one Attempt 8"
       }
     ],
     "phase_a_priced_by_launcher": {
@@ -110,7 +115,12 @@
     "remaining_note": "NOT permission. The attempt-7 authorization covered exactly one launcher invocation, is spent, and its lineage gate refuses every later commit. No attempt 8 is authorized, funded, prepared or implied.",
     "attempt_7_authorized": "SPENT",
     "attempt_7_per_launch_hard_usd": 23.0484,
-    "attempt_7_cap_margin_usd": 0.4181
+    "attempt_7_cap_margin_usd": 0.4181,
+    "committed": {
+      "device_canary_hard_usd": 1.0197,
+      "attempt_8_hard_usd_conditional": 23.0484,
+      "remaining_after_both_usd": 1.0029
+    }
   },
   "latest_commit": "f6ee8909ee772a09e0a85728810fe8da08f0560f",
   "documents": {
@@ -175,7 +185,7 @@
     "E2 phases 2-3"
   ],
   "autoinit": {
-    "status": "STAGE1_DEVICE_AUDIT_DONE_CANARY_PREPARED_NOTHING_AUTHORIZED",
+    "status": "CANARY_AUTHORIZED_ATTEMPT_8_CONDITIONAL",
     "package": "src/aadistill/autoinit",
     "tests": 209,
     "operator_kinds": [

@@ -53,6 +53,22 @@ from aadistill.autoinit.operators.base import (  # noqa: E402
 from aadistill.autoinit.stats import StatsCache  # noqa: E402
 
 CANONICAL = REPO / "artifacts/stage1/qwen3_0p6b_init_v0/checkpoint"
+#: The launcher watches this file and decides the session's terminal state from
+#: it. `ALL_DONE` and `CANARY_FAILED` are the only two that end a session.
+STATUS = Path("/workspace/autoinit_device_canary.status")
+
+
+def mark(name: str) -> None:
+    line = f"{datetime.now(timezone.utc):%FT%TZ} MARKER:{name}"
+    print(line, flush=True)
+    try:
+        STATUS.parent.mkdir(parents=True, exist_ok=True)
+        with STATUS.open("a") as f:
+            f.write(line + "\n")
+    except OSError:
+        pass          # never let marker writing be the thing that fails a run
+
+
 #: Every frozen implementation, in registry order. Six, across five kinds.
 OPERATORS = ("depth.positional_v0", "depth.causal_kl_greedy_v1",
              "width.global_pca_v0", "ffn.activation_importance_v0",
@@ -119,6 +135,7 @@ def main() -> int:
     from aadistill.autoinit.state import make_root_state
 
     started = time.time()
+    mark("CANARY_START")
     adapter = get_adapter("qwen3")
     parent = adapter.load(str(CANONICAL), device=args.device)
     parent_spec = adapter.spec_of(parent)
@@ -191,6 +208,7 @@ def main() -> int:
                           traceback=traceback.format_exc()[-8000:])
         record["seconds"] = round(time.time() - t0, 2)
         results.append(record)
+        mark(f"OPERATOR_{'OK' if record['ok'] else 'FAILED'}:{impl_id}")
         print(f"{'OK  ' if record['ok'] else 'FAIL'} {impl_id} "
               f"({record['seconds']}s)", flush=True)
         if torch.cuda.is_available():
@@ -230,8 +248,28 @@ def main() -> int:
                       "elapsed_minutes": report["elapsed_minutes"],
                       "failed": [r["impl_id"] for r in results if not r["ok"]]},
                      indent=2))
+    # The terminal marker. `ALL_DONE` only when every operator ran clean:
+    # a canary that certifies a partial pass is worse than no canary.
+    mark("ALL_DONE" if report["all_passed"] else "CANARY_FAILED")
     return 0 if report["all_passed"] else 1
 
 
 if __name__ == "__main__":
-    raise SystemExit(main())
+    try:
+        raise SystemExit(main())
+    except SystemExit:
+        raise
+    except BaseException as exc:                                  # noqa: BLE001
+        # Without a terminal marker the launcher would poll until the watchdog
+        # killed the pod at the hard bound. Fail closed, with the frame.
+        Path("/workspace").mkdir(parents=True, exist_ok=True)
+        try:
+            (REPO / "artifacts/audit/autoinit_device_canary").mkdir(
+                parents=True, exist_ok=True)
+            (REPO / "artifacts/audit/autoinit_device_canary/traceback.log"
+             ).write_text(traceback.format_exc())
+        except OSError:
+            pass
+        print(f"CANARY ABORTED: {type(exc).__name__}: {exc}", flush=True)
+        mark("CANARY_FAILED")
+        raise SystemExit(2)

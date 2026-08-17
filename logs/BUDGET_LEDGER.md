@@ -188,6 +188,12 @@ $213.00   +$1.93 for Phase A (2026-08-15). The maintainer approved raising the
           cap "e.g. $213-214" after being shown that Phase A did not fit;
           $213.00 was selected from that range as the conservative end and is
           the figure recorded here. Nothing was spent against it.
+$219.00   +$2.00 (2026-08-17). APPROVED. Funds AT MOST two things: one
+          infrastructure-only Stage-1 GPU device canary with hard cap
+          $1.0197, and -- ONLY if that canary passes and tears down
+          cleanly -- one complete Phase-A Attempt 8 under the existing
+          $23.0484 per-launch hard bound. It does NOT authorize a canary
+          retry, Attempt 9, or any change to the frozen science.
 $217.00   +$4.00 for Phase A attempt 6 (2026-08-17). APPROVED. The maintainer's
           words: "My recommended new cumulative project cap is $217.00",
           followed by "Record this approval in the ledger and machine-readable
@@ -270,12 +276,18 @@ $2.30   RAISED 2026-08-14 with maintainer approval, after attempt 1 spent
 ## Current position
 
 ```
-authorized cumulative cap                                    $217.00
+authorized cumulative cap                                    $219.00
     RAISED AND APPROVED 2026-08-17. See the caps list above.
+    Funds the $1.0197 canary and, conditionally, one $23.0484
+    Attempt 8. Not a retry reserve; no Attempt 9.
 actual cumulative spend                                      $193.9290
     = $193.1783 + $0.3552 attempt 6 + $0.3955 attempt 7
-unused authorization remaining                               $ 23.0710
-    NOT PERMISSION. Attempt 7's authorization
+unused authorization remaining                               $ 25.0710
+    = $219.00 - $193.9290. Committed against it:
+      device canary hard                                       $  1.0197
+      Attempt 8 hard, CONDITIONAL on the canary passing        $ 23.0484
+      remaining after both                                     $  1.0029
+    Attempt 7's authorization
     `autoinit.phase_a.2026-08-17T0850Z` covered exactly ONE
     launcher invocation, is SPENT, and its lineage gate refuses
     every later commit by construction. No attempt 8 is
