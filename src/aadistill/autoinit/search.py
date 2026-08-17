@@ -44,6 +44,7 @@ from .arch import ArchitectureAdapter, ArchSpec
 from .artifact import CheckpointIdentity, identify_checkpoint
 from .calibration import CalibrationProfile, consumes_calibration, profile_for
 from .metrics import StateEvalSuite, StateEvaluation
+from .device import model_device  # noqa: F401  (re-exported; the search's own boundary uses it)
 from .stats import DEFAULT_STATS_SPEC, StatsCache, StatsSpec, stats_cache_key
 from .operators.base import (
     OperatorContext,
@@ -146,22 +147,6 @@ class LevelRecord:
             "dead_ends": [dict(d) for d in self.dead_ends],
             "seconds": self.seconds,
         }
-
-
-def model_device(model: Any) -> Any:
-    """Where a model's weights actually are, not where they were asked to be.
-
-    An operator's child is built by `ChildBuilder` -> `build_student`, which
-    sets the dtype and deliberately does not place the model. Assuming it sits
-    on `SearchConfig.device` cost Phase-A attempt 6 a paid session.
-
-    Falls back to CPU only for a model with no parameters at all, which is not a
-    case the search produces; a parameterless object reaching here would fail
-    the parameter-count check immediately afterwards.
-    """
-    for p in model.parameters():
-        return p.device
-    return torch.device("cpu")
 
 
 class BeamSearch:

@@ -27,6 +27,7 @@ from ...init.project import final_norm_weights, stream_projection
 from ...init.sandwich import _in_proj as fold_and_project
 from ..arch import ArchitectureAdapter, ArchSpec, Capability
 from ..metrics import OperatorLocalMetrics
+from ..device import model_device, stats_to
 from ._common import ChildBuilder, collect_activation_stats
 from .base import (
     CalibrationNeed,
@@ -86,8 +87,14 @@ class WidthGlobalPCAV0(OperatorImplementation):
         # parent under the same profile: one pass, two operators. Never shared
         # across parents — the key includes the parent's artifact digest, and
         # re-collecting per state is the point of the architecture.
-        state = ctx.cached_stats(lambda: collect_activation_stats(
-            adapter, parent, (i["input_ids"] for i in ctx.calibration_items), ctx.device))
+        # The cache is host-resident by contract (autoinit.device). `proj` is
+        # derived from it and then multiplied against parent weights, so the
+        # working copy is moved to the parent's ACTUAL device here — explicitly,
+        # once, and freed when this call returns.
+        compute = model_device(parent)
+        state = stats_to(ctx.cached_stats(lambda: collect_activation_stats(
+            adapter, parent, (i["input_ids"] for i in ctx.calibration_items),
+            compute)), compute)
 
         # Same point set and weights as the incumbent recipe: all pre-norm stream
         # states plus the post-final-norm point, ends upweighted 9/8.

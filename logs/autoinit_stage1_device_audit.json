@@ -1,0 +1,140 @@
+{
+  "schema": "aadistill.autoinit.stage1_device_audit/v1",
+  "generated_utc": "2026-08-17T10:17:59.271294+00:00",
+  "git_commit": "96c53fc9fc50e1b0df6897cd402ab709472a4ccb",
+  "why": "three paid Phase-A sessions lost to one class of defect. Attempt 6 died in BeamSearch._validate, attempt 7 in ActivationStatsCollector, both 'a model and a tensor are on the same device' \u2014 true on the CPU-only dev box, false on a GPU. Fixing the site the last pod reached only revealed the next.",
+  "scope": "the Phase-A Stage-1 GPU search path ONLY. Not a whole-project audit; the frozen science is not reopened.",
+  "contract": {
+    "contract": "autoinit.stage1_device_contract@v1",
+    "version": 1,
+    "model_execution_device": "read from the weights via model_device(); SearchConfig.device is an intent, not evidence about any object. A parent on CUDA routinely coexists with a freshly built child on the host.",
+    "persistent_stats_cache_device": "HOST, always. One entry, 1.81 GiB at the 4B parent, dominated by res_sqsum (L+1, H, H) float64. Accumulated on the model's device, transferred to the host once in state(); consumers move a working copy back with stats_to() for one invocation.",
+    "ephemeral_tensors_indices_projections": "created on, or explicitly moved to, the device of the parameters they interact with",
+    "serialization_artifact_boundary": "save from wherever the model is; reload placed explicitly and validated against the produced model ON THE PRODUCED MODEL'S DEVICE, so the save/reload comparison is one numerical backend; only then moved to the search device to be measured",
+    "scope": "the Phase-A Stage-1 GPU search path: search.py, the five frozen operators and their shared helpers, the directly-used aadistill.init helpers, and the Qwen3 adapter/build/load boundary. NOT a whole-project audit and it does not reopen the frozen science."
+  },
+  "memory_accounting_behind_category_2": {
+    "why_it_matters": "'allocate the float64 accumulators on CUDA' would have been the one-line fix and is the wrong one",
+    "per_cache_entry_gib_at_4b_parent": 1.8137,
+    "dominated_by": "res_sqsum (L+1, H, H) float64 = 1.8066 GiB at H=2560, L=36",
+    "stats_cache_max_entries": 1,
+    "if_pinned_in_vram": "1.81 GiB held for the whole expansion of a parent so that two operators could avoid one transfer",
+    "if_accumulated_on_the_host": "x.T @ x is (H, H) float64 per collection point, so ~1.85 GiB per calibration item across PCIe; 67 items is ~124 GiB",
+    "chosen": "accumulate on the model's device, transfer to the host ONCE in state() (1.81 GiB total), consumers move a working copy back with stats_to() for one invocation and free it on return"
+  },
+  "audited": {
+    "search.py": {
+      "tensor_creations": [
+        "the validation probe ids"
+      ],
+      "boundaries": [
+        "adapter.load(device=...)",
+        "reloaded.to(config.device)"
+      ],
+      "status": "fixed 2026-08-17 (attempt-6 defect); probe now built on the produced model's device"
+    },
+    "operators/depth.py": {
+      "impls": [
+        "depth.positional_v0",
+        "depth.causal_kl_greedy_v1"
+      ],
+      "status": "coherent: _forward_logits returns .cpu(), targets .cpu(), distortion reduces on the host. Internally single-device.",
+      "regression": "test_the_depth_operator_keeps_its_reference_and_ablations_together"
+    },
+    "operators/width.py": {
+      "defect": "proj derived from the host cache multiplied against CUDA parent weights",
+      "fix": "stats_to(cache, model_device(parent))"
+    },
+    "operators/ffn.py": {
+      "defect": "importance and its topk index derived from the host cache, then used to slice CUDA weights",
+      "fix": "stats_to(cache, model_device(parent))"
+    },
+    "operators/attention.py": {
+      "defect": "head_rows() built a host index used to slice CUDA weights; tolerated by advanced indexing, refused by index_select",
+      "fix": "head_rows(..., device=weight.device); scores made an explicit host diagnostic"
+    },
+    "operators/composite.py": {
+      "defect": "init_student math against CUDA parent weights with host statistics",
+      "fix": "stats_to(state, model_device(parent)); sandwich.py needs no change because it writes via param.copy_(), which crosses devices"
+    },
+    "operators/_common.py": {
+      "ChildBuilder": "produces an UNPLACED child by design; assign() uses param.copy_(), which crosses devices. Left as is - the contract names it.",
+      "head_rows": "now takes a device"
+    },
+    "operators/base.py": {
+      "cached_stats": "unchanged; the cache is host-resident and the transfer is the caller's"
+    },
+    "init/collect.py": {
+      "defect": "ALL accumulators allocated with no device= (the attempt-7 kill), and bincount forced to .cpu()",
+      "fix": "allocate on the model's device; bincount on the accumulator's device; state() transfers to the host through a named seam"
+    },
+    "init/contribution.py": {
+      "status": "no tensor creation; operates on what it is handed, single-device by construction"
+    },
+    "init/sandwich.py": {
+      "status": "writes exclusively via param.copy_(), which crosses devices; all math is against the parent. Coherent once the statistics arrive on the parent's device."
+    },
+    "adapters/qwen3.py + models/student.py": {
+      "status": "build_model/build_student deliberately do NOT place the model; load() places explicitly. This is category 1 of the contract and is left unchanged - moving children to CUDA globally would make the save/reload check measure the backend rather than the serialization."
+    }
+  },
+  "regressions": {
+    "file": "tests/autoinit/test_search_operator_device_split.py",
+    "instrument": "tests/autoinit/device_split.py - a statistics tensor labelled as living on the persistent cache device raises when it meets a model-side tensor untransferred. Supplies the second device the dev box does not have.",
+    "instrument_self_check": "the label was initially stripped by any .to(torch.float64), which made the instrument pass a defect it was built to catch; .to() now counts as a transfer only when it names a device",
+    "mutations_caught": [
+      "width drops stats_to",
+      "ffn drops stats_to",
+      "composite drops stats_to",
+      "collector allocates accumulators on the host",
+      "collector state() stops transferring to the host"
+    ],
+    "verified_vacuous_then_fixed": [
+      "device equality assertions on a one-device box passed with the attempt-7 bug reinstated; replaced by a meta-device allocation check and a named transfer seam"
+    ]
+  },
+  "verification": {
+    "dev_box": "1777 passed, 7 skipped"
+  },
+  "not_changed": [
+    "search",
+    "objectives",
+    "seeds",
+    "thresholds",
+    "recovery",
+    "pricing",
+    "the science and session plans"
+  ],
+  "canary": {
+    "script": "scripts/pod/autoinit_device_canary.py",
+    "prepared_not_launched": true,
+    "scientific_use": false,
+    "what": "one real invocation of each of the six frozen implementations, each followed by the production materialize -> canonical reload -> validate -> measure lifecycle. No beam search, no recovery training, no battery, no ranking, no selection.",
+    "parent": "artifacts/stage1/qwen3_0p6b_init_v0/checkpoint (0.6B, not the 4B teacher: the defects are about where tensors are, not how large)",
+    "calibration": "4 items of the frozen mixture, truncated to 256 tokens",
+    "refuses_cpu": true,
+    "compute_seconds_from_the_project_cost_model": 1.0,
+    "price": {
+      "expected_usd": 0.627,
+      "soft_stop_usd": 0.6897,
+      "hard_terminate_usd": 1.0197,
+      "expected_minutes": 38.0,
+      "hard_terminate_minutes": 61.8,
+      "note": "the compute is ~1 s; the whole price is session overhead - setup 11 min, loads, six checkpoint writes and reloads, collection, transfer, a 10% contingency and the 20-minute artifact-recovery reserve"
+    },
+    "launch_path_not_built": "the canary has no launcher. Running it needs either a small session wrapper or a supervised manual session; neither is built and neither is authorized."
+  },
+  "cap_arithmetic": {
+    "spend": 193.929,
+    "current_cap": 217.0,
+    "remaining": 23.071,
+    "canary_hard": 1.0197,
+    "one_attempt_8_hard": 23.0484,
+    "needed_on_top_of_spend": 24.0681,
+    "cumulative_cap_required": 217.9971,
+    "short_under_the_current_cap": 0.9971,
+    "recommended": "$218.00 covers the canary plus one complete Attempt 8 with $0.0029 to spare, which is too thin; $219.00 leaves $1.0029. Neither is requested here - the maintainer sets the cap.",
+    "authorized_now": "NOTHING. No paid canary and no Attempt 8."
+  },
+  "record_sha256": "5726b6764848f5f3a87720bb29f98a49d3e90bfc4d664a48cbc0f7e5aa2b91fb"
+}

@@ -106,8 +106,18 @@ def copy_embeddings_and_final_norm(builder: ChildBuilder, adapter: ArchitectureA
                    adapter.final_norm(parent).weight)
 
 
-def head_rows(heads: list[int], head_dim: int) -> torch.Tensor:
-    return torch.tensor([h * head_dim + i for h in heads for i in range(head_dim)])
+def head_rows(heads: list[int], head_dim: int, device: Any = None) -> torch.Tensor:
+    """Row indices for a set of attention heads, on the device that will be
+    indexed.
+
+    An index built from a Python list lands on the host whatever it is about to
+    slice. Some torch ops accept that and some raise; relying on which is worse
+    than either. `device` is not optional in practice — every caller in the
+    search passes the weight's device — but it defaults to None so a caller that
+    only wants the arithmetic is not forced to invent one.
+    """
+    rows = torch.tensor([h * head_dim + i for h in heads for i in range(head_dim)])
+    return rows if device is None else rows.to(device)
 
 
 @torch.no_grad()

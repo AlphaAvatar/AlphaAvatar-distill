@@ -35,6 +35,8 @@ def _decoder_layers(model):
 class ActivationStatsCollector:
     def __init__(self, model):
         self.model = model
+        # Read from the weights, never from a config field or a caller's intent.
+        self.device = next(model.parameters()).device
         layers = _decoder_layers(model)
         self.num_layers = len(layers)
         self.hidden_size = model.config.hidden_size
@@ -45,12 +47,28 @@ class ActivationStatsCollector:
         # inputs of layers 1..N-1, then the final-norm output — N+1 points.
         n_points = self.num_layers + 1
         d, i = self.hidden_size, self.intermediate_size
+        # ACCUMULATE ON THE MODEL'S DEVICE. The hooks receive activations from
+        # the model, so an accumulator anywhere else is a cross-device add: that
+        # is what killed Phase-A attempt 7 in `ffn_abs_sum[idx] += ...`, and it
+        # had never fired because this collector's only previous execution was
+        # the Stage-0 regeneration on the CPU-only dev box, where the model and
+        # the accumulators coincide.
+        #
+        # Host accumulation would be the other way to make the devices agree,
+        # and it is the wrong one: `x.T @ x` is (H, H) float64 per collection
+        # point, so a 4B parent would push ~1.85 GiB across PCIe per calibration
+        # item. Accumulating here and transferring once in `state()` moves 1.81
+        # GiB in total instead. See `autoinit.device` for the contract.
+        dev = self.device
         self.res_count = 0
-        self.res_sum = torch.zeros(n_points, d, dtype=torch.float64)
-        self.res_sqsum = torch.zeros(n_points, d, d, dtype=torch.float64)
-        self.ffn_abs_sum = torch.zeros(self.num_layers, i, dtype=torch.float64)
-        self.ffn_sq_sum = torch.zeros(self.num_layers, i, dtype=torch.float64)
-        self.token_counts = torch.zeros(self.vocab_size, dtype=torch.int64)
+        self.res_sum = torch.zeros(n_points, d, dtype=torch.float64, device=dev)
+        self.res_sqsum = torch.zeros(n_points, d, d, dtype=torch.float64, device=dev)
+        self.ffn_abs_sum = torch.zeros(self.num_layers, i, dtype=torch.float64,
+                                       device=dev)
+        self.ffn_sq_sum = torch.zeros(self.num_layers, i, dtype=torch.float64,
+                                      device=dev)
+        self.token_counts = torch.zeros(self.vocab_size, dtype=torch.int64,
+                                        device=dev)
 
         self._hooks = []
         for idx, layer in enumerate(layers):
@@ -84,8 +102,10 @@ class ActivationStatsCollector:
             self.res_sum[point] += x.sum(0)
             self.res_sqsum[point] += x.T @ x
         self.res_count += n_tokens
+        # On the accumulator's device: `bincount` on the host would produce a
+        # host tensor and the `+=` would be the same cross-device add again.
         self.token_counts += torch.bincount(
-            input_ids[0].cpu(), minlength=self.vocab_size
+            input_ids[0].to(self.token_counts.device), minlength=self.vocab_size
         )
         return n_tokens
 
@@ -95,14 +115,33 @@ class ActivationStatsCollector:
         self._hooks = []
 
     def state(self) -> dict[str, torch.Tensor]:
+        """The statistics, ON THE HOST. This is the transfer boundary.
+
+        The persistent cache holds one of these and it is 1.81 GiB at a 4B
+        parent, so it does not live in VRAM between operator invocations. A
+        consumer that needs it for compute moves a working copy back with
+        `aadistill.autoinit.device.stats_to`, for the duration of one call.
+        """
         return {
-            "residual_sum": self.res_sum,
-            "residual_sqsum": self.res_sqsum,
+            "residual_sum": self._to_host(self.res_sum),
+            "residual_sqsum": self._to_host(self.res_sqsum),
             "residual_count": torch.tensor([self.res_count], dtype=torch.int64),
-            "ffn_abs_sum": self.ffn_abs_sum,
-            "ffn_sq_sum": self.ffn_sq_sum,
-            "token_counts": self.token_counts,
+            "ffn_abs_sum": self._to_host(self.ffn_abs_sum),
+            "ffn_sq_sum": self._to_host(self.ffn_sq_sum),
+            "token_counts": self._to_host(self.token_counts),
         }
+
+    @staticmethod
+    def _to_host(t: torch.Tensor) -> torch.Tensor:
+        """The transfer, as a named seam.
+
+        `.cpu()` inline would be untestable on a CPU-only box: it is a no-op
+        there and even returns `self`, so a regression that deleted it would
+        still pass. Routing every accumulator through one method lets a test
+        assert the boundary was crossed rather than assert `device == cpu`,
+        which is true either way.
+        """
+        return t.to("cpu")
 
     def save(self, path: str) -> dict:
         from safetensors.torch import save_file

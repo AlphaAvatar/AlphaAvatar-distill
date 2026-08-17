@@ -1,10 +1,61 @@
-**Updated:** 2026-08-17 09:30 UTC · branch `main`
+**Updated:** 2026-08-17 12:20 UTC · branch `main`
 **No pods running. Nothing billing.** **Stage 3 is COMPLETE.** Phase A has been
-attempted **seven** times for **$2.3828**. Attempt 7 got further than any before
-it — stage 0 passed, and one state was materialized, reloaded, validated and
-**measured on a GPU** — then failed closed on a **second** device-placement bug
-of the same class in different code. **STOPPED: no Attempt 8 is authorized,
-funded, prepared or implied, and no fix has been implemented.**
+attempted **seven** times for **$2.3828**. Attempts 6 and 7 both failed closed on
+device-placement defects that no CPU-only run can see. A **bounded device audit
+of the Stage-1 GPU search path** is now done at $0 and a real-CUDA canary is
+prepared. **Nothing is authorized: no paid canary and no Attempt 8.**
+
+## Stage-1 device contract and audit (2026-08-17)
+
+`autoinit.stage1_device_contract@v1` — [`device.py`](../src/aadistill/autoinit/device.py),
+record in [`autoinit_stage1_device_audit.json`](autoinit_stage1_device_audit.json).
+Four categories: the **model execution device** is read from the weights, never
+from a config field; the **persistent statistics cache is host-resident,
+always**; **ephemeral tensors, indices and projections** are created on the
+device of the parameters they meet; the **serialization boundary** validates on
+the produced model's device and measures on the search device.
+
+**Category 2 is a memory decision, so it carries its numbers.** One cache entry
+is **1.81 GiB** at a 4B parent (`res_sqsum` is 1.81 of it) and `max_entries` is
+1 — pinning it in VRAM holds that for a whole parent expansion. Accumulating on
+the host instead would push ~1.85 GiB per calibration item across PCIe, ~124 GiB
+over the mixture. So: accumulate on the model, transfer once, move a working
+copy back per invocation.
+
+Beyond the two already known, the audit found three more live sites — `width`,
+`ffn` and `composite` all multiply host statistics against device weights, and
+`attention` built a host index to slice device weights. `sandwich.py` needed no
+change (it writes via `param.copy_()`, which crosses devices) and `depth.*` was
+already internally coherent.
+
+The regressions
+([`test_search_operator_device_split.py`](../tests/autoinit/test_search_operator_device_split.py))
+supply the second device the dev box lacks: a statistics tensor labelled as
+cache-resident raises when it meets a model-side tensor untransferred. Five
+mutation classes are caught. **The instrument was wrong first** — it treated
+`.to(torch.float64)` as a device transfer and so passed the very defect it was
+built to catch — and two collector assertions were **vacuous** on one device and
+were replaced with a meta-device allocation check and a named transfer seam.
+
+**Canary, prepared and NOT launched:**
+[`autoinit_device_canary.py`](../scripts/pod/autoinit_device_canary.py). Six
+frozen implementations, one invocation each, through the production
+materialize/reload/validate/measure lifecycle on the 0.6B canonical student. No
+beam search, no recovery training, no battery, no selection; `scientific_use:
+false`; refuses CPU. **It has no launcher.** Price, separate: **$0.6270 expected
+/ $0.6897 soft / $1.0197 hard** — the compute is ~1 s, the rest is session
+overhead.
+
+```
+spend                  $193.9290
+cap                    $217.00
+remaining              $ 23.0710
+canary hard            $  1.0197
+one Attempt-8 hard     $ 23.0484
+minimum cap required   $217.9971   <-- $0.9971 above the current cap
+```
+
+Nothing is requested and nothing is authorized.
 
 ## Attempt 7 (2026-08-17, $0.3955): the attempt-6 fix held; a second device bug
 
@@ -360,9 +411,9 @@ stop". The margin is not a retry reserve.
    covered one launcher invocation, is spent, and its lineage gate refuses every
    later commit by construction. The remaining $23.0710 under the $217.00 cap is
    **not** permission.
-2. A maintainer decision is open: whether to audit device placement across every
-   tensor the search touches on a GPU, rather than fixing sites one paid pod at
-   a time. No Attempt 8 is authorized, funded, prepared or implied.
+2. A maintainer decision is open: a cumulative cap of at least **$217.9971**
+   would cover the $1.0197 canary plus one complete $23.0484 Attempt 8. Neither
+   is authorized, and the canary still has no launcher.
 
 ### Searched-leaf durability: RESOLVED 2026-08-15, needs no relay growth
 

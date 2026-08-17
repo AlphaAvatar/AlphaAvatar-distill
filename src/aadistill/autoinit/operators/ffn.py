@@ -22,6 +22,7 @@ import torch
 from ...init.project import ffn_neuron_importance
 from ..arch import ArchitectureAdapter, ArchSpec, Capability
 from ..metrics import OperatorLocalMetrics
+from ..device import model_device, stats_to
 from ._common import (
     ChildBuilder,
     collect_activation_stats,
@@ -76,8 +77,13 @@ class FFNActivationImportanceV0(OperatorImplementation):
         parent = ctx.model
         keep = ctx.target_spec[FFN_FIELD]
 
-        state = ctx.cached_stats(lambda: collect_activation_stats(
-            adapter, parent, (i["input_ids"] for i in ctx.calibration_items), ctx.device))
+        # Host cache -> device working copy (autoinit.device). `importance` is
+        # derived from it and `topk` on it produces the index that slices parent
+        # weights, so both must be where the weights are.
+        compute = model_device(parent)
+        state = stats_to(ctx.cached_stats(lambda: collect_activation_stats(
+            adapter, parent, (i["input_ids"] for i in ctx.calibration_items),
+            compute)), compute)
 
         new_spec = ctx.parent_spec.replace(**{FFN_FIELD: keep})
         builder = ChildBuilder(adapter, parent, new_spec, seed=ctx.seed)

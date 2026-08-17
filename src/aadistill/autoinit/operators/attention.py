@@ -104,11 +104,14 @@ class AttentionWeightProxyV0(OperatorImplementation):
             q64 = s_attn.q_proj.weight.to(torch.float64)
             o64 = s_attn.o_proj.weight.to(torch.float64)
             kept = select_q_heads(q64 * norm_w[None, :], o64, n_q, n_kv, keep_q, head_dim)
-            rows = head_rows(kept, head_dim)
+            rows = head_rows(kept, head_dim,
+                             device=s_attn.q_proj.weight.device)
 
+            # A host diagnostic, deliberately: these are reduced to Python
+            # floats immediately below and never meet a parameter again.
             scores = torch.tensor([
-                q64[h * head_dim:(h + 1) * head_dim, :].norm()
-                * o64[:, h * head_dim:(h + 1) * head_dim].norm()
+                float(q64[h * head_dim:(h + 1) * head_dim, :].norm()
+                      * o64[:, h * head_dim:(h + 1) * head_dim].norm())
                 for h in range(n_q)])
             retained.append(float(scores[kept].sum() / scores.sum()))
             kept_per_layer.append(list(kept))

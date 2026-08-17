@@ -1,10 +1,10 @@
 {
   "schema": "aadistill.current_state/v1",
-  "generated_utc": "2026-08-17T09:26:37+00:00",
+  "generated_utc": "2026-08-17T10:19:02+00:00",
   "current_phase": "Attempt 7 FAILED CLOSED in stage 1 at $0.3955. Stage 0 passed for the third time and the attempt-6 device fix HELD - one state was materialized, reloaded, validated and measured on a GPU. Stage 1 then hit a SECOND device bug of the same class in different code: ActivationCollector allocates its accumulators without a device, so a CUDA activation is added into a CPU tensor. init/collect.py is Stage-0 code whose only prior execution was on the CPU-only dev box.",
   "active_experiment": null,
   "paid_compute_running": false,
-  "next_work": "STOPPED. No attempt 8 is authorized, funded, prepared or implied, and no fix has been implemented. The pattern now has three instances: a CPU-only $0 path certifying GPU-only code. A device-placement audit of every tensor the search touches on a GPU is a larger and different piece of work than fixing whichever site the last pod happened to reach; that is a decision for the maintainer, not an inference from the unused balance.",
+  "next_work": "A maintainer cap decision. $217.9971 is the minimum cumulative cap covering the $1.0197 canary plus one complete $23.0484 Attempt 8, against the current $217.00. NOTHING is authorized - no paid canary and no Attempt 8 - and the canary has no launcher.",
   "teacher": {
     "model_id": "Qwen/Qwen3-4B-Thinking-2507",
     "revision": "768f209d9ea81521153ed38c47d515654e938aea",
@@ -175,7 +175,7 @@
     "E2 phases 2-3"
   ],
   "autoinit": {
-    "status": "ATTEMPT_7_FAILED_CLOSED_IN_STAGE_1_STOPPED",
+    "status": "STAGE1_DEVICE_AUDIT_DONE_CANARY_PREPARED_NOTHING_AUTHORIZED",
     "package": "src/aadistill/autoinit",
     "tests": 209,
     "operator_kinds": [
@@ -490,9 +490,9 @@
     "peak_working_storage_gib": 106
   },
   "tests": {
-    "passing": 1768,
+    "passing": 1777,
     "skipped": 7,
-    "note": "dev box; 1728 passed / 18 skipped under the pod simulator in 4m16s",
+    "note": "dev box, after the Stage-1 device audit",
     "venvs_verified": [
       "repo .venv transformers 5.13.1"
     ]
@@ -614,5 +614,36 @@
     "traceback": "logs/autoinit_phase_a_attempt7/stage1_traceback.log",
     "note": "the traceback preservation added before this run gave the exact frame with no guessing, on its first use",
     "evidence": "logs/autoinit_phase_a_attempt7/"
+  },
+  "stage1_device_audit": {
+    "contract": "autoinit.stage1_device_contract@v1",
+    "record": "logs/autoinit_stage1_device_audit.json",
+    "sites_fixed": [
+      "init/collect.py accumulators + bincount + host transfer seam",
+      "width.global_pca_v0",
+      "ffn.activation_importance_v0",
+      "composite.stage1_sandwich_v0",
+      "attention.weight_proxy_v0"
+    ],
+    "sites_confirmed_clean": [
+      "init/sandwich.py (writes via param.copy_)",
+      "init/contribution.py",
+      "depth.* (host-coherent)",
+      "ChildBuilder (unplaced child is category 1)"
+    ],
+    "regressions": "tests/autoinit/test_search_operator_device_split.py",
+    "mutations_caught": 5,
+    "stats_cache_gib_per_entry_at_4b": 1.8137,
+    "canary": {
+      "script": "scripts/pod/autoinit_device_canary.py",
+      "prepared": true,
+      "launched": false,
+      "launcher_built": false,
+      "scientific_use": false,
+      "expected_usd": 0.627,
+      "soft_stop_usd": 0.6897,
+      "hard_terminate_usd": 1.0197
+    },
+    "cap_required_for_canary_plus_attempt_8": 217.9971
   }
 }

@@ -3524,3 +3524,82 @@ two devices, cuda:0 and cpu!
   invocation, it is spent, and its lineage gate refuses every later commit by
   construction. **No Attempt 8 is authorized, funded, prepared or implied.** The
   remaining $23.0710 is not permission. No fix has been implemented.
+
+## 2026-08-17 — Bounded device-placement audit of the Stage-1 GPU search path
+
+- **Context:** three paid sessions lost to one class of defect. Fixing the site
+  the last pod reached only revealed the next, so the rule is written down and
+  the sites are made to follow it rather than patched one pod at a time.
+- **The contract** — `src/aadistill/autoinit/device.py`,
+  `autoinit.stage1_device_contract@v1`, four categories with deliberately
+  different answers:
+
+  1. **Model execution device** — read from the weights (`model_device`), never
+     assumed from a config field. `SearchConfig.device` is an intent, not
+     evidence about any object: a parent on CUDA routinely coexists with a
+     freshly built child on the host.
+  2. **Persistent statistics cache — HOST, always.** Accumulated on the model's
+     device, transferred to the host **once**, and moved back per invocation by
+     the consumer.
+  3. **Ephemeral tensors, indices, projections** — created on, or explicitly
+     moved to, the device of the parameters they meet.
+  4. **Serialization/artifact boundary** — save from wherever the model is;
+     reload placed explicitly and validated **on the produced model's device**;
+     only then moved to the search device to be measured.
+
+- **Why category 2 is not "allocate the accumulators on CUDA".** That would have
+  been the one-line fix. The numbers refuse it: one cache entry is **1.81 GiB**
+  at a 4B parent (`res_sqsum` at `(L+1, H, H)` float64 = 1.8066 of it) and
+  `StatsCache.max_entries` is 1, so pinning it holds 1.81 GiB of VRAM for the
+  whole expansion of a parent to save two operators one transfer. Host
+  accumulation is the other wrong answer: `x.T @ x` is `(H, H)` float64 per
+  collection point, ~1.85 GiB per calibration item across PCIe, ~124 GiB over
+  the mixture. Accumulate on the model, transfer once, move a working copy back
+  for one invocation.
+
+- **What the audit found**, beyond the two already known:
+
+  | site | defect |
+  | --- | --- |
+  | `width.global_pca_v0` | `proj` from the host cache multiplied against CUDA weights |
+  | `ffn.activation_importance_v0` | `importance` and its `topk` index from the host cache, slicing CUDA weights |
+  | `composite.stage1_sandwich_v0` | `init_student` math against CUDA weights with host statistics |
+  | `attention.weight_proxy_v0` | `head_rows()` host index slicing CUDA weights — tolerated by advanced indexing, refused by `index_select` |
+  | `init/collect.py` | every accumulator unplaced; `bincount` forced to `.cpu()` |
+
+  `sandwich.py` needed **no** change: it writes exclusively through
+  `param.copy_()`, which crosses devices, and all its math is against the
+  parent. `depth.*` is internally host-side and coherent. `ChildBuilder` still
+  produces an unplaced child — that is category 1, not a defect.
+
+- **The regressions supply the second device the box does not have.**
+  `tests/autoinit/device_split.py` labels a statistics tensor as cache-resident
+  and raises when it meets a model-side tensor untransferred. Each cache
+  consumer runs its real `execute()` against it; removing any of the three
+  `stats_to` calls fails.
+- **The instrument was wrong first, and is only trustworthy because that was
+  found.** It treated `.to(torch.float64)` as a device transfer, so the label
+  was stripped by the first dtype cast inside a projection helper and the
+  instrument passed the defect it was built to catch. `.to()` now counts as a
+  transfer only when it names a device.
+- **Two collector assertions were vacuous and were replaced.** `assert
+  accumulator.device == model.device` passes with the attempt-7 bug reinstated
+  when there is one device. Allocation is now checked against a **meta**-device
+  model, and the host transfer through a named seam whose omission is
+  detectable.
+- **Prepared, not launched:** `scripts/pod/autoinit_device_canary.py`. One real
+  invocation of each of the six frozen implementations plus the production
+  materialize/reload/validate/measure lifecycle, on the 0.6B canonical student
+  with four truncated calibration items. No beam search, no recovery training,
+  no battery, no ranking, no selection; `scientific_use: false` in the record;
+  it refuses to run on CPU. **It has no launcher** — running it needs a session
+  wrapper or a supervised manual session, and neither is built.
+- **Canary price, separate:** compute is ~1 s by the project's own cost model,
+  so the price is entirely session overhead — **$0.6270 expected / $0.6897 soft
+  / $1.0197 hard** (38.0 / 41.8 / 61.8 min).
+- **Cap arithmetic.** $23.0710 remains. The canary's $1.0197 plus one Attempt-8
+  hard bound of $23.0484 is $24.0681, so a cumulative cap of **$217.9971** is
+  the minimum — **$0.9971 above the current $217.00**. Nothing is requested and
+  nothing is authorized: **no paid canary and no Attempt 8.**
+- **Not changed:** search, objectives, seeds, thresholds, recovery, pricing, the
+  science and session plans. Stage 2–5 rehearsal was not expanded.

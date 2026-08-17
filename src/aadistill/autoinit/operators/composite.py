@@ -31,6 +31,7 @@ import torch
 from ...init.sandwich import init_student
 from ..arch import ArchitectureAdapter, ArchSpec, Capability
 from ..metrics import OperatorLocalMetrics
+from ..device import model_device, stats_to
 from ._common import collect_activation_stats, model_dtype
 from .base import (
     CalibrationNeed,
@@ -116,11 +117,17 @@ class CompositeStage1SandwichV0(OperatorImplementation):
         cfg = dict(ctx.config or {})
         kept_layers = cfg.get("kept_layers")
 
+        # Host cache -> device working copy (autoinit.device). `init_student`
+        # does all of its math against the PARENT's weights and writes into the
+        # student with `copy_`, which crosses devices on its own; what it cannot
+        # do is multiply a host projection by a device weight.
+        compute = model_device(parent)
         state = cfg.get("activation_state")
         if state is None:
             state = ctx.cached_stats(lambda: collect_activation_stats(
                 adapter, parent, (i["input_ids"] for i in ctx.calibration_items),
-                ctx.device))
+                compute))
+        state = stats_to(state, compute)
 
         dtype = model_dtype(adapter, parent)
         student_config = adapter.build_config(parent.config, ctx.target_spec)
