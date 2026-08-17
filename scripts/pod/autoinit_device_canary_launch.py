@@ -201,7 +201,15 @@ class DeviceCanary(_preflight.Preflight):
                 f"--workdir artifacts/autoinit/device_canary --device cuda")
 
 
-def main() -> int:
+def build_parser() -> argparse.ArgumentParser:
+    """The real parser, extracted so a test can assert on the namespace it
+    produces rather than on a transcription of it.
+
+    Attempt 1 was lost at $0.0603 because the inherited base reads attributes
+    off `self.a` that this parser did not define. Subclassing a launcher means
+    inheriting its ARGUMENT contract as well as its methods, and the contract is
+    invisible from the subclass.
+    """
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--scr", required=True)
     ap.add_argument("--session-commit", required=True)
@@ -229,7 +237,29 @@ def main() -> int:
     ap.add_argument("--runpod-config",
                     default=str(Path.home() / ".runpod/config.toml"))
     ap.add_argument("--out", default="logs/autoinit_device_canary_session.json")
-    args = ap.parse_args()
+    # --- read by the INHERITED base, not by anything written here ----------
+    #
+    # `TEACHER_REVISION` is forwarded to the shared setup script. The canary
+    # needs no teacher, but setup is shared and its behaviour must not change
+    # because a canary is driving it, so this is the same frozen revision every
+    # other session pins. Nothing here downloads or uses a teacher.
+    ap.add_argument("--teacher-revision",
+                    default="768f209d9ea81521153ed38c47d515654e938aea")
+    # Read only by the base's `fetch_products`, which this session OVERRIDES to
+    # return nothing. The value is therefore never used; it is canary-scoped
+    # rather than the real checkpoint store so that if some future edit ever did
+    # fetch, it could not land among real checkpoints.
+    ap.add_argument("--ckpt-store",
+                    default="artifacts/audit/autoinit_device_canary/never_fetched")
+    # Same: unused. One minute rather than a generous window, because a timeout
+    # that would mask a fetch this session must never perform is worse than one
+    # that fails.
+    ap.add_argument("--ckpt-fetch-limit-min", type=int, default=1)
+    return ap
+
+
+def main() -> int:
+    args = build_parser().parse_args()
 
     _preflight.AUTH_PATH = AUTH_PATH
     _preflight.STATUS = STATUS
