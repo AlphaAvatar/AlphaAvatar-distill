@@ -3728,3 +3728,51 @@ two devices, cuda:0 and cpu!
   P12 puts deleting them behind explicit approval.
 - **Verification:** 1780 passed / 7 skipped on the dev box; 1740 passed / 18
   skipped under the pod simulator in 4m13s; `verify_frozen_assets.py` passed.
+
+## 2026-08-18 — Documentation and fact ownership normalized
+
+- **Problem:** the same fact lived in several files and most copies were stale.
+  The README carried `$191.5462 against a $213.00 cap` through two cap raises and
+  claimed no `PhaseAAuthorization` existed after four had been issued;
+  `current_state.json` had grown to 33 KB and 28 keys by absorbing per-attempt
+  history that already lived in the per-run directories; `STATE.md` was 1,182
+  lines, most of it durable reference rather than state; `REPO_LAYOUT.md`
+  described directories with nothing checking they existed.
+- **Rule adopted: one owner per fact.** A file that does not own a fact links to
+  the one that does and does not restate it. Written down in
+  [`logs/CATALOG.md`](CATALOG.md) with five classes — CURRENT, REFERENCE,
+  HISTORICAL, SUPERSEDED, TERMINATED — and what may be edited in each.
+- **The three live-fact owners:** `current_state.json` (machine),
+  `STATE.md` (its human view), `BUDGET_LEDGER.md` (spend and caps). The README
+  owns none.
+- **Moved, not deleted:**
+  * `docs/HANDOFF_AUTOINITIALIZER.md` → `docs/archive/…_20260812.md`, with a
+    banner saying it is provenance and not a plan. It was the brief the
+    implementation was written against; reading a result without its brief is
+    how a decision becomes unexplainable.
+  * `logs/STATE.md`'s reference half (525 lines: binding rules, pinned assets,
+    protocol requirements, implementation state) → `docs/AUTOINIT_REFERENCE.md`,
+    unchanged. STATE.md is a snapshot; that material changes when the *design*
+    changes.
+  * the pre-normalization `current_state.json` → `logs/archive/`, so the 33 KB
+    version is recoverable without git archaeology.
+- **New:** `logs/CATALOG.md` and `docs/POD_SCRIPTS.md`. The latter classifies all
+  76 pod scripts; the thirteen retired experiment triples (D0, E2, E2P1, E3–E8b,
+  P0asst, P2) are **HISTORICAL and retained** — P4 makes reproducing the
+  implementation part of reproducing the result, so deleting E7's launcher would
+  make its $10.49 unreproducible from HEAD.
+- **The paid device-canary path is recorded TERMINATED** in both the catalog and
+  the snapshot: two authorized sessions, $0.1240, zero canary runs. Its script
+  and launcher are kept — the evidence is accountable spend, the workload is a
+  correct description of what a canary would do, and its generic lesson is being
+  moved into structure rather than prose. Nothing about it is prepared.
+- **Structural checks** in `tests/docs/test_repository_structure.py`: the README
+  states no dollar amount and no authorization status; every path named in
+  `REPO_LAYOUT.md` exists; `STATE.md` and `current_state.json` agree on money,
+  running and authorized; the snapshot stays under 12 KB and carries the frozen
+  identities unchanged; every `logs/` entry and every `scripts/pod/` file is
+  classified. Two mutations verified: a spend figure re-added to the README, and
+  a drifted number in STATE.md.
+- **Deliberately deferred:** the layout does not yet name `session.py`,
+  `session_runner.py` or `SESSION_ARCHITECTURE.md`. Documentation describes what
+  exists; those arrive with the refactoring commit.

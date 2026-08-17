@@ -1,0 +1,136 @@
+# Log catalog and fact ownership
+
+Which file owns which fact, and what "current", "historical", "superseded" and
+"terminated" mean here. A repository this size fails by having the same fact in
+four places and three of them stale; this page exists to make that a rule
+violation rather than a discovery.
+
+## Ownership rules
+
+**One owner per fact.** A file that does not own a fact links to the file that
+does. It does not restate it.
+
+| class | meaning | may be edited? |
+| --- | --- | --- |
+| **CURRENT** | describes the repository *now*. Exactly one owner per fact. | yes — that is the point |
+| **HISTORICAL** | evidence of something that happened. | **no.** Append a superseding note elsewhere; never rewrite |
+| **SUPERSEDED** | was current, has been replaced, kept for provenance | no — mark, do not edit |
+| **TERMINATED** | a path deliberately stopped. Evidence kept, work not resumed | no |
+| **REFERENCE** | durable design/protocol material. Changes when the design changes, not when a run finishes | yes, with a decision record |
+
+**The three live-fact owners, and nobody else:**
+
+| fact | owner |
+| --- | --- |
+| everything current, machine-readable | [`current_state.json`](current_state.json) |
+| the same, in prose | [`STATE.md`](STATE.md) — must agree with the above |
+| spend, caps, authorizations | [`BUDGET_LEDGER.md`](BUDGET_LEDGER.md) |
+
+`README.md` owns **no** live facts: no spend, no cap, no attempt count, no
+authorization status, no "current state" table. It is a timeless public
+overview and links here instead. A structural test enforces this.
+
+## CURRENT
+
+| file | owns |
+| --- | --- |
+| `current_state.json` | the minimal machine snapshot: budget, running, authorized, frozen identities, next starting point |
+| `STATE.md` | the human view of the above |
+| `BUDGET_LEDGER.md` | actual spend, the cap history and every authorization's status |
+| `decisions.md` | why things are the way they are — append-only in practice |
+| `EXPERIMENT_INDEX.md` | what each experiment proved, and what it does not support |
+| `EXPERIMENTS.md` | per-session chronology |
+| `checkpoint_registry.json` | which checkpoints exist and why |
+| `checkpoint_tombstones.json` | what was deleted and how to rebuild it |
+| `supported_models.md` | the supported-model table (AGENTS.md §3.4) |
+| `artifact_manifests.md` | external artifact manifests |
+| `CATALOG.md` | this file |
+
+## REFERENCE — frozen science and protocol
+
+Byte-for-byte preserved. These are cited by hash from executable code and from
+consumed authorizations; changing one silently invalidates recorded results.
+
+| file | what it pins |
+| --- | --- |
+| `autoinit_phase_a_recovery_plan_frozen.json` | the frozen **science** plan, `02be33b9…` |
+| `autoinit_phase_a_preregistration.json` / `.md` | the preregistration (draft) |
+| `autoinit_phase_a_preregistration_materialized.json` | the materialized preregistration |
+| `autoinit_v1_search_space.json` | the search space, its cost model and the operator ledger |
+| `autoinit_state_eval_v1_manifest.json` | the `state_eval@v1` asset identity |
+| `autoinit_recovery_search_v2_build.json` / `_audit.json` | the battery's build and its $0 audit |
+| `autoinit_threshold_characterization.json` | how the thresholds were derived |
+| `autoinit_phase_a_protocol_compat_v2.json` | `generation_runtime_comparability@v2` |
+| `autoinit_stage1_device_audit.json` | `autoinit.stage1_device_contract@v1` |
+| `autoinit_phase_a_fallback_audit.json` | the reference-cache fallback derivation and pricing |
+| `autoinit_phase_a_full_mixture_depth.json` | the full-mixture depth probe |
+| `autoinit_phase_a_preregistration.md` | the preregistration in prose |
+| `autoinit_recovery_search_v2_audit.json` | the battery's $0 item-by-item audit |
+
+## HISTORICAL — evidence, never rewritten
+
+Per-run directories. Each holds what a session actually produced.
+
+| directory | session |
+| --- | --- |
+| `autoinit_stage3_complete/` | **Stage 3 COMPLETE** — both permanent controls, thresholds materialized |
+| `autoinit_permanent_controls/` | the controls' own evidence |
+| `autoinit_preflight_run4/` | the micro-preflight's fourth and last attempt |
+| `autoinit_continuation_attempts/` | the eight characterization-continuation attempts |
+| `autoinit_phase_a_attempts/` | Phase-A attempts 1–5 |
+| `autoinit_phase_a_attempt6/`, `autoinit_phase_a_attempt7/` | attempts 6 and 7, with attempt 7's stage-1 traceback |
+| `autoinit_device_canary_attempt1/`, `autoinit_device_canary_attempt2/` | the two terminated canary sessions |
+| `e7_canary/`, `e7_canary_rerun/` | the control-plane canary runs |
+| `e8b_s2_dp_sa/`, `e8b_step0_records/` | E8b evidence |
+
+Consumed authorizations — kept because a spent grant is the record of what was
+permitted: `autoinit_phase_a_authorization.json`,
+`autoinit_device_canary_authorization.json`,
+`autoinit_micro_preflight_authorization.json`,
+`autoinit_continuation_authorization.json`. Each one's lineage gate refuses the
+current HEAD by construction, which is what "consumed" means operationally.
+
+Session records: `autoinit_phase_a_session.json`,
+`autoinit_device_canary_session.json`, `autoinit_preflight_session.json`,
+`autoinit_continuation_session.json`, and the `e*_session_evidence.json` family.
+
+Experiment records: everything named `e1_*` through `e8b_*`.
+
+$0 audits and measurements, each the evidence behind a decision that cites it:
+`autoinit_control_availability.json`, `autoinit_control_sb_packaging_repair.json`,
+`autoinit_dryrun_fresh.json`, `autoinit_dryrun_resume.json`,
+`autoinit_recovery_fingerprint_audit.json`,
+`autoinit_recovery_scoring_validation.json`,
+`autoinit_repeatability_cpu_smoke.json`, `autoinit_role_isolation.json`,
+`autoinit_tool_rendering_audit_tf5.json`, `autoinit_tool_scoring_audit.json`,
+`autoinit_relay_capacity.md`, `autoinit_phase_a_storage.md`,
+`autoinit_tool_rendering_migration.md`.
+
+## SUPERSEDED — kept for provenance, not for use
+
+| file | superseded by |
+| --- | --- |
+| `archive/` | earlier proposals and preregistrations; see its own README |
+| `archive/current_state_20260817_full.json` | the minimal `current_state.json`; this is the pre-normalization copy |
+| `autoinit_phase_a_repricing.md` | superseded **twice** — $20.0126, then $22.4508, now $23.0483. Kept because the `gpu_fraction` measurements in it are not recorded anywhere else |
+| `autoinit_recovery_search_v1_manifest.json` | `recovery_search_v2`. v1 was INVALID before first use — 0/20 tool prompts rendered |
+| `autoinit_pilot_proposal.md`, `autoinit_micro_preflight_plan.md`, `autoinit_preflight_remaining_gates.md` | executed and closed; the sessions' own evidence is authoritative |
+| `e5_proposal.md`, `e7_canary_proposal.md`, `e7_preregistration.md` | their runs |
+
+## TERMINATED — deliberately stopped
+
+| path | why |
+| --- | --- |
+| **the paid device-canary session** | two authorized sessions, $0.1240, **zero canary runs** — both died in the wrapper's inherited contracts, neither reached the canary script. Evidence in `autoinit_device_canary_attempt{1,2}/`; the generic lesson is in `decisions.md` and is now enforced by the session specification. **No further canary is prepared.** |
+| **E8b** | strategically terminated; no valid recovered-behaviour comparison |
+| **student-prefix recovery (E5)** | prefix-conditioned targets teach continuation, not closure |
+| **`recovery_search_v1`** | invalid before first use; preserved unmodified with a sibling `SUPERSEDED.md` |
+
+## Adding a log
+
+1. Decide its class from the table above.
+2. If it is CURRENT, name its owner here and make sure nothing else claims the
+   same fact.
+3. If it supersedes something, mark the old entry — do not delete or edit it.
+4. `tests/docs/test_repository_structure.py` requires every top-level entry in
+   `logs/` to be classified here.

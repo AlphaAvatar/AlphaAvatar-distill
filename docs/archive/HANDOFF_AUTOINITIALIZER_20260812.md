@@ -1,3 +1,15 @@
+> **ARCHIVED — provenance only. Do not act on this document.**
+>
+> Written 2026-08-12 at the close of E8, for the session that implemented the
+> AutoInitializer. That session happened: the harness was built, Stage 3 was
+> completed, Phase A was attempted seven times and the device audit followed.
+> Every forward-looking statement below has been overtaken. It is kept because
+> it is the brief the implementation was written against, and reading a result
+> without its brief is how a decision becomes unexplainable.
+>
+> Current state: [`logs/STATE.md`](../../logs/STATE.md) (human) and
+> [`logs/current_state.json`](../../logs/current_state.json) (machine).
+
 # Handoff — Teacher-Adaptive AutoInitializer
 
 **Self-contained.** Read this and you do not need any conversation history. Written

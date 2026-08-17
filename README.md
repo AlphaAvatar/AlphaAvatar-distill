@@ -13,53 +13,41 @@ of exactly the requested size. The current study is 4B → ~596M; the same machi
 intended to carry a later ~30B → ~4.xB setting, so nothing in the search engine may
 hard-code layer counts, hidden or FFN sizes, head counts, or a target parameter count.
 
-### Current state
+### Where the facts live
 
-| | |
-| --- | --- |
-| current best behaviour | E1/P1 KD-heavy at the 2.96M rung (`e1_r2960k_sb_pca` lineage) |
-| frozen battery | 150 prompts, inclusion mask `d6e24e0b09da1bcc…`, sampled from the 0.86M rung |
-| retained reference on it | usable_rollout 0.7300 · correct_overall 0.1867 · correct_given_usable 0.2511 |
-| active work | **Teacher-Adaptive AutoInitializer** — Stage 3 characterization **complete**; the Phase-A harness is **built and rehearsed**; the search itself is **not authorized** |
-| last completed experiment | **AutoInit-Stage3** — both permanent controls characterized, thresholds materialized ([products](./logs/autoinit_stage3_complete/)) |
-| control reference on `recovery_search_v2` | pooled `usable_rollout_rate` 0.3711 · `correct_overall` 0.0118 · `correct_given_usable` 0.0286 (380 prompts, two seeds) |
-| E8b | **strategically terminated; no valid recovered-behaviour comparison** |
-| actual cumulative spend | **$191.5462** against a $213.00 cap ([ledger](./logs/BUDGET_LEDGER.md)) |
-| proposed next paid step | AutoInitializer Phase A, $17.89 expected / $20.01 hard from the launcher's own plan — fits the $21.45 remaining, and is **still unauthorized**: no `PhaseAAuthorization` artifact exists and the launcher refuses to create a pod without one ([ledger](./logs/BUDGET_LEDGER.md)) |
-
-The two behaviour numbers above are **not comparable and neither is a
-regression**: 0.7300 is the E1 2.96M-rung checkpoint on the 150-prompt frozen
-battery, and 0.3711 is the pooled 0.86M-step *AutoInitializer controls* on the
-190-prompt `recovery_search_v2`. Different checkpoints, different training
-budgets, different batteries. The controls exist to be a reference point for a
-search, not to be the best model.
-
-### Repository map
+This page is a **timeless overview**. It deliberately carries no spend figure, no
+attempt count, no authorization status and no "current state" table — those go
+stale between sessions, and a stale README is worse than none. Every live fact
+has exactly one owner:
 
 | you want | read |
 | --- | --- |
-| current state, in minutes | [`logs/STATE.md`](./logs/STATE.md) |
-| **the next session's brief** | [`docs/HANDOFF_AUTOINITIALIZER.md`](./docs/HANDOFF_AUTOINITIALIZER.md) |
+| **current state, machine-readable** | [`logs/current_state.json`](./logs/current_state.json) |
+| **current state, in prose** | [`logs/STATE.md`](./logs/STATE.md) |
+| spend, caps, authorizations | [`logs/BUDGET_LEDGER.md`](./logs/BUDGET_LEDGER.md) |
+| which log owns which fact | [`logs/CATALOG.md`](./logs/CATALOG.md) |
+| where code lives | [`docs/REPO_LAYOUT.md`](./docs/REPO_LAYOUT.md) |
+| which pod script is live, historical or terminated | [`docs/POD_SCRIPTS.md`](./docs/POD_SCRIPTS.md) |
+| AutoInitializer binding rules and pinned assets | [`docs/AUTOINIT_REFERENCE.md`](./docs/AUTOINIT_REFERENCE.md) |
 | what each experiment proved | [`logs/EXPERIMENT_INDEX.md`](./logs/EXPERIMENT_INDEX.md) |
 | decisions and their reasons | [`logs/decisions.md`](./logs/decisions.md) |
 | which checkpoints exist, and why | [`logs/checkpoint_registry.json`](./logs/checkpoint_registry.json) |
 | what was deleted, and how to rebuild it | [`logs/checkpoint_tombstones.json`](./logs/checkpoint_tombstones.json) |
-| actual spend vs authorization | [`logs/BUDGET_LEDGER.md`](./logs/BUDGET_LEDGER.md) |
-| machine-readable state | [`logs/current_state.json`](./logs/current_state.json) |
-| the AutoInitializer search space and its cost | [`logs/autoinit_v1_search_space.json`](./logs/autoinit_v1_search_space.json) |
-| the proposed first paid pilot | [`logs/autoinit_pilot_proposal.md`](./logs/autoinit_pilot_proposal.md) |
-| superseded plans (provenance only) | [`logs/archive/`](./logs/archive/) |
-| per-session chronology | [`logs/EXPERIMENTS.md`](./logs/EXPERIMENTS.md) |
+| the working contract for coding agents | [`AGENTS.md`](./AGENTS.md) |
 
-**Research transition.** The next phase is a **Teacher-Adaptive AutoInitializer** —
-search over initialization operators, operator order and calibration configuration, with
-conditional remeasurement after every operator. **It is not implemented yet**; the
-architecture is decided and recorded in the handoff.
+**Research direction.** A **Teacher-Adaptive AutoInitializer**: search over
+initialization operators, operator order and calibration configuration, with
+conditional remeasurement after every operator. Its design, pinned assets and
+binding rules are in
+[`docs/AUTOINIT_REFERENCE.md`](./docs/AUTOINIT_REFERENCE.md); its status is in
+`logs/STATE.md`, not here.
 
-**One place for the experiment history: [`logs/EXPERIMENT_INDEX.md`](./logs/EXPERIMENT_INDEX.md)**
-— what each of E1–E8 asked, what it proved, what it does *not* support, and which
-checkpoints still matter. Chronology and per-session detail live in
-[`logs/EXPERIMENTS.md`](./logs/EXPERIMENTS.md); this README keeps only current state.
+The methods are meant to be **model-family-agnostic** — the same
+activation-statistics initialization, recovery training and deployment-numerics
+gates should apply to dense LLMs, MoE, VLM and Omni-models alike. That is a
+design constraint on the algorithm core, not a claim: the work so far is a dense
+text **baseline**, and no MoE, vision or audio model has been attempted or
+validated.
 
 ### What E1–E8 established
 
@@ -94,9 +82,9 @@ which operators have already been applied. The successor system therefore search
 initialization **operators, operator order, and calibration configuration**, remeasuring
 the actual checkpoint after every operator, and admits only complete target-size
 candidates to a fixed low-budget recovery probe. Design constraints are recorded in
-[`logs/decisions.md`](./logs/decisions.md); **no paid search is authorized.**
-
-The methods are meant to be **model-family-agnostic**: the same activation-statistics initialization, recovery training and deployment-numerics gates should apply to dense LLMs, MoE, VLM and Omni-models alike. That is a design constraint on the algorithm core, not a claim — the run below is a dense text **baseline**, and no MoE, vision or audio model has been attempted or validated ([scope decision](./logs/decisions.md)).
+[`logs/decisions.md`](./logs/decisions.md). Whether any paid search is
+authorized at a given moment is a live fact and lives in
+[`logs/current_state.json`](./logs/current_state.json), not here.
 
 [![Experiment 1 recovery-data scaling](./assets/e1_scaling.svg)](./assets/e1_scaling.svg)
 
@@ -168,8 +156,9 @@ evidence separates them.
 
 **Current experiment:** [Qwen/Qwen3-4B-Thinking-2507](https://huggingface.co/Qwen/Qwen3-4B-Thinking-2507) → a 0.6B-class student (Qwen3-0.6B geometry, ~6.7× compression, INT8 deployment target).
 
-Full record: [`logs/EXPERIMENTS.md`](./logs/EXPERIMENTS.md). Current state and next
-actions: [`logs/STATE.md`](./logs/STATE.md). Total paid compute to date: **$160.16**.
+Full record: [`logs/EXPERIMENTS.md`](./logs/EXPERIMENTS.md). Current state and
+next actions: [`logs/STATE.md`](./logs/STATE.md); cumulative spend against the
+authorized cap: [`logs/BUDGET_LEDGER.md`](./logs/BUDGET_LEDGER.md).
 
 ### How Stage 2/3 is measured
 
