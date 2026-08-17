@@ -45,6 +45,7 @@ import os
 import subprocess
 import sys
 import time
+import traceback
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -201,6 +202,32 @@ class PhaseADriver:
             say(f"STAGE {stage} FAILED: {reason}")
         return passed
 
+    def preserve_traceback(self, stage: int, exc: BaseException) -> dict:
+        """Keep the frame an UNEXPECTED in-process exception died in.
+
+        Attempt 6 lost stage 1's frame. Stages that shell out keep a log tail;
+        stages 1 and 5 run in-process, so all that survived was
+        `f"{type(exc).__name__}: {exc}"`. The message happened to name
+        `index_select`, which is how the call site was recovered — luck, not
+        evidence.
+
+        The short reason is unchanged and still what `record()` reports. The
+        full traceback goes to `AUDIT/stage{n}_traceback.log`, which the session
+        tars up with the rest of the audit directory, AND into the evidence JSON
+        so it survives even if the archive does not.
+        """
+        text = traceback.format_exc()
+        path = AUDIT / f"stage{stage}_traceback.log"
+        try:
+            path.write_text(
+                f"stage {stage}: {type(exc).__name__}: {exc}\n"
+                f"{datetime.now(timezone.utc):%FT%TZ}\n\n{text}")
+        except OSError as write_failed:                           # noqa: BLE001
+            # Never let evidence collection be the thing that fails the stage.
+            return {"traceback": text[-6000:],
+                    "traceback_file_error": str(write_failed)}
+        return {"traceback": text[-6000:], "traceback_file": path.name}
+
     def enter(self, stage: int) -> None:
         self.auth.require_stage(stage)
         PHASE_A_PLAN_V1.advance_to(stage, self.results)
@@ -240,7 +267,8 @@ class PhaseADriver:
         except Exception as exc:                                  # noqa: BLE001
             return self.record(0, False,
                                f"preregistration binding: {type(exc).__name__}: "
-                               f"{exc}"[-1500:])
+                               f"{exc}"[-1500:],
+                               **self.preserve_traceback(0, exc))
         try:
             self.auth.require_science_plan(self.plan.plan_hash)
         except AuthorizationError as exc:
@@ -301,7 +329,8 @@ class PhaseADriver:
         except Exception as exc:                                  # noqa: BLE001
             return self.record(0, False,
                                f"generation protocol: {type(exc).__name__}: "
-                               f"{exc}"[-1500:])
+                               f"{exc}"[-1500:],
+                               **self.preserve_traceback(0, exc))
 
         battery_manifest = json.loads((BATTERY / "manifest.json").read_text())
         if battery_manifest.get("content_sha256") != BATTERY_CONTENT:
@@ -886,7 +915,12 @@ class PhaseADriver:
                 self.record(stage, False, f"refused: {exc}"[-1500:])
                 ok = False
             except Exception as exc:                              # noqa: BLE001
-                self.record(stage, False, f"{type(exc).__name__}: {exc}"[-1500:])
+                # Unexpected. `RecoveryAdmissionError`/`AuthorizationError`
+                # above are refusals whose message IS the explanation; this
+                # branch is a defect, and a defect without a frame cost this
+                # project a paid session.
+                self.record(stage, False, f"{type(exc).__name__}: {exc}"[-1500:],
+                            **self.preserve_traceback(stage, exc))
                 ok = False
             if ok:
                 continue

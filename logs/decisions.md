@@ -3416,3 +3416,61 @@ cuda:0, different from other tensors on cpu
   place it in `ChildBuilder`) — and the test that would have caught it must run
   the validation path with `config.device` set to a device the model is not on,
   which is testable on CPU by asserting the placement rather than the arithmetic.
+
+## 2026-08-17 — The device fix, at the boundary rather than globally
+
+- **Context:** attempt 6's stage-1 failure. `BeamSearch._validate` forwards the
+  produced child and the canonical reload through **one** input, and that input
+  was built on `SearchConfig.device` — where the reload was placed, but not
+  necessarily the child.
+- **Decision:** fix it at the materialize/reload boundary. `ChildBuilder` still
+  produces a CPU child; `build_student` is untouched.
+
+  ```
+  validation_device = model_device(model)        # where the child ACTUALLY is
+  reloaded = adapter.load(ckpt, device=validation_device)
+  _validate(..., device=validation_device)       # one numerical backend
+  reloaded = reloaded.to(config.device)          # then measure on the search device
+  ```
+
+  `model_device` reads the weights rather than the config, which is the whole
+  bug in one function. `validation_device` and `measurement_device` are recorded
+  in `state.notes["validation"]`.
+- **Why not move the children to CUDA globally.** Three reasons, and the first
+  is the one that matters: a save/reload check that compared a host forward
+  against a device forward would be measuring the **backend**, not the
+  serialization — the number it reports, `reload_max_logit_diff`, would no
+  longer mean what it says. Second, placing every child would duplicate it into
+  VRAM to be checked, changing the memory model the search was priced under.
+  Third, `build_student` is shared with Stage-1/Stage-3 code that has its own
+  placement expectations.
+- **One regression**,
+  [`test_search_materialize_device_boundary.py`](../tests/autoinit/test_search_materialize_device_boundary.py):
+  drives the real `_materialize_and_measure` with the produced model on the host
+  and `config.device` elsewhere, asserting the reload is loaded on the produced
+  model's device, moved to the search device, and that the save/reload
+  comparison still runs on one backend. It **records** placement instead of
+  performing it, because the dev box has no GPU — which is precisely why the
+  original bug survived every $0 run. Under the old assumption it raises
+  `Torch not compiled with CUDA enabled` from
+  `torch.tensor(..., device="cuda:0")`, verified by reverting the fix.
+  The Phase-A rehearsal is **not** extended.
+- **Tracebacks preserved.** `PhaseADriver.preserve_traceback` writes the full
+  frame to `AUDIT/stage{n}_traceback.log` — collected with the rest of the audit
+  directory — and into the evidence JSON, for the three **unexpected**
+  `except Exception` sites. The short one-line reason is unchanged; it is what
+  `record()` reports and what the launcher prints. The
+  `RecoveryAdmissionError`/`AuthorizationError` branch is deliberately left
+  alone: those are refusals whose message *is* the explanation. Attempt 6's
+  frame was recoverable only because the message happened to name
+  `index_select`.
+- **Test hygiene note.** The new file is named `test_search_materialize_...` and
+  imports `fake_family` lazily. Both are required: the lazy import keeps
+  collection clean and the name sorts after `test_registry.py`, whose
+  `test_the_kind_set_is_open` asserts the toy kinds are absent. Undoing the
+  registrations afterwards is not an option — a module imports once, so
+  unregistering what its import performed strands `test_search.py`.
+- **Not changed:** search, science, thresholds, seeds, recovery, pricing, the
+  harness file set, or the cumulative cap.
+- **Status: STOPPED for a fresh one-use Attempt-7 authorization decision.** The
+  previous approval stopped at attempt 6; the unused $23.4665 is not permission.

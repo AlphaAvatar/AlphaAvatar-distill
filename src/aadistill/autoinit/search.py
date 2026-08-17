@@ -148,6 +148,22 @@ class LevelRecord:
         }
 
 
+def model_device(model: Any) -> Any:
+    """Where a model's weights actually are, not where they were asked to be.
+
+    An operator's child is built by `ChildBuilder` -> `build_student`, which
+    sets the dtype and deliberately does not place the model. Assuming it sits
+    on `SearchConfig.device` cost Phase-A attempt 6 a paid session.
+
+    Falls back to CPU only for a model with no parameters at all, which is not a
+    case the search produces; a parameterless object reaching here would fail
+    the parameter-count check immediately afterwards.
+    """
+    for p in model.parameters():
+        return p.device
+    return torch.device("cpu")
+
+
 class BeamSearch:
     """The engine. Family-agnostic by construction."""
 
@@ -265,19 +281,45 @@ class BeamSearch:
             num_parameters=self.adapter.param_count(planned_spec))
         state.mark_materialized(artifact)
 
-        reloaded = self.adapter.load(str(ckpt_dir), device=self.config.device)
-        checks = self._validate(state, model, reloaded, planned_spec)
+        # The reload is validated on the PRODUCED model's device, then moved to
+        # the search device to be measured.
+        #
+        # Phase-A attempt 6 died here. `_validate` forwards both models through
+        # one input, and that input used to be built on `config.device`. The
+        # reload is placed there too, but the produced child is whatever the
+        # operator built — `ChildBuilder` calls `build_student`, which sets the
+        # dtype and deliberately does NOT place the model, so on a GPU run the
+        # child is on the host and the probe indexed CPU embedding weights with
+        # a CUDA index. Every zero-cost run passes `device="cpu"`, where the two
+        # coincide and the mismatch cannot appear.
+        #
+        # Validating on the produced model's device rather than moving the child
+        # keeps the comparison on ONE numerical backend — a save/reload check
+        # that compared a host forward against a device forward would be
+        # measuring the backend, not the serialization — and it leaves the
+        # memory model alone: the child is not duplicated into VRAM to be
+        # checked, only the canonical reload goes there, and only after it has
+        # been validated.
+        validation_device = model_device(model)
+        reloaded = self.adapter.load(str(ckpt_dir), device=validation_device)
+        checks = self._validate(state, model, reloaded, planned_spec,
+                                device=validation_device)
         checks["n_shards"] = len(artifact.shards)
         checks["sharded"] = artifact.is_sharded
+        checks["validation_device"] = str(validation_device)
+        checks["measurement_device"] = str(self.config.device)
         state.notes["validation"] = checks
         state.mark_validated()
 
+        # The canonical reload — the file, not the in-memory object that wrote
+        # it — is what gets measured, on the search device.
+        reloaded = reloaded.to(self.config.device)
         evaluation = self.measurer(reloaded, artifact.artifact_digest)
         state.attach_evaluation(evaluation)
         del reloaded
 
     def _validate(self, state: InitializationState, produced: Any, reloaded: Any,
-                  planned_spec: ArchSpec) -> dict[str, Any]:
+                  planned_spec: ArchSpec, *, device: Any = None) -> dict[str, Any]:
         actual = self.adapter.spec_of(reloaded)
         if not actual.matches(planned_spec):
             state.mark_invalid(
@@ -291,7 +333,12 @@ class BeamSearch:
             raise SearchError(state.invalid_reason)
 
         with torch.no_grad():
-            ids = torch.tensor([[1, 2, 3, 4, 5]], device=self.config.device)
+            # On the device the two models being compared are actually on, which
+            # is the produced model's. NOT `config.device`: see the note in
+            # `_materialize_and_measure`.
+            ids = torch.tensor([[1, 2, 3, 4, 5]],
+                               device=device if device is not None
+                               else model_device(produced))
             a = produced(ids).logits
             b = reloaded(ids).logits
         if not torch.isfinite(b).all():

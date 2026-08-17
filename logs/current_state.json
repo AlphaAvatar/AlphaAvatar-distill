@@ -1,10 +1,10 @@
 {
   "schema": "aadistill.current_state/v1",
-  "generated_utc": "2026-08-17T04:19:28+00:00",
+  "generated_utc": "2026-08-17T06:19:31+00:00",
   "current_phase": "Attempt 6 FAILED CLOSED in stage 1 at $0.3552. Stage 0 passed for the second time in 3.1 min and the three defects fixed on 2026-08-16 all held - the calibration mixture staged (precheck reported 3 relay inputs, where every earlier attempt reported 2). Stage 1 died in BeamSearch._validate: the operator's in-memory child is built by build_student, which does .to(dtype) but never .to(device), so on a GPU it indexes CPU embedding weights with a CUDA index. Every $0 execution passes device='cpu', where both sides are on CPU and the check succeeds - the one substitution the rehearsal makes is the one that erases the bug.",
   "active_experiment": null,
   "paid_compute_running": false,
-  "next_work": "STOPPED per the maintainer: 'If it fails closed, stop; no Attempt 7 is implied.' Nothing is authorized. The diagnosis and the one-line placement fix are in decisions.md under 2026-08-16; do not implement or launch without a fresh decision.",
+  "next_work": "A fresh ONE-USE Attempt-7 authorization decision. The cap does not need to increase ($217.00 - $193.5335 = $23.4665 against a $23.0484 hard bound, $0.4181 margin), but the previous approval stopped at attempt 6, so the unused balance is NOT permission. Nothing is authorized. No attempt 8 is implied.",
   "teacher": {
     "model_id": "Qwen/Qwen3-4B-Thinking-2507",
     "revision": "768f209d9ea81521153ed38c47d515654e938aea",
@@ -172,7 +172,7 @@
     "E2 phases 2-3"
   ],
   "autoinit": {
-    "status": "ATTEMPT_6_FAILED_CLOSED_IN_STAGE_1_STOPPED",
+    "status": "ATTEMPT_6_DEFECTS_FIXED_AWAITING_ATTEMPT_7_AUTHORIZATION",
     "package": "src/aadistill/autoinit",
     "tests": 209,
     "operator_kinds": [
@@ -487,9 +487,9 @@
     "peak_working_storage_gib": 106
   },
   "tests": {
-    "passing": 1765,
+    "passing": 1768,
     "skipped": 7,
-    "note": "dev box. Under the pod simulator, 1725 passed / 18 skipped in 4m17s \u2014 the ~20-minute pre-flight rehearsal tests/pod/test_phase_a_stages1_5_execute.py is --ignore'd in BOTH the pod gate and the simulator, and the two ignore lists are pinned equal",
+    "note": "dev box; 1728 passed / 18 skipped under the pod simulator in 4m16s",
     "venvs_verified": [
       "repo .venv transformers 5.13.1"
     ]
@@ -581,6 +581,15 @@
     "root_cause": "BeamSearch._validate forwards the operator's in-memory child with ids on config.device; the child is built by build_student, which never places it on a device",
     "why_zero_cost_missed_it": "every $0 run passes device='cpu', where the ids and the child are both on CPU",
     "session_record": "logs/autoinit_phase_a_session.json",
-    "evidence": "aad-scratch/phase_a6_20260816/store/"
+    "evidence": "aad-scratch/phase_a6_20260816/store/",
+    "fixed_utc": "2026-08-17",
+    "fix": {
+      "where": "BeamSearch._materialize_and_measure / _validate",
+      "what": "the canonical reload is loaded on the PRODUCED model's device and the save/reload comparison runs there, on one numerical backend; only then is the reload moved to SearchConfig.device to be measured. ChildBuilder still produces a CPU child and build_student is untouched.",
+      "why_not_global": "comparing a host forward against a device forward would make reload_max_logit_diff a measurement of the backend rather than of the serialization, and placing every child would duplicate it into VRAM, changing the memory model the search was priced under",
+      "regression": "tests/autoinit/test_search_materialize_device_boundary.py",
+      "regression_fails_under_old_assumption": true,
+      "traceback_preservation": "PhaseADriver.preserve_traceback writes the full frame to AUDIT/stage{n}_traceback.log and into the evidence JSON for unexpected in-process exceptions; the short reason is unchanged"
+    }
   }
 }

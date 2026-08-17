@@ -1,4 +1,4 @@
-**Updated:** 2026-08-16 19:50 UTC · branch `main`
+**Updated:** 2026-08-16 21:15 UTC · branch `main`
 **No pods running. Nothing billing.** **Stage 3 is COMPLETE.** Phase A has been
 attempted **six** times for **$1.9873**. Attempt 6 reached **stage 1** — stage 0
 passed for the second time and every 2026-08-16 fix held — and failed closed on a
@@ -27,9 +27,18 @@ Pod `wgm2tamw8nu9f5`, 21.5 min, deleted with provider confirmation.
   `type: message`. The frame was recoverable here because the message named
   `index_select`; that is luck.
 
-Full account, including the one-line fix and the test that would have caught it,
-in [`decisions.md`](decisions.md). **Do not implement or launch it without a
-fresh decision.**
+**FIXED 2026-08-17** at the materialize/reload boundary, not by moving children
+to CUDA globally: the reload is loaded on the *produced model's* device, the
+save/reload comparison runs on one numerical backend, and only then is the
+canonical reload moved to `SearchConfig.device` to be measured. `ChildBuilder`
+still produces a CPU child and `build_student` is untouched. One regression,
+[`test_search_materialize_device_boundary.py`](../tests/autoinit/test_search_materialize_device_boundary.py),
+drives the real cycle with the two devices differing and fails under the old
+assumption. **Unexpected in-process driver exceptions now keep their full
+traceback** in `AUDIT/stage{n}_traceback.log` and in the evidence JSON; the
+short reason is unchanged. Full account in [`decisions.md`](decisions.md).
+
+**Nothing is authorized.** The previous approval stopped at attempt 6.
 
 ## Phase A stages 0–5 now execute for real at $0 (2026-08-16)
 
@@ -313,12 +322,13 @@ stop". The margin is not a retry reserve.
 
 ## What remains
 
-1. **Nothing.** Attempt 6 failed closed and the session is stopped by
-   instruction. $23.4665 remains under the $217.00 cap; that is **not**
-   permission — the cap funded one attempt and the attempt-6 authorization is
-   spent, with a lineage gate that refuses any later commit by construction.
-2. A seventh attempt would need a new cap decision **and** a new authorization.
-   The diagnosis and the candidate fix are recorded; neither is implemented.
+1. **A fresh one-use Attempt-7 authorization decision.** The device fix and the
+   traceback preservation are committed and verified. The cap does **not** need
+   to increase: $217.00 - $193.5335 = $23.4665 covers one $23.0484 hard-bound
+   session with $0.4181 margin. But the previous approval explicitly stopped at
+   attempt 6, so the unused balance is **not** permission — a new authorization
+   must be issued against the current base.
+2. No Attempt 8 is implied.
 
 ### Searched-leaf durability: RESOLVED 2026-08-15, needs no relay growth
 

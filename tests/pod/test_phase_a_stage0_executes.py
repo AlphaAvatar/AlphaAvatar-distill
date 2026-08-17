@@ -392,3 +392,44 @@ def test_a_real_content_digest_is_material_in_full(tmp_path):
     # And a content digest is not interchangeable with the fallback form.
     with pytest.raises(ComparabilityError):
         require_comparable(ident(STAGE3_IMAGE), one, context="form mismatch")
+
+
+def test_an_unexpected_in_process_failure_keeps_its_traceback(tmp_path):
+    """Attempt 6's stage 1 died in-process and left only `type: message`.
+
+    Stages that shell out keep a log tail. Stages 1 and 5 do not, so the frame
+    is gone unless the driver writes it down. The short reason must stay short —
+    it is what the session record and the launcher print — and the frame must
+    land in the audit evidence, in BOTH the JSON and a collected `.log`.
+    """
+    d, mod = build(tmp_path)
+    d.results, d.ev = {}, {"stages": {}}
+
+    def exploding_stage():
+        def inner():
+            raise RuntimeError("index is on cuda:0, different from other "
+                               "tensors on cpu")
+        inner()
+
+    d.stage0 = exploding_stage
+    for n in (1, 2, 3, 4, 5):
+        setattr(d, f"stage{n}", lambda: True)
+    d.finish = lambda success, failed: None
+
+    rc = mod.PhaseADriver.run(d)
+    assert rc == 20, "a blocking stage-0 failure must stop the run"
+
+    entry = d.ev["stages"]["0"]
+    assert entry["reason"].startswith("RuntimeError: index is on cuda:0"), (
+        "the short reason changed; it is what the session record reports")
+    assert "\n" not in entry["reason"], "the short reason must stay one line"
+
+    frame = entry["traceback"]
+    assert "Traceback (most recent call last)" in frame
+    assert "in exploding_stage" in frame and "in inner" in frame, (
+        "the frame that raised is missing; that is the whole point")
+
+    written = (mod.AUDIT / entry["traceback_file"]).read_text()
+    assert entry["traceback_file"] == "stage0_traceback.log"
+    assert "in inner" in written
+    assert written.startswith("stage 0: RuntimeError:")
