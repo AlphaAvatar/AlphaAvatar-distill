@@ -1,9 +1,35 @@
-**Updated:** 2026-08-17 09:40 UTC · branch `main`
+**Updated:** 2026-08-16 19:50 UTC · branch `main`
 **No pods running. Nothing billing.** **Stage 3 is COMPLETE.** Phase A has been
-attempted **five** times for **$1.6321**, with **one stage passed** (stage 0, on
-attempt 5). Nothing has been trained and no permanent artifact has been touched.
-**No attempt 6 is authorized, prepared, or implied**, and the cumulative cap does
-not currently cover one — see *Phase A: the cap gap* below.
+attempted **six** times for **$1.9873**. Attempt 6 reached **stage 1** — stage 0
+passed for the second time and every 2026-08-16 fix held — and failed closed on a
+device-placement bug that no zero-cost run can see. Nothing has been trained and
+no permanent artifact has been touched. **STOPPED: no Attempt 7 is authorized,
+funded or implied.**
+
+## Attempt 6 (2026-08-16, $0.3552): stage 0 passed, stage 1 died on device placement
+
+Pod `wgm2tamw8nu9f5`, 21.5 min, deleted with provider confirmation.
+
+* **Stage 0 passed in 3.1 min.** Frozen assets, frozen science plan, both
+  thresholds, engine probe, generation protocol, the Stage-3 binding under
+  `generation_runtime_comparability@v2`, attestation. `precheck OK: 3 relay
+  inputs` — the calibration mixture is staged, so attempt 5's failure did not
+  recur.
+* **Stage 1 failed** with `index is on cuda:0, different from other tensors on
+  cpu (wrapper_CUDA__index_select)`. `BeamSearch._validate` forwards the
+  operator's **in-memory** child with ids on `config.device`; that child comes
+  from `build_student`, which does `.to(dtype)` and **never `.to(device)`**.
+* **Why $0 could not have caught it.** Every zero-cost execution of this path —
+  including the full real-body stage-1 run — passes `device="cpu"`, where the
+  ids and the child are both on CPU and the check succeeds. The one substitution
+  the rehearsal makes is the one that erases the bug. CPU is not a weaker GPU.
+* **Also:** the driver keeps no traceback for an in-process stage failure, only
+  `type: message`. The frame was recoverable here because the message named
+  `index_select`; that is luck.
+
+Full account, including the one-line fix and the test that would have caught it,
+in [`decisions.md`](decisions.md). **Do not implement or launch it without a
+fresh decision.**
 
 ## Phase A stages 0–5 now execute for real at $0 (2026-08-16)
 
@@ -270,9 +296,9 @@ refuses `projected > cap`, so a cap rounded down makes the launcher refuse its
 own plan.
 
 ```
-cumulative spend                 $193.1783
+cumulative spend                 $193.5335   incl. attempt 6's $0.3552
 authorized cap                   $217.00     approved 2026-08-17
-remaining                        $ 23.8217
+remaining                        $ 23.4665   NOT permission
 Phase A hard bound               $ 23.0483
                                  ---------
 margin                           $  0.7734
@@ -287,11 +313,12 @@ stop". The margin is not a retry reserve.
 
 ## What remains
 
-1. **Attempt 6 is authorized and launched.** Read
-   [`autoinit_phase_a_session.json`](autoinit_phase_a_session.json) for the
-   terminal marker, the artifact gate and the provider-confirmed teardown.
-2. **If it fails closed, STOP.** No Attempt 7 is authorized, funded or implied;
-   it would need a new cap decision *and* a new authorization.
+1. **Nothing.** Attempt 6 failed closed and the session is stopped by
+   instruction. $23.4665 remains under the $217.00 cap; that is **not**
+   permission — the cap funded one attempt and the attempt-6 authorization is
+   spent, with a lineage gate that refuses any later commit by construction.
+2. A seventh attempt would need a new cap decision **and** a new authorization.
+   The diagnosis and the candidate fix are recorded; neither is implemented.
 
 ### Searched-leaf durability: RESOLVED 2026-08-15, needs no relay growth
 

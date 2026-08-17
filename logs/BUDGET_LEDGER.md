@@ -272,15 +272,18 @@ $2.30   RAISED 2026-08-14 with maintainer approval, after attempt 1 spent
 ```
 authorized cumulative cap                                    $217.00
     RAISED AND APPROVED 2026-08-17. See the caps list above.
-actual cumulative spend                                      $193.1783
-unused authorization remaining                               $ 23.8217
-Phase A hard threshold, from the launcher's own make_plan     $ 23.0483
-margin after a worst-case Phase A                            $  0.7734
-    ONE ATTEMPT. The margin is not a retry reserve: the
-    maintainer stated "This funds one attempt only and does not
-    imply Attempt 7" and "If it fails closed, stop". A seventh
-    attempt would need a new cap decision AND a new
+actual cumulative spend                                      $193.5335
+    = $193.1783 + $0.3552 for Phase A attempt 6
+unused authorization remaining                               $ 23.4665
+    NOT PERMISSION. The attempt-6 authorization
+    `autoinit.phase_a.2026-08-16T1912Z` is SPENT and its lineage
+    gate refuses any later commit by construction. The cap funded
+    ONE attempt: "This funds one attempt only and does not imply
+    Attempt 7"; "If it fails closed, stop." It failed closed. A
+    seventh attempt needs a new cap decision AND a new
     authorization, neither of which exists.
+paid compute currently running                                NONE
+    pod wgm2tamw8nu9f5 deleted, provider confirms gone
 
     SUPERSEDED Phase-A pricing, kept because a threshold that
     moved silently is how E6b overran:

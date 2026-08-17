@@ -1,10 +1,10 @@
 {
   "schema": "aadistill.current_state/v1",
-  "generated_utc": "2026-08-16T18:46:02+00:00",
-  "current_phase": "Attempt 6 AUTHORIZED AND LAUNCHING. Stages 0-5 of the driver were executed for real at $0 on 2026-08-16, which found three pod-fatal defects in never-executed code (ids/input_ids, a KeyError on manifest['suite_hash'] after the whole GPU search, and a 33.8 GiB unconditional reference cache). All fixed. The reference-cache fallback was then runtime-audited and the hard bound repriced to $23.0483 with both reserves before the soft stop; the project cap was raised to $217.00 and approved on 2026-08-17.",
+  "generated_utc": "2026-08-17T04:19:28+00:00",
+  "current_phase": "Attempt 6 FAILED CLOSED in stage 1 at $0.3552. Stage 0 passed for the second time in 3.1 min and the three defects fixed on 2026-08-16 all held - the calibration mixture staged (precheck reported 3 relay inputs, where every earlier attempt reported 2). Stage 1 died in BeamSearch._validate: the operator's in-memory child is built by build_student, which does .to(dtype) but never .to(device), so on a GPU it indexes CPU embedding weights with a CUDA index. Every $0 execution passes device='cpu', where both sides are on CPU and the check succeeds - the one substitution the rehearsal makes is the one that erases the bug.",
   "active_experiment": null,
   "paid_compute_running": false,
-  "next_work": "Attempt 6 is running or has just ended. Read logs/autoinit_phase_a_session.json for the terminal marker and the teardown gate. If it fails closed: STOP. No Attempt 7 is authorized, funded or implied - it would need a new cap decision AND a new authorization.",
+  "next_work": "STOPPED per the maintainer: 'If it fails closed, stop; no Attempt 7 is implied.' Nothing is authorized. The diagnosis and the one-line placement fix are in decisions.md under 2026-08-16; do not implement or launch without a fresh decision.",
   "teacher": {
     "model_id": "Qwen/Qwen3-4B-Thinking-2507",
     "revision": "768f209d9ea81521153ed38c47d515654e938aea",
@@ -55,12 +55,12 @@
     "dp_sa": "infrastructure artifact, not a promotable arm"
   },
   "budget": {
-    "actual_cumulative_spend_usd": 193.1783,
+    "actual_cumulative_spend_usd": 193.5335,
     "authorized_cap_usd": 217.0,
     "cap_raised_utc": "2026-08-17",
     "cap_approved": true,
     "cap_raise_note": "maintainer, 2026-08-17: 'My recommended new cumulative project cap is $217.00', then 'Record this approval in the ledger and machine-readable state ... and issue one fresh PhaseAAuthorization.' Raised to cover the hard bound repriced by the reference-cache fallback audit and the beam-6 pricing correction. FUNDS ONE ATTEMPT: 'This funds one attempt only and does not imply Attempt 7.'",
-    "remaining_usd": 23.8217,
+    "remaining_usd": 23.4665,
     "previous_caps": [
       {
         "cap_usd": 213.0,
@@ -106,7 +106,8 @@
           "why": "fallback reserve placed after the soft stop"
         }
       ]
-    }
+    },
+    "remaining_note": "NOT permission. The attempt-6 authorization is spent and the cap funded one attempt. A seventh needs a new cap decision AND a new authorization."
   },
   "latest_commit": "f6ee8909ee772a09e0a85728810fe8da08f0560f",
   "documents": {
@@ -171,7 +172,7 @@
     "E2 phases 2-3"
   ],
   "autoinit": {
-    "status": "AUTHORIZED_ATTEMPT_6",
+    "status": "ATTEMPT_6_FAILED_CLOSED_IN_STAGE_1_STOPPED",
     "package": "src/aadistill/autoinit",
     "tests": 209,
     "operator_kinds": [
@@ -563,5 +564,23 @@
     },
     "products": "logs/autoinit_stage3_complete/"
   },
-  "latest_commit_note": "the commit that existed when this file was written. Two commits follow in sequence: the pre-authorization base (this content), then an AUTHORIZATION-ONLY commit carrying logs/autoinit_phase_a_authorization.json and nothing else, because `lineage_from_authorized_base` refuses any other changed path between the authorized base and the commit the pod checks out."
+  "latest_commit_note": "the commit that existed when this file was written. Two commits follow in sequence: the pre-authorization base (this content), then an AUTHORIZATION-ONLY commit carrying logs/autoinit_phase_a_authorization.json and nothing else, because `lineage_from_authorized_base` refuses any other changed path between the authorized base and the commit the pod checks out.",
+  "attempt_6": {
+    "pod_id": "wgm2tamw8nu9f5",
+    "terminal": "PHASE_A_FAILED",
+    "failed_stage": 1,
+    "elapsed_minutes": 21.53,
+    "actual_usd": 0.3552,
+    "authorized_usd": 23.0484,
+    "within_authorization": true,
+    "provider_confirms_gone": true,
+    "trained_anything": false,
+    "permanent_controls_touched": false,
+    "stage0": "PASSED (second time); v2 comparability held; 3 relay inputs staged",
+    "stage1_error": "RuntimeError: Expected all tensors to be on the same device, but got index is on cuda:0, different from other tensors on cpu (wrapper_CUDA__index_select)",
+    "root_cause": "BeamSearch._validate forwards the operator's in-memory child with ids on config.device; the child is built by build_student, which never places it on a device",
+    "why_zero_cost_missed_it": "every $0 run passes device='cpu', where the ids and the child are both on CPU",
+    "session_record": "logs/autoinit_phase_a_session.json",
+    "evidence": "aad-scratch/phase_a6_20260816/store/"
+  }
 }

@@ -3357,3 +3357,62 @@ CalibrationError: calib.domain_balanced@v1:
   superseded, because a threshold that moves silently is how E6b overran.
 - **Not changed:** the search, the schedule, the seeds, the thresholds, the
   recovery design, the science. No partial caching. No rehearsal expansion.
+
+## 2026-08-16 — Attempt 6: STAGE 0 PASSED, stage 1 died on device placement ($0.3552)
+
+- **Result:** `PHASE_A_FAILED`, blocking stage 1. Pod `wgm2tamw8nu9f5` deleted,
+  provider confirms gone, 21.5 min, **$0.3552** of the $23.0484 authorization.
+  Nothing was trained; the permanent controls were inputs and are untouched.
+- **Stage 0 passed for the second time**, in 3.1 min: frozen assets, the frozen
+  science plan, both thresholds, the engine probe, the generation protocol, the
+  Stage-3 binding under `generation_runtime_comparability@v2` and the
+  attestation. The three defects fixed on 2026-08-16 all held — in particular
+  **the calibration mixture staged** (`precheck OK: 3 relay inputs`, where every
+  previous attempt reported 2), so the attempt-5 failure did not recur.
+- **The failure:**
+
+```
+RuntimeError: Expected all tensors to be on the same device, but got index is on
+cuda:0, different from other tensors on cpu
+(when checking argument in method wrapper_CUDA__index_select)
+```
+
+- **Exact cause, and it is certain.** `BeamSearch._validate`
+  (`src/aadistill/autoinit/search.py`) compares the operator's in-memory child
+  against the reloaded checkpoint:
+
+  ```python
+  ids = torch.tensor([[1, 2, 3, 4, 5]], device=self.config.device)  # cuda:0
+  a = produced(ids).logits     # <- `produced` is on CPU
+  b = reloaded(ids).logits     # <- reloaded via adapter.load(..., device=...)
+  ```
+
+  `reloaded` is placed by `adapter.load(..., device=self.config.device)`.
+  `produced` is `outcome.model`, built by `ChildBuilder` →
+  `Qwen3Adapter.build_model` → `build_student`, which does `.to(dtype)` and
+  **never `.to(device)`**. On a GPU the embedding lookup then indexes CPU
+  weights with a CUDA index. The run log confirms the position: teacher loaded,
+  child written (`Writing model shards`), child reloaded (`Loading weights`),
+  then the failure — i.e. inside `_validate`, before the measurement.
+- **Why $0 could not have caught it, and this is the point.** Every zero-cost
+  execution of this path — including the full real-body stage-1 run on
+  2026-08-16 — passes `device="cpu"`. With `config.device == "cpu"` the ids are
+  on CPU, the child is on CPU, and the comparison succeeds. **The one
+  substitution the rehearsal makes is the one that erases the bug.** A rehearsal
+  that stubs the model boundary cannot test device placement, by construction;
+  it is not that the rehearsal was too shallow, it is that CPU is not a weaker
+  GPU.
+- **Second finding:** the driver records `f"{type(exc).__name__}: {exc}"` for an
+  in-process stage failure and keeps no traceback. Subprocess stages keep a log
+  tail; stages 1 and 5 run in-process and do not. The frame was recoverable here
+  only because the message named `index_select` and the run log fixed the
+  position. That is luck, not evidence.
+- **Status: STOPPED.** The maintainer's instruction was "If it fails closed,
+  stop; no Attempt 7 is implied." No Attempt 7 is prepared, authorized or
+  funded. $23.8217 remained under the $217.00 cap before this run; $23.4665
+  remains after it, which is not permission.
+- **If a seventh attempt is ever authorized**, the fix is one placement — put the
+  produced child on `config.device` before `_validate` forwards through it (or
+  place it in `ChildBuilder`) — and the test that would have caught it must run
+  the validation path with `config.device` set to a device the model is not on,
+  which is testable on CPU by asserting the placement rather than the arithmetic.
