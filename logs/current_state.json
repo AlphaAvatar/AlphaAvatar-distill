@@ -1,6 +1,6 @@
 {
   "schema": "aadistill.current_state/v2",
-  "generated_utc": "2026-08-18T15:12:00+00:00",
+  "generated_utc": "2026-08-18T15:45:00+00:00",
   "_contract": "The minimal machine-readable CURRENT snapshot. It owns live facts and nothing else: no history, no per-attempt detail, no narrative. History lives in logs/decisions.md and the per-run directories; the human view of THIS file is logs/STATE.md and the two must agree. README owns no live facts at all. Ownership rules: logs/CATALOG.md.",
   "baseline_commit": "4b7ee709d51d2d54ba45865c06545a6e77eba00e",
   "baseline_commit_meaning": "The LAST TESTED IMPLEMENTATION: the commit whose tree produced the latest_verification figures below. It is deliberately NOT the commit carrying this file. Two commits follow it by construction and neither is separately tested: (1) the grant/provenance commit that adds the one-use grant document and this refresh, and (2) the authorization-only commit, which the Phase-A lineage gate requires to differ from its base in nothing but logs/autoinit_phase_a_authorization.json. Keeping the distinction explicit is the point: a reader must be able to tell which commit the 1874/1834/395 numbers describe from which commit a pod checks out. This field read fe3c2b3 while HEAD was four commits ahead once, and read 4563d106 after the post-fix verification, because nothing refreshes or checks it; it is refreshed as part of preparing a paid launch.",
@@ -18,9 +18,9 @@
     "bundles": 0
   },
   "budget": {
-    "cumulative_spend_usd": 194.243,
+    "cumulative_spend_usd": 194.583,
     "authorized_cap_usd": 219.0,
-    "remaining_usd": 24.757,
+    "remaining_usd": 24.417,
     "remaining_is_not_permission": true,
     "ledger": "logs/BUDGET_LEDGER.md"
   },
@@ -50,7 +50,7 @@
     "Stage 3 (both permanent controls, thresholds materialized)",
     "the Phase-A harness, stages 0-5 executing for real at $0",
     "the Stage-1 device audit (autoinit.stage1_device_contract@v1)",
-    "Stage 0 on hardware, passed three times"
+    "Stage 0 on hardware, passed four times (latest: attempt 9, protocol 250f72ef, identity 70a26e0b, science 02be33b9)"
   ],
   "latest_verification": {
     "utc": "2026-08-18T14:10:00+00:00",
@@ -62,7 +62,8 @@
     "focused_docs_storage_session": "395 passed, 5 skipped",
     "pod_condition_reproduced": "with artifacts/stage3/ladder_uniform present - the pod's exact state - test_no_tombstoned_path_is_still_on_disk now passes; the directory was removed again after",
     "scope": "CPU only; no checkpoint was loaded and no metric measured",
-    "phase_a_attempt_8": "FAILED CLOSED at the setup test gate, $0.19, 11.28 min, pod deleted and provider-confirmed gone; no stage ran. Setup reached ROPE_OK, so the manifest-driven relay staging (10 inputs), the pod-side frozen-asset gate and the staged checkpoint are HARDWARE-VERIFIED. Evidence: logs/autoinit_phase_a_attempt8/"
+    "phase_a_attempt_8": "FAILED CLOSED at the setup test gate, $0.19, 11.28 min, pod deleted and provider-confirmed gone; no stage ran. Setup reached ROPE_OK, so the manifest-driven relay staging (10 inputs), the pod-side frozen-asset gate and the staged checkpoint are HARDWARE-VERIFIED. Evidence: logs/autoinit_phase_a_attempt8/",
+    "phase_a_attempt_9": "Stage 0 PASSED and attested; Stage 1 FAILED on a device mismatch at src/aadistill/init/project.py:60, with the full traceback recovered. $0.34, 20.4 min, pod deleted and provider-confirmed gone. The attempt-8 test-gate fix HELD: setup reached SETUP_DONE and the blocking tests/docs suite passed. Nothing trained; no checkpoint, probe or search leaf produced. Evidence: logs/autoinit_phase_a_attempt9/"
   },
   "failed": [
     {
@@ -100,9 +101,15 @@
       "usd": 0.19,
       "where": "setup / test gate",
       "cause": "two dev-box-environment tests that cannot pass in a container: REPO_LAYOUT.md names two absolute host paths, and a tombstone names artifacts/stage3/ladder_uniform, which the pod's setup stages. Both added by the 2026-08-18 inventory/cleanup work; the pod simulator cannot reproduce either condition"
+    },
+    {
+      "run": "Phase A 9",
+      "usd": 0.34,
+      "where": "stage 1",
+      "cause": "stream_projection's `avg` accumulator allocated with no device: project.py:57 lands it on CPU while uncentered_moment follows `state`, which is cuda:0 on a pod. Third Stage-1 device-placement defect; autoinit.stage1_device_contract@v1 closed the first two and did not reach an accumulator two call levels below the operator"
     }
   ],
-  "failure_pattern": "through attempt 7: code no $0 path could execute - a GPU-only device, or a contract owned by inherited machinery. Attempt 8 is a new one: a $0 path that RUNS on the dev box and asserts dev-box filesystem state, so the simulator passes it for the wrong reason",
+  "failure_pattern": "three Stage-1 failures, three tensors allocated without a device in a path only a GPU executes (attempts 6, 7, 9). A CPU rehearsal cannot see any of them: both operands agree on CPU and the arithmetic is correct. Separately, attempt 8 was the inverse - a $0 path that RUNS on the dev box and asserts dev-box filesystem state",
   "canonical_infrastructure": [
     "the session specification: one immutable SessionSpec per session, one runner, no inheritance and no module-global retargeting",
     "the shared pod setup is manifest-driven on BOTH sides: it installs the local assets a session declares (SESSION_ASSETS) and stages the relay science inputs a session declares (SESSION_RELAY_INPUTS), and names no asset, relay path, destination or digest of its own",
@@ -125,9 +132,16 @@
     "the paid device-canary session path: STRATEGICALLY TERMINATED 2026-08-18. Two authorized sessions, $0.1240, zero canary runs; both died in the wrapper's inherited contracts. Its evidence and its generic lesson are kept; no further canary is prepared."
   ],
   "next_starting_point": {
-    "status": "The two attempt-8 assertions are FIXED and verified at $0. Nothing is authorized, funded or prepared: attempt 8's grant is spent and its lineage gate refuses the current HEAD.",
-    "next_decision": "Phase-A attempt 9, under a NEW one-use grant and the normal chain: pre-auth base commit -> issue against that grant -> authorization-only commit -> bundle upload -> round-trip verify -> launch. No canary and no further readiness phase is required.",
-    "not_authorized": "this fix authorizes nothing. The $24.7570 of unused cumulative headroom is not permission."
+    "status": "STOPPED FOR REVIEW after Phase-A attempt 9. The grant is spent and its lineage gate refuses the current HEAD. No attempt 10 is authorized, funded or prepared, and none may be inferred from the $24.4170 of unused headroom.",
+    "the_defect": "src/aadistill/init/project.py:57 allocates `avg` with a dtype and no device. It is NOT fixed: fixing it is the maintainer's call, and so is whether one line is the right scope.",
+    "what_the_reviewer_decides": [
+      "whether to fix project.py:57 alone, or to audit every torch.zeros/empty/ones allocation on the Stage-1 path for a missing device= at once, given that this is the third such defect and each has cost a paid session",
+      "whether autoinit.stage1_device_contract@v1 should be extended to assert placement rather than arithmetic, since a CPU rehearsal cannot see this class by construction",
+      "whether a $0 GPU-free placement check is possible - e.g. a meta-device or fake-tensor pass over the Stage-1 path - or whether this class can only be caught by paying",
+      "whether a further Phase-A attempt is warranted, and under what grant"
+    ],
+    "what_is_working": "setup, the manifest-driven relay staging, the pod-side frozen-asset gate, the blocking test gate, Stage 0 and its three frozen identities, artifact collection, the teardown gate and provider-confirmed teardown, and the traceback recovery that made this diagnosis free",
+    "either_paid_option_requires": "a new grant document, then the full chain: pre-auth base commit -> issue against that grant -> authorization-only commit -> bundle upload -> round-trip verify -> launch."
   },
   "read_order": [
     "logs/STATE.md — the human view of this file",

@@ -4189,3 +4189,78 @@ two devices, cuda:0 and cpu!
   directory some *driver* creates without declaring it would still be missed.
 - **Revisit when:** a session declares a new staging destination that collides
   with a retired path, or a driver is found creating an undeclared directory.
+
+## 2026-08-18 — Phase-A attempt 9: Stage 0 passed, Stage 1 died on a third unplaced tensor
+
+- **Context:** the maintainer gave GO for attempt 9 after the $0 fix for
+  attempt 8's two invalid test assertions, ruling explicitly that Stages 0-5 not
+  having run under the exact current harness is the uncertainty Phase A
+  exercises rather than a reason for another surrogate. The full chain ran: grant,
+  pre-auth base `ab4138a7`, authorization `autoinit.phase_a.2026-08-18T1512Z`,
+  authorization-only commit `9f3ff7f5` differing in exactly one path, bundle
+  round trip, and every pre-provider $0 gate.
+- **The harness digest was IDENTICAL to attempt 8** — `24d89b9f…` — because the
+  fix touched only `tests/docs/` and `logs/`, neither in the harness source set.
+  Attempt 9 therefore ran the same measured harness with the test gate's two
+  invalid assertions removed, which is the cleanest possible test of that fix.
+- **The fix held.** Setup reached `SETUP_DONE` in 7.4 min and the blocking
+  `tests/docs` suite **passed** on the pod. That question is closed.
+- **Stage 0 PASSED and attested**, the fourth time on hardware:
+  `evaluation_protocol 250f72ef`, `comparable_identity 70a26e0b`,
+  `science_plan 02be33b9`, `generation_source_digest a1b51736`, under torch
+  2.11.0+cu128 / transformers 5.13.1 / cuda 12.8 / sdpa. As on attempt 5 the host
+  drew driver `580.159.03`, the same as Stage 3, so this run does not by itself
+  discriminate comparability v2 from v1.
+- **Stage 1 FAILED**, and for the first time the cause came home rather than
+  dying with the pod:
+
+  ```
+  RuntimeError: Expected all tensors to be on the same device,
+                but found at least two devices, cuda:0 and cpu!
+      src/aadistill/init/project.py:60   avg += w * (m / m.trace())
+  ```
+
+  `project.py:57` allocates `avg = torch.zeros(d_teacher, d_teacher,
+  dtype=torch.float64)` with **no `device=`**, so it lands on CPU, while
+  `uncentered_moment(state, p)` follows `state` — CPU on the dev box, `cuda:0` on
+  a pod.
+- **This is the third Stage-1 device-placement defect**, and the pattern is now
+  unambiguous:
+
+  | attempt | cost | unplaced tensor |
+  | --- | ---: | --- |
+  | 6 | $0.3552 | `_validate` probe built on `config.device` |
+  | 7 | $0.3955 | `ActivationStatsCollector` accumulators |
+  | 9 | $0.3400 | `stream_projection`'s `avg` accumulator |
+
+  `autoinit.stage1_device_contract@v1` was written after 6 and 7 and closed both.
+  It did not reach a freshly-allocated accumulator two call levels below the
+  operator, in a helper the contract's authors had no reason to visit.
+- **Why every $0 gate passes over this line, and will keep doing so.** On a
+  CPU-only machine `state` is on CPU, both operands agree, and the arithmetic is
+  *correct*. The full suite, the pod simulator and every precheck exercise this
+  code and get the right answer. **A CPU rehearsal cannot see this class by
+  construction** — it is the exact lesson already recorded as "assert placement,
+  not arithmetic", and it has now been paid for three times.
+- **NOT FIXED, deliberately.** The instruction was to preserve the evidence and
+  stop on failure, and the scope question is genuinely the maintainer's: one line,
+  or an audit of every `torch.zeros`/`empty`/`ones` on the Stage-1 path for a
+  missing `device=`. Given three defects at three call depths, a one-line fix has
+  a poor track record here — but that is a judgement about how much to spend, not
+  a judgement I should make while a grant is spent and no new one exists.
+- **Also open:** whether the device contract should assert placement rather than
+  arithmetic, and whether a $0 GPU-free placement check is possible at all — a
+  meta-device or fake-tensor pass over the Stage-1 path would catch this class
+  without a GPU, and would be the first thing in this project that could.
+- **What is now demonstrated to work end to end on hardware:** setup, the
+  manifest-driven relay staging, the pod-side frozen-asset gate, the blocking
+  test gate, Stage 0 and its three frozen identities, the artifact manifest
+  (rc=0, 10 files, streams quiescent), the teardown gate, provider-confirmed
+  teardown, and traceback recovery.
+- **Disposition:** failed closed. Evidence preserved in
+  `logs/autoinit_phase_a_attempt9/`, pod terminated with provider confirmation,
+  stopped for review. Nothing trained; no checkpoint, probe or search leaf was
+  produced; the permanent controls are inputs here and were untouched. The grant
+  is spent and **no attempt 10 is authorized**.
+- **Revisit when:** the maintainer decides the fix scope. Cumulative spend
+  $194.5830 of $219.00.

@@ -278,8 +278,43 @@ $2.30   RAISED 2026-08-14 with maintainer approval, after attempt 1 spent
 ```
 authorized cumulative cap                                    $219.00
     RAISED AND APPROVED 2026-08-17. See the caps list above.
-actual cumulative spend                                      $194.2430
-    = $194.0530 + $0.1900 Phase A attempt 8.
+actual cumulative spend                                      $194.5830
+    = $194.0530 + $0.1900 attempt 8 + $0.3400 attempt 9.
+Phase A attempt 9 (L40S, 20.4 min) STAGE 0 PASSED, STAGE 1 FAILED $  0.3400
+    AUTHORIZED 2026-08-18 by an explicit maintainer GO, issued against
+    logs/autoinit_phase_a_attempt9_grant.json (sha256 7b62b5c516be) as
+    autoinit.phase_a.2026-08-18T1512Z.
+    THE ATTEMPT-8 FIX HELD: setup reached SETUP_DONE in 7.4 min and the
+    blocking test gate PASSED -- the same tests/docs suite that failed
+    attempt 8. That question is closed.
+    STAGE 0 PASSED and attested, the second time on hardware:
+      evaluation_protocol 250f72ef  comparable_identity 70a26e0b
+      science_plan 02be33b9         source_digest a1b51736
+    all three frozen identities matched under comparability v2. This host
+    drew driver 580.159.03 -- the same as Stage 3 and attempt 5 -- so as
+    on attempt 5 it does not by itself discriminate v2 from v1.
+    STAGE 1 FAILED, and the traceback CAME HOME:
+      RuntimeError: Expected all tensors to be on the same device, but
+      found at least two devices, cuda:0 and cpu!
+      src/aadistill/init/project.py:60  avg += w * (m / m.trace())
+    project.py:57 allocates `avg` with a dtype and NO device, so it lands
+    on CPU, while uncentered_moment() follows `state` -- CPU on the dev
+    box, cuda:0 on a pod. A CPU rehearsal cannot see it: both operands
+    agree there and the arithmetic is correct.
+    THIRD Stage-1 device-placement defect: attempt 6 ($0.3552) the
+    _validate probe, attempt 7 ($0.3955) the ActivationStatsCollector
+    accumulators, now this. autoinit.stage1_device_contract@v1 closed the
+    first two and did not reach a freshly-allocated accumulator two call
+    levels below the operator. Three for three, every one is a tensor
+    allocated without a device in a path only a GPU executes.
+    Nothing trained; no checkpoint, probe or search leaf produced. The
+    permanent controls are inputs here and were untouched. Manifest rc=0,
+    10 files, teardown gate allowed; pod deleted, provider confirms gone.
+    Watchdog's last tick read $0.3498 at 21.2 min, which counts until it
+    noticed the pod was already gone; the pod's own 20.4 min lifetime at
+    $0.99/h is $0.3366 -> $0.34 carried.
+    Failed closed; STOPPED FOR REVIEW. Grant spent; no attempt 10.
+    Evidence: logs/autoinit_phase_a_attempt9/
 Phase A attempt 8 (L40S, 11.28 min) SETUP TEST GATE FAILED   $  0.1900
     AUTHORIZED 2026-08-18 by an explicit maintainer GO, issued
     against the one-use grant logs/autoinit_phase_a_attempt8_grant.json
@@ -315,8 +350,8 @@ Phase A attempt 8 (L40S, 11.28 min) SETUP TEST GATE FAILED   $  0.1900
     one launch and is SPENT. No retry was attempted and no attempt 9
     is authorized, funded, prepared or implied.
     Evidence: logs/autoinit_phase_a_attempt8/
-unused authorization remaining                               $ 24.7570
-    = $219.00 - $194.2430. Previously committed against it:
+unused authorization remaining                               $ 24.4170
+    = $219.00 - $194.5830. Previously committed against it:
       device canary hard                                       $  1.0197
         SPENT $0.1240 across two sessions, NEITHER of which ran
         the canary script: attempt 1 died on the launcher's

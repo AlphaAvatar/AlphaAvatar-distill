@@ -1,0 +1,27 @@
+[15:14:09] budget: expected 1084 min $17.89 · soft $22.72 · hard $23.05 (authorized $23.05)
+[15:14:09] NVIDIA L40S $0.99/h, stock Medium
+[15:14:10] session commit 9f3ff7f53e18 verified: harness digests to 24d89b9ffe8e…, carries the authorization and only logs/autoinit_phase_a_authorization.json differs from the authorized base
+[15:14:10] frozen science plan 02be33b9a7a8… matches the authorization
+[15:14:10] precheck OK: 10 relay inputs, 2 local assets
+[15:14:11] created grgiu5atibea3x at $0.99/h
+[15:14:11] watchdog detached — hard 1397 min = $23.05
+[15:15:05]   starting (60s) — $0.01
+[15:16:08]   starting (120s) — $0.03
+[15:16:19] TCP 22 at 64.247.206.218:16838 after 2.1 min
+[15:16:22] draw 1: ssh reachable — $0.04
+[15:16:55] draw 1: image identity runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@580.159.03
+[15:16:55] draw 1: running setup
+[15:24:21] draw 1: setup complete — $0.17
+[15:24:28] driver detached, pid 6773, confirmed by descriptor_probe — $0.17
+[15:26:42]   2026-08-18T15:26:31Z MARKER:STAGE_START:1 — $0.21
+[15:31:25]   2026-08-18T15:30:43Z MARKER:PHASE_A_FAILED — $0.28
+[15:31:25] a blocking stage failed — collecting evidence, then tearing down. Completed probes are journalled and the permanent controls are inputs here and untouched.
+[15:31:25] polling ended: PHASE_A_FAILED — $0.28
+[15:33:26]   manifest rc=0
+10 file(s) across 5 class(es) -> /workspace/manifest.json
+  final_required: 10 · mutable_snapshot: 0 · final_streams_quiescent: True
+[15:34:26] teardown gate: allowed=True failed=training_complete
+[15:34:26] deleting pod (gate passed after PHASE_A_FAILED)
+[15:34:37] pod deleted — 20.4 min, $0.34; provider confirms gone: True
+
+autoinit-phase-a INCOMPLETE — /home/ecs-user/AlphaAvatar-distill/logs/autoinit_phase_a_session.json. STOP for review; no follow-on experiment was started.

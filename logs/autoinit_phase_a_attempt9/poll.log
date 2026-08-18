@@ -1,0 +1,5 @@
+2026-08-18T15:14:09Z elapsed=0min approx=$0.0000 launcher=1 pods=[NONE] status=[]
+2026-08-18T15:19:10Z elapsed=5min approx=$0.0825 launcher=1 pods=[grgiu5atibea3x:RUNNING] status=[]
+2026-08-18T15:24:12Z elapsed=10min approx=$0.1650 launcher=1 pods=[grgiu5atibea3x:RUNNING] status=[]
+2026-08-18T15:29:13Z elapsed=15min approx=$0.2475 launcher=1 pods=[grgiu5atibea3x:RUNNING] status=[]
+2026-08-18T15:34:14Z elapsed=20min approx=$0.3300 launcher=1 pods=[grgiu5atibea3x:RUNNING] status=[]

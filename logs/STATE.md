@@ -1,4 +1,4 @@
-**Updated:** 2026-08-18 · branch `main` · Phase-A attempt 9 prepared
+**Updated:** 2026-08-18 · branch `main` · after Phase-A attempt 9
 
 # Current state
 
@@ -9,20 +9,15 @@ not carry. If the two disagree, a structural test fails.
 **Nothing is running. Nothing is billing. Nothing is authorized. Nothing is
 prepared for launch.**
 
-All four are still true at this commit, and the distinction matters: a maintainer
-GO for attempt 9 exists as
-[`autoinit_phase_a_attempt9_grant.json`](autoinit_phase_a_attempt9_grant.json),
-but a **grant is a decision and an authorization is an artifact**. No artifact
-has been issued from it yet, and no bundle is prepared. The last tested
-implementation is `4b7ee709`; the grant/provenance commit carrying this file and
-the authorization-only commit that follows it are not separately tested.
+Phase-A attempt 9 ran on 2026-08-18: **Stage 0 passed and attested, Stage 1
+failed**, $0.34, pod deleted and provider-confirmed gone. Its grant is spent.
 
 ## Budget
 
 ```
-cumulative spend   $194.2430
+cumulative spend   $194.5830
 approved cap       $219.00
-remaining          $24.7570   NOT permission
+remaining          $24.4170   NOT permission
 ```
 
 Every authorization issued is **consumed** — each one's lineage gate refuses the
@@ -49,7 +44,8 @@ Also frozen: recovery design, selection rules, pooled_counts@v2, Stage-3 artifac
 * Stage 3 (both permanent controls, thresholds materialized)
 * the Phase-A harness, stages 0-5 executing for real at $0
 * the Stage-1 device audit (autoinit.stage1_device_contract@v1)
-* Stage 0 on hardware, passed three times
+* Stage 0 on hardware, passed four times — latest attempt 9, attesting
+  protocol `250f72ef`, identity `70a26e0b`, science plan `02be33b9`
 
 ## Latest verification
 
@@ -81,6 +77,7 @@ contract owned by inherited machinery (fixed by the session specification).
 | canary 1 | $0.0603 | before setup | wrapper missing 3 inherited self.a attributes |
 | canary 2 | $0.0637 | in setup | wrapper set LOCAL_ASSETS = (); shared setup copies them |
 | Phase A 8 | $0.1900 | setup / test gate | two dev-box-environment tests that cannot pass in a container |
+| Phase A 9 | $0.3400 | stage 1 | `stream_projection`'s `avg` allocated with no device (`project.py:57`) |
 
 **The pattern, through attempt 7:** code no $0 path could execute — a GPU-only
 device, or a contract owned by inherited machinery. **Attempt 8 is a new
@@ -125,22 +122,43 @@ instead of the cause, and it was paid for twice. Full diagnoses in
 
 ## Next starting point
 
-**The two attempt-8 assertions are fixed and verified at $0.** `REPO_LAYOUT.md`
-still names the real external storage paths; the layout test no longer demands
-that every execution environment be the maintainer's machine.
-`stage3_ladder_uniform_local_cache` is **withdrawn** — the deletion stands, the
-per-file hashes stand, and the entry no longer asserts that a routine staging
-destination is retired. Active tombstones: **16 / 3.6406 GiB**, against the
-**7 units / 3.660 GiB** the cleanup physically removed; both figures are true and
-neither corrects the other.
+**STOPPED FOR REVIEW.** Attempt 9's grant covered one launch and is spent; its
+lineage gate refuses the current HEAD. **No attempt 10 is authorized, funded or
+prepared**, and none may be inferred from the $24.4170 of unused headroom.
 
-**Nothing is authorized, funded or prepared.** Attempt 8's grant covered one
-launch, is spent, and its lineage gate refuses the current HEAD.
+**What worked.** Setup, the manifest-driven relay staging, the pod-side
+frozen-asset gate, and — for the first time — the blocking test gate that killed
+attempt 8. Stage 0 passed and attested all three frozen identities. Artifact
+collection, the teardown gate and provider-confirmed teardown all worked, and the
+stage-1 traceback came home, which is what made this diagnosis free.
 
-The next decision is **Phase-A attempt 9**, under a new one-use grant and the
-normal chain: **write a grant document** -> pre-auth base commit -> issue against
-that grant -> authorization-only commit -> bundle upload -> round-trip verify ->
-launch. No canary and no further readiness phase is required.
+**What failed.** `src/aadistill/init/project.py:57` allocates the projection
+accumulator with a dtype and **no device**, so it lands on CPU while
+`uncentered_moment` follows `state` — CPU on the dev box, `cuda:0` on a pod:
+
+```
+RuntimeError: Expected all tensors to be on the same device,
+              but found at least two devices, cuda:0 and cpu!
+    project.py:60   avg += w * (m / m.trace())
+```
+
+**It is the third of its kind.** Attempt 6 ($0.3552) the `_validate` probe,
+attempt 7 ($0.3955) the `ActivationStatsCollector` accumulators, attempt 9
+($0.3400) this. `autoinit.stage1_device_contract@v1` closed the first two and did
+not reach an accumulator two call levels below the operator. Every one is a
+tensor allocated without a device in a path only a GPU executes, and **a CPU
+rehearsal cannot see the class by construction** — on CPU both operands agree and
+the arithmetic is right.
+
+**The defect is not fixed.** Whether to change one line or audit every allocation
+on the Stage-1 path, whether the device contract should assert *placement* rather
+than arithmetic, and whether a $0 GPU-free placement check (meta device,
+fake-tensor pass) is possible at all, are the maintainer's decisions.
+Details in [`autoinit_phase_a_attempt9/`](autoinit_phase_a_attempt9/).
+
+A paid run needs the full chain: **write a grant document** -> pre-auth base
+commit -> issue against that grant -> authorization-only commit -> bundle upload
+-> round-trip verify -> launch.
 
 ## Where else to look
 
