@@ -86,6 +86,11 @@ Per-run directories. Each holds what a session actually produced.
 | `e7_canary/`, `e7_canary_rerun/` | the control-plane canary runs |
 | `e8b_s2_dp_sa/`, `e8b_step0_records/` | E8b evidence |
 
+Grant documents — the one-use maintainer decision an authorization is issued
+*against*, kept because a spent grant records what was permitted and by whom:
+`autoinit_phase_a_attempt8_grant.json`. The issuer requires one, refuses a grant
+that asserts an identity it did not compute, and hashes it into the artifact.
+
 Consumed authorizations — kept because a spent grant is the record of what was
 permitted: `autoinit_phase_a_authorization.json`,
 `autoinit_device_canary_authorization.json`,
