@@ -278,15 +278,45 @@ $2.30   RAISED 2026-08-14 with maintainer approval, after attempt 1 spent
 ```
 authorized cumulative cap                                    $219.00
     RAISED AND APPROVED 2026-08-17. See the caps list above.
-    Funds the $1.0197 canary and, conditionally, one $23.0484
-    Attempt 8. Not a retry reserve; no Attempt 9.
-actual cumulative spend                                      $194.0530
-    = $193.1783 + $0.3552 attempt 6 + $0.3955 attempt 7
-      + $0.0603 device canary attempt 1 (launcher argument
-      contract) + $0.0637 canary retry (shared setup asset
-      contract). The canary script has never run.
-unused authorization remaining                               $ 24.9470
-    = $219.00 - $194.0530. Committed against it:
+actual cumulative spend                                      $194.2430
+    = $194.0530 + $0.1900 Phase A attempt 8.
+Phase A attempt 8 (L40S, 11.28 min) SETUP TEST GATE FAILED   $  0.1900
+    AUTHORIZED 2026-08-18 by an explicit maintainer GO, issued
+    against the one-use grant logs/autoinit_phase_a_attempt8_grant.json
+    (sha256 09541ef547c6) as authorization
+    autoinit.phase_a.2026-08-18T1244Z. The device-canary condition
+    that had gated attempt 8 was superseded by that decision: the
+    canary path is TERMINATED and was not revived.
+    NO STAGE RAN. Nothing trained, measured, or written to the relay.
+    Setup reached ROPE_OK -- eight markers in -- so the new
+    manifest-driven relay staging, the pod-side frozen-asset gate and
+    the staged checkpoint all worked on hardware for the first time.
+    It then failed the blocking CPU test gate: 2 failed, 1789 passed,
+    63 skipped. Both failures are dev-box-environment tests that
+    cannot pass in a container, and both were added by the 2026-08-18
+    inventory/cleanup work, not by the relay-staging fix:
+      test_every_path_named_in_the_repo_layout_exists -- REPO_LAYOUT.md
+        names /home/ecs-user/aad-artifacts/ and /home/ecs-user/aad-scratch/,
+        and `REPO / ref` discards the base for an absolute operand, so
+        the test reads the host filesystem. A pod has neither (69b2e74).
+      test_no_tombstoned_path_is_still_on_disk -- the tombstone
+        stage3_ladder_uniform_local_cache names artifacts/stage3/
+        ladder_uniform, which the pod's setup STAGES as the recovery
+        pack's mirror. Same shape as the podsim tombstone dded03e
+        itself withdrew (dded03e).
+    The pod simulator could not catch either: it cannot unmake an
+    out-of-tree path, and for the tombstone it produces the OPPOSITE
+    of the pod's state -- it HIDES that gitignored directory, so the
+    assertion passes for the wrong reason.
+    Pod 2maapdxqg566r5 deleted by the launcher, provider confirms gone.
+    Watchdog accrued $0.1833 at its last tick; the launcher's rounded
+    $0.19 is carried, per the higher-figure rule above.
+    Failed closed as instructed; STOPPED FOR REVIEW. The grant covered
+    one launch and is SPENT. No retry was attempted and no attempt 9
+    is authorized, funded, prepared or implied.
+    Evidence: logs/autoinit_phase_a_attempt8/
+unused authorization remaining                               $ 24.7570
+    = $219.00 - $194.2430. Previously committed against it:
       device canary hard                                       $  1.0197
         SPENT $0.1240 across two sessions, NEITHER of which ran
         the canary script: attempt 1 died on the launcher's

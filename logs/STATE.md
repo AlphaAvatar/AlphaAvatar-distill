@@ -1,4 +1,4 @@
-**Updated:** 2026-08-18 · branch `main` · structural baseline
+**Updated:** 2026-08-18 · branch `main` · after Phase-A attempt 8
 
 # Current state
 
@@ -12,9 +12,9 @@ prepared for launch.**
 ## Budget
 
 ```
-cumulative spend   $194.0530
+cumulative spend   $194.2430
 approved cap       $219.00
-remaining          $24.9470   NOT permission
+remaining          $24.7570   NOT permission
 ```
 
 Every authorization issued is **consumed** — each one's lineage gate refuses the
@@ -73,8 +73,13 @@ contract owned by inherited machinery (fixed by the session specification).
 | Phase A 7 | $0.3955 | stage 1 | ActivationStatsCollector accumulators unplaced |
 | canary 1 | $0.0603 | before setup | wrapper missing 3 inherited self.a attributes |
 | canary 2 | $0.0637 | in setup | wrapper set LOCAL_ASSETS = (); shared setup copies them |
+| Phase A 8 | $0.1900 | setup / test gate | two dev-box-environment tests that cannot pass in a container |
 
-**The pattern:** every one was code no $0 path could execute: a GPU-only device, or a contract owned by inherited machinery. Twice the symptom was generalized
+**The pattern, through attempt 7:** code no $0 path could execute — a GPU-only
+device, or a contract owned by inherited machinery. **Attempt 8 is a new
+pattern:** a $0 path that *does* run on the dev box and asserts **dev-box
+filesystem state**, so the pod simulator passes it for the wrong reason.
+Details in [`autoinit_phase_a_attempt8/`](autoinit_phase_a_attempt8/). Twice the symptom was generalized
 instead of the cause, and it was paid for twice. Full diagnoses in
 [`decisions.md`](decisions.md); per-run evidence in the directories
 [`CATALOG.md`](CATALOG.md) lists.
@@ -106,32 +111,42 @@ instead of the cause, and it was paid for twice. Full diagnoses in
 
 ## Next starting point
 
-**Nothing is authorized and nothing is prepared.** The maintainer chooses.
+**STOPPED FOR REVIEW.** Phase-A attempt 8 ran on 2026-08-18 and failed closed at
+the setup test gate: **$0.19, 11.28 min, no stage ran**, pod deleted and provider
+confirmed gone. Its grant covered one launch and is **spent**. No attempt 9 is
+authorized, funded or prepared, and none may be inferred from the $24.7570 of
+unused headroom.
 
-The session architecture is **implemented** (2026-08-18), so the defect class
-that cost three paid pods is gone by construction rather than by care. What is
-left is a paid decision:
+**What worked, and is now hardware-verified:** the manifest-driven relay staging.
+Setup reached `ROPE_OK` — eight markers in — so all 10 declared science inputs
+staged and digest-verified on a pod, the pod-side frozen-asset gate passed, and
+the staged checkpoint loaded in both venvs. The $0 precheck covered 10 relay
+inputs where attempt 7 covered 3.
 
-1. **Phase A, attempt 8.** $23.0484 hard, unchanged — the price reproduces
-   exactly after both the session-architecture refactor and the relay-staging
-   fix. Stage-1 failures now come home with a traceback, and the
-   inherited-contract failures cannot recur on either the local-asset or the
-   relay side.
+**What failed:** two tests that cannot pass in a container, both added by the
+2026-08-18 inventory and cleanup work, neither related to the staging fix:
 
-   **The setup-contract readiness question is closed.** A seven-property audit on
-   2026-08-18 asked whether the shared setup was really driven by the session
-   declarations; it failed on all seven, the narrow fix landed at $0, and every
-   new gate is mutation-verified ([`decisions.md`](decisions.md)). The harness
-   digest moved, which invalidates nothing — every authorization was already
-   consumed. What remains is the GO / NO-GO decision.
-2. the device canary stays TERMINATED. Its launcher is converted, which is what
-   makes the point: it declares no local assets and now gets none. Reviving it
-   would be a new decision, not a resumption.
+1. `test_every_path_named_in_the_repo_layout_exists` — `REPO_LAYOUT.md` names
+   `/home/ecs-user/aad-artifacts/` and `/home/ecs-user/aad-scratch/`, and
+   `REPO / ref` discards the base for an absolute operand, so the test reads the
+   host filesystem.
+2. `test_no_tombstoned_path_is_still_on_disk` — the tombstone
+   `stage3_ladder_uniform_local_cache` names `artifacts/stage3/ladder_uniform`,
+   which the pod's setup **stages** as the recovery pack's mirror.
 
-A paid run needs the full chain, and it now starts one step earlier: **write a
-grant document** -> pre-auth base commit -> issue against that grant -> auth-only
-commit -> bundle upload -> round-trip verify -> launch. There is no grant
-document, so `issue_phase_a_authorization.py` refuses.
+The pod simulator could not catch either: it cannot unmake an out-of-tree path,
+and for the tombstone it produces the *opposite* of the pod's state — it hides
+that gitignored directory, so the assertion passes for the wrong reason.
+
+**The maintainer decides** whether the layout test should tolerate a path it
+cannot check in a container; whether the `stage3_ladder_uniform_local_cache`
+tombstone should be **withdrawn** exactly as `podsim_quarantine_residue` was, for
+exactly the same reason; whether the pod's blocking gate should run `tests/docs`
+at all; and whether a further attempt is warranted.
+
+A paid run needs the full chain: **write a grant document** -> pre-auth base
+commit -> issue against that grant -> auth-only commit -> bundle upload ->
+round-trip verify -> launch.
 
 ## Where else to look
 

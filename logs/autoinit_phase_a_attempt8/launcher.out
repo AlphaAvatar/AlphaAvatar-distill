@@ -1,0 +1,67 @@
+[12:47:38] budget: expected 1084 min $17.89 · soft $22.72 · hard $23.05 (authorized $23.05)
+[12:47:38] NVIDIA L40S $0.99/h, stock Low
+[12:47:38] session commit 4563d1064459 verified: harness digests to 24d89b9ffe8e…, carries the authorization and only logs/autoinit_phase_a_authorization.json differs from the authorized base
+[12:47:38] frozen science plan 02be33b9a7a8… matches the authorization
+[12:47:39] precheck OK: 10 relay inputs, 2 local assets
+[12:47:40] created 2maapdxqg566r5 at $0.99/h
+[12:47:40] watchdog detached — hard 1397 min = $23.05
+[12:48:33]   starting (60s) — $0.01
+[12:49:36]   starting (120s) — $0.03
+[12:50:29] TCP 22 at 195.26.232.134:20564 after 2.8 min
+[12:50:32] draw 1: ssh reachable — $0.05
+[12:51:00] draw 1: image identity runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@580.178.04
+[12:51:00] draw 1: running setup
+[12:58:46] setup did not reach SETUP_DONE:
+ + tokenspeed-mla==0.1.8
+ + tokenspeed-triton==3.8.10.post20260721
+ + torch==2.13.0
+ + torch-c-dlpack-ext==0.1.5
+ + torchaudio==2.11.0
+ + torchcodec==0.16.0
+ + torchvision==0.28.0
+ + tqdm==4.70.0
+ + transformers==5.15.0
+ + triton==3.7.1
+ + truststore==0.10.4
+ + typer==0.27.1
+ + typing-extensions==4.16.0
+ + typing-inspection==0.4.4
+ + urllib3==2.7.0
+ + uvicorn==0.52.3
+ + uvloop==0.22.1
+ + vllm==0.27.1
+ + watchfiles==1.2.0
+ + websockets==17.0.1
+ + xgrammar==0.2.3
+ + yarl==1.24.5
+ + z3-solver==4.15.4.0
+[12:53:08] vllm offline install completed in 10s
+vllm 0.27.1 | torch 2.13.0+cu130 True
+MARKER:VLLM_READY
+[12:53:20] downloading the teacher at the pinned revision
+
+Fetching 10 files:   0%|          | 0/10 [00:00<?, ?it/s]
+Fetching 10 files:  40%|████      | 4/10 [00:00<00:00, 28.09it/s]
+Fetching 10 files:  70%|███████   | 7/10 [00:00<00:00,  7.59it/s]
+Fetching 10 files:  80%|████████  | 8/10 [00:20<00:00,  7.59it/s]
+Fetching 10 files:  90%|█████████ | 9/10 [00:21<00:03,  3.53s/it]
+Fetching 10 files: 100%|██████████| 10/10 [00:25<00:00,  3.66s/it]
+Fetching 10 files: 100%|██████████| 10/10 [00:25<00:00,  2.59s/it]
+MARKER:TEACHER_READY
+[12:53:46] checking the RoPE base resolves in every venv
+  transformers 5.13.1: qwen3_0p6b_init_v0 stored 5,000,000 runtime 5,000,000 OK
+  transformers 5.15.0: qwen3_0p6b_init_v0 stored 5,000,000 runtime 5,000,000 OK
+MARKER:ROPE_OK
+[12:54:01] CPU test suite (128 vCPUs visible, cgroup budget 13; cpu set 0-12)
+=========================== short test summary info ============================
+FAILED tests/docs/test_repository_structure.py::test_every_path_named_in_the_repo_layout_exists
+FAILED tests/docs/test_storage_inventory.py::test_no_tombstoned_path_is_still_on_disk
+2 failed, 1789 passed, 63 skipped in 277.29s (0:04:37)
+[12:58:40] test suite failed rc=1
+SETUP_RC=1
+
+[12:58:46] ABORT after draw 1: setup_failed
+[12:58:46] deleting pod (setup setup_failed)
+[12:58:57] pod deleted — 11.3 min, $0.19; provider confirms gone: True
+
+autoinit-phase-a INCOMPLETE — /home/ecs-user/AlphaAvatar-distill/logs/autoinit_phase_a_session.json. STOP for review; no follow-on experiment was started.

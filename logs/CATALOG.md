@@ -82,6 +82,7 @@ Per-run directories. Each holds what a session actually produced.
 | `autoinit_continuation_attempts/` | the eight characterization-continuation attempts |
 | `autoinit_phase_a_attempts/` | Phase-A attempts 1–5 |
 | `autoinit_phase_a_attempt6/`, `autoinit_phase_a_attempt7/` | attempts 6 and 7, with attempt 7's stage-1 traceback |
+| `autoinit_phase_a_attempt8/` | attempt 8 — failed closed at the setup test gate, $0.19, no stage ran. Records what DID pass on hardware: the manifest-driven relay staging, the pod-side frozen-asset gate, `ROPE_OK` |
 | `autoinit_device_canary_attempt1/`, `autoinit_device_canary_attempt2/` | the two terminated canary sessions |
 | `e7_canary/`, `e7_canary_rerun/` | the control-plane canary runs |
 | `e8b_s2_dp_sa/`, `e8b_step0_records/` | E8b evidence |

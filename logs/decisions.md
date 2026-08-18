@@ -4052,3 +4052,70 @@ two devices, cuda:0 and cpu!
 - **Revisit when:** a session should stage *less* than the shared ten. That is
   now a one-line change to its `relay_inputs` and a real behaviour change, so it
   gets its own decision and its own record.
+
+## 2026-08-18 — Phase-A attempt 8: failed closed at the setup test gate, $0.19
+
+- **Context:** the maintainer gave an explicit GO for attempt 8 after the
+  readiness closure at `7ede650`, superseding the device-canary condition that
+  had previously gated it. The full chain was executed: grant document,
+  pre-authorization base `0b03d366`, issuance as
+  `autoinit.phase_a.2026-08-18T1244Z` against the current harness digest
+  `24d89b9f…`, authorization-only commit `4563d106` differing from its base in
+  exactly one path, bundle upload and round-trip verification, and every
+  pre-provider $0 gate.
+- **Outcome: no stage ran.** Pod `2maapdxqg566r5`, 11.28 min, **$0.19**, deleted
+  by the launcher with provider confirmation. Terminal state `setup_failed` on
+  draw 1; the driver never started, so there is no driver terminal marker.
+- **What this run PROVED, and it is not nothing.** Setup reached `ROPE_OK` —
+  eight markers in — which is the first hardware execution of the relay-staging
+  fix:
+  - `ASSETS_STAGED`: all **10** declared science inputs fetched from
+    `SESSION_RELAY_INPUTS`, every declared digest verified at every destination;
+  - `ASSETS_READY`: the pod-side frozen-asset gate passed against the
+    preregistered constants;
+  - `ROPE_OK`: the staged checkpoint loaded through `AutoConfig.from_pretrained`
+    in **both** venvs, each reading stored RoPE base 5,000,000 — direct evidence
+    the five companion files staged correctly, since a checkpoint without
+    `config.json` cannot be read at all.
+  The $0 precheck also covered 10 relay inputs where attempt 7 covered 3.
+- **What failed: the blocking CPU test gate**, `2 failed, 1789 passed, 63 skipped`.
+  Both failures are tests that **cannot pass in a container**, and both were
+  added by this repository's own 2026-08-18 inventory and cleanup work:
+  - `test_every_path_named_in_the_repo_layout_exists` — `docs/REPO_LAYOUT.md`
+    names the absolute host paths `/home/ecs-user/aad-artifacts/` and
+    `/home/ecs-user/aad-scratch/`. The test evaluates `(REPO / ref).exists()`,
+    and `pathlib` **discards the base** when the right operand is absolute, so
+    the assertion reads the dev box's literal filesystem. Introduced by
+    `69b2e74`.
+  - `test_no_tombstoned_path_is_still_on_disk` — the tombstone
+    `stage3_ladder_uniform_local_cache` names `artifacts/stage3/ladder_uniform`,
+    and the pod's setup **stages the recovery pack into exactly that
+    directory**. It always has: it is the mirror the recovery-corpus loader
+    reads, beside the `ladder_uniform_probe` copy `p2_driver.py` reads.
+    Introduced by `dded03e`.
+- **The second one is the same defect `dded03e` itself diagnosed.** That commit
+  withdrew the `podsim_quarantine_residue` tombstone because a tombstone asserts
+  something stopped existing, and the simulator recreates that quarantine by
+  design. `artifacts/stage3/ladder_uniform` is a destination the pod's setup
+  recreates by design. The precedent for withdrawal is exact; **the decision is
+  the maintainer's and is not taken here.**
+- **Why no $0 path caught it, which is the transferable lesson.** Every prior
+  paid failure was *code no $0 path could execute*. This one is the inverse: a
+  $0 path that **does** run on the dev box and asserts **dev-box filesystem
+  state**. The pod simulator cannot reproduce either condition — it cannot unmake
+  an out-of-tree path, and for the tombstone it produces the **opposite** of the
+  pod's state, because it *hides* that gitignored directory and the assertion
+  then passes for the wrong reason. A simulator that hides what a pod stages is
+  not simulating the pod.
+- **Attempt 7 never ran these tests.** It launched 2026-08-17, before both
+  commits. Attempt 8 is the first paid session to execute them, which is why a
+  defect introduced by zero-cost maintenance surfaced only on a billing pod.
+- **Disposition:** failed closed exactly as instructed — evidence recorded, pod
+  terminated with provider confirmation, stopped for review. No repair on the
+  live pod, no retry, no follow-on. The grant covered one launch and is spent.
+- **Open for the reviewer:** whether the layout test should tolerate a path it
+  cannot check in a container, or `REPO_LAYOUT.md` should name those two
+  differently; whether `stage3_ladder_uniform_local_cache` should be withdrawn;
+  whether the pod's blocking gate should run `tests/docs` at all, given that it
+  asserts properties of the dev box; and whether a further attempt is warranted.
+- **Revisit when:** the reviewer decides. Nothing here authorizes attempt 9.
