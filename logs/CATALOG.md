@@ -91,7 +91,8 @@ Per-run directories. Each holds what a session actually produced.
 Grant documents — the one-use maintainer decision an authorization is issued
 *against*, kept because a spent grant records what was permitted and by whom:
 `autoinit_phase_a_attempt8_grant.json`,
-`autoinit_phase_a_attempt9_grant.json`. The issuer requires one, refuses a grant
+`autoinit_phase_a_attempt9_grant.json`,
+`autoinit_phase_a_attempt10_grant.json`. The issuer requires one, refuses a grant
 that asserts an identity it did not compute, and hashes it into the artifact.
 
 Consumed authorizations — kept because a spent grant is the record of what was

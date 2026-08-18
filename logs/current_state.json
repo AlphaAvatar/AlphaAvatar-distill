@@ -1,8 +1,8 @@
 {
   "schema": "aadistill.current_state/v2",
-  "generated_utc": "2026-08-19T00:40:00+00:00",
+  "generated_utc": "2026-08-18T17:46:05Z",
   "_contract": "The minimal machine-readable CURRENT snapshot. It owns live facts and nothing else: no history, no per-attempt detail, no narrative. History lives in logs/decisions.md and the per-run directories; the human view of THIS file is logs/STATE.md and the two must agree. README owns no live facts at all. Ownership rules: logs/CATALOG.md.",
-  "baseline_commit": "4b7ee709d51d2d54ba45865c06545a6e77eba00e",
+  "baseline_commit": "0b33c5db3f7cab11093c5dbb5eac68e04c6561a3",
   "baseline_commit_meaning": "The LAST TESTED IMPLEMENTATION: the commit whose tree produced the latest_verification figures below. It is deliberately NOT the commit carrying this file. Two commits follow it by construction and neither is separately tested: (1) the grant/provenance commit that adds the one-use grant document and this refresh, and (2) the authorization-only commit, which the Phase-A lineage gate requires to differ from its base in nothing but logs/autoinit_phase_a_authorization.json. Keeping the distinction explicit is the point: a reader must be able to tell which commit the 1874/1834/395 numbers describe from which commit a pod checks out. This field read fe3c2b3 while HEAD was four commits ahead once, and read 4563d106 after the post-fix verification, because nothing refreshes or checks it; it is refreshed as part of preparing a paid launch.",
   "running": {
     "paid_compute": false,
@@ -54,7 +54,7 @@
     "the bounded Stage-1 device-allocation audit: 15 fresh-tensor factories in the frozen-operator closure classified device-coupled or intentionally host-only; 3 fixed, the rest verified correct"
   ],
   "latest_verification": {
-    "utc": "2026-08-19T00:40:00+00:00",
+    "utc": "2026-08-18T17:46:05Z",
     "after": "the bounded Stage-1 device-allocation audit that followed attempt 9",
     "full_suite": "1881 passed, 11 skipped, 0 errors in 19:48",
     "stage1_and_autoinit": "335 passed (tests/init/ + tests/autoinit/)",
@@ -63,7 +63,8 @@
     "phase_a_price_reproduced": "$17.8933 / $22.7183 / $23.0483 exactly, reserves 147.7683 and 36.2158 minutes",
     "harness_digest": "24d89b9ffe8e41f2712d2f105ca2076fd0552ccea7a089aeb5f2a844c39e1f42 - UNCHANGED, 16 files, deliberately not expanded: none of the three edited implementation files is in it, and the Attempt-10 authorization binds the new pre-auth commit",
     "mutation_verification": "5 mutations; removing the device from avg, from the orthonormality eye, or from the _head_rows call site each fails, and mechanically moving a host-only score vector fails. One gate passed first time and was rewritten against `meta`",
-    "scope": "CPU only; no checkpoint was loaded and no metric measured"
+    "scope": "CPU only; no checkpoint was loaded and no metric measured",
+    "timestamp_correction": "the previous record read 2026-08-19T00:40:00Z, about seven hours AHEAD of the real clock: local wall time (UTC+8) was written as if it were UTC. Timestamps here are now taken from `date -u`. The pod-side times in the attempt records are unaffected - the launcher, watchdog and driver all stamp real UTC themselves."
   },
   "failed": [
     {

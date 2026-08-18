@@ -1,4 +1,4 @@
-**Updated:** 2026-08-19 · branch `main` · after the Stage-1 device audit
+**Updated:** 2026-08-18 · branch `main` · Phase-A attempt 10 prepared
 
 # Current state
 
@@ -20,6 +20,11 @@ at $0**.
 cumulative spend   $194.5830
 approved cap       $219.00
 remaining          $24.4170   NOT permission
+
+A full hard-ceiling Attempt 10 brings the project to **$217.6314**, leaving
+**$1.3686** — not enough for another Phase-A launch. **Attempt 10 is the last one
+the cap affords.** If it fails, authorization for an eleventh must not be
+inferred from the remainder.
 ```
 
 Every authorization issued is **consumed** — each one's lineage gate refuses the
