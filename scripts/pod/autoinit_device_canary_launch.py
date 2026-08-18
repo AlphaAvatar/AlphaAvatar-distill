@@ -1,60 +1,74 @@
 #!/usr/bin/env python3
-"""One-use launcher for the Stage-1 device canary. Nothing general.
+"""The Stage-1 device canary, as a session specification. TERMINATED.
 
     PYTHONPATH=src setsid nohup python -u \
         scripts/pod/autoinit_device_canary_launch.py \
         --scr <scratch> --session-commit <sha> --bundle <name> < /dev/null &
 
-A **subclass** of the micro-preflight launcher, exactly as the Phase-A launcher
-is. Everything that has been proven on hardware is inherited untouched: the
-bundle identity check, the spend authorization, the detached start with a
-durable descriptor, the independent watchdog, the log relay, the four-threshold
-budget, the artifact gate and the provider-confirmed teardown. What is overridden
-is only what this session *is* — nine short declarations and three methods.
+**The paid device-canary session path is TERMINATED (2026-08-18.)** Two
+authorized sessions, $0.1240, **zero canary runs**: attempt 1 died before setup
+on three inherited `self.a` attributes this launcher's parser had never defined,
+and the retry died inside setup because it had honestly declared
+`LOCAL_ASSETS = ()` and the shared setup script copied two assets anyway. Neither
+reached the canary script, so neither says anything about device placement on
+CUDA. No further canary is prepared, and converting this file does not prepare
+one: it has no authorization artifact to load.
 
-It loads a **`SpendAuthorization`**, not a `PhaseAAuthorization`, and that is a
-property rather than an accident: the ordinary type's `allows_phase_a` is a hard
-`False`, so this launcher cannot start Phase A even if someone points it at the
-wrong artifact. The canary is infrastructure, not science.
+It is kept, converted, for two reasons. It is the workload description — one
+invocation of each frozen operator on real CUDA, through the production
+materialize -> reload -> validate -> measure lifecycle — and it is the smallest
+session in the repository, which makes it the one that shows what the
+specification form actually removed:
 
-Nothing it produces may enter scientific selection. There is no `fetch_products`
-and no checkpoint comes home: the canary's children are compressions of the
-canonical student toward a geometry picked to make every operator do work, and
-they die with the pod.
+* the argument contract is checked before a pod exists, so the three attributes
+  that killed attempt 1 cannot be missing silently;
+* `local_assets` is a manifest field the setup script READS, so declaring none
+  now means none are copied, which is exactly what the retry needed;
+* `SESSION_KIND` cannot leak in from another session, because there is no module
+  global for it to leak through.
+
+It names `SpendAuthorization`, whose `allows_phase_a` is a hard `False`, so this
+session cannot start Phase A whatever it is pointed at. Nothing it produces may
+enter scientific selection: there is no `fetch_products` and no checkpoint comes
+home. Its children are compressions of the canonical student toward a geometry
+picked to make every operator do work, and they die with the pod.
 """
 
 from __future__ import annotations
 
 import argparse
-import importlib.util
 import sys
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO_ROOT / "src"))
 
+from aadistill.autoinit.authorization import SpendAuthorization  # noqa: E402
 from aadistill.autoinit.recovery import PreflightPlan, PreflightStage  # noqa: E402
-from aadistill.infrastructure.budget import Phase, StepTime, plan_session  # noqa: E402
+from aadistill.infrastructure.budget import Phase  # noqa: E402
+from aadistill.infrastructure.session import (  # noqa: E402
+    ArtifactPolicy, BudgetSpec, MarkerPolicy, RelayInput, SessionContext,
+    SessionSpec, SetupManifest, TeardownPolicy,
+)
+from aadistill.infrastructure.session_runner import REPO, WS, run_session  # noqa: E402
 
-_spec = importlib.util.spec_from_file_location(
-    "autoinit_preflight_launch",
-    REPO_ROOT / "scripts/pod/autoinit_preflight_launch.py")
-_preflight = importlib.util.module_from_spec(_spec)
-sys.modules["autoinit_preflight_launch"] = _preflight
-_spec.loader.exec_module(_preflight)
-
-WS = _preflight.WS
-REPO = _preflight.REPO
 STATUS = f"{WS}/autoinit_device_canary.status"
 RUN_LOG = f"{WS}/autoinit_device_canary_run.log"
 AUTH_PATH = "logs/autoinit_device_canary_authorization.json"
 #: The canary reads the frozen calibration mixture and the canonical student.
 #: Both come from the relay; neither is a dev-box-only asset, so nothing is
-#: scp'd and `LOCAL_ASSETS` is empty.
-LOCAL_ASSETS: tuple[str, ...] = ()
+#: scp'd and no asset is installed. Under the old shared setup that declaration
+#: was ignored and cost $0.0637; `SESSION_ASSETS` is now what setup reads.
+LOCAL_ASSETS: tuple = ()
+TEST_IGNORES = ("tests/data/test_recovery_corpus_pipeline.py",
+                "tests/pod/test_phase_a_stages1_5_execute.py")
+#: Forwarded to the shared setup script. The canary needs no teacher, but setup
+#: is shared and its behaviour must not change because a canary is driving it,
+#: so this is the same frozen revision every other session pins.
+TEACHER_REVISION = "768f209d9ea81521153ed38c47d515654e938aea"
 
-#: One stage. The plan exists because the authorization binds to a plan hash,
-#: and a canary that borrowed the preflight's hash would be claiming to be a
+#: One stage. The plan exists because the authorization binds to a plan hash, and
+#: a canary that borrowed the preflight's hash would be claiming to be a
 #: preflight.
 CANARY_PLAN_V1 = PreflightPlan(
     plan_id="autoinit.device_canary",
@@ -84,131 +98,100 @@ SYNC_MINUTES = 5.0
 TRANSFER_MINUTES = 6.0
 
 
-class DeviceCanary(_preflight.Preflight):
-    """The micro-preflight machinery, pointed at one script."""
+def driver_command(ctx: SessionContext, plan) -> str:
+    return (f"/opt/train/bin/python "
+            f"{REPO}/scripts/pod/autoinit_device_canary.py "
+            f"--out {REPO}/artifacts/audit/autoinit_device_canary/result.json "
+            f"--workdir artifacts/autoinit/device_canary --device cuda")
 
-    def __init__(self, a):
-        super().__init__(a)
-        self.ev["schema"] = "aadistill.autoinit.device_canary_session/v1"
-        self.ev["scientific_use"] = False
-        self.ev["trains_anything"] = False
-        self.ev["retrains_permanent_controls"] = False
-        self.ev["phase_a_launched"] = False
-        self.ev["phase_a_reachable_from_this_launcher"] = False
 
-    audit_dirname = "autoinit_device_canary"
-    evidence_filename = "result.json"
-    archive_basename = "device_canary_artifacts.tar.gz"
-    spec_success = "configs/autoinit/device_canary_artifacts.json"
-    spec_failed = "configs/autoinit/device_canary_artifacts.json"
-    failure_markers = ("CANARY_FAILED",)
-    #: Empty on purpose. There is no partial success to come home for: the
-    #: report is written either way and is the only artifact.
-    incomplete_markers: tuple[str, ...] = ()
-    failure_note = ("an operator failed on CUDA — collecting the report, which "
-                    "carries the traceback, then tearing down. That failure IS "
-                    "the finding; nothing is retried.")
-    report_names = ("result.json",)
-    job_id = "autoinit_device_canary"
-
-    def event_streams(self) -> tuple[str, ...]:
-        return ()
-
-    def session_auth_path(self) -> str:
-        return AUTH_PATH
-
-    def session_plan_hash(self) -> str:
-        return CANARY_PLAN_V1.plan_hash
-
-    def setup_env(self) -> dict[str, str]:
-        """`SESSION_KIND` is left at its default, `spend`.
-
-        That routes setup to `SpendAuthorization`, whose
-        `assert a.allows_phase_a is False` is exactly the assertion this session
-        wants to pass.
-        """
-        return {}
-
-    def make_plan(self) -> bool:
-        self.plan = plan_session(
-            price_per_hour=self.a.max_price,
-            authorized_usd=self.auth.hard_cap_usd,
+def spec(args) -> SessionSpec:
+    return SessionSpec(
+        session_id="autoinit-device-canary",
+        schema="aadistill.autoinit.device_canary_session/v1",
+        description=("one invocation of each frozen operator on real CUDA, "
+                     "through the production lifecycle. TERMINATED path"),
+        authorization_path=AUTH_PATH,
+        #: The ordinary type, deliberately. Its `allows_phase_a` is a hard False,
+        #: so this session cannot start Phase A even if pointed at the wrong
+        #: artifact. The canary is infrastructure, not science.
+        authorization_loader=SpendAuthorization.load,
+        plan_id=CANARY_PLAN_V1.plan_id,
+        plan_hash=CANARY_PLAN_V1.plan_hash,
+        budget=BudgetSpec(
             arms=0, steps_per_arm=0,          # nothing is trained
-            step_time=StepTime(4.15, "unused; the canary trains nothing"),
-            setup_minutes=self.a.setup_minutes,
+            step_seconds=4.15,
+            step_source="unused; the canary trains nothing",
+            setup_minutes=args.setup_minutes,
+            transfer_minutes=args.transfer_minutes,
             other_phases=(
                 Phase("parent_load_and_calibration", PARENT_LOAD_MINUTES),
                 Phase("six_operator_invocations_and_lifecycles", CANARY_MINUTES),
                 Phase("artifact_manifest_and_verify", MANIFEST_MINUTES),
                 Phase("artifact_synchronization", SYNC_MINUTES)),
-            eval_minutes_per_arm=0.0, transfer_minutes=self.a.transfer_minutes,
-            contingency_fraction=0.10, artifact_recovery_reserve_minutes=20.0)
-        self.ev["budget_plan"] = self.plan.as_dict()
-        self.ev["priced_note"] = (
-            "the compute is ~1 s by the project's own cost model; this price is "
-            "session overhead")
-        try:
-            self.auth.require_within_cap(self.plan.hard_terminate_usd,
-                                         what="planned hard threshold")
-            self.auth.require_within_launch_limit(self.plan.hard_terminate_usd,
-                                                  what="planned hard threshold")
-        except Exception as exc:                                  # noqa: BLE001
-            self.say(f"AUTHORIZATION: {exc}")
-            return False
-        self.say(f"budget: expected {self.plan.expected_minutes:.0f} min "
-                 f"${self.plan.expected_usd:.2f} · soft "
-                 f"${self.plan.soft_stop_usd:.2f} · hard "
-                 f"${self.plan.hard_terminate_usd:.2f} "
-                 f"(authorized ${self.auth.hard_cap_usd:.2f})")
-        return True
-
-    def relay_precheck(self) -> bool:
-        """Fail at $0 rather than after a 45-minute setup.
-
-        Same shape as the base's, with this session's two inputs: the canonical
-        student it compresses and the frozen calibration mixture it reads. The
-        base hardcodes its own list, so this is an override rather than a
-        parameterization — one list, not a new abstraction.
-        """
-        need = ["stage1/qwen3_0p6b_init_v0/checkpoint/model.safetensors",
-                "e8_inputs_20260810/calibration_v1/items.jsonl"]
-        try:
-            from huggingface_hub import HfApi
-            present = set(HfApi().list_repo_files(
-                self.a.relay_repo, repo_type="model"))
-        except Exception as exc:                                  # noqa: BLE001
-            self.say(f"ABORT: cannot list the relay: {exc!r}"[:200])
-            return False
-        missing = [f for f in need if f not in present]
-        self.ev["precheck"] = {"relay_needed": need, "relay_missing": missing,
-                               "local_assets": list(LOCAL_ASSETS),
-                               "local_missing": []}
-        if missing:
-            self.say(f"ABORT: relay missing {missing}")
-            return False
-        self.say(f"precheck OK: {len(need)} relay inputs, no local assets")
-        return True
-
-    def fetch_products(self, host: str, target, stage2_passed: bool) -> list:
-        """Nothing. The canary produces no artifact worth keeping beyond its
-        report, which the normal report fetch already brings home."""
-        return []
-
-    def driver_command(self) -> str:
-        return (f"/opt/train/bin/python "
-                f"{REPO}/scripts/pod/autoinit_device_canary.py "
-                f"--out {REPO}/artifacts/audit/autoinit_device_canary/result.json "
-                f"--workdir artifacts/autoinit/device_canary --device cuda")
+            eval_minutes_per_arm=0.0, contingency_fraction=0.10,
+            artifact_recovery_reserve_minutes=20.0),
+        setup=SetupManifest(
+            relay_inputs=(
+                RelayInput("stage1/qwen3_0p6b_init_v0/checkpoint/model.safetensors"),
+                RelayInput("e8_inputs_20260810/calibration_v1/items.jsonl"),
+            ),
+            #: Empty, and now honoured. `SESSION_KIND` is absent too, which
+            #: routes setup to `SpendAuthorization` — whose
+            #: `assert a.allows_phase_a is False` is exactly the assertion this
+            #: session wants to pass.
+            local_assets=LOCAL_ASSETS,
+            required_env=("SESSION_COMMIT", "BUNDLE_NAME", "SESSION_STATUS",
+                          "SESSION_AUTH_PATH", "SESSION_PLAN_HASH",
+                          "SESSION_ASSETS", "TEACHER_REVISION"),
+            uv_max_seconds=args.uv_max_s, tests_max_seconds=args.tests_max_s,
+            teacher_revision=TEACHER_REVISION, test_ignores=TEST_IGNORES),
+        driver_command=driver_command,
+        driver_job_id="autoinit_device_canary",
+        status_path=STATUS, run_log_path=RUN_LOG,
+        markers=MarkerPolicy(
+            success="ALL_DONE",
+            failure=("CANARY_FAILED",),
+            #: Empty on purpose. There is no partial success to come home for:
+            #: the report is written either way and is the only artifact.
+            incomplete=(),
+            failure_note=("an operator failed on CUDA — collecting the report, "
+                          "which carries the traceback, then tearing down. That "
+                          "failure IS the finding; nothing is retried.")),
+        artifacts=ArtifactPolicy(
+            audit_dirname="autoinit_device_canary",
+            evidence_filename="result.json",
+            archive_basename="device_canary_artifacts.tar.gz",
+            spec_success="configs/autoinit/device_canary_artifacts.json",
+            spec_failed="configs/autoinit/device_canary_artifacts.json",
+            report_names=("result.json",),
+            event_streams=lambda ctx: (),
+            #: Nothing. The canary produces no artifact worth keeping beyond its
+            #: report, which the normal report fetch already brings home.
+            fetch_products=lambda ctx: []),
+        teardown=TeardownPolicy(note="nothing chains off the canary"),
+        precheck=(),
+        evidence_fields={"scientific_use": False,
+                         "trains_anything": False,
+                         "retrains_permanent_controls": False,
+                         "phase_a_launched": False,
+                         "phase_a_reachable_from_this_launcher": False,
+                         "session_path_status": "TERMINATED 2026-08-18",
+                         "priced_note": ("the compute is ~1 s by the project's "
+                                         "own cost model; this price is session "
+                                         "overhead")})
 
 
 def build_parser() -> argparse.ArgumentParser:
     """The real parser, extracted so a test can assert on the namespace it
     produces rather than on a transcription of it.
 
-    Attempt 1 was lost at $0.0603 because the inherited base reads attributes
-    off `self.a` that this parser did not define. Subclassing a launcher means
-    inheriting its ARGUMENT contract as well as its methods, and the contract is
-    invisible from the subclass.
+    Attempt 1 was lost at $0.0603 because the inherited base read attributes off
+    `self.a` that this parser did not define. There is no base to inherit from
+    now, and `SessionRunner.__init__` checks the namespace against
+    `RUNNER_ARGUMENT_CONTRACT` before a pod exists — but the parser is still
+    extracted, because a contract checked at runtime and a contract checked by a
+    test are worth having both.
     """
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--scr", required=True)
@@ -237,52 +220,13 @@ def build_parser() -> argparse.ArgumentParser:
     ap.add_argument("--runpod-config",
                     default=str(Path.home() / ".runpod/config.toml"))
     ap.add_argument("--out", default="logs/autoinit_device_canary_session.json")
-    # --- read by the INHERITED base, not by anything written here ----------
-    #
-    # `TEACHER_REVISION` is forwarded to the shared setup script. The canary
-    # needs no teacher, but setup is shared and its behaviour must not change
-    # because a canary is driving it, so this is the same frozen revision every
-    # other session pins. Nothing here downloads or uses a teacher.
-    ap.add_argument("--teacher-revision",
-                    default="768f209d9ea81521153ed38c47d515654e938aea")
-    # Read only by the base's `fetch_products`, which this session OVERRIDES to
-    # return nothing. The value is therefore never used; it is canary-scoped
-    # rather than the real checkpoint store so that if some future edit ever did
-    # fetch, it could not land among real checkpoints.
-    ap.add_argument("--ckpt-store",
-                    default="artifacts/audit/autoinit_device_canary/never_fetched")
-    # Same: unused. One minute rather than a generous window, because a timeout
-    # that would mask a fetch this session must never perform is worse than one
-    # that fails.
-    ap.add_argument("--ckpt-fetch-limit-min", type=int, default=1)
     return ap
 
 
 def main() -> int:
     args = build_parser().parse_args()
-
-    _preflight.AUTH_PATH = AUTH_PATH
-    _preflight.STATUS = STATUS
-    _preflight.RUN_LOG = RUN_LOG
-    _preflight.LOCAL_ASSETS = LOCAL_ASSETS
-    _preflight.PREFLIGHT_PLAN_V1 = CANARY_PLAN_V1
-
-    session = DeviceCanary(args)
-    ok = False
-    try:
-        ok = session.run()
-    except Exception as exc:                                      # noqa: BLE001
-        session.ev["launcher_error"] = f"{type(exc).__name__}: {exc}"
-        session.say(f"LAUNCHER ERROR: {type(exc).__name__}: {exc}")
-        if session.pod_id:
-            session.teardown_now("launcher error")
-    session.ev["passed"] = bool(ok)
-    session.ev["scientific_use"] = False
-    session.ev["followon_started"] = False
-    session.save()
-    print(f"\nDevice canary {'PASSED' if ok else 'FAILED'} — "
-          f"{REPO_ROOT / args.out}. STOP for review; nothing else was started.")
-    return 0 if ok else 11
+    return run_session(spec(args), args, REPO_ROOT,
+                       summary="STOP for review; nothing else was started.")
 
 
 if __name__ == "__main__":

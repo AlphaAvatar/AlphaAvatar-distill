@@ -18,6 +18,10 @@ from pathlib import Path
 
 import pytest
 
+from session_specs import (  # noqa: E402
+    SESSION_LAUNCHERS, load_session_launcher, session_args,
+)
+
 REPO = Path(__file__).resolve().parents[2]
 POD = REPO / "scripts/pod"
 
@@ -99,9 +103,21 @@ def python_source_is_non_empty(launch: Path, var: str) -> bool:
     return False
 
 
+#: The one setup script four sessions share. Its contract is not with a launcher
+#: any more — it is with each SESSION's manifest — so it is checked against all
+#: four rather than against the one file a `*_setup.sh` -> `*_launch.py` naming
+#: rule happens to pair it with. That pairing rule was the reason the canary
+#: could declare `LOCAL_ASSETS = ()` and still have two assets copied: nothing
+#: ever compared the canary to the script it would run.
+SHARED_SETUP = POD / "autoinit_preflight_setup.sh"
+
+
 @pytest.mark.parametrize("launch,setup", PAIRS,
                          ids=lambda p: p.name if isinstance(p, Path) else str(p))
 def test_launcher_forwards_every_variable_the_setup_reads(launch, setup):
+    if setup == SHARED_SETUP:
+        pytest.skip("checked against every session's manifest below, not against "
+                    "the one launcher the naming rule pairs it with")
     needed = required_env(setup.read_text())
     missing = sorted(v for v in needed if not forwards(launch, v))
     assert not missing, (
@@ -110,10 +126,77 @@ def test_launcher_forwards_every_variable_the_setup_reads(launch, setup):
         "runtime with a bare KeyError, after setup has already been paid for.")
 
 
+@pytest.mark.parametrize("name,extra", SESSION_LAUNCHERS,
+                         ids=lambda v: v if isinstance(v, str) else "")
+def test_every_session_supplies_what_the_shared_setup_reads(name, extra):
+    """The same contract, now checked against the environment that is really built.
+
+    `SessionSpec.setup_environment()` is what the runner passes to setup, so this
+    calls it rather than pattern-matching the launcher's source. A regex over
+    source can only find the shape it was taught; this finds the value.
+    """
+    mod = load_session_launcher(name)
+    env = mod.spec(session_args(mod, extra)).setup_environment(
+        session_commit="0" * 40, bundle="aad_test.bundle")
+    needed = required_env(SHARED_SETUP.read_text())
+    missing = sorted(v for v in needed if v not in env)
+    assert not missing, (
+        f"autoinit_preflight_setup.sh reads {missing} but the {name} session "
+        f"does not declare {'it' if len(missing) == 1 else 'them'}. The pod "
+        "fails at runtime with a bare KeyError, after setup has been paid for.")
+
+
+@pytest.mark.parametrize("name,extra", SESSION_LAUNCHERS,
+                         ids=lambda v: v if isinstance(v, str) else "")
+def test_a_session_declares_every_variable_it_says_it_requires(name, extra):
+    """`required_env` is the session's own claim about the contract. Check it.
+
+    A manifest that lists a variable it does not supply is worse than one that
+    lists nothing: it reads as a checked declaration and is not.
+    """
+    mod = load_session_launcher(name)
+    spec = mod.spec(session_args(mod, extra))
+    env = spec.setup_environment(session_commit="0" * 40, bundle="aad_test.bundle")
+    missing = sorted(v for v in spec.setup.required_env if v not in env)
+    assert not missing, (
+        f"{name} declares {missing} in `required_env` and does not put "
+        f"{'it' if len(missing) == 1 else 'them'} in the setup environment")
+
+
+@pytest.mark.parametrize("name,extra", SESSION_LAUNCHERS,
+                         ids=lambda v: v if isinstance(v, str) else "")
+def test_a_session_never_supplies_an_empty_value_the_setup_would_consume(name, extra):
+    """Forwarding an unset variable forwards an empty string, which is worse.
+
+    Two exemptions, both because the setup refuses the value itself, which is a
+    stronger guarantee than a non-empty default rather than a weaker one:
+
+    * `${VAR:?msg}` exits before an empty value is consumed;
+    * `${VAR?msg}` exits only when the variable is UNSET, which is how
+      `SESSION_ASSETS` can legitimately be empty. The device canary declares no
+      local assets, and empty is the correct value for it — the old shared setup
+      ignoring that declaration is what cost $0.0637.
+    """
+    setup_text = SHARED_SETUP.read_text()
+    needed = required_env(setup_text)
+    needed -= set(re.findall(r"\$\{([A-Z][A-Z0-9_]+):?\?", setup_text))
+    mod = load_session_launcher(name)
+    env = mod.spec(session_args(mod, extra)).setup_environment(
+        session_commit="0" * 40, bundle="aad_test.bundle")
+    empty = sorted(v for v in needed if env.get(v, "") == "")
+    assert not empty, (
+        f"the {name} session supplies {empty} as an empty string, and "
+        "autoinit_preflight_setup.sh consumes them without refusing an empty "
+        "value; the pod fails in a way that looks like a data problem")
+
+
 @pytest.mark.parametrize("launch,setup", PAIRS,
                          ids=lambda p: p.name if isinstance(p, Path) else str(p))
 def test_forwarded_variables_have_a_launcher_side_default(launch, setup):
     """Forwarding an unset variable forwards an empty string, which is worse."""
+    if setup == SHARED_SETUP:
+        pytest.skip("the shared setup's values come from a session manifest, "
+                    "checked above against the environment that is really built")
     needed = required_env(setup.read_text())
     # ...unless the setup itself refuses an empty one. `${VAR:?msg}` exits
     # before the value is ever consumed, which is a stronger guarantee than a

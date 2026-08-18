@@ -100,14 +100,40 @@ fetch("e8_inputs_20260810/calibration_v1", ["items.jsonl"],
       "/workspace/aad/artifacts/stage1/e8_calibration_v1")
 FETCHEOF
 
-# The two frozen search assets are dev-box artifacts (untracked, ~1.6 MB total),
-# so the launcher scp'd them to $WS/assets before this ran. Verified by content
-# hash here, not merely by presence: the whole preflight is a measurement of
-# these exact prompts.
-say "installing and verifying the frozen search assets"
-mkdir -p "$REPO/artifacts/stage1" "$REPO/artifacts/stage3"
-cp -r "$WS/assets/state_eval_v1" "$REPO/artifacts/stage1/"
-cp -r "$WS/assets/recovery_search_v2" "$REPO/artifacts/stage3/"
+# Dev-box-only artifacts (untracked, ~1.6 MB total) that the launcher scp'd to
+# $WS/assets before this ran. Verified by content hash below, not merely by
+# presence: the whole preflight is a measurement of these exact prompts.
+#
+# THE SESSION SAYS WHICH ONES, and this script no longer knows their names.
+# Until 2026-08-18 the two lines here were `cp -r "$WS/assets/state_eval_v1"` and
+# `cp -r "$WS/assets/recovery_search_v2"`, unconditionally, under `set -e`. The
+# device-canary retry declared `LOCAL_ASSETS = ()` because it honestly needed
+# neither, the launcher therefore scp'd neither, and this script copied them
+# anyway — into an empty directory. It died here, at $0.0637, and the session's
+# declaration had been correct the whole time.
+#
+# `SESSION_ASSETS` is a comma-separated list of `name:install_dir` pairs, built
+# from the session's own manifest. An empty value installs nothing, which is what
+# a session that declared nothing must get.
+# No apostrophe in this message. Line 29 already records why: inside a
+# ${v?word} expansion a bare ' opens a quote that swallows the rest of the file,
+# and writing one here cost a `bash -n` failure within a minute of typing it.
+: "${SESSION_ASSETS?the launcher must declare the local assets for this session, even when there are none}"
+say "installing the session's declared local assets: ${SESSION_ASSETS:-(none)}"
+if [ -n "$SESSION_ASSETS" ]; then
+  IFS=',' read -r -a _assets <<< "$SESSION_ASSETS"
+  for entry in "${_assets[@]}"; do
+    name="${entry%%:*}"; into="${entry#*:}"
+    [ -n "$name" ] && [ -n "$into" ] && [ "$name" != "$into" ] || {
+      say "MALFORMED SESSION_ASSETS ENTRY: ${entry}"; mark "SESSION_ASSETS_MALFORMED"; exit 99; }
+    [ -e "$WS/assets/$name" ] || {
+      say "DECLARED ASSET NOT STAGED: $name — the launcher did not scp it"
+      mark "DECLARED_ASSET_MISSING:${name}"; exit 99; }
+    mkdir -p "$REPO/$into"
+    cp -r "$WS/assets/$name" "$REPO/$into/"
+    say "  $name -> $into/"
+  done
+fi
 cd "$REPO" && PYTHONPATH=src python3 - <<'VERIFYEOF'
 import hashlib, json, sys
 want = {
@@ -405,11 +431,14 @@ say "CPU test suite ($(nproc) vCPUs visible, cgroup budget ${NCPU}; cpu set ${CP
 cd "$REPO"
 set +e
 tt0=$(date -u +%s)
+# The ignore list comes from the session's manifest, and a test pins it equal to
+# the pod simulator's — a simulation that runs a different command from the pod
+# is not a simulation. Unquoted on purpose: `SESSION_TEST_IGNORES` is a
+# space-separated flag list, and quoting it would pass one long argument.
 OMP_NUM_THREADS=$NTHREADS MKL_NUM_THREADS=$NTHREADS OPENBLAS_NUM_THREADS=$NTHREADS \
   taskset -c "$CPUS" \
   timeout "${TESTS_MAX_S:-2700}" /opt/train/bin/python -m pytest tests/ -q \
-  --ignore=tests/data/test_recovery_corpus_pipeline.py \
-  --ignore=tests/pod/test_phase_a_stages1_5_execute.py > /workspace/pytest.log 2>&1
+  ${SESSION_TEST_IGNORES:-} > /workspace/pytest.log 2>&1
 RC=$?
 tt=$(( $(date -u +%s) - tt0 ))
 set -e

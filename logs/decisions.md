@@ -3893,3 +3893,66 @@ two devices, cuda:0 and cpu!
   the 11.1 GiB of E2p1 intermediates, or when relay storage (92.12 GiB) becomes
   the binding constraint — noting that deleting from a Hugging Face repo's current
   revision reclaims no quota.
+
+## 2026-08-18 — Session architecture implemented: explicit composition, no inheritance
+
+- **Context:** three paid pods ($0.2315) died to one defect — a session
+  inheriting a requirement it never declared. The design was specified in
+  `docs/SESSION_ARCHITECTURE.md` after being built and reverted once, because
+  rebinding 30 coupled tests carelessly is worse than not refactoring. This
+  session did the whole of it, in the order that document lists.
+- **Decision — a session is one immutable declaration; one runner executes it.**
+  `SessionSpec` (frozen) plus `SessionRunner` (never subclassed, never mutating a
+  module global). The four launchers are now `spec(args) -> SessionSpec` and
+  nothing else. `session_prechecks.py` is a fourth module the sketch did not
+  name: the shared $0 gates run git and read the relay, and that I/O does not
+  belong in the module defining the frozen types.
+- **The proof it is behaviour-preserving is the price.** The runner was produced
+  by transforming `Preflight`, not rewriting it, and Phase A reprices to
+  **$17.8933 / $22.7183 / $23.0483** exactly, with both soft-stop reserves at
+  147.7683 and 36.2158 minutes. A test fails on a one-minute drift in
+  `SEARCH_MINUTES`, verified by mutation.
+- **Decision — the setup script reads `SESSION_ASSETS`.** It named
+  `state_eval_v1` and `recovery_search_v2` itself, so the device-canary retry,
+  which had correctly declared `LOCAL_ASSETS = ()`, had them copied anyway and
+  died under `set -e` at $0.0637. A session declaring nothing now installs
+  nothing; a declared-but-unstaged asset and a malformed entry both exit with
+  named markers. Executed for real in all four shapes, not inspected.
+- **Decision — the authorization schema and the grant are separate artifacts.**
+  `phase_a.py` carried attempt-7's grant prose: which attempt it covered, the
+  cumulative spend at approval, what it did not authorize. That is a one-use
+  maintainer decision living in executable source, where it goes stale silently
+  and still reads as current. The issuer now requires `--grant`, refuses a grant
+  missing any of its five fields, and refuses one that asserts an identity the
+  issuer derives (timestamp, committed base, harness digest, either plan hash).
+  **No grant document exists**, so Phase A cannot be issued at all.
+- **Decision — the harness sets gain the session machinery and bump to v2.** The
+  flow moved out of `autoinit_preflight_launch.py`; a digest that did not cover
+  the runner would certify a hundred lines of declaration while the code that
+  creates pods went unmeasured. Phase A's set **drops**
+  `autoinit_preflight_launch.py`, which was in it only because Phase A subclassed
+  that file.
+- **28 tests rebound, each preserving its stated intent**, and several are now
+  stronger because the thing they check became inspectable:
+  - the argument-contract test checked the canary against an AST walk of the base
+    class; it now checks the *declaration* against an AST walk of the runner, and
+    every session's real parser against the declaration;
+  - the setup-environment test pattern-matched the launcher's source for
+    `VAR={self.a.x}`; it now builds the environment each session really passes;
+  - the ignore-list pin compared two scripts; it compares all four sessions to
+    the simulator;
+  - two tests replaced hand-written argument namespaces with `build_parser()`,
+    which is the difference between testing a parser and testing a transcription
+    of one.
+- **A visible asymmetry, deliberately not closed.** The micro-preflight has never
+  had a session-commit gate; the continuation and Phase A each grew their own
+  after attempt 5. With prechecks as a declared tuple this is now readable in one
+  line. Adding one is a behaviour change and belongs in its own decision, not in
+  a refactor whose evidence is that the prices did not move.
+- **Risks:** every issued authorization is invalidated by the harness digest
+  moving, which is by design and costs nothing — all of them were already
+  consumed. The four sessions have never run under the new runner on hardware;
+  the flow is transformed rather than rewritten and the whole suite plus the pod
+  simulator pass, but the first paid run is still the first paid run.
+- **Revisit when:** a session needs a capability the spec cannot express, or the
+  micro-preflight's missing commit gate is decided on.

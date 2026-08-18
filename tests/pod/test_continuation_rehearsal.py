@@ -456,15 +456,18 @@ def test_a_blocking_failure_stops_before_characterization(tmp_path, kwargs, stag
 
 def test_the_launcher_reports_failure_when_the_driver_does():
     """`collect PASS + teardown PASS` must not become a successful session."""
-    launch = (REPO / "scripts/pod/autoinit_continuation_launch.py").read_text()
-    assert 'session.ev["continuation_successful"] = bool(ok)' in launch
-    assert "cleanup_is_not_success" in launch
-    assert "return 0 if ok else 11" in launch
-    # `ok` comes from the inherited collect_and_teardown, which returns `done`.
-    preflight = (REPO / "scripts/pod/autoinit_preflight_launch.py").read_text()
-    tail = preflight[preflight.index("def collect_and_teardown"):]
+    runner = (REPO / "src/aadistill/infrastructure/session_runner.py").read_text()
+    # `run_session` is now the shape of every launcher's `main`, so no session
+    # can forget to record the outcome or to write the record.
+    assert 'runner.ev["passed"] = bool(ok)' in runner
+    assert "cleanup_is_not_success" in runner
+    assert "return 0 if ok else 11" in runner
+    # `ok` comes from collect_and_teardown, which returns `done`.
+    tail = runner[runner.index("def collect_and_teardown"):]
     assert "return done" in tail
-    assert 'done = terminal == "ALL_DONE"' in tail or "done" in tail
+    assert "done = terminal == success" in tail
+    launch = (REPO / "scripts/pod/autoinit_continuation_launch.py").read_text()
+    assert "run_session(" in launch
 
 
 def test_transport_is_separate_from_identity():
@@ -497,7 +500,12 @@ def test_the_continuation_driver_cannot_train_or_reach_phase_a():
 
 
 def load_continuation_launcher():
-    """Import the real launcher module (it subclasses the preflight one)."""
+    """Import the real launcher module.
+
+    It used to subclass the preflight launcher and mutate that module's globals.
+    Since 2026-08-18 it is a spec provider: `mod.spec(args)` is the whole
+    session, and there is no base class to reach through.
+    """
     import importlib.util
 
     spec = importlib.util.spec_from_file_location(
@@ -508,37 +516,47 @@ def load_continuation_launcher():
     return mod
 
 
-class LaunchArgs:
-    """The launcher's real defaults, as `main()` would parse them."""
+def launch_args(mod, **overrides):
+    """The namespace the launcher's REAL parser produces.
 
-    scr = "/tmp/unused"
-    session_commit = "HEAD"
-    transport = "relay"
-    relay_repo = "AlphaAvatar/aadistill-artifacts"
-    max_price = 0.99
-    characterization_minutes = None      # filled from the launcher's own default
-    setup_minutes = None      # from the launcher's own default
-    transfer_minutes = 4.0
-    ckpt_store = "/home/ecs-user/aad-artifacts/autoinit"
-    ckpt_fetch_limit_min = 25
+    Was a hand-written class listing the defaults it expected. That is a
+    transcription, and a transcription is how a launcher and its parser come to
+    disagree — the failure mode that cost device-canary attempt 1.
+    """
+    args = mod.build_parser().parse_args(
+        ["--scr", "/tmp/unused", "--session-commit", "HEAD",
+         "--bundle", "aad_test.bundle", "--transport", "relay"])
+    for k, v in overrides.items():
+        setattr(args, k, v)
+    return args
 
 
 def bare_launcher(mod, **overrides):
-    """A launcher instance with no provider, no ssh and no pod — real methods."""
-    obj = mod.Continuation.__new__(mod.Continuation)
-    args = LaunchArgs()
-    # Take the budget from the launcher itself, so a change there cannot pass
-    # these tests by leaving a copied constant behind.
-    args.characterization_minutes = mod.CHARACTERIZATION_MINUTES
-    args.setup_minutes = mod.SETUP_MINUTES
-    for k, v in overrides.items():
-        setattr(args, k, v)
+    """A runner with no provider, no ssh and no pod — real methods, real spec.
+
+    Constructed through `__new__` so that `__init__`'s provider and
+    authorization work is skipped; every attribute the exercised methods read is
+    then set explicitly, which is what makes it visible when the runner starts
+    reading something new.
+    """
+    from aadistill.autoinit.continuation import CONTINUATION_AUTHORIZATION
+    from aadistill.infrastructure.session_runner import SessionRunner
+
+    args = launch_args(mod, **overrides)
+    obj = SessionRunner.__new__(SessionRunner)
+    obj.spec = mod.spec(args).validate()
     obj.a = args
+    obj.repo_root = REPO
+    obj.scr = Path(args.scr)
     obj.ev = {}
     obj.plan = None
+    obj.price = None
+    obj.pod_id = ""
+    obj.start_epoch = 0.0
+    obj.endpoint = ("", "")
+    obj.image_digest = ""
     obj.said: list[str] = []
     obj.say = obj.said.append
-    from aadistill.autoinit.continuation import CONTINUATION_AUTHORIZATION
     obj.auth = CONTINUATION_AUTHORIZATION
     return obj
 
@@ -597,14 +615,18 @@ def test_the_precheck_fails_at_zero_when_a_control_is_not_staged():
     import huggingface_hub
 
     def with_files(files, **overrides):
+        import dataclasses
         obj = bare_launcher(mod, **overrides)
-        # The commit gate runs first and has its own test; this one is about
-        # the inputs.
-        obj.verify_session_commit = lambda: True
+        # The commit gate and the local-record gates run first and have their own
+        # tests; this one is about the RELAY inputs, so the spec is rebuilt with
+        # an empty precheck tuple rather than stubbing a method that no longer
+        # exists.
+        obj.spec = dataclasses.replace(obj.spec, precheck=())
+        obj.save = lambda: None
         original = huggingface_hub.HfApi
         huggingface_hub.HfApi = lambda *a, **k: FakeApi(files)
         try:
-            return obj.relay_precheck(), obj
+            return obj.run_prechecks(), obj
         finally:
             huggingface_hub.HfApi = original
 
@@ -622,11 +644,16 @@ def test_the_precheck_fails_at_zero_when_a_control_is_not_staged():
     assert obj.ev["precheck"]["relay_missing"]
     assert any("ABORT at $0" in s for s in obj.said)
 
-    # Over scp the relay need not hold the controls at all.
+    # Over scp the relay need not hold the controls at all. The transport is a
+    # session fact, so it is recorded once — in the session record — rather than
+    # repeated inside the precheck block.
     ok, obj = with_files({init, pack}, transport="scp")
-    assert obj.ev["precheck"]["transport"] == "scp"
+    assert obj.spec.evidence_fields["transport"] == "scp"
     assert not [m for m in obj.ev["precheck"]["relay_missing"]
                 if "permanent_controls" in m]
+    assert not [r for r in obj.spec.setup.relay_inputs
+                if "permanent_controls" in r.path], (
+        "over scp the relay is not asked for the control weights at all")
 
 
 def continuation_output_tree(root: Path) -> None:
@@ -700,27 +727,44 @@ def test_the_launcher_recognises_the_markers_its_own_driver_emits():
     terminal = {m for m in emitted if m in {"ALL_DONE", "CONTINUATION_FAILED",
                                             "CONTINUATION_INCOMPLETE"}}
     assert terminal == {"ALL_DONE", "CONTINUATION_FAILED", "CONTINUATION_INCOMPLETE"}
-    recognised = {"ALL_DONE", *mod.Continuation.failure_markers}
+    spec = mod.spec(launch_args(mod))
+    recognised = {spec.markers.success, *spec.markers.failure}
     assert terminal <= recognised, terminal - recognised
     # INCOMPLETE means the blocking stages passed, so products still exist.
-    assert mod.Continuation.incomplete_markers == ("CONTINUATION_INCOMPLETE",)
+    assert spec.markers.incomplete == ("CONTINUATION_INCOMPLETE",)
+    assert spec.markers.stage2_passed("CONTINUATION_INCOMPLETE", {}) is True, (
+        "an incomplete continuation would have its products left on the pod")
 
 
 def test_the_continuation_fetches_no_checkpoints_and_waits_on_no_train_log():
     """It creates neither, and demanding either would block its teardown."""
-    mod = load_continuation_launcher()
-    obj = bare_launcher(mod)
-    assert obj.fetch_products("host", None, stage2_passed=True) == []
-    assert obj.event_streams() == ()
-    assert obj.audit_dirname == "autoinit_continuation"
-    assert obj.spec_success.endswith("continuation_artifacts.json")
+    from aadistill.infrastructure.session import SessionContext
 
-    # The preflight's own defaults are untouched by the hooks it gained.
-    pre = mod._preflight.Preflight
-    assert pre.audit_dirname == "autoinit_preflight"
-    assert pre.failure_markers == ("PREFLIGHT_FAILED", "PREFLIGHT_INCOMPLETE")
-    assert pre.spec_success == "configs/autoinit/preflight_artifacts.json"
-    assert pre.report_names[0] == "preflight_evidence.json"
+    mod = load_continuation_launcher()
+    spec = mod.spec(launch_args(mod))
+    ctx = SessionContext(scr=Path("/tmp"), args=None, auth=None, evidence={},
+                         say=lambda m: None, stage2_passed=True)
+    assert spec.artifacts.fetch_products(ctx) == []
+    assert spec.artifacts.event_streams(ctx) == ()
+    assert spec.artifacts.audit_dirname == "autoinit_continuation"
+    assert spec.artifacts.spec_success.endswith("continuation_artifacts.json")
+
+    # The preflight's own declaration is untouched. It is a separate spec now
+    # rather than a base class with defaults, so "untouched" is structural: there
+    # is nothing for the continuation to have overridden.
+    import importlib.util
+    s = importlib.util.spec_from_file_location(
+        "preflight_launch", REPO / "scripts/pod/autoinit_preflight_launch.py")
+    pf = importlib.util.module_from_spec(s)
+    sys.modules["preflight_launch"] = pf
+    s.loader.exec_module(pf)
+    pre = pf.spec(pf.build_parser().parse_args(
+        ["--scr", "/tmp/unused", "--session-commit", "HEAD",
+         "--bundle", "aad_test.bundle"]))
+    assert pre.artifacts.audit_dirname == "autoinit_preflight"
+    assert pre.markers.failure == ("PREFLIGHT_FAILED", "PREFLIGHT_INCOMPLETE")
+    assert pre.artifacts.spec_success == "configs/autoinit/preflight_artifacts.json"
+    assert pre.artifacts.report_names[0] == "preflight_evidence.json"
 
 
 def test_the_authorization_binds_the_code_that_actually_runs():
@@ -793,10 +837,14 @@ def test_the_session_commit_is_verified_against_the_authorization():
     head = subprocess.run(["git", "rev-parse", "HEAD"], capture_output=True,
                           text=True, cwd=REPO).stdout.strip()
 
-    obj = bare_launcher(mod, session_commit=head)
-    obj.auth = auth
-    verified = obj.verify_session_commit()
-    check = obj.ev["session_commit_check"]
+    from aadistill.infrastructure.session import SessionContext
+    from aadistill.infrastructure.session_prechecks import session_commit_gate
+
+    gate = session_commit_gate(REPO, mod.AUTH_PATH, check_lineage=False)
+    ctx = SessionContext(scr=Path("/tmp"), args=launch_args(mod, session_commit=head),
+                         auth=auth, evidence={}, say=lambda m: None)
+    verified, _msg = gate(ctx)
+    check = ctx.evidence["session_commit_check"]
     # Whether HEAD passes depends on where in the edit/issue/commit cycle the
     # tree is, and asserting either outcome makes this test a calendar. What
     # must always hold is that the gate REPORTS both facts and only admits a
@@ -816,12 +864,21 @@ def test_the_session_commit_is_verified_against_the_authorization():
     # WAS the authorized commit, so this assertion passed a valid commit off as
     # a stale one and proved nothing.
     stale_commit = "a54591011aa4527b679c5c62912b7df8d7e74255"   # pre-continuation
-    stale = bare_launcher(mod, session_commit=stale_commit)
-    stale.auth = auth
-    assert stale.verify_session_commit() is False
-    assert any("ABORT at $0" in s for s in stale.said)
-    assert stale.ev["session_commit_check"]["harness_digest_at_commit"] != \
-        auth.harness_source_digest
+    stale_ctx = SessionContext(
+        scr=Path("/tmp"),
+        args=launch_args(mod, session_commit=stale_commit),
+        auth=auth, evidence={}, say=lambda m: None)
+    stale_ok, stale_msg = gate(stale_ctx)
+    assert stale_ok is False
+    assert "digests to" in stale_msg or "does not contain" in stale_msg
+    assert stale_ctx.evidence["session_commit_check"][
+        "harness_digest_at_commit"] != auth.harness_source_digest
+
+    # And the continuation really runs this gate — the non-lineage variant,
+    # which is the one it has always had.
+    names = [getattr(c, "__name__", "") for c in mod.spec(launch_args(mod)).precheck]
+    assert "session_commit" in names, (
+        "the continuation no longer verifies its session commit")
 
 
 def test_the_relay_transport_does_not_depend_on_an_unexported_env_var(tmp_path):
@@ -832,9 +889,11 @@ def test_the_relay_transport_does_not_depend_on_an_unexported_env_var(tmp_path):
     session has already paid for setup, and for the only transport this
     continuation actually uses. The token has to come from the staged file.
     """
+    from aadistill.infrastructure.session import SessionContext
+
     mod = load_continuation_launcher()
-    obj = bare_launcher(mod)
-    obj.save = lambda: None
+    args = launch_args(mod)
+    evidence: dict = {}
 
     class FakeResult:
         returncode = 0
@@ -849,12 +908,15 @@ def test_the_relay_transport_does_not_depend_on_an_unexported_env_var(tmp_path):
             return FakeResult()
 
     target = FakeTarget()
+    ctx = SessionContext(scr=tmp_path, args=args, auth=None, evidence=evidence,
+                         say=lambda m: None, host="1.2.3.4", target=target,
+                         scp=("scp",))
     # scp of the two record files is a real subprocess; point it at /bin/true.
     import subprocess as sp
     original = sp.run
     sp.run = lambda *a, **k: FakeResult()
     try:
-        assert obj.materialize_controls(target, "1.2.3.4", ["scp"]) is True
+        assert mod.materialize_controls(ctx) is True
     finally:
         sp.run = original
 
@@ -865,9 +927,11 @@ def test_the_relay_transport_does_not_depend_on_an_unexported_env_var(tmp_path):
         # The token must reach the child through the environment it sets here,
         # not through one it hopes to inherit.
         assert cmd.index("HF_TOKEN=") < cmd.index("python3")
-    assert obj.ev["transport_detail"]["route"] == "relay"
+    assert evidence["transport_detail"]["route"] == "relay"
     assert all(c["materialized"] for c in
-               obj.ev["transport_detail"]["controls"].values())
+               evidence["transport_detail"]["controls"].values())
+    # And the session really wires it in, rather than defining it unused.
+    assert mod.spec(args).materialize_inputs is mod.materialize_controls
 
 
 @pytest.mark.skipif(
@@ -1213,10 +1277,29 @@ def test_setup_writes_its_markers_where_the_launcher_looks():
     assert "autoinit_preflight.status" not in setup
     assert "SESSION_STATUS" in setup
 
-    # The launcher must forward the SAME expression it probes with.
-    launch = (REPO / "scripts/pod/autoinit_preflight_launch.py").read_text()
-    assert "SESSION_STATUS={STATUS}" in launch
-    assert "PROBE_COMMAND.format(status=STATUS" in launch
+    # The session must forward the SAME path the runner probes with. It is one
+    # field now, read twice, so the two cannot disagree — but that is asserted
+    # rather than assumed, because "each side was individually correct" is
+    # exactly how the $0.1324 was spent.
+    runner_src = (REPO / "src/aadistill/infrastructure/session_runner.py").read_text()
+    assert '"SESSION_STATUS": self.status_path' in (
+        REPO / "src/aadistill/infrastructure/session.py").read_text()
+    assert "PROBE_COMMAND.format(status=self.spec.status_path" in runner_src
+    for name, extra in (("autoinit_preflight_launch", ()),
+                        ("autoinit_phase_a_launch", ()),
+                        ("autoinit_continuation_launch", ("--transport", "relay")),
+                        ("autoinit_device_canary_launch", ())):
+        import importlib.util
+        s = importlib.util.spec_from_file_location(
+            name, REPO / f"scripts/pod/{name}.py")
+        m = importlib.util.module_from_spec(s)
+        sys.modules[name] = m
+        s.loader.exec_module(m)
+        sp = m.spec(m.build_parser().parse_args(
+            ["--scr", "/tmp/u", "--session-commit", "HEAD",
+             "--bundle", "b.bundle", *extra]))
+        env = sp.setup_environment(session_commit="HEAD", bundle="b.bundle")
+        assert env["SESSION_STATUS"] == sp.status_path, name
 
     # And `mark` must actually land in the named file. Take the two real lines.
     lines = setup.splitlines(True)
@@ -1234,13 +1317,12 @@ def test_setup_writes_its_markers_where_the_launcher_looks():
         assert named.is_file(), "mark did not write to the file the launcher named"
         assert "MARKER:SETUP_DONE" in named.read_text()
 
-        # The probe the launcher actually runs must find it there.
-        mod = load_continuation_launcher()
-        probe = mod._preflight.PROBE_COMMAND.format(status=str(named),
-                                                    log="/dev/null")
+        # The probe the runner actually runs must find it there.
+        from aadistill.infrastructure import session_runner as sr
+        probe = sr.PROBE_COMMAND.format(status=str(named), log="/dev/null")
         out = subprocess.run(["bash", "-c", probe], capture_output=True,
                              text=True).stdout
-        assert mod._preflight.parse_setup_probe(out)["setup_done"] not in ("", "0")
+        assert sr.parse_setup_probe(out)["setup_done"] not in ("", "0")
 
         # Unset: fail closed rather than write markers to an empty path.
         env.pop("SESSION_STATUS")
@@ -1252,8 +1334,9 @@ def test_setup_writes_its_markers_where_the_launcher_looks():
     # equality is pinned rather than assumed.
     driver = (REPO / "scripts/pod/autoinit_continuation_driver.py").read_text()
     named = re.search(r'STATUS = WS / "([^"]+)"', driver).group(1)
-    assert mod.STATUS.endswith("/" + named), (
-        f"the driver writes {named} but the launcher probes {mod.STATUS}")
+    cont = load_continuation_launcher()
+    assert cont.STATUS.endswith("/" + named), (
+        f"the driver writes {named} but the session names {cont.STATUS}")
 
 
 def test_stage0_checks_evaluation_readiness_separately_from_identity():
@@ -1311,19 +1394,40 @@ def test_each_launcher_names_its_own_authorization_to_setup():
     import autoinit_continuation_launch as C
     from aadistill.autoinit.continuation import CONTINUATION_PLAN_V1
 
-    c = object.__new__(C.Continuation)
-    assert c.session_auth_path() == "logs/autoinit_continuation_authorization.json"
-    assert c.session_plan_hash() == CONTINUATION_PLAN_V1.plan_hash
+    import importlib.util
 
-    p = object.__new__(C._preflight.Preflight)
-    assert p.session_auth_path() == "logs/autoinit_micro_preflight_authorization.json"
-    assert p.session_plan_hash() != CONTINUATION_PLAN_V1.plan_hash
+    def spec_for(name, extra=()):
+        s = importlib.util.spec_from_file_location(
+            name, REPO / f"scripts/pod/{name}.py")
+        m = importlib.util.module_from_spec(s)
+        sys.modules[name] = m
+        s.loader.exec_module(m)
+        return m.spec(m.build_parser().parse_args(
+            ["--scr", "/tmp/u", "--session-commit", "HEAD",
+             "--bundle", "b.bundle", *extra]))
 
-    # And setup_on_draw actually ships them.
-    import inspect
-    src = inspect.getsource(C._preflight.Preflight.setup_on_draw)
-    assert "SESSION_AUTH_PATH={self.session_auth_path()}" in src
-    assert "SESSION_PLAN_HASH={self.session_plan_hash()}" in src
+    c = spec_for("autoinit_continuation_launch", ("--transport", "relay"))
+    assert c.authorization_path == "logs/autoinit_continuation_authorization.json"
+    assert c.plan_hash == CONTINUATION_PLAN_V1.plan_hash
+
+    p = spec_for("autoinit_preflight_launch")
+    assert p.authorization_path == "logs/autoinit_micro_preflight_authorization.json"
+    assert p.plan_hash != CONTINUATION_PLAN_V1.plan_hash
+
+    # Every session names a DIFFERENT authorization and a different plan. Sharing
+    # one binding is what killed continuation attempt 5 at $0.1369.
+    specs = [c, p, spec_for("autoinit_phase_a_launch"),
+             spec_for("autoinit_device_canary_launch")]
+    paths = [s.authorization_path for s in specs]
+    assert len(set(paths)) == len(paths), paths
+    hashes = [s.plan_hash for s in specs]
+    assert len(set(hashes)) == len(hashes), hashes
+
+    # And the setup environment actually ships them.
+    for s in specs:
+        env = s.setup_environment(session_commit="HEAD", bundle="b.bundle")
+        assert env["SESSION_AUTH_PATH"] == s.authorization_path
+        assert env["SESSION_PLAN_HASH"] == s.plan_hash
 
 
 def test_the_committed_cu128_lock_is_the_one_the_pods_actually_ran():

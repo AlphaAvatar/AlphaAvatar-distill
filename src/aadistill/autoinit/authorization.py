@@ -41,10 +41,20 @@ HARNESS_SOURCE_FILES_V1: tuple[str, ...] = (
     "scripts/pod/autoinit_engine_probe.py",
     "scripts/pod/watchdog.py",
     "scripts/pod/collect_artifacts.py",
+    # The session machinery. Added 2026-08-18 with the composition refactor: the
+    # flow that used to live in `autoinit_preflight_launch.py` now lives here, so
+    # a harness digest that did not cover it would certify a launcher that is a
+    # hundred lines of declaration while the code that creates pods, relays logs
+    # and tears down went unmeasured.
+    "src/aadistill/infrastructure/session.py",
+    "src/aadistill/infrastructure/session_runner.py",
+    "src/aadistill/infrastructure/session_prechecks.py",
     "src/aadistill/autoinit/authorization.py",
     "src/aadistill/autoinit/generation.py",
 )
-HARNESS_SOURCE_SET_VERSION = 1
+#: Bumped with the three session modules. A digest computed over set 1 and one
+#: computed over set 2 are not comparable, and the version is what says so.
+HARNESS_SOURCE_SET_VERSION = 2
 
 
 def harness_source_digest(repo_root: str | Path = ".", *,

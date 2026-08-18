@@ -43,6 +43,10 @@ from aadistill.autoinit.recovery import PREFLIGHT_PLAN_V1  # noqa: E402
 
 DRIVER_PATH = REPO / "scripts/pod/autoinit_preflight_driver.py"
 LAUNCH_PATH = REPO / "scripts/pod/autoinit_preflight_launch.py"
+#: The session machinery. It used to live inside the launcher above; the
+#: composition refactor moved the flow here and left the launcher a
+#: declaration, so the tests that assert on the FLOW follow it.
+RUNNER_PATH = REPO / "src/aadistill/infrastructure/session_runner.py"
 AUTH_PATH = REPO / "logs/autoinit_micro_preflight_authorization.json"
 
 pytestmark = pytest.mark.skipif(
@@ -389,10 +393,16 @@ def test_an_unrehearsed_harness_cannot_consume_the_authorization(tmp_path):
 
 
 def test_the_launcher_checks_the_harness_before_a_pod_can_exist():
-    source = LAUNCH_PATH.read_text()
-    assert "self.auth.require_harness(REPO_ROOT)" in source
+    """The flow moved into the runner on 2026-08-18; the requirement did not.
+
+    `require_harness` still has to run in construction, before anything is
+    priced and long before `create`, or an edited harness reaches a pod.
+    """
+    source = RUNNER_PATH.read_text()
+    assert "self.auth.require_harness(self.repo_root)" in source
     # In __init__, i.e. before make_plan/create are ever called.
     assert source.index("require_harness") < source.index("def make_plan")
+    assert source.index("require_harness") < source.index("def create")
 
 
 def test_every_engine_observed_generation_field_is_required():
@@ -434,7 +444,7 @@ def test_a_tampered_authorization_does_not_load(tmp_path):
 
 
 def test_the_launcher_treats_a_dead_or_hung_driver_as_terminal():
-    source = LAUNCH_PATH.read_text()
+    source = RUNNER_PATH.read_text()
     assert 'live, _ = probe(target, job)' in source
     assert 'terminal = f"DRIVER_{live}"' in source
     # It polls the PROVIDER, not the log: a wedged driver writes no lines and

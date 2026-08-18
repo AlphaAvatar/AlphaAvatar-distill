@@ -52,11 +52,12 @@
     "Stage 0 on hardware, passed three times"
   ],
   "latest_verification": {
-    "utc": "2026-08-17T20:28:38+00:00",
-    "after": "the log and checkpoint-storage cleanup",
-    "full_suite": "1798 passed, 9 skipped, 5 errors \u2014 the 5 are a transformers 4.57.1 incompatibility in the sibling AlphaAvatar venv, on a toy tokenizer written into tmp_path; the same file is 19/19 under the repo venv and this session touched none of that code",
-    "pod_simulator": "1763 passed, 20 skipped, restored exactly",
+    "utc": "2026-08-18T06:41:10+00:00",
+    "after": "the session-architecture refactor (and, before it, the log and checkpoint-storage cleanup)",
+    "full_suite": "1837 passed, 11 skipped, 5 errors \u2014 the 5 are a transformers 4.57.1 incompatibility in the sibling AlphaAvatar venv, raised on a toy tokenizer written into tmp_path before any repository artifact is read; the same file is 19/19 under the repo venv and no session touched that code",
+    "pod_simulator": "1802 passed, 22 skipped, restored exactly",
     "frozen_asset_verifier": "passed, no problems",
+    "phase_a_price_reproduced": "$17.8933 / $22.7183 / $23.0483 exactly, with both soft-stop reserves at 147.7683 and 36.2158 minutes",
     "scope": "CPU only; no checkpoint was loaded and no metric measured"
   },
   "failed": [
@@ -93,6 +94,9 @@
   ],
   "failure_pattern": "every one was code no $0 path could execute: a GPU-only device, or a contract owned by inherited machinery",
   "canonical_infrastructure": [
+    "the session specification: one immutable SessionSpec per session, one runner, no inheritance and no module-global retargeting",
+    "the shared pod setup is manifest-driven: it installs what a session declares",
+    "the Phase-A authorization schema carries no grant; the issuer requires one",
     "autoinit.stage1_device_contract@v1",
     "full tracebacks for unexpected in-process driver exceptions",
     "plan_session soft_stop_reserves, applied BEFORE the soft stop",
@@ -107,10 +111,9 @@
     "the paid device-canary session path: STRATEGICALLY TERMINATED 2026-08-18. Two authorized sessions, $0.1240, zero canary runs; both died in the wrapper's inherited contracts. Its evidence and its generic lesson are kept; no further canary is prepared."
   ],
   "next_starting_point": {
-    "option_1": "implement the SPECIFIED session architecture in docs/SESSION_ARCHITECTURE.md, in the order it lists. Zero cost. It removes the defect class that has cost three paid pods, and steps 1-2 are a valid stopping point because the Phase-A price reproducing exactly is the proof the transformation preserved behaviour.",
-    "option_2": "fix the canary wrapper (declare LOCAL_ASSETS as the other sessions do) and enumerate the WHOLE inherited contract before launching; $1.0197 hard. Note that the architecture work in option 1 is what makes that enumeration mechanical rather than a matter of remembering.",
-    "option_3": "skip the canary and go to Attempt 8; Phase A exercises the same operators on CUDA anyway and stage-1 failures now come home with a traceback; $23.0484 hard.",
-    "either_paid_option_requires": "a fresh authorization chain: pre-auth base commit -> issue -> auth-only commit -> bundle upload -> round-trip verify -> launch"
+    "option_1": "Phase A, attempt 8. $23.0484 hard, unchanged - the session architecture refactor reproduces the price exactly. Stage-1 failures come home with a traceback and the inherited-contract failures cannot recur.",
+    "option_2": "the device canary stays TERMINATED. Its launcher is converted, which is what makes the point: it declares no local assets and now gets none. Reviving it would be a new decision.",
+    "either_paid_option_requires": "a grant document, then the full chain: pre-auth base commit -> issue against that grant -> auth-only commit -> bundle upload -> round-trip verify -> launch. No grant document exists, so issue_phase_a_authorization.py refuses."
   },
   "read_order": [
     "logs/STATE.md \u2014 the human view of this file",

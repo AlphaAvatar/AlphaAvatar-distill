@@ -56,11 +56,18 @@ SCHEMA = "aadistill.autoinit.phase_a_authorization/v1"
 PHASE_A_HARNESS_SOURCE_FILES_V1: tuple[str, ...] = (
     "scripts/pod/autoinit_phase_a_launch.py",
     "scripts/pod/autoinit_phase_a_driver.py",
-    "scripts/pod/autoinit_preflight_launch.py",   # the launcher it subclasses
     "scripts/pod/autoinit_preflight_setup.sh",
     "scripts/pod/autoinit_engine_probe.py",
     "scripts/pod/watchdog.py",
     "scripts/pod/collect_artifacts.py",
+    # The session machinery, added 2026-08-18. It replaces
+    # `autoinit_preflight_launch.py`, which used to be in this set because Phase
+    # A SUBCLASSED it — an entry that recorded a dependency the composition
+    # refactor removed. What Phase A executes now is the runner and the spec
+    # types, and those are what a digest has to cover.
+    "src/aadistill/infrastructure/session.py",
+    "src/aadistill/infrastructure/session_runner.py",
+    "src/aadistill/infrastructure/session_prechecks.py",
     # Imported by the driver, not shelled out to, and therefore just as much
     # "the executable" as the driver itself. `phase_a_search` runs the beam;
     # `write_preregistration` builds the plan the driver binds against, so an
@@ -72,7 +79,9 @@ PHASE_A_HARNESS_SOURCE_FILES_V1: tuple[str, ...] = (
     "src/aadistill/autoinit/phase_a.py",
     "src/aadistill/autoinit/generation.py",
 )
-PHASE_A_HARNESS_SOURCE_SET_VERSION = 1
+#: Bumped with the session machinery: a digest over set 1 (which named
+#: the launcher Phase A subclassed) and one over set 2 are not comparable.
+PHASE_A_HARNESS_SOURCE_SET_VERSION = 2
 
 
 def phase_a_harness_digest(repo_root: str | Path = ".", *,
@@ -378,36 +387,25 @@ class PhaseAAuthorization:
 #: time by `scripts/autoinit/issue_phase_a_authorization.py`, against the
 #: committed tree. Editing any declared harness file invalidates it by design:
 #: re-rehearse, re-commit, re-issue.
+#: Written into `granted_by` by the template, and refused by the issuer. A grant
+#: is a one-use maintainer decision about a particular attempt at a particular
+#: cumulative spend; the schema below is durable. Keeping the two in one object
+#: meant this module carried attempt-7 prose — the cumulative spend at approval,
+#: which attempt it covered, what it did not authorize — as executable source,
+#: where it goes stale silently and reads as though it still applies.
+GRANT_PROSE_REQUIRED = (
+    "NO GRANT. This is the Phase-A authorization SCHEMA, not a grant. "
+    "scripts/autoinit/issue_phase_a_authorization.py requires --grant naming a "
+    "one-use grant document, and refuses to issue with this value in place.")
+
+#: The durable half: caps, stages, stage conditions and scope. Everything here
+#: is a property of what a Phase-A session IS. Everything about a particular
+#: permission — who granted it, when, at what cumulative spend, covering which
+#: attempt — arrives from the grant document at issue time.
 PHASE_A_AUTHORIZATION = PhaseAAuthorization(
     authorization_id="autoinit.phase_a.PLACEHOLDER",
     granted_utc="PLACEHOLDER",
-    granted_by=(
-        # Stated, not quoted. An earlier revision of this field attributed a
-        # sentence to the maintainer that came from a different message about a
-        # different cap; presenting a paraphrase as verbatim is how a grant's
-        # provenance stops being evidence. Nothing below is in quotation marks.
-        "maintainer. The grant instant is `granted_utc` and nothing here "
-        "restates it: at approval the maintainer's LOCAL date ran ahead of the "
-        "machine's UTC clock, and a prose date beside a UTC field is how a grant "
-        "comes to look back-dated.\n\n"
-        "This grant authorizes ONE additional Phase-A attempt -- attempt 7 -- "
-        "under the EXISTING cumulative project cap of $217.00, approved earlier "
-        "and recorded in BUDGET_LEDGER.md. The cap is not raised. Cumulative "
-        "spend at approval was $193.5335. Attempt 7 may use at most the existing "
-        "per-launch hard authorization of $23.0484, leaving about $0.4181 of "
-        "cumulative-cap margin at the full hard bound.\n\n"
-        "It covers exactly one Phase-A launcher invocation. It does not "
-        "authorize attempt 8, any increase above the $217.00 cumulative cap, or "
-        "any change to the frozen search, recovery, seeds, thresholds, "
-        "runtime-comparability rules, or the science and session plans.\n\n"
-        "Attempt 6 spent $0.3552 and failed closed in stage 1 on a "
-        "device-placement defect at the materialize/reload boundary, fixed on "
-        "this base. The figures below are the launcher's own make_plan output at "
-        "$0, not a transcription. Two superseded pricing bases are recorded in "
-        "BUDGET_LEDGER.md and autoinit_phase_a_fallback_audit.json: $20.0126 "
-        "(no fallback reserve, no beam-6 correction) and $22.4508 (fallback "
-        "reserve placed after the soft stop, which would have truncated the "
-        "conditional seed-sc rung)."),
+    granted_by=GRANT_PROSE_REQUIRED,
     plan_id=PHASE_A_PLAN_V1.plan_id,
     plan_hash=PHASE_A_PLAN_V1.plan_hash,
     # Filled at issue time from the frozen plan on disk, so a threshold that
@@ -449,9 +447,8 @@ PHASE_A_AUTHORIZATION = PhaseAAuthorization(
     },
     scope_note=(
         "Phase A only, one launcher invocation. This artifact authorizes the "
-        "SPEND and the STAGES; it is not by itself an instruction to launch. The "
-        "maintainer's 2026-08-15 message that requested it also says 'Do not "
-        "launch Phase A yet', so the run waits for a separate explicit go. "
+        "SPEND and the STAGES; it is not by itself an instruction to launch — "
+        "issuing and launching are separate, explicit decisions. "
         "Nothing here permits retraining the permanent controls, changing the "
         "frozen search or recovery design, a fourth seed, or any follow-on "
         "experiment: Phase A is a terminus and stops for review on every path, "

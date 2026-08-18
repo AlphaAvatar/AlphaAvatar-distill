@@ -20,12 +20,13 @@ to appear below.
 
 | file | role |
 | --- | --- |
-| `autoinit_preflight_launch.py` | micro-preflight **session specification** |
+| `autoinit_preflight_launch.py` | micro-preflight **session specification** — `spec(args) -> SessionSpec`, no flow |
 | `autoinit_phase_a_launch.py` | Phase-A **session specification** |
+| `autoinit_continuation_launch.py` | the Stage-3 continuation's **session specification** |
 | `autoinit_preflight_driver.py` | the micro-preflight's pod-side driver |
 | `autoinit_phase_a_driver.py` | the Phase-A pod-side driver, six stages |
-| `autoinit_preflight_setup.sh` | the shared, **manifest-driven** pod setup |
-| `autoinit_continuation_launch.py`, `autoinit_continuation_driver.py` | the Stage-3 characterization continuation |
+| `autoinit_preflight_setup.sh` | the shared pod setup. **Manifest-driven** since 2026-08-18: it reads `SESSION_ASSETS` and `SESSION_TEST_IGNORES` and names no session's assets itself |
+| `autoinit_continuation_driver.py` | the continuation's pod-side driver |
 | `autoinit_engine_probe.py` | vLLM engine identity probe, run at stage 0 |
 | `watchdog.py` | the independent provider-side kill switch |
 | `collect_artifacts.py` | artifact manifest, gate and collection |

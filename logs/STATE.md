@@ -45,17 +45,25 @@ Also frozen: recovery design, selection rules, pooled_counts@v2, Stage-3 artifac
 
 ## Latest verification
 
-After the log and checkpoint-storage cleanup, CPU only — no checkpoint was
-loaded and no metric measured:
+After the session-architecture refactor and, before it, the log and
+checkpoint-storage cleanup. CPU only — no checkpoint was loaded and no metric
+measured:
 
-* full suite **1798 passed, 9 skipped, 5 errors**. The five are a transformers
+* full suite **1837 passed, 11 skipped, 5 errors**. The five are a transformers
   4.57.1 incompatibility in the sibling AlphaAvatar venv, raised on a toy
-  tokenizer written into `tmp_path`; the same file is 19/19 under the repo venv,
-  and this session touched none of that code.
-* pod simulator **1763 passed, 20 skipped**, restored exactly.
+  tokenizer written into `tmp_path` before any repository artifact is read; the
+  same file is 19/19 under the repo venv, and no session touched that code.
+* pod simulator **1802 passed, 22 skipped**, restored exactly.
 * frozen-asset verifier **passed**, no problems.
+* Phase-A pricing reproduces **$17.8933 / $22.7183 / $23.0483** exactly, with
+  both soft-stop reserves at their derived minutes — the cheapest proof the
+  refactor preserved behaviour.
 
 ## What failed, and why
+
+All five are the same two classes, and both are now closed by construction:
+GPU-only device code (fixed by `autoinit.stage1_device_contract@v1`) and a
+contract owned by inherited machinery (fixed by the session specification).
 
 | run | cost | died at | cause |
 | --- | ---: | --- | --- |
@@ -72,6 +80,11 @@ instead of the cause, and it was paid for twice. Full diagnoses in
 
 ## Canonical infrastructure
 
+* **the session specification**: one immutable `SessionSpec` per session, one
+  runner, no inheritance and no module-global retargeting
+  ([`../docs/SESSION_ARCHITECTURE.md`](../docs/SESSION_ARCHITECTURE.md))
+* the shared pod setup is manifest-driven: it installs what a session declares
+* the Phase-A authorization schema carries no grant; the issuer requires one
 * autoinit.stage1_device_contract@v1
 * full tracebacks for unexpected in-process driver exceptions
 * plan_session soft_stop_reserves, applied BEFORE the soft stop
@@ -88,13 +101,23 @@ instead of the cause, and it was paid for twice. Full diagnoses in
 
 ## Next starting point
 
-Three options, **none authorized and none prepared**. The maintainer chooses.
+**Nothing is authorized and nothing is prepared.** The maintainer chooses.
 
-1. **implement the SPECIFIED session architecture in docs/SESSION_ARCHITECTURE.md, in the order it lists. Zero cost. It removes the defect class that has cost three paid pods, and steps 1-2 are a valid stopping point because the Phase-A price reproducing exactly is the proof the transformation preserved behaviour.**
-2. fix the canary wrapper (declare LOCAL_ASSETS as the other sessions do) and enumerate the WHOLE inherited contract before launching; $1.0197 hard. Note that the architecture work in option 1 is what makes that enumeration mechanical rather than a matter of remembering.
-3. skip the canary and go to Attempt 8; Phase A exercises the same operators on CUDA anyway and stage-1 failures now come home with a traceback; $23.0484 hard.
+The session architecture is **implemented** (2026-08-18), so the defect class
+that cost three paid pods is gone by construction rather than by care. What is
+left is a paid decision:
 
-Either paid option requires a fresh authorization chain: pre-auth base commit -> issue -> auth-only commit -> bundle upload -> round-trip verify -> launch.
+1. **Phase A, attempt 8.** $23.0484 hard, unchanged — the refactor reproduces the
+   price exactly. Stage-1 failures now come home with a traceback, and the
+   inherited-contract failures cannot recur.
+2. the device canary stays TERMINATED. Its launcher is converted, which is what
+   makes the point: it declares no local assets and now gets none. Reviving it
+   would be a new decision, not a resumption.
+
+A paid run needs the full chain, and it now starts one step earlier: **write a
+grant document** -> pre-auth base commit -> issue against that grant -> auth-only
+commit -> bundle upload -> round-trip verify -> launch. There is no grant
+document, so `issue_phase_a_authorization.py` refuses.
 
 ## Where else to look
 

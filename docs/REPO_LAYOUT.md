@@ -54,6 +54,9 @@ and their contents inventoried in
 | `src/aadistill/init/` | Stage-0/1 primitives: activation statistics, contribution, sandwich init |
 | `src/aadistill/data/`, `src/aadistill/evaluation/`, `src/aadistill/models/`, `src/aadistill/rollout/` | corpora, scorers, student construction, rollout |
 | `src/aadistill/infrastructure/` | provider, budget, watchdog, artifact gate, log relay, manifests |
+| `src/aadistill/infrastructure/session.py` | the typed, immutable `SessionSpec` a paid session IS |
+| `src/aadistill/infrastructure/session_runner.py` | the one runner that executes a spec. Never subclassed |
+| `src/aadistill/infrastructure/session_prechecks.py` | the shared $0 gates a session lists in `precheck` |
 
 ## `scripts/`
 
@@ -76,7 +79,7 @@ and their contents inventoried in
 | file | contents |
 | --- | --- |
 | `docs/REPO_LAYOUT.md` | this file |
-| `docs/SESSION_ARCHITECTURE.md` | how a paid session is specified and run: the inheritance problem, and the SPECIFIED replacement |
+| `docs/SESSION_ARCHITECTURE.md` | how a paid session is specified and run: the inheritance problem, and the IMPLEMENTED replacement |
 | `docs/POD_SCRIPTS.md` | every pod script, classified |
 | `docs/AUTOINIT_REFERENCE.md` | AutoInitializer binding rules, pinned assets, protocol requirements |
 | `docs/archive/` | superseded documents, kept for provenance and clearly bannered |

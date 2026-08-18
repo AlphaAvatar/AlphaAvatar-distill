@@ -17,6 +17,10 @@ from pathlib import Path
 
 import pytest
 
+from session_specs import (  # noqa: E402
+    SESSION_LAUNCHERS, load_session_launcher, session_args,
+)
+
 REPO = Path(__file__).resolve().parents[2]
 POD = REPO / "scripts/pod"
 
@@ -619,21 +623,41 @@ def test_the_simulator_and_the_pod_gate_ignore_the_same_files():
     An ignore list that differs from the pod's turns a green simulation into a
     statement about a command nobody runs. `--ignore` is the one place the two
     are allowed to be long, so it is the one place they are pinned.
+
+    The pod's list moved on 2026-08-18: the setup script reads
+    `$SESSION_TEST_IGNORES`, so it no longer contains the paths — the SESSION
+    does, in its manifest. The pin is therefore against every session's manifest
+    rather than against one script's text, which is strictly more than the
+    original checked: four sessions can now disagree with the simulator, and all
+    four are compared.
     """
     import re
 
-    def ignores(path):
+    def sim_ignores():
         # Stops at shell quoting so the trailing `"}` of a ${VAR:-"..."}
         # default is not captured as part of the path.
-        return sorted(re.findall(r"--ignore=([^\s\"']+)",
-                                 (REPO / path).read_text().replace("\\\n", " ")))
+        return sorted(re.findall(
+            r"--ignore=([^\s\"']+)",
+            (REPO / "scripts/pod/simulate_pod_env.sh").read_text()
+            .replace("\\\n", " ")))
 
-    pod = ignores("scripts/pod/autoinit_preflight_setup.sh")
-    sim = ignores("scripts/pod/simulate_pod_env.sh")
-    assert pod, "the pod gate ignores nothing; the extractor is not matching"
-    assert pod == sim, (
-        f"the pod gate ignores {pod} but the simulator ignores {sim}; the "
-        "simulation would not describe the pod's run")
-    assert "tests/pod/test_phase_a_stages1_5_execute.py" in pod, (
-        "the ~20-minute pre-flight rehearsal is back in the pod's 2700 s gate, "
-        "whose timeout exits 90 and kills a paid session")
+    sim = sim_ignores()
+    assert sim, "the simulator ignores nothing; the extractor is not matching"
+    setup_text = (REPO / "scripts/pod/autoinit_preflight_setup.sh").read_text()
+    assert "SESSION_TEST_IGNORES" in setup_text, (
+        "the pod gate no longer reads the session's ignore list; it has gone "
+        "back to naming paths itself, and a session cannot change what it runs")
+    assert not re.search(r"--ignore=\S", setup_text), (
+        "the pod gate names an --ignore path directly again; it must take the "
+        "list from the session, or the pin below tests nothing")
+
+    for name, extra in SESSION_LAUNCHERS:
+        mod = load_session_launcher(name)
+        spec = mod.spec(session_args(mod, extra))
+        pod = sorted(spec.setup.test_ignores)
+        assert pod == sim, (
+            f"{name} tells the pod gate to ignore {pod} but the simulator "
+            f"ignores {sim}; the simulation would not describe the pod's run")
+        assert "tests/pod/test_phase_a_stages1_5_execute.py" in pod, (
+            f"{name} puts the ~20-minute pre-flight rehearsal back in the pod's "
+            "2700 s gate, whose timeout exits 90 and kills a paid session")

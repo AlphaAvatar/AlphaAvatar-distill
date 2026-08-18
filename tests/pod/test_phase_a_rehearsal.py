@@ -632,13 +632,16 @@ def test_the_rejection_reason_is_carried_from_the_selection(tmp_path):
 def test_the_launcher_fetches_finalists_not_only_a_winner(tmp_path):
     """`unresolved_equivalence` has no winner and BOTH tied candidates are the
     result; fetching only a winner would discard the finding."""
-    mod = load_launcher()
-    session = mod.PhaseA.__new__(mod.PhaseA)
     import argparse
-    session.a = argparse.Namespace(fetch_finalists=True,
-                                   ckpt_store=str(tmp_path / "store"))
-    session.scr = tmp_path
-    session.say = lambda m: None
+
+    from aadistill.infrastructure.session import SessionContext
+
+    mod = load_launcher()
+    ctx = SessionContext(
+        scr=tmp_path,
+        args=argparse.Namespace(fetch_finalists=True,
+                                ckpt_store=str(tmp_path / "store")),
+        auth=None, evidence={}, say=lambda m: None)
     store = tmp_path / "store"
     store.mkdir()
     (store / "leaf_retention.json").write_text(json.dumps({"entries": [
@@ -651,7 +654,7 @@ def test_the_launcher_fetches_finalists_not_only_a_winner(tmp_path):
         {"canonical_id": "leaf2", "is_control": False,
          "permanent_checkpoint_retained": False},
     ]}))
-    assert mod.PhaseA.finalists_to_fetch(session) == ["leaf0", "leaf1"], (
+    assert mod.finalists_to_fetch(ctx) == ["leaf0", "leaf1"], (
         "the control is already held locally and a rejected leaf is not fetched")
 
 
@@ -676,24 +679,29 @@ def load_launcher():
 
 
 def launcher_defaults(mod):
-    import argparse
-    ap = argparse.ArgumentParser()
-    src = (REPO / "scripts/pod/autoinit_phase_a_launch.py").read_text()
-    ns = argparse.Namespace()
-    # Parse the real `main()` defaults by running its parser construction.
-    import re
-    for m in re.finditer(r'ap\.add_argument\("(--[a-z0-9-]+)"(.*?)\)\n', src, re.S):
-        flag, rest = m.group(1), m.group(2)
-        name = flag[2:].replace("-", "_")
-        d = re.search(r"default=([^,)]+)", rest)
-        if d:
-            try:
-                setattr(ns, name, eval(d.group(1), vars(mod)))  # noqa: S307
-            except Exception:
-                setattr(ns, name, None)
-        else:
-            setattr(ns, name, None)
-    return ns
+    """The namespace the launcher's REAL parser produces.
+
+    It used to be a regex over the source that `eval`'d each `default=`. That is
+    a transcription of a parser, and a transcription can disagree with the thing
+    it transcribes — which is the whole class of defect this session's refactor
+    exists to remove. `build_parser()` is extracted for exactly this.
+    """
+    return mod.build_parser().parse_args(
+        ["--scr", "/tmp/phase-a-test", "--session-commit", "0" * 40,
+         "--bundle", "aad_test.bundle"])
+
+
+def phase_a_spec(**overrides):
+    mod = load_launcher()
+    args = launcher_defaults(mod)
+    for k, v in overrides.items():
+        setattr(args, k, v)
+    return mod.spec(args).validate()
+
+
+def phase_a_plan(*, price_per_hour=0.99, authorized_usd, **overrides):
+    return phase_a_spec(**overrides).budget.plan(
+        price_per_hour=price_per_hour, authorized_usd=authorized_usd)
 
 
 def test_make_plan_prices_and_stays_inside_the_authorization():
@@ -701,61 +709,34 @@ def test_make_plan_prices_and_stays_inside_the_authorization():
 
     The step-time model has a measured 4.15 s/step floor and refuses anything
     below it without a stated reason; a Phase-A plan priced at the measured
-    end-to-end rate must supply one, or `make_plan` throws where nothing catches.
+    end-to-end rate must supply one, or pricing throws where nothing catches.
     """
-    mod = load_launcher()
-    a = launcher_defaults(mod)
-    a.max_price = 0.99
-
-    session = mod.PhaseA.__new__(mod.PhaseA)
-    session.a = a
-    session.ev = {}
-    session.plan = None
-    session.say = lambda msg: None
-    session.check_gpu_offered = lambda: True
-
-    class Auth:
-        hard_cap_usd = 23.0484
-        per_launch_hard_usd = 23.0484
-        def require_within_cap(self, usd, what=""):
-            if usd > self.hard_cap_usd:
-                raise AuthorizationError(f"{usd} over {self.hard_cap_usd}")
-        def require_within_launch_limit(self, usd, what=""):
-            pass
-    session.auth = Auth()
-
-    assert mod.PhaseA.make_plan(session) is True
-    plan = session.plan
+    plan = phase_a_plan(authorized_usd=23.0484)
+    spec = phase_a_spec()
     # 12 priced probes: rung 1's 6, rung 2's 3, and headroom for the conditional
     # tie-break so the watchdog cannot kill a legitimately triggered one.
-    assert session.ev["priced_probes"]["total_priced"] == 12
+    assert spec.evidence_fields["priced_probes"]["total_priced"] == 12
     assert plan.hard_terminate_usd <= 23.0484, "does not fit the repriced cap"
     assert plan.expected_usd < plan.soft_stop_usd < plan.hard_terminate_usd
 
 
 def test_the_authorization_constant_matches_what_make_plan_prices():
-    """`make_plan` calls `require_within_cap(plan.hard_terminate_usd)`. If the
+    """The runner calls `require_within_cap(plan.hard_terminate_usd)`. If the
     granted cap is below the priced threshold the launcher aborts at $0 — safe,
     but only discovered at launch. Checked here instead."""
     from aadistill.autoinit.phase_a import PHASE_A_AUTHORIZATION as A
 
-    mod = load_launcher()
-    a = launcher_defaults(mod)
-    a.max_price = 0.99
-    session = mod.PhaseA.__new__(mod.PhaseA)
-    session.a, session.ev, session.plan = a, {}, None
-    session.say = lambda m: None
-    session.check_gpu_offered = lambda: True
-    session.auth = A
-    assert mod.PhaseA.make_plan(session) is True, (
-        "the granted cap does not cover the plan the launcher prices")
-    assert session.plan.hard_terminate_usd <= A.hard_cap_usd
-    assert session.plan.hard_terminate_usd <= A.per_launch_hard_usd
+    plan = phase_a_plan(authorized_usd=A.hard_cap_usd)
+    A.require_within_cap(plan.hard_terminate_usd, what="planned hard threshold")
+    A.require_within_launch_limit(plan.hard_terminate_usd,
+                                  what="planned hard threshold")
+    assert plan.hard_terminate_usd <= A.hard_cap_usd
+    assert plan.hard_terminate_usd <= A.per_launch_hard_usd
     # The cap is the priced figure rounded UP at 4 dp, not a loose grant: a cap
     # rounded down would make `require_within_cap` refuse the launcher's own
     # plan by 2.5e-5 dollars, and a generous one would authorize slack nobody
     # derived.
-    assert 0 <= A.hard_cap_usd - session.plan.hard_terminate_usd < 1e-4
+    assert 0 <= A.hard_cap_usd - plan.hard_terminate_usd < 1e-4
     # It does NOT fit the currently recorded $213.00 project cap. That is the
     # point: attempt 6 needs a cap decision, and $217.00 is RECOMMENDED, not
     # approved. This asserts the recommendation would cover it, not that it was
@@ -795,8 +776,12 @@ def test_a_non_auth_path_changed_after_the_authorized_base_is_refused(tmp_path):
     # `from phase_a_launch import ...` — that only resolves if some earlier test
     # happened to put the module in sys.modules, so the test passed in the full
     # suite and failed in isolation.
-    mod = load_launcher()
-    lineage_from_authorized_base = mod.lineage_from_authorized_base
+    # The helper moved into the shared prechecks on 2026-08-18, because Phase A
+    # and the continuation each had their own copy of the surrounding gate and
+    # only one of them had grown this check. It is the same function.
+    from aadistill.infrastructure.session_prechecks import (
+        lineage_from_authorized_base, session_commit_gate,
+    )
 
     AUTH = "logs/autoinit_phase_a_authorization.json"
     repo = tmp_path / "repo"
@@ -870,31 +855,42 @@ def test_a_non_auth_path_changed_after_the_authorized_base_is_refused(tmp_path):
         harness_source_digest = digest_at(good)     # valid at BOTH commits
         authorized_session_commit = base
 
-    saved_root, saved_auth = mod.REPO_ROOT, mod.AUTH_PATH
-    try:
-        mod.REPO_ROOT, mod.AUTH_PATH = repo, AUTH
-        session = mod.PhaseA.__new__(mod.PhaseA)
-        session.auth = _Auth()
-        session.ev = {}
-        session.say = lambda m: None
+    from aadistill.infrastructure.session import SessionContext
 
-        session.a = argparse.Namespace(session_commit=good)
-        assert mod.PhaseA.verify_session_commit(session) is True, (
-            "the legitimate shape must still pass")
+    # The gate is a factory over (repo_root, auth_path), so driving it needs no
+    # module-global patching at all — which is the property the composition
+    # refactor was for. The `try/finally` that used to save and restore
+    # `mod.REPO_ROOT` is gone because there is nothing to restore.
+    gate = session_commit_gate(repo, AUTH, check_lineage=True)
 
-        session.a = argparse.Namespace(session_commit=bad)
-        session.ev = {}
-        assert mod.PhaseA.verify_session_commit(session) is False, (
-            "a commit whose harness digest and auth blob are both valid, but "
-            "which changed a non-auth path after the authorized base, must be "
-            "refused before a pod can exist")
-        check = session.ev["session_commit_check"]
-        # ...and refused for the RIGHT reason: the other two gates passed.
-        assert check["harness_matches"] is True
-        assert check["commit_carries_this_authorization"] is True
-        assert check["lineage"]["unexpected_paths"] == ["unrelated.txt"]
-    finally:
-        mod.REPO_ROOT, mod.AUTH_PATH = saved_root, saved_auth
+    def run(commit):
+        ctx = SessionContext(
+            scr=tmp_path, args=argparse.Namespace(session_commit=commit),
+            auth=_Auth(), evidence={}, say=lambda m: None)
+        return gate(ctx), ctx.evidence
+
+    (ok_flag, _msg), _ev = run(good)
+    assert ok_flag is True, "the legitimate shape must still pass"
+
+    (ok_flag, msg), ev = run(bad)
+    assert ok_flag is False, (
+        "a commit whose harness digest and auth blob are both valid, but "
+        "which changed a non-auth path after the authorized base, must be "
+        "refused before a pod can exist")
+    check = ev["session_commit_check"]
+    # ...and refused for the RIGHT reason: the other two gates passed.
+    assert check["harness_matches"] is True
+    assert check["commit_carries_this_authorization"] is True
+    assert check["lineage"]["unexpected_paths"] == ["unrelated.txt"]
+    assert "unrelated.txt" in msg
+
+    # And Phase A really uses the lineage-checking variant. The gate being
+    # correct is worthless if the session does not consult it — verified by
+    # mutation once already, when deleting the refusal left every other test
+    # green.
+    names = [getattr(c, "__name__", "") for c in phase_a_spec().precheck]
+    assert "session_commit_and_lineage" in names, (
+        "the Phase-A session no longer runs the lineage-checking commit gate")
 
 
 def test_every_script_the_driver_invokes_gets_its_required_arguments():
@@ -944,54 +940,75 @@ def test_every_script_the_driver_invokes_gets_its_required_arguments():
 
 def test_the_launcher_polls_for_the_markers_its_own_driver_emits():
     """The poll loop watched for PREFLIGHT_* while the driver emitted its own."""
-    mod = load_launcher()
+    spec = phase_a_spec()
     driver = (REPO / "scripts/pod/autoinit_phase_a_driver.py").read_text()
-    for marker in mod.PhaseA.failure_markers:
+    for marker in spec.markers.failure:
         assert f'mark("{marker}")' in driver, (
             f"the launcher polls for {marker} but the driver never emits it")
-    assert 'mark("ALL_DONE")' in driver
-    for marker in mod.PhaseA.incomplete_markers:
-        assert marker in mod.PhaseA.failure_markers
+    assert f'mark("{spec.markers.success}")' in driver
+    for marker in spec.markers.incomplete:
+        assert marker in spec.markers.failure
 
 
 def test_the_launcher_and_driver_agree_on_where_artifacts_go():
-    mod = load_launcher()
+    spec = phase_a_spec()
     driver = (REPO / "scripts/pod/autoinit_phase_a_driver.py").read_text()
-    assert f'artifacts/audit/{mod.PhaseA.audit_dirname}' in driver
-    assert mod.PhaseA.evidence_filename in driver
-    for name in mod.PhaseA.report_names:
+    assert f'artifacts/audit/{spec.artifacts.audit_dirname}' in driver
+    assert spec.artifacts.evidence_filename in driver
+    for name in spec.artifacts.report_names:
         assert name in driver, f"the launcher fetches {name}; the driver never writes it"
 
 
 def test_the_launcher_declares_a_phase_a_authorization_not_a_spend_one():
+    """The type is a FIELD now, so the permission is a property of the spec.
+
+    It used to be a module-global substitution — `_preflight.SpendAuthorization
+    = PhaseAAuthorization` — executed in `main()` before the session was
+    constructed. That is the mechanism `SESSION_KIND` leaked through when two
+    sessions shared one setup script, and attempt 1 paid $0.1075 for it. There is
+    no module global to retarget now, and this asserts both halves: the right
+    type is named, and the old mechanism is gone.
+    """
+    from aadistill.autoinit.phase_a import PHASE_A_PLAN_V1, PhaseAAuthorization
+
+    spec = phase_a_spec()
+    assert spec.authorization_loader.__self__ is PhaseAAuthorization
+    assert spec.plan_hash == PHASE_A_PLAN_V1.plan_hash
+    #: Setup must load the Phase-A TYPE, and the session says so in its own
+    #: manifest rather than in a global somebody else can see.
+    assert spec.setup.env.get("SESSION_KIND") == "phase_a", (
+        "setup would load the type that always says no")
+
     src = (REPO / "scripts/pod/autoinit_phase_a_launch.py").read_text()
-    assert "PhaseAAuthorization" in src
-    assert "SESSION_KIND" in src, "setup would load the type that always says no"
-    # The retarget must actually be there: the inherited `Preflight.__init__`
-    # resolves `SpendAuthorization` from the base module's globals at call time,
-    # so this line is what makes a Phase-A session load the type that can say yes.
-    assert "_preflight.SpendAuthorization = PhaseAAuthorization" in src
-    assert "_preflight.PREFLIGHT_PLAN_V1 = PHASE_A_PLAN_V1" in src
+    assert "_preflight." not in src, (
+        "the launcher mutates another module's globals again; that is the "
+        "mechanism SESSION_KIND leaked through")
 
 
-def test_phase_a_authorization_satisfies_everything_the_launcher_calls_on_auth():
-    """The base launcher is inherited wholesale, so the substituted type must
-    answer every call it makes. A missing method would surface as an
-    `AttributeError` inside `__init__` — on the dev box, before a pod, but only
-    if something exercises it. This does."""
+def test_phase_a_authorization_satisfies_everything_the_runner_calls_on_auth():
+    """The runner is shared, so the substituted type must answer every call.
+
+    A missing method would surface as an `AttributeError` inside `__init__` — on
+    the dev box, before a pod, but only if something exercises it. This does, and
+    it now scans the runner and the shared prechecks as well as the launcher,
+    because that is where the calls moved.
+    """
     import inspect
     import re
 
-    base = (REPO / "scripts/pod/autoinit_preflight_launch.py").read_text()
-    phase = (REPO / "scripts/pod/autoinit_phase_a_launch.py").read_text()
-    used = set(re.findall(r"self\.auth\.([a-z_]+)", base + phase))
+    sources = "".join(
+        (REPO / p).read_text() for p in (
+            "src/aadistill/infrastructure/session_runner.py",
+            "src/aadistill/infrastructure/session_prechecks.py",
+            "scripts/pod/autoinit_phase_a_launch.py"))
+    used = set(re.findall(r"(?:self|ctx)\.auth\.([a-z_]+)", sources))
     assert used, "the detector found no auth usage; it is broken"
 
     a = _auth()
     missing = [name for name in sorted(used) if not hasattr(a, name)]
     assert not missing, (
-        f"PhaseAAuthorization is substituted for SpendAuthorization in the "
-        f"inherited launcher but lacks {missing}")
+        f"PhaseAAuthorization is what a Phase-A session names, but the shared "
+        f"runner calls {missing} on it")
     # And the attributes it reads, not just the methods it calls.
     for attr in ("hard_cap_usd", "harness_source_files", "harness_source_digest",
                  "authorized_session_commit", "science_plan_hash"):
@@ -1084,23 +1101,7 @@ def test_make_plan_reproduces_the_repriced_thresholds_exactly():
     time and `require_within_cap` all read. If `make_plan` and the authorization
     disagree, the disagreement is discovered at launch on a billing pod.
     """
-    mod = load_launcher()
-    a = launcher_defaults(mod)
-    a.max_price = 0.99
-
-    session = mod.PhaseA.__new__(mod.PhaseA)
-    session.a, session.ev, session.plan = a, {}, None
-    session.say = lambda m: None
-    session.check_gpu_offered = lambda: True
-
-    class Auth:
-        hard_cap_usd = per_launch_hard_usd = 23.0484
-        def require_within_cap(self, usd, what=""): pass
-        def require_within_launch_limit(self, usd, what=""): pass
-    session.auth = Auth()
-
-    assert mod.PhaseA.make_plan(session) is True
-    plan = session.plan
+    plan = phase_a_plan(authorized_usd=23.0484)
     assert plan.expected_usd == pytest.approx(17.8933, abs=5e-5)
     assert plan.soft_stop_usd == pytest.approx(22.7183, abs=5e-5)
     assert plan.hard_terminate_usd == pytest.approx(23.0483, abs=5e-5)
@@ -1112,21 +1113,9 @@ def test_the_two_soft_stop_reserves_are_named_and_carry_their_derived_minutes():
     import json
 
     mod = load_launcher()
-    a = launcher_defaults(mod)
-    a.max_price = 0.99
-    session = mod.PhaseA.__new__(mod.PhaseA)
-    session.a, session.ev, session.plan = a, {}, None
-    session.say = lambda m: None
-    session.check_gpu_offered = lambda: True
+    plan = phase_a_plan(authorized_usd=23.0484)
 
-    class Auth:
-        hard_cap_usd = per_launch_hard_usd = 23.0484
-        def require_within_cap(self, usd, what=""): pass
-        def require_within_launch_limit(self, usd, what=""): pass
-    session.auth = Auth()
-    assert mod.PhaseA.make_plan(session) is True
-
-    reserves = {r.name: r.minutes for r in session.plan.soft_stop_reserves}
+    reserves = {r.name: r.minutes for r in plan.soft_stop_reserves}
     assert set(reserves) == {"stage1_reference_cache_fallback",
                              "beam6_search_pricing_correction"}
 
@@ -1145,10 +1134,10 @@ def test_the_two_soft_stop_reserves_are_named_and_carry_their_derived_minutes():
 
     # And the reserves land before the soft stop, which is what makes the
     # conditional seed-sc rung survive a stage-1 fallback.
-    assert session.plan.soft_stop_minutes == pytest.approx(
-        session.plan.expected_minutes * 1.10 + sum(reserves.values()))
-    assert (session.plan.hard_terminate_minutes
-            - session.plan.soft_stop_minutes) == pytest.approx(20.0)
+    assert plan.soft_stop_minutes == pytest.approx(
+        plan.expected_minutes * 1.10 + sum(reserves.values()))
+    assert (plan.hard_terminate_minutes
+            - plan.soft_stop_minutes) == pytest.approx(20.0)
 
 
 def test_the_conditional_third_seed_still_fits_under_a_full_fallback():
@@ -1159,28 +1148,16 @@ def test_the_conditional_third_seed_still_fits_under_a_full_fallback():
     stop, or `afford()` would refuse a legitimately triggered seed-sc rung.
     """
     mod = load_launcher()
-    a = launcher_defaults(mod)
-    a.max_price = 0.99
-    session = mod.PhaseA.__new__(mod.PhaseA)
-    session.a, session.ev, session.plan = a, {}, None
-    session.say = lambda m: None
-    session.check_gpu_offered = lambda: True
+    plan = phase_a_plan(authorized_usd=23.0484)
 
-    class Auth:
-        hard_cap_usd = per_launch_hard_usd = 23.0484
-        def require_within_cap(self, usd, what=""): pass
-        def require_within_launch_limit(self, usd, what=""): pass
-    session.auth = Auth()
-    assert mod.PhaseA.make_plan(session) is True
-
-    worst = (session.plan.expected_minutes
+    worst = (plan.expected_minutes
              + mod.FALLBACK_RESERVE_MINUTES
              + mod.BEAM6_SEARCH_CORRECTION_MINUTES)
-    assert worst <= session.plan.soft_stop_minutes, (
+    assert worst <= plan.soft_stop_minutes, (
         f"a full fallback needs {worst:.1f} min but the soft stop is at "
-        f"{session.plan.soft_stop_minutes:.1f}; the conditional seed-sc rung "
+        f"{plan.soft_stop_minutes:.1f}; the conditional seed-sc rung "
         "would be refused by afford()")
     # The 10% contingency is still intact on top of it, not consumed by the
     # reserves.
-    assert session.plan.soft_stop_minutes - worst == pytest.approx(
-        session.plan.expected_minutes * 0.10)
+    assert plan.soft_stop_minutes - worst == pytest.approx(
+        plan.expected_minutes * 0.10)
