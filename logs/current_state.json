@@ -1,6 +1,6 @@
 {
   "schema": "aadistill.current_state/v2",
-  "generated_utc": "2026-08-18T13:05:00+00:00",
+  "generated_utc": "2026-08-18T14:10:00+00:00",
   "_contract": "The minimal machine-readable CURRENT snapshot. It owns live facts and nothing else: no history, no per-attempt detail, no narrative. History lives in logs/decisions.md and the per-run directories; the human view of THIS file is logs/STATE.md and the two must agree. README owns no live facts at all. Ownership rules: logs/CATALOG.md.",
   "baseline_commit": "4563d10644591f8030d0a43ddcd4dbce95e12031",
   "baseline_commit_meaning": "the last COMMITTED commit this snapshot describes; the commit carrying this file is one later by construction. It read fe3c2b3 while HEAD was a84b7b8 - four commits stale - because it was edited after being generated and nothing refreshes or checks these two fields.",
@@ -53,15 +53,16 @@
     "Stage 0 on hardware, passed three times"
   ],
   "latest_verification": {
-    "utc": "2026-08-18T10:30:00+00:00",
-    "after": "making the session manifest authoritative for relay science-input staging (the relay-side twin of the LOCAL_ASSETS defect)",
-    "full_suite": "1872 passed, 11 skipped, 0 errors in 19:20 (the 1842 baseline plus the 30 new relay-contract gates)",
-    "pod_simulator": "1832 passed, 22 skipped in 2:53; artifact tree restored EXACTLY - 1591 entries, identical type/size/path before and after",
+    "utc": "2026-08-18T14:10:00+00:00",
+    "after": "the $0 fix for the two assertions that failed Phase-A attempt 8's setup test gate",
+    "full_suite": "1874 passed, 11 skipped, 0 errors in 19:32",
+    "pod_simulator": "1834 passed, 22 skipped in 2:53; artifact tree restored EXACTLY - 1598 entries, identical type/size/path before and after",
     "frozen_asset_verifier": "passed, no problems",
     "phase_a_price_reproduced": "$17.8933 / $22.7183 / $23.0483 exactly, with both soft-stop reserves at 147.7683 and 36.2158 minutes",
-    "canonical_full_suite_baseline": "1842 passed, 11 skipped, 0 errors under the repo .venv (python 3.14.2, torch 2.13.0+cpu, transformers 5.13.1). The previously recorded '1837 passed, 5 errors' was the same 1842 tests under the sibling AlphaAvatar venv, where transformers 4.57.1 raises on a toy tokenizer in tmp_path before any repository artifact is read",
+    "focused_docs_storage_session": "395 passed, 5 skipped",
+    "pod_condition_reproduced": "with artifacts/stage3/ladder_uniform present - the pod's exact state - test_no_tombstoned_path_is_still_on_disk now passes; the directory was removed again after",
     "scope": "CPU only; no checkpoint was loaded and no metric measured",
-    "phase_a_attempt_8": "FAILED CLOSED at the setup test gate, $0.19, 11.28 min, pod deleted and provider-confirmed gone; no stage ran. Setup reached ROPE_OK, so the manifest-driven relay staging (10 inputs), the pod-side frozen-asset gate and the staged checkpoint are now HARDWARE-VERIFIED. Evidence: logs/autoinit_phase_a_attempt8/"
+    "phase_a_attempt_8": "FAILED CLOSED at the setup test gate, $0.19, 11.28 min, pod deleted and provider-confirmed gone; no stage ran. Setup reached ROPE_OK, so the manifest-driven relay staging (10 inputs), the pod-side frozen-asset gate and the staged checkpoint are HARDWARE-VERIFIED. Evidence: logs/autoinit_phase_a_attempt8/"
   },
   "failed": [
     {
@@ -111,7 +112,10 @@
     "full tracebacks for unexpected in-process driver exceptions",
     "plan_session soft_stop_reserves, applied BEFORE the soft stop",
     "the pre-flight rehearsal ignored in both the pod gate and the simulator, with the ignore lists pinned equal",
-    "the pod simulator restores exactly and refuses concurrent sweeps"
+    "the pod simulator restores exactly and refuses concurrent sweeps",
+    "the layout test partitions its references: repository-relative paths must exist, declared host-local storage roots are verified where present and skipped where absent, and an undeclared absolute path still fails",
+    "an active tombstone may not name a declared session staging or mirror destination - checked against the four SessionSpecs, touching no path, so the dev box, the simulator and a pod all give the same answer",
+    "checkpoint_tombstones.json owns the active-tombstone counts and bytes"
   ],
   "abandoned": [
     "recovery_search_v1 (INVALID before first use)",
@@ -121,15 +125,9 @@
     "the paid device-canary session path: STRATEGICALLY TERMINATED 2026-08-18. Two authorized sessions, $0.1240, zero canary runs; both died in the wrapper's inherited contracts. Its evidence and its generic lesson are kept; no further canary is prepared."
   ],
   "next_starting_point": {
-    "status": "STOPPED FOR REVIEW after Phase-A attempt 8 failed closed. The grant is spent. No attempt 9 is authorized, funded or prepared, and none may be inferred from the $24.7570 of unused headroom.",
-    "what_the_reviewer_decides": [
-      "whether test_every_path_named_in_the_repo_layout_exists should tolerate an out-of-tree path it cannot check in a container, or whether REPO_LAYOUT.md should name those two paths differently",
-      "whether the stage3_ladder_uniform_local_cache tombstone should be WITHDRAWN, as the podsim_quarantine_residue tombstone was: it names a directory the pod's setup recreates by design, which is the same reason that one was withdrawn",
-      "whether the pod's blocking test gate should run the tests/docs suite at all, given that it asserts properties of the dev box's filesystem",
-      "whether a further Phase-A attempt is warranted, and under what grant"
-    ],
-    "what_is_NOT_in_question": "the relay-staging fix, which worked: 10 inputs staged and digest-verified on hardware, ASSETS_STAGED, ASSETS_READY and ROPE_OK all reached",
-    "either_paid_option_requires": "a new grant document, then the full chain: pre-auth base commit -> issue against that grant -> auth-only commit -> bundle upload -> round-trip verify -> launch."
+    "status": "The two attempt-8 assertions are FIXED and verified at $0. Nothing is authorized, funded or prepared: attempt 8's grant is spent and its lineage gate refuses the current HEAD.",
+    "next_decision": "Phase-A attempt 9, under a NEW one-use grant and the normal chain: pre-auth base commit -> issue against that grant -> authorization-only commit -> bundle upload -> round-trip verify -> launch. No canary and no further readiness phase is required.",
+    "not_authorized": "this fix authorizes nothing. The $24.7570 of unused cumulative headroom is not permission."
   },
   "read_order": [
     "logs/STATE.md — the human view of this file",

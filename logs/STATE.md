@@ -45,20 +45,19 @@ Also frozen: recovery design, selection rules, pooled_counts@v2, Stage-3 artifac
 
 ## Latest verification
 
-After making the session manifest authoritative for relay science-input staging.
-CPU only — no checkpoint was loaded and no metric measured:
+After the $0 fix for the two assertions that failed Phase-A attempt 8's setup
+test gate. CPU only — no checkpoint was loaded and no metric measured:
 
-* full suite **1872 passed, 11 skipped, 0 errors in 19:20 (the 1842 baseline plus the 30 new relay-contract gates)**.
-* pod simulator **1832 passed, 22 skipped in 2:53; artifact tree restored EXACTLY - 1591 entries, identical type/size/path before and after**.
+* full suite **1874 passed, 11 skipped, 0 errors** in 19:32.
+* pod simulator **1834 passed, 22 skipped**; artifact tree restored **exactly**
+  — 1598 entries, identical type/size/path before and after.
+* focused docs/storage/session **395 passed, 5 skipped**.
 * frozen-asset verifier **passed**, no problems.
-* Phase-A pricing reproduces **$17.8933 / $22.7183 / $23.0483** exactly, with
-  both soft-stop reserves at their derived minutes — the cheapest proof the
-  change preserved behaviour.
-
-**The canonical full-suite baseline is `1842 passed, 11 skipped, 0 errors`**
-under the repo `.venv`. The `1837 passed, 5 errors` recorded before was the same
-1842 tests under the sibling AlphaAvatar venv, whose transformers 4.57.1 raises
-on a toy tokenizer in `tmp_path` before any repository artifact is read.
+* Phase-A pricing reproduces **$17.8933 / $22.7183 / $23.0483** exactly, reserves
+  at 147.7683 and 36.2158 min.
+* **the pod's own condition reproduced**: with `artifacts/stage3/ladder_uniform`
+  present, `test_no_tombstoned_path_is_still_on_disk` now passes. The directory
+  was removed again afterwards.
 
 ## What failed, and why
 
@@ -94,6 +93,13 @@ instead of the cause, and it was paid for twice. Full diagnoses in
   declares, and names no asset, relay path, destination or digest of its own.
   `RelayInput` carries source, destination, digest and mirror; `dest=None` means
   only "the driver stages this", never "the shell knows"
+* the layout test partitions its references: repository-relative paths must
+  exist, declared host-local storage roots are verified where present and
+  **skipped where absent**, and an undeclared absolute path still fails
+* an active tombstone may not name a declared session staging or mirror
+  destination — checked against the four `SessionSpec`s, touching no path, so the
+  dev box, the simulator and a pod all give the same answer
+* `checkpoint_tombstones.json` owns the active-tombstone counts and bytes
 * the Phase-A authorization schema carries no grant; the issuer requires one
 * autoinit.stage1_device_contract@v1
 * full tracebacks for unexpected in-process driver exceptions
@@ -111,42 +117,22 @@ instead of the cause, and it was paid for twice. Full diagnoses in
 
 ## Next starting point
 
-**STOPPED FOR REVIEW.** Phase-A attempt 8 ran on 2026-08-18 and failed closed at
-the setup test gate: **$0.19, 11.28 min, no stage ran**, pod deleted and provider
-confirmed gone. Its grant covered one launch and is **spent**. No attempt 9 is
-authorized, funded or prepared, and none may be inferred from the $24.7570 of
-unused headroom.
+**The two attempt-8 assertions are fixed and verified at $0.** `REPO_LAYOUT.md`
+still names the real external storage paths; the layout test no longer demands
+that every execution environment be the maintainer's machine.
+`stage3_ladder_uniform_local_cache` is **withdrawn** — the deletion stands, the
+per-file hashes stand, and the entry no longer asserts that a routine staging
+destination is retired. Active tombstones: **16 / 3.6406 GiB**, against the
+**7 units / 3.660 GiB** the cleanup physically removed; both figures are true and
+neither corrects the other.
 
-**What worked, and is now hardware-verified:** the manifest-driven relay staging.
-Setup reached `ROPE_OK` — eight markers in — so all 10 declared science inputs
-staged and digest-verified on a pod, the pod-side frozen-asset gate passed, and
-the staged checkpoint loaded in both venvs. The $0 precheck covered 10 relay
-inputs where attempt 7 covered 3.
+**Nothing is authorized, funded or prepared.** Attempt 8's grant covered one
+launch, is spent, and its lineage gate refuses the current HEAD.
 
-**What failed:** two tests that cannot pass in a container, both added by the
-2026-08-18 inventory and cleanup work, neither related to the staging fix:
-
-1. `test_every_path_named_in_the_repo_layout_exists` — `REPO_LAYOUT.md` names
-   `/home/ecs-user/aad-artifacts/` and `/home/ecs-user/aad-scratch/`, and
-   `REPO / ref` discards the base for an absolute operand, so the test reads the
-   host filesystem.
-2. `test_no_tombstoned_path_is_still_on_disk` — the tombstone
-   `stage3_ladder_uniform_local_cache` names `artifacts/stage3/ladder_uniform`,
-   which the pod's setup **stages** as the recovery pack's mirror.
-
-The pod simulator could not catch either: it cannot unmake an out-of-tree path,
-and for the tombstone it produces the *opposite* of the pod's state — it hides
-that gitignored directory, so the assertion passes for the wrong reason.
-
-**The maintainer decides** whether the layout test should tolerate a path it
-cannot check in a container; whether the `stage3_ladder_uniform_local_cache`
-tombstone should be **withdrawn** exactly as `podsim_quarantine_residue` was, for
-exactly the same reason; whether the pod's blocking gate should run `tests/docs`
-at all; and whether a further attempt is warranted.
-
-A paid run needs the full chain: **write a grant document** -> pre-auth base
-commit -> issue against that grant -> auth-only commit -> bundle upload ->
-round-trip verify -> launch.
+The next decision is **Phase-A attempt 9**, under a new one-use grant and the
+normal chain: **write a grant document** -> pre-auth base commit -> issue against
+that grant -> authorization-only commit -> bundle upload -> round-trip verify ->
+launch. No canary and no further readiness phase is required.
 
 ## Where else to look
 

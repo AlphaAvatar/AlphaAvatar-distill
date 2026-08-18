@@ -157,3 +157,90 @@ def test_a_withdrawn_tombstone_says_why_it_was_wrong():
 def test_tombstone_ids_are_unique():
     ids = [t["canonical_id"] for t in load(TOMBSTONES)["tombstones"]]
     assert len(ids) == len(set(ids)), "duplicate canonical_id in the tombstones"
+
+
+# --- the failure class Phase-A attempt 8 paid for --------------------------
+
+def session_staging_destinations() -> dict[str, str]:
+    """Every directory a session's manifest declares setup will stage into.
+
+    Read from the four real `SessionSpec`s — the same declaration the pod
+    actually executes — so this cannot drift from what a pod does. Returns
+    `{repo_relative_dir: which session and field declared it}`.
+    """
+    import importlib.util
+    import sys
+
+    helper = REPO / "tests/pod/session_specs.py"
+    spec = importlib.util.spec_from_file_location("session_specs", helper)
+    mod = importlib.util.module_from_spec(spec)
+    sys.modules["session_specs"] = mod
+    spec.loader.exec_module(mod)
+
+    out: dict[str, str] = {}
+    for name, _m, _a, s in mod.all_specs():
+        for r in s.setup.relay_inputs:
+            for field, dest in (("dest", r.dest),
+                                ("also_stage_to", r.also_stage_to)):
+                if dest:
+                    out.setdefault(dest.strip("/"), f"{name}.{field} ({r.path})")
+    return out
+
+
+def test_no_active_tombstone_names_a_routine_staging_destination():
+    """A tombstone asserts a path stopped existing. A staging destination is
+    recreated by design, every session, so it can never be retired.
+
+    **This is the assertion Phase-A attempt 8 paid $0.19 to discover.** The
+    tombstone `stage3_ladder_uniform_local_cache` named
+    `artifacts/stage3/ladder_uniform`; the pod's setup stages the frozen
+    recovery pack into exactly that directory as the mirror the recovery-corpus
+    loader reads. On the pod the path existed,
+    `test_no_tombstoned_path_is_still_on_disk` fired, the blocking setup gate
+    failed and the session died having run no stage.
+
+    That test could not have caught this at $0: on the dev box the pod simulator
+    *hides* the same gitignored directory, so it passed for the wrong reason.
+    This one asks a question about **declarations** and touches the filesystem
+    nowhere, so it gives the same answer on the dev box, in the simulator and on
+    a pod.
+    """
+    staged = session_staging_destinations()
+    assert staged, "no staging destinations found; the extractor is broken"
+
+    problems = []
+    for t in load(TOMBSTONES)["tombstones"]:
+        if t.get("withdrawn"):
+            continue
+        for p in t["historical_paths"]:
+            if Path(p).is_absolute():
+                continue                     # not a path inside the checkout
+            rel = p.strip("/")
+            for dest, who in staged.items():
+                if rel == dest or rel.startswith(dest + "/") or dest.startswith(rel + "/"):
+                    problems.append(
+                        f"{t['canonical_id']} tombstones {p!r}, which {who} "
+                        f"stages into {dest!r}")
+    assert not problems, (
+        "an active tombstone names a routine session staging destination:\n  "
+        + "\n  ".join(problems)
+        + "\nA directory a session recreates by design has not been retired. "
+        "Withdraw the tombstone, keeping the deletion record and the reason, as "
+        "podsim_quarantine_residue and stage3_ladder_uniform_local_cache were.")
+
+
+def test_the_tombstone_totals_match_the_tombstones():
+    """`totals` is the owner of the active-tombstone accounting, so it has to be
+    derived from the list rather than remembered alongside it."""
+    doc = load(TOMBSTONES)
+    ts, t = doc["tombstones"], doc["totals"]
+    active = [x for x in ts if not x.get("withdrawn")]
+    withdrawn = [x for x in ts if x.get("withdrawn")]
+    assert t["tombstones_total"] == len(ts)
+    assert t["active"] == len(active)
+    assert t["withdrawn"] == len(withdrawn)
+    assert t["withdrawn_ids"] == sorted(x["canonical_id"] for x in withdrawn)
+    assert t["active_retired_bytes"] == sum(
+        x.get("size_bytes") or 0 for x in active)
+    assert t["withdrawn_bytes"] == sum(
+        x.get("size_bytes") or 0 for x in withdrawn)

@@ -83,15 +83,61 @@ def test_the_readme_points_at_the_owners_of_the_facts_it_dropped():
 
 # --- the layout describes a repository that exists --------------------------
 
+def external_storage_roots() -> set[str]:
+    """Host-local storage roots REPO_LAYOUT.md *declares* are outside the tree.
+
+    Read from the document's own "Storage that is not in the tree" section
+    rather than inferred from a leading slash, so an absolute path that wandered
+    into some other section is still a defect rather than a free pass.
+    """
+    text = LAYOUT.read_text()
+    start = text.index("## Storage that is not in the tree")
+    end = text.index("\n## ", start)
+    return {r for r in re.findall(r"`(/[A-Za-z0-9_./-]+)`", text[start:end])}
+
+
 def test_every_path_named_in_the_repo_layout_exists():
     """A layout document nobody checks becomes a description of a repository
-    that used to exist."""
-    missing = sorted(
-        ref for ref in backticked(LAYOUT)
-        if ("/" in ref or ref.endswith(".md"))
-        and "*" not in ref and "{" not in ref
-        and not (REPO / ref).exists())
+    that used to exist.
+
+    **Repository-relative references must exist, always.** That is the whole
+    point and it is not weakened below.
+
+    Absolute references are a different kind of claim. The two the document
+    names — the out-of-tree artifact store and the scratch area — are real
+    operational facts about the maintainer host, and `docs/REPO_LAYOUT.md`
+    should keep naming them exactly. But `Path(REPO) / "/home/ecs-user/..."`
+    **discards the base**, so the original assertion read the literal host
+    filesystem and demanded that every execution environment be the maintainer's
+    machine. A pod is not, and Phase-A attempt 8 paid $0.19 to discover it at the
+    setup test gate after the staging, the frozen-asset gate and the RoPE check
+    had all passed.
+
+    So they are checked the way `test_the_registry_covers_the_out_of_tree_store`
+    already checks that store: verified where they exist, skipped where they do
+    not. What is NOT skipped is that each one is a **declared** storage root —
+    a typo'd or invented absolute path still fails.
+    """
+    refs = {ref for ref in backticked(LAYOUT)
+            if ("/" in ref or ref.endswith(".md"))
+            and "*" not in ref and "{" not in ref}
+    declared_external = external_storage_roots()
+
+    absolute = {r for r in refs if r.startswith("/")}
+    undeclared = sorted(absolute - declared_external)
+    assert not undeclared, (
+        f"REPO_LAYOUT.md names the absolute paths {undeclared} outside its "
+        '"Storage that is not in the tree" section. An absolute path is a claim '
+        "about a particular host; declare it as a storage area or make it "
+        "repository-relative.")
+
+    missing = sorted(r for r in refs - absolute if not (REPO / r).exists())
     assert not missing, f"REPO_LAYOUT.md names paths that do not exist: {missing}"
+
+    absent = sorted(r for r in absolute if not Path(r).exists())
+    if absent:
+        pytest.skip(f"declared host-local storage roots not on this machine: "
+                    f"{absent}")
 
 
 # --- STATE.md and current_state.json are one fact, two views ----------------

@@ -4119,3 +4119,73 @@ two devices, cuda:0 and cpu!
   whether the pod's blocking gate should run `tests/docs` at all, given that it
   asserts properties of the dev box; and whether a further attempt is warranted.
 - **Revisit when:** the reviewer decides. Nothing here authorizes attempt 9.
+
+## 2026-08-18 — The two assertions that killed attempt 8, fixed at $0
+
+- **Context:** Phase-A attempt 8 failed closed at the pod's blocking test gate on
+  two tests with invalid environment semantics. The maintainer directed a narrow
+  fix: keep the real external storage paths in `docs/REPO_LAYOUT.md`, make the
+  layout test host-aware on the existing precedent, withdraw the offending
+  tombstone, and add one structural regression that does not depend on which
+  directories happen to exist. The `tests/docs` suite stays in the pod gate —
+  attempt 8 showed the other 1789 tests are container-clean.
+- **Decision 1 — the layout test partitions its references instead of weakening.**
+  Repository-relative references must still exist, unchanged. Absolute references
+  are a different kind of claim, and `Path(REPO) / "/home/ecs-user/…"` **discards
+  the base**, so the old assertion demanded that every execution environment be
+  the maintainer's machine. They are now checked the way
+  `test_the_registry_covers_the_out_of_tree_store` already checks that store:
+  verified where they exist, skipped where they do not. What is **not** skipped
+  is that each absolute path is *declared* in the document's own "Storage that is
+  not in the tree" section — an invented or typo'd absolute path still fails, so
+  the document cannot smuggle a host assumption into another section.
+  `REPO_LAYOUT.md` is unchanged: those two paths are real operational facts.
+- **Decision 2 — `stage3_ladder_uniform_local_cache` is WITHDRAWN, and the
+  deletion stands.** The 3 files were a genuine stale dev-box cache, were
+  hash-verified against the relay before removal, and 19.40 MiB was genuinely
+  reclaimed. The error is the **class**: `artifacts/stage3/ladder_uniform` is a
+  routine session materialization destination — the mirror the recovery-corpus
+  loader reads — so it exists again the moment any session runs. A tombstone
+  asserts a path stopped existing; this one cannot. Same semantic error and same
+  withdrawal as `podsim_quarantine_residue`. The old cache is **not** recreated,
+  the deletion is **not** erased, and the per-file sha256 remain the record of
+  exactly what was removed.
+- **Active-tombstone accounting is now owned, not inferred.** A `totals` block in
+  `checkpoint_tombstones.json` carries the counts and bytes, and a test derives
+  them from the list so they cannot drift. It also states plainly that the
+  physical figure and the active figure legitimately differ and neither corrects
+  the other: the cleanup removed **7 units / 3.660 GiB** and
+  `storage_measurements.json` measured that on disk; **16 tombstones / 3.6406
+  GiB** are now active, because two were withdrawn as a class error.
+- **Decision 3 — the regression asks about declarations, not the filesystem.**
+  `test_no_active_tombstone_names_a_routine_staging_destination` reads the four
+  real `SessionSpec`s and refuses any active tombstone naming a declared `dest`
+  or `also_stage_to`, in either containment direction. It touches no path, so it
+  gives the same answer on the dev box, under the simulator and on a pod — which
+  is the whole point. **The old test could not have caught this at $0**: on the
+  dev box the simulator *hides* that gitignored directory, so it passed for the
+  wrong reason. A simulator that hides what a pod stages is not simulating the
+  pod, and that is the transferable lesson from attempt 8.
+- **Mutation-verified, seven mutations.** Layout test: a declared root made absent
+  **skips** (the pod case), a missing repo-relative path **fails** (strength
+  preserved), an undeclared absolute path elsewhere **fails**. Tombstone gates:
+  un-withdrawing the ladder entry **fails** — i.e. the attempt-8 defect is now
+  caught at $0 — `totals.active` off by one **fails**, one byte off **fails**,
+  and removing the mirror declaration correctly **passes** (the collision is gone).
+  Additionally, the pod's exact condition was reproduced on the dev box: with
+  `artifacts/stage3/ladder_uniform` present, `test_no_tombstoned_path_is_still_on_disk`
+  now **passes**, and the directory was removed again afterwards.
+- **Verified:** full suite **1874 passed, 11 skipped, 0 errors** (19:32); focused
+  docs/storage/session **395 passed, 5 skipped**; pod simulator **1834 passed, 22
+  skipped**, artifact tree restored **exactly** (1598 entries identical);
+  frozen-asset verifier passed. Phase-A pricing `$17.8933 / $22.7183 / $23.0483`
+  with reserves `147.7683` and `36.2158` min, and every frozen science identity,
+  unchanged.
+- **Risks:** the layout test now skips rather than fails where a declared storage
+  root is absent, so a genuinely broken out-of-tree store on the maintainer host
+  would not be caught by *this* test — that is
+  `test_the_registry_covers_the_out_of_tree_store`'s job, and it uses the same
+  skip. The tombstone regression covers declared staging destinations; a
+  directory some *driver* creates without declaring it would still be missed.
+- **Revisit when:** a session declares a new staging destination that collides
+  with a retired path, or a driver is found creating an undeclared directory.

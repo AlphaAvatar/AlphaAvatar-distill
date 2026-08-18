@@ -32,6 +32,20 @@
     "withdrawn_utc"
   ],
   "note": "A tombstone is the precondition for deletion. Every entry carries the hash, the reason, whether reconstruction is possible, the recipe and its cost, and where the frozen results live. A scientific conclusion must never depend on a file still happening to exist at some path.",
+  "totals": {
+    "_owner": "the active-tombstone accounting. Derive counts and bytes from here, not by summing the list and hoping the caller remembered to skip withdrawals.",
+    "tombstones_total": 18,
+    "active": 16,
+    "active_retired_bytes": 3909090455,
+    "active_retired_human": "3.6406 GiB",
+    "withdrawn": 2,
+    "withdrawn_ids": [
+      "podsim_quarantine_residue",
+      "stage3_ladder_uniform_local_cache"
+    ],
+    "withdrawn_bytes": 20361115,
+    "physical_vs_active": "The 2026-08-18 cleanup physically removed SEVEN storage units totalling 3.660 GiB, and logs/storage_measurements.json measures that on disk. Two of those tombstones were later WITHDRAWN as a class error -- podsim_quarantine_residue and stage3_ladder_uniform_local_cache -- because each names a destination a routine command recreates by design. The deletions still happened and the bytes were still freed; what is no longer asserted is that those paths are retired. So the physical count (7 units, 3.660 GiB) and the ACTIVE-tombstone count (16 units, 3.6406 GiB) legitimately differ, and neither figure is a correction of the other."
+  },
   "tombstones": [
     {
       "canonical_id": "e8_baseline_init_reproduction",
@@ -56,7 +70,7 @@
       "size_human": "1.12 GiB",
       "reason_physical_weights_deleted": "byte-identical to artifacts/stage1/qwen3_0p6b_init_v0/checkpoint (both 86fbba78e8a2a32481ca77e5ac362ed1f17a39dbc30bcbc952cabd5df2633e54). Its scientific value was proving the rebuild path reproduces the control exactly, and that fact is the recorded hash match, not the bytes.",
       "deterministic_reconstruction_possible": true,
-      "reconstruction_recipe": "PYTHONPATH=src python scripts/init/build_stage1_init.py against the pinned Stage-0 activation cache aaeb2e4c\u2026 ; verified by hash equality with the control",
+      "reconstruction_recipe": "PYTHONPATH=src python scripts/init/build_stage1_init.py against the pinned Stage-0 activation cache aaeb2e4c… ; verified by hash equality with the control",
       "expected_reconstruction_cost": "$0 (CPU)",
       "frozen_results_location": "logs/EXPERIMENT_INDEX.md; logs/EXPERIMENTS.md",
       "deleted_utc": "2026-08-12T06:27:23+00:00"
@@ -110,7 +124,7 @@
         "vocab_size": 151936
       },
       "size_human": "1.12 GiB",
-      "reason_physical_weights_deleted": "E1's random-init control. Its result \u2014 PCA decisively beats random \u2014 is frozen in EXPERIMENT_INDEX.md and EXPERIMENTS.md \u00a711/\u00a728. A full copy is on the relay and the init is deterministic from its seed, so local weights add nothing.",
+      "reason_physical_weights_deleted": "E1's random-init control. Its result — PCA decisively beats random — is frozen in EXPERIMENT_INDEX.md and EXPERIMENTS.md §11/§28. A full copy is on the relay and the init is deterministic from its seed, so local weights add nothing.",
       "deterministic_reconstruction_possible": true,
       "reconstruction_recipe": "scripts/init/build_stage1_init.py with the random-init flag and the pinned seed",
       "expected_reconstruction_cost": "$0 (CPU, minutes)",
@@ -138,7 +152,7 @@
         "vocab_size": 151936
       },
       "size_human": "2.23 GiB",
-      "reason_physical_weights_deleted": "0.86M probe rung, seed sa. The frozen 150-prompt battery depends on the PROMPT SAMPLE (mask d6e24e0b09da1bcc\u2026), not on these weights.",
+      "reason_physical_weights_deleted": "0.86M probe rung, seed sa. The frozen 150-prompt battery depends on the PROMPT SAMPLE (mask d6e24e0b09da1bcc…), not on these weights.",
       "deterministic_reconstruction_possible": true,
       "reconstruction_recipe": "retrain from qwen3_0p6b_init_v0 with configs/stage3/e1/e1_r0860k_sa_pca.json",
       "expected_reconstruction_cost": "~$2 on L40S",
@@ -147,7 +161,7 @@
       "relay_copy_deleted_utc": "2026-08-15T00:00:00+00:00",
       "relay_copy_deleted_reason": "relay copy deleted 2026-08-15 to reclaim 2.23 GiB for the vLLM offline wheelhouse, on explicit maintainer instruction naming this checkpoint. NO copy survives anywhere: not on the dev box, not on the relay. The identity below (weights/config sha256) remains the binding record, and the recovery path is deterministic reconstruction from the recipe.",
       "surviving_copies": [],
-      "relay_path_status": "DELETED \u2014 the path no longer resolves",
+      "relay_path_status": "DELETED — the path no longer resolves",
       "recovery": "deterministic reconstruction only: retrain from qwen3_0p6b_init_v0 with configs/stage3/e1/e1_r0860k_sa_pca.json (~$2 on L40S), then verify against weights_sha256 above",
       "relay_lfs_object_permanently_deleted": {
         "utc": "2026-08-14T19:47Z",
@@ -210,7 +224,7 @@
         "vocab_size": 151936
       },
       "size_human": "2.23 GiB",
-      "reason_physical_weights_deleted": "Random-init arm at 2.96M. The init-vs-random conclusion is closed and frozen; no planned experiment reuses these weights. SOLE COPY \u2014 deleted deliberately under the 2026-08-12 closeout, results retained.",
+      "reason_physical_weights_deleted": "Random-init arm at 2.96M. The init-vs-random conclusion is closed and frozen; no planned experiment reuses these weights. SOLE COPY — deleted deliberately under the 2026-08-12 closeout, results retained.",
       "deterministic_reconstruction_possible": true,
       "reconstruction_recipe": "retrain from random_baseline with configs/stage3/e1/e1_r2960k_sb_rand.json",
       "expected_reconstruction_cost": "~$7 on L40S",
@@ -238,7 +252,7 @@
         "vocab_size": 151936
       },
       "size_human": "2.23 GiB",
-      "reason_physical_weights_deleted": "Highest E1 rung. Scientific result frozen; the AutoInitializer phase probes at 0.86M and confirms at 2.96M, so 5.50M weights are not required. SOLE COPY \u2014 deleted deliberately.",
+      "reason_physical_weights_deleted": "Highest E1 rung. Scientific result frozen; the AutoInitializer phase probes at 0.86M and confirms at 2.96M, so 5.50M weights are not required. SOLE COPY — deleted deliberately.",
       "deterministic_reconstruction_possible": true,
       "reconstruction_recipe": "retrain with configs/stage3/e1/e1_r5500k_sb_pca.json",
       "expected_reconstruction_cost": "~$13 on L40S",
@@ -266,7 +280,7 @@
         "vocab_size": 151936
       },
       "size_human": "2.23 GiB",
-      "reason_physical_weights_deleted": "Random-init arm at the highest rung; both its comparisons are closed. SOLE COPY \u2014 deleted deliberately.",
+      "reason_physical_weights_deleted": "Random-init arm at the highest rung; both its comparisons are closed. SOLE COPY — deleted deliberately.",
       "deterministic_reconstruction_possible": true,
       "reconstruction_recipe": "retrain with configs/stage3/e1/e1_r5500k_sb_rand.json",
       "expected_reconstruction_cost": "~$13 on L40S",
@@ -311,15 +325,15 @@
       "experiment": "E8a (RoPE skew diagnostic)",
       "seed": null,
       "scientific_role": "activation-cache reader probe, not a checkpoint",
-      "weights_sha256": "fa42904be1ce040b\u2026(truncated; full value in EXPERIMENTS.md \u00a736)",
+      "weights_sha256": "fa42904be1ce040b…(truncated; full value in EXPERIMENTS.md §36)",
       "config_sha256": null,
       "architecture": null,
       "size_human": "1.81 GiB",
-      "reason_physical_weights_deleted": "transformers 5.13.1 probe of the Stage-0 activation cache, produced to diagnose the 4.x/5.x rope_parameters skew. The finding is recorded (EXPERIMENTS.md \u00a736, decisions.md) and the canonical cache aaeb2e4c\u2026 is retained locally and on the relay.",
+      "reason_physical_weights_deleted": "transformers 5.13.1 probe of the Stage-0 activation cache, produced to diagnose the 4.x/5.x rope_parameters skew. The finding is recorded (EXPERIMENTS.md §36, decisions.md) and the canonical cache aaeb2e4c… is retained locally and on the relay.",
       "deterministic_reconstruction_possible": true,
       "reconstruction_recipe": "re-run scripts/init/collect_stage0.py under the named transformers version against the pinned teacher",
       "expected_reconstruction_cost": "$0 (CPU, ~1 h)",
-      "frozen_results_location": "logs/EXPERIMENTS.md \u00a736; logs/decisions.md",
+      "frozen_results_location": "logs/EXPERIMENTS.md §36; logs/decisions.md",
       "deleted_utc": "2026-08-12T08:36:45+00:00"
     },
     {
@@ -332,7 +346,7 @@
       "experiment": "E8a (RoPE skew diagnostic)",
       "seed": null,
       "scientific_role": "activation-cache reader probe, not a checkpoint",
-      "weights_sha256": "274e6d6d42b64a02\u2026(truncated; full value in EXPERIMENTS.md \u00a736)",
+      "weights_sha256": "274e6d6d42b64a02…(truncated; full value in EXPERIMENTS.md §36)",
       "config_sha256": null,
       "architecture": null,
       "size_human": "1.81 GiB",
@@ -340,7 +354,7 @@
       "deterministic_reconstruction_possible": true,
       "reconstruction_recipe": "re-run scripts/init/collect_stage0.py under the named transformers version against the pinned teacher",
       "expected_reconstruction_cost": "$0 (CPU, ~1 h)",
-      "frozen_results_location": "logs/EXPERIMENTS.md \u00a736; logs/decisions.md",
+      "frozen_results_location": "logs/EXPERIMENTS.md §36; logs/decisions.md",
       "deleted_utc": "2026-08-12T08:36:45+00:00"
     },
     {
@@ -455,7 +469,12 @@
       "reconstruction_recipe": "hf download AlphaAvatar/aadistill-artifacts --include 'stage3_recovery_corpus_v2/ladder_uniform/*', as scripts/pod/*_setup.sh do; or copy artifacts/stage3/ladder_uniform_probe",
       "expected_reconstruction_cost": "$0 (download, 19.4 MiB)",
       "frozen_results_location": "logs/relay_mirror_verification.json",
-      "deleted_utc": "2026-08-17T19:43:23+00:00"
+      "deleted_utc": "2026-08-17T19:43:23+00:00",
+      "withdrawn": true,
+      "withdrawn_utc": "2026-08-18T13:20:00+00:00",
+      "withdrawn_reason": "WITHDRAWN as an active tombstone; the deletion itself was valid and is kept above unchanged. The 3 files WERE a stale dev-box cache, they WERE hash-verified against the relay before removal, and removing them reclaimed 19.40 MiB. What is wrong is the CLASS: a tombstone asserts that a path stopped existing, and artifacts/stage3/ladder_uniform is a routine session materialization destination. Every pod session stages the frozen recovery pack into it -- it is the mirror the recovery-corpus loader reads, beside the ladder_uniform_probe copy p2_driver.py reads -- so the path exists again the moment any session runs. Phase-A attempt 8 proved it at cost: the pod staged the pack, test_no_tombstoned_path_is_still_on_disk fired on this entry, the blocking setup gate failed and the session died for $0.19 having run no stage. This is the same semantic error, and the same withdrawal, as podsim_quarantine_residue on 2026-08-17: a directory a routine command recreates by design has not been retired. The old cache is NOT recreated and the deletion is NOT erased; the entry stands as the record of what was removed and why, and no longer asserts that the path is gone.",
+      "still_true": "the deletion happened, the bytes are recoverable from relay_path, and the per-file sha256 above remain the record of exactly what was removed",
+      "no_longer_asserted": "that artifacts/stage3/ladder_uniform is a retired path"
     },
     {
       "canonical_id": "autoinit_dryrun_searched_leaves",
@@ -1980,7 +1999,7 @@
       ],
       "deletion_criterion": "verified_stale_cache",
       "deletion_criterion_meaning": "a stale local cache whose canonical remote artifact has been hash-verified",
-      "reason_physical_weights_deleted": "the staging copy left on the dev box after the wheelhouse was uploaded. All 196 wheels verified byte-identical to the relay copy \u2014 123 by LFS oid, and the other 73 downloaded and hashed because a non-LFS blob_id is a git sha1 over different bytes and proves nothing. The tracked manifest wheelhouse_vllm_sha256.json pins the same 196 hashes, and pods fetch from the relay, never from this machine.",
+      "reason_physical_weights_deleted": "the staging copy left on the dev box after the wheelhouse was uploaded. All 196 wheels verified byte-identical to the relay copy — 123 by LFS oid, and the other 73 downloaded and hashed because a non-LFS blob_id is a git sha1 over different bytes and proves nothing. The tracked manifest wheelhouse_vllm_sha256.json pins the same 196 hashes, and pods fetch from the relay, never from this machine.",
       "canonical_surviving_evidence": "the relay prefix transfer/wheelhouse_vllm_cp312, and the tracked hash manifest wheelhouse_vllm_sha256.json",
       "relay_hash_verified": true,
       "deterministic_reconstruction_possible": true,
@@ -2051,7 +2070,7 @@
       "deleted_utc": "2026-08-17T19:44:44+00:00",
       "withdrawn": true,
       "withdrawn_utc": "2026-08-17T20:29:24+00:00",
-      "withdrawn_reason": "WITHDRAWN, and the withdrawal is the useful record. The path was deleted and the deletion was harmless, but it is not a retirement: scripts/pod/simulate_pod_env.sh recreates this quarantine on every sweep by design \u2014 never deleting a recreated destination is what fixed the 2026-08-15 data-loss scare \u2014 and the very next simulator run put it back, which tests/docs/test_storage_inventory.py::test_no_tombstoned_path_is_still_on_disk caught. A tombstone asserts that something stopped existing; a directory regenerated by a routine command has not. This is recurring scratch, documented in the simulator's header, not a tombstoned artifact."
+      "withdrawn_reason": "WITHDRAWN, and the withdrawal is the useful record. The path was deleted and the deletion was harmless, but it is not a retirement: scripts/pod/simulate_pod_env.sh recreates this quarantine on every sweep by design — never deleting a recreated destination is what fixed the 2026-08-15 data-loss scare — and the very next simulator run put it back, which tests/docs/test_storage_inventory.py::test_no_tombstoned_path_is_still_on_disk caught. A tombstone asserts that something stopped existing; a directory regenerated by a routine command has not. This is recurring scratch, documented in the simulator's header, not a tombstoned artifact."
     }
   ],
   "schema_note": "v2 adds store, size_bytes, n_files, members, references_at_deletion, deletion_criterion, canonical_surviving_evidence and relay_hash_verified. v1 entries are unchanged and remain valid: every field they carried still means what it meant. A withdrawn entry is kept, never removed: the reason a tombstone was wrong is worth as much as the tombstone."
