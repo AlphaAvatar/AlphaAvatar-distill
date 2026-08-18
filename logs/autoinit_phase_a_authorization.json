@@ -1,9 +1,9 @@
 {
   "schema": "aadistill.autoinit.phase_a_authorization/v1",
-  "authorization_id": "autoinit.phase_a.2026-08-17T0850Z",
+  "authorization_id": "autoinit.phase_a.2026-08-18T1244Z",
   "version": 1,
-  "granted_utc": "2026-08-17T08:50:49Z",
-  "granted_by": "maintainer. The grant instant is `granted_utc` and nothing here restates it: at approval the maintainer's LOCAL date ran ahead of the machine's UTC clock, and a prose date beside a UTC field is how a grant comes to look back-dated.\n\nThis grant authorizes ONE additional Phase-A attempt -- attempt 7 -- under the EXISTING cumulative project cap of $217.00, approved earlier and recorded in BUDGET_LEDGER.md. The cap is not raised. Cumulative spend at approval was $193.5335. Attempt 7 may use at most the existing per-launch hard authorization of $23.0484, leaving about $0.4181 of cumulative-cap margin at the full hard bound.\n\nIt covers exactly one Phase-A launcher invocation. It does not authorize attempt 8, any increase above the $217.00 cumulative cap, or any change to the frozen search, recovery, seeds, thresholds, runtime-comparability rules, or the science and session plans.\n\nAttempt 6 spent $0.3552 and failed closed in stage 1 on a device-placement defect at the materialize/reload boundary, fixed on this base. The figures below are the launcher's own make_plan output at $0, not a transcription. Two superseded pricing bases are recorded in BUDGET_LEDGER.md and autoinit_phase_a_fallback_audit.json: $20.0126 (no fallback reserve, no beam-6 correction) and $22.4508 (fallback reserve placed after the soft stop, which would have truncated the conditional seed-sc rung).",
+  "granted_utc": "2026-08-18T12:44:25Z",
+  "granted_by": "Maintainer decision, recorded in the Phase-A readiness review of 2026-08-18. GO for Phase-A Attempt 8, and Attempt 8 only. The decision follows the readiness closure at commit 7ede6501457a5b9c54fa98e4161bea96917e2024, which made the session manifest authoritative for relay science-input staging: the shared setup no longer names any relay path, destination or digest, the real staging block is executed at $0 before a provider is contacted, every new gate is mutation-verified, the full suite is 1872 passed / 11 skipped / 0 errors, the pod simulator is 1832 passed / 22 skipped with the artifact tree restored exactly, the frozen-asset verifier passes, and Phase-A pricing reproduces to the digit. The maintainer records that the harness digest is EXPECTED to differ from every prior consumed authorization, because scripts/pod/autoinit_science_inputs.py is now part of the measured harness, and instructs that this authorization bind to the currently verified harness rather than preserve an older identity.\n\nCovers: One (1) launch of AutoInitializer Phase A, attempt 8, on a single NVIDIA L40S at no more than $0.99/h, executing the frozen Phase-A protocol through its six stages under the existing watchdog, soft-stop, hard-stop, artifact-collection and provider-confirmed teardown behaviour. Authorized pricing: expected $17.8933, soft stop $22.7183, priced hard value $23.0483, per-attempt authorization ceiling $23.0484.\n\nCumulative spend at approval $194.0530 against a cumulative cap of $219.00.\n\nDoes NOT authorize: A subsequent Phase-A attempt, or any retry after a failure - a failed gate is a fail-closed stop for review, never a repair on the live pod. Reviving the device canary, which remains strategically terminated. Any other paid session, generation run, evaluation run or storage operation. Any change to the frozen science: science plan 02be33b9, session plan 9377a2dc, Stage-3 protocol 250f72ef, equivalence interval 0.011695296982299022, feasibility floor 0.3, the sa/sb and conditional sc seed policy, the recovery, search and selection rules, or the permanent controls and frozen checkpoints. Any further maintenance, harness expansion, storage cleanup or architecture change before the run, including adding the micro-preflight session-commit gate. Treating the $24.9470 of unused cumulative headroom as authorization for anything beyond this one attempt.\n\nGrant document: logs/autoinit_phase_a_attempt8_grant.json sha256 09541ef547c6a3c9b9210b136171eba79f4c43330af2b123ee1f956206f1fa43",
   "plan_id": "autoinit.v1.phase_a_session",
   "phase_a_session_plan_hash": "9377a2dc61f21790dd111d72a5de0e039ea1d31afef2d09e18c98a0b0cc2a0aa",
   "phase_a_science_plan_hash": "02be33b9a7a8e26bc8bfb75795351e8cdc9ffd441b47066cc81887cfc511b55c",
@@ -26,19 +26,22 @@
     "5": "selection and report; unresolved_equivalence is a RESULT",
     "teardown": "collect, fetch the finalists, delete the pod, confirm from the provider, STOP for review"
   },
-  "scope_note": "Phase A only, one launcher invocation. This artifact authorizes the SPEND and the STAGES; it is not by itself an instruction to launch. The maintainer's 2026-08-15 message that requested it also says 'Do not launch Phase A yet', so the run waits for a separate explicit go. Nothing here permits retraining the permanent controls, changing the frozen search or recovery design, a fourth seed, or any follow-on experiment: Phase A is a terminus and stops for review on every path, including unresolved_equivalence.",
+  "scope_note": "Phase A only, one launcher invocation. This artifact authorizes the SPEND and the STAGES; it is not by itself an instruction to launch \u2014 issuing and launching are separate, explicit decisions. Nothing here permits retraining the permanent controls, changing the frozen search or recovery design, a fourth seed, or any follow-on experiment: Phase A is a terminus and stops for review on every path, including unresolved_equivalence.",
   "phase_a_authorized": true,
   "automatic_followon_start": false,
-  "authorized_session_commit": "f105cc8947a7ff0d9a327ddc6b63ce455ab613f7",
-  "harness_source_digest": "437fc7bc8c8eba701715fbb27cecf6903c8d721b855bc61a2d762becc03edca4",
+  "authorized_session_commit": "0b03d366c252ef0f47ef1af5451463d218c98b32",
+  "harness_source_digest": "24d89b9ffe8e41f2712d2f105ca2076fd0552ccea7a089aeb5f2a844c39e1f42",
   "harness_source_files": [
     "scripts/pod/autoinit_phase_a_launch.py",
     "scripts/pod/autoinit_phase_a_driver.py",
-    "scripts/pod/autoinit_preflight_launch.py",
     "scripts/pod/autoinit_preflight_setup.sh",
+    "scripts/pod/autoinit_science_inputs.py",
     "scripts/pod/autoinit_engine_probe.py",
     "scripts/pod/watchdog.py",
     "scripts/pod/collect_artifacts.py",
+    "src/aadistill/infrastructure/session.py",
+    "src/aadistill/infrastructure/session_runner.py",
+    "src/aadistill/infrastructure/session_prechecks.py",
     "scripts/autoinit/phase_a_search.py",
     "scripts/autoinit/write_preregistration.py",
     "src/aadistill/autoinit/authorization.py",
@@ -47,7 +50,7 @@
     "src/aadistill/autoinit/generation.py"
   ],
   "per_launch_hard_usd": 23.0484,
-  "provenance_commit": "f105cc8947a7ff0d9a327ddc6b63ce455ab613f7",
+  "provenance_commit": "0b03d366c252ef0f47ef1af5451463d218c98b32",
   "enforcement": "the launcher loads this artifact and refuses to create a pod whose priced hard threshold exceeds hard_cap_usd or per_launch_hard_usd, refuses a stage not in authorized_stages, refuses a harness that does not digest to the authorized value, and has no code path to any experiment after Phase A",
-  "authorization_sha256": "d88a27e316ff31e26a104585e1dac2842e7c2db5b7951b63fa06aa111d48b7d2"
+  "authorization_sha256": "25c85fbaeb3ae57c6ad6c401a2e11736f627975fc6ee029ade1b5d113f5fa173"
 }
