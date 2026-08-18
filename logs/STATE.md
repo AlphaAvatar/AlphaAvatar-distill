@@ -1,4 +1,4 @@
-**Updated:** 2026-08-18 · branch `main` · after Phase-A attempt 8
+**Updated:** 2026-08-18 · branch `main` · Phase-A attempt 9 prepared
 
 # Current state
 
@@ -8,6 +8,14 @@ not carry. If the two disagree, a structural test fails.
 
 **Nothing is running. Nothing is billing. Nothing is authorized. Nothing is
 prepared for launch.**
+
+All four are still true at this commit, and the distinction matters: a maintainer
+GO for attempt 9 exists as
+[`autoinit_phase_a_attempt9_grant.json`](autoinit_phase_a_attempt9_grant.json),
+but a **grant is a decision and an authorization is an artifact**. No artifact
+has been issued from it yet, and no bundle is prepared. The last tested
+implementation is `4b7ee709`; the grant/provenance commit carrying this file and
+the authorization-only commit that follows it are not separately tested.
 
 ## Budget
 

@@ -1,9 +1,9 @@
 {
   "schema": "aadistill.current_state/v2",
-  "generated_utc": "2026-08-18T14:10:00+00:00",
+  "generated_utc": "2026-08-18T15:12:00+00:00",
   "_contract": "The minimal machine-readable CURRENT snapshot. It owns live facts and nothing else: no history, no per-attempt detail, no narrative. History lives in logs/decisions.md and the per-run directories; the human view of THIS file is logs/STATE.md and the two must agree. README owns no live facts at all. Ownership rules: logs/CATALOG.md.",
-  "baseline_commit": "4563d10644591f8030d0a43ddcd4dbce95e12031",
-  "baseline_commit_meaning": "the last COMMITTED commit this snapshot describes; the commit carrying this file is one later by construction. It read fe3c2b3 while HEAD was a84b7b8 - four commits stale - because it was edited after being generated and nothing refreshes or checks these two fields.",
+  "baseline_commit": "4b7ee709d51d2d54ba45865c06545a6e77eba00e",
+  "baseline_commit_meaning": "The LAST TESTED IMPLEMENTATION: the commit whose tree produced the latest_verification figures below. It is deliberately NOT the commit carrying this file. Two commits follow it by construction and neither is separately tested: (1) the grant/provenance commit that adds the one-use grant document and this refresh, and (2) the authorization-only commit, which the Phase-A lineage gate requires to differ from its base in nothing but logs/autoinit_phase_a_authorization.json. Keeping the distinction explicit is the point: a reader must be able to tell which commit the 1874/1834/395 numbers describe from which commit a pod checks out. This field read fe3c2b3 while HEAD was four commits ahead once, and read 4563d106 after the post-fix verification, because nothing refreshes or checks it; it is refreshed as part of preparing a paid launch.",
   "running": {
     "paid_compute": false,
     "pods": 0,
