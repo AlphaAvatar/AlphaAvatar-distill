@@ -1,6 +1,6 @@
 {
   "schema": "aadistill.current_state/v2",
-  "generated_utc": "2026-08-18T15:45:00+00:00",
+  "generated_utc": "2026-08-19T00:40:00+00:00",
   "_contract": "The minimal machine-readable CURRENT snapshot. It owns live facts and nothing else: no history, no per-attempt detail, no narrative. History lives in logs/decisions.md and the per-run directories; the human view of THIS file is logs/STATE.md and the two must agree. README owns no live facts at all. Ownership rules: logs/CATALOG.md.",
   "baseline_commit": "4b7ee709d51d2d54ba45865c06545a6e77eba00e",
   "baseline_commit_meaning": "The LAST TESTED IMPLEMENTATION: the commit whose tree produced the latest_verification figures below. It is deliberately NOT the commit carrying this file. Two commits follow it by construction and neither is separately tested: (1) the grant/provenance commit that adds the one-use grant document and this refresh, and (2) the authorization-only commit, which the Phase-A lineage gate requires to differ from its base in nothing but logs/autoinit_phase_a_authorization.json. Keeping the distinction explicit is the point: a reader must be able to tell which commit the 1874/1834/395 numbers describe from which commit a pod checks out. This field read fe3c2b3 while HEAD was four commits ahead once, and read 4563d106 after the post-fix verification, because nothing refreshes or checks it; it is refreshed as part of preparing a paid launch.",
@@ -50,20 +50,20 @@
     "Stage 3 (both permanent controls, thresholds materialized)",
     "the Phase-A harness, stages 0-5 executing for real at $0",
     "the Stage-1 device audit (autoinit.stage1_device_contract@v1)",
-    "Stage 0 on hardware, passed four times (latest: attempt 9, protocol 250f72ef, identity 70a26e0b, science 02be33b9)"
+    "Stage 0 on hardware, passed four times (latest: attempt 9, protocol 250f72ef, identity 70a26e0b, science 02be33b9)",
+    "the bounded Stage-1 device-allocation audit: 15 fresh-tensor factories in the frozen-operator closure classified device-coupled or intentionally host-only; 3 fixed, the rest verified correct"
   ],
   "latest_verification": {
-    "utc": "2026-08-18T14:10:00+00:00",
-    "after": "the $0 fix for the two assertions that failed Phase-A attempt 8's setup test gate",
-    "full_suite": "1874 passed, 11 skipped, 0 errors in 19:32",
-    "pod_simulator": "1834 passed, 22 skipped in 2:53; artifact tree restored EXACTLY - 1598 entries, identical type/size/path before and after",
+    "utc": "2026-08-19T00:40:00+00:00",
+    "after": "the bounded Stage-1 device-allocation audit that followed attempt 9",
+    "full_suite": "1881 passed, 11 skipped, 0 errors in 19:48",
+    "stage1_and_autoinit": "335 passed (tests/init/ + tests/autoinit/)",
+    "pod_simulator": "1841 passed, 22 skipped in 2:54; artifact tree restored EXACTLY - 1609 entries, identical before and after",
     "frozen_asset_verifier": "passed, no problems",
-    "phase_a_price_reproduced": "$17.8933 / $22.7183 / $23.0483 exactly, with both soft-stop reserves at 147.7683 and 36.2158 minutes",
-    "focused_docs_storage_session": "395 passed, 5 skipped",
-    "pod_condition_reproduced": "with artifacts/stage3/ladder_uniform present - the pod's exact state - test_no_tombstoned_path_is_still_on_disk now passes; the directory was removed again after",
-    "scope": "CPU only; no checkpoint was loaded and no metric measured",
-    "phase_a_attempt_8": "FAILED CLOSED at the setup test gate, $0.19, 11.28 min, pod deleted and provider-confirmed gone; no stage ran. Setup reached ROPE_OK, so the manifest-driven relay staging (10 inputs), the pod-side frozen-asset gate and the staged checkpoint are HARDWARE-VERIFIED. Evidence: logs/autoinit_phase_a_attempt8/",
-    "phase_a_attempt_9": "Stage 0 PASSED and attested; Stage 1 FAILED on a device mismatch at src/aadistill/init/project.py:60, with the full traceback recovered. $0.34, 20.4 min, pod deleted and provider-confirmed gone. The attempt-8 test-gate fix HELD: setup reached SETUP_DONE and the blocking tests/docs suite passed. Nothing trained; no checkpoint, probe or search leaf produced. Evidence: logs/autoinit_phase_a_attempt9/"
+    "phase_a_price_reproduced": "$17.8933 / $22.7183 / $23.0483 exactly, reserves 147.7683 and 36.2158 minutes",
+    "harness_digest": "24d89b9ffe8e41f2712d2f105ca2076fd0552ccea7a089aeb5f2a844c39e1f42 - UNCHANGED, 16 files, deliberately not expanded: none of the three edited implementation files is in it, and the Attempt-10 authorization binds the new pre-auth commit",
+    "mutation_verification": "5 mutations; removing the device from avg, from the orthonormality eye, or from the _head_rows call site each fails, and mechanically moving a host-only score vector fails. One gate passed first time and was rewritten against `meta`",
+    "scope": "CPU only; no checkpoint was loaded and no metric measured"
   },
   "failed": [
     {
@@ -122,7 +122,9 @@
     "the pod simulator restores exactly and refuses concurrent sweeps",
     "the layout test partitions its references: repository-relative paths must exist, declared host-local storage roots are verified where present and skipped where absent, and an undeclared absolute path still fails",
     "an active tombstone may not name a declared session staging or mirror destination - checked against the four SessionSpecs, touching no path, so the dev box, the simulator and a pod all give the same answer",
-    "checkpoint_tombstones.json owns the active-tombstone counts and bytes"
+    "checkpoint_tombstones.json owns the active-tombstone counts and bytes",
+    "autoinit.stage1_device_contract@v1 category 5 (added 2026-08-19): a fresh factory on the Stage-1 path either names a device derived from what it meets, or is host-only on purpose and must not be mechanically moved",
+    "placement is asserted by intercepting factory calls (tests/autoinit/factory_placement.py), the dual of the HostCacheTensor split - neither instrument can see the other's class"
   ],
   "abandoned": [
     "recovery_search_v1 (INVALID before first use)",
@@ -132,16 +134,10 @@
     "the paid device-canary session path: STRATEGICALLY TERMINATED 2026-08-18. Two authorized sessions, $0.1240, zero canary runs; both died in the wrapper's inherited contracts. Its evidence and its generic lesson are kept; no further canary is prepared."
   ],
   "next_starting_point": {
-    "status": "STOPPED FOR REVIEW after Phase-A attempt 9. The grant is spent and its lineage gate refuses the current HEAD. No attempt 10 is authorized, funded or prepared, and none may be inferred from the $24.4170 of unused headroom.",
-    "the_defect": "src/aadistill/init/project.py:57 allocates `avg` with a dtype and no device. It is NOT fixed: fixing it is the maintainer's call, and so is whether one line is the right scope.",
-    "what_the_reviewer_decides": [
-      "whether to fix project.py:57 alone, or to audit every torch.zeros/empty/ones allocation on the Stage-1 path for a missing device= at once, given that this is the third such defect and each has cost a paid session",
-      "whether autoinit.stage1_device_contract@v1 should be extended to assert placement rather than arithmetic, since a CPU rehearsal cannot see this class by construction",
-      "whether a $0 GPU-free placement check is possible - e.g. a meta-device or fake-tensor pass over the Stage-1 path - or whether this class can only be caught by paying",
-      "whether a further Phase-A attempt is warranted, and under what grant"
-    ],
-    "what_is_working": "setup, the manifest-driven relay staging, the pod-side frozen-asset gate, the blocking test gate, Stage 0 and its three frozen identities, artifact collection, the teardown gate and provider-confirmed teardown, and the traceback recovery that made this diagnosis free",
-    "either_paid_option_requires": "a new grant document, then the full chain: pre-auth base commit -> issue against that grant -> authorization-only commit -> bundle upload -> round-trip verify -> launch."
+    "status": "The bounded audit is complete and verified at $0. Nothing is authorized, funded or prepared: attempt 9's grant is spent and its lineage gate refuses the current HEAD.",
+    "next_decision": "Phase-A attempt 10, under a NEW one-use grant and the normal chain: pre-auth base commit -> issue against that grant -> authorization-only commit -> bundle upload -> round-trip verify -> launch. No canary and no further readiness phase.",
+    "what_remains_unexercised": "Stages 2-5 have never run on hardware. Stage 1 itself has never completed a single operator expansion, so its first real execution is still ahead.",
+    "not_authorized": "this audit authorizes nothing. The $24.4170 of unused cumulative headroom is not permission."
   },
   "read_order": [
     "logs/STATE.md — the human view of this file",

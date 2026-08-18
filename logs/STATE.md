@@ -1,4 +1,4 @@
-**Updated:** 2026-08-18 · branch `main` · after Phase-A attempt 9
+**Updated:** 2026-08-19 · branch `main` · after the Stage-1 device audit
 
 # Current state
 
@@ -10,7 +10,9 @@ not carry. If the two disagree, a structural test fails.
 prepared for launch.**
 
 Phase-A attempt 9 ran on 2026-08-18: **Stage 0 passed and attested, Stage 1
-failed**, $0.34, pod deleted and provider-confirmed gone. Its grant is spent.
+failed**, $0.34, pod deleted and provider-confirmed gone. Its grant is spent. The
+bounded Stage-1 device-allocation audit that followed is **complete and verified
+at $0**.
 
 ## Budget
 
@@ -49,19 +51,17 @@ Also frozen: recovery design, selection rules, pooled_counts@v2, Stage-3 artifac
 
 ## Latest verification
 
-After the $0 fix for the two assertions that failed Phase-A attempt 8's setup
-test gate. CPU only — no checkpoint was loaded and no metric measured:
+After the bounded Stage-1 device-allocation audit. CPU only — no checkpoint was
+loaded and no metric measured:
 
-* full suite **1874 passed, 11 skipped, 0 errors** in 19:32.
-* pod simulator **1834 passed, 22 skipped**; artifact tree restored **exactly**
-  — 1598 entries, identical type/size/path before and after.
-* focused docs/storage/session **395 passed, 5 skipped**.
+* full suite **1881 passed, 11 skipped, 0 errors** in 19:48.
+* `tests/init/` + `tests/autoinit/` **335 passed**.
+* pod simulator **1841 passed, 22 skipped**; artifact tree restored **exactly** —
+  1609 entries identical before and after.
 * frozen-asset verifier **passed**, no problems.
-* Phase-A pricing reproduces **$17.8933 / $22.7183 / $23.0483** exactly, reserves
-  at 147.7683 and 36.2158 min.
-* **the pod's own condition reproduced**: with `artifacts/stage3/ladder_uniform`
-  present, `test_no_tombstoned_path_is_still_on_disk` now passes. The directory
-  was removed again afterwards.
+* Phase-A pricing **$17.8933 / $22.7183 / $23.0483**, reserves 147.7683 and
+  36.2158 min — unchanged.
+* harness digest **`24d89b9f…` unchanged, 16 files, deliberately not expanded**.
 
 ## What failed, and why
 
@@ -106,7 +106,12 @@ instead of the cause, and it was paid for twice. Full diagnoses in
   dev box, the simulator and a pod all give the same answer
 * `checkpoint_tombstones.json` owns the active-tombstone counts and bytes
 * the Phase-A authorization schema carries no grant; the issuer requires one
-* autoinit.stage1_device_contract@v1
+* autoinit.stage1_device_contract@v1, **category 5 added 2026-08-19**: a fresh
+  tensor factory on the Stage-1 path either names a device derived from what it
+  meets, or is host-only on purpose and must not be mechanically moved
+* placement asserted by intercepting factory calls
+  (`tests/autoinit/factory_placement.py`) — the dual of the `HostCacheTensor`
+  split; neither instrument can see the other's class
 * full tracebacks for unexpected in-process driver exceptions
 * plan_session soft_stop_reserves, applied BEFORE the soft stop
 * the pre-flight rehearsal ignored in both the pod gate and the simulator, with the ignore lists pinned equal
@@ -122,43 +127,28 @@ instead of the cause, and it was paid for twice. Full diagnoses in
 
 ## Next starting point
 
-**STOPPED FOR REVIEW.** Attempt 9's grant covered one launch and is spent; its
-lineage gate refuses the current HEAD. **No attempt 10 is authorized, funded or
-prepared**, and none may be inferred from the $24.4170 of unused headroom.
+**The bounded Stage-1 device audit is complete.** Fifteen fresh-tensor factories
+in the frozen-operator closure were classified device-coupled or intentionally
+host-only. **Three were fixed** — `project.py`'s `avg` (what attempt 9 died on),
+the orthonormality `torch.eye` eleven lines below it (a latent second defect that
+would have cost the next session), and `sandwich._head_rows`, whose index slices
+the parent's `q_proj` and `o_proj`. The rest were verified correct, including two
+host-only score vectors deliberately **not** moved.
 
-**What worked.** Setup, the manifest-driven relay staging, the pod-side
-frozen-asset gate, and — for the first time — the blocking test gate that killed
-attempt 8. Stage 0 passed and attested all three frozen identities. Artifact
-collection, the teardown gate and provider-confirmed teardown all worked, and the
-stage-1 traceback came home, which is what made this diagnosis free.
+The frozen Stage-1 mathematics, operator ids and declared semantics are
+untouched: only where three tensors are allocated.
 
-**What failed.** `src/aadistill/init/project.py:57` allocates the projection
-accumulator with a dtype and **no device**, so it lands on CPU while
-`uncentered_moment` follows `state` — CPU on the dev box, `cuda:0` on a pod:
+**Nothing is authorized, funded or prepared.** Attempt 9's grant covered one
+launch, is spent, and its lineage gate refuses the current HEAD.
 
-```
-RuntimeError: Expected all tensors to be on the same device,
-              but found at least two devices, cuda:0 and cpu!
-    project.py:60   avg += w * (m / m.trace())
-```
+The next decision is **Phase-A attempt 10**, under a new one-use grant and the
+normal chain: **write a grant document** -> pre-auth base commit -> issue against
+that grant -> authorization-only commit -> bundle upload -> round-trip verify ->
+launch.
 
-**It is the third of its kind.** Attempt 6 ($0.3552) the `_validate` probe,
-attempt 7 ($0.3955) the `ActivationStatsCollector` accumulators, attempt 9
-($0.3400) this. `autoinit.stage1_device_contract@v1` closed the first two and did
-not reach an accumulator two call levels below the operator. Every one is a
-tensor allocated without a device in a path only a GPU executes, and **a CPU
-rehearsal cannot see the class by construction** — on CPU both operands agree and
-the arithmetic is right.
-
-**The defect is not fixed.** Whether to change one line or audit every allocation
-on the Stage-1 path, whether the device contract should assert *placement* rather
-than arithmetic, and whether a $0 GPU-free placement check (meta device,
-fake-tensor pass) is possible at all, are the maintainer's decisions.
-Details in [`autoinit_phase_a_attempt9/`](autoinit_phase_a_attempt9/).
-
-A paid run needs the full chain: **write a grant document** -> pre-auth base
-commit -> issue against that grant -> authorization-only commit -> bundle upload
--> round-trip verify -> launch.
+**What is still unexercised:** Stages 2–5 have never run on hardware, and Stage 1
+has never completed a single operator expansion — its first real execution is
+still ahead.
 
 ## Where else to look
 

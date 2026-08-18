@@ -39,6 +39,33 @@ the model is. The canonical reload is placed explicitly, validated against the
 produced model **on the produced model's device** so the save/reload comparison
 runs on one numerical backend, and only then moved to the search device to be
 measured.
+
+**5. Fresh tensor factories on the device-coupled path (added 2026-08-19).**
+``torch.zeros``/``ones``/``empty``/``eye``/``full``/``tensor``/``arange`` default
+to the *host*, whatever they are about to meet. Every such call in this scope is
+therefore one of two things, and which one must be legible at the call site:
+
+* **device-coupled** — it participates in arithmetic or indexing with model
+  parameters or with a statistics working copy. It must name a device derived
+  from what it meets (``device=state["residual_sqsum"].device``,
+  ``device=proj.device``, ``device=w.device``), or be a ``*_like`` form that
+  inherits one.
+* **intentional host-only** — a control or diagnostic assembled from Python
+  scalars and reduced back to Python scalars, never meeting a parameter. These
+  are correct as they are and must **not** be mechanically moved;
+  ``attention.py``'s per-head ``scores`` and ``depth.py``'s host-side distortion
+  reduction are the worked examples.
+
+This category exists because category 3 already stated the rule and nothing
+checked it. Attempt 9 died at $0.34 on ``project.py``'s ``avg``, allocated with a
+dtype and no device two call levels below the operator; a second, latent instance
+(``torch.eye`` in the same function's orthonormality diagnostic) would have cost
+the next session. The :class:`~tests.autoinit.device_split.HostCacheTensor` split
+cannot observe this class by construction: it labels the persistent cache, and
+after ``stats_to`` returns plain tensors a freshly allocated host tensor is
+plain too. Placement is asserted instead by intercepting the factory calls —
+``tests/autoinit/factory_placement.py`` — which tests the *intent*, not whether
+the arithmetic happens to succeed on a one-device box.
 """
 
 from __future__ import annotations
@@ -106,6 +133,17 @@ def as_dict() -> dict[str, Any]:
             "validated against the produced model ON THE PRODUCED MODEL'S "
             "DEVICE, so the save/reload comparison is one numerical backend; "
             "only then moved to the search device to be measured"),
+        "fresh_tensor_factories": (
+            "added 2026-08-19 after Phase-A attempt 9. A factory on this path is "
+            "either DEVICE-COUPLED, and must name a device derived from what it "
+            "meets (or be a *_like form that inherits one), or INTENTIONALLY "
+            "HOST-ONLY, assembled from Python scalars and reduced back to them "
+            "without meeting a parameter -- and those must not be mechanically "
+            "moved. Category 3 stated the rule and nothing checked it; the "
+            "HostCacheTensor split cannot observe this class, because after "
+            "stats_to a freshly allocated host tensor is as plain as a moved "
+            "one. Asserted by intercepting the factory calls: "
+            "tests/autoinit/factory_placement.py"),
         "scope": (
             "the Phase-A Stage-1 GPU search path: search.py, the five frozen "
             "operators and their shared helpers, the directly-used "

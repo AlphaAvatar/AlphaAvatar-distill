@@ -30,6 +30,7 @@ loudly rather than silently interpolating.
 from __future__ import annotations
 
 import math
+from typing import Any
 
 import torch
 
@@ -133,8 +134,21 @@ def select_q_heads(
     return kept
 
 
-def _head_rows(heads: list[int], head_dim: int) -> torch.Tensor:
-    return torch.tensor([h * head_dim + i for h in heads for i in range(head_dim)])
+def _head_rows(heads: list[int], head_dim: int, device: Any = None) -> torch.Tensor:
+    """Row indices for a set of attention heads, on the device they will index.
+
+    The older sibling of `aadistill.autoinit.operators._common.head_rows`, which
+    grew the `device` argument when the operator path was audited and this one
+    did not — the two are deliberately not merged, because `init` is the lower
+    layer and importing an operator helper here would invert that.
+
+    Both exist for the same reason, stated in the device contract's category 3:
+    an index built from a Python list lands on the host whatever it is about to
+    slice, and some torch ops accept that while others raise. Relying on which
+    is worse than either.
+    """
+    rows = torch.tensor([h * head_dim + i for h in heads for i in range(head_dim)])
+    return rows if device is None else rows.to(device)
 
 
 def _in_proj(w: torch.Tensor, norm_w: torch.Tensor, proj: torch.Tensor, scale: float) -> torch.Tensor:
@@ -220,7 +234,10 @@ def init_student(
             t_cfg.num_attention_heads, t_cfg.num_key_value_heads,
             s_cfg.num_attention_heads, head_dim,
         )
-        q_rows = _head_rows(kept_q, head_dim)
+        # Indexes the parent's own weights, below and two lines further down, so
+        # it is built where they are.
+        q_rows = _head_rows(kept_q, head_dim,
+                            device=tl.self_attn.q_proj.weight.device)
         sl.self_attn.q_proj.weight.copy_(
             _in_proj(tl.self_attn.q_proj.weight, w_att_norm, proj, scale)[q_rows].to(dtype))
         sl.self_attn.k_proj.weight.copy_(

@@ -54,7 +54,15 @@ def stream_projection(
     if not (0 < d_student <= d_teacher):
         raise ValueError(f"d_student {d_student} not in (0, {d_teacher}]")
 
-    avg = torch.zeros(d_teacher, d_teacher, dtype=torch.float64)
+    # On the statistics' device, in float64. `uncentered_moment` slices
+    # `residual_sqsum`, so the summands land wherever the caller placed the
+    # state — `composite.apply` does `stats_to(state, model_device(parent))`
+    # before calling in, so on a pod that is cuda:0. A host accumulator here is
+    # what killed Phase-A attempt 9 at $0.34, on the `+=` below, and no CPU
+    # rehearsal can see it: on the dev box both operands are already host and
+    # the arithmetic is correct. The dtype is unchanged; only the placement is.
+    avg = torch.zeros(d_teacher, d_teacher, dtype=torch.float64,
+                      device=state["residual_sqsum"].device)
     for p, w in zip(points, weights):
         m = uncentered_moment(state, p)
         avg += w * (m / m.trace())
@@ -69,7 +77,14 @@ def stream_projection(
         "energy_captured_frac": (captured / total).item(),
         "top_eigenvalue": eigvals[-1].item(),
         "min_kept_eigenvalue": eigvals[-d_student].item(),
-        "orthonormality_error": (proj.T @ proj - torch.eye(d_student, dtype=torch.float64))
+        # `proj` follows `avg`, so once that is placed correctly this identity
+        # matrix is the NEXT host tensor to meet a device one. It was a latent
+        # second defect on the same line of reasoning: fixing only the
+        # accumulator would have moved the same RuntimeError eleven lines down
+        # and cost another paid session to find.
+        "orthonormality_error": (proj.T @ proj
+                                 - torch.eye(d_student, dtype=torch.float64,
+                                             device=proj.device))
         .abs()
         .max()
         .item(),

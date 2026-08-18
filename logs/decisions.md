@@ -4264,3 +4264,88 @@ two devices, cuda:0 and cpu!
   is spent and **no attempt 10 is authorized**.
 - **Revisit when:** the maintainer decides the fix scope. Cumulative spend
   $194.5830 of $219.00.
+
+## 2026-08-19 — The bounded Stage-1 device-allocation audit
+
+- **Context:** attempt 9 died at $0.34 on `project.py`'s `avg`, and the reviewer
+  identified a **second, latent defect in the same helper before any code was
+  written**: once `avg` follows the statistics, `proj` becomes device-side and
+  the orthonormality diagnostic's `torch.eye` is the next host tensor to meet
+  it. Fixing only `avg` would have moved the same `RuntimeError` eleven lines
+  down and cost the next session. Scope: one bounded audit of the execution
+  closure reachable from the frozen Stage-1 operators — not another readiness
+  project.
+- **The closure, and every fresh tensor factory in it.** Fifteen sites across
+  `autoinit/operators/`, `autoinit/search.py` and the reachable `init/` helpers
+  (`project`, `sandwich`, `collect`, `contribution` via `depth`). Each is
+  classified, and the classification is the deliverable:
+
+  | site | class | verdict |
+  | --- | --- | --- |
+  | `project.py:57` `avg` | device-coupled | **FIXED** — follows `state["residual_sqsum"].device` |
+  | `project.py:72` `eye` | device-coupled | **FIXED** — follows `proj.device` |
+  | `sandwich.py:137` `_head_rows` | device-coupled | **FIXED** — gained `device`, call site passes the parent weight's |
+  | `_common.py:119` `head_rows` | device-coupled | already correct; callers pass the weight's device |
+  | `search.py:324` probe `ids` | device-coupled | already correct and documented |
+  | `collect.py:64-70` accumulators | device-coupled | already correct, explicit `device=dev` |
+  | `width.py:124,126` `ones_like` | device-coupled | correct **by construction** — `*_like` inherits |
+  | `attention.py:112` `scores` | host-only | correct, and already documented as deliberate |
+  | `sandwich.py:123` `scores` | host-only | correct — `.item()` in, Python ranking out |
+  | `collect.py:128` `residual_count` | host cache | correct by design; consumers take `int(...)` |
+
+  `contribution.distortion` allocates nothing and is host on **both** sides:
+  `depth.py` `.cpu()`s the logits and the targets deliberately, to keep a 152k
+  vocabulary softmax off the device holding the teacher.
+- **Two host-only sites were deliberately NOT moved.** Both build a per-head
+  score vector out of Python floats and rank it in Python; neither ever indexes
+  or multiplies a parameter. Moving them would be the mirror-image error, and a
+  test now pins `select_q_heads`' vector as host so a later "consistency" pass
+  cannot quietly move it.
+- **Decision — extend `autoinit.stage1_device_contract@v1` rather than replace
+  it.** A fifth category: a fresh factory on this path is either device-coupled
+  and must name a device derived from what it meets, or intentionally host-only
+  and must not be mechanically moved. The ID is unchanged, as directed, and the
+  category is dated in the source so a record citing v1 can be placed. Category
+  3 already stated the underlying rule — **nothing checked it**, which is the
+  whole finding.
+- **Why the existing instrument could not have caught this.** `HostCacheTensor`
+  labels the persistent cache and fires when an unmoved cache tensor meets a
+  model-side one. After `stats_to` the working copy is a plain tensor, so a
+  *freshly allocated* host tensor mixed into the same arithmetic is plain too and
+  there is nothing to bite on. The two instruments are duals and neither sees the
+  other's class.
+- **Placement is asserted, not arithmetic.** `tests/autoinit/factory_placement.py`
+  (~40 lines, a sibling of `device_split.py`, no dispatch of its own) records
+  each factory call and whether it named a device. On one device the fixed and
+  broken versions produce identical numbers; they are trivially distinguishable
+  by what the factory was *told*. Where a device value had to be compared,
+  `meta` is used rather than `cpu` — a real second device present on every
+  machine.
+- **Mutation-verified, five mutations, and one gate failed first time.**
+  Removing the device from `avg`, from the `eye`, or from the `_head_rows` call
+  site each fails; mechanically moving a host-only score vector fails. The fifth
+  — `_head_rows` ignoring the device it is handed — **passed**, because
+  `assert rows.device == cpu` is true on a CPU box either way. That is the same
+  one-device blind spot in miniature, inside the very test written to close it.
+  Rewritten against `meta`, it now fails.
+- **The harness digest is UNCHANGED at `24d89b9f…`, 16 files, not expanded.**
+  None of the three edited implementation files is in it, by design: the
+  Attempt-10 authorization will bind the new clean pre-auth commit, and the
+  session-commit lineage is what carries the fix. Expanding the digest to cover
+  implementation would be a different decision with a different blast radius.
+- **Verified:** full suite **1881 passed, 11 skipped, 0 errors** (19:48);
+  `tests/init/` + `tests/autoinit/` **335 passed**; pod simulator **1841 passed,
+  22 skipped** with the artifact tree restored **exactly** (1609 entries);
+  frozen-asset verifier passed. Phase-A pricing `$17.8933 / $22.7183 / $23.0483`
+  and reserves `147.7683` / `36.2158` min unchanged; science `02be33b9`, session
+  `9377a2dc`, Stage-3 `250f72ef`, interval and floor unchanged. The Stage-1
+  mathematics, operator ids and declared semantics are untouched — only where
+  three tensors are allocated.
+- **Risks:** the audit covers the closure reachable from the frozen operators. A
+  future operator, or a helper reached only under a config this audit did not
+  exercise, is not covered by construction; the placement instrument is per-call
+  and only sees code a test actually runs. Stages 2-5 remain unexercised on
+  hardware.
+- **Revisit when:** a new Stage-1 operator or helper is added, or a fourth
+  device defect appears — which would mean per-call interception is not enough
+  and a static sweep is warranted.
