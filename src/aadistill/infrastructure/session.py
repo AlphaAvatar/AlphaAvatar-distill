@@ -31,7 +31,9 @@ is priced**, which is the only point at which refusing is free.
 
 from __future__ import annotations
 
+import json
 from dataclasses import dataclass, field
+from pathlib import Path
 from typing import Any, Callable, Mapping, Sequence
 
 from .budget import BudgetPlan, Phase, StepTime, plan_session
@@ -39,6 +41,34 @@ from .budget import BudgetPlan, Phase, StepTime, plan_session
 
 class SessionSpecError(ValueError):
     """A session declaration that cannot be executed as written."""
+
+
+#: The trees a session may stage into. Same set the local-asset check uses:
+#: everything else in the pod checkout is code the bundle put there.
+WRITABLE_TREES: tuple[str, ...] = ("artifacts", "logs", "configs")
+
+
+def _is_sha256(value: str) -> bool:
+    return len(value) == 64 and all(c in "0123456789abcdef" for c in value)
+
+
+def _bad_repo_dir(dest: str) -> list[str]:
+    """Why `dest` is not a repository-relative directory a session may write.
+
+    Absolute paths are refused rather than normalized: the shell used to write
+    `/workspace/aad/artifacts/...` literally, and a declaration that carries the
+    pod's absolute layout is one that cannot be checked against the repository
+    it claims to write into.
+    """
+    problems = []
+    if dest.startswith("/"):
+        problems.append("it is absolute; declare it relative to the repo root")
+    if ".." in Path(dest).parts:
+        problems.append("it escapes the repository with '..'")
+    root = dest.strip("/").split("/")[0]
+    if root not in WRITABLE_TREES:
+        problems.append(f"{root!r} is not one of {list(WRITABLE_TREES)}")
+    return problems
 
 
 # ---------------------------------------------------------------------------
@@ -53,16 +83,52 @@ class RelayInput:
     been paid for. Phase-A attempt 5 died at $0.6426 on a calibration file that
     was neither staged nor prechecked: stage 1 called ``resolve()`` and there was
     nothing to read.
+
+    Until 2026-08-18 this type carried a *path and nothing else*, and ``dest``
+    documented itself as "the setup script already knows where this goes". It
+    did know: ``autoinit_preflight_setup.sh`` named three relay prefixes, ten
+    filenames, four sha256 pins and a probe-to-ladder copy, unconditionally, for
+    every session. So the declaration was an existence assertion and the staging
+    was hidden — the same defect the ``LOCAL_ASSETS`` fix closed on the dev-box
+    side, still open on the relay side. Four of the ten files were declared by no
+    session at all, and the calibration that killed attempt 5 was declared by
+    two sessions out of four while being staged for all four.
+
+    Now the declaration IS the staging. ``dest`` means what it says, and the
+    setup script names no relay path, no filename and no digest of its own.
     """
 
     path: str
-    #: Where it lands in the repository on the pod, relative to the repo root.
-    #: ``None`` means the setup script already knows and this entry exists only
-    #: for the $0 precheck.
+    #: Repository-relative DIRECTORY it is staged into on the pod. ``None`` means
+    #: setup does not stage it — the continuation's two permanent controls arrive
+    #: by ``--transport``, and this entry buys them the $0 precheck. It can no
+    #: longer mean "the shell knows": a structural test forbids the shell from
+    #: knowing.
     dest: str | None = None
-    #: The frozen content hash, when one is pinned. Not verified here — the setup
-    #: script verifies on the pod — but recorded so a reader can find the pin.
+    #: The frozen content hash, when one is pinned. Verified on the pod, after
+    #: staging and before any science runs, at every destination it lands in.
     sha256: str | None = None
+    #: A second directory the staged file is copied to. The recovery pack is read
+    #: as ``ladder_uniform_probe`` by `p2_driver.py` and as ``ladder_uniform`` by
+    #: the recovery corpus loader; the shell used to do this with a directory
+    #: walk nobody had declared.
+    also_stage_to: str | None = None
+
+    @property
+    def staged(self) -> bool:
+        """Does setup put this file somewhere, or is it precheck-only?"""
+        return bool(self.dest)
+
+    def as_record(self) -> dict[str, Any]:
+        """The whole truth about one input: source, destinations, digest.
+
+        This is both what setup consumes and what the session record preserves.
+        They are the same dict on purpose — a serialized identity that dropped
+        the destination and the digest would describe a staging nobody could
+        reproduce.
+        """
+        return {"path": self.path, "dest": self.dest, "sha256": self.sha256,
+                "also_stage_to": self.also_stage_to}
 
 
 @dataclass(frozen=True)
@@ -122,6 +188,21 @@ class SetupManifest:
 
     def test_ignores_env(self) -> str:
         return " ".join(f"--ignore={p}" for p in self.test_ignores)
+
+    def staged_relay_inputs(self) -> tuple[RelayInput, ...]:
+        """The subset setup stages. The rest exist for the $0 precheck only."""
+        return tuple(r for r in self.relay_inputs if r.staged)
+
+    def relay_env(self) -> str:
+        """`SESSION_RELAY_INPUTS`: what setup fetches, and nothing else.
+
+        JSON rather than the `name:dest` form `SESSION_ASSETS` uses, because an
+        input carries four fields and one of them is a 64-character digest. The
+        shell hands this straight to the python that does the fetching, so there
+        is no shell parsing to get wrong.
+        """
+        return json.dumps([r.as_record() for r in self.staged_relay_inputs()],
+                          separators=(",", ":"), sort_keys=True)
 
 
 # ---------------------------------------------------------------------------
@@ -392,6 +473,40 @@ class SessionSpec:
                 "a local asset name may contain neither ':' nor ',': "
                 "SESSION_ASSETS is a comma-separated list of name:dest pairs")
 
+        # Relay inputs. Unchecked until 2026-08-18, because the shell staged
+        # them from its own hardcoded list and the declaration was decorative.
+        # Now the declaration is the staging, so a malformed one is a pod that
+        # fetches into the wrong place or verifies nothing.
+        pairs: set[tuple[str, str | None]] = set()
+        for r in self.setup.relay_inputs:
+            if not r.path.strip():
+                problems.append("a relay input declares no path")
+            if (r.path, r.dest) in pairs:
+                problems.append(
+                    f"relay input {r.path!r} is declared twice for the same "
+                    "destination")
+            pairs.add((r.path, r.dest))
+            if r.sha256 is not None and not _is_sha256(r.sha256):
+                problems.append(
+                    f"relay input {r.path!r} pins {r.sha256!r}, which is not a "
+                    "sha256; a digest that cannot match verifies nothing")
+            if r.also_stage_to and not r.dest:
+                problems.append(
+                    f"relay input {r.path!r} declares also_stage_to but no "
+                    "dest, so setup would have nothing to copy from")
+            for label, dest in (("dest", r.dest),
+                                ("also_stage_to", r.also_stage_to)):
+                if dest is None:
+                    continue
+                if not dest.strip():
+                    problems.append(
+                        f"relay input {r.path!r} declares an empty {label}; "
+                        "omit it to mean 'setup does not stage this'")
+                    continue
+                problems.extend(
+                    f"relay input {r.path!r} stages to {dest!r}: {why}"
+                    for why in _bad_repo_dir(dest))
+
         if problems:
             raise SessionSpecError(
                 f"{self.session_id}: incomplete session specification — "
@@ -415,6 +530,7 @@ class SessionSpec:
             "SESSION_AUTH_PATH": self.authorization_path,
             "SESSION_PLAN_HASH": self.plan_hash,
             "SESSION_ASSETS": self.setup.assets_env(),
+            "SESSION_RELAY_INPUTS": self.setup.relay_env(),
             "SESSION_TEST_IGNORES": self.setup.test_ignores_env(),
             "UV_MAX_S": str(self.setup.uv_max_seconds),
             "TESTS_MAX_S": str(self.setup.tests_max_seconds),
@@ -450,7 +566,12 @@ class SessionSpec:
             "setup": {
                 "env": dict(self.setup.env),
                 "required_env": list(self.setup.required_env),
-                "relay_inputs": [r.path for r in self.setup.relay_inputs],
+                # The whole record, not just the path. Until 2026-08-18 this was
+                # `[r.path for r in ...]`, so the session record — the artifact a
+                # later reader reproduces the run from — preserved neither the
+                # destination nor the digest of a single science input.
+                "relay_inputs": [r.as_record()
+                                 for r in self.setup.relay_inputs],
                 "local_assets": [a.as_env_entry()
                                  for a in self.setup.local_assets],
                 "uv_max_seconds": self.setup.uv_max_seconds,

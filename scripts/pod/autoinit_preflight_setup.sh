@@ -58,46 +58,87 @@ rm -rf "$REPO"; git clone -q "$WS/$BUNDLE_NAME" "$REPO"
 cd "$REPO"; git checkout -q "$SESSION_COMMIT"; git rev-parse HEAD
 mark REPO_READY
 
-say "staging the canonical init and the recovery pack from the relay"
-python3 - <<'FETCHEOF'
-import os, shutil, sys, time
+# THE SESSION SAYS WHICH SCIENCE INPUTS, and this script no longer knows their
+# names, their destinations or their hashes. Until 2026-08-18 the block below
+# was three literal `fetch(prefix, [names], dest)` calls, a directory walk that
+# mirrored the recovery pack, and a `want = {...}` dict of four sha256 pins —
+# executed unconditionally for every session. The sessions' own `relay_inputs`
+# named at most three of the ten files staged: the micro-preflight and the
+# continuation consumed the calibration without declaring it, and the device
+# canary was given the whole recovery pack it had not asked for. That is the
+# relay-side twin of the local-asset defect that cost the canary retry $0.0637,
+# and it survived the fix that closed the other one.
+#
+# `SESSION_RELAY_INPUTS` is the session's own manifest as JSON: for each input a
+# relay path, the repository directory it is staged into, an optional second
+# directory, and an optional sha256. A session that declares nothing stages
+# nothing.
+: "${SESSION_RELAY_INPUTS?the launcher must declare the relay science inputs for this session, even when there are none}"
+say "staging the session's declared science inputs from the relay"
+cd "$REPO"
+# `REPO=` inline rather than the literal `/workspace/aad` the old block carried,
+# so this exact code can be executed for real against a temporary tree. Four paid
+# pods have now died inside lines no $0 path could reach; a staging block that
+# can only run on a pod is one of them waiting to happen.
+REPO="$REPO" python3 - <<'FETCHEOF'
+import hashlib, json, os, shutil, sys, time
 from pathlib import Path
 from huggingface_hub import hf_hub_download
 RELAY, TOKEN = "AlphaAvatar/aadistill-artifacts", os.environ["HF_TOKEN"]
+REPO = Path(os.environ["REPO"])
 
-def fetch(prefix, names, dest, tries=5):
-    dest = Path(dest); dest.mkdir(parents=True, exist_ok=True)
-    for name in names:
-        last = None
-        for attempt in range(tries):
-            try:
-                p = hf_hub_download(RELAY, f"{prefix}/{name}", repo_type="model",
-                                    token=TOKEN)
-                shutil.copy(p, dest / name); break
-            except Exception as exc:
-                last = exc; time.sleep(5 * (attempt + 1))
-        else:
-            sys.exit(f"FETCH FAILED {prefix}/{name}: {last}")
-        print(f"  {prefix}/{name}", flush=True)
+inputs = json.loads(os.environ["SESSION_RELAY_INPUTS"])
+if not inputs:
+    print("  (this session declares no relay science input)", flush=True)
 
-CK = ["config.json", "generation_config.json", "model.safetensors",
-      "tokenizer.json", "tokenizer_config.json", "chat_template.jinja"]
-fetch("stage1/qwen3_0p6b_init_v0/checkpoint", CK,
-      "/workspace/aad/artifacts/stage1/qwen3_0p6b_init_v0/checkpoint")
-fetch("stage3_recovery_corpus_v2/ladder_uniform",
-      ["blocks.npz", "ladder.json", "audit.jsonl"],
-      "/workspace/aad/artifacts/stage3/ladder_uniform_probe")
-src = Path("/workspace/aad/artifacts/stage3/ladder_uniform_probe")
-dst = Path("/workspace/aad/artifacts/stage3/ladder_uniform"); dst.mkdir(parents=True, exist_ok=True)
-for f in src.iterdir(): shutil.copy(f, dst / f.name)
+# Retry policy unchanged from the hardcoded version: five attempts, linear
+# backoff. It is the one part of this block that was ever load-bearing on a real
+# host, so it is transformed rather than rewritten.
+def fetch_one(path, tries=5):
+    last = None
+    for attempt in range(tries):
+        try:
+            return hf_hub_download(RELAY, path, repo_type="model", token=TOKEN)
+        except Exception as exc:
+            last = exc
+            time.sleep(5 * (attempt + 1))
+    sys.exit(f"FETCH FAILED {path}: {last}")
 
-# The operator calibration mixture. Phase-A stage 1 calls
-# DOMAIN_BALANCED_V1.resolve(), which reads this exact file and verifies both
-# its byte hash and its derived token-content hash. Attempt 5 died here at
-# $0.6426 because nothing staged it: it is not a dev-box asset the launcher
-# scp's, and it was absent from this fetch and from the $0 precheck.
-fetch("e8_inputs_20260810/calibration_v1", ["items.jsonl"],
-      "/workspace/aad/artifacts/stage1/e8_calibration_v1")
+# Staged first, verified second, so a digest mismatch names the file rather than
+# stopping the run at whichever fetch happened to come next.
+staged = []
+for item in inputs:
+    src, dest = item["path"], item.get("dest")
+    if not dest:
+        sys.exit(f"SESSION_RELAY_INPUTS carries {src} with no dest; setup only "
+                 "receives inputs it is meant to stage")
+    name = src.rsplit("/", 1)[-1]
+    cached = fetch_one(src)
+    landed = []
+    for into in (dest, item.get("also_stage_to")):
+        if not into:
+            continue
+        d = REPO / into
+        d.mkdir(parents=True, exist_ok=True)
+        shutil.copy(cached, d / name)
+        landed.append(f"{into}/{name}")
+    print(f"  {src} -> {', '.join(landed)}", flush=True)
+    staged.append((src, item.get("sha256"), landed))
+
+# Every declared digest, at every destination the file landed in. The old block
+# pinned the mirrored `ladder_uniform/blocks.npz` separately from the probe copy;
+# checking each landing site keeps that, without a second list to maintain.
+checked = 0
+for src, want, landed in staged:
+    if not want:
+        continue
+    for rel in landed:
+        got = hashlib.sha256((REPO / rel).read_bytes()).hexdigest()
+        if got != want:
+            sys.exit(f"FROZEN ASSET MISMATCH {rel}: {got}")
+        print(f"  {rel} {got[:16]}...", flush=True)
+        checked += 1
+print(f"  staged {len(staged)} inputs, verified {checked} digests", flush=True)
 FETCHEOF
 
 # Dev-box-only artifacts (untracked, ~1.6 MB total) that the launcher scp'd to
@@ -134,27 +175,11 @@ if [ -n "$SESSION_ASSETS" ]; then
     say "  $name -> $into/"
   done
 fi
-cd "$REPO" && PYTHONPATH=src python3 - <<'VERIFYEOF'
-import hashlib, json, sys
-want = {
- "artifacts/stage1/qwen3_0p6b_init_v0/checkpoint/model.safetensors":
-   "86fbba78e8a2a32481ca77e5ac362ed1f17a39dbc30bcbc952cabd5df2633e54",
- "artifacts/stage3/ladder_uniform_probe/blocks.npz":
-   "6f324cb0f37bc0f07128e554ce8c161879419537478950496534f75fcecb249c",
- "artifacts/stage3/ladder_uniform/blocks.npz":
-   "6f324cb0f37bc0f07128e554ce8c161879419537478950496534f75fcecb249c",
- # calib.domain_balanced@v1's items_file_sha256, as the profile pins it. The
- # derived token-content hash d65c1f40... is checked by resolve() itself at
- # stage 1; this is the file-bytes pin.
- "artifacts/stage1/e8_calibration_v1/items.jsonl":
-   "c7202338109e459b17b70456461e8f304fadea7929ea547accee21adbbe7fd0b",
-}
-for path, sha in want.items():
-    got = hashlib.sha256(open(path, "rb").read()).hexdigest()
-    if got != sha: sys.exit(f"FROZEN ASSET MISMATCH {path}: {got}")
-    print(f"  {path.rsplit('/', 2)[-2]}/{path.rsplit('/', 1)[-1]} {got[:16]}...")
-VERIFYEOF
-
+# The four sha256 pins that used to live here are now fields on the session's
+# own declarations, verified above at every destination each file lands in.
+# `calib.domain_balanced@v1`'s items-file hash is one of them; the derived
+# token-content hash d65c1f40... is a different quantity and is still checked by
+# `resolve()` itself at stage 1, which is where it can be computed.
 mark ASSETS_STAGED
 
 say "training env: offline install from the relay wheelhouse"

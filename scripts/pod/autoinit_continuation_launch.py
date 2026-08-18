@@ -36,6 +36,10 @@ from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO_ROOT / "src"))
+# The sibling science-input declarations. Present when this file is run
+# directly; absent when a test loads it by path, which is how the
+# structural checks load every launcher.
+sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from aadistill.autoinit.authorization import SpendAuthorization  # noqa: E402
 from aadistill.autoinit.continuation import (  # noqa: E402
@@ -50,6 +54,9 @@ from aadistill.infrastructure.session_prechecks import (  # noqa: E402
     local_files_gate, session_commit_gate,
 )
 from aadistill.infrastructure.session_runner import REPO, WS, run_session  # noqa: E402
+from autoinit_science_inputs import (  # noqa: E402
+    CALIBRATION_V1, CANONICAL_INIT, RECOVERY_LADDER,
+)
 
 STATUS = f"{WS}/autoinit_continuation.status"
 RUN_LOG = f"{WS}/autoinit_continuation_run.log"
@@ -184,12 +191,16 @@ def driver_command(ctx: SessionContext, plan) -> str:
 def spec(args) -> SessionSpec:
     #: The pack is not training input here — nothing trains — but the strict
     #: import gate RECOMPUTES each control's pack hash from `blocks.npz` rather
-    #: than trusting the value its run recorded, so Stage 0 reads it.
-    relay_inputs = [
-        RelayInput("stage1/qwen3_0p6b_init_v0/checkpoint/model.safetensors"),
-        RelayInput("stage3_recovery_corpus_v2/ladder_uniform/blocks.npz"),
-    ]
+    #: than trusting the value its run recorded, so Stage 0 reads it. The
+    #: calibration is staged too: this session never declared it and the shared
+    #: shell staged it regardless, which is the asymmetry that made the
+    #: declaration decorative.
+    relay_inputs = [*CANONICAL_INIT, *RECOVERY_LADDER, *CALIBRATION_V1]
     if args.transport == "relay":
+        #: No `dest`, and that now means one thing only: setup does not stage
+        #: these. `materialize_inputs` does, by the route `--transport` names,
+        #: and the declaration buys them the $0 relay precheck. It can no longer
+        #: mean "the shell knows where this goes" — the shell knows nothing.
         relay_inputs += [RelayInput(f"permanent_controls/{c}/model/model.safetensors")
                          for c in CONTROLS]
     return SessionSpec(
@@ -229,7 +240,8 @@ def spec(args) -> SessionSpec:
             local_assets=LOCAL_ASSETS,
             required_env=("SESSION_COMMIT", "BUNDLE_NAME", "SESSION_STATUS",
                           "SESSION_AUTH_PATH", "SESSION_PLAN_HASH",
-                          "SESSION_ASSETS", "TEACHER_REVISION"),
+                          "SESSION_ASSETS", "SESSION_RELAY_INPUTS",
+                          "TEACHER_REVISION"),
             uv_max_seconds=args.uv_max_s, tests_max_seconds=args.tests_max_s,
             teacher_revision=TEACHER_REVISION, test_ignores=TEST_IGNORES),
         driver_command=driver_command,

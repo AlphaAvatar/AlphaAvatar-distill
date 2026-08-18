@@ -38,6 +38,11 @@ HARNESS_SOURCE_FILES_V1: tuple[str, ...] = (
     "scripts/pod/autoinit_preflight_launch.py",
     "scripts/pod/autoinit_preflight_driver.py",
     "scripts/pod/autoinit_preflight_setup.sh",
+    # What that script STAGES, since 2026-08-18: the relay sources, the
+    # destinations and the four frozen digests it used to carry itself. A
+    # harness digest that covered the shell but not its manifest would
+    # certify the fetching and leave what is fetched unmeasured.
+    "scripts/pod/autoinit_science_inputs.py",
     "scripts/pod/autoinit_engine_probe.py",
     "scripts/pod/watchdog.py",
     "scripts/pod/collect_artifacts.py",

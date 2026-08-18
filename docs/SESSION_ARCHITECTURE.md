@@ -113,6 +113,7 @@ The runner builds the setup environment **entirely** from the manifest:
 env = {"SESSION_COMMIT": …, "BUNDLE_NAME": …, "SESSION_STATUS": …,
        "SESSION_AUTH_PATH": …, "SESSION_PLAN_HASH": …,
        "SESSION_ASSETS": ",".join(f"{a.dest_name}:{a.install_to}" …),
+       "SESSION_RELAY_INPUTS": json.dumps([r.as_record() for r in staged]),
        "SESSION_TEST_IGNORES": " ".join(f"--ignore={p}" …),
        "UV_MAX_S": …, "TESTS_MAX_S": …, "TEACHER_REVISION": …,
        **spec.setup.env}
@@ -125,6 +126,48 @@ asset now gets none — that single change is what makes the canary retry's
 failure impossible rather than merely unlikely. The script refuses an asset that
 was declared but not staged, and a malformed entry, with named markers.
 
+### The same hole, one layer down — closed 2026-08-18
+
+`SESSION_ASSETS` fixed the **dev-box** side and left the **relay** side exactly as
+it was. The shared setup went on naming three relay prefixes, ten filenames, four
+sha256 pins and a probe-to-ladder directory walk, unconditionally, for every
+session. Measured against what the sessions declared:
+
+| session | declared | staged for it | undeclared |
+| --- | ---: | ---: | ---: |
+| micro-preflight | 2 | 10 | 8 — including the calibration mixture |
+| Phase A | 3 | 10 | 7 |
+| continuation | 2 (+2 transported) | 10 | 8 — including the calibration mixture |
+| device canary | 2 | 10 | 8 — including the whole recovery pack |
+
+`RelayInput` documented the hole in its own docstring: **"`None` means the setup
+script already knows and this entry exists only for the $0 precheck."** It did
+know. The declaration was an existence assertion consumed by one line of
+`session_runner.py`, and it had no connection to what was actually staged — so
+deleting an entry silently removed its $0 precheck while setup fetched the file
+anyway. That is precisely the failure mode of Phase-A attempt 5 ($0.6426 on an
+unstaged calibration), the failure the field was added to prevent.
+
+**Seven of the ten were declared by no session at all**: the five checkpoint
+companions `config.json`, `generation_config.json`, `tokenizer.json`,
+`tokenizer_config.json` and `chat_template.jinja`, plus the recovery pack's
+`ladder.json` and `audit.jsonl`. The companions went undeclared on the reasoning
+that the weights were the artifact. A control that shipped without its tokenizer
+is already written up in `logs/autoinit_control_sb_packaging_repair.json`.
+
+Now the declaration **is** the staging. `RelayInput` carries source, destination,
+digest and the second destination the recovery pack is mirrored to;
+`SESSION_RELAY_INPUTS` hands setup that manifest as JSON; the shell fetches what
+it is given and verifies every declared digest at every destination the file
+lands in. `dest=None` still exists and now means one thing only — *setup does not
+stage this* — which is true of the continuation's two permanent controls, staged
+by `--transport`. It can no longer mean "the shell knows", because a structural
+test forbids the shell from knowing.
+
+**What did not change:** every session stages the same ten files it staged
+before. This was a fix to where the staging is *declared*, not to what any
+session receives.
+
 ### What the structural checks cover
 
 | check | where |
@@ -134,6 +177,12 @@ was declared but not staged, and a malformed entry, with named markers.
 | every variable the setup script reads is in each session's built environment | `tests/pod/test_launcher_forwards_setup_env.py` |
 | no session supplies an empty value the setup consumes | same |
 | the setup script installs only what a session declares | `tests/pod/test_session_architecture.py` |
+| the setup script names no relay path, destination or digest of its own | same |
+| every staged input declares a destination, and the environment carries it | same |
+| a checkpoint is staged with the files it cannot load without | same |
+| the calibration pin here and in `datasets.py` cannot drift apart | same |
+| `validate()` refuses an absolute, escaping, out-of-tree, empty or duplicated staging destination, and a digest that is not a sha256 | same |
+| **the staging block itself, executed** against a temporary tree and a stub relay | same |
 | `validate()` refuses no success marker, no failure markers, no evidence file, no artifact spec, no status path | same |
 | no launcher mutates another module's globals; the runner is subclassed nowhere | same |
 | no attempt-specific grant prose in an authorization constant | same |

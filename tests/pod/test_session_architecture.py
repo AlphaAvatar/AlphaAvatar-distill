@@ -27,7 +27,8 @@ from pathlib import Path
 
 import pytest
 
-from session_specs import SESSION_LAUNCHERS, all_specs, load_session_launcher
+from session_specs import (SESSION_LAUNCHERS, all_specs,
+                           load_session_launcher, session_args)
 
 REPO = Path(__file__).resolve().parents[2]
 POD = REPO / "scripts/pod"
@@ -78,6 +79,43 @@ def test_validate_refuses_a_spec_that_could_never_finish_or_fail():
     with pytest.raises(SessionSpecError, match="artifact specs"):
         dataclasses.replace(spec, artifacts=ArtifactPolicy(
             "aud", "ev.json", "a.tar.gz", "", "f.json")).validate()
+
+
+@pytest.mark.parametrize("kwargs,fragment", [
+    ({"path": ""}, "declares no path"),
+    ({"dest": "/workspace/aad/artifacts/stage1/x"}, "it is absolute"),
+    ({"dest": "artifacts/../../etc"}, "escapes the repository"),
+    ({"dest": "src/aadistill"}, "not one of"),
+    ({"dest": "  "}, "empty dest"),
+    ({"sha256": "not-a-digest"}, "which is not a sha256"),
+    ({"dest": None, "also_stage_to": "artifacts/stage1/y"}, "no.*dest"),
+])
+def test_validate_refuses_a_malformed_relay_input(kwargs, fragment):
+    """Unchecked until 2026-08-18, because the shell staged from its own list
+    and the declaration was decorative. Now the declaration IS the staging, so a
+    malformed one is a pod that fetches into the wrong place or verifies
+    nothing."""
+    from aadistill.infrastructure.session import (
+        RelayInput, SessionSpecError, SetupManifest,
+    )
+
+    _name, _mod, _args, spec = all_specs()[0]
+    base = {"path": "stage1/x/model.safetensors", "dest": "artifacts/stage1/x"}
+    bad = RelayInput(**{**base, **kwargs})
+    manifest = dataclasses.replace(spec.setup, relay_inputs=(bad,))
+    assert isinstance(manifest, SetupManifest)
+    with pytest.raises(SessionSpecError, match=fragment):
+        dataclasses.replace(spec, setup=manifest).validate()
+
+
+def test_validate_refuses_the_same_input_declared_twice():
+    from aadistill.infrastructure.session import RelayInput, SessionSpecError
+
+    _name, _mod, _args, spec = all_specs()[0]
+    r = RelayInput("stage1/x/model.safetensors", dest="artifacts/stage1/x")
+    manifest = dataclasses.replace(spec.setup, relay_inputs=(r, r))
+    with pytest.raises(SessionSpecError, match="declared twice"):
+        dataclasses.replace(spec, setup=manifest).validate()
 
 
 def setup_installed_asset_names() -> set[str]:
@@ -220,3 +258,343 @@ def test_the_specs_are_frozen():
     assert dataclasses.is_dataclass(SessionSpec)
     with pytest.raises(dataclasses.FrozenInstanceError):
         spec.status_path = "/workspace/somewhere_else.status"
+
+
+# ---------------------------------------------------------------------------
+# The relay-side twin of the LOCAL_ASSETS defect, closed 2026-08-18.
+#
+# `SESSION_ASSETS` made the shared setup stop naming dev-box assets, and a test
+# above pins that. Nothing did the same for the relay: the script named three
+# prefixes, ten filenames, four sha256 pins and a probe-to-ladder copy, and ran
+# them for every session. The declarations named at most three of the ten — the
+# micro-preflight and the continuation consumed the calibration mixture without
+# declaring it, and the device canary was handed the whole recovery pack it had
+# never asked for. `RelayInput.dest` documented the hole in its own docstring:
+# "None means the setup script already knows".
+# ---------------------------------------------------------------------------
+
+def setup_code() -> str:
+    """The setup script with comments stripped.
+
+    The script explains the hardcoded fetches it used to contain, and an
+    extractor that read the explanation as the offence would make these tests
+    impossible to satisfy honestly. Same treatment as
+    `setup_installed_asset_names`.
+    """
+    return "\n".join(l for l in SETUP.read_text().splitlines()
+                     if not l.lstrip().startswith("#"))
+
+
+def test_the_shared_setup_names_no_relay_path_of_its_own():
+    """A new hardcoded science fetch must fail here, not on a paid pod.
+
+    This is the check that did not exist. Adding
+    `fetch("e8_inputs_20260810/whatever", ...)` to the shared script passed every
+    structural test in the repository until this one.
+    """
+    code = setup_code()
+    prefixes = sorted(set(re.findall(
+        r"['\"]((?:stage1|stage3|stage3_recovery_corpus_v2|e8_inputs_\d+|"
+        r"permanent_controls|transfer)/[A-Za-z0-9_./-]*)['\"]", code)))
+    # `transfer/` names the repo bundle and the two wheelhouses, which are
+    # harness inputs every session takes identically, not science a session
+    # selects. They are excluded by name so this test says what it means.
+    science = [p for p in prefixes if not p.startswith("transfer/")]
+    assert not science, (
+        f"autoinit_preflight_setup.sh names the relay paths {science} itself. A "
+        "session that does not declare them would be given them anyway, which is "
+        "the shape of defect that cost the device-canary retry $0.0637 one layer "
+        "down. Declare them in the session's `relay_inputs`.")
+
+
+def test_the_shared_setup_pins_no_digest_of_its_own():
+    """A digest in the shell is a digest no session's declaration carries."""
+    digests = sorted(set(re.findall(r"\b[0-9a-f]{64}\b", setup_code())))
+    assert not digests, (
+        f"autoinit_preflight_setup.sh hardcodes the sha256 pins {digests}. They "
+        "belong on the `RelayInput` that stages the file, so the session record "
+        "preserves what was verified.")
+
+
+def test_the_shared_setup_names_no_science_destination_of_its_own():
+    """Where a science input lands is the session's declaration, not the shell's.
+
+    A `glob` over `artifacts/stage1/*/checkpoint` is allowed and is not an
+    exception: it adapts to whatever the session staged, and refuses when a
+    session staged nothing.
+    """
+    code = setup_code()
+    # `*` is inside the class, so a glob is matched whole and then excluded. A
+    # class that omitted it would cut `artifacts/stage1/*/checkpoint` down to
+    # `artifacts/stage1/` and report the glob as a literal.
+    literals = sorted({m for m in re.findall(r"artifacts/[A-Za-z0-9_./*-]+", code)
+                       if "*" not in m})
+    assert not literals, (
+        f"autoinit_preflight_setup.sh writes to {literals} by name; the "
+        "destination is a field on the session's `RelayInput`.")
+    assert "SESSION_RELAY_INPUTS" in code, (
+        "the setup script no longer reads the session's science-input manifest")
+
+
+@pytest.mark.parametrize("name,extra", SESSION_LAUNCHERS,
+                         ids=lambda v: v if isinstance(v, str) else "")
+def test_every_staged_input_declares_a_destination_and_the_env_carries_it(name, extra):
+    """`dest=None` may mean "the driver stages it". It may not mean "the shell knows"."""
+    import json
+
+    mod = load_session_launcher(name)
+    spec = mod.spec(session_args(mod, extra))
+    env = spec.setup_environment(session_commit="0" * 40, bundle="aad.bundle")
+    staged = spec.setup.staged_relay_inputs()
+    assert staged, f"{name} stages no science input at all"
+    carried = json.loads(env["SESSION_RELAY_INPUTS"])
+    assert [r["path"] for r in carried] == [r.path for r in staged], (
+        f"{name}'s SESSION_RELAY_INPUTS is not its staged declaration")
+    for r in carried:
+        assert r["dest"], f"{name} would ask setup to stage {r['path']} nowhere"
+    # And the precheck-only ones are NOT handed to setup: setup receives what it
+    # is meant to do, not the whole declaration to filter itself.
+    unstaged = {r.path for r in spec.setup.relay_inputs if not r.staged}
+    assert unstaged.isdisjoint({r["path"] for r in carried}), (
+        f"{name} hands setup {unstaged & {r['path'] for r in carried}}, which "
+        "the driver stages by another route")
+
+
+@pytest.mark.parametrize("name,extra", SESSION_LAUNCHERS,
+                         ids=lambda v: v if isinstance(v, str) else "")
+def test_a_checkpoint_is_staged_with_the_files_it_cannot_load_without(name, extra):
+    """Weights are not a checkpoint. `logs/autoinit_control_sb_packaging_repair.json`
+    is the write-up of a control whose identity gates all passed and which could
+    not be evaluated, because it shipped without its tokenizer."""
+    mod = load_session_launcher(name)
+    spec = mod.spec(session_args(mod, extra))
+    staged = {r.path.rsplit("/", 1)[-1]
+              for r in spec.setup.staged_relay_inputs()
+              if r.path.startswith("stage1/qwen3_0p6b_init_v0/checkpoint/")}
+    if not staged:
+        pytest.skip(f"{name} stages no checkpoint")
+    missing = {"config.json", "tokenizer.json", "tokenizer_config.json",
+               "generation_config.json", "chat_template.jinja",
+               "model.safetensors"} - staged
+    assert not missing, (
+        f"{name} stages the canonical init without {sorted(missing)}; the "
+        "checkpoint would not load")
+
+
+def test_the_calibration_pin_matches_the_registry_that_already_carried_it():
+    """One hash, two homes, and they may not drift.
+
+    `aadistill.autoinit.datasets.E8A_CALIBRATION` has carried this file's hash
+    since E8a. The shared setup carried a second copy of it, and nothing compared
+    them.
+    """
+    import sys
+
+    sys.path.insert(0, str(POD))
+    from autoinit_science_inputs import CALIBRATION_V1
+
+    from aadistill.autoinit.datasets import E8A_CALIBRATION
+
+    pins = {r.sha256 for r in CALIBRATION_V1 if r.sha256}
+    assert pins == {E8A_CALIBRATION.content_sha256}, (
+        f"the staging pin {pins} and the registry's "
+        f"{E8A_CALIBRATION.content_sha256!r} disagree")
+    dests = {r.dest for r in CALIBRATION_V1}
+    assert E8A_CALIBRATION.path.startswith(tuple(d + "/" for d in dests)), (
+        f"the calibration is staged into {dests} and read from "
+        f"{E8A_CALIBRATION.path!r}")
+
+
+# ---------------------------------------------------------------------------
+# The staging block, EXECUTED. Not inspected, not simulated — run.
+#
+# Four paid pods have died inside lines no $0 path could reach. The block below
+# is extracted from the shell file itself and run against a temporary tree with
+# a stub relay, so a typo, a wrong key or a missing mkdir fails here for free.
+# Rehearsing a copy would prove nothing about the file the pod executes.
+# ---------------------------------------------------------------------------
+
+def extract_staging_block() -> str:
+    """The `FETCHEOF` heredoc body, verbatim from the shell script."""
+    text = SETUP.read_text()
+    start = text.index("<<'FETCHEOF'\n") + len("<<'FETCHEOF'\n")
+    end = text.index("\nFETCHEOF", start)
+    body = text[start:end]
+    assert "SESSION_RELAY_INPUTS" in body and "hf_hub_download" in body
+    return body
+
+
+def run_staging(tmp_path, inputs, relay_bytes, monkeypatch):
+    """Execute the real block with a stub `huggingface_hub`, in `tmp_path`."""
+    import json
+    import sys
+    import types
+
+    cache = tmp_path / "cache"
+    cache.mkdir()
+
+    fetched: list[str] = []
+
+    def hf_hub_download(repo, path, repo_type=None, token=None):
+        fetched.append(path)
+        if path not in relay_bytes:
+            raise FileNotFoundError(path)
+        p = cache / path.replace("/", "__")
+        p.write_bytes(relay_bytes[path])
+        return str(p)
+
+    stub = types.ModuleType("huggingface_hub")
+    stub.hf_hub_download = hf_hub_download
+    monkeypatch.setitem(sys.modules, "huggingface_hub", stub)
+
+    repo = tmp_path / "aad"
+    repo.mkdir()
+    monkeypatch.setenv("REPO", str(repo))
+    monkeypatch.setenv("HF_TOKEN", "stub-token")
+    monkeypatch.setenv("SESSION_RELAY_INPUTS", json.dumps(inputs))
+    # `time.sleep` would make the retry path cost 75 s of test wall clock.
+    monkeypatch.setattr("time.sleep", lambda *_a, **_k: None)
+
+    code = compile(extract_staging_block(), str(SETUP) + ":FETCHEOF", "exec")
+    exec(code, {"__name__": "__main__"})           # noqa: S102 — the point
+    return repo, fetched
+
+
+def test_the_staging_block_stages_exactly_what_it_is_given(tmp_path, monkeypatch):
+    import hashlib
+
+    payload = b"weights\n"
+    digest = hashlib.sha256(payload).hexdigest()
+    other = b"ladder\n"
+    inputs = [
+        {"path": "stage1/x/checkpoint/model.safetensors",
+         "dest": "artifacts/stage1/x/checkpoint",
+         "sha256": digest, "also_stage_to": None},
+        {"path": "corpus/ladder/blocks.npz", "dest": "artifacts/stage3/probe",
+         "sha256": hashlib.sha256(other).hexdigest(),
+         "also_stage_to": "artifacts/stage3/mirror"},
+    ]
+    relay = {"stage1/x/checkpoint/model.safetensors": payload,
+             "corpus/ladder/blocks.npz": other}
+    repo, fetched = run_staging(tmp_path, inputs, relay, monkeypatch)
+
+    assert fetched == [i["path"] for i in inputs], "fetched something else"
+    assert (repo / "artifacts/stage1/x/checkpoint/model.safetensors"
+            ).read_bytes() == payload
+    # The mirror is the probe-to-ladder copy, now declared instead of walked.
+    assert (repo / "artifacts/stage3/probe/blocks.npz").read_bytes() == other
+    assert (repo / "artifacts/stage3/mirror/blocks.npz").read_bytes() == other
+    # And nothing it was not given.
+    staged = {p.relative_to(repo).as_posix()
+              for p in repo.rglob("*") if p.is_file()}
+    assert staged == {"artifacts/stage1/x/checkpoint/model.safetensors",
+                      "artifacts/stage3/probe/blocks.npz",
+                      "artifacts/stage3/mirror/blocks.npz"}
+
+
+def test_the_staging_block_stages_nothing_when_a_session_declares_nothing(
+        tmp_path, monkeypatch):
+    """The canary retry's failure, at the relay layer. It must be a no-op."""
+    repo, fetched = run_staging(tmp_path, [], {}, monkeypatch)
+    assert fetched == []
+    assert not [p for p in repo.rglob("*") if p.is_file()]
+
+
+def test_the_staging_block_refuses_a_wrong_digest(tmp_path, monkeypatch):
+    import hashlib
+
+    inputs = [{"path": "a/b.bin", "dest": "artifacts/stage1/x",
+               "sha256": hashlib.sha256(b"expected").hexdigest(),
+               "also_stage_to": None}]
+    with pytest.raises(SystemExit) as e:
+        run_staging(tmp_path, inputs, {"a/b.bin": b"different"}, monkeypatch)
+    assert "FROZEN ASSET MISMATCH" in str(e.value)
+
+
+def test_the_staging_block_verifies_the_mirror_too(tmp_path, monkeypatch, capsys):
+    """The old block pinned `ladder_uniform/blocks.npz` separately from the probe
+    copy. Checking one landing site and not the other silently drops half of a
+    frozen pin — and would miss a mirror that failed to copy at all.
+
+    Asserted on the block's OUTPUT, not on its source text. The first version of
+    this test grepped for `for rel in landed`, which `for rel in landed[:1]`
+    still contains: the mutation that removes the second check left the gate
+    green.
+    """
+    import hashlib
+
+    inputs = [{"path": "a/b.bin", "dest": "artifacts/stage1/x",
+               "sha256": hashlib.sha256(b"ok").hexdigest(),
+               "also_stage_to": "artifacts/stage1/y"}]
+    repo, _ = run_staging(tmp_path, inputs, {"a/b.bin": b"ok"}, monkeypatch)
+    out = capsys.readouterr().out
+    assert (repo / "artifacts/stage1/x/b.bin").is_file()
+    assert (repo / "artifacts/stage1/y/b.bin").is_file()
+    assert "artifacts/stage1/x/b.bin " in out, "the primary was not verified"
+    assert "artifacts/stage1/y/b.bin " in out, "the mirror was not verified"
+    assert "verified 2 digests" in out, (
+        f"one file landed in two places and the block reports: {out!r}")
+
+
+def test_the_staging_block_refuses_an_input_with_no_destination(
+        tmp_path, monkeypatch):
+    """Setup receives what it must stage. A dest-less entry reaching it means
+    the precheck-only filter broke, and staging it somewhere invented would be
+    worse than stopping."""
+    inputs = [{"path": "a/b.bin", "dest": None, "sha256": None,
+               "also_stage_to": None}]
+    with pytest.raises(SystemExit) as e:
+        run_staging(tmp_path, inputs, {"a/b.bin": b"x"}, monkeypatch)
+    assert "no dest" in str(e.value)
+
+
+def test_the_staging_block_gives_up_and_names_the_file(tmp_path, monkeypatch):
+    inputs = [{"path": "missing/thing.bin", "dest": "artifacts/stage1/x",
+               "sha256": None, "also_stage_to": None}]
+    with pytest.raises(SystemExit) as e:
+        run_staging(tmp_path, inputs, {}, monkeypatch)
+    assert "FETCH FAILED missing/thing.bin" in str(e.value)
+
+
+@pytest.mark.parametrize("name,extra", SESSION_LAUNCHERS,
+                         ids=lambda v: v if isinstance(v, str) else "")
+def test_each_real_session_manifest_stages_through_the_real_block(
+        name, extra, tmp_path, monkeypatch):
+    """End to end at $0: this session's actual declaration, through the actual
+    shell code, landing the actual destinations — with the relay stubbed."""
+    import hashlib
+    import json
+
+    mod = load_session_launcher(name)
+    spec = mod.spec(session_args(mod, extra))
+    env = spec.setup_environment(session_commit="0" * 40, bundle="aad.bundle")
+    declared = json.loads(env["SESSION_RELAY_INPUTS"])
+
+    # The stub relay serves arbitrary bytes, and each declared pin is restated
+    # as the digest of what is actually served — a sha256 preimage is not
+    # available and is not what this test is for. What it exercises is the real
+    # declaration's paths, destinations and mirrors through the real code. That
+    # the frozen digests are the RIGHT ones is a separate claim, checked by
+    # `scripts/autoinit/verify_frozen_assets.py` and again on the pod.
+    relay, expect = {}, set()
+    for r in declared:
+        body = f"content of {r['path']}".encode()
+        relay[r["path"]] = body
+        if r["sha256"]:
+            r["sha256"] = hashlib.sha256(body).hexdigest()
+        nm = r["path"].rsplit("/", 1)[-1]
+        for into in (r["dest"], r["also_stage_to"]):
+            if into:
+                expect.add(f"{into}/{nm}")
+
+    repo, fetched = run_staging(tmp_path, declared, relay, monkeypatch)
+    landed = {p.relative_to(repo).as_posix()
+              for p in repo.rglob("*") if p.is_file()}
+    assert landed == expect, f"{name} staged {landed ^ expect} unexpectedly"
+    assert len(fetched) == len(declared)
+    for r in declared:
+        if r["sha256"]:
+            got = hashlib.sha256(
+                (repo / f"{r['dest']}/{r['path'].rsplit('/', 1)[-1]}"
+                 ).read_bytes()).hexdigest()
+            assert got == r["sha256"]

@@ -3956,3 +3956,99 @@ two devices, cuda:0 and cpu!
   simulator pass, but the first paid run is still the first paid run.
 - **Revisit when:** a session needs a capability the spec cannot express, or the
   micro-preflight's missing commit gate is decided on.
+
+## 2026-08-18 — The relay-side twin of the LOCAL_ASSETS defect, found and closed
+
+- **Context:** a Phase-A readiness check, asked as a question rather than a task:
+  is the shared setup's behaviour *fully* driven by the session declarations, or
+  does `autoinit_preflight_setup.sh` still hold session-specific knowledge about
+  checkpoint companion files, calibration, recovery packs, destinations or
+  hashes? Seven properties were named to verify mechanically. **All seven
+  failed.**
+- **The finding.** The 2026-08-18 session refactor fixed the **dev-box** side —
+  `SESSION_ASSETS`, so a session that declares no local asset gets none — and
+  left the **relay** side exactly as it was. The shell went on naming three relay
+  prefixes, ten filenames, four sha256 pins and a probe-to-ladder directory walk,
+  unconditionally, for every session:
+
+  | session | declared | staged for it | undeclared |
+  | --- | ---: | ---: | ---: |
+  | micro-preflight | 2 | 10 | 8, including the calibration mixture |
+  | Phase A | 3 | 10 | 7 |
+  | continuation | 2 (+2 transported) | 10 | 8, including the calibration mixture |
+  | device canary | 2 | 10 | 8, including the whole recovery pack |
+
+- **`RelayInput` documented the hole in its own docstring**: *"`None` means the
+  setup script already knows and this entry exists only for the $0 precheck."*
+  All eleven declarations across all four sessions used `dest=None`, and all used
+  `sha256=None`. The field was consumed by exactly one line —
+  `session_runner.py:222`, an existence check against the relay listing — with no
+  connection to what setup staged. **Deleting a declaration therefore removed its
+  $0 precheck while setup fetched the file anyway.** That is the exact failure
+  mode of Phase-A attempt 5 ($0.6426 on an unstaged calibration), which is the
+  failure the field was added to prevent, and the micro-preflight and the
+  continuation were sitting in it for the calibration at the moment of this audit.
+- **Seven of the ten were declared by no session at all** — the five checkpoint
+  companion files `config.json`, `generation_config.json`, `tokenizer.json`,
+  `tokenizer_config.json` and `chat_template.jinja`, plus the recovery pack's
+  `ladder.json` and `audit.jsonl`. The five companions went undeclared on the
+  reasoning that the weights are the artifact;
+  `logs/autoinit_control_sb_packaging_repair.json` is the write-up of a control
+  whose identity gates all passed and which could not be evaluated, because it
+  shipped without its tokenizer.
+- **Nothing would have caught a new one.** The single structural check over the
+  setup script,
+  `test_the_setup_script_installs_only_what_a_session_declares`, scans for
+  `$WS/assets/<name>` — the local-asset path. Adding
+  `fetch("e8_inputs_20260810/whatever", ...)` to the shared shell passed every
+  test in the repository.
+- **Decision — make the existing manifest authoritative, and change nothing
+  else.** `RelayInput` now carries source, destination, digest and the second
+  destination the recovery pack is mirrored to. `SESSION_RELAY_INPUTS` hands
+  setup that manifest as JSON. The shell stages what it is given and verifies
+  every declared digest **at every destination the file lands in**; it names no
+  relay path, no destination and no digest of its own. `dest=None` survives and
+  now means one thing — setup does not stage this — which is true of the
+  continuation's two permanent controls, staged by `--transport`.
+- **Alternatives rejected.** Reusing `aadistill.autoinit.datasets.DatasetAsset`:
+  it carries the consumer-side path and hash but no relay source, so it would
+  have needed relay-store knowledge added to the core — broader, and against
+  `docs/REPO_LAYOUT.md` rule 1. Narrowing what each session stages to what it
+  actually needs: that is a behaviour change, and a session pruned wrongly fails
+  on a paid pod. **Every session stages the same ten files it staged before**;
+  this fixed where the staging is declared, not what any session receives.
+- **The declarations live in `scripts/pod/autoinit_science_inputs.py`**, not in
+  `src/`, because `docs/REPO_LAYOUT.md` rule 1 keeps frozen hashes in the scripts
+  that own them. Sessions compose them by name, so "the micro-preflight stages
+  the calibration mixture" is a line a reader can see. The calibration pin is
+  restated from `datasets.E8A_CALIBRATION` and a test pins the two equal — one
+  hash, two homes, and nothing had compared them.
+- **The staging block is executed, not inspected.** The `FETCHEOF` body is
+  extracted from the shell file itself and run against a temporary tree with a
+  stub relay: staging, mirroring, digest refusal, fetch failure, the empty
+  declaration, and each of the four real session manifests end to end. Four paid
+  pods have now died inside lines no $0 path could reach; `REPO` became an inline
+  environment assignment rather than the literal `/workspace/aad` specifically so
+  this code could be run for free.
+- **Every new gate is mutation-verified.** Eight mutations against the shell, the
+  declarations and a launcher; four against `validate()`. One gate did **not**
+  fail on the first attempt: the mirror check asserted `"for rel in landed" in
+  body`, which `for rel in landed[:1]` still contains. It was replaced with an
+  assertion on the block's output — `verified 2 digests` — and now fails on both
+  the skipped verification and the skipped copy.
+- **What was preserved exactly:** Phase-A pricing `$17.8933 / $22.7183 /
+  $23.0483` with reserves `147.7683` and `36.2158` min; the four frozen digests,
+  unchanged; the fetch retry policy (five attempts, linear backoff); every
+  session's staged file set; the frozen-asset verifier passing with no problems.
+- **Risks:** the ten declarations are now the only description of what a pod
+  stages, so a wrong `dest` is a wrong staging — which is why `validate()`
+  refuses absolute, escaping, out-of-tree, empty and duplicated destinations, and
+  why the real manifests are executed at $0. The block has not run on hardware;
+  it is transformed from the proven one rather than rewritten, and the retry path
+  is the only part that was ever load-bearing on a real host.
+- **Not done, deliberately:** the micro-preflight still has no session-commit
+  gate. Untouched, for the reason recorded above it — closing it is a behaviour
+  change and belongs in its own decision.
+- **Revisit when:** a session should stage *less* than the shared ten. That is
+  now a one-line change to its `relay_inputs` and a real behaviour change, so it
+  gets its own decision and its own record.

@@ -31,6 +31,10 @@ from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO_ROOT / "src"))
+# The sibling science-input declarations. Present when this file is run
+# directly; absent when a test loads it by path, which is how the
+# structural checks load every launcher.
+sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from aadistill.autoinit.authorization import SpendAuthorization  # noqa: E402
 from aadistill.autoinit.recovery import PREFLIGHT_PLAN_V1  # noqa: E402
@@ -40,6 +44,9 @@ from aadistill.infrastructure.session import (  # noqa: E402
     SessionContext, SessionSpec, SetupManifest, TeardownPolicy,
 )
 from aadistill.infrastructure.session_runner import REPO, WS, run_session  # noqa: E402
+from autoinit_science_inputs import (  # noqa: E402
+    CALIBRATION_V1, CANONICAL_INIT, RECOVERY_LADDER,
+)
 
 STATUS = f"{WS}/autoinit_preflight.status"
 RUN_LOG = f"{WS}/autoinit_preflight_run.log"
@@ -136,14 +143,15 @@ def spec(args) -> SessionSpec:
             eval_minutes_per_arm=0.0, contingency_fraction=0.10,
             artifact_recovery_reserve_minutes=30.0),
         setup=SetupManifest(
-            relay_inputs=(
-                RelayInput("stage1/qwen3_0p6b_init_v0/checkpoint/model.safetensors"),
-                RelayInput("stage3_recovery_corpus_v2/ladder_uniform/blocks.npz"),
-            ),
+            #: The whole staging, declared. It used to name two files while the
+            #: shared setup staged ten — including the calibration mixture, which
+            #: this session consumed and did not declare.
+            relay_inputs=(*CANONICAL_INIT, *RECOVERY_LADDER, *CALIBRATION_V1),
             local_assets=LOCAL_ASSETS,
             required_env=("SESSION_COMMIT", "BUNDLE_NAME", "SESSION_STATUS",
                           "SESSION_AUTH_PATH", "SESSION_PLAN_HASH",
-                          "SESSION_ASSETS", "TEACHER_REVISION"),
+                          "SESSION_ASSETS", "SESSION_RELAY_INPUTS",
+                          "TEACHER_REVISION"),
             setup_markers=("ENV_READY", "REPO_READY", "ASSETS_STAGED",
                            "TRAIN_ENV", "ASSETS_READY", "VLLM_READY",
                            "TEACHER_READY", "ROPE_OK", "TESTS_OK",

@@ -45,19 +45,20 @@ Also frozen: recovery design, selection rules, pooled_counts@v2, Stage-3 artifac
 
 ## Latest verification
 
-After the session-architecture refactor and, before it, the log and
-checkpoint-storage cleanup. CPU only — no checkpoint was loaded and no metric
-measured:
+After making the session manifest authoritative for relay science-input staging.
+CPU only — no checkpoint was loaded and no metric measured:
 
-* full suite **1837 passed, 11 skipped, 5 errors**. The five are a transformers
-  4.57.1 incompatibility in the sibling AlphaAvatar venv, raised on a toy
-  tokenizer written into `tmp_path` before any repository artifact is read; the
-  same file is 19/19 under the repo venv, and no session touched that code.
-* pod simulator **1802 passed, 22 skipped**, restored exactly.
+* full suite **1872 passed, 11 skipped, 0 errors in 19:20 (the 1842 baseline plus the 30 new relay-contract gates)**.
+* pod simulator **1832 passed, 22 skipped in 2:53; artifact tree restored EXACTLY - 1591 entries, identical type/size/path before and after**.
 * frozen-asset verifier **passed**, no problems.
 * Phase-A pricing reproduces **$17.8933 / $22.7183 / $23.0483** exactly, with
   both soft-stop reserves at their derived minutes — the cheapest proof the
-  refactor preserved behaviour.
+  change preserved behaviour.
+
+**The canonical full-suite baseline is `1842 passed, 11 skipped, 0 errors`**
+under the repo `.venv`. The `1837 passed, 5 errors` recorded before was the same
+1842 tests under the sibling AlphaAvatar venv, whose transformers 4.57.1 raises
+on a toy tokenizer in `tmp_path` before any repository artifact is read.
 
 ## What failed, and why
 
@@ -83,7 +84,11 @@ instead of the cause, and it was paid for twice. Full diagnoses in
 * **the session specification**: one immutable `SessionSpec` per session, one
   runner, no inheritance and no module-global retargeting
   ([`../docs/SESSION_ARCHITECTURE.md`](../docs/SESSION_ARCHITECTURE.md))
-* the shared pod setup is manifest-driven: it installs what a session declares
+* the shared pod setup is manifest-driven on **both** sides: it installs the
+  local assets a session declares and stages the relay science inputs a session
+  declares, and names no asset, relay path, destination or digest of its own.
+  `RelayInput` carries source, destination, digest and mirror; `dest=None` means
+  only "the driver stages this", never "the shell knows"
 * the Phase-A authorization schema carries no grant; the issuer requires one
 * autoinit.stage1_device_contract@v1
 * full tracebacks for unexpected in-process driver exceptions
@@ -107,9 +112,18 @@ The session architecture is **implemented** (2026-08-18), so the defect class
 that cost three paid pods is gone by construction rather than by care. What is
 left is a paid decision:
 
-1. **Phase A, attempt 8.** $23.0484 hard, unchanged — the refactor reproduces the
-   price exactly. Stage-1 failures now come home with a traceback, and the
-   inherited-contract failures cannot recur.
+1. **Phase A, attempt 8.** $23.0484 hard, unchanged — the price reproduces
+   exactly after both the session-architecture refactor and the relay-staging
+   fix. Stage-1 failures now come home with a traceback, and the
+   inherited-contract failures cannot recur on either the local-asset or the
+   relay side.
+
+   **The setup-contract readiness question is closed.** A seven-property audit on
+   2026-08-18 asked whether the shared setup was really driven by the session
+   declarations; it failed on all seven, the narrow fix landed at $0, and every
+   new gate is mutation-verified ([`decisions.md`](decisions.md)). The harness
+   digest moved, which invalidates nothing — every authorization was already
+   consumed. What remains is the GO / NO-GO decision.
 2. the device canary stays TERMINATED. Its launcher is converted, which is what
    makes the point: it declares no local assets and now gets none. Reviving it
    would be a new decision, not a resumption.

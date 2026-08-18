@@ -25,7 +25,8 @@ to appear below.
 | `autoinit_continuation_launch.py` | the Stage-3 continuation's **session specification** |
 | `autoinit_preflight_driver.py` | the micro-preflight's pod-side driver |
 | `autoinit_phase_a_driver.py` | the Phase-A pod-side driver, six stages |
-| `autoinit_preflight_setup.sh` | the shared pod setup. **Manifest-driven** since 2026-08-18: it reads `SESSION_ASSETS` and `SESSION_TEST_IGNORES` and names no session's assets itself |
+| `autoinit_preflight_setup.sh` | the shared pod setup. **Manifest-driven** since 2026-08-18: it reads `SESSION_ASSETS`, `SESSION_RELAY_INPUTS` and `SESSION_TEST_IGNORES`, and names no session's assets, relay paths, destinations or digests itself |
+| `autoinit_science_inputs.py` | the frozen relay science inputs — source, destination, digest — that sessions compose their `relay_inputs` from. Lifted out of the shared setup on 2026-08-18; here rather than in `src/` because `docs/REPO_LAYOUT.md` rule 1 keeps frozen hashes in the scripts that own them |
 | `autoinit_continuation_driver.py` | the continuation's pod-side driver |
 | `autoinit_engine_probe.py` | vLLM engine identity probe, run at stage 0 |
 | `watchdog.py` | the independent provider-side kill switch |

@@ -45,6 +45,10 @@ from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO_ROOT / "src"))
+# The sibling science-input declarations. Present when this file is run
+# directly; absent when a test loads it by path, which is how the
+# structural checks load every launcher.
+sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from aadistill.autoinit.phase_a import (  # noqa: E402
     PHASE_A_PLAN_V1, PHASE_A_SCOPE, PhaseAAuthorization,
@@ -58,6 +62,9 @@ from aadistill.infrastructure.session_prechecks import (  # noqa: E402
     frozen_science_plan_gate, session_commit_gate,
 )
 from aadistill.infrastructure.session_runner import REPO, WS, run_session  # noqa: E402
+from autoinit_science_inputs import (  # noqa: E402
+    CALIBRATION_V1, CANONICAL_INIT, RECOVERY_LADDER,
+)
 
 STATUS = f"{WS}/autoinit_phase_a.status"
 RUN_LOG = f"{WS}/autoinit_phase_a_run.log"
@@ -267,15 +274,14 @@ def spec(args) -> SessionSpec:
         plan_hash=PHASE_A_PLAN_V1.plan_hash,
         budget=budget(args),
         setup=SetupManifest(
-            #: Every relay object a Phase-A session reads, checked at $0. The
-            #: calibration joined this list after attempt 5 died on it at
-            #: $0.6426: stage 1 calls `DOMAIN_BALANCED_V1.resolve()`, and nothing
-            #: staged or checked the file it reads.
-            relay_inputs=(
-                RelayInput("stage1/qwen3_0p6b_init_v0/checkpoint/model.safetensors"),
-                RelayInput("stage3_recovery_corpus_v2/ladder_uniform/blocks.npz"),
-                RelayInput("e8_inputs_20260810/calibration_v1/items.jsonl"),
-            ),
+            #: Every relay object a Phase-A session reads — and, since
+            #: 2026-08-18, every one it STAGES, with its destination and its
+            #: digest. The calibration joined this list after attempt 5 died on
+            #: it at $0.6426: stage 1 calls `DOMAIN_BALANCED_V1.resolve()`, and
+            #: nothing staged or checked the file it reads. Naming it here bought
+            #: the $0 precheck; it did not make the staging visible, because the
+            #: shared shell staged it either way. Now this IS the staging.
+            relay_inputs=(*CANONICAL_INIT, *RECOVERY_LADDER, *CALIBRATION_V1),
             local_assets=LOCAL_ASSETS,
             #: Setup must load the Phase-A authorization TYPE, not the narrow
             #: one. It arrives here, in this session's own manifest, rather than
@@ -283,7 +289,8 @@ def spec(args) -> SessionSpec:
             env={"SESSION_KIND": "phase_a"},
             required_env=("SESSION_COMMIT", "BUNDLE_NAME", "SESSION_STATUS",
                           "SESSION_AUTH_PATH", "SESSION_PLAN_HASH",
-                          "SESSION_ASSETS", "SESSION_KIND", "TEACHER_REVISION"),
+                          "SESSION_ASSETS", "SESSION_RELAY_INPUTS",
+                          "SESSION_KIND", "TEACHER_REVISION"),
             uv_max_seconds=args.uv_max_s, tests_max_seconds=args.tests_max_s,
             teacher_revision=TEACHER_REVISION, test_ignores=TEST_IGNORES),
         driver_command=driver_command,

@@ -42,6 +42,10 @@ from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO_ROOT / "src"))
+# The sibling science-input declarations. Present when this file is run
+# directly; absent when a test loads it by path, which is how the
+# structural checks load every launcher.
+sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from aadistill.autoinit.authorization import SpendAuthorization  # noqa: E402
 from aadistill.autoinit.recovery import PreflightPlan, PreflightStage  # noqa: E402
@@ -51,6 +55,9 @@ from aadistill.infrastructure.session import (  # noqa: E402
     SessionSpec, SetupManifest, TeardownPolicy,
 )
 from aadistill.infrastructure.session_runner import REPO, WS, run_session  # noqa: E402
+from autoinit_science_inputs import (  # noqa: E402
+    CALIBRATION_V1, CANONICAL_INIT, RECOVERY_LADDER,
+)
 
 STATUS = f"{WS}/autoinit_device_canary.status"
 RUN_LOG = f"{WS}/autoinit_device_canary_run.log"
@@ -132,10 +139,14 @@ def spec(args) -> SessionSpec:
             eval_minutes_per_arm=0.0, contingency_fraction=0.10,
             artifact_recovery_reserve_minutes=20.0),
         setup=SetupManifest(
-            relay_inputs=(
-                RelayInput("stage1/qwen3_0p6b_init_v0/checkpoint/model.safetensors"),
-                RelayInput("e8_inputs_20260810/calibration_v1/items.jsonl"),
-            ),
+            #: This session declared the init and the calibration and NOT the
+            #: recovery pack, while the shared setup staged the pack for it
+            #: anyway and hash-verified it twice — the same shape of undeclared
+            #: inheritance that cost this session $0.0637 on local assets, one
+            #: layer down. The pack is declared now because it is what setup
+            #: stages; TERMINATED means no further canary is prepared, not that
+            #: its specification may misdescribe the run it would perform.
+            relay_inputs=(*CANONICAL_INIT, *RECOVERY_LADDER, *CALIBRATION_V1),
             #: Empty, and now honoured. `SESSION_KIND` is absent too, which
             #: routes setup to `SpendAuthorization` — whose
             #: `assert a.allows_phase_a is False` is exactly the assertion this
@@ -143,7 +154,8 @@ def spec(args) -> SessionSpec:
             local_assets=LOCAL_ASSETS,
             required_env=("SESSION_COMMIT", "BUNDLE_NAME", "SESSION_STATUS",
                           "SESSION_AUTH_PATH", "SESSION_PLAN_HASH",
-                          "SESSION_ASSETS", "TEACHER_REVISION"),
+                          "SESSION_ASSETS", "SESSION_RELAY_INPUTS",
+                          "TEACHER_REVISION"),
             uv_max_seconds=args.uv_max_s, tests_max_seconds=args.tests_max_s,
             teacher_revision=TEACHER_REVISION, test_ignores=TEST_IGNORES),
         driver_command=driver_command,

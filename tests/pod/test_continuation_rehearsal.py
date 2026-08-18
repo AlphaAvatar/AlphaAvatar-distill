@@ -602,8 +602,15 @@ def test_the_precheck_fails_at_zero_when_a_control_is_not_staged():
     unstaged one must be discovered — not after a paid setup."""
     mod = load_continuation_launcher()
     staged = {f"permanent_controls/{c}/model/model.safetensors" for c in mod.CONTROLS}
+    # The rest of this session's declaration, taken FROM the declaration rather
+    # than transcribed. It was two literals until 2026-08-18, when the session
+    # started declaring the ten science files the shared setup had been staging
+    # for it all along — and a transcription is exactly what then goes stale.
+    science = {r.path for r in bare_launcher(mod).spec.setup.relay_inputs
+               if "permanent_controls" not in r.path}
     init = "stage1/qwen3_0p6b_init_v0/checkpoint/model.safetensors"
     pack = "stage3_recovery_corpus_v2/ladder_uniform/blocks.npz"
+    assert {init, pack} <= science, "the session stopped declaring its own inputs"
 
     class FakeApi:
         def __init__(self, files):
@@ -630,7 +637,7 @@ def test_the_precheck_fails_at_zero_when_a_control_is_not_staged():
         finally:
             huggingface_hub.HfApi = original
 
-    ok, obj = with_files({init, pack, *staged})
+    ok, obj = with_files({*science, *staged})
     assert ok is True
     assert all(f"permanent_controls/{c}/model/model.safetensors"
                in obj.ev["precheck"]["relay_needed"] for c in mod.CONTROLS)
@@ -639,7 +646,7 @@ def test_the_precheck_fails_at_zero_when_a_control_is_not_staged():
     assert pack in obj.ev["precheck"]["relay_needed"]
 
     # One control staged, the other not: the old precheck said OK.
-    ok, obj = with_files({init, pack, sorted(staged)[0]})
+    ok, obj = with_files({*science, sorted(staged)[0]})
     assert ok is False
     assert obj.ev["precheck"]["relay_missing"]
     assert any("ABORT at $0" in s for s in obj.said)
@@ -647,7 +654,7 @@ def test_the_precheck_fails_at_zero_when_a_control_is_not_staged():
     # Over scp the relay need not hold the controls at all. The transport is a
     # session fact, so it is recorded once — in the session record — rather than
     # repeated inside the precheck block.
-    ok, obj = with_files({init, pack}, transport="scp")
+    ok, obj = with_files(set(science), transport="scp")
     assert obj.spec.evidence_fields["transport"] == "scp"
     assert not [m for m in obj.ev["precheck"]["relay_missing"]
                 if "permanent_controls" in m]
