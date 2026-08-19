@@ -53,8 +53,16 @@ therefore one of two things, and which one must be legible at the call site:
 * **intentional host-only** — a control or diagnostic assembled from Python
   scalars and reduced back to Python scalars, never meeting a parameter. These
   are correct as they are and must **not** be mechanically moved;
-  ``attention.py``'s per-head ``scores`` and ``depth.py``'s host-side distortion
-  reduction are the worked examples.
+  ``attention.py``'s per-head ``scores`` and ``sandwich.select_q_heads``'s are
+  the worked examples.
+
+  ``depth.py``'s distortion reduction was listed here as a third example until
+  2026-08-19. It was not one: it ran on the host because the port of
+  ``scripts/training/search_depth_map.py`` inserted ``.cpu()``, and E8a runs that
+  reduction on the accelerator. Attempt 10 spent $11.43 discovering it. The
+  reduction is device-resident again, and the lesson is that "intentional
+  host-only" is a claim to check against the implementation being ported, not a
+  label to apply to whatever is already on the host.
 
 This category exists because category 3 already stated the rule and nothing
 checked it. Attempt 9 died at $0.34 on ``project.py``'s ``avg``, allocated with a
@@ -70,6 +78,8 @@ the arithmetic happens to succeed on a one-device box.
 
 from __future__ import annotations
 
+import os
+from pathlib import Path
 from typing import Any, Mapping
 
 import torch
@@ -151,3 +161,76 @@ def as_dict() -> dict[str, Any]:
             "NOT a whole-project audit and it does not reopen the frozen "
             "science."),
     }
+
+
+# ---------------------------------------------------------------------------
+# CPU budget. Added 2026-08-19 after Phase-A attempt 10.
+# ---------------------------------------------------------------------------
+
+def cpu_budget(cap: int = 16) -> tuple[int, str]:
+    """Usable CPUs: the **cgroup grant**, never what the kernel advertises.
+
+    `autoinit_preflight_setup.sh` has computed this correctly since E8b and
+    applies it — to the test suite only. The driver inherited nothing, so on
+    attempt 10 torch sized its pools from the 128 vCPUs the container could see
+    while the cgroup granted **13**: 192 threads on 13 CPUs, measured, through a
+    bandwidth-bound reduction whose BLAS barriers make every thread wait for the
+    slowest.
+
+    NOT `os.cpu_count()`, and not `nproc`: coreutils documents that `nproc`
+    honours `OMP_NUM_THREADS`, so once anything sets that variable `nproc` stops
+    reporting the machine and starts reporting our own cap.
+
+    Returns `(n, source)` so a run record can say which limit bound.
+    """
+    for path, parse in (
+        ("/sys/fs/cgroup/cpu.max", "v2"),                       # cgroup v2
+        ("/sys/fs/cgroup/cpu/cpu.cfs_quota_us", "v1"),          # cgroup v1
+    ):
+        try:
+            raw = Path(path).read_text().strip()
+        except OSError:
+            continue
+        try:
+            if parse == "v2":
+                quota_s, period_s = raw.split()
+                if quota_s == "max":
+                    continue
+                quota, period = int(quota_s), int(period_s)
+            else:
+                quota = int(raw)
+                period = int(Path("/sys/fs/cgroup/cpu/cpu.cfs_period_us")
+                             .read_text().strip())
+            if quota > 0 and period > 0:
+                return max(1, min(quota // period, cap)), f"cgroup.{parse}"
+        except (OSError, ValueError):
+            continue
+
+    # No quota: a bare host, where the affinity mask is the truth.
+    try:
+        return max(1, min(len(os.sched_getaffinity(0)), cap)), "sched_getaffinity"
+    except AttributeError:                                   # pragma: no cover
+        return max(1, min(os.cpu_count() or 1, cap)), "cpu_count"
+
+
+def apply_cpu_budget(cap: int = 16) -> dict[str, Any]:
+    """Hold torch to the CPUs we were actually granted. Returns what it did.
+
+    Called by the driver before any heavy work. `torch.set_num_threads` is the
+    part that binds: the environment variables are set too, because a subprocess
+    or a library that reads them at import would otherwise re-derive the wrong
+    number from the same visible-CPU count.
+    """
+    n, source = cpu_budget(cap)
+    before = torch.get_num_threads()
+    for var in ("OMP_NUM_THREADS", "MKL_NUM_THREADS", "OPENBLAS_NUM_THREADS",
+                "NUMEXPR_NUM_THREADS"):
+        os.environ[var] = str(n)
+    torch.set_num_threads(n)
+    try:
+        torch.set_num_interop_threads(max(1, min(n, 4)))
+    except RuntimeError:
+        pass                    # already initialized; the intra-op cap is what matters
+    return {"threads": n, "source": source, "torch_threads_before": before,
+            "torch_threads_after": torch.get_num_threads(),
+            "visible_cpus": os.cpu_count()}

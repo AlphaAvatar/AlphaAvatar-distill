@@ -1,4 +1,4 @@
-**Updated:** 2026-08-19 · branch `main` · after Phase-A attempt 10
+**Updated:** 2026-08-19 · branch `main` · after the causal-depth runtime repair
 
 # Current state
 
@@ -57,17 +57,20 @@ Also frozen: recovery design, selection rules, pooled_counts@v2, Stage-3 artifac
 
 ## Latest verification
 
-After the bounded Stage-1 device-allocation audit. CPU only — no checkpoint was
+After the bounded causal-depth runtime repair. CPU only — no checkpoint was
 loaded and no metric measured:
 
-* full suite **1881 passed, 11 skipped, 0 errors** in 19:48.
-* `tests/init/` + `tests/autoinit/` **335 passed**.
-* pod simulator **1841 passed, 22 skipped**; artifact tree restored **exactly** —
-  1609 entries identical before and after.
+* full suite **1892 passed, 11 skipped, 0 errors** in 16:06.
+* pod simulator **1852 passed, 22 skipped**; artifact tree restored **exactly** —
+  1623 entries identical before and after.
 * frozen-asset verifier **passed**, no problems.
-* Phase-A pricing **$17.8933 / $22.7183 / $23.0483**, reserves 147.7683 and
-  36.2158 min — unchanged.
-* harness digest **`24d89b9f…` unchanged, 16 files, deliberately not expanded**.
+* Phase-A pricing **$17.8933 / $22.7183 / $23.0483**, reserves unchanged.
+* equivalence: frozen greedy rule unchanged by known answer; the refactor
+  **bit-identical**, drift 0.0; bf16 cache exact; decision margins 8.195e-05 to
+  1.581e-03. The CUDA-vs-CPU drift is **not** established on a CPU box, and the
+  artifact says so rather than implying otherwise.
+* harness digest **moved** to `923f8436…` — the driver and search module are in
+  the 16-file set. Expected; the set was not expanded.
 
 ## What failed, and why
 
@@ -134,44 +137,38 @@ instead of the cause, and it was paid for twice. Full diagnoses in
 
 ## Next starting point
 
-**STOPPED FOR REVIEW.** Attempt 10's grant is spent. **Attempt 11 is not
-authorized**, and the remaining $12.9870 is both not permission and not enough.
+**The causal-depth runtime repair is complete and verified at $0.** It was a
+**port regression, not a design flaw**:
+`scripts/training/search_depth_map.py` — the E8a implementation this operator
+ports — keeps prepared inputs, reference logits, ablated logits and
+`distortion()` on the accelerator. The port introduced `.cpu()`. Three lines of
+placement put them back; the reduction itself was never touched.
 
-**What is now settled.** The Stage-1 device fixes work on CUDA: the composite
-expansion completed and wrote a state, so `stream_projection`'s `avg`, the
-orthonormality `eye` and `_head_rows` all placed correctly. Stage 0 has now
-passed five times. Setup, staging, the frozen-asset gate, the test gate, artifact
-collection, the teardown gate and provider-confirmed teardown all work.
+Also repaired: the driver holds torch to the **cgroup CPU grant** (attempt 10 ran
+192 threads on 13 granted), `search_minutes` is a **real fail-closed deadline**
+checked inside the candidate loop rather than an affordability precheck, and the
+search emits **one line per candidate** so a stall is distinguishable from work.
 
-**What failed is a new class.** Attempts 6/7/9 were *placement* — a tensor
-allocated without a device. Attempt 8 was a $0 path asserting dev-box filesystem
-state. Attempt 10 had correct placement and correct numerics, and failed on
-**runtime cost that nothing priced or bounded**:
+**No concurrency was added**, deliberately: `bypassed_blocks()` mutates the
+shared model layer list, so concurrent skip sets on one model are unsafe.
 
-* `depth.causal_kl_greedy_v1` runs `greedy_removal(36, 8)` = **260 evaluations ×
-  67 items = 17,420 forward+distortion pairs**;
-* each copies the logits device→host and runs a **151,936-vocabulary softmax/KL
-  on the CPU** — ~86 TiB of CPU traffic over the expansion, ~8.6 TiB copied off
-  the device. The `.cpu()` is deliberate and documented as memory-spike
-  avoidance; its CPU cost was never priced;
-* the driver ran **192 threads on a 13-vCPU cgroup** — the setup script computes
-  that budget and applies `taskset` **only to the test suite**;
-* `--search-minutes 180.0` is an **affordability precheck**, never a runtime
-  deadline. One expansion exceeded the whole search budget by ≥3.6×.
+**Pricing: the answer was already in the repository.** The frozen cost model
+records E8a running this exact workload — 260 evaluations, 67 items, 59,763
+positions, 4.02B — in **1,300 s on an L40S**: 21.7 min, **12.0 evaluations/min**,
+with the reduction on the accelerator. An independent FLOP derivation agrees to
+**95.1%**. The 180-minute assumption was invalidated for the **host** path
+(≥30×), not for the accelerator path. Derived bound and VRAM (~25.8 GiB peak,
+cache enabled under the 0.66 gate):
+[`autoinit_causal_depth_pricing_bound.json`](autoinit_causal_depth_pricing_bound.json).
 
-How far through the 260 evaluations it reached is **unknown** — `greedy_removal`
-journals only on completion.
+**What still needs a GPU:** that the *ported* code achieves E8a's rate, and its
+real peak VRAM — attempt 10 is the proof that a port can differ from its ancestor
+in ways no CPU run reveals. `scripts/autoinit/measure_causal_depth_runtime.py` is
+the bounded job (~20 evaluations, minutes of GPU time). **It is not authorized
+and was not run.**
 
-**The reviewer decides** whether the reduction may move to the device (**not** by
-deleting the `.cpu()` calls: the causal-depth scoring and removal rule is frozen
-science, so numerical equivalence and identical removal decisions must be shown
-first); whether the driver should inherit the cgroup-aware thread budget; whether
-`search_minutes` becomes a real deadline checked *inside* an expansion; whether
-the cost model should charge the scoring reduction; and the budget question.
-
-**Do not resume** the two attempt-10 search states against a changed numerical
-path without demonstrated compatibility. Their weights are gone with the pod;
-only specs and hashes survive.
+**Nothing is authorized, funded or prepared.** Attempt 11 is not authorized, and
+$12.9870 would not cover a full attempt in any case.
 
 ## Where else to look
 

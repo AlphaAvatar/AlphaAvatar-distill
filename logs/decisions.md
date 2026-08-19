@@ -4437,3 +4437,110 @@ two devices, cuda:0 and cpu!
 - **Revisit when:** the reviewer rules on the reduction's device, the driver's
   thread budget, `search_minutes` as a real deadline, the cost model, and the
   budget.
+
+## 2026-08-19 — The causal-depth runtime repair: restore E8a's path, prove it moved nothing
+
+- **Context:** attempt 10 spent $11.43 running a 151,936-vocabulary softmax/KL on
+  the host, 260 x 67 times per expansion. The reviewer supplied the anchor that
+  turned this from a design question into a port regression:
+  `scripts/training/search_depth_map.py` — the E8a implementation
+  `depth.causal_kl_greedy_v1` claims to port — keeps prepared inputs, reference
+  logits, ablated logits and `distortion()` on the selected accelerator. **The
+  port introduced the `.cpu()`.** So the task was not to invent a GPU algorithm;
+  it was to put the tensors back where E8a left them and prove the port still
+  computes the same thing.
+- **What changed, and it is three lines of placement.** `_forward_logits` no
+  longer returns `.cpu()`; `targets` are `.to(compute)` rather than `.cpu()`; and
+  the reference-cache memory probe follows the cache to the device
+  (`torch.cuda.mem_get_info` on CUDA) instead of measuring the host. The
+  reduction itself was **not touched** — `distortion` was always device-agnostic,
+  which is why the repair is a placement change and not a rewrite. Chunk size,
+  aggregation, greedy rule, tie-break, beam, calibration and operator ids are
+  untouched.
+- **The previous probe was correct reasoning on a false premise.** Its docstring
+  said: "E8a kept its cache on the accelerator and therefore checked
+  `torch.cuda.mem_get_info`; copying that probe here would measure free VRAM
+  against an allocation that never touches it." True — given the `.cpu()`. The
+  author adapted the probe to the defect rather than questioning it. The fallback
+  when the cache does not fit is still **recompute**, never a silent move to the
+  host, because a host-resident reference drags the whole reduction back with it.
+- **Equivalence, in four claims, because they are not the same claim.**
+  `scripts/autoinit/verify_depth_backend_equivalence.py` reports:
+  - **claim 0, the frozen greedy rule is unchanged**, by known answer — argmin
+    order and the lowest-index tie-break. This exists because a mutation proved
+    claims 1-3 *cannot* see a rule change: both arms share one `greedy_removal`,
+    so inverting argmin to argmax cancels out and the comparison still passed.
+    Without claim 0, "equivalence verified" would have read as "the science is
+    unchanged" while saying nothing of the kind.
+  - **claim 1, the refactor is exact**: repaired versus the old host-resident
+    path, same inputs — removal decisions identical, per-round tables
+    **bit-identical**, max chosen-score drift **0.0**, same forward-pass count.
+  - **claim 2, the bf16 reference cache is exact**: cached versus recomputed
+    delta **0.0**, re-checking E8a's claim rather than inheriting it.
+  - **claim 3, decision tolerance**: per-round chosen, runner-up and margin;
+    **min margin 8.195e-05**, max 1.581e-03.
+  - and it states in its own output **what it cannot establish**: the actual
+    CUDA-versus-CPU drift. Both arms ran on one device, so the measured drift is
+    zero *by construction*. That figure must come from the GPU and be compared
+    against the min margin.
+- **The other two repairs.** The driver now calls `apply_cpu_budget()` before
+  heavy work — attempt 10 ran 192 threads on a 13-vCPU cgroup because torch sized
+  its pools from the 128 the container advertised, while the setup script has
+  computed that budget correctly since E8b and applied it to the test suite only.
+  And `search_minutes` became a real deadline: a `Deadline` passed to
+  `BeamSearch` at construction — **not** a `SearchConfig` field, because that
+  dataclass "fixes a search run, and therefore everything that hashes" — checked
+  before each expansion and, via a new `on_candidate` hook, **inside**
+  `greedy_removal`'s candidate loop. Fail-closed.
+- **The search now says where it is.** `greedy_removal` gained `on_candidate`
+  beside its existing (and never-wired) `on_round`; `depth.apply` wires both. One
+  line per candidate, 260 for an expansion, each carrying evaluations, elapsed
+  minutes and the running eval/min rate, plus a per-round line with the chosen
+  layer, the runner-up and the margin. Attempt 10 was silent for 10 h 47 m
+  because a record is written only when a round *commits*, and a round is 29-36
+  evaluations. Neither hook can change a decision — both are called with what is
+  already computed and their return value is discarded — and a test asserts it.
+- **NO concurrency was added,** as directed. `bypassed_blocks()` mutates the
+  shared model layer list, so evaluating different skip sets concurrently against
+  one model is unsafe; the single-candidate GPU path is measured first.
+- **The pricing answer was already in the repository.** The frozen cost model's
+  hardware calibration (`logs/autoinit_v1_search_space.json`) records **E8a
+  running exactly this workload — 260 evaluations, 67 items, 59,763 positions,
+  4.02B full width — in 1,300 s on an L40S**: 21.7 min, **12.0 evaluations per
+  minute**, with the reduction on the accelerator. An independent FLOP derivation
+  reproduces it to **95.1%**. So the 180-minute assumption was **not** invalidated
+  for an accelerator-resident path — it was invalidated for the host path, by a
+  factor of **>= 30x**.
+- **Derived bound, and what still needs a GPU.**
+  `logs/autoinit_causal_depth_pricing_bound.json` carries ~21.7 min and ~25.8 GiB
+  peak (model 7.49 + bf16 cache 16.91 + chunks 1.16 + one ablated item 0.25) on a
+  45 GiB card, with the 0.66 gate leaving the cache **enabled**. What it does not
+  establish is that the *ported code* achieves E8a's rate — attempt 10 is the
+  proof that a port can differ from its ancestor in ways no CPU run reveals.
+  `scripts/autoinit/measure_causal_depth_runtime.py` is the bounded job that
+  would settle it: ~20 evaluations, minutes of GPU time, reporting evaluations
+  per minute and peak VRAM. **It is not authorized and was not run.**
+- **A bug I introduced and the suite caught:** the pre-expansion deadline check
+  read `parent.spec_hash`, which `InitializationState` does not have. It surfaced
+  in `test_phase_a_stages1_5_execute.py` — the file the pod gate ignores and
+  which executes stages 1-5 for real at toy scale, 14 minutes of the suite's 16.
+  Its `run_phase_a_search` stub also had to learn the new parameter, and it now
+  **records** what was forwarded rather than tolerating it: a `**kwargs` there
+  would have swallowed the budget and left the deadline silently unset on a pod.
+- **Verified:** full suite **1892 passed, 11 skipped, 0 errors** (16:06); pod
+  simulator **1852 passed, 22 skipped**, artifact tree restored **exactly** (1623
+  entries); frozen-asset verifier passed; equivalence artifact regenerated.
+  Pricing `$17.8933 / $22.7183 / $23.0483` and reserves unchanged; science
+  `02be33b9`, session `9377a2dc`, Stage-3 `250f72ef`, interval, floor and seeds
+  unchanged. **The harness digest moved** to `923f8436…` — the driver and the
+  search module are both in the 16-file set — which is expected: a new
+  authorization binds a new pre-auth commit, and the set was not expanded.
+- **Mutation-verified, eight mutations.** Restoring the `.cpu()`, sending targets
+  back to the host, silencing `on_candidate`, disabling the deadline, reading the
+  visible CPU count first, unbinding torch's threads — each fails a test. And
+  against the equivalence artifact: inverting argmin, and inverting the
+  tie-break — each is refused by claim 0.
+- **Revisit when:** the GPU measurement lands. If utilization is still materially
+  below saturation with scoring device-resident, bounded candidate/frontier
+  concurrency becomes the next question — and it needs `bypassed_blocks`' shared
+  mutation addressed first.

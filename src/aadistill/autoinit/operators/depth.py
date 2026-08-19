@@ -20,6 +20,7 @@ decision.
 
 from __future__ import annotations
 
+import time
 from collections.abc import Mapping
 from pathlib import Path
 from typing import Any
@@ -162,12 +163,16 @@ class DepthCausalKLGreedyV1(OperatorImplementation):
             model.config.use_cache = False
 
         domains = _domain_map(items)
-        targets = [item["input_ids"][0, 1:].cpu() for item in items]
         # From the weights, not from `ctx.device`: category 1 of the device
         # contract. The two agree on every path the search takes, so this
         # changes no behaviour — it removes the last operator that read the
         # intent instead of the fact.
         compute = model_device(model)
+        # On the compute device, like E8a's `prepare()`: "Token tensors, targets
+        # and boolean tag masks, once, on the device." These meet the logits
+        # inside `distortion`'s `gather`, so a host target would drag the whole
+        # reduction back to the host — which is exactly what happened.
+        targets = [item["input_ids"][0, 1:].to(compute) for item in items]
         reference = _ReferenceLogits(model, items, compute)
 
         def score(skip: frozenset[int]) -> float:
@@ -185,7 +190,45 @@ class DepthCausalKLGreedyV1(OperatorImplementation):
             return primary
 
         n_remove = ctx.parent_spec[DEPTH_FIELD] - ctx.target_spec[DEPTH_FIELD]
-        result = greedy_removal(score, ctx.parent_spec[DEPTH_FIELD], n_remove)
+
+        # Bounded progress, and the deadline checked where the cost is.
+        #
+        # A round is 29-36 model evaluations and a record is written only when
+        # one commits, so attempt 10 was silent for 10 h 47 m and nobody could
+        # tell a working search from a stalled one. This prints at most one line
+        # per candidate — 260 lines for the whole expansion — and it is the same
+        # callback that enforces the wall clock, because the two questions
+        # ("where is it?" and "has it run too long?") are asked at exactly the
+        # same instant.
+        started = time.monotonic()
+        progress = {"evaluations": 0, "rounds": 0}
+
+        def on_candidate(p: dict) -> None:
+            progress["evaluations"] = p["evaluations"]
+            mins = (time.monotonic() - started) / 60.0
+            rate = p["evaluations"] / mins if mins > 0 else 0.0
+            print(f"depth.causal_kl_greedy_v1: round {p['round']} "
+                  f"candidate {p['index']}/{p['of']} (layer {p['candidate']}) "
+                  f"score {p['score']:.6f} · {p['evaluations']} evals · "
+                  f"{mins:.1f} min · {rate:.2f} eval/min", flush=True)
+            if ctx.deadline is not None:
+                ctx.deadline.check(
+                    f"depth.causal_kl_greedy_v1 round {p['round']} "
+                    f"candidate {p['index']}/{p['of']} "
+                    f"({p['evaluations']} evaluations done)")
+
+        def on_round(r: dict) -> None:
+            progress["rounds"] = r["round"] + 1
+            ranked = sorted(r["table"], key=lambda x: (x["score"], x["candidate"]))
+            margin = (ranked[1]["score"] - ranked[0]["score"]
+                      if len(ranked) > 1 else float("nan"))
+            print(f"depth.causal_kl_greedy_v1: ROUND {r['round']} chose layer "
+                  f"{r['chosen']} score {r['chosen_score']:.6f}; runner-up "
+                  f"{ranked[1]['candidate'] if len(ranked) > 1 else None} "
+                  f"margin {margin:.3e}", flush=True)
+
+        result = greedy_removal(score, ctx.parent_spec[DEPTH_FIELD], n_remove,
+                                on_round=on_round, on_candidate=on_candidate)
         kept = result["kept"]
         child = _build_child_with_layers(ctx, kept)
 
@@ -228,15 +271,27 @@ def _domain_map(items) -> dict[str, list[str]]:
 def _forward_logits(model, item, device: str, skip=frozenset()):
     """One item's prediction-position logits, optionally with blocks bypassed.
 
-    Left in the model's own dtype. ``distortion`` upcasts to float32 in chunks
-    internally, so widening here would only double the bytes held per item
-    without changing a single reduced value.
+    Left in the model's own dtype **and on the model's device**. ``distortion``
+    upcasts to float32 in chunks internally, so widening here would only double
+    the bytes held per item without changing a single reduced value.
+
+    **This returned ``.cpu()`` until 2026-08-19, and that cost $11.43.** E8a —
+    ``scripts/training/search_depth_map.py``, the implementation this operator
+    ports — keeps prepared inputs, reference logits, ablated logits and the
+    ``distortion`` reduction on the selected accelerator. The port introduced the
+    transfer, and with it a full 151,936-vocabulary softmax/KL on the host, 260
+    evaluations x 67 items per expansion: ~86 TiB of CPU traffic and ~8.6 TiB
+    copied off the device. Attempt 10 ran 10 h 47 m inside one expansion, GPU at
+    0-1 %, and was stopped without finishing it.
+
+    Nothing about the reduction changed to fix this. The tensors simply stay
+    where E8a left them.
     """
     ids = item["input_ids"].to(device)
     if not skip:
-        return model(ids).logits[0, :-1].cpu()
+        return model(ids).logits[0, :-1]
     with bypassed_blocks(model, skip):
-        return model(ids).logits[0, :-1].cpu()
+        return model(ids).logits[0, :-1]
 
 
 class _ReferenceLogits:
@@ -273,7 +328,7 @@ class _ReferenceLogits:
         positions = sum(int(i["input_ids"].shape[1]) - 1 for i in items)
         itemsize = next(model.parameters()).dtype.itemsize
         self.estimate_bytes = positions * int(model.config.vocab_size) * itemsize
-        self.available_bytes, self.headroom_source = _host_available_memory_bytes()
+        self.available_bytes, self.headroom_source = _available_memory_bytes(device)
         self.enabled = (self.available_bytes is None
                         or self.estimate_bytes
                         <= self.BUDGET_FRACTION * self.available_bytes)
@@ -309,13 +364,37 @@ class _ReferenceLogits:
         }
 
 
-def _host_available_memory_bytes() -> tuple[int | None, str]:
-    """Free **host** memory, because that is where the cache lands.
+def _available_memory_bytes(device: Any) -> tuple[int | None, str]:
+    """Free memory **where the cache will actually live**.
 
-    ``_forward_logits`` returns ``.cpu()``, so the cache is host-resident no
-    matter what device the model is on. E8a kept its cache on the accelerator
-    and therefore checked ``torch.cuda.mem_get_info``; copying that probe here
-    would measure free VRAM against an allocation that never touches it.
+    Since 2026-08-19 the cache is device-resident, as E8a's always was, so on an
+    accelerator this asks the accelerator. The previous version measured the
+    host — correctly for the code as it then stood, because ``_forward_logits``
+    returned ``.cpu()``. Its own docstring said so:
+
+        "E8a kept its cache on the accelerator and therefore checked
+        ``torch.cuda.mem_get_info``; copying that probe here would measure free
+        VRAM against an allocation that never touches it."
+
+    That reasoning was sound and the premise was the defect. The probe follows
+    the cache rather than the other way round.
+
+    The fallback when it does not fit is **recompute**, never a silent move to
+    the host: a host-resident reference would drag the whole reduction back with
+    it, which is the $11.43 failure.
+    """
+    dev = torch.device(device) if not isinstance(device, torch.device) else device
+    if dev.type == "cuda":                       # pragma: no cover - needs a GPU
+        try:
+            free, _total = torch.cuda.mem_get_info(dev)
+            return int(free), f"cuda.mem_get_info:{dev}"
+        except Exception:                                          # noqa: BLE001
+            return None, "cuda.mem_get_info unavailable"
+    return _host_available_memory_bytes()
+
+
+def _host_available_memory_bytes() -> tuple[int | None, str]:
+    """Free host memory, for a CPU-resident cache.
 
     The **cgroup** grant comes first: inside a container ``/proc/meminfo``
     reports the *host's* memory, and this project has already shipped one bug

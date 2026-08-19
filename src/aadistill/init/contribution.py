@@ -241,6 +241,7 @@ def greedy_removal(
     protect: Collection[int] = (),
     completed_rounds: Iterable[dict] | None = None,
     on_round=None,
+    on_candidate=None,
 ) -> dict:
     """Remove `n_remove` blocks one at a time, re-scoring survivors every round.
 
@@ -258,6 +259,15 @@ def greedy_removal(
     pod restart is avoidable). Resumed rounds are replayed, not re-scored, and
     their recorded choice is trusted — the caller is responsible for only
     passing records produced by the same objective.
+
+    `on_round(record)` fires when a round commits; `on_candidate(progress)` fires
+    after every candidate is scored. **Neither can change a decision** — they are
+    called with what has already been computed and their return value is
+    discarded — but `on_candidate` may *raise*, which is how a wall-clock
+    deadline stops the search inside an expansion rather than after it. Both
+    exist because attempt 10 spent 10 h 47 m in one expansion emitting nothing:
+    a round record is written only when a round completes, and a round is 29-36
+    model evaluations, so between rounds the search is silent for hours.
     """
     if not 0 <= n_remove < n_layers:
         raise ValueError(f"cannot remove {n_remove} of {n_layers} layers")
@@ -290,6 +300,15 @@ def greedy_removal(
                 raise ValueError(f"objective returned {score} for candidate {c}")
             evaluations += 1
             table.append({"candidate": c, "score": score})
+            if on_candidate is not None:
+                # After the append, so the observer sees the same table the
+                # decision below will see. Its return value is discarded; only an
+                # exception it raises can affect control flow, and that stops the
+                # search rather than steering it.
+                on_candidate({"round": len(skipped), "candidate": c,
+                              "score": score, "index": len(table),
+                              "of": len(candidates),
+                              "evaluations": evaluations})
         best = min(table, key=lambda r: (r["score"], r["candidate"]))
         record = {
             "round": len(skipped),

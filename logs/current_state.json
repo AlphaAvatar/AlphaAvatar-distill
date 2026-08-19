@@ -1,6 +1,6 @@
 {
   "schema": "aadistill.current_state/v2",
-  "generated_utc": "2026-08-19T05:30:00Z",
+  "generated_utc": "2026-08-19T06:24:59Z",
   "_contract": "The minimal machine-readable CURRENT snapshot. It owns live facts and nothing else: no history, no per-attempt detail, no narrative. History lives in logs/decisions.md and the per-run directories; the human view of THIS file is logs/STATE.md and the two must agree. README owns no live facts at all. Ownership rules: logs/CATALOG.md.",
   "baseline_commit": "8183a23ef74fb9fba738ef62feef43dc72445b53",
   "baseline_commit_meaning": "The LAST TESTED IMPLEMENTATION: the commit whose tree produced the latest_verification figures below. It is deliberately NOT the commit carrying this file. Two commits follow it by construction and neither is separately tested: (1) the grant/provenance commit that adds the one-use grant document and this refresh, and (2) the authorization-only commit, which the Phase-A lineage gate requires to differ from its base in nothing but logs/autoinit_phase_a_authorization.json. Keeping the distinction explicit is the point: a reader must be able to tell which commit the 1874/1834/395 numbers describe from which commit a pod checks out. This field read fe3c2b3 while HEAD was four commits ahead once, and read 4563d106 after the post-fix verification, because nothing refreshes or checks it; it is refreshed as part of preparing a paid launch.",
@@ -53,16 +53,18 @@
     "the Stage-1 device audit (autoinit.stage1_device_contract@v1)",
     "the bounded Stage-1 device-allocation audit: 15 fresh-tensor factories in the frozen-operator closure classified device-coupled or intentionally host-only; 3 fixed, the rest verified correct",
     "Stage 0 on hardware, passed five times (attempt 10 attested interval 0.011695, floor 0.3000, plan 02be33b9)",
-    "the Stage-1 device fixes, confirmed on CUDA: attempt 10's composite expansion completed and wrote a state, so stream_projection's avg, the orthonormality eye and _head_rows all placed correctly"
+    "the Stage-1 device fixes, confirmed on CUDA: attempt 10's composite expansion completed and wrote a state, so stream_projection's avg, the orthonormality eye and _head_rows all placed correctly",
+    "the causal-depth runtime repair: scoring restored to the accelerator per E8a, cgroup-aware CPU budget, search_minutes as a fail-closed in-expansion deadline, bounded per-candidate progress"
   ],
   "latest_verification": {
-    "utc": "2026-08-18T17:46:05Z",
-    "after": "the bounded Stage-1 device-allocation audit that followed attempt 9",
-    "full_suite": "1881 passed, 11 skipped, 0 errors in 19:48",
-    "stage1_and_autoinit": "335 passed (tests/init/ + tests/autoinit/)",
-    "pod_simulator": "1841 passed, 22 skipped in 2:54; artifact tree restored EXACTLY - 1609 entries, identical before and after",
+    "utc": "2026-08-19T06:24:59Z",
+    "after": "the bounded causal-depth runtime repair that followed attempt 10",
+    "full_suite": "1892 passed, 11 skipped, 0 errors in 16:06",
+    "pod_simulator": "1852 passed, 22 skipped; artifact tree restored EXACTLY - 1623 entries identical before and after",
     "frozen_asset_verifier": "passed, no problems",
     "phase_a_price_reproduced": "$17.8933 / $22.7183 / $23.0483 exactly, reserves 147.7683 and 36.2158 minutes",
+    "equivalence": "logs/autoinit_depth_backend_equivalence.json: frozen greedy rule unchanged by known answer; refactor bit-identical, drift 0.0; bf16 cache exact; decision margins 8.195e-05 to 1.581e-03. CUDA-vs-CPU drift is NOT established on a CPU box and the artifact says so",
+    "harness_digest": "923f8436... - MOVED, expected: the driver and search module are in the 16-file set. Not expanded; a new authorization binds a new pre-auth commit",
     "scope": "CPU only; no checkpoint was loaded and no metric measured"
   },
   "failed": [
@@ -133,7 +135,10 @@
     "an active tombstone may not name a declared session staging or mirror destination - checked against the four SessionSpecs, touching no path, so the dev box, the simulator and a pod all give the same answer",
     "checkpoint_tombstones.json owns the active-tombstone counts and bytes",
     "autoinit.stage1_device_contract@v1 category 5 (added 2026-08-19): a fresh factory on the Stage-1 path either names a device derived from what it meets, or is host-only on purpose and must not be mechanically moved",
-    "placement is asserted by intercepting factory calls (tests/autoinit/factory_placement.py), the dual of the HostCacheTensor split - neither instrument can see the other's class"
+    "placement is asserted by intercepting factory calls (tests/autoinit/factory_placement.py), the dual of the HostCacheTensor split - neither instrument can see the other's class",
+    "causal-depth scoring is device-resident, as E8a's always was; the reference cache probes the device it lives on and falls back to RECOMPUTE, never to the host",
+    "search_minutes is a real deadline (Deadline, runtime-only so it is never hashed) checked before each expansion and inside greedy_removal's candidate loop",
+    "the driver holds torch to the cgroup CPU grant via apply_cpu_budget()"
   ],
   "abandoned": [
     "recovery_search_v1 (INVALID before first use)",
@@ -143,10 +148,11 @@
     "the paid device-canary session path: STRATEGICALLY TERMINATED 2026-08-18. Two authorized sessions, $0.1240, zero canary runs; both died in the wrapper's inherited contracts. Its evidence and its generic lesson are kept; no further canary is prepared."
   ],
   "next_starting_point": {
-    "status": "STOPPED after attempt 10 was halted on maintainer instruction. Grant spent. Attempt 11 NOT authorized, and $12.9870 is neither permission nor enough for a $23.0484 launch.",
-    "the_finding": "depth.causal_kl_greedy_v1 scores on the CPU by explicit .cpu() on both sides, 260 x 67 times per expansion; deliberate, documented, never priced. Full postmortem and numbers: logs/autoinit_phase_a_attempt10/",
-    "open_for_the_reviewer": "whether the reduction may move to the device (NOT by deleting the .cpu() calls - the causal-depth scoring and removal rule is frozen science, so numerical equivalence and identical removal decisions must be shown first); whether the driver inherits the setup's cgroup-aware thread budget; whether search_minutes becomes a runtime deadline checked inside an expansion; whether the cost model charges the scoring reduction; and the budget decision a retry requires.",
-    "do_not": "resume the two attempt-10 search states against a changed numerical path without demonstrated compatibility; their weights are gone."
+    "status": "The bounded runtime repair is complete and verified at $0. Nothing is authorized, funded or prepared. Attempt 11 is NOT authorized and $12.9870 would not cover a full attempt in any case.",
+    "the_finding": "a port regression, not a design flaw: E8a keeps the causal-depth reduction on the accelerator and the AutoInitializer port introduced .cpu(). Restored, with equivalence proved. Detail: logs/autoinit_depth_backend_equivalence.json",
+    "pricing": "the answer was already in the frozen cost model: E8a ran this exact workload in 1,300 s = 21.7 min = 12.0 evaluations/min on an L40S, and an independent FLOP derivation agrees to 95.1%. The 180-minute assumption was invalidated for the HOST path (>= 30x), not for the accelerator path. Derived bound and VRAM: logs/autoinit_causal_depth_pricing_bound.json",
+    "what_still_needs_a_gpu": "that the PORTED code achieves E8a's rate, and its real peak VRAM. scripts/autoinit/measure_causal_depth_runtime.py is the bounded job (~20 evaluations, minutes of GPU time). NOT authorized and NOT run.",
+    "not_done_deliberately": "no beam/candidate concurrency: bypassed_blocks() mutates the shared model layer list, so concurrent skip sets on one model are unsafe. Measure the single-candidate GPU path first."
   },
   "read_order": [
     "logs/STATE.md — the human view of this file",

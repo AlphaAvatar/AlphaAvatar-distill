@@ -54,6 +54,7 @@ sys.path.insert(0, str(REPO / "src"))
 sys.path.insert(0, str(REPO / "scripts/autoinit"))
 
 from aadistill.autoinit.authorization import AuthorizationError  # noqa: E402
+from aadistill.autoinit.device import apply_cpu_budget  # noqa: E402
 from aadistill.autoinit.generation import (  # noqa: E402
     RecoveryEvaluationProtocol, declared_generation_protocol,
     generation_source_digest, observe_generation_protocol,
@@ -440,9 +441,20 @@ class PhaseADriver:
         # intermediate which cannot be a recovery candidate at all.
         from phase_a_search import run_phase_a_search
 
+        # Hold torch to the CPUs the cgroup actually granted, before any heavy
+        # work. Attempt 10 ran 192 threads on a 13-vCPU grant because torch sized
+        # its pools from the 128 the container could see; the setup script has
+        # computed this correctly since E8b and applied it to the test suite
+        # only. Recorded, not just done, so the run says which limit bound.
+        budget = apply_cpu_budget()
+        say(f"cpu budget: {budget['threads']} threads "
+            f"({budget['source']}, {budget['visible_cpus']} visible)")
+        self.ev.setdefault("runtime", {})["cpu_budget"] = budget
+
         found = run_phase_a_search(
             workdir=SEARCH_WORKDIR, state_eval=STATE_EVAL,
-            top_n=self.plan.searched_leaves, device="cuda", repo_root=REPO)
+            top_n=self.plan.searched_leaves, device="cuda", repo_root=REPO,
+            search_minutes=self.a.search_minutes)
         (AUDIT / "search_result.json").write_text(
             json.dumps(found.summary, indent=2, default=str) + "\n")
 

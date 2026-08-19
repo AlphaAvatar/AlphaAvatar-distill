@@ -68,6 +68,66 @@ class SearchError(RuntimeError):
     """The search cannot proceed as configured."""
 
 
+class SearchDeadlineExceeded(SearchError):
+    """The search ran past its wall-clock budget and stopped, fail-closed."""
+
+
+@dataclass
+class Deadline:
+    """A real runtime budget, checked *inside* expensive work.
+
+    Added 2026-08-19. ``--search-minutes 180.0`` already existed and was already
+    priced, but it reached only ``self.afford(...)`` in the driver — an
+    affordability check *before* the search starts. Nothing consulted a clock
+    afterwards: this module recorded ``elapsed`` and ``wall_seconds`` and never
+    compared them to anything, and ``_expand_one`` had no clock at all. So one
+    expansion ran 10.78 h against a 3.0 h budget for the whole search and would
+    have continued to the watchdog's $23.05 ceiling.
+
+    Deliberately **not** a :class:`SearchConfig` field: that dataclass "fixes a
+    search run, and therefore everything that hashes". A wall-clock budget is an
+    operational limit, not part of the search's identity, and putting it there
+    would make every re-pricing a different search.
+
+    ``check()`` is cheap enough to call per candidate — one ``time.monotonic``
+    and a comparison — which is the granularity that matters, because the
+    expensive thing here is a single candidate evaluation.
+    """
+
+    seconds: float
+    started: float = field(default_factory=time.monotonic)
+    #: Set when the deadline fires, so a caller can report where it stopped.
+    fired_at: str = ""
+
+    @classmethod
+    def from_minutes(cls, minutes: float | None) -> "Deadline | None":
+        return None if minutes is None else cls(seconds=float(minutes) * 60.0)
+
+    def elapsed(self) -> float:
+        return time.monotonic() - self.started
+
+    def remaining(self) -> float:
+        return self.seconds - self.elapsed()
+
+    def expired(self) -> bool:
+        return self.remaining() <= 0.0
+
+    def check(self, where: str = "") -> None:
+        """Raise if the budget is spent. Fail closed: no partial credit."""
+        if self.expired():
+            self.fired_at = where or self.fired_at or "unspecified"
+            raise SearchDeadlineExceeded(
+                f"search deadline exceeded after {self.elapsed() / 60:.1f} min "
+                f"(budget {self.seconds / 60:.1f} min) at {self.fired_at}. The "
+                "search stopped rather than continuing to the cost backstop.")
+
+    def as_dict(self) -> dict[str, Any]:
+        return {"budget_minutes": round(self.seconds / 60, 4),
+                "elapsed_minutes": round(self.elapsed() / 60, 4),
+                "expired": self.expired(),
+                "fired_at": self.fired_at or None}
+
+
 CalibrationLoader = Callable[[CalibrationProfile], Sequence[Mapping[str, Any]]]
 Measurer = Callable[[Any, str], StateEvaluation]
 
@@ -163,9 +223,12 @@ class BeamSearch:
         calibration_loader: CalibrationLoader,
         measurer: Measurer,
         root_spec: ArchSpec | None = None,
+        deadline: "Deadline | None" = None,
     ) -> None:
         self.adapter = adapter
         self.config = config
+        #: Runtime only. Never hashed — see `Deadline`.
+        self.deadline = deadline
         self.root_teacher_id = root_teacher_id
         self.root_teacher_sha256 = root_teacher_sha256
         self.root_loader = root_loader
@@ -385,7 +448,14 @@ class BeamSearch:
             device=self.config.device, workdir=self.workdir,
             config=dict(operator_config),
             stats_cache=self.stats_cache,
-            stats_cache_key=self._stats_key(parent, profile))
+            stats_cache_key=self._stats_key(parent, profile),
+            deadline=self.deadline)
+
+        # Before the expansion, so a budget already spent does not buy one more
+        # hour-long operator; and the operator itself checks *inside* its own
+        # loop, which is the granularity that actually bounds the cost.
+        if self.deadline is not None:
+            self.deadline.check(f"before {impl.impl_id} on {parent.spec.spec_hash[:12]}")
 
         started = time.time()
         outcome = impl.execute(ctx)

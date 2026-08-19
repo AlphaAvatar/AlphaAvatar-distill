@@ -139,6 +139,12 @@ class OperatorContext:
     #: impossible rather than merely discouraged. `None` disables sharing.
     stats_cache: Any = None
     stats_cache_key: str | None = None
+    #: The search's wall-clock budget, or None. An operator whose work is
+    #: measured in hours is expected to call `deadline.check(...)` inside its own
+    #: loop: `depth.causal_kl_greedy_v1` ran 10.78 h against a 3.0 h budget
+    #: because nothing between the driver's affordability check and the cost
+    #: watchdog ever consulted a clock.
+    deadline: Any = None
 
     def cached_stats(self, collect):
         """Statistics for this parent under this profile, collected at most once."""

@@ -203,9 +203,19 @@ def build(tmp_path, monkeypatch, *, separated=False, n_suite_items=None,
     real_search = phase_a_search.run_phase_a_search
     calibration = calibration_subset(n_calibration_items)
 
-    def wrapped(*, workdir, state_eval, top_n, device, repo_root):
+    forwarded: dict = {}
+
+    def wrapped(*, workdir, state_eval, top_n, device, repo_root,
+                search_minutes=None):
         # `repo_root` is passed through UNCHANGED: it is what
         # `DOMAIN_BALANCED_V1.resolve()` reads.
+        #
+        # `search_minutes` is RECORDED rather than merely tolerated. This stub
+        # exists to substitute the boundary, not to hide a contract: when the
+        # driver grew a wall-clock budget the stub's signature was what caught
+        # it, and a `**kwargs` here would have swallowed the argument and left
+        # the deadline silently unset on a paid pod.
+        forwarded["search_minutes"] = search_minutes
         return real_search(
             workdir=workdir, state_eval=state_eval, top_n=top_n,
             device="cpu", repo_root=repo_root,
@@ -214,7 +224,8 @@ def build(tmp_path, monkeypatch, *, separated=False, n_suite_items=None,
             teacher_loader=lambda: teacher,
             target_geometry=TARGET_GEOMETRY,
             suite_bundle=(suite, items, manifest),
-            calibration_items=calibration)
+            calibration_items=calibration,
+            search_minutes=search_minutes)
 
     monkeypatch.setattr(phase_a_search, "run_phase_a_search", wrapped)
 
@@ -259,6 +270,8 @@ def build(tmp_path, monkeypatch, *, separated=False, n_suite_items=None,
         return fake_scored(label, seed, usable=usable, correct=correct)
 
     driver.battery = battery
+    # Exposed so a test can assert the budget really reached the search.
+    driver._forwarded_to_search = forwarded
     return driver, mod
 
 

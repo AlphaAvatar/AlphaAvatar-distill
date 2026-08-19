@@ -1,0 +1,89 @@
+{
+  "schema": "aadistill.autoinit.depth_backend_equivalence/v1",
+  "claim_0_frozen_greedy_rule_unchanged": {
+    "argmin_order": [
+      0,
+      1,
+      2
+    ],
+    "kept": [
+      3,
+      4,
+      5
+    ],
+    "argmin_correct": true,
+    "tie_breaks_to_lower_index": true,
+    "holds": true,
+    "why": "claims 1-3 compare two placements of the same rule, so they cannot see a change to the rule. This can."
+  },
+  "device": "cpu",
+  "cuda_available": false,
+  "config": {
+    "layers": 8,
+    "remove": 3,
+    "items": 6,
+    "length": 48,
+    "seed": 20260819
+  },
+  "claim_1_refactor_is_exact": {
+    "removal_decisions_identical": true,
+    "kept_repaired": [
+      0,
+      1,
+      2,
+      3,
+      4
+    ],
+    "kept_frozen_path": [
+      0,
+      1,
+      2,
+      3,
+      4
+    ],
+    "per_round_tables_bit_identical": true,
+    "max_chosen_score_drift": 0.0,
+    "forward_passes_repaired": 132,
+    "forward_passes_frozen_path": 132
+  },
+  "claim_2_bf16_reference_cache_is_exact": {
+    "cached_vs_recomputed_abs_delta": 0.0,
+    "exact": true,
+    "note": "E8a asserts caching bf16 logits is identical to recomputing them because distortion upcasts to float32 either way; re-checked here rather than inherited"
+  },
+  "claim_3_decision_tolerance": {
+    "rounds": [
+      {
+        "round": 0,
+        "chosen": 7,
+        "chosen_score": 0.0017583508520050252,
+        "runner_up": 6,
+        "runner_up_score": 0.0033393789558334554,
+        "margin": 0.0015810281038284302,
+        "n_candidates": 8
+      },
+      {
+        "round": 1,
+        "chosen": 6,
+        "chosen_score": 0.0044241273736066004,
+        "runner_up": 5,
+        "runner_up_score": 0.004506079440421247,
+        "margin": 8.195206681464642e-05,
+        "n_candidates": 7
+      },
+      {
+        "round": 2,
+        "chosen": 5,
+        "chosen_score": 0.006478281969085653,
+        "runner_up": 3,
+        "runner_up_score": 0.007319430404521049,
+        "margin": 0.000841148435435396,
+        "n_candidates": 6
+      }
+    ],
+    "min_margin": 8.195206681464642e-05,
+    "max_margin": 0.0015810281038284302,
+    "meaning": "a backend perturbing scores by less than min_margin cannot change a removal; one perturbing them by more can. Compare the GPU run's measured drift against this."
+  },
+  "what_this_does_not_establish": "the actual CUDA-versus-CPU drift. Both paths here ran on cpu, so the measured drift is zero by construction and is not evidence about a different backend. That figure must come from the GPU measurement run and be compared against min_margin above."
+}

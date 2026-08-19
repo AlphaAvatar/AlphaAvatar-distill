@@ -1,0 +1,57 @@
+{
+  "schema": "aadistill.autoinit.causal_depth_pricing_bound/v1",
+  "generated_utc": "2026-08-19T00:00:00Z",
+  "_status": "DERIVED, not measured on the repaired code. The GPU measurement job is scripts/autoinit/measure_causal_depth_runtime.py and is NOT authorized; this is what a budget decision can be made against, and what that job would confirm.",
+  "the_question": "attempt 10 invalidated the 180-minute search assumption. Was the assumption wrong, or was the path wrong?",
+  "answer": "the path. The frozen cost model's hardware calibration is itself a measurement of this exact workload on an accelerator, and the repair restores that path rather than inventing a new one.",
+  "frozen_cost_model_measurement": {
+    "source": "logs/autoinit_v1_search_space.json -> sweep[0].hardware.source",
+    "quote": "E8a: 260 subset evaluations over a 67-item / 59,763-position mixture in 1,300 s at 4.02B full width",
+    "hardware": "L40S, $0.99/h, 88.83 effective TFLOP/s (~24.5% of bf16 peak)",
+    "seconds": 1300,
+    "minutes": 21.67,
+    "evaluations_per_minute": 12.0,
+    "measured": true
+  },
+  "independent_derivation": {
+    "method": "2 * params * positions * mean-surviving-layer-fraction * evaluations",
+    "mean_surviving_layer_fraction": 0.8795,
+    "flop": 1.0987308024000002e+17,
+    "cost_model_flop": 1.1548e+17,
+    "agreement_pct": 95.1,
+    "note": "two independent routes to the same number is why this is offered as a bound rather than a guess"
+  },
+  "reduction_on_the_accelerator": {
+    "traffic_per_evaluation_tib": 0.33,
+    "l40s_bandwidth_gb_s": 864,
+    "minutes_for_260_at_50pct_bw": 3.6,
+    "note": "the reduction is bandwidth-bound and small beside the forwards ONCE it is on the device. On the host it was the whole cost."
+  },
+  "vram_bound": {
+    "model_bf16_gib": 7.49,
+    "reference_cache_bf16_gib": 16.91,
+    "ablated_logits_one_item_gib": 0.25,
+    "reduction_chunks_gib": 1.16,
+    "subtotal_gib": 25.81,
+    "l40s_total_gib": 44.99,
+    "cache_gate": "BUDGET_FRACTION 0.66 of free-after-model (~24.8 GiB) vs a 16.91 GiB cache -> ENABLED, so the (evals+1)*items cost structure holds and the fallback is not taken",
+    "caveat": "excludes activations and allocator fragmentation; the measurement job reports the real peak"
+  },
+  "what_attempt_10_cost_by_comparison": {
+    "host_path_minutes_for_one_expansion": ">= 647, unfinished",
+    "accelerator_priced_minutes": 21.67,
+    "ratio": ">= 30x"
+  },
+  "pricing_implication": {
+    "search_minutes_180_status": "NOT invalidated for the repaired path. It was invalidated for the host path. The beam-6 correction already carries the search to 216.2 min, which is the cost model's own beam-6 figure.",
+    "recommended_next_step": "measure before re-pricing: run scripts/autoinit/measure_causal_depth_runtime.py on one short L40S session (~2 min of evaluations plus teacher load) and compare evaluations/min against 12.0 and peak VRAM against 25.81 GiB.",
+    "why_not_just_reprice_now": "attempt 10 is the proof that a port can differ from its ancestor in ways no CPU run reveals. The derivation says the repaired code SHOULD hit E8a's rate; only the GPU says it DOES."
+  },
+  "budget_context": {
+    "cumulative_spend_usd": 206.013,
+    "cap_usd": 219.0,
+    "remaining_usd": 12.987,
+    "full_phase_a_ceiling_usd": 23.0484,
+    "note": "the remaining headroom does not cover a full Phase-A attempt. The measurement job is a different, much smaller ask and is not authorized either."
+  }
+}

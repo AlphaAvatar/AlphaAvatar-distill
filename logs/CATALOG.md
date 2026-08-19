@@ -44,6 +44,8 @@ overview and links here instead. A structural test enforces this.
 | `checkpoint_tombstones.json` | what was deleted and how to rebuild it |
 | `log_inventory.json` | every documentary file with its hash, class and disposition, the byte-identical duplicate groups and which copy is canonical, and the record of copies already removed |
 | `storage_measurements.json` | storage in the four areas, before and after each cleanup, measured the same way |
+| `autoinit_depth_backend_equivalence.json` | the causal-depth runtime repair's equivalence proof: the frozen greedy rule by known answer, the refactor bit-identical, the bf16 cache exact, and the per-round decision margins |
+| `autoinit_causal_depth_pricing_bound.json` | the DERIVED Stage-1 wall-time and VRAM bound for the repaired path, and the measurement protocol that would confirm it |
 | `relay_mirror_verification.json` | file-by-file proof that a local tree is byte-identical to its relay copy, and by which method each file was checked. The evidence a "stale local cache" deletion stands on |
 | `supported_models.md` | the supported-model table (AGENTS.md §3.4) |
 | `artifact_manifests.md` | external artifact manifests |

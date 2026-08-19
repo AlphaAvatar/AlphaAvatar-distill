@@ -43,7 +43,9 @@ from aadistill.autoinit.artifact import identify_checkpoint  # noqa: E402
 from aadistill.autoinit.calibration import DOMAIN_BALANCED_V1  # noqa: E402
 from aadistill.autoinit.metrics import StateEvaluator  # noqa: E402
 from aadistill.autoinit.ranking import PARETO_V1, SCHEDULE_V1  # noqa: E402
-from aadistill.autoinit.search import BeamSearch, SearchConfig  # noqa: E402
+from aadistill.autoinit.search import (  # noqa: E402
+    BeamSearch, Deadline, SearchConfig,
+)
 from aadistill.autoinit.state import make_control_state  # noqa: E402
 
 TEACHER_ID = "Qwen/Qwen3-4B-Thinking-2507"
@@ -113,6 +115,7 @@ def run_phase_a_search(*, workdir: Path, state_eval: Path, top_n: int,
                        target_geometry: dict | None = None,
                        suite_bundle=None, calibration_items=None,
                        profile=None,
+                       search_minutes: float | None = None,
                        ) -> PhaseASearch:
     """Search, then inject and measure the canonical control on the same suite.
 
@@ -160,12 +163,17 @@ def run_phase_a_search(*, workdir: Path, state_eval: Path, top_n: int,
         notes={"purpose": "AutoInitializer Phase A, the preregistered search",
                "profiles": "P=1; the 48 decomposed paths"})
 
+    # Runtime only, never hashed: `SearchConfig` fixes the search's identity and
+    # a wall-clock budget is not part of it. `--search-minutes` was priced from
+    # the start and reached only an affordability check; this is what makes it
+    # bind while the search is running.
     search = BeamSearch(
         adapter=adapter, config=config, root_teacher_id=teacher_id,
         root_teacher_sha256=suite_manifest.get("teacher_sha256", "") or "0" * 64,
         root_loader=lambda: teacher,
         calibration_loader=lambda profile: calibration,
-        measurer=lambda model, digest: evaluator.evaluate(model, digest))
+        measurer=lambda model, digest: evaluator.evaluate(model, digest),
+        deadline=Deadline.from_minutes(search_minutes))
     result = search.run()
 
     # --- the canonical control, injected by frozen hash ---------------------
