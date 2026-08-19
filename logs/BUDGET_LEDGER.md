@@ -278,9 +278,40 @@ $2.30   RAISED 2026-08-14 with maintainer approval, after attempt 1 spent
 ```
 authorized cumulative cap                                    $219.00
     RAISED AND APPROVED 2026-08-17. See the caps list above.
-actual cumulative spend                                      $206.0130
+actual cumulative spend                                      $206.0830
     = $194.0530 + $0.1900 attempt 8 + $0.3400 attempt 9
-      + $11.4300 attempt 10.
+      + $11.4300 attempt 10 + $0.0700 measurement attempt 1.
+Bounded measurement attempt 1 (L40S, 4.0 min) SETUP CONTRACT   $  0.0700
+    AUTHORIZED 2026-08-19 as autoinit.measurement.2026-08-19T1142Z
+    against logs/autoinit_measurement_grant.json (sha256 ec73be8c1962).
+    A SpendAuthorization: phase_a_authorized FALSE by type. NOT a
+    Phase-A attempt; hard ceiling $1.6294, of which $0.07 was spent.
+    NO MEASUREMENT RAN. Setup refused at the frozen-asset gate
+    (SETUP_RC=91, MARKER:FROZEN_ASSETS_FAILED) before the teacher
+    download and before any evaluation:
+      "state_eval_v1: artifacts/stage1/state_eval_v1 is absent"
+    The session declared LOCAL_ASSETS = () because it reads only the
+    calibration and the teacher, both from the relay. True, and beside
+    the point: autoinit_preflight_setup.sh runs verify_frozen_assets.py
+    UNCONDITIONALLY, and that verifier checks both frozen roots whatever
+    the session is doing. What binds is what the SETUP REQUIRES, not
+    what the session reads.
+    THE DEVICE-CANARY RETRY AGAIN, sixteen days later: that session also
+    declared LOCAL_ASSETS = (), also for a true reason, and also died in
+    setup ($0.0637). The 2026-08-18 fix stopped the setup COPYING
+    undeclared assets -- correct, and it held here -- but nothing told a
+    session which assets it MUST declare.
+    REPAIRED at $0: tests/pod/test_session_setup_contract.py asserts
+    verifier_required_local_roots is a subset of every session's
+    installed local roots, comparing DECLARATIONS not filesystem
+    presence, with the requirement DERIVED from verify_frozen_assets
+    .FROZEN rather than transcribed -- so a third frozen root added to
+    the verifier and to no session fails at $0. Mutation-verified.
+    The device canary's declaration was ALSO still wrong and is
+    corrected; that is not reviving it.
+    Pod deleted by the launcher, provider confirms gone. Failed closed.
+    AUTHORIZATION AND GRANT CONSUMED: one launch, spent, not reusable.
+    Evidence: logs/autoinit_measurement_attempt1/
 Phase A attempt 10 (L40S, 692.5 min) INCOMPLETE, RUNTIME COST  $ 11.4300
     AUTHORIZED 2026-08-18 as autoinit.phase_a.2026-08-18T1746Z against
     logs/autoinit_phase_a_attempt10_grant.json (sha256 3ef080d91d58).
@@ -389,8 +420,8 @@ Phase A attempt 8 (L40S, 11.28 min) SETUP TEST GATE FAILED   $  0.1900
     one launch and is SPENT. No retry was attempted and no attempt 9
     is authorized, funded, prepared or implied.
     Evidence: logs/autoinit_phase_a_attempt8/
-unused authorization remaining                               $ 12.9870
-    = $219.00 - $206.0130. NOT enough for another full Phase-A attempt
+unused authorization remaining                               $ 12.9170
+    = $219.00 - $206.0830. NOT enough for another full Phase-A attempt
     at the $23.0484 per-launch ceiling. A retry needs a separate
     budget/cap decision after the runtime fix is reviewed.
     Previously committed against it:

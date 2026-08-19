@@ -51,8 +51,8 @@ from aadistill.autoinit.authorization import SpendAuthorization  # noqa: E402
 from aadistill.autoinit.recovery import PreflightPlan, PreflightStage  # noqa: E402
 from aadistill.infrastructure.budget import Phase  # noqa: E402
 from aadistill.infrastructure.session import (  # noqa: E402
-    ArtifactPolicy, BudgetSpec, MarkerPolicy, RelayInput, SessionContext,
-    SessionSpec, SetupManifest, TeardownPolicy,
+    ArtifactPolicy, BudgetSpec, LocalAsset, MarkerPolicy, RelayInput,
+    SessionContext, SessionSpec, SetupManifest, TeardownPolicy,
 )
 from aadistill.infrastructure.session_runner import REPO, WS, run_session  # noqa: E402
 from autoinit_science_inputs import (  # noqa: E402
@@ -66,7 +66,19 @@ AUTH_PATH = "logs/autoinit_device_canary_authorization.json"
 #: Both come from the relay; neither is a dev-box-only asset, so nothing is
 #: scp'd and no asset is installed. Under the old shared setup that declaration
 #: was ignored and cost $0.0637; `SESSION_ASSETS` is now what setup reads.
-LOCAL_ASSETS: tuple = ()
+#: The two frozen assets the SHARED SETUP verifies. The canary reads neither —
+#: which is exactly what it declared in 2026-08-18, and exactly why it died in
+#: setup at $0.0637. That fix stopped the setup COPYING undeclared assets; it did
+#: not correct this declaration, so this session would still fail the
+#: unconditional `verify_frozen_assets.py` gate. TERMINATED means no further
+#: canary is prepared, not that its specification may misdescribe the run it
+#: would perform.
+LOCAL_ASSETS = (
+    LocalAsset("artifacts/stage1/state_eval_v1", "state_eval_v1",
+               "artifacts/stage1"),
+    LocalAsset("artifacts/stage3/recovery_search_v2", "recovery_search_v2",
+               "artifacts/stage3"),
+)
 TEST_IGNORES = ("tests/data/test_recovery_corpus_pipeline.py",
                 "tests/pod/test_phase_a_stages1_5_execute.py")
 #: Forwarded to the shared setup script. The canary needs no teacher, but setup

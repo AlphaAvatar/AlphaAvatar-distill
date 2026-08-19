@@ -1,0 +1,391 @@
+{
+  "schema": "aadistill.autoinit.measurement_session/v1",
+  "session_id": "autoinit-measurement",
+  "session_spec": {
+    "session_id": "autoinit-measurement",
+    "schema": "aadistill.autoinit.measurement_session/v1",
+    "description": "bounded causal-depth runtime and backend measurement: a rate and a per-item comparison against E8a. No search, no depth map, no checkpoint, no follow-on",
+    "authorization_path": "logs/autoinit_measurement_authorization.json",
+    "authorization_type": "SpendAuthorization.load",
+    "plan_id": "autoinit.causal_depth_measurement",
+    "plan_hash": "ac47b4c0445e96c84c6b7d7d11e5162270ebdadfa0c3c63f33adcc4a30b4a4df",
+    "status_path": "/workspace/autoinit_measurement.status",
+    "run_log_path": "/workspace/autoinit_measurement_run.log",
+    "driver_job_id": "autoinit_measurement",
+    "markers": {
+      "success": "ALL_DONE",
+      "failure": [
+        "MEASUREMENT_FAILED",
+        "MEASUREMENT_FALLBACK"
+      ],
+      "incomplete": [
+        "MEASUREMENT_FAILED",
+        "MEASUREMENT_FALLBACK"
+      ]
+    },
+    "artifacts": {
+      "audit_dirname": "autoinit_measurement",
+      "evidence_filename": "result.json",
+      "archive_basename": "measurement_artifacts.tar.gz",
+      "spec_success": "configs/autoinit/measurement_artifacts.json",
+      "spec_failed": "configs/autoinit/measurement_artifacts.json",
+      "report_names": [
+        "result.json"
+      ]
+    },
+    "setup": {
+      "env": {},
+      "required_env": [
+        "SESSION_COMMIT",
+        "BUNDLE_NAME",
+        "SESSION_STATUS",
+        "SESSION_AUTH_PATH",
+        "SESSION_PLAN_HASH",
+        "SESSION_ASSETS",
+        "SESSION_RELAY_INPUTS",
+        "TEACHER_REVISION"
+      ],
+      "relay_inputs": [
+        {
+          "path": "stage1/qwen3_0p6b_init_v0/checkpoint/model.safetensors",
+          "dest": "artifacts/stage1/qwen3_0p6b_init_v0/checkpoint",
+          "sha256": "86fbba78e8a2a32481ca77e5ac362ed1f17a39dbc30bcbc952cabd5df2633e54",
+          "also_stage_to": null
+        },
+        {
+          "path": "stage1/qwen3_0p6b_init_v0/checkpoint/config.json",
+          "dest": "artifacts/stage1/qwen3_0p6b_init_v0/checkpoint",
+          "sha256": null,
+          "also_stage_to": null
+        },
+        {
+          "path": "stage1/qwen3_0p6b_init_v0/checkpoint/generation_config.json",
+          "dest": "artifacts/stage1/qwen3_0p6b_init_v0/checkpoint",
+          "sha256": null,
+          "also_stage_to": null
+        },
+        {
+          "path": "stage1/qwen3_0p6b_init_v0/checkpoint/tokenizer.json",
+          "dest": "artifacts/stage1/qwen3_0p6b_init_v0/checkpoint",
+          "sha256": null,
+          "also_stage_to": null
+        },
+        {
+          "path": "stage1/qwen3_0p6b_init_v0/checkpoint/tokenizer_config.json",
+          "dest": "artifacts/stage1/qwen3_0p6b_init_v0/checkpoint",
+          "sha256": null,
+          "also_stage_to": null
+        },
+        {
+          "path": "stage1/qwen3_0p6b_init_v0/checkpoint/chat_template.jinja",
+          "dest": "artifacts/stage1/qwen3_0p6b_init_v0/checkpoint",
+          "sha256": null,
+          "also_stage_to": null
+        },
+        {
+          "path": "stage3_recovery_corpus_v2/ladder_uniform/blocks.npz",
+          "dest": "artifacts/stage3/ladder_uniform_probe",
+          "sha256": "6f324cb0f37bc0f07128e554ce8c161879419537478950496534f75fcecb249c",
+          "also_stage_to": "artifacts/stage3/ladder_uniform"
+        },
+        {
+          "path": "stage3_recovery_corpus_v2/ladder_uniform/ladder.json",
+          "dest": "artifacts/stage3/ladder_uniform_probe",
+          "sha256": null,
+          "also_stage_to": "artifacts/stage3/ladder_uniform"
+        },
+        {
+          "path": "stage3_recovery_corpus_v2/ladder_uniform/audit.jsonl",
+          "dest": "artifacts/stage3/ladder_uniform_probe",
+          "sha256": null,
+          "also_stage_to": "artifacts/stage3/ladder_uniform"
+        },
+        {
+          "path": "e8_inputs_20260810/calibration_v1/items.jsonl",
+          "dest": "artifacts/stage1/e8_calibration_v1",
+          "sha256": "c7202338109e459b17b70456461e8f304fadea7929ea547accee21adbbe7fd0b",
+          "also_stage_to": null
+        }
+      ],
+      "local_assets": [],
+      "uv_max_seconds": 1500,
+      "tests_max_seconds": 2700,
+      "teacher_revision": "768f209d9ea81521153ed38c47d515654e938aea",
+      "test_ignores": [
+        "tests/data/test_recovery_corpus_pipeline.py",
+        "tests/pod/test_phase_a_stages1_5_execute.py"
+      ]
+    },
+    "n_prechecks": 0,
+    "teardown": {
+      "always": true,
+      "require_provider_confirmation": true
+    }
+  },
+  "timeline": [
+    {
+      "utc": "2026-08-19T11:44:16+00:00",
+      "elapsed_min": 0.0,
+      "msg": "budget: expected 40 min $0.66 \u00b7 soft $0.73 \u00b7 hard $0.89 (authorized $1.63)"
+    },
+    {
+      "utc": "2026-08-19T11:44:25+00:00",
+      "elapsed_min": 0.0,
+      "msg": "NVIDIA L40S $0.99/h, stock Low"
+    },
+    {
+      "utc": "2026-08-19T11:44:25+00:00",
+      "elapsed_min": 0.0,
+      "msg": "precheck OK: 10 relay inputs, 0 local assets"
+    },
+    {
+      "utc": "2026-08-19T11:44:27+00:00",
+      "elapsed_min": 0.0,
+      "msg": "created detw95h0kqc7x6 at $0.99/h"
+    },
+    {
+      "utc": "2026-08-19T11:44:27+00:00",
+      "elapsed_min": 0.0,
+      "msg": "watchdog detached \u2014 hard 54 min = $0.89"
+    },
+    {
+      "utc": "2026-08-19T11:45:36+00:00",
+      "elapsed_min": 1.16,
+      "msg": "  starting (60s) \u2014 $0.02"
+    },
+    {
+      "utc": "2026-08-19T11:46:12+00:00",
+      "elapsed_min": 1.76,
+      "msg": "TCP 22 at 202.181.159.228:10149 after 1.8 min"
+    },
+    {
+      "utc": "2026-08-19T11:46:15+00:00",
+      "elapsed_min": 1.8,
+      "msg": "draw 1: ssh reachable \u2014 $0.03"
+    },
+    {
+      "utc": "2026-08-19T11:46:33+00:00",
+      "elapsed_min": 2.1,
+      "msg": "draw 1: image identity runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@580.126.09"
+    },
+    {
+      "utc": "2026-08-19T11:46:33+00:00",
+      "elapsed_min": 2.1,
+      "msg": "draw 1: running setup"
+    },
+    {
+      "utc": "2026-08-19T11:48:10+00:00",
+      "elapsed_min": 3.73,
+      "msg": "setup did not reach SETUP_DONE:\n + rich==15.0.0\n + safetensors==0.8.0\n + setuptools==81.0.0\n + shellingham==1.5.4\n + six==1.17.0\n + sympy==1.14.0\n + tokenizers==0.22.2\n + torch==2.11.0+cu128\n + tqdm==4.68.4\n + transformers==5.13.1\n + triton==3.6.0\n + typer==0.26.8\n + typing-extensions==4.16.0\n + urllib3==2.7.0\n + xxhash==3.8.1\n + yarl==1.24.2\nUsing Python 3.12.3 environment at: /opt/train\nResolved 1 package in 2ms\n   Building aadistill @ file:///workspace/aad\n      Built aadistill @ file:///workspace/aad\nPrepared 1 package in 261ms\nInstalled 1 package in 3ms\n + aadistill==0.0.1 (from file:///workspace/aad)\n[11:47:58] offline install completed in 11s\ntrain torch 2.11.0+cu128 NVIDIA L40S | transformers 5.13.1\nMARKER:TRAIN_ENV\n[11:48:04] verifying the frozen assets against the preregistered constants\n[11:48:05] FROZEN ASSET GATE FAILED -- output follows verbatim, because 'the \n[11:48:05] verifier could not run' and 'these are not the preregistered assets' are \n[11:48:05] different findings and must not be reported as the same one:\nBLOCKER: the pod is not running the preregistered assets. Do not enter Stage 1; record evidence and tear down.\n{\n  \"passed\": false,\n  \"problems\": [\n    \"state_eval_v1: artifacts/stage1/state_eval_v1 is absent\",\n    \"recovery_search_v2: artifacts/stage3/recovery_search_v2 is absent\"\n  ]\n}\nMARKER:FROZEN_ASSETS_FAILED\nSETUP_RC=91\n"
+    },
+    {
+      "utc": "2026-08-19T11:48:10+00:00",
+      "elapsed_min": 3.73,
+      "msg": "ABORT after draw 1: setup_failed"
+    },
+    {
+      "utc": "2026-08-19T11:48:10+00:00",
+      "elapsed_min": 3.73,
+      "msg": "deleting pod (setup setup_failed)"
+    },
+    {
+      "utc": "2026-08-19T11:48:25+00:00",
+      "elapsed_min": 3.97,
+      "msg": "pod deleted \u2014 4.0 min, $0.07; provider confirms gone: True"
+    }
+  ],
+  "stages": {
+    "setup": [
+      {
+        "draw": 1,
+        "setup_done": "0",
+        "host_cold": "0",
+        "setup_rc": "91",
+        "tail": "SETUP_RC=91"
+      }
+    ]
+  },
+  "authorization": {
+    "schema": "aadistill.autoinit.spend_authorization/v1",
+    "authorization_id": "autoinit.measurement.2026-08-19T1142Z",
+    "version": 1,
+    "granted_utc": "2026-08-19T11:42:33Z",
+    "granted_by": "Maintainer decision, 2026-08-19, after the measurement design was accepted and its dual reference-cache lifetime defect was fixed. GO for exactly one bounded L40S causal-depth runtime and backend measurement. The tested implementation identity is 331ecf58aead9648530e1af271c5e233577a3775: full suite 1914 passed / 11 skipped / 0 errors, pod simulator 1874 passed with the artifact tree restored exactly, frozen-asset verifier passed. This grant covers a measurement whose purpose is to produce the throughput, VRAM and cache-decision values that a SEPARATE repricing and a SEPARATE cumulative-budget decision will use.\n\nCovers: One (1) bounded causal-depth runtime and backend measurement on a single NVIDIA L40S at no more than $0.99/h, running exactly the reviewed job with its reviewed defaults: 3 deterministic samples at each skip cardinality 1-8, weighted extrapolation over the real 36,35,...,29 schedule, the production _ReferenceLogits cache policy unchanged, teacher revision 768f209d9ea81521153ed38c47d515654e938aea, the production peak captured before the comparison and the production cache released before E8a, E8a with cache_reference=False, exactly two backend pairs (|skip|=1 and |skip|=8), and utilization sampling enabled. Hard ceiling $1.6294.\n\nCumulative spend at approval $206.0130 against a cumulative cap of $219.00.\n\nDoes NOT authorize: Phase-A attempt 11 or any Phase-A attempt. Greedy search, depth-map selection, checkpoint writing, or any follow-on run - the session names SpendAuthorization, whose allows_phase_a is a hard False, so this is a property and not only a prohibition. Reviving the terminated device canary. Any other paid session. Any change to the frozen science: science plan 02be33b9, session plan 9377a2dc, Stage-3 protocol 250f72ef, runtime comparability 70a26e0b, equivalence interval 0.011695296982299022, feasibility floor 0.3, the seed policy, the operator ids and declared mathematics, or the recovery, search and selection rules. Modifying the implementation on the live pod. Treating the measured values as authorization for anything: they are inputs to a repricing and a separate budget decision.\n\nGrant document: logs/autoinit_measurement_grant.json sha256 ec73be8c1962842584e04571aa11fbab02868a058ab41ee797ed634f993eaa8f",
+    "plan_id": "autoinit.causal_depth_measurement",
+    "preflight_plan_hash": "ac47b4c0445e96c84c6b7d7d11e5162270ebdadfa0c3c63f33adcc4a30b4a4df",
+    "expected_usd": 0.4524,
+    "hard_cap_usd": 1.6294,
+    "authorized_stages": [
+      0
+    ],
+    "stage_conditions": {
+      "0": "bounded measurement only: no greedy search, no depth-map selection, no checkpoint, no follow-on"
+    },
+    "scope_note": "ONE bounded causal-depth runtime and backend measurement on a single L40S. NOT Phase-A attempt 11. Trains nothing, searches nothing, selects nothing, writes no checkpoint. `allows_phase_a` is False by type, so this artifact cannot start Phase A whatever it is pointed at. The measured throughput, VRAM and cache decision are inputs to a separate repricing and a separate cumulative-budget decision; they authorize nothing by themselves.",
+    "phase_a_authorized": false,
+    "automatic_phase_a_start": false,
+    "authorized_session_commit": "b710bdcea099fe1211b309655d1ba5fd6d017c63",
+    "harness_source_digest": "491e7b2aeff635f3a5b0f8a52273085e3146cb882fb986a04d0cc9eb81b7d74f",
+    "harness_source_files": [
+      "scripts/pod/autoinit_measurement_launch.py",
+      "scripts/autoinit/measure_causal_depth_runtime.py",
+      "scripts/pod/autoinit_preflight_setup.sh",
+      "scripts/pod/autoinit_science_inputs.py",
+      "scripts/pod/watchdog.py",
+      "scripts/pod/collect_artifacts.py",
+      "src/aadistill/autoinit/authorization.py",
+      "src/aadistill/autoinit/measurement.py",
+      "src/aadistill/autoinit/operators/depth.py",
+      "src/aadistill/init/contribution.py",
+      "src/aadistill/infrastructure/session.py",
+      "src/aadistill/infrastructure/session_prechecks.py",
+      "src/aadistill/infrastructure/session_runner.py"
+    ],
+    "per_launch_hard_usd": 1.6294,
+    "provenance_commit": "b710bdcea099fe1211b309655d1ba5fd6d017c63",
+    "enforcement": "the launcher loads this artifact and refuses to create a pod whose priced hard threshold exceeds hard_cap_usd, refuses a stage not in authorized_stages, and has no code path to Phase A",
+    "authorization_sha256": "bc07f537a9404b588a2a8618fb62d276e0f4df61bd9a2cbbed6e85a927f4e3db"
+  },
+  "session_plan_hash": "ac47b4c0445e96c84c6b7d7d11e5162270ebdadfa0c3c63f33adcc4a30b4a4df",
+  "harness_source_digest": "491e7b2aeff635f3a5b0f8a52273085e3146cb882fb986a04d0cc9eb81b7d74f",
+  "harness_source_files": [
+    "scripts/autoinit/measure_causal_depth_runtime.py",
+    "scripts/pod/autoinit_measurement_launch.py",
+    "scripts/pod/autoinit_preflight_setup.sh",
+    "scripts/pod/autoinit_science_inputs.py",
+    "scripts/pod/collect_artifacts.py",
+    "scripts/pod/watchdog.py",
+    "src/aadistill/autoinit/authorization.py",
+    "src/aadistill/autoinit/measurement.py",
+    "src/aadistill/autoinit/operators/depth.py",
+    "src/aadistill/infrastructure/session.py",
+    "src/aadistill/infrastructure/session_prechecks.py",
+    "src/aadistill/infrastructure/session_runner.py",
+    "src/aadistill/init/contribution.py"
+  ],
+  "scientific_use": false,
+  "trains_anything": false,
+  "runs_greedy_search": false,
+  "selects_a_depth_map": false,
+  "writes_a_checkpoint": false,
+  "retrains_permanent_controls": false,
+  "phase_a_launched": false,
+  "phase_a_reachable_from_this_launcher": false,
+  "followon_started": false,
+  "purpose": "measure the repaired port's evaluations/min, peak VRAM and cache decision, and compare it to E8a per item on one accelerator",
+  "budget_plan": {
+    "price_per_hour": 0.99,
+    "authorized_usd": 1.6294,
+    "expected_minutes": 40.0,
+    "soft_stop_minutes": 44.0,
+    "artifact_recovery_reserve_minutes": 10.0,
+    "hard_terminate_minutes": 54.0,
+    "step_time": {
+      "seconds": 4.15,
+      "source": "unused; the measurement trains nothing",
+      "measured": true
+    },
+    "breakdown": [
+      {
+        "name": "setup",
+        "minutes": 12.0
+      },
+      {
+        "name": "train",
+        "minutes": 0.0
+      },
+      {
+        "name": "evaluate",
+        "minutes": 0.0
+      },
+      {
+        "name": "transfer",
+        "minutes": 5.0
+      },
+      {
+        "name": "teacher_load",
+        "minutes": 8.0
+      },
+      {
+        "name": "timed_evaluations_and_e8a_pairs",
+        "minutes": 8.0
+      },
+      {
+        "name": "artifact_manifest_and_verify",
+        "minutes": 4.0
+      },
+      {
+        "name": "artifact_synchronization",
+        "minutes": 3.0
+      }
+    ],
+    "soft_stop_reserves": [],
+    "notes": [],
+    "soft_stop_reserve_minutes": 0,
+    "expected_usd": 0.66,
+    "soft_stop_usd": 0.726,
+    "artifact_recovery_reserve_usd": 0.165,
+    "hard_terminate_usd": 0.891
+  },
+  "quoted_price_per_hour": 0.99,
+  "stock_status": "Low",
+  "precheck": {
+    "relay_needed": [
+      "stage1/qwen3_0p6b_init_v0/checkpoint/model.safetensors",
+      "stage1/qwen3_0p6b_init_v0/checkpoint/config.json",
+      "stage1/qwen3_0p6b_init_v0/checkpoint/generation_config.json",
+      "stage1/qwen3_0p6b_init_v0/checkpoint/tokenizer.json",
+      "stage1/qwen3_0p6b_init_v0/checkpoint/tokenizer_config.json",
+      "stage1/qwen3_0p6b_init_v0/checkpoint/chat_template.jinja",
+      "stage3_recovery_corpus_v2/ladder_uniform/blocks.npz",
+      "stage3_recovery_corpus_v2/ladder_uniform/ladder.json",
+      "stage3_recovery_corpus_v2/ladder_uniform/audit.jsonl",
+      "e8_inputs_20260810/calibration_v1/items.jsonl"
+    ],
+    "relay_missing": [],
+    "local_assets": [],
+    "local_missing": []
+  },
+  "pod_id": "detw95h0kqc7x6",
+  "actual_price_per_hour": 0.99,
+  "terminate_after_utc": "2026-08-19T12:38:25Z",
+  "watchdog_journals": [
+    "/home/ecs-user/aad-scratch/measurement_20260819/watchdog.jsonl"
+  ],
+  "image_identity": {
+    "image_name": "runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404",
+    "observed": [
+      "580.126.09"
+    ],
+    "digest": "runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@580.126.09"
+  },
+  "setup_environment": {
+    "BUNDLE_NAME": "aad_autoinit_98bc7bb7.bundle",
+    "SESSION_ASSETS": "",
+    "SESSION_AUTH_PATH": "logs/autoinit_measurement_authorization.json",
+    "SESSION_COMMIT": "98bc7bb7786b86093db314ca69604c4db8c68a46",
+    "SESSION_PLAN_HASH": "ac47b4c0445e96c84c6b7d7d11e5162270ebdadfa0c3c63f33adcc4a30b4a4df",
+    "SESSION_RELAY_INPUTS": "[{\"also_stage_to\":null,\"dest\":\"artifacts/stage1/qwen3_0p6b_init_v0/checkpoint\",\"path\":\"stage1/qwen3_0p6b_init_v0/checkpoint/model.safetensors\",\"sha256\":\"86fbba78e8a2a32481ca77e5ac362ed1f17a39dbc30bcbc952cabd5df2633e54\"},{\"also_stage_to\":null,\"dest\":\"artifacts/stage1/qwen3_0p6b_init_v0/checkpoint\",\"path\":\"stage1/qwen3_0p6b_init_v0/checkpoint/config.json\",\"sha256\":null},{\"also_stage_to\":null,\"dest\":\"artifacts/stage1/qwen3_0p6b_init_v0/checkpoint\",\"path\":\"stage1/qwen3_0p6b_init_v0/checkpoint/generation_config.json\",\"sha256\":null},{\"also_stage_to\":null,\"dest\":\"artifacts/stage1/qwen3_0p6b_init_v0/checkpoint\",\"path\":\"stage1/qwen3_0p6b_init_v0/checkpoint/tokenizer.json\",\"sha256\":null},{\"also_stage_to\":null,\"dest\":\"artifacts/stage1/qwen3_0p6b_init_v0/checkpoint\",\"path\":\"stage1/qwen3_0p6b_init_v0/checkpoint/tokenizer_config.json\",\"sha256\":null},{\"also_stage_to\":null,\"dest\":\"artifacts/stage1/qwen3_0p6b_init_v0/checkpoint\",\"path\":\"stage1/qwen3_0p6b_init_v0/checkpoint/chat_template.jinja\",\"sha256\":null},{\"also_stage_to\":\"artifacts/stage3/ladder_uniform\",\"dest\":\"artifacts/stage3/ladder_uniform_probe\",\"path\":\"stage3_recovery_corpus_v2/ladder_uniform/blocks.npz\",\"sha256\":\"6f324cb0f37bc0f07128e554ce8c161879419537478950496534f75fcecb249c\"},{\"also_stage_to\":\"artifacts/stage3/ladder_uniform\",\"dest\":\"artifacts/stage3/ladder_uniform_probe\",\"path\":\"stage3_recovery_corpus_v2/ladder_uniform/ladder.json\",\"sha256\":null},{\"also_stage_to\":\"artifacts/stage3/ladder_uniform\",\"dest\":\"artifacts/stage3/ladder_uniform_probe\",\"path\":\"stage3_recovery_corpus_v2/ladder_uniform/audit.jsonl\",\"sha256\":null},{\"also_stage_to\":null,\"dest\":\"artifacts/stage1/e8_calibration_v1\",\"path\":\"e8_inputs_20260810/calibration_v1/items.jsonl\",\"sha256\":\"c7202338109e459b17b70456461e8f304fadea7929ea547accee21adbbe7fd0b\"}]",
+    "SESSION_STATUS": "/workspace/autoinit_measurement.status",
+    "SESSION_TEST_IGNORES": "--ignore=tests/data/test_recovery_corpus_pipeline.py --ignore=tests/pod/test_phase_a_stages1_5_execute.py",
+    "TEACHER_REVISION": "768f209d9ea81521153ed38c47d515654e938aea",
+    "TESTS_MAX_S": "2700",
+    "UV_MAX_S": "1500"
+  },
+  "final_pod_state": {
+    "exists": false,
+    "desired_status": "TERMINATED",
+    "billing": false
+  },
+  "provider_confirms_gone": true,
+  "cost": {
+    "price_per_hour": 0.99,
+    "elapsed_minutes": 3.97,
+    "actual_usd": 0.0655,
+    "authorized_usd": 1.6294,
+    "within_authorization": true
+  },
+  "passed": false,
+  "cleanup_is_not_success": "artifacts are collected and the pod is torn down on every path; the session outcome is decided by the driver's terminal marker alone",
+  "finished_utc": "2026-08-19T11:48:25+00:00"
+}

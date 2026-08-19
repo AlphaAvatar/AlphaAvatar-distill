@@ -1,0 +1,57 @@
+[11:44:16] budget: expected 40 min $0.66 · soft $0.73 · hard $0.89 (authorized $1.63)
+[11:44:25] NVIDIA L40S $0.99/h, stock Low
+[11:44:25] precheck OK: 10 relay inputs, 0 local assets
+[11:44:27] created detw95h0kqc7x6 at $0.99/h
+[11:44:27] watchdog detached — hard 54 min = $0.89
+[11:45:36]   starting (60s) — $0.02
+[11:46:12] TCP 22 at 202.181.159.228:10149 after 1.8 min
+[11:46:15] draw 1: ssh reachable — $0.03
+[11:46:33] draw 1: image identity runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@580.126.09
+[11:46:33] draw 1: running setup
+[11:48:10] setup did not reach SETUP_DONE:
+ + rich==15.0.0
+ + safetensors==0.8.0
+ + setuptools==81.0.0
+ + shellingham==1.5.4
+ + six==1.17.0
+ + sympy==1.14.0
+ + tokenizers==0.22.2
+ + torch==2.11.0+cu128
+ + tqdm==4.68.4
+ + transformers==5.13.1
+ + triton==3.6.0
+ + typer==0.26.8
+ + typing-extensions==4.16.0
+ + urllib3==2.7.0
+ + xxhash==3.8.1
+ + yarl==1.24.2
+Using Python 3.12.3 environment at: /opt/train
+Resolved 1 package in 2ms
+   Building aadistill @ file:///workspace/aad
+      Built aadistill @ file:///workspace/aad
+Prepared 1 package in 261ms
+Installed 1 package in 3ms
+ + aadistill==0.0.1 (from file:///workspace/aad)
+[11:47:58] offline install completed in 11s
+train torch 2.11.0+cu128 NVIDIA L40S | transformers 5.13.1
+MARKER:TRAIN_ENV
+[11:48:04] verifying the frozen assets against the preregistered constants
+[11:48:05] FROZEN ASSET GATE FAILED -- output follows verbatim, because 'the 
+[11:48:05] verifier could not run' and 'these are not the preregistered assets' are 
+[11:48:05] different findings and must not be reported as the same one:
+BLOCKER: the pod is not running the preregistered assets. Do not enter Stage 1; record evidence and tear down.
+{
+  "passed": false,
+  "problems": [
+    "state_eval_v1: artifacts/stage1/state_eval_v1 is absent",
+    "recovery_search_v2: artifacts/stage3/recovery_search_v2 is absent"
+  ]
+}
+MARKER:FROZEN_ASSETS_FAILED
+SETUP_RC=91
+
+[11:48:10] ABORT after draw 1: setup_failed
+[11:48:10] deleting pod (setup setup_failed)
+[11:48:25] pod deleted — 4.0 min, $0.07; provider confirms gone: True
+
+autoinit-measurement INCOMPLETE — /home/ecs-user/AlphaAvatar-distill/logs/autoinit_measurement_session.json. STOP for review. The measured values are inputs to a repricing and a separate budget decision; they authorize nothing.

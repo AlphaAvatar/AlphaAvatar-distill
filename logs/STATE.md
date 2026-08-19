@@ -18,9 +18,9 @@ selection result.**
 ## Budget
 
 ```
-cumulative spend   $206.0130
+cumulative spend   $206.0830
 approved cap       $219.00
-remaining          $12.9870   NOT permission
+remaining          $12.9170   NOT permission
 
 **$12.9870 is not enough for another full Phase-A attempt** at the $23.0484
 per-launch ceiling. A retry requires a separate budget/cap decision after the
@@ -81,6 +81,7 @@ contract owned by inherited machinery (fixed by the session specification).
 | Phase A 8 | $0.1900 | setup / test gate | two dev-box-environment tests that cannot pass in a container |
 | Phase A 9 | $0.3400 | stage 1 | `stream_projection`'s `avg` allocated with no device (`project.py:57`) |
 | Phase A 10 | $11.4300 | stage 1, 3rd expansion | `depth.causal_kl_greedy_v1`: 260×67 full-vocabulary softmax/KL **on the CPU**, unbounded and unpriced |
+| measurement 1 | $0.0700 | setup / frozen-asset gate | declared `LOCAL_ASSETS = ()`; the shared setup verifies both frozen roots unconditionally |
 
 **The pattern, through attempt 7:** code no $0 path could execute — a GPU-only
 device, or a contract owned by inherited machinery. **Attempt 8 is a new
@@ -130,33 +131,37 @@ instead of the cause, and it was paid for twice. Full diagnoses in
 
 ## Next starting point
 
-**The measurement job had three material defects and they were found before it
-cost anything.** It timed every sample at cardinality 8 (overstating
-evaluations/min, since larger skip sets run *fewer* layers); it built its own
-reference cache, bypassing the operator's 0.66 gate and recompute fallback; and
-it accepted an unpinned Hub revision. A fourth was mine — the docstring claimed
-GPU utilization it never sampled. All four are fixed and mutation-verified.
+**The bounded measurement launched and failed closed at setup: $0.07, 4.0 min, no
+measurement ran.** Its grant and authorization are **consumed** and must not be
+reused. Evidence in
+[`autoinit_measurement_attempt1/`](autoinit_measurement_attempt1/).
 
-**A finding that reshaped the comparison:** E8a merges a subtype's raw sums and
-normalizes once (position-weighted), while the operator normalizes per item and
-takes an unweighted mean — its own declared semantics. On unequal-length items
-these differ by **~0.027, about 300× the smallest decision margin (8.195e-05)**.
-A naive E8a-vs-port *score* comparison would have reported that as catastrophic
-drift. The paired check is therefore **per-item**, where the two must agree
-exactly, with the aggregation gap reported separately and marked expected.
+**The cause was a hidden setup contract, now closed.** The session declared
+`LOCAL_ASSETS = ()` because it reads only the calibration and the teacher, both
+from the relay — true, and beside the point:
+`autoinit_preflight_setup.sh` runs `verify_frozen_assets.py` **unconditionally**,
+and that verifier checks both frozen roots whatever the session is doing. This is
+the **device-canary retry's error sixteen days later** ($0.0637 then, $0.07 now):
+both declared what the session *needed* rather than what the setup *requires*.
 
-**Nothing is authorized.** The ask is **one short L40S measurement**, hard ceiling
-**$1.6294** retained (recomputed 3× basis $1.3571; expected $0.4524) — 12.5% of
-the remaining $12.9870. The job no longer holds two ~16.9 GiB reference caches at
-once: the production peak is read first, the production cache is released, and
-E8a runs with `cache_reference=False`. No search, no
-depth map, no checkpoint. It would settle: the repaired port's evaluations/min
-against E8a's 12.0, real peak VRAM and the cache decision, per-item E8a-vs-port
-equality on one accelerator, and sampled GPU utilization against attempt 10's
-0–1%.
+`tests/pod/test_session_setup_contract.py` now asserts
+`verifier_required_local_roots ⊆ session_installed_local_roots` for every
+session, comparing **declarations** rather than filesystem presence — a presence
+check passes on the dev box, where both roots exist, and says nothing about a
+pod. The requirement is **derived from the verifier**, so a third frozen root
+added there and to no session fails at $0. Mutation-verified, including that
+case. The device canary's declaration was **also still wrong** and is corrected.
 
-**Only after those measured values exist** should Stage 1 be repriced and a full
-Phase-A attempt considered. Attempt 11 is not the next step.
+**Process, recorded:** the launch did have a GO in the immediately preceding
+message. What was not reviewed is the session machinery built to execute it —
+`measurement.py`, an issuer, a `SessionSpec`, an artifact spec — written and
+launched in the same session, and precisely where it failed. **"My intended next
+decision is GO" is not executable permission**, and an explicit GO covers the
+workload named, not new paid-path infrastructure written to carry it.
+
+**Nothing is authorized, funded or prepared.** A replacement measurement needs a
+new grant and a new artifact, under the same measurement-only scope and $1.6294
+ceiling.
 
 ## Where else to look
 

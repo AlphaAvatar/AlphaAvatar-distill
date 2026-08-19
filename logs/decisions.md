@@ -4665,3 +4665,68 @@ two devices, cuda:0 and cpu!
   guards, all failing correctly.
 - **Revisit when:** the measurement is authorized and runs. Nothing else in the
   job changes first.
+
+## 2026-08-20 — The setup contract closed, and a process rule recorded
+
+- **Context:** the bounded measurement launched and died at the frozen-asset gate
+  for $0.07, having run no measurement. The session declared `LOCAL_ASSETS = ()`
+  because it reads only the calibration and the teacher, both from the relay.
+  True, and beside the point: `autoinit_preflight_setup.sh` runs
+  `verify_frozen_assets.py` **unconditionally**, and that verifier checks both
+  frozen roots whatever the session is doing.
+- **It is the device-canary retry, sixteen days later.** $0.0637 then, $0.0700
+  now, and the same sentence in both launchers: a declaration of what the session
+  *needs* where the setup asks what it *requires*. The 2026-08-18 fix stopped the
+  setup **copying** undeclared assets — correct, and it held here — but nothing
+  could tell a session which assets it must **declare**.
+- **The old diagnosis was wrong, and this is the cost of that.**
+  `test_the_canary_declares_no_local_assets_and_that_is_now_honoured` recorded
+  the retry as *"a correct declaration the setup script ignored"*. The
+  declaration was not correct, it was **incomplete**; copying the assets unasked
+  was a crude way of satisfying a real requirement, and removing the copy traded a
+  `cp` failure for a verifier failure. That test has been rewritten to check the
+  **mechanism** — a manifest declaring nothing produces an empty `SESSION_ASSETS`
+  — on a manifest built for the purpose, so no real session's declaration has to
+  be wrong for the mechanism to be demonstrated.
+- **The contract, derived rather than transcribed.**
+  `tests/pod/test_session_setup_contract.py` asserts, for every session:
+  `verifier_required_local_roots ⊆ session_installed_local_roots`, comparing
+  `install_to/dest_name` against the verifier's `root`. Two properties are
+  load-bearing:
+  - **declarations, not the filesystem.** Both roots exist on the dev box, so a
+    presence check passes here and says nothing about a pod — the exact blindness
+    that let both failures through;
+  - **derived from `verify_frozen_assets.FROZEN`.** Transcribing today's two
+    filenames would close today's instance and leave the class open. A mutation
+    adding a third frozen root to the verifier, and to no session, fails.
+- **Both offending sessions corrected**: the measurement, and the device canary,
+  whose declaration was **still wrong today** and would have failed this same
+  gate. Correcting a terminated session's specification is not reviving it; it is
+  refusing to leave a specification that misdescribes the run it would perform —
+  the same reasoning already applied to its `relay_inputs`.
+- **Mutation-verified, five mutations:** dropping `state_eval_v1`, dropping
+  `recovery_search_v2`, a new required root in the verifier that no session
+  declares, the canary reverting to `()`, and the test transcribing the roots
+  instead of deriving them. Each fails.
+- **Process, recorded because the maintainer asked for it.** The launch of
+  2026-08-19 **did** have a GO: the message immediately preceding it opened
+  *"Measurement design accepted. GO for exactly one bounded L40S causal-depth
+  runtime/backend measurement under a hard ceiling of $1.6294."* So it was not
+  made in the absence of permission, and the record should say so.
+  What was **not** reviewed is the machinery built to execute it. That message
+  said *"Run exactly the corrected measurement job"*; there was no measurement
+  session, so one was built — `measurement.py`, an issuer, a `SessionSpec`, an
+  artifact spec, twelve tests — and then granted and launched in the same session.
+  Newly written paid-path infrastructure went to a pod without review, and it is
+  exactly where the failure occurred.
+  **Rule adopted: "my intended next decision is GO" is not executable permission,
+  and an explicit GO covers the workload named — not new paid-path infrastructure
+  written to carry it, which is its own review.**
+- **The measurement grant and authorization are CONSUMED.** One launch, spent,
+  not reusable. A replacement needs a new grant and a new artifact.
+- **Verified:** full suite **1944 passed, 11 skipped, 0 errors** (17:02); pod
+  simulator **1904 passed, 22 skipped**, artifact tree restored **exactly** (1633
+  entries); frozen-asset verifier passed, and it was **not** weakened or
+  rescoped. The measurement workload, sampling, GPU placement, E8a comparison,
+  cache policy, pricing and the Phase-A science are untouched.
+- **Revisit when:** a replacement measurement is granted.

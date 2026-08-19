@@ -44,8 +44,8 @@ from aadistill.autoinit.authorization import SpendAuthorization  # noqa: E402
 from aadistill.autoinit.measurement import MEASUREMENT_PLAN_V1  # noqa: E402
 from aadistill.infrastructure.budget import Phase  # noqa: E402
 from aadistill.infrastructure.session import (  # noqa: E402
-    ArtifactPolicy, BudgetSpec, MarkerPolicy, SessionContext, SessionSpec,
-    SetupManifest, TeardownPolicy,
+    ArtifactPolicy, BudgetSpec, LocalAsset, MarkerPolicy, SessionContext,
+    SessionSpec, SetupManifest, TeardownPolicy,
 )
 from aadistill.infrastructure.session_runner import REPO, WS, run_session  # noqa: E402
 from autoinit_science_inputs import (  # noqa: E402
@@ -55,10 +55,23 @@ from autoinit_science_inputs import (  # noqa: E402
 STATUS = f"{WS}/autoinit_measurement.status"
 RUN_LOG = f"{WS}/autoinit_measurement_run.log"
 AUTH_PATH = "logs/autoinit_measurement_authorization.json"
-#: Nothing is scp'd. The measurement reads the frozen calibration and the teacher,
-#: both from the relay, so it declares no dev-box asset and — since 2026-08-18 —
-#: is therefore given none.
-LOCAL_ASSETS: tuple = ()
+#: The two frozen assets the SHARED SETUP verifies, not the ones this session
+#: reads. It reads neither: the measurement needs only the calibration and the
+#: teacher, both from the relay. But `autoinit_preflight_setup.sh` runs
+#: `verify_frozen_assets.py` unconditionally at `ASSETS_READY`, and that verifier
+#: checks both roots whatever the session is doing.
+#:
+#: This was `()` on the first launch, and it cost $0.07: the session declared what
+#: it NEEDED rather than what the shared setup REQUIRES — the device-canary
+#: retry's error ($0.0637) in a new costume. `test_session_setup_contract.py` now
+#: derives the required roots from the verifier itself, so the next session to
+#: get this wrong fails at $0.
+LOCAL_ASSETS = (
+    LocalAsset("artifacts/stage1/state_eval_v1", "state_eval_v1",
+               "artifacts/stage1"),
+    LocalAsset("artifacts/stage3/recovery_search_v2", "recovery_search_v2",
+               "artifacts/stage3"),
+)
 TEST_IGNORES = ("tests/data/test_recovery_corpus_pipeline.py",
                 "tests/pod/test_phase_a_stages1_5_execute.py")
 TEACHER_REVISION = "768f209d9ea81521153ed38c47d515654e938aea"

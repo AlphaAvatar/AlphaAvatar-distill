@@ -1,8 +1,8 @@
 {
   "schema": "aadistill.current_state/v2",
-  "generated_utc": "2026-08-19T11:41:56Z",
+  "generated_utc": "2026-08-19T15:58:33Z",
   "_contract": "The minimal machine-readable CURRENT snapshot. It owns live facts and nothing else: no history, no per-attempt detail, no narrative. History lives in logs/decisions.md and the per-run directories; the human view of THIS file is logs/STATE.md and the two must agree. README owns no live facts at all. Ownership rules: logs/CATALOG.md.",
-  "baseline_commit": "331ecf58aead9648530e1af271c5e233577a3775",
+  "baseline_commit": "98bc7bb7786b86093db314ca69604c4db8c68a46",
   "baseline_commit_meaning": "The LAST TESTED IMPLEMENTATION: the commit whose tree produced the latest_verification figures below. It is deliberately NOT the commit carrying this file. Two commits follow it by construction and neither is separately tested: (1) the grant/provenance commit that adds the one-use grant document and this refresh, and (2) the authorization-only commit, which the Phase-A lineage gate requires to differ from its base in nothing but logs/autoinit_phase_a_authorization.json. Keeping the distinction explicit is the point: a reader must be able to tell which commit the 1874/1834/395 numbers describe from which commit a pod checks out. This field read fe3c2b3 while HEAD was four commits ahead once, and read 4563d106 after the post-fix verification, because nothing refreshes or checks it; it is refreshed as part of preparing a paid launch.",
   "running": {
     "paid_compute": false,
@@ -18,9 +18,9 @@
     "bundles": 0
   },
   "budget": {
-    "cumulative_spend_usd": 206.013,
+    "cumulative_spend_usd": 206.083,
     "authorized_cap_usd": 219.0,
-    "remaining_usd": 12.987,
+    "remaining_usd": 12.917,
     "remaining_is_not_permission": true,
     "ledger": "logs/BUDGET_LEDGER.md",
     "headroom_note": "$12.9870 is NOT enough for another full Phase-A attempt at the $23.0484 per-launch ceiling. A retry requires a separate budget/cap decision after the runtime fix is reviewed."
@@ -115,6 +115,13 @@
       "where": "stage 1, third operator expansion",
       "cause": "depth.causal_kl_greedy_v1: 260x67 full-vocabulary softmax/KL on the CPU, unbounded and unpriced. NOT a scientific or Stage-1 selection result",
       "evidence": "logs/autoinit_phase_a_attempt10/"
+    },
+    {
+      "run": "measurement 1",
+      "usd": 0.07,
+      "where": "setup / frozen-asset gate",
+      "cause": "declared LOCAL_ASSETS = () because it reads neither frozen asset; the shared setup verifies both unconditionally. The device-canary retry's error ($0.0637) sixteen days later",
+      "evidence": "logs/autoinit_measurement_attempt1/"
     }
   ],
   "failure_pattern": "6/7/9 device placement; 8 a $0 path asserting dev-box state; 10 correct placement and numerics, unpriced runtime cost",
@@ -135,7 +142,8 @@
     "placement is asserted by intercepting factory calls (tests/autoinit/factory_placement.py), the dual of the HostCacheTensor split - neither instrument can see the other's class",
     "causal-depth scoring is device-resident, as E8a's always was; the reference cache probes the device it lives on and falls back to RECOMPUTE, never to the host",
     "search_minutes is a real deadline (Deadline, runtime-only so it is never hashed) checked before each expansion and inside greedy_removal's candidate loop",
-    "the driver holds torch to the cgroup CPU grant via apply_cpu_budget()"
+    "the driver holds torch to the cgroup CPU grant via apply_cpu_budget()",
+    "a session installs every local root verify_frozen_assets.py requires, derived from the verifier and compared against declarations (tests/pod/test_session_setup_contract.py)"
   ],
   "abandoned": [
     "recovery_search_v1 (INVALID before first use)",
@@ -169,5 +177,6 @@
     "logs/decisions.md — why things are the way they are",
     "logs/BUDGET_LEDGER.md — spend and caps",
     "AGENTS.md — the binding working contract"
-  ]
+  ],
+  "process_note": "'my intended next decision is GO' is NOT executable permission. An explicit imperative GO is required, and it covers the workload named - not new paid-path infrastructure written to carry it, which is its own review. The measurement launch of 2026-08-19 did have a GO in the immediately preceding message, but the session machinery executing it was written and launched in the same session without review, and that is where it failed."
 }

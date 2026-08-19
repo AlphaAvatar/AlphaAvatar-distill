@@ -140,25 +140,43 @@ def test_the_canary_pins_the_same_teacher_revision_as_every_other_session():
     assert revisions[CANARY] == "768f209d9ea81521153ed38c47d515654e938aea"
 
 
-def test_the_canary_declares_no_local_assets_and_that_is_now_honoured():
-    """The retry's $0.0637: a correct declaration the setup script ignored.
+def test_an_empty_local_asset_declaration_is_honoured_by_the_setup():
+    """The retry's $0.0637 mechanism, tested on the mechanism.
 
-    The canary reads the calibration mixture and the canonical student, both from
-    the relay. It wants no dev-box asset, said so, and the shared setup copied
-    two anyway out of a directory the launcher had therefore left empty.
+    This test used to assert that the CANARY declares no local asset, under the
+    heading "a correct declaration the setup script ignored". That diagnosis was
+    wrong, and the bounded measurement paid $0.07 on 2026-08-19 to prove it: the
+    canary's `()` was not correct, it was **incomplete**. The shared setup runs
+    `verify_frozen_assets.py` unconditionally, so both frozen roots are required
+    whatever a session reads. Copying them unasked was a crude way of satisfying
+    a real requirement; the 2026-08-18 fix stopped the copying and thereby traded
+    a `cp` failure for a verifier failure, which is what both sessions then hit.
+
+    What was always true, and is what this now tests, is the MECHANISM: a session
+    that declares nothing tells setup to install nothing. That is checked on a
+    manifest built for the purpose rather than on a real session, so no session's
+    declaration has to be wrong for the mechanism to be demonstrated.
+
+    Which roots a session must declare is
+    `tests/pod/test_session_setup_contract.py`.
     """
+    import dataclasses
+
     specs = {name: spec for name, _m, _a, spec in all_specs()}
-    canary = specs[CANARY]
-    assert canary.setup.local_assets == (), (
-        "the canary has acquired a local asset; it needs none")
-    env = canary.setup_environment(session_commit="0" * 40, bundle="b.bundle")
-    assert env["SESSION_ASSETS"] == "", (
-        "the canary would tell setup to install something")
-    # And the other sessions still declare theirs, so an empty value means
-    # "none declared" rather than "the mechanism is broken".
-    assert specs["autoinit_preflight_launch"].setup.local_assets, (
-        "no session declares a local asset; SESSION_ASSETS is empty for everyone "
-        "and this test proves nothing")
+    real = specs[CANARY]
+
+    empty = dataclasses.replace(real.setup, local_assets=())
+    assert dataclasses.replace(real, setup=empty).setup_environment(
+        session_commit="0" * 40, bundle="b.bundle")["SESSION_ASSETS"] == "", (
+        "a session declaring no local asset would still tell setup to install "
+        "something; that is the defect the canary retry paid for")
+
+    # And a real declaration still reaches setup, so an empty value means "none
+    # declared" rather than "the mechanism is broken".
+    env = specs["autoinit_preflight_launch"].setup_environment(
+        session_commit="0" * 40, bundle="b.bundle")
+    assert env["SESSION_ASSETS"], "no session declares a local asset"
+    assert "state_eval_v1:artifacts/stage1" in env["SESSION_ASSETS"]
 
 
 def test_the_canary_still_fetches_nothing_and_cannot_authorize_phase_a():
