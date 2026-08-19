@@ -1,0 +1,25 @@
+[17:48:20] budget: expected 1084 min $17.89 · soft $22.72 · hard $23.05 (authorized $23.05)
+[17:48:20] NVIDIA L40S $0.99/h, stock Medium
+[17:48:20] session commit 8183a23ef74f verified: harness digests to 24d89b9ffe8e…, carries the authorization and only logs/autoinit_phase_a_authorization.json differs from the authorized base
+[17:48:20] frozen science plan 02be33b9a7a8… matches the authorization
+[17:48:21] precheck OK: 10 relay inputs, 2 local assets
+[17:48:22] created nex2u8no79k6pl at $0.99/h
+[17:48:22] watchdog detached — hard 1397 min = $23.05
+[17:49:15]   starting (60s) — $0.01
+[17:50:18] TCP 22 at 64.247.206.217:17213 after 1.9 min
+[17:50:22] draw 1: ssh reachable — $0.03
+[17:51:01] draw 1: image identity runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@580.159.03
+[17:51:01] draw 1: running setup
+[17:57:37] draw 1: setup complete — $0.15
+[17:57:44] driver detached, pid 6051, confirmed by descriptor_probe — $0.15
+[17:59:57]   2026-08-18T17:59:50Z MARKER:STAGE_START:1 — $0.19
+[05:18:07] driver no longer running: EXITED:143
+[05:18:07] polling ended: DRIVER_EXITED:143 — $11.38
+[05:20:02]   manifest rc=0
+9 file(s) across 5 class(es) -> /workspace/manifest.json
+  final_required: 9 · mutable_snapshot: 0 · final_streams_quiescent: True
+[05:20:38] teardown gate: allowed=True failed=training_complete
+[05:20:38] deleting pod (gate passed after DRIVER_EXITED:143)
+[05:20:49] pod deleted — 692.5 min, $11.43; provider confirms gone: True
+
+autoinit-phase-a INCOMPLETE — /home/ecs-user/AlphaAvatar-distill/logs/autoinit_phase_a_session.json. STOP for review; no follow-on experiment was started.

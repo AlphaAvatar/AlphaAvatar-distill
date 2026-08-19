@@ -278,8 +278,47 @@ $2.30   RAISED 2026-08-14 with maintainer approval, after attempt 1 spent
 ```
 authorized cumulative cap                                    $219.00
     RAISED AND APPROVED 2026-08-17. See the caps list above.
-actual cumulative spend                                      $194.5830
-    = $194.0530 + $0.1900 attempt 8 + $0.3400 attempt 9.
+actual cumulative spend                                      $206.0130
+    = $194.0530 + $0.1900 attempt 8 + $0.3400 attempt 9
+      + $11.4300 attempt 10.
+Phase A attempt 10 (L40S, 692.5 min) INCOMPLETE, RUNTIME COST  $ 11.4300
+    AUTHORIZED 2026-08-18 as autoinit.phase_a.2026-08-18T1746Z against
+    logs/autoinit_phase_a_attempt10_grant.json (sha256 3ef080d91d58).
+    NOT A SCIENTIFIC RESULT AND NOT A STAGE-1 SELECTION RESULT.
+    Setup and Stage 0 passed; Stage 0 attested interval 0.011695,
+    floor 0.3000, plan 02be33b9. THE THREE STAGE-1 DEVICE FIXES HELD --
+    stream_projection ran on CUDA and the composite expansion below it
+    completed, so the attempt-9 defect did not recur.
+    Stage 1 then entered its THIRD operator expansion,
+    depth.causal_kl_greedy_v1 (third in deterministic registry order;
+    the two written states are exactly the first two), and was still
+    inside it 10 h 47 m later with the L40S at 0-1% utilisation and 192
+    driver threads saturating a 13-vCPU cgroup.
+    THE COST, IN THE OPERATOR'S OWN NUMBERS: greedy_removal(36, 8) is
+    260 evaluations x 67 calibration items = 17,420 forward+distortion
+    pairs. Each copies the logits device->host (_forward_logits returns
+    .cpu(), targets are .cpu()) and runs a full 151,936-vocabulary
+    softmax/KL on the CPU: ~0.33 TiB of CPU traffic per evaluation,
+    ~86 TiB over the expansion, ~8.6 TiB copied off the device. The
+    transfer is deliberate and documented; the CPU cost of the reduction
+    was never priced.
+    MEASURED VS PRICED: --search-minutes 180.0 priced the WHOLE beam
+    search at 3.0 h. This ONE expansion ran 10.78 h without finishing --
+    at least 3.6x the entire search budget, and a lower bound.
+    NOTHING ENFORCED IT: --search-minutes feeds only an affordability
+    check before the search starts (driver:433); search.py records
+    elapsed but never checks a deadline, and _expand_one has no clock.
+    The only backstop was the watchdog at the full $23.05 ceiling.
+    Stopped on maintainer instruction at 05:18 UTC via the supported
+    path -- the driver was stopped, the launcher's poll broke on
+    DRIVER_EXITED:143 and ran its normal collect_and_teardown. Manifest
+    rc=0, 9 files, gate allowed, pod deleted, provider confirms gone.
+    The pod was NOT repaired.
+    How far through the 260 evaluations it got is UNKNOWN: greedy_removal
+    journals only on completion, so the run emitted no external progress
+    signal. The two states' weights were not in the failed-artifact spec
+    and are gone; their specs and hashes survive.
+    Evidence: logs/autoinit_phase_a_attempt10/
 Phase A attempt 9 (L40S, 20.4 min) STAGE 0 PASSED, STAGE 1 FAILED $  0.3400
     AUTHORIZED 2026-08-18 by an explicit maintainer GO, issued against
     logs/autoinit_phase_a_attempt9_grant.json (sha256 7b62b5c516be) as
@@ -350,8 +389,11 @@ Phase A attempt 8 (L40S, 11.28 min) SETUP TEST GATE FAILED   $  0.1900
     one launch and is SPENT. No retry was attempted and no attempt 9
     is authorized, funded, prepared or implied.
     Evidence: logs/autoinit_phase_a_attempt8/
-unused authorization remaining                               $ 24.4170
-    = $219.00 - $194.5830. Previously committed against it:
+unused authorization remaining                               $ 12.9870
+    = $219.00 - $206.0130. NOT enough for another full Phase-A attempt
+    at the $23.0484 per-launch ceiling. A retry needs a separate
+    budget/cap decision after the runtime fix is reviewed.
+    Previously committed against it:
       device canary hard                                       $  1.0197
         SPENT $0.1240 across two sessions, NEITHER of which ran
         the canary script: attempt 1 died on the launcher's

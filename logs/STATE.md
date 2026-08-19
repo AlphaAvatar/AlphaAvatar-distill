@@ -1,4 +1,4 @@
-**Updated:** 2026-08-18 · branch `main` · Phase-A attempt 10 prepared
+**Updated:** 2026-08-19 · branch `main` · after Phase-A attempt 10
 
 # Current state
 
@@ -9,22 +9,23 @@ not carry. If the two disagree, a structural test fails.
 **Nothing is running. Nothing is billing. Nothing is authorized. Nothing is
 prepared for launch.**
 
-Phase-A attempt 9 ran on 2026-08-18: **Stage 0 passed and attested, Stage 1
-failed**, $0.34, pod deleted and provider-confirmed gone. Its grant is spent. The
-bounded Stage-1 device-allocation audit that followed is **complete and verified
-at $0**.
+Phase-A attempt 10 ran 2026-08-18/19 and was **stopped on maintainer
+instruction**: Stage 0 passed, Stage 1's third operator expansion ran 10 h 47 m
+without finishing while the paid L40S sat at 0-1 %. **$11.43, incomplete,
+operator runtime-cost failure — not a scientific result and not a Stage-1
+selection result.**
 
 ## Budget
 
 ```
-cumulative spend   $194.5830
+cumulative spend   $206.0130
 approved cap       $219.00
-remaining          $24.4170   NOT permission
+remaining          $12.9870   NOT permission
 
-A full hard-ceiling Attempt 10 brings the project to **$217.6314**, leaving
-**$1.3686** — not enough for another Phase-A launch. **Attempt 10 is the last one
-the cap affords.** If it fails, authorization for an eleventh must not be
-inferred from the remainder.
+**$12.9870 is not enough for another full Phase-A attempt** at the $23.0484
+per-launch ceiling. A retry requires a separate budget/cap decision after the
+runtime fix is reviewed. Stopping attempt 10 early preserved ~$11.6 of the
+ceiling it was authorized to spend.
 ```
 
 Every authorization issued is **consumed** — each one's lineage gate refuses the
@@ -83,6 +84,7 @@ contract owned by inherited machinery (fixed by the session specification).
 | canary 2 | $0.0637 | in setup | wrapper set LOCAL_ASSETS = (); shared setup copies them |
 | Phase A 8 | $0.1900 | setup / test gate | two dev-box-environment tests that cannot pass in a container |
 | Phase A 9 | $0.3400 | stage 1 | `stream_projection`'s `avg` allocated with no device (`project.py:57`) |
+| Phase A 10 | $11.4300 | stage 1, 3rd expansion | `depth.causal_kl_greedy_v1`: 260×67 full-vocabulary softmax/KL **on the CPU**, unbounded and unpriced |
 
 **The pattern, through attempt 7:** code no $0 path could execute — a GPU-only
 device, or a contract owned by inherited machinery. **Attempt 8 is a new
@@ -132,28 +134,44 @@ instead of the cause, and it was paid for twice. Full diagnoses in
 
 ## Next starting point
 
-**The bounded Stage-1 device audit is complete.** Fifteen fresh-tensor factories
-in the frozen-operator closure were classified device-coupled or intentionally
-host-only. **Three were fixed** — `project.py`'s `avg` (what attempt 9 died on),
-the orthonormality `torch.eye` eleven lines below it (a latent second defect that
-would have cost the next session), and `sandwich._head_rows`, whose index slices
-the parent's `q_proj` and `o_proj`. The rest were verified correct, including two
-host-only score vectors deliberately **not** moved.
+**STOPPED FOR REVIEW.** Attempt 10's grant is spent. **Attempt 11 is not
+authorized**, and the remaining $12.9870 is both not permission and not enough.
 
-The frozen Stage-1 mathematics, operator ids and declared semantics are
-untouched: only where three tensors are allocated.
+**What is now settled.** The Stage-1 device fixes work on CUDA: the composite
+expansion completed and wrote a state, so `stream_projection`'s `avg`, the
+orthonormality `eye` and `_head_rows` all placed correctly. Stage 0 has now
+passed five times. Setup, staging, the frozen-asset gate, the test gate, artifact
+collection, the teardown gate and provider-confirmed teardown all work.
 
-**Nothing is authorized, funded or prepared.** Attempt 9's grant covered one
-launch, is spent, and its lineage gate refuses the current HEAD.
+**What failed is a new class.** Attempts 6/7/9 were *placement* — a tensor
+allocated without a device. Attempt 8 was a $0 path asserting dev-box filesystem
+state. Attempt 10 had correct placement and correct numerics, and failed on
+**runtime cost that nothing priced or bounded**:
 
-The next decision is **Phase-A attempt 10**, under a new one-use grant and the
-normal chain: **write a grant document** -> pre-auth base commit -> issue against
-that grant -> authorization-only commit -> bundle upload -> round-trip verify ->
-launch.
+* `depth.causal_kl_greedy_v1` runs `greedy_removal(36, 8)` = **260 evaluations ×
+  67 items = 17,420 forward+distortion pairs**;
+* each copies the logits device→host and runs a **151,936-vocabulary softmax/KL
+  on the CPU** — ~86 TiB of CPU traffic over the expansion, ~8.6 TiB copied off
+  the device. The `.cpu()` is deliberate and documented as memory-spike
+  avoidance; its CPU cost was never priced;
+* the driver ran **192 threads on a 13-vCPU cgroup** — the setup script computes
+  that budget and applies `taskset` **only to the test suite**;
+* `--search-minutes 180.0` is an **affordability precheck**, never a runtime
+  deadline. One expansion exceeded the whole search budget by ≥3.6×.
 
-**What is still unexercised:** Stages 2–5 have never run on hardware, and Stage 1
-has never completed a single operator expansion — its first real execution is
-still ahead.
+How far through the 260 evaluations it reached is **unknown** — `greedy_removal`
+journals only on completion.
+
+**The reviewer decides** whether the reduction may move to the device (**not** by
+deleting the `.cpu()` calls: the causal-depth scoring and removal rule is frozen
+science, so numerical equivalence and identical removal decisions must be shown
+first); whether the driver should inherit the cgroup-aware thread budget; whether
+`search_minutes` becomes a real deadline checked *inside* an expansion; whether
+the cost model should charge the scoring reduction; and the budget question.
+
+**Do not resume** the two attempt-10 search states against a changed numerical
+path without demonstrated compatibility. Their weights are gone with the pod;
+only specs and hashes survive.
 
 ## Where else to look
 

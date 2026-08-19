@@ -1,8 +1,8 @@
 {
   "schema": "aadistill.current_state/v2",
-  "generated_utc": "2026-08-18T17:46:05Z",
+  "generated_utc": "2026-08-19T05:30:00Z",
   "_contract": "The minimal machine-readable CURRENT snapshot. It owns live facts and nothing else: no history, no per-attempt detail, no narrative. History lives in logs/decisions.md and the per-run directories; the human view of THIS file is logs/STATE.md and the two must agree. README owns no live facts at all. Ownership rules: logs/CATALOG.md.",
-  "baseline_commit": "0b33c5db3f7cab11093c5dbb5eac68e04c6561a3",
+  "baseline_commit": "8183a23ef74fb9fba738ef62feef43dc72445b53",
   "baseline_commit_meaning": "The LAST TESTED IMPLEMENTATION: the commit whose tree produced the latest_verification figures below. It is deliberately NOT the commit carrying this file. Two commits follow it by construction and neither is separately tested: (1) the grant/provenance commit that adds the one-use grant document and this refresh, and (2) the authorization-only commit, which the Phase-A lineage gate requires to differ from its base in nothing but logs/autoinit_phase_a_authorization.json. Keeping the distinction explicit is the point: a reader must be able to tell which commit the 1874/1834/395 numbers describe from which commit a pod checks out. This field read fe3c2b3 while HEAD was four commits ahead once, and read 4563d106 after the post-fix verification, because nothing refreshes or checks it; it is refreshed as part of preparing a paid launch.",
   "running": {
     "paid_compute": false,
@@ -18,11 +18,12 @@
     "bundles": 0
   },
   "budget": {
-    "cumulative_spend_usd": 194.583,
+    "cumulative_spend_usd": 206.013,
     "authorized_cap_usd": 219.0,
-    "remaining_usd": 24.417,
+    "remaining_usd": 12.987,
     "remaining_is_not_permission": true,
-    "ledger": "logs/BUDGET_LEDGER.md"
+    "ledger": "logs/BUDGET_LEDGER.md",
+    "headroom_note": "$12.9870 is NOT enough for another full Phase-A attempt at the $23.0484 per-launch ceiling. A retry requires a separate budget/cap decision after the runtime fix is reviewed."
   },
   "frozen": {
     "science_plan_hash": "02be33b9a7a8e26bc8bfb75795351e8cdc9ffd441b47066cc81887cfc511b55c",
@@ -50,8 +51,9 @@
     "Stage 3 (both permanent controls, thresholds materialized)",
     "the Phase-A harness, stages 0-5 executing for real at $0",
     "the Stage-1 device audit (autoinit.stage1_device_contract@v1)",
-    "Stage 0 on hardware, passed four times (latest: attempt 9, protocol 250f72ef, identity 70a26e0b, science 02be33b9)",
-    "the bounded Stage-1 device-allocation audit: 15 fresh-tensor factories in the frozen-operator closure classified device-coupled or intentionally host-only; 3 fixed, the rest verified correct"
+    "the bounded Stage-1 device-allocation audit: 15 fresh-tensor factories in the frozen-operator closure classified device-coupled or intentionally host-only; 3 fixed, the rest verified correct",
+    "Stage 0 on hardware, passed five times (attempt 10 attested interval 0.011695, floor 0.3000, plan 02be33b9)",
+    "the Stage-1 device fixes, confirmed on CUDA: attempt 10's composite expansion completed and wrote a state, so stream_projection's avg, the orthonormality eye and _head_rows all placed correctly"
   ],
   "latest_verification": {
     "utc": "2026-08-18T17:46:05Z",
@@ -61,10 +63,7 @@
     "pod_simulator": "1841 passed, 22 skipped in 2:54; artifact tree restored EXACTLY - 1609 entries, identical before and after",
     "frozen_asset_verifier": "passed, no problems",
     "phase_a_price_reproduced": "$17.8933 / $22.7183 / $23.0483 exactly, reserves 147.7683 and 36.2158 minutes",
-    "harness_digest": "24d89b9ffe8e41f2712d2f105ca2076fd0552ccea7a089aeb5f2a844c39e1f42 - UNCHANGED, 16 files, deliberately not expanded: none of the three edited implementation files is in it, and the Attempt-10 authorization binds the new pre-auth commit",
-    "mutation_verification": "5 mutations; removing the device from avg, from the orthonormality eye, or from the _head_rows call site each fails, and mechanically moving a host-only score vector fails. One gate passed first time and was rewritten against `meta`",
-    "scope": "CPU only; no checkpoint was loaded and no metric measured",
-    "timestamp_correction": "the previous record read 2026-08-19T00:40:00Z, about seven hours AHEAD of the real clock: local wall time (UTC+8) was written as if it were UTC. Timestamps here are now taken from `date -u`. The pod-side times in the attempt records are unaffected - the launcher, watchdog and driver all stamp real UTC themselves."
+    "scope": "CPU only; no checkpoint was loaded and no metric measured"
   },
   "failed": [
     {
@@ -101,16 +100,25 @@
       "run": "Phase A 8",
       "usd": 0.19,
       "where": "setup / test gate",
-      "cause": "two dev-box-environment tests that cannot pass in a container: REPO_LAYOUT.md names two absolute host paths, and a tombstone names artifacts/stage3/ladder_uniform, which the pod's setup stages. Both added by the 2026-08-18 inventory/cleanup work; the pod simulator cannot reproduce either condition"
+      "cause": "two dev-box-environment tests that cannot pass in a container",
+      "evidence": "logs/autoinit_phase_a_attempt8/"
     },
     {
       "run": "Phase A 9",
       "usd": 0.34,
       "where": "stage 1",
-      "cause": "stream_projection's `avg` accumulator allocated with no device: project.py:57 lands it on CPU while uncentered_moment follows `state`, which is cuda:0 on a pod. Third Stage-1 device-placement defect; autoinit.stage1_device_contract@v1 closed the first two and did not reach an accumulator two call levels below the operator"
+      "cause": "stream_projection's `avg` allocated with no device (project.py:57)",
+      "evidence": "logs/autoinit_phase_a_attempt9/"
+    },
+    {
+      "run": "Phase A 10",
+      "usd": 11.43,
+      "where": "stage 1, third operator expansion",
+      "cause": "depth.causal_kl_greedy_v1: 260x67 full-vocabulary softmax/KL on the CPU, unbounded and unpriced. NOT a scientific or Stage-1 selection result",
+      "evidence": "logs/autoinit_phase_a_attempt10/"
     }
   ],
-  "failure_pattern": "three Stage-1 failures, three tensors allocated without a device in a path only a GPU executes (attempts 6, 7, 9). A CPU rehearsal cannot see any of them: both operands agree on CPU and the arithmetic is correct. Separately, attempt 8 was the inverse - a $0 path that RUNS on the dev box and asserts dev-box filesystem state",
+  "failure_pattern": "6/7/9 device placement; 8 a $0 path asserting dev-box state; 10 correct placement and numerics, unpriced runtime cost",
   "canonical_infrastructure": [
     "the session specification: one immutable SessionSpec per session, one runner, no inheritance and no module-global retargeting",
     "the shared pod setup is manifest-driven on BOTH sides: it installs the local assets a session declares (SESSION_ASSETS) and stages the relay science inputs a session declares (SESSION_RELAY_INPUTS), and names no asset, relay path, destination or digest of its own",
@@ -135,10 +143,10 @@
     "the paid device-canary session path: STRATEGICALLY TERMINATED 2026-08-18. Two authorized sessions, $0.1240, zero canary runs; both died in the wrapper's inherited contracts. Its evidence and its generic lesson are kept; no further canary is prepared."
   ],
   "next_starting_point": {
-    "status": "The bounded audit is complete and verified at $0. Nothing is authorized, funded or prepared: attempt 9's grant is spent and its lineage gate refuses the current HEAD.",
-    "next_decision": "Phase-A attempt 10, under a NEW one-use grant and the normal chain: pre-auth base commit -> issue against that grant -> authorization-only commit -> bundle upload -> round-trip verify -> launch. No canary and no further readiness phase.",
-    "what_remains_unexercised": "Stages 2-5 have never run on hardware. Stage 1 itself has never completed a single operator expansion, so its first real execution is still ahead.",
-    "not_authorized": "this audit authorizes nothing. The $24.4170 of unused cumulative headroom is not permission."
+    "status": "STOPPED after attempt 10 was halted on maintainer instruction. Grant spent. Attempt 11 NOT authorized, and $12.9870 is neither permission nor enough for a $23.0484 launch.",
+    "the_finding": "depth.causal_kl_greedy_v1 scores on the CPU by explicit .cpu() on both sides, 260 x 67 times per expansion; deliberate, documented, never priced. Full postmortem and numbers: logs/autoinit_phase_a_attempt10/",
+    "open_for_the_reviewer": "whether the reduction may move to the device (NOT by deleting the .cpu() calls - the causal-depth scoring and removal rule is frozen science, so numerical equivalence and identical removal decisions must be shown first); whether the driver inherits the setup's cgroup-aware thread budget; whether search_minutes becomes a runtime deadline checked inside an expansion; whether the cost model charges the scoring reduction; and the budget decision a retry requires.",
+    "do_not": "resume the two attempt-10 search states against a changed numerical path without demonstrated compatibility; their weights are gone."
   },
   "read_order": [
     "logs/STATE.md — the human view of this file",

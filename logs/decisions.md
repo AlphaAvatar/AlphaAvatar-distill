@@ -4349,3 +4349,91 @@ two devices, cuda:0 and cpu!
 - **Revisit when:** a new Stage-1 operator or helper is added, or a fourth
   device defect appears — which would mean per-call interception is not enough
   and a static sweep is warranted.
+
+## 2026-08-19 — Attempt 10 stopped: a runtime cost nothing priced or bounded
+
+- **Context:** attempt 10 passed setup and Stage 0, entered Stage 1, and 10 h
+  47 m later had written no new search state, completed no probe, and left the
+  paid L40S at 0-1 % utilisation while 192 driver threads saturated a 13-vCPU
+  cgroup. The maintainer ordered a stop rather than spending the remaining
+  authorization to confirm it.
+- **Stopped through the supported path, not by killing the pod.** The launcher's
+  poll loop breaks on `DRIVER_*` when the driver is no longer alive and then runs
+  its ordinary `collect_and_teardown`. So the driver was stopped (SIGTERM, exit
+  143) and the launcher did the rest by itself: manifest `rc=0`, 9 files across 5
+  classes, streams quiescent, teardown gate allowed, pod deleted, provider
+  confirmed gone. Nothing was repaired on the pod and no profiling machinery was
+  installed. $11.43 of a $23.05 ceiling.
+- **The three Stage-1 device fixes held.** The composite expansion completed and
+  wrote a state, which means `stream_projection` ran on CUDA — `avg`, the
+  orthonormality `eye` and `_head_rows` all placed correctly. The bounded audit
+  did what it was for, and attempt 9's defect did not recur.
+- **The operator was identified by deterministic order, not inferred from the
+  symptom.** `registered_implementations()` is `attention.weight_proxy_v0`,
+  `composite.stage1_sandwich_v0`, `depth.causal_kl_greedy_v1`, … and the two
+  written states are exactly the first two. The third was in flight. This
+  confirmed the reviewer's hypothesis, offered before any diagnosis was run, that
+  the causal-depth expansion was the consumer — and it was the right hypothesis
+  to check first: my own initial guess, that `model_device(parent)` had resolved
+  to CPU, was wrong. The forward runs on CUDA; it is the *scoring* that is on the
+  host, by explicit design.
+- **The cost, in the operator's own numbers.** `greedy_removal(36, 8)` is 260
+  evaluations — `expected_evaluations`' docstring says so — and `score()` loops
+  all 67 calibration items, so **17,420 forward+distortion pairs**. Each copies
+  the logits device→host (`_forward_logits` returns `.cpu()`, `targets` are
+  `.cpu()`) and runs a full 151,936-vocabulary softmax/KL on the CPU:
+
+  ```
+  one logits tensor, all 59,763 positions   33.8 GiB float32
+  CPU traffic per evaluation                ~0.33 TiB
+  CPU traffic over the expansion            ~86 TiB
+  device -> host copies                     ~8.6 TiB
+  ```
+
+  The transfer is deliberate and documented — `distortion`'s docstring calls a
+  full-sequence float32 softmax of both models "a needless memory spike on the
+  one device that also has to hold the teacher". **The transfer was reasoned
+  about; the CPU cost of the reduction was not.**
+- **A second, independent multiplier.** This run's setup log reads `128 vCPUs
+  visible, cgroup budget 13; cpu set 0-12`. `autoinit_preflight_setup.sh`
+  computes that budget correctly and applies `OMP_NUM_THREADS` + `taskset` — **to
+  the test suite only**. The driver, started by `start_job.py`, inherits neither,
+  so torch sized its pools from the 128 it could see: 192 threads on 13 granted
+  CPUs, ~65 min accumulated CPU each. Bandwidth alone predicts ~3 h for 86 TiB at
+  10 GB/s; the observed >10.78 h without completion is consistent with that
+  degraded by ~15x oversubscription, but **the two were not separated
+  experimentally and this record does not claim they were.**
+- **Measured versus priced.** `--search-minutes 180.0` priced the *whole* beam
+  search at 3.0 h. One expansion ran 10.78 h and did not finish: **≥3.6x the
+  entire search budget, as a lower bound.**
+- **Nothing enforced it.** `search_minutes` is consumed only by
+  `self.afford(...)` at `autoinit_phase_a_driver.py:433`, an affordability check
+  *before* the search starts. `search.py` records `elapsed` and `wall_seconds`
+  but never compares them to a deadline, and `_expand_one` has no clock at all. A
+  single expensive expansion runs unbounded; the only backstop was the watchdog
+  at the full ceiling. Had the maintainer not intervened, the session would have
+  reached $23.05 and produced nothing.
+- **Progress was unobservable, which is its own finding.** `greedy_removal`
+  accumulates rounds in memory and the state is journalled only on completion, so
+  between 18:15 and the stop the run emitted no external signal. How far through
+  the 260 evaluations it reached is unknown and is not guessed at anywhere in
+  this record.
+- **Recorded as incomplete / operator runtime-cost failure.** Not a scientific
+  result, not a Stage-1 selection result, no probe. The two states' weights were
+  not in the failed-artifact spec and are gone with the pod; their specs and
+  hashes survive in `search_states.jsonl`. They must not be resumed against a
+  changed numerical path without demonstrated compatibility — and the loss of the
+  weights makes doing so accidentally impossible.
+- **Explicitly NOT decided here, and not to be fixed by reflex:** moving the
+  distortion reduction to the device is **not** a matter of deleting the `.cpu()`
+  calls. The causal-depth scoring and removal rule is frozen science; a backend
+  change must preserve the objective's numerics and produce identical removal
+  decisions, or it is a different operator wearing the same id.
+- **Budget.** Cumulative $194.5830 → **$206.0130** of $219.00, leaving
+  **$12.9870** — not enough for another full attempt at the $23.0484 ceiling.
+  Stopping early preserved ~$11.6 of the ceiling this attempt was authorized to
+  spend. A retry is a separate budget/cap decision after the runtime fix is
+  reviewed.
+- **Revisit when:** the reviewer rules on the reduction's device, the driver's
+  thread budget, `search_minutes` as a real deadline, the cost model, and the
+  budget.
