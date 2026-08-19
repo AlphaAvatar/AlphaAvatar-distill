@@ -99,7 +99,8 @@ Grant documents — the one-use maintainer decision an authorization is issued
 `autoinit_phase_a_attempt8_grant.json`,
 `autoinit_phase_a_attempt9_grant.json`,
 `autoinit_phase_a_attempt10_grant.json`,
-`autoinit_measurement_grant.json`. The issuer requires one, refuses a grant
+`autoinit_measurement_grant.json` (consumed),
+`autoinit_measurement_grant2.json`. The issuer requires one, refuses a grant
 that asserts an identity it did not compute, and hashes it into the artifact.
 
 Consumed authorizations — kept because a spent grant is the record of what was

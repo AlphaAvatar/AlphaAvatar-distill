@@ -22,7 +22,7 @@ cumulative spend   $206.0830
 approved cap       $219.00
 remaining          $12.9170   NOT permission
 
-**$12.9870 is not enough for another full Phase-A attempt** at the $23.0484
+**$12.9170 is not enough for another full Phase-A attempt** at the $23.0484
 per-launch ceiling. A retry requires a separate budget/cap decision after the
 runtime fix is reviewed. Stopping attempt 10 early preserved ~$11.6 of the
 ceiling it was authorized to spend.
@@ -57,13 +57,18 @@ Also frozen: recovery design, selection rules, pooled_counts@v2, Stage-3 artifac
 
 ## Latest verification
 
-After fixing the measurement job's dual reference-cache lifetime. CPU only — no
-checkpoint loaded, no metric measured, no GPU used:
+After closing the hidden setup contract that failed the first bounded
+measurement. Last tested implementation **`2d358d83`**. CPU only — no checkpoint
+loaded, no metric measured, no GPU used:
 
-* full suite **1914 passed, 11 skipped, 0 errors** in 17:27.
-* pod simulator **1874 passed, 22 skipped**; artifact tree restored **exactly** —
-  1623 entries.
-* frozen-asset verifier **passed**.
+* full suite **1944 passed, 11 skipped, 0 errors** in 17:02.
+* pod simulator **1904 passed, 22 skipped**; artifact tree restored **exactly** —
+  1633 entries identical before and after.
+* frozen-asset verifier **passed**, and was **not** weakened or rescoped.
+* setup contract: `verifier_required_local_roots ⊆ session_installed_local_roots`
+  for every session, derived from the verifier and compared against
+  declarations — mutation-verified, including a new required root that no
+  session declares.
 
 ## What failed, and why
 

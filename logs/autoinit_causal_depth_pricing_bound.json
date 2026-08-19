@@ -48,11 +48,11 @@
     "why_not_just_reprice_now": "attempt 10 is the proof that a port can differ from its ancestor in ways no CPU run reveals. The derivation says the repaired code SHOULD hit E8a's rate; only the GPU says it DOES."
   },
   "budget_context": {
-    "cumulative_spend_usd": 206.013,
+    "cumulative_spend_usd": 206.083,
     "cap_usd": 219.0,
-    "remaining_usd": 12.987,
+    "remaining_usd": 12.917,
     "full_phase_a_ceiling_usd": 23.0484,
-    "note": "the remaining headroom does not cover a full Phase-A attempt. The measurement job is a different, much smaller ask and is not authorized either."
+    "note": "the remaining headroom does not cover a full Phase-A attempt at the $23.0484 ceiling. It does cover one bounded measurement at $1.6294. The first bounded measurement was launched 2026-08-19 and failed closed at the setup contract for $0.07 without running; its grant and authorization are consumed."
   },
   "measurement_job": {
     "script": "scripts/autoinit/measure_causal_depth_runtime.py",

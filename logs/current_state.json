@@ -1,8 +1,8 @@
 {
   "schema": "aadistill.current_state/v2",
-  "generated_utc": "2026-08-19T15:58:33Z",
+  "generated_utc": "2026-08-19T17:36:55Z",
   "_contract": "The minimal machine-readable CURRENT snapshot. It owns live facts and nothing else: no history, no per-attempt detail, no narrative. History lives in logs/decisions.md and the per-run directories; the human view of THIS file is logs/STATE.md and the two must agree. README owns no live facts at all. Ownership rules: logs/CATALOG.md.",
-  "baseline_commit": "98bc7bb7786b86093db314ca69604c4db8c68a46",
+  "baseline_commit": "2d358d8388eb8ecc45de21d7e67ef7f6a049527b",
   "baseline_commit_meaning": "The LAST TESTED IMPLEMENTATION: the commit whose tree produced the latest_verification figures below. It is deliberately NOT the commit carrying this file. Two commits follow it by construction and neither is separately tested: (1) the grant/provenance commit that adds the one-use grant document and this refresh, and (2) the authorization-only commit, which the Phase-A lineage gate requires to differ from its base in nothing but logs/autoinit_phase_a_authorization.json. Keeping the distinction explicit is the point: a reader must be able to tell which commit the 1874/1834/395 numbers describe from which commit a pod checks out. This field read fe3c2b3 while HEAD was four commits ahead once, and read 4563d106 after the post-fix verification, because nothing refreshes or checks it; it is refreshed as part of preparing a paid launch.",
   "running": {
     "paid_compute": false,
@@ -23,7 +23,7 @@
     "remaining_usd": 12.917,
     "remaining_is_not_permission": true,
     "ledger": "logs/BUDGET_LEDGER.md",
-    "headroom_note": "$12.9870 is NOT enough for another full Phase-A attempt at the $23.0484 per-launch ceiling. A retry requires a separate budget/cap decision after the runtime fix is reviewed."
+    "headroom_note": "$12.9170 is NOT enough for another full Phase-A attempt at the $23.0484 per-launch ceiling. It is enough for one bounded measurement at $1.6294. Remaining headroom is not permission for either."
   },
   "frozen": {
     "science_plan_hash": "02be33b9a7a8e26bc8bfb75795351e8cdc9ffd441b47066cc81887cfc511b55c",
@@ -57,11 +57,12 @@
     "the causal-depth runtime repair: scoring restored to the accelerator per E8a, cgroup-aware CPU budget, search_minutes as a fail-closed in-expansion deadline, bounded per-candidate progress"
   ],
   "latest_verification": {
-    "utc": "2026-08-19T11:41:56Z",
-    "after": "building the bounded measurement session (full suite re-run: 1935 passed, 11 skipped, 0 errors)",
-    "full_suite": "1935 passed, 11 skipped, 0 errors in 16:55",
-    "pod_simulator": "1874 passed, 22 skipped; tree restored EXACTLY, 1623 entries",
-    "frozen_asset_verifier": "passed, no problems",
+    "utc": "2026-08-19T17:36:55Z",
+    "after": "closing the hidden setup contract that failed the first bounded measurement",
+    "full_suite": "1944 passed, 11 skipped, 0 errors in 17:02",
+    "pod_simulator": "1904 passed, 22 skipped; artifact tree restored EXACTLY - 1633 entries identical before and after",
+    "frozen_asset_verifier": "passed, no problems; NOT weakened or rescoped",
+    "setup_contract": "verifier_required_local_roots is a subset of every session's installed local roots, derived from verify_frozen_assets.FROZEN and compared against declarations; mutation-verified including a new required root that no session declares",
     "scope": "CPU only; no checkpoint loaded, no metric measured, no GPU used"
   },
   "failed": [
@@ -120,7 +121,7 @@
       "run": "measurement 1",
       "usd": 0.07,
       "where": "setup / frozen-asset gate",
-      "cause": "declared LOCAL_ASSETS = () because it reads neither frozen asset; the shared setup verifies both unconditionally. The device-canary retry's error ($0.0637) sixteen days later",
+      "cause": "declared LOCAL_ASSETS = () while the shared setup verifies both frozen roots unconditionally; the device-canary retry's error",
       "evidence": "logs/autoinit_measurement_attempt1/"
     }
   ],
@@ -153,22 +154,11 @@
     "the paid device-canary session path: STRATEGICALLY TERMINATED 2026-08-18. Two authorized sessions, $0.1240, zero canary runs; both died in the wrapper's inherited contracts. Its evidence and its generic lesson are kept; no further canary is prepared."
   ],
   "next_starting_point": {
-    "status": "The measurement job is corrected and $0-executed. NOTHING is authorized: no grant, no pod, no GPU run. Attempt 11 is not authorized and is not the next step.",
-    "the_ask": "ONE short L40S causal-depth measurement, hard ceiling $1.6294 retained (recomputed 3x basis is $1.3571; expected $0.4524). Not a Phase-A attempt: no search, no depth map, no checkpoint, no follow-on.",
-    "what_it_would_settle": [
-      "evaluations/min of the REPAIRED port against E8a's measured 12.0/min",
-      "real peak VRAM and which way the 0.66 reference-cache gate decides",
-      "E8a-vs-port per-item score equality on the same accelerator",
-      "GPU utilization, sampled, against attempt 10's 0-1%"
-    ],
-    "three_defects_found_and_fixed_before_spending": [
-      "it timed every sample at cardinality 8, overstating evaluations/min",
-      "it bypassed the operator's reference-cache gate and fallback",
-      "it accepted an unpinned Hub revision"
-    ],
-    "design_finding": "E8a aggregates a subtype position-weighted; the operator takes an unweighted mean over items. On unequal-length items these differ by ~0.027, ~300x the 8.195e-05 decision margin. A naive score comparison would have read as catastrophic drift, so the paired check is per-item.",
-    "only_after_that": "reprice Stage 1, then decide on a full Phase-A attempt.",
-    "memory_lifetime_fixed": "the job no longer holds two ~16.9 GiB reference caches at once: the production peak is read first, the production cache is released, and E8a runs with cache_reference=False. Both peaks are reported distinctly and production_peak_gib is the Phase-A number."
+    "status": "The setup contract is closed and verified at $0. The first bounded measurement is consumed and failed closed; its grant and authorization are spent and not reusable.",
+    "the_ask": "ONE replacement bounded L40S measurement, same measurement-only scope, hard ceiling $1.6294 retained, plan's own stop tighter at $0.8910 / 54 min. Not a Phase-A attempt.",
+    "what_it_settles": "the repaired port's evaluations/min against E8a's 12.0, real peak VRAM and the cache decision, per-item E8a-vs-port equality on one accelerator, and sampled GPU utilization",
+    "then": "the measured values come back for repricing and a SEPARATE cumulative-budget decision. Attempt 11 is not authorized and is not the next step.",
+    "process_rule": "'my intended next decision is GO' is not executable permission; an explicit GO covers the workload named, not new paid-path infrastructure written to carry it"
   },
   "read_order": [
     "logs/STATE.md — the human view of this file",
@@ -177,6 +167,5 @@
     "logs/decisions.md — why things are the way they are",
     "logs/BUDGET_LEDGER.md — spend and caps",
     "AGENTS.md — the binding working contract"
-  ],
-  "process_note": "'my intended next decision is GO' is NOT executable permission. An explicit imperative GO is required, and it covers the workload named - not new paid-path infrastructure written to carry it, which is its own review. The measurement launch of 2026-08-19 did have a GO in the immediately preceding message, but the session machinery executing it was written and launched in the same session without review, and that is where it failed."
+  ]
 }
