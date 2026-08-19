@@ -1,0 +1,41 @@
+{
+  "schema": "aadistill.autoinit.spend_authorization/v1",
+  "authorization_id": "autoinit.measurement.2026-08-19T1142Z",
+  "version": 1,
+  "granted_utc": "2026-08-19T11:42:33Z",
+  "granted_by": "Maintainer decision, 2026-08-19, after the measurement design was accepted and its dual reference-cache lifetime defect was fixed. GO for exactly one bounded L40S causal-depth runtime and backend measurement. The tested implementation identity is 331ecf58aead9648530e1af271c5e233577a3775: full suite 1914 passed / 11 skipped / 0 errors, pod simulator 1874 passed with the artifact tree restored exactly, frozen-asset verifier passed. This grant covers a measurement whose purpose is to produce the throughput, VRAM and cache-decision values that a SEPARATE repricing and a SEPARATE cumulative-budget decision will use.\n\nCovers: One (1) bounded causal-depth runtime and backend measurement on a single NVIDIA L40S at no more than $0.99/h, running exactly the reviewed job with its reviewed defaults: 3 deterministic samples at each skip cardinality 1-8, weighted extrapolation over the real 36,35,...,29 schedule, the production _ReferenceLogits cache policy unchanged, teacher revision 768f209d9ea81521153ed38c47d515654e938aea, the production peak captured before the comparison and the production cache released before E8a, E8a with cache_reference=False, exactly two backend pairs (|skip|=1 and |skip|=8), and utilization sampling enabled. Hard ceiling $1.6294.\n\nCumulative spend at approval $206.0130 against a cumulative cap of $219.00.\n\nDoes NOT authorize: Phase-A attempt 11 or any Phase-A attempt. Greedy search, depth-map selection, checkpoint writing, or any follow-on run - the session names SpendAuthorization, whose allows_phase_a is a hard False, so this is a property and not only a prohibition. Reviving the terminated device canary. Any other paid session. Any change to the frozen science: science plan 02be33b9, session plan 9377a2dc, Stage-3 protocol 250f72ef, runtime comparability 70a26e0b, equivalence interval 0.011695296982299022, feasibility floor 0.3, the seed policy, the operator ids and declared mathematics, or the recovery, search and selection rules. Modifying the implementation on the live pod. Treating the measured values as authorization for anything: they are inputs to a repricing and a separate budget decision.\n\nGrant document: logs/autoinit_measurement_grant.json sha256 ec73be8c1962842584e04571aa11fbab02868a058ab41ee797ed634f993eaa8f",
+  "plan_id": "autoinit.causal_depth_measurement",
+  "preflight_plan_hash": "ac47b4c0445e96c84c6b7d7d11e5162270ebdadfa0c3c63f33adcc4a30b4a4df",
+  "expected_usd": 0.4524,
+  "hard_cap_usd": 1.6294,
+  "authorized_stages": [
+    0
+  ],
+  "stage_conditions": {
+    "0": "bounded measurement only: no greedy search, no depth-map selection, no checkpoint, no follow-on"
+  },
+  "scope_note": "ONE bounded causal-depth runtime and backend measurement on a single L40S. NOT Phase-A attempt 11. Trains nothing, searches nothing, selects nothing, writes no checkpoint. `allows_phase_a` is False by type, so this artifact cannot start Phase A whatever it is pointed at. The measured throughput, VRAM and cache decision are inputs to a separate repricing and a separate cumulative-budget decision; they authorize nothing by themselves.",
+  "phase_a_authorized": false,
+  "automatic_phase_a_start": false,
+  "authorized_session_commit": "b710bdcea099fe1211b309655d1ba5fd6d017c63",
+  "harness_source_digest": "491e7b2aeff635f3a5b0f8a52273085e3146cb882fb986a04d0cc9eb81b7d74f",
+  "harness_source_files": [
+    "scripts/pod/autoinit_measurement_launch.py",
+    "scripts/autoinit/measure_causal_depth_runtime.py",
+    "scripts/pod/autoinit_preflight_setup.sh",
+    "scripts/pod/autoinit_science_inputs.py",
+    "scripts/pod/watchdog.py",
+    "scripts/pod/collect_artifacts.py",
+    "src/aadistill/autoinit/authorization.py",
+    "src/aadistill/autoinit/measurement.py",
+    "src/aadistill/autoinit/operators/depth.py",
+    "src/aadistill/init/contribution.py",
+    "src/aadistill/infrastructure/session.py",
+    "src/aadistill/infrastructure/session_prechecks.py",
+    "src/aadistill/infrastructure/session_runner.py"
+  ],
+  "per_launch_hard_usd": 1.6294,
+  "provenance_commit": "b710bdcea099fe1211b309655d1ba5fd6d017c63",
+  "enforcement": "the launcher loads this artifact and refuses to create a pod whose priced hard threshold exceeds hard_cap_usd, refuses a stage not in authorized_stages, and has no code path to Phase A",
+  "authorization_sha256": "bc07f537a9404b588a2a8618fb62d276e0f4df61bd9a2cbbed6e85a927f4e3db"
+}
