@@ -22,6 +22,7 @@ SESSION_LAUNCHERS: tuple[tuple[str, tuple[str, ...]], ...] = (
     ("autoinit_phase_a_launch", ()),
     ("autoinit_continuation_launch", ("--transport", "relay")),
     ("autoinit_device_canary_launch", ()),
+    ("autoinit_measurement_launch", ()),
 )
 
 

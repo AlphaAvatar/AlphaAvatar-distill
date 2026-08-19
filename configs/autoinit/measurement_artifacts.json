@@ -1,0 +1,20 @@
+{
+  "spec": "aadistill.artifact_spec/v1",
+  "session": "autoinit_measurement",
+  "note": "The bounded causal-depth runtime/backend measurement produces one report and nothing else. It trains nothing, searches nothing, selects no depth map and writes no checkpoint. The same spec serves success and failure: on failure the report still carries the timings, the cache decision, the utilization distribution and the per-item E8a deltas, which is the entire reason the session exists.",
+  "entries": [
+    {
+      "artifact_class": "measurement_report",
+      "pattern": "audit/autoinit_measurement/result.json",
+      "required": true,
+      "lifecycle": "final_required"
+    },
+    {
+      "artifact_class": "measurement_session_logs",
+      "pattern": "audit/autoinit_measurement/session/*",
+      "required": false,
+      "lifecycle": "final_required",
+      "min_matches": 0
+    }
+  ]
+}

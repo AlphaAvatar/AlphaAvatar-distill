@@ -69,6 +69,23 @@ from aadistill.init.contribution import (  # noqa: E402
     DistortionSums, distortion, domain_balanced_score,
 )
 
+#: Written when this runs as a paid session, so the launcher can classify the
+#: outcome from the status file exactly as it does for every other session.
+STATUS = Path("/workspace/autoinit_measurement.status")
+
+
+def mark(name: str) -> None:
+    from datetime import datetime, timezone
+    line = f"{datetime.now(timezone.utc):%FT%TZ} MARKER:{name}"
+    print(line, flush=True)
+    try:
+        STATUS.parent.mkdir(parents=True, exist_ok=True)
+        with STATUS.open("a") as f:
+            f.write(line + "\n")
+    except OSError:
+        pass                      # running off a pod: the print is the record
+
+
 #: The frozen teacher. Pinned, because a paid measurement against an unpinned Hub
 #: HEAD measures whatever was published that morning.
 TEACHER_ID = "Qwen/Qwen3-4B-Thinking-2507"
@@ -331,11 +348,14 @@ def main() -> None:
     ap.add_argument("--out", default="logs/autoinit_causal_depth_measured.json")
     args = ap.parse_args()
 
+    mark("MEASUREMENT_START")
     if not torch.cuda.is_available():
+        mark("MEASUREMENT_FAILED")
         raise SystemExit(
             "no CUDA device. This validates the accelerator path; running it on "
             "the host would re-measure exactly the defect being repaired.")
     if not args.teacher_revision:
+        mark("MEASUREMENT_FAILED")
         raise SystemExit(
             "refusing to measure against an unpinned Hub HEAD: pass the frozen "
             f"revision ({TEACHER_REVISION}).")
@@ -438,7 +458,26 @@ def main() -> None:
         },
     }
     out = REPO_ROOT / args.out
+    out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(json.dumps(report, indent=2) + "\n")
+
+    # Fail-closed on exactly the conditions the grant names. The artifact is
+    # written FIRST either way: a run that found a real backend difference is the
+    # one whose evidence matters most.
+    worst = max((p["max_per_item_kl_delta"] for p in core["paired"]), default=0.0)
+    if worst != 0.0:
+        mark("MEASUREMENT_FAILED")
+        raise SystemExit(
+            f"per-item backend delta {worst:.3e} is non-zero: the repaired port "
+            "and E8a disagree on the same accelerator. Evidence is written; "
+            "stopping rather than continuing.")
+    if not core["cache_decision"]["cached"]:
+        mark("MEASUREMENT_FALLBACK")
+        raise SystemExit(
+            "the production reference cache fell back to recompute, which "
+            "roughly doubles the forward passes and changes the cost basis this "
+            "measurement exists to establish. Evidence is written; stopping.")
+    mark("ALL_DONE")
     print(json.dumps({k: report[k] for k in
                       ("timing", "vram", "reference_cache_decision",
                        "gpu_utilization", "e8a_backend_comparison")}, indent=2))

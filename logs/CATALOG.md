@@ -45,6 +45,8 @@ overview and links here instead. A structural test enforces this.
 | `log_inventory.json` | every documentary file with its hash, class and disposition, the byte-identical duplicate groups and which copy is canonical, and the record of copies already removed |
 | `storage_measurements.json` | storage in the four areas, before and after each cleanup, measured the same way |
 | `autoinit_depth_backend_equivalence.json` | the causal-depth runtime repair's equivalence proof: the frozen greedy rule by known answer, the refactor bit-identical, the bf16 cache exact, and the per-round decision margins |
+| `autoinit_measurement_authorization.json` | the bounded measurement's one-use authorization — a `SpendAuthorization`, so `allows_phase_a` is False by type |
+| `autoinit_measurement_session.json` | that session's record |
 | `autoinit_causal_depth_pricing_bound.json` | the DERIVED Stage-1 wall-time and VRAM bound for the repaired path, and the measurement protocol that would confirm it |
 | `relay_mirror_verification.json` | file-by-file proof that a local tree is byte-identical to its relay copy, and by which method each file was checked. The evidence a "stale local cache" deletion stands on |
 | `supported_models.md` | the supported-model table (AGENTS.md §3.4) |
@@ -95,7 +97,8 @@ Grant documents — the one-use maintainer decision an authorization is issued
 *against*, kept because a spent grant records what was permitted and by whom:
 `autoinit_phase_a_attempt8_grant.json`,
 `autoinit_phase_a_attempt9_grant.json`,
-`autoinit_phase_a_attempt10_grant.json`. The issuer requires one, refuses a grant
+`autoinit_phase_a_attempt10_grant.json`,
+`autoinit_measurement_grant.json`. The issuer requires one, refuses a grant
 that asserts an identity it did not compute, and hashes it into the artifact.
 
 Consumed authorizations — kept because a spent grant is the record of what was

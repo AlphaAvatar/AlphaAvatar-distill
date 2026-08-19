@@ -1,8 +1,8 @@
 {
   "schema": "aadistill.current_state/v2",
-  "generated_utc": "2026-08-19T09:50:52Z",
+  "generated_utc": "2026-08-19T11:41:56Z",
   "_contract": "The minimal machine-readable CURRENT snapshot. It owns live facts and nothing else: no history, no per-attempt detail, no narrative. History lives in logs/decisions.md and the per-run directories; the human view of THIS file is logs/STATE.md and the two must agree. README owns no live facts at all. Ownership rules: logs/CATALOG.md.",
-  "baseline_commit": "8183a23ef74fb9fba738ef62feef43dc72445b53",
+  "baseline_commit": "331ecf58aead9648530e1af271c5e233577a3775",
   "baseline_commit_meaning": "The LAST TESTED IMPLEMENTATION: the commit whose tree produced the latest_verification figures below. It is deliberately NOT the commit carrying this file. Two commits follow it by construction and neither is separately tested: (1) the grant/provenance commit that adds the one-use grant document and this refresh, and (2) the authorization-only commit, which the Phase-A lineage gate requires to differ from its base in nothing but logs/autoinit_phase_a_authorization.json. Keeping the distinction explicit is the point: a reader must be able to tell which commit the 1874/1834/395 numbers describe from which commit a pod checks out. This field read fe3c2b3 while HEAD was four commits ahead once, and read 4563d106 after the post-fix verification, because nothing refreshes or checks it; it is refreshed as part of preparing a paid launch.",
   "running": {
     "paid_compute": false,
@@ -57,9 +57,9 @@
     "the causal-depth runtime repair: scoring restored to the accelerator per E8a, cgroup-aware CPU budget, search_minutes as a fail-closed in-expansion deadline, bounded per-candidate progress"
   ],
   "latest_verification": {
-    "utc": "2026-08-19T09:50:52Z",
-    "after": "fixing the measurement job's dual reference-cache lifetime",
-    "full_suite": "1914 passed, 11 skipped, 0 errors in 17:27",
+    "utc": "2026-08-19T11:41:56Z",
+    "after": "building the bounded measurement session (full suite re-run: 1935 passed, 11 skipped, 0 errors)",
+    "full_suite": "1935 passed, 11 skipped, 0 errors in 16:55",
     "pod_simulator": "1874 passed, 22 skipped; tree restored EXACTLY, 1623 entries",
     "frozen_asset_verifier": "passed, no problems",
     "scope": "CPU only; no checkpoint loaded, no metric measured, no GPU used"
