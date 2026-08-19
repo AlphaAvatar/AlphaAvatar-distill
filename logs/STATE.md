@@ -57,20 +57,14 @@ Also frozen: recovery design, selection rules, pooled_counts@v2, Stage-3 artifac
 
 ## Latest verification
 
-After the bounded causal-depth runtime repair. CPU only — no checkpoint was
-loaded and no metric measured:
+After correcting the causal-depth GPU measurement job. CPU only — no checkpoint
+loaded, no metric measured, no GPU used:
 
-* full suite **1892 passed, 11 skipped, 0 errors** in 16:06.
-* pod simulator **1852 passed, 22 skipped**; artifact tree restored **exactly** —
-  1623 entries identical before and after.
-* frozen-asset verifier **passed**, no problems.
-* Phase-A pricing **$17.8933 / $22.7183 / $23.0483**, reserves unchanged.
-* equivalence: frozen greedy rule unchanged by known answer; the refactor
-  **bit-identical**, drift 0.0; bf16 cache exact; decision margins 8.195e-05 to
-  1.581e-03. The CUDA-vs-CPU drift is **not** established on a CPU box, and the
-  artifact says so rather than implying otherwise.
-* harness digest **moved** to `923f8436…` — the driver and search module are in
-  the 16-file set. Expected; the set was not expanded.
+* full suite **1906 passed, 11 skipped, 0 errors** in 16:57.
+* pod simulator **1866 passed, 22 skipped**; artifact tree restored **exactly** —
+  1623 entries.
+* frozen-asset verifier **passed**; the CPU equivalence artifact still passes and
+  is retained as the independent proof on argmin, tie-break and cache semantics.
 
 ## What failed, and why
 
@@ -137,38 +131,30 @@ instead of the cause, and it was paid for twice. Full diagnoses in
 
 ## Next starting point
 
-**The causal-depth runtime repair is complete and verified at $0.** It was a
-**port regression, not a design flaw**:
-`scripts/training/search_depth_map.py` — the E8a implementation this operator
-ports — keeps prepared inputs, reference logits, ablated logits and
-`distortion()` on the accelerator. The port introduced `.cpu()`. Three lines of
-placement put them back; the reduction itself was never touched.
+**The measurement job had three material defects and they were found before it
+cost anything.** It timed every sample at cardinality 8 (overstating
+evaluations/min, since larger skip sets run *fewer* layers); it built its own
+reference cache, bypassing the operator's 0.66 gate and recompute fallback; and
+it accepted an unpinned Hub revision. A fourth was mine — the docstring claimed
+GPU utilization it never sampled. All four are fixed and mutation-verified.
 
-Also repaired: the driver holds torch to the **cgroup CPU grant** (attempt 10 ran
-192 threads on 13 granted), `search_minutes` is a **real fail-closed deadline**
-checked inside the candidate loop rather than an affordability precheck, and the
-search emits **one line per candidate** so a stall is distinguishable from work.
+**A finding that reshaped the comparison:** E8a merges a subtype's raw sums and
+normalizes once (position-weighted), while the operator normalizes per item and
+takes an unweighted mean — its own declared semantics. On unequal-length items
+these differ by **~0.027, about 300× the smallest decision margin (8.195e-05)**.
+A naive E8a-vs-port *score* comparison would have reported that as catastrophic
+drift. The paired check is therefore **per-item**, where the two must agree
+exactly, with the aggregation gap reported separately and marked expected.
 
-**No concurrency was added**, deliberately: `bypassed_blocks()` mutates the
-shared model layer list, so concurrent skip sets on one model are unsafe.
+**Nothing is authorized.** The ask is **one short L40S measurement**, hard ceiling
+**$1.6294** (expected $0.5431) — 12.5% of the remaining $12.9870. No search, no
+depth map, no checkpoint. It would settle: the repaired port's evaluations/min
+against E8a's 12.0, real peak VRAM and the cache decision, per-item E8a-vs-port
+equality on one accelerator, and sampled GPU utilization against attempt 10's
+0–1%.
 
-**Pricing: the answer was already in the repository.** The frozen cost model
-records E8a running this exact workload — 260 evaluations, 67 items, 59,763
-positions, 4.02B — in **1,300 s on an L40S**: 21.7 min, **12.0 evaluations/min**,
-with the reduction on the accelerator. An independent FLOP derivation agrees to
-**95.1%**. The 180-minute assumption was invalidated for the **host** path
-(≥30×), not for the accelerator path. Derived bound and VRAM (~25.8 GiB peak,
-cache enabled under the 0.66 gate):
-[`autoinit_causal_depth_pricing_bound.json`](autoinit_causal_depth_pricing_bound.json).
-
-**What still needs a GPU:** that the *ported* code achieves E8a's rate, and its
-real peak VRAM — attempt 10 is the proof that a port can differ from its ancestor
-in ways no CPU run reveals. `scripts/autoinit/measure_causal_depth_runtime.py` is
-the bounded job (~20 evaluations, minutes of GPU time). **It is not authorized
-and was not run.**
-
-**Nothing is authorized, funded or prepared.** Attempt 11 is not authorized, and
-$12.9870 would not cover a full attempt in any case.
+**Only after those measured values exist** should Stage 1 be repriced and a full
+Phase-A attempt considered. Attempt 11 is not the next step.
 
 ## Where else to look
 

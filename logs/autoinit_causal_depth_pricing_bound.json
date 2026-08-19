@@ -53,5 +53,38 @@
     "remaining_usd": 12.987,
     "full_phase_a_ceiling_usd": 23.0484,
     "note": "the remaining headroom does not cover a full Phase-A attempt. The measurement job is a different, much smaller ask and is not authorized either."
+  },
+  "measurement_job": {
+    "script": "scripts/autoinit/measure_causal_depth_runtime.py",
+    "status": "corrected and $0-executed; NOT authorized and NOT run on a GPU",
+    "sampling": {
+      "scheme": "skip(c, j) = {(3j + 5k) mod 36 : k < c}; RNG-free, recomputable by hand",
+      "why_stride_5": "gcd(5,36)=1, so layers are distinct and spread across depth; a block of eight adjacent layers is neither representative nor equally costly",
+      "cardinalities": "1..8, the real greedy schedule",
+      "samples_per_cardinality": 3,
+      "total_timed_evaluations": 24
+    },
+    "weighted_extrapolation": {
+      "weights": {
+        "1": 36,
+        "2": 35,
+        "3": 34,
+        "4": 33,
+        "5": 32,
+        "6": 31,
+        "7": 30,
+        "8": 29
+      },
+      "weights_sum": 260,
+      "formula": "T_260 = sum_c weight_c * mean_seconds(c)",
+      "why": "round r evaluates |skip|=r+1 over 36-r candidates, so larger skip sets run FEWER layers and are cheaper. Timing everything at cardinality 8 would overstate evaluations/min and understate the 260-evaluation runtime; the artifact reports that flat figure alongside, labelled WRONG, so the difference is visible"
+    },
+    "cost_ceiling_usd": {
+      "expected": 0.5431,
+      "with_2x_contingency": 1.0862,
+      "hard": 1.6294,
+      "basis": "24 evaluations + one reference pass + 2 E8a paired re-scorings at E8a's 12.0 eval/min, plus 8 min teacher load, 12 min pod setup and 5 min overhead, then 3x",
+      "share_of_remaining_headroom_pct": 12.5
+    }
   }
 }

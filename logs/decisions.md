@@ -4544,3 +4544,74 @@ two devices, cuda:0 and cpu!
   below saturation with scoring device-resident, bounded candidate/frontier
   concurrency becomes the next question — and it needs `bypassed_blocks`' shared
   mutation addressed first.
+
+## 2026-08-19 — The measurement job was wrong in three ways; corrected before it cost anything
+
+- **Context:** the runtime repair was accepted, but the reviewer refused to run
+  `measure_causal_depth_runtime.py` and named three material defects in the job
+  itself. All three were real, and a fourth — an unbacked claim — was mine too.
+- **1. It timed every sample at cardinality 8.** The real 36->28 search evaluates
+  skip sets of cardinality 1..8 with round weights 36,35,...,29. A larger skip
+  set runs **fewer** layers, so measuring only 28-layer forwards would have
+  overstated evaluations/min and understated the 260-evaluation runtime. My own
+  *derivation* had accounted for this (mean surviving fraction 0.8795); the
+  *measurement* had not, which is precisely the kind of gap that makes a measured
+  number worse than a derived one.
+  Now: `skip(c, j) = {(3j + 5k) mod 36 : k < c}` — RNG-free and recomputable by
+  hand, `gcd(5,36)=1` so the layers are distinct and spread — three samples at
+  each of the eight cardinalities, and `T_260 = Σ_c weight_c · mean(c)`. The
+  artifact also reports the flat cardinality-8 figure, **labelled WRONG**, so the
+  size of the error is visible rather than merely avoided.
+- **2. It built its own reference cache**, bypassing the operator's 0.66
+  free-VRAM gate and its recompute fallback — so the job would have measured a
+  cache arrangement the production path might not take. Now it imports
+  `_ReferenceLogits` and `_forward_logits` from the operator and reports
+  `decision()` verbatim. A test asserts the job holds no private cache dict.
+- **3. It accepted an unpinned Hub revision.** Now `--teacher-revision` defaults
+  to the frozen `768f209d…`, an empty revision is refused with a named error, and
+  a test pins that this is the same revision the session launcher uses — so the
+  two cannot drift apart silently.
+- **4. Mine to own: the docstring claimed the job reports GPU utilization and
+  the code never sampled it.** Attempt 10's 0-1 % was found by hand on a live
+  pod; a rate reported without it would leave exactly that gap. Now a background
+  thread samples `torch.cuda.utilization` at 0.5 s (falling back to
+  `nvidia-smi`), and reports mean/median/min/max plus the fraction below 10 %.
+  When it cannot sample, it **withdraws the claim** rather than estimating.
+- **A finding that changes the comparison design.** The reviewer asked for an
+  E8a-versus-port score comparison. E8a **merges raw `DistortionSums` across a
+  subtype's items and normalizes once** — a position-weighted mean — while the
+  operator normalizes each item first and takes an **unweighted** mean, exactly
+  as its own description says. On a mixture with unequal item lengths these
+  disagree by construction: **measured at 0.027 on a two-item toy, ~300x the
+  smallest real decision margin of 8.195e-05**. A naive score-level comparison
+  would therefore have reported catastrophic "drift" on the GPU that is in fact a
+  **declared aggregation choice**. The paired comparison is made where the two
+  paths must agree exactly — the **per-item `DistortionSums`** — and the
+  aggregation gap is reported separately, marked expected. A test pins the gap as
+  non-zero and above the margin, so if it ever closes the explanation gets
+  revisited rather than silently becoming wrong.
+- **The job is executed, not inspected.** `run_measurement` is a seam so its
+  whole body runs on the dev box at toy scale against a real tiny Qwen3, the
+  production cache class and the real E8a `Searcher` — four paid pods have died
+  inside lines no $0 path had run. That execution immediately caught a design bug
+  of mine: the seam hard-coded `N_REMOVE = 8`, so a 6-layer toy tried to bypass
+  all its layers. The schedule is now a function of both layer count and removal
+  count.
+- **Mutation-verified, six mutations:** reinstating cardinality-8-only sampling,
+  reintroducing a private cache, dropping the revision pin, silencing the
+  utilization sampler, clumping the skip sets into one adjacent block, and
+  importing `greedy_removal` into the job — each fails a test.
+- **No concurrency, no search, no selection.** A test asserts the job imports
+  neither `greedy_removal` nor `depth_span_map`.
+- **Proposed measurement-only ceiling: $1.6294** — expected $0.5431, 3x. Basis:
+  24 evaluations plus one reference pass plus two E8a paired re-scorings at E8a's
+  12.0 eval/min, plus 8 min teacher load, 12 min pod setup and 5 min overhead.
+  That is **12.5 % of the remaining $12.9870**, and it is a measurement ask, not
+  a Phase-A ask.
+- **Verified:** full suite **1906 passed, 11 skipped, 0 errors** (16:57); pod
+  simulator **1866 passed, 22 skipped**, artifact tree restored **exactly** (1623
+  entries); frozen-asset verifier passed; the CPU equivalence artifact still
+  passes and is retained as the independent proof that argmin, the tie-break and
+  the cache semantics were not changed.
+- **Revisit when:** the measurement lands. Only then reprice and consider a full
+  Phase-A attempt.
