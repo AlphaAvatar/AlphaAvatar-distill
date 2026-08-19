@@ -245,3 +245,108 @@ def test_the_job_runs_no_search_and_selects_no_depth_map():
     assert "greedy_removal" not in src, "the measurement job runs a greedy search"
     assert "depth_span_map" not in src
     assert "not_a_phase_a_attempt" in src
+
+
+# --- 6. one reference cache at a time ---------------------------------------
+#
+# GPU-only in its consequence: each frozen cache is ~16.9 GiB, so holding the
+# production one and E8a's together would either OOM the measurement or make the
+# reported peak describe a dual-cache arrangement no Phase-A run ever has. The
+# consequence cannot be reproduced on this box; the arrangement that causes it
+# can, and is what these assert.
+
+def test_the_production_peak_is_captured_before_the_comparison_path_exists():
+    src = (REPO / "scripts/autoinit/measure_causal_depth_runtime.py").read_text()
+    body = src[src.index("def run_measurement"):src.index("def main")]
+    prod = body.index("production_peak =")
+    release = body.index("reference._cache.clear()")
+    e8a = body.index("from search_depth_map import")
+    assert prod < release < e8a, (
+        "the production peak must be taken BEFORE the cache is released and "
+        "before E8a's path is built; otherwise it is not the Phase-A number")
+
+
+def test_the_production_cache_is_released_before_e8a_is_constructed():
+    src = (REPO / "scripts/autoinit/measure_causal_depth_runtime.py").read_text()
+    body = src[src.index("def run_measurement"):src.index("def main")]
+    assert "reference._cache.clear()" in body and "del reference" in body
+    assert "gc.collect()" in body
+    assert "torch.cuda.empty_cache()" in body
+    assert body.index("del reference") < body.index("Searcher(")
+
+
+def test_e8a_runs_without_a_second_reference_cache():
+    """The pairs validate backend numerics, not E8a throughput, and E8a defines
+    recomputation as numerically identical."""
+    src = (REPO / "scripts/autoinit/measure_causal_depth_runtime.py").read_text()
+    assert "cache_reference=False" in src
+    assert "cache_reference=True" not in src
+
+
+def test_the_two_peaks_are_reported_separately_and_not_substituted():
+    model = tiny_teacher()
+    items = toy_items(model.config.vocab_size)
+    core = JOB.run_measurement(model, items, torch.device("cpu"), n_layers=6,
+                               n_remove=3, samples_per_cardinality=1,
+                               e8a_pairs=2)
+    assert "production_peak_bytes" in core and "comparison_peak_bytes" in core
+    assert core["e8a_cache_reference"] is False
+    src = (REPO / "scripts/autoinit/measure_causal_depth_runtime.py").read_text()
+    assert '"which_is_the_phase_a_number": "production_peak_gib"' in src
+
+
+def test_the_released_cache_does_not_cost_the_port_results():
+    """Releasing is only safe because the port's per-item results are already
+    scalars. If they ever become tensors this test is the one that should fail."""
+    model = tiny_teacher()
+    items = toy_items(model.config.vocab_size)
+    core = JOB.run_measurement(model, items, torch.device("cpu"), n_layers=6,
+                               n_remove=3, samples_per_cardinality=1,
+                               e8a_pairs=2)
+    for p in core["paired"]:
+        assert isinstance(p["port_aggregated_score"], float)
+        assert isinstance(p["max_per_item_kl_delta"], float)
+
+
+def test_the_e8a_pairs_are_the_smallest_and_largest_skip_sets():
+    """Explicit, not 'whichever two came first in a dict'. They bracket the
+    schedule, so a backend difference appearing only at depth cannot hide."""
+    model = tiny_teacher()
+    items = toy_items(model.config.vocab_size)
+    core = JOB.run_measurement(model, items, torch.device("cpu"), n_layers=6,
+                               n_remove=3, samples_per_cardinality=1,
+                               e8a_pairs=2)
+    cards = [p["cardinality"] for p in core["paired"]]
+    assert cards == [1, 3], f"expected the smallest and largest, got {cards}"
+    assert core["paired"][0]["skip"] == sorted(JOB.skip_set(1, 0, 6))
+    assert core["paired"][1]["skip"] == sorted(JOB.skip_set(3, 0, 6))
+
+
+def test_the_pair_count_was_not_increased():
+    src = (REPO / "scripts/autoinit/measure_causal_depth_runtime.py").read_text()
+    assert 'ap.add_argument("--e8a-pairs", type=int, default=2,' in src
+
+
+def test_the_production_peak_is_read_before_the_comparison_peak():
+    """Behavioural, not textual. Both peaks are None on a CPU box, so a test
+    comparing only their values cannot tell "captured before the comparison"
+    from "captured after and copied" — a mutation kept the assignment in place
+    and aliased the value, and the source-ordering test passed. An injected
+    counter makes the order observable here."""
+    model = tiny_teacher()
+    items = toy_items(model.config.vocab_size)
+    reads = []
+
+    def counter():
+        reads.append(len(reads) + 1)
+        return reads[-1]
+
+    core = JOB.run_measurement(model, items, torch.device("cpu"), n_layers=6,
+                               n_remove=3, samples_per_cardinality=1,
+                               e8a_pairs=2, peak_reader=counter)
+    assert len(reads) == 2, f"expected exactly two peak reads, got {reads}"
+    assert core["production_peak_bytes"] == 1, "the production peak was not read first"
+    assert core["comparison_peak_bytes"] == 2
+    assert core["production_peak_bytes"] != core["comparison_peak_bytes"], (
+        "the two peaks are the same reading; the production number would then "
+        "include E8a's path")

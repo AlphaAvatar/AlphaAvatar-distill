@@ -49,6 +49,7 @@ extrapolation is weighted by the real schedule.
 from __future__ import annotations
 
 import argparse
+import gc
 import json
 import statistics
 import subprocess
@@ -156,7 +157,7 @@ class GpuSampler:
 
 def run_measurement(model, items, device, *, n_layers: int,
                     samples_per_cardinality: int, e8a_pairs: int,
-                    n_remove: int = N_REMOVE) -> dict:
+                    n_remove: int = N_REMOVE, peak_reader=None) -> dict:
     """The whole measurement, minus the CUDA-only bookkeeping.
 
     A seam, so this executes for real on the dev box at toy scale. Four paid pods
@@ -164,6 +165,16 @@ def run_measurement(model, items, device, *, n_layers: int,
     only ever runs on a GPU would be the fifth.
     """
     from aadistill.autoinit.operators.depth import _forward_logits, _ReferenceLogits
+
+    # Injectable so the ORDER of the two peak reads is testable on a box with one
+    # device. Both are None on CPU, so a test that only compared their values
+    # could not tell "captured before the comparison" from "captured after and
+    # copied" -- a mutation proved exactly that, by keeping the assignment where
+    # it was and aliasing the value.
+    if peak_reader is None:
+        def peak_reader():
+            return (torch.cuda.max_memory_allocated(device)
+                    if device.type == "cuda" else None)
 
     if not 0 < n_remove < n_layers:
         raise ValueError(f"cannot remove {n_remove} of {n_layers} layers")
@@ -219,6 +230,26 @@ def run_measurement(model, items, device, *, n_layers: int,
     total = sum(schedule.values())
     flat_s = total * means_by_c[max(schedule)]
 
+    # --- the PRODUCTION peak, captured here and never overwritten ----------
+    #
+    # Everything below builds a second reference path. Each frozen cache is
+    # ~16.9 GiB at the real mixture, so holding the production cache and E8a's
+    # at once would either OOM the job or make `max_memory_allocated` describe a
+    # dual-cache arrangement no Phase-A run ever has. The production number is
+    # taken before that can happen; the comparison's peak is reported separately
+    # and never substituted for it.
+    production_peak = peak_reader()
+
+    # Releasing the production cache loses nothing still needed: the port's
+    # results are already plain floats -- `per_item` holds
+    # `DistortionSums.as_dict()` scalars, not tensors.
+    reference._cache.clear()
+    del reference
+    gc.collect()
+    if device.type == "cuda":
+        torch.cuda.empty_cache()
+        torch.cuda.reset_peak_memory_stats(device)
+
     # --- E8a, same process, same GPU, same teacher, same skip sets ---------
     from search_depth_map import Searcher, prepare
 
@@ -227,32 +258,51 @@ def run_measurement(model, items, device, *, n_layers: int,
                   "n_prediction_positions": int(i["input_ids"].shape[1]) - 1,
                   "tags": {}} for i in items]
     prepared = prepare(e8a_items, device)
-    by_id = {p["item_id"]: p for p in prepared}
-    for p_ in prepared:
-        src = next(i for i in items if i["item_id"] == p_["item_id"])
-        assert torch.equal(p_["ids"].cpu(), src["input_ids"].cpu()), (
-            f"{p_['item_id']}: the two paths were not given the same tokens")
-    searcher = Searcher(model, prepared, domains, cache_reference=True, chunk=512)
+    by_id = {q["item_id"]: q for q in prepared}
+    for q in prepared:
+        src = next(i for i in items if i["item_id"] == q["item_id"])
+        assert torch.equal(q["ids"].cpu(), src["input_ids"].cpu()), (
+            f"{q['item_id']}: the two paths were not given the same tokens")
 
+    # `cache_reference=False`: these pairs validate BACKEND NUMERICS, not E8a's
+    # throughput, and E8a itself defines recomputation as numerically identical
+    # -- "distortion upcasts to float32 internally either way". So the comparison
+    # costs one extra forward per item and holds no second 16.9 GiB cache.
+    searcher = Searcher(model, prepared, domains, cache_reference=False,
+                        chunk=512)
+
+    # Explicit and deterministic: the smallest and the largest skip set, not
+    # whichever two happened to come first in a dict. They bracket the schedule,
+    # so a backend difference that appears only at depth cannot hide.
+    pair_skips = [skip_set(1, 0, n_layers), skip_set(n_remove, 0, n_layers)]
     paired = []
-    for key in list(port_scores)[:e8a_pairs]:
-        skip = frozenset(int(x) for x in key.split(","))
-        rec = searcher.evaluate(skip)
+    for skip in pair_skips[:e8a_pairs]:
+        key = ",".join(map(str, sorted(skip)))
+        port_score, port_per_item = port_scores[key], port_items[key]
+        # One pass yields both the per-item deltas and E8a's own aggregate, so
+        # the comparison does not re-run the model twice for two numbers.
+        e8a_per_subtype: dict[str, DistortionSums] = {}
         deltas = []
         for item in items:
-            p_ = by_id[item["item_id"]]
-            e = distortion(searcher.reference_logits(p_),
-                           searcher._logits(p_, skip), p_["targets"],
-                           chunk=512).as_dict()
-            deltas.append(abs(e["kl"] - port_items[key][item["item_id"]]["kl"]))
+            q = by_id[item["item_id"]]
+            sums = distortion(searcher.reference_logits(q),
+                              searcher._logits(q, skip), q["targets"],
+                              chunk=512)
+            e8a_per_subtype.setdefault(item["subtype"], DistortionSums()).merge(sums)
+            deltas.append(abs(sums.as_dict()["kl"]
+                              - port_per_item[item["item_id"]]["kl"]))
+        e8a_primary, _ = domain_balanced_score(
+            {k: v.as_dict()["kl"] for k, v in e8a_per_subtype.items()}, domains)
         paired.append({
-            "skip": sorted(skip),
+            "skip": sorted(skip), "cardinality": len(skip),
             "max_per_item_kl_delta": max(deltas),
             "mean_per_item_kl_delta": statistics.mean(deltas),
-            "port_aggregated_score": port_scores[key],
-            "e8a_aggregated_score": rec["primary_kl"],
-            "aggregated_difference": abs(rec["primary_kl"] - port_scores[key]),
+            "port_aggregated_score": port_score,
+            "e8a_aggregated_score": e8a_primary,
+            "aggregated_difference": abs(e8a_primary - port_score),
         })
+
+    comparison_peak = peak_reader()
 
     return {
         "schedule": schedule, "total_evaluations": total,
@@ -260,6 +310,12 @@ def run_measurement(model, items, device, *, n_layers: int,
         "weighted_s": weighted_s, "flat_s": flat_s,
         "reference_pass_s": ref_s, "cache_decision": cache_decision,
         "gpu": gpu.report(), "paired": paired,
+        # Two distinct peaks. The production one is the Phase-A answer; the
+        # comparison one exists only so a reader can see it was measured and
+        # kept apart, never folded in.
+        "production_peak_bytes": production_peak,
+        "comparison_peak_bytes": comparison_peak,
+        "e8a_cache_reference": False,
         "n_timed": sum(len(v) for v in timings.values()),
     }
 
@@ -311,7 +367,6 @@ def main() -> None:
                            n_remove=N_REMOVE,
                            samples_per_cardinality=args.samples_per_cardinality,
                            e8a_pairs=args.e8a_pairs)
-    peak = torch.cuda.max_memory_allocated(device)
 
     report = {
         "schema": "aadistill.autoinit.causal_depth_measured/v2",
@@ -353,7 +408,17 @@ def main() -> None:
             "flat_would_have_understated_by_pct": round(
                 100 * (core["weighted_s"] - core["flat_s"]) / core["weighted_s"], 1),
         },
-        "vram": {"peak_gib": round(peak / 2**30, 2)},
+        "vram": {
+            "production_peak_gib": round(core["production_peak_bytes"] / 2**30, 2),
+            "comparison_peak_gib": (
+                round(core["comparison_peak_bytes"] / 2**30, 2)
+                if core["comparison_peak_bytes"] is not None else None),
+            "which_is_the_phase_a_number": "production_peak_gib",
+            "note": ("the production reference cache is released before the E8a "
+                     "comparison builds its path, so neither peak includes two "
+                     "~16.9 GiB caches at once; E8a runs with "
+                     "cache_reference=False"),
+        },
         "reference_cache_decision": core["cache_decision"],
         "gpu_utilization": core["gpu"],
         "e8a_backend_comparison": {

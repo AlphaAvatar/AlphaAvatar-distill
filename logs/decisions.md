@@ -4615,3 +4615,53 @@ two devices, cuda:0 and cpu!
   the cache semantics were not changed.
 - **Revisit when:** the measurement lands. Only then reprice and consider a full
   Phase-A attempt.
+
+## 2026-08-19 — The measurement job could hold two 16.9 GiB caches at once
+
+- **Context:** the corrected measurement design was accepted in principle, and
+  the reviewer found one remaining GPU-only defect: the production
+  `_ReferenceLogits` cache stayed live through the paired comparison while
+  `Searcher(cache_reference=True)` built a second one. At the frozen mixture each
+  is ~16.9 GiB, so with the 4B model, ablated logits, the float32 reduction
+  workspace and activations the job would either OOM or report a
+  `max_memory_allocated` describing a **dual-cache arrangement no Phase-A run
+  ever has**. Neither outcome is a measurement.
+- **Fix, scoped to the measurement's lifetime and nothing else:**
+  - the **production peak is read immediately after the timed evaluations**,
+    before any comparison object exists;
+  - the production cache is cleared, dropped, `gc.collect()`-ed and
+    `empty_cache()`-ed before E8a's path is built;
+  - E8a runs with **`cache_reference=False`** — the pairs validate backend
+    numerics, not E8a's throughput, and E8a itself defines recomputation as
+    numerically identical;
+  - **both peaks are reported, distinctly**, with `production_peak_gib` named as
+    the Phase-A number and the comparison peak never substituted for it.
+- **Releasing is safe for a stated reason, not by luck.** The port's per-item
+  results are already scalars — `DistortionSums.as_dict()` — so nothing needed
+  survives only inside the cache. A test asserts they are floats, so if that ever
+  changes the release becomes a failure rather than a silent corruption.
+- **The pairs are now explicit:** one `|skip|=1` and one `|skip|=8`, which
+  bracket the schedule so a backend difference appearing only at depth cannot
+  hide. Previously they were the first two dict entries — an accident of
+  insertion order. The count was **not** increased.
+- **A gate that could not fail, and the fix.** Mutation testing found that the
+  peak-ordering test asserted *source position*: replacing the production read
+  with `None` and aliasing it to the comparison peak kept the assignment where it
+  was, and the test passed. On a one-device box both peaks are `None`, so no
+  value comparison could tell "captured before" from "captured after and copied".
+  The peak reader is now **injectable**, a test drives it with a counter, and
+  both aliasing mutations fail. This is the third time in this project that a
+  one-device box has made a placement or lifetime property untestable by
+  inspection alone; the pattern is now: **make the ordering observable, do not
+  assert the text**.
+- **Cost basis recomputed for the recomputation.** `cache_reference=False` costs
+  two forwards per item per pair instead of one plus a shared reference pass:
+  **+0.08 min**. Expected total 27.4 min = **$0.4524**; 3x = **$1.3571**, which
+  is *below* the previously proposed hard ceiling. **$1.6294 is retained** as the
+  ceiling because it is more conservative, not because it is needed.
+- **Verified:** full suite **1914 passed, 11 skipped, 0 errors** (17:27); pod
+  simulator **1874 passed, 22 skipped**, artifact tree restored **exactly** (1623
+  entries); frozen-asset verifier passed. Seven mutations against the job's
+  guards, all failing correctly.
+- **Revisit when:** the measurement is authorized and runs. Nothing else in the
+  job changes first.

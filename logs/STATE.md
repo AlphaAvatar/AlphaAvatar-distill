@@ -57,14 +57,13 @@ Also frozen: recovery design, selection rules, pooled_counts@v2, Stage-3 artifac
 
 ## Latest verification
 
-After correcting the causal-depth GPU measurement job. CPU only — no checkpoint
-loaded, no metric measured, no GPU used:
+After fixing the measurement job's dual reference-cache lifetime. CPU only — no
+checkpoint loaded, no metric measured, no GPU used:
 
-* full suite **1906 passed, 11 skipped, 0 errors** in 16:57.
-* pod simulator **1866 passed, 22 skipped**; artifact tree restored **exactly** —
+* full suite **1914 passed, 11 skipped, 0 errors** in 17:27.
+* pod simulator **1874 passed, 22 skipped**; artifact tree restored **exactly** —
   1623 entries.
-* frozen-asset verifier **passed**; the CPU equivalence artifact still passes and
-  is retained as the independent proof on argmin, tie-break and cache semantics.
+* frozen-asset verifier **passed**.
 
 ## What failed, and why
 
@@ -147,7 +146,10 @@ drift. The paired check is therefore **per-item**, where the two must agree
 exactly, with the aggregation gap reported separately and marked expected.
 
 **Nothing is authorized.** The ask is **one short L40S measurement**, hard ceiling
-**$1.6294** (expected $0.5431) — 12.5% of the remaining $12.9870. No search, no
+**$1.6294** retained (recomputed 3× basis $1.3571; expected $0.4524) — 12.5% of
+the remaining $12.9870. The job no longer holds two ~16.9 GiB reference caches at
+once: the production peak is read first, the production cache is released, and
+E8a runs with `cache_reference=False`. No search, no
 depth map, no checkpoint. It would settle: the repaired port's evaluations/min
 against E8a's 12.0, real peak VRAM and the cache decision, per-item E8a-vs-port
 equality on one accelerator, and sampled GPU utilization against attempt 10's

@@ -1,6 +1,6 @@
 {
   "schema": "aadistill.current_state/v2",
-  "generated_utc": "2026-08-19T08:50:57Z",
+  "generated_utc": "2026-08-19T09:50:52Z",
   "_contract": "The minimal machine-readable CURRENT snapshot. It owns live facts and nothing else: no history, no per-attempt detail, no narrative. History lives in logs/decisions.md and the per-run directories; the human view of THIS file is logs/STATE.md and the two must agree. README owns no live facts at all. Ownership rules: logs/CATALOG.md.",
   "baseline_commit": "8183a23ef74fb9fba738ef62feef43dc72445b53",
   "baseline_commit_meaning": "The LAST TESTED IMPLEMENTATION: the commit whose tree produced the latest_verification figures below. It is deliberately NOT the commit carrying this file. Two commits follow it by construction and neither is separately tested: (1) the grant/provenance commit that adds the one-use grant document and this refresh, and (2) the authorization-only commit, which the Phase-A lineage gate requires to differ from its base in nothing but logs/autoinit_phase_a_authorization.json. Keeping the distinction explicit is the point: a reader must be able to tell which commit the 1874/1834/395 numbers describe from which commit a pod checks out. This field read fe3c2b3 while HEAD was four commits ahead once, and read 4563d106 after the post-fix verification, because nothing refreshes or checks it; it is refreshed as part of preparing a paid launch.",
@@ -57,12 +57,11 @@
     "the causal-depth runtime repair: scoring restored to the accelerator per E8a, cgroup-aware CPU budget, search_minutes as a fail-closed in-expansion deadline, bounded per-candidate progress"
   ],
   "latest_verification": {
-    "utc": "2026-08-19T08:50:57Z",
-    "after": "correcting the causal-depth GPU measurement job",
-    "full_suite": "1906 passed, 11 skipped, 0 errors in 16:57",
-    "pod_simulator": "1866 passed, 22 skipped; tree restored EXACTLY, 1623 entries",
+    "utc": "2026-08-19T09:50:52Z",
+    "after": "fixing the measurement job's dual reference-cache lifetime",
+    "full_suite": "1914 passed, 11 skipped, 0 errors in 17:27",
+    "pod_simulator": "1874 passed, 22 skipped; tree restored EXACTLY, 1623 entries",
     "frozen_asset_verifier": "passed, no problems",
-    "equivalence_artifact": "still passes; retained as the independent CPU proof",
     "scope": "CPU only; no checkpoint loaded, no metric measured, no GPU used"
   },
   "failed": [
@@ -147,7 +146,7 @@
   ],
   "next_starting_point": {
     "status": "The measurement job is corrected and $0-executed. NOTHING is authorized: no grant, no pod, no GPU run. Attempt 11 is not authorized and is not the next step.",
-    "the_ask": "ONE short L40S causal-depth measurement, hard ceiling $1.6294 (expected $0.5431), 12.5% of the remaining $12.9870. Not a Phase-A attempt: no search, no depth map, no checkpoint.",
+    "the_ask": "ONE short L40S causal-depth measurement, hard ceiling $1.6294 retained (recomputed 3x basis is $1.3571; expected $0.4524). Not a Phase-A attempt: no search, no depth map, no checkpoint, no follow-on.",
     "what_it_would_settle": [
       "evaluations/min of the REPAIRED port against E8a's measured 12.0/min",
       "real peak VRAM and which way the 0.66 reference-cache gate decides",
@@ -160,7 +159,8 @@
       "it accepted an unpinned Hub revision"
     ],
     "design_finding": "E8a aggregates a subtype position-weighted; the operator takes an unweighted mean over items. On unequal-length items these differ by ~0.027, ~300x the 8.195e-05 decision margin. A naive score comparison would have read as catastrophic drift, so the paired check is per-item.",
-    "only_after_that": "reprice Stage 1, then decide on a full Phase-A attempt."
+    "only_after_that": "reprice Stage 1, then decide on a full Phase-A attempt.",
+    "memory_lifetime_fixed": "the job no longer holds two ~16.9 GiB reference caches at once: the production peak is read first, the production cache is released, and E8a runs with cache_reference=False. Both peaks are reported distinctly and production_peak_gib is the Phase-A number."
   },
   "read_order": [
     "logs/STATE.md — the human view of this file",

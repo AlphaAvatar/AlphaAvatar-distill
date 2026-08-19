@@ -80,11 +80,25 @@
       "why": "round r evaluates |skip|=r+1 over 36-r candidates, so larger skip sets run FEWER layers and are cheaper. Timing everything at cardinality 8 would overstate evaluations/min and understate the 260-evaluation runtime; the artifact reports that flat figure alongside, labelled WRONG, so the difference is visible"
     },
     "cost_ceiling_usd": {
-      "expected": 0.5431,
-      "with_2x_contingency": 1.0862,
-      "hard": 1.6294,
-      "basis": "24 evaluations + one reference pass + 2 E8a paired re-scorings at E8a's 12.0 eval/min, plus 8 min teacher load, 12 min pod setup and 5 min overhead, then 3x",
+      "expected": 0.4524,
+      "with_2x_contingency": 0.9047,
+      "recomputed_3x": 1.3571,
+      "hard_ceiling_retained": 1.6294,
+      "basis": "24 timed evaluations + one production reference pass + 2 E8a paired checks with the reference RECOMPUTED (2 forwards/item/pair), plus 8 min teacher load, 12 min pod setup, 5 min overhead, then 3x",
+      "recomputation_delta_minutes": 0.08,
+      "note": "E8a's cache_reference=False costs +0.08 min, so the recomputed 3x bound ($1.3571) sits UNDER the previously proposed $1.6294. The higher figure is retained as the hard ceiling because it is more conservative, not because it is needed.",
       "share_of_remaining_headroom_pct": 12.5
+    },
+    "memory_lifetime": {
+      "problem": "the job could hold TWO ~16.9 GiB accelerator reference caches at once - the production _ReferenceLogits cache still live while E8a built its own - which would either OOM the measurement or make the reported peak describe a dual-cache arrangement no Phase-A run has",
+      "fix": [
+        "the production peak is read immediately after the timed evaluations, before anything else exists",
+        "the production cache is cleared and dropped (gc + empty_cache) before E8a's path is built",
+        "E8a runs with cache_reference=False: the pairs validate backend numerics, not E8a throughput, and E8a defines recomputation as numerically identical",
+        "both peaks are reported, distinctly; production_peak_gib is the Phase-A number and the comparison peak is never substituted for it"
+      ],
+      "safe_because": "the port's per-item results are already scalars (DistortionSums.as_dict()), so releasing the cache loses nothing still needed - and a test fails if they ever become tensors",
+      "e8a_pairs": "explicit and deterministic: one |skip|=1 and one |skip|=8, which bracket the schedule. Not the first two dict entries. The count was NOT increased."
     }
   }
 }
