@@ -4730,3 +4730,159 @@ two devices, cuda:0 and cpu!
   rescoped. The measurement workload, sampling, GPU placement, E8a comparison,
   cache policy, pricing and the Phase-A science are untouched.
 - **Revisit when:** a replacement measurement is granted.
+
+## 2026-08-20 — The measurement entrypoint was untestable, and it cost $0.1834 to find out
+
+**Context.** The replacement bounded measurement (attempt 2, pod `1dxw5aw2d112jx`,
+1×L40S, 11.1 min, **$0.1834** of a $1.6294 ceiling) completed setup end to end —
+`SETUP_RC=0`, all eleven markers, both frozen assets staged and verified, 6.5
+minutes — and then exited 1 at `MARKER:MEASUREMENT_START`:
+
+```
+File ".../measure_causal_depth_runtime.py", line 370, in main
+    from aadistill.autoinit.datasets import as_operator_items
+ImportError: cannot import name 'as_operator_items'
+```
+
+It lives in `scripts/autoinit/phase_a_search.py` and always has. The attempt-1
+setup-contract repair **held on hardware**, which is the one thing this launch did
+establish.
+
+**The finding is not the typo.** Twenty-two tests covered that job. Every one of
+them called `run_measurement`, `skip_set`, `GpuSampler` or the stop conditions
+**directly**; not one called `main()`. So the entire production entrypoint —
+argument and default resolution, the pinned teacher revision, model loading,
+calibration and profile resolution, `as_operator_items`, identity assembly,
+`run_measurement`, report assembly, stop-condition evaluation and the artifact
+write — was reachable **only from a paid pod**. The tested surface and the
+executed surface were different surfaces, and the bug was in the one that had
+never run.
+
+That is a *class*. `main()` is where a job's real arguments, real identities and
+real wiring live, and a `main()` that only a pod can execute is a paid test.
+
+**Decision: the entrypoint is a callable seam, not a `main()`.**
+
+```python
+def run_entrypoint(args, *, hardware=None, teacher_loader=load_teacher,
+                   calibration=resolve_calibration, repo_root=REPO_ROOT,
+                   n_layers=PARENT_LAYERS, n_remove=N_REMOVE) -> dict: ...
+
+def main() -> None:
+    args = build_parser().parse_args()
+    report = run_entrypoint(args)
+    print(json.dumps(report, indent=2))
+```
+
+The CPU test drives `run_entrypoint` with a two-layer toy model, an injected
+loader and a fake hardware object. **There is no second implementation of
+`main()`** — the injection points are the CUDA-only bookkeeping and the weights,
+and nothing else. A structural test parses `main()` and asserts it is parsing and
+a call to the seam, so the orchestration cannot drift back out of reach.
+
+**Alternatives considered.** (a) Just fix the import — closes the instance, leaves
+the class, and the next unexecuted line in `main()` costs another pod. (b) Import
+at module scope so any import of the file catches it — real but partial: it
+catches import errors and nothing else about argument defaults, identity or the
+stop conditions. It is now true anyway as a consequence, not as the mechanism.
+(c) A separate toy `main()` — two implementations, and the paid one stays
+untested by construction.
+
+**Mutation-verified.**
+
+| mutation | result |
+| --- | --- |
+| the $0.18 import restored | 1 failed |
+| orchestration moved back into `main()` | 1 failed |
+| the unpinned-revision guard moved after loading | 2 failed |
+| the artifact written but the report not returned | 1 failed |
+| `load_teacher` stops passing `revision=` | **passed — a real hole** |
+
+The fifth is why mutation testing is worth the minutes. `load_teacher` is the one
+function the entrypoint test *injects past*, so its body is precisely what the
+seam cannot cover, and a mutation that would have measured against whatever the
+Hub published that morning was invisible to all 27 tests. It is now covered by a
+test that stubs `AutoModelForCausalLM.from_pretrained` and asserts on the call —
+pinned revision, dtype, device, and `use_cache` disabled, which `bypassed_blocks`
+requires. **Any seam has a blind spot exactly at its injection points, and those
+points need their own tests.**
+
+**Second decision: `evaluate_teardown` separates truncation from absence.**
+
+The launcher did not finish cleanly either. The manifest reported
+`final_streams_quiescent: False` with the one `final_required` report missing, and
+the emergency path raised:
+
+> an emergency teardown over a non-quiescent event stream must name the streams
+> it is truncating
+
+The measurement declares **no event streams** — `event_streams=lambda ctx: ()`,
+by design. `final_streams_quiescent` is one name over three different failures: a
+producer never signalled completion; a file is still being written; or a
+`final_required` class is simply missing. The first two are a tail being cut off.
+The third is an artifact that was never created, and demanding it name the streams
+it truncated is asking for a list that cannot exist.
+
+`evaluate_teardown` now takes `streams_at_risk` — the manifest's own
+`completion_marker_failures + still_being_written` — and requires naming only when
+there is something to name. `streams_at_risk=None`, a caller offering no evidence,
+keeps the strict rule unchanged. **Fail-closed behaviour for training sessions
+with incomplete event streams is preserved**: those sessions do have streams, the
+manifest does name them, and they must still be named in the record. Mutation-
+verified three ways: restoring the conflation fails 1, dropping the naming
+requirement fails 3, giving no-evidence callers the weak rule fails 2.
+
+**The seam immediately earned itself.** Writing the docs sentence above —
+*a seam's injection points are its blind spot* — made it obvious that
+`resolve_calibration` was the second injection point and had no test of its own.
+Executing it found a second defect in the paid path:
+
+`CalibrationProfile.resolve()` returns the loaded **rows**, not a filename — its
+job is to resolve the profile, not a path. The measurement passed that result
+straight into the report as `identities.calibration_path`, so
+`str(calib_path)` would have written **734,042 characters** of serialized
+mixture, every item and every token id, into a field labelled with a path. The
+real path is 81 characters. The measurement itself was unaffected — 67 items and
+59,763 positions either way, and `as_operator_items` takes rows — so this was an
+artifact defect, not a science defect, and no recorded result is touched because
+this job has never completed a run.
+
+It is the same shape as the import: a line only a pod would execute. Now
+`resolve_calibration` builds the path from `profile.items_path` and a test runs
+the real resolver against the real frozen asset, asserting a `Path`, the file's
+existence, `< 200` characters, and the frozen 67/59,763. Four mutations fail it,
+and **the bad import now fails three tests instead of one**, because the resolver
+is executed rather than matched as a string.
+
+Testing the third injection point also exposed a hazard worth its own line.
+`test_the_entrypoint_refuses_a_host_run_when_no_hardware_is_injected` is the only
+test that calls `run_entrypoint` with **nothing** injected — so when a mutation
+made the CUDA guard stop firing, it fell through to the real `load_teacher`,
+loaded the cached 7.6 GB teacher and began a full CPU measurement. It hung for
+900 s. Nothing was downloaded and nothing was damaged, but a $0 test was one
+broken guard away from doing real work. It now injects a loader that raises, so
+it fails in 2.9 s instead: **a $0 test must stay $0 even when the thing it
+guards is broken.**
+
+The third injection point, `Hardware`, genuinely cannot be covered at $0 — its
+three `torch.cuda.*` calls need a CUDA device. What is covered is that the real
+class is the default (a stand-in cannot become the production object) and that
+its branch dispatch is right off CUDA. **The remaining gap is recorded rather
+than papered over.**
+
+**Expected upside.** The paid path is now executable at $0, and a teardown records
+what it lost instead of raising about what it did not lose.
+
+**Risks.** The seam's injection points remain the untested boundary; that is
+inherent, and the answer is a test per injection point rather than a wider seam.
+The teardown change makes one branch of an emergency path more permissive, which
+is why it is gated on positive evidence rather than on the absence of it.
+
+**Revisit when** a third job grows a `main()` — the seam shape should be the
+default for any driver a pod invokes, not a repair applied after each bill.
+
+**Disposition.** Attempt 2 recorded consumed, setup-complete, driver-entrypoint
+failure. Grant and authorization spent, not reusable. Cumulative **$206.2664** of
+$219.00, remaining **$12.7336**. **No measurement attempt 3 and no Phase-A attempt
+11 is prepared, granted or implied.** Evidence:
+[`autoinit_measurement_attempt2/`](autoinit_measurement_attempt2/).

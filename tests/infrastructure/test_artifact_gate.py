@@ -484,3 +484,74 @@ def test_the_two_lifecycles_survive_a_manifest_round_trip(tmp_path):
     assert back.completion_markers == [
         {"path": "run.status", "contains": "MARKER:ALL_DONE"}]
     assert json.loads(path.read_text())["final_streams_quiescent"] is True
+
+
+# --- the three quiescence failures are not one failure ----------------------
+#
+# `final_streams_quiescent` is false when a producer has not signalled
+# completion, OR a file is still growing, OR a `final_required` class is simply
+# missing. Only the first two truncate a stream. The bounded measurement of
+# 2026-08-19 declares no streams at all; its driver crashed before writing its
+# one report, quiescence failed for the third reason, and the emergency path
+# demanded it name streams it did not have — so the session took the
+# launcher-error route instead of a clean incomplete collection.
+
+def _failing_state() -> dict:
+    """Every check passed except quiescence, which is the case under test."""
+    return {name: True for name in GATE_ORDER} | {"final_streams_quiescent": False}
+
+
+def test_a_session_with_no_event_streams_tears_down_cleanly_when_its_report_is_missing():
+    """Case 1. Nothing is truncated, so nothing has to be named."""
+    d = evaluate_teardown(
+        _failing_state(), emergency_budget=True,
+        emergency_reason="the driver died before writing its only report",
+        incomplete_event_streams=(),
+        streams_at_risk=())                 # the manifest says: no stream at risk
+    assert d.allowed and d.emergency
+    assert d.failed_check == "final_streams_quiescent"
+    assert d.incomplete_event_streams == ()
+    assert "No event stream was truncated" in d.reason
+    assert "THE FINAL EVENT STREAM IS INCOMPLETE" not in d.reason
+
+
+def test_a_stream_producing_session_that_does_not_name_its_loss_is_refused():
+    """Case 2, unchanged: the protection this whole rule exists for."""
+    with pytest.raises(ArtifactError, match="must name the streams it is truncating"):
+        evaluate_teardown(
+            _failing_state(), emergency_budget=True,
+            emergency_reason="the cost watchdog fired mid-training",
+            incomplete_event_streams=(),
+            streams_at_risk=("train_log.jsonl",))
+
+
+def test_a_stream_producing_session_that_names_its_loss_is_allowed_and_records_it():
+    """Case 3: permitted, and the loss is in the record rather than inferred."""
+    d = evaluate_teardown(
+        _failing_state(), emergency_budget=True,
+        emergency_reason="the cost watchdog fired mid-training",
+        incomplete_event_streams=("train_log.jsonl",),
+        streams_at_risk=("train_log.jsonl",))
+    assert d.allowed and d.emergency
+    assert d.incomplete_event_streams == ("train_log.jsonl",)
+    assert "THE FINAL EVENT STREAM IS INCOMPLETE" in d.reason
+    assert "train_log.jsonl" in d.reason
+
+
+def test_a_caller_supplying_no_evidence_still_gets_the_strict_rule():
+    """`streams_at_risk=None` is "I do not know", and an uninformed caller does
+    not get the weaker rule. Every pre-existing caller is unaffected."""
+    with pytest.raises(ArtifactError, match="must name the streams it is truncating"):
+        evaluate_teardown(
+            _failing_state(), emergency_budget=True,
+            emergency_reason="something went wrong",
+            incomplete_event_streams=())
+
+
+def test_the_normal_path_still_blocks_on_a_live_stream():
+    """None of this weakens the non-emergency gate: a growing stream still stops
+    a normal teardown, whatever the evidence says."""
+    d = evaluate_teardown(_failing_state(), streams_at_risk=())
+    assert not d.allowed and not d.emergency
+    assert d.failed_check == "final_streams_quiescent"
+    assert "must not be accepted as the final one" in d.reason

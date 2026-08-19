@@ -21,6 +21,8 @@ and the unbacked "reports GPU utilization" claim is now a real sampler.
 from __future__ import annotations
 
 import importlib.util
+import inspect
+import json
 import sys
 from pathlib import Path
 
@@ -350,3 +352,286 @@ def test_the_production_peak_is_read_before_the_comparison_peak():
     assert core["production_peak_bytes"] != core["comparison_peak_bytes"], (
         "the two peaks are the same reading; the production number would then "
         "include E8a's path")
+
+
+# --- 7. the ENTRYPOINT, executed ------------------------------------------
+#
+# Measurement attempt 2 died at $0.18 on `ImportError: cannot import name
+# 'as_operator_items' from 'aadistill.autoinit.datasets'` — a line inside
+# `main()`, which refuses to start without CUDA, so no $0 path had ever reached
+# it. `run_measurement` had a seam and was hammered; `main()` did not, and that
+# is exactly where the defect was.
+#
+# These drive `run_entrypoint` — the real one, the same function the paid CLI
+# calls — with a toy model and a stand-in for the CUDA-only bookkeeping. There is
+# no second implementation of the entrypoint anywhere.
+
+class FakeHardware:
+    """Only the CUDA-specific bookkeeping. Everything else is the real path."""
+
+    def __init__(self, device):
+        self.device = device
+        self.reset_calls = 0
+
+    def reset_peak(self):
+        self.reset_calls += 1
+
+    def name(self):
+        return "FakeDevice"
+
+    def total_gib(self):
+        return 44.99
+
+
+def test_the_entrypoint_runs_end_to_end_on_the_dev_box(tmp_path, monkeypatch):
+    """Argument defaults, the pinned identity, loading, calibration resolution,
+    `as_operator_items`, identity assembly, the measurement, report assembly,
+    the stop conditions and the artifact write — all of it, for free."""
+    model = tiny_teacher(n_layers=6)
+    items = toy_items(model.config.vocab_size)
+
+    def loader(args, device):
+        assert args.teacher_revision == JOB.TEACHER_REVISION, (
+            "the entrypoint did not carry the pinned revision to the loader")
+        return model
+
+    class Profile:
+        qualified_id = "calib.toy@v0"
+        profile_hash = "0" * 64
+
+    def calibration(repo_root):
+        return Profile(), Path(repo_root) / "toy_items.jsonl", items
+
+    args = JOB.build_parser().parse_args(
+        ["--out", "result.json", "--samples-per-cardinality", "1",
+         "--e8a-pairs", "2"])
+    monkeypatch.setattr(JOB, "STATUS", tmp_path / "status")
+
+    report = JOB.run_entrypoint(
+        args, hardware=FakeHardware(torch.device("cpu")),
+        teacher_loader=loader, calibration=calibration,
+        repo_root=tmp_path, n_layers=6, n_remove=3)
+
+    # The artifact was written where the CLI would write it.
+    out = tmp_path / "result.json"
+    assert out.is_file()
+    written = json.loads(out.read_text())
+    # Through JSON, because that is what was written: `mean_seconds_by_cardinality`
+    # is keyed by int and JSON has only string keys. Comparing the round-trip
+    # asserts "what landed on disk is what was produced" without pretending the
+    # coercion did not happen.
+    assert written == json.loads(json.dumps(report))
+
+    # And it carries what the grant asks it to report.
+    assert report["identities"]["revision_pinned"] is True
+    assert report["identities"]["revision"] == JOB.TEACHER_REVISION
+    assert report["device"]["name"] == "FakeDevice"
+    # Not `> 0`: a toy evaluation is ~8 ms, so the weighted total rounds to 0.0
+    # at two decimals. The rate does not round away, and the labelled-wrong flat
+    # figure must be present beside the weighted one whatever the scale.
+    timing = report["timing"]
+    assert timing["weighted_evaluations_per_minute"] > 0
+    assert timing["weighted_260_eval_minutes"] >= 0
+    assert "flat_cardinality_8_minutes_WRONG" in timing
+    assert set(timing["mean_seconds_by_cardinality"]) == {1, 2, 3}
+    assert report["vram"]["which_is_the_phase_a_number"] == "production_peak_gib"
+    assert len(report["e8a_backend_comparison"]["paired"]) == 2
+    assert report["reference_cache_decision"]["budget_fraction"] == 0.66
+
+    # And the success marker fired, which means both stop conditions passed.
+    assert "MARKER:ALL_DONE" in (tmp_path / "status").read_text()
+
+
+def test_the_entrypoint_imports_as_operator_items_from_its_real_owner():
+    """The $0.18 line. `as_operator_items` is defined in
+    `scripts/autoinit/phase_a_search.py` and nowhere else."""
+    import importlib.util
+
+    src = (REPO / "scripts/autoinit/measure_causal_depth_runtime.py").read_text()
+    assert "from phase_a_search import as_operator_items" in src
+    assert "from aadistill.autoinit.datasets import as_operator_items" not in src
+
+    # And it really is there, rather than merely spelled differently.
+    spec = importlib.util.spec_from_file_location(
+        "phase_a_search_probe", REPO / "scripts/autoinit/phase_a_search.py")
+    assert spec is not None
+    owner = (REPO / "scripts/autoinit/phase_a_search.py").read_text()
+    assert "def as_operator_items(" in owner
+    datasets = (REPO / "src/aadistill/autoinit/datasets.py").read_text()
+    assert "def as_operator_items(" not in datasets, (
+        "as_operator_items moved; the import in the measurement job needs "
+        "re-deriving rather than this test relaxing")
+
+
+def test_the_entrypoint_refuses_an_unpinned_revision_before_loading_anything():
+    """Fail-closed, and BEFORE the teacher is pulled — an unpinned measurement
+    should cost nothing, not a model download."""
+    args = JOB.build_parser().parse_args(["--teacher-revision", ""])
+    loaded = []
+
+    with pytest.raises(SystemExit, match="unpinned Hub HEAD"):
+        JOB.run_entrypoint(args, hardware=FakeHardware(torch.device("cpu")),
+                           teacher_loader=lambda a, d: loaded.append(1))
+    assert not loaded, "the teacher was loaded before the pin was checked"
+
+
+def test_the_entrypoint_refuses_a_host_run_when_no_hardware_is_injected():
+    """The production guard is still there: without CUDA and without an injected
+    stand-in, the entrypoint stops rather than measuring the host.
+
+    The loader is stubbed to EXPLODE rather than left at its default. This test
+    is the only one that calls `run_entrypoint` with nothing injected, so if the
+    guard ever stops firing it would fall through to the real `load_teacher` —
+    a 7.6 GB checkpoint and a full CPU measurement inside the $0 suite. A
+    mutation experiment did exactly that and hung for 900 s. A $0 test must stay
+    $0 even when the thing it is guarding is broken.
+    """
+    if torch.cuda.is_available():                       # pragma: no cover
+        pytest.skip("this box has CUDA; the guard cannot be exercised here")
+    args = JOB.build_parser().parse_args([])
+
+    def never(args, device):                            # pragma: no cover
+        raise AssertionError(
+            "the no-CUDA guard did not fire and the entrypoint reached the "
+            "teacher loader; on the real default that is a 7.6 GB load")
+
+    with pytest.raises(SystemExit, match="no CUDA device"):
+        JOB.run_entrypoint(args, teacher_loader=never)
+
+
+def test_main_is_only_parsing_and_a_call_to_the_seam():
+    """No orchestration may live in `main()`, or it is untested again."""
+    import ast
+
+    src = (REPO / "scripts/autoinit/measure_causal_depth_runtime.py").read_text()
+    fn = next(n for n in ast.parse(src).body
+              if isinstance(n, ast.FunctionDef) and n.name == "main")
+    called = {n.func.id for n in ast.walk(fn)
+              if isinstance(n, ast.Call) and isinstance(n.func, ast.Name)}
+    assert "run_entrypoint" in called
+    for forbidden in ("run_measurement", "apply_cpu_budget", "load_teacher",
+                      "resolve_calibration", "mark"):
+        assert forbidden not in called, (
+            f"main() calls {forbidden} directly; that orchestration belongs "
+            "behind run_entrypoint where a $0 test can reach it")
+
+
+def test_the_real_loader_passes_the_pinned_revision_through(monkeypatch):
+    """`load_teacher` is the one function the entrypoint test injects past, so
+    its body is the one place the seam cannot cover. A mutation dropping the
+    revision here passed every other test in this file — this is that hole.
+
+    `from_pretrained` is stubbed, so nothing is downloaded.
+    """
+    import transformers
+
+    seen = {}
+
+    class FakeAuto:
+        @staticmethod
+        def from_pretrained(name, **kw):
+            seen.update({"name": name, **kw})
+
+            class M:
+                config = type("C", (), {"use_cache": True})()
+
+                def to(self, device):
+                    seen["device"] = device
+                    return self
+
+                def eval(self):
+                    return self
+            return M()
+
+    monkeypatch.setattr(transformers, "AutoModelForCausalLM", FakeAuto)
+    args = JOB.build_parser().parse_args([])
+    model = JOB.load_teacher(args, torch.device("cpu"))
+
+    assert seen["name"] == JOB.TEACHER_ID
+    assert seen["revision"] == JOB.TEACHER_REVISION, (
+        "the loader dropped the pinned revision; a paid measurement would run "
+        "against whatever the Hub published that morning")
+    assert seen["dtype"] is torch.bfloat16
+    assert seen["device"] == torch.device("cpu")
+    assert model.config.use_cache is False, (
+        "bypassed_blocks requires use_cache=False and the loader must set it")
+
+
+def test_the_real_calibration_resolver_runs_and_returns_a_path_not_a_mixture():
+    """`resolve_calibration` is the second function the entrypoint test injects
+    past, and the second place a defect hid behind an injection point.
+
+    `DOMAIN_BALANCED_V1.resolve()` returns the loaded ROWS. Passing that on as
+    the report's `calibration_path` wrote **734,042 characters** of serialized
+    mixture — every item, every token id — into a field labelled with a path.
+    The measurement itself was unaffected; the artifact was not.
+
+    This executes the real resolver against the real frozen asset, which the dev
+    box has, so the import that cost $0.18 is *run* here rather than matched as
+    a string.
+    """
+    profile, path, items = JOB.resolve_calibration(JOB.REPO_ROOT)
+
+    assert isinstance(path, Path), f"got {type(path).__name__}"
+    assert path.is_file() and path.suffix == ".jsonl"
+    assert len(str(path)) < 200, (
+        f"calibration_path is {len(str(path))} chars; resolve() returns rows, "
+        "not a filename, and the report field must not carry the mixture")
+
+    # The frozen mixture, unchanged: this test must fail if the profile moves.
+    assert profile.qualified_id == "calib.domain_balanced@v1"
+    assert len(items) == 67
+    assert sum(int(i["input_ids"].shape[1]) - 1 for i in items) == 59_763
+
+
+def test_the_report_field_carries_the_path_and_not_the_items(tmp_path, monkeypatch):
+    """End to end, through the real resolver: what lands in the artifact."""
+    model = tiny_teacher(n_layers=4)
+    monkeypatch.setattr(JOB, "STATUS", tmp_path / "status")
+    args = JOB.build_parser().parse_args(
+        ["--out", "r.json", "--samples-per-cardinality", "1", "--e8a-pairs", "2"])
+
+    real_profile, real_path, _ = JOB.resolve_calibration(JOB.REPO_ROOT)
+
+    def calibration(repo_root):
+        # The real profile and the real path, with toy items so this stays free.
+        return real_profile, real_path, toy_items(model.config.vocab_size)
+
+    report = JOB.run_entrypoint(
+        args, hardware=FakeHardware(torch.device("cpu")),
+        teacher_loader=lambda a, d: model, calibration=calibration,
+        repo_root=tmp_path, n_layers=4, n_remove=2)
+
+    ident = report["identities"]
+    assert ident["calibration_path"] == str(real_path)
+    assert len(ident["calibration_path"]) < 200
+    assert ident["calibration_profile"] == "calib.domain_balanced@v1"
+    assert ident["calibration_profile_hash"] == real_profile.profile_hash
+    assert len((tmp_path / "r.json").read_bytes()) < 200_000, (
+        "the report is enormous; something serialized the mixture into it")
+
+
+def test_the_real_hardware_object_is_the_default_and_its_dispatch_is_exercised():
+    """The third and last injection point.
+
+    Unlike the other two, this one CANNOT be fully covered at $0: the CUDA calls
+    inside it need a CUDA device. What is coverable is that the real class is the
+    default the paid CLI gets, and that its branch dispatch is correct — so a
+    stand-in cannot quietly become the production object, and the non-CUDA
+    branches (which a `meta`/`cpu` device takes) do what they claim.
+
+    **The remaining gap is stated rather than papered over:** the three
+    `torch.cuda.*` calls are verified by a paid run and by nothing here.
+    """
+    sig = inspect.signature(JOB.run_entrypoint)
+    assert sig.parameters["hardware"].default is None, (
+        "hardware defaults to something other than None; the paid CLI must "
+        "construct the real Hardware, never inherit a test's stand-in")
+    assert sig.parameters["teacher_loader"].default is JOB.load_teacher
+    assert sig.parameters["calibration"].default is JOB.resolve_calibration
+
+    hw = JOB.Hardware(torch.device("meta"))
+    hw.reset_peak()                      # a no-op off CUDA, and must not raise
+    assert hw.name() == "meta"
+    assert hw.total_gib() == 0.0
+    assert JOB.Hardware.available() is torch.cuda.is_available()

@@ -1,0 +1,7 @@
+2026-08-19T17:49:15Z MARKER:MEASUREMENT_START
+Traceback (most recent call last):
+  File "/workspace/aad/scripts/autoinit/measure_causal_depth_runtime.py", line 488, in <module>
+    main()
+  File "/workspace/aad/scripts/autoinit/measure_causal_depth_runtime.py", line 370, in main
+    from aadistill.autoinit.datasets import as_operator_items
+ImportError: cannot import name 'as_operator_items' from 'aadistill.autoinit.datasets' (/workspace/aad/src/aadistill/autoinit/datasets.py)

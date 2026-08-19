@@ -598,7 +598,15 @@ class SessionRunner:
                 "Evidence is collected under the reduced spec and the pod is "
                 "torn down."),
             incomplete_event_streams=() if done
-            else art.event_streams(self.context()))
+            else art.event_streams(self.context()),
+            # The manifest's evidence about WHY quiescence failed, so the gate
+            # can tell a truncated stream from an artifact that was never
+            # written. A session declaring no streams and missing its one report
+            # is the second, and must not be asked to name streams it has none
+            # of. `None` when there is no manifest: no evidence, strict rule.
+            streams_at_risk=(
+                tuple(manifest.completion_marker_failures)
+                + tuple(manifest.still_being_written)) if manifest else None)
         self.ev["teardown_gate"] = decision.as_dict()
         self.ev["manifest_summary"] = (
             {"ok": manifest.ok, "entries": len(manifest.entries),

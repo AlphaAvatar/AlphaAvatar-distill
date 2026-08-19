@@ -1,0 +1,3 @@
+2026-08-19T17:40:17Z elapsed=0min approx=$0.0000 launcher=1 pods=[NONE] status=[]
+2026-08-19T17:45:18Z elapsed=5min approx=$0.0825 launcher=1 pods=[1dxw5aw2d112jx:RUNNING] status=[]
+2026-08-19T17:50:20Z elapsed=10min approx=$0.1650 launcher=1 pods=[1dxw5aw2d112jx:RUNNING] status=[]

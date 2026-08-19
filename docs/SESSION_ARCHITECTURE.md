@@ -168,6 +168,44 @@ test forbids the shell from knowing.
 before. This was a fix to where the staging is *declared*, not to what any
 session receives.
 
+### The driver's entrypoint is a seam — closed 2026-08-20
+
+The session specification says what a pod is *given*. It says nothing about
+whether the program the pod then runs has ever been executed, and on 2026-08-19
+that gap cost **$0.1834**: setup passed end to end, `SETUP_RC=0`, and the
+measurement driver exited 1 on the first statement of `main()` that touched the
+repository — an `as_operator_items` imported from a plausible module rather than
+the one that owns it.
+
+Twenty-two tests covered that job. Every one called its internals directly and
+none called `main()`, so argument defaults, the pinned teacher revision, model
+loading, calibration resolution, identity assembly, report assembly, the stop
+conditions and the artifact write were reachable **only from a paid pod**.
+
+The convention, for any script a `driver_command` invokes:
+
+```python
+def run_entrypoint(args, *, hardware=None, teacher_loader=load_teacher, ...):
+    ...                       # ALL of it
+
+def main() -> None:
+    args = build_parser().parse_args()
+    report = run_entrypoint(args)
+```
+
+`main()` is parsing and a call. A $0 test drives `run_entrypoint` with a toy
+model and stand-ins for the accelerator-only bookkeeping, so the dev box executes
+the production path rather than an imitation of it, and a structural test parses
+`main()` to keep the orchestration from drifting back out of reach. **There is no
+second `main()`** — a parallel toy implementation leaves the paid one untested by
+construction, which is the situation being fixed.
+
+**A seam's injection points are its blind spot.** `load_teacher` is what the test
+injects past, and a mutation dropping `revision=` from `from_pretrained` — which
+would measure against whatever the Hub published that morning — passed every test
+in the file. Each injection point needs its own test; that one stubs
+`from_pretrained` and asserts on the call.
+
 ### What the structural checks cover
 
 | check | where |
@@ -188,6 +226,9 @@ session receives.
 | no attempt-specific grant prose in an authorization constant | same |
 | every session names a distinct status file, run log, authorization, job id and plan | same |
 | the pod gate and the simulator ignore the same tests, for **all four** sessions | `tests/pod/test_pod_script_paths.py` |
+| every session installs every local root the shared setup's frozen-asset verifier requires, derived from the verifier and compared against declarations | `tests/pod/test_session_setup_contract.py` |
+| the measurement driver's whole entrypoint runs on the dev box, and `main()` is parsing plus a call to it | `tests/autoinit/test_causal_depth_measurement_job.py` |
+| the injected loader's real body passes the pinned revision and disables `use_cache` | same |
 
 ### The authorization/grant split
 

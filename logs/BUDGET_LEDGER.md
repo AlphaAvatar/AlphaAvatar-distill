@@ -278,9 +278,55 @@ $2.30   RAISED 2026-08-14 with maintainer approval, after attempt 1 spent
 ```
 authorized cumulative cap                                    $219.00
     RAISED AND APPROVED 2026-08-17. See the caps list above.
-actual cumulative spend                                      $206.0830
+actual cumulative spend                                      $206.2664
     = $194.0530 + $0.1900 attempt 8 + $0.3400 attempt 9
-      + $11.4300 attempt 10 + $0.0700 measurement attempt 1.
+      + $11.4300 attempt 10 + $0.0700 measurement attempt 1
+      + $0.1834 measurement attempt 2.
+Bounded measurement attempt 2 (L40S, 11.1 min) ENTRYPOINT      $  0.1834
+    AUTHORIZED 2026-08-19 as autoinit.measurement.2026-08-19T1738Z
+    against logs/autoinit_measurement_grant2.json (sha256 82f5104d49e4).
+    A SpendAuthorization: phase_a_authorized FALSE by type. NOT a
+    Phase-A attempt; hard ceiling $1.6294, of which $0.1834 was spent.
+    NO MEASUREMENT RAN. SETUP PASSED END TO END -- SETUP_RC=0, all
+    eleven markers, both frozen assets staged and verified, in 6.5 min.
+    The attempt-1 setup-contract repair HELD on hardware.
+    The driver then exited 1 in the first statement of main() that
+    touches the repository:
+      ImportError: cannot import name 'as_operator_items' from
+                   'aadistill.autoinit.datasets'
+    It lives in scripts/autoinit/phase_a_search.py and always has.
+    WHY $0 COULD NOT SEE IT: 22 tests covered this job and every one
+    called run_measurement / skip_set / GpuSampler / the stop conditions
+    DIRECTLY. None called main(), so the entire production entrypoint --
+    argument defaults, pinned revision, model loading, calibration
+    resolution, identity assembly, report, stop conditions, artifact
+    write -- was reachable only from a paid pod. The tested surface and
+    the executed surface were different surfaces.
+    REPAIRED at $0: run_entrypoint(args, *, hardware, teacher_loader,
+    calibration, ...) holds all of it and main() is three lines, so the
+    CPU test drives the production path with a toy loader rather than a
+    parallel imitation of it. No second main(). Mutation-verified:
+    restoring the bad import fails 1; bypassing the seam fails 1;
+    moving the unpinned-revision guard after loading fails 2.
+    A FIFTH MUTATION PASSED and exposed a real hole: load_teacher is the
+    one function the seam injects past, so dropping revision= from
+    from_pretrained -- measuring against whatever the Hub published that
+    morning -- was invisible. Now covered by a stubbed from_pretrained.
+    SECOND DEFECT, $0.0034 of the above: the launcher then raised
+    ArtifactError because the emergency teardown demanded this session
+    name the event streams it was truncating. It declares NONE by
+    design; quiescence failed because a final_required artifact was
+    MISSING, not because a producer was mid-write.
+    evaluate_teardown now takes streams_at_risk (the manifest's own
+    completion_marker_failures + still_being_written) and requires
+    naming only when there is something to name. streams_at_risk=None
+    keeps the strict rule, so FAIL-CLOSED BEHAVIOUR FOR TRAINING
+    SESSIONS WITH INCOMPLETE EVENT STREAMS IS UNCHANGED.
+    Pod deleted by the launcher, provider confirms gone at 11.1 min
+    against a 54-min hard bound.
+    AUTHORIZATION AND GRANT CONSUMED: one launch, spent, not reusable.
+    NO ATTEMPT 3 IS PREPARED OR AUTHORIZED.
+    Evidence: logs/autoinit_measurement_attempt2/
 Bounded measurement attempt 1 (L40S, 4.0 min) SETUP CONTRACT   $  0.0700
     AUTHORIZED 2026-08-19 as autoinit.measurement.2026-08-19T1142Z
     against logs/autoinit_measurement_grant.json (sha256 ec73be8c1962).
@@ -420,10 +466,14 @@ Phase A attempt 8 (L40S, 11.28 min) SETUP TEST GATE FAILED   $  0.1900
     one launch and is SPENT. No retry was attempted and no attempt 9
     is authorized, funded, prepared or implied.
     Evidence: logs/autoinit_phase_a_attempt8/
-unused authorization remaining                               $ 12.9170
-    = $219.00 - $206.0830. NOT enough for another full Phase-A attempt
+unused authorization remaining                               $ 12.7336
+    = $219.00 - $206.2664. NOT enough for another full Phase-A attempt
     at the $23.0484 per-launch ceiling. A retry needs a separate
     budget/cap decision after the runtime fix is reviewed.
+    UNUSED BALANCE IS NOT AUTHORIZATION. Nothing below is a standing
+    permission to spend it; each line is a consumed or lapsed commitment
+    kept for arithmetic. Neither measurement attempt 3 nor Phase-A
+    attempt 11 is prepared, funded, granted or implied by this figure.
     Previously committed against it:
       device canary hard                                       $  1.0197
         SPENT $0.1240 across two sessions, NEITHER of which ran

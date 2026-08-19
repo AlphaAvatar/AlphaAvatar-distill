@@ -63,6 +63,10 @@ import torch
 REPO_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO_ROOT / "src"))
 sys.path.insert(0, str(REPO_ROOT / "scripts" / "training"))
+# Its own directory: present when this file is run directly, absent when a
+# test loads it by path. `phase_a_search` -- the real owner of
+# `as_operator_items` -- lives here.
+sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from aadistill.autoinit.device import apply_cpu_budget  # noqa: E402
 from aadistill.init.contribution import (  # noqa: E402
@@ -337,7 +341,69 @@ def run_measurement(model, items, device, *, n_layers: int,
     }
 
 
-def main() -> None:
+class Hardware:
+    """The CUDA-only bookkeeping, behind a seam.
+
+    Not a toy implementation of anything — the real one is the default and is
+    what the paid CLI uses. A test injects a stand-in so the ENTRYPOINT itself
+    runs on the dev box, which is the whole point: measurement attempt 2 died at
+    $0.18 on an `ImportError` inside `main()`, on a line no $0 path had ever
+    executed because `main()` refuses to start without CUDA.
+    """
+
+    available = staticmethod(lambda: torch.cuda.is_available())
+
+    def __init__(self, device):
+        self.device = device
+
+    def reset_peak(self) -> None:
+        if self.device.type == "cuda":
+            torch.cuda.reset_peak_memory_stats(self.device)
+
+    def name(self) -> str:
+        return (torch.cuda.get_device_name(self.device)
+                if self.device.type == "cuda" else str(self.device))
+
+    def total_gib(self) -> float:
+        if self.device.type != "cuda":
+            return 0.0
+        return round(torch.cuda.get_device_properties(
+            self.device).total_memory / 2**30, 2)
+
+
+def load_teacher(args, device):
+    """The real loader. Injected in tests; never reimplemented there."""
+    from transformers import AutoModelForCausalLM
+
+    model = AutoModelForCausalLM.from_pretrained(
+        args.teacher, revision=args.teacher_revision, dtype=torch.bfloat16,
+    ).to(device).eval()
+    model.config.use_cache = False
+    return model
+
+
+def resolve_calibration(repo_root):
+    """The frozen profile and the items the operators consume.
+
+    `as_operator_items` lives in `scripts/autoinit/phase_a_search.py` and is
+    imported from its real owner. Attempt 2 spent $0.18 importing it from
+    `aadistill.autoinit.datasets`, where it has never been.
+
+    `resolve()` returns the loaded ROWS, not a path — its name says "resolve the
+    profile", not "resolve a filename". Passing its result on as the report's
+    `calibration_path` put **734,042 characters** of serialized mixture, token
+    ids and all, into a field labelled with a path. The path is
+    `profile.items_path`, and it is 81 characters.
+    """
+    from aadistill.autoinit.calibration import DOMAIN_BALANCED_V1
+    from phase_a_search import as_operator_items
+
+    rows = DOMAIN_BALANCED_V1.resolve(repo_root)
+    path = Path(repo_root) / DOMAIN_BALANCED_V1.items_path
+    return DOMAIN_BALANCED_V1, path, list(as_operator_items(rows))
+
+
+def build_parser() -> argparse.ArgumentParser:
     ap = argparse.ArgumentParser()
     ap.add_argument("--samples-per-cardinality", type=int, default=3,
                     help="8 cardinalities x this = total evaluations timed")
@@ -346,45 +412,52 @@ def main() -> None:
     ap.add_argument("--e8a-pairs", type=int, default=2,
                     help="skip sets scored by BOTH paths for the backend check")
     ap.add_argument("--out", default="logs/autoinit_causal_depth_measured.json")
-    args = ap.parse_args()
+    return ap
 
+
+def run_entrypoint(args, *, hardware=None, teacher_loader=load_teacher,
+                   calibration=resolve_calibration, repo_root=REPO_ROOT,
+                   n_layers=PARENT_LAYERS, n_remove=N_REMOVE) -> dict:
+    """Everything the paid CLI does, in one executable function.
+
+    `main()` is now argument parsing and a call to this. There is no separate
+    toy path: a $0 test drives THIS, with a tiny model and a stand-in for the
+    CUDA-only bookkeeping, so argument defaults, the pinned identity, loading,
+    calibration resolution, `as_operator_items`, identity assembly, the
+    measurement, report assembly, the stop conditions and the artifact write are
+    all covered by something that runs on the dev box.
+    """
     mark("MEASUREMENT_START")
-    if not torch.cuda.is_available():
-        mark("MEASUREMENT_FAILED")
-        raise SystemExit(
-            "no CUDA device. This validates the accelerator path; running it on "
-            "the host would re-measure exactly the defect being repaired.")
+    hw = hardware
+    if hw is None:
+        if not Hardware.available():
+            mark("MEASUREMENT_FAILED")
+            raise SystemExit(
+                "no CUDA device. This validates the accelerator path; running it "
+                "on the host would re-measure exactly the defect being repaired.")
+        hw = Hardware(torch.device("cuda"))
     if not args.teacher_revision:
         mark("MEASUREMENT_FAILED")
         raise SystemExit(
             "refusing to measure against an unpinned Hub HEAD: pass the frozen "
             f"revision ({TEACHER_REVISION}).")
 
+    device = hw.device
     budget = apply_cpu_budget()
-    device = torch.device("cuda")
-    torch.cuda.reset_peak_memory_stats(device)
+    hw.reset_peak()
 
-    from transformers import AutoModelForCausalLM
-
-    from aadistill.autoinit.calibration import DOMAIN_BALANCED_V1
-    from aadistill.autoinit.datasets import as_operator_items
     t0 = time.monotonic()
-    model = AutoModelForCausalLM.from_pretrained(
-        args.teacher, revision=args.teacher_revision, dtype=torch.bfloat16,
-    ).to(device).eval()
-    model.config.use_cache = False
+    model = teacher_loader(args, device)
     load_s = time.monotonic() - t0
-    assert model.config.num_hidden_layers == PARENT_LAYERS, (
-        f"schedule assumes {PARENT_LAYERS} layers, teacher has "
+    assert model.config.num_hidden_layers == n_layers, (
+        f"schedule assumes {n_layers} layers, teacher has "
         f"{model.config.num_hidden_layers}")
 
-    profile = DOMAIN_BALANCED_V1
-    calib_path = profile.resolve(REPO_ROOT)
-    items = list(as_operator_items(calib_path))
+    profile, calib_path, items = calibration(repo_root)
     positions = sum(int(i["input_ids"].shape[1]) - 1 for i in items)
 
-    core = run_measurement(model, items, device, n_layers=PARENT_LAYERS,
-                           n_remove=N_REMOVE,
+    core = run_measurement(model, items, device, n_layers=n_layers,
+                           n_remove=n_remove,
                            samples_per_cardinality=args.samples_per_cardinality,
                            e8a_pairs=args.e8a_pairs)
 
@@ -403,9 +476,7 @@ def main() -> None:
             "vocab": int(model.config.vocab_size),
             "layers": model.config.num_hidden_layers,
         },
-        "device": {"name": torch.cuda.get_device_name(device),
-                   "total_gib": round(torch.cuda.get_device_properties(device)
-                                      .total_memory / 2**30, 2)},
+        "device": {"name": hw.name(), "total_gib": hw.total_gib()},
         "cpu_budget": budget,
         "sampling": {
             "scheme": ("deterministic, RNG-free: skip(c, j) = {(3j + 5k) mod 36 : "
@@ -429,7 +500,9 @@ def main() -> None:
                 100 * (core["weighted_s"] - core["flat_s"]) / core["weighted_s"], 1),
         },
         "vram": {
-            "production_peak_gib": round(core["production_peak_bytes"] / 2**30, 2),
+            "production_peak_gib": (
+                round(core["production_peak_bytes"] / 2**30, 2)
+                if core["production_peak_bytes"] is not None else None),
             "comparison_peak_gib": (
                 round(core["comparison_peak_bytes"] / 2**30, 2)
                 if core["comparison_peak_bytes"] is not None else None),
@@ -457,14 +530,14 @@ def main() -> None:
             "cpu_equivalence_artifact": "logs/autoinit_depth_backend_equivalence.json",
         },
     }
-    out = REPO_ROOT / args.out
+    out = Path(repo_root) / args.out
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(json.dumps(report, indent=2) + "\n")
 
     # Fail-closed on exactly the conditions the grant names. The artifact is
     # written FIRST either way: a run that found a real backend difference is the
     # one whose evidence matters most.
-    worst = max((p["max_per_item_kl_delta"] for p in core["paired"]), default=0.0)
+    worst = max((q["max_per_item_kl_delta"] for q in core["paired"]), default=0.0)
     if worst != 0.0:
         mark("MEASUREMENT_FAILED")
         raise SystemExit(
@@ -478,10 +551,16 @@ def main() -> None:
             "roughly doubles the forward passes and changes the cost basis this "
             "measurement exists to establish. Evidence is written; stopping.")
     mark("ALL_DONE")
+    return report
+
+
+def main() -> None:
+    args = build_parser().parse_args()
+    report = run_entrypoint(args)
     print(json.dumps({k: report[k] for k in
                       ("timing", "vram", "reference_cache_decision",
                        "gpu_utilization", "e8a_backend_comparison")}, indent=2))
-    print(f"written: {out}")
+    print(f"written: {Path(REPO_ROOT) / args.out}")
 
 
 if __name__ == "__main__":

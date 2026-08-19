@@ -478,7 +478,8 @@ class GateDecision:
 
 def evaluate_teardown(state: dict[str, bool], *, emergency_budget: bool = False,
                       emergency_reason: str = "",
-                      incomplete_event_streams: tuple[str, ...] = ()) -> GateDecision:
+                      incomplete_event_streams: tuple[str, ...] = (),
+                      streams_at_risk: tuple[str, ...] | None = None) -> GateDecision:
     """May the pod be deleted?
 
     Normal path: every check in `GATE_ORDER` must be True. A check absent from
@@ -488,6 +489,26 @@ def evaluate_teardown(state: dict[str, bool], *, emergency_budget: bool = False,
     artifacts are incomplete, because an unbounded bill is worse than a lost
     artifact. It must say why, and the decision records which check it ran over
     so the loss is in the record rather than discovered later.
+
+    `streams_at_risk` is the manifest's **evidence** about why quiescence
+    failed, and it exists because those are three different failures wearing one
+    name. `final_streams_quiescent` is false when a producer has not signalled
+    completion, OR a file is still growing, OR a `final_required` class is simply
+    **missing**. Only the first two are a stream whose tail is being truncated;
+    the third is an artifact that was never written.
+
+    That mattered on 2026-08-19. The bounded measurement declares no event
+    streams at all. Its driver crashed before writing its one report, so
+    quiescence was false for the third reason — and the emergency path demanded
+    that it name the streams it was truncating, of which there were none. The
+    session took the launcher-error route instead of the clean
+    incomplete-collection route it should have had.
+
+    Pass the streams the manifest says are genuinely at risk
+    (`completion_marker_failures + still_being_written`) and the naming
+    requirement applies only when there is something to name. Leave it `None` —
+    the default — and the strict behaviour is unchanged, because a caller that
+    supplies no evidence has not earned the weaker rule.
     """
     checks = {name: bool(state.get(name, False)) for name in GATE_ORDER}
     failed = next((name for name in GATE_ORDER if not checks[name]), None)
@@ -512,14 +533,25 @@ def evaluate_teardown(state: dict[str, bool], *, emergency_budget: bool = False,
         incomplete = tuple(incomplete_event_streams)
         note = ""
         if not checks["final_streams_quiescent"]:
-            if not incomplete:
+            # Is a stream actually being truncated, or did quiescence fail
+            # because a final artifact is missing? `None` means the caller gave
+            # no evidence, and an uninformed caller gets the strict rule.
+            truncating = streams_at_risk is None or bool(streams_at_risk)
+            if truncating and not incomplete:
                 raise ArtifactError(
                     "an emergency teardown over a non-quiescent event stream "
                     "must name the streams it is truncating; 'the final event "
                     "stream is incomplete' has to be in the record, not "
                     "inferred from it later")
-            note = (f" THE FINAL EVENT STREAM IS INCOMPLETE for {list(incomplete)}"
-                    f": only a mutable_snapshot survives and its tail is lost.")
+            if incomplete:
+                note = (f" THE FINAL EVENT STREAM IS INCOMPLETE for "
+                        f"{list(incomplete)}: only a mutable_snapshot survives "
+                        f"and its tail is lost.")
+            else:
+                note = (" No event stream was truncated: this session declares "
+                        "none, and quiescence failed because a final_required "
+                        "artifact is missing rather than because a producer was "
+                        "mid-write. The missing artifacts are listed above.")
         return GateDecision(
             True, True, failed,
             f"EMERGENCY budget teardown over a failed gate ({failed}): "

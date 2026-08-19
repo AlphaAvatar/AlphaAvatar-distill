@@ -1,4 +1,4 @@
-**Updated:** 2026-08-19 · branch `main` · after the causal-depth runtime repair
+**Updated:** 2026-08-20 · branch `main` · after the entrypoint-seam and teardown closure
 
 # Current state
 
@@ -9,6 +9,10 @@ not carry. If the two disagree, a structural test fails.
 **Nothing is running. Nothing is billing. Nothing is authorized. Nothing is
 prepared for launch.**
 
+Two bounded measurements have now been launched and consumed; neither ran a
+measurement. Attempt 2 completed setup and died in its entrypoint's first
+repository import — **$0.1834, no measurement, cause closed at $0**.
+
 Phase-A attempt 10 ran 2026-08-18/19 and was **stopped on maintainer
 instruction**: Stage 0 passed, Stage 1's third operator expansion ran 10 h 47 m
 without finishing while the paid L40S sat at 0-1 %. **$11.43, incomplete,
@@ -18,11 +22,11 @@ selection result.**
 ## Budget
 
 ```
-cumulative spend   $206.0830
+cumulative spend   $206.2664
 approved cap       $219.00
-remaining          $12.9170   NOT permission
+remaining          $12.7336   NOT permission
 
-**$12.9170 is not enough for another full Phase-A attempt** at the $23.0484
+**$12.7336 is not enough for another full Phase-A attempt** at the $23.0484
 per-launch ceiling. A retry requires a separate budget/cap decision after the
 runtime fix is reviewed. Stopping attempt 10 early preserved ~$11.6 of the
 ceiling it was authorized to spend.
@@ -57,18 +61,22 @@ Also frozen: recovery design, selection rules, pooled_counts@v2, Stage-3 artifac
 
 ## Latest verification
 
-After closing the hidden setup contract that failed the first bounded
-measurement. Last tested implementation **`2d358d83`**. CPU only — no checkpoint
-loaded, no metric measured, no GPU used:
+After moving the measurement entrypoint behind an executable seam and separating
+teardown truncation from a missing artifact. CPU only — no checkpoint loaded, no
+metric measured, no GPU used:
 
-* full suite **1944 passed, 11 skipped, 0 errors** in 17:02.
-* pod simulator **1904 passed, 22 skipped**; artifact tree restored **exactly** —
-  1633 entries identical before and after.
+* full suite **1958 passed, 11 skipped, 0 errors** in 16:51.
+* pod simulator **1918 passed, 22 skipped**; artifact tree restored **exactly** —
+  1167 entries, identical listing hash before and after, hide directory empty.
 * frozen-asset verifier **passed**, and was **not** weakened or rescoped.
-* setup contract: `verifier_required_local_roots ⊆ session_installed_local_roots`
-  for every session, derived from the verifier and compared against
-  declarations — mutation-verified, including a new required root that no
-  session declares.
+* entrypoint seam mutation-verified **8 ways** across the seam, the loader and
+  the resolver. Two mutations initially *passed* and exposed the seam's own blind
+  spot — its injection points — which is how the calibration-path defect was
+  found; `load_teacher` and `resolve_calibration` now have their own tests.
+  `Hardware`'s three `torch.cuda.*` calls stay $0-uncoverable and are recorded
+  as such.
+* teardown gate mutation-verified **3 ways**, including that a caller supplying
+  no evidence still gets the strict fail-closed rule.
 
 ## What failed, and why
 
@@ -87,6 +95,7 @@ contract owned by inherited machinery (fixed by the session specification).
 | Phase A 9 | $0.3400 | stage 1 | `stream_projection`'s `avg` allocated with no device (`project.py:57`) |
 | Phase A 10 | $11.4300 | stage 1, 3rd expansion | `depth.causal_kl_greedy_v1`: 260×67 full-vocabulary softmax/KL **on the CPU**, unbounded and unpriced |
 | measurement 1 | $0.0700 | setup / frozen-asset gate | declared `LOCAL_ASSETS = ()`; the shared setup verifies both frozen roots unconditionally |
+| measurement 2 | $0.1834 | driver entrypoint, after `SETUP_RC=0` | `main()` imported `as_operator_items` from the wrong module — and **no $0 test called `main()`** |
 
 **The pattern, through attempt 7:** code no $0 path could execute — a GPU-only
 device, or a contract owned by inherited machinery. **Attempt 8 is a new
@@ -136,37 +145,65 @@ instead of the cause, and it was paid for twice. Full diagnoses in
 
 ## Next starting point
 
-**The bounded measurement launched and failed closed at setup: $0.07, 4.0 min, no
-measurement ran.** Its grant and authorization are **consumed** and must not be
-reused. Evidence in
+**Nothing is authorized, funded or prepared.** Both measurement grants and both
+measurement authorizations are **consumed**; each covered one launch and each
+one's lineage gate refuses the current HEAD by construction. **No measurement
+attempt 3 and no Phase-A attempt 11 is prepared.** The next paid step needs an
+explicit maintainer GO of its own.
+
+**Attempt 2's cause, and why $0 could not see it.** `main()` imported
+`as_operator_items` from `aadistill.autoinit.datasets`; it lives in
+`scripts/autoinit/phase_a_search.py`. Twenty-two tests covered that job and every
+one of them called `run_measurement`, `skip_set`, `GpuSampler` or the stop
+conditions **directly** — none called `main()`. The entire production entrypoint,
+argument defaults through artifact write, was reachable only from a paid pod, so
+the tested surface and the executed surface were different surfaces.
+
+`run_entrypoint(args, *, hardware, teacher_loader, calibration, ...)` now holds
+all of it and `main()` is parse-and-call, so the CPU test drives the production
+path with an injected toy loader instead of a parallel imitation of it. Restoring
+the bad import fails the suite; so does moving the orchestration back into
+`main()`. A **fifth mutation passed** and exposed the seam's one blind spot —
+`load_teacher` is the function the test injects past, so dropping `revision=`
+would have measured against whatever the Hub published that morning; it is now
+covered by a stubbed `from_pretrained`.
+
+**The seam then found a second defect, before it ever ran.** `resolve_calibration`
+is the *other* function the entrypoint test injects past, and it had no test of
+its own. `CalibrationProfile.resolve()` returns the loaded **rows**, not a
+filename, and the job passed that straight into the report as
+`identities.calibration_path` — **734,042 characters** of serialized mixture,
+token ids and all, in a field whose real value is 81 characters. An artifact
+defect, not a science defect: 67 items and 59,763 positions either way, and this
+job has never completed a run, so no recorded result is touched. It is the same
+shape as the import — a line only a pod would execute — and it would otherwise
+have been found by attempt 3.
+
+`Hardware` is the third injection point and genuinely **cannot** be covered at
+$0; its three `torch.cuda.*` calls need a device. What is covered is that the
+real class is the default and its dispatch is right off CUDA. That residual gap
+is recorded rather than papered over.
+
+**And the teardown gate.** The measurement declares no event streams, its report
+was never written, and the emergency path demanded it name the streams it was
+truncating — of which there were none. `final_streams_quiescent` is one name over
+three failures, and only two of them are a truncation. `evaluate_teardown` now
+takes the manifest's own `streams_at_risk` evidence and requires naming only when
+there is something to name; **a caller supplying no evidence keeps the strict
+rule, so fail-closed behaviour for training sessions with incomplete event
+streams is unchanged.**
+
+**What is still unmeasured** — the questions the two attempts were meant to
+answer and did not: the repaired port's evaluations/min against E8a's 12.0, real
+peak VRAM, the reference-cache decision at the frozen mixture, per-item
+E8a-vs-port equality on one accelerator, and sampled GPU utilization.
+
+Evidence: [`autoinit_measurement_attempt2/`](autoinit_measurement_attempt2/) and
 [`autoinit_measurement_attempt1/`](autoinit_measurement_attempt1/).
 
-**The cause was a hidden setup contract, now closed.** The session declared
-`LOCAL_ASSETS = ()` because it reads only the calibration and the teacher, both
-from the relay — true, and beside the point:
-`autoinit_preflight_setup.sh` runs `verify_frozen_assets.py` **unconditionally**,
-and that verifier checks both frozen roots whatever the session is doing. This is
-the **device-canary retry's error sixteen days later** ($0.0637 then, $0.07 now):
-both declared what the session *needed* rather than what the setup *requires*.
-
-`tests/pod/test_session_setup_contract.py` now asserts
-`verifier_required_local_roots ⊆ session_installed_local_roots` for every
-session, comparing **declarations** rather than filesystem presence — a presence
-check passes on the dev box, where both roots exist, and says nothing about a
-pod. The requirement is **derived from the verifier**, so a third frozen root
-added there and to no session fails at $0. Mutation-verified, including that
-case. The device canary's declaration was **also still wrong** and is corrected.
-
-**Process, recorded:** the launch did have a GO in the immediately preceding
-message. What was not reviewed is the session machinery built to execute it —
-`measurement.py`, an issuer, a `SessionSpec`, an artifact spec — written and
-launched in the same session, and precisely where it failed. **"My intended next
-decision is GO" is not executable permission**, and an explicit GO covers the
-workload named, not new paid-path infrastructure written to carry it.
-
-**Nothing is authorized, funded or prepared.** A replacement measurement needs a
-new grant and a new artifact, under the same measurement-only scope and $1.6294
-ceiling.
+**Process rule, standing:** "my intended next decision is GO" is not executable
+permission, and an explicit GO covers the workload named — not new paid-path
+infrastructure written to carry it.
 
 ## Where else to look
 
