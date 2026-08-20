@@ -145,61 +145,47 @@ instead of the cause, and it was paid for twice. Full diagnoses in
 
 ## Next starting point
 
-**Nothing is authorized, funded or prepared.** Both measurement grants and both
-measurement authorizations are **consumed**; each covered one launch and each
-one's lineage gate refuses the current HEAD by construction. **No measurement
-attempt 3 and no Phase-A attempt 11 is prepared.** The next paid step needs an
-explicit maintainer GO of its own.
+**Measurement Attempt 3 is granted and being prepared.** The maintainer's GO of
+2026-08-20 covers exactly one bounded L40S causal-depth runtime/backend
+measurement under the existing **$1.6294** ceiling, against reviewed
+implementation `1e3e783e`. The grant document is
+[`autoinit_measurement_grant3.json`](autoinit_measurement_grant3.json).
 
-**Attempt 2's cause, and why $0 could not see it.** `main()` imported
-`as_operator_items` from `aadistill.autoinit.datasets`; it lives in
-`scripts/autoinit/phase_a_search.py`. Twenty-two tests covered that job and every
-one of them called `run_measurement`, `skip_set`, `GpuSampler` or the stop
-conditions **directly** — none called `main()`. The entire production entrypoint,
-argument defaults through artifact write, was reachable only from a paid pod, so
-the tested surface and the executed surface were different surfaces.
+**At this commit nothing is authorized and nothing is launchable**: the
+authorization does not exist yet. It is issued against this tree in the next
+commit, which the lineage gate requires to differ from this one in nothing but
+the authorization artifact. That is why this snapshot still reads `authorized:
+false` — it describes the pre-authorization base, which is exactly what a pod
+checks out.
 
-`run_entrypoint(args, *, hardware, teacher_loader, calibration, ...)` now holds
-all of it and `main()` is parse-and-call, so the CPU test drives the production
-path with an injected toy loader instead of a parallel imitation of it. Restoring
-the bad import fails the suite; so does moving the orchestration back into
-`main()`. A **fifth mutation passed** and exposed the seam's one blind spot —
-`load_teacher` is the function the test injects past, so dropping `revision=`
-would have measured against whatever the Hub published that morning; it is now
-covered by a stubbed `from_pretrained`.
+**The two consumed attempts, and what each bought.** Attempt 1 ($0.0700) failed
+at the shared setup's frozen-asset gate: it declared `LOCAL_ASSETS = ()` because
+it reads only the calibration and the teacher, which is true and beside the point
+— `verify_frozen_assets.py` runs unconditionally. Attempt 2 ($0.1834) passed
+setup end to end and died in its entrypoint's first repository import. Both
+causes are closed at $0, mutation-verified, and both grants and authorizations
+are **spent and not reusable**.
 
-**The seam then found a second defect, before it ever ran.** `resolve_calibration`
-is the *other* function the entrypoint test injects past, and it had no test of
-its own. `CalibrationProfile.resolve()` returns the loaded **rows**, not a
-filename, and the job passed that straight into the report as
-`identities.calibration_path` — **734,042 characters** of serialized mixture,
-token ids and all, in a field whose real value is 81 characters. An artifact
-defect, not a science defect: 67 items and 59,763 positions either way, and this
-job has never completed a run, so no recorded result is touched. It is the same
-shape as the import — a line only a pod would execute — and it would otherwise
-have been found by attempt 3.
+**What attempt 2's closure changed.** The whole production entrypoint now runs on
+the dev box: `run_entrypoint()` holds argument and default resolution, the pinned
+teacher identity, model loading, calibration and profile resolution,
+`as_operator_items`, identity assembly, `run_measurement`, report assembly, the
+stop conditions and the artifact write, and `main()` is parsing plus a call to
+it. Executing the two injection points found a second latent defect — the report
+would have written **734,042 characters** of serialized mixture into
+`identities.calibration_path`, whose real value is 81 — and a $0 test that was
+one broken guard away from loading a 7.6 GB teacher. `Hardware`'s three
+`torch.cuda.*` calls remain $0-uncoverable and are recorded as such.
 
-`Hardware` is the third injection point and genuinely **cannot** be covered at
-$0; its three `torch.cuda.*` calls need a device. What is covered is that the
-real class is the default and its dispatch is right off CUDA. That residual gap
-is recorded rather than papered over.
+**What the run settles**, and nothing beyond it: the repaired port's
+evaluations/min against E8a's 12.0 anchor, real production peak VRAM kept
+distinct from the comparison-path peak, the `_ReferenceLogits` cache decision at
+the frozen mixture, the GPU utilization distribution, and per-item
+`DistortionSums` equality against E8a at `|skip|=1` and `|skip|=8` on one
+accelerator.
 
-**And the teardown gate.** The measurement declares no event streams, its report
-was never written, and the emergency path demanded it name the streams it was
-truncating — of which there were none. `final_streams_quiescent` is one name over
-three failures, and only two of them are a truncation. `evaluate_teardown` now
-takes the manifest's own `streams_at_risk` evidence and requires naming only when
-there is something to name; **a caller supplying no evidence keeps the strict
-rule, so fail-closed behaviour for training sessions with incomplete event
-streams is unchanged.**
-
-**What is still unmeasured** — the questions the two attempts were meant to
-answer and did not: the repaired port's evaluations/min against E8a's 12.0, real
-peak VRAM, the reference-cache decision at the frozen mixture, per-item
-E8a-vs-port equality on one accelerator, and sampled GPU utilization.
-
-Evidence: [`autoinit_measurement_attempt2/`](autoinit_measurement_attempt2/) and
-[`autoinit_measurement_attempt1/`](autoinit_measurement_attempt1/).
+**Attempt 11 is not prepared, granted or implied.** The measured values return
+for repricing and a separate cumulative-budget decision.
 
 **Process rule, standing:** "my intended next decision is GO" is not executable
 permission, and an explicit GO covers the workload named — not new paid-path
