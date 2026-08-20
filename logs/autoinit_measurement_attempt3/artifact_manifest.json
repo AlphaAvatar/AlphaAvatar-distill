@@ -1,0 +1,59 @@
+{
+  "root": "/workspace/aad/artifacts",
+  "created_utc": "2026-08-20T05:46:35+00:00",
+  "ok": true,
+  "specs": [
+    {
+      "artifact_class": "measurement_report",
+      "pattern": "audit/autoinit_measurement/result.json",
+      "required": true,
+      "min_matches": 1,
+      "min_bytes": 1,
+      "lifecycle": "final_required"
+    },
+    {
+      "artifact_class": "measurement_session_logs",
+      "pattern": "audit/autoinit_measurement/session/*",
+      "required": false,
+      "min_matches": 0,
+      "min_bytes": 1,
+      "lifecycle": "final_required"
+    }
+  ],
+  "entries": [
+    {
+      "path": "audit/autoinit_measurement/result.json",
+      "artifact_class": "measurement_report",
+      "size_bytes": 4140,
+      "sha256": "199f5679d1cf8496d400c5b87ef30e41f7dff95973c3d1cc9e5a272d67a77aeb",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "audit/autoinit_measurement/session/autoinit_measurement.status",
+      "artifact_class": "measurement_session_logs",
+      "size_bytes": 617,
+      "sha256": "36919c36d8c608f9bdbffde3b5445b647c9e65f0a9d3f69b45bd9145506b45ef",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "audit/autoinit_measurement/session/autoinit_measurement_run.log",
+      "artifact_class": "measurement_session_logs",
+      "size_bytes": 3608,
+      "sha256": "99a9a732d9df76eb9713d5ef1c3a917c1ca289f379bb691ed4017c71453bc2aa",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "audit/autoinit_measurement/session/setup.log",
+      "artifact_class": "measurement_session_logs",
+      "size_bytes": 23916,
+      "sha256": "64d739b47e6bad4b0287a601f8567cfb0706acfe8a48ff4a0546030731c308e2",
+      "lifecycle": "final_required"
+    }
+  ],
+  "missing": [],
+  "appended_during_archive": [],
+  "completion_markers": [],
+  "completion_marker_failures": [],
+  "still_being_written": [],
+  "final_streams_quiescent": true
+}

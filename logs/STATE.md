@@ -1,4 +1,4 @@
-**Updated:** 2026-08-20 · branch `main` · after the entrypoint-seam and teardown closure
+**Updated:** 2026-08-20 · branch `main` · after Measurement Attempt 3 COMPLETED
 
 # Current state
 
@@ -9,9 +9,11 @@ not carry. If the two disagree, a structural test fails.
 **Nothing is running. Nothing is billing. Nothing is authorized. Nothing is
 prepared for launch.**
 
-Two bounded measurements have now been launched and consumed; neither ran a
-measurement. Attempt 2 completed setup and died in its entrypoint's first
-repository import — **$0.1834, no measurement, cause closed at $0**.
+**Measurement Attempt 3 COMPLETED on 2026-08-20 for $0.2077.** `ALL_DONE`, both
+fail-closed conditions passed, pod deleted with provider confirmation. The
+repaired causal-depth port reaches **12.07 weighted evaluations/min** against
+E8a's frozen **12.0/min** anchor, and agrees with E8a **exactly** — per-item KL
+delta 0.0 at both |skip|=1 and |skip|=8. **These values authorize nothing.**
 
 Phase-A attempt 10 ran 2026-08-18/19 and was **stopped on maintainer
 instruction**: Stage 0 passed, Stage 1's third operator expansion ran 10 h 47 m
@@ -22,11 +24,11 @@ selection result.**
 ## Budget
 
 ```
-cumulative spend   $206.2664
+cumulative spend   $206.4741
 approved cap       $219.00
-remaining          $12.7336   NOT permission
+remaining          $12.5259   NOT permission
 
-**$12.7336 is not enough for another full Phase-A attempt** at the $23.0484
+**$12.5259 is not enough for another full Phase-A attempt** at the $23.0484
 per-launch ceiling. A retry requires a separate budget/cap decision after the
 runtime fix is reviewed. Stopping attempt 10 early preserved ~$11.6 of the
 ceiling it was authorized to spend.
@@ -145,47 +147,44 @@ instead of the cause, and it was paid for twice. Full diagnoses in
 
 ## Next starting point
 
-**Measurement Attempt 3 is granted and being prepared.** The maintainer's GO of
-2026-08-20 covers exactly one bounded L40S causal-depth runtime/backend
-measurement under the existing **$1.6294** ceiling, against reviewed
-implementation `1e3e783e`. The grant document is
-[`autoinit_measurement_grant3.json`](autoinit_measurement_grant3.json).
+**The measurement is done and nothing is running, billing, authorized or
+prepared.** Attempt 3's grant and authorization are **consumed**; all three
+measurement authorizations are spent and each one's lineage gate refuses the
+current HEAD by construction. Full artifact and analysis:
+[`autoinit_measurement_attempt3/`](autoinit_measurement_attempt3/).
 
-**At this commit nothing is authorized and nothing is launchable**: the
-authorization does not exist yet. It is issued against this tree in the next
-commit, which the lineage gate requires to differ from this one in nothing but
-the authorization artifact. That is why this snapshot still reads `authorized:
-false` — it describes the pre-authorization base, which is exactly what a pod
-checks out.
+### What was measured
 
-**The two consumed attempts, and what each bought.** Attempt 1 ($0.0700) failed
-at the shared setup's frozen-asset gate: it declared `LOCAL_ASSETS = ()` because
-it reads only the calibration and the teacher, which is true and beside the point
-— `verify_frozen_assets.py` runs unconditionally. Attempt 2 ($0.1834) passed
-setup end to end and died in its entrypoint's first repository import. Both
-causes are closed at $0, mutation-verified, and both grants and authorizations
-are **spent and not reusable**.
+| question | answer |
+| --- | --- |
+| rate vs the E8a anchor | **12.07** weighted evals/min vs **12.0** — +0.6%. 260 evals price at **21.53 min** |
+| backend equality | per-item KL delta **exactly 0.0** at \|skip\|=1 **and** \|skip\|=8 |
+| production peak VRAM | **26.82 GiB** on a 44.39 GiB L40S — 17.57 GiB headroom |
+| comparison-path peak | 10.45 GiB, kept separate; neither holds two ~16.9 GiB caches |
+| reference cache | **CACHED**, 16.913 GiB against 36.42 GiB available at fraction 0.66. No fallback |
+| GPU utilization | mean **98.3%**, median 98, min 94 over 221 samples; **zero** below 10% |
 
-**What attempt 2's closure changed.** The whole production entrypoint now runs on
-the dev box: `run_entrypoint()` holds argument and default resolution, the pinned
-teacher identity, model loading, calibration and profile resolution,
-`as_operator_items`, identity assembly, `run_measurement`, report assembly, the
-stop conditions and the artifact write, and `main()` is parsing plus a call to
-it. Executing the two injection points found a second latent defect — the report
-would have written **734,042 characters** of serialized mixture into
-`identities.calibration_path`, whose real value is 81 — and a $0 test that was
-one broken guard away from loading a 7.6 GB teacher. `Hardware`'s three
-`torch.cuda.*` calls remain $0-uncoverable and are recorded as such.
+The flat cardinality-8 extrapolation is **20.08 min** and understates by
+**6.7%** — evaluation cost falls monotonically with cardinality (5.251 s → 4.635 s)
+while the schedule spends most of its 260 evaluations at *low* cardinality, so
+pricing from the cheapest configuration is wrong. The artifact labels it as such.
 
-**What the run settles**, and nothing beyond it: the repaired port's
-evaluations/min against E8a's 12.0 anchor, real production peak VRAM kept
-distinct from the comparison-path peak, the `_ReferenceLogits` cache decision at
-the frozen mixture, the GPU utilization distribution, and per-item
-`DistortionSums` equality against E8a at `|skip|=1` and `|skip|=8` on one
-accelerator.
+### What this settles about attempt 10
 
-**Attempt 11 is not prepared, granted or implied.** The measured values return
-for repricing and a separate cumulative-budget decision.
+Attempt 10 spent **$11.43** and never finished one expansion, at 0–1% GPU. The
+same operator now runs at 98.3% and prices the whole schedule at 21.53 minutes —
+**at least 30× faster**. The `.cpu()` in `depth.causal_kl_greedy_v1` was the
+whole cause, and the frozen cost model was right all along. The cgroup fix is
+confirmed too: the container advertised 128 CPUs, the driver held torch to the
+13 it was granted.
+
+### What is decided next, by the maintainer and not here
+
+These numbers are **inputs to a repricing and a separate cumulative-budget
+decision**. $12.5259 remains against a $23.0484 per-launch Phase-A ceiling, so a
+Phase-A attempt still needs its own budget decision regardless of what the
+measurement shows. **No Phase-A attempt 11 is prepared, granted, funded or
+implied, and none is being prepared.**
 
 **Process rule, standing:** "my intended next decision is GO" is not executable
 permission, and an explicit GO covers the workload named — not new paid-path

@@ -1,0 +1,109 @@
+2026-08-20T05:43:50Z MARKER:MEASUREMENT_START
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+Loading weights:   0%|          | 0/398 [00:00<?, ?it/s]Loading weights: 100%|██████████| 398/398 [00:00<00:00, 6762.24it/s]
+  |skip|=1 sample 0: 5.27 s
+  |skip|=1 sample 1: 5.24 s
+  |skip|=1 sample 2: 5.24 s
+  |skip|=2 sample 0: 5.16 s
+  |skip|=2 sample 1: 5.18 s
+  |skip|=2 sample 2: 5.18 s
+  |skip|=3 sample 0: 5.10 s
+  |skip|=3 sample 1: 5.11 s
+  |skip|=3 sample 2: 5.11 s
+  |skip|=4 sample 0: 5.00 s
+  |skip|=4 sample 1: 5.00 s
+  |skip|=4 sample 2: 4.99 s
+  |skip|=5 sample 0: 4.90 s
+  |skip|=5 sample 1: 4.92 s
+  |skip|=5 sample 2: 4.91 s
+  |skip|=6 sample 0: 4.82 s
+  |skip|=6 sample 1: 4.85 s
+  |skip|=6 sample 2: 4.82 s
+  |skip|=7 sample 0: 4.72 s
+  |skip|=7 sample 1: 4.75 s
+  |skip|=7 sample 2: 4.73 s
+  |skip|=8 sample 0: 4.62 s
+  |skip|=8 sample 1: 4.64 s
+  |skip|=8 sample 2: 4.64 s
+2026-08-20T05:46:15Z MARKER:ALL_DONE
+{
+  "timing": {
+    "teacher_load_s": 3.03,
+    "reference_pass_s": 4.31,
+    "mean_seconds_by_cardinality": {
+      "1": 5.251,
+      "2": 5.175,
+      "3": 5.105,
+      "4": 5.0,
+      "5": 4.91,
+      "6": 4.829,
+      "7": 4.734,
+      "8": 4.635
+    },
+    "weighted_260_eval_minutes": 21.53,
+    "weighted_evaluations_per_minute": 12.07,
+    "flat_cardinality_8_minutes_WRONG": 20.08,
+    "flat_would_have_understated_by_pct": 6.7
+  },
+  "vram": {
+    "production_peak_gib": 26.82,
+    "comparison_peak_gib": 10.45,
+    "which_is_the_phase_a_number": "production_peak_gib",
+    "note": "the production reference cache is released before the E8a comparison builds its path, so neither peak includes two ~16.9 GiB caches at once; E8a runs with cache_reference=False"
+  },
+  "reference_cache_decision": {
+    "cached": true,
+    "estimate_bytes": 18160302336,
+    "estimate_gib": 16.913,
+    "available_bytes": 39107035136,
+    "budget_fraction": 0.66,
+    "headroom_source": "cuda.mem_get_info:cuda",
+    "fallback": null
+  },
+  "gpu_utilization": {
+    "method": "nvidia-smi",
+    "samples": 221,
+    "mean_pct": 98.3,
+    "median_pct": 98,
+    "min_pct": 94,
+    "max_pct": 100,
+    "fraction_below_10_pct": 0.0,
+    "attempt_10_reference": "0-1 % for 11 h with the reduction on the host"
+  },
+  "e8a_backend_comparison": {
+    "reference_implementation": "scripts/training/search_depth_map.py",
+    "paired": [
+      {
+        "skip": [
+          0
+        ],
+        "cardinality": 1,
+        "max_per_item_kl_delta": 0.0,
+        "mean_per_item_kl_delta": 0.0,
+        "port_aggregated_score": 8.302407928271709,
+        "e8a_aggregated_score": 8.279609395136651,
+        "aggregated_difference": 0.022798533135057752
+      },
+      {
+        "skip": [
+          0,
+          5,
+          10,
+          15,
+          20,
+          25,
+          30,
+          35
+        ],
+        "cardinality": 8,
+        "max_per_item_kl_delta": 0.0,
+        "mean_per_item_kl_delta": 0.0,
+        "port_aggregated_score": 12.512073765246884,
+        "e8a_aggregated_score": 12.478070221975976,
+        "aggregated_difference": 0.0340035432709076
+      }
+    ],
+    "per_item_is_the_comparison": "E8a merges raw sums per subtype and normalizes once (position-weighted); the operator normalizes per item and takes an unweighted mean. That is a DECLARED aggregation difference, not drift - ~0.027 on a toy, ~300x the 8.195e-05 decision margin - so the backend check is the per-item delta above."
+  }
+}
+written: /workspace/aad/artifacts/audit/autoinit_measurement/result.json

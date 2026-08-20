@@ -1,0 +1,136 @@
+{
+  "schema": "aadistill.autoinit.causal_depth_measured/v2",
+  "not_a_phase_a_attempt": "bounded rate and backend validation: no greedy search, no depth map, no checkpoint written",
+  "identities": {
+    "teacher": "Qwen/Qwen3-4B-Thinking-2507",
+    "revision": "768f209d9ea81521153ed38c47d515654e938aea",
+    "revision_pinned": true,
+    "calibration_profile": "calib.domain_balanced@v1",
+    "calibration_profile_hash": "11f36a88bad4879f8ab0e3586ca1f0af035401e505dc97815bed8d47b9f32e9b",
+    "calibration_path": "/workspace/aad/artifacts/stage1/e8_calibration_v1/items.jsonl",
+    "items": 67,
+    "positions": 59763,
+    "vocab": 151936,
+    "layers": 36
+  },
+  "device": {
+    "name": "NVIDIA L40S",
+    "total_gib": 44.39
+  },
+  "cpu_budget": {
+    "threads": 13,
+    "source": "cgroup.v2",
+    "torch_threads_before": 128,
+    "torch_threads_after": 13,
+    "visible_cpus": 128
+  },
+  "sampling": {
+    "scheme": "deterministic, RNG-free: skip(c, j) = {(3j + 5k) mod 36 : k < c}. gcd(5,36)=1 so the layers are distinct and spread",
+    "cardinalities": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8
+    ],
+    "samples_per_cardinality": 3,
+    "total_evaluations_timed": 24,
+    "schedule_weights": {
+      "1": 36,
+      "2": 35,
+      "3": 34,
+      "4": 33,
+      "5": 32,
+      "6": 31,
+      "7": 30,
+      "8": 29
+    },
+    "weights_sum": 260
+  },
+  "timing": {
+    "teacher_load_s": 3.03,
+    "reference_pass_s": 4.31,
+    "mean_seconds_by_cardinality": {
+      "1": 5.251,
+      "2": 5.175,
+      "3": 5.105,
+      "4": 5.0,
+      "5": 4.91,
+      "6": 4.829,
+      "7": 4.734,
+      "8": 4.635
+    },
+    "weighted_260_eval_minutes": 21.53,
+    "weighted_evaluations_per_minute": 12.07,
+    "flat_cardinality_8_minutes_WRONG": 20.08,
+    "flat_would_have_understated_by_pct": 6.7
+  },
+  "vram": {
+    "production_peak_gib": 26.82,
+    "comparison_peak_gib": 10.45,
+    "which_is_the_phase_a_number": "production_peak_gib",
+    "note": "the production reference cache is released before the E8a comparison builds its path, so neither peak includes two ~16.9 GiB caches at once; E8a runs with cache_reference=False"
+  },
+  "reference_cache_decision": {
+    "cached": true,
+    "estimate_bytes": 18160302336,
+    "estimate_gib": 16.913,
+    "available_bytes": 39107035136,
+    "budget_fraction": 0.66,
+    "headroom_source": "cuda.mem_get_info:cuda",
+    "fallback": null
+  },
+  "gpu_utilization": {
+    "method": "nvidia-smi",
+    "samples": 221,
+    "mean_pct": 98.3,
+    "median_pct": 98,
+    "min_pct": 94,
+    "max_pct": 100,
+    "fraction_below_10_pct": 0.0,
+    "attempt_10_reference": "0-1 % for 11 h with the reduction on the host"
+  },
+  "e8a_backend_comparison": {
+    "reference_implementation": "scripts/training/search_depth_map.py",
+    "paired": [
+      {
+        "skip": [
+          0
+        ],
+        "cardinality": 1,
+        "max_per_item_kl_delta": 0.0,
+        "mean_per_item_kl_delta": 0.0,
+        "port_aggregated_score": 8.302407928271709,
+        "e8a_aggregated_score": 8.279609395136651,
+        "aggregated_difference": 0.022798533135057752
+      },
+      {
+        "skip": [
+          0,
+          5,
+          10,
+          15,
+          20,
+          25,
+          30,
+          35
+        ],
+        "cardinality": 8,
+        "max_per_item_kl_delta": 0.0,
+        "mean_per_item_kl_delta": 0.0,
+        "port_aggregated_score": 12.512073765246884,
+        "e8a_aggregated_score": 12.478070221975976,
+        "aggregated_difference": 0.0340035432709076
+      }
+    ],
+    "per_item_is_the_comparison": "E8a merges raw sums per subtype and normalizes once (position-weighted); the operator normalizes per item and takes an unweighted mean. That is a DECLARED aggregation difference, not drift - ~0.027 on a toy, ~300x the 8.195e-05 decision margin - so the backend check is the per-item delta above."
+  },
+  "compare_against": {
+    "e8a_frozen_cost_model": "260 evaluations in 1,300 s = 21.7 min, 12.0/min",
+    "attempt_10_host_path": ">= 647 min for one expansion, unfinished",
+    "cpu_equivalence_artifact": "logs/autoinit_depth_backend_equivalence.json"
+  }
+}

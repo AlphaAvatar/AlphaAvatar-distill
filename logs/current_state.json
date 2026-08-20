@@ -1,6 +1,6 @@
 {
   "schema": "aadistill.current_state/v2",
-  "generated_utc": "2026-08-20T04:10:00Z",
+  "generated_utc": "2026-08-20T06:05:00Z",
   "_contract": "The minimal machine-readable CURRENT snapshot. It owns live facts and nothing else: no history, no per-attempt detail, no narrative. History lives in logs/decisions.md and the per-run directories; the human view of THIS file is logs/STATE.md and the two must agree. README owns no live facts. Ownership rules: logs/CATALOG.md.",
   "baseline_commit": "1e3e783e54f770511fec0b348dbe593194cef762",
   "baseline_commit_meaning": "The LAST TESTED IMPLEMENTATION: the commit whose tree produced the latest_verification figures. It is deliberately NOT always the commit carrying this file -- when a paid launch is prepared, a grant/provenance commit and an authorization-only commit follow it and neither is separately tested. A reader must be able to tell which commit the suite numbers describe from which commit a pod checks out. Nothing checks this field; it is refreshed by hand whenever the verified tree moves.",
@@ -11,19 +11,19 @@
   },
   "authorized": {
     "any": false,
-    "note": "every authorization issued is consumed. The two measurement authorizations each covered one launch and are spent; their lineage gates refuse the current HEAD by construction. A new paid action needs a new grant and a new artifact."
+    "note": "every authorization issued is consumed. All THREE measurement authorizations each covered one launch and are spent; their lineage gates refuse the current HEAD by construction. A new paid action needs a new grant and a new artifact."
   },
   "prepared_launch": {
     "any": false,
     "bundles": 0
   },
   "budget": {
-    "cumulative_spend_usd": 206.2664,
+    "cumulative_spend_usd": 206.4741,
     "authorized_cap_usd": 219.0,
-    "remaining_usd": 12.7336,
+    "remaining_usd": 12.5259,
     "remaining_is_not_permission": true,
     "ledger": "logs/BUDGET_LEDGER.md",
-    "headroom_note": "$12.7336 is NOT enough for another full Phase-A attempt at the $23.0484 per-launch ceiling. Remaining headroom is not permission, and nothing is prepared."
+    "headroom_note": "$12.5259 is NOT enough for another full Phase-A attempt at the $23.0484 per-launch ceiling. Remaining headroom is not permission, and nothing is prepared."
   },
   "frozen": {
     "science_plan_hash": "02be33b9a7a8e26bc8bfb75795351e8cdc9ffd441b47066cc81887cfc511b55c",
@@ -55,7 +55,8 @@
     "Stage 0 on hardware, passed five times (attempt 10 attested interval 0.011695, floor 0.3000, plan 02be33b9)",
     "the Stage-1 device fixes, confirmed on CUDA: attempt 10's composite expansion completed and wrote a state, so stream_projection's avg, the orthonormality eye and _head_rows all placed correctly",
     "the causal-depth runtime repair: scoring restored to the accelerator per E8a, cgroup-aware CPU budget, search_minutes as a fail-closed in-expansion deadline, bounded per-candidate progress",
-    "the measurement job's entrypoint behind an executable seam: run_entrypoint() holds all orchestration, main() is parse+call, and each injection point has its own test -- which is how the calibration-path defect was found at $0"
+    "the measurement job's entrypoint behind an executable seam: run_entrypoint() holds all orchestration, main() is parse+call, and each injection point has its own test -- which is how the calibration-path defect was found at $0",
+    "the bounded causal-depth runtime and backend measurement (attempt 3, $0.2077, ALL_DONE) -- see measured_causal_depth_runtime below"
   ],
   "latest_verification": {
     "utc": "2026-08-20T02:40:00Z",
@@ -63,9 +64,8 @@
     "full_suite": "1958 passed, 11 skipped, 0 errors in 16:51",
     "pod_simulator": "1918 passed, 22 skipped; artifact tree restored EXACTLY - 1167 entries, identical listing hash before and after",
     "frozen_asset_verifier": "passed, no problems; NOT weakened or rescoped",
-    "entrypoint_seam": "mutation-verified 8 ways. Two mutations initially PASSED and exposed the seam's injection points as its blind spot; executing them found a second latent defect and a $0 test that could load 7.6 GB. Hardware's 3 torch.cuda calls stay $0-uncoverable",
-    "teardown_gate": "mutation-verified 3 ways; a caller with no evidence keeps the strict rule",
-    "scope": "CPU only; no checkpoint loaded, no metric measured, no GPU used"
+    "scope": "CPU only; no checkpoint loaded, no metric measured, no GPU used",
+    "mutation_verified": "entrypoint seam 8 ways, teardown gate 3 ways; the seam's own injection points were its blind spot and now have their own tests. Detail: logs/decisions.md"
   },
   "failed": [
     {
@@ -134,10 +134,9 @@
     "the paid device-canary session path: STRATEGICALLY TERMINATED 2026-08-18. Two authorized sessions, $0.1240, zero canary runs; both died in the wrapper's inherited contracts. Its evidence and its generic lesson are kept; no further canary is prepared."
   ],
   "next_starting_point": {
-    "status": "Measurement Attempt 3 is GRANTED (logs/autoinit_measurement_grant3.json, 2026-08-20) against reviewed implementation 1e3e783e. At THIS commit nothing is authorized: the authorization is issued in the next commit, which differs from this base only in the authorization artifact.",
-    "the_ask": "ONE bounded L40S causal-depth runtime and backend measurement, measurement-only scope, hard ceiling $1.6294 with the plan's own internal stop binding first where tighter. Not a Phase-A attempt.",
-    "what_it_settles": "the repaired port's evaluations/min against E8a's 12.0 anchor, production peak VRAM distinct from the comparison peak, the _ReferenceLogits cache decision, GPU utilization, and per-item DistortionSums equality against E8a at |skip|=1 and 8",
-    "then": "the measured values return for repricing and a SEPARATE cumulative-budget decision. Attempt 11 is not prepared, granted or implied.",
+    "status": "Measurement Attempt 3 COMPLETE for $0.2077, ALL_DONE, pod deleted with provider confirmation. All three measurement grants and authorizations are consumed. Nothing is running, billing, authorized or prepared.",
+    "the_ask": "NOTHING. No Phase-A attempt 11 and no fourth measurement is prepared, granted, funded or implied. The next paid step needs an explicit maintainer GO of its own.",
+    "decision_owed_by_the_maintainer": "a repricing from the measured 21.53 min / 26.82 GiB, and a SEPARATE cumulative-budget decision: $12.5259 remains against a $23.0484 per-launch Phase-A ceiling, so Phase A needs its own budget decision whatever the measurement shows.",
     "process_rule": "'my intended next decision is GO' is not executable permission; an explicit GO covers the workload named, not new paid-path infrastructure written to carry it"
   },
   "read_order": [
@@ -148,5 +147,20 @@
     "logs/BUDGET_LEDGER.md \u2014 spend and caps",
     "AGENTS.md \u2014 the binding working contract"
   ],
-  "failed_before_the_current_architecture": "Phase A 1-5 $1.6321, 6 $0.3552, 7 $0.3955 (device placement), canary 1 $0.0603 and 2 $0.0637 (inherited contracts). All five classes are closed by autoinit.stage1_device_contract@v1 and the session specification. Detail: logs/decisions.md and the per-run directories."
+  "failed_before_the_current_architecture": "Phase A 1-5 $1.6321, 6 $0.3552, 7 $0.3955 (device placement), canary 1 $0.0603 and 2 $0.0637 (inherited contracts). All five classes are closed by autoinit.stage1_device_contract@v1 and the session specification. Detail: logs/decisions.md and the per-run directories.",
+  "measured_causal_depth_runtime": {
+    "artifact": "logs/autoinit_measurement_attempt3/result.json",
+    "weighted_evals_per_minute": 12.07,
+    "e8a_anchor_evals_per_minute": 12.0,
+    "weighted_260_eval_minutes": 21.53,
+    "flat_cardinality_8_minutes_WRONG": 20.08,
+    "flat_understates_pct": 6.7,
+    "max_per_item_kl_delta": 0.0,
+    "production_peak_gib": 26.82,
+    "comparison_peak_gib": 10.45,
+    "device_total_gib": 44.39,
+    "reference_cache_cached": true,
+    "gpu_mean_utilization_pct": 98.3,
+    "authorizes": "NOTHING. Inputs to a repricing and a separate budget decision."
+  }
 }

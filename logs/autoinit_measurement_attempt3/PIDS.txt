@@ -1,0 +1,7 @@
+# Measurement attempt 3 — 2026-08-20. setsid re-parents, so the pid the
+# starting shell recorded was its own, not the launcher's. These are confirmed
+# by argv, out of band, and are what to kill by if that is ever needed.
+launcher 1872733
+poller   1872734
+watchdog 1872804
+pod      fsk7tz1rnx43xr

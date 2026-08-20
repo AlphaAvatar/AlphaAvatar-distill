@@ -1,0 +1,21 @@
+[05:35:04] budget: expected 40 min $0.66 · soft $0.73 · hard $0.89 (authorized $1.63)
+[05:35:05] NVIDIA L40S $0.99/h, stock High
+[05:35:06] precheck OK: 10 relay inputs, 2 local assets
+[05:35:07] created fsk7tz1rnx43xr at $0.99/h
+[05:35:07] watchdog detached — hard 54 min = $0.89
+[05:36:12]   starting (60s) — $0.02
+[05:36:46] TCP 22 at 64.247.206.217:15797 after 1.7 min
+[05:36:49] draw 1: ssh reachable — $0.03
+[05:37:22] draw 1: image identity runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@580.159.03
+[05:37:22] draw 1: running setup
+[05:43:46] draw 1: setup complete — $0.14
+[05:43:52] driver detached, pid 6044, confirmed by descriptor_probe — $0.14
+[05:45:04]   2026-08-20T05:43:50Z MARKER:MEASUREMENT_START — $0.16
+[05:46:20]   2026-08-20T05:46:15Z MARKER:ALL_DONE — $0.18
+[05:46:20] polling ended: ALL_DONE — $0.18
+[05:47:15]   manifest rc=0
+4 file(s) across 2 class(es) -> /workspace/manifest.json
+  final_required: 4 · mutable_snapshot: 0 · final_streams_quiescent: True
+[05:47:31] teardown gate: allowed=True failed=None
+[05:47:31] deleting pod (gate passed)
+[05:47:42] pod deleted — 12.6 min, $0.21; provider confirms gone: True

@@ -4886,3 +4886,91 @@ failure. Grant and authorization spent, not reusable. Cumulative **$206.2664** o
 $219.00, remaining **$12.7336**. **No measurement attempt 3 and no Phase-A attempt
 11 is prepared, granted or implied.** Evidence:
 [`autoinit_measurement_attempt2/`](autoinit_measurement_attempt2/).
+
+## 2026-08-20 — The causal-depth port reaches E8a's throughput: 12.07/min measured
+
+**Context.** Attempt 10 spent **$11.43** discovering that
+`depth.causal_kl_greedy_v1` scored on the host: 260 evaluations × 67 items of
+full-vocabulary softmax/KL on a CPU, with the paid L40S at 0–1% for 10 h 47 m and
+no expansion finished. The repair moved the reduction back to the accelerator
+where E8a always kept it, and CPU equivalence was proved at $0. What a CPU could
+not answer was whether the repaired port reaches the ancestor's **throughput** on
+real hardware, what the real peak VRAM is, and which way the production reference
+cache decides at the frozen mixture.
+
+Three bounded L40S measurements were authorized to answer that, one at a time.
+Attempts 1 and 2 died in infrastructure — a hidden setup contract ($0.0700) and
+an entrypoint no $0 path had ever executed ($0.1834) — and each bought a
+structural closure. **Attempt 3 ran: $0.2077, 12.59 min, `ALL_DONE`.**
+
+**Result — the frozen cost model was right.**
+
+| | measured | anchor |
+| --- | ---: | ---: |
+| weighted evaluations/min | **12.07** | 12.0 |
+| 260-evaluation schedule | **21.53 min** | 21.7 min |
+
+**+0.6% against an anchor set by E8a a month earlier.** The port is not
+approximately as fast as its ancestor; it is the same speed. Attempt 10's host
+path needed ≥ 647 min for *one* expansion and never finished — **≥ 30× slower** —
+so that $11.43 was a placement bug, not an intrinsic cost, and the pricing built
+on 12.0/min never needed revising.
+
+**Backend equality is exact, not approximate.** Max *and* mean per-item KL delta
+are **0.0** at both `|skip|=1` and `|skip|=8`. Not "within tolerance" —
+identically zero, on one accelerator, per item.
+
+The aggregated scores differ by 0.0228 and 0.0340. That is the **declared**
+aggregation difference — E8a merges raw sums per subtype and normalizes once
+(position-weighted); the operator normalizes per item and takes an unweighted
+mean — predicted at ~0.027 from the CPU work and observed at 0.023–0.034. It is
+~300× the 8.195e-05 decision margin, which is precisely why the comparison
+contract is per-item. Had the contract compared aggregates, this run would have
+reported a false disagreement and stopped.
+
+**The flat extrapolation is wrong by 6.7%, in the direction that matters.**
+Per-evaluation cost falls monotonically with cardinality — 5.251 s at `|skip|=1`
+down to 4.635 s at `|skip|=8`, because skipping more layers is less work — while
+the real schedule spends most of its 260 evaluations at *low* cardinality
+(weights 36, 35, … 29). Pricing from cardinality 8 alone gives 20.08 min against
+the true 21.53. The artifact carries that figure under the key
+`flat_cardinality_8_minutes_WRONG`, which is the point: a number that would
+otherwise look like a reasonable estimate is labelled at the source.
+
+**VRAM and the cache decision.** Production peak **26.82 GiB** on a 44.39 GiB
+L40S, comparison-path peak 10.45 GiB, kept separate — the dual-cache repair holds
+and neither peak carries two ~16.9 GiB caches. The production `_ReferenceLogits`
+policy **caches** at the frozen mixture: 16.913 GiB estimated against 36.42 GiB
+available at budget fraction 0.66, headroom read from `cuda.mem_get_info`, no
+fallback. `MEASUREMENT_FALLBACK` was never approached and the priced basis stands.
+
+**Two earlier fixes are confirmed on hardware.** GPU utilization: mean 98.3%,
+median 98%, min 94, max 100 over 221 samples, with **zero** samples below 10% —
+against attempt 10's 0–1% for eleven hours. And the cgroup correction:
+`visible_cpus: 128`, `torch_threads_before: 128`, `torch_threads_after: 13`,
+source `cgroup.v2`. The container advertised CPUs it did not have, and the driver
+corrected for it rather than oversubscribing a 13-vCPU grant with 192 threads.
+
+**What the three attempts cost, and bought.** $0.4611 total. Attempt 1 bought a
+machine-independent setup contract derived from the frozen-asset verifier;
+attempt 2 bought an executable entrypoint seam, which then found two further
+defects at $0 before this run — a report field that would have carried 734,042
+characters of serialized mixture, and a $0 test one broken guard away from
+loading a 7.6 GB teacher. Attempt 3 spent $0.2077 and answered every question it
+was authorized to ask, on the first host draw, with setup passing in 6.4 min and
+the driver finishing in 2 min 25 s.
+
+**Decision: nothing is decided here.** These values are **inputs to a repricing
+and a separate cumulative-budget decision**, and they authorize nothing. Whatever
+the measurement shows, $12.5259 remains against a $23.0484 per-launch Phase-A
+ceiling, so Phase A needs its own budget decision on its own merits. **No
+Phase-A attempt 11 is prepared, granted, funded or implied.**
+
+**Revisit when** the maintainer reprices from 21.53 min / 26.82 GiB. The
+measurement's own numbers are now the input; the frozen 12.0/min anchor is
+corroborated rather than replaced.
+
+**Disposition.** Attempt 3 recorded consumed and COMPLETE. Grant and
+authorization spent, not reusable. Cumulative **$206.4741** of $219.00, remaining
+**$12.5259**. Evidence:
+[`autoinit_measurement_attempt3/`](autoinit_measurement_attempt3/).

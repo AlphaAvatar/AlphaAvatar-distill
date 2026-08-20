@@ -278,10 +278,51 @@ $2.30   RAISED 2026-08-14 with maintainer approval, after attempt 1 spent
 ```
 authorized cumulative cap                                    $219.00
     RAISED AND APPROVED 2026-08-17. See the caps list above.
-actual cumulative spend                                      $206.2664
+actual cumulative spend                                      $206.4741
     = $194.0530 + $0.1900 attempt 8 + $0.3400 attempt 9
       + $11.4300 attempt 10 + $0.0700 measurement attempt 1
-      + $0.1834 measurement attempt 2.
+      + $0.1834 measurement attempt 2 + $0.2077 measurement attempt 3.
+Bounded measurement attempt 3 (L40S, 12.6 min) **COMPLETE**    $  0.2077
+    AUTHORIZED 2026-08-20 as autoinit.measurement.2026-08-20T0512Z
+    against logs/autoinit_measurement_grant3.json (sha256 2124eaef0fc5).
+    A SpendAuthorization: phase_a_authorized FALSE by type. NOT a
+    Phase-A attempt; hard ceiling $1.6294, plan's own hard stop
+    $0.8910, of which $0.2077 was spent. ALL_DONE, passed=true,
+    manifest rc=0, teardown on the NORMAL gate, pod fsk7tz1rnx43xr
+    deleted with provider confirmation. No launcher error.
+    THE MEASUREMENT RAN AND ANSWERED EVERY QUESTION IT WAS SET.
+      rate            12.07 weighted evaluations/min against E8a's
+                      frozen 12.0/min anchor -- +0.6%. The 260-eval
+                      schedule prices at 21.53 min vs E8a's 21.7.
+                      Attempt 10's host path needed >= 647 min for ONE
+                      expansion and never finished: >= 30x slower.
+      backend         max AND mean per-item KL delta EXACTLY 0.0 at
+                      both |skip|=1 and |skip|=8. Not below a
+                      threshold -- identically zero.
+      aggregation     0.0228 and 0.0340 apart, which is the DECLARED
+                      position-weighted vs unweighted-mean difference
+                      (predicted ~0.027), not drift. It is ~300x the
+                      8.195e-05 decision margin, which is exactly why
+                      the contract compares per item.
+      VRAM            production peak 26.82 GiB (the Phase-A number),
+                      comparison peak 10.45 GiB, on a 44.39 GiB L40S:
+                      17.57 GiB headroom. The dual-cache repair holds.
+      cache           CACHED at the frozen mixture. 16.913 GiB estimate
+                      against 36.42 GiB available at fraction 0.66,
+                      headroom read from cuda.mem_get_info. No
+                      fallback; the priced basis stands.
+      GPU             mean 98.3%, median 98%, min 94, max 100 over 221
+                      nvidia-smi samples. ZERO samples below 10%.
+                      Attempt 10 sat at 0-1% for 11 hours. The .cpu()
+                      diagnosis is confirmed on hardware.
+      cgroup          visible_cpus 128, torch threads 128 -> 13 from
+                      cgroup.v2. The container reported CPUs it did
+                      not have and the driver corrected for it.
+    THESE VALUES AUTHORIZE NOTHING. They are inputs to a repricing and
+    a SEPARATE cumulative-budget decision. No Phase-A attempt 11 is
+    prepared, granted, funded or implied.
+    AUTHORIZATION AND GRANT CONSUMED: one launch, spent, not reusable.
+    Evidence: logs/autoinit_measurement_attempt3/
 Bounded measurement attempt 2 (L40S, 11.1 min) ENTRYPOINT      $  0.1834
     AUTHORIZED 2026-08-19 as autoinit.measurement.2026-08-19T1738Z
     against logs/autoinit_measurement_grant2.json (sha256 82f5104d49e4).
@@ -466,8 +507,8 @@ Phase A attempt 8 (L40S, 11.28 min) SETUP TEST GATE FAILED   $  0.1900
     one launch and is SPENT. No retry was attempted and no attempt 9
     is authorized, funded, prepared or implied.
     Evidence: logs/autoinit_phase_a_attempt8/
-unused authorization remaining                               $ 12.7336
-    = $219.00 - $206.2664. NOT enough for another full Phase-A attempt
+unused authorization remaining                               $ 12.5259
+    = $219.00 - $206.4741. NOT enough for another full Phase-A attempt
     at the $23.0484 per-launch ceiling. A retry needs a separate
     budget/cap decision after the runtime fix is reviewed.
     UNUSED BALANCE IS NOT AUTHORIZATION. Nothing below is a standing

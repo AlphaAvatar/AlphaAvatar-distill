@@ -90,6 +90,7 @@ Per-run directories. Each holds what a session actually produced.
 | `autoinit_phase_a_attempt9/` | attempt 9 — **Stage 0 passed and attested**, Stage 1 failed on device placement, $0.34. Carries the recovered `stage1_traceback.log` and the Stage-0 attestation |
 | `autoinit_measurement_attempt1/` | the bounded measurement's first launch — **failed closed at the frozen-asset gate**, $0.07, no measurement ran. Its grant and authorization are consumed |
 | `autoinit_phase_a_attempt10/` | attempt 10 — **incomplete, operator runtime-cost failure**, $11.43. Stage 0 passed; `depth.causal_kl_greedy_v1` ran 10 h 47 m without finishing, GPU idle. Carries `search_states.jsonl` (2 states, specs only — weights gone with the pod) |
+| `autoinit_measurement_attempt3/` | the bounded measurement's third launch — **COMPLETE**, $0.2077, `ALL_DONE`. Carries `result.json` (the reviewed artifact), the driver log with all 24 timings, and the artifact manifest. Its grant and authorization are consumed |
 | `autoinit_measurement_attempt2/` | the bounded measurement's second launch — **setup passed end to end (`SETUP_RC=0`); the driver died in its entrypoint's first repository import**, $0.1834, no measurement ran. Carries the driver traceback. Its grant and authorization are consumed |
 | `autoinit_device_canary_attempt1/`, `autoinit_device_canary_attempt2/` | the two terminated canary sessions |
 | `e7_canary/`, `e7_canary_rerun/` | the control-plane canary runs |
@@ -102,7 +103,7 @@ Grant documents — the one-use maintainer decision an authorization is issued
 `autoinit_phase_a_attempt10_grant.json`,
 `autoinit_measurement_grant.json` (consumed),
 `autoinit_measurement_grant2.json` (consumed),
-`autoinit_measurement_grant3.json`. The issuer requires one, refuses a grant
+`autoinit_measurement_grant3.json` (consumed). The issuer requires one, refuses a grant
 that asserts an identity it did not compute, and hashes it into the artifact.
 
 Consumed authorizations — kept because a spent grant is the record of what was
