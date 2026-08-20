@@ -1,0 +1,11 @@
+device cuda; loading packed token ladder from artifacts/stage3/ladder_uniform_probe ...
+loading teacher Qwen/Qwen3-4B-Thinking-2507 ...
+
+Loading weights:   0%|          | 0/398 [00:00<?, ?it/s]
+Loading weights: 100%|██████████| 398/398 [00:00<00:00, 5239.05it/s]
+Traceback (most recent call last):
+  File "/workspace/aad/scripts/training/train_stage3.py", line 331, in <module>
+    main()
+  File "/workspace/aad/scripts/training/train_stage3.py", line 173, in main
+    raise ValueError("teacher and student tokenizers differ; refusing to train")
+ValueError: teacher and student tokenizers differ; refusing to train

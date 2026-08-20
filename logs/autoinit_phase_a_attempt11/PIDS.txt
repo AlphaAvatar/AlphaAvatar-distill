@@ -1,0 +1,9 @@
+# Phase-A Attempt 11 - 2026-08-20. setsid re-parents, so the pid the starting
+# shell records is its own, not the launcher's. These are confirmed by argv,
+# out of band, and are what to kill by if that is ever needed.
+launcher 1933014
+poller   1933015
+watchdog 1933097
+pod      y1wmjhemi50jkw
+session  ac3c895f6d80291a1007ddada84f2bf7cde7abe3
+auth     autoinit.phase_a.2026-08-20T0940Z

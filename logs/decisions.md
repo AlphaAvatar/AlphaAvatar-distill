@@ -5050,3 +5050,103 @@ science are untouched.
 15 min); pod simulator **1931 passed / 22 skipped** with the artifact tree
 restored exactly (1167 entries, identical listing hash, hide directory empty);
 frozen-asset verifier passed and was not weakened or rescoped.
+
+## 2026-08-20 — Phase-A attempt 11: the search completed, and Stage 2 refused a one-token tokenizer
+
+**Context.** Attempt 11 launched under the $231.00 cap raise, against reviewed
+implementation `16e382f`. It cost **$3.2101** in 194.5 min and reached Stage 2.
+
+**Stage 0 and Stage 1 PASSED.** This is the first time the AutoInit beam search
+has run to completion: 43 states over 4 levels, 7 complete leaves, 18 pruned,
+five leaves selected at 596,049,920 parameters each, in 180.3 min.
+
+**The scientific finding: operator ordering carries signal.** Each selected leaf
+is a distinct four-operator composition, and the existing single-shot recipe
+`COMPOSITE_STAGE1(calib.domain_balanced@v1)` lands on **Pareto front 4 and is not
+selected** — four search-discovered orderings dominate it on equal-domain mean
+KL, worst-domain KL and critical-token KL. That is exactly the question Phase A
+was built to ask, and it now has a first answer. The canonical control was
+injected and verified against its frozen hash.
+
+**The leaf weights did not come home**, by design: `finalists_to_fetch` pulls
+finalists after Stage-5 selection, which never ran. The record survives — the
+search result, the reduced state journal, and the 25 MB full journal out of tree
+— but the five checkpoints died with the pod and cost ~180 min of search to
+regenerate. Worth revisiting: a search that completes but whose consumer stage
+fails currently discards everything the search produced.
+
+**The reference cache fell back all four times, and that is not a defect.**
+
+```
+16.9 GiB does not fit in 66% of 20.3 GiB free   ->  recompute per candidate
+```
+
+Measurement Attempt 3 saw **36.42 GiB** free standalone; inside the search only
+**20.3 GiB** is free, because the beam holds the parent teacher and candidate
+state. Four causal-depth invocations ran, each a full 260 evaluations, at
+6.96 / 9.63 / 7.72 / 10.79 eval/min against the standalone 12.07 — 122.1 min,
+**68% of the whole search**.
+
+The measurement was not wrong; it measured a different memory regime. The honest
+conclusion is that **the cached path may not be reachable inside the search at
+this teacher size at all**, and the fallback is the operating point rather than
+the contingency. That does not change the frozen science — the numbers are
+identical by construction — but it does mean any future pricing should treat the
+fallback as the expected path, not the risk.
+
+**The deadline fix was load-bearing by 17 seconds.** Stage 1 took 180.283 min
+against the 180.0000 base bound the search would have been killed at before
+`16e382f`. The alignment's own justification predicted the reference-cache
+fallback as the case that would need the reserve; the fallback engaged on the
+very next run, four times out of four, and the search finished 0.283 min past the
+old bound. Had that $0 change not been made, this run would have produced no
+result and the finding above would still be unknown.
+
+**Stage 2 failed closed, and the guard was right.**
+
+```
+train_stage3.py:173  ValueError: teacher and student tokenizers differ
+```
+
+Diagnosed and **reproduced at $0**:
+
+1. `Qwen3Adapter.save()` calls `model.save_pretrained(path)`, which writes
+   weights, `config.json` and `generation_config.json` and **no tokenizer
+   files**. This is correct for the search, which consumes pre-tokenized
+   calibration items and never needs a tokenizer.
+2. Stage 2 points a probe's `student_path` at that leaf directory.
+3. `AutoTokenizer.from_pretrained(leaf_dir)` **does not raise**. On a directory
+   holding only `config.json` it returns a tokenizer with a **one-token
+   vocabulary**, hash `42d8c56b2d86cf7b…` against the teacher's
+   `7781771acc3798ee…`.
+
+The equality guard caught it. Without that guard the probe would have trained
+against a one-token vocabulary and produced numbers that looked like results.
+
+The canonical init's own tokenizer is **not** implicated: it hashes identically
+to the teacher's, 151,669 tokens, zero token or id differences. What is missing
+is any step that carries those files into a *searched* leaf.
+
+**This is the `control_sb` class of 2026-08-16 in a new place.** Every leaf passed
+`materialize → reload → hash → validate` and reached `MEASURED`; every identity
+gate the search owns was green. None of them asks whether a downstream trainer
+can load a tokenizer, because the gates check what the **producer** needs. The
+generalizable rule is the one already written down and now paid for twice: when a
+checkpoint crosses a stage boundary, the gate belongs to the **consumer's**
+requirements, not the producer's.
+
+**Decision: none taken here.** The failure is recorded and the run stopped for
+review, per the grant. Two questions are owed to the maintainer:
+
+1. where the tokenizer contract belongs — the producer (`save()` copies the
+   files), the consumer (`train_stage3` refuses a directory with no tokenizer
+   files rather than accepting a 1-token fallback), or both. A silent 1-token
+   vocabulary from `AutoTokenizer` is a trap independent of this project and
+   arguably deserves refusing at the consumer whatever the producer does;
+2. budget. $21.3158 remains against a $23.0484 per-launch ceiling — **$1.7326
+   short** of another full attempt. The cap raise funded one attempt, it has run,
+   and the approval says it "does not authorize any subsequent attempt".
+
+**Disposition.** Consumed; Stage 1 passed, Stage 2 fail-closed stop. Cumulative
+**$209.6842** of $231.00. No Attempt 12 is prepared, granted, funded or implied.
+Evidence: [`autoinit_phase_a_attempt11/`](autoinit_phase_a_attempt11/).

@@ -294,10 +294,63 @@ authorized cumulative cap                                    $231.00
     hard ceiling, does not authorize any subsequent attempt, and does
     not authorize spend outside the next explicitly approved session.
     See the caps list above.
-actual cumulative spend                                      $206.4741
+actual cumulative spend                                      $209.6842
     = $194.0530 + $0.1900 attempt 8 + $0.3400 attempt 9
       + $11.4300 attempt 10 + $0.0700 measurement attempt 1
-      + $0.1834 measurement attempt 2 + $0.2077 measurement attempt 3.
+      + $0.1834 measurement attempt 2 + $0.2077 measurement attempt 3
+      + $3.2101 Phase-A attempt 11.
+Phase A attempt 11 (L40S, 194.6 min) STAGE 1 PASSED             $  3.2101
+    AUTHORIZED 2026-08-20 as autoinit.phase_a.2026-08-20T0940Z
+    against logs/autoinit_phase_a_attempt11_grant.json (sha256
+    6a6251f7a534). Ceiling $23.0484, of which $3.2101 was spent.
+    THE BEAM SEARCH RAN TO COMPLETION FOR THE FIRST TIME.
+      stage 0   PASSED, attested, 2.0 min.
+      stage 1   PASSED, 180.3 min. 43 states, 4 levels, 7 complete
+                leaves, 18 pruned. Five leaves selected, each
+                596,049,920 parameters, each a distinct four-operator
+                composition. Control injected and frozen-hash verified.
+                THE EXISTING COMPOSITE_STAGE1 RECIPE LANDS ON FRONT 4
+                AND IS NOT SELECTED -- four search-discovered orderings
+                dominate it. First evidence that operator ORDERING
+                carries signal, which is the question Phase A exists
+                to ask.
+      stage 2   FAILED CLOSED on the first rung-1 probe:
+                "teacher and student tokenizers differ; refusing to
+                train". Diagnosed and REPRODUCED at $0:
+                Qwen3Adapter.save() calls save_pretrained(), which
+                writes weights and config and NO tokenizer files;
+                AutoTokenizer.from_pretrained() on such a directory
+                does NOT raise -- it returns a ONE-TOKEN vocabulary.
+                The guard caught it. Without the guard the probe would
+                have trained against a 1-token tokenizer and produced
+                numbers. The canonical init's own tokenizer is fine and
+                hashes identically to the teacher's; what is missing is
+                any step carrying those files into a SEARCHED leaf.
+                The control_sb class again (2026-08-16): identity gates
+                pass while the checkpoint cannot be used, because the
+                gates check what the PRODUCER needs.
+      stages 3-5  not reached.
+    THE REFERENCE CACHE FELL BACK ALL FOUR TIMES. 16.9 GiB does not fit
+    in 66% of the 20.3 GiB free INSIDE the search; the measurement saw
+    36.42 GiB free standalone. Four causal-depth invocations, each a
+    full 260 evals: 37.3 / 27.0 / 33.7 / 24.1 min = 122.1 min, 68% of
+    the search, at 6.96-10.79 eval/min against the standalone 12.07.
+    The measurement was not wrong; it measured a different memory
+    regime, and the cached path may never be reachable inside the
+    search at this teacher size.
+    THE DEADLINE FIX WAS LOAD-BEARING BY 17 SECONDS. Stage 1 took
+    180.283 min against the old 180.0000 base bound it would have been
+    killed at, and 363.9841 as derived in 16e382f. That commit is the
+    only reason this search produced a result.
+    Pod deleted by the launcher, provider confirms gone at 194.5 min
+    against a 1397-min bound. manifest rc=0, 13 files, 7 classes.
+    LEAF WEIGHTS ARE GONE: finalists are fetched after stage-5
+    selection, which never ran, so the five checkpoints died with the
+    pod. The RECORD survives; regenerating the weights costs another
+    ~180 min of search.
+    AUTHORIZATION AND GRANT CONSUMED: one launch, spent, not reusable.
+    NO ATTEMPT 12 IS PREPARED, GRANTED, FUNDED OR IMPLIED.
+    Evidence: logs/autoinit_phase_a_attempt11/
 Bounded measurement attempt 3 (L40S, 12.6 min) **COMPLETE**    $  0.2077
     AUTHORIZED 2026-08-20 as autoinit.measurement.2026-08-20T0512Z
     against logs/autoinit_measurement_grant3.json (sha256 2124eaef0fc5).
@@ -523,11 +576,12 @@ Phase A attempt 8 (L40S, 11.28 min) SETUP TEST GATE FAILED   $  0.1900
     one launch and is SPENT. No retry was attempted and no attempt 9
     is authorized, funded, prepared or implied.
     Evidence: logs/autoinit_phase_a_attempt8/
-unused authorization remaining                               $ 24.5259
-    = $231.00 - $206.4741. This IS enough for one full Phase-A attempt
-    at the $23.0484 per-launch ceiling, with $1.4775 of margin -- which
-    is what the 2026-08-20 raise was granted for, and the ONLY thing it
-    was granted for.
+unused authorization remaining                               $ 21.3158
+    = $231.00 - $209.6842. This is NOT enough for another full Phase-A
+    attempt at the $23.0484 per-launch ceiling -- it is $1.7326 short.
+    The 2026-08-20 raise funded ONE attempt, that attempt has run, and
+    the maintainer's approval says in terms that it "does not authorize
+    any subsequent attempt".
     UNUSED BALANCE IS STILL NOT AUTHORIZATION. The cap makes Attempt 11
     affordable; the GRANT and the AUTHORIZATION are what make it
     permitted, and both are one-use. After Attempt 11 the remaining

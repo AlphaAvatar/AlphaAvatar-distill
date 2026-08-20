@@ -1,4 +1,4 @@
-**Updated:** 2026-08-20 · branch `main` · after the Stage-1 deadline/pricing alignment
+**Updated:** 2026-08-20 · branch `main` · after Phase-A attempt 11 — **Stage 1 PASSED**
 
 # Current state
 
@@ -24,16 +24,16 @@ selection result.**
 ## Budget
 
 ```
-cumulative spend   $206.4741
+cumulative spend   $209.6842
 approved cap       $231.00    RAISED AND APPROVED 2026-08-20
-remaining          $24.5259   affordability, NOT permission
+remaining          $21.3158   $1.7326 SHORT of one more full attempt
 
-**The cap was raised from $219.00 to $231.00 on 2026-08-20**, as a *cumulative
-project ceiling only*: it does not change the $23.0484 per-launch hard ceiling,
-does not authorize any subsequent attempt, and does not authorize spend outside
-the next explicitly approved session. One full hard-ceiling attempt reaches
-$229.5225, leaving $1.4775 of margin. It funds **one** Phase-A Attempt 11 and
-nothing else — Attempt 12 is not funded, authorized, prepared or implied.
+**The cap was raised from $219.00 to $231.00 on 2026-08-20** to fund exactly one
+Phase-A attempt. That attempt has run and cost **$3.2101** — far under its
+$23.0484 ceiling, because it stopped at Stage 2 rather than training nine probes.
+**$21.3158 remains, which is $1.7326 short of another full-ceiling attempt**, and
+the approval says in terms that it "does not authorize any subsequent attempt".
+Attempt 12 is not funded, authorized, prepared or implied.
 ```
 
 Every authorization issued is **consumed** — each one's lineage gate refuses the
@@ -149,40 +149,78 @@ instead of the cause, and it was paid for twice. Full diagnoses in
 
 ## Next starting point
 
-**Phase-A Attempt 11 is granted and being prepared.** The maintainer's GO of
-2026-08-20 covers exactly one launch through the frozen Stage 0-5 protocol,
-against reviewed implementation `16e382f`, following the approved cap raise to
-$231.00. Grant:
-[`autoinit_phase_a_attempt11_grant.json`](autoinit_phase_a_attempt11_grant.json).
+**Phase-A attempt 11 ran: Stage 0 and Stage 1 PASSED, Stage 2 failed closed.**
+$3.2101, 194.5 min, pod deleted with provider confirmation. Grant and
+authorization **consumed**. Full record:
+[`autoinit_phase_a_attempt11/`](autoinit_phase_a_attempt11/).
 
-**At this commit nothing is authorized and nothing is launchable**: the
-authorization does not exist yet. It is issued against this tree in the next
-commit, which the lineage gate requires to differ from this one in nothing but
-the authorization artifact. That is why this snapshot still reads `authorized:
-false` — it describes the pre-authorization base, which is what a pod checks out.
-
-### What attempt 10 left open, and how it was closed
-
-| blocker | closure |
-| --- | --- |
-| causal-depth scored on the host: $11.43, GPU at 0–1%, no expansion finished in 10 h 47 m | reduction returned to the accelerator, CPU equivalence proved at $0, then **measured**: 12.07 eval/min vs the 12.0 anchor, per-item KL delta **0.0**, GPU 98.3% |
-| the runtime deadline was the 180-min base while the priced envelope is 363.9841 min | deadline now **derived** from the same `BudgetPlan` as the dollar figures; mutation-verified 7 ways; pricing and identities unchanged |
-
-The cost model is **measured-confirmed, not replaced** — the causal-depth
-operator is not repriced, and beam width, search space, operators, calibration,
-seeds and the recovery/selection rules are untouched.
-
-### Pricing and bounds for this launch
+### The first completed AutoInit search
 
 ```
-expected            $17.8933      soft stop    $22.7183
-priced hard         $23.0483      ceiling      $23.0484
-stage-1 deadline    363.9841 min  = 180.0000 + 36.2158 + 147.7683
+43 states · 4 levels · 7 complete leaves · 18 pruned · 180.3 min
+5 leaves selected, each 596,049,920 parameters
 ```
 
-Worst case takes the project to $229.5225 of $231.00. **The cap raise funds this
-attempt and nothing after it**: Attempt 12 is not funded, authorized, prepared or
-implied, and must not be inferred from whatever headroom remains.
+Each leaf is a distinct four-operator composition. **The existing
+`COMPOSITE_STAGE1` recipe lands on Pareto front 4 and is not selected** — four
+search-discovered orderings dominate it. That is the first evidence this project
+has that operator *ordering* carries signal, which is the question Phase A was
+built to ask. The canonical control was injected and verified against its frozen
+hash.
+
+**The leaf weights are gone.** Finalists are fetched after Stage-5 selection,
+which never ran, so the five checkpoints died with the pod. The *record* survives
+— `search_result.json`, `search_states_reduced.jsonl`, and the 25 MB full journal
+out of tree — but regenerating the weights costs another ~180 min of search.
+
+### Two findings from the run itself
+
+**The reference cache fell back all four times.** 16.9 GiB does not fit in 66% of
+the **20.3 GiB** free *inside* the search; Measurement Attempt 3 saw 36.42 GiB
+free standalone. Four causal-depth invocations ran at 6.96–10.79 eval/min against
+the standalone 12.07, taking 122.1 min — **68% of the whole search**. The
+measurement was not wrong; it measured a different memory regime, and the cached
+path may simply not be reachable inside the search at this teacher size.
+
+**The deadline fix was load-bearing by 17 seconds.** Stage 1 took 180.283 min
+against the 180.0 bound it would have been killed at before `16e382f`. That
+commit is the only reason this search produced a result.
+
+### The open defect, diagnosed at $0 and NOT fixed
+
+```
+train_stage3.py:173  ValueError: teacher and student tokenizers differ
+```
+
+`Qwen3Adapter.save()` calls `save_pretrained()`, which writes weights and config
+and **no tokenizer files** — correct for the search, which consumes pre-tokenized
+items. Stage 2 then points a probe at that directory, and
+`AutoTokenizer.from_pretrained()` **does not raise**: it returns a **one-token
+vocabulary**. The teacher/student equality guard caught it; without that guard the
+probe would have trained against a 1-token tokenizer and produced numbers.
+
+Reproduced exactly at $0. The canonical init's own tokenizer is fine — identical
+hash to the teacher, 151,669 tokens, zero differences. What is missing is any
+step that carries those files into a *searched* leaf.
+
+**This is the `control_sb` class again**: identity gates all pass while the
+checkpoint cannot be used, because the gates check what the producer needs rather
+than what the consumer needs. Every leaf passed `materialize → reload → hash →
+validate` and reached `MEASURED`; none of those asks whether a trainer can load a
+tokenizer.
+
+**No fix is applied.** The run stopped for review, as the grant requires.
+
+### Two decisions owed, and nothing is prepared
+
+1. **How tokenizer files reach a searched leaf** — and whether
+   `AutoTokenizer`'s silent 1-token fallback should be refused at the producer,
+   the consumer, or both.
+2. **Budget.** $21.3158 remains, **$1.7326 short** of another full-ceiling
+   attempt. The cap raise funded one attempt, it has run, and the approval says
+   it "does not authorize any subsequent attempt".
+
+**No Attempt 12 is prepared, granted, funded or implied.**
 
 **Process rule, standing:** "my intended next decision is GO" is not executable
 permission, and a recommendation is not an approval.
