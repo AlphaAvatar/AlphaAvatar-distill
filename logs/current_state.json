@@ -69,10 +69,10 @@
     "utc": "2026-08-21T07:00:00Z",
     "after": "the selected-leaf off-pod transfer closure and the derived-cache storage cleanup",
     "full_suite": "2013 passed, 11 skipped, 0 errors in 17:30",
-    "pod_simulator": "1972 passed, 22 skipped; artifact tree restored EXACTLY - listing hash c1726a62 before and after, hide directory empty",
+    "pod_simulator": "1972 passed, 22 skipped; artifact tree restored EXACTLY (c1726a62 before and after)",
     "frozen_asset_verifier": "passed, no problems; NOT weakened or rescoped",
     "capacity_gate": "PASS - 22.2 GiB free for 11.6 GiB of leaves and working room",
-    "mutation_verified": "8 ways on the transfer closure, including re-gating the fetch on stage 2; the runner-reporting hole is closed by asserting GATE_ORDER is a subset of the keys the runner reports",
+    "mutation_verified": "8 ways on the transfer closure; the runner-reporting hole is closed by asserting GATE_ORDER is a subset of the keys the runner reports",
     "scope": "CPU only; no checkpoint loaded, no metric measured, no GPU used"
   },
   "failed": [
@@ -115,7 +115,7 @@
     "the paid device-canary session path: STRATEGICALLY TERMINATED 2026-08-18. Two authorized sessions, $0.1240, zero canary runs; both died in the wrapper's inherited contracts. Its evidence and its generic lesson are kept; no further canary is prepared."
   ],
   "next_starting_point": {
-    "status": "Local storage cleared: 22.25 GiB free (was 7.61), from derived caches with no checkpoint deleted. The Phase-A capacity gate now passes. Nothing is running, billing, authorized or prepared.",
+    "status": "Storage cleared: 22.25 GiB free (was 7.61) from derived caches, no checkpoint deleted. The Phase-A capacity gate passes. Nothing is running or prepared.",
     "the_ask": "NOTHING is prepared. The next review is a direct GO/NO-GO for Phase-A Attempt 12, which still requires its own one-use grant and authorization.",
     "budget": "cap $234.00 approved, $209.6842 spent, $24.3158 remaining -- one full-ceiling attempt with $1.2674 margin and nothing after it",
     "process_rule": "'my intended next decision is GO' is not executable permission; a recommendation is not an approval"
@@ -155,7 +155,7 @@
     "how": "derived caches only: ~/.cache/uv 7.4181 + 3 teacher weight blobs 7.4924",
     "checkpoints_deleted": 0,
     "review_units_retained_gib": 23.09,
-    "retention_reason": "all 10 are local-only with no second copy and need paid GPU; e5 is additionally protected and unclassified",
+    "retention_reason": "all 10 are local-only, no second copy, paid GPU; e5 unclassified",
     "record": "logs/derived_cache_cleanup.json"
   }
 }
