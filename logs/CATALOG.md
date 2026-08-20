@@ -104,6 +104,7 @@ Grant documents — the one-use maintainer decision an authorization is issued
 `autoinit_phase_a_attempt9_grant.json`,
 `autoinit_phase_a_attempt10_grant.json`,
 `autoinit_phase_a_attempt11_grant.json` (consumed),
+`autoinit_phase_a_attempt12_grant.json`,
 `autoinit_measurement_grant.json` (consumed),
 `autoinit_measurement_grant2.json` (consumed),
 `autoinit_measurement_grant3.json` (consumed). The issuer requires one, refuses a grant

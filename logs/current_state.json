@@ -1,9 +1,9 @@
 {
   "schema": "aadistill.current_state/v2",
-  "generated_utc": "2026-08-21T06:00:00Z",
+  "generated_utc": "2026-08-21T08:00:00Z",
   "_contract": "The minimal machine-readable CURRENT snapshot: live facts only, no history, no per-attempt detail, no narrative. History lives in logs/decisions.md and the per-run directories; the human view is logs/STATE.md and the two must agree. Ownership: logs/CATALOG.md.",
-  "baseline_commit": "1e3e783e54f770511fec0b348dbe593194cef762",
-  "baseline_commit_meaning": "The LAST TESTED IMPLEMENTATION: the commit whose tree produced the latest_verification figures. It is deliberately NOT always the commit carrying this file -- when a paid launch is prepared, a grant/provenance commit and an authorization-only commit follow it and neither is separately tested. A reader must be able to tell which commit the suite numbers describe from which commit a pod checks out. Nothing checks this field; it is refreshed by hand whenever the verified tree moves.",
+  "baseline_commit": "f331e49bf304edca7dc311702c36668d544f0f9f",
+  "baseline_commit_meaning": "The LAST TESTED IMPLEMENTATION: the commit whose tree produced the latest_verification figures. Deliberately NOT the commit carrying this file -- when a paid launch is prepared, the grant/provenance commit and the authorization-only commit both follow it and neither is separately tested. A reader must be able to tell which commit the suite numbers describe from which commit a pod checks out. Nothing checks this field; it is refreshed by hand.",
   "running": {
     "paid_compute": false,
     "pods": 0,
@@ -24,9 +24,7 @@
     "remaining_is_not_permission": true,
     "ledger": "logs/BUDGET_LEDGER.md",
     "headroom_note": "$24.3158 is enough for ONE full-ceiling Phase-A attempt ($23.0484) with $1.2674 of margin, and nothing after it. The cap is only the project ceiling: the per-launch ceiling is unchanged and Attempt 12 still needs its own one-use grant and authorization.",
-    "cap_decision_pending": null,
-    "cap_raised_2026_08_20": "APPROVED $219.00 -> $231.00. A CUMULATIVE PROJECT CEILING ONLY: it does not change the $23.0484 per-launch hard ceiling, does not authorize any subsequent attempt, and does not authorize spend outside the next explicitly approved session.",
-    "cap_raised_2026_08_21": "APPROVED $231.00 -> $234.00. Project ceiling only; does not authorize an Attempt 13 and does not authorize an Attempt 12 launch."
+    "cap_history": "$219 -> $231 (2026-08-20) -> $234 (2026-08-21), each a project ceiling only. Detail: logs/BUDGET_LEDGER.md"
   },
   "frozen": {
     "science_plan_hash": "02be33b9a7a8e26bc8bfb75795351e8cdc9ffd441b47066cc81887cfc511b55c",
@@ -63,7 +61,7 @@
     "the Stage-1 device fixes, confirmed on CUDA by attempt 10's completed composite expansion",
     "the causal-depth runtime repair: scoring on the accelerator per E8a, cgroup-aware CPU budget, a fail-closed in-expansion deadline",
     "the measurement job's entrypoint behind an executable seam, with a test per injection point",
-    "the Stage-1 runtime deadline derived from the priced envelope -- see stage1_runtime_deadline_minutes"
+    "the Stage-1 runtime deadline derived from the priced envelope (363.9841 min) -- see stage1_runtime_deadline_minutes"
   ],
   "latest_verification": {
     "utc": "2026-08-21T07:00:00Z",
@@ -72,7 +70,6 @@
     "pod_simulator": "1972 passed, 22 skipped; artifact tree restored EXACTLY (c1726a62 before and after)",
     "frozen_asset_verifier": "passed, no problems; NOT weakened or rescoped",
     "capacity_gate": "PASS - 22.2 GiB free for 11.6 GiB of leaves and working room",
-    "mutation_verified": "8 ways on the transfer closure; the runner-reporting hole is closed by asserting GATE_ORDER is a subset of the keys the runner reports",
     "scope": "CPU only; no checkpoint loaded, no metric measured, no GPU used"
   },
   "failed": [
@@ -115,9 +112,9 @@
     "the paid device-canary session path: STRATEGICALLY TERMINATED 2026-08-18. Two authorized sessions, $0.1240, zero canary runs; both died in the wrapper's inherited contracts. Its evidence and its generic lesson are kept; no further canary is prepared."
   ],
   "next_starting_point": {
-    "status": "Storage cleared: 22.25 GiB free (was 7.61) from derived caches, no checkpoint deleted. The Phase-A capacity gate passes. Nothing is running or prepared.",
-    "the_ask": "NOTHING is prepared. The next review is a direct GO/NO-GO for Phase-A Attempt 12, which still requires its own one-use grant and authorization.",
-    "budget": "cap $234.00 approved, $209.6842 spent, $24.3158 remaining -- one full-ceiling attempt with $1.2674 margin and nothing after it",
+    "status": "Phase-A Attempt 12 is GRANTED (logs/autoinit_phase_a_attempt12_grant.json, 2026-08-21) against tested implementation f331e49. At THIS commit nothing is authorized: the authorization is issued in the next commit, which differs from this base only in the authorization artifact.",
+    "the_ask": "ONE launch through the frozen Stage 0-5 protocol on a single L40S. Pricing unchanged: $17.8933 / $22.7183 / $23.0483, ceiling $23.0484. Stage-1 deadline 363.9841 min.",
+    "then": "report the stage-by-stage result, spend, scientific outputs, the off-pod status of the five leaves and provider-confirmed teardown, then STOP. Attempt 13 is not funded, authorized or implied.",
     "process_rule": "'my intended next decision is GO' is not executable permission; a recommendation is not an approval"
   },
   "read_order": [
@@ -152,10 +149,9 @@
     "free_gib": 22.25,
     "percent_used": 84.5,
     "reclaimed_gib": 14.9107,
-    "how": "derived caches only: ~/.cache/uv 7.4181 + 3 teacher weight blobs 7.4924",
     "checkpoints_deleted": 0,
     "review_units_retained_gib": 23.09,
-    "retention_reason": "all 10 are local-only, no second copy, paid GPU; e5 unclassified",
-    "record": "logs/derived_cache_cleanup.json"
+    "record": "logs/derived_cache_cleanup.json",
+    "summary": "14.9107 GiB reclaimed from derived caches, 0 checkpoints deleted; the 23.09 GiB review set is retained and closed"
   }
 }
