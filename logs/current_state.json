@@ -1,6 +1,6 @@
 {
   "schema": "aadistill.current_state/v2",
-  "generated_utc": "2026-08-20T06:05:00Z",
+  "generated_utc": "2026-08-20T09:20:00Z",
   "_contract": "The minimal machine-readable CURRENT snapshot. It owns live facts and nothing else: no history, no per-attempt detail, no narrative. History lives in logs/decisions.md and the per-run directories; the human view of THIS file is logs/STATE.md and the two must agree. README owns no live facts. Ownership rules: logs/CATALOG.md.",
   "baseline_commit": "1e3e783e54f770511fec0b348dbe593194cef762",
   "baseline_commit_meaning": "The LAST TESTED IMPLEMENTATION: the commit whose tree produced the latest_verification figures. It is deliberately NOT always the commit carrying this file -- when a paid launch is prepared, a grant/provenance commit and an authorization-only commit follow it and neither is separately tested. A reader must be able to tell which commit the suite numbers describe from which commit a pod checks out. Nothing checks this field; it is refreshed by hand whenever the verified tree moves.",
@@ -23,7 +23,8 @@
     "remaining_usd": 12.5259,
     "remaining_is_not_permission": true,
     "ledger": "logs/BUDGET_LEDGER.md",
-    "headroom_note": "$12.5259 is NOT enough for another full Phase-A attempt at the $23.0484 per-launch ceiling. Remaining headroom is not permission, and nothing is prepared."
+    "headroom_note": "$12.5259 is NOT enough for another full Phase-A attempt at the $23.0484 per-launch ceiling. Remaining headroom is not permission, and nothing is prepared.",
+    "cap_decision_pending": "RECOMMENDED and NOT APPROVED: raise the cumulative cap to $231.00 with the per-launch ceiling unchanged at $23.0484. $12.5259 remains, which is LESS than the $23.0484 per-launch ceiling, so Phase A is arithmetically blocked until a cap is approved in the imperative. Worst case for one more attempt: $229.5225."
   },
   "frozen": {
     "science_plan_hash": "02be33b9a7a8e26bc8bfb75795351e8cdc9ffd441b47066cc81887cfc511b55c",
@@ -48,6 +49,7 @@
     ]
   },
   "complete": [
+    "the bounded causal-depth runtime and backend measurement (attempt 3, $0.2077) -- see measured_causal_depth_runtime",
     "Stage 3 (both permanent controls, thresholds materialized)",
     "the Phase-A harness, stages 0-5 executing for real at $0",
     "the Stage-1 device audit (autoinit.stage1_device_contract@v1)",
@@ -56,16 +58,18 @@
     "the Stage-1 device fixes, confirmed on CUDA: attempt 10's composite expansion completed and wrote a state, so stream_projection's avg, the orthonormality eye and _head_rows all placed correctly",
     "the causal-depth runtime repair: scoring restored to the accelerator per E8a, cgroup-aware CPU budget, search_minutes as a fail-closed in-expansion deadline, bounded per-candidate progress",
     "the measurement job's entrypoint behind an executable seam: run_entrypoint() holds all orchestration, main() is parse+call, and each injection point has its own test -- which is how the calibration-path defect was found at $0",
-    "the bounded causal-depth runtime and backend measurement (attempt 3, $0.2077, ALL_DONE) -- see measured_causal_depth_runtime below"
+    "the Stage-1 runtime deadline derived from the priced envelope: 363.9841 min (base 180.0 + beam-6 36.2158 + fallback 147.7683) instead of the base alone, read off the same BudgetPlan that produces the dollar thresholds"
   ],
   "latest_verification": {
-    "utc": "2026-08-20T02:40:00Z",
-    "after": "moving the measurement entrypoint behind an executable seam and separating teardown truncation from a missing artifact",
-    "full_suite": "1958 passed, 11 skipped, 0 errors in 16:51",
-    "pod_simulator": "1918 passed, 22 skipped; artifact tree restored EXACTLY - 1167 entries, identical listing hash before and after",
+    "utc": "2026-08-20T09:20:00Z",
+    "after": "aligning the Stage-1 runtime deadline with the priced envelope",
+    "full_suite": "1972 passed, 11 skipped, 0 errors in 17:14",
+    "phase_a_stages1_5": "17 passed in 15:07 - a real stage 0->5 orchestration, now asserting the DERIVED deadline reaches the search",
+    "pod_simulator": "1931 passed, 22 skipped; artifact tree restored EXACTLY - 1167 entries, identical listing hash",
     "frozen_asset_verifier": "passed, no problems; NOT weakened or rescoped",
-    "scope": "CPU only; no checkpoint loaded, no metric measured, no GPU used",
-    "mutation_verified": "entrypoint seam 8 ways, teardown gate 3 ways; the seam's own injection points were its blind spot and now have their own tests. Detail: logs/decisions.md"
+    "mutation_verified": "7 ways: restoring the defect fails 7 tests, dropping either reserve fails 4, hard-coding the value fails 6",
+    "pricing_unchanged": "$17.8933 / $22.7183 / $23.0483, ceiling $23.0484 - exact",
+    "scope": "CPU only; no checkpoint loaded, no metric measured, no GPU used"
   },
   "failed": [
     {
@@ -88,27 +92,13 @@
       "where": "stage 1, third operator expansion",
       "cause": "depth.causal_kl_greedy_v1: 260x67 full-vocabulary softmax/KL on the CPU, unbounded and unpriced. NOT a scientific or Stage-1 selection result",
       "evidence": "logs/autoinit_phase_a_attempt10/"
-    },
-    {
-      "run": "measurement 1",
-      "usd": 0.07,
-      "where": "setup / frozen-asset gate",
-      "cause": "declared LOCAL_ASSETS = () while the shared setup verifies both frozen roots unconditionally; the canary retry's error",
-      "evidence": "logs/autoinit_measurement_attempt1/"
-    },
-    {
-      "run": "measurement 2",
-      "usd": 0.1834,
-      "where": "driver entrypoint, after SETUP_RC=0",
-      "cause": "main() imported as_operator_items from the wrong module. 22 tests covered this job and none called main(), so the whole production entrypoint was reachable only from a paid pod",
-      "evidence": "logs/autoinit_measurement_attempt2/"
     }
   ],
   "failure_pattern": "6/7/9 device placement; 8 a $0 path asserting dev-box state; 10 correct placement and numerics, unpriced runtime cost; measurement 1 a setup contract, 2 an entrypoint no $0 path ran",
   "canonical_infrastructure": [
-    "the session specification: one immutable SessionSpec per session, one runner, no inheritance and no module-global retargeting",
-    "the shared pod setup is manifest-driven on BOTH sides: it installs the local assets a session declares (SESSION_ASSETS) and stages the relay science inputs a session declares (SESSION_RELAY_INPUTS), and names no asset, relay path, destination or digest of its own",
-    "RelayInput carries source, destination, digest and mirror; dest=None means only 'the driver stages this', never 'the shell knows'",
+    "one immutable SessionSpec per session, one runner, no inheritance, no module-global retargeting",
+    "the shared pod setup is manifest-driven on BOTH sides: it installs and stages only what a session declares, and names no asset, relay path, destination or digest of its own",
+    "RelayInput carries source, destination, digest and mirror; dest=None means only 'the driver stages this'",
     "the Phase-A authorization schema carries no grant; the issuer requires one",
     "full tracebacks for unexpected in-process driver exceptions",
     "plan_session soft_stop_reserves, applied BEFORE the soft stop",
@@ -117,14 +107,15 @@
     "the layout test partitions its references: repo-relative paths must exist, declared host-local roots are checked where present and skipped where absent, and an undeclared absolute path still fails",
     "an active tombstone may not name a declared session staging or mirror destination - checked against the four SessionSpecs, touching no path, so every environment agrees",
     "checkpoint_tombstones.json owns the active-tombstone counts and bytes",
-    "autoinit.stage1_device_contract@v1 category 5 (added 2026-08-19): a fresh factory on the Stage-1 path either names a device derived from what it meets, or is host-only on purpose and must not be mechanically moved",
-    "placement is asserted by intercepting factory calls (tests/autoinit/factory_placement.py), the dual of the HostCacheTensor split - neither instrument can see the other's class",
-    "causal-depth scoring is device-resident, as E8a's always was; the reference cache probes the device it lives on and falls back to RECOMPUTE, never to the host",
-    "search_minutes is a real deadline (Deadline, runtime-only so it is never hashed) checked before each expansion and inside greedy_removal's candidate loop",
+    "autoinit.stage1_device_contract@v1, incl. category 5: a fresh factory on the Stage-1 path either names a device derived from what it meets, or is host-only on purpose",
+    "placement asserted by intercepting factory calls (tests/autoinit/factory_placement.py), the dual of the HostCacheTensor split",
+    "causal-depth scoring is device-resident; the reference cache falls back to RECOMPUTE, never to the host",
+    "the search deadline is real (runtime-only, never hashed) and is checked before each expansion and inside greedy_removal's candidate loop",
     "the driver holds torch to the cgroup CPU grant via apply_cpu_budget()",
-    "a session installs every local root verify_frozen_assets.py requires, derived from the verifier and compared against declarations (tests/pod/test_session_setup_contract.py)",
-    "a production entrypoint is a callable seam, not a main(): argument defaults, pinned identity, loading, resolution, the report, the stop conditions and the artifact write are one injectable function the $0 test executes",
-    "evaluate_teardown separates a truncated stream from an artifact that was never written: streams_at_risk carries the manifest's own evidence, and a caller supplying none keeps the strict fail-closed rule"
+    "a session installs every local root verify_frozen_assets.py requires, derived from the verifier and compared against declarations",
+    "a production entrypoint is a callable seam, not a main(): all orchestration is one injectable function the $0 test executes",
+    "evaluate_teardown separates a truncated stream from an artifact never written; a caller supplying no evidence keeps the strict rule",
+    "the Stage-1 runtime deadline is READ OFF the priced envelope (base + every soft-stop reserve), so the deadline cannot drift from the price and a new reserve extends it with no edit"
   ],
   "abandoned": [
     "recovery_search_v1 (INVALID before first use)",
@@ -134,10 +125,10 @@
     "the paid device-canary session path: STRATEGICALLY TERMINATED 2026-08-18. Two authorized sessions, $0.1240, zero canary runs; both died in the wrapper's inherited contracts. Its evidence and its generic lesson are kept; no further canary is prepared."
   ],
   "next_starting_point": {
-    "status": "Measurement Attempt 3 COMPLETE for $0.2077, ALL_DONE, pod deleted with provider confirmation. All three measurement grants and authorizations are consumed. Nothing is running, billing, authorized or prepared.",
-    "the_ask": "NOTHING. No Phase-A attempt 11 and no fourth measurement is prepared, granted, funded or implied. The next paid step needs an explicit maintainer GO of its own.",
-    "decision_owed_by_the_maintainer": "a repricing from the measured 21.53 min / 26.82 GiB, and a SEPARATE cumulative-budget decision: $12.5259 remains against a $23.0484 per-launch Phase-A ceiling, so Phase A needs its own budget decision whatever the measurement shows.",
-    "process_rule": "'my intended next decision is GO' is not executable permission; an explicit GO covers the workload named, not new paid-path infrastructure written to carry it"
+    "status": "The Stage-1 deadline/pricing alignment is done and verified at $0. Nothing is running, billing, authorized or prepared. All three measurement grants and authorizations are consumed.",
+    "the_ask": "NOTHING is prepared. Two maintainer decisions are owed, in order: (1) approve or reject the $231.00 cumulative cap; (2) then a direct GO / NO-GO for Phase-A Attempt 11, with no further canary, measurement or readiness phase.",
+    "if_go": "grant -> clean pre-auth base -> issue -> authorization-only commit differing in exactly one path -> bundle -> round-trip verify -> $0 gates -> one launch.",
+    "process_rule": "'my intended next decision is GO' is not executable permission; a recommendation is not an approval"
   },
   "read_order": [
     "logs/STATE.md \u2014 the human view of this file",
@@ -162,5 +153,6 @@
     "reference_cache_cached": true,
     "gpu_mean_utilization_pct": 98.3,
     "authorizes": "NOTHING. Inputs to a repricing and a separate budget decision."
-  }
+  },
+  "measurement_attempts_1_and_2": "$0.0700 setup contract (declared LOCAL_ASSETS = () while the shared setup verifies both frozen roots) and $0.1834 driver entrypoint (main() imported as_operator_items from the wrong module; no $0 test called main()). Both closed structurally and mutation-verified; attempt 3 then COMPLETED. Detail: logs/autoinit_measurement_attempt{1,2,3}/"
 }

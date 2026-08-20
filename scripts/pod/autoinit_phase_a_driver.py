@@ -451,10 +451,21 @@ class PhaseADriver:
             f"({budget['source']}, {budget['visible_cpus']} visible)")
         self.ev.setdefault("runtime", {})["cpu_budget"] = budget
 
+        # The DERIVED deadline, not the base allowance. `--search-minutes` is
+        # what stage 1 is expected to cost and is what `afford()` above checks;
+        # `--search-deadline-minutes` is what stage 1 is PAID for — the base plus
+        # both soft-stop reserves, computed by the launcher from the same
+        # BudgetPlan that produces the dollar thresholds.
+        #
+        # These were the same number until 2026-08-20, which meant a search that
+        # legitimately took the reference-cache fallback path — the risk the
+        # 147.7683-minute reserve was bought for — would have been killed at 180
+        # minutes with the reserve unspent, and the kill would have read as a
+        # failed search rather than a deadline disagreeing with its own price.
         found = run_phase_a_search(
             workdir=SEARCH_WORKDIR, state_eval=STATE_EVAL,
             top_n=self.plan.searched_leaves, device="cuda", repo_root=REPO,
-            search_minutes=self.a.search_minutes)
+            search_minutes=self.a.search_deadline_minutes)
         (AUDIT / "search_result.json").write_text(
             json.dumps(found.summary, indent=2, default=str) + "\n")
 
@@ -981,7 +992,15 @@ def main() -> int:
     ap.add_argument("--spent-usd", type=float, default=0.0)
     ap.add_argument("--soft-stop-usd", type=float, required=True)
     ap.add_argument("--authorized-usd", type=float, required=True)
-    ap.add_argument("--search-minutes", type=float, default=180.0)
+    # Both REQUIRED, with no defaults. The launcher is the single owner of
+    # both numbers; a default here would be a second copy of a pricing constant
+    # that could drift from the one that actually books the money.
+    ap.add_argument("--search-minutes", type=float, required=True,
+                    help="base search allowance; funds the affordability check")
+    ap.add_argument("--search-deadline-minutes", type=float, required=True,
+                    help="base allowance PLUS the stage-1 soft-stop reserves, "
+                         "derived by the launcher from the priced envelope; "
+                         "this is what actually bounds the search at runtime")
     ap.add_argument("--probe-train-minutes", type=float, default=62.0)
     ap.add_argument("--probe-battery-minutes", type=float, default=10.0)
     args = ap.parse_args()

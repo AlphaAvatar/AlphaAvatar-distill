@@ -118,6 +118,46 @@ BEAM6_SEARCH_CORRECTION_MINUTES = 12972.947682669545 / 60.0 - SEARCH_MINUTES
 #: Setup allowance, measured across the 2026-08-14/15 runs at ~10.4 min and
 #: priced at 11 so the number is not the optimistic one.
 SETUP_MINUTES = 11.0
+#: The Stage-1 phase name. ONE string with two readers: `budget()` prices stage 1
+#: under it, and `stage1_deadline_minutes()` reads it back out to bound stage 1
+#: at runtime. Neither restates the other's number.
+STAGE1_SEARCH_PHASE = "stage1_beam_search"
+
+
+def stage1_deadline_minutes(plan) -> float:
+    """The Stage-1 runtime deadline, READ OFF the priced envelope.
+
+    `SEARCH_MINUTES` is the base search allowance and stays exactly that. What
+    stage 1 is *paid for*, however, is that base plus both soft-stop reserves,
+    and both are consumed inside stage 1 by construction: the reference-cache
+    fallback happens during the search, and the beam-6 correction exists only
+    because the base was taken from the cost model's beam-4 row while the frozen
+    schedule is beam 6.
+
+    Until 2026-08-20 the runtime `Deadline` was built from the base alone. A
+    search that legitimately entered the fallback path — the exact risk the
+    147.7683-minute reserve was bought for — would have been killed at 180
+    minutes with that reserve unspent, and the kill would have looked like a
+    failed search rather than a deadline that disagreed with its own price by
+    183.98 minutes.
+
+    **Derived, not restated.** This reads the same `BudgetPlan` the dollar
+    figures come from, so a reserve added to the pricing extends this bound
+    automatically and cannot be added to one without the other. Every soft-stop
+    reserve is a Stage-1 risk by construction — `soft_stop_reserves` is folded in
+    *before* the soft stop precisely so stage 1 can consume it, per the field's
+    own contract in `budget.py` — and a test pins the current set, so a future
+    reserve that is NOT a Stage-1 risk has to be classified rather than silently
+    inflating this deadline.
+    """
+    base = [p.minutes for p in plan.breakdown if p.name == STAGE1_SEARCH_PHASE]
+    if len(base) != 1:
+        raise ValueError(
+            f"expected exactly one {STAGE1_SEARCH_PHASE!r} phase in the priced "
+            f"envelope, found {len(base)}. The Stage-1 deadline is derived from "
+            "the price and cannot be derived from a missing or ambiguous phase; "
+            "fix the pricing rather than hard-coding a deadline here.")
+    return base[0] + sum(r.minutes for r in plan.soft_stop_reserves)
 
 
 def probe_streams(ctx: SessionContext) -> tuple[str, ...]:
@@ -211,7 +251,12 @@ def driver_command(ctx: SessionContext, plan) -> str:
             f"--spent-usd {ctx.spent_usd:.4f} "
             f"--soft-stop-usd {plan.soft_stop_usd:.4f} "
             f"--authorized-usd {ctx.auth.hard_cap_usd:.4f} "
+            # The base allowance funds the affordability check; the DERIVED
+            # deadline bounds the search itself. They are different questions
+            # and were the same number until 2026-08-20, which would have
+            # killed a paid, valid fallback search at 180 min.
             f"--search-minutes {ctx.args.search_minutes} "
+            f"--search-deadline-minutes {stage1_deadline_minutes(plan):.4f} "
             f"--probe-train-minutes {ctx.args.probe_train_minutes} "
             f"--probe-battery-minutes {ctx.args.probe_battery_minutes}")
 
@@ -245,7 +290,7 @@ def budget(args) -> BudgetSpec:
         transfer_minutes=args.transfer_minutes,
         other_phases=(
             Phase("stage0_attestation_and_binding", 8.0),
-            Phase("stage1_beam_search", args.search_minutes),
+            Phase(STAGE1_SEARCH_PHASE, args.search_minutes),
             Phase("stage5_selection_and_report", 5.0),
             Phase("artifact_manifest_and_verify", 8.0),
             Phase("artifact_synchronization", 10.0)),

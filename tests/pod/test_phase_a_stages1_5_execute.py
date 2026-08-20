@@ -85,6 +85,13 @@ class Args:
     soft_stop_usd = 19.68
     authorized_usd = 20.02
     search_minutes = 180.0
+    #: The DERIVED stage-1 deadline: the base allowance plus both soft-stop
+    #: reserves, which is what the launcher computes from the priced envelope.
+    #: Distinct from `search_minutes` on purpose — they were the same number
+    #: until 2026-08-20, which would have killed a paid, valid fallback search
+    #: at 180 min. `test_stage1_bounds_the_search_by_the_derived_deadline`
+    #: asserts the driver forwards THIS one.
+    search_deadline_minutes = 363.9841
     probe_train_minutes = 61.55
     probe_battery_minutes = 9.82
 
@@ -532,3 +539,20 @@ def test_a_journalled_probe_is_restored_but_only_for_the_same_run(driven):
         assert driver.restore_probe({**descriptors[0], **moved}) is None, (
             f"a probe was adopted after {sorted(moved)} moved; that result "
             "does not describe this run")
+
+
+def test_stage1_bounds_the_search_by_the_derived_deadline_not_the_allowance(driven):
+    """The stub has recorded `search_minutes` since the driver grew a wall-clock
+    budget, and nothing asserted it — so the value it captured could have been
+    anything, including the base allowance that would kill a paid fallback
+    search at 180 minutes.
+
+    `Args.search_minutes` is 180.0 and `Args.search_deadline_minutes` is
+    363.9841, so the two are distinguishable and this cannot pass by accident.
+    """
+    driver, _mod, _codes = driven
+    forwarded = driver._forwarded_to_search["search_minutes"]
+    assert forwarded == pytest.approx(Args.search_deadline_minutes)
+    assert forwarded != pytest.approx(Args.search_minutes), (
+        "the driver bounded the search by the base allowance; the two soft-stop "
+        "reserves stage 1 is paid for would be unusable by stage 1")

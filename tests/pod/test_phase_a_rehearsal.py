@@ -1161,3 +1161,222 @@ def test_the_conditional_third_seed_still_fits_under_a_full_fallback():
     # reserves.
     assert plan.soft_stop_minutes - worst == pytest.approx(
         plan.expected_minutes * 0.10)
+
+
+# --- the Stage-1 runtime deadline, derived from the price -------------------
+#
+# The runtime `Deadline` was built from `SEARCH_MINUTES` alone until 2026-08-20,
+# while the priced Stage-1 envelope also carries two soft-stop reserves that are
+# both consumed *inside* stage 1. A search that legitimately took the
+# reference-cache fallback — the exact risk the 147.7683-minute reserve was
+# bought for — would have been killed at 180 minutes with the reserve unspent,
+# and the kill would have read as a failed search rather than a deadline
+# disagreeing with its own price by 183.98 minutes.
+#
+# These pin the derivation, both contributions, and the fact that removing
+# either reserve breaks it. The base allowance stays 180.0 and is NOT redefined.
+
+
+def test_the_base_search_allowance_is_still_180_and_is_not_redefined():
+    """The fix must not turn the deadline into a new science constant."""
+    mod = load_launcher()
+    assert mod.SEARCH_MINUTES == 180.0
+    args = launcher_defaults(mod)
+    assert args.search_minutes == 180.0
+    plan = phase_a_plan(authorized_usd=23.0484)
+    priced = {p.name: p.minutes for p in plan.breakdown}
+    assert priced[mod.STAGE1_SEARCH_PHASE] == 180.0, (
+        "stage 1 must still be PRICED at the base allowance; only the runtime "
+        "deadline consumes the reserves")
+
+
+def test_the_stage1_deadline_is_the_base_plus_both_reserves():
+    mod = load_launcher()
+    plan = phase_a_plan(authorized_usd=23.0484)
+    reserves = {r.name: r.minutes for r in plan.soft_stop_reserves}
+
+    deadline = mod.stage1_deadline_minutes(plan)
+    assert deadline == pytest.approx(
+        180.0 + reserves["beam6_search_pricing_correction"]
+        + reserves["stage1_reference_cache_fallback"])
+    assert deadline == pytest.approx(363.9841, abs=5e-5)
+    assert deadline > 180.0 + 183.0, (
+        "the deadline did not grow; a valid fallback search would still be "
+        "killed at the base allowance")
+
+
+def test_the_beam6_correction_contributes_to_the_runtime_deadline():
+    """Not merely present in the pricing — load-bearing in the deadline."""
+    mod = load_launcher()
+    full = mod.stage1_deadline_minutes(phase_a_plan(authorized_usd=23.0484))
+    without = mod.stage1_deadline_minutes(
+        phase_a_plan(authorized_usd=23.0484, beam6_correction_minutes=0.0))
+    assert full - without == pytest.approx(36.2158, abs=5e-5), (
+        "zeroing the beam-6 correction did not shorten the deadline, so the "
+        "deadline is not derived from it")
+
+
+def test_the_fallback_reserve_contributes_to_the_runtime_deadline():
+    mod = load_launcher()
+    full = mod.stage1_deadline_minutes(phase_a_plan(authorized_usd=23.0484))
+    without = mod.stage1_deadline_minutes(
+        phase_a_plan(authorized_usd=23.0484, fallback_reserve_minutes=0.0))
+    assert full - without == pytest.approx(147.7683, abs=5e-5), (
+        "zeroing the fallback reserve did not shorten the deadline; the "
+        "147.77 minutes stage 1 is paid for would not be usable by stage 1")
+
+
+@pytest.mark.parametrize("dropped,expected_loss", [
+    ("beam6_correction_minutes", 36.2158),
+    ("fallback_reserve_minutes", 147.7683),
+])
+def test_removing_either_reserve_breaks_the_deadline_and_the_price_together(
+        dropped, expected_loss):
+    """The contract is that the two move as one.
+
+    A reserve removed from the pricing must remove the same minutes from the
+    deadline. If they could diverge, the deadline would again be able to kill
+    work the session had paid for — which is the defect being fixed.
+    """
+    mod = load_launcher()
+    full_plan = phase_a_plan(authorized_usd=23.0484)
+    cut_plan = phase_a_plan(authorized_usd=23.0484, **{dropped: 0.0})
+
+    deadline_loss = (mod.stage1_deadline_minutes(full_plan)
+                     - mod.stage1_deadline_minutes(cut_plan))
+    price_loss = full_plan.soft_stop_minutes - cut_plan.soft_stop_minutes
+    assert deadline_loss == pytest.approx(expected_loss, abs=5e-5)
+    assert price_loss == pytest.approx(expected_loss, abs=5e-5)
+    assert deadline_loss == pytest.approx(price_loss), (
+        "the deadline and the price disagree about what removing this reserve "
+        "costs; they are supposed to have one source")
+
+
+def test_the_deadline_reads_the_priced_envelope_rather_than_restating_it():
+    """Derived, not duplicated.
+
+    A reserve added to the pricing must extend the deadline with no edit here or
+    in the derivation — otherwise the next reserve reintroduces exactly the
+    180-vs-364 split this closes.
+    """
+    import dataclasses
+
+    from aadistill.infrastructure.budget import Phase
+
+    mod = load_launcher()
+    plan = phase_a_plan(authorized_usd=23.0484)
+    before = mod.stage1_deadline_minutes(plan)
+
+    grown = dataclasses.replace(plan, soft_stop_reserves=(
+        *plan.soft_stop_reserves, Phase("a_future_stage1_risk", 12.5)))
+    assert mod.stage1_deadline_minutes(grown) == pytest.approx(before + 12.5)
+
+
+def test_a_missing_stage1_phase_fails_loudly_rather_than_defaulting():
+    """It must not fall back to a hard-coded 180."""
+    import dataclasses
+
+    mod = load_launcher()
+    plan = phase_a_plan(authorized_usd=23.0484)
+    stripped = dataclasses.replace(plan, breakdown=tuple(
+        p for p in plan.breakdown if p.name != mod.STAGE1_SEARCH_PHASE))
+    with pytest.raises(ValueError, match="stage1_beam_search"):
+        mod.stage1_deadline_minutes(stripped)
+
+
+def test_every_soft_stop_reserve_is_a_stage_1_risk():
+    """The derivation consumes ALL soft-stop reserves, which is only correct
+    while every one of them is spent inside stage 1. Both current reserves are.
+
+    This pins the set so a future reserve that is NOT a stage-1 risk has to be
+    classified deliberately instead of silently inflating the search deadline.
+    """
+    plan = phase_a_plan(authorized_usd=23.0484)
+    assert {r.name for r in plan.soft_stop_reserves} == {
+        "stage1_reference_cache_fallback", "beam6_search_pricing_correction"}, (
+        "the soft-stop reserve set changed. stage1_deadline_minutes() adds every "
+        "reserve to the SEARCH deadline; if the new one is not consumed inside "
+        "stage 1, the derivation must select rather than sum.")
+
+
+def test_the_launcher_sends_the_derived_deadline_and_the_base_allowance():
+    """Both, and distinctly — `afford()` needs the base, the search needs the
+    deadline, and sending one number for both is the defect."""
+    mod = load_launcher()
+    args = launcher_defaults(mod)
+    plan = phase_a_plan(authorized_usd=23.0484)
+
+    class Ctx:
+        pass
+    Ctx.args = args
+    Ctx.image_digest = "sha256:test"
+    Ctx.price = 0.99
+    Ctx.spent_usd = 0.20
+    Ctx.auth = type("A", (), {"hard_cap_usd": 23.0484})()
+
+    cmd = mod.driver_command(Ctx, plan)
+    assert "--search-minutes 180.0 " in cmd
+    assert "--search-deadline-minutes 363.9841 " in cmd
+    # And they are not the same token: a regression that reunified them would
+    # otherwise pass both assertions above if both read 180.
+    assert "--search-deadline-minutes 180" not in cmd
+
+
+def test_the_driver_bounds_the_search_by_the_deadline_not_the_allowance():
+    """The consumer end of the contract, read off the real driver source."""
+    src = (REPO / "scripts/pod/autoinit_phase_a_driver.py").read_text()
+    stage1 = src[src.index("def stage1(self)"):src.index("def stage2(self)")]
+    assert "search_minutes=self.a.search_deadline_minutes" in stage1, (
+        "stage 1 still passes the base allowance as the search deadline")
+    assert "self.afford(self.a.search_minutes" in stage1, (
+        "the affordability check should still use the BASE allowance; widening "
+        "it to the full envelope would refuse to start a search that is "
+        "expected to cost 180 minutes")
+
+
+def test_the_driver_declares_no_default_for_either_search_number():
+    """No second copy of a pricing constant.
+
+    The driver carried `default=180.0`, which is `SEARCH_MINUTES` restated in a
+    file that does not own it. The launcher always passes both, so a default is
+    only ever a value that can drift from the one booking the money.
+    """
+    src = (REPO / "scripts/pod/autoinit_phase_a_driver.py").read_text()
+    main = src[src.index("def main() -> int:"):]
+    for flag in ("--search-minutes", "--search-deadline-minutes"):
+        line = next(ln for ln in main.splitlines() if flag in ln)
+        assert "required=True" in line, f"{flag} is not required: {line.strip()}"
+    assert "default=180.0" not in main
+
+
+def test_the_deadline_derivation_moves_no_frozen_identity():
+    """Operational, not scientific.
+
+    The reserves are a *pricing* quantity and the deadline is a *runtime* bound.
+    Neither may reach an identity: if they did, re-pricing a session would
+    silently redefine the search it is pricing, and every budget revision would
+    invalidate the frozen plan. `SearchConfig` already excludes them by
+    construction (`test_the_deadline_is_not_part_of_the_search_identity`); this
+    checks the same thing one level up, through the real launcher.
+    """
+    import json
+
+    from aadistill.autoinit.phase_a import PHASE_A_PLAN_V1
+
+    SESSION = "9377a2dc61f21790dd111d72a5de0e039ea1d31afef2d09e18c98a0b0cc2a0aa"
+    SCIENCE = "02be33b9a7a8e26bc8bfb75795351e8cdc9ffd441b47066cc81887cfc511b55c"
+
+    assert PHASE_A_PLAN_V1.plan_hash == SESSION
+    assert json.loads((REPO / "logs/autoinit_phase_a_recovery_plan_frozen.json")
+                      .read_text())["plan_hash"] == SCIENCE
+
+    # And the identity is invariant under the very inputs the deadline is
+    # derived from: move both reserves, the hash must not follow.
+    baseline = phase_a_spec().plan_hash
+    assert baseline == SESSION
+    for override in ({"fallback_reserve_minutes": 0.0},
+                     {"beam6_correction_minutes": 0.0},
+                     {"search_minutes": 999.0}):
+        assert phase_a_spec(**override).plan_hash == SESSION, (
+            f"{override} moved the session plan hash; a pricing input has "
+            "reached the frozen identity")

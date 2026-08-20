@@ -1,4 +1,4 @@
-**Updated:** 2026-08-20 · branch `main` · after Measurement Attempt 3 COMPLETED
+**Updated:** 2026-08-20 · branch `main` · after the Stage-1 deadline/pricing alignment
 
 # Current state
 
@@ -178,13 +178,39 @@ whole cause, and the frozen cost model was right all along. The cgroup fix is
 confirmed too: the container advertised 128 CPUs, the driver held torch to the
 13 it was granted.
 
+### The Stage-1 deadline now matches the price
+
+The runtime `Deadline` was built from the 180-minute base allowance while the
+priced Stage-1 envelope is **363.9841 min** — the base plus the beam-6 correction
+(36.2158) and the reference-cache fallback reserve (147.7683), both consumed
+inside stage 1. A valid search taking the fallback path would have been killed at
+180 minutes with 183.98 minutes of purchased time unspent.
+
+`stage1_deadline_minutes(plan)` now reads the **same `BudgetPlan`** the dollar
+figures come from, so the deadline cannot drift from the price and a future
+reserve extends it with no edit. `SEARCH_MINUTES` stays 180.0 and stage 1 is
+still *priced* at the base; `afford()` still checks the base, because widening it
+would refuse to start a search expected to cost 180 minutes. The driver's
+duplicate `default=180.0` is gone — both flags are `required=True`.
+
+**Pricing is unchanged, exactly:** `$17.8933` / `$22.7183` / `$23.0483`, ceiling
+`$23.0484`. So are the frozen identities, and a test moves both reserves and the
+base and asserts the session plan hash does not follow. Mutation-verified seven
+ways. **The causal-depth operator is not repriced** — attempt 3 confirmed the
+existing cost model rather than replacing it.
+
 ### What is decided next, by the maintainer and not here
 
-These numbers are **inputs to a repricing and a separate cumulative-budget
-decision**. $12.5259 remains against a $23.0484 per-launch Phase-A ceiling, so a
-Phase-A attempt still needs its own budget decision regardless of what the
-measurement shows. **No Phase-A attempt 11 is prepared, granted, funded or
-implied, and none is being prepared.**
+**The cumulative budget needs an explicit maintainer decision, and has not had
+one.** $206.4741 is spent of a $219.00 cap, leaving **$12.5259** — less than the
+**$23.0484** per-launch Phase-A ceiling, so Phase A is *arithmetically* blocked,
+not merely discouraged. One more full attempt would reach a worst case of
+`$206.4741 + $23.0484 = $229.5225`.
+
+A cap of **$231.00** with the per-launch ceiling unchanged at $23.0484 has been
+**recommended and is NOT approved**. Until it is approved in the imperative, no
+Phase-A attempt may be prepared, granted or launched. **No Phase-A attempt 11 is
+prepared, granted, funded or implied, and none is being prepared.**
 
 **Process rule, standing:** "my intended next decision is GO" is not executable
 permission, and an explicit GO covers the workload named — not new paid-path

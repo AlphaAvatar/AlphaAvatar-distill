@@ -4974,3 +4974,79 @@ corroborated rather than replaced.
 authorization spent, not reusable. Cumulative **$206.4741** of $219.00, remaining
 **$12.5259**. Evidence:
 [`autoinit_measurement_attempt3/`](autoinit_measurement_attempt3/).
+
+## 2026-08-20 — The Stage-1 runtime deadline is derived from the price, not restated
+
+**Context.** The causal-depth runtime repair gave `BeamSearch` a real wall-clock
+`Deadline`, built from `search_minutes=180.0`. The priced Stage-1 envelope,
+however, is not 180 minutes: it is the base allowance **plus** two soft-stop
+reserves, both consumed inside stage 1 by construction.
+
+```
+base search allowance                      180.0000 min
++ beam-6 pricing correction                 36.2158
++ reference-cache fallback reserve         147.7683
+= what stage 1 is actually paid for        363.9841 min
+```
+
+The runtime deadline would therefore have killed a scientifically valid search at
+180 minutes with 183.98 minutes of *already-purchased* Stage-1 time unspent — and
+the kill would have read as a failed search rather than as a deadline disagreeing
+with its own price. The reference-cache fallback is precisely the case: it is
+numerically identical to the cached path at ~2.10× the forward work, so the run
+that most needs the reserve is the one the old deadline would have truncated.
+
+**Decision: derive the deadline from the pricing owner; do not restate it.**
+
+`stage1_deadline_minutes(plan)` in `autoinit_phase_a_launch.py` reads the
+`BudgetPlan` — the same object that produces the dollar thresholds — takes the
+`stage1_beam_search` phase out of `breakdown` and adds every `soft_stop_reserve`.
+The launcher passes the result as a new `--search-deadline-minutes`, and the
+driver bounds the search with it.
+
+* **`SEARCH_MINUTES` stays 180.0 and is not redefined.** Stage 1 is still
+  *priced* at the base allowance; only the runtime bound consumes the reserves.
+* **`afford()` still checks the base**, deliberately. Widening it to the full
+  envelope would refuse to start a search expected to cost 180 minutes.
+* **No duplicated constant.** A reserve added to the pricing extends the deadline
+  with no edit anywhere, and the driver's `--search-minutes default=180.0` — a
+  second copy of a pricing constant in a file that does not own it — is gone;
+  both flags are now `required=True`.
+
+**The pricing is unchanged, exactly:** `$17.8933` expected, `$22.7183` soft,
+`$23.0483` hard, `$23.0484` ceiling. So is every frozen identity — session plan
+`9377a2dc`, science plan `02be33b9` — and a test now moves both reserves and the
+base allowance and asserts the session plan hash does not follow. `SearchConfig`
+still has no `deadline` field: a wall-clock budget is operational, and putting it
+in the identity would make every re-pricing a different search.
+
+**Mutation-verified, seven ways.** Restoring the defect (deadline = base) fails 7
+tests; dropping either reserve from the derivation fails 4; hard-coding
+`363.9841` as a new constant fails 6; sending the base as the deadline, bounding
+the search by the base, and reintroducing `default=180.0` each fail 1.
+
+**One test was recording and never asserting.** The stage-1/5 rehearsal has
+captured `search_minutes` at the `run_phase_a_search` boundary since the driver
+grew a wall-clock budget — its docstring says the stub exists to catch exactly
+this — but nothing ever checked the captured value, so it could have been
+anything. It now asserts the *deadline* is forwarded and the base is not, and the
+two fixture values differ so it cannot pass by accident.
+
+**Risks.** Stage 1 may now legitimately occupy 6.07 h. That is bounded: the
+session hard-terminate is 1396.87 min, so the session-level bound still dominates
+by a wide margin, and `afford()` continues to govern whether later stages start.
+The derivation sums *all* soft-stop reserves, which is correct only while every
+reserve is a Stage-1 risk — both current ones are, and a test pins the set so a
+future non-Stage-1 reserve must be classified rather than silently inflating the
+search deadline.
+
+**Not done, deliberately:** the causal-depth operator is **not** repriced upward.
+Attempt 3 measured 12.07 eval/min against the 12.0 anchor, so the existing cost
+model is *measured-confirmed*, not replaced. Beam width, search space and frozen
+science are untouched.
+
+**Verification**, CPU only: canonical full suite **1972 passed / 11 skipped**;
+`test_phase_a_stages1_5_execute.py` **17 passed** (a real stage 0→5 orchestration,
+15 min); pod simulator **1931 passed / 22 skipped** with the artifact tree
+restored exactly (1167 entries, identical listing hash, hide directory empty);
+frozen-asset verifier passed and was not weakened or rescoped.
