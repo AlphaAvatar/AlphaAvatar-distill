@@ -35,6 +35,7 @@ from aadistill.autoinit.recovery import (
 from aadistill.infrastructure.env import code_state, hardware_report, set_determinism
 from aadistill.infrastructure.manifest import sha256_file, sha256_json, write_manifest
 from aadistill.models.teacher import DTYPES, load_teacher, tokenizer_hash
+from aadistill.models.tokenizer_contract import resolve_training_tokenizer
 from aadistill.data.ladder import ladder_blocks
 from aadistill.training.train import (
     JsonlLogger,
@@ -93,9 +94,21 @@ def main() -> None:
         model_path = REPO_ROOT / cfg["student_path"]
 
     logger = JsonlLogger(out_dir / "train_log.jsonl")
-    from transformers import AutoModelForCausalLM, AutoTokenizer
+    from transformers import AutoModelForCausalLM
 
-    tokenizer = AutoTokenizer.from_pretrained(REPO_ROOT / cfg["student_path"])
+    # The tokenizer is a SEPARATE dependency from the student weights, declared
+    # rather than inferred. A searched leaf is a model artifact and carries no
+    # tokenizer files by design; `AutoTokenizer.from_pretrained` on such a
+    # directory does not raise — it returns a ONE-TOKEN vocabulary. Phase-A
+    # attempt 11 reached Stage 2 on that path and was saved only by the
+    # teacher/student equality check further down. Resolved here, before any
+    # data construction, so a bad contract costs nothing.
+    tokenizer, tokenizer_contract = resolve_training_tokenizer(
+        student_path=cfg["student_path"],
+        tokenizer_source=cfg.get("tokenizer_source"),
+        expected_sha256=cfg.get("tokenizer_sha256"),
+        repo_root=REPO_ROOT)
+    logger.log("tokenizer_resolved", **tokenizer_contract)
     source = ("packed token ladder" if cfg.get("packing") == "ladder"
               else "Stage 2 mixture")
     print(f"device {device}; loading {source} from {cfg['data_dir']} ...")

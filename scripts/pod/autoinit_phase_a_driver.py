@@ -54,7 +54,11 @@ sys.path.insert(0, str(REPO / "src"))
 sys.path.insert(0, str(REPO / "scripts/autoinit"))
 
 from aadistill.autoinit.authorization import AuthorizationError  # noqa: E402
+from aadistill.autoinit.arch import get_adapter  # noqa: E402
 from aadistill.autoinit.device import apply_cpu_budget  # noqa: E402
+from aadistill.autoinit.leaf_durability import (  # noqa: E402
+    LeafDurabilityError, persist_selected_leaves,
+)
 from aadistill.autoinit.generation import (  # noqa: E402
     RecoveryEvaluationProtocol, declared_generation_protocol,
     generation_source_digest, observe_generation_protocol,
@@ -75,6 +79,22 @@ WS = Path("/workspace")
 STATUS = WS / "autoinit_phase_a.status"
 AUDIT = REPO / "artifacts/audit/autoinit_phase_a"
 SEARCH_WORKDIR = REPO / "artifacts/autoinit/phase_a_search"
+
+
+def selected_leaf_dir() -> Path:
+    """Where the five SELECTED leaves are preserved at the stage-1/2 boundary.
+
+    Under `AUDIT` because collection walks that tree on EVERY path including the
+    failure path — precisely what attempt 11 needed and the stage-5 fetch route
+    could not give it.
+
+    DERIVED at call time, not a module constant. As a constant computed from
+    `REPO` it ignored the rehearsal's `mod.AUDIT = tmp_path` redirection and
+    wrote seven real leaf directories into the repository's own artifact tree,
+    193 MB, on a box that was already out of disk. A test that redirects the
+    audit root must redirect everything written under it.
+    """
+    return AUDIT / "selected_leaves"
 BATTERY = REPO / "artifacts/stage3/recovery_search_v2"
 STATE_EVAL = REPO / "artifacts/stage1/state_eval_v1"
 #: The engine probe's target at stage 0. The canonical initialization is the only
@@ -502,7 +522,45 @@ class PhaseADriver:
                 "shortfall rather than shrinking N.",
                 n_admissible=len(self.leaves))
         mark(f"SEARCH_DONE:{len(self.leaves)}")
+
+        # THE DURABILITY BOUNDARY. Attempt 11 spent 180.3 min producing five
+        # valid selected leaves and then lost every checkpoint, because
+        # persistence happened only after stage-5 selection and stage 2 failed
+        # six seconds after stage 1 passed. Collection DOES run on the failure
+        # path — attempt 11's manifest came home with rc=0 — so a leaf that is a
+        # collected ARTIFACT survives a stage-2 failure, while a leaf that is
+        # only a stage-5 fetch product does not.
+        #
+        # Weight-only and byte-identical: `artifact_digest` folds in
+        # `tokenizer_sha256`, so adding tokenizer files here would move the
+        # identity the search metrics hang on. The tokenizer is the separate
+        # consumer dependency resolved in `train_stage3.py`.
+        try:
+            durability = persist_selected_leaves(
+                leaves=[{"state_id": s.state_id,
+                         "checkpoint_path": s.checkpoint_path,
+                         "artifact_digest": s.artifact["artifact_digest"]
+                         if isinstance(s.artifact, dict)
+                         else s.artifact.artifact_digest,
+                         "total_bytes": s.artifact["total_bytes"]
+                         if isinstance(s.artifact, dict)
+                         else s.artifact.total_bytes,
+                         "num_parameters": s.num_parameters}
+                        for s in self.leaves],
+                destination=selected_leaf_dir(),
+                adapter=get_adapter("qwen3"), spec=self.leaves[0].spec)
+        except LeafDurabilityError as exc:
+            return self.record(
+                1, False,
+                f"the search succeeded but its result could not be preserved: "
+                f"{exc}")
+        (AUDIT / "selected_leaf_durability.json").write_text(
+            json.dumps(durability, indent=2, default=str) + "\n")
+        say(f"selected leaves persisted: {durability['n_leaves']} at "
+            f"{durability['required_bytes'] / 2**30:.2f} GiB, digests re-verified")
+
         return self.record(1, True,
+                           durability=durability,
                            n_states=found.summary["summary"]["n_states"],
                            n_leaves=found.summary["summary"]["n_complete_leaves"],
                            n_resumed=len(found.summary["resumed_state_ids"]),

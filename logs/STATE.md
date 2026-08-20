@@ -1,4 +1,4 @@
-**Updated:** 2026-08-20 · branch `main` · after Phase-A attempt 11 — **Stage 1 PASSED**
+**Updated:** 2026-08-20 · branch `main` · after the tokenizer-contract and leaf-durability closure
 
 # Current state
 
@@ -33,7 +33,11 @@ Phase-A attempt. That attempt has run and cost **$3.2101** — far under its
 $23.0484 ceiling, because it stopped at Stage 2 rather than training nine probes.
 **$21.3158 remains, which is $1.7326 short of another full-ceiling attempt**, and
 the approval says in terms that it "does not authorize any subsequent attempt".
-Attempt 12 is not funded, authorized, prepared or implied.
+A cap of **$234.00** is **recommended and NOT approved** — one more full-ceiling
+launch reaches $232.7326, so $234.00 leaves $1.2674 of margin. That is a project
+ceiling only: the $23.0484 per-launch ceiling is unchanged, Attempt 12 still
+needs its own one-use grant and authorization, and $234.00 would not authorize an
+Attempt 13. Attempt 12 is not funded, authorized, prepared or implied.
 ```
 
 Every authorization issued is **consumed** — each one's lineage gate refuses the
@@ -149,78 +153,71 @@ instead of the cause, and it was paid for twice. Full diagnoses in
 
 ## Next starting point
 
-**Phase-A attempt 11 ran: Stage 0 and Stage 1 PASSED, Stage 2 failed closed.**
-$3.2101, 194.5 min, pod deleted with provider confirmation. Grant and
-authorization **consumed**. Full record:
-[`autoinit_phase_a_attempt11/`](autoinit_phase_a_attempt11/).
+**Both `$0` closures from attempt 11 are done and mutation-verified.** Nothing is
+running, billing, authorized or prepared.
 
-### The first completed AutoInit search
+### 1. The tokenizer is declared, not inferred
 
-```
-43 states · 4 levels · 7 complete leaves · 18 pruned · 180.3 min
-5 leaves selected, each 596,049,920 parameters
-```
+The producer is unchanged — a searched leaf is a model artifact and stays
+weight-only, because `artifact_digest` folds in `tokenizer_sha256` and adding
+files to a measured leaf would move the identity its search metrics hang on.
 
-Each leaf is a distinct four-operator composition. **The existing
-`COMPOSITE_STAGE1` recipe lands on Pareto front 4 and is not selected** — four
-search-discovered orderings dominate it. That is the first evidence this project
-has that operator *ordering* carries signal, which is the question Phase A was
-built to ask. The canonical control was injected and verified against its frozen
-hash.
+The contract moved to the consumer. `aadistill.models.tokenizer_contract`
+requires an explicit source, loads it through the real loader, verifies its hash
+against the frozen protocol identity `7781771acc3798ee…`, cross-checks any
+tokenizer the student itself carries, and refuses **before** training or data
+construction. Presence is decided by looking for files, never by calling the
+loader — the check attempt 11 proved does not hold.
 
-**The leaf weights are gone.** Finalists are fetched after Stage-5 selection,
-which never ran, so the five checkpoints died with the pod. The *record* survives
-— `search_result.json`, `search_states_reduced.jsonl`, and the 25 MB full journal
-out of tree — but regenerating the weights costs another ~180 min of search.
+**Only the Phase-A frozen recipe declares the contract.** The first attempt
+added it to all 54 recovery configs and the full suite refused: E3/E4/E8b pin
+those configs' *file hashes*, because reproducing a result means reproducing the
+config that produced it. The edit was reverted. A historical config re-run today
+refuses with a clear message instead of silently using a one-token vocabulary.
+**The recovery protocol fingerprint is unchanged at `ab0d8cfd…`**, verified
+before and after, so nothing about tokenization moved.
 
-### Two findings from the run itself
+### 2. A successful Stage 1 survives a failing Stage 2
 
-**The reference cache fell back all four times.** 16.9 GiB does not fit in 66% of
-the **20.3 GiB** free *inside* the search; Measurement Attempt 3 saw 36.42 GiB
-free standalone. Four causal-depth invocations ran at 6.96–10.79 eval/min against
-the standalone 12.07, taking 122.1 min — **68% of the whole search**. The
-measurement was not wrong; it measured a different memory regime, and the cached
-path may simply not be reachable inside the search at this teacher size.
+`aadistill.autoinit.leaf_durability` persists the five selected leaves at the
+Stage-1/2 boundary, into the audit tree that collection walks **on every path
+including failure** — which is what attempt 11 needed and the Stage-5 fetch route
+could not give it. Each copy's identity is recomputed after transfer and required
+to equal the digest the search recorded; a failure fails **Stage 1** closed, so
+Stage 2 cannot start on an unpreserved selection. Weight-only: a persisted copy
+that acquired tokenizer files is refused.
 
-**The deadline fix was load-bearing by 17 seconds.** Stage 1 took 180.283 min
-against the 180.0 bound it would have been killed at before `16e382f`. That
-commit is the only reason this search produced a result.
-
-### The open defect, diagnosed at $0 and NOT fixed
+### The blocking measurement: there is nowhere to put them
 
 ```
-train_stage3.py:173  ValueError: teacher and student tokenizers differ
+five selected leaves      5.55 GiB   (5 × 1.110, from the search's own record)
+relay                    ~1.03 GiB free   (92.10 GiB LFS of an inferred 93.13)
+dev box                   3.4 GiB free    (185 GiB of 197 used, 99%)
 ```
 
-`Qwen3Adapter.save()` calls `save_pretrained()`, which writes weights and config
-and **no tokenizer files** — correct for the search, which consumes pre-tokenized
-items. Stage 2 then points a probe at that directory, and
-`AutoTokenizer.from_pretrained()` **does not raise**: it returns a **one-token
-vocabulary**. The teacher/student equality guard caught it; without that guard the
-probe would have trained against a 1-token tokenizer and produced numbers.
+**No configured destination currently has room.** The durability boundary
+therefore refuses before moving a byte, which is the designed behaviour — a
+persistence step that runs out of space halfway has already destroyed what it was
+protecting. Freeing space, raising the relay quota or attaching storage is a
+maintainer decision and I have not taken it.
 
-Reproduced exactly at $0. The canonical init's own tokenizer is fine — identical
-hash to the teacher, 151,669 tokens, zero differences. What is missing is any
-step that carries those files into a *searched* leaf.
+### Pricing: recorded, not repriced
 
-**This is the `control_sb` class again**: identity gates all pass while the
-checkpoint cannot be used, because the gates check what the producer needs rather
-than what the consumer needs. Every leaf passed `materialize → reload → hash →
-validate` and reached `MEASURED`; none of those asks whether a trainer can load a
-tokenizer.
+The in-situ cache fell back 4/4 because the search has only ~20.3 GiB free
+against the 36.42 GiB a standalone measurement saw. Recorded in the reserve's own
+provenance comment. **Not repriced**: Stage 1 took 180.283 min against the 180.0
+base allowance, so the reserves keep their dollar semantics as contingency.
+Pricing remains exactly `$17.8933 / $22.7183 / $23.0483`, ceiling `$23.0484`,
+Stage-1 deadline `363.9841 min`. Frozen beam, search, operator and calibration
+science unchanged.
 
-**No fix is applied.** The run stopped for review, as the grant requires.
+### Two decisions owed
 
-### Two decisions owed, and nothing is prepared
+1. **Storage** — where the five leaves go, given nothing has 5.55 GiB free.
+2. **The $234.00 cap** — recommended, not approved.
 
-1. **How tokenizer files reach a searched leaf** — and whether
-   `AutoTokenizer`'s silent 1-token fallback should be refused at the producer,
-   the consumer, or both.
-2. **Budget.** $21.3158 remains, **$1.7326 short** of another full-ceiling
-   attempt. The cap raise funded one attempt, it has run, and the approval says
-   it "does not authorize any subsequent attempt".
-
-**No Attempt 12 is prepared, granted, funded or implied.**
+If both are settled, the next review is a direct GO / NO-GO for Phase-A Attempt
+12, with no further canary, measurement or readiness phase.
 
 **Process rule, standing:** "my intended next decision is GO" is not executable
 permission, and a recommendation is not an approval.

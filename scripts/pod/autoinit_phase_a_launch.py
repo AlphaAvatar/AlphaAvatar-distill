@@ -109,6 +109,19 @@ SEARCH_MINUTES = 180.0
 #: `PhaseADriver.afford()` refusing later probes — including a legitimately
 #: triggered conditional seed-sc rung. That would truncate the frozen design to
 #: pay for an infrastructure risk.
+#:
+#: **MEASURED 2026-08-20, attempt 11: the fallback fired 4/4.** Inside the search
+#: only ~20.3 GiB is free — the beam holds the parent teacher and candidate state
+#: — against the 36.42 GiB a standalone measurement saw, so the 16.9 GiB cache
+#: never fits. Four causal-depth invocations ran at 6.96–10.79 eval/min against
+#: the standalone 12.07, taking 122.1 min, 68% of the search.
+#:
+#: This is recorded and **not** repriced. The complete Stage-1 wall time was
+#: 180.283 min, which essentially reproduces the 180.0 base allowance above, so
+#: the dollar semantics of these reserves are unchanged and they remain
+#: contingency. If a future cost derivation shows the fallback is the expected
+#: path rather than the risk — which this single observation suggests but does
+#: not establish — that derivation, not this note, is what may move the price.
 FALLBACK_RESERVE_MINUTES = 8866.1 / 60.0                      # 147.7683
 #: Reserve 2 — the beam-6 search pricing correction. `SEARCH_MINUTES` was taken
 #: from the cost model's beam-4 row (182.07 min); the frozen schedule is beam 6,

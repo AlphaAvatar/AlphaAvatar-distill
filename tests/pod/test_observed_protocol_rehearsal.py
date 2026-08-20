@@ -104,6 +104,22 @@ def write_student(d: Path) -> None:
     ).save_pretrained(d)
 
 
+CANONICAL_TOKENIZER = REPO / "artifacts/stage1/qwen3_0p6b_init_v0/checkpoint"
+
+
+def canonical_tokenizer_sha256() -> str:
+    """Computed, not transcribed: a hard-coded hash here would silently drift
+    from the asset it claims to describe."""
+    import sys as _sys
+
+    _sys.path.insert(0, str(REPO / "src"))
+    from transformers import AutoTokenizer
+
+    from aadistill.models.teacher import tokenizer_hash
+
+    return tokenizer_hash(AutoTokenizer.from_pretrained(CANONICAL_TOKENIZER))
+
+
 @pytest.fixture(scope="module")
 def real_run(tmp_path_factory):
     """Train a toy control with the real `train_stage3.py` and return its tree."""
@@ -115,6 +131,14 @@ def real_run(tmp_path_factory):
     cfg = {
         "stage": "stage3_recovery", "run_name": "preflight_ctl_toy",
         "student_path": str(student), "teacher": None,
+        # The toy student is written by `save_pretrained` and carries NO
+        # tokenizer files, exactly like a searched leaf. Until 2026-08-20 this
+        # rehearsal therefore trained against a ONE-TOKEN vocabulary and nothing
+        # noticed, because `teacher: None` disables the teacher/student equality
+        # check that was the only guard. The tokenizer is now a declared
+        # dependency, so this states the one it uses.
+        "tokenizer_source": str(CANONICAL_TOKENIZER),
+        "tokenizer_sha256": canonical_tokenizer_sha256(),
         "data_dir": str(pack), "groups": None, "packing": "ladder", "rung": 40,
         "val_blocks": 2, "block_len": 16, "dtype": "float32",
         "autocast_bf16": False, "gradient_checkpointing": False,

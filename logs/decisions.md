@@ -5150,3 +5150,149 @@ review, per the grant. Two questions are owed to the maintainer:
 **Disposition.** Consumed; Stage 1 passed, Stage 2 fail-closed stop. Cumulative
 **$209.6842** of $231.00. No Attempt 12 is prepared, granted, funded or implied.
 Evidence: [`autoinit_phase_a_attempt11/`](autoinit_phase_a_attempt11/).
+
+## 2026-08-20 — The tokenizer contract belongs to the consumer, and Stage 1 now outlives Stage 2
+
+**Context.** Phase-A attempt 11 passed Stage 0 and Stage 1 — the first completed
+AutoInit beam search — and lost the probe at Stage 2 to
+`teacher and student tokenizers differ`, then lost the five selected leaf
+checkpoints with the pod. Two separate defects with one shape: a producer's
+output crossing a stage boundary into a consumer whose requirements nobody
+checked.
+
+### 1. The tokenizer source is declared, not inferred
+
+**The producer is not changed, deliberately.** A searched leaf is a *model*
+artifact. `Qwen3Adapter.save()` writes weights and config and no tokenizer files,
+which is correct: the search consumes pre-tokenized calibration items and never
+needs a tokenizer. And `CheckpointIdentity.artifact_digest` folds in
+`tokenizer_sha256` **when one is present**, so copying tokenizer files into an
+already-measured leaf would change the identity the Stage-1 metrics are attached
+to. Making `AutoTokenizer.from_pretrained(student_path)` succeed would have
+falsified the search record to fix a training bug.
+
+The contract moved to the consumer instead.
+`aadistill.models.tokenizer_contract.resolve_training_tokenizer`:
+
+* **requires** an explicit `tokenizer_source`, separate from `student_path`;
+* loads it through the real loader;
+* **verifies the loaded identity** against a pinned hash — a source that loads is
+  not thereby the right source;
+* cross-checks any tokenizer the student checkpoint itself carries, and refuses
+  when the two disagree;
+* refuses **before** training and before data construction.
+
+**Presence is decided by looking for files, never by calling the loader.** That
+is the whole point: attempt 11 established that
+`AutoTokenizer.from_pretrained()` on a directory holding only `config.json`
+**does not raise** — it returns a tokenizer with a **one-token vocabulary**, hash
+`42d8c56b2d86cf7b…` against the teacher's `7781771acc3798ee…`. A `try/except`
+around the loader would reproduce the bug in the code meant to prevent it.
+
+**Only the Phase-A frozen recipe declares the contract, and that is a
+correction.** The first attempt added `tokenizer_source` and `tokenizer_sha256`
+to all 54 recovery configs. The full suite refused it: `test_e3_configs`,
+`test_e4_configs` and `test_e8b_kd_chunk_regime` pin those configs' **file
+hashes**, because reproducing a recorded result means reproducing the config that
+produced it (P4). Editing 53 historical configs to fix a Phase-A bug would have
+broken the tie between every E3/E4/E8b result and its own recipe. The edit was
+reverted; the pins did their job.
+
+A historical config re-run today therefore refuses with the contract's message —
+strictly better than the previous behaviour of silently training against a
+one-token vocabulary — and adding the two fields becomes a deliberate one-line
+act by whoever re-runs it rather than a silent rewrite of the record.
+
+**The recovery protocol fingerprint is unchanged at `ab0d8cfd…`**, measured
+before and after: `phase_a_protocol` reads named fields rather than hashing the
+config file, so adding keys to the recipe cannot move it.
+
+**The toy rehearsal had been training on a one-token tokenizer.**
+`test_observed_protocol_rehearsal` writes its student with `save_pretrained` — no
+tokenizer files, exactly like a searched leaf — and sets `teacher: None`, which
+disabled the teacher/student equality check that was the only guard. So the trap
+was live inside the test suite as well, harmlessly, and unnoticed. It now
+declares its source, with the hash computed rather than transcribed.
+
+### 2. A successful Stage 1 must survive a failing Stage 2
+
+Attempt 11 spent **180.3 minutes** producing five valid, measured, selected
+leaves and kept none of them, because persistence happens after Stage-5 selection
+and Stage 2 failed six seconds after Stage 1 passed.
+
+The fix is not a new transfer path. Collection *already runs on the failure path*
+— attempt 11's manifest came home with `rc=0`, thirteen files. The leaves simply
+were not in it. So `aadistill.autoinit.leaf_durability.persist_selected_leaves`
+writes the five selected leaves into the audit tree at the Stage-1/2 boundary,
+which makes them a **collected artifact** rather than a Stage-5 fetch product.
+
+Each copy's identity is recomputed **after** transfer and required to equal the
+digest the search recorded — a copy that silently truncated passes every check
+made only at the source. A persisted copy that acquired tokenizer files is
+refused, because that would move the digest. A failure fails **Stage 1** closed,
+so Stage 2 cannot start on an unpreserved selection. Only the five selected
+leaves are preserved; the other 38 states are recorded and intentionally not.
+
+**And the space is checked before the first byte moves**, because a persistence
+step that runs out halfway has already destroyed what it was protecting.
+
+### The blocking measurement
+
+```
+five selected leaves      5.55 GiB   (5 × 1.110, from the search's own record)
+relay                    ~1.03 GiB free   (92.10 GiB LFS of an inferred 93.13)
+dev box                   3.4 GiB free    (185 of 197 GiB used, 99%)
+```
+
+**No configured destination currently has room.** The boundary therefore refuses,
+which is correct behaviour and also a blocker: Attempt 12 cannot preserve its
+result until storage is freed, the relay quota raised, or a destination chosen.
+That is a maintainer decision (P12) and was not taken here.
+
+### Pricing: recorded, not repriced
+
+The in-situ reference cache fell back **4/4** because the search leaves only
+~20.3 GiB free against the 36.42 GiB a standalone measurement saw. Recorded in
+the reserve's own provenance comment. **Not repriced**: Stage 1's complete wall
+time was 180.283 min, essentially reproducing the 180.0 base allowance, so the
+reserves keep their dollar semantics as contingency. `$17.8933 / $22.7183 /
+$23.0483`, ceiling `$23.0484`, Stage-1 deadline `363.9841 min`, frozen beam,
+search, operator and calibration science all unchanged.
+
+### Two defects this closure introduced, caught by running it for real
+
+**The durability destination polluted the repository.** `SELECTED_LEAF_DIR` was a
+module constant computed from `REPO`, so it ignored the rehearsal's
+`mod.AUDIT = tmp_path` redirection and wrote **seven real leaf directories,
+193 MB**, into the repository's own artifact tree — on a box that was already out
+of disk. It is now `selected_leaf_dir()`, derived from `AUDIT` at call time, and
+a test asserts the returned expression starts with `AUDIT /` and never mentions
+`REPO`. Restoring the constant fails it. **A test that redirects an output root
+must redirect everything written under it**, and a constant computed at import
+time cannot be redirected at all.
+
+**The dev box ran out of disk mid-suite**, which produced `3 failed, 14 errors`
+that were not code failures at all — `No space left on device`, with even tool
+output unable to write. Recovered 5 GB by removing `/tmp/pytest-of-ecs-user`,
+pytest's own scratch accumulated across ~10 full-suite runs. No project artifact
+was touched. This also sharpens the storage finding above: the box does not
+merely lack room for the five leaves at 5.55 GiB, it cannot hold them *and* run
+its own suite, which needs roughly 5 GB of scratch to complete.
+
+### Verification
+
+Mutation-verified. Ten mutations of the tokenizer contract and seven of the
+durability boundary fail correctly, including both original defects. **Four
+mutations initially passed and exposed real holes**, each now closed:
+
+* the trainer's **call site** was untested — rewiring it to pass `student_path`
+  passed every test of the contract function;
+* the tokenizer guard in the durability boundary was never *exercised*, because
+  the source had no tokenizer to begin with;
+* a durability failure that only warned still passed a loose source-text check;
+* `carries_tokenizer_files` was checked against a docstring that names the very
+  symbol being forbidden.
+
+Full suite, real Stage-0→5 orchestration (17 passed, 15:18 — the durability
+boundary executes there, since Stage 1 reports success only after it), frozen
+verifier and pod simulator all run on the final tree.

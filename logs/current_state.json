@@ -1,6 +1,6 @@
 {
   "schema": "aadistill.current_state/v2",
-  "generated_utc": "2026-08-20T13:30:00Z",
+  "generated_utc": "2026-08-20T15:00:00Z",
   "_contract": "The minimal machine-readable CURRENT snapshot: live facts only, no history, no per-attempt detail, no narrative. History lives in logs/decisions.md and the per-run directories; the human view is logs/STATE.md and the two must agree. Ownership: logs/CATALOG.md.",
   "baseline_commit": "1e3e783e54f770511fec0b348dbe593194cef762",
   "baseline_commit_meaning": "The LAST TESTED IMPLEMENTATION: the commit whose tree produced the latest_verification figures. It is deliberately NOT always the commit carrying this file -- when a paid launch is prepared, a grant/provenance commit and an authorization-only commit follow it and neither is separately tested. A reader must be able to tell which commit the suite numbers describe from which commit a pod checks out. Nothing checks this field; it is refreshed by hand whenever the verified tree moves.",
@@ -25,7 +25,8 @@
     "ledger": "logs/BUDGET_LEDGER.md",
     "headroom_note": "$21.3158 is NOT enough for another full Phase-A attempt at the $23.0484 per-launch ceiling -- $1.7326 short. The 2026-08-20 raise funded ONE attempt, it has run, and the approval says in terms that it does not authorize any subsequent attempt.",
     "cap_decision_pending": null,
-    "cap_raised_2026_08_20": "APPROVED $219.00 -> $231.00. A CUMULATIVE PROJECT CEILING ONLY: it does not change the $23.0484 per-launch hard ceiling, does not authorize any subsequent attempt, and does not authorize spend outside the next explicitly approved session."
+    "cap_raised_2026_08_20": "APPROVED $219.00 -> $231.00. A CUMULATIVE PROJECT CEILING ONLY: it does not change the $23.0484 per-launch hard ceiling, does not authorize any subsequent attempt, and does not authorize spend outside the next explicitly approved session.",
+    "cap_recommendation_pending": "RECOMMENDED and NOT APPROVED: $231.00 -> $234.00. One more full-ceiling launch reaches $232.7326, so $234.00 leaves $1.2674. Project ceiling only: the $23.0484 per-launch ceiling is unchanged, Attempt 12 still needs its own one-use grant/authorization, and $234.00 does not authorize an Attempt 13."
   },
   "frozen": {
     "science_plan_hash": "02be33b9a7a8e26bc8bfb75795351e8cdc9ffd441b47066cc81887cfc511b55c",
@@ -50,8 +51,10 @@
     ]
   },
   "complete": [
-    "Phase-A STAGE 1: the first completed AutoInit beam search (attempt 11, $3.2101) -- 43 states, 4 levels, 5 leaves selected, the COMPOSITE_STAGE1 baseline on front 4 and not selected",
-    "the bounded causal-depth runtime and backend measurement (attempt 3, $0.2077) -- see measured_causal_depth_runtime",
+    "the tokenizer consumer contract: the trainer declares and verifies its tokenizer source instead of inferring it from student_path",
+    "the selected-leaf durability boundary: the five leaves are persisted and re-verified before Stage 2",
+    "Phase-A STAGE 1: the first completed AutoInit beam search -- see phase_a_stage1_result",
+    "the bounded causal-depth runtime and backend measurement (attempt 3, $0.2077)",
     "Stage 3 (both permanent controls, thresholds materialized)",
     "the Phase-A harness, stages 0-5 executing for real at $0",
     "the Stage-1 device audit (autoinit.stage1_device_contract@v1)",
@@ -69,8 +72,7 @@
     "pod_simulator": "1931 passed, 22 skipped; artifact tree restored EXACTLY - 1167 entries, identical listing hash",
     "frozen_asset_verifier": "passed, no problems; NOT weakened or rescoped",
     "pricing_unchanged": "$17.8933 / $22.7183 / $23.0483, ceiling $23.0484 - exact",
-    "scope": "CPU only; no checkpoint loaded, no metric measured, no GPU used",
-    "exercised_on_hardware": "attempt 11's search finished 0.283 min past the old 180.0 bound, so the derivation is what produced a result"
+    "scope": "CPU only; no checkpoint loaded, no metric measured, no GPU used"
   },
   "failed": [
     {
@@ -112,9 +114,9 @@
     "the paid device-canary session path: STRATEGICALLY TERMINATED 2026-08-18. Two authorized sessions, $0.1240, zero canary runs; both died in the wrapper's inherited contracts. Its evidence and its generic lesson are kept; no further canary is prepared."
   ],
   "next_starting_point": {
-    "status": "Phase-A attempt 11 is consumed. STAGE 0 AND STAGE 1 PASSED -- the first completed AutoInit search. Stage 2 failed closed on a tokenizer guard and the run stopped for review. Nothing is running, billing, authorized or prepared.",
-    "the_ask": "NOTHING is prepared. Two maintainer decisions are owed: (1) how to carry tokenizer files into searched leaves, and (2) a cap decision -- $21.3158 remains against a $23.0484 ceiling, so no further full attempt fits.",
-    "the_open_defect": "Qwen3Adapter.save() writes no tokenizer files and AutoTokenizer.from_pretrained() on such a directory returns a 1-token vocabulary rather than raising. Reproduced at $0. NOT fixed -- the run stopped for review as the grant requires.",
+    "status": "The two $0 closures from attempt 11 are done and mutation-verified: the tokenizer consumer contract and the selected-leaf durability boundary. Nothing is running, billing, authorized or prepared.",
+    "the_ask": "NOTHING is prepared. Approve or reject the $234.00 cumulative cap; if approved, the next review is a direct GO/NO-GO for Phase-A Attempt 12 with no further canary, measurement or readiness phase.",
+    "blocking_measurement": "NO DESTINATION CURRENTLY HAS ROOM for the five leaves (5.55 GiB): the relay is at 92.10 GiB LFS of an inferred 93.13 GiB (~1.03 GiB free) and the dev box has 3.4 GiB free of 197 GiB. The durability boundary therefore FAILS CLOSED before Stage 2 rather than half-copying. Freeing space is a maintainer decision.",
     "process_rule": "'my intended next decision is GO' is not executable permission; a recommendation is not an approval"
   },
   "read_order": [
@@ -135,20 +137,14 @@
   },
   "phase_a_stage1_result": {
     "states": 43,
-    "levels": 4,
-    "complete_leaves": 7,
-    "pruned": 18,
     "leaves_selected": 5,
     "parameters_each": 596049920,
     "search_minutes": 180.283,
     "composite_stage1_baseline": "front 4, NOT selected -- four search-discovered orderings dominate it",
-    "reference_cache": "fell back to recompute all 4 invocations: 16.9 GiB does not fit in 66% of 20.3 GiB free inside the search",
-    "causal_depth_minutes": 122.1,
-    "deadline_margin": "finished 0.283 min PAST the old 180.0 bound; 16e382f is why",
-    "leaf_weights": "GONE with the pod (finalists fetch after stage-5, which never ran)",
+    "leaf_weights": "GONE with attempt 11's pod; the durability boundary now prevents a repeat, subject to storage",
     "artifact": "logs/autoinit_phase_a_attempt11/search_result.json"
   },
-  "causal_depth_cost": "measured standalone 12.07 eval/min / 21.53 min per 260 evals (attempt 3, cached); observed INSIDE the search 6.96-10.79 eval/min on the fallback path, which is the only path reachable there. See phase_a_stage1_result.",
   "measurement_attempts": "3 launches, $0.4611: $0.0700 setup contract, $0.1834 driver entrypoint, then $0.2077 COMPLETE. Detail: logs/autoinit_measurement_attempt{1,2,3}/",
-  "failed_before_attempt_11": "Phase A 8 $0.1900 (a $0 test asserting dev-box state), 9 $0.3400 (unplaced accumulator), 10 $11.4300 (causal-depth scored on the host, unpriced). All three classes closed and CONFIRMED closed by attempt 11 reaching stage 2. Earlier: Phase A 1-7 $2.3828 and two canaries $0.1240. Detail: logs/decisions.md and the per-run directories."
+  "failed_before_attempt_11": "Phase A 8 $0.1900 (a $0 test asserting dev-box state), 9 $0.3400 (unplaced accumulator), 10 $11.4300 (causal-depth scored on the host, unpriced). All three classes closed and CONFIRMED closed by attempt 11 reaching stage 2. Earlier: Phase A 1-7 $2.3828 and two canaries $0.1240. Detail: logs/decisions.md and the per-run directories.",
+  "causal_depth_cost": "standalone 12.07 eval/min (attempt 3, cached); INSIDE the search 6.96-10.79 on the fallback path, which fired 4/4. Recorded, NOT repriced: Stage 1 took 180.283 min against the 180.0 base allowance."
 }

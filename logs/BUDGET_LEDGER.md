@@ -579,6 +579,14 @@ Phase A attempt 8 (L40S, 11.28 min) SETUP TEST GATE FAILED   $  0.1900
 unused authorization remaining                               $ 21.3158
     = $231.00 - $209.6842. This is NOT enough for another full Phase-A
     attempt at the $23.0484 per-launch ceiling -- it is $1.7326 short.
+    RECOMMENDED AND NOT APPROVED (2026-08-20): raise the cumulative
+    project cap to $234.00. One further full-ceiling launch would reach
+    $209.6842 + $23.0484 = $232.7326, so $234.00 leaves $1.2674 of
+    margin. That is a PROJECT-LEVEL CEILING recommendation only: the
+    Phase-A per-launch hard ceiling stays $23.0484, a future Attempt 12
+    still requires a new explicit one-use grant and authorization, and
+    a $234.00 cap does NOT authorize an Attempt 13. Until it is
+    approved in the imperative, no Phase-A attempt may be prepared.
     The 2026-08-20 raise funded ONE attempt, that attempt has run, and
     the maintainer's approval says in terms that it "does not authorize
     any subsequent attempt".
