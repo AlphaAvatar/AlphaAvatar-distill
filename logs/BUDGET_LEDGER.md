@@ -188,6 +188,12 @@ $213.00   +$1.93 for Phase A (2026-08-15). The maintainer approved raising the
           cap "e.g. $213-214" after being shown that Phase A did not fit;
           $213.00 was selected from that range as the conservative end and is
           the figure recorded here. Nothing was spent against it.
+$234.00   +$3.00 (2026-08-21). APPROVED, in the maintainer's own words: "I
+          approve the cumulative project cap increase from $231.00 to $234.00,
+          but this is only the project ceiling. The Phase-A per-launch ceiling
+          remains $23.0484, and no Attempt 12 launch is authorized yet."
+          Arithmetic: $209.6842 spent, so one full hard-ceiling attempt reaches
+          $232.7326, leaving $1.2674. It does NOT authorize an Attempt 13.
 $231.00   +$12.00 (2026-08-20). APPROVED, in the maintainer's own words: "I
           approve raising the cumulative AlphaAvatar-distill project cap from
           $219.00 to $231.00." Explicitly scoped: "This is a cumulative project
@@ -288,8 +294,9 @@ $2.30   RAISED 2026-08-14 with maintainer approval, after attempt 1 spent
 ## Current position
 
 ```
-authorized cumulative cap                                    $231.00
-    RAISED AND APPROVED 2026-08-20, from $219.00. A CUMULATIVE PROJECT
+authorized cumulative cap                                    $234.00
+    RAISED AND APPROVED 2026-08-21, from $231.00 (itself raised from
+    $219.00 on 2026-08-20). A CUMULATIVE PROJECT
     CEILING ONLY: it does not change the $23.0484 Phase-A per-launch
     hard ceiling, does not authorize any subsequent attempt, and does
     not authorize spend outside the next explicitly approved session.
@@ -576,8 +583,15 @@ Phase A attempt 8 (L40S, 11.28 min) SETUP TEST GATE FAILED   $  0.1900
     one launch and is SPENT. No retry was attempted and no attempt 9
     is authorized, funded, prepared or implied.
     Evidence: logs/autoinit_phase_a_attempt8/
-unused authorization remaining                               $ 21.3158
-    = $231.00 - $209.6842. This is NOT enough for another full Phase-A
+unused authorization remaining                               $ 24.3158
+    = $234.00 - $209.6842. RAISED AND APPROVED 2026-08-21 from
+    $231.00. Enough for one full-ceiling Phase-A attempt ($23.0484)
+    with $1.2674 of margin -- and for nothing after it. The approval
+    says in terms that it is "only the project ceiling", that the
+    per-launch ceiling is unchanged, and that no Attempt 12 launch is
+    authorized yet. Attempt 12 still requires its own one-use grant and
+    authorization; a $234.00 cap does not authorize an Attempt 13.
+    (superseded arithmetic, kept for the audit trail: This is NOT enough for another full Phase-A
     attempt at the $23.0484 per-launch ceiling -- it is $1.7326 short.
     RECOMMENDED AND NOT APPROVED (2026-08-20): raise the cumulative
     project cap to $234.00. One further full-ceiling launch would reach

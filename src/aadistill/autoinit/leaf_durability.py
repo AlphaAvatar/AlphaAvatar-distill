@@ -38,9 +38,10 @@ import shutil
 from pathlib import Path
 from typing import Any, Callable, Mapping, Sequence
 
-from .artifact import identify_checkpoint
+from .artifact import _tokenizer_digest, identify_checkpoint
 
-__all__ = ["LeafDurabilityError", "free_bytes_at", "persist_selected_leaves"]
+__all__ = ["LeafDurabilityError", "free_bytes_at", "persist_selected_leaves",
+           "verify_transferred_leaf"]
 
 
 class LeafDurabilityError(RuntimeError):
@@ -121,6 +122,14 @@ def persist_selected_leaves(
                 "is a separate consumer dependency.")
         persisted.append({
             "state_id": state_id,
+            #: The whole identity, so a verifier on another machine can rebuild
+            #: `artifact_digest` from LOCAL bytes plus the two fields no file
+            #: carries -- `arch_signature` and `num_parameters`.
+            "identity": identity.as_dict(),
+            "weights_digest": identity.weights_digest,
+            "config_sha256": identity.config_sha256,
+            "arch_signature": identity.arch_signature,
+            "num_parameters": identity.num_parameters,
             "source": str(source),
             "path": str(target),
             "artifact_digest": identity.artifact_digest,
@@ -140,4 +149,60 @@ def persist_selected_leaves(
         "note": ("persisted after Stage-1 selection and before Stage 2, so a "
                  "Stage-2 failure cannot destroy a search that already "
                  "succeeded. Weight-only: no tokenizer files are added."),
+    }
+
+
+def verify_transferred_leaf(directory: str | Path, record: Mapping[str, Any], *,
+                            adapter: Any) -> dict:
+    """Re-identify a leaf that has landed on another machine.
+
+    Staging a leaf on the pod is not durability; it is a copy that dies with the
+    pod. This is the other half — run **after** the transfer, on the destination,
+    rebuilding the identity from the bytes that actually arrived.
+
+    `arch_signature` and `num_parameters` are taken from the record because no
+    file carries them: they come from the adapter's `ArchSpec`, which lives where
+    the search ran. **Everything else is recomputed from local bytes**, so a
+    transfer that truncated a shard or mangled a config is caught here rather
+    than assumed away.
+    """
+    from .artifact import CheckpointIdentity, ShardRecord
+    from ..infrastructure.manifest import sha256_file, sha256_json
+
+    import json as _json
+
+    d = Path(directory)
+    if not d.is_dir():
+        raise LeafDurabilityError(f"{d}: nothing arrived")
+    names = sorted(adapter.weight_files(str(d)))
+    if not names:
+        raise LeafDurabilityError(
+            f"{d}: no weight shards arrived; the transfer moved no weights")
+    config = d / "config.json"
+    if not config.is_file():
+        raise LeafDurabilityError(f"{d}: config.json did not arrive")
+
+    index_name = adapter.index_file(str(d))
+    local = CheckpointIdentity(
+        path=str(d),
+        shards=tuple(ShardRecord(n, sha256_file(d / n), (d / n).stat().st_size)
+                     for n in names),
+        config_sha256=sha256_json(_json.loads(config.read_text())),
+        arch_signature=record["arch_signature"],
+        num_parameters=int(record["num_parameters"]),
+        index_sha256=sha256_file(d / index_name) if index_name else None,
+        tokenizer_sha256=_tokenizer_digest(d))
+
+    recorded = record["artifact_digest"]
+    return {
+        "path": str(d),
+        "artifact_digest": local.artifact_digest,
+        "recorded_digest": recorded,
+        "matched": local.artifact_digest == recorded,
+        "weights_digest": local.weights_digest,
+        "weights_digest_matched": local.weights_digest == record.get("weights_digest"),
+        "single_shard_sha256": local.single_shard_sha256,
+        "shard_matched": local.single_shard_sha256 == record.get("single_shard_sha256"),
+        "tokenizer_sha256": local.tokenizer_sha256,
+        "total_bytes": local.total_bytes,
     }

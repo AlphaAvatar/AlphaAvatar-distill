@@ -456,6 +456,13 @@ GATE_ORDER: tuple[str, ...] = (
     "transfer_complete",
     "local_hashes_verified",
     "checkpoint_hashes_matched",
+    # Separate from `checkpoint_hashes_matched`, which is `all([])` and therefore
+    # VACUOUSLY TRUE when nothing was fetched. This asks the other question: were
+    # the products this session OWES off-pod actually secured? Phase-A attempt 11
+    # staged five selected leaves on the pod, fetched none of them because the
+    # product fetch returns early when stage 2 failed, and lost all five — with
+    # every other check green.
+    "required_products_secured",
     "report_inputs_verified",
 )
 

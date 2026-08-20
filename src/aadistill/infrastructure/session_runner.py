@@ -573,6 +573,16 @@ class SessionRunner:
             self.context(host=host, target=target, scp=tuple(scp),
                          stage2_passed=stage2_passed))
         self.ev["checkpoints_fetched"] = fetched
+        # Did this session secure what it OWES off-pod? Asked separately from
+        # `checkpoint_hashes_matched`, which is `all([])` and therefore vacuously
+        # true when the fetch returned nothing at all.
+        secured_ok, secured_why = art.products_secured(
+            self.context(host=host, target=target, scp=tuple(scp),
+                         stage2_passed=stage2_passed), fetched)
+        self.ev["required_products_secured"] = {"ok": bool(secured_ok),
+                                                "why": secured_why}
+        if not secured_ok:
+            self.say(f"  PRODUCTS NOT SECURED: {secured_why}")
 
         done = terminal == success
         state = {
@@ -587,6 +597,7 @@ class SessionRunner:
             "local_hashes_verified": local_ok,
             "checkpoint_hashes_matched": all(f.get("rc") == 0 for f in fetched),
             "report_inputs_verified": local_ok,
+            "required_products_secured": bool(secured_ok),
         }
         decision = evaluate_teardown(
             state,

@@ -214,6 +214,13 @@ def test_the_gate_order_matches_the_documented_sequence():
         "required_files_present", "final_streams_quiescent", "archive_created",
         "archive_contents_verified", "transfer_complete",
         "local_hashes_verified", "checkpoint_hashes_matched",
+        # Added 2026-08-21, and deliberately AFTER checkpoint_hashes_matched:
+        # that check is `all([])` and therefore vacuously true when the fetch
+        # returned nothing at all. This one asks whether the products a session
+        # OWES off-pod were actually secured. Phase-A attempt 11 staged five
+        # selected leaves on the pod, fetched none, and lost all five with every
+        # other check green.
+        "required_products_secured",
         "report_inputs_verified")
 
 
@@ -283,6 +290,7 @@ def test_a_log_that_grows_between_manifest_and_archive_still_verifies(tmp_path):
         "transfer_complete": True,
         "local_hashes_verified": not verify_extracted(local, manifest),
         "checkpoint_hashes_matched": True,
+        "required_products_secured": True,
         "report_inputs_verified": True}).allowed
 
 

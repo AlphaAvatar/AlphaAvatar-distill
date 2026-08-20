@@ -249,6 +249,18 @@ class ArtifactPolicy:
     #: Fetch what this session PRODUCED and cannot regenerate for free. Returns
     #: a list of records for the session evidence.
     fetch_products: Callable[["SessionContext"], list] = lambda ctx: []
+    #: Did this session secure the products it OWES off-pod? Returns `(ok, why)`
+    #: and feeds the `required_products_secured` teardown check.
+    #:
+    #: Separate from `fetch_products` returning cleanly, because `all([])` is
+    #: True: a fetch that returned NOTHING passes `checkpoint_hashes_matched`
+    #: while having secured nothing at all. Phase-A attempt 11 staged five
+    #: selected leaves on the pod and lost every one with every check green.
+    #:
+    #: The default answers "this session owes no products", which is the honest
+    #: answer for a run that produces no weights — not a reason to skip the gate.
+    products_secured: Callable[..., tuple[bool, str]] = \
+        lambda ctx, fetched: (True, "this session owes no off-pod products")
     #: Extra `(remote_path, local_filename)` pairs the log relay pulls while the
     #: driver runs, beyond the run log, the status file and the evidence. The
     #: preflight relays both controls' training streams; the continuation, which

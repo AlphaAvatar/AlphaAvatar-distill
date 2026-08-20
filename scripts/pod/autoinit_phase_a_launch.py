@@ -39,6 +39,7 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import shutil
 import subprocess
 import sys
 from pathlib import Path
@@ -173,6 +174,43 @@ def stage1_deadline_minutes(plan) -> float:
     return base[0] + sum(r.minutes for r in plan.soft_stop_reserves)
 
 
+#: What five bf16 leaves at the frozen student size actually weigh, measured
+#: from attempt 11's own search record: 5 x 1.110 GiB. Not an estimate.
+SELECTED_LEAF_BYTES = 5 * 1_192_099_840
+#: Room to land them AND for the box to keep working. The dev box ran out of
+#: disk mid-suite on 2026-08-20 and produced fourteen errors that were not code
+#: failures; the suite alone needs roughly 5 GB of scratch to complete.
+CKPT_STORE_MARGIN_BYTES = 6 * 2**30
+
+
+def ckpt_store_capacity_gate(ctx: SessionContext) -> tuple[bool, str]:
+    """Can the DEV BOX hold the five selected leaves? Asked before a pod exists.
+
+    The driver's own headroom check runs on the pod and proves only that the pod
+    can stage them. That is not durability, and a session that discovers at
+    teardown that the leaves have nowhere to land has already paid for the
+    search it is about to lose.
+    """
+    dest = Path(ctx.args.ckpt_store) / "phase_a"
+    probe = dest
+    while not probe.exists() and probe != probe.parent:
+        probe = probe.parent
+    free = shutil.disk_usage(probe).free
+    need = SELECTED_LEAF_BYTES + CKPT_STORE_MARGIN_BYTES
+    ctx.evidence.setdefault("precheck", {})["ckpt_store"] = {
+        "destination": str(dest), "free_bytes": free,
+        "required_bytes": need, "leaf_bytes": SELECTED_LEAF_BYTES}
+    if free < need:
+        return False, (
+            f"{probe} has {free / 2**30:.2f} GiB free; the five stage-1 selected "
+            f"leaves are {SELECTED_LEAF_BYTES / 2**30:.2f} GiB and landing them "
+            f"needs {need / 2**30:.2f} GiB with working room. Free space before "
+            "launching: a search that succeeds and cannot come home is the "
+            "attempt-11 loss repeated at full price.")
+    return True, (f"{probe}: {free / 2**30:.1f} GiB free for "
+                  f"{need / 2**30:.1f} GiB of leaves and working room")
+
+
 def probe_streams(ctx: SessionContext) -> tuple[str, ...]:
     """The probe training streams a torn-down session may have left mid-write.
 
@@ -211,6 +249,102 @@ def finalists_to_fetch(ctx: SessionContext) -> list[str]:
             ctx.say("  no retention record; falling back to the winner alone")
             return [winner]
     return []
+
+
+#: Where the Stage-1 selected leaves land off-pod. The existing dev-box
+#: checkpoint store, not a new one: `--ckpt-store` already defaults to
+#: `/home/ecs-user/aad-artifacts/autoinit` and `fetch_finalists` already writes
+#: `<store>/phase_a/<state_id>` through the product transfer path.
+SELECTED_LEAF_REPORT = "selected_leaf_durability.json"
+
+
+def selected_leaf_records(ctx: SessionContext) -> list[dict]:
+    """The five leaves Stage 1 staged, or [] if Stage 1 did not get that far.
+
+    Read from the durability report, which is fetched with the other reports
+    BEFORE products. Its existence IS the "stage 1 completed" signal: the driver
+    writes it only after persisting and re-verifying every selected leaf.
+    """
+    report = ctx.scr / "store" / SELECTED_LEAF_REPORT
+    if not report.is_file():
+        return []
+    return list(json.loads(report.read_text()).get("leaves", []))
+
+
+def fetch_selected_leaves(ctx: SessionContext) -> list:
+    """Bring the Stage-1 selected leaves off the pod, whatever Stage 2 did.
+
+    **This is the attempt-11 fix.** That session produced five valid, measured,
+    selected leaves in 180.3 minutes and lost every one, because the only
+    product fetch returns early when stage 2 did not pass — and stage 2 failed
+    six seconds after stage 1 succeeded. Staging them on the pod, which the
+    driver now does, is not durability; it is a copy that dies with the pod.
+
+    Deliberately NOT routed through the artifact tarball. The collector keeps
+    both the downloaded archive and its extracted copy while verifying, so five
+    incompressible 1.11 GiB safetensors would roughly double the temporary local
+    footprint on a box that is already short of disk. This uses the same
+    `scp -r` product path `fetch_finalists` uses.
+
+    Each leaf is re-identified ON THE DEV BOX after transfer and required to
+    equal the digest Stage 1 recorded. A transfer that silently truncated would
+    otherwise be indistinguishable from one that worked.
+    """
+    records = selected_leaf_records(ctx)
+    if not records:
+        return []
+
+    sys.path.insert(0, str(REPO_ROOT / "src"))
+    from aadistill.autoinit.arch import get_adapter
+    from aadistill.autoinit.leaf_durability import verify_transferred_leaf
+
+    adapter = get_adapter("qwen3")
+    staged = f"{REPO}/artifacts/audit/autoinit_phase_a/selected_leaves"
+    out: list = []
+    for rec in records:
+        state_id = rec["state_id"]
+        dest = Path(ctx.args.ckpt_store) / "phase_a" / state_id
+        dest.parent.mkdir(parents=True, exist_ok=True)
+        rc = subprocess.run(
+            ["timeout", f"{ctx.args.ckpt_fetch_limit_min}m", "scp", "-r",
+             *ctx.scp[1:], f"root@{ctx.host}:{staged}/{state_id}", str(dest)],
+            capture_output=True, timeout=ctx.args.ckpt_fetch_limit_min * 60 + 120)
+        entry = {"artifact": "stage1_selected_leaf", "state_id": state_id,
+                 "route": "scp", "dest": str(dest), "rc": rc.returncode}
+        if rc.returncode == 0:
+            try:
+                entry.update(verify_transferred_leaf(dest, rec, adapter=adapter))
+                if not entry.get("matched"):
+                    entry["rc"] = 1
+            except Exception as exc:                       # noqa: BLE001
+                entry["rc"] = 1
+                entry["verify_error"] = f"{type(exc).__name__}: {exc}"
+        else:
+            entry["scp_tail"] = (rc.stderr or b"").decode(errors="replace")[-300:]
+        out.append(entry)
+        ctx.say(f"  stage-1 leaf {state_id[:12]} -> {dest}: rc={entry['rc']} "
+                f"digest={'MATCHED' if entry.get('matched') else 'NOT MATCHED'}")
+    return out
+
+
+def selected_leaves_secured(ctx: SessionContext, fetched: list) -> tuple[bool, str]:
+    """Teardown may not proceed on a Stage-1 success whose leaves are still only
+    on the pod."""
+    records = selected_leaf_records(ctx)
+    if not records:
+        return True, "stage 1 did not stage any selected leaves"
+    want = {r["state_id"] for r in records}
+    got = {f["state_id"] for f in fetched
+           if f.get("artifact") == "stage1_selected_leaf" and f.get("rc") == 0
+           and f.get("matched")}
+    missing = sorted(want - got)
+    if missing:
+        return False, (
+            f"stage 1 staged {len(want)} selected leaves and only {len(got)} are "
+            f"verified off-pod; missing {missing}. Deleting the pod now would "
+            "destroy a search that already succeeded, which is exactly what "
+            "attempt 11 did.")
+    return True, f"all {len(want)} stage-1 selected leaves verified off-pod"
 
 
 def fetch_finalists(ctx: SessionContext) -> list:
@@ -375,14 +509,26 @@ def spec(args) -> SessionSpec:
                           "attested_evaluation_protocol.json",
                           "search_result.json", "rung1_selection.json",
                           "leaf_retention.json",
+                          #: Fetched BEFORE products, because
+                          #: `fetch_selected_leaves` reads it to learn which five
+                          #: leaves stage 1 staged and what they must hash to.
+                          #: Its presence is also the "stage 1 completed" signal.
+                          SELECTED_LEAF_REPORT,
                           "rung2_selection.json", "phase_a_result.json"),
             event_streams=probe_streams,
-            fetch_products=fetch_finalists),
+            #: BOTH, and in this order. `fetch_selected_leaves` runs whenever
+            #: stage 1 staged leaves — it is NOT gated on stage 2, which is the
+            #: gate that lost attempt 11's five leaves six seconds after the
+            #: search succeeded.
+            fetch_products=lambda ctx: [*fetch_selected_leaves(ctx),
+                                        *fetch_finalists(ctx)],
+            products_secured=selected_leaves_secured),
         teardown=TeardownPolicy(
             note="Phase A is a terminus; nothing chains off it"),
         precheck=(
             session_commit_gate(REPO_ROOT, AUTH_PATH, check_lineage=True),
             frozen_science_plan_gate(REPO_ROOT, FROZEN_SCIENCE_PLAN),
+            ckpt_store_capacity_gate,
         ),
         evidence_fields={
             "phase_a_session_plan_hash": PHASE_A_PLAN_V1.plan_hash,

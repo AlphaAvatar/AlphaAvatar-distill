@@ -170,7 +170,8 @@ def test_collect_artifacts_full_cycle(tmp_path):
         "final_streams_quiescent": True,
         "archive_created": True, "archive_contents_verified": True,
         "transfer_complete": True, "local_hashes_verified": True,
-        "checkpoint_hashes_matched": True, "report_inputs_verified": True}))
+        "checkpoint_hashes_matched": True, "required_products_secured": True,
+        "report_inputs_verified": True}))
     gate = run([str(POD / "collect_artifacts.py"), "gate", "--state",
                 str(state)])
     assert gate.returncode == 0

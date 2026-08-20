@@ -358,6 +358,10 @@ def test_safe_teardown_runs_the_whole_sequence(session):
     state["transfer_complete"] = True
     state["local_hashes_verified"] = not verify_extracted(store, manifest)
     state["checkpoint_hashes_matched"] = True
+    # E6b owed no off-pod products beyond its archive, so the session answers
+    # the products-secured question with "none owed" rather than skipping it —
+    # an unreported check counts as False and would block this teardown.
+    state["required_products_secured"] = True
     state["report_inputs_verified"] = True
 
     decision = evaluate_teardown(state)

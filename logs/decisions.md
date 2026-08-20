@@ -5296,3 +5296,170 @@ mutations initially passed and exposed real holes**, each now closed:
 Full suite, real Stage-0→5 orchestration (17 passed, 15:18 — the durability
 boundary executes there, since Stage 1 reports success only after it), frozen
 verifier and pod simulator all run on the final tree.
+
+## 2026-08-21 — Staging is not durability: the selected leaves now leave the pod
+
+**Context.** The 2026-08-20 closure copied the five Stage-1 selected leaves to
+`artifacts/audit/autoinit_phase_a/selected_leaves` on the pod and re-verified
+their digests there, and I described that as closing the attempt-11 loss. **It
+did not.** The maintainer found the gap:
+
+* neither `phase_a_artifacts.json` nor `phase_a_artifacts_failed.json` names
+  `selected_leaves`, so the archive never carried them;
+* `selected_leaf_durability.json` was not a fetched report;
+* `fetch_finalists` returns immediately when `stage2_passed` is false.
+
+A Stage-2 failure could therefore still delete all five leaves with the pod —
+**the exact class the closure existed to prevent, with every other check green.**
+Pod-side staging is a copy that dies with the pod.
+
+**What actually closes it.**
+
+| | |
+| --- | --- |
+| `selected_leaf_durability.json` | an explicitly fetched report, ordered before the products that read it |
+| the Stage-1 leaf fetch | a **separate** fetch, run whenever Stage 1 staged leaves, **not gated on Stage 2** |
+| destination | `<ckpt_store>/phase_a/<state_id>` — the existing `/home/ecs-user/aad-artifacts/autoinit` store, by the same `scp -r` product path `fetch_finalists` already uses |
+| **not** the tarball | the collector retains the downloaded archive *and* its extracted copy during verification, so five incompressible 1.11 GiB safetensors would roughly double the temporary local footprint on a box already short of disk |
+| verification | `verify_transferred_leaf` re-identifies **on the dev box** from the bytes that arrived |
+| teardown | `required_products_secured`, a new `GATE_ORDER` check |
+
+**Why a new gate check rather than reusing `checkpoint_hashes_matched`.** That
+check is `all(f["rc"] == 0 for f in fetched)`, which is `all([])` — **vacuously
+true when the fetch returned nothing at all**. It would have passed attempt 11
+exactly as it did. The new check asks the other question: were the products this
+session *owes* off-pod actually secured? An unreported check counts as False, so
+it fails closed by construction, and `ArtifactPolicy.products_secured` defaults
+to an explicit "this session owes no off-pod products" rather than a skip.
+
+**Why `arch_signature` comes from the record.** No file in a checkpoint carries
+it — it is the adapter's `ArchSpec` hash, which lives where the search ran.
+Everything else is recomputed from local bytes: shard hashes, config hash, index,
+tokenizer digest. A transfer that truncated a shard or mangled a config is caught
+on the destination rather than assumed away.
+
+**The $0 capacity gate, and why the pod-side one was not enough.**
+`free_bytes_at()` inside `persist_selected_leaves` runs on the **pod** and proves
+only that the pod can stage them. `ckpt_store_capacity_gate` is a pre-provider
+precheck against the actual dev-box destination, and it **refuses today**:
+8.30 GiB free against 5.55 GiB of leaves plus 6 GiB of working room. That margin
+is not arbitrary — the box ran out of disk mid-suite on 2026-08-20 and produced
+fourteen errors that were not code failures, and the suite alone needs roughly
+5 GB of scratch.
+
+**Storage cannot be provisioned from here.** `nvme0n1` is 200 GB and
+`nvme0n1p3` already spans 199.8 GB: **there is no unallocated space to grow
+into**. Adding ~20–30 GiB means expanding the cloud volume first — a paid
+infrastructure change — then `growpart` and `resize2fs`. Measured usage:
+`aad-artifacts` 83 GB (canonical, holds the retained optimizer states), `~/.cache`
+25 GB of which the HF hub is 14 GB and re-downloadable, `AlphaAvatar` 15 GB,
+`AlphaAvatar-distill` 8.4 GB. Nothing was deleted but pytest's own scratch.
+
+**Mutation-verified, eight ways**, including the original defect: re-gating the
+fetch on Stage 2, dropping the report, dropping the secured callable, counting an
+unverified leaf as secured, dropping the capacity gate, zeroing its margin,
+removing the check from `GATE_ORDER`, and — the one that initially **passed** —
+the runner silently ceasing to report it. That hole is closed by asserting
+`GATE_ORDER ⊆ the keys the runner reports`, which covers the next check as well
+as this one.
+
+**Unchanged, deliberately:** tokenizer semantics, search science, retention
+selection, Phase-A pricing, and the five-leaf count.
+
+**Budget.** The cumulative project cap is **$234.00**, approved 2026-08-21 as a
+project ceiling only. $209.6842 spent leaves **$24.3158** — one full-ceiling
+attempt with $1.2674 of margin, and nothing after it. The per-launch ceiling
+remains $23.0484; Attempt 12 still requires its own one-use grant and
+authorization, and $234.00 does not authorize an Attempt 13.
+
+**Lesson, recorded because I got it wrong once.** "Verified" answers *where*, not
+just *whether*. A digest checked on the machine that is about to be destroyed
+proves the copy was made, not that it survives. The verification has to run on
+the destination, after the transfer, or it is measuring the wrong thing.
+
+## 2026-08-21 — The headroom came from derived caches; no checkpoint was deletable
+
+**Context.** Phase-A Attempt 12 is gated on local storage: the five selected
+leaves are 5.55 GiB, the suite needs ~5 GB of scratch, and the box was at 96%
+with 7.6 GiB free. The maintainer authorised a bounded cleanup of *checkpoints no
+longer used by any living experiment*.
+
+**Finding: the checkpoint inventory has nothing safely deletable.** All ten
+registry units marked `review` — 23.09 GiB — fail the approved criteria, and they
+fail on the same field:
+
+| unit | GiB | why it stays |
+| --- | ---: | --- |
+| 2 × `e2p1/*/step_001023/trainer_state.pt` | 6.56 | optimizer states: unique, local-only, paid GPU to regenerate — protected by explicit instruction |
+| 7 × `e2p1/*/step_*/model` | 15.62 | `canonical_location: local only (no second copy)`, `relay_verified: false` — sole surviving copies of unique paid-run state |
+| `aad-artifacts/e5` | 0.90 | `protected: true`, `never_delete_clause: unclassified`, `status: unreviewed` — **ambiguous, retained and reported** |
+
+Sixteen tombstones had already retired 3.64 GiB in an earlier pass, so the easy
+checkpoint wins were taken long ago. Reporting the shortfall was the instructed
+response, and it is the correct one: every remaining candidate would have traded
+reproducibility for disk.
+
+**The headroom came from derived caches instead**, which satisfy the same
+criteria the checkpoints fail — canonical copy elsewhere, deterministic
+reconstruction, no paid GPU, no scientific content of this project's own:
+
+| | GiB | reconstruction |
+| --- | ---: | --- |
+| `~/.cache/uv` | 7.4181 | PyPI, via `uv sync` from the committed lockfile |
+| 3 × Qwen3-4B-Thinking weight blobs | 7.4924 | the Hub, revision `768f209d9ea81521153ed38c47d515654e938aea` |
+| **total** | **14.9107** | |
+
+Free space **7.61 → 22.25 GiB**, 96% → 84.5% used, clearing the ~20 GiB target
+**without deleting a single checkpoint**.
+
+**Two pieces of evidence make this safe rather than hopeful.**
+
+*The venv is not hardlinked to the uv cache.* Both live on the same device, so
+hardlinks were possible — and of **26,363** venv regular files, **zero** have
+`st_nlink > 1` and zero share an inode with the cache. Without that check,
+removing the cache could have freed nothing (linked bytes stay referenced) or
+broken the environment.
+
+*The evicted blobs' hashes are measured, not transcribed.* Each blob's sha256 was
+recomputed from its bytes **before** eviction and equals its cache filename. Only
+one revision is cached, so no unrelated revision was at risk, and only the three
+`model-0000N-of-00003.safetensors` blobs were removed — `tokenizer.json`,
+`vocab.json`, `merges.txt`, both configs and the shard index all stay. Verified
+afterwards under `HF_HUB_OFFLINE=1`: the teacher tokenizer still loads, 151,669
+tokens, hashing to `7781771acc3798ee…`, the frozen recovery-protocol identity.
+
+**Recorded as cleanup events, not tombstones.** A tombstone means a path is
+permanently retired; both caches are recreated by routine commands, so filing
+them as active tombstones would reproduce the tombstone-semantics defect this
+project has already fixed twice — an active tombstone naming a path a living
+session legitimately writes. `logs/derived_cache_cleanup.json` carries the paths,
+bytes, verified blob hashes, reconstruction source and revision, and the
+resulting free space. The tombstone file is untouched: still 16 active, 3.6406
+GiB, and no cache path appears in it.
+
+**The storage inventory could not see any of this, and now can.** Its four areas
+measure what the project *occupies*; none measured what the box has *left*, so a
+14.91 GiB reclamation outside every area moved no figure and the reading looked
+as though nothing had happened. Free space is also the quantity Phase A's new
+pre-provider capacity gate decides on — an inventory that cannot report it cannot
+answer the question being asked of it. A `filesystem` block was added: additive,
+with the four area definitions untouched, so the "same definitions or the
+difference means nothing" rule still holds.
+
+**Not touched:** the sibling AlphaAvatar project's Hub caches (MinerU2.5, livekit
+turn-detector, docling, plugins-persona, ~3.8 GB) — another project's working
+set, and deleting it would break that project to solve this one's problem.
+
+**Adding a gate check has a blast radius.** `required_products_secured` joined
+`GATE_ORDER`, and because an unreported check counts as False, four existing
+tests failed on the full suite — the documented-sequence assertion plus three
+hand-built teardown states that predate the check. That is the contract working:
+a session that does not answer the question does not get a teardown. Each was
+updated to answer it explicitly ("this session owes no off-pod products") rather
+than by relaxing the rule. The focused suites did not catch it; the canonical
+full suite did, which is why it is in the gate.
+
+**Verified after:** all 27 protected registry units present; the canonical
+initialization still hashes to `86fbba78…`; `state_eval_v1`,
+`recovery_search_v2`, the calibration mixture and the probe ladder all present;
+frozen-asset verifier passed.

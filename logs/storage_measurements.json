@@ -193,6 +193,62 @@
           "files": 659
         }
       }
+    },
+    {
+      "label": "after-derived-cache-cleanup",
+      "measured_utc": "2026-08-20T17:17:12+00:00",
+      "commit": "5c9fdd40ddd1fa1e2fd64cc46731491442c800c4",
+      "note": "uv build cache 7.4181 GiB and the three Qwen3-4B-Thinking-2507 weight blobs 7.4924 GiB evicted; no checkpoint deleted; see logs/derived_cache_cleanup.json",
+      "areas": {
+        "repository_working_tree": {
+          "definition": "the tree excluding .git, .venv, artifacts/ and caches",
+          "bytes": 153293505,
+          "files": 879,
+          "of_which_logs_bytes": 7345033,
+          "of_which_logs_files": 286,
+          "of_which_data_bytes": 139121268,
+          "of_which_data_files": 70,
+          "git_tracked_bytes": 14358405,
+          "git_tracked_files": 814,
+          "git_dir_bytes": 39310103
+        },
+        "local_artifact_storage": {
+          "definition": "artifacts/ in the tree PLUS the out-of-tree store, both generated and gitignored",
+          "bytes": 96241784146,
+          "files": 1419,
+          "in_tree": {
+            "path": "artifacts",
+            "bytes": 7390054345,
+            "files": 976
+          },
+          "out_of_tree": {
+            "path": "/home/ecs-user/aad-artifacts",
+            "bytes": 88851729801,
+            "files": 443
+          }
+        },
+        "relay_lfs_storage": {
+          "repo": "AlphaAvatar/aadistill-artifacts",
+          "bytes": 98913220067,
+          "files": 1152,
+          "source": "logs/checkpoint_registry.json (cached listing)",
+          "queried_utc": "2026-08-17T19:05:45+00:00"
+        },
+        "scratch_session_directories": {
+          "definition": "per-session working directories, bundles, poller output and pod-simulator quarantine",
+          "path": "/home/ecs-user/aad-scratch",
+          "bytes": 131247299,
+          "files": 851
+        }
+      },
+      "filesystem": {
+        "path": "/home/ecs-user",
+        "total_bytes": 210978394112,
+        "used_bytes": 178278256640,
+        "free_bytes": 23892717568,
+        "free_human": "22.25 GiB",
+        "percent_used": 84.5
+      }
     }
   ]
 }

@@ -26,6 +26,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import shutil
 import subprocess
 import sys
 from datetime import datetime, timezone
@@ -131,6 +132,15 @@ def human(n: int) -> str:
     return str(n)
 
 
+def _filesystem_free() -> dict:
+    """Free space on the volume the artifacts and the test scratch share."""
+    usage = shutil.disk_usage(Path.home())
+    return {"path": str(Path.home()), "total_bytes": usage.total,
+            "used_bytes": usage.used, "free_bytes": usage.free,
+            "free_human": f"{usage.free / 2**30:.2f} GiB",
+            "percent_used": round(100 * usage.used / usage.total, 1)}
+
+
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--label", required=True,
@@ -150,6 +160,18 @@ def main() -> int:
                                  check=False).stdout.strip(),
         "note": args.note,
         "areas": measure(args.relay),
+        #: The FILESYSTEM, added 2026-08-21. The four areas above measure what
+        #: this project occupies; none of them measures what the box has left,
+        #: so a 14.91 GiB reclamation from `~/.cache` — outside every area —
+        #: moved no figure here at all, and the reading read as if nothing had
+        #: happened. Free space is also the quantity Phase A's pre-provider
+        #: capacity gate now decides on, so an inventory that cannot report it
+        #: cannot answer the question being asked of it.
+        #:
+        #: Additive on purpose: the four area definitions are untouched, so the
+        #: "same definitions or the difference means nothing" rule still holds
+        #: and older readings simply lack this key.
+        "filesystem": _filesystem_free(),
     }
 
     out = REPO_ROOT / args.out

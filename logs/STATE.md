@@ -1,4 +1,4 @@
-**Updated:** 2026-08-20 · branch `main` · after the tokenizer-contract and leaf-durability closure
+**Updated:** 2026-08-21 · branch `main` · after the derived-cache storage cleanup
 
 # Current state
 
@@ -25,8 +25,8 @@ selection result.**
 
 ```
 cumulative spend   $209.6842
-approved cap       $231.00    RAISED AND APPROVED 2026-08-20
-remaining          $21.3158   $1.7326 SHORT of one more full attempt
+approved cap       $234.00    RAISED AND APPROVED 2026-08-21
+remaining          $24.3158   enough for ONE attempt, $1.2674 margin
 
 **The cap was raised from $219.00 to $231.00 on 2026-08-20** to fund exactly one
 Phase-A attempt. That attempt has run and cost **$3.2101** — far under its
@@ -153,71 +153,86 @@ instead of the cause, and it was paid for twice. Full diagnoses in
 
 ## Next starting point
 
-**Both `$0` closures from attempt 11 are done and mutation-verified.** Nothing is
-running, billing, authorized or prepared.
+**The selected-leaf closure is now actually off-pod.** The first version staged
+the five leaves on the pod and verified them there, which was useful staging and
+not durability: the artifact specs never named `selected_leaves`, the durability
+report was not fetched, and `fetch_finalists` returns immediately when Stage 2
+did not pass. A Stage-2 failure could still have deleted all five — the exact
+class the closure exists to prevent, with every other check green.
 
-### 1. The tokenizer is declared, not inferred
+What closes it:
 
-The producer is unchanged — a searched leaf is a model artifact and stays
-weight-only, because `artifact_digest` folds in `tokenizer_sha256` and adding
-files to a measured leaf would move the identity its search metrics hang on.
+| | |
+| --- | --- |
+| the durability report | now a **fetched report**, ordered before the products that read it |
+| the Stage-1 leaf fetch | **not gated on Stage 2** — it runs whenever Stage 1 staged leaves |
+| destination | `/home/ecs-user/aad-artifacts/autoinit/phase_a/<state_id>`, the existing store, by the **product `scp` path** |
+| not the tarball | the collector keeps archive *and* extracted copy while verifying; five incompressible 1.11 GiB safetensors would roughly double the temporary footprint |
+| verification | re-identified **on the dev box** from local bytes; `arch_signature` and `num_parameters` come from the record because no file carries them, everything else is recomputed |
+| teardown | `required_products_secured` is in `GATE_ORDER`, and an unreported check counts as False — so it **fails closed** |
 
-The contract moved to the consumer. `aadistill.models.tokenizer_contract`
-requires an explicit source, loads it through the real loader, verifies its hash
-against the frozen protocol identity `7781771acc3798ee…`, cross-checks any
-tokenizer the student itself carries, and refuses **before** training or data
-construction. Presence is decided by looking for files, never by calling the
-loader — the check attempt 11 proved does not hold.
+`checkpoint_hashes_matched` could not do this job: it is `all([])` and therefore
+vacuously true when the fetch returned nothing at all.
 
-**Only the Phase-A frozen recipe declares the contract.** The first attempt
-added it to all 54 recovery configs and the full suite refused: E3/E4/E8b pin
-those configs' *file hashes*, because reproducing a result means reproducing the
-config that produced it. The edit was reverted. A historical config re-run today
-refuses with a clear message instead of silently using a one-token vocabulary.
-**The recovery protocol fingerprint is unchanged at `ab0d8cfd…`**, verified
-before and after, so nothing about tokenization moved.
-
-### 2. A successful Stage 1 survives a failing Stage 2
-
-`aadistill.autoinit.leaf_durability` persists the five selected leaves at the
-Stage-1/2 boundary, into the audit tree that collection walks **on every path
-including failure** — which is what attempt 11 needed and the Stage-5 fetch route
-could not give it. Each copy's identity is recomputed after transfer and required
-to equal the digest the search recorded; a failure fails **Stage 1** closed, so
-Stage 2 cannot start on an unpreserved selection. Weight-only: a persisted copy
-that acquired tokenizer files is refused.
-
-### The blocking measurement: there is nowhere to put them
+### The $0 capacity gate refuses today, correctly
 
 ```
-five selected leaves      5.55 GiB   (5 × 1.110, from the search's own record)
-relay                    ~1.03 GiB free   (92.10 GiB LFS of an inferred 93.13)
-dev box                   3.4 GiB free    (185 GiB of 197 used, 99%)
+destination free   8.30 GiB
+five leaves        5.55 GiB   (measured, 5 × 1.110)
++ working room     6.00 GiB   (the suite alone needs ~5 GB of scratch)
+= required        11.55 GiB   ->  REFUSED before a pod exists
 ```
 
-**No configured destination currently has room.** The durability boundary
-therefore refuses before moving a byte, which is the designed behaviour — a
-persistence step that runs out of space halfway has already destroyed what it was
-protecting. Freeing space, raising the relay quota or attaching storage is a
-maintainer decision and I have not taken it.
+The driver's own headroom check runs on the **pod** and proves only that the pod
+can stage them. This one asks whether the destination can hold them, at $0,
+before anything is paid for.
 
-### Pricing: recorded, not repriced
+### Storage: cleared, and no checkpoint was deleted
 
-The in-situ cache fell back 4/4 because the search has only ~20.3 GiB free
-against the 36.42 GiB a standalone measurement saw. Recorded in the reserve's own
-provenance comment. **Not repriced**: Stage 1 took 180.283 min against the 180.0
-base allowance, so the reserves keep their dollar semantics as contingency.
-Pricing remains exactly `$17.8933 / $22.7183 / $23.0483`, ceiling `$23.0484`,
-Stage-1 deadline `363.9841 min`. Frozen beam, search, operator and calibration
-science unchanged.
+```
+free   7.61 GiB  ->  22.25 GiB      used 96%  ->  84.5%
+reclaimed 14.9107 GiB, entirely from DERIVED caches
+```
 
-### Two decisions owed
+| removed | GiB | reconstruction |
+| --- | ---: | --- |
+| `~/.cache/uv` | 7.4181 | PyPI via `uv sync` from the committed lockfile |
+| 3 × Qwen3-4B-Thinking weight blobs | 7.4924 | the Hub at revision `768f209d…` |
 
-1. **Storage** — where the five leaves go, given nothing has 5.55 GiB free.
-2. **The $234.00 cap** — recommended, not approved.
+**The checkpoint inventory had nothing safely deletable.** All ten `review` units
+(23.09 GiB) are `local only (no second copy)` and need **paid GPU** to
+reconstruct, including the two optimizer states; `aad-artifacts/e5` is
+additionally `protected` and unclassified and is **retained pending explicit
+classification**. Sixteen tombstones had already retired 3.64 GiB in an earlier
+pass.
 
-If both are settled, the next review is a direct GO / NO-GO for Phase-A Attempt
-12, with no further canary, measurement or readiness phase.
+Safety evidence rather than assertion: of **26,363** venv files, **zero** are
+hardlinked to the uv cache (same device, so links were possible); each evicted
+blob's sha256 was recomputed from its bytes before removal and matched its cache
+name; only one revision is cached; and the tokenizer, configs and shard index
+were kept, verified afterwards under `HF_HUB_OFFLINE=1` to still hash
+`7781771acc3798ee…`.
+
+Recorded in [`derived_cache_cleanup.json`](derived_cache_cleanup.json) as
+**cleanup events, not tombstones** — both caches are recreated by routine
+commands, and an active tombstone on such a path is the semantics defect this
+project has already fixed twice. The tombstone file is untouched at 16 active /
+3.6406 GiB.
+
+The storage inventory now reports filesystem free space. It previously measured
+only what the project occupies, so a reclamation outside all four areas moved no
+figure at all — and free space is exactly what the new capacity gate decides on.
+
+Untouched: the sibling AlphaAvatar project's Hub caches (~3.8 GB).
+
+### Two things stand between here and Attempt 12
+
+1. ~~Storage~~ — **cleared**: 22.25 GiB free and the capacity gate now passes.
+2. Nothing else. The cap is approved at **$234.00**, which funds one attempt with
+   $1.2674 of margin and nothing after it.
+
+**Attempt 12 is not prepared, granted or authorized.** It still needs its own
+one-use grant and authorization.
 
 **Process rule, standing:** "my intended next decision is GO" is not executable
 permission, and a recommendation is not an approval.

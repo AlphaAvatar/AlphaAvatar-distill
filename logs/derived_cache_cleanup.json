@@ -1,0 +1,81 @@
+{
+  "schema": "aadistill.derived_cache_cleanup/v1",
+  "_what_this_is": "DERIVED-CACHE cleanup events, deliberately NOT tombstones. A tombstone means a path is permanently retired and asserts that nothing may recreate it; both of these caches are recreated by routine commands (`uv sync`, any Hub download). Filing them as active tombstones would reproduce the tombstone-semantics defect this project has already fixed twice \u2014 an active tombstone naming a path a living session legitimately writes.",
+  "performed_utc": "2026-08-21T05:30:00Z",
+  "authorised_by": "Maintainer instruction, 2026-08-21: proceed with the derived-cache cleanup instead of checkpoint deletion; the 10 review checkpoint units are retained.",
+  "checkpoints_deleted": 0,
+  "checkpoint_note": "NONE. All 10 registry units marked `review` (23.09 GiB) record `canonical_location: local only (no second copy)` and `reconstruction_cost: paid GPU`, failing the approved criteria. aad-artifacts/e5 additionally carries protected=true and never_delete_clause=unclassified and is retained pending explicit classification.",
+  "events": [
+    {
+      "id": "uv_build_cache_2026_08_21",
+      "path": "/home/ecs-user/.cache/uv",
+      "kind": "package build/wheel cache",
+      "bytes_removed": 7965209483,
+      "gib_removed": 7.4181,
+      "scientific_content": "none - derived build artefacts only",
+      "reconstruction_source": "PyPI, via `uv sync` from the committed lockfile",
+      "reconstruction_cost": "network only; no paid GPU",
+      "safety_evidence": {
+        "same_filesystem_as_venv": true,
+        "venv_regular_files_examined": 26363,
+        "venv_files_with_nlink_gt_1": 0,
+        "venv_files_sharing_an_inode_with_the_cache": 0,
+        "meaning": "hardlinks were POSSIBLE (same device) and none exist, so the removal frees real bytes and cannot break the venv"
+      },
+      "recreated_by": "any `uv sync` / `uv pip install`"
+    },
+    {
+      "id": "qwen3_4b_thinking_weight_blobs_2026_08_21",
+      "path": "/home/ecs-user/.cache/huggingface/hub/models--Qwen--Qwen3-4B-Thinking-2507/blobs",
+      "kind": "upstream model weight blobs (Hugging Face cache)",
+      "bytes_removed": 8044982000,
+      "gib_removed": 7.4924,
+      "scientific_content": "none of the project's own - these are the upstream teacher's published weights, not a project checkpoint",
+      "reconstruction_source": "Qwen/Qwen3-4B-Thinking-2507 on the Hugging Face Hub",
+      "reconstruction_revision": "768f209d9ea81521153ed38c47d515654e938aea",
+      "reconstruction_cost": "network only; no paid GPU",
+      "only_revision_cached": "768f209d9ea81521153ed38c47d515654e938aea",
+      "blobs_evicted": [
+        {
+          "sha256": "98178c1cddbca8ad76102afdbf76e4df79b64b82377ad4dca34c755cac00571a",
+          "file": "model-00001-of-00003.safetensors",
+          "bytes": 3957900840,
+          "content_hash_verified": true
+        },
+        {
+          "sha256": "57b5bd1f667d420350f169342a90b50e5ffc2aa202ba1819da1af3367ff2261f",
+          "file": "model-00002-of-00003.safetensors",
+          "bytes": 3987450520,
+          "content_hash_verified": true
+        },
+        {
+          "sha256": "e3cccb84e8926f3f18c334465639939a68af310b0729938fccc2de66a9a31953",
+          "file": "model-00003-of-00003.safetensors",
+          "bytes": 99630640,
+          "content_hash_verified": true
+        }
+      ],
+      "hash_verification": "each blob's sha256 was recomputed from its bytes and equals its cache filename BEFORE eviction, so the recorded identity is measured rather than transcribed from a filename",
+      "retained_deliberately": [
+        "tokenizer.json (11,422,654 B)",
+        "tokenizer_config.json",
+        "vocab.json",
+        "merges.txt",
+        "config.json",
+        "generation_config.json",
+        "model.safetensors.index.json"
+      ],
+      "retention_reason": "several $0 tests load the teacher TOKENIZER by Hub id; keeping the tokenizer and configs lets them run offline with the weights gone. Verified after eviction with HF_HUB_OFFLINE=1: vocabulary 151,669, hash 7781771acc3798ee\u2026, matching the frozen recovery-protocol identity.",
+      "not_touched": "no other revision (only one is cached), no tokenizer/config metadata, and no sibling AlphaAvatar-project cache - MinerU2.5, livekit turn-detector, docling and plugins-persona, ~3.8 GB, belong to another project and were left alone",
+      "recreated_by": "any `from_pretrained` against that repo and revision"
+    }
+  ],
+  "totals": {
+    "bytes_removed": 16010191483,
+    "gib_removed": 14.9107,
+    "free_bytes_after": 23990665216,
+    "free_gib_after": 22.34,
+    "target_gib": 20.0,
+    "target_met": true
+  }
+}
