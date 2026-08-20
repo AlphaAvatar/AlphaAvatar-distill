@@ -25,13 +25,15 @@ selection result.**
 
 ```
 cumulative spend   $206.4741
-approved cap       $219.00
-remaining          $12.5259   NOT permission
+approved cap       $231.00    RAISED AND APPROVED 2026-08-20
+remaining          $24.5259   affordability, NOT permission
 
-**$12.5259 is not enough for another full Phase-A attempt** at the $23.0484
-per-launch ceiling. A retry requires a separate budget/cap decision after the
-runtime fix is reviewed. Stopping attempt 10 early preserved ~$11.6 of the
-ceiling it was authorized to spend.
+**The cap was raised from $219.00 to $231.00 on 2026-08-20**, as a *cumulative
+project ceiling only*: it does not change the $23.0484 per-launch hard ceiling,
+does not authorize any subsequent attempt, and does not authorize spend outside
+the next explicitly approved session. One full hard-ceiling attempt reaches
+$229.5225, leaving $1.4775 of margin. It funds **one** Phase-A Attempt 11 and
+nothing else — Attempt 12 is not funded, authorized, prepared or implied.
 ```
 
 Every authorization issued is **consumed** — each one's lineage gate refuses the
@@ -147,74 +149,43 @@ instead of the cause, and it was paid for twice. Full diagnoses in
 
 ## Next starting point
 
-**The measurement is done and nothing is running, billing, authorized or
-prepared.** Attempt 3's grant and authorization are **consumed**; all three
-measurement authorizations are spent and each one's lineage gate refuses the
-current HEAD by construction. Full artifact and analysis:
-[`autoinit_measurement_attempt3/`](autoinit_measurement_attempt3/).
+**Phase-A Attempt 11 is granted and being prepared.** The maintainer's GO of
+2026-08-20 covers exactly one launch through the frozen Stage 0-5 protocol,
+against reviewed implementation `16e382f`, following the approved cap raise to
+$231.00. Grant:
+[`autoinit_phase_a_attempt11_grant.json`](autoinit_phase_a_attempt11_grant.json).
 
-### What was measured
+**At this commit nothing is authorized and nothing is launchable**: the
+authorization does not exist yet. It is issued against this tree in the next
+commit, which the lineage gate requires to differ from this one in nothing but
+the authorization artifact. That is why this snapshot still reads `authorized:
+false` — it describes the pre-authorization base, which is what a pod checks out.
 
-| question | answer |
+### What attempt 10 left open, and how it was closed
+
+| blocker | closure |
 | --- | --- |
-| rate vs the E8a anchor | **12.07** weighted evals/min vs **12.0** — +0.6%. 260 evals price at **21.53 min** |
-| backend equality | per-item KL delta **exactly 0.0** at \|skip\|=1 **and** \|skip\|=8 |
-| production peak VRAM | **26.82 GiB** on a 44.39 GiB L40S — 17.57 GiB headroom |
-| comparison-path peak | 10.45 GiB, kept separate; neither holds two ~16.9 GiB caches |
-| reference cache | **CACHED**, 16.913 GiB against 36.42 GiB available at fraction 0.66. No fallback |
-| GPU utilization | mean **98.3%**, median 98, min 94 over 221 samples; **zero** below 10% |
+| causal-depth scored on the host: $11.43, GPU at 0–1%, no expansion finished in 10 h 47 m | reduction returned to the accelerator, CPU equivalence proved at $0, then **measured**: 12.07 eval/min vs the 12.0 anchor, per-item KL delta **0.0**, GPU 98.3% |
+| the runtime deadline was the 180-min base while the priced envelope is 363.9841 min | deadline now **derived** from the same `BudgetPlan` as the dollar figures; mutation-verified 7 ways; pricing and identities unchanged |
 
-The flat cardinality-8 extrapolation is **20.08 min** and understates by
-**6.7%** — evaluation cost falls monotonically with cardinality (5.251 s → 4.635 s)
-while the schedule spends most of its 260 evaluations at *low* cardinality, so
-pricing from the cheapest configuration is wrong. The artifact labels it as such.
+The cost model is **measured-confirmed, not replaced** — the causal-depth
+operator is not repriced, and beam width, search space, operators, calibration,
+seeds and the recovery/selection rules are untouched.
 
-### What this settles about attempt 10
+### Pricing and bounds for this launch
 
-Attempt 10 spent **$11.43** and never finished one expansion, at 0–1% GPU. The
-same operator now runs at 98.3% and prices the whole schedule at 21.53 minutes —
-**at least 30× faster**. The `.cpu()` in `depth.causal_kl_greedy_v1` was the
-whole cause, and the frozen cost model was right all along. The cgroup fix is
-confirmed too: the container advertised 128 CPUs, the driver held torch to the
-13 it was granted.
+```
+expected            $17.8933      soft stop    $22.7183
+priced hard         $23.0483      ceiling      $23.0484
+stage-1 deadline    363.9841 min  = 180.0000 + 36.2158 + 147.7683
+```
 
-### The Stage-1 deadline now matches the price
-
-The runtime `Deadline` was built from the 180-minute base allowance while the
-priced Stage-1 envelope is **363.9841 min** — the base plus the beam-6 correction
-(36.2158) and the reference-cache fallback reserve (147.7683), both consumed
-inside stage 1. A valid search taking the fallback path would have been killed at
-180 minutes with 183.98 minutes of purchased time unspent.
-
-`stage1_deadline_minutes(plan)` now reads the **same `BudgetPlan`** the dollar
-figures come from, so the deadline cannot drift from the price and a future
-reserve extends it with no edit. `SEARCH_MINUTES` stays 180.0 and stage 1 is
-still *priced* at the base; `afford()` still checks the base, because widening it
-would refuse to start a search expected to cost 180 minutes. The driver's
-duplicate `default=180.0` is gone — both flags are `required=True`.
-
-**Pricing is unchanged, exactly:** `$17.8933` / `$22.7183` / `$23.0483`, ceiling
-`$23.0484`. So are the frozen identities, and a test moves both reserves and the
-base and asserts the session plan hash does not follow. Mutation-verified seven
-ways. **The causal-depth operator is not repriced** — attempt 3 confirmed the
-existing cost model rather than replacing it.
-
-### What is decided next, by the maintainer and not here
-
-**The cumulative budget needs an explicit maintainer decision, and has not had
-one.** $206.4741 is spent of a $219.00 cap, leaving **$12.5259** — less than the
-**$23.0484** per-launch Phase-A ceiling, so Phase A is *arithmetically* blocked,
-not merely discouraged. One more full attempt would reach a worst case of
-`$206.4741 + $23.0484 = $229.5225`.
-
-A cap of **$231.00** with the per-launch ceiling unchanged at $23.0484 has been
-**recommended and is NOT approved**. Until it is approved in the imperative, no
-Phase-A attempt may be prepared, granted or launched. **No Phase-A attempt 11 is
-prepared, granted, funded or implied, and none is being prepared.**
+Worst case takes the project to $229.5225 of $231.00. **The cap raise funds this
+attempt and nothing after it**: Attempt 12 is not funded, authorized, prepared or
+implied, and must not be inferred from whatever headroom remains.
 
 **Process rule, standing:** "my intended next decision is GO" is not executable
-permission, and an explicit GO covers the workload named — not new paid-path
-infrastructure written to carry it.
+permission, and a recommendation is not an approval.
 
 ## Where else to look
 

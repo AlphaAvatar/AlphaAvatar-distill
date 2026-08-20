@@ -188,6 +188,18 @@ $213.00   +$1.93 for Phase A (2026-08-15). The maintainer approved raising the
           cap "e.g. $213-214" after being shown that Phase A did not fit;
           $213.00 was selected from that range as the conservative end and is
           the figure recorded here. Nothing was spent against it.
+$231.00   +$12.00 (2026-08-20). APPROVED, in the maintainer's own words: "I
+          approve raising the cumulative AlphaAvatar-distill project cap from
+          $219.00 to $231.00." Explicitly scoped: "This is a cumulative project
+          ceiling only. It does not change the existing Phase-A per-launch hard
+          ceiling of $23.0484, does not authorize any subsequent attempt, and
+          does not authorize spending outside the next explicitly approved
+          session."
+          The arithmetic it was granted against: $206.4741 spent, so one full
+          hard-ceiling Phase-A attempt reaches $206.4741 + $23.0484 =
+          $229.5225, leaving $1.4775 of margin under the new cap. It funds
+          ONE Phase-A Attempt 11 and nothing else. Attempt 12 is NOT funded,
+          authorized, prepared or implied by it.
 $219.00   +$2.00 (2026-08-17). APPROVED. Funds AT MOST two things: one
           infrastructure-only Stage-1 GPU device canary with hard cap
           $1.0197, and -- ONLY if that canary passes and tears down
@@ -276,8 +288,12 @@ $2.30   RAISED 2026-08-14 with maintainer approval, after attempt 1 spent
 ## Current position
 
 ```
-authorized cumulative cap                                    $219.00
-    RAISED AND APPROVED 2026-08-17. See the caps list above.
+authorized cumulative cap                                    $231.00
+    RAISED AND APPROVED 2026-08-20, from $219.00. A CUMULATIVE PROJECT
+    CEILING ONLY: it does not change the $23.0484 Phase-A per-launch
+    hard ceiling, does not authorize any subsequent attempt, and does
+    not authorize spend outside the next explicitly approved session.
+    See the caps list above.
 actual cumulative spend                                      $206.4741
     = $194.0530 + $0.1900 attempt 8 + $0.3400 attempt 9
       + $11.4300 attempt 10 + $0.0700 measurement attempt 1
@@ -507,14 +523,18 @@ Phase A attempt 8 (L40S, 11.28 min) SETUP TEST GATE FAILED   $  0.1900
     one launch and is SPENT. No retry was attempted and no attempt 9
     is authorized, funded, prepared or implied.
     Evidence: logs/autoinit_phase_a_attempt8/
-unused authorization remaining                               $ 12.5259
-    = $219.00 - $206.4741. NOT enough for another full Phase-A attempt
-    at the $23.0484 per-launch ceiling. A retry needs a separate
-    budget/cap decision after the runtime fix is reviewed.
-    UNUSED BALANCE IS NOT AUTHORIZATION. Nothing below is a standing
-    permission to spend it; each line is a consumed or lapsed commitment
-    kept for arithmetic. Neither measurement attempt 3 nor Phase-A
-    attempt 11 is prepared, funded, granted or implied by this figure.
+unused authorization remaining                               $ 24.5259
+    = $231.00 - $206.4741. This IS enough for one full Phase-A attempt
+    at the $23.0484 per-launch ceiling, with $1.4775 of margin -- which
+    is what the 2026-08-20 raise was granted for, and the ONLY thing it
+    was granted for.
+    UNUSED BALANCE IS STILL NOT AUTHORIZATION. The cap makes Attempt 11
+    affordable; the GRANT and the AUTHORIZATION are what make it
+    permitted, and both are one-use. After Attempt 11 the remaining
+    figure MUST NOT be read as funding an Attempt 12: the maintainer's
+    approval says the raise "does not authorize any subsequent attempt".
+    Nothing below is a standing permission to spend; each line is a
+    consumed or lapsed commitment kept for arithmetic.
     Previously committed against it:
       device canary hard                                       $  1.0197
         SPENT $0.1240 across two sessions, NEITHER of which ran

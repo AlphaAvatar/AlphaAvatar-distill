@@ -1,6 +1,6 @@
 {
   "schema": "aadistill.current_state/v2",
-  "generated_utc": "2026-08-20T09:20:00Z",
+  "generated_utc": "2026-08-20T10:00:00Z",
   "_contract": "The minimal machine-readable CURRENT snapshot. It owns live facts and nothing else: no history, no per-attempt detail, no narrative. History lives in logs/decisions.md and the per-run directories; the human view of THIS file is logs/STATE.md and the two must agree. README owns no live facts. Ownership rules: logs/CATALOG.md.",
   "baseline_commit": "1e3e783e54f770511fec0b348dbe593194cef762",
   "baseline_commit_meaning": "The LAST TESTED IMPLEMENTATION: the commit whose tree produced the latest_verification figures. It is deliberately NOT always the commit carrying this file -- when a paid launch is prepared, a grant/provenance commit and an authorization-only commit follow it and neither is separately tested. A reader must be able to tell which commit the suite numbers describe from which commit a pod checks out. Nothing checks this field; it is refreshed by hand whenever the verified tree moves.",
@@ -19,12 +19,13 @@
   },
   "budget": {
     "cumulative_spend_usd": 206.4741,
-    "authorized_cap_usd": 219.0,
-    "remaining_usd": 12.5259,
+    "authorized_cap_usd": 231.0,
+    "remaining_usd": 24.5259,
     "remaining_is_not_permission": true,
     "ledger": "logs/BUDGET_LEDGER.md",
-    "headroom_note": "$12.5259 is NOT enough for another full Phase-A attempt at the $23.0484 per-launch ceiling. Remaining headroom is not permission, and nothing is prepared.",
-    "cap_decision_pending": "RECOMMENDED and NOT APPROVED: raise the cumulative cap to $231.00 with the per-launch ceiling unchanged at $23.0484. $12.5259 remains, which is LESS than the $23.0484 per-launch ceiling, so Phase A is arithmetically blocked until a cap is approved in the imperative. Worst case for one more attempt: $229.5225."
+    "headroom_note": "$24.5259 IS enough for one full Phase-A attempt at the $23.0484 per-launch ceiling, with $1.4775 of margin. That is the only thing the 2026-08-20 raise was granted for. Attempt 12 is not funded, authorized or implied by it.",
+    "cap_decision_pending": null,
+    "cap_raised_2026_08_20": "APPROVED $219.00 -> $231.00. A CUMULATIVE PROJECT CEILING ONLY: it does not change the $23.0484 per-launch hard ceiling, does not authorize any subsequent attempt, and does not authorize spend outside the next explicitly approved session."
   },
   "frozen": {
     "science_plan_hash": "02be33b9a7a8e26bc8bfb75795351e8cdc9ffd441b47066cc81887cfc511b55c",
@@ -53,12 +54,12 @@
     "Stage 3 (both permanent controls, thresholds materialized)",
     "the Phase-A harness, stages 0-5 executing for real at $0",
     "the Stage-1 device audit (autoinit.stage1_device_contract@v1)",
-    "the bounded Stage-1 device-allocation audit: 15 fresh-tensor factories in the frozen-operator closure classified device-coupled or intentionally host-only; 3 fixed, the rest verified correct",
+    "the bounded Stage-1 device-allocation audit: 15 factories classified, 3 fixed, the rest verified",
     "Stage 0 on hardware, passed five times (attempt 10 attested interval 0.011695, floor 0.3000, plan 02be33b9)",
-    "the Stage-1 device fixes, confirmed on CUDA: attempt 10's composite expansion completed and wrote a state, so stream_projection's avg, the orthonormality eye and _head_rows all placed correctly",
-    "the causal-depth runtime repair: scoring restored to the accelerator per E8a, cgroup-aware CPU budget, search_minutes as a fail-closed in-expansion deadline, bounded per-candidate progress",
-    "the measurement job's entrypoint behind an executable seam: run_entrypoint() holds all orchestration, main() is parse+call, and each injection point has its own test -- which is how the calibration-path defect was found at $0",
-    "the Stage-1 runtime deadline derived from the priced envelope: 363.9841 min (base 180.0 + beam-6 36.2158 + fallback 147.7683) instead of the base alone, read off the same BudgetPlan that produces the dollar thresholds"
+    "the Stage-1 device fixes, confirmed on CUDA by attempt 10's completed composite expansion",
+    "the causal-depth runtime repair: scoring on the accelerator per E8a, cgroup-aware CPU budget, a fail-closed in-expansion deadline",
+    "the measurement job's entrypoint behind an executable seam, with a test per injection point",
+    "the Stage-1 runtime deadline derived from the priced envelope -- see stage1_runtime_deadline_minutes"
   ],
   "latest_verification": {
     "utc": "2026-08-20T09:20:00Z",
@@ -125,9 +126,9 @@
     "the paid device-canary session path: STRATEGICALLY TERMINATED 2026-08-18. Two authorized sessions, $0.1240, zero canary runs; both died in the wrapper's inherited contracts. Its evidence and its generic lesson are kept; no further canary is prepared."
   ],
   "next_starting_point": {
-    "status": "The Stage-1 deadline/pricing alignment is done and verified at $0. Nothing is running, billing, authorized or prepared. All three measurement grants and authorizations are consumed.",
-    "the_ask": "NOTHING is prepared. Two maintainer decisions are owed, in order: (1) approve or reject the $231.00 cumulative cap; (2) then a direct GO / NO-GO for Phase-A Attempt 11, with no further canary, measurement or readiness phase.",
-    "if_go": "grant -> clean pre-auth base -> issue -> authorization-only commit differing in exactly one path -> bundle -> round-trip verify -> $0 gates -> one launch.",
+    "status": "Phase-A Attempt 11 is GRANTED (logs/autoinit_phase_a_attempt11_grant.json, 2026-08-20) against reviewed implementation 16e382f, after the cap raise to $231.00. At THIS commit nothing is authorized: the authorization is issued in the next commit, which differs from this base only in the authorization artifact.",
+    "the_ask": "ONE launch of Phase A through the frozen Stage 0-5 protocol on a single L40S. Pricing unchanged: expected $17.8933, soft $22.7183, hard $23.0483, per-launch ceiling $23.0484. Stage-1 runtime deadline 363.9841 min.",
+    "then": "report the stage-by-stage result, actual spend, scientific outputs and provider-confirmed teardown, and STOP. Attempt 12 is not funded, authorized, prepared or implied -- the cap raise explicitly does not authorize any subsequent attempt.",
     "process_rule": "'my intended next decision is GO' is not executable permission; a recommendation is not an approval"
   },
   "read_order": [
@@ -144,15 +145,18 @@
     "weighted_evals_per_minute": 12.07,
     "e8a_anchor_evals_per_minute": 12.0,
     "weighted_260_eval_minutes": 21.53,
-    "flat_cardinality_8_minutes_WRONG": 20.08,
-    "flat_understates_pct": 6.7,
     "max_per_item_kl_delta": 0.0,
     "production_peak_gib": 26.82,
-    "comparison_peak_gib": 10.45,
-    "device_total_gib": 44.39,
     "reference_cache_cached": true,
     "gpu_mean_utilization_pct": 98.3,
-    "authorizes": "NOTHING. Inputs to a repricing and a separate budget decision."
+    "verdict": "the existing cost model is MEASURED-CONFIRMED, not replaced"
   },
-  "measurement_attempts_1_and_2": "$0.0700 setup contract (declared LOCAL_ASSETS = () while the shared setup verifies both frozen roots) and $0.1834 driver entrypoint (main() imported as_operator_items from the wrong module; no $0 test called main()). Both closed structurally and mutation-verified; attempt 3 then COMPLETED. Detail: logs/autoinit_measurement_attempt{1,2,3}/"
+  "measurement_attempts_1_and_2": "$0.0700 setup contract (declared LOCAL_ASSETS = () while the shared setup verifies both frozen roots) and $0.1834 driver entrypoint (main() imported as_operator_items from the wrong module; no $0 test called main()). Both closed structurally and mutation-verified; attempt 3 then COMPLETED. Detail: logs/autoinit_measurement_attempt{1,2,3}/",
+  "stage1_runtime_deadline_minutes": {
+    "total": 363.9841,
+    "base_search_allowance": 180.0,
+    "beam6_correction": 36.2158,
+    "reference_cache_fallback_reserve": 147.7683,
+    "derived_from": "the BudgetPlan that produces the dollar thresholds"
+  }
 }
