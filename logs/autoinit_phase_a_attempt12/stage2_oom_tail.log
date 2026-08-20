@@ -1,0 +1,15 @@
+gs, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/aad/src/aadistill/training/train.py", line 1060, in _eval_blocks
+    ce_sum, cn, kd_sum, kn = self._micro_losses(ids, mask, content)
+                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/aad/src/aadistill/training/train.py", line 827, in _micro_losses
+    ce_sum, ce_n = masked_ce(logits, ids, mask)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/aad/src/aadistill/training/train.py", line 380, in masked_ce
+    return F.cross_entropy(sel.float(), targets, reduction="sum"), count
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/train/lib/python3.12/site-packages/torch/nn/functional.py", line 3504, in cross_entropy
+    return torch._C._nn.cross_entropy_loss(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+torch.OutOfMemoryError: CUDA out of memory. Tried to allocate 3.58 GiB. GPU 0 has a total capacity of 44.39 GiB of which 2.36 GiB is free. Process 6820 has 24.05 GiB memory in use. Including non-PyTorch memory, this process has 17.97 GiB memory in use. Of the allocated memory 17.46 GiB is allocated by PyTorch, and 13.10 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://docs.pytorch.org/docs/stable/notes/cuda.html#optimizing-memory-usage-with-pytorch-cuda-alloc-conf)

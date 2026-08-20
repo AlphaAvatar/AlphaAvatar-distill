@@ -1,4 +1,4 @@
-**Updated:** 2026-08-21 · branch `main` · Phase-A Attempt 12 granted
+**Updated:** 2026-08-21 · branch `main` · after Phase-A Attempt 12 — **Stage 1 passed and its leaves survived**
 
 # Current state
 
@@ -24,9 +24,9 @@ selection result.**
 ## Budget
 
 ```
-cumulative spend   $209.6842
+cumulative spend   $213.4714
 approved cap       $234.00    RAISED AND APPROVED 2026-08-21
-remaining          $24.3158   enough for ONE attempt, $1.2674 margin
+remaining          $20.5286   $2.5198 SHORT of one more full attempt
 
 **The cap was raised from $219.00 to $231.00 on 2026-08-20** to fund exactly one
 Phase-A attempt. That attempt has run and cost **$3.2101** — far under its
@@ -153,42 +153,68 @@ instead of the cause, and it was paid for twice. Full diagnoses in
 
 ## Next starting point
 
-**Phase-A Attempt 12 is granted and being prepared.** The maintainer's GO of
-2026-08-21 covers exactly one launch through the frozen Stage 0-5 protocol,
-against tested implementation `f331e49`. Grant:
-[`autoinit_phase_a_attempt12_grant.json`](autoinit_phase_a_attempt12_grant.json).
+**Attempt 12 ran: Stage 0 and Stage 1 passed, and this time the search result
+survived.** $3.7872, 229.5 min, pod deleted with provider confirmation. Grant and
+authorization **consumed**. Full record:
+[`autoinit_phase_a_attempt12/`](autoinit_phase_a_attempt12/).
 
-**At this commit nothing is authorized and nothing is launchable**: the
-authorization does not exist yet. It is issued against this tree in the next
-commit, which the lineage gate requires to differ from this one in nothing but
-the authorization artifact. That is why this snapshot still reads `authorized:
-false` — it describes the pre-authorization base, which is what a pod checks out.
+### The durability closure worked
 
-### What attempt 11 left open, and how it was closed
+All five selected leaves transferred to
+`/home/ecs-user/aad-artifacts/autoinit/phase_a/` with `digest=MATCHED` — **after
+the Stage-2 failure**, which is precisely the case that returned early before.
+`required_products_secured` recorded `ok: true`. Re-verified independently
+afterwards from local bytes: **5/5** on `artifact_digest` and
+`single_shard_sha256`, 1.110 GiB each, `tokenizer_sha256: None` — still
+weight-only, so the identity the search metrics hang on is untouched.
 
-| defect | closure |
-| --- | --- |
-| Stage 2 inferred its tokenizer from a weight-only leaf and got a **one-token vocabulary** | the tokenizer is a declared consumer dependency: explicit source, verified against `7781771acc3798ee…`, cross-checked against any tokenizer the student carries, refused before training. Presence is a file check, never a loader call |
-| the five selected leaves died with the pod | they now **leave** it: the durability report is fetched before products, the transfer is **not gated on Stage 2**, leaves land in the dev-box store by the product path, each is re-identified from local bytes, and `required_products_secured` blocks teardown until they are |
+Attempt 11 produced the same five leaves and destroyed every one.
 
-The producer is unchanged — searched leaves stay weight-only, because
-`artifact_digest` folds in `tokenizer_sha256`.
+### The search is deterministic — two paid runs, byte-identical
 
-### Bounds for this launch
+| | attempt 11 | attempt 12 |
+| --- | --- | --- |
+| `config_hash` | `567d32789ba6dcef…` | **identical** |
+| states / complete leaves | 43 / 7 | **43 / 7** |
+| selected state ids | five | **identical, in order** |
+| first depth invocation | layer 21, 0.625600, margin 1.529e-03 | **identical** |
+| wall time | 180.3 min | 203.8 min |
+
+Different pods, different hosts, three days apart. Only wall time differs. This
+is direct evidence the frozen search is deterministic as the science plan claims
+— something no `$0` test could establish.
+
+### The open defect: two processes, one GPU
 
 ```
-expected            $17.8933      soft stop    $22.7183
-priced hard         $23.0483      ceiling      $23.0484
-stage-1 deadline    363.9841 min  = 180.0000 + 36.2158 + 147.7683
-local free          ~21 GiB       capacity gate PASSES
+torch.OutOfMemoryError: Tried to allocate 3.58 GiB.
+GPU 0 has 44.39 GiB of which 2.36 GiB is free.
+Process 6820 has 24.05 GiB in use … this process has 17.97 GiB in use.
 ```
 
-Worst case takes the project to $232.7326 of $234.00. **The cap funds this
-attempt and nothing after it** — Attempt 13 is not funded, authorized, prepared
-or implied, and must not be inferred from whatever margin remains.
+The driver runs the beam search **in-process** — deliberately, because the rungs
+need live `InitializationState` objects — so it still holds ~24 GiB when Stage 2
+spawns `train_stage3.py` as a subprocess needing ~18 GiB. 44.39 GiB does not fit
+both.
 
-**If Stage 1 completes, the five selected leaves must be verified off-pod before
-teardown, whatever Stages 2-5 do.**
+**Structural, not a race.** It will recur at the same point on every attempt on
+this hardware. Same shape as the reference-cache finding: the search's residency
+is larger than a standalone measurement of a stage suggests, and stage boundaries
+that look sequential in code are not sequential in device memory.
+
+Not the tokenizer — that closure held, and training reached a loss computation.
+**No fix is applied**; the run stopped for review.
+
+### Two decisions owed
+
+1. **How Stage 1 releases its device memory before Stage 2** spawns the trainer.
+2. **Budget.** $20.5286 remains, **$2.5198 short** of another full attempt.
+
+Worth weighing: the five verified leaves mean a future attempt could in principle
+start from Stage 2 rather than re-running a 203-minute search. That is a
+maintainer decision, not an assumption.
+
+**No Attempt 13 is prepared, granted, funded or implied.**
 
 **Process rule, standing:** "my intended next decision is GO" is not executable
 permission, and a recommendation is not an approval.

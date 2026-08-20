@@ -1,6 +1,6 @@
 {
   "schema": "aadistill.current_state/v2",
-  "generated_utc": "2026-08-21T08:00:00Z",
+  "generated_utc": "2026-08-21T07:20:00Z",
   "_contract": "The minimal machine-readable CURRENT snapshot: live facts only, no history, no per-attempt detail, no narrative. History lives in logs/decisions.md and the per-run directories; the human view is logs/STATE.md and the two must agree. Ownership: logs/CATALOG.md.",
   "baseline_commit": "f331e49bf304edca7dc311702c36668d544f0f9f",
   "baseline_commit_meaning": "The LAST TESTED IMPLEMENTATION: the commit whose tree produced the latest_verification figures. Deliberately NOT the commit carrying this file -- when a paid launch is prepared, the grant/provenance commit and the authorization-only commit both follow it and neither is separately tested. A reader must be able to tell which commit the suite numbers describe from which commit a pod checks out. Nothing checks this field; it is refreshed by hand.",
@@ -11,19 +11,19 @@
   },
   "authorized": {
     "any": false,
-    "note": "every authorization issued is consumed, including Phase-A attempt 11's. Their lineage gates refuse the current HEAD by construction. A new paid action needs a new grant, a new artifact and a new cap decision."
+    "note": "every authorization issued is consumed, including attempt 12's. Their lineage gates refuse the current HEAD by construction. A new paid action needs a new grant, a new artifact and a new cap decision."
   },
   "prepared_launch": {
     "any": false,
     "bundles": 0
   },
   "budget": {
-    "cumulative_spend_usd": 209.6842,
+    "cumulative_spend_usd": 213.4714,
     "authorized_cap_usd": 234.0,
-    "remaining_usd": 24.3158,
+    "remaining_usd": 20.5286,
     "remaining_is_not_permission": true,
     "ledger": "logs/BUDGET_LEDGER.md",
-    "headroom_note": "$24.3158 is enough for ONE full-ceiling Phase-A attempt ($23.0484) with $1.2674 of margin, and nothing after it. The cap is only the project ceiling: the per-launch ceiling is unchanged and Attempt 12 still needs its own one-use grant and authorization.",
+    "headroom_note": "$20.5286 is NOT enough for another full Phase-A attempt at the $23.0484 ceiling -- $2.5198 short. The cap funded one attempt, it has run, and the approval does not authorize Attempt 13.",
     "cap_history": "$219 -> $231 (2026-08-20) -> $234 (2026-08-21), each a project ceiling only. Detail: logs/BUDGET_LEDGER.md"
   },
   "frozen": {
@@ -49,6 +49,7 @@
     ]
   },
   "complete": [
+    "Phase-A Stage 1 PASSED TWICE with byte-identical results, and attempt 12's five leaves are preserved off-pod -- see phase_a_stage1_result",
     "the tokenizer consumer contract: the trainer declares and verifies its tokenizer source instead of inferring it from student_path",
     "the selected-leaf durability boundary: the five leaves are persisted and re-verified before Stage 2",
     "Phase-A STAGE 1: the first completed AutoInit beam search -- see phase_a_stage1_result",
@@ -65,20 +66,19 @@
   ],
   "latest_verification": {
     "utc": "2026-08-21T07:00:00Z",
-    "after": "the selected-leaf off-pod transfer closure and the derived-cache storage cleanup",
+    "after": "the selected-leaf off-pod transfer closure and the storage cleanup",
     "full_suite": "2013 passed, 11 skipped, 0 errors in 17:30",
     "pod_simulator": "1972 passed, 22 skipped; artifact tree restored EXACTLY (c1726a62 before and after)",
     "frozen_asset_verifier": "passed, no problems; NOT weakened or rescoped",
-    "capacity_gate": "PASS - 22.2 GiB free for 11.6 GiB of leaves and working room",
     "scope": "CPU only; no checkpoint loaded, no metric measured, no GPU used"
   },
   "failed": [
     {
-      "run": "Phase A 11",
-      "usd": 3.2101,
+      "run": "Phase A 12",
+      "usd": 3.7872,
       "where": "stage 2, first rung-1 probe",
-      "cause": "searched leaves carry no tokenizer files (save_pretrained writes weights and config only) and AutoTokenizer returns a ONE-TOKEN vocabulary instead of raising; the teacher/student tokenizer guard caught it. Stage 0 and Stage 1 PASSED",
-      "evidence": "logs/autoinit_phase_a_attempt11/"
+      "cause": "CUDA OOM: the driver holds the in-process search's ~24.05 GiB when stage 2 spawns the trainer needing ~17.97 GiB on a 44.39 GiB L40S. Structural. Stages 0-1 PASSED, five leaves preserved off-pod",
+      "evidence": "logs/autoinit_phase_a_attempt12/"
     }
   ],
   "failure_pattern": "6/7/9 device placement; 8 a $0 path asserting dev-box state; 10 correct placement and numerics, unpriced runtime cost; measurement 1 a setup contract, 2 an entrypoint no $0 path ran",
@@ -112,10 +112,11 @@
     "the paid device-canary session path: STRATEGICALLY TERMINATED 2026-08-18. Two authorized sessions, $0.1240, zero canary runs; both died in the wrapper's inherited contracts. Its evidence and its generic lesson are kept; no further canary is prepared."
   ],
   "next_starting_point": {
-    "status": "Phase-A Attempt 12 is GRANTED (logs/autoinit_phase_a_attempt12_grant.json, 2026-08-21) against tested implementation f331e49. At THIS commit nothing is authorized: the authorization is issued in the next commit, which differs from this base only in the authorization artifact.",
-    "the_ask": "ONE launch through the frozen Stage 0-5 protocol on a single L40S. Pricing unchanged: $17.8933 / $22.7183 / $23.0483, ceiling $23.0484. Stage-1 deadline 363.9841 min.",
-    "then": "report the stage-by-stage result, spend, scientific outputs, the off-pod status of the five leaves and provider-confirmed teardown, then STOP. Attempt 13 is not funded, authorized or implied.",
-    "process_rule": "'my intended next decision is GO' is not executable permission; a recommendation is not an approval"
+    "status": "Attempt 12 consumed. STAGE 0 AND STAGE 1 PASSED and, unlike attempt 11, the five selected leaves are preserved off-pod and digest-verified. Stage 2 failed on a CUDA OOM. Nothing is running, billing, authorized or prepared.",
+    "the_open_defect": "the driver holds the in-process search's ~24 GiB when stage 2 spawns the trainer as a subprocess; 44.39 GiB does not fit both. NOT fixed -- the run stopped for review as the grant requires.",
+    "the_ask": "NOTHING is prepared. Two decisions are owed: how stage 1 releases its device memory before stage 2, and a cap decision -- $20.5286 remains against a $23.0484 ceiling.",
+    "process_rule": "'my intended next decision is GO' is not executable permission; a recommendation is not an approval",
+    "reusable": "the five verified leaves mean a future attempt could start from stage 2 rather than re-running a 203-min search -- a maintainer decision, not an assumption"
   },
   "read_order": [
     "logs/STATE.md \u2014 the human view of this file",
@@ -128,9 +129,9 @@
   "failed_before_the_current_architecture": "Phase A 1-5 $1.6321, 6 $0.3552, 7 $0.3955 (device placement), canary 1 $0.0603 and 2 $0.0637 (inherited contracts). All five classes are closed by autoinit.stage1_device_contract@v1 and the session specification. Detail: logs/decisions.md and the per-run directories.",
   "stage1_runtime_deadline_minutes": {
     "total": 363.9841,
-    "base_search_allowance": 180.0,
-    "beam6_correction": 36.2158,
-    "reference_cache_fallback_reserve": 147.7683,
+    "base": 180.0,
+    "beam6": 36.2158,
+    "fallback_reserve": 147.7683,
     "derived_from": "the BudgetPlan that produces the dollar thresholds"
   },
   "phase_a_stage1_result": {
@@ -139,19 +140,20 @@
     "parameters_each": 596049920,
     "search_minutes": 180.283,
     "composite_stage1_baseline": "front 4, NOT selected -- four search-discovered orderings dominate it",
-    "leaf_weights": "GONE with attempt 11's pod; the durability boundary now prevents a repeat, subject to storage",
-    "artifact": "logs/autoinit_phase_a_attempt11/search_result.json"
+    "leaf_weights": "PRESERVED off-pod at aad-artifacts/autoinit/phase_a/, 5/5 digest-verified. Attempt 11's were lost with its pod.",
+    "artifact": "logs/autoinit_phase_a_attempt11/search_result.json",
+    "determinism": "attempts 11 and 12, different hosts: identical config_hash, 43 states, 7 leaves, identical selected ids, identical first-invocation depth decision (layer 21, 0.625600, margin 1.529e-03)"
   },
   "measurement_attempts": "3 launches, $0.4611: $0.0700 setup contract, $0.1834 driver entrypoint, then $0.2077 COMPLETE. Detail: logs/autoinit_measurement_attempt{1,2,3}/",
   "failed_before_attempt_11": "Phase A 8 $0.1900 (a $0 test asserting dev-box state), 9 $0.3400 (unplaced accumulator), 10 $11.4300 (causal-depth scored on the host, unpriced). All three classes closed and CONFIRMED closed by attempt 11 reaching stage 2. Earlier: Phase A 1-7 $2.3828 and two canaries $0.1240. Detail: logs/decisions.md and the per-run directories.",
   "causal_depth_cost": "standalone 12.07 eval/min (attempt 3, cached); INSIDE the search 6.96-10.79 on the fallback path, which fired 4/4. Recorded, NOT repriced: Stage 1 took 180.283 min against the 180.0 base allowance.",
   "local_storage": {
-    "free_gib": 22.25,
+    "free_gib": 15.0,
     "percent_used": 84.5,
     "reclaimed_gib": 14.9107,
     "checkpoints_deleted": 0,
     "review_units_retained_gib": 23.09,
     "record": "logs/derived_cache_cleanup.json",
-    "summary": "14.9107 GiB reclaimed from derived caches, 0 checkpoints deleted; the 23.09 GiB review set is retained and closed"
+    "summary": "14.9107 GiB reclaimed from derived caches, 0 checkpoints deleted; 5.55 GiB then consumed by attempt 12's leaves"
   }
 }

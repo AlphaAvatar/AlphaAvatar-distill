@@ -1,0 +1,1351 @@
+{
+  "schema": "aadistill.autoinit.phase_a_search/v1",
+  "generated_utc": "2026-08-20T22:55:29.221535+00:00",
+  "run_id": "autoinit.v1.phase_a",
+  "config_hash": "567d32789ba6dcefab2f67dea7d67d9641d51aac19b531f533fde828aa71681b",
+  "seed": 20260815,
+  "suite": "state_eval@v1",
+  "suite_hash": "6421fa4cf12ee2a16f452557c486aa95beb37e4aac4f7c7fd72d380993b39833",
+  "schedule": {
+    "schedule_id": "beam.delayed_prune",
+    "version": 1,
+    "description": "no quality pruning at level 0; beam width 6 from level 1 onward",
+    "warmup_levels": 1,
+    "width": 6,
+    "schedule_hash": "9ff15b3c7ec4729ad1b57cbb3dea940a4a24d544783ab6f37d4a36d99a818c12"
+  },
+  "policy": {
+    "policy_id": "beam.pareto_multi_objective",
+    "version": 2,
+    "description": "epsilon-Pareto over original-teacher fidelity: equal-domain mean KL, worst-domain KL and critical-token KL. NLL is diagnostic and never prunes. Lineage diversity precedes the deterministic state-id tie-break.",
+    "objectives": [
+      {
+        "key": "state.teacher_kl.equal_domain_mean",
+        "direction": "minimize",
+        "description": "equal-domain mean forward KL from the original teacher"
+      },
+      {
+        "key": "state.teacher_kl.worst_domain",
+        "direction": "minimize",
+        "description": "the domain this state preserves least well"
+      },
+      {
+        "key": "state.critical_token_kl",
+        "direction": "minimize",
+        "description": "unweighted mean KL over declared critical-token classes"
+      }
+    ],
+    "tie_break": [
+      "state.teacher_kl.equal_domain_mean",
+      "state.teacher_kl.worst_domain",
+      "state.critical_token_kl",
+      "state_id"
+    ],
+    "guardrails": [
+      {
+        "name": "structurally_valid",
+        "description": "the state reached MEASURED through materialize -> reload -> hash -> validate"
+      }
+    ],
+    "epsilon": {
+      "state.critical_token_kl": 0.0001,
+      "state.teacher_kl.equal_domain_mean": 0.0001,
+      "state.teacher_kl.worst_domain": 0.0001
+    },
+    "diversity_key": "parent_path",
+    "required_metrics": [
+      "state.teacher_kl.equal_domain_mean",
+      "state.teacher_kl.worst_domain",
+      "state.critical_token_kl"
+    ],
+    "policy_hash": "30a5305bc06dd1e886ea285fa7a3f90ac4b32f61bcb62bae35668f28922bf2e4",
+    "metadata": {
+      "nll_status": "diagnostic only; recorded per domain, never an objective"
+    }
+  },
+  "calibration_profile": "calib.domain_balanced@v1",
+  "summary": {
+    "run_id": "autoinit.v1.phase_a",
+    "config_hash": "567d32789ba6dcefab2f67dea7d67d9641d51aac19b531f533fde828aa71681b",
+    "n_states": 43,
+    "n_levels": 4,
+    "n_complete_leaves": 7,
+    "n_pruned": 18,
+    "n_resumed": 0,
+    "finished_utc": "2026-08-20T22:53:54.033156+00:00"
+  },
+  "levels": [
+    {
+      "level": 0,
+      "expanded_from": [
+        "8a59d1ef45f62d74cb476284dff211fc"
+      ],
+      "generated": [
+        "2c25e8b0970de8589d539a7332d99ca9",
+        "0a61c14f8c2fbe60332900eec7f19d12",
+        "1d4fe3fe9db268a7379ebbffd702b2b5",
+        "8ee77843199a5f5b7737fa36763d1618",
+        "73a6abf5e4788e91b8e9136eedb42dc5",
+        "10f5bc34d339f65efb171249a375c1a8"
+      ],
+      "ranking": {
+        "policy_id": "beam.pareto_multi_objective@v2",
+        "policy_hash": "30a5305bc06dd1e886ea285fa7a3f90ac4b32f61bcb62bae35668f28922bf2e4",
+        "beam_width": null,
+        "selected": [
+          "1d4fe3fe9db268a7379ebbffd702b2b5",
+          "73a6abf5e4788e91b8e9136eedb42dc5",
+          "8ee77843199a5f5b7737fa36763d1618",
+          "2c25e8b0970de8589d539a7332d99ca9",
+          "10f5bc34d339f65efb171249a375c1a8"
+        ],
+        "fronts": [
+          [
+            "1d4fe3fe9db268a7379ebbffd702b2b5"
+          ],
+          [
+            "73a6abf5e4788e91b8e9136eedb42dc5",
+            "8ee77843199a5f5b7737fa36763d1618"
+          ],
+          [
+            "2c25e8b0970de8589d539a7332d99ca9"
+          ],
+          [
+            "10f5bc34d339f65efb171249a375c1a8"
+          ]
+        ],
+        "lineages_kept": [
+          "root"
+        ],
+        "decisions": [
+          {
+            "state_id": "1d4fe3fe9db268a7379ebbffd702b2b5",
+            "path": "DEPTH(calib.domain_balanced@v1)",
+            "front": 0,
+            "position_in_front": 0,
+            "lineage": "root",
+            "selected": true,
+            "objectives": {
+              "state.teacher_kl.equal_domain_mean": 0.60418263847643,
+              "state.teacher_kl.worst_domain": 0.6300611321628695,
+              "state.critical_token_kl": 1.0548510144996555
+            },
+            "diagnostics": {
+              "state.nll.pooled_all_domains": 1.4145698818532126,
+              "state.nll.teacher_reference_pooled": 0.9303420924946204,
+              "state.nll.general": 2.9463776788510665,
+              "state.nll.reasoning_math": 0.8116644012916503,
+              "state.nll.rag_multihop": 1.867434355951981,
+              "state.nll.code": 0.8402074836741134,
+              "state.nll.tool": 1.2074239469331187
+            },
+            "reason": "kept: warmup level, no quality pruning by design"
+          },
+          {
+            "state_id": "73a6abf5e4788e91b8e9136eedb42dc5",
+            "path": "FFN(calib.domain_balanced@v1)",
+            "front": 1,
+            "position_in_front": 0,
+            "lineage": "root",
+            "selected": true,
+            "objectives": {
+              "state.teacher_kl.equal_domain_mean": 1.7926763569377335,
+              "state.teacher_kl.worst_domain": 2.956685984365458,
+              "state.critical_token_kl": 2.264181946907746
+            },
+            "diagnostics": {
+              "state.nll.pooled_all_domains": 2.487495025933048,
+              "state.nll.teacher_reference_pooled": 0.9303420924946204,
+              "state.nll.general": 5.140721820295764,
+              "state.nll.reasoning_math": 1.4882364297671649,
+              "state.nll.rag_multihop": 3.02940532341417,
+              "state.nll.code": 1.6483232999388617,
+              "state.nll.tool": 2.216013251897671
+            },
+            "reason": "kept: warmup level, no quality pruning by design"
+          },
+          {
+            "state_id": "8ee77843199a5f5b7737fa36763d1618",
+            "path": "DEPTH(calib.none@v1)",
+            "front": 1,
+            "position_in_front": 1,
+            "lineage": "root",
+            "selected": true,
+            "objectives": {
+              "state.teacher_kl.equal_domain_mean": 1.8942223756358054,
+              "state.teacher_kl.worst_domain": 2.0438508694179505,
+              "state.critical_token_kl": 5.147548892475205
+            },
+            "diagnostics": {
+              "state.nll.pooled_all_domains": 2.7339435020406166,
+              "state.nll.teacher_reference_pooled": 0.9303420924946204,
+              "state.nll.general": 3.9214148164361546,
+              "state.nll.reasoning_math": 2.222962195704154,
+              "state.nll.rag_multihop": 3.1216171050566413,
+              "state.nll.code": 2.1509972585472017,
+              "state.nll.tool": 2.635084756096973
+            },
+            "reason": "kept: warmup level, no quality pruning by design"
+          },
+          {
+            "state_id": "2c25e8b0970de8589d539a7332d99ca9",
+            "path": "ATTENTION(calib.none@v1)",
+            "front": 2,
+            "position_in_front": 0,
+            "lineage": "root",
+            "selected": true,
+            "objectives": {
+              "state.teacher_kl.equal_domain_mean": 4.063564941322069,
+              "state.teacher_kl.worst_domain": 4.452641027034151,
+              "state.critical_token_kl": 6.387712267314738
+            },
+            "diagnostics": {
+              "state.nll.pooled_all_domains": 4.797022686997711,
+              "state.nll.teacher_reference_pooled": 0.9303420924946204,
+              "state.nll.general": 5.756247647827847,
+              "state.nll.reasoning_math": 4.479892157282574,
+              "state.nll.rag_multihop": 5.251494039027211,
+              "state.nll.code": 4.719483541350409,
+              "state.nll.tool": 4.37546338545718
+            },
+            "reason": "kept: warmup level, no quality pruning by design"
+          },
+          {
+            "state_id": "10f5bc34d339f65efb171249a375c1a8",
+            "path": "RESIDUAL_WIDTH(calib.domain_balanced@v1)",
+            "front": 3,
+            "position_in_front": 0,
+            "lineage": "root",
+            "selected": true,
+            "objectives": {
+              "state.teacher_kl.equal_domain_mean": 9.693820363662265,
+              "state.teacher_kl.worst_domain": 10.606064089871811,
+              "state.critical_token_kl": 18.41948590632227
+            },
+            "diagnostics": {
+              "state.nll.pooled_all_domains": 10.448494476370307,
+              "state.nll.teacher_reference_pooled": 0.9303420924946204,
+              "state.nll.general": 13.1395205668783,
+              "state.nll.reasoning_math": 9.681712394489548,
+              "state.nll.rag_multihop": 11.518032543412048,
+              "state.nll.code": 9.746696000631356,
+              "state.nll.tool": 9.514196604871556
+            },
+            "reason": "kept: warmup level, no quality pruning by design"
+          }
+        ]
+      },
+      "leaves": [
+        "0a61c14f8c2fbe60332900eec7f19d12"
+      ],
+      "dead_ends": [],
+      "seconds": 3096.1985323429108
+    },
+    {
+      "level": 1,
+      "expanded_from": [
+        "1d4fe3fe9db268a7379ebbffd702b2b5",
+        "73a6abf5e4788e91b8e9136eedb42dc5",
+        "8ee77843199a5f5b7737fa36763d1618",
+        "2c25e8b0970de8589d539a7332d99ca9",
+        "10f5bc34d339f65efb171249a375c1a8"
+      ],
+      "generated": [
+        "410e5fedf70e6c07a35f4b7f9a4fe074",
+        "46d92844cbc3b68375f29071318ff5b4",
+        "ea5044cef76e0e7a3e16445e59a645fe",
+        "37bd141d45ef8b56896366ddd18a91b7",
+        "812f2d0ce6b9a202977a1988b3031af0",
+        "4d7bc2031c802e2e04d9cc638236a235",
+        "302e6ea29f00766a2469db0f65a8373e",
+        "0c95f69299dca6b12cfc39890ff79459",
+        "6b111bf76794f890da8c10dd21c9720f",
+        "a47ea0e84a44019fc4a18de2b0d5d7d7",
+        "a2baaa9ac1638bb5c67635ee05dcf446",
+        "d74ad7ac73e6c4442b51e5db9ac8e5e6",
+        "7363c43d4a3ad9ac8039cf5f52286ef2",
+        "8b245e4285694fd7ddba7e68a03513f1",
+        "757ae843ec67bf5844ff5b950ddd1a57",
+        "518313be771bf6b3629b8ec2c7524b88",
+        "5e56672209dba000fa7e2872282468eb",
+        "a42bd4fed5f7a9882bb05829a04213cb"
+      ],
+      "ranking": {
+        "policy_id": "beam.pareto_multi_objective@v2",
+        "policy_hash": "30a5305bc06dd1e886ea285fa7a3f90ac4b32f61bcb62bae35668f28922bf2e4",
+        "beam_width": 6,
+        "selected": [
+          "812f2d0ce6b9a202977a1988b3031af0",
+          "46d92844cbc3b68375f29071318ff5b4",
+          "6b111bf76794f890da8c10dd21c9720f",
+          "a2baaa9ac1638bb5c67635ee05dcf446",
+          "518313be771bf6b3629b8ec2c7524b88",
+          "4d7bc2031c802e2e04d9cc638236a235"
+        ],
+        "fronts": [
+          [
+            "812f2d0ce6b9a202977a1988b3031af0"
+          ],
+          [
+            "46d92844cbc3b68375f29071318ff5b4",
+            "4d7bc2031c802e2e04d9cc638236a235"
+          ],
+          [
+            "6b111bf76794f890da8c10dd21c9720f",
+            "a2baaa9ac1638bb5c67635ee05dcf446"
+          ],
+          [
+            "410e5fedf70e6c07a35f4b7f9a4fe074"
+          ],
+          [
+            "0c95f69299dca6b12cfc39890ff79459",
+            "d74ad7ac73e6c4442b51e5db9ac8e5e6",
+            "302e6ea29f00766a2469db0f65a8373e"
+          ],
+          [
+            "a47ea0e84a44019fc4a18de2b0d5d7d7",
+            "7363c43d4a3ad9ac8039cf5f52286ef2"
+          ],
+          [
+            "ea5044cef76e0e7a3e16445e59a645fe",
+            "37bd141d45ef8b56896366ddd18a91b7"
+          ],
+          [
+            "8b245e4285694fd7ddba7e68a03513f1"
+          ],
+          [
+            "518313be771bf6b3629b8ec2c7524b88"
+          ],
+          [
+            "a42bd4fed5f7a9882bb05829a04213cb",
+            "5e56672209dba000fa7e2872282468eb",
+            "757ae843ec67bf5844ff5b950ddd1a57"
+          ]
+        ],
+        "lineages_kept": [
+          "attention.weight_proxy_v0",
+          "depth.causal_kl_greedy_v1",
+          "depth.positional_v0",
+          "ffn.activation_importance_v0",
+          "width.global_pca_v0"
+        ],
+        "decisions": [
+          {
+            "state_id": "812f2d0ce6b9a202977a1988b3031af0",
+            "path": "FFN(calib.domain_balanced@v1)->DEPTH(calib.domain_balanced@v1)",
+            "front": 0,
+            "position_in_front": 0,
+            "lineage": "ffn.activation_importance_v0",
+            "selected": true,
+            "objectives": {
+              "state.teacher_kl.equal_domain_mean": 2.2165758361729773,
+              "state.teacher_kl.worst_domain": 3.2152226653703453,
+              "state.critical_token_kl": 5.933755118613796
+            },
+            "diagnostics": {
+              "state.nll.pooled_all_domains": 2.904042317600523,
+              "state.nll.teacher_reference_pooled": 0.9303420924946204,
+              "state.nll.general": 5.326361434752593,
+              "state.nll.reasoning_math": 1.8983150854660225,
+              "state.nll.rag_multihop": 3.41105347052409,
+              "state.nll.code": 2.076791511423697,
+              "state.nll.tool": 2.7435629962349717
+            },
+            "reason": "kept: front 0, lineage 'ffn.activation_importance_v0', beam 6"
+          },
+          {
+            "state_id": "46d92844cbc3b68375f29071318ff5b4",
+            "path": "DEPTH(calib.domain_balanced@v1)->FFN(calib.domain_balanced@v1)",
+            "front": 1,
+            "position_in_front": 0,
+            "lineage": "depth.causal_kl_greedy_v1",
+            "selected": true,
+            "objectives": {
+              "state.teacher_kl.equal_domain_mean": 2.8131458308559596,
+              "state.teacher_kl.worst_domain": 4.803195814956894,
+              "state.critical_token_kl": 8.52048274053009
+            },
+            "diagnostics": {
+              "state.nll.pooled_all_domains": 3.3605702926041237,
+              "state.nll.teacher_reference_pooled": 0.9303420924946204,
+              "state.nll.general": 6.839963531401247,
+              "state.nll.reasoning_math": 2.307634058913316,
+              "state.nll.rag_multihop": 3.6242404055917374,
+              "state.nll.code": 2.528187132242151,
+              "state.nll.tool": 3.0356638360805848
+            },
+            "reason": "kept: front 1, lineage 'depth.causal_kl_greedy_v1', beam 6"
+          },
+          {
+            "state_id": "4d7bc2031c802e2e04d9cc638236a235",
+            "path": "FFN(calib.domain_balanced@v1)->DEPTH(calib.none@v1)",
+            "front": 1,
+            "position_in_front": 1,
+            "lineage": "ffn.activation_importance_v0",
+            "selected": true,
+            "objectives": {
+              "state.teacher_kl.equal_domain_mean": 3.9535572056479147,
+              "state.teacher_kl.worst_domain": 4.602418958756138,
+              "state.critical_token_kl": 11.623085837474862
+            },
+            "diagnostics": {
+              "state.nll.pooled_all_domains": 4.708036635103752,
+              "state.nll.teacher_reference_pooled": 0.9303420924946204,
+              "state.nll.general": 6.69678373672372,
+              "state.nll.reasoning_math": 3.5830541649073195,
+              "state.nll.rag_multihop": 5.479626854746291,
+              "state.nll.code": 3.6884889581458946,
+              "state.nll.tool": 4.680334763900004
+            },
+            "reason": "kept: front 1, lineage 'ffn.activation_importance_v0', beam 6"
+          },
+          {
+            "state_id": "6b111bf76794f890da8c10dd21c9720f",
+            "path": "DEPTH(calib.none@v1)->FFN(calib.domain_balanced@v1)",
+            "front": 2,
+            "position_in_front": 0,
+            "lineage": "depth.positional_v0",
+            "selected": true,
+            "objectives": {
+              "state.teacher_kl.equal_domain_mean": 4.536999435833043,
+              "state.teacher_kl.worst_domain": 5.152527643210934,
+              "state.critical_token_kl": 11.249924138304937
+            },
+            "diagnostics": {
+              "state.nll.pooled_all_domains": 5.286459255288078,
+              "state.nll.teacher_reference_pooled": 0.9303420924946204,
+              "state.nll.general": 7.249087906952072,
+              "state.nll.reasoning_math": 4.813567948638853,
+              "state.nll.rag_multihop": 5.580344928100482,
+              "state.nll.code": 4.2942309619162335,
+              "state.nll.tool": 5.1095587863160965
+            },
+            "reason": "kept: front 2, lineage 'depth.positional_v0', beam 6"
+          },
+          {
+            "state_id": "a2baaa9ac1638bb5c67635ee05dcf446",
+            "path": "ATTENTION(calib.none@v1)->DEPTH(calib.domain_balanced@v1)",
+            "front": 2,
+            "position_in_front": 1,
+            "lineage": "attention.weight_proxy_v0",
+            "selected": true,
+            "objectives": {
+              "state.teacher_kl.equal_domain_mean": 5.037473475802139,
+              "state.teacher_kl.worst_domain": 5.2622923013526846,
+              "state.critical_token_kl": 9.760975525861769
+            },
+            "diagnostics": {
+              "state.nll.pooled_all_domains": 5.781846277864063,
+              "state.nll.teacher_reference_pooled": 0.9303420924946204,
+              "state.nll.general": 6.739109598993747,
+              "state.nll.reasoning_math": 5.3521515477087735,
+              "state.nll.rag_multihop": 6.2910604788018905,
+              "state.nll.code": 5.53760567576475,
+              "state.nll.tool": 5.471528848647301
+            },
+            "reason": "kept: front 2, lineage 'attention.weight_proxy_v0', beam 6"
+          },
+          {
+            "state_id": "410e5fedf70e6c07a35f4b7f9a4fe074",
+            "path": "DEPTH(calib.domain_balanced@v1)->ATTENTION(calib.none@v1)",
+            "front": 3,
+            "position_in_front": 0,
+            "lineage": "depth.causal_kl_greedy_v1",
+            "selected": false,
+            "objectives": {
+              "state.teacher_kl.equal_domain_mean": 5.282652674447667,
+              "state.teacher_kl.worst_domain": 5.429150160074322,
+              "state.critical_token_kl": 10.034552940958118
+            },
+            "diagnostics": {
+              "state.nll.pooled_all_domains": 5.966285662380376,
+              "state.nll.teacher_reference_pooled": 0.9303420924946204,
+              "state.nll.general": 7.4577576764881375,
+              "state.nll.reasoning_math": 5.4213277234418555,
+              "state.nll.rag_multihop": 6.5139269223259415,
+              "state.nll.code": 5.6059862597352295,
+              "state.nll.tool": 5.56594734416218
+            },
+            "reason": "pruned: epsilon-dominated (front 3) and the beam of 6 was already full"
+          },
+          {
+            "state_id": "0c95f69299dca6b12cfc39890ff79459",
+            "path": "DEPTH(calib.none@v1)->ATTENTION(calib.none@v1)",
+            "front": 4,
+            "position_in_front": 0,
+            "lineage": "depth.positional_v0",
+            "selected": false,
+            "objectives": {
+              "state.teacher_kl.equal_domain_mean": 5.973171618098437,
+              "state.teacher_kl.worst_domain": 6.483486084338816,
+              "state.critical_token_kl": 11.120002163876066
+            },
+            "diagnostics": {
+              "state.nll.pooled_all_domains": 6.7758705957736405,
+              "state.nll.teacher_reference_pooled": 0.9303420924946204,
+              "state.nll.general": 7.856294897402972,
+              "state.nll.reasoning_math": 5.938373278291814,
+              "state.nll.rag_multihop": 7.594696231776572,
+              "state.nll.code": 6.1226242560712745,
+              "state.nll.tool": 6.668676520954339
+            },
+            "reason": "pruned: epsilon-dominated (front 4) and the beam of 6 was already full"
+          },
+          {
+            "state_id": "d74ad7ac73e6c4442b51e5db9ac8e5e6",
+            "path": "ATTENTION(calib.none@v1)->DEPTH(calib.none@v1)",
+            "front": 4,
+            "position_in_front": 1,
+            "lineage": "attention.weight_proxy_v0",
+            "selected": false,
+            "objectives": {
+              "state.teacher_kl.equal_domain_mean": 5.973171618098437,
+              "state.teacher_kl.worst_domain": 6.483486084338816,
+              "state.critical_token_kl": 11.120002163876066
+            },
+            "diagnostics": {
+              "state.nll.pooled_all_domains": 6.7758705957736405,
+              "state.nll.teacher_reference_pooled": 0.9303420924946204,
+              "state.nll.general": 7.856294897402972,
+              "state.nll.reasoning_math": 5.938373278291814,
+              "state.nll.rag_multihop": 7.594696231776572,
+              "state.nll.code": 6.1226242560712745,
+              "state.nll.tool": 6.668676520954339
+            },
+            "reason": "pruned: epsilon-dominated (front 4) and the beam of 6 was already full"
+          },
+          {
+            "state_id": "302e6ea29f00766a2469db0f65a8373e",
+            "path": "FFN(calib.domain_balanced@v1)->RESIDUAL_WIDTH(calib.domain_balanced@v1)",
+            "front": 4,
+            "position_in_front": 2,
+            "lineage": "ffn.activation_importance_v0",
+            "selected": false,
+            "objectives": {
+              "state.teacher_kl.equal_domain_mean": 6.279930792664058,
+              "state.teacher_kl.worst_domain": 7.311065756503897,
+              "state.critical_token_kl": 10.378847710325633
+            },
+            "diagnostics": {
+              "state.nll.pooled_all_domains": 6.942725159393927,
+              "state.nll.teacher_reference_pooled": 0.9303420924946204,
+              "state.nll.general": 9.519587595860793,
+              "state.nll.reasoning_math": 6.358175357711187,
+              "state.nll.rag_multihop": 7.184498332434961,
+              "state.nll.code": 6.293555409392021,
+              "state.nll.tool": 6.5215513459943795
+            },
+            "reason": "pruned: epsilon-dominated (front 4) and the beam of 6 was already full"
+          },
+          {
+            "state_id": "a47ea0e84a44019fc4a18de2b0d5d7d7",
+            "path": "DEPTH(calib.none@v1)->RESIDUAL_WIDTH(calib.domain_balanced@v1)",
+            "front": 5,
+            "position_in_front": 0,
+            "lineage": "depth.positional_v0",
+            "selected": false,
+            "objectives": {
+              "state.teacher_kl.equal_domain_mean": 6.636373821299941,
+              "state.teacher_kl.worst_domain": 9.170852780037293,
+              "state.critical_token_kl": 10.735667176651802
+            },
+            "diagnostics": {
+              "state.nll.pooled_all_domains": 7.072929446227175,
+              "state.nll.teacher_reference_pooled": 0.9303420924946204,
+              "state.nll.general": 11.406831171659784,
+              "state.nll.reasoning_math": 5.933712850238686,
+              "state.nll.rag_multihop": 8.275818330992541,
+              "state.nll.code": 6.083222100447421,
+              "state.nll.tool": 5.849046661518054
+            },
+            "reason": "pruned: epsilon-dominated (front 5) and the beam of 6 was already full"
+          },
+          {
+            "state_id": "7363c43d4a3ad9ac8039cf5f52286ef2",
+            "path": "ATTENTION(calib.none@v1)->FFN(calib.domain_balanced@v1)",
+            "front": 5,
+            "position_in_front": 1,
+            "lineage": "attention.weight_proxy_v0",
+            "selected": false,
+            "objectives": {
+              "state.teacher_kl.equal_domain_mean": 6.961310366481209,
+              "state.teacher_kl.worst_domain": 7.788549617585575,
+              "state.critical_token_kl": 12.28840898131693
+            },
+            "diagnostics": {
+              "state.nll.pooled_all_domains": 7.6600928519804174,
+              "state.nll.teacher_reference_pooled": 0.9303420924946204,
+              "state.nll.general": 8.304666185442892,
+              "state.nll.reasoning_math": 6.481600183303945,
+              "state.nll.rag_multihop": 8.87136219137297,
+              "state.nll.code": 7.910338079945253,
+              "state.nll.tool": 7.323487928184759
+            },
+            "reason": "pruned: epsilon-dominated (front 5) and the beam of 6 was already full"
+          },
+          {
+            "state_id": "ea5044cef76e0e7a3e16445e59a645fe",
+            "path": "DEPTH(calib.domain_balanced@v1)->RESIDUAL_WIDTH(calib.domain_balanced@v1)",
+            "front": 6,
+            "position_in_front": 0,
+            "lineage": "depth.causal_kl_greedy_v1",
+            "selected": false,
+            "objectives": {
+              "state.teacher_kl.equal_domain_mean": 8.152326613511503,
+              "state.teacher_kl.worst_domain": 8.875352328839378,
+              "state.critical_token_kl": 14.197039014532617
+            },
+            "diagnostics": {
+              "state.nll.pooled_all_domains": 8.825460304453406,
+              "state.nll.teacher_reference_pooled": 0.9303420924946204,
+              "state.nll.general": 11.100848337394318,
+              "state.nll.reasoning_math": 7.862015332506829,
+              "state.nll.rag_multihop": 10.012239733361884,
+              "state.nll.code": 8.24436553778676,
+              "state.nll.tool": 8.062278732147059
+            },
+            "reason": "pruned: epsilon-dominated (front 6) and the beam of 6 was already full"
+          },
+          {
+            "state_id": "37bd141d45ef8b56896366ddd18a91b7",
+            "path": "FFN(calib.domain_balanced@v1)->ATTENTION(calib.none@v1)",
+            "front": 6,
+            "position_in_front": 1,
+            "lineage": "ffn.activation_importance_v0",
+            "selected": false,
+            "objectives": {
+              "state.teacher_kl.equal_domain_mean": 8.577093784926502,
+              "state.teacher_kl.worst_domain": 9.381138929276394,
+              "state.critical_token_kl": 12.964865634472226
+            },
+            "diagnostics": {
+              "state.nll.pooled_all_domains": 9.29395667990825,
+              "state.nll.teacher_reference_pooled": 0.9303420924946204,
+              "state.nll.general": 10.451452193242195,
+              "state.nll.reasoning_math": 7.808636522956549,
+              "state.nll.rag_multihop": 9.57932933987935,
+              "state.nll.code": 9.161927517915949,
+              "state.nll.tool": 9.87973744131726
+            },
+            "reason": "pruned: epsilon-dominated (front 6) and the beam of 6 was already full"
+          },
+          {
+            "state_id": "8b245e4285694fd7ddba7e68a03513f1",
+            "path": "ATTENTION(calib.none@v1)->RESIDUAL_WIDTH(calib.domain_balanced@v1)",
+            "front": 7,
+            "position_in_front": 0,
+            "lineage": "attention.weight_proxy_v0",
+            "selected": false,
+            "objectives": {
+              "state.teacher_kl.equal_domain_mean": 8.773813469429674,
+              "state.teacher_kl.worst_domain": 9.403811172511842,
+              "state.critical_token_kl": 13.914948105404697
+            },
+            "diagnostics": {
+              "state.nll.pooled_all_domains": 9.515763376697764,
+              "state.nll.teacher_reference_pooled": 0.9303420924946204,
+              "state.nll.general": 10.554557182547034,
+              "state.nll.reasoning_math": 8.96127482832657,
+              "state.nll.rag_multihop": 10.495133105802221,
+              "state.nll.code": 9.063726144453959,
+              "state.nll.tool": 8.992410380241926
+            },
+            "reason": "pruned: epsilon-dominated (front 7) and the beam of 6 was already full"
+          },
+          {
+            "state_id": "518313be771bf6b3629b8ec2c7524b88",
+            "path": "RESIDUAL_WIDTH(calib.domain_balanced@v1)->DEPTH(calib.domain_balanced@v1)",
+            "front": 8,
+            "position_in_front": 0,
+            "lineage": "width.global_pca_v0",
+            "selected": true,
+            "objectives": {
+              "state.teacher_kl.equal_domain_mean": 9.466479134055822,
+              "state.teacher_kl.worst_domain": 10.106613379338764,
+              "state.critical_token_kl": 16.849609615640016
+            },
+            "diagnostics": {
+              "state.nll.pooled_all_domains": 10.243891112610063,
+              "state.nll.teacher_reference_pooled": 0.9303420924946204,
+              "state.nll.general": 12.621671458566782,
+              "state.nll.reasoning_math": 9.530402379284748,
+              "state.nll.rag_multihop": 11.136163293346033,
+              "state.nll.code": 9.712611448187042,
+              "state.nll.tool": 9.452699838915628
+            },
+            "reason": "kept: front 8, lineage 'width.global_pca_v0', beam 6"
+          },
+          {
+            "state_id": "a42bd4fed5f7a9882bb05829a04213cb",
+            "path": "RESIDUAL_WIDTH(calib.domain_balanced@v1)->FFN(calib.domain_balanced@v1)",
+            "front": 9,
+            "position_in_front": 0,
+            "lineage": "width.global_pca_v0",
+            "selected": false,
+            "objectives": {
+              "state.teacher_kl.equal_domain_mean": 10.327288044659916,
+              "state.teacher_kl.worst_domain": 11.083741347246624,
+              "state.critical_token_kl": 19.675743303999788
+            },
+            "diagnostics": {
+              "state.nll.pooled_all_domains": 11.120372039497258,
+              "state.nll.teacher_reference_pooled": 0.9303420924946204,
+              "state.nll.general": 13.482485676543309,
+              "state.nll.reasoning_math": 10.422034314574345,
+              "state.nll.rag_multihop": 12.232074241023536,
+              "state.nll.code": 10.240154139144307,
+              "state.nll.tool": 10.300213910317877
+            },
+            "reason": "pruned: epsilon-dominated (front 9) and the beam of 6 was already full"
+          },
+          {
+            "state_id": "5e56672209dba000fa7e2872282468eb",
+            "path": "RESIDUAL_WIDTH(calib.domain_balanced@v1)->DEPTH(calib.none@v1)",
+            "front": 9,
+            "position_in_front": 1,
+            "lineage": "width.global_pca_v0",
+            "selected": false,
+            "objectives": {
+              "state.teacher_kl.equal_domain_mean": 10.406293304290859,
+              "state.teacher_kl.worst_domain": 12.385771542043672,
+              "state.critical_token_kl": 18.07472788032793
+            },
+            "diagnostics": {
+              "state.nll.pooled_all_domains": 11.03746109542688,
+              "state.nll.teacher_reference_pooled": 0.9303420924946204,
+              "state.nll.general": 14.93422148205339,
+              "state.nll.reasoning_math": 10.070978286481974,
+              "state.nll.rag_multihop": 11.73501249816238,
+              "state.nll.code": 10.442076496889243,
+              "state.nll.tool": 10.055349879533034
+            },
+            "reason": "pruned: epsilon-dominated (front 9) and the beam of 6 was already full"
+          },
+          {
+            "state_id": "757ae843ec67bf5844ff5b950ddd1a57",
+            "path": "RESIDUAL_WIDTH(calib.domain_balanced@v1)->ATTENTION(calib.none@v1)",
+            "front": 9,
+            "position_in_front": 2,
+            "lineage": "width.global_pca_v0",
+            "selected": false,
+            "objectives": {
+              "state.teacher_kl.equal_domain_mean": 10.669231316915383,
+              "state.teacher_kl.worst_domain": 10.969069406260921,
+              "state.critical_token_kl": 19.495854391496472
+            },
+            "diagnostics": {
+              "state.nll.pooled_all_domains": 11.52403187149459,
+              "state.nll.teacher_reference_pooled": 0.9303420924946204,
+              "state.nll.general": 13.036142988122512,
+              "state.nll.reasoning_math": 10.271405122699417,
+              "state.nll.rag_multihop": 12.237699515812855,
+              "state.nll.code": 11.215379497007351,
+              "state.nll.tool": 11.52179520167723
+            },
+            "reason": "pruned: epsilon-dominated (front 9) and the beam of 6 was already full"
+          }
+        ]
+      },
+      "leaves": [],
+      "dead_ends": [],
+      "seconds": 7117.677308320999
+    },
+    {
+      "level": 2,
+      "expanded_from": [
+        "812f2d0ce6b9a202977a1988b3031af0",
+        "46d92844cbc3b68375f29071318ff5b4",
+        "6b111bf76794f890da8c10dd21c9720f",
+        "a2baaa9ac1638bb5c67635ee05dcf446",
+        "518313be771bf6b3629b8ec2c7524b88",
+        "4d7bc2031c802e2e04d9cc638236a235"
+      ],
+      "generated": [
+        "363a0070848d7c48a2e1b7bf23bbd27d",
+        "493bd54d0d110f964ce9c168895be012",
+        "a4da617a42d9cf674cd5c735044f66c9",
+        "567e0a4ee422251734151ba08519a1ca",
+        "30906bd0185e885449450b2816b7634d",
+        "b5d74e605f8f0290d481a08341130c5c",
+        "09bd7a367ee9312c7f04239a0bb0e2bb",
+        "1b9661fe5a8e993503b43cc56cd343b1",
+        "b94b8b95a5080500ff741b6b8a4800b2",
+        "933b3713200b54d3bc7a43c950358bae",
+        "921790ae885865c8e5dce71881dac72c",
+        "e067ff7af53459fb4689b6a44df865ee"
+      ],
+      "ranking": {
+        "policy_id": "beam.pareto_multi_objective@v2",
+        "policy_hash": "30a5305bc06dd1e886ea285fa7a3f90ac4b32f61bcb62bae35668f28922bf2e4",
+        "beam_width": 6,
+        "selected": [
+          "493bd54d0d110f964ce9c168895be012",
+          "e067ff7af53459fb4689b6a44df865ee",
+          "b5d74e605f8f0290d481a08341130c5c",
+          "1b9661fe5a8e993503b43cc56cd343b1",
+          "567e0a4ee422251734151ba08519a1ca",
+          "933b3713200b54d3bc7a43c950358bae"
+        ],
+        "fronts": [
+          [
+            "493bd54d0d110f964ce9c168895be012"
+          ],
+          [
+            "e067ff7af53459fb4689b6a44df865ee",
+            "b5d74e605f8f0290d481a08341130c5c",
+            "1b9661fe5a8e993503b43cc56cd343b1",
+            "363a0070848d7c48a2e1b7bf23bbd27d"
+          ],
+          [
+            "567e0a4ee422251734151ba08519a1ca",
+            "30906bd0185e885449450b2816b7634d",
+            "09bd7a367ee9312c7f04239a0bb0e2bb"
+          ],
+          [
+            "933b3713200b54d3bc7a43c950358bae",
+            "a4da617a42d9cf674cd5c735044f66c9"
+          ],
+          [
+            "b94b8b95a5080500ff741b6b8a4800b2",
+            "921790ae885865c8e5dce71881dac72c"
+          ]
+        ],
+        "lineages_kept": [
+          "attention.weight_proxy_v0|depth.causal_kl_greedy_v1",
+          "depth.causal_kl_greedy_v1|ffn.activation_importance_v0",
+          "depth.positional_v0|ffn.activation_importance_v0",
+          "ffn.activation_importance_v0|depth.causal_kl_greedy_v1",
+          "ffn.activation_importance_v0|depth.positional_v0",
+          "width.global_pca_v0|depth.causal_kl_greedy_v1"
+        ],
+        "decisions": [
+          {
+            "state_id": "493bd54d0d110f964ce9c168895be012",
+            "path": "FFN(calib.domain_balanced@v1)->DEPTH(calib.domain_balanced@v1)->RESIDUAL_WIDTH(calib.domain_balanced@v1)",
+            "front": 0,
+            "position_in_front": 0,
+            "lineage": "ffn.activation_importance_v0|depth.causal_kl_greedy_v1",
+            "selected": true,
+            "objectives": {
+              "state.teacher_kl.equal_domain_mean": 6.593634916815058,
+              "state.teacher_kl.worst_domain": 7.37215651174592,
+              "state.critical_token_kl": 13.265857283661278
+            },
+            "diagnostics": {
+              "state.nll.pooled_all_domains": 7.260452426039362,
+              "state.nll.teacher_reference_pooled": 0.9303420924946204,
+              "state.nll.general": 9.493372094249459,
+              "state.nll.reasoning_math": 6.2492931478685065,
+              "state.nll.rag_multihop": 8.301870073656307,
+              "state.nll.code": 6.653216398043227,
+              "state.nll.tool": 6.669749660348959
+            },
+            "reason": "kept: front 0, lineage 'ffn.activation_importance_v0|depth.causal_kl_greedy_v1', beam 6"
+          },
+          {
+            "state_id": "e067ff7af53459fb4689b6a44df865ee",
+            "path": "FFN(calib.domain_balanced@v1)->DEPTH(calib.none@v1)->RESIDUAL_WIDTH(calib.domain_balanced@v1)",
+            "front": 1,
+            "position_in_front": 0,
+            "lineage": "ffn.activation_importance_v0|depth.positional_v0",
+            "selected": true,
+            "objectives": {
+              "state.teacher_kl.equal_domain_mean": 7.654640541846627,
+              "state.teacher_kl.worst_domain": 9.423926189612576,
+              "state.critical_token_kl": 14.033273279098335
+            },
+            "diagnostics": {
+              "state.nll.pooled_all_domains": 8.185305790585405,
+              "state.nll.teacher_reference_pooled": 0.9303420924946204,
+              "state.nll.general": 11.310780905028375,
+              "state.nll.reasoning_math": 7.152413705423633,
+              "state.nll.rag_multihop": 9.151248131068666,
+              "state.nll.code": 7.408781561336288,
+              "state.nll.tool": 7.411980471555585
+            },
+            "reason": "kept: front 1, lineage 'ffn.activation_importance_v0|depth.positional_v0', beam 6"
+          },
+          {
+            "state_id": "b5d74e605f8f0290d481a08341130c5c",
+            "path": "DEPTH(calib.none@v1)->FFN(calib.domain_balanced@v1)->RESIDUAL_WIDTH(calib.domain_balanced@v1)",
+            "front": 1,
+            "position_in_front": 1,
+            "lineage": "depth.positional_v0|ffn.activation_importance_v0",
+            "selected": true,
+            "objectives": {
+              "state.teacher_kl.equal_domain_mean": 8.437191045784665,
+              "state.teacher_kl.worst_domain": 9.103785310750862,
+              "state.critical_token_kl": 16.95304435175244
+            },
+            "diagnostics": {
+              "state.nll.pooled_all_domains": 9.294944334415373,
+              "state.nll.teacher_reference_pooled": 0.9303420924946204,
+              "state.nll.general": 10.466264833185337,
+              "state.nll.reasoning_math": 8.920234189113362,
+              "state.nll.rag_multihop": 10.286932401820716,
+              "state.nll.code": 8.112144297205008,
+              "state.nll.tool": 8.868558003925232
+            },
+            "reason": "kept: front 1, lineage 'depth.positional_v0|ffn.activation_importance_v0', beam 6"
+          },
+          {
+            "state_id": "1b9661fe5a8e993503b43cc56cd343b1",
+            "path": "ATTENTION(calib.none@v1)->DEPTH(calib.domain_balanced@v1)->RESIDUAL_WIDTH(calib.domain_balanced@v1)",
+            "front": 1,
+            "position_in_front": 2,
+            "lineage": "attention.weight_proxy_v0|depth.causal_kl_greedy_v1",
+            "selected": true,
+            "objectives": {
+              "state.teacher_kl.equal_domain_mean": 9.905144705176756,
+              "state.teacher_kl.worst_domain": 11.465194003324394,
+              "state.critical_token_kl": 13.435547623988414
+            },
+            "diagnostics": {
+              "state.nll.pooled_all_domains": 10.642041846239746,
+              "state.nll.teacher_reference_pooled": 0.9303420924946204,
+              "state.nll.general": 10.055433428680855,
+              "state.nll.reasoning_math": 10.718367787820934,
+              "state.nll.rag_multihop": 10.680377150671198,
+              "state.nll.code": 11.742986574762394,
+              "state.nll.tool": 10.300568821518288
+            },
+            "reason": "kept: front 1, lineage 'attention.weight_proxy_v0|depth.causal_kl_greedy_v1', beam 6"
+          },
+          {
+            "state_id": "363a0070848d7c48a2e1b7bf23bbd27d",
+            "path": "FFN(calib.domain_balanced@v1)->DEPTH(calib.domain_balanced@v1)->ATTENTION(calib.none@v1)",
+            "front": 1,
+            "position_in_front": 3,
+            "lineage": "ffn.activation_importance_v0|depth.causal_kl_greedy_v1",
+            "selected": false,
+            "objectives": {
+              "state.teacher_kl.equal_domain_mean": 10.943303792984986,
+              "state.teacher_kl.worst_domain": 11.420229927493816,
+              "state.critical_token_kl": 13.538392178664115
+            },
+            "diagnostics": {
+              "state.nll.pooled_all_domains": 11.610490728090063,
+              "state.nll.teacher_reference_pooled": 0.9303420924946204,
+              "state.nll.general": 12.654999282783036,
+              "state.nll.reasoning_math": 11.144128736488256,
+              "state.nll.rag_multihop": 11.907799406267856,
+              "state.nll.code": 11.710049301425634,
+              "state.nll.tool": 11.314645882884042
+            },
+            "reason": "pruned: epsilon-dominated (front 1) and the beam of 6 was already full"
+          },
+          {
+            "state_id": "567e0a4ee422251734151ba08519a1ca",
+            "path": "DEPTH(calib.domain_balanced@v1)->FFN(calib.domain_balanced@v1)->RESIDUAL_WIDTH(calib.domain_balanced@v1)",
+            "front": 2,
+            "position_in_front": 0,
+            "lineage": "depth.causal_kl_greedy_v1|ffn.activation_importance_v0",
+            "selected": true,
+            "objectives": {
+              "state.teacher_kl.equal_domain_mean": 9.527034634548107,
+              "state.teacher_kl.worst_domain": 9.88423436372619,
+              "state.critical_token_kl": 15.466354867917815
+            },
+            "diagnostics": {
+              "state.nll.pooled_all_domains": 10.286956122106355,
+              "state.nll.teacher_reference_pooled": 0.9303420924946204,
+              "state.nll.general": 10.555337848057196,
+              "state.nll.reasoning_math": 9.721016474919585,
+              "state.nll.rag_multihop": 10.857615529002107,
+              "state.nll.code": 10.039852876777699,
+              "state.nll.tool": 10.29456483974766
+            },
+            "reason": "kept: front 2, lineage 'depth.causal_kl_greedy_v1|ffn.activation_importance_v0', beam 6"
+          },
+          {
+            "state_id": "30906bd0185e885449450b2816b7634d",
+            "path": "DEPTH(calib.none@v1)->FFN(calib.domain_balanced@v1)->ATTENTION(calib.none@v1)",
+            "front": 2,
+            "position_in_front": 1,
+            "lineage": "depth.positional_v0|ffn.activation_importance_v0",
+            "selected": false,
+            "objectives": {
+              "state.teacher_kl.equal_domain_mean": 10.33115384320096,
+              "state.teacher_kl.worst_domain": 11.295759205380085,
+              "state.critical_token_kl": 15.041702037171113
+            },
+            "diagnostics": {
+              "state.nll.pooled_all_domains": 10.972380876289906,
+              "state.nll.teacher_reference_pooled": 0.9303420924946204,
+              "state.nll.general": 12.939449204867902,
+              "state.nll.reasoning_math": 10.168197021016015,
+              "state.nll.rag_multihop": 12.330631867030132,
+              "state.nll.code": 10.128039409659502,
+              "state.nll.tool": 10.163459450765021
+            },
+            "reason": "pruned: epsilon-dominated (front 2) and the beam of 6 was already full"
+          },
+          {
+            "state_id": "09bd7a367ee9312c7f04239a0bb0e2bb",
+            "path": "ATTENTION(calib.none@v1)->DEPTH(calib.domain_balanced@v1)->FFN(calib.domain_balanced@v1)",
+            "front": 2,
+            "position_in_front": 2,
+            "lineage": "attention.weight_proxy_v0|depth.causal_kl_greedy_v1",
+            "selected": false,
+            "objectives": {
+              "state.teacher_kl.equal_domain_mean": 10.45439518628643,
+              "state.teacher_kl.worst_domain": 11.864885924894805,
+              "state.critical_token_kl": 13.975976926516198
+            },
+            "diagnostics": {
+              "state.nll.pooled_all_domains": 11.335570945841784,
+              "state.nll.teacher_reference_pooled": 0.9303420924946204,
+              "state.nll.general": 9.298036808249403,
+              "state.nll.reasoning_math": 12.102906247609333,
+              "state.nll.rag_multihop": 12.04704406352688,
+              "state.nll.code": 12.024832787011242,
+              "state.nll.tool": 10.67912358989802
+            },
+            "reason": "pruned: epsilon-dominated (front 2) and the beam of 6 was already full"
+          },
+          {
+            "state_id": "933b3713200b54d3bc7a43c950358bae",
+            "path": "RESIDUAL_WIDTH(calib.domain_balanced@v1)->DEPTH(calib.domain_balanced@v1)->FFN(calib.domain_balanced@v1)",
+            "front": 3,
+            "position_in_front": 0,
+            "lineage": "width.global_pca_v0|depth.causal_kl_greedy_v1",
+            "selected": true,
+            "objectives": {
+              "state.teacher_kl.equal_domain_mean": 10.61909114233209,
+              "state.teacher_kl.worst_domain": 11.49694202013897,
+              "state.critical_token_kl": 19.670505789381245
+            },
+            "diagnostics": {
+              "state.nll.pooled_all_domains": 11.388524203514216,
+              "state.nll.teacher_reference_pooled": 0.9303420924946204,
+              "state.nll.general": 14.020089710903969,
+              "state.nll.reasoning_math": 10.845173312092129,
+              "state.nll.rag_multihop": 12.204052853402668,
+              "state.nll.code": 10.783452014914614,
+              "state.nll.tool": 10.462599685366879
+            },
+            "reason": "kept: front 3, lineage 'width.global_pca_v0|depth.causal_kl_greedy_v1', beam 6"
+          },
+          {
+            "state_id": "a4da617a42d9cf674cd5c735044f66c9",
+            "path": "DEPTH(calib.domain_balanced@v1)->FFN(calib.domain_balanced@v1)->ATTENTION(calib.none@v1)",
+            "front": 3,
+            "position_in_front": 1,
+            "lineage": "depth.causal_kl_greedy_v1|ffn.activation_importance_v0",
+            "selected": false,
+            "objectives": {
+              "state.teacher_kl.equal_domain_mean": 14.042365989602377,
+              "state.teacher_kl.worst_domain": 16.5718107078932,
+              "state.critical_token_kl": 15.769477012650626
+            },
+            "diagnostics": {
+              "state.nll.pooled_all_domains": 15.287804101036599,
+              "state.nll.teacher_reference_pooled": 0.9303420924946204,
+              "state.nll.general": 9.70441114053386,
+              "state.nll.reasoning_math": 16.791657840579617,
+              "state.nll.rag_multihop": 16.517994716227,
+              "state.nll.code": 16.04167319807067,
+              "state.nll.tool": 14.907794746734213
+            },
+            "reason": "pruned: epsilon-dominated (front 3) and the beam of 6 was already full"
+          },
+          {
+            "state_id": "b94b8b95a5080500ff741b6b8a4800b2",
+            "path": "RESIDUAL_WIDTH(calib.domain_balanced@v1)->DEPTH(calib.domain_balanced@v1)->ATTENTION(calib.none@v1)",
+            "front": 4,
+            "position_in_front": 0,
+            "lineage": "width.global_pca_v0|depth.causal_kl_greedy_v1",
+            "selected": false,
+            "objectives": {
+              "state.teacher_kl.equal_domain_mean": 11.787205505477814,
+              "state.teacher_kl.worst_domain": 12.487199439762612,
+              "state.critical_token_kl": 21.21631929866496
+            },
+            "diagnostics": {
+              "state.nll.pooled_all_domains": 12.668912222518689,
+              "state.nll.teacher_reference_pooled": 0.9303420924946204,
+              "state.nll.general": 14.15072382879681,
+              "state.nll.reasoning_math": 10.969254653806015,
+              "state.nll.rag_multihop": 13.744337920617635,
+              "state.nll.code": 12.140912508423883,
+              "state.nll.tool": 12.841726288802107
+            },
+            "reason": "pruned: epsilon-dominated (front 4) and the beam of 6 was already full"
+          },
+          {
+            "state_id": "921790ae885865c8e5dce71881dac72c",
+            "path": "FFN(calib.domain_balanced@v1)->DEPTH(calib.none@v1)->ATTENTION(calib.none@v1)",
+            "front": 4,
+            "position_in_front": 1,
+            "lineage": "ffn.activation_importance_v0|depth.positional_v0",
+            "selected": false,
+            "objectives": {
+              "state.teacher_kl.equal_domain_mean": 15.077989174279065,
+              "state.teacher_kl.worst_domain": 16.738810917916645,
+              "state.critical_token_kl": 16.531609947015742
+            },
+            "diagnostics": {
+              "state.nll.pooled_all_domains": 15.48973995968464,
+              "state.nll.teacher_reference_pooled": 0.9303420924946204,
+              "state.nll.general": 16.11669065019586,
+              "state.nll.reasoning_math": 15.872984693740355,
+              "state.nll.rag_multihop": 15.91677697463895,
+              "state.nll.code": 17.03715879475079,
+              "state.nll.tool": 13.965966333707017
+            },
+            "reason": "pruned: epsilon-dominated (front 4) and the beam of 6 was already full"
+          }
+        ]
+      },
+      "leaves": [],
+      "dead_ends": [],
+      "seconds": 1255.3651368618011
+    },
+    {
+      "level": 3,
+      "expanded_from": [
+        "493bd54d0d110f964ce9c168895be012",
+        "e067ff7af53459fb4689b6a44df865ee",
+        "b5d74e605f8f0290d481a08341130c5c",
+        "1b9661fe5a8e993503b43cc56cd343b1",
+        "567e0a4ee422251734151ba08519a1ca",
+        "933b3713200b54d3bc7a43c950358bae"
+      ],
+      "generated": [
+        "cca699c93f34dad7e94a5d13a25b2bc2",
+        "281a02c3ac18419b70e896296dac0d03",
+        "85bde4ded2c31953f802e39cf2252c87",
+        "4e429f7ed722b180dd662c779895693f",
+        "158b96cf651fd8ba8f8ceaefefde2067",
+        "68850e82f92a3ba6adbf5ec6dc010c8d"
+      ],
+      "ranking": null,
+      "leaves": [
+        "cca699c93f34dad7e94a5d13a25b2bc2",
+        "281a02c3ac18419b70e896296dac0d03",
+        "85bde4ded2c31953f802e39cf2252c87",
+        "4e429f7ed722b180dd662c779895693f",
+        "158b96cf651fd8ba8f8ceaefefde2067",
+        "68850e82f92a3ba6adbf5ec6dc010c8d"
+      ],
+      "dead_ends": [],
+      "seconds": 660.8607556819916
+    }
+  ],
+  "resumed_state_ids": [],
+  "top_n": {
+    "requested": 5,
+    "selected": [
+      {
+        "state_id": "cca699c93f34dad7e94a5d13a25b2bc2",
+        "path": "FFN(calib.domain_balanced@v1)->DEPTH(calib.domain_balanced@v1)->RESIDUAL_WIDTH(calib.domain_balanced@v1)->ATTENTION(calib.none@v1)",
+        "artifact_digest": "04fa7fe74f01ee63f6611cca6d7fce4fe1dba66b9865cf0b9c47495b9cfe33d4",
+        "single_shard_sha256": "db056398840f5c64f767fe8690803478918399c04bd7b4a1aeae6b7549c624af",
+        "checkpoint_path": "/workspace/aad/artifacts/autoinit/phase_a_search/states/cca699c93f34dad7e94a5d13a25b2bc2",
+        "num_parameters": 596049920
+      },
+      {
+        "state_id": "85bde4ded2c31953f802e39cf2252c87",
+        "path": "DEPTH(calib.none@v1)->FFN(calib.domain_balanced@v1)->RESIDUAL_WIDTH(calib.domain_balanced@v1)->ATTENTION(calib.none@v1)",
+        "artifact_digest": "590156f691fb10bff7e6a60f34bcee27ec452a963f24e1b638f735a386ee396f",
+        "single_shard_sha256": "0a9a5a78e87cc800c1187a2c19f75c5e490734d1518fe8968d517b2077353c45",
+        "checkpoint_path": "/workspace/aad/artifacts/autoinit/phase_a_search/states/85bde4ded2c31953f802e39cf2252c87",
+        "num_parameters": 596049920
+      },
+      {
+        "state_id": "158b96cf651fd8ba8f8ceaefefde2067",
+        "path": "DEPTH(calib.domain_balanced@v1)->FFN(calib.domain_balanced@v1)->RESIDUAL_WIDTH(calib.domain_balanced@v1)->ATTENTION(calib.none@v1)",
+        "artifact_digest": "1efe9d2a22e6e9960504febd0b292ad89e496b1d616d1b116e406984ebda63bb",
+        "single_shard_sha256": "7f6a7889a87c65aa2ebf135a8b57c9660abefccd26536890dc77f559cc65e2f9",
+        "checkpoint_path": "/workspace/aad/artifacts/autoinit/phase_a_search/states/158b96cf651fd8ba8f8ceaefefde2067",
+        "num_parameters": 596049920
+      },
+      {
+        "state_id": "4e429f7ed722b180dd662c779895693f",
+        "path": "ATTENTION(calib.none@v1)->DEPTH(calib.domain_balanced@v1)->RESIDUAL_WIDTH(calib.domain_balanced@v1)->FFN(calib.domain_balanced@v1)",
+        "artifact_digest": "071edc8ab55501fb271ca3938ca9407e839dc3bda618865f9299cfe0238fa0e3",
+        "single_shard_sha256": "cd334d30d7466ae3c76ed3dcdc7b66cceb0473d56e7af74028d6c7e93de45ace",
+        "checkpoint_path": "/workspace/aad/artifacts/autoinit/phase_a_search/states/4e429f7ed722b180dd662c779895693f",
+        "num_parameters": 596049920
+      },
+      {
+        "state_id": "281a02c3ac18419b70e896296dac0d03",
+        "path": "FFN(calib.domain_balanced@v1)->DEPTH(calib.none@v1)->RESIDUAL_WIDTH(calib.domain_balanced@v1)->ATTENTION(calib.none@v1)",
+        "artifact_digest": "e1289e46ff10f153bbb90a37f90ae3fc3f8b2b8b99c7c232328f8889c9755c7a",
+        "single_shard_sha256": "62daf60dac46487a7513b25ae984de4205d2a3e0849a58f7de633493ae7f57c6",
+        "checkpoint_path": "/workspace/aad/artifacts/autoinit/phase_a_search/states/281a02c3ac18419b70e896296dac0d03",
+        "num_parameters": 596049920
+      }
+    ],
+    "decisions": [
+      {
+        "state_id": "cca699c93f34dad7e94a5d13a25b2bc2",
+        "path": "FFN(calib.domain_balanced@v1)->DEPTH(calib.domain_balanced@v1)->RESIDUAL_WIDTH(calib.domain_balanced@v1)->ATTENTION(calib.none@v1)",
+        "front": 0,
+        "position_in_front": 0,
+        "lineage": "ffn.activation_importance_v0|depth.causal_kl_greedy_v1|width.global_pca_v0",
+        "selected": true,
+        "objectives": {
+          "state.teacher_kl.equal_domain_mean": 8.004627865634449,
+          "state.teacher_kl.worst_domain": 8.285835698999906,
+          "state.critical_token_kl": 12.110970508237354
+        },
+        "diagnostics": {
+          "state.nll.pooled_all_domains": 8.701866302238745,
+          "state.nll.teacher_reference_pooled": 0.9303420924946204,
+          "state.nll.general": 10.35017615364397,
+          "state.nll.reasoning_math": 8.056051092263681,
+          "state.nll.rag_multihop": 9.202625568855934,
+          "state.nll.code": 8.113993792705612,
+          "state.nll.tool": 8.449032799219504
+        },
+        "reason": "kept: front 0, lineage 'ffn.activation_importance_v0|depth.causal_kl_greedy_v1|width.global_pca_v0', beam 5"
+      },
+      {
+        "state_id": "85bde4ded2c31953f802e39cf2252c87",
+        "path": "DEPTH(calib.none@v1)->FFN(calib.domain_balanced@v1)->RESIDUAL_WIDTH(calib.domain_balanced@v1)->ATTENTION(calib.none@v1)",
+        "front": 1,
+        "position_in_front": 0,
+        "lineage": "depth.positional_v0|ffn.activation_importance_v0|width.global_pca_v0",
+        "selected": true,
+        "objectives": {
+          "state.teacher_kl.equal_domain_mean": 8.221182627136844,
+          "state.teacher_kl.worst_domain": 8.547897571102501,
+          "state.critical_token_kl": 14.553370529249493
+        },
+        "diagnostics": {
+          "state.nll.pooled_all_domains": 8.961332366672082,
+          "state.nll.teacher_reference_pooled": 0.9303420924946204,
+          "state.nll.general": 10.679493382861608,
+          "state.nll.reasoning_math": 7.783377612754794,
+          "state.nll.rag_multihop": 9.547975822331065,
+          "state.nll.code": 8.367418383322276,
+          "state.nll.tool": 9.04767621828002
+        },
+        "reason": "kept: front 1, lineage 'depth.positional_v0|ffn.activation_importance_v0|width.global_pca_v0', beam 5"
+      },
+      {
+        "state_id": "158b96cf651fd8ba8f8ceaefefde2067",
+        "path": "DEPTH(calib.domain_balanced@v1)->FFN(calib.domain_balanced@v1)->RESIDUAL_WIDTH(calib.domain_balanced@v1)->ATTENTION(calib.none@v1)",
+        "front": 2,
+        "position_in_front": 0,
+        "lineage": "depth.causal_kl_greedy_v1|ffn.activation_importance_v0|width.global_pca_v0",
+        "selected": true,
+        "objectives": {
+          "state.teacher_kl.equal_domain_mean": 9.567978373493997,
+          "state.teacher_kl.worst_domain": 10.5422077099917,
+          "state.critical_token_kl": 15.900577929341427
+        },
+        "diagnostics": {
+          "state.nll.pooled_all_domains": 10.34211383974287,
+          "state.nll.teacher_reference_pooled": 0.9303420924946204,
+          "state.nll.general": 11.130016346876534,
+          "state.nll.reasoning_math": 9.062610376322056,
+          "state.nll.rag_multihop": 11.618788268997672,
+          "state.nll.code": 10.032880743220945,
+          "state.nll.tool": 10.225772402683269
+        },
+        "reason": "kept: front 2, lineage 'depth.causal_kl_greedy_v1|ffn.activation_importance_v0|width.global_pca_v0', beam 5"
+      },
+      {
+        "state_id": "4e429f7ed722b180dd662c779895693f",
+        "path": "ATTENTION(calib.none@v1)->DEPTH(calib.domain_balanced@v1)->RESIDUAL_WIDTH(calib.domain_balanced@v1)->FFN(calib.domain_balanced@v1)",
+        "front": 2,
+        "position_in_front": 1,
+        "lineage": "attention.weight_proxy_v0|depth.causal_kl_greedy_v1|width.global_pca_v0",
+        "selected": true,
+        "objectives": {
+          "state.teacher_kl.equal_domain_mean": 11.362186707354258,
+          "state.teacher_kl.worst_domain": 12.36759535559016,
+          "state.critical_token_kl": 15.231128618872152
+        },
+        "diagnostics": {
+          "state.nll.pooled_all_domains": 12.274176176737562,
+          "state.nll.teacher_reference_pooled": 0.9303420924946204,
+          "state.nll.general": 10.766999192088642,
+          "state.nll.reasoning_math": 12.59735727690052,
+          "state.nll.rag_multihop": 12.27593436516285,
+          "state.nll.code": 12.433586802467763,
+          "state.nll.tool": 12.49721194518695
+        },
+        "reason": "kept: front 2, lineage 'attention.weight_proxy_v0|depth.causal_kl_greedy_v1|width.global_pca_v0', beam 5"
+      },
+      {
+        "state_id": "281a02c3ac18419b70e896296dac0d03",
+        "path": "FFN(calib.domain_balanced@v1)->DEPTH(calib.none@v1)->RESIDUAL_WIDTH(calib.domain_balanced@v1)->ATTENTION(calib.none@v1)",
+        "front": 3,
+        "position_in_front": 0,
+        "lineage": "ffn.activation_importance_v0|depth.positional_v0|width.global_pca_v0",
+        "selected": true,
+        "objectives": {
+          "state.teacher_kl.equal_domain_mean": 10.967033932109306,
+          "state.teacher_kl.worst_domain": 11.902143944325227,
+          "state.critical_token_kl": 17.849924123941104
+        },
+        "diagnostics": {
+          "state.nll.pooled_all_domains": 11.688175958872183,
+          "state.nll.teacher_reference_pooled": 0.9303420924946204,
+          "state.nll.general": 12.694421938881431,
+          "state.nll.reasoning_math": 10.381585286335946,
+          "state.nll.rag_multihop": 12.827039672070416,
+          "state.nll.code": 10.986718082385574,
+          "state.nll.tool": 11.749824722220858
+        },
+        "reason": "kept: front 3, lineage 'ffn.activation_importance_v0|depth.positional_v0|width.global_pca_v0', beam 5"
+      },
+      {
+        "state_id": "0a61c14f8c2fbe60332900eec7f19d12",
+        "path": "COMPOSITE_STAGE1(calib.domain_balanced@v1)",
+        "front": 4,
+        "position_in_front": 0,
+        "lineage": "root",
+        "selected": false,
+        "objectives": {
+          "state.teacher_kl.equal_domain_mean": 13.438634655792224,
+          "state.teacher_kl.worst_domain": 15.259375330971265,
+          "state.critical_token_kl": 25.048512531761297
+        },
+        "diagnostics": {
+          "state.nll.pooled_all_domains": 14.643082967010256,
+          "state.nll.teacher_reference_pooled": 0.9303420924946204,
+          "state.nll.general": 14.395384389649031,
+          "state.nll.reasoning_math": 12.716063012602348,
+          "state.nll.rag_multihop": 15.443130599971687,
+          "state.nll.code": 13.553383996402916,
+          "state.nll.tool": 16.100451744816947
+        },
+        "reason": "pruned: epsilon-dominated (front 4) and the beam of 5 was already full"
+      },
+      {
+        "state_id": "68850e82f92a3ba6adbf5ec6dc010c8d",
+        "path": "RESIDUAL_WIDTH(calib.domain_balanced@v1)->DEPTH(calib.domain_balanced@v1)->FFN(calib.domain_balanced@v1)->ATTENTION(calib.none@v1)",
+        "front": 4,
+        "position_in_front": 1,
+        "lineage": "width.global_pca_v0|depth.causal_kl_greedy_v1|ffn.activation_importance_v0",
+        "selected": false,
+        "objectives": {
+          "state.teacher_kl.equal_domain_mean": 13.888447158235724,
+          "state.teacher_kl.worst_domain": 15.003026841133929,
+          "state.critical_token_kl": 24.01627739156928
+        },
+        "diagnostics": {
+          "state.nll.pooled_all_domains": 14.789922464135781,
+          "state.nll.teacher_reference_pooled": 0.9303420924946204,
+          "state.nll.general": 16.759619355767796,
+          "state.nll.reasoning_math": 12.882874390559046,
+          "state.nll.rag_multihop": 16.343241880984518,
+          "state.nll.code": 13.975824921753418,
+          "state.nll.tool": 14.701161656810152
+        },
+        "reason": "pruned: epsilon-dominated (front 4) and the beam of 5 was already full"
+      }
+    ]
+  },
+  "control": {
+    "state_id": "control-qwen3_0p6b_init_v0",
+    "provenance": "retained_canonical",
+    "artifact_digest": "dc9500d3871a0f31214d55fa2b47b82e196f4f4630c607f43a24d16ed76d83bf",
+    "single_shard_sha256": "86fbba78e8a2a32481ca77e5ac362ed1f17a39dbc30bcbc952cabd5df2633e54",
+    "frozen_sha256_verified": true
+  }
+}

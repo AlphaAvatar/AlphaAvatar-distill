@@ -301,11 +301,49 @@ authorized cumulative cap                                    $234.00
     hard ceiling, does not authorize any subsequent attempt, and does
     not authorize spend outside the next explicitly approved session.
     See the caps list above.
-actual cumulative spend                                      $209.6842
+actual cumulative spend                                      $213.4714
     = $194.0530 + $0.1900 attempt 8 + $0.3400 attempt 9
       + $11.4300 attempt 10 + $0.0700 measurement attempt 1
       + $0.1834 measurement attempt 2 + $0.2077 measurement attempt 3
-      + $3.2101 Phase-A attempt 11.
+      + $3.2101 Phase-A attempt 11 + $3.7872 Phase-A attempt 12.
+Phase A attempt 12 (L40S, 229.5 min) STAGE 1 PASSED, KEPT     $  3.7872
+    AUTHORIZED 2026-08-20 as autoinit.phase_a.2026-08-20T1856Z
+    against logs/autoinit_phase_a_attempt12_grant.json (sha256
+    69e8150ea9d4). Ceiling $23.0484, of which $3.7872 was spent.
+      stage 0   PASSED, attested, 1.9 min.
+      stage 1   PASSED, 203.8 min, SEARCH_DONE:5.
+      stage 2   FAILED on CUDA OOM -- NOT the tokenizer, which is
+                closed: training reached a loss computation.
+      stages 3-5  not reached.
+    THE DURABILITY CLOSURE WORKED. All five stage-1 selected leaves
+    transferred to /home/ecs-user/aad-artifacts/autoinit/phase_a/ with
+    digest=MATCHED, AFTER the stage-2 failure -- the exact case that
+    returned early before -- and required_products_secured recorded
+    {ok: true, "all 5 stage-1 selected leaves verified off-pod"}. Each
+    was re-verified independently afterwards from local bytes: 5/5
+    artifact_digest and single_shard_sha256 match the stage-1 record,
+    1.110 GiB each, tokenizer_sha256 None (still weight-only).
+    Attempt 11 produced the SAME five leaves and destroyed all of them.
+    THE SEARCH IS DETERMINISTIC, and this is the second independent
+    paid confirmation: identical config_hash 567d32789ba6dcef,
+    identical 43 states / 7 complete leaves, identical selected state
+    ids in order, and the first depth invocation chose layer 21 with
+    score 0.625600, runner-up 17, margin 1.529e-03 -- byte-identical to
+    attempt 11 on a different host three days earlier. Only wall time
+    differs (203.8 vs 180.3 min), which is host speed.
+    THE OOM, in its own numbers: the driver runs the beam search
+    IN-PROCESS and still holds ~24.05 GiB at the end of stage 1; stage
+    2 spawns train_stage3.py as a SUBPROCESS needing ~17.97 GiB; the
+    L40S has 44.39 GiB and 2.36 GiB was free when cross_entropy asked
+    for 3.58. Structural, not a race: it will recur at the same point
+    on every attempt on this hardware. Same shape as the
+    reference-cache finding -- the search's residency is larger than a
+    standalone measurement of a stage suggests.
+    Pod deleted, provider confirms gone at 229.5 min against a 1397-min
+    bound. manifest rc=0, 14 files, 7 classes. No launcher error.
+    AUTHORIZATION AND GRANT CONSUMED. NO ATTEMPT 13 IS PREPARED,
+    GRANTED, FUNDED OR IMPLIED.
+    Evidence: logs/autoinit_phase_a_attempt12/
 Phase A attempt 11 (L40S, 194.6 min) STAGE 1 PASSED             $  3.2101
     AUTHORIZED 2026-08-20 as autoinit.phase_a.2026-08-20T0940Z
     against logs/autoinit_phase_a_attempt11_grant.json (sha256
@@ -583,8 +621,12 @@ Phase A attempt 8 (L40S, 11.28 min) SETUP TEST GATE FAILED   $  0.1900
     one launch and is SPENT. No retry was attempted and no attempt 9
     is authorized, funded, prepared or implied.
     Evidence: logs/autoinit_phase_a_attempt8/
-unused authorization remaining                               $ 24.3158
-    = $234.00 - $209.6842. RAISED AND APPROVED 2026-08-21 from
+unused authorization remaining                               $ 20.5286
+    = $234.00 - $213.4714. NOT enough for another full Phase-A attempt
+    at the $23.0484 per-launch ceiling -- it is $2.5198 short. The cap
+    funded one attempt, that attempt has run, and the approval says it
+    does not authorize Attempt 13.
+    (superseded: $24.3158 before attempt 12) RAISED AND APPROVED 2026-08-21 from
     $231.00. Enough for one full-ceiling Phase-A attempt ($23.0484)
     with $1.2674 of margin -- and for nothing after it. The approval
     says in terms that it is "only the project ceiling", that the

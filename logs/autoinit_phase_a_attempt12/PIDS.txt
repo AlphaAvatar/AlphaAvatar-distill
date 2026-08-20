@@ -1,0 +1,7 @@
+# Phase-A Attempt 12 - 2026-08-21. setsid re-parents, so the pid the starting
+# shell records is its own. These are confirmed by argv, out of band.
+launcher 2054239
+poller   2054240
+watchdog 2054334
+pod      o7hj2r3z2w8xat
+session  0c7cb42a9a177241718fb6c43388b5aea1e7bf43

@@ -1,0 +1,33 @@
+[19:19:45] budget: expected 1084 min $17.89 · soft $22.72 · hard $23.05 (authorized $23.05)
+[19:19:46] NVIDIA L40S $0.99/h, stock Low
+[19:19:46] session commit 0c7cb42a9a17 verified: harness digests to b9ff56681e84…, carries the authorization and only logs/autoinit_phase_a_authorization.json differs from the authorized base
+[19:19:46] frozen science plan 02be33b9a7a8… matches the authorization
+[19:19:46] /home/ecs-user/aad-artifacts/autoinit: 20.3 GiB free for 11.6 GiB of leaves and working room
+[19:19:47] precheck OK: 10 relay inputs, 2 local assets
+[19:19:48] created o7hj2r3z2w8xat at $0.99/h
+[19:19:48] watchdog detached — hard 1397 min = $23.05
+[19:20:43]   starting (60s) — $0.01
+[19:21:47]   starting (120s) — $0.03
+[19:22:51] TCP 22 at 202.181.159.219:10192 after 3.1 min
+[19:22:54] draw 1: ssh reachable — $0.05
+[19:23:20] draw 1: image identity runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@580.126.09
+[19:23:20] draw 1: running setup
+[19:29:45] draw 1: setup complete — $0.16
+[19:29:51] driver detached, pid 6817, confirmed by descriptor_probe — $0.17
+[19:32:01]   2026-08-20T19:31:41Z MARKER:STAGE_START:1 — $0.20
+[22:56:25]   2026-08-20T22:55:42Z MARKER:PHASE_A_FAILED — $3.57
+[22:56:25] a blocking stage failed — collecting evidence, then tearing down. Completed probes are journalled and the permanent controls are inputs here and untouched.
+[22:56:25] polling ended: PHASE_A_FAILED — $3.57
+[22:58:57]   manifest rc=0
+14 file(s) across 7 class(es) -> /workspace/manifest.json
+  final_required: 14 · mutable_snapshot: 0 · final_streams_quiescent: True
+[23:01:36]   stage-1 leaf cca699c93f34 -> /home/ecs-user/aad-artifacts/autoinit/phase_a/cca699c93f34dad7e94a5d13a25b2bc2: rc=0 digest=MATCHED
+[23:03:29]   stage-1 leaf 85bde4ded2c3 -> /home/ecs-user/aad-artifacts/autoinit/phase_a/85bde4ded2c31953f802e39cf2252c87: rc=0 digest=MATCHED
+[23:05:20]   stage-1 leaf 158b96cf651f -> /home/ecs-user/aad-artifacts/autoinit/phase_a/158b96cf651fd8ba8f8ceaefefde2067: rc=0 digest=MATCHED
+[23:07:14]   stage-1 leaf 4e429f7ed722 -> /home/ecs-user/aad-artifacts/autoinit/phase_a/4e429f7ed722b180dd662c779895693f: rc=0 digest=MATCHED
+[23:09:08]   stage-1 leaf 281a02c3ac18 -> /home/ecs-user/aad-artifacts/autoinit/phase_a/281a02c3ac18419b70e896296dac0d03: rc=0 digest=MATCHED
+[23:09:08] teardown gate: allowed=True failed=training_complete
+[23:09:08] deleting pod (gate passed after PHASE_A_FAILED)
+[23:09:20] pod deleted — 229.5 min, $3.79; provider confirms gone: True
+
+autoinit-phase-a INCOMPLETE — /home/ecs-user/AlphaAvatar-distill/logs/autoinit_phase_a_session.json. STOP for review; no follow-on experiment was started.

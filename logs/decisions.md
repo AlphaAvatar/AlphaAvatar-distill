@@ -5463,3 +5463,82 @@ full suite did, which is why it is in the gate.
 initialization still hashes to `86fbba78…`; `state_eval_v1`,
 `recovery_search_v2`, the calibration mixture and the probe ladder all present;
 frozen-asset verifier passed.
+
+## 2026-08-21 — Attempt 12: the search result survived, and the OOM is structural
+
+**Context.** Attempt 12 launched under the $234.00 cap against tested
+implementation `f331e49`. It cost **$3.7872** in 229.5 min. Stage 0 and Stage 1
+passed; Stage 2 failed on a **CUDA OOM**.
+
+### The durability closure did its job
+
+All five Stage-1 selected leaves reached
+`/home/ecs-user/aad-artifacts/autoinit/phase_a/` with `digest=MATCHED` — **after
+the Stage-2 failure**, which is exactly the branch that returned early before —
+and `required_products_secured` recorded `ok: true` before the teardown gate
+allowed deletion. Re-verified independently afterwards from local bytes: **5/5**
+on both `artifact_digest` and `single_shard_sha256`, 1.110 GiB each,
+`tokenizer_sha256: None`.
+
+Attempt 11 produced the *same five leaves* and destroyed all of them. The
+difference is mechanical, not luck: the durability report is a fetched report
+ordered before products, the transfer is not gated on Stage 2, and an unreported
+`required_products_secured` counts as False.
+
+**The tokenizer closure also held.** Stage 2 reached
+`masked_ce → F.cross_entropy`, which is past every tokenizer check. That defect
+is closed by evidence, not by argument.
+
+### An unplanned result: the search is deterministic
+
+| | attempt 11 | attempt 12 |
+| --- | --- | --- |
+| `config_hash` | `567d32789ba6dcef…` | identical |
+| states / complete leaves | 43 / 7 | 43 / 7 |
+| selected state ids | five | identical, in order |
+| first depth invocation, ROUND 7 | layer 21, score 0.625600, runner-up 17, margin 1.529e-03 | identical |
+| wall time | 180.3 min | 203.8 min |
+
+Different pods, different hosts, three days apart, and every scientific output
+matches to the digit. Only wall time differs, which is host speed. **The frozen
+search is deterministic in the way the science plan claims** — a result no `$0`
+test could produce, arriving free from having had to run twice. It also means the
+five preserved leaves are the same artifacts attempt 11 selected, so nothing
+scientific was lost by attempt 11's failure beyond the weights themselves.
+
+### The OOM, and why it is structural
+
+```
+Tried to allocate 3.58 GiB. GPU 0 has 44.39 GiB of which 2.36 GiB is free.
+Process 6820 has 24.05 GiB in use … this process has 17.97 GiB in use.
+```
+
+The driver runs the beam search **in-process**, deliberately: the rungs need live
+`InitializationState` objects, and a driver that reconstructed candidates from
+the append-only journal would have to skip `admit_leaves`. So at the end of
+Stage 1 the driver still holds the teacher and candidate state on the device.
+Stage 2 then spawns `train_stage3.py` as a **subprocess** needing its own
+~17.97 GiB, while ~24.05 GiB is still resident in the parent. 44.39 GiB does not
+fit both.
+
+**This will recur on every attempt on this hardware, at the same point, six
+seconds after Stage 1 succeeds.** It is not a race and not a leak.
+
+It is the third instance of one pattern, and worth naming as such: **the search's
+device residency is larger than any standalone measurement of a stage suggests.**
+The reference cache found it first — 20.3 GiB free inside the search against
+36.42 standalone, so the cached path never fits. Attempt 10 found it as CPU
+scoring. Now Stage 2 finds it as a subprocess that cannot get memory the parent
+never released. Stage boundaries that read as sequential in code are not
+sequential in device memory.
+
+**No fix applied**, per the grant. Two shapes are available and the choice is the
+maintainer's: release the driver's device state at the Stage-1/2 boundary
+(cheap, but the rungs' live objects are why it is in-process), or run Stage 2's
+trainer against the now-preserved leaves in a session that never held the search.
+
+**Disposition.** Consumed; Stage 1 passed with its result preserved; Stage 2
+fail-closed stop. Cumulative **$213.4714** of $234.00, leaving **$20.5286** —
+$2.5198 short of another full attempt. **No Attempt 13 is prepared, granted,
+funded or implied.** Evidence:
+[`autoinit_phase_a_attempt12/`](autoinit_phase_a_attempt12/).

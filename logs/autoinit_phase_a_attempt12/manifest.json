@@ -1,0 +1,209 @@
+{
+  "root": "/workspace/aad/artifacts",
+  "created_utc": "2026-08-20T22:56:37+00:00",
+  "ok": true,
+  "specs": [
+    {
+      "artifact_class": "phase_a_evidence",
+      "pattern": "audit/autoinit_phase_a/phase_a_evidence.json",
+      "required": true,
+      "min_matches": 1,
+      "min_bytes": 1,
+      "lifecycle": "final_required"
+    },
+    {
+      "artifact_class": "leaf_retention",
+      "pattern": "audit/autoinit_phase_a/leaf_retention.json",
+      "required": false,
+      "min_matches": 0,
+      "min_bytes": 1,
+      "lifecycle": "final_required"
+    },
+    {
+      "artifact_class": "probe_journal",
+      "pattern": "audit/autoinit_phase_a/probes/*.json",
+      "required": false,
+      "min_matches": 0,
+      "min_bytes": 1,
+      "lifecycle": "final_required"
+    },
+    {
+      "artifact_class": "search_journal",
+      "pattern": "autoinit/phase_a_search/states.jsonl",
+      "required": false,
+      "min_matches": 0,
+      "min_bytes": 1,
+      "lifecycle": "final_required"
+    },
+    {
+      "artifact_class": "gate_log",
+      "pattern": "audit/autoinit_phase_a/*.log",
+      "required": false,
+      "min_matches": 0,
+      "min_bytes": 1,
+      "lifecycle": "final_required"
+    },
+    {
+      "artifact_class": "audit_json",
+      "pattern": "audit/autoinit_phase_a/*.json",
+      "required": false,
+      "min_matches": 0,
+      "min_bytes": 1,
+      "lifecycle": "final_required"
+    },
+    {
+      "artifact_class": "probe_config",
+      "pattern": "audit/autoinit_phase_a/configs/*.json",
+      "required": false,
+      "min_matches": 0,
+      "min_bytes": 1,
+      "lifecycle": "final_required"
+    },
+    {
+      "artifact_class": "per_sample",
+      "pattern": "audit/autoinit_phase_a/*_per_sample.jsonl",
+      "required": false,
+      "min_matches": 0,
+      "min_bytes": 1,
+      "lifecycle": "final_required"
+    },
+    {
+      "artifact_class": "generations",
+      "pattern": "eval/phase_a/*/*.generations.jsonl",
+      "required": false,
+      "min_matches": 0,
+      "min_bytes": 1,
+      "lifecycle": "final_required"
+    },
+    {
+      "artifact_class": "generation_summary",
+      "pattern": "eval/phase_a/*/*.json",
+      "required": false,
+      "min_matches": 0,
+      "min_bytes": 1,
+      "lifecycle": "final_required"
+    },
+    {
+      "artifact_class": "probe_train_log",
+      "pattern": "stage3/phase_a/*/train_log.jsonl",
+      "required": false,
+      "min_matches": 0,
+      "min_bytes": 1,
+      "lifecycle": "final_required"
+    },
+    {
+      "artifact_class": "session_evidence",
+      "pattern": "audit/autoinit_phase_a/session/*",
+      "required": false,
+      "min_matches": 0,
+      "min_bytes": 1,
+      "lifecycle": "final_required"
+    }
+  ],
+  "entries": [
+    {
+      "path": "audit/autoinit_phase_a/phase_a_evidence.json",
+      "artifact_class": "phase_a_evidence",
+      "size_bytes": 91334,
+      "sha256": "bff0b111683d1783a0bf6037ee9b441c7b9b650c05406e9660b1b7b1b62a97c1",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "autoinit/phase_a_search/states.jsonl",
+      "artifact_class": "search_journal",
+      "size_bytes": 26203821,
+      "sha256": "1bbb3f7f22751a2199f9c9a0a5d864d7e293430125a323f5c7cc7eaab8823765",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "audit/autoinit_phase_a/autoinit.v1.phase_a.rung1.cca699c93f34.sa_train_tail.log",
+      "artifact_class": "gate_log",
+      "size_bytes": 1500,
+      "sha256": "1bf15296643721011ccae5aa781fe3ec8df6b960eea689866fa4c21ae56e6c52",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "audit/autoinit_phase_a/engine_probe.log",
+      "artifact_class": "gate_log",
+      "size_bytes": 11870,
+      "sha256": "7c43a97e5772daccbccbb757648db739e2db4747f4b8553901fabfb7504ca61e",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "audit/autoinit_phase_a/frozen_assets.log",
+      "artifact_class": "gate_log",
+      "size_bytes": 134,
+      "sha256": "10dc46971aab8170717c12e831e3ec62776fadcf5b92d0ac0910726d182b31fd",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "audit/autoinit_phase_a/attested_evaluation_protocol.json",
+      "artifact_class": "audit_json",
+      "size_bytes": 7656,
+      "sha256": "b6b8680d307f12d80ef771ac51e5a0f651dace0fa3b2630de7f398025c562507",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "audit/autoinit_phase_a/engine_probe.json",
+      "artifact_class": "audit_json",
+      "size_bytes": 1779,
+      "sha256": "b8d6ebdca2c6976571952f13bfc6fba0aafa9bf4bdae53f6bec7dd8ac0ae9f2c",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "audit/autoinit_phase_a/search_result.json",
+      "artifact_class": "audit_json",
+      "size_bytes": 61115,
+      "sha256": "9cb9bd6a5f077dc014e93c70d7ea642d0e8a42948e4a255ef9510fb79db04f93",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "audit/autoinit_phase_a/selected_leaf_durability.json",
+      "artifact_class": "audit_json",
+      "size_bytes": 10606,
+      "sha256": "53f485ed325e7212cdf61ec3e26eedc449e57acd03f9ddb58f6cac22d60bd441",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "audit/autoinit_phase_a/configs/autoinit.v1.phase_a.rung1.cca699c93f34.sa.json",
+      "artifact_class": "probe_config",
+      "size_bytes": 1906,
+      "sha256": "0463041f10114bcd83ef5fafa0cce493b879f89cd07bff17c4249e66d2570d76",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "stage3/phase_a/autoinit.v1.phase_a.rung1.cca699c93f34.sa/train_log.jsonl",
+      "artifact_class": "probe_train_log",
+      "size_bytes": 3184,
+      "sha256": "b3d07962c522aedc346e4f7f03bd7abcb1d7874746d814c2d83d23ba53375384",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "audit/autoinit_phase_a/session/autoinit_phase_a.status",
+      "artifact_class": "session_evidence",
+      "size_bytes": 822,
+      "sha256": "cb4f4f6df404853d704d7ec46353e0a3366b386bf5c1ccfdf1344a2cc6643c32",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "audit/autoinit_phase_a/session/autoinit_phase_a_run.log",
+      "artifact_class": "session_evidence",
+      "size_bytes": 150267,
+      "sha256": "218e387f9ce43b112b5e86a38c9eaf6396ac65cc0d0b99b1cbea91a593d4281b",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "audit/autoinit_phase_a/session/setup.log",
+      "artifact_class": "session_evidence",
+      "size_bytes": 24792,
+      "sha256": "0000aa36522acbabbc4a816b2db9a458b2378f47ee09f806f908f9ed28e57ce8",
+      "lifecycle": "final_required"
+    }
+  ],
+  "missing": [],
+  "appended_during_archive": [],
+  "completion_markers": [],
+  "completion_marker_failures": [],
+  "still_being_written": [],
+  "final_streams_quiescent": true
+}

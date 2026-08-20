@@ -93,6 +93,7 @@ Per-run directories. Each holds what a session actually produced.
 | `autoinit_phase_a_attempt10/` | attempt 10 — **incomplete, operator runtime-cost failure**, $11.43. Stage 0 passed; `depth.causal_kl_greedy_v1` ran 10 h 47 m without finishing, GPU idle. Carries `search_states.jsonl` (2 states, specs only — weights gone with the pod) |
 | `autoinit_measurement_attempt3/` | the bounded measurement's third launch — **COMPLETE**, $0.2077, `ALL_DONE`. Carries `result.json` (the reviewed artifact), the driver log with all 24 timings, and the artifact manifest. Its grant and authorization are consumed |
 | `autoinit_measurement_attempt2/` | the bounded measurement's second launch — **setup passed end to end (`SETUP_RC=0`); the driver died in its entrypoint's first repository import**, $0.1834, no measurement ran. Carries the driver traceback. Its grant and authorization are consumed |
+| `autoinit_phase_a_attempt12/` | attempt 12 — **Stage 1 PASSED and its five leaves were preserved off-pod**, $3.7872. Stage 2 failed on CUDA OOM (driver holds ~24 GiB from the in-process search). Carries the durability report, the OOM traceback and the search result, which is byte-identical to attempt 11's |
 | `autoinit_phase_a_attempt11/` | attempt 11 — **Stage 1 PASSED**, $3.2101. The first completed AutoInit beam search: 43 states, 5 leaves selected, the composite baseline beaten. Stage 2 failed closed on a tokenizer guard. Carries `search_result.json`, `search_states_reduced.jsonl` and the Stage-2 traceback; the 25 MB full state journal is out of tree (see `search_states_FULL_RECORD.md`) |
 | `autoinit_device_canary_attempt1/`, `autoinit_device_canary_attempt2/` | the two terminated canary sessions |
 | `e7_canary/`, `e7_canary_rerun/` | the control-plane canary runs |
@@ -104,7 +105,7 @@ Grant documents — the one-use maintainer decision an authorization is issued
 `autoinit_phase_a_attempt9_grant.json`,
 `autoinit_phase_a_attempt10_grant.json`,
 `autoinit_phase_a_attempt11_grant.json` (consumed),
-`autoinit_phase_a_attempt12_grant.json`,
+`autoinit_phase_a_attempt12_grant.json` (consumed),
 `autoinit_measurement_grant.json` (consumed),
 `autoinit_measurement_grant2.json` (consumed),
 `autoinit_measurement_grant3.json` (consumed). The issuer requires one, refuses a grant

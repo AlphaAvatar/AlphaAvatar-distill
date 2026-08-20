@@ -1,0 +1,1704 @@
+{
+  "schema": "aadistill.autoinit.phase_a_evidence/v1",
+  "started_utc": "2026-08-20T19:29:49.382159+00:00",
+  "phase_a": {
+    "plan": {
+      "plan_id": "autoinit.v1.phase_a_session",
+      "version": 1,
+      "plan_hash": "9377a2dc61f21790dd111d72a5de0e039ea1d31afef2d09e18c98a0b0cc2a0aa",
+      "stages": [
+        {
+          "stage": 0,
+          "name": "attestation and preregistration binding",
+          "purpose": "re-establish the runtime and evaluation identity this session measures under, and refuse to proceed unless the science plan is the frozen one",
+          "produces": [
+            "runtime fingerprint including image digest",
+            "attested evaluation protocol over recovery_search_v2",
+            "frozen-asset verification for state_eval_v1 and recovery_search_v2",
+            "assert_preregistered against the frozen Phase-A plan",
+            "the materialized thresholds this run will select against"
+          ],
+          "blocking": true,
+          "stop_conditions": [
+            "a frozen asset does not match its preregistered constant -> STOP",
+            "the executing science plan does not hash to the frozen one -> STOP: a threshold moved after freezing",
+            "the equivalence interval or feasibility floor is not materialized -> STOP: selection has no rule to apply",
+            "the scoring contract digest differs from the pinned one -> STOP"
+          ]
+        },
+        {
+          "stage": 1,
+          "name": "beam search over initialization paths",
+          "purpose": "materialize and measure the reachable initialization states, and produce the searched leaves the recovery rungs will probe",
+          "produces": [
+            "one measured, hash-bound state per expansion",
+            "level records including every prune reason",
+            "the epsilon-Pareto ranking at each pruned level",
+            "5 admissible complete leaves",
+            "the search journal, resumable by content-derived state id"
+          ],
+          "blocking": true,
+          "stop_conditions": [
+            "fewer than 5 admissible complete leaves exist -> STOP and report the shortfall rather than shrinking N",
+            "a materialized state fails canonical reload, spec match, parameter count or finiteness -> STOP",
+            "the state evaluation suite hash differs from the attested one -> STOP: the beam would rank on a different suite's questions"
+          ]
+        },
+        {
+          "stage": 2,
+          "name": "recovery rung 1 on seed sa",
+          "purpose": "probe the 5 searched leaves and the retained canonical control under one identical recovery recipe",
+          "produces": [
+            "6 probes at 1023 steps each on seed sa",
+            "recovery_search_v2 battery result per probe",
+            "the rung-1 survivor selection under the frozen rule",
+            "per-probe journal entries, resumable"
+          ],
+          "blocking": true,
+          "stop_conditions": [
+            "the canonical control is absent -> STOP: a comparison without the retained baseline is not the comparison the plan describes",
+            "capability schema validation fails -> scoring defect, STOP",
+            "a probe's evaluation protocol is not comparable to the attestation -> STOP"
+          ]
+        },
+        {
+          "stage": 3,
+          "name": "recovery rung 2 on seed sb",
+          "purpose": "second seed for the 2 survivors and the control, because the behaviour metric's seed-only spread is 0.1290",
+          "produces": [
+            "3 probes at 1023 steps each on seed sb",
+            "pooled_counts@v2 aggregates over sa and sb",
+            "the final selection, or an explicit tie"
+          ],
+          "blocking": true,
+          "stop_conditions": [
+            "the control did not advance -> STOP: it advances unconditionally",
+            "capability schema validation fails -> STOP"
+          ]
+        },
+        {
+          "stage": 4,
+          "name": "conditional tie-break on seed sc",
+          "purpose": "resolve finalists that finished inside the preregistered equivalence interval after two seeds \u2014 and only those",
+          "produces": [
+            "probes on seed sc for the tied finalists only",
+            "pooled aggregates over sa, sb and sc",
+            "the resolved winner, or unresolved_equivalence"
+          ],
+          "blocking": false,
+          "stop_conditions": [
+            "the rung-2 selection did not request a tie-break -> this stage does not run, which is not a failure",
+            "no fourth seed is requested under any outcome"
+          ]
+        },
+        {
+          "stage": 5,
+          "name": "selection and report",
+          "purpose": "record which initializer won, that the canonical control won, or that v1 resolved no unique behavioural winner",
+          "produces": [
+            "the final selection record with every exclusion",
+            "feasibility and catastrophic-gate outcomes per candidate",
+            "behaviour and correctness reported on separate axes",
+            "the Phase-A result artifact"
+          ],
+          "blocking": false,
+          "stop_conditions": [
+            "a tie surviving seed sc is reported as unresolved_equivalence and is a RESULT, not a failure",
+            "no follow-on experiment starts from this session"
+          ]
+        }
+      ],
+      "ordering_rationale": "controls are the expensive artifact and the one whose validity depends on a fixed runtime, so they are produced only after the runtime is attested and the cheap gates pass"
+    },
+    "scope": {
+      "trains_anything": true,
+      "retrains_permanent_controls": false,
+      "reaches_any_followon": false,
+      "control_is_injected_by_hash": true,
+      "searched_leaves": 5,
+      "survivors": 2,
+      "seeds": [
+        20260726,
+        20260801
+      ],
+      "conditional_tie_break_seed": 20260813,
+      "battery": "recovery_search_v2",
+      "state_eval_suite": "state_eval_v1",
+      "notes": {
+        "what_training_means_here": "Phase A trains 9 recovery probes (12 if the tie-break rung runs) at 1023 steps each. It does NOT retrain the two permanent controls, which were trained once and are injected by frozen hash",
+        "control_may_win": "'the incumbent won, AutoInitializer v1 did not improve recovered behaviour' is a reachable conclusion, and the selection is symmetric so that it stays reachable",
+        "no_winner_is_a_result": "unresolved_equivalence after seed sc is the finding, not a failure to be resolved by a fourth seed or a lexicographic tie-break",
+        "terminus": "Phase A stops for review. No follow-on experiment, full recovery of a winner, or Phase B starts from this session"
+      },
+      "session_plan_hash": "9377a2dc61f21790dd111d72a5de0e039ea1d31afef2d09e18c98a0b0cc2a0aa"
+    },
+    "harness_source_files": [
+      "scripts/pod/autoinit_phase_a_launch.py",
+      "scripts/pod/autoinit_phase_a_driver.py",
+      "scripts/pod/autoinit_preflight_setup.sh",
+      "scripts/pod/autoinit_science_inputs.py",
+      "scripts/pod/autoinit_engine_probe.py",
+      "scripts/pod/watchdog.py",
+      "scripts/pod/collect_artifacts.py",
+      "src/aadistill/infrastructure/session.py",
+      "src/aadistill/infrastructure/session_runner.py",
+      "src/aadistill/infrastructure/session_prechecks.py",
+      "scripts/autoinit/phase_a_search.py",
+      "scripts/autoinit/write_preregistration.py",
+      "src/aadistill/autoinit/authorization.py",
+      "src/aadistill/autoinit/generation_compat.py",
+      "src/aadistill/autoinit/phase_a.py",
+      "src/aadistill/autoinit/generation.py"
+    ],
+    "manifest_sha256": "cc0b23970fc0d98efe31791ad1bf778e1ea9dd06faf31ab99dbc35d45dc6f102"
+  },
+  "scope": {
+    "trains_anything": true,
+    "retrains_permanent_controls": false,
+    "reaches_any_followon": false,
+    "control_is_injected_by_hash": true,
+    "searched_leaves": 5,
+    "survivors": 2,
+    "seeds": [
+      20260726,
+      20260801
+    ],
+    "conditional_tie_break_seed": 20260813,
+    "battery": "recovery_search_v2",
+    "state_eval_suite": "state_eval_v1",
+    "notes": {
+      "what_training_means_here": "Phase A trains 9 recovery probes (12 if the tie-break rung runs) at 1023 steps each. It does NOT retrain the two permanent controls, which were trained once and are injected by frozen hash",
+      "control_may_win": "'the incumbent won, AutoInitializer v1 did not improve recovered behaviour' is a reachable conclusion, and the selection is symmetric so that it stays reachable",
+      "no_winner_is_a_result": "unresolved_equivalence after seed sc is the finding, not a failure to be resolved by a fourth seed or a lexicographic tie-break",
+      "terminus": "Phase A stops for review. No follow-on experiment, full recovery of a winner, or Phase B starts from this session"
+    },
+    "session_plan_hash": "9377a2dc61f21790dd111d72a5de0e039ea1d31afef2d09e18c98a0b0cc2a0aa"
+  },
+  "retrains_permanent_controls": false,
+  "followon_started": false,
+  "followon_reachable_from_this_driver": false,
+  "stages": {
+    "0": {
+      "passed": true,
+      "reason": "",
+      "finished_utc": "2026-08-20T19:31:41.228884+00:00",
+      "spend_usd": 0.1951,
+      "attested": {
+        "schema": "aadistill.autoinit.phase_a_attested_protocol/v1",
+        "generated_utc": "2026-08-20T19:31:41.227119+00:00",
+        "runtime": {
+          "version": 1,
+          "image_digest": "runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@580.126.09",
+          "python_version": "3.12.3",
+          "torch_version": "2.11.0+cu128",
+          "transformers_version": "5.13.1",
+          "cuda_runtime": "12.8",
+          "attention_backend": "sdpa"
+        },
+        "generation_source_digest": {
+          "digest": "a1b51736d6a6b1276322a04d44855d7b574011e165e77d6d23c3e31b3036f743",
+          "files": [
+            {
+              "path": "scripts/evaluation/uncapped_eval.py",
+              "sha256": "120e92dc08a49ae4e3ed74fbbc6537054c011382755cdec6418c11b341f780d4",
+              "bytes": 28667
+            },
+            {
+              "path": "src/aadistill/evaluation/behavior.py",
+              "sha256": "c6f52721e8b86bc2d875683bfb9c35b4101379fa5d48de7a48db93959e2935c2",
+              "bytes": 19983
+            },
+            {
+              "path": "src/aadistill/evaluation/degeneration.py",
+              "sha256": "793540820d4fc0f42d0c855e0d79eb879b94efa451e06030b2a14c55683f4961",
+              "bytes": 5245
+            }
+          ],
+          "rule": "sha256 over sorted 'path:sha256' lines of the declared set"
+        },
+        "scoring_contract": {
+          "contract": "recovery_search_scoring@v2",
+          "contract_id": "recovery_search_scoring",
+          "version": 2,
+          "digest": "808080a7c5d88d5a66760fd0d7eeabc5451c096ad0819f8c5663a0b8224660be",
+          "files": [
+            {
+              "path": "scripts/autoinit/score_recovery_search.py",
+              "sha256": "b19eba4c2c5f555aeb141811439ad5e5417a3222c3b57b78bad3f497eb90dba3",
+              "bytes": 21518
+            },
+            {
+              "path": "src/aadistill/autoinit/recovery.py",
+              "sha256": "39d6598e210b9619d56463f6ba3000d47e1a97f7121e7db25b97213d4d6c799e",
+              "bytes": 102452
+            },
+            {
+              "path": "src/aadistill/evaluation/behavior.py",
+              "sha256": "c6f52721e8b86bc2d875683bfb9c35b4101379fa5d48de7a48db93959e2935c2",
+              "bytes": 19983
+            },
+            {
+              "path": "src/aadistill/evaluation/capability.py",
+              "sha256": "da1bc3b1069d927b6ab2cbf0eaaf6763bfa491d396189b3dcde95977e39d67ad",
+              "bytes": 19568
+            },
+            {
+              "path": "src/aadistill/evaluation/strict_answer.py",
+              "sha256": "ecb4356a89d3563214ea11ade2307b0d106588bb7ff59f6b8c5e3b9c98d380e3",
+              "bytes": 7628
+            },
+            {
+              "path": "src/aadistill/evaluation/usable_rollout.py",
+              "sha256": "8159acdd7a0a6953dfefac7acf4f6fb4706f69a7264b625e9f9b7ff1a74826ca",
+              "bytes": 6155
+            }
+          ],
+          "rule": "sha256 over sorted 'path:sha256' lines of the declared recovery-scoring source set",
+          "covers": [
+            "usable_rollout components and their composition",
+            "protocol validity, including the tools_offered relaxation",
+            "the tool structural-executability gate",
+            "per-set correctness scorers",
+            "correct => usable",
+            "capability schema and aggregation",
+            "pooled_counts seed aggregation",
+            "the threshold formulas materialized from control data"
+          ],
+          "supersedes": {
+            "contract": "recovery_search_scoring@v1",
+            "identity_was": "a single hash of src/aadistill/evaluation/capability.py",
+            "why": "v1 could not see a defect in the composition. A prompted tool call was rejected as unexpected_tool_call, so the tool capability read a structural 0.0000 for every arm while capability.py itself was unchanged and its hash matched."
+          }
+        },
+        "evaluation_protocol": {
+          "evaluation_protocol_hash": "17218f7c635ee5f2e62f698f75d8731aa8eebc0e5475bf833673277f714e9ccc",
+          "generation": {
+            "generation_source_digest": "a1b51736d6a6b1276322a04d44855d7b574011e165e77d6d23c3e31b3036f743",
+            "generation_source_set_version": 1,
+            "vllm_version": "0.27.1",
+            "transformers_version": "5.15.0",
+            "torch_version": "2.13.0+cu130",
+            "dtype": "bfloat16",
+            "gpu_memory_utilization": 0.9,
+            "max_num_seqs": 256,
+            "max_num_batched_tokens": 8192,
+            "enforce_eager": false,
+            "tokenizer_source": "the evaluated checkpoint",
+            "tokenizer_sha256": "c1db93c8164f3e3ba2dbc8c6943fb574273a5efa87da4556ef9f460b5c0893b7",
+            "chat_template_sha256": "3802169b2a02b81e6adb7ab4f64f91ff02db753c8c3a64a01c35192d3a61d8d7",
+            "protocol": "project",
+            "system_message": "You are a helpful Assistant.",
+            "system_injection_rule": "injected only when the sample carries no system turn and protocol == project; a sample's own system prompt is preserved",
+            "chat_template_kwargs_json": "{}",
+            "thinking_mode": "template-default (not overridden)",
+            "trained_context": 8192,
+            "context_len_override": null,
+            "resolved_context": 8192,
+            "context_source": "trained_block_len",
+            "context_resolution_rule": "min(trained_context, architectural context); the effective context is the TRAINED context and this is not a 262K-context evaluation",
+            "temperature": 0.0,
+            "top_p": 1.0,
+            "top_k": -1,
+            "detokenize": false,
+            "max_tokens_rule": "per sample: resolved_context - len(prompt_ids); P18 unrestricted, never a chosen token budget",
+            "stop_token_ids": [
+              151645
+            ],
+            "stop_id_derivation_rule": "sorted union of config.eos_token_id, generation_config.eos_token_id, <|im_end|> and tokenizer.eos_token_id",
+            "degeneration_stop": true,
+            "degeneration_check_every": 256,
+            "degeneration_source_digest": "793540820d4fc0f42d0c855e0d79eb879b94efa451e06030b2a14c55683f4961",
+            "runtime_digest": "f0db1b430df37c766e9117ac24c0cbd1a4c89420a089b846884776a24d1594b6",
+            "protocol_id": "recovery_generation",
+            "version": 1,
+            "generation_protocol_fingerprint": "d07d1296e62fbd4fed50add28476aa334b47d1d7a0849a14ccb6d6bfefaafffb",
+            "is_materialized": true,
+            "unmaterialized_fields": [],
+            "excluded_by_design": [
+              "the checkpoint being generated from"
+            ],
+            "why_excluded": "the checkpoint is the treatment; a generation identity containing it would mark every pair of arms as mismatched"
+          },
+          "scoring_contract": "recovery_search_scoring@v2",
+          "scoring_digest": "808080a7c5d88d5a66760fd0d7eeabc5451c096ad0819f8c5663a0b8224660be",
+          "battery": {
+            "artifact": "recovery_search_v2",
+            "manifest_sha256": "58ae5c6dcbe32eb28c343a66830d7224a14537362deeeff2ce8219d0a31679d6",
+            "content_sha256": "a1b22778b00d95b6aba358c14a5af5b559fd807bb371c92131eacca59479f323"
+          },
+          "binding": "every control and every searched recovery probe must bind to this exact hash; a probe measured under a different one is not comparable to the thresholds materialized from these controls",
+          "notes": {}
+        },
+        "evaluation_protocol_hash": "17218f7c635ee5f2e62f698f75d8731aa8eebc0e5475bf833673277f714e9ccc",
+        "stage3_evaluation_protocol_hash": "250f72efbd43b86a475e8dda293b45f07ee61a4d858e147f4a5bd7681c32c2e4",
+        "bound_to_stage3_thresholds": true,
+        "comparability": {
+          "rule": "generation_runtime_comparability@v2",
+          "live_identity": "70a26e0b43df20e469385115b49683b50936919e02986088b76d3c30ffd87103",
+          "historical_identity": "70a26e0b43df20e469385115b49683b50936919e02986088b76d3c30ffd87103",
+          "identities_equal": true,
+          "live_driver": "580.126.09",
+          "historical_driver": "580.159.03",
+          "driver_branch_equal": true,
+          "driver_patch_differs": true
+        },
+        "comparable_identity": "70a26e0b43df20e469385115b49683b50936919e02986088b76d3c30ffd87103",
+        "science_plan_hash": "02be33b9a7a8e26bc8bfb75795351e8cdc9ffd441b47066cc81887cfc511b55c",
+        "equivalence_interval": 0.011695296982299022,
+        "feasibility_floor": 0.3,
+        "report_sha256": "844c4b1e5a5dfec8ea70cbf92b6b1591785087e314b1a99a5b64dc655a540da3"
+      },
+      "frozen_plan_hash": "02be33b9a7a8e26bc8bfb75795351e8cdc9ffd441b47066cc81887cfc511b55c"
+    },
+    "1": {
+      "passed": true,
+      "reason": "",
+      "finished_utc": "2026-08-20T22:55:33.587187+00:00",
+      "spend_usd": 3.559,
+      "durability": {
+        "schema": "aadistill.autoinit.selected_leaf_durability/v1",
+        "destination": "/workspace/aad/artifacts/audit/autoinit_phase_a/selected_leaves",
+        "n_leaves": 5,
+        "required_bytes": 5960675480,
+        "free_bytes_before": 88587341824,
+        "leaves": [
+          {
+            "state_id": "cca699c93f34dad7e94a5d13a25b2bc2",
+            "identity": {
+              "schema": "aadistill.autoinit.checkpoint_identity/v1",
+              "path": "/workspace/aad/artifacts/audit/autoinit_phase_a/selected_leaves/cca699c93f34dad7e94a5d13a25b2bc2",
+              "shards": [
+                {
+                  "filename": "model.safetensors",
+                  "sha256": "db056398840f5c64f767fe8690803478918399c04bd7b4a1aeae6b7549c624af",
+                  "size_bytes": 1192135096
+                }
+              ],
+              "n_shards": 1,
+              "total_bytes": 1192135096,
+              "weights_digest": "66cea45d5f527842a9907bed0845f58f4b1f717d8696bdabe1f783b3cc5bed56",
+              "artifact_digest": "04fa7fe74f01ee63f6611cca6d7fce4fe1dba66b9865cf0b9c47495b9cfe33d4",
+              "single_shard_sha256": "db056398840f5c64f767fe8690803478918399c04bd7b4a1aeae6b7549c624af",
+              "index_sha256": null,
+              "config_sha256": "f69c2fb3a120db405cd48c4b643b28d10a38b7b2e3ba9a3618e110888f2a6841",
+              "arch_signature": "09147a5c08d8ad7ad5bb18131bade73548a5fff08f0e0f99d6dd6ede227606c4",
+              "tokenizer_sha256": null,
+              "num_parameters": 596049920,
+              "extra": {}
+            },
+            "weights_digest": "66cea45d5f527842a9907bed0845f58f4b1f717d8696bdabe1f783b3cc5bed56",
+            "config_sha256": "f69c2fb3a120db405cd48c4b643b28d10a38b7b2e3ba9a3618e110888f2a6841",
+            "arch_signature": "09147a5c08d8ad7ad5bb18131bade73548a5fff08f0e0f99d6dd6ede227606c4",
+            "num_parameters": 596049920,
+            "source": "/workspace/aad/artifacts/autoinit/phase_a_search/states/cca699c93f34dad7e94a5d13a25b2bc2",
+            "path": "/workspace/aad/artifacts/audit/autoinit_phase_a/selected_leaves/cca699c93f34dad7e94a5d13a25b2bc2",
+            "artifact_digest": "04fa7fe74f01ee63f6611cca6d7fce4fe1dba66b9865cf0b9c47495b9cfe33d4",
+            "recorded_digest": "04fa7fe74f01ee63f6611cca6d7fce4fe1dba66b9865cf0b9c47495b9cfe33d4",
+            "single_shard_sha256": "db056398840f5c64f767fe8690803478918399c04bd7b4a1aeae6b7549c624af",
+            "total_bytes": 1192135096,
+            "tokenizer_sha256": null
+          },
+          {
+            "state_id": "85bde4ded2c31953f802e39cf2252c87",
+            "identity": {
+              "schema": "aadistill.autoinit.checkpoint_identity/v1",
+              "path": "/workspace/aad/artifacts/audit/autoinit_phase_a/selected_leaves/85bde4ded2c31953f802e39cf2252c87",
+              "shards": [
+                {
+                  "filename": "model.safetensors",
+                  "sha256": "0a9a5a78e87cc800c1187a2c19f75c5e490734d1518fe8968d517b2077353c45",
+                  "size_bytes": 1192135096
+                }
+              ],
+              "n_shards": 1,
+              "total_bytes": 1192135096,
+              "weights_digest": "0d0f2268f56eccc9549508f0f46e9ab1fa3bfd701f20704754d038d146609839",
+              "artifact_digest": "590156f691fb10bff7e6a60f34bcee27ec452a963f24e1b638f735a386ee396f",
+              "single_shard_sha256": "0a9a5a78e87cc800c1187a2c19f75c5e490734d1518fe8968d517b2077353c45",
+              "index_sha256": null,
+              "config_sha256": "f69c2fb3a120db405cd48c4b643b28d10a38b7b2e3ba9a3618e110888f2a6841",
+              "arch_signature": "09147a5c08d8ad7ad5bb18131bade73548a5fff08f0e0f99d6dd6ede227606c4",
+              "tokenizer_sha256": null,
+              "num_parameters": 596049920,
+              "extra": {}
+            },
+            "weights_digest": "0d0f2268f56eccc9549508f0f46e9ab1fa3bfd701f20704754d038d146609839",
+            "config_sha256": "f69c2fb3a120db405cd48c4b643b28d10a38b7b2e3ba9a3618e110888f2a6841",
+            "arch_signature": "09147a5c08d8ad7ad5bb18131bade73548a5fff08f0e0f99d6dd6ede227606c4",
+            "num_parameters": 596049920,
+            "source": "/workspace/aad/artifacts/autoinit/phase_a_search/states/85bde4ded2c31953f802e39cf2252c87",
+            "path": "/workspace/aad/artifacts/audit/autoinit_phase_a/selected_leaves/85bde4ded2c31953f802e39cf2252c87",
+            "artifact_digest": "590156f691fb10bff7e6a60f34bcee27ec452a963f24e1b638f735a386ee396f",
+            "recorded_digest": "590156f691fb10bff7e6a60f34bcee27ec452a963f24e1b638f735a386ee396f",
+            "single_shard_sha256": "0a9a5a78e87cc800c1187a2c19f75c5e490734d1518fe8968d517b2077353c45",
+            "total_bytes": 1192135096,
+            "tokenizer_sha256": null
+          },
+          {
+            "state_id": "158b96cf651fd8ba8f8ceaefefde2067",
+            "identity": {
+              "schema": "aadistill.autoinit.checkpoint_identity/v1",
+              "path": "/workspace/aad/artifacts/audit/autoinit_phase_a/selected_leaves/158b96cf651fd8ba8f8ceaefefde2067",
+              "shards": [
+                {
+                  "filename": "model.safetensors",
+                  "sha256": "7f6a7889a87c65aa2ebf135a8b57c9660abefccd26536890dc77f559cc65e2f9",
+                  "size_bytes": 1192135096
+                }
+              ],
+              "n_shards": 1,
+              "total_bytes": 1192135096,
+              "weights_digest": "39284750e971a889731e386ede076d5693e330f009742c0400c9ab24db7e9556",
+              "artifact_digest": "1efe9d2a22e6e9960504febd0b292ad89e496b1d616d1b116e406984ebda63bb",
+              "single_shard_sha256": "7f6a7889a87c65aa2ebf135a8b57c9660abefccd26536890dc77f559cc65e2f9",
+              "index_sha256": null,
+              "config_sha256": "f69c2fb3a120db405cd48c4b643b28d10a38b7b2e3ba9a3618e110888f2a6841",
+              "arch_signature": "09147a5c08d8ad7ad5bb18131bade73548a5fff08f0e0f99d6dd6ede227606c4",
+              "tokenizer_sha256": null,
+              "num_parameters": 596049920,
+              "extra": {}
+            },
+            "weights_digest": "39284750e971a889731e386ede076d5693e330f009742c0400c9ab24db7e9556",
+            "config_sha256": "f69c2fb3a120db405cd48c4b643b28d10a38b7b2e3ba9a3618e110888f2a6841",
+            "arch_signature": "09147a5c08d8ad7ad5bb18131bade73548a5fff08f0e0f99d6dd6ede227606c4",
+            "num_parameters": 596049920,
+            "source": "/workspace/aad/artifacts/autoinit/phase_a_search/states/158b96cf651fd8ba8f8ceaefefde2067",
+            "path": "/workspace/aad/artifacts/audit/autoinit_phase_a/selected_leaves/158b96cf651fd8ba8f8ceaefefde2067",
+            "artifact_digest": "1efe9d2a22e6e9960504febd0b292ad89e496b1d616d1b116e406984ebda63bb",
+            "recorded_digest": "1efe9d2a22e6e9960504febd0b292ad89e496b1d616d1b116e406984ebda63bb",
+            "single_shard_sha256": "7f6a7889a87c65aa2ebf135a8b57c9660abefccd26536890dc77f559cc65e2f9",
+            "total_bytes": 1192135096,
+            "tokenizer_sha256": null
+          },
+          {
+            "state_id": "4e429f7ed722b180dd662c779895693f",
+            "identity": {
+              "schema": "aadistill.autoinit.checkpoint_identity/v1",
+              "path": "/workspace/aad/artifacts/audit/autoinit_phase_a/selected_leaves/4e429f7ed722b180dd662c779895693f",
+              "shards": [
+                {
+                  "filename": "model.safetensors",
+                  "sha256": "cd334d30d7466ae3c76ed3dcdc7b66cceb0473d56e7af74028d6c7e93de45ace",
+                  "size_bytes": 1192135096
+                }
+              ],
+              "n_shards": 1,
+              "total_bytes": 1192135096,
+              "weights_digest": "8d3069ad1ddeb9cb6b49edae1a8852dcf682ad792d87405e2b6e752c231ac675",
+              "artifact_digest": "071edc8ab55501fb271ca3938ca9407e839dc3bda618865f9299cfe0238fa0e3",
+              "single_shard_sha256": "cd334d30d7466ae3c76ed3dcdc7b66cceb0473d56e7af74028d6c7e93de45ace",
+              "index_sha256": null,
+              "config_sha256": "f69c2fb3a120db405cd48c4b643b28d10a38b7b2e3ba9a3618e110888f2a6841",
+              "arch_signature": "09147a5c08d8ad7ad5bb18131bade73548a5fff08f0e0f99d6dd6ede227606c4",
+              "tokenizer_sha256": null,
+              "num_parameters": 596049920,
+              "extra": {}
+            },
+            "weights_digest": "8d3069ad1ddeb9cb6b49edae1a8852dcf682ad792d87405e2b6e752c231ac675",
+            "config_sha256": "f69c2fb3a120db405cd48c4b643b28d10a38b7b2e3ba9a3618e110888f2a6841",
+            "arch_signature": "09147a5c08d8ad7ad5bb18131bade73548a5fff08f0e0f99d6dd6ede227606c4",
+            "num_parameters": 596049920,
+            "source": "/workspace/aad/artifacts/autoinit/phase_a_search/states/4e429f7ed722b180dd662c779895693f",
+            "path": "/workspace/aad/artifacts/audit/autoinit_phase_a/selected_leaves/4e429f7ed722b180dd662c779895693f",
+            "artifact_digest": "071edc8ab55501fb271ca3938ca9407e839dc3bda618865f9299cfe0238fa0e3",
+            "recorded_digest": "071edc8ab55501fb271ca3938ca9407e839dc3bda618865f9299cfe0238fa0e3",
+            "single_shard_sha256": "cd334d30d7466ae3c76ed3dcdc7b66cceb0473d56e7af74028d6c7e93de45ace",
+            "total_bytes": 1192135096,
+            "tokenizer_sha256": null
+          },
+          {
+            "state_id": "281a02c3ac18419b70e896296dac0d03",
+            "identity": {
+              "schema": "aadistill.autoinit.checkpoint_identity/v1",
+              "path": "/workspace/aad/artifacts/audit/autoinit_phase_a/selected_leaves/281a02c3ac18419b70e896296dac0d03",
+              "shards": [
+                {
+                  "filename": "model.safetensors",
+                  "sha256": "62daf60dac46487a7513b25ae984de4205d2a3e0849a58f7de633493ae7f57c6",
+                  "size_bytes": 1192135096
+                }
+              ],
+              "n_shards": 1,
+              "total_bytes": 1192135096,
+              "weights_digest": "b40b58d39c60671e7463efa549c370057709c0f7cd2c3e5065dc22b1acd7a3fc",
+              "artifact_digest": "e1289e46ff10f153bbb90a37f90ae3fc3f8b2b8b99c7c232328f8889c9755c7a",
+              "single_shard_sha256": "62daf60dac46487a7513b25ae984de4205d2a3e0849a58f7de633493ae7f57c6",
+              "index_sha256": null,
+              "config_sha256": "f69c2fb3a120db405cd48c4b643b28d10a38b7b2e3ba9a3618e110888f2a6841",
+              "arch_signature": "09147a5c08d8ad7ad5bb18131bade73548a5fff08f0e0f99d6dd6ede227606c4",
+              "tokenizer_sha256": null,
+              "num_parameters": 596049920,
+              "extra": {}
+            },
+            "weights_digest": "b40b58d39c60671e7463efa549c370057709c0f7cd2c3e5065dc22b1acd7a3fc",
+            "config_sha256": "f69c2fb3a120db405cd48c4b643b28d10a38b7b2e3ba9a3618e110888f2a6841",
+            "arch_signature": "09147a5c08d8ad7ad5bb18131bade73548a5fff08f0e0f99d6dd6ede227606c4",
+            "num_parameters": 596049920,
+            "source": "/workspace/aad/artifacts/autoinit/phase_a_search/states/281a02c3ac18419b70e896296dac0d03",
+            "path": "/workspace/aad/artifacts/audit/autoinit_phase_a/selected_leaves/281a02c3ac18419b70e896296dac0d03",
+            "artifact_digest": "e1289e46ff10f153bbb90a37f90ae3fc3f8b2b8b99c7c232328f8889c9755c7a",
+            "recorded_digest": "e1289e46ff10f153bbb90a37f90ae3fc3f8b2b8b99c7c232328f8889c9755c7a",
+            "single_shard_sha256": "62daf60dac46487a7513b25ae984de4205d2a3e0849a58f7de633493ae7f57c6",
+            "total_bytes": 1192135096,
+            "tokenizer_sha256": null
+          }
+        ],
+        "note": "persisted after Stage-1 selection and before Stage 2, so a Stage-2 failure cannot destroy a search that already succeeded. Weight-only: no tokenizer files are added."
+      },
+      "n_states": 43,
+      "n_leaves": 7,
+      "n_resumed": 0,
+      "selected": [
+        "cca699c93f34dad7e94a5d13a25b2bc2",
+        "85bde4ded2c31953f802e39cf2252c87",
+        "158b96cf651fd8ba8f8ceaefefde2067",
+        "4e429f7ed722b180dd662c779895693f",
+        "281a02c3ac18419b70e896296dac0d03"
+      ],
+      "control": {
+        "state_id": "control-qwen3_0p6b_init_v0",
+        "provenance": "retained_canonical",
+        "artifact_digest": "dc9500d3871a0f31214d55fa2b47b82e196f4f4630c607f43a24d16ed76d83bf",
+        "single_shard_sha256": "86fbba78e8a2a32481ca77e5ac362ed1f17a39dbc30bcbc952cabd5df2633e54",
+        "frozen_sha256_verified": true
+      },
+      "levels": [
+        {
+          "level": 0,
+          "expanded_from": [
+            "8a59d1ef45f62d74cb476284dff211fc"
+          ],
+          "generated": [
+            "2c25e8b0970de8589d539a7332d99ca9",
+            "0a61c14f8c2fbe60332900eec7f19d12",
+            "1d4fe3fe9db268a7379ebbffd702b2b5",
+            "8ee77843199a5f5b7737fa36763d1618",
+            "73a6abf5e4788e91b8e9136eedb42dc5",
+            "10f5bc34d339f65efb171249a375c1a8"
+          ],
+          "ranking": {
+            "policy_id": "beam.pareto_multi_objective@v2",
+            "policy_hash": "30a5305bc06dd1e886ea285fa7a3f90ac4b32f61bcb62bae35668f28922bf2e4",
+            "beam_width": null,
+            "selected": [
+              "1d4fe3fe9db268a7379ebbffd702b2b5",
+              "73a6abf5e4788e91b8e9136eedb42dc5",
+              "8ee77843199a5f5b7737fa36763d1618",
+              "2c25e8b0970de8589d539a7332d99ca9",
+              "10f5bc34d339f65efb171249a375c1a8"
+            ],
+            "fronts": [
+              [
+                "1d4fe3fe9db268a7379ebbffd702b2b5"
+              ],
+              [
+                "73a6abf5e4788e91b8e9136eedb42dc5",
+                "8ee77843199a5f5b7737fa36763d1618"
+              ],
+              [
+                "2c25e8b0970de8589d539a7332d99ca9"
+              ],
+              [
+                "10f5bc34d339f65efb171249a375c1a8"
+              ]
+            ],
+            "lineages_kept": [
+              "root"
+            ],
+            "decisions": [
+              {
+                "state_id": "1d4fe3fe9db268a7379ebbffd702b2b5",
+                "path": "DEPTH(calib.domain_balanced@v1)",
+                "front": 0,
+                "position_in_front": 0,
+                "lineage": "root",
+                "selected": true,
+                "objectives": {
+                  "state.teacher_kl.equal_domain_mean": 0.60418263847643,
+                  "state.teacher_kl.worst_domain": 0.6300611321628695,
+                  "state.critical_token_kl": 1.0548510144996555
+                },
+                "diagnostics": {
+                  "state.nll.pooled_all_domains": 1.4145698818532126,
+                  "state.nll.teacher_reference_pooled": 0.9303420924946204,
+                  "state.nll.general": 2.9463776788510665,
+                  "state.nll.reasoning_math": 0.8116644012916503,
+                  "state.nll.rag_multihop": 1.867434355951981,
+                  "state.nll.code": 0.8402074836741134,
+                  "state.nll.tool": 1.2074239469331187
+                },
+                "reason": "kept: warmup level, no quality pruning by design"
+              },
+              {
+                "state_id": "73a6abf5e4788e91b8e9136eedb42dc5",
+                "path": "FFN(calib.domain_balanced@v1)",
+                "front": 1,
+                "position_in_front": 0,
+                "lineage": "root",
+                "selected": true,
+                "objectives": {
+                  "state.teacher_kl.equal_domain_mean": 1.7926763569377335,
+                  "state.teacher_kl.worst_domain": 2.956685984365458,
+                  "state.critical_token_kl": 2.264181946907746
+                },
+                "diagnostics": {
+                  "state.nll.pooled_all_domains": 2.487495025933048,
+                  "state.nll.teacher_reference_pooled": 0.9303420924946204,
+                  "state.nll.general": 5.140721820295764,
+                  "state.nll.reasoning_math": 1.4882364297671649,
+                  "state.nll.rag_multihop": 3.02940532341417,
+                  "state.nll.code": 1.6483232999388617,
+                  "state.nll.tool": 2.216013251897671
+                },
+                "reason": "kept: warmup level, no quality pruning by design"
+              },
+              {
+                "state_id": "8ee77843199a5f5b7737fa36763d1618",
+                "path": "DEPTH(calib.none@v1)",
+                "front": 1,
+                "position_in_front": 1,
+                "lineage": "root",
+                "selected": true,
+                "objectives": {
+                  "state.teacher_kl.equal_domain_mean": 1.8942223756358054,
+                  "state.teacher_kl.worst_domain": 2.0438508694179505,
+                  "state.critical_token_kl": 5.147548892475205
+                },
+                "diagnostics": {
+                  "state.nll.pooled_all_domains": 2.7339435020406166,
+                  "state.nll.teacher_reference_pooled": 0.9303420924946204,
+                  "state.nll.general": 3.9214148164361546,
+                  "state.nll.reasoning_math": 2.222962195704154,
+                  "state.nll.rag_multihop": 3.1216171050566413,
+                  "state.nll.code": 2.1509972585472017,
+                  "state.nll.tool": 2.635084756096973
+                },
+                "reason": "kept: warmup level, no quality pruning by design"
+              },
+              {
+                "state_id": "2c25e8b0970de8589d539a7332d99ca9",
+                "path": "ATTENTION(calib.none@v1)",
+                "front": 2,
+                "position_in_front": 0,
+                "lineage": "root",
+                "selected": true,
+                "objectives": {
+                  "state.teacher_kl.equal_domain_mean": 4.063564941322069,
+                  "state.teacher_kl.worst_domain": 4.452641027034151,
+                  "state.critical_token_kl": 6.387712267314738
+                },
+                "diagnostics": {
+                  "state.nll.pooled_all_domains": 4.797022686997711,
+                  "state.nll.teacher_reference_pooled": 0.9303420924946204,
+                  "state.nll.general": 5.756247647827847,
+                  "state.nll.reasoning_math": 4.479892157282574,
+                  "state.nll.rag_multihop": 5.251494039027211,
+                  "state.nll.code": 4.719483541350409,
+                  "state.nll.tool": 4.37546338545718
+                },
+                "reason": "kept: warmup level, no quality pruning by design"
+              },
+              {
+                "state_id": "10f5bc34d339f65efb171249a375c1a8",
+                "path": "RESIDUAL_WIDTH(calib.domain_balanced@v1)",
+                "front": 3,
+                "position_in_front": 0,
+                "lineage": "root",
+                "selected": true,
+                "objectives": {
+                  "state.teacher_kl.equal_domain_mean": 9.693820363662265,
+                  "state.teacher_kl.worst_domain": 10.606064089871811,
+                  "state.critical_token_kl": 18.41948590632227
+                },
+                "diagnostics": {
+                  "state.nll.pooled_all_domains": 10.448494476370307,
+                  "state.nll.teacher_reference_pooled": 0.9303420924946204,
+                  "state.nll.general": 13.1395205668783,
+                  "state.nll.reasoning_math": 9.681712394489548,
+                  "state.nll.rag_multihop": 11.518032543412048,
+                  "state.nll.code": 9.746696000631356,
+                  "state.nll.tool": 9.514196604871556
+                },
+                "reason": "kept: warmup level, no quality pruning by design"
+              }
+            ]
+          },
+          "leaves": [
+            "0a61c14f8c2fbe60332900eec7f19d12"
+          ],
+          "dead_ends": [],
+          "seconds": 3096.1985323429108
+        },
+        {
+          "level": 1,
+          "expanded_from": [
+            "1d4fe3fe9db268a7379ebbffd702b2b5",
+            "73a6abf5e4788e91b8e9136eedb42dc5",
+            "8ee77843199a5f5b7737fa36763d1618",
+            "2c25e8b0970de8589d539a7332d99ca9",
+            "10f5bc34d339f65efb171249a375c1a8"
+          ],
+          "generated": [
+            "410e5fedf70e6c07a35f4b7f9a4fe074",
+            "46d92844cbc3b68375f29071318ff5b4",
+            "ea5044cef76e0e7a3e16445e59a645fe",
+            "37bd141d45ef8b56896366ddd18a91b7",
+            "812f2d0ce6b9a202977a1988b3031af0",
+            "4d7bc2031c802e2e04d9cc638236a235",
+            "302e6ea29f00766a2469db0f65a8373e",
+            "0c95f69299dca6b12cfc39890ff79459",
+            "6b111bf76794f890da8c10dd21c9720f",
+            "a47ea0e84a44019fc4a18de2b0d5d7d7",
+            "a2baaa9ac1638bb5c67635ee05dcf446",
+            "d74ad7ac73e6c4442b51e5db9ac8e5e6",
+            "7363c43d4a3ad9ac8039cf5f52286ef2",
+            "8b245e4285694fd7ddba7e68a03513f1",
+            "757ae843ec67bf5844ff5b950ddd1a57",
+            "518313be771bf6b3629b8ec2c7524b88",
+            "5e56672209dba000fa7e2872282468eb",
+            "a42bd4fed5f7a9882bb05829a04213cb"
+          ],
+          "ranking": {
+            "policy_id": "beam.pareto_multi_objective@v2",
+            "policy_hash": "30a5305bc06dd1e886ea285fa7a3f90ac4b32f61bcb62bae35668f28922bf2e4",
+            "beam_width": 6,
+            "selected": [
+              "812f2d0ce6b9a202977a1988b3031af0",
+              "46d92844cbc3b68375f29071318ff5b4",
+              "6b111bf76794f890da8c10dd21c9720f",
+              "a2baaa9ac1638bb5c67635ee05dcf446",
+              "518313be771bf6b3629b8ec2c7524b88",
+              "4d7bc2031c802e2e04d9cc638236a235"
+            ],
+            "fronts": [
+              [
+                "812f2d0ce6b9a202977a1988b3031af0"
+              ],
+              [
+                "46d92844cbc3b68375f29071318ff5b4",
+                "4d7bc2031c802e2e04d9cc638236a235"
+              ],
+              [
+                "6b111bf76794f890da8c10dd21c9720f",
+                "a2baaa9ac1638bb5c67635ee05dcf446"
+              ],
+              [
+                "410e5fedf70e6c07a35f4b7f9a4fe074"
+              ],
+              [
+                "0c95f69299dca6b12cfc39890ff79459",
+                "d74ad7ac73e6c4442b51e5db9ac8e5e6",
+                "302e6ea29f00766a2469db0f65a8373e"
+              ],
+              [
+                "a47ea0e84a44019fc4a18de2b0d5d7d7",
+                "7363c43d4a3ad9ac8039cf5f52286ef2"
+              ],
+              [
+                "ea5044cef76e0e7a3e16445e59a645fe",
+                "37bd141d45ef8b56896366ddd18a91b7"
+              ],
+              [
+                "8b245e4285694fd7ddba7e68a03513f1"
+              ],
+              [
+                "518313be771bf6b3629b8ec2c7524b88"
+              ],
+              [
+                "a42bd4fed5f7a9882bb05829a04213cb",
+                "5e56672209dba000fa7e2872282468eb",
+                "757ae843ec67bf5844ff5b950ddd1a57"
+              ]
+            ],
+            "lineages_kept": [
+              "attention.weight_proxy_v0",
+              "depth.causal_kl_greedy_v1",
+              "depth.positional_v0",
+              "ffn.activation_importance_v0",
+              "width.global_pca_v0"
+            ],
+            "decisions": [
+              {
+                "state_id": "812f2d0ce6b9a202977a1988b3031af0",
+                "path": "FFN(calib.domain_balanced@v1)->DEPTH(calib.domain_balanced@v1)",
+                "front": 0,
+                "position_in_front": 0,
+                "lineage": "ffn.activation_importance_v0",
+                "selected": true,
+                "objectives": {
+                  "state.teacher_kl.equal_domain_mean": 2.2165758361729773,
+                  "state.teacher_kl.worst_domain": 3.2152226653703453,
+                  "state.critical_token_kl": 5.933755118613796
+                },
+                "diagnostics": {
+                  "state.nll.pooled_all_domains": 2.904042317600523,
+                  "state.nll.teacher_reference_pooled": 0.9303420924946204,
+                  "state.nll.general": 5.326361434752593,
+                  "state.nll.reasoning_math": 1.8983150854660225,
+                  "state.nll.rag_multihop": 3.41105347052409,
+                  "state.nll.code": 2.076791511423697,
+                  "state.nll.tool": 2.7435629962349717
+                },
+                "reason": "kept: front 0, lineage 'ffn.activation_importance_v0', beam 6"
+              },
+              {
+                "state_id": "46d92844cbc3b68375f29071318ff5b4",
+                "path": "DEPTH(calib.domain_balanced@v1)->FFN(calib.domain_balanced@v1)",
+                "front": 1,
+                "position_in_front": 0,
+                "lineage": "depth.causal_kl_greedy_v1",
+                "selected": true,
+                "objectives": {
+                  "state.teacher_kl.equal_domain_mean": 2.8131458308559596,
+                  "state.teacher_kl.worst_domain": 4.803195814956894,
+                  "state.critical_token_kl": 8.52048274053009
+                },
+                "diagnostics": {
+                  "state.nll.pooled_all_domains": 3.3605702926041237,
+                  "state.nll.teacher_reference_pooled": 0.9303420924946204,
+                  "state.nll.general": 6.839963531401247,
+                  "state.nll.reasoning_math": 2.307634058913316,
+                  "state.nll.rag_multihop": 3.6242404055917374,
+                  "state.nll.code": 2.528187132242151,
+                  "state.nll.tool": 3.0356638360805848
+                },
+                "reason": "kept: front 1, lineage 'depth.causal_kl_greedy_v1', beam 6"
+              },
+              {
+                "state_id": "4d7bc2031c802e2e04d9cc638236a235",
+                "path": "FFN(calib.domain_balanced@v1)->DEPTH(calib.none@v1)",
+                "front": 1,
+                "position_in_front": 1,
+                "lineage": "ffn.activation_importance_v0",
+                "selected": true,
+                "objectives": {
+                  "state.teacher_kl.equal_domain_mean": 3.9535572056479147,
+                  "state.teacher_kl.worst_domain": 4.602418958756138,
+                  "state.critical_token_kl": 11.623085837474862
+                },
+                "diagnostics": {
+                  "state.nll.pooled_all_domains": 4.708036635103752,
+                  "state.nll.teacher_reference_pooled": 0.9303420924946204,
+                  "state.nll.general": 6.69678373672372,
+                  "state.nll.reasoning_math": 3.5830541649073195,
+                  "state.nll.rag_multihop": 5.479626854746291,
+                  "state.nll.code": 3.6884889581458946,
+                  "state.nll.tool": 4.680334763900004
+                },
+                "reason": "kept: front 1, lineage 'ffn.activation_importance_v0', beam 6"
+              },
+              {
+                "state_id": "6b111bf76794f890da8c10dd21c9720f",
+                "path": "DEPTH(calib.none@v1)->FFN(calib.domain_balanced@v1)",
+                "front": 2,
+                "position_in_front": 0,
+                "lineage": "depth.positional_v0",
+                "selected": true,
+                "objectives": {
+                  "state.teacher_kl.equal_domain_mean": 4.536999435833043,
+                  "state.teacher_kl.worst_domain": 5.152527643210934,
+                  "state.critical_token_kl": 11.249924138304937
+                },
+                "diagnostics": {
+                  "state.nll.pooled_all_domains": 5.286459255288078,
+                  "state.nll.teacher_reference_pooled": 0.9303420924946204,
+                  "state.nll.general": 7.249087906952072,
+                  "state.nll.reasoning_math": 4.813567948638853,
+                  "state.nll.rag_multihop": 5.580344928100482,
+                  "state.nll.code": 4.2942309619162335,
+                  "state.nll.tool": 5.1095587863160965
+                },
+                "reason": "kept: front 2, lineage 'depth.positional_v0', beam 6"
+              },
+              {
+                "state_id": "a2baaa9ac1638bb5c67635ee05dcf446",
+                "path": "ATTENTION(calib.none@v1)->DEPTH(calib.domain_balanced@v1)",
+                "front": 2,
+                "position_in_front": 1,
+                "lineage": "attention.weight_proxy_v0",
+                "selected": true,
+                "objectives": {
+                  "state.teacher_kl.equal_domain_mean": 5.037473475802139,
+                  "state.teacher_kl.worst_domain": 5.2622923013526846,
+                  "state.critical_token_kl": 9.760975525861769
+                },
+                "diagnostics": {
+                  "state.nll.pooled_all_domains": 5.781846277864063,
+                  "state.nll.teacher_reference_pooled": 0.9303420924946204,
+                  "state.nll.general": 6.739109598993747,
+                  "state.nll.reasoning_math": 5.3521515477087735,
+                  "state.nll.rag_multihop": 6.2910604788018905,
+                  "state.nll.code": 5.53760567576475,
+                  "state.nll.tool": 5.471528848647301
+                },
+                "reason": "kept: front 2, lineage 'attention.weight_proxy_v0', beam 6"
+              },
+              {
+                "state_id": "410e5fedf70e6c07a35f4b7f9a4fe074",
+                "path": "DEPTH(calib.domain_balanced@v1)->ATTENTION(calib.none@v1)",
+                "front": 3,
+                "position_in_front": 0,
+                "lineage": "depth.causal_kl_greedy_v1",
+                "selected": false,
+                "objectives": {
+                  "state.teacher_kl.equal_domain_mean": 5.282652674447667,
+                  "state.teacher_kl.worst_domain": 5.429150160074322,
+                  "state.critical_token_kl": 10.034552940958118
+                },
+                "diagnostics": {
+                  "state.nll.pooled_all_domains": 5.966285662380376,
+                  "state.nll.teacher_reference_pooled": 0.9303420924946204,
+                  "state.nll.general": 7.4577576764881375,
+                  "state.nll.reasoning_math": 5.4213277234418555,
+                  "state.nll.rag_multihop": 6.5139269223259415,
+                  "state.nll.code": 5.6059862597352295,
+                  "state.nll.tool": 5.56594734416218
+                },
+                "reason": "pruned: epsilon-dominated (front 3) and the beam of 6 was already full"
+              },
+              {
+                "state_id": "0c95f69299dca6b12cfc39890ff79459",
+                "path": "DEPTH(calib.none@v1)->ATTENTION(calib.none@v1)",
+                "front": 4,
+                "position_in_front": 0,
+                "lineage": "depth.positional_v0",
+                "selected": false,
+                "objectives": {
+                  "state.teacher_kl.equal_domain_mean": 5.973171618098437,
+                  "state.teacher_kl.worst_domain": 6.483486084338816,
+                  "state.critical_token_kl": 11.120002163876066
+                },
+                "diagnostics": {
+                  "state.nll.pooled_all_domains": 6.7758705957736405,
+                  "state.nll.teacher_reference_pooled": 0.9303420924946204,
+                  "state.nll.general": 7.856294897402972,
+                  "state.nll.reasoning_math": 5.938373278291814,
+                  "state.nll.rag_multihop": 7.594696231776572,
+                  "state.nll.code": 6.1226242560712745,
+                  "state.nll.tool": 6.668676520954339
+                },
+                "reason": "pruned: epsilon-dominated (front 4) and the beam of 6 was already full"
+              },
+              {
+                "state_id": "d74ad7ac73e6c4442b51e5db9ac8e5e6",
+                "path": "ATTENTION(calib.none@v1)->DEPTH(calib.none@v1)",
+                "front": 4,
+                "position_in_front": 1,
+                "lineage": "attention.weight_proxy_v0",
+                "selected": false,
+                "objectives": {
+                  "state.teacher_kl.equal_domain_mean": 5.973171618098437,
+                  "state.teacher_kl.worst_domain": 6.483486084338816,
+                  "state.critical_token_kl": 11.120002163876066
+                },
+                "diagnostics": {
+                  "state.nll.pooled_all_domains": 6.7758705957736405,
+                  "state.nll.teacher_reference_pooled": 0.9303420924946204,
+                  "state.nll.general": 7.856294897402972,
+                  "state.nll.reasoning_math": 5.938373278291814,
+                  "state.nll.rag_multihop": 7.594696231776572,
+                  "state.nll.code": 6.1226242560712745,
+                  "state.nll.tool": 6.668676520954339
+                },
+                "reason": "pruned: epsilon-dominated (front 4) and the beam of 6 was already full"
+              },
+              {
+                "state_id": "302e6ea29f00766a2469db0f65a8373e",
+                "path": "FFN(calib.domain_balanced@v1)->RESIDUAL_WIDTH(calib.domain_balanced@v1)",
+                "front": 4,
+                "position_in_front": 2,
+                "lineage": "ffn.activation_importance_v0",
+                "selected": false,
+                "objectives": {
+                  "state.teacher_kl.equal_domain_mean": 6.279930792664058,
+                  "state.teacher_kl.worst_domain": 7.311065756503897,
+                  "state.critical_token_kl": 10.378847710325633
+                },
+                "diagnostics": {
+                  "state.nll.pooled_all_domains": 6.942725159393927,
+                  "state.nll.teacher_reference_pooled": 0.9303420924946204,
+                  "state.nll.general": 9.519587595860793,
+                  "state.nll.reasoning_math": 6.358175357711187,
+                  "state.nll.rag_multihop": 7.184498332434961,
+                  "state.nll.code": 6.293555409392021,
+                  "state.nll.tool": 6.5215513459943795
+                },
+                "reason": "pruned: epsilon-dominated (front 4) and the beam of 6 was already full"
+              },
+              {
+                "state_id": "a47ea0e84a44019fc4a18de2b0d5d7d7",
+                "path": "DEPTH(calib.none@v1)->RESIDUAL_WIDTH(calib.domain_balanced@v1)",
+                "front": 5,
+                "position_in_front": 0,
+                "lineage": "depth.positional_v0",
+                "selected": false,
+                "objectives": {
+                  "state.teacher_kl.equal_domain_mean": 6.636373821299941,
+                  "state.teacher_kl.worst_domain": 9.170852780037293,
+                  "state.critical_token_kl": 10.735667176651802
+                },
+                "diagnostics": {
+                  "state.nll.pooled_all_domains": 7.072929446227175,
+                  "state.nll.teacher_reference_pooled": 0.9303420924946204,
+                  "state.nll.general": 11.406831171659784,
+                  "state.nll.reasoning_math": 5.933712850238686,
+                  "state.nll.rag_multihop": 8.275818330992541,
+                  "state.nll.code": 6.083222100447421,
+                  "state.nll.tool": 5.849046661518054
+                },
+                "reason": "pruned: epsilon-dominated (front 5) and the beam of 6 was already full"
+              },
+              {
+                "state_id": "7363c43d4a3ad9ac8039cf5f52286ef2",
+                "path": "ATTENTION(calib.none@v1)->FFN(calib.domain_balanced@v1)",
+                "front": 5,
+                "position_in_front": 1,
+                "lineage": "attention.weight_proxy_v0",
+                "selected": false,
+                "objectives": {
+                  "state.teacher_kl.equal_domain_mean": 6.961310366481209,
+                  "state.teacher_kl.worst_domain": 7.788549617585575,
+                  "state.critical_token_kl": 12.28840898131693
+                },
+                "diagnostics": {
+                  "state.nll.pooled_all_domains": 7.6600928519804174,
+                  "state.nll.teacher_reference_pooled": 0.9303420924946204,
+                  "state.nll.general": 8.304666185442892,
+                  "state.nll.reasoning_math": 6.481600183303945,
+                  "state.nll.rag_multihop": 8.87136219137297,
+                  "state.nll.code": 7.910338079945253,
+                  "state.nll.tool": 7.323487928184759
+                },
+                "reason": "pruned: epsilon-dominated (front 5) and the beam of 6 was already full"
+              },
+              {
+                "state_id": "ea5044cef76e0e7a3e16445e59a645fe",
+                "path": "DEPTH(calib.domain_balanced@v1)->RESIDUAL_WIDTH(calib.domain_balanced@v1)",
+                "front": 6,
+                "position_in_front": 0,
+                "lineage": "depth.causal_kl_greedy_v1",
+                "selected": false,
+                "objectives": {
+                  "state.teacher_kl.equal_domain_mean": 8.152326613511503,
+                  "state.teacher_kl.worst_domain": 8.875352328839378,
+                  "state.critical_token_kl": 14.197039014532617
+                },
+                "diagnostics": {
+                  "state.nll.pooled_all_domains": 8.825460304453406,
+                  "state.nll.teacher_reference_pooled": 0.9303420924946204,
+                  "state.nll.general": 11.100848337394318,
+                  "state.nll.reasoning_math": 7.862015332506829,
+                  "state.nll.rag_multihop": 10.012239733361884,
+                  "state.nll.code": 8.24436553778676,
+                  "state.nll.tool": 8.062278732147059
+                },
+                "reason": "pruned: epsilon-dominated (front 6) and the beam of 6 was already full"
+              },
+              {
+                "state_id": "37bd141d45ef8b56896366ddd18a91b7",
+                "path": "FFN(calib.domain_balanced@v1)->ATTENTION(calib.none@v1)",
+                "front": 6,
+                "position_in_front": 1,
+                "lineage": "ffn.activation_importance_v0",
+                "selected": false,
+                "objectives": {
+                  "state.teacher_kl.equal_domain_mean": 8.577093784926502,
+                  "state.teacher_kl.worst_domain": 9.381138929276394,
+                  "state.critical_token_kl": 12.964865634472226
+                },
+                "diagnostics": {
+                  "state.nll.pooled_all_domains": 9.29395667990825,
+                  "state.nll.teacher_reference_pooled": 0.9303420924946204,
+                  "state.nll.general": 10.451452193242195,
+                  "state.nll.reasoning_math": 7.808636522956549,
+                  "state.nll.rag_multihop": 9.57932933987935,
+                  "state.nll.code": 9.161927517915949,
+                  "state.nll.tool": 9.87973744131726
+                },
+                "reason": "pruned: epsilon-dominated (front 6) and the beam of 6 was already full"
+              },
+              {
+                "state_id": "8b245e4285694fd7ddba7e68a03513f1",
+                "path": "ATTENTION(calib.none@v1)->RESIDUAL_WIDTH(calib.domain_balanced@v1)",
+                "front": 7,
+                "position_in_front": 0,
+                "lineage": "attention.weight_proxy_v0",
+                "selected": false,
+                "objectives": {
+                  "state.teacher_kl.equal_domain_mean": 8.773813469429674,
+                  "state.teacher_kl.worst_domain": 9.403811172511842,
+                  "state.critical_token_kl": 13.914948105404697
+                },
+                "diagnostics": {
+                  "state.nll.pooled_all_domains": 9.515763376697764,
+                  "state.nll.teacher_reference_pooled": 0.9303420924946204,
+                  "state.nll.general": 10.554557182547034,
+                  "state.nll.reasoning_math": 8.96127482832657,
+                  "state.nll.rag_multihop": 10.495133105802221,
+                  "state.nll.code": 9.063726144453959,
+                  "state.nll.tool": 8.992410380241926
+                },
+                "reason": "pruned: epsilon-dominated (front 7) and the beam of 6 was already full"
+              },
+              {
+                "state_id": "518313be771bf6b3629b8ec2c7524b88",
+                "path": "RESIDUAL_WIDTH(calib.domain_balanced@v1)->DEPTH(calib.domain_balanced@v1)",
+                "front": 8,
+                "position_in_front": 0,
+                "lineage": "width.global_pca_v0",
+                "selected": true,
+                "objectives": {
+                  "state.teacher_kl.equal_domain_mean": 9.466479134055822,
+                  "state.teacher_kl.worst_domain": 10.106613379338764,
+                  "state.critical_token_kl": 16.849609615640016
+                },
+                "diagnostics": {
+                  "state.nll.pooled_all_domains": 10.243891112610063,
+                  "state.nll.teacher_reference_pooled": 0.9303420924946204,
+                  "state.nll.general": 12.621671458566782,
+                  "state.nll.reasoning_math": 9.530402379284748,
+                  "state.nll.rag_multihop": 11.136163293346033,
+                  "state.nll.code": 9.712611448187042,
+                  "state.nll.tool": 9.452699838915628
+                },
+                "reason": "kept: front 8, lineage 'width.global_pca_v0', beam 6"
+              },
+              {
+                "state_id": "a42bd4fed5f7a9882bb05829a04213cb",
+                "path": "RESIDUAL_WIDTH(calib.domain_balanced@v1)->FFN(calib.domain_balanced@v1)",
+                "front": 9,
+                "position_in_front": 0,
+                "lineage": "width.global_pca_v0",
+                "selected": false,
+                "objectives": {
+                  "state.teacher_kl.equal_domain_mean": 10.327288044659916,
+                  "state.teacher_kl.worst_domain": 11.083741347246624,
+                  "state.critical_token_kl": 19.675743303999788
+                },
+                "diagnostics": {
+                  "state.nll.pooled_all_domains": 11.120372039497258,
+                  "state.nll.teacher_reference_pooled": 0.9303420924946204,
+                  "state.nll.general": 13.482485676543309,
+                  "state.nll.reasoning_math": 10.422034314574345,
+                  "state.nll.rag_multihop": 12.232074241023536,
+                  "state.nll.code": 10.240154139144307,
+                  "state.nll.tool": 10.300213910317877
+                },
+                "reason": "pruned: epsilon-dominated (front 9) and the beam of 6 was already full"
+              },
+              {
+                "state_id": "5e56672209dba000fa7e2872282468eb",
+                "path": "RESIDUAL_WIDTH(calib.domain_balanced@v1)->DEPTH(calib.none@v1)",
+                "front": 9,
+                "position_in_front": 1,
+                "lineage": "width.global_pca_v0",
+                "selected": false,
+                "objectives": {
+                  "state.teacher_kl.equal_domain_mean": 10.406293304290859,
+                  "state.teacher_kl.worst_domain": 12.385771542043672,
+                  "state.critical_token_kl": 18.07472788032793
+                },
+                "diagnostics": {
+                  "state.nll.pooled_all_domains": 11.03746109542688,
+                  "state.nll.teacher_reference_pooled": 0.9303420924946204,
+                  "state.nll.general": 14.93422148205339,
+                  "state.nll.reasoning_math": 10.070978286481974,
+                  "state.nll.rag_multihop": 11.73501249816238,
+                  "state.nll.code": 10.442076496889243,
+                  "state.nll.tool": 10.055349879533034
+                },
+                "reason": "pruned: epsilon-dominated (front 9) and the beam of 6 was already full"
+              },
+              {
+                "state_id": "757ae843ec67bf5844ff5b950ddd1a57",
+                "path": "RESIDUAL_WIDTH(calib.domain_balanced@v1)->ATTENTION(calib.none@v1)",
+                "front": 9,
+                "position_in_front": 2,
+                "lineage": "width.global_pca_v0",
+                "selected": false,
+                "objectives": {
+                  "state.teacher_kl.equal_domain_mean": 10.669231316915383,
+                  "state.teacher_kl.worst_domain": 10.969069406260921,
+                  "state.critical_token_kl": 19.495854391496472
+                },
+                "diagnostics": {
+                  "state.nll.pooled_all_domains": 11.52403187149459,
+                  "state.nll.teacher_reference_pooled": 0.9303420924946204,
+                  "state.nll.general": 13.036142988122512,
+                  "state.nll.reasoning_math": 10.271405122699417,
+                  "state.nll.rag_multihop": 12.237699515812855,
+                  "state.nll.code": 11.215379497007351,
+                  "state.nll.tool": 11.52179520167723
+                },
+                "reason": "pruned: epsilon-dominated (front 9) and the beam of 6 was already full"
+              }
+            ]
+          },
+          "leaves": [],
+          "dead_ends": [],
+          "seconds": 7117.677308320999
+        },
+        {
+          "level": 2,
+          "expanded_from": [
+            "812f2d0ce6b9a202977a1988b3031af0",
+            "46d92844cbc3b68375f29071318ff5b4",
+            "6b111bf76794f890da8c10dd21c9720f",
+            "a2baaa9ac1638bb5c67635ee05dcf446",
+            "518313be771bf6b3629b8ec2c7524b88",
+            "4d7bc2031c802e2e04d9cc638236a235"
+          ],
+          "generated": [
+            "363a0070848d7c48a2e1b7bf23bbd27d",
+            "493bd54d0d110f964ce9c168895be012",
+            "a4da617a42d9cf674cd5c735044f66c9",
+            "567e0a4ee422251734151ba08519a1ca",
+            "30906bd0185e885449450b2816b7634d",
+            "b5d74e605f8f0290d481a08341130c5c",
+            "09bd7a367ee9312c7f04239a0bb0e2bb",
+            "1b9661fe5a8e993503b43cc56cd343b1",
+            "b94b8b95a5080500ff741b6b8a4800b2",
+            "933b3713200b54d3bc7a43c950358bae",
+            "921790ae885865c8e5dce71881dac72c",
+            "e067ff7af53459fb4689b6a44df865ee"
+          ],
+          "ranking": {
+            "policy_id": "beam.pareto_multi_objective@v2",
+            "policy_hash": "30a5305bc06dd1e886ea285fa7a3f90ac4b32f61bcb62bae35668f28922bf2e4",
+            "beam_width": 6,
+            "selected": [
+              "493bd54d0d110f964ce9c168895be012",
+              "e067ff7af53459fb4689b6a44df865ee",
+              "b5d74e605f8f0290d481a08341130c5c",
+              "1b9661fe5a8e993503b43cc56cd343b1",
+              "567e0a4ee422251734151ba08519a1ca",
+              "933b3713200b54d3bc7a43c950358bae"
+            ],
+            "fronts": [
+              [
+                "493bd54d0d110f964ce9c168895be012"
+              ],
+              [
+                "e067ff7af53459fb4689b6a44df865ee",
+                "b5d74e605f8f0290d481a08341130c5c",
+                "1b9661fe5a8e993503b43cc56cd343b1",
+                "363a0070848d7c48a2e1b7bf23bbd27d"
+              ],
+              [
+                "567e0a4ee422251734151ba08519a1ca",
+                "30906bd0185e885449450b2816b7634d",
+                "09bd7a367ee9312c7f04239a0bb0e2bb"
+              ],
+              [
+                "933b3713200b54d3bc7a43c950358bae",
+                "a4da617a42d9cf674cd5c735044f66c9"
+              ],
+              [
+                "b94b8b95a5080500ff741b6b8a4800b2",
+                "921790ae885865c8e5dce71881dac72c"
+              ]
+            ],
+            "lineages_kept": [
+              "attention.weight_proxy_v0|depth.causal_kl_greedy_v1",
+              "depth.causal_kl_greedy_v1|ffn.activation_importance_v0",
+              "depth.positional_v0|ffn.activation_importance_v0",
+              "ffn.activation_importance_v0|depth.causal_kl_greedy_v1",
+              "ffn.activation_importance_v0|depth.positional_v0",
+              "width.global_pca_v0|depth.causal_kl_greedy_v1"
+            ],
+            "decisions": [
+              {
+                "state_id": "493bd54d0d110f964ce9c168895be012",
+                "path": "FFN(calib.domain_balanced@v1)->DEPTH(calib.domain_balanced@v1)->RESIDUAL_WIDTH(calib.domain_balanced@v1)",
+                "front": 0,
+                "position_in_front": 0,
+                "lineage": "ffn.activation_importance_v0|depth.causal_kl_greedy_v1",
+                "selected": true,
+                "objectives": {
+                  "state.teacher_kl.equal_domain_mean": 6.593634916815058,
+                  "state.teacher_kl.worst_domain": 7.37215651174592,
+                  "state.critical_token_kl": 13.265857283661278
+                },
+                "diagnostics": {
+                  "state.nll.pooled_all_domains": 7.260452426039362,
+                  "state.nll.teacher_reference_pooled": 0.9303420924946204,
+                  "state.nll.general": 9.493372094249459,
+                  "state.nll.reasoning_math": 6.2492931478685065,
+                  "state.nll.rag_multihop": 8.301870073656307,
+                  "state.nll.code": 6.653216398043227,
+                  "state.nll.tool": 6.669749660348959
+                },
+                "reason": "kept: front 0, lineage 'ffn.activation_importance_v0|depth.causal_kl_greedy_v1', beam 6"
+              },
+              {
+                "state_id": "e067ff7af53459fb4689b6a44df865ee",
+                "path": "FFN(calib.domain_balanced@v1)->DEPTH(calib.none@v1)->RESIDUAL_WIDTH(calib.domain_balanced@v1)",
+                "front": 1,
+                "position_in_front": 0,
+                "lineage": "ffn.activation_importance_v0|depth.positional_v0",
+                "selected": true,
+                "objectives": {
+                  "state.teacher_kl.equal_domain_mean": 7.654640541846627,
+                  "state.teacher_kl.worst_domain": 9.423926189612576,
+                  "state.critical_token_kl": 14.033273279098335
+                },
+                "diagnostics": {
+                  "state.nll.pooled_all_domains": 8.185305790585405,
+                  "state.nll.teacher_reference_pooled": 0.9303420924946204,
+                  "state.nll.general": 11.310780905028375,
+                  "state.nll.reasoning_math": 7.152413705423633,
+                  "state.nll.rag_multihop": 9.151248131068666,
+                  "state.nll.code": 7.408781561336288,
+                  "state.nll.tool": 7.411980471555585
+                },
+                "reason": "kept: front 1, lineage 'ffn.activation_importance_v0|depth.positional_v0', beam 6"
+              },
+              {
+                "state_id": "b5d74e605f8f0290d481a08341130c5c",
+                "path": "DEPTH(calib.none@v1)->FFN(calib.domain_balanced@v1)->RESIDUAL_WIDTH(calib.domain_balanced@v1)",
+                "front": 1,
+                "position_in_front": 1,
+                "lineage": "depth.positional_v0|ffn.activation_importance_v0",
+                "selected": true,
+                "objectives": {
+                  "state.teacher_kl.equal_domain_mean": 8.437191045784665,
+                  "state.teacher_kl.worst_domain": 9.103785310750862,
+                  "state.critical_token_kl": 16.95304435175244
+                },
+                "diagnostics": {
+                  "state.nll.pooled_all_domains": 9.294944334415373,
+                  "state.nll.teacher_reference_pooled": 0.9303420924946204,
+                  "state.nll.general": 10.466264833185337,
+                  "state.nll.reasoning_math": 8.920234189113362,
+                  "state.nll.rag_multihop": 10.286932401820716,
+                  "state.nll.code": 8.112144297205008,
+                  "state.nll.tool": 8.868558003925232
+                },
+                "reason": "kept: front 1, lineage 'depth.positional_v0|ffn.activation_importance_v0', beam 6"
+              },
+              {
+                "state_id": "1b9661fe5a8e993503b43cc56cd343b1",
+                "path": "ATTENTION(calib.none@v1)->DEPTH(calib.domain_balanced@v1)->RESIDUAL_WIDTH(calib.domain_balanced@v1)",
+                "front": 1,
+                "position_in_front": 2,
+                "lineage": "attention.weight_proxy_v0|depth.causal_kl_greedy_v1",
+                "selected": true,
+                "objectives": {
+                  "state.teacher_kl.equal_domain_mean": 9.905144705176756,
+                  "state.teacher_kl.worst_domain": 11.465194003324394,
+                  "state.critical_token_kl": 13.435547623988414
+                },
+                "diagnostics": {
+                  "state.nll.pooled_all_domains": 10.642041846239746,
+                  "state.nll.teacher_reference_pooled": 0.9303420924946204,
+                  "state.nll.general": 10.055433428680855,
+                  "state.nll.reasoning_math": 10.718367787820934,
+                  "state.nll.rag_multihop": 10.680377150671198,
+                  "state.nll.code": 11.742986574762394,
+                  "state.nll.tool": 10.300568821518288
+                },
+                "reason": "kept: front 1, lineage 'attention.weight_proxy_v0|depth.causal_kl_greedy_v1', beam 6"
+              },
+              {
+                "state_id": "363a0070848d7c48a2e1b7bf23bbd27d",
+                "path": "FFN(calib.domain_balanced@v1)->DEPTH(calib.domain_balanced@v1)->ATTENTION(calib.none@v1)",
+                "front": 1,
+                "position_in_front": 3,
+                "lineage": "ffn.activation_importance_v0|depth.causal_kl_greedy_v1",
+                "selected": false,
+                "objectives": {
+                  "state.teacher_kl.equal_domain_mean": 10.943303792984986,
+                  "state.teacher_kl.worst_domain": 11.420229927493816,
+                  "state.critical_token_kl": 13.538392178664115
+                },
+                "diagnostics": {
+                  "state.nll.pooled_all_domains": 11.610490728090063,
+                  "state.nll.teacher_reference_pooled": 0.9303420924946204,
+                  "state.nll.general": 12.654999282783036,
+                  "state.nll.reasoning_math": 11.144128736488256,
+                  "state.nll.rag_multihop": 11.907799406267856,
+                  "state.nll.code": 11.710049301425634,
+                  "state.nll.tool": 11.314645882884042
+                },
+                "reason": "pruned: epsilon-dominated (front 1) and the beam of 6 was already full"
+              },
+              {
+                "state_id": "567e0a4ee422251734151ba08519a1ca",
+                "path": "DEPTH(calib.domain_balanced@v1)->FFN(calib.domain_balanced@v1)->RESIDUAL_WIDTH(calib.domain_balanced@v1)",
+                "front": 2,
+                "position_in_front": 0,
+                "lineage": "depth.causal_kl_greedy_v1|ffn.activation_importance_v0",
+                "selected": true,
+                "objectives": {
+                  "state.teacher_kl.equal_domain_mean": 9.527034634548107,
+                  "state.teacher_kl.worst_domain": 9.88423436372619,
+                  "state.critical_token_kl": 15.466354867917815
+                },
+                "diagnostics": {
+                  "state.nll.pooled_all_domains": 10.286956122106355,
+                  "state.nll.teacher_reference_pooled": 0.9303420924946204,
+                  "state.nll.general": 10.555337848057196,
+                  "state.nll.reasoning_math": 9.721016474919585,
+                  "state.nll.rag_multihop": 10.857615529002107,
+                  "state.nll.code": 10.039852876777699,
+                  "state.nll.tool": 10.29456483974766
+                },
+                "reason": "kept: front 2, lineage 'depth.causal_kl_greedy_v1|ffn.activation_importance_v0', beam 6"
+              },
+              {
+                "state_id": "30906bd0185e885449450b2816b7634d",
+                "path": "DEPTH(calib.none@v1)->FFN(calib.domain_balanced@v1)->ATTENTION(calib.none@v1)",
+                "front": 2,
+                "position_in_front": 1,
+                "lineage": "depth.positional_v0|ffn.activation_importance_v0",
+                "selected": false,
+                "objectives": {
+                  "state.teacher_kl.equal_domain_mean": 10.33115384320096,
+                  "state.teacher_kl.worst_domain": 11.295759205380085,
+                  "state.critical_token_kl": 15.041702037171113
+                },
+                "diagnostics": {
+                  "state.nll.pooled_all_domains": 10.972380876289906,
+                  "state.nll.teacher_reference_pooled": 0.9303420924946204,
+                  "state.nll.general": 12.939449204867902,
+                  "state.nll.reasoning_math": 10.168197021016015,
+                  "state.nll.rag_multihop": 12.330631867030132,
+                  "state.nll.code": 10.128039409659502,
+                  "state.nll.tool": 10.163459450765021
+                },
+                "reason": "pruned: epsilon-dominated (front 2) and the beam of 6 was already full"
+              },
+              {
+                "state_id": "09bd7a367ee9312c7f04239a0bb0e2bb",
+                "path": "ATTENTION(calib.none@v1)->DEPTH(calib.domain_balanced@v1)->FFN(calib.domain_balanced@v1)",
+                "front": 2,
+                "position_in_front": 2,
+                "lineage": "attention.weight_proxy_v0|depth.causal_kl_greedy_v1",
+                "selected": false,
+                "objectives": {
+                  "state.teacher_kl.equal_domain_mean": 10.45439518628643,
+                  "state.teacher_kl.worst_domain": 11.864885924894805,
+                  "state.critical_token_kl": 13.975976926516198
+                },
+                "diagnostics": {
+                  "state.nll.pooled_all_domains": 11.335570945841784,
+                  "state.nll.teacher_reference_pooled": 0.9303420924946204,
+                  "state.nll.general": 9.298036808249403,
+                  "state.nll.reasoning_math": 12.102906247609333,
+                  "state.nll.rag_multihop": 12.04704406352688,
+                  "state.nll.code": 12.024832787011242,
+                  "state.nll.tool": 10.67912358989802
+                },
+                "reason": "pruned: epsilon-dominated (front 2) and the beam of 6 was already full"
+              },
+              {
+                "state_id": "933b3713200b54d3bc7a43c950358bae",
+                "path": "RESIDUAL_WIDTH(calib.domain_balanced@v1)->DEPTH(calib.domain_balanced@v1)->FFN(calib.domain_balanced@v1)",
+                "front": 3,
+                "position_in_front": 0,
+                "lineage": "width.global_pca_v0|depth.causal_kl_greedy_v1",
+                "selected": true,
+                "objectives": {
+                  "state.teacher_kl.equal_domain_mean": 10.61909114233209,
+                  "state.teacher_kl.worst_domain": 11.49694202013897,
+                  "state.critical_token_kl": 19.670505789381245
+                },
+                "diagnostics": {
+                  "state.nll.pooled_all_domains": 11.388524203514216,
+                  "state.nll.teacher_reference_pooled": 0.9303420924946204,
+                  "state.nll.general": 14.020089710903969,
+                  "state.nll.reasoning_math": 10.845173312092129,
+                  "state.nll.rag_multihop": 12.204052853402668,
+                  "state.nll.code": 10.783452014914614,
+                  "state.nll.tool": 10.462599685366879
+                },
+                "reason": "kept: front 3, lineage 'width.global_pca_v0|depth.causal_kl_greedy_v1', beam 6"
+              },
+              {
+                "state_id": "a4da617a42d9cf674cd5c735044f66c9",
+                "path": "DEPTH(calib.domain_balanced@v1)->FFN(calib.domain_balanced@v1)->ATTENTION(calib.none@v1)",
+                "front": 3,
+                "position_in_front": 1,
+                "lineage": "depth.causal_kl_greedy_v1|ffn.activation_importance_v0",
+                "selected": false,
+                "objectives": {
+                  "state.teacher_kl.equal_domain_mean": 14.042365989602377,
+                  "state.teacher_kl.worst_domain": 16.5718107078932,
+                  "state.critical_token_kl": 15.769477012650626
+                },
+                "diagnostics": {
+                  "state.nll.pooled_all_domains": 15.287804101036599,
+                  "state.nll.teacher_reference_pooled": 0.9303420924946204,
+                  "state.nll.general": 9.70441114053386,
+                  "state.nll.reasoning_math": 16.791657840579617,
+                  "state.nll.rag_multihop": 16.517994716227,
+                  "state.nll.code": 16.04167319807067,
+                  "state.nll.tool": 14.907794746734213
+                },
+                "reason": "pruned: epsilon-dominated (front 3) and the beam of 6 was already full"
+              },
+              {
+                "state_id": "b94b8b95a5080500ff741b6b8a4800b2",
+                "path": "RESIDUAL_WIDTH(calib.domain_balanced@v1)->DEPTH(calib.domain_balanced@v1)->ATTENTION(calib.none@v1)",
+                "front": 4,
+                "position_in_front": 0,
+                "lineage": "width.global_pca_v0|depth.causal_kl_greedy_v1",
+                "selected": false,
+                "objectives": {
+                  "state.teacher_kl.equal_domain_mean": 11.787205505477814,
+                  "state.teacher_kl.worst_domain": 12.487199439762612,
+                  "state.critical_token_kl": 21.21631929866496
+                },
+                "diagnostics": {
+                  "state.nll.pooled_all_domains": 12.668912222518689,
+                  "state.nll.teacher_reference_pooled": 0.9303420924946204,
+                  "state.nll.general": 14.15072382879681,
+                  "state.nll.reasoning_math": 10.969254653806015,
+                  "state.nll.rag_multihop": 13.744337920617635,
+                  "state.nll.code": 12.140912508423883,
+                  "state.nll.tool": 12.841726288802107
+                },
+                "reason": "pruned: epsilon-dominated (front 4) and the beam of 6 was already full"
+              },
+              {
+                "state_id": "921790ae885865c8e5dce71881dac72c",
+                "path": "FFN(calib.domain_balanced@v1)->DEPTH(calib.none@v1)->ATTENTION(calib.none@v1)",
+                "front": 4,
+                "position_in_front": 1,
+                "lineage": "ffn.activation_importance_v0|depth.positional_v0",
+                "selected": false,
+                "objectives": {
+                  "state.teacher_kl.equal_domain_mean": 15.077989174279065,
+                  "state.teacher_kl.worst_domain": 16.738810917916645,
+                  "state.critical_token_kl": 16.531609947015742
+                },
+                "diagnostics": {
+                  "state.nll.pooled_all_domains": 15.48973995968464,
+                  "state.nll.teacher_reference_pooled": 0.9303420924946204,
+                  "state.nll.general": 16.11669065019586,
+                  "state.nll.reasoning_math": 15.872984693740355,
+                  "state.nll.rag_multihop": 15.91677697463895,
+                  "state.nll.code": 17.03715879475079,
+                  "state.nll.tool": 13.965966333707017
+                },
+                "reason": "pruned: epsilon-dominated (front 4) and the beam of 6 was already full"
+              }
+            ]
+          },
+          "leaves": [],
+          "dead_ends": [],
+          "seconds": 1255.3651368618011
+        },
+        {
+          "level": 3,
+          "expanded_from": [
+            "493bd54d0d110f964ce9c168895be012",
+            "e067ff7af53459fb4689b6a44df865ee",
+            "b5d74e605f8f0290d481a08341130c5c",
+            "1b9661fe5a8e993503b43cc56cd343b1",
+            "567e0a4ee422251734151ba08519a1ca",
+            "933b3713200b54d3bc7a43c950358bae"
+          ],
+          "generated": [
+            "cca699c93f34dad7e94a5d13a25b2bc2",
+            "281a02c3ac18419b70e896296dac0d03",
+            "85bde4ded2c31953f802e39cf2252c87",
+            "4e429f7ed722b180dd662c779895693f",
+            "158b96cf651fd8ba8f8ceaefefde2067",
+            "68850e82f92a3ba6adbf5ec6dc010c8d"
+          ],
+          "ranking": null,
+          "leaves": [
+            "cca699c93f34dad7e94a5d13a25b2bc2",
+            "281a02c3ac18419b70e896296dac0d03",
+            "85bde4ded2c31953f802e39cf2252c87",
+            "4e429f7ed722b180dd662c779895693f",
+            "158b96cf651fd8ba8f8ceaefefde2067",
+            "68850e82f92a3ba6adbf5ec6dc010c8d"
+          ],
+          "dead_ends": [],
+          "seconds": 660.8607556819916
+        }
+      ]
+    },
+    "2": {
+      "passed": false,
+      "reason": "autoinit.v1.phase_a.rung1.cca699c93f34.sa: training failed rc=1; tail: ...ill/training/train.py\", line 827, in _micro_losses\n    ce_sum, ce_n = masked_ce(logits, ids, mask)\n                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspace/aad/src/aadistill/training/train.py\", line 380, in masked_ce\n    return F.cross_entropy(sel.float(), targets, reduction=\"sum\"), count\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/opt/train/lib/python3.12/site-packages/torch/nn/functional.py\", line 3504, in cross_entropy\n    return torch._C._nn.cross_entropy_loss(\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\ntorch.OutOfMemoryError: CUDA out of memory. Tried to allocate 3.58 GiB. GPU 0 has a total capacity of 44.39 GiB of which 2.36 GiB is free. Process 6820 has 24.05 GiB memory in use. Including non-PyTorch memory, this process has 17.97 GiB memory in use. Of the allocated memory 17.46 GiB is allocated by PyTorch, and 13.10 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://docs.pytorch.org/docs/stable/notes/cuda.html#optimizing-memory-usage-with-pytorch-cuda-alloc-conf)\n",
+      "finished_utc": "2026-08-20T22:55:42.691870+00:00",
+      "spend_usd": 3.5615
+    }
+  },
+  "authorization": {
+    "schema": "aadistill.autoinit.phase_a_authorization/v1",
+    "authorization_id": "autoinit.phase_a.2026-08-20T1856Z",
+    "version": 1,
+    "granted_utc": "2026-08-20T18:56:29Z",
+    "granted_by": "Maintainer decision, 2026-08-21, at commit f331e49. GO for Phase-A Attempt 12 only. Attempt 11 passed Stage 0 and Stage 1 -- the first completed AutoInit beam search, 43 states over 4 levels, five leaves selected, with the existing COMPOSITE_STAGE1 recipe on Pareto front 4 and NOT selected -- and then lost the probe at Stage 2 to a tokenizer inferred from a weight-only checkpoint, and lost all five leaf checkpoints with the pod. Both defects are closed and mutation-verified at $0. (1) The tokenizer is now a declared consumer dependency: an explicit source, loaded through the real loader, verified against the frozen protocol identity 7781771acc3798ee, cross-checked against any tokenizer the student itself carries, and refused before training or data construction; presence is decided by looking for files, never by calling the loader, because AutoTokenizer returns a one-token vocabulary on a config-only directory instead of raising. The producer is unchanged and searched leaves remain weight-only, because artifact_digest folds in tokenizer_sha256. (2) The five Stage-1 selected leaves now leave the pod: selected_leaf_durability.json is a fetched report ordered before products, the selected-leaf transfer runs whenever Stage 1 produced that report and is NOT gated on Stage 2, the leaves land in the existing dev-box checkpoint store by the product transfer path rather than the archive, each is re-identified from local bytes and required to match the Stage-1 artifact digest, and required_products_secured is a teardown-gate requirement so a completed search cannot be deleted while its leaves remain only on the pod. A pre-provider capacity gate now checks the actual dev-box destination. Local storage was cleared to 22.25 GiB by reclaiming 14.9107 GiB of derived caches with no checkpoint deleted; the retained 23.09 GiB review set is closed and must not be revisited. No further canary, measurement, readiness or cleanup phase is to be added before this run.\n\nCovers: One (1) launch of AutoInitializer Phase A, attempt 12, on a single NVIDIA L40S at no more than $0.99/h, proceeding through the frozen Stage 0-5 protocol with no scientific or infrastructure change, under the existing watchdog, soft-stop, hard-stop, artifact-gate, selected-leaf durability and provider-confirmed teardown behaviour. Authorized pricing, unchanged: expected $17.8933, soft stop $22.7183, priced hard value $23.0483, per-launch hard ceiling $23.0484. Stage-1 runtime deadline 363.9841 min, derived as base 180.0000 + beam-6 correction 36.2158 + reference-cache fallback reserve 147.7683. If Stage 1 completes, all five selected leaves MUST be verified off-pod before normal teardown, whatever happens in Stages 2-5.\n\nCumulative spend at approval $209.6842 against a cumulative cap of $234.00.\n\nDoes NOT authorize: Attempt 13, or any retry after a failure - a failed pre-provider, capacity, setup, Stage-0, Stage-1, Stage-2, Stage-3, pricing, authorization, bundle-identity, deadline, selected-leaf-durability, artifact or provider gate is a fail-closed stop for review, never an interactive repair on the live pod. Adding a further canary, measurement, readiness or cleanup phase. Deleting any further local artifact, or revisiting the retained 23.09 GiB checkpoint review set. Changing the tokenizer semantics, the search science, the retention selection, the five-leaf count, or Phase-A pricing. Reopening the frozen science: science plan 02be33b9, session plan 9377a2dc, Stage-3 protocol 250f72ef, runtime comparability 70a26e0b, equivalence interval 0.011695296982299022, feasibility floor 0.3, the seed and conditional-sc policy, the operators, the calibration, the operator ids and declared mathematics, or the recovery, search and selection rules. Reviving the terminated device canary. Any other paid session. Treating the remaining cumulative headroom as authorization beyond this one launch.\n\nGrant document: logs/autoinit_phase_a_attempt12_grant.json sha256 69e8150ea9d4d50dd16e0227318bf4df51b66f1dc5904888267d9f07da124a50",
+    "plan_id": "autoinit.v1.phase_a_session",
+    "phase_a_session_plan_hash": "9377a2dc61f21790dd111d72a5de0e039ea1d31afef2d09e18c98a0b0cc2a0aa",
+    "phase_a_science_plan_hash": "02be33b9a7a8e26bc8bfb75795351e8cdc9ffd441b47066cc81887cfc511b55c",
+    "expected_usd": 17.8933,
+    "hard_cap_usd": 23.0484,
+    "authorized_stages": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5
+    ],
+    "stage_conditions": {
+      "0": "attestation; frozen assets; assert_preregistered against the frozen science plan; both thresholds must be materialized",
+      "1": "beam search; 5 admissible leaves or STOP and report the shortfall",
+      "2": "recovery rung 1 on seed sa: 5 searched leaves + the injected canonical control, then the survivor selection and the leaf retention record",
+      "3": "recovery rung 2 on seed sb: 2 survivors + the control",
+      "4": "conditional tie-break on seed sc, ONLY for finalists inside the preregistered equivalence interval; no fourth seed",
+      "5": "selection and report; unresolved_equivalence is a RESULT",
+      "teardown": "collect, fetch the finalists, delete the pod, confirm from the provider, STOP for review"
+    },
+    "scope_note": "Phase A only, one launcher invocation. This artifact authorizes the SPEND and the STAGES; it is not by itself an instruction to launch \u2014 issuing and launching are separate, explicit decisions. Nothing here permits retraining the permanent controls, changing the frozen search or recovery design, a fourth seed, or any follow-on experiment: Phase A is a terminus and stops for review on every path, including unresolved_equivalence.",
+    "phase_a_authorized": true,
+    "automatic_followon_start": false,
+    "authorized_session_commit": "6075a6d97b0a0d516d5eddb23675341f8c4af3b8",
+    "harness_source_digest": "b9ff56681e84267a2cc71e10e958beea48699259f39ae5e8dc02b56a35c50215",
+    "harness_source_files": [
+      "scripts/pod/autoinit_phase_a_launch.py",
+      "scripts/pod/autoinit_phase_a_driver.py",
+      "scripts/pod/autoinit_preflight_setup.sh",
+      "scripts/pod/autoinit_science_inputs.py",
+      "scripts/pod/autoinit_engine_probe.py",
+      "scripts/pod/watchdog.py",
+      "scripts/pod/collect_artifacts.py",
+      "src/aadistill/infrastructure/session.py",
+      "src/aadistill/infrastructure/session_runner.py",
+      "src/aadistill/infrastructure/session_prechecks.py",
+      "scripts/autoinit/phase_a_search.py",
+      "scripts/autoinit/write_preregistration.py",
+      "src/aadistill/autoinit/authorization.py",
+      "src/aadistill/autoinit/generation_compat.py",
+      "src/aadistill/autoinit/phase_a.py",
+      "src/aadistill/autoinit/generation.py"
+    ],
+    "per_launch_hard_usd": 23.0484,
+    "provenance_commit": "6075a6d97b0a0d516d5eddb23675341f8c4af3b8",
+    "enforcement": "the launcher loads this artifact and refuses to create a pod whose priced hard threshold exceeds hard_cap_usd or per_launch_hard_usd, refuses a stage not in authorized_stages, refuses a harness that does not digest to the authorized value, and has no code path to any experiment after Phase A",
+    "authorization_sha256": "459bf9f1df61ef98e920529f48e6ad2ccae7c5babaefae7db861f421c3a3edab"
+  },
+  "elapsed_min": 205.89,
+  "spend_usd": 3.5615,
+  "runtime": {
+    "cpu_budget": {
+      "threads": 13,
+      "source": "cgroup.v2",
+      "torch_threads_before": 64,
+      "torch_threads_after": 13,
+      "visible_cpus": 128
+    }
+  },
+  "phase_a_successful": false,
+  "failed_stages": [
+    2
+  ],
+  "outcome": "FAILED",
+  "cleanup_is_not_success": "collection and teardown run regardless of the outcome; a clean cleanup does not make a failed search a successful Phase A"
+}
