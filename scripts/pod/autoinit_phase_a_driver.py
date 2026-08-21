@@ -56,6 +56,9 @@ sys.path.insert(0, str(REPO / "scripts/autoinit"))
 from aadistill.autoinit.authorization import AuthorizationError  # noqa: E402
 from aadistill.autoinit.arch import get_adapter  # noqa: E402
 from aadistill.autoinit.device import apply_cpu_budget  # noqa: E402
+from aadistill.autoinit.device_handoff import (  # noqa: E402
+    DeviceHandoffError, release_to_subprocess, require_headroom,
+)
 from aadistill.autoinit.leaf_durability import (  # noqa: E402
     LeafDurabilityError, persist_selected_leaves,
 )
@@ -110,6 +113,12 @@ STAGE3_EVALUATION_PROTOCOL_HASH = (
     "250f72efbd43b86a475e8dda293b45f07ee61a4d858e147f4a5bd7681c32c2e4")
 STAGE3_ATTESTATION = REPO / "logs/autoinit_stage3_complete/attested_evaluation_protocol.json"
 STAGE3_PROBE = REPO / "logs/autoinit_stage3_complete/engine_probe.json"
+#: What the stage-2 recovery trainer needs on the device, measured from attempt
+#: 12's own OOM: the subprocess had 17.97 GiB in use when it asked for 3.58 more.
+#: Rounded up, and checked against the DRIVER's free bytes rather than the
+#: parent's allocator figures, because a sibling process cannot use the parent's
+#: cached blocks.
+RECOVERY_TRAINER_BYTES = 22 * 2**30
 #: The versioned comparability relation the live protocol is judged under.
 COMPAT_V2 = REPO / "logs/autoinit_phase_a_protocol_compat_v2.json"
 FROZEN_RECIPE = REPO / "configs/stage3/e1/e1_r0860k_sa_pca.json"
@@ -559,14 +568,52 @@ class PhaseADriver:
         say(f"selected leaves persisted: {durability['n_leaves']} at "
             f"{durability['required_bytes'] / 2**30:.2f} GiB, digests re-verified")
 
+        # THE DEVICE HANDOFF. Attempt 12 died six seconds after this point:
+        # the driver runs the search IN-PROCESS and still held 24.05 GiB when
+        # stage 2 spawned train_stage3.py needing 17.97 GiB on a 44.39 GiB card.
+        #
+        # Deliberately AFTER durability: if the release or the headroom contract
+        # fails, the five leaves are already off the pod and the search is not
+        # lost. Ordering the other way would trade a completed 203-minute search
+        # for a memory diagnostic.
+        #
+        # `found` is dropped here rather than left to fall out of scope, because
+        # BeamSearch's closures capture the teacher, the primed evaluator and
+        # the calibration; anything holding the result holds them too. The
+        # states themselves carry metadata and checkpoint identities, not CUDA
+        # models, so the record below is what says which of the two the 24 GiB
+        # actually was.
+        # Everything still needed from `found` is taken FIRST. The whole point
+        # is that nothing survives this line holding the search's device state,
+        # so a later read of `found` would either resurrect it or -- as the
+        # first version of this block did -- raise NameError after a 203-minute
+        # search had already succeeded.
+        summary = found.summary
+        self.search_result = summary                 # the serializable part only
+        handoff = release_to_subprocess(drop=[found])
+        del found
+        (AUDIT / "device_handoff.json").write_text(
+            json.dumps(handoff, indent=2, default=str) + "\n")
+        self.ev.setdefault("runtime", {})["device_handoff"] = handoff
+        say(f"device handoff: {handoff.get('verdict', 'n/a')}")
+        try:
+            require_headroom(handoff["after"],
+                             need_bytes=RECOVERY_TRAINER_BYTES,
+                             what="the stage-2 recovery trainer")
+        except DeviceHandoffError as exc:
+            return self.record(
+                1, False,
+                f"stage 1 succeeded and its leaves are preserved, but the card "
+                f"cannot carry the recovery trainer: {exc}")
+
         return self.record(1, True,
                            durability=durability,
-                           n_states=found.summary["summary"]["n_states"],
-                           n_leaves=found.summary["summary"]["n_complete_leaves"],
-                           n_resumed=len(found.summary["resumed_state_ids"]),
+                           n_states=summary["summary"]["n_states"],
+                           n_leaves=summary["summary"]["n_complete_leaves"],
+                           n_resumed=len(summary["resumed_state_ids"]),
                            selected=[s.state_id for s in self.leaves],
-                           control=found.summary["control"],
-                           levels=found.summary["levels"])
+                           control=summary["control"],
+                           levels=summary["levels"])
 
     # -- probe machinery, shared by every rung ----------------------------
     def probe_config(self, descriptor: dict) -> Path:

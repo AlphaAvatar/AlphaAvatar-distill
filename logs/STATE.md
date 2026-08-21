@@ -1,4 +1,4 @@
-**Updated:** 2026-08-21 · branch `main` · after Phase-A Attempt 12 — **Stage 1 passed and its leaves survived**
+**Updated:** 2026-08-21 · branch `main` · Stage 1 is now importable; the continuation is implemented at $0
 
 # Current state
 
@@ -153,68 +153,53 @@ instead of the cause, and it was paid for twice. Full diagnoses in
 
 ## Next starting point
 
-**Attempt 12 ran: Stage 0 and Stage 1 passed, and this time the search result
-survived.** $3.7872, 229.5 min, pod deleted with provider confirmation. Grant and
-authorization **consumed**. Full record:
-[`autoinit_phase_a_attempt12/`](autoinit_phase_a_attempt12/).
+**Stage 1 is a result to import, not work to repeat.** Attempts 11 and 12 agree
+byte for byte, and attempt 12's five leaves are preserved and digest-verified. A
+recovery continuation starting at Stage 2 is implemented and verified at $0.
+**Nothing is running, billing, authorized or prepared.**
 
-### The durability closure worked
+### What was built
 
-All five selected leaves transferred to
-`/home/ecs-user/aad-artifacts/autoinit/phase_a/` with `digest=MATCHED` — **after
-the Stage-2 failure**, which is precisely the case that returned early before.
-`required_products_secured` recorded `ok: true`. Re-verified independently
-afterwards from local bytes: **5/5** on `artifact_digest` and
-`single_shard_sha256`, 1.110 GiB each, `tokenizer_sha256: None` — still
-weight-only, so the identity the search metrics hang on is untouched.
+| | |
+| --- | --- |
+| **device handoff** | records **allocated / reserved / driver-free** either side of a release, and derives the verdict from `allocated` — high reserved with low allocated is "allocator reservation, not a model leak". Headroom is checked against the **driver's** free bytes, since a sibling cannot use the parent's cached blocks. Placed **after** durability, so a failure costs a diagnostic and never a completed search |
+| **strict Stage-1 import** | binds the config hash; requires the five ids **in order**; re-identifies every checkpoint **from bytes** against both digests; requires target geometry and an artifact-bound evaluation; rebuilds the control from its frozen hash; feeds the same `admit_leaves` a live search feeds |
+| **no deserializer** | there is deliberately no `InitializationState.from_dict`, and a test asserts none appears. The journal is evidence, not a trusted format |
+| **derived budget** | `904.44` min, **`$14.9233` expected / `$16.7456` hard**, from the Phase-A `BudgetSpec` minus the Stage-1 phase and both Stage-1-only reserves. No dollar figure is written in the code |
 
-Attempt 11 produced the same five leaves and destroyed every one.
+### One open item, before any GO
 
-### The search is deterministic — two paid runs, byte-identical
+**The control comes back unmeasured, and cannot be otherwise.** Its Stage-1
+evaluation is not in the persisted evidence — no `retained_canonical` row in the
+journal, and `search_result["control"]` carries identity only — because a live
+search measures it on the GPU. A continuation must measure it on the suite, so
+the teacher and suite still have to be resident. One evaluation against a
+203-minute search, but not free. The admission gate refuses the control until it
+is measured, which is what makes that unskippable rather than forgotten.
 
-| | attempt 11 | attempt 12 |
-| --- | --- | --- |
-| `config_hash` | `567d32789ba6dcef…` | **identical** |
-| states / complete leaves | 43 / 7 | **43 / 7** |
-| selected state ids | five | **identical, in order** |
-| first depth invocation | layer 21, 0.625600, margin 1.529e-03 | **identical** |
-| wall time | 180.3 min | 203.8 min |
+### The orchestration caught what the fast tests could not
 
-Different pods, different hosts, three days apart. Only wall time differs. This
-is direct evidence the frozen search is deterministic as the science plan claims
-— something no `$0` test could establish.
+The first handoff dropped `found` and then read `found.summary` four lines below
+— a `NameError` **after** a 203-minute search had already succeeded, at exactly
+the boundary added to protect it. Every focused suite passed; only the real
+Stage-0→5 run reaches that line. A test now asserts **zero** reads of `found`
+after the release, so the bug fails in 0.25 s instead of 21 minutes.
 
-### The open defect: two processes, one GPU
+### Frozen science untouched
 
-```
-torch.OutOfMemoryError: Tried to allocate 3.58 GiB.
-GPU 0 has 44.39 GiB of which 2.36 GiB is free.
-Process 6820 has 24.05 GiB in use … this process has 17.97 GiB in use.
-```
+Session `9377a2dc…`, science `02be33b9…`, recovery fingerprint `ab0d8cfd…`,
+tokenizer `7781771a…`, Stage-1 deadline `363.9841 min`, Phase-A price
+`$17.8933 / $22.7183 / $23.0483`. Nothing was rewritten to pretend the session
+always began at Stage 2.
 
-The driver runs the beam search **in-process** — deliberately, because the rungs
-need live `InitializationState` objects — so it still holds ~24 GiB when Stage 2
-spawns `train_stage3.py` as a subprocess needing ~18 GiB. 44.39 GiB does not fit
-both.
+### Budget
 
-**Structural, not a race.** It will recur at the same point on every attempt on
-this hardware. Same shape as the reference-cache finding: the search's residency
-is larger than a standalone measurement of a stage suggests, and stage boundaries
-that look sequential in code are not sequential in device memory.
+Cap **$234.00**, spent **$213.4714**, remaining **$20.5286**. The continuation's
+`$16.7456` hard fits with **$3.78** to spare — no cap increase is needed, and
+none should be requested to rerun a completed search.
 
-Not the tokenizer — that closure held, and training reached a loss computation.
-**No fix is applied**; the run stopped for review.
-
-### Two decisions owed
-
-1. **How Stage 1 releases its device memory before Stage 2** spawns the trainer.
-2. **Budget.** $20.5286 remains, **$2.5198 short** of another full attempt.
-
-Worth weighing: the five verified leaves mean a future attempt could in principle
-start from Stage 2 rather than re-running a 203-minute search. That is a
-maintainer decision, not an assumption.
-
-**No Attempt 13 is prepared, granted, funded or implied.**
+**The next review is a GO/NO-GO for the recovery continuation, not for another
+Phase-A search.**
 
 **Process rule, standing:** "my intended next decision is GO" is not executable
 permission, and a recommendation is not an approval.

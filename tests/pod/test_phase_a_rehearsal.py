@@ -1380,3 +1380,89 @@ def test_the_deadline_derivation_moves_no_frozen_identity():
         assert phase_a_spec(**override).plan_hash == SESSION, (
             f"{override} moved the session plan hash; a pricing input has "
             "reached the frozen identity")
+
+
+# --- the Stage-2-to-5 continuation budget -----------------------------------
+#
+# Attempts 11 and 12 both completed Stage 1 and produced byte-identical results,
+# and attempt 12 preserved the five leaves off-pod. A continuation that imports
+# that result does not owe the search, so its price must not include it — but the
+# numbers have to come from the pricing owner, not from a new constant.
+
+
+def test_the_continuation_drops_the_stage_1_phase_and_only_that():
+    mod = load_launcher()
+    args = launcher_defaults(mod)
+    full, cont = mod.budget(args), mod.continuation_budget(args)
+
+    dropped = ({p.name for p in full.other_phases}
+               - {p.name for p in cont.other_phases})
+    assert dropped == {mod.STAGE1_SEARCH_PHASE}, dropped
+    # Everything else is carried through untouched.
+    assert cont.arms == full.arms and cont.steps_per_arm == full.steps_per_arm
+    assert cont.step_seconds == full.step_seconds
+    assert cont.eval_minutes_per_arm == full.eval_minutes_per_arm
+    assert cont.contingency_fraction == full.contingency_fraction
+    assert (cont.artifact_recovery_reserve_minutes
+            == full.artifact_recovery_reserve_minutes)
+    assert cont.setup_minutes == full.setup_minutes
+
+
+def test_the_continuation_drops_both_stage_1_only_reserves():
+    """The beam-6 correction and the reference-cache fallback are Stage-1 risks
+    by construction. A session that does not run stage 1 cannot take them."""
+    mod = load_launcher()
+    args = launcher_defaults(mod)
+    assert {r.name for r in mod.budget(args).soft_stop_reserves} == {
+        "stage1_reference_cache_fallback", "beam6_search_pricing_correction"}
+    assert mod.continuation_budget(args).soft_stop_reserves == ()
+
+
+def test_the_continuation_price_is_derived_not_written():
+    """No dollar figure is hard-coded: the numbers come from the same
+    `BudgetSpec.plan()` that prices the full session.
+
+    Cross-check against the maintainer's independent arithmetic: removing the
+    180-minute Stage-1 phase leaves ~904.44 expected minutes, ~$14.92 expected
+    and ~$16.75 hard under the current contingency/recovery formula.
+    """
+    mod = load_launcher()
+    args = launcher_defaults(mod)
+    full = mod.budget(args).plan(price_per_hour=0.99, authorized_usd=23.0484)
+    cont = mod.continuation_budget(args).plan(price_per_hour=0.99,
+                                              authorized_usd=23.0484)
+
+    assert full.expected_minutes - cont.expected_minutes == pytest.approx(180.0)
+    assert cont.expected_minutes == pytest.approx(904.44, abs=0.01)
+    assert cont.expected_usd == pytest.approx(14.92, abs=0.01)
+    assert cont.hard_terminate_usd == pytest.approx(16.75, abs=0.01)
+    # And the full Phase-A price is untouched by any of this.
+    assert full.expected_usd == pytest.approx(17.8933, abs=5e-5)
+    assert full.hard_terminate_usd == pytest.approx(23.0483, abs=5e-5)
+
+
+def test_the_continuation_carries_no_hard_coded_dollar_figure():
+    """A written number would drift from the plan it claims to derive from."""
+    import ast
+
+    src = (REPO / "scripts/pod/autoinit_phase_a_launch.py").read_text()
+    fn = next(n for n in ast.parse(src).body
+              if isinstance(n, ast.FunctionDef) and n.name == "continuation_budget")
+    body = ast.unparse(fn)
+    code = body.split('"""')[-1]
+    for token in ("14.92", "16.75", "904", "usd", "$"):
+        assert token not in code, f"{token!r} is written into the derivation: {code}"
+
+
+def test_the_continuation_is_cheaper_than_the_full_session_by_the_search():
+    """Sanity in the direction that matters: it must cost LESS, and the gap is
+    the search plus the risks the search carries."""
+    mod = load_launcher()
+    args = launcher_defaults(mod)
+    full = mod.budget(args).plan(price_per_hour=0.99, authorized_usd=23.0484)
+    cont = mod.continuation_budget(args).plan(price_per_hour=0.99,
+                                              authorized_usd=23.0484)
+    assert cont.hard_terminate_usd < full.hard_terminate_usd
+    saved = full.hard_terminate_minutes - cont.hard_terminate_minutes
+    # 180 min of search, its 10% contingency, and both stage-1 reserves.
+    assert saved == pytest.approx(180 * 1.10 + 36.2158 + 147.7683, abs=0.01)

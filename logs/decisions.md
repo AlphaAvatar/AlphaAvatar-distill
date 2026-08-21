@@ -5542,3 +5542,91 @@ fail-closed stop. Cumulative **$213.4714** of $234.00, leaving **$20.5286** —
 $2.5198 short of another full attempt. **No Attempt 13 is prepared, granted,
 funded or implied.** Evidence:
 [`autoinit_phase_a_attempt12/`](autoinit_phase_a_attempt12/).
+
+## 2026-08-21 — Stage 1 is a result to import, not work to repeat
+
+**Context.** Attempts 11 and 12 independently produced the same Stage-1 search —
+identical config hash, 43 states, 7 complete leaves, identical five selected ids
+in order — and attempt 12 preserved those five checkpoints off-pod with
+re-verified digests. A third search would cost 203 minutes and add nothing. The
+next execution path is a recovery continuation that begins at Stage 2.
+
+### 1. The Stage-1 → Stage-2 device boundary
+
+Attempt 12 OOMed six seconds after Stage 1 passed: the driver runs the search
+in-process and still held 24.05 GiB when Stage 2 spawned the trainer needing
+17.97 GiB on a 44.39 GiB card.
+
+**What that 24.05 GiB was is a question, not a finding, and the boundary answers
+it rather than assuming.** `InitializationState` carries metadata and checkpoint
+identities, not CUDA models, and PyTorch's caching allocator does not return
+freed blocks to the driver — so a process can hold tens of GiB *reserved* with
+almost nothing *allocated*. `release_to_subprocess` records **allocated,
+reserved and driver-visible free** on both sides, derives its verdict from
+`allocated`, and says so in words: high reserved with low allocated is
+"allocator reservation, not a model leak". Calling it a leak would send the next
+session hunting a bug that is not there.
+
+The headroom contract checks the **driver's** free bytes, not the parent's
+allocator figures, because a sibling process cannot use the parent's cached
+blocks however cheap they look from inside the parent.
+
+**Placed after durability, deliberately.** If the release or the contract fails,
+the five leaves are already off the pod: the cost is a diagnostic, not a
+completed search.
+
+### 2. A strict Stage-1 import, and no deserializer
+
+`import_stage1_result` binds the exact config hash, requires the five selected
+ids **in order** — the order is the ranking — re-identifies every checkpoint from
+local bytes, requires both `artifact_digest` and `single_shard_sha256` to equal
+the Stage-1 record, requires target geometry so `is_complete_leaf` is true for
+the right reason, requires each state's evaluation to be bound to its own
+artifact, rebuilds the control independently from its frozen hash, and feeds
+everything to the same `admit_leaves` a live search feeds.
+
+**There is deliberately no `InitializationState.from_dict`,** and a test asserts
+none appears. The journal is evidence, not a trusted serialization format; a
+permissive loader would turn every recorded line into something a later session
+could be talked into believing.
+
+**The control comes back UNMEASURED, and cannot be otherwise.** Its Stage-1
+evaluation is not in the persisted evidence — no `retained_canonical` row in the
+journal, and `search_result["control"]` carries identity only — because a live
+search measures it on the GPU. A continuation must therefore measure it on the
+suite, which means the teacher and the suite still have to be resident. One
+evaluation against a 203-minute search, but not free, and stated rather than
+discovered on a pod. The admission gate refuses the control until it is measured,
+which is what makes that unskippable.
+
+### 3. The continuation budget, derived
+
+Removing the `stage1_beam_search` phase and both Stage-1-only reserves — the
+beam-6 correction and the reference-cache fallback — from the existing
+`BudgetSpec` yields **904.44 expected minutes, $14.9233 expected, $16.7456
+hard**, reproducing the maintainer's independent arithmetic. No dollar figure is
+written in the derivation, and a test parses the function to prove it: the
+numbers come from the same `plan()` that prices the full session, so the two
+cannot drift. Full Phase-A pricing is unchanged at $17.8933 / $22.7183 /
+$23.0483.
+
+### The orchestration caught what the fast tests could not
+
+The first version of the handoff dropped `found` and then read `found.summary`
+four lines below — a `NameError` **after** a 203-minute search had already
+succeeded, at exactly the point of a boundary added to protect that search.
+Every focused suite passed; only the real Stage-0→5 run reaches that line. A test
+now parses `stage1` and asserts **zero** reads of `found` after the release, so
+restoring the bug fails in 0.25 s rather than 21 minutes.
+
+Two of the new tests were themselves defective and are recorded because the class
+recurs: one mutated `hidden_size` to the value it already held, so it passed
+vacuously; another copied five 1.11 GiB checkpoints into pytest scratch and
+filled the disk, and now uses symlinks.
+
+**Frozen science unchanged:** session `9377a2dc`, science `02be33b9`, recovery
+fingerprint `ab0d8cfd`, tokenizer `7781771a`, Stage-1 deadline 363.9841 min.
+Nothing was rewritten to pretend the session always began at Stage 2.
+
+**No grant, no pod, nothing prepared.** The next decision is a GO/NO-GO for the
+recovery continuation, not for another search.

@@ -1,6 +1,6 @@
 {
   "schema": "aadistill.current_state/v2",
-  "generated_utc": "2026-08-21T07:20:00Z",
+  "generated_utc": "2026-08-21T12:00:00Z",
   "_contract": "The minimal machine-readable CURRENT snapshot: live facts only, no history, no per-attempt detail, no narrative. History lives in logs/decisions.md and the per-run directories; the human view is logs/STATE.md and the two must agree. Ownership: logs/CATALOG.md.",
   "baseline_commit": "f331e49bf304edca7dc311702c36668d544f0f9f",
   "baseline_commit_meaning": "The LAST TESTED IMPLEMENTATION: the commit whose tree produced the latest_verification figures. Deliberately NOT the commit carrying this file -- when a paid launch is prepared, the grant/provenance commit and the authorization-only commit both follow it and neither is separately tested. A reader must be able to tell which commit the suite numbers describe from which commit a pod checks out. Nothing checks this field; it is refreshed by hand.",
@@ -46,9 +46,11 @@
       "pooled_counts@v2",
       "Stage-3 artifacts and thresholds",
       "the operator ledger's declared semantics"
-    ]
+    ],
+    "stage1_runtime_deadline_minutes": 363.9841
   },
   "complete": [
+    "the Stage-1/2 device handoff and the strict Stage-1 import -- see continuation_ready",
     "Phase-A Stage 1 PASSED TWICE with byte-identical results, and attempt 12's five leaves are preserved off-pod -- see phase_a_stage1_result",
     "the tokenizer consumer contract: the trainer declares and verifies its tokenizer source instead of inferring it from student_path",
     "the selected-leaf durability boundary: the five leaves are persisted and re-verified before Stage 2",
@@ -112,11 +114,11 @@
     "the paid device-canary session path: STRATEGICALLY TERMINATED 2026-08-18. Two authorized sessions, $0.1240, zero canary runs; both died in the wrapper's inherited contracts. Its evidence and its generic lesson are kept; no further canary is prepared."
   ],
   "next_starting_point": {
-    "status": "Attempt 12 consumed. STAGE 0 AND STAGE 1 PASSED and, unlike attempt 11, the five selected leaves are preserved off-pod and digest-verified. Stage 2 failed on a CUDA OOM. Nothing is running, billing, authorized or prepared.",
-    "the_open_defect": "the driver holds the in-process search's ~24 GiB when stage 2 spawns the trainer as a subprocess; 44.39 GiB does not fit both. NOT fixed -- the run stopped for review as the grant requires.",
-    "the_ask": "NOTHING is prepared. Two decisions are owed: how stage 1 releases its device memory before stage 2, and a cap decision -- $20.5286 remains against a $23.0484 ceiling.",
-    "process_rule": "'my intended next decision is GO' is not executable permission; a recommendation is not an approval",
-    "reusable": "the five verified leaves mean a future attempt could start from stage 2 rather than re-running a 203-min search -- a maintainer decision, not an assumption"
+    "status": "The $0 continuation implementation is done and mutation-verified: the device handoff, the strict Stage-1 import, frozen science untouched, and a derived continuation budget. Nothing is running or prepared.",
+    "the_ask": "NOTHING is prepared. The next review is a GO/NO-GO for the recovery continuation -- NOT another Phase-A search, which would recompute a result two runs already agree on.",
+    "open_item": "the control must be measured live; its stage-1 evaluation is absent from the persisted evidence",
+    "budget": "cap $234.00, spent $213.4714, remaining $20.5286 -- the continuation's $16.7456 hard fits with $3.78 to spare",
+    "process_rule": "'my intended next decision is GO' is not executable permission; a recommendation is not an approval"
   },
   "read_order": [
     "logs/STATE.md \u2014 the human view of this file",
@@ -127,23 +129,6 @@
     "AGENTS.md \u2014 the binding working contract"
   ],
   "failed_before_the_current_architecture": "Phase A 1-5 $1.6321, 6 $0.3552, 7 $0.3955 (device placement), canary 1 $0.0603 and 2 $0.0637 (inherited contracts). All five classes are closed by autoinit.stage1_device_contract@v1 and the session specification. Detail: logs/decisions.md and the per-run directories.",
-  "stage1_runtime_deadline_minutes": {
-    "total": 363.9841,
-    "base": 180.0,
-    "beam6": 36.2158,
-    "fallback_reserve": 147.7683,
-    "derived_from": "the BudgetPlan that produces the dollar thresholds"
-  },
-  "phase_a_stage1_result": {
-    "states": 43,
-    "leaves_selected": 5,
-    "parameters_each": 596049920,
-    "search_minutes": 180.283,
-    "composite_stage1_baseline": "front 4, NOT selected -- four search-discovered orderings dominate it",
-    "leaf_weights": "PRESERVED off-pod at aad-artifacts/autoinit/phase_a/, 5/5 digest-verified. Attempt 11's were lost with its pod.",
-    "artifact": "logs/autoinit_phase_a_attempt11/search_result.json",
-    "determinism": "attempts 11 and 12, different hosts: identical config_hash, 43 states, 7 leaves, identical selected ids, identical first-invocation depth decision (layer 21, 0.625600, margin 1.529e-03)"
-  },
   "measurement_attempts": "3 launches, $0.4611: $0.0700 setup contract, $0.1834 driver entrypoint, then $0.2077 COMPLETE. Detail: logs/autoinit_measurement_attempt{1,2,3}/",
   "failed_before_attempt_11": "Phase A 8 $0.1900 (a $0 test asserting dev-box state), 9 $0.3400 (unplaced accumulator), 10 $11.4300 (causal-depth scored on the host, unpriced). All three classes closed and CONFIRMED closed by attempt 11 reaching stage 2. Earlier: Phase A 1-7 $2.3828 and two canaries $0.1240. Detail: logs/decisions.md and the per-run directories.",
   "causal_depth_cost": "standalone 12.07 eval/min (attempt 3, cached); INSIDE the search 6.96-10.79 on the fallback path, which fired 4/4. Recorded, NOT repriced: Stage 1 took 180.283 min against the 180.0 base allowance.",
@@ -155,5 +140,15 @@
     "review_units_retained_gib": 23.09,
     "record": "logs/derived_cache_cleanup.json",
     "summary": "14.9107 GiB reclaimed from derived caches, 0 checkpoints deleted; 5.55 GiB then consumed by attempt 12's leaves"
+  },
+  "continuation_ready": {
+    "imports": "attempt 12's five preserved leaves, re-identified from bytes",
+    "budget_expected_usd": 14.9233,
+    "budget_hard_usd": 16.7456,
+    "budget_expected_minutes": 904.44,
+    "derivation": "the Phase-A BudgetSpec minus the stage-1 phase and both stage-1-only reserves; no dollar figure is written",
+    "open_item": "the control comes back UNMEASURED -- its stage-1 evaluation is not in the evidence -- so a continuation must measure it on the suite, which still needs the teacher and suite resident",
+    "not_prepared": "no grant, no authorization, no pod",
+    "stage1_source": "attempt 12: 43 states, 5 selected, byte-identical to attempt 11. logs/autoinit_phase_a_attempt12/"
   }
 }

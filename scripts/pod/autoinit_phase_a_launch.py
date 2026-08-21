@@ -42,6 +42,7 @@ import os
 import shutil
 import subprocess
 import sys
+from dataclasses import replace
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
@@ -449,6 +450,35 @@ def budget(args) -> BudgetSpec:
             Phase("stage1_reference_cache_fallback", args.fallback_reserve_minutes),
             Phase("beam6_search_pricing_correction", args.beam6_correction_minutes)),
         artifact_recovery_reserve_minutes=20.0)
+
+
+def continuation_budget(args) -> BudgetSpec:
+    """The Stage-2-to-5 budget, DERIVED from the full Phase-A one.
+
+    A recovery continuation starting from a verified Stage-1 result no longer
+    owes the search, so three things come out and nothing else moves:
+
+    * the `stage1_beam_search` phase — 180 min of work already done and paid for
+      by attempts 11 and 12, which produced byte-identical results;
+    * the beam-6 pricing correction, which exists only because `SEARCH_MINUTES`
+      was taken from the cost model's beam-4 row;
+    * the reference-cache fallback reserve, which the audit places **entirely
+      inside stage 1**.
+
+    Everything else is retained exactly: the probe training and battery work, the
+    same contingency fraction, the same artifact-recovery reserve, the same step
+    time and its provenance. **No dollar figure is written here** — the numbers
+    come from the same `BudgetSpec.plan()` that prices the full session, so the
+    continuation cannot drift from the thing it is derived from.
+    """
+    full = budget(args)
+    return replace(
+        full,
+        other_phases=tuple(p for p in full.other_phases
+                           if p.name != STAGE1_SEARCH_PHASE),
+        #: Both reserves are Stage-1 risks by construction, and stage 1 is not
+        #: run. Carrying them would price a risk this session cannot take.
+        soft_stop_reserves=())
 
 
 def spec(args) -> SessionSpec:
