@@ -301,12 +301,37 @@ authorized cumulative cap                                    $234.00
     hard ceiling, does not authorize any subsequent attempt, and does
     not authorize spend outside the next explicitly approved session.
     See the caps list above.
-actual cumulative spend                                      $213.4814
+actual cumulative spend                                      $213.7203
     = $194.0530 + $0.1900 attempt 8 + $0.3400 attempt 9
       + $11.4300 attempt 10 + $0.0700 measurement attempt 1
       + $0.1834 measurement attempt 2 + $0.2077 measurement attempt 3
       + $3.2101 Phase-A attempt 11 + $3.7872 Phase-A attempt 12
-      + $0.0100 recovery continuation attempt 1.
+      + $0.0100 recovery continuation attempt 1
+      + $0.2389 recovery continuation attempt 2.
+recovery continuation attempt 2 (L40S, 14.5 min) NO STAGE RAN $  0.2389
+    AUTHORIZED 2026-08-21 as autoinit.recovery_continuation.2026-08-21T2004Z
+    against logs/autoinit_recovery_continuation_attempt2_grant.json
+    (sha256 a29dac6fd120). Ceiling $16.7456, of which $0.2389 was spent.
+    Pod 7hthdteyc25xgx; provider confirms gone; watchdog ended pod_gone.
+    THE RESILIENCE CLOSURE WORKED: the readiness poll that killed attempt 1
+    succeeded, reaching TCP 22 at 3.7 min, and the image identity was
+    confirmed. Every $0 gate passed and the bundle round-tripped.
+    FAILED at LOCAL_ASSET staging: SessionRunner scps each declared local
+    asset with subprocess.run(..., timeout=600), which RAISES. One stage-1
+    leaf is 1.110 GiB = 1192 MB, so fitting the 600 s timeout needs
+    1.99 MB/s sustained. This session's own bundle upload minutes earlier
+    ran at 0.44 MB/s; the recorded dev-box uplink is 0.72 MB/s. One leaf
+    therefore needs 28-45 min against a 10-minute timeout -- 3-4.5x over.
+    It could not have succeeded, and would have repeated four more times.
+    NO $0 GATE COULD SEE IT: selected_leaves_present_gate asks whether the
+    leaves exist and verify LOCALLY, the structural staging test covers
+    SESSION_RELAY_INPUTS (pulled) not LOCAL_ASSETS (pushed), and the pod
+    simulator never scps. Declared, verified, and undeliverable.
+    BOTH TRANSPORTS ARE CLOSED: scp needs 1.99 MB/s against <=0.72 MB/s;
+    the relay has 1.60 GiB headroom against 5.55 GiB of leaves, which is
+    why --stage-leaves-to-relay is off. The five leaves currently have no
+    route to a pod. Not relaunched: the grant is spent and the arithmetic
+    says a rerun fails identically.
 recovery continuation attempt 1 (L40S, 0.7 min) NO STAGE RAN  $  0.0100
     AUTHORIZED 2026-08-21 as autoinit.recovery_continuation.2026-08-21T1642Z
     against logs/autoinit_recovery_continuation_grant.json. Ceiling

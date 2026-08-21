@@ -1,4 +1,4 @@
-**Updated:** 2026-08-22 · branch `main` · recovery continuation attempt 2 is RUNNING on pod `7hthdteyc25xgx`
+**Updated:** 2026-08-22 · branch `main` · attempt 2 fail-closed on leaf staging; the five leaves have no route to a pod
 
 # Current state
 
@@ -6,17 +6,28 @@ The **human view of [`current_state.json`](current_state.json)**. That file owns
 the live facts; this one says the same things in prose and adds nothing it does
 not carry. If the two disagree, a structural test fails.
 
-**RECOVERY CONTINUATION ATTEMPT 2 IS RUNNING AND BILLING.** Pod
-`7hthdteyc25xgx`, L40S at $0.99/h, launched 2026-08-21T20:06:31Z under
-`autoinit.recovery_continuation.2026-08-21T2004Z` — expected 904 min / $14.9233,
-soft stop $16.4156, hard terminate $16.7456 = 1014.9 min. Watchdog detached and
-independent. Live log:
-`/home/ecs-user/aad-scratch/rc2_3e3f2295/launcher.out`.
+**Nothing is running. Nothing is billing. Nothing is authorized. Nothing is
+prepared for launch.**
 
-**One session is authorized; nothing further is, and nothing is prepared for
-launch.** No follow-on is reachable from this launcher, the bundle is launched
-rather than staged, and attempt 1's grant and authorization remain spent and were
-not reused.
+**Recovery continuation attempt 2 ran on 2026-08-21 and bought nothing: $0.2389,
+no stage executed.** Pod `7hthdteyc25xgx`, 14.5 min, deleted with provider
+confirmation. **The provider-resilience closure worked** — the readiness poll
+that killed attempt 1 reached TCP 22 in 3.7 min and the image identity was
+confirmed. It then failed staging the first Stage-1 leaf, and the reason is
+arithmetic rather than luck:
+
+> `SessionRunner` scps each declared `LOCAL_ASSET` with
+> `subprocess.run(…, timeout=600)`, which **raises**. One leaf is **1.110 GiB**,
+> so fitting 600 s needs **1.99 MB/s sustained**. This session's own bundle
+> upload minutes earlier ran at **0.44 MB/s**; the recorded dev-box uplink is
+> **0.72 MB/s**. One leaf needs 28–45 min against a 10-minute timeout — over by
+> **3–4.5×** — and four more leaves would have followed.
+
+**The five leaves currently have no route to a pod.** scp is infeasible above;
+the relay alternative is off because it reported **1.60 GiB** of headroom against
+**5.55 GiB** of leaves. This is a transport decision for the maintainer, not
+something to route around. Full record:
+[`autoinit_recovery_continuation_attempt2/`](autoinit_recovery_continuation_attempt2/).
 
 **Measurement Attempt 3 COMPLETED on 2026-08-20 for $0.2077.** `ALL_DONE`, both
 fail-closed conditions passed, pod deleted with provider confirmation. The
@@ -33,9 +44,9 @@ selection result.**
 ## Budget
 
 ```
-cumulative spend   $213.4814
+cumulative spend   $213.7203
 approved cap       $234.00    RAISED AND APPROVED 2026-08-21
-remaining          $20.5186   $2.5298 SHORT of one more full attempt
+remaining          $20.2797   $2.7687 SHORT of one more full attempt
 
 ```
 

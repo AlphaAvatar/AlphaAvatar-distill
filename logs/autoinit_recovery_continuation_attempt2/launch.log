@@ -1,0 +1,17 @@
+[20:06:24] budget: expected 904 min $14.92 · soft $16.42 · hard $16.75 (authorized $16.75)
+[20:06:24] NVIDIA L40S $0.99/h, stock High
+[20:06:24] session commit 3e3f22955af4 verified: harness digests to e5a7183a0cf1…, carries the authorization and only logs/autoinit_recovery_continuation_authorization.json differs from the authorized base
+[20:06:24] frozen science plan 02be33b9a7a8… matches the authorization
+[20:06:24] continuation harness e5a7183a0cf1… over 22 files, search excluded
+[20:06:28] all 5 preserved stage-1 leaves verify locally
+[20:06:30] precheck OK: 10 relay inputs, 7 local assets
+[20:06:31] created 7hthdteyc25xgx at $0.99/h
+[20:06:31] watchdog detached — hard 1015 min = $16.75
+[20:07:25]   starting (60s) — $0.01
+[20:08:28]   starting (120s) — $0.03
+[20:09:32]   starting (180s) — $0.05
+[20:10:14] TCP 22 at 64.247.206.216:10145 after 3.7 min
+[20:10:17] draw 1: ssh reachable — $0.06
+[20:20:49] LAUNCHER ERROR: TimeoutExpired: Command '['scp', '-P', '10145', '-o', 'StrictHostKeyChecking=no', '-o', 'UserKnownHostsFile=/dev/null', '-r', '/home/ecs-user/aad-artifacts/autoinit/phase_a/cca699c93f34dad7e94a5d13a25b2bc2', 'root@64.247.206.216:/workspace/assets/cca699c93f34dad7e94a5d13a25b2bc2']' timed out after 600 seconds
+[20:20:49] deleting pod (launcher error)
+[20:21:00] pod deleted — 14.5 min, $0.24; provider confirms gone: True

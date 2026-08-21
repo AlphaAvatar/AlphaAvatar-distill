@@ -5,28 +5,25 @@
   "baseline_commit": "16a1685142fe4d4864d43b4351f89100a43f355c",
   "baseline_commit_meaning": "The LAST TESTED IMPLEMENTATION: the commit whose tree produced the latest_verification figures. Deliberately NOT the commit carrying this file -- the grant/provenance and authorization-only commits follow it and neither is separately tested. Refreshed by hand; nothing checks it.",
   "running": {
-    "paid_compute": true,
-    "pods": 1,
-    "launchers": 1,
-    "pod_id": "7hthdteyc25xgx",
-    "what": "recovery continuation attempt 2, from 2026-08-21T20:06:31Z, L40S $0.99/h, hard 1014.9 min = $16.7456",
-    "scratch": "/home/ecs-user/aad-scratch/rc2_3e3f2295"
+    "paid_compute": false,
+    "pods": 0,
+    "launchers": 0
   },
   "authorized": {
-    "any": true,
-    "note": "autoinit.recovery_continuation.2026-08-21T2004Z: base b2f0dc5, commit 3e3f2295, harness e5a7183a, hard/per-launch $16.7456. ONE continuation, no follow-on. Attempt 1's grant and authorization stay spent."
+    "any": false,
+    "note": "every authorization issued is consumed, including both continuation attempts; their lineage gates refuse the current HEAD by construction. A new paid action needs a new grant and artifact."
   },
   "prepared_launch": {
     "any": false,
-    "bundles": 1
+    "bundles": 0
   },
   "budget": {
-    "cumulative_spend_usd": 213.4814,
+    "cumulative_spend_usd": 213.7203,
     "authorized_cap_usd": 234.0,
-    "remaining_usd": 20.5186,
+    "remaining_usd": 20.2797,
     "remaining_is_not_permission": true,
     "ledger": "logs/BUDGET_LEDGER.md",
-    "headroom_note": "$20.5186 does NOT cover another full Phase-A attempt ($23.0484). It does cover one continuation ($16.7456) -- but balance is not authorization."
+    "headroom_note": "$20.2797 does NOT cover another full Phase-A attempt ($23.0484). It covers one continuation ($16.7456) -- but balance is not authorization, and the leaves have no transport."
   },
   "frozen": {
     "science_plan_hash": "02be33b9a7a8e26bc8bfb75795351e8cdc9ffd441b47066cc81887cfc511b55c",
@@ -53,18 +50,13 @@
   },
   "complete": [
     "control-plane resilience: all three SessionRunner reads; unconfirmable image identity fails closed",
-    "the Stage-1/2 device handoff and the strict Stage-1 import -- see continuation_ready",
     "Phase-A Stage 1 PASSED TWICE, byte-identical, five leaves preserved off-pod -- see continuation_ready",
     "the tokenizer consumer contract: the trainer declares and verifies its tokenizer source instead of inferring it from student_path",
     "the selected-leaf durability boundary: the five leaves are persisted and re-verified before Stage 2",
     "Stage 3 (both permanent controls, thresholds materialized)",
     "the Phase-A harness, stages 0-5 executing for real at $0",
     "the Stage-1 device audit (autoinit.stage1_device_contract@v1)",
-    "the bounded Stage-1 device-allocation audit: 15 factories, 3 fixed",
-    "Stage 0 on hardware, passed five times (attempt 10 attested interval 0.011695, floor 0.3000, plan 02be33b9)",
-    "the Stage-1 device fixes, confirmed on CUDA by attempt 10",
-    "the causal-depth runtime repair: accelerator scoring per E8a, cgroup-aware CPU budget, fail-closed in-expansion deadline",
-    "the Stage-1 runtime deadline derived from the priced envelope"
+    "Stage 0 on hardware, passed five times (attempt 10 attested interval 0.011695, floor 0.3000, plan 02be33b9)"
   ],
   "latest_verification": {
     "utc": "2026-08-22T03:20:00Z",
@@ -76,21 +68,21 @@
   },
   "failed": [
     {
+      "run": "recovery continuation 2",
+      "usd": 0.2389,
+      "where": "LOCAL_ASSET staging, 10.5 min into the pod; no stage ran",
+      "cause": "scp of one 1.110 GiB stage-1 leaf hit the hard-coded subprocess timeout=600, which RAISES. Fitting 600 s needs 1.99 MB/s; the dev box was 0.44 MB/s on this session's own bundle upload and is recorded at 0.72 MB/s. Impossible by 3-4.5x, and would have repeated 4 more times. The resilience closure WORKED -- readiness and image identity both succeeded",
+      "evidence": "logs/autoinit_recovery_continuation_attempt2/"
+    },
+    {
       "run": "recovery continuation 1",
       "usd": 0.01,
       "where": "launcher readiness poll, 27 s after pod creation; no stage ran",
-      "cause": "wait_endpoint called provider._gql uncaught against an endpoint measured at 25% transport failure. Every gate PASSED. CLOSED 2026-08-22 at all three sites",
+      "cause": "wait_endpoint called provider._gql uncaught against an endpoint at 25% transport failure. Every gate PASSED. CLOSED 2026-08-22 at all three sites",
       "evidence": "logs/autoinit_recovery_continuation_attempt1/"
-    },
-    {
-      "run": "Phase A 12",
-      "usd": 3.7872,
-      "where": "stage 2, first rung-1 probe",
-      "cause": "CUDA OOM: the driver holds the search's ~24.05 GiB when stage 2 spawns a trainer needing ~17.97 GiB on a 44.39 GiB L40S. Structural. Stages 0-1 PASSED, five leaves preserved off-pod",
-      "evidence": "logs/autoinit_phase_a_attempt12/"
     }
   ],
-  "failure_pattern": "6/7/9 device placement; 8 a $0 path asserting dev-box state; 10 unpriced runtime cost; measurement 1 a setup contract, 2 an untested entrypoint; continuation 1 an uncaught transport call. logs/decisions.md",
+  "failure_pattern": "6/7/9 device placement; 8 a $0 path asserting dev-box state; 10 unpriced runtime cost; measurement 1 a setup contract, 2 an untested entrypoint; continuation 1 an uncaught transport call, 2 an undeliverable declared asset. logs/decisions.md",
   "canonical_infrastructure": [
     "provider.observe() applies get()'s transient classification to ANY query: never raises, and a declined answer is unknown, never a negative answer. A test fails on any raw _gql in session_runner.py",
     "operational identity (session_id, schema, status_path, run_log_path, authorization_path, driver_job_id) is unique per session; SCIENTIFIC identity is not -- the continuation shares the frozen Phase-A plan_hash on purpose, asserted not merely allowed",
@@ -123,9 +115,9 @@
     "the paid device-canary session path: STRATEGICALLY TERMINATED 2026-08-18. Two authorized sessions, $0.1240, zero canary runs; both died in the wrapper's inherited contracts. Its evidence and its generic lesson are kept; no further canary is prepared."
   ],
   "next_starting_point": {
-    "status": "All three SessionRunner control-plane reads are transient-tolerant; unconfirmable image identity fails closed before the driver. The fix moved the continuation harness f2ea4332 -> e5a7183a, so the spent authorization refuses it. Nothing is running, billing or authorized.",
-    "the_ask": "GO/NO-GO for Recovery Continuation Attempt 2 under the derived $16.7456 ceiling. Needs a NEW one-use grant: the previous is spent and its harness moved.",
-    "budget": "cap $234.00, spent $213.4814, remaining $20.5186; $16.7456 still fits. Remaining balance is NOT authorization."
+    "status": "Attempt 2 fail-closed on local-asset staging, $0.2389, no stage ran, pod provider-confirmed gone. THE FIVE STAGE-1 LEAVES HAVE NO ROUTE TO A POD: scp needs 1.99 MB/s against <=0.72 MB/s observed, and the relay has 1.60 GiB headroom against 5.55 GiB. Nothing is running, billing, authorized or prepared.",
+    "the_ask": "A maintainer decision on leaf TRANSPORT before any further continuation. This is not a retry: the arithmetic says a rerun fails identically.",
+    "budget": "cap $234.00, spent $213.7203, remaining $20.2797. Balance is not authorization."
   },
   "read_order": [
     "logs/STATE.md \u2014 the human view of this file",
@@ -149,13 +141,12 @@
     "summary": "14.9107 GiB reclaimed from derived caches, 0 checkpoints deleted; 5.55 GiB then consumed by attempt 12's leaves"
   },
   "continuation_ready": {
-    "imports": "attempt 12's five preserved leaves, re-identified from bytes",
     "budget_expected_usd": 14.9233,
     "budget_hard_usd": 16.7456,
-    "budget_expected_minutes": 904.44,
     "not_prepared": "no grant, no authorization, no pod",
     "stage1_source": "attempt 12: 43 states, 5 selected, byte-identical to attempt 11",
-    "authorization": "its OWN schema (recovery_continuation_authorization/v1) and 22-file harness digest: the Phase-A set minus the unreachable search, plus the continuation launcher, driver, stage1_import, device_handoff, leaf_durability. Digest moved f2ea4332 -> e5a7183a with the resilience fix; attempt 1's artifact now refuses it",
-    "no_search": "structural: no phase_a_search import, no delegation, no stage choice that searches"
+    "blocked_on": "LEAF TRANSPORT. scp needs 1.99 MB/s per 1.110 GiB leaf to fit the hard-coded 600 s asset timeout; observed <=0.72 MB/s. The relay has 1.60 GiB headroom against 5.55 GiB. Both routes closed",
+    "authorization": "own schema recovery_continuation_authorization/v1, 22-file harness e5a7183a (Phase-A set minus the unreachable search, plus the continuation executables). Ceiling derived from continuation_budget()",
+    "imports": "attempt 12's five preserved leaves, re-identified from bytes; no search is reachable"
   }
 }
