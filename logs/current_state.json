@@ -3,7 +3,7 @@
   "generated_utc": "2026-08-21T16:00:00Z",
   "_contract": "The minimal machine-readable CURRENT snapshot: live facts only, no history, no per-attempt detail, no narrative. History lives in logs/decisions.md and the per-run directories; the human view is logs/STATE.md and the two must agree. Ownership: logs/CATALOG.md.",
   "baseline_commit": "03c25745c9e456eb268990db31f3eda5416fbcef",
-  "baseline_commit_meaning": "The LAST TESTED IMPLEMENTATION: the commit whose tree produced the latest_verification figures. Deliberately NOT the commit carrying this file -- the grant/provenance and authorization-only commits both follow it and neither is separately tested, so a reader can tell which commit the suite numbers describe from which a pod checks out. Refreshed by hand; nothing checks it.",
+  "baseline_commit_meaning": "The LAST TESTED IMPLEMENTATION: the commit whose tree produced the latest_verification figures. Deliberately NOT the commit carrying this file -- the grant/provenance and authorization-only commits follow it and neither is separately tested. Refreshed by hand; nothing checks it.",
   "running": {
     "paid_compute": false,
     "pods": 0,
@@ -49,6 +49,7 @@
     "stage1_runtime_deadline_minutes": 363.9841
   },
   "complete": [
+    "control-plane resilience: all three SessionRunner reads; unconfirmable image identity fails closed before setup",
     "the continuation's authorization identity -- see continuation_ready.authorization",
     "the Stage-1/2 device handoff and the strict Stage-1 import -- see continuation_ready",
     "Phase-A Stage 1 PASSED TWICE, byte-identical, five leaves preserved off-pod -- see continuation_ready",
@@ -64,10 +65,10 @@
     "the Stage-1 runtime deadline derived from the priced envelope"
   ],
   "latest_verification": {
-    "utc": "2026-08-22T00:20:00Z",
-    "after": "the continuation's own authorization type, harness digest and issuer, plus three pod-side consumers still wired to the Phase-A artifact",
-    "full_suite": "2098 passed, 11 skipped, 0 errors in 18:48",
-    "pod_simulator": "2057 passed, 22 skipped; artifact tree restored EXACTLY (c1726a62, 1168 entries)",
+    "utc": "2026-08-22T02:10:00Z",
+    "after": "the control-plane resilience closure: all three SessionRunner _gql sites",
+    "full_suite": "2124 passed, 11 skipped, 0 errors in 18:58",
+    "pod_simulator": "2083 passed, 22 skipped; artifact tree restored EXACTLY (c1726a62)",
     "frozen_asset_verifier": "passed, no problems; NOT weakened or rescoped",
     "scope": "CPU only, repo .venv (transformers 5.13.1); no checkpoint loaded, no metric measured, no GPU used"
   },
@@ -76,7 +77,7 @@
       "run": "recovery continuation 1",
       "usd": 0.01,
       "where": "launcher readiness poll, 27 s after pod creation; no stage ran",
-      "cause": "wait_endpoint calls provider._gql directly, bypassing provider.get ('Never raises'); <=90 polls against an endpoint measured at 25% transport failure. Every pre-provider gate PASSED. Relaunching unchanged would repeat",
+      "cause": "wait_endpoint called provider._gql uncaught; <=90 polls against an endpoint measured at 25% transport failure. Every gate PASSED. CLOSED 2026-08-22",
       "evidence": "logs/autoinit_recovery_continuation_attempt1/"
     },
     {
@@ -87,8 +88,9 @@
       "evidence": "logs/autoinit_phase_a_attempt12/"
     }
   ],
-  "failure_pattern": "6/7/9 device placement; 8 a $0 path asserting dev-box state; 10 unpriced runtime cost; measurement 1 a setup contract, 2 an untested entrypoint; continuation 1 an uncaught transport error. Detail: logs/decisions.md",
+  "failure_pattern": "6/7/9 device placement; 8 a $0 path asserting dev-box state; 10 unpriced runtime cost; measurement 1 a setup contract, 2 an untested entrypoint; continuation 1 an uncaught transport call. Detail: logs/decisions.md",
   "canonical_infrastructure": [
+    "provider.observe() applies get()'s transient classification to ANY query: never raises, and a declined answer is unknown, never a negative answer. A test fails on any raw _gql in session_runner.py",
     "one immutable SessionSpec per session, one runner, no inheritance, no module-global retargeting",
     "the shared pod setup is manifest-driven on BOTH sides: it installs and stages only what a session declares, and names no asset, relay path, destination or digest of its own",
     "RelayInput carries source, destination, digest and mirror; dest=None means only 'the driver stages this'",
@@ -118,10 +120,9 @@
     "the paid device-canary session path: STRATEGICALLY TERMINATED 2026-08-18. Two authorized sessions, $0.1240, zero canary runs; both died in the wrapper's inherited contracts. Its evidence and its generic lesson are kept; no further canary is prepared."
   ],
   "next_starting_point": {
-    "status": "The continuation launched, passed every gate, created a pod and died 27 s later in the launcher's readiness poll. $0.01, no stage ran, no science changed. Nothing is running, billing, authorized or prepared.",
-    "the_ask": "A one-line tolerance fix in session_runner.wait_endpoint (proposed, NOT applied) and a NEW one-use grant: the previous grant is single-issuance, and fixing the launcher moves the harness digest, invalidating the spent authorization by design.",
-    "budget": "cap $234.00, spent $213.4814, remaining $20.5186; $16.7456 still fits. Remaining balance is NOT authorization.",
-    "process_rule": "remaining balance is not permission; a spent single-issuance grant cannot fund a second artifact"
+    "status": "All three SessionRunner control-plane reads are transient-tolerant; unconfirmable image identity fails closed before the driver. The fix moved the continuation harness f2ea4332 -> e5a7183a, so the spent authorization refuses it. Nothing is running, billing or authorized.",
+    "the_ask": "GO/NO-GO for Recovery Continuation Attempt 2 under the same derived $16.7456 ceiling. It needs a NEW one-use grant: the previous one is spent and the harness it bound has changed.",
+    "budget": "cap $234.00, spent $213.4814, remaining $20.5186; $16.7456 still fits. Remaining balance is NOT authorization."
   },
   "read_order": [
     "logs/STATE.md \u2014 the human view of this file",
@@ -152,7 +153,7 @@
     "not_prepared": "no grant, no authorization, no pod",
     "stage1_source": "attempt 12: 43 states, 5 selected, byte-identical to attempt 11. logs/autoinit_phase_a_attempt12/",
     "search_unreachable": "structural: no phase_a_search import, no delegation to the searching stage1, no stage choice that searches",
-    "authorization": "its OWN schema (recovery_continuation_authorization/v1) and harness digest over 22 files: the Phase-A set minus the unreachable search, plus the continuation launcher, driver, stage1_import, device_handoff, leaf_durability. Ceiling derived from continuation_budget()",
+    "authorization": "its OWN schema (recovery_continuation_authorization/v1) and harness digest over 22 files: the Phase-A set minus the unreachable search, plus the continuation launcher, driver, stage1_import, device_handoff, leaf_durability. Ceiling derived from continuation_budget(). Digest moved f2ea4332 -> e5a7183a with the resilience fix, so attempt 1's artifact refuses it",
     "ran": "attempt 1 launched 2026-08-21, $0.01, no stage ran -- see logs/autoinit_recovery_continuation_attempt1/"
   }
 }

@@ -57,6 +57,17 @@ PROBE_COMMAND = (
 )
 
 
+class ImageIdentityUnavailable(RuntimeError):
+    """The provider would not confirm what image the pod is running.
+
+    Raised, not defaulted. Every artifact this project produces records the
+    image it was produced under; continuing with the image we *asked for*, when
+    the control plane will not say what is actually running, would put an
+    unverified identity into a reproducibility record. The session tears down
+    before the driver starts instead.
+    """
+
+
 def parse_setup_probe(stdout: str) -> dict:
     """Read the probe by LABEL, never by line position (see e8b: a $0.19 misread)."""
     out = {"setup_done": "0", "host_cold": "0", "setup_rc": "", "tail": ""}
@@ -181,11 +192,40 @@ class SessionRunner:
         return self.check_gpu_offered()
 
     def check_gpu_offered(self) -> bool:
-        """Is the GPU offered at or below the priced rate?"""
-        d = self.provider._gql(
-            'query { gpuTypes(input:{id:"%s"}) { id securePrice '
-            'lowestPrice(input:{gpuCount:1}) { stockStatus } } }' % self.a.gpu)
-        rows = (d.get("data") or {}).get("gpuTypes") or []
+        """Is the GPU offered at or below the priced rate?
+
+        Entirely at `$0`: this runs before `create()`, so every outcome here is
+        free and **no outcome may create a pod**. A transient control-plane
+        failure used to propagate out of `_gql` and through the launcher; it now
+        retries on the launcher's existing pod-acquisition budget
+        (`--create-attempts` × `--create-retry-seconds`, the knobs that already
+        govern "keep trying to get a pod") and then aborts cleanly.
+
+        Aborting is safe precisely because nothing is billing yet. The one thing
+        that must not happen is proceeding to `create()` on an unpriced GPU.
+        """
+        obs = None
+        for attempt in range(1, self.a.create_attempts + 1):
+            obs = self.provider.observe(
+                'query { gpuTypes(input:{id:"%s"}) { id securePrice '
+                'lowestPrice(input:{gpuCount:1}) { stockStatus } } }' % self.a.gpu)
+            if obs.ok:
+                break
+            self.ev.setdefault("control_plane_retries", []).append(
+                {"where": "check_gpu_offered", "attempt": attempt,
+                 "error": obs.error, "billing": False})
+            self.say(f"  price query failed ({obs.error}) — attempt "
+                     f"{attempt}/{self.a.create_attempts}, still at $0")
+            if attempt < self.a.create_attempts:
+                time.sleep(self.a.create_retry_seconds)
+        if obs is None or not obs.ok:
+            # Unknown, not "not offered". Either way no pod exists and none is
+            # created; the launcher stops here rather than guessing a price.
+            self.say(f"ABORT: cannot price {self.a.gpu} — the control plane did "
+                     f"not answer ({obs.error if obs else 'no attempt'}). "
+                     "No pod was created.")
+            return False
+        rows = (obs.data or {}).get("gpuTypes") or []
         if not rows:
             self.say(f"ABORT: {self.a.gpu} not offered")
             return False
@@ -311,14 +351,38 @@ class SessionRunner:
                  f"= ${self.plan.hard_terminate_usd:.2f}")
         return journal
 
-    def wait_endpoint(self):
-        deadline = time.time() + self.a.startup_limit_min * 60
+    def wait_endpoint(self, deadline: float | None = None):
+        """Poll for SSH until the startup deadline. **The pod is billing here.**
+
+        A failed observation is **unknown state**, not evidence that the pod has
+        no ports and certainly not that it is gone. Recovery-continuation
+        attempt 1 died on the first such blip, 27 s into a billing pod, against
+        a control plane measured at 25% transport failure — where surviving even
+        five of these polls is ~24% likely.
+
+        The deadline is the caller's when given, so one `startup_limit_min`
+        bounds every startup observation rather than each getting a fresh copy
+        of it.
+        """
+        if deadline is None:
+            deadline = time.time() + self.a.startup_limit_min * 60
         i = 0
+        transient = 0
         while time.time() < deadline:
-            d = self.provider._gql(
+            obs = self.provider.observe(
                 'query { pod(input:{podId:"%s"}) { runtime { ports '
                 '{ ip publicPort privatePort type } } } }' % self.pod_id)
-            rt = ((d.get("data") or {}).get("pod") or {}).get("runtime")
+            if not obs.ok:
+                transient += 1
+                self.ev.setdefault("control_plane_retries", []).append(
+                    {"where": "wait_endpoint", "attempt": transient,
+                     "error": obs.error, "billing": True})
+                if transient in (1, 10) or transient % 30 == 0:
+                    self.say(f"  control plane did not answer ({obs.error}) — "
+                             f"{transient} so far, still waiting for SSH")
+                time.sleep(10)
+                continue
+            rt = ((obs.data or {}).get("pod") or {}).get("runtime")
             for p in (rt or {}).get("ports") or []:
                 if p.get("privatePort") == 22 and p.get("type") == "tcp":
                     self.say(f"TCP 22 at {p['ip']}:{p['publicPort']} after "
@@ -330,13 +394,50 @@ class SessionRunner:
             time.sleep(10)
         return None
 
-    def read_image_digest(self, target: SSHTarget) -> str:
-        """The image the pod is really running, from the provider, not the arg."""
-        d = self.provider._gql(
-            'query { pod(input:{podId:"%s"}) { imageName machine { podHostId } } }'
-            % self.pod_id)
-        pod = ((d.get("data") or {}).get("pod") or {})
-        name = pod.get("imageName") or self.a.image
+    def read_image_digest(self, target: SSHTarget,
+                          deadline: float | None = None) -> str:
+        """The image the pod is really running, from the provider, not the arg.
+
+        **The pod is billing here too**, which is why this needed the same
+        tolerance as the endpoint poll: the blip that killed attempt 1 in
+        `wait_endpoint` would otherwise have killed the next session one step
+        later, after SSH was already up.
+
+        It retries under the caller's startup deadline and then **fails closed**.
+        It used to fall back to `self.a.image` — the argument — which is exactly
+        the unverified identity this method's own docstring says it is not. An
+        image the provider will not confirm is not an image identity, and the
+        driver must not start against one.
+        """
+        if deadline is None:
+            deadline = time.time() + self.a.startup_limit_min * 60
+        obs = None
+        attempt = 0
+        while time.time() < deadline:
+            obs = self.provider.observe(
+                'query { pod(input:{podId:"%s"}) { imageName machine '
+                '{ podHostId } } }' % self.pod_id)
+            if obs.ok:
+                break
+            attempt += 1
+            self.ev.setdefault("control_plane_retries", []).append(
+                {"where": "read_image_digest", "attempt": attempt,
+                 "error": obs.error, "billing": True})
+            if attempt in (1, 10) or attempt % 30 == 0:
+                self.say(f"  control plane did not answer for the image "
+                         f"identity ({obs.error}) — {attempt} so far")
+            time.sleep(10)
+        if obs is None or not obs.ok:
+            raise ImageIdentityUnavailable(
+                f"the control plane never confirmed the image for {self.pod_id} "
+                f"within the startup bound ({obs.error if obs else 'no attempt'})")
+        pod = ((obs.data or {}).get("pod") or {})
+        name = pod.get("imageName")
+        if not name:
+            raise ImageIdentityUnavailable(
+                f"the provider reports no imageName for {self.pod_id}; the "
+                "requested --image is what we asked for, not what is running, "
+                "and cannot stand in for it")
         rc = target.run(
             "cat /etc/podinfo/image_digest 2>/dev/null || "
             "nvidia-smi --query-gpu=driver_version --format=csv,noheader", timeout=60)
@@ -348,7 +449,12 @@ class SessionRunner:
 
     # -- 4. setup ----------------------------------------------------------
     def setup_on_draw(self, draw: int) -> str:
-        ep = self.wait_endpoint()
+        # ONE startup bound for every control-plane observation this draw makes.
+        # `wait_endpoint` and `read_image_digest` both poll a billing pod, and
+        # giving each its own fresh `startup_limit_min` would silently double
+        # the window the operator configured.
+        startup_deadline = time.time() + self.a.startup_limit_min * 60
+        ep = self.wait_endpoint(startup_deadline)
         if not ep:
             return "no_endpoint"
         host, port = ep
@@ -381,7 +487,15 @@ class SessionRunner:
                                   / "scripts/pod/autoinit_preflight_setup.sh"),
                               f"root@{host}:{WS}/"], capture_output=True, timeout=180)
 
-        self.image_digest = self.read_image_digest(target)
+        try:
+            self.image_digest = self.read_image_digest(target, startup_deadline)
+        except ImageIdentityUnavailable as exc:
+            # Fail closed BEFORE setup runs, so no driver ever starts against an
+            # image nobody can name. Deliberately not a redrawable outcome: the
+            # control plane, not this host, is what did not answer.
+            self.ev["image_identity_error"] = str(exc)
+            self.say(f"draw {draw}: {exc}")
+            return "no_image_identity"
         self.say(f"draw {draw}: image identity {self.image_digest}")
         self.say(f"draw {draw}: running setup")
         env = self.spec.setup_environment(session_commit=self.a.session_commit,

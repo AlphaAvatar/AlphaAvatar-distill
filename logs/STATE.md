@@ -1,4 +1,4 @@
-**Updated:** 2026-08-22 · branch `main` · the continuation launched, passed every gate, and died in the launcher's readiness poll for $0.01
+**Updated:** 2026-08-22 · branch `main` · every launcher control-plane read is now transient-tolerant; the spent authorization correctly refuses the fixed harness
 
 # Current state
 
@@ -79,9 +79,9 @@ and issuer, and closing the three **pod-side** consumers still wired to the
 Phase-A artifact. CPU only — no checkpoint loaded, no metric measured, no GPU
 used:
 
-* full suite **2098 passed, 11 skipped, 0 errors** in 18:48.
-* pod simulator **2057 passed, 22 skipped**; artifact tree restored **exactly** —
-  1168 entries, listing hash `c1726a62…` before and after.
+* full suite **2124 passed, 11 skipped, 0 errors** in 18:58.
+* pod simulator **2083 passed, 22 skipped**; artifact tree restored **exactly** —
+  listing hash `c1726a62…` before and after.
 * frozen-asset verifier **passed**, and was **not** weakened or rescoped.
 * **13 mutations**, each a passing state made to fail: the four executables the
   new digest must cover, the search whose identity it must *not* follow, the
@@ -201,6 +201,47 @@ Blast radius is bounded. Three `_gql` sites are uncaught, all pre-driver:
 `read_image_digest` (1). **The 15-hour main poll uses `get()`** and is not
 exposed.
 
+### Closed — all three sites, not only the one that failed
+
+`SessionRunner` had **three** direct `provider._gql()` calls, and two of them run
+while a pod is billing. Fixing only the endpoint poll would have moved the same
+failure one step later, into `read_image_digest()`, after SSH was already up.
+
+The classification now lives in one place. `provider.TRANSIENT_TRANSPORT` names
+what `get()` has always caught — `URLError`, `OSError`, `ValueError`
+(`JSONDecodeError` is a truncated body), `TimeoutError` — and
+`provider.observe()` applies it to *any* query, returning an `Observation` that
+**never raises** and reports a declined answer as **unknown**, never as "no".
+
+| site | billing? | behaviour now |
+| --- | --- | --- |
+| `check_gpu_offered` | no, `$0` | retries on the existing `--create-attempts` × `--create-retry-seconds`, then aborts cleanly. **No pod is created and nothing propagates through the launcher.** An unanswered price query is unknown, not "GPU not offered" |
+| `wait_endpoint` | **yes** | keeps polling under the **caller's** `startup_limit_min` deadline. A failed observation costs exactly one poll interval and is never read as no-ports or as gone |
+| `read_image_digest` | **yes** | retries under the *same* deadline, then **fails closed** with `ImageIdentityUnavailable` → `no_image_identity` → teardown before setup runs. It no longer falls back to `self.a.image`, which is what we *asked for*, not what is running |
+
+`setup_on_draw` now owns **one** startup deadline for both billing observations,
+so the operator's `startup_limit_min` cannot silently cover two windows. No new
+timeout constant was added and no deadline value changed.
+
+**`no_image_identity` is deliberately not redrawable**: the control plane failed,
+not the host, so redrawing onto another machine would just pay again for the same
+unanswered question.
+
+**14 mutations.** One initially *passed* and is worth naming: deleting the
+`continue` after a failed observation still loops and still recovers, so every
+outcome-level assertion held — but the failure then falls into the port scan with
+no data, sleeps a **second** time and advances the progress counter, spending the
+startup deadline at twice the intended rate. The tests now pin the sleep
+sequence, not just the outcome.
+
+**The class cannot come back quietly.** A test walks `session_runner.py`'s syntax
+tree and fails on **any** `_gql` attribute access, so a future single-shot in a
+paid path — precisely attempt 1 — breaks the suite instead of a pod.
+
+**This invalidates the spent authorization, by design.** The continuation harness
+digest moved `f2ea4332…` → `e5a7183a…`, and the consumed artifact now refuses it.
+That is the mechanism working, not a problem to route around.
+
 ### Why this stopped instead of retrying
 
 The grant says *"Consumed by exactly one issuance."* Fixing the launcher moves
@@ -296,9 +337,9 @@ Cap **$234.00**, spent **$213.4814**, remaining **$20.5186** — attempt 1 cost
 **$0.01**. A further continuation's `$16.7456` still fits with **$3.77** to
 spare. No cap increase requested; **remaining balance is not authorization**.
 
-**The next review is a GO/NO-GO for the `wait_endpoint` tolerance fix plus a NEW
-one-use grant for one more recovery continuation under the derived `$16.7456`
-ceiling — not another Phase-A search.**
+**The next review is a GO/NO-GO for Recovery Continuation Attempt 2 under the
+same derived `$16.7456` ceiling. It needs a NEW one-use grant: the previous one
+is spent, and the fix moved the harness it was bound to.**
 
 **Process rule, standing:** helpers existing is not the same as the path using
 them, and "my intended next decision is GO" is not executable permission.

@@ -55,6 +55,43 @@ USER_AGENT = "aadistill-watchdog/1.0 (+https://github.com/AlphaAvatar/AlphaAvata
 # these thresholds are denominated in — has stopped.
 GONE_STATUSES = frozenset({"TERMINATED", "EXITED", "DEAD"})
 
+#: What counts as "the control plane did not answer", as opposed to "it answered
+#: and the answer is no". Named once and used by every caller, because the whole
+#: failure mode is one caller classifying differently from another.
+#:
+#: `URLError` covers the TLS and connection-reset family; `OSError` its parent,
+#: for a socket that dies without a URL wrapper; `ValueError` covers
+#: `JSONDecodeError`, which is a truncated body and therefore also a transport
+#: symptom; `TimeoutError` is the deadline. Recovery-continuation attempt 1
+#: (2026-08-21) died on `SSL: UNEXPECTED_EOF_WHILE_READING` against an endpoint
+#: measured at 25% failure, in a launcher path that caught none of these.
+TRANSIENT_TRANSPORT: tuple[type[BaseException], ...] = (
+    urllib.error.URLError, OSError, ValueError, TimeoutError)
+
+
+@dataclass(frozen=True)
+class Observation:
+    """One control-plane answer, or the absence of one. Never an exception.
+
+    The distinction that matters is `ok`: **a failed observation is unknown
+    state, not a negative answer.** A caller that treats `ok=False` as "no ports
+    yet" merely wastes a poll; a caller that treats it as "the pod is gone"
+    abandons a billing pod, which is why `PodState.billing` reports unknown as
+    still billing and why this type refuses to collapse the two.
+    """
+
+    ok: bool
+    data: dict | None = None
+    error: str | None = None
+    #: True when the failure is the transport or a malformed body — retryable.
+    #: A GraphQL `errors` array is also transient by this definition: it is the
+    #: server declining to answer, and `get()` has always refused to read it as
+    #: absence.
+    transient: bool = False
+
+    def __bool__(self) -> bool:
+        return self.ok
+
 
 @dataclass(frozen=True)
 class PodState:
@@ -113,6 +150,8 @@ class PodProvider(Protocol):
 
     def get(self, pod_id: str) -> PodState: ...
 
+    def observe(self, query: str) -> Observation: ...
+
     def terminate(self, pod_id: str) -> list[TerminationAttempt]: ...
 
 
@@ -139,6 +178,30 @@ class RunPodProvider:
         with urllib.request.urlopen(req, timeout=self.timeout) as resp:
             return json.loads(resp.read().decode())
 
+    def observe(self, query: str) -> Observation:
+        """One `_gql` attempt, classified exactly the way `get()` classifies it.
+
+        `get()` has always been the resilient path — *"Never raises. A watchdog
+        that dies on a transient 502 is not a backstop."* — but it answers one
+        fixed question about one pod. Every other launcher query went straight to
+        `_gql`, which raises, so the same control-plane blip that `get()` absorbs
+        killed the launcher outright.
+
+        This is that classification, decoupled from that one query, so a caller
+        asking anything else gets the same treatment rather than a second,
+        divergent copy of the rules.
+        """
+        try:
+            body = self._gql(query)
+        except TRANSIENT_TRANSPORT as exc:
+            return Observation(ok=False, transient=True,
+                               error=f"{type(exc).__name__}: {exc}")
+        if body.get("errors"):
+            # The server declining to answer. Not an answer of "no".
+            return Observation(ok=False, transient=True,
+                               error=json.dumps(body["errors"])[:500])
+        return Observation(ok=True, data=body.get("data") or {})
+
     # -- state -------------------------------------------------------------
     def get(self, pod_id: str) -> PodState:
         """Never raises. A watchdog that dies on a transient 502 is not a backstop."""
@@ -148,7 +211,7 @@ class RunPodProvider:
         )
         try:
             body = self._gql(query)
-        except (urllib.error.URLError, OSError, ValueError, TimeoutError) as exc:
+        except TRANSIENT_TRANSPORT as exc:
             return PodState(pod_id=pod_id, exists=True,
                             error=f"{type(exc).__name__}: {exc}")
         if body.get("errors"):
@@ -252,6 +315,16 @@ class SimulatedProvider:
         return PodState(pod_id=pod_id, exists=True,
                         desired_status=self.desired_status, runtime_ready=True,
                         cost_per_hr=self.cost_per_hr)
+
+    def observe(self, query: str) -> Observation:
+        """Shares `poll_errors` with `get`, so one knob rehearses a control
+        plane that is flaky for every question, not only for pod state."""
+        self.calls.append("observe")
+        if self.poll_errors > 0:
+            self.poll_errors -= 1
+            return Observation(ok=False, transient=True,
+                               error="SimulatedError: control plane unreachable")
+        return Observation(ok=True, data={})
 
     def terminate(self, pod_id: str) -> list[TerminationAttempt]:
         self.calls.append("terminate")
