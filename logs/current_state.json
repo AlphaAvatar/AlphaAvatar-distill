@@ -1,6 +1,6 @@
 {
   "schema": "aadistill.current_state/v2",
-  "generated_utc": "2026-08-21T12:00:00Z",
+  "generated_utc": "2026-08-21T16:00:00Z",
   "_contract": "The minimal machine-readable CURRENT snapshot: live facts only, no history, no per-attempt detail, no narrative. History lives in logs/decisions.md and the per-run directories; the human view is logs/STATE.md and the two must agree. Ownership: logs/CATALOG.md.",
   "baseline_commit": "f331e49bf304edca7dc311702c36668d544f0f9f",
   "baseline_commit_meaning": "The LAST TESTED IMPLEMENTATION: the commit whose tree produced the latest_verification figures. Deliberately NOT the commit carrying this file -- when a paid launch is prepared, the grant/provenance commit and the authorization-only commit both follow it and neither is separately tested. A reader must be able to tell which commit the suite numbers describe from which commit a pod checks out. Nothing checks this field; it is refreshed by hand.",
@@ -114,11 +114,10 @@
     "the paid device-canary session path: STRATEGICALLY TERMINATED 2026-08-18. Two authorized sessions, $0.1240, zero canary runs; both died in the wrapper's inherited contracts. Its evidence and its generic lesson are kept; no further canary is prepared."
   ],
   "next_starting_point": {
-    "status": "The $0 continuation implementation is done and mutation-verified: the device handoff, the strict Stage-1 import, frozen science untouched, and a derived continuation budget. Nothing is running or prepared.",
-    "the_ask": "NOTHING is prepared. The next review is a GO/NO-GO for the recovery continuation -- NOT another Phase-A search, which would recompute a result two runs already agree on.",
-    "open_item": "the control must be measured live; its stage-1 evaluation is absent from the persisted evidence",
-    "budget": "cap $234.00, spent $213.4714, remaining $20.5286 -- the continuation's $16.7456 hard fits with $3.78 to spare",
-    "process_rule": "'my intended next decision is GO' is not executable permission; a recommendation is not an approval"
+    "status": "The recovery continuation is an EXECUTABLE session, priced by the derived budget, with the search structurally unreachable. Nothing is running, billing, authorized or prepared.",
+    "the_ask": "NOTHING is prepared. The next review is a GO/NO-GO for ONE recovery continuation under the derived $16.7456 hard ceiling -- not another Phase-A search.",
+    "budget": "cap $234.00, spent $213.4714, remaining $20.5286; the continuation's $16.7456 hard fits with $3.78 to spare. No cap increase requested.",
+    "process_rule": "'my intended next decision is GO' is not executable permission; helpers existing is not the path using them"
   },
   "read_order": [
     "logs/STATE.md \u2014 the human view of this file",
@@ -146,9 +145,11 @@
     "budget_expected_usd": 14.9233,
     "budget_hard_usd": 16.7456,
     "budget_expected_minutes": 904.44,
-    "derivation": "the Phase-A BudgetSpec minus the stage-1 phase and both stage-1-only reserves; no dollar figure is written",
-    "open_item": "the control comes back UNMEASURED -- its stage-1 evaluation is not in the evidence -- so a continuation must measure it on the suite, which still needs the teacher and suite resident",
+    "open_item": "the control cannot be imported measured -- its stage-1 evaluation is absent from the evidence -- so the continuation measures it once on the frozen suite, which still needs teacher and suite resident",
     "not_prepared": "no grant, no authorization, no pod",
-    "stage1_source": "attempt 12: 43 states, 5 selected, byte-identical to attempt 11. logs/autoinit_phase_a_attempt12/"
+    "stage1_source": "attempt 12: 43 states, 5 selected, byte-identical to attempt 11. logs/autoinit_phase_a_attempt12/",
+    "executable": "autoinit_recovery_continuation_{launch,driver}.py",
+    "search_unreachable": "structural: no phase_a_search import, no delegation to the searching stage1, no stage choice that searches",
+    "leaves_staged": "the five are declared session inputs in selected order, staged via SESSION_ASSETS, re-identified from bytes by a $0 precheck"
   }
 }

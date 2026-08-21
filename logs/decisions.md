@@ -5630,3 +5630,85 @@ Nothing was rewritten to pretend the session always began at Stage 2.
 
 **No grant, no pod, nothing prepared.** The next decision is a GO/NO-GO for the
 recovery continuation, not for another search.
+
+## 2026-08-21 — The continuation becomes executable; primitives are not a path
+
+**Context, and a correction.** `bd6ca1e` shipped the strict Stage-1 importer, the
+device handoff and `continuation_budget()`, and I reported the continuation as
+implemented. **It was not.** The production Phase-A path still constructed its
+`SessionSpec` with `budget(args)`, launched `autoinit_phase_a_driver.py --stage
+all`, had no continuation mode, ran `run_phase_a_search()` unconditionally in
+Stage 1, and never called `import_stage1_result()`. Authorizing it would have
+rerun the 203-minute search the work existed to avoid. The maintainer caught the
+gap between the helpers existing and the path using them.
+
+There was also no staging contract: the five preserved leaves lived on the
+maintainer host at an undeclared path a pod could not see.
+
+### The search is now structurally unreachable
+
+`autoinit_recovery_continuation_driver.py` never imports `phase_a_search`. The
+frozen identities moved to `phase_a_frozen.py` — the same values, byte for byte,
+re-exported so no existing caller changed — precisely so the continuation can
+bind them without putting `run_phase_a_search` one attribute lookup away. Its
+`stage1` overrides the searching one and never delegates, and its `--stage` has
+no value that selects a search.
+
+Three tests enforce this at the AST level, and mutating any of them fails:
+introducing a search import, delegating to `super().stage1()`, or offering a
+`"search"` stage choice.
+
+### Priced by the derivation, not the full ceiling
+
+The continuation `SessionSpec` is built with `continuation_budget(args)`:
+**904.44 expected minutes, $14.9233 expected, $16.7456 hard**, with no
+`stage1_beam_search` phase and no Stage-1-only reserves. Restoring `budget()`
+now breaks ten tests. The full Phase-A price is untouched at $17.8933 /
+$22.7183 / $23.0483.
+
+### The five leaves are declared inputs
+
+Bound by state id **in the selected order** with attempt 12's digests, read from
+the committed durability record rather than restated — a test asserts no state id
+is hard-coded in the launcher, because a second copy of five ids is a second
+thing to keep in step. They are staged through the ordinary `SESSION_ASSETS`
+contract, so the setup script installs them without knowing what they are, and a
+`$0` pre-provider gate re-identifies all five **from bytes** before a pod exists.
+
+### The control is measured, never invented
+
+The importer returns it unmeasured because its Stage-1 evaluation is absent from
+the evidence. The continuation measures it once, on the frozen `state_eval_v1`
+suite, through the same `StateEvaluator` and primed teacher the search used,
+attaches the hash-bound result, persists it as evidence, and puts the complete
+`[five leaves + control]` set through the same `admit_leaves` gate. Skipping the
+attachment or the gate each fails a test.
+
+### The handoff, and why it costs nothing here
+
+After admission the teacher and evaluator are dropped explicitly and
+`release_to_subprocess` measures what that freed before the headroom contract
+runs. This session never held the search's device residency, because it never ran
+the search — which is the point.
+
+### The entrypoint is exercised, not just its helpers
+
+That distinction is what this whole closure is about, so the tests run the real
+`stage1()` on the real preserved bytes: five leaves imported in the ranking's
+order, all `MEASURED`, control measured and admitted, handoff recorded, all three
+evidence files written. Only the control's GPU measurement is substituted. A
+second test symlinks one leaf's bytes under another's id and requires the
+entrypoint to refuse.
+
+**One hole found by mutation and closed:** the preserved-leaf precheck was tested
+as a function but never asserted to be *in* `spec.precheck` — dropping it from the
+tuple passed every other test. That is the same helper-versus-wiring gap that
+produced this whole correction, appearing one level down in my own tests.
+
+**Frozen science unchanged:** session `9377a2dc`, science `02be33b9`, recovery
+fingerprint `ab0d8cfd`, tokenizer `7781771a`. The continuation carries the same
+`plan_hash` and a distinct operational `session_id`; nothing was rewritten to
+pretend Phase A always began at Stage 2.
+
+**No grant, no authorization, no pod.** The next decision is a GO/NO-GO for one
+recovery continuation under the derived **$16.7456** ceiling.

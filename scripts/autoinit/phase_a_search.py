@@ -48,18 +48,18 @@ from aadistill.autoinit.search import (  # noqa: E402
 )
 from aadistill.autoinit.state import make_control_state  # noqa: E402
 
-TEACHER_ID = "Qwen/Qwen3-4B-Thinking-2507"
-TEACHER_REVISION = "768f209d9ea81521153ed38c47d515654e938aea"
-TARGET_GEOMETRY = dict(hidden_size=1024, num_hidden_layers=28, intermediate_size=3072,
-                       num_attention_heads=16, num_key_value_heads=8, head_dim=128,
-                       vocab_size=151936, tie_word_embeddings=True)
-CANONICAL_INIT = "artifacts/stage1/qwen3_0p6b_init_v0/checkpoint"
-CANONICAL_INIT_SHA256 = (
-    "86fbba78e8a2a32481ca77e5ac362ed1f17a39dbc30bcbc952cabd5df2633e54")
+#: Imported, not restated. They live in `phase_a_frozen` so a recovery
+#: continuation can bind the same identities WITHOUT importing this module and
+#: thereby putting `run_phase_a_search` within reach. Re-exported here so every
+#: existing caller is unaffected.
+#:
 #: The searched operators. P=1: one calibration profile, so operators declaring
 #: CalibrationNeed.NONE are offered once and the space is the 48 decomposed
 #: paths the preregistration names.
-SEARCH_SEED = 20260815
+from phase_a_frozen import (  # noqa: E402,F401
+    CANONICAL_INIT, CANONICAL_INIT_SHA256, SEARCH_SEED, TARGET_GEOMETRY,
+    TEACHER_ID, TEACHER_REVISION,
+)
 
 
 def as_operator_items(resolved):

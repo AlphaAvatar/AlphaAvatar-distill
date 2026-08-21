@@ -24,6 +24,8 @@ to appear below.
 | `autoinit_phase_a_launch.py` | Phase-A **session specification** |
 | `autoinit_continuation_launch.py` | the Stage-3 continuation's **session specification** |
 | `autoinit_measurement_launch.py` | the bounded causal-depth runtime/backend measurement's **session specification**. Names `SpendAuthorization`, so it cannot start Phase A; runs no search, selects no depth map, writes no checkpoint |
+| `autoinit_recovery_continuation_launch.py` | the recovery continuation's **session specification**. Priced by `continuation_budget` ($16.7456 hard, no search), declares attempt 12's five preserved leaves as staged session inputs, and names a driver that cannot search |
+| `autoinit_recovery_continuation_driver.py` | its pod-side driver. Stage 1 IMPORTS the verified attempt-12 result — it never imports `phase_a_search`, never delegates to the searching `stage1`, and has no `--stage` value that searches |
 | `autoinit_preflight_driver.py` | the micro-preflight's pod-side driver |
 | `autoinit_phase_a_driver.py` | the Phase-A pod-side driver, six stages |
 | `autoinit_preflight_setup.sh` | the shared pod setup. **Manifest-driven** since 2026-08-18: it reads `SESSION_ASSETS`, `SESSION_RELAY_INPUTS` and `SESSION_TEST_IGNORES`, and names no session's assets, relay paths, destinations or digests itself |

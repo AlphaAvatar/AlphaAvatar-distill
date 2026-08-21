@@ -1,4 +1,4 @@
-**Updated:** 2026-08-21 · branch `main` · Stage 1 is now importable; the continuation is implemented at $0
+**Updated:** 2026-08-21 · branch `main` · the recovery continuation is an executable session
 
 # Current state
 
@@ -153,56 +153,54 @@ instead of the cause, and it was paid for twice. Full diagnoses in
 
 ## Next starting point
 
-**Stage 1 is a result to import, not work to repeat.** Attempts 11 and 12 agree
-byte for byte, and attempt 12's five leaves are preserved and digest-verified. A
-recovery continuation starting at Stage 2 is implemented and verified at $0.
-**Nothing is running, billing, authorized or prepared.**
+**The recovery continuation is now an executable session.** The previous commit
+shipped only the primitives — the production path still priced with `budget()`,
+launched `--stage all` against the full driver, and ran the search
+unconditionally. Authorizing it would have rerun the 203-minute search the work
+existed to avoid. **Nothing is running, billing, authorized or prepared.**
 
-### What was built
+### What changed
 
 | | |
 | --- | --- |
-| **device handoff** | records **allocated / reserved / driver-free** either side of a release, and derives the verdict from `allocated` — high reserved with low allocated is "allocator reservation, not a model leak". Headroom is checked against the **driver's** free bytes, since a sibling cannot use the parent's cached blocks. Placed **after** durability, so a failure costs a diagnostic and never a completed search |
-| **strict Stage-1 import** | binds the config hash; requires the five ids **in order**; re-identifies every checkpoint **from bytes** against both digests; requires target geometry and an artifact-bound evaluation; rebuilds the control from its frozen hash; feeds the same `admit_leaves` a live search feeds |
-| **no deserializer** | there is deliberately no `InitializationState.from_dict`, and a test asserts none appears. The journal is evidence, not a trusted format |
-| **derived budget** | `904.44` min, **`$14.9233` expected / `$16.7456` hard**, from the Phase-A `BudgetSpec` minus the Stage-1 phase and both Stage-1-only reserves. No dollar figure is written in the code |
+| **search unreachable** | the continuation driver never imports `phase_a_search`; the frozen identities moved to `phase_a_frozen.py` (same values, re-exported) so they can be bound without the search in reach. `stage1` is overridden and never delegates; no `--stage` value searches. Three AST tests enforce it |
+| **priced by the derivation** | `continuation_budget(args)` — **904.44 min, `$14.9233` expected, `$16.7456` hard**, no Stage-1 phase, no Stage-1 reserves. Restoring `budget()` breaks ten tests |
+| **five leaves as inputs** | declared by state id **in the selected order** with attempt 12's digests, read from the committed record (a test forbids hard-coding them), staged via `SESSION_ASSETS`, re-identified **from bytes** by a `$0` precheck before a pod exists |
+| **the strict importer is used** | `import_stage1_result()` on the staged bytes; a test forbids a second reconstruction in the driver |
+| **the control is measured** | once, on the frozen suite, through the same evaluator and primed teacher; attached hash-bound, persisted, and put through the same `admit_leaves` gate |
+| **handoff before Stage 2** | teacher and evaluator dropped explicitly, `release_to_subprocess` measures what that freed, headroom required. It costs nothing here because this session never held the search |
 
-### One open item, before any GO
+### The entrypoint is exercised, not just its helpers
 
-**The control comes back unmeasured, and cannot be otherwise.** Its Stage-1
-evaluation is not in the persisted evidence — no `retained_canonical` row in the
-journal, and `search_result["control"]` carries identity only — because a live
-search measures it on the GPU. A continuation must measure it on the suite, so
-the teacher and suite still have to be resident. One evaluation against a
-203-minute search, but not free. The admission gate refuses the control until it
-is measured, which is what makes that unskippable rather than forgotten.
+Which is the whole point of this correction, so the tests run the real
+`stage1()` on the real preserved bytes: five leaves imported in the ranking's
+order, all `MEASURED`, control measured and admitted, handoff recorded, all three
+evidence files written. A second test symlinks one leaf's bytes under another's
+id and requires the entrypoint to refuse.
 
-### The orchestration caught what the fast tests could not
-
-The first handoff dropped `found` and then read `found.summary` four lines below
-— a `NameError` **after** a 203-minute search had already succeeded, at exactly
-the boundary added to protect it. Every focused suite passed; only the real
-Stage-0→5 run reaches that line. A test now asserts **zero** reads of `found`
-after the release, so the bug fails in 0.25 s instead of 21 minutes.
+**One hole found by mutation and closed:** the preserved-leaf precheck was tested
+as a function but never asserted to be *in* `spec.precheck` — dropping it passed
+every other test. The same helper-versus-wiring gap that produced this
+correction, one level down in my own tests.
 
 ### Frozen science untouched
 
 Session `9377a2dc…`, science `02be33b9…`, recovery fingerprint `ab0d8cfd…`,
-tokenizer `7781771a…`, Stage-1 deadline `363.9841 min`, Phase-A price
-`$17.8933 / $22.7183 / $23.0483`. Nothing was rewritten to pretend the session
-always began at Stage 2.
+tokenizer `7781771a…`. The continuation carries the **same** `plan_hash` with a
+distinct operational `session_id`; nothing was rewritten to pretend Phase A
+always began at Stage 2. Full Phase-A pricing unchanged at `$17.8933 / $22.7183 /
+$23.0483`.
 
 ### Budget
 
 Cap **$234.00**, spent **$213.4714**, remaining **$20.5286**. The continuation's
-`$16.7456` hard fits with **$3.78** to spare — no cap increase is needed, and
-none should be requested to rerun a completed search.
+`$16.7456` hard fits with **$3.78** to spare. No cap increase requested.
 
-**The next review is a GO/NO-GO for the recovery continuation, not for another
-Phase-A search.**
+**The next review is a GO/NO-GO for one recovery continuation under the derived
+`$16.7456` ceiling — not another Phase-A search.**
 
-**Process rule, standing:** "my intended next decision is GO" is not executable
-permission, and a recommendation is not an approval.
+**Process rule, standing:** helpers existing is not the same as the path using
+them, and "my intended next decision is GO" is not executable permission.
 
 ## Where else to look
 
