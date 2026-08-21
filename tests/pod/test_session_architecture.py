@@ -240,13 +240,82 @@ def test_the_issuer_refuses_to_issue_without_a_grant_document():
         "the issuer no longer refuses a grant that asserts a derived identity")
 
 
-def test_every_session_names_a_distinct_status_file_and_authorization():
-    """Two sessions sharing either one is the $0.1324 and the $0.1369."""
+def test_every_session_has_a_distinct_operational_identity():
+    """Two sessions sharing any of these is the $0.1324 and the $0.1369.
+
+    **Operational identity, not scientific identity.** This list used to include
+    `plan_hash`, which conflated the two: a plan hash names *what science is
+    being run*, while a status file, a log, an authorization path and a job id
+    name *which run is running*. Those are different questions, and two sessions
+    may legitimately answer the first identically.
+
+    The recovery continuation is exactly that case — it runs the frozen Phase-A
+    plan from Stage 2 rather than a plan of its own — and requiring global
+    `plan_hash` uniqueness would have forced a *frozen scientific identity* to
+    change in order to satisfy a test about *file names*. See
+    `test_the_recovery_continuation_shares_the_science_and_not_the_session`,
+    which pins that sharing as deliberate rather than leaving it merely
+    unchecked.
+    """
     specs = [spec for _n, _m, _a, spec in all_specs()]
-    for field in ("status_path", "run_log_path", "authorization_path",
-                  "driver_job_id", "plan_hash"):
+    for field in ("session_id", "schema", "status_path", "run_log_path",
+                  "authorization_path", "driver_job_id"):
         values = [getattr(s, field) for s in specs]
         assert len(set(values)) == len(values), f"sessions share {field}: {values}"
+
+
+def test_the_recovery_continuation_shares_the_science_and_not_the_session():
+    """The one intentional `plan_hash` collision, asserted rather than allowed.
+
+    Dropping `plan_hash` from the uniqueness list above removes a check; this
+    replaces it with a stronger and more specific one. The continuation must
+    share the **full Phase-A** plan hash — nothing was rewritten to pretend
+    Phase A always began at Stage 2 — while being a different operational
+    session in every respect that decides what runs, what it costs, and what
+    permits it.
+    """
+    by_name = {name: spec for name, _m, _a, spec in all_specs()}
+    cont = by_name["autoinit_recovery_continuation_launch"]
+    phase_a = by_name["autoinit_phase_a_launch"]
+
+    # Same science, deliberately and exactly.
+    assert cont.plan_hash == phase_a.plan_hash
+    assert cont.plan_id == phase_a.plan_id
+    assert cont.plan_hash == (
+        "9377a2dc61f21790dd111d72a5de0e039ea1d31afef2d09e18c98a0b0cc2a0aa"), (
+        "the frozen Phase-A session plan moved")
+
+    # Different operational session, in every field that names a run.
+    for field in ("session_id", "schema", "status_path", "run_log_path",
+                  "authorization_path", "driver_job_id"):
+        assert getattr(cont, field) != getattr(phase_a, field), field
+
+    # Its own authorization TYPE and harness, not Phase A's.
+    from aadistill.autoinit.recovery_continuation import (
+        RECOVERY_CONTINUATION_HARNESS_FILES_V1, RecoveryContinuationAuthorization,
+    )
+    from aadistill.autoinit.phase_a import (
+        PHASE_A_HARNESS_SOURCE_FILES_V1, PhaseAAuthorization,
+    )
+    assert cont.authorization_loader == RecoveryContinuationAuthorization.load
+    assert phase_a.authorization_loader == PhaseAAuthorization.load
+    assert (set(RECOVERY_CONTINUATION_HARNESS_FILES_V1)
+            != set(PHASE_A_HARNESS_SOURCE_FILES_V1))
+    assert ("scripts/autoinit/phase_a_search.py"
+            not in RECOVERY_CONTINUATION_HARNESS_FILES_V1)
+
+    # Its own budget: the Stage-1 search phase and both Stage-1 reserves are
+    # gone, so it cannot be priced as if it were running one.
+    plan = cont.budget.plan(price_per_hour=0.99, authorized_usd=16.7456)
+    assert not [p for p in plan.breakdown if p.name == "stage1_beam_search"]
+    assert plan.soft_stop_reserves == ()
+    assert plan.hard_terminate_usd == pytest.approx(16.7456, abs=1e-4)
+    full = phase_a.budget.plan(price_per_hour=0.99, authorized_usd=23.0484)
+    assert plan.hard_terminate_usd < full.hard_terminate_usd
+
+    # And it says so about itself.
+    assert cont.evidence_fields["runs_a_search"] is False
+    assert phase_a.evidence_fields.get("runs_a_search") is not False
 
 
 def test_the_specs_are_frozen():

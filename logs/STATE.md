@@ -74,13 +74,12 @@ Also frozen: recovery design, selection rules, pooled_counts@v2, Stage-3 artifac
 
 ## Latest verification
 
-After giving the recovery continuation its own authorization type, harness digest
-and issuer, and closing the three **pod-side** consumers still wired to the
-Phase-A artifact. CPU only — no checkpoint loaded, no metric measured, no GPU
-used:
+After the control-plane resilience closure and after including the recovery
+continuation in the shared structural session set. CPU only — no checkpoint
+loaded, no metric measured, no GPU used:
 
-* full suite **2124 passed, 11 skipped, 0 errors** in 18:58.
-* pod simulator **2083 passed, 22 skipped**; artifact tree restored **exactly** —
+* full suite **2135 passed, 11 skipped, 0 errors** in 19:16.
+* pod simulator **2094 passed, 22 skipped**; artifact tree restored **exactly** —
   listing hash `c1726a62…` before and after.
 * frozen-asset verifier **passed**, and was **not** weakened or rescoped.
 * **13 mutations**, each a passing state made to fail: the four executables the
@@ -254,6 +253,38 @@ existing deadline loop and keep polling until `startup_limit_min`. No new
 constant, no new deadline, still fails closed at 15 minutes.
 
 **Nothing is running, billing, authorized or prepared.**
+
+### The continuation is now covered by the shared structural contracts
+
+`tests/pod/session_specs.py` defines the set of real sessions the generic
+`SessionSpec`/setup/staging checks run against, and the continuation was absent
+from it — so the session about to be paid for was the one session those contracts
+did not cover. It is now in `SESSION_LAUNCHERS`, and it passes all of them,
+including the **executed** staging block: its real manifest, through the real
+shell code, landing the real destinations.
+
+Adding it required separating two identities the uniqueness test had conflated.
+A `plan_hash` names *what science is being run*; a status file, log,
+authorization path and job id name *which run is running*. The invariant now
+requires **`session_id`, `schema`, `status_path`, `run_log_path`,
+`authorization_path` and `driver_job_id`** to be distinct across operational
+sessions, and no longer requires `plan_hash` to be globally unique — because the
+continuation runs the frozen Phase-A plan from Stage 2, and demanding uniqueness
+there would have forced a **frozen scientific identity** to change to satisfy a
+test about file names.
+
+Dropping that field removes a check, so it is replaced by a stronger, specific
+one: the continuation must share the **full** Phase-A `plan_hash`
+(`9377a2dc…`, asserted literally) while differing in all six operational fields,
+loading `RecoveryContinuationAuthorization` rather than Phase A's, carrying a
+harness set that excludes the search, pricing with no `stage1_beam_search` phase
+and no Stage-1 reserves to a hard `$16.7456`, and declaring
+`runs_a_search == False`.
+
+**Mutation-verified 9 ways**, including that removing the continuation from the
+covered set fails, that each of the six uniqueness fields fails on a real
+collision, and that rewriting the continuation's `plan_hash` — the thing this
+change exists *not* to do — fails.
 
 ## How the continuation was built
 
