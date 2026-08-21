@@ -301,11 +301,31 @@ authorized cumulative cap                                    $234.00
     hard ceiling, does not authorize any subsequent attempt, and does
     not authorize spend outside the next explicitly approved session.
     See the caps list above.
-actual cumulative spend                                      $213.4714
+actual cumulative spend                                      $213.4814
     = $194.0530 + $0.1900 attempt 8 + $0.3400 attempt 9
       + $11.4300 attempt 10 + $0.0700 measurement attempt 1
       + $0.1834 measurement attempt 2 + $0.2077 measurement attempt 3
-      + $3.2101 Phase-A attempt 11 + $3.7872 Phase-A attempt 12.
+      + $3.2101 Phase-A attempt 11 + $3.7872 Phase-A attempt 12
+      + $0.0100 recovery continuation attempt 1.
+recovery continuation attempt 1 (L40S, 0.7 min) NO STAGE RAN  $  0.0100
+    AUTHORIZED 2026-08-21 as autoinit.recovery_continuation.2026-08-21T1642Z
+    against logs/autoinit_recovery_continuation_grant.json. Ceiling
+    $16.7456, of which $0.0100 was spent. EVERY pre-provider gate
+    passed; pod dckc72mtoe9ijw was created and then deleted 27 s later
+    when the launcher's readiness poll raised URLError (SSL
+    UNEXPECTED_EOF). Provider confirms gone: True. Nothing billing.
+    NOT a gate failure and NOT a scientific result: no stage ran, no
+    leaf was touched, no science changed. The five preserved stage-1
+    leaves are untouched inputs on the dev box.
+    ROOT CAUSE, measured afterwards at $0: the RunPod GraphQL endpoint
+    was returning transport errors at 5/20 = 25% (SSL EOF, ECONNRESET,
+    RemoteDisconnected). `session_runner.wait_endpoint` calls
+    `provider._gql` DIRECTLY, bypassing `provider.get`, which is the
+    one documented as "Never raises. A watchdog that dies on a
+    transient 502 is not a backstop." That poll makes up to 90 calls;
+    at 25% loss it cannot survive. The 15-hour main poll DOES use
+    `get()` and is not exposed. Relaunching unchanged would repeat.
+    The single-issuance grant is spent, so the fix needs a new grant.
 Phase A attempt 12 (L40S, 229.5 min) STAGE 1 PASSED, KEPT     $  3.7872
     AUTHORIZED 2026-08-20 as autoinit.phase_a.2026-08-20T1856Z
     against logs/autoinit_phase_a_attempt12_grant.json (sha256

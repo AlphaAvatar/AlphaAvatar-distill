@@ -1,4 +1,4 @@
-**Updated:** 2026-08-21 · branch `main` · the recovery continuation is an executable, separately authorized session
+**Updated:** 2026-08-22 · branch `main` · the continuation launched, passed every gate, and died in the launcher's readiness poll for $0.01
 
 # Current state
 
@@ -24,18 +24,19 @@ selection result.**
 ## Budget
 
 ```
-cumulative spend   $213.4714
+cumulative spend   $213.4814
 approved cap       $234.00    RAISED AND APPROVED 2026-08-21
-remaining          $20.5286   $2.5198 SHORT of one more full attempt
+remaining          $20.5186   $2.5298 SHORT of one more full attempt
 
 ```
 
 The cap went **$219.00 → $231.00** (2026-08-20, to fund exactly one Phase-A
 attempt) **→ $234.00** (2026-08-21). Attempt 12 has since **run**, costing
 **$3.7872** — far under its $23.0484 ceiling, because it stopped at Stage 2
-rather than training nine probes. **$20.5286 remains, $2.5198 short of another
-full-ceiling attempt.** The recovery continuation's derived **$16.7456** ceiling
-does fit, with $3.78 to spare.
+rather than training nine probes. **$20.5186 remains, $2.5298 short of another
+full-ceiling attempt.** A recovery continuation's derived **$16.7456** ceiling
+still fits, with $3.77 to spare — but the one-use grant that funded attempt 1 is
+spent.
 
 Each raise is a **project ceiling only**. It authorizes nothing: the next paid
 action needs its own one-use grant and its own authorization artifact, and
@@ -65,8 +66,11 @@ Also frozen: recovery design, selection rules, pooled_counts@v2, Stage-3 artifac
 * Stage 3 (both permanent controls, thresholds materialized)
 * the Phase-A harness, stages 0-5 executing for real at $0
 * the Stage-1 device audit (autoinit.stage1_device_contract@v1)
-* Stage 0 on hardware, passed four times — latest attempt 9, attesting
-  protocol `250f72ef`, identity `70a26e0b`, science plan `02be33b9`
+* Stage 0 on hardware, passed five times — attempt 10 attesting protocol
+  `250f72ef`, identity `70a26e0b`, science plan `02be33b9`
+* Phase-A **Stage 1**, passed twice with byte-identical results; attempt 12's
+  five selected leaves are preserved off-pod and verify locally
+* the continuation's own authorization type, harness digest and issuer
 
 ## Latest verification
 
@@ -92,9 +96,11 @@ environment; a run there reads as seven failures that are not real.
 
 ## What failed, and why
 
-All five are the same two classes, and both are now closed by construction:
-GPU-only device code (fixed by `autoinit.stage1_device_contract@v1`) and a
-contract owned by inherited machinery (fixed by the session specification).
+The early runs are two classes, both closed by construction: GPU-only device
+code (fixed by `autoinit.stage1_device_contract@v1`) and a contract owned by
+inherited machinery (fixed by the session specification). **Continuation 1 is a
+third:** an unguarded transport call on a path that only runs while a pod is
+already billing.
 
 | run | cost | died at | cause |
 | --- | ---: | --- | --- |
@@ -108,6 +114,8 @@ contract owned by inherited machinery (fixed by the session specification).
 | Phase A 10 | $11.4300 | stage 1, 3rd expansion | `depth.causal_kl_greedy_v1`: 260×67 full-vocabulary softmax/KL **on the CPU**, unbounded and unpriced |
 | measurement 1 | $0.0700 | setup / frozen-asset gate | declared `LOCAL_ASSETS = ()`; the shared setup verifies both frozen roots unconditionally |
 | measurement 2 | $0.1834 | driver entrypoint, after `SETUP_RC=0` | `main()` imported `as_operator_items` from the wrong module — and **no $0 test called `main()`** |
+| Phase A 12 | $3.7872 | stage 2, first rung-1 probe | CUDA OOM: the driver still held the search's ~24.05 GiB. **Stages 0-1 passed; five leaves preserved off-pod** |
+| continuation 1 | $0.0100 | launcher readiness poll, 27 s in | `wait_endpoint` calls `provider._gql` uncaught against an endpoint measured at **25% transport failure**. Every gate passed; no stage ran |
 
 **The pattern, through attempt 7:** code no $0 path could execute — a GPU-only
 device, or a contract owned by inherited machinery. **Attempt 8 is a new
@@ -160,13 +168,59 @@ instead of the cause, and it was paid for twice. Full diagnoses in
 * any fourth seed
 * the paid device-canary session path: STRATEGICALLY TERMINATED 2026-08-18. Two authorized sessions, $0.1240, zero canary runs; both died in the wrapper's inherited contracts. Its evidence and its generic lesson are kept; no further canary is prepared.
 
-## Next starting point
+## The continuation ran, and bought nothing — $0.01
 
-**The recovery continuation is now an executable session.** The previous commit
+**Attempt 1, 2026-08-21.** Authorization `autoinit.recovery_continuation.2026-08-21T1642Z`,
+base `b1ebbb6`, session commit `8c7c42e`, bundle `aad_autoinit_8c7c42e1.bundle`.
+Pod `dckc72mtoe9ijw`, L40S, **0.7 min, $0.01, provider confirms gone**. Full
+record: [`autoinit_recovery_continuation_attempt1/`](autoinit_recovery_continuation_attempt1/).
+
+**The whole chain worked.** One-use grant, clean base, continuation-specific
+issuance, an authorization-only commit differing from its base in exactly one
+path, a bundle whose bytes and checkout round-tripped and whose **harness digest
+recomputed from the relay checkout** matched, and all four pre-provider `$0`
+gates green — including all five preserved leaves verifying locally.
+
+**Then the launcher died 27 seconds after creating the pod**, on
+`URLError: SSL UNEXPECTED_EOF` in its readiness poll. **No stage ran. No leaf was
+read on the pod. No science changed.**
+
+### Root cause, measured at $0 afterwards
+
+The RunPod GraphQL endpoint was failing **5 of 20 requests — 25%** (SSL EOF,
+`ECONNRESET`, `RemoteDisconnected`). `session_runner.wait_endpoint()` polls it
+every 10 s for up to 15 minutes — **up to 90 calls** — via `provider._gql()`
+**directly**, and catches nothing. `provider.get()` is the wrapper built for
+exactly this, carrying the comment *"Never raises. A watchdog that dies on a
+transient 502 is not a backstop."* The launcher deserves the same tolerance and
+did not have it. At 25% loss, surviving five polls is ~24%: **relaunching
+unchanged would repeat, not gamble.**
+
+Blast radius is bounded. Three `_gql` sites are uncaught, all pre-driver:
+`check_gpu_offered` (1 call, $0), `wait_endpoint` (≤90, billing ← this),
+`read_image_digest` (1). **The 15-hour main poll uses `get()`** and is not
+exposed.
+
+### Why this stopped instead of retrying
+
+The grant says *"Consumed by exactly one issuance."* Fixing the launcher moves
+the continuation harness digest, which invalidates the authorization **by
+design** and would need a second issuance from a spent one-use grant. That is a
+maintainer decision.
+
+**Proposed, not applied:** catch `URLError`/`OSError` inside `wait_endpoint`'s
+existing deadline loop and keep polling until `startup_limit_min`. No new
+constant, no new deadline, still fails closed at 15 minutes.
+
+**Nothing is running, billing, authorized or prepared.**
+
+## How the continuation was built
+
+**The recovery continuation is an executable session.** An earlier commit
 shipped only the primitives — the production path still priced with `budget()`,
 launched `--stage all` against the full driver, and ran the search
-unconditionally. Authorizing it would have rerun the 203-minute search the work
-existed to avoid. **Nothing is running, billing, authorized or prepared.**
+unconditionally. Authorizing that would have rerun the 203-minute search the work
+existed to avoid.
 
 ### What changed
 
@@ -238,11 +292,13 @@ $23.0483`.
 
 ### Budget
 
-Cap **$234.00**, spent **$213.4714**, remaining **$20.5286**. The continuation's
-`$16.7456` hard fits with **$3.78** to spare. No cap increase requested.
+Cap **$234.00**, spent **$213.4814**, remaining **$20.5186** — attempt 1 cost
+**$0.01**. A further continuation's `$16.7456` still fits with **$3.77** to
+spare. No cap increase requested; **remaining balance is not authorization**.
 
-**The next review is a GO/NO-GO for one recovery continuation under the derived
-`$16.7456` ceiling — not another Phase-A search.**
+**The next review is a GO/NO-GO for the `wait_endpoint` tolerance fix plus a NEW
+one-use grant for one more recovery continuation under the derived `$16.7456`
+ceiling — not another Phase-A search.**
 
 **Process rule, standing:** helpers existing is not the same as the path using
 them, and "my intended next decision is GO" is not executable permission.

@@ -93,6 +93,7 @@ Per-run directories. Each holds what a session actually produced.
 | `autoinit_phase_a_attempt10/` | attempt 10 — **incomplete, operator runtime-cost failure**, $11.43. Stage 0 passed; `depth.causal_kl_greedy_v1` ran 10 h 47 m without finishing, GPU idle. Carries `search_states.jsonl` (2 states, specs only — weights gone with the pod) |
 | `autoinit_measurement_attempt3/` | the bounded measurement's third launch — **COMPLETE**, $0.2077, `ALL_DONE`. Carries `result.json` (the reviewed artifact), the driver log with all 24 timings, and the artifact manifest. Its grant and authorization are consumed |
 | `autoinit_measurement_attempt2/` | the bounded measurement's second launch — **setup passed end to end (`SETUP_RC=0`); the driver died in its entrypoint's first repository import**, $0.1834, no measurement ran. Carries the driver traceback. Its grant and authorization are consumed |
+| `autoinit_recovery_continuation_attempt1/` | continuation attempt 1 — **no stage ran**, $0.0100. Every gate passed and the pod died 27 s later when `wait_endpoint` hit an uncaught `URLError` against an endpoint measured at 25% transport failure. Carries the launcher log, the session record and the 20-request endpoint probe |
 | `autoinit_phase_a_attempt12/` | attempt 12 — **Stage 1 PASSED and its five leaves were preserved off-pod**, $3.7872. Stage 2 failed on CUDA OOM (driver holds ~24 GiB from the in-process search). Carries the durability report, the OOM traceback and the search result, which is byte-identical to attempt 11's |
 | `autoinit_phase_a_attempt11/` | attempt 11 — **Stage 1 PASSED**, $3.2101. The first completed AutoInit beam search: 43 states, 5 leaves selected, the composite baseline beaten. Stage 2 failed closed on a tokenizer guard. Carries `search_result.json`, `search_states_reduced.jsonl` and the Stage-2 traceback; the 25 MB full state journal is out of tree (see `search_states_FULL_RECORD.md`) |
 | `autoinit_device_canary_attempt1/`, `autoinit_device_canary_attempt2/` | the two terminated canary sessions |
@@ -108,19 +109,22 @@ Grant documents — the one-use maintainer decision an authorization is issued
 `autoinit_phase_a_attempt12_grant.json` (consumed),
 `autoinit_measurement_grant.json` (consumed),
 `autoinit_measurement_grant2.json` (consumed),
-`autoinit_measurement_grant3.json` (consumed). The issuer requires one, refuses a grant
+`autoinit_measurement_grant3.json` (consumed),
+`autoinit_recovery_continuation_grant.json` (consumed — single-issuance). The issuer requires one, refuses a grant
 that asserts an identity it did not compute, and hashes it into the artifact.
 
 Consumed authorizations — kept because a spent grant is the record of what was
 permitted: `autoinit_phase_a_authorization.json`,
 `autoinit_device_canary_authorization.json`,
 `autoinit_micro_preflight_authorization.json`,
-`autoinit_continuation_authorization.json`. Each one's lineage gate refuses the
+`autoinit_continuation_authorization.json`,
+`autoinit_recovery_continuation_authorization.json`. Each one's lineage gate refuses the
 current HEAD by construction, which is what "consumed" means operationally.
 
 Session records: `autoinit_phase_a_session.json`,
 `autoinit_device_canary_session.json`, `autoinit_preflight_session.json`,
-`autoinit_continuation_session.json`, and the `e*_session_evidence.json` family.
+`autoinit_continuation_session.json`, `autoinit_recovery_continuation_session.json`,
+and the `e*_session_evidence.json` family.
 
 Experiment records: everything named `e1_*` through `e8b_*`.
 

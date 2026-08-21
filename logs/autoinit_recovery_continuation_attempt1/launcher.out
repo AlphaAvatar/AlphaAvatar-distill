@@ -1,0 +1,14 @@
+[16:46:24] budget: expected 904 min $14.92 · soft $16.42 · hard $16.75 (authorized $16.75)
+[16:46:26] NVIDIA L40S $0.99/h, stock High
+[16:46:26] session commit 8c7c42e1a686 verified: harness digests to f2ea4332272e…, carries the authorization and only logs/autoinit_recovery_continuation_authorization.json differs from the authorized base
+[16:46:26] frozen science plan 02be33b9a7a8… matches the authorization
+[16:46:26] continuation harness f2ea4332272e… over 22 files, search excluded
+[16:46:30] all 5 preserved stage-1 leaves verify locally
+[16:46:31] precheck OK: 10 relay inputs, 7 local assets
+[16:46:33] created dckc72mtoe9ijw at $0.99/h
+[16:46:33] watchdog detached — hard 1015 min = $16.75
+[16:47:00] LAUNCHER ERROR: URLError: <urlopen error [SSL: UNEXPECTED_EOF_WHILE_READING] EOF occurred in violation of protocol (_ssl.c:1081)>
+[16:47:00] deleting pod (launcher error)
+[16:47:14] pod deleted — 0.7 min, $0.01; provider confirms gone: True
+
+autoinit-recovery-continuation INCOMPLETE — /home/ecs-user/AlphaAvatar-distill/logs/autoinit_recovery_continuation_session.json. STOP for review. The continuation consumed the verified attempt-12 Stage-1 result and ran no search.

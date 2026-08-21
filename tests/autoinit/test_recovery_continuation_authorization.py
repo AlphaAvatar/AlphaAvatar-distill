@@ -580,8 +580,24 @@ def test_the_module_carries_no_grant_prose():
     assert "NO GRANT" in CONTINUATION_GRANT_PROSE_REQUIRED
 
 
-def test_no_continuation_authorization_artifact_exists_yet():
-    """This work is readiness, not permission. The issuer targets that path; a
-    file there would mean a session had authorized itself."""
-    assert not (REPO / "logs/autoinit_recovery_continuation_authorization.json"
-                ).exists(), "an unrequested continuation authorization exists"
+def test_any_continuation_authorization_present_is_a_spent_one():
+    """Until 2026-08-21 this asserted the artifact did not exist, because the
+    work was readiness rather than permission. The maintainer then authorized one
+    continuation and it was issued, so that form of the test has done its job.
+
+    What still has to hold is the property it was protecting: **no session
+    authorizes itself.** An artifact may exist only as the record of a permission
+    that was granted and is now spent — bound to a base commit that is no longer
+    HEAD, so its lineage gate refuses the current tree by construction.
+    """
+    path = REPO / "logs/autoinit_recovery_continuation_authorization.json"
+    if not path.exists():
+        return
+    auth = RecoveryContinuationAuthorization.load(path)
+    head = subprocess.run(["git", "rev-parse", "HEAD"], capture_output=True,
+                          text=True, cwd=REPO).stdout.strip()
+    assert auth.authorized_session_commit not in ("", None, head), (
+        "the authorization names the current HEAD as its authorized base, which "
+        "is what a self-issued artifact looks like")
+    # And it is still the narrow thing that was granted.
+    assert auth.hard_cap_usd == 16.7456 and auth.allows_beam_search is False

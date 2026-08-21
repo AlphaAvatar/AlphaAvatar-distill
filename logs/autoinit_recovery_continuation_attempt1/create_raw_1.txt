@@ -1,0 +1,22 @@
+{
+  "containerDiskInGb": 200,
+  "costPerHr": 0.99,
+  "desiredStatus": "RUNNING",
+  "env": [
+    "PUBLIC_KEY=ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIPHyLTGGhfoY+v3w7CEP8xX0shw4wzWxHnJDqsh60731 alphaavatar-runpod\nssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC0X+f7hsoLZFbJeFXGStjQiea01LsDIFDE5LdnKCrOjGQK10BvmiW593WTL27OChjStN+xb0zMIyTu/rKas9wNL5msNlUbljmwwj4pIPTEMK31FPhUiBpy2vTlHrH1hdNapHX9nh5iOTTvgZV/Vu+a2lxZvdTFkl5GtTLs2TGsHSmKijnrPro2j++BLUd69VTvW8tFsN/w6VALIAnmrt23wUq15Chjhgs3Ar2SI9A/Ww5+T6aRnP6nOKk+DPGAB5RIVL1Rla88sG3lyraNVSFpBfC8tDnyq7PO6uzolWBJ+Dw4I9HP9eia5IJcGRoi+pGCD0Ml0bFmSQiA1coT2zw1 runpodctl-ssh-key"
+  ],
+  "gpuCount": 1,
+  "id": "dckc72mtoe9ijw",
+  "imageName": "runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404",
+  "lastStatusChange": "Rented by User: Fri Aug 21 2026 16:46:33 GMT+0000 (Coordinated Universal Time)",
+  "machine": {
+    "gpuDisplayName": "L40S",
+    "location": "US"
+  },
+  "memoryInGb": 125,
+  "name": "aadistill-autoinit-recovery-continuation",
+  "ports": "22/tcp",
+  "vcpuCount": 32,
+  "volumeInGb": 0,
+  "volumeMountPath": "/workspace"
+}

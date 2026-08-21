@@ -1,0 +1,6 @@
+  FAIL URLError <urlopen error [SSL: UNEXPECTED_EOF_WHILE_READING] EOF occurred in violation of protocol (_ssl.c:1081)>
+  FAIL URLError <urlopen error [SSL: UNEXPECTED_EOF_WHILE_READING] EOF occurred in violation of protocol (_ssl.c:1081)>
+  FAIL URLError <urlopen error [Errno 104] Connection reset by peer>
+  FAIL URLError <urlopen error [Errno 104] Connection reset by peer>
+  FAIL RemoteDisconnected Remote end closed connection without response
+15/20 ok, 5 failed in 148.9s

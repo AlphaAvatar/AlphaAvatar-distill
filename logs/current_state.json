@@ -11,20 +11,19 @@
   },
   "authorized": {
     "any": false,
-    "note": "every authorization issued is consumed, including attempt 12's; their lineage gates refuse the current HEAD by construction. A new paid action needs a new grant and a new artifact."
+    "note": "every authorization issued is consumed, including the recovery continuation's. Their lineage gates refuse the current HEAD by construction. A new paid action needs a new grant and a new artifact."
   },
   "prepared_launch": {
     "any": false,
     "bundles": 0
   },
   "budget": {
-    "cumulative_spend_usd": 213.4714,
+    "cumulative_spend_usd": 213.4814,
     "authorized_cap_usd": 234.0,
-    "remaining_usd": 20.5286,
+    "remaining_usd": 20.5186,
     "remaining_is_not_permission": true,
     "ledger": "logs/BUDGET_LEDGER.md",
-    "headroom_note": "$20.5286 is NOT enough for another full Phase-A attempt ($23.0484) -- $2.5198 short. The cap funded one attempt, it has run, and does not authorize Attempt 13.",
-    "cap_history": "$219 -> $231 (2026-08-20) -> $234 (2026-08-21), each a project ceiling only. Detail: logs/BUDGET_LEDGER.md"
+    "headroom_note": "$20.5186 is NOT enough for another full Phase-A attempt ($23.0484) -- $2.5298 short. It DOES cover one more recovery continuation at $16.7456, but remaining balance is not authorization: the one-use grant is spent."
   },
   "frozen": {
     "science_plan_hash": "02be33b9a7a8e26bc8bfb75795351e8cdc9ffd441b47066cc81887cfc511b55c",
@@ -70,19 +69,25 @@
     "full_suite": "2098 passed, 11 skipped, 0 errors in 18:48",
     "pod_simulator": "2057 passed, 22 skipped; artifact tree restored EXACTLY (c1726a62, 1168 entries)",
     "frozen_asset_verifier": "passed, no problems; NOT weakened or rescoped",
-    "venv": "the repo .venv (transformers 5.13.1). The AlphaAvatar venv's 4.57.1 fails 6 tokenizer tests; it is not canonical",
-    "scope": "CPU only; no checkpoint loaded, no metric measured, no GPU used"
+    "scope": "CPU only, repo .venv (transformers 5.13.1); no checkpoint loaded, no metric measured, no GPU used"
   },
   "failed": [
+    {
+      "run": "recovery continuation 1",
+      "usd": 0.01,
+      "where": "launcher readiness poll, 27 s after pod creation; no stage ran",
+      "cause": "wait_endpoint calls provider._gql directly, bypassing provider.get ('Never raises'); <=90 polls against an endpoint measured at 25% transport failure. Every pre-provider gate PASSED. Relaunching unchanged would repeat",
+      "evidence": "logs/autoinit_recovery_continuation_attempt1/"
+    },
     {
       "run": "Phase A 12",
       "usd": 3.7872,
       "where": "stage 2, first rung-1 probe",
-      "cause": "CUDA OOM: the driver holds the in-process search's ~24.05 GiB when stage 2 spawns the trainer needing ~17.97 GiB on a 44.39 GiB L40S. Structural. Stages 0-1 PASSED, five leaves preserved off-pod",
+      "cause": "CUDA OOM: the driver holds the search's ~24.05 GiB when stage 2 spawns a trainer needing ~17.97 GiB on a 44.39 GiB L40S. Structural. Stages 0-1 PASSED, five leaves preserved off-pod",
       "evidence": "logs/autoinit_phase_a_attempt12/"
     }
   ],
-  "failure_pattern": "6/7/9 device placement; 8 a $0 path asserting dev-box state; 10 unpriced runtime cost; measurement 1 a setup contract, 2 an untested entrypoint. Per-run detail: logs/decisions.md",
+  "failure_pattern": "6/7/9 device placement; 8 a $0 path asserting dev-box state; 10 unpriced runtime cost; measurement 1 a setup contract, 2 an untested entrypoint; continuation 1 an uncaught transport error. Detail: logs/decisions.md",
   "canonical_infrastructure": [
     "one immutable SessionSpec per session, one runner, no inheritance, no module-global retargeting",
     "the shared pod setup is manifest-driven on BOTH sides: it installs and stages only what a session declares, and names no asset, relay path, destination or digest of its own",
@@ -113,10 +118,10 @@
     "the paid device-canary session path: STRATEGICALLY TERMINATED 2026-08-18. Two authorized sessions, $0.1240, zero canary runs; both died in the wrapper's inherited contracts. Its evidence and its generic lesson are kept; no further canary is prepared."
   ],
   "next_starting_point": {
-    "status": "The recovery continuation is an EXECUTABLE session, priced by the derived budget, with the search structurally unreachable and its own authorization type and harness digest. Nothing is running, billing, authorized or prepared.",
-    "the_ask": "NOTHING is prepared. The next review is a GO/NO-GO for ONE recovery continuation under the derived $16.7456 hard ceiling -- not another Phase-A search.",
-    "budget": "cap $234.00, spent $213.4714, remaining $20.5286; the continuation's $16.7456 hard fits with $3.78 to spare. No cap increase requested.",
-    "process_rule": "'my intended next decision is GO' is not executable permission; helpers existing is not the path using them"
+    "status": "The continuation launched, passed every gate, created a pod and died 27 s later in the launcher's readiness poll. $0.01, no stage ran, no science changed. Nothing is running, billing, authorized or prepared.",
+    "the_ask": "A one-line tolerance fix in session_runner.wait_endpoint (proposed, NOT applied) and a NEW one-use grant: the previous grant is single-issuance, and fixing the launcher moves the harness digest, invalidating the spent authorization by design.",
+    "budget": "cap $234.00, spent $213.4814, remaining $20.5186; $16.7456 still fits. Remaining balance is NOT authorization.",
+    "process_rule": "remaining balance is not permission; a spent single-issuance grant cannot fund a second artifact"
   },
   "read_order": [
     "logs/STATE.md \u2014 the human view of this file",
@@ -144,12 +149,10 @@
     "budget_expected_usd": 14.9233,
     "budget_hard_usd": 16.7456,
     "budget_expected_minutes": 904.44,
-    "open_item": "the control cannot be imported measured -- its stage-1 evaluation is absent from the evidence -- so the continuation measures it once on the frozen suite, which still needs teacher and suite resident",
     "not_prepared": "no grant, no authorization, no pod",
     "stage1_source": "attempt 12: 43 states, 5 selected, byte-identical to attempt 11. logs/autoinit_phase_a_attempt12/",
-    "executable": "autoinit_recovery_continuation_{launch,driver}.py",
     "search_unreachable": "structural: no phase_a_search import, no delegation to the searching stage1, no stage choice that searches",
-    "leaves_staged": "the five are declared session inputs in selected order, staged via SESSION_ASSETS, re-identified from bytes by a $0 precheck",
-    "authorization": "its OWN schema (recovery_continuation_authorization/v1) and harness digest over 22 files: the Phase-A set minus the unreachable search, plus the continuation launcher, driver, stage1_import, device_handoff, leaf_durability. Refused across from Phase A by schema; ceiling derived from continuation_budget(), never written. Issuer: issue_recovery_continuation_authorization.py --grant (grant_type recovery_continuation)"
+    "authorization": "its OWN schema (recovery_continuation_authorization/v1) and harness digest over 22 files: the Phase-A set minus the unreachable search, plus the continuation launcher, driver, stage1_import, device_handoff, leaf_durability. Ceiling derived from continuation_budget()",
+    "ran": "attempt 1 launched 2026-08-21, $0.01, no stage ran -- see logs/autoinit_recovery_continuation_attempt1/"
   }
 }
