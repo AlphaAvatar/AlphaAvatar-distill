@@ -1,4 +1,4 @@
-**Updated:** 2026-08-21 · branch `main` · the recovery continuation is an executable session
+**Updated:** 2026-08-21 · branch `main` · the recovery continuation is an executable, separately authorized session
 
 # Current state
 
@@ -28,17 +28,18 @@ cumulative spend   $213.4714
 approved cap       $234.00    RAISED AND APPROVED 2026-08-21
 remaining          $20.5286   $2.5198 SHORT of one more full attempt
 
-**The cap was raised from $219.00 to $231.00 on 2026-08-20** to fund exactly one
-Phase-A attempt. That attempt has run and cost **$3.2101** — far under its
-$23.0484 ceiling, because it stopped at Stage 2 rather than training nine probes.
-**$21.3158 remains, which is $1.7326 short of another full-ceiling attempt**, and
-the approval says in terms that it "does not authorize any subsequent attempt".
-A cap of **$234.00** is **recommended and NOT approved** — one more full-ceiling
-launch reaches $232.7326, so $234.00 leaves $1.2674 of margin. That is a project
-ceiling only: the $23.0484 per-launch ceiling is unchanged, Attempt 12 still
-needs its own one-use grant and authorization, and $234.00 would not authorize an
-Attempt 13. Attempt 12 is not funded, authorized, prepared or implied.
 ```
+
+The cap went **$219.00 → $231.00** (2026-08-20, to fund exactly one Phase-A
+attempt) **→ $234.00** (2026-08-21). Attempt 12 has since **run**, costing
+**$3.7872** — far under its $23.0484 ceiling, because it stopped at Stage 2
+rather than training nine probes. **$20.5286 remains, $2.5198 short of another
+full-ceiling attempt.** The recovery continuation's derived **$16.7456** ceiling
+does fit, with $3.78 to spare.
+
+Each raise is a **project ceiling only**. It authorizes nothing: the next paid
+action needs its own one-use grant and its own authorization artifact, and
+remaining balance has never been permission.
 
 Every authorization issued is **consumed** — each one's lineage gate refuses the
 current HEAD by construction. A new paid action needs a new artifact. Detail in
@@ -69,22 +70,25 @@ Also frozen: recovery design, selection rules, pooled_counts@v2, Stage-3 artifac
 
 ## Latest verification
 
-After moving the measurement entrypoint behind an executable seam and separating
-teardown truncation from a missing artifact. CPU only — no checkpoint loaded, no
-metric measured, no GPU used:
+After giving the recovery continuation its own authorization type, harness digest
+and issuer, and closing the three **pod-side** consumers still wired to the
+Phase-A artifact. CPU only — no checkpoint loaded, no metric measured, no GPU
+used:
 
-* full suite **1958 passed, 11 skipped, 0 errors** in 16:51.
-* pod simulator **1918 passed, 22 skipped**; artifact tree restored **exactly** —
-  1167 entries, identical listing hash before and after, hide directory empty.
+* full suite **2098 passed, 11 skipped, 0 errors** in 18:48.
+* pod simulator **2057 passed, 22 skipped**; artifact tree restored **exactly** —
+  1168 entries, listing hash `c1726a62…` before and after.
 * frozen-asset verifier **passed**, and was **not** weakened or rescoped.
-* entrypoint seam mutation-verified **8 ways** across the seam, the loader and
-  the resolver. Two mutations initially *passed* and exposed the seam's own blind
-  spot — its injection points — which is how the calibration-path defect was
-  found; `load_teacher` and `resolve_calibration` now have their own tests.
-  `Hardware`'s three `torch.cuda.*` calls stay $0-uncoverable and are recorded
-  as such.
-* teardown gate mutation-verified **3 ways**, including that a caller supplying
-  no evidence still gets the strict fail-closed rule.
+* **13 mutations**, each a passing state made to fail: the four executables the
+  new digest must cover, the search whose identity it must *not* follow, the
+  schema refusal, the file-set substitution, the derived ceiling, the grant type,
+  the driver's artifact, the setup branch and `SESSION_KIND`.
+* the setup branch is verified by **running the real shell block** with a real
+  artifact — text-matching it proves only that it was typed.
+
+**Run it in the repo `.venv`** (transformers 5.13.1). The AlphaAvatar venv's
+4.57.1 fails six tokenizer tests on this tree and is not the canonical
+environment; a run there reads as seven failures that are not real.
 
 ## What failed, and why
 
@@ -132,6 +136,11 @@ instead of the cause, and it was paid for twice. Full diagnoses in
   dev box, the simulator and a pod all give the same answer
 * `checkpoint_tombstones.json` owns the active-tombstone counts and bytes
 * the Phase-A authorization schema carries no grant; the issuer requires one
+* one session, one authorization **type**, refused across by schema — and one
+  harness set naming exactly what that session executes. Full Phase A and the
+  recovery continuation are distinct operational harnesses, measured
+  independently; a shared executable belongs to both sets by derivation, never by
+  a second hand-maintained copy
 * autoinit.stage1_device_contract@v1, **category 5 added 2026-08-19**: a fresh
   tensor factory on the Stage-1 path either names a device derived from what it
   meets, or is host-only on purpose and must not be mechanically moved
@@ -169,6 +178,42 @@ existed to avoid. **Nothing is running, billing, authorized or prepared.**
 | **the strict importer is used** | `import_stage1_result()` on the staged bytes; a test forbids a second reconstruction in the driver |
 | **the control is measured** | once, on the frozen suite, through the same evaluator and primed teacher; attached hash-bound, persisted, and put through the same `admit_leaves` gate |
 | **handoff before Stage 2** | teacher and evaluator dropped explicitly, `release_to_subprocess` measures what that freed, headroom required. It costs nothing here because this session never held the search |
+| **its own authorization** | schema `recovery_continuation_authorization/v1`, harness digest over **22** files — the Phase-A set minus the unreachable search, plus this launcher, driver, `stage1_import`, `device_handoff`, `leaf_durability`. Refused across from Phase A **by schema**. Ceiling derived from `continuation_budget()`, never written |
+
+### The authorization measured the wrong executable
+
+`PHASE_A_HARNESS_SOURCE_FILES_V1` contains **neither continuation file**, so
+issuing with `--out logs/autoinit_recovery_continuation_…` would have produced a
+green digest over code this session does not run, while the launcher, driver and
+strict importer it *does* run went unmeasured — and carried the search's
+`$23.0484` ceiling into a session priced at `$16.7456`. The two are now distinct
+operational harnesses, independently measured: the continuation set is **derived**
+from the Phase-A set (minus search, plus its own), so the fourteen shared paths
+cannot drift between two hand-maintained copies. Phase A's set was **not**
+broadened.
+
+**Three pod-side consumers were still wired to the Phase-A artifact**, found by
+asking who else loads it — none of them reachable from the launcher tests:
+
+* `PhaseADriver.__init__` loaded a hard-coded
+  `logs/autoinit_phase_a_authorization.json`. That file **is committed**, holding
+  attempt 12's consumed `$23.0484` authorization, so the continuation would not
+  have crashed — it would have enforced `require_within_cap` against the search's
+  ceiling, **38% too high**, and recorded the wrong grant as what authorized the
+  run. The artifact and type are now class attributes; the continuation overrides
+  both.
+* the shared setup script selects its loader on `SESSION_KIND`, and the
+  continuation **declared none** — falling to `spend`, whose `SpendAuthorization`
+  refuses any artifact asserting `phase_a_authorized`. The session would have
+  died at setup, **exit 98**, before any work. A third branch now loads the
+  continuation type; the session declares the kind and requires it.
+* `required_env` omitted `SESSION_KIND` entirely.
+
+**Mutation-verified 13 ways.** Two initially *passed*: the schema-refusal test was
+satisfied one check later by a different refusal, so it was not measuring what it
+named; and `as_dict` wrote `allows_beam_search` as a literal rather than from the
+property. The setup branch is exercised by **running the real shell block**, not
+by matching its text.
 
 ### The entrypoint is exercised, not just its helpers
 

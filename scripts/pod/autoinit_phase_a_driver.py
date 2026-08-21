@@ -166,6 +166,17 @@ def say(msg: str) -> None:
 
 
 class PhaseADriver:
+    #: WHICH artifact governs this run, and what type may govern it. Class
+    #: attributes rather than a hard-coded path because the recovery
+    #: continuation subclasses this driver: with the path fixed here, the
+    #: continuation would have loaded attempt 12's CONSUMED Phase-A
+    #: authorization on the pod — a real, committed file — and run its
+    #: `require_within_cap` against $23.0484 instead of the $16.7456 its own
+    #: budget derives. Not a crash; a silently wrong ceiling, and evidence
+    #: naming the wrong grant.
+    AUTHORIZATION_TYPE = PhaseAAuthorization
+    AUTHORIZATION_PATH = "logs/autoinit_phase_a_authorization.json"
+
     def __init__(self, a):
         self.a = a
         self.t0 = time.time()
@@ -188,8 +199,7 @@ class PhaseADriver:
             "stages": {}}
         AUDIT.mkdir(parents=True, exist_ok=True)
         (AUDIT / "probes").mkdir(parents=True, exist_ok=True)
-        self.auth = PhaseAAuthorization.load(
-            REPO / "logs/autoinit_phase_a_authorization.json")
+        self.auth = self.AUTHORIZATION_TYPE.load(REPO / self.AUTHORIZATION_PATH)
         self.auth.require_plan(PHASE_A_PLAN_V1.plan_hash)
         self.ev["authorization"] = self.auth.as_dict()
 

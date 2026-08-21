@@ -3,7 +3,7 @@
   "generated_utc": "2026-08-21T16:00:00Z",
   "_contract": "The minimal machine-readable CURRENT snapshot: live facts only, no history, no per-attempt detail, no narrative. History lives in logs/decisions.md and the per-run directories; the human view is logs/STATE.md and the two must agree. Ownership: logs/CATALOG.md.",
   "baseline_commit": "f331e49bf304edca7dc311702c36668d544f0f9f",
-  "baseline_commit_meaning": "The LAST TESTED IMPLEMENTATION: the commit whose tree produced the latest_verification figures. Deliberately NOT the commit carrying this file -- when a paid launch is prepared, the grant/provenance commit and the authorization-only commit both follow it and neither is separately tested. A reader must be able to tell which commit the suite numbers describe from which commit a pod checks out. Nothing checks this field; it is refreshed by hand.",
+  "baseline_commit_meaning": "The LAST TESTED IMPLEMENTATION: the commit whose tree produced the latest_verification figures. Deliberately NOT the commit carrying this file -- the grant/provenance and authorization-only commits both follow it and neither is separately tested, so a reader can tell which commit the suite numbers describe from which a pod checks out. Refreshed by hand; nothing checks it.",
   "running": {
     "paid_compute": false,
     "pods": 0,
@@ -11,7 +11,7 @@
   },
   "authorized": {
     "any": false,
-    "note": "every authorization issued is consumed, including attempt 12's. Their lineage gates refuse the current HEAD by construction. A new paid action needs a new grant, a new artifact and a new cap decision."
+    "note": "every authorization issued is consumed, including attempt 12's; their lineage gates refuse the current HEAD by construction. A new paid action needs a new grant and a new artifact."
   },
   "prepared_launch": {
     "any": false,
@@ -23,7 +23,7 @@
     "remaining_usd": 20.5286,
     "remaining_is_not_permission": true,
     "ledger": "logs/BUDGET_LEDGER.md",
-    "headroom_note": "$20.5286 is NOT enough for another full Phase-A attempt at the $23.0484 ceiling -- $2.5198 short. The cap funded one attempt, it has run, and the approval does not authorize Attempt 13.",
+    "headroom_note": "$20.5286 is NOT enough for another full Phase-A attempt ($23.0484) -- $2.5198 short. The cap funded one attempt, it has run, and does not authorize Attempt 13.",
     "cap_history": "$219 -> $231 (2026-08-20) -> $234 (2026-08-21), each a project ceiling only. Detail: logs/BUDGET_LEDGER.md"
   },
   "frozen": {
@@ -50,28 +50,27 @@
     "stage1_runtime_deadline_minutes": 363.9841
   },
   "complete": [
+    "the continuation's authorization identity -- see continuation_ready.authorization",
     "the Stage-1/2 device handoff and the strict Stage-1 import -- see continuation_ready",
-    "Phase-A Stage 1 PASSED TWICE with byte-identical results, and attempt 12's five leaves are preserved off-pod -- see phase_a_stage1_result",
+    "Phase-A Stage 1 PASSED TWICE, byte-identical, five leaves preserved off-pod -- see continuation_ready",
     "the tokenizer consumer contract: the trainer declares and verifies its tokenizer source instead of inferring it from student_path",
     "the selected-leaf durability boundary: the five leaves are persisted and re-verified before Stage 2",
-    "Phase-A STAGE 1: the first completed AutoInit beam search -- see phase_a_stage1_result",
-    "the bounded causal-depth runtime and backend measurement (attempt 3, $0.2077)",
     "Stage 3 (both permanent controls, thresholds materialized)",
     "the Phase-A harness, stages 0-5 executing for real at $0",
     "the Stage-1 device audit (autoinit.stage1_device_contract@v1)",
-    "the bounded Stage-1 device-allocation audit: 15 factories classified, 3 fixed, the rest verified",
+    "the bounded Stage-1 device-allocation audit: 15 factories, 3 fixed",
     "Stage 0 on hardware, passed five times (attempt 10 attested interval 0.011695, floor 0.3000, plan 02be33b9)",
-    "the Stage-1 device fixes, confirmed on CUDA by attempt 10's completed composite expansion",
-    "the causal-depth runtime repair: scoring on the accelerator per E8a, cgroup-aware CPU budget, a fail-closed in-expansion deadline",
-    "the measurement job's entrypoint behind an executable seam, with a test per injection point",
-    "the Stage-1 runtime deadline derived from the priced envelope (363.9841 min) -- see stage1_runtime_deadline_minutes"
+    "the Stage-1 device fixes, confirmed on CUDA by attempt 10",
+    "the causal-depth runtime repair: accelerator scoring per E8a, cgroup-aware CPU budget, fail-closed in-expansion deadline",
+    "the Stage-1 runtime deadline derived from the priced envelope"
   ],
   "latest_verification": {
-    "utc": "2026-08-21T07:00:00Z",
-    "after": "the selected-leaf off-pod transfer closure and the storage cleanup",
-    "full_suite": "2013 passed, 11 skipped, 0 errors in 17:30",
-    "pod_simulator": "1972 passed, 22 skipped; artifact tree restored EXACTLY (c1726a62 before and after)",
+    "utc": "2026-08-22T00:20:00Z",
+    "after": "the continuation's own authorization type, harness digest and issuer, plus three pod-side consumers still wired to the Phase-A artifact",
+    "full_suite": "2098 passed, 11 skipped, 0 errors in 18:48",
+    "pod_simulator": "2057 passed, 22 skipped; artifact tree restored EXACTLY (c1726a62, 1168 entries)",
     "frozen_asset_verifier": "passed, no problems; NOT weakened or rescoped",
+    "venv": "the repo .venv (transformers 5.13.1). The AlphaAvatar venv's 4.57.1 fails 6 tokenizer tests; it is not canonical",
     "scope": "CPU only; no checkpoint loaded, no metric measured, no GPU used"
   },
   "failed": [
@@ -83,7 +82,7 @@
       "evidence": "logs/autoinit_phase_a_attempt12/"
     }
   ],
-  "failure_pattern": "6/7/9 device placement; 8 a $0 path asserting dev-box state; 10 correct placement and numerics, unpriced runtime cost; measurement 1 a setup contract, 2 an entrypoint no $0 path ran",
+  "failure_pattern": "6/7/9 device placement; 8 a $0 path asserting dev-box state; 10 unpriced runtime cost; measurement 1 a setup contract, 2 an untested entrypoint. Per-run detail: logs/decisions.md",
   "canonical_infrastructure": [
     "one immutable SessionSpec per session, one runner, no inheritance, no module-global retargeting",
     "the shared pod setup is manifest-driven on BOTH sides: it installs and stages only what a session declares, and names no asset, relay path, destination or digest of its own",
@@ -94,7 +93,7 @@
     "the pre-flight rehearsal ignored in both the pod gate and the simulator, with the ignore lists pinned equal",
     "the pod simulator restores exactly and refuses concurrent sweeps",
     "the layout test partitions its references: repo-relative paths must exist, declared host-local roots are checked where present and skipped where absent, and an undeclared absolute path still fails",
-    "an active tombstone may not name a declared session staging or mirror destination - checked against the four SessionSpecs, touching no path, so every environment agrees",
+    "an active tombstone may not name a declared session staging or mirror destination - checked against the SessionSpecs, touching no path",
     "checkpoint_tombstones.json owns the active-tombstone counts and bytes",
     "autoinit.stage1_device_contract@v1, incl. category 5: a fresh factory on the Stage-1 path either names a device derived from what it meets, or is host-only on purpose",
     "placement asserted by intercepting factory calls (tests/autoinit/factory_placement.py), the dual of the HostCacheTensor split",
@@ -114,7 +113,7 @@
     "the paid device-canary session path: STRATEGICALLY TERMINATED 2026-08-18. Two authorized sessions, $0.1240, zero canary runs; both died in the wrapper's inherited contracts. Its evidence and its generic lesson are kept; no further canary is prepared."
   ],
   "next_starting_point": {
-    "status": "The recovery continuation is an EXECUTABLE session, priced by the derived budget, with the search structurally unreachable. Nothing is running, billing, authorized or prepared.",
+    "status": "The recovery continuation is an EXECUTABLE session, priced by the derived budget, with the search structurally unreachable and its own authorization type and harness digest. Nothing is running, billing, authorized or prepared.",
     "the_ask": "NOTHING is prepared. The next review is a GO/NO-GO for ONE recovery continuation under the derived $16.7456 hard ceiling -- not another Phase-A search.",
     "budget": "cap $234.00, spent $213.4714, remaining $20.5286; the continuation's $16.7456 hard fits with $3.78 to spare. No cap increase requested.",
     "process_rule": "'my intended next decision is GO' is not executable permission; helpers existing is not the path using them"
@@ -150,6 +149,7 @@
     "stage1_source": "attempt 12: 43 states, 5 selected, byte-identical to attempt 11. logs/autoinit_phase_a_attempt12/",
     "executable": "autoinit_recovery_continuation_{launch,driver}.py",
     "search_unreachable": "structural: no phase_a_search import, no delegation to the searching stage1, no stage choice that searches",
-    "leaves_staged": "the five are declared session inputs in selected order, staged via SESSION_ASSETS, re-identified from bytes by a $0 precheck"
+    "leaves_staged": "the five are declared session inputs in selected order, staged via SESSION_ASSETS, re-identified from bytes by a $0 precheck",
+    "authorization": "its OWN schema (recovery_continuation_authorization/v1) and harness digest over 22 files: the Phase-A set minus the unreachable search, plus the continuation launcher, driver, stage1_import, device_handoff, leaf_durability. Refused across from Phase A by schema; ceiling derived from continuation_budget(), never written. Issuer: issue_recovery_continuation_authorization.py --grant (grant_type recovery_continuation)"
   }
 }

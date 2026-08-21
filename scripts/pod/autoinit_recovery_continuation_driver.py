@@ -45,6 +45,9 @@ from aadistill.autoinit.device_handoff import (  # noqa: E402
     DeviceHandoffError, release_to_subprocess, require_headroom,
 )
 from aadistill.autoinit.recovery import admit_leaves  # noqa: E402
+from aadistill.autoinit.recovery_continuation import (  # noqa: E402
+    RecoveryContinuationAuthorization,
+)
 from aadistill.autoinit.stage1_import import (  # noqa: E402
     Stage1ImportError, import_stage1_result,
 )
@@ -66,6 +69,12 @@ EVIDENCE = REPO / "logs/autoinit_phase_a_attempt12"
 
 class RecoveryContinuationDriver(PhaseADriver):
     """Stages 0 and 2-5 of Phase A, with Stage 1 imported rather than searched."""
+
+    #: ITS OWN artifact and type. Inheriting the parent's would have loaded
+    #: attempt 12's consumed Phase-A authorization — which is committed at that
+    #: path — and enforced a $23.0484 ceiling on a session priced at $16.7456.
+    AUTHORIZATION_TYPE = RecoveryContinuationAuthorization
+    AUTHORIZATION_PATH = "logs/autoinit_recovery_continuation_authorization.json"
 
     def stage1(self) -> bool:
         """Import the verified Stage-1 result. No search is reachable from here."""

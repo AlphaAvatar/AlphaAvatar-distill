@@ -516,6 +516,24 @@ print(f'  {a.authorization_id}: stages {list(a.authorized_stages)}, '
       f'hard \${a.hard_cap_usd:.2f}, phase A {a.allows_phase_a}, '
       f'followon {a.automatic_followon_start}')
 " || { say "THE SESSION AUTHORIZATION DOES NOT BIND TO THIS SESSION'S PLAN"; mark "AUTHORIZATION_MISMATCH"; exit 98; }
+elif [ "$SESSION_KIND" = "recovery_continuation" ]; then
+  # A THIRD type, not a relaxation of the second. The continuation's artifact
+  # carries `phase_a_authorized: true` (it runs Phase-A stages), so the spend
+  # branch below would refuse it — and the phase_a branch above would accept a
+  # full-search authorization in its place, at the search's ceiling.
+  cd "$REPO" && PYTHONPATH=src SESSION_AUTH_PATH="$SESSION_AUTH_PATH" \
+    SESSION_PLAN_HASH="$SESSION_PLAN_HASH" /opt/train/bin/python -c "
+import os
+from aadistill.autoinit.recovery_continuation import RecoveryContinuationAuthorization
+a = RecoveryContinuationAuthorization.load(os.environ['SESSION_AUTH_PATH'])
+a.require_plan(os.environ['SESSION_PLAN_HASH'])
+assert a.authorizes_recovery_continuation is True
+assert a.allows_beam_search is False, 'the continuation cannot reach a search'
+assert a.automatic_followon_start is False, 'nothing chains off the continuation'
+print(f'  {a.authorization_id}: stages {list(a.authorized_stages)}, '
+      f'hard \${a.hard_cap_usd:.4f}, search {a.allows_beam_search}, '
+      f'followon {a.automatic_followon_start}')
+" || { say "THE SESSION AUTHORIZATION DOES NOT BIND TO THIS SESSION'S PLAN"; mark "AUTHORIZATION_MISMATCH"; exit 98; }
 else
   cd "$REPO" && PYTHONPATH=src SESSION_AUTH_PATH="$SESSION_AUTH_PATH" \
     SESSION_PLAN_HASH="$SESSION_PLAN_HASH" /opt/train/bin/python -c "
