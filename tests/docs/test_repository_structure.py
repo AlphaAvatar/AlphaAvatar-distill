@@ -161,14 +161,44 @@ def test_the_two_state_views_agree_on_money():
 
 
 def test_the_two_state_views_agree_on_what_is_running_and_authorized():
+    """Agreement, in whichever direction is true.
+
+    This used to assert `paid_compute is False` outright — written when nothing
+    had ever been launched, so "the two views agree" and "nothing is running"
+    were the same sentence. They are not: once a pod is billing, that form
+    demands the snapshot claim nothing is running while a pod costs money, which
+    is the one failure mode a handoff document must never have.
+
+    So it compares the two views instead of pinning one state. Quiet must be
+    stated as quiet, and a live session must be stated as live — with the pod id,
+    so the reader can go and look.
+    """
     snap = load_snapshot()
-    text = STATE.read_text().lower()
-    assert snap["running"]["paid_compute"] is False
-    assert snap["authorized"]["any"] is False
-    assert snap["prepared_launch"]["any"] is False
-    for claim in ("nothing is running", "nothing is billing",
-                  "nothing is authorized", "nothing is\nprepared for launch"):
-        assert claim in text or claim.replace("\n", " ") in text, claim
+    # Whitespace-normalised: the claims are prose and wrap wherever the sentence
+    # happens to reach the margin. Matching raw text meant every reflow was a
+    # test failure, and the two accepted newline positions were whichever two
+    # had been written so far.
+    text = " ".join(STATE.read_text().lower().split())
+
+    if not snap["running"]["paid_compute"]:
+        assert snap["running"]["pods"] == 0
+        for claim in ("nothing is running", "nothing is billing"):
+            assert claim in text, claim
+    else:
+        # A live run must be visible in prose, and identified.
+        assert snap["running"]["pods"] >= 1
+        assert snap["running"]["pod_id"].lower() in text, (
+            "STATE.md does not name the pod the snapshot says is billing")
+        for claim in ("nothing is running", "nothing is billing"):
+            assert claim not in text, (
+                f"STATE.md still says {claim!r} while a pod is billing")
+
+    if not snap["authorized"]["any"]:
+        assert "nothing is authorized" in text
+    else:
+        assert "nothing is authorized" not in text
+    if not snap["prepared_launch"]["any"]:
+        assert "nothing is prepared for launch" in text
 
 
 def test_the_snapshot_stays_minimal_and_declares_its_contract():

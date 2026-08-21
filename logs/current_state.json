@@ -5,17 +5,20 @@
   "baseline_commit": "16a1685142fe4d4864d43b4351f89100a43f355c",
   "baseline_commit_meaning": "The LAST TESTED IMPLEMENTATION: the commit whose tree produced the latest_verification figures. Deliberately NOT the commit carrying this file -- the grant/provenance and authorization-only commits follow it and neither is separately tested. Refreshed by hand; nothing checks it.",
   "running": {
-    "paid_compute": false,
-    "pods": 0,
-    "launchers": 0
+    "paid_compute": true,
+    "pods": 1,
+    "launchers": 1,
+    "pod_id": "7hthdteyc25xgx",
+    "what": "recovery continuation attempt 2, from 2026-08-21T20:06:31Z, L40S $0.99/h, hard 1014.9 min = $16.7456",
+    "scratch": "/home/ecs-user/aad-scratch/rc2_3e3f2295"
   },
   "authorized": {
-    "any": false,
-    "note": "every authorization issued is consumed, including the continuation's; their lineage gates refuse the current HEAD by construction. A new paid action needs a new grant and artifact."
+    "any": true,
+    "note": "autoinit.recovery_continuation.2026-08-21T2004Z: base b2f0dc5, commit 3e3f2295, harness e5a7183a, hard/per-launch $16.7456. ONE continuation, no follow-on. Attempt 1's grant and authorization stay spent."
   },
   "prepared_launch": {
     "any": false,
-    "bundles": 0
+    "bundles": 1
   },
   "budget": {
     "cumulative_spend_usd": 213.4814,
@@ -153,8 +156,6 @@
     "not_prepared": "no grant, no authorization, no pod",
     "stage1_source": "attempt 12: 43 states, 5 selected, byte-identical to attempt 11",
     "authorization": "its OWN schema (recovery_continuation_authorization/v1) and 22-file harness digest: the Phase-A set minus the unreachable search, plus the continuation launcher, driver, stage1_import, device_handoff, leaf_durability. Digest moved f2ea4332 -> e5a7183a with the resilience fix; attempt 1's artifact now refuses it",
-    "ran": "attempt 1: $0.01, no stage ran -- logs/autoinit_recovery_continuation_attempt1/",
-    "structural_coverage": "in SESSION_LAUNCHERS since 2026-08-22: the same generic structural checks as every other paid session",
     "no_search": "structural: no phase_a_search import, no delegation, no stage choice that searches"
   }
 }

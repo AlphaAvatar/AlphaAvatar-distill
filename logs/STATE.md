@@ -1,4 +1,4 @@
-**Updated:** 2026-08-22 · branch `main` · every launcher control-plane read is now transient-tolerant; the spent authorization correctly refuses the fixed harness
+**Updated:** 2026-08-22 · branch `main` · recovery continuation attempt 2 is RUNNING on pod `7hthdteyc25xgx`
 
 # Current state
 
@@ -6,8 +6,17 @@ The **human view of [`current_state.json`](current_state.json)**. That file owns
 the live facts; this one says the same things in prose and adds nothing it does
 not carry. If the two disagree, a structural test fails.
 
-**Nothing is running. Nothing is billing. Nothing is authorized. Nothing is
-prepared for launch.**
+**RECOVERY CONTINUATION ATTEMPT 2 IS RUNNING AND BILLING.** Pod
+`7hthdteyc25xgx`, L40S at $0.99/h, launched 2026-08-21T20:06:31Z under
+`autoinit.recovery_continuation.2026-08-21T2004Z` — expected 904 min / $14.9233,
+soft stop $16.4156, hard terminate $16.7456 = 1014.9 min. Watchdog detached and
+independent. Live log:
+`/home/ecs-user/aad-scratch/rc2_3e3f2295/launcher.out`.
+
+**One session is authorized; nothing further is, and nothing is prepared for
+launch.** No follow-on is reachable from this launcher, the bundle is launched
+rather than staged, and attempt 1's grant and authorization remain spent and were
+not reused.
 
 **Measurement Attempt 3 COMPLETED on 2026-08-20 for $0.2077.** `ALL_DONE`, both
 fail-closed conditions passed, pod deleted with provider confirmation. The
@@ -248,11 +257,8 @@ the continuation harness digest, which invalidates the authorization **by
 design** and would need a second issuance from a spent one-use grant. That is a
 maintainer decision.
 
-**Proposed, not applied:** catch `URLError`/`OSError` inside `wait_endpoint`'s
-existing deadline loop and keep polling until `startup_limit_min`. No new
-constant, no new deadline, still fails closed at 15 minutes.
-
-**Nothing is running, billing, authorized or prepared.**
+**Since applied, and broadened** — see *Closed — all three sites* above. Attempt
+1 spent **$0.01** and is a closed record; attempt 2 is the run in flight.
 
 ### The continuation is now covered by the shared structural contracts
 
