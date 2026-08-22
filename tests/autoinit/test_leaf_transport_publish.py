@@ -63,15 +63,37 @@ def test_the_canonical_store_is_still_the_owner(pub):
     assert "TRANSPORT ONLY" in src
 
 
-def test_the_before_manifest_refuses_a_drifted_canonical_shard(pub, monkeypatch):
+def test_the_before_manifest_refuses_a_drifted_canonical_shard(pub, tmp_path,
+                                                                monkeypatch):
     """Every digest is recomputed from the canonical bytes and checked against
     the attempt-12 record. A local copy that drifted makes everything
-    downstream meaningless, so it must stop here."""
+    downstream meaningless, so it must stop here.
+
+    Driven against a synthetic store since 2026-08-22. It used to read the real
+    5.55 GiB canonical checkpoints, so on any host without them — every pod —
+    `build_before()` exited at "canonical leaf missing" and the drift assertion
+    below never ran at all. What this test is about is the *refusal*, and
+    synthetic bytes exercise it identically while letting it run anywhere.
+    """
+    store = tmp_path / "canonical"
+    leaf = store / "leaf0"
+    leaf.mkdir(parents=True)
+    (leaf / "model.safetensors").write_bytes(b"the real weights")
+    (leaf / "config.json").write_text('{"a": 1}')
+    honest_shard = pub.sha256_file(leaf / "model.safetensors")
+
+    evidence = tmp_path / "durability.json"
+    evidence.write_text(json.dumps({"leaves": [{
+        "state_id": "leaf0",
+        "identity": {"single_shard_sha256": honest_shard,
+                     "artifact_digest": "d" * 64, "config_sha256": "c" * 64,
+                     "arch_signature": "a" * 64, "total_bytes": 16}}]}))
+    monkeypatch.setattr(pub, "CANONICAL_STORE", store)
+    monkeypatch.setattr(pub, "EVIDENCE", evidence)
+
     real = pub.sha256_file
-    calls = {"n": 0}
 
     def wrong(path: Path):
-        calls["n"] += 1
         if str(path).endswith(".safetensors"):
             return "0" * 64
         return real(path)
@@ -190,3 +212,57 @@ def test_verification_writes_no_manifest_when_it_fails(pub):
         "the session would accept an unverified transport manifest")
     assert "no verified transport" in launcher, (
         "the $0 leaf gate no longer refuses an unverified transport")
+
+
+# --- the attempt-3 regression ----------------------------------------------
+#
+# This module is part of the suite the pod's SETUP GATE runs, even though the
+# publisher it exercises is a dev-box tool the paid session never executes.
+# `verify()` used to `mkdtemp` into the literal `/home/ecs-user/aad-scratch`,
+# which a pod does not have, so five tests here raised `FileNotFoundError` and
+# recovery continuation attempt 3 died at $0.2011 — with the transport it was
+# testing already proven on that same pod.
+
+def test_the_round_trip_needs_no_dev_box_directory(pub, tmp_path, monkeypatch):
+    """The attempt-3 condition: no configured scratch, no dev-box scratch.
+
+    `verify()` must still run. Pointing `DEV_BOX_SCRATCH` at a path that does
+    not exist reproduces a pod exactly for this code path, without needing one.
+    """
+    monkeypatch.delenv(pub.SCRATCH_ENV, raising=False)
+    monkeypatch.setattr(pub, "DEV_BOX_SCRATCH", tmp_path / "no-such-scratch")
+    assert pub.scratch_dir() is None, (
+        "with neither root present the publisher must defer to tempfile, not "
+        "name a directory the host may not have")
+
+    man = manifest_for(pub, [{"filename": "model.safetensors", "size_bytes": 10,
+                              "sha256": "a" * 64,
+                              "remote_path": "phase_a_attempt12/leaf0/model.safetensors"}])
+    monkeypatch.setattr(pub, "remote_oids", lambda m: {
+        "phase_a_attempt12/leaf0/model.safetensors":
+            {"size_bytes": 10, "lfs_sha256": "a" * 64}})
+    monkeypatch.setattr(pub, "EVIDENCE", tmp_path / "e.json")
+    (tmp_path / "e.json").write_text(json.dumps({"leaves": [
+        {"state_id": "leaf0", "identity": {}}]}))
+    import huggingface_hub
+    monkeypatch.setattr(huggingface_hub, "hf_hub_download",
+                        lambda *a, **k: str(tmp_path / "e.json"))
+
+    # The assertion is that this returns at all. Before the fix it raised
+    # FileNotFoundError from mkdtemp, which is what the pod saw.
+    result = pub.verify(man)
+    assert "problems" in result and "round_trip" in result
+
+
+def test_a_configured_scratch_root_is_preferred_when_it_exists(pub, tmp_path,
+                                                               monkeypatch):
+    """The other branch of the same choice, so neither is left unexecuted."""
+    configured = tmp_path / "configured"
+    configured.mkdir()
+    monkeypatch.setenv(pub.SCRATCH_ENV, str(configured))
+    monkeypatch.setattr(pub, "DEV_BOX_SCRATCH", tmp_path / "no-such-scratch")
+    assert pub.scratch_dir() == str(configured)
+
+    # A configured root that is not there is a preference, not a requirement.
+    monkeypatch.setenv(pub.SCRATCH_ENV, str(tmp_path / "absent"))
+    assert pub.scratch_dir() is None

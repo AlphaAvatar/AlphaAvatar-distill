@@ -59,8 +59,54 @@ CANONICAL_STORE = Path("/home/ecs-user/aad-artifacts/autoinit/phase_a")
 EVIDENCE = REPO_ROOT / "logs/autoinit_phase_a_attempt12/selected_leaf_durability.json"
 MANIFEST = REPO_ROOT / "logs/autoinit_selected_leaf_transport_manifest.json"
 
+#: The configured scratch root, when the operator names one. The dev box keeps
+#: session working directories under `/home/ecs-user/aad-scratch`, which is where
+#: a multi-GiB round trip belongs on that host.
+SCRATCH_ENV = "AAD_SCRATCH"
+DEV_BOX_SCRATCH = Path("/home/ecs-user/aad-scratch")
+
+
+def scratch_dir() -> str | None:
+    """Where `verify()` puts its round-trip temporaries.
+
+    `None` means "let `tempfile` choose", which is the whole point: this returns
+    a *preference*, never a requirement.
+
+    Until 2026-08-22 the parent was the literal `/home/ecs-user/aad-scratch`,
+    passed straight to `mkdtemp`. That directory does not exist on a pod, so
+    `mkdtemp` raised `FileNotFoundError` — and although this module is a dev-box
+    publishing tool the paid session never runs, its **tests** are part of the
+    suite the pod's setup gate executes. Five of them reach this line, and
+    recovery continuation attempt 3 died there at $0.2011 with the transport
+    itself already proven.
+
+    So the host default is a preference used only when it is actually there.
+    Order: the configured root if it names an existing directory, then the dev
+    box's own root if present, then the platform temporary directory.
+    """
+    configured = os.environ.get(SCRATCH_ENV, "").strip()
+    if configured and Path(configured).is_dir():
+        return configured
+    if DEV_BOX_SCRATCH.is_dir():
+        return str(DEV_BOX_SCRATCH)
+    return None
+
 
 def token() -> str:
+    """The Hugging Face token, environment first.
+
+    The same portability defect as `scratch_dir()`, one line further down and
+    found the same way. Every pod-side script in `autoinit_preflight_setup.sh`
+    reads `HF_TOKEN`, which the setup exports before the test gate runs; a pod
+    has no `~/.cache/huggingface/token`. This is evaluated as an *argument* to
+    `hf_hub_download`, so it runs even in tests that patch the download away —
+    which is exactly how it surfaced once `mkdtemp` stopped failing first.
+
+    The file remains the dev-box path, so nothing about local use changes.
+    """
+    env = os.environ.get("HF_TOKEN", "").strip()
+    if env:
+        return env
     return Path(os.path.expanduser("~/.cache/huggingface/token")).read_text().strip()
 
 
@@ -196,7 +242,7 @@ def verify(man: dict, *, keep: bool = False) -> dict:
     adapter = get_adapter("qwen3")
     by_id = {r["state_id"]: r for r in json.loads(EVIDENCE.read_text())["leaves"]}
     round_trip = []
-    tmp = Path(tempfile.mkdtemp(prefix="leaf-roundtrip-", dir="/home/ecs-user/aad-scratch"))
+    tmp = Path(tempfile.mkdtemp(prefix="leaf-roundtrip-", dir=scratch_dir()))
     try:
         for rec in man["leaves"]:
             sid = rec["state_id"]

@@ -51,6 +51,30 @@ although a fix to that file would not move the harness digest, it would move the
 session commit, which the lineage gate constrains to differ from its base in
 exactly one path.
 
+### The repair, approved and applied 2026-08-22
+
+`scratch_dir()` returns a **preference, never a requirement**: the configured
+`AAD_SCRATCH` if it names an existing directory, else the dev box's own root if
+present, else `None` — which lets `tempfile` choose. Dev-box behaviour is
+unchanged.
+
+**Running it under real pod conditions found a second instance of the same defect
+one line further down.** `token()` read `~/.cache/huggingface/token`, which a pod
+does not have — every pod-side script in the setup reads `HF_TOKEN`, which the
+setup exports *before* the test gate runs. It is evaluated as an **argument** to
+`hf_hub_download`, so it executes even in tests that patch the download away, and
+it only surfaced once `mkdtemp` stopped failing first. `token()` now reads the
+environment first and falls back to the file.
+
+A third test, `test_the_before_manifest_refuses_a_drifted_canonical_shard`, drove
+`build_before()` against the **real 5.55 GiB canonical store**, so on any host
+without it the run exited at "canonical leaf missing" and the drift assertion
+never executed. It now builds a synthetic store and record. This is not a
+weakening: deleting the drift check still fails it.
+
+Per the maintainer's instruction the module was **not** added to `TEST_IGNORES`
+and **no** generic hard-coded-host-root guard was added.
+
 **Recovery continuation attempt 2 ran on 2026-08-21 and bought nothing: $0.2389,
 no stage executed.** Pod `7hthdteyc25xgx`, 14.5 min, deleted with provider
 confirmation. **The provider-resilience closure worked** — the readiness poll
@@ -136,22 +160,31 @@ Also frozen: recovery design, selection rules, pooled_counts@v2, Stage-3 artifac
 
 ## Latest verification
 
-After retiring 8.4752 GiB of remote copies and verifying the five-leaf
-transport mirror. CPU only — no checkpoint loaded, no metric measured, no GPU
-used:
+After the attempt-3 portability repair. CPU only — no checkpoint loaded, no
+metric measured, no GPU used:
 
-* full suite **2160 passed, 12 skipped, 0 errors** in 20:03 — one more test
-  runs and one fewer skips, because the transport is now verified rather than
-  absent.
-* pod simulator **2119 passed, 23 skipped**; artifact tree restored **exactly** —
-  listing hash `c1726a62…` before and after.
+* full suite **2162 passed, 12 skipped, 0 errors** in 18:25 — **+2** on the
+  2160 baseline, which are exactly the attempt-3 regression and its
+  configured-root branch; the skip count is unchanged.
+* **the publisher module on a pod-like host: 11 passed** with no
+  `/home/ecs-user/aad-scratch`, no `/home/ecs-user/aad-artifacts` and no token
+  file, with `HF_TOKEN` set the way a pod sets it. Run in a mount namespace
+  holding the repo and interpreter over a tmpfs `/home/ecs-user` — the same
+  instrument that reproduced attempt 3's five failures before the fix.
 * frozen-asset verifier **passed**, and was **not** weakened or rescoped.
-* **13 mutations**, each a passing state made to fail: the four executables the
-  new digest must cover, the search whose identity it must *not* follow, the
-  schema refusal, the file-set substitution, the derived ceiling, the grant type,
-  the driver's artifact, the setup branch and `SESSION_KIND`.
-* the setup branch is verified by **running the real shell block** with a real
-  artifact — text-matching it proves only that it was typed.
+* **6 mutations**, each a passing state made to fail: the hard-coded `mkdtemp`
+  parent (attempt 3's defect), an ignored `AAD_SCRATCH`, the dev-box root
+  returned unconditionally, the file-only token, the drifted-shard test reading
+  the real canonical store again, and the drift check itself deleted — the last
+  one proving the rewritten test still catches what it always caught.
+* the continuation **harness digest is unchanged at `162c09ed…`**: the publisher
+  and its tests are outside the 22-file set, so this repair moves the session
+  commit and nothing else.
+
+Earlier, at the five-leaf transport mirror: full suite 2160 passed / 12 skipped;
+pod simulator **2119 passed, 23 skipped** with the artifact tree restored exactly
+(listing hash `c1726a62…`); 13 mutations; the setup branch verified by running the
+real shell block with a real artifact.
 
 **Run it in the repo `.venv`** (transformers 5.13.1). The AlphaAvatar venv's
 4.57.1 fails six tokenizer tests on this tree and is not the canonical

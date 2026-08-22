@@ -61,11 +61,12 @@
     "Stage 0 on hardware, passed five times (attempt 10 attested interval 0.011695, floor 0.3000, plan 02be33b9)"
   ],
   "latest_verification": {
-    "utc": "2026-08-23T00:30:00Z",
-    "after": "retiring 8.4752 GiB of remote copies and verifying the five-leaf transport mirror",
-    "full_suite": "2160 passed, 12 skipped in 20:03 (one more test runs now the transport is verified)",
-    "pod_simulator": "2119 passed, 23 skipped; artifact tree restored EXACTLY (c1726a62)",
-    "frozen_asset_verifier": "passed, no problems; NOT weakened or rescoped",
+    "utc": "2026-08-22T14:40:00Z",
+    "after": "the attempt-3 portability repair to publish_selected_leaves.py",
+    "full_suite": "2162 passed, 12 skipped in 18:25 (+2: the attempt-3 regression and its env branch)",
+    "pod_like_host": "the transport publisher module: 11 passed with NO /home/ecs-user/aad-scratch, NO /home/ecs-user/aad-artifacts and NO token file, HF_TOKEN set as a pod sets it",
+    "mutations": "6, each a passing state made to fail: the hard-coded mkdtemp dir, the ignored AAD_SCRATCH, the unconditional dev-box root, the file-only token, the real canonical store, and the deleted drift check",
+    "frozen_asset_verifier": "passed, no problems",
     "scope": "CPU only, repo .venv; no checkpoint loaded, no metric measured, no GPU used"
   },
   "failed": [
@@ -116,8 +117,8 @@
     "the paid device-canary session path: STRATEGICALLY TERMINATED 2026-08-18. Two authorized sessions, $0.1240, zero canary runs; both died in the wrapper's inherited contracts. Its evidence and its generic lesson are kept; no further canary is prepared."
   ],
   "next_starting_point": {
-    "status": "Recovery continuation attempt 3 ran 2026-08-22 and bought nothing: $0.2011, no stage. It failed the setup test gate on a dev-box path inside a publishing tool. The five-leaf transport itself PASSED on the pod. Nothing is running, billing, authorized or prepared.",
-    "the_ask": "A maintainer decision on the one-line fix to publish_selected_leaves.py (or on ignoring its test module on the pod), then a NEW one-use grant for attempt 4. Attempt 3's grant and authorization are spent.",
+    "status": "The attempt-3 portability defect is repaired and verified on a pod-like host. publish_selected_leaves.py no longer requires any dev-box directory. Nothing is running, billing, authorized or prepared.",
+    "the_ask": "Authorization review for Recovery Continuation Attempt 4. It needs a NEW one-use grant and authorization because the session commit moved; the continuation harness digest is UNCHANGED at 162c09ed, since the publisher and its tests are outside the 22-file set.",
     "budget": "cap $234.00, spent $213.9214, remaining $20.0786. Balance is not authorization."
   },
   "read_order": [
