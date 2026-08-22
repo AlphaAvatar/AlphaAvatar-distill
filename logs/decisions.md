@@ -1,5 +1,14 @@
 # Decision records
 
+## 2026-08-22 — The five-leaf transport mirror is complete and verified
+
+- **Outcome of the retention decision above.** With 8.8722 GiB free, all five Attempt-12 selected leaves were published to the private `AlphaAvatar/aadistill-transport` repo — 15 files, 5.5513 GiB, in the frozen selected order `cca699c9, 85bde4de, 158b96cf, 4e429f7e, 281a02c3`.
+- **Verified three independent ways**, because a copy that is present but wrong would only be discovered on a billing pod: remote size and the hub's own LFS sha256 OID (no bytes moved); a round-trip download re-hashed locally; and `verify_transferred_leaf` — the same function the pod runs — rebuilding the identity from the bytes that actually arrived. Result: **5/5 `matched` and `shard_matched`**, and **`artifact_digest` reproduces the committed attempt-12 record for all five**. The manifest is marked `verified: true`; the continuation's `$0` gate refuses anything less.
+- **Final quota:** inventory 89.8091 GiB, **3.3209 GiB free**. The session declares 25 relay inputs — 10 main relay, 15 transport — with only 2 small artifacts left on the scp path.
+- **The transfer rates are the point.** Leaves 3-5 uploaded at **0.76-0.79 MB/s**, the identical rate that made the scp path impossible. Nothing about the dev box improved. What changed is *when and where* the slow half happens: once, at `$0`, off the paid path, with the pod pulling from the hub instead. Leaves 1-2 completed at 164 and 241 MB/s because the hub deduplicated them — which incidentally established that the quota-blocked run had transferred leaf 2's bytes and only had its commit refused.
+- **Risks that remain.** The reclaim lever is spent: 69.671 GiB of remote objects are sole-copy and off-limits, the wheelhouses are on the paid critical path, and only 3.32 GiB of quota is left. A future need for remote space means a plan upgrade or a maintainer decision about sole-copy evidence, not another cleanup.
+- **Revisit when:** a continuation is authorised. Attempt 2's grant and authorization are spent, and this work moved the continuation harness, so Attempt 3 needs a new grant. Nothing was launched.
+
 ## 2026-08-22 — Retired 8.4752 GiB of REMOTE relay copies; the leaves now fit
 
 - **Context:** the account-wide storage finding changed the retention calculus. The maintainer decided explicitly that obsolete remote checkpoint redundancy is not worth blocking the five selected Phase-A leaves, and authorised deleting HF/relay copies whose canonical local copy is complete and hash-verified.

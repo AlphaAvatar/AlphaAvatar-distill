@@ -1,4 +1,4 @@
-**Updated:** 2026-08-22 · branch `main` · the multi-repo relay contract is built; leaf transport is still unsolved
+**Updated:** 2026-08-22 · branch `main` · leaf transport SOLVED — the five-leaf mirror is verified
 
 # Current state
 
@@ -94,14 +94,14 @@ Also frozen: recovery design, selection rules, pooled_counts@v2, Stage-3 artifac
 
 ## Latest verification
 
-After building the multi-repo relay contract and measuring the second-repo
-transport premise to be false. CPU only — no checkpoint loaded, no metric
-measured, no GPU used:
+After retiring 8.4752 GiB of remote copies and verifying the five-leaf
+transport mirror. CPU only — no checkpoint loaded, no metric measured, no GPU
+used:
 
-* full suite **2159 passed, 13 skipped, 0 errors** in 19:27. The two extra
-  skips are the honest *no verified transport* branch, paired with tests
-  that assert the `$0` gate **refuses** in that state.
-* pod simulator **2118 passed, 24 skipped**; artifact tree restored **exactly** —
+* full suite **2160 passed, 12 skipped, 0 errors** in 20:03 — one more test
+  runs and one fewer skips, because the transport is now verified rather than
+  absent.
+* pod simulator **2119 passed, 23 skipped**; artifact tree restored **exactly** —
   listing hash `c1726a62…` before and after.
 * frozen-asset verifier **passed**, and was **not** weakened or rescoped.
 * **13 mutations**, each a passing state made to fail: the four executables the
@@ -305,7 +305,58 @@ covered set fails, that each of the six uniqueness fields fails on a real
 collision, and that rewriting the continuation's `plan_hash` — the thing this
 change exists *not* to do — fails.
 
-## Leaf transport: the second-repo route is measured, and it does not work
+## Leaf transport is solved and verified
+
+**The five Attempt-12 leaves are mirrored** in the private
+`AlphaAvatar/aadistill-transport` repo — 15 files, **5.5513 GiB**, in the frozen
+selected order. The manifest
+[`autoinit_selected_leaf_transport_manifest.json`](autoinit_selected_leaf_transport_manifest.json)
+is marked `verified: true`, and the continuation's `$0` gate accepts it.
+
+Verified three independent ways, because a copy that is *present* but *wrong*
+would be discovered on a billing pod:
+
+| check | result |
+| --- | --- |
+| remote size + hub LFS sha256 OID, no bytes moved | 15/15 |
+| round-trip download, re-hashed locally | 15/15 |
+| `verify_transferred_leaf` re-identification | **5/5 `matched` and `shard_matched`** |
+| `artifact_digest` reproduces the attempt-12 record | **5/5** |
+
+The session now declares **25** relay inputs — 10 from the main relay, 15 from
+transport — and only **2** small artifacts remain on the scp path.
+
+### What made it possible
+
+Retiring **8.4752 GiB** of remote copies, an explicit maintainer decision after
+the account-wide finding. These are **remote retention changes, not retirements
+of science**: every checkpoint still exists canonically on local disk with
+unchanged identity and hashes.
+Record: [`autoinit_relay_retention_20260822.json`](autoinit_relay_retention_20260822.json).
+
+Quota: inventory **92.7330 → 84.2578 GiB** (8.8722 free), then the leaves
+uploaded to **89.8091 GiB**, leaving **3.3209 GiB** of headroom.
+
+**The reclaim was capped by evidence, not effort.** 32 objects totalling
+**69.671 GiB** have no byte-identical local copy and are the only surviving
+copies — `e1_scaling_20260801` alone is 42.19 GiB across 19 objects, the largest
+and most obviously obsolete group by name, untouchable for exactly that reason.
+8.47 GiB was all the duplicated bytes there were, and **this lever is now spent**.
+
+**A near-miss:** the two wheelhouses (7.4 GiB) are fetched by `snapshot_download`
+inside the setup script, *not* through the `RelayInput` contract, so "delete what
+no manifest declares" would have flagged them — putting PyPI back on the paid
+critical path, the failure that cost $2.07. Protected by prefix, re-derived
+inside the deletion script.
+
+**Rates, for the record:** leaves 3–5 uploaded at **0.76–0.79 MB/s** — the same
+rate that made scp impossible. Nothing about the dev box improved; the push now
+happens once, at `$0`, off the paid path, and the pod pulls from the hub instead.
+Leaves 1–2 went at 164 and 241 MB/s because the hub deduplicated them, which
+incidentally showed the quota-blocked run had transferred leaf 2's bytes and only
+had its commit refused.
+
+## How the second-repo premise was refuted (historical)
 
 The maintainer directed that the five leaves reach a pod through a second
 private Hugging Face repo, on the strength of a 2026-08-13 note: *"a 1 MiB write
