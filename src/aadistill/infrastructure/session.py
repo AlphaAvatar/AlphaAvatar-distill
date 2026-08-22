@@ -75,6 +75,12 @@ def _bad_repo_dir(dest: str) -> list[str]:
 # what a session needs staged before its driver starts
 # ---------------------------------------------------------------------------
 
+#: The artifact store every declaration has always meant. Named once so a
+#: session that needs a *different* repository says so in its manifest rather
+#: than in a fetch block nobody declared.
+MAIN_RELAY = "AlphaAvatar/aadistill-artifacts"
+
+
 @dataclass(frozen=True)
 class RelayInput:
     """One object the pod fetches from the artifact store.
@@ -99,6 +105,24 @@ class RelayInput:
     """
 
     path: str
+    #: WHICH artifact repository holds it. Defaults to the main relay, so every
+    #: existing declaration keeps its meaning unchanged.
+    #:
+    #: Added 2026-08-22 because the five Attempt-12 leaves cannot travel by the
+    #: routes that existed. Pushing them by scp needs 1.99 MB/s to fit the
+    #: launcher's 600 s per-asset timeout against a dev box observed at
+    #: 0.44-0.72 MB/s — that is what ended continuation attempt 2 — and the main
+    #: relay had 1.60 GiB of headroom against 5.55 GiB of leaves. A second
+    #: private repo was measured to work (2026-08-13: "a 1 MiB write to a
+    #: different private repo succeeded, so the limit binds per-repo"), which
+    #: inverts the transfer: the pod PULLS at hub speed instead of the dev box
+    #: PUSHING while a GPU bills.
+    #:
+    #: It lives on ``RelayInput`` rather than in a continuation-specific fetch
+    #: block for the same reason ``dest`` does. A hidden second fetch path would
+    #: be exactly the defect this type was created to remove: staging the
+    #: manifest does not declare.
+    repo: str = MAIN_RELAY
     #: Repository-relative DIRECTORY it is staged into on the pod. ``None`` means
     #: setup does not stage it — the continuation's two permanent controls arrive
     #: by ``--transport``, and this entry buys them the $0 precheck. It can no
@@ -127,8 +151,8 @@ class RelayInput:
         the destination and the digest would describe a staging nobody could
         reproduce.
         """
-        return {"path": self.path, "dest": self.dest, "sha256": self.sha256,
-                "also_stage_to": self.also_stage_to}
+        return {"repo": self.repo, "path": self.path, "dest": self.dest,
+                "sha256": self.sha256, "also_stage_to": self.also_stage_to}
 
 
 @dataclass(frozen=True)

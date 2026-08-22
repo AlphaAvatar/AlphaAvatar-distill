@@ -114,12 +114,25 @@ def test_it_is_not_priced_at_the_full_search_ceiling(spec):
 
 # --- 3. the five leaves are declared session inputs -------------------------
 
+def leaf_inputs(spec, launcher):
+    return [r for r in spec.setup.relay_inputs
+            if r.dest and r.dest.startswith(launcher.STAGED_INTO)]
+
+
 def test_the_five_leaves_are_declared_in_the_selected_order(spec, launcher):
-    staged = [a for a in spec.setup.local_assets
-              if a.install_to == launcher.STAGED_INTO]
-    assert len(staged) == 5
+    """They travel by RELAY now, not by scp — attempt 2 died pushing the first
+    one — but the order is still the ranking and still comes from the record."""
+    if not launcher.transport_is_verified():
+        pytest.skip("no verified transport; covered by the refusal test below")
+    staged = leaf_inputs(spec, launcher)
+    seen: list[str] = []
+    for r in staged:
+        sid = r.dest.rsplit("/", 1)[-1]
+        if sid not in seen:
+            seen.append(sid)
     recorded = [l["state_id"] for l in launcher.selected_leaf_identities()]
-    assert [a.dest_name for a in staged] == recorded, "order is the ranking"
+    assert seen == recorded, "order is the ranking"
+    assert len(staged) == 15, "five leaves x three files"
 
 
 def test_the_leaf_identities_come_from_the_committed_record(launcher):
@@ -134,15 +147,40 @@ def test_the_leaf_identities_come_from_the_committed_record(launcher):
         assert sid not in src, f"{sid[:12]} is hard-coded in the launcher"
 
 
-def test_the_leaves_are_staged_through_the_session_asset_contract(spec, launcher):
-    """Through `SESSION_ASSETS`, like every other local input — so a session
-    that failed to declare them gets none rather than finding a host path."""
-    assert "SESSION_ASSETS" in spec.setup.required_env
-    staged = [a for a in spec.setup.local_assets
-              if a.install_to == launcher.STAGED_INTO]
-    for a in staged:
-        assert a.as_env_entry() == f"{a.dest_name}:{launcher.STAGED_INTO}"
-        assert str(launcher.CKPT_STORE) in a.repo_path
+def test_the_leaves_are_staged_through_the_declared_relay_contract(spec, launcher):
+    """Through `SESSION_RELAY_INPUTS`, from the transport repo, with a digest on
+    every file — so a session that failed to declare them gets none rather than
+    finding them on some undeclared path.
+
+    They are no longer `LOCAL_ASSETS`: pushing 1.110 GiB by scp needs 1.99 MB/s
+    to fit the launcher's 600 s per-asset timeout, and the dev box is 0.72 MB/s.
+    """
+    assert "SESSION_RELAY_INPUTS" in spec.setup.required_env
+    if not launcher.transport_is_verified():
+        pytest.skip("no verified transport; covered by the refusal test below")
+    staged = leaf_inputs(spec, launcher)
+    assert staged, "the leaves are not declared as relay inputs"
+    for r in staged:
+        assert r.repo == launcher.TRANSPORT_REPO
+        assert r.sha256, f"{r.path} is staged with no digest"
+        assert r.path.startswith("phase_a_attempt12/"), (
+            "the remote path must identify the attempt")
+        assert r.dest.rsplit("/", 1)[-1] in r.path, (
+            "the remote path must identify the state id")
+
+
+def test_no_large_checkpoint_travels_by_scp_any_more(spec, launcher):
+    """The regression that cost attempt 2: a multi-GiB LOCAL_ASSET is a push
+    across the dev-box uplink under a 600 s timeout."""
+    for a in spec.setup.local_assets:
+        src = REPO / a.repo_path if not a.repo_path.startswith("/") else Path(a.repo_path)
+        if not src.exists():
+            continue
+        size = sum(f.stat().st_size for f in src.rglob("*") if f.is_file()) \
+            if src.is_dir() else src.stat().st_size
+        assert size < 200 * 2**20, (
+            f"{a.repo_path} is {size / 2**20:.0f} MiB on the scp path; at the "
+            "measured 0.72 MB/s that cannot fit the 600 s per-asset timeout")
 
 
 def test_the_frozen_phase_a_assets_are_still_declared(spec):
@@ -162,14 +200,37 @@ def test_a_missing_preserved_leaf_refuses_before_a_pod_exists(launcher, tmp_path
     assert not ok and "absent" in why
 
 
-def test_the_capacity_gate_verifies_the_real_leaves(launcher):
+def test_the_leaf_gate_reflects_whether_a_verified_transport_exists(launcher):
+    """Both branches are asserted, because both are real states of this repo.
+
+    With a verified transport the gate passes and names five leaves. Without
+    one — which is where the account-wide Hugging Face private-storage limit
+    left it on 2026-08-22 — it must **refuse**, at `$0`, naming the missing
+    transport. Silence in that state would let a session launch with nothing to
+    stage.
+    """
     class Ctx:
         evidence: dict = {}
-    ok, why = launcher.selected_leaves_present_gate(Ctx)
     if not Path(launcher.CKPT_STORE).is_dir():
-        pytest.skip("the preserved leaves are not on this host")
-    assert ok, why
-    assert Ctx.evidence["precheck"]["selected_leaves"]["n"] == 5
+        pytest.skip("the canonical leaves are not on this host")
+    ok, why = launcher.selected_leaves_present_gate(Ctx)
+    if launcher.transport_is_verified():
+        assert ok, why
+        assert Ctx.evidence["precheck"]["selected_leaves"]["n"] == 5
+        assert Ctx.evidence["precheck"]["selected_leaves"]["transport_files"] == 15
+    else:
+        assert not ok, "the gate passed with no verified transport"
+        assert "no verified transport" in why
+        assert Ctx.evidence["precheck"]["selected_leaves"][
+            "transport_verified"] is False
+
+
+def test_an_unverified_transport_declares_no_leaf_inputs(launcher):
+    """The other half: a session with no verified transport must not silently
+    declare relay inputs that would 404 on the pod."""
+    if launcher.transport_is_verified():
+        pytest.skip("the transport is verified; the empty branch is not live")
+    assert launcher.selected_leaf_inputs() == ()
 
 
 # --- 4. the strict importer is the one used ---------------------------------

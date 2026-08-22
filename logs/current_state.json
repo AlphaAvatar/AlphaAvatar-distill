@@ -49,6 +49,7 @@
     "stage1_runtime_deadline_minutes": 363.9841
   },
   "complete": [
+    "the multi-repo relay contract: RelayInput carries its repository, setup fetches per-item, the $0 precheck lists every declared repo. Transport-agnostic",
     "control-plane resilience: all three SessionRunner reads; unconfirmable image identity fails closed",
     "Phase-A Stage 1 PASSED TWICE, byte-identical, five leaves preserved off-pod -- see continuation_ready",
     "the tokenizer consumer contract: the trainer declares and verifies its tokenizer source instead of inferring it from student_path",
@@ -59,12 +60,12 @@
     "Stage 0 on hardware, passed five times (attempt 10 attested interval 0.011695, floor 0.3000, plan 02be33b9)"
   ],
   "latest_verification": {
-    "utc": "2026-08-22T03:20:00Z",
-    "after": "including the recovery continuation in the shared structural session set",
-    "full_suite": "2135 passed, 11 skipped, 0 errors in 19:16",
-    "pod_simulator": "2094 passed, 22 skipped; artifact tree restored EXACTLY (c1726a62)",
+    "utc": "2026-08-22T16:50:00Z",
+    "after": "the multi-repo relay contract and the refuted second-repo transport premise",
+    "full_suite": "2159 passed, 13 skipped in 19:27; the 2 extra skips are the 'no verified transport' branch, whose refusal is asserted",
+    "pod_simulator": "2118 passed, 24 skipped; artifact tree restored EXACTLY (c1726a62)",
     "frozen_asset_verifier": "passed, no problems; NOT weakened or rescoped",
-    "scope": "CPU only, repo .venv (transformers 5.13.1); no checkpoint loaded, no metric measured, no GPU used"
+    "scope": "CPU only, repo .venv; no checkpoint loaded, no metric measured, no GPU used"
   },
   "failed": [
     {
@@ -115,8 +116,8 @@
     "the paid device-canary session path: STRATEGICALLY TERMINATED 2026-08-18. Two authorized sessions, $0.1240, zero canary runs; both died in the wrapper's inherited contracts. Its evidence and its generic lesson are kept; no further canary is prepared."
   ],
   "next_starting_point": {
-    "status": "Attempt 2 fail-closed on local-asset staging, $0.2389, no stage ran, pod provider-confirmed gone. THE FIVE STAGE-1 LEAVES HAVE NO ROUTE TO A POD: scp needs 1.99 MB/s against <=0.72 MB/s observed, and the relay has 1.60 GiB headroom against 5.55 GiB. Nothing is running, billing, authorized or prepared.",
-    "the_ask": "A maintainer decision on leaf TRANSPORT before any further continuation. This is not a retry: the arithmetic says a rerun fails identically.",
+    "status": "Leaf transport is unsolved. The multi-repo contract is built and verified, but the second private repo cannot hold the leaves: the HF private-storage limit is account-wide (93.279 GiB used vs ~93.13 limit). The continuation refuses at $0 while no verified transport manifest exists. Nothing is running, billing, authorized or prepared.",
+    "the_ask": "A maintainer decision on TRANSPORT. The 2026-08-13 'limit binds per-repo' conclusion came from a 1 MiB probe and is refuted; any replacement must be tested at representative size.",
     "budget": "cap $234.00, spent $213.7203, remaining $20.2797. Balance is not authorization."
   },
   "read_order": [
@@ -145,7 +146,7 @@
     "budget_hard_usd": 16.7456,
     "not_prepared": "no grant, no authorization, no pod",
     "stage1_source": "attempt 12: 43 states, 5 selected, byte-identical to attempt 11",
-    "blocked_on": "LEAF TRANSPORT. scp needs 1.99 MB/s per 1.110 GiB leaf to fit the hard-coded 600 s asset timeout; observed <=0.72 MB/s. The relay has 1.60 GiB headroom against 5.55 GiB. Both routes closed",
+    "blocked_on": "LEAF TRANSPORT, unsolved. scp needs 1.99 MB/s per 1.110 GiB leaf to fit the 600 s asset timeout; measured 0.69 MB/s (leaf 1: 28.8 min). The second-private-repo route adds nothing: the HF private limit is ACCOUNT-WIDE, not per-repo -- see logs/autoinit_leaf_transport_quota_finding.json",
     "authorization": "own schema recovery_continuation_authorization/v1, 22-file harness e5a7183a (Phase-A set minus the unreachable search, plus the continuation executables). Ceiling derived from continuation_budget()",
     "imports": "attempt 12's five preserved leaves, re-identified from bytes; no search is reachable"
   }

@@ -1,4 +1,4 @@
-**Updated:** 2026-08-22 · branch `main` · attempt 2 fail-closed on leaf staging; the five leaves have no route to a pod
+**Updated:** 2026-08-22 · branch `main` · the multi-repo relay contract is built; leaf transport is still unsolved
 
 # Current state
 
@@ -94,12 +94,14 @@ Also frozen: recovery design, selection rules, pooled_counts@v2, Stage-3 artifac
 
 ## Latest verification
 
-After the control-plane resilience closure and after including the recovery
-continuation in the shared structural session set. CPU only — no checkpoint
-loaded, no metric measured, no GPU used:
+After building the multi-repo relay contract and measuring the second-repo
+transport premise to be false. CPU only — no checkpoint loaded, no metric
+measured, no GPU used:
 
-* full suite **2135 passed, 11 skipped, 0 errors** in 19:16.
-* pod simulator **2094 passed, 22 skipped**; artifact tree restored **exactly** —
+* full suite **2159 passed, 13 skipped, 0 errors** in 19:27. The two extra
+  skips are the honest *no verified transport* branch, paired with tests
+  that assert the `$0` gate **refuses** in that state.
+* pod simulator **2118 passed, 24 skipped**; artifact tree restored **exactly** —
   listing hash `c1726a62…` before and after.
 * frozen-asset verifier **passed**, and was **not** weakened or rescoped.
 * **13 mutations**, each a passing state made to fail: the four executables the
@@ -302,6 +304,66 @@ and no Stage-1 reserves to a hard `$16.7456`, and declaring
 covered set fails, that each of the six uniqueness fields fails on a real
 collision, and that rewriting the continuation's `plan_hash` — the thing this
 change exists *not* to do — fails.
+
+## Leaf transport: the second-repo route is measured, and it does not work
+
+The maintainer directed that the five leaves reach a pod through a second
+private Hugging Face repo, on the strength of a 2026-08-13 note: *"a 1 MiB write
+to a different private repo succeeded, so the limit binds per-repo, not
+account-wide."* **That conclusion is refuted.**
+
+A dedicated private repo `AlphaAvatar/aadistill-transport` was created and the
+leaves uploaded in the frozen selected order. It accepted **exactly one leaf —
+1.110 GiB** — and then refused:
+
+> `BadRequestError: Private repository storage limit reached`
+
+| repo | files | size |
+| --- | ---: | ---: |
+| `aadistill-transport` (**brand new**) | 6 | **1.1103 GiB** |
+| `aadistill-artifacts` | 1162 | 92.1687 GiB |
+| **combined** | | **93.279 GiB** vs the ~**93.13 GiB** recorded limit |
+
+A fresh repository got **no allowance of its own** — it consumed the account's
+remaining slack and stopped. The limit is **account-wide**.
+
+**Why the earlier inference failed, which is the reusable part.** A 1 MiB write
+succeeding is equally consistent with an account-wide limit that happens to have
+≥1 MiB of slack — which is exactly what it had. A token-sized probe cannot
+distinguish the two hypotheses; only a write at **representative size** can. Any
+replacement transport must be tested at ~5.55 GiB, not with a small file.
+Measurements: [`autoinit_leaf_transport_quota_finding.json`](autoinit_leaf_transport_quota_finding.json).
+
+**Also measured, and it confirms the attempt-2 diagnosis independently:** leaf 1
+uploaded at **0.69 MB/s (28.8 min)**. The scp path needs 1.99 MB/s to fit the
+600 s per-asset timeout — 2.9× over.
+
+### What was built anyway, and is worth keeping
+
+The multi-repo contract is **transport-agnostic** and mutation-verified, so
+whatever route is chosen, a session can declare where its bytes come from:
+
+* `RelayInput` carries `repo`, defaulting to the main relay — nothing existing
+  moved, and the ten Phase-A science inputs are unchanged;
+* `SESSION_RELAY_INPUTS` serializes it, so the session record preserves it;
+* the shared setup fetches each item from **its** declared repo and now names no
+  repository of its own in the staging block; an item with no repo fails closed;
+* the `$0` precheck groups declared inputs **by repository** and lists every one,
+  so a leaf in the wrong repo, a changed repo id, or one missing remote file all
+  refuse before a provider call.
+
+**Mutation-verified 14 ways** across the transport publisher (4 verification
+layers plus canonical-drift and unverified-manifest refusal) and the multi-repo
+contract (single-repo revert, repo dropped from the env, the shell naming a repo
+again, the default moved), plus an **executed** two-repo staging test.
+
+The continuation now declares the leaves as relay inputs and **refuses at `$0`**
+while no verified transport manifest exists — it does not silently declare inputs
+that would 404 on a pod.
+
+**Nothing was deleted.** The 1.110 GiB in the transport repo is a re-creatable
+copy whose canonical original is intact and verifying; removing it would reclaim
+account quota, but that is the maintainer's call.
 
 ## How the continuation was built
 

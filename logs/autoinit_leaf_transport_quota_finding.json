@@ -1,0 +1,27 @@
+{
+  "schema": "aadistill.autoinit.leaf_transport_quota_finding/v1",
+  "measured_utc": "2026-08-22T08:20:00Z",
+  "question": "Does the Hugging Face private-storage limit bind PER REPOSITORY, as recorded on 2026-08-13, or across the account?",
+  "answer": "ACCOUNT-WIDE. The per-repository conclusion was wrong.",
+  "how": "A brand-new, empty private repo accepted exactly one 1.110 GiB leaf and then refused the next upload with BadRequestError: 'Private repository storage limit reached'. A per-repository limit would have given a fresh repo its full allowance.",
+  "repos": {
+    "AlphaAvatar/aadistill-transport": {
+      "private": true,
+      "files": 6,
+      "bytes": 1192139865,
+      "gib": 1.1103
+    },
+    "AlphaAvatar/aadistill-artifacts": {
+      "private": true,
+      "files": 1162,
+      "bytes": 98965430104,
+      "gib": 92.1687
+    }
+  },
+  "combined_bytes": 100157569969,
+  "combined_gib": 93.279,
+  "recorded_limit_gib": 93.13,
+  "why_the_earlier_inference_failed": "The 2026-08-13 probe wrote 1 MiB to a second private repo and succeeded. That is equally consistent with an account-wide limit that happened to have >=1 MiB of slack, which is what it actually had. A token-sized write cannot distinguish the two hypotheses; only a write at representative size can.",
+  "consequence": "The five selected leaves (5.55 GiB) cannot be delivered by a second private repo. Transport remains unsolved.",
+  "not_done": "Nothing was deleted. The 1.110 GiB already in the transport repo is a re-creatable copy whose canonical original is intact and verified on the dev box; it is left in place for the maintainer to dispose of."
+}

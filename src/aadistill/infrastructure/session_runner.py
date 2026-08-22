@@ -259,21 +259,30 @@ class SessionRunner:
             if message:
                 self.say(message)
 
+        # Grouped BY REPOSITORY, because a session may declare inputs in more
+        # than one. Checking every path against a single repo would report the
+        # transport leaves as missing, or — worse, if the ids were ever swapped —
+        # report a path as present because some *other* repo happens to hold it.
+        by_repo: dict[str, list[str]] = {}
+        for r in self.spec.setup.relay_inputs:
+            by_repo.setdefault(r.repo, []).append(r.path)
         need = [r.path for r in self.spec.setup.relay_inputs]
         missing: list[str] = []
-        if need:
+        listed: dict[str, int] = {}
+        for repo, paths in sorted(by_repo.items()):
             try:
                 from huggingface_hub import HfApi              # noqa: PLC0415
-                present = set(HfApi().list_repo_files(
-                    getattr(self.a, "relay_repo", "AlphaAvatar/aadistill-artifacts"),
-                    repo_type="model"))
+                present = set(HfApi().list_repo_files(repo, repo_type="model"))
             except Exception as exc:                           # noqa: BLE001
-                self.say(f"ABORT: cannot list the relay: {exc!r}"[:200])
+                self.say(f"ABORT: cannot list {repo}: {exc!r}"[:200])
                 return False
-            missing = [f for f in need if f not in present]
+            listed[repo] = len(present)
+            missing += [f"{repo}:{f}" for f in paths if f not in present]
         local = [a.repo_path for a in self.spec.setup.local_assets]
         local_missing = [p for p in local if not (self.repo_root / p).exists()]
         self.ev["precheck"] = {"relay_needed": need, "relay_missing": missing,
+                               "relay_repos": {r: len(p) for r, p in by_repo.items()},
+                               "relay_repo_files_listed": listed,
                                "local_assets": local,
                                "local_missing": local_missing}
         if missing or local_missing:
@@ -281,7 +290,9 @@ class SessionRunner:
                      f"local missing {local_missing}")
             self.save()
             return False
-        self.say(f"precheck OK: {len(need)} relay inputs, {len(local)} local assets")
+        repos = ", ".join(f"{len(p)} from {r}" for r, p in sorted(by_repo.items()))
+        self.say(f"precheck OK: {len(need)} relay inputs ({repos}), "
+                 f"{len(local)} local assets")
         return True
 
     # -- 3. create ---------------------------------------------------------

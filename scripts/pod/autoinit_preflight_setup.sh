@@ -69,10 +69,16 @@ mark REPO_READY
 # relay-side twin of the local-asset defect that cost the canary retry $0.0637,
 # and it survived the fix that closed the other one.
 #
-# `SESSION_RELAY_INPUTS` is the session's own manifest as JSON: for each input a
-# relay path, the repository directory it is staged into, an optional second
-# directory, and an optional sha256. A session that declares nothing stages
-# nothing.
+# `SESSION_RELAY_INPUTS` is the session's own manifest as JSON: for each input
+# the REPOSITORY it comes from, a path within it, the repository directory it is
+# staged into on the pod, an optional second directory, and an optional sha256.
+# A session that declares nothing stages nothing.
+#
+# `repo` is declared per item rather than fixed here, because the five
+# Attempt-12 leaves live in a private TRANSPORT repo: the main relay had
+# 1.60 GiB of headroom against 5.55 GiB of leaves, and pushing them by scp
+# needed 1.99 MB/s against a dev box observed at 0.44-0.72 MB/s. This shell
+# still names no repository, path, filename or digest of its own.
 : "${SESSION_RELAY_INPUTS?the launcher must declare the relay science inputs for this session, even when there are none}"
 say "staging the session's declared science inputs from the relay"
 cd "$REPO"
@@ -84,7 +90,7 @@ REPO="$REPO" python3 - <<'FETCHEOF'
 import hashlib, json, os, shutil, sys, time
 from pathlib import Path
 from huggingface_hub import hf_hub_download
-RELAY, TOKEN = "AlphaAvatar/aadistill-artifacts", os.environ["HF_TOKEN"]
+TOKEN = os.environ["HF_TOKEN"]
 REPO = Path(os.environ["REPO"])
 
 inputs = json.loads(os.environ["SESSION_RELAY_INPUTS"])
@@ -94,26 +100,30 @@ if not inputs:
 # Retry policy unchanged from the hardcoded version: five attempts, linear
 # backoff. It is the one part of this block that was ever load-bearing on a real
 # host, so it is transformed rather than rewritten.
-def fetch_one(path, tries=5):
+def fetch_one(repo, path, tries=5):
     last = None
     for attempt in range(tries):
         try:
-            return hf_hub_download(RELAY, path, repo_type="model", token=TOKEN)
+            return hf_hub_download(repo, path, repo_type="model", token=TOKEN)
         except Exception as exc:
             last = exc
             time.sleep(5 * (attempt + 1))
-    sys.exit(f"FETCH FAILED {path}: {last}")
+    sys.exit(f"FETCH FAILED {repo}:{path}: {last}")
 
 # Staged first, verified second, so a digest mismatch names the file rather than
 # stopping the run at whichever fetch happened to come next.
 staged = []
 for item in inputs:
     src, dest = item["path"], item.get("dest")
+    repo = item.get("repo")
+    if not repo:
+        sys.exit(f"SESSION_RELAY_INPUTS carries {src} with no repo; this script "
+                 "names no repository of its own")
     if not dest:
         sys.exit(f"SESSION_RELAY_INPUTS carries {src} with no dest; setup only "
                  "receives inputs it is meant to stage")
     name = src.rsplit("/", 1)[-1]
-    cached = fetch_one(src)
+    cached = fetch_one(repo, src)
     landed = []
     for into in (dest, item.get("also_stage_to")):
         if not into:
@@ -122,7 +132,7 @@ for item in inputs:
         d.mkdir(parents=True, exist_ok=True)
         shutil.copy(cached, d / name)
         landed.append(f"{into}/{name}")
-    print(f"  {src} -> {', '.join(landed)}", flush=True)
+    print(f"  {repo}:{src} -> {', '.join(landed)}", flush=True)
     staged.append((src, item.get("sha256"), landed))
 
 # Every declared digest, at every destination the file landed in. The old block

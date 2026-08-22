@@ -30,6 +30,8 @@ import pytest
 from session_specs import (SESSION_LAUNCHERS, all_specs,
                            load_session_launcher, session_args)
 
+from aadistill.infrastructure.session import MAIN_RELAY
+
 REPO = Path(__file__).resolve().parents[2]
 POD = REPO / "scripts/pod"
 SETUP = POD / "autoinit_preflight_setup.sh"
@@ -100,7 +102,8 @@ def test_validate_refuses_a_malformed_relay_input(kwargs, fragment):
     )
 
     _name, _mod, _args, spec = all_specs()[0]
-    base = {"path": "stage1/x/model.safetensors", "dest": "artifacts/stage1/x"}
+    base = {"repo": MAIN_RELAY, "path": "stage1/x/model.safetensors",
+            "dest": "artifacts/stage1/x"}
     bad = RelayInput(**{**base, **kwargs})
     manifest = dataclasses.replace(spec.setup, relay_inputs=(bad,))
     assert isinstance(manifest, SetupManifest)
@@ -493,7 +496,7 @@ def extract_staging_block() -> str:
     return body
 
 
-def run_staging(tmp_path, inputs, relay_bytes, monkeypatch):
+def run_staging(tmp_path, inputs, relay_bytes, monkeypatch, record_repo=None):
     """Execute the real block with a stub `huggingface_hub`, in `tmp_path`."""
     import json
     import sys
@@ -506,6 +509,8 @@ def run_staging(tmp_path, inputs, relay_bytes, monkeypatch):
 
     def hf_hub_download(repo, path, repo_type=None, token=None):
         fetched.append(path)
+        if record_repo is not None:
+            record_repo.append((path, repo))
         if path not in relay_bytes:
             raise FileNotFoundError(path)
         p = cache / path.replace("/", "__")
@@ -536,10 +541,11 @@ def test_the_staging_block_stages_exactly_what_it_is_given(tmp_path, monkeypatch
     digest = hashlib.sha256(payload).hexdigest()
     other = b"ladder\n"
     inputs = [
-        {"path": "stage1/x/checkpoint/model.safetensors",
+        {"repo": MAIN_RELAY, "path": "stage1/x/checkpoint/model.safetensors",
          "dest": "artifacts/stage1/x/checkpoint",
          "sha256": digest, "also_stage_to": None},
-        {"path": "corpus/ladder/blocks.npz", "dest": "artifacts/stage3/probe",
+        {"repo": MAIN_RELAY, "path": "corpus/ladder/blocks.npz",
+         "dest": "artifacts/stage3/probe",
          "sha256": hashlib.sha256(other).hexdigest(),
          "also_stage_to": "artifacts/stage3/mirror"},
     ]
@@ -572,7 +578,7 @@ def test_the_staging_block_stages_nothing_when_a_session_declares_nothing(
 def test_the_staging_block_refuses_a_wrong_digest(tmp_path, monkeypatch):
     import hashlib
 
-    inputs = [{"path": "a/b.bin", "dest": "artifacts/stage1/x",
+    inputs = [{"repo": MAIN_RELAY, "path": "a/b.bin", "dest": "artifacts/stage1/x",
                "sha256": hashlib.sha256(b"expected").hexdigest(),
                "also_stage_to": None}]
     with pytest.raises(SystemExit) as e:
@@ -592,7 +598,7 @@ def test_the_staging_block_verifies_the_mirror_too(tmp_path, monkeypatch, capsys
     """
     import hashlib
 
-    inputs = [{"path": "a/b.bin", "dest": "artifacts/stage1/x",
+    inputs = [{"repo": MAIN_RELAY, "path": "a/b.bin", "dest": "artifacts/stage1/x",
                "sha256": hashlib.sha256(b"ok").hexdigest(),
                "also_stage_to": "artifacts/stage1/y"}]
     repo, _ = run_staging(tmp_path, inputs, {"a/b.bin": b"ok"}, monkeypatch)
@@ -610,19 +616,52 @@ def test_the_staging_block_refuses_an_input_with_no_destination(
     """Setup receives what it must stage. A dest-less entry reaching it means
     the precheck-only filter broke, and staging it somewhere invented would be
     worse than stopping."""
-    inputs = [{"path": "a/b.bin", "dest": None, "sha256": None,
+    inputs = [{"repo": MAIN_RELAY, "path": "a/b.bin", "dest": None, "sha256": None,
                "also_stage_to": None}]
     with pytest.raises(SystemExit) as e:
         run_staging(tmp_path, inputs, {"a/b.bin": b"x"}, monkeypatch)
     assert "no dest" in str(e.value)
 
 
+def test_the_staging_block_refuses_an_input_with_no_repo(tmp_path, monkeypatch):
+    """Executed, not inspected. An item without a repository means the manifest
+    and the shell disagree about who decides where bytes come from, and the
+    shell must not resolve that by defaulting."""
+    inputs = [{"path": "a/b.bin", "dest": "artifacts/stage1/x",
+               "sha256": None, "also_stage_to": None}]          # no "repo"
+    with pytest.raises(SystemExit) as e:
+        run_staging(tmp_path, inputs, {"a/b.bin": b"x"}, monkeypatch)
+    assert "with no repo" in str(e.value)
+
+
+def test_the_staging_block_fetches_each_item_from_its_own_repo(tmp_path,
+                                                               monkeypatch):
+    """Two repositories in one manifest, and each file must be asked for from
+    the one that declares it — the property the transport leaves depend on."""
+    seen: list[tuple[str, str]] = []
+    inputs = [
+        {"repo": MAIN_RELAY, "path": "sci/a.bin", "dest": "artifacts/stage1/x",
+         "sha256": None, "also_stage_to": None},
+        {"repo": "AlphaAvatar/aadistill-transport", "path": "leaf/m.bin",
+         "dest": "artifacts/stage1/y", "sha256": None, "also_stage_to": None},
+    ]
+    repo_dir, fetched = run_staging(
+        tmp_path, inputs, {"sci/a.bin": b"one", "leaf/m.bin": b"two"},
+        monkeypatch, record_repo=seen)
+    assert dict(seen) == {"sci/a.bin": MAIN_RELAY,
+                          "leaf/m.bin": "AlphaAvatar/aadistill-transport"}
+    assert (repo_dir / "artifacts/stage1/x/a.bin").read_bytes() == b"one"
+    assert (repo_dir / "artifacts/stage1/y/m.bin").read_bytes() == b"two"
+
+
 def test_the_staging_block_gives_up_and_names_the_file(tmp_path, monkeypatch):
-    inputs = [{"path": "missing/thing.bin", "dest": "artifacts/stage1/x",
+    inputs = [{"repo": MAIN_RELAY, "path": "missing/thing.bin", "dest": "artifacts/stage1/x",
                "sha256": None, "also_stage_to": None}]
     with pytest.raises(SystemExit) as e:
         run_staging(tmp_path, inputs, {}, monkeypatch)
-    assert "FETCH FAILED missing/thing.bin" in str(e.value)
+    # The message names the REPOSITORY as well as the path now, because with
+    # more than one declared repo "not found" is ambiguous without it.
+    assert f"FETCH FAILED {MAIN_RELAY}:missing/thing.bin" in str(e.value)
 
 
 @pytest.mark.parametrize("name,extra", SESSION_LAUNCHERS,

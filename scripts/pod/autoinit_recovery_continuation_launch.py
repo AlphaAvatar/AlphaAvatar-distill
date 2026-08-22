@@ -52,7 +52,7 @@ from aadistill.autoinit.recovery_continuation import (  # noqa: E402
     SEARCH_ONLY_HARNESS_FILES, recovery_continuation_harness_digest,
 )
 from aadistill.infrastructure.session import (  # noqa: E402
-    ArtifactPolicy, LocalAsset, MarkerPolicy, SessionContext, SessionSpec,
+    ArtifactPolicy, MarkerPolicy, RelayInput, SessionContext, SessionSpec,
     SetupManifest, TeardownPolicy,
 )
 from aadistill.infrastructure.session_prechecks import (  # noqa: E402
@@ -77,8 +77,13 @@ FROZEN_SCIENCE_PLAN = "logs/autoinit_phase_a_recovery_plan_frozen.json"
 #: Attempt 12's committed durability record — the five ids, in order, with the
 #: digests the bytes must reproduce.
 STAGE1_EVIDENCE = REPO_ROOT / "logs/autoinit_phase_a_attempt12"
-#: The canonical local checkpoint store the leaves were preserved into.
+#: The canonical local checkpoint store. Still the scientific owner: the
+#: transport repo is a delivery path and nothing more.
 CKPT_STORE = Path("/home/ecs-user/aad-artifacts/autoinit/phase_a")
+#: Transport only, private, and verified at $0 before any paid session may use
+#: it -- see logs/autoinit_selected_leaf_transport_manifest.json.
+TRANSPORT_REPO = "AlphaAvatar/aadistill-transport"
+TRANSPORT_MANIFEST = REPO_ROOT / "logs/autoinit_selected_leaf_transport_manifest.json"
 #: Where they land in the pod's repository, and where the driver reads them.
 STAGED_INTO = "artifacts/autoinit/phase_a_selected"
 
@@ -97,20 +102,63 @@ def selected_leaf_identities() -> list[dict]:
             for r in dur["leaves"]]
 
 
-def selected_leaf_assets() -> tuple[LocalAsset, ...]:
-    """The five preserved checkpoints, declared as ordinary session inputs.
+def transport_is_verified() -> bool:
+    """Has the transport manifest been written AND round-trip verified?
 
-    Through the same `SESSION_ASSETS` contract every other local asset uses, so
-    the setup script stages them without knowing what they are — and so a
-    session that failed to declare them gets none rather than silently finding
-    them on a host path.
+    Publishing the leaves is a separate `$0` step
+    (`scripts/autoinit/publish_selected_leaves.py`). Until it has verified all
+    five remote copies against attempt 12's identities, this session has no
+    usable transport and must not launch.
     """
-    return tuple(LocalAsset(str(CKPT_STORE / leaf["state_id"]),
-                            leaf["state_id"], STAGED_INTO)
-                 for leaf in selected_leaf_identities())
+    if not TRANSPORT_MANIFEST.is_file():
+        return False
+    try:
+        man = json.loads(TRANSPORT_MANIFEST.read_text())
+    except json.JSONDecodeError:
+        return False
+    return bool(man.get("verified")) and man.get("repo") == TRANSPORT_REPO
 
 
-LOCAL_ASSETS = (*PHASE_A_LOCAL_ASSETS, *selected_leaf_assets())
+def selected_leaf_inputs() -> tuple[RelayInput, ...]:
+    """The five preserved checkpoints, PULLED from the transport repo.
+
+    They used to be `LocalAsset`s, pushed by scp — and that is what ended
+    continuation attempt 2. The launcher stages each local asset with a
+    hard-coded 600 s timeout, and one 1.110 GiB leaf needs **1.99 MB/s** to fit
+    it against a dev box observed at 0.44-0.72 MB/s. The first leaf could not
+    have arrived, and four more would have followed.
+
+    So the slow half moved off the paid path entirely: the bytes were published
+    to a private transport repo at `$0` on the dev box, and the pod now pulls
+    them at hub speed through the ordinary declared-manifest contract. The
+    per-file digests come from the transport manifest, which itself only
+    reproduces attempt 12's committed identities — nothing here is a new
+    scientific claim, and `artifacts/autoinit/phase_a_selected/<state_id>` is
+    still where the strict importer looks.
+
+    One `RelayInput` per FILE, because that is what the relay contract stages;
+    the directory is reassembled by every file naming the same `dest`.
+    """
+    if not transport_is_verified():
+        # NOT a spec-build failure: whether bytes are published is runtime state,
+        # and a session that cannot be *described* cannot be structurally
+        # checked either. Declaring nothing here means the $0 leaf gate refuses
+        # with the reason, which is where every other "this cannot run" lives —
+        # and it is still strictly before a pod exists.
+        return ()
+    man = json.loads(TRANSPORT_MANIFEST.read_text())
+    out = []
+    for rec in sorted(man["leaves"], key=lambda r: r["selected_order"]):
+        for f in rec["files"]:
+            out.append(RelayInput(
+                path=f["remote_path"], repo=TRANSPORT_REPO,
+                dest=f"{STAGED_INTO}/{rec['state_id']}", sha256=f["sha256"]))
+    return tuple(out)
+
+
+#: Only genuinely small dev-box artifacts stay on the scp path. The leaves left
+#: it; nothing else joined it.
+LOCAL_ASSETS = PHASE_A_LOCAL_ASSETS
 
 
 def driver_command(ctx: SessionContext, plan) -> str:
@@ -149,7 +197,8 @@ def spec(args) -> SessionSpec:
         #: $16.7456 hard — derived, never written.
         budget=continuation_budget(args),
         setup=SetupManifest(
-            relay_inputs=(*CANONICAL_INIT, *RECOVERY_LADDER, *CALIBRATION_V1),
+            relay_inputs=(*CANONICAL_INIT, *RECOVERY_LADDER, *CALIBRATION_V1,
+                          *selected_leaf_inputs()),
             local_assets=LOCAL_ASSETS,
             #: Declared, not defaulted. Without it the setup script falls to
             #: `SESSION_KIND=spend` and loads a `SpendAuthorization`, which
@@ -258,10 +307,20 @@ def continuation_harness_gate(ctx: SessionContext) -> tuple[bool, str]:
 
 
 def selected_leaves_present_gate(ctx: SessionContext) -> tuple[bool, str]:
-    """Are the five preserved leaves on this host, with the right bytes?
+    """Are the five canonical leaves intact, and does the transport declare them?
 
-    Asked at $0, before a pod exists. Staging is what puts them on the pod; this
-    asks whether there is anything to stage, and whether it is the right thing.
+    Asked at $0, before a pod exists. Two questions, deliberately separate now
+    that the bytes travel by relay:
+
+    * the **canonical** copies under `CKPT_STORE` still reproduce attempt 12's
+      identities — they remain the scientific owner, and the transport manifest
+      is only meaningful if what it was built from is still right;
+    * the session's declared relay inputs cover **exactly** those five state ids,
+      in the frozen selected order, with the digests the manifest recorded.
+
+    Whether those paths actually EXIST in the transport repo is the runner's
+    multi-repo relay precheck, which lists every declared repository. This gate
+    does not duplicate it.
     """
     sys.path.insert(0, str(REPO_ROOT / "src"))
     from aadistill.autoinit.arch import get_adapter
@@ -280,14 +339,49 @@ def selected_leaves_present_gate(ctx: SessionContext) -> tuple[bool, str]:
                 bad.append(f"{rec['state_id'][:12]}: digest mismatch")
         except Exception as exc:                       # noqa: BLE001
             bad.append(f"{rec['state_id'][:12]}: {type(exc).__name__}")
+    # The declared transport must cover exactly these five, in this order.
+    if not transport_is_verified():
+        ctx.evidence.setdefault("precheck", {})["selected_leaves"] = {
+            "store": str(CKPT_STORE), "transport_repo": TRANSPORT_REPO,
+            "transport_verified": False}
+        return False, (
+            f"the five leaves have no verified transport: {TRANSPORT_MANIFEST} "
+            "is absent or not marked verified. Publish and verify them with "
+            "scripts/autoinit/publish_selected_leaves.py before launching; the "
+            "canonical copies alone cannot reach a pod.")
+    inputs = selected_leaf_inputs()
+    man = json.loads(TRANSPORT_MANIFEST.read_text())
+    want_order = [r["state_id"] for r in dur["leaves"]]
+    got_order = [r["state_id"] for r in sorted(man["leaves"],
+                                               key=lambda x: x["selected_order"])]
+    if got_order != want_order:
+        bad.append(f"transport order {got_order} != selected order {want_order}")
+    by_state: dict[str, set] = {}
+    for r in inputs:
+        by_state.setdefault(r.dest.rsplit("/", 1)[-1], set()).add(r.repo)
+    if set(by_state) != set(want_order):
+        bad.append(f"transport covers {sorted(by_state)}, expected {want_order}")
+    off = {s: sorted(v) for s, v in by_state.items() if v != {TRANSPORT_REPO}}
+    if off:
+        bad.append(f"leaves declared from an unexpected repo: {off}")
+    # Every declared digest must be one the manifest recorded for that leaf.
+    recorded = {f["sha256"] for rec in man["leaves"] for f in rec["files"]}
+    stray = [r.path for r in inputs if r.sha256 not in recorded]
+    if stray:
+        bad.append(f"relay inputs with digests absent from the manifest: {stray}")
+
     ctx.evidence.setdefault("precheck", {})["selected_leaves"] = {
-        "store": str(CKPT_STORE), "n": len(dur["leaves"]), "problems": bad}
+        "store": str(CKPT_STORE), "n": len(dur["leaves"]),
+        "transport_repo": TRANSPORT_REPO, "transport_files": len(inputs),
+        "transport_verified": bool(man.get("verified")), "problems": bad}
     if bad:
         return False, (
             f"the preserved stage-1 leaves are not usable: {bad}. This session "
             "imports them rather than searching; without them there is nothing "
             "to continue from.")
-    return True, f"all {len(dur['leaves'])} preserved stage-1 leaves verify locally"
+    return True, (f"all {len(dur['leaves'])} canonical stage-1 leaves verify "
+                  f"locally; {len(inputs)} transport files declared from "
+                  f"{TRANSPORT_REPO} in selected order")
 
 
 def build_parser() -> argparse.ArgumentParser:
