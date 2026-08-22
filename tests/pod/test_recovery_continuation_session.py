@@ -255,7 +255,8 @@ def test_the_control_is_measured_then_admitted_then_handed_off():
                             if isinstance(n, ast.FunctionDef) and n.name == "stage1"))
     order = [body.index(tok) for tok in (
         "import_stage1_result", "measure_control", "attach_evaluation",
-        "admit_leaves", "release_to_subprocess", "require_headroom")]
+        "admit_leaves", "cuda_memory", "del teacher, evaluator",
+        "complete_release", "require_released", "require_headroom")]
     assert order == sorted(order), "the stage-1 contract is out of order"
 
 
@@ -270,9 +271,31 @@ def test_the_control_measurement_is_not_invented():
 
 
 def test_the_handoff_releases_the_teacher_and_evaluator():
+    """The caller deletes; the helper measures. Attempt 4 did neither usefully.
+
+    `del teacher, evaluator` must precede `complete_release`, because a snapshot
+    taken before the caller drops its names describes the world the release was
+    supposed to change. `evaluator` must be in that `del`: `prime_reference`
+    stores the teacher on `StateEvaluator._teacher`, so dropping `teacher` alone
+    leaves the model alive behind the evaluator.
+    """
     src = DRIVER.read_text()
-    assert "release_to_subprocess(drop=[teacher, evaluator])" in src
     assert "del teacher, evaluator" in src
+    assert "release_to_subprocess" not in src, (
+        "the API that could not release the caller's references is back")
+    assert src.index("del teacher, evaluator") < src.index("complete_release("), (
+        "the release is measured before the caller drops its objects")
+    assert src.index("before = cuda_memory()") < src.index("del teacher, evaluator")
+
+
+def test_a_retained_card_refuses_before_the_trainer_is_spawned():
+    """The verdict must gate, not merely be recorded. Attempt 4 read
+    `live_retention: true` and started the trainer anyway."""
+    src = DRIVER.read_text()
+    assert "require_released(handoff" in src, (
+        "the live-retention verdict is diagnosed and not enforced")
+    assert src.index("require_released(handoff") < src.index("require_headroom("), (
+        "a card that was never released should fail on that, not on free bytes")
 
 
 def test_the_preserved_leaf_gate_is_wired_into_the_spec(spec, launcher):

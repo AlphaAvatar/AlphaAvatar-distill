@@ -61,12 +61,12 @@
     "Stage 0 on hardware, passed six times; attempt 4 also passed STAGE 1 on hardware -- five leaves re-identified from pod bytes, control measured on state_eval@v1"
   ],
   "latest_verification": {
-    "utc": "2026-08-22T14:40:00Z",
-    "after": "the attempt-3 portability repair to publish_selected_leaves.py",
-    "full_suite": "2162 passed, 12 skipped in 18:25 (+2: the attempt-3 regression and its env branch)",
-    "pod_like_host": "the transport publisher module: 11 passed with NO /home/ecs-user/aad-scratch, NO /home/ecs-user/aad-artifacts and NO token file, HF_TOKEN set as a pod sets it",
-    "mutations": "6, each a passing state made to fail: the hard-coded mkdtemp dir, the ignored AAD_SCRATCH, the unconditional dev-box root, the file-only token, the real canonical store, and the deleted drift check",
+    "utc": "2026-08-23T00:20:00Z",
+    "after": "the two attempt-4 memory-contract repairs",
+    "full_suite": "2172 passed, 12 skipped in 18:42 (+10 on 2162: the attempt-4 handoff regressions and the driver wiring assertions; skips unchanged)",
+    "mutations": "7, each a passing state made to fail: before measured inside the helper, require_released a no-op, each driver dropping its require_released call, deleting only the teacher, the 22 GiB constant restored, and the snapshot taken after the del",
     "frozen_asset_verifier": "passed, no problems",
+    "harness_digest": "162c09ed -> 95cf336d; these files are inside the 22-file set",
     "scope": "CPU only, repo .venv; no checkpoint loaded, no metric measured, no GPU used"
   },
   "failed": [
@@ -117,8 +117,8 @@
     "the paid device-canary session path: STRATEGICALLY TERMINATED 2026-08-18. Two authorized sessions, $0.1240, zero canary runs; both died in the wrapper's inherited contracts. Its evidence and its generic lesson are kept; no further canary is prepared."
   ],
   "next_starting_point": {
-    "status": "Recovery continuation attempt 4 reached STAGE 2 -- the furthest yet. Stages 0 and 1 passed on hardware: five leaves imported and re-identified from pod bytes, canonical control measured. Stage 2's first rung-1 probe hit CUDA OOM. Nothing is running, billing, authorized or prepared.",
-    "the_ask": "A maintainer decision on two coupled repairs: find what still references the teacher/evaluator after release_to_subprocess, and calibrate RECOVERY_TRAINER_BYTES against a measured rung-1 probe. Both touch the 22-file harness, so they move the harness digest too.",
+    "status": "Both attempt-4 memory-contract repairs are applied and verified at $0: complete_release() takes no objects and the caller deletes before it measures, require_released() makes the live_retention verdict block, and RECOVERY_TRAINER_BYTES is 41.65 GiB derived from the controls' measured 39.79 GiB peak. Nothing is running, billing, authorized or prepared.",
+    "the_ask": "Authorization review for Recovery Continuation Attempt 5. It needs a NEW one-use grant and authorization: the session commit moved AND the harness digest moved 162c09ed -> 95cf336d, since these files are inside the 22-file set.",
     "budget": "cap $234.00, spent $214.3326, remaining $19.6674. Balance is not authorization."
   },
   "read_order": [
@@ -146,7 +146,7 @@
     "budget_expected_usd": 14.9233,
     "budget_hard_usd": 16.7456,
     "stage1_source": "attempt 12: 43 states, 5 selected; IMPORTED AND RE-IDENTIFIED FROM POD BYTES by attempt 4, config 567d32789ba6",
-    "authorization": "own schema recovery_continuation_authorization/v1, 22-file harness 162c09ed (Phase-A set minus the unreachable search, plus the continuation executables). Ceiling derived from continuation_budget()",
+    "authorization": "own schema recovery_continuation_authorization/v1, 22-file harness 95cf336d (Phase-A set minus the unreachable search, plus the continuation executables). Ceiling derived from continuation_budget()",
     "imports": "attempt 12's five preserved leaves, re-identified from bytes; no search is reachable",
     "transport": "PROVEN ON PAID HARDWARE by attempts 3 and 4: the five leaves are mirrored in the private aadistill-transport repo (15 files, 5.5513 GiB) in selected order and stage on a pod. Manifest: logs/autoinit_selected_leaf_transport_manifest.json"
   }

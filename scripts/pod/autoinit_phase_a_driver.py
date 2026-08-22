@@ -57,7 +57,8 @@ from aadistill.autoinit.authorization import AuthorizationError  # noqa: E402
 from aadistill.autoinit.arch import get_adapter  # noqa: E402
 from aadistill.autoinit.device import apply_cpu_budget  # noqa: E402
 from aadistill.autoinit.device_handoff import (  # noqa: E402
-    DeviceHandoffError, release_to_subprocess, require_headroom,
+    DeviceHandoffError, complete_release, cuda_memory, require_headroom,
+    require_released,
 )
 from aadistill.autoinit.leaf_durability import (  # noqa: E402
     LeafDurabilityError, persist_selected_leaves,
@@ -113,12 +114,34 @@ STAGE3_EVALUATION_PROTOCOL_HASH = (
     "250f72efbd43b86a475e8dda293b45f07ee61a4d858e147f4a5bd7681c32c2e4")
 STAGE3_ATTESTATION = REPO / "logs/autoinit_stage3_complete/attested_evaluation_protocol.json"
 STAGE3_PROBE = REPO / "logs/autoinit_stage3_complete/engine_probe.json"
-#: What the stage-2 recovery trainer needs on the device, measured from attempt
-#: 12's own OOM: the subprocess had 17.97 GiB in use when it asked for 3.58 more.
-#: Rounded up, and checked against the DRIVER's free bytes rather than the
-#: parent's allocator figures, because a sibling process cannot use the parent's
-#: cached blocks.
-RECOVERY_TRAINER_BYTES = 22 * 2**30
+#: What the stage-2 recovery trainer needs on the device. DERIVED FROM A
+#: MEASUREMENT, not chosen: the full basis is recorded in
+#: `logs/autoinit_recovery_trainer_memory_basis.json` and a test pins these terms
+#: against it.
+#:
+#: The old value was `22 * 2**30`, attributed to attempt 12's OOM — a subprocess
+#: that "had 17.97 GiB in use when it asked for 3.58 more", rounded up. That is a
+#: **lower bound observed mid-failure**, not a requirement, and it was 17.79 GiB
+#: below the trainer's real peak. So `require_headroom` passed on recovery
+#: continuation attempt 4 with 12.32 GiB of apparent slack and the probe OOM'd.
+#:
+#: The peak comes from `preflight_ctl_r0860k_{sa,sb}`, the two permanent
+#: controls: the same frozen recipe in every memory-relevant field, on an L40S,
+#: each reporting `torch.cuda.max_memory_allocated()` of **39.79 GiB** over a
+#: COMPLETED 1023-step run — so gradients and both AdamW moments are included,
+#: which attempt 4's pre-backward footprint could not be.
+RECOVERY_TRAINER_PEAK_ALLOCATED_GIB = 39.79
+#: `max_memory_allocated` counts PyTorch's live tensors; `require_headroom`
+#: compares against the driver's free bytes. These two convert one into the
+#: other, both read off attempt 4's own OOM message, which decomposes the
+#: trainer process exactly: 34.44 allocated + 1.35 reserved-but-unallocated =
+#: 35.79 reserved, against 36.30 total including non-PyTorch memory.
+RECOVERY_TRAINER_RESERVED_SLACK_GIB = 1.35
+RECOVERY_TRAINER_NON_TORCH_GIB = 0.51
+RECOVERY_TRAINER_BYTES = int(
+    (RECOVERY_TRAINER_PEAK_ALLOCATED_GIB
+     + RECOVERY_TRAINER_RESERVED_SLACK_GIB
+     + RECOVERY_TRAINER_NON_TORCH_GIB) * 2**30)
 #: The versioned comparability relation the live protocol is judged under.
 COMPAT_V2 = REPO / "logs/autoinit_phase_a_protocol_compat_v2.json"
 FROZEN_RECIPE = REPO / "configs/stage3/e1/e1_r0860k_sa_pca.json"
@@ -600,13 +623,18 @@ class PhaseADriver:
         # search had already succeeded.
         summary = found.summary
         self.search_result = summary                 # the serializable part only
-        handoff = release_to_subprocess(drop=[found])
+        # The BEFORE snapshot is taken here, by the frame that owns `found`, and
+        # the `del` happens BEFORE `complete_release` measures the result. A
+        # callee cannot rebind this name, which is why it no longer pretends to.
+        before = cuda_memory()
         del found
+        handoff = complete_release(before)
         (AUDIT / "device_handoff.json").write_text(
             json.dumps(handoff, indent=2, default=str) + "\n")
         self.ev.setdefault("runtime", {})["device_handoff"] = handoff
         say(f"device handoff: {handoff.get('verdict', 'n/a')}")
         try:
+            require_released(handoff, what="the stage-2 recovery trainer")
             require_headroom(handoff["after"],
                              need_bytes=RECOVERY_TRAINER_BYTES,
                              what="the stage-2 recovery trainer")

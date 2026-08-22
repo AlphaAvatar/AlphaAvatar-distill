@@ -1,5 +1,27 @@
 # Decision records
 
+## 2026-08-23 — The two memory-contract repairs: a release that releases, and a threshold that was measured
+
+- **Context:** the maintainer approved option (c) — both repairs — with three constraints: no separate calibration launch, no relaunch yet, and no change to the frozen recovery recipe, KD chunk, microbatch, dtype, optimizer or trainer implementation to solve what is an infrastructure memory contract.
+
+**(a) The handoff lifecycle.** `release_to_subprocess(drop=[teacher, evaluator])` was the defect, not a victim of one. It copied the sequence into a callee-local list and cleared *that*; a callee cannot rebind `teacher` in the caller's frame, so nothing was released. It also took `before` **and** `after` itself, so `after` was measured before the caller's `del` ran — a real release could not have registered even if one had happened. `StateEvaluator.prime_reference` stores the teacher on `_teacher`, so dropping `teacher` alone would have left the model alive behind the evaluator anyway.
+
+  The API now cannot express the mistake: **`complete_release(before)` accepts no objects**, because a function that promised to release something it cannot reach was a lie told by the type signature. The caller snapshots with `cuda_memory()`, deletes its own names, then measures. Applied identically to the continuation's `teacher`/`evaluator` path and full Phase A's `found` path.
+
+- **The verdict now gates.** `require_released` refuses when `live_retention` is true, above the same `LIVE_RETENTION_LIMIT_BYTES` (1 GiB) the verdict has always used — now named rather than inline. It is deliberately separate from `require_headroom`: one asks whether the release worked, the other whether the card has room, and a caller should be able to tell which failed. Attempt 4 read *"7.55 GiB is still ALLOCATED … a genuine retention"* and started the trainer regardless, because only free bytes gated.
+
+**(b) The trainer requirement, measured rather than chosen.** `RECOVERY_TRAINER_BYTES` was `22 * 2**30`, attributed to attempt 12's mid-failure footprint rounded up. The maintainer's caution was correct and load-bearing: **attempt 4's 36.30 GiB is only a lower bound**, since it OOM'd inside the first `kd_forward_kl`, before `loss.backward()` and before the first `AdamW.step()`, so gradients and both moment tensors had not materialized. Setting the requirement from it would have rebuilt the same defect at a higher number.
+
+  **Exact-recipe historical evidence exists and was used.** `preflight_ctl_r0860k_{sa,sb}` — the two permanent controls — report `torch.cuda.max_memory_allocated()` of **39.79 GiB**, identically, each over a COMPLETED 1023-step run on an **L40S**, with every memory-relevant field of `configs/stage3/e1/e1_r0860k_sa_pca.json` reproduced exactly; the only difference is `data_dir`, the staged pack path, which is an allowed probe override and cannot change the memory profile. Converting that PyTorch figure into the device figure `require_headroom` compares against uses two overheads read off attempt 4's own OOM decomposition — 1.35 GiB reserved-but-unallocated and 0.51 GiB non-PyTorch — giving **41.65 GiB**. Derivation recorded mechanically in [`autoinit_recovery_trainer_memory_basis.json`](autoinit_recovery_trainer_memory_basis.json) and pinned by a test. **No calibration launch was bought.**
+
+  The old constant was **17.79 GiB below the trainer's measured peak** — worse than the ~14 GiB the attempt-4 write-up estimated against the pre-backward footprint.
+
+- **The margin is unchanged**, per instruction; nothing in the evidence says its semantics are wrong.
+- **The tightness is now visible, and is a finding rather than a problem to engineer away.** 41.65 + 2.00 = **43.65 GiB required against a 44.39 GiB card**, leaving 0.74 GiB for the driver process. Attempt 4's own numbers say the driver's non-allocated overhead is 0.52 GiB, so a correctly released card offers ~43.87 GiB and clears the bar by ~0.22 GiB. **This recipe genuinely almost fills an L40S**, which is exactly why a retention of any size is fatal. The recipe was not touched to widen the gap.
+- **Verified:** full suite, frozen verifier, and **7 mutations** each turning a passing state into a failing one — `before` measured inside the helper again, `require_released` made a no-op, each driver dropping its `require_released` call, deleting only the teacher, the 22 GiB constant restored, and the snapshot taken after the `del`.
+- **The continuation harness digest moves** `162c09ed…` → `95cf336d…`, because unlike attempt 3's repair these files are inside the 22-file set. Attempt 5 therefore needs a new grant and authorization on both counts.
+- **Revisit when:** attempt 5 is authorized. Budget unchanged at `$214.3326` of `$234.00`; the `$16.7456` ceiling still fits.
+
 ## 2026-08-22 — Attempt 4: Stages 0 and 1 pass on hardware; the headroom gate built for attempt 12 did not fire
 
 - **Context:** the maintainer granted one launch after accepting the attempt-3 portability closure. The chain executed unchanged: grant commit `38db4f2`, authorization `autoinit.recovery_continuation.2026-08-22T1454Z` bound to that base and to harness `162c09ed` — **the same digest as attempt 3**, since the repair touched only files outside the 22-file set — authorization-only commit `ef4353c`, bundle round-tripped with its harness recomputed from the relay checkout, and every `$0` gate green (full suite 2162/12, frozen verifier clean, publisher 11/11 on a pod-like host).

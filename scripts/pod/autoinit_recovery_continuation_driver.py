@@ -42,7 +42,8 @@ sys.path.insert(0, str(REPO / "scripts" / "autoinit"))
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from aadistill.autoinit.device_handoff import (  # noqa: E402
-    DeviceHandoffError, release_to_subprocess, require_headroom,
+    DeviceHandoffError, complete_release, cuda_memory, require_headroom,
+    require_released,
 )
 from aadistill.autoinit.recovery import admit_leaves  # noqa: E402
 from aadistill.autoinit.recovery_continuation import (  # noqa: E402
@@ -134,13 +135,20 @@ class RecoveryContinuationDriver(PhaseADriver):
         self.search_result = imported.summary
 
         # --- hand the card to recovery --------------------------------------
-        handoff = release_to_subprocess(drop=[teacher, evaluator])
+        # The BEFORE snapshot is taken here, by the frame that owns the names,
+        # and the `del` happens BEFORE `complete_release` measures the result.
+        # `evaluator` must go too: `prime_reference` stores the teacher on
+        # `StateEvaluator._teacher`, so dropping `teacher` alone leaves the
+        # model alive behind the evaluator.
+        before = cuda_memory()
         del teacher, evaluator
+        handoff = complete_release(before)
         (AUDIT / "device_handoff.json").write_text(
             json.dumps(handoff, indent=2, default=str) + "\n")
         self.ev.setdefault("runtime", {})["device_handoff"] = handoff
         say(f"device handoff: {handoff.get('verdict', 'n/a')}")
         try:
+            require_released(handoff, what="the stage-2 recovery trainer")
             require_headroom(handoff["after"], need_bytes=RECOVERY_TRAINER_BYTES,
                              what="the stage-2 recovery trainer")
         except DeviceHandoffError as exc:

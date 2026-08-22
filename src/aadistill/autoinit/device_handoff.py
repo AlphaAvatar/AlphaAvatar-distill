@@ -30,21 +30,44 @@ The last one is the one that matters for the handoff: a sibling process cannot
 use the parent's cached blocks, so `torch.cuda.memory_reserved()` falling is
 worth nothing unless `cuda.mem_get_info()` free rises with it.
 
-Nothing here decides policy. `require_headroom` refuses, the caller decides what
-to do about it, and the numbers land in the session record either way.
+**The release itself belongs to the caller, and only to the caller.** Until
+2026-08-23 this module offered `release_to_subprocess(drop=[...])`, which took
+the caller's objects and "cleared" them — by copying the sequence into a local
+list and clearing *that*. Rebinding a callee-local name cannot rebind
+`teacher`, `evaluator` or `found` in the caller's frame, so nothing was ever
+released; and the `after` measurement was taken before the caller's own `del`
+ran, so the record could not have observed a release even if one had happened.
+Recovery continuation attempt 4 reported `freed_allocated_bytes: 0` and OOM'd in
+Stage 2 six seconds later.
+
+So the lifecycle is now explicit and cannot be got wrong by a caller that reads
+the signature: **the caller** snapshots with `cuda_memory()`, **the caller**
+deletes its own device-owning names, and only then calls `complete_release()`,
+which takes no objects because it cannot release any.
+
+`require_headroom` refuses on the driver's free bytes; `require_released`
+refuses on a genuine live retention, which is the condition the verdict already
+diagnosed and nothing acted on. The numbers land in the session record either way.
 """
 
 from __future__ import annotations
 
 import gc
-from typing import Any, Callable, Sequence
+from typing import Any, Callable
 
 __all__ = [
     "DeviceHandoffError",
+    "LIVE_RETENTION_LIMIT_BYTES",
+    "complete_release",
     "cuda_memory",
-    "release_to_subprocess",
     "require_headroom",
+    "require_released",
 ]
+
+#: Above this, `allocated` after a release is a genuine hold rather than
+#: measurement noise or a small resident buffer. Unchanged from the value the
+#: verdict has always used; it is named here because it is now load-bearing.
+LIVE_RETENTION_LIMIT_BYTES = 1 << 30
 
 
 class DeviceHandoffError(RuntimeError):
@@ -79,19 +102,27 @@ def cuda_memory(device: int | str = 0, *, torch_mod: Any = None) -> dict:
     }
 
 
-def release_to_subprocess(
+def complete_release(
+    before: dict,
     *,
-    drop: Sequence[Any] = (),
     device: int | str = 0,
     torch_mod: Any = None,
     collect: Callable[[], Any] = gc.collect,
 ) -> dict:
-    """Release the stage's device state and measure what that actually freed.
+    """Finish a release the CALLER has already performed, and measure it.
 
-    `drop` is the caller's references. They are cleared here rather than left to
-    fall out of scope, because a closure captured by a returned object keeps its
-    captures alive for as long as the object lives — which for a driver that
-    holds the search result is the rest of the session.
+    Call order, which is the whole contract::
+
+        before = cuda_memory()          # caller snapshots
+        del teacher, evaluator          # caller drops ITS OWN names
+        handoff = complete_release(before)
+
+    `before` is a parameter rather than something measured here because a
+    snapshot taken inside this function is necessarily taken *before* the
+    caller's `del`, and would therefore describe the world the release was
+    supposed to change. This function deliberately accepts **no objects**: a
+    callee cannot rebind a caller's names, so any parameter promising to release
+    something would be a lie the type signature tells.
 
     Returns a record with `before`, `after` and the deltas, and — the point of
     the exercise — a `verdict` that distinguishes a genuine live-allocation hold
@@ -101,13 +132,6 @@ def release_to_subprocess(
     if torch is None:
         import torch as torch  # noqa: PLC0414
 
-    before = cuda_memory(device, torch_mod=torch)
-
-    # Clear the caller's references first: dropping the list is not enough if the
-    # caller still holds them, which is why they are passed in explicitly.
-    refs = list(drop)
-    refs.clear()
-    del drop
     collected = collect()
 
     if before.get("available"):
@@ -129,7 +153,7 @@ def release_to_subprocess(
     record["gained_free_bytes"] = after["free_bytes"] - before["free_bytes"]
 
     still_live = after["allocated_bytes"]
-    if still_live > 1 << 30:
+    if still_live > LIVE_RETENTION_LIMIT_BYTES:
         record["verdict"] = (
             f"{still_live / 2**30:.2f} GiB is still ALLOCATED after the release, "
             "so something holds live tensors — this is a genuine retention, not "
@@ -143,6 +167,33 @@ def release_to_subprocess(
             "model leak")
         record["live_retention"] = False
     return record
+
+
+def require_released(record: dict, *, what: str) -> None:
+    """Refuse to start `what` while the driver still holds live device tensors.
+
+    The verdict has diagnosed this correctly since the module was written and
+    nothing ever acted on it. Attempt 4's handoff said, in as many words,
+    *"7.55 GiB is still ALLOCATED after the release … a genuine retention, not
+    allocator caching"* — and the run continued, because only `free_bytes`
+    gated. A diagnosis that is recorded but not enforced is not a gate.
+
+    Deliberately separate from `require_headroom`: that one asks whether the
+    card has room, this one asks whether the release worked. They fail for
+    different reasons and a caller should be able to tell which happened.
+    """
+    if not record.get("after", {}).get("available"):
+        return
+    if not record.get("live_retention"):
+        return
+    still = record["after"]["allocated_bytes"]
+    raise DeviceHandoffError(
+        f"refusing to start {what}: {still / 2**30:.2f} GiB is still ALLOCATED "
+        f"after the release, over the {LIVE_RETENTION_LIMIT_BYTES / 2**30:.2f} "
+        "GiB live-retention limit, so the caller did not actually drop its "
+        "device-owning objects. Those bytes are unavailable to a sibling "
+        "process however much free memory remains. Attempt 4 read this exact "
+        "verdict, started the trainer anyway and lost the probe to an OOM.")
 
 
 def require_headroom(snapshot: dict, *, need_bytes: int, what: str,

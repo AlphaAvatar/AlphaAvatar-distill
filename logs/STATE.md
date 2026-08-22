@@ -1,4 +1,4 @@
-**Updated:** 2026-08-22 · branch `main` · attempt 4 passed Stages 0 and 1 on hardware; Stage 2 OOM
+**Updated:** 2026-08-23 · branch `main` · both attempt-4 memory-contract repairs applied and verified
 
 # Current state
 
@@ -47,9 +47,37 @@ fit. Had the threshold matched the real trainer, the gate would have refused at
 gate written to stop it — whose refusal message names attempt 12 — did not fire,
 because it was calibrated against a trainer footprint that was never measured.**
 
-Both candidate repairs touch `autoinit_phase_a_driver.py` and
-`device_handoff.py`, which **are** in the 22-file harness, so unlike attempt 3's
-repair they move the continuation harness digest as well as the session commit.
+### Both repairs, approved and applied 2026-08-23
+
+**(a) The handoff lifecycle.** The old API was the defect: it copied the caller's
+sequence into a callee-local list and cleared *that*, and it measured `after`
+before the caller's `del` ran. `complete_release(before)` now **accepts no
+objects** — the caller snapshots, deletes its own names, then measures — applied
+identically to the continuation's teacher/evaluator path and Phase A's `found`
+path. `require_released` makes the existing `live_retention` verdict **block**
+rather than merely be recorded, above the same 1 GiB limit, and is kept separate
+from `require_headroom` so a caller can tell which failed.
+
+**(b) The trainer requirement, measured.** `RECOVERY_TRAINER_BYTES` was `22 GiB`
+— **17.79 GiB below the trainer's measured peak**. Attempt 4's 36.30 GiB is only
+a lower bound, since it died before `backward()` and the first `AdamW.step()`.
+The permanent controls `preflight_ctl_r0860k_{sa,sb}` report
+`max_memory_allocated()` of **39.79 GiB**, identically, each over a completed
+1023-step run on an **L40S**, running every memory-relevant field of the frozen
+recipe. Plus 1.35 GiB reserved slack and 0.51 GiB non-PyTorch overhead — both
+read off attempt 4's own OOM decomposition — gives **41.65 GiB**. Basis recorded
+in [`autoinit_recovery_trainer_memory_basis.json`](autoinit_recovery_trainer_memory_basis.json)
+and pinned by a test. **No calibration launch was bought.**
+
+The margin is unchanged, and the recipe was not touched. **The tightness is now
+visible:** 41.65 + 2.00 = **43.65 GiB required against a 44.39 GiB card**. A
+correctly released card offers ~43.87 GiB — attempt 4's own figures put the
+driver's non-allocated overhead at 0.52 GiB — so it clears by **~0.22 GiB**. This
+recipe genuinely almost fills an L40S, which is why a retention of any size is
+fatal.
+
+**The continuation harness digest moves `162c09ed…` → `95cf336d…`**, because
+unlike attempt 3's repair these files are inside the 22-file set.
 
 **Recovery continuation attempt 3 ran on 2026-08-22 and bought nothing: $0.2011,
 no stage executed.** Pod `ku8vcn5mu8hp9i`, 12.2 min, deleted with provider
@@ -203,26 +231,29 @@ Also frozen: recovery design, selection rules, pooled_counts@v2, Stage-3 artifac
 
 ## Latest verification
 
-After the attempt-3 portability repair. CPU only — no checkpoint loaded, no
-metric measured, no GPU used:
+After the two attempt-4 memory-contract repairs. CPU only — no checkpoint
+loaded, no metric measured, no GPU used:
 
-* full suite **2162 passed, 12 skipped, 0 errors** in 18:25 — **+2** on the
-  2160 baseline, which are exactly the attempt-3 regression and its
-  configured-root branch; the skip count is unchanged.
+* full suite **2172 passed, 12 skipped, 0 errors** in 18:42 — **+10** on the
+  2162 baseline: the attempt-4 handoff regressions and the driver wiring
+  assertions. The skip count is unchanged.
 * **the publisher module on a pod-like host: 11 passed** with no
   `/home/ecs-user/aad-scratch`, no `/home/ecs-user/aad-artifacts` and no token
   file, with `HF_TOKEN` set the way a pod sets it. Run in a mount namespace
   holding the repo and interpreter over a tmpfs `/home/ecs-user` — the same
   instrument that reproduced attempt 3's five failures before the fix.
 * frozen-asset verifier **passed**, and was **not** weakened or rescoped.
-* **6 mutations**, each a passing state made to fail: the hard-coded `mkdtemp`
-  parent (attempt 3's defect), an ignored `AAD_SCRATCH`, the dev-box root
-  returned unconditionally, the file-only token, the drifted-shard test reading
-  the real canonical store again, and the drift check itself deleted — the last
-  one proving the rewritten test still catches what it always caught.
-* the continuation **harness digest is unchanged at `162c09ed…`**: the publisher
-  and its tests are outside the 22-file set, so this repair moves the session
-  commit and nothing else.
+* **7 mutations**, each a passing state made to fail: `before` measured inside
+  the helper again, `require_released` made a no-op, each driver dropping its
+  `require_released` call, deleting only the teacher, the 22 GiB constant
+  restored, and the snapshot taken after the `del`.
+* the continuation **harness digest moves `162c09ed…` → `95cf336d…`** — these
+  files are inside the 22-file set, so attempt 5 needs a new authorization on
+  both the commit and the digest.
+
+Earlier, after the attempt-3 portability repair: full suite 2162 passed / 12
+skipped; the publisher module 11 passed on a pod-like host with no
+`aad-scratch`, no `aad-artifacts` and no token file; 6 mutations.
 
 Earlier, at the five-leaf transport mirror: full suite 2160 passed / 12 skipped;
 pod simulator **2119 passed, 23 skipped** with the artifact tree restored exactly

@@ -137,6 +137,7 @@ Experiment records: everything named `e1_*` through `e8b_*`.
 $0 audits and measurements, each the evidence behind a decision that cites it:
 `autoinit_leaf_transport_quota_finding.json`, `autoinit_relay_retention_20260822.json`,
 `autoinit_selected_leaf_transport_manifest.json` (the verified five-leaf transport mirror),
+`autoinit_recovery_trainer_memory_basis.json` (the measured basis for RECOVERY_TRAINER_BYTES),
 `autoinit_control_availability.json`,
 `autoinit_control_sb_packaging_repair.json`,
 `autoinit_dryrun_fresh.json`, `autoinit_dryrun_resume.json`,

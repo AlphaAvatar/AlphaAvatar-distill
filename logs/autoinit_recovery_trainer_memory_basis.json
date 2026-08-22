@@ -1,0 +1,53 @@
+{
+  "schema": "aadistill.autoinit.recovery_trainer_memory_basis/v1",
+  "_what_this_is": "The empirical basis for RECOVERY_TRAINER_BYTES in scripts/pod/autoinit_phase_a_driver.py. It exists because the previous value was a constant somebody chose rather than a quantity anybody measured: 22 GiB, against a trainer whose measured peak is 39.79 GiB. require_headroom therefore passed on recovery continuation attempt 4 with 12.32 GiB of apparent slack, and the probe OOM'd. A guard whose threshold is written rather than measured is a guess wearing a gate's clothing.",
+  "recorded_utc": "2026-08-23T00:00:00Z",
+  "basis": "exact-recipe historical peak, measured after completed optimizer steps",
+  "why_not_attempt_4s_footprint": "Attempt 4 OOM'd inside the first kd_forward_kl, BEFORE loss.backward() and before the first AdamW.step(). Its 36.30 GiB is a lower bound only: gradients and the two AdamW moment tensors had not fully materialized. Using it as the requirement would rebuild the same defect at a higher number.",
+  "measurement": {
+    "source": "preflight_ctl_r0860k_{sa,sb} — the two permanent controls",
+    "metric": "torch.cuda.max_memory_allocated(), recorded by the trainer at src/aadistill/training/train.py:1305 as gpu_mem_gb",
+    "peak_allocated_gib": 39.79,
+    "agreement": "sa and sb report the identical peak, 39.79 GiB, each over a COMPLETED 1023-step run (102 logged points, steps 10..1020, rising to 39.79 and flat thereafter)",
+    "device": "NVIDIA L40S — the same card class the continuation runs on",
+    "torch": "2.11.0+cu128",
+    "trainable_params_fp32": 440467456,
+    "total_params": 596049920
+  },
+  "recipe_identity": {
+    "frozen_recipe": "configs/stage3/e1/e1_r0860k_sa_pca.json",
+    "verified_identical": [
+      "block_len", "dtype", "autocast_bf16", "gradient_checkpointing", "packing",
+      "trainable_patterns", "loss", "optim", "batch", "schedule", "student_path", "teacher"
+    ],
+    "only_difference": "data_dir — artifacts/stage3/ladder_uniform_probe vs artifacts/stage3/ladder_uniform, which is the staged pack path and one of the allowed PROBE_OVERRIDES. It does not change block_len, batch or packing, so it cannot change the memory profile.",
+    "note": "Every memory-relevant field of the frozen recipe is reproduced exactly, so this is the recipe Phase-A probes run, not an analogue."
+  },
+  "conversion_to_device_bytes": {
+    "why": "require_headroom compares against the DRIVER's free_bytes — what a sibling process can actually obtain. max_memory_allocated counts only PyTorch's live tensors, so two observed overheads are added to convert a PyTorch figure into a device figure.",
+    "observed_from": "recovery continuation attempt 4's own OOM message, which decomposes the trainer process exactly",
+    "attempt_4_decomposition_gib": {
+      "pytorch_allocated": 34.44,
+      "pytorch_reserved_but_unallocated": 1.35,
+      "pytorch_reserved_total": 35.79,
+      "process_total_including_non_pytorch": 36.30,
+      "non_pytorch_overhead": 0.51
+    },
+    "terms_gib": {
+      "peak_allocated": 39.79,
+      "allocator_reserved_slack": 1.35,
+      "non_pytorch_overhead": 0.51
+    },
+    "sum_gib": 41.65,
+    "need_bytes": 44721346969
+  },
+  "consequences": {
+    "old_value_gib": 22.0,
+    "shortfall_against_measured_peak_gib": 17.79,
+    "attempt_4_would_now_be_refused": "free was 36.32 GiB against 41.65 + 2.00 margin = 43.65 required; short by 7.33 GiB, so the gate refuses at $0.36 with a diagnosis instead of losing the probe to an OOM",
+    "headroom_after_repair_a": "with the teacher and evaluator actually released, attempt 4's free would have been ~43.87 GiB, which clears the requirement by ~0.22 GiB",
+    "margin_unchanged": "the existing 2 GiB require_headroom margin is kept; nothing in this evidence says its semantics are wrong",
+    "TIGHTNESS_WARNING": "41.65 + 2.00 = 43.65 GiB required against a 44.39 GiB card leaves only 0.74 GiB for the driver process, including its CUDA context. This recipe genuinely almost fills an L40S. That is a property of the frozen recipe, which is NOT to be changed to widen the margin; it is the reason a live retention of any size is fatal and why the release must actually release."
+  },
+  "not_purchased": "No calibration launch was bought. The peak comes from runs that already happened and whose logs were retained; the overheads come from attempt 4's own failure message."
+}
