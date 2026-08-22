@@ -131,7 +131,8 @@ and the `e*_session_evidence.json` family.
 Experiment records: everything named `e1_*` through `e8b_*`.
 
 $0 audits and measurements, each the evidence behind a decision that cites it:
-`autoinit_leaf_transport_quota_finding.json`, `autoinit_control_availability.json`,
+`autoinit_leaf_transport_quota_finding.json`, `autoinit_relay_retention_20260822.json`,
+`autoinit_control_availability.json`,
 `autoinit_control_sb_packaging_repair.json`,
 `autoinit_dryrun_fresh.json`, `autoinit_dryrun_resume.json`,
 `autoinit_recovery_fingerprint_audit.json`,

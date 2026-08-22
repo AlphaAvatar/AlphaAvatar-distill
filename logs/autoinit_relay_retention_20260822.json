@@ -1,0 +1,92 @@
+{
+  "schema": "aadistill.relay_retention_change/v1",
+  "date": "2026-08-22",
+  "what_this_is": "A REMOTE RETENTION CHANGE, not a retirement of science. Each object below stopped being mirrored on Hugging Face. The checkpoint itself continues to exist canonically on local storage, and its identity, hashes and experiment records are unchanged. Nothing here retires a result.",
+  "authorised_by": "Explicit maintainer decision, 2026-08-22: obsolete remote checkpoint redundancy is not worth blocking the five selected Phase-A leaves, given the account-wide Hugging Face storage limit.",
+  "method": "HfApi.permanently_delete_lfs_files(rewrite_history=True), selected by exact file_oid identity. Ordinary deletion reclaims nothing on this account -- measured twice -- because LFS is billed including history.",
+  "checks_per_object": [
+    "canonical local copy exists under /home/ecs-user/aad-artifacts",
+    "local sha256 == remote file_oid, re-verified at delete time",
+    "no current session manifest declares the remote path",
+    "not on the paid critical path (wheelhouses), not a permanent control, not the canonical initialization"
+  ],
+  "quota": {
+    "inventory_before_gib": 92.733,
+    "inventory_after_gib": 84.2578,
+    "reclaimed_gib": 8.4752,
+    "free_after_gib": 8.8722,
+    "note": "the LFS inventory sum is the billing basis; repo_info.usedStorage lags"
+  },
+  "retired": [
+    {
+      "remote_repo": "AlphaAvatar/aadistill-artifacts",
+      "path": "e5_start/p2_ceheavy_sb/model.safetensors",
+      "file_oid": "9828b1780a5eb4e2eac40951dff01188f7423a1b2b9121c551a157239f9fa68b",
+      "bytes": 2384234968,
+      "gib": 2.2205,
+      "canonical_local": "/home/ecs-user/aad-artifacts/p2_ceheavy/p2_ceheavy_sb/model.safetensors"
+    },
+    {
+      "remote_repo": "AlphaAvatar/aadistill-artifacts",
+      "path": "e5_start/p2_ceheavy_sa/model.safetensors",
+      "file_oid": "4aface45a12cd02e508a6b0ee58294c97ba032a8d24302c89fc6317e86d75fb4",
+      "bytes": 2384234968,
+      "gib": 2.2205,
+      "canonical_local": "/home/ecs-user/aad-artifacts/p2_ceheavy/p2_ceheavy_sa/model.safetensors"
+    },
+    {
+      "remote_repo": "AlphaAvatar/aadistill-artifacts",
+      "path": "e8_inputs_20260810/stage0/qwen3_4b_thinking_v1/activation_stats.safetensors",
+      "file_oid": "aaeb2e4c1ec67e6f6dd21ca40eceb0c193a9da5b010e8d12fcd5d24376cc47c1",
+      "bytes": 1947442680,
+      "gib": 1.8137,
+      "canonical_local": "/home/ecs-user/AlphaAvatar-distill/artifacts/stage0/qwen3_4b_thinking_v1/activation_stats.safetensors"
+    },
+    {
+      "remote_repo": "AlphaAvatar/aadistill-artifacts",
+      "path": "e8_init_20260810/e8_contribution_init_v1/checkpoint/model.safetensors",
+      "file_oid": "7a0694a5d5c59f8e0b0ebc9ac8648b1ec026bf93cab026d33c61ca8fc85d1edb",
+      "bytes": 1192135096,
+      "gib": 1.1103,
+      "canonical_local": "/home/ecs-user/AlphaAvatar-distill/artifacts/stage1/e8_contribution_init_v1/checkpoint/model.safetensors"
+    },
+    {
+      "remote_repo": "AlphaAvatar/aadistill-transport",
+      "path": "phase_a_attempt12/selected_leaves/cca699c93f34dad7e94a5d13a25b2bc2/model.safetensors",
+      "file_oid": "db056398840f5c64f767fe8690803478918399c04bd7b4a1aeae6b7549c624af",
+      "bytes": 1192135096,
+      "gib": 1.1103,
+      "canonical_local": "/home/ecs-user/aad-artifacts/autoinit/phase_a/cca699c93f34dad7e94a5d13a25b2bc2/model.safetensors",
+      "note": "partial upload from the quota-blocked run; re-uploaded in full afterwards"
+    }
+  ],
+  "consolidated_first": [
+    {
+      "from": "/home/ecs-user/AlphaAvatar-distill/artifacts/stage0/qwen3_4b_thinking_v1/activation_stats.safetensors",
+      "to": "/home/ecs-user/aad-artifacts/relay_retired/e8_inputs_20260810/stage0/qwen3_4b_thinking_v1/activation_stats.safetensors"
+    },
+    {
+      "from": "/home/ecs-user/AlphaAvatar-distill/artifacts/stage1/e8_contribution_init_v1/checkpoint/model.safetensors",
+      "to": "/home/ecs-user/aad-artifacts/relay_retired/e8_init_20260810/e8_contribution_init_v1/checkpoint/model.safetensors"
+    }
+  ],
+  "preserved_metadata": "The small config/tokenizer/generation_config sidecars of the retired checkpoints remain on the relay as reconstruction and accountability metadata; only the large weight objects were removed.",
+  "NOT_retired_sole_copy": {
+    "n": 32,
+    "gib": 69.671,
+    "rule": "no byte-identical local copy exists, so the relay holds the only surviving copy",
+    "groups": [
+      "e1_scaling_20260801",
+      "stage3",
+      "stage3_recovery_corpus_v2"
+    ],
+    "note": "e1_scaling_20260801 alone is 42.19 GiB across 19 objects -- the largest and most obviously obsolete group, and untouchable for exactly this reason."
+  },
+  "post_checks": {
+    "all_session_relay_inputs_resolve": true,
+    "wheelhouse_cu128_files": 91,
+    "wheelhouse_vllm_files": 196,
+    "permanent_control_files": 18,
+    "canonical_init_files": 12
+  }
+}
