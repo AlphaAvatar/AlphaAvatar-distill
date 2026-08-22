@@ -1,4 +1,4 @@
-**Updated:** 2026-08-23 · branch `main` · recovery continuation attempt 5 is LIVE
+**Updated:** 2026-08-23 · branch `main` · attempt 5 verified both memory repairs and trained the first probe
 
 # Current state
 
@@ -6,22 +6,44 @@ The **human view of [`current_state.json`](current_state.json)**. That file owns
 the live facts; this one says the same things in prose and adds nothing it does
 not carry. If the two disagree, a structural test fails.
 
-**A paid run is in flight.** Recovery continuation attempt 5 launched
-2026-08-22T19:47:07Z on pod `9jxov5bjtiy2xu`, an L40S at $0.99/h, under
-authorization `autoinit.recovery_continuation.2026-08-22T1925Z` — one use,
-consumed by this launch, hard ceiling **$16.7456** (1015 min). Session commit
-`63625e1`, base `4794193`, continuation harness **`95cf336d`** over 22 files with
-the search excluded.
+**Nothing is running. Nothing is billing. Nothing is authorized. Nothing is
+prepared for launch.**
 
-It runs with both attempt-4 memory-contract repairs in force. **A refusal by
-`require_released` or `require_headroom` after Stage 1 is the intended
-fail-closed result, not a failure of the run** — it is to be reported, not
-worked around, and neither gate nor the frozen recipe may be weakened to avoid
-it.
+**Recovery continuation attempt 5 ran on 2026-08-22 and bought the most of any
+attempt: $1.3511, both memory repairs verified on hardware, and the first
+recovery probe TRAINED.** Pod `9jxov5bjtiy2xu`, 81.9 min, deleted with provider
+confirmation. Full record:
+[`autoinit_recovery_continuation_attempt5/`](autoinit_recovery_continuation_attempt5/).
 
-Live artifacts are in `/home/ecs-user/aad-scratch/recovery_cont5_20260823/`:
-`launcher.out`, the detached `watchdog.jsonl`, and `poll.jsonl` from an
-independent third-eye poller.
+**The memory repairs are confirmed**, against attempt 4's identical `before`:
+
+| | attempt 4 | attempt 5 |
+| --- | ---: | ---: |
+| `freed_allocated_bytes` | **0** | **8,101,709,824** |
+| allocated after | 7.55 GiB | **0.008 GiB** |
+| free after | 36.32 GiB | **43.87 GiB** |
+| `live_retention` | **true** | **false** |
+
+The caller-owned release freed **7.54 GiB** attempt 4 could not free at all, and
+`require_headroom` passed on **43.87 GiB against 43.65 required** — the figure the
+repair predicted before the run, to two decimals.
+
+**Then the first recovery probe trained**: `MARKER:PROBE_TRAINED` after **61.7
+minutes**, against the 61.55 the budget is priced from.
+
+**Stage 2 then failed reading that probe's checkpoint** — a writer/consumer gap
+with the writer right and one of two consumers wrong:
+
+> `train.py:1208` writes `out_dir/checkpoints/latest.txt` and
+> `checkpoints/<tag>/model`. `train_stage3.py`'s resume path reads exactly that.
+> `autoinit_phase_a_driver.py:736-738` reads `out_dir/latest.txt` and
+> `out_dir/<tag>/model` — **dropping the `checkpoints/` component in both**.
+
+No `$0` gate could catch it: the line is reached only after a real 62-minute
+probe completes, and the simulator and rehearsal stub the training subprocess.
+The repair is inside the 22-file harness, so it moves the digest as well as the
+session commit. **The probe's own artifacts were lost with the pod** — the fetch
+spec collects finalists, and a trained-but-unscored probe is not one.
 
 **Recovery continuation attempt 4 ran on 2026-08-22 and got further than any
 attempt before it: $0.4112, Stages 0 and 1 PASSED on hardware, Stage 2 OOM.**
@@ -194,9 +216,9 @@ selection result.**
 ## Budget
 
 ```
-cumulative spend   $214.3326
+cumulative spend   $215.6837
 approved cap       $234.00    RAISED AND APPROVED 2026-08-21
-remaining          $19.6674   $3.3810 SHORT of one more full Phase-A attempt
+remaining          $18.3163   $4.7321 SHORT of one more full Phase-A attempt
 
 ```
 
@@ -303,6 +325,7 @@ already billing.
 | continuation 2 | $0.2389 | LOCAL_ASSET staging, 10.5 min in | scp of one 1.110 GiB leaf against a hard-coded 600 s timeout: needs 1.99 MB/s, dev box gives ≤0.79. **Closed by the transport mirror** |
 | continuation 3 | $0.2011 | setup CPU test gate, 12.2 min in | `publish_selected_leaves.verify()` mkdtemps into `/home/ecs-user/aad-scratch`, absent on a pod. **The 25-input transport staging PASSED first** |
 | continuation 4 | $0.4112 | stage 2, first rung-1 probe | CUDA OOM: the release freed 0 allocated bytes and the headroom gate demands 24 GiB for a probe that needs ≳36.6. **Stages 0 and 1 PASSED on hardware** |
+| continuation 5 | $1.3511 | stage 2, after the probe trained | `latest.txt` read without the `checkpoints/` component the trainer writes. **Both memory repairs verified; the first probe TRAINED in 61.7 min** |
 
 **The pattern, through attempt 7:** code no $0 path could execute — a GPU-only
 device, or a contract owned by inherited machinery. **Attempt 8 is a new

@@ -1,0 +1,18 @@
+2026-08-22T19:57:59Z MARKER:DRIVER_START
+2026-08-22T19:57:59Z MARKER:STAGE_START:0
+[20:00:12] attested: interval 0.011695, floor 0.3000, plan 02be33b9a7a8…
+2026-08-22T20:00:12Z MARKER:STAGE_PASSED:0
+2026-08-22T20:00:12Z MARKER:STAGE_START:1
+[20:00:18] imported 5 stage-1 leaves, config 567d32789ba6…, re-identified from bytes
+2026-08-22T20:00:18Z MARKER:STAGE1_IMPORTED:5
+Loading weights:   0%|          | 0/398 [00:00<?, ?it/s]Loading weights: 100%|██████████| 398/398 [00:00<00:00, 7360.41it/s]
+Loading weights:   0%|          | 0/310 [00:00<?, ?it/s]Loading weights: 100%|██████████| 310/310 [00:00<00:00, 8864.61it/s]
+[20:03:25] control measured on state_eval@v1 (74022 positions)
+[20:03:25] device handoff: 0.01 GiB allocated and 0.02 GiB reserved after the release; the pre-release figure was allocator reservation, not a model leak
+2026-08-22T20:03:25Z MARKER:STAGE_PASSED:1
+2026-08-22T20:03:25Z MARKER:STAGE_START:2
+2026-08-22T21:05:06Z MARKER:PROBE_TRAINED:autoinit.v1.phase_a.rung1.cca699c93f34.sa
+2026-08-22T21:05:06Z MARKER:STAGE_FAILED:2
+[21:05:06] STAGE 2 FAILED: FileNotFoundError: [Errno 2] No such file or directory: '/workspace/aad/artifacts/stage3/phase_a/autoinit.v1.phase_a.rung1.cca699c93f34.sa/latest.txt'
+2026-08-22T21:05:06Z MARKER:PHASE_A_FAILED
+[21:05:06] stopping before any later stage; completed probes are journalled and the permanent controls are untouched

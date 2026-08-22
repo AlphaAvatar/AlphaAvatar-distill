@@ -1,0 +1,24 @@
+se_a/autoinit.v1.phase_a.rung1.cca699c93f34.sa/checkpoints/step_001023"
+}
+
+Loading weights:   0%|          | 0/398 [00:00<?, ?it/s]
+Loading weights: 100%|██████████| 398/398 [00:00<00:00, 5791.73it/s]
+
+Loading weights:   0%|          | 0/310 [00:00<?, ?it/s]
+Loading weights:  36%|███▌      | 111/310 [00:00<00:00, 1075.24it/s]
+Loading weights:  79%|███████▉  | 246/310 [00:00<00:00, 1039.13it/s]
+Loading weights: 100%|██████████| 310/310 [00:00<00:00, 1155.94it/s]
+/opt/train/lib/python3.12/site-packages/torch/autograd/graph.py:869: UserWarning: Flash Attention defaults to a non-deterministic algorithm. To explicitly enable determinism call torch.use_deterministic_algorithms(True, warn_only=False). (Triggered internally at /pytorch/aten/src/ATen/native/transformers/cuda/attention_backward.cu:124.)
+  return Variable._execution_engine.run_backward(  # Calls into the C++ engine to run the backward pass
+
+Writing model shards:   0%|          | 0/1 [00:00<?, ?it/s]
+Writing model shards: 100%|██████████| 1/1 [00:02<00:00,  2.19s/it]
+Writing model shards: 100%|██████████| 1/1 [00:02<00:00,  2.19s/it]
+
+Writing model shards:   0%|          | 0/1 [00:00<?, ?it/s]
+Writing model shards: 100%|██████████| 1/1 [00:02<00:00,  2.36s/it]
+Writing model shards: 100%|██████████| 1/1 [00:02<00:00,  2.36s/it]
+
+Writing model shards:   0%|          | 0/1 [00:00<?, ?it/s]
+Writing model shards: 100%|██████████| 1/1 [00:02<00:00,  2.06s/it]
+Writing model shards: 100%|██████████| 1/1 [00:02<00:00,  2.06s/it]

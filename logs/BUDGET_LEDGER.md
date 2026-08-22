@@ -309,12 +309,38 @@ actual cumulative spend                                      $213.9214
       + $0.0100 recovery continuation attempt 1
       + $0.2389 recovery continuation attempt 2
       + $0.2011 recovery continuation attempt 3
-      + $0.4112 recovery continuation attempt 4.
-remaining under the $234.00 cap                              $ 19.6674
-    Covers one continuation ceiling ($16.7456) with $2.9218 to spare;
-    does NOT cover a full Phase-A attempt ($23.0484), short by $3.3810.
+      + $0.4112 recovery continuation attempt 4
+      + $1.3511 recovery continuation attempt 5.
+remaining under the $234.00 cap                              $ 18.3163
+    Covers one continuation ceiling ($16.7456) with $1.5707 to spare;
+    does NOT cover a full Phase-A attempt ($23.0484), short by $4.7321.
     REMAINING BALANCE IS NOT AUTHORIZATION. Every grant issued so far,
-    including attempt 4's, is spent.
+    including attempt 5's, is spent.
+recovery continuation attempt 5 (L40S, 81.9 min) PROBE TRAINED $  1.3511
+    AUTHORIZED 2026-08-22 as autoinit.recovery_continuation.2026-08-22T1925Z
+    (sha256 7f575d5f) against
+    logs/autoinit_recovery_continuation_attempt5_grant.json.
+    Base 4794193, session commit 63625e1, harness 95cf336d over 22 files.
+    Ceiling $16.7456, of which $1.3511 was spent. Pod 9jxov5bjtiy2xu;
+    provider confirms gone; watchdog ended pod_gone after 82 ticks.
+    BOTH MEMORY REPAIRS VERIFIED ON HARDWARE. Against attempt 4's
+    identical `before`: freed_allocated_bytes 8,101,709,824 vs 0,
+    allocated after 0.008 GiB vs 7.55, free 43.87 GiB vs 36.32,
+    live_retention false vs true. require_headroom passed on 43.87 against
+    the 43.65 requirement -- the figure the repair predicted, to two
+    decimals -- so the 41.65 GiB basis is very nearly exact rather than
+    merely conservative.
+    AND THE FIRST RECOVERY PROBE TRAINED: MARKER:PROBE_TRAINED for
+    rung1.cca699c93f34.sa after 61.7 min against the 61.55 min the budget
+    is priced from, confirming the pricing basis on hardware.
+    FAILED at stage 2 AFTER that training, reading the probe's checkpoint:
+    the driver reads out_dir/latest.txt and out_dir/<tag>/model, while the
+    trainer writes out_dir/checkpoints/latest.txt and
+    checkpoints/<tag>/model. train_stage3.py's resume path reads it
+    correctly -- one writer, two consumers, one wrong, on a line only a
+    completed 62-minute probe can reach. The probe's own artifacts were
+    lost with the pod: the fetch spec collects finalists, and a
+    trained-but-unscored probe is not one.
 recovery continuation attempt 4 (L40S, 24.9 min) STAGES 0-1   $  0.4112
     AUTHORIZED 2026-08-22 as autoinit.recovery_continuation.2026-08-22T1454Z
     (sha256 874d54f6) against

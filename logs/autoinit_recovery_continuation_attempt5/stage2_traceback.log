@@ -1,0 +1,23 @@
+stage 2: FileNotFoundError: [Errno 2] No such file or directory: '/workspace/aad/artifacts/stage3/phase_a/autoinit.v1.phase_a.rung1.cca699c93f34.sa/latest.txt'
+2026-08-22T21:05:06Z
+
+Traceback (most recent call last):
+  File "/workspace/aad/scripts/pod/autoinit_phase_a_driver.py", line 1079, in run
+    ok = stages[stage]()
+         ^^^^^^^^^^^^^^^
+  File "/workspace/aad/scripts/pod/autoinit_phase_a_driver.py", line 864, in stage2
+    records = self.run_rung(2, descriptors, "rung1")
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/aad/scripts/pod/autoinit_phase_a_driver.py", line 850, in run_rung
+    records.append(self.run_probe(descriptor))
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/aad/scripts/pod/autoinit_phase_a_driver.py", line 737, in run_probe
+    latest = (trained / "latest.txt").read_text().strip()
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/pathlib.py", line 1029, in read_text
+    with self.open(mode='r', encoding=encoding, errors=errors) as f:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/pathlib.py", line 1015, in open
+    return io.open(self, mode, buffering, encoding, errors, newline)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '/workspace/aad/artifacts/stage3/phase_a/autoinit.v1.phase_a.rung1.cca699c93f34.sa/latest.txt'

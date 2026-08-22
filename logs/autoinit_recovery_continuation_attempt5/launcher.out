@@ -1,0 +1,28 @@
+[19:46:59] budget: expected 904 min $14.92 · soft $16.42 · hard $16.75 (authorized $16.75)
+[19:47:00] NVIDIA L40S $0.99/h, stock Medium
+[19:47:00] session commit 63625e159b89 verified: harness digests to 95cf336da151…, carries the authorization and only logs/autoinit_recovery_continuation_authorization.json differs from the authorized base
+[19:47:00] frozen science plan 02be33b9a7a8… matches the authorization
+[19:47:00] continuation harness 95cf336da151… over 22 files, search excluded
+[19:47:04] all 5 canonical stage-1 leaves verify locally; 15 transport files declared from AlphaAvatar/aadistill-transport in selected order
+[19:47:05] precheck OK: 25 relay inputs (10 from AlphaAvatar/aadistill-artifacts, 15 from AlphaAvatar/aadistill-transport), 2 local assets
+[19:47:07] created 9jxov5bjtiy2xu at $0.99/h
+[19:47:07] watchdog detached — hard 1015 min = $16.75
+[19:48:00]   starting (60s) — $0.01
+[19:49:04]   starting (120s) — $0.03
+[19:49:25] TCP 22 at 64.247.206.201:11972 after 2.3 min
+[19:49:28] draw 1: ssh reachable — $0.04
+[19:49:58] draw 1: image identity runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@580.159.03
+[19:49:58] draw 1: running setup
+[19:57:54] draw 1: setup complete — $0.18
+[19:58:01] driver detached, pid 7070, confirmed by descriptor_probe — $0.18
+[20:00:13]   2026-08-22T19:57:51Z MARKER:SETUP_DONE — $0.22
+[21:05:51] driver no longer running: EXITED:22
+[21:05:51] polling ended: DRIVER_EXITED:22 — $1.30
+[21:08:06]   manifest rc=0
+15 file(s) across 6 class(es) -> /workspace/manifest.json
+  final_required: 15 · mutable_snapshot: 0 · final_streams_quiescent: True
+[21:08:48] teardown gate: allowed=True failed=training_complete
+[21:08:48] deleting pod (gate passed after DRIVER_EXITED:22)
+[21:08:59] pod deleted — 81.9 min, $1.35; provider confirms gone: True
+
+autoinit-recovery-continuation INCOMPLETE — /home/ecs-user/AlphaAvatar-distill/logs/autoinit_recovery_continuation_session.json. STOP for review. The continuation consumed the verified attempt-12 Stage-1 result and ran no search.
