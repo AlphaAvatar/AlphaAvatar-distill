@@ -1,4 +1,4 @@
-**Updated:** 2026-08-23 · branch `main` · both attempt-4 memory-contract repairs applied and verified
+**Updated:** 2026-08-23 · branch `main` · recovery continuation attempt 5 is LIVE
 
 # Current state
 
@@ -6,8 +6,22 @@ The **human view of [`current_state.json`](current_state.json)**. That file owns
 the live facts; this one says the same things in prose and adds nothing it does
 not carry. If the two disagree, a structural test fails.
 
-**Nothing is running. Nothing is billing. Nothing is authorized. Nothing is
-prepared for launch.**
+**A paid run is in flight.** Recovery continuation attempt 5 launched
+2026-08-22T19:47:07Z on pod `9jxov5bjtiy2xu`, an L40S at $0.99/h, under
+authorization `autoinit.recovery_continuation.2026-08-22T1925Z` — one use,
+consumed by this launch, hard ceiling **$16.7456** (1015 min). Session commit
+`63625e1`, base `4794193`, continuation harness **`95cf336d`** over 22 files with
+the search excluded.
+
+It runs with both attempt-4 memory-contract repairs in force. **A refusal by
+`require_released` or `require_headroom` after Stage 1 is the intended
+fail-closed result, not a failure of the run** — it is to be reported, not
+worked around, and neither gate nor the frozen recipe may be weakened to avoid
+it.
+
+Live artifacts are in `/home/ecs-user/aad-scratch/recovery_cont5_20260823/`:
+`launcher.out`, the detached `watchdog.jsonl`, and `poll.jsonl` from an
+independent third-eye poller.
 
 **Recovery continuation attempt 4 ran on 2026-08-22 and got further than any
 attempt before it: $0.4112, Stages 0 and 1 PASSED on hardware, Stage 2 OOM.**

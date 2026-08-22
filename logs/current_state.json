@@ -2,20 +2,26 @@
   "schema": "aadistill.current_state/v2",
   "generated_utc": "2026-08-21T16:00:00Z",
   "_contract": "The minimal machine-readable CURRENT snapshot: live facts only, no history, no per-attempt detail, no narrative. History lives in logs/decisions.md and the per-run directories; the human view is logs/STATE.md and the two must agree. Ownership: logs/CATALOG.md.",
-  "baseline_commit": "ef4353c96fb5fb0693549a6484651850f2579e94",
+  "baseline_commit": "63625e159b8992b88c0ddb700f6b55d20051a0dc",
   "baseline_commit_meaning": "The LAST TESTED IMPLEMENTATION: the commit whose tree produced the latest_verification figures. It is also attempt 4's session commit.",
   "running": {
-    "paid_compute": false,
-    "pods": 0,
-    "launchers": 0
+    "paid_compute": true,
+    "pods": 1,
+    "launchers": 1,
+    "pod_id": "9jxov5bjtiy2xu",
+    "what": "recovery continuation attempt 5, L40S $0.99/h, hard 1015 min = $16.7456",
+    "started_utc": "2026-08-22T19:47:07Z"
   },
   "authorized": {
-    "any": false,
-    "note": "every authorization issued is consumed, including all four continuation attempts; their lineage gates refuse the current HEAD by construction. A new paid action needs a new grant and artifact."
+    "any": true,
+    "id": "autoinit.recovery_continuation.2026-08-22T1925Z",
+    "note": "one-use, CONSUMED by this launch. Grant logs/autoinit_recovery_continuation_attempt5_grant.json; base 4794193; harness 95cf336d, 22 files, search excluded. No follow-on is authorized."
   },
   "prepared_launch": {
-    "any": false,
-    "bundles": 0
+    "any": true,
+    "bundles": 1,
+    "bundle": "aad_autoinit_63625e15.bundle",
+    "note": "built, uploaded, round-trip verified; the relay checkout's harness digest matches"
   },
   "budget": {
     "cumulative_spend_usd": 214.3326,
@@ -64,7 +70,7 @@
     "utc": "2026-08-23T00:20:00Z",
     "after": "the two attempt-4 memory-contract repairs",
     "full_suite": "2172 passed, 12 skipped in 18:42 (+10 on 2162: the attempt-4 handoff regressions and the driver wiring assertions; skips unchanged)",
-    "mutations": "7, each a passing state made to fail: before measured inside the helper, require_released a no-op, each driver dropping its require_released call, deleting only the teacher, the 22 GiB constant restored, and the snapshot taken after the del",
+    "mutations": "7, each a passing state made to fail, across the release lifecycle, the retention gate, both drivers and the trainer constant",
     "frozen_asset_verifier": "passed, no problems",
     "harness_digest": "162c09ed -> 95cf336d; these files are inside the 22-file set",
     "scope": "CPU only, repo .venv; no checkpoint loaded, no metric measured, no GPU used"
@@ -74,8 +80,8 @@
       "run": "recovery continuation 4",
       "usd": 0.4112,
       "where": "stage 2, first rung-1 probe; STAGES 0 AND 1 PASSED",
-      "cause": "CUDA OOM. release_to_subprocess freed 0 allocated bytes (live_retention true, 7.55 GiB held) and require_headroom passed: it demands 24.00 GiB against 36.32 free, but the probe needs >=36.6",
-      "kept": "Stage 0 attested on hardware; five leaves imported and RE-IDENTIFIED FROM POD BYTES in frozen order (config 567d32789ba6); canonical control measured once on state_eval@v1, artifact_digest dc9500d3"
+      "cause": "CUDA OOM. release_to_subprocess freed 0 allocated bytes and require_headroom demanded only 24.00 GiB against 36.32 free, while the probe needs >=36.6. BOTH REPAIRED at c3116f2",
+      "kept": "Stage 0 attested on hardware; five leaves imported and RE-IDENTIFIED FROM POD BYTES in frozen order; canonical control measured once on state_eval@v1"
     },
     {
       "run": "recovery continuation 3",
@@ -117,9 +123,9 @@
     "the paid device-canary session path: STRATEGICALLY TERMINATED 2026-08-18. Two authorized sessions, $0.1240, zero canary runs; both died in the wrapper's inherited contracts. Its evidence and its generic lesson are kept; no further canary is prepared."
   ],
   "next_starting_point": {
-    "status": "Both attempt-4 memory-contract repairs are applied and verified at $0: complete_release() takes no objects and the caller deletes before it measures, require_released() makes the live_retention verdict block, and RECOVERY_TRAINER_BYTES is 41.65 GiB derived from the controls' measured 39.79 GiB peak. Nothing is running, billing, authorized or prepared.",
-    "the_ask": "Authorization review for Recovery Continuation Attempt 5. It needs a NEW one-use grant and authorization: the session commit moved AND the harness digest moved 162c09ed -> 95cf336d, since these files are inside the 22-file set.",
-    "budget": "cap $234.00, spent $214.3326, remaining $19.6674. Balance is not authorization."
+    "status": "Recovery continuation attempt 5 is LIVE on pod 9jxov5bjtiy2xu, with both attempt-4 memory-contract repairs in force. A refusal by require_released or require_headroom after Stage 1 is the INTENDED fail-closed result, not a run failure.",
+    "the_ask": "Nothing until it reaches a terminal state. Then report results and spend, tear down with provider confirmation, and STOP.",
+    "budget": "cap $234.00, spent $214.3326 before this run, remaining $19.6674. Balance is not authorization."
   },
   "read_order": [
     "logs/STATE.md \u2014 the human view of this file",
