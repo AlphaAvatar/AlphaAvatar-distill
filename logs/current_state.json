@@ -2,20 +2,26 @@
   "schema": "aadistill.current_state/v2",
   "generated_utc": "2026-08-21T16:00:00Z",
   "_contract": "The minimal machine-readable CURRENT snapshot: live facts only, no history, no per-attempt detail, no narrative. History lives in logs/decisions.md and the per-run directories; the human view is logs/STATE.md and the two must agree. Ownership: logs/CATALOG.md.",
-  "baseline_commit": "1833b7a19d4d4131780cec4a23c594a806755aac",
-  "baseline_commit_meaning": "The LAST TESTED IMPLEMENTATION: the commit whose tree produced the latest_verification figures. Deliberately NOT the commit carrying this file -- the grant/provenance and authorization-only commits follow it and neither is separately tested. Refreshed by hand; nothing checks it.",
+  "baseline_commit": "ad73e05a34c5144a5a16e2b85622637cf45ed610",
+  "baseline_commit_meaning": "The LAST TESTED IMPLEMENTATION: the commit whose tree produced the latest_verification figures. It is also the live session commit the pod checked out.",
   "running": {
-    "paid_compute": false,
-    "pods": 0,
-    "launchers": 0
+    "paid_compute": true,
+    "pods": 1,
+    "launchers": 1,
+    "pod_id": "ku8vcn5mu8hp9i",
+    "what": "recovery continuation attempt 3, L40S $0.99/h, hard 1015 min = $16.7456",
+    "started_utc": "2026-08-22T13:34:05Z"
   },
   "authorized": {
-    "any": false,
-    "note": "every authorization issued is consumed, including both continuation attempts; their lineage gates refuse the current HEAD by construction. A new paid action needs a new grant and artifact."
+    "any": true,
+    "id": "autoinit.recovery_continuation.2026-08-22T1311Z",
+    "note": "one-use, CONSUMED by this launch. Grant logs/autoinit_recovery_continuation_attempt3_grant.json; base 7368568; harness 162c09ed, 22 files, search excluded. No follow-on is authorized."
   },
   "prepared_launch": {
-    "any": false,
-    "bundles": 0
+    "any": true,
+    "bundles": 1,
+    "bundle": "aad_autoinit_ad73e05a.bundle",
+    "note": "built, uploaded, round-trip verified; the checkout's harness digest matches the authorization"
   },
   "budget": {
     "cumulative_spend_usd": 213.7203,
@@ -117,9 +123,9 @@
     "the paid device-canary session path: STRATEGICALLY TERMINATED 2026-08-18. Two authorized sessions, $0.1240, zero canary runs; both died in the wrapper's inherited contracts. Its evidence and its generic lesson are kept; no further canary is prepared."
   ],
   "next_starting_point": {
-    "status": "The five-leaf transport mirror is complete and verified. HF quota: 89.8091 GiB used, 3.3209 GiB free, after retiring 8.4752 GiB of remote copies whose canonical local copies are hash-verified. Nothing is running, billing, authorized or prepared.",
-    "the_ask": "GO/NO-GO for Recovery Continuation Attempt 3. It needs a NEW one-use grant: attempt 2's is spent, and the multi-repo/transport work moved the continuation harness.",
-    "budget": "cap $234.00, spent $213.7203, remaining $20.2797. Balance is not authorization."
+    "status": "Recovery continuation attempt 3 is LIVE on pod ku8vcn5mu8hp9i. It imports attempt 12's five selected leaves from the transport repo and runs recovery Stages 2-5. No search is reachable.",
+    "the_ask": "Nothing until it reaches a terminal state. Then report results and spend, tear the pod down with provider confirmation, and STOP. A further attempt needs a new grant and a new budget decision.",
+    "budget": "cap $234.00, spent $213.7203 before this run, remaining $20.2797. Balance is not authorization."
   },
   "read_order": [
     "logs/STATE.md \u2014 the human view of this file",
@@ -129,9 +135,9 @@
     "logs/BUDGET_LEDGER.md \u2014 spend and caps",
     "AGENTS.md \u2014 the binding working contract"
   ],
-  "failed_before_the_current_architecture": "Phase A 1-5 $1.6321, 6 $0.3552, 7 $0.3955 (device placement), canary 1 $0.0603 and 2 $0.0637 (inherited contracts). All five classes are closed by autoinit.stage1_device_contract@v1 and the session specification. Detail: logs/decisions.md and the per-run directories.",
+  "failed_before_the_current_architecture": "Phase A 1-5 $1.6321, 6 $0.3552, 7 $0.3955 (device placement), canary 1 $0.0603 and 2 $0.0637 (inherited contracts). All five classes closed by autoinit.stage1_device_contract@v1 and the session specification. Detail: logs/decisions.md",
   "measurement_attempts": "3 launches, $0.4611: $0.0700 setup contract, $0.1834 driver entrypoint, then $0.2077 COMPLETE. Detail: logs/autoinit_measurement_attempt{1,2,3}/",
-  "failed_before_attempt_11": "Phase A 8 $0.1900 (a $0 test asserting dev-box state), 9 $0.3400 (unplaced accumulator), 10 $11.4300 (causal-depth scored on the host, unpriced). All three classes closed and CONFIRMED closed by attempt 11 reaching stage 2. Earlier: Phase A 1-7 $2.3828 and two canaries $0.1240. Detail: logs/decisions.md and the per-run directories.",
+  "failed_before_attempt_11": "Phase A 8 $0.1900 (a $0 test asserting dev-box state), 9 $0.3400 (unplaced accumulator), 10 $11.4300 (causal depth scored on the host, unpriced). All three closed and CONFIRMED closed by attempt 11 reaching stage 2. Detail: logs/decisions.md",
   "causal_depth_cost": "standalone 12.07 eval/min (attempt 3, cached); INSIDE the search 6.96-10.79 on the fallback path, which fired 4/4. Recorded, NOT repriced: Stage 1 took 180.283 min against the 180.0 base allowance.",
   "local_storage": {
     "free_gib": 15.0,
@@ -145,10 +151,9 @@
   "continuation_ready": {
     "budget_expected_usd": 14.9233,
     "budget_hard_usd": 16.7456,
-    "not_prepared": "no grant, no authorization, no pod",
     "stage1_source": "attempt 12: 43 states, 5 selected, byte-identical to attempt 11",
-    "authorization": "own schema recovery_continuation_authorization/v1, 22-file harness e5a7183a (Phase-A set minus the unreachable search, plus the continuation executables). Ceiling derived from continuation_budget()",
+    "authorization": "own schema recovery_continuation_authorization/v1, 22-file harness 162c09ed (Phase-A set minus the unreachable search, plus the continuation executables). Ceiling derived from continuation_budget()",
     "imports": "attempt 12's five preserved leaves, re-identified from bytes; no search is reachable",
-    "transport": "VERIFIED 2026-08-22: the five leaves are mirrored in the private aadistill-transport repo (15 files, 5.5513 GiB) in selected order; all five round-trip re-identify and reproduce the attempt-12 artifact_digest. Manifest: logs/autoinit_selected_leaf_transport_manifest.json"
+    "transport": "VERIFIED 2026-08-22: the five leaves are mirrored in the private aadistill-transport repo (15 files, 5.5513 GiB) in selected order, all five round-trip re-identifying to the attempt-12 artifact_digest. Manifest: logs/autoinit_selected_leaf_transport_manifest.json"
   }
 }
