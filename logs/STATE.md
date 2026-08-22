@@ -1,4 +1,4 @@
-**Updated:** 2026-08-22 · branch `main` · recovery continuation attempt 4 is LIVE
+**Updated:** 2026-08-22 · branch `main` · attempt 4 passed Stages 0 and 1 on hardware; Stage 2 OOM
 
 # Current state
 
@@ -6,24 +6,50 @@ The **human view of [`current_state.json`](current_state.json)**. That file owns
 the live facts; this one says the same things in prose and adds nothing it does
 not carry. If the two disagree, a structural test fails.
 
-**A paid run is in flight.** Recovery continuation attempt 4 launched
-2026-08-22T15:15:44Z on pod `k1mgu38q0y6sei`, an L40S at $0.99/h, under
-authorization `autoinit.recovery_continuation.2026-08-22T1454Z` — one use,
-consumed by this launch, hard ceiling **$16.7456** (1015 min). Session commit
-`ef4353c`, base `38db4f2`, continuation harness `162c09ed` over 22 files with the
-search excluded — **unchanged from attempt 3**, because the portability repair
-touched the leaf publisher and its tests, both outside the 22-file set.
+**Nothing is running. Nothing is billing. Nothing is authorized. Nothing is
+prepared for launch.**
 
-It imports attempt 12's five selected leaves **from the transport repo** and runs
-recovery Stages 2-5. **No search is reachable from this harness.** Nothing else is
-authorized, and no follow-on may start.
+**Recovery continuation attempt 4 ran on 2026-08-22 and got further than any
+attempt before it: $0.4112, Stages 0 and 1 PASSED on hardware, Stage 2 OOM.**
+Pod `k1mgu38q0y6sei`, 24.9 min, deleted with provider confirmation. Full record:
+[`autoinit_recovery_continuation_attempt4/`](autoinit_recovery_continuation_attempt4/).
 
-Live artifacts are in `/home/ecs-user/aad-scratch/recovery_cont4_20260822/`:
-`launcher.out`, the detached `watchdog.jsonl`, and `poll.jsonl` from an
-independent third-eye poller that terminates nothing and never raises.
+**What it bought, and it is real:**
 
-Attempt 3 already proved the transport on paid hardware, and the pre-provider gate
-read the same **25 relay inputs (10 main + 15 transport), 2 local assets** here.
+* **Stage 0** attested the frozen protocol on hardware — interval `0.011695`,
+  floor `0.3000`, plan `02be33b9…`;
+* **Stage 1 imported the five Attempt-12 leaves in the frozen selected order and
+  re-identified every one of them from the bytes that arrived on the pod**,
+  matching the Stage-1 artifact and shard digests. `config_hash 567d32789ba6…`.
+  No search was run, and none was reachable;
+* **the canonical control was measured once** on the frozen `state_eval@v1`
+  suite (74022 positions), producing `artifact_digest dc9500d3…`;
+* admission accepted the five leaves plus the measured control.
+
+That is the whole import path — transport, staging, strict byte re-identification,
+control measurement, admission — demonstrated end to end on a paid pod.
+
+**Then Stage 2's first rung-1 probe hit a CUDA OOM**, and two defects compounded:
+
+> **The release freed nothing.** `release_to_subprocess(drop=[teacher, evaluator])`
+> reports `freed_allocated_bytes: 0` — allocated was 8,110,229,504 B before *and*
+> after; only reserved cache came back. The handoff diagnosed it correctly:
+> `live_retention: true`, *"a genuine retention, not allocator caching"*.
+>
+> **The headroom gate's estimate of the trainer is ~14 GiB too low.**
+> `require_headroom` demands `RECOVERY_TRAINER_BYTES + margin` = 22 + 2 = **24.00
+> GiB** and saw **36.32 GiB** free, so it passed with 12.32 GiB of apparent slack.
+> The probe then used **36.30 GiB** and OOM'd asking for 298 MiB more.
+
+Had the release worked, ~43.87 GiB would have been free and the probe would have
+fit. Had the threshold matched the real trainer, the gate would have refused at
+`$0.36` with a diagnosis instead of an OOM. **This is attempt 12's class, and the
+gate written to stop it — whose refusal message names attempt 12 — did not fire,
+because it was calibrated against a trainer footprint that was never measured.**
+
+Both candidate repairs touch `autoinit_phase_a_driver.py` and
+`device_handoff.py`, which **are** in the 22-file harness, so unlike attempt 3's
+repair they move the continuation harness digest as well as the session commit.
 
 **Recovery continuation attempt 3 ran on 2026-08-22 and bought nothing: $0.2011,
 no stage executed.** Pod `ku8vcn5mu8hp9i`, 12.2 min, deleted with provider
@@ -105,10 +131,10 @@ arithmetic rather than luck:
 > **0.72 MB/s**. One leaf needs 28–45 min against a 10-minute timeout — over by
 > **3–4.5×** — and four more leaves would have followed.
 
-**The five leaves currently have no route to a pod.** scp is infeasible above;
-the relay alternative is off because it reported **1.60 GiB** of headroom against
-**5.55 GiB** of leaves. This is a transport decision for the maintainer, not
-something to route around. Full record:
+**SUPERSEDED.** At the time, the five leaves had no route to a pod: scp was
+infeasible above, and the relay alternative reported **1.60 GiB** of headroom
+against **5.55 GiB** of leaves. That was resolved by the transport mirror, and
+attempts 3 and 4 have since staged all five on paid hardware. Full record:
 [`autoinit_recovery_continuation_attempt2/`](autoinit_recovery_continuation_attempt2/).
 
 **Measurement Attempt 3 COMPLETED on 2026-08-20 for $0.2077.** `ALL_DONE`, both
@@ -126,19 +152,20 @@ selection result.**
 ## Budget
 
 ```
-cumulative spend   $213.9214
+cumulative spend   $214.3326
 approved cap       $234.00    RAISED AND APPROVED 2026-08-21
-remaining          $20.0786   $2.9698 SHORT of one more full Phase-A attempt
+remaining          $19.6674   $3.3810 SHORT of one more full Phase-A attempt
 
 ```
 
 The cap went **$219.00 → $231.00** (2026-08-20, to fund exactly one Phase-A
 attempt) **→ $234.00** (2026-08-21). Since then attempt 12 **ran** for $3.7872 —
 far under its $23.0484 ceiling, because it stopped at Stage 2 rather than
-training nine probes — and the three recovery continuations spent $0.0100,
-$0.2389 and $0.2011 without executing a stage. A continuation's derived
-**$16.7456** ceiling still fits inside the remaining $20.0786, with $3.3330 to
-spare; a full Phase-A attempt does not. **Every grant issued so far is spent.**
+training nine probes — and the four recovery continuations spent $0.0100,
+$0.2389, $0.2011 and $0.4112 — the last of which passed Stages 0 and 1. A
+continuation's derived **$16.7456** ceiling still fits inside the remaining
+$19.6674, with $2.9218 to spare; a full Phase-A attempt does not. **Every grant
+issued so far is spent.**
 
 Each raise is a **project ceiling only**. It authorizes nothing: the next paid
 action needs its own one-use grant and its own authorization artifact, and
@@ -230,6 +257,7 @@ already billing.
 | continuation 1 | $0.0100 | launcher readiness poll, 27 s in | `wait_endpoint` calls `provider._gql` uncaught against an endpoint measured at **25% transport failure**. Every gate passed; no stage ran |
 | continuation 2 | $0.2389 | LOCAL_ASSET staging, 10.5 min in | scp of one 1.110 GiB leaf against a hard-coded 600 s timeout: needs 1.99 MB/s, dev box gives ≤0.79. **Closed by the transport mirror** |
 | continuation 3 | $0.2011 | setup CPU test gate, 12.2 min in | `publish_selected_leaves.verify()` mkdtemps into `/home/ecs-user/aad-scratch`, absent on a pod. **The 25-input transport staging PASSED first** |
+| continuation 4 | $0.4112 | stage 2, first rung-1 probe | CUDA OOM: the release freed 0 allocated bytes and the headroom gate demands 24 GiB for a probe that needs ≳36.6. **Stages 0 and 1 PASSED on hardware** |
 
 **The pattern, through attempt 7:** code no $0 path could execute — a GPU-only
 device, or a contract owned by inherited machinery. **Attempt 8 is a new

@@ -1,0 +1,23 @@
+{
+  "schema": "aadistill.autoinit.device_handoff/v1",
+  "before": {
+    "available": true,
+    "allocated_bytes": 8110229504,
+    "reserved_bytes": 12767461376,
+    "free_bytes": 34354888704,
+    "total_bytes": 47665709056
+  },
+  "after": {
+    "available": true,
+    "allocated_bytes": 8110229504,
+    "reserved_bytes": 8124366848,
+    "free_bytes": 38997983232,
+    "total_bytes": 47665709056
+  },
+  "gc_collected": 285,
+  "freed_reserved_bytes": 4643094528,
+  "freed_allocated_bytes": 0,
+  "gained_free_bytes": 4643094528,
+  "verdict": "7.55 GiB is still ALLOCATED after the release, so something holds live tensors \u2014 this is a genuine retention, not allocator caching",
+  "live_retention": true
+}

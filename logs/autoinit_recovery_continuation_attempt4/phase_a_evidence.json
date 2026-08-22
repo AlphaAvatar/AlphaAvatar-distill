@@ -1,0 +1,472 @@
+{
+  "schema": "aadistill.autoinit.phase_a_evidence/v1",
+  "started_utc": "2026-08-22T15:28:30.358785+00:00",
+  "phase_a": {
+    "plan": {
+      "plan_id": "autoinit.v1.phase_a_session",
+      "version": 1,
+      "plan_hash": "9377a2dc61f21790dd111d72a5de0e039ea1d31afef2d09e18c98a0b0cc2a0aa",
+      "stages": [
+        {
+          "stage": 0,
+          "name": "attestation and preregistration binding",
+          "purpose": "re-establish the runtime and evaluation identity this session measures under, and refuse to proceed unless the science plan is the frozen one",
+          "produces": [
+            "runtime fingerprint including image digest",
+            "attested evaluation protocol over recovery_search_v2",
+            "frozen-asset verification for state_eval_v1 and recovery_search_v2",
+            "assert_preregistered against the frozen Phase-A plan",
+            "the materialized thresholds this run will select against"
+          ],
+          "blocking": true,
+          "stop_conditions": [
+            "a frozen asset does not match its preregistered constant -> STOP",
+            "the executing science plan does not hash to the frozen one -> STOP: a threshold moved after freezing",
+            "the equivalence interval or feasibility floor is not materialized -> STOP: selection has no rule to apply",
+            "the scoring contract digest differs from the pinned one -> STOP"
+          ]
+        },
+        {
+          "stage": 1,
+          "name": "beam search over initialization paths",
+          "purpose": "materialize and measure the reachable initialization states, and produce the searched leaves the recovery rungs will probe",
+          "produces": [
+            "one measured, hash-bound state per expansion",
+            "level records including every prune reason",
+            "the epsilon-Pareto ranking at each pruned level",
+            "5 admissible complete leaves",
+            "the search journal, resumable by content-derived state id"
+          ],
+          "blocking": true,
+          "stop_conditions": [
+            "fewer than 5 admissible complete leaves exist -> STOP and report the shortfall rather than shrinking N",
+            "a materialized state fails canonical reload, spec match, parameter count or finiteness -> STOP",
+            "the state evaluation suite hash differs from the attested one -> STOP: the beam would rank on a different suite's questions"
+          ]
+        },
+        {
+          "stage": 2,
+          "name": "recovery rung 1 on seed sa",
+          "purpose": "probe the 5 searched leaves and the retained canonical control under one identical recovery recipe",
+          "produces": [
+            "6 probes at 1023 steps each on seed sa",
+            "recovery_search_v2 battery result per probe",
+            "the rung-1 survivor selection under the frozen rule",
+            "per-probe journal entries, resumable"
+          ],
+          "blocking": true,
+          "stop_conditions": [
+            "the canonical control is absent -> STOP: a comparison without the retained baseline is not the comparison the plan describes",
+            "capability schema validation fails -> scoring defect, STOP",
+            "a probe's evaluation protocol is not comparable to the attestation -> STOP"
+          ]
+        },
+        {
+          "stage": 3,
+          "name": "recovery rung 2 on seed sb",
+          "purpose": "second seed for the 2 survivors and the control, because the behaviour metric's seed-only spread is 0.1290",
+          "produces": [
+            "3 probes at 1023 steps each on seed sb",
+            "pooled_counts@v2 aggregates over sa and sb",
+            "the final selection, or an explicit tie"
+          ],
+          "blocking": true,
+          "stop_conditions": [
+            "the control did not advance -> STOP: it advances unconditionally",
+            "capability schema validation fails -> STOP"
+          ]
+        },
+        {
+          "stage": 4,
+          "name": "conditional tie-break on seed sc",
+          "purpose": "resolve finalists that finished inside the preregistered equivalence interval after two seeds \u2014 and only those",
+          "produces": [
+            "probes on seed sc for the tied finalists only",
+            "pooled aggregates over sa, sb and sc",
+            "the resolved winner, or unresolved_equivalence"
+          ],
+          "blocking": false,
+          "stop_conditions": [
+            "the rung-2 selection did not request a tie-break -> this stage does not run, which is not a failure",
+            "no fourth seed is requested under any outcome"
+          ]
+        },
+        {
+          "stage": 5,
+          "name": "selection and report",
+          "purpose": "record which initializer won, that the canonical control won, or that v1 resolved no unique behavioural winner",
+          "produces": [
+            "the final selection record with every exclusion",
+            "feasibility and catastrophic-gate outcomes per candidate",
+            "behaviour and correctness reported on separate axes",
+            "the Phase-A result artifact"
+          ],
+          "blocking": false,
+          "stop_conditions": [
+            "a tie surviving seed sc is reported as unresolved_equivalence and is a RESULT, not a failure",
+            "no follow-on experiment starts from this session"
+          ]
+        }
+      ],
+      "ordering_rationale": "controls are the expensive artifact and the one whose validity depends on a fixed runtime, so they are produced only after the runtime is attested and the cheap gates pass"
+    },
+    "scope": {
+      "trains_anything": true,
+      "retrains_permanent_controls": false,
+      "reaches_any_followon": false,
+      "control_is_injected_by_hash": true,
+      "searched_leaves": 5,
+      "survivors": 2,
+      "seeds": [
+        20260726,
+        20260801
+      ],
+      "conditional_tie_break_seed": 20260813,
+      "battery": "recovery_search_v2",
+      "state_eval_suite": "state_eval_v1",
+      "notes": {
+        "what_training_means_here": "Phase A trains 9 recovery probes (12 if the tie-break rung runs) at 1023 steps each. It does NOT retrain the two permanent controls, which were trained once and are injected by frozen hash",
+        "control_may_win": "'the incumbent won, AutoInitializer v1 did not improve recovered behaviour' is a reachable conclusion, and the selection is symmetric so that it stays reachable",
+        "no_winner_is_a_result": "unresolved_equivalence after seed sc is the finding, not a failure to be resolved by a fourth seed or a lexicographic tie-break",
+        "terminus": "Phase A stops for review. No follow-on experiment, full recovery of a winner, or Phase B starts from this session"
+      },
+      "session_plan_hash": "9377a2dc61f21790dd111d72a5de0e039ea1d31afef2d09e18c98a0b0cc2a0aa"
+    },
+    "harness_source_files": [
+      "scripts/pod/autoinit_phase_a_launch.py",
+      "scripts/pod/autoinit_phase_a_driver.py",
+      "scripts/pod/autoinit_preflight_setup.sh",
+      "scripts/pod/autoinit_science_inputs.py",
+      "scripts/pod/autoinit_engine_probe.py",
+      "scripts/pod/watchdog.py",
+      "scripts/pod/collect_artifacts.py",
+      "src/aadistill/infrastructure/session.py",
+      "src/aadistill/infrastructure/session_runner.py",
+      "src/aadistill/infrastructure/session_prechecks.py",
+      "scripts/autoinit/phase_a_search.py",
+      "scripts/autoinit/write_preregistration.py",
+      "src/aadistill/autoinit/authorization.py",
+      "src/aadistill/autoinit/generation_compat.py",
+      "src/aadistill/autoinit/phase_a.py",
+      "src/aadistill/autoinit/generation.py"
+    ],
+    "manifest_sha256": "cc0b23970fc0d98efe31791ad1bf778e1ea9dd06faf31ab99dbc35d45dc6f102"
+  },
+  "scope": {
+    "trains_anything": true,
+    "retrains_permanent_controls": false,
+    "reaches_any_followon": false,
+    "control_is_injected_by_hash": true,
+    "searched_leaves": 5,
+    "survivors": 2,
+    "seeds": [
+      20260726,
+      20260801
+    ],
+    "conditional_tie_break_seed": 20260813,
+    "battery": "recovery_search_v2",
+    "state_eval_suite": "state_eval_v1",
+    "notes": {
+      "what_training_means_here": "Phase A trains 9 recovery probes (12 if the tie-break rung runs) at 1023 steps each. It does NOT retrain the two permanent controls, which were trained once and are injected by frozen hash",
+      "control_may_win": "'the incumbent won, AutoInitializer v1 did not improve recovered behaviour' is a reachable conclusion, and the selection is symmetric so that it stays reachable",
+      "no_winner_is_a_result": "unresolved_equivalence after seed sc is the finding, not a failure to be resolved by a fourth seed or a lexicographic tie-break",
+      "terminus": "Phase A stops for review. No follow-on experiment, full recovery of a winner, or Phase B starts from this session"
+    },
+    "session_plan_hash": "9377a2dc61f21790dd111d72a5de0e039ea1d31afef2d09e18c98a0b0cc2a0aa"
+  },
+  "retrains_permanent_controls": false,
+  "followon_started": false,
+  "followon_reachable_from_this_driver": false,
+  "stages": {
+    "0": {
+      "passed": true,
+      "reason": "",
+      "finished_utc": "2026-08-22T15:31:19.960539+00:00",
+      "spend_usd": 0.256,
+      "attested": {
+        "schema": "aadistill.autoinit.phase_a_attested_protocol/v1",
+        "generated_utc": "2026-08-22T15:31:19.959445+00:00",
+        "runtime": {
+          "version": 1,
+          "image_digest": "runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@580.178.04",
+          "python_version": "3.12.3",
+          "torch_version": "2.11.0+cu128",
+          "transformers_version": "5.13.1",
+          "cuda_runtime": "12.8",
+          "attention_backend": "sdpa"
+        },
+        "generation_source_digest": {
+          "digest": "a1b51736d6a6b1276322a04d44855d7b574011e165e77d6d23c3e31b3036f743",
+          "files": [
+            {
+              "path": "scripts/evaluation/uncapped_eval.py",
+              "sha256": "120e92dc08a49ae4e3ed74fbbc6537054c011382755cdec6418c11b341f780d4",
+              "bytes": 28667
+            },
+            {
+              "path": "src/aadistill/evaluation/behavior.py",
+              "sha256": "c6f52721e8b86bc2d875683bfb9c35b4101379fa5d48de7a48db93959e2935c2",
+              "bytes": 19983
+            },
+            {
+              "path": "src/aadistill/evaluation/degeneration.py",
+              "sha256": "793540820d4fc0f42d0c855e0d79eb879b94efa451e06030b2a14c55683f4961",
+              "bytes": 5245
+            }
+          ],
+          "rule": "sha256 over sorted 'path:sha256' lines of the declared set"
+        },
+        "scoring_contract": {
+          "contract": "recovery_search_scoring@v2",
+          "contract_id": "recovery_search_scoring",
+          "version": 2,
+          "digest": "808080a7c5d88d5a66760fd0d7eeabc5451c096ad0819f8c5663a0b8224660be",
+          "files": [
+            {
+              "path": "scripts/autoinit/score_recovery_search.py",
+              "sha256": "b19eba4c2c5f555aeb141811439ad5e5417a3222c3b57b78bad3f497eb90dba3",
+              "bytes": 21518
+            },
+            {
+              "path": "src/aadistill/autoinit/recovery.py",
+              "sha256": "39d6598e210b9619d56463f6ba3000d47e1a97f7121e7db25b97213d4d6c799e",
+              "bytes": 102452
+            },
+            {
+              "path": "src/aadistill/evaluation/behavior.py",
+              "sha256": "c6f52721e8b86bc2d875683bfb9c35b4101379fa5d48de7a48db93959e2935c2",
+              "bytes": 19983
+            },
+            {
+              "path": "src/aadistill/evaluation/capability.py",
+              "sha256": "da1bc3b1069d927b6ab2cbf0eaaf6763bfa491d396189b3dcde95977e39d67ad",
+              "bytes": 19568
+            },
+            {
+              "path": "src/aadistill/evaluation/strict_answer.py",
+              "sha256": "ecb4356a89d3563214ea11ade2307b0d106588bb7ff59f6b8c5e3b9c98d380e3",
+              "bytes": 7628
+            },
+            {
+              "path": "src/aadistill/evaluation/usable_rollout.py",
+              "sha256": "8159acdd7a0a6953dfefac7acf4f6fb4706f69a7264b625e9f9b7ff1a74826ca",
+              "bytes": 6155
+            }
+          ],
+          "rule": "sha256 over sorted 'path:sha256' lines of the declared recovery-scoring source set",
+          "covers": [
+            "usable_rollout components and their composition",
+            "protocol validity, including the tools_offered relaxation",
+            "the tool structural-executability gate",
+            "per-set correctness scorers",
+            "correct => usable",
+            "capability schema and aggregation",
+            "pooled_counts seed aggregation",
+            "the threshold formulas materialized from control data"
+          ],
+          "supersedes": {
+            "contract": "recovery_search_scoring@v1",
+            "identity_was": "a single hash of src/aadistill/evaluation/capability.py",
+            "why": "v1 could not see a defect in the composition. A prompted tool call was rejected as unexpected_tool_call, so the tool capability read a structural 0.0000 for every arm while capability.py itself was unchanged and its hash matched."
+          }
+        },
+        "evaluation_protocol": {
+          "evaluation_protocol_hash": "7327e880645492ec308fce62054b4845dce3de12e3079bb17a32e7d22898411a",
+          "generation": {
+            "generation_source_digest": "a1b51736d6a6b1276322a04d44855d7b574011e165e77d6d23c3e31b3036f743",
+            "generation_source_set_version": 1,
+            "vllm_version": "0.27.1",
+            "transformers_version": "5.15.0",
+            "torch_version": "2.13.0+cu130",
+            "dtype": "bfloat16",
+            "gpu_memory_utilization": 0.9,
+            "max_num_seqs": 256,
+            "max_num_batched_tokens": 8192,
+            "enforce_eager": false,
+            "tokenizer_source": "the evaluated checkpoint",
+            "tokenizer_sha256": "c1db93c8164f3e3ba2dbc8c6943fb574273a5efa87da4556ef9f460b5c0893b7",
+            "chat_template_sha256": "3802169b2a02b81e6adb7ab4f64f91ff02db753c8c3a64a01c35192d3a61d8d7",
+            "protocol": "project",
+            "system_message": "You are a helpful Assistant.",
+            "system_injection_rule": "injected only when the sample carries no system turn and protocol == project; a sample's own system prompt is preserved",
+            "chat_template_kwargs_json": "{}",
+            "thinking_mode": "template-default (not overridden)",
+            "trained_context": 8192,
+            "context_len_override": null,
+            "resolved_context": 8192,
+            "context_source": "trained_block_len",
+            "context_resolution_rule": "min(trained_context, architectural context); the effective context is the TRAINED context and this is not a 262K-context evaluation",
+            "temperature": 0.0,
+            "top_p": 1.0,
+            "top_k": -1,
+            "detokenize": false,
+            "max_tokens_rule": "per sample: resolved_context - len(prompt_ids); P18 unrestricted, never a chosen token budget",
+            "stop_token_ids": [
+              151645
+            ],
+            "stop_id_derivation_rule": "sorted union of config.eos_token_id, generation_config.eos_token_id, <|im_end|> and tokenizer.eos_token_id",
+            "degeneration_stop": true,
+            "degeneration_check_every": 256,
+            "degeneration_source_digest": "793540820d4fc0f42d0c855e0d79eb879b94efa451e06030b2a14c55683f4961",
+            "runtime_digest": "85a14f8b455db08b4bf19a1a3fa783df0974813cf6a5f34cdf270b5b6c03834e",
+            "protocol_id": "recovery_generation",
+            "version": 1,
+            "generation_protocol_fingerprint": "1e5031c2b7debcccb6ab8f92d9863fb2a8381aefd534d5267cb0b519e6192206",
+            "is_materialized": true,
+            "unmaterialized_fields": [],
+            "excluded_by_design": [
+              "the checkpoint being generated from"
+            ],
+            "why_excluded": "the checkpoint is the treatment; a generation identity containing it would mark every pair of arms as mismatched"
+          },
+          "scoring_contract": "recovery_search_scoring@v2",
+          "scoring_digest": "808080a7c5d88d5a66760fd0d7eeabc5451c096ad0819f8c5663a0b8224660be",
+          "battery": {
+            "artifact": "recovery_search_v2",
+            "manifest_sha256": "58ae5c6dcbe32eb28c343a66830d7224a14537362deeeff2ce8219d0a31679d6",
+            "content_sha256": "a1b22778b00d95b6aba358c14a5af5b559fd807bb371c92131eacca59479f323"
+          },
+          "binding": "every control and every searched recovery probe must bind to this exact hash; a probe measured under a different one is not comparable to the thresholds materialized from these controls",
+          "notes": {}
+        },
+        "evaluation_protocol_hash": "7327e880645492ec308fce62054b4845dce3de12e3079bb17a32e7d22898411a",
+        "stage3_evaluation_protocol_hash": "250f72efbd43b86a475e8dda293b45f07ee61a4d858e147f4a5bd7681c32c2e4",
+        "bound_to_stage3_thresholds": true,
+        "comparability": {
+          "rule": "generation_runtime_comparability@v2",
+          "live_identity": "70a26e0b43df20e469385115b49683b50936919e02986088b76d3c30ffd87103",
+          "historical_identity": "70a26e0b43df20e469385115b49683b50936919e02986088b76d3c30ffd87103",
+          "identities_equal": true,
+          "live_driver": "580.178.04",
+          "historical_driver": "580.159.03",
+          "driver_branch_equal": true,
+          "driver_patch_differs": true
+        },
+        "comparable_identity": "70a26e0b43df20e469385115b49683b50936919e02986088b76d3c30ffd87103",
+        "science_plan_hash": "02be33b9a7a8e26bc8bfb75795351e8cdc9ffd441b47066cc81887cfc511b55c",
+        "equivalence_interval": 0.011695296982299022,
+        "feasibility_floor": 0.3,
+        "report_sha256": "d0abf36e6380f82bf7fa2ba7bdbf87512d8c43bc457c95d916ac2986c5b83e39"
+      },
+      "frozen_plan_hash": "02be33b9a7a8e26bc8bfb75795351e8cdc9ffd441b47066cc81887cfc511b55c"
+    },
+    "1": {
+      "passed": true,
+      "reason": "",
+      "finished_utc": "2026-08-22T15:35:22.451091+00:00",
+      "spend_usd": 0.3227,
+      "imported": true,
+      "stage1_source": "phase-a attempt 12, verified from bytes",
+      "config_hash": "567d32789ba6dcefab2f67dea7d67d9641d51aac19b531f533fde828aa71681b",
+      "selected": [
+        "cca699c93f34dad7e94a5d13a25b2bc2",
+        "85bde4ded2c31953f802e39cf2252c87",
+        "158b96cf651fd8ba8f8ceaefefde2067",
+        "4e429f7ed722b180dd662c779895693f",
+        "281a02c3ac18419b70e896296dac0d03"
+      ],
+      "control_measured": true,
+      "device_handoff": "7.55 GiB is still ALLOCATED after the release, so something holds live tensors \u2014 this is a genuine retention, not allocator caching"
+    },
+    "2": {
+      "passed": false,
+      "reason": "autoinit.v1.phase_a.rung1.cca699c93f34.sa: training failed rc=1; tail: ...step_once()\n        ^^^^^^^^^^^^^^^^\n  File \"/workspace/aad/src/aadistill/training/train.py\", line 975, in step_once\n    ce_sum, _, kd_sum, _ = self._micro_losses(mids, mmask, mcontent)\n                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspace/aad/src/aadistill/training/train.py\", line 832, in _micro_losses\n    kd_sum, kd_n = kd_forward_kl(\n                   ^^^^^^^^^^^^^^\n  File \"/workspace/aad/src/aadistill/training/train.py\", line 404, in kd_forward_kl\n    kl = (t.exp() * (t - s)).sum()\n          ~~~~~~~~^~~~~~~~~\ntorch.OutOfMemoryError: CUDA out of memory. Tried to allocate 298.00 MiB. GPU 0 has a total capacity of 44.39 GiB of which 12.06 MiB is free. Process 6324 has 8.06 GiB memory in use. Including non-PyTorch memory, this process has 36.30 GiB memory in use. Of the allocated memory 34.44 GiB is allocated by PyTorch, and 1.35 GiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://docs.pytorch.org/docs/stable/notes/cuda.html#optimizing-memory-usage-with-pytorch-cuda-alloc-conf)\n",
+      "finished_utc": "2026-08-22T15:36:02.443940+00:00",
+      "spend_usd": 0.3337
+    }
+  },
+  "authorization": {
+    "schema": "aadistill.autoinit.recovery_continuation_authorization/v1",
+    "authorization_id": "autoinit.recovery_continuation.2026-08-22T1454Z",
+    "version": 1,
+    "granted_utc": "2026-08-22T14:54:20Z",
+    "granted_by": "Maintainer decision, 2026-08-22. 'GO for Recovery Continuation Attempt 4. The Attempt-3 blocker is closed sufficiently for another paid continuation. I reviewed d592b8a: the scratch fallback is portable, HF_TOKEN correctly covers the pod environment with the local token file retained only as fallback, and the canonical-shard test rewrite preserves the actual drift refusal rather than weakening it. The targeted pod-like regression is the right closure. No TEST_IGNORES exemption or generic readiness guard is needed.' Against last tested implementation d592b8a, which is also the pre-authorization HEAD. Since attempt 3 exactly one closure landed and was accepted: PORTABILITY OF THE LEAF PUBLISHER. Attempt 3 reached the pod's setup CPU test gate and failed it because scripts/autoinit/publish_selected_leaves.py hard-coded dev-box paths, and although that module is a dev-box publishing tool the paid session never executes, its TEST module is part of the suite the pod gate runs. Three independent host dependencies were found and closed: verify() called tempfile.mkdtemp with dir='/home/ecs-user/aad-scratch', now scratch_dir() returning the configured AAD_SCRATCH if it names an existing directory, else the dev-box root if present, else None so tempfile chooses; token() read '~/.cache/huggingface/token', which no pod has, now reading HF_TOKEN first with the file retained as fallback -- this one was invisible until mkdtemp stopped failing first, because it is evaluated as an argument to hf_hub_download and therefore runs even in tests that patch the download away; and test_the_before_manifest_refuses_a_drifted_canonical_shard drove build_before() against the real 5.55 GiB canonical store, so on any pod it exited at 'canonical leaf missing' and the drift assertion never executed, now driven against a synthetic store and record. No TEST_IGNORES entry and no generic hard-coded-host-root guard were added, as instructed. Verified at $0 on the current tree: full suite 2162 passed / 12 skipped, +2 on the 2160 baseline with the skip count unchanged; the publisher module 11 passed on a POD-LIKE HOST with no aad-scratch, no aad-artifacts and no token file, HF_TOKEN set as a pod sets it; frozen-asset verifier passed with no problems; 6 mutations each turning a passing state into a failing one, including deleting the drift check to prove the rewritten test was not weakened. The continuation harness digest is UNCHANGED at 162c09ed because the publisher and its tests are outside the 22-file set, so the repair moved the session commit and nothing else.\n\nCovers: One (1) launch of the AutoInitializer Phase-A RECOVERY CONTINUATION, attempt 4, on a single NVIDIA L40S at no more than $0.99/h. It imports the verified Attempt-12 Stage-1 result -- the five preserved selected leaves, in the committed selected order, re-identified from the bytes that actually arrive on the pod -- and runs recovery Stages 2 through 5 under the frozen science, the existing watchdog, soft-stop, hard-stop, artifact-gate and provider-confirmed teardown behaviour. The reviewed execution path is preserved exactly: Stage 0 attestation, strict Stage-1 import, canonical-control measurement once on the frozen Stage-1 suite, admit_leaves over the five imported leaves plus the measured control, device handoff and headroom gate, then frozen recovery Stages 2-5 only, with the conditional seed-sc rung firing only if the frozen rule fires. The five leaves travel as 15 relay inputs from the private transport repository, a path already PROVEN on paid hardware by attempt 3, which reached ASSETS_STAGED, ASSETS_READY and VLLM_READY; only 2 small artifacts totalling 1.577 MiB remain on the scp path. Authorized pricing is DERIVED from continuation_budget(), not written: expected $14.9233, per-launch hard ceiling $16.7456, which is also the hard cap. The beam search is not run, not reconstructed, and is structurally unreachable from this harness.\n\nCumulative spend at approval $213.9214 against a cumulative cap of $234.00.\n\nDoes NOT authorize: A beam search, a fresh Stage 1, or any reconstruction of the search - the continuation imports Attempt 12's result and cannot reach a search. Re-ranking or re-selecting the five leaves, or changing their committed selected order. Any science-plan modification. Retraining the permanent controls. Measuring the canonical control more than once, or on anything other than the frozen Stage-1 suite. Any new canary, rehearsal, readiness, measurement, architecture, pricing or harness expansion. Any additional storage cleanup, including deleting any of the 32 sole-copy remote objects totalling 69.671 GiB or the two protected wheelhouses. Any live-pod repair followed by a relaunch: a failed authorization, transport, staging, imported-leaf, control-measurement, admission, device-handoff, recovery, artifact-integrity, budget or provider gate is a fail-closed stop for review. Increasing the cumulative cap. Any follow-on or automatically started session. Reopening the frozen science: science plan 02be33b9, session plan 9377a2dc, Stage-3 protocol 250f72ef, equivalence interval 0.011695296982299022, feasibility floor 0.3, tokenizer 7781771acc3798ee, recovery fingerprint ab0d8cfd, the seed and conditional-sc policy, the operator ids and declared mathematics, or the recovery, search and selection rules. Reusing the spent attempt-1, attempt-2 or attempt-3 grant or authorization. Any other paid session. Treating the remaining cumulative headroom as authorization beyond this one launch.\n\nGrant document: logs/autoinit_recovery_continuation_attempt4_grant.json sha256 d382f05daba38d74174b4965e8789a0d12038dd15267bbbc026012343179bc1d",
+    "plan_id": "autoinit.v1.phase_a_session",
+    "phase_a_session_plan_hash": "9377a2dc61f21790dd111d72a5de0e039ea1d31afef2d09e18c98a0b0cc2a0aa",
+    "phase_a_science_plan_hash": "02be33b9a7a8e26bc8bfb75795351e8cdc9ffd441b47066cc81887cfc511b55c",
+    "expected_usd": 14.9233,
+    "hard_cap_usd": 16.7456,
+    "authorized_stages": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5
+    ],
+    "stage_conditions": {
+      "1": "import the verified attempt-12 Stage-1 result from staged bytes, measure the canonical control once on the frozen suite, and admit the complete set. NO SEARCH.",
+      "2": "rung-1 recovery probes on the imported leaves",
+      "5": "selection and report; Phase A remains a terminus"
+    },
+    "scope_note": "ONE recovery continuation: import the verified Phase-A attempt-12 Stage-1 result and run recovery Stages 2-5. It does NOT authorize a beam search, a fresh Stage 1, a re-ranking or re-selection of the five leaves, retraining the permanent controls, or any follow-on session. The search is structurally unreachable from this harness.",
+    "phase_a_authorized": true,
+    "automatic_followon_start": false,
+    "authorized_session_commit": "38db4f2cb5628d1892ecbec0401b7a90ae2a9777",
+    "harness_source_digest": "162c09ed7d6fb2da28ecac98c326a8144f3f4d66f5af6b1c6e5282ecd91fcfe7",
+    "harness_source_files": [
+      "scripts/autoinit/phase_a_frozen.py",
+      "scripts/autoinit/write_preregistration.py",
+      "scripts/pod/autoinit_engine_probe.py",
+      "scripts/pod/autoinit_phase_a_driver.py",
+      "scripts/pod/autoinit_phase_a_launch.py",
+      "scripts/pod/autoinit_preflight_setup.sh",
+      "scripts/pod/autoinit_recovery_continuation_driver.py",
+      "scripts/pod/autoinit_recovery_continuation_launch.py",
+      "scripts/pod/autoinit_science_inputs.py",
+      "scripts/pod/collect_artifacts.py",
+      "scripts/pod/watchdog.py",
+      "src/aadistill/autoinit/authorization.py",
+      "src/aadistill/autoinit/device_handoff.py",
+      "src/aadistill/autoinit/generation.py",
+      "src/aadistill/autoinit/generation_compat.py",
+      "src/aadistill/autoinit/leaf_durability.py",
+      "src/aadistill/autoinit/phase_a.py",
+      "src/aadistill/autoinit/recovery_continuation.py",
+      "src/aadistill/autoinit/stage1_import.py",
+      "src/aadistill/infrastructure/session.py",
+      "src/aadistill/infrastructure/session_prechecks.py",
+      "src/aadistill/infrastructure/session_runner.py"
+    ],
+    "per_launch_hard_usd": 16.7456,
+    "provenance_commit": "38db4f2cb5628d1892ecbec0401b7a90ae2a9777",
+    "enforcement": "the launcher loads this artifact and refuses to create a pod whose priced hard threshold exceeds hard_cap_usd or per_launch_hard_usd, refuses a stage not in authorized_stages, refuses a harness that does not digest to the authorized value, and has no code path to any experiment after Phase A",
+    "allows_beam_search": false,
+    "authorizes_recovery_continuation": true,
+    "stage1_source": "imported from the verified Phase-A attempt-12 result; this session runs no search and cannot reach one",
+    "authorization_sha256": "874d54f6dac49f195505539eab696409ce09080505c1ba1db3adeba0fd8228e9"
+  },
+  "elapsed_min": 7.53,
+  "spend_usd": 0.3337,
+  "runtime": {
+    "device_handoff": {
+      "schema": "aadistill.autoinit.device_handoff/v1",
+      "before": {
+        "available": true,
+        "allocated_bytes": 8110229504,
+        "reserved_bytes": 12767461376,
+        "free_bytes": 34354888704,
+        "total_bytes": 47665709056
+      },
+      "after": {
+        "available": true,
+        "allocated_bytes": 8110229504,
+        "reserved_bytes": 8124366848,
+        "free_bytes": 38997983232,
+        "total_bytes": 47665709056
+      },
+      "gc_collected": 285,
+      "freed_reserved_bytes": 4643094528,
+      "freed_allocated_bytes": 0,
+      "gained_free_bytes": 4643094528,
+      "verdict": "7.55 GiB is still ALLOCATED after the release, so something holds live tensors \u2014 this is a genuine retention, not allocator caching",
+      "live_retention": true
+    }
+  },
+  "phase_a_successful": false,
+  "failed_stages": [
+    2
+  ],
+  "outcome": "FAILED",
+  "cleanup_is_not_success": "collection and teardown run regardless of the outcome; a clean cleanup does not make a failed search a successful Phase A"
+}

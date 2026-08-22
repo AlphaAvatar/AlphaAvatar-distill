@@ -1,0 +1,30 @@
+2026-08-22T15:28:30Z MARKER:DRIVER_START
+2026-08-22T15:28:30Z MARKER:STAGE_START:0
+[15:31:19] attested: interval 0.011695, floor 0.3000, plan 02be33b9a7a8…
+2026-08-22T15:31:19Z MARKER:STAGE_PASSED:0
+2026-08-22T15:31:19Z MARKER:STAGE_START:1
+[15:31:27] imported 5 stage-1 leaves, config 567d32789ba6…, re-identified from bytes
+2026-08-22T15:31:27Z MARKER:STAGE1_IMPORTED:5
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+Loading weights:   0%|          | 0/398 [00:00<?, ?it/s]Loading weights: 100%|██████████| 398/398 [00:00<00:00, 4169.55it/s]
+Loading weights:   0%|          | 0/310 [00:00<?, ?it/s]Loading weights: 100%|██████████| 310/310 [00:00<00:00, 5190.51it/s]
+[15:35:22] control measured on state_eval@v1 (74022 positions)
+[15:35:22] device handoff: 7.55 GiB is still ALLOCATED after the release, so something holds live tensors — this is a genuine retention, not allocator caching
+2026-08-22T15:35:22Z MARKER:STAGE_PASSED:1
+2026-08-22T15:35:22Z MARKER:STAGE_START:2
+2026-08-22T15:36:02Z MARKER:STAGE_FAILED:2
+[15:36:02] STAGE 2 FAILED: autoinit.v1.phase_a.rung1.cca699c93f34.sa: training failed rc=1; tail: ...step_once()
+        ^^^^^^^^^^^^^^^^
+  File "/workspace/aad/src/aadistill/training/train.py", line 975, in step_once
+    ce_sum, _, kd_sum, _ = self._micro_losses(mids, mmask, mcontent)
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/aad/src/aadistill/training/train.py", line 832, in _micro_losses
+    kd_sum, kd_n = kd_forward_kl(
+                   ^^^^^^^^^^^^^^
+  File "/workspace/aad/src/aadistill/training/train.py", line 404, in kd_forward_kl
+    kl = (t.exp() * (t - s)).sum()
+          ~~~~~~~~^~~~~~~~~
+torch.OutOfMemoryError: CUDA out of memory. Tried to allocate 298.00 MiB. GPU 0 has a total capacity of 44.39 GiB of which 12.06 MiB is free. Process 6324 has 8.06 GiB memory in use. Including non-PyTorch memory, this process has 36.30 GiB memory in use. Of the allocated memory 34.44 GiB is allocated by PyTorch, and 1.35 GiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://docs.pytorch.org/docs/stable/notes/cuda.html#optimizing-memory-usage-with-pytorch-cuda-alloc-conf)
+
+2026-08-22T15:36:02Z MARKER:PHASE_A_FAILED
+[15:36:02] stopping before any later stage; completed probes are journalled and the permanent controls are untouched

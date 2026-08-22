@@ -1,0 +1,18 @@
+rkspace/aad/scripts/training/train_stage3.py", line 344, in <module>
+    main()
+  File "/workspace/aad/scripts/training/train_stage3.py", line 319, in main
+    summary = trainer.run()
+              ^^^^^^^^^^^^^
+  File "/workspace/aad/src/aadistill/training/train.py", line 1301, in run
+    m = self.step_once()
+        ^^^^^^^^^^^^^^^^
+  File "/workspace/aad/src/aadistill/training/train.py", line 975, in step_once
+    ce_sum, _, kd_sum, _ = self._micro_losses(mids, mmask, mcontent)
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/aad/src/aadistill/training/train.py", line 832, in _micro_losses
+    kd_sum, kd_n = kd_forward_kl(
+                   ^^^^^^^^^^^^^^
+  File "/workspace/aad/src/aadistill/training/train.py", line 404, in kd_forward_kl
+    kl = (t.exp() * (t - s)).sum()
+          ~~~~~~~~^~~~~~~~~
+torch.OutOfMemoryError: CUDA out of memory. Tried to allocate 298.00 MiB. GPU 0 has a total capacity of 44.39 GiB of which 12.06 MiB is free. Process 6324 has 8.06 GiB memory in use. Including non-PyTorch memory, this process has 36.30 GiB memory in use. Of the allocated memory 34.44 GiB is allocated by PyTorch, and 1.35 GiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://docs.pytorch.org/docs/stable/notes/cuda.html#optimizing-memory-usage-with-pytorch-cuda-alloc-conf)

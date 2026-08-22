@@ -5,31 +5,25 @@
   "baseline_commit": "ef4353c96fb5fb0693549a6484651850f2579e94",
   "baseline_commit_meaning": "The LAST TESTED IMPLEMENTATION: the commit whose tree produced the latest_verification figures. It is also attempt 4's session commit.",
   "running": {
-    "paid_compute": true,
-    "pods": 1,
-    "launchers": 1,
-    "pod_id": "k1mgu38q0y6sei",
-    "what": "recovery continuation attempt 4, L40S $0.99/h, hard 1015 min = $16.7456",
-    "started_utc": "2026-08-22T15:15:44Z"
+    "paid_compute": false,
+    "pods": 0,
+    "launchers": 0
   },
   "authorized": {
-    "any": true,
-    "id": "autoinit.recovery_continuation.2026-08-22T1454Z",
-    "note": "one-use, CONSUMED by this launch. Grant logs/autoinit_recovery_continuation_attempt4_grant.json; base 38db4f2; harness 162c09ed, 22 files, search excluded. No follow-on is authorized."
+    "any": false,
+    "note": "every authorization issued is consumed, including all four continuation attempts; their lineage gates refuse the current HEAD by construction. A new paid action needs a new grant and artifact."
   },
   "prepared_launch": {
-    "any": true,
-    "bundles": 1,
-    "bundle": "aad_autoinit_ef4353c9.bundle",
-    "note": "built, uploaded, round-trip verified; the relay checkout's harness digest matches the authorization"
+    "any": false,
+    "bundles": 0
   },
   "budget": {
-    "cumulative_spend_usd": 213.9214,
+    "cumulative_spend_usd": 214.3326,
     "authorized_cap_usd": 234.0,
-    "remaining_usd": 20.0786,
+    "remaining_usd": 19.6674,
     "remaining_is_not_permission": true,
     "ledger": "logs/BUDGET_LEDGER.md",
-    "headroom_note": "$20.0786 does NOT cover another full Phase-A attempt ($23.0484). It covers one continuation ($16.7456) -- but balance is not authorization."
+    "headroom_note": "$19.6674 covers one continuation ceiling ($16.7456) with $2.9218 to spare; it does NOT cover a full Phase-A attempt ($23.0484). Balance is not authorization."
   },
   "frozen": {
     "science_plan_hash": "02be33b9a7a8e26bc8bfb75795351e8cdc9ffd441b47066cc81887cfc511b55c",
@@ -55,8 +49,8 @@
     "stage1_runtime_deadline_minutes": 363.9841
   },
   "complete": [
-    "the five-leaf transport mirror, verified by LFS oid, round trip and artifact_digest",
-    "the multi-repo relay contract: RelayInput carries its repository, setup fetches per-item, the $0 precheck lists every declared repo. Transport-agnostic",
+    "the five-leaf transport mirror, and staging it on a pod (attempts 3 and 4)",
+    "the multi-repo relay contract: RelayInput carries its repository, setup fetches per-item",
     "control-plane resilience: all three SessionRunner reads; unconfirmable image identity fails closed",
     "Phase-A Stage 1 PASSED TWICE, byte-identical, five leaves preserved off-pod -- see continuation_ready",
     "the tokenizer consumer contract: the trainer declares and verifies its tokenizer source instead of inferring it from student_path",
@@ -64,7 +58,7 @@
     "Stage 3 (both permanent controls, thresholds materialized)",
     "the Phase-A harness, stages 0-5 executing for real at $0",
     "the Stage-1 device audit (autoinit.stage1_device_contract@v1)",
-    "Stage 0 on hardware, passed five times (attempt 10 attested interval 0.011695, floor 0.3000, plan 02be33b9)"
+    "Stage 0 on hardware, passed six times; attempt 4 also passed STAGE 1 on hardware -- five leaves re-identified from pod bytes, control measured on state_eval@v1"
   ],
   "latest_verification": {
     "utc": "2026-08-22T14:40:00Z",
@@ -77,23 +71,23 @@
   },
   "failed": [
     {
-      "run": "recovery continuation 3",
-      "usd": 0.2011,
-      "where": "setup CPU test gate, 12.2 min in; no stage ran",
-      "cause": "publish_selected_leaves hard-coded dev-box paths; its TESTS run in the pod gate though the tool does not. REPAIRED at d592b8a and verified on a pod-like host",
-      "kept": "the TRANSPORT WORKED: ASSETS_STAGED/ASSETS_READY/VLLM_READY reached, so all 25 relay inputs including 5.5513 GiB of leaves were fetched and digest-verified"
+      "run": "recovery continuation 4",
+      "usd": 0.4112,
+      "where": "stage 2, first rung-1 probe; STAGES 0 AND 1 PASSED",
+      "cause": "CUDA OOM. release_to_subprocess freed 0 allocated bytes (live_retention true, 7.55 GiB held) and require_headroom passed: it demands 24.00 GiB against 36.32 free, but the probe needs >=36.6",
+      "kept": "Stage 0 attested on hardware; five leaves imported and RE-IDENTIFIED FROM POD BYTES in frozen order (config 567d32789ba6); canonical control measured once on state_eval@v1, artifact_digest dc9500d3"
     },
     {
-      "run": "recovery continuation 2",
-      "usd": 0.2389,
-      "where": "LOCAL_ASSET staging, 10.5 min in; no stage ran",
-      "cause": "scp of one 1.110 GiB leaf against a hard-coded 600 s timeout. CLOSED by the transport mirror"
+      "run": "recovery continuation 3",
+      "usd": 0.2011,
+      "where": "setup CPU test gate; no stage ran",
+      "cause": "publish_selected_leaves hard-coded dev-box paths; REPAIRED at d592b8a. The transport itself worked: all 25 relay inputs staged and digest-verified"
     }
   ],
-  "failure_pattern": "6/7/9 device placement; 8 a $0 path asserting dev-box state; 10 unpriced runtime cost; measurement 1 a setup contract, 2 an untested entrypoint; continuation 1 an uncaught transport call, 2 an undeliverable declared asset, 3 a $0 test EXECUTING dev-box-only code inside the pod gate -- attempt 8's class one step out",
+  "failure_pattern": "6/7/9 device placement; 8 a $0 path asserting dev-box state; 10 unpriced runtime cost; measurement 1 a setup contract, 2 an untested entrypoint; continuation 1 an uncaught transport call, 2 an undeliverable declared asset, 3 a $0 test executing dev-box-only code, 4 the attempt-12 OOM class again -- the headroom gate built to stop it passed because its trainer estimate is ~14 GiB too low and the teacher/evaluator release freed nothing",
   "canonical_infrastructure": [
     "provider.observe() applies get()'s transient classification to ANY query: never raises, and a declined answer is unknown, never a negative answer. A test fails on any raw _gql in session_runner.py",
-    "operational identity (session_id, schema, status_path, run_log_path, authorization_path, driver_job_id) is unique per session; SCIENTIFIC identity is not -- the continuation shares the frozen Phase-A plan_hash on purpose, asserted not merely allowed",
+    "operational identity (session_id, schema, status_path, run_log_path, authorization_path, driver_job_id) is unique across sessions; plan_hash is NOT, so the continuation keeps the frozen Phase-A plan rather than rewriting science to satisfy a filename test",
     "one immutable SessionSpec per session, one runner, no inheritance, no module-global retargeting",
     "the shared pod setup is manifest-driven on BOTH sides: it installs and stages only what a session declares, and names no asset, relay path, destination or digest of its own",
     "RelayInput carries source, destination, digest and mirror; dest=None means only 'the driver stages this'",
@@ -102,7 +96,7 @@
     "plan_session soft_stop_reserves, applied BEFORE the soft stop",
     "the pre-flight rehearsal ignored in both the pod gate and the simulator, with the ignore lists pinned equal",
     "the pod simulator restores exactly and refuses concurrent sweeps",
-    "the layout test partitions its references: repo-relative paths must exist, declared host-local roots are checked where present and skipped where absent, and an undeclared absolute path still fails",
+    "the layout test partitions its references: repo-relative paths must exist, declared host-local roots are checked where present and skipped where absent, an undeclared absolute path still fails",
     "an active tombstone may not name a declared session staging or mirror destination - checked against the SessionSpecs, touching no path",
     "checkpoint_tombstones.json owns the active-tombstone counts and bytes",
     "autoinit.stage1_device_contract@v1, incl. category 5: a fresh factory on the Stage-1 path either names a device derived from what it meets, or is host-only on purpose",
@@ -113,7 +107,7 @@
     "a session installs every local root verify_frozen_assets.py requires, derived from the verifier and compared against declarations",
     "a production entrypoint is a callable seam, not a main(): all orchestration is one injectable function the $0 test executes",
     "evaluate_teardown separates a truncated stream from an artifact never written; a caller supplying no evidence keeps the strict rule",
-    "the Stage-1 runtime deadline is READ OFF the priced envelope (base + every soft-stop reserve), so the deadline cannot drift from the price and a new reserve extends it with no edit"
+    "the Stage-1 runtime deadline is READ OFF the priced envelope (base + every soft-stop reserve), so it cannot drift from what was paid for"
   ],
   "abandoned": [
     "recovery_search_v1 (INVALID before first use)",
@@ -123,9 +117,9 @@
     "the paid device-canary session path: STRATEGICALLY TERMINATED 2026-08-18. Two authorized sessions, $0.1240, zero canary runs; both died in the wrapper's inherited contracts. Its evidence and its generic lesson are kept; no further canary is prepared."
   ],
   "next_starting_point": {
-    "status": "Recovery continuation attempt 4 is LIVE on pod k1mgu38q0y6sei, importing attempt 12's five selected leaves from the transport repo and running recovery Stages 2-5. No search is reachable.",
-    "the_ask": "Nothing until it reaches a terminal state. Then report results and spend, tear the pod down with provider confirmation, and STOP. A further attempt needs a new grant and a new budget decision.",
-    "budget": "cap $234.00, spent $213.9214 before this run, remaining $20.0786. Balance is not authorization."
+    "status": "Recovery continuation attempt 4 reached STAGE 2 -- the furthest yet. Stages 0 and 1 passed on hardware: five leaves imported and re-identified from pod bytes, canonical control measured. Stage 2's first rung-1 probe hit CUDA OOM. Nothing is running, billing, authorized or prepared.",
+    "the_ask": "A maintainer decision on two coupled repairs: find what still references the teacher/evaluator after release_to_subprocess, and calibrate RECOVERY_TRAINER_BYTES against a measured rung-1 probe. Both touch the 22-file harness, so they move the harness digest too.",
+    "budget": "cap $234.00, spent $214.3326, remaining $19.6674. Balance is not authorization."
   },
   "read_order": [
     "logs/STATE.md \u2014 the human view of this file",
@@ -151,9 +145,9 @@
   "continuation_ready": {
     "budget_expected_usd": 14.9233,
     "budget_hard_usd": 16.7456,
-    "stage1_source": "attempt 12: 43 states, 5 selected, byte-identical to attempt 11",
+    "stage1_source": "attempt 12: 43 states, 5 selected; IMPORTED AND RE-IDENTIFIED FROM POD BYTES by attempt 4, config 567d32789ba6",
     "authorization": "own schema recovery_continuation_authorization/v1, 22-file harness 162c09ed (Phase-A set minus the unreachable search, plus the continuation executables). Ceiling derived from continuation_budget()",
     "imports": "attempt 12's five preserved leaves, re-identified from bytes; no search is reachable",
-    "transport": "VERIFIED 2026-08-22: the five leaves are mirrored in the private aadistill-transport repo (15 files, 5.5513 GiB) in selected order, all five round-trip re-identifying to the attempt-12 artifact_digest. Manifest: logs/autoinit_selected_leaf_transport_manifest.json"
+    "transport": "PROVEN ON PAID HARDWARE by attempts 3 and 4: the five leaves are mirrored in the private aadistill-transport repo (15 files, 5.5513 GiB) in selected order and stage on a pod. Manifest: logs/autoinit_selected_leaf_transport_manifest.json"
   }
 }

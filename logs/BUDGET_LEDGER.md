@@ -308,12 +308,38 @@ actual cumulative spend                                      $213.9214
       + $3.2101 Phase-A attempt 11 + $3.7872 Phase-A attempt 12
       + $0.0100 recovery continuation attempt 1
       + $0.2389 recovery continuation attempt 2
-      + $0.2011 recovery continuation attempt 3.
-remaining under the $234.00 cap                              $ 20.0786
-    Covers one continuation ceiling ($16.7456) with $3.3330 to spare;
-    does NOT cover a full Phase-A attempt ($23.0484), short by $2.9698.
+      + $0.2011 recovery continuation attempt 3
+      + $0.4112 recovery continuation attempt 4.
+remaining under the $234.00 cap                              $ 19.6674
+    Covers one continuation ceiling ($16.7456) with $2.9218 to spare;
+    does NOT cover a full Phase-A attempt ($23.0484), short by $3.3810.
     REMAINING BALANCE IS NOT AUTHORIZATION. Every grant issued so far,
-    including attempt 3's, is spent.
+    including attempt 4's, is spent.
+recovery continuation attempt 4 (L40S, 24.9 min) STAGES 0-1   $  0.4112
+    AUTHORIZED 2026-08-22 as autoinit.recovery_continuation.2026-08-22T1454Z
+    (sha256 874d54f6) against
+    logs/autoinit_recovery_continuation_attempt4_grant.json.
+    Base 38db4f2, session commit ef4353c, harness 162c09ed over 22 files --
+    unchanged from attempt 3, since the portability repair touched files
+    outside the set. Ceiling $16.7456, of which $0.4112 was spent. Pod
+    k1mgu38q0y6sei; provider confirms gone; watchdog ended pod_gone after
+    26 ticks.
+    THE PORTABILITY REPAIR WORKED: setup passed for the first time in any
+    continuation, and the driver started confirmed by descriptor probe.
+    STAGE 0 AND STAGE 1 PASSED ON HARDWARE. Stage 0 attested interval
+    0.011695, floor 0.3000, plan 02be33b9. Stage 1 imported the five
+    Attempt-12 leaves in frozen selected order, RE-IDENTIFIED FROM THE POD
+    BYTES against the Stage-1 artifact and shard digests (config
+    567d32789ba6), and measured the canonical control once on state_eval@v1
+    over 74022 positions (artifact_digest dc9500d3). No search ran.
+    FAILED at stage 2, first rung-1 probe, on CUDA OOM in kd_forward_kl.
+    Two compounding defects: release_to_subprocess reported
+    freed_allocated_bytes=0 with live_retention=true (7.55 GiB still held
+    after drop+del), and require_headroom demands RECOVERY_TRAINER_BYTES
+    22 GiB + 2 margin = 24.00 against 36.32 free, so it passed -- while the
+    probe actually used 36.30 GiB and OOM'd asking for 298 MiB more.
+    Attempt 12's class: the gate written to stop it, whose message names
+    attempt 12, was calibrated ~14 GiB below the trainer that ran.
 recovery continuation attempt 3 (L40S, 12.2 min) NO STAGE RAN $  0.2011
     AUTHORIZED 2026-08-22 as autoinit.recovery_continuation.2026-08-22T1311Z
     (sha256 021d8830) against
