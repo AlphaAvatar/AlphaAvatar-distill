@@ -2,7 +2,7 @@
   "schema": "aadistill.current_state/v2",
   "generated_utc": "2026-08-21T16:00:00Z",
   "_contract": "The minimal machine-readable CURRENT snapshot: live facts only, no history, no per-attempt detail, no narrative. History lives in logs/decisions.md and the per-run directories; the human view is logs/STATE.md and the two must agree. Ownership: logs/CATALOG.md.",
-  "baseline_commit": "871da2e2af27ec60581009e9d5e8a9b4895a3c68",
+  "baseline_commit": "1833b7a19d4d4131780cec4a23c594a806755aac",
   "baseline_commit_meaning": "The LAST TESTED IMPLEMENTATION: the commit whose tree produced the latest_verification figures. Deliberately NOT the commit carrying this file -- the grant/provenance and authorization-only commits follow it and neither is separately tested. Refreshed by hand; nothing checks it.",
   "running": {
     "paid_compute": false,
