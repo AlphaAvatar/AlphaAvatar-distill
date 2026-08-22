@@ -3,33 +3,27 @@
   "generated_utc": "2026-08-21T16:00:00Z",
   "_contract": "The minimal machine-readable CURRENT snapshot: live facts only, no history, no per-attempt detail, no narrative. History lives in logs/decisions.md and the per-run directories; the human view is logs/STATE.md and the two must agree. Ownership: logs/CATALOG.md.",
   "baseline_commit": "ad73e05a34c5144a5a16e2b85622637cf45ed610",
-  "baseline_commit_meaning": "The LAST TESTED IMPLEMENTATION: the commit whose tree produced the latest_verification figures. It is also the live session commit the pod checked out.",
+  "baseline_commit_meaning": "The LAST TESTED IMPLEMENTATION: the commit whose tree produced the latest_verification figures. It is also attempt 3's session commit.",
   "running": {
-    "paid_compute": true,
-    "pods": 1,
-    "launchers": 1,
-    "pod_id": "ku8vcn5mu8hp9i",
-    "what": "recovery continuation attempt 3, L40S $0.99/h, hard 1015 min = $16.7456",
-    "started_utc": "2026-08-22T13:34:05Z"
+    "paid_compute": false,
+    "pods": 0,
+    "launchers": 0
   },
   "authorized": {
-    "any": true,
-    "id": "autoinit.recovery_continuation.2026-08-22T1311Z",
-    "note": "one-use, CONSUMED by this launch. Grant logs/autoinit_recovery_continuation_attempt3_grant.json; base 7368568; harness 162c09ed, 22 files, search excluded. No follow-on is authorized."
+    "any": false,
+    "note": "every authorization issued is consumed, including all three continuation attempts; their lineage gates refuse the current HEAD by construction. A new paid action needs a new grant and artifact."
   },
   "prepared_launch": {
-    "any": true,
-    "bundles": 1,
-    "bundle": "aad_autoinit_ad73e05a.bundle",
-    "note": "built, uploaded, round-trip verified; the checkout's harness digest matches the authorization"
+    "any": false,
+    "bundles": 0
   },
   "budget": {
-    "cumulative_spend_usd": 213.7203,
+    "cumulative_spend_usd": 213.9214,
     "authorized_cap_usd": 234.0,
-    "remaining_usd": 20.2797,
+    "remaining_usd": 20.0786,
     "remaining_is_not_permission": true,
     "ledger": "logs/BUDGET_LEDGER.md",
-    "headroom_note": "$20.2797 does NOT cover another full Phase-A attempt ($23.0484). It covers one continuation ($16.7456) -- but balance is not authorization, and the leaves have no transport."
+    "headroom_note": "$20.0786 does NOT cover another full Phase-A attempt ($23.0484). It covers one continuation ($16.7456) -- but balance is not authorization."
   },
   "frozen": {
     "science_plan_hash": "02be33b9a7a8e26bc8bfb75795351e8cdc9ffd441b47066cc81887cfc511b55c",
@@ -76,21 +70,20 @@
   },
   "failed": [
     {
+      "run": "recovery continuation 3",
+      "usd": 0.2011,
+      "where": "setup CPU test gate, 12.2 min into the pod; no stage ran",
+      "cause": "publish_selected_leaves.verify() hard-codes dir=/home/ecs-user/aad-scratch in mkdtemp; absent on a pod, so 5 tests in tests/autoinit/test_leaf_transport_publish.py raise FileNotFoundError. Reproduced at $0 in a mount namespace: 5 failed, matching the pod",
+      "kept": "the TRANSPORT WORKED: the pod reached ASSETS_STAGED/ASSETS_READY/VLLM_READY, so all 25 declared relay inputs including 5.5513 GiB of leaves were fetched and digest-verified"
+    },
+    {
       "run": "recovery continuation 2",
       "usd": 0.2389,
       "where": "LOCAL_ASSET staging, 10.5 min into the pod; no stage ran",
-      "cause": "scp of one 1.110 GiB stage-1 leaf hit the hard-coded subprocess timeout=600, which RAISES. Fitting 600 s needs 1.99 MB/s; the dev box was 0.44 MB/s on this session's own bundle upload and is recorded at 0.72 MB/s. Impossible by 3-4.5x, and would have repeated 4 more times. The resilience closure WORKED -- readiness and image identity both succeeded",
-      "evidence": "logs/autoinit_recovery_continuation_attempt2/"
-    },
-    {
-      "run": "recovery continuation 1",
-      "usd": 0.01,
-      "where": "launcher readiness poll, 27 s after pod creation; no stage ran",
-      "cause": "wait_endpoint called provider._gql uncaught against an endpoint at 25% transport failure. Every gate PASSED. CLOSED 2026-08-22 at all three sites",
-      "evidence": "logs/autoinit_recovery_continuation_attempt1/"
+      "cause": "scp of one 1.110 GiB stage-1 leaf hit the hard-coded subprocess timeout of 600 s; the dev-box uplink made that arithmetically impossible. CLOSED by the transport mirror"
     }
   ],
-  "failure_pattern": "6/7/9 device placement; 8 a $0 path asserting dev-box state; 10 unpriced runtime cost; measurement 1 a setup contract, 2 an untested entrypoint; continuation 1 an uncaught transport call, 2 an undeliverable declared asset. logs/decisions.md",
+  "failure_pattern": "6/7/9 device placement; 8 a $0 path asserting dev-box state; 10 unpriced runtime cost; measurement 1 a setup contract, 2 an untested entrypoint; continuation 1 an uncaught transport call, 2 an undeliverable declared asset, 3 a $0 test EXECUTING dev-box-only code inside the pod gate -- attempt 8's class one step out",
   "canonical_infrastructure": [
     "provider.observe() applies get()'s transient classification to ANY query: never raises, and a declined answer is unknown, never a negative answer. A test fails on any raw _gql in session_runner.py",
     "operational identity (session_id, schema, status_path, run_log_path, authorization_path, driver_job_id) is unique per session; SCIENTIFIC identity is not -- the continuation shares the frozen Phase-A plan_hash on purpose, asserted not merely allowed",
@@ -123,9 +116,9 @@
     "the paid device-canary session path: STRATEGICALLY TERMINATED 2026-08-18. Two authorized sessions, $0.1240, zero canary runs; both died in the wrapper's inherited contracts. Its evidence and its generic lesson are kept; no further canary is prepared."
   ],
   "next_starting_point": {
-    "status": "Recovery continuation attempt 3 is LIVE on pod ku8vcn5mu8hp9i. It imports attempt 12's five selected leaves from the transport repo and runs recovery Stages 2-5. No search is reachable.",
-    "the_ask": "Nothing until it reaches a terminal state. Then report results and spend, tear the pod down with provider confirmation, and STOP. A further attempt needs a new grant and a new budget decision.",
-    "budget": "cap $234.00, spent $213.7203 before this run, remaining $20.2797. Balance is not authorization."
+    "status": "Recovery continuation attempt 3 ran 2026-08-22 and bought nothing: $0.2011, no stage. It failed the setup test gate on a dev-box path inside a publishing tool. The five-leaf transport itself PASSED on the pod. Nothing is running, billing, authorized or prepared.",
+    "the_ask": "A maintainer decision on the one-line fix to publish_selected_leaves.py (or on ignoring its test module on the pod), then a NEW one-use grant for attempt 4. Attempt 3's grant and authorization are spent.",
+    "budget": "cap $234.00, spent $213.9214, remaining $20.0786. Balance is not authorization."
   },
   "read_order": [
     "logs/STATE.md \u2014 the human view of this file",

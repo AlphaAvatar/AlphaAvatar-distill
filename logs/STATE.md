@@ -1,4 +1,4 @@
-**Updated:** 2026-08-22 · branch `main` · recovery continuation attempt 3 is LIVE
+**Updated:** 2026-08-22 · branch `main` · attempt 3 proved the transport and died in the test gate
 
 # Current state
 
@@ -6,26 +6,50 @@ The **human view of [`current_state.json`](current_state.json)**. That file owns
 the live facts; this one says the same things in prose and adds nothing it does
 not carry. If the two disagree, a structural test fails.
 
-**A paid run is in flight.** Recovery continuation attempt 3 launched
-2026-08-22T13:34:05Z on pod `ku8vcn5mu8hp9i`, an L40S at $0.99/h, under
-authorization `autoinit.recovery_continuation.2026-08-22T1311Z` — one use,
-consumed by this launch, hard ceiling **$16.7456** (1015 min). Session commit
-`ad73e05`, base `7368568`, continuation harness `162c09ed` over 22 files with the
-search excluded.
+**Nothing is running. Nothing is billing. Nothing is authorized. Nothing is
+prepared for launch.**
 
-It imports attempt 12's five selected leaves **from the transport repo** and runs
-recovery Stages 2-5. **No search is reachable from this harness.** Nothing else is
-authorized, and no follow-on may start.
+**Recovery continuation attempt 3 ran on 2026-08-22 and bought nothing: $0.2011,
+no stage executed.** Pod `ku8vcn5mu8hp9i`, 12.2 min, deleted with provider
+confirmation. Full record:
+[`autoinit_recovery_continuation_attempt3/`](autoinit_recovery_continuation_attempt3/).
 
-Live artifacts are in `/home/ecs-user/aad-scratch/recovery_cont3_20260822/`:
-`launcher.out`, the detached `watchdog.jsonl`, and `poll.jsonl` from an
-independent third-eye poller that terminates nothing and never raises.
+**The transport premise is now proven on a paid pod, which is the result worth
+keeping.** The pre-provider gate read *"25 relay inputs (10 from
+AlphaAvatar/aadistill-artifacts, 15 from AlphaAvatar/aadistill-transport), 2 local
+assets"* — attempt 2's read *"10 relay inputs, 7 local assets"* — and the pod then
+reached `ASSETS_STAGED`, `ASSETS_READY` and `VLLM_READY`. The setup script runs
+under `set -euo pipefail` and marks strictly in order, so those markers prove all
+25 declared inputs were fetched from their own declared repositories and every
+declared sha256 verified at every landing site, **including 5.5513 GiB of Stage-1
+leaves pulled from the transport repo at hub speed**.
 
-**What the launch proved that attempt 2 could not.** The pre-provider gate now
-reads *"25 relay inputs (10 from AlphaAvatar/aadistill-artifacts, 15 from
-AlphaAvatar/aadistill-transport), 2 local assets"*. Attempt 2's read *"10 relay
-inputs, 7 local assets"* and died pushing the first 1.110 GiB leaf by scp. The
-leaves are no longer on the scp path; only 1.577 MiB is.
+**Then the setup CPU test gate failed**, and the cause is a dev-box path in a
+dev-box tool:
+
+> `scripts/autoinit/publish_selected_leaves.py:199` calls
+> `tempfile.mkdtemp(prefix="leaf-roundtrip-", dir="/home/ecs-user/aad-scratch")`.
+> That directory does not exist on a pod, so `mkdtemp` raises and the five tests
+> in `tests/autoinit/test_leaf_transport_publish.py` that reach `verify()` fail.
+
+**Reproduced at $0 rather than inferred**, by running the real module in a mount
+namespace holding the repo and the interpreter but no `/home/ecs-user/aad-scratch`:
+**5 failed**, matching the pod's count exactly, and recovering the two failure
+names the 40-line `setup.log` tail did not transport.
+
+**This is attempt 8's class, one step out.** Attempt 8 was a `$0` test *asserting*
+dev-box filesystem state. This is a `$0` test *executing production code that
+requires* it. The layout test skips a **declared** host-local root where absent —
+correctly — and nothing connects "this path is host-local" to "code requiring it
+must not run on a pod". The pod simulator simulates the pod's repository tree, not
+its host filesystem. `publish_selected_leaves.py` is deliberately **not** in the
+22-file harness, but its test module is not in `TEST_IGNORES` either, so the pod
+ran it.
+
+A retry needs a **new grant and a new authorization**: attempt 3's are spent, and
+although a fix to that file would not move the harness digest, it would move the
+session commit, which the lineage gate constrains to differ from its base in
+exactly one path.
 
 **Recovery continuation attempt 2 ran on 2026-08-21 and bought nothing: $0.2389,
 no stage executed.** Pod `7hthdteyc25xgx`, 14.5 min, deleted with provider
@@ -62,19 +86,19 @@ selection result.**
 ## Budget
 
 ```
-cumulative spend   $213.7203
+cumulative spend   $213.9214
 approved cap       $234.00    RAISED AND APPROVED 2026-08-21
-remaining          $20.2797   $2.7687 SHORT of one more full attempt
+remaining          $20.0786   $2.9698 SHORT of one more full Phase-A attempt
 
 ```
 
 The cap went **$219.00 → $231.00** (2026-08-20, to fund exactly one Phase-A
-attempt) **→ $234.00** (2026-08-21). Attempt 12 has since **run**, costing
-**$3.7872** — far under its $23.0484 ceiling, because it stopped at Stage 2
-rather than training nine probes. **$20.5186 remains, $2.5298 short of another
-full-ceiling attempt.** A recovery continuation's derived **$16.7456** ceiling
-still fits, with $3.77 to spare — but the one-use grant that funded attempt 1 is
-spent.
+attempt) **→ $234.00** (2026-08-21). Since then attempt 12 **ran** for $3.7872 —
+far under its $23.0484 ceiling, because it stopped at Stage 2 rather than
+training nine probes — and the three recovery continuations spent $0.0100,
+$0.2389 and $0.2011 without executing a stage. A continuation's derived
+**$16.7456** ceiling still fits inside the remaining $20.0786, with $3.3330 to
+spare; a full Phase-A attempt does not. **Every grant issued so far is spent.**
 
 Each raise is a **project ceiling only**. It authorizes nothing: the next paid
 action needs its own one-use grant and its own authorization artifact, and
@@ -155,6 +179,8 @@ already billing.
 | measurement 2 | $0.1834 | driver entrypoint, after `SETUP_RC=0` | `main()` imported `as_operator_items` from the wrong module — and **no $0 test called `main()`** |
 | Phase A 12 | $3.7872 | stage 2, first rung-1 probe | CUDA OOM: the driver still held the search's ~24.05 GiB. **Stages 0-1 passed; five leaves preserved off-pod** |
 | continuation 1 | $0.0100 | launcher readiness poll, 27 s in | `wait_endpoint` calls `provider._gql` uncaught against an endpoint measured at **25% transport failure**. Every gate passed; no stage ran |
+| continuation 2 | $0.2389 | LOCAL_ASSET staging, 10.5 min in | scp of one 1.110 GiB leaf against a hard-coded 600 s timeout: needs 1.99 MB/s, dev box gives ≤0.79. **Closed by the transport mirror** |
+| continuation 3 | $0.2011 | setup CPU test gate, 12.2 min in | `publish_selected_leaves.verify()` mkdtemps into `/home/ecs-user/aad-scratch`, absent on a pod. **The 25-input transport staging PASSED first** |
 
 **The pattern, through attempt 7:** code no $0 path could execute — a GPU-only
 device, or a contract owned by inherited machinery. **Attempt 8 is a new

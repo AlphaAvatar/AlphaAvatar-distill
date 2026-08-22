@@ -301,13 +301,37 @@ authorized cumulative cap                                    $234.00
     hard ceiling, does not authorize any subsequent attempt, and does
     not authorize spend outside the next explicitly approved session.
     See the caps list above.
-actual cumulative spend                                      $213.7203
+actual cumulative spend                                      $213.9214
     = $194.0530 + $0.1900 attempt 8 + $0.3400 attempt 9
       + $11.4300 attempt 10 + $0.0700 measurement attempt 1
       + $0.1834 measurement attempt 2 + $0.2077 measurement attempt 3
       + $3.2101 Phase-A attempt 11 + $3.7872 Phase-A attempt 12
       + $0.0100 recovery continuation attempt 1
-      + $0.2389 recovery continuation attempt 2.
+      + $0.2389 recovery continuation attempt 2
+      + $0.2011 recovery continuation attempt 3.
+remaining under the $234.00 cap                              $ 20.0786
+    Covers one continuation ceiling ($16.7456) with $3.3330 to spare;
+    does NOT cover a full Phase-A attempt ($23.0484), short by $2.9698.
+    REMAINING BALANCE IS NOT AUTHORIZATION. Every grant issued so far,
+    including attempt 3's, is spent.
+recovery continuation attempt 3 (L40S, 12.2 min) NO STAGE RAN $  0.2011
+    AUTHORIZED 2026-08-22 as autoinit.recovery_continuation.2026-08-22T1311Z
+    (sha256 021d8830) against
+    logs/autoinit_recovery_continuation_attempt3_grant.json.
+    Base 7368568, session commit ad73e05, harness 162c09ed over 22 files.
+    Ceiling $16.7456, of which $0.2011 was spent. Pod ku8vcn5mu8hp9i;
+    provider confirms gone; watchdog ended pod_gone after 13 ticks.
+    THE TRANSPORT CLOSURE WORKED: the pre-provider gate read 25 relay
+    inputs (10 main + 15 transport) and 2 local assets, and the pod
+    reached ASSETS_STAGED, ASSETS_READY and VLLM_READY -- so 5.5513 GiB
+    of Stage-1 leaves were pulled from the transport repo and every
+    declared digest verified. Attempt 2's failure class is closed.
+    FAILED at the setup CPU test gate: publish_selected_leaves.verify()
+    calls tempfile.mkdtemp(dir="/home/ecs-user/aad-scratch"), a dev-box
+    path absent on a pod, so 5 tests raise FileNotFoundError. Reproduced
+    at $0 in a mount namespace -- 5 failed, matching the pod exactly.
+    Attempt 8's class one step out: a $0 test EXECUTING dev-box-only code
+    rather than merely asserting dev-box state.
 recovery continuation attempt 2 (L40S, 14.5 min) NO STAGE RAN $  0.2389
     AUTHORIZED 2026-08-21 as autoinit.recovery_continuation.2026-08-21T2004Z
     against logs/autoinit_recovery_continuation_attempt2_grant.json

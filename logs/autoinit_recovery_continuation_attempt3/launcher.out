@@ -1,0 +1,71 @@
+[13:33:57] budget: expected 904 min $14.92 · soft $16.42 · hard $16.75 (authorized $16.75)
+[13:33:58] NVIDIA L40S $0.99/h, stock Medium
+[13:33:58] session commit ad73e05a34c5 verified: harness digests to 162c09ed7d6f…, carries the authorization and only logs/autoinit_recovery_continuation_authorization.json differs from the authorized base
+[13:33:58] frozen science plan 02be33b9a7a8… matches the authorization
+[13:33:58] continuation harness 162c09ed7d6f… over 22 files, search excluded
+[13:34:02] all 5 canonical stage-1 leaves verify locally; 15 transport files declared from AlphaAvatar/aadistill-transport in selected order
+[13:34:03] precheck OK: 25 relay inputs (10 from AlphaAvatar/aadistill-artifacts, 15 from AlphaAvatar/aadistill-transport), 2 local assets
+[13:34:05] created ku8vcn5mu8hp9i at $0.99/h
+[13:34:05] watchdog detached — hard 1015 min = $16.75
+[13:34:59]   starting (60s) — $0.01
+[13:36:03]   starting (120s) — $0.03
+[13:37:09]   starting (180s) — $0.05
+[13:37:51] TCP 22 at 202.181.159.230:19588 after 3.8 min
+[13:37:54] draw 1: ssh reachable — $0.06
+[13:38:20] draw 1: image identity runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@580.126.09
+[13:38:20] draw 1: running setup
+[13:46:05] setup did not reach SETUP_DONE:
+ + tokenspeed-mla==0.1.8
+ + tokenspeed-triton==3.8.10.post20260721
+ + torch==2.13.0
+ + torch-c-dlpack-ext==0.1.5
+ + torchaudio==2.11.0
+ + torchcodec==0.16.0
+ + torchvision==0.28.0
+ + tqdm==4.70.0
+ + transformers==5.15.0
+ + triton==3.7.1
+ + truststore==0.10.4
+ + typer==0.27.1
+ + typing-extensions==4.16.0
+ + typing-inspection==0.4.4
+ + urllib3==2.7.0
+ + uvicorn==0.52.3
+ + uvloop==0.22.1
+ + vllm==0.27.1
+ + watchfiles==1.2.0
+ + websockets==17.0.1
+ + xgrammar==0.2.3
+ + yarl==1.24.5
+ + z3-solver==4.15.4.0
+[13:41:33] vllm offline install completed in 10s
+vllm 0.27.1 | torch 2.13.0+cu130 True
+MARKER:VLLM_READY
+[13:41:42] downloading the teacher at the pinned revision
+
+Fetching 10 files:   0%|          | 0/10 [00:00<?, ?it/s]
+Fetching 10 files:  10%|█         | 1/10 [00:00<00:01,  6.68it/s]
+Fetching 10 files:  40%|████      | 4/10 [00:00<00:00, 15.70it/s]
+Fetching 10 files:  70%|███████   | 7/10 [00:01<00:00,  5.04it/s]
+Fetching 10 files:  80%|████████  | 8/10 [00:20<00:00,  5.04it/s]
+Fetching 10 files:  90%|█████████ | 9/10 [00:24<00:04,  4.03s/it]
+Fetching 10 files: 100%|██████████| 10/10 [00:26<00:00,  3.74s/it]
+Fetching 10 files: 100%|██████████| 10/10 [00:26<00:00,  2.68s/it]
+MARKER:TEACHER_READY
+[13:42:09] checking the RoPE base resolves in every venv
+  transformers 5.13.1: qwen3_0p6b_init_v0 stored 5,000,000 runtime 5,000,000 OK
+  transformers 5.15.0: qwen3_0p6b_init_v0 stored 5,000,000 runtime 5,000,000 OK
+MARKER:ROPE_OK
+[13:42:19] CPU test suite (128 vCPUs visible, cgroup budget 13; cpu set 0-12)
+FAILED tests/autoinit/test_leaf_transport_publish.py::test_a_size_mismatch_at_the_far_end_is_caught
+FAILED tests/autoinit/test_leaf_transport_publish.py::test_an_lfs_oid_that_disagrees_is_caught_without_downloading
+FAILED tests/autoinit/test_leaf_transport_publish.py::test_a_file_absent_from_the_far_end_is_caught
+5 failed, 2053 passed, 84 skipped in 219.10s (0:03:39)
+[13:45:59] test suite failed rc=1
+SETUP_RC=1
+
+[13:46:05] ABORT after draw 1: setup_failed
+[13:46:05] deleting pod (setup setup_failed)
+[13:46:16] pod deleted — 12.2 min, $0.20; provider confirms gone: True
+
+autoinit-recovery-continuation INCOMPLETE — /home/ecs-user/AlphaAvatar-distill/logs/autoinit_recovery_continuation_session.json. STOP for review. The continuation consumed the verified attempt-12 Stage-1 result and ran no search.
