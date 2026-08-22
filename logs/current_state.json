@@ -2,20 +2,26 @@
   "schema": "aadistill.current_state/v2",
   "generated_utc": "2026-08-21T16:00:00Z",
   "_contract": "The minimal machine-readable CURRENT snapshot: live facts only, no history, no per-attempt detail, no narrative. History lives in logs/decisions.md and the per-run directories; the human view is logs/STATE.md and the two must agree. Ownership: logs/CATALOG.md.",
-  "baseline_commit": "ad73e05a34c5144a5a16e2b85622637cf45ed610",
-  "baseline_commit_meaning": "The LAST TESTED IMPLEMENTATION: the commit whose tree produced the latest_verification figures. It is also attempt 3's session commit.",
+  "baseline_commit": "ef4353c96fb5fb0693549a6484651850f2579e94",
+  "baseline_commit_meaning": "The LAST TESTED IMPLEMENTATION: the commit whose tree produced the latest_verification figures. It is also attempt 4's session commit.",
   "running": {
-    "paid_compute": false,
-    "pods": 0,
-    "launchers": 0
+    "paid_compute": true,
+    "pods": 1,
+    "launchers": 1,
+    "pod_id": "k1mgu38q0y6sei",
+    "what": "recovery continuation attempt 4, L40S $0.99/h, hard 1015 min = $16.7456",
+    "started_utc": "2026-08-22T15:15:44Z"
   },
   "authorized": {
-    "any": false,
-    "note": "every authorization issued is consumed, including all three continuation attempts; their lineage gates refuse the current HEAD by construction. A new paid action needs a new grant and artifact."
+    "any": true,
+    "id": "autoinit.recovery_continuation.2026-08-22T1454Z",
+    "note": "one-use, CONSUMED by this launch. Grant logs/autoinit_recovery_continuation_attempt4_grant.json; base 38db4f2; harness 162c09ed, 22 files, search excluded. No follow-on is authorized."
   },
   "prepared_launch": {
-    "any": false,
-    "bundles": 0
+    "any": true,
+    "bundles": 1,
+    "bundle": "aad_autoinit_ef4353c9.bundle",
+    "note": "built, uploaded, round-trip verified; the relay checkout's harness digest matches the authorization"
   },
   "budget": {
     "cumulative_spend_usd": 213.9214,
@@ -73,15 +79,15 @@
     {
       "run": "recovery continuation 3",
       "usd": 0.2011,
-      "where": "setup CPU test gate, 12.2 min into the pod; no stage ran",
-      "cause": "publish_selected_leaves.verify() hard-codes dir=/home/ecs-user/aad-scratch in mkdtemp; absent on a pod, so 5 tests in tests/autoinit/test_leaf_transport_publish.py raise FileNotFoundError. Reproduced at $0 in a mount namespace: 5 failed, matching the pod",
-      "kept": "the TRANSPORT WORKED: the pod reached ASSETS_STAGED/ASSETS_READY/VLLM_READY, so all 25 declared relay inputs including 5.5513 GiB of leaves were fetched and digest-verified"
+      "where": "setup CPU test gate, 12.2 min in; no stage ran",
+      "cause": "publish_selected_leaves hard-coded dev-box paths; its TESTS run in the pod gate though the tool does not. REPAIRED at d592b8a and verified on a pod-like host",
+      "kept": "the TRANSPORT WORKED: ASSETS_STAGED/ASSETS_READY/VLLM_READY reached, so all 25 relay inputs including 5.5513 GiB of leaves were fetched and digest-verified"
     },
     {
       "run": "recovery continuation 2",
       "usd": 0.2389,
-      "where": "LOCAL_ASSET staging, 10.5 min into the pod; no stage ran",
-      "cause": "scp of one 1.110 GiB stage-1 leaf hit the hard-coded subprocess timeout of 600 s; the dev-box uplink made that arithmetically impossible. CLOSED by the transport mirror"
+      "where": "LOCAL_ASSET staging, 10.5 min in; no stage ran",
+      "cause": "scp of one 1.110 GiB leaf against a hard-coded 600 s timeout. CLOSED by the transport mirror"
     }
   ],
   "failure_pattern": "6/7/9 device placement; 8 a $0 path asserting dev-box state; 10 unpriced runtime cost; measurement 1 a setup contract, 2 an untested entrypoint; continuation 1 an uncaught transport call, 2 an undeliverable declared asset, 3 a $0 test EXECUTING dev-box-only code inside the pod gate -- attempt 8's class one step out",
@@ -117,9 +123,9 @@
     "the paid device-canary session path: STRATEGICALLY TERMINATED 2026-08-18. Two authorized sessions, $0.1240, zero canary runs; both died in the wrapper's inherited contracts. Its evidence and its generic lesson are kept; no further canary is prepared."
   ],
   "next_starting_point": {
-    "status": "The attempt-3 portability defect is repaired and verified on a pod-like host. publish_selected_leaves.py no longer requires any dev-box directory. Nothing is running, billing, authorized or prepared.",
-    "the_ask": "Authorization review for Recovery Continuation Attempt 4. It needs a NEW one-use grant and authorization because the session commit moved; the continuation harness digest is UNCHANGED at 162c09ed, since the publisher and its tests are outside the 22-file set.",
-    "budget": "cap $234.00, spent $213.9214, remaining $20.0786. Balance is not authorization."
+    "status": "Recovery continuation attempt 4 is LIVE on pod k1mgu38q0y6sei, importing attempt 12's five selected leaves from the transport repo and running recovery Stages 2-5. No search is reachable.",
+    "the_ask": "Nothing until it reaches a terminal state. Then report results and spend, tear the pod down with provider confirmation, and STOP. A further attempt needs a new grant and a new budget decision.",
+    "budget": "cap $234.00, spent $213.9214 before this run, remaining $20.0786. Balance is not authorization."
   },
   "read_order": [
     "logs/STATE.md \u2014 the human view of this file",

@@ -1,4 +1,4 @@
-**Updated:** 2026-08-22 · branch `main` · attempt 3 proved the transport and died in the test gate
+**Updated:** 2026-08-22 · branch `main` · recovery continuation attempt 4 is LIVE
 
 # Current state
 
@@ -6,8 +6,24 @@ The **human view of [`current_state.json`](current_state.json)**. That file owns
 the live facts; this one says the same things in prose and adds nothing it does
 not carry. If the two disagree, a structural test fails.
 
-**Nothing is running. Nothing is billing. Nothing is authorized. Nothing is
-prepared for launch.**
+**A paid run is in flight.** Recovery continuation attempt 4 launched
+2026-08-22T15:15:44Z on pod `k1mgu38q0y6sei`, an L40S at $0.99/h, under
+authorization `autoinit.recovery_continuation.2026-08-22T1454Z` — one use,
+consumed by this launch, hard ceiling **$16.7456** (1015 min). Session commit
+`ef4353c`, base `38db4f2`, continuation harness `162c09ed` over 22 files with the
+search excluded — **unchanged from attempt 3**, because the portability repair
+touched the leaf publisher and its tests, both outside the 22-file set.
+
+It imports attempt 12's five selected leaves **from the transport repo** and runs
+recovery Stages 2-5. **No search is reachable from this harness.** Nothing else is
+authorized, and no follow-on may start.
+
+Live artifacts are in `/home/ecs-user/aad-scratch/recovery_cont4_20260822/`:
+`launcher.out`, the detached `watchdog.jsonl`, and `poll.jsonl` from an
+independent third-eye poller that terminates nothing and never raises.
+
+Attempt 3 already proved the transport on paid hardware, and the pre-provider gate
+read the same **25 relay inputs (10 main + 15 transport), 2 local assets** here.
 
 **Recovery continuation attempt 3 ran on 2026-08-22 and bought nothing: $0.2011,
 no stage executed.** Pod `ku8vcn5mu8hp9i`, 12.2 min, deleted with provider
