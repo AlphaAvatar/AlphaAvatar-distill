@@ -2,20 +2,26 @@
   "schema": "aadistill.current_state/v2",
   "generated_utc": "2026-08-21T16:00:00Z",
   "_contract": "The minimal machine-readable CURRENT snapshot: live facts only, no history, no per-attempt detail, no narrative. History lives in logs/decisions.md and the per-run directories; the human view is logs/STATE.md and the two must agree. Ownership: logs/CATALOG.md.",
-  "baseline_commit": "63625e159b8992b88c0ddb700f6b55d20051a0dc",
+  "baseline_commit": "08670e5e7c499c6623bd7505c3efe0a509cf348c",
   "baseline_commit_meaning": "The LAST TESTED IMPLEMENTATION: the commit whose tree produced the latest_verification figures. It is also attempt 4's session commit.",
   "running": {
-    "paid_compute": false,
-    "pods": 0,
-    "launchers": 0
+    "paid_compute": true,
+    "pods": 1,
+    "launchers": 1,
+    "pod_id": "ifp8feyil1gp7v",
+    "what": "recovery continuation attempt 6, L40S $0.99/h, hard 1015 min = $16.7456",
+    "started_utc": "2026-08-23T10:05:35Z"
   },
   "authorized": {
-    "any": false,
-    "note": "every authorization issued is consumed, including all five continuation attempts; their lineage gates refuse the current HEAD by construction."
+    "any": true,
+    "id": "autoinit.recovery_continuation.2026-08-23T0944Z",
+    "note": "one-use, CONSUMED by this launch. Grant logs/autoinit_recovery_continuation_attempt6_grant.json; base 948b1e8; harness 0dbf1272, 22 files, search excluded. No follow-on is authorized."
   },
   "prepared_launch": {
-    "any": false,
-    "bundles": 0
+    "any": true,
+    "bundles": 1,
+    "bundle": "aad_autoinit_08670e5e.bundle",
+    "note": "built, uploaded, round-trip verified; the relay checkout's harness digest matches"
   },
   "budget": {
     "cumulative_spend_usd": 215.6837,
@@ -64,8 +70,7 @@
     "utc": "2026-08-23T06:00:00Z",
     "after": "the attempt-5 checkpoint-path repair",
     "full_suite": "2176 passed, 12 skipped in 18:37 (+4 on 2172; skips unchanged)",
-    "the_stub_encoded_the_bug": "the $0 stage-execution harness DID run run_probe and passed only because its fake trainer wrote the layout the DRIVER expected rather than the trainer's. Fixed",
-    "mutations": "5, including an end-to-end run: with the driver defect reintroduced the repaired harness fails 1+14, so it would now catch attempt 5",
+    "mutations": "5, incl. an end-to-end run: with the driver defect reintroduced the repaired harness fails 1+14. Its fake trainer had been writing the DRIVER's wrong checkpoint layout, which is why no gate caught attempt 5",
     "frozen_asset_verifier": "passed, no problems",
     "harness_digest": "95cf336d -> 0dbf1272",
     "scope": "CPU only, repo .venv; no checkpoint loaded, no metric measured, no GPU used"
@@ -75,7 +80,7 @@
       "run": "recovery continuation 5",
       "usd": 1.3511,
       "where": "stage 2, AFTER the first rung-1 probe trained for 61.7 min",
-      "cause": "FileNotFoundError on latest.txt: the driver read out_dir/latest.txt while the trainer writes out_dir/checkpoints/latest.txt. REPAIRED; the $0 harness's fake trainer had been writing the driver's wrong layout, which is why no gate caught it",
+      "cause": "FileNotFoundError on latest.txt: the driver read out_dir/latest.txt while the trainer writes out_dir/checkpoints/latest.txt. REPAIRED at 01be685",
       "kept": "BOTH MEMORY REPAIRS VERIFIED ON HARDWARE: freed_allocated_bytes 8,101,709,824 vs attempt 4's 0, live_retention false, free 43.87 GiB against the 43.65 GiB gate -- the predicted figure exactly. And the first recovery probe TRAINED, 61.7 min against the 61.55 priced"
     },
     {
@@ -118,9 +123,9 @@
     "the paid device-canary session path: STRATEGICALLY TERMINATED 2026-08-18. Two authorized sessions, $0.1240, zero canary runs; both died in the wrapper's inherited contracts. Its evidence and its generic lesson are kept; no further canary is prepared."
   ],
   "next_starting_point": {
-    "status": "The attempt-5 checkpoint-path repair is applied and verified at $0: trained_model_dir resolves out_dir/checkpoints/<tag>/model and run_probe does no path arithmetic of its own. Retention was deliberately NOT implemented. Nothing is running, billing, authorized or prepared.",
-    "the_ask": "Authorization review for Recovery Continuation Attempt 6. It needs a NEW one-use grant and authorization: the session commit moved AND the harness digest moved 95cf336d -> 0dbf1272.",
-    "budget": "cap $234.00, spent $215.6837, remaining $18.3163. Balance is not authorization."
+    "status": "Recovery continuation attempt 6 is LIVE on pod ifp8feyil1gp7v. Every stage through the Stage-1/2 boundary is already proven on hardware; this run retrains the rung-1 probe attempt 5 lost and continues into recovery.",
+    "the_ask": "Nothing until it reaches a terminal state. Then report results and spend, tear down with provider confirmation, and STOP.",
+    "budget": "cap $234.00, spent $215.6837 before this run, remaining $18.3163. Balance is not authorization; a full-ceiling run leaves $1.5707."
   },
   "read_order": [
     "logs/STATE.md \u2014 the human view of this file",

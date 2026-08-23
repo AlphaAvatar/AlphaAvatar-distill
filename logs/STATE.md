@@ -1,4 +1,4 @@
-**Updated:** 2026-08-23 · branch `main` · the attempt-5 checkpoint-path repair is applied and verified
+**Updated:** 2026-08-23 · branch `main` · recovery continuation attempt 6 is LIVE
 
 # Current state
 
@@ -6,8 +6,24 @@ The **human view of [`current_state.json`](current_state.json)**. That file owns
 the live facts; this one says the same things in prose and adds nothing it does
 not carry. If the two disagree, a structural test fails.
 
-**Nothing is running. Nothing is billing. Nothing is authorized. Nothing is
-prepared for launch.**
+**A paid run is in flight.** Recovery continuation attempt 6 launched
+2026-08-23T10:05:35Z on pod `ifp8feyil1gp7v`, an L40S at $0.99/h, under
+authorization `autoinit.recovery_continuation.2026-08-23T0944Z` — one use,
+consumed by this launch, hard ceiling **$16.7456** (1015 min). Session commit
+`08670e5`, base `948b1e8`, continuation harness **`0dbf1272`** over 22 files with
+the search excluded.
+
+Everything up to the Stage-1/2 boundary is already proven on hardware: the
+transport (attempts 3-4), Stage 0 and the strict Stage-1 import with control
+measurement and admission (attempts 4-5), and the release/headroom contracts
+(attempt 5). This run **retrains the rung-1 probe attempt 5 lost** — that probe
+is not resumable scientific work — and continues into recovery.
+
+A refusal by `require_released` or `require_headroom` after Stage 1 remains the
+intended fail-closed result, not a failure of the run.
+
+Live artifacts are in `/home/ecs-user/aad-scratch/recovery_cont6_20260823/`:
+`launcher.out`, the detached `watchdog.jsonl`, and `poll.jsonl`.
 
 **Recovery continuation attempt 5 ran on 2026-08-22 and bought the most of any
 attempt: $1.3511, both memory repairs verified on hardware, and the first
