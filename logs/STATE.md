@@ -1,4 +1,4 @@
-**Updated:** 2026-08-23 · branch `main` · attempt 6 cleared the checkpoint read; generation has no tokenizer
+**Updated:** 2026-08-23 · branch `main` · the attempt-6 tokenizer repair is applied and verified
 
 # Current state
 
@@ -50,6 +50,28 @@ evaluated checkpoint"* true instead. That is a maintainer decision.
 and the 61.55 priced — **+16.6%** on a different host. One observation is not a
 trend, but nine probes at 71.9 would move the envelope. The trained probe was
 **again lost with the pod**: 71.9 paid minutes, for the second time.
+
+### The repair, approved and applied 2026-08-23
+
+**The frozen rule is preserved by making it true, not by changing it.** After
+`trained_model_dir()` resolves a trained probe and before `battery()` runs,
+`materialize_eval_tokenizer()` copies `tokenizer.json`, `tokenizer_config.json`
+and `chat_template.jinja` from the already-attested `CANONICAL_INIT` into the
+checkpoint's `model/` directory. `battery()` still invokes `uncapped_eval.py`
+with `--model <trained dir>` and **no `--tokenizer`**, so `tokenizer_source`
+remains *"the evaluated checkpoint"* and the bytes are the ones Stage 0 attested.
+
+Fail-closed and idempotent: a missing source sidecar raises; an absent
+destination is copied and re-hashed; an identical destination is accepted; a
+**differing** destination is refused rather than overwritten, because which
+tokenizer a probe was scored against must stay recoverable.
+
+`uncapped_eval.py`, the trainer, `Trainer.save_checkpoint`, the frozen recipe,
+comparability v2, the Stage-3 attestation and every frozen threshold are
+**untouched** — `uncapped_eval.py` is part of the generation source digest, so
+editing it would have turned an infrastructure repair into a protocol change.
+
+The continuation harness digest moves **`8b56fc7b…` → `b824441c…`**.
 
 **Recovery continuation attempt 5 ran on 2026-08-22 and bought the most of any
 attempt: $1.3511, both memory repairs verified on hardware, and the first

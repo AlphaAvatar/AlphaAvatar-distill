@@ -61,13 +61,13 @@
     "Stage 0 on hardware, passed six times; attempt 4 also passed STAGE 1 on hardware -- five leaves re-identified from pod bytes, control measured on state_eval@v1"
   ],
   "latest_verification": {
-    "utc": "2026-08-23T12:40:00Z",
-    "after": "attempt 6 and the post-attempt bookkeeping normalization",
-    "full_suite": "2176 passed, 12 skipped in 18:38",
+    "utc": "2026-08-23T14:20:00Z",
+    "after": "the attempt-6 evaluation-tokenizer materialization",
+    "full_suite": "2183 passed, 12 skipped in 18:37 (+7 on 2176; skips unchanged)",
+    "mutations": "5, incl. end to end: removing the materialization makes the stage-1-5 harness fail, and each of overwrite-on-conflict, skip-on-missing-source and a --tokenizer flag fails its own gate",
     "frozen_asset_verifier": "passed, no problems",
-    "harness_digest": "0dbf1272 -> 8b56fc7b (the trained_model_dir docstring, inside the 22-file set)",
-    "scope": "CPU only, repo .venv; no checkpoint loaded, no metric measured, no GPU used",
-    "note": "the AlphaAvatar venv (transformers 4.57.1) was kept out of every gate: it fails six tokenizer tests here and misreads rope_theta by 500x"
+    "harness_digest": "8b56fc7b -> b824441c",
+    "scope": "CPU only, repo .venv; no checkpoint loaded, no metric measured, no GPU used"
   },
   "failed": [
     {
@@ -118,8 +118,8 @@
     "the paid device-canary session path: STRATEGICALLY TERMINATED 2026-08-18. Two authorized sessions, $0.1240, zero canary runs; both died in the wrapper's inherited contracts. Its evidence and its generic lesson are kept; no further canary is prepared."
   ],
   "next_starting_point": {
-    "status": "Recovery continuation attempt 6 confirmed the attempt-5 checkpoint repair on hardware and reached the battery. Generation failed: a trainer-written checkpoint has no tokenizer, so apply_chat_template raised. Nothing is running, billing, authorized or prepared.",
-    "the_ask": "A maintainer decision on how the probe's evaluation gets the frozen tokenizer WITHOUT changing tokenizer_source, which is material under generation_runtime_comparability@v2 and was attested as 'the evaluated checkpoint' with tokenizer_sha256 c1db93c8. Passing --tokenizer would fix the crash and break comparability with the Stage-3 thresholds.",
+    "status": "The attempt-6 tokenizer blocker is repaired protocol-preservingly: run_probe materializes the frozen sidecars into the trained checkpoint from CANONICAL_INIT, and battery() still passes --model with NO --tokenizer, so tokenizer_source stays 'the evaluated checkpoint'. Nothing is running, billing, authorized or prepared.",
+    "the_ask": "Authorization review for Recovery Continuation Attempt 7. It needs a NEW one-use grant and authorization: the session commit moved AND the harness digest moved 8b56fc7b -> b824441c.",
     "budget": "cap $234.00, spent $217.1763, remaining $16.8237 against a $16.7456 ceiling -- $0.0781 of margin. Balance is not authorization."
   },
   "read_order": [
@@ -147,7 +147,7 @@
     "budget_expected_usd": 14.9233,
     "budget_hard_usd": 16.7456,
     "stage1_source": "attempt 12: 43 states, 5 selected; IMPORTED AND RE-IDENTIFIED FROM POD BYTES by attempt 4, config 567d32789ba6",
-    "authorization": "own schema recovery_continuation_authorization/v1, 22-file harness 8b56fc7b (Phase-A set minus the unreachable search, plus the continuation executables). Ceiling derived from continuation_budget()",
+    "authorization": "own schema recovery_continuation_authorization/v1, 22-file harness b824441c. Ceiling derived from continuation_budget()",
     "imports": "attempt 12's five preserved leaves, re-identified from bytes; no search is reachable",
     "transport": "PROVEN ON PAID HARDWARE by attempts 3 and 4: the five leaves are mirrored in the private aadistill-transport repo (15 files, 5.5513 GiB) in selected order and stage on a pod. Manifest: logs/autoinit_selected_leaf_transport_manifest.json"
   }

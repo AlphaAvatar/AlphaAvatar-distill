@@ -463,3 +463,112 @@ def test_run_probe_uses_the_resolver_rather_than_its_own_path_arithmetic():
     assert "trained_model_dir(" in body
     assert "latest.txt" not in body, (
         "run_probe is doing its own checkpoint path arithmetic again")
+
+
+# --- the attempt-6 regression -----------------------------------------------
+#
+# Attempt 6 trained a probe for 71.9 min and then died in generation:
+# `Trainer.save_checkpoint` writes weights and config, so the checkpoint had no
+# tokenizer, and `uncapped_eval`'s --tokenizer defaults to "the checkpoint's
+# own". The fix must NOT pass --tokenizer: `tokenizer_source` is material under
+# generation_runtime_comparability@v2 and Stage 0 attests "the evaluated
+# checkpoint", so an external source makes every probe incomparable to the
+# Stage-3 controls. The rule is made true instead.
+
+def _canonical_tokenizer(root):
+    root.mkdir(parents=True, exist_ok=True)
+    (root / "tokenizer.json").write_text('{"model": "frozen"}')
+    (root / "tokenizer_config.json").write_text('{"eos_token": "<|im_end|>"}')
+    (root / "chat_template.jinja").write_text("{% for m in messages %}{{ m }}{% endfor %}")
+    return root
+
+
+def test_a_model_only_checkpoint_receives_the_canonical_sidecars(tmp_path):
+    """The trainer writes save_pretrained output; the battery needs a tokenizer."""
+    sys.path.insert(0, str(REPO / "scripts/pod"))
+    from autoinit_phase_a_driver import (
+        EVAL_TOKENIZER_SIDECARS, materialize_eval_tokenizer)
+    from aadistill.infrastructure.manifest import sha256_file
+
+    src = _canonical_tokenizer(tmp_path / "canonical")
+    model = tmp_path / "probe" / "checkpoints" / "step_1023" / "model"
+    model.mkdir(parents=True)
+    (model / "model.safetensors").write_bytes(b"weights")
+    (model / "config.json").write_text("{}")
+    for name in EVAL_TOKENIZER_SIDECARS:
+        assert not (model / name).exists(), "the trainer does not write these"
+
+    rec = materialize_eval_tokenizer(model, source=src)
+
+    for name in EVAL_TOKENIZER_SIDECARS:
+        assert (model / name).is_file(), name
+        assert sha256_file(model / name) == sha256_file(src / name), (
+            f"{name} is not byte-identical to the canonical source")
+    assert {f["action"] for f in rec["files"]} == {"copied"}
+
+
+def test_materialization_is_idempotent(tmp_path):
+    """A re-entered probe must not fail on its own previous work."""
+    sys.path.insert(0, str(REPO / "scripts/pod"))
+    from autoinit_phase_a_driver import materialize_eval_tokenizer
+
+    src = _canonical_tokenizer(tmp_path / "canonical")
+    model = tmp_path / "model"
+    model.mkdir()
+    materialize_eval_tokenizer(model, source=src)
+    again = materialize_eval_tokenizer(model, source=src)
+    assert {f["action"] for f in again["files"]} == {"already present"}
+
+
+def test_a_conflicting_sidecar_fails_closed_rather_than_being_overwritten(tmp_path):
+    """Which tokenizer the probe was scored against must stay recoverable."""
+    sys.path.insert(0, str(REPO / "scripts/pod"))
+    from autoinit_phase_a_driver import materialize_eval_tokenizer
+    from aadistill.autoinit.recovery import RecoveryAdmissionError
+
+    src = _canonical_tokenizer(tmp_path / "canonical")
+    model = tmp_path / "model"
+    model.mkdir()
+    (model / "tokenizer.json").write_text('{"model": "SOMETHING ELSE"}')
+
+    with pytest.raises(RecoveryAdmissionError, match="refusing to overwrite"):
+        materialize_eval_tokenizer(model, source=src)
+    assert (model / "tokenizer.json").read_text() == '{"model": "SOMETHING ELSE"}', (
+        "the conflicting file was overwritten")
+
+
+def test_a_missing_canonical_sidecar_fails_closed(tmp_path):
+    sys.path.insert(0, str(REPO / "scripts/pod"))
+    from autoinit_phase_a_driver import materialize_eval_tokenizer
+    from aadistill.autoinit.recovery import RecoveryAdmissionError
+
+    src = _canonical_tokenizer(tmp_path / "canonical")
+    (src / "chat_template.jinja").unlink()
+    model = tmp_path / "model"
+    model.mkdir()
+    with pytest.raises(RecoveryAdmissionError, match="incomplete"):
+        materialize_eval_tokenizer(model, source=src)
+
+
+def test_run_probe_materializes_before_the_battery_and_passes_no_tokenizer_flag():
+    """Wiring, and the protocol constraint that must survive it."""
+    import ast
+
+    src = (REPO / "scripts/pod/autoinit_phase_a_driver.py").read_text()
+    tree = ast.parse(src)
+    run_probe = ast.unparse(next(
+        n for n in ast.walk(tree)
+        if isinstance(n, ast.FunctionDef) and n.name == "run_probe"))
+    assert run_probe.index("trained_model_dir(") < run_probe.index(
+        "materialize_eval_tokenizer(") < run_probe.index("self.battery("), (
+        "the tokenizer must be materialized after the checkpoint resolves and "
+        "before the battery reads it")
+
+    battery = ast.unparse(next(
+        n for n in ast.walk(tree)
+        if isinstance(n, ast.FunctionDef) and n.name == "battery"))
+    assert "--model" in battery
+    assert "--tokenizer" not in battery, (
+        "passing --tokenizer changes tokenizer_source, which is MATERIAL under "
+        "generation_runtime_comparability@v2, and makes every probe "
+        "incomparable to the Stage-3 controls")

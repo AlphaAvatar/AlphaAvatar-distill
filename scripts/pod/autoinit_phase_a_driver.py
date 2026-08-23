@@ -42,6 +42,7 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import shutil
 import subprocess
 import sys
 import time
@@ -128,6 +129,76 @@ def trained_model_dir(out_dir: Path) -> Path:
             f"{latest} names tag {tag!r} but {model_dir} is not a directory; the "
             "checkpoint index and the checkpoint tree disagree")
     return model_dir
+
+
+#: The evaluation tokenizer, as files. `Trainer.save_checkpoint` writes
+#: `save_pretrained(...)` — weights and config — so a trainer-written probe
+#: checkpoint has no tokenizer at all, and `uncapped_eval.py`'s `--tokenizer`
+#: defaults to *the checkpoint's own*. Recovery continuation attempt 6 trained a
+#: probe for 71.9 minutes and then died on `apply_chat_template` for want of
+#: these three files.
+EVAL_TOKENIZER_SIDECARS = ("tokenizer.json", "tokenizer_config.json",
+                           "chat_template.jinja")
+
+
+def materialize_eval_tokenizer(model_dir: Path, source: Path | None = None) -> dict:
+    """Give a trained probe checkpoint the frozen evaluation tokenizer.
+
+    **Why this rather than `--tokenizer`.** Passing `--tokenizer` would fix the
+    crash and silently destroy the comparison. `tokenizer_source` is a declared
+    field of the evaluation protocol, and `generation_runtime_comparability@v2`
+    makes material *every* declared field except `runtime_digest`,
+    `evaluation_protocol_hash` and `generation_protocol_fingerprint`. Stage 0
+    attests `tokenizer_source = "the evaluated checkpoint"`; an external
+    tokenizer rewrites that rule and makes every probe incomparable to the
+    Stage-3 controls that materialized the equivalence interval and the
+    feasibility floor.
+
+    So the rule is left alone and made TRUE instead: the evaluated checkpoint is
+    given the very bytes Stage 0 already attested, copied from the canonical
+    initialization staged beside it. `uncapped_eval.py` is untouched — it is part
+    of the generation source digest, and editing it would turn an infrastructure
+    repair into a protocol change.
+
+    Fail-closed and idempotent, in that order:
+
+    * a missing source sidecar raises — a probe evaluated against a tokenizer
+      that is only half there is worse than one that did not run;
+    * an absent destination is copied byte-for-byte and re-hashed;
+    * a destination already identical to the source is accepted, so a resumed or
+      re-entered probe does not fail on its own previous work;
+    * a destination that DIFFERS is refused, never overwritten. That would mean
+      the trainer had started writing tokenizers, or the wrong source was staged,
+      and quietly replacing it would destroy the evidence of which bytes the
+      probe was actually scored against.
+    """
+    src_dir = CANONICAL_INIT if source is None else source
+    landed = []
+    for name in EVAL_TOKENIZER_SIDECARS:
+        src, dst = src_dir / name, model_dir / name
+        if not src.is_file():
+            raise RecoveryAdmissionError(
+                f"the frozen evaluation tokenizer is incomplete: {src} is "
+                "missing, so the probe cannot be scored against the tokenizer "
+                "Stage 0 attested")
+        want = sha256_file(src)
+        if not dst.exists():
+            shutil.copyfile(src, dst)
+            action = "copied"
+        elif sha256_file(dst) == want:
+            action = "already present"
+        else:
+            raise RecoveryAdmissionError(
+                f"{dst} already exists and differs from the canonical "
+                f"{src}; refusing to overwrite it, because which tokenizer the "
+                "probe was scored against would then be unrecoverable")
+        got = sha256_file(dst)
+        if got != want:
+            raise RecoveryAdmissionError(
+                f"{dst} hashes to {got} after materialization but the canonical "
+                f"source hashes to {want}")
+        landed.append({"file": name, "sha256": got, "action": action})
+    return {"source": str(src_dir), "files": landed}
 
 
 def selected_leaf_dir() -> Path:
@@ -779,6 +850,12 @@ class PhaseADriver:
         mark(f"PROBE_TRAINED:{name}")
 
         model_dir = trained_model_dir(REPO / f"artifacts/stage3/phase_a/{name}")
+        # The trainer writes no tokenizer, and the battery evaluates "the
+        # checkpoint's own" — the frozen material rule. Give the checkpoint the
+        # attested bytes rather than pointing the evaluator somewhere else.
+        tok = materialize_eval_tokenizer(model_dir)
+        say(f"  {name}: evaluation tokenizer "
+            f"{', '.join(f['action'] for f in tok['files'])}")
         result = self.battery(name, model_dir, descriptor["seed"])
 
         record = {

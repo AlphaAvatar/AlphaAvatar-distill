@@ -276,8 +276,18 @@ def build(tmp_path, monkeypatch, *, separated=False, n_suite_items=None,
     # reachable, and which one runs is a property of the numbers rather than of
     # a flag inside the driver.
     seen: dict[str, int] = {}
+    #: What `run_probe` actually handed the battery, so a test can assert the
+    #: evaluation tokenizer was materialized into the trained checkpoint BEFORE
+    #: generation would have read it. Attempt 6 died here for want of it.
+    presented: list[dict] = []
 
     def battery(label, model_dir, seed):
+        from aadistill.infrastructure.manifest import sha256_file
+        presented.append({
+            "label": label, "model_dir": Path(model_dir),
+            "sidecars": {n: (sha256_file(Path(model_dir) / n)
+                             if (Path(model_dir) / n).is_file() else None)
+                         for n in mod.EVAL_TOKENIZER_SIDECARS}})
         state = label.split(".")[-2]
         if not separated:
             usable, correct = 74, 2
@@ -291,6 +301,7 @@ def build(tmp_path, monkeypatch, *, separated=False, n_suite_items=None,
     driver.battery = battery
     # Exposed so a test can assert the budget really reached the search.
     driver._forwarded_to_search = forwarded
+    driver._presented_to_battery = presented
     return driver, mod
 
 
@@ -568,3 +579,46 @@ def test_stage1_bounds_the_search_by_the_derived_deadline_not_the_allowance(driv
     assert forwarded != pytest.approx(Args.search_minutes), (
         "the driver bounded the search by the base allowance; the two soft-stop "
         "reserves stage 1 is paid for would be unusable by stage 1")
+
+
+def test_the_model_handed_to_the_battery_carries_the_evaluation_tokenizer(driven):
+    """Attempt 6's blocker, end to end.
+
+    `Trainer.save_checkpoint` writes weights and config; the battery evaluates
+    "the checkpoint's own tokenizer". Without materialization the probe reaches
+    generation with no `chat_template` and `apply_chat_template` raises — after
+    ~62 GPU-minutes have already been paid for.
+    """
+    from aadistill.infrastructure.manifest import sha256_file
+
+    driver, mod, _codes = driven
+    presented = driver._presented_to_battery
+    assert presented, "no probe reached the battery"
+    for seen in presented:
+        for name in mod.EVAL_TOKENIZER_SIDECARS:
+            got = seen["sidecars"][name]
+            assert got is not None, (
+                f"{seen['label']} reached the battery without {name}")
+            assert got == sha256_file(mod.CANONICAL_INIT / name), (
+                f"{seen['label']}'s {name} is not the canonical attested bytes")
+
+
+def test_the_battery_never_passes_an_external_tokenizer(driven):
+    """The protocol constraint the materialization exists to preserve.
+
+    `tokenizer_source` is a declared field of the evaluation protocol and
+    `generation_runtime_comparability@v2` makes every declared field material
+    except `runtime_digest`, `evaluation_protocol_hash` and
+    `generation_protocol_fingerprint`. Stage 0 attests "the evaluated
+    checkpoint"; `--tokenizer` would rewrite that to "external: ..." and make
+    every probe incomparable to the Stage-3 controls.
+    """
+    import ast
+
+    _driver, mod, _codes = driven
+    battery = ast.unparse(next(
+        n for n in ast.walk(ast.parse(
+            (REPO / "scripts/pod/autoinit_phase_a_driver.py").read_text()))
+        if isinstance(n, ast.FunctionDef) and n.name == "battery"))
+    assert "uncapped_eval.py" in battery and "--model" in battery
+    assert "--tokenizer" not in battery
