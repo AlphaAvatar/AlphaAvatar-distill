@@ -99,12 +99,15 @@ def trained_model_dir(out_dir: Path) -> Path:
     site would hide the arguments it checks.)
 
     This consumer did not: until 2026-08-23 it read `out_dir/latest.txt` and
-    `out_dir/<tag>/model`, dropping the `checkpoints/` component in both. It is
-    reached once per probe, **after** the training subprocess returns, so no `$0`
-    path executes it — the pod simulator and the pre-flight rehearsal stub that
-    subprocess rather than producing a checkpoint tree. Recovery continuation
-    attempt 5 trained a rung-1 probe for 61.7 minutes and then died here, and
-    that training was lost with the pod.
+    `out_dir/<tag>/model`, dropping the `checkpoints/` component in both.
+    Recovery continuation attempt 5 trained a rung-1 probe for 61.7 minutes and
+    then died here, and that training was lost with the pod.
+
+    A `$0` path **does** execute this line — `test_phase_a_stages1_5_execute.py`
+    drives the whole stage end to end — and it certified the defect anyway,
+    because its fake trainer wrote the layout this consumer expected rather than
+    the one the trainer writes. The fake now emits the real tree, so the harness
+    is sensitive to this class; attempt 6 then confirmed the fix on hardware.
 
     Both failures are named rather than left to a bare `FileNotFoundError`,
     because at this point a probe has already been paid for and the distinction

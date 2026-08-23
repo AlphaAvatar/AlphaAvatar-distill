@@ -1,0 +1,33 @@
+2026-08-23T10:13:40Z MARKER:DRIVER_START
+2026-08-23T10:13:40Z MARKER:STAGE_START:0
+[10:15:49] attested: interval 0.011695, floor 0.3000, plan 02be33b9a7a8…
+2026-08-23T10:15:49Z MARKER:STAGE_PASSED:0
+2026-08-23T10:15:49Z MARKER:STAGE_START:1
+[10:15:55] imported 5 stage-1 leaves, config 567d32789ba6…, re-identified from bytes
+2026-08-23T10:15:55Z MARKER:STAGE1_IMPORTED:5
+Loading weights:   0%|          | 0/398 [00:00<?, ?it/s]Loading weights: 100%|██████████| 398/398 [00:00<00:00, 5385.03it/s]
+Loading weights:   0%|          | 0/310 [00:00<?, ?it/s]Loading weights: 100%|██████████| 310/310 [00:00<00:00, 6124.08it/s]
+[10:18:36] control measured on state_eval@v1 (74022 positions)
+[10:18:37] device handoff: 0.01 GiB allocated and 0.02 GiB reserved after the release; the pre-release figure was allocator reservation, not a model leak
+2026-08-23T10:18:37Z MARKER:STAGE_PASSED:1
+2026-08-23T10:18:37Z MARKER:STAGE_START:2
+2026-08-23T11:30:28Z MARKER:PROBE_TRAINED:autoinit.v1.phase_a.rung1.cca699c93f34.sa
+2026-08-23T11:31:18Z MARKER:STAGE_FAILED:2
+[11:31:18] STAGE 2 FAILED: autoinit.v1.phase_a.rung1.cca699c93f34.sa: generation rc=1; tail: ...[00:00<00:00, 53.77it/s]
+Capturing CUDA graphs (FULL): 100%|██████████| 35/35 [00:00<00:00, 52.33it/s]
+Traceback (most recent call last):
+  File "/workspace/aad/scripts/evaluation/uncapped_eval.py", line 547, in <module>
+    raise SystemExit(main())
+                     ^^^^^^
+  File "/workspace/aad/scripts/evaluation/uncapped_eval.py", line 321, in main
+    prompt = tok.apply_chat_template(turns, tools=s.get("tools"),
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/vllm/lib/python3.12/site-packages/transformers/tokenization_utils_base.py", line 3085, in apply_chat_template
+    chat_template = self.get_chat_template(chat_template, tools)
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/vllm/lib/python3.12/site-packages/transformers/tokenization_utils_base.py", line 3270, in get_chat_template
+    raise ValueError(
+ValueError: Cannot use chat template functions because tokenizer.chat_template is not set and no template argument was passed! For information about writing templates and setting the tokenizer.chat_template attribute, please see the documentation at https://huggingface.co/docs/transformers/main/en/chat_templating
+
+2026-08-23T11:31:18Z MARKER:PHASE_A_FAILED
+[11:31:18] stopping before any later stage; completed probes are journalled and the permanent controls are untouched

@@ -310,12 +310,38 @@ actual cumulative spend                                      $213.9214
       + $0.2389 recovery continuation attempt 2
       + $0.2011 recovery continuation attempt 3
       + $0.4112 recovery continuation attempt 4
-      + $1.3511 recovery continuation attempt 5.
-remaining under the $234.00 cap                              $ 18.3163
-    Covers one continuation ceiling ($16.7456) with $1.5707 to spare;
-    does NOT cover a full Phase-A attempt ($23.0484), short by $4.7321.
+      + $1.3511 recovery continuation attempt 5
+      + $1.4926 recovery continuation attempt 6.
+remaining under the $234.00 cap                              $ 16.8237
+    ONLY $0.0781 ABOVE the $16.7456 continuation ceiling. One more
+    full-ceiling continuation fits by under eight cents, and nothing
+    else does: a Phase-A attempt needs $23.0484. If attempt 7 runs to
+    its ceiling the project reaches $233.9219 of $234.00.
     REMAINING BALANCE IS NOT AUTHORIZATION. Every grant issued so far,
-    including attempt 5's, is spent.
+    including attempt 6's, is spent.
+recovery continuation attempt 6 (L40S, 90.5 min) BATTERY REACHED $  1.4926
+    AUTHORIZED 2026-08-23 as autoinit.recovery_continuation.2026-08-23T0944Z
+    (sha256 b15aab3c) against
+    logs/autoinit_recovery_continuation_attempt6_grant.json.
+    Base 948b1e8, session commit 08670e5, harness 0dbf1272 over 22 files.
+    Ceiling $16.7456, of which $1.4926 was spent. Pod ifp8feyil1gp7v;
+    provider confirms gone; watchdog ended pod_gone after 91 ticks.
+    THE ATTEMPT-5 REPAIR IS CONFIRMED: trained_model_dir() resolved the
+    probe checkpoint with no FileNotFoundError and execution entered
+    battery(), past the line that ended attempt 5. Setup $0.13 and TCP 22
+    in 0.2 min, both the best recorded.
+    FAILED in generation, 50 s after PROBE_TRAINED: uncapped_eval raised
+    ValueError, tokenizer.chat_template is not set. Trainer.save_checkpoint
+    writes weights and config only; battery() passes --model <that dir>
+    with no --tokenizer, and that flag defaults to the checkpoint's own
+    tokenizer. Every proven caller had pointed --model at CANONICAL_INIT,
+    a full checkpoint.
+    PROTOCOL WARNING: passing --tokenizer would fix the crash and break
+    comparability. tokenizer_source is material under
+    generation_runtime_comparability@v2 and Stage 0 attested it as "the
+    evaluated checkpoint" with tokenizer_sha256 c1db93c8.
+    The probe trained in 71.9 min against 61.55 priced (+16.6%) and was
+    again lost with the pod -- the second time paid training was discarded.
 recovery continuation attempt 5 (L40S, 81.9 min) PROBE TRAINED $  1.3511
     AUTHORIZED 2026-08-22 as autoinit.recovery_continuation.2026-08-22T1925Z
     (sha256 7f575d5f) against

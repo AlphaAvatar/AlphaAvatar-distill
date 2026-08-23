@@ -1,0 +1,26 @@
+[10:05:28] budget: expected 904 min $14.92 · soft $16.42 · hard $16.75 (authorized $16.75)
+[10:05:28] NVIDIA L40S $0.99/h, stock High
+[10:05:28] session commit 08670e5e7c49 verified: harness digests to 0dbf12726e87…, carries the authorization and only logs/autoinit_recovery_continuation_authorization.json differs from the authorized base
+[10:05:28] frozen science plan 02be33b9a7a8… matches the authorization
+[10:05:28] continuation harness 0dbf12726e87… over 22 files, search excluded
+[10:05:32] all 5 canonical stage-1 leaves verify locally; 15 transport files declared from AlphaAvatar/aadistill-transport in selected order
+[10:05:34] precheck OK: 25 relay inputs (10 from AlphaAvatar/aadistill-artifacts, 15 from AlphaAvatar/aadistill-transport), 2 local assets
+[10:05:35] created ifp8feyil1gp7v at $0.99/h
+[10:05:35] watchdog detached — hard 1015 min = $16.75
+[10:05:46] TCP 22 at 64.247.206.218:15309 after 0.2 min
+[10:05:49] draw 1: ssh reachable — $0.00
+[10:06:20] draw 1: image identity runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@580.159.03
+[10:06:20] draw 1: running setup
+[10:13:35] draw 1: setup complete — $0.13
+[10:13:42] driver detached, pid 7150, confirmed by descriptor_probe — $0.13
+[10:15:55]   2026-08-23T10:13:32Z MARKER:SETUP_DONE — $0.17
+[11:32:54] driver no longer running: EXITED:22
+[11:32:54] polling ended: DRIVER_EXITED:22 — $1.44
+[11:35:09]   manifest rc=0
+15 file(s) across 6 class(es) -> /workspace/manifest.json
+  final_required: 15 · mutable_snapshot: 0 · final_streams_quiescent: True
+[11:35:51] teardown gate: allowed=True failed=training_complete
+[11:35:51] deleting pod (gate passed after DRIVER_EXITED:22)
+[11:36:03] pod deleted — 90.5 min, $1.49; provider confirms gone: True
+
+autoinit-recovery-continuation INCOMPLETE — /home/ecs-user/AlphaAvatar-distill/logs/autoinit_recovery_continuation_session.json. STOP for review. The continuation consumed the verified attempt-12 Stage-1 result and ran no search.

@@ -1,4 +1,4 @@
-**Updated:** 2026-08-23 · branch `main` · recovery continuation attempt 6 is LIVE
+**Updated:** 2026-08-23 · branch `main` · attempt 6 cleared the checkpoint read; generation has no tokenizer
 
 # Current state
 
@@ -6,24 +6,50 @@ The **human view of [`current_state.json`](current_state.json)**. That file owns
 the live facts; this one says the same things in prose and adds nothing it does
 not carry. If the two disagree, a structural test fails.
 
-**A paid run is in flight.** Recovery continuation attempt 6 launched
-2026-08-23T10:05:35Z on pod `ifp8feyil1gp7v`, an L40S at $0.99/h, under
-authorization `autoinit.recovery_continuation.2026-08-23T0944Z` — one use,
-consumed by this launch, hard ceiling **$16.7456** (1015 min). Session commit
-`08670e5`, base `948b1e8`, continuation harness **`0dbf1272`** over 22 files with
-the search excluded.
+**Nothing is running. Nothing is billing. Nothing is authorized. Nothing is
+prepared for launch.**
 
-Everything up to the Stage-1/2 boundary is already proven on hardware: the
-transport (attempts 3-4), Stage 0 and the strict Stage-1 import with control
-measurement and admission (attempts 4-5), and the release/headroom contracts
-(attempt 5). This run **retrains the rung-1 probe attempt 5 lost** — that probe
-is not resumable scientific work — and continues into recovery.
+**Recovery continuation attempt 6 ran on 2026-08-23 and went one step further
+than any attempt: $1.4926.** Pod `ifp8feyil1gp7v`, 90.5 min, deleted with
+provider confirmation. Full record:
+[`autoinit_recovery_continuation_attempt6/`](autoinit_recovery_continuation_attempt6/).
 
-A refusal by `require_released` or `require_headroom` after Stage 1 remains the
-intended fail-closed result, not a failure of the run.
+**The attempt-5 repair is confirmed on hardware.** The probe trained,
+`trained_model_dir()` resolved its checkpoint with no `FileNotFoundError`, and
+execution entered `battery()` — past the exact line that ended attempt 5. Setup
+cost **$0.13** and TCP 22 came up in **0.2 min**, both the best yet.
 
-Live artifacts are in `/home/ecs-user/aad-scratch/recovery_cont6_20260823/`:
-`launcher.out`, the detached `watchdog.jsonl`, and `poll.jsonl`.
+**Generation then failed**, 50 s after `PROBE_TRAINED`:
+
+> `uncapped_eval.py` → `tok.apply_chat_template(...)` →
+> `ValueError: tokenizer.chat_template is not set`.
+>
+> `Trainer.save_checkpoint` writes `save_pretrained(ckpt_dir/"model")` — weights
+> and config, **no tokenizer** — and `battery()` passes `--model <that dir>` with
+> no `--tokenizer`, whose default is *"the checkpoint's own tokenizer"*.
+
+Every previously proven caller passed `--model CANONICAL_INIT`, which *is* a full
+checkpoint with `tokenizer*.json` and `chat_template.jinja`. The Phase-A battery
+is the first ever to point `--model` at a **trainer-written** checkpoint, so the
+default had never met one. Third appearance of the checkpoint-without-a-tokenizer
+class.
+
+**The obvious one-line fix is not protocol-neutral, and must not be applied
+blind.** Stage 0 of this run attested `tokenizer_source: "the evaluated
+checkpoint"` and `tokenizer_sha256: c1db93c8…` under the frozen protocol
+`250f72ef…`. `RecoveryEvaluationProtocol.identity()` returns every declared
+field, and `generation_runtime_comparability@v2` declares material *"every field
+the protocol already declares except `runtime_digest`,
+`evaluation_protocol_hash`, `generation_protocol_fingerprint`"* — so
+`tokenizer_source` **is material**. Passing `--tokenizer` would change it to
+`"external: …"` and make every probe incomparable to the Stage-3 controls that
+materialized the thresholds. The protocol-neutral shape is to make *"the
+evaluated checkpoint"* true instead. That is a maintainer decision.
+
+**Recorded, not diagnosed:** the probe took **71.9 min** against attempt 5's 61.7
+and the 61.55 priced — **+16.6%** on a different host. One observation is not a
+trend, but nine probes at 71.9 would move the envelope. The trained probe was
+**again lost with the pod**: 71.9 paid minutes, for the second time.
 
 **Recovery continuation attempt 5 ran on 2026-08-22 and bought the most of any
 attempt: $1.3511, both memory repairs verified on hardware, and the first
@@ -264,9 +290,9 @@ selection result.**
 ## Budget
 
 ```
-cumulative spend   $215.6837
+cumulative spend   $217.1763
 approved cap       $234.00    RAISED AND APPROVED 2026-08-21
-remaining          $18.3163   $4.7321 SHORT of one more full Phase-A attempt
+remaining          $16.8237   only $0.0781 above the $16.7456 continuation ceiling
 
 ```
 
@@ -331,9 +357,16 @@ loaded, no metric measured, no GPU used:
   the helper again, `require_released` made a no-op, each driver dropping its
   `require_released` call, deleting only the teacher, the 22 GiB constant
   restored, and the snapshot taken after the `del`.
-* the continuation **harness digest moves `162c09ed…` → `95cf336d…`** — these
-  files are inside the 22-file set, so attempt 5 needs a new authorization on
-  both the commit and the digest.
+* the continuation **harness digest is now `8b56fc7b…`** — `162c09ed` →
+  `95cf336d` (memory repairs) → `0dbf1272` (checkpoint path) → `8b56fc7b`
+  (the `trained_model_dir` docstring, corrected post-attempt-6). Attempt 7 needs
+  a new authorization on both the commit and the digest.
+
+**Two bookkeeping items were normalized after attempt 6**, as directed: the
+`trained_model_dir` docstring no longer claims no `$0` path executes it — the
+corrected end-to-end fake does — and `baseline_commit` tracks the tree that
+produced these figures. The suite was re-run after the docstring change so that
+claim stays true.
 
 Earlier, after the attempt-3 portability repair: full suite 2162 passed / 12
 skipped; the publisher module 11 passed on a pod-like host with no
