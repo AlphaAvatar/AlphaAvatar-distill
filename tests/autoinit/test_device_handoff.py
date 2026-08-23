@@ -390,3 +390,76 @@ def test_a_released_card_clears_the_new_requirement():
                 "total_bytes": 47665709056}
     require_headroom(released, need_bytes=drv.RECOVERY_TRAINER_BYTES,
                      what="the stage-2 recovery trainer")
+
+
+# --- the attempt-5 regression -----------------------------------------------
+#
+# Attempt 5 trained a rung-1 probe for 61.7 minutes and then died reading its
+# checkpoint, because run_probe dropped the `checkpoints/` component that
+# Trainer.save_checkpoint writes and train_stage3.py's resume path reads. The
+# line runs once per probe, AFTER the training subprocess returns, so no $0 path
+# had ever executed it: the simulator and the rehearsal stub that subprocess
+# instead of producing a checkpoint tree. So this builds the tree.
+
+def _real_layout(root, tag="step_1023"):
+    """The layout Trainer.save_checkpoint actually writes."""
+    ckpt = root / "checkpoints" / tag / "model"
+    ckpt.mkdir(parents=True)
+    (ckpt / "model.safetensors").write_bytes(b"weights")
+    (root / "checkpoints" / "latest.txt").write_text(tag + "\n")
+    return ckpt
+
+
+def test_the_driver_resolves_the_model_the_trainer_actually_wrote(tmp_path):
+    sys.path.insert(0, str(REPO / "scripts/pod"))
+    from autoinit_phase_a_driver import trained_model_dir
+
+    out_dir = tmp_path / "autoinit.v1.phase_a.rung1.cca699c93f34.sa"
+    expected = _real_layout(out_dir)
+
+    # The defect, pinned: there is NO root-level latest.txt in a real tree, so a
+    # consumer that reads out_dir/latest.txt cannot work.
+    assert not (out_dir / "latest.txt").exists()
+
+    got = trained_model_dir(out_dir)
+    assert got == expected
+    assert got.is_dir() and (got / "model.safetensors").is_file()
+    assert "checkpoints" in got.parts, (
+        "the resolved path skipped the checkpoints/ component again")
+
+
+def test_a_probe_that_wrote_no_checkpoint_is_named_not_a_bare_oserror(tmp_path):
+    """By this point a probe has been paid for; the message is the diagnosis."""
+    sys.path.insert(0, str(REPO / "scripts/pod"))
+    from autoinit_phase_a_driver import trained_model_dir
+    from aadistill.autoinit.recovery import RecoveryAdmissionError
+
+    out_dir = tmp_path / "probe"
+    (out_dir / "checkpoints").mkdir(parents=True)
+    with pytest.raises(RecoveryAdmissionError, match="checkpoint index"):
+        trained_model_dir(out_dir)
+
+
+def test_an_index_pointing_at_a_missing_tag_is_distinguished(tmp_path):
+    sys.path.insert(0, str(REPO / "scripts/pod"))
+    from autoinit_phase_a_driver import trained_model_dir
+    from aadistill.autoinit.recovery import RecoveryAdmissionError
+
+    out_dir = tmp_path / "probe"
+    (out_dir / "checkpoints").mkdir(parents=True)
+    (out_dir / "checkpoints" / "latest.txt").write_text("step_9999\n")
+    with pytest.raises(RecoveryAdmissionError, match="disagree"):
+        trained_model_dir(out_dir)
+
+
+def test_run_probe_uses_the_resolver_rather_than_its_own_path_arithmetic():
+    """Wiring: testing the helper proves nothing about whether run_probe calls it."""
+    import ast
+
+    src = (REPO / "scripts/pod/autoinit_phase_a_driver.py").read_text()
+    fn = next(n for n in ast.walk(ast.parse(src))
+              if isinstance(n, ast.FunctionDef) and n.name == "run_probe")
+    body = ast.unparse(fn)
+    assert "trained_model_dir(" in body
+    assert "latest.txt" not in body, (
+        "run_probe is doing its own checkpoint path arithmetic again")

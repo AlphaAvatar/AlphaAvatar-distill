@@ -85,6 +85,48 @@ AUDIT = REPO / "artifacts/audit/autoinit_phase_a"
 SEARCH_WORKDIR = REPO / "artifacts/autoinit/phase_a_search"
 
 
+def trained_model_dir(out_dir: Path) -> Path:
+    """The model a just-finished probe wrote, resolved the way the trainer writes it.
+
+    `Trainer.save_checkpoint` (`src/aadistill/training/train.py`) writes
+    `out_dir/checkpoints/latest.txt` holding a tag, and the checkpoint itself at
+    `out_dir/checkpoints/<tag>/model`. The trainer entrypoint's own resume path
+    reads exactly that and always has.
+
+    (That entrypoint is deliberately not named in full here: a rehearsal test
+    scans this file for the first occurrence of each invoked script path and
+    reads the flags that follow it, so a mention in prose above the real call
+    site would hide the arguments it checks.)
+
+    This consumer did not: until 2026-08-23 it read `out_dir/latest.txt` and
+    `out_dir/<tag>/model`, dropping the `checkpoints/` component in both. It is
+    reached once per probe, **after** the training subprocess returns, so no `$0`
+    path executes it — the pod simulator and the pre-flight rehearsal stub that
+    subprocess rather than producing a checkpoint tree. Recovery continuation
+    attempt 5 trained a rung-1 probe for 61.7 minutes and then died here, and
+    that training was lost with the pod.
+
+    Both failures are named rather than left to a bare `FileNotFoundError`,
+    because at this point a probe has already been paid for and the distinction
+    between "the trainer wrote nothing" and "the tag points nowhere" is the
+    whole diagnosis.
+    """
+    ckpt_root = out_dir / "checkpoints"
+    latest = ckpt_root / "latest.txt"
+    if not latest.is_file():
+        raise RecoveryAdmissionError(
+            f"the probe finished but {latest} does not exist; the trainer writes "
+            f"its checkpoint index under {ckpt_root}, so either training wrote no "
+            "checkpoint or the output directory is not the one it was given")
+    tag = latest.read_text().strip()
+    model_dir = ckpt_root / tag / "model"
+    if not model_dir.is_dir():
+        raise RecoveryAdmissionError(
+            f"{latest} names tag {tag!r} but {model_dir} is not a directory; the "
+            "checkpoint index and the checkpoint tree disagree")
+    return model_dir
+
+
 def selected_leaf_dir() -> Path:
     """Where the five SELECTED leaves are preserved at the stage-1/2 boundary.
 
@@ -733,9 +775,7 @@ class PhaseADriver:
                 f"...{(rc.stdout + rc.stderr)[-1200:]}")
         mark(f"PROBE_TRAINED:{name}")
 
-        trained = REPO / f"artifacts/stage3/phase_a/{name}"
-        latest = (trained / "latest.txt").read_text().strip()
-        model_dir = trained / latest / "model"
+        model_dir = trained_model_dir(REPO / f"artifacts/stage3/phase_a/{name}")
         result = self.battery(name, model_dir, descriptor["seed"])
 
         record = {

@@ -245,8 +245,20 @@ def build(tmp_path, monkeypatch, *, separated=False, n_suite_items=None,
         if any(a.endswith("train_stage3.py") for a in argv):
             config = json.loads(Path(argv[argv.index("--config") + 1]).read_text())
             out = mod.REPO / f"artifacts/stage3/phase_a/{config['run_name']}"
-            (out / "step000" / "model").mkdir(parents=True, exist_ok=True)
-            (out / "latest.txt").write_text("step000\n")
+            # THE LAYOUT `Trainer.save_checkpoint` ACTUALLY WRITES: the index and
+            # the checkpoints both live under `checkpoints/`, which is what
+            # `tests/training/test_train.py` asserts of the real trainer and what
+            # `train_stage3.py`'s resume path reads.
+            #
+            # Until 2026-08-23 this fake wrote `out/step000/model` and
+            # `out/latest.txt` — the layout the DRIVER wrongly expected. Two
+            # artifacts agreed with each other and both disagreed with the
+            # trainer, so this end-to-end harness executed `run_probe` and still
+            # certified a path that cannot work. Attempt 5 trained a probe for
+            # 61.7 paid minutes and died on it.
+            ckpts = out / "checkpoints"
+            (ckpts / "step000" / "model").mkdir(parents=True, exist_ok=True)
+            (ckpts / "latest.txt").write_text("step000\n")
             return subprocess.CompletedProcess(argv, 0, "trained", "")
         return real_run(argv, **kwargs)
 

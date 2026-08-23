@@ -1,4 +1,4 @@
-**Updated:** 2026-08-23 · branch `main` · attempt 5 verified both memory repairs and trained the first probe
+**Updated:** 2026-08-23 · branch `main` · the attempt-5 checkpoint-path repair is applied and verified
 
 # Current state
 
@@ -41,9 +41,41 @@ with the writer right and one of two consumers wrong:
 
 No `$0` gate could catch it: the line is reached only after a real 62-minute
 probe completes, and the simulator and rehearsal stub the training subprocess.
-The repair is inside the 22-file harness, so it moves the digest as well as the
-session commit. **The probe's own artifacts were lost with the pod** — the fetch
-spec collects finalists, and a trained-but-unscored probe is not one.
+**The probe's own artifacts were lost with the pod** — the fetch spec collects
+finalists, and a trained-but-unscored probe is not one.
+
+### The repair, approved and applied 2026-08-23
+
+`trained_model_dir(out_dir)` resolves `out_dir/checkpoints/latest.txt` →
+`out_dir/checkpoints/<tag>/model` — what `Trainer.save_checkpoint` writes — and
+`run_probe` calls it and does no path arithmetic of its own. Both failure modes
+are named rather than raising a bare `FileNotFoundError`, because by then a probe
+has been paid for and "wrote no checkpoint" and "index names a missing tag" are
+different diagnoses.
+
+Per the maintainer's instruction this is **option (a) only**: a driver-local
+helper, no cross-module checkpoint abstraction and no harness expansion for a
+hypothetical third consumer. The writer and `train_stage3.py`'s resume consumer
+already agree.
+
+**Retention was deliberately not implemented.** `restore_probe()` resumes only
+completed *scored* journal entries, so making a trained-only probe reusable would
+need a new bound journal state, cross-session staging, evaluation-only resume
+semantics and a large-checkpoint transfer policy — disproportionate to this
+blocker, and it would enlarge the final paid attempt's change surface.
+**Attempt 5's trained probe is not resumable scientific work: attempt 6 starts
+recovery normally from the preserved Stage-1 inputs and retrains it.**
+
+**The `$0` harness had been simulating a layout the trainer never writes.**
+`tests/pod/test_phase_a_stages1_5_execute.py` *does* execute `run_probe` end to
+end — but its fake trainer wrote `out/latest.txt` and `out/step000/model`, the
+layout the **driver** wrongly expected. Two artifacts agreed with each other and
+both disagreed with `Trainer.save_checkpoint`, which
+`tests/training/test_train.py` has always asserted correctly. The fake now writes
+the real layout, and with the driver defect reintroduced that harness fails
+**1 + 14** — so it would have caught attempt 5.
+
+The continuation harness digest moves **`95cf336d…` → `0dbf1272…`**.
 
 **Recovery continuation attempt 4 ran on 2026-08-22 and got further than any
 attempt before it: $0.4112, Stages 0 and 1 PASSED on hardware, Stage 2 OOM.**

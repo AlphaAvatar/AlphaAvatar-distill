@@ -61,12 +61,13 @@
     "Stage 0 on hardware, passed six times; attempt 4 also passed STAGE 1 on hardware -- five leaves re-identified from pod bytes, control measured on state_eval@v1"
   ],
   "latest_verification": {
-    "utc": "2026-08-23T00:20:00Z",
-    "after": "the two attempt-4 memory-contract repairs",
-    "full_suite": "2172 passed, 12 skipped in 18:42 (+10 on 2162: the attempt-4 handoff regressions and the driver wiring assertions; skips unchanged)",
-    "mutations": "7, each a passing state made to fail, across the release lifecycle, the retention gate, both drivers and the trainer constant",
+    "utc": "2026-08-23T06:00:00Z",
+    "after": "the attempt-5 checkpoint-path repair",
+    "full_suite": "2176 passed, 12 skipped in 18:37 (+4 on 2172; skips unchanged)",
+    "the_stub_encoded_the_bug": "the $0 stage-execution harness DID run run_probe and passed only because its fake trainer wrote the layout the DRIVER expected rather than the trainer's. Fixed",
+    "mutations": "5, including an end-to-end run: with the driver defect reintroduced the repaired harness fails 1+14, so it would now catch attempt 5",
     "frozen_asset_verifier": "passed, no problems",
-    "harness_digest": "162c09ed -> 95cf336d; these files are inside the 22-file set",
+    "harness_digest": "95cf336d -> 0dbf1272",
     "scope": "CPU only, repo .venv; no checkpoint loaded, no metric measured, no GPU used"
   },
   "failed": [
@@ -74,7 +75,7 @@
       "run": "recovery continuation 5",
       "usd": 1.3511,
       "where": "stage 2, AFTER the first rung-1 probe trained for 61.7 min",
-      "cause": "FileNotFoundError on latest.txt. The driver reads out_dir/latest.txt and out_dir/<tag>/model; the trainer writes out_dir/checkpoints/latest.txt and .../checkpoints/<tag>/model. train_stage3.py's resume path reads it correctly -- one writer, two consumers, one wrong",
+      "cause": "FileNotFoundError on latest.txt: the driver read out_dir/latest.txt while the trainer writes out_dir/checkpoints/latest.txt. REPAIRED; the $0 harness's fake trainer had been writing the driver's wrong layout, which is why no gate caught it",
       "kept": "BOTH MEMORY REPAIRS VERIFIED ON HARDWARE: freed_allocated_bytes 8,101,709,824 vs attempt 4's 0, live_retention false, free 43.87 GiB against the 43.65 GiB gate -- the predicted figure exactly. And the first recovery probe TRAINED, 61.7 min against the 61.55 priced"
     },
     {
@@ -117,8 +118,8 @@
     "the paid device-canary session path: STRATEGICALLY TERMINATED 2026-08-18. Two authorized sessions, $0.1240, zero canary runs; both died in the wrapper's inherited contracts. Its evidence and its generic lesson are kept; no further canary is prepared."
   ],
   "next_starting_point": {
-    "status": "Recovery continuation attempt 5 verified both memory repairs on hardware and TRAINED the first recovery probe (61.7 min). Stage 2 then failed reading that probe's checkpoint: the driver omits the 'checkpoints/' path component the trainer writes and train_stage3.py's resume path reads correctly. Nothing is running, billing, authorized or prepared.",
-    "the_ask": "A maintainer decision on the one-line path repair in autoinit_phase_a_driver.run_probe (latest.txt and the model dir), and on whether a trained-but-unscored probe should be journalled or fetched so 62 paid minutes are not lost again. The repair is inside the 22-file harness, so it moves the digest too.",
+    "status": "The attempt-5 checkpoint-path repair is applied and verified at $0: trained_model_dir resolves out_dir/checkpoints/<tag>/model and run_probe does no path arithmetic of its own. Retention was deliberately NOT implemented. Nothing is running, billing, authorized or prepared.",
+    "the_ask": "Authorization review for Recovery Continuation Attempt 6. It needs a NEW one-use grant and authorization: the session commit moved AND the harness digest moved 95cf336d -> 0dbf1272.",
     "budget": "cap $234.00, spent $215.6837, remaining $18.3163. Balance is not authorization."
   },
   "read_order": [
@@ -146,7 +147,7 @@
     "budget_expected_usd": 14.9233,
     "budget_hard_usd": 16.7456,
     "stage1_source": "attempt 12: 43 states, 5 selected; IMPORTED AND RE-IDENTIFIED FROM POD BYTES by attempt 4, config 567d32789ba6",
-    "authorization": "own schema recovery_continuation_authorization/v1, 22-file harness 95cf336d (Phase-A set minus the unreachable search, plus the continuation executables). Ceiling derived from continuation_budget()",
+    "authorization": "own schema recovery_continuation_authorization/v1, 22-file harness 0dbf1272 (Phase-A set minus the unreachable search, plus the continuation executables). Ceiling derived from continuation_budget()",
     "imports": "attempt 12's five preserved leaves, re-identified from bytes; no search is reachable",
     "transport": "PROVEN ON PAID HARDWARE by attempts 3 and 4: the five leaves are mirrored in the private aadistill-transport repo (15 files, 5.5513 GiB) in selected order and stage on a pod. Manifest: logs/autoinit_selected_leaf_transport_manifest.json"
   }
