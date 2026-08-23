@@ -1,4 +1,4 @@
-**Updated:** 2026-08-23 · branch `main` · the attempt-6 tokenizer repair is applied and verified
+**Updated:** 2026-08-23 · branch `main` · recovery continuation attempt 7 is LIVE
 
 # Current state
 
@@ -6,8 +6,26 @@ The **human view of [`current_state.json`](current_state.json)**. That file owns
 the live facts; this one says the same things in prose and adds nothing it does
 not carry. If the two disagree, a structural test fails.
 
-**Nothing is running. Nothing is billing. Nothing is authorized. Nothing is
-prepared for launch.**
+**A paid run is in flight.** Recovery continuation attempt 7 launched
+2026-08-23T13:35:46Z on pod `3c1g6e01kdu1ya`, an L40S at $0.99/h, under
+authorization `autoinit.recovery_continuation.2026-08-23T1314Z` — one use,
+consumed by this launch, hard ceiling **$16.7456** (1015 min). Session commit
+`d968b20`, base `7e1d429`, continuation harness **`b824441c`** over 22 files with
+the search excluded.
+
+**This is the last launch the project's headroom can fund.** A full-ceiling run
+reaches **$233.9219** of the `$234.00` cap. No cap increase, ceiling increase or
+live-run extension is authorized, and **a soft- or hard-stop refusal is an
+accepted outcome** — attempt 6's probe ran 71.9 min against the 61.55 the
+envelope is priced from, so a slower host may well trip it. That refusal is to be
+reported, not worked around.
+
+Every stage through the battery entry is already proven on hardware. This run
+carries the tokenizer materialization, so the probe's evaluation should proceed
+where attempt 6 stopped.
+
+Live artifacts are in `/home/ecs-user/aad-scratch/recovery_cont7_20260823/`:
+`launcher.out`, the detached `watchdog.jsonl`, and `poll.jsonl`.
 
 **Recovery continuation attempt 6 ran on 2026-08-23 and went one step further
 than any attempt: $1.4926.** Pod `ifp8feyil1gp7v`, 90.5 min, deleted with

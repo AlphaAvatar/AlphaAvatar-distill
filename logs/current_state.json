@@ -2,20 +2,26 @@
   "schema": "aadistill.current_state/v2",
   "generated_utc": "2026-08-21T16:00:00Z",
   "_contract": "The minimal machine-readable CURRENT snapshot: live facts only, no history, no per-attempt detail, no narrative. History lives in logs/decisions.md and the per-run directories; the human view is logs/STATE.md and the two must agree. Ownership: logs/CATALOG.md.",
-  "baseline_commit": "30dcee30a92a6a95261e18031fd0fbe34ee95434",
+  "baseline_commit": "d968b20102bb8d40de54f840047a809c4536d3ca",
   "baseline_commit_meaning": "The LAST TESTED IMPLEMENTATION: the commit whose tree produced the latest_verification figures. The suite was re-run after attempt 6's docstring normalization, so that tree is this one, not attempt 6's session commit.",
   "running": {
-    "paid_compute": false,
-    "pods": 0,
-    "launchers": 0
+    "paid_compute": true,
+    "pods": 1,
+    "launchers": 1,
+    "pod_id": "3c1g6e01kdu1ya",
+    "what": "recovery continuation attempt 7, L40S $0.99/h, hard 1015 min = $16.7456",
+    "started_utc": "2026-08-23T13:35:46Z"
   },
   "authorized": {
-    "any": false,
-    "note": "every authorization issued is consumed, including all six continuation attempts."
+    "any": true,
+    "id": "autoinit.recovery_continuation.2026-08-23T1314Z",
+    "note": "one-use, CONSUMED by this launch. Grant logs/autoinit_recovery_continuation_attempt7_grant.json; base 7e1d429; harness b824441c. A full-ceiling run reaches $233.9219 of $234.00; no further launch is fundable."
   },
   "prepared_launch": {
-    "any": false,
-    "bundles": 0
+    "any": true,
+    "bundles": 1,
+    "bundle": "aad_autoinit_d968b201.bundle",
+    "note": "built, uploaded, round-trip verified; the relay checkout's harness digest matches"
   },
   "budget": {
     "cumulative_spend_usd": 217.1763,
@@ -64,7 +70,7 @@
     "utc": "2026-08-23T14:20:00Z",
     "after": "the attempt-6 evaluation-tokenizer materialization",
     "full_suite": "2183 passed, 12 skipped in 18:37 (+7 on 2176; skips unchanged)",
-    "mutations": "5, incl. end to end: removing the materialization makes the stage-1-5 harness fail, and each of overwrite-on-conflict, skip-on-missing-source and a --tokenizer flag fails its own gate",
+    "mutations": "5, incl. end to end: removing the materialization makes the stage-1-5 harness fail; overwrite-on-conflict, skip-on-missing-source and a --tokenizer flag each fail their own gate",
     "frozen_asset_verifier": "passed, no problems",
     "harness_digest": "8b56fc7b -> b824441c",
     "scope": "CPU only, repo .venv; no checkpoint loaded, no metric measured, no GPU used"
@@ -74,15 +80,14 @@
       "run": "recovery continuation 6",
       "usd": 1.4926,
       "where": "stage 2 battery, 50 s after the probe trained",
-      "cause": "uncapped_eval ValueError: tokenizer.chat_template is not set. Trainer.save_checkpoint writes weights+config only, and battery() passes --model <that dir> with no --tokenizer, whose default is the checkpoint's own. Proven callers had used CANONICAL_INIT",
-      "kept": "THE ATTEMPT-5 REPAIR WORKED: trained_model_dir resolved the checkpoint, no FileNotFoundError, and execution entered battery(). Probe trained in 71.9 min",
-      "warning": "passing --tokenizer is NOT protocol-neutral: tokenizer_source is material under generation_runtime_comparability@v2, and Stage 0 attested 'the evaluated checkpoint'"
+      "cause": "a trainer-written checkpoint carries no tokenizer, so apply_chat_template raised. REPAIRED at 30dcee3 by materializing the attested sidecars into the evaluated checkpoint; --tokenizer was rejected because tokenizer_source is material under comparability v2",
+      "kept": "the attempt-5 repair worked: the checkpoint resolved and execution entered battery(). Probe trained in 71.9 min against 61.55 priced"
     },
     {
       "run": "recovery continuation 5",
       "usd": 1.3511,
       "where": "stage 2, after the probe trained",
-      "cause": "latest.txt read without the checkpoints/ component. REPAIRED at 01be685 and confirmed by attempt 6"
+      "cause": "latest.txt read without the checkpoints/ component. REPAIRED at 01be685, confirmed by attempt 6"
     }
   ],
   "failure_pattern": "6/7/9 device placement; 8 a $0 path asserting dev-box state; 10 unpriced runtime cost; measurement 1 a setup contract, 2 an untested entrypoint; continuation 1 an uncaught transport call, 2 an undeliverable asset, 3 dev-box-only code in the pod gate, 4 the attempt-12 OOM class, 5 a checkpoint path, 6 a trainer-written checkpoint with no tokenizer -- each one further in",
@@ -118,9 +123,9 @@
     "the paid device-canary session path: STRATEGICALLY TERMINATED 2026-08-18. Two authorized sessions, $0.1240, zero canary runs; both died in the wrapper's inherited contracts. Its evidence and its generic lesson are kept; no further canary is prepared."
   ],
   "next_starting_point": {
-    "status": "The attempt-6 tokenizer blocker is repaired protocol-preservingly: run_probe materializes the frozen sidecars into the trained checkpoint from CANONICAL_INIT, and battery() still passes --model with NO --tokenizer, so tokenizer_source stays 'the evaluated checkpoint'. Nothing is running, billing, authorized or prepared.",
-    "the_ask": "Authorization review for Recovery Continuation Attempt 7. It needs a NEW one-use grant and authorization: the session commit moved AND the harness digest moved 8b56fc7b -> b824441c.",
-    "budget": "cap $234.00, spent $217.1763, remaining $16.8237 against a $16.7456 ceiling -- $0.0781 of margin. Balance is not authorization."
+    "status": "Recovery continuation attempt 7 is LIVE on pod 3c1g6e01kdu1ya with the tokenizer materialization in force. A soft/hard budget stop is an ACCEPTED outcome, not something to work around.",
+    "the_ask": "Nothing until it reaches a terminal state. Then report results, per-probe minutes against the 61.55 priced, spend and provider-confirmed teardown, and STOP.",
+    "budget": "cap $234.00, spent $217.1763 before this run, remaining $16.8237 against a $16.7456 ceiling. This is the last launch the headroom can fund."
   },
   "read_order": [
     "logs/STATE.md \u2014 the human view of this file",
