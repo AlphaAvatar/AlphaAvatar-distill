@@ -50,11 +50,14 @@ initializations cannot be told apart from each other, even after the conditional
 third seed. Per the frozen rules that is a **result**, not a condition to be
 resolved: `unresolved_equivalence` stands and **no fourth seed follows**. Whether
 the leaf-over-control separation is scientifically actionable is a maintainer
-judgement; this record does not claim it as a win, because the plan's own winner
-rule returned `None`.
+judgement. `cca699c93f34…` is the **numerical/provisional leader**; it is **not**
+the resolved Phase-A winner, because the plan's own winner rule returned `None`
+and the two searched leaves were never separated from each other.
 
 The absolute correctness numbers are small in every arm, control included. That
-is a property of the 0.86M-token recovery rung, not of the comparison.
+is a property of the 0.86M-token **selection probe**, not of the comparison, and
+it must not be read as final recovered-model capability. Phase A ranks
+initializations at equal budget; formal recovery is later Stage 2/3 work.
 
 ## Comparability
 
@@ -128,3 +131,13 @@ here: nothing further is authorized.
   frozen science untouched;
 * `$230.0350` cumulative against the `$234.00` cap — **`$3.9650` remains**, which
   funds no further paid session of any kind.
+
+---
+
+**Appended 2026-08-24 (closeout, `$0`).** The launcher defect above was repaired:
+`session_runner` now uses `fetch_result_ok`, which judges a transfer result by
+`rc == 0` and treats an identifier as nothing to fail, so a successful Phase A is
+recorded as successful while a failed transfer still fails closed. This run's own
+`INCOMPLETE` / `passed: false` record is **left as it was written** — it is what
+the session observed, and the driver's `DRIVER_EXITED:0` above is the
+authoritative statement that Phase A completed.

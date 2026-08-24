@@ -1,4 +1,4 @@
-**Updated:** 2026-08-24 · branch `main` · **PHASE A IS COMPLETE**
+**Updated:** 2026-08-24 · branch `main` · **PHASE A COMPLETE — initialization SELECTION, unresolved**
 
 # Current state
 
@@ -9,7 +9,23 @@ not carry. If the two disagree, a structural test fails.
 **Nothing is running. Nothing is billing. Nothing is authorized. Nothing is
 prepared for launch.**
 
-# PHASE A IS COMPLETE
+# PHASE A IS COMPLETE — as a SELECTION experiment
+
+**What Phase A is.** A low-budget **initialization-selection** experiment: it
+searches initialization and operator order under the fixed
+`calib.domain_balanced@v1` calibration distribution, and ranks candidates using
+matched **0.86M selection probes**. It is **not** the project's formal recovery
+training. Formal recovery remains later Stage 2 / Stage 3 work, and nothing here
+estimates recovered-model capability.
+
+**Two different things are called "the control", and they stay distinct:**
+
+* `preflight_ctl_r0860k_{sa,sb}` — the **historical permanent Stage-3 controls**
+  that materialized the equivalence interval and feasibility floor. **Imported,
+  never retrained**; Phase A does not touch them.
+* `qwen3_0p6b_init_v0` — the **Phase-A canonical initialization control**,
+  hash-injected, which correctly received matched fresh selection probes
+  alongside the searched leaves.
 
 **Recovery continuation attempt 7 ran 2026-08-23/24 and finished: `ALL_DONE`,
 $12.8587, all six stages, eleven probes across three seeds.** Pod
@@ -39,10 +55,16 @@ Pooled over seeds, primary metric `correct_overall`, interval **0.011695**:
   ahead on the behaviour axis too.
 * `85bde4de` − control = **0.010784**, inside → not separated.
 
-**This record claims no win.** The plan's winner rule returned `None`; whether
-the leaf-over-control separation is actionable is a maintainer judgement. Absolute
-correctness is small in every arm including the control, which is a property of
-the 0.86M recovery rung rather than of the comparison.
+**No searched leaf is the resolved Phase-A winner.** `cca699c93f34…` is the
+**numerical/provisional leader** and is separated from the canonical
+initialization under the frozen equivalence rule; it and `85bde4ded2c3…` were
+**not separated from each other** after the full frozen sa/sb/sc procedure, so
+the plan's winner rule returned `None`.
+
+**Do not read the small absolute 0.86M correctness rates as final
+recovered-model capability.** They sit near the floor in every arm including the
+control — the same property the Stage-3 controls show at `correct_overall`
+0.0118. These are selection probes at equal budget, nothing more.
 
 **Comparability holds:** `comparable_identity 70a26e0b…` live equals historical,
 `bound_to_stage3_thresholds: true`. The run's raw protocol hash differs from
@@ -52,6 +74,25 @@ declares non-material.
 **Timing:** eleven probes at **61.0–61.1 min** training against **61.55** priced —
 attempt 6's 71.9 min was host variance. Both carried-in repairs held: handoff
 freed to 0.01 GiB, and the evaluation tokenizer materialized before every battery.
+
+## The next scientific sequence — NONE of it started
+
+1. **Phase B** — test the AutoInitializer's **calibration/data-distribution
+   sensitivity**: the planned `calib.reasoning_heavy@v1` against the existing
+   `calib.domain_balanced@v1`. Phase A searched under one distribution only, so
+   its ranking is conditional on that choice.
+2. **Complete final initialization selection**, after Phase B. Phase A's
+   `unresolved_equivalence` is not a final selection.
+3. **The canonical Stage-1 NLL diagnostic**, run on the finally selected
+   initialization under the established Stage-1 measurement contract.
+   **Diagnostic only — never a promotion criterion**, and **not** the
+   `state_eval@v1` search-side NLL fields, which are a different measurement and
+   must not be substituted for it. This measurement has never been run.
+4. **Only then**, the project's formal **Stage 2 / Stage 3 recovery training**.
+
+**Nothing in this list is implemented or started**, and none of it is funded:
+`$3.9650` remains, which authorizes **no new paid session**. Phase B or any
+subsequent GPU work needs a new explicit maintainer budget decision.
 
 ## The launcher defect — cosmetic here, must be fixed before any future session
 

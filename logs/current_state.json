@@ -61,12 +61,12 @@
     "Stage 0 on hardware, passed six times; attempt 4 also passed STAGE 1 on hardware -- five leaves re-identified from pod bytes, control measured on state_eval@v1"
   ],
   "latest_verification": {
-    "utc": "2026-08-23T14:20:00Z",
-    "after": "the attempt-6 evaluation-tokenizer materialization",
-    "full_suite": "2183 passed, 12 skipped in 18:37 (+7 on 2176; skips unchanged)",
-    "mutations": "5, incl. end to end: removing the materialization makes the stage-1-5 harness fail; overwrite-on-conflict, skip-on-missing-source and a --tokenizer flag each fail their own gate",
+    "utc": "2026-08-24T06:00:00Z",
+    "after": "the Phase-A $0 closeout",
+    "full_suite": "2187 passed, 12 skipped in 18:43 (+4: the attempt-7 launcher regressions)",
     "frozen_asset_verifier": "passed, no problems",
-    "harness_digest": "8b56fc7b -> b824441c",
+    "mutations": "3 on the launcher fix: the crash restored at the call site, failed transfers waved through, and a missing rc defaulted to 0",
+    "harness_digest": "b824441c -> a27bb922; session_runner.py is one of the 22 harness files and the fetch_result_ok repair changed it. No frozen SCIENCE identity moved",
     "scope": "CPU only, repo .venv; no checkpoint loaded, no metric measured, no GPU used"
   },
   "failed": [
@@ -75,34 +75,10 @@
       "usd": 0.0,
       "where": "session_runner after collection, on a successful Phase A",
       "cause": "checkpoint_hashes_matched does all(f.get('rc')==0 for f in fetched), but Phase A's fetch_products is finalists_to_fetch, which returns canonical_id STRINGS. AttributeError. Only a SUCCESSFUL Phase A reaches it with a non-empty list",
-      "impact": "cosmetic: everything was fetched and nothing was owed off-pod, but the session reads INCOMPLETE/passed=false despite DRIVER_EXITED:0. MUST be fixed: a successful Phase A cannot currently be recorded as successful"
+      "impact": "cosmetic: everything was fetched and nothing was owed off-pod, but the session read INCOMPLETE/passed=false despite DRIVER_EXITED:0. FIXED in the 2026-08-24 closeout via fetch_result_ok; attempt 7's own record is left as written"
     }
   ],
   "failure_pattern": "continuation 1 an uncaught transport call, 2 an undeliverable asset, 3 dev-box-only code in the pod gate, 4 the attempt-12 OOM class, 5 a checkpoint path, 6 a trainer-written checkpoint with no tokenizer, 7 the DRIVER SUCCEEDED and the launcher crashed after collection on a line only success reaches. Each failure was further in than the last",
-  "canonical_infrastructure": [
-    "provider.observe() applies get()'s transient classification to ANY query: never raises, and a declined answer is unknown, never a negative answer. A test fails on any raw _gql in session_runner.py",
-    "operational identity (session_id, schema, status_path, run_log_path, authorization_path, driver_job_id) is unique across sessions; plan_hash is NOT, so the continuation keeps the frozen Phase-A plan rather than rewriting science to satisfy a filename test",
-    "one immutable SessionSpec per session, one runner, no inheritance, no module-global retargeting",
-    "the shared pod setup is manifest-driven on BOTH sides: it installs and stages only what a session declares, and names no asset, relay path, destination or digest of its own",
-    "RelayInput carries source, destination, digest and mirror; dest=None means only 'the driver stages this'",
-    "the Phase-A authorization schema carries no grant; the issuer requires one",
-    "full tracebacks for unexpected in-process driver exceptions",
-    "plan_session soft_stop_reserves, applied BEFORE the soft stop",
-    "the pre-flight rehearsal ignored in both the pod gate and the simulator, with the ignore lists pinned equal",
-    "the pod simulator restores exactly and refuses concurrent sweeps",
-    "the layout test partitions its references: repo-relative paths must exist, declared host-local roots are checked where present and skipped where absent, an undeclared absolute path still fails",
-    "an active tombstone may not name a declared session staging or mirror destination - checked against the SessionSpecs, touching no path",
-    "checkpoint_tombstones.json owns the active-tombstone counts and bytes",
-    "autoinit.stage1_device_contract@v1, incl. category 5: a fresh factory on the Stage-1 path either names a device derived from what it meets, or is host-only on purpose",
-    "placement asserted by intercepting factory calls (tests/autoinit/factory_placement.py), the dual of the HostCacheTensor split",
-    "causal-depth scoring is device-resident; the reference cache falls back to RECOMPUTE, never to the host",
-    "the search deadline is real (runtime-only, never hashed) and is checked before each expansion and inside greedy_removal's candidate loop",
-    "the driver holds torch to the cgroup CPU grant via apply_cpu_budget()",
-    "a session installs every local root verify_frozen_assets.py requires, derived from the verifier and compared against declarations",
-    "a production entrypoint is a callable seam, not a main(): all orchestration is one injectable function the $0 test executes",
-    "evaluate_teardown separates a truncated stream from an artifact never written; a caller supplying no evidence keeps the strict rule",
-    "the Stage-1 runtime deadline is READ OFF the priced envelope (base + every soft-stop reserve), so it cannot drift from what was paid for"
-  ],
   "abandoned": [
     "recovery_search_v1 (INVALID before first use)",
     "Phase-A pricing bases $20.0126 and $22.4508",
@@ -143,8 +119,20 @@
     "tie_break_ran": true,
     "pooled_correct_overall": "cca699c93f34 0.029412 | 85bde4ded2c3 0.019608 | control-qwen 0.008824",
     "pooled_usable_rollout": "cca699c93f34 0.6561 | 85bde4ded2c3 0.5456 | control-qwen 0.4947",
-    "reading": "the two best searched initializations differ by 0.009804, INSIDE the 0.011695 interval, so unresolved even after seed sc; no fourth seed. cca699c9 IS separated from the canonical control (0.020588 > interval); 85bde4de is not. The winner rule returned None",
     "comparability": "comparable_identity 70a26e0b, live == historical, bound_to_stage3_thresholds true; the raw protocol hash differs only by driver patch, non-material under v2",
-    "record": "logs/autoinit_recovery_continuation_attempt7/"
-  }
+    "record": "logs/autoinit_recovery_continuation_attempt7/",
+    "kind": "SELECTION experiment: initialization/operator order searched under the fixed calib.domain_balanced@v1. The 0.86M matched probes are SELECTION probes, not recovery training; formal recovery is later Stage 2/3 work",
+    "provisional_leader": "cca699c93f34 is the numerical/provisional leader and IS separated from the canonical initialization (0.020588 > 0.011695). It is NOT the resolved winner: it and 85bde4ded2c3 were not separated from each other after the frozen sa/sb/sc procedure",
+    "two_controls": "preflight_ctl_r0860k_{sa,sb} are the historical permanent Stage-3 controls that materialized the thresholds, imported never retrained. qwen3_0p6b_init_v0 is the Phase-A canonical initialization control, hash-injected, which received matched fresh selection probes",
+    "do_not_read": "the small absolute 0.86M correctness rates are NOT final recovered-model capability; they sit near the floor in every arm including the control"
+  },
+  "next_sequence": {
+    "_status": "NONE of this is implemented or started, and none of it is funded",
+    "1_phase_b": "calibration/data-distribution sensitivity: planned calib.reasoning_heavy@v1 vs the existing calib.domain_balanced@v1. Phase A searched one distribution only",
+    "2_final_selection": "complete final initialization selection after Phase B; Phase A's unresolved_equivalence is not a final selection",
+    "3_canonical_stage1_nll": "the canonical Stage-1 NLL diagnostic on the finally selected initialization, under the established Stage-1 measurement contract. DIAGNOSTIC ONLY, never a promotion criterion, and NOT the state_eval@v1 search-side NLL fields. Never yet run",
+    "4_formal_recovery": "only then, the project's formal Stage 2/Stage 3 recovery training",
+    "funding": "$3.9650 remains and authorizes NO new paid session; Phase B or any GPU work needs a new explicit maintainer budget decision"
+  },
+  "canonical_infrastructure_moved_to": "docs/SESSION_ARCHITECTURE.md and logs/decisions.md"
 }

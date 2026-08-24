@@ -68,6 +68,36 @@ class ImageIdentityUnavailable(RuntimeError):
     """
 
 
+def fetch_result_ok(entry: object) -> bool:
+    """Did one `fetch_products` entry represent a successful transfer?
+
+    `fetch_products` returns two shapes, and only one of them is a transfer:
+
+    * a **transfer result** — `fetch_controls` and `fetch_selected_leaves` scp
+      something and report `{"rc": ..., ...}`. Its `rc` must be 0, and a failed
+      transfer must fail closed here;
+    * an **identifier** — `finalists_to_fetch` returns `canonical_id` strings
+      naming the initializations that earn permanent retention. It performs no
+      transfer, because those bytes are already off-pod; there is no `rc` to
+      check, and inventing a failure for one would be as wrong as inventing a
+      success for a broken scp.
+
+    Until 2026-08-24 this was `f.get("rc") == 0` applied to both, so a string
+    raised `AttributeError`. The line is only reached with a non-empty list on a
+    **successful** Phase A, which is why seven attempts never touched it: recovery
+    continuation attempt 7 completed all six stages, collected every artifact, and
+    was then recorded `INCOMPLETE` because the status computation crashed.
+
+    Whether a session actually secured what it OWES is a different question,
+    asked separately by `ArtifactPolicy.products_secured` — precisely because
+    `all([])` is vacuously true. This predicate only judges transfers that
+    happened.
+    """
+    if isinstance(entry, dict):
+        return entry.get("rc") == 0
+    return True
+
+
 def parse_setup_probe(stdout: str) -> dict:
     """Read the probe by LABEL, never by line position (see e8b: a $0.19 misread)."""
     out = {"setup_done": "0", "host_cold": "0", "setup_rc": "", "tail": ""}
@@ -720,7 +750,7 @@ class SessionRunner:
             "archive_contents_verified": r_ver.returncode == 0,
             "transfer_complete": (store / art.archive_basename).is_file(),
             "local_hashes_verified": local_ok,
-            "checkpoint_hashes_matched": all(f.get("rc") == 0 for f in fetched),
+            "checkpoint_hashes_matched": all(fetch_result_ok(f) for f in fetched),
             "report_inputs_verified": local_ok,
             "required_products_secured": bool(secured_ok),
         }

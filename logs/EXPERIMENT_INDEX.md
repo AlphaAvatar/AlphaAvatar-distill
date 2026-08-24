@@ -168,6 +168,35 @@ against the pooled figure, never a single seed.
 
 ---
 
+## AutoInit Phase A — initialization SELECTION under one calibration
+
+| field | value |
+| --- | --- |
+| kind | `selection` — it ranks initializations under a fixed calibration distribution. It is **not** the project's recovery-training stage and makes no claim about recovered-model capability |
+| ran | 2026-08-24, `ALL_DONE`, 779.3 min, $12.8587 (recovery continuation attempt 7) |
+| what varied | initialization and operator order only, searched under `calib.domain_balanced@v1`. Every probe used the identical frozen recovery recipe; `PROBE_OVERRIDES` permits nothing else |
+| probes | **11**, all trained and scored: rung 1 = 5 searched leaves + the canonical-initialization control on seed sa; rung 2 = 2 survivors + control on sb; rung 3 = 2 tied finalists on sc |
+| the two controls, kept distinct | `preflight_ctl_r0860k_{sa,sb}` are the **historical permanent Stage-3 controls** that materialized the thresholds; they were **imported, never retrained** here. `qwen3_0p6b_init_v0` is the **Phase-A canonical initialization control**, hash-injected, which correctly received matched fresh selection probes alongside the leaves |
+| selection probes | 0.86M supervised tokens each — **selection probes to distinguish initialization quality**, not recovery training |
+| terminal result | **`unresolved_equivalence`, `winner: None`** |
+| pooled `correct_overall` | `cca699c93f34` **0.029412** · `85bde4ded2c3` 0.019608 · `control-qwen` 0.008824, against interval **0.011695** |
+| pooled `usable_rollout_rate` | 0.6561 · 0.5456 · 0.4947 |
+| what separated | `cca699c93f34` − control = 0.020588, **outside** the interval. `85bde4ded2c3` − control = 0.010784, inside |
+| what did NOT separate | `cca699c93f34` − `85bde4ded2c3` = 0.009804, **inside** the interval after the full frozen sa/sb/sc procedure. **No fourth seed follows** |
+| provisional leader | `cca699c93f34…` is the **numerical/provisional leader** and is separated from the canonical initialization. It is **not** the resolved Phase-A winner; the plan's winner rule returned `None` |
+| comparability | `comparable_identity 70a26e0b…`, live == historical, `bound_to_stage3_thresholds: true`; the raw protocol hash differs only by driver patch, non-material under `generation_runtime_comparability@v2` |
+| cost of the whole line | $12.8587 completing; seven continuation attempts total, six of which died in unexecuted lines before any stage |
+| artifacts | `logs/autoinit_recovery_continuation_attempt7/`, including all 11 probe records |
+| in current lineage | **yes** — but only as *selection*. Final initialization selection awaits Phase B |
+
+**Do not read the absolute correctness rates as recovered-model capability.**
+They sit near the floor in every arm including the control, which is a property
+of a 0.86M selection probe — the same property the Stage-3 controls show at
+`correct_overall` 0.0118. Phase A compares initializations at equal budget; it
+does not estimate what a fully recovered model can do.
+
+---
+
 ## Project-level conclusions carried forward
 
 1. **PCA/structural initialization decisively beats random initialization** (E1).

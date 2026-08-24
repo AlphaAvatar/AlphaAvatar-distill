@@ -253,3 +253,64 @@ def test_the_canary_driver_is_runnable():
     assert result.returncode == 0
     assert "--broken-runpodctl" in result.stdout
     assert "--authorized-usd" in result.stdout
+
+
+# --- attempt 7: a SUCCESSFUL Phase A must be recorded as successful ---------
+#
+# Recovery continuation attempt 7 completed all six stages, trained and scored
+# eleven probes, produced its result and had every artifact collected — and was
+# then written down as INCOMPLETE, because the status computation crashed:
+#
+#   all(f.get("rc") == 0 for f in fetched)
+#
+# `fetch_products` for Phase A is `finalists_to_fetch`, which returns
+# `canonical_id` STRINGS. Only a successful run reaches this line with a
+# non-empty list, which is why six earlier attempts never found it.
+
+def _fetch_result_ok():
+    sys.path.insert(0, str(REPO / "src"))
+    from aadistill.infrastructure.session_runner import fetch_result_ok
+    return fetch_result_ok
+
+
+def test_string_finalist_identifiers_do_not_crash_the_status_computation():
+    """Attempt 7's exact terminal shape: two canonical ids, no transfer."""
+    fetch_result_ok = _fetch_result_ok()
+    fetched = ["cca699c93f34dad7e94a5d13a25b2bc2",
+               "85bde4ded2c31953f802e39cf2252c87"]
+    # The computation the runner performs, verbatim.
+    assert all(fetch_result_ok(f) for f in fetched) is True
+
+
+def test_a_failed_transfer_still_fails_closed():
+    """The property the crash must not be traded away for."""
+    fetch_result_ok = _fetch_result_ok()
+    assert fetch_result_ok({"control": "ctl_sa", "rc": 0, "bytes": 5}) is True
+    assert fetch_result_ok({"control": "ctl_sa", "rc": 1, "bytes": 0}) is False
+    assert fetch_result_ok({"leaf": "abc", "rc": 255}) is False
+    # A dict with no `rc` at all is not a successful transfer either.
+    assert fetch_result_ok({"leaf": "abc"}) is False
+    assert all(fetch_result_ok(f) for f in
+               [{"rc": 0}, "an-identifier", {"rc": 1}]) is False
+
+
+def test_the_runner_uses_the_predicate_rather_than_get_rc_directly():
+    """Wiring: the crash was at the call site, not in a helper."""
+    src = (REPO / "src/aadistill/infrastructure/session_runner.py").read_text()
+    assert "fetch_result_ok(f) for f in fetched" in src
+    assert 'f.get("rc") == 0 for f in fetched' not in src, (
+        "the attempt-7 crash is back")
+
+
+def test_the_phase_a_finalist_fetch_really_does_return_strings():
+    """Pins the shape the predicate exists for, at its source.
+
+    If `finalists_to_fetch` ever starts returning transfer records, this test
+    fails and the tolerance above should be re-examined rather than silently
+    covering a second shape.
+    """
+    src = (REPO / "scripts/pod/autoinit_recovery_continuation_launch.py").read_text()
+    assert "fetch_products=finalists_to_fetch" in src
+    launch = (REPO / "scripts/pod/autoinit_phase_a_launch.py").read_text()
+    assert 'return [e["canonical_id"] for e in entries' in launch, (
+        "finalists_to_fetch no longer returns canonical_id strings")
