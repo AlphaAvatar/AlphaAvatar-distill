@@ -1,4 +1,4 @@
-**Updated:** 2026-08-23 · branch `main` · recovery continuation attempt 7 is LIVE
+**Updated:** 2026-08-24 · branch `main` · **PHASE A IS COMPLETE**
 
 # Current state
 
@@ -6,26 +6,69 @@ The **human view of [`current_state.json`](current_state.json)**. That file owns
 the live facts; this one says the same things in prose and adds nothing it does
 not carry. If the two disagree, a structural test fails.
 
-**A paid run is in flight.** Recovery continuation attempt 7 launched
-2026-08-23T13:35:46Z on pod `3c1g6e01kdu1ya`, an L40S at $0.99/h, under
-authorization `autoinit.recovery_continuation.2026-08-23T1314Z` — one use,
-consumed by this launch, hard ceiling **$16.7456** (1015 min). Session commit
-`d968b20`, base `7e1d429`, continuation harness **`b824441c`** over 22 files with
-the search excluded.
+**Nothing is running. Nothing is billing. Nothing is authorized. Nothing is
+prepared for launch.**
 
-**This is the last launch the project's headroom can fund.** A full-ceiling run
-reaches **$233.9219** of the `$234.00` cap. No cap increase, ceiling increase or
-live-run extension is authorized, and **a soft- or hard-stop refusal is an
-accepted outcome** — attempt 6's probe ran 71.9 min against the 61.55 the
-envelope is priced from, so a slower host may well trip it. That refusal is to be
-reported, not worked around.
+# PHASE A IS COMPLETE
 
-Every stage through the battery entry is already proven on hardware. This run
-carries the tokenizer materialization, so the probe's evaluation should proceed
-where attempt 6 stopped.
+**Recovery continuation attempt 7 ran 2026-08-23/24 and finished: `ALL_DONE`,
+$12.8587, all six stages, eleven probes across three seeds.** Pod
+`3c1g6e01kdu1ya`, 779.3 min, deleted with provider confirmation. Full record:
+[`autoinit_recovery_continuation_attempt7/`](autoinit_recovery_continuation_attempt7/).
 
-Live artifacts are in `/home/ecs-user/aad-scratch/recovery_cont7_20260823/`:
-`launcher.out`, the detached `watchdog.jsonl`, and `poll.jsonl`.
+## The result
+
+```
+decision_status   unresolved_equivalence
+winner            None
+tie_break_ran     True
+```
+
+Pooled over seeds, primary metric `correct_overall`, interval **0.011695**:
+
+| candidate | correct_overall | usable_rollout_rate |
+| --- | ---: | ---: |
+| `cca699c93f34` | **0.029412** | 0.6561 |
+| `85bde4ded2c3` | 0.019608 | 0.5456 |
+| `control-qwen` (canonical init) | 0.008824 | 0.4947 |
+
+* `cca699c9` − `85bde4de` = **0.009804**, inside the interval → tied, unresolved
+  even after seed sc. **No fourth seed follows** — that is the frozen rule, and
+  `unresolved_equivalence` is a result, not a condition to resolve.
+* `cca699c9` − control = **0.020588**, outside → separated, leaf better, and
+  ahead on the behaviour axis too.
+* `85bde4de` − control = **0.010784**, inside → not separated.
+
+**This record claims no win.** The plan's winner rule returned `None`; whether
+the leaf-over-control separation is actionable is a maintainer judgement. Absolute
+correctness is small in every arm including the control, which is a property of
+the 0.86M recovery rung rather than of the comparison.
+
+**Comparability holds:** `comparable_identity 70a26e0b…` live equals historical,
+`bound_to_stage3_thresholds: true`. The run's raw protocol hash differs from
+`250f72ef` only by driver patch, which `generation_runtime_comparability@v2`
+declares non-material.
+
+**Timing:** eleven probes at **61.0–61.1 min** training against **61.55** priced —
+attempt 6's 71.9 min was host variance. Both carried-in repairs held: handoff
+freed to 0.01 GiB, and the evaluation tokenizer materialized before every battery.
+
+## The launcher defect — cosmetic here, must be fixed before any future session
+
+`session_runner.py` computes
+`all(f.get("rc") == 0 for f in fetched)`, but Phase A's `fetch_products` is
+`finalists_to_fetch`, which returns **`canonical_id` strings**. `AttributeError`
+— on a line only a **successful** Phase A reaches, which is why seven attempts
+never hit it.
+
+It fired **after** collection: 9 reports fetched, `local_hash_problems: []`, the
+archive extracted with all 11 probe trees, and nothing owed off-pod — the two
+retained finalists are *initializations* already preserved at 1.2 GiB each and
+mirrored in transport. Verified present.
+
+Consequence: the session reads `INCOMPLETE` / `passed: false` despite
+`DRIVER_EXITED:0`, and teardown ran as an emergency delete. **A successful Phase A
+currently cannot be recorded as successful.**
 
 **Recovery continuation attempt 6 ran on 2026-08-23 and went one step further
 than any attempt: $1.4926.** Pod `ifp8feyil1gp7v`, 90.5 min, deleted with
@@ -330,9 +373,9 @@ selection result.**
 ## Budget
 
 ```
-cumulative spend   $217.1763
+cumulative spend   $230.0350
 approved cap       $234.00    RAISED AND APPROVED 2026-08-21
-remaining          $16.8237   only $0.0781 above the $16.7456 continuation ceiling
+remaining          $ 3.9650   funds NO further paid session of any kind
 
 ```
 

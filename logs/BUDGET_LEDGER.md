@@ -301,7 +301,11 @@ authorized cumulative cap                                    $234.00
     hard ceiling, does not authorize any subsequent attempt, and does
     not authorize spend outside the next explicitly approved session.
     See the caps list above.
-actual cumulative spend                                      $213.9214
+actual cumulative spend                                      $230.0350
+    The header below drifted from its own itemization between attempts
+    4 and 7 -- the per-attempt terms were always added, the total was
+    not re-summed. Re-derived 2026-08-24; the terms sum to $230.0350
+    exactly, and $234.00 - $230.0350 = $3.9650.
     = $194.0530 + $0.1900 attempt 8 + $0.3400 attempt 9
       + $11.4300 attempt 10 + $0.0700 measurement attempt 1
       + $0.1834 measurement attempt 2 + $0.2077 measurement attempt 3
@@ -311,14 +315,37 @@ actual cumulative spend                                      $213.9214
       + $0.2011 recovery continuation attempt 3
       + $0.4112 recovery continuation attempt 4
       + $1.3511 recovery continuation attempt 5
-      + $1.4926 recovery continuation attempt 6.
-remaining under the $234.00 cap                              $ 16.8237
-    ONLY $0.0781 ABOVE the $16.7456 continuation ceiling. One more
-    full-ceiling continuation fits by under eight cents, and nothing
-    else does: a Phase-A attempt needs $23.0484. If attempt 7 runs to
-    its ceiling the project reaches $233.9219 of $234.00.
-    REMAINING BALANCE IS NOT AUTHORIZATION. Every grant issued so far,
-    including attempt 6's, is spent.
+      + $1.4926 recovery continuation attempt 6
+      + $12.8587 recovery continuation attempt 7.
+remaining under the $234.00 cap                              $  3.9650
+    FUNDS NO FURTHER PAID SESSION OF ANY KIND: a continuation ceiling
+    is $16.7456 and a Phase-A attempt $23.0484.
+    REMAINING BALANCE IS NOT AUTHORIZATION. Every grant issued, through
+    attempt 7's, is spent.
+recovery continuation attempt 7 (L40S, 779.3 min) PHASE A COMPLETE $ 12.8587
+    AUTHORIZED 2026-08-23 as autoinit.recovery_continuation.2026-08-23T1314Z
+    (sha256 d354557e) against
+    logs/autoinit_recovery_continuation_attempt7_grant.json.
+    Base 7e1d429, session commit d968b20, harness b824441c over 22 files.
+    Ceiling $16.7456, of which $12.8587 was spent -- UNDER the $14.9233
+    expected. Pod 3c1g6e01kdu1ya; provider confirms gone; watchdog ended
+    pod_gone.
+    ALL_DONE. Six stages, ELEVEN probes trained and scored: 6 in rung 1
+    on seed sa, 3 in rung 2 on sb, 2 in the conditional rung 3 on sc.
+    RESULT: unresolved_equivalence, winner None, tie_break_ran true.
+    Pooled correct_overall: cca699c93f34 0.029412, 85bde4ded2c3 0.019608,
+    control-qwen 0.008824, against a 0.011695 interval. The two searched
+    leaves are tied with each other; cca699c9 IS separated from the
+    canonical control and 85bde4de is not. No fourth seed follows.
+    Comparability held: comparable_identity 70a26e0b, live == historical.
+    Probe training was 61.0-61.1 min against 61.55 priced, so attempt 6's
+    71.9 min was host variance.
+    THE LAUNCHER THEN CRASHED AFTER COLLECTION on a fetch_products
+    contract mismatch (AttributeError: 'str' object has no attribute
+    'get'), mislabelling the session INCOMPLETE despite DRIVER_EXITED:0.
+    Nothing was lost: 9 reports fetched, local_hash_problems [], archive
+    extracted with all 11 probe trees, and the two retained finalists are
+    initializations already preserved at 1.2 GiB each.
 recovery continuation attempt 6 (L40S, 90.5 min) BATTERY REACHED $  1.4926
     AUTHORIZED 2026-08-23 as autoinit.recovery_continuation.2026-08-23T0944Z
     (sha256 b15aab3c) against

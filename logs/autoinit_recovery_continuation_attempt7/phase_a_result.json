@@ -1,0 +1,702 @@
+{
+  "schema": "aadistill.autoinit.phase_a_result/v1",
+  "generated_utc": "2026-08-24T02:30:05.072647+00:00",
+  "science_plan_hash": "02be33b9a7a8e26bc8bfb75795351e8cdc9ffd441b47066cc81887cfc511b55c",
+  "evaluation_protocol_hash": "7327e880645492ec308fce62054b4845dce3de12e3079bb17a32e7d22898411a",
+  "equivalence_interval": 0.011695296982299022,
+  "feasibility_floor": 0.3,
+  "rung1_selection": {
+    "rung": 1,
+    "ranked": [
+      {
+        "state_id": "85bde4ded2c31953f802e39cf2252c87",
+        "is_control": false,
+        "seeds": [
+          20260726
+        ],
+        "probe_ids": [
+          "autoinit.v1.phase_a.rung1.85bde4ded2c3.sa"
+        ],
+        "n": 190,
+        "usable": 107,
+        "correct": 7,
+        "n_scorable": 170,
+        "usable_scorable": 103,
+        "usable_rollout_rate": 0.5631578947368421,
+        "correct_overall": 0.041176470588235294,
+        "correct_given_usable": 0.06796116504854369,
+        "aggregation": "pooled_counts@v2",
+        "per_capability": {
+          "gsm8k": {
+            "n": 30,
+            "usable": 21,
+            "usable_rollout_rate": 0.7
+          },
+          "math_verified": {
+            "n": 30,
+            "usable": 17,
+            "usable_rollout_rate": 0.5666666666666667
+          },
+          "multihop": {
+            "n": 30,
+            "usable": 19,
+            "usable_rollout_rate": 0.6333333333333333
+          },
+          "rag": {
+            "n": 30,
+            "usable": 21,
+            "usable_rollout_rate": 0.7
+          },
+          "knowledge": {
+            "n": 30,
+            "usable": 20,
+            "usable_rollout_rate": 0.6666666666666666
+          },
+          "tool": {
+            "n": 20,
+            "usable": 5,
+            "usable_rollout_rate": 0.25
+          }
+        }
+      },
+      {
+        "state_id": "cca699c93f34dad7e94a5d13a25b2bc2",
+        "is_control": false,
+        "seeds": [
+          20260726
+        ],
+        "probe_ids": [
+          "autoinit.v1.phase_a.rung1.cca699c93f34.sa"
+        ],
+        "n": 190,
+        "usable": 122,
+        "correct": 6,
+        "n_scorable": 170,
+        "usable_scorable": 116,
+        "usable_rollout_rate": 0.6421052631578947,
+        "correct_overall": 0.03529411764705882,
+        "correct_given_usable": 0.05172413793103448,
+        "aggregation": "pooled_counts@v2",
+        "per_capability": {
+          "gsm8k": {
+            "n": 30,
+            "usable": 24,
+            "usable_rollout_rate": 0.8
+          },
+          "math_verified": {
+            "n": 30,
+            "usable": 21,
+            "usable_rollout_rate": 0.7
+          },
+          "multihop": {
+            "n": 30,
+            "usable": 22,
+            "usable_rollout_rate": 0.7333333333333333
+          },
+          "rag": {
+            "n": 30,
+            "usable": 29,
+            "usable_rollout_rate": 0.9666666666666667
+          },
+          "knowledge": {
+            "n": 30,
+            "usable": 9,
+            "usable_rollout_rate": 0.3
+          },
+          "tool": {
+            "n": 20,
+            "usable": 11,
+            "usable_rollout_rate": 0.55
+          }
+        }
+      },
+      {
+        "state_id": "158b96cf651fd8ba8f8ceaefefde2067",
+        "is_control": false,
+        "seeds": [
+          20260726
+        ],
+        "probe_ids": [
+          "autoinit.v1.phase_a.rung1.158b96cf651f.sa"
+        ],
+        "n": 190,
+        "usable": 135,
+        "correct": 5,
+        "n_scorable": 170,
+        "usable_scorable": 129,
+        "usable_rollout_rate": 0.7105263157894737,
+        "correct_overall": 0.029411764705882353,
+        "correct_given_usable": 0.03875968992248062,
+        "aggregation": "pooled_counts@v2",
+        "per_capability": {
+          "gsm8k": {
+            "n": 30,
+            "usable": 23,
+            "usable_rollout_rate": 0.7666666666666667
+          },
+          "math_verified": {
+            "n": 30,
+            "usable": 18,
+            "usable_rollout_rate": 0.6
+          },
+          "multihop": {
+            "n": 30,
+            "usable": 29,
+            "usable_rollout_rate": 0.9666666666666667
+          },
+          "rag": {
+            "n": 30,
+            "usable": 28,
+            "usable_rollout_rate": 0.9333333333333333
+          },
+          "knowledge": {
+            "n": 30,
+            "usable": 16,
+            "usable_rollout_rate": 0.5333333333333333
+          },
+          "tool": {
+            "n": 20,
+            "usable": 15,
+            "usable_rollout_rate": 0.75
+          }
+        }
+      },
+      {
+        "state_id": "281a02c3ac18419b70e896296dac0d03",
+        "is_control": false,
+        "seeds": [
+          20260726
+        ],
+        "probe_ids": [
+          "autoinit.v1.phase_a.rung1.281a02c3ac18.sa"
+        ],
+        "n": 190,
+        "usable": 110,
+        "correct": 3,
+        "n_scorable": 170,
+        "usable_scorable": 107,
+        "usable_rollout_rate": 0.5789473684210527,
+        "correct_overall": 0.01764705882352941,
+        "correct_given_usable": 0.028037383177570093,
+        "aggregation": "pooled_counts@v2",
+        "per_capability": {
+          "gsm8k": {
+            "n": 30,
+            "usable": 23,
+            "usable_rollout_rate": 0.7666666666666667
+          },
+          "math_verified": {
+            "n": 30,
+            "usable": 16,
+            "usable_rollout_rate": 0.5333333333333333
+          },
+          "multihop": {
+            "n": 30,
+            "usable": 24,
+            "usable_rollout_rate": 0.8
+          },
+          "rag": {
+            "n": 30,
+            "usable": 26,
+            "usable_rollout_rate": 0.8666666666666667
+          },
+          "knowledge": {
+            "n": 30,
+            "usable": 4,
+            "usable_rollout_rate": 0.13333333333333333
+          },
+          "tool": {
+            "n": 20,
+            "usable": 14,
+            "usable_rollout_rate": 0.7
+          }
+        }
+      },
+      {
+        "state_id": "control-qwen3_0p6b_init_v0",
+        "is_control": true,
+        "seeds": [
+          20260726
+        ],
+        "probe_ids": [
+          "autoinit.v1.phase_a.rung1.control-qwen.sa"
+        ],
+        "n": 190,
+        "usable": 80,
+        "correct": 2,
+        "n_scorable": 170,
+        "usable_scorable": 80,
+        "usable_rollout_rate": 0.42105263157894735,
+        "correct_overall": 0.011764705882352941,
+        "correct_given_usable": 0.025,
+        "aggregation": "pooled_counts@v2",
+        "per_capability": {
+          "gsm8k": {
+            "n": 30,
+            "usable": 11,
+            "usable_rollout_rate": 0.36666666666666664
+          },
+          "math_verified": {
+            "n": 30,
+            "usable": 8,
+            "usable_rollout_rate": 0.26666666666666666
+          },
+          "multihop": {
+            "n": 30,
+            "usable": 17,
+            "usable_rollout_rate": 0.5666666666666667
+          },
+          "rag": {
+            "n": 30,
+            "usable": 25,
+            "usable_rollout_rate": 0.8333333333333334
+          },
+          "knowledge": {
+            "n": 30,
+            "usable": 8,
+            "usable_rollout_rate": 0.26666666666666666
+          },
+          "tool": {
+            "n": 20,
+            "usable": 11,
+            "usable_rollout_rate": 0.55
+          }
+        }
+      },
+      {
+        "state_id": "4e429f7ed722b180dd662c779895693f",
+        "is_control": false,
+        "seeds": [
+          20260726
+        ],
+        "probe_ids": [
+          "autoinit.v1.phase_a.rung1.4e429f7ed722.sa"
+        ],
+        "n": 190,
+        "usable": 74,
+        "correct": 1,
+        "n_scorable": 170,
+        "usable_scorable": 73,
+        "usable_rollout_rate": 0.3894736842105263,
+        "correct_overall": 0.0058823529411764705,
+        "correct_given_usable": 0.0136986301369863,
+        "aggregation": "pooled_counts@v2",
+        "per_capability": {
+          "gsm8k": {
+            "n": 30,
+            "usable": 11,
+            "usable_rollout_rate": 0.36666666666666664
+          },
+          "math_verified": {
+            "n": 30,
+            "usable": 5,
+            "usable_rollout_rate": 0.16666666666666666
+          },
+          "multihop": {
+            "n": 30,
+            "usable": 22,
+            "usable_rollout_rate": 0.7333333333333333
+          },
+          "rag": {
+            "n": 30,
+            "usable": 22,
+            "usable_rollout_rate": 0.7333333333333333
+          },
+          "knowledge": {
+            "n": 30,
+            "usable": 5,
+            "usable_rollout_rate": 0.16666666666666666
+          },
+          "tool": {
+            "n": 20,
+            "usable": 8,
+            "usable_rollout_rate": 0.4
+          }
+        }
+      }
+    ],
+    "selected_searched": [
+      "85bde4ded2c31953f802e39cf2252c87",
+      "cca699c93f34dad7e94a5d13a25b2bc2"
+    ],
+    "auto_advanced_control": [
+      "control-qwen3_0p6b_init_v0"
+    ],
+    "advancing": [
+      "control-qwen3_0p6b_init_v0",
+      "85bde4ded2c31953f802e39cf2252c87",
+      "cca699c93f34dad7e94a5d13a25b2bc2"
+    ],
+    "excluded_by_feasibility": [],
+    "excluded_by_catastrophic_capability": [],
+    "all_exclusions": [],
+    "control_present": true,
+    "capability_schema_enforced": true,
+    "rule": "rung 1: exclude searched leaves below the feasibility floor, then take the top 2 by correct_overall; the canonical control advances unconditionally and consumes no slot"
+  },
+  "final_selection": {
+    "rung": "final",
+    "ranked": [
+      {
+        "state_id": "cca699c93f34dad7e94a5d13a25b2bc2",
+        "is_control": false,
+        "seeds": [
+          20260726,
+          20260801,
+          20260813
+        ],
+        "probe_ids": [
+          "autoinit.v1.phase_a.rung1.cca699c93f34.sa",
+          "autoinit.v1.phase_a.rung2.cca699c93f34.sb",
+          "autoinit.v1.phase_a.rung3.cca699c93f34.sc"
+        ],
+        "n": 570,
+        "usable": 374,
+        "correct": 15,
+        "n_scorable": 510,
+        "usable_scorable": 355,
+        "usable_rollout_rate": 0.656140350877193,
+        "correct_overall": 0.029411764705882353,
+        "correct_given_usable": 0.04225352112676056,
+        "aggregation": "pooled_counts@v2",
+        "per_capability": {
+          "gsm8k": {
+            "n": 90,
+            "usable": 78,
+            "usable_rollout_rate": 0.8666666666666667
+          },
+          "math_verified": {
+            "n": 90,
+            "usable": 57,
+            "usable_rollout_rate": 0.6333333333333333
+          },
+          "multihop": {
+            "n": 90,
+            "usable": 63,
+            "usable_rollout_rate": 0.7
+          },
+          "rag": {
+            "n": 90,
+            "usable": 86,
+            "usable_rollout_rate": 0.9555555555555556
+          },
+          "knowledge": {
+            "n": 90,
+            "usable": 32,
+            "usable_rollout_rate": 0.35555555555555557
+          },
+          "tool": {
+            "n": 60,
+            "usable": 39,
+            "usable_rollout_rate": 0.65
+          }
+        }
+      },
+      {
+        "state_id": "85bde4ded2c31953f802e39cf2252c87",
+        "is_control": false,
+        "seeds": [
+          20260726,
+          20260801,
+          20260813
+        ],
+        "probe_ids": [
+          "autoinit.v1.phase_a.rung1.85bde4ded2c3.sa",
+          "autoinit.v1.phase_a.rung2.85bde4ded2c3.sb",
+          "autoinit.v1.phase_a.rung3.85bde4ded2c3.sc"
+        ],
+        "n": 570,
+        "usable": 311,
+        "correct": 10,
+        "n_scorable": 510,
+        "usable_scorable": 297,
+        "usable_rollout_rate": 0.5456140350877193,
+        "correct_overall": 0.0196078431372549,
+        "correct_given_usable": 0.03367003367003367,
+        "aggregation": "pooled_counts@v2",
+        "per_capability": {
+          "gsm8k": {
+            "n": 90,
+            "usable": 63,
+            "usable_rollout_rate": 0.7
+          },
+          "math_verified": {
+            "n": 90,
+            "usable": 39,
+            "usable_rollout_rate": 0.43333333333333335
+          },
+          "multihop": {
+            "n": 90,
+            "usable": 51,
+            "usable_rollout_rate": 0.5666666666666667
+          },
+          "rag": {
+            "n": 90,
+            "usable": 66,
+            "usable_rollout_rate": 0.7333333333333333
+          },
+          "knowledge": {
+            "n": 90,
+            "usable": 46,
+            "usable_rollout_rate": 0.5111111111111111
+          },
+          "tool": {
+            "n": 60,
+            "usable": 32,
+            "usable_rollout_rate": 0.5333333333333333
+          }
+        }
+      },
+      {
+        "state_id": "control-qwen3_0p6b_init_v0",
+        "is_control": true,
+        "seeds": [
+          20260726,
+          20260801
+        ],
+        "probe_ids": [
+          "autoinit.v1.phase_a.rung1.control-qwen.sa",
+          "autoinit.v1.phase_a.rung2.control-qwen.sb"
+        ],
+        "n": 380,
+        "usable": 188,
+        "correct": 3,
+        "n_scorable": 340,
+        "usable_scorable": 184,
+        "usable_rollout_rate": 0.49473684210526314,
+        "correct_overall": 0.008823529411764706,
+        "correct_given_usable": 0.016304347826086956,
+        "aggregation": "pooled_counts@v2",
+        "per_capability": {
+          "gsm8k": {
+            "n": 60,
+            "usable": 28,
+            "usable_rollout_rate": 0.4666666666666667
+          },
+          "math_verified": {
+            "n": 60,
+            "usable": 18,
+            "usable_rollout_rate": 0.3
+          },
+          "multihop": {
+            "n": 60,
+            "usable": 37,
+            "usable_rollout_rate": 0.6166666666666667
+          },
+          "rag": {
+            "n": 60,
+            "usable": 50,
+            "usable_rollout_rate": 0.8333333333333334
+          },
+          "knowledge": {
+            "n": 60,
+            "usable": 25,
+            "usable_rollout_rate": 0.4166666666666667
+          },
+          "tool": {
+            "n": 40,
+            "usable": 26,
+            "usable_rollout_rate": 0.65
+          }
+        }
+      }
+    ],
+    "decision_status": "unresolved_equivalence",
+    "winner": null,
+    "winner_is_control": false,
+    "provisional_leader": "cca699c93f34dad7e94a5d13a25b2bc2",
+    "provisional_leader_is_control": false,
+    "excluded_by_feasibility": [],
+    "excluded_by_catastrophic_capability": [],
+    "all_exclusions": [],
+    "equivalence_interval": 0.011695296982299022,
+    "capability_schema_enforced": true,
+    "control_present": true,
+    "tied_within_equivalence": [
+      "cca699c93f34dad7e94a5d13a25b2bc2",
+      "85bde4ded2c31953f802e39cf2252c87"
+    ],
+    "needs_tie_break_seed": false,
+    "tie_break_candidates": [],
+    "tie_break_completed": true,
+    "interpretation": "AutoInitializer v1 did not resolve a unique behavioural winner; whether to full-recover both tied candidates is a separate decision and a separate authorization.",
+    "rule": "final: pooled-count aggregate over sa and sb; among finalists clearing the feasibility floor, top 1 by correct_overall. The canonical control is eligible to win. Finalists inside the equivalence interval go to seed sc."
+  },
+  "decision_status": "unresolved_equivalence",
+  "winner": null,
+  "winner_is_control": false,
+  "tie_break_ran": true,
+  "pooled_rows": [
+    {
+      "state_id": "85bde4ded2c31953f802e39cf2252c87",
+      "is_control": false,
+      "seeds": [
+        20260726,
+        20260801,
+        20260813
+      ],
+      "probe_ids": [
+        "autoinit.v1.phase_a.rung1.85bde4ded2c3.sa",
+        "autoinit.v1.phase_a.rung2.85bde4ded2c3.sb",
+        "autoinit.v1.phase_a.rung3.85bde4ded2c3.sc"
+      ],
+      "n": 570,
+      "usable": 311,
+      "correct": 10,
+      "n_scorable": 510,
+      "usable_scorable": 297,
+      "usable_rollout_rate": 0.5456140350877193,
+      "correct_overall": 0.0196078431372549,
+      "correct_given_usable": 0.03367003367003367,
+      "aggregation": "pooled_counts@v2",
+      "per_capability": {
+        "gsm8k": {
+          "n": 90,
+          "usable": 63,
+          "usable_rollout_rate": 0.7
+        },
+        "math_verified": {
+          "n": 90,
+          "usable": 39,
+          "usable_rollout_rate": 0.43333333333333335
+        },
+        "multihop": {
+          "n": 90,
+          "usable": 51,
+          "usable_rollout_rate": 0.5666666666666667
+        },
+        "rag": {
+          "n": 90,
+          "usable": 66,
+          "usable_rollout_rate": 0.7333333333333333
+        },
+        "knowledge": {
+          "n": 90,
+          "usable": 46,
+          "usable_rollout_rate": 0.5111111111111111
+        },
+        "tool": {
+          "n": 60,
+          "usable": 32,
+          "usable_rollout_rate": 0.5333333333333333
+        }
+      }
+    },
+    {
+      "state_id": "cca699c93f34dad7e94a5d13a25b2bc2",
+      "is_control": false,
+      "seeds": [
+        20260726,
+        20260801,
+        20260813
+      ],
+      "probe_ids": [
+        "autoinit.v1.phase_a.rung1.cca699c93f34.sa",
+        "autoinit.v1.phase_a.rung2.cca699c93f34.sb",
+        "autoinit.v1.phase_a.rung3.cca699c93f34.sc"
+      ],
+      "n": 570,
+      "usable": 374,
+      "correct": 15,
+      "n_scorable": 510,
+      "usable_scorable": 355,
+      "usable_rollout_rate": 0.656140350877193,
+      "correct_overall": 0.029411764705882353,
+      "correct_given_usable": 0.04225352112676056,
+      "aggregation": "pooled_counts@v2",
+      "per_capability": {
+        "gsm8k": {
+          "n": 90,
+          "usable": 78,
+          "usable_rollout_rate": 0.8666666666666667
+        },
+        "math_verified": {
+          "n": 90,
+          "usable": 57,
+          "usable_rollout_rate": 0.6333333333333333
+        },
+        "multihop": {
+          "n": 90,
+          "usable": 63,
+          "usable_rollout_rate": 0.7
+        },
+        "rag": {
+          "n": 90,
+          "usable": 86,
+          "usable_rollout_rate": 0.9555555555555556
+        },
+        "knowledge": {
+          "n": 90,
+          "usable": 32,
+          "usable_rollout_rate": 0.35555555555555557
+        },
+        "tool": {
+          "n": 60,
+          "usable": 39,
+          "usable_rollout_rate": 0.65
+        }
+      }
+    },
+    {
+      "state_id": "control-qwen3_0p6b_init_v0",
+      "is_control": true,
+      "seeds": [
+        20260726,
+        20260801
+      ],
+      "probe_ids": [
+        "autoinit.v1.phase_a.rung1.control-qwen.sa",
+        "autoinit.v1.phase_a.rung2.control-qwen.sb"
+      ],
+      "n": 380,
+      "usable": 188,
+      "correct": 3,
+      "n_scorable": 340,
+      "usable_scorable": 184,
+      "usable_rollout_rate": 0.49473684210526314,
+      "correct_overall": 0.008823529411764706,
+      "correct_given_usable": 0.016304347826086956,
+      "aggregation": "pooled_counts@v2",
+      "per_capability": {
+        "gsm8k": {
+          "n": 60,
+          "usable": 28,
+          "usable_rollout_rate": 0.4666666666666667
+        },
+        "math_verified": {
+          "n": 60,
+          "usable": 18,
+          "usable_rollout_rate": 0.3
+        },
+        "multihop": {
+          "n": 60,
+          "usable": 37,
+          "usable_rollout_rate": 0.6166666666666667
+        },
+        "rag": {
+          "n": 60,
+          "usable": 50,
+          "usable_rollout_rate": 0.8333333333333334
+        },
+        "knowledge": {
+          "n": 60,
+          "usable": 25,
+          "usable_rollout_rate": 0.4166666666666667
+        },
+        "tool": {
+          "n": 40,
+          "usable": 26,
+          "usable_rollout_rate": 0.65
+        }
+      }
+    }
+  ],
+  "axes": {
+    "behaviour": "usable_rollout_rate, with every component rate",
+    "capability": "correct_overall over scorable prompts",
+    "diagnostic": "correct_given_usable; reported, never reorders"
+  },
+  "capability_schema_enforced": true,
+  "no_followon": "Phase A stops here. A winner does not authorize full recovery, and unresolved_equivalence does not authorize a fourth seed.",
+  "report_sha256": "273dacca539d55031cc4f7a2779d3dfcb76eace76ab3dae6132dd5f907ea1c06"
+}

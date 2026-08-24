@@ -1,0 +1,62 @@
+2026-08-23T13:44:18Z MARKER:DRIVER_START
+2026-08-23T13:44:18Z MARKER:STAGE_START:0
+[13:46:25] attested: interval 0.011695, floor 0.3000, plan 02be33b9a7a8…
+2026-08-23T13:46:25Z MARKER:STAGE_PASSED:0
+2026-08-23T13:46:25Z MARKER:STAGE_START:1
+[13:46:30] imported 5 stage-1 leaves, config 567d32789ba6…, re-identified from bytes
+2026-08-23T13:46:30Z MARKER:STAGE1_IMPORTED:5
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+Loading weights:   0%|          | 0/398 [00:00<?, ?it/s]Loading weights: 100%|██████████| 398/398 [00:00<00:00, 5822.42it/s]
+Loading weights:   0%|          | 0/310 [00:00<?, ?it/s]Loading weights: 100%|██████████| 310/310 [00:00<00:00, 7897.53it/s]
+[13:49:19] control measured on state_eval@v1 (74022 positions)
+[13:49:20] device handoff: 0.01 GiB allocated and 0.02 GiB reserved after the release; the pre-release figure was allocator reservation, not a model leak
+2026-08-23T13:49:20Z MARKER:STAGE_PASSED:1
+2026-08-23T13:49:20Z MARKER:STAGE_START:2
+2026-08-23T14:50:18Z MARKER:PROBE_TRAINED:autoinit.v1.phase_a.rung1.cca699c93f34.sa
+[14:50:18]   autoinit.v1.phase_a.rung1.cca699c93f34.sa: evaluation tokenizer copied, copied, copied
+2026-08-23T14:56:44Z MARKER:PROBE_SCORED:autoinit.v1.phase_a.rung1.cca699c93f34.sa
+2026-08-23T15:57:52Z MARKER:PROBE_TRAINED:autoinit.v1.phase_a.rung1.85bde4ded2c3.sa
+[15:57:52]   autoinit.v1.phase_a.rung1.85bde4ded2c3.sa: evaluation tokenizer copied, copied, copied
+2026-08-23T16:06:12Z MARKER:PROBE_SCORED:autoinit.v1.phase_a.rung1.85bde4ded2c3.sa
+2026-08-23T17:07:20Z MARKER:PROBE_TRAINED:autoinit.v1.phase_a.rung1.158b96cf651f.sa
+[17:07:20]   autoinit.v1.phase_a.rung1.158b96cf651f.sa: evaluation tokenizer copied, copied, copied
+2026-08-23T17:13:55Z MARKER:PROBE_SCORED:autoinit.v1.phase_a.rung1.158b96cf651f.sa
+2026-08-23T18:14:57Z MARKER:PROBE_TRAINED:autoinit.v1.phase_a.rung1.4e429f7ed722.sa
+[18:14:57]   autoinit.v1.phase_a.rung1.4e429f7ed722.sa: evaluation tokenizer copied, copied, copied
+2026-08-23T18:25:13Z MARKER:PROBE_SCORED:autoinit.v1.phase_a.rung1.4e429f7ed722.sa
+2026-08-23T19:26:19Z MARKER:PROBE_TRAINED:autoinit.v1.phase_a.rung1.281a02c3ac18.sa
+[19:26:19]   autoinit.v1.phase_a.rung1.281a02c3ac18.sa: evaluation tokenizer copied, copied, copied
+2026-08-23T19:33:59Z MARKER:PROBE_SCORED:autoinit.v1.phase_a.rung1.281a02c3ac18.sa
+2026-08-23T20:35:02Z MARKER:PROBE_TRAINED:autoinit.v1.phase_a.rung1.control-qwen.sa
+[20:35:02]   autoinit.v1.phase_a.rung1.control-qwen.sa: evaluation tokenizer copied, copied, copied
+2026-08-23T20:45:11Z MARKER:PROBE_SCORED:autoinit.v1.phase_a.rung1.control-qwen.sa
+2026-08-23T20:45:11Z MARKER:LEAF_RETENTION:2+control
+[20:45:11] rung 1: advancing ['control-qwen3_0p6b_init_v0', '85bde4ded2c31953f802e39cf2252c87', 'cca699c93f34dad7e94a5d13a25b2bc2']
+[20:45:11] retention: 2/5 leaves advance plus the control, 3 tombstoned
+2026-08-23T20:45:11Z MARKER:STAGE_PASSED:2
+2026-08-23T20:45:11Z MARKER:STAGE_START:3
+2026-08-23T21:46:16Z MARKER:PROBE_TRAINED:autoinit.v1.phase_a.rung2.cca699c93f34.sb
+[21:46:16]   autoinit.v1.phase_a.rung2.cca699c93f34.sb: evaluation tokenizer copied, copied, copied
+2026-08-23T21:51:55Z MARKER:PROBE_SCORED:autoinit.v1.phase_a.rung2.cca699c93f34.sb
+2026-08-23T22:53:00Z MARKER:PROBE_TRAINED:autoinit.v1.phase_a.rung2.85bde4ded2c3.sb
+[22:53:00]   autoinit.v1.phase_a.rung2.85bde4ded2c3.sb: evaluation tokenizer copied, copied, copied
+2026-08-23T23:02:35Z MARKER:PROBE_SCORED:autoinit.v1.phase_a.rung2.85bde4ded2c3.sb
+2026-08-24T00:03:39Z MARKER:PROBE_TRAINED:autoinit.v1.phase_a.rung2.control-qwen.sb
+[00:03:39]   autoinit.v1.phase_a.rung2.control-qwen.sb: evaluation tokenizer copied, copied, copied
+2026-08-24T00:11:19Z MARKER:PROBE_SCORED:autoinit.v1.phase_a.rung2.control-qwen.sb
+[00:11:19] after two seeds: tie_pending
+2026-08-24T00:11:19Z MARKER:STAGE_PASSED:3
+2026-08-24T00:11:19Z MARKER:STAGE_START:4
+2026-08-24T01:12:24Z MARKER:PROBE_TRAINED:autoinit.v1.phase_a.rung3.cca699c93f34.sc
+[01:12:24]   autoinit.v1.phase_a.rung3.cca699c93f34.sc: evaluation tokenizer copied, copied, copied
+2026-08-24T01:19:37Z MARKER:PROBE_SCORED:autoinit.v1.phase_a.rung3.cca699c93f34.sc
+2026-08-24T02:20:48Z MARKER:PROBE_TRAINED:autoinit.v1.phase_a.rung3.85bde4ded2c3.sc
+[02:20:48]   autoinit.v1.phase_a.rung3.85bde4ded2c3.sc: evaluation tokenizer copied, copied, copied
+2026-08-24T02:30:05Z MARKER:PROBE_SCORED:autoinit.v1.phase_a.rung3.85bde4ded2c3.sc
+[02:30:05] tie-break: 2 probes on seed 20260813
+2026-08-24T02:30:05Z MARKER:STAGE_PASSED:4
+2026-08-24T02:30:05Z MARKER:STAGE_START:5
+[02:30:05] RESULT: unresolved_equivalence · winner=None · is_control=False
+2026-08-24T02:30:05Z MARKER:STAGE_PASSED:5
+2026-08-24T02:30:05Z MARKER:ALL_DONE
+[02:30:05] Phase A complete — $12.78. STOP for review; no follow-on experiment is reachable from this driver.

@@ -1,0 +1,26 @@
+[13:35:38] budget: expected 904 min $14.92 · soft $16.42 · hard $16.75 (authorized $16.75)
+[13:35:39] NVIDIA L40S $0.99/h, stock Low
+[13:35:39] session commit d968b20102bb verified: harness digests to b824441c3cbf…, carries the authorization and only logs/autoinit_recovery_continuation_authorization.json differs from the authorized base
+[13:35:39] frozen science plan 02be33b9a7a8… matches the authorization
+[13:35:39] continuation harness b824441c3cbf… over 22 files, search excluded
+[13:35:43] all 5 canonical stage-1 leaves verify locally; 15 transport files declared from AlphaAvatar/aadistill-transport in selected order
+[13:35:45] precheck OK: 25 relay inputs (10 from AlphaAvatar/aadistill-artifacts, 15 from AlphaAvatar/aadistill-transport), 2 local assets
+[13:35:46] created 3c1g6e01kdu1ya at $0.99/h
+[13:35:46] watchdog detached — hard 1015 min = $16.75
+[13:36:30] TCP 22 at 64.247.206.219:19807 after 0.7 min
+[13:36:33] draw 1: ssh reachable — $0.01
+[13:37:05] draw 1: image identity runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@580.178.04
+[13:37:05] draw 1: running setup
+[13:44:14] draw 1: setup complete — $0.14
+[13:44:20] driver detached, pid 7231, confirmed by descriptor_probe — $0.14
+[13:46:32]   2026-08-23T13:44:11Z MARKER:SETUP_DONE — $0.18
+[02:30:12] driver no longer running: EXITED:0
+[02:30:12] polling ended: DRIVER_EXITED:0 — $12.78
+[02:34:07]   manifest rc=0
+257 file(s) across 11 class(es) -> /workspace/manifest.json
+  final_required: 257 · mutable_snapshot: 0 · final_streams_quiescent: True
+[02:34:54] LAUNCHER ERROR: AttributeError: 'str' object has no attribute 'get'
+[02:34:54] deleting pod (launcher error)
+[02:35:05] pod deleted — 779.3 min, $12.86; provider confirms gone: True
+
+autoinit-recovery-continuation INCOMPLETE — /home/ecs-user/AlphaAvatar-distill/logs/autoinit_recovery_continuation_session.json. STOP for review. The continuation consumed the verified attempt-12 Stage-1 result and ran no search.

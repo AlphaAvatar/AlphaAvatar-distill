@@ -1,0 +1,165 @@
+{
+  "schema": "aadistill.autoinit.phase_a_attested_protocol/v1",
+  "generated_utc": "2026-08-23T13:46:25.039490+00:00",
+  "runtime": {
+    "version": 1,
+    "image_digest": "runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@580.178.04",
+    "python_version": "3.12.3",
+    "torch_version": "2.11.0+cu128",
+    "transformers_version": "5.13.1",
+    "cuda_runtime": "12.8",
+    "attention_backend": "sdpa"
+  },
+  "generation_source_digest": {
+    "digest": "a1b51736d6a6b1276322a04d44855d7b574011e165e77d6d23c3e31b3036f743",
+    "files": [
+      {
+        "path": "scripts/evaluation/uncapped_eval.py",
+        "sha256": "120e92dc08a49ae4e3ed74fbbc6537054c011382755cdec6418c11b341f780d4",
+        "bytes": 28667
+      },
+      {
+        "path": "src/aadistill/evaluation/behavior.py",
+        "sha256": "c6f52721e8b86bc2d875683bfb9c35b4101379fa5d48de7a48db93959e2935c2",
+        "bytes": 19983
+      },
+      {
+        "path": "src/aadistill/evaluation/degeneration.py",
+        "sha256": "793540820d4fc0f42d0c855e0d79eb879b94efa451e06030b2a14c55683f4961",
+        "bytes": 5245
+      }
+    ],
+    "rule": "sha256 over sorted 'path:sha256' lines of the declared set"
+  },
+  "scoring_contract": {
+    "contract": "recovery_search_scoring@v2",
+    "contract_id": "recovery_search_scoring",
+    "version": 2,
+    "digest": "808080a7c5d88d5a66760fd0d7eeabc5451c096ad0819f8c5663a0b8224660be",
+    "files": [
+      {
+        "path": "scripts/autoinit/score_recovery_search.py",
+        "sha256": "b19eba4c2c5f555aeb141811439ad5e5417a3222c3b57b78bad3f497eb90dba3",
+        "bytes": 21518
+      },
+      {
+        "path": "src/aadistill/autoinit/recovery.py",
+        "sha256": "39d6598e210b9619d56463f6ba3000d47e1a97f7121e7db25b97213d4d6c799e",
+        "bytes": 102452
+      },
+      {
+        "path": "src/aadistill/evaluation/behavior.py",
+        "sha256": "c6f52721e8b86bc2d875683bfb9c35b4101379fa5d48de7a48db93959e2935c2",
+        "bytes": 19983
+      },
+      {
+        "path": "src/aadistill/evaluation/capability.py",
+        "sha256": "da1bc3b1069d927b6ab2cbf0eaaf6763bfa491d396189b3dcde95977e39d67ad",
+        "bytes": 19568
+      },
+      {
+        "path": "src/aadistill/evaluation/strict_answer.py",
+        "sha256": "ecb4356a89d3563214ea11ade2307b0d106588bb7ff59f6b8c5e3b9c98d380e3",
+        "bytes": 7628
+      },
+      {
+        "path": "src/aadistill/evaluation/usable_rollout.py",
+        "sha256": "8159acdd7a0a6953dfefac7acf4f6fb4706f69a7264b625e9f9b7ff1a74826ca",
+        "bytes": 6155
+      }
+    ],
+    "rule": "sha256 over sorted 'path:sha256' lines of the declared recovery-scoring source set",
+    "covers": [
+      "usable_rollout components and their composition",
+      "protocol validity, including the tools_offered relaxation",
+      "the tool structural-executability gate",
+      "per-set correctness scorers",
+      "correct => usable",
+      "capability schema and aggregation",
+      "pooled_counts seed aggregation",
+      "the threshold formulas materialized from control data"
+    ],
+    "supersedes": {
+      "contract": "recovery_search_scoring@v1",
+      "identity_was": "a single hash of src/aadistill/evaluation/capability.py",
+      "why": "v1 could not see a defect in the composition. A prompted tool call was rejected as unexpected_tool_call, so the tool capability read a structural 0.0000 for every arm while capability.py itself was unchanged and its hash matched."
+    }
+  },
+  "evaluation_protocol": {
+    "evaluation_protocol_hash": "7327e880645492ec308fce62054b4845dce3de12e3079bb17a32e7d22898411a",
+    "generation": {
+      "generation_source_digest": "a1b51736d6a6b1276322a04d44855d7b574011e165e77d6d23c3e31b3036f743",
+      "generation_source_set_version": 1,
+      "vllm_version": "0.27.1",
+      "transformers_version": "5.15.0",
+      "torch_version": "2.13.0+cu130",
+      "dtype": "bfloat16",
+      "gpu_memory_utilization": 0.9,
+      "max_num_seqs": 256,
+      "max_num_batched_tokens": 8192,
+      "enforce_eager": false,
+      "tokenizer_source": "the evaluated checkpoint",
+      "tokenizer_sha256": "c1db93c8164f3e3ba2dbc8c6943fb574273a5efa87da4556ef9f460b5c0893b7",
+      "chat_template_sha256": "3802169b2a02b81e6adb7ab4f64f91ff02db753c8c3a64a01c35192d3a61d8d7",
+      "protocol": "project",
+      "system_message": "You are a helpful Assistant.",
+      "system_injection_rule": "injected only when the sample carries no system turn and protocol == project; a sample's own system prompt is preserved",
+      "chat_template_kwargs_json": "{}",
+      "thinking_mode": "template-default (not overridden)",
+      "trained_context": 8192,
+      "context_len_override": null,
+      "resolved_context": 8192,
+      "context_source": "trained_block_len",
+      "context_resolution_rule": "min(trained_context, architectural context); the effective context is the TRAINED context and this is not a 262K-context evaluation",
+      "temperature": 0.0,
+      "top_p": 1.0,
+      "top_k": -1,
+      "detokenize": false,
+      "max_tokens_rule": "per sample: resolved_context - len(prompt_ids); P18 unrestricted, never a chosen token budget",
+      "stop_token_ids": [
+        151645
+      ],
+      "stop_id_derivation_rule": "sorted union of config.eos_token_id, generation_config.eos_token_id, <|im_end|> and tokenizer.eos_token_id",
+      "degeneration_stop": true,
+      "degeneration_check_every": 256,
+      "degeneration_source_digest": "793540820d4fc0f42d0c855e0d79eb879b94efa451e06030b2a14c55683f4961",
+      "runtime_digest": "85a14f8b455db08b4bf19a1a3fa783df0974813cf6a5f34cdf270b5b6c03834e",
+      "protocol_id": "recovery_generation",
+      "version": 1,
+      "generation_protocol_fingerprint": "1e5031c2b7debcccb6ab8f92d9863fb2a8381aefd534d5267cb0b519e6192206",
+      "is_materialized": true,
+      "unmaterialized_fields": [],
+      "excluded_by_design": [
+        "the checkpoint being generated from"
+      ],
+      "why_excluded": "the checkpoint is the treatment; a generation identity containing it would mark every pair of arms as mismatched"
+    },
+    "scoring_contract": "recovery_search_scoring@v2",
+    "scoring_digest": "808080a7c5d88d5a66760fd0d7eeabc5451c096ad0819f8c5663a0b8224660be",
+    "battery": {
+      "artifact": "recovery_search_v2",
+      "manifest_sha256": "58ae5c6dcbe32eb28c343a66830d7224a14537362deeeff2ce8219d0a31679d6",
+      "content_sha256": "a1b22778b00d95b6aba358c14a5af5b559fd807bb371c92131eacca59479f323"
+    },
+    "binding": "every control and every searched recovery probe must bind to this exact hash; a probe measured under a different one is not comparable to the thresholds materialized from these controls",
+    "notes": {}
+  },
+  "evaluation_protocol_hash": "7327e880645492ec308fce62054b4845dce3de12e3079bb17a32e7d22898411a",
+  "stage3_evaluation_protocol_hash": "250f72efbd43b86a475e8dda293b45f07ee61a4d858e147f4a5bd7681c32c2e4",
+  "bound_to_stage3_thresholds": true,
+  "comparability": {
+    "rule": "generation_runtime_comparability@v2",
+    "live_identity": "70a26e0b43df20e469385115b49683b50936919e02986088b76d3c30ffd87103",
+    "historical_identity": "70a26e0b43df20e469385115b49683b50936919e02986088b76d3c30ffd87103",
+    "identities_equal": true,
+    "live_driver": "580.178.04",
+    "historical_driver": "580.159.03",
+    "driver_branch_equal": true,
+    "driver_patch_differs": true
+  },
+  "comparable_identity": "70a26e0b43df20e469385115b49683b50936919e02986088b76d3c30ffd87103",
+  "science_plan_hash": "02be33b9a7a8e26bc8bfb75795351e8cdc9ffd441b47066cc81887cfc511b55c",
+  "equivalence_interval": 0.011695296982299022,
+  "feasibility_floor": 0.3,
+  "report_sha256": "c6232e785708b4d936872e5da89249e8c8f5f14c275cc4549bde5e453973b5d8"
+}

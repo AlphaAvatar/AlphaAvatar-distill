@@ -5,31 +5,25 @@
   "baseline_commit": "d968b20102bb8d40de54f840047a809c4536d3ca",
   "baseline_commit_meaning": "The LAST TESTED IMPLEMENTATION: the commit whose tree produced the latest_verification figures. The suite was re-run after attempt 6's docstring normalization, so that tree is this one, not attempt 6's session commit.",
   "running": {
-    "paid_compute": true,
-    "pods": 1,
-    "launchers": 1,
-    "pod_id": "3c1g6e01kdu1ya",
-    "what": "recovery continuation attempt 7, L40S $0.99/h, hard 1015 min = $16.7456",
-    "started_utc": "2026-08-23T13:35:46Z"
+    "paid_compute": false,
+    "pods": 0,
+    "launchers": 0
   },
   "authorized": {
-    "any": true,
-    "id": "autoinit.recovery_continuation.2026-08-23T1314Z",
-    "note": "one-use, CONSUMED by this launch. Grant logs/autoinit_recovery_continuation_attempt7_grant.json; base 7e1d429; harness b824441c. A full-ceiling run reaches $233.9219 of $234.00; no further launch is fundable."
+    "any": false,
+    "note": "every authorization issued is consumed, including all seven continuation attempts."
   },
   "prepared_launch": {
-    "any": true,
-    "bundles": 1,
-    "bundle": "aad_autoinit_d968b201.bundle",
-    "note": "built, uploaded, round-trip verified; the relay checkout's harness digest matches"
+    "any": false,
+    "bundles": 0
   },
   "budget": {
-    "cumulative_spend_usd": 217.1763,
+    "cumulative_spend_usd": 230.035,
     "authorized_cap_usd": 234.0,
-    "remaining_usd": 16.8237,
+    "remaining_usd": 3.965,
     "remaining_is_not_permission": true,
     "ledger": "logs/BUDGET_LEDGER.md",
-    "headroom_note": "$16.8237 remains against a $16.7456 continuation ceiling -- a margin of $0.0781. One more full-ceiling continuation fits by under eight cents; nothing else does. Balance is not authorization."
+    "headroom_note": "$3.9650 funds NO further paid session of any kind: a continuation ceiling is $16.7456 and a Phase-A attempt $23.0484. Balance is not authorization."
   },
   "frozen": {
     "science_plan_hash": "02be33b9a7a8e26bc8bfb75795351e8cdc9ffd441b47066cc81887cfc511b55c",
@@ -77,20 +71,14 @@
   },
   "failed": [
     {
-      "run": "recovery continuation 6",
-      "usd": 1.4926,
-      "where": "stage 2 battery, 50 s after the probe trained",
-      "cause": "a trainer-written checkpoint carries no tokenizer, so apply_chat_template raised. REPAIRED at 30dcee3 by materializing the attested sidecars into the evaluated checkpoint; --tokenizer was rejected because tokenizer_source is material under comparability v2",
-      "kept": "the attempt-5 repair worked: the checkpoint resolved and execution entered battery(). Probe trained in 71.9 min against 61.55 priced"
-    },
-    {
-      "run": "recovery continuation 5",
-      "usd": 1.3511,
-      "where": "stage 2, after the probe trained",
-      "cause": "latest.txt read without the checkpoints/ component. REPAIRED at 01be685, confirmed by attempt 6"
+      "run": "recovery continuation 7 launcher (the DRIVER succeeded)",
+      "usd": 0.0,
+      "where": "session_runner after collection, on a successful Phase A",
+      "cause": "checkpoint_hashes_matched does all(f.get('rc')==0 for f in fetched), but Phase A's fetch_products is finalists_to_fetch, which returns canonical_id STRINGS. AttributeError. Only a SUCCESSFUL Phase A reaches it with a non-empty list",
+      "impact": "cosmetic: everything was fetched and nothing was owed off-pod, but the session reads INCOMPLETE/passed=false despite DRIVER_EXITED:0. MUST be fixed: a successful Phase A cannot currently be recorded as successful"
     }
   ],
-  "failure_pattern": "6/7/9 device placement; 8 a $0 path asserting dev-box state; 10 unpriced runtime cost; measurement 1 a setup contract, 2 an untested entrypoint; continuation 1 an uncaught transport call, 2 an undeliverable asset, 3 dev-box-only code in the pod gate, 4 the attempt-12 OOM class, 5 a checkpoint path, 6 a trainer-written checkpoint with no tokenizer -- each one further in",
+  "failure_pattern": "continuation 1 an uncaught transport call, 2 an undeliverable asset, 3 dev-box-only code in the pod gate, 4 the attempt-12 OOM class, 5 a checkpoint path, 6 a trainer-written checkpoint with no tokenizer, 7 the DRIVER SUCCEEDED and the launcher crashed after collection on a line only success reaches. Each failure was further in than the last",
   "canonical_infrastructure": [
     "provider.observe() applies get()'s transient classification to ANY query: never raises, and a declined answer is unknown, never a negative answer. A test fails on any raw _gql in session_runner.py",
     "operational identity (session_id, schema, status_path, run_log_path, authorization_path, driver_job_id) is unique across sessions; plan_hash is NOT, so the continuation keeps the frozen Phase-A plan rather than rewriting science to satisfy a filename test",
@@ -123,9 +111,9 @@
     "the paid device-canary session path: STRATEGICALLY TERMINATED 2026-08-18. Two authorized sessions, $0.1240, zero canary runs; both died in the wrapper's inherited contracts. Its evidence and its generic lesson are kept; no further canary is prepared."
   ],
   "next_starting_point": {
-    "status": "Recovery continuation attempt 7 is LIVE on pod 3c1g6e01kdu1ya with the tokenizer materialization in force. A soft/hard budget stop is an ACCEPTED outcome, not something to work around.",
-    "the_ask": "Nothing until it reaches a terminal state. Then report results, per-probe minutes against the 61.55 priced, spend and provider-confirmed teardown, and STOP.",
-    "budget": "cap $234.00, spent $217.1763 before this run, remaining $16.8237 against a $16.7456 ceiling. This is the last launch the headroom can fund."
+    "status": "PHASE A IS COMPLETE. Attempt 7 ran all six stages, trained and scored 11 probes across three seeds, and produced unresolved_equivalence with no winner. Nothing is running, billing, authorized or prepared.",
+    "the_ask": "A maintainer decision on the scientific reading, and on the launcher defect that mislabels a successful Phase A as INCOMPLETE. No paid session is fundable: $3.9650 remains against a $16.7456 continuation ceiling.",
+    "budget": "cap $234.00, spent $230.0350, remaining $3.9650. Balance is not authorization."
   },
   "read_order": [
     "logs/STATE.md \u2014 the human view of this file",
@@ -148,12 +136,15 @@
     "record": "logs/derived_cache_cleanup.json",
     "summary": "14.9107 GiB reclaimed from derived caches, 0 checkpoints deleted; 5.55 GiB then consumed by attempt 12's leaves"
   },
-  "continuation_ready": {
-    "budget_expected_usd": 14.9233,
-    "budget_hard_usd": 16.7456,
-    "stage1_source": "attempt 12: 43 states, 5 selected; IMPORTED AND RE-IDENTIFIED FROM POD BYTES by attempt 4, config 567d32789ba6",
-    "authorization": "own schema recovery_continuation_authorization/v1, 22-file harness b824441c. Ceiling derived from continuation_budget()",
-    "imports": "attempt 12's five preserved leaves, re-identified from bytes; no search is reachable",
-    "transport": "PROVEN ON PAID HARDWARE by attempts 3 and 4: the five leaves are mirrored in the private aadistill-transport repo (15 files, 5.5513 GiB) in selected order and stage on a pod. Manifest: logs/autoinit_selected_leaf_transport_manifest.json"
+  "phase_a_result": {
+    "status": "COMPLETE 2026-08-24 by recovery continuation attempt 7, $12.8587, ALL_DONE",
+    "decision_status": "unresolved_equivalence",
+    "winner": null,
+    "tie_break_ran": true,
+    "pooled_correct_overall": "cca699c93f34 0.029412 | 85bde4ded2c3 0.019608 | control-qwen 0.008824",
+    "pooled_usable_rollout": "cca699c93f34 0.6561 | 85bde4ded2c3 0.5456 | control-qwen 0.4947",
+    "reading": "the two best searched initializations differ by 0.009804, INSIDE the 0.011695 interval, so unresolved even after seed sc; no fourth seed. cca699c9 IS separated from the canonical control (0.020588 > interval); 85bde4de is not. The winner rule returned None",
+    "comparability": "comparable_identity 70a26e0b, live == historical, bound_to_stage3_thresholds true; the raw protocol hash differs only by driver patch, non-material under v2",
+    "record": "logs/autoinit_recovery_continuation_attempt7/"
   }
 }

@@ -1,0 +1,88 @@
+{
+  "artifact_digest": "dc9500d3871a0f31214d55fa2b47b82e196f4f4630c607f43a24d16ed76d83bf",
+  "suite_id": "state_eval@v1",
+  "suite_hash": "6421fa4cf12ee2a16f452557c486aa95beb37e4aac4f7c7fd72d380993b39833",
+  "reference": "root_teacher",
+  "values": {
+    "state.critical_token_kl": 18.207580485302415,
+    "state.critical_token_kl.assistant": 11.289392126623959,
+    "state.critical_token_kl.eos": 15.569417558397566,
+    "state.critical_token_kl.final_answer": 14.185234201810164,
+    "state.critical_token_kl.reasoning": 10.4340017076202,
+    "state.critical_token_kl.think_close": 20.508177389417376,
+    "state.critical_token_kl.tool_close": 22.56749279158456,
+    "state.nll.code": 12.315943234970751,
+    "state.nll.general": 11.07723989083766,
+    "state.nll.pooled_all_domains": 11.711092331399728,
+    "state.nll.rag_multihop": 11.477196656969646,
+    "state.nll.reasoning_math": 11.17255087186956,
+    "state.nll.teacher_reference_pooled": 0.9303420924946204,
+    "state.nll.tool": 12.306539443138874,
+    "state.nll_delta_vs_teacher_pooled": 10.780750238905107,
+    "state.reverse_kl.token_mean": 19.76388646195082,
+    "state.teacher_kl.code": 12.035581080740746,
+    "state.teacher_kl.equal_domain_mean": 10.763046289627521,
+    "state.teacher_kl.general": 8.936927460991305,
+    "state.teacher_kl.rag_multihop": 10.288267212297098,
+    "state.teacher_kl.reasoning_math": 10.908437159794325,
+    "state.teacher_kl.token_mean": 10.90405306100156,
+    "state.teacher_kl.tool": 11.646018534314136,
+    "state.teacher_kl.worst_domain": 12.035581080740746,
+    "state.top1_agreement": 0.05095782334981492
+  },
+  "positions": 74022,
+  "detail": {
+    "per_subtype_kl": {
+      "code": 12.035581080740746,
+      "general": 8.936927460991305,
+      "multihop_qa": 9.705689699071604,
+      "rag_evidence": 10.870844725522593,
+      "gsm8k": 10.3965507709686,
+      "openmath": 11.420323548620049,
+      "tool_calling": 11.646018534314136
+    },
+    "per_domain_kl": {
+      "general": 8.936927460991305,
+      "reasoning_math": 10.908437159794325,
+      "rag_multihop": 10.288267212297098,
+      "code": 12.035581080740746,
+      "tool": 11.646018534314136
+    },
+    "per_domain_nll": {
+      "general": 11.07723989083766,
+      "reasoning_math": 11.17255087186956,
+      "rag_multihop": 11.477196656969646,
+      "code": 12.315943234970751,
+      "tool": 12.306539443138874
+    },
+    "tagged": {
+      "assistant": {
+        "positions": 45801,
+        "kl": 11.289392126623959
+      },
+      "eos": {
+        "positions": 70,
+        "kl": 15.569417558397566
+      },
+      "final_answer": {
+        "positions": 10058,
+        "kl": 14.185234201810164
+      },
+      "reasoning": {
+        "positions": 35603,
+        "kl": 10.4340017076202
+      },
+      "think_close": {
+        "positions": 70,
+        "kl": 20.508177389417376
+      },
+      "tool_close": {
+        "positions": 28,
+        "kl": 22.56749279158456
+      }
+    },
+    "reference_strategy": "recompute"
+  },
+  "measured_utc": null,
+  "runtime": {}
+}
