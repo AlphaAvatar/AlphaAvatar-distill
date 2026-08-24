@@ -1,6 +1,6 @@
 {
   "schema": "aadistill.current_state/v2",
-  "generated_utc": "2026-08-24T18:00:00Z",
+  "generated_utc": "2026-08-25T12:00:00Z",
   "_contract": "The minimal machine-readable CURRENT snapshot: live facts only, no history, no per-attempt detail, no narrative. History lives in logs/decisions.md and the per-run directories; the human view is logs/STATE.md and the two must agree. Ownership: logs/CATALOG.md.",
   "baseline_commit": "6734dd2f49f04b3ac37ba635db30f697bf13ccad",
   "baseline_commit_meaning": "The LAST TESTED IMPLEMENTATION: the commit whose tree produced the latest_verification figures.",
@@ -61,12 +61,12 @@
     "Stage 0 on hardware, passed six times; attempt 4 also passed STAGE 1 on hardware -- five leaves re-identified from pod bytes, control measured on state_eval@v1"
   ],
   "latest_verification": {
-    "utc": "2026-08-24T18:00:00Z",
-    "after": "the $0 Phase-B reconstruction pass",
-    "full_suite": "2188 passed, 12 skipped in 18:44 (+1: the Phase-B calibration blocker). A first run failed test_the_snapshot_stays_minimal_and_declares_its_contract -- this file had been pushed past its 12,000-byte ceiling; the detail was moved to the reconstruction doc and the suite re-run clean",
+    "utc": "2026-08-25T12:00:00Z",
+    "after": "the Phase-B unblocked implementation pass (items 4-6)",
+    "full_suite": "2210 passed, 12 skipped in 18:48 (+22 across five new gates)",
     "frozen_asset_verifier": "passed, no problems",
-    "mutations": "3 on the new blocker test, each turning the passing state into a failing one: the budget lowered to the feasible figure, the binding weight moved off code, and the transcribed pool constant corrupted",
-    "harness_digest": "UNCHANGED, both of them: phase_a 58011135, continuation a27bb922. Only logs/ and one test file were touched; no harness or src file moved, and no frozen SCIENCE identity moved",
+    "mutations": "18 across five gates, each turning a passing state into a failing one: 3 on the calibration blocker, 6 on the two-profile search, 4 on the profile/items seam, 5 on the repricing, 3 on the whole-function P=2 run. Two of my own gates were found weak first: one assertion was vacuous, and the seam unit tests missed a dangling reference in a line only a completed search reaches.",
+    "harness_digest": "phase_a 58011135 -> a182efb4: phase_a_search.py is in PHASE_A_HARNESS_SOURCE_FILES_V1 and gained two-profile support, the mislabeling fix and a truthful singular/plural profile summary. Expected and authorized 2026-08-25. continuation a27bb922 UNCHANGED. No frozen SCIENCE identity moved.",
     "scope": "CPU only, repo .venv; no checkpoint loaded, no metric measured, no GPU used"
   },
   "failed": [
@@ -87,8 +87,8 @@
     "the paid device-canary session path: STRATEGICALLY TERMINATED 2026-08-18. Two authorized sessions, $0.1240, zero canary runs; both died in the wrapper's inherited contracts. Its evidence and its generic lesson are kept; no further canary is prepared."
   ],
   "next_starting_point": {
-    "status": "PHASE A IS COMPLETE. Attempt 7 ran all six stages, trained and scored 11 probes across three seeds, and produced unresolved_equivalence with no winner. Nothing is running, billing, authorized or prepared.",
-    "the_ask": "A maintainer decision on the scientific reading, and on the launcher defect that mislabels a successful Phase A as INCOMPLETE. No paid session is fundable: $3.9650 remains against a $16.7456 continuation ceiling.",
+    "status": "Phase A is complete (unresolved_equivalence, no winner). Phase B's reviewer decisions are taken and its unblocked $0 implementation is done. Nothing is running, billing, authorized or prepared.",
+    "the_ask": "Confirm the multihop_qa support/deviation choice in logs/autoinit_phase_b_reconstruction.md 2A, then v2 / plan / preregistration follow. A paid Phase B needs a new cumulative-budget decision: $3.9650 remains against a $26.8049 hard bound.",
     "budget": "cap $234.00, spent $230.0350, remaining $3.9650. Balance is not authorization."
   },
   "read_order": [
@@ -128,13 +128,14 @@
   },
   "next_sequence": {
     "_status": "NONE of this is implemented or started, and none of it is funded",
-    "1_phase_b": "calibration/data-distribution sensitivity: planned calib.reasoning_heavy@v1 vs the existing calib.domain_balanced@v1. Phase A searched one distribution only. RECONSTRUCTED at $0 2026-08-24 and BLOCKED on reviewer decisions, not on implementation -- see logs/autoinit_phase_b_reconstruction.md",
-    "1_phase_b_blocked_on": "THREE reviewer decisions, not implementation: (a) calib.reasoning_heavy@v1 cannot be built as specified -- its weights need more code and math than its declared pool holds, and its budget IS the whole pool, so a without-replacement draw is the identity; (b) the repo prices Phase B as a SEARCH ONLY and records no rule for combining it with Phase A, which has no winner; (c) no Phase-B preregistration exists. Arithmetic, options, derived cost and the readiness checklist: logs/autoinit_phase_b_reconstruction.md",
-    "1_phase_b_cost": "search P=2 beam 6 warmup 1 on L40S: $1.8950-$7.4349, 244.9 GiB working (provision >=300 GiB). Recovery probes NOT specified. Indicative hard totals with a $3.00 reserve: ~$10.44 / ~$25.17 / ~$30.08; implied cap ~$240.47 / ~$255.20 / ~$260.11. NOT an authorization",
+    "1_phase_b": "calibration/data-distribution sensitivity: calib.reasoning_heavy@v2 vs calib.domain_balanced@v1. Phase A searched one distribution only. See logs/autoinit_phase_b_reconstruction.md",
+    "1_phase_b_blocked_on": "Reviewer decisions taken 2026-08-25: mixture option (b); full fresh joint P=2 beam with no Phase-A leaf reuse; cross-phase behavioural terminal selection. ONE open item: calib.reasoning_heavy@v2 is derived but NOT materialized, pending confirmation of the multihop_qa support/deviation choice. See logs/autoinit_phase_b_reconstruction.md 2A.",
+    "1_phase_b_cost": "Repriced mechanically (scripts/autoinit/price_phase_b.py -> logs/autoinit_phase_b_pricing.json): search P=2 $1.8950-$7.4349, 244.87 GiB working; 5-10 probes still owed of 8 candidates at $1.637 (reuse saves $4.911-$6.548); $3.00 reserve. Expected $13.0800, hard $26.8049. Implied cap ~$256.84. NOT an authorization.",
     "2_final_selection": "complete final initialization selection after Phase B; Phase A's unresolved_equivalence is not a final selection",
     "3_canonical_stage1_nll": "the canonical Stage-1 NLL diagnostic on the finally selected initialization, under the established Stage-1 measurement contract. DIAGNOSTIC ONLY, never a promotion criterion, and NOT the state_eval@v1 search-side NLL fields. Never yet run",
     "4_formal_recovery": "only then, the project's formal Stage 2/Stage 3 recovery training",
-    "funding": "$3.9650 remains and authorizes NO new paid session; Phase B or any GPU work needs a new explicit maintainer budget decision"
+    "funding": "$3.9650 remains and authorizes NO new paid session; Phase B or any GPU work needs a new explicit maintainer budget decision",
+    "1_phase_b_implementation": "DONE: a toy P=2 search.run() with distinct per-profile items -- it found a pod-fatal defect (the engine asked the loader for the calib.none sentinel, which resolve() refuses; every historical loader ignored its argument and answered anyway; fixed in search.py, no identity moved); the two-profile entry point and the mislabeling seam; the repricing. REMAINING in order: materialize v2, the Phase-B plan/authorization type, then the preregistration, which must bind v2's profile hash."
   },
   "canonical_infrastructure_moved_to": "docs/SESSION_ARCHITECTURE.md and logs/decisions.md"
 }

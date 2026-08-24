@@ -303,6 +303,21 @@ class BeamSearch:
         return sorted(self.config.allowed_impls)
 
     def calibration_for(self, profile: CalibrationProfile) -> Sequence[Mapping[str, Any]]:
+        # The sentinel describes no mixture — `NO_CALIBRATION.resolve()` raises by
+        # design — so asking the loader for its items is asking for something that
+        # cannot exist. Every loader written so far has been `lambda profile:
+        # items`, which ignores its argument and therefore answered anyway; the
+        # first loader that actually dispatched on the profile raised KeyError
+        # inside the beam. A correct Phase-B loader delegating to
+        # `profile.resolve()` would have raised CalibrationError there instead —
+        # on a paid pod, mid-search.
+        #
+        # Identity is untouched: `n_calibration_items` is the only thing derived
+        # from this list and `_expand_one` explicitly excludes it from
+        # `config_hash`, while both `CalibrationNeed.NONE` implementations ignore
+        # `config` entirely. So no state id, and no recorded Phase-A state, moves.
+        if profile.is_no_calibration:
+            return ()
         key = profile.qualified_id
         if key not in self._calibration_cache:
             self._calibration_cache[key] = list(self.calibration_loader(profile))

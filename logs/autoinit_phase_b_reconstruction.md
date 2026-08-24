@@ -116,6 +116,112 @@ tractable change, not a frozen-science violation.
 
 ---
 
+## 2A. Option (b) resolved mechanically — 2026-08-25
+
+The reviewer selected **option (b)**: a versioned `calib.reasoning_heavy@v2` doing
+deterministic **with-replacement** reweighting of the same frozen 67-item pool,
+preserving the 59,763-position budget, the declared domain weights, the source
+support and the existing leakage-safe support; no silent truncation, no silent
+approximation; and — before materializing — establish whether the whole-item
+multiset can realize the target allocation, reporting the minimum achievable
+deviation and proposing the rounding rule.
+
+**Exact realization is impossible**, for a reason prior to any algorithm: the
+targets are not integers. `0.35 × 59,763 = 20,917.05`; four of the five domain
+targets have a fractional part. No whole-item multiset can sum to a non-integer.
+
+### The proposed rule
+
+**R1 — domain apportionment.** Largest-remainder (Hamilton) over the declared
+weights; remainder ties broken by ascending domain id. This is the standard
+integer apportionment and it sums to the budget **exactly**:
+
+| domain | exact target | quota | deviation |
+| --- | ---: | ---: | ---: |
+| code | 11,952.60 | 11,953 | +0.40 |
+| general | 5,976.30 | 5,976 | −0.30 |
+| math | 20,917.05 | 20,917 | −0.05 |
+| rag_multihop | 14,940.75 | 14,941 | +0.25 |
+| tool | 5,976.30 | 5,976 | −0.30 |
+| **total** | 59,763 | **59,763** | 0 |
+
+**R2 — unreachable domain quota.** Four of the five quotas are exactly realizable
+by a whole-item multiset. **`code` = 11,953 is not**; the nearest reachable values
+are 11,952 and 11,954, both at distance 1. Take the nearest, **ties toward the
+lower**, and transfer the difference to the reachable domain with the most
+negative apportionment remainder (ties by ascending id). That is `general`
+(−0.30, tied with `tool`, resolved by name), and 5,977 is reachable.
+
+**Result: `code` 11,952 · `general` 5,977 · `math` 20,917 · `rag_multihop` 14,941
+· `tool` 5,976 = 59,763 exactly.** Maximum domain deviation from the exact
+fractional target is **0.70 positions — 1.17 × 10⁻⁵ of the budget**. That is the
+minimum achievable: it cannot be zero, and no other integer assignment is closer.
+
+**R3 — sub-type apportionment.** Within each domain, split the quota across its
+sub-types by largest remainder over **the pool's own sub-type position shares**.
+This holds within-domain composition fixed so that only the domain mix — the
+thing the hypothesis is about — changes. Without it a plain uniform draw drifts
+`math/gsm8k` by **+19.4 points** (0.5049 → 0.6993), which would confound the
+comparison with a second, undeclared change.
+
+**R4 — unreachable sub-type quota, repaired INSIDE its domain.** `multihop_qa` =
+7,526 is unreachable. The repair transfers the difference to another sub-type of
+**the same domain**, so every domain weight stays exactly as R1/R2 set it and the
+deviation is confined. `code`, `general`, `tool_calling` are single-sub-type;
+`gsm8k`/`openmath` are exact.
+
+**R5 — realization.** Among all exact whole-item multisets summing to a sub-type
+quota, take the one **maximizing distinct items used**, then minimizing multiset
+size, then lexicographically smallest by sorted `item_id`. Deterministic without a
+PRNG, and it maximizes source support by construction.
+
+### The one open choice: `multihop_qa`
+
+`multihop_qa` has 5 items, all 1,675–1,835 positions, so its reachable sums are
+sparse and support is tightly coupled to deviation. The full frontier, with
+`rag_evidence` absorbing the remainder so `rag_multihop` stays at 14,941:
+
+| multihop_qa | deviation | % of rag_multihop | distinct items used | rag_evidence | its support |
+| ---: | ---: | ---: | ---: | ---: | ---: |
+| 7,340 | −186 | −1.24% | **1 / 5** | 7,601 | 10 / 13 |
+| 7,296 | −230 | −1.54% | 2 / 5 | 7,645 | 10 / 13 |
+| 7,205 | −321 | −2.15% | 3 / 5 | 7,736 | 11 / 13 |
+| **7,074** | **−452** | **−3.03%** | **4 / 5** | **7,867** | 10 / 13 |
+
+**Recommendation: 7,074.** The nearest-reachable rule alone would pick 7,340,
+which realizes the sub-type as **four copies of one session** — rank-deficient
+input to an activation-statistics operator, and a 5× narrower sample of the
+capability the reasoning-heavy profile exists to emphasise. The cost is 452
+positions inside one domain, **0.76% of the budget**, with every declared domain
+weight still exact to 0.70 positions. A 3% shift inside `rag_multihop` is far
+below anything this search can resolve; one session standing in for a sub-type is
+not.
+
+**This is the choice to confirm before materialization.** Under it the sub-type
+quotas are `code` 11,952 · `general` 5,977 · `gsm8k` 10,560 · `openmath` 10,357 ·
+`multihop_qa` 7,074 · `rag_evidence` 7,867 · `tool_calling` 5,976 = **59,763**.
+
+### Why full source support is not attainable, and is not a defect
+
+Requiring every pool item to appear at least once is **impossible for every
+down-weighted domain**, because down-weighting *means* dropping sessions:
+
+| sub-type | overshoot if every item must be used |
+| --- | ---: |
+| tool_calling | +45.67% of its quota |
+| general | +38.65% |
+| multihop_qa | +19.20% |
+| rag_evidence | +13.39% |
+
+Realized support under R5 is `code` 4/6, `general` 12/16, `gsm8k` 9/10,
+`openmath` 3/5, `multihop_qa` 4/5, `rag_evidence` 10/13, `tool_calling` 9/12 —
+**51 of 67 distinct sessions across 62 draws**, and the realization has been
+constructed and checked to sum to 59,763 exactly. "Source support" is preserved in the sense the
+profile declares it (all five sources, all seven sub-types, every domain present);
+it is not, and cannot be, every individual session.
+
+---
+
 ## 3. Implementation status
 
 ### Already built
@@ -138,55 +244,54 @@ written and its branching rule is asserted, but it has never been executed.
   = 10, not 6×2.
 * **All source data is present and hash-verifiable** (§4).
 
-### Missing, and required by the design as written
+### Status against the design, updated 2026-08-25
 
-1. **`calib.reasoning_heavy@v1` is not materialized** — `materialized=False`, no
-   `items_path`, no `content_sha256`; `resolve()` refuses it, and a test asserts
-   that refusal. **Blocked on §2**, not on effort.
+1. **`calib.reasoning_heavy@v2` is not materialized.** v1 is unbuildable (§2);
+   v2's apportionment is derived and verified (§2A) and its realization has been
+   constructed and checked to sum to 59,763 exactly. **Held at the reviewer's
+   checkpoint**: the `multihop_qa` support/deviation choice is proposed, not
+   taken.
 2. **No builder exists for it.** `scripts/data/build_e8_calibration.py` is the
-   only calibration builder and it hard-codes `POSITIONS_PER_SUBTYPE = 8192` as a
-   module constant with no per-domain override, so it cannot express a reweighted
-   mixture without a change. Which change depends on §6.2.
-3. **The Phase-A search entry point is single-profile.**
-   `scripts/autoinit/phase_a_search.py:158-164` builds `profiles=(active_profile,)`
-   and passes `calibration_loader=lambda profile: calibration` — a closure that
-   **ignores its `profile` argument** and returns one fixed item list. Both must
-   change for P=2.
-4. **Latent mislabeling on the same seam, reported and deliberately not fixed
-   here.** At `phase_a_search.py:154-156`, `active_profile` and `calibration`
-   are resolved independently: a caller passing `profile=X` without
-   `calibration_items=` gets a run *labelled* X and *fed* `DOMAIN_BALANCED_V1`
-   items. No current caller does this — every call site passes both or neither —
-   so it is unreachable today and becomes reachable the moment Phase B wires a
-   second profile. It is **not** repaired in this pass: `phase_a_search.py` is
-   inside `PHASE_A_HARNESS_SOURCE_FILES_V1`, so editing it moves the Phase-A
-   harness digest, and moving a digest bound into a closed record buys nothing
-   while no run is authorized. Whoever implements Phase B must fix it in the same
-   change that adds the second profile.
-5. **A two-profile beam has never been RUN — not once, not even at toy scale.**
-   The branching rule above is tested by *enumerating* `_candidate_expansions`;
-   it never calls `search.run()`. Every executed search on record — both dry-run
-   journals (`autoinit_dryrun_{fresh,resume}.json`) and every `make_search`
-   caller in the suite except that one enumeration — uses **P=1**. And every test
-   passes `calibration_loader=lambda profile: items`, a closure that ignores its
-   argument, so **the per-profile loading path has never run with two distinct
-   item sets either**. `dry_run_search.py --profiles 2` exists; no record of it
-   having been executed exists. By this project's own standing rule — four paid
-   pods have died in never-executed lines — a P=2 toy run through the full
-   `run()` cycle, with genuinely different items per profile, is a `$0`
-   prerequisite before any Phase-B pod, not an optional extra.
+   only calibration builder and hard-codes `POSITIONS_PER_SUBTYPE = 8192` with no
+   per-domain override. Blocked on 1 only.
+3. ~~**The Phase-A search entry point is single-profile.**~~ **DONE.**
+   `run_phase_a_search` now takes `profiles=` alongside `profile=`, and
+   `resolve_profiles` / `build_calibration_loader` resolve the searched profiles
+   and their items **together**. The loader answers for the profile it is *asked*
+   about: a mapping keyed by `qualified_id`; a bare sequence only when exactly one
+   profile is active, bound to it, raising if asked about another; or — when
+   omitted — each profile resolving itself from disk, hash-verified. 8 tests,
+   4 mutations.
+4. ~~**Latent mislabeling on the same seam.**~~ **FIXED by 3.** `active_profile`
+   and `calibration` used to be resolved independently, so `profile=X` without
+   `calibration_items=` produced a run *labelled* X and *fed* the domain-balanced
+   mixture. There is no longer a path on which the label and the mixture can
+   disagree.
+   **3 and 4 move the Phase-A harness digest** — `scripts/autoinit/phase_a_search.py`
+   is in `PHASE_A_HARNESS_SOURCE_FILES_V1`. Expected, authorized, and reported. No
+   frozen *science* identity moves.
+5. ~~**A two-profile beam has never been RUN.**~~ **DONE — and it found a
+   defect.** `tests/autoinit/test_two_profile_search.py` executes a full P=2
+   `search.run()` with genuinely different tokens per profile. On its first
+   execution it raised inside the beam: the engine calls `calibration_loader`
+   with the `calib.none@v1` sentinel, whose `resolve()` raises by design. Every
+   loader ever written here was `lambda profile: items`, which ignores its
+   argument and answered anyway, so nothing had ever exercised it; a correct
+   Phase-B loader delegating to `profile.resolve()` would have raised
+   `CalibrationError` there instead — **on a paid pod, mid-search**. Fixed in
+   `search.py` by short-circuiting the sentinel. **No identity moves**:
+   `n_calibration_items` is the only thing derived from that list, `_expand_one`
+   explicitly excludes it from `config_hash`, and both `CalibrationNeed.NONE`
+   implementations ignore `config`. 5 tests, 6 mutations; 1192 autoinit/pod tests
+   pass unchanged.
 6. **No Phase-B session plan or authorization type.** `PHASE_A_PLAN_V1` stages
-   0–5 are Phase-A-shaped (rung 1 on sa, rung 2 on sb, conditional sc, five
-   searched leaves plus the canonical control). `PhaseAAuthorization` refuses a
-   stage outside its authorized set and cannot express a follow-on.
-7. **No Phase-B preregistration.** `autoinit_phase_a_preregistration.json`
-   carries `active_calibration_profile` in the **singular** and contains zero
-   occurrences of `reasoning_heavy` or `phase_b`. Under the project's own rule a
-   ranking policy, halving plan and selection rule must be frozen *before* the run
-   they judge — so a preregistration is a prerequisite, and it cannot be written
-   until §6 is decided.
-
----
+   0–5 are Phase-A-shaped and `PhaseAAuthorization` cannot express a follow-on.
+   Next in sequence, after 1.
+7. **No Phase-B preregistration.** It must bind `calib.reasoning_heavy@v2`'s
+   profile hash, so it follows 1 rather than preceding it. The terminal procedure
+   it will freeze is the reviewer's cross-phase behavioural selection, already
+   encoded mechanically in `scripts/autoinit/price_phase_b.py`.
+8. ~~**The paid work is unpriced.**~~ **DONE.** See §7.
 
 ## 4. Source and asset availability — all present, all $0-verifiable
 
@@ -341,25 +446,24 @@ produce a number that means nothing.
 
 ---
 
-## 8. Ordered readiness checklist
+## 8. Ordered readiness checklist — updated 2026-08-25
 
 | # | item | status |
 | --- | --- | --- |
-| 1 | resolve §6.2 — how the reweighted mixture is drawn | **blocked on reviewer** |
-| 2 | resolve §6.1 — search-only vs search+recovery, and the final-selection rule | **blocked on reviewer** |
-| 3 | resolve §6.3 — reuse Phase A's leaves, or re-run jointly | **blocked on reviewer** |
-| 4 | build `calib.reasoning_heavy@v2` and pin its content hash | $0, blocked on 1 |
-| 5 | fresh leakage proof, if option (c) is chosen | $0, blocked on 1 |
-| 6 | two-profile support in `phase_a_search.py`, incl. the §3.4 mislabeling fix | $0, blocked on 2 |
-| 7 | **run a full toy P=2 beam through `search.run()`** with genuinely different items per profile — never once executed (§3.5) | $0, **not blocked**, and required before any Phase-B pod |
-| 8 | a Phase-B session plan and authorization type | $0, blocked on 2 |
-| 9 | Phase-B preregistration, frozen before the run it judges | $0, blocked on 1–3 |
+| 1 | §6.2 — how the reweighted mixture is drawn | **DECIDED: option (b).** Apportionment derived and verified (§2A); **one choice awaiting confirmation** — `multihop_qa` support vs deviation |
+| 2 | §6.1 — search-only vs search+recovery, and the final-selection rule | **DECIDED:** cross-phase behavioural selection, encoded in `price_phase_b.py` |
+| 3 | §6.3 — reuse Phase-A leaves, or re-run jointly | **DECIDED:** full fresh joint P=2 beam; no leaf reuse to restrict the space |
+| 4 | run a full toy P=2 beam through `search.run()` | **DONE** — and it found a pod-fatal defect (§3.5) |
+| 5 | two-profile support in `phase_a_search.py`, incl. the mislabeling fix | **DONE** (§3.3, §3.4) |
+| 6 | mechanically reprice the missing paid work | **DONE** (§7) |
+| 7 | build `calib.reasoning_heavy@v2` and pin its content hash | $0, blocked on the §2A confirmation |
+| 8 | a Phase-B session plan and authorization type | $0, follows 7 |
+| 9 | Phase-B preregistration, frozen before the run it judges | $0, follows 7 — it must bind v2's profile hash |
 | 10 | measure the activation-statistics GPU/CPU split | collapses the cost range; still unmeasured |
 | 11 | new cumulative-budget decision | **maintainer** |
 | 12 | reviewer GO | **reviewer** |
 
-Items 1–3 are genuinely upstream: four of the remaining `$0` items cannot be
-written without them, and writing them anyway would be inventing Phase-B science
-in an implementation pass. **Item 7 is the exception — it is unblocked and can be
-done now**, and it should be, because "the engine supports P=2" currently rests
-on a branching-rule enumeration rather than on an executed search.
+Items 4, 5 and 6 were the unblocked work and are complete. Item 7 is held at the
+reviewer's own checkpoint — the rule was to propose the rounding/tolerance rule
+*before* materializing the profile — and 8 and 9 follow it because a
+preregistration that does not bind the mixture it judges is not a preregistration.

@@ -91,6 +91,72 @@ def as_operator_items(resolved):
     return out
 
 
+def resolve_profiles(profile, profiles) -> tuple:
+    """The profiles a run actually searches. One place decides, and it refuses
+    to guess: `profile=` and `profiles=` together is an ambiguity, not a default."""
+    if profile is not None and profiles is not None:
+        raise ValueError(
+            "pass profile= or profiles=, not both; two answers to 'which mixtures "
+            "does this search branch over' cannot be reconciled here")
+    if profiles is not None:
+        active = tuple(profiles)
+        if not active:
+            raise ValueError("profiles= is empty; a search must branch over at least one")
+        ids = [p.qualified_id for p in active]
+        if len(set(ids)) != len(ids):
+            raise ValueError(f"profiles= repeats a profile: {ids}")
+        return active
+    return (profile,) if profile is not None else (DOMAIN_BALANCED_V1,)
+
+
+def build_calibration_loader(active_profiles, calibration_items, repo_root):
+    """A loader that answers for the profile it is ASKED about.
+
+    `calibration_items` may be a mapping keyed by `qualified_id` (any number of
+    profiles) or a bare sequence (permitted only when exactly one profile is
+    active, since a bare sequence cannot say which mixture it is). When omitted,
+    each profile resolves itself from disk, hash-verified.
+
+    A loader that ignored its argument was the historical shape and is what made
+    the mislabeling above invisible; it is now impossible to construct here.
+    """
+    from collections.abc import Mapping
+
+    ids = [p.qualified_id for p in active_profiles]
+    if calibration_items is None:
+        cache: dict = {}
+
+        def load(profile):
+            if profile.qualified_id not in cache:
+                cache[profile.qualified_id] = as_operator_items(profile.resolve(repo_root))
+            return cache[profile.qualified_id]
+        return load
+
+    if isinstance(calibration_items, Mapping):
+        missing = [i for i in ids if i not in calibration_items]
+        if missing:
+            raise ValueError(
+                f"calibration_items supplies {sorted(calibration_items)} but the "
+                f"search branches over {ids}; missing {missing}")
+        return lambda profile: calibration_items[profile.qualified_id]
+
+    if len(active_profiles) != 1:
+        raise ValueError(
+            f"calibration_items is a bare sequence but the search branches over "
+            f"{len(active_profiles)} profiles {ids}; a sequence cannot say which "
+            "mixture it is. Pass a mapping keyed by qualified_id")
+    only = ids[0]
+    return lambda profile: calibration_items if profile.qualified_id == only else (
+        _refuse(profile, only))
+
+
+def _refuse(profile, only):
+    raise ValueError(
+        f"the loader was asked for {profile.qualified_id!r} but was built for "
+        f"{only!r}; returning the wrong mixture is how a run gets labelled with "
+        "one profile and fed another")
+
+
 @dataclass
 class PhaseASearch:
     """What the rungs need, as live objects plus a serializable summary."""
@@ -114,7 +180,7 @@ def run_phase_a_search(*, workdir: Path, state_eval: Path, top_n: int,
                        teacher_loader=None, seed: int = SEARCH_SEED,
                        target_geometry: dict | None = None,
                        suite_bundle=None, calibration_items=None,
-                       profile=None,
+                       profile=None, profiles=None,
                        search_minutes: float | None = None,
                        ) -> PhaseASearch:
     """Search, then inject and measure the canonical control on the same suite.
@@ -151,17 +217,28 @@ def run_phase_a_search(*, workdir: Path, state_eval: Path, top_n: int,
 
     # Hash-verified on load: a calibration mixture that drifted would change every
     # operator's statistics without changing any recorded identity.
-    active_profile = profile or DOMAIN_BALANCED_V1
-    calibration = (calibration_items if calibration_items is not None
-                   else as_operator_items(DOMAIN_BALANCED_V1.resolve(repo_root)))
+    #
+    # `active_profiles` and the items are resolved TOGETHER. They used to be
+    # independent: `active_profile` came from `profile or DOMAIN_BALANCED_V1`
+    # while the items fell back to `DOMAIN_BALANCED_V1.resolve()` regardless, so
+    # passing `profile=X` without `calibration_items=` produced a run LABELLED X
+    # and FED the domain-balanced mixture. No caller did that -- every one passed
+    # both or neither -- which is exactly why it survived to the point where
+    # Phase B would be the first to wire a second profile.
+    active_profiles = resolve_profiles(profile, profiles)
+    calibration_loader = build_calibration_loader(
+        active_profiles, calibration_items, repo_root)
 
+    n = len(active_profiles)
     config = SearchConfig(
         run_id="autoinit.v1.phase_a", target_spec=target_spec,
         schedule=SCHEDULE_V1, seed=seed, workdir=Path(workdir),
-        profiles=(active_profile,), policy=PARETO_V1, suite=suite,
+        profiles=active_profiles, policy=PARETO_V1, suite=suite,
         device=device,
         notes={"purpose": "AutoInitializer Phase A, the preregistered search",
-               "profiles": "P=1; the 48 decomposed paths"})
+               "profiles": (f"P={n}; " + ("the 48 decomposed paths" if n == 1
+                                          else f"{24 * (1 + n) * n * n} decomposed paths")),
+               "profile_ids": ",".join(p.qualified_id for p in active_profiles)})
 
     # Runtime only, never hashed: `SearchConfig` fixes the search's identity and
     # a wall-clock budget is not part of it. `--search-minutes` was priced from
@@ -171,7 +248,7 @@ def run_phase_a_search(*, workdir: Path, state_eval: Path, top_n: int,
         adapter=adapter, config=config, root_teacher_id=teacher_id,
         root_teacher_sha256=suite_manifest.get("teacher_sha256", "") or "0" * 64,
         root_loader=lambda: teacher,
-        calibration_loader=lambda profile: calibration,
+        calibration_loader=calibration_loader,
         measurer=lambda model, digest: evaluator.evaluate(model, digest),
         deadline=Deadline.from_minutes(search_minutes))
     result = search.run()
@@ -208,7 +285,13 @@ def run_phase_a_search(*, workdir: Path, state_eval: Path, top_n: int,
         "suite_hash": suite.suite_hash,
         "schedule": SCHEDULE_V1.as_dict(),
         "policy": PARETO_V1.as_dict(),
-        "calibration_profile": active_profile.qualified_id,
+        # Singular stays singular and means what it always meant. On a P>1 run it
+        # is None rather than one of several: a consumer that reads it would
+        # otherwise be told a two-profile search ran under one mixture, which is
+        # the same class of lie the loader seam above was fixed to prevent.
+        "calibration_profile": (active_profiles[0].qualified_id
+                                if len(active_profiles) == 1 else None),
+        "calibration_profiles": [p.qualified_id for p in active_profiles],
         "summary": result.summary(),
         "levels": [level.as_dict() for level in result.levels],
         "resumed_state_ids": list(result.resumed),

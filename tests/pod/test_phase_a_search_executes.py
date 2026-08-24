@@ -239,3 +239,63 @@ def test_the_search_resumes_without_repeating_a_measured_state(tmp_path):
         "whole search again")
     assert (second.summary["summary"]["n_states"]
             == first.summary["summary"]["n_states"])
+
+
+def _profile_b():
+    return CalibrationProfile(
+        profile_id="rehearsal.reasoning_heavy", version=1,
+        description="toy stand-in for calib.reasoning_heavy@v2",
+        sources=tuple(CalibrationSource("rehearsal", "local", d, 2) for d in DOMAINS),
+        domain_weights={d: 1.0 / len(DOMAINS) for d in DOMAINS},
+        token_budget=1, sample_rule="reweighted", seed=2000)
+
+
+def test_the_whole_function_runs_a_two_profile_search(tmp_path):
+    """Phase B's shape, through `run_phase_a_search` itself rather than its helpers.
+
+    `resolve_profiles` and `build_calibration_loader` are unit-tested in
+    `test_phase_a_search_profile_seam.py`, and that was not enough: the rename
+    they were extracted from left a dangling `active_profile` in the summary
+    block — a line only a search that runs to completion reaches. Testing the
+    seam in isolation could not see it. This runs the function.
+    """
+    from phase_a_search import run_phase_a_search
+
+    adapter = get_adapter("qwen3")
+    teacher = _teacher()
+    target_spec = ArchSpec.of("qwen3", TARGET_GEOMETRY)
+    control_dir = tmp_path / "canonical_control"
+    adapter.save(adapter.build_model(
+        adapter.build_config(teacher.config, target_spec), torch.float32, 4242),
+        str(control_dir))
+
+    a, b = _profile(), _profile_b()
+    found = run_phase_a_search(
+        workdir=tmp_path / "search", state_eval=tmp_path / "unused", top_n=3,
+        device="cpu", repo_root=tmp_path, teacher_id="rehearsal-tiny-teacher",
+        canonical_init="canonical_control", canonical_sha256=None,
+        teacher_loader=lambda: teacher, target_geometry=TARGET_GEOMETRY,
+        suite_bundle=_suite_bundle(),
+        # Different tokens per profile: a profile that never reached an operator
+        # would change a result here, not just a label.
+        calibration_items={a.qualified_id: _items(7, 2), b.qualified_id: _items(31, 2)},
+        profiles=(a, b))
+
+    assert found.summary["summary"]["n_complete_leaves"] > 0
+    assert set(found.summary["calibration_profiles"]) == {a.qualified_id, b.qualified_id}
+    # Singular must NOT name one of two mixtures.
+    assert found.summary["calibration_profile"] is None
+    # Both mixtures actually reached the states, and the sentinel is present.
+    seen = {p for state in found.result.states.values() for p in state.profile_ids}
+    assert {a.qualified_id, b.qualified_id} <= seen
+    assert "calib.none@v1" in seen
+    # The whole summary still serializes -- the driver writes it to disk, and the
+    # dangling reference this test exists for was IN that block.
+    import json
+    json.dumps(found.summary, default=str)
+
+
+def test_a_single_profile_run_still_reports_its_profile_in_the_singular(searched):
+    """The existing consumer (`test_phase_a_stages1_5_execute`) reads this key."""
+    assert searched.summary["calibration_profile"] == "rehearsal.domain_balanced@v1"
+    assert searched.summary["calibration_profiles"] == ["rehearsal.domain_balanced@v1"]

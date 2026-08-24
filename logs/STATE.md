@@ -87,9 +87,16 @@ freed to 0.01 GiB, and the evaluation tokenizer materialized before every batter
    whole pool, so a draw without replacement is the identity), the repository
    prices Phase B as a **search only** and records **no rule** for combining it
    with Phase A's behavioural result, and no Phase-B preregistration exists. The
-   search engine branches over two profiles and the entry point does not — but a
-   two-profile beam has **never actually been run**, not even at toy scale, so a
-   `$0` P=2 rehearsal through the full cycle is an unblocked prerequisite. Full
+   **The reviewer's decisions were taken 2026-08-25** — mixture option (b), a
+   full fresh joint P=2 beam with no Phase-A leaf reuse, and a cross-phase
+   behavioural terminal selection — and the unblocked `$0` implementation is
+   done: a toy P=2 `search.run()` (which found a **pod-fatal defect**: the engine
+   asked the calibration loader for the `calib.none` sentinel, which `resolve()`
+   refuses; every historical loader ignored its argument and answered anyway),
+   the two-profile entry point and the profile/items mislabeling seam, and the
+   mechanical repricing. **One item awaits confirmation**: the `multihop_qa`
+   support-vs-deviation choice, at the reviewer's own "propose before
+   implementing" checkpoint. Full
    reconstruction, arithmetic, derived cost and the readiness checklist:
    [`autoinit_phase_b_reconstruction.md`](autoinit_phase_b_reconstruction.md).
 2. **Complete final initialization selection**, after Phase B. Phase A's
