@@ -80,7 +80,18 @@ freed to 0.01 GiB, and the evaluation tokenizer materialized before every batter
 1. **Phase B** — test the AutoInitializer's **calibration/data-distribution
    sensitivity**: the planned `calib.reasoning_heavy@v1` against the existing
    `calib.domain_balanced@v1`. Phase A searched under one distribution only, so
-   its ranking is conditional on that choice.
+   its ranking is conditional on that choice. **Reconstructed at `$0` on
+   2026-08-24 and BLOCKED on three reviewer decisions**, not on implementation:
+   `calib.reasoning_heavy@v1` **cannot be built as specified** (its weights need
+   more `code` and `math` than its declared pool holds, and its budget *is* the
+   whole pool, so a draw without replacement is the identity), the repository
+   prices Phase B as a **search only** and records **no rule** for combining it
+   with Phase A's behavioural result, and no Phase-B preregistration exists. The
+   search engine branches over two profiles and the entry point does not — but a
+   two-profile beam has **never actually been run**, not even at toy scale, so a
+   `$0` P=2 rehearsal through the full cycle is an unblocked prerequisite. Full
+   reconstruction, arithmetic, derived cost and the readiness checklist:
+   [`autoinit_phase_b_reconstruction.md`](autoinit_phase_b_reconstruction.md).
 2. **Complete final initialization selection**, after Phase B. Phase A's
    `unresolved_equivalence` is not a final selection.
 3. **The canonical Stage-1 NLL diagnostic**, run on the finally selected

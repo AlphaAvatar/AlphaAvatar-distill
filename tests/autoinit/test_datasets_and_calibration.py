@@ -224,6 +224,49 @@ def test_the_built_profile_resolves_and_re_derives_the_frozen_mixture_hash():
 
 
 @needs_calibration
+def test_reasoning_heavy_v1_cannot_be_drawn_from_its_declared_pool():
+    """Phase B's blocker, pinned so a weight edit has to confront it.
+
+    `calib.reasoning_heavy@v1` declares itself a reweighted draw from the
+    domain-balanced pool at `token_budget == 59_763`. Two things are wrong with
+    that and both are arithmetic, not opinion:
+
+    * the pool cannot supply the `code` or `math` weights at that budget;
+    * the budget *is* the whole pool, so a draw without replacement is the
+      identity — two profiles differing only by `profile_hash`, which is the
+      byte-identical-state failure the 2026-08-12 Decision (1) removed.
+
+    See `logs/autoinit_phase_b_reconstruction.md` §2. Every resolution needs a
+    new profile version, so this test is expected to be *deleted with a decision
+    record*, not quietly relaxed.
+    """
+    pool = {}
+    for line in CALIB_ITEMS.read_text().splitlines():
+        item = json.loads(line)
+        pool[item["domain"]] = pool.get(item["domain"], 0) + item["n_prediction_positions"]
+
+    # Transcribed, not read from the profile: a constant that imported its own
+    # expected value from its subject could never fail.
+    assert pool == {"general": 8287, "math": 16781, "rag_multihop": 17368,
+                    "code": 8622, "tool": 8705}
+    assert sum(pool.values()) == 59_763 == REASONING_HEAVY_V1.token_budget, (
+        "the declared budget is the entire pool, so a without-replacement draw "
+        "reproduces calib.domain_balanced@v1 exactly")
+
+    budget = REASONING_HEAVY_V1.token_budget
+    short = {d: w * budget - pool[d]
+             for d, w in REASONING_HEAVY_V1.domain_weights.items()
+             if w * budget > pool[d]}
+    assert sorted(short) == ["code", "math"]
+    assert round(short["code"], 1) == 3330.6
+    assert round(short["math"], 1) == 4136.0
+
+    # `code` binds: the largest budget at which every weight is achievable.
+    feasible = min(pool[d] / w for d, w in REASONING_HEAVY_V1.domain_weights.items())
+    assert round(feasible, 1) == 43110.0 and feasible < budget
+
+
+@needs_calibration
 def test_a_tampered_mixture_is_rejected_even_at_the_right_file_hash():
     from aadistill.autoinit.calibration import CalibrationError, mixture_content_sha256
 

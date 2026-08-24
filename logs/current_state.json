@@ -1,6 +1,6 @@
 {
   "schema": "aadistill.current_state/v2",
-  "generated_utc": "2026-08-21T16:00:00Z",
+  "generated_utc": "2026-08-24T18:00:00Z",
   "_contract": "The minimal machine-readable CURRENT snapshot: live facts only, no history, no per-attempt detail, no narrative. History lives in logs/decisions.md and the per-run directories; the human view is logs/STATE.md and the two must agree. Ownership: logs/CATALOG.md.",
   "baseline_commit": "6734dd2f49f04b3ac37ba635db30f697bf13ccad",
   "baseline_commit_meaning": "The LAST TESTED IMPLEMENTATION: the commit whose tree produced the latest_verification figures.",
@@ -61,12 +61,12 @@
     "Stage 0 on hardware, passed six times; attempt 4 also passed STAGE 1 on hardware -- five leaves re-identified from pod bytes, control measured on state_eval@v1"
   ],
   "latest_verification": {
-    "utc": "2026-08-24T06:00:00Z",
-    "after": "the Phase-A $0 closeout",
-    "full_suite": "2187 passed, 12 skipped in 18:43 (+4: the attempt-7 launcher regressions)",
+    "utc": "2026-08-24T18:00:00Z",
+    "after": "the $0 Phase-B reconstruction pass",
+    "full_suite": "2188 passed, 12 skipped in 18:44 (+1: the Phase-B calibration blocker). A first run failed test_the_snapshot_stays_minimal_and_declares_its_contract -- this file had been pushed past its 12,000-byte ceiling; the detail was moved to the reconstruction doc and the suite re-run clean",
     "frozen_asset_verifier": "passed, no problems",
-    "mutations": "3 on the launcher fix: the crash restored at the call site, failed transfers waved through, and a missing rc defaulted to 0",
-    "harness_digest": "b824441c -> a27bb922; session_runner.py is one of the 22 harness files and the fetch_result_ok repair changed it. No frozen SCIENCE identity moved",
+    "mutations": "3 on the new blocker test, each turning the passing state into a failing one: the budget lowered to the feasible figure, the binding weight moved off code, and the transcribed pool constant corrupted",
+    "harness_digest": "UNCHANGED, both of them: phase_a 58011135, continuation a27bb922. Only logs/ and one test file were touched; no harness or src file moved, and no frozen SCIENCE identity moved",
     "scope": "CPU only, repo .venv; no checkpoint loaded, no metric measured, no GPU used"
   },
   "failed": [
@@ -128,7 +128,9 @@
   },
   "next_sequence": {
     "_status": "NONE of this is implemented or started, and none of it is funded",
-    "1_phase_b": "calibration/data-distribution sensitivity: planned calib.reasoning_heavy@v1 vs the existing calib.domain_balanced@v1. Phase A searched one distribution only",
+    "1_phase_b": "calibration/data-distribution sensitivity: planned calib.reasoning_heavy@v1 vs the existing calib.domain_balanced@v1. Phase A searched one distribution only. RECONSTRUCTED at $0 2026-08-24 and BLOCKED on reviewer decisions, not on implementation -- see logs/autoinit_phase_b_reconstruction.md",
+    "1_phase_b_blocked_on": "THREE reviewer decisions, not implementation: (a) calib.reasoning_heavy@v1 cannot be built as specified -- its weights need more code and math than its declared pool holds, and its budget IS the whole pool, so a without-replacement draw is the identity; (b) the repo prices Phase B as a SEARCH ONLY and records no rule for combining it with Phase A, which has no winner; (c) no Phase-B preregistration exists. Arithmetic, options, derived cost and the readiness checklist: logs/autoinit_phase_b_reconstruction.md",
+    "1_phase_b_cost": "search P=2 beam 6 warmup 1 on L40S: $1.8950-$7.4349, 244.9 GiB working (provision >=300 GiB). Recovery probes NOT specified. Indicative hard totals with a $3.00 reserve: ~$10.44 / ~$25.17 / ~$30.08; implied cap ~$240.47 / ~$255.20 / ~$260.11. NOT an authorization",
     "2_final_selection": "complete final initialization selection after Phase B; Phase A's unresolved_equivalence is not a final selection",
     "3_canonical_stage1_nll": "the canonical Stage-1 NLL diagnostic on the finally selected initialization, under the established Stage-1 measurement contract. DIAGNOSTIC ONLY, never a promotion criterion, and NOT the state_eval@v1 search-side NLL fields. Never yet run",
     "4_formal_recovery": "only then, the project's formal Stage 2/Stage 3 recovery training",

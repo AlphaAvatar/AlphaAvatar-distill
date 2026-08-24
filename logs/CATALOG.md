@@ -50,6 +50,7 @@ overview and links here instead. A structural test enforces this.
 | `autoinit_measurement_session.json` | that session's record |
 | `autoinit_causal_depth_pricing_bound.json` | the DERIVED Stage-1 wall-time and VRAM bound for the repaired path, and the measurement protocol that would confirm it |
 | `relay_mirror_verification.json` | file-by-file proof that a local tree is byte-identical to its relay copy, and by which method each file was checked. The evidence a "stale local cache" deletion stands on |
+| `autoinit_phase_b_reconstruction.md` | what Phase B **is** according to this repository, what blocks it, and what it would cost — the reconstruction of the committed design, its three open scientific choices, the arithmetic showing `calib.reasoning_heavy@v1` is unbuildable as specified, and the readiness checklist. Owns no live spend or authorization fact; it links to `BUDGET_LEDGER.md` for those |
 | `supported_models.md` | the supported-model table (AGENTS.md §3.4) |
 | `artifact_manifests.md` | external artifact manifests |
 | `CATALOG.md` | this file |
