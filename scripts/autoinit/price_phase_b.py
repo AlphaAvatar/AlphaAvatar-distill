@@ -12,11 +12,17 @@ same materialized recovery protocol and seed. So the paid probe count is the
 candidate set MINUS what has already been observed, and pricing it any other way
 would bill for evidence this project already owns.
 
-What is reused is therefore not an assumption here: the inventory is read off the
-probe records in `logs/autoinit_recovery_continuation_attempt7/probes/`, and a
-candidate/seed pair counts as observed only if its record is on disk. Reuse
-remains **conditional** on the strict reconstruction check at run time — this
-script prices the best case for reuse and reports the worst case beside it.
+Reuse is **not** assumed from the existence of a file. It is taken from
+`logs/autoinit_historical_probe_reuse.json`, the strict reconstruction record
+produced by `verify_historical_probe_reuse.py`, and this script **fails closed**
+if that record is missing, unverified, or describes a different set of probe
+bytes than the ones on disk now.
+
+One leg of reuse cannot be closed at `$0`: Phase B's own runtime must be
+comparable to Phase A's under `generation_runtime_comparability@v2`, and Phase
+B's runtime does not exist yet. If that Stage-0 precondition fails, **every**
+historical probe is lost at once — so it is a separate scenario here, not a
+widening of a range.
 
 Every anchor is the one `plan_search.py` already uses; none is re-derived here.
 """
@@ -57,9 +63,12 @@ SETUP_RESERVE_USD = 3.00
 
 PROBE_RE = re.compile(r"^autoinit\.v1\.phase_a\.rung(\d)\.([^.]+)\.(s[abc])\.json$")
 
+#: The strict reconstruction record this pricing is conditional on.
+REUSE_RECORD = REPO_ROOT / "logs/autoinit_historical_probe_reuse.json"
+
 
 def observed_probes(root: Path = PROBES) -> dict[str, set[str]]:
-    """{candidate -> {seeds observed}}, read off disk rather than assumed."""
+    """{candidate -> {seeds observed}} — what EXISTS, which is not what is reusable."""
     seen: dict[str, set[str]] = {}
     if not root.is_dir():
         raise SystemExit(f"no probe records at {root}; cannot price reuse")
@@ -68,6 +77,43 @@ def observed_probes(root: Path = PROBES) -> dict[str, set[str]]:
         if m:
             seen.setdefault(m.group(2), set()).add(m.group(3))
     return seen
+
+
+def _repo_relative(path: Path) -> str:
+    """Repo-relative when it can be, absolute otherwise. A record that names a
+    path outside the tree is a fact worth printing, not a crash."""
+    try:
+        return str(path.relative_to(REPO_ROOT))
+    except ValueError:
+        return str(path)
+
+
+def verified_reuse() -> dict:
+    """The reuse verdict, or a refusal. Never a default.
+
+    Pricing against unverified reuse is how a session gets funded for five probes
+    and then owes eight, so every failure path here raises instead of degrading
+    to the pessimistic case: a silent fallback would look like a priced plan.
+    """
+    from verify_historical_probe_reuse import probes_dir_digest
+
+    if not REUSE_RECORD.is_file():
+        raise SystemExit(
+            f"{REUSE_RECORD.name} is missing. Run "
+            "scripts/autoinit/verify_historical_probe_reuse.py first; reuse may "
+            "not be priced from the existence of probe files.")
+    rec = json.loads(REUSE_RECORD.read_text())
+    if not rec.get("reuse_verified"):
+        raise SystemExit(
+            f"{REUSE_RECORD.name} reports reuse_verified=false "
+            f"({rec.get('failures')}); re-verify or price the no-reuse scenario "
+            "explicitly.")
+    live = probes_dir_digest()
+    if rec.get("probes_dir_digest") != live:
+        raise SystemExit(
+            f"{REUSE_RECORD.name} verified probe bytes {str(rec.get('probes_dir_digest'))[:12]} "
+            f"but the directory now hashes to {live[:12]}; re-run the verifier.")
+    return rec
 
 
 def price(hardware=L40S_MEASURED) -> dict:
@@ -82,32 +128,44 @@ def price(hardware=L40S_MEASURED) -> dict:
         warmup_levels=SCHEDULE_V1.warmup_levels, hardware=hardware,
         composite=COMPOSITE).as_dict()
 
-    # --- sa: every candidate, minus those already observed on sa -------------
+    # --- reuse comes from the strict reconstruction record, not from `seen` ----
+    reuse = verified_reuse()
+    verified = set(reuse["admitted_reusable_probes"])          # "candidate/seed"
+
+    def has(candidate: str, seed: str) -> bool:
+        return f"{candidate}/{seed}" in verified
+
     priors = [*PHASE_A_FINALISTS, CONTROL]
-    sa_reusable = [c for c in priors if "sa" in seen.get(c, ())]
-    sa_missing = PHASE_B_SEARCHED_LEAVES + (len(priors) - len(sa_reusable))
+    n_candidates = PHASE_B_SEARCHED_LEAVES + len(priors)
 
-    # --- sb and sc are driven by WHICH candidates survive sa, which is not
-    # knowable before the run. The two ends must be internally coherent: pricing
-    # sb as if the survivors were new AND sc as if they were the priors mixes two
-    # incompatible worlds and understates the bill.
-    control_sb = "sb" in seen.get(CONTROL, ())
-    control_sc = "sc" in seen.get(CONTROL, ())
-    priors_with_sc = [c for c in PHASE_A_FINALISTS if "sc" in seen.get(c, ())]
+    # --- sa: every candidate, minus the priors whose sa is VERIFIED reusable ---
+    sa_reusable = [c for c in priors if has(c, "sa")]
+    sa_missing = n_candidates - len(sa_reusable)
 
-    # Best: both survivors are the Phase-A finalists, and no tie-break fires.
+    control_sb, control_sc = has(CONTROL, "sb"), has(CONTROL, "sc")
+    priors_with_sc = [c for c in PHASE_A_FINALISTS if has(c, "sc")]
+
+    # Best: reuse holds, both sb survivors are the Phase-A finalists, no tie-break.
     sb_missing_best = 0 if control_sb else 1
     sc_missing_best = 0
 
-    # Worst: both survivors are new Phase-B leaves, and the tie-break fires over
-    # the two survivors plus the control — none of which has an sc on record.
+    # Worst WITH reuse: both survivors are new Phase-B leaves, and the tie-break
+    # fires over those two plus the control. Coherent: one world, not a mix.
     sb_missing_worst = SURVIVORS_AT_SB + (0 if control_sb else 1)
     sc_missing_worst = SURVIVORS_AT_SB + (0 if control_sc else 1)
 
+    # Worst WITHOUT reuse: Stage 0 finds Phase B's runtime not comparable, so no
+    # historical probe may be cited and every rung is paid in full.
+    nr_sa = n_candidates
+    nr_sb = SURVIVORS_AT_SB + 1
+    nr_sc = SURVIVORS_AT_SB + 1
+
     lo_probes = sa_missing + sb_missing_best + sc_missing_best
     hi_probes = sa_missing + sb_missing_worst + sc_missing_worst
+    nr_probes = nr_sa + nr_sb + nr_sc
     lo = search["usd_low"] + lo_probes * unit["total_usd"] + SETUP_RESERVE_USD
     hi = search["usd_high"] + hi_probes * unit["total_usd"] + SETUP_RESERVE_USD
+    nr = search["usd_high"] + nr_probes * unit["total_usd"] + SETUP_RESERVE_USD
 
     return {
         "schema": "aadistill.autoinit.phase_b_pricing/v1",
@@ -131,21 +189,29 @@ def price(hardware=L40S_MEASURED) -> dict:
         },
         "observed_probes": {k: sorted(v) for k, v in sorted(seen.items())},
         "scenarios": {
-            "best": ("both sb survivors are the Phase-A finalists (their sb is on "
-                     "record) and no tie-break fires"),
-            "worst": ("both sb survivors are new Phase-B leaves, and the tie-break "
-                      "fires over those two plus the control -- none of which has "
-                      "an sc on record"),
+            "low": ("reuse holds; both sb survivors are the Phase-A finalists, whose "
+                    "sb is verified; no tie-break fires. A FLOOR, not an expectation: "
+                    "no expected-value assumption over survivor identity or tie-break "
+                    "probability is defined anywhere, so this is not an 'expected' cost"),
+            "hard_with_reuse": ("reuse holds; both sb survivors are new Phase-B leaves "
+                                "and the tie-break fires over those two plus the "
+                                "control, none of which has a verified sc"),
+            "hard_no_reuse": ("Stage 0 finds Phase B's runtime not comparable to Phase "
+                              "A's under generation_runtime_comparability@v2, so NO "
+                              "historical probe may be cited and every rung is paid in "
+                              "full. This is the binding bound for an authorization"),
         },
         "reuse": {
+            "source": _repo_relative(REUSE_RECORD),
+            "verified": True,
+            "probes_dir_digest": reuse["probes_dir_digest"],
+            "admitted_reusable_probes": sorted(verified),
+            "verifiable_but_not_admitted": reuse.get("verifiable_but_not_admitted", []),
             "sa_reusable": sorted(sa_reusable),
             "priors_with_sc": sorted(priors_with_sc),
-            "control_sb_on_record": control_sb,
-            "control_sc_on_record": control_sc,
-            "conditional_on": ("strict reconstruction proving the same "
-                               "materialized recovery protocol and seed; a "
-                               "candidate that fails it is re-run and priced "
-                               "at the worst case"),
+            "control_sb_verified": control_sb,
+            "control_sc_verified": control_sc,
+            "open_precondition": reuse["open_precondition"],
             "not_admitted": ("the other three Phase-A leaves (158b96cf, "
                              "281a02c3, 4e429f7e) also hold sa probes and are "
                              "retained off-pod; the procedure admits only the "
@@ -155,7 +221,9 @@ def price(hardware=L40S_MEASURED) -> dict:
             "sa_missing": sa_missing,
             "sb_missing_low": sb_missing_best, "sb_missing_high": sb_missing_worst,
             "sc_missing_low": sc_missing_best, "sc_missing_high": sc_missing_worst,
+            "no_reuse_sa": nr_sa, "no_reuse_sb": nr_sb, "no_reuse_sc": nr_sc,
             "total_low": lo_probes, "total_high": hi_probes,
+            "total_no_reuse": nr_probes,
             "per_probe_usd": round(unit["total_usd"], 4),
             "per_probe_hours": round(unit["hours"], 4),
         },
@@ -174,10 +242,16 @@ def price(hardware=L40S_MEASURED) -> dict:
         },
         "setup_reserve_usd": SETUP_RESERVE_USD,
         "total": {
-            "expected_usd": round(lo, 4), "hard_usd": round(hi, 4),
-            "note": ("expected = search low + best-case reuse; hard = search high "
-                     "+ no reuse beyond sa. The range is dominated by the "
-                     "activation-statistics GPU/CPU split, still unmeasured."),
+            "low_usd": round(lo, 4),
+            "hard_with_reuse_usd": round(hi, 4),
+            "hard_no_reuse_usd": round(nr, 4),
+            "note": ("low is a FLOOR, not an expectation -- no expected-value "
+                     "assumption is defined. hard_no_reuse is what an authorization "
+                     "must cover, because the comparability precondition is only "
+                     "testable at Stage 0 of the run itself. The spread within each "
+                     "scenario is dominated by the activation-statistics GPU/CPU "
+                     "split, still unmeasured and deliberately not measured by a "
+                     "separate paid session."),
         },
     }
 
@@ -192,13 +266,15 @@ def main() -> None:
     out.write_text(json.dumps(result, indent=2) + "\n")
 
     p, t, s = result["probes"], result["total"], result["search"]
-    print(f"search P=2         ${s['usd_low']:.4f} - ${s['usd_high']:.4f}   "
+    print(f"search P=2          ${s['usd_low']:.4f} - ${s['usd_high']:.4f}   "
           f"{s['hours_low']:.2f}-{s['hours_high']:.2f} h, {s['peak_storage_gib_working']} GiB working")
-    print(f"probes still owed  {p['total_low']}-{p['total_high']} "
-          f"(sa {p['sa_missing']}, sb {p['sb_missing_low']}-{p['sb_missing_high']}, "
-          f"sc {p['sc_missing_low']}-{p['sc_missing_high']}) @ ${p['per_probe_usd']}")
-    print(f"setup reserve      ${result['setup_reserve_usd']:.2f}")
-    print(f"TOTAL              expected ${t['expected_usd']:.4f}   hard ${t['hard_usd']:.4f}")
+    print(f"reuse               VERIFIED: {len(result['reuse']['admitted_reusable_probes'])} probes "
+          f"({', '.join(result['reuse']['admitted_reusable_probes'])})")
+    print(f"probes owed         low {p['total_low']}  hard/reuse {p['total_high']}  "
+          f"hard/no-reuse {p['total_no_reuse']}  @ ${p['per_probe_usd']}")
+    print(f"setup reserve       ${result['setup_reserve_usd']:.2f}")
+    print(f"TOTAL               low ${t['low_usd']:.4f}   hard(reuse) ${t['hard_with_reuse_usd']:.4f}   "
+          f"hard(no reuse) ${t['hard_no_reuse_usd']:.4f}")
     print(f"wrote {out.relative_to(REPO_ROOT)}")
 
 

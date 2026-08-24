@@ -199,7 +199,13 @@ def test_the_three_v1_profiles_are_representable_and_only_one_is_built():
     assert [p.profile_id for p in (STAGE0_CURRENT_V1, DOMAIN_BALANCED_V1,
                                    REASONING_HEAVY_V1)] == [
         "calib.stage0_current", "calib.domain_balanced", "calib.reasoning_heavy"]
-    assert [p.qualified_id for p in buildable_profiles()] == ["calib.domain_balanced@v1"]
+    # Of the v1 generation, still exactly one. `calib.reasoning_heavy@v2` is now
+    # built too and appears in `buildable_profiles()`; v1 remains unbuildable by
+    # arithmetic, which is why there is a v2 at all — see
+    # tests/autoinit/test_reasoning_heavy_v2.py.
+    v1_buildable = [p.qualified_id for p in buildable_profiles()
+                    if p.qualified_id.endswith("@v1")]
+    assert v1_buildable == ["calib.domain_balanced@v1"]
 
 
 def test_an_unbuilt_profile_refuses_to_resolve():

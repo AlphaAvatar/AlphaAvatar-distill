@@ -1,6 +1,6 @@
 {
   "schema": "aadistill.autoinit.phase_b_pricing/v1",
-  "generated_utc": "2026-08-24T18:12:08.960701+00:00",
+  "generated_utc": "2026-08-24T19:11:13.873973+00:00",
   "_contract": "Prices the paid work Phase B still owes under the 2026-08-25 reviewer procedure. NOT an authorization, and not a grant: the binding per-launch ceiling is issued by the authorization code against a frozen plan.",
   "hardware": {
     "name": "L40S",
@@ -50,10 +50,29 @@
     ]
   },
   "scenarios": {
-    "best": "both sb survivors are the Phase-A finalists (their sb is on record) and no tie-break fires",
-    "worst": "both sb survivors are new Phase-B leaves, and the tie-break fires over those two plus the control -- none of which has an sc on record"
+    "low": "reuse holds; both sb survivors are the Phase-A finalists, whose sb is verified; no tie-break fires. A FLOOR, not an expectation: no expected-value assumption over survivor identity or tie-break probability is defined anywhere, so this is not an 'expected' cost",
+    "hard_with_reuse": "reuse holds; both sb survivors are new Phase-B leaves and the tie-break fires over those two plus the control, none of which has a verified sc",
+    "hard_no_reuse": "Stage 0 finds Phase B's runtime not comparable to Phase A's under generation_runtime_comparability@v2, so NO historical probe may be cited and every rung is paid in full. This is the binding bound for an authorization"
   },
   "reuse": {
+    "source": "logs/autoinit_historical_probe_reuse.json",
+    "verified": true,
+    "probes_dir_digest": "a5115816861ad239f646facec4d53ba2c7925c9430c530e7c6d0af2560d5b1af",
+    "admitted_reusable_probes": [
+      "85bde4ded2c3/sa",
+      "85bde4ded2c3/sb",
+      "85bde4ded2c3/sc",
+      "cca699c93f34/sa",
+      "cca699c93f34/sb",
+      "cca699c93f34/sc",
+      "control-qwen/sa",
+      "control-qwen/sb"
+    ],
+    "verifiable_but_not_admitted": [
+      "158b96cf651f/sa",
+      "281a02c3ac18/sa",
+      "4e429f7ed722/sa"
+    ],
     "sa_reusable": [
       "85bde4ded2c3",
       "cca699c93f34",
@@ -63,9 +82,24 @@
       "85bde4ded2c3",
       "cca699c93f34"
     ],
-    "control_sb_on_record": true,
-    "control_sc_on_record": false,
-    "conditional_on": "strict reconstruction proving the same materialized recovery protocol and seed; a candidate that fails it is re-run and priced at the worst case",
+    "control_sb_verified": true,
+    "control_sc_verified": false,
+    "open_precondition": {
+      "what": "Phase B's own runtime must be comparable to Phase A's under generation_runtime_comparability@v2",
+      "why_not_checkable_now": "Phase B's runtime does not exist yet",
+      "checked_where": "Stage 0 of the eventual Phase-B session, fail-closed",
+      "if_it_fails": "ALL historical reuse is lost at once, not part of it; priced as a separate no-reuse scenario",
+      "phase_a_comparability": {
+        "rule": "generation_runtime_comparability@v2",
+        "live_identity": "70a26e0b43df20e469385115b49683b50936919e02986088b76d3c30ffd87103",
+        "historical_identity": "70a26e0b43df20e469385115b49683b50936919e02986088b76d3c30ffd87103",
+        "identities_equal": true,
+        "live_driver": "580.178.04",
+        "historical_driver": "580.159.03",
+        "driver_branch_equal": true,
+        "driver_patch_differs": true
+      }
+    },
     "not_admitted": "the other three Phase-A leaves (158b96cf, 281a02c3, 4e429f7e) also hold sa probes and are retained off-pod; the procedure admits only the two finalists, so their sa evidence goes unused"
   },
   "probes": {
@@ -74,8 +108,12 @@
     "sb_missing_high": 2,
     "sc_missing_low": 0,
     "sc_missing_high": 3,
+    "no_reuse_sa": 8,
+    "no_reuse_sb": 3,
+    "no_reuse_sc": 3,
     "total_low": 5,
     "total_high": 10,
+    "total_no_reuse": 14,
     "per_probe_usd": 1.637,
     "per_probe_hours": 1.4152
   },
@@ -95,8 +133,9 @@
   },
   "setup_reserve_usd": 3.0,
   "total": {
-    "expected_usd": 13.08,
-    "hard_usd": 26.8049,
-    "note": "expected = search low + best-case reuse; hard = search high + no reuse beyond sa. The range is dominated by the activation-statistics GPU/CPU split, still unmeasured."
+    "low_usd": 13.08,
+    "hard_with_reuse_usd": 26.8049,
+    "hard_no_reuse_usd": 33.3529,
+    "note": "low is a FLOOR, not an expectation -- no expected-value assumption is defined. hard_no_reuse is what an authorization must cover, because the comparability precondition is only testable at Stage 0 of the run itself. The spread within each scenario is dominated by the activation-statistics GPU/CPU split, still unmeasured and deliberately not measured by a separate paid session."
   }
 }

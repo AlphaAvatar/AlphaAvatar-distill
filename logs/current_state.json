@@ -1,6 +1,6 @@
 {
   "schema": "aadistill.current_state/v2",
-  "generated_utc": "2026-08-25T12:00:00Z",
+  "generated_utc": "2026-08-25T20:00:00Z",
   "_contract": "The minimal machine-readable CURRENT snapshot: live facts only, no history, no per-attempt detail, no narrative. History lives in logs/decisions.md and the per-run directories; the human view is logs/STATE.md and the two must agree. Ownership: logs/CATALOG.md.",
   "baseline_commit": "6734dd2f49f04b3ac37ba635db30f697bf13ccad",
   "baseline_commit_meaning": "The LAST TESTED IMPLEMENTATION: the commit whose tree produced the latest_verification figures.",
@@ -61,12 +61,12 @@
     "Stage 0 on hardware, passed six times; attempt 4 also passed STAGE 1 on hardware -- five leaves re-identified from pod bytes, control measured on state_eval@v1"
   ],
   "latest_verification": {
-    "utc": "2026-08-25T12:00:00Z",
-    "after": "the Phase-B unblocked implementation pass (items 4-6)",
-    "full_suite": "2210 passed, 12 skipped in 18:48 (+22 across five new gates)",
+    "utc": "2026-08-25T20:00:00Z",
+    "after": "Phase-B: v2 materialized, reuse verified, pricing contract repaired",
+    "full_suite": "2239 passed, 12 skipped in 19:13",
     "frozen_asset_verifier": "passed, no problems",
-    "mutations": "18 across five gates, each turning a passing state into a failing one: 3 on the calibration blocker, 6 on the two-profile search, 4 on the profile/items seam, 5 on the repricing, 3 on the whole-function P=2 run. Two of my own gates were found weak first: one assertion was vacuous, and the seam unit tests missed a dangling reference in a line only a completed search reaches.",
-    "harness_digest": "phase_a 58011135 -> a182efb4: phase_a_search.py is in PHASE_A_HARNESS_SOURCE_FILES_V1 and gained two-profile support, the mislabeling fix and a truthful singular/plural profile summary. Expected and authorized 2026-08-25. continuation a27bb922 UNCHANGED. No frozen SCIENCE identity moved.",
+    "mutations": "29 across eight gates. Three of my own gates were weak first and are recorded, not quietly fixed: one vacuous assertion; seam unit tests that missed a dangling reference only a completed search reaches; and v2 tests that read the BUILT ARTIFACT, so reverting the sub-type repair left them green while the code no longer produced the pinned mixture. A rebuild-from-pool test closes it.",
+    "harness_digest": "phase_a a182efb4 and continuation a27bb922, BOTH UNCHANGED this pass -- which is itself a finding: this pass changed search.py (the sentinel fix) and calibration.py (v2), both of which determine what a paid search computes, and neither is in PHASE_A_HARNESS_SOURCE_FILES_V1. Nor are ranking.py, reweight.py or operators/base.py. Extending the set is a Phase-B plan decision (it moves the digest), so it is SURFACED, not taken.",
     "scope": "CPU only, repo .venv; no checkpoint loaded, no metric measured, no GPU used"
   },
   "failed": [
@@ -78,7 +78,7 @@
       "impact": "cosmetic: everything was fetched and nothing was owed off-pod, but the session read INCOMPLETE/passed=false despite DRIVER_EXITED:0. FIXED in the 2026-08-24 closeout via fetch_result_ok; attempt 7's own record is left as written"
     }
   ],
-  "failure_pattern": "continuation 1 an uncaught transport call, 2 an undeliverable asset, 3 dev-box-only code in the pod gate, 4 the attempt-12 OOM class, 5 a checkpoint path, 6 a trainer-written checkpoint with no tokenizer, 7 the DRIVER SUCCEEDED and the launcher crashed after collection on a line only success reaches. Each failure was further in than the last",
+  "failure_pattern": "continuation 1 an uncaught transport call, 2 an undeliverable asset, 3 dev-box-only code in the pod gate, 4 the attempt-12 OOM class, 5 a checkpoint path, 6 a checkpoint with no tokenizer, 7 the DRIVER SUCCEEDED and the launcher crashed on a line only success reaches. Each failure was further in than the last. See logs/decisions.md",
   "abandoned": [
     "recovery_search_v1 (INVALID before first use)",
     "Phase-A pricing bases $20.0126 and $22.4508",
@@ -87,8 +87,8 @@
     "the paid device-canary session path: STRATEGICALLY TERMINATED 2026-08-18. Two authorized sessions, $0.1240, zero canary runs; both died in the wrapper's inherited contracts. Its evidence and its generic lesson are kept; no further canary is prepared."
   ],
   "next_starting_point": {
-    "status": "Phase A is complete (unresolved_equivalence, no winner). Phase B's reviewer decisions are taken and its unblocked $0 implementation is done. Nothing is running, billing, authorized or prepared.",
-    "the_ask": "Confirm the multihop_qa support/deviation choice in logs/autoinit_phase_b_reconstruction.md 2A, then v2 / plan / preregistration follow. A paid Phase B needs a new cumulative-budget decision: $3.9650 remains against a $26.8049 hard bound.",
+    "status": "Phase A is complete (unresolved_equivalence, no winner). Phase B's decisions are taken, its calibration profile is materialized and its paid work is priced. Nothing is running, billing, authorized or prepared.",
+    "the_ask": "The remaining $0 work is the Phase-B plan/authorization type, the preregistration and the final repricing, in that order. A paid Phase B needs a new cumulative-budget decision: $3.9650 remains against a $33.3529 no-reuse bound.",
     "budget": "cap $234.00, spent $230.0350, remaining $3.9650. Balance is not authorization."
   },
   "read_order": [
@@ -99,9 +99,9 @@
     "logs/BUDGET_LEDGER.md \u2014 spend and caps",
     "AGENTS.md \u2014 the binding working contract"
   ],
-  "failed_before_the_current_architecture": "Phase A 1-5 $1.6321, 6 $0.3552, 7 $0.3955 (device placement), canary 1 $0.0603 and 2 $0.0637 (inherited contracts). All five classes closed by autoinit.stage1_device_contract@v1 and the session specification. Detail: logs/decisions.md",
+  "failed_before_the_current_architecture": "Phase A 1-5 $1.6321, 6 $0.3552, 7 $0.3955; canary 1 $0.0603, 2 $0.0637. All five classes closed by autoinit.stage1_device_contract@v1 and the session specification. See logs/decisions.md",
   "measurement_attempts": "3 launches, $0.4611: $0.0700 setup contract, $0.1834 driver entrypoint, then $0.2077 COMPLETE. Detail: logs/autoinit_measurement_attempt{1,2,3}/",
-  "failed_before_attempt_11": "Phase A 8 $0.1900 (a $0 test asserting dev-box state), 9 $0.3400 (unplaced accumulator), 10 $11.4300 (causal depth scored on the host, unpriced). All three closed and CONFIRMED closed by attempt 11 reaching stage 2. Detail: logs/decisions.md",
+  "failed_before_attempt_11": "Phase A 8 $0.1900, 9 $0.3400, 10 $11.4300. All three closed and CONFIRMED closed by attempt 11 reaching stage 2. See logs/decisions.md",
   "causal_depth_cost": "standalone 12.07 eval/min (attempt 3, cached); INSIDE the search 6.96-10.79 on the fallback path, which fired 4/4. Recorded, NOT repriced: Stage 1 took 180.283 min against the 180.0 base allowance.",
   "local_storage": {
     "free_gib": 15.0,
@@ -129,13 +129,13 @@
   "next_sequence": {
     "_status": "NONE of this is implemented or started, and none of it is funded",
     "1_phase_b": "calibration/data-distribution sensitivity: calib.reasoning_heavy@v2 vs calib.domain_balanced@v1. Phase A searched one distribution only. See logs/autoinit_phase_b_reconstruction.md",
-    "1_phase_b_blocked_on": "Reviewer decisions taken 2026-08-25: mixture option (b); full fresh joint P=2 beam with no Phase-A leaf reuse; cross-phase behavioural terminal selection. ONE open item: calib.reasoning_heavy@v2 is derived but NOT materialized, pending confirmation of the multihop_qa support/deviation choice. See logs/autoinit_phase_b_reconstruction.md 2A.",
-    "1_phase_b_cost": "Repriced mechanically (scripts/autoinit/price_phase_b.py -> logs/autoinit_phase_b_pricing.json): search P=2 $1.8950-$7.4349, 244.87 GiB working; 5-10 probes still owed of 8 candidates at $1.637 (reuse saves $4.911-$6.548); $3.00 reserve. Expected $13.0800, hard $26.8049. Implied cap ~$256.84. NOT an authorization.",
+    "1_phase_b_blocked_on": "All reviewer decisions taken and encoded. calib.reasoning_heavy@v2 IS MATERIALIZED: profile_hash 6c67b8df, content cdb28389, items_file a2ff8c92; 62 draws over 51/67 sessions, 59,763 positions exactly, max domain deviation 0.70, multihop_qa 7,074 as approved. REMAINING $0 WORK in order: Phase-B plan + authorization type, preregistration (binding BOTH profile_hash and content_sha256), final repricing.",
+    "1_phase_b_cost": "Repriced against VERIFIED reuse. Search P=2 $1.8950-$7.4349, 244.87 GiB working. Three coherent scenarios: low 5 probes $13.0800 (a FLOOR, not an expectation), hard-with-reuse 10 probes $26.8049, hard-NO-reuse 14 probes $33.3529 -- the last is what an authorization must cover. Implied cap ~$263.39. NOT an authorization.",
     "2_final_selection": "complete final initialization selection after Phase B; Phase A's unresolved_equivalence is not a final selection",
     "3_canonical_stage1_nll": "the canonical Stage-1 NLL diagnostic on the finally selected initialization, under the established Stage-1 measurement contract. DIAGNOSTIC ONLY, never a promotion criterion, and NOT the state_eval@v1 search-side NLL fields. Never yet run",
     "4_formal_recovery": "only then, the project's formal Stage 2/Stage 3 recovery training",
     "funding": "$3.9650 remains and authorizes NO new paid session; Phase B or any GPU work needs a new explicit maintainer budget decision",
-    "1_phase_b_implementation": "DONE: a toy P=2 search.run() with distinct per-profile items -- it found a pod-fatal defect (the engine asked the loader for the calib.none sentinel, which resolve() refuses; every historical loader ignored its argument and answered anyway; fixed in search.py, no identity moved); the two-profile entry point and the mislabeling seam; the repricing. REMAINING in order: materialize v2, the Phase-B plan/authorization type, then the preregistration, which must bind v2's profile hash."
+    "1_phase_b_implementation": "DONE: toy P=2 search.run() (found a pod-fatal sentinel defect in the engine's calibration loader); the two-profile entry point and mislabeling seam; strict probe reconstruction (all 11 verify, artifact digests re-derived from retained bytes); v2 built and hashed; the repricing, fail-closed on the verified reuse record. The seed is wired into R5's tie-break but on THIS pool every optimum is unique (brute-force verified), so it never binds -- recorded, and the reason a preregistration must bind content_sha256, not profile_hash alone."
   },
   "canonical_infrastructure_moved_to": "docs/SESSION_ARCHITECTURE.md and logs/decisions.md"
 }

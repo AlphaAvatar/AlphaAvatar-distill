@@ -222,6 +222,65 @@ it is not, and cannot be, every individual session.
 
 ---
 
+## 2B. v2 materialized — 2026-08-25
+
+The reviewer approved `multihop_qa` = 7,074 and required two corrections before
+materialization. Both are in, and the profile is built.
+
+**The approved rationale, stated narrowly.** 7,340 does **not** make the whole
+activation-statistics input rank-deficient. It concentrates the `multihop_qa`
+capability slice into four copies of one session — an unnecessary item-level
+concentration confound. 7,074 removes it for 452 positions absorbed by
+`rag_evidence` *inside* `rag_multihop`, leaving every domain quota unchanged.
+
+**Correction 1 — the seed is wired into the tie-break, and its real reach is
+recorded.** R5's final tie-break is now the seed-derived order
+`sha256(f"{seed}:{item_id}")` ascending, not lexicographic, and the complete R1–R5
+semantics are stated verbatim in `sample_rule` **before** the profile hash is
+computed — so the hash covers the procedure rather than a label for it.
+
+That is the structural fix. The honest result is that **on this pool the seed
+never binds**: every sub-type's optimum is unique — verified by brute-force
+enumeration, not merely by the dynamic program that produces it — so no tie is
+ever exercised and a different seed yields the same bytes. The seed identifies the
+*rule instance*, not the sampled bytes. Asserted as a test so it cannot rot into a
+claim, and it is precisely why a preregistration must bind `content_sha256`.
+
+**Correction 2 — the two repair levels are deliberately different rules.**
+A domain's deviation distorts the weights the profile exists to declare, so R2
+minimizes it (nearest reachable, ties lower). A sub-type's deviation is absorbed
+by a sibling and moves no domain weight, so R4 spends it on support (most distinct
+sessions at or below the quota, ties by smallest deviation). A single unified rule
+was tried and rejected on measurement: it moves quotas that are currently exact —
+`gsm8k` 10,560→10,556, `openmath` 10,357→10,347, `code` 11,953→11,939 — trading
+real deviation for support where the arithmetic never forced a choice.
+
+### The built mixture
+
+| | |
+| --- | --- |
+| `profile_hash` | `6c67b8dff0e81a775371a62b1b293677e45c173f52aee119d036c95081782ddd` |
+| `content_sha256` | `cdb2838946b9355294406d2bc398bc8390306ced84a35b09900f45a033ccc370` |
+| `items_file_sha256` | `a2ff8c92c16aaf5c178db160690430f4972216d45a57ab0025835ecd0ca41fc4` |
+| draws / distinct sessions | 62 over **51 of 67** |
+| positions | **59,763 exactly** |
+| max domain deviation | **0.70 positions** (1.17 × 10⁻⁵ of the budget) |
+
+Domain quotas — `code` 11,952 · `general` 5,977 · `math` 20,917 · `rag_multihop`
+14,941 · `tool` 5,976. Sub-type quotas — `code` 11,952 · `general` 5,977 ·
+`gsm8k` 10,560 · `openmath` 10,357 · **`multihop_qa` 7,074** · **`rag_evidence`
+7,867** · `tool_calling` 5,976.
+
+Leakage is **inherited, not re-proved**: every token is a token of the source
+mixture drawn with replacement, and reweighting a leakage-checked pool cannot
+introduce a leak the pool does not have.
+
+`manifest_sha256` is deliberately *not* pinned in the profile: it covers
+`generated_utc` and so moves on every rebuild. `content_sha256` and
+`items_file_sha256` are stable and both reproduce from the pool.
+
+---
+
 ## 3. Implementation status
 
 ### Already built
@@ -385,85 +444,66 @@ chosen.
 
 ---
 
-## 7. Cost and storage, if Phase B runs as specified
+## 7. Cost and storage — repriced 2026-08-25 against VERIFIED reuse
 
-Mechanically derived from `autoinit_v1_search_space.json` (L40S at $0.99/h,
-88.83 TFLOP/s measured from E8a). **These are inputs to an authorization, not an
-authorization.**
+Regenerable: `PYTHONPATH=src python scripts/autoinit/price_phase_b.py`
+→ [`autoinit_phase_b_pricing.json`](autoinit_phase_b_pricing.json). It **fails
+closed** if the reuse record is missing, unverified, or describes different probe
+bytes than the ones on disk. **These are inputs to an authorization, not one.**
 
-**Search, P=2, beam 6, warmup 1:**
+**Search, P=2, beam 6, warmup 1, L40S:** $1.8950–$7.4349, 1.91–7.51 h, 74–114
+states, 8–20 leaves, **244.9 GiB** peak working storage (provision ≥300 GiB),
+14.3 GiB resident. The spread is the unmeasured activation-statistics GPU/CPU
+split, which is **not** to be closed by a separate paid session.
 
-| quantity | value |
-| --- | --- |
-| cost | **$1.8950 – $7.4349** |
-| wall-clock | 1.91 – 7.51 h |
-| states materialized | 74 – 114 |
-| leaves | 8 – 20 |
-| peak working storage | **244.9 GiB** → provision ≥300 GiB container disk |
-| total bytes written | 292.9 GiB |
-| retained after pruning | 40.7 GiB |
-| peak GPU resident | 14.3 GiB — an L40S is sufficient; no A100 needed |
+**Probes.** 8 candidates at sa (5 Phase-B leaves + 2 Phase-A finalists + the
+control). Reuse is verified for 8 historical probes, so:
 
-The range is still the **unmeasured activation-statistics GPU/CPU split**, the
-same quantity that has made every AutoInitializer cost a range since 2026-08-12.
-It remains unmeasured.
-
-**Recovery probes are not specified.** *If* Phase B were given Phase-A's halving
-shape (5 searched leaves + the control on sa; 2 survivors + the control on sb),
-the priced anchors give **$14.733** plus a conditional third seed at **$4.911** —
-but adopting those numbers would be adopting a design decision that §6.1 says is
-open.
-
-**Indicative totals** (search + $3.00 setup/redraw reserve, the reserve Phase A
-used; setup time has varied 30× across this project's sessions):
-
-| scenario | expected | hard |
+| scenario | probes | total |
 | --- | ---: | ---: |
-| search only | ~$4.90 | ~$10.44 |
-| search + Phase-A-shaped recovery, no third seed | ~$19.63 | ~$25.17 |
-| search + recovery + conditional third seed | ~$24.54 | ~$30.08 |
+| **low** — reuse holds, the priors survive sb, no tie-break | 5 | **$13.0800** |
+| **hard, reuse holds** — both survivors new, tie-break fires | 10 | **$26.8049** |
+| **hard, no reuse** — Stage 0 finds the runtime not comparable | 14 | **$33.3529** |
 
-**The binding per-launch ceiling must be derived by the pricing and authorization
-code once a Phase-B plan exists** — as Phase A's $23.0484 was — not from this
-table.
+**`low` is a floor, not an expectation.** No expected-value assumption over
+survivor identity or tie-break probability is defined anywhere, so nothing here is
+called "expected".
+
+**`hard_no_reuse` is what an authorization must cover.** The comparability
+precondition is only testable at Stage 0 of the run itself, and if it fails
+*every* historical probe is lost at once rather than some of them.
+
+Two facts that drive the arithmetic: the control has **no `sc`** on record, which
+is why worst-case `sc` costs one probe more than `sb`; and the three unadmitted
+Phase-A leaves hold verified `sa` probes and are retained off-pod, so admitting
+them would cost nothing at `sa` — surfaced, not acted on.
 
 ### Budget consequence
 
-Actual cumulative spend is **$230.0350** against a **$234.00** cap; **$3.9650**
-remains, and **that funds no paid session of any kind.** Against actual spend, the
-scenarios above imply a new cumulative cap of roughly:
+Actual cumulative spend **$230.0350** against a **$234.00** cap; **$3.9650**
+remains and funds nothing. Against actual spend, `hard_no_reuse` implies a new
+cumulative cap near **$263.39**. **A new explicit maintainer cumulative-budget
+decision is required before any Phase-B GPU work.**
 
-| scenario | cap implied at the hard figure |
-| --- | ---: |
-| search only | ~$240.47 |
-| search + recovery | ~$255.20 |
-| search + recovery + third seed | ~$260.11 |
-
-**A new explicit maintainer cumulative-budget decision is required before any
-Phase-B GPU work.** No grant or authorization was issued by this pass, and none
-should be until §6 is settled — pricing a design that is not yet chosen would
-produce a number that means nothing.
-
----
-
-## 8. Ordered readiness checklist — updated 2026-08-25
+## 8. Ordered readiness checklist — updated 2026-08-25 (second pass)
 
 | # | item | status |
 | --- | --- | --- |
-| 1 | §6.2 — how the reweighted mixture is drawn | **DECIDED: option (b).** Apportionment derived and verified (§2A); **one choice awaiting confirmation** — `multihop_qa` support vs deviation |
-| 2 | §6.1 — search-only vs search+recovery, and the final-selection rule | **DECIDED:** cross-phase behavioural selection, encoded in `price_phase_b.py` |
-| 3 | §6.3 — reuse Phase-A leaves, or re-run jointly | **DECIDED:** full fresh joint P=2 beam; no leaf reuse to restrict the space |
-| 4 | run a full toy P=2 beam through `search.run()` | **DONE** — and it found a pod-fatal defect (§3.5) |
-| 5 | two-profile support in `phase_a_search.py`, incl. the mislabeling fix | **DONE** (§3.3, §3.4) |
-| 6 | mechanically reprice the missing paid work | **DONE** (§7) |
-| 7 | build `calib.reasoning_heavy@v2` and pin its content hash | $0, blocked on the §2A confirmation |
-| 8 | a Phase-B session plan and authorization type | $0, follows 7 |
-| 9 | Phase-B preregistration, frozen before the run it judges | $0, follows 7 — it must bind v2's profile hash |
-| 10 | measure the activation-statistics GPU/CPU split | collapses the cost range; still unmeasured |
-| 11 | new cumulative-budget decision | **maintainer** |
-| 12 | reviewer GO | **reviewer** |
+| 1 | §6.2 — how the reweighted mixture is drawn | **DONE.** Option (b); `multihop_qa` = 7,074 approved; both corrections in (§2B) |
+| 2 | §6.1 — the final-selection rule | **DECIDED:** cross-phase behavioural selection |
+| 3 | §6.3 — reuse Phase-A leaves, or re-run jointly | **DECIDED:** full fresh joint P=2 beam |
+| 4 | a full toy P=2 `search.run()` | **DONE** — found a pod-fatal defect (§3.5) |
+| 5 | two-profile entry point + mislabeling fix | **DONE** (§3.3, §3.4) |
+| 6 | **strict historical probe reconstruction** | **DONE — all 11 probes verify.** `verify_historical_probe_reuse.py` → `autoinit_historical_probe_reuse.json`. One leg is **not** closable at `$0` and is reported: Phase B's runtime comparability, a Stage-0 precondition |
+| 7 | materialize and hash `calib.reasoning_heavy@v2` | **DONE** (§2B) |
+| 8 | mechanically reprice the missing paid work | **DONE** (§7), now conditional on the verified reuse and fail-closed without it |
+| 9 | a Phase-B session plan and authorization type | `$0`, **next** |
+| 10 | Phase-B preregistration | `$0`, follows 9. Must bind **both** v2's `profile_hash` *and* its `content_sha256` (plus `items_file_sha256`) — `profile_hash` does not identify the sampled bytes, and on this pool the seed does not either |
+| 11 | final mechanical repricing | `$0`, follows 10 |
+| 12 | activation-statistics GPU/CPU split | **not to be measured by a separate paid session.** Keep the conservative bound unless it falls out of the Phase-B run itself |
+| 13 | new cumulative-budget decision | **maintainer** |
+| 14 | reviewer GO | **reviewer** |
 
-Items 4, 5 and 6 were the unblocked work and are complete. Item 7 is held at the
-reviewer's own checkpoint — the rule was to propose the rounding/tolerance rule
-*before* materializing the profile — and 8 and 9 follow it because a
-preregistration that does not bind the mixture it judges is not a preregistration.
+Items 1–8 are complete. 9–11 are the remaining `$0` work and are strictly
+ordered: the preregistration binds the plan and the mixture identity, and the
+final repricing follows whatever the plan fixes.

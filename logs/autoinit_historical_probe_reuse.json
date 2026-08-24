@@ -1,0 +1,271 @@
+{
+  "schema": "aadistill.autoinit.historical_probe_reuse/v1",
+  "generated_utc": "2026-08-24T19:10:08.558642+00:00",
+  "_contract": "The strict reconstruction check Phase B's reuse is conditional on. Consumed by scripts/autoinit/price_phase_b.py, which fails closed if this record is missing or its probes_dir_digest no longer matches.",
+  "probes_dir_digest": "a5115816861ad239f646facec4d53ba2c7925c9430c530e7c6d0af2560d5b1af",
+  "live_scoring_contract_digest": "808080a7c5d88d5a66760fd0d7eeabc5451c096ad0819f8c5663a0b8224660be",
+  "attested_protocol_hash": "7327e880645492ec308fce62054b4845dce3de12e3079bb17a32e7d22898411a",
+  "seeds": {
+    "sa": 20260726,
+    "sb": 20260801,
+    "sc": 20260813
+  },
+  "n_probes": 11,
+  "reuse_verified": true,
+  "reusable_probes": [
+    "158b96cf651f/sa",
+    "281a02c3ac18/sa",
+    "4e429f7ed722/sa",
+    "85bde4ded2c3/sa",
+    "85bde4ded2c3/sb",
+    "85bde4ded2c3/sc",
+    "cca699c93f34/sa",
+    "cca699c93f34/sb",
+    "cca699c93f34/sc",
+    "control-qwen/sa",
+    "control-qwen/sb"
+  ],
+  "admitted_reusable_probes": [
+    "85bde4ded2c3/sa",
+    "85bde4ded2c3/sb",
+    "85bde4ded2c3/sc",
+    "cca699c93f34/sa",
+    "cca699c93f34/sb",
+    "cca699c93f34/sc",
+    "control-qwen/sa",
+    "control-qwen/sb"
+  ],
+  "verifiable_but_not_admitted": [
+    "158b96cf651f/sa",
+    "281a02c3ac18/sa",
+    "4e429f7ed722/sa"
+  ],
+  "failures": [],
+  "probes": [
+    {
+      "probe_id": "autoinit.v1.phase_a.rung1.158b96cf651f.sa",
+      "candidate": "158b96cf651f",
+      "seed": "sa",
+      "checks": {
+        "complete": true,
+        "seed_is_the_frozen_one": true,
+        "artifact_digest_re_derives_from_bytes": true,
+        "battery_is_recovery_search_v2": true,
+        "scoring_contract_matches_live": true,
+        "protocol_hash_matches_attested": true
+      },
+      "admitted_by_the_procedure": false,
+      "reusable": true,
+      "failed": [],
+      "checkpoint_error": null,
+      "recomputed_artifact_digest": "1efe9d2a22e6e9960504febd0b292ad89e496b1d616d1b116e406984ebda63bb",
+      "recorded_artifact_digest": "1efe9d2a22e6e9960504febd0b292ad89e496b1d616d1b116e406984ebda63bb"
+    },
+    {
+      "probe_id": "autoinit.v1.phase_a.rung1.281a02c3ac18.sa",
+      "candidate": "281a02c3ac18",
+      "seed": "sa",
+      "checks": {
+        "complete": true,
+        "seed_is_the_frozen_one": true,
+        "artifact_digest_re_derives_from_bytes": true,
+        "battery_is_recovery_search_v2": true,
+        "scoring_contract_matches_live": true,
+        "protocol_hash_matches_attested": true
+      },
+      "admitted_by_the_procedure": false,
+      "reusable": true,
+      "failed": [],
+      "checkpoint_error": null,
+      "recomputed_artifact_digest": "e1289e46ff10f153bbb90a37f90ae3fc3f8b2b8b99c7c232328f8889c9755c7a",
+      "recorded_artifact_digest": "e1289e46ff10f153bbb90a37f90ae3fc3f8b2b8b99c7c232328f8889c9755c7a"
+    },
+    {
+      "probe_id": "autoinit.v1.phase_a.rung1.4e429f7ed722.sa",
+      "candidate": "4e429f7ed722",
+      "seed": "sa",
+      "checks": {
+        "complete": true,
+        "seed_is_the_frozen_one": true,
+        "artifact_digest_re_derives_from_bytes": true,
+        "battery_is_recovery_search_v2": true,
+        "scoring_contract_matches_live": true,
+        "protocol_hash_matches_attested": true
+      },
+      "admitted_by_the_procedure": false,
+      "reusable": true,
+      "failed": [],
+      "checkpoint_error": null,
+      "recomputed_artifact_digest": "071edc8ab55501fb271ca3938ca9407e839dc3bda618865f9299cfe0238fa0e3",
+      "recorded_artifact_digest": "071edc8ab55501fb271ca3938ca9407e839dc3bda618865f9299cfe0238fa0e3"
+    },
+    {
+      "probe_id": "autoinit.v1.phase_a.rung1.85bde4ded2c3.sa",
+      "candidate": "85bde4ded2c3",
+      "seed": "sa",
+      "checks": {
+        "complete": true,
+        "seed_is_the_frozen_one": true,
+        "artifact_digest_re_derives_from_bytes": true,
+        "battery_is_recovery_search_v2": true,
+        "scoring_contract_matches_live": true,
+        "protocol_hash_matches_attested": true
+      },
+      "admitted_by_the_procedure": true,
+      "reusable": true,
+      "failed": [],
+      "checkpoint_error": null,
+      "recomputed_artifact_digest": "590156f691fb10bff7e6a60f34bcee27ec452a963f24e1b638f735a386ee396f",
+      "recorded_artifact_digest": "590156f691fb10bff7e6a60f34bcee27ec452a963f24e1b638f735a386ee396f"
+    },
+    {
+      "probe_id": "autoinit.v1.phase_a.rung1.cca699c93f34.sa",
+      "candidate": "cca699c93f34",
+      "seed": "sa",
+      "checks": {
+        "complete": true,
+        "seed_is_the_frozen_one": true,
+        "artifact_digest_re_derives_from_bytes": true,
+        "battery_is_recovery_search_v2": true,
+        "scoring_contract_matches_live": true,
+        "protocol_hash_matches_attested": true
+      },
+      "admitted_by_the_procedure": true,
+      "reusable": true,
+      "failed": [],
+      "checkpoint_error": null,
+      "recomputed_artifact_digest": "04fa7fe74f01ee63f6611cca6d7fce4fe1dba66b9865cf0b9c47495b9cfe33d4",
+      "recorded_artifact_digest": "04fa7fe74f01ee63f6611cca6d7fce4fe1dba66b9865cf0b9c47495b9cfe33d4"
+    },
+    {
+      "probe_id": "autoinit.v1.phase_a.rung1.control-qwen.sa",
+      "candidate": "control-qwen",
+      "seed": "sa",
+      "checks": {
+        "complete": true,
+        "seed_is_the_frozen_one": true,
+        "artifact_digest_re_derives_from_bytes": true,
+        "battery_is_recovery_search_v2": true,
+        "scoring_contract_matches_live": true,
+        "protocol_hash_matches_attested": true
+      },
+      "admitted_by_the_procedure": true,
+      "reusable": true,
+      "failed": [],
+      "checkpoint_error": null,
+      "recomputed_artifact_digest": "dc9500d3871a0f31214d55fa2b47b82e196f4f4630c607f43a24d16ed76d83bf",
+      "recorded_artifact_digest": "dc9500d3871a0f31214d55fa2b47b82e196f4f4630c607f43a24d16ed76d83bf"
+    },
+    {
+      "probe_id": "autoinit.v1.phase_a.rung2.85bde4ded2c3.sb",
+      "candidate": "85bde4ded2c3",
+      "seed": "sb",
+      "checks": {
+        "complete": true,
+        "seed_is_the_frozen_one": true,
+        "artifact_digest_re_derives_from_bytes": true,
+        "battery_is_recovery_search_v2": true,
+        "scoring_contract_matches_live": true,
+        "protocol_hash_matches_attested": true
+      },
+      "admitted_by_the_procedure": true,
+      "reusable": true,
+      "failed": [],
+      "checkpoint_error": null,
+      "recomputed_artifact_digest": "590156f691fb10bff7e6a60f34bcee27ec452a963f24e1b638f735a386ee396f",
+      "recorded_artifact_digest": "590156f691fb10bff7e6a60f34bcee27ec452a963f24e1b638f735a386ee396f"
+    },
+    {
+      "probe_id": "autoinit.v1.phase_a.rung2.cca699c93f34.sb",
+      "candidate": "cca699c93f34",
+      "seed": "sb",
+      "checks": {
+        "complete": true,
+        "seed_is_the_frozen_one": true,
+        "artifact_digest_re_derives_from_bytes": true,
+        "battery_is_recovery_search_v2": true,
+        "scoring_contract_matches_live": true,
+        "protocol_hash_matches_attested": true
+      },
+      "admitted_by_the_procedure": true,
+      "reusable": true,
+      "failed": [],
+      "checkpoint_error": null,
+      "recomputed_artifact_digest": "04fa7fe74f01ee63f6611cca6d7fce4fe1dba66b9865cf0b9c47495b9cfe33d4",
+      "recorded_artifact_digest": "04fa7fe74f01ee63f6611cca6d7fce4fe1dba66b9865cf0b9c47495b9cfe33d4"
+    },
+    {
+      "probe_id": "autoinit.v1.phase_a.rung2.control-qwen.sb",
+      "candidate": "control-qwen",
+      "seed": "sb",
+      "checks": {
+        "complete": true,
+        "seed_is_the_frozen_one": true,
+        "artifact_digest_re_derives_from_bytes": true,
+        "battery_is_recovery_search_v2": true,
+        "scoring_contract_matches_live": true,
+        "protocol_hash_matches_attested": true
+      },
+      "admitted_by_the_procedure": true,
+      "reusable": true,
+      "failed": [],
+      "checkpoint_error": null,
+      "recomputed_artifact_digest": "dc9500d3871a0f31214d55fa2b47b82e196f4f4630c607f43a24d16ed76d83bf",
+      "recorded_artifact_digest": "dc9500d3871a0f31214d55fa2b47b82e196f4f4630c607f43a24d16ed76d83bf"
+    },
+    {
+      "probe_id": "autoinit.v1.phase_a.rung3.85bde4ded2c3.sc",
+      "candidate": "85bde4ded2c3",
+      "seed": "sc",
+      "checks": {
+        "complete": true,
+        "seed_is_the_frozen_one": true,
+        "artifact_digest_re_derives_from_bytes": true,
+        "battery_is_recovery_search_v2": true,
+        "scoring_contract_matches_live": true,
+        "protocol_hash_matches_attested": true
+      },
+      "admitted_by_the_procedure": true,
+      "reusable": true,
+      "failed": [],
+      "checkpoint_error": null,
+      "recomputed_artifact_digest": "590156f691fb10bff7e6a60f34bcee27ec452a963f24e1b638f735a386ee396f",
+      "recorded_artifact_digest": "590156f691fb10bff7e6a60f34bcee27ec452a963f24e1b638f735a386ee396f"
+    },
+    {
+      "probe_id": "autoinit.v1.phase_a.rung3.cca699c93f34.sc",
+      "candidate": "cca699c93f34",
+      "seed": "sc",
+      "checks": {
+        "complete": true,
+        "seed_is_the_frozen_one": true,
+        "artifact_digest_re_derives_from_bytes": true,
+        "battery_is_recovery_search_v2": true,
+        "scoring_contract_matches_live": true,
+        "protocol_hash_matches_attested": true
+      },
+      "admitted_by_the_procedure": true,
+      "reusable": true,
+      "failed": [],
+      "checkpoint_error": null,
+      "recomputed_artifact_digest": "04fa7fe74f01ee63f6611cca6d7fce4fe1dba66b9865cf0b9c47495b9cfe33d4",
+      "recorded_artifact_digest": "04fa7fe74f01ee63f6611cca6d7fce4fe1dba66b9865cf0b9c47495b9cfe33d4"
+    }
+  ],
+  "open_precondition": {
+    "what": "Phase B's own runtime must be comparable to Phase A's under generation_runtime_comparability@v2",
+    "why_not_checkable_now": "Phase B's runtime does not exist yet",
+    "checked_where": "Stage 0 of the eventual Phase-B session, fail-closed",
+    "if_it_fails": "ALL historical reuse is lost at once, not part of it; priced as a separate no-reuse scenario",
+    "phase_a_comparability": {
+      "rule": "generation_runtime_comparability@v2",
+      "live_identity": "70a26e0b43df20e469385115b49683b50936919e02986088b76d3c30ffd87103",
+      "historical_identity": "70a26e0b43df20e469385115b49683b50936919e02986088b76d3c30ffd87103",
+      "identities_equal": true,
+      "live_driver": "580.178.04",
+      "historical_driver": "580.159.03",
+      "driver_branch_equal": true,
+      "driver_patch_differs": true
+    }
+  }
+}

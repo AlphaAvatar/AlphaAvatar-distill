@@ -1,4 +1,4 @@
-**Updated:** 2026-08-24 · branch `main` · **PHASE A COMPLETE — initialization SELECTION, unresolved**
+**Updated:** 2026-08-25 · branch `main` · **PHASE A COMPLETE; PHASE B decided, calibration built, not launched**
 
 # Current state
 
@@ -78,26 +78,22 @@ freed to 0.01 GiB, and the evaluation tokenizer materialized before every batter
 ## The next scientific sequence — NONE of it started
 
 1. **Phase B** — test the AutoInitializer's **calibration/data-distribution
-   sensitivity**: the planned `calib.reasoning_heavy@v1` against the existing
-   `calib.domain_balanced@v1`. Phase A searched under one distribution only, so
-   its ranking is conditional on that choice. **Reconstructed at `$0` on
-   2026-08-24 and BLOCKED on three reviewer decisions**, not on implementation:
-   `calib.reasoning_heavy@v1` **cannot be built as specified** (its weights need
-   more `code` and `math` than its declared pool holds, and its budget *is* the
-   whole pool, so a draw without replacement is the identity), the repository
-   prices Phase B as a **search only** and records **no rule** for combining it
-   with Phase A's behavioural result, and no Phase-B preregistration exists. The
-   **The reviewer's decisions were taken 2026-08-25** — mixture option (b), a
-   full fresh joint P=2 beam with no Phase-A leaf reuse, and a cross-phase
-   behavioural terminal selection — and the unblocked `$0` implementation is
-   done: a toy P=2 `search.run()` (which found a **pod-fatal defect**: the engine
-   asked the calibration loader for the `calib.none` sentinel, which `resolve()`
-   refuses; every historical loader ignored its argument and answered anyway),
-   the two-profile entry point and the profile/items mislabeling seam, and the
-   mechanical repricing. **One item awaits confirmation**: the `multihop_qa`
-   support-vs-deviation choice, at the reviewer's own "propose before
-   implementing" checkpoint. Full
-   reconstruction, arithmetic, derived cost and the readiness checklist:
+   sensitivity**: `calib.reasoning_heavy@v2` against `calib.domain_balanced@v1`.
+   Phase A searched under one distribution only, so its ranking is conditional on
+   that choice. **All reviewer decisions are taken and encoded, and the profile is
+   built**: `profile_hash 6c67b8df…`, `content cdb28389…`, 62 draws over 51 of 67
+   sessions, **59,763 positions exactly**, maximum domain deviation **0.70
+   positions**. `multihop_qa` is 7,074 — 4 of 5 distinct sessions — rather than the
+   nearer 7,340, which would have concentrated that capability slice into four
+   copies of one session.
+   Also done: a full toy P=2 `search.run()` (which found a **pod-fatal** defect —
+   the engine asked the calibration loader for the `calib.none` sentinel, which
+   `resolve()` refuses, and every loader ever written here ignored its argument and
+   answered anyway); the two-profile entry point and its mislabeling seam; and the
+   **strict historical probe reconstruction** — all 11 Phase-A probes verify, with
+   their artifact digests re-derived from the retained checkpoint bytes.
+   **Remaining `$0` work, strictly ordered:** the Phase-B session plan and
+   authorization type, the preregistration, then the final repricing. Detail:
    [`autoinit_phase_b_reconstruction.md`](autoinit_phase_b_reconstruction.md).
 2. **Complete final initialization selection**, after Phase B. Phase A's
    `unresolved_equivalence` is not a final selection.

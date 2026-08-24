@@ -387,12 +387,88 @@ REASONING_HEAVY_V1 = register_profile(CalibrationProfile(
     metadata={"pool": "calib.domain_balanced@v1"},
 ))
 
+#: v2's specification, declared as constants because the builder and the profile
+#: must not be able to disagree about it: `sample_rule` is inside `profile_hash`,
+#: so a rule the builder does not actually follow would still be certified.
+#:
+#: The rule is stated in full rather than named. A `sample_rule` reading
+#: "weighted draw, deterministic by seed" is what v1 said, and it described three
+#: mutually incompatible procedures.
+REASONING_HEAVY_V2_TOKEN_BUDGET = 59_763
+REASONING_HEAVY_V2_SEED = 20260812
+REASONING_HEAVY_V2_DOMAIN_WEIGHTS = {
+    "general": 0.10, "math": 0.35, "rag_multihop": 0.25, "code": 0.20, "tool": 0.10}
+REASONING_HEAVY_V2_SAMPLE_RULE = (
+    "Deterministic with-replacement reweighting of calib.domain_balanced@v1's "
+    "frozen 67-item pool, in five steps. "
+    "R1 DOMAIN APPORTIONMENT: largest-remainder (Hamilton) over the declared "
+    "domain weights, in prediction positions, remainder ties by ascending domain "
+    "id; sums to token_budget exactly. "
+    "R2 UNREACHABLE DOMAIN QUOTA: a quota no whole-item multiset can hit moves to "
+    "the nearest reachable value, ties toward the LOWER, and the difference is "
+    "transferred to the reachable domain with the most negative apportionment "
+    "remainder (ties by ascending id); the budget total is conserved. Nearest, "
+    "because a domain's deviation distorts the weights this profile declares. "
+    "R3 SUB-TYPE APPORTIONMENT: within each domain, largest-remainder over the "
+    "SOURCE POOL's own sub-type position shares, so only the domain mix changes "
+    "and within-domain composition is held fixed. "
+    "R4 UNREACHABLE SUB-TYPE QUOTA: repaired INSIDE its own domain, so no domain "
+    "weight moves; among reachable values at or below the quota, take the one "
+    "admitting the most distinct sessions, ties by smallest deviation. Support "
+    "rather than nearest, because here the deviation is absorbed by a sibling. "
+    "R5 REALIZATION: among all exact whole-item multisets for a sub-type quota, "
+    "the one maximizing distinct sessions, then minimizing multiset size, then "
+    "broken by the SEED-DERIVED item order sha256(f'{seed}:{item_id}') ascending. "
+    "No session is ever truncated. Items are emitted once per draw, ordered by "
+    "(domain, subtype, item_id, draw_index). "
+    "Implemented in aadistill.autoinit.reweight; built by "
+    "scripts/data/build_reasoning_heavy_calibration.py.")
+
+REASONING_HEAVY_V2 = register_profile(CalibrationProfile(
+    profile_id="calib.reasoning_heavy",
+    version=2,
+    description=(
+        "A reasoning-weighted counterpart to the domain-balanced mixture, for the "
+        "hypothesis that an operator should be calibrated on the capability the "
+        "recipe actually targets (AGENTS.md P3/P10.1) rather than on a uniform "
+        "domain average. Supersedes v1, which was UNBUILDABLE: its weights needed "
+        "more code and math positions than the pool holds, and its budget was the "
+        "whole pool, so a draw without replacement was the identity."),
+    sources=tuple(
+        CalibrationSource("aadistill/e8_calibration_v1", "2026-08-10", d, 0,
+                          note="with-replacement reweighted draw from the same pool")
+        for d in E8A_DOMAINS
+    ),
+    domain_weights=REASONING_HEAVY_V2_DOMAIN_WEIGHTS,
+    token_budget=REASONING_HEAVY_V2_TOKEN_BUDGET,
+    sample_rule=REASONING_HEAVY_V2_SAMPLE_RULE,
+    seed=REASONING_HEAVY_V2_SEED,
+    materialized=True,
+    items_path="artifacts/stage1/reasoning_heavy_v2/items.jsonl",
+    content_sha256="cdb2838946b9355294406d2bc398bc8390306ced84a35b09900f45a033ccc370",
+    items_file_sha256="a2ff8c92c16aaf5c178db160690430f4972216d45a57ab0025835ecd0ca41fc4",
+    # Inherited, not re-proved: every token here is a token of the source
+    # mixture, and reweighting a leakage-checked pool cannot introduce a leak the
+    # pool does not have.
+    leakage_exclusions=DOMAIN_BALANCED_V1.leakage_exclusions,
+    leakage_proof_path=DOMAIN_BALANCED_V1.leakage_proof_path,
+    metadata={"pool": DOMAIN_BALANCED_V1.qualified_id,
+              "manifest": "artifacts/stage1/reasoning_heavy_v2/manifest.json",
+              "supersedes": "calib.reasoning_heavy@v1",
+              "seed_note": ("the seed breaks R5 ties by construction; on THIS pool "
+                            "every sub-type optimum is unique, so no tie is "
+                            "exercised and the seed does not change the bytes -- "
+                            "verified by brute force, and recorded rather than "
+                            "implied")},
+))
+
 V1_PROFILES = (STAGE0_CURRENT_V1, DOMAIN_BALANCED_V1, REASONING_HEAVY_V1)
+PROFILES = (*V1_PROFILES, REASONING_HEAVY_V2)
 
 
 def buildable_profiles() -> list[CalibrationProfile]:
     """Profiles a run can actually use today."""
-    return [p for p in V1_PROFILES if p.materialized]
+    return [p for p in PROFILES if p.materialized]
 
 
 def profile_summary(profiles: Sequence[CalibrationProfile] = V1_PROFILES) -> list[dict[str, Any]]:
