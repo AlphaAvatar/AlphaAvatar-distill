@@ -1,6 +1,6 @@
 {
   "schema": "aadistill.autoinit.phase_b_pricing/v1",
-  "generated_utc": "2026-08-25T05:25:56.428520+00:00",
+  "generated_utc": "2026-08-25T09:25:39.930909+00:00",
   "_contract": "Prices the paid work Phase B still owes under the 2026-08-25 reviewer procedure. NOT an authorization, and not a grant: the binding per-launch ceiling is issued by the authorization code against a frozen plan.",
   "hardware": {
     "name": "L40S",

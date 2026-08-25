@@ -62,15 +62,34 @@ SCHEMA = "aadistill.autoinit.phase_b_authorization/v1"
 #:   execute while implying that it does.
 #: * the probe path — see `PHASE_B_DELEGATED_IDENTITIES`.
 PHASE_B_EXECUTABLE_SOURCE_FILES_V1: tuple[str, ...] = (
+    "scripts/autoinit/load_state_eval.py",
+    "scripts/autoinit/phase_a_frozen.py",
     "scripts/autoinit/phase_a_search.py",
+    "scripts/autoinit/verify_frozen_assets.py",
+    "scripts/autoinit/write_preregistration.py",
+    "scripts/pod/autoinit_engine_probe.py",
+    "scripts/pod/autoinit_phase_a_driver.py",
+    "scripts/pod/autoinit_phase_a_launch.py",
+    "scripts/pod/autoinit_phase_b_driver.py",
+    "scripts/pod/autoinit_phase_b_launch.py",
+    "scripts/pod/autoinit_preflight_setup.sh",
+    "scripts/pod/autoinit_science_inputs.py",
+    "scripts/pod/collect_artifacts.py",
+    "scripts/pod/watchdog.py",
     "src/aadistill/autoinit/__init__.py",
     "src/aadistill/autoinit/adapters/__init__.py",
     "src/aadistill/autoinit/adapters/qwen3.py",
     "src/aadistill/autoinit/arch.py",
     "src/aadistill/autoinit/artifact.py",
+    "src/aadistill/autoinit/authorization.py",
     "src/aadistill/autoinit/calibration.py",
+    "src/aadistill/autoinit/cost.py",
     "src/aadistill/autoinit/datasets.py",
     "src/aadistill/autoinit/device.py",
+    "src/aadistill/autoinit/device_handoff.py",
+    "src/aadistill/autoinit/generation.py",
+    "src/aadistill/autoinit/generation_compat.py",
+    "src/aadistill/autoinit/leaf_durability.py",
     "src/aadistill/autoinit/metrics.py",
     "src/aadistill/autoinit/operators/__init__.py",
     "src/aadistill/autoinit/operators/_common.py",
@@ -80,18 +99,28 @@ PHASE_B_EXECUTABLE_SOURCE_FILES_V1: tuple[str, ...] = (
     "src/aadistill/autoinit/operators/depth.py",
     "src/aadistill/autoinit/operators/ffn.py",
     "src/aadistill/autoinit/operators/width.py",
+    "src/aadistill/autoinit/phase_a.py",
     "src/aadistill/autoinit/phase_b.py",
     "src/aadistill/autoinit/ranking.py",
     "src/aadistill/autoinit/search.py",
     "src/aadistill/autoinit/state.py",
     "src/aadistill/autoinit/stats.py",
     "src/aadistill/data/extra_stream.py",
+    "src/aadistill/infrastructure/artifact_gate.py",
+    "src/aadistill/infrastructure/budget.py",
+    "src/aadistill/infrastructure/log_relay.py",
     "src/aadistill/infrastructure/manifest.py",
+    "src/aadistill/infrastructure/provider.py",
+    "src/aadistill/infrastructure/remote.py",
+    "src/aadistill/infrastructure/session.py",
+    "src/aadistill/infrastructure/session_prechecks.py",
+    "src/aadistill/infrastructure/session_runner.py",
     "src/aadistill/init/contribution.py",
     "src/aadistill/init/project.py",
     "src/aadistill/init/sandwich.py",
 )
-PHASE_B_SOURCE_SET_VERSION = 1
+#: Bumped when the driver and launcher joined the set.
+PHASE_B_SOURCE_SET_VERSION = 2
 
 #: What covers the rest of the paid session, so "not in the digest" never means
 #: "unaccounted for". Each is an existing, independently bound source identity.
@@ -110,15 +139,11 @@ PHASE_B_DELEGATED_IDENTITIES: dict[str, str] = {
     "the selection rules": "the frozen science plan hash",
 }
 
-#: Named because an unwritten executable is a blocker, not an omission. Phase B
-#: has no pod driver or launcher yet; when they exist they join the set above and
-#: the digest moves, which is the point of declaring it now rather than later.
-PHASE_B_UNCOVERED: tuple[str, ...] = (
-    "scripts/pod/autoinit_phase_b_driver.py — does not exist",
-    "scripts/pod/autoinit_phase_b_launch.py — does not exist",
-    "the session machinery a Phase-B launcher would execute "
-    "(infrastructure/session*.py), which enters the set with the launcher",
-)
+#: Empty since 2026-08-26, when the driver and launcher were written and joined
+#: the set above. It stays as a declared field rather than being deleted: the
+#: launcher's precheck refuses to create a pod while anything is listed here, so
+#: a future uncovered executable fails closed instead of being forgotten.
+PHASE_B_UNCOVERED: tuple[str, ...] = ()
 
 
 def phase_b_source_digest(repo_root: str | Path = ".", *,
@@ -321,7 +346,12 @@ class PhaseBAuthorization:
     #: pool the seed does not even reach the bytes.
     calibration_profile_hashes: dict[str, str]
     calibration_content_hashes: dict[str, str]
-    expected_usd: float
+    #: NOT `expected_usd`. No expected-value assumption over survivor identity or
+    #: tie-break probability is defined anywhere, so the low figure is a planning
+    #: FLOOR — what the session costs if reuse holds, the Phase-A finalists
+    #: survive sb and no tie-break fires. Calling it "expected" would invite
+    #: budgeting against an outcome nobody estimated the probability of.
+    planning_floor_usd: float
     hard_cap_usd: float
     authorized_stages: tuple[int, ...]
     stage_conditions: dict[str, str]
@@ -360,7 +390,7 @@ class PhaseBAuthorization:
                 self.calibration_profile_hashes.items())),
             "calibration_content_hashes": dict(sorted(
                 self.calibration_content_hashes.items())),
-            "expected_usd": self.expected_usd,
+            "planning_floor_usd": self.planning_floor_usd,
             "hard_cap_usd": self.hard_cap_usd,
             "authorized_stages": list(self.authorized_stages),
             "stage_conditions": dict(self.stage_conditions),
@@ -502,7 +532,7 @@ class PhaseBAuthorization:
             science_plan_hash=raw["phase_b_science_plan_hash"],
             calibration_profile_hashes=dict(raw["calibration_profile_hashes"]),
             calibration_content_hashes=dict(raw["calibration_content_hashes"]),
-            expected_usd=float(raw["expected_usd"]),
+            planning_floor_usd=float(raw["planning_floor_usd"]),
             hard_cap_usd=float(raw["hard_cap_usd"]),
             authorized_stages=tuple(raw["authorized_stages"]),
             stage_conditions=dict(raw["stage_conditions"]),

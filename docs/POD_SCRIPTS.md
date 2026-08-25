@@ -27,7 +27,9 @@ to appear below.
 | `autoinit_recovery_continuation_launch.py` | the recovery continuation's **session specification**. Priced by `continuation_budget` ($16.7456 hard, no search), declares attempt 12's five preserved leaves as staged session inputs, and names a driver that cannot search |
 | `autoinit_recovery_continuation_driver.py` | its pod-side driver. Stage 1 IMPORTS the verified attempt-12 result — it never imports `phase_a_search`, never delegates to the searching `stage1`, and has no `--stage` value that searches |
 | `autoinit_preflight_driver.py` | the micro-preflight's pod-side driver |
-| `autoinit_phase_a_driver.py` | the Phase-A pod-side driver, six stages |
+| `autoinit_phase_a_driver.py` | the Phase-A pod-side driver, six stages. Also the **base class Phase B inherits**, so it is inside the Phase-B executable-source identity too |
+| `autoinit_phase_b_launch.py` | Phase-B **session specification**: joint P=2 search, `PhaseBAuthorization`, and **ten** priced probes rather than twelve because three candidates are cited from verified Phase-A evidence. Prechecks refuse at `$0` on an unbound executable, a stale preregistration or an unverified reuse record |
+| `autoinit_phase_b_driver.py` | the Phase-B pod-side driver. Subclasses the Phase-A driver and overrides four things: the governing artifacts, stage 0's additional bindings, the joint two-profile search, and `restore_probe`'s comparability rule for imported evidence. It redirects the inherited `mark()` to the status file the Phase-B launcher polls |
 | `autoinit_preflight_setup.sh` | the shared pod setup. **Manifest-driven** since 2026-08-18: it reads `SESSION_ASSETS`, `SESSION_RELAY_INPUTS` and `SESSION_TEST_IGNORES`, and names no session's assets, relay paths, destinations or digests itself |
 | `autoinit_science_inputs.py` | the frozen relay science inputs — source, destination, digest — that sessions compose their `relay_inputs` from. Lifted out of the shared setup on 2026-08-18; here rather than in `src/` because `docs/REPO_LAYOUT.md` rule 1 keeps frozen hashes in the scripts that own them |
 | `autoinit_continuation_driver.py` | the continuation's pod-side driver |

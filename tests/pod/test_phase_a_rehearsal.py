@@ -1323,15 +1323,29 @@ def test_the_launcher_sends_the_derived_deadline_and_the_base_allowance():
 
 
 def test_the_driver_bounds_the_search_by_the_deadline_not_the_allowance():
-    """The consumer end of the contract, read off the real driver source."""
+    """The consumer end of the contract, read off the real driver source.
+
+    The search call moved into the `run_search` seam when Phase B needed to vary
+    the calibration profiles without duplicating the 160 lines around it, so the
+    two halves of the contract now live in two methods: `run_search` bounds the
+    search by the DEADLINE, and `stage1` still checks affordability against the
+    BASE allowance. Both are asserted, and against the real source rather than a
+    fixture.
+    """
     src = (REPO / "scripts/pod/autoinit_phase_a_driver.py").read_text()
+    run_search = src[src.index("def run_search(self"):src.index("def stage1(self)")]
     stage1 = src[src.index("def stage1(self)"):src.index("def stage2(self)")]
-    assert "search_minutes=self.a.search_deadline_minutes" in stage1, (
-        "stage 1 still passes the base allowance as the search deadline")
+    assert "search_minutes=self.a.search_deadline_minutes" in run_search, (
+        "the search seam passes the base allowance as the search deadline")
+    assert "search_minutes=self.a.search_minutes" not in run_search, (
+        "the base allowance reached the search deadline")
     assert "self.afford(self.a.search_minutes" in stage1, (
         "the affordability check should still use the BASE allowance; widening "
         "it to the full envelope would refuse to start a search that is "
         "expected to cost 180 minutes")
+    assert "self.run_search(" in stage1, (
+        "stage 1 no longer goes through the seam, so a subclass varying the "
+        "search would be silently bypassed")
 
 
 def test_the_driver_declares_no_default_for_either_search_number():

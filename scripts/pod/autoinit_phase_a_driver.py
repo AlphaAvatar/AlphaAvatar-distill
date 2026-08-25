@@ -607,6 +607,24 @@ class PhaseADriver:
                            frozen_plan_hash=frozen["plan_hash"])
 
     # -- stage 1: beam search ---------------------------------------------
+    def run_search(self, run_phase_a_search):
+        """The search call itself. One profile, exactly as Phase A ran it.
+
+        A seam, not a configuration surface: everything around it in `stage1` —
+        the affordability check, the CPU budget, the suite binding, the leaf
+        shortfall rule and the durability boundary — is identical for any search
+        and must not be duplicated by a subclass that only wants to vary the
+        mixtures. Phase B overrides this method and nothing else in stage 1.
+
+        `run_phase_a_search` is passed in rather than imported here so the import
+        stays at its call site, where the comment explaining why the search runs
+        in-process lives.
+        """
+        return run_phase_a_search(
+            workdir=SEARCH_WORKDIR, state_eval=STATE_EVAL,
+            top_n=self.plan.searched_leaves, device="cuda", repo_root=REPO,
+            search_minutes=self.a.search_deadline_minutes)
+
     def stage1(self) -> bool:
         self.enter(1)
         if not self.afford(self.a.search_minutes, "beam search"):
@@ -640,10 +658,7 @@ class PhaseADriver:
         # 147.7683-minute reserve was bought for — would have been killed at 180
         # minutes with the reserve unspent, and the kill would have read as a
         # failed search rather than a deadline disagreeing with its own price.
-        found = run_phase_a_search(
-            workdir=SEARCH_WORKDIR, state_eval=STATE_EVAL,
-            top_n=self.plan.searched_leaves, device="cuda", repo_root=REPO,
-            search_minutes=self.a.search_deadline_minutes)
+        found = self.run_search(run_phase_a_search)
         (AUDIT / "search_result.json").write_text(
             json.dumps(found.summary, indent=2, default=str) + "\n")
 

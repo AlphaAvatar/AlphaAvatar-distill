@@ -1,4 +1,4 @@
-**Updated:** 2026-08-25 · branch `main` · **PHASE A COMPLETE; PHASE B FROZEN AND UNLAUNCHED**
+**Updated:** 2026-08-26 · branch `main` · **PHASE A COMPLETE; PHASE B IMPLEMENTED, FROZEN, UNLAUNCHED**
 
 # Current state
 
@@ -109,8 +109,22 @@ freed to 0.01 GiB, and the evaluation tokenizer materialized before every batter
    accounted for by the existing trainer, generation and scoring digests rather
    than duplicated.
 
-   **One material gap before any launch:** there is no Phase-B pod driver or
-   launcher. They enter the source digest when written, which moves it.
+   **The executables now exist.** `scripts/pod/autoinit_phase_b_{driver,launch}.py`:
+   the driver subclasses the Phase-A one and overrides only the governing
+   artifacts, stage-0's additional bindings, the joint search and
+   `restore_probe`; the launcher prices **ten** probes rather than twelve,
+   because three candidates are cited from verified Phase-A evidence. The
+   executable-source digest is **`39ba45d8…` over 56 files with nothing
+   uncovered**, and the preregistration (`3dda1035…`) binds it.
+
+   Building them found two real defects: the v2 mixture was declared as a relay
+   input the pod could not fetch — attempt 5's failure exactly — and the
+   inherited `mark()` would have written markers to the Phase-A status file while
+   the launcher polled the Phase-B one, making a working session look hung. Both
+   fixed, both pinned by tests.
+
+   **No material blocker remains in the code.** What is left is a maintainer
+   cumulative-budget decision and a reviewer GO.
    Detail: [`autoinit_phase_b_reconstruction.md`](autoinit_phase_b_reconstruction.md),
    [`autoinit_phase_b_preregistration.json`](autoinit_phase_b_preregistration.json).
 2. **Complete final initialization selection**, after Phase B. Phase A's

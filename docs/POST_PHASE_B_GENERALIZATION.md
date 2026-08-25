@@ -121,3 +121,72 @@ new model or data configuration work without changing generic core logic.
 
 A refactor that adds five protocols and removes no hard-coded assumption has made
 the codebase worse, and this project's standing rule (AGENTS.md P1) says so.
+
+---
+
+# After Phase B: AutoInitializer v1 is closed, the research is not
+
+**Recorded 2026-08-26 as a roadmap decision. Nothing here is started, and none of
+it may influence the frozen Phase-B definitions.** Phase B is the **terminal
+evaluation of AutoInitializer v1**, not the end of AutoInitializer research.
+
+## Order
+
+1. **The generalization pass above comes first.** Do it before any new operator
+   research, so the core supports different datasets, model families, sizes and
+   hardware without carrying E8/Qwen3-specific assumptions into the next preset.
+2. **Then identify a DEPTH incumbent** from Phase A + B evidence.
+3. **Then strengthen the other operator kinds**, in this order: **ATTENTION**,
+   then **FFN**, then **RESIDUAL_WIDTH**.
+
+## What "incumbent" means, and what it does not
+
+An incumbent is the **default DEPTH implementation for the next research
+preset** — nothing more.
+
+* **Do not delete or re-semantic historical DEPTH implementations.** They stay
+  registered and reproducible; every recorded result depends on them meaning what
+  they meant when it was measured.
+* **Do not infer universal DEPTH superiority from the final Phase-B winner leaf.**
+  A leaf is a *composition*; attributing its behaviour to one operator is exactly
+  the mistake E8a documented, where an operator's own objective was 3.11× better
+  and the composed initialization was 2.8 nats worse. Use **matched** evidence
+  where it exists.
+* **Preserve a cheap / no-calibration fallback if the evidence supports the
+  distinction.** `depth.positional_v0` costs no calibration pass and no forward
+  logits; if it is close enough on matched evidence, that is a real operating
+  point and not a consolation prize.
+
+## Why ATTENTION first
+
+The decomposed operators are **uneven in sophistication**, and that unevenness is
+the argument:
+
+| kind | current v1 method | signal used |
+| --- | --- | --- |
+| DEPTH | `depth.causal_kl_greedy_v1` | causal KL against the teacher |
+| WIDTH | `width.global_pca_v0` | activation PCA |
+| FFN | `ffn.activation_importance_v0` | activation importance |
+| **ATTENTION** | **`attention.weight_proxy_v0`** | **weights only — no calibration at all** |
+
+ATTENTION is the only kind still represented solely by a pure weight proxy: it
+declares `CalibrationNeed.NONE` and therefore cannot see the teacher's behaviour
+at all. That makes it the most obvious place to look for additional signal once
+v1 is closed.
+
+## Rules for every new method
+
+* **A new method gets a new immutable implementation id.** Never silently replace
+  the semantics of an existing operator id — the registry is append-only in
+  practice for the same reason the calibration profiles are versioned.
+* **Bake-offs are followed by a joint interaction confirmation search.**
+  Independently best operators are not guaranteed to compose into the best
+  initialization; that is the composition risk the AutoInitializer exists to
+  measure, and testing operators only in isolation would reintroduce it.
+
+## Boundary
+
+None of this modifies Phase B. The frozen Phase-B preregistration, session plan,
+executable-source identity, calibration identities and candidate set are fixed
+before any Phase-B result exists, and a roadmap written afterwards must not reach
+back into them.

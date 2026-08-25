@@ -44,7 +44,7 @@ def _authorization(**overrides) -> PhaseBAuthorization:
         calibration_content_hashes={
             DOMAIN_BALANCED_V1.qualified_id: DOMAIN_BALANCED_V1.content_sha256,
             REASONING_HEAVY_V2.qualified_id: REASONING_HEAVY_V2.content_sha256},
-        expected_usd=1.0, hard_cap_usd=2.0, authorized_stages=(0, 1, 2, 3, 4, 5),
+        planning_floor_usd=1.0, hard_cap_usd=2.0, authorized_stages=(0, 1, 2, 3, 4, 5),
         stage_conditions={}, scope_note="test")
     return PhaseBAuthorization(**{**base, **overrides})
 
@@ -89,8 +89,14 @@ def test_the_set_is_provenance_closure_not_a_maximal_file_list():
     assert "src/aadistill/autoinit/reweight.py" not in covered
     assert "scripts/data/build_reasoning_heavy_calibration.py" not in covered
     # The probe path is bound elsewhere, and the record says by what.
+    # `recovery.py` is inside RECOVERY_SCORING_FILES_V2, which the driver binds
+    # at stage 0, so a change to the selection rules it holds is still detected.
     assert "src/aadistill/autoinit/recovery.py" not in covered
-    assert "src/aadistill/autoinit/generation.py" not in covered
+    # `autoinit/generation.py` IS covered: it is not in GENERATION_SOURCE_FILES_V1
+    # (that set is the evaluator), and it decides the protocol hash and the
+    # comparability verdict the whole Stage-0 gate turns on.
+    assert "src/aadistill/autoinit/generation.py" in covered
+    assert "src/aadistill/autoinit/generation_compat.py" in covered
     for topic in ("probe training", "probe generation", "probe scoring",
                   "the calibration mixtures"):
         assert topic in PHASE_B_DELEGATED_IDENTITIES, topic
@@ -99,12 +105,29 @@ def test_the_set_is_provenance_closure_not_a_maximal_file_list():
     assert "provenance" in PHASE_B_DELEGATED_IDENTITIES["the calibration mixtures"]
 
 
-def test_the_unwritten_driver_is_declared_as_a_gap_not_omitted():
-    joined = " ".join(PHASE_B_UNCOVERED)
-    assert "phase_b_driver" in joined and "does not exist" in joined
-    assert "launch" in joined
-    digest = phase_b_source_digest(REPO)
-    assert digest["not_yet_covered"] == list(PHASE_B_UNCOVERED)
+def test_the_driver_and_launcher_now_EXIST_and_are_covered():
+    """The blocker is closed. The field stays so a future gap fails closed."""
+    covered = set(PHASE_B_EXECUTABLE_SOURCE_FILES_V1)
+    for executable in ("scripts/pod/autoinit_phase_b_driver.py",
+                       "scripts/pod/autoinit_phase_b_launch.py",
+                       # The parent class: every inherited stage a Phase-B run
+                       # executes lives here, so it is Phase-B runtime too.
+                       "scripts/pod/autoinit_phase_a_driver.py",
+                       "scripts/pod/autoinit_phase_a_launch.py",
+                       # Shelled out to, so no import closure reaches them.
+                       "scripts/pod/autoinit_preflight_setup.sh",
+                       "scripts/pod/watchdog.py",
+                       "scripts/pod/collect_artifacts.py",
+                       "scripts/pod/autoinit_engine_probe.py",
+                       "scripts/autoinit/verify_frozen_assets.py",
+                       # Stage 0 imports build_frozen_plan from it.
+                       "scripts/autoinit/write_preregistration.py",
+                       # The session machinery the launcher runs.
+                       "src/aadistill/infrastructure/session_runner.py",
+                       "src/aadistill/infrastructure/session_prechecks.py"):
+        assert executable in covered, executable
+    assert PHASE_B_UNCOVERED == (), PHASE_B_UNCOVERED
+    assert phase_b_source_digest(REPO)["not_yet_covered"] == []
 
 
 def test_the_digest_fails_closed_on_a_missing_declared_file():

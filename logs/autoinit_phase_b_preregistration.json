@@ -1,6 +1,6 @@
 {
   "schema": "aadistill.autoinit.phase_b_preregistration/v1",
-  "generated_utc": "2026-08-25T05:21:38.071087+00:00",
+  "generated_utc": "2026-08-25T09:24:15.582617+00:00",
   "status": "FROZEN BEFORE ANY PHASE-B RESULT EXISTS. Not an authorization, not a grant, and not an instruction to launch.",
   "hypothesis": "Does the AutoInitializer's preferred composition change when the calibration distribution changes? Phase A searched one distribution, so its ranking is conditional on it.",
   "search": {
@@ -172,18 +172,37 @@
     "unchanged_from_phase_a": true
   },
   "executable_source": {
-    "digest": "92e2170e1a86c1a8cbc36ecc8fb50844682f5af77364ca38cdd0a2e64bbda57f",
-    "set_version": 1,
+    "digest": "39ba45d86018cafe370672db7b39d88c65db92e5d57727d41b2d17b41a7a5e30",
+    "set_version": 2,
     "files": [
+      "scripts/autoinit/load_state_eval.py",
+      "scripts/autoinit/phase_a_frozen.py",
       "scripts/autoinit/phase_a_search.py",
+      "scripts/autoinit/verify_frozen_assets.py",
+      "scripts/autoinit/write_preregistration.py",
+      "scripts/pod/autoinit_engine_probe.py",
+      "scripts/pod/autoinit_phase_a_driver.py",
+      "scripts/pod/autoinit_phase_a_launch.py",
+      "scripts/pod/autoinit_phase_b_driver.py",
+      "scripts/pod/autoinit_phase_b_launch.py",
+      "scripts/pod/autoinit_preflight_setup.sh",
+      "scripts/pod/autoinit_science_inputs.py",
+      "scripts/pod/collect_artifacts.py",
+      "scripts/pod/watchdog.py",
       "src/aadistill/autoinit/__init__.py",
       "src/aadistill/autoinit/adapters/__init__.py",
       "src/aadistill/autoinit/adapters/qwen3.py",
       "src/aadistill/autoinit/arch.py",
       "src/aadistill/autoinit/artifact.py",
+      "src/aadistill/autoinit/authorization.py",
       "src/aadistill/autoinit/calibration.py",
+      "src/aadistill/autoinit/cost.py",
       "src/aadistill/autoinit/datasets.py",
       "src/aadistill/autoinit/device.py",
+      "src/aadistill/autoinit/device_handoff.py",
+      "src/aadistill/autoinit/generation.py",
+      "src/aadistill/autoinit/generation_compat.py",
+      "src/aadistill/autoinit/leaf_durability.py",
       "src/aadistill/autoinit/metrics.py",
       "src/aadistill/autoinit/operators/__init__.py",
       "src/aadistill/autoinit/operators/_common.py",
@@ -193,13 +212,22 @@
       "src/aadistill/autoinit/operators/depth.py",
       "src/aadistill/autoinit/operators/ffn.py",
       "src/aadistill/autoinit/operators/width.py",
+      "src/aadistill/autoinit/phase_a.py",
       "src/aadistill/autoinit/phase_b.py",
       "src/aadistill/autoinit/ranking.py",
       "src/aadistill/autoinit/search.py",
       "src/aadistill/autoinit/state.py",
       "src/aadistill/autoinit/stats.py",
       "src/aadistill/data/extra_stream.py",
+      "src/aadistill/infrastructure/artifact_gate.py",
+      "src/aadistill/infrastructure/budget.py",
+      "src/aadistill/infrastructure/log_relay.py",
       "src/aadistill/infrastructure/manifest.py",
+      "src/aadistill/infrastructure/provider.py",
+      "src/aadistill/infrastructure/remote.py",
+      "src/aadistill/infrastructure/session.py",
+      "src/aadistill/infrastructure/session_prechecks.py",
+      "src/aadistill/infrastructure/session_runner.py",
       "src/aadistill/init/contribution.py",
       "src/aadistill/init/project.py",
       "src/aadistill/init/sandwich.py"
@@ -214,11 +242,7 @@
       "the recovery battery": "recovery_search_v2 content and manifest hashes",
       "the selection rules": "the frozen science plan hash"
     },
-    "not_yet_covered": [
-      "scripts/pod/autoinit_phase_b_driver.py \u2014 does not exist",
-      "scripts/pod/autoinit_phase_b_launch.py \u2014 does not exist",
-      "the session machinery a Phase-B launcher would execute (infrastructure/session*.py), which enters the set with the launcher"
-    ],
+    "not_yet_covered": [],
     "phase_a_harness_untouched": "PHASE_A_HARNESS_SOURCE_FILES_V1 is historical fact about a completed experiment and is not widened by Phase B"
   },
   "science_plan": {
@@ -447,5 +471,5 @@
     ]
   },
   "not_authorized": "No Phase-B grant or authorization exists, no cumulative-budget increase has been requested, and this document neither creates nor implies one.",
-  "preregistration_sha256": "8f211ce1ed83fbe2eaf9f06d753eab7bc69e2fdf708dd44d9ffc515312fb9b0b"
+  "preregistration_sha256": "3dda103567733d5fd4d6d70f0512129f6318cb13dd0982602afa35a41cdbfe5a"
 }

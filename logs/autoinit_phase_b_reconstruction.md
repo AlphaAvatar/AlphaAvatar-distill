@@ -501,14 +501,14 @@ decision is required before any Phase-B GPU work.**
 | 10 | Phase-B preregistration | **DONE** — `8f211ce1…`, self-verifying |
 | 11 | final mechanical repricing | **DONE** — ceiling **$26.8049**, cap **$256.8399** |
 | 12 | activation-statistics GPU/CPU split | **NOT to be measured by a separate paid session.** The conservative bound stands unless it falls out of the Phase-B run |
-| 13 | **a Phase-B pod driver and launcher** | **NOT WRITTEN — the one material blocker.** They enter the executable-source digest, which moves it |
+| 13 | a Phase-B pod driver and launcher | **DONE 2026-08-26.** `scripts/pod/autoinit_phase_b_{driver,launch}.py`; the digest moved to `39ba45d8…` over 56 files and `PHASE_B_UNCOVERED` is now empty |
 | 14 | new cumulative-budget decision | **maintainer** |
 | 15 | reviewer GO | **reviewer** |
 
-Items 1–11 are complete and frozen. Item 13 is the only implementation work left
-before a paid Phase B is fundable, and it must precede any grant: an
-authorization issued now would bind a digest that is not the digest of the thing
-that will run.
+Items 1–11 and 13 are complete and frozen. **No implementation work remains**;
+the digest an authorization would bind is now the digest of the thing that will
+run. What is left is items 14 and 15 — a maintainer budget decision and a
+reviewer GO.
 
 ## 9. What Phase B may not do
 
