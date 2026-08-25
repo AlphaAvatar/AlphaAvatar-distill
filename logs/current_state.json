@@ -1,6 +1,6 @@
 {
   "schema": "aadistill.current_state/v2",
-  "generated_utc": "2026-08-27T09:00:00Z",
+  "generated_utc": "2026-08-27T10:00:00Z",
   "_contract": "The minimal machine-readable CURRENT snapshot: live facts only, no history, no per-attempt detail, no narrative. History lives in logs/decisions.md and the per-run directories; the human view is logs/STATE.md and the two must agree. Ownership: logs/CATALOG.md.",
   "baseline_commit": "ed77c68b10946a44bac9e043e8dd8b6dab121662",
   "baseline_commit_meaning": "The LAST TESTED IMPLEMENTATION: the commit whose tree produced the latest_verification figures.",
@@ -11,7 +11,7 @@
   },
   "authorized": {
     "any": false,
-    "note": "every authorization issued is consumed, including all seven continuation attempts."
+    "note": "Maintainer APPROVED the cap increase to $256.84 and the reviewer gave GO for ONE Phase-B execution, but NO PhaseBAuthorization has been issued: a pre-provider gate fails, and a one-use grant binds a commit that any fix will move."
   },
   "prepared_launch": {
     "any": false,
@@ -55,7 +55,7 @@
     "stage1_runtime_deadline_minutes_by_phase": {
       "phase_a": 363.9841,
       "phase_b": 543.9841,
-      "derivation": "base search allowance + both soft-stop reserves; phase B = 360.0+147.7683+36.2158"
+      "derivation": "base + both soft-stop reserves; phase B = 360.0+147.7683+36.2158"
     },
     "phase_b_calibration": {
       "calib.domain_balanced@v1": {
@@ -101,9 +101,9 @@
     "the paid device-canary session path: TERMINATED 2026-08-18, evidence kept, none prepared"
   ],
   "next_starting_point": {
-    "status": "Phase A complete. Phase B is fully implemented and frozen at $0 -- plan, grant type, driver, launcher, executable-source identity, preregistration and pricing. Nothing is running, billing, authorized or prepared for launch.",
-    "the_ask": "A maintainer cumulative-budget decision (ceiling $26.8049, implied cap $256.8399) and a reviewer GO. No material blocker remains in the code.",
-    "budget": "cap $234.00, spent $230.0350, remaining $3.9650. Balance is not authorization."
+    "status": "Phase B is approved, fully prepared and NOT launched. All bindings verified on 42e173a. Every pre-provider gate passes EXCEPT checkpoint-store capacity.",
+    "the_ask": "A maintainer decision on 1.03 GiB of dev-box disk: the checkpoint store has 10.52 GiB free and landing the five Phase-B Top-5 leaves needs 11.55 (5.55 + a MEASURED 6 GiB margin). No safe unilateral fix -- see logs/decisions.md 2026-08-27.",
+    "budget": "cap $256.84, spent $230.0350, headroom $26.8050; session ceiling $26.8049."
   },
   "read_order": [
     "logs/STATE.md \u2014 the human view of this file",
@@ -143,7 +143,7 @@
   "next_sequence": {
     "_status": "NONE of this is implemented or started, and none of it is funded",
     "1_phase_b": "calibration/data-distribution sensitivity: calib.reasoning_heavy@v2 vs calib.domain_balanced@v1, searched JOINTLY at P=2. PREPARED AND FROZEN, NOT LAUNCHED. See logs/autoinit_phase_b_preregistration.json and logs/autoinit_phase_b_reconstruction.md",
-    "1_phase_b_blocked_on": "NOTHING. Maintainer approved the cumulative cap increase to $256.84 and the reviewer gave GO on science, implementation and one paid execution bounded by the $26.8049 single-session hard ceiling. Current identities: plan 23f23649, preregistration ba572bb7, executable-source cad571c8 over 56 files with nothing uncovered.",
+    "1_phase_b_blocked_on": "ONE pre-provider gate: checkpoint-store capacity, short by 1.03 GiB. Science, implementation, budget and every other gate are GO. Identities: plan 23f23649, preregistration ba572bb7, executable-source cad571c8 over 56 files, nothing uncovered.",
     "1_phase_b_cost": "Search P=2 $1.8950-$7.4349, 244.87 GiB working, 300 GiB provisioned. AUTHORIZATION CEILING $26.8049 (10 probes, verified reuse); low $13.0800 is a FLOOR. Implied cap $256.8399. The 14-probe no-reuse figure is a REJECTED counterfactual: stage-0 comparability failure TERMINATES. NOT an authorization; none requested.",
     "2_final_selection": "complete final initialization selection after Phase B; Phase A's unresolved_equivalence is not a final selection",
     "3_canonical_stage1_nll": "the canonical Stage-1 NLL diagnostic on the finally selected initialization, under the established Stage-1 measurement contract. DIAGNOSTIC ONLY, never a promotion criterion, and NOT the state_eval@v1 search-side NLL fields. Never yet run",

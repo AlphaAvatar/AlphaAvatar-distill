@@ -1,4 +1,4 @@
-**Updated:** 2026-08-26 · branch `main` · **PHASE A COMPLETE; PHASE B IMPLEMENTED, FROZEN, UNLAUNCHED**
+**Updated:** 2026-08-27 · branch `main` · **PHASE B APPROVED AND NOT LAUNCHED — one gate short**
 
 # Current state
 
