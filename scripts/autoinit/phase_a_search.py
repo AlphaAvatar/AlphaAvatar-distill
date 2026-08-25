@@ -27,7 +27,7 @@ from __future__ import annotations
 import argparse
 import json
 import sys
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
@@ -46,7 +46,9 @@ from aadistill.autoinit.ranking import PARETO_V1, SCHEDULE_V1  # noqa: E402
 from aadistill.autoinit.search import (  # noqa: E402
     BeamSearch, Deadline, SearchConfig,
 )
-from aadistill.autoinit.state import make_control_state  # noqa: E402
+from aadistill.autoinit.state import (  # noqa: E402
+    make_control_state, make_retained_state,
+)
 
 #: Imported, not restated. They live in `phase_a_frozen` so a recovery
 #: continuation can bind the same identities WITHOUT importing this module and
@@ -165,6 +167,9 @@ class PhaseASearch:
     control: Any
     top_n: Any
     summary: dict[str, Any]
+    #: Retained candidates injected alongside the control and measured on the
+    #: same suite. Empty for Phase A; the two Phase-A finalists for Phase B.
+    imported: list = field(default_factory=list)
 
     @property
     def leaves(self) -> list:
@@ -181,6 +186,7 @@ def run_phase_a_search(*, workdir: Path, state_eval: Path, top_n: int,
                        target_geometry: dict | None = None,
                        suite_bundle=None, calibration_items=None,
                        profile=None, profiles=None,
+                       retained_candidates=(),
                        search_minutes: float | None = None,
                        ) -> PhaseASearch:
     """Search, then inject and measure the canonical control on the same suite.
@@ -273,6 +279,38 @@ def run_phase_a_search(*, workdir: Path, state_eval: Path, top_n: int,
         evaluator.evaluate(adapter.load(str(init_dir), device=device),
                            control_artifact.artifact_digest))
 
+    # --- retained cross-phase candidates, injected by digest ----------------
+    # Measured HERE, inside the search, because this is where the teacher and the
+    # primed evaluator already exist. Measuring them after stage 1 would mean
+    # reloading a 4B teacher the device-handoff contract has just released.
+    #
+    # Empty for Phase A, which has none. Phase B passes the two retained Phase-A
+    # finalists so its cross-phase comparison has all eight candidates.
+    imported = []
+    for entry in retained_candidates:
+        directory = Path(entry["checkpoint_dir"])
+        if not directory.is_dir():
+            raise FileNotFoundError(
+                f"retained candidate {entry['candidate_id']} is not staged at "
+                f"{directory}; refusing to continue into a rung that would try to "
+                "train a checkpoint that is not here")
+        config = AutoConfig.from_pretrained(str(directory))
+        spec = adapter.spec_from_config(config)
+        art = identify_checkpoint(directory, adapter=adapter, spec=spec,
+                                  num_parameters=adapter.param_count(spec))
+        state = make_retained_state(
+            state_id=entry["candidate_id"], artifact=art, spec=spec,
+            target_spec=target_spec, num_parameters=adapter.param_count(spec),
+            root_teacher_id=teacher_id,
+            root_teacher_sha256=suite_manifest.get("teacher_sha256", "") or "0" * 64,
+            description=entry.get("description", "retained cross-phase candidate"),
+            provenance=entry.get("provenance", "retained_imported"),
+            expected_artifact_digest=entry.get("expected_artifact_digest"))
+        state.attach_evaluation(
+            evaluator.evaluate(adapter.load(str(directory), device=device),
+                               art.artifact_digest))
+        imported.append(state)
+
     ranking = result.top_n(PARETO_V1, min(top_n, len(result.leaves)))
 
     summary = {
@@ -292,6 +330,9 @@ def run_phase_a_search(*, workdir: Path, state_eval: Path, top_n: int,
         "calibration_profile": (active_profiles[0].qualified_id
                                 if len(active_profiles) == 1 else None),
         "calibration_profiles": [p.qualified_id for p in active_profiles],
+        "retained_candidates": [
+            {"state_id": s.state_id, "provenance": s.provenance,
+             "artifact_digest": s.artifact_digest} for s in imported],
         "summary": result.summary(),
         "levels": [level.as_dict() for level in result.levels],
         "resumed_state_ids": list(result.resumed),
@@ -314,7 +355,7 @@ def run_phase_a_search(*, workdir: Path, state_eval: Path, top_n: int,
         },
     }
     return PhaseASearch(result=result, control=control, top_n=ranking,
-                        summary=summary)
+                        summary=summary, imported=imported)
 
 
 def main() -> int:

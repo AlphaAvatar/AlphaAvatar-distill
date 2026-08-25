@@ -990,9 +990,22 @@ class PhaseADriver:
         return records
 
     # -- stage 2: rung 1 on seed sa ---------------------------------------
+    def candidate_universe(self) -> list:
+        """Every candidate the rungs compare. One place decides, and stages 2, 3
+        and 4 all read it.
+
+        A seam, like `run_search`. Phase A's universe is its searched leaves plus
+        the retained canonical control; Phase B additionally admits the two
+        retained Phase-A finalists, whose behavioural evidence it cites rather
+        than re-buying. Building the list separately in three stages is how a
+        cross-phase candidate ends up in the rung-1 selection and missing from
+        the rung-2 one.
+        """
+        return [*self.leaves, self.control_state]
+
     def stage2(self) -> bool:
         self.enter(2)
-        candidates = [*self.leaves, self.control_state]
+        candidates = self.candidate_universe()
         admit_leaves(candidates, self.plan)
         descriptors = probe_configs(candidates, self.plan, rung=1)
         try:
@@ -1031,7 +1044,7 @@ class PhaseADriver:
         advancing = set(self.rung1["advancing"])
         by_state = {r["state_id"]: r for r in records}
         entries = []
-        for state in (*self.leaves, self.control_state):
+        for state in self.candidate_universe():
             is_control = state.provenance == "retained_canonical"
             probe = by_state.get(state.state_id, {})
             keeps = is_control or state.state_id in advancing
@@ -1102,7 +1115,7 @@ class PhaseADriver:
     def stage3(self) -> bool:
         self.enter(3)
         advancing = set(self.rung1["advancing"])
-        candidates = [s for s in (*self.leaves, self.control_state)
+        candidates = [s for s in self.candidate_universe()
                       if s.state_id in advancing]
         if not any(s.provenance == "retained_canonical" for s in candidates):
             return self.record(3, False,
@@ -1141,7 +1154,7 @@ class PhaseADriver:
                                reason_not_run=self.rung2["decision_status"])
 
         tied = set(self.rung2["tie_break_candidates"])
-        candidates = [s for s in (*self.leaves, self.control_state)
+        candidates = [s for s in self.candidate_universe()
                       if s.state_id in tied]
         # `probe_configs` indexes `plan.seeds`, which holds sa and sb only, and
         # refuses rung 3. Extending it would mean editing recovery.py, which is

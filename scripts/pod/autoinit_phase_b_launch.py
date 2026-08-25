@@ -44,8 +44,8 @@ from aadistill.autoinit.phase_b import (  # noqa: E402
     phase_b_source_digest,
 )
 from aadistill.infrastructure.session import (  # noqa: E402
-    ArtifactPolicy, LocalAsset, MarkerPolicy, SessionContext, SessionSpec,
-    SetupManifest, TeardownPolicy,
+    ArtifactPolicy, LocalAsset, MarkerPolicy, RelayInput, SessionContext,
+    SessionSpec, SetupManifest, TeardownPolicy,
 )
 from aadistill.infrastructure.session_prechecks import (  # noqa: E402
     frozen_science_plan_gate, session_commit_gate,
@@ -56,8 +56,15 @@ from autoinit_science_inputs import (  # noqa: E402
 )
 from autoinit_phase_a_launch import (  # noqa: E402
     LOCAL_ASSETS as PHASE_A_LOCAL_ASSETS, STAGE1_SEARCH_PHASE, TEACHER_REVISION,
-    TEST_IGNORES, budget as phase_a_budget, finalists_to_fetch, probe_streams,
-    selected_leaves_secured, stage1_deadline_minutes,
+    TEST_IGNORES, budget as phase_a_budget, ckpt_store_capacity_gate,
+    fetch_selected_leaves, probe_streams, selected_leaves_secured,
+    stage1_deadline_minutes,
+)
+#: The transport staging Phase A's continuation proved on hardware. Phase B
+#: needs TWO of those five leaves on the pod — not to train them, but so the
+#: search can measure them on the same state-evaluation suite as everything else.
+from autoinit_recovery_continuation_launch import (  # noqa: E402
+    STAGED_INTO, TRANSPORT_MANIFEST, TRANSPORT_REPO, transport_is_verified,
 )
 
 STATUS = f"{WS}/autoinit_phase_b.status"
@@ -94,6 +101,77 @@ CALIBRATION_V2_LOCAL = (
     LocalAsset("artifacts/stage1/reasoning_heavy_v2", "reasoning_heavy_v2",
                "artifacts/stage1"),
 )
+
+
+#: The two retained Phase-A finalists Phase B admits to the cross-phase
+#: comparison. Their behaviour is CITED from verified evidence — no probe is
+#: bought for them — but the bytes must be here for their step-0 measurement to
+#: be comparable with the Phase-B leaves', which is why they are staged.
+IMPORTED_FINALIST_PREFIXES = ("cca699c93f34", "85bde4ded2c3")
+
+
+def imported_finalist_inputs() -> tuple:
+    """Relay inputs for exactly the two admitted finalists, and no others.
+
+    Filtered rather than staging all five: the other three are excluded from the
+    candidate set, and staging 3.3 GiB of checkpoints a session may not compare
+    would spend pod disk and transfer time on bytes it must not use.
+    """
+    if not transport_is_verified():
+        return ()
+    manifest = json.loads(TRANSPORT_MANIFEST.read_text())
+    out = []
+    for record in sorted(manifest["leaves"], key=lambda r: r["selected_order"]):
+        if not record["state_id"].startswith(IMPORTED_FINALIST_PREFIXES):
+            continue
+        for f in record["files"]:
+            out.append(RelayInput(
+                path=f["remote_path"], repo=TRANSPORT_REPO,
+                dest=f"{STAGED_INTO}/{record['state_id']}", sha256=f["sha256"]))
+    return tuple(out)
+
+
+def imported_finalists_staged_gate(ctx: SessionContext) -> tuple[bool, str]:
+    """Refuse before a pod exists if the two finalists cannot be delivered.
+
+    Without them the search cannot measure them, `candidate_universe` would be
+    six rather than the preregistered eight, and the run would compare a
+    different set from the one it froze.
+    """
+    inputs = imported_finalist_inputs()
+    if not inputs:
+        return False, ("the two retained Phase-A finalists are not deliverable: "
+                       "the transport manifest is missing or unverified, so the "
+                       "cross-phase candidate set could not be assembled")
+    staged = {i.dest for i in inputs}
+    if len(staged) != len(IMPORTED_FINALIST_PREFIXES):
+        return False, (f"expected {len(IMPORTED_FINALIST_PREFIXES)} finalist "
+                       f"destinations, found {sorted(staged)}")
+    return True, (f"{len(inputs)} files stage the {len(staged)} admitted Phase-A "
+                  "finalists for measurement")
+
+
+#: The frozen storage contract: 244.87 GiB peak working set, provision >= 300.
+PHASE_B_PEAK_WORKING_GIB = 244.87
+PHASE_B_PROVISION_GIB = 300
+
+
+def disk_provision_gate(ctx: SessionContext) -> tuple[bool, str]:
+    """A pod smaller than the frozen provision cannot finish the search.
+
+    Mechanically known, not a thing to discover: the P=2 working set is 244.87
+    GiB and the cost model says provision >= 300. A 200 GiB pod — the Phase-A
+    default this launcher would otherwise inherit — runs out mid-beam, after the
+    search has been paid for.
+    """
+    requested = int(getattr(ctx.args, "disk_gb", 0) or 0)
+    if requested < PHASE_B_PROVISION_GIB:
+        return False, (
+            f"--disk-gb {requested} is below the frozen Phase-B provision of "
+            f"{PHASE_B_PROVISION_GIB} GiB (peak working set "
+            f"{PHASE_B_PEAK_WORKING_GIB} GiB). Refusing before the pod exists.")
+    return True, (f"{requested} GiB container disk against a "
+                  f"{PHASE_B_PEAK_WORKING_GIB} GiB peak working set")
 
 
 def phase_b_budget(args):
@@ -165,8 +243,12 @@ def preregistration_gate(ctx: SessionContext) -> tuple[bool, str]:
     from aadistill.infrastructure.manifest import sha256_json
 
     prereg = json.loads(PREREGISTRATION.read_text())
-    stated = prereg.pop("preregistration_sha256", None)
-    if sha256_json(prereg) != stated:
+    stated = prereg.get("preregistration_sha256")
+    # Same rule the writer uses: `generated_utc` is provenance, not commitment,
+    # and hashing it would make the id churn on every regeneration.
+    material = {k: v for k, v in prereg.items()
+                if k not in ("preregistration_sha256", "generated_utc")}
+    if sha256_json(material) != stated:
         return False, f"{PREREGISTRATION.name} has been edited since it was frozen"
     if prereg["session_plan"]["plan_hash"] != PHASE_B_PLAN_V1.plan_hash:
         return False, ("the preregistration binds session plan "
@@ -226,7 +308,8 @@ def spec(args) -> SessionSpec:
         plan_hash=PHASE_B_PLAN_V1.plan_hash,
         budget=phase_b_budget(args),
         setup=SetupManifest(
-            relay_inputs=(*CANONICAL_INIT, *RECOVERY_LADDER, *CALIBRATION_V1),
+            relay_inputs=(*CANONICAL_INIT, *RECOVERY_LADDER, *CALIBRATION_V1,
+                          *imported_finalist_inputs()),
             local_assets=(*PHASE_A_LOCAL_ASSETS, *CALIBRATION_V2_LOCAL),
             env={"SESSION_KIND": "phase_b"},
             required_env=("SESSION_COMMIT", "BUNDLE_NAME", "SESSION_STATUS",
@@ -262,7 +345,19 @@ def spec(args) -> SessionSpec:
                           "leaf_retention.json", "rung2_selection.json",
                           "phase_a_result.json"),
             event_streams=probe_streams,
-            fetch_products=finalists_to_fetch,
+            #: `fetch_selected_leaves` returns TRANSFER RESULTS — dicts carrying
+            #: `state_id`, `rc` and `matched` — which is exactly what
+            #: `selected_leaves_secured` reads. `finalists_to_fetch` returns
+            #: canonical-id STRINGS, and pairing the two would have failed only
+            #: after a scientifically successful run, or left the P=2 Top-5
+            #: bytes unsecured. That mismatch is the same shape as the defect
+            #: that mislabelled a successful Phase A as INCOMPLETE.
+            #:
+            #: `fetch_finalists` is deliberately NOT chained here: for Phase B its
+            #: retention record also names the two imported Phase-A finalists,
+            #: which are already retained off-pod, and re-fetching them would
+            #: spend transfer time on bytes the dev box already holds.
+            fetch_products=fetch_selected_leaves,
             products_secured=selected_leaves_secured),
         teardown=TeardownPolicy(
             note="nothing chains off Phase B; it is a terminus like Phase A"),
@@ -272,6 +367,9 @@ def spec(args) -> SessionSpec:
             phase_b_source_gate,
             preregistration_gate,
             reuse_record_gate,
+            disk_provision_gate,
+            imported_finalists_staged_gate,
+            ckpt_store_capacity_gate,
         ),
         evidence_fields={
             "phase": "B",
@@ -296,6 +394,7 @@ def build_parser() -> argparse.ArgumentParser:
 
     ap = phase_a_parser()
     ap.set_defaults(out="logs/autoinit_phase_b_session.json",
+                    disk_gb=PHASE_B_PROVISION_GIB,
                     search_minutes=SEARCH_MINUTES_P2,
                     rung1_probes=RUNG1_PROBES_P2,
                     rung2_probes=RUNG2_PROBES_P2,

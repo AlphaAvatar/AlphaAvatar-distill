@@ -371,6 +371,59 @@ def make_control_state(*, control_id: str, artifact: CheckpointIdentity,
     return state
 
 
+def make_retained_state(*, state_id: str, artifact: CheckpointIdentity,
+                        spec: ArchSpec, target_spec: ArchSpec,
+                        num_parameters: int, root_teacher_id: str,
+                        root_teacher_sha256: str, description: str,
+                        provenance: str = "retained_imported",
+                        expected_artifact_digest: str | None = None,
+                        ) -> InitializationState:
+    """Inject a retained checkpoint that is NOT the canonical control.
+
+    ``make_control_state`` exists for one specific artifact and encodes that: it
+    prefixes the id with ``control-`` and stamps ``retained_canonical``, which is
+    the value `admit_leaves` and the selection rules read to mean "this advances
+    unconditionally and is the baseline". A cross-phase candidate is neither.
+
+    So this constructor takes the id and the provenance explicitly. The id
+    matters beyond bookkeeping: ``probe_configs`` derives probe ids from
+    ``state_id[:12]``, so an imported candidate keeps its ORIGINAL canonical id or
+    its probes stop matching the historical records that are its evidence.
+
+    The bytes decide. ``expected_artifact_digest`` is compared against the digest
+    computed from what is actually on disk, so a checkpoint that is not the one
+    the evidence describes is refused here rather than silently probed.
+    """
+    if expected_artifact_digest is not None and \
+            artifact.artifact_digest != expected_artifact_digest:
+        raise StateError(
+            f"{state_id}: the checkpoint at {artifact.path} digests to "
+            f"{artifact.artifact_digest[:12]} but the evidence records "
+            f"{expected_artifact_digest[:12]}. An imported candidate whose bytes "
+            "contradict its record is not that candidate.")
+    if provenance == "retained_canonical":
+        raise StateError(
+            "use make_control_state for the canonical control; stamping that "
+            "provenance here would make an imported candidate advance "
+            "unconditionally and be treated as the baseline")
+    if not spec.matches(target_spec):
+        raise StateError(
+            f"{state_id}: a recovery candidate must already be at the target "
+            f"architecture; it is {spec.describe()}")
+    state = InitializationState(
+        state_id=state_id, parent_id=None,
+        root_teacher_id=root_teacher_id, root_teacher_sha256=root_teacher_sha256,
+        spec=spec, target_spec=target_spec, steps=(),
+        num_parameters=num_parameters, depth=0, seed=0,
+        checkpoint_path=artifact.path, artifact=artifact,
+        provenance=provenance,
+        notes={"description": description,
+               "expected_artifact_digest": expected_artifact_digest},
+    )
+    state.validity = StateValidity.VALIDATED
+    return state
+
+
 def child_state(parent: InitializationState, step: OperatorStep, spec: ArchSpec,
                 num_parameters: int, seed: int) -> InitializationState:
     """A planned child. Deliberately carries **no** metrics from ``parent``."""

@@ -289,8 +289,22 @@ def build() -> dict:
             "increase has been requested, and this document neither creates nor "
             "implies one."),
     }
-    prereg["preregistration_sha256"] = sha256_json(prereg)
+    prereg["preregistration_sha256"] = preregistration_identity(prereg)
     return prereg
+
+
+def preregistration_identity(prereg: dict) -> str:
+    """The identity of what is frozen, excluding when it was written.
+
+    `generated_utc` is kept in the document as provenance and excluded from the
+    hash. Including it made the id change on every regeneration even when not one
+    byte of the actual commitment moved — an identity that churns cannot be cited
+    as "the frozen preregistration", and re-freezing after an unrelated edit
+    would look like the science had moved.
+    """
+    material = {k: v for k, v in prereg.items()
+                if k not in ("preregistration_sha256", "generated_utc")}
+    return sha256_json(material)
 
 
 def main() -> None:

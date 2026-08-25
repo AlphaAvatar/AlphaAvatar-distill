@@ -37,6 +37,7 @@ authorization has no code path to a follow-on experiment.
 from __future__ import annotations
 
 import argparse
+from collections.abc import Mapping
 import json
 import os
 import shutil
@@ -335,8 +336,17 @@ def selected_leaves_secured(ctx: SessionContext, fetched: list) -> tuple[bool, s
     if not records:
         return True, "stage 1 did not stage any selected leaves"
     want = {r["state_id"] for r in records}
+    # Defensive on SHAPE, not on outcome. `fetch_products` legitimately returns
+    # two shapes — transfer results and bare identifier strings — and this gate
+    # used to call `.get` on whatever arrived. A launcher wired to the
+    # identifier-returning fetcher therefore raised `AttributeError` here
+    # instead of refusing, and it could only do so AFTER a scientifically
+    # successful run, which is the most expensive moment to lose the bytes. An
+    # entry that is not a transfer result is simply not evidence that a leaf is
+    # secured, so it is skipped and the missing-leaf branch reports it.
     got = {f["state_id"] for f in fetched
-           if f.get("artifact") == "stage1_selected_leaf" and f.get("rc") == 0
+           if isinstance(f, Mapping)
+           and f.get("artifact") == "stage1_selected_leaf" and f.get("rc") == 0
            and f.get("matched")}
     missing = sorted(want - got)
     if missing:

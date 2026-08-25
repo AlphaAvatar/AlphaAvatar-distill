@@ -1,6 +1,6 @@
 {
   "schema": "aadistill.current_state/v2",
-  "generated_utc": "2026-08-26T12:00:00Z",
+  "generated_utc": "2026-08-26T20:00:00Z",
   "_contract": "The minimal machine-readable CURRENT snapshot: live facts only, no history, no per-attempt detail, no narrative. History lives in logs/decisions.md and the per-run directories; the human view is logs/STATE.md and the two must agree. Ownership: logs/CATALOG.md.",
   "baseline_commit": "9cad2a1e729cbf319667439baecf1d1730edabef",
   "baseline_commit_meaning": "The LAST TESTED IMPLEMENTATION: the commit whose tree produced the latest_verification figures.",
@@ -48,8 +48,9 @@
     ],
     "stage1_runtime_deadline_minutes": 363.9841,
     "phase_b_session_plan_hash": "23f23649b4be92bd8852bf9d89f8dcb372bc5a00a175ae631d32b9d71de8032d",
-    "phase_b_preregistration_sha256": "3dda103567733d5fd4d6d70f0512129f6318cb13dd0982602afa35a41cdbfe5a",
-    "phase_b_executable_source_digest": "39ba45d86018cafe370672db7b39d88c65db92e5d57727d41b2d17b41a7a5e30"
+    "phase_b_preregistration_sha256": "ba572bb7085287e87112c4bf43fb14302ce3931a992591d98a7cb70e3ba6a0f8",
+    "phase_b_executable_source_digest": "cad571c8381f00ae9056d04b0f0051106bc6d2537a631d8cecbbc6fc7f5366fc",
+    "phase_b_identity_note": "CURRENT values only; earlier ids from this session's iterations are SUPERSEDED, not live (history in logs/decisions.md). The preregistration id excludes generated_utc, so it is stable across regenerations and moves only when the commitment moves."
   },
   "complete": [
     "Phase A end to end: search, three rungs, eleven probes, unresolved_equivalence",
@@ -60,12 +61,12 @@
     "detail: logs/decisions.md and the per-run directories"
   ],
   "latest_verification": {
-    "utc": "2026-08-26T12:00:00Z",
-    "after": "the Phase-B driver and launcher",
-    "full_suite": "2285 passed, 12 skipped in 19:10",
+    "utc": "2026-08-26T20:00:00Z",
+    "after": "the reviewer-found repair pass (candidate universe, disk, transfer)",
+    "full_suite": "2299 passed, 12 skipped in 18:36",
     "frozen_asset_verifier": "passed, no problems",
-    "mutations": "8 across the Phase-B driver and launcher gates, each turning a passing state into a failing one and each checked against its TARGETED test. One initially survived -- the candidate exclusion is defended twice -- and the test was strengthened to isolate the driver's own guard rather than the mutation dismissed.",
-    "harness_digest": "BOTH historical digests MOVED, by one seam extraction in autoinit_phase_a_driver.py so Phase B can vary the profiles without duplicating 160 lines: phase_a a182efb4 -> 92fc1bd3, continuation a27bb922 -> 2b182037 (that set contains the same file, because its driver subclasses the class). Both sessions are complete with consumed authorizations, so either would now refuse to relaunch -- the desired direction. NEW: phase_b source 39ba45d8 over 56 files, nothing uncovered. No frozen SCIENCE identity moved.",
+    "mutations": "12 on the three repaired paths plus the identity rule, each turning a passing state into a failing one and each checked against its TARGETED test. Two initially survived -- stage 2 bypassing the universe seam, and the secured gate ignoring rc/matched -- and both tests were strengthened rather than the mutations dismissed.",
+    "harness_digest": "phase_a 2f8082fe and continuation 3eaefd15, both moved again: this pass edited autoinit_phase_a_driver.py (the candidate_universe seam) and autoinit_phase_a_launch.py (shape-defensive selected_leaves_secured), and both sets contain those files. Both sessions are complete with consumed authorizations. phase_b source 57ca2b96 over 56 files, nothing uncovered. No frozen SCIENCE identity moved.",
     "scope": "CPU only, repo .venv; no checkpoint loaded, no metric measured, no GPU used"
   },
   "failed": [
@@ -129,13 +130,13 @@
   "next_sequence": {
     "_status": "NONE of this is implemented or started, and none of it is funded",
     "1_phase_b": "calibration/data-distribution sensitivity: calib.reasoning_heavy@v2 vs calib.domain_balanced@v1, searched JOINTLY at P=2. PREPARED AND FROZEN, NOT LAUNCHED. See logs/autoinit_phase_b_preregistration.json and logs/autoinit_phase_b_reconstruction.md",
-    "1_phase_b_blocked_on": "A maintainer cumulative-budget decision and a reviewer GO. The $0 implementation is now COMPLETE: driver, launcher, plan 23f23649, preregistration 3dda1035, executable-source digest 39ba45d8 over 56 files with NOTHING uncovered, PhaseBAuthorization (allows_phase_a False by type, planning_floor_usd not expected_usd). No Phase-B grant exists.",
-    "1_phase_b_cost": "Search P=2 $1.8950-$7.4349, 244.87 GiB working. AUTHORIZATION CEILING $26.8049 (10 probes, verified reuse); low $13.0800 is a FLOOR, not an expectation. Implied cumulative cap $256.8399. The 14-probe no-reuse figure $33.3529 is a REJECTED COUNTERFACTUAL: Stage-0 comparability failure TERMINATES the session, because the frozen feasibility floor and equivalence interval would not describe anything it could produce. NOT an authorization; none requested.",
+    "1_phase_b_blocked_on": "A maintainer cumulative-budget decision and a reviewer GO. The $0 implementation is COMPLETE: plan 23f23649, preregistration a4477cdc, executable-source digest 57ca2b96 over 56 files with nothing uncovered, PhaseBAuthorization (allows_phase_a False by type, planning_floor_usd). No Phase-B grant exists.",
+    "1_phase_b_cost": "Search P=2 $1.8950-$7.4349, 244.87 GiB working, 300 GiB provisioned. AUTHORIZATION CEILING $26.8049 (10 probes, verified reuse); low $13.0800 is a FLOOR. Implied cap $256.8399. The 14-probe no-reuse figure is a REJECTED counterfactual: stage-0 comparability failure TERMINATES. NOT an authorization; none requested.",
     "2_final_selection": "complete final initialization selection after Phase B; Phase A's unresolved_equivalence is not a final selection",
     "3_canonical_stage1_nll": "the canonical Stage-1 NLL diagnostic on the finally selected initialization, under the established Stage-1 measurement contract. DIAGNOSTIC ONLY, never a promotion criterion, and NOT the state_eval@v1 search-side NLL fields. Never yet run",
     "4_formal_recovery": "only then, the project's formal Stage 2/Stage 3 recovery training",
     "funding": "$3.9650 remains and authorizes NO new paid session; Phase B or any GPU work needs a new explicit maintainer budget decision",
-    "1_phase_b_implementation": "COMPLETE at $0. scripts/pod/autoinit_phase_b_{driver,launch}.py: the driver subclasses the Phase-A one and overrides the governing artifacts, stage-0 bindings, the joint P=2 search and restore_probe's comparability rule for imported evidence; reuse is implemented as JOURNAL SEEDING so the inherited rung machinery needs no special case. The launcher prices TEN probes, not twelve. Two defects were found and fixed while building it: the v2 mixture was declared as a RelayInput the pod cannot fetch (attempt 5's failure mode), and the driver's inherited mark() wrote to the Phase-A status file the launcher does not poll."
+    "1_phase_b_implementation": "COMPLETE at $0, after a reviewer-found repair pass on three paid-path defects: (1) the inherited stage 2 built SIX candidates while the preregistration froze EIGHT -- fixed by a candidate_universe seam plus the two retained Phase-A finalists, measured in-search and cited rather than retrained; (2) the launcher inherited a 200 GiB disk against a 244.87 GiB working set -- now 300 with a fail-closed gate; (3) fetch_products returned id strings while products_secured expected transfer records, which would have crashed only AFTER a successful run. Detail: logs/decisions.md."
   },
   "canonical_infrastructure_moved_to": "docs/SESSION_ARCHITECTURE.md and logs/decisions.md"
 }

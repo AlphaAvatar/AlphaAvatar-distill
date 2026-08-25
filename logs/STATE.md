@@ -109,21 +109,28 @@ freed to 0.01 GiB, and the evaluation tokenizer materialized before every batter
    accounted for by the existing trainer, generation and scoring digests rather
    than duplicated.
 
-   **The executables now exist.** `scripts/pod/autoinit_phase_b_{driver,launch}.py`:
-   the driver subclasses the Phase-A one and overrides only the governing
-   artifacts, stage-0's additional bindings, the joint search and
-   `restore_probe`; the launcher prices **ten** probes rather than twelve,
-   because three candidates are cited from verified Phase-A evidence. The
-   executable-source digest is **`39ba45d8…` over 56 files with nothing
-   uncovered**, and the preregistration (`3dda1035…`) binds it.
+   **The executables exist and have been repaired.**
+   `scripts/pod/autoinit_phase_b_{driver,launch}.py`. A reviewer pass found three
+   defects in the *paid execution path*, all now fixed and mutation-tested:
 
-   Building them found two real defects: the v2 mixture was declared as a relay
-   input the pod could not fetch — attempt 5's failure exactly — and the
-   inherited `mark()` would have written markers to the Phase-A status file while
-   the launcher polled the Phase-B one, making a working session look hung. Both
-   fixed, both pinned by tests.
+   * the inherited stage 2 built **six** candidates while the preregistration
+     froze **eight** — journal seeding alone could not fix it, because a citation
+     is only consulted if a descriptor exists for its candidate. A
+     `candidate_universe()` seam now feeds stages 2/3/4 and the retention record,
+     and the two retained Phase-A finalists are injected by digest and measured
+     inside the search, cited rather than retrained;
+   * the launcher inherited a **200 GiB** disk against a 244.87 GiB working set —
+     now **300** with a fail-closed gate;
+   * `fetch_products` returned id strings while `products_secured` expected
+     transfer records — a mismatch that could only bite **after** a successful
+     run. The proven record-returning fetcher is wired, and the secured gate now
+     refuses a wrong shape instead of raising.
 
-   **No material blocker remains in the code.** What is left is a maintainer
+   Identities: executable source **`57ca2b96…`** (56 files, nothing uncovered),
+   preregistration **`a4477cdc…`**. Cost unchanged: floor **$13.0800**, ceiling
+   **$26.8049**, implied cap **$256.8399**.
+
+   **No material blocker remains in the code** — only a maintainer
    cumulative-budget decision and a reviewer GO.
    Detail: [`autoinit_phase_b_reconstruction.md`](autoinit_phase_b_reconstruction.md),
    [`autoinit_phase_b_preregistration.json`](autoinit_phase_b_preregistration.json).

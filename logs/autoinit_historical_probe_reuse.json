@@ -1,6 +1,6 @@
 {
   "schema": "aadistill.autoinit.historical_probe_reuse/v1",
-  "generated_utc": "2026-08-25T05:25:55.208415+00:00",
+  "generated_utc": "2026-08-25T16:00:42.582009+00:00",
   "_contract": "The strict reconstruction check Phase B's reuse is conditional on. Consumed by scripts/autoinit/price_phase_b.py, which fails closed if this record is missing or its probes_dir_digest no longer matches.",
   "probes_dir_digest": "a5115816861ad239f646facec4d53ba2c7925c9430c530e7c6d0af2560d5b1af",
   "live_scoring_contract_digest": "808080a7c5d88d5a66760fd0d7eeabc5451c096ad0819f8c5663a0b8224660be",

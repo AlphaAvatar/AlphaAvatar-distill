@@ -225,12 +225,20 @@ def test_a_probe_this_session_ran_still_binds_STRICTLY(driver, tmp_path):
 def test_run_search_passes_BOTH_profiles_and_a_dispatching_loader(driver):
     captured = {}
 
-    def fake_search(**kwargs):
-        captured.update(kwargs)
-        return "result"
-
     driver.plan = types.SimpleNamespace(searched_leaves=5)
-    assert driver.run_search(fake_search) == "result"
+    imported = [types.SimpleNamespace(state_id="cca699c93f34dad7e94a5d13a25b2bc2"),
+                types.SimpleNamespace(state_id="85bde4ded2c31953f802e39cf2252c87")]
+
+    def fake_search_with_imports(**kwargs):
+        captured.update(kwargs)
+        return types.SimpleNamespace(imported=imported)
+
+    found = driver.run_search(fake_search_with_imports)
+    assert found.imported == imported
+    assert driver.imported_finalists == imported, (
+        "the imported finalists never reached the driver, so the universe would "
+        "be six rather than eight")
+    assert captured["retained_candidates"], "no retained candidate was injected"
     assert captured["profiles"] == (DOMAIN_BALANCED_V1, REASONING_HEAVY_V2)
     items = captured["calibration_items"]
     assert set(items) == {DOMAIN_BALANCED_V1.qualified_id,
@@ -373,3 +381,285 @@ def test_the_candidate_filter_holds_even_if_the_RECORD_admits_an_excluded_leaf(
     assert any(s["probe_id"].endswith("158b96cf651f.sa")
                and "not in the Phase-B candidate set" in s["reason"]
                for s in imported["skipped"])
+
+
+# --- repair 1: the cross-phase candidate universe ---------------------------
+
+
+class _FakeState:
+    """Enough of an InitializationState for `probe_configs` and the universe."""
+
+    def __init__(self, state_id, provenance="search"):
+        self.state_id = state_id
+        self.provenance = provenance
+        self.path_label = "ROOT"
+        self.checkpoint_path = f"/pod/{state_id}"
+        self.artifact_digest = f"digest-{state_id}"
+        self.checkpoint_sha256 = f"shard-{state_id}"
+        self.num_parameters = 596_049_920
+
+
+def test_stage2_actually_receives_EIGHT_candidate_descriptors(driver):
+    """Not that a constant says eight — that the descriptors are eight.
+
+    The inherited stage 2 builds `leaves + control` = six. Journal seeding does
+    not fix that: a citation is only consulted if a DESCRIPTOR exists for its
+    candidate, so without this the run would seed eight citations, use three, and
+    compare a different set from the one the preregistration froze.
+    """
+    from aadistill.autoinit.recovery import probe_configs
+
+    driver.leaves = [_FakeState(f"phaseb{i:026d}") for i in range(5)]
+    driver.imported_finalists = [
+        _FakeState("cca699c93f34dad7e94a5d13a25b2bc2", "retained_phase_a_finalist"),
+        _FakeState("85bde4ded2c31953f802e39cf2252c87", "retained_phase_a_finalist")]
+    driver.control_state = _FakeState("control-qwen3_0p6b_init_v0",
+                                      "retained_canonical")
+
+    universe = driver.candidate_universe()
+    assert len(universe) == 8, [s.state_id[:12] for s in universe]
+
+    plan = types.SimpleNamespace(
+        plan_id="autoinit.v1.phase_a", seeds=(20260726, 20260801),
+        recipe=types.SimpleNamespace(recipe_id="e1_p1_kd_heavy@0.86M"),
+        feasibility_metric="usable_rollout_rate", primary_metric="correct_overall")
+    descriptors = probe_configs(universe, plan, rung=1)
+    assert len(descriptors) == 8, "stage 2 would not have compared eight candidates"
+
+    ids = [d["probe_id"] for d in descriptors]
+    # The imported ids must be EXACTLY the historical ones, or their citations
+    # are never found and they are silently retrained.
+    assert "autoinit.v1.phase_a.rung1.cca699c93f34.sa" in ids
+    assert "autoinit.v1.phase_a.rung1.85bde4ded2c3.sa" in ids
+    assert "autoinit.v1.phase_a.rung1.control-qwen.sa" in ids
+    # Seven searched candidates compete for the two sb slots; the control does
+    # not consume one.
+    searched = [s for s in universe if s.provenance != "retained_canonical"]
+    assert len(searched) == 7
+
+
+def test_only_the_FIVE_new_leaves_owe_a_new_sa_probe(driver):
+    """The eight-candidate universe must not become an eight-probe bill."""
+    driver.import_historical_probes()
+    driver.evaluation_protocol = types.SimpleNamespace(
+        evaluation_protocol_hash="live-and-comparable")
+
+    owed, cited = [], []
+    for probe_id, digest, seed in (
+            ("autoinit.v1.phase_a.rung1.cca699c93f34.sa", None, None),
+            ("autoinit.v1.phase_a.rung1.85bde4ded2c3.sa", None, None),
+            ("autoinit.v1.phase_a.rung1.control-qwen.sa", None, None)):
+        record = json.loads((HISTORICAL / f"{probe_id}.json").read_text())
+        restored = driver.restore_probe({
+            "probe_id": probe_id,
+            "student_artifact_digest": record["student_artifact_digest"],
+            "seed": record["seed"]})
+        (cited if restored else owed).append(probe_id)
+    assert len(cited) == 3 and not owed, owed
+
+    # A brand-new Phase-B leaf has nothing to restore and is genuinely owed.
+    assert driver.restore_probe({
+        "probe_id": "autoinit.v1.phase_a.rung1.phaseb000000.sa",
+        "student_artifact_digest": "d", "seed": 20260726}) is None
+
+
+def test_it_fails_closed_when_an_imported_finalist_lacks_its_evidence(
+        driver, tmp_path, monkeypatch):
+    """Do not fall through into training a checkpoint staged read-only."""
+    record = json.loads(
+        (REPO / "logs/autoinit_historical_probe_reuse.json").read_text())
+    thin = tmp_path / "reuse.json"
+    thin.write_text(json.dumps({
+        **record,
+        "admitted_reusable_probes": [p for p in record["admitted_reusable_probes"]
+                                     if not p.startswith("cca699c93f34/sb")]}))
+    monkeypatch.setattr(pbd, "REUSE_RECORD", thin)
+    with pytest.raises(RuntimeError, match="lack verified evidence"):
+        driver.require_citable(("sa", "sb"))
+
+
+def test_an_imported_finalist_with_contradicting_bytes_is_refused():
+    """The digest decides, not the record."""
+    from aadistill.autoinit.state import StateError, make_retained_state
+
+    artifact = types.SimpleNamespace(artifact_digest="actual", path="/pod/x",
+                                     single_shard_sha256=None, is_sharded=False)
+    with pytest.raises(StateError, match="contradict its record"):
+        make_retained_state(
+            state_id="cca699c93f34dad7e94a5d13a25b2bc2", artifact=artifact,
+            spec=None, target_spec=None, num_parameters=1,
+            root_teacher_id="t", root_teacher_sha256="a" * 64, description="d",
+            expected_artifact_digest="recorded")
+
+
+def test_an_imported_candidate_may_not_masquerade_as_the_control():
+    from aadistill.autoinit.state import StateError, make_retained_state
+
+    artifact = types.SimpleNamespace(artifact_digest="d", path="/pod/x")
+    with pytest.raises(StateError, match="use make_control_state"):
+        make_retained_state(
+            state_id="x", artifact=artifact, spec=None, target_spec=None,
+            num_parameters=1, root_teacher_id="t", root_teacher_sha256="a" * 64,
+            description="d", provenance="retained_canonical")
+
+
+def test_the_parents_universe_is_still_leaves_plus_control():
+    """Phase A must not acquire cross-phase candidates by inheritance."""
+    parent = object.__new__(PhaseADriver)
+    parent.leaves = [_FakeState("a"), _FakeState("b")]
+    parent.control_state = _FakeState("c", "retained_canonical")
+    assert len(parent.candidate_universe()) == 3
+
+
+# --- repair 2: disk provisioning --------------------------------------------
+
+
+def test_the_disk_default_meets_the_frozen_provision():
+    args = pbl.build_parser().parse_args(
+        ["--scr", "/tmp/scr", "--session-commit", "d" * 40, "--bundle", "b.tgz"])
+    assert args.disk_gb == pbl.PHASE_B_PROVISION_GIB == 300
+    assert pbl.PHASE_B_PEAK_WORKING_GIB > 240
+
+
+def test_a_pod_below_the_frozen_provision_is_refused_before_it_exists():
+    for requested, expected in ((200, False), (299, False), (300, True), (400, True)):
+        ctx = types.SimpleNamespace(args=types.SimpleNamespace(disk_gb=requested))
+        ok, why = pbl.disk_provision_gate(ctx)
+        assert ok is expected, (requested, why)
+        if not ok:
+            assert "below the frozen Phase-B provision" in why
+
+
+# --- repair 3: the successful-run transfer path -----------------------------
+
+
+def test_fetch_and_secure_speak_the_SAME_contract(monkeypatch, tmp_path):
+    """Successful Stage 1 → five leaves fetched → five transfer records → secured.
+
+    The failure this closes is asymmetric: it can only bite AFTER a
+    scientifically successful run, which is the most expensive moment to lose
+    the bytes.
+    """
+    import autoinit_phase_a_launch as pal
+
+    store = tmp_path / "store"
+    store.mkdir()
+    leaves = [{"state_id": f"leaf{i}", "artifact_digest": f"d{i}"} for i in range(5)]
+    (store / pal.SELECTED_LEAF_REPORT).write_text(json.dumps({"leaves": leaves}))
+    ctx = types.SimpleNamespace(scr=tmp_path, args=types.SimpleNamespace(
+        fetch_finalists=True, ckpt_store=str(tmp_path / "ck")))
+
+    # The real transfer needs a pod; the contract under test is the SHAPE both
+    # halves agree on, so the transfer itself is the one thing stood in for.
+    fetched = [{"artifact": "stage1_selected_leaf", "state_id": r["state_id"],
+                "rc": 0, "matched": True} for r in leaves]
+    monkeypatch.setattr(pal, "fetch_selected_leaves", lambda c: fetched)
+
+    ok, why = pal.selected_leaves_secured(ctx, fetched)
+    assert ok, why
+    assert "all 5 stage-1 selected leaves verified off-pod" in why
+
+    # And the shape the OLD wiring produced — bare id strings — is REFUSED
+    # rather than raising. It used to call `.get` on a str and die with
+    # AttributeError, after a successful run, at teardown.
+    ok, why = pal.selected_leaves_secured(ctx, [r["state_id"] for r in leaves])
+    assert not ok
+    assert "only 0 are" in why and "attempt 11" in why
+
+
+def test_the_phase_b_policy_uses_the_record_returning_fetcher():
+    """By NAME, not by identity.
+
+    `test_phase_a_rehearsal` loads the launcher a second time through
+    `importlib.util.spec_from_file_location`, so two live module objects hold two
+    distinct function objects for the same source. An `is` comparison then fails
+    for a reason that has nothing to do with the wiring under test — it passed
+    alone and failed in the full suite.
+    """
+    args = pbl.build_parser().parse_args(
+        ["--scr", "/tmp/scr", "--session-commit", "d" * 40, "--bundle", "b.tgz"])
+    policy = pbl.spec(args).artifacts
+    assert policy.fetch_products.__name__ == "fetch_selected_leaves"
+    assert policy.products_secured.__name__ == "selected_leaves_secured"
+    # The defect being closed: the id-returning fetcher paired with a
+    # record-consuming gate.
+    assert policy.fetch_products.__name__ != "finalists_to_fetch"
+
+
+def test_the_checkpoint_store_capacity_gate_is_wired():
+    """A pod may not be created unless the destination can hold the leaves."""
+    args = pbl.build_parser().parse_args(
+        ["--scr", "/tmp/scr", "--session-commit", "d" * 40, "--bundle", "b.tgz"])
+    names = {getattr(g, "__name__", "") for g in pbl.spec(args).precheck}
+    assert "ckpt_store_capacity_gate" in names, sorted(names)
+
+
+def test_only_the_two_admitted_finalists_are_staged():
+    inputs = pbl.imported_finalist_inputs()
+    dests = {i.dest for i in inputs}
+    assert len(dests) == 2, dests
+    for excluded in ("158b96cf651f", "281a02c3ac18", "4e429f7ed722"):
+        assert not any(excluded in d for d in dests), excluded
+    for admitted in pbl.IMPORTED_FINALIST_PREFIXES:
+        assert any(admitted in d for d in dests), admitted
+
+
+def test_stage2_ITSELF_reads_the_universe_seam(driver, monkeypatch, tmp_path):
+    """Asserting `candidate_universe()` returns eight proves nothing if stage 2
+    does not call it. Reverting stage 2 to the hardcoded `leaves + control` was
+    caught only by the digest cross-check, which is not a test of behaviour."""
+    import autoinit_phase_a_driver as pad
+
+    monkeypatch.setattr(pad, "STATUS", tmp_path / "s.status")
+    driver.results[0] = {"passed": True}
+    driver.results[1] = {"passed": True}
+    driver.plan = types.SimpleNamespace(searched_leaves=5)
+
+    called = []
+
+    def universe():
+        called.append(True)
+        raise _Sentinel("stage 2 reached the seam")
+
+    monkeypatch.setattr(driver, "candidate_universe", universe)
+    with pytest.raises(_Sentinel):
+        driver.stage2()
+    assert called, "stage 2 built its candidates without going through the seam"
+
+
+class _Sentinel(Exception):
+    pass
+
+
+def test_the_secured_gate_refuses_a_FAILED_or_UNMATCHED_transfer(tmp_path):
+    """It must check the outcome, not merely the shape. A truncated leaf that
+    reports `matched: False` is exactly what the digest re-check is for."""
+    import autoinit_phase_a_launch as pal
+
+    store = tmp_path / "store"
+    store.mkdir()
+    leaves = [{"state_id": f"leaf{i}"} for i in range(3)]
+    (store / pal.SELECTED_LEAF_REPORT).write_text(json.dumps({"leaves": leaves}))
+    ctx = types.SimpleNamespace(scr=tmp_path, args=types.SimpleNamespace(
+        fetch_finalists=True, ckpt_store=str(tmp_path / "ck")))
+
+    def record(state_id, **over):
+        return {"artifact": "stage1_selected_leaf", "state_id": state_id,
+                "rc": 0, "matched": True, **over}
+
+    ok, why = pal.selected_leaves_secured(
+        ctx, [record("leaf0"), record("leaf1", rc=1), record("leaf2")])
+    assert not ok and "leaf1" in why, why
+
+    ok, why = pal.selected_leaves_secured(
+        ctx, [record("leaf0"), record("leaf1"), record("leaf2", matched=False)])
+    assert not ok and "leaf2" in why, why
+
+    ok, why = pal.selected_leaves_secured(
+        ctx, [record("leaf0"), record("leaf1"),
+              record("leaf2", artifact="something_else")])
+    assert not ok and "leaf2" in why, why
+
+    ok, _ = pal.selected_leaves_secured(
+        ctx, [record("leaf0"), record("leaf1"), record("leaf2")])
+    assert ok

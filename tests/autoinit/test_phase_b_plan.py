@@ -319,12 +319,25 @@ def test_the_preregistration_freezes_the_whole_procedure_before_any_result():
 
 
 @pytest.mark.skipif(not PREREG.is_file(), reason="preregistration not emitted")
-def test_the_preregistration_is_self_verifying():
+def test_the_preregistration_is_self_verifying_AND_stable():
+    """The identity excludes `generated_utc`.
+
+    It used to include it, so every regeneration produced a new id even when not
+    one byte of the commitment had moved — an identity that churns cannot be
+    cited as "the frozen preregistration". The timestamp stays in the document as
+    provenance.
+    """
     from aadistill.infrastructure.manifest import sha256_json
 
     prereg = json.loads(PREREG.read_text())
-    stated = prereg.pop("preregistration_sha256")
-    assert sha256_json(prereg) == stated, "the preregistration has been edited"
+    stated = prereg["preregistration_sha256"]
+    material = {k: v for k, v in prereg.items()
+                if k not in ("preregistration_sha256", "generated_utc")}
+    assert sha256_json(material) == stated, "the preregistration has been edited"
+    assert "generated_utc" in prereg, "provenance was dropped rather than excluded"
+    # Hashing the timestamp in would give a different answer — that is the bug.
+    with_time = {k: v for k, v in prereg.items() if k != "preregistration_sha256"}
+    assert sha256_json(with_time) != stated
 
 
 @pytest.mark.skipif(not PREREG.is_file(), reason="preregistration not emitted")

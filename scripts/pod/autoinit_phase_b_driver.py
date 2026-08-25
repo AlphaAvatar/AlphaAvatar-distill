@@ -89,6 +89,12 @@ _phase_a.STATUS = STATUS
 REUSE_RECORD = REPO / "logs/autoinit_historical_probe_reuse.json"
 #: Where the historical probe records themselves live, in the committed tree.
 HISTORICAL_PROBES = REPO / "logs/autoinit_recovery_continuation_attempt7/probes"
+#: The Phase-A durability record: the canonical ids and the digests their bytes
+#: must reproduce.
+LEAF_RETENTION = REPO / "logs/autoinit_recovery_continuation_attempt7/leaf_retention.json"
+#: Where the launcher stages the two retained finalists on the pod. Read-only
+#: inputs: they are measured on the state-evaluation suite and never trained.
+STAGED_FINALISTS = REPO / "artifacts/autoinit/phase_a_selected"
 
 
 class PhaseBDriver(PhaseADriver):
@@ -116,6 +122,7 @@ class PhaseBDriver(PhaseADriver):
         self.rung1 = None
         self.rung2 = None
         self.imported_probe_ids: set[str] = set()
+        self.imported_finalists: list = []
         self.comparability = None
         self.ev: dict = {
             "schema": "aadistill.autoinit.phase_b_evidence/v1",
@@ -249,6 +256,37 @@ class PhaseBDriver(PhaseADriver):
                 "probes_dir_digest": record.get("probes_dir_digest"),
                 "source": str(HISTORICAL_PROBES.relative_to(REPO))}
 
+    # -- the cross-phase candidate universe --------------------------------
+    def candidate_universe(self) -> list:
+        """Eight: the Phase-B Top-5, the two retained Phase-A finalists, the control.
+
+        The inherited universe is `leaves + control` — six here — and journal
+        seeding alone does not fix that: a probe record is only consulted if a
+        DESCRIPTOR is generated for its candidate, and descriptors come from this
+        list. Without the finalists the run would seed six citations, use three,
+        and quietly compare a different set from the one the preregistration
+        froze.
+
+        `self.leaves` still means exactly the Phase-B Top-5. The imported states
+        are kept separate so nothing blurs what the P=2 search produced.
+        """
+        return [*self.leaves, *self.imported_finalists, self.control_state]
+
+    def require_citable(self, rung_seed_names: tuple[str, ...]) -> None:
+        """Every imported finalist must already have the evidence it will be asked
+        for. Fail closed rather than fall through into training bytes that were
+        never staged for training."""
+        record = json.loads(REUSE_RECORD.read_text())
+        admitted = set(record.get("admitted_reusable_probes") or ())
+        missing = [f"{c}/{s}" for c in PHASE_A_IMPORTED_FINALISTS
+                   for s in rung_seed_names if f"{c}/{s}" not in admitted]
+        if missing:
+            raise RuntimeError(
+                f"imported Phase-A finalists lack verified evidence for {missing}. "
+                "Phase B cites their behaviour; it does not retrain them, and "
+                "their checkpoints are staged read-only for measurement. "
+                "Refusing rather than falling through into a probe.")
+
     # -- stage 1: the joint P=2 search -------------------------------------
     def run_search(self, run_phase_a_search):
         """Both mixtures, searched jointly, in one beam.
@@ -262,14 +300,59 @@ class PhaseBDriver(PhaseADriver):
 
         items = {p.qualified_id: as_operator_items(p.resolve(REPO))
                  for p in (DOMAIN_BALANCED_V1, REASONING_HEAVY_V2)}
-        say(f"phase B search: P=2 over {sorted(items)}")
-        return run_phase_a_search(
+        # Refuse before the search rather than after it: if the citations these
+        # candidates depend on are not verified, no amount of searching helps.
+        self.require_citable(("sa", "sb"))
+        say(f"phase B search: P=2 over {sorted(items)}; "
+            f"{len(PHASE_A_IMPORTED_FINALISTS)} retained finalists injected")
+        found = run_phase_a_search(
             workdir=REPO / "artifacts/autoinit/phase_b_search",
             state_eval=REPO / "artifacts/stage1/state_eval_v1",
             top_n=self.plan.searched_leaves, device="cuda", repo_root=REPO,
             profiles=(DOMAIN_BALANCED_V1, REASONING_HEAVY_V2),
             calibration_items=items,
+            retained_candidates=self.retained_candidate_specs(),
             search_minutes=self.a.search_deadline_minutes)
+        # Published here rather than in the inherited stage 1, which knows only
+        # about leaves and the control. Kept OFF `self.leaves`: those are the
+        # Phase-B Top-5 and nothing else.
+        self.imported_finalists = list(found.imported)
+        if len(self.imported_finalists) != len(PHASE_A_IMPORTED_FINALISTS):
+            raise RuntimeError(
+                f"expected {len(PHASE_A_IMPORTED_FINALISTS)} retained finalists, "
+                f"measured {len(self.imported_finalists)}; the cross-phase "
+                "comparison would be missing a preregistered candidate")
+        say(f"retained finalists measured: "
+            f"{[s.state_id[:12] for s in self.imported_finalists]}")
+        return found
+
+    def retained_candidate_specs(self) -> list[dict]:
+        """The two Phase-A finalists, by canonical id and recorded digest.
+
+        The id is the ORIGINAL one, because `probe_configs` derives probe ids
+        from `state_id[:12]` and a renamed candidate would stop matching the
+        historical records that are its entire evidence.
+        """
+        retention = json.loads(LEAF_RETENTION.read_text())
+        by_id = {e["canonical_id"]: e for e in retention["entries"]}
+        specs = []
+        for candidate in PHASE_A_IMPORTED_FINALISTS:
+            entry = next((e for cid, e in by_id.items()
+                          if cid.startswith(candidate)), None)
+            if entry is None:
+                raise RuntimeError(
+                    f"{candidate} is not in the Phase-A leaf retention record; "
+                    "its identity cannot be established and it must not be "
+                    "compared on an assumed digest")
+            specs.append({
+                "candidate_id": entry["canonical_id"],
+                "checkpoint_dir": str(STAGED_FINALISTS / entry["canonical_id"]),
+                "expected_artifact_digest": entry["artifact_digest"],
+                "provenance": "retained_phase_a_finalist",
+                "description": ("a retained Phase-A finalist, cited rather than "
+                                "re-searched; its behaviour is imported evidence"),
+            })
+        return specs
 
     # -- citing an imported probe ------------------------------------------
     def restore_probe(self, descriptor: dict) -> dict | None:

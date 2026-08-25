@@ -501,7 +501,7 @@ decision is required before any Phase-B GPU work.**
 | 10 | Phase-B preregistration | **DONE** — `8f211ce1…`, self-verifying |
 | 11 | final mechanical repricing | **DONE** — ceiling **$26.8049**, cap **$256.8399** |
 | 12 | activation-statistics GPU/CPU split | **NOT to be measured by a separate paid session.** The conservative bound stands unless it falls out of the Phase-B run |
-| 13 | a Phase-B pod driver and launcher | **DONE 2026-08-26.** `scripts/pod/autoinit_phase_b_{driver,launch}.py`; the digest moved to `39ba45d8…` over 56 files and `PHASE_B_UNCOVERED` is now empty |
+| 13 | a Phase-B pod driver and launcher | **DONE.** `scripts/pod/autoinit_phase_b_{driver,launch}.py`, then a reviewer repair pass on three paid-path defects: the six-vs-eight candidate universe, the 200-vs-300 GiB disk, and the fetch/secure contract mismatch. Digest `cad571c8…` over 56 files, nothing uncovered |
 | 14 | new cumulative-budget decision | **maintainer** |
 | 15 | reviewer GO | **reviewer** |
 
