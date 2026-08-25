@@ -924,6 +924,35 @@ and none should be.
 
 **No paid compute is running.** Verified by provider query: zero live pods.
 
+## 2026-08-27 — cumulative cap raised to $256.84 for ONE Phase-B execution
+
+```
+previous cumulative actual spend                             $230.0350
+previous authorized cumulative cap                           $234.00
+NEW authorized cumulative cap                                $256.8400
+newly approved headroom                                      $ 26.8050
+Phase-B SINGLE-SESSION hard ceiling                          $ 26.8049
+Phase-B planning floor (NOT an expected spend)               $ 13.0800
+```
+
+**APPROVED by the maintainer**, in their own words: "Increase the
+AlphaAvatar-distill cumulative budget cap from **$234.00 to $256.84**." The
+reviewer's verdict on the same message: Phase-B science GO, Phase-B
+implementation/readiness GO, cumulative increase APPROVED, and one Phase-B paid
+execution authorized to prepare and launch subject to the frozen fail-closed
+gates.
+
+**The $0.0001 difference is deliberate.** `$256.8400 - $230.0350 = $26.8050`,
+while the frozen single-session ceiling is `$26.8049`. The rounding margin
+belongs to the **cumulative** cap; it does not enlarge the session ceiling, and
+`PhaseBAuthorization.require_within_cap` is issued against `$26.8049`.
+
+**`$13.0800` is a planning floor, not an expected spend.** No expected-value
+assumption over survivor identity or tie-break probability is defined anywhere.
+
+**Unused headroom is not authorization.** Whatever Phase B does not spend funds
+nothing else; a later experiment needs its own maintainer decision.
+
 ## Standing rules
 
 * Plan from **actual spend**, never from unused room under a previous authorization.

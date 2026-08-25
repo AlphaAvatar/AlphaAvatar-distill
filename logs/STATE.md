@@ -144,8 +144,11 @@ freed to 0.01 GiB, and the evaluation tokenizer materialized before every batter
 4. **Only then**, the project's formal **Stage 2 / Stage 3 recovery training**.
 
 **Nothing in this list is implemented or started**, and none of it is funded:
-`$3.9650` remains, which authorizes **no new paid session**. Phase B or any
-subsequent GPU work needs a new explicit maintainer budget decision.
+`$26.8050` of headroom is approved for **one** Phase-B execution, bounded by the
+frozen single-session hard ceiling of **$26.8049**. The `$0.0001` difference
+belongs to the cumulative cap and does not enlarge the session ceiling.
+`$13.0800` is a planning floor, not an expected spend. Unused headroom is **not**
+authorization for any later experiment.
 
 ## The launcher defect — cosmetic here, must be fixed before any future session
 
@@ -468,8 +471,8 @@ selection result.**
 
 ```
 cumulative spend   $230.0350
-approved cap       $234.00    RAISED AND APPROVED 2026-08-21
-remaining          $ 3.9650   funds NO further paid session of any kind
+approved cap       $256.84    RAISED AND APPROVED 2026-08-27 for ONE Phase-B run
+remaining          $26.8050   headroom; the Phase-B session ceiling is $26.8049
 
 ```
 

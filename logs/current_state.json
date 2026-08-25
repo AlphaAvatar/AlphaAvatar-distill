@@ -1,6 +1,6 @@
 {
   "schema": "aadistill.current_state/v2",
-  "generated_utc": "2026-08-26T20:00:00Z",
+  "generated_utc": "2026-08-27T09:00:00Z",
   "_contract": "The minimal machine-readable CURRENT snapshot: live facts only, no history, no per-attempt detail, no narrative. History lives in logs/decisions.md and the per-run directories; the human view is logs/STATE.md and the two must agree. Ownership: logs/CATALOG.md.",
   "baseline_commit": "ed77c68b10946a44bac9e043e8dd8b6dab121662",
   "baseline_commit_meaning": "The LAST TESTED IMPLEMENTATION: the commit whose tree produced the latest_verification figures.",
@@ -19,11 +19,13 @@
   },
   "budget": {
     "cumulative_spend_usd": 230.035,
-    "authorized_cap_usd": 234.0,
-    "remaining_usd": 3.965,
+    "authorized_cap_usd": 256.84,
+    "remaining_usd": 26.805,
+    "phase_b_single_session_hard_ceiling_usd": 26.8049,
+    "planning_floor_usd": 13.08,
     "remaining_is_not_permission": true,
     "ledger": "logs/BUDGET_LEDGER.md",
-    "headroom_note": "$3.9650 funds NO further paid session of any kind: a continuation ceiling is $16.7456 and a Phase-A attempt $23.0484. Balance is not authorization."
+    "headroom_note": "Approved 2026-08-27 for ONE Phase-B execution. The $0.0001 between the $26.8050 headroom and the $26.8049 session ceiling belongs to the CUMULATIVE cap. Unused headroom is not authorization for any later experiment."
   },
   "frozen": {
     "science_plan_hash": "02be33b9a7a8e26bc8bfb75795351e8cdc9ffd441b47066cc81887cfc511b55c",
@@ -44,20 +46,33 @@
       "selection rules",
       "pooled_counts@v2",
       "Stage-3 artifacts and thresholds",
-      "the operator ledger's declared semantics"
+      "the operator ledger"
     ],
-    "stage1_runtime_deadline_minutes": 363.9841,
     "phase_b_session_plan_hash": "23f23649b4be92bd8852bf9d89f8dcb372bc5a00a175ae631d32b9d71de8032d",
     "phase_b_preregistration_sha256": "ba572bb7085287e87112c4bf43fb14302ce3931a992591d98a7cb70e3ba6a0f8",
     "phase_b_executable_source_digest": "cad571c8381f00ae9056d04b0f0051106bc6d2537a631d8cecbbc6fc7f5366fc",
-    "phase_b_identity_note": "CURRENT values only; earlier ids from this session's iterations are SUPERSEDED, not live (history in logs/decisions.md). The preregistration id excludes generated_utc, so it is stable across regenerations and moves only when the commitment moves."
+    "phase_b_identity_note": "CURRENT only; earlier ids are SUPERSEDED (history: logs/decisions.md). The preregistration id excludes generated_utc, so it moves only when the commitment moves.",
+    "stage1_runtime_deadline_minutes_by_phase": {
+      "phase_a": 363.9841,
+      "phase_b": 543.9841,
+      "derivation": "base search allowance + both soft-stop reserves; phase B = 360.0+147.7683+36.2158"
+    },
+    "phase_b_calibration": {
+      "calib.domain_balanced@v1": {
+        "spec": "11f36a88",
+        "content": "d65c1f40"
+      },
+      "calib.reasoning_heavy@v2": {
+        "spec": "6c67b8df",
+        "content": "cdb28389",
+        "items_file": "a2ff8c92"
+      }
+    }
   },
   "complete": [
     "Phase A end to end: search, three rungs, eleven probes, unresolved_equivalence",
-    "the five-leaf transport mirror and the multi-repo relay contract",
     "Stage 3 (both permanent controls, thresholds materialized)",
-    "the Stage-1 device audit (autoinit.stage1_device_contract@v1)",
-    "Phase-B $0 preparation: v2 mixture, probe-reuse verification, session plan, authorization type, executable-source identity, preregistration, pricing",
+    "Phase-B $0 readiness: v2 mixture, probe-reuse verification, plan, authorization type, executable-source identity, preregistration, driver, launcher, pricing",
     "detail: logs/decisions.md and the per-run directories"
   ],
   "latest_verification": {
@@ -65,27 +80,25 @@
     "after": "the reviewer-found repair pass (candidate universe, disk, transfer)",
     "full_suite": "2299 passed, 12 skipped in 18:36",
     "frozen_asset_verifier": "passed, no problems",
-    "mutations": "12 on the three repaired paths plus the identity rule, each turning a passing state into a failing one and each checked against its TARGETED test. Two initially survived -- stage 2 bypassing the universe seam, and the secured gate ignoring rc/matched -- and both tests were strengthened rather than the mutations dismissed.",
-    "harness_digest": "phase_a 2f8082fe and continuation 3eaefd15, both moved again: this pass edited autoinit_phase_a_driver.py (the candidate_universe seam) and autoinit_phase_a_launch.py (shape-defensive selected_leaves_secured), and both sets contain those files. Both sessions are complete with consumed authorizations. phase_b source 57ca2b96 over 56 files, nothing uncovered. No frozen SCIENCE identity moved.",
+    "mutations": "12 on the three repaired paths plus the identity rule, each turning a passing state into a failing one and each checked against its TARGETED test; two initially survived and those tests were strengthened.",
+    "harness_digest": "phase_a 2f8082fe, continuation 3eaefd15; both moved during the Phase-B work because both sets contain files it edited, and both sessions are complete with consumed authorizations. phase_b executable source cad571c8 over 56 files, nothing uncovered. No frozen SCIENCE identity moved.",
     "scope": "CPU only, repo .venv; no checkpoint loaded, no metric measured, no GPU used"
   },
   "failed": [
     {
       "run": "recovery continuation 7 launcher (the DRIVER succeeded)",
       "usd": 0.0,
-      "where": "session_runner after collection, on a successful Phase A",
-      "cause": "checkpoint_hashes_matched does all(f.get('rc')==0 for f in fetched), but Phase A's fetch_products is finalists_to_fetch, which returns canonical_id STRINGS. AttributeError. Only a SUCCESSFUL Phase A reaches it with a non-empty list",
-      "impact": "cosmetic: everything was fetched and nothing was owed off-pod, but the session read INCOMPLETE/passed=false despite DRIVER_EXITED:0. FIXED in the 2026-08-24 closeout via fetch_result_ok; attempt 7's own record is left as written"
+      "cause": "checkpoint_hashes_matched treated canonical_id STRINGS as transfer results",
+      "impact": "cosmetic; FIXED in the 2026-08-24 closeout via fetch_result_ok"
     }
   ],
-  "failure_pattern": "continuation 1 an uncaught transport call, 2 an undeliverable asset, 3 dev-box-only code in the pod gate, 4 the attempt-12 OOM class, 5 a checkpoint path, 6 a checkpoint with no tokenizer, 7 the DRIVER SUCCEEDED and the launcher crashed on a line only success reaches. Each failure was further in than the last. See logs/decisions.md",
+  "failure_pattern": "continuation 1-7: an uncaught transport call, an undeliverable asset, dev-box-only code in the pod gate, the attempt-12 OOM class, a checkpoint path, a checkpoint with no tokenizer, and finally a SUCCEEDING driver whose launcher crashed on a line only success reaches. Each failure was further in than the last. See logs/decisions.md",
   "abandoned": [
     "recovery_search_v1 (INVALID before first use)",
     "calib.reasoning_heavy@v1 (UNBUILDABLE; superseded by v2)",
     "the 14-probe Phase-B no-reuse path (rejected counterfactual, not a fallback)",
-    "student-prefix recovery (E5)",
-    "any fourth seed",
-    "the paid device-canary session path (terminated 2026-08-18)"
+    "student-prefix recovery (E5); any fourth seed",
+    "the paid device-canary session path: TERMINATED 2026-08-18, evidence kept, none prepared"
   ],
   "next_starting_point": {
     "status": "Phase A complete. Phase B is fully implemented and frozen at $0 -- plan, grant type, driver, launcher, executable-source identity, preregistration and pricing. Nothing is running, billing, authorized or prepared for launch.",
@@ -100,9 +113,9 @@
     "logs/BUDGET_LEDGER.md \u2014 spend and caps",
     "AGENTS.md \u2014 the binding working contract"
   ],
-  "failed_before_the_current_architecture": "Phase A 1-5 $1.6321, 6 $0.3552, 7 $0.3955; canary 1 $0.0603, 2 $0.0637. All five classes closed by autoinit.stage1_device_contract@v1 and the session specification. See logs/decisions.md",
-  "measurement_attempts": "3 launches, $0.4611: $0.0700 setup contract, $0.1834 driver entrypoint, then $0.2077 COMPLETE. Detail: logs/autoinit_measurement_attempt{1,2,3}/",
-  "failed_before_attempt_11": "Phase A 8 $0.1900, 9 $0.3400, 10 $11.4300. All three closed and CONFIRMED closed by attempt 11 reaching stage 2. See logs/decisions.md",
+  "failed_before_the_current_architecture": "Phase A 1-5, 6, 7 and both canary attempts, $2.6108 total; all five classes closed by autoinit.stage1_device_contract@v1 and the session specification. See logs/decisions.md",
+  "measurement_attempts": "3 launches, $0.4611, ending COMPLETE. See logs/autoinit_measurement_attempt{1,2,3}/",
+  "failed_before_attempt_11": "Phase A 8 $0.1900, 9 $0.3400, 10 $11.4300; all closed and confirmed closed by attempt 11. See logs/decisions.md",
   "causal_depth_cost": "standalone 12.07 eval/min (attempt 3, cached); INSIDE the search 6.96-10.79 on the fallback path, which fired 4/4. Recorded, NOT repriced: Stage 1 took 180.283 min against the 180.0 base allowance.",
   "local_storage": {
     "free_gib": 15.0,
@@ -130,7 +143,7 @@
   "next_sequence": {
     "_status": "NONE of this is implemented or started, and none of it is funded",
     "1_phase_b": "calibration/data-distribution sensitivity: calib.reasoning_heavy@v2 vs calib.domain_balanced@v1, searched JOINTLY at P=2. PREPARED AND FROZEN, NOT LAUNCHED. See logs/autoinit_phase_b_preregistration.json and logs/autoinit_phase_b_reconstruction.md",
-    "1_phase_b_blocked_on": "A maintainer cumulative-budget decision and a reviewer GO. The $0 implementation is COMPLETE: plan 23f23649, preregistration a4477cdc, executable-source digest 57ca2b96 over 56 files with nothing uncovered, PhaseBAuthorization (allows_phase_a False by type, planning_floor_usd). No Phase-B grant exists.",
+    "1_phase_b_blocked_on": "NOTHING. Maintainer approved the cumulative cap increase to $256.84 and the reviewer gave GO on science, implementation and one paid execution bounded by the $26.8049 single-session hard ceiling. Current identities: plan 23f23649, preregistration ba572bb7, executable-source cad571c8 over 56 files with nothing uncovered.",
     "1_phase_b_cost": "Search P=2 $1.8950-$7.4349, 244.87 GiB working, 300 GiB provisioned. AUTHORIZATION CEILING $26.8049 (10 probes, verified reuse); low $13.0800 is a FLOOR. Implied cap $256.8399. The 14-probe no-reuse figure is a REJECTED counterfactual: stage-0 comparability failure TERMINATES. NOT an authorization; none requested.",
     "2_final_selection": "complete final initialization selection after Phase B; Phase A's unresolved_equivalence is not a final selection",
     "3_canonical_stage1_nll": "the canonical Stage-1 NLL diagnostic on the finally selected initialization, under the established Stage-1 measurement contract. DIAGNOSTIC ONLY, never a promotion criterion, and NOT the state_eval@v1 search-side NLL fields. Never yet run",
