@@ -1,6 +1,6 @@
 {
   "schema": "aadistill.current_state/v2",
-  "generated_utc": "2026-08-27T11:00:00Z",
+  "generated_utc": "2026-08-27T12:00:00Z",
   "_contract": "The minimal machine-readable CURRENT snapshot: live facts only, no history, no per-attempt detail, no narrative. History lives in logs/decisions.md and the per-run directories; the human view is logs/STATE.md and the two must agree. Ownership: logs/CATALOG.md.",
   "baseline_commit": "ed77c68b10946a44bac9e043e8dd8b6dab121662",
   "baseline_commit_meaning": "The LAST TESTED IMPLEMENTATION: the commit whose tree produced the latest_verification figures.",
@@ -11,7 +11,7 @@
   },
   "authorized": {
     "any": false,
-    "note": "Maintainer APPROVED the cap increase to $256.84 and the reviewer gave GO for ONE Phase-B execution, but NO PhaseBAuthorization has been issued: a pre-provider gate fails, and a one-use grant binds a commit that any fix will move."
+    "note": "A one-use PhaseBAuthorization was issued (autoinit.phase_b.20260825T201335Z, sha cc0f69cd) and is valid in itself but CANNOT BE CONSUMED -- see next_sequence. Treat it as spent and unusable; it must be re-issued after the repair."
   },
   "prepared_launch": {
     "any": false,
@@ -101,9 +101,9 @@
     "the paid device-canary session path: TERMINATED 2026-08-18, evidence kept, none prepared"
   ],
   "next_starting_point": {
-    "status": "Phase B is approved and every pre-provider gate now passes. The capacity blocker was cleared by reclaiming 1.5000 GiB of REBUILDABLE derived caches only -- no checkpoint, scientific artifact, relay_retired object or sibling-project asset was touched, and the measured 6 GiB margin was not shrunk.",
-    "the_ask": "Issue the one-use PhaseBAuthorization against the final clean commit, then launch.",
-    "budget": "cap $256.84, spent $230.0350, headroom $26.8050; session ceiling $26.8049."
+    "status": "Phase B is approved, capacity is resolved and every identity gate passes, but the session is NOT launched: the first precheck raises AttributeError.",
+    "the_ask": "A reviewer decision to reopen Phase-B readiness for one minimal repair: give PhaseBAuthorization the three names the shared session machinery requires, as aliases over its source_* fields. That edits phase_b.py, inside the executable-source set, so cad571c8 moves, ba572bb7 must be re-frozen and the authorization re-issued.",
+    "budget": "cap $256.84, spent $230.0350 (UNCHANGED); session ceiling $26.8049. Nothing spent."
   },
   "read_order": [
     "logs/STATE.md \u2014 the human view of this file",
@@ -120,7 +120,7 @@
   "local_storage": {
     "free_gib": 14.9402,
     "ckpt_store_gate": "PASS (11.55 GiB required)",
-    "last_reclamation": "logs/derived_cache_cleanup_20260827.json -- 6.2387 GiB of rebuildable caches in two passes; the second was pytest scratch that a suite run created between two gate checks",
+    "last_reclamation": "logs/derived_cache_cleanup_20260827.json -- 6.2387 GiB of rebuildable caches in two passes",
     "volatility_note": "a full-suite run consumes ~4.7 GiB of /tmp on this single-filesystem box, so the launcher's own capacity gate is the protection that matters",
     "checkpoints_deleted": 0,
     "scientific_artifacts_deleted": 0
@@ -142,13 +142,13 @@
   "next_sequence": {
     "_status": "NONE of this is implemented or started, and none of it is funded",
     "1_phase_b": "calibration/data-distribution sensitivity: calib.reasoning_heavy@v2 vs calib.domain_balanced@v1, searched JOINTLY at P=2. PREPARED AND FROZEN, NOT LAUNCHED. See logs/autoinit_phase_b_preregistration.json and logs/autoinit_phase_b_reconstruction.md",
-    "1_phase_b_blocked_on": "NOTHING. Capacity cleared 2026-08-27 (12.0162 GiB free vs 11.55 required). Identities: plan 23f23649, preregistration ba572bb7, executable-source cad571c8 over 56 files, nothing uncovered.",
+    "1_phase_b_blocked_on": "ONE defect found at the final gate: PhaseBAuthorization uses source_* naming while session_prechecks and session_runner require harness_source_files, harness_source_digest and require_harness. The first precheck raises AttributeError, so the commit-lineage gate never runs for Phase B. It fails BEFORE a pod, so no money was at risk.",
     "1_phase_b_cost": "Search P=2 $1.8950-$7.4349, 244.87 GiB working, 300 GiB provisioned. AUTHORIZATION CEILING $26.8049 (10 probes, verified reuse); low $13.0800 is a FLOOR. Implied cap $256.8399. The 14-probe no-reuse figure is a REJECTED counterfactual: stage-0 comparability failure TERMINATES. NOT an authorization; none requested.",
     "2_final_selection": "complete final initialization selection after Phase B; Phase A's unresolved_equivalence is not a final selection",
     "3_canonical_stage1_nll": "the canonical Stage-1 NLL diagnostic on the finally selected initialization, under the established Stage-1 measurement contract. DIAGNOSTIC ONLY, never a promotion criterion, and NOT the state_eval@v1 search-side NLL fields. Never yet run",
     "4_formal_recovery": "only then, the project's formal Stage 2/Stage 3 recovery training",
     "funding": "$3.9650 remains and authorizes NO new paid session; Phase B or any GPU work needs a new explicit maintainer budget decision",
-    "1_phase_b_implementation": "COMPLETE at $0, after a reviewer-found repair pass on three paid-path defects: (1) the inherited stage 2 built SIX candidates while the preregistration froze EIGHT -- fixed by a candidate_universe seam plus the two retained Phase-A finalists, measured in-search and cited rather than retrained; (2) the launcher inherited a 200 GiB disk against a 244.87 GiB working set -- now 300 with a fail-closed gate; (3) fetch_products returned id strings while products_secured expected transfer records, which would have crashed only AFTER a successful run. Detail: logs/decisions.md."
+    "1_phase_b_implementation": "COMPLETE except the authorization/session-machinery naming mismatch above. Driver, launcher, plan, preregistration, executable-source identity, pricing and all storage/capacity work are done and verified. See logs/decisions.md 2026-08-27."
   },
   "canonical_infrastructure_moved_to": "docs/SESSION_ARCHITECTURE.md and logs/decisions.md"
 }

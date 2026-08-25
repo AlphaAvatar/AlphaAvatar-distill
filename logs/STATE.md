@@ -1,4 +1,4 @@
-**Updated:** 2026-08-27 · branch `main` · **PHASE B APPROVED AND NOT LAUNCHED — one gate short**
+**Updated:** 2026-08-27 · branch `main` · **PHASE B AUTHORIZED, NOT LAUNCHED — precheck contract defect**
 
 # Current state
 
