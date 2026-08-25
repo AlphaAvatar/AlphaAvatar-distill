@@ -118,9 +118,10 @@
   "failed_before_attempt_11": "Phase A 8 $0.1900, 9 $0.3400, 10 $11.4300; all closed and confirmed closed by attempt 11. See logs/decisions.md",
   "causal_depth_cost": "standalone 12.07 eval/min (attempt 3, cached); INSIDE the search 6.96-10.79 on the fallback path, which fired 4/4. Recorded, NOT repriced: Stage 1 took 180.283 min against the 180.0 base allowance.",
   "local_storage": {
-    "free_gib": 12.0162,
+    "free_gib": 14.9402,
     "ckpt_store_gate": "PASS (11.55 GiB required)",
-    "last_reclamation": "logs/derived_cache_cleanup_20260827.json -- 1.5000 GiB of rebuildable caches",
+    "last_reclamation": "logs/derived_cache_cleanup_20260827.json -- 6.2387 GiB of rebuildable caches in two passes; the second was pytest scratch that a suite run created between two gate checks",
+    "volatility_note": "a full-suite run consumes ~4.7 GiB of /tmp on this single-filesystem box, so the launcher's own capacity gate is the protection that matters",
     "checkpoints_deleted": 0,
     "scientific_artifacts_deleted": 0
   },

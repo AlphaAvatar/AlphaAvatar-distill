@@ -38,6 +38,26 @@
       "bytes": 25376117,
       "gib": 0.0236,
       "why_reproducible": "pip wheel cache. Recreated by any pip/uv install."
+    },
+    {
+      "path": "/tmp/pytest-of-ecs-user",
+      "bytes": 5088163739,
+      "gib": 4.7387,
+      "why_reproducible": "pytest scratch from six retained suite runs. Ephemeral by construction and recreated by any run.",
+      "note": "Found because the capacity gate FAILED AGAIN 20 minutes after passing: the full suite run between the two checks had consumed 4.8 GB of /tmp, which is on the same filesystem. This is precisely the phenomenon the measured 6 GiB ckpt-store margin exists for, observed live."
     }
-  ]
+  ],
+  "free_space_is_volatile": "A full-suite run consumes ~4.7 GiB of /tmp scratch on this single-filesystem box, so free space measured before a suite run does not describe the state after one. The launcher re-runs ckpt_store_capacity_gate itself before creating a pod, which is the protection that matters.",
+  "totals": {
+    "bytes": 6698751110,
+    "gib": 6.2387,
+    "checkpoints_deleted": 0,
+    "scientific_artifacts_deleted": 0
+  },
+  "result": {
+    "ckpt_store_free_gib_before": 10.5024,
+    "ckpt_store_free_gib_after": 14.9402,
+    "gate_required_gib": 11.55,
+    "gate_result": "PASS"
+  }
 }
