@@ -52,6 +52,7 @@ from aadistill.autoinit.phase_b import (  # noqa: E402
 from aadistill.autoinit.recovery import (  # noqa: E402
     recovery_scoring_contract, trainer_source_digest,
 )
+from aadistill.infrastructure.manifest import sha256_json  # noqa: E402
 
 FROZEN_PLAN = "logs/autoinit_phase_a_recovery_plan_frozen.json"
 PREREGISTRATION = "logs/autoinit_phase_b_preregistration.json"
@@ -212,13 +213,19 @@ def main() -> None:
     )
 
     payload = auth.as_dict()
-    # Recorded beside the authorization rather than inside its hash: these are
-    # the identities Phase B DELEGATES, and they are verified at stage 0 by the
-    # code that owns them.
+    # These join the payload and are then hashed WITH it. Adding them after
+    # `as_dict()` computed `authorization_sha256` produced an artifact that
+    # failed its own tamper check on the first issue attempt -- `load()`
+    # recomputes over everything except the hash field, so any key added
+    # afterwards is indistinguishable from an edit. Which is the point of the
+    # check; it caught this.
+    payload.pop("authorization_sha256")
     payload["delegated_identities"] = {
         "trainer": trainer_source_digest(REPO_ROOT)["digest"],
         "generation": generation_source_digest(REPO_ROOT)["digest"],
         "scoring_contract": recovery_scoring_contract(REPO_ROOT)["digest"],
+        "_why_here": ("identities Phase B DELEGATES rather than digests: they are "
+                      "verified at stage 0 by the code that owns them"),
     }
     payload["preregistration_sha256"] = prereg["preregistration_sha256"]
     payload["historical_reuse"] = {
@@ -228,6 +235,7 @@ def main() -> None:
     }
     payload["cumulative_cap_usd"] = CUMULATIVE_CAP_USD
     payload["one_use"] = True
+    payload["authorization_sha256"] = sha256_json(payload)
 
     out = Path(args.out)
     out = out if out.is_absolute() else REPO_ROOT / args.out
