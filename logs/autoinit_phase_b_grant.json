@@ -1,0 +1,9 @@
+{
+  "schema": "aadistill.autoinit.phase_b_grant/v1",
+  "_what_this_is": "A ONE-USE maintainer decision. Not a schema, not reusable, and not an instruction to launch by itself: issuing and launching are separate, explicit steps.",
+  "granted_by": "Maintainer approval, 2026-08-27, in their own words: \"Maintainer approval is granted. Increase the AlphaAvatar-distill cumulative budget cap from $234.00 to $256.84. The approved Phase-B session remains bounded by the frozen single-session hard ceiling of $26.8049. The $13.0800 figure remains a planning floor only, not an expected spend.\" Reviewer verdict in the same message: Phase-B science GO, Phase-B implementation/readiness GO, cumulative-budget increase to $256.84 APPROVED, and one Phase-B paid execution AUTHORIZED TO PREPARE AND LAUNCH subject to the frozen fail-closed gates.",
+  "covers": "exactly one paid Phase-B execution: the frozen joint P=2 beam-6 search over calib.domain_balanced@v1 and calib.reasoning_heavy@v2, then the cross-phase rungs over eight candidates at sa, of which only the five new Phase-B leaves incur new probes.",
+  "cumulative_spend_at_approval_usd": 230.0350,
+  "cumulative_cap_usd": 256.84,
+  "does_not_authorize": "a second Phase-B attempt; any reopening of Phase A; the rejected 14-probe no-reuse path (a Stage-0 comparability failure TERMINATES the session); rematerializing the Stage-3 controls or redefining their thresholds; admitting the three excluded Phase-A leaves; a fourth seed; the post-Phase-B generalization pass; a DEPTH incumbent change; ATTENTION/FFN/RESIDUAL_WIDTH operator research; the canonical Stage-1 NLL diagnostic; formal Stage 2/3 recovery training; or any further grant or paid session. Unused headroom is not authorization for anything."
+}
