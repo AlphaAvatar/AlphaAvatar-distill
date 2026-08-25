@@ -130,13 +130,25 @@ def test_each_scenario_describes_ONE_world():
     assert (p["total_low"], p["total_high"], p["total_no_reuse"]) == (5, 10, 14)
 
 
-def test_the_no_reuse_scenario_pays_every_rung_in_full():
-    p = price()["probes"]
+def test_the_no_reuse_path_is_a_REJECTED_counterfactual_not_the_ceiling():
+    """Comparability failure terminates at stage 0; it does not buy a bigger run.
+
+    The frozen feasibility floor and equivalence interval were materialized under
+    Phase A's runtime. If comparability fails they describe nothing this session
+    could produce, so re-running eight candidates is a differently-thresholded
+    experiment, not a fallback — and funding it would be funding that experiment.
+    """
+    r = price()
+    p, t = r["probes"], r["total"]
     n = PHASE_B_SEARCHED_LEAVES + len(PHASE_A_FINALISTS) + 1
     assert p["no_reuse_sa"] == n
-    assert p["no_reuse_sb"] == SURVIVORS_AT_SB + 1
-    assert p["no_reuse_sc"] == SURVIVORS_AT_SB + 1
     assert p["total_no_reuse"] > p["total_high"] > p["total_low"]
+    # It is priced, and it is NOT the ceiling.
+    assert t["authorization_ceiling_usd"] == t["hard_with_reuse_usd"]
+    assert t["rejected_counterfactual_no_reuse_usd"] > t["authorization_ceiling_usd"]
+    assert "TERMINATE" in r["comparability_gate"]["on_fail"]
+    assert "rerunning" in r["comparability_gate"]["not_a_fallback"]
+    assert "NOT an executable path" in r["scenarios"]["rejected_counterfactual_no_reuse"]
 
 
 def test_the_floor_is_not_called_an_expectation():
@@ -144,7 +156,8 @@ def test_the_floor_is_not_called_an_expectation():
     probability is defined anywhere, so nothing here may be called 'expected'."""
     r = price()
     assert set(r["total"]) == {"low_usd", "hard_with_reuse_usd",
-                               "hard_no_reuse_usd", "note"}
+                               "authorization_ceiling_usd",
+                               "rejected_counterfactual_no_reuse_usd", "note"}
     assert "expected_usd" not in r["total"]
     assert "FLOOR, not an expectation" in r["total"]["note"]
     assert "not an expectation" in r["scenarios"]["low"]
@@ -154,7 +167,7 @@ def test_the_totals_are_ordered_and_composed_of_what_they_claim():
     r = price()
     lo = r["total"]["low_usd"]
     hi = r["total"]["hard_with_reuse_usd"]
-    nr = r["total"]["hard_no_reuse_usd"]
+    nr = r["total"]["rejected_counterfactual_no_reuse_usd"]
     assert 0 < lo < hi < nr
     p, s = r["probes"], r["search"]
     assert abs(lo - (s["usd_low"] + p["total_low"] * p["per_probe_usd"]

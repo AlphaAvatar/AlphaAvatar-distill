@@ -1,6 +1,6 @@
 {
   "schema": "aadistill.autoinit.phase_b_pricing/v1",
-  "generated_utc": "2026-08-24T19:11:13.873973+00:00",
+  "generated_utc": "2026-08-25T05:25:56.428520+00:00",
   "_contract": "Prices the paid work Phase B still owes under the 2026-08-25 reviewer procedure. NOT an authorization, and not a grant: the binding per-launch ceiling is issued by the authorization code against a frozen plan.",
   "hardware": {
     "name": "L40S",
@@ -51,8 +51,8 @@
   },
   "scenarios": {
     "low": "reuse holds; both sb survivors are the Phase-A finalists, whose sb is verified; no tie-break fires. A FLOOR, not an expectation: no expected-value assumption over survivor identity or tie-break probability is defined anywhere, so this is not an 'expected' cost",
-    "hard_with_reuse": "reuse holds; both sb survivors are new Phase-B leaves and the tie-break fires over those two plus the control, none of which has a verified sc",
-    "hard_no_reuse": "Stage 0 finds Phase B's runtime not comparable to Phase A's under generation_runtime_comparability@v2, so NO historical probe may be cited and every rung is paid in full. This is the binding bound for an authorization"
+    "hard_with_reuse": "reuse holds; both sb survivors are new Phase-B leaves and the tie-break fires over those two plus the control, none of which has a verified sc. THIS is the authorization ceiling",
+    "rejected_counterfactual_no_reuse": "what a run that cited no historical evidence would have cost. NOT an executable path: if Stage-0 comparability fails the session TERMINATES before any search or probe, because the frozen feasibility floor and equivalence interval would not describe anything it could produce. Priced only so the rejection is on the record"
   },
   "reuse": {
     "source": "logs/autoinit_historical_probe_reuse.json",
@@ -135,7 +135,13 @@
   "total": {
     "low_usd": 13.08,
     "hard_with_reuse_usd": 26.8049,
-    "hard_no_reuse_usd": 33.3529,
-    "note": "low is a FLOOR, not an expectation -- no expected-value assumption is defined. hard_no_reuse is what an authorization must cover, because the comparability precondition is only testable at Stage 0 of the run itself. The spread within each scenario is dominated by the activation-statistics GPU/CPU split, still unmeasured and deliberately not measured by a separate paid session."
+    "authorization_ceiling_usd": 26.8049,
+    "rejected_counterfactual_no_reuse_usd": 33.3529,
+    "note": "low is a FLOOR, not an expectation -- no expected-value assumption is defined anywhere. The AUTHORIZATION CEILING is hard_with_reuse: Stage-0 comparability is a fail-closed terminate, not a switch to a larger run, so the no-reuse figure is a rejected counterfactual rather than a bound to fund. The spread within each scenario is dominated by the activation-statistics GPU/CPU split, still unmeasured and deliberately NOT to be measured by a separate paid session."
+  },
+  "comparability_gate": {
+    "rule": "generation_runtime_comparability@v2",
+    "on_fail": "TERMINATE at stage 0, before any search or probe",
+    "not_a_fallback": "do not respond to comparability failure by rerunning all eight candidates, and do not rematerialize the Stage-3 controls or redefine thresholds"
   }
 }

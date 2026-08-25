@@ -51,6 +51,8 @@ and their contents inventoried in
 | `src/aadistill/autoinit/generation.py`, `src/aadistill/autoinit/generation_compat.py` | evaluation-protocol identity and `generation_runtime_comparability@v2` |
 | `src/aadistill/autoinit/authorization.py` | `SpendAuthorization` — the type whose `allows_phase_a` is always `False` |
 | `src/aadistill/autoinit/phase_a.py` | the Phase-A **schema and frozen plan**. Carries no grant prose |
+| `src/aadistill/autoinit/phase_b.py` | the Phase-B session plan, its own executable-source identity, and the `PhaseBAuthorization` type whose `allows_phase_a` is False by type |
+| `src/aadistill/autoinit/reweight.py` | the R1–R5 calibration reweighting rule. Build-time only; the pod never runs it |
 | `src/aadistill/init/` | Stage-0/1 primitives: activation statistics, contribution, sandwich init |
 | `src/aadistill/data/`, `src/aadistill/evaluation/`, `src/aadistill/models/`, `src/aadistill/rollout/` | corpora, scorers, student construction, rollout |
 | `src/aadistill/infrastructure/` | provider, budget, watchdog, artifact gate, log relay, manifests |
@@ -82,6 +84,7 @@ and their contents inventoried in
 | `docs/SESSION_ARCHITECTURE.md` | how a paid session is specified and run: the inheritance problem, and the IMPLEMENTED replacement |
 | `docs/POD_SCRIPTS.md` | every pod script, classified |
 | `docs/AUTOINIT_REFERENCE.md` | AutoInitializer binding rules, pinned assets, protocol requirements |
+| `docs/POST_PHASE_B_GENERALIZATION.md` | the generalization backlog — **not to be started before Phase B completes** |
 | `docs/archive/` | superseded documents, kept for provenance and clearly bannered |
 
 ## Rules that govern the layout

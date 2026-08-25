@@ -1,0 +1,451 @@
+{
+  "schema": "aadistill.autoinit.phase_b_preregistration/v1",
+  "generated_utc": "2026-08-25T05:21:38.071087+00:00",
+  "status": "FROZEN BEFORE ANY PHASE-B RESULT EXISTS. Not an authorization, not a grant, and not an instruction to launch.",
+  "hypothesis": "Does the AutoInitializer's preferred composition change when the calibration distribution changes? Phase A searched one distribution, so its ranking is conditional on it.",
+  "search": {
+    "profiles": 2,
+    "joint": true,
+    "joint_rationale": "the two arms compete for the same beam slots; P=2 changes pruning, so Phase-A leaves are NOT injected to restrict the space and the domain-balanced arm is re-searched rather than imported",
+    "beam_width": 6,
+    "warmup_levels": 1,
+    "schedule": {
+      "schedule_id": "beam.delayed_prune",
+      "version": 1,
+      "description": "no quality pruning at level 0; beam width 6 from level 1 onward",
+      "warmup_levels": 1,
+      "width": 6,
+      "schedule_hash": "9ff15b3c7ec4729ad1b57cbb3dea940a4a24d544783ab6f37d4a36d99a818c12"
+    },
+    "ranking_policy": {
+      "policy_id": "beam.pareto_multi_objective",
+      "version": 2,
+      "description": "epsilon-Pareto over original-teacher fidelity: equal-domain mean KL, worst-domain KL and critical-token KL. NLL is diagnostic and never prunes. Lineage diversity precedes the deterministic state-id tie-break.",
+      "objectives": [
+        {
+          "key": "state.teacher_kl.equal_domain_mean",
+          "direction": "minimize",
+          "description": "equal-domain mean forward KL from the original teacher"
+        },
+        {
+          "key": "state.teacher_kl.worst_domain",
+          "direction": "minimize",
+          "description": "the domain this state preserves least well"
+        },
+        {
+          "key": "state.critical_token_kl",
+          "direction": "minimize",
+          "description": "unweighted mean KL over declared critical-token classes"
+        }
+      ],
+      "tie_break": [
+        "state.teacher_kl.equal_domain_mean",
+        "state.teacher_kl.worst_domain",
+        "state.critical_token_kl",
+        "state_id"
+      ],
+      "guardrails": [
+        {
+          "name": "structurally_valid",
+          "description": "the state reached MEASURED through materialize -> reload -> hash -> validate"
+        }
+      ],
+      "epsilon": {
+        "state.critical_token_kl": 0.0001,
+        "state.teacher_kl.equal_domain_mean": 0.0001,
+        "state.teacher_kl.worst_domain": 0.0001
+      },
+      "diversity_key": "parent_path",
+      "required_metrics": [
+        "state.teacher_kl.equal_domain_mean",
+        "state.teacher_kl.worst_domain",
+        "state.critical_token_kl"
+      ],
+      "policy_hash": "30a5305bc06dd1e886ea285fa7a3f90ac4b32f61bcb62bae35668f28922bf2e4",
+      "metadata": {
+        "nll_status": "diagnostic only; recorded per domain, never an objective"
+      }
+    },
+    "decomposed_paths": 288,
+    "operator_branching": {
+      "attention.weight_proxy_v0": {
+        "kind": "ATTENTION",
+        "calibration": "none",
+        "profiles_branched_over": 1,
+        "note": "invoked once against the calib.none@v1 sentinel; it consumes no mixture, so branching it would manufacture byte-identical states"
+      },
+      "composite.stage1_sandwich_v0": {
+        "kind": "COMPOSITE_STAGE1",
+        "calibration": "activation_stats",
+        "profiles_branched_over": 2,
+        "note": "branches over both calibration profiles"
+      },
+      "depth.causal_kl_greedy_v1": {
+        "kind": "DEPTH",
+        "calibration": "forward_logits",
+        "profiles_branched_over": 2,
+        "note": "branches over both calibration profiles"
+      },
+      "depth.positional_v0": {
+        "kind": "DEPTH",
+        "calibration": "none",
+        "profiles_branched_over": 1,
+        "note": "invoked once against the calib.none@v1 sentinel; it consumes no mixture, so branching it would manufacture byte-identical states"
+      },
+      "ffn.activation_importance_v0": {
+        "kind": "FFN",
+        "calibration": "activation_stats",
+        "profiles_branched_over": 2,
+        "note": "branches over both calibration profiles"
+      },
+      "width.global_pca_v0": {
+        "kind": "RESIDUAL_WIDTH",
+        "calibration": "activation_stats",
+        "profiles_branched_over": 2,
+        "note": "branches over both calibration profiles"
+      }
+    },
+    "no_calibration_sentinel": "calib.none@v1",
+    "nll_is_not_an_objective": "NLL is recorded per domain as a diagnostic and appears nowhere in the beam objectives or the tie-break"
+  },
+  "calibration_profiles": [
+    {
+      "qualified_id": "calib.domain_balanced@v1",
+      "spec_identity": {
+        "profile_hash": "11f36a88bad4879f8ab0e3586ca1f0af035401e505dc97815bed8d47b9f32e9b",
+        "covers": "sources, revisions, domain weights, token budget, sample rule, seed, role, leakage exclusions"
+      },
+      "materialized_identity": {
+        "content_sha256": "d65c1f40e4837ea1bd5bcc33c68041a13b797c68f5be3c0686e0142ed761028f",
+        "items_file_sha256": "c7202338109e459b17b70456461e8f304fadea7929ea547accee21adbbe7fd0b",
+        "items_path": "artifacts/stage1/e8_calibration_v1/items.jsonl",
+        "covers": "the sampled bytes the operators are actually fed"
+      },
+      "why_both": "profile_hash does NOT identify the sampled bytes. A mixture can satisfy its spec hash and be different bytes \u2014 a rebuild under a changed rule, a truncated file, a rendering change. For calib.reasoning_heavy@v2 the seed does not even reach the bytes, because every sub-type optimum is unique.",
+      "token_budget": 59763,
+      "domain_weights": {
+        "code": 0.2,
+        "general": 0.2,
+        "math": 0.2,
+        "rag_multihop": 0.2,
+        "tool": 0.2
+      },
+      "leakage_proof_path": "artifacts/stage1/e8_calibration_v1/leakage.json",
+      "leakage_exclusions": [
+        "ladder_uniform_probe.rung",
+        "ladder_uniform_probe.val",
+        "prompt_content_collisions"
+      ]
+    },
+    {
+      "qualified_id": "calib.reasoning_heavy@v2",
+      "spec_identity": {
+        "profile_hash": "6c67b8dff0e81a775371a62b1b293677e45c173f52aee119d036c95081782ddd",
+        "covers": "sources, revisions, domain weights, token budget, sample rule, seed, role, leakage exclusions"
+      },
+      "materialized_identity": {
+        "content_sha256": "cdb2838946b9355294406d2bc398bc8390306ced84a35b09900f45a033ccc370",
+        "items_file_sha256": "a2ff8c92c16aaf5c178db160690430f4972216d45a57ab0025835ecd0ca41fc4",
+        "items_path": "artifacts/stage1/reasoning_heavy_v2/items.jsonl",
+        "covers": "the sampled bytes the operators are actually fed"
+      },
+      "why_both": "profile_hash does NOT identify the sampled bytes. A mixture can satisfy its spec hash and be different bytes \u2014 a rebuild under a changed rule, a truncated file, a rendering change. For calib.reasoning_heavy@v2 the seed does not even reach the bytes, because every sub-type optimum is unique.",
+      "token_budget": 59763,
+      "domain_weights": {
+        "code": 0.2,
+        "general": 0.1,
+        "math": 0.35,
+        "rag_multihop": 0.25,
+        "tool": 0.1
+      },
+      "leakage_proof_path": "artifacts/stage1/e8_calibration_v1/leakage.json",
+      "leakage_exclusions": [
+        "ladder_uniform_probe.rung",
+        "ladder_uniform_probe.val",
+        "prompt_content_collisions"
+      ]
+    }
+  ],
+  "state_evaluation": {
+    "suite": "state_eval@v1",
+    "content_sha256": "a1197205e43aad0e71c0e1bb436ee7babba3b5d8bb25b9c4d5c464f659db20fc",
+    "unchanged_from_phase_a": true
+  },
+  "executable_source": {
+    "digest": "92e2170e1a86c1a8cbc36ecc8fb50844682f5af77364ca38cdd0a2e64bbda57f",
+    "set_version": 1,
+    "files": [
+      "scripts/autoinit/phase_a_search.py",
+      "src/aadistill/autoinit/__init__.py",
+      "src/aadistill/autoinit/adapters/__init__.py",
+      "src/aadistill/autoinit/adapters/qwen3.py",
+      "src/aadistill/autoinit/arch.py",
+      "src/aadistill/autoinit/artifact.py",
+      "src/aadistill/autoinit/calibration.py",
+      "src/aadistill/autoinit/datasets.py",
+      "src/aadistill/autoinit/device.py",
+      "src/aadistill/autoinit/metrics.py",
+      "src/aadistill/autoinit/operators/__init__.py",
+      "src/aadistill/autoinit/operators/_common.py",
+      "src/aadistill/autoinit/operators/attention.py",
+      "src/aadistill/autoinit/operators/base.py",
+      "src/aadistill/autoinit/operators/composite.py",
+      "src/aadistill/autoinit/operators/depth.py",
+      "src/aadistill/autoinit/operators/ffn.py",
+      "src/aadistill/autoinit/operators/width.py",
+      "src/aadistill/autoinit/phase_b.py",
+      "src/aadistill/autoinit/ranking.py",
+      "src/aadistill/autoinit/search.py",
+      "src/aadistill/autoinit/state.py",
+      "src/aadistill/autoinit/stats.py",
+      "src/aadistill/data/extra_stream.py",
+      "src/aadistill/infrastructure/manifest.py",
+      "src/aadistill/init/contribution.py",
+      "src/aadistill/init/project.py",
+      "src/aadistill/init/sandwich.py"
+    ],
+    "rule": "sha256 over sorted 'path:sha256' lines of the declared Phase-B executable source set",
+    "delegated_identities": {
+      "probe training": "recovery.trainer_source_digest over TRAINER_SOURCE_FILES_V1",
+      "probe generation": "generation.generation_source_digest over GENERATION_SOURCE_FILES_V1, inside the attested evaluation protocol",
+      "probe scoring": "recovery.recovery_scoring_contract over RECOVERY_SCORING_FILES_V2, which includes recovery.py",
+      "the calibration mixtures": "profile_hash for the spec and content_sha256 + items_file_sha256 for the sampled bytes; the builder is provenance, not runtime",
+      "the state-evaluation suite": "state_eval@v1 content and manifest hashes",
+      "the recovery battery": "recovery_search_v2 content and manifest hashes",
+      "the selection rules": "the frozen science plan hash"
+    },
+    "not_yet_covered": [
+      "scripts/pod/autoinit_phase_b_driver.py \u2014 does not exist",
+      "scripts/pod/autoinit_phase_b_launch.py \u2014 does not exist",
+      "the session machinery a Phase-B launcher would execute (infrastructure/session*.py), which enters the set with the launcher"
+    ],
+    "phase_a_harness_untouched": "PHASE_A_HARNESS_SOURCE_FILES_V1 is historical fact about a completed experiment and is not widened by Phase B"
+  },
+  "science_plan": {
+    "plan_hash": "02be33b9a7a8e26bc8bfb75795351e8cdc9ffd441b47066cc81887cfc511b55c",
+    "source": "logs/autoinit_phase_a_recovery_plan_frozen.json",
+    "reused_unchanged": true,
+    "equivalence_interval": 0.011695296982299022,
+    "feasibility_floor": 0.3,
+    "catastrophic_capability_rule": {
+      "candidate_max": 0.1,
+      "control_min": 0.4,
+      "enforced_at": [
+        "rung1",
+        "final"
+      ],
+      "metric": "usable_rollout_rate",
+      "rule_id": "per_capability_collapse",
+      "statement": "candidate usable_rollout_rate < 0.1 AND control usable_rollout_rate > 0.4 -> catastrophic failure, candidate excluded",
+      "version": 1
+    },
+    "recipe": {
+      "block_len": 8192,
+      "ce_weight": 0.25,
+      "description": "The recovery recipe every E1 arm used, at the rung the frozen battery was sampled from. Held fixed so a difference between two probes is a difference between two initializations.",
+      "kd_scope": "all",
+      "kd_weight": 1.0,
+      "pack": "artifacts/stage3/ladder_uniform_probe",
+      "pack_sha256": "6f324cb0f37bc0f07128e554ce8c161879419537478950496534f75fcecb249c",
+      "recipe_id": "e1_p1_kd_heavy@0.86M",
+      "temperature": 1.0,
+      "tokens": 860000
+    },
+    "phase_b_does_not": "rematerialize the Stage-3 controls, redefine the feasibility floor or equivalence interval, or add a fourth seed"
+  },
+  "runtime_comparability_gate": {
+    "rule": "generation_runtime_comparability@v2",
+    "checked_at": "stage 0, before any search or probe",
+    "on_pass": "verified historical Phase-A probe evidence is citable and Phase B continues",
+    "on_fail": "FAIL CLOSED and TERMINATE the session before any search or probe",
+    "why_terminate_rather_than_rerun": "comparability is not merely a reuse convenience. It is what lets behavioural results be judged against the FROZEN Stage-3 feasibility floor and equivalence interval, which were materialized under Phase A's runtime. If it fails, those thresholds do not describe anything this session could produce, so re-running all eight candidates would be a differently-thresholded experiment wearing Phase B's name \u2014 and would not restore the interval either.",
+    "explicitly_not_a_fallback": "the 14-probe no-reuse path is a rejected counterfactual, retained in the pricing artifact for comparison only; it is NOT an executable scientific fallback and NOT the authorization ceiling"
+  },
+  "candidate_set": {
+    "phase_b_top_n": 5,
+    "admission_rule": "the Top-5 admissible complete leaves of the joint P=2 search, by the frozen epsilon-Pareto ranking",
+    "imported_phase_a_finalists": [
+      "cca699c93f34",
+      "85bde4ded2c3"
+    ],
+    "canonical_control": "control-qwen",
+    "total_at_sa": 8,
+    "excluded_phase_a_leaves": {
+      "158b96cf651f": "lost the Phase-A rung-1 behavioural admission step",
+      "281a02c3ac18": "lost the Phase-A rung-1 behavioural admission step",
+      "4e429f7ed722": "lost the Phase-A rung-1 behavioural admission step"
+    },
+    "exclusion_rule": "These three hold VERIFIED sa probes and are retained off-pod, so admitting them would cost nothing at sa. Zero marginal cost is not an admission criterion. They were excluded at Phase-A rung 1 under the same primary metric and the same feasibility and catastrophic gates that Phase B applies, and a candidate set that can grow after results are visible is not a preregistered set.",
+    "closed_before_results": "recorded here so it cannot be reopened once Phase-B results are visible and one of the excluded leaves looks convenient"
+  },
+  "historical_evidence": {
+    "requirement": "an imported result is citable ONLY where strict reconstruction proves the same materialized recovery protocol and seed",
+    "record": "logs/autoinit_historical_probe_reuse.json",
+    "probes_dir_digest": "a5115816861ad239f646facec4d53ba2c7925c9430c530e7c6d0af2560d5b1af",
+    "verified_at_preregistration": [
+      "85bde4ded2c3/sa",
+      "85bde4ded2c3/sb",
+      "85bde4ded2c3/sc",
+      "cca699c93f34/sa",
+      "cca699c93f34/sb",
+      "cca699c93f34/sc",
+      "control-qwen/sa",
+      "control-qwen/sb"
+    ],
+    "checks": "completeness; the frozen seed for the rung; the artifact digest re-derived from the retained checkpoint bytes; the battery and scoring-contract identities; the attested protocol hash",
+    "re_verified_on_pod": true
+  },
+  "procedure": {
+    "seeds": {
+      "sa": 20260726,
+      "sb": 20260801,
+      "sc": 20260813,
+      "fourth_seed": "never"
+    },
+    "rung_sa": "all 8 candidates; the 5 new leaves are probed, the 3 verified priors are cited",
+    "rung_sb": "the 2 globally best searched candidates by correct_overall among feasible candidates, plus the control, which advances unconditionally; only missing probes are run",
+    "selection": "constraint then objective, never a weighted sum: usable_rollout_rate gates by the frozen feasibility floor, correct_overall ranks, correct_given_usable explains",
+    "decision": "pooled sa+sb under pooled_counts@v2, judged against the frozen equivalence interval",
+    "rung_sc": "conditional, only for candidates inside the equivalence interval that lack a verified sc",
+    "terminal_results": [
+      "a resolved winner",
+      "the control wins",
+      "unresolved_equivalence with winner=None"
+    ],
+    "unresolved_is_a_result": true,
+    "tie_break_authority": {
+      "may_break_a_tie": [
+        "seed sc, once, for tied candidates only"
+      ],
+      "may_NOT_break_a_tie": [
+        "search-side KL \u2014 it ranks states, not behaviour",
+        "search-side NLL \u2014 E7 measured a -5.22 nat swing moving behaviour by +0.0000",
+        "the canonical Stage-1 NLL diagnostic \u2014 diagnostic only, and not run by this session",
+        "a fourth seed \u2014 never"
+      ]
+    }
+  },
+  "session_plan": {
+    "plan_id": "autoinit.v1.phase_b_session",
+    "plan_hash": "23f23649b4be92bd8852bf9d89f8dcb372bc5a00a175ae631d32b9d71de8032d",
+    "version": 1,
+    "stages": [
+      {
+        "stage": 0,
+        "name": "attestation, comparability gate and evidence binding",
+        "purpose": "establish that this session measures under a runtime the frozen Stage-3 thresholds still apply to, and that the historical evidence it intends to cite is the evidence it verified at $0",
+        "produces": [
+          "runtime fingerprint including image digest",
+          "attested evaluation protocol over recovery_search_v2",
+          "comparable_generation_identity under generation_runtime_comparability@v2",
+          "frozen-asset verification for state_eval_v1 and recovery_search_v2",
+          "both calibration profiles resolved and hash-verified: spec identity AND materialized content identity",
+          "the Phase-B executable-source digest",
+          "re-verification of the historical probe reconstruction record against the probe bytes on the pod",
+          "assert_preregistered against the frozen Phase-B plan"
+        ],
+        "blocking": true,
+        "stop_conditions": [
+          "the comparable identity differs from Phase A's -> STOP AND TERMINATE before any search or probe. The frozen feasibility floor and equivalence interval were materialized under Phase A's runtime and do not describe this one, so nothing this session could produce would be judgeable against them",
+          "comparability failure is NOT answered by re-running all eight candidates: that is a differently-thresholded experiment, and it would not restore the frozen interval either",
+          "Stage 3 controls are NOT rematerialized and thresholds are NOT redefined under any outcome of this stage",
+          "a calibration profile's content hash does not re-derive from its items -> STOP: profile_hash identifies the spec, not the bytes",
+          "the historical probe record does not verify -> STOP rather than citing evidence whose reconstruction was never proved",
+          "a frozen asset does not match its preregistered constant -> STOP",
+          "the executing science plan does not hash to the frozen one -> STOP"
+        ]
+      },
+      {
+        "stage": 1,
+        "name": "joint P=2 beam search over both calibration profiles",
+        "purpose": "search the two calibration distributions JOINTLY, so the domain-balanced arm competes for the same beam slots as the reasoning-heavy arm and pruning is decided across both",
+        "produces": [
+          "one measured, hash-bound state per expansion",
+          "each state's calibration profile recorded on its steps",
+          "level records including every prune reason",
+          "the epsilon-Pareto ranking at each pruned level",
+          "5 admissible complete leaves, the Phase-B Top-5",
+          "the search journal, resumable by content-derived state id"
+        ],
+        "blocking": true,
+        "stop_conditions": [
+          "Phase-A leaves are NOT injected to restrict the space: P=2 changes pruning, so this is a fresh joint search",
+          "fewer than 5 admissible complete leaves exist -> STOP and report the shortfall rather than shrinking N",
+          "a materialized state fails canonical reload, spec match, parameter count or finiteness -> STOP",
+          "the state evaluation suite hash differs from the attested one -> STOP: the beam would rank on a different suite's questions"
+        ]
+      },
+      {
+        "stage": 2,
+        "name": "cross-phase rung 1 on seed sa",
+        "purpose": "probe the Phase-B Top-5 on seed sa, and admit the imported Phase-A finalists and canonical control on their VERIFIED historical sa evidence rather than re-buying it",
+        "produces": [
+          "5 probes at 1023 steps each on seed sa, for the new leaves",
+          "3 imported sa results, cited by verified reconstruction",
+          "the global rung-1 selection over all 8 candidates",
+          "per-probe journal entries, resumable"
+        ],
+        "blocking": true,
+        "stop_conditions": [
+          "the canonical control is absent -> STOP",
+          "an imported result whose reconstruction is not verified is NOT cited; the candidate is re-probed or the session stops",
+          "the three excluded Phase-A leaves are NOT admitted, whatever their retained sa evidence would have cost",
+          "capability schema validation fails -> scoring defect, STOP"
+        ]
+      },
+      {
+        "stage": 3,
+        "name": "cross-phase rung 2 on seed sb",
+        "purpose": "second seed for the two globally best searched candidates and the control, because the behaviour metric's seed-only spread is 0.1290",
+        "produces": [
+          "probes on seed sb for those finalists that lack a verified sb \u2014 between 0 and 2, plus the control if it lacks one",
+          "pooled_counts@v2 aggregates over sa and sb",
+          "the final selection under the frozen equivalence rule"
+        ],
+        "blocking": true,
+        "stop_conditions": [
+          "the control did not advance -> STOP: it advances unconditionally",
+          "the two survivors are selected GLOBALLY by correct_overall among feasible candidates, not within the Phase-B leaves alone",
+          "capability schema validation fails -> STOP"
+        ]
+      },
+      {
+        "stage": 4,
+        "name": "conditional tie-break on seed sc",
+        "purpose": "resolve finalists inside the preregistered equivalence interval after two seeds \u2014 and only those, and only where no verified sc already exists",
+        "produces": [
+          "probes on seed sc for tied finalists that lack one",
+          "imported sc results where verified",
+          "pooled aggregates over sa, sb and sc",
+          "the resolved winner, or unresolved_equivalence"
+        ],
+        "blocking": false,
+        "stop_conditions": [
+          "the rung-2 selection did not request a tie-break -> this stage does not run, which is not a failure",
+          "no fourth seed is requested under any outcome"
+        ]
+      },
+      {
+        "stage": 5,
+        "name": "selection and report",
+        "purpose": "record which initialization won across both phases, that the canonical control won, or that the comparison resolved no unique behavioural winner",
+        "produces": [
+          "the final cross-phase selection record with every exclusion",
+          "which calibration profile each admitted leaf was searched under, so the distribution-sensitivity question is answerable",
+          "feasibility and catastrophic-gate outcomes per candidate",
+          "behaviour and correctness reported on separate axes",
+          "the Phase-B result artifact"
+        ],
+        "blocking": false,
+        "stop_conditions": [
+          "a tie surviving seed sc is reported as unresolved_equivalence and is a RESULT, not a failure",
+          "search-side KL and NLL may NOT break a behavioural tie",
+          "the canonical Stage-1 NLL diagnostic may NOT break a tie and is not run by this session",
+          "no follow-on experiment starts from this session"
+        ]
+      }
+    ]
+  },
+  "not_authorized": "No Phase-B grant or authorization exists, no cumulative-budget increase has been requested, and this document neither creates nor implies one.",
+  "preregistration_sha256": "8f211ce1ed83fbe2eaf9f06d753eab7bc69e2fdf708dd44d9ffc515312fb9b0b"
+}

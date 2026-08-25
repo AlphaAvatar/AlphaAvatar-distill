@@ -1,6 +1,6 @@
 {
   "schema": "aadistill.current_state/v2",
-  "generated_utc": "2026-08-25T20:00:00Z",
+  "generated_utc": "2026-08-25T23:00:00Z",
   "_contract": "The minimal machine-readable CURRENT snapshot: live facts only, no history, no per-attempt detail, no narrative. History lives in logs/decisions.md and the per-run directories; the human view is logs/STATE.md and the two must agree. Ownership: logs/CATALOG.md.",
   "baseline_commit": "6734dd2f49f04b3ac37ba635db30f697bf13ccad",
   "baseline_commit_meaning": "The LAST TESTED IMPLEMENTATION: the commit whose tree produced the latest_verification figures.",
@@ -37,7 +37,7 @@
       "sc_conditional": 20260813,
       "fourth_seed": "never"
     },
-    "calibration": "calib.domain_balanced@v1 (67 items, 59,763 positions)",
+    "calibration": "calib.domain_balanced@v1 (spec 11f36a88, content d65c1f40) and calib.reasoning_heavy@v2 (spec 6c67b8df, content cdb28389). Both identities are bound: profile_hash does NOT identify the sampled bytes",
     "runtime_comparability": "generation_runtime_comparability@v2",
     "also": [
       "recovery design",
@@ -46,27 +46,26 @@
       "Stage-3 artifacts and thresholds",
       "the operator ledger's declared semantics"
     ],
-    "stage1_runtime_deadline_minutes": 363.9841
+    "stage1_runtime_deadline_minutes": 363.9841,
+    "phase_b_session_plan_hash": "23f23649b4be92bd8852bf9d89f8dcb372bc5a00a175ae631d32b9d71de8032d",
+    "phase_b_preregistration_sha256": "8f211ce1ed83fbe2eaf9f06d753eab7bc69e2fdf708dd44d9ffc515312fb9b0b",
+    "phase_b_executable_source_digest": "92e2170e1a86c1a8cbc36ecc8fb50844682f5af77364ca38cdd0a2e64bbda57f"
   },
   "complete": [
-    "the five-leaf transport mirror, and staging it on a pod (attempts 3 and 4)",
-    "the multi-repo relay contract: RelayInput carries its repository, setup fetches per-item",
-    "control-plane resilience: all three SessionRunner reads; unconfirmable image identity fails closed",
-    "Phase-A Stage 1 PASSED TWICE, byte-identical, five leaves preserved off-pod -- see continuation_ready",
-    "the tokenizer consumer contract: the trainer declares and verifies its tokenizer source instead of inferring it from student_path",
-    "the selected-leaf durability boundary: the five leaves are persisted and re-verified before Stage 2",
+    "Phase A end to end: search, three rungs, eleven probes, unresolved_equivalence",
+    "the five-leaf transport mirror and the multi-repo relay contract",
     "Stage 3 (both permanent controls, thresholds materialized)",
-    "the Phase-A harness, stages 0-5 executing for real at $0",
     "the Stage-1 device audit (autoinit.stage1_device_contract@v1)",
-    "Stage 0 on hardware, passed six times; attempt 4 also passed STAGE 1 on hardware -- five leaves re-identified from pod bytes, control measured on state_eval@v1"
+    "Phase-B $0 preparation: v2 mixture, probe-reuse verification, session plan, authorization type, executable-source identity, preregistration, pricing",
+    "detail: logs/decisions.md and the per-run directories"
   ],
   "latest_verification": {
-    "utc": "2026-08-25T20:00:00Z",
-    "after": "Phase-B: v2 materialized, reuse verified, pricing contract repaired",
-    "full_suite": "2239 passed, 12 skipped in 19:13",
+    "utc": "2026-08-25T23:00:00Z",
+    "after": "the Phase-B $0 freeze: plan, grant type, source identity, preregistration, pricing",
+    "full_suite": "2263 passed, 12 skipped in 18:19",
     "frozen_asset_verifier": "passed, no problems",
-    "mutations": "29 across eight gates. Three of my own gates were weak first and are recorded, not quietly fixed: one vacuous assertion; seam unit tests that missed a dangling reference only a completed search reaches; and v2 tests that read the BUILT ARTIFACT, so reverting the sub-type repair left them green while the code no longer produced the pinned mixture. A rebuild-from-pool test closes it.",
-    "harness_digest": "phase_a a182efb4 and continuation a27bb922, BOTH UNCHANGED this pass -- which is itself a finding: this pass changed search.py (the sentinel fix) and calibration.py (v2), both of which determine what a paid search computes, and neither is in PHASE_A_HARNESS_SOURCE_FILES_V1. Nor are ranking.py, reweight.py or operators/base.py. Extending the set is a Phase-B plan decision (it moves the digest), so it is SURFACED, not taken.",
+    "mutations": "7 on the new Phase-B gates, each turning a passing state into a failing one, and each checked to fail its TARGETED test rather than only the preregistration cross-check: widening the Phase-A harness, dropping search.py, bloating the set with the non-executing builder, answering comparability failure by re-running, a grant claiming Phase A, require_calibration checking only the spec hash, and admitting an excluded leaf.",
+    "harness_digest": "phase_a a182efb4 and continuation a27bb922 UNCHANGED -- Phase A's harness is historical fact and was not widened. NEW: phase_b executable-source digest 92e2170e over 28 files, a separate identity covering what a paid P=2 SEARCH executes; the probe path is bound by the existing trainer/generation/scoring digests instead of being duplicated into it.",
     "scope": "CPU only, repo .venv; no checkpoint loaded, no metric measured, no GPU used"
   },
   "failed": [
@@ -81,14 +80,15 @@
   "failure_pattern": "continuation 1 an uncaught transport call, 2 an undeliverable asset, 3 dev-box-only code in the pod gate, 4 the attempt-12 OOM class, 5 a checkpoint path, 6 a checkpoint with no tokenizer, 7 the DRIVER SUCCEEDED and the launcher crashed on a line only success reaches. Each failure was further in than the last. See logs/decisions.md",
   "abandoned": [
     "recovery_search_v1 (INVALID before first use)",
-    "Phase-A pricing bases $20.0126 and $22.4508",
+    "calib.reasoning_heavy@v1 (UNBUILDABLE; superseded by v2)",
+    "the 14-probe Phase-B no-reuse path (rejected counterfactual, not a fallback)",
     "student-prefix recovery (E5)",
     "any fourth seed",
-    "the paid device-canary session path: STRATEGICALLY TERMINATED 2026-08-18. Two authorized sessions, $0.1240, zero canary runs; both died in the wrapper's inherited contracts. Its evidence and its generic lesson are kept; no further canary is prepared."
+    "the paid device-canary session path (terminated 2026-08-18)"
   ],
   "next_starting_point": {
-    "status": "Phase A is complete (unresolved_equivalence, no winner). Phase B's decisions are taken, its calibration profile is materialized and its paid work is priced. Nothing is running, billing, authorized or prepared.",
-    "the_ask": "The remaining $0 work is the Phase-B plan/authorization type, the preregistration and the final repricing, in that order. A paid Phase B needs a new cumulative-budget decision: $3.9650 remains against a $33.3529 no-reuse bound.",
+    "status": "Phase A is complete (unresolved_equivalence, no winner). Phase B is fully prepared at $0 and frozen: plan, authorization type, executable-source identity, preregistration and pricing. Nothing is running, billing, authorized or prepared for launch.",
+    "the_ask": "A maintainer cumulative-budget decision (cap $256.8399 implied) and a reviewer GO. Before any launch the Phase-B pod driver and launcher must be written; they enter the executable-source digest, which moves it.",
     "budget": "cap $234.00, spent $230.0350, remaining $3.9650. Balance is not authorization."
   },
   "read_order": [
@@ -128,14 +128,14 @@
   },
   "next_sequence": {
     "_status": "NONE of this is implemented or started, and none of it is funded",
-    "1_phase_b": "calibration/data-distribution sensitivity: calib.reasoning_heavy@v2 vs calib.domain_balanced@v1. Phase A searched one distribution only. See logs/autoinit_phase_b_reconstruction.md",
-    "1_phase_b_blocked_on": "All reviewer decisions taken and encoded. calib.reasoning_heavy@v2 IS MATERIALIZED: profile_hash 6c67b8df, content cdb28389, items_file a2ff8c92; 62 draws over 51/67 sessions, 59,763 positions exactly, max domain deviation 0.70, multihop_qa 7,074 as approved. REMAINING $0 WORK in order: Phase-B plan + authorization type, preregistration (binding BOTH profile_hash and content_sha256), final repricing.",
-    "1_phase_b_cost": "Repriced against VERIFIED reuse. Search P=2 $1.8950-$7.4349, 244.87 GiB working. Three coherent scenarios: low 5 probes $13.0800 (a FLOOR, not an expectation), hard-with-reuse 10 probes $26.8049, hard-NO-reuse 14 probes $33.3529 -- the last is what an authorization must cover. Implied cap ~$263.39. NOT an authorization.",
+    "1_phase_b": "calibration/data-distribution sensitivity: calib.reasoning_heavy@v2 vs calib.domain_balanced@v1, searched JOINTLY at P=2. PREPARED AND FROZEN, NOT LAUNCHED. See logs/autoinit_phase_b_preregistration.json and logs/autoinit_phase_b_reconstruction.md",
+    "1_phase_b_blocked_on": "A maintainer cumulative-budget decision and a reviewer GO. The $0 preparation is COMPLETE: session plan 23f23649, preregistration 8f211ce1, executable-source digest 92e2170e over 28 files, PhaseBAuthorization type (allows_phase_a False BY TYPE). One material gap remains before any launch: no Phase-B pod driver or launcher exists, and they enter the source digest when written.",
+    "1_phase_b_cost": "Search P=2 $1.8950-$7.4349, 244.87 GiB working. AUTHORIZATION CEILING $26.8049 (10 probes, verified reuse); low $13.0800 is a FLOOR, not an expectation. Implied cumulative cap $256.8399. The 14-probe no-reuse figure $33.3529 is a REJECTED COUNTERFACTUAL: Stage-0 comparability failure TERMINATES the session, because the frozen feasibility floor and equivalence interval would not describe anything it could produce. NOT an authorization; none requested.",
     "2_final_selection": "complete final initialization selection after Phase B; Phase A's unresolved_equivalence is not a final selection",
     "3_canonical_stage1_nll": "the canonical Stage-1 NLL diagnostic on the finally selected initialization, under the established Stage-1 measurement contract. DIAGNOSTIC ONLY, never a promotion criterion, and NOT the state_eval@v1 search-side NLL fields. Never yet run",
     "4_formal_recovery": "only then, the project's formal Stage 2/Stage 3 recovery training",
     "funding": "$3.9650 remains and authorizes NO new paid session; Phase B or any GPU work needs a new explicit maintainer budget decision",
-    "1_phase_b_implementation": "DONE: toy P=2 search.run() (found a pod-fatal sentinel defect in the engine's calibration loader); the two-profile entry point and mislabeling seam; strict probe reconstruction (all 11 verify, artifact digests re-derived from retained bytes); v2 built and hashed; the repricing, fail-closed on the verified reuse record. The seed is wired into R5's tie-break but on THIS pool every optimum is unique (brute-force verified), so it never binds -- recorded, and the reason a preregistration must bind content_sha256, not profile_hash alone."
+    "1_phase_b_implementation": "DONE: the toy P=2 search.run(); the two-profile entry point and mislabeling seam; strict historical probe reconstruction (all 11 verify); calib.reasoning_heavy@v2 built and hashed; the Phase-B session plan, authorization type, executable-source identity and preregistration; the final repricing. NOT DONE and NOT started: the Phase-B pod driver/launcher, and the post-Phase-B generalization refactor (docs/POST_PHASE_B_GENERALIZATION.md), which must not precede Phase B."
   },
   "canonical_infrastructure_moved_to": "docs/SESSION_ARCHITECTURE.md and logs/decisions.md"
 }

@@ -1,4 +1,4 @@
-**Updated:** 2026-08-25 · branch `main` · **PHASE A COMPLETE; PHASE B decided, calibration built, not launched**
+**Updated:** 2026-08-25 · branch `main` · **PHASE A COMPLETE; PHASE B FROZEN AND UNLAUNCHED**
 
 # Current state
 
@@ -77,24 +77,42 @@ freed to 0.01 GiB, and the evaluation tokenizer materialized before every batter
 
 ## The next scientific sequence — NONE of it started
 
-1. **Phase B** — test the AutoInitializer's **calibration/data-distribution
-   sensitivity**: `calib.reasoning_heavy@v2` against `calib.domain_balanced@v1`.
-   Phase A searched under one distribution only, so its ranking is conditional on
-   that choice. **All reviewer decisions are taken and encoded, and the profile is
-   built**: `profile_hash 6c67b8df…`, `content cdb28389…`, 62 draws over 51 of 67
-   sessions, **59,763 positions exactly**, maximum domain deviation **0.70
-   positions**. `multihop_qa` is 7,074 — 4 of 5 distinct sessions — rather than the
-   nearer 7,340, which would have concentrated that capability slice into four
-   copies of one session.
-   Also done: a full toy P=2 `search.run()` (which found a **pod-fatal** defect —
-   the engine asked the calibration loader for the `calib.none` sentinel, which
-   `resolve()` refuses, and every loader ever written here ignored its argument and
-   answered anyway); the two-profile entry point and its mislabeling seam; and the
-   **strict historical probe reconstruction** — all 11 Phase-A probes verify, with
-   their artifact digests re-derived from the retained checkpoint bytes.
-   **Remaining `$0` work, strictly ordered:** the Phase-B session plan and
-   authorization type, the preregistration, then the final repricing. Detail:
-   [`autoinit_phase_b_reconstruction.md`](autoinit_phase_b_reconstruction.md).
+1. **Phase B** — calibration/data-distribution sensitivity:
+   `calib.reasoning_heavy@v2` against `calib.domain_balanced@v1`, searched
+   **jointly at P=2**. **Fully prepared at `$0` and frozen. NOT LAUNCHED.**
+
+   | | |
+   | --- | --- |
+   | session plan | `23f23649…` (`autoinit.v1.phase_b_session`, 6 stages) |
+   | preregistration | `8f211ce1…`, self-verifying, frozen before any result |
+   | executable-source digest | `92e2170e…` over **28** files |
+   | science plan | `02be33b9…`, **reused unchanged** |
+   | `calib.domain_balanced@v1` | spec `11f36a88…` · content `d65c1f40…` |
+   | `calib.reasoning_heavy@v2` | spec `6c67b8df…` · content `cdb28389…` |
+   | authorization ceiling | **$26.8049** → implied cap **$256.8399** |
+
+   **Comparability is a terminate condition, not a bigger run.** If Stage 0 finds
+   the runtime not comparable under `generation_runtime_comparability@v2`, the
+   session **stops before any search or probe** — the frozen feasibility floor and
+   equivalence interval were materialized under Phase A's runtime and would not
+   describe anything this session could produce. The 14-probe no-reuse figure
+   (`$33.3529`) is a **rejected counterfactual**, priced so the rejection is on
+   the record, and is **not** the authorization ceiling.
+
+   **The candidate set is closed**: the Phase-B Top-5, the two retained Phase-A
+   finalists and the canonical control — 8 at `sa`. The three Phase-A
+   non-finalists stay excluded even though their `sa` probes are already paid for
+   and verified; zero marginal cost is not an admission criterion.
+
+   **Phase A's harness identity is untouched.** Phase B declares its own
+   executable-source set covering what a paid *search* executes; the probe path is
+   accounted for by the existing trainer, generation and scoring digests rather
+   than duplicated.
+
+   **One material gap before any launch:** there is no Phase-B pod driver or
+   launcher. They enter the source digest when written, which moves it.
+   Detail: [`autoinit_phase_b_reconstruction.md`](autoinit_phase_b_reconstruction.md),
+   [`autoinit_phase_b_preregistration.json`](autoinit_phase_b_preregistration.json).
 2. **Complete final initialization selection**, after Phase B. Phase A's
    `unresolved_equivalence` is not a final selection.
 3. **The canonical Stage-1 NLL diagnostic**, run on the finally selected

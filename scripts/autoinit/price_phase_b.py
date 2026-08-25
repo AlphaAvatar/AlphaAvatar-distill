@@ -20,9 +20,16 @@ bytes than the ones on disk now.
 
 One leg of reuse cannot be closed at `$0`: Phase B's own runtime must be
 comparable to Phase A's under `generation_runtime_comparability@v2`, and Phase
-B's runtime does not exist yet. If that Stage-0 precondition fails, **every**
-historical probe is lost at once — so it is a separate scenario here, not a
-widening of a range.
+B's runtime does not exist yet.
+
+**That gate terminates the session; it does not trigger a bigger one.**
+Comparability is what lets behavioural results be judged against the *frozen*
+Stage-3 feasibility floor and equivalence interval. If it fails at Stage 0, those
+thresholds do not describe anything this session could produce, so re-running all
+eight candidates would be a differently-thresholded experiment wearing Phase B's
+name — and would not restore the interval either. The 14-probe figure is
+therefore a **rejected counterfactual**, retained for comparison only. The
+authorization ceiling is the verified-reuse hard case.
 
 Every anchor is the one `plan_search.py` already uses; none is re-derived here.
 """
@@ -154,8 +161,10 @@ def price(hardware=L40S_MEASURED) -> dict:
     sb_missing_worst = SURVIVORS_AT_SB + (0 if control_sb else 1)
     sc_missing_worst = SURVIVORS_AT_SB + (0 if control_sc else 1)
 
-    # Worst WITHOUT reuse: Stage 0 finds Phase B's runtime not comparable, so no
-    # historical probe may be cited and every rung is paid in full.
+    # The REJECTED counterfactual: what a no-reuse run would have cost. It is not
+    # an executable path -- Stage 0 fails closed and terminates -- and it is not
+    # the authorization ceiling. Kept because "we considered it and rejected it"
+    # and "we never priced it" are different statements.
     nr_sa = n_candidates
     nr_sb = SURVIVORS_AT_SB + 1
     nr_sc = SURVIVORS_AT_SB + 1
@@ -195,11 +204,14 @@ def price(hardware=L40S_MEASURED) -> dict:
                     "probability is defined anywhere, so this is not an 'expected' cost"),
             "hard_with_reuse": ("reuse holds; both sb survivors are new Phase-B leaves "
                                 "and the tie-break fires over those two plus the "
-                                "control, none of which has a verified sc"),
-            "hard_no_reuse": ("Stage 0 finds Phase B's runtime not comparable to Phase "
-                              "A's under generation_runtime_comparability@v2, so NO "
-                              "historical probe may be cited and every rung is paid in "
-                              "full. This is the binding bound for an authorization"),
+                                "control, none of which has a verified sc. THIS is the "
+                                "authorization ceiling"),
+            "rejected_counterfactual_no_reuse": (
+                "what a run that cited no historical evidence would have cost. NOT an "
+                "executable path: if Stage-0 comparability fails the session TERMINATES "
+                "before any search or probe, because the frozen feasibility floor and "
+                "equivalence interval would not describe anything it could produce. "
+                "Priced only so the rejection is on the record"),
         },
         "reuse": {
             "source": _repo_relative(REUSE_RECORD),
@@ -244,14 +256,23 @@ def price(hardware=L40S_MEASURED) -> dict:
         "total": {
             "low_usd": round(lo, 4),
             "hard_with_reuse_usd": round(hi, 4),
-            "hard_no_reuse_usd": round(nr, 4),
+            "authorization_ceiling_usd": round(hi, 4),
+            "rejected_counterfactual_no_reuse_usd": round(nr, 4),
             "note": ("low is a FLOOR, not an expectation -- no expected-value "
-                     "assumption is defined. hard_no_reuse is what an authorization "
-                     "must cover, because the comparability precondition is only "
-                     "testable at Stage 0 of the run itself. The spread within each "
-                     "scenario is dominated by the activation-statistics GPU/CPU "
-                     "split, still unmeasured and deliberately not measured by a "
-                     "separate paid session."),
+                     "assumption is defined anywhere. The AUTHORIZATION CEILING is "
+                     "hard_with_reuse: Stage-0 comparability is a fail-closed "
+                     "terminate, not a switch to a larger run, so the no-reuse "
+                     "figure is a rejected counterfactual rather than a bound to "
+                     "fund. The spread within each scenario is dominated by the "
+                     "activation-statistics GPU/CPU split, still unmeasured and "
+                     "deliberately NOT to be measured by a separate paid session."),
+        },
+        "comparability_gate": {
+            "rule": "generation_runtime_comparability@v2",
+            "on_fail": "TERMINATE at stage 0, before any search or probe",
+            "not_a_fallback": ("do not respond to comparability failure by rerunning "
+                               "all eight candidates, and do not rematerialize the "
+                               "Stage-3 controls or redefine thresholds"),
         },
     }
 
@@ -270,11 +291,13 @@ def main() -> None:
           f"{s['hours_low']:.2f}-{s['hours_high']:.2f} h, {s['peak_storage_gib_working']} GiB working")
     print(f"reuse               VERIFIED: {len(result['reuse']['admitted_reusable_probes'])} probes "
           f"({', '.join(result['reuse']['admitted_reusable_probes'])})")
-    print(f"probes owed         low {p['total_low']}  hard/reuse {p['total_high']}  "
-          f"hard/no-reuse {p['total_no_reuse']}  @ ${p['per_probe_usd']}")
+    print(f"probes owed         low {p['total_low']}  hard {p['total_high']}  "
+          f"(rejected no-reuse counterfactual {p['total_no_reuse']})  @ ${p['per_probe_usd']}")
     print(f"setup reserve       ${result['setup_reserve_usd']:.2f}")
-    print(f"TOTAL               low ${t['low_usd']:.4f}   hard(reuse) ${t['hard_with_reuse_usd']:.4f}   "
-          f"hard(no reuse) ${t['hard_no_reuse_usd']:.4f}")
+    print(f"TOTAL               low ${t['low_usd']:.4f} (a floor)   "
+          f"AUTHORIZATION CEILING ${t['authorization_ceiling_usd']:.4f}")
+    print(f"                    rejected no-reuse counterfactual "
+          f"${t['rejected_counterfactual_no_reuse_usd']:.4f} -- stage 0 terminates instead")
     print(f"wrote {out.relative_to(REPO_ROOT)}")
 
 

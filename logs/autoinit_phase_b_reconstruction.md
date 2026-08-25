@@ -485,25 +485,42 @@ remains and funds nothing. Against actual spend, `hard_no_reuse` implies a new
 cumulative cap near **$263.39**. **A new explicit maintainer cumulative-budget
 decision is required before any Phase-B GPU work.**
 
-## 8. Ordered readiness checklist — updated 2026-08-25 (second pass)
+## 8. Ordered readiness checklist — CLOSED 2026-08-25
 
 | # | item | status |
 | --- | --- | --- |
-| 1 | §6.2 — how the reweighted mixture is drawn | **DONE.** Option (b); `multihop_qa` = 7,074 approved; both corrections in (§2B) |
-| 2 | §6.1 — the final-selection rule | **DECIDED:** cross-phase behavioural selection |
-| 3 | §6.3 — reuse Phase-A leaves, or re-run jointly | **DECIDED:** full fresh joint P=2 beam |
+| 1 | how the reweighted mixture is drawn | **DONE** — option (b), `multihop_qa` 7,074 (§2A, §2B) |
+| 2 | the final-selection rule | **DONE** — cross-phase behavioural selection |
+| 3 | reuse Phase-A leaves, or re-run jointly | **DONE** — full fresh joint P=2 beam |
 | 4 | a full toy P=2 `search.run()` | **DONE** — found a pod-fatal defect (§3.5) |
 | 5 | two-profile entry point + mislabeling fix | **DONE** (§3.3, §3.4) |
-| 6 | **strict historical probe reconstruction** | **DONE — all 11 probes verify.** `verify_historical_probe_reuse.py` → `autoinit_historical_probe_reuse.json`. One leg is **not** closable at `$0` and is reported: Phase B's runtime comparability, a Stage-0 precondition |
+| 6 | strict historical probe reconstruction | **DONE** — all 11 verify |
 | 7 | materialize and hash `calib.reasoning_heavy@v2` | **DONE** (§2B) |
-| 8 | mechanically reprice the missing paid work | **DONE** (§7), now conditional on the verified reuse and fail-closed without it |
-| 9 | a Phase-B session plan and authorization type | `$0`, **next** |
-| 10 | Phase-B preregistration | `$0`, follows 9. Must bind **both** v2's `profile_hash` *and* its `content_sha256` (plus `items_file_sha256`) — `profile_hash` does not identify the sampled bytes, and on this pool the seed does not either |
-| 11 | final mechanical repricing | `$0`, follows 10 |
-| 12 | activation-statistics GPU/CPU split | **not to be measured by a separate paid session.** Keep the conservative bound unless it falls out of the Phase-B run itself |
-| 13 | new cumulative-budget decision | **maintainer** |
-| 14 | reviewer GO | **reviewer** |
+| 8 | Phase-B session plan and authorization type | **DONE** — plan `23f23649…`, `PhaseBAuthorization` |
+| 9 | Phase-B executable-source identity | **DONE** — `92e2170e…` over 28 files |
+| 10 | Phase-B preregistration | **DONE** — `8f211ce1…`, self-verifying |
+| 11 | final mechanical repricing | **DONE** — ceiling **$26.8049**, cap **$256.8399** |
+| 12 | activation-statistics GPU/CPU split | **NOT to be measured by a separate paid session.** The conservative bound stands unless it falls out of the Phase-B run |
+| 13 | **a Phase-B pod driver and launcher** | **NOT WRITTEN — the one material blocker.** They enter the executable-source digest, which moves it |
+| 14 | new cumulative-budget decision | **maintainer** |
+| 15 | reviewer GO | **reviewer** |
 
-Items 1–8 are complete. 9–11 are the remaining `$0` work and are strictly
-ordered: the preregistration binds the plan and the mixture identity, and the
-final repricing follows whatever the plan fixes.
+Items 1–11 are complete and frozen. Item 13 is the only implementation work left
+before a paid Phase B is fundable, and it must precede any grant: an
+authorization issued now would bind a digest that is not the digest of the thing
+that will run.
+
+## 9. What Phase B may not do
+
+Frozen in the plan and the preregistration, not merely stated here:
+
+* **not** rematerialize the Stage-3 controls or redefine the feasibility floor or
+  equivalence interval;
+* **not** respond to a Stage-0 comparability failure by re-running all eight
+  candidates — it terminates instead;
+* **not** admit the three excluded Phase-A leaves, whatever their retained `sa`
+  evidence would have cost;
+* **not** inject Phase-A leaves to restrict the search space;
+* **not** break a behavioural tie with search-side KL, search-side NLL, the
+  canonical Stage-1 NLL diagnostic, or a fourth seed;
+* **not** start any follow-on experiment.
