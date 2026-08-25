@@ -43,6 +43,7 @@ overview and links here instead. A structural test enforces this.
 | `checkpoint_registry.json` | every checkpoint and weight artifact in all three storage areas — repo `artifacts/`, the out-of-tree store `/home/ecs-user/aad-artifacts`, and the relay — with hash, references, relay correspondence and proposed disposition |
 | `checkpoint_tombstones.json` | what was deleted and how to rebuild it |
 | `log_inventory.json` | every documentary file with its hash, class and disposition, the byte-identical duplicate groups and which copy is canonical, and the record of copies already removed |
+| `derived_cache_cleanup_20260827.json` | the 2026-08-27 reclamation of 1.5000 GiB of rebuildable derived caches (HF datasets/xet, pre-commit, pip) that cleared `ckpt_store_capacity_gate` for Phase B. Deliberately **not** tombstones — every path is recreated by a routine command — and it records what was explicitly *not* touched |
 | `derived_cache_cleanup.json` | derived-cache reclamation events (uv build cache, upstream teacher weight blobs) — deliberately **not** tombstones, because both paths are recreated by routine commands. Carries verified blob hashes, the pinned reconstruction revision and the resulting free space |
 | `storage_measurements.json` | storage in the four areas, before and after each cleanup, measured the same way |
 | `autoinit_depth_backend_equivalence.json` | the causal-depth runtime repair's equivalence proof: the frozen greedy rule by known answer, the refactor bit-identical, the bf16 cache exact, and the per-round decision margins |

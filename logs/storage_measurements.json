@@ -249,6 +249,41 @@
         "free_human": "22.25 GiB",
         "percent_used": 84.5
       }
+    },
+    {
+      "label": "after-derived-cache-cleanup-20260827",
+      "measured_utc": "2026-08-25T19:46:01.567957+00:00",
+      "commit": "94cb073baf9725815985d71d3fcfe1fc73eb5549",
+      "note": "Reclaimed 1,610,587,371 bytes (1.5000 GiB) of REBUILDABLE derived caches only, to clear ckpt_store_capacity_gate for the approved Phase-B session. No checkpoint, scientific artifact, relay_retired object or sibling-project asset was touched, and the measured 6 GiB ckpt-store working margin was not shrunk.",
+      "areas": {
+        "filesystem_root": {
+          "definition": "df on /",
+          "free_bytes_before": 11276140544,
+          "free_bytes_after": 12902334464
+        },
+        "ckpt_store": {
+          "definition": "free space at /home/ecs-user/aad-artifacts",
+          "free_gib_before": 10.5024,
+          "free_gib_after": 12.0162,
+          "gate_required_gib": 11.55,
+          "gate_result": "PASS"
+        },
+        "out_of_tree_artifact_store": {
+          "definition": "/home/ecs-user/aad-artifacts",
+          "bytes": 97979120699,
+          "note": "UNCHANGED: nothing was deleted here"
+        },
+        "caches": {
+          "definition": "~/.cache after the cleanup",
+          "bytes": 8093702254,
+          "removed": [
+            "huggingface/datasets",
+            "huggingface/xet",
+            "pre-commit",
+            "pip"
+          ]
+        }
+      }
     }
   ]
 }

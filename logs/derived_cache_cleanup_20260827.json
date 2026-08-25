@@ -1,0 +1,43 @@
+{
+  "schema": "aadistill.derived_cache_cleanup/v1",
+  "_what_this_is": "DERIVED-CACHE cleanup, deliberately NOT tombstones: every path here is recreated by a routine command. Filing them as tombstones would assert that nothing may recreate them, which is false.",
+  "performed_utc": "2026-08-25T19:45:13.536495+00:00",
+  "authorised_by": "Reviewer decision 2026-08-27: GO for one narrow $0 storage-resolution pass, rebuildable derived caches FIRST, to clear the ckpt_store_capacity_gate.",
+  "purpose": "free >= 1.03 GiB so ckpt_store_capacity_gate passes and the approved Phase-B session can land its five Top-5 selected leaves",
+  "checkpoints_deleted": 0,
+  "scientific_artifacts_deleted": 0,
+  "explicitly_not_touched": [
+    "/home/ecs-user/aad-artifacts (all scientific artifacts)",
+    "/home/ecs-user/aad-artifacts/relay_retired (now the SOLE copy of those objects)",
+    "sibling AlphaAvatar assets: MinerU2.5, livekit turn-detector, plugins-persona, docling",
+    "/home/ecs-user/.local/share/uv (the repo .venv's CPython lives there -- pyvenv.cfg points at it)",
+    "all model blobs, permanent controls and current-lineage artifacts",
+    "the 6 GiB ckpt_store working margin, which is measured and was not shrunk"
+  ],
+  "events": [
+    {
+      "path": "/home/ecs-user/.cache/huggingface/datasets",
+      "bytes": 1128517094,
+      "gib": 1.051,
+      "why_reproducible": "HF datasets Arrow caches (hotpot_qa, oasst2, squad_v2, trivia_qa, xlam, dolly). Rebuilt by re-running the builders in scripts/data/, which fetch at pinned revisions; every corpus this project uses is already materialized under artifacts/. No test calls load_dataset."
+    },
+    {
+      "path": "/home/ecs-user/.cache/huggingface/xet",
+      "bytes": 312775923,
+      "gib": 0.2913,
+      "why_reproducible": "HF Xet content-addressed transfer chunk cache. Pure download accelerator; recreated by any Hub transfer."
+    },
+    {
+      "path": "/home/ecs-user/.cache/pre-commit",
+      "bytes": 143918237,
+      "gib": 0.134,
+      "why_reproducible": "pre-commit hook environments. Recreated by `pre-commit install`/run."
+    },
+    {
+      "path": "/home/ecs-user/.cache/pip",
+      "bytes": 25376117,
+      "gib": 0.0236,
+      "why_reproducible": "pip wheel cache. Recreated by any pip/uv install."
+    }
+  ]
+}
