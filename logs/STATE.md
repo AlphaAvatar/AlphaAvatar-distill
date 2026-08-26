@@ -1,4 +1,4 @@
-**Updated:** 2026-08-27 · branch `main` · **PHASE-B ATTEMPT 2 ABORTED AT SETUP — $0.2300, no stage ran; a reviewer decision is required**
+**Updated:** 2026-08-27 · branch `main` · **PHASE-B ATTEMPT 3 PREPARED — attempts 1+2 were setup failures, $0.3800, no stage ran**
 
 # Current state
 
@@ -158,16 +158,26 @@ freed to 0.01 GiB, and the evaluation tokenizer materialized before every batter
    `PhaseBAuthorization` was loaded by `SpendAuthorization.load`, which reads a
    `preflight_plan_hash` the Phase-B schema does not carry.
 
-   **This is the third collision between the Phase-B authorization type and shared
-   pod-side machinery**, and it needs a reviewer decision rather than a unilateral
-   fix: the standing instruction is to adapt the artifact rather than edit shared
-   infrastructure, but doing so here would require the artifact to assert an
-   `expected_usd` that the pricing contract deliberately removed. Both options and
-   the recommendation are in
-   [`autoinit_phase_b_attempt2.json`](autoinit_phase_b_attempt2.json).
+   **Repaired by reviewer decision (Option A):** `autoinit_preflight_setup.sh` now
+   has a dedicated `phase_b` branch that loads `PhaseBAuthorization`, binds the
+   session plan, and asserts Phase B allowed / Phase A refused / no automatic
+   follow-on — symmetric with the `phase_a` and `recovery_continuation` branches.
+   Phase B is **not** routed through `SpendAuthorization` and `expected_usd` is not
+   reintroduced: that loader falls back to `HARNESS_SOURCE_FILES_V1`, so it would
+   have passed while binding Phase B to Phase A's file list. The exact branch body
+   was executed against the real Phase-B artifact on the dev box.
 
-   **A third attempt is also arithmetically blocked**: `$26.5750` of headroom
-   against a `$26.8049` session ceiling.
+   **A static completeness gate now prevents the class**
+   (`tests/pod/test_session_kind_dispatch.py`): it builds every launcher's real
+   `SessionSpec`, reads the `SESSION_KIND` it exports and the
+   `authorization_loader` it uses, parses the shell branches, and requires the two
+   to name the same class. Seven mutations, all killed — including a branch that
+   exists but loads the wrong type, and a launcher declaring a kind with no branch.
+
+   Identities after the repair: executable source **`45f6bb8c93ff…`** (57 files,
+   set version 3), preregistration **`e167feaa502f…`**. Only those two moved;
+   science plan, session plan, both calibration identities, candidate set,
+   thresholds, seeds, floor and ceiling verified unchanged.
    Detail: [`autoinit_phase_b_reconstruction.md`](autoinit_phase_b_reconstruction.md),
    [`autoinit_phase_b_preregistration.json`](autoinit_phase_b_preregistration.json).
 2. **Complete final initialization selection**, after Phase B. Phase A's
@@ -507,8 +517,8 @@ selection result.**
 
 ```
 cumulative spend   $230.4150  incl. Phase-B setup attempts 1+2 at $0.3800
-approved cap       $256.99    RAISED to restore the retry envelope
-remaining          $26.5750   headroom — BELOW the $26.8049 session ceiling
+approved cap       $257.22    RAISED twice, each time replacing lost setup cost
+remaining          $26.8050   headroom; the Phase-B session ceiling is $26.8049
 
 ```
 

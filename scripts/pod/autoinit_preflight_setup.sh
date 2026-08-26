@@ -526,6 +526,33 @@ print(f'  {a.authorization_id}: stages {list(a.authorized_stages)}, '
       f'hard \${a.hard_cap_usd:.2f}, phase A {a.allows_phase_a}, '
       f'followon {a.automatic_followon_start}')
 " || { say "THE SESSION AUTHORIZATION DOES NOT BIND TO THIS SESSION'S PLAN"; mark "AUTHORIZATION_MISMATCH"; exit 98; }
+elif [ "$SESSION_KIND" = "phase_b" ]; then
+  # A FOURTH type, and it needs its own branch for the same reason the third did.
+  # Phase B's artifact is a `PhaseBAuthorization`: its plan hash lives in
+  # `phase_b_session_plan_hash` and its floor in `planning_floor_usd`, because the
+  # pricing review removed `expected_usd` — no expected-value assumption over
+  # survivor identity or tie-break probability is defined anywhere. The spend
+  # branch below therefore cannot read it, and attempt 2 proved that at $0.2300:
+  # `SpendAuthorization.load` raised `KeyError: 'preflight_plan_hash'` here, one
+  # step after the test gate passed.
+  #
+  # Routing Phase B through the spend branch would be worse than the crash even if
+  # the artifact carried those keys: `SpendAuthorization.load` falls back to
+  # `HARNESS_SOURCE_FILES_V1` when `harness_source_files` is absent, so the check
+  # would pass while binding Phase B to PHASE A's file list.
+  cd "$REPO" && PYTHONPATH=src SESSION_AUTH_PATH="$SESSION_AUTH_PATH" \
+    SESSION_PLAN_HASH="$SESSION_PLAN_HASH" /opt/train/bin/python -c "
+import os
+from aadistill.autoinit.phase_b import PhaseBAuthorization
+a = PhaseBAuthorization.load(os.environ['SESSION_AUTH_PATH'])
+a.require_plan(os.environ['SESSION_PLAN_HASH'])
+assert a.allows_phase_b is True, 'a Phase-B session needs a Phase-B authorization'
+assert a.allows_phase_a is False, 'this artifact claims Phase A authorization'
+assert a.automatic_followon_start is False, 'nothing chains off Phase B'
+print(f'  {a.authorization_id}: stages {list(a.authorized_stages)}, '
+      f'hard \${a.hard_cap_usd:.4f}, phase B {a.allows_phase_b}, '
+      f'phase A {a.allows_phase_a}, followon {a.automatic_followon_start}')
+" || { say "THE SESSION AUTHORIZATION DOES NOT BIND TO THIS SESSION'S PLAN"; mark "AUTHORIZATION_MISMATCH"; exit 98; }
 elif [ "$SESSION_KIND" = "recovery_continuation" ]; then
   # A THIRD type, not a relaxation of the second. The continuation's artifact
   # carries `phase_a_authorized: true` (it runs Phase-A stages), so the spend

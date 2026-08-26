@@ -59,15 +59,16 @@ PREREGISTRATION = "logs/autoinit_phase_b_preregistration.json"
 REUSE_RECORD = "logs/autoinit_historical_probe_reuse.json"
 
 #: The frozen ceilings. The session ceiling is NOT the cumulative headroom: the
-#: maintainer's $256.9900 cap less $230.1850 spent leaves $26.8050, and the
+#: maintainer's $257.2200 cap less $230.4150 spent leaves $26.8050, and the
 #: $0.0001 rounding margin belongs to the cumulative cap.
 #:
-#: The cap moved $256.84 -> $256.99 to RESTORE the retry envelope that attempt 1
-#: consumed as $0.1500 of setup, not to enlarge anything: the session ceiling is
-#: unchanged, and so is the floor.
+#: The cap has been raised twice, each time to REPLACE setup cost already lost and
+#: never to enlarge anything: $256.84 -> $256.99 after attempt 1 spent $0.1500,
+#: then -> $257.22 after attempt 2 spent $0.2300. The session ceiling and the
+#: planning floor have not moved through either.
 HARD_CEILING_USD = 26.8049
 PLANNING_FLOOR_USD = 13.0800
-CUMULATIVE_CAP_USD = 256.99
+CUMULATIVE_CAP_USD = 257.22
 
 GRANT_FIELDS = ("granted_by", "covers", "cumulative_spend_at_approval_usd",
                 "cumulative_cap_usd", "does_not_authorize")

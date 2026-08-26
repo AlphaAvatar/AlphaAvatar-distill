@@ -1,6 +1,6 @@
 {
   "schema": "aadistill.autoinit.phase_b_preregistration/v1",
-  "generated_utc": "2026-08-26T10:08:59.565585+00:00",
+  "generated_utc": "2026-08-26T16:43:56.428785+00:00",
   "status": "FROZEN BEFORE ANY PHASE-B RESULT EXISTS. Not an authorization, not a grant, and not an instruction to launch.",
   "hypothesis": "Does the AutoInitializer's preferred composition change when the calibration distribution changes? Phase A searched one distribution, so its ranking is conditional on it.",
   "search": {
@@ -172,7 +172,7 @@
     "unchanged_from_phase_a": true
   },
   "executable_source": {
-    "digest": "686d43aa99df8f67b7efada56e771644cbf200b18791f236e88c840f9a2a3779",
+    "digest": "45f6bb8c93ff7cc03598528b369dd96554fc9fa7d706bfb7ee83304c695586f4",
     "set_version": 3,
     "files": [
       "scripts/autoinit/load_state_eval.py",
@@ -472,5 +472,5 @@
     ]
   },
   "not_authorized": "No Phase-B grant or authorization exists, no cumulative-budget increase has been requested, and this document neither creates nor implies one.",
-  "preregistration_sha256": "3e466574eb1dbfaa283e8cd80e6cd22d500f9af253bc5c88cf5d5b27c6ef54b4"
+  "preregistration_sha256": "e167feaa502f2271624441b1f315e1590ce7008b7af5e491c96e3b04eb172c68"
 }

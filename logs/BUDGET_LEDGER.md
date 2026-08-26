@@ -1015,6 +1015,32 @@ authorization `autoinit.phase_b.20260826T101431Z` is **consumed**.
 attempt is arithmetically blocked without a new maintainer cap decision. Phase-B
 setup attempts have cost **$0.3800** in total and produced no scientific evidence.
 
+## 2026-08-27 — cumulative cap raised to $257.22, replacing attempt 2's setup cost
+
+```
+cumulative spend                                             $230.4150
+previous authorized cumulative cap                           $256.9900
+NEW authorized cumulative cap                                $257.2200
+remaining headroom                                           $ 26.8050
+Phase-B retry single-session hard ceiling  (UNCHANGED)       $ 26.8049
+planning floor, not an expectation         (UNCHANGED)       $ 13.0800
+```
+
+Reviewer/maintainer approval, 2026-08-27: "cumulative cap: raise from **$256.99 to
+$257.22**; Phase-B retry single-session ceiling: **unchanged at $26.8049**. The
+extra `$0.23` only replaces the setup cost already lost in Attempt 2. It does not
+increase the retry's per-session scientific budget or authorize later work."
+
+**Second replacement of the same kind.** The cap has moved twice — `$256.84` →
+`$256.99` after attempt 1's `$0.1500`, then → `$257.22` after attempt 2's
+`$0.2300` — each time restoring headroom to `$26.8050` against an unmoved
+`$26.8049` ceiling. Phase-B setup attempts have now cost **$0.3800** and produced
+**no scientific evidence**; attempts 1 and 2 must not enter the Phase-B scientific
+evidence set.
+
+Grant document: `autoinit_phase_b_grant_attempt3.json`. **Unused headroom is not
+authorization.**
+
 ## Standing rules
 
 * Plan from **actual spend**, never from unused room under a previous authorization.
