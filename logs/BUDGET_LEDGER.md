@@ -967,6 +967,32 @@ Aborted at the pod-side setup test gate; **no scientific stage ran**. The pod wa
 deleted and the provider confirms it is gone. The one-use authorization
 `autoinit.phase_b.20260826T053826Z` is **consumed**; a retry needs a new grant.
 
+## 2026-08-27 — cumulative cap raised to $256.99 to RESTORE the retry envelope
+
+```
+cumulative spend                                             $230.1850
+previous authorized cumulative cap                           $256.8400
+NEW authorized cumulative cap                                $256.9900
+remaining headroom                                           $ 26.8050
+Phase-B retry single-session hard ceiling  (UNCHANGED)       $ 26.8049
+planning floor, not an expectation         (UNCHANGED)       $ 13.0800
+```
+
+Maintainer approval, 2026-08-27: "raise the cumulative budget cap from **$256.84
+to $256.99**. Keep the frozen Phase-B retry single-session hard ceiling unchanged
+at **$26.8049**. The extra `$0.15` only restores the original full retry envelope
+after Attempt 1 spent `$0.15`; do not use it to enlarge the session ceiling or
+fund later work."
+
+**This is a restoration, not an increase in scope.** Attempt 1 spent `$0.1500`
+without entering a scientific stage, which left `$26.6550` of headroom against a
+`$26.8049` session ceiling — arithmetically short of the run it authorized. The
+`$0.15` puts the retry back where it started; the ceiling and the floor did not
+move, and the `$0.0001` difference remains cumulative rounding margin.
+
+Grant document: `autoinit_phase_b_grant_retry.json`. **Unused headroom is not
+authorization** — whatever the retry does not spend funds nothing else.
+
 ## Standing rules
 
 * Plan from **actual spend**, never from unused room under a previous authorization.

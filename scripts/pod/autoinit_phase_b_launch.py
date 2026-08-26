@@ -35,13 +35,14 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO_ROOT / "src"))
 sys.path.insert(0, str(Path(__file__).resolve().parent))
+sys.path.insert(0, str(REPO_ROOT / "scripts/autoinit"))
 
 from aadistill.autoinit.calibration import (  # noqa: E402
     DOMAIN_BALANCED_V1, REASONING_HEAVY_V2,
 )
 from aadistill.autoinit.phase_b import (  # noqa: E402
-    PHASE_B_PLAN_V1, PHASE_B_SEARCHED_LEAVES, PhaseBAuthorization,
-    phase_b_source_digest,
+    CANONICAL_CONTROL, PHASE_A_IMPORTED_FINALISTS, PHASE_B_PLAN_V1,
+    PHASE_B_SEARCHED_LEAVES, PhaseBAuthorization, phase_b_source_digest,
 )
 from aadistill.infrastructure.session import (  # noqa: E402
     ArtifactPolicy, LocalAsset, MarkerPolicy, RelayInput, SessionContext,
@@ -66,6 +67,9 @@ from autoinit_phase_a_launch import (  # noqa: E402
 from autoinit_recovery_continuation_launch import (  # noqa: E402
     STAGED_INTO, TRANSPORT_MANIFEST, TRANSPORT_REPO, transport_is_verified,
 )
+from verify_historical_probe_reuse import (  # noqa: E402
+    ADMITTED as REUSE_ADMITTED, verify as verify_historical_reuse,
+)
 
 STATUS = f"{WS}/autoinit_phase_b.status"
 RUN_LOG = f"{WS}/autoinit_phase_b_run.log"
@@ -73,6 +77,29 @@ AUTH_PATH = "logs/autoinit_phase_b_authorization.json"
 FROZEN_SCIENCE_PLAN = "logs/autoinit_phase_a_recovery_plan_frozen.json"
 PREREGISTRATION = REPO_ROOT / "logs/autoinit_phase_b_preregistration.json"
 REUSE_RECORD = REPO_ROOT / "logs/autoinit_historical_probe_reuse.json"
+
+#: Phase-B-specific, and deliberately built by extension rather than by editing
+#: Phase A's tuple: `TEST_IGNORES` is the historical contract several completed
+#: sessions ran under, and rewriting it would retroactively change what they
+#: mean. The one addition is the strict-reconstruction module, whose tests read
+#: the dev-box retained checkpoint store that a pod does not have and does not
+#: need. That store is checked on the machine that owns it, before a pod exists,
+#: by `historical_reuse_reconstruction_gate` below — the check moves, it does not
+#: disappear.
+#:
+#: Attempt 1 aborted at `$0.15` because those tests ran on the pod. Ignoring the
+#: whole pricing module would have been the wrong repair: everything else in it
+#: reads committed records and is exactly the kind of thing a pod should re-check.
+PHASE_B_TEST_IGNORES = (*TEST_IGNORES,
+                        "tests/autoinit/test_phase_b_reuse_hostlocal.py")
+
+#: The citations Phase B's ten-probe budget spends nothing on, derived from the
+#: candidate rules rather than pasted: sa/sb/sc for each imported finalist, and
+#: sa/sb for the control, which has no sc on record. If any one of them stops
+#: reconstructing, the session would need a probe it has not booked.
+REQUIRED_CITATIONS = frozenset(
+    [f"{c}/{s}" for c in PHASE_A_IMPORTED_FINALISTS for s in ("sa", "sb", "sc")]
+    + [f"{CANONICAL_CONTROL}/sa", f"{CANONICAL_CONTROL}/sb"])
 
 #: The P=2 search allowance. The P=1 search was priced at 180 min base; the cost
 #: model puts the two-profile search at 1.91-7.51 h against 0.94-3.60 h for one,
@@ -293,6 +320,71 @@ def reuse_record_gate(ctx: SessionContext) -> tuple[bool, str]:
     return True, f"{len(admitted)} verified probes citable; pricing ten, not twelve"
 
 
+def historical_reuse_reconstruction_gate(ctx: SessionContext) -> tuple[bool, str]:
+    """Re-run the STRICT reconstruction here, on the machine that has the bytes.
+
+    `reuse_record_gate` above reads the committed record. That is the artifact
+    the pricing consumes, so it must be checked — but a record is a claim about
+    bytes, and this gate is the claim being re-earned: it re-derives every
+    probe's `student_artifact_digest` from the retained Phase-A checkpoints under
+    the dev-box artifact store and refuses to create a pod if any citation no
+    longer reconstructs.
+
+    It lives here rather than in the pod's setup gate because the retained store
+    is a dev-box artifact store and is intentionally not transported. Phase-B
+    attempt 1 spent `$0.15` learning that a pod cannot answer this question. The
+    answer is to ask the right machine, at the right moment — before the provider
+    is touched — not to lower the standard.
+
+    Checked: 11 probes; every artifact digest re-derived from bytes;
+    `reuse_verified`; no failures; the evidence set still digests to what the
+    record describes; and the eight citations the ten-probe budget depends on.
+    """
+    expected = {*PHASE_A_IMPORTED_FINALISTS, CANONICAL_CONTROL}
+    if set(REUSE_ADMITTED) != expected:
+        return False, ("the verifier admits candidates "
+                       f"{sorted(REUSE_ADMITTED)} but the frozen Phase-B rule "
+                       f"admits {sorted(expected)}")
+    try:
+        live = verify_historical_reuse()
+    except Exception as exc:                     # noqa: BLE001 - refuse, never crash
+        return False, (f"the strict historical-reuse verifier raised "
+                       f"{type(exc).__name__}: {exc}")
+
+    if live["n_probes"] != 11:
+        return False, (f"the verifier found {live['n_probes']} historical probes, "
+                       "not the 11 the cross-phase procedure was frozen against")
+    unreconstructed = [p["probe_id"] for p in live["probes"]
+                       if not p["checks"]["artifact_digest_re_derives_from_bytes"]]
+    if unreconstructed:
+        return False, (f"{len(unreconstructed)} probe(s) no longer re-derive their "
+                       f"artifact digest from the retained checkpoint bytes: "
+                       f"{unreconstructed[:3]}")
+    if not live["reuse_verified"] or live["failures"]:
+        return False, (f"strict reconstruction failed: {live['failures']}")
+
+    if not REUSE_RECORD.is_file():
+        return False, f"{REUSE_RECORD.name} is missing; nothing to reconcile against"
+    record = json.loads(REUSE_RECORD.read_text())
+    if live["probes_dir_digest"] != record.get("probes_dir_digest"):
+        return False, ("the evidence set has drifted since the record was "
+                       f"written: live {live['probes_dir_digest'][:12]}… vs "
+                       f"recorded {str(record.get('probes_dir_digest'))[:12]}…; "
+                       "re-run the verifier rather than citing a stale record")
+
+    admitted = set(live["admitted_reusable_probes"])
+    missing = sorted(REQUIRED_CITATIONS - admitted)
+    if missing:
+        return False, (f"the citations Phase B books no probe for are not all "
+                       f"reusable: missing {missing}")
+    if admitted != set(record.get("admitted_reusable_probes") or []):
+        return False, ("the live admitted set disagrees with the committed "
+                       "record, so the pricing was computed over a different "
+                       "evidence set than the one on disk")
+    return True, (f"{len(admitted)} citations re-derived from retained bytes; "
+                  f"evidence set {live['probes_dir_digest'][:12]}… matches the record")
+
+
 def spec(args) -> SessionSpec:
     return SessionSpec(
         session_id="autoinit-phase-b",
@@ -321,7 +413,8 @@ def spec(args) -> SessionSpec:
                            "TEACHER_READY", "ROPE_OK", "TESTS_OK",
                            "AUTHORIZATION_OK", "SETUP_DONE"),
             uv_max_seconds=args.uv_max_s, tests_max_seconds=args.tests_max_s,
-            teacher_revision=TEACHER_REVISION, test_ignores=TEST_IGNORES),
+            teacher_revision=TEACHER_REVISION,
+            test_ignores=PHASE_B_TEST_IGNORES),
         driver_command=driver_command,
         driver_job_id="autoinit_phase_b",
         status_path=STATUS, run_log_path=RUN_LOG,
@@ -367,6 +460,7 @@ def spec(args) -> SessionSpec:
             phase_b_source_gate,
             preregistration_gate,
             reuse_record_gate,
+            historical_reuse_reconstruction_gate,
             disk_provision_gate,
             imported_finalists_staged_gate,
             ckpt_store_capacity_gate,

@@ -1,4 +1,4 @@
-**Updated:** 2026-08-26 · branch `main` · **PHASE B ATTEMPT 1 ABORTED AT SETUP — $0.1500, no stage ran**
+**Updated:** 2026-08-27 · branch `main` · **PHASE-B RETRY PREPARED — attempt 1 aborted at setup, $0.1500, no stage ran**
 
 # Current state
 
@@ -126,12 +126,30 @@ freed to 0.01 GiB, and the evaluation tokenizer materialized before every batter
      run. The proven record-returning fetcher is wired, and the secured gate now
      refuses a wrong shape instead of raising.
 
-   Identities: executable source **`57ca2b96…`** (56 files, nothing uncovered),
-   preregistration **`a4477cdc…`**. Cost unchanged: floor **$13.0800**, ceiling
-   **$26.8049**, implied cap **$256.8399**.
+   **Attempt 1 aborted in the pod's own setup test gate**, 8.8 min, **$0.1500**,
+   no scientific stage entered; the pod is deleted and the provider confirms it.
+   Two defects, both introduced by this session: `verify_historical_probe_reuse`
+   reconstructs Phase-A citations from `/home/ecs-user/aad-artifacts`, a dev-box
+   artifact store no pod has, and its two tests ran inside the pod's gate; and a
+   log directory created for the invalidated authorization was left out of
+   `CATALOG.md`, so the structural test was **already red at the launch commit**.
 
-   **No material blocker remains in the code** — only a maintainer
-   cumulative-budget decision and a reviewer GO.
+   **Both are repaired.** The strict reconstruction now lives in a host-local test
+   module excluded by a Phase-B-specific ignore list — Phase A's historical
+   contract is untouched — and the same check runs on the dev box *before a pod
+   exists* as `historical_reuse_reconstruction_gate`, over all 11 probes, the
+   per-probe digest re-derivation, the evidence-set digest and the eight citations
+   the ten-probe budget assumes. **The verifier itself was not weakened**; the
+   question moved to the machine that can answer it. Nine mutations, all killed.
+
+   Identities: executable source **`686d43aa…`** (57 files, set version 3, nothing
+   uncovered — the verifier joined the set because it now decides whether a pod is
+   created), preregistration **`3e466574…`**. Science unchanged: session plan
+   `23f23649…`, science plan `02be33b9…`, both calibration spec **and** content
+   identities, the closed 8-candidate set, thresholds, seeds and reuse rules all
+   verified unmoved. Cost unchanged: floor **$13.0800**, ceiling **$26.8049**.
+
+   **No material blocker remains in the code.**
    Detail: [`autoinit_phase_b_reconstruction.md`](autoinit_phase_b_reconstruction.md),
    [`autoinit_phase_b_preregistration.json`](autoinit_phase_b_preregistration.json).
 2. **Complete final initialization selection**, after Phase B. Phase A's
@@ -471,8 +489,8 @@ selection result.**
 
 ```
 cumulative spend   $230.1850  incl. Phase-B attempt 1 at $0.1500
-approved cap       $256.84    RAISED AND APPROVED for ONE Phase-B run
-remaining          $26.6550   headroom; the Phase-B session ceiling is $26.8049
+approved cap       $256.99    RAISED to restore the retry envelope
+remaining          $26.8050   headroom; the Phase-B session ceiling is $26.8049
 
 ```
 

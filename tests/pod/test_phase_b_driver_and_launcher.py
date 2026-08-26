@@ -703,14 +703,14 @@ def _issued(tmp_path, **over):
 
 def test_require_harness_actually_RE_DERIVES_the_phase_b_digest(tmp_path):
     """Not an alias returning a stored string: the real derivation, over the real
-    56 files, failing closed when it disagrees."""
+    57 files, failing closed when it disagrees."""
     from aadistill.autoinit.authorization import AuthorizationError
     from aadistill.autoinit.phase_b import phase_b_source_digest
 
     auth, _ = _issued(tmp_path)
     observed = auth.require_harness(REPO)
     assert observed["digest"] == phase_b_source_digest(REPO)["digest"]
-    assert len(observed["files"]) == 56
+    assert len(observed["files"]) == 57
     assert observed["not_yet_covered"] == []
     # It is the Phase-B set, not Phase A's.
     paths = {e["path"] for e in observed["files"]}
@@ -777,3 +777,146 @@ def test_the_canonical_schema_still_has_ONE_name_per_identity(tmp_path):
     # The aliases exist on the object only, and agree with the canonical fields.
     assert auth.harness_source_digest == auth.source_digest
     assert auth.harness_source_files == auth.source_files
+
+
+# --- repair 4: the pod is not asked for bytes only the dev box has -----------
+#
+# Attempt 1 died at $0.15 in the pod's setup gate, on two tests that reconstruct
+# Phase-A citations from `/home/ecs-user/aad-artifacts` — a dev-box artifact
+# store that is intentionally not transported. The repair moves the question to
+# the machine that can answer it. These tests hold that boundary from both
+# sides: nothing pod-run may reach for the store, and the check must still
+# happen before a pod exists.
+
+
+def _live_like(**over):
+    """A `verify()`-shaped result taken from the real record, then mutated.
+
+    Derived from the producer's own output rather than hand-drawn: a fixture
+    invented to match what the consumer wants is how a stub ends up certifying
+    the defect it was supposed to catch.
+    """
+    base = json.loads((REPO / "logs/autoinit_historical_probe_reuse.json").read_text())
+    return {**base, **over}
+
+
+def test_no_pod_run_test_reconstructs_citations_from_the_dev_box_store():
+    """The rule the abort taught, enforced against every test in the tree.
+
+    Importing `verify` means calling into the retained checkpoint store. Any
+    module that does so must be excluded from the pod's setup gate, or it will
+    fail there for a reason that has nothing to do with the session.
+    """
+    import ast
+
+    offenders = []
+    for path in sorted((REPO / "tests").rglob("test_*.py")):
+        tree = ast.parse(path.read_text())
+        pulls_verify = any(
+            isinstance(n, ast.ImportFrom)
+            and n.module == "verify_historical_probe_reuse"
+            and any(a.name == "verify" for a in n.names)
+            for n in ast.walk(tree))
+        if pulls_verify:
+            rel = path.relative_to(REPO).as_posix()
+            if rel not in pbl.PHASE_B_TEST_IGNORES:
+                offenders.append(rel)
+    assert not offenders, (
+        f"{offenders} reconstruct Phase-A citations from the dev-box checkpoint "
+        "store but still run inside the pod's setup gate; that is the defect "
+        "that aborted Phase-B attempt 1")
+
+
+def test_the_host_local_module_exists_and_is_the_one_excluded():
+    excluded = set(pbl.PHASE_B_TEST_IGNORES) - set(pbl.TEST_IGNORES)
+    assert excluded == {"tests/autoinit/test_phase_b_reuse_hostlocal.py"}
+    assert (REPO / "tests/autoinit/test_phase_b_reuse_hostlocal.py").is_file()
+    # The exclusion is Phase-B-specific: Phase A's historical contract, which
+    # completed sessions ran under, is not rewritten by this repair.
+    assert pbl.TEST_IGNORES == ("tests/data/test_recovery_corpus_pipeline.py",
+                               "tests/pod/test_phase_a_stages1_5_execute.py")
+    assert set(pbl.PHASE_B_TEST_IGNORES) > set(pbl.TEST_IGNORES)
+
+
+def test_the_session_actually_ships_the_phase_b_ignore_list(spec):
+    session, _ = spec
+    assert session.setup.test_ignores == pbl.PHASE_B_TEST_IGNORES
+    assert "tests/autoinit/test_phase_b_reuse_hostlocal.py" in \
+        session.setup.test_ignores_env()
+
+
+def test_the_reconstruction_gate_runs_before_a_pod_exists(spec):
+    session, _ = spec
+    names = [getattr(g, "__name__", type(g).__name__) for g in session.precheck]
+    assert "historical_reuse_reconstruction_gate" in names
+    # Record first, then the bytes the record claims to describe.
+    assert names.index("reuse_record_gate") < \
+        names.index("historical_reuse_reconstruction_gate")
+
+
+@pytest.mark.parametrize("mutation,expected", [
+    ({"n_probes": 10}, "not the 11"),
+    ({"reuse_verified": False, "failures": [{"probe_id": "x"}]}, "reconstruction failed"),
+    ({"probes_dir_digest": "0" * 64}, "drifted"),
+    ({"admitted_reusable_probes": ["cca699c93f34/sa"]}, "not all"),
+])
+def test_the_reconstruction_gate_refuses_a_broken_evidence_set(
+        monkeypatch, mutation, expected):
+    monkeypatch.setattr(pbl, "verify_historical_reuse",
+                        lambda: _live_like(**mutation))
+    ok, why = pbl.historical_reuse_reconstruction_gate(types.SimpleNamespace())
+    assert not ok and expected in why, why
+
+
+def test_the_gate_refuses_a_probe_that_no_longer_derives_from_BYTES(monkeypatch):
+    """The load-bearing check, asserted per probe rather than via the verdict.
+
+    A verifier that flipped only its summary field — or a record edited to say
+    `reuse_verified: true` — must still be caught, because the gate reads the
+    per-probe checks itself.
+    """
+    live = _live_like()
+    live["probes"] = [dict(p) for p in live["probes"]]
+    live["probes"][0] = {**live["probes"][0], "checks": {
+        **live["probes"][0]["checks"], "artifact_digest_re_derives_from_bytes": False}}
+    monkeypatch.setattr(pbl, "verify_historical_reuse", lambda: live)
+    ok, why = pbl.historical_reuse_reconstruction_gate(types.SimpleNamespace())
+    assert not ok and "no longer re-derive" in why
+
+
+def test_the_gate_refuses_rather_than_crashing_when_the_verifier_raises(monkeypatch):
+    def boom():
+        raise FileNotFoundError("the retained store is gone")
+
+    monkeypatch.setattr(pbl, "verify_historical_reuse", boom)
+    ok, why = pbl.historical_reuse_reconstruction_gate(types.SimpleNamespace())
+    assert not ok and "FileNotFoundError" in why
+
+
+def test_the_gate_refuses_a_verifier_that_admits_a_DIFFERENT_candidate_set(
+        monkeypatch):
+    """The two halves must agree on who the priors are, not merely on the count."""
+    monkeypatch.setattr(pbl, "REUSE_ADMITTED",
+                        ("cca699c93f34", "158b96cf651f", "control-qwen"))
+    ok, why = pbl.historical_reuse_reconstruction_gate(types.SimpleNamespace())
+    assert not ok and "frozen Phase-B rule" in why
+
+
+def test_the_required_citations_are_the_eight_the_budget_assumes():
+    assert pbl.REQUIRED_CITATIONS == frozenset({
+        "cca699c93f34/sa", "cca699c93f34/sb", "cca699c93f34/sc",
+        "85bde4ded2c3/sa", "85bde4ded2c3/sb", "85bde4ded2c3/sc",
+        "control-qwen/sa", "control-qwen/sb"})
+    # The control has no sc on record; asserting sc for it would demand evidence
+    # that never existed and block every launch.
+    assert "control-qwen/sc" not in pbl.REQUIRED_CITATIONS
+
+
+def test_the_verifier_is_inside_the_digest_the_grant_is_issued_against():
+    """It decides whether a pod is created, so it is executable, not provenance."""
+    from aadistill.autoinit.phase_b import (
+        PHASE_B_EXECUTABLE_SOURCE_FILES_V1, PHASE_B_SOURCE_SET_VERSION,
+    )
+    assert "scripts/autoinit/verify_historical_probe_reuse.py" in \
+        PHASE_B_EXECUTABLE_SOURCE_FILES_V1
+    assert PHASE_B_SOURCE_SET_VERSION == 3

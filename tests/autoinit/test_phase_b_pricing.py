@@ -5,6 +5,12 @@ not something to buy again. But "evidence" has to be earned: the first version o
 this pricing treated a probe as reusable because its **file existed**, which is
 the absence of the check rather than the check. Reuse now comes from the strict
 reconstruction record, and pricing fails closed without it.
+
+This module runs **everywhere**, including inside the pod's setup gate. The
+strict reconstruction itself — which reads the dev-box retained checkpoint store
+— lives in `test_phase_b_reuse_hostlocal.py`, because a pod has no such store and
+was never meant to. Nothing here may reach for those bytes; if a test needs
+`verify()`, it belongs in the host-local module.
 """
 
 from __future__ import annotations
@@ -24,7 +30,7 @@ from price_phase_b import (  # noqa: E402
     CONTROL, PHASE_A_FINALISTS, PHASE_B_SEARCHED_LEAVES, SURVIVORS_AT_SB,
     observed_probes, price,
 )
-from verify_historical_probe_reuse import ADMITTED, CHECKPOINTS, verify  # noqa: E402
+from verify_historical_probe_reuse import ADMITTED, CHECKPOINTS  # noqa: E402
 
 
 # --- the historical evidence ------------------------------------------------
@@ -45,37 +51,6 @@ def test_all_five_leaves_are_declared_so_unlooked_is_not_reported_as_unverified(
     assert len(CHECKPOINTS) == 6, "five searched leaves plus the control"
     unadmitted = set(CHECKPOINTS) - set(ADMITTED)
     assert unadmitted == {"158b96cf651f", "281a02c3ac18", "4e429f7ed722"}
-
-
-# --- strict reconstruction --------------------------------------------------
-
-
-def test_every_historical_probe_reconstructs_and_reuse_is_verified():
-    r = verify()
-    assert r["n_probes"] == 11
-    assert r["reuse_verified"] is True, r["failures"]
-    assert not r["failures"]
-    # The three unadmitted leaves verify too; they are simply not in the
-    # candidate set, which is a procedure fact and not an identity failure.
-    assert len(r["verifiable_but_not_admitted"]) == 3
-    assert len(r["admitted_reusable_probes"]) == 8
-
-
-def test_the_load_bearing_check_is_the_digest_re_derived_from_BYTES():
-    """A probe belongs to a checkpoint only if the bytes still say so."""
-    r = verify()
-    for probe in r["probes"]:
-        assert probe["checks"]["artifact_digest_re_derives_from_bytes"]
-        assert probe["recomputed_artifact_digest"] == probe["recorded_artifact_digest"]
-        assert probe["recomputed_artifact_digest"], "a digest was never computed"
-
-
-def test_the_unclosable_leg_is_reported_rather_than_assumed():
-    """Phase B's runtime does not exist yet, so comparability cannot be checked."""
-    pre = verify()["open_precondition"]
-    assert "runtime" in pre["what"] and "comparab" in pre["what"]
-    assert "does not exist yet" in pre["why_not_checkable_now"]
-    assert "ALL historical reuse is lost" in pre["if_it_fails"]
 
 
 # --- the pricing fails closed -----------------------------------------------
@@ -221,32 +196,6 @@ def test_a_probe_that_EXISTS_but_is_not_verified_is_still_billed(monkeypatch, tm
         "reading file existence rather than the verification verdict")
 
 
-def test_a_checkpoint_whose_BYTES_disagree_is_not_reusable(monkeypatch):
-    """M5: the load-bearing check must actually compare against the bytes."""
-    import verify_historical_probe_reuse as vhr
-
-    swapped = dict(vhr.CHECKPOINTS)
-    # Point one finalist at the OTHER finalist's retained checkpoint. Same shape,
-    # same parameter count, different weights — so only a real byte comparison
-    # can tell, and the probe must stop being reusable.
-    swapped["cca699c93f34"] = vhr.CHECKPOINTS["85bde4ded2c3"]
-    monkeypatch.setattr(vhr, "CHECKPOINTS", swapped)
-
-    r = vhr.verify()
-    assert r["reuse_verified"] is False
-    bad = [p for p in r["probes"] if p["candidate"] == "cca699c93f34"]
-    assert bad and all(
-        "artifact_digest_re_derives_from_bytes" in p["failed"] for p in bad)
-    assert all(p["recomputed_artifact_digest"] != p["recorded_artifact_digest"]
-               for p in bad)
-
-
-def test_a_changed_scoring_contract_invalidates_reuse(monkeypatch):
-    """M6: old numbers may not be silently re-interpreted under a new scorer."""
-    import verify_historical_probe_reuse as vhr
-
-    monkeypatch.setattr(vhr, "recovery_scoring_contract",
-                        lambda: {"digest": "f" * 64})
-    r = vhr.verify()
-    assert r["reuse_verified"] is False
-    assert all("scoring_contract_matches_live" in p["failed"] for p in r["probes"])
+# M5 (bytes that disagree are not reusable) and M6 (a changed scoring contract
+# invalidates reuse) both drive `verify()` against the retained store and now
+# live in `test_phase_b_reuse_hostlocal.py`.

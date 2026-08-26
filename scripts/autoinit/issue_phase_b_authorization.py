@@ -15,7 +15,7 @@ What this binds, and what invalidates it if edited:
 * the **session plan** hash;
 * the **science plan** hash, read from the frozen plan on disk rather than a
   constant, so a threshold that moved after freezing cannot be authorized;
-* the **Phase-B executable-source digest** — 56 files, the driver, launcher,
+* the **Phase-B executable-source digest** — 57 files, the driver, launcher,
   search engine, operators, adapters and session machinery a paid run executes;
 * the **preregistration** identity, so a run cannot execute under a record that
   describes something else;
@@ -59,11 +59,15 @@ PREREGISTRATION = "logs/autoinit_phase_b_preregistration.json"
 REUSE_RECORD = "logs/autoinit_historical_probe_reuse.json"
 
 #: The frozen ceilings. The session ceiling is NOT the cumulative headroom: the
-#: maintainer's $256.8400 cap less $230.0350 spent leaves $26.8050, and the
+#: maintainer's $256.9900 cap less $230.1850 spent leaves $26.8050, and the
 #: $0.0001 rounding margin belongs to the cumulative cap.
+#:
+#: The cap moved $256.84 -> $256.99 to RESTORE the retry envelope that attempt 1
+#: consumed as $0.1500 of setup, not to enlarge anything: the session ceiling is
+#: unchanged, and so is the floor.
 HARD_CEILING_USD = 26.8049
 PLANNING_FLOOR_USD = 13.0800
-CUMULATIVE_CAP_USD = 256.84
+CUMULATIVE_CAP_USD = 256.99
 
 GRANT_FIELDS = ("granted_by", "covers", "cumulative_spend_at_approval_usd",
                 "cumulative_cap_usd", "does_not_authorize")
