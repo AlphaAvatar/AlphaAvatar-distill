@@ -1,6 +1,6 @@
 {
   "schema": "aadistill.current_state/v2",
-  "generated_utc": "2026-08-27T13:00:00Z",
+  "generated_utc": "2026-08-26T09:20:00Z",
   "_contract": "The minimal machine-readable CURRENT snapshot: live facts only, no history, no per-attempt detail, no narrative. History lives in logs/decisions.md and the per-run directories; the human view is logs/STATE.md and the two must agree. Ownership: logs/CATALOG.md.",
   "baseline_commit": "ed77c68b10946a44bac9e043e8dd8b6dab121662",
   "baseline_commit_meaning": "The LAST TESTED IMPLEMENTATION: the commit whose tree produced the latest_verification figures.",
@@ -11,21 +11,21 @@
   },
   "authorized": {
     "any": false,
-    "note": "autoinit.phase_b.20260825T201335Z is PERMANENTLY UNUSABLE and preserved as historical evidence that an authorization was invalidated before provider creation at $0 spend. It must not be patched, revived or reused. A new one-use grant is issued against the repaired commit."
+    "note": "autoinit.phase_b.20260826T053826Z is CONSUMED -- one-use, loaded and spent by attempt 1. A retry needs a new grant. autoinit.phase_b.20260825T201335Z remains permanently unusable in logs/superseded/."
   },
   "prepared_launch": {
     "any": false,
     "bundles": 0
   },
   "budget": {
-    "cumulative_spend_usd": 230.035,
+    "cumulative_spend_usd": 230.185,
     "authorized_cap_usd": 256.84,
-    "remaining_usd": 26.805,
+    "remaining_usd": 26.655,
     "phase_b_single_session_hard_ceiling_usd": 26.8049,
     "planning_floor_usd": 13.08,
     "remaining_is_not_permission": true,
     "ledger": "logs/BUDGET_LEDGER.md",
-    "headroom_note": "Approved 2026-08-27 for ONE Phase-B execution. The $0.0001 between the $26.8050 headroom and the $26.8049 session ceiling belongs to the CUMULATIVE cap. Unused headroom is not authorization for any later experiment."
+    "headroom_note": "Phase-B attempt 1 spent $0.1500 and aborted at the pod-side test gate; no scientific stage ran. The $0.0001 rounding margin belongs to the CUMULATIVE cap. Unused headroom is not authorization."
   },
   "frozen": {
     "science_plan_hash": "02be33b9a7a8e26bc8bfb75795351e8cdc9ffd441b47066cc81887cfc511b55c",
@@ -86,10 +86,13 @@
   },
   "failed": [
     {
-      "run": "recovery continuation 7 launcher (the DRIVER succeeded)",
-      "usd": 0.0,
-      "cause": "checkpoint_hashes_matched treated canonical_id STRINGS as transfer results",
-      "impact": "cosmetic; FIXED in the 2026-08-24 closeout via fetch_result_ok"
+      "run": "Phase-B attempt 1",
+      "usd": 0.15,
+      "pod": "4dbqycjrivhq17 (deleted, provider confirms gone)",
+      "where": "pod-side setup test gate, before any scientific stage",
+      "cause": "two defects, both mine: (1) verify_historical_probe_reuse hardcodes the DEV-BOX checkpoint store, so its two tests fail on the pod -- dev-box-only code in the pod gate, the same class as continuation attempt 3; (2) the catalog test was ALREADY RED at the launch commit because logs/superseded/ was uncatalogued, and I did not re-run the suite at the final commit",
+      "impact": "no scientific stage ran; no Phase-B science, calibration or pricing is in question",
+      "record": "logs/autoinit_phase_b_attempt1.json"
     }
   ],
   "failure_pattern": "continuation 1-7: an uncaught transport call, an undeliverable asset, dev-box-only code in the pod gate, the attempt-12 OOM class, a checkpoint path, a checkpoint with no tokenizer, and finally a SUCCEEDING driver whose launcher crashed on a line only success reaches. Each failure was further in than the last. See logs/decisions.md",
@@ -101,9 +104,9 @@
     "the paid device-canary session path: TERMINATED 2026-08-18, evidence kept, none prepared"
   ],
   "next_starting_point": {
-    "status": "Phase B is approved, capacity is resolved and every identity gate passes, but the session is NOT launched: the first precheck raises AttributeError.",
-    "the_ask": "A reviewer decision to reopen Phase-B readiness for one minimal repair: give PhaseBAuthorization the three names the shared session machinery requires, as aliases over its source_* fields. That edits phase_b.py, inside the executable-source set, so cad571c8 moves, ba572bb7 must be re-frozen and the authorization re-issued.",
-    "budget": "cap $256.84, spent $230.0350 (UNCHANGED); session ceiling $26.8049. Nothing spent."
+    "status": "Phase-B attempt 1 aborted at setup for $0.1500. Nothing is running or billing; the pod is deleted and the provider confirms it. The catalog defect is fixed.",
+    "the_ask": "A reviewer decision on the probe-reuse tests: they prove the citations Phase B's ten-probe price depends on, and they cannot run on a pod that has no checkpoint store. Skipping them weakens a real gate; adding them to TEST_IGNORES hides them from the pod only. Then a new one-use grant.",
+    "budget": "cap $256.84, spent $230.1850, headroom $26.6550; session ceiling $26.8049."
   },
   "read_order": [
     "logs/STATE.md \u2014 the human view of this file",
@@ -142,7 +145,7 @@
   "next_sequence": {
     "_status": "NONE of this is implemented or started, and none of it is funded",
     "1_phase_b": "calibration/data-distribution sensitivity: calib.reasoning_heavy@v2 vs calib.domain_balanced@v1, searched JOINTLY at P=2. PREPARED AND FROZEN, NOT LAUNCHED. See logs/autoinit_phase_b_preregistration.json and logs/autoinit_phase_b_reconstruction.md",
-    "1_phase_b_blocked_on": "NOTHING. The three-name compatibility repair is in: PhaseBAuthorization now exposes harness_source_files / harness_source_digest / require_harness as ALIASES over its canonical source_* fields, so the shared session machinery works and source_* stays the only serialized name. Executable digest 5a84c040, preregistration c78161aa; nothing else moved.",
+    "1_phase_b_blocked_on": "The pod-side test gate. verify_historical_probe_reuse reads /home/ecs-user/aad-artifacts, which exists only on the dev box, so its two tests fail on any pod. Reproducible at $0.",
     "1_phase_b_cost": "Search P=2 $1.8950-$7.4349, 244.87 GiB working, 300 GiB provisioned. AUTHORIZATION CEILING $26.8049 (10 probes, verified reuse); low $13.0800 is a FLOOR. Implied cap $256.8399. The 14-probe no-reuse figure is a REJECTED counterfactual: stage-0 comparability failure TERMINATES. NOT an authorization; none requested.",
     "2_final_selection": "complete final initialization selection after Phase B; Phase A's unresolved_equivalence is not a final selection",
     "3_canonical_stage1_nll": "the canonical Stage-1 NLL diagnostic on the finally selected initialization, under the established Stage-1 measurement contract. DIAGNOSTIC ONLY, never a promotion criterion, and NOT the state_eval@v1 search-side NLL fields. Never yet run",

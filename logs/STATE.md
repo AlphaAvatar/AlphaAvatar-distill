@@ -1,4 +1,4 @@
-**Updated:** 2026-08-27 · branch `main` · **PHASE B AUTHORIZED, NOT LAUNCHED — precheck contract defect**
+**Updated:** 2026-08-26 · branch `main` · **PHASE B ATTEMPT 1 ABORTED AT SETUP — $0.1500, no stage ran**
 
 # Current state
 
@@ -470,9 +470,9 @@ selection result.**
 ## Budget
 
 ```
-cumulative spend   $230.0350
-approved cap       $256.84    RAISED AND APPROVED 2026-08-27 for ONE Phase-B run
-remaining          $26.8050   headroom; the Phase-B session ceiling is $26.8049
+cumulative spend   $230.1850  incl. Phase-B attempt 1 at $0.1500
+approved cap       $256.84    RAISED AND APPROVED for ONE Phase-B run
+remaining          $26.6550   headroom; the Phase-B session ceiling is $26.8049
 
 ```
 

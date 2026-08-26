@@ -1,0 +1,57 @@
+{
+  "schema": "aadistill.autoinit.phase_b_attempt/v1",
+  "attempt": 1,
+  "date": "2026-08-26",
+  "outcome": "ABORTED AT SETUP \u2014 the pod-side test gate failed. No scientific stage ran.",
+  "pod_id": "4dbqycjrivhq17",
+  "gpu": "NVIDIA L40S @ $0.99/h",
+  "elapsed_min": 8.8,
+  "spend_usd": 0.15,
+  "pod_state_after": {
+    "exists": false,
+    "desired_status": "TERMINATED",
+    "billing": false,
+    "provider_confirms_gone": true
+  },
+  "authorization": {
+    "id": "autoinit.phase_b.20260826T053826Z",
+    "sha": "95dc8839",
+    "state": "CONSUMED \u2014 one-use, loaded and spent by this attempt. A retry needs a new grant."
+  },
+  "identities_at_launch": {
+    "session_commit": "218c51c75909a00d22fd3fd6975d6c47dca128eb",
+    "executable_source": "5a84c04038bdeddbe2ab3d88f12ff981746bf0c2458c8d9b70dfce283cf1b4bf",
+    "preregistration": "c78161aa15d4a70b84b85234fbd2acaa33c929a74c523bb7a4b6fcb45af3634d",
+    "bundle": "aad_autoinit_218c51c7.bundle",
+    "bundle_sha256": "ba8d2eb6d7c1a0c1e891dc4bc013863ffc084f9b59e6fd4d7728132dadf5116a"
+  },
+  "what_PASSED_on_hardware": [
+    "every pre-provider gate, including session_commit_gate -- the gate that crashed before the alias repair ran correctly and reported the harness digest, the carried authorization and the single expected diff from the authorized base",
+    "pod creation, TCP 22 in 0.2 min, ssh reachable at $0.00",
+    "16 relay inputs staged from two repositories, 3 local assets",
+    "TEACHER_READY, and ROPE_OK in BOTH venvs (stored 5,000,000 == runtime 5,000,000)"
+  ],
+  "why_it_failed": [
+    {
+      "test": "tests/autoinit/test_phase_b_pricing.py::test_every_historical_probe_reconstructs_and_reuse_is_verified",
+      "and": "::test_the_load_bearing_check_is_the_digest_re_derived_from_BYTES",
+      "cause": "verify_historical_probe_reuse.CHECKPOINTS hardcodes /home/ecs-user/aad-artifacts/autoinit/phase_a/..., which exists only on the DEV BOX. On the pod all 11 probes fail artifact_digest_re_derives_from_bytes, so reuse_verified is False and both tests fail.",
+      "class": "dev-box-only code inside the pod's setup test gate -- the same class as recovery continuation attempt 3, and named in the project's own lessons: harness exclusion does not exclude tests. Reproducible at $0 by pointing CHECKPOINTS at a nonexistent path, which is how it was confirmed after the fact.",
+      "reproduced_at_zero_cost": true
+    },
+    {
+      "test": "tests/docs/test_repository_structure.py::test_every_log_is_classified_in_the_catalog",
+      "cause": "logs/superseded/ was created to preserve the invalidated authorization and never added to CATALOG.md. It was ALREADY RED at the launch commit.",
+      "class": "a red test shipped to a paid pod",
+      "my_error": "the last full suite predated both the authorization commit and the superseded/ move; I did not re-run tests/docs at the final commit before launching"
+    }
+  ],
+  "cost_of_the_lesson_usd": 0.15,
+  "what_must_change_before_a_retry": [
+    "make the probe-reuse verification pod-safe: either skip when the checkpoint store is absent (the established `needs_calibration` pattern) or add these tests to TEST_IGNORES -- a decision for the reviewer, because skipping weakens a gate that exists to prove citations",
+    "catalogue logs/superseded/ and logs/autoinit_phase_b_session.json",
+    "re-run the FULL suite at the exact launch commit, not before it",
+    "a new one-use authorization: the previous one is consumed"
+  ],
+  "not_changed": "no Phase-B science, no calibration identity, no pricing, no candidate set. Nothing scientific ran, so nothing scientific is in question."
+}

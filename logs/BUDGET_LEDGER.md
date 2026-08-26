@@ -953,6 +953,20 @@ assumption over survivor identity or tie-break probability is defined anywhere.
 **Unused headroom is not authorization.** Whatever Phase B does not spend funds
 nothing else; a later experiment needs its own maintainer decision.
 
+## 2026-08-26 — Phase-B attempt 1: $0.1500, aborted at setup
+
+```
+cumulative spend before                                      $230.0350
+Phase-B attempt 1 (pod 4dbqycjrivhq17, 8.8 min, L40S)        $  0.1500
+cumulative spend after                                       $230.1850
+authorized cumulative cap                                    $256.8400
+remaining headroom                                           $ 26.6550
+```
+
+Aborted at the pod-side setup test gate; **no scientific stage ran**. The pod was
+deleted and the provider confirms it is gone. The one-use authorization
+`autoinit.phase_b.20260826T053826Z` is **consumed**; a retry needs a new grant.
+
 ## Standing rules
 
 * Plan from **actual spend**, never from unused room under a previous authorization.

@@ -52,6 +52,8 @@ overview and links here instead. A structural test enforces this.
 | `autoinit_causal_depth_pricing_bound.json` | the DERIVED Stage-1 wall-time and VRAM bound for the repaired path, and the measurement protocol that would confirm it |
 | `relay_mirror_verification.json` | file-by-file proof that a local tree is byte-identical to its relay copy, and by which method each file was checked. The evidence a "stale local cache" deletion stands on |
 | `autoinit_historical_probe_reuse.json` | the strict reconstruction check Phase B's probe reuse is conditional on, regenerable with `scripts/autoinit/verify_historical_probe_reuse.py`: per probe, completeness, the frozen seed, the artifact digest **re-derived from the retained checkpoint bytes**, the battery and scoring-contract identities, and the attested protocol hash. Also records the one leg that cannot be closed at `$0` — Phase B's own runtime comparability, a Stage-0 precondition |
+| `autoinit_phase_b_attempt1.json` | Phase-B attempt 1: ABORTED at the pod-side test gate after 8.8 min and **$0.15**. No scientific stage ran. Records what passed on hardware, the two defects that stopped it, and what must change before a retry |
+| `autoinit_phase_b_session.json` | the launcher's own session record for that attempt |
 | `autoinit_phase_b_grant.json` | the ONE-USE maintainer decision authorizing a single Phase-B execution: who permitted what, the cumulative spend at approval, the new cap, and an explicit list of what it does **not** authorize. An input to the issuer, never a constant in executable source |
 | `autoinit_phase_b_authorization.json` | the issued one-use `PhaseBAuthorization`, binding the session commit, executable-source digest, preregistration, both plan hashes, both calibration spec **and** content identities, the historical-reuse verdict, and the `$26.8049` hard ceiling. Written by `scripts/autoinit/issue_phase_b_authorization.py`, which refuses to overwrite an existing one |
 | `autoinit_phase_b_pricing.json` | the paid work Phase B still owes under the 2026-08-25 terminal procedure, regenerable with `scripts/autoinit/price_phase_b.py`: the historical probe inventory read off disk, which candidate/seed pairs are reusable, the probes still owed at both ends of a coherent best/worst case, and the search's P=2 cost and storage. **Not an authorization** — the binding per-launch ceiling is issued by the authorization code against a frozen plan |
@@ -83,6 +85,12 @@ consumed authorizations; changing one silently invalidates recorded results.
 | `autoinit_recovery_search_v2_audit.json` | the battery's $0 item-by-item audit |
 
 ## HISTORICAL — evidence, never rewritten
+
+`superseded/` holds artifacts that were superseded before use and are kept
+as evidence rather than deleted — currently the Phase-B authorization that was
+invalidated by the naming defect **before provider creation, at $0 spend**. Files
+here are never revived or reused; the `_UNUSABLE` suffix says so in the name.
+
 
 Per-run directories. Each holds what a session actually produced.
 
