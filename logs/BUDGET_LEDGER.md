@@ -993,6 +993,28 @@ move, and the `$0.0001` difference remains cumulative rounding margin.
 Grant document: `autoinit_phase_b_grant_retry.json`. **Unused headroom is not
 authorization** — whatever the retry does not spend funds nothing else.
 
+## 2026-08-27 — Phase-B attempt 2: $0.2300, aborted at the authorization gate
+
+```
+cumulative spend before                                      $230.1850
+Phase-B attempt 2 (pod xgca8kkv4pm68n, 13.9 min, L40S)       $  0.2300
+cumulative spend after                                       $230.4150
+authorized cumulative cap                                    $256.9900
+remaining headroom                                           $ 26.5750
+Phase-B single-session hard ceiling                          $ 26.8049
+```
+
+The pod's **test gate passed** — the attempt-1 defect is fixed — and setup then
+failed one step later at `AUTHORIZATION_MISMATCH` (`SETUP_RC=98`): the shared
+setup script has no `SESSION_KIND=phase_b` branch, so it loaded a
+`PhaseBAuthorization` with `SpendAuthorization.load`. **No scientific stage ran.**
+The pod was deleted and the provider confirms it is gone. The one-use
+authorization `autoinit.phase_b.20260826T101431Z` is **consumed**.
+
+**Headroom `$26.5750` is now BELOW the `$26.8049` session ceiling**, so a third
+attempt is arithmetically blocked without a new maintainer cap decision. Phase-B
+setup attempts have cost **$0.3800** in total and produced no scientific evidence.
+
 ## Standing rules
 
 * Plan from **actual spend**, never from unused room under a previous authorization.

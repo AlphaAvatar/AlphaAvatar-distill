@@ -1,0 +1,91 @@
+{
+  "schema": "aadistill.autoinit.phase_b_attempt/v1",
+  "attempt": 2,
+  "date": "2026-08-27",
+  "outcome": "setup_failed",
+  "classification": "provider/setup attempt. Scientific stages NOT entered. No Phase-B scientific evidence produced.",
+  "pod_id": "xgca8kkv4pm68n",
+  "gpu": "NVIDIA L40S @ $0.99/h",
+  "image": "runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@580.159.04",
+  "elapsed_min": 13.9,
+  "spend_usd": 0.2300,
+  "pod_state_after": "deleted; provider confirms gone (launcher check True, and an independent `runpodctl pod list` returns an empty table)",
+
+  "authorization": {
+    "id": "autoinit.phase_b.20260826T101431Z",
+    "authorization_sha256": "a6351ed635de2b44f5b9a080396f81fe8772588900309f95a12e74211a56540d",
+    "status": "CONSUMED. One-use. Must never be reused, patched or revived.",
+    "grant_document": "logs/autoinit_phase_b_grant_retry.json"
+  },
+  "identities_at_launch": {
+    "repair_commit": "47a97241ca6c4cf7c1be312017a4d2b5b67fc299",
+    "launch_commit": "13d68a40b0e0df6c67de38383fd2a3b98e836bb0",
+    "executable_source_digest": "686d43aa99df8f67b7efada56e771644cbf200b18791f236e88c840f9a2a3779",
+    "executable_source_files": 57,
+    "executable_source_set_version": 3,
+    "preregistration_sha256": "3e466574eb1dbfaa283e8cd80e6cd22d500f9af253bc5c88cf5d5b27c6ef54b4",
+    "session_plan_hash": "23f23649b4be92bd8852bf9d89f8dcb372bc5a00a175ae631d32b9d71de8032d",
+    "science_plan_hash": "02be33b9a7a8e26bc8bfb75795351e8cdc9ffd441b47066cc81887cfc511b55c",
+    "bundle": "aad_autoinit_13d68a40.bundle"
+  },
+
+  "pre_launch_gates": {
+    "exact_launch_commit_suite": "2319 passed, 12 skipped, 0 failed, at 13d68a40 with a clean tree",
+    "frozen_verifier": "passed: true, problems: []",
+    "pre_provider_gates": "all 9 passed, including the new historical_reuse_reconstruction_gate",
+    "ckpt_store_capacity": "15.5 GiB free for 11.6 GiB of leaves and working room"
+  },
+
+  "what_PASSED_on_hardware": [
+    "pod created on the THIRD create attempt; the first two returned 'There are no longer any instances available'",
+    "TCP 22 in 2.4 min; image identity resolved before setup ran",
+    "16 relay inputs from two repositories and 3 local assets staged",
+    "TEACHER_READY; ROPE_OK in both venvs",
+    "TESTS_OK — 2207 passed, 84 skipped in 338.68s. THE ATTEMPT-1 DEFECT IS FIXED: the strict historical-reuse reconstruction no longer runs on a pod, and the log catalog is complete."
+  ],
+
+  "why_it_failed": {
+    "marker": "AUTHORIZATION_MISMATCH, SETUP_RC=98",
+    "where": "scripts/pod/autoinit_preflight_setup.sh, the authorization-binding step immediately after TESTS_OK",
+    "error": "KeyError: 'preflight_plan_hash' raised inside aadistill/autoinit/authorization.py:233, SpendAuthorization.load",
+    "root_cause": "The shared setup script dispatches the authorization check on SESSION_KIND and has exactly three branches: phase_a, recovery_continuation, and an else that loads the narrow SpendAuthorization. Phase B declares SESSION_KIND=phase_b, which no branch matches, so a PhaseBAuthorization artifact is loaded by SpendAuthorization.load. That loader reads raw['preflight_plan_hash'] and raw['expected_usd']; the Phase-B schema carries phase_b_session_plan_hash and planning_floor_usd instead.",
+    "class": "the same 'inherited contracts, not needs' failure as the harness_source_* aliases: the Phase-B authorization type was designed for what Phase B needed to say, and the SHARED pod-side machinery that consumes it was not consulted. This is the third collision between that type and shared infrastructure.",
+    "why_no_local_test_caught_it": "the dispatch lives in a bash script that only ever executes on a pod, and no test asserts that every SESSION_KIND a launcher declares has a branch in the setup script. That check is cheap and purely static."
+  },
+
+  "the_decision_this_needs": {
+    "why_it_is_not_mine": "the standing instruction from the previous review was 'do not modify the shared runner/prechecks; adapt the Phase-B authorization to the already-established shared contract'. Applied literally here that means option B below, and option B requires the Phase-B artifact to assert an expected_usd — the exact field the pricing review removed on the grounds that no expected-value assumption over survivor identity or tie-break probability is defined anywhere. So the instruction and the pricing contract point in opposite directions, and resolving that is a reviewer decision.",
+    "option_A_add_a_phase_b_branch": {
+      "what": "a fourth branch in autoinit_preflight_setup.sh loading PhaseBAuthorization, calling require_plan, and asserting allows_phase_a is False — mirroring the recovery_continuation branch exactly",
+      "for": "the script ALREADY dispatches by kind, so this is the established pattern rather than a new abstraction; it cannot change behaviour for any other session kind, because the branch is selected by SESSION_KIND; and it keeps the coarse setup check honest about which artifact type it is reading",
+      "against": "it edits shared pod-side infrastructure, which the previous review told me not to do",
+      "cost": "autoinit_preflight_setup.sh is inside PHASE_B_EXECUTABLE_SOURCE_FILES_V1, so the executable digest moves, the preregistration must be re-frozen, and the authorization must be re-issued"
+    },
+    "option_B_adapt_the_artifact": {
+      "what": "emit preflight_plan_hash and expected_usd in the Phase-B authorization so SpendAuthorization.load accepts it",
+      "against": "it reintroduces expected_usd, which the pricing contract rejects as a claim the project cannot support; and SpendAuthorization.load reads harness_source_files with a .get that falls back to HARNESS_SOURCE_FILES_V1, so the setup gate would silently verify Phase B against PHASE A's harness file list — a check that passes while meaning the wrong thing",
+      "verdict": "not recommended; it satisfies the letter of the shared contract by making the artifact assert two things that are not true"
+    },
+    "recommended": "A, plus a $0 static test asserting that every SESSION_KIND declared by any launcher has a matching branch in the setup script. That test would have caught this before either paid attempt."
+  },
+
+  "budget": {
+    "spend_before_usd": 230.1850,
+    "this_attempt_usd": 0.2300,
+    "spend_after_usd": 230.4150,
+    "cumulative_cap_usd": 256.99,
+    "headroom_after_usd": 26.5750,
+    "session_ceiling_usd": 26.8049,
+    "blocking_arithmetic": "headroom $26.5750 is now BELOW the frozen $26.8049 session ceiling, so a third attempt cannot be authorized without a new maintainer cap decision. Phase-B setup attempts have cost $0.3800 in total and produced no scientific evidence."
+  },
+
+  "not_changed": [
+    "the P=2 search science, beam, schedule and ranking policy",
+    "the closed 8-candidate cross-phase set and its three exclusions",
+    "both calibration identities, spec and materialized content",
+    "the frozen science plan, feasibility floor, equivalence interval, sa/sb/sc procedure and the no-fourth-seed rule",
+    "the reuse rules and the historical probe evidence",
+    "the disk margin and the storage-retention policy",
+    "the $13.0800 planning floor and the $26.8049 session ceiling"
+  ]
+}

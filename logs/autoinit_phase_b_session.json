@@ -179,10 +179,11 @@
       "teacher_revision": "768f209d9ea81521153ed38c47d515654e938aea",
       "test_ignores": [
         "tests/data/test_recovery_corpus_pipeline.py",
-        "tests/pod/test_phase_a_stages1_5_execute.py"
+        "tests/pod/test_phase_a_stages1_5_execute.py",
+        "tests/autoinit/test_phase_b_reuse_hostlocal.py"
       ]
     },
-    "n_prechecks": 8,
+    "n_prechecks": 9,
     "teardown": {
       "always": true,
       "require_provider_confirmation": true
@@ -190,109 +191,134 @@
   },
   "timeline": [
     {
-      "utc": "2026-08-26T05:42:20+00:00",
+      "utc": "2026-08-26T10:36:41+00:00",
       "elapsed_min": 0.0,
       "msg": "budget: expected 1122 min $18.51 \u00b7 soft $23.39 \u00b7 hard $23.72 (authorized $26.80)"
     },
     {
-      "utc": "2026-08-26T05:42:21+00:00",
+      "utc": "2026-08-26T10:36:41+00:00",
       "elapsed_min": 0.0,
       "msg": "NVIDIA L40S $0.99/h, stock Low"
     },
     {
-      "utc": "2026-08-26T05:42:21+00:00",
+      "utc": "2026-08-26T10:36:41+00:00",
       "elapsed_min": 0.0,
-      "msg": "session commit 218c51c75909 verified: harness digests to 5a84c04038bd\u2026, carries the authorization and only logs/autoinit_phase_b_authorization.json differs from the authorized base"
+      "msg": "session commit 13d68a40b0e0 verified: harness digests to 686d43aa99df\u2026, carries the authorization and only logs/autoinit_phase_b_authorization.json differs from the authorized base"
     },
     {
-      "utc": "2026-08-26T05:42:21+00:00",
+      "utc": "2026-08-26T10:36:41+00:00",
       "elapsed_min": 0.0,
       "msg": "frozen science plan 02be33b9a7a8\u2026 matches the authorization"
     },
     {
-      "utc": "2026-08-26T05:42:21+00:00",
+      "utc": "2026-08-26T10:36:41+00:00",
       "elapsed_min": 0.0,
-      "msg": "phase-B executable 5a84c04038bd\u2026 matches the grant"
+      "msg": "phase-B executable 686d43aa99df\u2026 matches the grant"
     },
     {
-      "utc": "2026-08-26T05:42:21+00:00",
+      "utc": "2026-08-26T10:36:41+00:00",
       "elapsed_min": 0.0,
-      "msg": "preregistration c78161aa15d4\u2026 binds this executable and both mixtures"
+      "msg": "preregistration 3e466574eb1d\u2026 binds this executable and both mixtures"
     },
     {
-      "utc": "2026-08-26T05:42:21+00:00",
+      "utc": "2026-08-26T10:36:41+00:00",
       "elapsed_min": 0.0,
       "msg": "8 verified probes citable; pricing ten, not twelve"
     },
     {
-      "utc": "2026-08-26T05:42:21+00:00",
+      "utc": "2026-08-26T10:36:47+00:00",
+      "elapsed_min": 0.0,
+      "msg": "8 citations re-derived from retained bytes; evidence set a5115816861a\u2026 matches the record"
+    },
+    {
+      "utc": "2026-08-26T10:36:47+00:00",
       "elapsed_min": 0.0,
       "msg": "300 GiB container disk against a 244.87 GiB peak working set"
     },
     {
-      "utc": "2026-08-26T05:42:21+00:00",
+      "utc": "2026-08-26T10:36:47+00:00",
       "elapsed_min": 0.0,
       "msg": "6 files stage the 2 admitted Phase-A finalists for measurement"
     },
     {
-      "utc": "2026-08-26T05:42:21+00:00",
+      "utc": "2026-08-26T10:36:47+00:00",
       "elapsed_min": 0.0,
       "msg": "/home/ecs-user/aad-artifacts/autoinit/phase_a: 15.5 GiB free for 11.6 GiB of leaves and working room"
     },
     {
-      "utc": "2026-08-26T05:42:22+00:00",
+      "utc": "2026-08-26T10:36:48+00:00",
       "elapsed_min": 0.0,
       "msg": "precheck OK: 16 relay inputs (10 from AlphaAvatar/aadistill-artifacts, 6 from AlphaAvatar/aadistill-transport), 3 local assets"
     },
     {
-      "utc": "2026-08-26T05:42:24+00:00",
+      "utc": "2026-08-26T10:36:49+00:00",
       "elapsed_min": 0.0,
-      "msg": "created 4dbqycjrivhq17 at $0.99/h"
+      "msg": "attempt 1: create failed \u2014 {\"error\":\"There are no longer any instances available.\"}\nUsage:\n  runpodctl pod create [flags]\n\nFlags:\n      --cloud-type string          cloud type (SECURE or COMMUNITY) (default \"SECURE\")\n      --co"
     },
     {
-      "utc": "2026-08-26T05:42:24+00:00",
+      "utc": "2026-08-26T10:41:50+00:00",
+      "elapsed_min": 0.0,
+      "msg": "attempt 2: create failed \u2014 {\"error\":\"There are no longer any instances available.\"}\nUsage:\n  runpodctl pod create [flags]\n\nFlags:\n      --cloud-type string          cloud type (SECURE or COMMUNITY) (default \"SECURE\")\n      --co"
+    },
+    {
+      "utc": "2026-08-26T10:46:52+00:00",
+      "elapsed_min": 0.0,
+      "msg": "created xgca8kkv4pm68n at $0.99/h"
+    },
+    {
+      "utc": "2026-08-26T10:46:52+00:00",
       "elapsed_min": 0.0,
       "msg": "watchdog detached \u2014 hard 1438 min = $23.72"
     },
     {
-      "utc": "2026-08-26T05:42:36+00:00",
-      "elapsed_min": 0.21,
-      "msg": "TCP 22 at 64.247.206.212:17960 after 0.2 min"
+      "utc": "2026-08-26T10:47:51+00:00",
+      "elapsed_min": 0.98,
+      "msg": "  starting (60s) \u2014 $0.02"
     },
     {
-      "utc": "2026-08-26T05:42:39+00:00",
-      "elapsed_min": 0.26,
-      "msg": "draw 1: ssh reachable \u2014 $0.00"
+      "utc": "2026-08-26T10:48:56+00:00",
+      "elapsed_min": 2.07,
+      "msg": "  starting (120s) \u2014 $0.03"
     },
     {
-      "utc": "2026-08-26T05:43:15+00:00",
-      "elapsed_min": 0.86,
-      "msg": "draw 1: image identity runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@580.159.03"
+      "utc": "2026-08-26T10:49:18+00:00",
+      "elapsed_min": 2.43,
+      "msg": "TCP 22 at 91.199.227.82:27585 after 2.4 min"
     },
     {
-      "utc": "2026-08-26T05:43:15+00:00",
-      "elapsed_min": 0.86,
+      "utc": "2026-08-26T10:49:22+00:00",
+      "elapsed_min": 2.5,
+      "msg": "draw 1: ssh reachable \u2014 $0.04"
+    },
+    {
+      "utc": "2026-08-26T10:49:50+00:00",
+      "elapsed_min": 2.97,
+      "msg": "draw 1: image identity runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@580.159.04"
+    },
+    {
+      "utc": "2026-08-26T10:49:50+00:00",
+      "elapsed_min": 2.97,
       "msg": "draw 1: running setup"
     },
     {
-      "utc": "2026-08-26T05:51:00+00:00",
-      "elapsed_min": 8.61,
-      "msg": "setup did not reach SETUP_DONE:\n + tokenspeed-mla==0.1.8\n + tokenspeed-triton==3.8.10.post20260721\n + torch==2.13.0\n + torch-c-dlpack-ext==0.1.5\n + torchaudio==2.11.0\n + torchcodec==0.16.0\n + torchvision==0.28.0\n + tqdm==4.70.0\n + transformers==5.15.0\n + triton==3.7.1\n + truststore==0.10.4\n + typer==0.27.1\n + typing-extensions==4.16.0\n + typing-inspection==0.4.4\n + urllib3==2.7.0\n + uvicorn==0.52.3\n + uvloop==0.22.1\n + vllm==0.27.1\n + watchfiles==1.2.0\n + websockets==17.0.1\n + xgrammar==0.2.3\n + yarl==1.24.5\n + z3-solver==4.15.4.0\n[05:45:10] vllm offline install completed in 7s\nvllm 0.27.1 | torch 2.13.0+cu130 True\nMARKER:VLLM_READY\n[05:45:20] downloading the teacher at the pinned revision\n\nFetching 10 files:   0%|          | 0/10 [00:00<?, ?it/s]\nFetching 10 files:  20%|\u2588\u2588        | 2/10 [00:00<00:00, 17.95it/s]\nFetching 10 files:  60%|\u2588\u2588\u2588\u2588\u2588\u2588    | 6/10 [00:00<00:00, 28.44it/s]\nFetching 10 files:  80%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588  | 8/10 [00:20<00:00, 28.44it/s]\nFetching 10 files:  90%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588 | 9/10 [00:21<00:03,  3.17s/it]\nFetching 10 files: 100%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588| 10/10 [00:23<00:00,  2.88s/it]\nFetching 10 files: 100%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588| 10/10 [00:23<00:00,  2.31s/it]\nMARKER:TEACHER_READY\n[05:45:44] checking the RoPE base resolves in every venv\n  transformers 5.13.1: qwen3_0p6b_init_v0 stored 5,000,000 runtime 5,000,000 OK\n  transformers 5.15.0: qwen3_0p6b_init_v0 stored 5,000,000 runtime 5,000,000 OK\nMARKER:ROPE_OK\n[05:45:55] CPU test suite (128 vCPUs visible, cgroup budget 13; cpu set 0-12)\nFAILED tests/autoinit/test_phase_b_pricing.py::test_every_historical_probe_reconstructs_and_reuse_is_verified\nFAILED tests/autoinit/test_phase_b_pricing.py::test_the_load_bearing_check_is_the_digest_re_derived_from_BYTES\nFAILED tests/docs/test_repository_structure.py::test_every_log_is_classified_in_the_catalog\n3 failed, 2196 passed, 84 skipped in 297.42s (0:04:57)\n[05:50:54] test suite failed rc=1\nSETUP_RC=1\n"
+      "utc": "2026-08-26T11:00:35+00:00",
+      "elapsed_min": 13.71,
+      "msg": "setup did not reach SETUP_DONE:\n0\n + websockets==17.0.1\n + xgrammar==0.2.3\n + yarl==1.24.5\n + z3-solver==4.15.4.0\n[10:53:57] vllm offline install completed in 10s\nvllm 0.27.1 | torch 2.13.0+cu130 True\nMARKER:VLLM_READY\n[10:54:09] downloading the teacher at the pinned revision\n\nFetching 10 files:   0%|          | 0/10 [00:00<?, ?it/s]\nFetching 10 files:  10%|\u2588         | 1/10 [00:00<00:03,  2.81it/s]\nFetching 10 files:  50%|\u2588\u2588\u2588\u2588\u2588     | 5/10 [00:00<00:00,  7.60it/s]\nFetching 10 files:  60%|\u2588\u2588\u2588\u2588\u2588\u2588    | 6/10 [00:00<00:00,  7.23it/s]\nFetching 10 files:  80%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588  | 8/10 [00:02<00:00,  2.45it/s]\nFetching 10 files:  90%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588 | 9/10 [00:20<00:04,  4.27s/it]\nFetching 10 files: 100%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588| 10/10 [00:23<00:00,  3.91s/it]\nFetching 10 files: 100%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588| 10/10 [00:23<00:00,  2.31s/it]\nMARKER:TEACHER_READY\n[10:54:33] checking the RoPE base resolves in every venv\n  transformers 5.13.1: qwen3_0p6b_init_v0 stored 5,000,000 runtime 5,000,000 OK\n  transformers 5.15.0: qwen3_0p6b_init_v0 stored 5,000,000 runtime 5,000,000 OK\nMARKER:ROPE_OK\n[10:54:47] CPU test suite (256 vCPUs visible, cgroup budget 16; cpu set 0-15)\n........................................................................ [ 94%]\n........................................................................ [ 97%]\n...........................................................              [100%]\n2207 passed, 84 skipped in 338.68s (0:05:38)\n[11:00:28] test suite passed in 341s on cpu set 0-15\nMARKER:TESTS_OK:341s\n[11:00:28] verifying logs/autoinit_phase_b_authorization.json binds to this session's plan (kind=phase_b)\nTraceback (most recent call last):\n  File \"<string>\", line 4, in <module>\n  File \"/workspace/aad/src/aadistill/autoinit/authorization.py\", line 233, in load\n    plan_id=raw[\"plan_id\"], plan_hash=raw[\"preflight_plan_hash\"],\n                                      ~~~^^^^^^^^^^^^^^^^^^^^^^^\nKeyError: 'preflight_plan_hash'\n[11:00:30] THE SESSION AUTHORIZATION DOES NOT BIND TO THIS SESSION'S PLAN\nMARKER:AUTHORIZATION_MISMATCH\nSETUP_RC=98\n"
     },
     {
-      "utc": "2026-08-26T05:51:00+00:00",
-      "elapsed_min": 8.61,
+      "utc": "2026-08-26T11:00:35+00:00",
+      "elapsed_min": 13.71,
       "msg": "ABORT after draw 1: setup_failed"
     },
     {
-      "utc": "2026-08-26T05:51:00+00:00",
-      "elapsed_min": 8.61,
+      "utc": "2026-08-26T11:00:35+00:00",
+      "elapsed_min": 13.71,
       "msg": "deleting pod (setup setup_failed)"
     },
     {
-      "utc": "2026-08-26T05:51:11+00:00",
-      "elapsed_min": 8.79,
-      "msg": "pod deleted \u2014 8.8 min, $0.15; provider confirms gone: True"
+      "utc": "2026-08-26T11:00:46+00:00",
+      "elapsed_min": 13.9,
+      "msg": "pod deleted \u2014 13.9 min, $0.23; provider confirms gone: True"
     }
   ],
   "stages": {
@@ -301,17 +327,17 @@
         "draw": 1,
         "setup_done": "0",
         "host_cold": "0",
-        "setup_rc": "1",
-        "tail": "SETUP_RC=1"
+        "setup_rc": "98",
+        "tail": "SETUP_RC=98"
       }
     ]
   },
   "authorization": {
     "schema": "aadistill.autoinit.phase_b_authorization/v1",
-    "authorization_id": "autoinit.phase_b.20260826T053826Z",
+    "authorization_id": "autoinit.phase_b.20260826T101431Z",
     "version": 1,
-    "granted_utc": "2026-08-26T05:38:26.870831+00:00",
-    "granted_by": "Maintainer approval, 2026-08-27, in their own words: \"Maintainer approval is granted. Increase the AlphaAvatar-distill cumulative budget cap from $234.00 to $256.84. The approved Phase-B session remains bounded by the frozen single-session hard ceiling of $26.8049. The $13.0800 figure remains a planning floor only, not an expected spend.\" Reviewer verdict in the same message: Phase-B science GO, Phase-B implementation/readiness GO, cumulative-budget increase to $256.84 APPROVED, and one Phase-B paid execution AUTHORIZED TO PREPARE AND LAUNCH subject to the frozen fail-closed gates.\n\nCovers: exactly one paid Phase-B execution: the frozen joint P=2 beam-6 search over calib.domain_balanced@v1 and calib.reasoning_heavy@v2, then the cross-phase rungs over eight candidates at sa, of which only the five new Phase-B leaves incur new probes.\n\nCumulative spend at approval $230.0350 against a cumulative cap of $256.84.\n\nDoes NOT authorize: a second Phase-B attempt; any reopening of Phase A; the rejected 14-probe no-reuse path (a Stage-0 comparability failure TERMINATES the session); rematerializing the Stage-3 controls or redefining their thresholds; admitting the three excluded Phase-A leaves; a fourth seed; the post-Phase-B generalization pass; a DEPTH incumbent change; ATTENTION/FFN/RESIDUAL_WIDTH operator research; the canonical Stage-1 NLL diagnostic; formal Stage 2/3 recovery training; or any further grant or paid session. Unused headroom is not authorization for anything.\n\nGrant document: logs/autoinit_phase_b_grant.json",
+    "granted_utc": "2026-08-26T10:14:31.815210+00:00",
+    "granted_by": "Maintainer approval, 2026-08-27, in their own words: \"Maintainer approval is granted to raise the cumulative budget cap from $256.84 to $256.99. Keep the frozen Phase-B retry single-session hard ceiling unchanged at $26.8049. The extra $0.15 only restores the original full retry envelope after Attempt 1 spent $0.15; do not use it to enlarge the session ceiling or fund later work.\" Reviewer verdict in the same message: narrow $0 repair GO, cumulative cap $256.99 APPROVED, Phase-B retry after the repaired gates are green GO, no science changes.\n\nCovers: exactly one paid Phase-B execution \u2014 the retry of the already-frozen session: the joint P=2 beam search over calib.domain_balanced@v1 and calib.reasoning_heavy@v2, then the cross-phase rungs over eight candidates at sa, of which only the five new Phase-B leaves incur new probes.\n\nCumulative spend at approval $230.1850 against a cumulative cap of $256.99.\n\nDoes NOT authorize: a third Phase-B attempt; any reopening of Phase A; any change to the P=2 search science, candidate set, cross-phase behavioural procedure, thresholds, reuse rules, disk margin or storage-retention policy; the rejected 14-probe no-reuse path (a Stage-0 comparability failure TERMINATES the session); rematerializing the Stage-3 controls or redefining their thresholds; admitting the three excluded Phase-A leaves; a fourth seed; the post-Phase-B generalization pass; a DEPTH incumbent change; ATTENTION/FFN/RESIDUAL_WIDTH operator research; the canonical Stage-1 NLL diagnostic; formal Stage 2/3 recovery training; or any further grant or paid session. The $0.15 cap increase restores the retry envelope Attempt 1 consumed and does NOT enlarge the $26.8049 session ceiling. Unused headroom is not authorization for anything.\n\nGrant document: logs/autoinit_phase_b_grant_retry.json",
     "plan_id": "autoinit.v1.phase_b_session",
     "phase_b_session_plan_hash": "23f23649b4be92bd8852bf9d89f8dcb372bc5a00a175ae631d32b9d71de8032d",
     "phase_b_science_plan_hash": "02be33b9a7a8e26bc8bfb75795351e8cdc9ffd441b47066cc81887cfc511b55c",
@@ -346,13 +372,14 @@
     "phase_b_authorized": true,
     "phase_a_authorized": false,
     "automatic_followon_start": false,
-    "authorized_session_commit": "a77496139e414f63b60857027a84b329efa7343e",
-    "source_digest": "5a84c04038bdeddbe2ab3d88f12ff981746bf0c2458c8d9b70dfce283cf1b4bf",
+    "authorized_session_commit": "47a97241ca6c4cf7c1be312017a4d2b5b67fc299",
+    "source_digest": "686d43aa99df8f67b7efada56e771644cbf200b18791f236e88c840f9a2a3779",
     "source_files": [
       "scripts/autoinit/load_state_eval.py",
       "scripts/autoinit/phase_a_frozen.py",
       "scripts/autoinit/phase_a_search.py",
       "scripts/autoinit/verify_frozen_assets.py",
+      "scripts/autoinit/verify_historical_probe_reuse.py",
       "scripts/autoinit/write_preregistration.py",
       "scripts/pod/autoinit_engine_probe.py",
       "scripts/pod/autoinit_phase_a_driver.py",
@@ -407,17 +434,18 @@
       "src/aadistill/init/sandwich.py"
     ],
     "per_launch_hard_usd": 26.8049,
-    "provenance_commit": "a77496139e414f63b60857027a84b329efa7343e",
+    "provenance_commit": "47a97241ca6c4cf7c1be312017a4d2b5b67fc299",
     "enforcement": "the launcher loads this artifact and refuses to create a pod whose priced hard threshold exceeds hard_cap_usd or per_launch_hard_usd, refuses a stage not in authorized_stages, refuses an executable that does not digest to the authorized value, refuses a calibration mixture whose spec OR content hash differs, and has no code path to Phase A or to any experiment after Phase B",
-    "authorization_sha256": "a5dd5e2d1e234bfe1899e54511cf6cfc6a4f807d33210bbf3d836257f59ee26e"
+    "authorization_sha256": "3cef5b9d5f5ffd97f4a8cc747b375e02dfc021302e6d14acd1fa62c80a3b719c"
   },
   "session_plan_hash": "23f23649b4be92bd8852bf9d89f8dcb372bc5a00a175ae631d32b9d71de8032d",
-  "harness_source_digest": "5a84c04038bdeddbe2ab3d88f12ff981746bf0c2458c8d9b70dfce283cf1b4bf",
+  "harness_source_digest": "686d43aa99df8f67b7efada56e771644cbf200b18791f236e88c840f9a2a3779",
   "harness_source_files": [
     "scripts/autoinit/load_state_eval.py",
     "scripts/autoinit/phase_a_frozen.py",
     "scripts/autoinit/phase_a_search.py",
     "scripts/autoinit/verify_frozen_assets.py",
+    "scripts/autoinit/verify_historical_probe_reuse.py",
     "scripts/autoinit/write_preregistration.py",
     "scripts/pod/autoinit_engine_probe.py",
     "scripts/pod/autoinit_phase_a_driver.py",
@@ -563,16 +591,16 @@
   "quoted_price_per_hour": 0.99,
   "stock_status": "Low",
   "session_commit_check": {
-    "session_commit": "218c51c75909a00d22fd3fd6975d6c47dca128eb",
-    "authorized_session_commit": "a77496139e414f63b60857027a84b329efa7343e",
-    "harness_digest_at_commit": "5a84c04038bdeddbe2ab3d88f12ff981746bf0c2458c8d9b70dfce283cf1b4bf",
-    "authorized_harness_digest": "5a84c04038bdeddbe2ab3d88f12ff981746bf0c2458c8d9b70dfce283cf1b4bf",
+    "session_commit": "13d68a40b0e0df6c67de38383fd2a3b98e836bb0",
+    "authorized_session_commit": "47a97241ca6c4cf7c1be312017a4d2b5b67fc299",
+    "harness_digest_at_commit": "686d43aa99df8f67b7efada56e771644cbf200b18791f236e88c840f9a2a3779",
+    "authorized_harness_digest": "686d43aa99df8f67b7efada56e771644cbf200b18791f236e88c840f9a2a3779",
     "harness_matches": true,
     "commit_carries_this_authorization": true,
     "rule": "the pod checks out this commit from a bundle; its harness must digest to the authorized value and it must carry the authorization the driver will load",
     "lineage": {
-      "authorized_base": "a77496139e414f63b60857027a84b329efa7343e",
-      "session_commit": "218c51c75909a00d22fd3fd6975d6c47dca128eb",
+      "authorized_base": "47a97241ca6c4cf7c1be312017a4d2b5b67fc299",
+      "session_commit": "13d68a40b0e0df6c67de38383fd2a3b98e836bb0",
       "descends_from_base": true,
       "changed_paths": [
         "logs/autoinit_phase_b_authorization.json"
@@ -586,7 +614,7 @@
     {
       "check": "session_commit_and_lineage",
       "ok": true,
-      "message": "session commit 218c51c75909 verified: harness digests to 5a84c04038bd\u2026, carries the authorization and only logs/autoinit_phase_b_authorization.json differs from the authorized base"
+      "message": "session commit 13d68a40b0e0 verified: harness digests to 686d43aa99df\u2026, carries the authorization and only logs/autoinit_phase_b_authorization.json differs from the authorized base"
     },
     {
       "check": "frozen_science_plan",
@@ -596,17 +624,22 @@
     {
       "check": "phase_b_source_gate",
       "ok": true,
-      "message": "phase-B executable 5a84c04038bd\u2026 matches the grant"
+      "message": "phase-B executable 686d43aa99df\u2026 matches the grant"
     },
     {
       "check": "preregistration_gate",
       "ok": true,
-      "message": "preregistration c78161aa15d4\u2026 binds this executable and both mixtures"
+      "message": "preregistration 3e466574eb1d\u2026 binds this executable and both mixtures"
     },
     {
       "check": "reuse_record_gate",
       "ok": true,
       "message": "8 verified probes citable; pricing ten, not twelve"
+    },
+    {
+      "check": "historical_reuse_reconstruction_gate",
+      "ok": true,
+      "message": "8 citations re-derived from retained bytes; evidence set a5115816861a\u2026 matches the record"
     },
     {
       "check": "disk_provision_gate",
@@ -649,7 +682,7 @@
       "AlphaAvatar/aadistill-transport": 6
     },
     "relay_repo_files_listed": {
-      "AlphaAvatar/aadistill-artifacts": 1164,
+      "AlphaAvatar/aadistill-artifacts": 1165,
       "AlphaAvatar/aadistill-transport": 16
     },
     "local_assets": [
@@ -659,29 +692,29 @@
     ],
     "local_missing": []
   },
-  "pod_id": "4dbqycjrivhq17",
+  "pod_id": "xgca8kkv4pm68n",
   "actual_price_per_hour": 0.99,
-  "terminate_after_utc": "2026-08-27T05:40:13Z",
+  "terminate_after_utc": "2026-08-27T10:34:40Z",
   "watchdog_journals": [
-    "/home/ecs-user/phase_b_scr/watchdog.jsonl"
+    "/home/ecs-user/phase_b_retry_scr/watchdog.jsonl"
   ],
   "image_identity": {
     "image_name": "runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404",
     "observed": [
-      "580.159.03"
+      "580.159.04"
     ],
-    "digest": "runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@580.159.03"
+    "digest": "runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@580.159.04"
   },
   "setup_environment": {
-    "BUNDLE_NAME": "aad_autoinit_218c51c7.bundle",
+    "BUNDLE_NAME": "aad_autoinit_13d68a40.bundle",
     "SESSION_ASSETS": "state_eval_v1:artifacts/stage1,recovery_search_v2:artifacts/stage3,reasoning_heavy_v2:artifacts/stage1",
     "SESSION_AUTH_PATH": "logs/autoinit_phase_b_authorization.json",
-    "SESSION_COMMIT": "218c51c75909a00d22fd3fd6975d6c47dca128eb",
+    "SESSION_COMMIT": "13d68a40b0e0df6c67de38383fd2a3b98e836bb0",
     "SESSION_KIND": "phase_b",
     "SESSION_PLAN_HASH": "23f23649b4be92bd8852bf9d89f8dcb372bc5a00a175ae631d32b9d71de8032d",
     "SESSION_RELAY_INPUTS": "[{\"also_stage_to\":null,\"dest\":\"artifacts/stage1/qwen3_0p6b_init_v0/checkpoint\",\"path\":\"stage1/qwen3_0p6b_init_v0/checkpoint/model.safetensors\",\"repo\":\"AlphaAvatar/aadistill-artifacts\",\"sha256\":\"86fbba78e8a2a32481ca77e5ac362ed1f17a39dbc30bcbc952cabd5df2633e54\"},{\"also_stage_to\":null,\"dest\":\"artifacts/stage1/qwen3_0p6b_init_v0/checkpoint\",\"path\":\"stage1/qwen3_0p6b_init_v0/checkpoint/config.json\",\"repo\":\"AlphaAvatar/aadistill-artifacts\",\"sha256\":null},{\"also_stage_to\":null,\"dest\":\"artifacts/stage1/qwen3_0p6b_init_v0/checkpoint\",\"path\":\"stage1/qwen3_0p6b_init_v0/checkpoint/generation_config.json\",\"repo\":\"AlphaAvatar/aadistill-artifacts\",\"sha256\":null},{\"also_stage_to\":null,\"dest\":\"artifacts/stage1/qwen3_0p6b_init_v0/checkpoint\",\"path\":\"stage1/qwen3_0p6b_init_v0/checkpoint/tokenizer.json\",\"repo\":\"AlphaAvatar/aadistill-artifacts\",\"sha256\":null},{\"also_stage_to\":null,\"dest\":\"artifacts/stage1/qwen3_0p6b_init_v0/checkpoint\",\"path\":\"stage1/qwen3_0p6b_init_v0/checkpoint/tokenizer_config.json\",\"repo\":\"AlphaAvatar/aadistill-artifacts\",\"sha256\":null},{\"also_stage_to\":null,\"dest\":\"artifacts/stage1/qwen3_0p6b_init_v0/checkpoint\",\"path\":\"stage1/qwen3_0p6b_init_v0/checkpoint/chat_template.jinja\",\"repo\":\"AlphaAvatar/aadistill-artifacts\",\"sha256\":null},{\"also_stage_to\":\"artifacts/stage3/ladder_uniform\",\"dest\":\"artifacts/stage3/ladder_uniform_probe\",\"path\":\"stage3_recovery_corpus_v2/ladder_uniform/blocks.npz\",\"repo\":\"AlphaAvatar/aadistill-artifacts\",\"sha256\":\"6f324cb0f37bc0f07128e554ce8c161879419537478950496534f75fcecb249c\"},{\"also_stage_to\":\"artifacts/stage3/ladder_uniform\",\"dest\":\"artifacts/stage3/ladder_uniform_probe\",\"path\":\"stage3_recovery_corpus_v2/ladder_uniform/ladder.json\",\"repo\":\"AlphaAvatar/aadistill-artifacts\",\"sha256\":null},{\"also_stage_to\":\"artifacts/stage3/ladder_uniform\",\"dest\":\"artifacts/stage3/ladder_uniform_probe\",\"path\":\"stage3_recovery_corpus_v2/ladder_uniform/audit.jsonl\",\"repo\":\"AlphaAvatar/aadistill-artifacts\",\"sha256\":null},{\"also_stage_to\":null,\"dest\":\"artifacts/stage1/e8_calibration_v1\",\"path\":\"e8_inputs_20260810/calibration_v1/items.jsonl\",\"repo\":\"AlphaAvatar/aadistill-artifacts\",\"sha256\":\"c7202338109e459b17b70456461e8f304fadea7929ea547accee21adbbe7fd0b\"},{\"also_stage_to\":null,\"dest\":\"artifacts/autoinit/phase_a_selected/cca699c93f34dad7e94a5d13a25b2bc2\",\"path\":\"phase_a_attempt12/selected_leaves/cca699c93f34dad7e94a5d13a25b2bc2/config.json\",\"repo\":\"AlphaAvatar/aadistill-transport\",\"sha256\":\"e94e4d3a9cab307a55f97991776ec22f0b2b6e2ec91c93a6ceba5639f3bf7a49\"},{\"also_stage_to\":null,\"dest\":\"artifacts/autoinit/phase_a_selected/cca699c93f34dad7e94a5d13a25b2bc2\",\"path\":\"phase_a_attempt12/selected_leaves/cca699c93f34dad7e94a5d13a25b2bc2/generation_config.json\",\"repo\":\"AlphaAvatar/aadistill-transport\",\"sha256\":\"28fb42f15159b552b9301b3f8f197c1b5ccd68c95ff0e3498d68678f61c1c633\"},{\"also_stage_to\":null,\"dest\":\"artifacts/autoinit/phase_a_selected/cca699c93f34dad7e94a5d13a25b2bc2\",\"path\":\"phase_a_attempt12/selected_leaves/cca699c93f34dad7e94a5d13a25b2bc2/model.safetensors\",\"repo\":\"AlphaAvatar/aadistill-transport\",\"sha256\":\"db056398840f5c64f767fe8690803478918399c04bd7b4a1aeae6b7549c624af\"},{\"also_stage_to\":null,\"dest\":\"artifacts/autoinit/phase_a_selected/85bde4ded2c31953f802e39cf2252c87\",\"path\":\"phase_a_attempt12/selected_leaves/85bde4ded2c31953f802e39cf2252c87/config.json\",\"repo\":\"AlphaAvatar/aadistill-transport\",\"sha256\":\"e94e4d3a9cab307a55f97991776ec22f0b2b6e2ec91c93a6ceba5639f3bf7a49\"},{\"also_stage_to\":null,\"dest\":\"artifacts/autoinit/phase_a_selected/85bde4ded2c31953f802e39cf2252c87\",\"path\":\"phase_a_attempt12/selected_leaves/85bde4ded2c31953f802e39cf2252c87/generation_config.json\",\"repo\":\"AlphaAvatar/aadistill-transport\",\"sha256\":\"28fb42f15159b552b9301b3f8f197c1b5ccd68c95ff0e3498d68678f61c1c633\"},{\"also_stage_to\":null,\"dest\":\"artifacts/autoinit/phase_a_selected/85bde4ded2c31953f802e39cf2252c87\",\"path\":\"phase_a_attempt12/selected_leaves/85bde4ded2c31953f802e39cf2252c87/model.safetensors\",\"repo\":\"AlphaAvatar/aadistill-transport\",\"sha256\":\"0a9a5a78e87cc800c1187a2c19f75c5e490734d1518fe8968d517b2077353c45\"}]",
     "SESSION_STATUS": "/workspace/autoinit_phase_b.status",
-    "SESSION_TEST_IGNORES": "--ignore=tests/data/test_recovery_corpus_pipeline.py --ignore=tests/pod/test_phase_a_stages1_5_execute.py",
+    "SESSION_TEST_IGNORES": "--ignore=tests/data/test_recovery_corpus_pipeline.py --ignore=tests/pod/test_phase_a_stages1_5_execute.py --ignore=tests/autoinit/test_phase_b_reuse_hostlocal.py",
     "TEACHER_REVISION": "768f209d9ea81521153ed38c47d515654e938aea",
     "TESTS_MAX_S": "2700",
     "UV_MAX_S": "1500"
@@ -694,12 +727,12 @@
   "provider_confirms_gone": true,
   "cost": {
     "price_per_hour": 0.99,
-    "elapsed_minutes": 8.79,
-    "actual_usd": 0.1451,
+    "elapsed_minutes": 13.9,
+    "actual_usd": 0.2293,
     "authorized_usd": 26.8049,
     "within_authorization": true
   },
   "passed": false,
   "cleanup_is_not_success": "artifacts are collected and the pod is torn down on every path; the session outcome is decided by the driver's terminal marker alone",
-  "finished_utc": "2026-08-26T05:51:11+00:00"
+  "finished_utc": "2026-08-26T11:00:46+00:00"
 }

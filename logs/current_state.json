@@ -18,14 +18,14 @@
     "bundles": 0
   },
   "budget": {
-    "cumulative_spend_usd": 230.185,
+    "cumulative_spend_usd": 230.415,
     "authorized_cap_usd": 256.99,
-    "remaining_usd": 26.805,
+    "remaining_usd": 26.575,
     "phase_b_single_session_hard_ceiling_usd": 26.8049,
     "planning_floor_usd": 13.08,
     "remaining_is_not_permission": true,
     "ledger": "logs/BUDGET_LEDGER.md",
-    "headroom_note": "Attempt 1 spent $0.1500 and aborted in the pod's setup test gate; no scientific stage ran. The cap moved $256.84 -> $256.99 to RESTORE that envelope, not to enlarge the $26.8049 session ceiling. The $0.0001 rounding margin belongs to the CUMULATIVE cap. Headroom is not permission."
+    "headroom_note": "Phase-B setup attempts 1+2 cost $0.3800 and entered NO scientific stage. Headroom $26.5750 is now BELOW the $26.8049 session ceiling, so a third attempt needs a new maintainer cap decision. Headroom is not permission."
   },
   "frozen": {
     "science_plan_hash": "02be33b9a7a8e26bc8bfb75795351e8cdc9ffd441b47066cc81887cfc511b55c",
@@ -104,9 +104,9 @@
     "the paid device-canary session path: TERMINATED 2026-08-18, evidence kept, none prepared"
   ],
   "next_starting_point": {
-    "status": "Phase-B retry PREPARED. The pod gate no longer asks a pod for dev-box bytes: the strict historical-reuse reconstruction moved to a host-local test module plus a pre-provider launcher gate. Attempt 1's pod is deleted and provider-confirmed gone.",
-    "the_ask": "Nothing. Reviewer GO is granted for the repair, the $256.99 cap and the retry; the next action is to issue the one-use grant, make the authorization-only launch commit, re-run the suite AT that commit, then launch.",
-    "budget": "cap $256.99, spent $230.1850, headroom $26.8050; session ceiling $26.8049."
+    "status": "Phase-B attempt 2 aborted at the pod's authorization-binding step for $0.2300; the TEST GATE PASSED, so the attempt-1 defect is closed. Pod deleted, provider confirms gone. Nothing is running or billing.",
+    "the_ask": "A reviewer decision on the SESSION_KIND dispatch gap: add a phase_b branch to the shared setup script (recommended), or make the Phase-B artifact loadable by SpendAuthorization, which would require asserting an expected_usd the pricing contract removed. Then a new cap decision, since headroom is below the ceiling.",
+    "budget": "cap $256.99, spent $230.4150, headroom $26.5750; session ceiling $26.8049 \u2014 headroom is BELOW it."
   },
   "read_order": [
     "logs/STATE.md \u2014 the human view of this file",
@@ -145,7 +145,7 @@
   "next_sequence": {
     "_status": "NONE of this is implemented or started, and none of it is funded",
     "1_phase_b": "calib.reasoning_heavy@v2 vs calib.domain_balanced@v1, searched JOINTLY at P=2. FROZEN; attempt 1 aborted in setup for $0.1500, no scientific stage entered. See logs/autoinit_phase_b_{preregistration,attempt1}.json",
-    "1_phase_b_blocked_on": "nothing in code; attempt-1 defects fixed. Awaiting only the launch sequence itself",
+    "1_phase_b_blocked_on": "autoinit_preflight_setup.sh has no SESSION_KIND=phase_b branch, so the pod loads a PhaseBAuthorization with SpendAuthorization.load. See logs/autoinit_phase_b_attempt2.json",
     "1_phase_b_cost": "Search P=2 $1.8950-$7.4349, 244.87 GiB working, 300 GiB provisioned. AUTHORIZATION CEILING $26.8049 (10 probes, verified reuse); $13.0800 is a FLOOR, not an expectation. The 14-probe no-reuse figure is a REJECTED counterfactual: a stage-0 comparability failure TERMINATES.",
     "2_final_selection": "complete final initialization selection after Phase B; Phase A's unresolved_equivalence is not a final selection",
     "3_canonical_stage1_nll": "the canonical Stage-1 NLL diagnostic on the finally selected initialization, under the established Stage-1 measurement contract. DIAGNOSTIC ONLY, never a promotion criterion, and NOT the state_eval@v1 search-side NLL fields. Never yet run",

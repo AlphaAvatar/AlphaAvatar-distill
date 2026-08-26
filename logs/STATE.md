@@ -1,4 +1,4 @@
-**Updated:** 2026-08-27 · branch `main` · **PHASE-B RETRY PREPARED — attempt 1 aborted at setup, $0.1500, no stage ran**
+**Updated:** 2026-08-27 · branch `main` · **PHASE-B ATTEMPT 2 ABORTED AT SETUP — $0.2300, no stage ran; a reviewer decision is required**
 
 # Current state
 
@@ -149,7 +149,25 @@ freed to 0.01 GiB, and the evaluation tokenizer materialized before every batter
    identities, the closed 8-candidate set, thresholds, seeds and reuse rules all
    verified unmoved. Cost unchanged: floor **$13.0800**, ceiling **$26.8049**.
 
-   **No material blocker remains in the code.**
+   **Attempt 2 then aborted one step past the repair**, 13.9 min, **$0.2300**, no
+   scientific stage entered; the pod is deleted and the provider confirms it. The
+   **pod test gate passed** — 2207 passed — so the attempt-1 defect is closed.
+   Setup failed at `AUTHORIZATION_MISMATCH`: `autoinit_preflight_setup.sh`
+   dispatches the authorization check on `SESSION_KIND` and has branches for
+   `phase_a`, `recovery_continuation` and a `spend` default only, so a
+   `PhaseBAuthorization` was loaded by `SpendAuthorization.load`, which reads a
+   `preflight_plan_hash` the Phase-B schema does not carry.
+
+   **This is the third collision between the Phase-B authorization type and shared
+   pod-side machinery**, and it needs a reviewer decision rather than a unilateral
+   fix: the standing instruction is to adapt the artifact rather than edit shared
+   infrastructure, but doing so here would require the artifact to assert an
+   `expected_usd` that the pricing contract deliberately removed. Both options and
+   the recommendation are in
+   [`autoinit_phase_b_attempt2.json`](autoinit_phase_b_attempt2.json).
+
+   **A third attempt is also arithmetically blocked**: `$26.5750` of headroom
+   against a `$26.8049` session ceiling.
    Detail: [`autoinit_phase_b_reconstruction.md`](autoinit_phase_b_reconstruction.md),
    [`autoinit_phase_b_preregistration.json`](autoinit_phase_b_preregistration.json).
 2. **Complete final initialization selection**, after Phase B. Phase A's
@@ -488,9 +506,9 @@ selection result.**
 ## Budget
 
 ```
-cumulative spend   $230.1850  incl. Phase-B attempt 1 at $0.1500
+cumulative spend   $230.4150  incl. Phase-B setup attempts 1+2 at $0.3800
 approved cap       $256.99    RAISED to restore the retry envelope
-remaining          $26.8050   headroom; the Phase-B session ceiling is $26.8049
+remaining          $26.5750   headroom — BELOW the $26.8049 session ceiling
 
 ```
 
