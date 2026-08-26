@@ -663,3 +663,117 @@ def test_the_secured_gate_refuses_a_FAILED_or_UNMATCHED_transfer(tmp_path):
     ok, _ = pal.selected_leaves_secured(
         ctx, [record("leaf0"), record("leaf1"), record("leaf2")])
     assert ok
+
+
+# --- the shared-machinery seam ----------------------------------------------
+#
+# The defect this covers reached the final pre-provider gate: PhaseBAuthorization
+# named three things `source_*` while the SHARED session machinery reads
+# `harness_*`, so `session_commit_gate` raised AttributeError instead of running
+# and the commit-lineage check never executed for Phase B. Property equality
+# would not have caught it -- nothing was comparing the two names. What catches
+# it is driving the real inherited path.
+
+
+def _issued(tmp_path, **over):
+    """A real, self-verifying authorization artifact, loaded back off disk."""
+    from aadistill.autoinit.phase_b import phase_b_source_digest
+
+    fields = dict(
+        authorization_id="seam-test", granted_utc="2026-08-27T00:00:00Z",
+        granted_by="test", plan_id=PHASE_B_PLAN_V1.plan_id,
+        plan_hash=PHASE_B_PLAN_V1.plan_hash, science_plan_hash="s" * 64,
+        calibration_profile_hashes={
+            DOMAIN_BALANCED_V1.qualified_id: DOMAIN_BALANCED_V1.profile_hash,
+            REASONING_HEAVY_V2.qualified_id: REASONING_HEAVY_V2.profile_hash},
+        calibration_content_hashes={
+            DOMAIN_BALANCED_V1.qualified_id: DOMAIN_BALANCED_V1.content_sha256,
+            REASONING_HEAVY_V2.qualified_id: REASONING_HEAVY_V2.content_sha256},
+        planning_floor_usd=13.08, hard_cap_usd=26.8049,
+        authorized_stages=(0, 1, 2, 3, 4, 5), stage_conditions={},
+        scope_note="seam test",
+        source_digest=phase_b_source_digest(REPO)["digest"],
+        authorized_session_commit="0" * 40)
+    fields.update(over)
+    tmp_path.mkdir(parents=True, exist_ok=True)
+    path = tmp_path / "auth.json"
+    path.write_text(json.dumps(PhaseBAuthorization(**fields).as_dict()))
+    return PhaseBAuthorization.load(path), path
+
+
+def test_require_harness_actually_RE_DERIVES_the_phase_b_digest(tmp_path):
+    """Not an alias returning a stored string: the real derivation, over the real
+    56 files, failing closed when it disagrees."""
+    from aadistill.autoinit.authorization import AuthorizationError
+    from aadistill.autoinit.phase_b import phase_b_source_digest
+
+    auth, _ = _issued(tmp_path)
+    observed = auth.require_harness(REPO)
+    assert observed["digest"] == phase_b_source_digest(REPO)["digest"]
+    assert len(observed["files"]) == 56
+    assert observed["not_yet_covered"] == []
+    # It is the Phase-B set, not Phase A's.
+    paths = {e["path"] for e in observed["files"]}
+    assert "scripts/pod/autoinit_phase_b_driver.py" in paths
+    assert "src/aadistill/autoinit/phase_b.py" in paths
+
+    stale, _ = _issued(tmp_path / "stale", source_digest="0" * 64)
+    with pytest.raises(AuthorizationError, match="Re-rehearse and re-issue"):
+        stale.require_harness(REPO)
+
+
+def test_the_shared_session_runner_line_works_against_this_type(tmp_path):
+    """`session_runner` does exactly `self.auth.require_harness(self.repo_root)`.
+    That line is what raised for Phase B."""
+    auth, _ = _issued(tmp_path)
+    harness = auth.require_harness(REPO)          # the runner's line, verbatim
+    assert harness["digest"] == auth.harness_source_digest
+    assert tuple(e["path"] for e in harness["files"]) == tuple(sorted(auth.harness_source_files))
+
+
+def test_session_commit_gate_runs_against_a_phase_b_authorization(tmp_path):
+    """The gate that never executed. It reads `harness_source_files` and
+    `harness_source_digest` off the authorization and re-derives both from git."""
+    import subprocess
+
+    from aadistill.infrastructure.session_prechecks import session_commit_gate
+
+    commit = subprocess.run(["git", "rev-parse", "HEAD"], capture_output=True,
+                            text=True, cwd=REPO).stdout.strip()
+    auth, path = _issued(tmp_path)
+    gate = session_commit_gate(REPO, str(path), check_lineage=False)
+    ctx = types.SimpleNamespace(
+        auth=auth, args=types.SimpleNamespace(session_commit=commit), evidence={})
+    ok, why = gate(ctx)                      # must not raise, whatever it decides
+    assert isinstance(ok, bool) and isinstance(why, str)
+
+    # It ran, and it consulted the ALIAS fields. Before the repair this line was
+    # never reached: the gate raised AttributeError on `harness_source_files`.
+    record = ctx.evidence["session_commit_check"]
+    assert record["authorized_harness_digest"] == auth.source_digest, (
+        "the gate did not read the authorization's digest through the alias")
+    assert len(record["harness_digest_at_commit"]) == 64, (
+        "the gate never re-derived a digest from the commit's blobs, so it did "
+        "not iterate harness_source_files")
+    assert record["harness_matches"] is (
+        record["harness_digest_at_commit"] == auth.source_digest)
+
+    # And it fails closed on a digest it was not granted against, by that name.
+    stale, stale_path = _issued(tmp_path / "stale", source_digest="0" * 64)
+    ctx2 = types.SimpleNamespace(
+        auth=stale, args=types.SimpleNamespace(session_commit=commit), evidence={})
+    ok2, why2 = session_commit_gate(REPO, str(stale_path), check_lineage=False)(ctx2)
+    assert not ok2 and "authorization was not granted against" in why2
+
+
+def test_the_canonical_schema_still_has_ONE_name_per_identity(tmp_path):
+    """`source_*` stays canonical in the JSON. Duplicating `harness_*` into the
+    artifact would create a second thing to keep in step, which is the defect
+    class the aliases exist to avoid."""
+    auth, path = _issued(tmp_path)
+    raw = json.loads(path.read_text())
+    assert "source_digest" in raw and "source_files" in raw
+    assert not any(k.startswith("harness_") for k in raw), sorted(raw)
+    # The aliases exist on the object only, and agree with the canonical fields.
+    assert auth.harness_source_digest == auth.source_digest
+    assert auth.harness_source_files == auth.source_files

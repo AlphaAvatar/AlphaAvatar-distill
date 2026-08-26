@@ -376,6 +376,41 @@ class PhaseBAuthorization:
     def automatic_followon_start(self) -> bool:
         return False
 
+    # --- compatibility with the shared session machinery ------------------
+    #
+    # `session_prechecks` and `session_runner` are shared across every session
+    # type and read `harness_source_files`, `harness_source_digest` and
+    # `require_harness()`. Phase B named the same three things `source_*` /
+    # `require_source()` when this type was written, and the mismatch was not a
+    # cosmetic one: `session_commit_gate` raised `AttributeError` instead of
+    # running, so the commit-lineage check that caught continuation attempt 5's
+    # stale binding never executed for Phase B at all.
+    #
+    # These are ALIASES, not fields. `source_*` stays the canonical serialized
+    # schema and `as_dict()` is untouched, so the authorization JSON carries one
+    # name per identity and there is nothing to keep in step. Adapting to the
+    # established shared contract is the correct direction: the runner is used by
+    # sessions that are already complete, and renaming it would move their
+    # identities to suit a newer one.
+
+    @property
+    def harness_source_files(self) -> tuple[str, ...]:
+        """What the shared machinery calls `source_files`."""
+        return self.source_files
+
+    @property
+    def harness_source_digest(self) -> str | None:
+        """What the shared machinery calls `source_digest`."""
+        return self.source_digest
+
+    def require_harness(self, repo_root: str | Path = ".") -> dict[str, Any]:
+        """The shared machinery's name for `require_source`.
+
+        Delegates rather than reimplements, so there is exactly one digest
+        derivation and one failure message.
+        """
+        return self.require_source(repo_root)
+
     def as_dict(self) -> dict[str, Any]:
         payload = {
             "schema": SCHEMA,
