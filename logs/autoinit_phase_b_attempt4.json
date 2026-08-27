@@ -1,0 +1,140 @@
+{
+  "schema": "aadistill.autoinit.phase_b_attempt/v1",
+  "attempt": 4,
+  "date": "2026-08-27",
+  "outcome": "EXECUTION_INCOMPLETE",
+  "classification": "EXECUTION_INCOMPLETE / NO_SCIENTIFIC_RESULT. Stage 0 passed and Stage 1 COMPLETED its search, measured the control and both imported finalists, and computed its ranking \u2014 then raised while building the summary record. Stages 2-5 never ran, so there is no sa/sb/sc evidence and no cross-phase selection. No calibration hypothesis was answered.",
+  "pod_id": "zjwpsurs2dyvw8",
+  "gpu": "NVIDIA L40S @ $0.99/h",
+  "image": "runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@580.159.03",
+  "elapsed_min": 495.2,
+  "spend_usd": 8.17,
+  "pod_state_after": "deleted after the teardown gate passed; provider confirms gone (launcher check True and an independent `runpodctl pod list` returns an empty table)",
+  "authorization": {
+    "id": "autoinit.phase_b.20260827T102821Z",
+    "authorization_sha256": "8fb449dee209c3b45f1ac0415b33e9b2ef6547957b24e100713b70d631a10d02",
+    "status": "CONSUMED. One-use. Never to be reused, patched or revived.",
+    "grant_document": "logs/autoinit_phase_b_grant_attempt4.json"
+  },
+  "identities_at_launch": {
+    "repair_base_commit": "b28a907c6ea8edc4ddfa362c2cec1183f5f56125",
+    "launch_commit": "27a366e8ce3f922c200269a24321eca1eb123bdd",
+    "executable_source_digest": "d232e5c75ec74089d955592dd454d6a7974857f57b2e34e8d96fe34d82f45622",
+    "executable_source_files": 58,
+    "executable_source_set_version": 4,
+    "preregistration_sha256": "1d3d8079b9064a37e1c77a89c9f3e749c61dfb6050c31be577bd1350cba3aa6c",
+    "session_plan_hash": "23f23649b4be92bd8852bf9d89f8dcb372bc5a00a175ae631d32b9d71de8032d",
+    "science_plan_hash": "02be33b9a7a8e26bc8bfb75795351e8cdc9ffd441b47066cc81887cfc511b55c",
+    "bundle": "aad_autoinit_27a366e8.bundle"
+  },
+  "pre_launch_gates": {
+    "exact_launch_commit_suite": "2392 passed, 12 skipped, 0 failed, clean tree",
+    "frozen_verifier": "passed: true, problems: []",
+    "pre_provider_gates": "all 10 passed, including the new poll_lifetime_gate",
+    "poll_lifetime": "1967.9 min against a 1925.9 min hard bound, 42.0 min slack"
+  },
+  "what_WORKED": {
+    "setup": "7.3 min, TCP 22 in 1.8 min, TESTS_OK:269s, AUTHORIZATION_OK, $0.16",
+    "stage_0": "PASSED in 2.2 min. interval 0.011695, floor 0.3000, plan 02be33b9. Executable and both mixtures rebound on the pod; 8 historical citations imported. Comparability held, so the ten-probe budget stood.",
+    "poll_lifetime_repair": "the gate reported 1967.9 min against a 1925.9 min hard bound and the run never approached either \u2014 but the inherited 1320 min would still have been wrong.",
+    "journal_retention_repair": "CONFIRMED ON HARDWARE. states.jsonl and telemetry.jsonl both came home this time, from the Phase-B path the corrected specs collect. Attempt 3 lost exactly these.",
+    "P1_partial_reference_cache": "CONFIRMED ON HARDWARE. Every one of the 12 causal-depth expansions ran in `partial` mode \u2014 e.g. 'caching 52/67 items (78%, 13.2 GiB), recomputing the rest' \u2014 where attempt 3 refused all 16.9 GiB and recomputed everything.",
+    "P2_stats_cache": "10 cache hits across 82 expansions: ten activation-statistics passes that were NOT recollected.",
+    "search_completed": "`search.run()` returned, the canonical control was measured, both retained finalists were measured inside the search, and `result.top_n(PARETO_V1, ...)` computed a ranking. All of it before the failure."
+  },
+  "measured_speedup": {
+    "attempt_3": {
+      "mode": "recomputed",
+      "invocations": 12,
+      "total_min": 388.2,
+      "mean_min": 32.3,
+      "range_min": [
+        28.5,
+        38.4
+      ]
+    },
+    "attempt_4": {
+      "mode": "partial",
+      "invocations": 12,
+      "total_min": 287.3,
+      "mean_min": 23.9,
+      "range_min": [
+        20.5,
+        31.4
+      ]
+    },
+    "delta": "101 min less for identical work, a 26% reduction. Modelled saving was 41.8% of causal-depth FORWARD work, diluted here by the non-forward share of an expansion \u2014 consistent, and measured rather than assumed."
+  },
+  "why_it_failed": {
+    "error": "AttributeError: 'Qwen3Config' object has no attribute 'run_id'",
+    "where": "scripts/autoinit/phase_a_search.py:319, building the summary record",
+    "root_cause": "`config` holds the SearchConfig for the whole function, and the `for entry in retained_candidates:` loop rebinds it with `config = AutoConfig.from_pretrained(str(directory))`. The summary then reads `config.run_id` off a Qwen3Config. A local-name collision.",
+    "why_it_never_appeared_before": "that loop body only executes when `retained_candidates` is non-empty, which is PHASE B ONLY. Phase A passes none, so `config` was never rebound and every Phase-A run and every zero-cost test passed straight over it.",
+    "when_it_fired": "AFTER the search, the control measurement, the imported finalist measurements and the ranking. The scientific work of Stage 1 was complete; only its report was not written.",
+    "class": "a $0-detectable defect on a path only Phase B reaches. The same shape as the SESSION_KIND gap and the artifact-spec path: Phase-B-only code that no Phase-A run and no test ever executed."
+  },
+  "stage_1_evidence_recovered": {
+    "journal": "155 records over 82 distinct states: 29 measured-and-retained, 53 pruned, all with measurements. The complete search.",
+    "complete_leaves": 9,
+    "leaf_composition": "5 searched decomposed leaves, 2 composite leaves (one per mixture) and the 2 imported Phase-A finalists, which were measured inside the search as the design requires.",
+    "top_5_status": "NOT REPORTED HERE. The run computed a ranking and then died before writing it, so no Top-5 artifact exists. The ranking is deterministically reconstructible from the journal under the frozen PARETO_V1, but reconstructing it post hoc and then treating it as the session's result is precisely the move this project's own rules forbid. Whether a retry may CITE this search rather than re-running it is a reviewer decision, not mine."
+  },
+  "telemetry_first_measurement": {
+    "_note": "The instrumentation added in this pass, reporting on its first real run. Recorded, NOT acted on: pricing research is closed.",
+    "stage_1_minutes": 478.5,
+    "accounted_minutes": 472.3,
+    "coverage": "98.7%",
+    "breakdown": {
+      "operator_seconds": "320.2 min, 67.8%",
+      "state_evaluation_seconds": "147.2 min, 31.2%",
+      "identify_seconds": "2.4 min, 0.5%",
+      "materialize_seconds": "1.0 min, 0.2%",
+      "parent_load_seconds": "1.0 min, 0.2%",
+      "validation_seconds": "0.2 min",
+      "canonical_reload_seconds": "0.2 min"
+    },
+    "finding": "STATE EVALUATION is 31.2% of Stage 1 \u2014 147.2 min over 82 expansions, about 1.8 min each. The cost model prices it as pure FLOPs at roughly 0.04-0.08 min per child, so it is underpriced by more than an order of magnitude. Meanwhile the materialization overhead component I added (save+hash+reload+validate) is OVERpriced: 4.8 min actual against roughly 1 min charged per root child. The hard bound remains conservative overall, but its composition is wrong in two directions and the next pricing pass should start here.",
+    "caveat": "this is one run at one beam position; 82 expansions is a sample, not a law."
+  },
+  "budget": {
+    "spend_before_usd": 239.915,
+    "this_attempt_usd": 8.17,
+    "spend_after_usd": 248.085,
+    "cumulative_cap_usd": 275.59,
+    "headroom_after_usd": 27.505,
+    "session_ceiling_usd": 35.666,
+    "blocking_arithmetic": "headroom $27.5050 is BELOW the $35.6660 session ceiling, so a fifth attempt is arithmetically blocked without a new maintainer cap decision. Phase-B attempts have now cost $18.0500 and produced no scientific result."
+  },
+  "preregistration_deviations": "None. Every binding the run reached matched: executable digest, both plan hashes, both calibration spec and content identities, the 8 imported citations, the closed candidate set and the Stage-0 fail-closed condition. The run ended inside Stage 1.",
+  "not_changed": [
+    "the P=2 search science, beam, schedule and ranking policy",
+    "the closed 8-candidate cross-phase set and its three exclusions",
+    "both calibration identities, spec and materialized content",
+    "the frozen science plan, feasibility floor, equivalence interval and sa/sb/sc",
+    "the permanent Stage-3 controls, untouched",
+    "the corrected pricing model, P1 and P2 semantics",
+    "the $16.4555 planning floor and the $35.6660 session ceiling"
+  ],
+  "retained_artifacts": {
+    "out_of_tree": {
+      "_path": "/home/ecs-user/aad-artifacts/autoinit/phase_b/attempt4/",
+      "_why": "53 MB; too large for the repository, per the checkpoint policy",
+      "states.jsonl": "10b5e6f2c8cc952a0e491d40f4c31ea0c554c531b3ce4d5bc7400020215c1897",
+      "telemetry.jsonl": "c4fbfdfd36c0606c5f916b6a03d19afb5450586cf1a4812bd21e94519de6461a"
+    },
+    "in_repo": {
+      "_path": "logs/autoinit_phase_b_attempt4/",
+      "phase_a_evidence.json": "26af2f4426afe3cd85c9c9f1ec5a57aa06ed4e14f899d6d1934f45472c4e03d9",
+      "phase_b_stage0_binding.json": "a249f7cfcd2f0bea689011867fe419a454861835aef2ae93fe974b9a0a1cf325",
+      "attested_evaluation_protocol.json": "aeb3d8ae5597b9ef533997217868293614bea7aeaaa320978c9a8c9014468657",
+      "stage1_traceback.log": "6a8d4b43a3f9d157a92fae685ed7af1cbee9c2ab74bf61d32ad62707a24ae16c",
+      "engine_probe.json": "49593edb8bdf3047ee4feccd4bb59d0f954124b9ca3c894460b6be0dece8d431",
+      "frozen_assets.log": "10dc46971aab8170717c12e831e3ec62776fadcf5b92d0ac0910726d182b31fd",
+      "session_markers.status": "56b5f449d0691d4b44901ea0b976f28a60db7a969eb871c249079e5399c02a77",
+      "search_telemetry.jsonl": "c4fbfdfd36c0606c5f916b6a03d19afb5450586cf1a4812bd21e94519de6461a",
+      "driver_run.log": "f4a6b2f5cccf06f60286271e905c2e6561431a578f34ed6551bc8a46128896a0"
+    },
+    "no_checkpoints_retained": "stage 1 never reached the retention step, so no Phase-B Top-5 bytes were transferred. The dev-box store is unchanged apart from the journal above."
+  },
+  "the_fix_not_applied": "renaming the loop-local `config` in `scripts/autoinit/phase_a_search.py` is a one-line change, but it is a NEW material blocker and the standing instruction is to stop and report. It also needs a test that executes the retained-candidates path, which is the thing no test has ever executed."
+}

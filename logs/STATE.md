@@ -1,4 +1,4 @@
-**Updated:** 2026-08-27 · branch `main` · **ATTEMPT 4 APPROVED AND PREPARING — ceiling $35.6660, cap $275.59**
+**Updated:** 2026-08-28 · branch `main` · **ATTEMPT 4: the search COMPLETED, the summary raised — $8.17, no scientific result**
 
 # Current state
 
@@ -208,6 +208,38 @@ freed to 0.01 GiB, and the evaluation tokenizer materialized before every batter
 
    **Approved 2026-08-27**: session hard ceiling **$35.6660**, cumulative cap
    **$275.59**. The corrected pricing model, P1 and P2 are frozen.
+
+   **ATTEMPT 4 RAN AND GOT FURTHER THAN ANY BEFORE IT.** Pod `zjwpsurs2dyvw8`,
+   495.2 min, **$8.17**. Stage 0 passed in 2.2 min. **Stage 1 completed its
+   search**, measured the canonical control and both imported finalists, and
+   computed its ranking — then raised `AttributeError: 'Qwen3Config' object has no
+   attribute 'run_id'` while building the summary record. Stages 2–5 never ran, so
+   the outcome is again **`EXECUTION_INCOMPLETE / NO_SCIENTIFIC_RESULT`**. Pod
+   deleted, provider-confirmed.
+
+   **The defect is one line and Phase-B-only.** `scripts/autoinit/phase_a_search.py`
+   holds the `SearchConfig` in a local named `config`, and the
+   `for entry in retained_candidates:` loop rebinds it with
+   `AutoConfig.from_pretrained(...)`. That loop body executes **only when retained
+   candidates are passed, which is Phase B alone**, so no Phase-A run and no test
+   ever reached it. Not fixed: it is a new material blocker and the standing
+   instruction is to stop and report.
+
+   **Both repairs from the previous pass are confirmed on hardware.** The search
+   journal came home — 53 MB, retained out-of-tree — where attempt 3 lost it. P1
+   ran in `partial` mode throughout (*"caching 52/67 items (78%, 13.2 GiB)"*), and
+   the same 12 causal-depth expansions cost **287.3 min against attempt 3's
+   388.2 — a 26% reduction**, measured rather than modelled.
+
+   **The telemetry's first real reading accounts for 98.7% of Stage 1** and names
+   the next bottleneck: **state evaluation is 31.2%** (147.2 min over 82
+   expansions) against a cost model that prices it at seconds per child, while the
+   materialization overhead I added is *over*priced at 4.8 min actual. Recorded,
+   not acted on — pricing research is closed.
+
+   **A fifth attempt is arithmetically blocked**: `$27.5050` of headroom against a
+   `$35.6660` ceiling. Detail:
+   [`autoinit_phase_b_attempt4.json`](autoinit_phase_b_attempt4.json).
 
    **One further repair closed before attempt 4.** Phase B inherited Phase A's
    `--poll-limit-min 1320` — 22 h — against a corrected envelope that terminates
@@ -578,9 +610,9 @@ selection result.**
 ## Budget
 
 ```
-cumulative spend   $239.9150  incl. Phase-B attempts 1-3 at $9.8800
+cumulative spend   $248.0850  incl. Phase-B attempts 1-4 at $18.0500
 approved cap       $275.59    APPROVED against the corrected pricing model
-remaining          $35.6750   headroom; the attempt-4 session ceiling is $35.6660
+remaining          $27.5050   headroom — BELOW the $35.6660 session ceiling
 
 ```
 

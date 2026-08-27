@@ -1156,6 +1156,34 @@ the Phase-B scientific result.
 Grant document: `autoinit_phase_b_grant_attempt4.json`. Attempt 4 is authorized
 only after the poll-lifetime repair and every existing gate passes.
 
+## 2026-08-28 — Phase-B attempt 4: $8.1700, search completed, summary raised
+
+```
+cumulative spend before                                      $239.9150
+Phase-B attempt 4 (pod zjwpsurs2dyvw8, 495.2 min, L40S)      $  8.1700
+cumulative spend after                                       $248.0850
+authorized cumulative cap                                    $275.5900
+remaining headroom                                           $ 27.5050
+Phase-B session hard ceiling                                 $ 35.6660
+```
+
+Stage 0 passed; **Stage 1 completed its search**, measured the control and both
+imported finalists and computed its ranking, then raised
+`AttributeError: 'Qwen3Config' object has no attribute 'run_id'` while building
+the summary — a local-name collision on a path only Phase B reaches. Stages 2-5
+never ran: `EXECUTION_INCOMPLETE / NO_SCIENTIFIC_RESULT`. Pod deleted and
+provider-confirmed. The authorization `autoinit.phase_b.20260827T102821Z` is
+**consumed**.
+
+**Two repairs confirmed on hardware.** The search journal came home this time
+(53 MB, retained out-of-tree), and P1 ran in `partial` mode throughout: the same
+12 causal-depth expansions cost **287.3 min against attempt 3's 388.2**, a 26%
+reduction.
+
+**Headroom `$27.5050` is below the `$35.6660` session ceiling**, so a fifth
+attempt is arithmetically blocked without a new maintainer cap decision.
+Phase-B attempts have now cost **$18.0500** with no scientific result.
+
 ## Standing rules
 
 * Plan from **actual spend**, never from unused room under a previous authorization.

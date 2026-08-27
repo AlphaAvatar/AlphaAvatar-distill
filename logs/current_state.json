@@ -18,14 +18,14 @@
     "bundles": 0
   },
   "budget": {
-    "cumulative_spend_usd": 239.915,
+    "cumulative_spend_usd": 248.085,
     "authorized_cap_usd": 275.59,
-    "remaining_usd": 35.675,
+    "remaining_usd": 27.505,
     "phase_b_single_session_hard_ceiling_usd": 35.666,
     "planning_floor_usd": 16.4555,
     "remaining_is_not_permission": true,
     "ledger": "logs/BUDGET_LEDGER.md",
-    "headroom_note": "Ceiling $35.6660 and cap $275.59 approved 2026-08-27 against the corrected pricing model. $239.9150 + $35.6660 = $275.5810; the $0.0090 margin is ordinary rounding. Attempts 1-3 cost $9.8800 and produced no Phase-B scientific result. Headroom is not permission."
+    "headroom_note": "Phase-B attempts 1-4 cost $18.0500 and produced no scientific result. Headroom $27.5050 is BELOW the $35.6660 session ceiling, so a fifth attempt needs a new maintainer cap decision. Headroom is not permission."
   },
   "frozen": {
     "science_plan_hash": "02be33b9a7a8e26bc8bfb75795351e8cdc9ffd441b47066cc81887cfc511b55c",
@@ -104,9 +104,9 @@
     "the paid device-canary session path: TERMINATED 2026-08-18, evidence kept, none prepared"
   ],
   "next_starting_point": {
-    "status": "Attempt 4 APPROVED. The poll-lifetime repair is in: the Phase-B polling default is derived from the priced plan (1967.87 min against a 1925.87 min hard bound) instead of inheriting Phase A's 1320. Nothing is running.",
-    "the_ask": "Nothing. The launch sequence is the remaining work: issue the one-use grant, make the authorization-only launch commit, re-verify at that exact commit, then launch.",
-    "budget": "cap $275.59, spent $239.9150, headroom $35.6750; session ceiling $35.6660."
+    "status": "Attempt 4: Stage 0 passed, Stage 1 COMPLETED its search and then raised on a local-name collision while writing the summary (phase_a_search.py:319, config rebound by AutoConfig in the retained-candidates loop \u2014 a Phase-B-only path). EXECUTION_INCOMPLETE / NO_SCIENTIFIC_RESULT. Pod deleted and confirmed gone; nothing running.",
+    "the_ask": "A reviewer decision on the one-line fix plus a test that executes the retained-candidates path, and a maintainer cap decision, since headroom is now below the session ceiling. Also open: whether a retry may CITE attempt 4's completed search (its journal is retained) rather than re-running eight hours of it.",
+    "budget": "cap $275.59, spent $248.0850, headroom $27.5050; session ceiling $35.6660 \u2014 headroom is BELOW it."
   },
   "read_order": [
     "logs/STATE.md \u2014 the human view of this file",
@@ -144,8 +144,8 @@
   },
   "next_sequence": {
     "_status": "NONE of this is implemented or started, and none of it is funded",
-    "1_phase_b": "RAN 2026-08-26/27: EXECUTION_INCOMPLETE / NO_SCIENTIFIC_RESULT \u2014 Stage 0 passed, Stage 1 hit the search deadline. NOT a scientific null. See logs/autoinit_phase_b_attempt3.json",
-    "1_phase_b_blocked_on": "nothing; attempt 4 is approved and preparing",
+    "1_phase_b": "attempt 4 ran 2026-08-27: Stage 0 passed, Stage 1's search COMPLETED, summary raised. EXECUTION_INCOMPLETE / NO_SCIENTIFIC_RESULT. See logs/autoinit_phase_b_attempt4.json",
+    "1_phase_b_blocked_on": "a one-line fix in phase_a_search.py (loop-local `config` shadows the SearchConfig) with a test on the Phase-B-only retained-candidates path, plus a cap decision",
     "1_phase_b_cost": "P=2 search planning $5.2705-$9.5066, HARD $16.2960 (16.461 h); Stage-1 deadline 987.6348 min; poll lifetime 1967.87 min; floor $16.4555, APPROVED ceiling $35.6660",
     "2_final_selection": "complete final initialization selection after Phase B; Phase A's unresolved_equivalence is not a final selection",
     "3_canonical_stage1_nll": "the canonical Stage-1 NLL diagnostic on the finally selected initialization, under the established Stage-1 measurement contract. DIAGNOSTIC ONLY, never a promotion criterion, and NOT the state_eval@v1 search-side NLL fields. Never yet run",
