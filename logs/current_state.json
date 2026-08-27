@@ -104,8 +104,8 @@
     "the paid device-canary session path: TERMINATED 2026-08-18, evidence kept, none prepared"
   ],
   "next_starting_point": {
-    "status": "Attempt 4: Stage 0 passed, Stage 1 COMPLETED its search and then raised on a local-name collision while writing the summary (phase_a_search.py:319, config rebound by AutoConfig in the retained-candidates loop \u2014 a Phase-B-only path). EXECUTION_INCOMPLETE / NO_SCIENTIFIC_RESULT. Pod deleted and confirmed gone; nothing running.",
-    "the_ask": "A reviewer decision on the one-line fix plus a test that executes the retained-candidates path, and a maintainer cap decision, since headroom is now below the session ceiling. Also open: whether a retry may CITE attempt 4's completed search (its journal is retained) rather than re-running eight hours of it.",
+    "status": "Attempt-4 repairs done at $0: the retained-candidate variable shadowing is fixed, a whole-function P=2 Stage-1 integration test now executes the Phase-B-only path on CPU, and a completed search is committed to an atomic hash-bound stage1_selection.json before any later bookkeeping can fail. Nothing running; no pod, grant or authorization.",
+    "the_ask": "A maintainer cap decision. $248.0850 + $35.6660 = $283.7510; the reviewer recommends $283.76. Attempt 5 needs that plus a fresh one-use grant.",
     "budget": "cap $275.59, spent $248.0850, headroom $27.5050; session ceiling $35.6660 \u2014 headroom is BELOW it."
   },
   "read_order": [
@@ -145,13 +145,13 @@
   "next_sequence": {
     "_status": "NONE of this is implemented or started, and none of it is funded",
     "1_phase_b": "attempt 4 ran 2026-08-27: Stage 0 passed, Stage 1's search COMPLETED, summary raised. EXECUTION_INCOMPLETE / NO_SCIENTIFIC_RESULT. See logs/autoinit_phase_b_attempt4.json",
-    "1_phase_b_blocked_on": "a one-line fix in phase_a_search.py (loop-local `config` shadows the SearchConfig) with a test on the Phase-B-only retained-candidates path, plus a cap decision",
+    "1_phase_b_blocked_on": "a cumulative cap decision only; the attempt-4 defect is fixed, covered by a whole-function integration test, and a completed Stage-1 is now durable",
     "1_phase_b_cost": "P=2 search planning $5.2705-$9.5066, HARD $16.2960 (16.461 h); Stage-1 deadline 987.6348 min; poll lifetime 1967.87 min; floor $16.4555, APPROVED ceiling $35.6660",
     "2_final_selection": "complete final initialization selection after Phase B; Phase A's unresolved_equivalence is not a final selection",
     "3_canonical_stage1_nll": "the canonical Stage-1 NLL diagnostic on the finally selected initialization, under the established Stage-1 measurement contract. DIAGNOSTIC ONLY, never a promotion criterion, and NOT the state_eval@v1 search-side NLL fields. Never yet run",
     "4_formal_recovery": "only then, the project's formal Stage 2/Stage 3 recovery training",
     "funding": "$26.8050 of headroom is approved for ONE Phase-B retry bounded by the $26.8049 session ceiling. Nothing else in this list is funded.",
-    "1_phase_b_implementation": "COMPLETE, repaired five times; latest is the journal/telemetry/repricing pass. Executable source 58 files, set version 4"
+    "1_phase_b_implementation": "COMPLETE, repaired six times; latest closes the retained-candidate shadowing and adds the Stage-1 durability boundary. Executable source 59 files, set version 5"
   },
   "canonical_infrastructure_moved_to": "docs/SESSION_ARCHITECTURE.md and logs/decisions.md"
 }

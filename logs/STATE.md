@@ -246,8 +246,19 @@ freed to 0.01 GiB, and the evaluation tokenizer materialized before every batter
    materialization overhead I added is *over*priced at 4.8 min actual. Recorded,
    not acted on — pricing research is closed.
 
+   **Repaired at `$0` on 2026-08-28.** The shadowing is fixed by lifecycle naming
+   (`search_config` / `control_model_config` / `retained_model_config`); a
+   whole-function CPU test now executes the Phase-B-only Stage-1 path — P=2, two
+   real mixtures, two real retained candidates — and reverting the fix inside it
+   reproduces attempt 4's failure exactly; and a completed search is committed to
+   an atomic hash-bound `stage1_selection.json` **before** the control, the
+   retained candidates or the summary, with the failed-run collector required to
+   secure those five checkpoints when it exists. Executable source
+   **`3ad6a6e3edf1…`** (59 files, set version 5), preregistration
+   **`53f1347f6865…`**; pricing verified unmoved.
+
    **A fifth attempt is arithmetically blocked**: `$27.5050` of headroom against a
-   `$35.6660` ceiling. Detail:
+   `$35.6660` ceiling. `$248.0850 + $35.6660 = $283.7510`. Detail:
    [`autoinit_phase_b_attempt4.json`](autoinit_phase_b_attempt4.json).
 
    **One further repair closed before attempt 4.** Phase B inherited Phase A's
