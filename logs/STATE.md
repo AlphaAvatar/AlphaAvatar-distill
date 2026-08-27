@@ -190,11 +190,21 @@ freed to 0.01 GiB, and the evaluation tokenizer materialized before every batter
    beside the journal and never into state identity.
 
    **The cost model is re-derived and the ceiling has moved.** Search planning
-   range **$1.8950–$8.0213**; search hard bound **16.573 h**; Stage-1 deadline
-   **994.3950 min**; session floor **$13.0800** unchanged; **session hard ceiling
-   $35.7775**, implying a cumulative cap of **$275.6925** at the current spend.
-   `children_max × mean` is gone as the ceiling — an average cannot bound a beam
-   that retains expensive parents.
+   range **$5.2705–$9.5066**; search hard bound **16.461 h**; Stage-1 deadline
+   **987.6348 min**; session floor **$16.4555** (was `$13.0800`); **session hard
+   ceiling $35.6660**, implying a cumulative cap of **$275.5810** at the current
+   spend. `children_max × mean` is gone as the ceiling — an average cannot bound a
+   beam that retains expensive parents.
+
+   **A second pricing pass closed three accounting gaps**, two of which were
+   cancelling: `composite.stage1_sandwich_v0` reached the branching counts and was
+   priced at zero; FFN/WIDTH statistics were charged per operator rather than once
+   per `(parent, profile)` as `StatsCache` actually shares them; and the non-FLOP
+   path — save, hash, canonical reload, validate — was covered by a TFLOP/s anchor
+   measured on forward compute. The root is priced as unable to share, because
+   `_stats_key` returns `None` without an artifact digest: **six** collections at
+   level 0 against two per level-1 parent. The bound moved only 994.4 → 987.6 min,
+   which is why a check on the total alone would have passed against both defects.
 
    **This is a fail-closed blocker for attempt 4**, not a resolved item: the
    frozen `$26.8049` was deliberately left unchanged, so `plan_session` now

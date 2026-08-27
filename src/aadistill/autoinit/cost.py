@@ -135,6 +135,61 @@ def activation_stats_bytes(spec: ArchSpec) -> int:
     return moments + ffn + spec["vocab_size"] * 8
 
 
+def consumes_activation_stats(impl: OperatorImplementation) -> bool:
+    """Does this implementation take an activation-statistics pass?
+
+    The one question that decides whether a parent's collection is shared with
+    it. `CalibrationNeed.FORWARD_LOGITS` consumes calibration but collects no
+    statistics — `depth.causal_kl_greedy_v1` runs its own forwards — so it must
+    not be counted as a consumer of the shared pass.
+    """
+    from .operators.base import CalibrationNeed
+
+    return getattr(impl, "calibration", None) is CalibrationNeed.ACTIVATION_STATS
+
+
+# --- non-FLOP per-child overhead --------------------------------------------
+
+#: Sustained bytes/second for the materialization path as a whole: writing the
+#: shards, reading them back to hash, and reading them again for the canonical
+#: reload. Deliberately pessimistic for container storage — a hard bound may not
+#: assume a fast disk — and deliberately ONE number rather than three, because
+#: the three are not separately measured and inventing a split would dress a
+#: guess as a model.
+CHECKPOINT_IO_BYTES_PER_SECOND = 400e6
+
+#: Per child, independent of size: process/Python overhead, config and tokenizer
+#: writes, `identify_checkpoint` bookkeeping, the round-trip validation forward
+#: and its comparison, and the journal append.
+PER_CHILD_FIXED_SECONDS = 10.0
+
+#: How many times the checkpoint's bytes cross storage per child: written once by
+#: `adapter.save`, read once by `identify_checkpoint` to hash, read once by the
+#: canonical reload. The search contract requires all three and none may be
+#: skipped, so the factor is structural rather than tunable.
+CHECKPOINT_IO_PASSES = 3
+
+
+def materialization_overhead_seconds(child_bytes: float) -> float:
+    """save -> hash/identify -> canonical reload -> validate, for one child.
+
+    **None of this is FLOPs, and the hardware anchor does not cover it.**
+    `L40S_MEASURED.effective_tflops` was measured from 260 subset evaluations —
+    pure forward compute — so using it to price checkpoint I/O, hashing, Python
+    bookkeeping and a round-trip validation would be reading a number off an
+    instrument that was never pointed at them.
+
+    Attempt 3 makes the size of the gap concrete: 544.7 min of Stage 1, 388.2 min
+    of measured causal DEPTH, and 156.5 min of everything else that the FLOP model
+    accounted for only as a few seconds of state evaluation per child.
+
+    Conservative by construction, and cheap: it is one multiply and an add per
+    child, on a term the search performs for every state it produces.
+    """
+    return (CHECKPOINT_IO_PASSES * float(child_bytes) / CHECKPOINT_IO_BYTES_PER_SECOND
+            + PER_CHILD_FIXED_SECONDS)
+
+
 # --- per-operator cost ------------------------------------------------------
 
 
@@ -230,7 +285,8 @@ def operator_cost(impl: OperatorImplementation, parent_spec: ArchSpec,
                   calibration_tokens: int, seq_len: int,
                   hardware: HardwareProfile,
                   depth_reference_mode: str = "cached",
-                  depth_cached_fraction: float = 0.0) -> OperatorCost:
+                  depth_cached_fraction: float = 0.0,
+                  include_stats: bool = True) -> OperatorCost:
     plan = impl.plan(parent_spec, target_spec, adapter,
                      {"n_calibration_items": 1})
     child_spec = plan.result_spec
@@ -249,11 +305,18 @@ def operator_cost(impl: OperatorImplementation, parent_spec: ArchSpec,
     elif plan.stats_passes:
         # One forward with hooks, then a float64 eigendecomposition or top-k.
         flops = calibration_tokens * forward_flops_per_token(parent_spec, seq_len)
-        stats_low = hardware.seconds_for(flops)
-        stats_high = calibration_tokens * CPU_STATS_SECONDS_PER_TOKEN
+        if include_stats:
+            stats_low = hardware.seconds_for(flops)
+            stats_high = calibration_tokens * CPU_STATS_SECONDS_PER_TOKEN
+            notes = (f"{plan.notes}; statistics pass priced as a range: "
+                     "GPU-forward-only lower bound vs the measured CPU end-to-end rate")
+        else:
+            # The pass is charged ONCE for this (parent, profile) by the caller,
+            # because `StatsCache` shares it across every stats-consuming operator
+            # at that parent. Charging it here as well would bill the same
+            # collection to composite AND ffn AND width.
+            notes = f"{plan.notes}; statistics pass charged once per (parent, profile)"
         flops = 0.0  # accounted inside the stats bounds instead of twice
-        notes = (f"{plan.notes}; statistics pass priced as a range: GPU-forward-only "
-                 f"lower bound vs the measured CPU end-to-end rate")
 
     child_bytes = checkpoint_bytes(child_spec, adapter)
     parent_bytes = checkpoint_bytes(parent_spec, adapter)
@@ -429,63 +492,129 @@ def branching_estimate(root_spec: ArchSpec, target_spec: ArchSpec,
 # --- the conservative hard bound --------------------------------------------
 
 
+@dataclass(frozen=True)
+class Expansion:
+    """One (parent geometry, implementation) the search will perform at a level.
+
+    `multiplicity` is how many times it actually runs — once per profile it
+    consumes, once total otherwise — so `depth.positional_v0` and
+    `attention.weight_proxy_v0` stay single at P=2.
+
+    `operator_seconds_*` EXCLUDE the activation-statistics pass. Statistics are
+    charged separately, per (parent, profile), because that is what the runtime
+    cache does; folding them in here would bill one collection to composite AND
+    ffn AND width.
+    """
+
+    level: int
+    parent_spec_hash: str
+    impl_id: str
+    multiplicity: int
+    consumes_stats: bool
+    operator_seconds_low: float
+    operator_seconds_high: float
+    eval_seconds: float
+    overhead_seconds: float
+    child_bytes: int
+    peak_resident_bytes: int
+
+    def child_seconds_low(self) -> float:
+        return self.operator_seconds_low + self.eval_seconds + self.overhead_seconds
+
+    def child_seconds_high(self) -> float:
+        return self.operator_seconds_high + self.eval_seconds + self.overhead_seconds
+
+
+def stats_collections(level: int, expansions: Sequence[Expansion],
+                      n_profiles: int) -> int:
+    """How many activation-statistics passes ONE parent actually pays for.
+
+    This must match `StatsCache`, not idealize it. The cache key is
+    `(parent artifact digest, profile hash, stats spec, adapter, numerics)` and
+    the search holds one entry per active profile, so a parent with any number of
+    stats-consuming operators pays `n_profiles` collections — one shared pass per
+    mixture, reused by `composite`, `ffn` and `width` alike.
+
+    **Except at the root, where the runtime cannot share.** `BeamSearch._stats_key`
+    returns `None` when `parent.artifact_digest is None`, and the root's identity
+    is a published revision rather than an artifact the search computed, so every
+    stats-consuming expansion of the root collects its own. Pricing the root as
+    though it shared would understate the widest level in the search by exactly
+    the operators that make it wide.
+    """
+    consumers = [e for e in expansions if e.consumes_stats]
+    if not consumers:
+        return 0
+    if level == 0:
+        return sum(e.multiplicity for e in consumers)
+    return n_profiles
+
+
+def _parent_seconds(level: int, expansions: Sequence[Expansion], n_profiles: int,
+                    stats_low: float, stats_high: float) -> tuple[float, float]:
+    """One parent's whole expansion set, statistics charged once per profile."""
+    collections = stats_collections(level, expansions, n_profiles)
+    low = sum(e.multiplicity * e.child_seconds_low() for e in expansions)
+    high = sum(e.multiplicity * e.child_seconds_high() for e in expansions)
+    return low + collections * stats_low, high + collections * stats_high
+
+
 def conservative_hard_seconds(
-        level_costs: Mapping[int, Sequence["OperatorCost"]],
+        by_level: Mapping[int, Mapping[str, list[Expansion]]],
+        stats_cost: Mapping[str, tuple[float, float]],
         branching: Mapping[str, Any],
-        multiplicity: Mapping[str, int]) -> tuple[float, list[dict[str, Any]]]:
+        n_profiles: int) -> tuple[float, list[dict[str, Any]]]:
     """A hard bound a beam of expensive parents cannot exceed.
 
     The bound this replaces was ``children_max x mean_node_seconds_high``, and an
     average is not a bound. Node cost at one level varies by more than 2x with the
     parent's geometry — a causal-depth search against the full-width teacher
-    against the same search on an already-narrowed parent — so a beam that happens
-    to retain the expensive parents costs more than ``children_max`` averages, and
-    an authorization ceiling derived from it can be spent before the level ends.
+    against the same search on an already-narrowed parent — and some operators
+    cost nothing at all, so a beam that happens to retain the expensive parents
+    costs more than ``children_max`` averages.
 
-    The construction here is structural rather than statistical:
+    The construction is structural rather than statistical:
 
-    1. group the level's enumerated nodes by **parent geometry**;
-    2. for each parent, sum its own expansions, each counted once per profile it
-       actually consumes — so `depth.positional_v0` and `attention.weight_proxy_v0`
-       are counted **once**, not once per profile;
+    1. group the level's expansions by **parent geometry**;
+    2. cost each parent over its own expansions, each counted once per profile it
+       consumes, plus the statistics passes that parent actually pays for under
+       the runtime's sharing rule;
     3. the beam holds up to ``parents_max`` states, so take the ``parents_max``
-       most expensive parents. If the level has fewer distinct geometries than the
-       beam can hold, pad with the most expensive one rather than assuming the
+       most expensive parents. If the level has fewer distinct geometries than
+       the beam can hold, pad with the most expensive rather than assuming the
        beam is under-filled.
-
-    That is the worst *admissible* beam, not the worst arithmetic, and it uses the
-    actual branching and the actual parent specs.
     """
     total = 0.0
     per_level: list[dict[str, Any]] = []
     for entry in branching["per_level"]:
         level = entry["level"]
-        costs = list(level_costs.get(level, []))
-        if not costs:
+        parents = by_level.get(level)
+        if not parents:
             continue
-        by_parent: dict[str, dict[str, float]] = {}
-        for cost in costs:
-            # One entry per (parent geometry, implementation): the same pair
-            # recurs across enumerated paths and must not be counted twice.
-            by_parent.setdefault(cost.parent_spec_hash, {})[cost.impl_id] = \
-                cost.seconds_high()
-        parent_totals = sorted(
-            (sum(sec * multiplicity.get(impl_id, 1) for impl_id, sec in impls.items())
-             for impls in by_parent.values()),
-            reverse=True)
+        totals = []
+        for parent_hash, expansions in parents.items():
+            lo, hi = stats_cost.get(parent_hash, (0.0, 0.0))
+            totals.append(_parent_seconds(level, expansions, n_profiles, lo, hi)[1])
+        totals.sort(reverse=True)
         k = int(entry["parents_max"])
-        chosen = parent_totals[:k]
+        chosen = totals[:k]
         if len(chosen) < k:                       # beam wider than the geometry
-            chosen += [parent_totals[0]] * (k - len(chosen))
+            chosen += [totals[0]] * (k - len(chosen))
         level_seconds = sum(chosen)
         total += level_seconds
         per_level.append({
             "level": level,
             "parents_max": k,
-            "distinct_parent_geometries": len(parent_totals),
-            "most_expensive_parent_seconds": parent_totals[0],
-            "least_expensive_parent_seconds": parent_totals[-1],
-            "padded_with_the_maximum": len(parent_totals) < k,
+            "distinct_parent_geometries": len(totals),
+            "most_expensive_parent_seconds": totals[0],
+            "least_expensive_parent_seconds": totals[-1],
+            # Reported so the bound can be checked against the thing it replaces
+            # WITHIN the same priced world. Comparing `seconds_hard` against an
+            # average taken from the `high` world compares two different models
+            # and cannot detect a hard bound that quietly went back to a mean.
+            "mean_parent_seconds": sum(totals) / len(totals),
+            "chosen_mean_seconds": level_seconds / k if k else 0.0,
+            "padded_with_the_maximum": len(totals) < k,
             "level_seconds": level_seconds,
         })
     return total, per_level
@@ -546,13 +675,22 @@ def price_search(root_spec: ArchSpec, target_spec: ArchSpec,
                  composite: Sequence[OperatorImplementation] = (),
                  depth_cached_fraction: float = 0.0,
                  hard_reference_mode: str = "recomputed") -> SearchCostEstimate:
-    """Price the search by averaging real per-node costs over the enumerated paths.
+    """Price the search from the expansions it will actually perform.
 
-    Per-node cost genuinely depends on position: a causal depth search at the
-    head of a path runs against the full-width teacher, and the same search at
-    the tail runs against an already-compressed state for a small fraction of the
-    FLOPs. Averaging over the enumerated geometry captures that instead of
-    pricing every node at the worst case.
+    Three things this gets right that the first version did not, and they do not
+    cancel:
+
+    * **Composite is costed.** `composite.stage1_sandwich_v0` reached only the
+      branching counts, so its leaves appeared in `states_materialized` and
+      `leaves_max` while costing nothing. Each one consumes activation
+      statistics, transforms, materializes, reloads, validates and is evaluated.
+    * **Statistics are charged once per (parent, profile)**, matching `StatsCache`,
+      instead of once per stats-consuming operator. `composite`, `ffn` and
+      `width` share one collection per mixture at a parent — except at the root,
+      where `_stats_key` returns `None` and the runtime genuinely cannot share.
+    * **The non-FLOP path is priced.** save -> hash -> canonical reload ->
+      validate is I/O, hashing and Python; the hardware anchor was measured on
+      forward compute and does not cover it.
     """
     paths = enumerate_paths(root_spec, target_spec, adapter, impls)
     branching = branching_estimate(root_spec, target_spec, adapter, impls,
@@ -561,54 +699,123 @@ def price_search(root_spec: ArchSpec, target_spec: ArchSpec,
                                    include_composite=composite)
     by_impl = {i.impl_id: i for i in impls}
     multiplicity = profile_multiplicity(impls, n_profiles)
+    composite_multiplicity = profile_multiplicity(composite, n_profiles)
 
-    # THREE priced worlds, because the intact reference is paid for three
-    # different ways and the difference is a factor of two on the dominant
-    # operator. Attempt 3 proved this is not academic: the 1.91-7.51 h range that
-    # authorized it assumed `cached`, the run executed `recomputed`, and Stage 1
-    # hit its deadline at 9.08 h without finishing.
     modes = {"low": "cached", "high": "partial", "hard": hard_reference_mode}
-    level_costs: dict[str, dict[int, list[OperatorCost]]] = {k: {} for k in modes}
+
+    # One activation-statistics pass per parent GEOMETRY, priced once and reused
+    # by every consumer at that parent — which is what the runtime cache does.
+    stats_cost: dict[str, tuple[float, float]] = {}
+
+    def stats_for(parent_spec: ArchSpec) -> tuple[float, float]:
+        key = parent_spec.spec_hash
+        if key not in stats_cost:
+            flops = calibration_tokens * forward_flops_per_token(parent_spec, seq_len)
+            stats_cost[key] = (hardware.seconds_for(flops),
+                               calibration_tokens * CPU_STATS_SECONDS_PER_TOKEN)
+        return stats_cost[key]
+
+    # level -> parent_spec_hash -> [Expansion], one entry per distinct
+    # (parent geometry, implementation). The same pair recurs across enumerated
+    # paths and must not be counted twice.
+    worlds: dict[str, dict[int, dict[str, dict[str, Expansion]]]] = {
+        k: {} for k in modes}
     child_sizes: dict[int, list[int]] = {}
+    parent_specs: dict[str, ArchSpec] = {}
+
+    def record(which: str, level: int, parent_spec: ArchSpec, child_spec: ArchSpec,
+               impl: OperatorImplementation, mult: int) -> None:
+        mode = modes[which]
+        cost = operator_cost(
+            impl, parent_spec, target_spec, adapter,
+            calibration_tokens=calibration_tokens, seq_len=seq_len,
+            hardware=hardware, depth_reference_mode=mode,
+            depth_cached_fraction=depth_cached_fraction, include_stats=False)
+        entry = Expansion(
+            level=level, parent_spec_hash=parent_spec.spec_hash,
+            impl_id=impl.impl_id, multiplicity=mult,
+            consumes_stats=consumes_activation_stats(impl),
+            operator_seconds_low=cost.seconds_low(),
+            operator_seconds_high=cost.seconds_high(),
+            eval_seconds=evaluation_cost(child_spec, suite_tokens=suite_tokens,
+                                         seq_len=seq_len, hardware=hardware),
+            overhead_seconds=materialization_overhead_seconds(cost.child_bytes),
+            child_bytes=cost.child_bytes,
+            peak_resident_bytes=cost.peak_resident_bytes)
+        worlds[which].setdefault(level, {}).setdefault(
+            parent_spec.spec_hash, {})[impl.impl_id] = entry
+        parent_specs[parent_spec.spec_hash] = parent_spec
+
     for path in paths:
         for node in path:
-            eval_seconds = evaluation_cost(node.child_spec, suite_tokens=suite_tokens,
-                                           seq_len=seq_len, hardware=hardware)
-            for which, mode in modes.items():
-                cost = operator_cost(
-                    by_impl[node.impl_id], node.parent_spec, target_spec, adapter,
-                    calibration_tokens=calibration_tokens, seq_len=seq_len,
-                    hardware=hardware, depth_reference_mode=mode,
-                    depth_cached_fraction=depth_cached_fraction)
-                level_costs[which].setdefault(node.level, []).append(OperatorCost(
-                    **{**cost.__dict__, "gpu_seconds": cost.gpu_seconds + eval_seconds}))
+            for which in modes:
+                record(which, node.level, node.parent_spec, node.child_spec,
+                       by_impl[node.impl_id], multiplicity[node.impl_id])
             child_sizes.setdefault(node.level, []).append(
-                level_costs["low"][node.level][-1].child_bytes)
+                checkpoint_bytes(node.child_spec, adapter))
+
+    # COMPOSITE. It applies only from the uncompressed root, so it is a level-0
+    # expansion, and it branches over profiles because it consumes calibration.
+    for impl in composite:
+        mult = composite_multiplicity.get(impl.impl_id, n_profiles)
+        child_spec = impl.plan(root_spec, target_spec, adapter,
+                               {"n_calibration_items": 1}).result_spec
+        for which in modes:
+            record(which, 0, root_spec, child_spec, impl, mult)
+        for _ in range(mult):
+            child_sizes.setdefault(0, []).append(
+                checkpoint_bytes(child_spec, adapter))
+
+    def flatten(which: str) -> dict[int, dict[str, list[Expansion]]]:
+        return {level: {ph: list(by_impl_map.values())
+                        for ph, by_impl_map in parents.items()}
+                for level, parents in worlds[which].items()}
+
+    stats_by_parent = {ph: stats_for(spec) for ph, spec in parent_specs.items()}
 
     seconds_low = seconds_high = 0.0
     per_operator: list[dict[str, Any]] = []
+    low_levels, high_levels = flatten("low"), flatten("high")
     for entry in branching["per_level"]:
         level = entry["level"]
-        low_costs = level_costs["low"].get(level, [])
-        high_costs = level_costs["high"].get(level, [])
-        if not low_costs:
+        if level not in low_levels:
             continue
-        mean_low = sum(c.seconds_low() for c in low_costs) / len(low_costs)
-        mean_high = sum(c.seconds_high() for c in high_costs) / len(high_costs)
-        seconds_low += entry["children_min"] * mean_low
-        seconds_high += entry["children_max"] * mean_high
+        def level_mean(levels, index):
+            totals = []
+            for ph, expansions in levels[level].items():
+                lo, hi = stats_by_parent[ph]
+                totals.append(_parent_seconds(level, expansions, n_profiles, lo, hi)[index])
+            return sum(totals) / len(totals), max(totals)
+        mean_low, _ = level_mean(low_levels, 0)
+        mean_high, max_high = level_mean(high_levels, 1)
+        # A parent's whole expansion set, so the multiplier is parents rather
+        # than children: `children_max` counts individual expansions and would
+        # multiply a per-parent total by the number of expansions in it.
+        seconds_low += entry["parents_min"] * mean_low
+        seconds_high += entry["parents_max"] * mean_high
         per_operator.append({
             "level": level,
+            "parents_min": entry["parents_min"], "parents_max": entry["parents_max"],
             "children_min": entry["children_min"], "children_max": entry["children_max"],
-            "mean_node_seconds_low": mean_low, "mean_node_seconds_high": mean_high,
-            "max_node_seconds_high": max(c.seconds_high() for c in high_costs),
-            "implementations": sorted({c.impl_id for c in low_costs}),
+            "mean_parent_seconds_low": mean_low, "mean_parent_seconds_high": mean_high,
+            "max_parent_seconds_high": max_high,
+            # A RANGE across the level's parents, not the first one's: at level 2
+            # a parent with FFN and WIDTH still to apply pays two collections and
+            # one with only DEPTH and ATTENTION left pays none, and reporting
+            # whichever happened to be enumerated first reads as though the whole
+            # level were free.
+            "stats_collections_per_parent": {
+                "min": min(stats_collections(level, e, n_profiles)
+                           for e in low_levels[level].values()),
+                "max": max(stats_collections(level, e, n_profiles)
+                           for e in low_levels[level].values())},
+            "implementations": sorted({e.impl_id
+                                       for expansions in low_levels[level].values()
+                                       for e in expansions}),
         })
 
-    # The bound an authorization may be issued against. NOT `seconds_high`: that
-    # is `children_max x mean`, and a mean is not a bound.
     seconds_hard, hard_per_level = conservative_hard_seconds(
-        level_costs["hard"], branching, multiplicity)
+        flatten("hard"), stats_by_parent, branching, n_profiles)
 
     # The teacher's reference logits over the suite are computed once for the
     # whole search, not per candidate.
@@ -636,20 +843,33 @@ def price_search(root_spec: ArchSpec, target_spec: ArchSpec,
             continue
         sizes = child_sizes[level]
         mean_child = sum(sizes) / len(sizes)
-        parents_resident = entry["parents_max"] * max(
-            c.peak_resident_bytes - c.child_bytes for c in level_costs["low"][level])
+        resident = [e.peak_resident_bytes - e.child_bytes
+                    for expansions in low_levels[level].values() for e in expansions]
+        parents_resident = entry["parents_max"] * max(resident)
         peak_working = max(peak_working,
                            int(parents_resident + entry["children_max"] * mean_child))
         total_written += entry["children_max"] * mean_child
 
     retained = beam_width * max(max(v) for v in child_sizes.values())
-    peak_resident = max(max(c.peak_resident_bytes for c in costs)
-                        for costs in level_costs["low"].values())
+    peak_resident = max(e.peak_resident_bytes
+                        for parents in low_levels.values()
+                        for expansions in parents.values() for e in expansions)
 
     notes = [
         f"hardware anchor: {hardware.source}",
         "statistics-pass cost is a range; the GPU/CPU split of the float64 "
         "accumulation has never been measured separately",
+        "statistics are charged ONCE per (parent, profile), matching StatsCache — "
+        "except at the root, where _stats_key returns None because the root has no "
+        "artifact digest, so every stats-consuming expansion of the root collects "
+        "its own",
+        f"composite leaves are priced: {sum(composite_multiplicity.get(i.impl_id, n_profiles) for i in composite)} "
+        "level-0 expansions, each consuming statistics, materializing, reloading, "
+        "validating and being evaluated",
+        f"non-FLOP overhead per child: {CHECKPOINT_IO_PASSES} x checkpoint bytes at "
+        f"{CHECKPOINT_IO_BYTES_PER_SECOND / 1e6:.0f} MB/s plus "
+        f"{PER_CHILD_FIXED_SECONDS:.0f} s fixed — the hardware anchor was measured "
+        "on forward compute and does not cover save/hash/reload/validate",
         "storage: 'working' is the concurrent peak (a level's whole child set is "
         "on disk before ranking can start), 'written' is total I/O volume, "
         "'retained' is what survives once pruned weights are released",

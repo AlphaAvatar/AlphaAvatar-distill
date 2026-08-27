@@ -189,38 +189,53 @@
     {
       "item": "share causal-depth scores across profiles",
       "estimated_gain": "would halve causal DEPTH at P=2",
-      "interaction_surface": "SCIENTIFICALLY UNSAFE as stated. The two profiles are different mixtures; the domain-balanced aggregation is over each mixture's own items, so the scores are not the same quantity. Sharing them would silently answer the calibration question with one distribution's answer.",
-      "recommendation": "REJECT unless restricted to a provably identical item subset"
+      "interaction_surface": "HIGH, and deferred rather than rejected. The AGGREGATED profile scores genuinely differ - the domain-balanced aggregation is over each mixture's own items - but the item-level work for a given (parent, skip-set, item_id) is the same forward, so it could in principle be computed once and aggregated independently by each mixture. The correction is mine: an earlier note called this scientifically unsafe, which overstated it. What is true is that the sharing must be at the item level and the aggregation must stay per-mixture.",
+      "recommendation": "DEFER. Not worth the complexity before Phase B completes; revisit with the item-level framing above, not the aggregate-sharing one."
     }
   ],
   "corrected_cost_model": {
-    "invalidated": "the 1.91-7.51 h P=2 range, which assumed a cached intact reference",
+    "invalidated": "the 1.91-7.51 h P=2 range, which assumed a cached intact reference; and the first correction of it, which priced composite at zero while double-counting FFN/WIDTH statistics",
+    "corrections": {
+      "composite_leaves_are_priced": "`composite.stage1_sandwich_v0` reached the branching counts and nothing else, so its two P=2 leaves appeared in states_materialized and leaves_max while costing nothing. Each is now a level-0 expansion consuming activation statistics, transforming, materializing, reloading, validating and being evaluated.",
+      "statistics_charged_once_per_parent_profile": "was once per stats-consuming OPERATOR. It is now once per (parent, profile), matching StatsCache: composite, ffn and width share one collection per mixture at a parent. EXCEPT at the root, where BeamSearch._stats_key returns None because the root has no artifact digest, so its six stats-consuming expansions each collect their own. Level 0 is the widest level in the search and pricing it as though it shared would understate exactly what makes it wide.",
+      "non_flop_overhead_is_explicit": "save -> hash/identify -> canonical reload -> validate is I/O, hashing and Python. The L40S anchor of 88.83 TFLOP/s was measured on 260 subset evaluations - pure forward compute - and does not cover any of it. Charged per materialized child as 3 x checkpoint bytes at a deliberately pessimistic 400 MB/s plus 10 s fixed: 1.08 min for a 6.79 GiB root child, 0.32 min for a 1.11 GiB leaf.",
+      "why_they_had_to_be_fixed_together": "the omission and the double-count partly CANCELLED: the hard bound moved only 994.4 -> 987.6 min while its composition changed materially. A check on the total alone would have passed against both defects."
+    },
+    "stats_collections_per_parent": {
+      "level_0": 6,
+      "level_1": 2,
+      "levels_2_3": "0-2"
+    },
     "search_planning_range_usd": {
-      "low": 1.895,
-      "high": 8.0213
+      "low": 5.2705,
+      "high": 9.5066
     },
     "search_planning_range_hours": {
-      "low": 1.91,
-      "high": 8.1
+      "low": 5.324,
+      "high": 9.603
     },
     "search_hard_bound": {
-      "hours": 16.573,
-      "minutes": 994.395,
-      "usd": 16.4075
+      "hours": 16.461,
+      "minutes": 987.6348,
+      "usd": 16.296
     },
     "reference_modes": {
       "low": "cached",
       "high": "partial at 79.3%",
       "hard": "recomputed"
     },
-    "hard_bound_construction": "per level, the `parents_max` most expensive parent GEOMETRIES, each costed over its own expansions with no-calibration operators counted once. Replaces `children_max x mean node cost`, which is an average and cannot bound a beam that retains expensive parents.",
-    "replay_constraint": "the recomputed mode's most expensive expansion is 45.8 min against 38.4 min observed, and its cheapest is 8.7 min against 28.5 min observed, so the observed band lies inside the modelled band. The CACHED mode's most expensive expansion is 21.7 min \u2014 below the CHEAPEST invocation actually observed \u2014 which is why the old range was wrong.",
-    "stage1_deadline_minutes": 994.395,
-    "session_floor_usd": 13.08,
-    "session_hard_ceiling_usd": 35.7775,
-    "plan_hard_terminate_usd": 31.8995,
-    "plan_soft_stop_usd": 31.5695,
-    "implied_cumulative_cap_usd": 275.6925,
-    "blocker": "the derived ceiling $35.7775 EXCEEDS the frozen $26.8049, and the budget planner refuses the session under the frozen figure by $5.09. Attempt 4 is blocked until the maintainer approves the new ceiling and cap. The frozen constant was NOT changed in this pass."
+    "hard_bound_construction": "per level, the `parents_max` most expensive parent GEOMETRIES, each costed over its own expansions with no-calibration operators counted once and statistics charged under the runtime's sharing rule. Where the beam can hold every distinct geometry (level 2) the bound is their sum, which legitimately equals parents_max x mean; where it cannot (levels 1 and 3) the chosen mean strictly exceeds the level mean.",
+    "replay_constraint": {
+      "per_expansion": "recomputed spans 8.7-45.8 min against 28.5-38.4 observed, so the observed band lies inside the modelled one. The CACHED mode's most expensive expansion is 21.7 min - below the CHEAPEST invocation observed - which is why the old range was wrong.",
+      "levels_entered": "attempt 3's 12 causal-depth invocations reconstruct exactly: 2 at the root, then 10 at level 1 (five of the eight level-0 children had not applied DEPTH, x2 profiles), dying at a level-1 FFN. The hard model bounds levels 0+1 at 749.4 min against the 544.7 min the run spent inside them without finishing, and level 0 alone at 130.6 min against the 76.1 min its two root invocations actually took."
+    },
+    "stage1_deadline_minutes": 987.6348,
+    "session_floor_usd": 16.4555,
+    "session_hard_ceiling_usd": 35.666,
+    "plan_hard_terminate_usd": 31.7769,
+    "plan_soft_stop_usd": 31.4469,
+    "implied_cumulative_cap_usd": 275.581,
+    "floor_moved": "$13.0800 -> $16.4555. The floor is the low scenario and it now includes composite, the root's unshared statistics and the materialization overhead. It remains a FLOOR, not an expectation.",
+    "blocker": "the derived ceiling $35.6660 exceeds the frozen $26.8049, and plan_session refuses the session under the frozen figure by $5.09 (plan hard $31.7769). The frozen constant was NOT changed in this pass. Attempt 4 is fail-closed until the maintainer approves the ceiling and the cap."
   }
 }

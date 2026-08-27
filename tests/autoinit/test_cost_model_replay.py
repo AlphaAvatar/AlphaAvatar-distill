@@ -159,52 +159,50 @@ def test_the_hard_bound_is_above_the_averaged_projection():
     assert est.seconds_hard > est.seconds_high > est.seconds_low > 0
 
 
-def test_children_max_times_the_mean_can_underprice_an_expensive_beam():
-    """The specific defect: an average is not a bound.
+def test_an_average_over_parents_is_below_the_bound_over_the_worst_parents():
+    """The specific defect the hard bound replaces: an average is not a bound.
 
-    Node cost at one level varies by more than 2x with the parent's geometry, so
-    a beam that retains the expensive parents costs more than `children_max`
-    averages — and that product was the authorization ceiling.
+    Node cost at one level varies by more than 2x with the parent's geometry, and
+    some operators cost nothing at all (a positional heuristic takes no
+    measurement), so a beam that retains the expensive parents costs more than
+    `parents_max` averages. Rebuilt here from the estimate's own per-level report
+    so the comparison is explicit rather than asserted.
     """
-    by_impl = {i.impl_id: i for i in pb.DECOMPOSED}
-    multiplicity = profile_multiplicity(pb.DECOMPOSED, 2)
-    level_costs: dict[int, list] = {}
-    for path in enumerate_paths(pb.TEACHER, pb.TARGET, pb.ADAPTER, pb.DECOMPOSED):
-        for node in path:
-            cost = operator_cost(
-                by_impl[node.impl_id], node.parent_spec, pb.TARGET, pb.ADAPTER,
-                calibration_tokens=pb.CALIBRATION_TOKENS,
-                seq_len=pb.CALIBRATION_SEQ_LEN, hardware=L40S_MEASURED,
-                depth_reference_mode="recomputed")
-            level_costs.setdefault(node.level, []).append(cost)
-
     est = estimate(2, OBSERVED_CACHED_FRACTION)
-    hard, per_level = conservative_hard_seconds(
-        level_costs, est.branching, multiplicity)
+    averaged = sum(e["parents_max"] * e["mean_parent_seconds_high"]
+                   for e in est.per_operator)
+    worst = sum(e["parents_max"] * e["max_parent_seconds_high"]
+                for e in est.per_operator)
+    assert averaged < worst, (
+        "the level means and maxima coincide, so this fixture no longer exercises "
+        "the spread the bound exists to handle")
+    assert est.seconds_hard > averaged
+    # And at least one level really does have that spread.
+    assert any(e["max_parent_seconds_high"] > 1.5 * e["mean_parent_seconds_high"]
+               for e in est.per_operator)
 
-    # The construction this replaces, rebuilt here so the comparison is explicit
-    # rather than asserted: `children_max` expansions each priced at the level's
-    # MEAN node cost.
-    old_bound = 0.0
-    for entry in est.branching["per_level"]:
-        costs = level_costs.get(entry["level"])
-        if not costs:
-            continue
-        old_bound += entry["children_max"] * (
-            sum(c.seconds_high() for c in costs) / len(costs))
-
-    assert hard > old_bound, (
-        f"the conservative bound ({hard / 3600:.2f} h) is not above the "
-        f"children_max x mean construction ({old_bound / 3600:.2f} h); the change "
-        "would not have raised the ceiling it was meant to raise")
-    assert per_level
-    assert all(e["most_expensive_parent_seconds"]
-               >= e["least_expensive_parent_seconds"] for e in per_level)
-    # Some operators genuinely cost ~0 (a positional heuristic takes no
-    # measurement), which is exactly why a per-level MEAN understates a beam that
-    # retains causal-depth parents.
-    cheapest = min(c.seconds_high() for costs in level_costs.values() for c in costs)
-    assert cheapest == 0.0
+    # WITHIN the hard world, not across two of them. A first mutation pass
+    # replaced the per-parent maxima with the level mean and this test still
+    # passed, because `averaged` above is built from the `high` world while
+    # `seconds_hard` is built from the `hard` one — two different models, so the
+    # comparison could never detect the substitution.
+    spread_levels = [e for e in est.hard_per_level
+                     if e["most_expensive_parent_seconds"] > e["least_expensive_parent_seconds"]]
+    assert spread_levels, "no level has a parent-cost spread to bound"
+    for entry in spread_levels:
+        assert entry["chosen_mean_seconds"] >= entry["mean_parent_seconds"] - 1e-9, entry
+    # Strictly greater exactly where the beam cannot hold every geometry — and
+    # NOT where it can, because a beam that holds all of them legitimately costs
+    # their sum. Level 2 has six distinct geometries and a width of six.
+    selective = [e for e in spread_levels
+                 if e["distinct_parent_geometries"] != e["parents_max"]]
+    assert selective, "no level is narrower than its geometry; nothing to select"
+    for entry in selective:
+        assert entry["chosen_mean_seconds"] > entry["mean_parent_seconds"], (
+            f"level {entry['level']}: the bound averages "
+            f"{entry['chosen_mean_seconds']:.1f} s per parent against a level mean "
+            f"of {entry['mean_parent_seconds']:.1f} s — it is selecting the mean, "
+            "not the most expensive admissible beam")
 
 
 def test_the_hard_bound_uses_the_beam_width_not_the_child_count():
@@ -238,3 +236,171 @@ def test_the_estimate_records_which_mode_each_figure_used():
         "guarantees a fraction, not the whole")
     body = est.as_dict()
     assert body["hours_hard"] > body["hours_high"] > body["hours_low"]
+
+
+# --- composite is priced, and statistics are charged once -------------------
+#
+# These two corrections were found together and must be tested together: the
+# first version omitted composite entirely while double-counting FFN/WIDTH
+# statistics, and the two errors partly cancelled in the total. A test that
+# checked only the total would have passed against both defects.
+
+
+def test_composite_leaves_are_priced_not_merely_counted():
+    """`composite.stage1_sandwich_v0` reached the state counts and nothing else.
+
+    Each P=2 composite leaf consumes activation statistics, transforms,
+    materializes, reloads, validates and is evaluated. Pricing it at zero while
+    reporting it in `leaves_max` is a bill that does not mention an item.
+    """
+    with_composite = estimate(2, OBSERVED_CACHED_FRACTION)
+    without = price_search(
+        pb.TEACHER, pb.TARGET, pb.ADAPTER, pb.DECOMPOSED,
+        calibration_tokens=pb.CALIBRATION_TOKENS,
+        suite_tokens=pb.CALIBRATION_TOKENS, seq_len=pb.CALIBRATION_SEQ_LEN,
+        n_profiles=2, beam_width=SCHEDULE_V1.width,
+        warmup_levels=SCHEDULE_V1.warmup_levels, hardware=L40S_MEASURED,
+        composite=(), depth_cached_fraction=OBSERVED_CACHED_FRACTION)
+
+    assert with_composite.branching["composite_leaves"] == 2
+    assert without.branching["composite_leaves"] == 0
+    for field in ("seconds_low", "seconds_high", "seconds_hard"):
+        assert getattr(with_composite, field) > getattr(without, field), (
+            f"{field} is identical with and without composite, so composite is "
+            "still counted in the branching and priced at nothing")
+
+    level0 = [e for e in with_composite.per_operator if e["level"] == 0][0]
+    assert "composite.stage1_sandwich_v0" in level0["implementations"]
+
+
+def test_statistics_are_charged_once_per_parent_and_profile():
+    """The pricing must match `StatsCache`, not idealize it or ignore it.
+
+    At a non-root parent, `composite`, `ffn` and `width` share one collection per
+    mixture. Charging each operator its own pass would bill the same collection
+    three times; charging one pass for the whole parent would ignore the second
+    profile.
+    """
+    from aadistill.autoinit.cost import Expansion, stats_collections
+
+    def expansion(impl_id, consumes, mult=2):
+        return Expansion(level=1, parent_spec_hash="p", impl_id=impl_id,
+                         multiplicity=mult, consumes_stats=consumes,
+                         operator_seconds_low=0.0, operator_seconds_high=0.0,
+                         eval_seconds=0.0, overhead_seconds=0.0,
+                         child_bytes=0, peak_resident_bytes=0)
+
+    consumers = [expansion("composite.stage1_sandwich_v0", True),
+                 expansion("ffn.activation_importance_v0", True),
+                 expansion("width.global_pca_v0", True)]
+    # Three consumers, two profiles, ONE collection per profile.
+    assert stats_collections(1, consumers, n_profiles=2) == 2
+    assert stats_collections(1, consumers, n_profiles=1) == 1
+    # A parent with no stats consumer pays nothing.
+    assert stats_collections(1, [expansion("depth.positional_v0", False, 1)],
+                             n_profiles=2) == 0
+
+
+def test_the_ROOT_cannot_share_and_is_priced_accordingly():
+    """`_stats_key` returns None for the root, so the runtime collects per operator.
+
+    The root has no artifact digest — its identity is a published revision, not
+    something the search computed — so sharing has nothing to key on. Level 0 is
+    the widest level in the search, and pricing it as though it shared would
+    understate it by exactly the operators that make it wide.
+    """
+    import inspect
+
+    from aadistill.autoinit import search as search_module
+    from aadistill.autoinit.cost import Expansion, stats_collections
+
+    source = inspect.getsource(search_module.BeamSearch._stats_key)
+    assert "if parent.artifact_digest is None:" in source
+    assert "return None" in source
+
+    def expansion(impl_id):
+        return Expansion(level=0, parent_spec_hash="root", impl_id=impl_id,
+                         multiplicity=2, consumes_stats=True,
+                         operator_seconds_low=0.0, operator_seconds_high=0.0,
+                         eval_seconds=0.0, overhead_seconds=0.0,
+                         child_bytes=0, peak_resident_bytes=0)
+
+    consumers = [expansion("composite.stage1_sandwich_v0"),
+                 expansion("ffn.activation_importance_v0"),
+                 expansion("width.global_pca_v0")]
+    # Six, not two: three consumers x two profiles, none of them shared.
+    assert stats_collections(0, consumers, n_profiles=2) == 6
+
+    est = estimate(2, OBSERVED_CACHED_FRACTION)
+    level0 = [e for e in est.per_operator if e["level"] == 0][0]
+    assert level0["stats_collections_per_parent"] == {"min": 6, "max": 6}
+    level1 = [e for e in est.per_operator if e["level"] == 1][0]
+    assert level1["stats_collections_per_parent"] == {"min": 2, "max": 2}
+
+
+def test_causal_depth_is_not_counted_as_a_statistics_consumer():
+    """It consumes calibration but collects no statistics; it runs its own forwards."""
+    from aadistill.autoinit.cost import consumes_activation_stats
+    from aadistill.autoinit.operators.base import get_implementation
+
+    assert not consumes_activation_stats(get_implementation("depth.causal_kl_greedy_v1"))
+    assert consumes_activation_stats(get_implementation("composite.stage1_sandwich_v0"))
+    assert consumes_activation_stats(get_implementation("ffn.activation_importance_v0"))
+    assert consumes_activation_stats(get_implementation("width.global_pca_v0"))
+
+
+# --- the non-FLOP path ------------------------------------------------------
+
+
+def test_materialization_overhead_is_explicit_and_scales_with_the_checkpoint():
+    """The hardware anchor was measured on forward compute and does not cover I/O."""
+    from aadistill.autoinit.cost import (
+        CHECKPOINT_IO_PASSES, PER_CHILD_FIXED_SECONDS,
+        materialization_overhead_seconds,
+    )
+
+    assert materialization_overhead_seconds(0) == pytest.approx(PER_CHILD_FIXED_SECONDS)
+    big = materialization_overhead_seconds(8 * 2**30)
+    small = materialization_overhead_seconds(1 * 2**30)
+    assert big > small > PER_CHILD_FIXED_SECONDS
+    # save + hash + reload: three passes over the bytes, structurally.
+    assert CHECKPOINT_IO_PASSES == 3
+
+
+def test_the_overhead_actually_reaches_the_priced_total():
+    """A component nothing multiplies is a comment, not a model."""
+    import aadistill.autoinit.cost as cost_module
+
+    baseline = estimate(2, OBSERVED_CACHED_FRACTION).seconds_hard
+    original = cost_module.PER_CHILD_FIXED_SECONDS
+    try:
+        cost_module.PER_CHILD_FIXED_SECONDS = original + 60.0
+        inflated = estimate(2, OBSERVED_CACHED_FRACTION).seconds_hard
+    finally:
+        cost_module.PER_CHILD_FIXED_SECONDS = original
+    assert inflated > baseline, (
+        "raising the per-child fixed overhead by a minute changed nothing; the "
+        "overhead component is not reaching the total")
+
+
+def test_the_replay_covers_the_levels_attempt_3_actually_entered():
+    """Attempt 3's 12 causal-depth invocations reconstruct exactly.
+
+    Level 0 expands the root and offers causal DEPTH twice (once per profile).
+    With `warmup_levels=1` nothing is pruned there, so all eight decomposed
+    level-0 children become level-1 parents; five of them have not yet applied
+    DEPTH, giving 5 x 2 = 10 more. 2 + 10 = 12, and the deadline fired at a
+    level-1 FFN expansion — consistent with being partway through that level.
+
+    So the hard model must cover levels 0 and 1 in at least the 544.7 min the run
+    spent without finishing them.
+    """
+    est = estimate(2, OBSERVED_CACHED_FRACTION)
+    by_level = {e["level"]: e for e in est.hard_per_level}
+    covered = (by_level[0]["level_seconds"] + by_level[1]["level_seconds"]) / 60.0
+    assert covered >= OBSERVED_STAGE1_MIN, (
+        f"levels 0+1 are bounded at {covered:.1f} min but attempt 3 spent "
+        f"{OBSERVED_STAGE1_MIN} min inside them without finishing")
+    # Level 0 alone must cover the two root causal-depth invocations, which are
+    # the two most expensive observed: 38.4 + 37.7 = 76.1 min.
+    assert by_level[0]["level_seconds"] / 60.0 >= 76.1

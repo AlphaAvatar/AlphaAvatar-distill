@@ -1069,7 +1069,40 @@ Phase-B attempts have now cost **$9.8800** in total, of which `$0.3800` was setu
 failure. Headroom `$17.3050` is below the `$26.8049` ceiling, so a fourth attempt
 is arithmetically blocked without a new maintainer decision.
 
-## 2026-08-27 — the Phase-B session ceiling is RE-DERIVED: $35.7775, not $26.8049
+## 2026-08-27 — pricing closure: composite, shared statistics, materialization
+
+**No spend.** The ceiling below supersedes the `$35.7775` figure recorded earlier
+the same day, which was arithmetically close but not faithful.
+
+```
+search planning range (P=2)                       $ 5.2705 - $ 9.5066
+search HARD bound  (16.461 h, 987.635 min)                  $16.2960
+ten priced probes @ $1.637                                  $16.3700
+setup reserve                                               $ 3.0000
+------------------------------------------------------------------
+DERIVED session hard ceiling                                $35.6660
+session floor (was $13.0800), NOT an expectation            $16.4555
+plan hard terminate / soft stop                   $31.7769 / $31.4469
+------------------------------------------------------------------
+implied cumulative cap at $239.9150 spent                  $275.5810
+```
+
+**Three accounting corrections, and two of them were cancelling.**
+`composite.stage1_sandwich_v0` reached the branching counts and was priced at
+zero, while FFN/WIDTH statistics were charged per operator instead of once per
+`(parent, profile)`. Fixing only one would have moved the total the wrong way.
+Third, the non-FLOP path — save, hash, canonical reload, validate — is now
+charged explicitly, because the `88.83 TFLOP/s` anchor was measured on forward
+compute and never covered checkpoint I/O.
+
+**The root cannot share statistics** and is now priced accordingly: `_stats_key`
+returns `None` for a parent with no artifact digest, so level 0 pays **six**
+collections where a level-1 parent pays two.
+
+The net effect on the bound is small — 994.4 -> 987.6 min — and that is the point:
+the composition is now faithful rather than coincidentally close.
+
+## 2026-08-27 — (superseded) first re-derivation: $35.7775
 
 **No spend. This is a pricing correction, not a transaction.** Cumulative spend
 is unchanged at **$239.9150** against the approved **$257.22** cap.

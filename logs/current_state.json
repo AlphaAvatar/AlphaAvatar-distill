@@ -105,8 +105,8 @@
   ],
   "next_starting_point": {
     "status": "Phase B RAN and did not complete: EXECUTION_INCOMPLETE / NO_SCIENTIFIC_RESULT. Stage 0 passed; Stage 1 exhausted its 544 min allowance and stopped fail-closed. No Top-5, no rungs, no selection, no calibration hypothesis answered. Pod deleted and confirmed gone.",
-    "the_ask": "A maintainer decision on the re-derived Phase-B session hard ceiling $35.7775 (was $26.8049) and the implied cumulative cap $275.6925 (was $257.22). plan_session REFUSES the session under the frozen ceiling by $5.09, so attempt 4 is fail-closed until that is settled.",
-    "budget": "cap $257.22, spent $239.9150, headroom $17.3050. The DERIVED session hard ceiling is now $35.7775 and the floor is unchanged at $13.0800."
+    "the_ask": "A maintainer decision on the re-derived Phase-B session hard ceiling $35.6660 (was $26.8049) and the implied cumulative cap $275.5810. plan_session REFUSES the session under the frozen ceiling by $5.09, so attempt 4 is fail-closed until that is settled.",
+    "budget": "spent $239.9150. DERIVED session hard ceiling $35.6660, floor $16.4555, Stage-1 deadline 987.6348 min. The old $257.22 cap is not part of the new session price."
   },
   "read_order": [
     "logs/STATE.md \u2014 the human view of this file",
@@ -145,8 +145,8 @@
   "next_sequence": {
     "_status": "NONE of this is implemented or started, and none of it is funded",
     "1_phase_b": "RAN 2026-08-26/27: EXECUTION_INCOMPLETE / NO_SCIENTIFIC_RESULT \u2014 Stage 0 passed, Stage 1 hit the search deadline. NOT a scientific null. See logs/autoinit_phase_b_attempt3.json",
-    "1_phase_b_blocked_on": "a maintainer decision on the re-derived $35.7775 session ceiling and the $275.6925 implied cap; the code is repaired and the frozen $26.8049 was deliberately not changed",
-    "1_phase_b_cost": "P=2 search planning $1.8950-$8.0213, HARD $16.4075 (16.573 h); Stage-1 deadline 994.3950 min; session floor $13.0800, DERIVED ceiling $35.7775. The old 1.91-7.51 h range is invalidated",
+    "1_phase_b_blocked_on": "a maintainer decision on the re-derived $35.6660 session ceiling and the $275.5810 implied cap; the frozen $26.8049 was deliberately not changed",
+    "1_phase_b_cost": "P=2 search planning $5.2705-$9.5066, HARD $16.2960 (16.461 h); Stage-1 deadline 987.6348 min; session floor $16.4555, DERIVED ceiling $35.6660. Composite, shared stats and the non-FLOP materialization path are all priced",
     "2_final_selection": "complete final initialization selection after Phase B; Phase A's unresolved_equivalence is not a final selection",
     "3_canonical_stage1_nll": "the canonical Stage-1 NLL diagnostic on the finally selected initialization, under the established Stage-1 measurement contract. DIAGNOSTIC ONLY, never a promotion criterion, and NOT the state_eval@v1 search-side NLL fields. Never yet run",
     "4_formal_recovery": "only then, the project's formal Stage 2/Stage 3 recovery training",
