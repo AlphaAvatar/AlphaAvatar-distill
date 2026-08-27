@@ -68,6 +68,13 @@ SURVIVORS_AT_SB = 2                # best two searched candidates, globally
 #: across this project's sessions and is covered only by this.
 SETUP_RESERVE_USD = 3.00
 
+#: The measured admission share of the intact reference on the hardware Phase B
+#: ran on: 16.9 GiB of reference against 66% of 20.3 GiB free = 79.3%. Used only
+#: for the search's `high` projection; the `hard` figure this pricing now takes
+#: its ceiling from assumes NO reference caching, because the bounded cache
+#: guarantees a fraction and a ceiling may not rest on one.
+DEPTH_CACHED_FRACTION = 13.4 / 16.9
+
 PROBE_RE = re.compile(r"^autoinit\.v1\.phase_a\.rung(\d)\.([^.]+)\.(s[abc])\.json$")
 
 #: The strict reconstruction record this pricing is conditional on.
@@ -133,7 +140,8 @@ def price(hardware=L40S_MEASURED) -> dict:
         calibration_tokens=CALIBRATION_TOKENS, suite_tokens=CALIBRATION_TOKENS,
         seq_len=CALIBRATION_SEQ_LEN, n_profiles=2, beam_width=SCHEDULE_V1.width,
         warmup_levels=SCHEDULE_V1.warmup_levels, hardware=hardware,
-        composite=COMPOSITE).as_dict()
+        composite=COMPOSITE,
+        depth_cached_fraction=DEPTH_CACHED_FRACTION).as_dict()
 
     # --- reuse comes from the strict reconstruction record, not from `seen` ----
     reuse = verified_reuse()
@@ -173,8 +181,12 @@ def price(hardware=L40S_MEASURED) -> dict:
     hi_probes = sa_missing + sb_missing_worst + sc_missing_worst
     nr_probes = nr_sa + nr_sb + nr_sc
     lo = search["usd_low"] + lo_probes * unit["total_usd"] + SETUP_RESERVE_USD
-    hi = search["usd_high"] + hi_probes * unit["total_usd"] + SETUP_RESERVE_USD
-    nr = search["usd_high"] + nr_probes * unit["total_usd"] + SETUP_RESERVE_USD
+    # The CEILING takes the search's conservative bound, not its averaged
+    # projection. Attempt 3 spent 9.08 h in a search whose `usd_high` claimed
+    # 7.51 h and did not finish; an authorization must be issued against a figure
+    # a beam of expensive parents cannot exceed.
+    hi = search["usd_hard"] + hi_probes * unit["total_usd"] + SETUP_RESERVE_USD
+    nr = search["usd_hard"] + nr_probes * unit["total_usd"] + SETUP_RESERVE_USD
 
     return {
         "schema": "aadistill.autoinit.phase_b_pricing/v1",
@@ -241,8 +253,15 @@ def price(hardware=L40S_MEASURED) -> dict:
         },
         "search": {
             "usd_low": search["usd_low"], "usd_high": search["usd_high"],
+            # The bound the ceiling is composed from. `usd_high` is
+            # `children_max x mean node cost`, which is an average projection and
+            # not something an authorization may rest on.
+            "usd_hard": search["usd_hard"],
             "hours_low": round(search["hours_low"], 3),
             "hours_high": round(search["hours_high"], 3),
+            "hours_hard": round(search["hours_hard"], 3),
+            "reference_modes": search["reference_modes"],
+            "hard_per_level": search["hard_per_level"],
             "states_min": search["branching"]["states_materialized_min"],
             "states_max": search["branching"]["states_materialized_max"],
             "leaves_min": search["branching"]["leaves_min"],

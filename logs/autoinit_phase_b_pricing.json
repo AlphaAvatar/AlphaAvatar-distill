@@ -1,6 +1,6 @@
 {
   "schema": "aadistill.autoinit.phase_b_pricing/v1",
-  "generated_utc": "2026-08-25T16:00:43.817835+00:00",
+  "generated_utc": "2026-08-27T06:45:08.325591+00:00",
   "_contract": "Prices the paid work Phase B still owes under the 2026-08-25 reviewer procedure. NOT an authorization, and not a grant: the binding per-launch ceiling is issued by the authorization code against a frozen plan.",
   "hardware": {
     "name": "L40S",
@@ -119,9 +119,55 @@
   },
   "search": {
     "usd_low": 1.895,
-    "usd_high": 7.4349,
+    "usd_high": 8.0213,
+    "usd_hard": 16.4075,
     "hours_low": 1.914,
-    "hours_high": 7.51,
+    "hours_high": 8.102,
+    "hours_hard": 16.573,
+    "reference_modes": {
+      "low": "cached",
+      "high": "partial",
+      "hard": "recomputed",
+      "depth_cached_fraction": "0.7928994082840237"
+    },
+    "hard_per_level": [
+      {
+        "level": 0,
+        "parents_max": 1,
+        "distinct_parent_geometries": 1,
+        "most_expensive_parent_seconds": 6775.896889711105,
+        "least_expensive_parent_seconds": 6775.896889711105,
+        "padded_with_the_maximum": false,
+        "level_seconds": 6775.896889711105
+      },
+      {
+        "level": 1,
+        "parents_max": 8,
+        "distinct_parent_geometries": 4,
+        "most_expensive_parent_seconds": 6184.832535782917,
+        "least_expensive_parent_seconds": 1264.1189861137104,
+        "padded_with_the_maximum": true,
+        "level_seconds": 38839.935734714985
+      },
+      {
+        "level": 2,
+        "parents_max": 6,
+        "distinct_parent_geometries": 6,
+        "most_expensive_parent_seconds": 3126.3469070629126,
+        "least_expensive_parent_seconds": 629.4905369582226,
+        "padded_with_the_maximum": false,
+        "level_seconds": 9632.280914188557
+      },
+      {
+        "level": 3,
+        "parents_max": 6,
+        "distinct_parent_geometries": 4,
+        "most_expensive_parent_seconds": 1051.4444170860763,
+        "least_expensive_parent_seconds": 0.8707585921426545,
+        "padded_with_the_maximum": true,
+        "level_seconds": 4409.995442623337
+      }
+    ],
     "states_min": 74,
     "states_max": 114,
     "leaves_min": 8,
@@ -134,9 +180,9 @@
   "setup_reserve_usd": 3.0,
   "total": {
     "low_usd": 13.08,
-    "hard_with_reuse_usd": 26.8049,
-    "authorization_ceiling_usd": 26.8049,
-    "rejected_counterfactual_no_reuse_usd": 33.3529,
+    "hard_with_reuse_usd": 35.7775,
+    "authorization_ceiling_usd": 35.7775,
+    "rejected_counterfactual_no_reuse_usd": 42.3255,
     "note": "low is a FLOOR, not an expectation -- no expected-value assumption is defined anywhere. The AUTHORIZATION CEILING is hard_with_reuse: Stage-0 comparability is a fail-closed terminate, not a switch to a larger run, so the no-reuse figure is a rejected counterfactual rather than a bound to fund. The spread within each scenario is dominated by the activation-statistics GPU/CPU split, still unmeasured and deliberately NOT to be measured by a separate paid session."
   },
   "comparability_gate": {

@@ -703,14 +703,14 @@ def _issued(tmp_path, **over):
 
 def test_require_harness_actually_RE_DERIVES_the_phase_b_digest(tmp_path):
     """Not an alias returning a stored string: the real derivation, over the real
-    57 files, failing closed when it disagrees."""
+    58 files, failing closed when it disagrees."""
     from aadistill.autoinit.authorization import AuthorizationError
     from aadistill.autoinit.phase_b import phase_b_source_digest
 
     auth, _ = _issued(tmp_path)
     observed = auth.require_harness(REPO)
     assert observed["digest"] == phase_b_source_digest(REPO)["digest"]
-    assert len(observed["files"]) == 57
+    assert len(observed["files"]) == 58
     assert observed["not_yet_covered"] == []
     # It is the Phase-B set, not Phase A's.
     paths = {e["path"] for e in observed["files"]}
@@ -919,4 +919,7 @@ def test_the_verifier_is_inside_the_digest_the_grant_is_issued_against():
     )
     assert "scripts/autoinit/verify_historical_probe_reuse.py" in \
         PHASE_B_EXECUTABLE_SOURCE_FILES_V1
-    assert PHASE_B_SOURCE_SET_VERSION == 3
+    # And the pricing module, for the same reason: the launcher imports it to
+    # derive the Stage-1 deadline, so it decides how long a paid search may run.
+    assert "scripts/autoinit/price_phase_b.py" in PHASE_B_EXECUTABLE_SOURCE_FILES_V1
+    assert PHASE_B_SOURCE_SET_VERSION == 4

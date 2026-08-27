@@ -65,6 +65,7 @@ PHASE_B_EXECUTABLE_SOURCE_FILES_V1: tuple[str, ...] = (
     "scripts/autoinit/load_state_eval.py",
     "scripts/autoinit/phase_a_frozen.py",
     "scripts/autoinit/phase_a_search.py",
+    "scripts/autoinit/price_phase_b.py",
     "scripts/autoinit/verify_frozen_assets.py",
     "scripts/autoinit/verify_historical_probe_reuse.py",
     "scripts/autoinit/write_preregistration.py",
@@ -120,13 +121,15 @@ PHASE_B_EXECUTABLE_SOURCE_FILES_V1: tuple[str, ...] = (
     "src/aadistill/init/project.py",
     "src/aadistill/init/sandwich.py",
 )
-#: Bumped when the driver and launcher joined the set (2), and again when the
-#: strict historical-reuse verifier did (3). The verifier used to be pure
-#: provenance — it wrote a record the pricing consumed. It is now imported by the
-#: launcher and run as a pre-provider gate, so it decides whether a pod is
-#: created; code with that power belongs inside the digest the grant is issued
-#: against, not beside it.
-PHASE_B_SOURCE_SET_VERSION = 3
+#: Bumped when the driver and launcher joined the set (2), the strict
+#: historical-reuse verifier did (3), and the Phase-B pricing module did (4) —
+#: the launcher now imports it to DERIVE the Stage-1 deadline from the corrected
+#: cost model, so it decides how long a paid search may run.
+#:
+#: (3) and (4) are the same judgement: a module that was provenance becomes
+#: executable the moment the launcher imports it to make a decision about money
+#: or time, and it then belongs inside the digest the grant is issued against.
+PHASE_B_SOURCE_SET_VERSION = 4
 
 #: What covers the rest of the paid session, so "not in the digest" never means
 #: "unaccounted for". Each is an existing, independently bound source identity.

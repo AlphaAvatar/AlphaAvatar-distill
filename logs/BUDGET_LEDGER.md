@@ -1055,7 +1055,7 @@ Phase-B single-session hard ceiling                          $ 26.8049
 The first attempt to enter the science. **Stage 0 passed** — comparability held,
 so all historical reuse was preserved — and **Stage 1 hit its 544 min search
 deadline** and stopped fail-closed rather than running to the `$23.72` cost
-backstop. No Top-5, no rungs, no selection: a **null result**. The pod was deleted
+backstop. No Top-5, no rungs, no selection: **EXECUTION_INCOMPLETE / NO_SCIENTIFIC_RESULT**. The pod was deleted
 and the provider confirms it is gone. The one-use authorization
 `autoinit.phase_b.20260826T164611Z` is **consumed**.
 
@@ -1068,6 +1068,36 @@ decision.
 Phase-B attempts have now cost **$9.8800** in total, of which `$0.3800` was setup
 failure. Headroom `$17.3050` is below the `$26.8049` ceiling, so a fourth attempt
 is arithmetically blocked without a new maintainer decision.
+
+## 2026-08-27 — the Phase-B session ceiling is RE-DERIVED: $35.7775, not $26.8049
+
+**No spend. This is a pricing correction, not a transaction.** Cumulative spend
+is unchanged at **$239.9150** against the approved **$257.22** cap.
+
+```
+search planning range (P=2)                       $ 1.8950 - $ 8.0213
+search HARD bound  (16.573 h, 994.395 min)                  $16.4075
+ten priced probes @ $1.637                                  $16.3700
+setup reserve                                               $ 3.0000
+------------------------------------------------------------------
+DERIVED session hard ceiling                                $35.7775
+session floor, unchanged, NOT an expectation                $13.0800
+plan hard terminate / soft stop                   $31.8995 / $31.5695
+------------------------------------------------------------------
+implied cumulative cap at $239.9150 spent                  $275.6925
+```
+
+**Why the old number was wrong.** `$26.8049` rested on a P=2 search priced at
+1.91-7.51 h. That range assumed the intact causal-depth reference was computed
+**once** and cached; attempt 3 recomputed it **per candidate**, ran 9.08 h — above
+the whole old range — and did not finish. The corrected model prices all three
+reference modes and bounds the beam by its most expensive admissible parents
+instead of by `children_max x mean`, which is an average and not a bound.
+
+**The frozen `$26.8049` was deliberately NOT changed**, so this is fail-closed
+rather than applied: `plan_session` refuses the session under it by **$5.09**,
+with the figure in the error. **Attempt 4 cannot launch** until the maintainer
+rules on the ceiling and the cap.
 
 ## Standing rules
 

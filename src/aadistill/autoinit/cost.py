@@ -171,14 +171,39 @@ class OperatorCost:
         }
 
 
-def greedy_depth_flops(spec: ArchSpec, n_remove: int, tokens: int,
-                       seq_len: int) -> tuple[float, float]:
+#: The three ways the intact reference can be paid for, cheapest first. They are
+#: not interchangeable and pricing the wrong one is what invalidated the
+#: 1.91-7.51 h P=2 range: that range assumed CACHED, attempt 3 ran RECOMPUTED, and
+#: the search hit its deadline at 9.08 h without finishing.
+REFERENCE_MODES = ("cached", "partial", "recomputed")
+
+
+def greedy_depth_flops(spec: ArchSpec, n_remove: int, tokens: int, seq_len: int,
+                       *, reference_mode: str = "cached",
+                       cached_fraction: float = 0.0) -> tuple[float, float]:
     """FLOPs and the average surviving-layer count for a full greedy removal.
 
     Round ``r`` evaluates ``L - r`` candidates, each with ``r + 1`` blocks
     bypassed, so the work is not ``260 x full model`` — it is the exact sum below,
-    plus one intact reference pass.
+    plus **the intact reference, whose cost depends on how it is held**:
+
+    ``cached``
+        one intact pass for the whole expansion. What this function priced
+        unconditionally until 2026-08-27, and the reason the P=2 range was wrong.
+    ``recomputed``
+        one intact pass *per candidate*: `evaluations` of them. This is what
+        Phase-B attempt 3 actually ran — 16.9 GiB of reference against a 13.4 GiB
+        allowance, all-or-nothing, so none of it was kept.
+    ``partial``
+        ``cached_fraction`` of the mixture is resident and paid for once; the
+        remainder is recomputed per candidate. This is what the bounded cache
+        added, and it is a *fraction*, so a hard bound may not assume it.
+
+    The fraction is over prediction positions, which is what the cache admits on,
+    so it maps directly onto forward cost.
     """
+    if reference_mode not in REFERENCE_MODES:
+        raise ValueError(f"reference_mode must be one of {REFERENCE_MODES}")
     n_layers = spec["num_hidden_layers"]
     total, evaluations = 0.0, 0
     weighted_layers = 0.0
@@ -189,14 +214,23 @@ def greedy_depth_flops(spec: ArchSpec, n_remove: int, tokens: int,
                                                                layers=surviving)
         weighted_layers += candidates * surviving
         evaluations += candidates
-    total += tokens * forward_flops_per_token(spec, seq_len)  # intact reference
+    intact = tokens * forward_flops_per_token(spec, seq_len)
+    if reference_mode == "cached":
+        total += intact
+    elif reference_mode == "recomputed":
+        total += evaluations * intact
+    else:
+        share = min(max(float(cached_fraction), 0.0), 1.0)
+        total += share * intact + (1.0 - share) * evaluations * intact
     return total, (weighted_layers / evaluations if evaluations else 0.0)
 
 
 def operator_cost(impl: OperatorImplementation, parent_spec: ArchSpec,
                   target_spec: ArchSpec, adapter: ArchitectureAdapter, *,
                   calibration_tokens: int, seq_len: int,
-                  hardware: HardwareProfile) -> OperatorCost:
+                  hardware: HardwareProfile,
+                  depth_reference_mode: str = "cached",
+                  depth_cached_fraction: float = 0.0) -> OperatorCost:
     plan = impl.plan(parent_spec, target_spec, adapter,
                      {"n_calibration_items": 1})
     child_spec = plan.result_spec
@@ -206,9 +240,12 @@ def operator_cost(impl: OperatorImplementation, parent_spec: ArchSpec,
 
     if impl.impl_id == "depth.causal_kl_greedy_v1":
         n_remove = parent_spec["num_hidden_layers"] - target_spec["num_hidden_layers"]
-        flops, avg_layers = greedy_depth_flops(parent_spec, n_remove,
-                                               calibration_tokens, seq_len)
-        notes = f"{plan.notes}; mean {avg_layers:.2f} surviving blocks per evaluation"
+        flops, avg_layers = greedy_depth_flops(
+            parent_spec, n_remove, calibration_tokens, seq_len,
+            reference_mode=depth_reference_mode,
+            cached_fraction=depth_cached_fraction)
+        notes = (f"{plan.notes}; mean {avg_layers:.2f} surviving blocks per "
+                 f"evaluation; intact reference {depth_reference_mode}")
     elif plan.stats_passes:
         # One forward with hooks, then a float64 eigendecomposition or top-k.
         flops = calibration_tokens * forward_flops_per_token(parent_spec, seq_len)
@@ -389,6 +426,71 @@ def branching_estimate(root_spec: ArchSpec, target_spec: ArchSpec,
     }
 
 
+# --- the conservative hard bound --------------------------------------------
+
+
+def conservative_hard_seconds(
+        level_costs: Mapping[int, Sequence["OperatorCost"]],
+        branching: Mapping[str, Any],
+        multiplicity: Mapping[str, int]) -> tuple[float, list[dict[str, Any]]]:
+    """A hard bound a beam of expensive parents cannot exceed.
+
+    The bound this replaces was ``children_max x mean_node_seconds_high``, and an
+    average is not a bound. Node cost at one level varies by more than 2x with the
+    parent's geometry — a causal-depth search against the full-width teacher
+    against the same search on an already-narrowed parent — so a beam that happens
+    to retain the expensive parents costs more than ``children_max`` averages, and
+    an authorization ceiling derived from it can be spent before the level ends.
+
+    The construction here is structural rather than statistical:
+
+    1. group the level's enumerated nodes by **parent geometry**;
+    2. for each parent, sum its own expansions, each counted once per profile it
+       actually consumes — so `depth.positional_v0` and `attention.weight_proxy_v0`
+       are counted **once**, not once per profile;
+    3. the beam holds up to ``parents_max`` states, so take the ``parents_max``
+       most expensive parents. If the level has fewer distinct geometries than the
+       beam can hold, pad with the most expensive one rather than assuming the
+       beam is under-filled.
+
+    That is the worst *admissible* beam, not the worst arithmetic, and it uses the
+    actual branching and the actual parent specs.
+    """
+    total = 0.0
+    per_level: list[dict[str, Any]] = []
+    for entry in branching["per_level"]:
+        level = entry["level"]
+        costs = list(level_costs.get(level, []))
+        if not costs:
+            continue
+        by_parent: dict[str, dict[str, float]] = {}
+        for cost in costs:
+            # One entry per (parent geometry, implementation): the same pair
+            # recurs across enumerated paths and must not be counted twice.
+            by_parent.setdefault(cost.parent_spec_hash, {})[cost.impl_id] = \
+                cost.seconds_high()
+        parent_totals = sorted(
+            (sum(sec * multiplicity.get(impl_id, 1) for impl_id, sec in impls.items())
+             for impls in by_parent.values()),
+            reverse=True)
+        k = int(entry["parents_max"])
+        chosen = parent_totals[:k]
+        if len(chosen) < k:                       # beam wider than the geometry
+            chosen += [parent_totals[0]] * (k - len(chosen))
+        level_seconds = sum(chosen)
+        total += level_seconds
+        per_level.append({
+            "level": level,
+            "parents_max": k,
+            "distinct_parent_geometries": len(parent_totals),
+            "most_expensive_parent_seconds": parent_totals[0],
+            "least_expensive_parent_seconds": parent_totals[-1],
+            "padded_with_the_maximum": len(parent_totals) < k,
+            "level_seconds": level_seconds,
+        })
+    return total, per_level
+
+
 # --- whole-search pricing ---------------------------------------------------
 
 
@@ -404,6 +506,13 @@ class SearchCostEstimate:
     peak_storage_bytes_working: int
     total_bytes_written: int
     peak_resident_bytes: int
+    #: The conservative beam-compatible bound. `seconds_high` is an averaged
+    #: projection and is NOT safe to authorize against; this is.
+    seconds_hard: float = 0.0
+    usd_hard: float = 0.0
+    hard_per_level: list[dict[str, Any]] = field(default_factory=list)
+    #: Which intact-reference mode each of the three figures was priced under.
+    reference_modes: Mapping[str, str] = field(default_factory=dict)
     per_operator: list[dict[str, Any]] = field(default_factory=list)
     notes: list[str] = field(default_factory=list)
 
@@ -414,6 +523,11 @@ class SearchCostEstimate:
             "seconds_low": self.seconds_low, "seconds_high": self.seconds_high,
             "hours_low": self.seconds_low / 3600, "hours_high": self.seconds_high / 3600,
             "usd_low": round(self.usd_low, 4), "usd_high": round(self.usd_high, 4),
+            "seconds_hard": self.seconds_hard,
+            "hours_hard": self.seconds_hard / 3600,
+            "usd_hard": round(self.usd_hard, 4),
+            "hard_per_level": self.hard_per_level,
+            "reference_modes": dict(self.reference_modes),
             "peak_storage_gib_retained": self.peak_storage_bytes_retained / 2**30,
             "peak_storage_gib_working": self.peak_storage_bytes_working / 2**30,
             "total_gib_written": self.total_bytes_written / 2**30,
@@ -429,7 +543,9 @@ def price_search(root_spec: ArchSpec, target_spec: ArchSpec,
                  calibration_tokens: int, suite_tokens: int, seq_len: int,
                  n_profiles: int, beam_width: int, hardware: HardwareProfile,
                  warmup_levels: int = 0,
-                 composite: Sequence[OperatorImplementation] = ()) -> SearchCostEstimate:
+                 composite: Sequence[OperatorImplementation] = (),
+                 depth_cached_fraction: float = 0.0,
+                 hard_reference_mode: str = "recomputed") -> SearchCostEstimate:
     """Price the search by averaging real per-node costs over the enumerated paths.
 
     Per-node cost genuinely depends on position: a causal depth search at the
@@ -444,39 +560,55 @@ def price_search(root_spec: ArchSpec, target_spec: ArchSpec,
                                    warmup_levels=warmup_levels,
                                    include_composite=composite)
     by_impl = {i.impl_id: i for i in impls}
+    multiplicity = profile_multiplicity(impls, n_profiles)
 
-    level_costs: dict[int, list[OperatorCost]] = {}
+    # THREE priced worlds, because the intact reference is paid for three
+    # different ways and the difference is a factor of two on the dominant
+    # operator. Attempt 3 proved this is not academic: the 1.91-7.51 h range that
+    # authorized it assumed `cached`, the run executed `recomputed`, and Stage 1
+    # hit its deadline at 9.08 h without finishing.
+    modes = {"low": "cached", "high": "partial", "hard": hard_reference_mode}
+    level_costs: dict[str, dict[int, list[OperatorCost]]] = {k: {} for k in modes}
     child_sizes: dict[int, list[int]] = {}
     for path in paths:
         for node in path:
-            cost = operator_cost(by_impl[node.impl_id], node.parent_spec, target_spec,
-                                 adapter, calibration_tokens=calibration_tokens,
-                                 seq_len=seq_len, hardware=hardware)
             eval_seconds = evaluation_cost(node.child_spec, suite_tokens=suite_tokens,
                                            seq_len=seq_len, hardware=hardware)
-            level_costs.setdefault(node.level, []).append(cost)
-            child_sizes.setdefault(node.level, []).append(cost.child_bytes)
-            level_costs[node.level][-1] = OperatorCost(
-                **{**cost.__dict__, "gpu_seconds": cost.gpu_seconds + eval_seconds})
+            for which, mode in modes.items():
+                cost = operator_cost(
+                    by_impl[node.impl_id], node.parent_spec, target_spec, adapter,
+                    calibration_tokens=calibration_tokens, seq_len=seq_len,
+                    hardware=hardware, depth_reference_mode=mode,
+                    depth_cached_fraction=depth_cached_fraction)
+                level_costs[which].setdefault(node.level, []).append(OperatorCost(
+                    **{**cost.__dict__, "gpu_seconds": cost.gpu_seconds + eval_seconds}))
+            child_sizes.setdefault(node.level, []).append(
+                level_costs["low"][node.level][-1].child_bytes)
 
     seconds_low = seconds_high = 0.0
     per_operator: list[dict[str, Any]] = []
     for entry in branching["per_level"]:
         level = entry["level"]
-        costs = level_costs.get(level, [])
-        if not costs:
+        low_costs = level_costs["low"].get(level, [])
+        high_costs = level_costs["high"].get(level, [])
+        if not low_costs:
             continue
-        mean_low = sum(c.seconds_low() for c in costs) / len(costs)
-        mean_high = sum(c.seconds_high() for c in costs) / len(costs)
+        mean_low = sum(c.seconds_low() for c in low_costs) / len(low_costs)
+        mean_high = sum(c.seconds_high() for c in high_costs) / len(high_costs)
         seconds_low += entry["children_min"] * mean_low
         seconds_high += entry["children_max"] * mean_high
         per_operator.append({
             "level": level,
             "children_min": entry["children_min"], "children_max": entry["children_max"],
             "mean_node_seconds_low": mean_low, "mean_node_seconds_high": mean_high,
-            "max_node_seconds_high": max(c.seconds_high() for c in costs),
-            "implementations": sorted({c.impl_id for c in costs}),
+            "max_node_seconds_high": max(c.seconds_high() for c in high_costs),
+            "implementations": sorted({c.impl_id for c in low_costs}),
         })
+
+    # The bound an authorization may be issued against. NOT `seconds_high`: that
+    # is `children_max x mean`, and a mean is not a bound.
+    seconds_hard, hard_per_level = conservative_hard_seconds(
+        level_costs["hard"], branching, multiplicity)
 
     # The teacher's reference logits over the suite are computed once for the
     # whole search, not per candidate.
@@ -484,6 +616,7 @@ def price_search(root_spec: ArchSpec, target_spec: ArchSpec,
                                   seq_len=seq_len, hardware=hardware)
     seconds_low += teacher_ref
     seconds_high += teacher_ref
+    seconds_hard += teacher_ref
 
     # Storage has three distinct numbers and conflating them understates the
     # disk a run actually needs.
@@ -504,14 +637,14 @@ def price_search(root_spec: ArchSpec, target_spec: ArchSpec,
         sizes = child_sizes[level]
         mean_child = sum(sizes) / len(sizes)
         parents_resident = entry["parents_max"] * max(
-            c.peak_resident_bytes - c.child_bytes for c in level_costs[level])
+            c.peak_resident_bytes - c.child_bytes for c in level_costs["low"][level])
         peak_working = max(peak_working,
                            int(parents_resident + entry["children_max"] * mean_child))
         total_written += entry["children_max"] * mean_child
 
     retained = beam_width * max(max(v) for v in child_sizes.values())
     peak_resident = max(max(c.peak_resident_bytes for c in costs)
-                        for costs in level_costs.values())
+                        for costs in level_costs["low"].values())
 
     notes = [
         f"hardware anchor: {hardware.source}",
@@ -520,6 +653,13 @@ def price_search(root_spec: ArchSpec, target_spec: ArchSpec,
         "storage: 'working' is the concurrent peak (a level's whole child set is "
         "on disk before ranking can start), 'written' is total I/O volume, "
         "'retained' is what survives once pruned weights are released",
+        f"intact reference: low={modes['low']}, high={modes['high']} at "
+        f"{depth_cached_fraction:.0%} resident, hard={modes['hard']}. The hard "
+        "figure assumes NO reference caching unless a mechanical guarantee is "
+        "passed, because the bounded cache guarantees a fraction and not the whole",
+        "seconds_hard is the beam-compatible bound (the parents_max most expensive "
+        "parent geometries per level); seconds_high is an average projection and "
+        "must not be used as an authorization ceiling",
     ]
     if not hardware.measured:
         notes.append(f"{hardware.name} throughput is ESTIMATED, not measured")
@@ -528,6 +668,9 @@ def price_search(root_spec: ArchSpec, target_spec: ArchSpec,
         hardware=hardware, branching=branching,
         seconds_low=seconds_low, seconds_high=seconds_high,
         usd_low=hardware.usd_for(seconds_low), usd_high=hardware.usd_for(seconds_high),
+        seconds_hard=seconds_hard, usd_hard=hardware.usd_for(seconds_hard),
+        hard_per_level=hard_per_level,
+        reference_modes={**modes, "depth_cached_fraction": str(depth_cached_fraction)},
         peak_storage_bytes_retained=int(retained),
         peak_storage_bytes_working=int(peak_working),
         total_bytes_written=int(total_written),

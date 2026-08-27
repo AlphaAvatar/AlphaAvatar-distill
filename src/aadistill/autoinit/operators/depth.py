@@ -20,6 +20,7 @@ decision.
 
 from __future__ import annotations
 
+import os
 import time
 from collections.abc import Mapping
 from pathlib import Path
@@ -175,16 +176,51 @@ class DepthCausalKLGreedyV1(OperatorImplementation):
         targets = [item["input_ids"][0, 1:].to(compute) for item in items]
         reference = _ReferenceLogits(model, items, compute)
 
+        # Operational timings, kept OUT of every returned metric and hash.
+        #
+        # The phase split is honest only across a synchronization boundary. On
+        # CUDA the two forwards are asynchronous and `distortion(...).as_dict()`
+        # is what forces the sync, so timing them naively would bill both
+        # forwards to the reduction. Inserting syncs to fix that perturbs the
+        # hot path this pass exists to make faster, so it is OPT-IN: without it
+        # the totals and the counts are exact and the split is simply not
+        # reported. A diagnostic run sets AADISTILL_DEPTH_SYNC_TELEMETRY=1.
+        sync_split = os.environ.get("AADISTILL_DEPTH_SYNC_TELEMETRY") == "1"
+        cuda_sync = (torch.cuda.synchronize
+                     if sync_split and torch.device(compute).type == "cuda"
+                     else None)
+        timing = {"reference_seconds": 0.0, "ablated_seconds": 0.0,
+                  "distortion_seconds": 0.0, "item_seconds": 0.0,
+                  "candidate_subsets": 0, "ablated_forwards": 0,
+                  "distortion_calls": 0, "split_is_attributed": bool(cuda_sync)
+                  or torch.device(compute).type != "cuda"}
+
         def score(skip: frozenset[int]) -> float:
             per_subtype: dict[str, list[float]] = {}
+            timing["candidate_subsets"] += 1
+            item_started = time.perf_counter()
             for item, tgt in zip(items, targets):
                 # Order matters: the reference is the UNBYPASSED parent, so when
                 # it is being recomputed it must not be taken inside the bypass.
+                t0 = time.perf_counter()
                 ref = reference.get(item)
+                if cuda_sync:
+                    cuda_sync()
+                t1 = time.perf_counter()
                 abl = _forward_logits(model, item, compute, skip)
+                if cuda_sync:
+                    cuda_sync()
+                t2 = time.perf_counter()
                 sums = distortion(ref, abl, tgt, chunk=512).as_dict()
+                t3 = time.perf_counter()
+                timing["reference_seconds"] += t1 - t0
+                timing["ablated_seconds"] += t2 - t1
+                timing["distortion_seconds"] += t3 - t2
+                timing["ablated_forwards"] += 1
+                timing["distortion_calls"] += 1
                 per_subtype.setdefault(item["subtype"], []).append(sums["kl"])
                 del abl
+            timing["item_seconds"] += time.perf_counter() - item_started
             means = {k: sum(v) / len(v) for k, v in per_subtype.items()}
             primary, _ = domain_balanced_score(means, domains)
             return primary
@@ -254,7 +290,14 @@ class DepthCausalKLGreedyV1(OperatorImplementation):
             # have free. The numbers are identical either way, so the decision
             # belongs with the byproducts.
             artifacts={"search_rounds": result["rounds"],
-                       "reference_cache": reference.decision()},
+                       "reference_cache": reference.decision(),
+                       # Operational only. `artifacts` is already excluded from
+                       # the trace and from state identity — see the note above
+                       # — which is exactly why the timings belong here and in
+                       # no other field the operator returns.
+                       "timing": {k: (round(v, 4) if isinstance(v, float) else v)
+                                  for k, v in timing.items()},
+                       "reference_counters": reference.counters()},
         )
 
 
@@ -318,50 +361,116 @@ class _ReferenceLogits:
     """
 
     #: E8a's fraction. The rest holds the ablated logits, the float32 reduction
-    #: chunks, and the activations of the next forward pass.
+    #: chunks, and the activations of the next forward pass. **Unchanged**: the
+    #: partial mode below spends less than this allowance, never more.
     BUDGET_FRACTION = 0.66
 
     def __init__(self, model, items, device: str) -> None:
         self.model = model
         self.device = device
         self._cache: dict[str, torch.Tensor] = {}
-        positions = sum(int(i["input_ids"].shape[1]) - 1 for i in items)
+        items = list(items)
         itemsize = next(model.parameters()).dtype.itemsize
-        self.estimate_bytes = positions * int(model.config.vocab_size) * itemsize
+        vocab = int(model.config.vocab_size)
+        #: Per item, in the order the mixture draws them. The order is load-bearing
+        #: for the admission decision below and must not be sorted or reordered.
+        self._item_bytes = {i["item_id"]: (int(i["input_ids"].shape[1]) - 1) * vocab * itemsize
+                            for i in items}
+        positions = sum(int(i["input_ids"].shape[1]) - 1 for i in items)
+        self.estimate_bytes = positions * vocab * itemsize
         self.available_bytes, self.headroom_source = _available_memory_bytes(device)
-        self.enabled = (self.available_bytes is None
-                        or self.estimate_bytes
-                        <= self.BUDGET_FRACTION * self.available_bytes)
+
+        budget = (None if self.available_bytes is None
+                  else self.BUDGET_FRACTION * self.available_bytes)
+        self.enabled = budget is None or self.estimate_bytes <= budget
+
+        # PARTIAL CACHING. Until 2026-08-27 this was all-or-nothing, and Phase-B
+        # attempt 3 landed exactly in the gap: a 16.9 GiB reference against a
+        # 66%-of-20.3 GiB = 13.4 GiB allowance. 79% of it fit and none of it was
+        # kept, so every one of 260 candidates recomputed the ENTIRE reference —
+        # ~2x the forward passes for the whole expansion, twelve times over.
+        #
+        # Admission is by the mixture's own item order and nothing else: no
+        # sorting by size, no packing heuristic. A size-greedy admission would
+        # make the resident set depend on how much memory the host happened to
+        # have free, so two runs on different hosts would cache different items.
+        # They would still compute identical numbers — recompute and hit return
+        # the same tensor — but the *telemetry* would stop being comparable, and
+        # a rule that reads "the first k items that fit" is one a reader can
+        # verify against the frozen mixture.
+        self.admitted: set[str] = set()
+        self.admitted_bytes = 0
+        if self.enabled:
+            self.admitted = set(self._item_bytes)
+            self.admitted_bytes = self.estimate_bytes
+        elif budget is not None:
+            for item in items:                     # mixture order, deliberately
+                size = self._item_bytes[item["item_id"]]
+                if self.admitted_bytes + size > budget:
+                    break
+                self.admitted.add(item["item_id"])
+                self.admitted_bytes += size
+
+        self.mode = ("cached" if self.enabled
+                     else "partial" if self.admitted else "recomputed")
         if not self.enabled:
             # Loud, like E8a's. A run that quietly doubled its forward passes is
             # a run whose wall-clock estimate no longer holds.
+            share = (100.0 * len(self.admitted) / max(len(self._item_bytes), 1))
             print(f"depth.causal_kl_greedy_v1: reference cache "
                   f"{self.estimate_bytes / 2**30:.1f} GiB does not fit in "
                   f"{self.BUDGET_FRACTION:.0%} of {self.available_bytes / 2**30:.1f} "
-                  f"GiB ({self.headroom_source}) -> recomputing the reference per "
-                  "candidate: identical numbers, ~2x the forward passes",
+                  f"GiB ({self.headroom_source}) -> {self.mode}: caching "
+                  f"{len(self.admitted)}/{len(self._item_bytes)} items "
+                  f"({share:.0f}%, {self.admitted_bytes / 2**30:.1f} GiB), "
+                  "recomputing the rest. Identical numbers either way.",
                   flush=True)
 
+        #: Telemetry only. Counted, never returned into a metric or a hash.
+        self.hits = 0
+        self.recomputes = 0
+        self.fills = 0
+
     def get(self, item) -> torch.Tensor:
-        if not self.enabled:
-            return _forward_logits(self.model, item, self.device)
-        hit = self._cache.get(item["item_id"])
-        if hit is None:
-            hit = _forward_logits(self.model, item, self.device)
-            self._cache[item["item_id"]] = hit
-        return hit
+        item_id = item["item_id"]
+        hit = self._cache.get(item_id)
+        if hit is not None:
+            self.hits += 1
+            return hit
+        computed = _forward_logits(self.model, item, self.device)
+        if item_id in self.admitted:
+            self._cache[item_id] = computed
+            self.fills += 1
+        else:
+            self.recomputes += 1
+        return computed
 
     def decision(self) -> dict[str, Any]:
+        n_items = len(self._item_bytes)
         return {
+            "mode": self.mode,
+            # Kept as the original boolean so existing readers of this artifact
+            # keep their meaning: True iff the WHOLE reference is resident.
             "cached": self.enabled,
+            "items_total": n_items,
+            "items_cached": len(self.admitted),
+            "items_recomputed_per_candidate": n_items - len(self.admitted),
             "estimate_bytes": int(self.estimate_bytes),
             "estimate_gib": round(self.estimate_bytes / 2**30, 3),
+            "admitted_bytes": int(self.admitted_bytes),
+            "admitted_gib": round(self.admitted_bytes / 2**30, 3),
             "available_bytes": self.available_bytes,
             "budget_fraction": self.BUDGET_FRACTION,
             "headroom_source": self.headroom_source,
             "fallback": None if self.enabled else (
-                "recompute per candidate: identical numbers, ~2x forward passes"),
+                f"{self.mode}: {len(self.admitted)}/{n_items} items resident, the "
+                "remainder recomputed per candidate; identical numbers"),
         }
+
+    def counters(self) -> dict[str, int]:
+        """Telemetry only — hits, fills and recomputes over the whole expansion."""
+        return {"reference_hits": self.hits, "reference_fills": self.fills,
+                "reference_recomputes": self.recomputes}
 
 
 def _available_memory_bytes(device: Any) -> tuple[int | None, str]:

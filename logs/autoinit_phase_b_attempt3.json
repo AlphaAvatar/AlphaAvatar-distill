@@ -2,8 +2,8 @@
   "schema": "aadistill.autoinit.phase_b_attempt/v1",
   "attempt": 3,
   "date": "2026-08-27",
-  "outcome": "FAILED at stage 1 \u2014 SearchDeadlineExceeded",
-  "classification": "The first Phase-B attempt to ENTER the science. Stage 0 passed; Stage 1 exhausted its allowance and stopped by design. NO Top-5, NO sa/sb/sc rungs, NO cross-phase selection. This is a null result and must not be read as evidence about either calibration distribution.",
+  "outcome": "EXECUTION_INCOMPLETE",
+  "classification": "EXECUTION_INCOMPLETE / NO_SCIENTIFIC_RESULT. The first Phase-B attempt to ENTER the science: Stage 0 passed, Stage 1 exhausted its allowance and stopped by design. NO Top-5, NO sa/sb/sc rungs, NO cross-phase selection. No calibration hypothesis was answered, because the procedure that would answer it did not complete. Phase A's `unresolved_equivalence` is a COMPLETED scientific outcome \u2014 the procedure ran to its end and the candidates were behaviourally indistinguishable inside the frozen interval. Attempt 3 is not that: the procedure did not run. Calling both a 'null result' would let an execution failure be cited as evidence about the calibration hypothesis.",
   "pod_id": "wkausr939ts7vv",
   "gpu": "NVIDIA L40S @ $0.99/h",
   "image": "runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@580.159.03",
@@ -97,7 +97,8 @@
     "sb_progression": null,
     "sc_progression": null,
     "final_selection": null,
-    "why_null": "Stage 1 never produced admissible leaves, so stages 2-5 never ran. There is no Phase-B scientific result, and a null result must not be reinterpreted as a winner or as evidence about either calibration distribution."
+    "why_null": "Stage 1 never produced admissible leaves, so stages 2-5 never ran. This is EXECUTION_INCOMPLETE / NO_SCIENTIFIC_RESULT, not a scientific null: there is no Phase-B result to reinterpret as a winner, a tie, or an unresolved_equivalence. Phase A's `unresolved_equivalence` is a COMPLETED scientific outcome \u2014 the procedure ran to its end and the candidates were behaviourally indistinguishable inside the frozen interval. Attempt 3 is not that: the procedure did not run. Calling both a 'null result' would let an execution failure be cited as evidence about the calibration hypothesis.",
+    "status": "EXECUTION_INCOMPLETE / NO_SCIENTIFIC_RESULT"
   },
   "retained_artifacts": {
     "location": "logs/autoinit_phase_b_attempt3/",
@@ -132,5 +133,94 @@
     "the permanent Stage-3 controls, untouched",
     "the historical probe evidence and the reuse rules",
     "the $13.0800 planning floor and the $26.8049 session ceiling"
-  ]
+  ],
+  "bottleneck_analysis": {
+    "_basis": "Reconstructed from the driver log, which is all that survives: the search journal never came home. The telemetry added in the 2026-08-27 pass measures these directly on the next run instead of inferring them.",
+    "stage1_minutes": 544.7,
+    "depth_minutes": 388.2,
+    "depth_share": "71.3%",
+    "remainder_minutes": 156.5,
+    "remainder_share": "28.7%",
+    "remainder_contents": "materialization, canonical reload, validation, state evaluation, statistics collection, and the operators that log no per-candidate line (width, ffn, attention). The split among these was NOT measurable from the log; it is what the new per-expansion telemetry records.",
+    "why_depth_dominates": "the intact reference ran in `recomputed` mode, so each of 260 candidates per expansion paid a full reference forward on top of its ablated forward \u2014 about 2x the forward work for the whole expansion, twelve expansions over.",
+    "gpu_idleness": "observed but not quantified. `distortion(...).as_dict()` materializes Python floats once per item per candidate \u2014 260 x 67 = 17,420 host synchronizations per expansion \u2014 which is the most likely source. Deferred item 3 below."
+  },
+  "optimizations_implemented": {
+    "P1_partial_reference_caching": {
+      "what": "`_ReferenceLogits` admits as many calibration items as fit under the UNCHANGED 0.66 allowance, in the frozen mixture's own order, and recomputes only the uncached remainder. Previously all-or-nothing.",
+      "measured_admission_share": "79.3% (13.4 GiB allowance / 16.9 GiB reference)",
+      "modelled_saving_at_the_root_geometry": "41.8% of causal-depth forward work",
+      "projected_on_attempt_3s_own_work": "the same 12 expansions fall from 388.2 min to ~226.0 min, projecting Stage 1 at ~382.5 min for identical work",
+      "equivalence": "cached, partial and recomputed produce IDENTICAL removal order, kept layers, per-round candidate score tables and operator metrics, asserted exactly rather than approximately",
+      "budget_fraction": "0.66, unchanged; partial mode spends less than it, never more"
+    },
+    "P2_two_entry_activation_stats_cache": {
+      "what": "`max_entries` is now one per ACTIVE profile, and the search clears the cache at each parent boundary. At P=1 this is exactly the previous single entry.",
+      "defect": "`_candidate_expansions` orders by impl_id, giving ffn(db), ffn(rh), width(db), width(rh). A single entry made all four miss: FOUR statistics passes for a parent that needs two.",
+      "modelled_saving": "0.19-10.43 min per parent, 1.12-62.57 min for a beam-6 level. The range is wide because the statistics pass is priced as GPU-forward-only vs measured CPU end-to-end and the float64 accumulation's device split has never been measured \u2014 the new telemetry records it.",
+      "reuse_boundary": "UNCHANGED. The key still leads with the parent's artifact digest, so cross-parent reuse remains impossible by construction, and clearing at the parent boundary bounds residency to the parent being expanded."
+    }
+  },
+  "deferred_optimizations_analyzed_not_implemented": [
+    {
+      "item": "load one parent model once for all sibling expansions",
+      "estimated_gain": "~10 loads per parent at P=2 instead of 1. The new `parent_load_seconds` telemetry measures it per expansion; unmeasured today.",
+      "interaction_surface": "HIGH. Operators mutate the model they are handed \u2014 `use_cache = False`, `bypassed_blocks`, ChildBuilder copies \u2014 so one shared instance risks cross-expansion contamination that would be invisible in the metrics.",
+      "recommendation": "measure first with the new telemetry, then decide"
+    },
+    {
+      "item": "memoize duplicate calibration-item forwards across operators",
+      "estimated_gain": "the same items are forwarded by causal DEPTH and by the statistics pass on the same parent",
+      "interaction_surface": "HIGH, and it is the memory problem again: the object being shared is the 16.9 GiB logits tensor that did not fit in the first place.",
+      "recommendation": "not before P1's telemetry shows what the residency actually is"
+    },
+    {
+      "item": "reduce CUDA->Python scalar synchronizations",
+      "estimated_gain": "potentially large: 17,420 syncs per causal-depth expansion, and the most likely cause of the observed GPU idleness",
+      "interaction_surface": "MEDIUM. Batching the reduction changes accumulation ORDER, which changes floating-point results \u2014 so it is not automatically science-preserving and needs the same three-way equivalence proof P1 got.",
+      "recommendation": "highest expected value of the five; run one diagnostic expansion with AADISTILL_DEPTH_SYNC_TELEMETRY=1 first"
+    },
+    {
+      "item": "pipeline CPU/GPU state evaluation",
+      "estimated_gain": "bounded by the 28.7% remainder, and only part of it",
+      "interaction_surface": "MEDIUM: concurrency around materialize/reload/measure, which is the cycle the engine refuses to skip parts of",
+      "recommendation": "after the remainder is broken down by the new telemetry"
+    },
+    {
+      "item": "share causal-depth scores across profiles",
+      "estimated_gain": "would halve causal DEPTH at P=2",
+      "interaction_surface": "SCIENTIFICALLY UNSAFE as stated. The two profiles are different mixtures; the domain-balanced aggregation is over each mixture's own items, so the scores are not the same quantity. Sharing them would silently answer the calibration question with one distribution's answer.",
+      "recommendation": "REJECT unless restricted to a provably identical item subset"
+    }
+  ],
+  "corrected_cost_model": {
+    "invalidated": "the 1.91-7.51 h P=2 range, which assumed a cached intact reference",
+    "search_planning_range_usd": {
+      "low": 1.895,
+      "high": 8.0213
+    },
+    "search_planning_range_hours": {
+      "low": 1.91,
+      "high": 8.1
+    },
+    "search_hard_bound": {
+      "hours": 16.573,
+      "minutes": 994.395,
+      "usd": 16.4075
+    },
+    "reference_modes": {
+      "low": "cached",
+      "high": "partial at 79.3%",
+      "hard": "recomputed"
+    },
+    "hard_bound_construction": "per level, the `parents_max` most expensive parent GEOMETRIES, each costed over its own expansions with no-calibration operators counted once. Replaces `children_max x mean node cost`, which is an average and cannot bound a beam that retains expensive parents.",
+    "replay_constraint": "the recomputed mode's most expensive expansion is 45.8 min against 38.4 min observed, and its cheapest is 8.7 min against 28.5 min observed, so the observed band lies inside the modelled band. The CACHED mode's most expensive expansion is 21.7 min \u2014 below the CHEAPEST invocation actually observed \u2014 which is why the old range was wrong.",
+    "stage1_deadline_minutes": 994.395,
+    "session_floor_usd": 13.08,
+    "session_hard_ceiling_usd": 35.7775,
+    "plan_hard_terminate_usd": 31.8995,
+    "plan_soft_stop_usd": 31.5695,
+    "implied_cumulative_cap_usd": 275.6925,
+    "blocker": "the derived ceiling $35.7775 EXCEEDS the frozen $26.8049, and the budget planner refuses the session under the frozen figure by $5.09. Attempt 4 is blocked until the maintainer approves the new ceiling and cap. The frozen constant was NOT changed in this pass."
+  }
 }

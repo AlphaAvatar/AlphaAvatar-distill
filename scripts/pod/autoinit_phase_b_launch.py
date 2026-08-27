@@ -40,6 +40,8 @@ sys.path.insert(0, str(REPO_ROOT / "scripts/autoinit"))
 from aadistill.autoinit.calibration import (  # noqa: E402
     DOMAIN_BALANCED_V1, REASONING_HEAVY_V2,
 )
+from aadistill.autoinit.cost import L40S_MEASURED, price_search  # noqa: E402
+from aadistill.autoinit.ranking import SCHEDULE_V1  # noqa: E402
 from aadistill.autoinit.phase_b import (  # noqa: E402
     CANONICAL_CONTROL, PHASE_A_IMPORTED_FINALISTS, PHASE_B_PLAN_V1,
     PHASE_B_SEARCHED_LEAVES, PhaseBAuthorization, phase_b_source_digest,
@@ -56,11 +58,16 @@ from autoinit_science_inputs import (  # noqa: E402
     CALIBRATION_V1, CANONICAL_INIT, RECOVERY_LADDER,
 )
 from autoinit_phase_a_launch import (  # noqa: E402
+    BEAM6_SEARCH_CORRECTION_MINUTES, FALLBACK_RESERVE_MINUTES,
     LOCAL_ASSETS as PHASE_A_LOCAL_ASSETS, STAGE1_SEARCH_PHASE, TEACHER_REVISION,
     TEST_IGNORES, budget as phase_a_budget, ckpt_store_capacity_gate,
     fetch_selected_leaves, probe_streams, selected_leaves_secured,
     stage1_deadline_minutes,
 )
+#: The frozen Phase-B geometry and mixture sizes the cost model prices against.
+#: Imported rather than restated so the deadline and the dollar figures cannot
+#: describe different searches.
+import price_phase_b as _pricing  # noqa: E402
 #: The transport staging Phase A's continuation proved on hardware. Phase B
 #: needs TWO of those five leaves on the pod — not to train them, but so the
 #: search can measure them on the same state-evaluation suite as everything else.
@@ -101,11 +108,52 @@ REQUIRED_CITATIONS = frozenset(
     [f"{c}/{s}" for c in PHASE_A_IMPORTED_FINALISTS for s in ("sa", "sb", "sc")]
     + [f"{CANONICAL_CONTROL}/sa", f"{CANONICAL_CONTROL}/sb"])
 
-#: The P=2 search allowance. The P=1 search was priced at 180 min base; the cost
-#: model puts the two-profile search at 1.91-7.51 h against 0.94-3.60 h for one,
-#: so the base doubles and the beam-6 correction reserve doubles with it. Both
-#: are launcher-owned, like every other pricing constant here.
-SEARCH_MINUTES_P2 = 360.0
+#: The measured admission share of the intact reference on the hardware Phase B
+#: actually ran on: 16.9 GiB of reference against 66% of 20.3 GiB free. Used ONLY
+#: for the `high` projection. The `hard` bound assumes nothing is cached, because
+#: the bounded cache guarantees a fraction and a ceiling may not rest on one.
+DEPTH_CACHED_FRACTION = 13.4 / 16.9
+
+#: The P=2 search envelope, DERIVED from the corrected cost model rather than
+#: doubled from the P=1 figure.
+#:
+#: The old constant was 360.0 min, reached by doubling the P=1 base because the
+#: model's P=2 range doubled with it. Attempt 3 falsified that: the search ran
+#: 544.7 min — the full derived deadline — and had not finished, because the model
+#: priced the intact reference as ONE pass while the run recomputed it per
+#: candidate. The corrected model prices all three reference modes and bounds the
+#: beam by its most expensive admissible parents instead of by an average.
+PHASE_B_SEARCH_ESTIMATE = price_search(
+    _pricing.TEACHER, _pricing.TARGET, _pricing.ADAPTER, _pricing.DECOMPOSED,
+    calibration_tokens=_pricing.CALIBRATION_TOKENS,
+    suite_tokens=_pricing.CALIBRATION_TOKENS,
+    seq_len=_pricing.CALIBRATION_SEQ_LEN, n_profiles=2,
+    beam_width=SCHEDULE_V1.width, warmup_levels=SCHEDULE_V1.warmup_levels,
+    hardware=L40S_MEASURED, composite=_pricing.COMPOSITE,
+    depth_cached_fraction=DEPTH_CACHED_FRACTION)
+
+#: What Stage 1 must be allowed, end to end. This IS the deadline.
+SEARCH_HARD_MINUTES_P2 = PHASE_B_SEARCH_ESTIMATE.seconds_hard / 60.0
+
+#: And the base, so that `stage1_deadline_minutes` — which is `base + every
+#: soft-stop reserve`, because every reserve is consumed inside stage 1 — lands
+#: exactly on the hard bound.
+#:
+#: Both inherited reserves are SUBSUMED by the corrected model and must not be
+#: added on top of it: `stage1_reference_cache_fallback` bought the difference
+#: between a cached and a recomputed reference, which the `hard` mode now prices
+#: directly, and `beam6_search_pricing_correction` corrected a beam-4 row to beam
+#: 6, which `conservative_hard_seconds` now does structurally from `parents_max`.
+#: Subtracting them here keeps them in the dollar envelope while making the
+#: deadline exactly the derived bound rather than the bound plus its own
+#: corrections counted twice.
+SUBSUMED_RESERVE_MINUTES = FALLBACK_RESERVE_MINUTES + BEAM6_SEARCH_CORRECTION_MINUTES
+SEARCH_MINUTES_P2 = SEARCH_HARD_MINUTES_P2 - SUBSUMED_RESERVE_MINUTES
+if SEARCH_MINUTES_P2 <= 0:                       # pragma: no cover - defensive
+    raise SystemExit(
+        f"the derived P=2 search bound ({SEARCH_HARD_MINUTES_P2:.1f} min) is "
+        f"smaller than the reserves it subsumes ({SUBSUMED_RESERVE_MINUTES:.1f} "
+        "min); the envelope shape changed and Phase B must be re-derived")
 
 #: Ten, not twelve. Five Phase-B leaves at sa; up to two survivors at sb; up to
 #: three at the conditional sc rung. The three imported candidates are cited from
@@ -429,8 +477,13 @@ def spec(args) -> SessionSpec:
             audit_dirname="autoinit_phase_a",
             evidence_filename="phase_a_evidence.json",
             archive_basename="phase_a_artifacts.tar.gz",
-            spec_success="configs/autoinit/phase_a_artifacts.json",
-            spec_failed="configs/autoinit/phase_a_artifacts_failed.json",
+            #: Phase-B-specific, because the Phase-A specs collect the Phase-A
+            #: search journal. Attempt 3 hit its search deadline and the journal
+            #: — per-state timings, beam contents, how close it came — was
+            #: deleted with the pod because the collector looked in
+            #: `phase_a_search`. The probe minimums here are also Phase B's own.
+            spec_success="configs/autoinit/phase_b_artifacts.json",
+            spec_failed="configs/autoinit/phase_b_artifacts_failed.json",
             report_names=("phase_a_evidence.json",
                           "attested_evaluation_protocol.json",
                           "phase_b_stage0_binding.json", "search_result.json",

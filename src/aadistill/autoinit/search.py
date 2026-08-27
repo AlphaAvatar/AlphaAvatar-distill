@@ -46,6 +46,7 @@ from .calibration import CalibrationProfile, consumes_calibration, profile_for
 from .metrics import StateEvalSuite, StateEvaluation
 from .device import model_device
 from .stats import DEFAULT_STATS_SPEC, StatsCache, StatsSpec, stats_cache_key
+from .telemetry import TelemetrySink
 from .operators.base import (
     OperatorContext,
     OperatorImplementation,
@@ -246,10 +247,24 @@ class BeamSearch:
         self.resumed_ids: set[str] = set()
         self._calibration_cache: dict[str, Sequence[Mapping[str, Any]]] = {}
         self._journal: dict[str, dict[str, Any]] = {}
-        # One entry: the search expands a single parent at a time, and holding
-        # several 4B-class statistics sets would trade measured memory for a
-        # saving the access pattern does not produce.
-        self.stats_cache = StatsCache(stats_spec=config.stats_spec, max_entries=1)
+        # ONE ENTRY PER ACTIVE PROFILE, not one entry.
+        #
+        # `_candidate_expansions` orders by impl_id, so a P=2 parent is expanded
+        # as ... ffn(db), ffn(rh), width(db), width(rh). With a single entry that
+        # sequence thrashes: every one of the four misses, evicting the entry the
+        # next one wants, and the parent pays FOUR statistics passes where two
+        # would do. At P=1 this is `max_entries=1` exactly as before, so no
+        # single-profile search changes.
+        #
+        # This does not widen the reuse boundary by one inch. The key still
+        # carries the parent's artifact digest, so cross-parent reuse remains
+        # impossible by construction — and `run()` additionally clears the cache
+        # at each parent boundary, so the resident set is bounded by the profiles
+        # of the parent being expanded rather than by eviction order.
+        self.stats_cache = StatsCache(stats_spec=config.stats_spec,
+                                      max_entries=max(1, len(config.profiles)))
+        #: Operational timings. Never hashed, never returned into a state.
+        self.telemetry = TelemetrySink(self.workdir / "telemetry.jsonl")
 
         adapter.validate_target(config.target_spec)
 
@@ -336,12 +351,14 @@ class BeamSearch:
         """
         ckpt_dir = self.workdir / "states" / state.state_id
         ckpt_dir.mkdir(parents=True, exist_ok=True)
-        self.adapter.save(model, str(ckpt_dir),
-                          max_shard_size=self.config.max_shard_size)
+        with self.telemetry.timed("materialize_seconds"):
+            self.adapter.save(model, str(ckpt_dir),
+                              max_shard_size=self.config.max_shard_size)
 
-        artifact = identify_checkpoint(
-            ckpt_dir, adapter=self.adapter, spec=planned_spec,
-            num_parameters=self.adapter.param_count(planned_spec))
+        with self.telemetry.timed("identify_seconds"):
+            artifact = identify_checkpoint(
+                ckpt_dir, adapter=self.adapter, spec=planned_spec,
+                num_parameters=self.adapter.param_count(planned_spec))
         state.mark_materialized(artifact)
 
         # The reload is validated on the PRODUCED model's device, then moved to
@@ -364,9 +381,11 @@ class BeamSearch:
         # checked, only the canonical reload goes there, and only after it has
         # been validated.
         validation_device = model_device(model)
-        reloaded = self.adapter.load(str(ckpt_dir), device=validation_device)
-        checks = self._validate(state, model, reloaded, planned_spec,
-                                device=validation_device)
+        with self.telemetry.timed("canonical_reload_seconds"):
+            reloaded = self.adapter.load(str(ckpt_dir), device=validation_device)
+        with self.telemetry.timed("validation_seconds"):
+            checks = self._validate(state, model, reloaded, planned_spec,
+                                    device=validation_device)
         checks["n_shards"] = len(artifact.shards)
         checks["sharded"] = artifact.is_sharded
         checks["validation_device"] = str(validation_device)
@@ -377,7 +396,8 @@ class BeamSearch:
         # The canonical reload — the file, not the in-memory object that wrote
         # it — is what gets measured, on the search device.
         reloaded = reloaded.to(self.config.device)
-        evaluation = self.measurer(reloaded, artifact.artifact_digest)
+        with self.telemetry.timed("state_evaluation_seconds"):
+            evaluation = self.measurer(reloaded, artifact.artifact_digest)
         state.attach_evaluation(evaluation)
         del reloaded
 
@@ -455,7 +475,10 @@ class BeamSearch:
         if restored is not None:
             return restored
 
+        load_started = time.perf_counter()
         parent_model = self._load_state_model(parent)
+        parent_load_seconds = time.perf_counter() - load_started
+        stats_before = (self.stats_cache.hits, self.stats_cache.misses)
         ctx = OperatorContext(
             adapter=self.adapter, model=parent_model, parent_spec=parent.spec,
             target_spec=self.config.target_spec, profile=profile,
@@ -480,6 +503,23 @@ class BeamSearch:
             step, local_metrics=outcome.local_metrics, trace=dict(outcome.trace),
             artifacts=dict(outcome.artifacts), wall_seconds=elapsed))
         self._materialize_and_measure(state, outcome.model, plan.result_spec)
+        # Emitted AFTER materialization so one record covers the whole expansion.
+        # `drain_phases` empties the accumulators the materialize path filled, so
+        # each record describes its own expansion and nothing accumulates across
+        # them. None of this reaches `state`.
+        self.telemetry.record(
+            "expansion",
+            state_id=state.state_id, parent_id=parent.state_id,
+            impl_id=impl.impl_id, profile=profile.qualified_id,
+            parent_load_seconds=round(parent_load_seconds, 4),
+            operator_seconds=round(elapsed, 4),
+            stats_cache={"hits": self.stats_cache.hits - stats_before[0],
+                         "misses": self.stats_cache.misses - stats_before[1],
+                         "profile": profile.qualified_id},
+            operator_timing=dict(outcome.artifacts.get("timing", {})),
+            reference_cache=dict(outcome.artifacts.get("reference_cache", {})),
+            reference_counters=dict(outcome.artifacts.get("reference_counters", {})),
+            **self.telemetry.drain_phases())
         del outcome
         self.store.append(state)
         return state
@@ -576,6 +616,11 @@ class BeamSearch:
             dead_ends: list[dict[str, str]] = []
 
             for parent in parents:
+                # The resident statistics belong to the PREVIOUS parent and can
+                # never be hit again — the key carries the parent's artifact
+                # digest — so holding them only costs ~1.8 GiB each. Dropping
+                # them here bounds the resident set to the parent being expanded.
+                self.stats_cache.clear()
                 expansions = list(self._candidate_expansions(parent))
                 if not expansions and not parent.is_complete_leaf():
                     exclude = () if self.config.allow_kind_repeat else tuple(

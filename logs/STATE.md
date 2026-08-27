@@ -1,4 +1,4 @@
-**Updated:** 2026-08-27 · branch `main` · **PHASE B RAN AND RETURNED A NULL RESULT — Stage 0 passed, Stage 1 ran out of time, $9.50**
+**Updated:** 2026-08-27 · branch `main` · **PHASE B RAN AND DID NOT COMPLETE — EXECUTION_INCOMPLETE / NO_SCIENTIFIC_RESULT, $9.50**
 
 # Current state
 
@@ -158,24 +158,48 @@ freed to 0.01 GiB, and the evaluation tokenizer materialized before every batter
    `PhaseBAuthorization` was loaded by `SpendAuthorization.load`, which reads a
    `preflight_plan_hash` the Phase-B schema does not carry.
 
-   **ATTEMPT 3 RAN THE SCIENCE AND RETURNED A NULL RESULT.** Pod
+   **ATTEMPT 3 ENTERED THE SCIENCE AND DID NOT COMPLETE — `EXECUTION_INCOMPLETE / NO_SCIENTIFIC_RESULT`.** Pod
    `wkausr939ts7vv`, 575.9 min, **$9.50**. **Stage 0 PASSED**: comparability held
    under `generation_runtime_comparability@v2`, both mixtures and the executable
    digest rebound on the pod, and the 8 historical citations imported — so the
    ten-probe budget stood and the rejected 14-probe path was never reachable.
    **Stage 1 hit its 544 min search deadline** and stopped fail-closed rather than
    running to the `$23.72` backstop. **No Top-5, no `sa`/`sb`/`sc` rungs, no
-   selection.** A null result is not evidence about either calibration
-   distribution and must not be read as one.
+   selection.** **No calibration hypothesis was answered**, because the
+   procedure that would answer it did not run. This is **not** a scientific null:
+   Phase A's `unresolved_equivalence` is a completed outcome — the procedure ran
+   to its end and the candidates were indistinguishable inside the frozen
+   interval — and conflating the two would let an execution failure be cited as
+   evidence about the calibration distributions.
 
    **The P=2 search was underpriced at the top of its own range** — 1.91–7.51 h
    priced, 9.08 h actual and unfinished. `depth.causal_kl_greedy_v1` took
    **388.2 min, 71.3% of the search**, over 12 expansions averaging 32.3 min.
 
-   **An evidence gap, recorded not fixed:** the failed-run artifact spec collects
-   `autoinit/phase_a_search/states.jsonl` while the Phase-B driver writes
-   `phase_b_search/states.jsonl`, so the search journal — the one artifact that
-   would say how close the beam came — never came home and the pod is gone.
+   **The 2026-08-27 `$0` pass repaired all three.** *Journal retention:* Phase-B
+   artifact specs now collect `phase_b_search/states.jsonl`, derived from the
+   writer by test; the failure path stays optional so a search that died before
+   writing cannot hold a pod open. *Speed, science-preserving:* the reference
+   cache admits the first k mixture items that fit under the **unchanged** 0.66
+   fraction instead of refusing 79% that did fit — 41.8% less causal-depth forward
+   work, with cached/partial/recomputed proven to produce identical removal
+   orders, score tables and metrics; and the activation-stats cache holds one
+   entry per active profile, ending a P=2 thrash that cost four passes where two
+   would do. *Telemetry:* per-expansion load/operator/materialize/identify/reload/
+   validate/evaluate timings, plus the causal-depth reference breakdown, written
+   beside the journal and never into state identity.
+
+   **The cost model is re-derived and the ceiling has moved.** Search planning
+   range **$1.8950–$8.0213**; search hard bound **16.573 h**; Stage-1 deadline
+   **994.3950 min**; session floor **$13.0800** unchanged; **session hard ceiling
+   $35.7775**, implying a cumulative cap of **$275.6925** at the current spend.
+   `children_max × mean` is gone as the ceiling — an average cannot bound a beam
+   that retains expensive parents.
+
+   **This is a fail-closed blocker for attempt 4**, not a resolved item: the
+   frozen `$26.8049` was deliberately left unchanged, so `plan_session` now
+   **refuses** the session under it by `$5.09`. A maintainer decision on the
+   ceiling and the cap is required before any relaunch.
    Detail: [`autoinit_phase_b_attempt3.json`](autoinit_phase_b_attempt3.json).
 
    **Repaired by reviewer decision (Option A):** `autoinit_preflight_setup.sh` now

@@ -72,6 +72,19 @@ from autoinit_phase_a_driver import (  # noqa: E402
 WS = Path("/workspace")
 STATUS = WS / "autoinit_phase_b.status"
 
+#: Phase B searches into its OWN workdir, not Phase A's — the two sessions retain
+#: different journals and a shared path would let one overwrite the other's.
+#:
+#: It is a module constant rather than a literal inside `run_search` because the
+#: artifact specs that COLLECT this journal live in different files, and attempt 3
+#: proved they can disagree silently: the specs named `phase_a_search` while the
+#: driver wrote `phase_b_search`, the collector matched nothing, `min_matches: 0`
+#: reported `missing: 0`, and the search journal was deleted with the pod at the
+#: one moment it mattered — a deadline failure with no per-state timings.
+#: `tests/pod/test_phase_b_artifact_paths.py` now holds writer and both
+#: collectors to this constant.
+SEARCH_WORKDIR = REPO / "artifacts/autoinit/phase_b_search"
+
 #: `mark()` is a module function that appends to the module global `STATUS`, and
 #: every inherited stage calls it. Without this line a Phase-B run would write
 #: its markers to `autoinit_phase_a.status` while `autoinit_phase_b_launch.py`
@@ -306,7 +319,7 @@ class PhaseBDriver(PhaseADriver):
         say(f"phase B search: P=2 over {sorted(items)}; "
             f"{len(PHASE_A_IMPORTED_FINALISTS)} retained finalists injected")
         found = run_phase_a_search(
-            workdir=REPO / "artifacts/autoinit/phase_b_search",
+            workdir=SEARCH_WORKDIR,
             state_eval=REPO / "artifacts/stage1/state_eval_v1",
             top_n=self.plan.searched_leaves, device="cuda", repo_root=REPO,
             profiles=(DOMAIN_BALANCED_V1, REASONING_HEAVY_V2),

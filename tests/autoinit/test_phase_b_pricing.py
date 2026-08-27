@@ -147,8 +147,14 @@ def test_the_totals_are_ordered_and_composed_of_what_they_claim():
     p, s = r["probes"], r["search"]
     assert abs(lo - (s["usd_low"] + p["total_low"] * p["per_probe_usd"]
                      + r["setup_reserve_usd"])) < 0.01
-    assert abs(nr - (s["usd_high"] + p["total_no_reuse"] * p["per_probe_usd"]
+    # The CEILING composes from the search's conservative bound, not its averaged
+    # projection. Attempt 3 spent 9.08 h in a search whose `usd_high` claimed
+    # 7.51 h and did not finish, so an average is not something to authorize.
+    assert abs(hi - (s["usd_hard"] + p["total_high"] * p["per_probe_usd"]
                      + r["setup_reserve_usd"])) < 0.01
+    assert abs(nr - (s["usd_hard"] + p["total_no_reuse"] * p["per_probe_usd"]
+                     + r["setup_reserve_usd"])) < 0.01
+    assert s["usd_hard"] > s["usd_high"] > s["usd_low"]
 
 
 def test_it_prices_a_two_profile_search_not_a_one_profile_one():
