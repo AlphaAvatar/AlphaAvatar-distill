@@ -1,0 +1,43 @@
+{
+  "executable_source_digest": "45f6bb8c93ff7cc03598528b369dd96554fc9fa7d706bfb7ee83304c695586f4",
+  "calibration": {
+    "calib.domain_balanced@v1": {
+      "profile_hash": "11f36a88bad4879f8ab0e3586ca1f0af035401e505dc97815bed8d47b9f32e9b",
+      "content_sha256": "d65c1f40e4837ea1bd5bcc33c68041a13b797c68f5be3c0686e0142ed761028f",
+      "items_file_sha256": "c7202338109e459b17b70456461e8f304fadea7929ea547accee21adbbe7fd0b"
+    },
+    "calib.reasoning_heavy@v2": {
+      "profile_hash": "6c67b8dff0e81a775371a62b1b293677e45c173f52aee119d036c95081782ddd",
+      "content_sha256": "cdb2838946b9355294406d2bc398bc8390306ced84a35b09900f45a033ccc370",
+      "items_file_sha256": "a2ff8c92c16aaf5c178db160690430f4972216d45a57ab0025835ecd0ca41fc4"
+    }
+  },
+  "imported_probes": {
+    "probe_ids": [
+      "autoinit.v1.phase_a.rung1.85bde4ded2c3.sa",
+      "autoinit.v1.phase_a.rung1.cca699c93f34.sa",
+      "autoinit.v1.phase_a.rung1.control-qwen.sa",
+      "autoinit.v1.phase_a.rung2.85bde4ded2c3.sb",
+      "autoinit.v1.phase_a.rung2.cca699c93f34.sb",
+      "autoinit.v1.phase_a.rung2.control-qwen.sb",
+      "autoinit.v1.phase_a.rung3.85bde4ded2c3.sc",
+      "autoinit.v1.phase_a.rung3.cca699c93f34.sc"
+    ],
+    "skipped": [
+      {
+        "probe_id": "autoinit.v1.phase_a.rung1.158b96cf651f.sa",
+        "reason": "candidate is not in the Phase-B candidate set"
+      },
+      {
+        "probe_id": "autoinit.v1.phase_a.rung1.281a02c3ac18.sa",
+        "reason": "candidate is not in the Phase-B candidate set"
+      },
+      {
+        "probe_id": "autoinit.v1.phase_a.rung1.4e429f7ed722.sa",
+        "reason": "candidate is not in the Phase-B candidate set"
+      }
+    ],
+    "probes_dir_digest": "a5115816861ad239f646facec4d53ba2c7925c9430c530e7c6d0af2560d5b1af",
+    "source": "logs/autoinit_recovery_continuation_attempt7/probes"
+  }
+}

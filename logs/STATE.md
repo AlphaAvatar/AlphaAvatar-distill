@@ -1,4 +1,4 @@
-**Updated:** 2026-08-27 · branch `main` · **PHASE-B ATTEMPT 3 PREPARED — attempts 1+2 were setup failures, $0.3800, no stage ran**
+**Updated:** 2026-08-27 · branch `main` · **PHASE B RAN AND RETURNED A NULL RESULT — Stage 0 passed, Stage 1 ran out of time, $9.50**
 
 # Current state
 
@@ -157,6 +157,26 @@ freed to 0.01 GiB, and the evaluation tokenizer materialized before every batter
    `phase_a`, `recovery_continuation` and a `spend` default only, so a
    `PhaseBAuthorization` was loaded by `SpendAuthorization.load`, which reads a
    `preflight_plan_hash` the Phase-B schema does not carry.
+
+   **ATTEMPT 3 RAN THE SCIENCE AND RETURNED A NULL RESULT.** Pod
+   `wkausr939ts7vv`, 575.9 min, **$9.50**. **Stage 0 PASSED**: comparability held
+   under `generation_runtime_comparability@v2`, both mixtures and the executable
+   digest rebound on the pod, and the 8 historical citations imported — so the
+   ten-probe budget stood and the rejected 14-probe path was never reachable.
+   **Stage 1 hit its 544 min search deadline** and stopped fail-closed rather than
+   running to the `$23.72` backstop. **No Top-5, no `sa`/`sb`/`sc` rungs, no
+   selection.** A null result is not evidence about either calibration
+   distribution and must not be read as one.
+
+   **The P=2 search was underpriced at the top of its own range** — 1.91–7.51 h
+   priced, 9.08 h actual and unfinished. `depth.causal_kl_greedy_v1` took
+   **388.2 min, 71.3% of the search**, over 12 expansions averaging 32.3 min.
+
+   **An evidence gap, recorded not fixed:** the failed-run artifact spec collects
+   `autoinit/phase_a_search/states.jsonl` while the Phase-B driver writes
+   `phase_b_search/states.jsonl`, so the search journal — the one artifact that
+   would say how close the beam came — never came home and the pod is gone.
+   Detail: [`autoinit_phase_b_attempt3.json`](autoinit_phase_b_attempt3.json).
 
    **Repaired by reviewer decision (Option A):** `autoinit_preflight_setup.sh` now
    has a dedicated `phase_b` branch that loads `PhaseBAuthorization`, binds the
@@ -516,9 +536,9 @@ selection result.**
 ## Budget
 
 ```
-cumulative spend   $230.4150  incl. Phase-B setup attempts 1+2 at $0.3800
+cumulative spend   $239.9150  incl. Phase-B attempts 1-3 at $9.8800
 approved cap       $257.22    RAISED twice, each time replacing lost setup cost
-remaining          $26.8050   headroom; the Phase-B session ceiling is $26.8049
+remaining          $17.3050   headroom — BELOW the $26.8049 session ceiling
 
 ```
 

@@ -1,0 +1,10 @@
+$ /workspace/aad/scripts/autoinit/verify_frozen_assets.py
+rc=0
+--- stdout ---
+{
+  "passed": true,
+  "problems": []
+}
+
+--- stderr ---
+

@@ -1041,6 +1041,34 @@ evidence set.
 Grant document: `autoinit_phase_b_grant_attempt3.json`. **Unused headroom is not
 authorization.**
 
+## 2026-08-27 — Phase-B attempt 3: $9.5000, Stage 0 passed, Stage 1 ran out of time
+
+```
+cumulative spend before                                      $230.4150
+Phase-B attempt 3 (pod wkausr939ts7vv, 575.9 min, L40S)      $  9.5000
+cumulative spend after                                       $239.9150
+authorized cumulative cap                                    $257.2200
+remaining headroom                                           $ 17.3050
+Phase-B single-session hard ceiling                          $ 26.8049
+```
+
+The first attempt to enter the science. **Stage 0 passed** — comparability held,
+so all historical reuse was preserved — and **Stage 1 hit its 544 min search
+deadline** and stopped fail-closed rather than running to the `$23.72` cost
+backstop. No Top-5, no rungs, no selection: a **null result**. The pod was deleted
+and the provider confirms it is gone. The one-use authorization
+`autoinit.phase_b.20260826T164611Z` is **consumed**.
+
+**The cost model was wrong at the top of its own range.** The P=2 search was
+priced at 1.91–7.51 h; it ran 9.08 h without finishing. `depth.causal_kl_greedy_v1`
+alone took **388.2 min, 71.3% of the search**, across 12 expansions averaging
+**32.3 min** each. Repricing needs the measured figure, and that is a reviewer
+decision.
+
+Phase-B attempts have now cost **$9.8800** in total, of which `$0.3800` was setup
+failure. Headroom `$17.3050` is below the `$26.8049` ceiling, so a fourth attempt
+is arithmetically blocked without a new maintainer decision.
+
 ## Standing rules
 
 * Plan from **actual spend**, never from unused room under a previous authorization.

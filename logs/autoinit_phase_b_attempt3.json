@@ -1,0 +1,136 @@
+{
+  "schema": "aadistill.autoinit.phase_b_attempt/v1",
+  "attempt": 3,
+  "date": "2026-08-27",
+  "outcome": "FAILED at stage 1 \u2014 SearchDeadlineExceeded",
+  "classification": "The first Phase-B attempt to ENTER the science. Stage 0 passed; Stage 1 exhausted its allowance and stopped by design. NO Top-5, NO sa/sb/sc rungs, NO cross-phase selection. This is a null result and must not be read as evidence about either calibration distribution.",
+  "pod_id": "wkausr939ts7vv",
+  "gpu": "NVIDIA L40S @ $0.99/h",
+  "image": "runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@580.159.03",
+  "elapsed_min": 575.9,
+  "spend_usd": 9.5,
+  "spend_note": "$9.5000 is the billing basis (pod lifetime 575.9 min). The driver's own accounting reports $9.4498 over its 547.91 min of driver time; the difference is pod startup and teardown.",
+  "pod_state_after": "deleted after the teardown gate passed; provider confirms gone (launcher check True, and an independent `runpodctl pod list` returns an empty table)",
+  "authorization": {
+    "id": "autoinit.phase_b.20260826T164611Z",
+    "authorization_sha256": "b502b090013b7674bd1a70bb9711671e008c1048c9e092538ca4b7949ac3fd33",
+    "status": "CONSUMED. One-use. Never to be reused, patched or revived.",
+    "grant_document": "logs/autoinit_phase_b_grant_attempt3.json"
+  },
+  "identities_at_launch": {
+    "repair_commit": "304cbe0616c9a2f4ac315ad9a50a4b58a8b88f80",
+    "launch_commit": "4a25699a920b36c4aa7cdfde9ca5ee32bb99b0ed",
+    "executable_source_digest": "45f6bb8c93ff7cc03598528b369dd96554fc9fa7d706bfb7ee83304c695586f4",
+    "executable_source_files": 57,
+    "preregistration_sha256": "e167feaa502f2271624441b1f315e1590ce7008b7af5e491c96e3b04eb172c68",
+    "session_plan_hash": "23f23649b4be92bd8852bf9d89f8dcb372bc5a00a175ae631d32b9d71de8032d",
+    "science_plan_hash": "02be33b9a7a8e26bc8bfb75795351e8cdc9ffd441b47066cc81887cfc511b55c",
+    "bundle": "aad_autoinit_4a25699a.bundle"
+  },
+  "pre_launch_gates": {
+    "exact_launch_commit_suite": "2333 passed, 12 skipped, 0 failed, at 4a25699a with a clean tree",
+    "frozen_verifier": "passed: true, problems: []",
+    "pre_provider_gates": "all 9 passed",
+    "ckpt_store_capacity": "14.9 GiB free for 11.6 GiB of leaves and working room"
+  },
+  "stage_0": {
+    "verdict": "PASSED at 17:35:22Z, 3.15 min after driver start",
+    "attestation": "interval 0.011695, floor 0.3000, plan 02be33b9a7a8\u2026",
+    "comparability": "generation_runtime_comparability@v2 held EXACTLY: live_identity == historical_identity == 70a26e0b43df\u2026, identities_equal true, live_driver == historical_driver == 580.159.03, driver_patch_differs false. All historical reuse was therefore preserved and the ten-probe budget stood; the rejected 14-probe no-reuse path was never reachable.",
+    "executable_source_digest_rebound_on_pod": "45f6bb8c93ff7cc03598528b369dd96554fc9fa7d706bfb7ee83304c695586f4",
+    "calibration_identities_rebound_on_pod": {
+      "calib.domain_balanced@v1": {
+        "profile_hash": "11f36a88bad4879f8ab0e3586ca1f0af035401e505dc97815bed8d47b9f32e9b",
+        "content_sha256": "d65c1f40e4837ea1bd5bcc33c68041a13b797c68f5be3c0686e0142ed761028f",
+        "items_file_sha256": "c7202338109e459b17b70456461e8f304fadea7929ea547accee21adbbe7fd0b"
+      },
+      "calib.reasoning_heavy@v2": {
+        "profile_hash": "6c67b8dff0e81a775371a62b1b293677e45c173f52aee119d036c95081782ddd",
+        "content_sha256": "cdb2838946b9355294406d2bc398bc8390306ced84a35b09900f45a033ccc370",
+        "items_file_sha256": "a2ff8c92c16aaf5c178db160690430f4972216d45a57ab0025835ecd0ca41fc4"
+      }
+    },
+    "historical_probes_imported": 8,
+    "historical_probes_skipped": "3 leaves, each because the candidate is not in the Phase-B candidate set",
+    "probes_dir_digest": "a5115816861ad239f646facec4d53ba2c7925c9430c530e7c6d0af2560d5b1af",
+    "evaluation_protocol_hash": {
+      "phase_b": "250f72efbd43b86a475e8dda293b45f07ee61a4d858e147f4a5bd7681c32c2e4",
+      "phase_a_attested": "7327e880645492ec308fce62054b4845dce3de12e3079bb17a32e7d22898411a",
+      "note": "These differ BY CONSTRUCTION and it is not a comparability failure: the protocol hash covers the runtime block, and Phase A's session ran on image digest 580.178.04 against this session's 580.159.03. What decides reuse is the comparability rule above, whose live and historical identities are identical. The two hashes must not be substituted for one another."
+    }
+  },
+  "stage_1": {
+    "verdict": "FAILED \u2014 SearchDeadlineExceeded",
+    "started_utc": "2026-08-26T17:35:22Z",
+    "failed_utc": "2026-08-27T02:40:08Z",
+    "message": "search deadline exceeded after 544.7 min (budget 544.0 min) at before ffn.activation_importance_v0 on 85421eab09ee. The search stopped rather than continuing to the cost backstop.",
+    "configuration": "P=2 over ['calib.domain_balanced@v1', 'calib.reasoning_heavy@v2']; 2 retained finalists injected; 13 CPU threads (cgroup.v2, 128 visible)",
+    "behaved_correctly": "The deadline is a fail-closed guard and it did its job: the search stopped at 544.7 min rather than running to the $23.72 cost backstop. The overrun past 544.0 min is one operator expansion's granularity \u2014 the check fires BEFORE an expansion, not during one.",
+    "what_the_allowance_bought": {
+      "depth_operator_invocations_completed": 12,
+      "depth_minutes_total": 388.2,
+      "depth_share_of_search": "71.3%",
+      "depth_minutes_mean_each": 32.3,
+      "depth_minutes_range": "28.5 - 38.4",
+      "candidates_per_invocation": 260,
+      "rounds_per_invocation": "0-7 (36, 35, 34 ... 29 layer candidates)",
+      "teacher_evals_logged": 3120,
+      "remainder": "156.5 min (28.7%) went to state materialization, reload/validate round-trips, state_eval measurement, statistics, and the operators that emit no per-candidate log line (width, ffn, attention)."
+    },
+    "what_is_NOT_known": "How many search STATES completed, and how close the beam was to five admissible leaves. Only depth.causal_kl_greedy_v1 logs per-candidate progress, so the 12 invocations are a firm count of DEPTH expansions and NOT a count of total expansions or states."
+  },
+  "the_evidence_gap": {
+    "what": "The search journal never came home and the pod is deleted, so it is gone.",
+    "why": "configs/autoinit/phase_a_artifacts_failed.json collects search_journal at 'autoinit/phase_a_search/states.jsonl' (archive root /workspace/aad/artifacts). The Phase-B driver writes its journal to artifacts/autoinit/phase_b_search/states.jsonl \u2014 one directory name apart. The pattern matched nothing, and because the entry is required:false / min_matches:0, the manifest reported missing:0 and the teardown gate passed.",
+    "cost": "For a DEADLINE failure this is the single most useful artifact: it holds per-state timings, the beam contents, and how many admissible leaves existed when the clock ran out. Without it, any repricing of the P=2 search rests on the DEPTH figures reconstructed from the driver log above.",
+    "class": "the same shared-machinery mismatch as the SESSION_KIND gap: the Phase-B driver overrode the workdir and the artifact spec, a different file, still names the Phase-A path. 'Ask who else loads it' \u2014 for a new output location, enumerate the collectors too.",
+    "not_fixed_here": "This is a real defect but fixing it is not in the scope of the terminal-report stop. Recorded for the reviewer."
+  },
+  "cost_model_finding": {
+    "priced_p2_search": "1.91 - 7.51 h ($1.8950 - $7.4349)",
+    "actual": "9.08 h and still incomplete",
+    "implication": "The P=2 search cost was underestimated at the top of its own priced range. The DEPTH operator dominates at ~32 min per expansion, and P=2 doubles the number of expansions rather than sharing them. Any future attempt needs a repriced allowance derived from the measured 32.3 min DEPTH figure, not from the Phase-A P=1 extrapolation \u2014 and that is a reviewer decision, not an adjustment to make quietly."
+  },
+  "results": {
+    "p2_top5": null,
+    "sa_table": null,
+    "sb_progression": null,
+    "sc_progression": null,
+    "final_selection": null,
+    "why_null": "Stage 1 never produced admissible leaves, so stages 2-5 never ran. There is no Phase-B scientific result, and a null result must not be reinterpreted as a winner or as evidence about either calibration distribution."
+  },
+  "retained_artifacts": {
+    "location": "logs/autoinit_phase_b_attempt3/",
+    "sha256": {
+      "phase_a_evidence.json": "37514aa7c74f87d065f2170cac30463f01bd8a4b6a9e965964d59a29bec208ed",
+      "phase_b_stage0_binding.json": "b2b2300a6be8ec1317de83ac1cc85fd2f52d69319aa549824a1182c77c0401dd",
+      "stage1_traceback.log": "ddeda48b081f55e36e83c4cf5b1bee6be56ba869cd5e728cdedc6163fb5a5c46",
+      "engine_probe.json": "49593edb8bdf3047ee4feccd4bb59d0f954124b9ca3c894460b6be0dece8d431",
+      "frozen_assets.log": "10dc46971aab8170717c12e831e3ec62776fadcf5b92d0ac0910726d182b31fd",
+      "attested_evaluation_protocol.json": "c3984aafedb8d1dbd5b03eec24ee7640f797185c9dad10d4fa8d0e999a55c15e",
+      "session_markers.status": "cbcaa3bdd2b6d520d4231bcb749a79ea5c5b2e3d7552fccd2716e47962c26ed6",
+      "driver_run.log": "derived: the collected run log with vLLM weight-loading progress lines removed; the unfiltered original hashes b1743882282e80e1c1543593d68002c3f7d7a5ad2da081d5fadc07d5e3538352"
+    },
+    "imported_probe_hashes": "logs/autoinit_phase_b_attempt3/imported_probe_hashes.txt \u2014 the 8 historical citations as the pod journalled them",
+    "no_checkpoints_retained": "the search produced no admissible leaves, so there were no Phase-B Top-5 bytes to transfer. The dev-box artifact store is unchanged."
+  },
+  "budget": {
+    "spend_before_usd": 230.415,
+    "this_attempt_usd": 9.5,
+    "spend_after_usd": 239.915,
+    "cumulative_cap_usd": 257.22,
+    "headroom_after_usd": 17.305,
+    "session_ceiling_usd": 26.8049,
+    "note": "Headroom $17.3050 is below the $26.8049 session ceiling, so a fourth attempt is arithmetically blocked without a new maintainer decision \u2014 and it would need a repriced search allowance regardless. Phase-B attempts have now cost $9.8800 in total."
+  },
+  "preregistration_deviations": "None. The executed session matched the frozen preregistration in every respect that ran: executable digest, both plan hashes, both calibration spec and content identities, the 8 imported citations, the closed candidate set and the Stage-0 fail-closed condition were all rebound on the pod and all matched. The run ended inside Stage 1 without reaching any stage the preregistration could be deviated from.",
+  "not_changed": [
+    "the P=2 search science, beam, schedule and ranking policy",
+    "the closed 8-candidate cross-phase set and its three exclusions",
+    "both calibration identities, spec and materialized content",
+    "the frozen science plan, feasibility floor, equivalence interval, sa/sb/sc procedure and the no-fourth-seed rule",
+    "the permanent Stage-3 controls, untouched",
+    "the historical probe evidence and the reuse rules",
+    "the $13.0800 planning floor and the $26.8049 session ceiling"
+  ]
+}
