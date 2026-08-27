@@ -10,6 +10,7 @@ project two pods.
 from __future__ import annotations
 
 import json
+import subprocess
 import sys
 import types
 from pathlib import Path
@@ -21,6 +22,7 @@ sys.path.insert(0, str(REPO / "src"))
 sys.path.insert(0, str(REPO / "scripts/pod"))
 sys.path.insert(0, str(REPO / "scripts/autoinit"))
 
+import autoinit_phase_a_launch as pal  # noqa: E402
 import autoinit_phase_b_driver as pbd  # noqa: E402
 import autoinit_phase_b_launch as pbl  # noqa: E402
 from aadistill.autoinit.calibration import (  # noqa: E402
@@ -579,8 +581,11 @@ def test_the_phase_b_policy_uses_the_record_returning_fetcher():
     args = pbl.build_parser().parse_args(
         ["--scr", "/tmp/scr", "--session-commit", "d" * 40, "--bundle", "b.tgz"])
     policy = pbl.spec(args).artifacts
-    assert policy.fetch_products.__name__ == "fetch_selected_leaves"
-    assert policy.products_secured.__name__ == "selected_leaves_secured"
+    # Phase-B wrappers since 2026-08-28: the retention report stays the primary
+    # source and the Stage-1 selection is the fallback for a search that
+    # completed and then failed before stage 2 ever wrote one.
+    assert policy.fetch_products.__name__ == "fetch_phase_b_products"
+    assert policy.products_secured.__name__ == "phase_b_products_secured"
     # The defect being closed: the id-returning fetcher paired with a
     # record-consuming gate.
     assert policy.fetch_products.__name__ != "finalists_to_fetch"
@@ -703,14 +708,14 @@ def _issued(tmp_path, **over):
 
 def test_require_harness_actually_RE_DERIVES_the_phase_b_digest(tmp_path):
     """Not an alias returning a stored string: the real derivation, over the real
-    58 files, failing closed when it disagrees."""
+    59 files, failing closed when it disagrees."""
     from aadistill.autoinit.authorization import AuthorizationError
     from aadistill.autoinit.phase_b import phase_b_source_digest
 
     auth, _ = _issued(tmp_path)
     observed = auth.require_harness(REPO)
     assert observed["digest"] == phase_b_source_digest(REPO)["digest"]
-    assert len(observed["files"]) == 58
+    assert len(observed["files"]) == 59
     assert observed["not_yet_covered"] == []
     # It is the Phase-B set, not Phase A's.
     paths = {e["path"] for e in observed["files"]}
@@ -829,8 +834,14 @@ def test_no_pod_run_test_reconstructs_citations_from_the_dev_box_store():
 
 def test_the_host_local_module_exists_and_is_the_one_excluded():
     excluded = set(pbl.PHASE_B_TEST_IGNORES) - set(pbl.TEST_IGNORES)
-    assert excluded == {"tests/autoinit/test_phase_b_reuse_hostlocal.py"}
-    assert (REPO / "tests/autoinit/test_phase_b_reuse_hostlocal.py").is_file()
+    assert excluded == {
+        # dev-box artifact store; a pod has none
+        "tests/autoinit/test_phase_b_reuse_hostlocal.py",
+        # a ~7 min CPU beam search, already proven at $0 before launch
+        "tests/pod/test_phase_b_stage1_executes.py",
+    }
+    for rel in excluded:
+        assert (REPO / rel).is_file(), rel
     # The exclusion is Phase-B-specific: Phase A's historical contract, which
     # completed sessions ran under, is not rewritten by this repair.
     assert pbl.TEST_IGNORES == ("tests/data/test_recovery_corpus_pipeline.py",
@@ -922,4 +933,130 @@ def test_the_verifier_is_inside_the_digest_the_grant_is_issued_against():
     # And the pricing module, for the same reason: the launcher imports it to
     # derive the Stage-1 deadline, so it decides how long a paid search may run.
     assert "scripts/autoinit/price_phase_b.py" in PHASE_B_EXECUTABLE_SOURCE_FILES_V1
-    assert PHASE_B_SOURCE_SET_VERSION == 4
+    # And the Stage-1 selection artifact: written inside the paid search, read by
+    # the failed-run collector, so it decides what survives a failure.
+    assert "src/aadistill/autoinit/stage1_selection.py" in PHASE_B_EXECUTABLE_SOURCE_FILES_V1
+    assert PHASE_B_SOURCE_SET_VERSION == 5
+
+
+# --- repair 6: a completed search must not die with the pod ------------------
+#
+# Attempt 4 completed an eight-hour search, ranked it, and then raised in the
+# summary. `fetch_products` correctly found nothing to fetch, because the only
+# source it had — `leaf_retention.json` — is written during STAGE 2. Five
+# measured, selected checkpoints were deleted with the pod.
+
+
+def _selection(scr: Path, state_ids, checkpoint_root="/workspace/aad/x"):
+    """A real, self-verifying selection artifact where the collector looks."""
+    from aadistill.autoinit import stage1_selection
+    from aadistill.infrastructure.manifest import sha256_json
+
+    body = {
+        "schema": stage1_selection.SCHEMA,
+        "generated_utc": "2026-08-28T00:00:00+00:00",
+        "search": {"run_id": "autoinit.v1.phase_a", "config_hash": "c" * 64},
+        "journal": {"path": "states.jsonl", "sha256": "j" * 64},
+        "selected": [{"state_id": s, "artifact_digest": f"{s}-digest",
+                      "checkpoint_path": f"{checkpoint_root}/{s}",
+                      "single_shard_sha256": None, "num_parameters": 1,
+                      "path": s, "impl_ids": [], "calibration_profiles": []}
+                     for s in state_ids],
+        "n_selected": len(state_ids),
+        "decisions": [{"state_id": s, "reason": "selected"} for s in state_ids],
+    }
+    body["selection_sha256"] = sha256_json(
+        {k: v for k, v in body.items()
+         if k not in ("selection_sha256", "generated_utc")})
+    dest = scr / pbl.STAGE1_SELECTION_IN_ARCHIVE
+    dest.parent.mkdir(parents=True, exist_ok=True)
+    dest.write_text(json.dumps(body, indent=2))
+    return body
+
+
+def _ctx(scr, **over):
+    base = dict(scr=scr, args=types.SimpleNamespace(
+        ckpt_store=str(scr / "store"), ckpt_fetch_limit_min=1),
+        host="h", scp=("scp", "-P", "1"), say=lambda m: None, evidence={})
+    base.update(over)
+    return types.SimpleNamespace(**base)
+
+
+def test_no_selection_means_the_failed_teardown_stays_non_blocking(tmp_path):
+    """A search that died before ranking has nothing to secure."""
+    ctx = _ctx(tmp_path)
+    assert pbl.stage1_selection_records(ctx) == []
+    assert pbl.fetch_phase_b_products(ctx) == []
+    ok, why = pbl.phase_b_products_secured(ctx, [])
+    assert ok, why
+
+
+def test_a_present_selection_makes_teardown_BLOCK_until_the_bytes_are_off_pod(tmp_path):
+    ids = [f"leaf{n}" for n in range(5)]
+    _selection(tmp_path, ids)
+    ctx = _ctx(tmp_path)
+    assert len(pbl.stage1_selection_records(ctx)) == 5
+    ok, why = pbl.phase_b_products_secured(ctx, [])
+    assert not ok
+    assert "search COMPLETED" in why and "leaf0" in why
+
+    secured = [{"artifact": "stage1_selected_leaf", "state_id": s, "rc": 0,
+                "matched": True} for s in ids]
+    ok, why = pbl.phase_b_products_secured(ctx, secured)
+    assert ok and "5 stage-1 selected leaves verified" in why
+
+
+def test_a_tampered_selection_is_ignored_rather_than_trusted(tmp_path):
+    body = _selection(tmp_path, ["leaf0"])
+    dest = tmp_path / pbl.STAGE1_SELECTION_IN_ARCHIVE
+    body["selected"].append(dict(body["selected"][0], state_id="smuggled"))
+    dest.write_text(json.dumps(body))
+    ctx = _ctx(tmp_path)
+    assert pbl.stage1_selection_records(ctx) == [], (
+        "an edited selection was accepted; its hash is the only thing that makes "
+        "it evidence")
+
+
+def test_the_failed_collector_FETCHES_the_selected_checkpoints(tmp_path, monkeypatch):
+    """The injected-failure integration: search done, ranked, selection written,
+    stage 2 never ran — the collector must still bring the five home."""
+    ids = [f"leaf{n}" for n in range(5)]
+    _selection(tmp_path, ids)
+    calls = []
+
+    def fake_run(argv, **kw):
+        calls.append(argv)
+        Path(argv[-1]).mkdir(parents=True, exist_ok=True)
+        return subprocess.CompletedProcess(argv, 0, b"", b"")
+
+    monkeypatch.setattr(pal.subprocess, "run", fake_run)
+    # Patched at its SOURCE: `fetch_selected_leaves` imports it inside the
+    # function, so a name bound on the launcher module would never be consulted.
+    from aadistill.autoinit import leaf_durability
+
+    monkeypatch.setattr(leaf_durability, "verify_transferred_leaf",
+                        lambda dest, rec, adapter: {
+                            "matched": True,
+                            "artifact_digest": rec["artifact_digest"]})
+    fetched = pbl.fetch_phase_b_products(_ctx(tmp_path))
+    assert {f["state_id"] for f in fetched} == set(ids)
+    assert all(f["rc"] == 0 and f["matched"] for f in fetched)
+    # And it fetched each leaf's OWN recorded checkpoint path, not a stage-2
+    # staging directory that a stage-1 failure never created.
+    sources = [a[-2] for a in calls]
+    assert all(f"/workspace/aad/x/leaf" in s for s in sources), sources
+
+    ok, why = pbl.phase_b_products_secured(_ctx(tmp_path), fetched)
+    assert ok, why
+
+
+def test_the_retention_report_stays_the_PRIMARY_source(tmp_path, monkeypatch):
+    """The selection is a fallback, not a replacement: stage 2's report is the
+    stronger statement and must win when both exist."""
+    _selection(tmp_path, ["leaf0"])
+    monkeypatch.setattr(pbl, "fetch_selected_leaves",
+                        lambda ctx, **kw: [{"artifact": "stage1_selected_leaf",
+                                            "state_id": "from-retention", "rc": 0,
+                                            "matched": True}])
+    fetched = pbl.fetch_phase_b_products(_ctx(tmp_path))
+    assert [f["state_id"] for f in fetched] == ["from-retention"]

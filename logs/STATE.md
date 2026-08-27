@@ -231,6 +231,15 @@ freed to 0.01 GiB, and the evaluation tokenizer materialized before every batter
    the same 12 causal-depth expansions cost **287.3 min against attempt 3's
    388.2 — a 26% reduction**, measured rather than modelled.
 
+   **Correction to this record:** an earlier version said the journal held "5
+   searched + 2 composite + 2 imported finalists". Mechanically it holds **9
+   BeamSearch leaves, all `provenance="search"`** — 2 composite and 7 decomposed —
+   and **no imported finalists at all**, because `make_retained_state` builds them
+   outside BeamSearch and nothing appends them to the store. Two of the seven
+   carry the Phase-A finalists' state ids because ids are content-derived and the
+   same composition was rediscovered, which is the reproducibility contract
+   working rather than the finalists appearing.
+
    **The telemetry's first real reading accounts for 98.7% of Stage 1** and names
    the next bottleneck: **state evaluation is 31.2%** (147.2 min over 82
    expansions) against a cost model that prices it at seconds per child, while the

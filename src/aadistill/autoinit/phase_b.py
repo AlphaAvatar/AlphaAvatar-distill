@@ -105,6 +105,7 @@ PHASE_B_EXECUTABLE_SOURCE_FILES_V1: tuple[str, ...] = (
     "src/aadistill/autoinit/phase_b.py",
     "src/aadistill/autoinit/ranking.py",
     "src/aadistill/autoinit/search.py",
+    "src/aadistill/autoinit/stage1_selection.py",
     "src/aadistill/autoinit/state.py",
     "src/aadistill/autoinit/stats.py",
     "src/aadistill/data/extra_stream.py",
@@ -122,14 +123,16 @@ PHASE_B_EXECUTABLE_SOURCE_FILES_V1: tuple[str, ...] = (
     "src/aadistill/init/sandwich.py",
 )
 #: Bumped when the driver and launcher joined the set (2), the strict
-#: historical-reuse verifier did (3), and the Phase-B pricing module did (4) —
+#: historical-reuse verifier did (3), the Phase-B pricing module did (4), and the
+#: Stage-1 selection artifact did (5) — it is written inside the paid search and
+#: read by the failed-run collector, so it decides what survives a failure —
 #: the launcher now imports it to DERIVE the Stage-1 deadline from the corrected
 #: cost model, so it decides how long a paid search may run.
 #:
 #: (3) and (4) are the same judgement: a module that was provenance becomes
 #: executable the moment the launcher imports it to make a decision about money
 #: or time, and it then belongs inside the digest the grant is issued against.
-PHASE_B_SOURCE_SET_VERSION = 4
+PHASE_B_SOURCE_SET_VERSION = 5
 
 #: What covers the rest of the paid session, so "not in the digest" never means
 #: "unaccounted for". Each is an existing, independently bound source identity.

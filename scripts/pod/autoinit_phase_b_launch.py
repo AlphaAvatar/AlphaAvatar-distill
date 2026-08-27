@@ -57,6 +57,7 @@ from aadistill.infrastructure.session_runner import REPO, WS, run_session  # noq
 from autoinit_science_inputs import (  # noqa: E402
     CALIBRATION_V1, CANONICAL_INIT, RECOVERY_LADDER,
 )
+from collections.abc import Mapping  # noqa: E402
 from autoinit_phase_a_launch import (  # noqa: E402
     BEAM6_SEARCH_CORRECTION_MINUTES, FALLBACK_RESERVE_MINUTES,
     LOCAL_ASSETS as PHASE_A_LOCAL_ASSETS, STAGE1_SEARCH_PHASE, TEACHER_REVISION,
@@ -98,7 +99,14 @@ REUSE_RECORD = REPO_ROOT / "logs/autoinit_historical_probe_reuse.json"
 #: whole pricing module would have been the wrong repair: everything else in it
 #: reads committed records and is exactly the kind of thing a pod should re-check.
 PHASE_B_TEST_IGNORES = (*TEST_IGNORES,
-                        "tests/autoinit/test_phase_b_reuse_hostlocal.py")
+                        "tests/autoinit/test_phase_b_reuse_hostlocal.py",
+                        #: A ~7 min CPU beam search. It exists to execute the
+                        #: Phase-B Stage-1 path at `$0` on the dev box, which is
+                        #: precisely where it belongs — running it again inside
+                        #: the pod's setup gate would bill seven minutes of L40S
+                        #: to re-prove something already proven for free, exactly
+                        #: as `test_phase_a_stages1_5_execute.py` is excluded.
+                        "tests/pod/test_phase_b_stage1_executes.py")
 
 #: The citations Phase B's ten-probe budget spends nothing on, derived from the
 #: candidate rules rather than pasted: sa/sb/sc for each imported finalist, and
@@ -309,6 +317,87 @@ def phase_b_poll_limit_minutes(args, plan=None) -> float:
              + args.ckpt_fetch_limit_min
              + TEARDOWN_OBSERVED_MINUTES)
     return plan.hard_terminate_minutes + slack
+
+
+#: Where the collector's extracted archive puts the Stage-1 selection artifact.
+STAGE1_SELECTION_IN_ARCHIVE = ("store/extracted/autoinit/phase_b_search/"
+                               "stage1_selection.json")
+
+
+def stage1_selection_records(ctx: SessionContext) -> list[dict]:
+    """The five leaves the SEARCH selected, or [] if it never got that far.
+
+    A second source for the same question `selected_leaf_records` answers, and it
+    exists because that one reads `leaf_retention.json` — which the driver writes
+    during **stage 2**. Attempt 4 completed the search, ranked it, and then died
+    inside stage 1, so no retention report was ever written and the product fetch
+    correctly found nothing to fetch. Five measured, selected checkpoints were
+    deleted with the pod.
+
+    The selection artifact is written the moment a ranking exists, so its presence
+    means the search completed whatever failed afterwards. It arrives in the
+    extracted archive, which the collector unpacks before fetching products.
+    """
+    from aadistill.autoinit import stage1_selection
+
+    path = ctx.scr / STAGE1_SELECTION_IN_ARCHIVE
+    if not path.is_file():
+        return []
+    try:
+        record = stage1_selection.load(path)
+    except Exception as exc:                       # noqa: BLE001 - never fatal
+        ctx.say(f"  stage-1 selection present but unusable: {type(exc).__name__}: {exc}")
+        return []
+    return list(record.get("selected") or [])
+
+
+def fetch_phase_b_products(ctx: SessionContext) -> list:
+    """Stage-2 retention first; the Stage-1 selection as the fallback.
+
+    Deliberately not merged into one source. `leaf_retention.json` means the
+    driver persisted and re-verified the leaves ON the pod, which is the stronger
+    statement, and it stays the primary path. The selection artifact means only
+    that the search chose them — which is exactly the case attempt 4 landed in and
+    exactly the case where the bytes were lost.
+    """
+    fetched = fetch_selected_leaves(ctx)
+    if fetched:
+        return fetched
+    records = stage1_selection_records(ctx)
+    if not records:
+        return []
+    ctx.say(f"  stage-1 selection present with no retention report: securing "
+            f"{len(records)} selected leaves from the search workdir")
+    return fetch_selected_leaves(ctx, records=records,
+                                 staged=f"{REPO}/artifacts/autoinit/phase_b_search/states")
+
+
+def phase_b_products_secured(ctx: SessionContext, fetched: list) -> tuple[bool, str]:
+    """Teardown may not complete while a COMPLETED search's leaves are on the pod.
+
+    Non-blocking when there is no selection: a search that died before ranking has
+    nothing to secure, and holding a dead pod open for artifacts it correctly
+    never produced is the failure mode the reduced failed-run spec exists to
+    avoid. Blocking the moment a selection exists, because then the bytes are the
+    output of work already paid for.
+    """
+    ok, why = selected_leaves_secured(ctx, fetched)
+    if not ok:
+        return ok, why
+    records = stage1_selection_records(ctx)
+    if not records:
+        return True, why
+    want = {r["state_id"] for r in records}
+    got = {f["state_id"] for f in fetched
+           if isinstance(f, Mapping) and f.get("rc") == 0 and f.get("matched")}
+    missing = sorted(want - got)
+    if missing:
+        return False, (
+            f"the stage-1 selection names {len(want)} leaves and only {len(got)} "
+            f"are verified off-pod; missing {missing}. The search COMPLETED — "
+            "deleting the pod now would destroy exactly the science it paid for, "
+            "which is what attempt 4 did.")
+    return True, f"all {len(want)} stage-1 selected leaves verified off-pod"
 
 
 def poll_lifetime_gate(ctx: SessionContext) -> tuple[bool, str]:
@@ -575,8 +664,8 @@ def spec(args) -> SessionSpec:
             #: retention record also names the two imported Phase-A finalists,
             #: which are already retained off-pod, and re-fetching them would
             #: spend transfer time on bytes the dev box already holds.
-            fetch_products=fetch_selected_leaves,
-            products_secured=selected_leaves_secured),
+            fetch_products=fetch_phase_b_products,
+            products_secured=phase_b_products_secured),
         teardown=TeardownPolicy(
             note="nothing chains off Phase B; it is a terminus like Phase A"),
         precheck=(

@@ -3,7 +3,7 @@
   "attempt": 4,
   "date": "2026-08-27",
   "outcome": "EXECUTION_INCOMPLETE",
-  "classification": "EXECUTION_INCOMPLETE / NO_SCIENTIFIC_RESULT. Stage 0 passed and Stage 1 COMPLETED its search, measured the control and both imported finalists, and computed its ranking \u2014 then raised while building the summary record. Stages 2-5 never ran, so there is no sa/sb/sc evidence and no cross-phase selection. No calibration hypothesis was answered.",
+  "classification": "EXECUTION_INCOMPLETE / NO_SCIENTIFIC_RESULT. Stage 0 passed and Stage 1 COMPLETED its search, measured the control and both imported finalists, and computed its ranking \u2014 then raised while building the summary record. Stages 2-5 never ran, so there is no sa/sb/sc evidence and no cross-phase selection. The journal is audit and diagnostic evidence only; without the retained Top-5 checkpoint bytes it cannot be upgraded into citable candidate evidence. No calibration hypothesis was answered.",
   "pod_id": "zjwpsurs2dyvw8",
   "gpu": "NVIDIA L40S @ $0.99/h",
   "image": "runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@580.159.03",
@@ -74,10 +74,21 @@
     "class": "a $0-detectable defect on a path only Phase B reaches. The same shape as the SESSION_KIND gap and the artifact-spec path: Phase-B-only code that no Phase-A run and no test ever executed."
   },
   "stage_1_evidence_recovered": {
-    "journal": "155 records over 82 distinct states: 29 measured-and-retained, 53 pruned, all with measurements. The complete search.",
-    "complete_leaves": 9,
-    "leaf_composition": "5 searched decomposed leaves, 2 composite leaves (one per mixture) and the 2 imported Phase-A finalists, which were measured inside the search as the design requires.",
-    "top_5_status": "NOT REPORTED HERE. The run computed a ranking and then died before writing it, so no Top-5 artifact exists. The ranking is deterministically reconstructible from the journal under the frozen PARETO_V1, but reconstructing it post hoc and then treating it as the session's result is precisely the move this project's own rules forbid. Whether a retry may CITE this search rather than re-running it is a reviewer decision, not mine."
+    "_correction": "An earlier version of this record said the journal held '5 searched + 2 composite + 2 imported finalists = 9 complete leaves'. That was wrong. Mechanically, from the latest record per state_id: EVERY record in the journal has provenance='search', and the imported Phase-A finalists are NOT in it at all.",
+    "method": "latest record per state_id from the retained states.jsonl",
+    "records": 155,
+    "distinct_state_ids": 82,
+    "validity": {
+      "measured": 29,
+      "pruned": 53
+    },
+    "beamsearch_complete_leaves": 9,
+    "of_which_composite": 2,
+    "of_which_decomposed_four_operator": 7,
+    "imported_phase_a_finalists_in_journal": 0,
+    "why_zero": "`make_retained_state` builds the imported finalists outside BeamSearch and nothing appends them to the store, so attempt 4's measurements of them are not in the journal and are lost with the pod.",
+    "the_id_coincidence": "Two of the seven decomposed leaves carry state_ids identical to the Phase-A finalists \u2014 85bde4ded2c3 and cca699c93f34. They are NOT the imported finalists appearing in the journal. State ids are content-derived, so the Phase-B search under calib.domain_balanced@v1 rediscovering the same operator composition from the same root produces the same id. That is the reproducibility contract working, and reading it as the finalists being journalled is what produced the original error.",
+    "top_n_status": "NOT REPORTED. The run computed a ranking and died before writing it, so no Top-5 artifact exists. It is reconstructible from the journal, but the journal alone is not citable candidate evidence: the restore contract requires the checkpoint BYTES with a re-derived artifact identity, and those were deleted with the pod. Reviewer decision, 2026-08-28: do not reconstruct it, do not begin sa from journal-only state ids, and do not build a one-off replay path to avoid rerunning Stage 1. A fresh complete P=2 search after the durability repair is cleaner."
   },
   "telemetry_first_measurement": {
     "_note": "The instrumentation added in this pass, reporting on its first real run. Recorded, NOT acted on: pricing research is closed.",

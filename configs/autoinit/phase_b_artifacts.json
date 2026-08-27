@@ -29,6 +29,13 @@
       "min_bytes": 1
     },
     {
+      "artifact_class": "stage1_selection",
+      "pattern": "autoinit/phase_b_search/stage1_selection.json",
+      "required": true,
+      "lifecycle": "final_required",
+      "min_bytes": 1
+    },
+    {
       "artifact_class": "phase_a_result",
       "pattern": "audit/autoinit_phase_a/phase_a_result.json",
       "required": true,

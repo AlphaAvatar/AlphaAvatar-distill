@@ -31,6 +31,13 @@
       "min_matches": 0
     },
     {
+      "artifact_class": "stage1_selection",
+      "pattern": "autoinit/phase_b_search/stage1_selection.json",
+      "required": false,
+      "lifecycle": "final_required",
+      "min_matches": 0
+    },
+    {
       "artifact_class": "gate_log",
       "pattern": "audit/autoinit_phase_a/*.log",
       "required": false,

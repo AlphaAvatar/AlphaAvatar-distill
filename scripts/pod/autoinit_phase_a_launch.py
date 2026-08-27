@@ -273,7 +273,8 @@ def selected_leaf_records(ctx: SessionContext) -> list[dict]:
     return list(json.loads(report.read_text()).get("leaves", []))
 
 
-def fetch_selected_leaves(ctx: SessionContext) -> list:
+def fetch_selected_leaves(ctx: SessionContext, *, records: list | None = None,
+                          staged: str | None = None) -> list:
     """Bring the Stage-1 selected leaves off the pod, whatever Stage 2 did.
 
     **This is the attempt-11 fix.** That session produced five valid, measured,
@@ -292,7 +293,11 @@ def fetch_selected_leaves(ctx: SessionContext) -> list:
     equal the digest Stage 1 recorded. A transfer that silently truncated would
     otherwise be indistinguishable from one that worked.
     """
-    records = selected_leaf_records(ctx)
+    # `records`/`staged` let a caller supply a DIFFERENT source for the same
+    # question — Phase B passes the Stage-1 selection artifact when stage 2 never
+    # ran to write a retention report. Defaults are exactly the previous
+    # behaviour, so no existing caller changes.
+    records = selected_leaf_records(ctx) if records is None else records
     if not records:
         return []
 
@@ -301,15 +306,18 @@ def fetch_selected_leaves(ctx: SessionContext) -> list:
     from aadistill.autoinit.leaf_durability import verify_transferred_leaf
 
     adapter = get_adapter("qwen3")
-    staged = f"{REPO}/artifacts/audit/autoinit_phase_a/selected_leaves"
+    staged = staged or f"{REPO}/artifacts/audit/autoinit_phase_a/selected_leaves"
     out: list = []
     for rec in records:
         state_id = rec["state_id"]
         dest = Path(ctx.args.ckpt_store) / "phase_a" / state_id
         dest.parent.mkdir(parents=True, exist_ok=True)
+        # The record's own path when it has one — the Stage-1 selection names
+        # each leaf's real checkpoint directory, which is not under `staged`.
+        source = rec.get("checkpoint_path") or f"{staged}/{state_id}"
         rc = subprocess.run(
             ["timeout", f"{ctx.args.ckpt_fetch_limit_min}m", "scp", "-r",
-             *ctx.scp[1:], f"root@{ctx.host}:{staged}/{state_id}", str(dest)],
+             *ctx.scp[1:], f"root@{ctx.host}:{source}", str(dest)],
             capture_output=True, timeout=ctx.args.ckpt_fetch_limit_min * 60 + 120)
         entry = {"artifact": "stage1_selected_leaf", "state_id": state_id,
                  "route": "scp", "dest": str(dest), "rc": rc.returncode}

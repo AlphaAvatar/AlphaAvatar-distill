@@ -42,7 +42,8 @@ from aadistill.autoinit.arch import ArchSpec, get_adapter  # noqa: E402
 from aadistill.autoinit.artifact import identify_checkpoint  # noqa: E402
 from aadistill.autoinit.calibration import DOMAIN_BALANCED_V1  # noqa: E402
 from aadistill.autoinit.metrics import StateEvaluator  # noqa: E402
-from aadistill.autoinit.ranking import PARETO_V1, SCHEDULE_V1  # noqa: E402
+from aadistill.autoinit.ranking import PARETO_V1, SCHEDULE_V1
+from aadistill.autoinit import stage1_selection  # noqa: E402
 from aadistill.autoinit.search import (  # noqa: E402
     BeamSearch, Deadline, SearchConfig,
 )
@@ -236,7 +237,12 @@ def run_phase_a_search(*, workdir: Path, state_eval: Path, top_n: int,
         active_profiles, calibration_items, repo_root)
 
     n = len(active_profiles)
-    config = SearchConfig(
+    # NAMED FOR ITS LIFETIME, not for its type. This object is the search's
+    # identity and is read again ~80 lines below to build the summary; a name as
+    # generic as `config` invited exactly what happened in Phase-B attempt 4,
+    # where the retained-candidate loop rebound it with a `Qwen3Config` and the
+    # summary then read `run_id` off a model config, eight hours into a paid run.
+    search_config = SearchConfig(
         run_id="autoinit.v1.phase_a", target_spec=target_spec,
         schedule=SCHEDULE_V1, seed=seed, workdir=Path(workdir),
         profiles=active_profiles, policy=PARETO_V1, suite=suite,
@@ -251,7 +257,7 @@ def run_phase_a_search(*, workdir: Path, state_eval: Path, top_n: int,
     # the start and reached only an affordability check; this is what makes it
     # bind while the search is running.
     search = BeamSearch(
-        adapter=adapter, config=config, root_teacher_id=teacher_id,
+        adapter=adapter, config=search_config, root_teacher_id=teacher_id,
         root_teacher_sha256=suite_manifest.get("teacher_sha256", "") or "0" * 64,
         root_loader=lambda: teacher,
         calibration_loader=calibration_loader,
@@ -259,10 +265,30 @@ def run_phase_a_search(*, workdir: Path, state_eval: Path, top_n: int,
         deadline=Deadline.from_minutes(search_minutes))
     result = search.run()
 
+    # --- THE DURABILITY BOUNDARY -------------------------------------------
+    #
+    # The ranking is a pure function of `result.leaves`; nothing below this point
+    # feeds it. So it is computed HERE, the instant the expensive part succeeds,
+    # and committed to an atomic hash-bound artifact before the control
+    # measurement, the retained candidates, the summary, or any other bookkeeping.
+    #
+    # Phase-B attempt 4 is why. It completed this search, measured everything,
+    # ranked it — and then raised in the summary dict, ending the session with no
+    # authoritative record of which five leaves had won. Eight hours of completed
+    # science, unusable, because the only place the selection was ever going to be
+    # written was the thing that failed.
+    ranking = result.top_n(PARETO_V1, min(top_n, len(result.leaves)))
+    selection_path = stage1_selection.commit(
+        search_config=search_config, ranking=ranking, suite=suite, policy=PARETO_V1,
+        profiles=active_profiles, journal_path=Path(workdir) / "states.jsonl",
+        directory=Path(workdir))
+    print(f"stage-1 selection committed: {selection_path} "
+          f"({len(ranking.selected)} leaves)", flush=True)
+
     # --- the canonical control, injected by frozen hash ---------------------
     init_dir = Path(repo_root) / canonical_init
-    control_cfg = AutoConfig.from_pretrained(str(init_dir))
-    control_spec = adapter.spec_from_config(control_cfg)
+    control_model_config = AutoConfig.from_pretrained(str(init_dir))
+    control_spec = adapter.spec_from_config(control_model_config)
     control_artifact = identify_checkpoint(
         init_dir, adapter=adapter, spec=control_spec,
         num_parameters=adapter.param_count(control_spec))
@@ -294,8 +320,8 @@ def run_phase_a_search(*, workdir: Path, state_eval: Path, top_n: int,
                 f"retained candidate {entry['candidate_id']} is not staged at "
                 f"{directory}; refusing to continue into a rung that would try to "
                 "train a checkpoint that is not here")
-        config = AutoConfig.from_pretrained(str(directory))
-        spec = adapter.spec_from_config(config)
+        retained_model_config = AutoConfig.from_pretrained(str(directory))
+        spec = adapter.spec_from_config(retained_model_config)
         art = identify_checkpoint(directory, adapter=adapter, spec=spec,
                                   num_parameters=adapter.param_count(spec))
         state = make_retained_state(
@@ -311,13 +337,13 @@ def run_phase_a_search(*, workdir: Path, state_eval: Path, top_n: int,
                                art.artifact_digest))
         imported.append(state)
 
-    ranking = result.top_n(PARETO_V1, min(top_n, len(result.leaves)))
-
     summary = {
         "schema": "aadistill.autoinit.phase_a_search/v1",
         "generated_utc": datetime.now(timezone.utc).isoformat(),
-        "run_id": config.run_id,
-        "config_hash": config.config_hash,
+        # From the SearchConfig and nothing else. Everything above this line may
+        # have loaded a model config; none of it may answer these two questions.
+        "run_id": search_config.run_id,
+        "config_hash": search_config.config_hash,
         "seed": seed,
         "suite": suite.qualified_id,
         "suite_hash": suite.suite_hash,
