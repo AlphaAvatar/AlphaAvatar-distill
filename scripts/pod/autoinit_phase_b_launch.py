@@ -271,6 +271,78 @@ def phase_b_budget(args):
         other_phases=widened)
 
 
+#: Measured, not chosen. Attempt 3 saw its terminal marker at 02:40:27 and had
+#: the pod deleted and provider-confirmed at 02:43:15 — **2.8 min** — for a run
+#: that FAILED and therefore had no products to transfer. Ten minutes carries
+#: that with margin and covers the artifact manifest, the archive build and the
+#: provider confirmation on a run that succeeded.
+TEARDOWN_OBSERVED_MINUTES = 10.0
+
+
+def phase_b_poll_limit_minutes(args, plan=None) -> float:
+    """How long the launcher must keep polling. DERIVED from the priced plan.
+
+    Phase B inherited Phase A's `--poll-limit-min 1320`, which is 22 h. The
+    corrected Phase-B envelope terminates at ~1926 min (~32.1 h), so the launcher
+    would have stopped polling **ten hours before** the session reached its own
+    operational hard bound — and a launcher that stops polling leaves a pod alive
+    and billing. That is the most expensive failure mode this project has.
+
+    The contract is relational rather than another constant: the polling lifetime
+    must exceed the plan's hard-terminate lifetime by enough to observe the end,
+    collect, transfer and tear down. Every term is an existing bounded knob:
+
+    * one poll interval of granularity, because the terminal marker can be seen
+      up to `--poll-seconds` late;
+    * `--ckpt-fetch-limit-min`, the bound already placed on fetching the products
+      home, which is the one post-terminal step that moves real bytes;
+    * the measured teardown above.
+
+    `authorized_usd` is deliberately unbounded here: this reads MINUTES, which do
+    not depend on it, and the authorization check belongs to the runner's
+    `make_plan`, where it already happens against the real grant.
+    """
+    if plan is None:
+        plan = phase_b_budget(args).plan(price_per_hour=args.max_price,
+                                         authorized_usd=float("inf"))
+    slack = (args.poll_seconds / 60.0
+             + args.ckpt_fetch_limit_min
+             + TEARDOWN_OBSERVED_MINUTES)
+    return plan.hard_terminate_minutes + slack
+
+
+def poll_lifetime_gate(ctx: SessionContext) -> tuple[bool, str]:
+    """Refuse, before a pod exists, to poll for less than the session can run.
+
+    The derived default makes this pass; the gate is what makes it a contract
+    rather than a default, because `--poll-limit-min` is still a flag a caller
+    can set to anything.
+    """
+    limit = getattr(ctx.args, "poll_limit_min", None)
+    if limit is None:
+        return False, ("--poll-limit-min was never resolved; the Phase-B default "
+                       "is derived from the priced plan and main() must set it")
+    if ctx.plan is None:                          # pragma: no cover - runner sets it
+        return False, "the budget plan is not available, so the poll lifetime is unbound"
+    hard = ctx.plan.hard_terminate_minutes
+    # Subsumed by the slack check below — anything failing this fails that too —
+    # and kept only because "the launcher would stop polling while the pod is
+    # still alive" is the sentence someone reading a refusal at 3 a.m. needs, and
+    # "less than the 42 min needed to tear down" is not. A mutation weakening
+    # `<=` to `<` changes the message and not the verdict; that is expected.
+    if limit <= hard:
+        return False, (f"--poll-limit-min {limit:.1f} does not exceed the plan's "
+                       f"hard-terminate lifetime {hard:.1f} min; the launcher would "
+                       "stop polling while the pod is still alive and billing")
+    required = phase_b_poll_limit_minutes(ctx.args, plan=ctx.plan)
+    if limit < required:
+        return False, (f"--poll-limit-min {limit:.1f} exceeds the hard bound "
+                       f"{hard:.1f} but leaves less than the {required - hard:.1f} min "
+                       "needed to observe the end, fetch the products and tear down")
+    return True, (f"polling {limit:.1f} min against a {hard:.1f} min hard bound "
+                  f"({limit - hard:.1f} min of teardown slack)")
+
+
 def driver_command(ctx: SessionContext, plan) -> str:
     return (f"/opt/train/bin/python "
             f"{REPO}/scripts/pod/autoinit_phase_b_driver.py "
@@ -517,6 +589,7 @@ def spec(args) -> SessionSpec:
             disk_provision_gate,
             imported_finalists_staged_gate,
             ckpt_store_capacity_gate,
+            poll_lifetime_gate,
         ),
         evidence_fields={
             "phase": "B",
@@ -545,12 +618,19 @@ def build_parser() -> argparse.ArgumentParser:
                     search_minutes=SEARCH_MINUTES_P2,
                     rung1_probes=RUNG1_PROBES_P2,
                     rung2_probes=RUNG2_PROBES_P2,
-                    tie_break_probes=TIE_BREAK_PROBES_P2)
+                    tie_break_probes=TIE_BREAK_PROBES_P2,
+                    #: Resolved in `main()` from the priced plan. NOT a Phase-B
+                    #: constant: Phase A's historical 1320 stays exactly where it
+                    #: is, and a number here would go stale the next time the
+                    #: envelope moves — which is precisely how 1320 became wrong.
+                    poll_limit_min=None)
     return ap
 
 
 def main() -> int:
     args = build_parser().parse_args()
+    if args.poll_limit_min is None:
+        args.poll_limit_min = phase_b_poll_limit_minutes(args)
     return run_session(spec(args), args, REPO_ROOT,
                        summary=("STOP for review. Phase B searched two "
                                 "calibration distributions jointly and cited "

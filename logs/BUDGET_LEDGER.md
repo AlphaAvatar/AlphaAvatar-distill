@@ -1132,6 +1132,30 @@ rather than applied: `plan_session` refuses the session under it by **$5.09**,
 with the figure in the error. **Attempt 4 cannot launch** until the maintainer
 rules on the ceiling and the cap.
 
+## 2026-08-27 — APPROVED: session ceiling $35.6660, cumulative cap $275.59
+
+**No spend.** Maintainer decision, 2026-08-27, on the corrected pricing model.
+
+```
+cumulative spend                                            $239.9150
+NEW authorized cumulative cap                               $275.5900
+Phase-B attempt-4 session hard ceiling                      $ 35.6660
+planning floor, NOT an expectation                          $ 16.4555
+search hard bound (16.461 h, 987.635 min)                   $ 16.2960
+plan hard terminate / soft stop                   $31.7769 / $31.4469
+```
+
+`$239.9150 + $35.6660 = $275.5810`; the cap is `$275.59`, so the margin is
+`$0.0090` of ordinary rounding. **Unused cumulative headroom does not authorize
+any later experiment.**
+
+Attempts 1-3 remain historical: `$0.1500` and `$0.2300` of setup failure and
+`$9.5000` of `EXECUTION_INCOMPLETE / NO_SCIENTIFIC_RESULT`. None of them enters
+the Phase-B scientific result.
+
+Grant document: `autoinit_phase_b_grant_attempt4.json`. Attempt 4 is authorized
+only after the poll-lifetime repair and every existing gate passes.
+
 ## Standing rules
 
 * Plan from **actual spend**, never from unused room under a previous authorization.

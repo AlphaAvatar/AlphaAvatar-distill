@@ -1,4 +1,4 @@
-**Updated:** 2026-08-27 · branch `main` · **PHASE B RAN AND DID NOT COMPLETE — EXECUTION_INCOMPLETE / NO_SCIENTIFIC_RESULT, $9.50**
+**Updated:** 2026-08-27 · branch `main` · **ATTEMPT 4 APPROVED AND PREPARING — ceiling $35.6660, cap $275.59**
 
 # Current state
 
@@ -206,10 +206,18 @@ freed to 0.01 GiB, and the evaluation tokenizer materialized before every batter
    level 0 against two per level-1 parent. The bound moved only 994.4 → 987.6 min,
    which is why a check on the total alone would have passed against both defects.
 
-   **This is a fail-closed blocker for attempt 4**, not a resolved item: the
-   frozen `$26.8049` was deliberately left unchanged, so `plan_session` now
-   **refuses** the session under it by `$5.09`. A maintainer decision on the
-   ceiling and the cap is required before any relaunch.
+   **Approved 2026-08-27**: session hard ceiling **$35.6660**, cumulative cap
+   **$275.59**. The corrected pricing model, P1 and P2 are frozen.
+
+   **One further repair closed before attempt 4.** Phase B inherited Phase A's
+   `--poll-limit-min 1320` — 22 h — against a corrected envelope that terminates
+   at **1925.87 min (32.10 h)**, so the launcher would have stopped polling **606
+   min** before the session reached its own hard bound, leaving a pod alive and
+   billing. The Phase-B default is now **derived from the priced plan**:
+   `hard_terminate_minutes` plus one poll interval, the checkpoint-fetch limit and
+   a teardown time measured from attempt 3 — **1967.87 min (32.80 h)**, 42 min of
+   slack. Phase A's 1320 is untouched, and `poll_lifetime_gate` refuses before a
+   pod exists if the two ever drift apart again.
    Detail: [`autoinit_phase_b_attempt3.json`](autoinit_phase_b_attempt3.json).
 
    **Repaired by reviewer decision (Option A):** `autoinit_preflight_setup.sh` now
@@ -571,8 +579,8 @@ selection result.**
 
 ```
 cumulative spend   $239.9150  incl. Phase-B attempts 1-3 at $9.8800
-approved cap       $257.22    RAISED twice, each time replacing lost setup cost
-remaining          $17.3050   headroom — BELOW the $26.8049 session ceiling
+approved cap       $275.59    APPROVED against the corrected pricing model
+remaining          $35.6750   headroom; the attempt-4 session ceiling is $35.6660
 
 ```
 

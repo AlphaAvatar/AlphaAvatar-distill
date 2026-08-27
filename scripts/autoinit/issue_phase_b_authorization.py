@@ -58,17 +58,18 @@ FROZEN_PLAN = "logs/autoinit_phase_a_recovery_plan_frozen.json"
 PREREGISTRATION = "logs/autoinit_phase_b_preregistration.json"
 REUSE_RECORD = "logs/autoinit_historical_probe_reuse.json"
 
-#: The frozen ceilings. The session ceiling is NOT the cumulative headroom: the
-#: maintainer's $257.2200 cap less $230.4150 spent leaves $26.8050, and the
-#: $0.0001 rounding margin belongs to the cumulative cap.
+#: The ceilings, RE-DERIVED and approved 2026-08-27. `$26.8049` rested on a P=2
+#: search priced at 1.91-7.51 h; attempt 3 ran 9.08 h without finishing, because
+#: the model assumed a cached intact reference while the run recomputed it per
+#: candidate. The corrected model prices all three reference modes, costs the
+#: composite leaves, charges statistics once per (parent, profile) as the runtime
+#: shares them, and adds the non-FLOP materialization path.
 #:
-#: The cap has been raised twice, each time to REPLACE setup cost already lost and
-#: never to enlarge anything: $256.84 -> $256.99 after attempt 1 spent $0.1500,
-#: then -> $257.22 after attempt 2 spent $0.2300. The session ceiling and the
-#: planning floor have not moved through either.
-HARD_CEILING_USD = 26.8049
-PLANNING_FLOOR_USD = 13.0800
-CUMULATIVE_CAP_USD = 257.22
+#: The cumulative cap is `$239.9150 spent + $35.6660 approved`, rounded up by
+#: `$0.0090` of ordinary rounding margin. Headroom is not authorization.
+HARD_CEILING_USD = 35.6660
+PLANNING_FLOOR_USD = 16.4555
+CUMULATIVE_CAP_USD = 275.59
 
 GRANT_FIELDS = ("granted_by", "covers", "cumulative_spend_at_approval_usd",
                 "cumulative_cap_usd", "does_not_authorize")
