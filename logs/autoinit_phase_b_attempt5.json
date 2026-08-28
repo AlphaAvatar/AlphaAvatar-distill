@@ -1,0 +1,191 @@
+{
+  "schema": "aadistill.autoinit.phase_b_attempt/v1",
+  "attempt": 5,
+  "date": "2026-08-28",
+  "outcome": "EXECUTION_INCOMPLETE",
+  "classification": "EXECUTION_INCOMPLETE / NO_SCIENTIFIC_RESULT for the CROSS-PHASE selection. Stage 0 passed, Stage 1 COMPLETED and emitted an authoritative Top-5, and Stage 2 ran three new sa probes before failing on a procedural collision. No sb/sc progression and no cross-phase initialization selection, so the calibration hypothesis is still unanswered.",
+  "pod_id": "37aah10zvqk4lo",
+  "gpu": "NVIDIA L40S @ $0.99/h",
+  "image": "runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@580.159.03",
+  "elapsed_min": 725.7,
+  "spend_usd": 11.97,
+  "pod_state_after": "deleted; provider confirms gone (launcher check True and an independent `runpodctl pod list` returns empty)",
+  "authorization": {
+    "id": "autoinit.phase_b.20260828T070326Z",
+    "authorization_sha256": "5bc0dc4193b78785546020320cc7b552c9077075503802c7997988c1af2191c9",
+    "status": "CONSUMED. One-use.",
+    "grant_document": "logs/autoinit_phase_b_grant_attempt5.json"
+  },
+  "identities_at_launch": {
+    "state_normalization_commit": "f87138f",
+    "launch_commit": "8d6ba98e4ffe98bef382eb2480983c2f2d304bbc",
+    "executable_source_digest": "3ad6a6e3edf13ca48fe8814eae5aa7296e62bc0cf3ad5a1758cd2fe8b75583bb",
+    "executable_source_files": 59,
+    "executable_source_set_version": 5,
+    "preregistration_sha256": "53f1347f6865e10eb827200af9e9282ab38af08e12423365385b378f70112f6a",
+    "session_plan_hash": "23f23649b4be92bd8852bf9d89f8dcb372bc5a00a175ae631d32b9d71de8032d",
+    "science_plan_hash": "02be33b9a7a8e26bc8bfb75795351e8cdc9ffd441b47066cc81887cfc511b55c",
+    "bundle": "aad_autoinit_8d6ba98e.bundle"
+  },
+  "pre_launch_gates": {
+    "exact_launch_commit_suite": "2407 passed, 12 skipped, 0 failed",
+    "frozen_verifier": "passed",
+    "pre_provider_gates": "all 10 passed"
+  },
+  "timeline": {
+    "setup_complete": "07:58:33 (21.9 min, $0.41)",
+    "stage_0_passed": "08:01:39",
+    "stage_1_passed": "15:45:45 \u2014 the P=2 search COMPLETED in 464.1 min of its 987.6 min allowance",
+    "stage_2_failed": "19:11:56, after three new sa probes",
+    "pod_deleted": "19:39:09, provider-confirmed"
+  },
+  "STAGE_1_RESULT_authoritative": {
+    "_status": "This IS a session-emitted result: `search_result.json` was written, so the attempt-4 shadowing fix held and the summary completed. It is the Stage-1 SEARCH outcome only \u2014 not a behavioural selection.",
+    "run_id": "autoinit.v1.phase_a",
+    "config_hash": "03a259106066ddfb\u2026",
+    "profiles": [
+      "calib.domain_balanced@v1",
+      "calib.reasoning_heavy@v2"
+    ],
+    "top_5": [
+      {
+        "state_id": "cca699c93f34",
+        "path": "FFN(db)->DEPTH(db)->WIDTH(db)->ATTENTION(none)"
+      },
+      {
+        "state_id": "85bde4ded2c3",
+        "path": "DEPTH(none)->FFN(db)->WIDTH(db)->ATTENTION(none)"
+      },
+      {
+        "state_id": "ab7632b00788",
+        "path": "ATTENTION(none)->DEPTH(rh)->WIDTH(db)->FFN(db)"
+      },
+      {
+        "state_id": "fe9683e6a9c7",
+        "path": "DEPTH(db)->FFN(db)->WIDTH(rh)->ATTENTION(none)"
+      },
+      {
+        "state_id": "bf5ae3b6ae00",
+        "path": "COMPOSITE_STAGE1(rh)"
+      }
+    ],
+    "reading_note": "db = calib.domain_balanced@v1, rh = calib.reasoning_heavy@v2. Three of the five involve the reasoning-heavy mixture. This is a SEARCH ranking on state_eval@v1, NOT the behavioural comparison Phase B exists to make, and it must not be reported as answering the calibration question."
+  },
+  "THE_FINDING_exact_reproduction": {
+    "what": "Two of the five searched leaves are BYTE-IDENTICAL to two retained Phase-A finalists: cca699c93f34 (04fa7fe74f01ee63) and 85bde4ded2c3 (590156f691fb10bf).",
+    "verified": "`identify_checkpoint` re-derived on the dev box gives the same artifact digest for the retained Phase-A directory and for the Phase-B copy that landed inside it. Two independent directions agree.",
+    "why": "State ids are content-derived. Phase B, searching a strictly larger space at P=2, rediscovered the same two compositions from the same root under calib.domain_balanced@v1 and produced the same bytes.",
+    "significance": "A genuine cross-session reproducibility result: the search is deterministic enough that an independent run reconstructs a prior session's checkpoints exactly. It is also the direct cause of the Stage-2 failure."
+  },
+  "why_stage_2_failed": {
+    "error": "ValueError: duplicate seeds in [20260726, 20260726]; each seed counts once",
+    "where": "POOLED_COUNTS_V2.pool, via selection_row, in stage 2",
+    "root_cause": "The frozen candidate universe is 5 searched leaves + 2 imported Phase-A finalists + 1 control = 8, and assumes those are DISTINCT. Because the search reproduced two of the imports exactly, two candidate ids each carry BOTH a cited historical sa probe (seed 20260726) and a newly run one at the same seed. Pooling refuses duplicate seeds \u2014 correctly, since counting one seed twice would inflate the evidence.",
+    "so_the_real_universe_was": "6 distinct candidates, not 8: 3 new leaves + 2 reproduced finalists + the control.",
+    "class": "SCIENTIFIC/PROCEDURAL, not mechanical. The pooling guard did exactly its job; what is wrong is a preregistered candidate rule that cannot express 'a searched leaf turned out to BE an imported candidate'. Fixing it is a change to the frozen procedure and is a reviewer decision, not mine."
+  },
+  "sa_evidence": {
+    "_note": "seed 20260726 throughout; scores are the frozen recovery score",
+    "newly_run_this_session": [
+      {
+        "candidate": "fe9683e6a9c7",
+        "score": 0.7474,
+        "digest": "c313d1b4081b9a3b"
+      },
+      {
+        "candidate": "bf5ae3b6ae00",
+        "score": 0.6526,
+        "digest": "11fad25573d08de0"
+      },
+      {
+        "candidate": "ab7632b00788",
+        "score": 0.4158,
+        "digest": "0e13f3dc99d22e03"
+      }
+    ],
+    "cited_from_verified_phase_a_evidence": [
+      {
+        "candidate": "cca699c93f34",
+        "score": 0.6421,
+        "digest": "04fa7fe74f01ee63"
+      },
+      {
+        "candidate": "85bde4ded2c3",
+        "score": 0.5632,
+        "digest": "590156f691fb10bf"
+      },
+      {
+        "candidate": "control-qwen",
+        "score": 0.4211,
+        "digest": "dc9500d3871a0f31"
+      }
+    ],
+    "never_probed": "the two reproduced leaves were not probed again as leaves; the collision fired first",
+    "INTERPRETATION_WARNING": "These are three new sa points beside three citations, on an incomplete rung, with no sb/sc and no selection. They are NOT a ranking and must not be read as one. Rung 1 has an admission step this run never reached."
+  },
+  "sb_sc_progression": null,
+  "final_selection": null,
+  "winner": null,
+  "defects_found": [
+    {
+      "id": "D1",
+      "what": "all five leaf transfers reported rc=1 digest=NOT MATCHED",
+      "cause": "`verify_transferred_leaf` requires `record['arch_signature']` and the Stage-1 selection record I added never provides it -> KeyError, caught and turned into rc=1.",
+      "impact": "NONE to the bytes. All five landed complete and all five digests re-derive correctly against the selection artifact. The failure was in the verification, not the transfer.",
+      "class": "writer/consumer contract gap \u2014 a new record type not checked against its consumer"
+    },
+    {
+      "id": "D2",
+      "what": "teardown proceeded although products_secured returned False",
+      "evidence": "'PRODUCTS NOT SECURED: ... 0 are verified off-pod' immediately followed by 'teardown gate: allowed=True' and pod deletion",
+      "impact": "none this time, because the bytes had in fact landed \u2014 but the gate that exists to stop exactly this did not stop it. Had the transfer genuinely failed, a completed search would have been deleted.",
+      "class": "the outer teardown gate does not consult the secured verdict"
+    },
+    {
+      "id": "D3",
+      "what": "leaf destination collides with the retained Phase-A store",
+      "detail": "`fetch_selected_leaves` writes to ckpt_store/phase_a/<state_id>, and two reproduced leaves have ids that already exist there. `scp -r` nested rather than overwriting.",
+      "impact": "no damage \u2014 the Phase-A files keep their 2026-08-21 timestamps and the historical-reuse verifier still passes 11/11 with 8 admitted \u2014 but 2 x 1.2 GiB of duplicate bytes now sit nested in the retained store, on a filesystem at 96%."
+    }
+  ],
+  "retained_artifacts": {
+    "out_of_tree": {
+      "_path": "/home/ecs-user/aad-artifacts/autoinit/phase_b/attempt5/",
+      "states.jsonl": "64b7e62d536d2a6afb6e635bd1050e68cb355a2a06bc113e4490ec6a45f6c8c1",
+      "telemetry.jsonl": "537bf64483f599e5c9459d844dea66c9263cc01be1cc5608fb4404295aba9e3c",
+      "stage1_selection.json": "08276d912cd79cd6edfc59273112c87e65d51230773e54ced5ce5527e7bf8e28"
+    },
+    "stage1_selection_identity": {
+      "selection_sha256": "84fd6496851995aef8ac624b68944c0881fdaf62a29013ea2aec5acb0e87a35c",
+      "n_selected": 5,
+      "note": "self-verifying; written the instant ranking existed, before any later bookkeeping"
+    },
+    "top5_checkpoints_on_dev_box": {
+      "_all_five_verified": "each re-derived digest equals the selection artifact's",
+      "ab7632b00788f825e252ea8d5ff4be30": "/home/ecs-user/aad-artifacts/autoinit/phase_a/ab7632b00788f825e252ea8d5ff4be30",
+      "fe9683e6a9c783bbc6fe276a78c851c6": "/home/ecs-user/aad-artifacts/autoinit/phase_a/fe9683e6a9c783bbc6fe276a78c851c6",
+      "bf5ae3b6ae00c3dbb963805135b3838f": "/home/ecs-user/aad-artifacts/autoinit/phase_a/bf5ae3b6ae00c3dbb963805135b3838f",
+      "cca699c93f34dad7e94a5d13a25b2bc2": "byte-identical to the retained Phase-A finalist already at that path; a nested duplicate also exists",
+      "85bde4ded2c31953f802e39cf2252c87": "byte-identical to the retained Phase-A finalist already at that path; a nested duplicate also exists"
+    },
+    "in_repo": "logs/autoinit_phase_b_attempt5/ \u2014 evidence, stage-0 binding, search_result.json, stage-2 traceback, 11 probe records, telemetry, filtered driver log"
+  },
+  "budget": {
+    "spend_before_usd": 248.085,
+    "this_attempt_usd": 11.97,
+    "spend_after_usd": 260.055,
+    "cumulative_cap_usd": 283.76,
+    "headroom_after_usd": 23.705,
+    "session_ceiling_usd": 35.666,
+    "blocking_arithmetic": "headroom $23.7050 is BELOW the $35.6660 session ceiling, so a sixth attempt needs a new cap decision. Phase-B attempts now total $30.0200."
+  },
+  "preregistration_deviations": "None in what executed. The deviation is that the preregistered candidate universe of 8 DISTINCT candidates was not realisable: the search reproduced two of the imports, leaving 6 distinct. That is a property of the frozen procedure meeting a reproducible search, not a departure from it by this session.",
+  "not_changed": [
+    "P=2 search science, beam, schedule, ranking policy",
+    "both calibration identities",
+    "the frozen science plan, floor and interval",
+    "the permanent Stage-3 controls",
+    "P1/P2 semantics",
+    "the pricing model"
+  ]
+}

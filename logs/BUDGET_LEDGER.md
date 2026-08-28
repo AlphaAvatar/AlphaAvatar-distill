@@ -1206,6 +1206,28 @@ remain historical evidence and none enters the Phase-B scientific result.
 
 Grant document: `autoinit_phase_b_grant_attempt5.json`.
 
+## 2026-08-29 — Phase-B attempt 5: $11.9700, Stage 1 completed, Stage 2 failed
+
+```
+cumulative spend before                                      $248.0850
+Phase-B attempt 5 (pod 37aah10zvqk4lo, 725.7 min, L40S)      $ 11.9700
+cumulative spend after                                       $260.0550
+authorized cumulative cap                                    $283.7600
+remaining headroom                                           $ 23.7050
+Phase-B session hard ceiling                                 $ 35.6660
+```
+
+**The furthest any attempt has reached.** Stage 0 passed; **Stage 1 completed the
+P=2 search in 464 min of its 987.6 min allowance and emitted an authoritative
+Top-5**; Stage 2 ran three new `sa` probes and then failed on
+`duplicate seeds in [20260726, 20260726]`. No `sb`/`sc`, no cross-phase
+selection: **`EXECUTION_INCOMPLETE / NO_SCIENTIFIC_RESULT`** for the calibration
+question. Pod deleted and provider-confirmed; the authorization
+`autoinit.phase_b.20260828T070326Z` is **consumed**.
+
+**Headroom `$23.7050` is below the `$35.6660` ceiling**, so a sixth attempt needs
+a new cap decision. Phase-B attempts now total **$30.0200**.
+
 ## Standing rules
 
 * Plan from **actual spend**, never from unused room under a previous authorization.

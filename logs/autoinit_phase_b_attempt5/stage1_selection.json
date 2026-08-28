@@ -1,0 +1,337 @@
+{
+  "schema": "aadistill.autoinit.stage1_selection/v1",
+  "generated_utc": "2026-08-28T15:43:27.065308+00:00",
+  "_contract": "Written the moment a Stage-1 ranking exists, before the control measurement, the retained candidates, the summary, or any other bookkeeping. If this file exists the search COMPLETED and these five leaves were selected, whatever happened afterwards. It is not a search result and not a substitute for the summary.",
+  "search": {
+    "run_id": "autoinit.v1.phase_a",
+    "config_hash": "03a259106066ddfbf840fcd874451e1a2863273fc595d61db7d024261aaea1d7",
+    "seed": 20260815,
+    "target_spec_hash": "09147a5c08d8ad7ad5bb18131bade73548a5fff08f0e0f99d6dd6ede227606c4",
+    "workdir": "/workspace/aad/artifacts/autoinit/phase_b_search"
+  },
+  "journal": {
+    "path": "/workspace/aad/artifacts/autoinit/phase_b_search/states.jsonl",
+    "sha256": "64b7e62d536d2a6afb6e635bd1050e68cb355a2a06bc113e4490ec6a45f6c8c1"
+  },
+  "policy": {
+    "qualified_id": "beam.pareto_multi_objective@v2",
+    "hash": "30a5305bc06dd1e886ea285fa7a3f90ac4b32f61bcb62bae35668f28922bf2e4"
+  },
+  "suite": {
+    "qualified_id": "state_eval@v1",
+    "hash": "6421fa4cf12ee2a16f452557c486aa95beb37e4aac4f7c7fd72d380993b39833"
+  },
+  "profiles": [
+    {
+      "qualified_id": "calib.domain_balanced@v1",
+      "profile_hash": "11f36a88bad4879f8ab0e3586ca1f0af035401e505dc97815bed8d47b9f32e9b",
+      "content_sha256": "d65c1f40e4837ea1bd5bcc33c68041a13b797c68f5be3c0686e0142ed761028f"
+    },
+    {
+      "qualified_id": "calib.reasoning_heavy@v2",
+      "profile_hash": "6c67b8dff0e81a775371a62b1b293677e45c173f52aee119d036c95081782ddd",
+      "content_sha256": "cdb2838946b9355294406d2bc398bc8390306ced84a35b09900f45a033ccc370"
+    }
+  ],
+  "selected": [
+    {
+      "state_id": "cca699c93f34dad7e94a5d13a25b2bc2",
+      "path": "FFN(calib.domain_balanced@v1)->DEPTH(calib.domain_balanced@v1)->RESIDUAL_WIDTH(calib.domain_balanced@v1)->ATTENTION(calib.none@v1)",
+      "artifact_digest": "04fa7fe74f01ee63f6611cca6d7fce4fe1dba66b9865cf0b9c47495b9cfe33d4",
+      "single_shard_sha256": "db056398840f5c64f767fe8690803478918399c04bd7b4a1aeae6b7549c624af",
+      "checkpoint_path": "/workspace/aad/artifacts/autoinit/phase_b_search/states/cca699c93f34dad7e94a5d13a25b2bc2",
+      "num_parameters": 596049920,
+      "impl_ids": [
+        "ffn.activation_importance_v0",
+        "depth.causal_kl_greedy_v1",
+        "width.global_pca_v0",
+        "attention.weight_proxy_v0"
+      ],
+      "calibration_profiles": [
+        "calib.domain_balanced@v1",
+        "calib.none@v1"
+      ]
+    },
+    {
+      "state_id": "85bde4ded2c31953f802e39cf2252c87",
+      "path": "DEPTH(calib.none@v1)->FFN(calib.domain_balanced@v1)->RESIDUAL_WIDTH(calib.domain_balanced@v1)->ATTENTION(calib.none@v1)",
+      "artifact_digest": "590156f691fb10bff7e6a60f34bcee27ec452a963f24e1b638f735a386ee396f",
+      "single_shard_sha256": "0a9a5a78e87cc800c1187a2c19f75c5e490734d1518fe8968d517b2077353c45",
+      "checkpoint_path": "/workspace/aad/artifacts/autoinit/phase_b_search/states/85bde4ded2c31953f802e39cf2252c87",
+      "num_parameters": 596049920,
+      "impl_ids": [
+        "depth.positional_v0",
+        "ffn.activation_importance_v0",
+        "width.global_pca_v0",
+        "attention.weight_proxy_v0"
+      ],
+      "calibration_profiles": [
+        "calib.domain_balanced@v1",
+        "calib.none@v1"
+      ]
+    },
+    {
+      "state_id": "ab7632b00788f825e252ea8d5ff4be30",
+      "path": "ATTENTION(calib.none@v1)->DEPTH(calib.reasoning_heavy@v2)->RESIDUAL_WIDTH(calib.domain_balanced@v1)->FFN(calib.domain_balanced@v1)",
+      "artifact_digest": "0e13f3dc99d22e03538864828ec188e819fb9ef223dafd465d4c0f37858371c8",
+      "single_shard_sha256": "c576287771e290e534b98c3ebb8b79c6337f7373d4f30d809af438f99497700e",
+      "checkpoint_path": "/workspace/aad/artifacts/autoinit/phase_b_search/states/ab7632b00788f825e252ea8d5ff4be30",
+      "num_parameters": 596049920,
+      "impl_ids": [
+        "attention.weight_proxy_v0",
+        "depth.causal_kl_greedy_v1",
+        "width.global_pca_v0",
+        "ffn.activation_importance_v0"
+      ],
+      "calibration_profiles": [
+        "calib.domain_balanced@v1",
+        "calib.none@v1",
+        "calib.reasoning_heavy@v2"
+      ]
+    },
+    {
+      "state_id": "fe9683e6a9c783bbc6fe276a78c851c6",
+      "path": "DEPTH(calib.domain_balanced@v1)->FFN(calib.domain_balanced@v1)->RESIDUAL_WIDTH(calib.reasoning_heavy@v2)->ATTENTION(calib.none@v1)",
+      "artifact_digest": "c313d1b4081b9a3b410dddf7a29ebcaad8dd0759179d51e1d761238c1743a2a6",
+      "single_shard_sha256": "d025f38da508803845ea4d01b7cea160d117d47de3535965c7866dc05cd1e48e",
+      "checkpoint_path": "/workspace/aad/artifacts/autoinit/phase_b_search/states/fe9683e6a9c783bbc6fe276a78c851c6",
+      "num_parameters": 596049920,
+      "impl_ids": [
+        "depth.causal_kl_greedy_v1",
+        "ffn.activation_importance_v0",
+        "width.global_pca_v0",
+        "attention.weight_proxy_v0"
+      ],
+      "calibration_profiles": [
+        "calib.domain_balanced@v1",
+        "calib.none@v1",
+        "calib.reasoning_heavy@v2"
+      ]
+    },
+    {
+      "state_id": "bf5ae3b6ae00c3dbb963805135b3838f",
+      "path": "COMPOSITE_STAGE1(calib.reasoning_heavy@v2)",
+      "artifact_digest": "11fad25573d08de0124cc5c3db01970ba8a6d8c818d405d7683109e81372df47",
+      "single_shard_sha256": "26356cffc6b0cb53842156481eaef84b675e87dc9a68428b8c1e4fab3370b2af",
+      "checkpoint_path": "/workspace/aad/artifacts/autoinit/phase_b_search/states/bf5ae3b6ae00c3dbb963805135b3838f",
+      "num_parameters": 596049920,
+      "impl_ids": [
+        "composite.stage1_sandwich_v0"
+      ],
+      "calibration_profiles": [
+        "calib.reasoning_heavy@v2"
+      ]
+    }
+  ],
+  "n_selected": 5,
+  "decisions": [
+    {
+      "state_id": "cca699c93f34dad7e94a5d13a25b2bc2",
+      "path": "FFN(calib.domain_balanced@v1)->DEPTH(calib.domain_balanced@v1)->RESIDUAL_WIDTH(calib.domain_balanced@v1)->ATTENTION(calib.none@v1)",
+      "front": 0,
+      "position_in_front": 0,
+      "lineage": "ffn.activation_importance_v0|depth.causal_kl_greedy_v1|width.global_pca_v0",
+      "selected": true,
+      "objectives": {
+        "state.teacher_kl.equal_domain_mean": 8.00463946338612,
+        "state.teacher_kl.worst_domain": 8.285937996797783,
+        "state.critical_token_kl": 12.110949027405555
+      },
+      "diagnostics": {
+        "state.nll.pooled_all_domains": 8.701837705253656,
+        "state.nll.teacher_reference_pooled": 0.9303384963747948,
+        "state.nll.general": 10.35014563978161,
+        "state.nll.reasoning_math": 8.056023063905783,
+        "state.nll.rag_multihop": 9.202599716964453,
+        "state.nll.code": 8.113962243853171,
+        "state.nll.tool": 8.449003540592507
+      },
+      "reason": "kept: front 0, lineage 'ffn.activation_importance_v0|depth.causal_kl_greedy_v1|width.global_pca_v0', beam 5"
+    },
+    {
+      "state_id": "85bde4ded2c31953f802e39cf2252c87",
+      "path": "DEPTH(calib.none@v1)->FFN(calib.domain_balanced@v1)->RESIDUAL_WIDTH(calib.domain_balanced@v1)->ATTENTION(calib.none@v1)",
+      "front": 1,
+      "position_in_front": 0,
+      "lineage": "depth.positional_v0|ffn.activation_importance_v0|width.global_pca_v0",
+      "selected": true,
+      "objectives": {
+        "state.teacher_kl.equal_domain_mean": 8.221184824199392,
+        "state.teacher_kl.worst_domain": 8.547991927381585,
+        "state.critical_token_kl": 14.553337649386386
+      },
+      "diagnostics": {
+        "state.nll.pooled_all_domains": 8.961294030051942,
+        "state.nll.teacher_reference_pooled": 0.9303384963747948,
+        "state.nll.general": 10.679454911688453,
+        "state.nll.reasoning_math": 7.783339945021924,
+        "state.nll.rag_multihop": 9.547936690456593,
+        "state.nll.code": 8.367382098749617,
+        "state.nll.tool": 9.047637157917087
+      },
+      "reason": "kept: front 1, lineage 'depth.positional_v0|ffn.activation_importance_v0|width.global_pca_v0', beam 5"
+    },
+    {
+      "state_id": "6a9250e8190864572de52e633a33a0ad",
+      "path": "FFN(calib.domain_balanced@v1)->DEPTH(calib.reasoning_heavy@v2)->RESIDUAL_WIDTH(calib.domain_balanced@v1)->ATTENTION(calib.none@v1)",
+      "front": 1,
+      "position_in_front": 1,
+      "lineage": "ffn.activation_importance_v0|depth.causal_kl_greedy_v1|width.global_pca_v0",
+      "selected": false,
+      "objectives": {
+        "state.teacher_kl.equal_domain_mean": 8.322871128379694,
+        "state.teacher_kl.worst_domain": 8.912677193129236,
+        "state.critical_token_kl": 12.46768535260121
+      },
+      "diagnostics": {
+        "state.nll.pooled_all_domains": 8.986541459968226,
+        "state.nll.teacher_reference_pooled": 0.9303384963747948,
+        "state.nll.general": 10.912499406778114,
+        "state.nll.reasoning_math": 8.108499408157646,
+        "state.nll.rag_multihop": 9.695366179191126,
+        "state.nll.code": 8.415995203054656,
+        "state.nll.tool": 8.648895684920484
+      },
+      "reason": "pruned: epsilon-dominated (front 1) and the beam of 5 was already full"
+    },
+    {
+      "state_id": "ab7632b00788f825e252ea8d5ff4be30",
+      "path": "ATTENTION(calib.none@v1)->DEPTH(calib.reasoning_heavy@v2)->RESIDUAL_WIDTH(calib.domain_balanced@v1)->FFN(calib.domain_balanced@v1)",
+      "front": 2,
+      "position_in_front": 0,
+      "lineage": "attention.weight_proxy_v0|depth.causal_kl_greedy_v1|width.global_pca_v0",
+      "selected": true,
+      "objectives": {
+        "state.teacher_kl.equal_domain_mean": 9.037654442080084,
+        "state.teacher_kl.worst_domain": 9.688687836920032,
+        "state.critical_token_kl": 14.577525379436075
+      },
+      "diagnostics": {
+        "state.nll.pooled_all_domains": 9.83815447370891,
+        "state.nll.teacher_reference_pooled": 0.9303384963747948,
+        "state.nll.general": 10.373657351040627,
+        "state.nll.reasoning_math": 8.85780826241541,
+        "state.nll.rag_multihop": 10.710826367128435,
+        "state.nll.code": 9.254540320871776,
+        "state.nll.tool": 9.982500608077505
+      },
+      "reason": "kept: front 2, lineage 'attention.weight_proxy_v0|depth.causal_kl_greedy_v1|width.global_pca_v0', beam 5"
+    },
+    {
+      "state_id": "8501a07865ee5d33f9679254762762cc",
+      "path": "ATTENTION(calib.none@v1)->DEPTH(calib.reasoning_heavy@v2)->RESIDUAL_WIDTH(calib.domain_balanced@v1)->FFN(calib.reasoning_heavy@v2)",
+      "front": 3,
+      "position_in_front": 0,
+      "lineage": "attention.weight_proxy_v0|depth.causal_kl_greedy_v1|width.global_pca_v0",
+      "selected": false,
+      "objectives": {
+        "state.teacher_kl.equal_domain_mean": 9.085587277469706,
+        "state.teacher_kl.worst_domain": 9.792226533730801,
+        "state.critical_token_kl": 14.607783278708355
+      },
+      "diagnostics": {
+        "state.nll.pooled_all_domains": 9.894364170568062,
+        "state.nll.teacher_reference_pooled": 0.9303384963747948,
+        "state.nll.general": 10.40556337864466,
+        "state.nll.reasoning_math": 8.877043248472585,
+        "state.nll.rag_multihop": 10.817096163723336,
+        "state.nll.code": 9.281860365131898,
+        "state.nll.tool": 10.049643451341174
+      },
+      "reason": "pruned: epsilon-dominated (front 3) and the beam of 5 was already full"
+    },
+    {
+      "state_id": "fe9683e6a9c783bbc6fe276a78c851c6",
+      "path": "DEPTH(calib.domain_balanced@v1)->FFN(calib.domain_balanced@v1)->RESIDUAL_WIDTH(calib.reasoning_heavy@v2)->ATTENTION(calib.none@v1)",
+      "front": 3,
+      "position_in_front": 1,
+      "lineage": "depth.causal_kl_greedy_v1|ffn.activation_importance_v0|width.global_pca_v0",
+      "selected": true,
+      "objectives": {
+        "state.teacher_kl.equal_domain_mean": 9.200148885577745,
+        "state.teacher_kl.worst_domain": 9.765585299887146,
+        "state.critical_token_kl": 14.668104125904271
+      },
+      "diagnostics": {
+        "state.nll.pooled_all_domains": 9.953878954079094,
+        "state.nll.teacher_reference_pooled": 0.9303384963747948,
+        "state.nll.general": 10.641632730337005,
+        "state.nll.reasoning_math": 9.015473246127499,
+        "state.nll.rag_multihop": 10.226294270251206,
+        "state.nll.code": 9.812299484992462,
+        "state.nll.tool": 10.286167215839688
+      },
+      "reason": "kept: front 3, lineage 'depth.causal_kl_greedy_v1|ffn.activation_importance_v0|width.global_pca_v0', beam 5"
+    },
+    {
+      "state_id": "bf5ae3b6ae00c3dbb963805135b3838f",
+      "path": "COMPOSITE_STAGE1(calib.reasoning_heavy@v2)",
+      "front": 4,
+      "position_in_front": 0,
+      "lineage": "root",
+      "selected": true,
+      "objectives": {
+        "state.teacher_kl.equal_domain_mean": 13.120444071823528,
+        "state.teacher_kl.worst_domain": 14.369299115383363,
+        "state.critical_token_kl": 18.440090260521796
+      },
+      "diagnostics": {
+        "state.nll.pooled_all_domains": 13.925931764136633,
+        "state.nll.teacher_reference_pooled": 0.9303384963747948,
+        "state.nll.general": 16.520545726308402,
+        "state.nll.reasoning_math": 11.405256517466807,
+        "state.nll.rag_multihop": 15.068790190492862,
+        "state.nll.code": 12.785059500185847,
+        "state.nll.tool": 14.500222655576001
+      },
+      "reason": "kept: front 4, lineage 'root', beam 5"
+    },
+    {
+      "state_id": "d0c3bfeb0c882a1747ed237052aaedd0",
+      "path": "RESIDUAL_WIDTH(calib.domain_balanced@v1)->DEPTH(calib.domain_balanced@v1)->FFN(calib.reasoning_heavy@v2)->ATTENTION(calib.none@v1)",
+      "front": 5,
+      "position_in_front": 0,
+      "lineage": "width.global_pca_v0|depth.causal_kl_greedy_v1|ffn.activation_importance_v0",
+      "selected": false,
+      "objectives": {
+        "state.teacher_kl.equal_domain_mean": 13.384554935527408,
+        "state.teacher_kl.worst_domain": 14.580600765621643,
+        "state.critical_token_kl": 23.853662294086245
+      },
+      "diagnostics": {
+        "state.nll.pooled_all_domains": 14.281369502856638,
+        "state.nll.teacher_reference_pooled": 0.9303384963747948,
+        "state.nll.general": 16.543560364817377,
+        "state.nll.reasoning_math": 12.208162167689636,
+        "state.nll.rag_multihop": 15.902902847456708,
+        "state.nll.code": 13.232884591502474,
+        "state.nll.tool": 14.255748620178604
+      },
+      "reason": "pruned: epsilon-dominated (front 5) and the beam of 5 was already full"
+    },
+    {
+      "state_id": "0a61c14f8c2fbe60332900eec7f19d12",
+      "path": "COMPOSITE_STAGE1(calib.domain_balanced@v1)",
+      "front": 6,
+      "position_in_front": 0,
+      "lineage": "root",
+      "selected": false,
+      "objectives": {
+        "state.teacher_kl.equal_domain_mean": 13.438686756998504,
+        "state.teacher_kl.worst_domain": 15.259389327384413,
+        "state.critical_token_kl": 25.048505133277153
+      },
+      "diagnostics": {
+        "state.nll.pooled_all_domains": 14.643076114964265,
+        "state.nll.teacher_reference_pooled": 0.9303384963747948,
+        "state.nll.general": 14.395371154094024,
+        "state.nll.reasoning_math": 12.716054503929325,
+        "state.nll.rag_multihop": 15.443122582810773,
+        "state.nll.code": 13.553376370400734,
+        "state.nll.tool": 16.10044984337607
+      },
+      "reason": "pruned: epsilon-dominated (front 6) and the beam of 5 was already full"
+    }
+  ],
+  "selection_sha256": "84fd6496851995aef8ac624b68944c0881fdaf62a29013ea2aec5acb0e87a35c"
+}

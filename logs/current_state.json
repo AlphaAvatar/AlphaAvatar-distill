@@ -18,14 +18,14 @@
     "bundles": 0
   },
   "budget": {
-    "cumulative_spend_usd": 248.085,
+    "cumulative_spend_usd": 260.055,
     "authorized_cap_usd": 283.76,
-    "remaining_usd": 35.675,
+    "remaining_usd": 23.705,
     "phase_b_single_session_hard_ceiling_usd": 35.666,
     "planning_floor_usd": 16.4555,
     "remaining_is_not_permission": true,
     "ledger": "logs/BUDGET_LEDGER.md",
-    "headroom_note": "Cap $283.76 approved 2026-08-28 for ONE Phase-B attempt bounded by the $35.6660 session ceiling; $248.0850 + $35.6660 = $283.7510, so $0.0090 is rounding margin. Phase-B attempts 1-4 cost $18.0500 and produced no scientific result. Unused headroom authorizes nothing."
+    "headroom_note": "Phase-B attempts 1-5 cost $30.0200. Attempt 5 completed Stage 1 and emitted a Top-5 but failed in Stage 2, so the calibration question is still unanswered. Headroom $23.7050 is BELOW the $35.6660 ceiling; a sixth attempt needs a new cap decision."
   },
   "frozen": {
     "science_plan_hash": "02be33b9a7a8e26bc8bfb75795351e8cdc9ffd441b47066cc81887cfc511b55c",
@@ -108,9 +108,9 @@
     "the paid device-canary session path: TERMINATED 2026-08-18, evidence kept, none prepared"
   ],
   "next_starting_point": {
-    "status": "Attempt 5 APPROVED and preparing. Attempt-4 repairs are in: shadowing fixed, a whole-function P=2 Stage-1 test executes the Phase-B-only path on CPU, and a completed search is committed to an atomic hash-bound stage1_selection.json before later bookkeeping can fail.",
-    "the_ask": "Nothing. The launch sequence is the remaining work: issue the one-use grant, make the authorization-only launch commit, re-verify at that exact commit, then launch.",
-    "budget": "cap $283.76, spent $248.0850, headroom $35.6750; session ceiling $35.6660, planning floor $16.4555."
+    "status": "Attempt 5: Stage 0 passed, Stage 1 COMPLETED with an authoritative Top-5, Stage 2 ran three new sa probes then failed on duplicate seeds \u2014 the search reproduced two imported Phase-A finalists byte-identically. Pod deleted and confirmed gone.",
+    "the_ask": "A reviewer decision on the reproduced-candidate collision in the frozen candidate universe, plus a cap decision. Three mechanical defects are recorded in the attempt-5 record.",
+    "budget": "cap $283.76, spent $260.0550, headroom $23.7050; ceiling $35.6660 \u2014 headroom is BELOW it."
   },
   "read_order": [
     "logs/STATE.md \u2014 the human view of this file",
@@ -148,8 +148,8 @@
   },
   "next_sequence": {
     "_status": "NONE of this is implemented or started, and none of it is funded",
-    "1_phase_b": "attempt 4 ran 2026-08-27: Stage 0 passed, Stage 1's search COMPLETED, summary raised. EXECUTION_INCOMPLETE / NO_SCIENTIFIC_RESULT. See logs/autoinit_phase_b_attempt4.json",
-    "1_phase_b_blocked_on": "a cumulative cap decision only; the attempt-4 defect is fixed, covered by a whole-function integration test, and a completed Stage-1 is now durable",
+    "1_phase_b": "attempt 5 ran 2026-08-28: Stage 1 COMPLETE with an authoritative Top-5; Stage 2 failed on a candidate-universe collision. See logs/autoinit_phase_b_attempt5.json",
+    "1_phase_b_blocked_on": "a reviewer decision on the reproduced-candidate collision in the frozen candidate universe, plus a cap decision",
     "1_phase_b_cost": "P=2 search planning $5.2705-$9.5066, HARD $16.2960 (16.461 h); Stage-1 deadline 987.6348 min; poll lifetime 1967.87 min; floor $16.4555, APPROVED ceiling $35.6660",
     "2_final_selection": "complete final initialization selection after Phase B; Phase A's unresolved_equivalence is not a final selection",
     "3_canonical_stage1_nll": "the canonical Stage-1 NLL diagnostic on the finally selected initialization, under the established Stage-1 measurement contract. DIAGNOSTIC ONLY, never a promotion criterion, and NOT the state_eval@v1 search-side NLL fields. Never yet run",

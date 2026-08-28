@@ -1,4 +1,4 @@
-**Updated:** 2026-08-28 · branch `main` · **ATTEMPT 5 APPROVED — cap $283.76, ceiling $35.6660**
+**Updated:** 2026-08-29 · branch `main` · **ATTEMPT 5: Stage 1 COMPLETE with a Top-5; Stage 2 failed on a candidate collision — $11.97**
 
 # Current state
 
@@ -259,7 +259,29 @@ freed to 0.01 GiB, and the evaluation tokenizer materialized before every batter
    **`3ad6a6e3edf1…`** (59 files, set version 5), preregistration
    **`53f1347f6865…`**; pricing verified unmoved.
 
-   **Attempt 5 is approved**: cap `$283.76`, session ceiling `$35.6660`, planning
+   **ATTEMPT 5 REACHED THE SCIENCE.** Pod `37aah10zvqk4lo`, 725.7 min, **$11.97**.
+   Stage 0 passed; **Stage 1 completed the P=2 search in 464 min of its 987.6 min
+   allowance and emitted an authoritative Top-5** — the attempt-4 shadowing fix
+   held and `search_result.json` was written. Stage 2 ran **three new `sa`
+   probes** and then failed:
+   `ValueError: duplicate seeds in [20260726, 20260726]`.
+
+   **The cause is a scientific finding, not a bug.** Two of the five searched
+   leaves are **byte-identical** to two retained Phase-A finalists — `cca699c93f34`
+   and `85bde4ded2c3` — verified by re-deriving `identify_checkpoint` on both the
+   retained directory and the transferred copy. State ids are content-derived, so
+   the larger P=2 search rediscovered the same compositions from the same root and
+   produced the same bytes. The frozen candidate universe assumes 5 searched + 2
+   imported + 1 control are **distinct**; in fact there were **6 distinct
+   candidates**, and two ids carried both a cited historical `sa` probe and a fresh
+   one at the same seed. The pooling guard refused, correctly.
+
+   **Still `EXECUTION_INCOMPLETE / NO_SCIENTIFIC_RESULT`** for the calibration
+   question: no `sb`/`sc`, no cross-phase selection, `winner=None` not reached
+   because the procedure did not run. **All five Top-5 checkpoints are on the dev
+   box and all five digests verify.**
+
+   Attempt 5 was approved at cap `$283.76`, session ceiling `$35.6660`, planning
    floor `$16.4555`, Stage-1 deadline `987.6348 min`. Current identities are
    executable source **`3ad6a6e3edf1…`** (59 files, set version 5) and
    preregistration **`53f1347f6865…`**. Detail:
@@ -635,9 +657,9 @@ selection result.**
 ## Budget
 
 ```
-cumulative spend   $248.0850  incl. Phase-B attempts 1-4 at $18.0500
+cumulative spend   $260.0550  incl. Phase-B attempts 1-5 at $30.0200
 approved cap       $283.76    APPROVED for ONE Phase-B attempt
-remaining          $35.6750   headroom; the attempt-5 session ceiling is $35.6660
+remaining          $23.7050   headroom — BELOW the $35.6660 session ceiling
 
 ```
 

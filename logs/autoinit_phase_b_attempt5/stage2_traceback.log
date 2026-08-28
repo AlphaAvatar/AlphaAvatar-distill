@@ -1,0 +1,16 @@
+stage 2: ValueError: duplicate seeds in [20260726, 20260726]; each seed counts once
+2026-08-28T19:11:56Z
+
+Traceback (most recent call last):
+  File "/workspace/aad/scripts/pod/autoinit_phase_a_driver.py", line 1227, in run
+    ok = stages[stage]()
+         ^^^^^^^^^^^^^^^
+  File "/workspace/aad/scripts/pod/autoinit_phase_a_driver.py", line 1016, in stage2
+    rows = self.selection_row(records)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/aad/scripts/pod/autoinit_phase_a_driver.py", line 949, in selection_row
+    pooled = POOLED_COUNTS_V2.pool(per_seed)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/aad/src/aadistill/autoinit/recovery.py", line 269, in pool
+    raise ValueError(f"duplicate seeds in {seeds}; each seed counts once")
+ValueError: duplicate seeds in [20260726, 20260726]; each seed counts once
