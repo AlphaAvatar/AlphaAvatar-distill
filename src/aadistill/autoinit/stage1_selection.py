@@ -59,6 +59,13 @@ def journal_sha256(path: str | Path) -> str:
     return digest.hexdigest()
 
 
+#: Every field `leaf_durability.verify_transferred_leaf` reads off the record.
+#: Named here so the writer and its consumer cannot drift apart silently again.
+TRANSFER_VERIFICATION_FIELDS = ("artifact_digest", "arch_signature",
+                                "num_parameters", "weights_digest",
+                                "single_shard_sha256")
+
+
 def build(*, search_config, ranking, suite, policy, profiles,
           journal_path: str | Path) -> dict[str, Any]:
     """The record. Pure — it computes, it does not write."""
@@ -72,6 +79,14 @@ def build(*, search_config, ranking, suite, policy, profiles,
             "num_parameters": state.num_parameters,
             "impl_ids": [step.impl_id for step in state.steps],
             "calibration_profiles": sorted({step.profile_id for step in state.steps}),
+            # REQUIRED BY `verify_transferred_leaf`, which rebuilds the identity
+            # from the bytes that arrived and takes these two from the record
+            # because no file carries them. Attempt 5 omitted `arch_signature`,
+            # so every one of five transfers reported NOT MATCHED on a KeyError
+            # while the bytes were in fact correct — a secured gate that cried
+            # wolf at exactly the moment it must be believed.
+            "arch_signature": state.artifact.arch_signature if state.artifact else None,
+            "weights_digest": state.artifact.weights_digest if state.artifact else None,
         }
         for state in ranking.selected
     ]

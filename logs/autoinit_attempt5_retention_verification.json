@@ -1,0 +1,92 @@
+{
+  "schema": "aadistill.autoinit.attempt5_retention_verification/v1",
+  "generated_utc": "2026-08-29T00:00:00+00:00",
+  "_contract": "A SEPARATE record, not an edit. Attempt 5's Stage-1 selection artifact is frozen and stays byte-for-byte as it was written, omitted `arch_signature` and all. This supplies the transfer-verification identities independently, re-derived on the dev box from the bytes that arrived, so the continuation can treat those five checkpoints as secured without anyone editing a frozen artifact after the fact.",
+  "why_it_exists": "`verify_transferred_leaf` reads `arch_signature` off the record; the writer did not emit it, so all five transfers reported rc=1 NOT MATCHED on a KeyError while the bytes were correct. The writer is fixed for future runs; attempt 5's artifact is not rewritten.",
+  "stage1_selection_sha256": "84fd6496851995aef8ac624b68944c0881fdaf62a29013ea2aec5acb0e87a35c",
+  "all_five_verified": true,
+  "checkpoints": [
+    {
+      "state_id": "cca699c93f34dad7e94a5d13a25b2bc2",
+      "path": "/home/ecs-user/aad-artifacts/autoinit/phase_a/cca699c93f34dad7e94a5d13a25b2bc2",
+      "recorded_artifact_digest": "04fa7fe74f01ee63f6611cca6d7fce4fe1dba66b9865cf0b9c47495b9cfe33d4",
+      "rederived_artifact_digest": "04fa7fe74f01ee63f6611cca6d7fce4fe1dba66b9865cf0b9c47495b9cfe33d4",
+      "matched": true,
+      "arch_signature": "09147a5c08d8ad7ad5bb18131bade73548a5fff08f0e0f99d6dd6ede227606c4",
+      "weights_digest": "66cea45d5f527842a9907bed0845f58f4b1f717d8696bdabe1f783b3cc5bed56",
+      "num_parameters": 596049920,
+      "single_shard_sha256": "db056398840f5c64f767fe8690803478918399c04bd7b4a1aeae6b7549c624af"
+    },
+    {
+      "state_id": "85bde4ded2c31953f802e39cf2252c87",
+      "path": "/home/ecs-user/aad-artifacts/autoinit/phase_a/85bde4ded2c31953f802e39cf2252c87",
+      "recorded_artifact_digest": "590156f691fb10bff7e6a60f34bcee27ec452a963f24e1b638f735a386ee396f",
+      "rederived_artifact_digest": "590156f691fb10bff7e6a60f34bcee27ec452a963f24e1b638f735a386ee396f",
+      "matched": true,
+      "arch_signature": "09147a5c08d8ad7ad5bb18131bade73548a5fff08f0e0f99d6dd6ede227606c4",
+      "weights_digest": "0d0f2268f56eccc9549508f0f46e9ab1fa3bfd701f20704754d038d146609839",
+      "num_parameters": 596049920,
+      "single_shard_sha256": "0a9a5a78e87cc800c1187a2c19f75c5e490734d1518fe8968d517b2077353c45"
+    },
+    {
+      "state_id": "ab7632b00788f825e252ea8d5ff4be30",
+      "path": "/home/ecs-user/aad-artifacts/autoinit/phase_a/ab7632b00788f825e252ea8d5ff4be30",
+      "recorded_artifact_digest": "0e13f3dc99d22e03538864828ec188e819fb9ef223dafd465d4c0f37858371c8",
+      "rederived_artifact_digest": "0e13f3dc99d22e03538864828ec188e819fb9ef223dafd465d4c0f37858371c8",
+      "matched": true,
+      "arch_signature": "09147a5c08d8ad7ad5bb18131bade73548a5fff08f0e0f99d6dd6ede227606c4",
+      "weights_digest": "3fd110b7b46d7ed84967b18c2a05919fd7e9fb0ae2c981f199cda0e021cba078",
+      "num_parameters": 596049920,
+      "single_shard_sha256": "c576287771e290e534b98c3ebb8b79c6337f7373d4f30d809af438f99497700e"
+    },
+    {
+      "state_id": "fe9683e6a9c783bbc6fe276a78c851c6",
+      "path": "/home/ecs-user/aad-artifacts/autoinit/phase_a/fe9683e6a9c783bbc6fe276a78c851c6",
+      "recorded_artifact_digest": "c313d1b4081b9a3b410dddf7a29ebcaad8dd0759179d51e1d761238c1743a2a6",
+      "rederived_artifact_digest": "c313d1b4081b9a3b410dddf7a29ebcaad8dd0759179d51e1d761238c1743a2a6",
+      "matched": true,
+      "arch_signature": "09147a5c08d8ad7ad5bb18131bade73548a5fff08f0e0f99d6dd6ede227606c4",
+      "weights_digest": "78862511b33bd1486c7f2a486567b9ad127896d403bbc69db22160f18206deb7",
+      "num_parameters": 596049920,
+      "single_shard_sha256": "d025f38da508803845ea4d01b7cea160d117d47de3535965c7866dc05cd1e48e"
+    },
+    {
+      "state_id": "bf5ae3b6ae00c3dbb963805135b3838f",
+      "path": "/home/ecs-user/aad-artifacts/autoinit/phase_a/bf5ae3b6ae00c3dbb963805135b3838f",
+      "recorded_artifact_digest": "11fad25573d08de0124cc5c3db01970ba8a6d8c818d405d7683109e81372df47",
+      "rederived_artifact_digest": "11fad25573d08de0124cc5c3db01970ba8a6d8c818d405d7683109e81372df47",
+      "matched": true,
+      "arch_signature": "09147a5c08d8ad7ad5bb18131bade73548a5fff08f0e0f99d6dd6ede227606c4",
+      "weights_digest": "a4fac8e18f38fdb6c5aaaf48efc73229ba9a12b010b38772a90333583c320932",
+      "num_parameters": 596049920,
+      "single_shard_sha256": "26356cffc6b0cb53842156481eaef84b675e87dc9a68428b8c1e4fab3370b2af"
+    }
+  ],
+  "deduplicated": [
+    {
+      "state_id": "cca699c93f34dad7e94a5d13a25b2bc2",
+      "canonical_path": "/home/ecs-user/aad-artifacts/autoinit/phase_a/cca699c93f34dad7e94a5d13a25b2bc2",
+      "canonical_digest": "04fa7fe74f01ee63f6611cca6d7fce4fe1dba66b9865cf0b9c47495b9cfe33d4",
+      "nested_copy_removed": "/home/ecs-user/aad-artifacts/autoinit/phase_a/cca699c93f34dad7e94a5d13a25b2bc2/cca699c93f34dad7e94a5d13a25b2bc2",
+      "nested_digest": "04fa7fe74f01ee63f6611cca6d7fce4fe1dba66b9865cf0b9c47495b9cfe33d4",
+      "proven_identical_before_removal": true,
+      "bytes_reclaimed": 1192140817
+    },
+    {
+      "state_id": "85bde4ded2c31953f802e39cf2252c87",
+      "canonical_path": "/home/ecs-user/aad-artifacts/autoinit/phase_a/85bde4ded2c31953f802e39cf2252c87",
+      "canonical_digest": "590156f691fb10bff7e6a60f34bcee27ec452a963f24e1b638f735a386ee396f",
+      "nested_copy_removed": "/home/ecs-user/aad-artifacts/autoinit/phase_a/85bde4ded2c31953f802e39cf2252c87/85bde4ded2c31953f802e39cf2252c87",
+      "nested_digest": "590156f691fb10bff7e6a60f34bcee27ec452a963f24e1b638f735a386ee396f",
+      "proven_identical_before_removal": true,
+      "bytes_reclaimed": 1192140817
+    }
+  ],
+  "bytes_reclaimed_total": 2384281634,
+  "post_cleanup_checks": {
+    "canonical_files_intact": true,
+    "historical_citations_reconstruct": "11 probes, reuse_verified true, 8 admitted",
+    "note": "derived duplicate cleanup, not scientific artifact retirement: the canonical Phase-A checkpoints were never touched"
+  },
+  "record_sha256": "3266aeb408a060fe09513239c924a785c0e5c00a8931241f521301cd74bd119e"
+}

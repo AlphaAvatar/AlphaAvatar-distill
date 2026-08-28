@@ -708,14 +708,14 @@ def _issued(tmp_path, **over):
 
 def test_require_harness_actually_RE_DERIVES_the_phase_b_digest(tmp_path):
     """Not an alias returning a stored string: the real derivation, over the real
-    59 files, failing closed when it disagrees."""
+    60 files, failing closed when it disagrees."""
     from aadistill.autoinit.authorization import AuthorizationError
     from aadistill.autoinit.phase_b import phase_b_source_digest
 
     auth, _ = _issued(tmp_path)
     observed = auth.require_harness(REPO)
     assert observed["digest"] == phase_b_source_digest(REPO)["digest"]
-    assert len(observed["files"]) == 59
+    assert len(observed["files"]) == 60
     assert observed["not_yet_covered"] == []
     # It is the Phase-B set, not Phase A's.
     paths = {e["path"] for e in observed["files"]}
@@ -936,7 +936,10 @@ def test_the_verifier_is_inside_the_digest_the_grant_is_issued_against():
     # And the Stage-1 selection artifact: written inside the paid search, read by
     # the failed-run collector, so it decides what survives a failure.
     assert "src/aadistill/autoinit/stage1_selection.py" in PHASE_B_EXECUTABLE_SOURCE_FILES_V1
-    assert PHASE_B_SOURCE_SET_VERSION == 5
+    # And identity collapse: it decides which candidates are distinct, which IS
+    # the behavioural universe.
+    assert "src/aadistill/autoinit/identity_collapse.py" in PHASE_B_EXECUTABLE_SOURCE_FILES_V1
+    assert PHASE_B_SOURCE_SET_VERSION == 6
 
 
 # --- repair 6: a completed search must not die with the pod ------------------
@@ -1060,3 +1063,96 @@ def test_the_retention_report_stays_the_PRIMARY_source(tmp_path, monkeypatch):
                                             "matched": True}])
     fetched = pbl.fetch_phase_b_products(_ctx(tmp_path))
     assert [f["state_id"] for f in fetched] == ["from-retention"]
+
+
+# --- repair 7: the three defects attempt 5 exposed ---------------------------
+
+
+def test_the_selection_writer_produces_every_field_transfer_verification_reads():
+    """D1. Attempt 5 reported five NOT MATCHED on a KeyError while the bytes were
+    correct, because the writer omitted `arch_signature`.
+
+    Asserted against the CONSUMER's source, not against a list I maintain by
+    hand — that is what drifted."""
+    import inspect
+    import re
+
+    from aadistill.autoinit import leaf_durability, stage1_selection
+
+    source = inspect.getsource(leaf_durability.verify_transferred_leaf)
+    required = set(re.findall(r'record\["(\w+)"\]', source))
+    assert required, "the consumer no longer reads any record field; re-read it"
+    declared = set(stage1_selection.TRANSFER_VERIFICATION_FIELDS)
+    assert required <= declared, (
+        f"verify_transferred_leaf requires {sorted(required - declared)} which the "
+        "Stage-1 selection writer does not declare")
+    # And they are actually emitted, not merely declared.
+    import ast
+
+    build = inspect.getsource(stage1_selection.build)
+    emitted = {n.value for n in ast.walk(ast.parse(build))
+               if isinstance(n, ast.Constant) and isinstance(n.value, str)}
+    for field in required:
+        assert field in emitted, f"{field} is declared but never written"
+
+
+def test_the_teardown_reports_and_returns_the_secured_verdict():
+    """D2. Attempt 5 logged 'deleting the pod now would destroy exactly the
+    science it paid for' and then reported a clean teardown."""
+    import inspect
+
+    from aadistill.infrastructure import session_runner
+
+    source = inspect.getsource(session_runner)
+    assert "PRODUCTS_UNSECURED / ARTIFACT_LOSS_RISK" in source
+    assert 'self.ev["artifact_loss_risk"]' in source
+    # The outer result must consume it, not just log it.
+    assert "return done and bool(secured_ok)" in source, (
+        "the teardown still returns `done` regardless of whether the products "
+        "this session owes are off-pod")
+    assert "with PRODUCTS_UNSECURED / ARTIFACT_LOSS_RISK" in source
+
+
+def test_retention_deduplicates_a_byte_identical_rediscovery(tmp_path, monkeypatch):
+    """D3. A rediscovered checkpoint already retained must cost zero bytes."""
+    dest_root = tmp_path / "store"
+    (dest_root / "phase_a" / "leafA").mkdir(parents=True)
+    monkeypatch.setattr(pal, "_retained_digest", lambda d, a: ("SAME", None))
+    monkeypatch.setattr(pal, "selected_leaf_records",
+                        lambda ctx: [{"state_id": "leafA", "artifact_digest": "SAME"}])
+
+    def fail(*a, **k):
+        raise AssertionError("scp ran for a checkpoint that was already retained")
+
+    monkeypatch.setattr(pal.subprocess, "run", fail)
+    ctx = types.SimpleNamespace(
+        scr=tmp_path, args=types.SimpleNamespace(ckpt_store=str(dest_root),
+                                                 ckpt_fetch_limit_min=1),
+        host="h", scp=("scp",), say=lambda m: None, evidence={})
+    out = pal.fetch_selected_leaves(ctx)
+    assert len(out) == 1
+    assert out[0]["route"] == "already_retained"
+    assert out[0]["rc"] == 0 and out[0]["matched"] is True
+    assert out[0]["bytes_transferred"] == 0
+
+
+def test_retention_REFUSES_a_same_id_different_bytes_collision(tmp_path, monkeypatch):
+    """The fail-closed half: never scp into a directory holding other bytes."""
+    dest_root = tmp_path / "store"
+    (dest_root / "phase_a" / "leafA").mkdir(parents=True)
+    monkeypatch.setattr(pal, "_retained_digest", lambda d, a: ("OTHER", None))
+    monkeypatch.setattr(pal, "selected_leaf_records",
+                        lambda ctx: [{"state_id": "leafA", "artifact_digest": "SAME"}])
+
+    def fail(*a, **k):
+        raise AssertionError("scp ran into a directory holding different bytes")
+
+    monkeypatch.setattr(pal.subprocess, "run", fail)
+    ctx = types.SimpleNamespace(
+        scr=tmp_path, args=types.SimpleNamespace(ckpt_store=str(dest_root),
+                                                 ckpt_fetch_limit_min=1),
+        host="h", scp=("scp",), say=lambda m: None, evidence={})
+    out = pal.fetch_selected_leaves(ctx)
+    assert out[0]["route"] == "refused" and out[0]["rc"] == 1
+    assert out[0]["matched"] is False
+    assert "differs" in out[0]["verify_error"]

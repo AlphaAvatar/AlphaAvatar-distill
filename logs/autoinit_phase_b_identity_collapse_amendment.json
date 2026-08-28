@@ -1,0 +1,250 @@
+{
+  "schema": "aadistill.autoinit.phase_b_identity_collapse_amendment/v1",
+  "generated_utc": "2026-08-29T00:00:00+00:00",
+  "_contract": "A NARROW amendment to the frozen Phase-B preregistration, created AFTER observing that the P=2 search reproduced two imported candidates exactly. It does not rewrite the preregistration and does not pretend the original ever said 6. The original assumption \u2014 5 searched + 2 imported + 1 control = 8 DISTINCT \u2014 was falsified by a reproducible search, and this records what replaces it and why.",
+  "amends": {
+    "preregistration_sha256": "53f1347f6865e10eb827200af9e9282ab38af08e12423365385b378f70112f6a",
+    "original_assumption": "8 distinct candidates at sa",
+    "falsified_by": "two of the five Phase-B searched leaves are byte-identical to two retained Phase-A finalists",
+    "observed_in": "Phase-B attempt 5, 2026-08-28"
+  },
+  "stage1_selection": {
+    "selection_sha256": "84fd6496851995aef8ac624b68944c0881fdaf62a29013ea2aec5acb0e87a35c",
+    "n_selected": 5,
+    "top_5": [
+      {
+        "state_id": "cca699c93f34dad7e94a5d13a25b2bc2",
+        "artifact_digest": "04fa7fe74f01ee63f6611cca6d7fce4fe1dba66b9865cf0b9c47495b9cfe33d4",
+        "path": "FFN(calib.domain_balanced@v1)->DEPTH(calib.domain_balanced@v1)->RESIDUAL_WIDTH(calib.domain_balanced@v1)->ATTENTION(calib.none@v1)"
+      },
+      {
+        "state_id": "85bde4ded2c31953f802e39cf2252c87",
+        "artifact_digest": "590156f691fb10bff7e6a60f34bcee27ec452a963f24e1b638f735a386ee396f",
+        "path": "DEPTH(calib.none@v1)->FFN(calib.domain_balanced@v1)->RESIDUAL_WIDTH(calib.domain_balanced@v1)->ATTENTION(calib.none@v1)"
+      },
+      {
+        "state_id": "ab7632b00788f825e252ea8d5ff4be30",
+        "artifact_digest": "0e13f3dc99d22e03538864828ec188e819fb9ef223dafd465d4c0f37858371c8",
+        "path": "ATTENTION(calib.none@v1)->DEPTH(calib.reasoning_heavy@v2)->RESIDUAL_WIDTH(calib.domain_balanced@v1)->FFN(calib.domain_balanced@v1)"
+      },
+      {
+        "state_id": "fe9683e6a9c783bbc6fe276a78c851c6",
+        "artifact_digest": "c313d1b4081b9a3b410dddf7a29ebcaad8dd0759179d51e1d761238c1743a2a6",
+        "path": "DEPTH(calib.domain_balanced@v1)->FFN(calib.domain_balanced@v1)->RESIDUAL_WIDTH(calib.reasoning_heavy@v2)->ATTENTION(calib.none@v1)"
+      },
+      {
+        "state_id": "bf5ae3b6ae00c3dbb963805135b3838f",
+        "artifact_digest": "11fad25573d08de0124cc5c3db01970ba8a6d8c818d405d7683109e81372df47",
+        "path": "COMPOSITE_STAGE1(calib.reasoning_heavy@v2)"
+      }
+    ]
+  },
+  "exact_reproduction_proofs": [
+    {
+      "state_id": "cca699c93f34dad7e94a5d13a25b2bc2",
+      "searched_role": {
+        "source": "attempt-5 Stage-1 selection artifact",
+        "artifact_digest": "04fa7fe74f01ee63f6611cca6d7fce4fe1dba66b9865cf0b9c47495b9cfe33d4"
+      },
+      "imported_role": {
+        "source": "retained Phase-A finalist directory",
+        "path": "/home/ecs-user/aad-artifacts/autoinit/phase_a/cca699c93f34dad7e94a5d13a25b2bc2",
+        "artifact_digest": "04fa7fe74f01ee63f6611cca6d7fce4fe1dba66b9865cf0b9c47495b9cfe33d4"
+      },
+      "state_ids_agree": true,
+      "artifact_digests_agree": true,
+      "nested_copy_digest": "04fa7fe74f01ee63f6611cca6d7fce4fe1dba66b9865cf0b9c47495b9cfe33d4",
+      "proof": "`identify_checkpoint` re-derived independently on the retained Phase-A directory, on the nested copy Attempt 5's teardown wrote, and recorded by the Stage-1 selection artifact: all three agree. Same content-derived state id, same materialized artifact digest, same bytes."
+    },
+    {
+      "state_id": "85bde4ded2c31953f802e39cf2252c87",
+      "searched_role": {
+        "source": "attempt-5 Stage-1 selection artifact",
+        "artifact_digest": "590156f691fb10bff7e6a60f34bcee27ec452a963f24e1b638f735a386ee396f"
+      },
+      "imported_role": {
+        "source": "retained Phase-A finalist directory",
+        "path": "/home/ecs-user/aad-artifacts/autoinit/phase_a/85bde4ded2c31953f802e39cf2252c87",
+        "artifact_digest": "590156f691fb10bff7e6a60f34bcee27ec452a963f24e1b638f735a386ee396f"
+      },
+      "state_ids_agree": true,
+      "artifact_digests_agree": true,
+      "nested_copy_digest": "590156f691fb10bff7e6a60f34bcee27ec452a963f24e1b638f735a386ee396f",
+      "proof": "`identify_checkpoint` re-derived independently on the retained Phase-A directory, on the nested copy Attempt 5's teardown wrote, and recorded by the Stage-1 selection artifact: all three agree. Same content-derived state id, same materialized artifact digest, same bytes."
+    }
+  ],
+  "rule": {
+    "name": "identity collapse by materialized identity",
+    "collapse_when": "the canonical state identity AND the re-derived artifact digest both agree",
+    "fail_closed_when": "state ids agree and artifact digests differ \u2014 a content-derived id that disagrees about its own bytes is a broken identity, not a duplicate to merge",
+    "never_inputs": [
+      "names",
+      "state-id prefixes",
+      "composition descriptions",
+      "sa scores",
+      "behavioural ranking",
+      "correctness outcomes"
+    ],
+    "role_precedence": [
+      "searched",
+      "imported_finalist",
+      "control"
+    ],
+    "searched_role_is_primary": "for an initialization the search rediscovered; it is what the P=2 search produced and what the Top-5 admitted",
+    "imported_role_semantics": "an evidence alias: it contributes citable historical provenance, not a second treatment",
+    "no_top5_backfill": "the Top-5 stands exactly as emitted. Ranks 6/7 are NOT promoted to restore an artificial count of eight",
+    "one_observation_per": "(materialized initialization, seed)",
+    "duplicate_seed_guard": "POOLED_COUNTS_V2 is UNCHANGED and its refusal was correct. The fix is to stop presenting one initialization twice, not to permit double counting",
+    "implementation": "src/aadistill/autoinit/identity_collapse.py"
+  },
+  "independence": "This amendment's behaviour depends only on artifact identity. It was written after the collision was observed, and it consumes no sa score, no behavioural ranking and no correctness outcome \u2014 so it cannot have been shaped by which candidate happened to win.",
+  "collapsed_universe": {
+    "entries_in": 8,
+    "distinct_candidates": 6,
+    "universe_identity": "e94f15d2e648d86a2a7a1496c5e1c0ef47b78d87746bb622488a06af0418d483",
+    "candidates": [
+      {
+        "state_id": "85bde4ded2c31953f802e39cf2252c87",
+        "artifact_digest": "590156f691fb10bff7e6a60f34bcee27ec452a963f24e1b638f735a386ee396f",
+        "primary_role": "searched",
+        "roles": [
+          "searched",
+          "imported_finalist"
+        ],
+        "is_collapsed": true,
+        "checkpoint_path": "/home/ecs-user/aad-artifacts/autoinit/phase_a/85bde4ded2c31953f802e39cf2252c87",
+        "aliases": [
+          "phase_a_retained_finalist"
+        ],
+        "detail": {
+          "n_entries": 2
+        }
+      },
+      {
+        "state_id": "ab7632b00788f825e252ea8d5ff4be30",
+        "artifact_digest": "0e13f3dc99d22e03538864828ec188e819fb9ef223dafd465d4c0f37858371c8",
+        "primary_role": "searched",
+        "roles": [
+          "searched"
+        ],
+        "is_collapsed": false,
+        "checkpoint_path": "/home/ecs-user/aad-artifacts/autoinit/phase_a/ab7632b00788f825e252ea8d5ff4be30",
+        "aliases": [],
+        "detail": {
+          "n_entries": 1
+        }
+      },
+      {
+        "state_id": "bf5ae3b6ae00c3dbb963805135b3838f",
+        "artifact_digest": "11fad25573d08de0124cc5c3db01970ba8a6d8c818d405d7683109e81372df47",
+        "primary_role": "searched",
+        "roles": [
+          "searched"
+        ],
+        "is_collapsed": false,
+        "checkpoint_path": "/home/ecs-user/aad-artifacts/autoinit/phase_a/bf5ae3b6ae00c3dbb963805135b3838f",
+        "aliases": [],
+        "detail": {
+          "n_entries": 1
+        }
+      },
+      {
+        "state_id": "cca699c93f34dad7e94a5d13a25b2bc2",
+        "artifact_digest": "04fa7fe74f01ee63f6611cca6d7fce4fe1dba66b9865cf0b9c47495b9cfe33d4",
+        "primary_role": "searched",
+        "roles": [
+          "searched",
+          "imported_finalist"
+        ],
+        "is_collapsed": true,
+        "checkpoint_path": "/home/ecs-user/aad-artifacts/autoinit/phase_a/cca699c93f34dad7e94a5d13a25b2bc2",
+        "aliases": [
+          "phase_a_retained_finalist"
+        ],
+        "detail": {
+          "n_entries": 2
+        }
+      },
+      {
+        "state_id": "control-qwen",
+        "artifact_digest": "dc9500d3871a0f31214d55fa2b47b82e196f4f4630c607f43a24d16ed76d83bf",
+        "primary_role": "control",
+        "roles": [
+          "control"
+        ],
+        "is_collapsed": false,
+        "checkpoint_path": "artifacts/stage1/qwen3_0p6b_init_v0/checkpoint",
+        "aliases": [],
+        "detail": {
+          "n_entries": 1
+        }
+      },
+      {
+        "state_id": "fe9683e6a9c783bbc6fe276a78c851c6",
+        "artifact_digest": "c313d1b4081b9a3b410dddf7a29ebcaad8dd0759179d51e1d761238c1743a2a6",
+        "primary_role": "searched",
+        "roles": [
+          "searched"
+        ],
+        "is_collapsed": false,
+        "checkpoint_path": "/home/ecs-user/aad-artifacts/autoinit/phase_a/fe9683e6a9c783bbc6fe276a78c851c6",
+        "aliases": [],
+        "detail": {
+          "n_entries": 1
+        }
+      }
+    ]
+  },
+  "rung1_selection": {
+    "computed_by": "the frozen SuccessiveHalvingPlan.select_rung1_survivors, unchanged",
+    "plan_hash": "02be33b9a7a8e26bc8bfb75795351e8cdc9ffd441b47066cc81887cfc511b55c",
+    "rule": "rung 1: exclude searched leaves below the feasibility floor, then take the top 2 by correct_overall; the canonical control advances unconditionally and consumes no slot",
+    "selected_searched": [
+      "fe9683e6a9c783bbc6fe276a78c851c6",
+      "85bde4ded2c31953f802e39cf2252c87"
+    ],
+    "auto_advanced_control": [
+      "control-qwen3_0p6b_init_v0"
+    ],
+    "advancing": [
+      "control-qwen3_0p6b_init_v0",
+      "fe9683e6a9c783bbc6fe276a78c851c6",
+      "85bde4ded2c31953f802e39cf2252c87"
+    ],
+    "excluded_by_feasibility": [],
+    "excluded_by_catastrophic_capability": [],
+    "ranked": [
+      {
+        "state_id": "fe9683e6a9c783bbc6fe276a78c851c6",
+        "is_control": false,
+        "correct_overall": 0.047058823529411764
+      },
+      {
+        "state_id": "85bde4ded2c31953f802e39cf2252c87",
+        "is_control": false,
+        "correct_overall": 0.041176470588235294
+      },
+      {
+        "state_id": "bf5ae3b6ae00c3dbb963805135b3838f",
+        "is_control": false,
+        "correct_overall": 0.03529411764705882
+      },
+      {
+        "state_id": "cca699c93f34dad7e94a5d13a25b2bc2",
+        "is_control": false,
+        "correct_overall": 0.03529411764705882
+      },
+      {
+        "state_id": "ab7632b00788f825e252ea8d5ff4be30",
+        "is_control": false,
+        "correct_overall": 0.01764705882352941
+      },
+      {
+        "state_id": "control-qwen3_0p6b_init_v0",
+        "is_control": true,
+        "correct_overall": 0.011764705882352941
+      }
+    ]
+  },
+  "amendment_sha256": "df413bd99119dab72c16399362298620abec0efdce36754a1627b14e616b26bb"
+}

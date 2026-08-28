@@ -738,6 +738,26 @@ class SessionRunner:
                                                 "why": secured_why}
         if not secured_ok:
             self.say(f"  PRODUCTS NOT SECURED: {secured_why}")
+            # An EXPLICIT terminal condition, recorded before the pod is deleted.
+            #
+            # Deliberately not a block. Holding the most expensive pod in the
+            # project open until a transfer succeeds is an unbounded bill, and the
+            # fetch above already ran inside the teardown envelope. What was
+            # missing is that the session reported a clean teardown while its own
+            # secured gate said "deleting the pod now would destroy exactly the
+            # science it paid for" — attempt 5, verbatim. It is now on the record
+            # and in the terminal state, so no reader has to reconstruct it from a
+            # log line.
+            self.ev["artifact_loss_risk"] = {
+                "condition": "PRODUCTS_UNSECURED / ARTIFACT_LOSS_RISK",
+                "why": secured_why,
+                "fetched": len(fetched),
+                "note": ("the bounded fetch ran and did not secure what this "
+                         "session owes off-pod; the pod is deleted anyway because "
+                         "an unbounded hold is a worse failure, and this record "
+                         "is what makes the risk visible"),
+            }
+            self.say("  RECORDED: PRODUCTS_UNSECURED / ARTIFACT_LOSS_RISK")
 
         done = terminal == success
         state = {
@@ -779,15 +799,21 @@ class SessionRunner:
              "missing": manifest.missing,
              "still_being_written": manifest.still_being_written}
             if manifest else None)
+        risk = " · PRODUCTS_UNSECURED/ARTIFACT_LOSS_RISK" if not secured_ok else ""
         self.say(f"teardown gate: allowed={decision.allowed} "
-                 f"failed={decision.failed_check}")
+                 f"failed={decision.failed_check}{risk}")
         self.save()
         if not decision.allowed:
             self.say("GATE BLOCKED — the runner is NOT deleting the pod; the "
                      "watchdog remains the backstop")
             return False
-        self.teardown_now("gate passed" if done else f"gate passed after {terminal}")
-        return done
+        # Never "clean" when the secured gate said otherwise: the reason a pod is
+        # being deleted must carry the fact that its products are not off-pod.
+        reason = "gate passed" if done else f"gate passed after {terminal}"
+        if not secured_ok:
+            reason += " with PRODUCTS_UNSECURED / ARTIFACT_LOSS_RISK"
+        self.teardown_now(reason)
+        return done and bool(secured_ok)
 
     def finish_emergency(self) -> None:
         streams = self.spec.artifacts.event_streams(self.context())

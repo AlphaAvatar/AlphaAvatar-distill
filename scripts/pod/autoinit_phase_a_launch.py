@@ -273,6 +273,21 @@ def selected_leaf_records(ctx: SessionContext) -> list[dict]:
     return list(json.loads(report.read_text()).get("leaves", []))
 
 
+def _retained_digest(directory, adapter) -> tuple[str | None, str | None]:
+    """Re-derive the artifact digest of a checkpoint already on this machine."""
+    try:
+        from transformers import AutoConfig
+
+        from aadistill.autoinit.artifact import identify_checkpoint
+
+        spec = adapter.spec_from_config(AutoConfig.from_pretrained(str(directory)))
+        return identify_checkpoint(
+            directory, adapter=adapter, spec=spec,
+            num_parameters=adapter.param_count(spec)).artifact_digest, None
+    except Exception as exc:                       # noqa: BLE001 - report, never crash
+        return None, f"{type(exc).__name__}: {exc}"
+
+
 def fetch_selected_leaves(ctx: SessionContext, *, records: list | None = None,
                           staged: str | None = None) -> list:
     """Bring the Stage-1 selected leaves off the pod, whatever Stage 2 did.
@@ -312,6 +327,43 @@ def fetch_selected_leaves(ctx: SessionContext, *, records: list | None = None,
         state_id = rec["state_id"]
         dest = Path(ctx.args.ckpt_store) / "phase_a" / state_id
         dest.parent.mkdir(parents=True, exist_ok=True)
+        # ALREADY RETAINED? A content-derived state id means a later phase can
+        # rediscover an earlier phase's initialization exactly, and Phase-B
+        # attempt 5 did: two selected leaves were byte-identical to retained
+        # Phase-A finalists. `scp -r` into an existing directory NESTS rather than
+        # overwrites, so it burned 2 x 1.2 GiB and reported NOT MATCHED against a
+        # checkpoint that was already correct and already here.
+        #
+        # So: re-derive the digest of what is already there. Equal means secured —
+        # transfer zero bytes. Different means a content-derived id disagreeing
+        # about its own bytes, which is a refusal, never a merge and never an scp
+        # into that directory.
+        if dest.is_dir():
+            existing, existing_error = _retained_digest(dest, adapter)
+            if existing is not None and existing == rec.get("artifact_digest"):
+                entry = {"artifact": "stage1_selected_leaf", "state_id": state_id,
+                         "route": "already_retained", "dest": str(dest), "rc": 0,
+                         "matched": True, "artifact_digest": existing,
+                         "bytes_transferred": 0,
+                         "note": ("byte-identical to a checkpoint already retained "
+                                  "at this path; deduplicated rather than copied")}
+                out.append(entry)
+                ctx.say(f"  stage-1 leaf {state_id[:12]} already retained at {dest} "
+                        f"(digest matches) — 0 bytes transferred")
+                continue
+            out.append({"artifact": "stage1_selected_leaf", "state_id": state_id,
+                        "route": "refused", "dest": str(dest), "rc": 1,
+                        "matched": False,
+                        "verify_error": (
+                            f"{dest} already holds a checkpoint whose digest "
+                            f"{str(existing)[:12]} differs from the selected "
+                            f"{str(rec.get('artifact_digest'))[:12]}"
+                            + (f" ({existing_error})" if existing_error else "")),
+                        "note": ("same state id, different bytes — refusing to "
+                                 "write into the existing directory")})
+            ctx.say(f"  stage-1 leaf {state_id[:12]} REFUSED: {dest} holds "
+                    "different bytes under the same state id")
+            continue
         # The record's own path when it has one — the Stage-1 selection names
         # each leaf's real checkpoint directory, which is not under `staged`.
         source = rec.get("checkpoint_path") or f"{staged}/{state_id}"

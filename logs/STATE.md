@@ -1,4 +1,4 @@
-**Updated:** 2026-08-29 · branch `main` · **ATTEMPT 5: Stage 1 COMPLETE with a Top-5; Stage 2 failed on a candidate collision — $11.97**
+**Updated:** 2026-08-29 · branch `main` · **PHASE_B_STAGE1_COMPLETE / BEHAVIOURAL_SELECTION_INCOMPLETE — continuation ceiling $8.0691**
 
 # Current state
 
@@ -276,10 +276,35 @@ freed to 0.01 GiB, and the evaluation tokenizer materialized before every batter
    candidates**, and two ids carried both a cited historical `sa` probe and a fresh
    one at the same seed. The pooling guard refused, correctly.
 
-   **Still `EXECUTION_INCOMPLETE / NO_SCIENTIFIC_RESULT`** for the calibration
-   question: no `sb`/`sc`, no cross-phase selection, `winner=None` not reached
-   because the procedure did not run. **All five Top-5 checkpoints are on the dev
-   box and all five digests verify.**
+   **The project state is now `PHASE_B_STAGE1_COMPLETE /
+   BEHAVIOURAL_SELECTION_INCOMPLETE`** — not a null result and not a winner. Stage
+   0, the joint P=2 search, the authoritative Top-5 and the Stage-1 selection
+   artifact are all done and retained, and **all five Top-5 checkpoints are on the
+   dev box with re-derived identities**. What is missing is the behavioural
+   cross-phase selection.
+
+   **Identity collapse (`df413bd9…`), by materialized identity only.** Collapse
+   requires the state id **and** the re-derived artifact digest to agree; same id
+   with different bytes is a refusal, not a merge; names, prefixes, `sa` scores and
+   behavioural outcomes are never inputs. The searched role is primary; the
+   imported role is an evidence alias. **The Top-5 is unchanged — no rank 6/7
+   backfill.** The universe is **6 distinct candidates** (identity `e94f15d2…`),
+   not the 8 the preregistration assumed, and the amendment records that the
+   assumption was falsified rather than pretending it always said 6.
+
+   **`POOLED_COUNTS_V2` is untouched** — its refusal was correct. The fix is one
+   observation per `(initialization, seed)`.
+
+   **Rung 1 was computed at `$0` by the frozen selection code**, on six candidates
+   whose `sa` all reconstruct strictly: survivors `fe9683e6a9c7` (0.0471) and
+   `85bde4ded2c3` (0.0412), control auto-advancing, no feasibility or catastrophic
+   exclusions. Only `fe9683e6a9c7` lacks `sb`, and at most `fe9683e6a9c7` and the
+   control lack `sc`.
+
+   **So the next paid session is a behavioural continuation, not another Phase B**:
+   floor **$5.4784** (1 probe), **ceiling $8.0691** (3 probes) — against the
+   `$35.6660` that books a search already bought. **Current headroom `$23.7050`
+   already covers it; no cap increase is needed.**
 
    Attempt 5 was approved at cap `$283.76`, session ceiling `$35.6660`, planning
    floor `$16.4555`, Stage-1 deadline `987.6348 min`. Current identities are
