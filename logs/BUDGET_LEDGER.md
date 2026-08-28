@@ -1184,6 +1184,28 @@ reduction.
 attempt is arithmetically blocked without a new maintainer cap decision.
 Phase-B attempts have now cost **$18.0500** with no scientific result.
 
+## 2026-08-28 — APPROVED: cumulative cap $283.76 for Phase-B attempt 5
+
+**No spend.** Maintainer decision, 2026-08-28.
+
+```
+cumulative spend                                            $248.0850
+NEW authorized cumulative cap                               $283.7600
+Phase-B attempt-5 session hard ceiling  (UNCHANGED)         $ 35.6660
+planning floor, NOT an expectation      (UNCHANGED)         $ 16.4555
+```
+
+`$248.0850 + $35.6660 = $283.7510`; the cap is `$283.76`, so `$0.0090` is
+ordinary rounding. **The ceiling and floor have not moved** — only the spend
+beneath them has. **Unused cumulative headroom authorizes nothing.**
+
+Phase-B attempts 1-4 cost **$18.0500** and produced no scientific result:
+`$0.1500` and `$0.2300` of setup failure, `$9.5000` on a search deadline, and
+`$8.1700` on a search that completed and then raised in its summary. All four
+remain historical evidence and none enters the Phase-B scientific result.
+
+Grant document: `autoinit_phase_b_grant_attempt5.json`.
+
 ## Standing rules
 
 * Plan from **actual spend**, never from unused room under a previous authorization.

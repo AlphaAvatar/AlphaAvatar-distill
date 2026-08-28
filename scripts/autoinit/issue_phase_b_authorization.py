@@ -65,11 +65,13 @@ REUSE_RECORD = "logs/autoinit_historical_probe_reuse.json"
 #: composite leaves, charges statistics once per (parent, profile) as the runtime
 #: shares them, and adds the non-FLOP materialization path.
 #:
-#: The cumulative cap is `$239.9150 spent + $35.6660 approved`, rounded up by
-#: `$0.0090` of ordinary rounding margin. Headroom is not authorization.
+#: The cumulative cap is `$248.0850 spent + $35.6660 approved = $283.7510`,
+#: rounded up to `$283.76` — `$0.0090` of ordinary margin. Headroom is not
+#: authorization. The ceiling and floor themselves have not moved since they were
+#: derived; only the spend under them has.
 HARD_CEILING_USD = 35.6660
 PLANNING_FLOOR_USD = 16.4555
-CUMULATIVE_CAP_USD = 275.59
+CUMULATIVE_CAP_USD = 283.76
 
 GRANT_FIELDS = ("granted_by", "covers", "cumulative_spend_at_approval_usd",
                 "cumulative_cap_usd", "does_not_authorize")
