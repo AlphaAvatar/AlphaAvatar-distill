@@ -19,13 +19,13 @@
   },
   "budget": {
     "cumulative_spend_usd": 248.085,
-    "authorized_cap_usd": 275.59,
-    "remaining_usd": 27.505,
+    "authorized_cap_usd": 283.76,
+    "remaining_usd": 35.675,
     "phase_b_single_session_hard_ceiling_usd": 35.666,
     "planning_floor_usd": 16.4555,
     "remaining_is_not_permission": true,
     "ledger": "logs/BUDGET_LEDGER.md",
-    "headroom_note": "Phase-B attempts 1-4 cost $18.0500 and produced no scientific result. Headroom $27.5050 is BELOW the $35.6660 session ceiling, so a fifth attempt needs a new maintainer cap decision. Headroom is not permission."
+    "headroom_note": "Cap $283.76 approved 2026-08-28 for ONE Phase-B attempt bounded by the $35.6660 session ceiling; $248.0850 + $35.6660 = $283.7510, so $0.0090 is rounding margin. Phase-B attempts 1-4 cost $18.0500 and produced no scientific result. Unused headroom authorizes nothing."
   },
   "frozen": {
     "science_plan_hash": "02be33b9a7a8e26bc8bfb75795351e8cdc9ffd441b47066cc81887cfc511b55c",
@@ -49,12 +49,12 @@
       "the operator ledger"
     ],
     "phase_b_session_plan_hash": "23f23649b4be92bd8852bf9d89f8dcb372bc5a00a175ae631d32b9d71de8032d",
-    "phase_b_preregistration_sha256": "c78161aa15d4a70b84b85234fbd2acaa33c929a74c523bb7a4b6fcb45af3634d",
-    "phase_b_executable_source_digest": "5a84c04038bdeddbe2ab3d88f12ff981746bf0c2458c8d9b70dfce283cf1b4bf",
-    "phase_b_identity_note": "CURRENT only; earlier ids are SUPERSEDED (history: logs/decisions.md). The preregistration id excludes generated_utc, so it moves only when the commitment moves.",
+    "phase_b_preregistration_sha256": "53f1347f6865e10eb827200af9e9282ab38af08e12423365385b378f70112f6a",
+    "phase_b_executable_source_digest": "3ad6a6e3edf13ca48fe8814eae5aa7296e62bc0cf3ad5a1758cd2fe8b75583bb",
+    "phase_b_identity_note": "CURRENT only; earlier ids are SUPERSEDED (history: logs/decisions.md). The preregistration id excludes generated_utc, so it moves only when the commitment moves. The Phase-B session plan hash 23f23649 has never moved.",
     "stage1_runtime_deadline_minutes_by_phase": {
       "phase_a": 363.9841,
-      "phase_b": 543.9841,
+      "phase_b": 987.6348,
       "derivation": "base + both soft-stop reserves; phase B = 360.0+147.7683+36.2158"
     },
     "phase_b_calibration": {
@@ -67,7 +67,10 @@
         "content": "cdb28389",
         "items_file": "a2ff8c92"
       }
-    }
+    },
+    "phase_b_executable_source_files": 59,
+    "phase_b_executable_source_set_version": 5,
+    "phase_b_pricing": "floor $16.4555 (NOT an expectation), session hard ceiling $35.6660, search hard $16.2960 / 16.461 h. The 1.91-7.51 h range and $26.8049 are SUPERSEDED."
   },
   "complete": [
     "Phase A end to end: search, three rungs, eleven probes, unresolved_equivalence",
@@ -76,13 +79,14 @@
     "detail: logs/decisions.md and the per-run directories"
   ],
   "latest_verification": {
-    "utc": "2026-08-26T20:00:00Z",
-    "after": "the reviewer-found repair pass (candidate universe, disk, transfer)",
-    "full_suite": "2299 passed, 12 skipped in 18:36",
+    "utc": "2026-08-28T00:00:00Z",
+    "after": "the attempt-4 repair pass: shadowing fix, whole-function Phase-B Stage-1 integration test, Stage-1 selection durability",
+    "full_suite": "2407 passed, 12 skipped in 26:31",
     "frozen_asset_verifier": "passed, no problems",
-    "mutations": "12 on the three repaired paths plus the identity rule, each turning a passing state into a failing one and each checked against its TARGETED test; two initially survived and those tests were strengthened.",
-    "harness_digest": "phase_a 2f8082fe, continuation 3eaefd15; both moved during the Phase-B work because both sets contain files it edited, and both sessions are complete with consumed authorizations. phase_b executable source cad571c8 over 56 files, nothing uncovered. No frozen SCIENCE identity moved.",
-    "scope": "CPU only, repo .venv; no checkpoint loaded, no metric measured, no GPU used"
+    "historical_reuse": "11 probes reconstructed from retained bytes, 8 admitted, probes_dir_digest matches the committed record",
+    "mutations": "8 on the repaired paths, each killed by its targeted test; reverting the shadowing fix reproduces attempt 4 exactly",
+    "identities": "phase_b executable source 3ad6a6e3edf1, 59 files, set version 5, nothing uncovered; preregistration 53f1347f6865; pricing byte-identical. No frozen SCIENCE identity moved.",
+    "scope": "CPU only, repo .venv; no checkpoint trained, no GPU used"
   },
   "failed": [
     {
@@ -104,9 +108,9 @@
     "the paid device-canary session path: TERMINATED 2026-08-18, evidence kept, none prepared"
   ],
   "next_starting_point": {
-    "status": "Attempt-4 repairs done at $0: the retained-candidate variable shadowing is fixed, a whole-function P=2 Stage-1 integration test now executes the Phase-B-only path on CPU, and a completed search is committed to an atomic hash-bound stage1_selection.json before any later bookkeeping can fail. Nothing running; no pod, grant or authorization.",
-    "the_ask": "A maintainer cap decision. $248.0850 + $35.6660 = $283.7510; the reviewer recommends $283.76. Attempt 5 needs that plus a fresh one-use grant.",
-    "budget": "cap $275.59, spent $248.0850, headroom $27.5050; session ceiling $35.6660 \u2014 headroom is BELOW it."
+    "status": "Attempt 5 APPROVED and preparing. Attempt-4 repairs are in: shadowing fixed, a whole-function P=2 Stage-1 test executes the Phase-B-only path on CPU, and a completed search is committed to an atomic hash-bound stage1_selection.json before later bookkeeping can fail.",
+    "the_ask": "Nothing. The launch sequence is the remaining work: issue the one-use grant, make the authorization-only launch commit, re-verify at that exact commit, then launch.",
+    "budget": "cap $283.76, spent $248.0850, headroom $35.6750; session ceiling $35.6660, planning floor $16.4555."
   },
   "read_order": [
     "logs/STATE.md \u2014 the human view of this file",
@@ -150,7 +154,7 @@
     "2_final_selection": "complete final initialization selection after Phase B; Phase A's unresolved_equivalence is not a final selection",
     "3_canonical_stage1_nll": "the canonical Stage-1 NLL diagnostic on the finally selected initialization, under the established Stage-1 measurement contract. DIAGNOSTIC ONLY, never a promotion criterion, and NOT the state_eval@v1 search-side NLL fields. Never yet run",
     "4_formal_recovery": "only then, the project's formal Stage 2/Stage 3 recovery training",
-    "funding": "$26.8050 of headroom is approved for ONE Phase-B retry bounded by the $26.8049 session ceiling. Nothing else in this list is funded.",
+    "funding": "$35.6750 of headroom is approved for ONE Phase-B attempt bounded by the $35.6660 session ceiling. Nothing else in this list is funded.",
     "1_phase_b_implementation": "COMPLETE, repaired six times; latest closes the retained-candidate shadowing and adds the Stage-1 durability boundary. Executable source 59 files, set version 5"
   },
   "canonical_infrastructure_moved_to": "docs/SESSION_ARCHITECTURE.md and logs/decisions.md"

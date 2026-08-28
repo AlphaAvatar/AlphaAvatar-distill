@@ -1,4 +1,4 @@
-**Updated:** 2026-08-28 · branch `main` · **ATTEMPT 4: the search COMPLETED, the summary raised — $8.17, no scientific result**
+**Updated:** 2026-08-28 · branch `main` · **ATTEMPT 5 APPROVED — cap $283.76, ceiling $35.6660**
 
 # Current state
 
@@ -79,17 +79,19 @@ freed to 0.01 GiB, and the evaluation tokenizer materialized before every batter
 
 1. **Phase B** — calibration/data-distribution sensitivity:
    `calib.reasoning_heavy@v2` against `calib.domain_balanced@v1`, searched
-   **jointly at P=2**. **Fully prepared at `$0` and frozen. NOT LAUNCHED.**
+   **jointly at P=2**. **Frozen. Four paid attempts, no scientific result yet;
+   attempt 5 is approved and not launched.**
 
    | | |
    | --- | --- |
    | session plan | `23f23649…` (`autoinit.v1.phase_b_session`, 6 stages) |
-   | preregistration | `8f211ce1…`, self-verifying, frozen before any result |
-   | executable-source digest | `92e2170e…` over **28** files |
+   | preregistration | `53f1347f6865…`, self-verifying, frozen before any result |
+   | executable-source digest | `3ad6a6e3edf1…` over **59** files, set version 5 |
    | science plan | `02be33b9…`, **reused unchanged** |
    | `calib.domain_balanced@v1` | spec `11f36a88…` · content `d65c1f40…` |
    | `calib.reasoning_heavy@v2` | spec `6c67b8df…` · content `cdb28389…` |
-   | authorization ceiling | **$26.8049** → implied cap **$256.8399** |
+   | Stage-1 deadline | **987.6348 min**, derived from the priced hard bound |
+   | planning floor / ceiling | **$16.4555** / **$35.6660** → cap **$283.76** |
 
    **Comparability is a terminate condition, not a bigger run.** If Stage 0 finds
    the runtime not comparable under `generation_runtime_comparability@v2`, the
@@ -257,8 +259,10 @@ freed to 0.01 GiB, and the evaluation tokenizer materialized before every batter
    **`3ad6a6e3edf1…`** (59 files, set version 5), preregistration
    **`53f1347f6865…`**; pricing verified unmoved.
 
-   **A fifth attempt is arithmetically blocked**: `$27.5050` of headroom against a
-   `$35.6660` ceiling. `$248.0850 + $35.6660 = $283.7510`. Detail:
+   **Attempt 5 is approved**: cap `$283.76`, session ceiling `$35.6660`, planning
+   floor `$16.4555`, Stage-1 deadline `987.6348 min`. Current identities are
+   executable source **`3ad6a6e3edf1…`** (59 files, set version 5) and
+   preregistration **`53f1347f6865…`**. Detail:
    [`autoinit_phase_b_attempt4.json`](autoinit_phase_b_attempt4.json).
 
    **One further repair closed before attempt 4.** Phase B inherited Phase A's
@@ -304,11 +308,12 @@ freed to 0.01 GiB, and the evaluation tokenizer materialized before every batter
 4. **Only then**, the project's formal **Stage 2 / Stage 3 recovery training**.
 
 **Nothing in this list is implemented or started**, and none of it is funded:
-`$26.8050` of headroom is approved for **one** Phase-B execution, bounded by the
-frozen single-session hard ceiling of **$26.8049**. The `$0.0001` difference
-belongs to the cumulative cap and does not enlarge the session ceiling.
-`$13.0800` is a planning floor, not an expected spend. Unused headroom is **not**
-authorization for any later experiment.
+`$35.6750` of headroom is approved for **one** Phase-B execution, bounded by the
+frozen single-session hard ceiling of **$35.6660**. `$248.0850 + $35.6660 =
+$283.7510` against a `$283.76` cap, so the `$0.0090` difference is rounding and
+does not enlarge the session ceiling. `$16.4555` is a planning floor, not an
+expected spend. Unused headroom is **not** authorization for any later
+experiment.
 
 ## The launcher defect — cosmetic here, must be fixed before any future session
 
@@ -631,8 +636,8 @@ selection result.**
 
 ```
 cumulative spend   $248.0850  incl. Phase-B attempts 1-4 at $18.0500
-approved cap       $275.59    APPROVED against the corrected pricing model
-remaining          $27.5050   headroom — BELOW the $35.6660 session ceiling
+approved cap       $283.76    APPROVED for ONE Phase-B attempt
+remaining          $35.6750   headroom; the attempt-5 session ceiling is $35.6660
 
 ```
 
