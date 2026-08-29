@@ -1,6 +1,6 @@
 {
  "schema": "aadistill.current_state/v2",
- "generated_utc": "2026-08-29T15:05:26Z",
+ "generated_utc": "2026-08-29T15:35:21Z",
  "_contract": "The minimal machine-readable CURRENT snapshot: live facts only, no history, no per-attempt detail, no narrative. History lives in logs/decisions.md and the per-run directories; the human view is logs/STATE.md and the two must agree. Ownership: logs/CATALOG.md.",
  "baseline_commit": "b7c0099bfffc8962e4368917c59f8a9a8508d063",
  "baseline_commit_meaning": "The LAST TESTED IMPLEMENTATION: the commit whose tree produced the latest_verification figures (2461 passed / 12 skipped / 0 failed).",
@@ -10,8 +10,8 @@
   "launchers": 0
  },
  "authorized": {
-  "any": false,
-  "note": "the 20260829T115028Z issue is RETIRED to superseded/ UNUSED: it bound the pre-repair executable 1682cd7d, which the product-contract repair moved to 96c346ff. A fresh one-use authorization is issued at the launch commit. No pod, no spend."
+  "any": true,
+  "note": "one one-use behavioural-continuation authorization against the repaired executable 96c346ff, written at the NEXT commit: the lineage check requires the launch commit to differ from its authorized base by exactly the authorization path. The 115028Z issue bound the pre-repair 1682cd7d and is retired to superseded/ UNUSED. No pod, no spend."
  },
  "prepared_launch": {
   "any": false,
@@ -56,12 +56,12 @@
   "detail: logs/decisions.md and the per-run directories"
  ],
  "latest_verification": {
-  "utc": "2026-08-29T15:05:26Z",
-  "after": "the product-contract repair",
-  "full_suite": "PENDING at this commit",
-  "verifiers": "PENDING",
-  "gates": "PENDING",
-  "continuation": "53 tests (11 new product-contract); 15 new mutations, no survivors",
+  "utc": "2026-08-29T15:35:21Z",
+  "after": "the product-contract repair and the identity refreeze",
+  "full_suite": "2479 passed, 12 skipped, 0 failed in 26:23",
+  "verifiers": "frozen assets clean; both reuse records verified, digests unchanged; relay asset fe9683e6a9c7 present on the transport repo at the recorded sizes",
+  "gates": "run at the launch commit, not this one",
+  "continuation": "53 tests, 11 of them the new product contract; 15 mutations of the product contract, capacity gate, archives, no-search guarantee and the 6-to-3 boundary, no survivors",
   "scope": "CPU only; no GPU, no pod, $0"
  },
  "failure_pattern": "continuation 1-7: an uncaught transport call, an undeliverable asset, dev-box-only code in the pod gate, the attempt-12 OOM class, a checkpoint path, a checkpoint with no tokenizer, and finally a SUCCEEDING driver whose launcher crashed on a line only success reaches. Each failure was further in than the last. See logs/decisions.md",

@@ -10,11 +10,14 @@ not carry. If the two disagree, a structural test fails.
 pod exists and no bundle is staged. Spend is `$260.0550` of the `$283.7600` cap,
 `$23.7050` remaining.
 
-**Nothing is authorized at this commit.** The
-`autoinit.continuation_b.20260829T115028Z` grant bound the pre-repair executable
-`1682cd7d` and is retired to `superseded/` **UNUSED** — it was never launched
-against and no spend occurred under it. A fresh one-use authorization is issued
-at the launch commit, against `96c346ff`.
+**One behavioural-continuation authorization is issued**, one-use, against the
+repaired executable `96c346ff`. It is written at the **next** commit and nowhere
+else: `session_commit_gate`'s lineage check requires the launch commit to differ
+from the authorized base by exactly one path — the authorization artifact — so
+this commit declares the pending issuance and the launch commit carries only the
+file. The earlier `autoinit.continuation_b.20260829T115028Z` grant bound the
+pre-repair digest `1682cd7d` and is retired to `superseded/` **UNUSED**: it was
+never launched against and no spend occurred under it.
 
 # The product contract is REPAIRED — the last blocker is closed
 
