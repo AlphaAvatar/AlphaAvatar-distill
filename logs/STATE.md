@@ -1,4 +1,4 @@
-**Updated:** 2026-08-29 · branch `main` · **PHASE_B_STAGE1_COMPLETE / BEHAVIOURAL_SELECTION_INCOMPLETE — authorization issued, LAUNCH BLOCKED at ckpt_store_capacity_gate**
+**Updated:** 2026-08-29 · branch `main` · **PHASE_B_STAGE1_COMPLETE / BEHAVIOURAL_SELECTION_INCOMPLETE — product contract repaired, all 7 pre-provider gates green**
 
 # Current state
 
@@ -6,55 +6,88 @@ The **human view of [`current_state.json`](current_state.json)**. That file owns
 the live facts; this one says the same things in prose and adds nothing it does
 not carry. If the two disagree, a structural test fails.
 
-**Nothing is running. Nothing is billing. Nothing is prepared for launch.**
-One behavioural-continuation authorization IS issued —
-`autoinit.continuation_b.20260829T115028Z`, one-use and **unused**. No pod exists,
-no bundle is staged, and no spend has occurred under it.
+**Nothing is running. Nothing is billing. Nothing is prepared for launch** — no
+pod exists and no bundle is staged. Spend is `$260.0550` of the `$283.7600` cap,
+`$23.7050` remaining.
 
-# LAUNCH BLOCKED AGAIN — an inherited product contract
+**Nothing is authorized at this commit.** The
+`autoinit.continuation_b.20260829T115028Z` grant bound the pre-repair executable
+`1682cd7d` and is retired to `superseded/` **UNUSED** — it was never launched
+against and no spend occurred under it. A fresh one-use authorization is issued
+at the launch commit, against `96c346ff`.
 
-The digest repair below worked: `session_commit_gate`, which refused every launch
-before, now passes on all three of its checks at the launch commit. Six of the
-seven pre-provider gates are green. The seventh is not, and it is the same class
-of defect one layer further out.
+# The product contract is REPAIRED — the last blocker is closed
 
-`ckpt_store_capacity_gate` demands **11.55 GiB** of dev-box space — 5.55 GiB of
-"five stage-1 selected leaves" plus 6 GiB of working room. **This session produces
-no leaves.** It runs no search; its three finalists already exist locally and on
-the relay. Its actual product is the artifact archive, which for comparable
-sessions is **~15 MB**. The gate is asking for roughly a thousand times what the
-session needs, and refusing on that basis.
+`ckpt_store_capacity_gate` was refusing every launch, and it was right to refuse
+the thing it was asked: it demanded **11.55 GiB** of dev-box space for "five
+stage-1 selected leaves" plus 6 GiB of working room, on `--ckpt-store`. **This
+session produces no leaves.** It runs no search; its three finalists already
+exist locally and on the relay. It was asking for roughly a thousand times the
+session's need, on the wrong filesystem, for a product that does not exist.
 
-The same inheritance runs deeper than the gate. The continuation's
-`ArtifactPolicy` still declares:
+The same inheritance set `fetch_products = fetch_selected_leaves` and
+`products_secured = selected_leaves_secured`. Both are Phase B's, and both exist
+to rescue **search output** — the attempt-11 fix, where five measured leaves were
+lost because the product fetch returned early.
 
-```
-fetch_products   = fetch_selected_leaves
-products_secured = selected_leaves_secured
-```
+**What those two actually did, driven rather than assumed.** They were **inert,
+not fatal**. `selected_leaf_records` reads
+`<scr>/store/selected_leaf_durability.json`; the continuation driver never writes
+one and does not fetch one, so both returned empty and the secured check passed
+vacuously with `"stage 1 did not stage any selected leaves"`. The earlier reading
+here — that at teardown they would hunt the pod for five directories and judge
+the session unsecured — **overstated it**, and the correction is pinned by a test
+rather than left in prose. They still had to go: a declaration that is wrong but
+currently harmless is exactly the kind that survives review, and it stays
+harmless only until something downstream starts writing that report.
 
-Both are Phase B's, and both exist to rescue **search output** — the attempt-11
-fix, where five measured leaves were lost because the product fetch returned
-early. At the continuation's teardown they would look on the pod for five leaf
-directories that were never created there, and judge the session's products
-unsecured.
+**The repaired contract.** No leaf fetch and no leaf-secured check — the
+`ArtifactPolicy` defaults, which answer "this session owes no off-pod products"
+explicitly rather than skipping the gate. The durable science travels where it
+already did, in the artifact archive: probe journal, probe configs, generations,
+per-sample rows, the pooled decision, the report and the session/audit evidence.
+Temporary probe training checkpoints are **not** promoted to permanent products;
+nothing downstream reads them.
 
-**What the correct contract is.** No leaf fetch: this session's checkpoints are
-inputs, not outputs, and are already durable in two places. A capacity check sized
-to the archive plus working room, not to a search's output. Both are small,
-mechanical changes — and both move the continuation executable digest again, which
-means the issued authorization must be **superseded, not reused**.
+**The replacement gate measures what the collector writes.**
+`SessionRunner.collect_and_teardown` scp's the archive to `<args.scr>/store` and
+extracts a second full copy beside it, so that is the filesystem checked. Its
+requirement is measured, not guessed: `du -sb` over every retained session store
+on this box, restricted to the **search-free** ones, because every store above
+13.7 MB here is dominated by a 26–55 MB `states.jsonl` this session cannot write.
+Largest comparable **13,641,956 B**, ×4, plus 1 GiB of working room — **1076
+MiB**, against a closest structural analogue (recovery continuation attempt 7:
+eleven probes, full generations, `ALL_DONE`) of 11.53 MiB. Derivation in
+[`autoinit_continuation_b_capacity.json`](autoinit_continuation_b_capacity.json).
 
-**A second, separate fact.** The dev box hit **100% disk** during the
-launch-commit suite: `/` was at 99% before the run and pytest's own temp trees
-filled the rest, which is what produced ten spurious errors in that run rather
-than any code defect. 7.6 GiB was reclaimed by deleting `/tmp/pytest-of-*`;
-`/home/ecs-user/aad-artifacts` holds **95 GB** of prior-experiment output and is
-where real headroom would come from. That is a maintainer call, not something to
-delete unilaterally.
+**11 tests, 15 mutations, no survivors** — reconnecting either callable,
+restoring the five-leaf gate, pointing the gate at `--ckpt-store`, silently
+moving the measured bound or the safety factor, dropping the probe journal or the
+pooled decision from either archive, promoting probe checkpoints to products,
+adding a search call site, and moving the 6→3 boundary all fail.
 
-**Nothing was launched.** The authorization is issued, one-use and unused; no pod
-was created; spend remains `$260.0550`.
+**What moved, and what did not.** The executable digest `1682cd7d…` → `96c346ff…`
+and the preregistration `808390d1…` → `21e69909…`, both by design. The
+preregistration diff is exactly those two lines. Science, evidence and pricing
+are untouched: plan `a2ef4cd68a4b…`, Stage-1 selection, the amendment, the
+six-candidate universe, both reuse digests, the rung-1 result, the calibration
+identities, the three finalists, floor `$5.4784`, ceiling `$8.0691`, cap
+`$283.76`. The authorization issued against the old digest is retired to
+`superseded/` **UNUSED**.
+
+**Scratch no longer lands in `$HOME`.** The launcher defaults to
+`/home/ecs-user/aad-scratch/sessions/<session-id>`, so no sixth `phase_b_*_scr`
+is created. The five that exist were inventoried at `$0` before anything was
+deleted, and one finding matters:
+**`phase_b_a5_scr` holds the only surviving raw generations, per-sample rows and
+train logs for Attempt 5's three fresh `sa` probes** — including `fe9683e6a9c7`,
+which this session cites. The probe *journals* are canonical in
+`autoinit_phase_b_attempt5/probes/` and the search journal is in `aad-artifacts`,
+but the generations they were computed from exist nowhere else. It must not be
+retired; promoting it into `aad-artifacts` is a maintainer call. Only the five
+git bundles were deleted — each proven rebuildable from a commit that is an
+ancestor of `origin/main` — reclaiming **31.26 MiB**. Full record in
+[`scratch_inventory_20260829.json`](scratch_inventory_20260829.json).
 
 # The launch blocker is REPAIRED
 
@@ -232,8 +265,8 @@ freed to 0.01 GiB, and the evaluation tokenizer materialized before every batter
    | --- | --- |
    | session plan | `a2ef4cd68a4b…` (`autoinit.v1.phase_b_behavioural_continuation`) |
    | stages | `0, 1, 3, 4, 5` — **no stage 2**, because Phase A's stage 2 is rung 1 |
-   | preregistration | `808390d11f3d…`, frozen before any continuation result |
-   | executable-source digest | `1682cd7d95e6…` over **62** files, set version 3 |
+   | preregistration | `21e69909e1bc…`, frozen before any continuation result |
+   | executable-source digest | `96c346ffcf6a…` over **62** files, set version 3 |
    | relay assets | `1643145376ba…`, `fe9683e6a9c7` round-trip verified |
    | floor / ceiling | **$5.4784** (1 probe) / **$8.0691** (3 probes) |
 

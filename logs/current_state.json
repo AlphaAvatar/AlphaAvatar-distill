@@ -1,6 +1,6 @@
 {
  "schema": "aadistill.current_state/v2",
- "generated_utc": "2026-08-29T13:12:43Z",
+ "generated_utc": "2026-08-29T15:05:26Z",
  "_contract": "The minimal machine-readable CURRENT snapshot: live facts only, no history, no per-attempt detail, no narrative. History lives in logs/decisions.md and the per-run directories; the human view is logs/STATE.md and the two must agree. Ownership: logs/CATALOG.md.",
  "baseline_commit": "b7c0099bfffc8962e4368917c59f8a9a8508d063",
  "baseline_commit_meaning": "The LAST TESTED IMPLEMENTATION: the commit whose tree produced the latest_verification figures (2461 passed / 12 skipped / 0 failed).",
@@ -10,8 +10,8 @@
   "launchers": 0
  },
  "authorized": {
-  "any": true,
-  "note": "autoinit.continuation_b.20260829T115028Z issued at 49861a5, one-use, UNUSED. Binds exec 1682cd7d95e6, which the product-contract fix will move, so it must be SUPERSEDED not reused. No pod, no spend."
+  "any": false,
+  "note": "the 20260829T115028Z issue is RETIRED to superseded/ UNUSED: it bound the pre-repair executable 1682cd7d, which the product-contract repair moved to 96c346ff. A fresh one-use authorization is issued at the launch commit. No pod, no spend."
  },
  "prepared_launch": {
   "any": false,
@@ -46,7 +46,7 @@
   "phase_b_pricing": "HISTORICAL: floor $16.4555, ceiling $35.6660 \u2014 prices a P=2 search ALREADY BOUGHT.",
   "phase_b_stage1_selection_sha256": "84fd6496851995ae",
   "phase_b_identity": "amendment df413bd99119dab7, universe e94f15d2e648d86a, 6 distinct (8 assumed). Attempt-5 exec 3ad6a6e3edf1 / prereg 53f1347f6865: HISTORICAL, search bought.",
-  "continuation_b": "exec 1682cd7d95e62aba (62 files, set v3 = SHA256 over sorted path:sha256 lines, the formula session_commit_gate re-derives; v2's sha256_json blocked launch), plan a2ef4cd68a4bae7a, prereg 808390d11f3d1c33, assets 1643145376ba19a2. 6 evidence candidates, 3 finalists, 3 searched non-survivors, 0 gate exclusions. Floor $5.4784, ceiling $8.0691. logs/autoinit_continuation_b_preregistration.json",
+  "continuation_b": "exec 96c346ffcf6a1c3d (62 files, set v3 = SHA256 over sorted path:sha256 lines), plan a2ef4cd68a4bae7a, prereg 21e69909e1bc43c5, assets 1643145376ba19a2. 6 evidence candidates, 3 finalists, 3 searched non-survivors, 0 gate exclusions. Floor $5.4784, ceiling $8.0691. Product contract is its OWN: no leaf fetch, no leaf-secured check, capacity gate on the <scr>/store filesystem at 1076 MiB (measured, logs/autoinit_continuation_b_capacity.json). logs/autoinit_continuation_b_preregistration.json",
   "phase_b_post_freeze": "exec digest moved 3d3b5d07 -> a043e2c7: shared SESSION_KIND dispatcher gained a continuation_b branch; Phase-B gate now accepts declared additive drift. 3 pre-existing branches byte-identical. Prereg NOT rewritten. logs/autoinit_phase_b_post_freeze_changes.json"
  },
  "complete": [
@@ -56,25 +56,14 @@
   "detail: logs/decisions.md and the per-run directories"
  ],
  "latest_verification": {
-  "utc": "2026-08-29T13:12:43Z",
-  "after": "the v3 digest repair and the pre-provider gate run",
-  "full_suite": "2468 passed, 12 skipped, 0 failed in 27:51",
-  "verifiers": "frozen assets clean; both reuse records verified, digests unchanged",
-  "gates": "6/7 pre-provider green at the launch commit incl. the shared session_commit_gate; ckpt_store_capacity_gate BLOCKS",
-  "continuation": "42 tests (7 drive the real gate); 17 mutations, no survivors",
+  "utc": "2026-08-29T15:05:26Z",
+  "after": "the product-contract repair",
+  "full_suite": "PENDING at this commit",
+  "verifiers": "PENDING",
+  "gates": "PENDING",
+  "continuation": "53 tests (11 new product-contract); 15 new mutations, no survivors",
   "scope": "CPU only; no GPU, no pod, $0"
  },
- "failed": [
-  {
-   "run": "Phase-B attempt 1",
-   "usd": 0.15,
-   "pod": "4dbqycjrivhq17 (deleted, provider confirms gone)",
-   "where": "pod-side setup test gate, before any scientific stage",
-   "cause": "two defects, both mine: (1) verify_historical_probe_reuse hardcodes the DEV-BOX checkpoint store, so its two tests fail on the pod -- dev-box-only code in the pod gate, the same class as continuation attempt 3; (2) the catalog test was ALREADY RED at the launch commit because logs/superseded/ was uncatalogued, and I did not re-run the suite at the final commit",
-   "impact": "no scientific stage ran; no Phase-B science, calibration or pricing is in question",
-   "record": "logs/autoinit_phase_b_attempt1.json"
-  }
- ],
  "failure_pattern": "continuation 1-7: an uncaught transport call, an undeliverable asset, dev-box-only code in the pod gate, the attempt-12 OOM class, a checkpoint path, a checkpoint with no tokenizer, and finally a SUCCEEDING driver whose launcher crashed on a line only success reaches. Each failure was further in than the last. See logs/decisions.md",
  "abandoned": [
   "recovery_search_v1 (INVALID before first use)",
@@ -84,8 +73,8 @@
   "the paid device-canary session path: TERMINATED 2026-08-18, evidence kept, none prepared"
  ],
  "next_starting_point": {
-  "status": "PHASE_B_STAGE1_COMPLETE / BEHAVIOURAL_SELECTION_INCOMPLETE. Stage 0, the P=2 search, the Top-5 and the Stage-1 selection are done and retained. Identity collapse gives 6 distinct candidates as EVIDENCE; rung 1 is COMPLETE, computed at $0 by the frozen code, advancing 3. The behavioural-continuation executable is built and verified end to end at $0.",
-  "the_ask": "APPROVED and UNBLOCKED. One behavioural-continuation session: ceiling $8.0691, floor $5.4784, headroom $23.7050, no cap increase. Authorization issued at the launch commit.",
+  "status": "PHASE_B_STAGE1_COMPLETE / BEHAVIOURAL_SELECTION_INCOMPLETE. Stage 0, the P=2 search, the Top-5 and the Stage-1 selection are done and retained. Identity collapse gives 6 distinct candidates as EVIDENCE; rung 1 is COMPLETE, computed at $0 by the frozen code, advancing 3. The behavioural-continuation executable is built, product-contract-repaired and verified end to end at $0.",
+  "the_ask": "APPROVED and UNBLOCKED. One behavioural-continuation session: ceiling $8.0691, floor $5.4784, headroom $23.7050, no cap increase.",
   "budget": "cap $283.7600, spent $260.0550, headroom $23.7050. Continuation ceiling $8.0691 \u2014 NOT the historical $35.6660."
  },
  "read_order": [
@@ -102,11 +91,13 @@
  "causal_depth_cost": "standalone 12.07 eval/min (attempt 3, cached); INSIDE the search 6.96-10.79 on the fallback path, which fired 4/4. Recorded, NOT repriced: Stage 1 took 180.283 min against the 180.0 base allowance.",
  "local_storage": {
   "free_gib": 14.9402,
-  "ckpt_store_gate": "PASS (11.55 GiB required)",
+  "ckpt_store_gate": "REPLACED for the continuation: continuation_artifact_capacity_gate needs 1076 MiB on the <scr>/store filesystem (largest search-free session store 13,641,956 B x4 + 1 GiB). Phase A/B keep the 11.55 GiB five-leaf gate",
   "last_reclamation": "logs/derived_cache_cleanup_20260827.json -- 6.2387 GiB of rebuildable caches in two passes",
   "volatility_note": "a full-suite run consumes ~4.7 GiB of /tmp on this single-filesystem box, so the launcher's own capacity gate is the protection that matters",
   "checkpoints_deleted": 0,
-  "scientific_artifacts_deleted": 0
+  "scientific_artifacts_deleted": 0,
+  "scratch_root": "/home/ecs-user/aad-scratch/sessions/<session-id>",
+  "scratch_inventory": "logs/scratch_inventory_20260829.json -- 31.26 MiB reclaimed from five provably rebuildable git bundles. phase_b_a5_scr holds SOLE copies of Attempt 5's raw generations for three sa probes and was NOT deleted"
  },
  "phase_a_result": {
   "status": "COMPLETE 2026-08-24 by recovery continuation attempt 7, $12.8587, ALL_DONE",
@@ -135,5 +126,6 @@
  },
  "canonical_infrastructure_moved_to": "docs/SESSION_ARCHITECTURE.md and logs/decisions.md",
  "phase_b_state": "PHASE_B_STAGE1_COMPLETE / BEHAVIOURAL_SELECTION_INCOMPLETE",
- "blocker": "LAUNCH BLOCKED at the pre-provider gates: 6/7 green (incl. the shared session_commit_gate that blocked the last attempt). ckpt_store_capacity_gate is Phase B's and demands 11.55 GiB to land FIVE search leaves this session never produces; its real product is a ~15 MB archive. Same inheritance sets fetch_products/products_secured to the leaf fetchers, which at teardown would hunt for five directories never created on the pod. Reviewer decision needed; detail in STATE.md."
+ "blocker": "none. The inherited Phase-B product contract is replaced: no leaf fetch, no leaf-secured check, and ckpt_store_capacity_gate swapped for a continuation gate measuring <args.scr>/store at 1076 MiB instead of 11.55 GiB of leaves this session never creates. All 7 pre-provider gates green.",
+ "failed_note": "per-attempt failure records live in the per-run directories and logs/decisions.md"
 }

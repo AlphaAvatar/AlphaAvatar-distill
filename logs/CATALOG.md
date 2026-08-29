@@ -58,7 +58,7 @@ overview and links here instead. A structural test enforces this.
 | `autoinit_attempt5_probe_reuse.json` | strict reconstruction of the three rung-1 `sa` probes Attempt 5 PAID for, to the same standard as the historical Phase-A citations. Regenerable with `scripts/autoinit/verify_attempt5_probe_reuse.py` |
 | `autoinit_attempt5_retention_verification.json` | the transfer-verification identities for Attempt 5's five Top-5 checkpoints, re-derived independently on the dev box. A SEPARATE record — the frozen Stage-1 selection artifact is not edited — plus the proof and accounting for the nested-duplicate cleanup |
 | `autoinit_behavioural_continuation_pricing.json` | what Phase B still owes once Stage 1 is treated as complete: one missing `sb`, at most two conditional `sc`, and the fixed session costs. Regenerable with `scripts/autoinit/price_behavioural_continuation.py`. **Not an authorization** |
-| `autoinit_continuation_b_authorization.json` | the ONE-USE behavioural-continuation authorization issued 2026-08-29 at commit `49861a5`, binding the v3 executable digest, the session and science plans, the preregistration, both calibration identities, all six cited evidence identities and the verified relay assets. `runs_search` is False **by type**. **Issued but UNUSED**: the launch was blocked at `ckpt_store_capacity_gate`, and the fix for that moves the executable digest, so this artifact must be superseded rather than reused |
+| `autoinit_continuation_b_authorization.json` | the ONE-USE behavioural-continuation authorization for the **current** launch, binding the session commit, the v3 executable digest, the session and science plans, the preregistration, both calibration identities, all six cited evidence identities and the verified relay assets. `runs_search` is False **by type**. Written by `scripts/autoinit/issue_continuation_b_authorization.py`, which refuses to overwrite an existing one. The 2026-08-29T115028Z issue is retired to `superseded/` **UNUSED** — it bound the pre-repair digest `1682cd7d` |
 | `autoinit_continuation_b_grant.json` | the maintainer's permission for the one behavioural-continuation session, transcribed verbatim from the review messages of 2026-08-29 and consumed as an INPUT by `scripts/autoinit/issue_continuation_b_authorization.py`. States who permitted what, at what cumulative spend, and — at length — what it does **not** cover. Asserts no hash, digest or commit: the issuer derives every identity and refuses a grant that claims one it did not compute |
 | `autoinit_continuation_b_preregistration.json` | what the behavioural continuation would do, frozen before any continuation result exists: the six-candidate evidence universe versus the **three** active finalists, the reused-vs-missing `sb`/`sc` inventory, the reuse rule and why two raw protocol hashes are comparable under `generation_runtime_comparability@v2`, the executable source digest and its derivation, the no-search guarantee, and the floor/ceiling. Regenerable with `scripts/autoinit/write_continuation_b_preregistration.py`. **Not an authorization** |
 | `autoinit_continuation_b_assets.json` | the relay copy of `fe9683e6a9c7`, the one advancing checkpoint no prior session staged. Records repo, repo type, per-file hashes and the **round-trip verification**: the bytes were downloaded back and the checkpoint identity re-derived to equal the local canonical, before any provider resource existed. Upload-command success is not evidence |
@@ -110,9 +110,13 @@ consumed authorizations; changing one silently invalidates recorded results.
 ## HISTORICAL — evidence, never rewritten
 
 `superseded/` holds artifacts that were superseded before use and are kept
-as evidence rather than deleted — currently the Phase-B authorization that was
-invalidated by the naming defect **before provider creation, at $0 spend**. Files
-here are never revived or reused; the `_UNUSABLE` suffix says so in the name.
+as evidence rather than deleted — the Phase-B authorizations, and
+`autoinit_continuation_b_authorization_20260829T115028Z_UNUSED.json`, the
+behavioural-continuation grant that was issued, blocked at
+`ckpt_store_capacity_gate` and then invalidated by the product-contract repair
+that moved the executable digest `1682cd7d` → `96c346ff`. Every one of them was
+retired **before provider creation, at $0 spend**. Files here are never revived
+or reused; the `_UNUSABLE` / `_UNUSED` / `_CONSUMED` suffix says so in the name.
 
 
 Per-run directories. Each holds what a session actually produced.
