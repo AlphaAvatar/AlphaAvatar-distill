@@ -57,6 +57,31 @@ def build() -> dict:
     rung1 = amendment["rung1_selection"]
     source = continuation_source_digest(REPO_ROOT)
 
+    # Two DIFFERENT concepts, conflated in v1 under one name that read as though
+    # it held both. `gate_exclusions` are the feasibility and catastrophic-
+    # capability refusals rung 1 applies BEFORE ranking; both are empty for this
+    # result, which is a fact worth stating rather than an absence to infer.
+    # `searched_non_survivors` are the Top-5 leaves that simply ranked below the
+    # top-2 cut. v1 derived the second from `rung1["all_exclusions"]` — a key that
+    # does not exist — so `.get(...)` returned `[]` and the field silently claimed
+    # there were none.
+    #
+    # Derived from the two frozen identities, never from behavioural scores: a
+    # non-survivor list read off a measurement would let the measurement decide
+    # the record of who was eligible.
+    top5 = [entry["state_id"] for entry in selection["selected"]]
+    survivors = list(rung1["selected_searched"])
+    missing = sorted(set(survivors) - set(top5))
+    if missing:
+        raise SystemExit(
+            f"refusing to preregister: the frozen rung-1 survivors {missing} are "
+            "not in the authoritative Top-5. One of the two records is wrong, and "
+            "guessing which would corrupt the other.")
+    searched_non_survivors = sorted(set(top5) - set(survivors))
+    if len(searched_non_survivors) != len(top5) - len(survivors):
+        raise SystemExit(
+            "refusing to preregister: the Top-5 contains duplicate state ids")
+
     if not assets["verification"]["verified"]:
         raise SystemExit(
             "refusing to preregister: the relay copy of the advancing checkpoint "
@@ -104,8 +129,27 @@ def build() -> dict:
                      "decision, the conditional sc and the final selection. Rung 1 "
                      "is complete and frozen; this session imports that result and "
                      "does not recompute it."),
-            "excluded_non_survivors": [e["state_id"]
-                                       for e in rung1.get("all_exclusions", [])],
+            "gate_exclusions": {
+                "by_feasibility": rung1["excluded_by_feasibility"],
+                "by_catastrophic_capability":
+                    rung1["excluded_by_catastrophic_capability"],
+                "meaning": ("candidates rung 1 refused BEFORE ranking, on the "
+                            "feasibility floor or the catastrophic-capability "
+                            "rule. Both are empty for this result: every searched "
+                            "leaf was eligible, and the cut was made by rank."),
+            },
+            "searched_non_survivors": {
+                "state_ids": searched_non_survivors,
+                "derivation": ("the authoritative Attempt-5 Top-5 MINUS the two "
+                               "frozen rung-1 survivors. Not selected by hand and "
+                               "not read from behavioural scores."),
+                "meaning": ("eligible searched leaves that ranked below the top-2 "
+                            "cut. They remain in the six-candidate EVIDENCE "
+                            "universe and carry citable sa observations; they may "
+                            "not enter sb, the pooled decision, sc or the final "
+                            "selection."),
+                "top5": top5,
+            },
         },
         "probe_inventory": {
             "derivation": ("from the two verified reuse records, cross-checked "

@@ -1,4 +1,4 @@
-**Updated:** 2026-08-29 · branch `main` · **PHASE_B_STAGE1_COMPLETE / BEHAVIOURAL_SELECTION_INCOMPLETE — continuation executable BUILT AND VERIFIED, ceiling $8.0691, unauthorized**
+**Updated:** 2026-08-29 · branch `main` · **PHASE_B_STAGE1_COMPLETE / BEHAVIOURAL_SELECTION_INCOMPLETE — continuation APPROVED at ceiling $8.0691, LAUNCH BLOCKED on a source-digest formula mismatch**
 
 # Current state
 
@@ -8,6 +8,50 @@ not carry. If the two disagree, a structural test fails.
 
 **Nothing is running. Nothing is billing. Nothing is authorized. Nothing is
 prepared for launch.**
+
+# LAUNCH BLOCKED — one defect, found by the launch gate itself
+
+The behavioural continuation is **approved** (ceiling `$8.0691`, floor `$5.4784`,
+cap `$283.76`, no increase needed) and its science and implementation are signed
+off. It **cannot launch**, and the thing that stopped it is the gate that exists
+to stop exactly this.
+
+`continuation_source_digest` computes its digest as `sha256_json(entries)`.
+`session_commit_gate` — the **first** pre-provider precheck, written after
+continuation attempt 5 died at `$0.1369` on a stale binding — recomputes the
+digest itself, as `sha256` over joined `path:sha256` lines. That is the formula
+**both** `harness_source_digest` (Phase A) and `phase_b_source_digest` use. Mine
+is the only one that differs, so the two values can never agree.
+
+Run against `b7c0099` at `$0`, the gate says:
+
+```
+harness_matches: false
+the harness at b7c0099 digests to c45a2147fb2b…, authorized 88e1ef576d81….
+The pod would run code this authorization was not granted against.
+```
+
+**Why this was not caught earlier.** Every `$0` check I built compared
+`continuation_source_digest` against *itself* — `continuation_source_gate` and
+`require_source` both recompute it the same way, so they agree no matter which
+formula it uses. Nothing exercised the one consumer that recomputes the digest
+*independently*. I checked that `ContinuationAuthorization` had every method the
+inherited machinery calls; I did not check that the **value** was in the format
+the consumer re-derives. A matching attribute name is not a matching contract.
+
+**The fix is one line** — use the line-join formula, matching Phase A and Phase B.
+It is internally self-consistent: no consumer compares this digest against a
+stored value except the authorization itself, and nothing in code pins the
+current number.
+
+**Why it is not applied here.** It moves the continuation executable digest
+`88e1ef576d81…` → `c45a2147fb2b…`, which is a pinned identity, and this pass was
+scoped to records only with an explicit instruction not to reopen executable
+readiness. Applying it also forces regenerating the preregistration and this file.
+That is a reviewer decision, not mine to take silently.
+
+**Nothing was issued.** No authorization artifact exists, no launch commit, no
+pod, no spend.
 
 # PHASE A IS COMPLETE — as a SELECTION experiment
 
@@ -125,14 +169,24 @@ freed to 0.01 GiB, and the evaluation tokenizer materialized before every batter
    universe of 6 carries the completed `sa` evidence and the identity-collapse
    result. Rung 1 is COMPLETE and frozen, and only its survivors plus the
    auto-advancing control — `fe9683e6a9c7`, `85bde4ded2c3`, `control-qwen3_0p6b_init_v0`
-   — may enter `sb`, the pooled decision, `sc` and the final selection. The three
-   searched non-survivors are never materialized and never probed.
+   — may enter `sb`, the pooled decision, `sc` and the final selection.
+
+   The other three — `ab7632b00788`, `bf5ae3b6ae00`, `cca699c93f34` — are
+   **searched non-survivors**: eligible leaves that ranked below the top-2 cut.
+   They keep their citable `sa` observations and are never materialized or probed.
+   That is a different thing from a **gate exclusion**, and the preregistration now
+   records the two separately: `gate_exclusions` (feasibility and catastrophic
+   capability) are **both empty** for this result, because every searched leaf was
+   eligible and the cut was made by rank. The non-survivor list is derived
+   mechanically as the authoritative Top-5 minus the two frozen survivors — never
+   from behavioural scores, since a list read off a measurement would let the
+   measurement decide who had been eligible.
 
    | continuation — CURRENT | |
    | --- | --- |
    | session plan | `a2ef4cd68a4b…` (`autoinit.v1.phase_b_behavioural_continuation`) |
    | stages | `0, 1, 3, 4, 5` — **no stage 2**, because Phase A's stage 2 is rung 1 |
-   | preregistration | `7900c87d814b…`, frozen before any continuation result |
+   | preregistration | `a73f7fb63fcf…`, frozen before any continuation result |
    | executable-source digest | `88e1ef576d81…` over **61** files, set version 2 |
    | relay assets | `1643145376ba…`, `fe9683e6a9c7` round-trip verified |
    | floor / ceiling | **$5.4784** (1 probe) / **$8.0691** (3 probes) |
@@ -307,8 +361,9 @@ freed to 0.01 GiB, and the evaluation tokenizer materialized before every batter
    level 0 against two per level-1 parent. The bound moved only 994.4 → 987.6 min,
    which is why a check on the total alone would have passed against both defects.
 
-   **Approved 2026-08-27**: session hard ceiling **$35.6660**, cumulative cap
-   **$275.59**. The corrected pricing model, P1 and P2 are frozen.
+   **Approved 2026-08-27** (historical, for the search that has since been
+   bought): session hard ceiling **$35.6660**, cumulative cap **$275.59**. The
+   corrected pricing model, P1 and P2 are frozen.
 
    **ATTEMPT 4 RAN AND GOT FURTHER THAN ANY BEFORE IT.** Pod `zjwpsurs2dyvw8`,
    495.2 min, **$8.17**. Stage 0 passed in 2.2 min. **Stage 1 completed its
@@ -405,11 +460,13 @@ freed to 0.01 GiB, and the evaluation tokenizer materialized before every batter
    `$35.6660` that books a search already bought. **Current headroom `$23.7050`
    already covers it; no cap increase is needed.**
 
-   Attempt 5 was approved at cap `$283.76`, session ceiling `$35.6660`, planning
-   floor `$16.4555`, Stage-1 deadline `987.6348 min`. Current identities are
-   executable source **`3ad6a6e3edf1…`** (59 files, set version 5) and
-   preregistration **`53f1347f6865…`**. Detail:
-   [`autoinit_phase_b_attempt4.json`](autoinit_phase_b_attempt4.json).
+   **APPROVED for one paid behavioural-continuation session** at ceiling
+   `$8.0691`, floor `$5.4784`, cumulative cap `$283.76` — no cap increase. Current
+   launch identities are the CONTINUATION's, listed in the table above; the
+   Attempt-5 figures (`$35.6660` ceiling, `$16.4555` floor, `987.6348 min` Stage-1
+   deadline, executable `3ad6a6e3edf1…`, preregistration `53f1347f6865…`) are
+   **historical evidence of a completed search** and are not launch identities.
+   Detail: [`autoinit_phase_b_attempt4.json`](autoinit_phase_b_attempt4.json).
 
    **One further repair closed before attempt 4.** Phase B inherited Phase A's
    `--poll-limit-min 1320` — 22 h — against a corrected envelope that terminates
@@ -453,13 +510,12 @@ freed to 0.01 GiB, and the evaluation tokenizer materialized before every batter
    must not be substituted for it. This measurement has never been run.
 4. **Only then**, the project's formal **Stage 2 / Stage 3 recovery training**.
 
-**Nothing in this list is implemented or started**, and none of it is funded:
-`$35.6750` of headroom is approved for **one** Phase-B execution, bounded by the
-frozen single-session hard ceiling of **$35.6660**. `$248.0850 + $35.6660 =
-$283.7510` against a `$283.76` cap, so the `$0.0090` difference is rounding and
-does not enlarge the session ceiling. `$16.4555` is a planning floor, not an
-expected spend. Unused headroom is **not** authorization for any later
-experiment.
+**Nothing in this list is implemented or started**, and none of it is funded.
+What IS funded is exactly one **behavioural-continuation** session, bounded by
+the hard ceiling **`$8.0691`** against headroom `$23.7050`. `$5.4784` is a
+planning floor, not an expected spend. The `$35.6750` / `$35.6660` full-Phase-B
+allowance is **spent and closed** — Stage 1 was bought and retained by attempt 5.
+Unused headroom is **not** authorization for any later experiment.
 
 ## The launcher defect — cosmetic here, must be fixed before any future session
 
@@ -782,8 +838,8 @@ selection result.**
 
 ```
 cumulative spend   $260.0550  incl. Phase-B attempts 1-5 at $30.0200
-approved cap       $283.76    APPROVED for ONE Phase-B attempt
-remaining          $23.7050   headroom — BELOW the $35.6660 session ceiling
+approved cap       $283.7600  no increase requested or required
+remaining          $23.7050   headroom — COVERS the $8.0691 continuation ceiling
 
 ```
 

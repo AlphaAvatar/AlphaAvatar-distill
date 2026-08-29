@@ -1,6 +1,6 @@
 {
   "schema": "aadistill.autoinit.continuation_b_preregistration/v1",
-  "generated_utc": "2026-08-29T09:34:48.717059+00:00",
+  "generated_utc": "2026-08-29T10:38:45.580952+00:00",
   "status": "FROZEN BEFORE ANY BEHAVIOURAL-CONTINUATION RESULT EXISTS. Not an authorization, not a grant, and not an instruction to launch.",
   "what_this_session_is": "Phase-B Stage 1 is COMPLETE. Attempt 5 ran the joint P=2 search to completion, emitted an authoritative Top-5 and a durable Stage-1 selection artifact, and paid for three rung-1 sa probes. It then died on a candidate-universe collision that the identity-collapse amendment resolves, and rung 1 was completed at $0 from retained evidence. What remains is behavioural: one missing sb, and at most two conditional sc. This session buys ONLY that.",
   "what_this_session_must_not_do": [
@@ -33,7 +33,27 @@
     ],
     "computed_by": "the frozen SuccessiveHalvingPlan.select_rung1_survivors, unchanged",
     "role": "The ONLY states that may enter sb, the pooled sa+sb decision, the conditional sc and the final selection. Rung 1 is complete and frozen; this session imports that result and does not recompute it.",
-    "excluded_non_survivors": []
+    "gate_exclusions": {
+      "by_feasibility": [],
+      "by_catastrophic_capability": [],
+      "meaning": "candidates rung 1 refused BEFORE ranking, on the feasibility floor or the catastrophic-capability rule. Both are empty for this result: every searched leaf was eligible, and the cut was made by rank."
+    },
+    "searched_non_survivors": {
+      "state_ids": [
+        "ab7632b00788f825e252ea8d5ff4be30",
+        "bf5ae3b6ae00c3dbb963805135b3838f",
+        "cca699c93f34dad7e94a5d13a25b2bc2"
+      ],
+      "derivation": "the authoritative Attempt-5 Top-5 MINUS the two frozen rung-1 survivors. Not selected by hand and not read from behavioural scores.",
+      "meaning": "eligible searched leaves that ranked below the top-2 cut. They remain in the six-candidate EVIDENCE universe and carry citable sa observations; they may not enter sb, the pooled decision, sc or the final selection.",
+      "top5": [
+        "cca699c93f34dad7e94a5d13a25b2bc2",
+        "85bde4ded2c31953f802e39cf2252c87",
+        "ab7632b00788f825e252ea8d5ff4be30",
+        "fe9683e6a9c783bbc6fe276a78c851c6",
+        "bf5ae3b6ae00c3dbb963805135b3838f"
+      ]
+    }
   },
   "probe_inventory": {
     "derivation": "from the two verified reuse records, cross-checked against what the executable actually buys in a whole-function run",
@@ -160,5 +180,5 @@
     "winner=None with unresolved_equivalence \u2014 a RESULT, not a failure"
   ],
   "not_authorized": "No continuation grant or authorization exists, no cumulative-budget increase has been requested, and this document does not request one. It records what the session would do if one were issued.",
-  "preregistration_sha256": "7900c87d814b5cb796e463ae63c98ef9f5e9d6d158a4ff56f35edb5bfbd404dd"
+  "preregistration_sha256": "a73f7fb63fcfa2359e3ee47e300bcc3b49792628e676910363f2b5bf6a056375"
 }
