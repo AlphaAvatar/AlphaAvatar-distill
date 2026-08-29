@@ -1,0 +1,123 @@
+{
+ "schema": "aadistill.scratch_inventory/v1",
+ "generated_utc": "2026-08-29T15:00:49Z",
+ "scope": "The five AlphaAvatar-distill scratch directories sitting directly under /home/ecs-user: phase_b_scr, phase_b_retry_scr, phase_b_a3_scr, phase_b_a4_scr, phase_b_a5_scr. Asked: is any byte in them the ONLY surviving copy? Nothing was deleted before this answer existed.",
+ "method": "sha256 of every file in all five directories; then sha256 of every file under logs/, configs/, artifacts/, /home/ecs-user/aad-artifacts and /home/ecs-user/aad-scratch whose SIZE matches one of them. Size-indexing is what makes it /bin/bash: the 95 GB artifact store is stat'd, not hashed. A file is 'sole' when no byte-identical copy exists outside these five directories.",
+ "totals": {
+  "phase_b_scr": {
+   "files": 10,
+   "bytes": 6444031,
+   "sole_copy_files": 10,
+   "sole_copy_bytes": 6444031
+  },
+  "phase_b_retry_scr": {
+   "files": 11,
+   "bytes": 6505938,
+   "sole_copy_files": 9,
+   "sole_copy_bytes": 6501652
+  },
+  "phase_b_a3_scr": {
+   "files": 36,
+   "bytes": 7812944,
+   "sole_copy_files": 17,
+   "sole_copy_bytes": 7600882
+  },
+  "phase_b_a4_scr": {
+   "files": 38,
+   "bytes": 77536161,
+   "sole_copy_files": 17,
+   "sole_copy_bytes": 22388574
+  },
+  "phase_b_a5_scr": {
+   "files": 110,
+   "bytes": 81563229,
+   "sole_copy_files": 83,
+   "sole_copy_bytes": 25893531
+  }
+ },
+ "findings": {
+  "phase_b_a5_scr": {
+   "verdict": "DO NOT DELETE \u2014 holds sole-copy scientific evidence",
+   "what": "the complete raw generations, per-sample scoring rows, train logs, scoring/generation logs and recovery-search results for Attempt 5's THREE fresh rung-1 sa probes: ab7632b00788, bf5ae3b6ae00 and fe9683e6a9c7. 83 files, 24.69 MiB, no copy anywhere else.",
+   "why_it_matters": "fe9683e6a9c7/sa is a CITED REUSE INPUT to the behavioural continuation (logs/autoinit_attempt5_probe_reuse.json, probes_dir_digest 2e5030fa...). AGENTS.md P18 requires the complete raw generation to be saved for every evaluated sample. Deleting this directory would destroy the raw generations behind evidence the next paid session cites.",
+   "what_IS_retained_canonically": {
+    "probe journals": "logs/autoinit_phase_b_attempt5/probes/ (11 files, in git)",
+    "search journal": "aad-artifacts/autoinit/phase_b/attempt5/states.jsonl",
+    "stage-1 selection": "aad-artifacts/autoinit/phase_b/attempt5/stage1_selection.json",
+    "search result / evidence": "logs/autoinit_phase_b_attempt5/",
+    "note": "the journals summarize the probes; the generations and per-sample rows they were computed from exist only here"
+   },
+   "recommendation": "promote this directory's store/extracted tree into aad-artifacts/autoinit/phase_b/attempt5/ so the raw generations sit in the canonical store rather than in a directory named 'scratch'. MAINTAINER CALL, not done here: the handoff scope is inventory plus safe cleanup, and this is a change to the canonical artifact store."
+  },
+  "phase_b_a4_scr": {
+   "verdict": "keep the directory; nothing scientific is unique to it",
+   "sole_copies": "operational only \u2014 the launcher log, the watchdog journal, the pod-side run log, setup.log, engine_probe.log, the collection manifest and the archive itself",
+   "the_54_MB_search_journal_is_retained": "aad-artifacts/autoinit/phase_b/attempt4/states.jsonl",
+   "evidence_file_is_retained": "logs/autoinit_phase_b_attempt4/phase_a_evidence.json"
+  },
+  "phase_b_a3_scr": {
+   "verdict": "keep the directory; nothing scientific is unique to it",
+   "sole_copies": "operational only; attempt 3 died in the pod-side setup gate",
+   "evidence_file_is_retained": "logs/autoinit_phase_b_attempt3/phase_a_evidence.json"
+  },
+  "phase_b_scr": {
+   "verdict": "keep the directory; operational failure evidence only",
+   "sole_copies": "launch.log, launcher.out, watchdog.jsonl, poll.jsonl, pod_id, pod_start_epoch \u2014 the record of a setup-stage failure. P11: a failed run must stay useful to the next agent."
+  },
+  "phase_b_retry_scr": {
+   "verdict": "keep the directory; operational failure evidence only",
+   "sole_copies": "as above, plus three create_raw draws"
+  }
+ },
+ "deleted": {
+  "what": "the five session git bundles, and nothing else",
+  "why_provably_derived": "each is a git bundle of ONE commit, and every one of those commits is present in this repository and is an ancestor of origin/main. A bundle is a transport copy of history that git already holds.",
+  "rebuild": "git bundle create <out>.bundle <commit>",
+  "files": [
+   {
+    "path": "phase_b_scr/aad_autoinit_218c51c7.bundle",
+    "commit": "218c51c75909a00d22fd3fd6975d6c47dca128eb",
+    "bytes": 6431555,
+    "commit_present": true,
+    "ancestor_of_origin_main": true
+   },
+   {
+    "path": "phase_b_retry_scr/aad_autoinit_13d68a40.bundle",
+    "commit": "13d68a40b0e0df6c67de38383fd2a3b98e836bb0",
+    "bytes": 6487102,
+    "commit_present": true,
+    "ancestor_of_origin_main": true
+   },
+   {
+    "path": "phase_b_a3_scr/aad_autoinit_4a25699a.bundle",
+    "commit": "4a25699a920b36c4aa7cdfde9ca5ee32bb99b0ed",
+    "bytes": 6437940,
+    "commit_present": true,
+    "ancestor_of_origin_main": true
+   },
+   {
+    "path": "phase_b_a4_scr/aad_autoinit_27a366e8.bundle",
+    "commit": "27a366e8ce3f922c200269a24321eca1eb123bdd",
+    "bytes": 6647097,
+    "commit_present": true,
+    "ancestor_of_origin_main": true
+   },
+   {
+    "path": "phase_b_a5_scr/aad_autoinit_8d6ba98e.bundle",
+    "commit": "8d6ba98e4ffe98bef382eb2480983c2f2d304bbc",
+    "bytes": 6773263,
+    "commit_present": true,
+    "ancestor_of_origin_main": true
+   }
+  ],
+  "reclaimed_bytes": 32776957,
+  "reclaimed_mib": 31.26
+ },
+ "not_deleted_and_why": {
+  "store/extracted trees": "byte-for-byte re-extractions of the tarball beside them, so technically redundant \u2014 but for a5 the tarball would then be the ONLY copy of the raw generations on one disk. Removing a second copy of sole-copy evidence to reclaim 114 MB is a worse trade than the disk it frees.",
+  "operational logs": "launch.log, launcher.out, watchdog.jsonl, poll.jsonl and the pod-side run/setup logs have no canonical copy. They are the failure record for four paid attempts.",
+  "whole directories": "none qualified. The handoff authorizes deleting directories PROVEN to be derived/redundant/temp; every one of the five contains at least one sole-copy file."
+ },
+ "future_scratch": "/home/ecs-user/aad-scratch/sessions/<session-id>. The behavioural continuation launcher now defaults there, so no sixth phase_b_*_scr is created.",
+ "aad_artifacts": "UNTOUCHED. 95 GB canonical scientific store, not moved."
+}

@@ -30,6 +30,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import shutil
 import sys
 from dataclasses import replace
 from pathlib import Path
@@ -56,8 +57,7 @@ from aadistill.infrastructure.session_runner import REPO, WS, run_session  # noq
 from autoinit_science_inputs import CANONICAL_INIT, RECOVERY_LADDER  # noqa: E402
 from autoinit_phase_a_launch import (  # noqa: E402
     LOCAL_ASSETS as PHASE_A_LOCAL_ASSETS, TEACHER_REVISION, TEST_IGNORES,
-    budget as phase_a_budget, ckpt_store_capacity_gate, fetch_selected_leaves,
-    probe_streams, selected_leaves_secured,
+    budget as phase_a_budget, probe_streams,
 )
 from autoinit_recovery_continuation_launch import (  # noqa: E402
     STAGED_INTO, TRANSPORT_MANIFEST, TRANSPORT_REPO, transport_is_verified,
@@ -88,6 +88,92 @@ ADVANCING_NEW_LEAF = "fe9683e6a9c783bbc6fe276a78c851c6"
 ADVANCING_RETAINED = "85bde4ded2c31953f802e39cf2252c87"
 
 CONTINUATION_ASSET_MANIFEST = REPO_ROOT / "logs/autoinit_continuation_b_assets.json"
+
+#: New scratch goes under the project's scratch root, one directory per session
+#: — NOT another `phase_b_*_scr` beside it in `$HOME`. Five of those already
+#: exist from earlier attempts; a sixth would be the sixth place a reader has to
+#: look for a session's launch log. `/home/ecs-user/aad-artifacts` is untouched:
+#: it is the canonical scientific artifact store, and this is scratch.
+DEFAULT_SCRATCH_ROOT = Path("/home/ecs-user/aad-scratch/sessions")
+
+# --- this session's artifact-store capacity contract ------------------------
+#
+# **What this session actually produces.** Not checkpoints. Its three finalists
+# already exist, on this box and on the relay, and it runs no search: its only
+# irreplaceable product is the artifact archive carrying the newly bought probe
+# journal, generations, per-sample rows, the pooled decision and the report.
+#
+# **Measured, not estimated.** `SessionRunner.collect_and_teardown` writes the
+# downloaded archive AND its extracted copy under `<args.scr>/store`, so the
+# bound is the whole store directory rather than the tarball. `du -sb` over
+# every retained session scratch on this box, restricted to SEARCH-FREE
+# sessions — the only comparable class, since this one cannot run a search:
+#
+#     recovery continuation attempt 7   12,094,788 B   11 probes, ALL_DONE
+#     E7                                13,641,956 B   largest search-free store
+#
+# Every store above that on this box (33.8 MB, 70.3 MB, 74.1 MB) belongs to a
+# session that ran the Phase-A or P=2 search and is dominated by a `states.jsonl`
+# search journal of 26-55 MB, which this session is mechanically unable to write.
+# Derivation and the full measurement table:
+# `logs/autoinit_continuation_b_capacity.json`.
+CONTINUATION_STORE_MEASURED_BYTES = 13_641_956
+#: Applied to the largest measured comparable rather than to the closest one. A
+#: continuation that runs its conditional `sc` writes two probes' worth of
+#: generations that no measured comparable contained, and a factor is the honest
+#: way to carry that rather than predicting the number.
+CONTINUATION_STORE_SAFETY_FACTOR = 4
+#: Working room on the same filesystem for the manifest, the relay journals, the
+#: launch log and the watchdog stream. Deliberately far above the measured need:
+#: the cost of over-reserving a GiB is nothing, and the cost of under-reserving
+#: is a successful session whose evidence cannot land.
+CONTINUATION_SCRATCH_MARGIN_BYTES = 1 * 2**30
+
+
+def continuation_artifact_bytes_required() -> int:
+    return (CONTINUATION_STORE_MEASURED_BYTES * CONTINUATION_STORE_SAFETY_FACTOR
+            + CONTINUATION_SCRATCH_MARGIN_BYTES)
+
+
+def continuation_artifact_capacity_gate(ctx: SessionContext) -> tuple[bool, str]:
+    """Can the SCRATCH filesystem hold what this session brings home?
+
+    **Deliberately not `--ckpt-store`.** Phase A's `ckpt_store_capacity_gate`
+    asks whether `/home/ecs-user/aad-artifacts/autoinit` can hold five bf16
+    stage-1 leaves, because a Phase-A or Phase-B session that completes a search
+    and cannot land its leaves has lost the search — the attempt-11 failure. This
+    session produces no leaves. Inheriting that gate made it demand 11.55 GiB, a
+    thousand times its need, on the wrong filesystem for the wrong product, and
+    it refused every launch on that basis.
+
+    The filesystem checked here is the one the collector actually writes:
+    `<args.scr>/store`, where both the archive and its extracted copy land.
+    """
+    dest = Path(ctx.args.scr) / "store"
+    probe = dest
+    while not probe.exists() and probe != probe.parent:
+        probe = probe.parent
+    free = shutil.disk_usage(probe).free
+    need = continuation_artifact_bytes_required()
+    ctx.evidence.setdefault("precheck", {})["continuation_artifact_store"] = {
+        "destination": str(dest), "filesystem_probed": str(probe),
+        "free_bytes": free, "required_bytes": need,
+        "measured_comparable_bytes": CONTINUATION_STORE_MEASURED_BYTES,
+        "safety_factor": CONTINUATION_STORE_SAFETY_FACTOR,
+        "working_margin_bytes": CONTINUATION_SCRATCH_MARGIN_BYTES,
+        "produces_checkpoint_products": False}
+    if free < need:
+        return False, (
+            f"{probe} has {free / 2**20:.1f} MiB free; this session's artifact "
+            f"archive and its extracted copy need {need / 2**20:.1f} MiB "
+            f"({CONTINUATION_STORE_MEASURED_BYTES / 2**20:.1f} MiB measured from "
+            f"the largest comparable search-free session, x"
+            f"{CONTINUATION_STORE_SAFETY_FACTOR}, plus "
+            f"{CONTINUATION_SCRATCH_MARGIN_BYTES / 2**30:.0f} GiB of working "
+            "room). Free space before launching: the probe journal is the only "
+            "thing here that cannot be re-derived for free.")
+    return True, (f"{probe}: {free / 2**30:.2f} GiB free for "
+                  f"{need / 2**20:.0f} MiB of archive and working room")
 
 
 def continuation_inputs() -> tuple:
@@ -265,6 +351,27 @@ def spec(args) -> SessionSpec:
                           "tearing down. A stage-0 comparability failure is a "
                           "TERMINATE: every cited observation would be lost at "
                           "once and re-buying them is a larger session.")),
+        # `fetch_products` and `products_secured` are left at their DEFAULTS —
+        # "fetch nothing" and "this session owes no off-pod products". That is
+        # the honest contract for this session, not a skipped gate.
+        #
+        # They were Phase B's `fetch_selected_leaves` / `selected_leaves_secured`,
+        # inherited along with the launcher. Both exist to rescue SEARCH OUTPUT:
+        # attempt 11 produced five measured stage-1 leaves and lost every one
+        # because the only product fetch returned early. This session runs no
+        # search. Its three finalists are INPUTS, already durable on this box and
+        # on the relay, and at teardown the inherited pair would have gone
+        # looking on the pod for five leaf directories nothing ever created
+        # there — then judged a scientifically complete session unsecured.
+        #
+        # What this session must not lose is its probe journal, generations,
+        # per-sample rows, pooled decision and report. None of those are weights;
+        # all of them travel in the artifact archive described by
+        # `configs/autoinit/continuation_b_artifacts.json`, whose entries were
+        # enumerated from a real end-to-end run. The temporary probe training
+        # checkpoints are deliberately NOT promoted to permanent products: no
+        # downstream evidence contract reads them, and the frozen final selection
+        # is computed from the journal.
         artifacts=ArtifactPolicy(
             audit_dirname="autoinit_phase_a",
             evidence_filename="phase_a_evidence.json",
@@ -274,9 +381,7 @@ def spec(args) -> SessionSpec:
             report_names=("phase_a_evidence.json",
                           "attested_evaluation_protocol.json",
                           "rung2_selection.json", "phase_a_result.json"),
-            event_streams=probe_streams,
-            fetch_products=fetch_selected_leaves,
-            products_secured=selected_leaves_secured),
+            event_streams=probe_streams),
         teardown=TeardownPolicy(
             note="nothing chains off the continuation; it is a terminus"),
         precheck=(
@@ -286,7 +391,7 @@ def spec(args) -> SessionSpec:
             no_search_gate,
             evidence_binding_gate,
             continuation_price_gate,
-            ckpt_store_capacity_gate,
+            continuation_artifact_capacity_gate,
         ),
         evidence_fields={
             "phase": "B-continuation",
@@ -311,7 +416,15 @@ def build_parser() -> argparse.ArgumentParser:
     ap.set_defaults(out="logs/autoinit_continuation_b_session.json",
                     disk_gb=120,
                     rung1_probes=0, rung2_probes=1, tie_break_probes=2,
-                    poll_limit_min=None)
+                    poll_limit_min=None,
+                    scr=str(DEFAULT_SCRATCH_ROOT / "autoinit-continuation-b"))
+    # `set_defaults` does not clear `required`, and Phase A declares `--scr`
+    # required precisely because it has no sensible default. This session does:
+    # one directory per session under the project scratch root. Passing `--scr`
+    # explicitly still wins, and the capacity gate checks whatever is resolved.
+    for action in ap._actions:                     # no public argparse accessor
+        if action.dest == "scr":
+            action.required = False
     return ap
 
 

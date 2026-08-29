@@ -1,0 +1,237 @@
+{
+ "schema": "aadistill.continuation_b_capacity/v1",
+ "generated_utc": "2026-08-29T14:51:27Z",
+ "purpose": "Provenance for continuation_artifact_capacity_gate's frozen requirement in scripts/pod/autoinit_continuation_b_launch.py. The behavioural continuation produces NO checkpoint products, so Phase B's ckpt_store_capacity_gate -- which demands 5 x 1.110 GiB of stage-1 selected leaves plus 6 GiB of margin, 11.55 GiB, on --ckpt-store -- was both the wrong filesystem and the wrong product, and it refused every launch. This records what the replacement is measured from, so the number is not one estimate wearing a gate's clothing.",
+ "what_the_gate_checks": {
+  "filesystem": "the one containing <args.scr>/store",
+  "why": "SessionRunner.collect_and_teardown scp's the archive to <scr>/store/<archive_basename> and extracts a second full copy to <scr>/store/extracted before verifying it. Both copies are on the scratch filesystem, so the bound is the whole store directory rather than the tarball.",
+  "not_checked": "--ckpt-store (/home/ecs-user/aad-artifacts/autoinit): this session lands no weights there. Its three finalists are INPUTS, already durable on this box and on the relay."
+ },
+ "method": "du -sb over every retained session store directory under /home/ecs-user/{aad-scratch,phase_b_*_scr}, classified by whether the extracted tree contains a states.jsonl search journal.",
+ "measured_utc_note": "figures are the on-disk state at generation time",
+ "population": {
+  "stores_measured": 32,
+  "search_free": 25,
+  "ran_a_search": 7
+ },
+ "comparable_class": "SEARCH-FREE sessions only. The continuation is mechanically unable to run a search, so a session that did is not comparable: every store above 13.7 MB on this box is dominated by a 26-55 MB states.jsonl the continuation cannot write.",
+ "closest_structural_analogue": {
+  "scratch": "aad-scratch/recovery_cont7_20260823/store",
+  "store_bytes": 12094788,
+  "why": "recovery continuation attempt 7: eleven probes across three rungs with full generations and per-sample rows, ALL_DONE, no search. The same shape of session as this one, one rung longer."
+ },
+ "bound_taken_from": {
+  "scratch": "aad-scratch/e7_20260809_124148/store",
+  "store_bytes": 13641956,
+  "why": "the largest search-free store measured, not the closest analogue"
+ },
+ "requirement": {
+  "measured_bytes": 13641956,
+  "safety_factor": 4,
+  "working_margin_bytes": 1073741824,
+  "working_margin_covers": "manifest.json, the fetched reports, the relay journals, launch.log and the watchdog stream, all on the same filesystem",
+  "required_bytes": 1128309648,
+  "required_mib": 1076.0,
+  "headroom_over_closest_analogue": 93.3,
+  "replaces": {
+   "gate": "ckpt_store_capacity_gate",
+   "required_bytes": 12402950144,
+   "required_gib": 11.55
+  }
+ },
+ "why_a_factor_and_not_a_prediction": "A continuation that runs its conditional sc writes two probes' worth of generations and per-sample rows that no measured comparable contained. A multiplier on the largest measured comparable carries that honestly; predicting the exact figure would be the same guess the replaced gate made.",
+ "table": [
+  {
+   "scratch": "phase_b_a5_scr/store",
+   "store_bytes": 74095647,
+   "search_journal_bytes": 54871696,
+   "ran_a_search": true
+  },
+  {
+   "scratch": "phase_b_a4_scr/store",
+   "store_bytes": 70336392,
+   "search_journal_bytes": 54871765,
+   "ran_a_search": true
+  },
+  {
+   "scratch": "aad-scratch/phase_a12_20260821/store",
+   "store_bytes": 33843940,
+   "search_journal_bytes": 26203821,
+   "ran_a_search": true
+  },
+  {
+   "scratch": "aad-scratch/phase_a11_20260820/store",
+   "store_bytes": 33789922,
+   "search_journal_bytes": 26203788,
+   "ran_a_search": true
+  },
+  {
+   "scratch": "aad-scratch/e7_20260809_124148/store",
+   "store_bytes": 13641956,
+   "search_journal_bytes": null,
+   "ran_a_search": false
+  },
+  {
+   "scratch": "aad-scratch/recovery_cont7_20260823/store",
+   "store_bytes": 12094788,
+   "search_journal_bytes": null,
+   "ran_a_search": false
+  },
+  {
+   "scratch": "aad-scratch/autoinit_pf4_20260813_192141/store",
+   "store_bytes": 1061041,
+   "search_journal_bytes": null,
+   "ran_a_search": false
+  },
+  {
+   "scratch": "phase_b_a3_scr/store",
+   "store_bytes": 794118,
+   "search_journal_bytes": null,
+   "ran_a_search": false
+  },
+  {
+   "scratch": "aad-scratch/e8a5_20260810_173626/store",
+   "store_bytes": 733565,
+   "search_journal_bytes": null,
+   "ran_a_search": false
+  },
+  {
+   "scratch": "aad-scratch/recovery_cont6_20260823/store",
+   "store_bytes": 285620,
+   "search_journal_bytes": null,
+   "ran_a_search": false
+  },
+  {
+   "scratch": "aad-scratch/recovery_cont5_20260823/store",
+   "store_bytes": 272588,
+   "search_journal_bytes": null,
+   "ran_a_search": false
+  },
+  {
+   "scratch": "aad-scratch/recovery_cont4_20260822/store",
+   "store_bytes": 218280,
+   "search_journal_bytes": null,
+   "ran_a_search": false
+  },
+  {
+   "scratch": "aad-scratch/phase_a7_20260817/store",
+   "store_bytes": 194503,
+   "search_journal_bytes": 9213,
+   "ran_a_search": true
+  },
+  {
+   "scratch": "aad-scratch/phase_a10_20260818/store",
+   "store_bytes": 183273,
+   "search_journal_bytes": 18153,
+   "ran_a_search": true
+  },
+  {
+   "scratch": "aad-scratch/phase_a9_20260818/store",
+   "store_bytes": 183161,
+   "search_journal_bytes": 9211,
+   "ran_a_search": true
+  },
+  {
+   "scratch": "aad-scratch/phase_a5_20260816/store",
+   "store_bytes": 152517,
+   "search_journal_bytes": null,
+   "ran_a_search": false
+  },
+  {
+   "scratch": "aad-scratch/phase_a6_20260816/store",
+   "store_bytes": 151318,
+   "search_journal_bytes": null,
+   "ran_a_search": false
+  },
+  {
+   "scratch": "aad-scratch/phase_a4_20260815/store",
+   "store_bytes": 107803,
+   "search_journal_bytes": null,
+   "ran_a_search": false
+  },
+  {
+   "scratch": "aad-scratch/phase_a3_20260815/store",
+   "store_bytes": 106895,
+   "search_journal_bytes": null,
+   "ran_a_search": false
+  },
+  {
+   "scratch": "aad-scratch/phase_a2_20260815/store",
+   "store_bytes": 98401,
+   "search_journal_bytes": null,
+   "ran_a_search": false
+  },
+  {
+   "scratch": "aad-scratch/measurement3_20260820/store",
+   "store_bytes": 67582,
+   "search_journal_bytes": null,
+   "ran_a_search": false
+  },
+  {
+   "scratch": "aad-scratch/autoinit_pf3_20260813_162012/store",
+   "store_bytes": 57616,
+   "search_journal_bytes": null,
+   "ran_a_search": false
+  },
+  {
+   "scratch": "aad-scratch/e8b2_20260810_203004/store",
+   "store_bytes": 51388,
+   "search_journal_bytes": null,
+   "ran_a_search": false
+  },
+  {
+   "scratch": "aad-scratch/canary_20260809_113459/store",
+   "store_bytes": 20230,
+   "search_journal_bytes": null,
+   "ran_a_search": false
+  },
+  {
+   "scratch": "aad-scratch/e8b_s2e_20260812_014451/store",
+   "store_bytes": 19499,
+   "search_journal_bytes": null,
+   "ran_a_search": false
+  },
+  {
+   "scratch": "aad-scratch/e8b_s2d_20260812_004400/store",
+   "store_bytes": 19457,
+   "search_journal_bytes": null,
+   "ran_a_search": false
+  },
+  {
+   "scratch": "aad-scratch/autoinit_pf2_20260813_154226/store",
+   "store_bytes": 19332,
+   "search_journal_bytes": null,
+   "ran_a_search": false
+  },
+  {
+   "scratch": "aad-scratch/e8b_s1c_20260811_094408/store",
+   "store_bytes": 15330,
+   "search_journal_bytes": null,
+   "ran_a_search": false
+  },
+  {
+   "scratch": "aad-scratch/measurement2_20260819/store",
+   "store_bytes": 10091,
+   "search_journal_bytes": null,
+   "ran_a_search": false
+  },
+  {
+   "scratch": "aad-scratch/canary2_20260817/store",
+   "store_bytes": 4096,
+   "search_journal_bytes": null,
+   "ran_a_search": false
+  },
+  {
+   "scratch": "aad-scratch/canary_20260817/store",
+   "store_bytes": 4096,
+   "search_journal_bytes": null,
+   "ran_a_search": false
+  },
+  {
+   "scratch": "aad-scratch/e8b_s2f_20260812_022605/store",
+   "store_bytes": 4096,
+   "search_journal_bytes": null,
+   "ran_a_search": false
+  }
+ ]
+}
