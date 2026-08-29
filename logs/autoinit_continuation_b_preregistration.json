@@ -1,6 +1,6 @@
 {
   "schema": "aadistill.autoinit.continuation_b_preregistration/v1",
-  "generated_utc": "2026-08-29T10:38:45.580952+00:00",
+  "generated_utc": "2026-08-29T11:49:12.319624+00:00",
   "status": "FROZEN BEFORE ANY BEHAVIOURAL-CONTINUATION RESULT EXISTS. Not an authorization, not a grant, and not an instruction to launch.",
   "what_this_session_is": "Phase-B Stage 1 is COMPLETE. Attempt 5 ran the joint P=2 search to completion, emitted an authoritative Top-5 and a durable Stage-1 selection artifact, and paid for three rung-1 sa probes. It then died on a candidate-universe collision that the identity-collapse amendment resolves, and rung 1 was completed at $0 from retained evidence. What remains is behavioural: one missing sb, and at most two conditional sc. This session buys ONLY that.",
   "what_this_session_must_not_do": [
@@ -110,9 +110,9 @@
     "top_n": 5
   },
   "executable_source": {
-    "digest": "88e1ef576d810514e855c94f03dbc36a1d818a065c37ff5b6140da128e5e7e55",
-    "set_version": 2,
-    "n_files": 61,
+    "digest": "1682cd7d95e62aba7d40e815d3cbfe0e47021ea573cddc46e613d0f85e64e2c0",
+    "set_version": 3,
+    "n_files": 62,
     "derivation": "the REAL import closure of the continuation driver and launcher, plus three subprocess-invoked runtime files. NOT curated: it therefore includes search.py, ranking.py and the operator modules, which the package __init__ loads for every consumer. What source is LOADED and what operation is PERMITTED are separate claims and are recorded separately."
   },
   "no_search_guarantee": {
@@ -180,5 +180,5 @@
     "winner=None with unresolved_equivalence \u2014 a RESULT, not a failure"
   ],
   "not_authorized": "No continuation grant or authorization exists, no cumulative-budget increase has been requested, and this document does not request one. It records what the session would do if one were issued.",
-  "preregistration_sha256": "a73f7fb63fcfa2359e3ee47e300bcc3b49792628e676910363f2b5bf6a056375"
+  "preregistration_sha256": "808390d11f3d1c330c127ef970d17dc7a732557782c70b20ed787a572440ff5e"
 }

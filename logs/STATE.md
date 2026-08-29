@@ -1,4 +1,4 @@
-**Updated:** 2026-08-29 · branch `main` · **PHASE_B_STAGE1_COMPLETE / BEHAVIOURAL_SELECTION_INCOMPLETE — continuation APPROVED at ceiling $8.0691, LAUNCH BLOCKED on a source-digest formula mismatch**
+**Updated:** 2026-08-29 · branch `main` · **PHASE_B_STAGE1_COMPLETE / BEHAVIOURAL_SELECTION_INCOMPLETE — continuation APPROVED and UNBLOCKED, ceiling $8.0691**
 
 # Current state
 
@@ -9,49 +9,48 @@ not carry. If the two disagree, a structural test fails.
 **Nothing is running. Nothing is billing. Nothing is authorized. Nothing is
 prepared for launch.**
 
-# LAUNCH BLOCKED — one defect, found by the launch gate itself
+# The launch blocker is REPAIRED
 
-The behavioural continuation is **approved** (ceiling `$8.0691`, floor `$5.4784`,
-cap `$283.76`, no increase needed) and its science and implementation are signed
-off. It **cannot launch**, and the thing that stopped it is the gate that exists
-to stop exactly this.
+The behavioural continuation was approved and then could not launch, because its
+executable identity was computed in a format the launch gate cannot reproduce.
 
-`continuation_source_digest` computes its digest as `sha256_json(entries)`.
-`session_commit_gate` — the **first** pre-provider precheck, written after
-continuation attempt 5 died at `$0.1369` on a stale binding — recomputes the
-digest itself, as `sha256` over joined `path:sha256` lines. That is the formula
-**both** `harness_source_digest` (Phase A) and `phase_b_source_digest` use. Mine
-is the only one that differs, so the two values can never agree.
+`continuation_source_digest` used `sha256_json(entries)`. `session_commit_gate` —
+the **first** pre-provider precheck, written after continuation attempt 5 died at
+`$0.1369` on a stale binding — does not read that value: it **re-derives** the
+digest from the git blobs at the launch commit, as `sha256` over sorted
+`path:sha256` lines. That is what Phase A's `harness_source_digest` and
+`phase_b_source_digest` already produce. Mine was the only one that differed, so
+the two could never agree and the gate refused every launch.
 
-Run against `b7c0099` at `$0`, the gate says:
+**Why every `$0` check missed it.** All of them compared the digest against code
+that computes it the same way — `continuation_source_gate` and `require_source`
+share one implementation — so they agreed under either formula. Nothing exercised
+the one consumer that re-derives it independently. A matching attribute name is
+not a matching contract.
 
-```
-harness_matches: false
-the harness at b7c0099 digests to c45a2147fb2b…, authorized 88e1ef576d81….
-The pod would run code this authorization was not granted against.
-```
+**The repair.** The producer adapts to the shared convention; the gate is
+untouched and no authorization-specific workaround exists. The formula had been
+inlined in **seven** places, including inside the consumer, which is how an
+eighth copy came to disagree, so
+`aadistill.infrastructure.source_identity.canonical_source_digest` now holds one
+implementation for a new session to import. It deliberately does **not** rewrite
+the existing seven: each lives inside a frozen source set, and changing them
+would move Phase-A and Phase-B digests for a reason unrelated to their science. A
+test asserts all three producers return the same value for the same files.
 
-**Why this was not caught earlier.** Every `$0` check I built compared
-`continuation_source_digest` against *itself* — `continuation_source_gate` and
-`require_source` both recompute it the same way, so they agree no matter which
-formula it uses. Nothing exercised the one consumer that recomputes the digest
-*independently*. I checked that `ContinuationAuthorization` had every method the
-inherited machinery calls; I did not check that the **value** was in the format
-the consumer re-derives. A matching attribute name is not a matching contract.
+Set version **v2 → v3** records an *algorithm* change, not a content change: the
+same files under the two schemes give different digests and would otherwise read
+as an edit. `source_identity.py` joined the source set — caught by the closure
+test, not by inspection — taking it from 61 to **62** files.
 
-**The fix is one line** — use the line-join formula, matching Phase A and Phase B.
-It is internally self-consistent: no consumer compares this digest against a
-stored value except the authorization itself, and nothing in code pins the
-current number.
-
-**Why it is not applied here.** It moves the continuation executable digest
-`88e1ef576d81…` → `c45a2147fb2b…`, which is a pinned identity, and this pass was
-scoped to records only with an explicit instruction not to reopen executable
-readiness. Applying it also forces regenerating the preregistration and this file.
-That is a reviewer decision, not mine to take silently.
-
-**Nothing was issued.** No authorization artifact exists, no launch commit, no
-pod, no spend.
+**The regressions run the real consumer.** Seven tests drive the actual
+`session_commit_gate` against the actual authorization shape and require
+acceptance; five mutations (the old `sha256_json`, an unsorted set, a dropped
+separator, a changed separator, a silently reverted version) all fail through the
+gate. No science, evidence or pricing identity moved: plan `a2ef4cd68a4b…`,
+Stage-1 selection, amendment, six-candidate universe, both reuse digests, rung-1
+result, calibration identities, finalists, floor `$5.4784`, ceiling `$8.0691` and
+cap `$283.76` all held.
 
 # PHASE A IS COMPLETE — as a SELECTION experiment
 
@@ -186,8 +185,8 @@ freed to 0.01 GiB, and the evaluation tokenizer materialized before every batter
    | --- | --- |
    | session plan | `a2ef4cd68a4b…` (`autoinit.v1.phase_b_behavioural_continuation`) |
    | stages | `0, 1, 3, 4, 5` — **no stage 2**, because Phase A's stage 2 is rung 1 |
-   | preregistration | `a73f7fb63fcf…`, frozen before any continuation result |
-   | executable-source digest | `88e1ef576d81…` over **61** files, set version 2 |
+   | preregistration | `808390d11f3d…`, frozen before any continuation result |
+   | executable-source digest | `1682cd7d95e6…` over **62** files, set version 3 |
    | relay assets | `1643145376ba…`, `fe9683e6a9c7` round-trip verified |
    | floor / ceiling | **$5.4784** (1 probe) / **$8.0691** (3 probes) |
 

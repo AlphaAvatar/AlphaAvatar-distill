@@ -1,6 +1,6 @@
 {
  "schema": "aadistill.current_state/v2",
- "generated_utc": "2026-08-29T11:11:42Z",
+ "generated_utc": "2026-08-29T11:49:30Z",
  "_contract": "The minimal machine-readable CURRENT snapshot: live facts only, no history, no per-attempt detail, no narrative. History lives in logs/decisions.md and the per-run directories; the human view is logs/STATE.md and the two must agree. Ownership: logs/CATALOG.md.",
  "baseline_commit": "b7c0099bfffc8962e4368917c59f8a9a8508d063",
  "baseline_commit_meaning": "The LAST TESTED IMPLEMENTATION: the commit whose tree produced the latest_verification figures (2461 passed / 12 skipped / 0 failed).",
@@ -46,7 +46,7 @@
   "phase_b_pricing": "HISTORICAL: floor $16.4555, ceiling $35.6660 \u2014 prices a P=2 search ALREADY BOUGHT.",
   "phase_b_stage1_selection_sha256": "84fd6496851995ae",
   "phase_b_identity": "amendment df413bd99119dab7, universe e94f15d2e648d86a, 6 distinct (8 assumed). Attempt-5 exec 3ad6a6e3edf1 / prereg 53f1347f6865: HISTORICAL, search bought.",
-  "continuation_b": "exec 88e1ef576d81 (61 files, set v2, the REAL import closure \u2014 see blocker: the FORMULA is wrong for session_commit_gate), plan a2ef4cd68a4b, prereg a73f7fb63fcf, assets 1643145376ba. 6 evidence candidates, 3 finalists (fe9683e6a9c7, 85bde4ded2c3, control), 3 searched non-survivors, 0 gate exclusions. Floor $5.4784, ceiling $8.0691. Rung 1 COMPLETE and imported. logs/autoinit_continuation_b_preregistration.json",
+  "continuation_b": "exec 1682cd7d95e62aba (62 files, set v3 = SHA256 over sorted path:sha256 lines, the formula session_commit_gate re-derives; v2's sha256_json blocked launch), plan a2ef4cd68a4bae7a, prereg 808390d11f3d1c33, assets 1643145376ba19a2. 6 evidence candidates, 3 finalists, 3 searched non-survivors, 0 gate exclusions. Floor $5.4784, ceiling $8.0691. logs/autoinit_continuation_b_preregistration.json",
   "phase_b_post_freeze": "exec digest moved 3d3b5d07 -> a043e2c7: shared SESSION_KIND dispatcher gained a continuation_b branch; Phase-B gate now accepts declared additive drift. 3 pre-existing branches byte-identical. Prereg NOT rewritten. logs/autoinit_phase_b_post_freeze_changes.json"
  },
  "complete": [
@@ -56,12 +56,12 @@
   "detail: logs/decisions.md and the per-run directories"
  ],
  "latest_verification": {
-  "utc": "2026-08-29T11:11:42Z",
-  "after": "the prereg/state-only normalization",
-  "full_suite": "2461 passed, 12 skipped, 0 failed in 28:53",
+  "utc": "2026-08-29T11:49:30Z",
+  "after": "the v2->v3 source-digest contract repair",
+  "full_suite": "2468 passed, 12 skipped, 0 failed in 27:22",
   "frozen_asset_verifier": "passed, no problems",
-  "reuse_records": "both re-run, probes_dir_digests unchanged (11/8 and 3/3)",
-  "continuation": "35 whole-function tests, both decision paths; 12 mutations, no survivors; relay fe9683 identity re-derived; all frozen identities re-checked unchanged after the normalization",
+  "reuse_records": "both verified, probes_dir_digests unchanged (11/8 and 3/3)",
+  "continuation": "42 tests incl. 7 driving the REAL shared session_commit_gate; 5 digest mutations + 12 earlier, no survivors; relay fe9683 identity re-derived; no science/evidence/pricing identity moved",
   "scope": "CPU only, repo .venv; no checkpoint trained, no GPU, no pod, $0"
  },
  "failed": [
@@ -85,7 +85,7 @@
  ],
  "next_starting_point": {
   "status": "PHASE_B_STAGE1_COMPLETE / BEHAVIOURAL_SELECTION_INCOMPLETE. Stage 0, the P=2 search, the Top-5 and the Stage-1 selection are done and retained. Identity collapse gives 6 distinct candidates as EVIDENCE; rung 1 is COMPLETE, computed at $0 by the frozen code, advancing 3. The behavioural-continuation executable is built and verified end to end at $0.",
-  "the_ask": "APPROVED for one behavioural-continuation session (ceiling $8.0691, floor $5.4784, headroom $23.7050, no cap increase) \u2014 but LAUNCH IS BLOCKED. See blocker below. No authorization has been issued.",
+  "the_ask": "APPROVED and UNBLOCKED. One behavioural-continuation session: ceiling $8.0691, floor $5.4784, headroom $23.7050, no cap increase. Authorization issued at the launch commit.",
   "budget": "cap $283.7600, spent $260.0550, headroom $23.7050. Continuation ceiling $8.0691 \u2014 NOT the historical $35.6660."
  },
  "read_order": [
@@ -134,6 +134,5 @@
   "1_phase_b_implementation": "the behavioural-continuation executable is BUILT and verified end to end at $0; identities in frozen.continuation_b"
  },
  "canonical_infrastructure_moved_to": "docs/SESSION_ARCHITECTURE.md and logs/decisions.md",
- "phase_b_state": "PHASE_B_STAGE1_COMPLETE / BEHAVIOURAL_SELECTION_INCOMPLETE",
- "blocker": "LAUNCH BLOCKED \u2014 reviewer decision required. continuation_source_digest uses sha256_json; session_commit_gate recomputes the line-join formula Phase A and Phase B both use, so they never agree and the first pre-provider gate refuses every launch (verified at $0: 88e1ef576d81 vs c45a2147fb2b). One-line fix, but it MOVES the pinned exec digest. No authorization, no pod, no spend. Detail in STATE.md."
+ "phase_b_state": "PHASE_B_STAGE1_COMPLETE / BEHAVIOURAL_SELECTION_INCOMPLETE"
 }
