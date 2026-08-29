@@ -1,6 +1,6 @@
 {
  "schema": "aadistill.current_state/v2",
- "generated_utc": "2026-08-29T11:49:30Z",
+ "generated_utc": "2026-08-29T12:10:58Z",
  "_contract": "The minimal machine-readable CURRENT snapshot: live facts only, no history, no per-attempt detail, no narrative. History lives in logs/decisions.md and the per-run directories; the human view is logs/STATE.md and the two must agree. Ownership: logs/CATALOG.md.",
  "baseline_commit": "b7c0099bfffc8962e4368917c59f8a9a8508d063",
  "baseline_commit_meaning": "The LAST TESTED IMPLEMENTATION: the commit whose tree produced the latest_verification figures (2461 passed / 12 skipped / 0 failed).",
@@ -10,8 +10,8 @@
   "launchers": 0
  },
  "authorized": {
-  "any": false,
-  "note": "autoinit.phase_b.20260826T053826Z is CONSUMED -- one-use, loaded and spent by attempt 1. A retry needs a new grant. autoinit.phase_b.20260825T201335Z remains permanently unusable in logs/superseded/."
+  "any": true,
+  "note": "autoinit.continuation_b.20260829T115028Z issued at 49861a5, one-use, UNUSED. Binds exec 1682cd7d95e6, which the product-contract fix will move, so it must be SUPERSEDED not reused. No pod, no spend."
  },
  "prepared_launch": {
   "any": false,
@@ -134,5 +134,6 @@
   "1_phase_b_implementation": "the behavioural-continuation executable is BUILT and verified end to end at $0; identities in frozen.continuation_b"
  },
  "canonical_infrastructure_moved_to": "docs/SESSION_ARCHITECTURE.md and logs/decisions.md",
- "phase_b_state": "PHASE_B_STAGE1_COMPLETE / BEHAVIOURAL_SELECTION_INCOMPLETE"
+ "phase_b_state": "PHASE_B_STAGE1_COMPLETE / BEHAVIOURAL_SELECTION_INCOMPLETE",
+ "blocker": "LAUNCH BLOCKED at the pre-provider gates: 6/7 green (incl. the shared session_commit_gate that blocked the last attempt). ckpt_store_capacity_gate is Phase B's and demands 11.55 GiB to land FIVE search leaves this session never produces; its real product is a ~15 MB archive. Same inheritance sets fetch_products/products_secured to the leaf fetchers, which at teardown would hunt for five directories never created on the pod. Reviewer decision needed; detail in STATE.md."
 }

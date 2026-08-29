@@ -1,4 +1,4 @@
-**Updated:** 2026-08-29 · branch `main` · **PHASE_B_STAGE1_COMPLETE / BEHAVIOURAL_SELECTION_INCOMPLETE — continuation APPROVED and UNBLOCKED, ceiling $8.0691**
+**Updated:** 2026-08-29 · branch `main` · **PHASE_B_STAGE1_COMPLETE / BEHAVIOURAL_SELECTION_INCOMPLETE — authorization issued, LAUNCH BLOCKED at ckpt_store_capacity_gate**
 
 # Current state
 
@@ -6,8 +6,55 @@ The **human view of [`current_state.json`](current_state.json)**. That file owns
 the live facts; this one says the same things in prose and adds nothing it does
 not carry. If the two disagree, a structural test fails.
 
-**Nothing is running. Nothing is billing. Nothing is authorized. Nothing is
-prepared for launch.**
+**Nothing is running. Nothing is billing. Nothing is prepared for launch.**
+One behavioural-continuation authorization IS issued —
+`autoinit.continuation_b.20260829T115028Z`, one-use and **unused**. No pod exists,
+no bundle is staged, and no spend has occurred under it.
+
+# LAUNCH BLOCKED AGAIN — an inherited product contract
+
+The digest repair below worked: `session_commit_gate`, which refused every launch
+before, now passes on all three of its checks at the launch commit. Six of the
+seven pre-provider gates are green. The seventh is not, and it is the same class
+of defect one layer further out.
+
+`ckpt_store_capacity_gate` demands **11.55 GiB** of dev-box space — 5.55 GiB of
+"five stage-1 selected leaves" plus 6 GiB of working room. **This session produces
+no leaves.** It runs no search; its three finalists already exist locally and on
+the relay. Its actual product is the artifact archive, which for comparable
+sessions is **~15 MB**. The gate is asking for roughly a thousand times what the
+session needs, and refusing on that basis.
+
+The same inheritance runs deeper than the gate. The continuation's
+`ArtifactPolicy` still declares:
+
+```
+fetch_products   = fetch_selected_leaves
+products_secured = selected_leaves_secured
+```
+
+Both are Phase B's, and both exist to rescue **search output** — the attempt-11
+fix, where five measured leaves were lost because the product fetch returned
+early. At the continuation's teardown they would look on the pod for five leaf
+directories that were never created there, and judge the session's products
+unsecured.
+
+**What the correct contract is.** No leaf fetch: this session's checkpoints are
+inputs, not outputs, and are already durable in two places. A capacity check sized
+to the archive plus working room, not to a search's output. Both are small,
+mechanical changes — and both move the continuation executable digest again, which
+means the issued authorization must be **superseded, not reused**.
+
+**A second, separate fact.** The dev box hit **100% disk** during the
+launch-commit suite: `/` was at 99% before the run and pytest's own temp trees
+filled the rest, which is what produced ten spurious errors in that run rather
+than any code defect. 7.6 GiB was reclaimed by deleting `/tmp/pytest-of-*`;
+`/home/ecs-user/aad-artifacts` holds **95 GB** of prior-experiment output and is
+where real headroom would come from. That is a maintainer call, not something to
+delete unilaterally.
+
+**Nothing was launched.** The authorization is issued, one-use and unused; no pod
+was created; spend remains `$260.0550`.
 
 # The launch blocker is REPAIRED
 
@@ -242,8 +289,12 @@ freed to 0.01 GiB, and the evaluation tokenizer materialized before every batter
    identity `70a26e0b…`. The continuation binds imported evidence on student
    identity and seed and defers comparability to that rule.
 
-   **Nothing is authorized.** No grant exists, no cap increase is requested, and
-   the `$8.0691` ceiling fits the existing `$23.7050` headroom.
+   **Authorized, not launched.** The grant document
+   [`autoinit_continuation_b_grant.json`](autoinit_continuation_b_grant.json) and
+   the one-use authorization `autoinit.continuation_b.20260829T115028Z` both
+   exist; no cap increase was requested, and the `$8.0691` ceiling fits the
+   existing `$23.7050` headroom. The authorization is **unused** — the launch is
+   blocked at `ckpt_store_capacity_gate`, above.
 
    **Comparability is a terminate condition, not a bigger run.** If Stage 0 finds
    the runtime not comparable under `generation_runtime_comparability@v2`, the
