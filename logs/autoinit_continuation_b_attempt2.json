@@ -1,0 +1,82 @@
+{
+ "schema": "aadistill.autoinit.continuation_b_attempt/v1",
+ "attempt": 2,
+ "generated_utc": "2026-08-29T21:02:23Z",
+ "verdict": "ABORTED AT DRIVER STAGE 0 \u2014 no scientific stage ran",
+ "authorization": "autoinit.continuation_b.20260829T194657Z (one-use, CONSUMED)",
+ "session_commit": "839810840ddec6b8d08fc7108f02a7afee2591bf",
+ "executable_source_digest": "746b9d689d056003f72c428e0f6d8239424965d04ba52039019b5dd73ea9af17",
+ "preregistration_sha256": "8335d1495e78d1a7f83ba4560ee9017d7ad63c8443f6b40c22c8dc5875bf6b36",
+ "pod": {
+  "id": "ew2ykjczuex87i",
+  "gpu": "NVIDIA L40S",
+  "image": {
+   "image_name": "runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404",
+   "observed": [
+    "580.159.04"
+   ],
+   "digest": "runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@580.159.04"
+  },
+  "elapsed_minutes": 19.07,
+  "usd": 0.3146,
+  "authorized_usd": 8.0691,
+  "within_authorization": true,
+  "final_state": {
+   "exists": false,
+   "desired_status": "TERMINATED",
+   "billing": false
+  },
+  "provider_confirms_gone": true
+ },
+ "what_the_previous_repair_FIXED": "the pod CPU test gate passed this time \u2014 SETUP_RC=0, SETUP_DONE reached, AUTHORIZATION_OK reached, driver detached and confirmed by descriptor probe. The attempt-1 calibration/test-scope defect is closed and did not recur.",
+ "reached": [
+  "ENV_READY",
+  "REPO_READY",
+  "ASSETS_STAGED",
+  "TRAIN_ENV",
+  "ASSETS_READY",
+  "VLLM_READY",
+  "TEACHER_READY",
+  "ROPE_OK",
+  "TESTS_OK",
+  "AUTHORIZATION_OK",
+  "SETUP_DONE",
+  "DRIVER_START",
+  "STAGE_START:0"
+ ],
+ "stopped_at": "driver stage 0 (stage_bind), 3 min after the driver started",
+ "what_did_NOT_happen": [
+  "no probe was trained or evaluated",
+  "no sb was bought",
+  "no sc was bought",
+  "no pooled decision",
+  "no final selection",
+  "no search \u2014 runs_search False by type, no-search gate passed",
+  "no scientific evidence changed"
+ ],
+ "pre_provider_gates": "all 7 passed in the real launcher before the pod existed",
+ "root_cause": {
+  "error": "stage 0: AttributeError: 'PhaseAAuthorization' object has no attribute 'require_evidence'",
+  "summary": "ContinuationDriver never overrides PhaseADriver's AUTHORIZATION_TYPE / AUTHORIZATION_PATH class attributes, so on the pod it loaded logs/autoinit_phase_a_authorization.json as a PhaseAAuthorization \u2014 a real, committed file \u2014 instead of its own ContinuationAuthorization. stage_bind then called require_evidence(), which only ContinuationAuthorization has.",
+  "the_seam_predicted_this": "PhaseADriver's own comment on those attributes says: 'the continuation subclasses this driver: with the path fixed here, the continuation would have loaded attempt 12's CONSUMED Phase-A authorization on the pod ... Not a crash; a silently wrong ceiling, and evidence naming the wrong grant.' The seam was built for exactly this subclass and the subclass did not use it. It crashed rather than being silent only because require_evidence does not exist on the Phase-A type \u2014 a lucky failure mode.",
+  "every_other_subclass_sets_them": {
+   "scripts/pod/autoinit_phase_b_driver.py": "PhaseBAuthorization + its own path + PLAN",
+   "scripts/pod/autoinit_recovery_continuation_driver.py": "RecoveryContinuationAuthorization + its own path",
+   "scripts/pod/autoinit_continuation_b_driver.py": "NEITHER \u2014 the only one"
+  },
+  "the_repair_is_not_one_line": "setting the two attributes alone moves the failure to the NEXT statement: PhaseADriver.__init__ ends with self.auth.require_plan(PHASE_A_PLAN_V1.plan_hash), and a ContinuationAuthorization refuses it \u2014 verified at $0: 'this authorization binds plan a2ef4cd68a4b and the session runs 9377a2dc61f2'. The parent also stamps the Phase-A evidence schema and scope. PhaseBDriver solved the same problem by NOT calling super().__init__ and reimplementing it with its own TYPE, PATH and PLAN; ContinuationDriver calls super().__init__ and inherits all four wrong things.",
+  "class": "the fourth instance of inherited-contracts-not-needs, and the first to reach a driver stage. Attempt 1 was a missing input declaration; this is a missing seam override."
+ },
+ "why_no_zero_cost_check_caught_it": {
+  "the_whole_function_test_overwrites_the_evidence": "tests/pod/test_continuation_b_executes.py builds the driver with the REAL __init__ \u2014 which loaded the wrong authorization there too \u2014 and then immediately discards it:\n    driver = ContinuationDriver.__new__(ContinuationDriver)\n    ContinuationDriver.__init__(driver, Args())\n    driver.auth = make_auth(...)   # <- overwrites\nEvery later assertion ran against a correctly-typed authorization the test supplied, so the seam's wrong default was loaded and masked in the same three lines. Seam injection points are the blind spot: extracting an injectable seam makes the injected value the only unexecuted code left.",
+  "the_launcher_gate_asked_a_different_object": "evidence_binding_gate calls ContinuationDriver.observed_evidence() and then ctx.auth.require_evidence(observed) \u2014 where ctx.auth is the LAUNCHER's correctly-loaded ContinuationAuthorization. The gate proved the evidence matches the grant; it never exercised the DRIVER's own load path.",
+  "how_to_close_it": "assert the type and path the driver's real __init__ produces, before any test-supplied auth replaces it \u2014 and assert it for every PhaseADriver subclass, so a new one cannot inherit Phase A's grant silently."
+ },
+ "evidence": {
+  "session_record": "logs/autoinit_continuation_b_session.json",
+  "stage0_traceback": "logs/autoinit_continuation_b_attempt2/stage0_traceback.log",
+  "artifact_archive": "collected: 9 files across 4 classes, teardown gate allowed",
+  "journals": "logs/autoinit_continuation_b_attempt2/"
+ },
+ "next_action": "STOP for review. The authorization is CONSUMED. The repair is to give ContinuationDriver its own AUTHORIZATION_TYPE, AUTHORIZATION_PATH and PLAN in the PhaseBDriver shape, plus a test that executes the real __init__ for every subclass."
+}

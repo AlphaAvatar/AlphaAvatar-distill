@@ -1263,6 +1263,41 @@ pod's exact ignore set: the same four tests fail, and only those four. Record:
 Headroom `$23.4537` still covers one `$8.0691` continuation, but the grant
 explicitly excludes a second attempt, so one needs a maintainer decision.
 
+## 2026-08-29 — Behavioural continuation attempt 2: $0.3146, aborted at driver stage 0
+
+```
+cumulative spend before                                      $260.3063
+continuation attempt 2 (pod ew2ykjczuex87i, 19.1 min, L40S)  $  0.3146
+cumulative spend after                                       $260.6209
+authorized cumulative cap                                    $283.7600
+remaining headroom                                           $ 23.1391
+continuation session hard ceiling                            $  8.0691
+```
+
+**Further than attempt 1, and still no scientific stage.** The attempt-1 repair
+worked: the CPU test gate **passed**, `SETUP_RC=0`, `AUTHORIZATION_OK` and
+`SETUP_DONE` were reached, and the driver detached and was confirmed by
+descriptor probe. Three minutes later `stage_bind` raised
+
+```
+AttributeError: 'PhaseAAuthorization' object has no attribute 'require_evidence'
+```
+
+`ContinuationDriver` never overrides `PhaseADriver`'s `AUTHORIZATION_TYPE` /
+`AUTHORIZATION_PATH`, so on the pod it loaded the committed **Phase-A**
+authorization instead of its own. It is the only `PhaseADriver` subclass that
+sets neither; Phase B and the recovery continuation both do. The seam's own
+comment names this subclass as the reason it exists.
+
+The artifact archive was collected (9 files, 4 classes), the teardown gate
+allowed, the pod deleted at 20:53:51Z and the provider confirms gone and not
+billing. The authorization `autoinit.continuation_b.20260829T194657Z` is
+**consumed**.
+
+Behavioural-continuation attempts now total **$0.5659** and have bought no
+science. Record:
+[`autoinit_continuation_b_attempt2.json`](autoinit_continuation_b_attempt2.json).
+
 ## Standing rules
 
 * Plan from **actual spend**, never from unused room under a previous authorization.

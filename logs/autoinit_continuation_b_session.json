@@ -169,7 +169,9 @@
         "tests/pod/test_phase_a_stages1_5_execute.py",
         "tests/autoinit/test_phase_b_reuse_hostlocal.py",
         "tests/pod/test_phase_b_stage1_executes.py",
-        "tests/pod/test_continuation_b_executes.py"
+        "tests/pod/test_continuation_b_executes.py",
+        "tests/autoinit/test_causal_depth_measurement_job.py",
+        "tests/pod/test_phase_b_driver_and_launcher.py"
       ]
     },
     "n_prechecks": 7,
@@ -180,121 +182,161 @@
   },
   "timeline": [
     {
-      "utc": "2026-08-29T16:05:08+00:00",
+      "utc": "2026-08-29T20:34:43+00:00",
       "elapsed_min": 0.0,
       "msg": "budget: expected 262 min $4.32 \u00b7 soft $4.76 \u00b7 hard $5.09 (authorized $8.07)"
     },
     {
-      "utc": "2026-08-29T16:05:09+00:00",
+      "utc": "2026-08-29T20:34:44+00:00",
       "elapsed_min": 0.0,
       "msg": "NVIDIA L40S $0.99/h, stock Low"
     },
     {
-      "utc": "2026-08-29T16:05:09+00:00",
+      "utc": "2026-08-29T20:34:44+00:00",
       "elapsed_min": 0.0,
-      "msg": "session commit 8df1bad216aa verified: harness digests to 96c346ffcf6a\u2026, carries the authorization and only logs/autoinit_continuation_b_authorization.json differs from the authorized base"
+      "msg": "session commit 839810840dde verified: harness digests to 746b9d689d05\u2026, carries the authorization and only logs/autoinit_continuation_b_authorization.json differs from the authorized base"
     },
     {
-      "utc": "2026-08-29T16:05:09+00:00",
+      "utc": "2026-08-29T20:34:44+00:00",
       "elapsed_min": 0.0,
       "msg": "frozen science plan 02be33b9a7a8\u2026 matches the authorization"
     },
     {
-      "utc": "2026-08-29T16:05:09+00:00",
+      "utc": "2026-08-29T20:34:44+00:00",
       "elapsed_min": 0.0,
-      "msg": "continuation executable 96c346ffcf6a\u2026 matches the grant"
+      "msg": "continuation executable 746b9d689d05\u2026 matches the grant"
     },
     {
-      "utc": "2026-08-29T16:05:09+00:00",
+      "utc": "2026-08-29T20:34:44+00:00",
       "elapsed_min": 0.0,
       "msg": "no search call site on the continuation's own path; 1 known-neutralized elsewhere; runs_search False"
     },
     {
-      "utc": "2026-08-29T16:05:09+00:00",
+      "utc": "2026-08-29T20:34:44+00:00",
       "elapsed_min": 0.0,
       "msg": "cited evidence matches the grant: universe e94f15d2e648\u2026"
     },
     {
-      "utc": "2026-08-29T16:05:09+00:00",
+      "utc": "2026-08-29T20:34:44+00:00",
       "elapsed_min": 0.0,
       "msg": "continuation ceiling $8.0691 covers the priced $8.0691 and is below the full-session $35.6660"
     },
     {
-      "utc": "2026-08-29T16:05:09+00:00",
+      "utc": "2026-08-29T20:34:44+00:00",
       "elapsed_min": 0.0,
-      "msg": "/home/ecs-user/aad-scratch/sessions/autoinit-continuation-b: 9.64 GiB free for 1076 MiB of archive and working room"
+      "msg": "/home/ecs-user/aad-scratch/sessions/autoinit-continuation-b: 9.63 GiB free for 1076 MiB of archive and working room"
     },
     {
-      "utc": "2026-08-29T16:05:10+00:00",
+      "utc": "2026-08-29T20:34:45+00:00",
       "elapsed_min": 0.0,
       "msg": "precheck OK: 15 relay inputs (9 from AlphaAvatar/aadistill-artifacts, 6 from AlphaAvatar/aadistill-transport), 2 local assets"
     },
     {
-      "utc": "2026-08-29T16:05:11+00:00",
+      "utc": "2026-08-29T20:34:47+00:00",
       "elapsed_min": 0.0,
-      "msg": "created nuitz0ketxukpm at $0.99/h"
+      "msg": "created ew2ykjczuex87i at $0.99/h"
     },
     {
-      "utc": "2026-08-29T16:05:11+00:00",
+      "utc": "2026-08-29T20:34:47+00:00",
       "elapsed_min": 0.0,
       "msg": "watchdog detached \u2014 hard 308 min = $5.09"
     },
     {
-      "utc": "2026-08-29T16:05:44+00:00",
-      "elapsed_min": 0.54,
-      "msg": "TCP 22 at 82.221.170.242:37055 after 0.5 min"
+      "utc": "2026-08-29T20:35:40+00:00",
+      "elapsed_min": 0.89,
+      "msg": "  starting (60s) \u2014 $0.01"
     },
     {
-      "utc": "2026-08-29T16:05:46+00:00",
-      "elapsed_min": 0.59,
-      "msg": "draw 1: ssh reachable \u2014 $0.01"
+      "utc": "2026-08-29T20:36:44+00:00",
+      "elapsed_min": 1.96,
+      "msg": "  starting (120s) \u2014 $0.03"
     },
     {
-      "utc": "2026-08-29T16:07:11+00:00",
-      "elapsed_min": 2.0,
-      "msg": "draw 1: image identity runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@580.159.03"
+      "utc": "2026-08-29T20:37:49+00:00",
+      "elapsed_min": 3.04,
+      "msg": "TCP 22 at 91.199.227.82:31613 after 3.0 min"
     },
     {
-      "utc": "2026-08-29T16:07:11+00:00",
-      "elapsed_min": 2.0,
+      "utc": "2026-08-29T20:37:53+00:00",
+      "elapsed_min": 3.1,
+      "msg": "draw 1: ssh reachable \u2014 $0.05"
+    },
+    {
+      "utc": "2026-08-29T20:38:18+00:00",
+      "elapsed_min": 3.52,
+      "msg": "draw 1: image identity runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@580.159.04"
+    },
+    {
+      "utc": "2026-08-29T20:38:18+00:00",
+      "elapsed_min": 3.52,
       "msg": "draw 1: running setup"
     },
     {
-      "utc": "2026-08-29T16:20:14+00:00",
-      "elapsed_min": 15.05,
-      "msg": "setup did not reach SETUP_DONE:\nion==0.28.0\n + tqdm==4.70.0\n + transformers==5.15.0\n + triton==3.7.1\n + truststore==0.10.4\n + typer==0.27.1\n + typing-extensions==4.16.0\n + typing-inspection==0.4.4\n + urllib3==2.7.0\n + uvicorn==0.52.3\n + uvloop==0.22.1\n + vllm==0.27.1\n + watchfiles==1.2.0\n + websockets==17.0.1\n + xgrammar==0.2.3\n + yarl==1.24.5\n + z3-solver==4.15.4.0\n[16:12:06] vllm offline install completed in 10s\nvllm 0.27.1 | torch 2.13.0+cu130 True\nMARKER:VLLM_READY\n[16:12:19] downloading the teacher at the pinned revision\n\nFetching 10 files:   0%|          | 0/10 [00:00<?, ?it/s]\nFetching 10 files:  10%|\u2588         | 1/10 [00:00<00:01,  5.61it/s]\nFetching 10 files:  20%|\u2588\u2588        | 2/10 [00:00<00:01,  6.63it/s]\nFetching 10 files:  30%|\u2588\u2588\u2588       | 3/10 [00:00<00:00,  7.64it/s]\nFetching 10 files:  40%|\u2588\u2588\u2588\u2588      | 4/10 [00:00<00:00,  7.44it/s]\nFetching 10 files:  50%|\u2588\u2588\u2588\u2588\u2588     | 5/10 [00:01<00:01,  3.98it/s]\nFetching 10 files:  70%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588   | 7/10 [00:02<00:01,  2.64it/s]\nFetching 10 files:  80%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588  | 8/10 [00:03<00:01,  1.25it/s]\nFetching 10 files:  90%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588 | 9/10 [00:37<00:09,  9.71s/it]\nFetching 10 files: 100%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588| 10/10 [00:43<00:00,  8.67s/it]\nFetching 10 files: 100%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588| 10/10 [00:43<00:00,  4.32s/it]\nMARKER:TEACHER_READY\n[16:13:03] checking the RoPE base resolves in every venv\n  transformers 5.13.1: qwen3_0p6b_init_v0 stored 5,000,000 runtime 5,000,000 OK\n  transformers 5.15.0: qwen3_0p6b_init_v0 stored 5,000,000 runtime 5,000,000 OK\nMARKER:ROPE_OK\n[16:13:18] CPU test suite (128 vCPUs visible, cgroup budget 13; cpu set 0-12)\nFAILED tests/autoinit/test_causal_depth_measurement_job.py::test_the_report_field_carries_the_path_and_not_the_items\nFAILED tests/pod/test_phase_b_driver_and_launcher.py::test_run_search_passes_BOTH_profiles_and_a_dispatching_loader\nFAILED tests/pod/test_phase_b_driver_and_launcher.py::test_the_v2_mixture_travels_a_path_the_pod_can_actually_read\n4 failed, 2300 passed, 95 skipped in 408.00s (0:06:48)\n[16:20:09] test suite failed rc=1\nSETUP_RC=1\n"
+      "utc": "2026-08-29T20:47:18+00:00",
+      "elapsed_min": 12.53,
+      "msg": "draw 1: setup complete \u2014 $0.21"
     },
     {
-      "utc": "2026-08-29T16:20:14+00:00",
-      "elapsed_min": 15.05,
-      "msg": "ABORT after draw 1: setup_failed"
+      "utc": "2026-08-29T20:47:23+00:00",
+      "elapsed_min": 12.61,
+      "msg": "driver detached, pid 8428, confirmed by descriptor_probe \u2014 $0.21"
     },
     {
-      "utc": "2026-08-29T16:20:14+00:00",
-      "elapsed_min": 15.05,
-      "msg": "deleting pod (setup setup_failed)"
+      "utc": "2026-08-29T20:49:33+00:00",
+      "elapsed_min": 14.78,
+      "msg": "  2026-08-29T20:47:22Z MARKER:STAGE_START:0 \u2014 $0.24"
     },
     {
-      "utc": "2026-08-29T16:20:25+00:00",
-      "elapsed_min": 15.23,
-      "msg": "pod deleted \u2014 15.2 min, $0.25; provider confirms gone: True"
+      "utc": "2026-08-29T20:51:46+00:00",
+      "elapsed_min": 16.99,
+      "msg": "  2026-08-29T20:50:21Z MARKER:PHASE_A_FAILED \u2014 $0.28"
+    },
+    {
+      "utc": "2026-08-29T20:51:46+00:00",
+      "elapsed_min": 16.99,
+      "msg": "a blocking stage failed \u2014 collecting evidence, then tearing down. A stage-0 comparability failure is a TERMINATE: every cited observation would be lost at once and re-buying them is a larger session."
+    },
+    {
+      "utc": "2026-08-29T20:51:46+00:00",
+      "elapsed_min": 16.99,
+      "msg": "polling ended: PHASE_A_FAILED \u2014 $0.28"
+    },
+    {
+      "utc": "2026-08-29T20:53:19+00:00",
+      "elapsed_min": 18.55,
+      "msg": "  manifest rc=0\n9 file(s) across 4 class(es) -> /workspace/manifest.json\n  final_required: 9 \u00b7 mutable_snapshot: 0 \u00b7 final_streams_quiescent: True"
+    },
+    {
+      "utc": "2026-08-29T20:53:40+00:00",
+      "elapsed_min": 18.88,
+      "msg": "teardown gate: allowed=True failed=training_complete"
+    },
+    {
+      "utc": "2026-08-29T20:53:40+00:00",
+      "elapsed_min": 18.88,
+      "msg": "deleting pod (gate passed after PHASE_A_FAILED)"
+    },
+    {
+      "utc": "2026-08-29T20:53:51+00:00",
+      "elapsed_min": 19.07,
+      "msg": "pod deleted \u2014 19.1 min, $0.31; provider confirms gone: True"
     }
   ],
   "stages": {
     "setup": [
       {
         "draw": 1,
-        "setup_done": "0",
+        "setup_done": "1",
         "host_cold": "0",
-        "setup_rc": "1",
-        "tail": "SETUP_RC=1"
+        "setup_rc": "0",
+        "tail": "SETUP_RC=0"
       }
     ]
   },
   "authorization": {
     "schema": "aadistill.autoinit.continuation_authorization/v1",
-    "authorization_id": "autoinit.continuation_b.20260829T153538Z",
-    "granted_utc": "2026-08-29T15:35:38.100765+00:00",
+    "authorization_id": "autoinit.continuation_b.20260829T194657Z",
+    "granted_utc": "2026-08-29T19:46:57.728931+00:00",
     "granted_by": "Maintainer review, 2026-08-29, across two messages.\n\nApproval: \"The behavioural continuation is approved for paid launch after one final prereg/state-only normalization.\" Reviewer verdict, verbatim: \"continuation science: GO\"; \"implementation/readiness: GO\"; \"existing cumulative cap $283.76: sufficient\"; \"continuation hard ceiling: $8.0691\"; \"no new budget increase is required\"; \"paid launch: GO after the normalization below and exact-launch gates\".\n\nAfter the assistant reported a launch blocker (the continuation computed its executable digest with sha256_json while the shared session_commit_gate independently re-derives SHA256 over sorted path:sha256 lines), the maintainer granted the repair: \"GO for the one-line digest-contract repair. This is a narrow executable-identity fix, not a reopening of continuation science, pricing, or the behavioural-selection design.\" The maintainer further directed: \"the continuation producer must adapt to the established shared contract. Do not modify session_commit_gate and do not add an authorization-specific workaround.\"\n\nLaunch condition, verbatim: \"If every gate passes, launch the behavioural continuation directly without returning for another routine review. If another genuinely new material blocker appears, stop and report.\"\n\nCovers: ONE behavioural-continuation session: import the completed Phase-B Stage-1 and rung-1 state, buy only the genuinely missing behavioural probes (one sb for fe9683e6a9c7, and at worst two conditional sc for fe9683e6a9c7 and the canonical control), apply the frozen pooled sa+sb rule and the frozen final-selection rule, emit the terminal report, retain evidence, tear the pod down and stop.\n\nCumulative spend at approval $260.0550 against a cumulative cap of $283.76.\n\nDoes NOT authorize: Re-buying Phase-B Stage 1 or any search \u2014 Stage 1 is complete, retained and authoritative, and runs_search is False by type. Also excluded: a second attempt; any use of the historical $35.6660 full-Phase-B ceiling; a fourth seed; backfilling rank 6 or 7; probing any of the three searched non-survivors (ab7632b00788, bf5ae3b6ae00, cca699c93f34), which are evidence only; recomputing rung 1; any cumulative-cap increase; post-Phase-B generalization; DEPTH incumbent selection; ATTENTION/FFN/RESIDUAL_WIDTH research; the canonical Stage-1 NLL; formal Stage 2/Stage 3 recovery training; and any new paid session of any kind. The maintainer's words: \"No changes to science, candidate selection, probes, generalization, operator R&D, canonical Stage-1 NLL, or formal Stage 2/3 in this repair.\"\n\nGrant document: logs/autoinit_continuation_b_grant.json",
     "plan_id": "autoinit.v1.phase_b_behavioural_continuation",
     "continuation_plan_hash": "a2ef4cd68a4bae7a0de399b078ad99e41e23ae8448b2871b0c3f381d687703cf",
@@ -338,8 +380,8 @@
     "runs_search": false,
     "phase_a_authorized": false,
     "automatic_followon_start": false,
-    "authorized_session_commit": "de5c2ac335b1b574ce58b351a9fc61899bcff905",
-    "source_digest": "96c346ffcf6a1c3dc315d2d631388178700be75eb66ff820140e5e0bf663aff6",
+    "authorized_session_commit": "f20f2001003fb29984dc50e2f1f8e43deea9abdf",
+    "source_digest": "746b9d689d056003f72c428e0f6d8239424965d04ba52039019b5dd73ea9af17",
     "source_files": [
       "scripts/pod/autoinit_continuation_b_driver.py",
       "scripts/pod/autoinit_continuation_b_launch.py",
@@ -404,12 +446,12 @@
       "src/aadistill/init/project.py",
       "src/aadistill/init/sandwich.py"
     ],
-    "provenance_commit": "de5c2ac335b1b574ce58b351a9fc61899bcff905",
+    "provenance_commit": "f20f2001003fb29984dc50e2f1f8e43deea9abdf",
     "version": 1,
-    "authorization_sha256": "84f6933ddc70a40feb74d500633d258f9e3568200c42c654cefc25c89c25b53e"
+    "authorization_sha256": "9325fc0783d334544d50d2f720f5c73b2432ef74ff78cd50ec50019f9b1d26e3"
   },
   "session_plan_hash": "a2ef4cd68a4bae7a0de399b078ad99e41e23ae8448b2871b0c3f381d687703cf",
-  "harness_source_digest": "96c346ffcf6a1c3dc315d2d631388178700be75eb66ff820140e5e0bf663aff6",
+  "harness_source_digest": "746b9d689d056003f72c428e0f6d8239424965d04ba52039019b5dd73ea9af17",
   "harness_source_files": [
     "scripts/pod/autoinit_continuation_b_driver.py",
     "scripts/pod/autoinit_continuation_b_launch.py",
@@ -551,16 +593,16 @@
   "quoted_price_per_hour": 0.99,
   "stock_status": "Low",
   "session_commit_check": {
-    "session_commit": "8df1bad216aa2ed7f12b698e19b4f09bfe2b5c36",
-    "authorized_session_commit": "de5c2ac335b1b574ce58b351a9fc61899bcff905",
-    "harness_digest_at_commit": "96c346ffcf6a1c3dc315d2d631388178700be75eb66ff820140e5e0bf663aff6",
-    "authorized_harness_digest": "96c346ffcf6a1c3dc315d2d631388178700be75eb66ff820140e5e0bf663aff6",
+    "session_commit": "839810840ddec6b8d08fc7108f02a7afee2591bf",
+    "authorized_session_commit": "f20f2001003fb29984dc50e2f1f8e43deea9abdf",
+    "harness_digest_at_commit": "746b9d689d056003f72c428e0f6d8239424965d04ba52039019b5dd73ea9af17",
+    "authorized_harness_digest": "746b9d689d056003f72c428e0f6d8239424965d04ba52039019b5dd73ea9af17",
     "harness_matches": true,
     "commit_carries_this_authorization": true,
     "rule": "the pod checks out this commit from a bundle; its harness must digest to the authorized value and it must carry the authorization the driver will load",
     "lineage": {
-      "authorized_base": "de5c2ac335b1b574ce58b351a9fc61899bcff905",
-      "session_commit": "8df1bad216aa2ed7f12b698e19b4f09bfe2b5c36",
+      "authorized_base": "f20f2001003fb29984dc50e2f1f8e43deea9abdf",
+      "session_commit": "839810840ddec6b8d08fc7108f02a7afee2591bf",
       "descends_from_base": true,
       "changed_paths": [
         "logs/autoinit_continuation_b_authorization.json"
@@ -574,7 +616,7 @@
     {
       "check": "session_commit_and_lineage",
       "ok": true,
-      "message": "session commit 8df1bad216aa verified: harness digests to 96c346ffcf6a\u2026, carries the authorization and only logs/autoinit_continuation_b_authorization.json differs from the authorized base"
+      "message": "session commit 839810840dde verified: harness digests to 746b9d689d05\u2026, carries the authorization and only logs/autoinit_continuation_b_authorization.json differs from the authorized base"
     },
     {
       "check": "frozen_science_plan",
@@ -584,7 +626,7 @@
     {
       "check": "continuation_source_gate",
       "ok": true,
-      "message": "continuation executable 96c346ffcf6a\u2026 matches the grant"
+      "message": "continuation executable 746b9d689d05\u2026 matches the grant"
     },
     {
       "check": "no_search_gate",
@@ -604,7 +646,7 @@
     {
       "check": "continuation_artifact_capacity_gate",
       "ok": true,
-      "message": "/home/ecs-user/aad-scratch/sessions/autoinit-continuation-b: 9.64 GiB free for 1076 MiB of archive and working room"
+      "message": "/home/ecs-user/aad-scratch/sessions/autoinit-continuation-b: 9.63 GiB free for 1076 MiB of archive and working room"
     }
   ],
   "precheck": {
@@ -631,7 +673,7 @@
       "AlphaAvatar/aadistill-transport": 6
     },
     "relay_repo_files_listed": {
-      "AlphaAvatar/aadistill-artifacts": 1169,
+      "AlphaAvatar/aadistill-artifacts": 1170,
       "AlphaAvatar/aadistill-transport": 19
     },
     "local_assets": [
@@ -640,32 +682,84 @@
     ],
     "local_missing": []
   },
-  "pod_id": "nuitz0ketxukpm",
+  "pod_id": "ew2ykjczuex87i",
   "actual_price_per_hour": 0.99,
-  "terminate_after_utc": "2026-08-29T21:13:29Z",
+  "terminate_after_utc": "2026-08-30T01:43:05Z",
   "watchdog_journals": [
     "/home/ecs-user/aad-scratch/sessions/autoinit-continuation-b/watchdog.jsonl"
   ],
   "image_identity": {
     "image_name": "runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404",
     "observed": [
-      "580.159.03"
+      "580.159.04"
     ],
-    "digest": "runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@580.159.03"
+    "digest": "runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@580.159.04"
   },
   "setup_environment": {
-    "BUNDLE_NAME": "aad_autoinit_8df1bad2.bundle",
+    "BUNDLE_NAME": "aad_autoinit_83981084.bundle",
     "SESSION_ASSETS": "state_eval_v1:artifacts/stage1,recovery_search_v2:artifacts/stage3",
     "SESSION_AUTH_PATH": "logs/autoinit_continuation_b_authorization.json",
-    "SESSION_COMMIT": "8df1bad216aa2ed7f12b698e19b4f09bfe2b5c36",
+    "SESSION_COMMIT": "839810840ddec6b8d08fc7108f02a7afee2591bf",
     "SESSION_KIND": "continuation_b",
     "SESSION_PLAN_HASH": "a2ef4cd68a4bae7a0de399b078ad99e41e23ae8448b2871b0c3f381d687703cf",
     "SESSION_RELAY_INPUTS": "[{\"also_stage_to\":null,\"dest\":\"artifacts/stage1/qwen3_0p6b_init_v0/checkpoint\",\"path\":\"stage1/qwen3_0p6b_init_v0/checkpoint/model.safetensors\",\"repo\":\"AlphaAvatar/aadistill-artifacts\",\"sha256\":\"86fbba78e8a2a32481ca77e5ac362ed1f17a39dbc30bcbc952cabd5df2633e54\"},{\"also_stage_to\":null,\"dest\":\"artifacts/stage1/qwen3_0p6b_init_v0/checkpoint\",\"path\":\"stage1/qwen3_0p6b_init_v0/checkpoint/config.json\",\"repo\":\"AlphaAvatar/aadistill-artifacts\",\"sha256\":null},{\"also_stage_to\":null,\"dest\":\"artifacts/stage1/qwen3_0p6b_init_v0/checkpoint\",\"path\":\"stage1/qwen3_0p6b_init_v0/checkpoint/generation_config.json\",\"repo\":\"AlphaAvatar/aadistill-artifacts\",\"sha256\":null},{\"also_stage_to\":null,\"dest\":\"artifacts/stage1/qwen3_0p6b_init_v0/checkpoint\",\"path\":\"stage1/qwen3_0p6b_init_v0/checkpoint/tokenizer.json\",\"repo\":\"AlphaAvatar/aadistill-artifacts\",\"sha256\":null},{\"also_stage_to\":null,\"dest\":\"artifacts/stage1/qwen3_0p6b_init_v0/checkpoint\",\"path\":\"stage1/qwen3_0p6b_init_v0/checkpoint/tokenizer_config.json\",\"repo\":\"AlphaAvatar/aadistill-artifacts\",\"sha256\":null},{\"also_stage_to\":null,\"dest\":\"artifacts/stage1/qwen3_0p6b_init_v0/checkpoint\",\"path\":\"stage1/qwen3_0p6b_init_v0/checkpoint/chat_template.jinja\",\"repo\":\"AlphaAvatar/aadistill-artifacts\",\"sha256\":null},{\"also_stage_to\":\"artifacts/stage3/ladder_uniform\",\"dest\":\"artifacts/stage3/ladder_uniform_probe\",\"path\":\"stage3_recovery_corpus_v2/ladder_uniform/blocks.npz\",\"repo\":\"AlphaAvatar/aadistill-artifacts\",\"sha256\":\"6f324cb0f37bc0f07128e554ce8c161879419537478950496534f75fcecb249c\"},{\"also_stage_to\":\"artifacts/stage3/ladder_uniform\",\"dest\":\"artifacts/stage3/ladder_uniform_probe\",\"path\":\"stage3_recovery_corpus_v2/ladder_uniform/ladder.json\",\"repo\":\"AlphaAvatar/aadistill-artifacts\",\"sha256\":null},{\"also_stage_to\":\"artifacts/stage3/ladder_uniform\",\"dest\":\"artifacts/stage3/ladder_uniform_probe\",\"path\":\"stage3_recovery_corpus_v2/ladder_uniform/audit.jsonl\",\"repo\":\"AlphaAvatar/aadistill-artifacts\",\"sha256\":null},{\"also_stage_to\":null,\"dest\":\"artifacts/autoinit/phase_a_selected/fe9683e6a9c783bbc6fe276a78c851c6\",\"path\":\"phase_b_attempt5/selected_leaves/fe9683e6a9c783bbc6fe276a78c851c6/config.json\",\"repo\":\"AlphaAvatar/aadistill-transport\",\"sha256\":\"e94e4d3a9cab307a55f97991776ec22f0b2b6e2ec91c93a6ceba5639f3bf7a49\"},{\"also_stage_to\":null,\"dest\":\"artifacts/autoinit/phase_a_selected/fe9683e6a9c783bbc6fe276a78c851c6\",\"path\":\"phase_b_attempt5/selected_leaves/fe9683e6a9c783bbc6fe276a78c851c6/generation_config.json\",\"repo\":\"AlphaAvatar/aadistill-transport\",\"sha256\":\"28fb42f15159b552b9301b3f8f197c1b5ccd68c95ff0e3498d68678f61c1c633\"},{\"also_stage_to\":null,\"dest\":\"artifacts/autoinit/phase_a_selected/fe9683e6a9c783bbc6fe276a78c851c6\",\"path\":\"phase_b_attempt5/selected_leaves/fe9683e6a9c783bbc6fe276a78c851c6/model.safetensors\",\"repo\":\"AlphaAvatar/aadistill-transport\",\"sha256\":\"d025f38da508803845ea4d01b7cea160d117d47de3535965c7866dc05cd1e48e\"},{\"also_stage_to\":null,\"dest\":\"artifacts/autoinit/phase_a_selected/85bde4ded2c31953f802e39cf2252c87\",\"path\":\"phase_a_attempt12/selected_leaves/85bde4ded2c31953f802e39cf2252c87/config.json\",\"repo\":\"AlphaAvatar/aadistill-transport\",\"sha256\":\"e94e4d3a9cab307a55f97991776ec22f0b2b6e2ec91c93a6ceba5639f3bf7a49\"},{\"also_stage_to\":null,\"dest\":\"artifacts/autoinit/phase_a_selected/85bde4ded2c31953f802e39cf2252c87\",\"path\":\"phase_a_attempt12/selected_leaves/85bde4ded2c31953f802e39cf2252c87/generation_config.json\",\"repo\":\"AlphaAvatar/aadistill-transport\",\"sha256\":\"28fb42f15159b552b9301b3f8f197c1b5ccd68c95ff0e3498d68678f61c1c633\"},{\"also_stage_to\":null,\"dest\":\"artifacts/autoinit/phase_a_selected/85bde4ded2c31953f802e39cf2252c87\",\"path\":\"phase_a_attempt12/selected_leaves/85bde4ded2c31953f802e39cf2252c87/model.safetensors\",\"repo\":\"AlphaAvatar/aadistill-transport\",\"sha256\":\"0a9a5a78e87cc800c1187a2c19f75c5e490734d1518fe8968d517b2077353c45\"}]",
     "SESSION_STATUS": "/workspace/autoinit_continuation_b.status",
-    "SESSION_TEST_IGNORES": "--ignore=tests/data/test_recovery_corpus_pipeline.py --ignore=tests/pod/test_phase_a_stages1_5_execute.py --ignore=tests/autoinit/test_phase_b_reuse_hostlocal.py --ignore=tests/pod/test_phase_b_stage1_executes.py --ignore=tests/pod/test_continuation_b_executes.py",
+    "SESSION_TEST_IGNORES": "--ignore=tests/data/test_recovery_corpus_pipeline.py --ignore=tests/pod/test_phase_a_stages1_5_execute.py --ignore=tests/autoinit/test_phase_b_reuse_hostlocal.py --ignore=tests/pod/test_phase_b_stage1_executes.py --ignore=tests/pod/test_continuation_b_executes.py --ignore=tests/autoinit/test_causal_depth_measurement_job.py --ignore=tests/pod/test_phase_b_driver_and_launcher.py",
     "TEACHER_REVISION": "768f209d9ea81521153ed38c47d515654e938aea",
     "TESTS_MAX_S": "2700",
     "UV_MAX_S": "1500"
+  },
+  "driver_job": {
+    "job_id": "autoinit_continuation_b",
+    "pid": 8428,
+    "workdir": "/workspace/aad",
+    "command": "/opt/train/bin/python /workspace/aad/scripts/pod/autoinit_continuation_b_driver.py --stage all --image-digest 'runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@580.159.04' --rate 0.99 --spent-usd 0.2067 --soft-stop-usd 4.7573 --authorized-usd 8.0691 --probe-train-minutes 61.55 --probe-battery-minutes 9.82",
+    "log_path": "/workspace/autoinit_continuation_b_run.log",
+    "status_path": "/workspace/autoinit_continuation_b.status",
+    "pid_path": "/workspace/jobs/autoinit_continuation_b.pid",
+    "descriptor_path": "/workspace/jobs/autoinit_continuation_b.job.json",
+    "exit_path": "/workspace/jobs/autoinit_continuation_b.exit",
+    "started_utc": "2026-08-29T20:47:21Z",
+    "start_channel_closed": true,
+    "confirmed_by": "descriptor_probe"
+  },
+  "terminal": "PHASE_A_FAILED",
+  "local_hash_problems": [],
+  "fetched_reports": [
+    "phase_a_evidence.json",
+    "attested_evaluation_protocol.json"
+  ],
+  "checkpoints_fetched": [],
+  "required_products_secured": {
+    "ok": true,
+    "why": "this session owes no off-pod products"
+  },
+  "teardown_gate": {
+    "allowed": true,
+    "emergency": true,
+    "failed_check": "training_complete",
+    "reason": "EMERGENCY budget teardown over a failed gate (training_complete): a blocking stage failed (PHASE_A_FAILED); the products of the stages that did not run do not exist and must not be demanded. Evidence is collected under the reduced spec and the pod is torn down.. Artifacts for the remaining checks ['training_complete', 'evaluation_complete'] are LOST.",
+    "checks": {
+      "training_complete": false,
+      "evaluation_complete": false,
+      "artifact_manifest_created": true,
+      "required_files_present": true,
+      "final_streams_quiescent": true,
+      "archive_created": true,
+      "archive_contents_verified": true,
+      "transfer_complete": true,
+      "local_hashes_verified": true,
+      "checkpoint_hashes_matched": true,
+      "required_products_secured": true,
+      "report_inputs_verified": true
+    },
+    "incomplete_event_streams": []
+  },
+  "manifest_summary": {
+    "ok": true,
+    "entries": 9,
+    "missing": [],
+    "still_being_written": []
   },
   "final_pod_state": {
     "exists": false,
@@ -675,12 +769,12 @@
   "provider_confirms_gone": true,
   "cost": {
     "price_per_hour": 0.99,
-    "elapsed_minutes": 15.23,
-    "actual_usd": 0.2513,
+    "elapsed_minutes": 19.07,
+    "actual_usd": 0.3146,
     "authorized_usd": 8.0691,
     "within_authorization": true
   },
   "passed": false,
   "cleanup_is_not_success": "artifacts are collected and the pod is torn down on every path; the session outcome is decided by the driver's terminal marker alone",
-  "finished_utc": "2026-08-29T16:20:25+00:00"
+  "finished_utc": "2026-08-29T20:53:51+00:00"
 }

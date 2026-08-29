@@ -1,0 +1,248 @@
+{
+  "schema": "aadistill.autoinit.phase_a_evidence/v1",
+  "started_utc": "2026-08-29T20:47:22.631606+00:00",
+  "phase_a": {
+    "plan": {
+      "plan_id": "autoinit.v1.phase_a_session",
+      "version": 1,
+      "plan_hash": "9377a2dc61f21790dd111d72a5de0e039ea1d31afef2d09e18c98a0b0cc2a0aa",
+      "stages": [
+        {
+          "stage": 0,
+          "name": "attestation and preregistration binding",
+          "purpose": "re-establish the runtime and evaluation identity this session measures under, and refuse to proceed unless the science plan is the frozen one",
+          "produces": [
+            "runtime fingerprint including image digest",
+            "attested evaluation protocol over recovery_search_v2",
+            "frozen-asset verification for state_eval_v1 and recovery_search_v2",
+            "assert_preregistered against the frozen Phase-A plan",
+            "the materialized thresholds this run will select against"
+          ],
+          "blocking": true,
+          "stop_conditions": [
+            "a frozen asset does not match its preregistered constant -> STOP",
+            "the executing science plan does not hash to the frozen one -> STOP: a threshold moved after freezing",
+            "the equivalence interval or feasibility floor is not materialized -> STOP: selection has no rule to apply",
+            "the scoring contract digest differs from the pinned one -> STOP"
+          ]
+        },
+        {
+          "stage": 1,
+          "name": "beam search over initialization paths",
+          "purpose": "materialize and measure the reachable initialization states, and produce the searched leaves the recovery rungs will probe",
+          "produces": [
+            "one measured, hash-bound state per expansion",
+            "level records including every prune reason",
+            "the epsilon-Pareto ranking at each pruned level",
+            "5 admissible complete leaves",
+            "the search journal, resumable by content-derived state id"
+          ],
+          "blocking": true,
+          "stop_conditions": [
+            "fewer than 5 admissible complete leaves exist -> STOP and report the shortfall rather than shrinking N",
+            "a materialized state fails canonical reload, spec match, parameter count or finiteness -> STOP",
+            "the state evaluation suite hash differs from the attested one -> STOP: the beam would rank on a different suite's questions"
+          ]
+        },
+        {
+          "stage": 2,
+          "name": "recovery rung 1 on seed sa",
+          "purpose": "probe the 5 searched leaves and the retained canonical control under one identical recovery recipe",
+          "produces": [
+            "6 probes at 1023 steps each on seed sa",
+            "recovery_search_v2 battery result per probe",
+            "the rung-1 survivor selection under the frozen rule",
+            "per-probe journal entries, resumable"
+          ],
+          "blocking": true,
+          "stop_conditions": [
+            "the canonical control is absent -> STOP: a comparison without the retained baseline is not the comparison the plan describes",
+            "capability schema validation fails -> scoring defect, STOP",
+            "a probe's evaluation protocol is not comparable to the attestation -> STOP"
+          ]
+        },
+        {
+          "stage": 3,
+          "name": "recovery rung 2 on seed sb",
+          "purpose": "second seed for the 2 survivors and the control, because the behaviour metric's seed-only spread is 0.1290",
+          "produces": [
+            "3 probes at 1023 steps each on seed sb",
+            "pooled_counts@v2 aggregates over sa and sb",
+            "the final selection, or an explicit tie"
+          ],
+          "blocking": true,
+          "stop_conditions": [
+            "the control did not advance -> STOP: it advances unconditionally",
+            "capability schema validation fails -> STOP"
+          ]
+        },
+        {
+          "stage": 4,
+          "name": "conditional tie-break on seed sc",
+          "purpose": "resolve finalists that finished inside the preregistered equivalence interval after two seeds \u2014 and only those",
+          "produces": [
+            "probes on seed sc for the tied finalists only",
+            "pooled aggregates over sa, sb and sc",
+            "the resolved winner, or unresolved_equivalence"
+          ],
+          "blocking": false,
+          "stop_conditions": [
+            "the rung-2 selection did not request a tie-break -> this stage does not run, which is not a failure",
+            "no fourth seed is requested under any outcome"
+          ]
+        },
+        {
+          "stage": 5,
+          "name": "selection and report",
+          "purpose": "record which initializer won, that the canonical control won, or that v1 resolved no unique behavioural winner",
+          "produces": [
+            "the final selection record with every exclusion",
+            "feasibility and catastrophic-gate outcomes per candidate",
+            "behaviour and correctness reported on separate axes",
+            "the Phase-A result artifact"
+          ],
+          "blocking": false,
+          "stop_conditions": [
+            "a tie surviving seed sc is reported as unresolved_equivalence and is a RESULT, not a failure",
+            "no follow-on experiment starts from this session"
+          ]
+        }
+      ],
+      "ordering_rationale": "controls are the expensive artifact and the one whose validity depends on a fixed runtime, so they are produced only after the runtime is attested and the cheap gates pass"
+    },
+    "scope": {
+      "trains_anything": true,
+      "retrains_permanent_controls": false,
+      "reaches_any_followon": false,
+      "control_is_injected_by_hash": true,
+      "searched_leaves": 5,
+      "survivors": 2,
+      "seeds": [
+        20260726,
+        20260801
+      ],
+      "conditional_tie_break_seed": 20260813,
+      "battery": "recovery_search_v2",
+      "state_eval_suite": "state_eval_v1",
+      "notes": {
+        "what_training_means_here": "Phase A trains 9 recovery probes (12 if the tie-break rung runs) at 1023 steps each. It does NOT retrain the two permanent controls, which were trained once and are injected by frozen hash",
+        "control_may_win": "'the incumbent won, AutoInitializer v1 did not improve recovered behaviour' is a reachable conclusion, and the selection is symmetric so that it stays reachable",
+        "no_winner_is_a_result": "unresolved_equivalence after seed sc is the finding, not a failure to be resolved by a fourth seed or a lexicographic tie-break",
+        "terminus": "Phase A stops for review. No follow-on experiment, full recovery of a winner, or Phase B starts from this session"
+      },
+      "session_plan_hash": "9377a2dc61f21790dd111d72a5de0e039ea1d31afef2d09e18c98a0b0cc2a0aa"
+    },
+    "harness_source_files": [
+      "scripts/pod/autoinit_phase_a_launch.py",
+      "scripts/pod/autoinit_phase_a_driver.py",
+      "scripts/pod/autoinit_preflight_setup.sh",
+      "scripts/pod/autoinit_science_inputs.py",
+      "scripts/pod/autoinit_engine_probe.py",
+      "scripts/pod/watchdog.py",
+      "scripts/pod/collect_artifacts.py",
+      "src/aadistill/infrastructure/session.py",
+      "src/aadistill/infrastructure/session_runner.py",
+      "src/aadistill/infrastructure/session_prechecks.py",
+      "scripts/autoinit/phase_a_search.py",
+      "scripts/autoinit/write_preregistration.py",
+      "src/aadistill/autoinit/authorization.py",
+      "src/aadistill/autoinit/generation_compat.py",
+      "src/aadistill/autoinit/phase_a.py",
+      "src/aadistill/autoinit/generation.py"
+    ],
+    "manifest_sha256": "cc0b23970fc0d98efe31791ad1bf778e1ea9dd06faf31ab99dbc35d45dc6f102"
+  },
+  "scope": {
+    "trains_anything": true,
+    "retrains_permanent_controls": false,
+    "reaches_any_followon": false,
+    "control_is_injected_by_hash": true,
+    "searched_leaves": 5,
+    "survivors": 2,
+    "seeds": [
+      20260726,
+      20260801
+    ],
+    "conditional_tie_break_seed": 20260813,
+    "battery": "recovery_search_v2",
+    "state_eval_suite": "state_eval_v1",
+    "notes": {
+      "what_training_means_here": "Phase A trains 9 recovery probes (12 if the tie-break rung runs) at 1023 steps each. It does NOT retrain the two permanent controls, which were trained once and are injected by frozen hash",
+      "control_may_win": "'the incumbent won, AutoInitializer v1 did not improve recovered behaviour' is a reachable conclusion, and the selection is symmetric so that it stays reachable",
+      "no_winner_is_a_result": "unresolved_equivalence after seed sc is the finding, not a failure to be resolved by a fourth seed or a lexicographic tie-break",
+      "terminus": "Phase A stops for review. No follow-on experiment, full recovery of a winner, or Phase B starts from this session"
+    },
+    "session_plan_hash": "9377a2dc61f21790dd111d72a5de0e039ea1d31afef2d09e18c98a0b0cc2a0aa"
+  },
+  "retrains_permanent_controls": false,
+  "followon_started": false,
+  "followon_reachable_from_this_driver": false,
+  "stages": {
+    "0": {
+      "passed": false,
+      "reason": "AttributeError: 'PhaseAAuthorization' object has no attribute 'require_evidence'",
+      "finished_utc": "2026-08-29T20:50:21.327219+00:00",
+      "spend_usd": 0.2558,
+      "traceback": "Traceback (most recent call last):\n  File \"/workspace/aad/scripts/pod/autoinit_continuation_b_driver.py\", line 483, in run\n    ok = stages[stage]()\n         ^^^^^^^^^^^^^^^\n  File \"/workspace/aad/scripts/pod/autoinit_continuation_b_driver.py\", line 403, in stage_bind\n    self.auth.require_evidence(observed)\n    ^^^^^^^^^^^^^^^^^^^^^^^^^^\nAttributeError: 'PhaseAAuthorization' object has no attribute 'require_evidence'\n",
+      "traceback_file": "stage0_traceback.log"
+    }
+  },
+  "authorization": {
+    "schema": "aadistill.autoinit.phase_a_authorization/v1",
+    "authorization_id": "autoinit.phase_a.2026-08-20T1856Z",
+    "version": 1,
+    "granted_utc": "2026-08-20T18:56:29Z",
+    "granted_by": "Maintainer decision, 2026-08-21, at commit f331e49. GO for Phase-A Attempt 12 only. Attempt 11 passed Stage 0 and Stage 1 -- the first completed AutoInit beam search, 43 states over 4 levels, five leaves selected, with the existing COMPOSITE_STAGE1 recipe on Pareto front 4 and NOT selected -- and then lost the probe at Stage 2 to a tokenizer inferred from a weight-only checkpoint, and lost all five leaf checkpoints with the pod. Both defects are closed and mutation-verified at $0. (1) The tokenizer is now a declared consumer dependency: an explicit source, loaded through the real loader, verified against the frozen protocol identity 7781771acc3798ee, cross-checked against any tokenizer the student itself carries, and refused before training or data construction; presence is decided by looking for files, never by calling the loader, because AutoTokenizer returns a one-token vocabulary on a config-only directory instead of raising. The producer is unchanged and searched leaves remain weight-only, because artifact_digest folds in tokenizer_sha256. (2) The five Stage-1 selected leaves now leave the pod: selected_leaf_durability.json is a fetched report ordered before products, the selected-leaf transfer runs whenever Stage 1 produced that report and is NOT gated on Stage 2, the leaves land in the existing dev-box checkpoint store by the product transfer path rather than the archive, each is re-identified from local bytes and required to match the Stage-1 artifact digest, and required_products_secured is a teardown-gate requirement so a completed search cannot be deleted while its leaves remain only on the pod. A pre-provider capacity gate now checks the actual dev-box destination. Local storage was cleared to 22.25 GiB by reclaiming 14.9107 GiB of derived caches with no checkpoint deleted; the retained 23.09 GiB review set is closed and must not be revisited. No further canary, measurement, readiness or cleanup phase is to be added before this run.\n\nCovers: One (1) launch of AutoInitializer Phase A, attempt 12, on a single NVIDIA L40S at no more than $0.99/h, proceeding through the frozen Stage 0-5 protocol with no scientific or infrastructure change, under the existing watchdog, soft-stop, hard-stop, artifact-gate, selected-leaf durability and provider-confirmed teardown behaviour. Authorized pricing, unchanged: expected $17.8933, soft stop $22.7183, priced hard value $23.0483, per-launch hard ceiling $23.0484. Stage-1 runtime deadline 363.9841 min, derived as base 180.0000 + beam-6 correction 36.2158 + reference-cache fallback reserve 147.7683. If Stage 1 completes, all five selected leaves MUST be verified off-pod before normal teardown, whatever happens in Stages 2-5.\n\nCumulative spend at approval $209.6842 against a cumulative cap of $234.00.\n\nDoes NOT authorize: Attempt 13, or any retry after a failure - a failed pre-provider, capacity, setup, Stage-0, Stage-1, Stage-2, Stage-3, pricing, authorization, bundle-identity, deadline, selected-leaf-durability, artifact or provider gate is a fail-closed stop for review, never an interactive repair on the live pod. Adding a further canary, measurement, readiness or cleanup phase. Deleting any further local artifact, or revisiting the retained 23.09 GiB checkpoint review set. Changing the tokenizer semantics, the search science, the retention selection, the five-leaf count, or Phase-A pricing. Reopening the frozen science: science plan 02be33b9, session plan 9377a2dc, Stage-3 protocol 250f72ef, runtime comparability 70a26e0b, equivalence interval 0.011695296982299022, feasibility floor 0.3, the seed and conditional-sc policy, the operators, the calibration, the operator ids and declared mathematics, or the recovery, search and selection rules. Reviving the terminated device canary. Any other paid session. Treating the remaining cumulative headroom as authorization beyond this one launch.\n\nGrant document: logs/autoinit_phase_a_attempt12_grant.json sha256 69e8150ea9d4d50dd16e0227318bf4df51b66f1dc5904888267d9f07da124a50",
+    "plan_id": "autoinit.v1.phase_a_session",
+    "phase_a_session_plan_hash": "9377a2dc61f21790dd111d72a5de0e039ea1d31afef2d09e18c98a0b0cc2a0aa",
+    "phase_a_science_plan_hash": "02be33b9a7a8e26bc8bfb75795351e8cdc9ffd441b47066cc81887cfc511b55c",
+    "expected_usd": 17.8933,
+    "hard_cap_usd": 23.0484,
+    "authorized_stages": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5
+    ],
+    "stage_conditions": {
+      "0": "attestation; frozen assets; assert_preregistered against the frozen science plan; both thresholds must be materialized",
+      "1": "beam search; 5 admissible leaves or STOP and report the shortfall",
+      "2": "recovery rung 1 on seed sa: 5 searched leaves + the injected canonical control, then the survivor selection and the leaf retention record",
+      "3": "recovery rung 2 on seed sb: 2 survivors + the control",
+      "4": "conditional tie-break on seed sc, ONLY for finalists inside the preregistered equivalence interval; no fourth seed",
+      "5": "selection and report; unresolved_equivalence is a RESULT",
+      "teardown": "collect, fetch the finalists, delete the pod, confirm from the provider, STOP for review"
+    },
+    "scope_note": "Phase A only, one launcher invocation. This artifact authorizes the SPEND and the STAGES; it is not by itself an instruction to launch \u2014 issuing and launching are separate, explicit decisions. Nothing here permits retraining the permanent controls, changing the frozen search or recovery design, a fourth seed, or any follow-on experiment: Phase A is a terminus and stops for review on every path, including unresolved_equivalence.",
+    "phase_a_authorized": true,
+    "automatic_followon_start": false,
+    "authorized_session_commit": "6075a6d97b0a0d516d5eddb23675341f8c4af3b8",
+    "harness_source_digest": "b9ff56681e84267a2cc71e10e958beea48699259f39ae5e8dc02b56a35c50215",
+    "harness_source_files": [
+      "scripts/pod/autoinit_phase_a_launch.py",
+      "scripts/pod/autoinit_phase_a_driver.py",
+      "scripts/pod/autoinit_preflight_setup.sh",
+      "scripts/pod/autoinit_science_inputs.py",
+      "scripts/pod/autoinit_engine_probe.py",
+      "scripts/pod/watchdog.py",
+      "scripts/pod/collect_artifacts.py",
+      "src/aadistill/infrastructure/session.py",
+      "src/aadistill/infrastructure/session_runner.py",
+      "src/aadistill/infrastructure/session_prechecks.py",
+      "scripts/autoinit/phase_a_search.py",
+      "scripts/autoinit/write_preregistration.py",
+      "src/aadistill/autoinit/authorization.py",
+      "src/aadistill/autoinit/generation_compat.py",
+      "src/aadistill/autoinit/phase_a.py",
+      "src/aadistill/autoinit/generation.py"
+    ],
+    "per_launch_hard_usd": 23.0484,
+    "provenance_commit": "6075a6d97b0a0d516d5eddb23675341f8c4af3b8",
+    "enforcement": "the launcher loads this artifact and refuses to create a pod whose priced hard threshold exceeds hard_cap_usd or per_launch_hard_usd, refuses a stage not in authorized_stages, refuses a harness that does not digest to the authorized value, and has no code path to any experiment after Phase A",
+    "authorization_sha256": "459bf9f1df61ef98e920529f48e6ad2ccae7c5babaefae7db861f421c3a3edab"
+  },
+  "elapsed_min": 2.98,
+  "spend_usd": 0.2558
+}

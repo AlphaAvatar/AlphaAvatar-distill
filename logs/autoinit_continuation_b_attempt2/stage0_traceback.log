@@ -1,0 +1,11 @@
+stage 0: AttributeError: 'PhaseAAuthorization' object has no attribute 'require_evidence'
+2026-08-29T20:50:21Z
+
+Traceback (most recent call last):
+  File "/workspace/aad/scripts/pod/autoinit_continuation_b_driver.py", line 483, in run
+    ok = stages[stage]()
+         ^^^^^^^^^^^^^^^
+  File "/workspace/aad/scripts/pod/autoinit_continuation_b_driver.py", line 403, in stage_bind
+    self.auth.require_evidence(observed)
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'PhaseAAuthorization' object has no attribute 'require_evidence'

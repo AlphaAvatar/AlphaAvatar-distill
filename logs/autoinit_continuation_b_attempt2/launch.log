@@ -1,0 +1,96 @@
+[16:05:08] budget: expected 262 min $4.32 · soft $4.76 · hard $5.09 (authorized $8.07)
+[16:05:09] NVIDIA L40S $0.99/h, stock Low
+[16:05:09] session commit 8df1bad216aa verified: harness digests to 96c346ffcf6a…, carries the authorization and only logs/autoinit_continuation_b_authorization.json differs from the authorized base
+[16:05:09] frozen science plan 02be33b9a7a8… matches the authorization
+[16:05:09] continuation executable 96c346ffcf6a… matches the grant
+[16:05:09] no search call site on the continuation's own path; 1 known-neutralized elsewhere; runs_search False
+[16:05:09] cited evidence matches the grant: universe e94f15d2e648…
+[16:05:09] continuation ceiling $8.0691 covers the priced $8.0691 and is below the full-session $35.6660
+[16:05:09] /home/ecs-user/aad-scratch/sessions/autoinit-continuation-b: 9.64 GiB free for 1076 MiB of archive and working room
+[16:05:10] precheck OK: 15 relay inputs (9 from AlphaAvatar/aadistill-artifacts, 6 from AlphaAvatar/aadistill-transport), 2 local assets
+[16:05:11] created nuitz0ketxukpm at $0.99/h
+[16:05:11] watchdog detached — hard 308 min = $5.09
+[16:05:44] TCP 22 at 82.221.170.242:37055 after 0.5 min
+[16:05:46] draw 1: ssh reachable — $0.01
+[16:07:11] draw 1: image identity runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@580.159.03
+[16:07:11] draw 1: running setup
+[16:20:14] setup did not reach SETUP_DONE:
+ion==0.28.0
+ + tqdm==4.70.0
+ + transformers==5.15.0
+ + triton==3.7.1
+ + truststore==0.10.4
+ + typer==0.27.1
+ + typing-extensions==4.16.0
+ + typing-inspection==0.4.4
+ + urllib3==2.7.0
+ + uvicorn==0.52.3
+ + uvloop==0.22.1
+ + vllm==0.27.1
+ + watchfiles==1.2.0
+ + websockets==17.0.1
+ + xgrammar==0.2.3
+ + yarl==1.24.5
+ + z3-solver==4.15.4.0
+[16:12:06] vllm offline install completed in 10s
+vllm 0.27.1 | torch 2.13.0+cu130 True
+MARKER:VLLM_READY
+[16:12:19] downloading the teacher at the pinned revision
+
+Fetching 10 files:   0%|          | 0/10 [00:00<?, ?it/s]
+Fetching 10 files:  10%|█         | 1/10 [00:00<00:01,  5.61it/s]
+Fetching 10 files:  20%|██        | 2/10 [00:00<00:01,  6.63it/s]
+Fetching 10 files:  30%|███       | 3/10 [00:00<00:00,  7.64it/s]
+Fetching 10 files:  40%|████      | 4/10 [00:00<00:00,  7.44it/s]
+Fetching 10 files:  50%|█████     | 5/10 [00:01<00:01,  3.98it/s]
+Fetching 10 files:  70%|███████   | 7/10 [00:02<00:01,  2.64it/s]
+Fetching 10 files:  80%|████████  | 8/10 [00:03<00:01,  1.25it/s]
+Fetching 10 files:  90%|█████████ | 9/10 [00:37<00:09,  9.71s/it]
+Fetching 10 files: 100%|██████████| 10/10 [00:43<00:00,  8.67s/it]
+Fetching 10 files: 100%|██████████| 10/10 [00:43<00:00,  4.32s/it]
+MARKER:TEACHER_READY
+[16:13:03] checking the RoPE base resolves in every venv
+  transformers 5.13.1: qwen3_0p6b_init_v0 stored 5,000,000 runtime 5,000,000 OK
+  transformers 5.15.0: qwen3_0p6b_init_v0 stored 5,000,000 runtime 5,000,000 OK
+MARKER:ROPE_OK
+[16:13:18] CPU test suite (128 vCPUs visible, cgroup budget 13; cpu set 0-12)
+FAILED tests/autoinit/test_causal_depth_measurement_job.py::test_the_report_field_carries_the_path_and_not_the_items
+FAILED tests/pod/test_phase_b_driver_and_launcher.py::test_run_search_passes_BOTH_profiles_and_a_dispatching_loader
+FAILED tests/pod/test_phase_b_driver_and_launcher.py::test_the_v2_mixture_travels_a_path_the_pod_can_actually_read
+4 failed, 2300 passed, 95 skipped in 408.00s (0:06:48)
+[16:20:09] test suite failed rc=1
+SETUP_RC=1
+
+[16:20:14] ABORT after draw 1: setup_failed
+[16:20:14] deleting pod (setup setup_failed)
+[16:20:25] pod deleted — 15.2 min, $0.25; provider confirms gone: True
+[20:34:43] budget: expected 262 min $4.32 · soft $4.76 · hard $5.09 (authorized $8.07)
+[20:34:44] NVIDIA L40S $0.99/h, stock Low
+[20:34:44] session commit 839810840dde verified: harness digests to 746b9d689d05…, carries the authorization and only logs/autoinit_continuation_b_authorization.json differs from the authorized base
+[20:34:44] frozen science plan 02be33b9a7a8… matches the authorization
+[20:34:44] continuation executable 746b9d689d05… matches the grant
+[20:34:44] no search call site on the continuation's own path; 1 known-neutralized elsewhere; runs_search False
+[20:34:44] cited evidence matches the grant: universe e94f15d2e648…
+[20:34:44] continuation ceiling $8.0691 covers the priced $8.0691 and is below the full-session $35.6660
+[20:34:44] /home/ecs-user/aad-scratch/sessions/autoinit-continuation-b: 9.63 GiB free for 1076 MiB of archive and working room
+[20:34:45] precheck OK: 15 relay inputs (9 from AlphaAvatar/aadistill-artifacts, 6 from AlphaAvatar/aadistill-transport), 2 local assets
+[20:34:47] created ew2ykjczuex87i at $0.99/h
+[20:34:47] watchdog detached — hard 308 min = $5.09
+[20:35:40]   starting (60s) — $0.01
+[20:36:44]   starting (120s) — $0.03
+[20:37:49] TCP 22 at 91.199.227.82:31613 after 3.0 min
+[20:37:53] draw 1: ssh reachable — $0.05
+[20:38:18] draw 1: image identity runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@580.159.04
+[20:38:18] draw 1: running setup
+[20:47:18] draw 1: setup complete — $0.21
+[20:47:23] driver detached, pid 8428, confirmed by descriptor_probe — $0.21
+[20:49:33]   2026-08-29T20:47:22Z MARKER:STAGE_START:0 — $0.24
+[20:51:46]   2026-08-29T20:50:21Z MARKER:PHASE_A_FAILED — $0.28
+[20:51:46] a blocking stage failed — collecting evidence, then tearing down. A stage-0 comparability failure is a TERMINATE: every cited observation would be lost at once and re-buying them is a larger session.
+[20:51:46] polling ended: PHASE_A_FAILED — $0.28
+[20:53:19]   manifest rc=0
+9 file(s) across 4 class(es) -> /workspace/manifest.json
+  final_required: 9 · mutable_snapshot: 0 · final_streams_quiescent: True
+[20:53:40] teardown gate: allowed=True failed=training_complete
+[20:53:40] deleting pod (gate passed after PHASE_A_FAILED)
+[20:53:51] pod deleted — 19.1 min, $0.31; provider confirms gone: True

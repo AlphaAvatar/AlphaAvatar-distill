@@ -1,0 +1,12 @@
+{
+ "bundle": "aad_autoinit_83981084.bundle",
+ "session_commit": "839810840ddec6b8d08fc7108f02a7afee2591bf",
+ "bytes": 7051090,
+ "uploaded_sha256": "a6bd6b5ff3852e3cfe357613c7d5eccfd7a91955812318bd428ce551dc5db545",
+ "downloaded_sha256": "a6bd6b5ff3852e3cfe357613c7d5eccfd7a91955812318bd428ce551dc5db545",
+ "checkout_head": "839810840ddec6b8d08fc7108f02a7afee2591bf",
+ "redigested_from_relay_checkout": "746b9d689d056003f72c428e0f6d8239424965d04ba52039019b5dd73ea9af17",
+ "authorized_source_digest": "746b9d689d056003f72c428e0f6d8239424965d04ba52039019b5dd73ea9af17",
+ "carries_this_authorization": true,
+ "verified_before_provider_creation": true
+}

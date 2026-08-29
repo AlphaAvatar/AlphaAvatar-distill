@@ -7,15 +7,81 @@ the live facts; this one says the same things in prose and adds nothing it does
 not carry. If the two disagree, a structural test fails.
 
 **Nothing is running. Nothing is billing. Nothing is prepared for launch.**
-Pod `nuitz0ketxukpm` was deleted at `16:20:25Z`; the provider confirms it gone
-and not billing, and the launcher, watchdog and poller have all exited. Spend is
-`$260.3063` of the `$283.7600` cap, `$23.4537` remaining.
+Pod `ew2ykjczuex87i` was deleted at `20:53:51Z`; the provider confirms it gone
+and not billing, and the launcher, watchdog and poller have all exited — the
+poller journalled `pod_gone` and stopped itself. Spend is `$260.6209` of the
+`$283.7600` cap, `$23.1391` remaining.
 
-**One replacement attempt is funded and authorized, and has NOT been launched.**
-The reviewer approved exactly one, after the repair below and its verification;
-the launch itself waits on their go-ahead. `autoinit.continuation_b.20260829T153538Z`
-is **CONSUMED permanently** and must never be reused; the `115028Z` grant stays
-retired **UNUSED**.
+**Nothing is authorized.** All three behavioural-continuation grants are retired:
+`194657Z` and `153538Z` **CONSUMED**, `115028Z` **UNUSED**.
+
+# ATTEMPT 2 CLEARED THE TEST GATE AND DIED AT DRIVER STAGE 0 — $0.3146
+
+**The attempt-1 repair worked.** The CPU test gate **passed** on hardware,
+`SETUP_RC=0`, `AUTHORIZATION_OK` and `SETUP_DONE` were reached, and the driver
+detached and was confirmed by descriptor probe. The calibration/test-scope defect
+is closed and did not recur.
+
+Three minutes into the driver, `stage_bind` raised:
+
+```
+AttributeError: 'PhaseAAuthorization' object has no attribute 'require_evidence'
+```
+
+**No scientific stage ran** — no probe trained or evaluated, no `sb`, no `sc`, no
+pooled decision, no final selection, no search reachable. No evidence moved.
+
+## The seam was built for this subclass, and this subclass ignored it
+
+`PhaseADriver` exposes `AUTHORIZATION_TYPE` and `AUTHORIZATION_PATH` as class
+attributes. Its own comment on them reads:
+
+> the continuation subclasses this driver: with the path fixed here, the
+> continuation would have loaded attempt 12's CONSUMED Phase-A authorization on
+> the pod — a real, committed file … Not a crash; a silently wrong ceiling, and
+> evidence naming the wrong grant.
+
+`ContinuationDriver` overrides **neither**, so on the pod it loaded
+`logs/autoinit_phase_a_authorization.json` as a `PhaseAAuthorization`. It is the
+**only** `PhaseADriver` subclass that sets neither — `autoinit_phase_b_driver.py`
+and `autoinit_recovery_continuation_driver.py` both do. It crashed rather than
+running silently on a wrong ceiling only because `require_evidence` does not
+exist on the Phase-A type, which is the lucky version of this bug.
+
+**The repair is not one line.** Setting the two attributes moves the failure to
+the next statement: `PhaseADriver.__init__` ends with
+`self.auth.require_plan(PHASE_A_PLAN_V1.plan_hash)`, and a
+`ContinuationAuthorization` refuses it — verified at `$0`: *"this authorization
+binds plan `a2ef4cd68a4b` and the session runs `9377a2dc61f2`"*. The parent also
+stamps Phase A's evidence schema and scope. `PhaseBDriver` solved exactly this by
+**not** calling `super().__init__` and reimplementing it with its own `TYPE`,
+`PATH` and `PLAN`; `ContinuationDriver` calls `super().__init__` and inherits all
+four wrong things.
+
+## Why no `$0` check caught it
+
+The whole-function test runs the real `__init__` — which loaded the wrong
+authorization there too — and then discards it in the next line:
+
+```python
+driver = ContinuationDriver.__new__(ContinuationDriver)
+ContinuationDriver.__init__(driver, Args())
+driver.auth = make_auth(...)          # overwrites what __init__ loaded
+```
+
+Every later assertion ran against a correctly-typed authorization the test
+supplied. The seam's wrong default was loaded and masked in the same three lines
+— seam injection points are the blind spot, again.
+
+The launcher's `evidence_binding_gate` asked a **different object**: it calls
+`ContinuationDriver.observed_evidence()` and then `ctx.auth.require_evidence()`
+on the *launcher's* correctly-loaded grant. It proved the evidence matches; it
+never exercised the driver's own load path.
+
+Record: [`autoinit_continuation_b_attempt2.json`](autoinit_continuation_b_attempt2.json),
+evidence in [`autoinit_continuation_b_attempt2/`](autoinit_continuation_b_attempt2/).
+
+**The repair is not applied.** A third attempt needs a maintainer decision.
 
 # ATTEMPT 1 REACHED THE POD AND STOPPED AT THE TEST GATE — $0.2513
 
