@@ -6,18 +6,38 @@ The **human view of [`current_state.json`](current_state.json)**. That file owns
 the live facts; this one says the same things in prose and adds nothing it does
 not carry. If the two disagree, a structural test fails.
 
-**Nothing is running. Nothing is billing. Nothing is prepared for launch** — no
-pod exists and no bundle is staged. Spend is `$260.0550` of the `$283.7600` cap,
-`$23.7050` remaining.
+## A PAID SESSION IS LIVE — pod `nuitz0ketxukpm`
 
-**One behavioural-continuation authorization is issued**, one-use, against the
-repaired executable `96c346ff`. It is written at the **next** commit and nowhere
-else: `session_commit_gate`'s lineage check requires the launch commit to differ
-from the authorized base by exactly one path — the authorization artifact — so
-this commit declares the pending issuance and the launch commit carries only the
-file. The earlier `autoinit.continuation_b.20260829T115028Z` grant bound the
-pre-repair digest `1682cd7d` and is retired to `superseded/` **UNUSED**: it was
-never launched against and no spend occurred under it.
+The behavioural continuation **launched 2026-08-29T16:05:11Z** at commit
+`8df1bad`, on an L40S at `$0.99/h`. All seven pre-provider gates passed inside
+the real launcher before the pod was created. The watchdog is detached with a
+hard stop at **308 min = $5.09**, against the authorization's `$8.0691` ceiling;
+the priced expectation is 262 min / `$4.32`, soft stop `$4.76`.
+
+Three independent views, deliberately: the **launcher** (polls the driver), the
+**watchdog** (provider control plane only, so a blocked ssh or hung driver is
+invisible and irrelevant to it), and a third **poller** journalling to
+`/home/ecs-user/aad-scratch/sessions/autoinit-continuation-b/poll.jsonl` so a
+durable record survives if both of the others die.
+
+Spend before this session is `$260.0550` of the `$283.7600` cap. **The session's
+own cost is not yet known** and must be read from the provider, not from the
+rate — it enters `BUDGET_LEDGER.md` when the pod is confirmed gone.
+
+**The authorization is `autoinit.continuation_b.20260829T153538Z`**, one-use and
+now consumed. It was written at its own commit and nowhere else:
+`session_commit_gate`'s lineage check requires the launch commit to differ from
+the authorized base by exactly one path — the authorization artifact — so
+`de5c2ac` declared the pending issuance and `8df1bad` carries only the file. The
+earlier `autoinit.continuation_b.20260829T115028Z` grant bound the pre-repair
+digest `1682cd7d` and is retired to `superseded/` **UNUSED**: it was never
+launched against and no spend occurred under it.
+
+The bundle round-tripped before any provider resource existed: a fresh clone of
+the relay bytes checks out `8df1bad216aa`, its 62 executable files re-derive to
+`96c346ffcf6a…`, and it carries this exact authorization. It is consumed by the
+running session, and beyond it **nothing is prepared for launch** — no second
+attempt, no follow-on, no staged bundle.
 
 # The product contract is REPAIRED — the last blocker is closed
 

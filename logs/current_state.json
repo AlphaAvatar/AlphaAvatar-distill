@@ -1,21 +1,24 @@
 {
  "schema": "aadistill.current_state/v2",
- "generated_utc": "2026-08-29T15:35:21Z",
+ "generated_utc": "2026-08-29T16:07:30Z",
  "_contract": "The minimal machine-readable CURRENT snapshot: live facts only, no history, no per-attempt detail, no narrative. History lives in logs/decisions.md and the per-run directories; the human view is logs/STATE.md and the two must agree. Ownership: logs/CATALOG.md.",
  "baseline_commit": "b7c0099bfffc8962e4368917c59f8a9a8508d063",
  "baseline_commit_meaning": "The LAST TESTED IMPLEMENTATION: the commit whose tree produced the latest_verification figures (2461 passed / 12 skipped / 0 failed).",
  "running": {
-  "paid_compute": false,
-  "pods": 0,
-  "launchers": 0
+  "paid_compute": true,
+  "pods": 1,
+  "launchers": 1,
+  "pod_id": "nuitz0ketxukpm",
+  "note": "behavioural continuation, L40S $0.99/h, launched 2026-08-29T16:05:11Z at 8df1bad. Watchdog hard stop 308 min = $5.09 against the $8.0691 ceiling. Third-view poller journals to aad-scratch/sessions/autoinit-continuation-b/poll.jsonl. Cost UNKNOWN until the provider confirms the pod gone"
  },
  "authorized": {
   "any": true,
-  "note": "one one-use behavioural-continuation authorization against the repaired executable 96c346ff, written at the NEXT commit: the lineage check requires the launch commit to differ from its authorized base by exactly the authorization path. The 115028Z issue bound the pre-repair 1682cd7d and is retired to superseded/ UNUSED. No pod, no spend."
+  "note": "autoinit.continuation_b.20260829T153538Z, one-use, CONSUMED by the launch at commit 8df1bad. Ceiling $8.0691."
  },
  "prepared_launch": {
   "any": false,
-  "bundles": 0
+  "bundles": 0,
+  "note": "the launch bundle is consumed by the running session"
  },
  "budget": {
   "cumulative_spend_usd": 260.055,
@@ -49,18 +52,12 @@
   "continuation_b": "exec 96c346ffcf6a1c3d (62 files, set v3 = SHA256 over sorted path:sha256 lines), plan a2ef4cd68a4bae7a, prereg 21e69909e1bc43c5, assets 1643145376ba19a2. 6 evidence candidates, 3 finalists, 3 searched non-survivors, 0 gate exclusions. Floor $5.4784, ceiling $8.0691. Product contract is its OWN: no leaf fetch, no leaf-secured check, capacity gate on the <scr>/store filesystem at 1076 MiB (measured, logs/autoinit_continuation_b_capacity.json). logs/autoinit_continuation_b_preregistration.json",
   "phase_b_post_freeze": "exec digest moved 3d3b5d07 -> a043e2c7: shared SESSION_KIND dispatcher gained a continuation_b branch; Phase-B gate now accepts declared additive drift. 3 pre-existing branches byte-identical. Prereg NOT rewritten. logs/autoinit_phase_b_post_freeze_changes.json"
  },
- "complete": [
-  "Phase A end to end: search, three rungs, eleven probes, unresolved_equivalence",
-  "Stage 3 (both permanent controls, thresholds materialized)",
-  "Phase-B $0 readiness: v2 mixture, probe-reuse verification, plan, authorization type, executable-source identity, preregistration, driver, launcher, pricing",
-  "detail: logs/decisions.md and the per-run directories"
- ],
  "latest_verification": {
   "utc": "2026-08-29T15:35:21Z",
   "after": "the product-contract repair and the identity refreeze",
   "full_suite": "2479 passed, 12 skipped, 0 failed in 26:23",
   "verifiers": "frozen assets clean; both reuse records verified, digests unchanged; relay asset fe9683e6a9c7 present on the transport repo at the recorded sizes",
-  "gates": "run at the launch commit, not this one",
+  "gates": "7 of 7 pre-provider gates green at the launch commit, and again inside the real launcher before the pod was created",
   "continuation": "53 tests, 11 of them the new product contract; 15 mutations of the product contract, capacity gate, archives, no-search guarantee and the 6-to-3 boundary, no survivors",
   "scope": "CPU only; no GPU, no pod, $0"
  },
