@@ -112,14 +112,20 @@ consumed authorizations; changing one silently invalidates recorded results.
 
 ## HISTORICAL — evidence, never rewritten
 
-`superseded/` holds artifacts that were superseded before use and are kept
-as evidence rather than deleted — the Phase-B authorizations, and
-`autoinit_continuation_b_authorization_20260829T115028Z_UNUSED.json`, the
-behavioural-continuation grant that was issued, blocked at
-`ckpt_store_capacity_gate` and then invalidated by the product-contract repair
-that moved the executable digest `1682cd7d` → `96c346ff`. Every one of them was
-retired **before provider creation, at $0 spend**. Files here are never revived
-or reused; the `_UNUSABLE` / `_UNUSED` / `_CONSUMED` suffix says so in the name.
+`superseded/` holds retired authorizations, kept as evidence rather than deleted.
+Files here are never revived or reused; the suffix says which kind each is.
+
+* `_UNUSED` — issued, never launched against, `$0` spent.
+  `autoinit_continuation_b_authorization_20260829T115028Z_UNUSED.json` was
+  blocked at `ckpt_store_capacity_gate` and then invalidated by the
+  product-contract repair that moved the executable `1682cd7d` → `96c346ff`.
+* `_CONSUMED` — spent on a real pod.
+  `autoinit_continuation_b_authorization_20260829T153538Z_CONSUMED.json` bought
+  behavioural continuation attempt 1: pod `nuitz0ketxukpm`, **$0.2513**, aborted
+  at the pod test gate with no scientific stage. **Permanently consumed**, and
+  superseded in any case by the pod-test-scope repair that moved the executable
+  `96c346ff` → `746b9d68`.
+* `_UNUSABLE` — invalidated before use by a defect in the artifact itself.
 
 
 Per-run directories. Each holds what a session actually produced.
