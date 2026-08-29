@@ -379,3 +379,120 @@ def test_the_six_to_three_boundary_is_intact():
     assert prereg["active_finalists"]["count"] == 3
     assert len(prereg["active_finalists"]["state_ids"]) == 3
     assert len(prereg["active_finalists"]["searched_non_survivors"]["state_ids"]) == 3
+
+
+# --- bind is not consume: the calibration mixtures ---------------------------
+#
+# Continuation attempt 1 reached the pod and died here for $0.2513. Both
+# calibration mixtures are bound into this session's authorization and
+# preregistration, and neither is a runtime input. The inherited pod test gate
+# ran two modules that DO read them, they were not on the filesystem, and four
+# tests failed before any probe was bought.
+#
+# The repair is the ignore set, not the asset list. Staging bytes a session never
+# reads so an unrelated inherited test can find them would make the wrong thing
+# true: the session would then genuinely depend on a Phase-B search input.
+
+#: The two modules that exercise machinery outside the continuation runtime.
+SEARCH_ONLY_MODULES = (
+    "tests/autoinit/test_causal_depth_measurement_job.py",
+    "tests/pod/test_phase_b_driver_and_launcher.py",
+)
+
+#: The mixtures, and where their bytes would have to be for those modules to pass.
+CALIBRATION_DIRS = (
+    "artifacts/stage1/e8_calibration_v1",
+    "artifacts/stage1/reasoning_heavy_v2",
+)
+
+
+def test_the_search_only_modules_are_ignored_on_the_pod(cont, args):
+    ignores = cont.spec(args).setup.test_ignores
+    for module in SEARCH_ONLY_MODULES:
+        assert module in ignores, (
+            f"{module} runs in the pod gate; it reads a calibration mixture this "
+            "session does not stage, and it cost attempt 1 $0.2513")
+    # And the exclusions the session already had are still there.
+    for module in ("tests/pod/test_continuation_b_executes.py",
+                   "tests/autoinit/test_phase_b_reuse_hostlocal.py",
+                   "tests/pod/test_phase_b_stage1_executes.py",
+                   "tests/pod/test_phase_a_stages1_5_execute.py"):
+        assert module in ignores, module
+
+
+def test_removing_either_ignore_is_caught(cont, args):
+    """The guard, fed the mutation. A passing exclusion list proves nothing
+    unless dropping an entry is detectable."""
+    from dataclasses import replace
+
+    real = cont.spec(args).setup
+    for module in SEARCH_ONLY_MODULES:
+        shortened = tuple(m for m in real.test_ignores if m != module)
+        assert module not in shortened
+        with pytest.raises(AssertionError):
+            for m in SEARCH_ONLY_MODULES:
+                assert m in shortened, m
+        # The mutated manifest really is what the pod would be told to run.
+        assert replace(real, test_ignores=shortened).test_ignores == shortened
+
+
+def test_the_session_stages_NEITHER_calibration_mixture(cont, args):
+    """The other half of the repair, and the half that is easy to get wrong.
+
+    The reviewer's decision was explicit: do not make these runtime dependencies
+    merely to satisfy inherited tests. So the spec must NOT grow a relay input or
+    a local asset for either mixture.
+    """
+    setup = cont.spec(args).setup
+    staged = ([r.path for r in setup.relay_inputs]
+              + [a.repo_path for a in setup.local_assets]
+              + [a.dest_name for a in setup.local_assets])
+    for name in ("e8_calibration_v1", "reasoning_heavy", "calibration"):
+        assert not any(name in s for s in staged), (
+            f"the continuation stages {name!r}; the calibration mixtures are "
+            "Phase-B SEARCH inputs, bound here as provenance and never read")
+
+
+def test_the_identities_are_still_bound_even_though_the_bytes_are_not(cont, args):
+    """Bind is not consume — and dropping the bind is not the repair either."""
+    spec = cont.spec(args)
+    profiles = spec.evidence_fields["calibration_profiles"]
+    assert set(profiles) == {"calib.domain_balanced@v1", "calib.reasoning_heavy@v2"}
+    for ident in profiles.values():
+        assert ident["profile_hash"] and ident["content_sha256"]
+
+    auth = spec.authorization_loader(REPO / spec.authorization_path) \
+        if (REPO / spec.authorization_path).is_file() else None
+    if auth is not None:                       # absent between authorizations
+        for qualified in profiles:
+            assert qualified in auth.calibration_profile_hashes
+            assert qualified in auth.calibration_content_hashes
+
+
+def test_no_calibration_is_reachable_from_the_continuation_runtime():
+    """Why the ignores are safe, checked rather than asserted.
+
+    If the continuation DID read a mixture, excluding the tests that notice
+    would hide a real defect and buy another pod. Two independent facts say it
+    does not: the driver names no calibration, and the stage map has no search.
+    """
+    driver = (REPO / "scripts/pod/autoinit_continuation_b_driver.py").read_text()
+    for token in ("DOMAIN_BALANCED", "REASONING_HEAVY", "e8_calibration_v1",
+                  "reasoning_heavy_v2", "resolve_calibration"):
+        assert token not in driver, (
+            f"the continuation driver references {token}; the calibration "
+            "mixtures may be runtime inputs after all, and excluding the tests "
+            "that read them would hide it")
+
+    # The stage map is a local inside `run()`, so this pins its text; the
+    # whole-function proof that it binds no search is
+    # `test_the_continuation_stage_map_contains_no_search_stage`, which drives
+    # the real map with `run_phase_a_search` replaced by a detonator.
+    assert ("stages = {0: self.stage_bind, 1: self.stage_import, "
+            "3: self.stage3,") in driver
+    assert "self.stage1" not in driver.split("def run(")[1]
+
+    # The probe path names what it DOES consume, and it is neither mixture.
+    parent = (REPO / "scripts/pod/autoinit_phase_a_driver.py").read_text()
+    assert 'artifacts/stage3/ladder_uniform_probe' in parent
+    assert 'artifacts/stage3/recovery_search_v2' in parent

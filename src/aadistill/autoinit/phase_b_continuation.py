@@ -217,9 +217,20 @@ class ContinuationAuthorization:
     def require_calibration(self, profile: Any) -> None:
         """Both mixtures, by spec hash AND by content hash.
 
-        The continuation runs no search, so it consumes no calibration directly;
-        the probe trainer does. Kept for the same reason the field is kept: a
-        grant that names a mixture must be able to refuse a different one.
+        **Bound as provenance, not consumed at runtime.** An earlier version of
+        this docstring said the probe trainer consumes the calibration; it does
+        not. The paid behavioural probes train from
+        `artifacts/stage3/ladder_uniform_probe` and are scored on the
+        `artifacts/stage3/recovery_search_v2` battery. Neither mixture is read by
+        this session at all: the continuation runs no search, and the only
+        calibration reference on the inherited path is a comment inside the
+        `stage1` its stage map never binds.
+
+        What these identities *do* is name the distribution under which the
+        imported Phase-B Stage-1 result was produced. That is worth binding — a
+        grant that names a mixture must be able to refuse a different one — and
+        it is why the mixtures are **not** staged onto the pod. Reading the bind
+        as a consume is what cost continuation attempt 1 `$0.2513`.
         """
         qualified = profile.qualified_id
         expected_spec = self.calibration_profile_hashes.get(qualified)

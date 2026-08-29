@@ -72,12 +72,44 @@ PRICING = REPO_ROOT / "logs/autoinit_behavioural_continuation_pricing.json"
 AMENDMENT = REPO_ROOT / "logs/autoinit_phase_b_identity_collapse_amendment.json"
 
 #: Same exclusions as Phase B, plus this session's own whole-function test, which
-#: runs the continuation end to end on CPU and belongs on the dev box.
+#: runs the continuation end to end on CPU and belongs on the dev box, plus the
+#: two modules that exercise the Phase-B SEARCH this session cannot run.
+#:
+#: **Bind is not consume.** Attempt 1 died here for `$0.2513`. Both calibration
+#: mixtures are bound into this session's authorization and preregistration as
+#: provenance for the imported Stage-1 result — and neither is a runtime input.
+#: The paid behavioural probes train from `artifacts/stage3/ladder_uniform_probe`
+#: and are scored on the `artifacts/stage3/recovery_search_v2` battery; the
+#: continuation driver contains no calibration reference at all, and the one
+#: mention in `PhaseADriver` is a comment inside the `stage1` search this
+#: session overrides with a raise and never binds into its stage map.
+#:
+#: `calib.domain_balanced@v1` and `calib.reasoning_heavy@v2` are therefore
+#: Phase-B search inputs, and the right repair is NOT to stage them here. Making
+#: a session depend on bytes it never reads, so that an unrelated inherited test
+#: can find them, is the inheritance defect one layer further out.
+#:
+#: What the two modules below actually assert:
+#:
+#: * `test_causal_depth_measurement_job` drives the causal-depth/calibration
+#:   measurement job through the real resolver, which loads
+#:   `artifacts/stage1/e8_calibration_v1/items.jsonl`. Diagnostic search
+#:   machinery; nothing in the continuation's stage map reaches it.
+#: * `test_phase_b_driver_and_launcher` builds the **Phase-B** spec and requires
+#:   both calibration profiles and the `reasoning_heavy_v2` staging that Phase B
+#:   declares and this session does not. It is a correct test of a session this
+#:   one is structurally unable to be.
+#:
+#: Both keep running in full on the dev box, where the bytes live. The check
+#: moves; it does not disappear — exactly as `test_phase_b_reuse_hostlocal` is
+#: excluded here and checked before a pod exists.
 CONTINUATION_TEST_IGNORES = (
     *TEST_IGNORES,
     "tests/autoinit/test_phase_b_reuse_hostlocal.py",
     "tests/pod/test_phase_b_stage1_executes.py",
     "tests/pod/test_continuation_b_executes.py",
+    "tests/autoinit/test_causal_depth_measurement_job.py",
+    "tests/pod/test_phase_b_driver_and_launcher.py",
 )
 
 #: The advancing candidates whose bytes must be on the pod. `fe9683e6a9c7` is the
