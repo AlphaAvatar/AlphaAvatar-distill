@@ -1,0 +1,96 @@
+{
+ "schema": "aadistill.autoinit.continuation_b_attempt/v1",
+ "attempt": 1,
+ "generated_utc": "2026-08-29T16:34:55Z",
+ "verdict": "ABORTED AT THE POD TEST GATE \u2014 no scientific stage ran",
+ "authorization": "autoinit.continuation_b.20260829T153538Z (one-use, CONSUMED)",
+ "session_commit": "8df1bad216aa2ed7f12b698e19b4f09bfe2b5c36",
+ "executable_source_digest": "96c346ffcf6a1c3dc315d2d631388178700be75eb66ff820140e5e0bf663aff6",
+ "preregistration_sha256": "21e69909e1bc43c5e4770ab02aa95f959581c63588903bb67915e7f863645679",
+ "pod": {
+  "id": "nuitz0ketxukpm",
+  "gpu": "NVIDIA L40S",
+  "image": {
+   "image_name": "runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404",
+   "observed": [
+    "580.159.03"
+   ],
+   "digest": "runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@580.159.03"
+  },
+  "price_per_hour": 0.99,
+  "elapsed_minutes": 15.23,
+  "usd": 0.2513,
+  "authorized_usd": 8.0691,
+  "within_authorization": true,
+  "final_state": {
+   "exists": false,
+   "desired_status": "TERMINATED",
+   "billing": false
+  },
+  "provider_confirms_gone": true
+ },
+ "reached": [
+  "ENV_READY",
+  "REPO_READY",
+  "ASSETS_STAGED",
+  "TRAIN_ENV",
+  "ASSETS_READY",
+  "VLLM_READY",
+  "TEACHER_READY",
+  "ROPE_OK"
+ ],
+ "stopped_at": "TESTS_OK \u2014 the CPU test gate, before AUTHORIZATION_OK and SETUP_DONE",
+ "gate_result": "4 failed, 2300 passed, 95 skipped in 408.00s",
+ "what_did_NOT_happen": [
+  "no probe was trained or evaluated",
+  "no sb was bought",
+  "no sc was bought",
+  "no pooled decision",
+  "no final selection",
+  "no search \u2014 runs_search is False by type and the no-search gate passed",
+  "no scientific evidence changed"
+ ],
+ "pre_provider_gates": "all 7 passed, in the real launcher, before the pod existed",
+ "root_cause": {
+  "summary": "the continuation launcher stages NEITHER calibration mixture. It declares relay_inputs=(*CANONICAL_INIT, *RECOVERY_LADDER, *continuation_inputs()) and local_assets=PHASE_A_LOCAL_ASSETS, so Phase B's CALIBRATION_V1 and CALIBRATION_V2_LOCAL are both absent.",
+  "missing": [
+   {
+    "asset": "calib.domain_balanced@v1",
+    "path": "artifacts/stage1/e8_calibration_v1/items.jsonl",
+    "travels_by": "relay (autoinit_science_inputs.CALIBRATION_V1)",
+    "declared_by_phase_b": true,
+    "declared_by_continuation": false
+   },
+   {
+    "asset": "calib.reasoning_heavy@v2",
+    "path": "artifacts/stage1/reasoning_heavy_v2/items.jsonl",
+    "travels_by": "dev-box LocalAsset \u2014 built here at $0 and never uploaded, so a RelayInput naming it would be unfetchable",
+    "declared_by_phase_b": true,
+    "declared_by_continuation": false
+   }
+  ],
+  "why_it_is_not_merely_a_test_problem": "calib.domain_balanced@v1 is the fixed distribution every probe is measured under, and BOTH identities are bound into this session's authorization (calibration_profile_hashes, calibration_content_hashes) and its preregistration. The session asserts the mixtures identify it while never staging their bytes. The test gate stopped it at $0.2513; the next failure point would have been a probe stage, far more expensive.",
+  "class": "the same inheritance defect as the product contract repaired earlier today: the continuation was derived from Phase B's launcher and took some declarations from Phase A instead. Reasoning from what the session NEEDED rather than what the machinery REQUIRES.",
+  "not_caused_by": "the product-contract repair. Both omissions predate it; the previous attempt never reached a pod because ckpt_store_capacity_gate refused first."
+ },
+ "reproduced_at_zero_cost": {
+  "method": "hid artifacts/stage1/{e8_calibration_v1,reasoning_heavy_v2} on the dev box and re-ran the suite under the pod's exact ignore set",
+  "result": "the same 4 tests fail, and only those 4",
+  "failures": [
+   "tests/autoinit/test_causal_depth_measurement_job.py::test_the_real_calibration_resolver_runs_and_returns_a_path_not_a_mixture",
+   "tests/autoinit/test_causal_depth_measurement_job.py::test_the_report_field_carries_the_path_and_not_the_items",
+   "tests/pod/test_phase_b_driver_and_launcher.py::test_run_search_passes_BOTH_profiles_and_a_dispatching_loader",
+   "tests/pod/test_phase_b_driver_and_launcher.py::test_the_v2_mixture_travels_a_path_the_pod_can_actually_read"
+  ],
+  "control": "hiding reasoning_heavy_v2 alone reproduces exactly 2 of the 4, which is what separates the two missing assets",
+  "note": "the pod's setup probe relays a bounded tail, so only 3 of the 4 names survived in launcher.out. The fourth was recovered by reproduction, not from the log \u2014 a gap worth closing."
+ },
+ "evidence": {
+  "session_record": "logs/autoinit_continuation_b_session.json",
+  "launcher_log": "/home/ecs-user/aad-scratch/sessions/autoinit-continuation-b/launcher.out",
+  "watchdog_journal": "/home/ecs-user/aad-scratch/sessions/autoinit-continuation-b/watchdog.jsonl",
+  "poll_journal": "/home/ecs-user/aad-scratch/sessions/autoinit-continuation-b/poll.jsonl",
+  "bundle_roundtrip": "/home/ecs-user/aad-scratch/sessions/autoinit-continuation-b/bundle_roundtrip.json"
+ },
+ "next_action": "STOP for review. The authorization is consumed and the grant explicitly excludes a second attempt. The $0 fix is to declare both calibration assets on the continuation spec, with a test that fails when either is missing."
+}

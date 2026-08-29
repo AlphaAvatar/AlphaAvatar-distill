@@ -1228,6 +1228,41 @@ question. Pod deleted and provider-confirmed; the authorization
 **Headroom `$23.7050` is below the `$35.6660` ceiling**, so a sixth attempt needs
 a new cap decision. Phase-B attempts now total **$30.0200**.
 
+## 2026-08-29 — Behavioural continuation attempt 1: $0.2513, aborted at the pod test gate
+
+```
+cumulative spend before                                      $260.0550
+continuation attempt 1 (pod nuitz0ketxukpm, 15.2 min, L40S)  $  0.2513
+cumulative spend after                                       $260.3063
+authorized cumulative cap                                    $283.7600
+remaining headroom                                           $ 23.4537
+continuation session hard ceiling                            $  8.0691
+```
+
+**No scientific stage ran.** Setup reached `VLLM_READY`, `TEACHER_READY` and
+`ROPE_OK`, then the CPU test gate returned **4 failed / 2300 passed / 95
+skipped** and the session aborted before any probe was bought. Pod deleted at
+16:20:25Z; provider confirms gone, `billing: false`. The authorization
+`autoinit.continuation_b.20260829T153538Z` is **consumed**.
+
+**The gate caught a real missing input, not a flaky test.** The continuation
+launcher declares
+`relay_inputs=(*CANONICAL_INIT, *RECOVERY_LADDER, *continuation_inputs())` and
+`local_assets=PHASE_A_LOCAL_ASSETS`, so it stages **neither calibration
+mixture**: `CALIBRATION_V1` (relay → `artifacts/stage1/e8_calibration_v1/`) and
+`CALIBRATION_V2_LOCAL` (dev-box → `artifacts/stage1/reasoning_heavy_v2/`) are
+both Phase B's and both were dropped. The session binds both calibration
+identities in its authorization and preregistration while never staging the
+bytes — and `calib.domain_balanced@v1` is the fixed distribution every probe is
+measured under, so this would have failed later at far greater cost.
+
+Reproduced at **$0** afterwards by hiding both directories and re-running the
+pod's exact ignore set: the same four tests fail, and only those four. Record:
+[`autoinit_continuation_b_attempt1.json`](autoinit_continuation_b_attempt1.json).
+
+Headroom `$23.4537` still covers one `$8.0691` continuation, but the grant
+explicitly excludes a second attempt, so one needs a maintainer decision.
+
 ## Standing rules
 
 * Plan from **actual spend**, never from unused room under a previous authorization.

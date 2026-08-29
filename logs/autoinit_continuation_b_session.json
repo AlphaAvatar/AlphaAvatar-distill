@@ -1,0 +1,686 @@
+{
+  "schema": "aadistill.autoinit.continuation_b_session/v1",
+  "session_id": "autoinit-continuation-b",
+  "session_spec": {
+    "session_id": "autoinit-continuation-b",
+    "schema": "aadistill.autoinit.continuation_b_session/v1",
+    "description": "Phase-B behavioural continuation: import the completed Stage-1 and rung-1 state, buy only the missing sb and conditional sc, then the frozen final selection",
+    "authorization_path": "logs/autoinit_continuation_b_authorization.json",
+    "authorization_type": "ContinuationAuthorization.load",
+    "plan_id": "autoinit.v1.phase_b_behavioural_continuation",
+    "plan_hash": "a2ef4cd68a4bae7a0de399b078ad99e41e23ae8448b2871b0c3f381d687703cf",
+    "status_path": "/workspace/autoinit_continuation_b.status",
+    "run_log_path": "/workspace/autoinit_continuation_b_run.log",
+    "driver_job_id": "autoinit_continuation_b",
+    "markers": {
+      "success": "ALL_DONE",
+      "failure": [
+        "PHASE_A_FAILED",
+        "PHASE_A_INCOMPLETE"
+      ],
+      "incomplete": [
+        "PHASE_A_INCOMPLETE"
+      ]
+    },
+    "artifacts": {
+      "audit_dirname": "autoinit_phase_a",
+      "evidence_filename": "phase_a_evidence.json",
+      "archive_basename": "continuation_b_artifacts.tar.gz",
+      "spec_success": "configs/autoinit/continuation_b_artifacts.json",
+      "spec_failed": "configs/autoinit/continuation_b_artifacts_failed.json",
+      "report_names": [
+        "phase_a_evidence.json",
+        "attested_evaluation_protocol.json",
+        "rung2_selection.json",
+        "phase_a_result.json"
+      ]
+    },
+    "setup": {
+      "env": {
+        "SESSION_KIND": "continuation_b"
+      },
+      "required_env": [
+        "SESSION_COMMIT",
+        "BUNDLE_NAME",
+        "SESSION_STATUS",
+        "SESSION_AUTH_PATH",
+        "SESSION_PLAN_HASH",
+        "SESSION_ASSETS",
+        "SESSION_RELAY_INPUTS",
+        "SESSION_KIND",
+        "TEACHER_REVISION"
+      ],
+      "relay_inputs": [
+        {
+          "repo": "AlphaAvatar/aadistill-artifacts",
+          "path": "stage1/qwen3_0p6b_init_v0/checkpoint/model.safetensors",
+          "dest": "artifacts/stage1/qwen3_0p6b_init_v0/checkpoint",
+          "sha256": "86fbba78e8a2a32481ca77e5ac362ed1f17a39dbc30bcbc952cabd5df2633e54",
+          "also_stage_to": null
+        },
+        {
+          "repo": "AlphaAvatar/aadistill-artifacts",
+          "path": "stage1/qwen3_0p6b_init_v0/checkpoint/config.json",
+          "dest": "artifacts/stage1/qwen3_0p6b_init_v0/checkpoint",
+          "sha256": null,
+          "also_stage_to": null
+        },
+        {
+          "repo": "AlphaAvatar/aadistill-artifacts",
+          "path": "stage1/qwen3_0p6b_init_v0/checkpoint/generation_config.json",
+          "dest": "artifacts/stage1/qwen3_0p6b_init_v0/checkpoint",
+          "sha256": null,
+          "also_stage_to": null
+        },
+        {
+          "repo": "AlphaAvatar/aadistill-artifacts",
+          "path": "stage1/qwen3_0p6b_init_v0/checkpoint/tokenizer.json",
+          "dest": "artifacts/stage1/qwen3_0p6b_init_v0/checkpoint",
+          "sha256": null,
+          "also_stage_to": null
+        },
+        {
+          "repo": "AlphaAvatar/aadistill-artifacts",
+          "path": "stage1/qwen3_0p6b_init_v0/checkpoint/tokenizer_config.json",
+          "dest": "artifacts/stage1/qwen3_0p6b_init_v0/checkpoint",
+          "sha256": null,
+          "also_stage_to": null
+        },
+        {
+          "repo": "AlphaAvatar/aadistill-artifacts",
+          "path": "stage1/qwen3_0p6b_init_v0/checkpoint/chat_template.jinja",
+          "dest": "artifacts/stage1/qwen3_0p6b_init_v0/checkpoint",
+          "sha256": null,
+          "also_stage_to": null
+        },
+        {
+          "repo": "AlphaAvatar/aadistill-artifacts",
+          "path": "stage3_recovery_corpus_v2/ladder_uniform/blocks.npz",
+          "dest": "artifacts/stage3/ladder_uniform_probe",
+          "sha256": "6f324cb0f37bc0f07128e554ce8c161879419537478950496534f75fcecb249c",
+          "also_stage_to": "artifacts/stage3/ladder_uniform"
+        },
+        {
+          "repo": "AlphaAvatar/aadistill-artifacts",
+          "path": "stage3_recovery_corpus_v2/ladder_uniform/ladder.json",
+          "dest": "artifacts/stage3/ladder_uniform_probe",
+          "sha256": null,
+          "also_stage_to": "artifacts/stage3/ladder_uniform"
+        },
+        {
+          "repo": "AlphaAvatar/aadistill-artifacts",
+          "path": "stage3_recovery_corpus_v2/ladder_uniform/audit.jsonl",
+          "dest": "artifacts/stage3/ladder_uniform_probe",
+          "sha256": null,
+          "also_stage_to": "artifacts/stage3/ladder_uniform"
+        },
+        {
+          "repo": "AlphaAvatar/aadistill-transport",
+          "path": "phase_b_attempt5/selected_leaves/fe9683e6a9c783bbc6fe276a78c851c6/config.json",
+          "dest": "artifacts/autoinit/phase_a_selected/fe9683e6a9c783bbc6fe276a78c851c6",
+          "sha256": "e94e4d3a9cab307a55f97991776ec22f0b2b6e2ec91c93a6ceba5639f3bf7a49",
+          "also_stage_to": null
+        },
+        {
+          "repo": "AlphaAvatar/aadistill-transport",
+          "path": "phase_b_attempt5/selected_leaves/fe9683e6a9c783bbc6fe276a78c851c6/generation_config.json",
+          "dest": "artifacts/autoinit/phase_a_selected/fe9683e6a9c783bbc6fe276a78c851c6",
+          "sha256": "28fb42f15159b552b9301b3f8f197c1b5ccd68c95ff0e3498d68678f61c1c633",
+          "also_stage_to": null
+        },
+        {
+          "repo": "AlphaAvatar/aadistill-transport",
+          "path": "phase_b_attempt5/selected_leaves/fe9683e6a9c783bbc6fe276a78c851c6/model.safetensors",
+          "dest": "artifacts/autoinit/phase_a_selected/fe9683e6a9c783bbc6fe276a78c851c6",
+          "sha256": "d025f38da508803845ea4d01b7cea160d117d47de3535965c7866dc05cd1e48e",
+          "also_stage_to": null
+        },
+        {
+          "repo": "AlphaAvatar/aadistill-transport",
+          "path": "phase_a_attempt12/selected_leaves/85bde4ded2c31953f802e39cf2252c87/config.json",
+          "dest": "artifacts/autoinit/phase_a_selected/85bde4ded2c31953f802e39cf2252c87",
+          "sha256": "e94e4d3a9cab307a55f97991776ec22f0b2b6e2ec91c93a6ceba5639f3bf7a49",
+          "also_stage_to": null
+        },
+        {
+          "repo": "AlphaAvatar/aadistill-transport",
+          "path": "phase_a_attempt12/selected_leaves/85bde4ded2c31953f802e39cf2252c87/generation_config.json",
+          "dest": "artifacts/autoinit/phase_a_selected/85bde4ded2c31953f802e39cf2252c87",
+          "sha256": "28fb42f15159b552b9301b3f8f197c1b5ccd68c95ff0e3498d68678f61c1c633",
+          "also_stage_to": null
+        },
+        {
+          "repo": "AlphaAvatar/aadistill-transport",
+          "path": "phase_a_attempt12/selected_leaves/85bde4ded2c31953f802e39cf2252c87/model.safetensors",
+          "dest": "artifacts/autoinit/phase_a_selected/85bde4ded2c31953f802e39cf2252c87",
+          "sha256": "0a9a5a78e87cc800c1187a2c19f75c5e490734d1518fe8968d517b2077353c45",
+          "also_stage_to": null
+        }
+      ],
+      "local_assets": [
+        "state_eval_v1:artifacts/stage1",
+        "recovery_search_v2:artifacts/stage3"
+      ],
+      "uv_max_seconds": 1500,
+      "tests_max_seconds": 2700,
+      "teacher_revision": "768f209d9ea81521153ed38c47d515654e938aea",
+      "test_ignores": [
+        "tests/data/test_recovery_corpus_pipeline.py",
+        "tests/pod/test_phase_a_stages1_5_execute.py",
+        "tests/autoinit/test_phase_b_reuse_hostlocal.py",
+        "tests/pod/test_phase_b_stage1_executes.py",
+        "tests/pod/test_continuation_b_executes.py"
+      ]
+    },
+    "n_prechecks": 7,
+    "teardown": {
+      "always": true,
+      "require_provider_confirmation": true
+    }
+  },
+  "timeline": [
+    {
+      "utc": "2026-08-29T16:05:08+00:00",
+      "elapsed_min": 0.0,
+      "msg": "budget: expected 262 min $4.32 \u00b7 soft $4.76 \u00b7 hard $5.09 (authorized $8.07)"
+    },
+    {
+      "utc": "2026-08-29T16:05:09+00:00",
+      "elapsed_min": 0.0,
+      "msg": "NVIDIA L40S $0.99/h, stock Low"
+    },
+    {
+      "utc": "2026-08-29T16:05:09+00:00",
+      "elapsed_min": 0.0,
+      "msg": "session commit 8df1bad216aa verified: harness digests to 96c346ffcf6a\u2026, carries the authorization and only logs/autoinit_continuation_b_authorization.json differs from the authorized base"
+    },
+    {
+      "utc": "2026-08-29T16:05:09+00:00",
+      "elapsed_min": 0.0,
+      "msg": "frozen science plan 02be33b9a7a8\u2026 matches the authorization"
+    },
+    {
+      "utc": "2026-08-29T16:05:09+00:00",
+      "elapsed_min": 0.0,
+      "msg": "continuation executable 96c346ffcf6a\u2026 matches the grant"
+    },
+    {
+      "utc": "2026-08-29T16:05:09+00:00",
+      "elapsed_min": 0.0,
+      "msg": "no search call site on the continuation's own path; 1 known-neutralized elsewhere; runs_search False"
+    },
+    {
+      "utc": "2026-08-29T16:05:09+00:00",
+      "elapsed_min": 0.0,
+      "msg": "cited evidence matches the grant: universe e94f15d2e648\u2026"
+    },
+    {
+      "utc": "2026-08-29T16:05:09+00:00",
+      "elapsed_min": 0.0,
+      "msg": "continuation ceiling $8.0691 covers the priced $8.0691 and is below the full-session $35.6660"
+    },
+    {
+      "utc": "2026-08-29T16:05:09+00:00",
+      "elapsed_min": 0.0,
+      "msg": "/home/ecs-user/aad-scratch/sessions/autoinit-continuation-b: 9.64 GiB free for 1076 MiB of archive and working room"
+    },
+    {
+      "utc": "2026-08-29T16:05:10+00:00",
+      "elapsed_min": 0.0,
+      "msg": "precheck OK: 15 relay inputs (9 from AlphaAvatar/aadistill-artifacts, 6 from AlphaAvatar/aadistill-transport), 2 local assets"
+    },
+    {
+      "utc": "2026-08-29T16:05:11+00:00",
+      "elapsed_min": 0.0,
+      "msg": "created nuitz0ketxukpm at $0.99/h"
+    },
+    {
+      "utc": "2026-08-29T16:05:11+00:00",
+      "elapsed_min": 0.0,
+      "msg": "watchdog detached \u2014 hard 308 min = $5.09"
+    },
+    {
+      "utc": "2026-08-29T16:05:44+00:00",
+      "elapsed_min": 0.54,
+      "msg": "TCP 22 at 82.221.170.242:37055 after 0.5 min"
+    },
+    {
+      "utc": "2026-08-29T16:05:46+00:00",
+      "elapsed_min": 0.59,
+      "msg": "draw 1: ssh reachable \u2014 $0.01"
+    },
+    {
+      "utc": "2026-08-29T16:07:11+00:00",
+      "elapsed_min": 2.0,
+      "msg": "draw 1: image identity runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@580.159.03"
+    },
+    {
+      "utc": "2026-08-29T16:07:11+00:00",
+      "elapsed_min": 2.0,
+      "msg": "draw 1: running setup"
+    },
+    {
+      "utc": "2026-08-29T16:20:14+00:00",
+      "elapsed_min": 15.05,
+      "msg": "setup did not reach SETUP_DONE:\nion==0.28.0\n + tqdm==4.70.0\n + transformers==5.15.0\n + triton==3.7.1\n + truststore==0.10.4\n + typer==0.27.1\n + typing-extensions==4.16.0\n + typing-inspection==0.4.4\n + urllib3==2.7.0\n + uvicorn==0.52.3\n + uvloop==0.22.1\n + vllm==0.27.1\n + watchfiles==1.2.0\n + websockets==17.0.1\n + xgrammar==0.2.3\n + yarl==1.24.5\n + z3-solver==4.15.4.0\n[16:12:06] vllm offline install completed in 10s\nvllm 0.27.1 | torch 2.13.0+cu130 True\nMARKER:VLLM_READY\n[16:12:19] downloading the teacher at the pinned revision\n\nFetching 10 files:   0%|          | 0/10 [00:00<?, ?it/s]\nFetching 10 files:  10%|\u2588         | 1/10 [00:00<00:01,  5.61it/s]\nFetching 10 files:  20%|\u2588\u2588        | 2/10 [00:00<00:01,  6.63it/s]\nFetching 10 files:  30%|\u2588\u2588\u2588       | 3/10 [00:00<00:00,  7.64it/s]\nFetching 10 files:  40%|\u2588\u2588\u2588\u2588      | 4/10 [00:00<00:00,  7.44it/s]\nFetching 10 files:  50%|\u2588\u2588\u2588\u2588\u2588     | 5/10 [00:01<00:01,  3.98it/s]\nFetching 10 files:  70%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588   | 7/10 [00:02<00:01,  2.64it/s]\nFetching 10 files:  80%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588  | 8/10 [00:03<00:01,  1.25it/s]\nFetching 10 files:  90%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588 | 9/10 [00:37<00:09,  9.71s/it]\nFetching 10 files: 100%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588| 10/10 [00:43<00:00,  8.67s/it]\nFetching 10 files: 100%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588| 10/10 [00:43<00:00,  4.32s/it]\nMARKER:TEACHER_READY\n[16:13:03] checking the RoPE base resolves in every venv\n  transformers 5.13.1: qwen3_0p6b_init_v0 stored 5,000,000 runtime 5,000,000 OK\n  transformers 5.15.0: qwen3_0p6b_init_v0 stored 5,000,000 runtime 5,000,000 OK\nMARKER:ROPE_OK\n[16:13:18] CPU test suite (128 vCPUs visible, cgroup budget 13; cpu set 0-12)\nFAILED tests/autoinit/test_causal_depth_measurement_job.py::test_the_report_field_carries_the_path_and_not_the_items\nFAILED tests/pod/test_phase_b_driver_and_launcher.py::test_run_search_passes_BOTH_profiles_and_a_dispatching_loader\nFAILED tests/pod/test_phase_b_driver_and_launcher.py::test_the_v2_mixture_travels_a_path_the_pod_can_actually_read\n4 failed, 2300 passed, 95 skipped in 408.00s (0:06:48)\n[16:20:09] test suite failed rc=1\nSETUP_RC=1\n"
+    },
+    {
+      "utc": "2026-08-29T16:20:14+00:00",
+      "elapsed_min": 15.05,
+      "msg": "ABORT after draw 1: setup_failed"
+    },
+    {
+      "utc": "2026-08-29T16:20:14+00:00",
+      "elapsed_min": 15.05,
+      "msg": "deleting pod (setup setup_failed)"
+    },
+    {
+      "utc": "2026-08-29T16:20:25+00:00",
+      "elapsed_min": 15.23,
+      "msg": "pod deleted \u2014 15.2 min, $0.25; provider confirms gone: True"
+    }
+  ],
+  "stages": {
+    "setup": [
+      {
+        "draw": 1,
+        "setup_done": "0",
+        "host_cold": "0",
+        "setup_rc": "1",
+        "tail": "SETUP_RC=1"
+      }
+    ]
+  },
+  "authorization": {
+    "schema": "aadistill.autoinit.continuation_authorization/v1",
+    "authorization_id": "autoinit.continuation_b.20260829T153538Z",
+    "granted_utc": "2026-08-29T15:35:38.100765+00:00",
+    "granted_by": "Maintainer review, 2026-08-29, across two messages.\n\nApproval: \"The behavioural continuation is approved for paid launch after one final prereg/state-only normalization.\" Reviewer verdict, verbatim: \"continuation science: GO\"; \"implementation/readiness: GO\"; \"existing cumulative cap $283.76: sufficient\"; \"continuation hard ceiling: $8.0691\"; \"no new budget increase is required\"; \"paid launch: GO after the normalization below and exact-launch gates\".\n\nAfter the assistant reported a launch blocker (the continuation computed its executable digest with sha256_json while the shared session_commit_gate independently re-derives SHA256 over sorted path:sha256 lines), the maintainer granted the repair: \"GO for the one-line digest-contract repair. This is a narrow executable-identity fix, not a reopening of continuation science, pricing, or the behavioural-selection design.\" The maintainer further directed: \"the continuation producer must adapt to the established shared contract. Do not modify session_commit_gate and do not add an authorization-specific workaround.\"\n\nLaunch condition, verbatim: \"If every gate passes, launch the behavioural continuation directly without returning for another routine review. If another genuinely new material blocker appears, stop and report.\"\n\nCovers: ONE behavioural-continuation session: import the completed Phase-B Stage-1 and rung-1 state, buy only the genuinely missing behavioural probes (one sb for fe9683e6a9c7, and at worst two conditional sc for fe9683e6a9c7 and the canonical control), apply the frozen pooled sa+sb rule and the frozen final-selection rule, emit the terminal report, retain evidence, tear the pod down and stop.\n\nCumulative spend at approval $260.0550 against a cumulative cap of $283.76.\n\nDoes NOT authorize: Re-buying Phase-B Stage 1 or any search \u2014 Stage 1 is complete, retained and authoritative, and runs_search is False by type. Also excluded: a second attempt; any use of the historical $35.6660 full-Phase-B ceiling; a fourth seed; backfilling rank 6 or 7; probing any of the three searched non-survivors (ab7632b00788, bf5ae3b6ae00, cca699c93f34), which are evidence only; recomputing rung 1; any cumulative-cap increase; post-Phase-B generalization; DEPTH incumbent selection; ATTENTION/FFN/RESIDUAL_WIDTH research; the canonical Stage-1 NLL; formal Stage 2/Stage 3 recovery training; and any new paid session of any kind. The maintainer's words: \"No changes to science, candidate selection, probes, generalization, operator R&D, canonical Stage-1 NLL, or formal Stage 2/3 in this repair.\"\n\nGrant document: logs/autoinit_continuation_b_grant.json",
+    "plan_id": "autoinit.v1.phase_b_behavioural_continuation",
+    "continuation_plan_hash": "a2ef4cd68a4bae7a0de399b078ad99e41e23ae8448b2871b0c3f381d687703cf",
+    "science_plan_hash": "02be33b9a7a8e26bc8bfb75795351e8cdc9ffd441b47066cc81887cfc511b55c",
+    "calibration_profile_hashes": {
+      "calib.domain_balanced@v1": "11f36a88bad4879f8ab0e3586ca1f0af035401e505dc97815bed8d47b9f32e9b",
+      "calib.reasoning_heavy@v2": "6c67b8dff0e81a775371a62b1b293677e45c173f52aee119d036c95081782ddd"
+    },
+    "calibration_content_hashes": {
+      "calib.domain_balanced@v1": "d65c1f40e4837ea1bd5bcc33c68041a13b797c68f5be3c0686e0142ed761028f",
+      "calib.reasoning_heavy@v2": "cdb2838946b9355294406d2bc398bc8390306ced84a35b09900f45a033ccc370"
+    },
+    "bound_evidence": {
+      "stage1_selection_sha256": "84fd6496851995aef8ac624b68944c0881fdaf62a29013ea2aec5acb0e87a35c",
+      "identity_collapse_amendment_sha256": "df413bd99119dab72c16399362298620abec0efdce36754a1627b14e616b26bb",
+      "collapsed_universe_identity": "e94f15d2e648d86a2a7a1496c5e1c0ef47b78d87746bb622488a06af0418d483",
+      "historical_reuse_probes_dir_digest": "a5115816861ad239f646facec4d53ba2c7925c9430c530e7c6d0af2560d5b1af",
+      "attempt5_reuse_probes_dir_digest": "2e5030fadc786faaafe1ec3ac3a2ccb4af367e98bf630a89a16938729a77844e",
+      "rung1_selection_digest": "1f86c6e6e9cfc67aeb428be092bbf87ad91d2b6b6ae175bf55786f92b7696b6e"
+    },
+    "planning_floor_usd": 5.4784,
+    "hard_cap_usd": 8.0691,
+    "per_launch_hard_usd": 8.0691,
+    "authorized_stages": [
+      0,
+      1,
+      3,
+      4,
+      5
+    ],
+    "stage_conditions": {
+      "0": "attestation; generation_runtime_comparability@v2; the v3 continuation executable-source digest; BOTH calibration identities per profile; and every one of the six cited evidence identities. A comparability FAILURE TERMINATES: every cited observation would be lost at once and re-buying them is a different, larger session",
+      "1": "import the completed behavioural state. NO search, NO new sa probe, NO recomputation of rung 1. The six-candidate collapsed universe must rebuild to the bound identity, and exactly THREE finalists \u2014 fe9683e6a9c7, 85bde4ded2c3 and the canonical control \u2014 may enter the probe stages. The three searched non-survivors are evidence and are never materialized",
+      "2": "ABSENT BY DESIGN. Phase A's stage 2 is rung 1 on seed sa, which this session imports as completed evidence rather than buying",
+      "3": "rung 2 on sb, then the frozen pooled sa+sb decision unchanged. Only genuinely missing observations are run: fe9683e6a9c7/sb is bought; 85bde4ded2c3/sb and control/sb are cited",
+      "4": "conditional tie-break on sc, only for candidates inside the frozen equivalence interval that lack a verified sc. At worst fe9683e6a9c7/sc and control/sc; 85bde4ded2c3/sc is cited. NO fourth seed, ever",
+      "5": "final selection and report under the frozen rule. unresolved_equivalence with winner=None is a RESULT. Stage-1 ranking, search-side KL/NLL, the canonical Stage-1 NLL and state-id ordering may NOT break a tie",
+      "teardown": "retain probe, raw generation and scoring evidence and the final report; collect provider and billing evidence; delete the pod; confirm from the provider that nothing remains running; STOP for review"
+    },
+    "scope_note": "ONE behavioural-continuation execution, one launcher invocation. This artifact authorizes the SPEND and the STAGES; it is not by itself an instruction to launch. It CANNOT authorize a search: runs_search is False by type. Nothing here permits a second attempt, re-buying Phase-B Stage 1, a fourth seed, backfilling rank 6/7, probing a searched non-survivor, post-Phase-B generalization, DEPTH incumbent selection, ATTENTION/FFN/RESIDUAL_WIDTH research, the canonical Stage-1 NLL, or formal Stage 2/3 recovery training. The continuation is a terminus and stops for review on every path.",
+    "runs_search": false,
+    "phase_a_authorized": false,
+    "automatic_followon_start": false,
+    "authorized_session_commit": "de5c2ac335b1b574ce58b351a9fc61899bcff905",
+    "source_digest": "96c346ffcf6a1c3dc315d2d631388178700be75eb66ff820140e5e0bf663aff6",
+    "source_files": [
+      "scripts/pod/autoinit_continuation_b_driver.py",
+      "scripts/pod/autoinit_continuation_b_launch.py",
+      "scripts/pod/autoinit_phase_a_driver.py",
+      "scripts/pod/autoinit_phase_a_launch.py",
+      "scripts/pod/autoinit_preflight_setup.sh",
+      "scripts/pod/autoinit_recovery_continuation_launch.py",
+      "scripts/pod/autoinit_science_inputs.py",
+      "scripts/pod/collect_artifacts.py",
+      "scripts/pod/watchdog.py",
+      "src/aadistill/__init__.py",
+      "src/aadistill/autoinit/__init__.py",
+      "src/aadistill/autoinit/adapters/__init__.py",
+      "src/aadistill/autoinit/adapters/qwen3.py",
+      "src/aadistill/autoinit/arch.py",
+      "src/aadistill/autoinit/artifact.py",
+      "src/aadistill/autoinit/authorization.py",
+      "src/aadistill/autoinit/calibration.py",
+      "src/aadistill/autoinit/cost.py",
+      "src/aadistill/autoinit/datasets.py",
+      "src/aadistill/autoinit/device.py",
+      "src/aadistill/autoinit/device_handoff.py",
+      "src/aadistill/autoinit/generation.py",
+      "src/aadistill/autoinit/generation_compat.py",
+      "src/aadistill/autoinit/identity_collapse.py",
+      "src/aadistill/autoinit/leaf_durability.py",
+      "src/aadistill/autoinit/manifest.py",
+      "src/aadistill/autoinit/metrics.py",
+      "src/aadistill/autoinit/operators/__init__.py",
+      "src/aadistill/autoinit/operators/_common.py",
+      "src/aadistill/autoinit/operators/attention.py",
+      "src/aadistill/autoinit/operators/base.py",
+      "src/aadistill/autoinit/operators/composite.py",
+      "src/aadistill/autoinit/operators/depth.py",
+      "src/aadistill/autoinit/operators/ffn.py",
+      "src/aadistill/autoinit/operators/width.py",
+      "src/aadistill/autoinit/phase_a.py",
+      "src/aadistill/autoinit/phase_b_continuation.py",
+      "src/aadistill/autoinit/ranking.py",
+      "src/aadistill/autoinit/recovery.py",
+      "src/aadistill/autoinit/recovery_continuation.py",
+      "src/aadistill/autoinit/search.py",
+      "src/aadistill/autoinit/state.py",
+      "src/aadistill/autoinit/stats.py",
+      "src/aadistill/autoinit/telemetry.py",
+      "src/aadistill/data/__init__.py",
+      "src/aadistill/data/extra_stream.py",
+      "src/aadistill/infrastructure/__init__.py",
+      "src/aadistill/infrastructure/artifact_gate.py",
+      "src/aadistill/infrastructure/budget.py",
+      "src/aadistill/infrastructure/log_relay.py",
+      "src/aadistill/infrastructure/manifest.py",
+      "src/aadistill/infrastructure/provider.py",
+      "src/aadistill/infrastructure/remote.py",
+      "src/aadistill/infrastructure/session.py",
+      "src/aadistill/infrastructure/session_prechecks.py",
+      "src/aadistill/infrastructure/session_runner.py",
+      "src/aadistill/infrastructure/source_identity.py",
+      "src/aadistill/init/__init__.py",
+      "src/aadistill/init/collect.py",
+      "src/aadistill/init/contribution.py",
+      "src/aadistill/init/project.py",
+      "src/aadistill/init/sandwich.py"
+    ],
+    "provenance_commit": "de5c2ac335b1b574ce58b351a9fc61899bcff905",
+    "version": 1,
+    "authorization_sha256": "84f6933ddc70a40feb74d500633d258f9e3568200c42c654cefc25c89c25b53e"
+  },
+  "session_plan_hash": "a2ef4cd68a4bae7a0de399b078ad99e41e23ae8448b2871b0c3f381d687703cf",
+  "harness_source_digest": "96c346ffcf6a1c3dc315d2d631388178700be75eb66ff820140e5e0bf663aff6",
+  "harness_source_files": [
+    "scripts/pod/autoinit_continuation_b_driver.py",
+    "scripts/pod/autoinit_continuation_b_launch.py",
+    "scripts/pod/autoinit_phase_a_driver.py",
+    "scripts/pod/autoinit_phase_a_launch.py",
+    "scripts/pod/autoinit_preflight_setup.sh",
+    "scripts/pod/autoinit_recovery_continuation_launch.py",
+    "scripts/pod/autoinit_science_inputs.py",
+    "scripts/pod/collect_artifacts.py",
+    "scripts/pod/watchdog.py",
+    "src/aadistill/__init__.py",
+    "src/aadistill/autoinit/__init__.py",
+    "src/aadistill/autoinit/adapters/__init__.py",
+    "src/aadistill/autoinit/adapters/qwen3.py",
+    "src/aadistill/autoinit/arch.py",
+    "src/aadistill/autoinit/artifact.py",
+    "src/aadistill/autoinit/authorization.py",
+    "src/aadistill/autoinit/calibration.py",
+    "src/aadistill/autoinit/cost.py",
+    "src/aadistill/autoinit/datasets.py",
+    "src/aadistill/autoinit/device.py",
+    "src/aadistill/autoinit/device_handoff.py",
+    "src/aadistill/autoinit/generation.py",
+    "src/aadistill/autoinit/generation_compat.py",
+    "src/aadistill/autoinit/identity_collapse.py",
+    "src/aadistill/autoinit/leaf_durability.py",
+    "src/aadistill/autoinit/manifest.py",
+    "src/aadistill/autoinit/metrics.py",
+    "src/aadistill/autoinit/operators/__init__.py",
+    "src/aadistill/autoinit/operators/_common.py",
+    "src/aadistill/autoinit/operators/attention.py",
+    "src/aadistill/autoinit/operators/base.py",
+    "src/aadistill/autoinit/operators/composite.py",
+    "src/aadistill/autoinit/operators/depth.py",
+    "src/aadistill/autoinit/operators/ffn.py",
+    "src/aadistill/autoinit/operators/width.py",
+    "src/aadistill/autoinit/phase_a.py",
+    "src/aadistill/autoinit/phase_b_continuation.py",
+    "src/aadistill/autoinit/ranking.py",
+    "src/aadistill/autoinit/recovery.py",
+    "src/aadistill/autoinit/recovery_continuation.py",
+    "src/aadistill/autoinit/search.py",
+    "src/aadistill/autoinit/state.py",
+    "src/aadistill/autoinit/stats.py",
+    "src/aadistill/autoinit/telemetry.py",
+    "src/aadistill/data/__init__.py",
+    "src/aadistill/data/extra_stream.py",
+    "src/aadistill/infrastructure/__init__.py",
+    "src/aadistill/infrastructure/artifact_gate.py",
+    "src/aadistill/infrastructure/budget.py",
+    "src/aadistill/infrastructure/log_relay.py",
+    "src/aadistill/infrastructure/manifest.py",
+    "src/aadistill/infrastructure/provider.py",
+    "src/aadistill/infrastructure/remote.py",
+    "src/aadistill/infrastructure/session.py",
+    "src/aadistill/infrastructure/session_prechecks.py",
+    "src/aadistill/infrastructure/session_runner.py",
+    "src/aadistill/infrastructure/source_identity.py",
+    "src/aadistill/init/__init__.py",
+    "src/aadistill/init/collect.py",
+    "src/aadistill/init/contribution.py",
+    "src/aadistill/init/project.py",
+    "src/aadistill/init/sandwich.py"
+  ],
+  "phase": "B-continuation",
+  "continuation_plan_hash": "a2ef4cd68a4bae7a0de399b078ad99e41e23ae8448b2871b0c3f381d687703cf",
+  "runs_search": false,
+  "stage1_imported_not_recomputed": true,
+  "calibration_profiles": {
+    "calib.domain_balanced@v1": {
+      "profile_hash": "11f36a88bad4879f8ab0e3586ca1f0af035401e505dc97815bed8d47b9f32e9b",
+      "content_sha256": "d65c1f40e4837ea1bd5bcc33c68041a13b797c68f5be3c0686e0142ed761028f"
+    },
+    "calib.reasoning_heavy@v2": {
+      "profile_hash": "6c67b8dff0e81a775371a62b1b293677e45c173f52aee119d036c95081782ddd",
+      "content_sha256": "cdb2838946b9355294406d2bc398bc8390306ced84a35b09900f45a033ccc370"
+    }
+  },
+  "retrains_permanent_controls": false,
+  "redefines_thresholds": false,
+  "followon_started": false,
+  "followon_reachable_from_this_launcher": false,
+  "budget_plan": {
+    "price_per_hour": 0.99,
+    "authorized_usd": 8.0691,
+    "expected_minutes": 262.11,
+    "soft_stop_minutes": 288.321,
+    "artifact_recovery_reserve_minutes": 20.0,
+    "hard_terminate_minutes": 308.321,
+    "step_time": {
+      "seconds": 3.6099706744868034,
+      "source": "measured end-to-end: 61.55 min per 1023-step probe, on two arms",
+      "measured": true
+    },
+    "breakdown": [
+      {
+        "name": "setup",
+        "minutes": 11.0
+      },
+      {
+        "name": "train",
+        "minutes": 184.65
+      },
+      {
+        "name": "evaluate",
+        "minutes": 29.46
+      },
+      {
+        "name": "transfer",
+        "minutes": 6.0
+      },
+      {
+        "name": "stage0_attestation_and_binding",
+        "minutes": 8.0
+      },
+      {
+        "name": "stage5_selection_and_report",
+        "minutes": 5.0
+      },
+      {
+        "name": "artifact_manifest_and_verify",
+        "minutes": 8.0
+      },
+      {
+        "name": "artifact_synchronization",
+        "minutes": 10.0
+      }
+    ],
+    "soft_stop_reserves": [],
+    "notes": [
+      "below-floor step time accepted: 3.6099706744868034 s/step vs floor 4.15 \u2014 the 4.15 s/step floor is E6b's IN-LOOP figure. Attempt 4 measured 3.15 s/step in-loop for this exact model, rung and card, and 61.55 min end-to-end for the whole 1023-step probe including its periodic evaluation and checkpointing, on two arms. The rate used here is that end-to-end figure divided by the step count, so it is slower than the in-loop measurement rather than an optimistic version of it."
+    ],
+    "soft_stop_reserve_minutes": 0,
+    "expected_usd": 4.3248,
+    "soft_stop_usd": 4.7573,
+    "artifact_recovery_reserve_usd": 0.33,
+    "hard_terminate_usd": 5.0873
+  },
+  "quoted_price_per_hour": 0.99,
+  "stock_status": "Low",
+  "session_commit_check": {
+    "session_commit": "8df1bad216aa2ed7f12b698e19b4f09bfe2b5c36",
+    "authorized_session_commit": "de5c2ac335b1b574ce58b351a9fc61899bcff905",
+    "harness_digest_at_commit": "96c346ffcf6a1c3dc315d2d631388178700be75eb66ff820140e5e0bf663aff6",
+    "authorized_harness_digest": "96c346ffcf6a1c3dc315d2d631388178700be75eb66ff820140e5e0bf663aff6",
+    "harness_matches": true,
+    "commit_carries_this_authorization": true,
+    "rule": "the pod checks out this commit from a bundle; its harness must digest to the authorized value and it must carry the authorization the driver will load",
+    "lineage": {
+      "authorized_base": "de5c2ac335b1b574ce58b351a9fc61899bcff905",
+      "session_commit": "8df1bad216aa2ed7f12b698e19b4f09bfe2b5c36",
+      "descends_from_base": true,
+      "changed_paths": [
+        "logs/autoinit_continuation_b_authorization.json"
+      ],
+      "unexpected_paths": [],
+      "ok": true,
+      "reason": "only logs/autoinit_continuation_b_authorization.json differs from the authorized base"
+    }
+  },
+  "prechecks": [
+    {
+      "check": "session_commit_and_lineage",
+      "ok": true,
+      "message": "session commit 8df1bad216aa verified: harness digests to 96c346ffcf6a\u2026, carries the authorization and only logs/autoinit_continuation_b_authorization.json differs from the authorized base"
+    },
+    {
+      "check": "frozen_science_plan",
+      "ok": true,
+      "message": "frozen science plan 02be33b9a7a8\u2026 matches the authorization"
+    },
+    {
+      "check": "continuation_source_gate",
+      "ok": true,
+      "message": "continuation executable 96c346ffcf6a\u2026 matches the grant"
+    },
+    {
+      "check": "no_search_gate",
+      "ok": true,
+      "message": "no search call site on the continuation's own path; 1 known-neutralized elsewhere; runs_search False"
+    },
+    {
+      "check": "evidence_binding_gate",
+      "ok": true,
+      "message": "cited evidence matches the grant: universe e94f15d2e648\u2026"
+    },
+    {
+      "check": "continuation_price_gate",
+      "ok": true,
+      "message": "continuation ceiling $8.0691 covers the priced $8.0691 and is below the full-session $35.6660"
+    },
+    {
+      "check": "continuation_artifact_capacity_gate",
+      "ok": true,
+      "message": "/home/ecs-user/aad-scratch/sessions/autoinit-continuation-b: 9.64 GiB free for 1076 MiB of archive and working room"
+    }
+  ],
+  "precheck": {
+    "relay_needed": [
+      "stage1/qwen3_0p6b_init_v0/checkpoint/model.safetensors",
+      "stage1/qwen3_0p6b_init_v0/checkpoint/config.json",
+      "stage1/qwen3_0p6b_init_v0/checkpoint/generation_config.json",
+      "stage1/qwen3_0p6b_init_v0/checkpoint/tokenizer.json",
+      "stage1/qwen3_0p6b_init_v0/checkpoint/tokenizer_config.json",
+      "stage1/qwen3_0p6b_init_v0/checkpoint/chat_template.jinja",
+      "stage3_recovery_corpus_v2/ladder_uniform/blocks.npz",
+      "stage3_recovery_corpus_v2/ladder_uniform/ladder.json",
+      "stage3_recovery_corpus_v2/ladder_uniform/audit.jsonl",
+      "phase_b_attempt5/selected_leaves/fe9683e6a9c783bbc6fe276a78c851c6/config.json",
+      "phase_b_attempt5/selected_leaves/fe9683e6a9c783bbc6fe276a78c851c6/generation_config.json",
+      "phase_b_attempt5/selected_leaves/fe9683e6a9c783bbc6fe276a78c851c6/model.safetensors",
+      "phase_a_attempt12/selected_leaves/85bde4ded2c31953f802e39cf2252c87/config.json",
+      "phase_a_attempt12/selected_leaves/85bde4ded2c31953f802e39cf2252c87/generation_config.json",
+      "phase_a_attempt12/selected_leaves/85bde4ded2c31953f802e39cf2252c87/model.safetensors"
+    ],
+    "relay_missing": [],
+    "relay_repos": {
+      "AlphaAvatar/aadistill-artifacts": 9,
+      "AlphaAvatar/aadistill-transport": 6
+    },
+    "relay_repo_files_listed": {
+      "AlphaAvatar/aadistill-artifacts": 1169,
+      "AlphaAvatar/aadistill-transport": 19
+    },
+    "local_assets": [
+      "artifacts/stage1/state_eval_v1",
+      "artifacts/stage3/recovery_search_v2"
+    ],
+    "local_missing": []
+  },
+  "pod_id": "nuitz0ketxukpm",
+  "actual_price_per_hour": 0.99,
+  "terminate_after_utc": "2026-08-29T21:13:29Z",
+  "watchdog_journals": [
+    "/home/ecs-user/aad-scratch/sessions/autoinit-continuation-b/watchdog.jsonl"
+  ],
+  "image_identity": {
+    "image_name": "runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404",
+    "observed": [
+      "580.159.03"
+    ],
+    "digest": "runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@580.159.03"
+  },
+  "setup_environment": {
+    "BUNDLE_NAME": "aad_autoinit_8df1bad2.bundle",
+    "SESSION_ASSETS": "state_eval_v1:artifacts/stage1,recovery_search_v2:artifacts/stage3",
+    "SESSION_AUTH_PATH": "logs/autoinit_continuation_b_authorization.json",
+    "SESSION_COMMIT": "8df1bad216aa2ed7f12b698e19b4f09bfe2b5c36",
+    "SESSION_KIND": "continuation_b",
+    "SESSION_PLAN_HASH": "a2ef4cd68a4bae7a0de399b078ad99e41e23ae8448b2871b0c3f381d687703cf",
+    "SESSION_RELAY_INPUTS": "[{\"also_stage_to\":null,\"dest\":\"artifacts/stage1/qwen3_0p6b_init_v0/checkpoint\",\"path\":\"stage1/qwen3_0p6b_init_v0/checkpoint/model.safetensors\",\"repo\":\"AlphaAvatar/aadistill-artifacts\",\"sha256\":\"86fbba78e8a2a32481ca77e5ac362ed1f17a39dbc30bcbc952cabd5df2633e54\"},{\"also_stage_to\":null,\"dest\":\"artifacts/stage1/qwen3_0p6b_init_v0/checkpoint\",\"path\":\"stage1/qwen3_0p6b_init_v0/checkpoint/config.json\",\"repo\":\"AlphaAvatar/aadistill-artifacts\",\"sha256\":null},{\"also_stage_to\":null,\"dest\":\"artifacts/stage1/qwen3_0p6b_init_v0/checkpoint\",\"path\":\"stage1/qwen3_0p6b_init_v0/checkpoint/generation_config.json\",\"repo\":\"AlphaAvatar/aadistill-artifacts\",\"sha256\":null},{\"also_stage_to\":null,\"dest\":\"artifacts/stage1/qwen3_0p6b_init_v0/checkpoint\",\"path\":\"stage1/qwen3_0p6b_init_v0/checkpoint/tokenizer.json\",\"repo\":\"AlphaAvatar/aadistill-artifacts\",\"sha256\":null},{\"also_stage_to\":null,\"dest\":\"artifacts/stage1/qwen3_0p6b_init_v0/checkpoint\",\"path\":\"stage1/qwen3_0p6b_init_v0/checkpoint/tokenizer_config.json\",\"repo\":\"AlphaAvatar/aadistill-artifacts\",\"sha256\":null},{\"also_stage_to\":null,\"dest\":\"artifacts/stage1/qwen3_0p6b_init_v0/checkpoint\",\"path\":\"stage1/qwen3_0p6b_init_v0/checkpoint/chat_template.jinja\",\"repo\":\"AlphaAvatar/aadistill-artifacts\",\"sha256\":null},{\"also_stage_to\":\"artifacts/stage3/ladder_uniform\",\"dest\":\"artifacts/stage3/ladder_uniform_probe\",\"path\":\"stage3_recovery_corpus_v2/ladder_uniform/blocks.npz\",\"repo\":\"AlphaAvatar/aadistill-artifacts\",\"sha256\":\"6f324cb0f37bc0f07128e554ce8c161879419537478950496534f75fcecb249c\"},{\"also_stage_to\":\"artifacts/stage3/ladder_uniform\",\"dest\":\"artifacts/stage3/ladder_uniform_probe\",\"path\":\"stage3_recovery_corpus_v2/ladder_uniform/ladder.json\",\"repo\":\"AlphaAvatar/aadistill-artifacts\",\"sha256\":null},{\"also_stage_to\":\"artifacts/stage3/ladder_uniform\",\"dest\":\"artifacts/stage3/ladder_uniform_probe\",\"path\":\"stage3_recovery_corpus_v2/ladder_uniform/audit.jsonl\",\"repo\":\"AlphaAvatar/aadistill-artifacts\",\"sha256\":null},{\"also_stage_to\":null,\"dest\":\"artifacts/autoinit/phase_a_selected/fe9683e6a9c783bbc6fe276a78c851c6\",\"path\":\"phase_b_attempt5/selected_leaves/fe9683e6a9c783bbc6fe276a78c851c6/config.json\",\"repo\":\"AlphaAvatar/aadistill-transport\",\"sha256\":\"e94e4d3a9cab307a55f97991776ec22f0b2b6e2ec91c93a6ceba5639f3bf7a49\"},{\"also_stage_to\":null,\"dest\":\"artifacts/autoinit/phase_a_selected/fe9683e6a9c783bbc6fe276a78c851c6\",\"path\":\"phase_b_attempt5/selected_leaves/fe9683e6a9c783bbc6fe276a78c851c6/generation_config.json\",\"repo\":\"AlphaAvatar/aadistill-transport\",\"sha256\":\"28fb42f15159b552b9301b3f8f197c1b5ccd68c95ff0e3498d68678f61c1c633\"},{\"also_stage_to\":null,\"dest\":\"artifacts/autoinit/phase_a_selected/fe9683e6a9c783bbc6fe276a78c851c6\",\"path\":\"phase_b_attempt5/selected_leaves/fe9683e6a9c783bbc6fe276a78c851c6/model.safetensors\",\"repo\":\"AlphaAvatar/aadistill-transport\",\"sha256\":\"d025f38da508803845ea4d01b7cea160d117d47de3535965c7866dc05cd1e48e\"},{\"also_stage_to\":null,\"dest\":\"artifacts/autoinit/phase_a_selected/85bde4ded2c31953f802e39cf2252c87\",\"path\":\"phase_a_attempt12/selected_leaves/85bde4ded2c31953f802e39cf2252c87/config.json\",\"repo\":\"AlphaAvatar/aadistill-transport\",\"sha256\":\"e94e4d3a9cab307a55f97991776ec22f0b2b6e2ec91c93a6ceba5639f3bf7a49\"},{\"also_stage_to\":null,\"dest\":\"artifacts/autoinit/phase_a_selected/85bde4ded2c31953f802e39cf2252c87\",\"path\":\"phase_a_attempt12/selected_leaves/85bde4ded2c31953f802e39cf2252c87/generation_config.json\",\"repo\":\"AlphaAvatar/aadistill-transport\",\"sha256\":\"28fb42f15159b552b9301b3f8f197c1b5ccd68c95ff0e3498d68678f61c1c633\"},{\"also_stage_to\":null,\"dest\":\"artifacts/autoinit/phase_a_selected/85bde4ded2c31953f802e39cf2252c87\",\"path\":\"phase_a_attempt12/selected_leaves/85bde4ded2c31953f802e39cf2252c87/model.safetensors\",\"repo\":\"AlphaAvatar/aadistill-transport\",\"sha256\":\"0a9a5a78e87cc800c1187a2c19f75c5e490734d1518fe8968d517b2077353c45\"}]",
+    "SESSION_STATUS": "/workspace/autoinit_continuation_b.status",
+    "SESSION_TEST_IGNORES": "--ignore=tests/data/test_recovery_corpus_pipeline.py --ignore=tests/pod/test_phase_a_stages1_5_execute.py --ignore=tests/autoinit/test_phase_b_reuse_hostlocal.py --ignore=tests/pod/test_phase_b_stage1_executes.py --ignore=tests/pod/test_continuation_b_executes.py",
+    "TEACHER_REVISION": "768f209d9ea81521153ed38c47d515654e938aea",
+    "TESTS_MAX_S": "2700",
+    "UV_MAX_S": "1500"
+  },
+  "final_pod_state": {
+    "exists": false,
+    "desired_status": "TERMINATED",
+    "billing": false
+  },
+  "provider_confirms_gone": true,
+  "cost": {
+    "price_per_hour": 0.99,
+    "elapsed_minutes": 15.23,
+    "actual_usd": 0.2513,
+    "authorized_usd": 8.0691,
+    "within_authorization": true
+  },
+  "passed": false,
+  "cleanup_is_not_success": "artifacts are collected and the pod is torn down on every path; the session outcome is decided by the driver's terminal marker alone",
+  "finished_utc": "2026-08-29T16:20:25+00:00"
+}

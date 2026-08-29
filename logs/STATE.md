@@ -6,38 +6,84 @@ The **human view of [`current_state.json`](current_state.json)**. That file owns
 the live facts; this one says the same things in prose and adds nothing it does
 not carry. If the two disagree, a structural test fails.
 
-## A PAID SESSION IS LIVE — pod `nuitz0ketxukpm`
+**Nothing is running. Nothing is billing. Nothing is prepared for launch.**
+Pod `nuitz0ketxukpm` was deleted at `16:20:25Z`; the provider confirms it gone
+and not billing, and the launcher, watchdog and poller have all exited. Spend is
+`$260.3063` of the `$283.7600` cap, `$23.4537` remaining. **Nothing is
+authorized** — `autoinit.continuation_b.20260829T153538Z` is consumed.
 
-The behavioural continuation **launched 2026-08-29T16:05:11Z** at commit
-`8df1bad`, on an L40S at `$0.99/h`. All seven pre-provider gates passed inside
-the real launcher before the pod was created. The watchdog is detached with a
-hard stop at **308 min = $5.09**, against the authorization's `$8.0691` ceiling;
-the priced expectation is 262 min / `$4.32`, soft stop `$4.76`.
+# ATTEMPT 1 REACHED THE POD AND STOPPED AT THE TEST GATE — $0.2513
 
-Three independent views, deliberately: the **launcher** (polls the driver), the
-**watchdog** (provider control plane only, so a blocked ssh or hung driver is
-invisible and irrelevant to it), and a third **poller** journalling to
-`/home/ecs-user/aad-scratch/sessions/autoinit-continuation-b/poll.jsonl` so a
-durable record survives if both of the others die.
+The behavioural continuation launched `2026-08-29T16:05:11Z` at commit
+`8df1bad` on an L40S. All seven pre-provider gates passed **inside the real
+launcher**, the bundle round-tripped, and setup reached `VLLM_READY`,
+`TEACHER_READY` and `ROPE_OK`. The CPU test gate then returned **4 failed / 2300
+passed / 95 skipped** and the session aborted after 15.2 minutes.
 
-Spend before this session is `$260.0550` of the `$283.7600` cap. **The session's
-own cost is not yet known** and must be read from the provider, not from the
-rate — it enters `BUDGET_LEDGER.md` when the pod is confirmed gone.
+**No scientific stage ran.** No probe was trained or evaluated, no `sb` or `sc`
+was bought, no pooled decision or final selection was computed, and no search was
+reachable. No evidence moved.
 
-**The authorization is `autoinit.continuation_b.20260829T153538Z`**, one-use and
-now consumed. It was written at its own commit and nowhere else:
-`session_commit_gate`'s lineage check requires the launch commit to differ from
-the authorized base by exactly one path — the authorization artifact — so
-`de5c2ac` declared the pending issuance and `8df1bad` carries only the file. The
-earlier `autoinit.continuation_b.20260829T115028Z` grant bound the pre-repair
-digest `1682cd7d` and is retired to `superseded/` **UNUSED**: it was never
-launched against and no spend occurred under it.
+## The gate caught a real missing input
+
+The continuation launcher stages **neither calibration mixture**. It declares
+
+```
+relay_inputs = (*CANONICAL_INIT, *RECOVERY_LADDER, *continuation_inputs())
+local_assets = PHASE_A_LOCAL_ASSETS
+```
+
+so Phase B's two calibration declarations are both absent:
+
+| asset | path | travels by | Phase B | continuation |
+| --- | --- | --- | --- | --- |
+| `calib.domain_balanced@v1` | `artifacts/stage1/e8_calibration_v1/items.jsonl` | relay | declared | **omitted** |
+| `calib.reasoning_heavy@v2` | `artifacts/stage1/reasoning_heavy_v2/items.jsonl` | dev-box local asset — built here and never uploaded | declared | **omitted** |
+
+**This is not merely a test problem.** `calib.domain_balanced@v1` is the fixed
+distribution every probe is measured under, and **both** identities are bound
+into this session's authorization and preregistration. The session asserts the
+mixtures identify it while never staging their bytes. The gate stopped it at
+`$0.2513`; the next failure point would have been a probe stage.
+
+**Same class as the product contract repaired earlier today** — derived from
+Phase B's launcher, but taking some declarations from Phase A. Reasoning from
+what the session *needed* instead of what the machinery *requires*. Not caused by
+that repair: both omissions predate it, and the previous attempt never reached a
+pod because `ckpt_store_capacity_gate` refused first.
+
+## Reproduced at $0, exactly
+
+Hiding both directories on the dev box and re-running the suite under the pod's
+exact ignore set fails **the same four tests and only those four**. Hiding
+`reasoning_heavy_v2` alone reproduces exactly two of them, which is what
+separates the two missing assets. The fourth name was recovered this way rather
+than from the log: the pod's setup probe relays a bounded tail, so only three of
+the four survived in `launcher.out` — a gap worth closing.
+
+Full record: [`autoinit_continuation_b_attempt1.json`](autoinit_continuation_b_attempt1.json),
+journals in [`autoinit_continuation_b_attempt1/`](autoinit_continuation_b_attempt1/).
+
+## The repair is a reviewer decision, so it is NOT applied
+
+`calib.domain_balanced@v1` plainly must be staged. `calib.reasoning_heavy@v2` is
+the open question: the continuation binds its identity, but the tests that fail
+for it are **Phase B's launcher tests**, which read the dev-box filesystem and
+fail only because the file is absent. Two legitimate repairs exist — stage the
+asset, or let that test skip when it is absent — and choosing between them
+decides whether this session consumes the v2 mixture at all. Applying either
+would move the executable digest again and pre-empt that call, so the executable
+is left exactly as launched.
+
+**The authorization is consumed and the grant explicitly excludes a second
+attempt.** A retry needs a maintainer decision on both the repair and the
+funding.
 
 The bundle round-tripped before any provider resource existed: a fresh clone of
 the relay bytes checks out `8df1bad216aa`, its 62 executable files re-derive to
-`96c346ffcf6a…`, and it carries this exact authorization. It is consumed by the
-running session, and beyond it **nothing is prepared for launch** — no second
-attempt, no follow-on, no staged bundle.
+`96c346ffcf6a…`, and it carries this exact authorization. The earlier
+`autoinit.continuation_b.20260829T115028Z` grant bound the pre-repair digest
+`1682cd7d` and is retired to `superseded/` **UNUSED**.
 
 # The product contract is REPAIRED — the last blocker is closed
 

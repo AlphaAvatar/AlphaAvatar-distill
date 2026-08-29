@@ -1,19 +1,18 @@
 {
  "schema": "aadistill.current_state/v2",
- "generated_utc": "2026-08-29T16:07:30Z",
+ "generated_utc": "2026-08-29T16:35:35Z",
  "_contract": "The minimal machine-readable CURRENT snapshot: live facts only, no history, no per-attempt detail, no narrative. History lives in logs/decisions.md and the per-run directories; the human view is logs/STATE.md and the two must agree. Ownership: logs/CATALOG.md.",
  "baseline_commit": "b7c0099bfffc8962e4368917c59f8a9a8508d063",
  "baseline_commit_meaning": "The LAST TESTED IMPLEMENTATION: the commit whose tree produced the latest_verification figures (2461 passed / 12 skipped / 0 failed).",
  "running": {
-  "paid_compute": true,
-  "pods": 1,
-  "launchers": 1,
-  "pod_id": "nuitz0ketxukpm",
-  "note": "behavioural continuation, L40S $0.99/h, launched 2026-08-29T16:05:11Z at 8df1bad. Watchdog hard stop 308 min = $5.09 against the $8.0691 ceiling. Third-view poller journals to aad-scratch/sessions/autoinit-continuation-b/poll.jsonl. Cost UNKNOWN until the provider confirms the pod gone"
+  "paid_compute": false,
+  "pods": 0,
+  "launchers": 0,
+  "note": "pod nuitz0ketxukpm deleted 2026-08-29T16:20:25Z, provider confirms gone and not billing; launcher, watchdog and poller all exited"
  },
  "authorized": {
-  "any": true,
-  "note": "autoinit.continuation_b.20260829T153538Z, one-use, CONSUMED by the launch at commit 8df1bad. Ceiling $8.0691."
+  "any": false,
+  "note": "autoinit.continuation_b.20260829T153538Z is CONSUMED by attempt 1. The grant explicitly excludes a second attempt, so a retry needs a maintainer decision."
  },
  "prepared_launch": {
   "any": false,
@@ -21,13 +20,13 @@
   "note": "the launch bundle is consumed by the running session"
  },
  "budget": {
-  "cumulative_spend_usd": 260.055,
+  "cumulative_spend_usd": 260.3063,
   "authorized_cap_usd": 283.76,
-  "remaining_usd": 23.705,
+  "remaining_usd": 23.4537,
   "planning_floor_usd": 5.4784,
   "remaining_is_not_permission": true,
   "ledger": "logs/BUDGET_LEDGER.md",
-  "headroom_note": "Phase-B attempts 1-5 cost $30.0200. Attempt 5 COMPLETED Stage 1 and the P=2 search and emitted an authoritative Top-5; rung 1 was then finished at $0. The remaining work is the behavioural continuation at ceiling $8.0691, which headroom $23.7050 covers. The $35.6660 full-Phase-B ceiling is HISTORICAL and must not authorize it.",
+  "headroom_note": "Phase-B attempts 1-5 cost $30.0200; behavioural continuation attempt 1 cost $0.2513 and bought no science. Headroom $23.4537 still covers one $8.0691 continuation, but the grant excludes a second attempt.",
   "continuation_hard_ceiling_usd": 8.0691,
   "continuation_planning_floor_usd": 5.4784
  },
@@ -53,13 +52,13 @@
   "phase_b_post_freeze": "exec digest moved 3d3b5d07 -> a043e2c7: shared SESSION_KIND dispatcher gained a continuation_b branch; Phase-B gate now accepts declared additive drift. 3 pre-existing branches byte-identical. Prereg NOT rewritten. logs/autoinit_phase_b_post_freeze_changes.json"
  },
  "latest_verification": {
-  "utc": "2026-08-29T15:35:21Z",
-  "after": "the product-contract repair and the identity refreeze",
-  "full_suite": "2479 passed, 12 skipped, 0 failed in 26:23",
-  "verifiers": "frozen assets clean; both reuse records verified, digests unchanged; relay asset fe9683e6a9c7 present on the transport repo at the recorded sizes",
-  "gates": "7 of 7 pre-provider gates green at the launch commit, and again inside the real launcher before the pod was created",
-  "continuation": "53 tests, 11 of them the new product contract; 15 mutations of the product contract, capacity gate, archives, no-search guarantee and the 6-to-3 boundary, no survivors",
-  "scope": "CPU only; no GPU, no pod, $0"
+  "utc": "2026-08-29T16:35:35Z",
+  "after": "continuation attempt 1",
+  "full_suite": "2479 passed, 12 skipped, 0 failed at the launch commit 8df1bad",
+  "pod_gate": "4 failed, 2300 passed, 95 skipped \u2014 reproduced EXACTLY at $0 by hiding the two undeclared calibration directories",
+  "verifiers": "frozen assets clean; both reuse digests unchanged; relay asset present",
+  "gates": "7 of 7 pre-provider green, in the real launcher, before the pod existed",
+  "scope": "one paid pod, $0.2513, no scientific stage"
  },
  "failure_pattern": "continuation 1-7: an uncaught transport call, an undeliverable asset, dev-box-only code in the pod gate, the attempt-12 OOM class, a checkpoint path, a checkpoint with no tokenizer, and finally a SUCCEEDING driver whose launcher crashed on a line only success reaches. Each failure was further in than the last. See logs/decisions.md",
  "abandoned": [
@@ -70,9 +69,9 @@
   "the paid device-canary session path: TERMINATED 2026-08-18, evidence kept, none prepared"
  ],
  "next_starting_point": {
-  "status": "PHASE_B_STAGE1_COMPLETE / BEHAVIOURAL_SELECTION_INCOMPLETE. Stage 0, the P=2 search, the Top-5 and the Stage-1 selection are done and retained. Identity collapse gives 6 distinct candidates as EVIDENCE; rung 1 is COMPLETE, computed at $0 by the frozen code, advancing 3. The behavioural-continuation executable is built, product-contract-repaired and verified end to end at $0.",
-  "the_ask": "APPROVED and UNBLOCKED. One behavioural-continuation session: ceiling $8.0691, floor $5.4784, headroom $23.7050, no cap increase.",
-  "budget": "cap $283.7600, spent $260.0550, headroom $23.7050. Continuation ceiling $8.0691 \u2014 NOT the historical $35.6660."
+  "status": "PHASE_B_STAGE1_COMPLETE / BEHAVIOURAL_SELECTION_INCOMPLETE. The product contract is repaired and all 7 pre-provider gates pass. Continuation attempt 1 reached the pod and aborted at the test gate on two undeclared calibration assets; no scientific stage ran and no evidence moved.",
+  "the_ask": "REVIEW. Decide the calibration-staging repair, then whether to authorize a second continuation attempt at ceiling $8.0691 against headroom $23.4537.",
+  "budget": "cap $283.7600, spent $260.3063, headroom $23.4537. Continuation ceiling $8.0691 \u2014 NOT the historical $35.6660."
  },
  "read_order": [
   "logs/STATE.md \u2014 the human view of this file",
@@ -123,6 +122,6 @@
  },
  "canonical_infrastructure_moved_to": "docs/SESSION_ARCHITECTURE.md and logs/decisions.md",
  "phase_b_state": "PHASE_B_STAGE1_COMPLETE / BEHAVIOURAL_SELECTION_INCOMPLETE",
- "blocker": "none. The inherited Phase-B product contract is replaced: no leaf fetch, no leaf-secured check, and ckpt_store_capacity_gate swapped for a continuation gate measuring <args.scr>/store at 1076 MiB instead of 11.55 GiB of leaves this session never creates. All 7 pre-provider gates green.",
+ "blocker": "NEW, found on hardware: the continuation launcher stages NEITHER calibration mixture. relay_inputs omits CALIBRATION_V1 (artifacts/stage1/e8_calibration_v1) and local_assets is Phase A's, omitting CALIBRATION_V2_LOCAL (artifacts/stage1/reasoning_heavy_v2). Both are Phase B's. The pod test gate caught it at $0.2513 before any probe. Reproduced at $0. Two candidate repairs, one of them a design call. logs/autoinit_continuation_b_attempt1.json",
  "failed_note": "per-attempt failure records live in the per-run directories and logs/decisions.md"
 }
