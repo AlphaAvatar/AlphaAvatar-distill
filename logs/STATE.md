@@ -1,4 +1,4 @@
-**Updated:** 2026-08-29 · branch `main` · **PHASE_B_STAGE1_COMPLETE / BEHAVIOURAL_SELECTION_INCOMPLETE — continuation ceiling $8.0691**
+**Updated:** 2026-08-29 · branch `main` · **PHASE_B_STAGE1_COMPLETE / BEHAVIOURAL_SELECTION_INCOMPLETE — continuation executable BUILT AND VERIFIED, ceiling $8.0691, unauthorized**
 
 # Current state
 
@@ -79,10 +79,24 @@ freed to 0.01 GiB, and the evaluation tokenizer materialized before every batter
 
 1. **Phase B** — calibration/data-distribution sensitivity:
    `calib.reasoning_heavy@v2` against `calib.domain_balanced@v1`, searched
-   **jointly at P=2**. **Frozen. Four paid attempts, no scientific result yet;
-   attempt 5 is approved and not launched.**
+   **jointly at P=2**.
 
-   | | |
+   **PHASE-B STAGE 1 IS COMPLETE.** Attempt 5 ran Stage 0 and the joint P=2
+   search to completion, emitted an authoritative Top-5 and a durable Stage-1
+   selection artifact, and paid for three rung-1 `sa` probes. It then died in
+   stage 2 on `duplicate seeds` — the pooling guard was right, and what was wrong
+   was the candidate universe it was asked to pool. The identity-collapse
+   amendment resolves that: two "searched" leaves are byte-identical to two
+   retained Phase-A finalists, so the universe is **6 distinct candidates**, not
+   the 8 the preregistration assumed. **Rung 1 was then completed at `$0`** by the
+   frozen selection code from retained evidence.
+
+   Stage 1 is **bought, retained and authoritative**. It is never re-purchased.
+   The identities below are therefore **historical evidence, not current launch
+   identities** — the `$35.6660` ceiling in particular prices a 16.5 h search that
+   already exists.
+
+   | historical — full Phase B | |
    | --- | --- |
    | session plan | `23f23649…` (`autoinit.v1.phase_b_session`, 6 stages) |
    | preregistration | `53f1347f6865…`, self-verifying, frozen before any result |
@@ -90,8 +104,93 @@ freed to 0.01 GiB, and the evaluation tokenizer materialized before every batter
    | science plan | `02be33b9…`, **reused unchanged** |
    | `calib.domain_balanced@v1` | spec `11f36a88…` · content `d65c1f40…` |
    | `calib.reasoning_heavy@v2` | spec `6c67b8df…` · content `cdb28389…` |
-   | Stage-1 deadline | **987.6348 min**, derived from the priced hard bound |
-   | planning floor / ceiling | **$16.4555** / **$35.6660** → cap **$283.76** |
+   | Stage-1 selection | `84fd6496851995ae…`, durable, authoritative |
+   | amendment / universe | `df413bd99119dab7…` / `e94f15d2e648…`, **6** distinct |
+   | planning floor / ceiling | **$16.4555** / **$35.6660** — **HISTORICAL ONLY** |
+
+1b. **The behavioural continuation** — the only paid work Phase B still owes,
+   and a **separate session** rather than a flag on the existing one.
+
+   **What remains is small.** One missing `sb` and at most two conditional `sc`:
+   **1 to 3 probes**, against the ten a full Phase B books.
+
+   ```
+   candidate        sa       sb        sc
+   fe9683e6a9c7     cited    MISSING   MISSING
+   85bde4ded2c3     cited    cited     cited
+   control-qwen     cited    cited     MISSING
+   ```
+
+   **Six candidates are evidence; three are the workload.** The collapsed
+   universe of 6 carries the completed `sa` evidence and the identity-collapse
+   result. Rung 1 is COMPLETE and frozen, and only its survivors plus the
+   auto-advancing control — `fe9683e6a9c7`, `85bde4ded2c3`, `control-qwen3_0p6b_init_v0`
+   — may enter `sb`, the pooled decision, `sc` and the final selection. The three
+   searched non-survivors are never materialized and never probed.
+
+   | continuation — CURRENT | |
+   | --- | --- |
+   | session plan | `a2ef4cd68a4b…` (`autoinit.v1.phase_b_behavioural_continuation`) |
+   | stages | `0, 1, 3, 4, 5` — **no stage 2**, because Phase A's stage 2 is rung 1 |
+   | preregistration | `7900c87d814b…`, frozen before any continuation result |
+   | executable-source digest | `88e1ef576d81…` over **61** files, set version 2 |
+   | relay assets | `1643145376ba…`, `fe9683e6a9c7` round-trip verified |
+   | floor / ceiling | **$5.4784** (1 probe) / **$8.0691** (3 probes) |
+
+   **The search is unreachable, and that is checked five ways.** The plan declares
+   no search stage; `stage1()` and `run_search()` raise; the stage map never binds
+   them; `ContinuationAuthorization.runs_search` is `False` **by type**, with no
+   field to set; and the whole-function test drives the real stage map with
+   `BeamSearch` and `run_phase_a_search` replaced by detonators, on both the
+   resolved and the tie path, touching neither.
+
+   **Loaded is not the same claim as permitted.** The executable-source digest is
+   derived from the REAL import closure, so it **includes** `search.py`,
+   `ranking.py` and every operator module — the `aadistill.autoinit` package
+   `__init__` loads them for every consumer. Excluding them would let loaded files
+   change under a grant that claimed to pin the executable. What may *execute* is
+   a separate contract, enforced separately and more strongly. Exactly one loaded
+   file holds a search call site — `PhaseADriver`, whose `stage1` is overridden
+   with a raise — and a call site appearing anywhere else fails the `$0` gate.
+
+   **One frozen digest moved, and it is recorded rather than re-frozen.**
+   `autoinit_preflight_setup.sh` is the single `SESSION_KIND` dispatcher for every
+   launchable session AND a member of three frozen source sets, so the
+   continuation could not become launchable without moving them. Phase B's
+   executable digest went `3d3b5d07…` → `a043e2c7…`. The Phase-B preregistration
+   is **not** rewritten — that would destroy the record of what attempt 5 executed
+   — and the gate is not deleted. Instead `aadistill.autoinit.post_freeze` accepts
+   drift only when it is declared in
+   [`autoinit_phase_b_post_freeze_changes.json`](autoinit_phase_b_post_freeze_changes.json),
+   is additive with zero lines removed, and leaves **every pre-existing dispatch
+   branch byte-identical** — re-derived from the script, not read from the note.
+   The launcher gate and its test share that one implementation. Seven mutations
+   of the note, plus deleting it, are all refused. Phase A's harness set and the
+   recovery continuation's contain the same file; both sessions are complete and
+   their authorizations consumed, so no live gate binds them, and the blast radius
+   is recorded rather than left to be discovered.
+
+   **Building it found five defects that every cheaper gate had passed**, each
+   guaranteed to fire on a paid pod: `stage_bind` never ran the inherited stage 0,
+   so `self.plan` and `self.evaluation_protocol` were unset when stage 3 read
+   them; `enter()` ordered stages against Phase A's plan, whose stage 1 is the
+   search; `ContinuationAuthorization` lacked `require_science_plan`, which the
+   inherited stage 0 calls unconditionally; `restore_probe` was inherited strict
+   and would have **re-bought all eight citable probes** at roughly nine times the
+   ceiling while reporting success; and the universe builder demanded all six
+   checkpoints be staged to read three. A sixth, `SESSION_KIND=continuation_b`
+   having no bash dispatch branch, was caught automatically by the guard written
+   after attempt 2 paid `$0.2300` for the same defect.
+
+   **Why reuse works at all.** The eight citable probes carry **two** raw
+   `evaluation_protocol_hash` values (`7327e880…`, `250f72ef…`) that differ by host
+   NVIDIA driver patch alone. `generation_runtime_comparability@v2` declares both
+   the patch and the raw hash non-material, and all of them share the comparable
+   identity `70a26e0b…`. The continuation binds imported evidence on student
+   identity and seed and defers comparability to that rule.
+
+   **Nothing is authorized.** No grant exists, no cap increase is requested, and
+   the `$8.0691` ceiling fits the existing `$23.7050` headroom.
 
    **Comparability is a terminate condition, not a bigger run.** If Stage 0 finds
    the runtime not comparable under `generation_runtime_comparability@v2`, the
@@ -733,45 +832,25 @@ Also frozen: recovery design, selection rules, pooled_counts@v2, Stage-3 artifac
 
 ## Latest verification
 
-After the two attempt-4 memory-contract repairs. CPU only — no checkpoint
-loaded, no metric measured, no GPU used:
+**2026-08-29 — after the `$0` behavioural-continuation implementation pass.**
+CPU only, repo `.venv`. No checkpoint trained, no GPU used, no pod created, no
+grant issued, `$0` spent.
 
-* full suite **2172 passed, 12 skipped, 0 errors** in 18:42 — **+10** on the
-  2162 baseline: the attempt-4 handoff regressions and the driver wiring
-  assertions. The skip count is unchanged.
-* **the publisher module on a pod-like host: 11 passed** with no
-  `/home/ecs-user/aad-scratch`, no `/home/ecs-user/aad-artifacts` and no token
-  file, with `HF_TOKEN` set the way a pod sets it. Run in a mount namespace
-  holding the repo and interpreter over a tmpfs `/home/ecs-user` — the same
-  instrument that reproduced attempt 3's five failures before the fix.
-* frozen-asset verifier **passed**, and was **not** weakened or rescoped.
-* **7 mutations**, each a passing state made to fail: `before` measured inside
-  the helper again, `require_released` made a no-op, each driver dropping its
-  `require_released` call, deleting only the teacher, the 22 GiB constant
-  restored, and the snapshot taken after the `del`.
-* the continuation **harness digest is now `8b56fc7b…`** — `162c09ed` →
-  `95cf336d` (memory repairs) → `0dbf1272` (checkpoint path) → `8b56fc7b`
-  (the `trained_model_dir` docstring, corrected post-attempt-6). Attempt 7 needs
-  a new authorization on both the commit and the digest.
-
-**Two bookkeeping items were normalized after attempt 6**, as directed: the
-`trained_model_dir` docstring no longer claims no `$0` path executes it — the
-corrected end-to-end fake does — and `baseline_commit` tracks the tree that
-produced these figures. The suite was re-run after the docstring change so that
-claim stays true.
-
-Earlier, after the attempt-3 portability repair: full suite 2162 passed / 12
-skipped; the publisher module 11 passed on a pod-like host with no
-`aad-scratch`, no `aad-artifacts` and no token file; 6 mutations.
-
-Earlier, at the five-leaf transport mirror: full suite 2160 passed / 12 skipped;
-pod simulator **2119 passed, 23 skipped** with the artifact tree restored exactly
-(listing hash `c1726a62…`); 13 mutations; the setup branch verified by running the
-real shell block with a real artifact.
-
-**Run it in the repo `.venv`** (transformers 5.13.1). The AlphaAvatar venv's
-4.57.1 fails six tokenizer tests on this tree and is not the canonical
-environment; a run there reads as seven failures that are not real.
+* **full suite: 2461 passed, 12 skipped, 0 failed** (27:01)
+* frozen-asset verifier: passed, no problems
+* both probe-reuse verifiers re-run: historical 11 reconstructed / 8 admitted,
+  Attempt-5 3 / 3, **both `probes_dir_digest` values unchanged**
+* continuation whole-function tests: **35**, covering the resolved-at-`sb` path
+  and the `tie_pending → sc → terminal` path through the real stage map
+* mutations: **12, no survivors** — 8 against the continuation (reuse-vs-new
+  probe, stage ordering, inherited stage 0, the 6→3 finalist boundary, search
+  reachable, the auth contract, digest re-derivation, evidence binding) and 4
+  against the post-freeze drift rule
+* relay: `fe9683e6a9c7` round-trip verified — downloaded back, all three files
+  byte-identical, artifact identity **re-derived** to
+  `c313d1b4081b9a3b…`, before any provider resource existed
+* identities: no frozen Phase-A or Phase-B *record* was rewritten; the Phase-B
+  executable digest moved for a declared, additive, branch-identical reason
 
 ## What failed, and why
 

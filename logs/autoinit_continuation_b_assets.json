@@ -1,0 +1,46 @@
+{
+  "schema": "aadistill.autoinit.continuation_b_assets/v1",
+  "generated_utc": "2026-08-29T08:28:09.712726+00:00",
+  "_contract": "The relay copy of the ONE advancing checkpoint that no prior session staged. Uploaded dev-box -> relay at $0, BEFORE any provider resource exists, because the dev-box uplink is 0.72 MB/s and pushing 1.19 GiB while an L40S bills would cost ~28 paid minutes for a free transfer.",
+  "repo": "AlphaAvatar/aadistill-transport",
+  "repo_type": "model",
+  "state_id": "fe9683e6a9c783bbc6fe276a78c851c6",
+  "artifact_digest": "c313d1b4081b9a3b410dddf7a29ebcaad8dd0759179d51e1d761238c1743a2a6",
+  "num_parameters": 596049920,
+  "local_source": "/home/ecs-user/aad-artifacts/autoinit/phase_a/fe9683e6a9c783bbc6fe276a78c851c6",
+  "files": [
+    {
+      "filename": "config.json",
+      "remote_path": "phase_b_attempt5/selected_leaves/fe9683e6a9c783bbc6fe276a78c851c6/config.json",
+      "sha256": "e94e4d3a9cab307a55f97991776ec22f0b2b6e2ec91c93a6ceba5639f3bf7a49",
+      "bytes": 1419,
+      "verified_by": "round-trip download and rehash"
+    },
+    {
+      "filename": "generation_config.json",
+      "remote_path": "phase_b_attempt5/selected_leaves/fe9683e6a9c783bbc6fe276a78c851c6/generation_config.json",
+      "sha256": "28fb42f15159b552b9301b3f8f197c1b5ccd68c95ff0e3498d68678f61c1c633",
+      "bytes": 206,
+      "verified_by": "round-trip download and rehash"
+    },
+    {
+      "filename": "model.safetensors",
+      "remote_path": "phase_b_attempt5/selected_leaves/fe9683e6a9c783bbc6fe276a78c851c6/model.safetensors",
+      "sha256": "d025f38da508803845ea4d01b7cea160d117d47de3535965c7866dc05cd1e48e",
+      "bytes": 1192135096,
+      "verified_by": "round-trip download and rehash"
+    }
+  ],
+  "verification": {
+    "method": "every file downloaded back from the relay into a scratch directory and rehashed, then the checkpoint identity RE-DERIVED from the returned bytes with identify_checkpoint and required to equal the local canonical digest. Upload-command success is not evidence that the remote bytes are correct.",
+    "remote_artifact_digest": "c313d1b4081b9a3b410dddf7a29ebcaad8dd0759179d51e1d761238c1743a2a6",
+    "local_artifact_digest": "c313d1b4081b9a3b410dddf7a29ebcaad8dd0759179d51e1d761238c1743a2a6",
+    "identity_match": true,
+    "files_match": true,
+    "verified": true,
+    "performed_before_provider_creation": true,
+    "provider_resources_existing_at_verification": "none"
+  },
+  "consumer_note": "The pod fetches with repo_type='model' (autoinit_preflight_setup.sh:107), which is where these bytes were written. A dataset repo of the same name does not exist; an unauthenticated list_repo_files raises RepositoryNotFoundError, which means a missing credential, not a missing repo.",
+  "assets_sha256": "1643145376ba19a2e5cb8c63c0e2a77e4bd35f068d4620e7b289062e059e737b"
+}

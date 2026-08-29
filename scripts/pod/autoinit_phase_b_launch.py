@@ -491,11 +491,19 @@ def preregistration_gate(ctx: SessionContext) -> tuple[bool, str]:
                        f"{prereg['session_plan']['plan_hash'][:12]}… but the plan "
                        f"about to run is {PHASE_B_PLAN_V1.plan_hash[:12]}…")
     observed = phase_b_source_digest(REPO_ROOT)["digest"]
-    if prereg["executable_source"]["digest"] != observed:
-        return False, ("the preregistration was frozen against executable "
-                       f"{prereg['executable_source']['digest'][:12]}… but the "
-                       f"executable is {observed[:12]}…; re-freeze it rather than "
-                       "running code the record does not describe")
+    # Not equality. Phase-B STAGE 1 IS COMPLETE, and the one file that moved is
+    # the SHARED SESSION_KIND dispatcher, which had to gain a branch for the
+    # behavioural continuation to be launchable at all. Re-freezing this
+    # preregistration would destroy the record of what attempt 5 executed, so
+    # declared additive drift that leaves every pre-existing branch
+    # byte-identical is accepted and everything else still fails closed.
+    from aadistill.autoinit.post_freeze import accounted_for
+
+    ok, why = accounted_for(prereg["executable_source"]["digest"], observed,
+                            REPO_ROOT)
+    if not ok:
+        return False, why + " — re-freeze it rather than running code the record "\
+                            "does not describe"
     by_id = {p["qualified_id"]: p for p in prereg["calibration_profiles"]}
     for profile in (DOMAIN_BALANCED_V1, REASONING_HEAVY_V2):
         entry = by_id.get(profile.qualified_id)

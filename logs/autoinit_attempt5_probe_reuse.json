@@ -1,6 +1,6 @@
 {
   "schema": "aadistill.autoinit.attempt5_probe_reuse/v1",
-  "generated_utc": "2026-08-28T19:57:05.217118+00:00",
+  "generated_utc": "2026-08-29T08:38:05.286035+00:00",
   "_contract": "Strict reconstruction of the three rung-1 `sa` probes Attempt 5 PAID for, to the same standard as the historical Phase-A citations. Consumed by the behavioural-continuation pricing, which fails closed without it. Not an authorization.",
   "source": "logs/autoinit_phase_b_attempt5/probes",
   "probes_dir_digest": "2e5030fadc786faaafe1ec3ac3a2ccb4af367e98bf630a89a16938729a77844e",

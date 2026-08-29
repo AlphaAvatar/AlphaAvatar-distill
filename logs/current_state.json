@@ -1,152 +1,150 @@
 {
-  "schema": "aadistill.current_state/v2",
-  "generated_utc": "2026-08-26T09:20:00Z",
-  "_contract": "The minimal machine-readable CURRENT snapshot: live facts only, no history, no per-attempt detail, no narrative. History lives in logs/decisions.md and the per-run directories; the human view is logs/STATE.md and the two must agree. Ownership: logs/CATALOG.md.",
-  "baseline_commit": "ed77c68b10946a44bac9e043e8dd8b6dab121662",
-  "baseline_commit_meaning": "The LAST TESTED IMPLEMENTATION: the commit whose tree produced the latest_verification figures.",
-  "running": {
-    "paid_compute": false,
-    "pods": 0,
-    "launchers": 0
+ "schema": "aadistill.current_state/v2",
+ "generated_utc": "2026-08-29T10:04:11Z",
+ "_contract": "The minimal machine-readable CURRENT snapshot: live facts only, no history, no per-attempt detail, no narrative. History lives in logs/decisions.md and the per-run directories; the human view is logs/STATE.md and the two must agree. Ownership: logs/CATALOG.md.",
+ "baseline_commit": "ed77c68b10946a44bac9e043e8dd8b6dab121662",
+ "baseline_commit_meaning": "The LAST TESTED IMPLEMENTATION: the commit whose tree produced the latest_verification figures.",
+ "running": {
+  "paid_compute": false,
+  "pods": 0,
+  "launchers": 0
+ },
+ "authorized": {
+  "any": false,
+  "note": "autoinit.phase_b.20260826T053826Z is CONSUMED -- one-use, loaded and spent by attempt 1. A retry needs a new grant. autoinit.phase_b.20260825T201335Z remains permanently unusable in logs/superseded/."
+ },
+ "prepared_launch": {
+  "any": false,
+  "bundles": 0
+ },
+ "budget": {
+  "cumulative_spend_usd": 260.055,
+  "authorized_cap_usd": 283.76,
+  "remaining_usd": 23.705,
+  "phase_b_single_session_hard_ceiling_usd": 35.666,
+  "planning_floor_usd": 16.4555,
+  "remaining_is_not_permission": true,
+  "ledger": "logs/BUDGET_LEDGER.md",
+  "headroom_note": "Phase-B attempts 1-5 cost $30.0200. Attempt 5 completed Stage 1 and emitted a Top-5 but failed in Stage 2, so the calibration question is still unanswered. Headroom $23.7050 is BELOW the $35.6660 ceiling; a sixth attempt needs a new cap decision."
+ },
+ "frozen": {
+  "science_plan_hash": "02be33b9a7a8e26bc8bfb75795351e8cdc9ffd441b47066cc81887cfc511b55c",
+  "session_plan_hash": "9377a2dc61f21790dd111d72a5de0e039ea1d31afef2d09e18c98a0b0cc2a0aa",
+  "stage3_evaluation_protocol_hash": "250f72efbd43b86a475e8dda293b45f07ee61a4d858e147f4a5bd7681c32c2e4",
+  "equivalence_interval": 0.011695296982299022,
+  "feasibility_floor": 0.3,
+  "seeds": {
+   "sa": 20260726,
+   "sb": 20260801,
+   "sc_conditional": 20260813,
+   "fourth_seed": "never"
   },
-  "authorized": {
-    "any": false,
-    "note": "autoinit.phase_b.20260826T053826Z is CONSUMED -- one-use, loaded and spent by attempt 1. A retry needs a new grant. autoinit.phase_b.20260825T201335Z remains permanently unusable in logs/superseded/."
+  "calibration": "calib.domain_balanced@v1 (spec 11f36a88, content d65c1f40) and calib.reasoning_heavy@v2 (spec 6c67b8df, content cdb28389). Both identities are bound: profile_hash does NOT identify the sampled bytes",
+  "runtime_comparability": "generation_runtime_comparability@v2",
+  "phase_b_session_plan_hash": "23f23649b4be92bd8852bf9d89f8dcb372bc5a00a175ae631d32b9d71de8032d",
+  "phase_b_calibration": {
+   "calib.domain_balanced@v1": {
+    "spec": "11f36a88",
+    "content": "d65c1f40"
+   },
+   "calib.reasoning_heavy@v2": {
+    "spec": "6c67b8df",
+    "content": "cdb28389",
+    "items_file": "a2ff8c92"
+   }
   },
-  "prepared_launch": {
-    "any": false,
-    "bundles": 0
-  },
-  "budget": {
-    "cumulative_spend_usd": 260.055,
-    "authorized_cap_usd": 283.76,
-    "remaining_usd": 23.705,
-    "phase_b_single_session_hard_ceiling_usd": 35.666,
-    "planning_floor_usd": 16.4555,
-    "remaining_is_not_permission": true,
-    "ledger": "logs/BUDGET_LEDGER.md",
-    "headroom_note": "Phase-B attempts 1-5 cost $30.0200. Attempt 5 completed Stage 1 and emitted a Top-5 but failed in Stage 2, so the calibration question is still unanswered. Headroom $23.7050 is BELOW the $35.6660 ceiling; a sixth attempt needs a new cap decision."
-  },
-  "frozen": {
-    "science_plan_hash": "02be33b9a7a8e26bc8bfb75795351e8cdc9ffd441b47066cc81887cfc511b55c",
-    "session_plan_hash": "9377a2dc61f21790dd111d72a5de0e039ea1d31afef2d09e18c98a0b0cc2a0aa",
-    "stage3_evaluation_protocol_hash": "250f72efbd43b86a475e8dda293b45f07ee61a4d858e147f4a5bd7681c32c2e4",
-    "equivalence_interval": 0.011695296982299022,
-    "feasibility_floor": 0.3,
-    "seeds": {
-      "sa": 20260726,
-      "sb": 20260801,
-      "sc_conditional": 20260813,
-      "fourth_seed": "never"
-    },
-    "calibration": "calib.domain_balanced@v1 (spec 11f36a88, content d65c1f40) and calib.reasoning_heavy@v2 (spec 6c67b8df, content cdb28389). Both identities are bound: profile_hash does NOT identify the sampled bytes",
-    "runtime_comparability": "generation_runtime_comparability@v2",
-    "phase_b_session_plan_hash": "23f23649b4be92bd8852bf9d89f8dcb372bc5a00a175ae631d32b9d71de8032d",
-    "stage1_runtime_deadline_minutes_by_phase": {
-      "phase_a": 363.9841,
-      "phase_b": 987.6348,
-      "derivation": "base + both soft-stop reserves; phase B = 360.0+147.7683+36.2158"
-    },
-    "phase_b_calibration": {
-      "calib.domain_balanced@v1": {
-        "spec": "11f36a88",
-        "content": "d65c1f40"
-      },
-      "calib.reasoning_heavy@v2": {
-        "spec": "6c67b8df",
-        "content": "cdb28389",
-        "items_file": "a2ff8c92"
-      }
-    },
-    "phase_b_pricing": "floor $16.4555 (NOT an expectation), session hard ceiling $35.6660, search hard $16.2960 / 16.461 h. The 1.91-7.51 h range and $26.8049 are SUPERSEDED.",
-    "phase_b_stage1_selection_sha256": "84fd6496851995ae",
-    "phase_b_identity": "exec 3ad6a6e3edf13ca4 (59 files, set v5), prereg 53f1347f6865e10e, amendment df413bd99119dab7, universe 6 distinct (was 8 assumed); identity e94f15d2e648d86a"
-  },
-  "complete": [
-    "Phase A end to end: search, three rungs, eleven probes, unresolved_equivalence",
-    "Stage 3 (both permanent controls, thresholds materialized)",
-    "Phase-B $0 readiness: v2 mixture, probe-reuse verification, plan, authorization type, executable-source identity, preregistration, driver, launcher, pricing",
-    "detail: logs/decisions.md and the per-run directories"
-  ],
-  "latest_verification": {
-    "utc": "2026-08-28T00:00:00Z",
-    "after": "the attempt-5 identity-collapse and behavioural-continuation preparation pass",
-    "full_suite": "2407 passed, 12 skipped in 26:31",
-    "frozen_asset_verifier": "passed, no problems",
-    "historical_reuse": "11 probes reconstructed from retained bytes, 8 admitted, probes_dir_digest matches the committed record",
-    "mutations": "targeted; D1/D2/D3 each killed by their own test",
-    "identities": "phase_b executable re-derived this pass; amendment df413bd9, collapsed universe e94f15d2. No frozen SCIENCE identity moved.",
-    "scope": "CPU only, repo .venv; no checkpoint trained, no GPU used"
-  },
-  "failed": [
-    {
-      "run": "Phase-B attempt 1",
-      "usd": 0.15,
-      "pod": "4dbqycjrivhq17 (deleted, provider confirms gone)",
-      "where": "pod-side setup test gate, before any scientific stage",
-      "cause": "two defects, both mine: (1) verify_historical_probe_reuse hardcodes the DEV-BOX checkpoint store, so its two tests fail on the pod -- dev-box-only code in the pod gate, the same class as continuation attempt 3; (2) the catalog test was ALREADY RED at the launch commit because logs/superseded/ was uncatalogued, and I did not re-run the suite at the final commit",
-      "impact": "no scientific stage ran; no Phase-B science, calibration or pricing is in question",
-      "record": "logs/autoinit_phase_b_attempt1.json"
-    }
-  ],
-  "failure_pattern": "continuation 1-7: an uncaught transport call, an undeliverable asset, dev-box-only code in the pod gate, the attempt-12 OOM class, a checkpoint path, a checkpoint with no tokenizer, and finally a SUCCEEDING driver whose launcher crashed on a line only success reaches. Each failure was further in than the last. See logs/decisions.md",
-  "abandoned": [
-    "recovery_search_v1 (INVALID before first use)",
-    "calib.reasoning_heavy@v1 (UNBUILDABLE; superseded by v2)",
-    "the 14-probe Phase-B no-reuse path (rejected counterfactual, not a fallback)",
-    "student-prefix recovery (E5); any fourth seed",
-    "the paid device-canary session path: TERMINATED 2026-08-18, evidence kept, none prepared"
-  ],
-  "next_starting_point": {
-    "status": "PHASE_B_STAGE1_COMPLETE / BEHAVIOURAL_SELECTION_INCOMPLETE. Stage 0, the P=2 search, the Top-5 and the Stage-1 selection are done and retained. Identity collapse gives 6 distinct candidates; rung-1 survivors computed at $0 by the frozen code. Only a behavioural continuation remains.",
-    "the_ask": "A maintainer decision on ONE behavioural-continuation session: ceiling $8.0691, floor $5.4784. Current headroom $23.7050 already covers it, so no cap increase is required.",
-    "budget": "cap $283.76, spent $260.0550, headroom $23.7050. Continuation ceiling $8.0691 (NOT the $35.6660 full-Phase-B figure \u2014 Stage 1 is bought)."
-  },
-  "read_order": [
-    "logs/STATE.md \u2014 the human view of this file",
-    "logs/CATALOG.md \u2014 which log owns which fact, and what is superseded",
-    "docs/REPO_LAYOUT.md \u2014 where code lives",
-    "logs/decisions.md \u2014 why things are the way they are",
-    "logs/BUDGET_LEDGER.md \u2014 spend and caps",
-    "AGENTS.md \u2014 the binding working contract"
-  ],
-  "failed_before_the_current_architecture": "Phase A 1-5, 6, 7 and both canary attempts, $2.6108 total; all five classes closed by autoinit.stage1_device_contract@v1 and the session specification. See logs/decisions.md",
-  "measurement_attempts": "3 launches, $0.4611, ending COMPLETE. See logs/autoinit_measurement_attempt{1,2,3}/",
-  "failed_before_attempt_11": "Phase A 8 $0.1900, 9 $0.3400, 10 $11.4300; all closed and confirmed closed by attempt 11. See logs/decisions.md",
-  "causal_depth_cost": "standalone 12.07 eval/min (attempt 3, cached); INSIDE the search 6.96-10.79 on the fallback path, which fired 4/4. Recorded, NOT repriced: Stage 1 took 180.283 min against the 180.0 base allowance.",
-  "local_storage": {
-    "free_gib": 14.9402,
-    "ckpt_store_gate": "PASS (11.55 GiB required)",
-    "last_reclamation": "logs/derived_cache_cleanup_20260827.json -- 6.2387 GiB of rebuildable caches in two passes",
-    "volatility_note": "a full-suite run consumes ~4.7 GiB of /tmp on this single-filesystem box, so the launcher's own capacity gate is the protection that matters",
-    "checkpoints_deleted": 0,
-    "scientific_artifacts_deleted": 0
-  },
-  "phase_a_result": {
-    "status": "COMPLETE 2026-08-24 by recovery continuation attempt 7, $12.8587, ALL_DONE",
-    "decision_status": "unresolved_equivalence",
-    "winner": null,
-    "tie_break_ran": true,
-    "pooled_correct_overall": "cca699c93f34 0.029412 | 85bde4ded2c3 0.019608 | control-qwen 0.008824",
-    "pooled_usable_rollout": "cca699c93f34 0.6561 | 85bde4ded2c3 0.5456 | control-qwen 0.4947",
-    "comparability": "comparable_identity 70a26e0b, live == historical, bound_to_stage3_thresholds true; the raw protocol hash differs only by driver patch, non-material under v2",
-    "record": "logs/autoinit_recovery_continuation_attempt7/",
-    "kind": "SELECTION experiment: initialization/operator order searched under the fixed calib.domain_balanced@v1. The 0.86M matched probes are SELECTION probes, not recovery training; formal recovery is later Stage 2/3 work",
-    "provisional_leader": "cca699c93f34 is the numerical/provisional leader and IS separated from the canonical initialization (0.020588 > 0.011695). It is NOT the resolved winner: it and 85bde4ded2c3 were not separated from each other after the frozen sa/sb/sc procedure",
-    "two_controls": "preflight_ctl_r0860k_{sa,sb} are the historical permanent Stage-3 controls that materialized the thresholds, imported never retrained. qwen3_0p6b_init_v0 is the Phase-A canonical initialization control, hash-injected, which received matched fresh selection probes",
-    "do_not_read": "the small absolute 0.86M correctness rates are NOT final recovered-model capability; they sit near the floor in every arm including the control"
-  },
-  "next_sequence": {
-    "_status": "NONE of this is implemented or started, and none of it is funded",
-    "1_phase_b": "PHASE_B_STAGE1_COMPLETE / BEHAVIOURAL_SELECTION_INCOMPLETE. Remaining: 1 missing sb (fe9683e6a9c7) and at most 2 conditional sc (fe9683e6a9c7, control). See logs/autoinit_behavioural_continuation_pricing.json",
-    "1_phase_b_blocked_on": "a maintainer GO for one behavioural-continuation session; no cap increase needed",
-    "1_phase_b_cost": "behavioural continuation: floor $5.4784 (1 probe), CEILING $8.0691 (3 probes). Stage 1 is complete and must not be repurchased at the old $35.6660",
-    "2_final_selection": "complete final initialization selection after Phase B; Phase A's unresolved_equivalence is not a final selection",
-    "3_canonical_stage1_nll": "the canonical Stage-1 NLL diagnostic on the finally selected initialization, under the established Stage-1 measurement contract. DIAGNOSTIC ONLY, never a promotion criterion, and NOT the state_eval@v1 search-side NLL fields. Never yet run",
-    "4_formal_recovery": "only then, the project's formal Stage 2/Stage 3 recovery training",
-    "funding": "$35.6750 of headroom is approved for ONE Phase-B attempt bounded by the $35.6660 session ceiling. Nothing else in this list is funded.",
-    "1_phase_b_implementation": "COMPLETE, repaired six times; latest closes the retained-candidate shadowing and adds the Stage-1 durability boundary. Executable source 59 files, set version 5"
-  },
-  "canonical_infrastructure_moved_to": "docs/SESSION_ARCHITECTURE.md and logs/decisions.md",
-  "phase_b_state": "PHASE_B_STAGE1_COMPLETE / BEHAVIOURAL_SELECTION_INCOMPLETE"
+  "phase_b_pricing": "HISTORICAL: floor $16.4555, ceiling $35.6660. Prices a P=2 search ALREADY BOUGHT \u2014 must not authorize the continuation.",
+  "phase_b_stage1_selection_sha256": "84fd6496851995ae",
+  "phase_b_identity": "exec 3ad6a6e3edf13ca4 (59 files, set v5), prereg 53f1347f6865e10e, amendment df413bd99119dab7, universe 6 distinct (was 8 assumed); identity e94f15d2e648d86a",
+  "continuation_b": "exec 88e1ef576d810514 (61 files, set v2 \u2014 the REAL import closure, so it INCLUDES search.py/ranking.py/operators; loaded != permitted), plan a2ef4cd68a4bae7a, prereg 7900c87d814b5cb7, assets 1643145376ba19a2. 6 evidence candidates, 3 active finalists (fe9683e6a9c7, 85bde4ded2c3, control). Floor $5.4784 (1 probe), ceiling $8.0691 (3). Rung 1 COMPLETE and imported. See logs/autoinit_continuation_b_preregistration.json.",
+  "phase_b_post_freeze": "exec digest moved 3d3b5d07 -> a043e2c7: the shared SESSION_KIND dispatcher gained a continuation_b branch and the Phase-B gate now accepts declared additive drift. 3 pre-existing branches byte-identical, 0 lines removed. Preregistration NOT rewritten. logs/autoinit_phase_b_post_freeze_changes.json"
+ },
+ "complete": [
+  "Phase A end to end: search, three rungs, eleven probes, unresolved_equivalence",
+  "Stage 3 (both permanent controls, thresholds materialized)",
+  "Phase-B $0 readiness: v2 mixture, probe-reuse verification, plan, authorization type, executable-source identity, preregistration, driver, launcher, pricing",
+  "detail: logs/decisions.md and the per-run directories"
+ ],
+ "latest_verification": {
+  "utc": "2026-08-29T10:04:11Z",
+  "after": "the $0 behavioural-continuation implementation pass",
+  "full_suite": "2461 passed, 12 skipped, 0 failed in 27:01",
+  "frozen_asset_verifier": "passed, no problems",
+  "reuse_records": "both re-verified this pass, probes_dir_digests unchanged: historical 11 reconstructed / 8 admitted, attempt5 3 / 3",
+  "continuation_whole_function": "34 tests; both the resolved-at-sb and tie_pending->sc paths driven through the real stage map; 8 targeted mutations, no survivors",
+  "relay": "fe9683e6a9c7 round-trip verified, re-derived digest c313d1b4081b equals local canonical; done before any provider resource existed",
+  "identities": "no frozen Phase-A or Phase-B identity was touched",
+  "scope": "CPU only, repo .venv; no checkpoint trained, no GPU, no pod"
+ },
+ "failed": [
+  {
+   "run": "Phase-B attempt 1",
+   "usd": 0.15,
+   "pod": "4dbqycjrivhq17 (deleted, provider confirms gone)",
+   "where": "pod-side setup test gate, before any scientific stage",
+   "cause": "two defects, both mine: (1) verify_historical_probe_reuse hardcodes the DEV-BOX checkpoint store, so its two tests fail on the pod -- dev-box-only code in the pod gate, the same class as continuation attempt 3; (2) the catalog test was ALREADY RED at the launch commit because logs/superseded/ was uncatalogued, and I did not re-run the suite at the final commit",
+   "impact": "no scientific stage ran; no Phase-B science, calibration or pricing is in question",
+   "record": "logs/autoinit_phase_b_attempt1.json"
+  }
+ ],
+ "failure_pattern": "continuation 1-7: an uncaught transport call, an undeliverable asset, dev-box-only code in the pod gate, the attempt-12 OOM class, a checkpoint path, a checkpoint with no tokenizer, and finally a SUCCEEDING driver whose launcher crashed on a line only success reaches. Each failure was further in than the last. See logs/decisions.md",
+ "abandoned": [
+  "recovery_search_v1 (INVALID before first use)",
+  "calib.reasoning_heavy@v1 (UNBUILDABLE; superseded by v2)",
+  "the 14-probe Phase-B no-reuse path (rejected counterfactual, not a fallback)",
+  "student-prefix recovery (E5); any fourth seed",
+  "the paid device-canary session path: TERMINATED 2026-08-18, evidence kept, none prepared"
+ ],
+ "next_starting_point": {
+  "status": "PHASE_B_STAGE1_COMPLETE / BEHAVIOURAL_SELECTION_INCOMPLETE. Stage 0, the P=2 search, the Top-5 and the Stage-1 selection are done and retained. Identity collapse gives 6 distinct candidates as evidence; rung 1 is COMPLETE, computed at $0 by the frozen code, advancing 3. A dedicated behavioural-continuation executable now exists and is verified end to end at $0 \u2014 driver, launcher, authorization type, artifact specs, preregistration and relay assets. Only the paid behavioural continuation remains.",
+  "the_ask": "A maintainer decision on ONE behavioural-continuation session: ceiling $8.0691, floor $5.4784. Current headroom $23.7050 already covers it, so no cap increase is required. Nothing is authorized and no grant has been issued.",
+  "budget": "cap $283.76, spent $260.0550, headroom $23.7050. Continuation ceiling $8.0691 (NOT the $35.6660 full-Phase-B figure \u2014 Stage 1 is bought)."
+ },
+ "read_order": [
+  "logs/STATE.md \u2014 the human view of this file",
+  "logs/CATALOG.md \u2014 which log owns which fact, and what is superseded",
+  "docs/REPO_LAYOUT.md \u2014 where code lives",
+  "logs/decisions.md \u2014 why things are the way they are",
+  "logs/BUDGET_LEDGER.md \u2014 spend and caps",
+  "AGENTS.md \u2014 the binding working contract"
+ ],
+ "failed_before_the_current_architecture": "Phase A 1-5, 6, 7 and both canary attempts, $2.6108 total; all five classes closed by autoinit.stage1_device_contract@v1 and the session specification. See logs/decisions.md",
+ "measurement_attempts": "3 launches, $0.4611, ending COMPLETE. See logs/autoinit_measurement_attempt{1,2,3}/",
+ "failed_before_attempt_11": "Phase A 8 $0.1900, 9 $0.3400, 10 $11.4300; all closed and confirmed closed by attempt 11. See logs/decisions.md",
+ "causal_depth_cost": "standalone 12.07 eval/min (attempt 3, cached); INSIDE the search 6.96-10.79 on the fallback path, which fired 4/4. Recorded, NOT repriced: Stage 1 took 180.283 min against the 180.0 base allowance.",
+ "local_storage": {
+  "free_gib": 14.9402,
+  "ckpt_store_gate": "PASS (11.55 GiB required)",
+  "last_reclamation": "logs/derived_cache_cleanup_20260827.json -- 6.2387 GiB of rebuildable caches in two passes",
+  "volatility_note": "a full-suite run consumes ~4.7 GiB of /tmp on this single-filesystem box, so the launcher's own capacity gate is the protection that matters",
+  "checkpoints_deleted": 0,
+  "scientific_artifacts_deleted": 0
+ },
+ "phase_a_result": {
+  "status": "COMPLETE 2026-08-24 by recovery continuation attempt 7, $12.8587, ALL_DONE",
+  "decision_status": "unresolved_equivalence",
+  "winner": null,
+  "tie_break_ran": true,
+  "pooled_correct_overall": "cca699c93f34 0.029412 | 85bde4ded2c3 0.019608 | control-qwen 0.008824",
+  "pooled_usable_rollout": "cca699c93f34 0.6561 | 85bde4ded2c3 0.5456 | control-qwen 0.4947",
+  "comparability": "comparable_identity 70a26e0b, live == historical, bound_to_stage3_thresholds true; the raw protocol hash differs only by driver patch, non-material under v2",
+  "record": "logs/autoinit_recovery_continuation_attempt7/",
+  "kind": "SELECTION experiment: initialization/operator order searched under the fixed calib.domain_balanced@v1. The 0.86M matched probes are SELECTION probes, not recovery training; formal recovery is later Stage 2/3 work",
+  "provisional_leader": "cca699c93f34 is the numerical/provisional leader and IS separated from the canonical initialization (0.020588 > 0.011695). It is NOT the resolved winner: it and 85bde4ded2c3 were not separated from each other after the frozen sa/sb/sc procedure",
+  "two_controls": "preflight_ctl_r0860k_{sa,sb} are the historical permanent Stage-3 controls that materialized the thresholds, imported never retrained. qwen3_0p6b_init_v0 is the Phase-A canonical initialization control, hash-injected, which received matched fresh selection probes",
+  "do_not_read": "the small absolute 0.86M correctness rates are NOT final recovered-model capability; they sit near the floor in every arm including the control"
+ },
+ "next_sequence": {
+  "_status": "NONE of this is implemented or started, and none of it is funded",
+  "1_phase_b": "PHASE_B_STAGE1_COMPLETE / BEHAVIOURAL_SELECTION_INCOMPLETE. Remaining: 1 missing sb (fe9683e6a9c7) and at most 2 conditional sc (fe9683e6a9c7, control). See logs/autoinit_behavioural_continuation_pricing.json",
+  "1_phase_b_blocked_on": "a maintainer GO for one behavioural-continuation session; no cap increase needed",
+  "1_phase_b_cost": "floor $5.4784, CEILING $8.0691; NOT the old $35.6660",
+  "2_final_selection": "complete final initialization selection after Phase B; Phase A's unresolved_equivalence is not a final selection",
+  "3_canonical_stage1_nll": "the canonical Stage-1 NLL diagnostic on the finally selected initialization, under the established Stage-1 measurement contract. DIAGNOSTIC ONLY, never a promotion criterion, and NOT the state_eval@v1 search-side NLL fields. Never yet run",
+  "4_formal_recovery": "only then, the project's formal Stage 2/Stage 3 recovery training",
+  "funding": "$35.6750 of headroom is approved for ONE Phase-B attempt bounded by the $35.6660 session ceiling. Nothing else in this list is funded.",
+  "1_phase_b_implementation": "the behavioural-continuation executable is BUILT and verified end to end at $0; identities in frozen.continuation_b"
+ },
+ "canonical_infrastructure_moved_to": "docs/SESSION_ARCHITECTURE.md and logs/decisions.md",
+ "phase_b_state": "PHASE_B_STAGE1_COMPLETE / BEHAVIOURAL_SELECTION_INCOMPLETE"
 }

@@ -1,0 +1,18 @@
+{
+  "spec": "aadistill.artifact_spec/v1",
+  "session": "autoinit_continuation_b",
+  "note": "Failure spec: what to rescue from a continuation that did NOT reach ALL_DONE. Everything is optional except the evidence file, because a session that died in stage 0 has produced nothing else and a required-but-absent artifact would turn a recoverable failure into a collection error. What matters most here is the probe journal: a newly bought sb or sc is the only irreplaceable product this session can create, and losing it means the next attempt re-buys it. No search artifacts appear, on success or failure, because this session cannot produce them.",
+  "entries": [
+    {"artifact_class": "phase_a_evidence", "pattern": "audit/autoinit_phase_a/phase_a_evidence.json", "required": true, "lifecycle": "final_required"},
+    {"artifact_class": "probe_journal", "pattern": "audit/autoinit_phase_a/probes/*.json", "required": false, "lifecycle": "final_required"},
+    {"artifact_class": "continuation_binding", "pattern": "audit/autoinit_phase_a/continuation_b_stage0_binding.json", "required": false, "lifecycle": "final_required"},
+    {"artifact_class": "audit_json", "pattern": "audit/autoinit_phase_a/*.json", "required": false, "lifecycle": "final_required"},
+    {"artifact_class": "probe_config", "pattern": "audit/autoinit_phase_a/configs/*.json", "required": false, "lifecycle": "final_required"},
+    {"artifact_class": "per_sample", "pattern": "audit/autoinit_phase_a/*_per_sample.jsonl", "required": false, "lifecycle": "final_required"},
+    {"artifact_class": "generations", "pattern": "eval/phase_a/*/*.generations.jsonl", "required": false, "lifecycle": "final_required"},
+    {"artifact_class": "generation_summary", "pattern": "eval/phase_a/*/*.json", "required": false, "lifecycle": "final_required"},
+    {"artifact_class": "probe_train_log", "pattern": "stage3/phase_a/*/train_log.jsonl", "required": false, "lifecycle": "final_required"},
+    {"artifact_class": "gate_log", "pattern": "audit/autoinit_phase_a/*.log", "required": false, "lifecycle": "final_required"},
+    {"artifact_class": "session_evidence", "pattern": "audit/autoinit_phase_a/session/*", "required": false, "lifecycle": "final_required"}
+  ]
+}

@@ -1,0 +1,47 @@
+{
+  "schema": "aadistill.autoinit.phase_b_post_freeze_changes/v1",
+  "generated_utc": "2026-08-29T10:03:54.278618+00:00",
+  "_contract": "The frozen Phase-B preregistration binds an executable-source digest. Two of its members had to change so the behavioural continuation could exist at all: the SINGLE SESSION_KIND dispatcher shared by every launchable session, and the Phase-B launcher's own preregistration gate, which now enforces the recorded-drift rule this file feeds. Recording that is the alternative to rewriting the preregistration (which would destroy the evidence of what attempt 5 executed) and to deleting the gate (which would destroy its meaning). Phase-B STAGE 1 IS COMPLETE and no further full Phase-B session is planned.",
+  "phase_b_status": "STAGE 1 COMPLETE \u2014 the frozen digest is historical evidence",
+  "baseline_ref": "05a0f429de1f892559282e1fdad45c455892f86c",
+  "frozen_digest": "3d3b5d0717723cd3bf81bd9e8da1cedb0d78dc927e52d310e43b1d3a7d66f993",
+  "frozen_set_version": 6,
+  "post_freeze_digest": "a043e2c76de80e92dd06691e474004e0cd2ed1933fe1d1d6d66f083ca7c6ab4a",
+  "changed_files": [
+    "scripts/pod/autoinit_phase_b_launch.py",
+    "scripts/pod/autoinit_preflight_setup.sh"
+  ],
+  "change": {
+    "what": "added an elif branch for SESSION_KIND=continuation_b, and made the Phase-B preregistration gate accept recorded, additive, branch-identical drift instead of exact equality",
+    "why": "the behavioural continuation carries a ContinuationAuthorization, which PhaseBAuthorization.load rejects on schema and which the spend default cannot read. Attempt 2 proved that at $0.2300 for phase_b itself; the dispatch-completeness regression written afterwards caught this one automatically, at $0, before any pod existed.",
+    "additive_only": true,
+    "lines_added": 25,
+    "lines_removed": 0
+  },
+  "dispatch_branches": {
+    "pre_existing_unchanged": {
+      "phase_a": "91f17860d883975b6d2370525e75d72924bcd172283dfa1769d1cc5e8fdc7074",
+      "phase_b": "6647692753c2ce65768075c3b9794a8f5b7e59e34dc04128745a93c2e3393edd",
+      "recovery_continuation": "fb0f99e2ffa2aba3259e2ffda849350c779e90598749f4787b47b4996243b890"
+    },
+    "pre_existing_changed": [],
+    "added": [
+      "continuation_b"
+    ]
+  },
+  "why_this_is_safe_for_phase_b": "A Phase-B session exports SESSION_KIND=phase_b and takes its own branch, which is byte-identical to the frozen one. The added branch is unreachable from a Phase-B session by construction.",
+  "new_runtime_module_not_in_the_frozen_set": {
+    "module": "src/aadistill/autoinit/post_freeze.py",
+    "loaded_by": "autoinit_phase_b_launch.preregistration_gate, which imports it at call time",
+    "why_not_added_to_the_set": "adding a member would move the digest again and is re-freezing by another name. Declared here instead, for the same reason the continuation's own source set is derived from its real import closure: a digest that omits a loaded file lets that file change without anything noticing. This module is small, has no side effects, and its own behaviour is mutation-tested."
+  },
+  "also_affected_frozen_sets": {
+    "note": "the same dispatcher is a member of Phase A's harness set and the recovery continuation's. Both of those sessions are COMPLETE and their authorizations are consumed, so no live gate binds them; recorded here so the blast radius is not discovered later.",
+    "sets": [
+      "aadistill.autoinit.authorization.HARNESS_SOURCE_FILES_V1",
+      "aadistill.autoinit.recovery_continuation.PHASE_A_HARNESS_SOURCE_FILES_V1"
+    ]
+  },
+  "not_a_licence": "This does NOT authorize further edits to the Phase-B source set. Any future change must be recorded here with the same evidence, and a change that is not additive, or that alters a pre-existing dispatch branch, must fail the gate rather than be appended to this list.",
+  "note_sha256": "dc726c3729e966c2dc946ff0b50518e8384ed7ebbcc157fc598bdb497cb6051a"
+}

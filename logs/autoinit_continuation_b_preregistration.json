@@ -1,0 +1,164 @@
+{
+  "schema": "aadistill.autoinit.continuation_b_preregistration/v1",
+  "generated_utc": "2026-08-29T09:34:48.717059+00:00",
+  "status": "FROZEN BEFORE ANY BEHAVIOURAL-CONTINUATION RESULT EXISTS. Not an authorization, not a grant, and not an instruction to launch.",
+  "what_this_session_is": "Phase-B Stage 1 is COMPLETE. Attempt 5 ran the joint P=2 search to completion, emitted an authoritative Top-5 and a durable Stage-1 selection artifact, and paid for three rung-1 sa probes. It then died on a candidate-universe collision that the identity-collapse amendment resolves, and rung 1 was completed at $0 from retained evidence. What remains is behavioural: one missing sb, and at most two conditional sc. This session buys ONLY that.",
+  "what_this_session_must_not_do": [
+    "run the P=2 search, or any search",
+    "purchase a new sa probe",
+    "recompute rung 1",
+    "probe a searched non-survivor",
+    "reach a fourth seed",
+    "break a tie with Stage-1 ranking, search-side KL/NLL, the canonical Stage-1 NLL, or state-id ordering"
+  ],
+  "evidence_universe": {
+    "distinct_candidates": 6,
+    "universe_identity": "e94f15d2e648d86a2a7a1496c5e1c0ef47b78d87746bb622488a06af0418d483",
+    "amendment_sha256": "df413bd99119dab72c16399362298620abec0efdce36754a1627b14e616b26bb",
+    "role": "EVIDENCE and provenance only. Six distinct materialized initializations carry the completed sa evidence and the identity-collapse result. Their bytes are NOT staged, because five-sixths of them are never probed."
+  },
+  "active_finalists": {
+    "count": 3,
+    "state_ids": [
+      "control-qwen3_0p6b_init_v0",
+      "fe9683e6a9c783bbc6fe276a78c851c6",
+      "85bde4ded2c31953f802e39cf2252c87"
+    ],
+    "selected_searched": [
+      "fe9683e6a9c783bbc6fe276a78c851c6",
+      "85bde4ded2c31953f802e39cf2252c87"
+    ],
+    "auto_advanced_control": [
+      "control-qwen3_0p6b_init_v0"
+    ],
+    "computed_by": "the frozen SuccessiveHalvingPlan.select_rung1_survivors, unchanged",
+    "role": "The ONLY states that may enter sb, the pooled sa+sb decision, the conditional sc and the final selection. Rung 1 is complete and frozen; this session imports that result and does not recompute it.",
+    "excluded_non_survivors": []
+  },
+  "probe_inventory": {
+    "derivation": "from the two verified reuse records, cross-checked against what the executable actually buys in a whole-function run",
+    "cited_sa": "all six evidence candidates \u2014 no new sa is purchased",
+    "missing_sb": [
+      "fe9683e6a9c7"
+    ],
+    "reused_sb": [
+      "85bde4ded2c3",
+      "control-qwen"
+    ],
+    "missing_sc_worst_case": [
+      "fe9683e6a9c7",
+      "control-qwen"
+    ],
+    "reused_sc": [
+      "85bde4ded2c3"
+    ],
+    "sc_is_conditional": "sc runs only for candidates inside the frozen equivalence interval that lack a verified sc",
+    "new_probes_min": 1,
+    "new_probes_max": 3
+  },
+  "reuse_rule": {
+    "binds_on": [
+      "student_artifact_digest",
+      "seed"
+    ],
+    "comparability": "generation_runtime_comparability@v2. The citable evidence carries TWO raw evaluation_protocol_hash values (7327e880\u2026 and 250f72ef\u2026) that differ by host NVIDIA driver patch alone, which the rule declares non-material; all share the comparable identity 70a26e0b\u2026. Requiring exact equality of the raw hash would re-buy all eight citable probes.",
+    "historical_record": {
+      "probes_dir_digest": "a5115816861ad239f646facec4d53ba2c7925c9430c530e7c6d0af2560d5b1af",
+      "admitted": [
+        "85bde4ded2c3/sa",
+        "85bde4ded2c3/sb",
+        "85bde4ded2c3/sc",
+        "cca699c93f34/sa",
+        "cca699c93f34/sb",
+        "cca699c93f34/sc",
+        "control-qwen/sa",
+        "control-qwen/sb"
+      ]
+    },
+    "attempt5_record": {
+      "probes_dir_digest": "2e5030fadc786faaafe1ec3ac3a2ccb4af367e98bf630a89a16938729a77844e",
+      "admitted": [
+        "ab7632b00788/sa",
+        "bf5ae3b6ae00/sa",
+        "fe9683e6a9c7/sa"
+      ]
+    }
+  },
+  "stage1_evidence": {
+    "status": "COMPLETE \u2014 imported, never re-purchased",
+    "selection_sha256": "84fd6496851995aef8ac624b68944c0881fdaf62a29013ea2aec5acb0e87a35c",
+    "top_n": 5
+  },
+  "executable_source": {
+    "digest": "88e1ef576d810514e855c94f03dbc36a1d818a065c37ff5b6140da128e5e7e55",
+    "set_version": 2,
+    "n_files": 61,
+    "derivation": "the REAL import closure of the continuation driver and launcher, plus three subprocess-invoked runtime files. NOT curated: it therefore includes search.py, ranking.py and the operator modules, which the package __init__ loads for every consumer. What source is LOADED and what operation is PERMITTED are separate claims and are recorded separately."
+  },
+  "no_search_guarantee": {
+    "claims": [
+      "the continuation plan declares no search stage",
+      "stage1() and run_search() raise",
+      "ContinuationAuthorization.runs_search is False BY TYPE \u2014 no field exists",
+      "no search call site on the continuation's own path",
+      "the only loaded file containing one is PhaseADriver, whose stage1 is overridden with a raise and never bound into the stage map",
+      "a whole-function test drives the real stage map with BeamSearch and run_phase_a_search replaced by detonators, and neither is touched on either the resolved or the tie path"
+    ],
+    "known_neutralized_call_sites": [
+      "scripts/pod/autoinit_phase_a_driver.py"
+    ],
+    "observed_call_site_owners": [
+      "scripts/pod/autoinit_phase_a_driver.py"
+    ]
+  },
+  "science_plan": {
+    "plan_hash": "02be33b9a7a8e26bc8bfb75795351e8cdc9ffd441b47066cc81887cfc511b55c",
+    "source": "logs/autoinit_phase_a_recovery_plan_frozen.json",
+    "unchanged": true
+  },
+  "session_plan": {
+    "plan_id": "autoinit.v1.phase_b_behavioural_continuation",
+    "plan_hash": "a2ef4cd68a4bae7a0de399b078ad99e41e23ae8448b2871b0c3f381d687703cf",
+    "version": 2,
+    "stages": [
+      0,
+      1,
+      3,
+      4,
+      5
+    ],
+    "stage_2_absent_because": "Phase A's stage 2 is rung 1 on seed sa, which this session imports as completed evidence rather than buying"
+  },
+  "calibration_profiles": [
+    {
+      "qualified_id": "calib.domain_balanced@v1",
+      "profile_hash": "11f36a88bad4879f8ab0e3586ca1f0af035401e505dc97815bed8d47b9f32e9b",
+      "content_sha256": "d65c1f40e4837ea1bd5bcc33c68041a13b797c68f5be3c0686e0142ed761028f"
+    },
+    {
+      "qualified_id": "calib.reasoning_heavy@v2",
+      "profile_hash": "6c67b8dff0e81a775371a62b1b293677e45c173f52aee119d036c95081782ddd",
+      "content_sha256": "cdb2838946b9355294406d2bc398bc8390306ced84a35b09900f45a033ccc370"
+    }
+  ],
+  "relay_assets": {
+    "repo": "AlphaAvatar/aadistill-transport",
+    "repo_type": "model",
+    "state_id": "fe9683e6a9c783bbc6fe276a78c851c6",
+    "artifact_digest": "c313d1b4081b9a3b410dddf7a29ebcaad8dd0759179d51e1d761238c1743a2a6",
+    "verified": true,
+    "verified_before_provider_creation": true
+  },
+  "budget": {
+    "floor_usd": 5.4784,
+    "hard_ceiling_usd": 8.0691,
+    "full_phase_b_ceiling_usd_HISTORICAL_ONLY": 35.666,
+    "note": "the $35.6660 full-Phase-B ceiling is HISTORICAL and must not authorize this session; it prices a search already bought"
+  },
+  "valid_terminal_results": [
+    "a winner selected under the frozen rule",
+    "winner=None with unresolved_equivalence \u2014 a RESULT, not a failure"
+  ],
+  "not_authorized": "No continuation grant or authorization exists, no cumulative-budget increase has been requested, and this document does not request one. It records what the session would do if one were issued.",
+  "preregistration_sha256": "7900c87d814b5cb796e463ae63c98ef9f5e9d6d158a4ff56f35edb5bfbd404dd"
+}

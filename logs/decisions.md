@@ -1,5 +1,35 @@
 # Decision records
 
+## 2026-08-29 — A frozen executable digest may move, if the move is recorded and provably additive
+
+- Context: `scripts/pod/autoinit_preflight_setup.sh` is simultaneously (a) a member
+  of the frozen Phase-B executable-source set and (b) the single `SESSION_KIND`
+  dispatcher every launchable session goes through. The behavioural continuation
+  needs its own branch there — attempt 2 proved at `$0.2300` that a session whose
+  kind has no branch is loaded by the wrong authorization type — so the frozen
+  Phase-B digest moved from `3d3b5d07…` to `10f236d5…`.
+- Decision: do not rewrite the Phase-B preregistration, and do not delete the gate.
+  Record the change in `logs/autoinit_phase_b_post_freeze_changes.json` and reshape
+  the gate to require that every difference is declared, that the change is additive
+  with zero lines removed, and that **every pre-existing dispatch branch is
+  byte-identical** — re-derived by the test from the script itself, not read from the
+  note. A Phase-B session takes its own branch and cannot reach a new one, so that is
+  the property which actually protects it.
+- Alternatives considered: regenerating the Phase-B preregistration (destroys the
+  evidence of what attempt 5 actually ran, and the maintainer instruction is
+  explicitly not to rewrite it); deleting the assertion (removes a real gate);
+  duplicating the dispatcher per session (four near-identical copies, and the
+  completeness regression could no longer prove coverage).
+- Expected upside: the frozen artifact stays untouched and citable, while a
+  non-additive change or an edit to a live branch still fails at `$0`.
+- Risks: the note could become a habit — a place to append excuses. Mitigated by
+  `not_a_licence` in the artifact itself and by the gate re-deriving the branch
+  hashes rather than believing them. Mutation-tested: editing a pre-existing branch,
+  staling the recorded digest, claiming a non-additive change, and deleting the note
+  are all killed.
+- Revisit when: any Phase-B source file other than the dispatcher changes, or if a
+  second entry is ever proposed for the changed-files list.
+
 ## 2026-08-29 — Identity collapse: the search reproduced two of its own imports
 
 - **Context:** a `$0` pass after attempt 5. No pod, no grant, no authorization, no Stage-1 rerun. Project state reclassified to **`PHASE_B_STAGE1_COMPLETE / BEHAVIOURAL_SELECTION_INCOMPLETE`** — Stage 0, the joint P=2 search, the authoritative Top-5 and the Stage-1 selection artifact are done and retained; the behavioural cross-phase selection is not.

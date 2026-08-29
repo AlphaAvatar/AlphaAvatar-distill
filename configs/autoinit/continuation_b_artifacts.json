@@ -1,0 +1,23 @@
+{
+  "spec": "aadistill.artifact_spec/v1",
+  "session": "autoinit_continuation_b",
+  "note": "Success spec for a behavioural continuation that reached ALL_DONE. Continuation-specific because the full Phase-B spec REQUIRES artifacts this session cannot produce and must never be asked to: search_result.json, the states.jsonl search journal, stage1_selection.json and leaf_retention.json are all products of the P=2 search, which is complete, retained, authoritative and mechanically unreachable here. Requiring them would fail a SUCCESSFUL session at teardown for not re-buying a 16.5 h search. They enter this session as bound, hash-checked INPUTS instead. rung1_selection.json is likewise imported from the identity-collapse amendment rather than recomputed. The entries below were enumerated from a real end-to-end run of the continuation driver (tests/pod/test_continuation_b_executes.py), not predicted. Probe minimums: min_matches 12 journalled probes — 11 imported citations plus the one mandatory missing sb — and 1 probe config, because sc is CONDITIONAL and a resolved-at-sb session legitimately produces exactly one new probe. Entries are ArtifactSpec kwargs.",
+  "entries": [
+    {"artifact_class": "phase_a_evidence", "pattern": "audit/autoinit_phase_a/phase_a_evidence.json", "required": true, "lifecycle": "final_required"},
+    {"artifact_class": "attested_protocol", "pattern": "audit/autoinit_phase_a/attested_evaluation_protocol.json", "required": true, "lifecycle": "final_required"},
+    {"artifact_class": "continuation_binding", "pattern": "audit/autoinit_phase_a/continuation_b_stage0_binding.json", "required": true, "lifecycle": "final_required"},
+    {"artifact_class": "phase_a_result", "pattern": "audit/autoinit_phase_a/phase_a_result.json", "required": true, "lifecycle": "final_required"},
+    {"artifact_class": "rung2_selection", "pattern": "audit/autoinit_phase_a/rung2_selection.json", "required": true, "lifecycle": "final_required"},
+    {"artifact_class": "probe_journal", "pattern": "audit/autoinit_phase_a/probes/*.json", "required": true, "min_matches": 12, "lifecycle": "final_required"},
+    {"artifact_class": "probe_config", "pattern": "audit/autoinit_phase_a/configs/*.json", "required": true, "min_matches": 1, "lifecycle": "final_required"},
+    {"artifact_class": "engine_probe", "pattern": "audit/autoinit_phase_a/engine_probe.json", "required": true, "lifecycle": "final_required"},
+    {"artifact_class": "recovery_search_result", "pattern": "audit/autoinit_phase_a/*_recovery_search.json", "required": true, "lifecycle": "final_required"},
+    {"artifact_class": "per_sample", "pattern": "audit/autoinit_phase_a/*_per_sample.jsonl", "required": true, "lifecycle": "final_required"},
+    {"artifact_class": "generations", "pattern": "eval/phase_a/*/*.generations.jsonl", "required": true, "lifecycle": "final_required"},
+    {"artifact_class": "generation_summary", "pattern": "eval/phase_a/*/*.json", "required": false, "lifecycle": "final_required"},
+    {"artifact_class": "probe_train_log", "pattern": "stage3/phase_a/*/train_log.jsonl", "required": false, "lifecycle": "final_required"},
+    {"artifact_class": "probe_train_tail", "pattern": "audit/autoinit_phase_a/*_train_tail.log", "required": false, "lifecycle": "final_required"},
+    {"artifact_class": "gate_log", "pattern": "audit/autoinit_phase_a/*.log", "required": false, "lifecycle": "final_required"},
+    {"artifact_class": "session_evidence", "pattern": "audit/autoinit_phase_a/session/*", "required": false, "lifecycle": "final_required"}
+  ]
+}

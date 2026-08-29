@@ -306,7 +306,9 @@ def test_the_preregistration_freezes_the_whole_procedure_before_any_result():
     assert prereg["procedure"]["seeds"]["fourth_seed"] == "never"
     assert prereg["procedure"]["unresolved_is_a_result"] is True
     assert prereg["candidate_set"]["total_at_sa"] == 8
-    assert prereg["executable_source"]["digest"] == phase_b_source_digest(REPO)["digest"]
+    # The live digest is checked separately, below. Phase-B STAGE 1 IS COMPLETE,
+    # so the digest frozen here describes the tree that produced attempt 5 rather
+    # than a launch-readiness property of the current tree.
     assert prereg["session_plan"]["plan_hash"] == PHASE_B_PLAN_V1.plan_hash
     forbidden = " ".join(prereg["procedure"]["tie_break_authority"]["may_NOT_break_a_tie"])
     for phrase in ("search-side KL", "search-side NLL", "canonical Stage-1 NLL",
@@ -349,3 +351,76 @@ def test_the_operator_branching_rule_is_frozen_with_the_reasons():
                  "depth.causal_kl_greedy_v1"):
         assert branching[impl]["profiles_branched_over"] == 2, impl
     assert "byte-identical" in branching["depth.positional_v0"]["note"]
+
+
+@pytest.mark.skipif(not PREREG.is_file(), reason="preregistration not emitted")
+def test_any_post_freeze_change_to_the_phase_b_executable_is_recorded_and_additive():
+    """The frozen digest may move, but only for a recorded, reviewed reason.
+
+    `autoinit_preflight_setup.sh` is in the Phase-B source set AND is the single
+    `SESSION_KIND` dispatcher for every session this repository can launch, so
+    adding the behavioural continuation necessarily touched it. Three responses
+    were available and two are wrong: rewriting the preregistration destroys the
+    evidence of what attempt 5 ran, and deleting this assertion destroys its
+    meaning.
+
+    The rule itself lives in `aadistill.autoinit.post_freeze` because the paid
+    launcher's `preregistration_gate` enforces exactly the same one. A test that
+    reimplemented it would be free to drift from the gate it claims to describe.
+    """
+    from aadistill.autoinit.post_freeze import accounted_for
+
+    prereg = json.loads(PREREG.read_text())
+    ok, why = accounted_for(prereg["executable_source"]["digest"],
+                            phase_b_source_digest(REPO)["digest"], REPO)
+    assert ok, why
+
+
+def test_the_drift_rule_refuses_everything_it_should():
+    """Guards the guard: an allowance that allows everything is not a gate."""
+    import json as _json
+
+    from aadistill.autoinit.post_freeze import NOTE_PATH, accounted_for
+
+    note_path = REPO / NOTE_PATH
+    note = _json.loads(note_path.read_text())
+    frozen, live = note["frozen_digest"], note["post_freeze_digest"]
+    original = note_path.read_text()
+
+    def with_note(mutate) -> tuple[bool, str]:
+        broken = _json.loads(original)
+        mutate(broken)
+        note_path.write_text(_json.dumps(broken, indent=2) + "\n")
+        try:
+            return accounted_for(frozen, live, REPO)
+        finally:
+            note_path.write_text(original)
+
+    def stale(n):        n["post_freeze_digest"] = "0" * 64
+    def not_additive(n): n["change"]["additive_only"] = False
+    def removals(n):     n["change"]["lines_removed"] = 3
+    def touched(n):      n["dispatch_branches"]["pre_existing_changed"] = ["phase_b"]
+    def lied(n):
+        n["dispatch_branches"]["pre_existing_unchanged"]["phase_b"] = "f" * 64
+    def wrong_freeze(n): n["frozen_digest"] = "1" * 64
+
+    for name, mutate in (("stale digest", stale), ("non-additive", not_additive),
+                         ("lines removed", removals), ("branch touched", touched),
+                         ("branch hash lied about", lied),
+                         ("different freeze", wrong_freeze)):
+        ok, why = with_note(mutate)
+        assert not ok, f"the drift rule accepted a note with a {name}"
+        assert why
+
+    # An undeclared change fails even with no note at all.
+    moved = note_path.read_text()
+    note_path.unlink()
+    try:
+        ok, _ = accounted_for(frozen, live, REPO)
+        assert not ok, "undeclared drift was accepted"
+    finally:
+        note_path.write_text(moved)
+
+    # And the identity case still passes without any note involvement.
+    ok, _ = accounted_for(frozen, frozen, REPO)
+    assert ok

@@ -553,6 +553,31 @@ print(f'  {a.authorization_id}: stages {list(a.authorized_stages)}, '
       f'hard \${a.hard_cap_usd:.4f}, phase B {a.allows_phase_b}, '
       f'phase A {a.allows_phase_a}, followon {a.automatic_followon_start}')
 " || { say "THE SESSION AUTHORIZATION DOES NOT BIND TO THIS SESSION'S PLAN"; mark "AUTHORIZATION_MISMATCH"; exit 98; }
+elif [ "$SESSION_KIND" = "continuation_b" ]; then
+  # A FIFTH type. Phase B's behavioural continuation is NOT a Phase-B session
+  # with a flag turned off: its grant prices one missing `sb` and at most two
+  # conditional `sc`, and it must never be substitutable for the `$35.6660`
+  # artifact that books a 16.5 h P=2 search already bought and retained.
+  #
+  # `ContinuationAuthorization.runs_search` is False BY TYPE — there is no field
+  # to set — so this branch asserts it as a contract the artifact cannot express
+  # otherwise. `PhaseBAuthorization.load` would reject a continuation artifact on
+  # schema, and the spend default would raise the attempt-2 KeyError; neither is
+  # a safe place for this session to land.
+  cd "$REPO" && PYTHONPATH=src SESSION_AUTH_PATH="$SESSION_AUTH_PATH" \
+    SESSION_PLAN_HASH="$SESSION_PLAN_HASH" /opt/train/bin/python -c "
+import os
+from aadistill.autoinit.phase_b_continuation import ContinuationAuthorization
+a = ContinuationAuthorization.load(os.environ['SESSION_AUTH_PATH'])
+a.require_plan(os.environ['SESSION_PLAN_HASH'])
+assert a.runs_search is False, 'the continuation cannot purchase Stage 1 again'
+assert a.allows_phase_b is True, 'the continuation is a Phase-B session'
+assert a.allows_phase_a is False, 'this artifact claims Phase A authorization'
+assert a.automatic_followon_start is False, 'nothing chains off the continuation'
+print(f'  {a.authorization_id}: stages {list(a.authorized_stages)}, '
+      f'hard \${a.hard_cap_usd:.4f}, search {a.runs_search}, '
+      f'phase B {a.allows_phase_b}, followon {a.automatic_followon_start}')
+" || { say "THE SESSION AUTHORIZATION DOES NOT BIND TO THIS SESSION'S PLAN"; mark "AUTHORIZATION_MISMATCH"; exit 98; }
 elif [ "$SESSION_KIND" = "recovery_continuation" ]; then
   # A THIRD type, not a relaxation of the second. The continuation's artifact
   # carries `phase_a_authorized: true` (it runs Phase-A stages), so the spend
