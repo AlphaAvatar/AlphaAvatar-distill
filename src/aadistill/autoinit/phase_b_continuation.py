@@ -32,6 +32,9 @@ from pathlib import Path
 from typing import Any
 
 from ..infrastructure.manifest import sha256_json
+from ..infrastructure.source_identity import (
+    CANONICAL_DIGEST_ALGORITHM, canonical_source_digest,
+)
 from .authorization import AuthorizationError
 from .recovery import PreflightPlan, PreflightStage
 
@@ -424,13 +427,26 @@ CONTINUATION_SOURCE_FILES_V2: tuple[str, ...] = (
     "src/aadistill/infrastructure/session.py",
     "src/aadistill/infrastructure/session_prechecks.py",
     "src/aadistill/infrastructure/session_runner.py",
+    "src/aadistill/infrastructure/source_identity.py",
     "src/aadistill/init/__init__.py",
     "src/aadistill/init/collect.py",
     "src/aadistill/init/contribution.py",
     "src/aadistill/init/project.py",
     "src/aadistill/init/sandwich.py",
 )
-CONTINUATION_SOURCE_SET_VERSION = 2
+#: v2 -> v3 is an ALGORITHM change, not a content change. The file set is
+#: identical; what moved is how the set becomes an identity. v2 used
+#: `sha256_json(entries)`, which `session_commit_gate` — the first pre-provider
+#: precheck — can never reproduce, because it re-derives the digest itself from
+#: git blobs using the canonical line-join formula that Phase A and Phase B
+#: already use. The version is bumped so a reader can tell "the algorithm was
+#: corrected" from "someone edited the executable"; the same 61 files under the
+#: two schemes produce different digests and would otherwise look like an edit.
+#:
+#: This is an executable/provenance identity only. No scientific protocol is
+#: versioned by it.
+CONTINUATION_SOURCE_SET_VERSION = 3
+CONTINUATION_SOURCE_DIGEST_ALGORITHM = CANONICAL_DIGEST_ALGORITHM
 
 
 def derive_continuation_closure(repo_root: str | Path = ".") -> tuple[str, ...]:
@@ -555,5 +571,10 @@ def continuation_source_digest(repo_root: str | Path = ".", *,
         entries.append({"path": rel, "sha256": sha256_file(path),
                         "bytes": path.stat().st_size})
     return {"set_version": CONTINUATION_SOURCE_SET_VERSION,
+            "algorithm": CONTINUATION_SOURCE_DIGEST_ALGORITHM,
             "n_files": len(entries), "files": entries,
-            "digest": sha256_json(entries), "not_yet_covered": []}
+            # The SHARED formula, imported rather than re-typed. `session_commit_gate`
+            # re-derives this value independently from the blobs at the launch
+            # commit, so a producer-local variant is not a style question: it is a
+            # value the gate cannot reproduce, and it refused every launch.
+            "digest": canonical_source_digest(entries), "not_yet_covered": []}

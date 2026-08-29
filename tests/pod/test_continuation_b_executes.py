@@ -921,3 +921,175 @@ def test_importing_this_driver_does_not_rebind_the_shared_status_global():
     finally:
         sys.modules.pop("continuation_b_import_probe", None)
         parent.STATUS = before
+
+
+# --- the SHARED consumer, not another self-comparison -----------------------
+#
+# Everything else in this file compares the continuation's digest against code
+# that computes it the same way, so all of it passed while the launch was
+# blocked. `session_commit_gate` is the only consumer that re-derives the digest
+# INDEPENDENTLY -- from git blobs at the launch commit -- and it is the first
+# pre-provider precheck. These tests drive it for real.
+
+def _authorized_commit() -> str:
+    """A commit whose tree contains the continuation source. HEAD by default."""
+    import subprocess
+
+    return subprocess.run(["git", "rev-parse", "HEAD"], cwd=REPO,
+                          capture_output=True, text=True, check=True).stdout.strip()
+
+
+def _gate_ctx(digest: str, files, commit: str):
+    import types
+
+    auth = types.SimpleNamespace(harness_source_files=tuple(files),
+                                 harness_source_digest=digest,
+                                 authorized_session_commit=commit)
+    return types.SimpleNamespace(args=types.SimpleNamespace(session_commit=commit),
+                                 auth=auth, evidence={})
+
+
+def _run_shared_gate(digest, files, commit=None):
+    from aadistill.infrastructure.session_prechecks import session_commit_gate
+
+    commit = commit or _authorized_commit()
+    ctx = _gate_ctx(digest, files, commit)
+    ok, why = session_commit_gate(
+        REPO, "logs/autoinit_continuation_b_authorization.json",
+        check_lineage=False)(ctx)
+    record = ctx.evidence.get("session_commit_check")
+    if record is None:
+        # The gate returned before recording, which it does only when the commit
+        # does not CONTAIN a declared source file. Not a probe bug: a pod checks
+        # out this commit from a bundle, so an uncommitted source file is a real
+        # launch blocker. Surfaced rather than skipped.
+        raise AssertionError(
+            f"the shared gate could not evaluate {commit}: {why}. The continuation "
+            "source must be committed before it can be launched from.")
+    return ok, why, record
+
+
+def test_the_SHARED_commit_gate_accepts_the_continuation_source_identity():
+    """The regression the whole repair exists for.
+
+    v2 computed `sha256_json(entries)`; the gate re-derives
+    `sha256("".join(f"{path}:{sha256}\\n"))`. Same field, same type, values that
+    can never agree -- so the first pre-provider gate refused every launch while
+    every continuation-local check reported success.
+
+    `check_lineage=False` because the authorization artifact does not exist yet;
+    the claim under test is the DIGEST contract, and the lineage half is
+    exercised at the real launch commit.
+    """
+    from aadistill.autoinit.phase_b_continuation import (
+        CONTINUATION_SOURCE_FILES_V2, continuation_source_digest,
+    )
+
+    observed = continuation_source_digest(REPO)
+    ok, why, record = _run_shared_gate(observed["digest"],
+                                       CONTINUATION_SOURCE_FILES_V2)
+    assert record["harness_matches"] is True, (
+        f"the shared gate re-derived {record['harness_digest_at_commit']} but the "
+        f"continuation produces {record['authorized_harness_digest']}. {why}")
+    assert record["harness_digest_at_commit"] == observed["digest"]
+    assert observed["set_version"] == 3
+    assert observed["algorithm"] == "sha256-over-sorted-path-colon-sha256-lines/v1"
+
+
+def test_the_continuation_uses_the_same_formula_as_phase_a_and_phase_b():
+    """One formula, three producers. Asserted on VALUES, not on shared imports."""
+    from aadistill.autoinit.authorization import harness_source_digest
+    from aadistill.autoinit.phase_b import phase_b_source_digest
+    from aadistill.autoinit.phase_b_continuation import (
+        CONTINUATION_SOURCE_FILES_V2, continuation_source_digest,
+    )
+    from aadistill.infrastructure.source_identity import canonical_source_digest
+
+    probe = ("README.md", "AGENTS.md")
+    a = harness_source_digest(REPO, files=probe)["digest"]
+    b = phase_b_source_digest(REPO, files=probe)["digest"]
+    c = continuation_source_digest(REPO, files=probe)["digest"]
+    assert a == b == c, {"phase_a": a, "phase_b": b, "continuation": c}
+
+    # And the shared helper is that same value, so the six remaining inlined
+    # copies are byte-equivalent rather than merely believed to be.
+    from aadistill.autoinit.phase_a import sha256_file
+    entries = [{"path": r, "sha256": sha256_file(REPO / r)} for r in probe]
+    assert canonical_source_digest(entries) == a
+
+    full = continuation_source_digest(REPO)["digest"]
+    assert full == canonical_source_digest(
+        [{"path": r, "sha256": sha256_file(REPO / r)}
+         for r in CONTINUATION_SOURCE_FILES_V2])
+
+
+def test_the_shared_gate_refuses_a_digest_from_the_OLD_formula():
+    """The exact defect, re-created. Must fail through the shared gate."""
+    from aadistill.autoinit.phase_a import sha256_file
+    from aadistill.autoinit.phase_b_continuation import CONTINUATION_SOURCE_FILES_V2
+    from aadistill.infrastructure.manifest import sha256_json
+
+    stale = sha256_json([{"path": r, "sha256": sha256_file(REPO / r),
+                          "bytes": (REPO / r).stat().st_size}
+                         for r in sorted(CONTINUATION_SOURCE_FILES_V2)])
+    ok, why, record = _run_shared_gate(stale, CONTINUATION_SOURCE_FILES_V2)
+    assert record["harness_matches"] is False
+    assert not ok
+    assert "was not granted against" in why or "digests to" in why
+
+
+def test_the_shared_gate_refuses_a_reordered_file_set():
+    """Order is part of the identity: the consumer iterates `sorted(...)`.
+
+    A producer that preserved declaration order would agree only by luck, so the
+    helper sorts rather than trusting the caller.
+    """
+    from aadistill.autoinit.phase_a import sha256_file
+    from aadistill.autoinit.phase_b_continuation import CONTINUATION_SOURCE_FILES_V2
+    import hashlib
+
+    reversed_files = tuple(reversed(sorted(CONTINUATION_SOURCE_FILES_V2)))
+    unsorted = hashlib.sha256("".join(
+        f"{r}:{sha256_file(REPO / r)}\n" for r in reversed_files).encode()).hexdigest()
+    ok, _, record = _run_shared_gate(unsorted, CONTINUATION_SOURCE_FILES_V2)
+    assert record["harness_matches"] is False, (
+        "a digest built in the wrong order was accepted; the producer is not "
+        "sorting and agrees with the consumer only by coincidence")
+    assert not ok
+
+
+def test_the_shared_gate_refuses_a_set_with_a_file_omitted():
+    """A digest over a smaller executable than the one that runs."""
+    from aadistill.autoinit.phase_b_continuation import (
+        CONTINUATION_SOURCE_FILES_V2, continuation_source_digest,
+    )
+
+    short = tuple(f for f in CONTINUATION_SOURCE_FILES_V2
+                  if f != "src/aadistill/autoinit/search.py")
+    assert len(short) == len(CONTINUATION_SOURCE_FILES_V2) - 1
+    partial = continuation_source_digest(REPO, files=short)["digest"]
+    # Declared as the FULL set but digested over one fewer file.
+    ok, _, record = _run_shared_gate(partial, CONTINUATION_SOURCE_FILES_V2)
+    assert record["harness_matches"] is False
+    assert not ok
+
+
+def test_the_shared_gate_refuses_a_stale_executable_digest():
+    """A grant bound to an older tree cannot launch the current one."""
+    ok, why, record = _run_shared_gate(
+        "88e1ef576d810514e855c94f03dbc36a1d818a065c37ff5b6140da128e5e7e55",
+        __import__("aadistill.autoinit.phase_b_continuation", fromlist=["x"]
+                   ).CONTINUATION_SOURCE_FILES_V2)
+    assert record["harness_matches"] is False
+    assert not ok
+
+
+def test_the_gate_probe_itself_can_fail():
+    """Guards the guard: a probe that always reports False proves nothing."""
+    from aadistill.autoinit.phase_b_continuation import (
+        CONTINUATION_SOURCE_FILES_V2, continuation_source_digest,
+    )
+
+    ok, _, record = _run_shared_gate(continuation_source_digest(REPO)["digest"],
+                                     CONTINUATION_SOURCE_FILES_V2)
+    assert record["harness_matches"] is True
