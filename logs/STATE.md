@@ -938,25 +938,24 @@ Also frozen: recovery design, selection rules, pooled_counts@v2, Stage-3 artifac
 
 ## Latest verification
 
-**2026-08-29 — after the `$0` behavioural-continuation implementation pass.**
-CPU only, repo `.venv`. No checkpoint trained, no GPU used, no pod created, no
-grant issued, `$0` spent.
+**2026-08-29 — after the v3 source-digest repair and the pre-provider gate run.**
+CPU only, repo `.venv`. No checkpoint trained, no GPU, no pod, `$0` spent.
 
-* **full suite: 2461 passed, 12 skipped, 0 failed** (27:01)
-* frozen-asset verifier: passed, no problems
-* both probe-reuse verifiers re-run: historical 11 reconstructed / 8 admitted,
-  Attempt-5 3 / 3, **both `probes_dir_digest` values unchanged**
-* continuation whole-function tests: **35**, covering the resolved-at-`sb` path
-  and the `tie_pending → sc → terminal` path through the real stage map
-* mutations: **12, no survivors** — 8 against the continuation (reuse-vs-new
-  probe, stage ordering, inherited stage 0, the 6→3 finalist boundary, search
-  reachable, the auth contract, digest re-derivation, evidence binding) and 4
-  against the post-freeze drift rule
-* relay: `fe9683e6a9c7` round-trip verified — downloaded back, all three files
-  byte-identical, artifact identity **re-derived** to
-  `c313d1b4081b9a3b…`, before any provider resource existed
-* identities: no frozen Phase-A or Phase-B *record* was rewritten; the Phase-B
-  executable digest moved for a declared, additive, branch-identical reason
+* **full suite: 2468 passed, 12 skipped, 0 failed** (27:51)
+* frozen-asset verifier clean; both probe-reuse verifiers re-run with unchanged
+  `probes_dir_digest` values
+* continuation: **42 tests**, seven of which drive the **real** shared
+  `session_commit_gate` rather than comparing the digest against itself
+* **17 mutations, no survivors** — 12 behavioural, 5 against the digest contract
+  (old `sha256_json`, unsorted, dropped separator, changed separator, reverted
+  version)
+* pre-provider gates at the launch commit: **6 of 7 green**, including
+  `session_commit_gate` with `harness_matches`, `commit_carries_this_authorization`
+  and `lineage.ok` all true. `ckpt_store_capacity_gate` **BLOCKS** — see above
+* an earlier run of this suite reported 14 failures; every one was the disk-full
+  event, not code. One tracked config had been truncated to 0 bytes and committed
+  by an unchecked `git add -A`; restored from `49861a5`, and no other tracked
+  file is zero-length
 
 ## What failed, and why
 

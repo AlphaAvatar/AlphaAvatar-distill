@@ -1,6 +1,6 @@
 {
  "schema": "aadistill.current_state/v2",
- "generated_utc": "2026-08-29T12:10:58Z",
+ "generated_utc": "2026-08-29T13:12:43Z",
  "_contract": "The minimal machine-readable CURRENT snapshot: live facts only, no history, no per-attempt detail, no narrative. History lives in logs/decisions.md and the per-run directories; the human view is logs/STATE.md and the two must agree. Ownership: logs/CATALOG.md.",
  "baseline_commit": "b7c0099bfffc8962e4368917c59f8a9a8508d063",
  "baseline_commit_meaning": "The LAST TESTED IMPLEMENTATION: the commit whose tree produced the latest_verification figures (2461 passed / 12 skipped / 0 failed).",
@@ -56,13 +56,13 @@
   "detail: logs/decisions.md and the per-run directories"
  ],
  "latest_verification": {
-  "utc": "2026-08-29T11:49:30Z",
-  "after": "the v2->v3 source-digest contract repair",
-  "full_suite": "2468 passed, 12 skipped, 0 failed in 27:22",
-  "frozen_asset_verifier": "passed, no problems",
-  "reuse_records": "both verified, probes_dir_digests unchanged (11/8 and 3/3)",
-  "continuation": "42 tests incl. 7 driving the REAL shared session_commit_gate; 5 digest mutations + 12 earlier, no survivors; relay fe9683 identity re-derived; no science/evidence/pricing identity moved",
-  "scope": "CPU only, repo .venv; no checkpoint trained, no GPU, no pod, $0"
+  "utc": "2026-08-29T13:12:43Z",
+  "after": "the v3 digest repair and the pre-provider gate run",
+  "full_suite": "2468 passed, 12 skipped, 0 failed in 27:51",
+  "verifiers": "frozen assets clean; both reuse records verified, digests unchanged",
+  "gates": "6/7 pre-provider green at the launch commit incl. the shared session_commit_gate; ckpt_store_capacity_gate BLOCKS",
+  "continuation": "42 tests (7 drive the real gate); 17 mutations, no survivors",
+  "scope": "CPU only; no GPU, no pod, $0"
  },
  "failed": [
   {
