@@ -9,8 +9,13 @@ not carry. If the two disagree, a structural test fails.
 **Nothing is running. Nothing is billing. Nothing is prepared for launch.**
 Pod `nuitz0ketxukpm` was deleted at `16:20:25Z`; the provider confirms it gone
 and not billing, and the launcher, watchdog and poller have all exited. Spend is
-`$260.3063` of the `$283.7600` cap, `$23.4537` remaining. **Nothing is
-authorized** — `autoinit.continuation_b.20260829T153538Z` is consumed.
+`$260.3063` of the `$283.7600` cap, `$23.4537` remaining.
+
+**One replacement attempt is funded and authorized, and has NOT been launched.**
+The reviewer approved exactly one, after the repair below and its verification;
+the launch itself waits on their go-ahead. `autoinit.continuation_b.20260829T153538Z`
+is **CONSUMED permanently** and must never be reused; the `115028Z` grant stays
+retired **UNUSED**.
 
 # ATTEMPT 1 REACHED THE POD AND STOPPED AT THE TEST GATE — $0.2513
 
@@ -64,20 +69,58 @@ the four survived in `launcher.out` — a gap worth closing.
 Full record: [`autoinit_continuation_b_attempt1.json`](autoinit_continuation_b_attempt1.json),
 journals in [`autoinit_continuation_b_attempt1/`](autoinit_continuation_b_attempt1/).
 
-## The repair is a reviewer decision, so it is NOT applied
+## The repair: BIND IS NOT CONSUME — the ignore set, not the asset list
 
-`calib.domain_balanced@v1` plainly must be staged. `calib.reasoning_heavy@v2` is
-the open question: the continuation binds its identity, but the tests that fail
-for it are **Phase B's launcher tests**, which read the dev-box filesystem and
-fail only because the file is absent. Two legitimate repairs exist — stage the
-asset, or let that test skip when it is absent — and choosing between them
-decides whether this session consumes the v2 mixture at all. Applying either
-would move the executable digest again and pre-empt that call, so the executable
-is left exactly as launched.
+The reviewer traced the runtime path and corrected my framing: **neither mixture
+should be staged.** They are Phase-B *search* inputs. The paid behavioural probes
+train from `artifacts/stage3/ladder_uniform_probe` and are scored on the
+`artifacts/stage3/recovery_search_v2` battery.
 
-**The authorization is consumed and the grant explicitly excludes a second
-attempt.** A retry needs a maintainer decision on both the repair and the
-funding.
+**Verified rather than accepted**, because excluding tests that read a genuine
+dependency would hide it and buy another pod:
+
+* the continuation driver contains **no calibration reference at all** — not
+  `DOMAIN_BALANCED`, `REASONING_HEAVY`, `e8_calibration_v1`, `reasoning_heavy_v2`
+  or `resolve_calibration`;
+* its stage map is `{0: stage_bind, 1: stage_import, 3, 4, 5}` — no search;
+* the only calibration mention on the inherited path is a **comment** inside the
+  `PhaseADriver.stage1` this session overrides with a raise and never binds.
+
+So the two failing modules exercise machinery this session is structurally unable
+to run, and both are added to `CONTINUATION_TEST_IGNORES`:
+
+| module | what it needs that this session has no reason to have |
+| --- | --- |
+| `tests/autoinit/test_causal_depth_measurement_job.py` | drives the causal-depth job through the real resolver, which loads `e8_calibration_v1/items.jsonl` |
+| `tests/pod/test_phase_b_driver_and_launcher.py` | builds the **Phase-B** spec and requires both profiles plus `reasoning_heavy_v2` staging |
+
+Both keep running in full on the dev box, where the bytes live. **The check
+moves; it does not disappear** — as `test_phase_b_reuse_hostlocal` already does.
+
+The identities stay bound. They name the distribution the imported Stage-1 result
+was produced under, and a grant that names a mixture must be able to refuse a
+different one. `require_calibration`'s docstring said the probe trainer consumes
+the mixture; it does not, and the wording is corrected.
+
+**Proof, at `$0`.** With `artifacts/stage1/e8_calibration_v1` **and**
+`artifacts/stage1/reasoning_heavy_v2` moved off the filesystem simultaneously,
+the exact pod command `python -m pytest tests/ -q $SESSION_TEST_IGNORES` returns
+**2288 passed, 23 skipped, 0 failed**.
+
+Five new tests pin it, including one that fails if the spec ever grows a relay
+input or local asset for either mixture, and one that fails if the driver ever
+gains a calibration reference.
+
+## A gap this exposed, not repaired here
+
+`tests/pod/session_specs.py::SESSION_LAUNCHERS` says *"keep this list complete: a
+session missing from it is a session no structural check covers"* — and it omits
+both `autoinit_phase_b_launch` and `autoinit_continuation_b_launch`. Neither is
+covered by the simulator/pod ignore-list pin or the setup-env forwarding checks,
+which is why this divergence had no `$0` guard. That pin also asserts every
+session's ignore list **equals** the simulator's two-entry list, which Phase B
+(4) and the continuation (7) both legitimately exceed, so adding them requires
+reworking the pin. Larger than the approved repair; recorded, not done.
 
 The bundle round-tripped before any provider resource existed: a fresh clone of
 the relay bytes checks out `8df1bad216aa`, its 62 executable files re-derive to
