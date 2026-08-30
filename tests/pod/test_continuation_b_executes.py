@@ -391,6 +391,18 @@ def build(tmp_path, monkeypatch, *, tie: bool):
     monkeypatch.setattr(parent, "AUDIT", mod.AUDIT)
     monkeypatch.setattr(parent, "STATUS", mod.STATUS)
 
+    # The driver resolves finalist bytes from the POD STAGING CONTRACT, not from
+    # the amendment's `checkpoint_path` — that is the attempt-3 repair. So this
+    # test must stage its toy checkpoints where the driver looks, exactly as the
+    # launcher's relay inputs do on a pod.
+    #
+    # Absolute values, so `REPO / <abs>` resolves to them and nothing else in the
+    # driver's use of REPO is disturbed. `build_checkpoints` already writes each
+    # one to `tmp_path/ckpt/<state_id>`, which IS the staging layout.
+    monkeypatch.setattr(mod, "STAGED_FINALISTS", str(tmp_path / "ckpt"))
+    monkeypatch.setattr(mod, "CANONICAL_CONTROL_CHECKPOINT",
+                        str(tmp_path / "ckpt" / CONTROL_COLLAPSED))
+
     # -- THE GUARANTEE: no search may execute, for the whole run ------------
     beam = Detonator("BeamSearch")
     search = Detonator("run_phase_a_search")
