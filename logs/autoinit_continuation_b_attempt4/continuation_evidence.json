@@ -1,0 +1,1105 @@
+{
+  "schema": "aadistill.autoinit.continuation_b_evidence/v1",
+  "started_utc": "2026-08-30T11:56:01.011656+00:00",
+  "phase": "B-continuation",
+  "question": "which of the three active finalists survives the frozen pooled sa+sb rule, and the conditional sc",
+  "runs_search": false,
+  "stage1_imported_not_recomputed": true,
+  "retrains_permanent_controls": false,
+  "redefines_thresholds": false,
+  "followon_started": false,
+  "followon_reachable_from_this_driver": false,
+  "stages": {
+    "0": {
+      "passed": true,
+      "reason": "",
+      "finished_utc": "2026-08-30T11:58:06.428328+00:00",
+      "spend_usd": 0.1699,
+      "attested": {
+        "schema": "aadistill.autoinit.phase_a_attested_protocol/v1",
+        "generated_utc": "2026-08-30T11:58:06.426577+00:00",
+        "runtime": {
+          "version": 1,
+          "image_digest": "runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@580.159.03",
+          "python_version": "3.12.3",
+          "torch_version": "2.11.0+cu128",
+          "transformers_version": "5.13.1",
+          "cuda_runtime": "12.8",
+          "attention_backend": "sdpa"
+        },
+        "generation_source_digest": {
+          "digest": "a1b51736d6a6b1276322a04d44855d7b574011e165e77d6d23c3e31b3036f743",
+          "files": [
+            {
+              "path": "scripts/evaluation/uncapped_eval.py",
+              "sha256": "120e92dc08a49ae4e3ed74fbbc6537054c011382755cdec6418c11b341f780d4",
+              "bytes": 28667
+            },
+            {
+              "path": "src/aadistill/evaluation/behavior.py",
+              "sha256": "c6f52721e8b86bc2d875683bfb9c35b4101379fa5d48de7a48db93959e2935c2",
+              "bytes": 19983
+            },
+            {
+              "path": "src/aadistill/evaluation/degeneration.py",
+              "sha256": "793540820d4fc0f42d0c855e0d79eb879b94efa451e06030b2a14c55683f4961",
+              "bytes": 5245
+            }
+          ],
+          "rule": "sha256 over sorted 'path:sha256' lines of the declared set"
+        },
+        "scoring_contract": {
+          "contract": "recovery_search_scoring@v2",
+          "contract_id": "recovery_search_scoring",
+          "version": 2,
+          "digest": "808080a7c5d88d5a66760fd0d7eeabc5451c096ad0819f8c5663a0b8224660be",
+          "files": [
+            {
+              "path": "scripts/autoinit/score_recovery_search.py",
+              "sha256": "b19eba4c2c5f555aeb141811439ad5e5417a3222c3b57b78bad3f497eb90dba3",
+              "bytes": 21518
+            },
+            {
+              "path": "src/aadistill/autoinit/recovery.py",
+              "sha256": "39d6598e210b9619d56463f6ba3000d47e1a97f7121e7db25b97213d4d6c799e",
+              "bytes": 102452
+            },
+            {
+              "path": "src/aadistill/evaluation/behavior.py",
+              "sha256": "c6f52721e8b86bc2d875683bfb9c35b4101379fa5d48de7a48db93959e2935c2",
+              "bytes": 19983
+            },
+            {
+              "path": "src/aadistill/evaluation/capability.py",
+              "sha256": "da1bc3b1069d927b6ab2cbf0eaaf6763bfa491d396189b3dcde95977e39d67ad",
+              "bytes": 19568
+            },
+            {
+              "path": "src/aadistill/evaluation/strict_answer.py",
+              "sha256": "ecb4356a89d3563214ea11ade2307b0d106588bb7ff59f6b8c5e3b9c98d380e3",
+              "bytes": 7628
+            },
+            {
+              "path": "src/aadistill/evaluation/usable_rollout.py",
+              "sha256": "8159acdd7a0a6953dfefac7acf4f6fb4706f69a7264b625e9f9b7ff1a74826ca",
+              "bytes": 6155
+            }
+          ],
+          "rule": "sha256 over sorted 'path:sha256' lines of the declared recovery-scoring source set",
+          "covers": [
+            "usable_rollout components and their composition",
+            "protocol validity, including the tools_offered relaxation",
+            "the tool structural-executability gate",
+            "per-set correctness scorers",
+            "correct => usable",
+            "capability schema and aggregation",
+            "pooled_counts seed aggregation",
+            "the threshold formulas materialized from control data"
+          ],
+          "supersedes": {
+            "contract": "recovery_search_scoring@v1",
+            "identity_was": "a single hash of src/aadistill/evaluation/capability.py",
+            "why": "v1 could not see a defect in the composition. A prompted tool call was rejected as unexpected_tool_call, so the tool capability read a structural 0.0000 for every arm while capability.py itself was unchanged and its hash matched."
+          }
+        },
+        "evaluation_protocol": {
+          "evaluation_protocol_hash": "250f72efbd43b86a475e8dda293b45f07ee61a4d858e147f4a5bd7681c32c2e4",
+          "generation": {
+            "generation_source_digest": "a1b51736d6a6b1276322a04d44855d7b574011e165e77d6d23c3e31b3036f743",
+            "generation_source_set_version": 1,
+            "vllm_version": "0.27.1",
+            "transformers_version": "5.15.0",
+            "torch_version": "2.13.0+cu130",
+            "dtype": "bfloat16",
+            "gpu_memory_utilization": 0.9,
+            "max_num_seqs": 256,
+            "max_num_batched_tokens": 8192,
+            "enforce_eager": false,
+            "tokenizer_source": "the evaluated checkpoint",
+            "tokenizer_sha256": "c1db93c8164f3e3ba2dbc8c6943fb574273a5efa87da4556ef9f460b5c0893b7",
+            "chat_template_sha256": "3802169b2a02b81e6adb7ab4f64f91ff02db753c8c3a64a01c35192d3a61d8d7",
+            "protocol": "project",
+            "system_message": "You are a helpful Assistant.",
+            "system_injection_rule": "injected only when the sample carries no system turn and protocol == project; a sample's own system prompt is preserved",
+            "chat_template_kwargs_json": "{}",
+            "thinking_mode": "template-default (not overridden)",
+            "trained_context": 8192,
+            "context_len_override": null,
+            "resolved_context": 8192,
+            "context_source": "trained_block_len",
+            "context_resolution_rule": "min(trained_context, architectural context); the effective context is the TRAINED context and this is not a 262K-context evaluation",
+            "temperature": 0.0,
+            "top_p": 1.0,
+            "top_k": -1,
+            "detokenize": false,
+            "max_tokens_rule": "per sample: resolved_context - len(prompt_ids); P18 unrestricted, never a chosen token budget",
+            "stop_token_ids": [
+              151645
+            ],
+            "stop_id_derivation_rule": "sorted union of config.eos_token_id, generation_config.eos_token_id, <|im_end|> and tokenizer.eos_token_id",
+            "degeneration_stop": true,
+            "degeneration_check_every": 256,
+            "degeneration_source_digest": "793540820d4fc0f42d0c855e0d79eb879b94efa451e06030b2a14c55683f4961",
+            "runtime_digest": "2db007528a37f4d02113265d225531aec441a483e03e626556e0e6049a7af101",
+            "protocol_id": "recovery_generation",
+            "version": 1,
+            "generation_protocol_fingerprint": "714237c516afc0a8421126ca30ec4a2b657689d4c81f8973834a42bceb11a3bb",
+            "is_materialized": true,
+            "unmaterialized_fields": [],
+            "excluded_by_design": [
+              "the checkpoint being generated from"
+            ],
+            "why_excluded": "the checkpoint is the treatment; a generation identity containing it would mark every pair of arms as mismatched"
+          },
+          "scoring_contract": "recovery_search_scoring@v2",
+          "scoring_digest": "808080a7c5d88d5a66760fd0d7eeabc5451c096ad0819f8c5663a0b8224660be",
+          "battery": {
+            "artifact": "recovery_search_v2",
+            "manifest_sha256": "58ae5c6dcbe32eb28c343a66830d7224a14537362deeeff2ce8219d0a31679d6",
+            "content_sha256": "a1b22778b00d95b6aba358c14a5af5b559fd807bb371c92131eacca59479f323"
+          },
+          "binding": "every control and every searched recovery probe must bind to this exact hash; a probe measured under a different one is not comparable to the thresholds materialized from these controls",
+          "notes": {}
+        },
+        "evaluation_protocol_hash": "250f72efbd43b86a475e8dda293b45f07ee61a4d858e147f4a5bd7681c32c2e4",
+        "stage3_evaluation_protocol_hash": "250f72efbd43b86a475e8dda293b45f07ee61a4d858e147f4a5bd7681c32c2e4",
+        "bound_to_stage3_thresholds": true,
+        "comparability": {
+          "rule": "generation_runtime_comparability@v2",
+          "live_identity": "70a26e0b43df20e469385115b49683b50936919e02986088b76d3c30ffd87103",
+          "historical_identity": "70a26e0b43df20e469385115b49683b50936919e02986088b76d3c30ffd87103",
+          "identities_equal": true,
+          "live_driver": "580.159.03",
+          "historical_driver": "580.159.03",
+          "driver_branch_equal": true,
+          "driver_patch_differs": false
+        },
+        "comparable_identity": "70a26e0b43df20e469385115b49683b50936919e02986088b76d3c30ffd87103",
+        "science_plan_hash": "02be33b9a7a8e26bc8bfb75795351e8cdc9ffd441b47066cc81887cfc511b55c",
+        "equivalence_interval": 0.011695296982299022,
+        "feasibility_floor": 0.3,
+        "report_sha256": "019ac439a7c94b0a031a47c6f5bd7f29221f9c7095783bfd942df878662e2982"
+      },
+      "frozen_plan_hash": "02be33b9a7a8e26bc8bfb75795351e8cdc9ffd441b47066cc81887cfc511b55c",
+      "continuation_binding": {
+        "executable_source_digest": "5344d0480803e259a071ab1486ee671479bddf8402f90feff9a676c30891fa65",
+        "cited_evidence": {
+          "stage1_selection_sha256": "84fd6496851995aef8ac624b68944c0881fdaf62a29013ea2aec5acb0e87a35c",
+          "identity_collapse_amendment_sha256": "df413bd99119dab72c16399362298620abec0efdce36754a1627b14e616b26bb",
+          "collapsed_universe_identity": "e94f15d2e648d86a2a7a1496c5e1c0ef47b78d87746bb622488a06af0418d483",
+          "historical_reuse_probes_dir_digest": "a5115816861ad239f646facec4d53ba2c7925c9430c530e7c6d0af2560d5b1af",
+          "attempt5_reuse_probes_dir_digest": "2e5030fadc786faaafe1ec3ac3a2ccb4af367e98bf630a89a16938729a77844e",
+          "rung1_selection_digest": "1f86c6e6e9cfc67aeb428be092bbf87ad91d2b6b6ae175bf55786f92b7696b6e"
+        }
+      }
+    },
+    "1": {
+      "passed": true,
+      "reason": "",
+      "finished_utc": "2026-08-30T11:58:09.815240+00:00",
+      "spend_usd": 0.1708,
+      "evidence_universe": 6,
+      "active_finalists": [
+        "85bde4ded2c31953f802e39cf2252c87",
+        "control-qwen3_0p6b_init_v0",
+        "fe9683e6a9c783bbc6fe276a78c851c6"
+      ],
+      "excluded_non_survivors": [
+        "ab7632b00788f825e252ea8d5ff4be30",
+        "bf5ae3b6ae00c3dbb963805135b3838f",
+        "cca699c93f34dad7e94a5d13a25b2bc2"
+      ],
+      "seeded": {
+        "imported": [
+          "autoinit.v1.phase_a.rung1.85bde4ded2c3.sa",
+          "autoinit.v1.phase_a.rung1.ab7632b00788.sa",
+          "autoinit.v1.phase_a.rung1.bf5ae3b6ae00.sa",
+          "autoinit.v1.phase_a.rung1.cca699c93f34.sa",
+          "autoinit.v1.phase_a.rung1.control-qwen.sa",
+          "autoinit.v1.phase_a.rung1.fe9683e6a9c7.sa",
+          "autoinit.v1.phase_a.rung2.85bde4ded2c3.sb",
+          "autoinit.v1.phase_a.rung2.cca699c93f34.sb",
+          "autoinit.v1.phase_a.rung2.control-qwen.sb",
+          "autoinit.v1.phase_a.rung3.85bde4ded2c3.sc",
+          "autoinit.v1.phase_a.rung3.cca699c93f34.sc"
+        ],
+        "skipped": [
+          {
+            "probe_id": "autoinit.v1.phase_a.rung1.158b96cf651f.sa",
+            "reason": "not admitted by a verified reuse record, or outside the collapsed universe"
+          },
+          {
+            "probe_id": "autoinit.v1.phase_a.rung1.281a02c3ac18.sa",
+            "reason": "not admitted by a verified reuse record, or outside the collapsed universe"
+          },
+          {
+            "probe_id": "autoinit.v1.phase_a.rung1.4e429f7ed722.sa",
+            "reason": "not admitted by a verified reuse record, or outside the collapsed universe"
+          },
+          {
+            "probe_id": "autoinit.v1.phase_a.rung1.85bde4ded2c3.sa",
+            "reason": "already seeded; one observation per seed"
+          },
+          {
+            "probe_id": "autoinit.v1.phase_a.rung1.cca699c93f34.sa",
+            "reason": "already seeded; one observation per seed"
+          },
+          {
+            "probe_id": "autoinit.v1.phase_a.rung1.control-qwen.sa",
+            "reason": "already seeded; one observation per seed"
+          },
+          {
+            "probe_id": "autoinit.v1.phase_a.rung2.85bde4ded2c3.sb",
+            "reason": "already seeded; one observation per seed"
+          },
+          {
+            "probe_id": "autoinit.v1.phase_a.rung2.cca699c93f34.sb",
+            "reason": "already seeded; one observation per seed"
+          },
+          {
+            "probe_id": "autoinit.v1.phase_a.rung2.control-qwen.sb",
+            "reason": "already seeded; one observation per seed"
+          },
+          {
+            "probe_id": "autoinit.v1.phase_a.rung3.85bde4ded2c3.sc",
+            "reason": "already seeded; one observation per seed"
+          },
+          {
+            "probe_id": "autoinit.v1.phase_a.rung3.cca699c93f34.sc",
+            "reason": "already seeded; one observation per seed"
+          }
+        ],
+        "n_imported": 11
+      },
+      "rung1": {
+        "computed_by": "the frozen SuccessiveHalvingPlan.select_rung1_survivors, unchanged",
+        "plan_hash": "02be33b9a7a8e26bc8bfb75795351e8cdc9ffd441b47066cc81887cfc511b55c",
+        "rule": "rung 1: exclude searched leaves below the feasibility floor, then take the top 2 by correct_overall; the canonical control advances unconditionally and consumes no slot",
+        "selected_searched": [
+          "fe9683e6a9c783bbc6fe276a78c851c6",
+          "85bde4ded2c31953f802e39cf2252c87"
+        ],
+        "auto_advanced_control": [
+          "control-qwen3_0p6b_init_v0"
+        ],
+        "advancing": [
+          "control-qwen3_0p6b_init_v0",
+          "fe9683e6a9c783bbc6fe276a78c851c6",
+          "85bde4ded2c31953f802e39cf2252c87"
+        ],
+        "excluded_by_feasibility": [],
+        "excluded_by_catastrophic_capability": [],
+        "ranked": [
+          {
+            "state_id": "fe9683e6a9c783bbc6fe276a78c851c6",
+            "is_control": false,
+            "correct_overall": 0.047058823529411764
+          },
+          {
+            "state_id": "85bde4ded2c31953f802e39cf2252c87",
+            "is_control": false,
+            "correct_overall": 0.041176470588235294
+          },
+          {
+            "state_id": "bf5ae3b6ae00c3dbb963805135b3838f",
+            "is_control": false,
+            "correct_overall": 0.03529411764705882
+          },
+          {
+            "state_id": "cca699c93f34dad7e94a5d13a25b2bc2",
+            "is_control": false,
+            "correct_overall": 0.03529411764705882
+          },
+          {
+            "state_id": "ab7632b00788f825e252ea8d5ff4be30",
+            "is_control": false,
+            "correct_overall": 0.01764705882352941
+          },
+          {
+            "state_id": "control-qwen3_0p6b_init_v0",
+            "is_control": true,
+            "correct_overall": 0.011764705882352941
+          }
+        ]
+      }
+    },
+    "3": {
+      "passed": true,
+      "reason": "",
+      "finished_utc": "2026-08-30T13:10:14.247457+00:00",
+      "spend_usd": 1.36,
+      "selection": {
+        "rung": "final",
+        "ranked": [
+          {
+            "state_id": "fe9683e6a9c783bbc6fe276a78c851c6",
+            "is_control": false,
+            "seeds": [
+              20260726,
+              20260801
+            ],
+            "probe_ids": [
+              "autoinit.v1.phase_a.rung1.fe9683e6a9c7.sa",
+              "autoinit.v1.phase_a.rung2.fe9683e6a9c7.sb"
+            ],
+            "n": 380,
+            "usable": 272,
+            "correct": 11,
+            "n_scorable": 340,
+            "usable_scorable": 263,
+            "usable_rollout_rate": 0.7157894736842105,
+            "correct_overall": 0.03235294117647059,
+            "correct_given_usable": 0.04182509505703422,
+            "aggregation": "pooled_counts@v2",
+            "per_capability": {
+              "gsm8k": {
+                "n": 60,
+                "usable": 53,
+                "usable_rollout_rate": 0.8833333333333333
+              },
+              "math_verified": {
+                "n": 60,
+                "usable": 36,
+                "usable_rollout_rate": 0.6
+              },
+              "multihop": {
+                "n": 60,
+                "usable": 53,
+                "usable_rollout_rate": 0.8833333333333333
+              },
+              "rag": {
+                "n": 60,
+                "usable": 55,
+                "usable_rollout_rate": 0.9166666666666666
+              },
+              "knowledge": {
+                "n": 60,
+                "usable": 35,
+                "usable_rollout_rate": 0.5833333333333334
+              },
+              "tool": {
+                "n": 40,
+                "usable": 31,
+                "usable_rollout_rate": 0.775
+              }
+            }
+          },
+          {
+            "state_id": "85bde4ded2c31953f802e39cf2252c87",
+            "is_control": false,
+            "seeds": [
+              20260726,
+              20260801,
+              20260813
+            ],
+            "probe_ids": [
+              "autoinit.v1.phase_a.rung1.85bde4ded2c3.sa",
+              "autoinit.v1.phase_a.rung2.85bde4ded2c3.sb",
+              "autoinit.v1.phase_a.rung3.85bde4ded2c3.sc"
+            ],
+            "n": 570,
+            "usable": 311,
+            "correct": 10,
+            "n_scorable": 510,
+            "usable_scorable": 297,
+            "usable_rollout_rate": 0.5456140350877193,
+            "correct_overall": 0.0196078431372549,
+            "correct_given_usable": 0.03367003367003367,
+            "aggregation": "pooled_counts@v2",
+            "per_capability": {
+              "gsm8k": {
+                "n": 90,
+                "usable": 63,
+                "usable_rollout_rate": 0.7
+              },
+              "math_verified": {
+                "n": 90,
+                "usable": 39,
+                "usable_rollout_rate": 0.43333333333333335
+              },
+              "multihop": {
+                "n": 90,
+                "usable": 51,
+                "usable_rollout_rate": 0.5666666666666667
+              },
+              "rag": {
+                "n": 90,
+                "usable": 66,
+                "usable_rollout_rate": 0.7333333333333333
+              },
+              "knowledge": {
+                "n": 90,
+                "usable": 46,
+                "usable_rollout_rate": 0.5111111111111111
+              },
+              "tool": {
+                "n": 60,
+                "usable": 32,
+                "usable_rollout_rate": 0.5333333333333333
+              }
+            }
+          },
+          {
+            "state_id": "control-qwen3_0p6b_init_v0",
+            "is_control": true,
+            "seeds": [
+              20260726,
+              20260801
+            ],
+            "probe_ids": [
+              "autoinit.v1.phase_a.rung1.control-qwen.sa",
+              "autoinit.v1.phase_a.rung2.control-qwen.sb"
+            ],
+            "n": 380,
+            "usable": 188,
+            "correct": 3,
+            "n_scorable": 340,
+            "usable_scorable": 184,
+            "usable_rollout_rate": 0.49473684210526314,
+            "correct_overall": 0.008823529411764706,
+            "correct_given_usable": 0.016304347826086956,
+            "aggregation": "pooled_counts@v2",
+            "per_capability": {
+              "gsm8k": {
+                "n": 60,
+                "usable": 28,
+                "usable_rollout_rate": 0.4666666666666667
+              },
+              "math_verified": {
+                "n": 60,
+                "usable": 18,
+                "usable_rollout_rate": 0.3
+              },
+              "multihop": {
+                "n": 60,
+                "usable": 37,
+                "usable_rollout_rate": 0.6166666666666667
+              },
+              "rag": {
+                "n": 60,
+                "usable": 50,
+                "usable_rollout_rate": 0.8333333333333334
+              },
+              "knowledge": {
+                "n": 60,
+                "usable": 25,
+                "usable_rollout_rate": 0.4166666666666667
+              },
+              "tool": {
+                "n": 40,
+                "usable": 26,
+                "usable_rollout_rate": 0.65
+              }
+            }
+          }
+        ],
+        "decision_status": "resolved",
+        "winner": "fe9683e6a9c783bbc6fe276a78c851c6",
+        "winner_is_control": false,
+        "provisional_leader": "fe9683e6a9c783bbc6fe276a78c851c6",
+        "provisional_leader_is_control": false,
+        "excluded_by_feasibility": [],
+        "excluded_by_catastrophic_capability": [],
+        "all_exclusions": [],
+        "equivalence_interval": 0.011695296982299022,
+        "capability_schema_enforced": true,
+        "control_present": true,
+        "tied_within_equivalence": [
+          "fe9683e6a9c783bbc6fe276a78c851c6"
+        ],
+        "needs_tie_break_seed": false,
+        "tie_break_candidates": [],
+        "tie_break_completed": false,
+        "interpretation": null,
+        "rule": "final: pooled-count aggregate over sa and sb; among finalists clearing the feasibility floor, top 1 by correct_overall. The canonical control is eligible to win. Finalists inside the equivalence interval go to seed sc."
+      },
+      "n_probes": 3
+    },
+    "4": {
+      "passed": true,
+      "reason": "",
+      "finished_utc": "2026-08-30T13:10:14.249201+00:00",
+      "spend_usd": 1.36,
+      "ran": false,
+      "reason_not_run": "resolved"
+    },
+    "5": {
+      "passed": true,
+      "reason": "",
+      "finished_utc": "2026-08-30T13:10:14.255856+00:00",
+      "spend_usd": 1.36,
+      "result": {
+        "schema": "aadistill.autoinit.phase_a_result/v1",
+        "generated_utc": "2026-08-30T13:10:14.254214+00:00",
+        "science_plan_hash": "02be33b9a7a8e26bc8bfb75795351e8cdc9ffd441b47066cc81887cfc511b55c",
+        "evaluation_protocol_hash": "250f72efbd43b86a475e8dda293b45f07ee61a4d858e147f4a5bd7681c32c2e4",
+        "equivalence_interval": 0.011695296982299022,
+        "feasibility_floor": 0.3,
+        "rung1_selection": {
+          "computed_by": "the frozen SuccessiveHalvingPlan.select_rung1_survivors, unchanged",
+          "plan_hash": "02be33b9a7a8e26bc8bfb75795351e8cdc9ffd441b47066cc81887cfc511b55c",
+          "rule": "rung 1: exclude searched leaves below the feasibility floor, then take the top 2 by correct_overall; the canonical control advances unconditionally and consumes no slot",
+          "selected_searched": [
+            "fe9683e6a9c783bbc6fe276a78c851c6",
+            "85bde4ded2c31953f802e39cf2252c87"
+          ],
+          "auto_advanced_control": [
+            "control-qwen3_0p6b_init_v0"
+          ],
+          "advancing": [
+            "control-qwen3_0p6b_init_v0",
+            "fe9683e6a9c783bbc6fe276a78c851c6",
+            "85bde4ded2c31953f802e39cf2252c87"
+          ],
+          "excluded_by_feasibility": [],
+          "excluded_by_catastrophic_capability": [],
+          "ranked": [
+            {
+              "state_id": "fe9683e6a9c783bbc6fe276a78c851c6",
+              "is_control": false,
+              "correct_overall": 0.047058823529411764
+            },
+            {
+              "state_id": "85bde4ded2c31953f802e39cf2252c87",
+              "is_control": false,
+              "correct_overall": 0.041176470588235294
+            },
+            {
+              "state_id": "bf5ae3b6ae00c3dbb963805135b3838f",
+              "is_control": false,
+              "correct_overall": 0.03529411764705882
+            },
+            {
+              "state_id": "cca699c93f34dad7e94a5d13a25b2bc2",
+              "is_control": false,
+              "correct_overall": 0.03529411764705882
+            },
+            {
+              "state_id": "ab7632b00788f825e252ea8d5ff4be30",
+              "is_control": false,
+              "correct_overall": 0.01764705882352941
+            },
+            {
+              "state_id": "control-qwen3_0p6b_init_v0",
+              "is_control": true,
+              "correct_overall": 0.011764705882352941
+            }
+          ]
+        },
+        "final_selection": {
+          "rung": "final",
+          "ranked": [
+            {
+              "state_id": "fe9683e6a9c783bbc6fe276a78c851c6",
+              "is_control": false,
+              "seeds": [
+                20260726,
+                20260801
+              ],
+              "probe_ids": [
+                "autoinit.v1.phase_a.rung1.fe9683e6a9c7.sa",
+                "autoinit.v1.phase_a.rung2.fe9683e6a9c7.sb"
+              ],
+              "n": 380,
+              "usable": 272,
+              "correct": 11,
+              "n_scorable": 340,
+              "usable_scorable": 263,
+              "usable_rollout_rate": 0.7157894736842105,
+              "correct_overall": 0.03235294117647059,
+              "correct_given_usable": 0.04182509505703422,
+              "aggregation": "pooled_counts@v2",
+              "per_capability": {
+                "gsm8k": {
+                  "n": 60,
+                  "usable": 53,
+                  "usable_rollout_rate": 0.8833333333333333
+                },
+                "math_verified": {
+                  "n": 60,
+                  "usable": 36,
+                  "usable_rollout_rate": 0.6
+                },
+                "multihop": {
+                  "n": 60,
+                  "usable": 53,
+                  "usable_rollout_rate": 0.8833333333333333
+                },
+                "rag": {
+                  "n": 60,
+                  "usable": 55,
+                  "usable_rollout_rate": 0.9166666666666666
+                },
+                "knowledge": {
+                  "n": 60,
+                  "usable": 35,
+                  "usable_rollout_rate": 0.5833333333333334
+                },
+                "tool": {
+                  "n": 40,
+                  "usable": 31,
+                  "usable_rollout_rate": 0.775
+                }
+              }
+            },
+            {
+              "state_id": "85bde4ded2c31953f802e39cf2252c87",
+              "is_control": false,
+              "seeds": [
+                20260726,
+                20260801,
+                20260813
+              ],
+              "probe_ids": [
+                "autoinit.v1.phase_a.rung1.85bde4ded2c3.sa",
+                "autoinit.v1.phase_a.rung2.85bde4ded2c3.sb",
+                "autoinit.v1.phase_a.rung3.85bde4ded2c3.sc"
+              ],
+              "n": 570,
+              "usable": 311,
+              "correct": 10,
+              "n_scorable": 510,
+              "usable_scorable": 297,
+              "usable_rollout_rate": 0.5456140350877193,
+              "correct_overall": 0.0196078431372549,
+              "correct_given_usable": 0.03367003367003367,
+              "aggregation": "pooled_counts@v2",
+              "per_capability": {
+                "gsm8k": {
+                  "n": 90,
+                  "usable": 63,
+                  "usable_rollout_rate": 0.7
+                },
+                "math_verified": {
+                  "n": 90,
+                  "usable": 39,
+                  "usable_rollout_rate": 0.43333333333333335
+                },
+                "multihop": {
+                  "n": 90,
+                  "usable": 51,
+                  "usable_rollout_rate": 0.5666666666666667
+                },
+                "rag": {
+                  "n": 90,
+                  "usable": 66,
+                  "usable_rollout_rate": 0.7333333333333333
+                },
+                "knowledge": {
+                  "n": 90,
+                  "usable": 46,
+                  "usable_rollout_rate": 0.5111111111111111
+                },
+                "tool": {
+                  "n": 60,
+                  "usable": 32,
+                  "usable_rollout_rate": 0.5333333333333333
+                }
+              }
+            },
+            {
+              "state_id": "control-qwen3_0p6b_init_v0",
+              "is_control": true,
+              "seeds": [
+                20260726,
+                20260801
+              ],
+              "probe_ids": [
+                "autoinit.v1.phase_a.rung1.control-qwen.sa",
+                "autoinit.v1.phase_a.rung2.control-qwen.sb"
+              ],
+              "n": 380,
+              "usable": 188,
+              "correct": 3,
+              "n_scorable": 340,
+              "usable_scorable": 184,
+              "usable_rollout_rate": 0.49473684210526314,
+              "correct_overall": 0.008823529411764706,
+              "correct_given_usable": 0.016304347826086956,
+              "aggregation": "pooled_counts@v2",
+              "per_capability": {
+                "gsm8k": {
+                  "n": 60,
+                  "usable": 28,
+                  "usable_rollout_rate": 0.4666666666666667
+                },
+                "math_verified": {
+                  "n": 60,
+                  "usable": 18,
+                  "usable_rollout_rate": 0.3
+                },
+                "multihop": {
+                  "n": 60,
+                  "usable": 37,
+                  "usable_rollout_rate": 0.6166666666666667
+                },
+                "rag": {
+                  "n": 60,
+                  "usable": 50,
+                  "usable_rollout_rate": 0.8333333333333334
+                },
+                "knowledge": {
+                  "n": 60,
+                  "usable": 25,
+                  "usable_rollout_rate": 0.4166666666666667
+                },
+                "tool": {
+                  "n": 40,
+                  "usable": 26,
+                  "usable_rollout_rate": 0.65
+                }
+              }
+            }
+          ],
+          "decision_status": "resolved",
+          "winner": "fe9683e6a9c783bbc6fe276a78c851c6",
+          "winner_is_control": false,
+          "provisional_leader": "fe9683e6a9c783bbc6fe276a78c851c6",
+          "provisional_leader_is_control": false,
+          "excluded_by_feasibility": [],
+          "excluded_by_catastrophic_capability": [],
+          "all_exclusions": [],
+          "equivalence_interval": 0.011695296982299022,
+          "capability_schema_enforced": true,
+          "control_present": true,
+          "tied_within_equivalence": [
+            "fe9683e6a9c783bbc6fe276a78c851c6"
+          ],
+          "needs_tie_break_seed": false,
+          "tie_break_candidates": [],
+          "tie_break_completed": false,
+          "interpretation": null,
+          "rule": "final: pooled-count aggregate over sa and sb; among finalists clearing the feasibility floor, top 1 by correct_overall. The canonical control is eligible to win. Finalists inside the equivalence interval go to seed sc."
+        },
+        "decision_status": "resolved",
+        "winner": "fe9683e6a9c783bbc6fe276a78c851c6",
+        "winner_is_control": false,
+        "tie_break_ran": false,
+        "pooled_rows": [
+          {
+            "state_id": "85bde4ded2c31953f802e39cf2252c87",
+            "is_control": false,
+            "seeds": [
+              20260726,
+              20260801,
+              20260813
+            ],
+            "probe_ids": [
+              "autoinit.v1.phase_a.rung1.85bde4ded2c3.sa",
+              "autoinit.v1.phase_a.rung2.85bde4ded2c3.sb",
+              "autoinit.v1.phase_a.rung3.85bde4ded2c3.sc"
+            ],
+            "n": 570,
+            "usable": 311,
+            "correct": 10,
+            "n_scorable": 510,
+            "usable_scorable": 297,
+            "usable_rollout_rate": 0.5456140350877193,
+            "correct_overall": 0.0196078431372549,
+            "correct_given_usable": 0.03367003367003367,
+            "aggregation": "pooled_counts@v2",
+            "per_capability": {
+              "gsm8k": {
+                "n": 90,
+                "usable": 63,
+                "usable_rollout_rate": 0.7
+              },
+              "math_verified": {
+                "n": 90,
+                "usable": 39,
+                "usable_rollout_rate": 0.43333333333333335
+              },
+              "multihop": {
+                "n": 90,
+                "usable": 51,
+                "usable_rollout_rate": 0.5666666666666667
+              },
+              "rag": {
+                "n": 90,
+                "usable": 66,
+                "usable_rollout_rate": 0.7333333333333333
+              },
+              "knowledge": {
+                "n": 90,
+                "usable": 46,
+                "usable_rollout_rate": 0.5111111111111111
+              },
+              "tool": {
+                "n": 60,
+                "usable": 32,
+                "usable_rollout_rate": 0.5333333333333333
+              }
+            }
+          },
+          {
+            "state_id": "control-qwen3_0p6b_init_v0",
+            "is_control": true,
+            "seeds": [
+              20260726,
+              20260801
+            ],
+            "probe_ids": [
+              "autoinit.v1.phase_a.rung1.control-qwen.sa",
+              "autoinit.v1.phase_a.rung2.control-qwen.sb"
+            ],
+            "n": 380,
+            "usable": 188,
+            "correct": 3,
+            "n_scorable": 340,
+            "usable_scorable": 184,
+            "usable_rollout_rate": 0.49473684210526314,
+            "correct_overall": 0.008823529411764706,
+            "correct_given_usable": 0.016304347826086956,
+            "aggregation": "pooled_counts@v2",
+            "per_capability": {
+              "gsm8k": {
+                "n": 60,
+                "usable": 28,
+                "usable_rollout_rate": 0.4666666666666667
+              },
+              "math_verified": {
+                "n": 60,
+                "usable": 18,
+                "usable_rollout_rate": 0.3
+              },
+              "multihop": {
+                "n": 60,
+                "usable": 37,
+                "usable_rollout_rate": 0.6166666666666667
+              },
+              "rag": {
+                "n": 60,
+                "usable": 50,
+                "usable_rollout_rate": 0.8333333333333334
+              },
+              "knowledge": {
+                "n": 60,
+                "usable": 25,
+                "usable_rollout_rate": 0.4166666666666667
+              },
+              "tool": {
+                "n": 40,
+                "usable": 26,
+                "usable_rollout_rate": 0.65
+              }
+            }
+          },
+          {
+            "state_id": "fe9683e6a9c783bbc6fe276a78c851c6",
+            "is_control": false,
+            "seeds": [
+              20260726,
+              20260801
+            ],
+            "probe_ids": [
+              "autoinit.v1.phase_a.rung1.fe9683e6a9c7.sa",
+              "autoinit.v1.phase_a.rung2.fe9683e6a9c7.sb"
+            ],
+            "n": 380,
+            "usable": 272,
+            "correct": 11,
+            "n_scorable": 340,
+            "usable_scorable": 263,
+            "usable_rollout_rate": 0.7157894736842105,
+            "correct_overall": 0.03235294117647059,
+            "correct_given_usable": 0.04182509505703422,
+            "aggregation": "pooled_counts@v2",
+            "per_capability": {
+              "gsm8k": {
+                "n": 60,
+                "usable": 53,
+                "usable_rollout_rate": 0.8833333333333333
+              },
+              "math_verified": {
+                "n": 60,
+                "usable": 36,
+                "usable_rollout_rate": 0.6
+              },
+              "multihop": {
+                "n": 60,
+                "usable": 53,
+                "usable_rollout_rate": 0.8833333333333333
+              },
+              "rag": {
+                "n": 60,
+                "usable": 55,
+                "usable_rollout_rate": 0.9166666666666666
+              },
+              "knowledge": {
+                "n": 60,
+                "usable": 35,
+                "usable_rollout_rate": 0.5833333333333334
+              },
+              "tool": {
+                "n": 40,
+                "usable": 31,
+                "usable_rollout_rate": 0.775
+              }
+            }
+          }
+        ],
+        "axes": {
+          "behaviour": "usable_rollout_rate, with every component rate",
+          "capability": "correct_overall over scorable prompts",
+          "diagnostic": "correct_given_usable; reported, never reorders"
+        },
+        "capability_schema_enforced": true,
+        "no_followon": "Phase A stops here. A winner does not authorize full recovery, and unresolved_equivalence does not authorize a fourth seed.",
+        "report_sha256": "7ced0ea6cdf70b1c63ccbaae51217bc53a39af4a439a6273f69241187c0707bf"
+      }
+    }
+  },
+  "authorization": {
+    "schema": "aadistill.autoinit.continuation_authorization/v1",
+    "authorization_id": "autoinit.continuation_b.20260830T114643Z",
+    "granted_utc": "2026-08-30T11:46:43.521973+00:00",
+    "granted_by": "Maintainer review, 2026-08-29, across two messages.\n\nApproval: \"The behavioural continuation is approved for paid launch after one final prereg/state-only normalization.\" Reviewer verdict, verbatim: \"continuation science: GO\"; \"implementation/readiness: GO\"; \"existing cumulative cap $283.76: sufficient\"; \"continuation hard ceiling: $8.0691\"; \"no new budget increase is required\"; \"paid launch: GO after the normalization below and exact-launch gates\".\n\nAfter the assistant reported a launch blocker (the continuation computed its executable digest with sha256_json while the shared session_commit_gate independently re-derives SHA256 over sorted path:sha256 lines), the maintainer granted the repair: \"GO for the one-line digest-contract repair. This is a narrow executable-identity fix, not a reopening of continuation science, pricing, or the behavioural-selection design.\" The maintainer further directed: \"the continuation producer must adapt to the established shared contract. Do not modify session_commit_gate and do not add an authorization-specific workaround.\"\n\nLaunch condition, verbatim: \"If every gate passes, launch the behavioural continuation directly without returning for another routine review. If another genuinely new material blocker appears, stop and report.\"\n\nCovers: ONE behavioural-continuation session: import the completed Phase-B Stage-1 and rung-1 state, buy only the genuinely missing behavioural probes (one sb for fe9683e6a9c7, and at worst two conditional sc for fe9683e6a9c7 and the canonical control), apply the frozen pooled sa+sb rule and the frozen final-selection rule, emit the terminal report, retain evidence, tear the pod down and stop.\n\nCumulative spend at approval $260.0550 against a cumulative cap of $283.76.\n\nDoes NOT authorize: Re-buying Phase-B Stage 1 or any search \u2014 Stage 1 is complete, retained and authoritative, and runs_search is False by type. Also excluded: a second attempt; any use of the historical $35.6660 full-Phase-B ceiling; a fourth seed; backfilling rank 6 or 7; probing any of the three searched non-survivors (ab7632b00788, bf5ae3b6ae00, cca699c93f34), which are evidence only; recomputing rung 1; any cumulative-cap increase; post-Phase-B generalization; DEPTH incumbent selection; ATTENTION/FFN/RESIDUAL_WIDTH research; the canonical Stage-1 NLL; formal Stage 2/Stage 3 recovery training; and any new paid session of any kind. The maintainer's words: \"No changes to science, candidate selection, probes, generalization, operator R&D, canonical Stage-1 NLL, or formal Stage 2/3 in this repair.\"\n\nGrant document: logs/autoinit_continuation_b_grant.json",
+    "plan_id": "autoinit.v1.phase_b_behavioural_continuation",
+    "continuation_plan_hash": "a2ef4cd68a4bae7a0de399b078ad99e41e23ae8448b2871b0c3f381d687703cf",
+    "science_plan_hash": "02be33b9a7a8e26bc8bfb75795351e8cdc9ffd441b47066cc81887cfc511b55c",
+    "calibration_profile_hashes": {
+      "calib.domain_balanced@v1": "11f36a88bad4879f8ab0e3586ca1f0af035401e505dc97815bed8d47b9f32e9b",
+      "calib.reasoning_heavy@v2": "6c67b8dff0e81a775371a62b1b293677e45c173f52aee119d036c95081782ddd"
+    },
+    "calibration_content_hashes": {
+      "calib.domain_balanced@v1": "d65c1f40e4837ea1bd5bcc33c68041a13b797c68f5be3c0686e0142ed761028f",
+      "calib.reasoning_heavy@v2": "cdb2838946b9355294406d2bc398bc8390306ced84a35b09900f45a033ccc370"
+    },
+    "bound_evidence": {
+      "stage1_selection_sha256": "84fd6496851995aef8ac624b68944c0881fdaf62a29013ea2aec5acb0e87a35c",
+      "identity_collapse_amendment_sha256": "df413bd99119dab72c16399362298620abec0efdce36754a1627b14e616b26bb",
+      "collapsed_universe_identity": "e94f15d2e648d86a2a7a1496c5e1c0ef47b78d87746bb622488a06af0418d483",
+      "historical_reuse_probes_dir_digest": "a5115816861ad239f646facec4d53ba2c7925c9430c530e7c6d0af2560d5b1af",
+      "attempt5_reuse_probes_dir_digest": "2e5030fadc786faaafe1ec3ac3a2ccb4af367e98bf630a89a16938729a77844e",
+      "rung1_selection_digest": "1f86c6e6e9cfc67aeb428be092bbf87ad91d2b6b6ae175bf55786f92b7696b6e"
+    },
+    "planning_floor_usd": 5.4784,
+    "hard_cap_usd": 8.0691,
+    "per_launch_hard_usd": 8.0691,
+    "authorized_stages": [
+      0,
+      1,
+      3,
+      4,
+      5
+    ],
+    "stage_conditions": {
+      "0": "attestation; generation_runtime_comparability@v2; the v3 continuation executable-source digest; BOTH calibration identities per profile; and every one of the six cited evidence identities. A comparability FAILURE TERMINATES: every cited observation would be lost at once and re-buying them is a different, larger session",
+      "1": "import the completed behavioural state. NO search, NO new sa probe, NO recomputation of rung 1. The six-candidate collapsed universe must rebuild to the bound identity, and exactly THREE finalists \u2014 fe9683e6a9c7, 85bde4ded2c3 and the canonical control \u2014 may enter the probe stages. The three searched non-survivors are evidence and are never materialized",
+      "2": "ABSENT BY DESIGN. Phase A's stage 2 is rung 1 on seed sa, which this session imports as completed evidence rather than buying",
+      "3": "rung 2 on sb, then the frozen pooled sa+sb decision unchanged. Only genuinely missing observations are run: fe9683e6a9c7/sb is bought; 85bde4ded2c3/sb and control/sb are cited",
+      "4": "conditional tie-break on sc, only for candidates inside the frozen equivalence interval that lack a verified sc. At worst fe9683e6a9c7/sc and control/sc; 85bde4ded2c3/sc is cited. NO fourth seed, ever",
+      "5": "final selection and report under the frozen rule. unresolved_equivalence with winner=None is a RESULT. Stage-1 ranking, search-side KL/NLL, the canonical Stage-1 NLL and state-id ordering may NOT break a tie",
+      "teardown": "retain probe, raw generation and scoring evidence and the final report; collect provider and billing evidence; delete the pod; confirm from the provider that nothing remains running; STOP for review"
+    },
+    "scope_note": "ONE behavioural-continuation execution, one launcher invocation. This artifact authorizes the SPEND and the STAGES; it is not by itself an instruction to launch. It CANNOT authorize a search: runs_search is False by type. Nothing here permits a second attempt, re-buying Phase-B Stage 1, a fourth seed, backfilling rank 6/7, probing a searched non-survivor, post-Phase-B generalization, DEPTH incumbent selection, ATTENTION/FFN/RESIDUAL_WIDTH research, the canonical Stage-1 NLL, or formal Stage 2/3 recovery training. The continuation is a terminus and stops for review on every path.",
+    "runs_search": false,
+    "phase_a_authorized": false,
+    "automatic_followon_start": false,
+    "authorized_session_commit": "5c5edba1850fede878e890b38de61ac29f96b048",
+    "source_digest": "5344d0480803e259a071ab1486ee671479bddf8402f90feff9a676c30891fa65",
+    "source_files": [
+      "scripts/pod/autoinit_continuation_b_driver.py",
+      "scripts/pod/autoinit_continuation_b_launch.py",
+      "scripts/pod/autoinit_phase_a_driver.py",
+      "scripts/pod/autoinit_phase_a_launch.py",
+      "scripts/pod/autoinit_preflight_setup.sh",
+      "scripts/pod/autoinit_recovery_continuation_launch.py",
+      "scripts/pod/autoinit_science_inputs.py",
+      "scripts/pod/collect_artifacts.py",
+      "scripts/pod/watchdog.py",
+      "src/aadistill/__init__.py",
+      "src/aadistill/autoinit/__init__.py",
+      "src/aadistill/autoinit/adapters/__init__.py",
+      "src/aadistill/autoinit/adapters/qwen3.py",
+      "src/aadistill/autoinit/arch.py",
+      "src/aadistill/autoinit/artifact.py",
+      "src/aadistill/autoinit/authorization.py",
+      "src/aadistill/autoinit/calibration.py",
+      "src/aadistill/autoinit/cost.py",
+      "src/aadistill/autoinit/datasets.py",
+      "src/aadistill/autoinit/device.py",
+      "src/aadistill/autoinit/device_handoff.py",
+      "src/aadistill/autoinit/generation.py",
+      "src/aadistill/autoinit/generation_compat.py",
+      "src/aadistill/autoinit/identity_collapse.py",
+      "src/aadistill/autoinit/leaf_durability.py",
+      "src/aadistill/autoinit/manifest.py",
+      "src/aadistill/autoinit/metrics.py",
+      "src/aadistill/autoinit/operators/__init__.py",
+      "src/aadistill/autoinit/operators/_common.py",
+      "src/aadistill/autoinit/operators/attention.py",
+      "src/aadistill/autoinit/operators/base.py",
+      "src/aadistill/autoinit/operators/composite.py",
+      "src/aadistill/autoinit/operators/depth.py",
+      "src/aadistill/autoinit/operators/ffn.py",
+      "src/aadistill/autoinit/operators/width.py",
+      "src/aadistill/autoinit/phase_a.py",
+      "src/aadistill/autoinit/phase_b_continuation.py",
+      "src/aadistill/autoinit/ranking.py",
+      "src/aadistill/autoinit/recovery.py",
+      "src/aadistill/autoinit/recovery_continuation.py",
+      "src/aadistill/autoinit/search.py",
+      "src/aadistill/autoinit/state.py",
+      "src/aadistill/autoinit/stats.py",
+      "src/aadistill/autoinit/telemetry.py",
+      "src/aadistill/data/__init__.py",
+      "src/aadistill/data/extra_stream.py",
+      "src/aadistill/infrastructure/__init__.py",
+      "src/aadistill/infrastructure/artifact_gate.py",
+      "src/aadistill/infrastructure/budget.py",
+      "src/aadistill/infrastructure/log_relay.py",
+      "src/aadistill/infrastructure/manifest.py",
+      "src/aadistill/infrastructure/provider.py",
+      "src/aadistill/infrastructure/remote.py",
+      "src/aadistill/infrastructure/session.py",
+      "src/aadistill/infrastructure/session_prechecks.py",
+      "src/aadistill/infrastructure/session_runner.py",
+      "src/aadistill/infrastructure/source_identity.py",
+      "src/aadistill/init/__init__.py",
+      "src/aadistill/init/collect.py",
+      "src/aadistill/init/contribution.py",
+      "src/aadistill/init/project.py",
+      "src/aadistill/init/sandwich.py"
+    ],
+    "provenance_commit": "5c5edba1850fede878e890b38de61ac29f96b048",
+    "version": 1,
+    "authorization_sha256": "74870eb71729576ff7e00d660343ccd6a5637b2fa780b247a85709ccaa9a8b14"
+  },
+  "elapsed_min": 74.22,
+  "spend_usd": 1.36,
+  "continuation_binding": {
+    "executable_source_digest": "5344d0480803e259a071ab1486ee671479bddf8402f90feff9a676c30891fa65",
+    "cited_evidence": {
+      "stage1_selection_sha256": "84fd6496851995aef8ac624b68944c0881fdaf62a29013ea2aec5acb0e87a35c",
+      "identity_collapse_amendment_sha256": "df413bd99119dab72c16399362298620abec0efdce36754a1627b14e616b26bb",
+      "collapsed_universe_identity": "e94f15d2e648d86a2a7a1496c5e1c0ef47b78d87746bb622488a06af0418d483",
+      "historical_reuse_probes_dir_digest": "a5115816861ad239f646facec4d53ba2c7925c9430c530e7c6d0af2560d5b1af",
+      "attempt5_reuse_probes_dir_digest": "2e5030fadc786faaafe1ec3ac3a2ccb4af367e98bf630a89a16938729a77844e",
+      "rung1_selection_digest": "1f86c6e6e9cfc67aeb428be092bbf87ad91d2b6b6ae175bf55786f92b7696b6e"
+    }
+  },
+  "probes": [
+    {
+      "probe_id": "autoinit.v1.phase_a.rung2.85bde4ded2c3.sb",
+      "rung": 2,
+      "seed": 20260801,
+      "is_control": false,
+      "resumed": true
+    },
+    {
+      "probe_id": "autoinit.v1.phase_a.rung2.control-qwen.sb",
+      "rung": 2,
+      "seed": 20260801,
+      "is_control": true,
+      "resumed": true
+    },
+    {
+      "probe_id": "autoinit.v1.phase_a.rung2.fe9683e6a9c7.sb",
+      "rung": 2,
+      "seed": 20260801,
+      "is_control": false,
+      "resumed": false
+    }
+  ]
+}

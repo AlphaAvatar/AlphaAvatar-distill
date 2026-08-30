@@ -1,0 +1,185 @@
+{
+  "rung": "final",
+  "ranked": [
+    {
+      "state_id": "fe9683e6a9c783bbc6fe276a78c851c6",
+      "is_control": false,
+      "seeds": [
+        20260726,
+        20260801
+      ],
+      "probe_ids": [
+        "autoinit.v1.phase_a.rung1.fe9683e6a9c7.sa",
+        "autoinit.v1.phase_a.rung2.fe9683e6a9c7.sb"
+      ],
+      "n": 380,
+      "usable": 272,
+      "correct": 11,
+      "n_scorable": 340,
+      "usable_scorable": 263,
+      "usable_rollout_rate": 0.7157894736842105,
+      "correct_overall": 0.03235294117647059,
+      "correct_given_usable": 0.04182509505703422,
+      "aggregation": "pooled_counts@v2",
+      "per_capability": {
+        "gsm8k": {
+          "n": 60,
+          "usable": 53,
+          "usable_rollout_rate": 0.8833333333333333
+        },
+        "math_verified": {
+          "n": 60,
+          "usable": 36,
+          "usable_rollout_rate": 0.6
+        },
+        "multihop": {
+          "n": 60,
+          "usable": 53,
+          "usable_rollout_rate": 0.8833333333333333
+        },
+        "rag": {
+          "n": 60,
+          "usable": 55,
+          "usable_rollout_rate": 0.9166666666666666
+        },
+        "knowledge": {
+          "n": 60,
+          "usable": 35,
+          "usable_rollout_rate": 0.5833333333333334
+        },
+        "tool": {
+          "n": 40,
+          "usable": 31,
+          "usable_rollout_rate": 0.775
+        }
+      }
+    },
+    {
+      "state_id": "85bde4ded2c31953f802e39cf2252c87",
+      "is_control": false,
+      "seeds": [
+        20260726,
+        20260801,
+        20260813
+      ],
+      "probe_ids": [
+        "autoinit.v1.phase_a.rung1.85bde4ded2c3.sa",
+        "autoinit.v1.phase_a.rung2.85bde4ded2c3.sb",
+        "autoinit.v1.phase_a.rung3.85bde4ded2c3.sc"
+      ],
+      "n": 570,
+      "usable": 311,
+      "correct": 10,
+      "n_scorable": 510,
+      "usable_scorable": 297,
+      "usable_rollout_rate": 0.5456140350877193,
+      "correct_overall": 0.0196078431372549,
+      "correct_given_usable": 0.03367003367003367,
+      "aggregation": "pooled_counts@v2",
+      "per_capability": {
+        "gsm8k": {
+          "n": 90,
+          "usable": 63,
+          "usable_rollout_rate": 0.7
+        },
+        "math_verified": {
+          "n": 90,
+          "usable": 39,
+          "usable_rollout_rate": 0.43333333333333335
+        },
+        "multihop": {
+          "n": 90,
+          "usable": 51,
+          "usable_rollout_rate": 0.5666666666666667
+        },
+        "rag": {
+          "n": 90,
+          "usable": 66,
+          "usable_rollout_rate": 0.7333333333333333
+        },
+        "knowledge": {
+          "n": 90,
+          "usable": 46,
+          "usable_rollout_rate": 0.5111111111111111
+        },
+        "tool": {
+          "n": 60,
+          "usable": 32,
+          "usable_rollout_rate": 0.5333333333333333
+        }
+      }
+    },
+    {
+      "state_id": "control-qwen3_0p6b_init_v0",
+      "is_control": true,
+      "seeds": [
+        20260726,
+        20260801
+      ],
+      "probe_ids": [
+        "autoinit.v1.phase_a.rung1.control-qwen.sa",
+        "autoinit.v1.phase_a.rung2.control-qwen.sb"
+      ],
+      "n": 380,
+      "usable": 188,
+      "correct": 3,
+      "n_scorable": 340,
+      "usable_scorable": 184,
+      "usable_rollout_rate": 0.49473684210526314,
+      "correct_overall": 0.008823529411764706,
+      "correct_given_usable": 0.016304347826086956,
+      "aggregation": "pooled_counts@v2",
+      "per_capability": {
+        "gsm8k": {
+          "n": 60,
+          "usable": 28,
+          "usable_rollout_rate": 0.4666666666666667
+        },
+        "math_verified": {
+          "n": 60,
+          "usable": 18,
+          "usable_rollout_rate": 0.3
+        },
+        "multihop": {
+          "n": 60,
+          "usable": 37,
+          "usable_rollout_rate": 0.6166666666666667
+        },
+        "rag": {
+          "n": 60,
+          "usable": 50,
+          "usable_rollout_rate": 0.8333333333333334
+        },
+        "knowledge": {
+          "n": 60,
+          "usable": 25,
+          "usable_rollout_rate": 0.4166666666666667
+        },
+        "tool": {
+          "n": 40,
+          "usable": 26,
+          "usable_rollout_rate": 0.65
+        }
+      }
+    }
+  ],
+  "decision_status": "resolved",
+  "winner": "fe9683e6a9c783bbc6fe276a78c851c6",
+  "winner_is_control": false,
+  "provisional_leader": "fe9683e6a9c783bbc6fe276a78c851c6",
+  "provisional_leader_is_control": false,
+  "excluded_by_feasibility": [],
+  "excluded_by_catastrophic_capability": [],
+  "all_exclusions": [],
+  "equivalence_interval": 0.011695296982299022,
+  "capability_schema_enforced": true,
+  "control_present": true,
+  "tied_within_equivalence": [
+    "fe9683e6a9c783bbc6fe276a78c851c6"
+  ],
+  "needs_tie_break_seed": false,
+  "tie_break_candidates": [],
+  "tie_break_completed": false,
+  "interpretation": null,
+  "rule": "final: pooled-count aggregate over sa and sb; among finalists clearing the feasibility floor, top 1 by correct_overall. The canonical control is eligible to win. Finalists inside the equivalence interval go to seed sc."
+}

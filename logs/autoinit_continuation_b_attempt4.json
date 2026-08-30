@@ -1,0 +1,116 @@
+{
+ "schema": "aadistill.autoinit.continuation_b_attempt/v1",
+ "attempt": 4,
+ "generated_utc": "2026-08-30T13:18:39Z",
+ "verdict": "ALL_DONE \u2014 the behavioural continuation COMPLETED and resolved",
+ "authorization": "autoinit.continuation_b.20260830T114643Z (one-use, CONSUMED)",
+ "session_commit": "fcdacb02418cc2d46a50ded771827c5114466863",
+ "executable_source_digest": "5344d0480803e259a071ab1486ee671479bddf8402f90feff9a676c30891fa65",
+ "preregistration_sha256": "281242df4e0276668e195e5755d107c85e442fdeaa6497ea5a16ba07cfa95189",
+ "pod": {
+  "id": "hyvp7dw3zkb1zk",
+  "gpu": "NVIDIA L40S",
+  "image": {
+   "image_name": "runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404",
+   "observed": [
+    "580.159.03"
+   ],
+   "digest": "runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@580.159.03"
+  },
+  "elapsed_minutes": 88.97,
+  "usd": 1.468,
+  "authorized_usd": 8.0691,
+  "within_authorization": true,
+  "final_state": {
+   "exists": false,
+   "desired_status": "TERMINATED",
+   "billing": false
+  },
+  "provider_confirms_gone": true
+ },
+ "what_was_purchased": {
+  "probes_bought": [
+   "autoinit.v1.phase_a.rung2.fe9683e6a9c7.sb"
+  ],
+  "count": 1,
+  "why_only_one": "the frozen selector resolved at the pooled sa+sb stage, so the conditional sc rung correctly did not run",
+  "probes_reused": "all 11 imported citations \u2014 8 historical, 3 from Attempt 5 \u2014 re-verified at stage 0 against the grant's bound digests",
+  "no_sa_rerun": true,
+  "no_search": true,
+  "no_rung1_recomputation": true,
+  "fourth_seed": "never reached"
+ },
+ "result": {
+  "decision_status": "resolved",
+  "winner": "fe9683e6a9c783bbc6fe276a78c851c6",
+  "winner_is_control": false,
+  "tie_break_ran": false,
+  "equivalence_interval": 0.011695296982299022,
+  "feasibility_floor": 0.3,
+  "report_sha256": "7ced0ea6cdf70b1c63ccbaae51217bc53a39af4a439a6273f69241187c0707bf",
+  "margin_over_runner_up": 0.012745,
+  "separated_by": "0.012745 > the preregistered equivalence interval 0.011695, which is exactly why no sc was bought",
+  "pooled_sa_plus_sb": [
+   {
+    "state_id": "fe9683e6a9c783bbc6fe276a78c851c6",
+    "usable_rollout_rate": 0.7157894736842105,
+    "correct_overall": 0.03235294117647059,
+    "correct_given_usable": 0.04182509505703422,
+    "n": 380,
+    "usable": 272,
+    "correct": 11,
+    "seeds": [
+     20260726,
+     20260801
+    ]
+   },
+   {
+    "state_id": "85bde4ded2c31953f802e39cf2252c87",
+    "usable_rollout_rate": 0.5456140350877193,
+    "correct_overall": 0.0196078431372549,
+    "correct_given_usable": 0.03367003367003367,
+    "n": 570,
+    "usable": 311,
+    "correct": 10,
+    "seeds": [
+     20260726,
+     20260801,
+     20260813
+    ]
+   },
+   {
+    "state_id": "control-qwen3_0p6b_init_v0",
+    "usable_rollout_rate": 0.49473684210526314,
+    "correct_overall": 0.008823529411764706,
+    "correct_given_usable": 0.016304347826086956,
+    "n": 380,
+    "usable": 188,
+    "correct": 3,
+    "seeds": [
+     20260726,
+     20260801
+    ]
+   }
+  ],
+  "rule": "final: pooled-count aggregate over sa and sb; among finalists clearing the feasibility floor, top 1 by correct_overall. The canonical control is eligible to win. Finalists inside the equivalence interval go to seed sc."
+ },
+ "how_to_read_it": {
+  "primary_axis": "usable_rollout is the Stage-2/3 primary metric and it separates cleanly: 0.7158 for the winner against 0.5456 and 0.4947. Report it with its components, never as a single score.",
+  "correctness_is_secondary": "the absolute correctness rates are small \u2014 11 correct of 380 for the winner \u2014 and sit near the floor in every arm including the control, exactly as in Phase A. They are a SELECTION signal under a fixed 0.86M probe, NOT recovered-model capability.",
+  "what_this_does_NOT_authorize": "full recovery training, a canonical Stage-1 NLL, DEPTH incumbent selection, or any post-Phase-B operator work. The result's own no_followon field says so.",
+  "margin_is_thin": "0.012745 clears 0.011695 by 0.001050 \u2014 roughly one additional correct sample. The rule is preregistered and was applied as frozen, but the separation is narrow and should be read as such."
+ },
+ "the_four_defects_this_run_cleared": [
+  "attempt 1: inherited product contract / pod test scope (calibration)",
+  "attempt 2: driver constructor loading the Phase-A authorization",
+  "attempt 3: finalist bytes resolved from the amendment's dev-box path",
+  "all three repaired and confirmed on hardware by this run"
+ ],
+ "evidence": {
+  "session_record": "logs/autoinit_continuation_b_session.json",
+  "final_result": "logs/autoinit_continuation_b_attempt4/phase_a_result.json",
+  "pooled_decision": "logs/autoinit_continuation_b_attempt4/rung2_selection.json",
+  "archive": "44 files across 16 classes; teardown gate allowed=True failed=None"
+ },
+ "next_action": "STOP for scientific review. Nothing chains off this session."
+}

@@ -1,6 +1,6 @@
 {
  "schema": "aadistill.current_state/v2",
- "generated_utc": "2026-08-30T10:58:04Z",
+ "generated_utc": "2026-08-30T13:19:12Z",
  "_contract": "The minimal machine-readable CURRENT snapshot: live facts only, no history, no per-attempt detail, no narrative. History lives in logs/decisions.md and the per-run directories; the human view is logs/STATE.md and the two must agree. Ownership: logs/CATALOG.md.",
  "baseline_commit": "b7c0099bfffc8962e4368917c59f8a9a8508d063",
  "baseline_commit_meaning": "The LAST TESTED IMPLEMENTATION: the commit whose tree produced the latest_verification figures (2461 passed / 12 skipped / 0 failed).",
@@ -8,11 +8,11 @@
   "paid_compute": false,
   "pods": 0,
   "launchers": 0,
-  "note": "pod qbfqbp3y6hq8iu deleted 2026-08-30T09:30:28Z, provider confirms gone and not billing; launcher, watchdog and poller all exited"
+  "note": "pod hyvp7dw3zkb1zk deleted 2026-08-30T13:16:42Z, provider confirms gone and not billing; launcher, watchdog and poller all stopped"
  },
  "authorized": {
   "any": false,
-  "note": "autoinit.continuation_b.20260830T091529Z CONSUMED by attempt 3 and retired. 194657Z and 153538Z CONSUMED, 115028Z UNUSED. A fourth attempt needs a new maintainer decision."
+  "note": "autoinit.continuation_b.20260830T114643Z CONSUMED by attempt 4 and retired. All four continuation grants are retired. Nothing further is authorized."
  },
  "prepared_launch": {
   "any": false,
@@ -20,13 +20,13 @@
   "note": "the launch bundle is consumed by the running session"
  },
  "budget": {
-  "cumulative_spend_usd": 260.8484,
+  "cumulative_spend_usd": 262.3164,
   "authorized_cap_usd": 283.76,
-  "remaining_usd": 22.9116,
+  "remaining_usd": 21.4436,
   "planning_floor_usd": 5.4784,
   "remaining_is_not_permission": true,
   "ledger": "logs/BUDGET_LEDGER.md",
-  "headroom_note": "Phase-B attempts 1-5 cost $30.0200; behavioural continuation attempts 1-3 cost $0.7934 and bought no probe. Headroom $22.9116 still covers one $8.0691 continuation.",
+  "headroom_note": "Phase-B attempts 1-5 cost $30.0200; behavioural continuation attempts 1-4 cost $2.2614 and DELIVERED the result. Nothing further is funded.",
   "continuation_hard_ceiling_usd": 8.0691,
   "continuation_planning_floor_usd": 5.4784
  },
@@ -49,18 +49,17 @@
   "phase_b_stage1_selection_sha256": "84fd6496851995ae",
   "phase_b_identity": "amendment df413bd99119dab7, universe e94f15d2e648d86a, 6 distinct (8 assumed). Attempt-5 exec 3ad6a6e3edf1 / prereg 53f1347f6865: HISTORICAL, search bought.",
   "continuation_b": "exec 5344d0480803e259 (62 files, set v3), plan a2ef4cd68a4bae7a, prereg 281242df4e027666, assets 1643145376ba19a2. 6 evidence candidates, 3 finalists. Floor $5.4784, ceiling $8.0691. Finalist bytes resolve from the POD STAGING contract (artifacts/autoinit/phase_a_selected/<state_id>; control at artifacts/stage1/<CONTROL_ID>/checkpoint), never the amendment's dev-box checkpoint_path -- which stays frozen at df413bd99119dab7. The digest check after resolution is unchanged. logs/autoinit_continuation_b_preregistration.json",
-  "phase_b_post_freeze": "exec digest moved 3d3b5d07 -> a043e2c7: shared SESSION_KIND dispatcher gained a continuation_b branch; Phase-B gate now accepts declared additive drift. 3 pre-existing branches byte-identical. Prereg NOT rewritten. logs/autoinit_phase_b_post_freeze_changes.json"
+  "phase_b_post_freeze": "exec digest moved 3d3b5d07 -> a043e2c7: shared SESSION_KIND dispatcher gained a continuation_b branch; Phase-B gate now accepts declared additive drift. 3 pre-existing branches byte-identical. Prereg NOT rewritten. logs/autoinit_phase_b_post_freeze_changes.json",
+  "continuation_b_result": "RESOLVED 2026-08-30. winner fe9683e6a9c783bbc6fe276a78c851c6, not the control, tie_break_ran False. Pooled sa+sb usable_rollout 0.7158 / 0.5456 / 0.4947; correct_overall 0.032353 / 0.019608 / 0.008824. Margin 0.012745 over the 0.011695 equivalence interval \u2014 separated by 0.001050, which is why no sc was bought. report_sha256 7ced0ea6cdf70b1c. SELECTION evidence under a fixed 0.86M probe, NOT recovered-model capability, and it authorizes no follow-on. logs/autoinit_continuation_b_attempt4.json"
  },
  "latest_verification": {
-  "utc": "2026-08-30T10:58:04Z",
-  "after": "the stage-1 staging-path repair",
-  "full_suite": "2499 passed, 12 skipped, 0 failed in 26:06",
-  "stage1_reproduction": "$0: amendment checkpoint_path points at a nonexistent dev-box directory, the valid checkpoint exists ONLY under artifacts/autoinit/phase_a_selected/<state_id>, build_finalist_states succeeds; a moved identity still fails closed",
-  "mutations": "5 on the staging repair, no survivors",
-  "verifiers": "frozen assets clean",
-  "frozen_identities": "all hold vs the attempt-3 launch commit b189fad; the rest of the preregistration is byte-identical",
-  "gates": "to be run at the authorization-only commit",
-  "scope": "CPU only; no GPU, no pod, $0"
+  "utc": "2026-08-30T13:19:12Z",
+  "after": "continuation attempt 4",
+  "terminal": "ALL_DONE \u2014 decision_status resolved",
+  "probes_bought": "1 (fe9683e6a9c7/sb); 11 citations reused; no sc, no sa, no search",
+  "gates": "7 of 7 PASS including session_commit_and_lineage",
+  "teardown": "gate allowed=True failed=None; 44 artifacts across 16 classes",
+  "scope": "one paid pod, $1.4680 against the $8.0691 ceiling"
  },
  "failure_pattern": "continuation 1-7: an uncaught transport call, an undeliverable asset, dev-box-only code in the pod gate, the attempt-12 OOM class, a checkpoint path, a checkpoint with no tokenizer, and finally a SUCCEEDING driver whose launcher crashed on a line only success reaches. Each failure was further in than the last. See logs/decisions.md",
  "abandoned": [
@@ -71,9 +70,9 @@
   "the paid device-canary session path: TERMINATED 2026-08-18, evidence kept, none prepared"
  ],
  "next_starting_point": {
-  "status": "PHASE_B_STAGE1_COMPLETE / BEHAVIOURAL_SELECTION_INCOMPLETE. Four defects found and closed on the way to a paid probe: inherited product contract, pod test scope, driver constructor, finalist staging resolution. Attempts 1-3 cost $0.7934 and bought no probe. Stage 0 has passed on hardware.",
-  "the_ask": "REVIEW the repaired frozen commit, then the approved sequence: new one-use authorization -> authorization-only commit -> 7/7 gates -> exactly one paid launch at ceiling $8.0691 against headroom $22.9116.",
-  "budget": "cap $283.7600, spent $260.8484, headroom $22.9116. Continuation ceiling $8.0691 \u2014 NOT the historical $35.6660."
+  "status": "PHASE_B_COMPLETE. The behavioural continuation resolved: fe9683e6a9c7 wins the frozen pooled sa+sb rule over 85bde4ded2c3 and the canonical control. Four launches, $2.2614; the first three each closed a distinct defect and bought nothing.",
+  "the_ask": "SCIENTIFIC REVIEW of the result. Nothing chains off it: the result's own no_followon field states that a winner does not authorize full recovery.",
+  "budget": "cap $283.7600, spent $262.3164, headroom $21.4436. Nothing further is funded."
  },
  "read_order": [
   "logs/STATE.md \u2014 the human view of this file",
@@ -123,7 +122,7 @@
   "1_phase_b_implementation": "the behavioural-continuation executable is BUILT and verified end to end at $0; identities in frozen.continuation_b"
  },
  "canonical_infrastructure_moved_to": "docs/SESSION_ARCHITECTURE.md and logs/decisions.md",
- "phase_b_state": "PHASE_B_STAGE1_COMPLETE / BEHAVIOURAL_SELECTION_INCOMPLETE",
- "blocker": "none. Attempt 3's stage-1 defect is repaired: a provenance path is not a runtime staging path. Proven at $0 with the amendment's dev-box directory absent and the checkpoint only under the staged location. Awaiting launch review; nothing issued, nothing launched.",
+ "phase_b_state": "PHASE_B_COMPLETE \u2014 behavioural selection RESOLVED",
+ "blocker": "none. The behavioural continuation is COMPLETE and RESOLVED.",
  "failed_note": "per-attempt failure records live in the per-run directories and logs/decisions.md"
 }

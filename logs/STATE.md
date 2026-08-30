@@ -1,4 +1,4 @@
-**Updated:** 2026-08-30 · branch `main` · **PHASE_B_STAGE1_COMPLETE / BEHAVIOURAL_SELECTION_INCOMPLETE — stage-1 staging repaired, awaiting launch review**
+**Updated:** 2026-08-30 · branch `main` · **PHASE_B COMPLETE — behavioural selection RESOLVED**
 
 # Current state
 
@@ -7,13 +7,68 @@ the live facts; this one says the same things in prose and adds nothing it does
 not carry. If the two disagree, a structural test fails.
 
 **Nothing is running. Nothing is billing. Nothing is prepared for launch.**
-Pod `qbfqbp3y6hq8iu` was deleted at `09:30:28Z`; the provider confirms it gone
-and not billing, and the launcher, watchdog and poller have all exited — the
-poller journalled `pod_gone` and stopped itself. Spend is `$260.8484` of the
-`$283.7600` cap, `$22.9116` remaining.
+Pod `hyvp7dw3zkb1zk` was deleted at `13:16:42Z`; the provider confirms it gone
+and not billing, and the launcher, watchdog and poller are all stopped. Spend is
+`$262.3164` of the `$283.7600` cap, `$21.4436` remaining. **Nothing is
+authorized** — all four continuation grants are retired.
 
-**Nothing is authorized.** All four behavioural-continuation grants are retired:
-`091529Z`, `194657Z` and `153538Z` **CONSUMED**, `115028Z` **UNUSED**.
+# THE BEHAVIOURAL CONTINUATION IS COMPLETE — resolved, $1.4680
+
+`ALL_DONE`. Attempt 4 bought **one** probe —
+`autoinit.v1.phase_a.rung2.fe9683e6a9c7.sb`, the single mandatory missing
+observation — reused all eleven citations, and the frozen selector **resolved at
+the pooled `sa+sb` stage**, so no `sc` was bought and no fourth seed was reached.
+
+## The result
+
+**Winner: `fe9683e6a9c783bbc6fe276a78c851c6`.** Not the control.
+`decision_status: resolved`, `tie_break_ran: false`, report `7ced0ea6cdf70b1c`.
+
+| pooled `sa+sb` | usable_rollout | correct_overall | correct given usable | n |
+| --- | --- | --- | --- | --- |
+| **`fe9683e6a9c7`** | **0.7158** | **0.032353** | 0.041825 | 380 |
+| `85bde4ded2c3` | 0.5456 | 0.019608 | 0.033670 | 570 |
+| `control-qwen3_0p6b_init_v0` | 0.4947 | 0.008824 | 0.016304 | 380 |
+
+**Why no `sc`.** The margin over the runner-up is `0.012745`, which clears the
+preregistered equivalence interval `0.011695`. The frozen rule sends finalists
+*inside* the interval to seed `sc`; these were outside it, so the conditional
+rung correctly did not run.
+
+## How to read this, and how not to
+
+* **`usable_rollout` is the primary axis** and it separates cleanly — `0.7158`
+  against `0.5456` and `0.4947`. Report it with its components, never as one
+  score.
+* **Correctness is secondary and small.** Eleven correct out of 380 for the
+  winner; every arm including the control sits near the floor, exactly as in
+  Phase A. This is a **selection** signal under a fixed 0.86M probe, **not**
+  recovered-model capability.
+* **The margin is thin.** `0.012745` clears `0.011695` by `0.001050` — roughly
+  one additional correct sample. The rule was preregistered and applied as
+  frozen, and the separation should be read as narrow.
+* **It authorizes nothing further.** The result's own `no_followon` field: *"a
+  winner does not authorize full recovery, and unresolved_equivalence does not
+  authorize a fourth seed."*
+
+## What it cost, and what the earlier attempts bought
+
+Four launches, **$2.2614** total. Attempt 4 was `$1.4680` against the `$8.0691`
+ceiling — under the `$4.32` expectation, because only one of the three priced
+probes was needed. The three earlier attempts cost `$0.7934` between them and
+each closed a distinct defect that no `$0` check had caught:
+
+| attempt | $ | reached | defect closed |
+| --- | --- | --- | --- |
+| 1 | 0.2513 | pod test gate | inherited product contract / pod test scope |
+| 2 | 0.3146 | driver stage 0 | constructor loaded the Phase-A authorization |
+| 3 | 0.2275 | stage 1 | finalist bytes read from the amendment's dev-box path |
+| 4 | 1.4680 | **ALL_DONE** | — |
+
+Records: [`autoinit_continuation_b_attempt4.json`](autoinit_continuation_b_attempt4.json)
+and the per-attempt files beside it.
+
+---
 
 # REPAIRED — finalist bytes come from the pod staging contract
 

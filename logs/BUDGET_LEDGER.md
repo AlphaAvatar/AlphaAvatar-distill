@@ -1343,6 +1343,34 @@ Behavioural-continuation attempts now total **$0.7934** and have bought no
 probe. Record:
 [`autoinit_continuation_b_attempt3.json`](autoinit_continuation_b_attempt3.json).
 
+## 2026-08-30 — Behavioural continuation attempt 4: $1.4680, COMPLETE and RESOLVED
+
+```
+cumulative spend before                                      $260.8484
+continuation attempt 4 (pod hyvp7dw3zkb1zk, 89.0 min, L40S)  $  1.4680
+cumulative spend after                                       $262.3164
+authorized cumulative cap                                    $283.7600
+remaining headroom                                           $ 21.4436
+continuation session hard ceiling                            $  8.0691
+```
+
+**`ALL_DONE`.** The first behavioural-continuation session to buy a probe and
+reach a terminal scientific result. All 7 pre-provider gates passed, setup and
+the CPU test gate passed, stage 0 bound every cited identity, stage 3 trained and
+evaluated **one** probe — `autoinit.v1.phase_a.rung2.fe9683e6a9c7.sb`, the single
+mandatory missing observation — and the frozen selector resolved at the pooled
+`sa+sb` stage, so **no `sc` was bought**.
+
+Came in at **$1.4680 against the $8.0691 ceiling** and well under the $4.32
+expectation, because only one of the three priced probes was needed. 44 artifacts
+across 16 classes collected, teardown gate `allowed=True failed=None`, pod deleted
+13:16:42Z, provider confirms gone and not billing.
+
+Behavioural-continuation attempts total **$2.2614** across four launches; the
+three that bought nothing cost `$0.7934` between them and each closed a distinct
+defect. Record:
+[`autoinit_continuation_b_attempt4.json`](autoinit_continuation_b_attempt4.json).
+
 ## Standing rules
 
 * Plan from **actual spend**, never from unused room under a previous authorization.

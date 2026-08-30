@@ -1,0 +1,25 @@
+2026-08-30T11:56:01Z MARKER:DRIVER_START
+2026-08-30T11:56:01Z MARKER:STAGE_START:0
+[11:58:06] attested: interval 0.011695, floor 0.3000, plan 02be33b9a7a8…
+2026-08-30T11:58:06Z MARKER:STAGE_PASSED:0
+[11:58:06] continuation evidence bound: universe e94f15d2e648…, stage-1 selection 84fd64968519…
+2026-08-30T11:58:06Z MARKER:STAGE_START:1
+[11:58:09] imported 11 completed observations; 6 distinct candidates as evidence; 3 advancing ['85bde4ded2c31953f802e39cf2252c87', 'control-qwen3_0p6b_init_v0', 'fe9683e6a9c783bbc6fe276a78c851c6']; 3 searched non-survivors excluded ['ab7632b00788f825e252ea8d5ff4be30', 'bf5ae3b6ae00c3dbb963805135b3838f', 'cca699c93f34dad7e94a5d13a25b2bc2']
+2026-08-30T11:58:09Z MARKER:STAGE_PASSED:1
+2026-08-30T11:58:09Z MARKER:STAGE_START:3
+[11:58:09]   autoinit.v1.phase_a.rung2.85bde4ded2c3.sb: cited from verified evidence (protocol 7327e8806454…, comparable under v2)
+[11:58:09]   autoinit.v1.phase_a.rung2.85bde4ded2c3.sb: cited from verified evidence (protocol 7327e8806454…, comparable under v2)
+[11:58:09]   autoinit.v1.phase_a.rung2.control-qwen.sb: cited from verified evidence (protocol 7327e8806454…, comparable under v2)
+[11:58:09]   autoinit.v1.phase_a.rung2.control-qwen.sb: cited from verified evidence (protocol 7327e8806454…, comparable under v2)
+2026-08-30T13:03:04Z MARKER:PROBE_TRAINED:autoinit.v1.phase_a.rung2.fe9683e6a9c7.sb
+[13:03:04]   autoinit.v1.phase_a.rung2.fe9683e6a9c7.sb: evaluation tokenizer copied, copied, copied
+2026-08-30T13:10:14Z MARKER:PROBE_SCORED:autoinit.v1.phase_a.rung2.fe9683e6a9c7.sb
+[13:10:14] after two seeds: resolved
+2026-08-30T13:10:14Z MARKER:STAGE_PASSED:3
+2026-08-30T13:10:14Z MARKER:STAGE_START:4
+[13:10:14] no tie-break owed — finalists are separated by more than the equivalence interval, or already resolved
+2026-08-30T13:10:14Z MARKER:STAGE_PASSED:4
+2026-08-30T13:10:14Z MARKER:STAGE_START:5
+[13:10:14] RESULT: resolved · winner=fe9683e6a9c783bbc6fe276a78c851c6 · is_control=False
+2026-08-30T13:10:14Z MARKER:STAGE_PASSED:5
+2026-08-30T13:10:14Z MARKER:ALL_DONE
