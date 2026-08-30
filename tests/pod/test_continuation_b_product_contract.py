@@ -496,3 +496,207 @@ def test_no_calibration_is_reachable_from_the_continuation_runtime():
     parent = (REPO / "scripts/pod/autoinit_phase_a_driver.py").read_text()
     assert 'artifacts/stage3/ladder_uniform_probe' in parent
     assert 'artifacts/stage3/recovery_search_v2' in parent
+
+
+# --- provenance path is not runtime staging path ----------------------------
+#
+# Continuation attempt 3 passed 7/7 gates, setup and STAGE 0 — binding every
+# cited identity and importing all eleven probe journals — and then refused one
+# second later:
+#
+#   85bde4ded2c31953f802e39cf2252c87 is an ADVANCING finalist but is not staged
+#   at /home/ecs-user/aad-artifacts/autoinit/phase_a/85bde4ded2c3...
+#
+# `build_finalist_states` resolved each finalist as `Path(c.checkpoint_path)`,
+# a field of the FROZEN amendment which records DEV-BOX absolute paths. The pod
+# stages them somewhere else entirely.
+#
+# The old whole-function test could not catch this: it builds toy checkpoints in
+# tmp_path and points the amendment at them, so `checkpoint_path` always exists
+# there. Its assertion — an advancing finalist must be staged — is correct, and
+# is exactly what fired on the pod. What nothing asserted is that the path the
+# driver DERIVES is one the pod will have. These tests assert the derivation.
+
+STAGED_FINALISTS_REL = "artifacts/autoinit/phase_a_selected"
+CONTROL_CHECKPOINT_REL = "artifacts/stage1/qwen3_0p6b_init_v0/checkpoint"
+
+#: TOY geometry, borrowed from the whole-function test. The first version of the
+#: tests below built at the real frozen target geometry, and a 596M-parameter
+#: float32 student is ~2.4 GiB written twice per run — which filled this box to
+#: 100% during the mutation harness. It would also have run inside the POD's
+#: setup test gate, on a 2700 s timeout whose expiry exits 90 and kills a paid
+#: session. Nothing here is about model size: what is under test is which
+#: DIRECTORY the driver resolves, so the smallest checkpoint that round-trips
+#: through `identify_checkpoint` is the right one.
+TOY_TEACHER_GEOMETRY = dict(hidden_size=32, num_hidden_layers=6,
+                            intermediate_size=48, num_attention_heads=4,
+                            num_key_value_heads=2, head_dim=8,
+                            vocab_size=151936, tie_word_embeddings=True)
+TOY_TARGET_GEOMETRY = dict(hidden_size=16, num_hidden_layers=4,
+                           intermediate_size=24, num_attention_heads=2,
+                           num_key_value_heads=2, head_dim=8,
+                           vocab_size=151936, tie_word_embeddings=True)
+
+
+def toy_student(adapter, target, seed: int, into: Path):
+    """Write the smallest checkpoint that satisfies the identity path."""
+    import torch
+    from transformers import Qwen3Config, Qwen3ForCausalLM
+
+    torch.manual_seed(seed)
+    teacher = Qwen3ForCausalLM(Qwen3Config(
+        max_position_embeddings=4096, rope_theta=5_000_000,
+        **TOY_TEACHER_GEOMETRY)).float().eval()
+    adapter.save(adapter.build_model(
+        adapter.build_config(teacher.config, target), torch.float32, seed),
+        str(into))
+
+
+def test_the_driver_and_the_launcher_agree_on_where_finalists_are_staged(cont):
+    """One contract, checked from both ends.
+
+    The launcher writes the advancing leaves to a `dest`; the driver reads them
+    from a derived path. If those two strings ever diverge the session fails on
+    a pod, which is the only place both halves run.
+    """
+    import autoinit_continuation_b_driver as drv
+
+    assert drv.STAGED_FINALISTS == STAGED_FINALISTS_REL
+    assert drv.CANONICAL_CONTROL_CHECKPOINT == CONTROL_CHECKPOINT_REL
+
+    # The launcher's own relay inputs must land exactly there.
+    dests = {r.dest for r in cont.continuation_inputs()}
+    assert dests, "the launcher stages no finalists; the contract is untested"
+    for dest in dests:
+        assert dest.startswith(drv.STAGED_FINALISTS + "/"), (
+            f"the launcher stages a finalist at {dest} but the driver looks "
+            f"under {drv.STAGED_FINALISTS}")
+    # And the control travels to the path the driver derives for it.
+    from autoinit_science_inputs import CANONICAL_INIT
+
+    assert {r.dest for r in CANONICAL_INIT} == {drv.CANONICAL_CONTROL_CHECKPOINT}
+
+
+def test_resolution_ignores_the_amendment_and_uses_the_staging_path():
+    """The derivation itself, with no filesystem involved."""
+    import types
+
+    import autoinit_continuation_b_driver as drv
+
+    searched = types.SimpleNamespace(
+        state_id="85bde4ded2c31953f802e39cf2252c87", primary_role="searched",
+        checkpoint_path="/home/ecs-user/aad-artifacts/autoinit/phase_a/DEVBOX")
+    control = types.SimpleNamespace(
+        state_id="control-qwen", primary_role="control",
+        checkpoint_path="/home/ecs-user/aad-artifacts/DEVBOX-CONTROL")
+
+    got = drv.ContinuationDriver.staged_checkpoint(drv.ContinuationDriver, searched)
+    assert got == drv.REPO / STAGED_FINALISTS_REL / searched.state_id
+    assert "aad-artifacts" not in str(got), (
+        "the resolver still returns a dev-box provenance path")
+
+    got = drv.ContinuationDriver.staged_checkpoint(drv.ContinuationDriver, control)
+    assert got == drv.REPO / CONTROL_CHECKPOINT_REL
+    assert "aad-artifacts" not in str(got)
+
+
+def test_build_finalist_states_succeeds_when_only_the_staged_bytes_exist(
+        tmp_path, monkeypatch):
+    """The pod's actual situation, reproduced at `$0`.
+
+    The amendment's `checkpoint_path` points at a directory that does NOT exist,
+    exactly as on a pod. The valid checkpoint exists ONLY under the staged
+    location. `build_finalist_states` must succeed — and must still re-derive the
+    identity and match the amendment's bound digest.
+    """
+    import json as _json
+
+    from transformers import AutoConfig
+
+    import autoinit_continuation_b_driver as drv
+    from aadistill.autoinit.arch import ArchSpec, get_adapter
+    from aadistill.autoinit.artifact import identify_checkpoint
+
+    repo = tmp_path / "pod_repo"
+    monkeypatch.setattr(drv, "REPO", repo)
+
+    # A toy student, written ONLY to the staged location. Nothing is ever
+    # written to the amendment's path.
+    import phase_a_frozen
+
+    monkeypatch.setattr(phase_a_frozen, "TARGET_GEOMETRY", TOY_TARGET_GEOMETRY)
+    adapter = get_adapter("qwen3")
+    target = ArchSpec.of("qwen3", TOY_TARGET_GEOMETRY)
+    state_id = "85bde4ded2c31953f802e39cf2252c87"
+    staged = repo / STAGED_FINALISTS_REL / state_id
+    toy_student(adapter, target, 7, staged)
+    spec = adapter.spec_from_config(AutoConfig.from_pretrained(str(staged)))
+    digest = identify_checkpoint(
+        staged, adapter=adapter, spec=spec,
+        num_parameters=adapter.param_count(spec)).artifact_digest
+
+    devbox = "/nonexistent/aad-artifacts/autoinit/phase_a/" + state_id
+    assert not Path(devbox).exists()
+
+    amendment = tmp_path / "amendment.json"
+    amendment.write_text(_json.dumps({
+        "rung1_selection": {"advancing": [state_id]},
+        "collapsed_universe": {"universe_identity": "x", "candidates": []}}))
+    monkeypatch.setattr(drv, "AMENDMENT", amendment)
+
+    manifest = repo / "artifacts/stage1/state_eval_v1/manifest.json"
+    manifest.parent.mkdir(parents=True, exist_ok=True)
+    manifest.write_text(_json.dumps({"teacher_sha256": "0" * 64}))
+
+    import types
+    driver = drv.ContinuationDriver.__new__(drv.ContinuationDriver)
+    driver.evidence_universe = [types.SimpleNamespace(
+        state_id=state_id, primary_role="searched", roles=("searched",),
+        artifact_digest=digest, checkpoint_path=devbox)]
+
+    states = drv.ContinuationDriver.build_finalist_states(driver)
+    assert len(states) == 1, states
+    assert states[0].state_id == state_id
+
+
+def test_a_staged_checkpoint_whose_identity_moved_still_fails_closed(
+        tmp_path, monkeypatch):
+    """The repair moves the lookup; it must not weaken the check."""
+    import json as _json
+    import types
+
+    from transformers import AutoConfig
+
+    import autoinit_continuation_b_driver as drv
+    from aadistill.autoinit.arch import ArchSpec, get_adapter
+    from aadistill.autoinit.identity_collapse import IdentityCollapseError
+
+    import phase_a_frozen
+
+    repo = tmp_path / "pod_repo"
+    monkeypatch.setattr(drv, "REPO", repo)
+    monkeypatch.setattr(phase_a_frozen, "TARGET_GEOMETRY", TOY_TARGET_GEOMETRY)
+    adapter = get_adapter("qwen3")
+    target = ArchSpec.of("qwen3", TOY_TARGET_GEOMETRY)
+    state_id = "85bde4ded2c31953f802e39cf2252c87"
+    staged = repo / STAGED_FINALISTS_REL / state_id
+    toy_student(adapter, target, 9, staged)
+    AutoConfig.from_pretrained(str(staged))
+
+    amendment = tmp_path / "amendment.json"
+    amendment.write_text(_json.dumps({
+        "rung1_selection": {"advancing": [state_id]},
+        "collapsed_universe": {"universe_identity": "x", "candidates": []}}))
+    monkeypatch.setattr(drv, "AMENDMENT", amendment)
+    manifest = repo / "artifacts/stage1/state_eval_v1/manifest.json"
+    manifest.parent.mkdir(parents=True, exist_ok=True)
+    manifest.write_text(_json.dumps({"teacher_sha256": "0" * 64}))
+
+    driver = drv.ContinuationDriver.__new__(drv.ContinuationDriver)
+    driver.evidence_universe = [types.SimpleNamespace(
+        state_id=state_id, primary_role="searched", roles=("searched",),
+        artifact_digest="d" * 64,          # NOT what the staged bytes derive to
+        checkpoint_path="/nonexistent/devbox")]
+
+    with pytest.raises(IdentityCollapseError):
+        drv.ContinuationDriver.build_finalist_states(driver)

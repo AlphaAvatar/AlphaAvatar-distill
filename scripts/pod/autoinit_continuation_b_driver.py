@@ -85,9 +85,36 @@ HISTORICAL_PROBES = REPO / "logs/autoinit_recovery_continuation_attempt7/probes"
 ATTEMPT5_PROBES = REPO / "logs/autoinit_phase_b_attempt5/probes"
 
 CANONICAL_CONTROL = "control-qwen"
+
+#: Where the LAUNCHER stages the advancing finalists on the pod, and therefore
+#: where this driver must look for their bytes.
+#:
+#: **A provenance path is not a runtime staging path.** Attempt 3 died here for
+#: `$0.2275`, one second after stage 0 passed: `build_finalist_states` resolved
+#: each finalist as `Path(c.checkpoint_path)`, a field of the FROZEN
+#: identity-collapse amendment which records DEV-BOX absolute paths under
+#: `/home/ecs-user/aad-artifacts/autoinit/phase_a/`. No such directory exists on
+#: a pod, so an advancing finalist was reported unstaged.
+#:
+#: The amendment is untouched and must stay so — its digest `df413bd99119dab7`
+#: is bound by the authorization and the preregistration, and its paths remain
+#: correct provenance for the machine that materialized those bytes. What
+#: changes is only where THIS process looks. The bytes found here are still
+#: re-identified and required to equal the amendment's bound digest, so the
+#: repair moves the lookup without weakening the check.
+#:
+#: `autoinit_phase_b_driver` establishes the same contract with the same
+#: literal. It is restated rather than imported: borrowing the constant would
+#: pull the Phase-B search driver into this session's import closure, which
+#: `no_search_gate` measures and `CONTINUATION_SOURCE_FILES_V2` pins.
+STAGED_FINALISTS = "artifacts/autoinit/phase_a_selected"
 #: The canonical control's own id. Its collapsed state id is the truncated
 #: `control-qwen`; the state this driver builds is `control-<CONTROL_ID>`.
 CONTROL_ID = "qwen3_0p6b_init_v0"
+#: Derived from `CONTROL_ID` rather than written out, so the staged location and
+#: the control's identity cannot drift apart. This is the `dest` the launcher's
+#: `CANONICAL_INIT` relay inputs write to.
+CANONICAL_CONTROL_CHECKPOINT = f"artifacts/stage1/{CONTROL_ID}/checkpoint"
 
 #: The two numbers that keep evidence and workload apart, asserted rather than
 #: assumed. SIX distinct behavioural candidates carry the completed `sa`
@@ -257,6 +284,23 @@ class ContinuationDriver(PhaseADriver):
                 "describes a different experiment")
         return collapsed
 
+    def staged_checkpoint(self, candidate) -> Path:
+        """Where the POD holds this finalist's bytes.
+
+        Derived from the staging contract, never read from the amendment. The
+        amendment's `checkpoint_path` is provenance for the dev box and is not
+        consulted here at all — which is the whole repair, since consulting it
+        is what ended attempt 3 one second after stage 0 passed.
+
+        Nothing is weakened by this: the caller re-identifies whatever it finds
+        and requires the digest to equal the amendment's bound value, so the
+        amendment still decides whether the staged bytes are the right ones. It
+        just no longer decides where to look for them.
+        """
+        if candidate.primary_role == "control":
+            return REPO / CANONICAL_CONTROL_CHECKPOINT
+        return REPO / STAGED_FINALISTS / candidate.state_id
+
     def build_finalist_states(self) -> list:
         """The THREE active finalists, rebuilt from retained bytes.
 
@@ -294,12 +338,14 @@ class ContinuationDriver(PhaseADriver):
             if not (c.state_id in advancing
                     or (control and full_control_id in advancing)):
                 continue
-            directory = Path(c.checkpoint_path)
+            directory = self.staged_checkpoint(c)
             if not directory.is_dir():
                 raise RecoveryAdmissionError(
                     f"{c.state_id} is an ADVANCING finalist but is not staged at "
                     f"{directory}; the continuation probes it and cannot rebuild "
-                    "it from nothing")
+                    "it from nothing. This is the pod STAGING path, not the "
+                    "amendment's dev-box provenance path — if it is empty the "
+                    "launcher did not deliver the bytes")
             spec = adapter.spec_from_config(AutoConfig.from_pretrained(str(directory)))
             n_params = adapter.param_count(spec)
             artifact = identify_checkpoint(directory, adapter=adapter, spec=spec,
