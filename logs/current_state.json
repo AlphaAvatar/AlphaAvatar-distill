@@ -1,6 +1,6 @@
 {
  "schema": "aadistill.current_state/v2",
- "generated_utc": "2026-08-30T09:33:10Z",
+ "generated_utc": "2026-08-30T10:58:04Z",
  "_contract": "The minimal machine-readable CURRENT snapshot: live facts only, no history, no per-attempt detail, no narrative. History lives in logs/decisions.md and the per-run directories; the human view is logs/STATE.md and the two must agree. Ownership: logs/CATALOG.md.",
  "baseline_commit": "b7c0099bfffc8962e4368917c59f8a9a8508d063",
  "baseline_commit_meaning": "The LAST TESTED IMPLEMENTATION: the commit whose tree produced the latest_verification figures (2461 passed / 12 skipped / 0 failed).",
@@ -48,17 +48,19 @@
   "phase_b_pricing": "HISTORICAL: floor $16.4555, ceiling $35.6660 \u2014 prices a P=2 search ALREADY BOUGHT.",
   "phase_b_stage1_selection_sha256": "84fd6496851995ae",
   "phase_b_identity": "amendment df413bd99119dab7, universe e94f15d2e648d86a, 6 distinct (8 assumed). Attempt-5 exec 3ad6a6e3edf1 / prereg 53f1347f6865: HISTORICAL, search bought.",
-  "continuation_b": "exec 1bf97d7da6d183ec (62 files, set v3), plan a2ef4cd68a4bae7a, prereg 68cb7e898552388d, assets 1643145376ba19a2. 6 evidence candidates, 3 finalists, 3 searched non-survivors, 0 gate exclusions. Floor $5.4784, ceiling $8.0691. BIND IS NOT CONSUME: both calibration identities bound as provenance, neither mixture staged. ContinuationDriver owns its constructor, authorization type/path and PLAN. logs/autoinit_continuation_b_preregistration.json",
+  "continuation_b": "exec 5344d0480803e259 (62 files, set v3), plan a2ef4cd68a4bae7a, prereg 281242df4e027666, assets 1643145376ba19a2. 6 evidence candidates, 3 finalists. Floor $5.4784, ceiling $8.0691. Finalist bytes resolve from the POD STAGING contract (artifacts/autoinit/phase_a_selected/<state_id>; control at artifacts/stage1/<CONTROL_ID>/checkpoint), never the amendment's dev-box checkpoint_path -- which stays frozen at df413bd99119dab7. The digest check after resolution is unchanged. logs/autoinit_continuation_b_preregistration.json",
   "phase_b_post_freeze": "exec digest moved 3d3b5d07 -> a043e2c7: shared SESSION_KIND dispatcher gained a continuation_b branch; Phase-B gate now accepts declared additive drift. 3 pre-existing branches byte-identical. Prereg NOT rewritten. logs/autoinit_phase_b_post_freeze_changes.json"
  },
  "latest_verification": {
-  "utc": "2026-08-30T09:33:10Z",
-  "after": "continuation attempt 3",
-  "full_suite": "2495 passed, 12 skipped, 0 failed at the base commit 4958bb2",
-  "gates": "7 of 7 PASS including session_commit_and_lineage",
-  "on_hardware": "stage 0 PASSED: evidence bound, universe and Stage-1 selection verified, protocol attested, 11 probe journals imported",
+  "utc": "2026-08-30T10:58:04Z",
+  "after": "the stage-1 staging-path repair",
+  "full_suite": "2499 passed, 12 skipped, 0 failed in 26:06",
+  "stage1_reproduction": "$0: amendment checkpoint_path points at a nonexistent dev-box directory, the valid checkpoint exists ONLY under artifacts/autoinit/phase_a_selected/<state_id>, build_finalist_states succeeds; a moved identity still fails closed",
+  "mutations": "5 on the staging repair, no survivors",
   "verifiers": "frozen assets clean",
-  "scope": "one paid pod, $0.2275, no probe bought"
+  "frozen_identities": "all hold vs the attempt-3 launch commit b189fad; the rest of the preregistration is byte-identical",
+  "gates": "to be run at the authorization-only commit",
+  "scope": "CPU only; no GPU, no pod, $0"
  },
  "failure_pattern": "continuation 1-7: an uncaught transport call, an undeliverable asset, dev-box-only code in the pod gate, the attempt-12 OOM class, a checkpoint path, a checkpoint with no tokenizer, and finally a SUCCEEDING driver whose launcher crashed on a line only success reaches. Each failure was further in than the last. See logs/decisions.md",
  "abandoned": [
@@ -69,8 +71,8 @@
   "the paid device-canary session path: TERMINATED 2026-08-18, evidence kept, none prepared"
  ],
  "next_starting_point": {
-  "status": "PHASE_B_STAGE1_COMPLETE / BEHAVIOURAL_SELECTION_INCOMPLETE. Attempt 3 passed 7/7 gates, setup, and STAGE 0 -- binding every cited identity and importing all 11 probe journals -- then refused at stage 1 on a dev-box checkpoint path. No probe has been bought in any attempt.",
-  "the_ask": "REVIEW the stage-1 finalist-resolution defect, then whether to authorize a fourth attempt at ceiling $8.0691 against headroom $22.9116.",
+  "status": "PHASE_B_STAGE1_COMPLETE / BEHAVIOURAL_SELECTION_INCOMPLETE. Four defects found and closed on the way to a paid probe: inherited product contract, pod test scope, driver constructor, finalist staging resolution. Attempts 1-3 cost $0.7934 and bought no probe. Stage 0 has passed on hardware.",
+  "the_ask": "REVIEW the repaired frozen commit, then the approved sequence: new one-use authorization -> authorization-only commit -> 7/7 gates -> exactly one paid launch at ceiling $8.0691 against headroom $22.9116.",
   "budget": "cap $283.7600, spent $260.8484, headroom $22.9116. Continuation ceiling $8.0691 \u2014 NOT the historical $35.6660."
  },
  "read_order": [
@@ -122,6 +124,6 @@
  },
  "canonical_infrastructure_moved_to": "docs/SESSION_ARCHITECTURE.md and logs/decisions.md",
  "phase_b_state": "PHASE_B_STAGE1_COMPLETE / BEHAVIOURAL_SELECTION_INCOMPLETE",
- "blocker": "NEW, at stage 1: build_finalist_states resolves finalists as Path(c.checkpoint_path) from the frozen amendment, which records DEV-BOX absolute paths. On the pod they are staged at artifacts/autoinit/phase_a_selected/<state_id>, which PhaseBDriver already resolves against (STAGED_FINALISTS). The amendment must NOT move -- its hash is bound by the authorization and preregistration -- so the repair belongs in the driver. logs/autoinit_continuation_b_attempt3.json",
+ "blocker": "none. Attempt 3's stage-1 defect is repaired: a provenance path is not a runtime staging path. Proven at $0 with the amendment's dev-box directory absent and the checkpoint only under the staged location. Awaiting launch review; nothing issued, nothing launched.",
  "failed_note": "per-attempt failure records live in the per-run directories and logs/decisions.md"
 }

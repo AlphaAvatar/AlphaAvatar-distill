@@ -1,4 +1,4 @@
-**Updated:** 2026-08-30 · branch `main` · **PHASE_B_STAGE1_COMPLETE / BEHAVIOURAL_SELECTION_INCOMPLETE — stage 0 passed on hardware, blocked at stage 1**
+**Updated:** 2026-08-30 · branch `main` · **PHASE_B_STAGE1_COMPLETE / BEHAVIOURAL_SELECTION_INCOMPLETE — stage-1 staging repaired, awaiting launch review**
 
 # Current state
 
@@ -14,6 +14,61 @@ poller journalled `pod_gone` and stopped itself. Spend is `$260.8484` of the
 
 **Nothing is authorized.** All four behavioural-continuation grants are retired:
 `091529Z`, `194657Z` and `153538Z` **CONSUMED**, `115028Z` **UNUSED**.
+
+# REPAIRED — finalist bytes come from the pod staging contract
+
+`build_finalist_states` no longer reads the amendment's `checkpoint_path`. A new
+`staged_checkpoint()` derives the pod location:
+
+| candidate | resolved path |
+| --- | --- |
+| searched finalists | `REPO / "artifacts/autoinit/phase_a_selected" / state_id` |
+| canonical control | `REPO / f"artifacts/stage1/{CONTROL_ID}/checkpoint"` |
+
+The control path is **derived from `CONTROL_ID`** so the staged location and the
+control's identity cannot drift apart. Both constants are **restated, not
+imported** from `autoinit_phase_b_driver`: borrowing them would pull the Phase-B
+search driver into this session's import closure, which `no_search_gate` measures
+and `CONTINUATION_SOURCE_FILES_V2` pins.
+
+**The amendment is unchanged and stays frozen** — bound identity
+`df413bd99119dab7`, verified intact. Its dev-box paths remain correct provenance
+for the machine that materialized those bytes.
+
+**Identity verification is untouched.** Whatever is found at the staged path is
+still re-identified and required to equal the amendment's bound digest; a
+mismatch still raises `IdentityCollapseError`. The amendment still decides
+whether the bytes are the right ones — it no longer decides where to look.
+
+## Verification
+
+| check | result |
+| --- | --- |
+| `$0` stage-1 reproduction | amendment `checkpoint_path` points at a **nonexistent** dev-box directory (asserted absent), the valid checkpoint exists **only** under the staged location, `build_finalist_states` **succeeds** |
+| launcher ↔ driver contract | the launcher's relay `dest` and the driver's derived path pinned to the same string, from both ends |
+| fail-closed check | a staged checkpoint whose identity moved still raises |
+| mutations | **5, no survivors** — restoring `Path(c.checkpoint_path)`, returning the amendment path, moving either constant, dropping the digest check |
+| full suite | **2499 passed, 12 skipped, 0 failed** |
+| frozen verifier | clean |
+| frozen identities | all hold; the rest of the preregistration is **byte-identical** |
+
+**Two things the verification itself caught**, both worth keeping:
+
+* The first version of these tests built at the real frozen target geometry — a
+  ~2.4 GiB float32 checkpoint written twice per run — and six mutation-harness
+  runs took this box to **100% disk**. They now use the toy geometry: 2.4 s
+  instead of 31.8 s, no measurable disk. That matters beyond the dev box, since
+  they also run inside the **pod's setup gate**, on a 2700 s timeout whose expiry
+  exits 90 and kills a paid session.
+* The full suite went **red** on the first pass — 11 failures — because the
+  whole-function test still staged its checkpoints where the driver no longer
+  looks. Targeted runs of the changed files passed; only the full suite exercised
+  the interaction. The test now depends on the staging contract, which is exactly
+  the property whose absence let attempt 3 buy the failure.
+
+**Nothing is issued and nothing is launched.**
+
+---
 
 # ATTEMPT 3 PASSED STAGE 0 — and stopped at stage 1 · $0.2275
 
