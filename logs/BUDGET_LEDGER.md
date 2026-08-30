@@ -1371,6 +1371,39 @@ three that bought nothing cost `$0.7934` between them and each closed a distinct
 defect. Record:
 [`autoinit_continuation_b_attempt4.json`](autoinit_continuation_b_attempt4.json).
 
+## 2026-08-30 — Behavioural continuation attempt 5: $1.5433, PHASE B RESOLVED
+
+```
+cumulative spend before                                      $262.3164
+continuation attempt 5 (pod skoh6l6wmmwxce, 93.5 min, L40S)  $  1.5433
+cumulative spend after                                       $263.8597
+authorized cumulative cap                                    $283.7600
+remaining headroom                                           $ 19.9003
+continuation session hard ceiling                            $  5.4784
+```
+
+**Phase B is closed.** All 8 pre-provider gates passed; the pod independently
+recomputed the corrected rung-2 decision and reproduced it exactly
+(`11/340`, `9/340`, `3/340` → `tie_pending`, candidates
+`{fe9683e6a9c7, 85bde4ded2c3}`); stage 4 then bought **exactly one** probe,
+`autoinit.v1.phase_a.rung3.fe9683e6a9c7.sc`, and stage 5 resolved.
+
+**Winner `fe9683e6a9c7`**, not the control, `tie_break_ran: true`, report
+`8c8842b84fe85cec`. Final pooled `sa+sb+sc`: `16/510 = 0.031373` against
+`10/510 = 0.019608`; the control stays at `3/340 = 0.008824` because it is
+outside the interval and correctly never advanced.
+
+**The margin clears by `0.000070`** — `0.011765` against an interval of
+`0.011695`. One correct answer is `1/510 = 0.001961`, so the separation is about
+**3.6% of a single correct sample**. The frozen rule was applied exactly as
+preregistered; the result is what it returns, and it is not a comfortable
+separation.
+
+Came in at `$1.5433` against the `$5.4784` ceiling. Behavioural-continuation
+attempts total **$3.8047** across five launches; the three that bought nothing
+cost `$0.7934` and each closed a distinct defect. Record:
+[`autoinit_continuation_b_attempt5.json`](autoinit_continuation_b_attempt5.json).
+
 ## Standing rules
 
 * Plan from **actual spend**, never from unused room under a previous authorization.

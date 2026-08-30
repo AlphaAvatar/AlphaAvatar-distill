@@ -1,4 +1,4 @@
-**Updated:** 2026-08-30 · branch `main` · **PHASE_B BEHAVIOURAL SELECTION — TIE_PENDING, one probe owed**
+**Updated:** 2026-08-30 · branch `main` · **PHASE B COMPLETE — behavioural selection RESOLVED**
 
 # Current state
 
@@ -7,9 +7,74 @@ the live facts; this one says the same things in prose and adds nothing it does
 not carry. If the two disagree, a structural test fails.
 
 **Nothing is running. Nothing is billing. Nothing is prepared for launch.**
-Pod `hyvp7dw3zkb1zk` was deleted at `13:16:42Z`; the provider confirms it gone
-and not billing. Spend is `$262.3164` of the `$283.7600` cap, `$21.4436`
-remaining. **Nothing is authorized** — all four continuation grants are retired.
+Pod `skoh6l6wmmwxce` was deleted at `21:15:07Z`; the provider confirms it gone and
+not billing. Spend is `$263.8597` of the `$283.7600` cap, `$19.9003` remaining.
+**Nothing is authorized** — all five continuation grants are retired, and no
+further paid work is approved.
+
+# PHASE B IS CLOSED — resolved, $1.5433
+
+All **8** pre-provider gates passed. The pod recomputed the corrected rung-2
+decision independently and **reproduced it exactly** — `11/340`, `9/340`, `3/340`
+→ `tie_pending`, candidates `{fe9683e6a9c7, 85bde4ded2c3}` — which is the
+strongest available confirmation that the stage-aware pooling repair works in the
+real runtime. Stage 4 then bought **exactly one** probe,
+`autoinit.v1.phase_a.rung3.fe9683e6a9c7.sc`, and stage 5 resolved.
+
+## The result
+
+**Winner: `fe9683e6a9c783bbc6fe276a78c851c6`.** Not the control.
+`decision_status: resolved`, `tie_break_ran: true`, report `8c8842b84fe85cec`.
+
+| final pooled | seeds | correct | correct_overall | usable_rollout |
+| --- | --- | --- | --- | --- |
+| **`fe9683e6a9c7`** | sa+sb+sc | 16/510 | **0.031373** | 0.6842 |
+| `85bde4ded2c3` | sa+sb+sc | 10/510 | 0.019608 | 0.5456 |
+| control | sa+sb | 3/340 | 0.008824 | 0.4947 |
+
+The control has fewer observations **by design** — it is outside the equivalence
+interval and correctly never advanced to `sc`. At `0.008824` it cannot affect the
+outcome.
+
+## Read the margin carefully
+
+`0.011765` against an interval of `0.011695`. It clears by **`0.000070`**.
+
+One correct answer is `1/510 = 0.001961`, so the separation is about **3.6% of a
+single correct sample**. Had `fe9683e6a9c7` scored 15 instead of 16, the margin
+would be `0.009804` and the result `unresolved_equivalence`.
+
+The frozen rule was applied exactly as preregistered and the decision is what it
+returns. It is **not** a comfortable separation, and nothing downstream should
+treat it as one.
+
+Correctness remains near the floor in every arm — 16 of 510 for the winner. This
+is **selection** evidence under a fixed 0.86M probe, not recovered-model
+capability. `correct_overall` is the ranking metric; `usable_rollout` does not
+rank, though here it agrees.
+
+## What it authorizes
+
+**Nothing.** Not formal recovery, not a canonical Stage-1 NLL, not Phase C. The
+**Phase A vs Phase B scientific comparison is owed next**, and must precede any
+Phase C execution.
+
+## Cost across five launches
+
+| attempt | $ | reached | outcome |
+| --- | --- | --- | --- |
+| 1 | 0.2513 | pod test gate | closed the product-contract / test-scope defect |
+| 2 | 0.3146 | driver stage 0 | closed the constructor / authorization defect |
+| 3 | 0.2275 | stage 1 | closed the dev-box finalist-path defect |
+| 4 | 1.4680 | ALL_DONE | bought `fe9683/sb`; decision **withdrawn** (pooling defect) |
+| 5 | 1.5433 | **ALL_DONE** | bought `fe9683/sc`; **RESOLVED** |
+
+**$3.8047** total. Records: [`autoinit_continuation_b_attempt5.json`](autoinit_continuation_b_attempt5.json)
+and the per-attempt files beside it.
+
+---
+
+# Superseded: the withdrawn attempt-4 decision
 
 # THE ATTEMPT-4 DECISION IS WITHDRAWN — the state is TIE_PENDING
 

@@ -1,6 +1,6 @@
 {
  "schema": "aadistill.current_state/v2",
- "generated_utc": "2026-08-30T19:27:08Z",
+ "generated_utc": "2026-08-30T21:18:37Z",
  "_contract": "The minimal machine-readable CURRENT snapshot: live facts only, no history, no per-attempt detail, no narrative. History lives in logs/decisions.md and the per-run directories; the human view is logs/STATE.md and the two must agree. Ownership: logs/CATALOG.md.",
  "baseline_commit": "884acb04c3aca3a548f825b5011f562131d9d86c",
  "baseline_commit_meaning": "The LAST TESTED IMPLEMENTATION: the commit whose tree produced the latest_verification figures (2524 passed / 12 skipped / 0 failed). Commits after it changed only logs and metadata -- no file in CONTINUATION_SOURCE_FILES_V2 -- so the tested implementation is unchanged.",
@@ -8,11 +8,11 @@
   "paid_compute": false,
   "pods": 0,
   "launchers": 0,
-  "note": "pod hyvp7dw3zkb1zk deleted 2026-08-30T13:16:42Z, provider confirms gone and not billing; launcher, watchdog and poller all stopped"
+  "note": "pod skoh6l6wmmwxce deleted 2026-08-30T21:15:07Z, provider confirms gone and not billing; launcher, watchdog and poller all stopped"
  },
  "authorized": {
   "any": false,
-  "note": "autoinit.continuation_b.20260830T114643Z CONSUMED by attempt 4 and retired. All four continuation grants are retired. Nothing further is authorized."
+  "note": "autoinit.continuation_b.20260830T194023Z CONSUMED by attempt 5 and retired. All five continuation grants retired. Nothing is authorized and no further paid work is approved."
  },
  "prepared_launch": {
   "any": false,
@@ -20,13 +20,13 @@
   "note": "nothing is prepared. The attempt-4 bundle is consumed and its authorization retired; no new one is issued"
  },
  "budget": {
-  "cumulative_spend_usd": 262.3164,
+  "cumulative_spend_usd": 263.8597,
   "authorized_cap_usd": 283.76,
-  "remaining_usd": 21.4436,
+  "remaining_usd": 19.9003,
   "planning_floor_usd": 5.4784,
   "remaining_is_not_permission": true,
   "ledger": "logs/BUDGET_LEDGER.md",
-  "headroom_note": "Phase-B attempts 1-5 cost $30.0200; behavioural continuation attempts 1-4 cost $2.2614. They did NOT deliver the Phase-B result: attempt 4 produced valid retained fe9683e6a9c7/sb, but its reported resolved winner was WITHDRAWN when the stage-aware pooling defect was found. Phase-B behavioural selection is TIE_PENDING and exactly one observation is owed, fe9683e6a9c7/sc. One reviewed one-use authorization at ceiling $5.4784 against headroom $21.4436 is the only approved next paid action; nothing is funded until it is issued.",
+  "headroom_note": "Phase-B attempts 1-5 cost $30.0200; behavioural continuation attempts 1-5 cost $3.8047 and CLOSED Phase B. Nothing further is funded or approved.",
   "continuation_hard_ceiling_usd": 5.4784,
   "continuation_planning_floor_usd": 4.183
  },
@@ -53,14 +53,14 @@
   "continuation_b_result": "TIE_PENDING \u2014 see phase_b_result. Attempt 4's decision is WITHDRAWN; its fe9683e6a9c7/sb probe is retained, strictly reconstructed and authorization-bound."
  },
  "latest_verification": {
-  "utc": "2026-08-30T17:39:19Z",
-  "after": "the one-probe launch contract",
-  "full_suite": "2524 passed, 12 skipped, 0 failed in 25:16",
-  "verifiers": "frozen assets clean; all THREE reuse records verify",
-  "mutations": "9 on the one-probe contract, no survivors",
-  "scope_enforcement": "PURCHASABLE whitelist + probe_config purchase seam + workload_scope_gate; priced 1, booked 1, purchasable 1",
-  "gates": "8 pre-provider gates; to be run at the authorization-only commit",
-  "scope": "CPU only; no GPU, no pod, $0"
+  "utc": "2026-08-30T21:18:37Z",
+  "after": "continuation attempt 5",
+  "terminal": "ALL_DONE \u2014 decision_status resolved",
+  "gates": "8 of 8 PASS including workload_scope_gate",
+  "probes_bought": "1, exactly fe9683e6a9c7/sc as whitelisted; 12 citations reused; no sa, no sb, no 85bde/sc, no control/sc, no search",
+  "rung2_reproduced_on_hardware": "the pod recomputed the corrected rung-2 and reproduced 11/340, 9/340, 3/340 -> tie_pending",
+  "teardown": "gate allowed=True failed=None; 45 artifacts across 16 classes",
+  "scope": "one paid pod, $1.5433 against the $5.4784 ceiling"
  },
  "abandoned": [
   "recovery_search_v1 (INVALID before first use)",
@@ -70,9 +70,9 @@
   "the paid device-canary session path: TERMINATED 2026-08-18, evidence kept, none prepared"
  ],
  "next_starting_point": {
-  "status": "PHASE_B BEHAVIOURAL SELECTION = TIE_PENDING. Exactly one observation is owed: fe9683e6a9c7/sc. The one-probe contract is mechanically enforced at three independent points and mutation-verified.",
-  "the_ask": "REVIEW the repaired frozen base. After the sc terminal result, the PHASE A vs PHASE B scientific comparison is owed BEFORE anything else; then Phase C (ATTENTION operator R&D), NOT formal recovery training.",
-  "budget": "cap $283.7600, spent $262.3164, headroom $21.4436. Continuation ceiling is now $5.4784 for ONE probe \u2014 NOT the withdrawn $8.0691."
+  "status": "PHASE_B COMPLETE \u2014 RESOLVED, winner fe9683e6a9c7, by a margin of 0.000070 over the equivalence interval. Five continuation launches, $3.8047; the first three bought nothing and each closed a distinct defect.",
+  "the_ask": "REVIEW. The complete PHASE A vs PHASE B scientific comparison is owed next and must precede any Phase C execution. No paid work is approved.",
+  "budget": "cap $283.7600, spent $263.8597, headroom $19.9003. Nothing is funded."
  },
  "read_order": [
   "logs/STATE.md \u2014 the human view of this file",
@@ -104,9 +104,9 @@
   "detail": "logs/decisions.md \u2014 provisional leader, two controls, comparability"
  },
  "next_sequence": {
-  "_status": "Phase-B behavioural selection is TIE_PENDING. The one-probe continuation is implemented and verified at $0. NOTHING is authorized, funded or started below.",
-  "1_phase_b": "TIE_PENDING. Search, rung 1 and all sa+sb evidence are COMPLETE and reuse-only. Remaining: exactly ONE observation, fe9683e6a9c7/sc. 85bde4ded2c3/sc is retained and cited; the control is outside the equivalence interval and does not advance. logs/autoinit_continuation_b_corrected_rung2.json",
-  "1_phase_b_blocked_on": "reviewed one-use authorization for exactly fe9683e6a9c7/sc. Nothing else is a next paid action.",
+  "_status": "Phase B is CLOSED. The Phase A vs Phase B comparison is the next deliverable and is unpaid. Nothing below it is authorized, funded or started.",
+  "1_phase_b": "COMPLETE \u2014 RESOLVED. See phase_b_result.",
+  "1_phase_b_blocked_on": "nothing; Phase B is closed",
   "1_phase_b_cost": "floor $4.1830, HARD CEILING $5.4784, hard_probes 1. The $8.0691 figure priced three probes and is superseded; the $35.6660 full-Phase-B figure is historical.",
   "2_phase_a_vs_phase_b": "OWED IMMEDIATELY after the sc terminal result, before any other work: the full Phase A vs Phase B scientific comparison, as the handoff document. Do not collapse search-ranking, behavioural-selection, diagnostic and recovery-training evidence into one category.",
   "3_phase_c": "PHASE C \u2014 operator R&D, starting with a new/improved ATTENTION operator against the frozen incumbent; then FFN, then RESIDUAL_WIDTH; joint confirmation search later.",
@@ -115,23 +115,24 @@
   "funding": "nothing is funded. One reviewed one-use authorization at ceiling $5.4784 against headroom $21.4436 is the only approved next paid action, and it is not yet issued."
  },
  "canonical_infrastructure_moved_to": "docs/SESSION_ARCHITECTURE.md and logs/decisions.md",
- "phase_b_state": "PHASE_B BEHAVIOURAL SELECTION \u2014 TIE_PENDING",
- "blocker": "none. Both launch-contract items are closed: the Attempt-4 reuse digest is authorization-bound, and the runtime is mechanically narrowed to one purchasable probe by PURCHASABLE + the probe_config purchase seam + workload_scope_gate. Awaiting review; nothing issued, nothing launched.",
+ "phase_b_state": "PHASE_B COMPLETE \u2014 behavioural selection RESOLVED",
+ "blocker": "none. Phase B is closed. The Phase A vs Phase B scientific comparison is OWED before any Phase C execution.",
  "failed_note": "per-attempt failure records live in the per-run directories and logs/decisions.md",
  "phase_b_result": {
-  "status": "TIE_PENDING \u2014 no winner",
-  "decision": "corrected rung-2 pooled over sa+sb ONLY: fe9683e6a9c7 11/340 = 0.032353, 85bde4ded2c3 9/340 = 0.026471, control 3/340 = 0.008824; margin 0.005882 < interval 0.011695",
-  "tie_break_candidates": [
-   "fe9683e6a9c7",
-   "85bde4ded2c3"
-  ],
-  "control": "outside the equivalence interval; does not advance to sc",
-  "ranking_metric": "correct_overall. usable_rollout is a feasibility/behaviour axis reported alongside and does NOT rank",
-  "attempt4": "produced and retained fe9683e6a9c7/sb \u2014 valid evidence. Its reported resolved/winner=fe9683e6a9c7 is WITHDRAWN: the inherited pooling let the imported 85bde4ded2c3/sc into the rung-2 comparison (n=570 vs 380). Attempt 4 did NOT deliver a Phase-B winner.",
-  "owed": [
-   "fe9683e6a9c7/sc"
-  ],
-  "record": "logs/autoinit_continuation_b_corrected_rung2.json"
+  "status": "RESOLVED",
+  "winner": "fe9683e6a9c783bbc6fe276a78c851c6",
+  "winner_is_control": false,
+  "tie_break_ran": true,
+  "report_sha256": "8c8842b84fe85cece28beaa859c70b16a2724104b2a2b31975cd90b485611bee",
+  "final_pooled_sa_sb_sc": "fe9683e6a9c7 16/510 = 0.031373 (usable 0.6842) | 85bde4ded2c3 10/510 = 0.019608 (usable 0.5456) | control 3/340 = 0.008824 (usable 0.4947, no sc \u2014 outside the interval)",
+  "margin": 0.011765,
+  "equivalence_interval": 0.011695296982299022,
+  "clears_by": 7e-05,
+  "read_with_care": "the margin clears by 0.000070 \u2014 about 3.6% of ONE correct sample (1/510 = 0.001961). At 15 correct instead of 16 the result would be unresolved_equivalence. The frozen rule was applied exactly as preregistered; the separation is not comfortable.",
+  "ranking_metric": "correct_overall; usable_rollout does NOT rank, though it agrees here",
+  "not_capability": "SELECTION evidence under a fixed 0.86M probe. 16 correct of 510; every arm including the control sits near the floor",
+  "authorizes": "nothing. Not formal recovery, not a canonical Stage-1 NLL, not Phase C before the Phase A/B comparison is reviewed",
+  "record": "logs/autoinit_continuation_b_attempt5.json"
  },
  "history": "per-attempt records, failure patterns and cost history live in logs/decisions.md, logs/BUDGET_LEDGER.md and the per-run directories"
 }

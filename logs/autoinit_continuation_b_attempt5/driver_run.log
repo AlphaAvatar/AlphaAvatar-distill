@@ -1,0 +1,31 @@
+2026-08-30T19:55:11Z MARKER:DRIVER_START
+2026-08-30T19:55:11Z MARKER:STAGE_START:0
+[19:58:10] attested: interval 0.011695, floor 0.3000, plan 02be33b9a7a8…
+2026-08-30T19:58:10Z MARKER:STAGE_PASSED:0
+[19:58:10] continuation evidence bound: universe e94f15d2e648…, stage-1 selection 84fd64968519…
+2026-08-30T19:58:10Z MARKER:STAGE_START:1
+[19:58:14] imported 12 completed observations; 6 distinct candidates as evidence; 3 advancing ['85bde4ded2c31953f802e39cf2252c87', 'control-qwen3_0p6b_init_v0', 'fe9683e6a9c783bbc6fe276a78c851c6']; 3 searched non-survivors excluded ['ab7632b00788f825e252ea8d5ff4be30', 'bf5ae3b6ae00c3dbb963805135b3838f', 'cca699c93f34dad7e94a5d13a25b2bc2']
+2026-08-30T19:58:14Z MARKER:STAGE_PASSED:1
+2026-08-30T19:58:14Z MARKER:STAGE_START:3
+[19:58:14]   autoinit.v1.phase_a.rung2.85bde4ded2c3.sb: cited from verified evidence (protocol 7327e8806454…, comparable under v2)
+[19:58:14]   autoinit.v1.phase_a.rung2.85bde4ded2c3.sb: cited from verified evidence (protocol 7327e8806454…, comparable under v2)
+[19:58:14]   autoinit.v1.phase_a.rung2.control-qwen.sb: cited from verified evidence (protocol 7327e8806454…, comparable under v2)
+[19:58:14]   autoinit.v1.phase_a.rung2.control-qwen.sb: cited from verified evidence (protocol 7327e8806454…, comparable under v2)
+[19:58:14]   autoinit.v1.phase_a.rung2.fe9683e6a9c7.sb: cited from verified evidence (protocol 250f72efbd43…, comparable under v2)
+[19:58:14]   autoinit.v1.phase_a.rung2.fe9683e6a9c7.sb: cited from verified evidence (protocol 250f72efbd43…, comparable under v2)
+[19:58:14] rung-2 decision pools sa+sb only; withheld ['autoinit.v1.phase_a.rung3.85bde4ded2c3.sc']
+[19:58:14] after two seeds: tie_pending
+2026-08-30T19:58:14Z MARKER:STAGE_PASSED:3
+2026-08-30T19:58:14Z MARKER:STAGE_START:4
+[19:58:14]   autoinit.v1.phase_a.rung3.85bde4ded2c3.sc: cited from verified evidence (protocol 7327e8806454…, comparable under v2)
+[19:58:14]   autoinit.v1.phase_a.rung3.85bde4ded2c3.sc: cited from verified evidence (protocol 7327e8806454…, comparable under v2)
+2026-08-30T21:00:24Z MARKER:PROBE_TRAINED:autoinit.v1.phase_a.rung3.fe9683e6a9c7.sc
+[21:00:24]   autoinit.v1.phase_a.rung3.fe9683e6a9c7.sc: evaluation tokenizer copied, copied, copied
+2026-08-30T21:08:50Z MARKER:PROBE_SCORED:autoinit.v1.phase_a.rung3.fe9683e6a9c7.sc
+[21:08:50] tie-break: 2 probes on seed 20260813
+2026-08-30T21:08:50Z MARKER:STAGE_PASSED:4
+2026-08-30T21:08:50Z MARKER:STAGE_START:5
+[21:08:50] final decision admits sc for 2 tie candidate(s): ['autoinit.v1.phase_a.rung3.85bde4ded2c3.sc', 'autoinit.v1.phase_a.rung3.fe9683e6a9c7.sc']
+[21:08:50] RESULT: resolved · winner=fe9683e6a9c783bbc6fe276a78c851c6 · is_control=False
+2026-08-30T21:08:50Z MARKER:STAGE_PASSED:5
+2026-08-30T21:08:50Z MARKER:ALL_DONE
