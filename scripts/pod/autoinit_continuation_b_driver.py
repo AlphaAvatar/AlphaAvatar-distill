@@ -104,8 +104,49 @@ EXPECTED_ACTIVE_FINALISTS = 3
 class ContinuationDriver(PhaseADriver):
     """Phase A's probe machinery, without Phase A's search."""
 
+    #: Attempt 2 died at stage 0 for `$0.3146` because these were not set.
+    #:
+    #: `PhaseADriver` declares them as a seam precisely so a subclass can name
+    #: its own grant, and its comment there names THIS subclass as the reason.
+    #: Left unset, the driver loaded `logs/autoinit_phase_a_authorization.json`
+    #: — a real, committed Phase-A grant — and `stage_bind` then called
+    #: `require_evidence`, which only `ContinuationAuthorization` has. Every
+    #: other `PhaseADriver` subclass sets both; this one did not.
+    AUTHORIZATION_TYPE = ContinuationAuthorization
+    AUTHORIZATION_PATH = "logs/autoinit_continuation_b_authorization.json"
+    PLAN = CONTINUATION_PLAN_V1
+
     def __init__(self, args) -> None:
-        super().__init__(args)
+        #: NOT `super().__init__(args)`. The parent binds three things this
+        #: session must not inherit: the Phase-A authorization type and path,
+        #: `PHASE_A_PLAN_V1`, and the Phase-A evidence schema and scope. Setting
+        #: the two class attributes above and still calling the parent would only
+        #: move attempt 2's failure one line later, to the parent's closing
+        #: `require_plan(PHASE_A_PLAN_V1.plan_hash)` — a `ContinuationAuthorization`
+        #: refuses it, since it binds `a2ef4cd68a4b` and that check asks for
+        #: `9377a2dc61f2`.
+        #:
+        #: Written out rather than patched afterwards, the same shape
+        #: `PhaseBDriver` already uses, so the continuation's contract is visible
+        #: at the point it is established. A test asserts this constructor leaves
+        #: no attribute the inherited stages rely on unset, and that it produces
+        #: a real `ContinuationAuthorization` BEFORE any test supplies one.
+        import time
+        from datetime import datetime, timezone
+
+        self.a = args
+        self.t0 = time.time()
+        self.results: dict[int, dict] = {}
+        self.evaluation_protocol = None
+        self.plan = None                 # the frozen SuccessiveHalvingPlan
+        #: Inherited stage 3/4/5 read these. The search never runs here, so
+        #: `search_result` and `leaves` stay empty rather than being populated by
+        #: a stage-1 this driver refuses.
+        self.search_result = None
+        self.leaves: list = []
+        self.control_state = None
+        self.rung1 = None
+        self.rung2 = None
         self.plan_spec = CONTINUATION_PLAN_V1
         #: SIX distinct candidates: evidence and provenance.
         self.evidence_universe: list = []
@@ -113,6 +154,28 @@ class ContinuationDriver(PhaseADriver):
         self.finalists: list = []
         self.imported_probe_ids: set[str] = set()
         self.evidence_observed: dict[str, str] = {}
+        #: The evidence envelope describes THIS session. The artifact pathname is
+        #: unchanged — the collection contract names it and moving it would widen
+        #: this repair — but what the file claims must be the continuation's, not
+        #: a Phase-A schema and scope inherited along with the writer.
+        self.ev: dict = {
+            "schema": "aadistill.autoinit.continuation_b_evidence/v1",
+            "started_utc": datetime.now(timezone.utc).isoformat(),
+            "phase": "B-continuation",
+            "question": ("which of the three active finalists survives the "
+                         "frozen pooled sa+sb rule, and the conditional sc"),
+            "runs_search": False,
+            "stage1_imported_not_recomputed": True,
+            "retrains_permanent_controls": False,
+            "redefines_thresholds": False,
+            "followon_started": False,
+            "followon_reachable_from_this_driver": False,
+            "stages": {}}
+        AUDIT.mkdir(parents=True, exist_ok=True)
+        (AUDIT / "probes").mkdir(parents=True, exist_ok=True)
+        self.auth = self.AUTHORIZATION_TYPE.load(REPO / self.AUTHORIZATION_PATH)
+        self.auth.require_plan(self.PLAN.plan_hash)
+        self.ev["authorization"] = self.auth.as_dict()
 
     def enter(self, stage: int) -> None:
         """The CONTINUATION plan decides stage ordering, not Phase A's.

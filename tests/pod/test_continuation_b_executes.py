@@ -404,9 +404,26 @@ def build(tmp_path, monkeypatch, *, tie: bool):
     import phase_a_frozen
     monkeypatch.setattr(phase_a_frozen, "TARGET_GEOMETRY", TARGET_GEOMETRY)
 
-    driver = mod.ContinuationDriver.__new__(mod.ContinuationDriver)
-    mod.ContinuationDriver.__init__(driver, Args())
-    driver.auth = make_auth(ev["evidence"], tmp_path)
+    # The CONSTRUCTOR loads this session's authorization, rather than a line
+    # afterwards that replaces whatever the constructor loaded.
+    #
+    # The old form was:
+    #
+    #     driver = ContinuationDriver.__new__(ContinuationDriver)
+    #     ContinuationDriver.__init__(driver, Args())
+    #     driver.auth = make_auth(...)      # <- overwrote it
+    #
+    # and it is what concealed the attempt-2 defect for `$0.3146`: the real
+    # `__init__` loaded a `PhaseAAuthorization`, because the driver overrode
+    # neither `AUTHORIZATION_TYPE` nor `AUTHORIZATION_PATH`, and the very next
+    # statement discarded the evidence. Writing the scenario grant to disk and
+    # pointing the seam at it means this test drives the same load path the pod
+    # does. The dedicated wiring regression is
+    # `tests/pod/test_driver_authorization_wiring.py`.
+    auth_file = tmp_path / "continuation_b_authorization.json"
+    auth_file.write_text(json.dumps(make_auth(ev["evidence"], tmp_path).as_dict()))
+    monkeypatch.setattr(mod.ContinuationDriver, "AUTHORIZATION_PATH", str(auth_file))
+    driver = mod.ContinuationDriver(Args())
 
     # -- boundary: frozen-asset gate and vLLM engine probe (no GPU here) ----
     real_gate = parent.PhaseADriver.gate.__get__(driver)
