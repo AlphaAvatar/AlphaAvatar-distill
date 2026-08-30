@@ -221,6 +221,7 @@ def write_evidence(tmp_path: Path, ckpts: dict, *, tie: bool) -> dict:
     logs = tmp_path / "evidence"
     (logs / "historical").mkdir(parents=True, exist_ok=True)
     (logs / "attempt5").mkdir(parents=True, exist_ok=True)
+    (logs / "attempt4").mkdir(parents=True, exist_ok=True)
 
     digest_of = {
         FINALIST_LEAVES[0]: ckpts[FINALIST_LEAVES[0]]["digest"],
@@ -274,17 +275,30 @@ def write_evidence(tmp_path: Path, ckpts: dict, *, tie: bool) -> dict:
     # -- the REAL reuse inventory -------------------------------------------
     # historical: 85bde sa/sb/sc, cca699 sa/sb/sc, control sa/sb
     # attempt 5 : ab7632 sa, bf5ae3 sa, fe9683 sa
-    # so: every candidate has sa; sb is missing for fe9683 ONLY; sc is missing
-    # for fe9683 and the control.
+    # attempt 4 : fe9683 sb        <- the one probe attempt 4 paid for
+    #
+    # So EVERY sa and EVERY sb is retained, and the only missing observation is
+    # fe9683/sc. That is the current scientific state, and it is what the
+    # one-probe contract is built on: nothing else may be purchased.
     spread = {FINALIST_LEAVES[0]: 0, FINALIST_LEAVES[1]: 1, CONTROL_STATE: 2}
 
     def counts(state_id: str) -> tuple[int, int]:
+        """`tie` ties the two FINALISTS — never the control.
+
+        It used to tie all three, which made the toy tie set
+        `{fe9683, 85bde, control}`. That was harmless while stage 4 could buy an
+        `sc` for anyone; under the one-probe contract it means stage 4 tries to
+        purchase the control's `sc`, the driver correctly refuses, and the stage
+        fails. The real decision has the control well outside the equivalence
+        interval — `0.008824` against `0.032353` and `0.026471` — so the fixture
+        now says the same thing.
+        """
         if tie:
-            return 74, 2
+            return (74, 2) if state_id in FINALIST_LEAVES else (56, 0)
         rank = spread[state_id]
         return 74 + 9 * rank, 2 + 6 * rank
 
-    historical_admitted, attempt5_reusable = [], []
+    historical_admitted, attempt5_reusable, attempt4_reusable = [], [], []
     for state_id, short, seeds, where, protocol in (
             (FINALIST_LEAVES[1], "85bde4ded2c3", ("sa", "sb", "sc"), "historical",
              PROTOCOL_HISTORICAL),
@@ -294,7 +308,10 @@ def write_evidence(tmp_path: Path, ckpts: dict, *, tie: bool) -> dict:
              PROTOCOL_HISTORICAL),
             (NON_SURVIVORS[0], "ab7632b00788", ("sa",), "attempt5", PROTOCOL_ATTEMPT5),
             (NON_SURVIVORS[1], "bf5ae3b6ae00", ("sa",), "attempt5", PROTOCOL_ATTEMPT5),
-            (FINALIST_LEAVES[0], "fe9683e6a9c7", ("sa",), "attempt5", PROTOCOL_ATTEMPT5)):
+            (FINALIST_LEAVES[0], "fe9683e6a9c7", ("sa",), "attempt5", PROTOCOL_ATTEMPT5),
+            # Attempt 4's purchased probe, now a strictly verified citation.
+            (FINALIST_LEAVES[0], "fe9683e6a9c7", ("sb",), "attempt4",
+             PROTOCOL_ATTEMPT5)):
         for seed_name in seeds:
             rung = {"sa": 1, "sb": 2, "sc": 3}[seed_name]
             seed = {"sa": SEED_SA, "sb": SEED_SB, "sc": SEED_SC}[seed_name]
@@ -310,8 +327,8 @@ def write_evidence(tmp_path: Path, ckpts: dict, *, tie: bool) -> dict:
                                   usable=usable, correct=correct)
             (logs / where / f"{record['probe_id']}.json").write_text(
                 json.dumps(record, indent=2))
-            (historical_admitted if where == "historical"
-             else attempt5_reusable).append(f"{key}/{seed_name}")
+            {"historical": historical_admitted, "attempt5": attempt5_reusable,
+             "attempt4": attempt4_reusable}[where].append(f"{key}/{seed_name}")
 
     (logs / "historical_reuse.json").write_text(json.dumps({
         "reuse_verified": True, "probes_dir_digest": "h" * 64,
@@ -319,6 +336,9 @@ def write_evidence(tmp_path: Path, ckpts: dict, *, tie: bool) -> dict:
     (logs / "attempt5_reuse.json").write_text(json.dumps({
         "reuse_verified": True, "probes_dir_digest": "a" * 64,
         "reusable_probes": sorted(attempt5_reusable)}, indent=2))
+    (logs / "attempt4_reuse.json").write_text(json.dumps({
+        "reuse_verified": True, "probes_dir_digest": "4" * 64,
+        "reusable_probes": sorted(attempt4_reusable)}, indent=2))
 
     return {"logs": logs, "amendment": amendment, "selection": selection,
             "rung1": rung1, "identity": identity,
@@ -328,6 +348,7 @@ def write_evidence(tmp_path: Path, ckpts: dict, *, tie: bool) -> dict:
                 "collapsed_universe_identity": identity,
                 "historical_reuse_probes_dir_digest": "h" * 64,
                 "attempt5_reuse_probes_dir_digest": "a" * 64,
+                "attempt4_reuse_probes_dir_digest": "4" * 64,
                 "rung1_selection_digest": sha256_json({
                     "selected_searched": rung1["selected_searched"],
                     "auto_advanced_control": rung1["auto_advanced_control"],
@@ -388,6 +409,8 @@ def build(tmp_path, monkeypatch, *, tie: bool):
     monkeypatch.setattr(mod, "ATTEMPT5_REUSE", ev["logs"] / "attempt5_reuse.json")
     monkeypatch.setattr(mod, "HISTORICAL_PROBES", ev["logs"] / "historical")
     monkeypatch.setattr(mod, "ATTEMPT5_PROBES", ev["logs"] / "attempt5")
+    monkeypatch.setattr(mod, "ATTEMPT4_REUSE", ev["logs"] / "attempt4_reuse.json")
+    monkeypatch.setattr(mod, "ATTEMPT4_PROBES", ev["logs"] / "attempt4")
     monkeypatch.setattr(parent, "AUDIT", mod.AUDIT)
     monkeypatch.setattr(parent, "STATUS", mod.STATUS)
 
@@ -572,12 +595,19 @@ def test_the_three_non_survivors_never_reach_a_probe(resolved):
             assert loser[:12] not in label, f"{loser[:12]} was probed"
 
 
-def test_exactly_one_new_sb_probe_is_bought(resolved):
-    """The whole economic claim of the continuation, asserted mechanically."""
+def test_no_sb_probe_is_bought_any_more(resolved):
+    """Attempt 4 bought the last one, so rung 2 is now REUSE ONLY.
+
+    This test used to assert that exactly one `sb` was purchased, which was the
+    whole economic claim before Attempt 4 ran. Every `sb` is now retained
+    evidence, and buying one would mean replacing an observation the corrected
+    rung-2 decision was computed over.
+    """
     driver, _, _, _ = resolved
-    assert len(driver._trained) == 1, driver._trained
-    assert "fe9683e6a9c7" in driver._trained[0]
-    assert ".sb" in driver._trained[0] or "rung2" in driver._trained[0]
+    assert not [t for t in driver._trained if ".sb" in t or "rung2" in t], (
+        f"an sb was purchased: {driver._trained}")
+    cited_sb = {r["state_id"] for r in driver._cited if r["seed"] == SEED_SB}
+    assert cited_sb == {*FINALIST_LEAVES, CONTROL_STATE}, cited_sb
 
 
 def test_no_new_sa_probe_is_ever_bought(resolved):
@@ -585,13 +615,14 @@ def test_no_new_sa_probe_is_ever_bought(resolved):
     assert not [t for t in driver._trained if "rung1" in t or t.endswith(".sa")]
 
 
-def test_the_reused_sb_probes_are_cited_not_rerun(resolved):
-    """Two of the three sb observations are cited; only fe9683's is bought."""
+def test_all_three_sb_observations_are_cited_including_attempt_4s(resolved):
+    """`fe9683e6a9c7/sb` is Attempt 4's purchase, cited from the attempt-4 reuse
+    record rather than re-run — which is the point of retaining it."""
     driver, _, _, _ = resolved
     cited_sb = {r["state_id"] for r in driver._cited if r["seed"] == SEED_SB}
-    assert cited_sb == {FINALIST_LEAVES[1], CONTROL_STATE}, cited_sb
-    assert FINALIST_LEAVES[0] not in cited_sb, (
-        "fe9683 had no sb evidence and must have been newly run")
+    assert cited_sb == {*FINALIST_LEAVES, CONTROL_STATE}, cited_sb
+    assert FINALIST_LEAVES[0] in cited_sb, (
+        "Attempt 4's sb was not cited; the session would re-buy ~72 min of L40S")
     assert all(r.get("resumed") for r in driver._cited)
 
 
@@ -606,9 +637,14 @@ def test_imported_probes_are_cited_under_a_protocol_hash_that_is_not_this_runs(
     cited nothing; the override compares student identity and seed and defers
     comparability to the rule.
 
-    Asserted as "differs from this run's" rather than "equals a constant",
-    because that is the property that makes reuse work on a pod whose driver
-    patch nobody controls.
+    Asserted as "at least one differs from this run's" rather than "none match".
+    Attempt 4's `fe9683e6a9c7/sb` legitimately carries `250f72ef…`, the same
+    attested protocol Attempt 5 ran under, and a session whose runtime reproduces
+    that hash would cite it even under the inherited strict check. That is not a
+    weakness — it is one citation out of several. What must remain true is that a
+    probe whose raw hash DIFFERS is still cited, because that is the case the
+    strict check refuses and the case a pod with an uncontrolled driver patch
+    actually produces.
     """
     driver, _, _, _ = resolved
     cited = [r for r in driver._cited if r.get("imported_evidence")]
@@ -616,8 +652,9 @@ def test_imported_probes_are_cited_under_a_protocol_hash_that_is_not_this_runs(
     mine = driver.evaluation_protocol.evaluation_protocol_hash
     citing = {r["evaluation_protocol_hash"] for r in cited}
     assert citing, "no protocol hashes recorded on the cited probes"
-    assert mine not in citing, (
-        "the cited evidence happens to share this run's raw protocol hash, so "
+    diverging = citing - {mine}
+    assert diverging, (
+        "every cited probe happens to share this run's raw protocol hash, so "
         "this test would also pass under the inherited strict check and proves "
         "nothing about comparability")
 
@@ -893,7 +930,11 @@ def test_the_continuation_budget_strips_the_search_and_its_reserves():
     names = " ".join(p.name for p in budget.other_phases)
     assert "search" not in names and "beam" not in names
     assert budget.soft_stop_reserves == ()
-    assert budget.arms == args.rung2_probes + args.tie_break_probes == 3
+    # ONE arm now: every sa and sb is retained and 85bde/sc exists, so the only
+    # purchasable observation is fe9683e6a9c7/sc. Asserted as the relation rather
+    # than a constant, plus the constant, so a change to either side shows up.
+    assert budget.arms == args.rung2_probes + args.tie_break_probes == 1
+    assert (args.rung2_probes, args.tie_break_probes) == (0, 1)
 
 
 # --- executable-source provenance -------------------------------------------
