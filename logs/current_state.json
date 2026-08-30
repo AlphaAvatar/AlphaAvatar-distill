@@ -1,6 +1,6 @@
 {
  "schema": "aadistill.current_state/v2",
- "generated_utc": "2026-08-30T14:29:53Z",
+ "generated_utc": "2026-08-30T17:39:19Z",
  "_contract": "The minimal machine-readable CURRENT snapshot: live facts only, no history, no per-attempt detail, no narrative. History lives in logs/decisions.md and the per-run directories; the human view is logs/STATE.md and the two must agree. Ownership: logs/CATALOG.md.",
  "baseline_commit": "b7c0099bfffc8962e4368917c59f8a9a8508d063",
  "baseline_commit_meaning": "The LAST TESTED IMPLEMENTATION: the commit whose tree produced the latest_verification figures (2461 passed / 12 skipped / 0 failed).",
@@ -48,17 +48,18 @@
   "phase_b_pricing": "HISTORICAL: floor $16.4555, ceiling $35.6660 \u2014 prices a P=2 search ALREADY BOUGHT.",
   "phase_b_stage1_selection_sha256": "84fd6496851995ae",
   "phase_b_identity": "amendment df413bd99119dab7, universe e94f15d2e648d86a, 6 distinct (8 assumed). Attempt-5 exec 3ad6a6e3edf1 / prereg 53f1347f6865: HISTORICAL, search bought.",
-  "continuation_b": "exec 08901a03fb4d19b0 (62 files, set v3), plan a2ef4cd68a4bae7a, prereg b64231ee283e4668. Floor $4.1830, ceiling $5.4784, max 1 new probe \u2014 RE-PRICED for what is owed; the $8.0691 ceiling priced three. Pooling is stage-aware: rung 2 admits (1,2) only, the final decision admits sc for the tie candidates. logs/autoinit_continuation_b_preregistration.json",
+  "continuation_b": "exec 20c37deb56bc31ea (62 files, set v3), SESSION PLAN v3 6d6f971364868d84, prereg 806b7e99c51b9dc5. Floor $4.1830, ceiling $5.4784, exactly ONE purchasable observation: fe9683e6a9c7/sc. Every sa, every sb and 85bde4ded2c3/sc are REUSE-ONLY and fail closed if missing. BOUND_EVIDENCE has 7 entries; attempt4_reuse_probes_dir_digest is now bound. logs/autoinit_continuation_b_preregistration.json",
   "phase_b_post_freeze": "exec digest moved 3d3b5d07 -> a043e2c7: shared SESSION_KIND dispatcher gained a continuation_b branch; Phase-B gate now accepts declared additive drift. 3 pre-existing branches byte-identical. Prereg NOT rewritten. logs/autoinit_phase_b_post_freeze_changes.json",
   "continuation_b_result": "WITHDRAWN then CORRECTED 2026-08-30. Attempt 4's resolved/winner=fe9683e6a9c7 is NOT accepted: the inherited pooling let the imported 85bde4ded2c3/sc into the rung-2 comparison (n=570 vs 380). Recomputed at $0 with sa+sb only and the real frozen selector: fe9683 11/340=0.032353, 85bde 9/340=0.026471, control 3/340=0.008824; margin 0.005882 < interval 0.011695 -> TIE_PENDING, winner None, tie candidates {fe9683e6a9c7, 85bde4ded2c3}. correct_overall is the ranking metric; usable_rollout does NOT rank. logs/autoinit_continuation_b_corrected_rung2.json"
  },
  "latest_verification": {
-  "utc": "2026-08-30T14:29:53Z",
-  "after": "the stage-aware pooling repair and re-pricing",
-  "corrected_rung2": "recomputed at $0 with the driver's own pooling and the real frozen select_final_winner: tie_pending, winner None, candidates {fe9683e6a9c7, 85bde4ded2c3}, sc owed {fe9683}",
-  "attempt4_probe": "fe9683e6a9c7/sb strictly reconstructed, reuse_verified, imported",
-  "mutations": "5 on the pooling repair, no survivors (one closed after surviving)",
-  "full_suite": "running at fd2d06d",
+  "utc": "2026-08-30T17:39:19Z",
+  "after": "the one-probe launch contract",
+  "full_suite": "2524 passed, 12 skipped, 0 failed in 25:16",
+  "verifiers": "frozen assets clean; all THREE reuse records verify",
+  "mutations": "9 on the one-probe contract, no survivors",
+  "scope_enforcement": "PURCHASABLE whitelist + probe_config purchase seam + workload_scope_gate; priced 1, booked 1, purchasable 1",
+  "gates": "8 pre-provider gates; to be run at the authorization-only commit",
   "scope": "CPU only; no GPU, no pod, $0"
  },
  "failure_pattern": "continuation 1-7: an uncaught transport call, an undeliverable asset, dev-box-only code in the pod gate, the attempt-12 OOM class, a checkpoint path, a checkpoint with no tokenizer, and finally a SUCCEEDING driver whose launcher crashed on a line only success reaches. Each failure was further in than the last. See logs/decisions.md",
@@ -70,8 +71,8 @@
   "the paid device-canary session path: TERMINATED 2026-08-18, evidence kept, none prepared"
  ],
  "next_starting_point": {
-  "status": "PHASE_B BEHAVIOURAL SELECTION = TIE_PENDING. Search, rung 1 and the sa+sb evidence are COMPLETE. Missing: exactly fe9683e6a9c7/sc. Attempt 4's sb probe is strictly retained and can never be repurchased.",
-  "the_ask": "REVIEW the corrected decision and the one-probe pricing. Nothing is authorized.",
+  "status": "PHASE_B BEHAVIOURAL SELECTION = TIE_PENDING. Exactly one observation is owed: fe9683e6a9c7/sc. The one-probe contract is mechanically enforced at three independent points and mutation-verified.",
+  "the_ask": "REVIEW the repaired frozen base. After the sc terminal result, the PHASE A vs PHASE B scientific comparison is owed BEFORE anything else; then Phase C (ATTENTION operator R&D), NOT formal recovery training.",
   "budget": "cap $283.7600, spent $262.3164, headroom $21.4436. Continuation ceiling is now $5.4784 for ONE probe \u2014 NOT the withdrawn $8.0691."
  },
  "read_order": [
@@ -115,14 +116,14 @@
   "1_phase_b": "PHASE_B_STAGE1_COMPLETE / BEHAVIOURAL_SELECTION_INCOMPLETE. Stage 1, the P=2 search and rung 1 are COMPLETE. Remaining: 1 missing sb (fe9683e6a9c7), at most 2 conditional sc. logs/autoinit_continuation_b_preregistration.json",
   "1_phase_b_blocked_on": "nothing \u2014 approved for one behavioural-continuation session; no cap increase needed",
   "1_phase_b_cost": "behavioural continuation: floor $5.4784, HARD CEILING $8.0691. The $35.6660 full-Phase-B figure is historical.",
-  "2_final_selection": "complete final initialization selection after Phase B; Phase A's unresolved_equivalence is not a final selection",
-  "3_canonical_stage1_nll": "the canonical Stage-1 NLL diagnostic on the finally selected initialization, under the established Stage-1 measurement contract. DIAGNOSTIC ONLY, never a promotion criterion, and NOT the state_eval@v1 search-side NLL fields. Never yet run",
-  "4_formal_recovery": "only then, the project's formal Stage 2/Stage 3 recovery training",
+  "2_final_selection": "complete the Phase-B behavioural selection with fe9683e6a9c7/sc, then produce the PHASE A vs PHASE B scientific comparison as the handoff document",
+  "3_canonical_stage1_nll": "DEFERRED until the final initialization is uniquely selected \u2014 after the operator-development program, not before",
+  "4_formal_recovery": "DEFERRED. After Phase B closes the next phase is PHASE C \u2014 operator R&D starting with a new/improved ATTENTION operator against the frozen incumbent; then FFN, then RESIDUAL_WIDTH; joint confirmation search later. A Phase-B winner is NOT authorization for formal recovery.",
   "funding": "$8.0691 approved for ONE behavioural-continuation session against headroom $23.7050; nothing else here is funded. The $35.6660 full-Phase-B allowance is SPENT and CLOSED.",
   "1_phase_b_implementation": "the behavioural-continuation executable is BUILT and verified end to end at $0; identities in frozen.continuation_b"
  },
  "canonical_infrastructure_moved_to": "docs/SESSION_ARCHITECTURE.md and logs/decisions.md",
  "phase_b_state": "PHASE_B BEHAVIOURAL SELECTION \u2014 TIE_PENDING",
- "blocker": "none. The attempt-4 pooling defect is repaired and the state is corrected to tie_pending. Exactly one observation is owed: fe9683e6a9c7/sc. Awaiting review; nothing issued, nothing launched.",
+ "blocker": "none. Both launch-contract items are closed: the Attempt-4 reuse digest is authorization-bound, and the runtime is mechanically narrowed to one purchasable probe by PURCHASABLE + the probe_config purchase seam + workload_scope_gate. Awaiting review; nothing issued, nothing launched.",
  "failed_note": "per-attempt failure records live in the per-run directories and logs/decisions.md"
 }

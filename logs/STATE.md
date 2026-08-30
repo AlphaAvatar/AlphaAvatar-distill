@@ -60,14 +60,44 @@ and does **not** rank. The driver's own `axes` field already said so — the cod
 was right and the prose was not. That `fe9683e6a9c7` also leads on
 `usable_rollout` is supporting evidence, not what selects it.
 
-## What is still owed
+## What is still owed — and the contract that enforces it
 
-**Exactly one observation: `fe9683e6a9c7/sc`.** `85bde4ded2c3/sc` already exists
-and is reused; no fourth seed, no `sa` rerun, no rung-1 recomputation, no search.
+**Exactly one observation: `fe9683e6a9c7/sc`.** Every `sa`, every `sb` — including
+the one Attempt 4 purchased — and `85bde4ded2c3/sc` are retained.
 
-Attempt 4's own `fe9683e6a9c7/sb` is strictly reconstructed by
-[`verify_attempt4_probe_reuse.py`](../scripts/autoinit/verify_attempt4_probe_reuse.py)
-and imported by the driver, so it can never be repurchased.
+A dollar ceiling does not encode that: `$5.4784` funds one probe of *any* kind,
+so a session that bought a replacement `sb` instead of the owed `sc` would stay
+inside budget and report success. Three independent statements of the scope must
+agree, and the executable is narrowed at the act of buying:
+
+| where | what it says |
+| --- | --- |
+| `ContinuationDriver.PURCHASABLE` | `(("fe9683e6a9c7", 3),)` — a whitelist, since a *count* is satisfied by buying the wrong probe |
+| `probe_config()` | the purchase seam. The inherited `run_probe` reaches it **iff** `restore_probe` returned nothing, and it is the only call site in the codebase — so a citable descriptor never arrives, and this can only stop a purchase, never suppress reuse |
+| launcher | `rung2_probes=0`, `tie_break_probes=1` |
+| `workload_scope_gate` | priced `hard_probes`, booked probes and the whitelist must agree — and a right-sized whitelist naming the **wrong candidate** is refused |
+
+Every `sa`, every `sb` and `85bde4ded2c3/sc` are **reuse-only**: a missing or
+non-binding one **fails closed** and is never repurchased, because a replacement
+is a different measurement from the one the corrected rung-2 decision was
+computed over.
+
+**Attempt 4's probe is authorization-bound.** `attempt4_reuse_probes_dir_digest`
+is the seventh `BOUND_EVIDENCE` entry, produced by `observed_evidence()`, carried
+by the issuer, recorded in the preregistration's reuse rule, and re-checked at
+stage 0 and by the launcher's evidence gate. `reuse_verified` inside the record
+is **not** equivalent — it says what was true when the record was written, and
+nothing stops the record moving between issuance and execution.
+
+**Session plan v2 → v3.** Version 2 described "one missing `sb` and at most two
+conditional `sc`", which would authorize work now forbidden. The frozen recovery
+science plan is untouched.
+
+**9 mutations, no survivors** — dropping the purchase seam, permitting
+everything, widening the whitelist to a replacement `sb`, pointing it at the
+wrong candidate, unbinding the attempt-4 digest, dropping it from observed
+evidence, booking a second probe, dropping the workload gate, reverting the plan
+to v2.
 
 ## Re-priced for what is owed
 
