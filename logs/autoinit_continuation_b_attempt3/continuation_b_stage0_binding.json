@@ -1,0 +1,11 @@
+{
+  "executable_source_digest": "1bf97d7da6d183ec063d5da1683d236c9897f81935cecaa3afd0029b3f8fb888",
+  "cited_evidence": {
+    "stage1_selection_sha256": "84fd6496851995aef8ac624b68944c0881fdaf62a29013ea2aec5acb0e87a35c",
+    "identity_collapse_amendment_sha256": "df413bd99119dab72c16399362298620abec0efdce36754a1627b14e616b26bb",
+    "collapsed_universe_identity": "e94f15d2e648d86a2a7a1496c5e1c0ef47b78d87746bb622488a06af0418d483",
+    "historical_reuse_probes_dir_digest": "a5115816861ad239f646facec4d53ba2c7925c9430c530e7c6d0af2560d5b1af",
+    "attempt5_reuse_probes_dir_digest": "2e5030fadc786faaafe1ec3ac3a2ccb4af367e98bf630a89a16938729a77844e",
+    "rung1_selection_digest": "1f86c6e6e9cfc67aeb428be092bbf87ad91d2b6b6ae175bf55786f92b7696b6e"
+  }
+}

@@ -1,6 +1,6 @@
 {
  "schema": "aadistill.current_state/v2",
- "generated_utc": "2026-08-30T08:19:25Z",
+ "generated_utc": "2026-08-30T09:33:10Z",
  "_contract": "The minimal machine-readable CURRENT snapshot: live facts only, no history, no per-attempt detail, no narrative. History lives in logs/decisions.md and the per-run directories; the human view is logs/STATE.md and the two must agree. Ownership: logs/CATALOG.md.",
  "baseline_commit": "b7c0099bfffc8962e4368917c59f8a9a8508d063",
  "baseline_commit_meaning": "The LAST TESTED IMPLEMENTATION: the commit whose tree produced the latest_verification figures (2461 passed / 12 skipped / 0 failed).",
@@ -8,11 +8,11 @@
   "paid_compute": false,
   "pods": 0,
   "launchers": 0,
-  "note": "pod ew2ykjczuex87i deleted 2026-08-29T20:53:51Z, provider confirms gone and not billing; launcher, watchdog and poller all exited"
+  "note": "pod qbfqbp3y6hq8iu deleted 2026-08-30T09:30:28Z, provider confirms gone and not billing; launcher, watchdog and poller all exited"
  },
  "authorized": {
   "any": false,
-  "note": "autoinit.continuation_b.20260829T194657Z is CONSUMED by attempt 2 and retired. 153538Z CONSUMED, 115028Z UNUSED. A third attempt needs a new maintainer decision."
+  "note": "autoinit.continuation_b.20260830T091529Z CONSUMED by attempt 3 and retired. 194657Z and 153538Z CONSUMED, 115028Z UNUSED. A fourth attempt needs a new maintainer decision."
  },
  "prepared_launch": {
   "any": false,
@@ -20,13 +20,13 @@
   "note": "the launch bundle is consumed by the running session"
  },
  "budget": {
-  "cumulative_spend_usd": 260.6209,
+  "cumulative_spend_usd": 260.8484,
   "authorized_cap_usd": 283.76,
-  "remaining_usd": 23.1391,
+  "remaining_usd": 22.9116,
   "planning_floor_usd": 5.4784,
   "remaining_is_not_permission": true,
   "ledger": "logs/BUDGET_LEDGER.md",
-  "headroom_note": "Phase-B attempts 1-5 cost $30.0200; behavioural continuation attempts 1-2 cost $0.5659 and bought no science. Headroom $23.1391 still covers one $8.0691 continuation.",
+  "headroom_note": "Phase-B attempts 1-5 cost $30.0200; behavioural continuation attempts 1-3 cost $0.7934 and bought no probe. Headroom $22.9116 still covers one $8.0691 continuation.",
   "continuation_hard_ceiling_usd": 8.0691,
   "continuation_planning_floor_usd": 5.4784
  },
@@ -52,14 +52,13 @@
   "phase_b_post_freeze": "exec digest moved 3d3b5d07 -> a043e2c7: shared SESSION_KIND dispatcher gained a continuation_b branch; Phase-B gate now accepts declared additive drift. 3 pre-existing branches byte-identical. Prereg NOT rewritten. logs/autoinit_phase_b_post_freeze_changes.json"
  },
  "latest_verification": {
-  "utc": "2026-08-30T08:19:25Z",
-  "after": "the ContinuationDriver constructor repair",
-  "full_suite": "2495 passed, 12 skipped, 0 failed in 27:19",
+  "utc": "2026-08-30T09:33:10Z",
+  "after": "continuation attempt 3",
+  "full_suite": "2495 passed, 12 skipped, 0 failed at the base commit 4958bb2",
+  "gates": "7 of 7 PASS including session_commit_and_lineage",
+  "on_hardware": "stage 0 PASSED: evidence bound, universe and Stage-1 selection verified, protocol attested, 11 probe journals imported",
   "verifiers": "frozen assets clean",
-  "gates": "6 of 6 green against a candidate authorization built to a SCRATCH path outside the repo; session_commit_and_lineage defers because it requires the authorization committed at the session commit",
-  "frozen_identities": "all unchanged vs 8398108, and the rest of the preregistration is byte-identical",
-  "mutations": "5 on the constructor repair, no survivors",
-  "scope": "CPU only; no GPU, no pod, $0"
+  "scope": "one paid pod, $0.2275, no probe bought"
  },
  "failure_pattern": "continuation 1-7: an uncaught transport call, an undeliverable asset, dev-box-only code in the pod gate, the attempt-12 OOM class, a checkpoint path, a checkpoint with no tokenizer, and finally a SUCCEEDING driver whose launcher crashed on a line only success reaches. Each failure was further in than the last. See logs/decisions.md",
  "abandoned": [
@@ -70,9 +69,9 @@
   "the paid device-canary session path: TERMINATED 2026-08-18, evidence kept, none prepared"
  ],
  "next_starting_point": {
-  "status": "PHASE_B_STAGE1_COMPLETE / BEHAVIOURAL_SELECTION_INCOMPLETE. Three defects found and closed on the way to a paid run: the inherited product contract, the pod test scope, and the driver constructor. Attempts 1-2 cost $0.5659 and bought no science.",
-  "the_ask": "REVIEW the repaired frozen commit. Funding is approved for exactly one further replacement attempt at ceiling $8.0691 against headroom $23.1391; the authorization is minted only on the go-ahead.",
-  "budget": "cap $283.7600, spent $260.6209, headroom $23.1391. Continuation ceiling $8.0691 \u2014 NOT the historical $35.6660."
+  "status": "PHASE_B_STAGE1_COMPLETE / BEHAVIOURAL_SELECTION_INCOMPLETE. Attempt 3 passed 7/7 gates, setup, and STAGE 0 -- binding every cited identity and importing all 11 probe journals -- then refused at stage 1 on a dev-box checkpoint path. No probe has been bought in any attempt.",
+  "the_ask": "REVIEW the stage-1 finalist-resolution defect, then whether to authorize a fourth attempt at ceiling $8.0691 against headroom $22.9116.",
+  "budget": "cap $283.7600, spent $260.8484, headroom $22.9116. Continuation ceiling $8.0691 \u2014 NOT the historical $35.6660."
  },
  "read_order": [
   "logs/STATE.md \u2014 the human view of this file",
@@ -123,6 +122,6 @@
  },
  "canonical_infrastructure_moved_to": "docs/SESSION_ARCHITECTURE.md and logs/decisions.md",
  "phase_b_state": "PHASE_B_STAGE1_COMPLETE / BEHAVIOURAL_SELECTION_INCOMPLETE",
- "blocker": "none. Attempt 2's stage-0 defect is repaired: ContinuationDriver now owns AUTHORIZATION_TYPE/PATH/PLAN and does not call super().__init__. Awaiting reviewer go-ahead to issue the replacement authorization; nothing is issued and nothing is launched.",
+ "blocker": "NEW, at stage 1: build_finalist_states resolves finalists as Path(c.checkpoint_path) from the frozen amendment, which records DEV-BOX absolute paths. On the pod they are staged at artifacts/autoinit/phase_a_selected/<state_id>, which PhaseBDriver already resolves against (STAGED_FINALISTS). The amendment must NOT move -- its hash is bound by the authorization and preregistration -- so the repair belongs in the driver. logs/autoinit_continuation_b_attempt3.json",
  "failed_note": "per-attempt failure records live in the per-run directories and logs/decisions.md"
 }

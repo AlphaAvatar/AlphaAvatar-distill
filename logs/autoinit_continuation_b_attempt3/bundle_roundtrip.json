@@ -1,0 +1,12 @@
+{
+ "bundle": "aad_autoinit_b189fade.bundle",
+ "session_commit": "b189fadeb30d8a761f9e23a8ab147228d923b9f7",
+ "bytes": 7099490,
+ "uploaded_sha256": "ff00482c76e635b84974e7473db5b852c4fbfa310606cf9f3263a1c3a2248431",
+ "downloaded_sha256": "ff00482c76e635b84974e7473db5b852c4fbfa310606cf9f3263a1c3a2248431",
+ "checkout_head": "b189fadeb30d8a761f9e23a8ab147228d923b9f7",
+ "redigested_from_relay_checkout": "1bf97d7da6d183ec063d5da1683d236c9897f81935cecaa3afd0029b3f8fb888",
+ "authorized_source_digest": "1bf97d7da6d183ec063d5da1683d236c9897f81935cecaa3afd0029b3f8fb888",
+ "carries_this_authorization": true,
+ "verified_before_provider_creation": true
+}

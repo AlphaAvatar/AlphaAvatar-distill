@@ -1,0 +1,29 @@
+[09:16:37] budget: expected 262 min $4.32 · soft $4.76 · hard $5.09 (authorized $8.07)
+[09:16:38] NVIDIA L40S $0.99/h, stock High
+[09:16:38] session commit b189fadeb30d verified: harness digests to 1bf97d7da6d1…, carries the authorization and only logs/autoinit_continuation_b_authorization.json differs from the authorized base
+[09:16:38] frozen science plan 02be33b9a7a8… matches the authorization
+[09:16:38] continuation executable 1bf97d7da6d1… matches the grant
+[09:16:38] no search call site on the continuation's own path; 1 known-neutralized elsewhere; runs_search False
+[09:16:38] cited evidence matches the grant: universe e94f15d2e648…
+[09:16:38] continuation ceiling $8.0691 covers the priced $8.0691 and is below the full-session $35.6660
+[09:16:38] /home/ecs-user/aad-scratch/sessions/autoinit-continuation-b/store: 9.61 GiB free for 1076 MiB of archive and working room
+[09:16:39] precheck OK: 15 relay inputs (9 from AlphaAvatar/aadistill-artifacts, 6 from AlphaAvatar/aadistill-transport), 2 local assets
+[09:16:41] created qbfqbp3y6hq8iu at $0.99/h
+[09:16:41] watchdog detached — hard 308 min = $5.09
+[09:17:02] TCP 22 at 64.247.206.212:17966 after 0.4 min
+[09:17:05] draw 1: ssh reachable — $0.01
+[09:17:35] draw 1: image identity runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@580.159.03
+[09:17:35] draw 1: running setup
+[09:25:19] draw 1: setup complete — $0.14
+[09:25:25] driver detached, pid 7816, confirmed by descriptor_probe — $0.14
+[09:27:36]   2026-08-30T09:27:31Z MARKER:PHASE_A_FAILED — $0.18
+[09:27:36] a blocking stage failed — collecting evidence, then tearing down. A stage-0 comparability failure is a TERMINATE: every cited observation would be lost at once and re-buying them is a larger session.
+[09:27:36] polling ended: PHASE_A_FAILED — $0.18
+[09:29:51]   manifest rc=0
+20 file(s) across 6 class(es) -> /workspace/manifest.json
+  final_required: 20 · mutable_snapshot: 0 · final_streams_quiescent: True
+[09:30:17] teardown gate: allowed=True failed=training_complete
+[09:30:17] deleting pod (gate passed after PHASE_A_FAILED)
+[09:30:28] pod deleted — 13.8 min, $0.23; provider confirms gone: True
+
+autoinit-continuation-b INCOMPLETE — /home/ecs-user/AlphaAvatar-distill/logs/autoinit_continuation_b_session.json. STOP for review. The behavioural continuation finished Phase B's rungs from completed evidence; nothing chains off it.

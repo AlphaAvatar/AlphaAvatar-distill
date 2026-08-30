@@ -1,0 +1,72 @@
+{
+ "schema": "aadistill.autoinit.continuation_b_attempt/v1",
+ "attempt": 3,
+ "generated_utc": "2026-08-30T09:32:36Z",
+ "verdict": "STAGE 0 PASSED; ABORTED AT STAGE 1 (import) \u2014 no probe was bought",
+ "authorization": "autoinit.continuation_b.20260830T091529Z (one-use, CONSUMED)",
+ "session_commit": "b189fadeb30d8a761f9e23a8ab147228d923b9f7",
+ "executable_source_digest": "1bf97d7da6d183ec063d5da1683d236c9897f81935cecaa3afd0029b3f8fb888",
+ "preregistration_sha256": "68cb7e898552388dfca30cdb6c6343eb16fcc1c50e6acbdd63bb40994786ef22",
+ "pod": {
+  "id": "qbfqbp3y6hq8iu",
+  "gpu": "NVIDIA L40S",
+  "image": {
+   "image_name": "runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404",
+   "observed": [
+    "580.159.03"
+   ],
+   "digest": "runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@580.159.03"
+  },
+  "elapsed_minutes": 13.79,
+  "usd": 0.2275,
+  "authorized_usd": 8.0691,
+  "within_authorization": true,
+  "final_state": {
+   "exists": false,
+   "desired_status": "TERMINATED",
+   "billing": false
+  },
+  "provider_confirms_gone": true
+ },
+ "what_the_constructor_repair_FIXED": "STAGE 0 PASSED. The driver loaded its own ContinuationAuthorization, bound every cited identity, verified the collapsed universe e94f15d2e648 and the Stage-1 selection 84fd64968519, attested the evaluation protocol (interval 0.011695, floor 0.3000, plan 02be33b9a7a8) and imported all ELEVEN probe journals. The attempt-2 defect is hardware-closed.",
+ "reached": [
+  "setup complete",
+  "DRIVER_START",
+  "STAGE_START:0",
+  "STAGE_PASSED:0",
+  "STAGE_START:1"
+ ],
+ "stopped_at": "stage 1 (stage_import), the same second stage 0 passed",
+ "what_did_NOT_happen": [
+  "no probe was trained or evaluated",
+  "no sb was bought",
+  "no sc was bought",
+  "no pooled decision",
+  "no final selection",
+  "no search \u2014 runs_search False by type",
+  "no scientific evidence changed",
+  "the permanent controls were untouched"
+ ],
+ "pre_provider_gates": "7 of 7 PASS, including session_commit_and_lineage",
+ "root_cause": {
+  "error": "85bde4ded2c31953f802e39cf2252c87 is an ADVANCING finalist but is not staged at /home/ecs-user/aad-artifacts/autoinit/phase_a/85bde4ded2c31953f802e39cf2252c87; the continuation probes it and cannot rebuild it from nothing",
+  "summary": "a DEV-BOX path used on the pod. ContinuationDriver.build_finalist_states resolves each finalist as Path(c.checkpoint_path), and checkpoint_path comes from the identity-collapse amendment, which records dev-box absolute paths under /home/ecs-user/aad-artifacts/autoinit/phase_a/. That directory does not exist on a pod.",
+  "where_they_actually_are": {
+   "searched finalists": "artifacts/autoinit/phase_a_selected/<state_id>, relative to the pod repo \u2014 the launcher's relay inputs stage fe9683e6a9c7 and 85bde4ded2c3 there via STAGED_INTO",
+   "canonical control": "artifacts/stage1/qwen3_0p6b_init_v0/checkpoint"
+  },
+  "phase_b_already_solved_it": "autoinit_phase_b_driver.py:110 defines STAGED_FINALISTS = REPO / 'artifacts/autoinit/phase_a_selected' and line 362 resolves a finalist as STAGED_FINALISTS / canonical_id. The continuation reads the amendment's dev-box path instead. Same constant, same staging location, different resolution.",
+  "the_amendment_MUST_NOT_MOVE": "checkpoint_path lives inside the frozen identity-collapse amendment, whose sha256 df413bd99119dab7 is bound by the authorization and the preregistration. The repair therefore belongs in the DRIVER \u2014 map state_id to the pod staging directory \u2014 and must not edit the amendment. Its dev-box paths remain correct provenance for the machine that holds those bytes.",
+  "class": "the fourth instance of inherited-contracts-not-needs, and the second of dev-box-only paths reaching a pod \u2014 the same class as Phase-B attempt 1's verify_historical_probe_reuse. Each attempt has failed further in: product contract, pod test scope, driver constructor, now finalist resolution."
+ },
+ "why_no_zero_cost_check_caught_it": "the whole-function test builds toy checkpoints in tmp_path and monkeypatches the amendment to point at them, so c.checkpoint_path is always a path that exists in that test. The assertion it makes is that an ADVANCING finalist must be staged \u2014 which is exactly right, and is what fired on the pod. What no /bin/bash check asserts is that the path the driver derives is one the POD will have. A test would need to assert the resolution rule, not the existence of a file the test itself created.",
+ "evidence": {
+  "session_record": "logs/autoinit_continuation_b_session.json",
+  "driver_log": "logs/autoinit_continuation_b_attempt3/autoinit_continuation_b_run.log",
+  "stage0_binding": "logs/autoinit_continuation_b_attempt3/continuation_b_stage0_binding.json",
+  "imported_probes": "11 journals collected, in the archive",
+  "archive": "20 files across 6 classes; teardown gate allowed",
+  "stale_artifact_note": "the reused scratch store/extracted still held attempt 2's stage0_traceback.log, dated 2026-08-29T20:50:21Z. This run produced NO stage-0 traceback because stage 0 passed. Diagnosis was taken from a clean extraction of this run's archive, not from the reused directory."
+ },
+ "next_action": "STOP for review. The authorization is CONSUMED. The repair is to resolve finalist bytes from the pod staging location, as PhaseBDriver already does, without touching the frozen amendment."
+}

@@ -1,0 +1,9 @@
+{"utc":"2026-08-30T09:17:18Z","pod":"qbfqbp3y6hq8iu","minutes":0,"usd_at_rate":0.0000,"state":"exists/RUNNING/billing"}
+{"utc":"2026-08-30T09:19:19Z","pod":"qbfqbp3y6hq8iu","minutes":2,"usd_at_rate":0.0330,"state":"exists/RUNNING/billing"}
+{"utc":"2026-08-30T09:21:19Z","pod":"qbfqbp3y6hq8iu","minutes":4,"usd_at_rate":0.0660,"state":"exists/RUNNING/billing"}
+{"utc":"2026-08-30T09:23:20Z","pod":"qbfqbp3y6hq8iu","minutes":6,"usd_at_rate":0.0990,"state":"exists/RUNNING/billing"}
+{"utc":"2026-08-30T09:25:20Z","pod":"qbfqbp3y6hq8iu","minutes":8,"usd_at_rate":0.1320,"state":"exists/RUNNING/billing"}
+{"utc":"2026-08-30T09:27:21Z","pod":"qbfqbp3y6hq8iu","minutes":10,"usd_at_rate":0.1650,"state":"exists/RUNNING/billing"}
+{"utc":"2026-08-30T09:29:22Z","pod":"qbfqbp3y6hq8iu","minutes":12,"usd_at_rate":0.1980,"state":"exists/RUNNING/billing"}
+{"utc":"2026-08-30T09:31:22Z","pod":"qbfqbp3y6hq8iu","minutes":14,"usd_at_rate":0.2310,"state":"GONE/TERMINATED/idle"}
+{"utc":"2026-08-30T09:31:22Z","event":"pod_gone","minutes":14,"usd_at_rate":0.2310}

@@ -1,0 +1,10 @@
+2026-08-30T09:25:23Z MARKER:DRIVER_START
+2026-08-30T09:25:23Z MARKER:STAGE_START:0
+[09:27:31] attested: interval 0.011695, floor 0.3000, plan 02be33b9a7a8…
+2026-08-30T09:27:31Z MARKER:STAGE_PASSED:0
+[09:27:31] continuation evidence bound: universe e94f15d2e648…, stage-1 selection 84fd64968519…
+2026-08-30T09:27:31Z MARKER:STAGE_START:1
+2026-08-30T09:27:31Z MARKER:STAGE_FAILED:1
+[09:27:31] STAGE 1 FAILED: 85bde4ded2c31953f802e39cf2252c87 is an ADVANCING finalist but is not staged at /home/ecs-user/aad-artifacts/autoinit/phase_a/85bde4ded2c31953f802e39cf2252c87; the continuation probes it and cannot rebuild it from nothing
+2026-08-30T09:27:31Z MARKER:PHASE_A_FAILED
+[09:27:31] stopping before any later stage; completed observations are journalled and the permanent controls are untouched

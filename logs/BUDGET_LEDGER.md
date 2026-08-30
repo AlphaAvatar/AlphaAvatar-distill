@@ -1298,6 +1298,51 @@ Behavioural-continuation attempts now total **$0.5659** and have bought no
 science. Record:
 [`autoinit_continuation_b_attempt2.json`](autoinit_continuation_b_attempt2.json).
 
+## 2026-08-30 — Behavioural continuation attempt 3: $0.2275, stage 0 PASSED, stage 1 failed
+
+```
+cumulative spend before                                      $260.6209
+continuation attempt 3 (pod qbfqbp3y6hq8iu, 13.8 min, L40S)  $  0.2275
+cumulative spend after                                       $260.8484
+authorized cumulative cap                                    $283.7600
+remaining headroom                                           $ 22.9116
+continuation session hard ceiling                            $  8.0691
+```
+
+**The furthest any continuation attempt has reached, and the first to pass a
+scientific stage.** All 7 pre-provider gates passed including
+`session_commit_and_lineage`; setup completed; the driver loaded its own
+`ContinuationAuthorization`; and **stage 0 PASSED** — every cited identity bound,
+the collapsed universe `e94f15d2e648` and Stage-1 selection `84fd64968519`
+verified, the evaluation protocol attested (interval `0.011695`, floor `0.3000`),
+and all **eleven** probe journals imported. The attempt-2 constructor defect is
+hardware-closed.
+
+Stage 1 then refused, in the same second:
+
+```
+85bde4ded2c31953f802e39cf2252c87 is an ADVANCING finalist but is not staged at
+/home/ecs-user/aad-artifacts/autoinit/phase_a/85bde4ded2c31953f802e39cf2252c87
+```
+
+**A dev-box path used on the pod.** `build_finalist_states` resolves each
+finalist as `Path(c.checkpoint_path)`, and `checkpoint_path` comes from the
+frozen identity-collapse amendment, which records dev-box absolute paths. The
+launcher stages the finalists at `artifacts/autoinit/phase_a_selected/<state_id>`
+— which is exactly what `autoinit_phase_b_driver.py` already resolves against
+(`STAGED_FINALISTS / canonical_id`, lines 110 and 362). The amendment must
+**not** move: its hash `df413bd99119dab7` is bound by the authorization and the
+preregistration, and its dev-box paths are correct for the machine holding those
+bytes. The repair belongs in the driver.
+
+Twenty artifacts across six classes were collected, the teardown gate allowed,
+the pod deleted at 09:30:28Z and the provider confirms gone and not billing. The
+authorization `autoinit.continuation_b.20260830T091529Z` is **consumed**.
+
+Behavioural-continuation attempts now total **$0.7934** and have bought no
+probe. Record:
+[`autoinit_continuation_b_attempt3.json`](autoinit_continuation_b_attempt3.json).
+
 ## Standing rules
 
 * Plan from **actual spend**, never from unused room under a previous authorization.

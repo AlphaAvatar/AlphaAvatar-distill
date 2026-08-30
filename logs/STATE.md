@@ -1,4 +1,4 @@
-**Updated:** 2026-08-29 · branch `main` · **PHASE_B_STAGE1_COMPLETE / BEHAVIOURAL_SELECTION_INCOMPLETE — product contract repaired, all 7 pre-provider gates green**
+**Updated:** 2026-08-30 · branch `main` · **PHASE_B_STAGE1_COMPLETE / BEHAVIOURAL_SELECTION_INCOMPLETE — stage 0 passed on hardware, blocked at stage 1**
 
 # Current state
 
@@ -7,13 +7,75 @@ the live facts; this one says the same things in prose and adds nothing it does
 not carry. If the two disagree, a structural test fails.
 
 **Nothing is running. Nothing is billing. Nothing is prepared for launch.**
-Pod `ew2ykjczuex87i` was deleted at `20:53:51Z`; the provider confirms it gone
+Pod `qbfqbp3y6hq8iu` was deleted at `09:30:28Z`; the provider confirms it gone
 and not billing, and the launcher, watchdog and poller have all exited — the
-poller journalled `pod_gone` and stopped itself. Spend is `$260.6209` of the
-`$283.7600` cap, `$23.1391` remaining.
+poller journalled `pod_gone` and stopped itself. Spend is `$260.8484` of the
+`$283.7600` cap, `$22.9116` remaining.
 
-**Nothing is authorized.** All three behavioural-continuation grants are retired:
-`194657Z` and `153538Z` **CONSUMED**, `115028Z` **UNUSED**.
+**Nothing is authorized.** All four behavioural-continuation grants are retired:
+`091529Z`, `194657Z` and `153538Z` **CONSUMED**, `115028Z` **UNUSED**.
+
+# ATTEMPT 3 PASSED STAGE 0 — and stopped at stage 1 · $0.2275
+
+The furthest any continuation attempt has reached, and **the first to pass a
+scientific stage**. All 7 pre-provider gates passed, including
+`session_commit_and_lineage`; setup completed; the driver loaded its own
+`ContinuationAuthorization`; and **stage 0 PASSED** — every cited identity bound,
+the collapsed universe `e94f15d2e648…` and Stage-1 selection `84fd64968519…`
+verified, the evaluation protocol attested (interval `0.011695`, floor `0.3000`,
+plan `02be33b9a7a8…`), and **all eleven probe journals imported**. The attempt-2
+constructor defect is hardware-closed.
+
+Stage 1 then refused, in the same second:
+
+```
+85bde4ded2c31953f802e39cf2252c87 is an ADVANCING finalist but is not staged at
+/home/ecs-user/aad-artifacts/autoinit/phase_a/85bde4ded2c31953f802e39cf2252c87
+```
+
+**A dev-box path used on the pod.** `build_finalist_states` resolves each
+finalist as `Path(c.checkpoint_path)`, and `checkpoint_path` comes from the
+frozen identity-collapse amendment, which records dev-box absolute paths under
+`/home/ecs-user/aad-artifacts/autoinit/phase_a/`. On the pod the finalists are
+staged at `artifacts/autoinit/phase_a_selected/<state_id>`.
+
+**Phase B already resolves exactly that location.**
+`autoinit_phase_b_driver.py:110` defines
+`STAGED_FINALISTS = REPO / "artifacts/autoinit/phase_a_selected"` and line 362
+uses `STAGED_FINALISTS / canonical_id`. Same constant, same staging directory,
+different resolution — the fourth instance of the same inheritance class, and the
+second time a dev-box-only path has reached a pod.
+
+**The amendment must not move.** Its hash `df413bd99119dab7` is bound by the
+authorization and the preregistration, and its dev-box paths are correct
+provenance for the machine that holds those bytes. The repair belongs in the
+**driver**: map `state_id` to the pod staging directory.
+
+**Why no `$0` check caught it.** The whole-function test builds toy checkpoints in
+`tmp_path` and points the amendment at them, so `c.checkpoint_path` always exists
+there. Its assertion — that an advancing finalist must be staged — is right, and
+is what fired on the pod. What nothing asserts is that the path the driver
+*derives* is one the pod will have.
+
+**No probe was bought.** No `sb`, no `sc`, no pooled decision, no final selection,
+no search reachable, no evidence moved, permanent controls untouched.
+
+Twenty artifacts across six classes were collected and the teardown gate allowed
+before deletion. Record:
+[`autoinit_continuation_b_attempt3.json`](autoinit_continuation_b_attempt3.json),
+evidence in [`autoinit_continuation_b_attempt3/`](autoinit_continuation_b_attempt3/).
+
+**A diagnosis hazard worth recording.** The reused scratch `store/extracted` still
+held attempt 2's `stage0_traceback.log`, dated `2026-08-29T20:50:21Z`. This run
+produced none, because stage 0 passed. Reading the reused directory would have
+reported the previous attempt's failure as this one's; the diagnosis was taken
+from a clean extraction of this run's own archive.
+
+**The repair is not applied.** A fourth attempt needs a maintainer decision.
+
+---
+
+# Previous attempt (2) — constructor defect, now closed
 
 # ATTEMPT 2 CLEARED THE TEST GATE AND DIED AT DRIVER STAGE 0 — $0.3146
 
