@@ -65,6 +65,7 @@ AMENDMENT = "logs/autoinit_phase_b_identity_collapse_amendment.json"
 STAGE1_SELECTION = "logs/autoinit_phase_b_attempt5/stage1_selection.json"
 HISTORICAL_REUSE = "logs/autoinit_historical_probe_reuse.json"
 ATTEMPT5_REUSE = "logs/autoinit_attempt5_probe_reuse.json"
+ATTEMPT4_REUSE = "logs/autoinit_attempt4_probe_reuse.json"
 ASSETS = "logs/autoinit_continuation_b_assets.json"
 PRICING = "logs/autoinit_behavioural_continuation_pricing.json"
 
@@ -75,8 +76,18 @@ PRICING = "logs/autoinit_behavioural_continuation_pricing.json"
 #:
 #: The `$35.6660` full-Phase-B ceiling is HISTORICAL and must never authorize this
 #: session — it books a search that attempt 5 completed and retained.
-HARD_CEILING_USD = 8.0691
-PLANNING_FLOOR_USD = 5.4784
+#: Re-priced after Attempt 4. The `$8.0691` figure booked three probes — one
+#: replacement `sb` and two conditional `sc`. Attempt 4 purchased the last `sb`,
+#: `85bde4ded2c3/sc` is retained, and the corrected rung-2 decision names two tie
+#: candidates of which one already holds its `sc`. Exactly ONE observation
+#: remains, so the ceiling prices one probe.
+#:
+#: Left as constants the issuer checks the pricing artifact against, rather than
+#: read from it: a ceiling that simply mirrors whatever the pricing file says is
+#: not an independent check, and this is the last place a mis-priced session can
+#: be refused before a grant exists. The refusal is what caught the mismatch.
+HARD_CEILING_USD = 5.4784
+PLANNING_FLOOR_USD = 4.1830
 CUMULATIVE_CAP_USD = 283.76
 FULL_PHASE_B_CEILING_USD = 35.6660
 
@@ -115,8 +126,8 @@ def load_grant(path: Path) -> dict:
 def observed_evidence() -> dict[str, str]:
     """Re-derived here, not copied from the preregistration.
 
-    The driver's `observed_evidence()` re-derives the same six identities on the
-    pod and `require_evidence` compares them. Reading the preregistration's copy
+    The driver's `observed_evidence()` re-derives the same seven identities on
+    the pod and `require_evidence` compares them. Reading the preregistration's copy
     instead would bind the grant to a record rather than to the artifacts, and a
     record can be regenerated.
     """
@@ -124,6 +135,11 @@ def observed_evidence() -> dict[str, str]:
     amendment = json.loads((REPO_ROOT / AMENDMENT).read_text())
     historical = json.loads((REPO_ROOT / HISTORICAL_REUSE).read_text())
     attempt5 = json.loads((REPO_ROOT / ATTEMPT5_REUSE).read_text())
+    #: Attempt 4's purchased `fe9683e6a9c7/sb`. Bound like the other two: without
+    #: it the session no longer holds complete `sa+sb`, and `reuse_verified`
+    #: inside the record is not a substitute — that field says what was true when
+    #: the record was written, and the record can move before execution.
+    attempt4 = json.loads((REPO_ROOT / ATTEMPT4_REUSE).read_text())
     rung1 = amendment["rung1_selection"]
     return {
         "stage1_selection_sha256": selection["selection_sha256"],
@@ -132,6 +148,7 @@ def observed_evidence() -> dict[str, str]:
             amendment["collapsed_universe"]["universe_identity"],
         "historical_reuse_probes_dir_digest": historical["probes_dir_digest"],
         "attempt5_reuse_probes_dir_digest": attempt5["probes_dir_digest"],
+        "attempt4_reuse_probes_dir_digest": attempt4["probes_dir_digest"],
         "rung1_selection_digest": sha256_json({
             "selected_searched": rung1["selected_searched"],
             "auto_advanced_control": rung1["auto_advanced_control"],
