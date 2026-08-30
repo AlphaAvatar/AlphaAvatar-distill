@@ -41,6 +41,7 @@ SELECTION = REPO_ROOT / "logs/autoinit_phase_b_attempt5/stage1_selection.json"
 HISTORICAL = REPO_ROOT / "logs/autoinit_historical_probe_reuse.json"
 ATTEMPT5 = REPO_ROOT / "logs/autoinit_attempt5_probe_reuse.json"
 ATTEMPT4 = REPO_ROOT / "logs/autoinit_attempt4_probe_reuse.json"
+CORRECTED_RUNG2 = REPO_ROOT / "logs/autoinit_continuation_b_corrected_rung2.json"
 FROZEN = REPO_ROOT / "logs/autoinit_phase_a_recovery_plan_frozen.json"
 
 FULL_PHASE_B_CEILING_USD = 35.6660
@@ -54,6 +55,7 @@ def build() -> dict:
     historical = json.loads(HISTORICAL.read_text())
     attempt5 = json.loads(ATTEMPT5.read_text())
     attempt4 = json.loads(ATTEMPT4.read_text())
+    corrected = json.loads(CORRECTED_RUNG2.read_text())
     frozen = json.loads(FROZEN.read_text())
     science = frozen.get("plan_hash") or frozen["plan"]["plan_hash"]
     rung1 = amendment["rung1_selection"]
@@ -93,16 +95,26 @@ def build() -> dict:
     body = {
         "schema": "aadistill.autoinit.continuation_b_preregistration/v1",
         "generated_utc": datetime.now(timezone.utc).isoformat(),
-        "status": ("FROZEN BEFORE ANY BEHAVIOURAL-CONTINUATION RESULT EXISTS. Not "
-                   "an authorization, not a grant, and not an instruction to launch."),
+        "status": ("FROZEN BEFORE THE ONE REMAINING OBSERVATION IS PURCHASED. "
+                   "Attempt 4 has already run: it produced and retained "
+                   "fe9683e6a9c7/sb, and its reported resolved/winner decision "
+                   "was WITHDRAWN because the inherited pooling let an imported "
+                   "sc into the rung-2 comparison. The corrected rung-2 decision, "
+                   "recomputed from the same retained evidence over sa+sb alone, "
+                   "is tie_pending and is stated below. Not an authorization, not "
+                   "a grant, and not an instruction to launch."),
         "what_this_session_is": (
             "Phase-B Stage 1 is COMPLETE. Attempt 5 ran the joint P=2 search to "
             "completion, emitted an authoritative Top-5 and a durable Stage-1 "
             "selection artifact, and paid for three rung-1 sa probes. It then died "
             "on a candidate-universe collision that the identity-collapse "
             "amendment resolves, and rung 1 was completed at $0 from retained "
-            "evidence. What remains is behavioural: one missing sb, and at most "
-            "two conditional sc. This session buys ONLY that."),
+            "evidence. Attempt 4 then purchased the last missing sb "
+            "(fe9683e6a9c7/sb), which is retained, strictly reconstructed and "
+            "authorization-bound. Every sa and every sb now exists, and "
+            "85bde4ded2c3/sc exists from the Phase-A continuation. What remains "
+            "is EXACTLY ONE observation: fe9683e6a9c7/sc. This session buys ONLY "
+            "that."),
         "what_this_session_must_not_do": [
             "run the P=2 search, or any search",
             "purchase a new sa probe",
@@ -111,6 +123,11 @@ def build() -> dict:
             "reach a fourth seed",
             "break a tie with Stage-1 ranking, search-side KL/NLL, the canonical "
             "Stage-1 NLL, or state-id ordering",
+            "purchase a replacement sa or sb -- all are retained and reuse-only; "
+            "a missing or non-binding one FAILS CLOSED",
+            "re-run 85bde4ded2c3/sc, which is retained and reuse-only",
+            "probe the canonical control on the tie-break seed: it is outside "
+            "the equivalence interval and is not a tie candidate",
         ],
         "evidence_universe": {
             "distinct_candidates": amendment["collapsed_universe"]["distinct_candidates"],
@@ -154,18 +171,62 @@ def build() -> dict:
             },
         },
         "probe_inventory": {
-            "derivation": ("from the two verified reuse records, cross-checked "
-                           "against what the executable actually buys in a "
-                           "whole-function run"),
+            "derivation": ("from the THREE verified reuse records -- historical, "
+                           "Attempt-5 fresh sa, and Attempt-4 fresh sb -- "
+                           "cross-checked against what the executable actually "
+                           "buys in a whole-function run and against the "
+                           "recomputed rung-2 decision"),
             "cited_sa": "all six evidence candidates — no new sa is purchased",
             "missing_sb": pricing["evidence"]["missing_sb"],
-            "reused_sb": ["85bde4ded2c3", "control-qwen"],
+            "reused_sb": ["fe9683e6a9c7", "85bde4ded2c3", "control-qwen"],
+            "reused_sb_note": ("all THREE finalists. fe9683e6a9c7/sb is Attempt "
+                               "4's purchase, cited from the Attempt-4 reuse "
+                               "record rather than re-run"),
             "missing_sc_worst_case": pricing["evidence"]["missing_sc_worst_case"],
             "reused_sc": ["85bde4ded2c3"],
             "sc_is_conditional": ("sc runs only for candidates inside the frozen "
                                   "equivalence interval that lack a verified sc"),
+            "purchasable": ["fe9683e6a9c7/sc"],
+            "reuse_only": ("every sa, every sb, and 85bde4ded2c3/sc. A missing or "
+                           "non-binding one fails closed and is never "
+                           "repurchased: a replacement is a different measurement "
+                           "from the one the corrected rung-2 decision was "
+                           "computed over"),
             "new_probes_min": pricing["total"]["low_probes"],
             "new_probes_max": pricing["total"]["hard_probes"],
+        },
+        "corrected_rung2": {
+            "status": ("ACCEPTED. This is the decision the session continues "
+                       "from, and it is already computed -- stage 3 recomputes "
+                       "it from the same retained evidence and must reproduce "
+                       "it"),
+            "admitted_rungs": corrected["admitted_rungs"],
+            "why_sa_sb_only": (
+                "the continuation IMPORTS completed evidence before stage 3, and "
+                "that includes 85bde4ded2c3/sc. Pooling every completed rung -- "
+                "correct in Phase A, where rung 3 could only exist after rung 2 "
+                "had decided -- compared 85bde4ded2c3 over sa+sb+sc (n=570) "
+                "against sa+sb (n=380) for the others. That is what Attempt 4 "
+                "did, and its 0.012745 margin is not a quantity the frozen rule "
+                "is defined over"),
+            "pooled_rows": [
+                {"state_id": r["state_id"], "correct": r["correct"],
+                 "n_scorable": r["n_scorable"],
+                 "correct_overall": r["correct_overall"],
+                 "usable_rollout_rate": r["usable_rollout_rate"]}
+                for r in corrected["pooled_rows"]],
+            "ranking_metric": corrected["ranking_metric"],
+            "equivalence_interval": corrected["equivalence_interval"],
+            "margin": round(corrected["pooled_rows"][0]["correct_overall"]
+                            - corrected["pooled_rows"][1]["correct_overall"], 6),
+            "decision_status": corrected["decision_status"],
+            "winner": corrected["winner"],
+            "tie_break_candidates": corrected["tie_break_candidates"],
+            "control_is_outside_the_interval": True,
+            "sc_already_held": corrected["sc_already_held"],
+            "sc_still_owed": corrected["sc_still_owed"],
+            "withdrawn": corrected["withdrawn_decision"]["decision_status"],
+            "source": "logs/autoinit_continuation_b_corrected_rung2.json",
         },
         "reuse_rule": {
             "binds_on": ["student_artifact_digest", "seed"],

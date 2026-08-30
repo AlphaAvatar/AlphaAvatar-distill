@@ -17,17 +17,24 @@ After identity collapse the universe is six distinct candidates; rung 1 —
 computed by the frozen selection code, not chosen here — advances
 `fe9683e6a9c7`, `85bde4ded2c3` and the auto-advancing control. Their evidence:
 
-    candidate        sa       sb        sc
-    fe9683e6a9c7     cited    MISSING   MISSING
-    85bde4ded2c3     cited    cited     cited
-    control-qwen     cited    cited     MISSING
+    candidate        sa       sb                     sc
+    fe9683e6a9c7     cited    cited (Attempt 4)      MISSING
+    85bde4ded2c3     cited    cited                  cited
+    control-qwen     cited    cited                  not a tie candidate
 
-So **one `sb`** is owed, and **at most two `sc`** if the tie-break fires. One to
-three probes, against the ten a full Phase B books.
+Attempt 4 purchased `fe9683e6a9c7/sb`, so **no `sb` is owed**. The corrected
+rung-2 decision — pooled over `sa+sb` alone — is `tie_pending` with candidates
+`{fe9683e6a9c7, 85bde4ded2c3}`, and `85bde4ded2c3/sc` already exists. The control
+is outside the equivalence interval and does not advance to `sc`.
+
+So **exactly one observation is owed: `fe9683e6a9c7/sc`**, against the ten a full
+Phase B books.
 
 `sc` is conditional by construction: it runs only for candidates inside the frozen
 equivalence interval that lack a verified `sc`. Both ends are priced, and the
-ceiling takes the worst case — it is a bound, not a forecast.
+ceiling takes the worst case — it is a bound, not a forecast. The `sc` set is read
+from the recomputed rung-2 artifact rather than derived here, so the price and the
+science cannot disagree about what is missing.
 """
 
 from __future__ import annotations
@@ -168,6 +175,24 @@ def price(hardware=L40S_MEASURED) -> dict:
                     "are retained on the dev box with re-derived identities"),
             "selection_sha256": amendment["stage1_selection"]["selection_sha256"]},
         "sc_basis": sc_basis,
+        "reuse_provenance": {
+            "why_missing_sb_is_empty": (
+                "Attempt 4 purchased fe9683e6a9c7/sb and it is retained. Without "
+                "that citation this session would owe a replacement sb as well, "
+                "and the ceiling would price two probes rather than one"),
+            "records": [
+                {"record": "logs/autoinit_historical_probe_reuse.json",
+                 "probes_dir_digest": json.loads(HISTORICAL.read_text())["probes_dir_digest"],
+                 "admits": sorted(ev["historical"])},
+                {"record": "logs/autoinit_attempt5_probe_reuse.json",
+                 "probes_dir_digest": json.loads(ATTEMPT5.read_text())["probes_dir_digest"],
+                 "admits": sorted(ev["attempt5"])},
+                {"record": "logs/autoinit_attempt4_probe_reuse.json",
+                 "probes_dir_digest": (json.loads(ATTEMPT4.read_text())["probes_dir_digest"]
+                                       if ATTEMPT4.is_file() else None),
+                 "admits": sorted(ev.get("attempt4", []))},
+            ],
+        },
         "universe": {
             "distinct_candidates": amendment["collapsed_universe"]["distinct_candidates"],
             "universe_identity": amendment["collapsed_universe"]["universe_identity"],

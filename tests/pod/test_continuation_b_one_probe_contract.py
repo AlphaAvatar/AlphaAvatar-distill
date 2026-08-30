@@ -234,3 +234,108 @@ def test_the_session_plan_describes_the_one_probe_scope():
     conditions = " ".join(stages[4].stop_conditions)
     assert "at most ONE descriptor" in conditions
     assert "no fourth seed" in conditions
+
+
+# --- the committed artifacts must describe the committed source -------------
+#
+# The metadata-coherence repair found that the committed preregistration bound
+# executable digest `20c37deb…` while the source tree produced `a5ce6311…`. The
+# cause was mundane: the preregistration was regenerated, two further comment
+# edits were made to source files in the set, and everything was committed
+# together. Nothing checked the two against each other.
+#
+# `continuation_source_gate` would not have caught it — it compares the GRANT's
+# digest to the live source, and the issuer computes the grant's digest fresh.
+# The stale value was only ever in the preregistration.
+
+def test_the_preregistration_binds_the_live_executable_digest():
+    from aadistill.autoinit.phase_b_continuation import continuation_source_digest
+
+    prereg = json.loads(
+        (REPO / "logs/autoinit_continuation_b_preregistration.json").read_text())
+    recorded = prereg["executable_source"]["digest"]
+    live = continuation_source_digest(REPO)["digest"]
+    assert recorded == live, (
+        f"the preregistration binds {recorded[:12]}… but the source tree digests "
+        f"to {live[:12]}…. Regenerate it: an edit to a file in the source set "
+        "after the last regeneration leaves the document describing code that no "
+        "longer exists.")
+    assert prereg["executable_source"]["n_files"] == len(
+        continuation_source_digest(REPO)["files"])
+
+
+def test_the_preregistration_binds_the_live_session_plan_and_pricing():
+    from aadistill.autoinit.phase_b_continuation import CONTINUATION_PLAN_V1
+
+    prereg = json.loads(
+        (REPO / "logs/autoinit_continuation_b_preregistration.json").read_text())
+    priced = json.loads(PRICING.read_text())
+
+    assert prereg["session_plan"]["plan_hash"] == CONTINUATION_PLAN_V1.plan_hash
+    assert prereg["session_plan"]["version"] == CONTINUATION_PLAN_V1.version == 3
+    assert prereg["budget"]["floor_usd"] == priced["total"]["low_usd"] == 4.1830
+    assert prereg["budget"]["hard_ceiling_usd"] == priced["total"]["hard_usd"] \
+        == 5.4784
+    assert prereg["probe_inventory"]["new_probes_max"] == \
+        priced["total"]["hard_probes"] == 1
+
+
+def test_the_preregistration_states_the_current_scientific_state():
+    """No stale V2 narrative alongside V3 fields."""
+    prereg = json.loads(
+        (REPO / "logs/autoinit_continuation_b_preregistration.json").read_text())
+    blob = json.dumps(prereg)
+
+    assert "at most two conditional sc" not in blob, (
+        "the preregistration still describes the pre-Attempt-4 scope")
+    assert "one missing sb" not in blob
+
+    corrected = prereg["corrected_rung2"]
+    assert corrected["decision_status"] == "tie_pending"
+    assert corrected["winner"] is None
+    assert [c[:12] for c in corrected["tie_break_candidates"]] == [
+        "fe9683e6a9c7", "85bde4ded2c3"]
+    assert [s[:12] for s in corrected["sc_still_owed"]] == ["fe9683e6a9c7"]
+    assert corrected["control_is_outside_the_interval"] is True
+    assert corrected["admitted_rungs"] == [1, 2]
+
+    inv = prereg["probe_inventory"]
+    assert inv["missing_sb"] == []
+    assert sorted(inv["reused_sb"]) == sorted(
+        ["fe9683e6a9c7", "85bde4ded2c3", "control-qwen"])
+    assert inv["purchasable"] == ["fe9683e6a9c7/sc"]
+
+    # Three reuse records, not two.
+    assert set(prereg["reuse_rule"]) >= {
+        "historical_record", "attempt5_record", "attempt4_record"}
+
+
+def test_the_pricing_cites_the_attempt4_reuse_that_makes_missing_sb_empty():
+    priced = json.loads(PRICING.read_text())
+    prov = priced["reuse_provenance"]
+    records = {r["record"]: r for r in prov["records"]}
+    a4 = records["logs/autoinit_attempt4_probe_reuse.json"]
+    assert a4["admits"] == ["fe9683e6a9c7/sb"]
+    assert a4["probes_dir_digest"] == json.loads(
+        ATTEMPT4_REUSE.read_text())["probes_dir_digest"]
+    assert priced["evidence"]["missing_sb"] == []
+
+
+def test_the_live_snapshot_says_tie_pending_not_resolved():
+    state = json.loads((REPO / "logs/current_state.json").read_text())
+    blob = json.dumps(state)
+
+    assert state["phase_b_state"].endswith("TIE_PENDING")
+    assert state["phase_b_result"]["status"].startswith("TIE_PENDING")
+    assert state["phase_b_result"]["owed"] == ["fe9683e6a9c7/sc"]
+    assert state["authorized"]["any"] is False
+    assert state["running"]["pods"] == 0 and state["running"]["launchers"] == 0
+    assert state["prepared_launch"]["any"] is False
+    assert state["budget"]["continuation_hard_ceiling_usd"] == 5.4784
+    assert state["budget"]["continuation_planning_floor_usd"] == 4.1830
+
+    # The superseded scope and ceiling must not still be described as current.
+    assert "at most 2 conditional sc" not in blob
+    assert "HARD CEILING $8.0691" not in blob
+    # The roadmap survives.
+    assert "PHASE C" in blob and "ATTENTION" in blob

@@ -734,12 +734,17 @@ freed to 0.01 GiB, and the evaluation tokenizer materialized before every batter
 
    | continuation — CURRENT | |
    | --- | --- |
-   | session plan | `a2ef4cd68a4b…` (`autoinit.v1.phase_b_behavioural_continuation`) |
+   | session plan | `6d6f971364868d84…` **v3** (`autoinit.v1.phase_b_behavioural_continuation`) |
    | stages | `0, 1, 3, 4, 5` — **no stage 2**, because Phase A's stage 2 is rung 1 |
-   | preregistration | `21e69909e1bc…`, frozen before any continuation result |
-   | executable-source digest | `96c346ffcf6a…` over **62** files, set version 3 |
+   | preregistration | `bd827d12b660…` |
+   | executable-source digest | `a5ce6311789e…` over **62** files, set version 3 |
    | relay assets | `1643145376ba…`, `fe9683e6a9c7` round-trip verified |
-   | floor / ceiling | **$5.4784** (1 probe) / **$8.0691** (3 probes) |
+   | floor / ceiling | **$4.1830** (0 probes) / **$5.4784** (1 probe) |
+   | purchasable | exactly `fe9683e6a9c7/sc` |
+
+   The `$8.0691` ceiling and the v2 plan below priced three probes and are
+   **superseded**. Figures in the historical sections that follow record what was
+   true at the time and are left alone.
 
    **The search is unreachable, and that is checked five ways.** The plan declares
    no search stage; `stage1()` and `run_search()` raise; the stage map never binds

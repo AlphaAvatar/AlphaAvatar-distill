@@ -1,6 +1,6 @@
 {
   "schema": "aadistill.autoinit.behavioural_continuation_pricing/v1",
-  "generated_utc": "2026-08-30T14:28:04.689149+00:00",
+  "generated_utc": "2026-08-30T19:04:09.036976+00:00",
   "_contract": "Prices ONLY the behavioural evidence Phase B still owes. Stage 1 is complete, retained and authoritative; it is not repriced here and must not be repurchased. NOT an authorization.",
   "hardware": {
     "name": "L40S",
@@ -27,6 +27,41 @@
       "cca699c93f34"
     ],
     "rule": "only finalists inside the equivalence interval go to sc, and only those without a verified one are bought"
+  },
+  "reuse_provenance": {
+    "why_missing_sb_is_empty": "Attempt 4 purchased fe9683e6a9c7/sb and it is retained. Without that citation this session would owe a replacement sb as well, and the ceiling would price two probes rather than one",
+    "records": [
+      {
+        "record": "logs/autoinit_historical_probe_reuse.json",
+        "probes_dir_digest": "a5115816861ad239f646facec4d53ba2c7925c9430c530e7c6d0af2560d5b1af",
+        "admits": [
+          "85bde4ded2c3/sa",
+          "85bde4ded2c3/sb",
+          "85bde4ded2c3/sc",
+          "cca699c93f34/sa",
+          "cca699c93f34/sb",
+          "cca699c93f34/sc",
+          "control-qwen/sa",
+          "control-qwen/sb"
+        ]
+      },
+      {
+        "record": "logs/autoinit_attempt5_probe_reuse.json",
+        "probes_dir_digest": "2e5030fadc786faaafe1ec3ac3a2ccb4af367e98bf630a89a16938729a77844e",
+        "admits": [
+          "ab7632b00788/sa",
+          "bf5ae3b6ae00/sa",
+          "fe9683e6a9c7/sa"
+        ]
+      },
+      {
+        "record": "logs/autoinit_attempt4_probe_reuse.json",
+        "probes_dir_digest": "4d2ef1c9f113dbda339f2c430a9e6d461cea54d0b44933d449dff6154e2af793",
+        "admits": [
+          "fe9683e6a9c7/sb"
+        ]
+      }
+    ]
   },
   "universe": {
     "distinct_candidates": 6,

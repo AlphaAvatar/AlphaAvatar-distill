@@ -1,15 +1,18 @@
 {
   "schema": "aadistill.autoinit.continuation_b_preregistration/v1",
-  "generated_utc": "2026-08-30T16:27:19.921051+00:00",
-  "status": "FROZEN BEFORE ANY BEHAVIOURAL-CONTINUATION RESULT EXISTS. Not an authorization, not a grant, and not an instruction to launch.",
-  "what_this_session_is": "Phase-B Stage 1 is COMPLETE. Attempt 5 ran the joint P=2 search to completion, emitted an authoritative Top-5 and a durable Stage-1 selection artifact, and paid for three rung-1 sa probes. It then died on a candidate-universe collision that the identity-collapse amendment resolves, and rung 1 was completed at $0 from retained evidence. What remains is behavioural: one missing sb, and at most two conditional sc. This session buys ONLY that.",
+  "generated_utc": "2026-08-30T19:06:14.844291+00:00",
+  "status": "FROZEN BEFORE THE ONE REMAINING OBSERVATION IS PURCHASED. Attempt 4 has already run: it produced and retained fe9683e6a9c7/sb, and its reported resolved/winner decision was WITHDRAWN because the inherited pooling let an imported sc into the rung-2 comparison. The corrected rung-2 decision, recomputed from the same retained evidence over sa+sb alone, is tie_pending and is stated below. Not an authorization, not a grant, and not an instruction to launch.",
+  "what_this_session_is": "Phase-B Stage 1 is COMPLETE. Attempt 5 ran the joint P=2 search to completion, emitted an authoritative Top-5 and a durable Stage-1 selection artifact, and paid for three rung-1 sa probes. It then died on a candidate-universe collision that the identity-collapse amendment resolves, and rung 1 was completed at $0 from retained evidence. Attempt 4 then purchased the last missing sb (fe9683e6a9c7/sb), which is retained, strictly reconstructed and authorization-bound. Every sa and every sb now exists, and 85bde4ded2c3/sc exists from the Phase-A continuation. What remains is EXACTLY ONE observation: fe9683e6a9c7/sc. This session buys ONLY that.",
   "what_this_session_must_not_do": [
     "run the P=2 search, or any search",
     "purchase a new sa probe",
     "recompute rung 1",
     "probe a searched non-survivor",
     "reach a fourth seed",
-    "break a tie with Stage-1 ranking, search-side KL/NLL, the canonical Stage-1 NLL, or state-id ordering"
+    "break a tie with Stage-1 ranking, search-side KL/NLL, the canonical Stage-1 NLL, or state-id ordering",
+    "purchase a replacement sa or sb -- all are retained and reuse-only; a missing or non-binding one FAILS CLOSED",
+    "re-run 85bde4ded2c3/sc, which is retained and reuse-only",
+    "probe the canonical control on the tie-break seed: it is outside the equivalence interval and is not a tie candidate"
   ],
   "evidence_universe": {
     "distinct_candidates": 6,
@@ -56,13 +59,15 @@
     }
   },
   "probe_inventory": {
-    "derivation": "from the two verified reuse records, cross-checked against what the executable actually buys in a whole-function run",
+    "derivation": "from the THREE verified reuse records -- historical, Attempt-5 fresh sa, and Attempt-4 fresh sb -- cross-checked against what the executable actually buys in a whole-function run and against the recomputed rung-2 decision",
     "cited_sa": "all six evidence candidates \u2014 no new sa is purchased",
     "missing_sb": [],
     "reused_sb": [
+      "fe9683e6a9c7",
       "85bde4ded2c3",
       "control-qwen"
     ],
+    "reused_sb_note": "all THREE finalists. fe9683e6a9c7/sb is Attempt 4's purchase, cited from the Attempt-4 reuse record rather than re-run",
     "missing_sc_worst_case": [
       "fe9683e6a9c7"
     ],
@@ -70,8 +75,62 @@
       "85bde4ded2c3"
     ],
     "sc_is_conditional": "sc runs only for candidates inside the frozen equivalence interval that lack a verified sc",
+    "purchasable": [
+      "fe9683e6a9c7/sc"
+    ],
+    "reuse_only": "every sa, every sb, and 85bde4ded2c3/sc. A missing or non-binding one fails closed and is never repurchased: a replacement is a different measurement from the one the corrected rung-2 decision was computed over",
     "new_probes_min": 0,
     "new_probes_max": 1
+  },
+  "corrected_rung2": {
+    "status": "ACCEPTED. This is the decision the session continues from, and it is already computed -- stage 3 recomputes it from the same retained evidence and must reproduce it",
+    "admitted_rungs": [
+      1,
+      2
+    ],
+    "why_sa_sb_only": "the continuation IMPORTS completed evidence before stage 3, and that includes 85bde4ded2c3/sc. Pooling every completed rung -- correct in Phase A, where rung 3 could only exist after rung 2 had decided -- compared 85bde4ded2c3 over sa+sb+sc (n=570) against sa+sb (n=380) for the others. That is what Attempt 4 did, and its 0.012745 margin is not a quantity the frozen rule is defined over",
+    "pooled_rows": [
+      {
+        "state_id": "fe9683e6a9c783bbc6fe276a78c851c6",
+        "correct": 11,
+        "n_scorable": 340,
+        "correct_overall": 0.03235294117647059,
+        "usable_rollout_rate": 0.7157894736842105
+      },
+      {
+        "state_id": "85bde4ded2c31953f802e39cf2252c87",
+        "correct": 9,
+        "n_scorable": 340,
+        "correct_overall": 0.026470588235294117,
+        "usable_rollout_rate": 0.5631578947368421
+      },
+      {
+        "state_id": "control-qwen3_0p6b_init_v0",
+        "correct": 3,
+        "n_scorable": 340,
+        "correct_overall": 0.008823529411764706,
+        "usable_rollout_rate": 0.49473684210526314
+      }
+    ],
+    "ranking_metric": "correct_overall \u2014 the frozen equivalence metric. usable_rollout is a feasibility/behaviour axis reported alongside it and does NOT rank.",
+    "equivalence_interval": 0.011695296982299022,
+    "margin": 0.005882,
+    "decision_status": "tie_pending",
+    "winner": null,
+    "tie_break_candidates": [
+      "fe9683e6a9c783bbc6fe276a78c851c6",
+      "85bde4ded2c31953f802e39cf2252c87"
+    ],
+    "control_is_outside_the_interval": true,
+    "sc_already_held": [
+      "85bde4ded2c31953f802e39cf2252c87",
+      "cca699c93f34dad7e94a5d13a25b2bc2"
+    ],
+    "sc_still_owed": [
+      "fe9683e6a9c783bbc6fe276a78c851c6"
+    ],
+    "withdrawn": "resolved",
+    "source": "logs/autoinit_continuation_b_corrected_rung2.json"
   },
   "reuse_rule": {
     "binds_on": [
@@ -114,7 +173,7 @@
     "top_n": 5
   },
   "executable_source": {
-    "digest": "20c37deb56bc31ea3cebabe9993f8d02c22eb0eab64cbab435c97ae60d1c4210",
+    "digest": "a5ce6311789eb4cd28902dfa8e2a65f1fea26123ab67a7fda025c8e8960d7141",
     "set_version": 3,
     "n_files": 62,
     "derivation": "the REAL import closure of the continuation driver and launcher, plus three subprocess-invoked runtime files. NOT curated: it therefore includes search.py, ranking.py and the operator modules, which the package __init__ loads for every consumer. What source is LOADED and what operation is PERMITTED are separate claims and are recorded separately."
@@ -184,5 +243,5 @@
     "winner=None with unresolved_equivalence \u2014 a RESULT, not a failure"
   ],
   "not_authorized": "No continuation grant or authorization exists, no cumulative-budget increase has been requested, and this document does not request one. It records what the session would do if one were issued.",
-  "preregistration_sha256": "806b7e99c51b9dc5b44fd70ca3be084d278f21607e987f3b951dfbdcf248636f"
+  "preregistration_sha256": "bd827d12b66073563f263c1265b9ac5d0ae79694407ac60ebb27f07c5f476d91"
 }
