@@ -31,6 +31,41 @@ AttributeError: 'PhaseAAuthorization' object has no attribute 'require_evidence'
 **No scientific stage ran** — no probe trained or evaluated, no `sb`, no `sc`, no
 pooled decision, no final selection, no search reachable. No evidence moved.
 
+## REPAIRED — ContinuationDriver owns its constructor
+
+`ContinuationDriver` now declares `AUTHORIZATION_TYPE = ContinuationAuthorization`,
+`AUTHORIZATION_PATH = logs/autoinit_continuation_b_authorization.json` and
+`PLAN = CONTINUATION_PLAN_V1`, and **does not call `super().__init__`**. Setting
+the two attributes alone would not have been enough: `PhaseADriver.__init__`
+binds three things this session must not inherit — the Phase-A type and path,
+`PHASE_A_PLAN_V1`, and the Phase-A evidence schema and scope — and its closing
+`require_plan(PHASE_A_PLAN_V1.plan_hash)` is refused by a
+`ContinuationAuthorization`. The failure would simply have moved one line.
+
+The shape is `PhaseBDriver`'s, kept **local**: `PhaseADriver` is untouched and no
+framework was extracted to remove the constructor duplication. The evidence
+**pathname is unchanged** — the collection contract names it — but its content is
+now the continuation's, not a Phase-A schema and scope inherited along with the
+writer. Nothing read `ev["phase_a"]` or `ev["scope"]`; checked before removing.
+
+**The test that could not have caught this now can.** The whole-function test's
+`driver.auth = make_auth(...)` overwrite is gone: it writes the scenario grant to
+disk and points the seam at it, so the constructor performs the same load the pod
+does. In the mutation run, *dropping `AUTHORIZATION_TYPE` is now killed by that
+test itself*.
+
+[`test_driver_authorization_wiring.py`](../tests/pod/test_driver_authorization_wiring.py)
+asserts on `driver.auth` **as the constructor left it**, never substituting one:
+the type, that the object carries the identity of the file at
+`AUTHORIZATION_PATH`, that the continuation plan is accepted and a Phase-A plan
+refused, that the evidence envelope is continuation-owned, and that no attribute
+`PhaseADriver.__init__` establishes is left unset — derived from the parent's
+**bytecode**, so a future parent addition cannot silently leave this driver
+short. It pins the same seam for all four `PhaseADriver`-derived drivers.
+
+**Five mutations, no survivors:** drop either override, point the path back at
+Phase A, validate against Phase A's plan, restore the Phase-A evidence schema.
+
 ## The seam was built for this subclass, and this subclass ignored it
 
 `PhaseADriver` exposes `AUTHORIZATION_TYPE` and `AUTHORIZATION_PATH` as class
@@ -81,7 +116,29 @@ never exercised the driver's own load path.
 Record: [`autoinit_continuation_b_attempt2.json`](autoinit_continuation_b_attempt2.json),
 evidence in [`autoinit_continuation_b_attempt2/`](autoinit_continuation_b_attempt2/).
 
-**The repair is not applied.** A third attempt needs a maintainer decision.
+## Verification of the repair
+
+| check | result |
+| --- | --- |
+| full suite | **2495 passed, 12 skipped, 0 failed** (27:19) |
+| frozen verifier | clean, no problems |
+| no-search / whole-function / calibration-boundary tests | green |
+| pre-provider gates | **6 of 6** against a candidate authorization built to a scratch path **outside** the repo |
+| `session_commit_and_lineage` | **defers** — it structurally requires the authorization *committed at the session commit*, which cannot exist before issuance |
+| executable digest | `746b9d68…` → `1bf97d7da6d183ec…` |
+| preregistration | `8335d149…` → `68cb7e898552388d…` |
+| the rest of the preregistration | **byte-identical** — it moved only because it binds the new executable |
+| frozen science / evidence / pricing | all unchanged, compared mechanically against `8398108` |
+| `194657Z` | permanently **CONSUMED** |
+
+**Nothing is issued and nothing is launched.** The repaired frozen commit is
+reported for review; the replacement authorization is minted only on the
+reviewer's go-ahead.
+
+Two minor findings, neither a blocker: `issue_continuation_b_authorization.py`
+crashes on a cosmetic `relative_to` when `--out` points outside the repo, *after*
+correctly writing the file; and `SESSION_LAUNCHERS` still omits the Phase-B and
+continuation launchers, as previously recorded.
 
 # ATTEMPT 1 REACHED THE POD AND STOPPED AT THE TEST GATE — $0.2513
 

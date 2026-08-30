@@ -1,6 +1,6 @@
 {
  "schema": "aadistill.current_state/v2",
- "generated_utc": "2026-08-29T21:02:53Z",
+ "generated_utc": "2026-08-30T08:19:25Z",
  "_contract": "The minimal machine-readable CURRENT snapshot: live facts only, no history, no per-attempt detail, no narrative. History lives in logs/decisions.md and the per-run directories; the human view is logs/STATE.md and the two must agree. Ownership: logs/CATALOG.md.",
  "baseline_commit": "b7c0099bfffc8962e4368917c59f8a9a8508d063",
  "baseline_commit_meaning": "The LAST TESTED IMPLEMENTATION: the commit whose tree produced the latest_verification figures (2461 passed / 12 skipped / 0 failed).",
@@ -48,17 +48,18 @@
   "phase_b_pricing": "HISTORICAL: floor $16.4555, ceiling $35.6660 \u2014 prices a P=2 search ALREADY BOUGHT.",
   "phase_b_stage1_selection_sha256": "84fd6496851995ae",
   "phase_b_identity": "amendment df413bd99119dab7, universe e94f15d2e648d86a, 6 distinct (8 assumed). Attempt-5 exec 3ad6a6e3edf1 / prereg 53f1347f6865: HISTORICAL, search bought.",
-  "continuation_b": "exec 746b9d689d056003 (62 files, set v3), plan a2ef4cd68a4bae7a, prereg 8335d1495e78d1a7, assets 1643145376ba19a2. 6 evidence candidates, 3 finalists, 3 searched non-survivors, 0 gate exclusions. Floor $5.4784, ceiling $8.0691. BIND IS NOT CONSUME: both calibration identities are bound as provenance and NEITHER mixture is staged \u2014 they are Phase-B search inputs. logs/autoinit_continuation_b_preregistration.json",
+  "continuation_b": "exec 1bf97d7da6d183ec (62 files, set v3), plan a2ef4cd68a4bae7a, prereg 68cb7e898552388d, assets 1643145376ba19a2. 6 evidence candidates, 3 finalists, 3 searched non-survivors, 0 gate exclusions. Floor $5.4784, ceiling $8.0691. BIND IS NOT CONSUME: both calibration identities bound as provenance, neither mixture staged. ContinuationDriver owns its constructor, authorization type/path and PLAN. logs/autoinit_continuation_b_preregistration.json",
   "phase_b_post_freeze": "exec digest moved 3d3b5d07 -> a043e2c7: shared SESSION_KIND dispatcher gained a continuation_b branch; Phase-B gate now accepts declared additive drift. 3 pre-existing branches byte-identical. Prereg NOT rewritten. logs/autoinit_phase_b_post_freeze_changes.json"
  },
  "latest_verification": {
-  "utc": "2026-08-29T21:02:53Z",
-  "after": "continuation attempt 2",
-  "full_suite": "2484 passed, 12 skipped, 0 failed at the launch commit 8398108",
-  "pod_gate": "PASSED on hardware \u2014 the attempt-1 repair held",
-  "gates": "7 of 7 pre-provider green in the real launcher",
+  "utc": "2026-08-30T08:19:25Z",
+  "after": "the ContinuationDriver constructor repair",
+  "full_suite": "2495 passed, 12 skipped, 0 failed in 27:19",
   "verifiers": "frozen assets clean",
-  "scope": "one paid pod, $0.3146, no scientific stage"
+  "gates": "6 of 6 green against a candidate authorization built to a SCRATCH path outside the repo; session_commit_and_lineage defers because it requires the authorization committed at the session commit",
+  "frozen_identities": "all unchanged vs 8398108, and the rest of the preregistration is byte-identical",
+  "mutations": "5 on the constructor repair, no survivors",
+  "scope": "CPU only; no GPU, no pod, $0"
  },
  "failure_pattern": "continuation 1-7: an uncaught transport call, an undeliverable asset, dev-box-only code in the pod gate, the attempt-12 OOM class, a checkpoint path, a checkpoint with no tokenizer, and finally a SUCCEEDING driver whose launcher crashed on a line only success reaches. Each failure was further in than the last. See logs/decisions.md",
  "abandoned": [
@@ -69,8 +70,8 @@
   "the paid device-canary session path: TERMINATED 2026-08-18, evidence kept, none prepared"
  ],
  "next_starting_point": {
-  "status": "PHASE_B_STAGE1_COMPLETE / BEHAVIOURAL_SELECTION_INCOMPLETE. Attempt 2 cleared setup and the pod test gate and died at driver stage 0 on an authorization type the driver never overrode. No scientific stage has ever run.",
-  "the_ask": "REVIEW the stage-0 defect and decide the driver-constructor repair, then whether to authorize a third attempt at ceiling $8.0691 against headroom $23.1391.",
+  "status": "PHASE_B_STAGE1_COMPLETE / BEHAVIOURAL_SELECTION_INCOMPLETE. Three defects found and closed on the way to a paid run: the inherited product contract, the pod test scope, and the driver constructor. Attempts 1-2 cost $0.5659 and bought no science.",
+  "the_ask": "REVIEW the repaired frozen commit. Funding is approved for exactly one further replacement attempt at ceiling $8.0691 against headroom $23.1391; the authorization is minted only on the go-ahead.",
   "budget": "cap $283.7600, spent $260.6209, headroom $23.1391. Continuation ceiling $8.0691 \u2014 NOT the historical $35.6660."
  },
  "read_order": [
@@ -122,6 +123,6 @@
  },
  "canonical_infrastructure_moved_to": "docs/SESSION_ARCHITECTURE.md and logs/decisions.md",
  "phase_b_state": "PHASE_B_STAGE1_COMPLETE / BEHAVIOURAL_SELECTION_INCOMPLETE",
- "blocker": "NEW, found on hardware at driver stage 0: ContinuationDriver overrides neither AUTHORIZATION_TYPE nor AUTHORIZATION_PATH, so on the pod it loads the committed Phase-A authorization. It is the ONLY PhaseADriver subclass that sets neither. Not a one-line fix: setting them moves the failure to super().__init__'s require_plan(PHASE_A_PLAN_V1), which a ContinuationAuthorization refuses. PhaseBDriver's shape is the precedent. logs/autoinit_continuation_b_attempt2.json",
+ "blocker": "none. Attempt 2's stage-0 defect is repaired: ContinuationDriver now owns AUTHORIZATION_TYPE/PATH/PLAN and does not call super().__init__. Awaiting reviewer go-ahead to issue the replacement authorization; nothing is issued and nothing is launched.",
  "failed_note": "per-attempt failure records live in the per-run directories and logs/decisions.md"
 }
