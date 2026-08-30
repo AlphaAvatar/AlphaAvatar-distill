@@ -1,6 +1,6 @@
 {
   "schema": "aadistill.autoinit.behavioural_continuation_pricing/v1",
-  "generated_utc": "2026-08-29T10:42:09.668278+00:00",
+  "generated_utc": "2026-08-30T14:28:04.689149+00:00",
   "_contract": "Prices ONLY the behavioural evidence Phase B still owes. Stage 1 is complete, retained and authoritative; it is not repriced here and must not be repurchased. NOT an authorization.",
   "hardware": {
     "name": "L40S",
@@ -14,6 +14,19 @@
     "status": "COMPLETE \u2014 not priced here",
     "why": "attempt 5 emitted search_result.json, an authoritative Top-5 and a durable Stage-1 selection artifact; all five checkpoints are retained on the dev box with re-derived identities",
     "selection_sha256": "84fd6496851995aef8ac624b68944c0881fdaf62a29013ea2aec5acb0e87a35c"
+  },
+  "sc_basis": {
+    "source": "logs/autoinit_continuation_b_corrected_rung2.json",
+    "decision_status": "tie_pending",
+    "tie_break_candidates": [
+      "fe9683e6a9c7",
+      "85bde4ded2c3"
+    ],
+    "already_held": [
+      "85bde4ded2c3",
+      "cca699c93f34"
+    ],
+    "rule": "only finalists inside the equivalence interval go to sc, and only those without a verified one are bought"
   },
   "universe": {
     "distinct_candidates": 6,
@@ -46,12 +59,9 @@
       "bf5ae3b6ae00/sa",
       "fe9683e6a9c7/sa"
     ],
-    "missing_sb": [
-      "fe9683e6a9c7"
-    ],
+    "missing_sb": [],
     "missing_sc_worst_case": [
-      "fe9683e6a9c7",
-      "control-qwen"
+      "fe9683e6a9c7"
     ],
     "note": "sc is CONDITIONAL: it runs only for candidates inside the frozen equivalence interval that lack a verified sc. The ceiling assumes it fires for all of them."
   },
@@ -77,13 +87,13 @@
   },
   "prerequisite_at_zero_cost": "`fe9683e6a9c7` is the only advancing checkpoint not already on the relay. Upload it dev-box -> relay BEFORE launching: no pod is running, so the 0.72 MB/s uplink costs nothing, and the pod then pulls it fast. Doing it with a pod up would bill ~28 min of L40S for a transfer that is free.",
   "total": {
-    "low_usd": 5.4784,
-    "low_probes": 1,
-    "hard_usd": 8.0691,
-    "hard_probes": 3,
-    "low_minutes": 150.21,
-    "hard_minutes": 307.22,
-    "note": "low = the tie-break never fires; hard = it fires for every advancing candidate lacking a verified sc. The HARD figure is the authorization ceiling. Neither is an expectation: no expected-value assumption over tie-break probability is defined anywhere."
+    "low_usd": 4.183,
+    "low_probes": 0,
+    "hard_usd": 5.4784,
+    "hard_probes": 1,
+    "low_minutes": 71.7,
+    "hard_minutes": 150.21,
+    "note": "low = every owed probe is already held; hard = every probe in `sc_basis` is bought. Once a rung-2 decision exists, that set is the TIE CANDIDATES lacking a verified sc, not every advancing candidate \u2014 the frozen rule sends only finalists inside the equivalence interval to seed sc. The HARD figure is the authorization ceiling. Neither is an expectation: no expected-value assumption over tie-break probability is defined anywhere."
   },
   "comparison": {
     "full_phase_b_ceiling_usd": 35.666,

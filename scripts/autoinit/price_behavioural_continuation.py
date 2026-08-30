@@ -47,6 +47,10 @@ from aadistill.autoinit.cost import L40S_MEASURED  # noqa: E402
 
 HISTORICAL = REPO_ROOT / "logs/autoinit_historical_probe_reuse.json"
 ATTEMPT5 = REPO_ROOT / "logs/autoinit_attempt5_probe_reuse.json"
+ATTEMPT4 = REPO_ROOT / "logs/autoinit_attempt4_probe_reuse.json"
+#: The recomputed rung-2 decision. When it exists it names exactly which sc
+#: probes are owed; without it the pricing books the worst case.
+CORRECTED_RUNG2 = REPO_ROOT / "logs/autoinit_continuation_b_corrected_rung2.json"
 AMENDMENT = REPO_ROOT / "logs/autoinit_phase_b_identity_collapse_amendment.json"
 
 #: Measured, not chosen: the slowest setup across attempts 3, 4 and 5 was
@@ -80,8 +84,18 @@ def evidence() -> dict:
             f"({fresh.get('failures')}). Run verify_attempt5_probe_reuse.py first; "
             "a continuation that cannot cite those three sa probes is a different, "
             "larger session.")
+    attempt4 = (json.loads(ATTEMPT4.read_text()) if ATTEMPT4.is_file()
+                else {"reusable_probes": [], "reuse_verified": True})
+    if not attempt4.get("reuse_verified"):
+        raise SystemExit(
+            "refusing to price: the Attempt-4 probe reconstruction is unverified "
+            f"({attempt4.get('failures')}). Run verify_attempt4_probe_reuse.py "
+            "first; without it the one sb probe Attempt 4 paid for would be "
+            "priced as if it had to be re-bought.")
     return {"historical": have, "attempt5": set(fresh["reusable_probes"]),
-            "all": have | set(fresh["reusable_probes"])}
+            "attempt4": set(attempt4["reusable_probes"]),
+            "all": have | set(fresh["reusable_probes"])
+                        | set(attempt4["reusable_probes"])}
 
 
 def price(hardware=L40S_MEASURED) -> dict:
@@ -93,7 +107,33 @@ def price(hardware=L40S_MEASURED) -> dict:
     advancing = [*survivors, control]
 
     missing_sb = [c for c in advancing if f"{c}/sb" not in ev["all"]]
-    missing_sc = [c for c in advancing if f"{c}/sc" not in ev["all"]]
+
+    # `sc` is owed to the TIE CANDIDATES, not to everything that advanced.
+    #
+    # The frozen rule sends only finalists INSIDE the equivalence interval to
+    # seed sc. Pricing every advancing candidate for one was harmless while the
+    # rung-2 decision did not exist yet — it over-booked, which is the safe
+    # direction. It is no longer harmless now that the decision DOES exist and
+    # names two candidates, one of which already holds its sc: booking three sc
+    # probes would price a session three times the size of the one that is owed.
+    #
+    # Read from the recomputed rung-2 artifact rather than recomputed here, so
+    # the price and the science cannot disagree about which probes are missing.
+    if CORRECTED_RUNG2.is_file():
+        corrected = json.loads(CORRECTED_RUNG2.read_text())
+        missing_sc = [s[:12] for s in corrected["sc_still_owed"]]
+        sc_basis = {
+            "source": "logs/autoinit_continuation_b_corrected_rung2.json",
+            "decision_status": corrected["decision_status"],
+            "tie_break_candidates": [s[:12] for s in
+                                     corrected["tie_break_candidates"]],
+            "already_held": [s[:12] for s in corrected["sc_already_held"]],
+            "rule": ("only finalists inside the equivalence interval go to sc, "
+                     "and only those without a verified one are bought")}
+    else:
+        missing_sc = [c for c in advancing if f"{c}/sc" not in ev["all"]]
+        sc_basis = {"source": "worst case — no rung-2 decision exists yet",
+                    "rule": "every advancing candidate priced for an sc"}
 
     unit = probe_cost(hardware.price_per_hour_usd)
     per_probe = unit["total_usd"]
@@ -127,6 +167,7 @@ def price(hardware=L40S_MEASURED) -> dict:
                     "and a durable Stage-1 selection artifact; all five checkpoints "
                     "are retained on the dev box with re-derived identities"),
             "selection_sha256": amendment["stage1_selection"]["selection_sha256"]},
+        "sc_basis": sc_basis,
         "universe": {
             "distinct_candidates": amendment["collapsed_universe"]["distinct_candidates"],
             "universe_identity": amendment["collapsed_universe"]["universe_identity"],
@@ -159,11 +200,14 @@ def price(hardware=L40S_MEASURED) -> dict:
             "hard_usd": hard["usd"], "hard_probes": hard["probes"],
             "low_minutes": low["minutes_with_contingency_and_recovery"],
             "hard_minutes": hard["minutes_with_contingency_and_recovery"],
-            "note": ("low = the tie-break never fires; hard = it fires for every "
-                     "advancing candidate lacking a verified sc. The HARD figure is "
-                     "the authorization ceiling. Neither is an expectation: no "
-                     "expected-value assumption over tie-break probability is "
-                     "defined anywhere.")},
+            "note": ("low = every owed probe is already held; hard = every probe "
+                     "in `sc_basis` is bought. Once a rung-2 decision exists, "
+                     "that set is the TIE CANDIDATES lacking a verified sc, not "
+                     "every advancing candidate — the frozen rule sends only "
+                     "finalists inside the equivalence interval to seed sc. The "
+                     "HARD figure is the authorization ceiling. Neither is an "
+                     "expectation: no expected-value assumption over tie-break "
+                     "probability is defined anywhere.")},
         "comparison": {
             "full_phase_b_ceiling_usd": 35.6660,
             "why_not_that": ("that ceiling books a 16.5 h P=2 search and ten probes. "

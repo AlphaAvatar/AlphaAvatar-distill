@@ -1,0 +1,54 @@
+{
+  "schema": "aadistill.autoinit.attempt4_probe_reuse/v1",
+  "generated_utc": "2026-08-30T14:20:32.325428+00:00",
+  "_contract": "Strict reconstruction of the ONE rung-2 `sb` probe Attempt 4 PAID for, to the same standard as the historical and Attempt-5 citations. Attempt 4's DECISION was withdrawn \u2014 the inherited pooling let a historical `sc` leak into the rung-2 comparison \u2014 but the probe is a valid finished measurement and must never be repurchased. Not an authorization.",
+  "why_the_decision_does_not_taint_the_probe": "the defect was in which records the selector pooled, not in how any single probe was trained, evaluated or scored. This record checks the probe against the checkpoint bytes, the frozen battery, the live scoring contract and the attested protocol \u2014 none of which the pooling defect touches.",
+  "source": "logs/autoinit_continuation_b_attempt4/probes",
+  "probes_dir_digest": "4d2ef1c9f113dbda339f2c430a9e6d461cea54d0b44933d449dff6154e2af793",
+  "attested_protocol_hash": "250f72efbd43b86a475e8dda293b45f07ee61a4d858e147f4a5bd7681c32c2e4",
+  "live_scoring_contract_digest": "808080a7c5d88d5a66760fd0d7eeabc5451c096ad0819f8c5663a0b8224660be",
+  "seed_sb": 20260801,
+  "n_probes": 1,
+  "reuse_verified": true,
+  "reusable_probes": [
+    "fe9683e6a9c7/sb"
+  ],
+  "failures": [],
+  "probes": [
+    {
+      "probe_id": "autoinit.v1.phase_a.rung2.fe9683e6a9c7.sb",
+      "candidate": "fe9683e6a9c7",
+      "seed": 20260801,
+      "rung": 2,
+      "checkpoint_dir": "/home/ecs-user/aad-artifacts/autoinit/phase_a/fe9683e6a9c783bbc6fe276a78c851c6",
+      "checks": {
+        "complete": true,
+        "seed_is_the_frozen_sb": true,
+        "rung_is_2": true,
+        "artifact_digest_re_derives_from_bytes": true,
+        "battery_is_recovery_search_v2": true,
+        "scoring_contract_matches_live": true,
+        "protocol_hash_matches_attested": true,
+        "carries_the_pooled_counts": true,
+        "no_conflicting_duplicate_observation": true
+      },
+      "reusable": true,
+      "failed": [],
+      "checkpoint_error": null,
+      "recomputed_artifact_digest": "c313d1b4081b9a3b410dddf7a29ebcaad8dd0759179d51e1d761238c1743a2a6",
+      "recorded_artifact_digest": "c313d1b4081b9a3b410dddf7a29ebcaad8dd0759179d51e1d761238c1743a2a6",
+      "correct": 3,
+      "n_scorable": 170,
+      "correct_overall": 0.0176,
+      "duplicate_records_for_this_state_and_seed": [
+        "autoinit.v1.phase_a.rung2.fe9683e6a9c7.sb.json"
+      ]
+    }
+  ],
+  "open_precondition": {
+    "what": "a later session's runtime must be comparable to Attempt 4's under generation_runtime_comparability@v2",
+    "why_not_checkable_now": "that session's runtime does not exist yet",
+    "checked_where": "Stage 0 of the eventual session, fail-closed",
+    "if_it_fails": "ALL cited behavioural evidence is lost at once, historical, Attempt-5 and Attempt-4 alike"
+  }
+}

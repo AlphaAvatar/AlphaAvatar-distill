@@ -83,6 +83,14 @@ HISTORICAL_REUSE = REPO / "logs/autoinit_historical_probe_reuse.json"
 ATTEMPT5_REUSE = REPO / "logs/autoinit_attempt5_probe_reuse.json"
 HISTORICAL_PROBES = REPO / "logs/autoinit_recovery_continuation_attempt7/probes"
 ATTEMPT5_PROBES = REPO / "logs/autoinit_phase_b_attempt5/probes"
+#: Attempt 4's ONE purchased probe, `fe9683e6a9c7/sb`. Its session's decision was
+#: withdrawn — the inherited pooling let a historical `sc` leak into the rung-2
+#: comparison — but the probe is a valid finished measurement of the right
+#: checkpoint on the right seed, strictly reconstructed by
+#: `scripts/autoinit/verify_attempt4_probe_reuse.py`. Citing it is what stops the
+#: next session paying ~72 min of L40S for evidence that already exists.
+ATTEMPT4_REUSE = REPO / "logs/autoinit_attempt4_probe_reuse.json"
+ATTEMPT4_PROBES = REPO / "logs/autoinit_continuation_b_attempt4/probes"
 
 CANONICAL_CONTROL = "control-qwen"
 
@@ -241,6 +249,11 @@ class ContinuationDriver(PhaseADriver):
         amendment = json.loads(AMENDMENT.read_text())
         historical = json.loads(HISTORICAL_REUSE.read_text())
         attempt5 = json.loads(ATTEMPT5_REUSE.read_text())
+        #: Attempt 4's reuse record is deliberately NOT bound here. `BOUND_EVIDENCE`
+        #: is the authorization's frozen evidence set, and adding a key to it would
+        #: change the grant schema and every preregistration that names it. The
+        #: record is instead required to be `reuse_verified` at the point it is
+        #: read, in `stage_import` — fail-closed, same effect, no identity moved.
         rung1 = amendment["rung1_selection"]
         from aadistill.infrastructure.manifest import sha256_json
 
@@ -283,6 +296,67 @@ class ContinuationDriver(PhaseADriver):
                 f"{EXPECTED_EVIDENCE_UNIVERSE}; the amendment this session cites "
                 "describes a different experiment")
         return collapsed
+
+    #: Which rungs each decision may pool. Phase A never needed this: its rung 3
+    #: could only exist AFTER rung 2 had decided, so "pool every completed rung"
+    #: and "pool sa+sb" were the same set at the moment rung 2 was formed.
+    #:
+    #: This session breaks that assumption. It IMPORTS historical evidence before
+    #: stage 3, and that evidence includes `85bde4ded2c3/sc` — a rung-3 record
+    #: sitting in the probe store while the rung-2 decision is being made. The
+    #: inherited `pooled_over_rungs` pooled it, so attempt 4 compared
+    #: `85bde4ded2c3` over sa+sb+sc (n=570) against `fe9683e6a9c7` and the
+    #: control over sa+sb (n=380). That is not a same-rung comparison, and the
+    #: `0.012745` margin it produced — which "resolved" the session and skipped
+    #: the tie-break — is not a quantity the frozen rule is defined over.
+    #:
+    #: On sa+sb alone the same evidence gives `0.032353` against `0.026471`, a
+    #: margin of `0.005882`, which is INSIDE the `0.011695` equivalence interval
+    #: and is therefore `tie_pending`.
+    RUNG2_ADMITTED = (1, 2)
+    TIE_BREAK_RUNG = 3
+
+    def pooled_over_rungs(self) -> list[dict]:
+        """Stage-aware pooling: `sc` must not leak backward into rung 2.
+
+        Two decisions call this, and they admit different evidence:
+
+        * **the rung-2 decision** (`stage3`, before `self.rung2` is assigned) —
+          `sa` and `sb` only. A historical `sc` may be physically present in the
+          store; it is invisible here.
+        * **the final decision** (`stage5`) — `sa` and `sb` for everyone, plus
+          `sc` for exactly the tie-break candidates the rung-2 result named. A
+          candidate that was never tied contributes no `sc`, whether or not one
+          exists on disk.
+
+        Deliberately keyed on `self.rung2 is None` rather than on a stage
+        argument: the parent calls this with no arguments from both places, and
+        an argument would have to be threaded through `stage3`/`stage5`
+        overrides that otherwise have no reason to exist.
+        """
+        finalists = set(self.rung1["advancing"])
+        records = [json.loads(p.read_text())
+                   for p in sorted((AUDIT / "probes").glob("*.json"))]
+        records = [r for r in records
+                   if r.get("complete") and r["state_id"] in finalists]
+
+        if self.rung2 is None:
+            kept = [r for r in records if r["rung"] in self.RUNG2_ADMITTED]
+            dropped = [r["probe_id"] for r in records
+                       if r["rung"] not in self.RUNG2_ADMITTED]
+            if dropped:
+                say(f"rung-2 decision pools sa+sb only; withheld {sorted(dropped)}")
+        else:
+            tied = set(self.rung2.get("tie_break_candidates") or ())
+            kept = [r for r in records
+                    if r["rung"] in self.RUNG2_ADMITTED
+                    or (r["rung"] == self.TIE_BREAK_RUNG
+                        and r["state_id"] in tied)]
+            admitted = sorted(r["probe_id"] for r in kept
+                              if r["rung"] == self.TIE_BREAK_RUNG)
+            say(f"final decision admits sc for {len(admitted)} tie candidate(s): "
+                f"{admitted}")
+        return self.selection_row(kept)
 
     def staged_checkpoint(self, candidate) -> Path:
         """Where the POD holds this finalist's bytes.
@@ -392,6 +466,8 @@ class ContinuationDriver(PhaseADriver):
         """
         historical = json.loads(HISTORICAL_REUSE.read_text())
         attempt5 = json.loads(ATTEMPT5_REUSE.read_text())
+        attempt4 = (json.loads(ATTEMPT4_REUSE.read_text())
+                    if ATTEMPT4_REUSE.is_file() else {"reusable_probes": []})
         if not historical.get("reuse_verified"):
             raise RecoveryAdmissionError(
                 "the historical reuse record is unverified; the continuation may "
@@ -401,8 +477,13 @@ class ContinuationDriver(PhaseADriver):
                 "the Attempt-5 reuse record is unverified; those three sa probes "
                 "would have to be re-bought, which is a larger session")
 
+        if ATTEMPT4_REUSE.is_file() and not attempt4.get("reuse_verified"):
+            raise RecoveryAdmissionError(
+                "the Attempt-4 reuse record exists but is unverified; its sb "
+                "probe would be silently re-bought")
         admitted = set(historical.get("admitted_reusable_probes") or ())
         admitted |= set(attempt5.get("reusable_probes") or ())
+        admitted |= set(attempt4.get("reusable_probes") or ())
         known = {c.state_id[:12] for c in
                  collapse([{"state_id": c["state_id"],
                             "artifact_digest": c["artifact_digest"], "role": r}
@@ -413,7 +494,7 @@ class ContinuationDriver(PhaseADriver):
         dest = AUDIT / "probes"
         dest.mkdir(parents=True, exist_ok=True)
         copied, skipped = [], []
-        for source in (HISTORICAL_PROBES, ATTEMPT5_PROBES):
+        for source in (HISTORICAL_PROBES, ATTEMPT5_PROBES, ATTEMPT4_PROBES):
             for path in sorted(source.glob("*.json")):
                 probe = json.loads(path.read_text())
                 probe_id = probe.get("probe_id", "")
