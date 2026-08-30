@@ -1,4 +1,4 @@
-**Updated:** 2026-08-30 · branch `main` · **PHASE_B COMPLETE — behavioural selection RESOLVED**
+**Updated:** 2026-08-30 · branch `main` · **PHASE_B BEHAVIOURAL SELECTION — TIE_PENDING, one probe owed**
 
 # Current state
 
@@ -8,65 +8,99 @@ not carry. If the two disagree, a structural test fails.
 
 **Nothing is running. Nothing is billing. Nothing is prepared for launch.**
 Pod `hyvp7dw3zkb1zk` was deleted at `13:16:42Z`; the provider confirms it gone
-and not billing, and the launcher, watchdog and poller are all stopped. Spend is
-`$262.3164` of the `$283.7600` cap, `$21.4436` remaining. **Nothing is
-authorized** — all four continuation grants are retired.
+and not billing. Spend is `$262.3164` of the `$283.7600` cap, `$21.4436`
+remaining. **Nothing is authorized** — all four continuation grants are retired.
 
-# THE BEHAVIOURAL CONTINUATION IS COMPLETE — resolved, $1.4680
+# THE ATTEMPT-4 DECISION IS WITHDRAWN — the state is TIE_PENDING
 
-`ALL_DONE`. Attempt 4 bought **one** probe —
-`autoinit.v1.phase_a.rung2.fe9683e6a9c7.sb`, the single mandatory missing
-observation — reused all eleven citations, and the frozen selector **resolved at
-the pooled `sa+sb` stage**, so no `sc` was bought and no fourth seed was reached.
+Attempt 4 reported `resolved / winner=fe9683e6a9c7`. **That decision is not
+accepted.** The probe it bought is valid and retained; the decision it computed
+was formed over evidence the frozen rule is not defined on.
 
-## The result
+## What went wrong
 
-**Winner: `fe9683e6a9c783bbc6fe276a78c851c6`.** Not the control.
-`decision_status: resolved`, `tie_break_ran: false`, report `7ced0ea6cdf70b1c`.
+The continuation **imports** completed evidence before stage 3, and that includes
+`85bde4ded2c3/sc`. The inherited `pooled_over_rungs` pools *every completed
+rung* — correct in Phase A, where rung 3 could only exist after rung 2 had
+decided. Here it produced an asymmetric comparison:
 
-| pooled `sa+sb` | usable_rollout | correct_overall | correct given usable | n |
-| --- | --- | --- | --- | --- |
-| **`fe9683e6a9c7`** | **0.7158** | **0.032353** | 0.041825 | 380 |
-| `85bde4ded2c3` | 0.5456 | 0.019608 | 0.033670 | 570 |
-| `control-qwen3_0p6b_init_v0` | 0.4947 | 0.008824 | 0.016304 | 380 |
-
-**Why no `sc`.** The margin over the runner-up is `0.012745`, which clears the
-preregistered equivalence interval `0.011695`. The frozen rule sends finalists
-*inside* the interval to seed `sc`; these were outside it, so the conditional
-rung correctly did not run.
-
-## How to read this, and how not to
-
-* **`usable_rollout` is the primary axis** and it separates cleanly — `0.7158`
-  against `0.5456` and `0.4947`. Report it with its components, never as one
-  score.
-* **Correctness is secondary and small.** Eleven correct out of 380 for the
-  winner; every arm including the control sits near the floor, exactly as in
-  Phase A. This is a **selection** signal under a fixed 0.86M probe, **not**
-  recovered-model capability.
-* **The margin is thin.** `0.012745` clears `0.011695` by `0.001050` — roughly
-  one additional correct sample. The rule was preregistered and applied as
-  frozen, and the separation should be read as narrow.
-* **It authorizes nothing further.** The result's own `no_followon` field: *"a
-  winner does not authorize full recovery, and unresolved_equivalence does not
-  authorize a fourth seed."*
-
-## What it cost, and what the earlier attempts bought
-
-Four launches, **$2.2614** total. Attempt 4 was `$1.4680` against the `$8.0691`
-ceiling — under the `$4.32` expectation, because only one of the three priced
-probes was needed. The three earlier attempts cost `$0.7934` between them and
-each closed a distinct defect that no `$0` check had caught:
-
-| attempt | $ | reached | defect closed |
+| withdrawn | rungs | n | correct_overall |
 | --- | --- | --- | --- |
-| 1 | 0.2513 | pod test gate | inherited product contract / pod test scope |
-| 2 | 0.3146 | driver stage 0 | constructor loaded the Phase-A authorization |
-| 3 | 0.2275 | stage 1 | finalist bytes read from the amendment's dev-box path |
-| 4 | 1.4680 | **ALL_DONE** | — |
+| `fe9683e6a9c7` | sa+sb | 380 | 0.032353 |
+| `85bde4ded2c3` | **sa+sb+sc** | **570** | 0.019608 |
+| control | sa+sb | 380 | 0.008824 |
 
-Records: [`autoinit_continuation_b_attempt4.json`](autoinit_continuation_b_attempt4.json)
-and the per-attempt files beside it.
+The `0.012745` margin that "resolved" the session is not a same-rung quantity.
+
+## The corrected decision
+
+Recomputed at `$0` from the same retained journals with `sa+sb` only, using the
+driver's own pooling and the **real** frozen `select_final_winner`:
+
+| pooled `sa+sb` | correct_overall | usable_rollout |
+| --- | --- | --- |
+| `fe9683e6a9c7` | **0.032353** (11/340) | 0.7158 |
+| `85bde4ded2c3` | **0.026471** (9/340) | 0.5632 |
+| control | **0.008824** (3/340) | 0.4947 |
+
+`margin = 0.005882` — **inside** the `0.011695` equivalence interval.
+
+> **`decision_status: tie_pending`, `winner: None`**
+> tie candidates `{fe9683e6a9c7, 85bde4ded2c3}`; control is outside the interval
+> and does not advance.
+
+Record: [`autoinit_continuation_b_corrected_rung2.json`](autoinit_continuation_b_corrected_rung2.json).
+
+## A wording correction
+
+Earlier reports here called `usable_rollout` the primary axis and leaned on it to
+describe the winner. **`correct_overall` is the frozen ranking and equivalence
+metric**; `usable_rollout` is a feasibility/behaviour axis reported alongside it
+and does **not** rank. The driver's own `axes` field already said so — the code
+was right and the prose was not. That `fe9683e6a9c7` also leads on
+`usable_rollout` is supporting evidence, not what selects it.
+
+## What is still owed
+
+**Exactly one observation: `fe9683e6a9c7/sc`.** `85bde4ded2c3/sc` already exists
+and is reused; no fourth seed, no `sa` rerun, no rung-1 recomputation, no search.
+
+Attempt 4's own `fe9683e6a9c7/sb` is strictly reconstructed by
+[`verify_attempt4_probe_reuse.py`](../scripts/autoinit/verify_attempt4_probe_reuse.py)
+and imported by the driver, so it can never be repurchased.
+
+## Re-priced for what is owed
+
+| | was | now |
+| --- | --- | --- |
+| floor | `$5.4784` | **`$4.1830`** |
+| hard ceiling | `$8.0691` | **`$5.4784`** |
+| max new probes | 3 | **1** |
+
+`sc` is priced for the **tie candidates** lacking a verified one, not for every
+advancing candidate. Over-booking was harmless before a rung-2 decision existed;
+it is not harmless now that one does.
+
+## The repair
+
+Pooling is stage-aware, local to `ContinuationDriver`: rung 2 admits rungs
+`(1, 2)` only, and the final decision admits `sc` for exactly the tie candidates.
+The withheld record is named in the run log rather than silently dropped.
+
+**10 tests from the real retained journals; 5 mutations, no survivors.** One
+survived the first pass — removing the attempt-4 import source killed nothing,
+because the reuse record proved the probe *citable* while nothing proved the
+driver *cites* it. A future session would have silently re-bought ~72 min of
+L40S. Closed by driving the real import.
+
+---
+
+# Superseded: what attempt 4 reported
+
+The full withdrawn result, its asymmetric table and the four-launch cost history
+are retained in
+[`autoinit_continuation_b_attempt4.json`](autoinit_continuation_b_attempt4.json)
+and the per-attempt records beside it.
 
 ---
 

@@ -810,16 +810,52 @@ def test_the_priced_probe_inventory_is_what_the_executable_actually_buys(
     resolved_driver, *_ = resolved
     tied_driver, *_ = tied
 
-    assert priced["evidence"]["missing_sb"] == ["fe9683e6a9c7"]
-    assert set(priced["evidence"]["missing_sc_worst_case"]) == {
-        "fe9683e6a9c7", CONTROL_COLLAPSED}
-    assert priced["total"]["low_probes"] == len(resolved_driver._trained), (
-        "the floor prices a different number of probes than the resolved-at-sb "
-        "path actually buys")
-    assert priced["total"]["hard_probes"] == len(tied_driver._trained), (
-        "the CEILING prices a different number of probes than the tie path "
-        "actually buys; a session can exceed a ceiling derived this way")
-    assert priced["total"]["hard_usd"] <= 8.0691
+    # --- what the REAL evidence still owes -------------------------------
+    #
+    # Attempt 4 bought `fe9683e6a9c7/sb`, and it is now a verified reusable
+    # citation, so no `sb` is missing. `sc` is owed to the TIE CANDIDATES
+    # lacking one, and `85bde4ded2c3/sc` already exists — so exactly one probe.
+    assert priced["evidence"]["missing_sb"] == []
+    assert priced["evidence"]["missing_sc_worst_case"] == ["fe9683e6a9c7"]
+    assert priced["sc_basis"]["decision_status"] == "tie_pending"
+    assert set(priced["sc_basis"]["tie_break_candidates"]) == {
+        "fe9683e6a9c7", "85bde4ded2c3"}
+    assert priced["total"]["low_probes"] == 0
+    assert priced["total"]["hard_probes"] == 1
+    assert priced["total"]["hard_usd"] < 8.0691, (
+        "the re-priced ceiling is not below the withdrawn three-probe one")
+
+    # --- what the EXECUTABLE buys, on its own terms -----------------------
+    #
+    # Deliberately NOT a count comparison against the pricing any more. The
+    # pricing is derived from the REAL reuse records; this fixture runs on toy
+    # checkpoints whose digests deliberately do not match them, so the driver
+    # correctly refuses to cite `fe9683e6a9c7/sb` here and re-buys it. Before
+    # the attempt-4 probe was retained the two numbers happened to coincide at
+    # 1, which made this assertion look stronger than it was.
+    #
+    # What is still worth asserting, and is fixture-independent, is the SHAPE of
+    # the purchase: the tie path buys only what it cannot cite, only for tie
+    # candidates, and never an `sa` or a search.
+    def rungs(trained):
+        return {t.split(".")[-1] for t in trained}
+
+    assert rungs(resolved_driver._trained) <= {"sb"}, resolved_driver._trained
+    assert rungs(tied_driver._trained) <= {"sb", "sc"}, tied_driver._trained
+    assert not [t for t in tied_driver._trained if ".sa" in t or "rung1" in t]
+    # Every `sc` bought belongs to a tie candidate OF THAT RUN. Stated against
+    # the driver's own rung-2 result rather than the real-world candidate set:
+    # the toy numbers differ from the real ones, so this fixture's tie set
+    # legitimately includes the control while the real one does not. The
+    # invariant — never probe outside the tie set — holds either way.
+    tie_ids = {c[:12] for c in tied_driver.rung2["tie_break_candidates"]}
+    bought_sc = [t for t in tied_driver._trained if t.endswith(".sc")]
+    assert bought_sc, "the tie path bought no sc; it is not exercising stage 4"
+    for probe in bought_sc:
+        assert any(c in probe for c in tie_ids), (
+            f"{probe} is an sc outside this run's tie candidates {sorted(tie_ids)}")
+    # And no candidate that already holds a verified sc is re-probed.
+    assert len(bought_sc) == len(set(bought_sc))
 
 
 # --- the launcher's operational envelope ------------------------------------
