@@ -1,9 +1,9 @@
 {
  "schema": "aadistill.current_state/v2",
- "generated_utc": "2026-08-30T19:04:42Z",
+ "generated_utc": "2026-08-30T19:27:08Z",
  "_contract": "The minimal machine-readable CURRENT snapshot: live facts only, no history, no per-attempt detail, no narrative. History lives in logs/decisions.md and the per-run directories; the human view is logs/STATE.md and the two must agree. Ownership: logs/CATALOG.md.",
- "baseline_commit": "b7c0099bfffc8962e4368917c59f8a9a8508d063",
- "baseline_commit_meaning": "The LAST TESTED IMPLEMENTATION: the commit whose tree produced the latest_verification figures (2461 passed / 12 skipped / 0 failed).",
+ "baseline_commit": "884acb04c3aca3a548f825b5011f562131d9d86c",
+ "baseline_commit_meaning": "The LAST TESTED IMPLEMENTATION: the commit whose tree produced the latest_verification figures (2524 passed / 12 skipped / 0 failed). Commits after it changed only logs and metadata -- no file in CONTINUATION_SOURCE_FILES_V2 -- so the tested implementation is unchanged.",
  "running": {
   "paid_compute": false,
   "pods": 0,
@@ -26,7 +26,7 @@
   "planning_floor_usd": 5.4784,
   "remaining_is_not_permission": true,
   "ledger": "logs/BUDGET_LEDGER.md",
-  "headroom_note": "Phase-B attempts 1-5 cost $30.0200; behavioural continuation attempts 1-4 cost $2.2614 and DELIVERED the result. Nothing further is funded.",
+  "headroom_note": "Phase-B attempts 1-5 cost $30.0200; behavioural continuation attempts 1-4 cost $2.2614. They did NOT deliver the Phase-B result: attempt 4 produced valid retained fe9683e6a9c7/sb, but its reported resolved winner was WITHDRAWN when the stage-aware pooling defect was found. Phase-B behavioural selection is TIE_PENDING and exactly one observation is owed, fe9683e6a9c7/sc. One reviewed one-use authorization at ceiling $5.4784 against headroom $21.4436 is the only approved next paid action; nothing is funded until it is issued.",
   "continuation_hard_ceiling_usd": 5.4784,
   "continuation_planning_floor_usd": 4.183
  },
@@ -48,7 +48,7 @@
   "phase_b_pricing": "HISTORICAL: floor $16.4555, ceiling $35.6660 \u2014 prices a P=2 search ALREADY BOUGHT.",
   "phase_b_stage1_selection_sha256": "84fd6496851995ae",
   "phase_b_identity": "amendment df413bd99119dab7, universe e94f15d2e648d86a, 6 distinct (8 assumed). Attempt-5 exec 3ad6a6e3edf1 / prereg 53f1347f6865: HISTORICAL, search bought.",
-  "continuation_b": "exec 20c37deb56bc31ea (62 files, set v3), SESSION PLAN v3 6d6f971364868d84, prereg 806b7e99c51b9dc5. Floor $4.1830, ceiling $5.4784, exactly ONE purchasable observation: fe9683e6a9c7/sc. Every sa, every sb and 85bde4ded2c3/sc are REUSE-ONLY and fail closed if missing. BOUND_EVIDENCE has 7 entries; attempt4_reuse_probes_dir_digest is now bound. logs/autoinit_continuation_b_preregistration.json",
+  "continuation_b": "exec a5ce6311789eb4cd (62 files, set v3), SESSION PLAN v3 6d6f971364868d84, prereg bd827d12b6607356. Floor $4.1830, ceiling $5.4784, exactly ONE purchasable observation: fe9683e6a9c7/sc. Every sa, every sb and 85bde4ded2c3/sc are REUSE-ONLY and fail closed if missing. BOUND_EVIDENCE has 7 entries; attempt4_reuse_probes_dir_digest is bound. logs/autoinit_continuation_b_preregistration.json",
   "phase_b_post_freeze": "exec digest moved 3d3b5d07 -> a043e2c7: shared SESSION_KIND dispatcher gained a continuation_b branch; Phase-B gate now accepts declared additive drift. 3 pre-existing branches byte-identical. Prereg NOT rewritten. logs/autoinit_phase_b_post_freeze_changes.json",
   "continuation_b_result": "TIE_PENDING \u2014 see phase_b_result. Attempt 4's decision is WITHDRAWN; its fe9683e6a9c7/sb probe is retained, strictly reconstructed and authorization-bound."
  },
