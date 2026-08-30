@@ -42,11 +42,34 @@ sys.path.insert(0, str(REPO / "src"))
 sys.path.insert(0, str(REPO / "scripts/pod"))
 sys.path.insert(0, str(REPO / "scripts/autoinit"))
 
-#: A real, valid continuation authorization to construct against. The live one
-#: is retired after every attempt, so the fixture is a retired artifact — which
-#: is the point: it is a genuine `ContinuationAuthorization` on disk, not a stub.
-FIXTURE_AUTH = (REPO / "logs/superseded"
-                / "autoinit_continuation_b_authorization_20260829T194657Z_CONSUMED.json")
+#: A real, valid continuation authorization to construct against.
+#:
+#: Built from the LIVE plan hash rather than read from a retired artifact. The
+#: first version of this fixture used the retired `194657Z` grant, which binds
+#: session plan v2; when the plan moved to v3 the constructor correctly refused
+#: it and five tests errored on a stale fixture rather than on a defect. A
+#: fixture that goes stale whenever the thing it tests moves is a fixture that
+#: will eventually be "fixed" by weakening the check.
+#:
+#: It is still a genuine `ContinuationAuthorization` written to disk and parsed
+#: by the real loader — nothing here is a stub.
+def fixture_auth_payload() -> dict:
+    from aadistill.autoinit.phase_b_continuation import (
+        BOUND_EVIDENCE, CONTINUATION_PLAN_V1, ContinuationAuthorization,
+    )
+
+    return ContinuationAuthorization(
+        authorization_id="autoinit.continuation_b.FIXTURE",
+        granted_utc="2026-08-31T00:00:00Z", granted_by="wiring regression",
+        plan_id=CONTINUATION_PLAN_V1.plan_id,
+        plan_hash=CONTINUATION_PLAN_V1.plan_hash,
+        science_plan_hash="0" * 64,
+        calibration_profile_hashes={}, calibration_content_hashes={},
+        bound_evidence={k: f"{i:064d}" for i, k in enumerate(BOUND_EVIDENCE)},
+        planning_floor_usd=4.1830, hard_cap_usd=5.4784,
+        per_launch_hard_usd=5.4784, authorized_stages=(0, 1, 3, 4, 5),
+        stage_conditions={}, scope_note="wiring regression fixture",
+        source_digest="0" * 64).as_dict()
 
 
 def load(name: str):
@@ -77,7 +100,8 @@ def constructed(tmp_path, monkeypatch):
     mod = load("autoinit_continuation_b_driver")
     repo = tmp_path / "repo"
     (repo / "logs").mkdir(parents=True)
-    shutil.copy(FIXTURE_AUTH, repo / mod.ContinuationDriver.AUTHORIZATION_PATH)
+    (repo / mod.ContinuationDriver.AUTHORIZATION_PATH).write_text(
+        json.dumps(fixture_auth_payload()))
     monkeypatch.setattr(mod, "REPO", repo)
     monkeypatch.setattr(mod, "AUDIT", tmp_path / "audit")
     return mod, mod.ContinuationDriver(Args())
@@ -103,7 +127,7 @@ def test_it_came_from_the_continuation_authorization_path(constructed):
             == "logs/autoinit_continuation_b_authorization.json")
     # Not merely declared — the object carries the fixture's own identity, so the
     # constructor demonstrably read THAT file.
-    fixture = json.loads(FIXTURE_AUTH.read_text())
+    fixture = fixture_auth_payload()
     assert driver.auth.authorization_id == fixture["authorization_id"]
     assert driver.auth.hard_cap_usd == fixture["hard_cap_usd"]
 
@@ -182,7 +206,8 @@ def test_the_mutation_that_caused_attempt_2_is_caught(tmp_path, monkeypatch):
 
     repo = tmp_path / "repo"
     (repo / "logs").mkdir(parents=True)
-    shutil.copy(FIXTURE_AUTH, repo / mod.ContinuationDriver.AUTHORIZATION_PATH)
+    (repo / mod.ContinuationDriver.AUTHORIZATION_PATH).write_text(
+        json.dumps(fixture_auth_payload()))
     shutil.copy(REPO / "logs/autoinit_phase_a_authorization.json",
                 repo / "logs/autoinit_phase_a_authorization.json")
     monkeypatch.setattr(mod, "REPO", repo)

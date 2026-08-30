@@ -1,6 +1,6 @@
 {
   "schema": "aadistill.autoinit.continuation_b_preregistration/v1",
-  "generated_utc": "2026-08-30T14:28:05.681719+00:00",
+  "generated_utc": "2026-08-30T16:27:19.921051+00:00",
   "status": "FROZEN BEFORE ANY BEHAVIOURAL-CONTINUATION RESULT EXISTS. Not an authorization, not a grant, and not an instruction to launch.",
   "what_this_session_is": "Phase-B Stage 1 is COMPLETE. Attempt 5 ran the joint P=2 search to completion, emitted an authoritative Top-5 and a durable Stage-1 selection artifact, and paid for three rung-1 sa probes. It then died on a candidate-universe collision that the identity-collapse amendment resolves, and rung 1 was completed at $0 from retained evidence. What remains is behavioural: one missing sb, and at most two conditional sc. This session buys ONLY that.",
   "what_this_session_must_not_do": [
@@ -99,6 +99,13 @@
         "bf5ae3b6ae00/sa",
         "fe9683e6a9c7/sa"
       ]
+    },
+    "attempt4_record": {
+      "probes_dir_digest": "4d2ef1c9f113dbda339f2c430a9e6d461cea54d0b44933d449dff6154e2af793",
+      "admitted": [
+        "fe9683e6a9c7/sb"
+      ],
+      "why_bound": "Attempt 4 purchased fe9683e6a9c7/sb. Without it the session no longer holds complete sa+sb, so it is authorization-bound like the other two rather than trusted via reuse_verified inside its own record"
     }
   },
   "stage1_evidence": {
@@ -107,7 +114,7 @@
     "top_n": 5
   },
   "executable_source": {
-    "digest": "08901a03fb4d19b0fb0cee62f4284a86c94d8c3e85a9b15144f7bcd45df8156e",
+    "digest": "20c37deb56bc31ea3cebabe9993f8d02c22eb0eab64cbab435c97ae60d1c4210",
     "set_version": 3,
     "n_files": 62,
     "derivation": "the REAL import closure of the continuation driver and launcher, plus three subprocess-invoked runtime files. NOT curated: it therefore includes search.py, ranking.py and the operator modules, which the package __init__ loads for every consumer. What source is LOADED and what operation is PERMITTED are separate claims and are recorded separately."
@@ -135,8 +142,8 @@
   },
   "session_plan": {
     "plan_id": "autoinit.v1.phase_b_behavioural_continuation",
-    "plan_hash": "a2ef4cd68a4bae7a0de399b078ad99e41e23ae8448b2871b0c3f381d687703cf",
-    "version": 2,
+    "plan_hash": "6d6f971364868d84d0fb05c8fd1a87d11b2e7a6ac5876191714af2a8aa96aa5e",
+    "version": 3,
     "stages": [
       0,
       1,
@@ -177,5 +184,5 @@
     "winner=None with unresolved_equivalence \u2014 a RESULT, not a failure"
   ],
   "not_authorized": "No continuation grant or authorization exists, no cumulative-budget increase has been requested, and this document does not request one. It records what the session would do if one were issued.",
-  "preregistration_sha256": "b64231ee283e4668b9171245ae2c63483277a52ea0401fe2d54b1d8a401fd4f6"
+  "preregistration_sha256": "806b7e99c51b9dc5b44fd70ca3be084d278f21607e987f3b951dfbdcf248636f"
 }

@@ -5,11 +5,12 @@
 
 Phase-B Stage 1 is complete: attempt 5 emitted an authoritative Top-5, a durable
 Stage-1 selection artifact and a retained journal, and rung 1 was finished at `$0`
-under the identity-collapse amendment. This session buys **one missing `sb`** and
-**at most two conditional `sc`** — one to three probes against the ten a full
+under the identity-collapse amendment. Attempt 4 then bought the last missing
+`sb`, and its withdrawn decision was recomputed to `tie_pending`. This session
+buys **exactly one observation — `fe9683e6a9c7/sc`** — against the ten a full
 Phase B books, and no search at all.
 
-Three things keep that honest.
+Four things keep that honest.
 
 **A different authorization type.** `ContinuationAuthorization.runs_search` is
 `False` by type — there is no field to set — so a continuation grant cannot
@@ -24,6 +25,12 @@ missing, and the launcher refuses if the two are confused.
 continuation runs and deliberately excludes the search, the operators and the
 ranking policy: this session runs none of them, and a digest covering them would
 imply it might.
+
+**A scope, not just a budget.** `$5.4784` funds one probe of any kind, so a
+ceiling alone would let the session buy a replacement `sb` instead of the owed
+`sc` and report success. `workload_scope_gate` requires the priced probe count,
+the launcher's booked probes and the driver's `PURCHASABLE` whitelist to agree,
+and the driver refuses at the purchase seam itself.
 """
 
 from __future__ import annotations
@@ -331,6 +338,65 @@ def continuation_price_gate(ctx: SessionContext) -> tuple[bool, str]:
                   f"${priced:.4f} and is below the full-session ${full_phase_b:.4f}")
 
 
+def workload_scope_gate(ctx: SessionContext) -> tuple[bool, str]:
+    """The executable's scientific scope must equal what was priced.
+
+    A dollar ceiling does not bound science. `$5.4784` funds one probe of any
+    kind, so a session that quietly bought a replacement `sb` instead of the owed
+    `sc` would stay inside its budget and report success. This gate compares
+    three independent statements of the same scope and requires them to agree:
+
+    * the **pricing artifact** — `hard_probes`, derived from the reuse records
+      and the recomputed rung-2 decision;
+    * the **launcher's runtime budget** — `rung2_probes + tie_break_probes`,
+      which is what the plan actually books;
+    * the **driver's purchase whitelist** — `PURCHASABLE`, which is what the
+      executable can physically buy.
+
+    Widening any one of them alone fails here, at `$0`.
+    """
+    sys.path.insert(0, str(REPO_ROOT / "scripts/pod"))
+    try:
+        from autoinit_continuation_b_driver import ContinuationDriver
+    except Exception as exc:                                    # noqa: BLE001
+        return False, f"the continuation driver does not import: {exc}"
+
+    if not PRICING.is_file():
+        return False, f"{PRICING.name} is missing; the priced scope is unknown"
+    priced = json.loads(PRICING.read_text())
+    hard_probes = priced["total"]["hard_probes"]
+    booked = ctx.args.rung2_probes + ctx.args.tie_break_probes
+    purchasable = list(ContinuationDriver.PURCHASABLE)
+
+    ctx.evidence.setdefault("precheck", {})["workload_scope"] = {
+        "priced_hard_probes": hard_probes, "booked_probes": booked,
+        "purchasable": [f"{c}/rung{r}" for c, r in purchasable],
+        "missing_sb": priced["evidence"]["missing_sb"],
+        "missing_sc": priced["evidence"]["missing_sc_worst_case"]}
+
+    if booked != hard_probes:
+        return False, (
+            f"the launcher books {booked} probe(s) "
+            f"(rung2={ctx.args.rung2_probes} + tie_break={ctx.args.tie_break_probes}) "
+            f"but the pricing authorizes {hard_probes}. A ceiling derived from "
+            "one number and a workload derived from another is how a session "
+            "buys something it was not priced for.")
+    if len(purchasable) != hard_probes:
+        return False, (
+            f"the driver may purchase {len(purchasable)} observation(s) "
+            f"{[f'{c}/rung{r}' for c, r in purchasable]} against {hard_probes} "
+            "priced; the executable's scope and the price disagree")
+    owed = set(priced["evidence"]["missing_sc_worst_case"])
+    named = {c for c, _ in purchasable}
+    if named != owed:
+        return False, (
+            f"the driver may buy {sorted(named)} but the evidence says "
+            f"{sorted(owed)} is owed; the executable would purchase a different "
+            "observation from the one that is missing")
+    return True, (f"scope agrees: {hard_probes} priced, {booked} booked, "
+                  f"purchasable {[f'{c}/rung{r}' for c, r in purchasable]}")
+
+
 def driver_command(ctx: SessionContext, plan) -> str:
     return (f"/opt/train/bin/python "
             f"{REPO}/scripts/pod/autoinit_continuation_b_driver.py "
@@ -423,6 +489,7 @@ def spec(args) -> SessionSpec:
             no_search_gate,
             evidence_binding_gate,
             continuation_price_gate,
+            workload_scope_gate,
             continuation_artifact_capacity_gate,
         ),
         evidence_fields={
@@ -447,7 +514,12 @@ def build_parser() -> argparse.ArgumentParser:
     ap = phase_a_parser()
     ap.set_defaults(out="logs/autoinit_continuation_b_session.json",
                     disk_gb=120,
-                    rung1_probes=0, rung2_probes=1, tie_break_probes=2,
+                    #: The corrected scientific inventory, not the old worst
+                    #: case. No `sb` is missing — Attempt 4 bought the last one —
+                    #: and `85bde4ded2c3/sc` is retained, so the tie-break owes
+                    #: exactly one probe. `workload_scope_gate` requires this to
+                    #: agree with the pricing artifact.
+                    rung1_probes=0, rung2_probes=0, tie_break_probes=1,
                     poll_limit_min=None,
                     scr=str(DEFAULT_SCRATCH_ROOT / "autoinit-continuation-b"))
     # `set_defaults` does not clear `required`, and Phase A declares `--scr`

@@ -3,8 +3,13 @@
 Phase-B attempt 5 completed Stage 0 and the joint P=2 search, emitted an
 authoritative Top-5 and a durable Stage-1 selection artifact, and ran three
 rung-1 `sa` probes. It then failed on a candidate-universe collision that the
-identity-collapse amendment resolves. What is left is small: **one missing `sb`,
-and at most two conditional `sc`**.
+identity-collapse amendment resolves.
+
+Attempt 4 then purchased the one missing `sb` and reached a terminal result whose
+DECISION was withdrawn — the inherited pooling let an imported `sc` into the
+rung-2 comparison. The corrected decision, recomputed from the same retained
+evidence with `sa+sb` alone, is `tie_pending`. So what is left is now exactly
+**one observation: `fe9683e6a9c7/sc`**. Everything else is retained and cited.
 
 Running the full Phase-B session again to reach them would repurchase a 16.5 h
 search that is already bought and already retained. So this is a different
@@ -20,8 +25,8 @@ import closure never reaches `phase_a_search`.
 
 What it imports instead is evidence, and it refuses to start if any of it has
 moved: the Attempt-5 Stage-1 selection, the identity-collapse amendment, the
-six-candidate universe identity, both strict reuse records, and the frozen
-rung-1 result.
+six-candidate universe identity, all THREE strict reuse records — historical,
+Attempt-5 `sa` and Attempt-4 `sb` — and the frozen rung-1 result.
 """
 
 from __future__ import annotations
@@ -49,6 +54,17 @@ BOUND_EVIDENCE = (
     "collapsed_universe_identity",
     "historical_reuse_probes_dir_digest",
     "attempt5_reuse_probes_dir_digest",
+    #: Attempt 4's purchased `fe9683e6a9c7/sb`.
+    #:
+    #: It was briefly imported by the runtime but NOT bound here, on the reasoning
+    #: that `reuse_verified` inside the record was enough. It is not: that field
+    #: says the record verified when it was written, and nothing then stops the
+    #: record being edited, regenerated or removed between issuance and execution.
+    #: The other two reuse digests are bound for exactly that reason and this one
+    #: is now load-bearing in the same way — without it the session no longer has
+    #: complete `sa+sb`, because Attempt 4's probe IS the `fe9683e6a9c7/sb`
+    #: observation.
+    "attempt4_reuse_probes_dir_digest",
     "rung1_selection_digest",
 )
 
@@ -60,9 +76,21 @@ BOUND_EVIDENCE = (
 #: There is no stage 2, and its absence is the point: Phase A's stage 2 is rung 1
 #: on seed `sa`, which this session IMPORTS as completed evidence rather than
 #: buying. A gap in the numbering is the honest way to say that.
+#: **Version 3 narrows the operational scope to what is actually owed.**
+#:
+#: Version 2 described "one missing `sb` and at most two conditional `sc`". That
+#: was the state before Attempt 4 ran. Attempt 4 purchased `fe9683e6a9c7/sb`, and
+#: the corrected rung-2 decision — `tie_pending` over `sa+sb` alone — names two
+#: tie candidates of which one already holds a verified `sc`. Exactly one new
+#: observation remains: `fe9683e6a9c7/sc`.
+#:
+#: Keeping version 2 would authorize work now explicitly forbidden: a replacement
+#: `sb`, a second `sc`, and a repurchase of any retained observation. The frozen
+#: RECOVERY SCIENCE plan is untouched — this is the session's operational scope,
+#: not its science.
 CONTINUATION_PLAN_V1 = PreflightPlan(
     plan_id="autoinit.v1.phase_b_behavioural_continuation",
-    version=2,
+    version=3,
     stages=(
         PreflightStage(
             stage=0, name="attestation, comparability and evidence binding",
@@ -76,7 +104,8 @@ CONTINUATION_PLAN_V1 = PreflightPlan(
                   "source digest matches the grant; the Attempt-5 Stage-1 "
                   "selection, identity-collapse amendment, six-candidate universe "
                   "identity, historical reuse record, Attempt-5 fresh-sa reuse "
-                  "record and frozen rung-1 result all match. A comparability "
+                  "record, Attempt-4 fresh-sb reuse record "
+                  "and frozen rung-1 result all match. A comparability "
                   "failure TERMINATES: every cited observation would be lost at "
                   "once, and re-buying them is a different, larger session",)),
         PreflightStage(
@@ -92,24 +121,31 @@ CONTINUATION_PLAN_V1 = PreflightPlan(
                   "purchased, and no searched non-survivor is materialized",)),
         # No stage 2. Phase A's stage 2 is rung 1 on sa; this session imports it.
         PreflightStage(
-            stage=3, name="rung 2 on seed sb, then the frozen pooled decision",
+            stage=3, name="rung 2 from retained sa+sb evidence — REUSE ONLY",
             blocking=True,
-            purpose=("buy the sb evidence that does not exist, cite the sb "
-                     "evidence that does, and apply the frozen equivalence and "
-                     "final-selection rule unchanged to the pooled two seeds"),
+            purpose=("cite every sa and sb observation from retained evidence and "
+                     "apply the frozen equivalence and final-selection rule "
+                     "unchanged to the pooled two seeds. NOTHING is purchased "
+                     "here: all sa and sb evidence exists"),
             produces=("stage record", "rung2_selection.json"),
-            stop_conditions=("every advancing candidate has an sb observation; each was "
-                  "either strictly reconstructed from retained evidence or newly "
-                  "run here, and no (initialization, seed) contributes twice; the "
-                  "decision comes from the frozen implementation and a tie_pending "
-                  "names exactly which candidates lack a verified sc",)),
+            stop_conditions=("every advancing candidate has an sb observation and every "
+                  "one of them was strictly reconstructed from retained evidence; "
+                  "a missing or non-binding sa or sb FAILS CLOSED and is never "
+                  "repurchased; no (initialization, seed) contributes twice; the "
+                  "pooled decision admits sa and sb ONLY, so an imported sc cannot "
+                  "leak backward into it",)),
         PreflightStage(
-            stage=4, name="conditional tie-break on seed sc", blocking=False,
-            purpose=("resolve candidates inside the preregistered equivalence "
-                     "interval after two seeds — only those, and only where no "
-                     "verified sc already exists"),
+            stage=4, name="the one owed observation: fe9683e6a9c7/sc",
+            blocking=False,
+            purpose=("purchase the single missing tie-break observation. "
+                     "85bde4ded2c3/sc is retained and is cited, not re-run; the "
+                     "control is outside the equivalence interval and is not "
+                     "probed"),
             produces=("stage record",),
-            stop_conditions=("no fourth seed, ever",)),
+            stop_conditions=("at most ONE descriptor reaches the probe trainer, and it is "
+                  "fe9683e6a9c7 on the tie-break seed; a missing or non-binding "
+                  "retained 85bde4ded2c3/sc FAILS CLOSED and is never "
+                  "repurchased; no fourth seed, ever",)),
         PreflightStage(
             stage=5, name="final selection and report", blocking=True,
             purpose=("emit the terminal cross-phase result under the frozen "

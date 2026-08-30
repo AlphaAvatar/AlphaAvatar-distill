@@ -40,6 +40,7 @@ ASSETS = REPO_ROOT / "logs/autoinit_continuation_b_assets.json"
 SELECTION = REPO_ROOT / "logs/autoinit_phase_b_attempt5/stage1_selection.json"
 HISTORICAL = REPO_ROOT / "logs/autoinit_historical_probe_reuse.json"
 ATTEMPT5 = REPO_ROOT / "logs/autoinit_attempt5_probe_reuse.json"
+ATTEMPT4 = REPO_ROOT / "logs/autoinit_attempt4_probe_reuse.json"
 FROZEN = REPO_ROOT / "logs/autoinit_phase_a_recovery_plan_frozen.json"
 
 FULL_PHASE_B_CEILING_USD = 35.6660
@@ -52,6 +53,7 @@ def build() -> dict:
     selection = json.loads(SELECTION.read_text())
     historical = json.loads(HISTORICAL.read_text())
     attempt5 = json.loads(ATTEMPT5.read_text())
+    attempt4 = json.loads(ATTEMPT4.read_text())
     frozen = json.loads(FROZEN.read_text())
     science = frozen.get("plan_hash") or frozen["plan"]["plan_hash"]
     rung1 = amendment["rung1_selection"]
@@ -180,6 +182,14 @@ def build() -> dict:
             "attempt5_record": {
                 "probes_dir_digest": attempt5["probes_dir_digest"],
                 "admitted": sorted(attempt5["reusable_probes"])},
+            "attempt4_record": {
+                "probes_dir_digest": attempt4["probes_dir_digest"],
+                "admitted": sorted(attempt4["reusable_probes"]),
+                "why_bound": (
+                    "Attempt 4 purchased fe9683e6a9c7/sb. Without it the session "
+                    "no longer holds complete sa+sb, so it is authorization-bound "
+                    "like the other two rather than trusted via reuse_verified "
+                    "inside its own record")},
         },
         "stage1_evidence": {
             "status": "COMPLETE — imported, never re-purchased",

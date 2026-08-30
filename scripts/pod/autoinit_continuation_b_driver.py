@@ -3,17 +3,24 @@
 
 Attempt 5 completed Stage 0 and the joint P=2 search, emitted an authoritative
 Top-5 and a durable Stage-1 selection, and ran three rung-1 `sa` probes. Rung 1
-was then completed at `$0` under the identity-collapse amendment. What remains is
-**one missing `sb`** and **at most two conditional `sc`**.
+was then completed at `$0` under the identity-collapse amendment. Attempt 4 bought
+the last missing `sb`, and its decision was withdrawn and recomputed to
+`tie_pending` over `sa+sb` alone. What remains is **exactly one observation:
+`fe9683e6a9c7/sc`**.
 
 So this driver imports the completed state instead of recomputing it:
 
     stage 0  attestation, comparability, and every cited identity re-checked
     stage 1  import the completed behavioural state — NO search, NO new sa
-    stage 2  rung 2 on sb: buy only what does not exist
-    stage 3  the frozen pooled sa+sb decision, unchanged
-    stage 4  conditional sc, only where no verified sc exists
+    stage 3  the frozen pooled sa+sb decision from RETAINED evidence only
+    stage 4  the one owed observation: fe9683e6a9c7/sc
     stage 5  the frozen final selection and report
+
+There is no stage 2: Phase A's stage 2 is rung 1 on `sa`, which this session
+imports. Every `sa` and `sb`, and `85bde4ded2c3/sc`, are reuse-only — a missing
+or non-binding one FAILS CLOSED rather than being repurchased, because a
+replacement is a different measurement from the one the decision was computed
+over. `PURCHASABLE` names the single descriptor that may reach the trainer.
 
 **Why this is a separate driver and not a `--skip-search` flag.** A flag leaves a
 16.5 h purchase one mistake away, and this project has paid four times for code
@@ -249,11 +256,14 @@ class ContinuationDriver(PhaseADriver):
         amendment = json.loads(AMENDMENT.read_text())
         historical = json.loads(HISTORICAL_REUSE.read_text())
         attempt5 = json.loads(ATTEMPT5_REUSE.read_text())
-        #: Attempt 4's reuse record is deliberately NOT bound here. `BOUND_EVIDENCE`
-        #: is the authorization's frozen evidence set, and adding a key to it would
-        #: change the grant schema and every preregistration that names it. The
-        #: record is instead required to be `reuse_verified` at the point it is
-        #: read, in `stage_import` — fail-closed, same effect, no identity moved.
+        #: Attempt 4's reuse record IS bound. It was briefly
+        #: left unbound on the reasoning that `reuse_verified` inside the record
+        #: was enough — it is not. That field records what was true when the
+        #: record was written, and nothing stops the record being edited,
+        #: regenerated or deleted between issuance and execution. This digest is
+        #: now load-bearing in the same way the other two are: without Attempt 4's
+        #: probe the session no longer holds complete `sa+sb`.
+        attempt4 = json.loads(ATTEMPT4_REUSE.read_text())
         rung1 = amendment["rung1_selection"]
         from aadistill.infrastructure.manifest import sha256_json
 
@@ -264,6 +274,7 @@ class ContinuationDriver(PhaseADriver):
                 amendment["collapsed_universe"]["universe_identity"],
             "historical_reuse_probes_dir_digest": historical["probes_dir_digest"],
             "attempt5_reuse_probes_dir_digest": attempt5["probes_dir_digest"],
+            "attempt4_reuse_probes_dir_digest": attempt4["probes_dir_digest"],
             "rung1_selection_digest": sha256_json({
                 "selected_searched": rung1["selected_searched"],
                 "auto_advanced_control": rung1["auto_advanced_control"],
@@ -357,6 +368,61 @@ class ContinuationDriver(PhaseADriver):
             say(f"final decision admits sc for {len(admitted)} tie candidate(s): "
                 f"{admitted}")
         return self.selection_row(kept)
+
+    #: The ONE observation this session may purchase: `(candidate, rung)`.
+    #:
+    #: Everything else is retained and must be cited. `sa` is complete for all six
+    #: evidence candidates; `sb` is complete for all three finalists — Attempt 4
+    #: bought the last one — and `85bde4ded2c3/sc` exists from the Phase-A
+    #: continuation. The corrected rung-2 decision is `tie_pending` over two
+    #: candidates, one of which already holds its `sc`.
+    #:
+    #: Expressed as a purchase whitelist rather than as a probe COUNT, because a
+    #: count is satisfied by buying the wrong probe. The dollar ceiling is not a
+    #: scientific scope either: `$5.4784` would comfortably fund one replacement
+    #: `sb` instead of the owed `sc`, and the session would report success.
+    PURCHASABLE = (("fe9683e6a9c7", 3),)
+
+    def require_purchasable(self, descriptor: dict) -> None:
+        """Refuse to buy anything but the single owed observation.
+
+        Called from `probe_config`, which the inherited `run_probe` reaches if
+        and only if `restore_probe` returned nothing — i.e. exactly when a probe
+        is about to be TRAINED. A descriptor that could be cited never arrives
+        here, so this cannot suppress reuse; it can only stop a purchase.
+
+        The failure is deliberately loud and terminal. A retained observation
+        that has gone missing or stopped binding is a corrupted-evidence
+        condition, not a reason to spend an hour of L40S regenerating it: the
+        regenerated probe would not be the observation the frozen decision was
+        computed over.
+        """
+        probe_id = descriptor["probe_id"]
+        rung = descriptor.get("rung")
+        allowed = any(candidate in probe_id and rung == r
+                      for candidate, r in self.PURCHASABLE)
+        if allowed:
+            return
+        owed = ", ".join(f"{c}/rung{r}" for c, r in self.PURCHASABLE) or "(nothing)"
+        raise RecoveryAdmissionError(
+            f"{probe_id} is not citable from retained evidence and this session "
+            f"may not buy it. The only purchasable observation is {owed}. "
+            "Everything else — every sa, every sb, and 85bde4ded2c3/sc — is "
+            "retained evidence the corrected rung-2 decision was computed over; "
+            "if one of them is missing or no longer binds, that is a corrupted-"
+            "evidence condition and this session fails closed rather than "
+            "replacing it with a different measurement.")
+
+    def probe_config(self, descriptor: dict) -> Path:
+        """The purchase seam, and the only one.
+
+        `PhaseADriver.run_probe` calls this on the line after it decides nothing
+        could be restored, and nothing else in the codebase calls it — so
+        checking here binds the scope to the act of buying rather than to a
+        count, a budget or an intention.
+        """
+        self.require_purchasable(descriptor)
+        return super().probe_config(descriptor)
 
     def staged_checkpoint(self, candidate) -> Path:
         """Where the POD holds this finalist's bytes.
