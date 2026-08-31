@@ -1,6 +1,6 @@
 {
  "schema": "aadistill.current_state/v2",
- "generated_utc": "2026-08-31T05:18:56Z",
+ "generated_utc": "2026-08-31T09:00:33Z",
  "_contract": "The minimal machine-readable CURRENT snapshot: live facts only, no history, no per-attempt detail, no narrative. History lives in logs/decisions.md and the per-run directories; the human view is logs/STATE.md and the two must agree. Ownership: logs/CATALOG.md.",
  "baseline_commit": "884acb04c3aca3a548f825b5011f562131d9d86c",
  "baseline_commit_meaning": "The LAST TESTED IMPLEMENTATION: the commit whose tree produced the latest_verification figures (2524 passed / 12 skipped / 0 failed). Commits after it changed only logs and metadata -- no file in CONTINUATION_SOURCE_FILES_V2 -- so the tested implementation is unchanged.",
@@ -74,10 +74,11 @@
   "budget": "cap $283.7600, spent $263.8597, headroom $19.9003. Nothing is funded."
  },
  "read_order": [
+  "logs/PHASE_INDEX.md \u2014 the scientific history by phase, START HERE",
+  "logs/phase_a_vs_phase_b_comparison.md \u2014 what Phase A and B concluded",
+  "logs/HANDOFF_next_session.md \u2014 the next-session handoffs",
   "logs/STATE.md \u2014 the human view of this file",
-  "logs/CATALOG.md \u2014 which log owns which fact, and what is superseded",
-  "docs/REPO_LAYOUT.md \u2014 where code lives",
-  "logs/decisions.md \u2014 why things are the way they are",
+  "logs/CATALOG.md \u2014 which log owns which fact",
   "logs/BUDGET_LEDGER.md \u2014 spend and caps",
   "AGENTS.md \u2014 the binding working contract"
  ],
@@ -131,5 +132,24 @@
   "authorizes": "nothing. Not formal recovery, not a canonical Stage-1 NLL, not Phase C before the Phase A/B comparison is reviewed",
   "record": "logs/autoinit_continuation_b_attempt5.json"
  },
- "history": "per-attempt records, failure patterns and cost history live in logs/decisions.md, logs/BUDGET_LEDGER.md and the per-run directories"
+ "history": "per-attempt records, failure patterns and cost history live in logs/decisions.md, logs/BUDGET_LEDGER.md and the per-run directories",
+ "phase_c": {
+  "status": "NOT STARTED / NOT DESIGNED / NOT PRICED / NOT AUTHORIZED",
+  "structure": "logs/phase_c_roadmap.md \u2014 C0 power design, C1 fixed-path ATTENTION isolation, C2 ATTENTION-aware re-search",
+  "incumbent": "fe9683e6a9c783bbc6fe276a78c851c6, artifact digest c313d1b4081b, at aad-artifacts/autoinit/phase_a/fe9683e6a9c783bbc6fe276a78c851c6 \u2014 proposed, with its caveats: margin 0.000070, not distinguishable from Phase A's leader, not a benchmark, NOT recovered, component operators not individually validated"
+ },
+ "handoff": "logs/HANDOFF_next_session.md \u2014 ChatGPT review session and Claude Code execution session",
+ "storage": {
+  "repo_gib": 8.27,
+  "aad_artifacts_gib": 94.69,
+  "aad_scratch_gib": 0.24,
+  "free_gib": 10.14,
+  "roots": {
+   "git": "/home/ecs-user/AlphaAvatar-distill",
+   "canonical artifacts": "/home/ecs-user/aad-artifacts",
+   "scratch": "/home/ecs-user/aad-scratch/sessions/<session-id>"
+  },
+  "closeout": "logs/storage_closeout_20260831.json",
+  "note": "the five $HOME phase_b_*_scr directories were deleted 2026-08-31 after every byte was proven redundant; 140 MiB reclaimed. Two duplicate checkpoint pairs (2.92 GiB) were found and deliberately NOT deleted"
+ }
 }

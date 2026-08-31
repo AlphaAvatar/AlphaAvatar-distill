@@ -1,4 +1,4 @@
-**Updated:** 2026-08-30 · branch `main` · **PHASE B COMPLETE — behavioural selection RESOLVED**
+**Updated:** 2026-08-31 · branch `main` · **PHASE B CLOSED · PHASE C NOT STARTED**
 
 # Current state
 
@@ -6,11 +6,40 @@ The **human view of [`current_state.json`](current_state.json)**. That file owns
 the live facts; this one says the same things in prose and adds nothing it does
 not carry. If the two disagree, a structural test fails.
 
-**Nothing is running. Nothing is billing. Nothing is prepared for launch.**
-Pod `skoh6l6wmmwxce` was deleted at `21:15:07Z`; the provider confirms it gone and
-not billing. Spend is `$263.8597` of the `$283.7600` cap, `$19.9003` remaining.
-**Nothing is authorized** — all five continuation grants are retired, and no
-further paid work is approved.
+**Nothing is running. Nothing is billing. Nothing is prepared for launch. Nothing
+is authorized.** Zero pods, zero orchestration, all five behavioural-continuation
+grants retired. Spend is `$263.8597` of the `$283.7600` cap, `$19.9003`
+remaining.
+
+**Phase A and Phase B are both terminal.** Phase C is **NOT STARTED / NOT
+DESIGNED / NOT PRICED / NOT AUTHORIZED**.
+
+## Where to start
+
+| you want | read |
+| --- | --- |
+| the scientific history, by phase | [`PHASE_INDEX.md`](PHASE_INDEX.md) |
+| what Phase A and B concluded | [`phase_a_vs_phase_b_comparison.md`](phase_a_vs_phase_b_comparison.md) |
+| the Phase-C structure | [`phase_c_roadmap.md`](phase_c_roadmap.md) |
+| the next-session handoffs | [`HANDOFF_next_session.md`](HANDOFF_next_session.md) |
+| storage and what was cleaned | [`storage_closeout_20260831.json`](storage_closeout_20260831.json) |
+
+## Filesystem policy — three roots, no others
+
+| purpose | path |
+| --- | --- |
+| git repository | `/home/ecs-user/AlphaAvatar-distill` — 8.27 GiB |
+| canonical scientific artifacts | `/home/ecs-user/aad-artifacts` — 94.69 GiB |
+| scratch | `/home/ecs-user/aad-scratch/sessions/<session-id>` — 0.24 GiB |
+
+The five `$HOME/phase_b_*_scr` directories were deleted on 2026-08-31 after every
+one of their 200 files was proven to have a canonical copy — including hashing
+all 128 members of the three remaining tarballs. **140 MiB** reclaimed, nothing
+unique lost. Before deleting, 89 files of sole-copy Attempt-5 raw evidence were
+promoted to `aad-artifacts`, and 60 session journals to the per-attempt log
+directories. Free space: 10.14 GiB.
+
+---
 
 # PHASE B IS CLOSED — resolved, $1.5433
 
