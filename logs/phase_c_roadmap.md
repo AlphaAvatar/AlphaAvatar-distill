@@ -1,11 +1,15 @@
 # Phase C — ATTENTION operator R&D · roadmap
 
-**Status: NOT STARTED · NOT DESIGNED · NOT PRICED · NOT AUTHORIZED.**
+**Status: C0 COMPLETE / APPROVED / FROZEN · C1 NOT STARTED · C2 NOT STARTED.
+NOT PRICED · NOT AUTHORIZED · NO COMPUTE.**
 
-No Phase-C experiment exists. Nothing below is a plan of record for a paid
-session — it is the agreed *structure*, recorded so the next session starts from
-it rather than reinventing it. A Phase-C design must be written, reviewed and
-authorized before any compute.
+The Phase-C0 protocol is frozen in
+[`phase_c0_preregistration.json`](phase_c0_preregistration.json), with its sizing
+evidence in [`phase_c0_sizing_evidence.json`](phase_c0_sizing_evidence.json).
+Those two files, not this page, are the record of what C1 must do. This page is
+the surrounding structure and rationale.
+
+No Phase-C experiment has run. Nothing here is authorization for compute.
 
 Formal Stage-2/Stage-3 recovery training remains **deferred** until the
 operator-development programme is complete. The Phase-B winner is **not**
@@ -15,69 +19,92 @@ authorization for it.
 
 ## Why ATTENTION, and why first
 
-From [`phase_a_vs_phase_b_comparison.md`](phase_a_vs_phase_b_comparison.md) §4:
+> **Interpretation corrected 2026-09-01.** An earlier version of this section
+> argued from the fact that competitive Phase-B paths "selected `calib.none@v1`"
+> for ATTENTION. **That is not evidence and must not be repeated.**
+> `attention.weight_proxy_v0` declares `CalibrationNeed.NONE`
+> (`src/aadistill/autoinit/operators/attention.py`), and
+> `BeamSearch._candidate_expansions` offers such an implementation **exactly
+> once, against the `NO_CALIBRATION` sentinel**, however many profiles are active
+> (`src/aadistill/autoinit/search.py`, `src/aadistill/autoinit/calibration.py`).
+> The search never had a second option to reject. See
+> [`decisions.md`](decisions.md) 2026-09-01.
 
-`attention.weight_proxy_v0` appears in **every** non-composite Phase-B Top-5
-path, and in **every one of them the calibration selected is `calib.none@v1`** —
-including the winner, the runner-up, Phase A's leader, and `ab7632b00788`, which
-placed ATTENTION *first* and still declined to calibrate it. The search was free
-to use either profile and consistently did not.
+The correct motivation:
 
-That does **not** show attention manipulation is useless. It supports the
-narrower, defensible claim:
+> Phase A/B exercised only `attention.weight_proxy_v0`. That implementation
+> declares `CalibrationNeed.NONE`, so its no-calibration assignment was
+> mechanical rather than a choice between competing calibration profiles.
+>
+> No activation-based, forward-logit, or causal ATTENTION formulation competed
+> against it.
+>
+> Therefore Phase A/B contain **no operator-level evidence** that such ATTENTION
+> formulations are inferior. Phase C1 creates the missing fixed-path ATTENTION
+> comparison.
 
-> **The current ATTENTION operator and its search formulation did not provide a
-> competitive positive transformation in Phase B.**
+The operator's own docstring records the gap it was built with: activation-based
+head importance "would need attention hooks Stage 0 never cached", and a future
+`attention.activation_importance_v1` or `attention.causal_kl_v1` was anticipated
+as a separate registered id.
 
-Two readings remain open and the programme is designed to separate them: the
-*operator* may be weak, or the *search formulation around it* may be. Neither
-phase can distinguish them, because neither varied one operator with the rest
-held fixed.
-
----
-
-## Phase C0 — protocol and power design
-
-**Before any probe is bought.** This step exists because of a measured property
-of the evidence, not as ceremony.
-
-The effects that decided both phases are **1–6 correct answers out of 510**, and
-the frozen equivalence interval is `0.011695` — six samples. A single-variable
-ATTENTION experiment powered like Phase A/B will most likely return
-`unresolved_equivalence` regardless of whether the new operator helps.
-
-C0 must settle, and record:
-
-1. **The minimum effect worth detecting.** What size of improvement would change
-   what we build? State it in `correct_overall` and in correct-answer counts.
-2. **Whether the current sample size can detect it.** At n=510 across three
-   seeds, one answer is `0.001961`. Compute the detectable effect honestly; if it
-   exceeds the minimum worth detecting, the design is not adequate as-is.
-3. **The implications of the equivalence interval.** `0.011695` derives from the
-   control's own binomial SE under the frozen
-   `seed_aware_max_binomial_seedrange` rule. It is a property of the *control*,
-   not of the candidates. Whether it is the right yardstick for an
-   operator-isolation experiment is a live question — changing it requires a
-   decision record, and it must be decided **before** results exist.
-4. **Options if power is inadequate**, priced: more prompts per probe, more
-   seeds, a larger probe rung, a different battery, or accepting that the
-   experiment answers a coarser question. Each has a cost; none may be chosen
-   after seeing an outcome.
-5. **`usable_rollout` as a measurement question only.** It separates more cleanly
-   than `correct_overall` in every comparison to date
-   (`0.6842 / 0.6561 / 0.5456 / 0.4947` against correctness rates clustered near
-   the floor). That is worth understanding. It must **not** become the ranking
-   metric without a separate, explicit, reviewed decision record — it is blind to
-   correctness by construction, and a terse contentless reply scores perfectly on
-   it.
-
-**Output:** a written protocol with a registered decision rule, before probes.
+Neither phase can attribute anything to a single operator, because neither varied
+one operator with the rest held fixed. That is the gap C1 closes.
 
 ---
 
-## Phase C1 — fixed-path ATTENTION isolation
+## Phase C0 — protocol and power design · **COMPLETE / FROZEN 2026-09-01**
 
-**The causal-ish test neither Phase A nor Phase B contains.**
+**Output:** [`phase_c0_preregistration.json`](phase_c0_preregistration.json)
+(protocol, `aadistill.autoinit.phase_c0_protocol/v1`) and
+[`phase_c0_sizing_evidence.json`](phase_c0_sizing_evidence.json) (the power
+evidence behind the battery size). Both are binding on C1.
+
+What C0 settled:
+
+| question | answer |
+| --- | --- |
+| primary endpoint | `correct_overall` over 850 scorable prompts. `usable_rollout` was **not** promoted to a ranking metric |
+| estimand | prompt-mean of the seed-mean paired difference, over 3 **fixed** fresh seeds |
+| inference | stratified **prompt**-cluster bootstrap; the CI is conditional on those three seed pairs and is not a seed-population claim |
+| SESOI | `+0.010` absolute — a **decision boundary**, not a power target |
+| design alternative | `+0.015`, at which the design achieves `P(GO) = 0.8379` |
+| battery | **950 prompts** (850 scorable + 100 code), historical mixture preserved exactly |
+| seeds | exactly **3 fresh**, paired, fixed blocks; exact IDs deliberately **not** chosen here |
+| rule | three-way GO / NO-GO / INCONCLUSIVE, no forced winner |
+
+Two structural findings drove the design, both measured rather than assumed:
+
+* **Correctness is strongly prompt-clustered.** Same-prompt cross-seed ICC is
+  `0.25 ± 0.095`; `P(correct | correct on another seed) = 0.257` against a
+  `0.022` marginal. The 510 historical prompt-seed rows were never 510
+  independent observations.
+* **The old design could not have answered this question.** At the Phase-A/B
+  design the frozen `0.011695` interval sits at ~1.2 standard errors of the arm
+  difference, and Phase B's margin of `0.011765` is ~1.23 — which is why that
+  result is protocol-resolved but scientifically weak. C1 therefore does **not**
+  reuse `SuccessiveHalvingPlan` or `EquivalenceRule`; both remain untouched and
+  in force for Phase A/B.
+
+`usable_rollout` stays secondary and gates via a veto only. It is blind to
+correctness by construction — a terse contentless reply scores perfectly on it —
+and promoting it would still require its own decision record.
+
+---
+
+## Phase C1 — fixed-path ATTENTION isolation · **NOT STARTED**
+
+**The causal-ish test neither Phase A nor Phase B contains.** Protocol frozen in
+[`phase_c0_preregistration.json`](phase_c0_preregistration.json); nothing is
+implemented, priced or authorized.
+
+**What C1 is, stated precisely.** C1 *does* execute compute: **2 arms × 3 fresh
+recovery seeds = 6 `E1_KD_HEAVY_0860K` recovery probes**. Calling it "not a
+recovery run" would be wrong. The correct boundary is:
+
+> Phase C1 is a fixed-path ATTENTION isolation experiment using short 0.86M
+> recovery probes. It is **not formal recovery evidence** and does not establish
+> recovered-model capability.
 
 Freeze `fe9683e6a9c783bbc6fe276a78c851c6` as the behavioural incumbent. Hold
 **everything** fixed except the ATTENTION operator:
@@ -91,22 +118,23 @@ Freeze `fe9683e6a9c783bbc6fe276a78c851c6` as the behavioural incumbent. Hold
 | geometry, teacher, tokenizer | frozen student spec, unchanged |
 | battery, seeds, protocol | the frozen behavioural protocol |
 
-**Vary only:** the ATTENTION operator (and, if C0 decides it is in scope, its
-calibration).
+**Vary only:** the ATTENTION operator.
 
 > **Question C1.** Does a new ATTENTION operator improve the frozen `fe9683`
 > initialization when ATTENTION is the only intended variable?
 
-**Anchors that must be measured or cited in the same comparison:**
-
-* `fe9683` as-is — the incumbent, with its retained three-seed evidence;
-* the incumbent with the *current* `attention.weight_proxy_v0` re-run if the
-  protocol changes at all, so the comparison is like-for-like;
-* each candidate ATTENTION formulation.
+**Both arms are measured fresh, and the historical evidence is not an arm.**
+C0 requires fresh seeds and a fresh battery, so `fe9683`'s retained `sa/sb/sc`
+result **cannot** stand in for the incumbent arm: it was produced under the seeds
+that selected it and on the development battery. The incumbent is re-run with the
+current `attention.weight_proxy_v0` on the same three fresh seeds and the same
+fresh battery as the replacement, so the comparison is like-for-like and paired.
+`recovery_search_v2` and `sa/sb/sc` remain development/historical evidence only.
 
 **What C1 can conclude:** that a specific ATTENTION operator does or does not
-improve *this* fixed path. **What it cannot:** that the result generalizes to
-other paths, orders, or student sizes. Say so in the record.
+improve *this* fixed path, under a conditional-on-three-seed-pairs interval.
+**What it cannot:** that the result generalizes to other paths, orders, student
+sizes, or to a population of recovery seeds. Say so in the record.
 
 ---
 

@@ -355,9 +355,20 @@ def test_the_live_snapshot_records_the_terminal_phase_b_state():
     assert state["budget"]["planning_floor_usd"] is None, (
         "a planning floor implies a priced next session; none is planned")
 
-    # Phase C is not started, and the snapshot says all four words.
-    for word in ("NOT STARTED", "NOT DESIGNED", "NOT PRICED", "NOT AUTHORIZED"):
-        assert word in state["phase_c"]["status"], word
+    # Phase C execution is not started.
+    #
+    # This used to require the four words "NOT STARTED / NOT DESIGNED / NOT
+    # PRICED / NOT AUTHORIZED" in a single `phase_c.status`. That premise
+    # expired on 2026-09-01: Phase C0 is COMPLETE / APPROVED / FROZEN, and its
+    # whole purpose was to *design* C1. Keeping "NOT DESIGNED" would have forced
+    # the snapshot to state something false, so the assertion moved to the part
+    # that is still true and still worth protecting — that no Phase-C *execution*
+    # has started, been priced, or been authorized.
+    assert "FROZEN" in state["phase_c"]["c0"]["status"]
+    assert state["phase_c"]["c0"]["authorizes"] == "nothing"
+    for word in ("NOT STARTED", "NOT IMPLEMENTED", "NOT PRICED", "NOT AUTHORIZED"):
+        assert word in state["phase_c"]["c1"]["status"], word
+    assert "NOT STARTED" in state["phase_c"]["c2"]["status"]
 
     # No superseded scope or ceiling described as current.
     assert "at most 2 conditional sc" not in blob

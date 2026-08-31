@@ -22,7 +22,8 @@ implements and executes; you decide whether it may.
 | spend | **`$263.8597`** of a **`$283.7600`** cap · headroom **`$19.9003`** |
 | authorizations | **none live.** All five behavioural-continuation grants retired. Six consumed prior-phase files remain at `logs/*_authorization.json` — each binds a *non-HEAD* commit, so none can launch; they are kept because live drivers and issuers reference their paths |
 | pods / orchestration | **zero** |
-| Phase C | **NOT STARTED / NOT DESIGNED / NOT PRICED / NOT AUTHORIZED** |
+| Phase C0 | **COMPLETE / APPROVED / FROZEN** — [`phase_c0_preregistration.json`](phase_c0_preregistration.json) |
+| Phase C1 / C2 | **NOT STARTED / NOT IMPLEMENTED / NOT PRICED / NOT AUTHORIZED** |
 
 ## Phase A — COMPLETE
 
@@ -70,10 +71,15 @@ Three conclusions that should govern Phase C:
    *inside* the interval, so they were never tested head-to-head.
 2. **Search-side KL did not predict behaviour.** The winner sat on Pareto
    **front 3**; `cca699` was front 0.
-3. **ATTENTION took `calib.none@v1` in every competitive path**, including one
-   that placed it first. Supports only the narrow claim that *the current
-   operator and its search formulation* gave no competitive positive
-   transformation — the Phase-C motivation.
+3. **Only one ATTENTION formulation was ever exercised.**
+   `attention.weight_proxy_v0` declares `CalibrationNeed.NONE`, so its uniform
+   `calib.none@v1` assignment was **mechanical, not a search preference** — the
+   search was never offered an alternative. *(The earlier reading, that the
+   search "declined to calibrate" ATTENTION, was **withdrawn 2026-09-01**; see
+   [`decisions.md`](decisions.md).)* No activation-based, forward-logit or causal
+   formulation competed against it, so Phase A/B contain **no operator-level
+   evidence** that such formulations are inferior. That gap is the Phase-C
+   motivation, and C1 closes it.
 
 **No operator-level causal claim is supported by either phase.** Neither varied
 one operator with the rest held fixed.

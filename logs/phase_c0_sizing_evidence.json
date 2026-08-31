@@ -1,0 +1,118 @@
+{
+  "schema": "aadistill.autoinit.phase_c0_sizing_evidence/v1",
+  "version": 1,
+  "generated_utc": "2026-09-01T00:00:00Z",
+  "_contract": "The evidence behind the Phase-C0 battery-size decision. Simulation only: no GPU, no pod, no model was run. Every input is either measured from retained per-sample rows or a declared planning assumption. Protocol: logs/phase_c0_preregistration.json.",
+
+  "decision": {
+    "selected_candidate": "A",
+    "selected_scorable_n": 850,
+    "selected_total_n": 950,
+    "sizing_rule": "smallest exact-mixture candidate with P(GO | Delta=+0.015) >= 0.80",
+    "rule_fixed_before_results": true,
+    "candidate_b_note": "Candidate B also passed and is slightly better powered (0.8672 vs 0.8379). It was NOT rejected as scientifically worse. The predeclared rule selects the smallest passing candidate, so choosing B after seeing that it had higher power would have been selection on the outcome."
+  },
+
+  "planning_assumptions": {
+    "rho": 0.15,
+    "rho_justification": "Conservative planning value. The MEASURED same-prompt cross-seed ICC on correctness is 0.2501 with a leave-one-arm-out jackknife SE of 0.0950. Higher rho HELPS the paired estimand (heterogeneity concentrated in few prompts leaves most prompt-level differences identically zero), so the conservative direction is LOW rho, and 0.15 sits about one SE below the point estimate.",
+    "seeds": 3,
+    "seeds_role": "fixed experimental blocks",
+    "incumbent_anchor_p": 0.031373,
+    "incumbent_anchor_source": "fe9683e6a9c783bbc6fe276a78c851c6 pooled correct_overall (16/510) on the historical mixture. This is the conservative anchor for an ABSOLUTE SESOI: a higher base rate carries more variance and therefore needs a larger N.",
+    "inference": "stratified prompt-cluster bootstrap, prompts resampled with replacement, each prompt's complete arm x seed vector kept together, strata = the frozen battery strata",
+    "robustness_gate": "at least 2 of 3 seed-specific Delta_correct > 0, included in the simulated GO",
+    "design_target": "P(GO | Delta=+0.015) >= 0.80",
+    "sesoi": 0.010,
+    "arm_x_seed_shock_sigma": 0.0,
+    "arm_x_seed_shock_justification": "Zero in the primary run because, under the conditional framing frozen in C0, an arm x seed shock is part of the conditional estimand rather than error the interval must cover. A robustness row at sigma=0.008 is reported below and is explicitly OUTSIDE the frozen framing.",
+    "generative_model": "per-prompt latent correctness propensity ~ Beta(a,b) with mean = incumbent anchor and beta-binomial ICC = rho; given the propensity, correctness is independent across seeds and arms; treatment applies a proportional lift delivering the stated absolute Delta",
+    "generative_model_validation": "At rho=0.25 the fitted Beta predicts P(a prompt is ever answered correctly in 14 arm-seed observations) = 0.163 against an observed 28/170 = 0.165."
+  },
+
+  "candidate_definitions": {
+    "A": {"scorable": 850, "total": 950,
+          "mixture": {"gsm8k": 150, "math_verified": 150, "multihop": 150, "rag": 150,
+                      "knowledge": 150, "tool": 100, "code": 100}},
+    "B": {"scorable": 1020, "total": 1140,
+          "mixture": {"gsm8k": 180, "math_verified": 180, "multihop": 180, "rag": 180,
+                      "knowledge": 180, "tool": 120, "code": 120}}
+  },
+
+  "results": {
+    "_method": "stratified bootstrap, the inference actually specified for C1. S = simulated experiments, B = bootstrap resamples per experiment.",
+    "A": {
+      "S": {"0.0": 12000, "0.005": 8000, "0.010": 8000, "0.015": 12000, "0.020": 8000},
+      "B_resamples": 1200,
+      "P_GO": {"0.000": 0.0140, "0.005": 0.1435, "0.010": 0.4988,
+               "0.015": 0.8379, "0.020": 0.9745},
+      "P_GO_2se": {"0.000": 0.0021, "0.005": 0.0078, "0.010": 0.0112,
+                   "0.015": 0.0067, "0.020": 0.0035},
+      "P_NOGO": {"0.000": 0.7248, "0.005": 0.2953, "0.010": 0.0542,
+                 "0.015": 0.0053, "0.020": 0.0003},
+      "P_INCONCLUSIVE": {"0.000": 0.2612, "0.005": 0.5613, "0.010": 0.4470,
+                         "0.015": 0.1568, "0.020": 0.0253}
+    },
+    "B": {
+      "S": {"0.0": 12000, "0.015": 12000},
+      "B_resamples": 1200,
+      "P_GO": {"0.000": 0.0085, "0.015": 0.8672},
+      "P_GO_2se": {"0.000": 0.0017, "0.015": 0.0062},
+      "P_NOGO": {"0.000": 0.7829, "0.015": 0.0032},
+      "P_INCONCLUSIVE": {"0.000": 0.2086, "0.015": 0.1296},
+      "note": "Only the two decision cells were run at high precision for B; the sizing rule needed nothing else once A passed."
+    }
+  },
+
+  "decision_arithmetic": {
+    "criterion": 0.80,
+    "A_P_GO_at_0.015": 0.8379,
+    "A_lower_2se_bound": 0.8312,
+    "A_verdict": "PASS — the lower 2-SE bound is still above 0.80",
+    "B_P_GO_at_0.015": 0.8672,
+    "B_verdict": "PASS, but larger; the rule selects the smallest passing candidate",
+    "selected": "A"
+  },
+
+  "robustness": {
+    "_status": "Reported for completeness. NOT part of the sizing rule; the decision above stands regardless.",
+    "per_stratum_measured_rates_instead_of_homogeneous": {"A": 0.847, "B": 0.872},
+    "uniform_instead_of_proportional_effect_allocation": {"A": 0.839, "B": 0.858},
+    "arm_x_seed_shock_sigma_0.008": {
+      "A": {"P_GO_at_0.015": 0.753, "P_GO_at_0": 0.069},
+      "B": {"P_GO_at_0.015": 0.766, "P_GO_at_0": 0.057},
+      "interpretation": "OUTSIDE the frozen conditional framing. Under the C0 decision that seeds are fixed blocks and the CI is conditional on them, this shock is part of the conditional truth, not error the interval must cover. Recorded so the assumption is visible rather than hidden."
+    }
+  },
+
+  "measured_inputs_from_retained_evidence": {
+    "_source": "17 retained arm-seed per-sample observations; 13 from searched arms. Paths: logs/autoinit_stage3_complete/, aad-artifacts/autoinit/phase_b/attempt5/raw_evidence/, and aad-artifacts/autoinit/preserved_scratch_20260901/.",
+    "icc_correctness_pooled": 0.2501,
+    "icc_jackknife_se": 0.0950,
+    "icc_per_arm": {"cca699": 0.3131, "85bde": 0.0820, "fe9683": 0.4401,
+                    "control": -0.0089, "ctlpre": -0.0119},
+    "icc_per_arm_note": "The two slightly negative values are small-sample noise, not evidence of negative dependence.",
+    "p_correct_given_correct_on_another_seed": 0.257,
+    "marginal_p_correct": 0.02206,
+    "concordance_counts": {"both_correct": 9, "exactly_one": 52, "within_arm_seed_pairs": 9},
+    "scorable_prompts_ever_correct": {"all_17_observations": 28, "searched_13_observations": 26,
+                                      "of": 170},
+    "per_set_correctness_over_13_searched_observations": {
+      "rag": 0.0744, "multihop": 0.0487, "gsm8k": 0.0154,
+      "math_verified": 0.0026, "knowledge": 0.0026, "tool": 0.0000},
+    "usable_rollout_variance_components": {"binomial_sd": 0.0360, "seed_sd": 0.0447,
+                                           "note": "usable_rollout carries a real seed component; correctness does not measurably, which is why the two axes call for different designs and why usable_rollout is a veto rather than a ranking metric."},
+    "shared_vs_arm_specific_seed_effect": {
+      "sa_to_sb": {"mean_shared_shift": -0.0103, "arm_x_seed_sd": 0.0130},
+      "sa_to_sc": {"mean_shared_shift": -0.0216, "arm_x_seed_sd": 0.0123},
+      "binomial_sd_of_that_contrast": 0.0159,
+      "reading": "There is a real SHARED seed effect, which cancels because both arms use the same fresh seeds. The residual arm x seed interaction sits below its own binomial sd and is not distinguishable from zero — but is not asserted to be zero."
+    }
+  },
+
+  "reproduction": {
+    "no_compute": "No GPU, no pod, no model inference. Pure simulation plus arithmetic over retained per-sample rows.",
+    "determinism": "numpy default_rng with fixed integer seeds derived from the candidate name and effect size; the reported figures are Monte Carlo estimates and carry the 2-SE bounds tabulated above.",
+    "audit_route": "The measured inputs are re-derivable from the retained per-sample JSONL rows named above. The simulation is fully specified by planning_assumptions and candidate_definitions."
+  }
+}

@@ -1,0 +1,224 @@
+{
+  "schema": "aadistill.autoinit.phase_c0_protocol/v1",
+  "protocol_id": "autoinit.v1.phase_c0",
+  "version": 1,
+  "frozen_utc": "2026-09-01T00:00:00Z",
+  "status": "FROZEN — scientifically approved. Governs Phase C1. No C1 implementation, battery, seed set, pricing or authorization exists.",
+  "_contract": "The Phase-C1 protocol and its decision rule, registered BEFORE any candidate ATTENTION operator exists and before any C1 behavioural result exists. Nothing here may be changed after a C1 result is seen; a change requires a dated decision record in logs/decisions.md and a new version of this file. Sizing evidence: logs/phase_c0_sizing_evidence.json.",
+
+  "scope": {
+    "what_c1_is": "A fixed-path ATTENTION isolation experiment using short 0.86M recovery probes.",
+    "what_c1_executes": "2 arms x 3 fresh recovery seeds = 6 E1_KD_HEAVY_0860K recovery probes.",
+    "what_c1_is_not": "NOT formal recovery evidence. It does not establish recovered-model capability. Formal Stage-2/Stage-3 recovery training is explicitly OUT OF SCOPE and remains deferred.",
+    "generalization_limit": "A C1 result speaks only to this fixed path at this student geometry. It does not generalize to other operator orders, other paths, or other student sizes, and the C1 record must say so."
+  },
+
+  "incumbent": {
+    "state_id": "fe9683e6a9c783bbc6fe276a78c851c6",
+    "artifact_digest": "c313d1b4081b9a3b410dddf7a29ebcaad8dd0759179d51e1d761238c1743a2a6",
+    "arch_spec_hash": "09147a5c08d8ad7ad5bb18131bade73548a5fff08f0e0f99d6dd6ede227606c4",
+    "retained_at": "/home/ecs-user/aad-artifacts/autoinit/phase_a/fe9683e6a9c783bbc6fe276a78c851c6",
+    "root_teacher_id": "Qwen/Qwen3-4B-Thinking-2507",
+    "num_parameters": 596049920,
+    "provenance": "Phase-B winner under the frozen Phase-B procedure. Its margin cleared the frozen equivalence interval by 0.000070 and it is not distinguishable from Phase A's numerical leader cca699c93f34. It is an INCUMBENT, not a benchmark and not a recovered model.",
+    "pre_attention_parent": {
+      "state_id": "b8820f41d062bffffca4b99148602136",
+      "artifact_digest": "eea90c91346a0745b8b1b847503b48fe73c33bb9d75d92c196dc43598e91e722",
+      "arch_spec": {"head_dim": 128, "hidden_size": 1024, "intermediate_size": 3072,
+                    "num_attention_heads": 32, "num_hidden_layers": 28,
+                    "num_key_value_heads": 8, "tie_word_embeddings": true,
+                    "vocab_size": 151936},
+      "weights_retained": false,
+      "note": "Intermediate weights were dropped by SearchConfig.prune_weights. Any C1 rebuild of this parent is verifiable against the recorded artifact_digest. This is a C1 implementation/materialization concern, not a C0 statistical one."
+    }
+  },
+
+  "fixed_path": {
+    "path_label": "DEPTH(calib.domain_balanced@v1)->FFN(calib.domain_balanced@v1)->RESIDUAL_WIDTH(calib.reasoning_heavy@v2)->ATTENTION(current vs replacement)",
+    "steps": [
+      {"kind": "DEPTH", "impl_id": "depth.causal_kl_greedy_v1", "calibration": "calib.domain_balanced@v1", "held_fixed": true},
+      {"kind": "FFN", "impl_id": "ffn.activation_importance_v0", "calibration": "calib.domain_balanced@v1", "held_fixed": true},
+      {"kind": "RESIDUAL_WIDTH", "impl_id": "width.global_pca_v0", "calibration": "calib.reasoning_heavy@v2", "held_fixed": true},
+      {"kind": "ATTENTION", "impl_id": "THE ONLY VARIABLE", "calibration": "per arm", "held_fixed": false}
+    ],
+    "operator_order_held_fixed": true,
+    "note": "ATTENTION does real structural work in this path: the parent carries 32 query heads and the leaf 16, at unchanged head_dim and KV count."
+  },
+
+  "held_fixed_geometry": {
+    "hidden_size": 1024,
+    "intermediate_size": 3072,
+    "num_attention_heads": 16,
+    "num_attention_heads_note": "final target after ATTENTION; the pre-ATTENTION parent carries 32",
+    "num_key_value_heads": 8,
+    "num_hidden_layers": 28,
+    "head_dim": 128,
+    "vocab_size": 151936,
+    "tie_word_embeddings": true
+  },
+
+  "recovery_recipe": {
+    "recipe_id": "e1_p1_kd_heavy@0.86M",
+    "source": "src/aadistill/autoinit/recovery.py :: E1_KD_HEAVY_0860K",
+    "ce_weight": 0.25, "kd_weight": 1.0, "temperature": 1.0, "kd_scope": "all",
+    "tokens": 860000, "block_len": 8192,
+    "pack": "artifacts/stage3/ladder_uniform_probe",
+    "pack_sha256": "6f324cb0f37bc0f07128e554ce8c161879419537478950496534f75fcecb249c",
+    "held_fixed": true
+  },
+
+  "arms": {
+    "count": 2,
+    "definition": ["incumbent: the fixed path with the CURRENT ATTENTION operator",
+                   "treatment: the identical fixed path with ONE replacement ATTENTION operator"],
+    "successive_halving": false,
+    "elimination_rung": false,
+    "tie_break_rung": false,
+    "rule": "Both arms complete EVERY preregistered confirmation seed. No arm is eliminated on partial evidence.",
+    "why_not_successive_halving": "SuccessiveHalvingPlan.__post_init__ requires searched_leaves >= 2 and 1 <= survivors < searched_leaves, so a two-arm design would be forced to eliminate one arm at rung 1 on single-seed evidence — the exact mechanism that removed cca699c93f34 from Phase B. The Phase-A/B SuccessiveHalvingPlan, EquivalenceRule and selection logic are NOT used by C1 and remain untouched."
+  },
+
+  "confirmation_seeds": {
+    "count": 3,
+    "must_be_fresh": true,
+    "never_used_in": ["Phase-A selection", "Phase-B selection", "C1 development screening"],
+    "identical_seed_set_for_both_arms": true,
+    "role": "FIXED EXPERIMENTAL BLOCKS. They are not a sample from a recovery-seed superpopulation for the purposes of the primary CI.",
+    "exact_values": null,
+    "exact_values_rule": "DELIBERATELY NOT SET HERE. No prospective deterministic seed-selection rule exists that could choose them without reference to future candidate results. The exact seed IDs MUST be materialized and hash-bound in the C1 execution preregistration BEFORE any candidate behavioural result exists.",
+    "historical_seeds_excluded": {"sa": 20260726, "sb": 20260801, "sc": 20260813,
+                                  "why": "fe9683e6a9c783bbc6fe276a78c851c6 was itself selected under sa/sb/sc; reusing them for confirmation leaves a winner's-curse / seed-selection channel"}
+  },
+
+  "battery": {
+    "status": "SPECIFIED, NOT BUILT. Construction and freezing are C1 work.",
+    "total_prompts": 950,
+    "scorable_prompts": 850,
+    "non_scorable_code_prompts": 100,
+    "mixture": {"gsm8k": 150, "math_verified": 150, "multihop": 150, "rag": 150,
+                "knowledge": 150, "tool": 100, "code": 100},
+    "mixture_rule": "The frozen historical recovery-search top-level mixture 3:3:3:3:3:2 over the scorable sets, with the same relative non-scorable code component. It is preserved EXACTLY. It was not reweighted toward the historically higher-yield sets and no set was dropped for a low historical correctness rate.",
+    "why_the_mixture_is_frozen": "The finding that ~142 of 170 historical scorable prompts were never answered correctly by any arm is a MEASUREMENT RESULT, not permission to outcome-select the evaluation distribution. The SESOI is defined ON this mixture; changing the mixture would change what +0.010 absolute means.",
+    "exclusions": {
+      "rule": "Disjoint by BOTH stable source id AND normalized prompt content hash, following the convention in scripts/data/build_recovery_search_battery.py.",
+      "roles": ["OPERATOR_CALIBRATION", "STATE_EVALUATION", "RECOVERY_SEARCH",
+                "full recovery-training corpus (artifacts/stage3/corpus_v2/sessions.jsonl)",
+                "FINAL_PROMOTION"],
+      "no_outcome_selected_prompts": "No prompt may be selected, weighted, retained or dropped using any Phase-A/B model outcome.",
+      "stratification_allowed": "Source-native, outcome-independent metadata (e.g. MATH-500 level, SQuAD-v2 answerable/unanswerable, HotpotQA level) MAY be used for stratification WITHIN the frozen top-level mixture."
+    },
+    "feasibility_checked_utc": "2026-09-01",
+    "available_after_exclusion": {"gsm8k": 1189, "math_verified": 470, "multihop": 7275,
+                                  "rag": 11743, "knowledge": 17623, "tool": 59980,
+                                  "code": 480},
+    "binding_stratum": "math_verified — 150 needed of 470 available (3.1x headroom), the tightest. All seven strata are satisfiable."
+  },
+
+  "endpoints": {
+    "primary": {
+      "metric": "correct_overall",
+      "denominator": "the 850 scorable prompts (the 100 code prompts are behaviour-only and never enter correctness)",
+      "aggregation_reference": "src/aadistill/autoinit/recovery.py :: ScorableAwareSeedAggregation (pooled_counts@v2)"
+    },
+    "secondary": {
+      "metric": "usable_rollout",
+      "reference": "src/aadistill/evaluation/usable_rollout.py",
+      "role": "SECONDARY ONLY. It never contributes positive ranking credit and never reorders arms. It gates via the veto below.",
+      "why": "It is blind to correctness by construction: a terse contentless but well-formed reply scores perfectly."
+    },
+    "diagnostics_only": ["correct_given_usable", "teacher-forced top-1", "teacher-native CE",
+                         "FineWeb NLL", "training loss"]
+  },
+
+  "estimand": {
+    "definition": "Delta = mean over prompts ( mean over the 3 fixed fresh seeds ( correct_new(prompt,seed) - correct_incumbent(prompt,seed) ) )",
+    "unit_of_analysis": "the prompt",
+    "not_iid": "prompt x seed rows are NOT independent observations. Measured same-prompt cross-seed ICC on correctness is 0.25 +/- 0.095 (jackknife over arms); P(correct on a second seed | correct on the first) = 0.257 against a 0.022 marginal, an 11.7x lift."
+  },
+
+  "primary_inference": {
+    "method": "stratified cluster bootstrap",
+    "resample": "PROMPTS ONLY, with replacement",
+    "cluster_integrity": "each prompt's complete arm x seed vector is kept together",
+    "strata": "the frozen battery strata (gsm8k, math_verified, multihop, rag, knowledge, tool)",
+    "seeds_are_not_resampled": true,
+    "ci_claim_boundary": "The resulting interval represents PROMPT-DISTRIBUTION UNCERTAINTY CONDITIONAL ON THE THREE PREREGISTERED FRESH RECOVERY-SEED CHECKPOINT PAIRS. It is NOT a confidence interval over a population of hypothetical future recovery seeds, and must never be reported as one.",
+    "explicitly_not_used_as_primary": ["seed-level variance component", "two-way bootstrap",
+                                       "multiway bootstrap", "mixed model"],
+    "why": "Seed-superpopulation generalization is a different and substantially more expensive question. C1 does not make that claim. A prompt-cluster bootstrap with seeds held fixed cannot observe an arm x seed shock, which is exactly why the conditional claim boundary is stated rather than the interval being presented as more general than it is."
+  },
+
+  "effect_sizes": {
+    "sesoi": 0.010,
+    "sesoi_units": "absolute correct_overall on the frozen 850-prompt scorable mixture",
+    "sesoi_role": "DECISION BOUNDARY, not the effect at which the design must have 80% power",
+    "design_alternative": 0.015,
+    "design_power_criterion": "P(GO | true Delta = +0.015) >= 0.80",
+    "expected_behaviour_at_the_boundary": "P(GO) is approximately 0.5 when the true effect lies exactly on the +0.010 promotion boundary. That is expected and not pathological: the point estimate exceeds its own expectation about half the time."
+  },
+
+  "decision_rule": {
+    "GO": ["one-sided 95% prompt-sampling LCB(Delta) > 0",
+           "AND point estimate Delta >= +0.010",
+           "AND at least 2 of the 3 seed-specific Delta_correct > 0",
+           "AND all behavioural guardrails pass"],
+    "NO_GO": ["one-sided 95% prompt-sampling UCB(Delta) < +0.010",
+              "OR a preregistered behavioural veto fires"],
+    "INCONCLUSIVE": "otherwise",
+    "no_forced_winner": true,
+    "seed_robustness_note": "The >=2-of-3 condition is a ROBUSTNESS condition preventing a single seed from driving promotion. It is NOT a seed-level significance test and does not convert the conditional CI into a seed-population claim."
+  },
+
+  "also_reported": ["conventional two-sided 95% prompt-sampling CI",
+                    "each of the 3 seed-specific Delta_correct",
+                    "McNemar discordance counts per seed (b_gained, b_lost, net, discordant)",
+                    "per-set and per-domain diagnostics",
+                    "all five usable_rollout component rates alongside the conjunction"],
+
+  "behavioural_guardrails": {
+    "usable_rollout_veto": {
+      "pooled": "Delta_usable > -0.05 absolute",
+      "per_seed": "every fresh-seed Delta_usable > -0.10 absolute",
+      "status": "practical preregistered promotion boundaries, NOT a claim of precise statistical non-inferiority",
+      "why_not_ni": "usable_rollout carries a real seed-level variance component (measured seed sd 0.0447 against a binomial 0.0360), and three seeds do not support a tight formal NI estimate."
+    },
+    "catastrophic_capability_veto": {
+      "status": "PRESERVED. Recorded verbatim from the existing implementation rather than paraphrased.",
+      "reference": "src/aadistill/autoinit/recovery.py :: CatastrophicCapabilityRule, instance CATASTROPHIC_V1",
+      "rule_id": "per_capability_collapse",
+      "version": 1,
+      "metric": "usable_rollout_rate",
+      "candidate_max": 0.10,
+      "control_min": 0.40,
+      "statement": "candidate usable_rollout_rate < 0.10 AND control usable_rollout_rate > 0.40 -> catastrophic failure, candidate excluded",
+      "capability_schema_reference": "src/aadistill/autoinit/recovery.py :: CAPABILITY_SCHEMA_V1",
+      "capability_schema_expected": ["gsm8k", "math_verified", "multihop", "rag", "knowledge", "tool"],
+      "capability_schema_policy": "exact set match; missing/extra capabilities, absent metrics, non-numeric values, NaN/Inf and out-of-range rates all raise. No defaults.",
+      "open_binding_for_c1": "The rule as written compares a candidate against a CONTROL. C1 has no canonical-control arm; the incumbent occupies that position. Which arm binds the control_min operand MUST be stated explicitly in the C1 execution preregistration. C0 does not silently re-point it."
+    }
+  },
+
+  "sizing": {
+    "selected_candidate": "A",
+    "selected_scorable_n": 850,
+    "selected_total_n": 950,
+    "sizing_rule": "choose the smallest exact-mixture candidate for which P(GO | Delta=+0.015) >= 0.80",
+    "result": "Candidate A (850 scorable) gives P(GO | +0.015) = 0.8379, which clears 0.80, and it was the smaller of the two frozen candidates.",
+    "candidate_b_rejected_because": "The predeclared sizing rule selects the SMALLEST passing candidate. Candidate B (1020 scorable) also passed, at P(GO | +0.015) = 0.8672. It was NOT rejected for being scientifically worse — it is slightly better powered and was not chosen because the rule was fixed before the numbers were seen.",
+    "evidence": "logs/phase_c0_sizing_evidence.json"
+  },
+
+  "historical_evidence_status": {
+    "recovery_search_v2": "DEVELOPMENT / HISTORICAL EVIDENCE ONLY. Not a C1 confirmation asset.",
+    "seeds_sa_sb_sc": "DEVELOPMENT / HISTORICAL EVIDENCE ONLY. Not C1 confirmation seeds.",
+    "final_promotion": "artifacts/eval/battery_v2 and the 846-prompt capability battery remain UNTOUCHED and unconsumed, reserved for later final promotion.",
+    "fe9683_sb_per_sample_rows": "MISSING and not reconstructed from aggregate counts. Reduces historical calibration information; NOT a C1 blocker, because C1 is a prospective fresh paired experiment."
+  },
+
+  "out_of_scope_for_c1": ["formal Stage-2/Stage-3 recovery training",
+                          "canonical Stage-1 NLL",
+                          "any claim of recovered-model capability",
+                          "Phase C2 joint re-search, which runs only if C1 finds a worthwhile formulation"],
+
+  "what_c0_does_not_authorize": "Nothing. No pricing, no authorization, no pod, no GPU compute, no ATTENTION implementation, no C1 plan class, no fixed-path driver, no battery construction, and no seed selection."
+}

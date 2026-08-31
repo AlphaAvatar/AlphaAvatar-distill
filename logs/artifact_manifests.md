@@ -947,3 +947,50 @@ retrain.
   Pods fetch from the relay, never from the dev box, whose uplink is 0.72 MB/s.
 - **Related:** `logs/decisions.md` 2026-08-18 (cleanup);
   `requirements-vllm.txt`; `docs/POD_SCRIPTS.md` (`build_wheelhouse.py`).
+
+## Preserved sole-copy Phase-A/B raw evidence — promoted 2026-09-01
+
+- **Artifact:** `/home/ecs-user/aad-artifacts/autoinit/preserved_scratch_20260901/`
+  — out-of-tree, **not** in git. 359 files, 13,575,205 bytes (12.95 MiB).
+- **Manifest:** `MANIFEST.json` inside that directory, schema
+  `aadistill.promoted_raw_evidence/v1`, **sha256
+  `3e1a72e2ade2fde610b95e41e147f7f93d37fd4418a4a2d9f61ae58d27cca0b7`**
+  (156,532 bytes). One record per file: `origin` (the `aad-scratch` path it was
+  copied from), `path` (relative layout, preserved under the originating session
+  directory name), `bytes`, `sha256`, `role`, `verified`.
+- **Contents by scientific role:** 12 per-sample row files · 90 raw generation
+  files · 24 training event streams · 12 scored probe results · 18 probe configs
+  · 1 evaluation-protocol attestation · 102 run-metadata files · 99 session logs
+  · 1 other.
+- **Why it exists:** the Phase-C0 audit found that **11 of the 12** retained
+  Phase-A per-sample row files, and 90 raw generation files, were **sole copies**
+  under `aad-scratch` session directories outside the declared
+  `aad-scratch/sessions/<session-id>` convention. AGENTS.md P18 requires the
+  complete raw generation to be retained for every evaluated sample, and every
+  `$0` variance, ICC and paired analysis behind the frozen Phase-C0 design rests
+  on these rows.
+- **Creation command:** a read-only inventory pass (every `aad-scratch` file
+  size-indexed against repo `logs/`, repo `artifacts/` and `aad-artifacts`, with
+  sha256 computed only inside size-collision groups) followed by `shutil.copy2`
+  of every sole copy under a session `store/extracted/` tree, each verified by
+  re-hashing source and destination.
+- **Verification:** all 359 re-hashed from the manifest — **0 missing, 0
+  size/hash mismatch**; **359/359 originals still present**; and the preserved
+  copy *alone* re-derives the frozen Phase-A/B pooled figures — `cca699c93f34`
+  15/510 = 0.029412 (usable 0.6561), `85bde4ded2c3` 10/510 = 0.019608 (usable
+  0.5456), control 3/340 = 0.008824 (usable 0.4947).
+- **Copy, not move.** The `aad-scratch` originals are **retained** and must not
+  be deleted in this phase.
+- **Why a new sibling directory:** the three probe-reuse verifiers all read
+  `aad-artifacts/autoinit/phase_a`, and the attempt-5
+  `raw_evidence/MANIFEST.json` enumerates a fixed 89-file set. A new directory
+  disturbs neither.
+- **Excluded deliberately:** 140.66 MiB of session transport bundles
+  (`*.bundle`) and store tarballs — operational transport, not scientific
+  evidence. No decision on them is required in C0.
+- **Known gap:** per-sample rows for `fe9683e6a9c7/sb` do not exist anywhere;
+  only the aggregate probe JSON survives. They are **not** reconstructed from
+  aggregate counts.
+- **Related:** `logs/decisions.md` 2026-09-01; `logs/current_state.json`
+  (`storage.preserved_scratch_20260901`); `logs/STATE.md`;
+  `logs/phase_c0_sizing_evidence.json`.

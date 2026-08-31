@@ -6244,3 +6244,123 @@ pretend Phase A always began at Stage 2.
 
 **No grant, no authorization, no pod.** The next decision is a GO/NO-GO for one
 recovery continuation under the derived **$16.7456** ceiling.
+
+---
+
+## 2026-09-01 — The ATTENTION "calib.none" reading is withdrawn
+
+- **Context:** the Phase-C motivation of record was that competitive Phase-B
+  paths repeatedly "selected `calib.none@v1`" for ATTENTION although the search
+  was free to calibrate it, including a path that placed ATTENTION first. That
+  reading appeared in `phase_c_roadmap.md` and in
+  `phase_a_vs_phase_b_comparison.md` §4.
+- **Finding:** it is not evidence. `attention.weight_proxy_v0` declares
+  `CalibrationNeed.NONE` (`src/aadistill/autoinit/operators/attention.py`), and
+  `BeamSearch._candidate_expansions` offers such an implementation **exactly
+  once, against the `NO_CALIBRATION` sentinel**, however many profiles are
+  active (`src/aadistill/autoinit/search.py`,
+  `src/aadistill/autoinit/calibration.py`). The uniform `calib.none@v1` is a
+  mechanical consequence of the only registered ATTENTION implementation being
+  calibration-free. The search never had a second option and never declined one.
+- **Decision:** withdraw the reading. The corrected motivation of record is:
+
+  > Phase A/B exercised only `attention.weight_proxy_v0`. That implementation
+  > declares `CalibrationNeed.NONE`, so its no-calibration assignment was
+  > mechanical rather than a choice between competing calibration profiles.
+  > No activation-based, forward-logit, or causal ATTENTION formulation competed
+  > against it. Therefore Phase A/B contain no operator-level evidence that such
+  > ATTENTION formulations are inferior. Phase C1 creates the missing fixed-path
+  > ATTENTION comparison.
+
+- **Alternatives considered:** deleting the old text. Rejected — the record
+  should show what was believed and when it was corrected. The passages are
+  retained with an explicit withdrawal notice instead.
+- **Scope:** interpretation only. **No frozen Phase-A/B numerical result, metric,
+  hash or artifact changed.** Phase A remains `unresolved_equivalence`; Phase B
+  remains `RESOLVED` with winner `fe9683e6a9c783bbc6fe276a78c851c6`.
+- **Risks:** the withdrawn claim may survive in older prose elsewhere; anyone
+  meeting it should be routed here.
+- **Revisit when:** a calibrated ATTENTION implementation exists and C1 has
+  measured it.
+
+## 2026-09-01 — Phase C0 frozen: protocol, decision rule and battery size
+
+- **Context:** Phase C1 needs a design registered before any candidate ATTENTION
+  operator exists. The Phase-A/B instrument is not adequate for it: the frozen
+  `0.011695` equivalence interval sits at about **1.2 standard errors** of the
+  arm difference at that design, and Phase B's winning margin of `0.011765` is
+  about **1.23** — protocol-resolved, but far too coarse for a single-variable
+  isolation experiment.
+- **Decision:** freeze `logs/phase_c0_preregistration.json`
+  (`aadistill.autoinit.phase_c0_protocol/v1`) with sizing evidence in
+  `logs/phase_c0_sizing_evidence.json`. Key terms:
+  * two arms, no successive halving, no elimination rung, both arms complete
+    every confirmation seed;
+  * exactly **3 fresh** paired recovery seeds as **fixed experimental blocks**;
+    exact IDs deliberately not chosen here and to be hash-bound in the C1
+    execution preregistration before any candidate result exists;
+  * fresh battery of **950 prompts** (850 scorable + 100 code) preserving the
+    historical `3:3:3:3:3:2` mixture **exactly**;
+  * primary endpoint `correct_overall`; `usable_rollout` secondary, veto only;
+  * estimand = prompt-mean of the seed-mean paired difference; primary inference
+    = stratified **prompt**-cluster bootstrap, seeds not resampled;
+  * SESOI `+0.010` as a **decision boundary**, design alternative `+0.015` with
+    `P(GO) >= 0.80`;
+  * three-way GO / NO-GO / INCONCLUSIVE, no forced winner.
+- **Why the CI claim is deliberately narrow:** a prompt-cluster bootstrap with
+  seeds held fixed cannot observe an arm x seed shock. Rather than dress that up,
+  C1 states the interval as *prompt-distribution uncertainty conditional on the
+  three preregistered fresh recovery-seed checkpoint pairs*. Seed-superpopulation
+  generalization is a different and much more expensive question that C1 does not
+  claim. Seed-level variance components, two-way and multiway bootstraps and
+  mixed models are explicitly **not** the primary inference.
+- **Sizing:** rule fixed before the numbers — *smallest exact-mixture candidate
+  with `P(GO | +0.015) >= 0.80`*. Candidate A (850 scorable) gives **0.8379**
+  (lower 2-SE bound 0.8312) and was selected. Candidate B (1020) also passed at
+  **0.8672**; it was **not** rejected as scientifically worse, only as larger.
+  Planning assumptions: conservative ICC `rho = 0.15` (measured `0.25 ± 0.095`;
+  low rho is the conservative direction for a paired estimand), incumbent anchor
+  `p = 0.031373`, 3 fixed seeds, `>=2/3` positive-seed robustness gate.
+- **Alternatives considered:** reusing `SuccessiveHalvingPlan` — rejected, since
+  `searched_leaves >= 2` with `survivors < searched_leaves` forces a two-arm
+  design to eliminate one arm at rung 1 on single-seed evidence, the exact
+  mechanism that removed `cca699c93f34` from Phase B. Reweighting the battery
+  toward the higher-yield sets — rejected, that would outcome-select the
+  evaluation distribution and would also change what `+0.010 absolute` means.
+- **Scope:** protocol and metadata only. The Phase-A/B `SuccessiveHalvingPlan`,
+  `EquivalenceRule`, `FeasibilityRule` and selection logic are untouched and
+  remain in force for those phases. No runtime or source file changed.
+- **Risks:** the conditional CI must never be reported as a seed-population
+  interval; the catastrophic-capability veto's control operand is unbound for a
+  two-arm design and must be stated in the C1 execution preregistration.
+- **Revisit when:** C1 execution preregistration is written, or if the battery
+  cannot be constructed to the frozen mixture.
+
+## 2026-09-01 — Sole-copy Phase-A evidence preserved out of scratch
+
+- **Context:** the Phase-C0 audit found that **11 of the 12** retained Phase-A
+  per-sample row files, and 90 raw generation files, were **sole copies** living
+  under `aad-scratch` session directories outside the declared
+  `aad-scratch/sessions/<session-id>` convention. Every `$0` variance, ICC and
+  paired analysis behind the C0 design rests on them, and AGENTS.md P18 requires
+  the complete raw generation to be retained for every evaluated sample.
+- **Decision:** copy every sole-copy file under a session `store/extracted/` tree
+  to `/home/ecs-user/aad-artifacts/autoinit/preserved_scratch_20260901/`,
+  preserving the relative layout under the originating session name, with a
+  `MANIFEST.json` (`aadistill.promoted_raw_evidence/v1`) recording origin path,
+  size, sha256 and scientific role. **359 files, 12.95 MiB**, every one
+  hash-verified after copying. **Copy, not move: the originals are retained.**
+- **Verification:** all 359 re-hashed from the manifest — 0 missing, 0 mismatched;
+  359/359 originals still present; and the preserved copy **alone** re-derives
+  the frozen figures (`cca699` 15/510 = 0.029412 usable 0.6561, `85bde` 10/510 =
+  0.019608 usable 0.5456, control 3/340 = 0.008824 usable 0.4947).
+- **Why the destination is new:** the three probe-reuse verifiers all read
+  `aad-artifacts/autoinit/phase_a`, and the attempt-5 `raw_evidence/MANIFEST.json`
+  enumerates a fixed 89-file set. A new sibling directory disturbs neither.
+- **Correction to prior wording:** `current_state.json` previously said scratch
+  was "CLOSED 2026-08-31". That closeout covered only the five retired
+  `$HOME/phase_b_*_scr` roots. It did **not** mean all `/home/ecs-user/aad-scratch`
+  scientific evidence had been removed, and the wording is corrected accordingly.
+- **Not decided here:** the 140.66 MiB of session transport bundles need no C0
+  decision. The `aad-scratch` originals are **not** deleted in this phase.
+- **Revisit when:** a maintainer decides whether the originals may be released.

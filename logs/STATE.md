@@ -1,4 +1,5 @@
-**Updated:** 2026-08-31 · branch `main` · **PHASE B CLOSED · PHASE C NOT STARTED**
+**Updated:** 2026-09-01 · branch `main` · **PHASE B CLOSED · PHASE C0 FROZEN ·
+PHASE C1 NOT STARTED**
 
 # Current state
 
@@ -11,14 +12,59 @@ is authorized.** Zero pods, zero orchestration, all five behavioural-continuatio
 grants retired. Spend is `$263.8597` of the `$283.7600` cap, `$19.9003`
 remaining.
 
-**Phase A and Phase B are both terminal.** Phase C is **NOT STARTED / NOT
-DESIGNED / NOT PRICED / NOT AUTHORIZED**.
+| phase | status |
+| --- | --- |
+| Phase A | **COMPLETE / FROZEN** |
+| Phase B | **COMPLETE / RESOLVED / FROZEN** |
+| Phase C0 | **COMPLETE / APPROVED / FROZEN** |
+| Phase C1 | **NOT STARTED** |
+| Phase C2 | **NOT STARTED** |
+| formal recovery evidence | **NONE** |
+
+**Phase C is UNPRICED, UNAUTHORIZED, and has consumed no compute.** No C1
+implementation exists.
+
+## Phase C0 — frozen 2026-09-01
+
+The protocol governing Phase C1 is
+[`phase_c0_preregistration.json`](phase_c0_preregistration.json)
+(`aadistill.autoinit.phase_c0_protocol/v1`); the power evidence behind its
+battery size is
+[`phase_c0_sizing_evidence.json`](phase_c0_sizing_evidence.json).
+
+| | |
+| --- | --- |
+| C1 confirmation battery | **850 scorable / 950 total** |
+| C1 confirmation seeds | **exactly 3 fresh paired fixed blocks** |
+| primary endpoint | `correct_overall` over the 850 scorable |
+| SESOI / design alternative | `+0.010` boundary · `+0.015` at `P(GO) = 0.8379` |
+
+C1 is a **fixed-path ATTENTION isolation experiment using short 0.86M recovery
+probes** — 2 arms × 3 fresh seeds = **6 `E1_KD_HEAVY_0860K` probes**. It is *not*
+formal recovery evidence and establishes no recovered-model capability.
+
+### Verification run with the C0 freeze
+
+`1057 passed / 11 skipped / 0 failed` (20m40s) across `tests/docs`,
+`tests/autoinit/test_state.py`, `tests/pod` and `tests/test_usable_rollout.py` —
+the suites that own the state, schema, catalog, link and session-contract
+invariants this commit touches. All four frozen-asset verifiers PASS:
+`verify_frozen_assets`, `verify_historical_probe_reuse`,
+`verify_attempt5_probe_reuse`, `verify_attempt4_probe_reuse`. The verifiers
+rewrite only their own `generated_utc`; every digest was unchanged and that
+churn was reverted, so no frozen evidence file is touched by this commit.
+
+**No runtime or source implementation file changed** — the diff is `logs/` plus
+one test whose premise expired (it required the snapshot to call Phase C "NOT
+DESIGNED", which C0 has now made false).
 
 ## Where to start
 
 | you want | read |
 | --- | --- |
 | the scientific history, by phase | [`PHASE_INDEX.md`](PHASE_INDEX.md) |
+| the frozen C1 protocol | [`phase_c0_preregistration.json`](phase_c0_preregistration.json) |
+| the power evidence behind N=850 | [`phase_c0_sizing_evidence.json`](phase_c0_sizing_evidence.json) |
 | what Phase A and B concluded | [`phase_a_vs_phase_b_comparison.md`](phase_a_vs_phase_b_comparison.md) |
 | the Phase-C structure | [`phase_c_roadmap.md`](phase_c_roadmap.md) |
 | the next-session handoffs | [`HANDOFF_next_session.md`](HANDOFF_next_session.md) |
@@ -28,16 +74,37 @@ DESIGNED / NOT PRICED / NOT AUTHORIZED**.
 
 | purpose | path |
 | --- | --- |
-| git repository | `/home/ecs-user/AlphaAvatar-distill` — 8.27 GiB |
-| canonical scientific artifacts | `/home/ecs-user/aad-artifacts` — 94.69 GiB |
-| scratch | `/home/ecs-user/aad-scratch/sessions/<session-id>` — 0.24 GiB |
+| git repository | `/home/ecs-user/AlphaAvatar-distill` |
+| canonical scientific artifacts | `/home/ecs-user/aad-artifacts` |
+| scratch | `/home/ecs-user/aad-scratch/sessions/<session-id>` |
 
 The five `$HOME/phase_b_*_scr` directories were deleted on 2026-08-31 after every
 one of their 200 files was proven to have a canonical copy — including hashing
 all 128 members of the three remaining tarballs. **140 MiB** reclaimed, nothing
 unique lost. Before deleting, 89 files of sole-copy Attempt-5 raw evidence were
 promoted to `aad-artifacts`, and 60 session journals to the per-attempt log
-directories. Free space: 10.21 GiB.
+directories.
+
+> **That closeout covered those five `$HOME` roots ONLY.** It did **not** mean
+> that all `/home/ecs-user/aad-scratch` scientific evidence had been removed, and
+> it had not been. A 2026-09-01 audit found **11 of the 12** retained Phase-A
+> per-sample row files, plus 90 raw generation files, still sole copies under
+> `aad-scratch` session directories outside the declared convention.
+
+### Preserved evidence — `preserved_scratch_20260901`
+
+`/home/ecs-user/aad-artifacts/autoinit/preserved_scratch_20260901/` — **359
+files, 12.95 MiB**, byte-for-byte copies of every sole-copy Phase-A/B per-sample
+row file, raw generation, training event stream and scored probe result found
+under a session `store/extracted/` tree. `MANIFEST.json`
+(`aadistill.promoted_raw_evidence/v1`, sha256
+`3e1a72e2ade2fde610b95e41e147f7f93d37fd4418a4a2d9f61ae58d27cca0b7`) records
+origin path, size, sha256 and scientific role for every file.
+
+All 359 were re-hashed from the manifest — 0 missing, 0 mismatched — and the
+preserved copy **alone** re-derives the frozen Phase-A/B pooled figures. **Copy,
+not move: the `aad-scratch` originals are retained and must not be deleted in
+this phase.** The 140.66 MiB of session transport bundles need no C0 decision.
 
 ---
 

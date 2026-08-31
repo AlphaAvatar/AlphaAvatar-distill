@@ -300,22 +300,44 @@ operator order.
 and the least supported today.*
 
 ### ATTENTION — the Phase-C motivation
-**Negative / weak search signal, and it is consistent.** `attention.weight_proxy_v0`
-appears in **every** non-composite Top-5 path, and in **every one of them the
-calibration selected is `calib.none@v1`** — including the winner, the runner-up,
-the Phase-A leader, and `ab7632b00788`, which placed ATTENTION *first* and still
-took `calib.none@v1`.
 
-The search was free to calibrate attention with either profile and, across every
-competitive path it found, declined to.
+> **INTERPRETATION WITHDRAWN AND CORRECTED, 2026-09-01.** The reading below is
+> **wrong** and must not be cited. No number in it changes; the inference from
+> those numbers does. Decision record: [`decisions.md`](decisions.md) 2026-09-01.
+> Corrected motivation of record:
+> [`phase_c0_preregistration.json`](phase_c0_preregistration.json).
+>
+> **The correction.** `attention.weight_proxy_v0` declares
+> `CalibrationNeed.NONE`. `BeamSearch._candidate_expansions` offers such an
+> implementation **exactly once, against the `NO_CALIBRATION` sentinel**, however
+> many profiles are active. The search was therefore **never free to calibrate
+> ATTENTION** and never declined anything — `calib.none@v1` was mechanical, not a
+> choice. The claim "the search was free to calibrate attention and declined to"
+> is false as a matter of the search implementation.
+>
+> **What actually motivates Phase C:** Phase A/B exercised only
+> `attention.weight_proxy_v0`. No activation-based, forward-logit, or causal
+> ATTENTION formulation competed against it. Therefore Phase A/B contain **no
+> operator-level evidence** that such formulations are inferior. Phase C1 creates
+> the missing fixed-path comparison.
 
-This does **not** show that attention manipulation is useless. It supports the
-narrower and defensible conclusion:
+*The original text is retained below, struck through in meaning, so the record
+shows what was believed and when it was corrected.*
 
-> **The current ATTENTION operator and its search formulation did not provide a
-> competitive positive transformation in Phase B.**
+~~**Negative / weak search signal, and it is consistent.**~~ `attention.weight_proxy_v0`
+appears in **every** non-composite Top-5 path, and in every one of them the
+calibration recorded is `calib.none@v1` — including the winner, the runner-up,
+the Phase-A leader, and `ab7632b00788`, which placed ATTENTION *first*. *(That
+uniformity is the mechanical consequence described above, not a search
+preference.)*
 
-That is the motivation for Phase C.
+~~The search was free to calibrate attention with either profile and, across every
+competitive path it found, declined to.~~ **False — see the correction above.**
+
+~~This supports the narrower conclusion that the current ATTENTION operator and
+its search formulation did not provide a competitive positive transformation in
+Phase B.~~ **Not supported.** Phase B says nothing about ATTENTION calibration
+because no calibrated ATTENTION variant existed to compete.
 
 ### COMPOSITE
 **Negative search signal, one instance.** `composite.stage1_sandwich_v0` under
@@ -370,9 +392,12 @@ Proposed direction:
 2. **Do not rerun Phase B.** Its result is closed and its evidence retained.
 3. **Do not begin formal recovery training.** Deferred until the
    operator-development program is complete.
-4. **Redesign the ATTENTION operator itself.** The evidence motivating this is
-   §4: the current formulation was never competitively calibrated by a search
-   that was free to calibrate it.
+4. **Redesign the ATTENTION operator itself.** *(Motivation corrected
+   2026-09-01 — see the withdrawal notice in §4.)* Only one ATTENTION
+   formulation, `attention.weight_proxy_v0`, was ever exercised, and it is
+   calibration-free by declaration. No activation-based, forward-logit or causal
+   formulation competed against it, so no operator-level evidence about such
+   formulations exists either way.
 5. **Test the new operator against the frozen incumbent** with as clean a
    single-variable protocol as practical — one operator varied, the rest of the
    path held at the incumbent's. This is the design property both phases lack
