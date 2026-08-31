@@ -13,7 +13,7 @@ duplicates no facts: every row is a status label and a link.
 | --- | --- | --- |
 | **Phase A** | COMPLETE | **`unresolved_equivalence`** — no winner. Numerical leader `cca699c93f34` |
 | **Phase B** | COMPLETE | **`resolved`** — winner `fe9683e6a9c7`, but the separation is razor-thin |
-| **Phase C** | **NOT STARTED / NOT DESIGNED / NOT PRICED / NOT AUTHORIZED** | — |
+| **Phase C** | **NOT STARTED / NOT DESIGNED / NOT PRICED / NOT AUTHORIZED** | structure recorded in [`phase_c_roadmap.md`](phase_c_roadmap.md) |
 
 > The two phases' best candidates are **not distinguishable**: `16/510` vs
 > `15/510`, one correct answer apart. See

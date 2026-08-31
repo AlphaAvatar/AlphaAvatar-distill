@@ -360,7 +360,9 @@ The incumbent is a *starting point*, not a result to defend.
 ## 6. Phase C handoff — proposed starting point
 
 **Phase C — ATTENTION operator R&D.** Not launched, not designed, not priced,
-not authorized.
+not authorized. The agreed structure — C0 power design, C1 fixed-path isolation,
+C2 ATTENTION-aware re-search — is recorded in
+[`phase_c_roadmap.md`](phase_c_roadmap.md).
 
 Proposed direction:
 

@@ -34,6 +34,7 @@ overview and links here instead. A structural test enforces this.
 
 | file | owns |
 | --- | --- |
+| `phase_c_roadmap.md` | the agreed STRUCTURE for Phase C — ATTENTION operator R&D — recorded so the next session starts from it. C0 protocol/power design before any probe, C1 fixed-path ATTENTION isolation against the frozen `fe9683` incumbent, C2 ATTENTION-aware joint re-search with the three anchors that keep operator-improvement separable from re-optimized composition. **NOT STARTED / NOT DESIGNED / NOT PRICED / NOT AUTHORIZED**; not a plan of record for a paid session |
 | `PHASE_INDEX.md` | **the phase → experiment → attempt index.** `CATALOG.md` organizes logs by CLASS (who owns which fact); this one organizes the same evidence by the order the science happened, so a reviewer who does not know the filenames can reconstruct Phase A → Phase B without guessing. Duplicates no facts: every row is a status label and a link. Marks attempt 4's withdrawn decision unmistakably |
 | `current_state.json` | the minimal machine snapshot: budget, running, authorized, frozen identities, next starting point |
 | `STATE.md` | the human view of the above |
