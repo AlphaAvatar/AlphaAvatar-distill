@@ -20,7 +20,7 @@ implements and executes; you decide whether it may.
 | --- | --- |
 | repository HEAD | see `git rev-parse origin/main`; recorded in [`current_state.json`](current_state.json) |
 | spend | **`$263.8597`** of a **`$283.7600`** cap · headroom **`$19.9003`** |
-| authorizations | **none.** All five behavioural-continuation grants retired |
+| authorizations | **none live.** All five behavioural-continuation grants retired. Six consumed prior-phase files remain at `logs/*_authorization.json` — each binds a *non-HEAD* commit, so none can launch; they are kept because live drivers and issuers reference their paths |
 | pods / orchestration | **zero** |
 | Phase C | **NOT STARTED / NOT DESIGNED / NOT PRICED / NOT AUTHORIZED** |
 
