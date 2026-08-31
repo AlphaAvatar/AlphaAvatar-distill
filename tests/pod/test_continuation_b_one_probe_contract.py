@@ -321,21 +321,58 @@ def test_the_pricing_cites_the_attempt4_reuse_that_makes_missing_sb_empty():
     assert priced["evidence"]["missing_sb"] == []
 
 
-def test_the_live_snapshot_says_tie_pending_not_resolved():
+def test_the_live_snapshot_records_the_terminal_phase_b_state():
+    """Phase B is CLOSED and the snapshot must say so.
+
+    This test previously pinned the snapshot to `TIE_PENDING`, which was correct
+    while one observation was still owed and became wrong the moment
+    `fe9683e6a9c7/sc` resolved it. It now pins the terminal state instead, and
+    keeps the parts that never depended on the phase being open: that nothing is
+    authorized, nothing is running, and no superseded ceiling is described as
+    current.
+    """
     state = json.loads((REPO / "logs/current_state.json").read_text())
     blob = json.dumps(state)
 
-    assert state["phase_b_state"].endswith("TIE_PENDING")
-    assert state["phase_b_result"]["status"].startswith("TIE_PENDING")
-    assert state["phase_b_result"]["owed"] == ["fe9683e6a9c7/sc"]
+    # Terminal, and resolved.
+    assert "COMPLETE" in state["phase_b_state"]
+    assert state["phase_b_result"]["status"] == "RESOLVED"
+    assert state["phase_b_result"]["winner"] == (
+        "fe9683e6a9c783bbc6fe276a78c851c6")
+    assert state["phase_b_result"]["winner_is_control"] is False
+    assert state["phase_b_result"]["tie_break_ran"] is True
+
+    # The caveat travels with the result, always.
+    assert state["phase_b_result"]["clears_by"] == 0.00007
+    assert "not comfortable" in state["phase_b_result"]["read_with_care"]
+    assert "SELECTION evidence" in state["phase_b_result"]["not_capability"]
+    assert state["phase_b_result"]["authorizes"].startswith("nothing")
+
+    # Nothing is live.
     assert state["authorized"]["any"] is False
     assert state["running"]["pods"] == 0 and state["running"]["launchers"] == 0
     assert state["prepared_launch"]["any"] is False
-    assert state["budget"]["continuation_hard_ceiling_usd"] == 5.4784
-    assert state["budget"]["continuation_planning_floor_usd"] == 4.1830
+    assert state["budget"]["planning_floor_usd"] is None, (
+        "a planning floor implies a priced next session; none is planned")
 
-    # The superseded scope and ceiling must not still be described as current.
+    # Phase C is not started, and the snapshot says all four words.
+    for word in ("NOT STARTED", "NOT DESIGNED", "NOT PRICED", "NOT AUTHORIZED"):
+        assert word in state["phase_c"]["status"], word
+
+    # No superseded scope or ceiling described as current.
     assert "at most 2 conditional sc" not in blob
     assert "HARD CEILING $8.0691" not in blob
     # The roadmap survives.
-    assert "PHASE C" in blob and "ATTENTION" in blob
+    assert "PHASE C" in blob or "phase_c" in blob
+    assert "ATTENTION" in blob
+
+
+def test_the_handoff_and_phase_index_exist_and_are_linked():
+    """A new reviewer must be able to reconstruct the history without knowing
+    filenames. These two are the entry points the snapshot promises."""
+    for name in ("PHASE_INDEX.md", "phase_a_vs_phase_b_comparison.md",
+                 "phase_c_roadmap.md", "HANDOFF_next_session.md"):
+        assert (REPO / "logs" / name).is_file(), name
+    state = json.loads((REPO / "logs/current_state.json").read_text())
+    assert state["read_order"][0].startswith("logs/PHASE_INDEX.md")
+    assert "HANDOFF_next_session.md" in state["handoff"]
