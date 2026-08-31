@@ -24,6 +24,8 @@ has exactly one owner:
 | --- | --- |
 | **current state, machine-readable** | [`logs/current_state.json`](./logs/current_state.json) |
 | **current state, in prose** | [`logs/STATE.md`](./logs/STATE.md) |
+| **the scientific history, by phase** | [`logs/PHASE_INDEX.md`](./logs/PHASE_INDEX.md) — start here if you do not know the filenames |
+| **what Phase A and Phase B concluded** | [`logs/phase_a_vs_phase_b_comparison.md`](./logs/phase_a_vs_phase_b_comparison.md) |
 | spend, caps, authorizations | [`logs/BUDGET_LEDGER.md`](./logs/BUDGET_LEDGER.md) |
 | which log owns which fact | [`logs/CATALOG.md`](./logs/CATALOG.md) |
 | where code lives | [`docs/REPO_LAYOUT.md`](./docs/REPO_LAYOUT.md) |

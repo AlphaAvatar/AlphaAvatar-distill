@@ -1,4 +1,10 @@
-# Canonical experiment index — E1 to E8
+# Canonical experiment index — E1 to E8, and the AutoInit phases
+
+> **Phase A and Phase B are both COMPLETE.** Their full history, every attempt and
+> every artifact are indexed in [`PHASE_INDEX.md`](PHASE_INDEX.md); the scientific
+> conclusions are in
+> [`phase_a_vs_phase_b_comparison.md`](phase_a_vs_phase_b_comparison.md). The rows
+> below cover the E-series and the two AutoInit phase results.
 
 One place to answer: **what has been run, what did each one prove, and which
 checkpoints still matter?** Detail lives in [`EXPERIMENTS.md`](EXPERIMENTS.md) (numbered
@@ -187,13 +193,38 @@ against the pooled figure, never a single seed.
 | comparability | `comparable_identity 70a26e0b…`, live == historical, `bound_to_stage3_thresholds: true`; the raw protocol hash differs only by driver patch, non-material under `generation_runtime_comparability@v2` |
 | cost of the whole line | $12.8587 completing; seven continuation attempts total, six of which died in unexecuted lines before any stage |
 | artifacts | `logs/autoinit_recovery_continuation_attempt7/`, including all 11 probe records |
-| in current lineage | **yes** — but only as *selection*. Final initialization selection awaits Phase B |
+| in current lineage | **yes** — as *selection* only. Superseded as the current selection by Phase B, which resolved; see below |
 
 **Do not read the absolute correctness rates as recovered-model capability.**
 They sit near the floor in every arm including the control, which is a property
 of a 0.86M selection probe — the same property the Stage-3 controls show at
 `correct_overall` 0.0118. Phase A compares initializations at equal budget; it
 does not estimate what a fully recovered model can do.
+
+---
+
+## Phase B — joint P=2 search over two calibration profiles
+
+| field | value |
+| --- | --- |
+| kind | **experiment**, COMPLETE 2026-08-30 |
+| question | does the preferred initialization change when the calibration distribution is allowed to vary? |
+| regime | joint `P=2` beam over `calib.domain_balanced@v1` and `calib.reasoning_heavy@v2`; same frozen behavioural plan, seeds and equivalence interval as Phase A |
+| universe | authoritative Top-5 → identity collapse → **six** distinct candidates → rung-1 advanced `fe9683e6a9c7`, `85bde4ded2c3`, control |
+| primary result | **`resolved`, winner `fe9683e6a9c783bbc6fe276a78c851c6`** — `16/510 = 0.031373` `correct_overall`, `usable_rollout` `0.6842` |
+| margin | `0.011765` against a `0.011695` interval — clears by **`0.000070`**, about 3.6% of ONE correct sample |
+| accepted | a searched initialization is **clearly separated from the canonical control**; the frozen protocol selects `fe9683e6a9c7` |
+| **not** supported | that `fe9683e6a9c7` is intrinsically or decisively superior. It is **not distinguishable** from Phase A's leader `cca699c93f34` (`16/510` vs `15/510` — one answer, ~1/6 of the interval), and the two were never tested head-to-head |
+| **not** supported | any operator-level causal claim. `fe9683e6a9c7` is a joint path; no phase varied one operator with the rest fixed |
+| withdrawn | continuation attempt 4's `resolved` decision — pooled an imported `sc` into a rung-2 comparison. Its purchased probe is retained and valid |
+| checkpoints | `fe9683e6a9c7…` (Phase-C incumbent), `85bde4ded2c3…`, `cca699c93f34…`, canonical control |
+| artifacts | [`PHASE_INDEX.md`](PHASE_INDEX.md) → Phase B; terminal result in [`autoinit_continuation_b_attempt5/`](autoinit_continuation_b_attempt5/) |
+| cost | search $30.0200 across five attempts; behavioural continuation $3.8047 across five |
+| in current lineage | **yes** — `fe9683e6a9c7` is the proposed frozen incumbent for Phase C |
+
+**Read the same caution as Phase A.** 16 correct of 510. This is
+initialization-selection evidence under a fixed 0.86M probe, **not**
+recovered-model capability. No Stage-2/3 recovery has been run on any of these.
 
 ---
 
@@ -206,6 +237,8 @@ does not estimate what a fully recovered model can do.
 5. **General-language NLL is not a reliable promotion criterion** (E7) — hence NLL alone may not prune a search state.
 6. **E8a demonstrated a strong mismatch between a full-width depth-ablation proxy and the fully-compressed step-0 initializer**, motivating conditional / operator-order search.
 7. **E8b did not complete recovered behaviour and must not be used to claim a depth × compression interaction.**
+8. **Phase A ended `unresolved_equivalence`; Phase B is protocol-resolved but by 3.6% of one sample** — and its winner is not distinguishable from Phase A's leader. Searched initializations beat the canonical control; no operator-level cause is established.
+9. **The current ATTENTION operator took `calib.none@v1` in every competitive Phase-B path**, including the winner. That motivates Phase C.
 
 ## Current best behavioural checkpoint
 

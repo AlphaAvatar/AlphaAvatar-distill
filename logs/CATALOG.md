@@ -34,6 +34,7 @@ overview and links here instead. A structural test enforces this.
 
 | file | owns |
 | --- | --- |
+| `PHASE_INDEX.md` | **the phase → experiment → attempt index.** `CATALOG.md` organizes logs by CLASS (who owns which fact); this one organizes the same evidence by the order the science happened, so a reviewer who does not know the filenames can reconstruct Phase A → Phase B without guessing. Duplicates no facts: every row is a status label and a link. Marks attempt 4's withdrawn decision unmistakably |
 | `current_state.json` | the minimal machine snapshot: budget, running, authorized, frozen identities, next starting point |
 | `STATE.md` | the human view of the above |
 | `BUDGET_LEDGER.md` | actual spend, the cap history and every authorization's status |
