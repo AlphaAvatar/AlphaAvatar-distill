@@ -37,7 +37,7 @@ one of their 200 files was proven to have a canonical copy — including hashing
 all 128 members of the three remaining tarballs. **140 MiB** reclaimed, nothing
 unique lost. Before deleting, 89 files of sole-copy Attempt-5 raw evidence were
 promoted to `aad-artifacts`, and 60 session journals to the per-attempt log
-directories. Free space: 10.14 GiB.
+directories. Free space: 10.21 GiB.
 
 ---
 
@@ -84,9 +84,12 @@ rank, though here it agrees.
 
 ## What it authorizes
 
-**Nothing.** Not formal recovery, not a canonical Stage-1 NLL, not Phase C. The
-**Phase A vs Phase B scientific comparison is owed next**, and must precede any
-Phase C execution.
+**Nothing.** Not formal recovery, not a canonical Stage-1 NLL, and not Phase C
+execution. The Phase A vs Phase B scientific comparison
+([`phase_a_vs_phase_b_comparison.md`](phase_a_vs_phase_b_comparison.md)) is
+**COMPLETE and accepted**; the next research task is **Phase C0 — protocol,
+statistical power and experimental design review**, which must precede any Phase
+C execution.
 
 ## Cost across five launches
 
@@ -640,19 +643,24 @@ identities, the three finalists, floor `$5.4784`, ceiling `$8.0691`, cap
 `$283.76`. The authorization issued against the old digest is retired to
 `superseded/` **UNUSED**.
 
-**Scratch no longer lands in `$HOME`.** The launcher defaults to
-`/home/ecs-user/aad-scratch/sessions/<session-id>`, so no sixth `phase_b_*_scr`
-is created. The five that exist were inventoried at `$0` before anything was
-deleted, and one finding matters:
-**`phase_b_a5_scr` holds the only surviving raw generations, per-sample rows and
-train logs for Attempt 5's three fresh `sa` probes** — including `fe9683e6a9c7`,
-which this session cites. The probe *journals* are canonical in
-`autoinit_phase_b_attempt5/probes/` and the search journal is in `aad-artifacts`,
-but the generations they were computed from exist nowhere else. It must not be
-retired; promoting it into `aad-artifacts` is a maintainer call. Only the five
-git bundles were deleted — each proven rebuildable from a commit that is an
-ancestor of `origin/main` — reclaiming **31.26 MiB**. Full record in
-[`scratch_inventory_20260829.json`](scratch_inventory_20260829.json).
+**Scratch no longer lands in `$HOME`, and the five old roots are gone.** The
+launcher defaults to `/home/ecs-user/aad-scratch/sessions/<session-id>`, so no
+sixth `phase_b_*_scr` is created.
+
+The 2026-08-29 inventory found that **`phase_b_a5_scr` held the only surviving
+raw generations, per-sample rows and train logs for Attempt 5's three fresh `sa`
+probes** — including `fe9683e6a9c7`. That is why it was not deleted then. It has
+since been **resolved rather than retired**: on 2026-08-31 those 89 sole-copy
+files were promoted into `aad-artifacts`, and 60 session journals into the
+per-attempt log directories, every file hash-verified, before any deletion. The
+five roots were then removed, reclaiming **140 MiB**. `verify_attempt5_probe_reuse`
+now passes reading only repo journals and `aad-artifacts`, which is the evidence
+that nothing load-bearing went with them.
+
+Earlier, only the five git bundles had been deleted — each proven rebuildable
+from a commit that is an ancestor of `origin/main` — reclaiming **31.26 MiB**.
+Records: [`scratch_inventory_20260829.json`](scratch_inventory_20260829.json) and
+[`storage_closeout_20260831.json`](storage_closeout_20260831.json).
 
 # The launch blocker is REPAIRED
 

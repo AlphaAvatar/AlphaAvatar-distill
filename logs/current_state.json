@@ -1,24 +1,24 @@
 {
   "schema": "aadistill.current_state/v2",
-  "generated_utc": "2026-08-31T09:00:33Z",
-  "_contract": "The minimal machine-readable CURRENT snapshot: live facts only, no history, no per-attempt detail, no narrative. History lives in logs/decisions.md and the per-run directories; the human view is logs/STATE.md and the two must agree. Ownership: logs/CATALOG.md.",
-  "baseline_commit": "884acb04c3aca3a548f825b5011f562131d9d86c",
-  "baseline_commit_meaning": "The LAST TESTED IMPLEMENTATION: the commit whose tree produced the latest_verification figures (2524 passed / 12 skipped / 0 failed). Commits after it changed only logs and metadata -- no file in CONTINUATION_SOURCE_FILES_V2 -- so the tested implementation is unchanged.",
+  "generated_utc": "2026-08-31T17:20:16Z",
+  "_contract": "Minimal machine-readable CURRENT snapshot: live facts only, no history, no per-attempt detail, no narrative. History: logs/decisions.md and the per-run dirs. Human view: logs/STATE.md, which must agree. Ownership: logs/CATALOG.md.",
+  "baseline_commit": "1a0d12b28dcf4071d60c5a8260b9e4e5d8443cde",
+  "baseline_commit_meaning": "LAST TESTED IMPLEMENTATION: the tree that produced latest_verification (2530/12/0). Every commit after it touched only logs/. Corrected 2026-08-31 from 884acb04, whose note wrongly said only logs changed after it -- three dev-box tools had too, none in CONTINUATION_SOURCE_FILES_V2.",
   "running": {
     "paid_compute": false,
     "pods": 0,
     "launchers": 0,
-    "note": "pod skoh6l6wmmwxce deleted 2026-08-30T21:15:07Z, provider confirms gone and not billing; launcher, watchdog and poller all stopped"
+    "note": "pod skoh6l6wmmwxce deleted 2026-08-30T21:15:07Z, provider confirms gone; launcher, watchdog and poller all stopped"
   },
   "authorized": {
     "any": false,
     "note": "autoinit.continuation_b.20260830T194023Z CONSUMED by attempt 5 and retired. All five continuation grants retired. Nothing is authorized and no further paid work is approved.",
-    "consumed_files_retained": "Six prior-phase authorization files remain at logs/*_authorization.json (continuation, device_canary, measurement, micro_preflight, phase_a, recovery_continuation). Each binds a NON-HEAD authorized_session_commit, so session_commit_gate rejects all six at any current commit. They are NOT moved to logs/superseded/ because 10-22 files each -- including live drivers, launchers and issuers -- reference their paths. Presence of these files is not authorization; 'authorized.any' is the field that answers that question."
+    "consumed_files_retained": "Six consumed prior-phase logs/*_authorization.json remain in place; each binds a NON-HEAD commit so session_commit_gate rejects all six. Not moved to superseded/ because live drivers/launchers/issuers reference their paths. Presence is not authorization -- 'any' answers that."
   },
   "prepared_launch": {
     "any": false,
     "bundles": 0,
-    "note": "nothing is prepared. The attempt-4 bundle is consumed and its authorization retired; no new one is issued"
+    "note": "nothing prepared; the attempt-4 bundle is consumed and its authorization retired"
   },
   "budget": {
     "cumulative_spend_usd": 263.8597,
@@ -27,9 +27,8 @@
     "planning_floor_usd": null,
     "remaining_is_not_permission": true,
     "ledger": "logs/BUDGET_LEDGER.md",
-    "headroom_note": "Phase-B attempts 1-5 cost $30.0200; behavioural continuation attempts 1-5 cost $3.8047 and CLOSED Phase B. Nothing further is funded or approved.",
-    "closed_continuation_pricing": "HISTORICAL: floor $4.1830 / ceiling $5.4784 / 1 probe priced the final fe9683e6a9c7/sc session, which is spent and closed. Not a standing allowance.",
-    "planning_floor_note": "no next paid session is planned or priced, so there is no planning floor. Phase C is unpriced and unauthorized."
+    "headroom_note": "Phase-B attempts 1-5 cost $30.0200; continuation attempts 1-5 cost $3.8047 and CLOSED Phase B. Nothing further is funded.",
+    "planning_floor_note": "no next paid session is planned or priced. Phase C is unpriced and unauthorized."
   },
   "frozen": {
     "science_plan_hash": "02be33b9a7a8e26bc8bfb75795351e8cdc9ffd441b47066cc81887cfc511b55c",
@@ -43,24 +42,27 @@
       "sc_conditional": 20260813,
       "fourth_seed": "never"
     },
-    "calibration": "calib.domain_balanced@v1 (spec 11f36a88, content d65c1f40) and calib.reasoning_heavy@v2 (spec 6c67b8df, content cdb28389, items a2ff8c92). Both identities are bound: profile_hash does NOT identify the sampled bytes",
+    "calibration": "calib.domain_balanced@v1 (spec 11f36a88, content d65c1f40) and calib.reasoning_heavy@v2 (spec 6c67b8df, content cdb28389, items a2ff8c92). Both identities bound: profile_hash does NOT identify the sampled bytes",
     "runtime_comparability": "generation_runtime_comparability@v2",
     "phase_b_session_plan_hash": "23f23649b4be92bd8852bf9d89f8dcb372bc5a00a175ae631d32b9d71de8032d",
     "phase_b_pricing": "HISTORICAL: floor $16.4555, ceiling $35.6660 \u2014 prices a P=2 search ALREADY BOUGHT.",
     "phase_b_stage1_selection_sha256": "84fd6496851995ae",
     "phase_b_identity": "amendment df413bd99119dab7, universe e94f15d2e648d86a, 6 distinct (8 assumed). Attempt-5 exec 3ad6a6e3edf1 / prereg 53f1347f6865: HISTORICAL, search bought.",
-    "continuation_b": "CLOSED. Final session: exec a5ce6311789eb4cd, session plan V3 6d6f971364868d84, prereg bd827d12b6607356, authorization 20260830T194023Z (CONSUMED). It purchased exactly fe9683e6a9c7/sc for $1.5433 against a $5.4784 ceiling. No continuation is pending, priced or approved.",
-    "phase_b_post_freeze": "exec digest moved 3d3b5d07 -> a043e2c7: shared SESSION_KIND dispatcher gained a continuation_b branch; Phase-B gate now accepts declared additive drift. 3 pre-existing branches byte-identical. Prereg NOT rewritten. logs/autoinit_phase_b_post_freeze_changes.json"
+    "continuation_b": "CLOSED. exec a5ce6311789eb4cd, session plan V3 6d6f971364868d84, prereg bd827d12b6607356, authorization 20260830T194023Z (CONSUMED). Bought exactly fe9683e6a9c7/sc for $1.5433 against a $5.4784 ceiling. None pending or priced.",
+    "phase_b_post_freeze": "exec digest moved 3d3b5d07 -> a043e2c7: the shared SESSION_KIND dispatcher gained a continuation_b branch; 3 pre-existing branches byte-identical; prereg NOT rewritten. logs/autoinit_phase_b_post_freeze_changes.json"
   },
   "latest_verification": {
-    "utc": "2026-08-30T21:18:37Z",
-    "after": "continuation attempt 5",
-    "terminal": "ALL_DONE \u2014 decision_status resolved",
-    "gates": "8 of 8 PASS including workload_scope_gate",
-    "probes_bought": "1, exactly fe9683e6a9c7/sc as whitelisted; 12 citations reused; no sa, no sb, no 85bde/sc, no control/sc, no search",
-    "rung2_reproduced_on_hardware": "the pod recomputed the corrected rung-2 and reproduced 11/340, 9/340, 3/340 -> tie_pending",
-    "teardown": "gate allowed=True failed=None; 45 artifacts across 16 classes",
-    "scope": "one paid pod, $1.5433 against the $5.4784 ceiling"
+    "utc": "2026-08-31T17:29:12Z",
+    "kind": "CURRENT -- $0 closeout verification at the live tree. No compute, no pod, no authorization.",
+    "commit": "1a0d12b28dcf4071d60c5a8260b9e4e5d8443cde",
+    "suite": "2530 passed / 12 skipped / 0 failed (28m01s)",
+    "verifiers": "4 of 4 PASS: frozen_assets, historical/attempt4/attempt5 probe-reuse",
+    "scratch_deletion_safe": "verify_attempt5_probe_reuse passes from repo journals + aad-artifacts only",
+    "pods": "0, via GraphQL myself{pods} uptime, not the CLI field",
+    "closeout_utc": "2026-08-31T18:02:32+08:00",
+    "closeout_result": "Phase A/B frozen; scratch closed; storage reconciled; handoffs written; 2.9 GiB of regenerable pytest fixtures removed.",
+    "closeout_record": "logs/storage_closeout_20260831.json",
+    "stale_process_killed": "a session waiter spinning 12.7h -- its own pgrep -f pattern matched the invoking shell's argv"
   },
   "abandoned": [
     "recovery_search_v1 (INVALID before first use)",
@@ -70,29 +72,20 @@
     "the paid device-canary session path: TERMINATED 2026-08-18, evidence kept, none prepared"
   ],
   "next_starting_point": {
-    "status": "PHASE_B COMPLETE \u2014 RESOLVED, winner fe9683e6a9c7, by a margin of 0.000070 over the equivalence interval. Five continuation launches, $3.8047; the first three bought nothing and each closed a distinct defect.",
-    "the_ask": "REVIEW the Phase A vs Phase B comparison. No paid work is approved, priced or requested.",
-    "budget": "cap $283.7600, spent $263.8597, headroom $19.9003. Nothing is funded."
+    "status": "PHASE A and PHASE B CLOSED and accepted; the comparison is COMPLETE.",
+    "the_ask": "Phase C0 -- statistical power and experimental design review. No implementation, no ATTENTION operator yet. No paid work approved, priced or requested.",
+    "budget": "see budget: nothing is funded."
   },
   "read_order": [
-    "logs/PHASE_INDEX.md \u2014 the scientific history by phase, START HERE",
-    "logs/phase_a_vs_phase_b_comparison.md \u2014 what Phase A and B concluded",
-    "logs/HANDOFF_next_session.md \u2014 the next-session handoffs",
-    "logs/STATE.md \u2014 the human view of this file",
-    "logs/CATALOG.md \u2014 which log owns which fact",
-    "logs/BUDGET_LEDGER.md \u2014 spend and caps",
-    "AGENTS.md \u2014 the binding working contract"
+    "logs/PHASE_INDEX.md -- history by phase, START HERE",
+    "logs/phase_a_vs_phase_b_comparison.md -- what A and B concluded",
+    "logs/phase_c_roadmap.md -- C0/C1/C2",
+    "logs/HANDOFF_next_session.md -- next-session handoffs",
+    "logs/STATE.md -- human view of this file",
+    "logs/CATALOG.md -- which log owns which fact",
+    "logs/BUDGET_LEDGER.md -- spend and caps",
+    "AGENTS.md -- the binding working contract"
   ],
-  "local_storage": {
-    "free_gib": 14.9402,
-    "ckpt_store_gate": "REPLACED for the continuation: continuation_artifact_capacity_gate needs 1076 MiB on the <scr>/store filesystem (largest search-free session store 13,641,956 B x4 + 1 GiB). Phase A/B keep the 11.55 GiB five-leaf gate",
-    "last_reclamation": "logs/derived_cache_cleanup_20260827.json -- 6.2387 GiB of rebuildable caches in two passes",
-    "volatility_note": "a full-suite run consumes ~4.7 GiB of /tmp on this single-filesystem box, so the launcher's own capacity gate is the protection that matters",
-    "checkpoints_deleted": 0,
-    "scientific_artifacts_deleted": 0,
-    "scratch_root": "/home/ecs-user/aad-scratch/sessions/<session-id>",
-    "scratch_inventory": "logs/scratch_inventory_20260829.json -- 31.26 MiB reclaimed from five provably rebuildable git bundles. phase_b_a5_scr holds SOLE copies of Attempt 5's raw generations for three sa probes and was NOT deleted"
-  },
   "phase_a_result": {
     "status": "COMPLETE 2026-08-24, $12.8587, ALL_DONE",
     "decision_status": "unresolved_equivalence",
@@ -105,18 +98,17 @@
     "detail": "logs/decisions.md \u2014 provisional leader, two controls, comparability"
   },
   "next_sequence": {
-    "_status": "Phase B is CLOSED. The next deliverable is UNPAID and is the Phase A vs Phase B scientific comparison. Nothing below it is authorized, funded, priced or started.",
-    "1_phase_a_vs_phase_b": "the complete scientific comparison, from retained evidence, no GPU. MUST precede any Phase C execution. logs/phase_a_vs_phase_b_comparison.md",
-    "2_phase_c": "PHASE C \u2014 ATTENTION operator R&D against the frozen incumbent, with as clean a single-variable protocol as practical. Not designed, not priced, not authorized.",
-    "3_then": "only after ATTENTION is understood: FFN, then RESIDUAL_WIDTH; joint confirmation search later.",
-    "4_canonical_stage1_nll": "only after the final initialization is uniquely selected",
-    "5_formal_recovery": "DEFERRED until the operator-development program is complete. The Phase-B winner is NOT authorization for it.",
+    "_status": "Phase A and Phase B CLOSED and accepted; the comparison is COMPLETE. Nothing below is authorized, funded or started.",
+    "0_comparison": "COMPLETE and accepted -- logs/phase_a_vs_phase_b_comparison.md. Frozen.",
+    "1_phase_c0": "CURRENT NEXT RESEARCH TASK -- Phase C0: protocol, statistical power and experimental design review. UNPAID, no GPU. Precedes any Phase C execution.",
+    "2_phase_c1": "fixed-path ATTENTION isolation on frozen incumbent fe9683. Only after C0 review.",
+    "3_phase_c2": "ATTENTION-aware joint beam re-search. Only if C1 finds a worthwhile ATTENTION formulation.",
+    "4_then": "FFN, then RESIDUAL_WIDTH; joint confirmation search later; canonical Stage-1 NLL only once the initialization is uniquely selected.",
+    "5_formal_recovery": "DEFERRED until operator development is complete. The Phase-B winner is NOT authorization for it.",
     "funding": "nothing is funded or priced."
   },
-  "canonical_infrastructure_moved_to": "docs/SESSION_ARCHITECTURE.md and logs/decisions.md",
   "phase_b_state": "PHASE_B COMPLETE \u2014 behavioural selection RESOLVED",
-  "blocker": "none. Phase B is closed. The Phase A vs Phase B scientific comparison is OWED before any Phase C execution.",
-  "failed_note": "per-attempt failure records live in the per-run directories and logs/decisions.md",
+  "blocker": "none.",
   "phase_b_result": {
     "status": "RESOLVED",
     "winner": "fe9683e6a9c783bbc6fe276a78c851c6",
@@ -130,38 +122,44 @@
     "read_with_care": "the margin clears by 0.000070 \u2014 about 3.6% of ONE correct sample (1/510 = 0.001961). At 15 correct instead of 16 the result would be unresolved_equivalence. The frozen rule was applied exactly as preregistered; the separation is not comfortable.",
     "ranking_metric": "correct_overall; usable_rollout does NOT rank, though it agrees here",
     "not_capability": "SELECTION evidence under a fixed 0.86M probe. 16 correct of 510; every arm including the control sits near the floor",
-    "authorizes": "nothing. Not formal recovery, not a canonical Stage-1 NLL, not Phase C before the Phase A/B comparison is reviewed",
+    "authorizes": "nothing. Not formal recovery, not a canonical Stage-1 NLL, and not Phase C execution before the Phase C0 design review.",
     "record": "logs/autoinit_continuation_b_attempt5.json"
   },
-  "history": "per-attempt records, failure patterns and cost history live in logs/decisions.md, logs/BUDGET_LEDGER.md and the per-run directories",
+  "history": "per-attempt records, failure patterns and cost history: logs/decisions.md, logs/BUDGET_LEDGER.md and the per-run dirs. Infrastructure: docs/SESSION_ARCHITECTURE.md.",
   "phase_c": {
     "status": "NOT STARTED / NOT DESIGNED / NOT PRICED / NOT AUTHORIZED",
     "structure": "logs/phase_c_roadmap.md \u2014 C0 power design, C1 fixed-path ATTENTION isolation, C2 ATTENTION-aware re-search",
-    "incumbent": "fe9683e6a9c783bbc6fe276a78c851c6, artifact digest c313d1b4081b, at aad-artifacts/autoinit/phase_a/fe9683e6a9c783bbc6fe276a78c851c6 \u2014 proposed, with its caveats: margin 0.000070, not distinguishable from Phase A's leader, not a benchmark, NOT recovered, component operators not individually validated"
+    "incumbent": "fe9683e6a9c783bbc6fe276a78c851c6, artifact digest c313d1b4081b, at aad-artifacts/autoinit/phase_a/<id>. Proposed WITH caveats: margin 0.000070, not distinguishable from Phase A's leader, not a benchmark, NOT recovered, component operators not individually validated."
   },
   "handoff": "logs/HANDOFF_next_session.md \u2014 ChatGPT review session and Claude Code execution session",
   "storage": {
-    "repo_gib": 8.27,
+    "measured_utc": "2026-08-31T17:20:16Z",
+    "repo_gib": 8.22,
     "aad_artifacts_gib": 94.69,
     "aad_scratch_gib": 0.24,
-    "free_gib": 10.14,
+    "free_gib": 10.21,
     "roots": {
       "git": "/home/ecs-user/AlphaAvatar-distill",
       "canonical artifacts": "/home/ecs-user/aad-artifacts",
       "scratch": "/home/ecs-user/aad-scratch/sessions/<session-id>"
     },
-    "closeout": "logs/storage_closeout_20260831.json",
-    "note": "the five $HOME phase_b_*_scr directories were deleted 2026-08-31 after every byte was proven redundant; 140 MiB reclaimed. Two duplicate checkpoint pairs (2.92 GiB) were found and deliberately NOT deleted"
+    "roots_note": "the ONLY working roots. The five $HOME/phase_b_*_scr are gone and must not return.",
+    "scratch_state": "CLOSED 2026-08-31: 89 sole-copy raw-evidence files promoted to aad-artifacts and 60 journals to per-attempt log dirs, hash-verified, before deletion; 140 MiB reclaimed. Attempt-5 load-bearing evidence is canonical and re-verified from repo journals + aad-artifacts.",
+    "checkpoints_deleted": 0,
+    "scientific_artifacts_deleted": 0,
+    "open_maintainer_decision": "KEEP / unresolved ownership: 2 duplicate checkpoint pairs, 2.92 GiB. NOT deletion candidates.",
+    "closeout": "logs/storage_closeout_20260831.json -- reclamation history, gate sizes, /tmp volatility"
   },
-  "closeout": {
-    "utc": "2026-08-31T00:00:00Z",
-    "scope": "repository and artifact closeout; no GPU work, no authorization, no compute",
-    "suite": "2530 passed, 12 skipped, 0 failed at 1a0d12b28dcf (28m01s)",
-    "verifiers": "verify_frozen_assets + historical/attempt4/attempt5 probe-reuse: all PASS",
-    "pods": "0, confirmed via GraphQL myself{pods} -- not the CLI field",
-    "orchestration": "none. One stale process was found and killed: a session waiter spinning 12.7h because its own `pgrep -f` pattern matched the invoking shell's argv. Cost nothing (dev box) but it is the known self-match failure mode.",
-    "scratch": "5 $HOME/phase_b_*_scr dirs deleted after promoting 89 sole-copy raw-evidence files and 60 journals, all hash-verified; 140 MiB reclaimed",
-    "open_maintainer_decision": "2 duplicate checkpoint pairs, 2.92 GiB, deliberately NOT deleted -- see logs/storage_closeout_20260831.json",
-    "phase_c": "NOT STARTED / NOT DESIGNED / NOT PRICED / NOT AUTHORIZED"
+  "historical_paid_verification": {
+    "utc": "2026-08-30T21:18:37Z",
+    "kind": "HISTORICAL -- last PAID session (continuation attempt 5). Superseded as live verification; kept as the runtime evidence behind the Phase-B result.",
+    "terminal": "ALL_DONE, resolved; 8/8 gates; bought exactly fe9683e6a9c7/sc for $1.5433 against a $5.4784 ceiling; teardown confirmed",
+    "record": "logs/autoinit_continuation_b_attempt5.json"
+  },
+  "deferred_not_blocking": {
+    "_note": "open, none blocking. Detail: logs/HANDOFF_next_session.md",
+    "duplicate_checkpoints": "2.92 GiB, KEEP / unresolved ownership -- maintainer decision, NOT deletion candidates",
+    "session_launchers_coverage": "SESSION_LAUNCHERS omits the Phase-B and continuation launchers; DEFERRED infrastructure debt",
+    "issuer_relative_to": "cosmetic relative_to crash when --out is outside the repo, after writing the file"
   }
 }
