@@ -1,0 +1,436 @@
+{
+  "schema": "aadistill.autoinit.phase_b_evidence/v1",
+  "started_utc": "2026-08-27T10:59:20.385589+00:00",
+  "phase": "B",
+  "hypothesis": "does the preferred composition change when the calibration distribution changes",
+  "profiles": [
+    "calib.domain_balanced@v1",
+    "calib.reasoning_heavy@v2"
+  ],
+  "retrains_permanent_controls": false,
+  "redefines_thresholds": false,
+  "followon_started": false,
+  "followon_reachable_from_this_driver": false,
+  "excluded_phase_a_leaves": {
+    "158b96cf651f": "lost the Phase-A rung-1 behavioural admission step",
+    "281a02c3ac18": "lost the Phase-A rung-1 behavioural admission step",
+    "4e429f7ed722": "lost the Phase-A rung-1 behavioural admission step"
+  },
+  "stages": {
+    "0": {
+      "passed": true,
+      "reason": "",
+      "finished_utc": "2026-08-27T11:01:31.366630+00:00",
+      "spend_usd": 0.1968,
+      "attested": {
+        "schema": "aadistill.autoinit.phase_a_attested_protocol/v1",
+        "generated_utc": "2026-08-27T11:01:31.365662+00:00",
+        "runtime": {
+          "version": 1,
+          "image_digest": "runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@580.159.03",
+          "python_version": "3.12.3",
+          "torch_version": "2.11.0+cu128",
+          "transformers_version": "5.13.1",
+          "cuda_runtime": "12.8",
+          "attention_backend": "sdpa"
+        },
+        "generation_source_digest": {
+          "digest": "a1b51736d6a6b1276322a04d44855d7b574011e165e77d6d23c3e31b3036f743",
+          "files": [
+            {
+              "path": "scripts/evaluation/uncapped_eval.py",
+              "sha256": "120e92dc08a49ae4e3ed74fbbc6537054c011382755cdec6418c11b341f780d4",
+              "bytes": 28667
+            },
+            {
+              "path": "src/aadistill/evaluation/behavior.py",
+              "sha256": "c6f52721e8b86bc2d875683bfb9c35b4101379fa5d48de7a48db93959e2935c2",
+              "bytes": 19983
+            },
+            {
+              "path": "src/aadistill/evaluation/degeneration.py",
+              "sha256": "793540820d4fc0f42d0c855e0d79eb879b94efa451e06030b2a14c55683f4961",
+              "bytes": 5245
+            }
+          ],
+          "rule": "sha256 over sorted 'path:sha256' lines of the declared set"
+        },
+        "scoring_contract": {
+          "contract": "recovery_search_scoring@v2",
+          "contract_id": "recovery_search_scoring",
+          "version": 2,
+          "digest": "808080a7c5d88d5a66760fd0d7eeabc5451c096ad0819f8c5663a0b8224660be",
+          "files": [
+            {
+              "path": "scripts/autoinit/score_recovery_search.py",
+              "sha256": "b19eba4c2c5f555aeb141811439ad5e5417a3222c3b57b78bad3f497eb90dba3",
+              "bytes": 21518
+            },
+            {
+              "path": "src/aadistill/autoinit/recovery.py",
+              "sha256": "39d6598e210b9619d56463f6ba3000d47e1a97f7121e7db25b97213d4d6c799e",
+              "bytes": 102452
+            },
+            {
+              "path": "src/aadistill/evaluation/behavior.py",
+              "sha256": "c6f52721e8b86bc2d875683bfb9c35b4101379fa5d48de7a48db93959e2935c2",
+              "bytes": 19983
+            },
+            {
+              "path": "src/aadistill/evaluation/capability.py",
+              "sha256": "da1bc3b1069d927b6ab2cbf0eaaf6763bfa491d396189b3dcde95977e39d67ad",
+              "bytes": 19568
+            },
+            {
+              "path": "src/aadistill/evaluation/strict_answer.py",
+              "sha256": "ecb4356a89d3563214ea11ade2307b0d106588bb7ff59f6b8c5e3b9c98d380e3",
+              "bytes": 7628
+            },
+            {
+              "path": "src/aadistill/evaluation/usable_rollout.py",
+              "sha256": "8159acdd7a0a6953dfefac7acf4f6fb4706f69a7264b625e9f9b7ff1a74826ca",
+              "bytes": 6155
+            }
+          ],
+          "rule": "sha256 over sorted 'path:sha256' lines of the declared recovery-scoring source set",
+          "covers": [
+            "usable_rollout components and their composition",
+            "protocol validity, including the tools_offered relaxation",
+            "the tool structural-executability gate",
+            "per-set correctness scorers",
+            "correct => usable",
+            "capability schema and aggregation",
+            "pooled_counts seed aggregation",
+            "the threshold formulas materialized from control data"
+          ],
+          "supersedes": {
+            "contract": "recovery_search_scoring@v1",
+            "identity_was": "a single hash of src/aadistill/evaluation/capability.py",
+            "why": "v1 could not see a defect in the composition. A prompted tool call was rejected as unexpected_tool_call, so the tool capability read a structural 0.0000 for every arm while capability.py itself was unchanged and its hash matched."
+          }
+        },
+        "evaluation_protocol": {
+          "evaluation_protocol_hash": "250f72efbd43b86a475e8dda293b45f07ee61a4d858e147f4a5bd7681c32c2e4",
+          "generation": {
+            "generation_source_digest": "a1b51736d6a6b1276322a04d44855d7b574011e165e77d6d23c3e31b3036f743",
+            "generation_source_set_version": 1,
+            "vllm_version": "0.27.1",
+            "transformers_version": "5.15.0",
+            "torch_version": "2.13.0+cu130",
+            "dtype": "bfloat16",
+            "gpu_memory_utilization": 0.9,
+            "max_num_seqs": 256,
+            "max_num_batched_tokens": 8192,
+            "enforce_eager": false,
+            "tokenizer_source": "the evaluated checkpoint",
+            "tokenizer_sha256": "c1db93c8164f3e3ba2dbc8c6943fb574273a5efa87da4556ef9f460b5c0893b7",
+            "chat_template_sha256": "3802169b2a02b81e6adb7ab4f64f91ff02db753c8c3a64a01c35192d3a61d8d7",
+            "protocol": "project",
+            "system_message": "You are a helpful Assistant.",
+            "system_injection_rule": "injected only when the sample carries no system turn and protocol == project; a sample's own system prompt is preserved",
+            "chat_template_kwargs_json": "{}",
+            "thinking_mode": "template-default (not overridden)",
+            "trained_context": 8192,
+            "context_len_override": null,
+            "resolved_context": 8192,
+            "context_source": "trained_block_len",
+            "context_resolution_rule": "min(trained_context, architectural context); the effective context is the TRAINED context and this is not a 262K-context evaluation",
+            "temperature": 0.0,
+            "top_p": 1.0,
+            "top_k": -1,
+            "detokenize": false,
+            "max_tokens_rule": "per sample: resolved_context - len(prompt_ids); P18 unrestricted, never a chosen token budget",
+            "stop_token_ids": [
+              151645
+            ],
+            "stop_id_derivation_rule": "sorted union of config.eos_token_id, generation_config.eos_token_id, <|im_end|> and tokenizer.eos_token_id",
+            "degeneration_stop": true,
+            "degeneration_check_every": 256,
+            "degeneration_source_digest": "793540820d4fc0f42d0c855e0d79eb879b94efa451e06030b2a14c55683f4961",
+            "runtime_digest": "2db007528a37f4d02113265d225531aec441a483e03e626556e0e6049a7af101",
+            "protocol_id": "recovery_generation",
+            "version": 1,
+            "generation_protocol_fingerprint": "714237c516afc0a8421126ca30ec4a2b657689d4c81f8973834a42bceb11a3bb",
+            "is_materialized": true,
+            "unmaterialized_fields": [],
+            "excluded_by_design": [
+              "the checkpoint being generated from"
+            ],
+            "why_excluded": "the checkpoint is the treatment; a generation identity containing it would mark every pair of arms as mismatched"
+          },
+          "scoring_contract": "recovery_search_scoring@v2",
+          "scoring_digest": "808080a7c5d88d5a66760fd0d7eeabc5451c096ad0819f8c5663a0b8224660be",
+          "battery": {
+            "artifact": "recovery_search_v2",
+            "manifest_sha256": "58ae5c6dcbe32eb28c343a66830d7224a14537362deeeff2ce8219d0a31679d6",
+            "content_sha256": "a1b22778b00d95b6aba358c14a5af5b559fd807bb371c92131eacca59479f323"
+          },
+          "binding": "every control and every searched recovery probe must bind to this exact hash; a probe measured under a different one is not comparable to the thresholds materialized from these controls",
+          "notes": {}
+        },
+        "evaluation_protocol_hash": "250f72efbd43b86a475e8dda293b45f07ee61a4d858e147f4a5bd7681c32c2e4",
+        "stage3_evaluation_protocol_hash": "250f72efbd43b86a475e8dda293b45f07ee61a4d858e147f4a5bd7681c32c2e4",
+        "bound_to_stage3_thresholds": true,
+        "comparability": {
+          "rule": "generation_runtime_comparability@v2",
+          "live_identity": "70a26e0b43df20e469385115b49683b50936919e02986088b76d3c30ffd87103",
+          "historical_identity": "70a26e0b43df20e469385115b49683b50936919e02986088b76d3c30ffd87103",
+          "identities_equal": true,
+          "live_driver": "580.159.03",
+          "historical_driver": "580.159.03",
+          "driver_branch_equal": true,
+          "driver_patch_differs": false
+        },
+        "comparable_identity": "70a26e0b43df20e469385115b49683b50936919e02986088b76d3c30ffd87103",
+        "science_plan_hash": "02be33b9a7a8e26bc8bfb75795351e8cdc9ffd441b47066cc81887cfc511b55c",
+        "equivalence_interval": 0.011695296982299022,
+        "feasibility_floor": 0.3,
+        "report_sha256": "a1adcbd2678be286fce86904e5d4a163aa51d3ed134c36a4564fdc04fff22316"
+      },
+      "frozen_plan_hash": "02be33b9a7a8e26bc8bfb75795351e8cdc9ffd441b47066cc81887cfc511b55c",
+      "phase_b_binding": {
+        "executable_source_digest": "d232e5c75ec74089d955592dd454d6a7974857f57b2e34e8d96fe34d82f45622",
+        "calibration": {
+          "calib.domain_balanced@v1": {
+            "profile_hash": "11f36a88bad4879f8ab0e3586ca1f0af035401e505dc97815bed8d47b9f32e9b",
+            "content_sha256": "d65c1f40e4837ea1bd5bcc33c68041a13b797c68f5be3c0686e0142ed761028f",
+            "items_file_sha256": "c7202338109e459b17b70456461e8f304fadea7929ea547accee21adbbe7fd0b"
+          },
+          "calib.reasoning_heavy@v2": {
+            "profile_hash": "6c67b8dff0e81a775371a62b1b293677e45c173f52aee119d036c95081782ddd",
+            "content_sha256": "cdb2838946b9355294406d2bc398bc8390306ced84a35b09900f45a033ccc370",
+            "items_file_sha256": "a2ff8c92c16aaf5c178db160690430f4972216d45a57ab0025835ecd0ca41fc4"
+          }
+        },
+        "imported_probes": {
+          "probe_ids": [
+            "autoinit.v1.phase_a.rung1.85bde4ded2c3.sa",
+            "autoinit.v1.phase_a.rung1.cca699c93f34.sa",
+            "autoinit.v1.phase_a.rung1.control-qwen.sa",
+            "autoinit.v1.phase_a.rung2.85bde4ded2c3.sb",
+            "autoinit.v1.phase_a.rung2.cca699c93f34.sb",
+            "autoinit.v1.phase_a.rung2.control-qwen.sb",
+            "autoinit.v1.phase_a.rung3.85bde4ded2c3.sc",
+            "autoinit.v1.phase_a.rung3.cca699c93f34.sc"
+          ],
+          "skipped": [
+            {
+              "probe_id": "autoinit.v1.phase_a.rung1.158b96cf651f.sa",
+              "reason": "candidate is not in the Phase-B candidate set"
+            },
+            {
+              "probe_id": "autoinit.v1.phase_a.rung1.281a02c3ac18.sa",
+              "reason": "candidate is not in the Phase-B candidate set"
+            },
+            {
+              "probe_id": "autoinit.v1.phase_a.rung1.4e429f7ed722.sa",
+              "reason": "candidate is not in the Phase-B candidate set"
+            }
+          ],
+          "probes_dir_digest": "a5115816861ad239f646facec4d53ba2c7925c9430c530e7c6d0af2560d5b1af",
+          "source": "logs/autoinit_recovery_continuation_attempt7/probes"
+        }
+      }
+    }
+  },
+  "authorization": {
+    "schema": "aadistill.autoinit.phase_b_authorization/v1",
+    "authorization_id": "autoinit.phase_b.20260827T102821Z",
+    "version": 1,
+    "granted_utc": "2026-08-27T10:28:21.939639+00:00",
+    "granted_by": "Maintainer decision, 2026-08-27, in their own words: \"Approve the pricing closure and the new cumulative budget. Phase-B session hard ceiling: $35.6660 \u2014 APPROVED. Cumulative cap: raise to $275.59 \u2014 APPROVED. Current cumulative spend remains $239.9150. P1 partial causal-DEPTH caching: frozen/approved. P2 two-profile stats caching: frozen/approved. Current corrected pricing model: frozen/approved. Attempt 4 is authorized only after the final poll-lifetime repair and all existing gates pass.\"\n\nCovers: exactly one paid Phase-B execution \u2014 attempt 4 of the already-frozen session: the joint P=2 beam search over calib.domain_balanced@v1 and calib.reasoning_heavy@v2, then the cross-phase rungs over eight candidates at sa, of which only the five new Phase-B leaves incur new probes.\n\nCumulative spend at approval $239.9150 against a cumulative cap of $275.59.\n\nDoes NOT authorize: a fifth Phase-B attempt; any reopening of Phase A; reopening pricing research, P1/P2 optimization, root stats-cache optimization, CUDA-sync optimization, cross-profile score sharing, search-space or science changes, or generalization/operator R&D; any change to the P=2 search science, candidate universe, Top-5 admission rule, imported finalists/control, sa/sb/sc procedure, feasibility floor, equivalence interval, reuse rules, disk margin or storage-retention policy; the rejected 14-probe no-reuse path (a Stage-0 comparability failure TERMINATES the session); rematerializing the Stage-3 controls; admitting the three excluded Phase-A leaves; a fourth seed; the post-Phase-B generalization pass; a DEPTH incumbent change; ATTENTION/FFN/RESIDUAL_WIDTH operator research; the canonical Stage-1 NLL diagnostic; formal Stage 2/3 recovery training; or any further grant or paid session. Attempts 1-3 remain historical setup/execution-incomplete evidence and do not enter the Phase-B scientific result. Unused cumulative headroom does not authorize any later experiment.\n\nGrant document: logs/autoinit_phase_b_grant_attempt4.json",
+    "plan_id": "autoinit.v1.phase_b_session",
+    "phase_b_session_plan_hash": "23f23649b4be92bd8852bf9d89f8dcb372bc5a00a175ae631d32b9d71de8032d",
+    "phase_b_science_plan_hash": "02be33b9a7a8e26bc8bfb75795351e8cdc9ffd441b47066cc81887cfc511b55c",
+    "calibration_profile_hashes": {
+      "calib.domain_balanced@v1": "11f36a88bad4879f8ab0e3586ca1f0af035401e505dc97815bed8d47b9f32e9b",
+      "calib.reasoning_heavy@v2": "6c67b8dff0e81a775371a62b1b293677e45c173f52aee119d036c95081782ddd"
+    },
+    "calibration_content_hashes": {
+      "calib.domain_balanced@v1": "d65c1f40e4837ea1bd5bcc33c68041a13b797c68f5be3c0686e0142ed761028f",
+      "calib.reasoning_heavy@v2": "cdb2838946b9355294406d2bc398bc8390306ced84a35b09900f45a033ccc370"
+    },
+    "planning_floor_usd": 16.4555,
+    "hard_cap_usd": 35.666,
+    "authorized_stages": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5
+    ],
+    "stage_conditions": {
+      "0": "attestation; generation_runtime_comparability@v2; the Phase-B executable-source digest; BOTH calibration identities per profile; import of the verified historical probes. A comparability FAILURE TERMINATES the session before any search or probe and is NOT answered by re-running eight candidates",
+      "1": "full fresh joint P=2 beam-6 search under SCHEDULE_V1 and PARETO_V1 on the unchanged state_eval@v1; 5 admissible leaves or STOP and report the shortfall",
+      "2": "cross-phase rung 1 on sa over EIGHT candidates: the Phase-B Top-5 (probed) plus cca699c93f34, 85bde4ded2c3 and the canonical control (cited from verified evidence). The three excluded Phase-A leaves are NOT admitted",
+      "3": "rung 2 on sb: the two globally best searched candidates plus the control, which advances unconditionally; only missing probes are run",
+      "4": "conditional tie-break on sc, only for candidates inside the frozen equivalence interval that lack a verified sc; no fourth seed",
+      "5": "selection and report; unresolved_equivalence with winner=None is a RESULT. Search-side KL/NLL and the canonical Stage-1 NLL may NOT break a tie",
+      "teardown": "transfer and verify the five Phase-B Top-5 leaves through the transfer-result contract, collect, delete the pod, confirm from the provider, STOP for review"
+    },
+    "scope_note": "ONE Phase-B execution, one launcher invocation. This artifact authorizes the SPEND and the STAGES; it is not by itself an instruction to launch. Nothing here permits a second attempt, reopening Phase A, the rejected 14-probe no-reuse path, rematerializing the Stage-3 controls, a fourth seed, or any follow-on experiment: Phase B is a terminus and stops for review on every path, including unresolved_equivalence.",
+    "phase_b_authorized": true,
+    "phase_a_authorized": false,
+    "automatic_followon_start": false,
+    "authorized_session_commit": "b28a907c6ea8edc4ddfa362c2cec1183f5f56125",
+    "source_digest": "d232e5c75ec74089d955592dd454d6a7974857f57b2e34e8d96fe34d82f45622",
+    "source_files": [
+      "scripts/autoinit/load_state_eval.py",
+      "scripts/autoinit/phase_a_frozen.py",
+      "scripts/autoinit/phase_a_search.py",
+      "scripts/autoinit/price_phase_b.py",
+      "scripts/autoinit/verify_frozen_assets.py",
+      "scripts/autoinit/verify_historical_probe_reuse.py",
+      "scripts/autoinit/write_preregistration.py",
+      "scripts/pod/autoinit_engine_probe.py",
+      "scripts/pod/autoinit_phase_a_driver.py",
+      "scripts/pod/autoinit_phase_a_launch.py",
+      "scripts/pod/autoinit_phase_b_driver.py",
+      "scripts/pod/autoinit_phase_b_launch.py",
+      "scripts/pod/autoinit_preflight_setup.sh",
+      "scripts/pod/autoinit_science_inputs.py",
+      "scripts/pod/collect_artifacts.py",
+      "scripts/pod/watchdog.py",
+      "src/aadistill/autoinit/__init__.py",
+      "src/aadistill/autoinit/adapters/__init__.py",
+      "src/aadistill/autoinit/adapters/qwen3.py",
+      "src/aadistill/autoinit/arch.py",
+      "src/aadistill/autoinit/artifact.py",
+      "src/aadistill/autoinit/authorization.py",
+      "src/aadistill/autoinit/calibration.py",
+      "src/aadistill/autoinit/cost.py",
+      "src/aadistill/autoinit/datasets.py",
+      "src/aadistill/autoinit/device.py",
+      "src/aadistill/autoinit/device_handoff.py",
+      "src/aadistill/autoinit/generation.py",
+      "src/aadistill/autoinit/generation_compat.py",
+      "src/aadistill/autoinit/leaf_durability.py",
+      "src/aadistill/autoinit/metrics.py",
+      "src/aadistill/autoinit/operators/__init__.py",
+      "src/aadistill/autoinit/operators/_common.py",
+      "src/aadistill/autoinit/operators/attention.py",
+      "src/aadistill/autoinit/operators/base.py",
+      "src/aadistill/autoinit/operators/composite.py",
+      "src/aadistill/autoinit/operators/depth.py",
+      "src/aadistill/autoinit/operators/ffn.py",
+      "src/aadistill/autoinit/operators/width.py",
+      "src/aadistill/autoinit/phase_a.py",
+      "src/aadistill/autoinit/phase_b.py",
+      "src/aadistill/autoinit/ranking.py",
+      "src/aadistill/autoinit/search.py",
+      "src/aadistill/autoinit/state.py",
+      "src/aadistill/autoinit/stats.py",
+      "src/aadistill/data/extra_stream.py",
+      "src/aadistill/infrastructure/artifact_gate.py",
+      "src/aadistill/infrastructure/budget.py",
+      "src/aadistill/infrastructure/log_relay.py",
+      "src/aadistill/infrastructure/manifest.py",
+      "src/aadistill/infrastructure/provider.py",
+      "src/aadistill/infrastructure/remote.py",
+      "src/aadistill/infrastructure/session.py",
+      "src/aadistill/infrastructure/session_prechecks.py",
+      "src/aadistill/infrastructure/session_runner.py",
+      "src/aadistill/init/contribution.py",
+      "src/aadistill/init/project.py",
+      "src/aadistill/init/sandwich.py"
+    ],
+    "per_launch_hard_usd": 35.666,
+    "provenance_commit": "b28a907c6ea8edc4ddfa362c2cec1183f5f56125",
+    "enforcement": "the launcher loads this artifact and refuses to create a pod whose priced hard threshold exceeds hard_cap_usd or per_launch_hard_usd, refuses a stage not in authorized_stages, refuses an executable that does not digest to the authorized value, refuses a calibration mixture whose spec OR content hash differs, and has no code path to Phase A or to any experiment after Phase B",
+    "authorization_sha256": "9357bac39fa86e983000af3797771e35847e9f94830b8c6a7740a89a5455187d"
+  },
+  "elapsed_min": 2.18,
+  "spend_usd": 0.1968,
+  "phase_b_binding": {
+    "executable_source_digest": "d232e5c75ec74089d955592dd454d6a7974857f57b2e34e8d96fe34d82f45622",
+    "calibration": {
+      "calib.domain_balanced@v1": {
+        "profile_hash": "11f36a88bad4879f8ab0e3586ca1f0af035401e505dc97815bed8d47b9f32e9b",
+        "content_sha256": "d65c1f40e4837ea1bd5bcc33c68041a13b797c68f5be3c0686e0142ed761028f",
+        "items_file_sha256": "c7202338109e459b17b70456461e8f304fadea7929ea547accee21adbbe7fd0b"
+      },
+      "calib.reasoning_heavy@v2": {
+        "profile_hash": "6c67b8dff0e81a775371a62b1b293677e45c173f52aee119d036c95081782ddd",
+        "content_sha256": "cdb2838946b9355294406d2bc398bc8390306ced84a35b09900f45a033ccc370",
+        "items_file_sha256": "a2ff8c92c16aaf5c178db160690430f4972216d45a57ab0025835ecd0ca41fc4"
+      }
+    },
+    "imported_probes": {
+      "probe_ids": [
+        "autoinit.v1.phase_a.rung1.85bde4ded2c3.sa",
+        "autoinit.v1.phase_a.rung1.cca699c93f34.sa",
+        "autoinit.v1.phase_a.rung1.control-qwen.sa",
+        "autoinit.v1.phase_a.rung2.85bde4ded2c3.sb",
+        "autoinit.v1.phase_a.rung2.cca699c93f34.sb",
+        "autoinit.v1.phase_a.rung2.control-qwen.sb",
+        "autoinit.v1.phase_a.rung3.85bde4ded2c3.sc",
+        "autoinit.v1.phase_a.rung3.cca699c93f34.sc"
+      ],
+      "skipped": [
+        {
+          "probe_id": "autoinit.v1.phase_a.rung1.158b96cf651f.sa",
+          "reason": "candidate is not in the Phase-B candidate set"
+        },
+        {
+          "probe_id": "autoinit.v1.phase_a.rung1.281a02c3ac18.sa",
+          "reason": "candidate is not in the Phase-B candidate set"
+        },
+        {
+          "probe_id": "autoinit.v1.phase_a.rung1.4e429f7ed722.sa",
+          "reason": "candidate is not in the Phase-B candidate set"
+        }
+      ],
+      "probes_dir_digest": "a5115816861ad239f646facec4d53ba2c7925c9430c530e7c6d0af2560d5b1af",
+      "source": "logs/autoinit_recovery_continuation_attempt7/probes"
+    }
+  }
+}
+c178db160690430f4972216d45a57ab0025835ecd0ca41fc4"
+      }
+    },
+    "imported_probes": {
+      "probe_ids": [
+        "autoinit.v1.phase_a.rung1.85bde4ded2c3.sa",
+        "autoinit.v1.phase_a.rung1.cca699c93f34.sa",
+        "autoinit.v1.phase_a.rung1.control-qwen.sa",
+        "autoinit.v1.phase_a.rung2.85bde4ded2c3.sb",
+        "autoinit.v1.phase_a.rung2.cca699c93f34.sb",
+        "autoinit.v1.phase_a.rung2.control-qwen.sb",
+        "autoinit.v1.phase_a.rung3.85bde4ded2c3.sc",
+        "autoinit.v1.phase_a.rung3.cca699c93f34.sc"
+      ],
+      "skipped": [
+        {
+          "probe_id": "autoinit.v1.phase_a.rung1.158b96cf651f.sa",
+          "reason": "candidate is not in the Phase-B candidate set"
+        },
+        {
+          "probe_id": "autoinit.v1.phase_a.rung1.281a02c3ac18.sa",
+          "reason": "candidate is not in the Phase-B candidate set"
+        },
+        {
+          "probe_id": "autoinit.v1.phase_a.rung1.4e429f7ed722.sa",
+          "reason": "candidate is not in the Phase-B candidate set"
+        }
+      ],
+      "probes_dir_digest": "a5115816861ad239f646facec4d53ba2c7925c9430c530e7c6d0af2560d5b1af",
+      "source": "logs/autoinit_recovery_continuation_attempt7/probes"
+    }
+  },
+  "runtime": {
+    "cpu_budget": {
+      "threads": 16,
+      "source": "cgroup.v2",
+      "torch_threads_before": 128,
+      "torch_threads_after": 16,
+      "visible_cpus": 256
+    }
+  },
+  "phase_a_successful": false,
+  "failed_stages": [
+    1
+  ],
+  "outcome": "FAILED",
+  "cleanup_is_not_success": "collection and teardown run regardless of the outcome; a clean cleanup does not make a failed search a successful Phase A"
+}

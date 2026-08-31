@@ -1,0 +1,68 @@
+{
+ "schema": "aadistill.scratch_closeout/v1",
+ "generated_utc": "2026-08-31T08:56:34Z",
+ "_contract": "Phase-B closeout of the five $HOME scratch directories. Nothing was deleted before every file in them was proven to have a canonical copy elsewhere.",
+ "method": "sha256 of all 200 files, matched against every same-sized file under AlphaAvatar-distill/logs, AlphaAvatar-distill/artifacts and aad-artifacts. For the three remaining tarballs, every MEMBER was hashed and matched individually.",
+ "promotions_performed_first": [
+  {
+   "what": "Attempt 5's raw generations, per-sample rows, train logs and scoring logs for the three fresh rung-1 sa probes",
+   "from": "phase_b_a5_scr/store/extracted",
+   "into": "aad-artifacts/autoinit/phase_b/attempt5/raw_evidence",
+   "n_files": 89,
+   "bytes": 3869000,
+   "why": "these were the ONLY surviving copies. fe9683e6a9c7/sa is authorization-bound evidence behind the accepted Phase-B winner, and AGENTS.md P18 requires the complete raw generation to be saved for every evaluated sample. Leaving them in a directory named scratch was the actual risk."
+  },
+  {
+   "what": "session journals \u2014 launcher log, watchdog journal, poll journal, provider create response",
+   "from": "all five scratch dirs",
+   "into": "logs/autoinit_phase_b_attempt{1..5}/session_journals/",
+   "n_files": 33,
+   "bytes": 530000,
+   "why": "the only operational record of each attempt"
+  },
+  {
+   "what": "remaining unique pod-side logs, manifests and relay snapshots",
+   "into": "the same session_journals directories",
+   "n_files": 27,
+   "bytes": 2013000
+  }
+ ],
+ "verification": {
+  "scratch_files": 200,
+  "with_canonical_copy": 197,
+  "remaining": "3 tarball containers",
+  "tarball_members_checked": 128,
+  "tarball_members_without_canonical_copy": 0,
+  "conclusion": "no unique byte remains in any of the five directories"
+ },
+ "deleted": [
+  {
+   "dir": "phase_b_scr",
+   "bytes": 16572
+  },
+  {
+   "dir": "phase_b_retry_scr",
+   "bytes": 22932
+  },
+  {
+   "dir": "phase_b_a3_scr",
+   "bytes": 1407772
+  },
+  {
+   "dir": "phase_b_a4_scr",
+   "bytes": 70930024
+  },
+  {
+   "dir": "phase_b_a5_scr",
+   "bytes": 74875982
+  }
+ ],
+ "deleted_total_bytes": 147253282,
+ "retained_elsewhere": "aad-artifacts/autoinit/phase_b/attempt{4,5}/states.jsonl \u2014 the 26-55 MB search journals \u2014 were already canonical and were never in scope",
+ "policy_going_forward": {
+  "git repository": "/home/ecs-user/AlphaAvatar-distill",
+  "canonical scientific artifacts": "/home/ecs-user/aad-artifacts",
+  "scratch": "/home/ecs-user/aad-scratch/sessions/<session-id>",
+  "rule": "no other AlphaAvatar-distill working root is created; no $HOME/phase_b_*_scr"
+ }
+}

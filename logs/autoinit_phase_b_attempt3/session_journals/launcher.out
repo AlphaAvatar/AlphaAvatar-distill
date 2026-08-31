@@ -1,0 +1,40 @@
+[17:07:11] budget: expected 1122 min $18.51 · soft $23.39 · hard $23.72 (authorized $26.80)
+[17:07:11] NVIDIA L40S $0.99/h, stock Low
+[17:07:11] session commit 4a25699a920b verified: harness digests to 45f6bb8c93ff…, carries the authorization and only logs/autoinit_phase_b_authorization.json differs from the authorized base
+[17:07:11] frozen science plan 02be33b9a7a8… matches the authorization
+[17:07:11] phase-B executable 45f6bb8c93ff… matches the grant
+[17:07:11] preregistration e167feaa502f… binds this executable and both mixtures
+[17:07:11] 8 verified probes citable; pricing ten, not twelve
+[17:07:17] 8 citations re-derived from retained bytes; evidence set a5115816861a… matches the record
+[17:07:17] 300 GiB container disk against a 244.87 GiB peak working set
+[17:07:17] 6 files stage the 2 admitted Phase-A finalists for measurement
+[17:07:17] /home/ecs-user/aad-artifacts/autoinit/phase_a: 14.9 GiB free for 11.6 GiB of leaves and working room
+[17:07:19] precheck OK: 16 relay inputs (10 from AlphaAvatar/aadistill-artifacts, 6 from AlphaAvatar/aadistill-transport), 3 local assets
+[17:07:20] created wkausr939ts7vv at $0.99/h
+[17:07:20] watchdog detached — hard 1438 min = $23.72
+[17:08:14]   starting (60s) — $0.01
+[17:09:18]   starting (120s) — $0.03
+[17:10:23]   starting (180s) — $0.05
+[17:11:28]   starting (240s) — $0.07
+[17:12:32]   starting (300s) — $0.09
+[17:13:36]   starting (360s) — $0.10
+[17:14:41]   starting (420s) — $0.12
+[17:15:45] TCP 22 at 82.221.170.242:37054 after 8.4 min
+[17:15:49] draw 1: ssh reachable — $0.14
+[17:18:16] draw 1: image identity runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@580.159.03
+[17:18:16] draw 1: running setup
+[17:32:09] draw 1: setup complete — $0.41
+[17:32:14] driver detached, pid 8319, confirmed by descriptor_probe — $0.41
+[17:34:26]   2026-08-26T17:32:13Z MARKER:STAGE_START:0 — $0.45
+[17:36:43]   2026-08-26T17:35:22Z MARKER:STAGE_START:1 — $0.48
+[02:40:27]   2026-08-27T02:40:08Z MARKER:PHASE_A_FAILED — $9.46
+[02:40:27] a blocking stage failed — collecting evidence, then tearing down. A stage-0 comparability failure is a TERMINATE, not a trigger for a larger run.
+[02:40:27] polling ended: PHASE_A_FAILED — $9.46
+[02:42:22]   manifest rc=0
+18 file(s) across 5 class(es) -> /workspace/manifest.json
+  final_required: 18 · mutable_snapshot: 0 · final_streams_quiescent: True
+[02:43:04] teardown gate: allowed=True failed=training_complete
+[02:43:04] deleting pod (gate passed after PHASE_A_FAILED)
+[02:43:15] pod deleted — 575.9 min, $9.50; provider confirms gone: True
+
+autoinit-phase-b INCOMPLETE — /home/ecs-user/AlphaAvatar-distill/logs/autoinit_phase_b_session.json. STOP for review. Phase B searched two calibration distributions jointly and cited verified Phase-A evidence; nothing chains off it.

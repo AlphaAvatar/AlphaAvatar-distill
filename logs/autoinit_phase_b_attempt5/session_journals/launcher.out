@@ -1,0 +1,47 @@
+[07:33:18] budget: expected 1565 min $25.83 · soft $31.45 · hard $31.78 (authorized $35.67)
+[07:33:19] NVIDIA L40S $0.99/h, stock Medium
+[07:33:19] session commit 8d6ba98e4ffe verified: harness digests to 3ad6a6e3edf1…, carries the authorization and only logs/autoinit_phase_b_authorization.json differs from the authorized base
+[07:33:19] frozen science plan 02be33b9a7a8… matches the authorization
+[07:33:19] phase-B executable 3ad6a6e3edf1… matches the grant
+[07:33:19] preregistration 53f1347f6865… binds this executable and both mixtures
+[07:33:19] 8 verified probes citable; pricing ten, not twelve
+[07:33:25] 8 citations re-derived from retained bytes; evidence set a5115816861a… matches the record
+[07:33:25] 300 GiB container disk against a 244.87 GiB peak working set
+[07:33:25] 6 files stage the 2 admitted Phase-A finalists for measurement
+[07:33:25] /home/ecs-user/aad-artifacts/autoinit/phase_a: 14.6 GiB free for 11.6 GiB of leaves and working room
+[07:33:25] polling 1967.9 min against a 1925.9 min hard bound (42.0 min of teardown slack)
+[07:33:26] precheck OK: 16 relay inputs (10 from AlphaAvatar/aadistill-artifacts, 6 from AlphaAvatar/aadistill-transport), 3 local assets
+[07:33:27] created 37aah10zvqk4lo at $0.99/h
+[07:33:27] watchdog detached — hard 1926 min = $31.78
+[07:33:39] TCP 22 at 82.221.170.242:37084 after 0.2 min
+[07:33:41] draw 1: ssh reachable — $0.00
+[07:36:40] draw 1: image identity runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@580.159.03
+[07:36:40] draw 1: running setup
+[07:58:33] draw 1: setup complete — $0.41
+[07:58:38] driver detached, pid 8119, confirmed by descriptor_probe — $0.42
+[08:00:50]   2026-08-28T07:58:37Z MARKER:STAGE_START:0 — $0.45
+[08:03:05]   2026-08-28T08:01:39Z MARKER:STAGE_START:1 — $0.49
+[15:47:42]   2026-08-28T15:45:45Z MARKER:STAGE_START:2 — $8.16
+[16:48:42]   2026-08-28T16:47:01Z MARKER:PROBE_TRAINED:autoinit.v1.phase_a.rung1.ab7632b00788.sa — $9.16
+[16:57:45]   2026-08-28T16:55:52Z MARKER:PROBE_SCORED:autoinit.v1.phase_a.rung1.ab7632b00788.sa — $9.31
+[17:58:32]   2026-08-28T17:57:05Z MARKER:PROBE_TRAINED:autoinit.v1.phase_a.rung1.fe9683e6a9c7.sa — $10.31
+[18:03:03]   2026-08-28T18:02:25Z MARKER:PROBE_SCORED:autoinit.v1.phase_a.rung1.fe9683e6a9c7.sa — $10.39
+[19:04:02]   2026-08-28T19:03:31Z MARKER:PROBE_TRAINED:autoinit.v1.phase_a.rung1.bf5ae3b6ae00.sa — $11.39
+[19:13:01]   2026-08-28T19:11:56Z MARKER:PHASE_A_FAILED — $11.54
+[19:13:01] a blocking stage failed — collecting evidence, then tearing down. A stage-0 comparability failure is a TERMINATE, not a trigger for a larger run.
+[19:13:01] polling ended: PHASE_A_FAILED — $11.54
+[19:17:35]   manifest rc=0
+90 file(s) across 13 class(es) -> /workspace/manifest.json
+  final_required: 90 · mutable_snapshot: 0 · final_streams_quiescent: True
+[19:18:34]   stage-1 selection present with no retention report: securing 5 selected leaves from the search workdir
+[19:23:10]   stage-1 leaf cca699c93f34 -> /home/ecs-user/aad-artifacts/autoinit/phase_a/cca699c93f34dad7e94a5d13a25b2bc2: rc=1 digest=NOT MATCHED
+[19:27:09]   stage-1 leaf 85bde4ded2c3 -> /home/ecs-user/aad-artifacts/autoinit/phase_a/85bde4ded2c31953f802e39cf2252c87: rc=1 digest=NOT MATCHED
+[19:31:14]   stage-1 leaf ab7632b00788 -> /home/ecs-user/aad-artifacts/autoinit/phase_a/ab7632b00788f825e252ea8d5ff4be30: rc=1 digest=NOT MATCHED
+[19:35:08]   stage-1 leaf fe9683e6a9c7 -> /home/ecs-user/aad-artifacts/autoinit/phase_a/fe9683e6a9c783bbc6fe276a78c851c6: rc=1 digest=NOT MATCHED
+[19:38:58]   stage-1 leaf bf5ae3b6ae00 -> /home/ecs-user/aad-artifacts/autoinit/phase_a/bf5ae3b6ae00c3dbb963805135b3838f: rc=1 digest=NOT MATCHED
+[19:38:58]   PRODUCTS NOT SECURED: the stage-1 selection names 5 leaves and only 0 are verified off-pod; missing ['85bde4ded2c31953f802e39cf2252c87', 'ab7632b00788f825e252ea8d5ff4be30', 'bf5ae3b6ae00c3dbb963805135b3838f', 'cca699c93f34dad7e94a5d13a25b2bc2', 'fe9683e6a9c783bbc6fe276a78c851c6']. The search COMPLETED — deleting the pod now would destroy exactly the science it paid for, which is what attempt 4 did.
+[19:38:58] teardown gate: allowed=True failed=training_complete
+[19:38:58] deleting pod (gate passed after PHASE_A_FAILED)
+[19:39:09] pod deleted — 725.7 min, $11.97; provider confirms gone: True
+
+autoinit-phase-b INCOMPLETE — /home/ecs-user/AlphaAvatar-distill/logs/autoinit_phase_b_session.json. STOP for review. Phase B searched two calibration distributions jointly and cited verified Phase-A evidence; nothing chains off it.

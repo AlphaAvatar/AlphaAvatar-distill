@@ -1,0 +1,32 @@
+[10:49:22] budget: expected 1565 min $25.83 · soft $31.45 · hard $31.78 (authorized $35.67)
+[10:49:22] NVIDIA L40S $0.99/h, stock Low
+[10:49:22] session commit 27a366e8ce3f verified: harness digests to d232e5c75ec7…, carries the authorization and only logs/autoinit_phase_b_authorization.json differs from the authorized base
+[10:49:22] frozen science plan 02be33b9a7a8… matches the authorization
+[10:49:22] phase-B executable d232e5c75ec7… matches the grant
+[10:49:22] preregistration 1d3d8079b906… binds this executable and both mixtures
+[10:49:22] 8 verified probes citable; pricing ten, not twelve
+[10:49:28] 8 citations re-derived from retained bytes; evidence set a5115816861a… matches the record
+[10:49:28] 300 GiB container disk against a 244.87 GiB peak working set
+[10:49:28] 6 files stage the 2 admitted Phase-A finalists for measurement
+[10:49:28] /home/ecs-user/aad-artifacts/autoinit/phase_a: 14.9 GiB free for 11.6 GiB of leaves and working room
+[10:49:28] polling 1967.9 min against a 1925.9 min hard bound (42.0 min of teardown slack)
+[10:49:30] precheck OK: 16 relay inputs (10 from AlphaAvatar/aadistill-artifacts, 6 from AlphaAvatar/aadistill-transport), 3 local assets
+[10:49:31] created zjwpsurs2dyvw8 at $0.99/h
+[10:49:31] watchdog detached — hard 1926 min = $31.78
+[10:50:24]   starting (60s) — $0.01
+[10:51:17] TCP 22 at 64.247.206.229:11531 after 1.8 min
+[10:51:21] draw 1: ssh reachable — $0.03
+[10:51:58] draw 1: image identity runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@580.159.03
+[10:51:58] draw 1: running setup
+[10:59:16] draw 1: setup complete — $0.16
+[10:59:22] driver detached, pid 8579, confirmed by descriptor_probe — $0.16
+[11:01:35]   2026-08-27T11:01:31Z MARKER:STAGE_START:1 — $0.20
+[19:00:59]   2026-08-27T19:00:04Z MARKER:PHASE_A_FAILED — $8.11
+[19:00:59] a blocking stage failed — collecting evidence, then tearing down. A stage-0 comparability failure is a TERMINATE, not a trigger for a larger run.
+[19:00:59] polling ended: PHASE_A_FAILED — $8.11
+[19:03:35]   manifest rc=0
+20 file(s) across 7 class(es) -> /workspace/manifest.json
+  final_required: 20 · mutable_snapshot: 0 · final_streams_quiescent: True
+[19:04:32] teardown gate: allowed=True failed=training_complete
+[19:04:32] deleting pod (gate passed after PHASE_A_FAILED)
+[19:04:43] pod deleted — 495.2 min, $8.17; provider confirms gone: True

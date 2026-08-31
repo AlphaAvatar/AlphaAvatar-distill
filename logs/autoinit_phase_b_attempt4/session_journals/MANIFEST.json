@@ -1,0 +1,38 @@
+{
+ "schema": "aadistill.promoted_session_journals/v1",
+ "source": "/home/ecs-user/phase_b_a4_scr (session scratch, now redundant)",
+ "session": "autoinit_phase_b_attempt4",
+ "why": "the launcher log, watchdog journal, poll journal and provider create response were the only surviving operational record of this attempt. Promoted so the scratch directory can be removed.",
+ "files": [
+  {
+   "name": "launcher.out",
+   "bytes": 2624,
+   "sha256": "355b79b760d5c94413b7ee49a773275bc6d42ffbdf42ff8f198f0af140b6263d"
+  },
+  {
+   "name": "launch.log",
+   "bytes": 2388,
+   "sha256": "1ec5b44b15fe4be2da0c369a724b9a3fe4baac7a10b88856345873dae31e3504"
+  },
+  {
+   "name": "watchdog.jsonl",
+   "bytes": 128952,
+   "sha256": "2fcccf33bc32ce1c1f391455f9be314eeff0bc7b84b41376630d836f354f4d4e"
+  },
+  {
+   "name": "pod_id",
+   "bytes": 14,
+   "sha256": "fdf2749980b3a0e8d3fb08e5ae96030bbff419606b23bbe487c32559251ba72e"
+  },
+  {
+   "name": "pod_start_epoch",
+   "bytes": 17,
+   "sha256": "2863ec9d526bc5431b5e1f89b0ad0d5ff71df3f0cdbb3bdefd5d9d027547a5fb"
+  },
+  {
+   "name": "create_raw_1.txt",
+   "bytes": 1054,
+   "sha256": "eef622d02f7870232019e36ad4d0debd329d2a967f3be56141f4f0f4cb3955fe"
+  }
+ ]
+}

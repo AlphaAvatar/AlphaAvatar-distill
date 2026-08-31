@@ -1,0 +1,120 @@
+{
+ "schema": "aadistill.storage_closeout/v1",
+ "generated_utc": "2026-08-31T08:58:21Z",
+ "_contract": "Phase-B storage closeout. Sizes measured, duplicates found by hashing only inside size-collision groups, and nothing deleted without proof of a canonical copy.",
+ "sizes_after": {
+  "repo /home/ecs-user/AlphaAvatar-distill": 8880601833,
+  "  repo .git": 59978936,
+  "  repo artifacts/": 7391645322,
+  "  repo logs/": 15991284,
+  "canonical /home/ecs-user/aad-artifacts": 101669404451,
+  "scratch /home/ecs-user/aad-scratch": 256145346
+ },
+ "free_bytes_after": 10887479296,
+ "scratch_directories": {
+  "phase_b_scr": {
+   "before": 40960,
+   "after": 0,
+   "status": "DELETED"
+  },
+  "phase_b_retry_scr": {
+   "before": 57344,
+   "after": 0,
+   "status": "DELETED"
+  },
+  "phase_b_a3_scr": {
+   "before": 1363148,
+   "after": 0,
+   "status": "DELETED"
+  },
+  "phase_b_a4_scr": {
+   "before": 70883328,
+   "after": 0,
+   "status": "DELETED"
+  },
+  "phase_b_a5_scr": {
+   "before": 74868736,
+   "after": 0,
+   "status": "DELETED"
+  },
+  "aad-scratch/sessions": {
+   "status": "KEPT \u2014 the only scratch root going forward"
+  }
+ },
+ "reclaimed_bytes": 147193856,
+ "reclaimed_note": "140 MiB from the five $HOME scratch directories",
+ "deletions_and_why_safe": [
+  {
+   "what": "the five $HOME phase_b_*_scr directories",
+   "proof": "all 200 files sha256'd and matched against every same-sized file under logs/, artifacts/ and aad-artifacts. 197 matched directly; the 3 remaining were tarballs whose 128 members were each hashed and each matched. Nothing unique remained AFTER the promotions below, which were performed first.",
+   "record": "logs/scratch_closeout_20260831.json"
+  }
+ ],
+ "promotions_performed_before_deleting": [
+  {
+   "n_files": 89,
+   "bytes": 3869000,
+   "what": "Attempt-5 raw generations, per-sample rows, train and scoring logs for the three fresh rung-1 sa probes",
+   "into": "aad-artifacts/autoinit/phase_b/attempt5/raw_evidence/",
+   "why": "they were SOLE copies, and fe9683e6a9c7/sa is authorization-bound evidence behind the accepted Phase-B winner"
+  },
+  {
+   "n_files": 60,
+   "bytes": 2543000,
+   "what": "session journals and remaining unique pod-side logs for all five attempts",
+   "into": "logs/autoinit_phase_b_attempt{1..5}/session_journals/"
+  }
+ ],
+ "checkpoints": {
+  "weight_files_found": 45,
+  "method": "size-indexed; hashes computed only inside size-collision groups",
+  "duplicate_groups": 2,
+  "reclaimable_bytes": 3139577776,
+  "decision": "NOT DELETED \u2014 see below",
+  "pairs": [
+   {
+    "bytes": 1947442680,
+    "paths": [
+     "AlphaAvatar-distill/artifacts/stage0/qwen3_4b_thinking_v1/activation_stats.safetensors",
+     "aad-artifacts/relay_retired/e8_inputs_20260810/stage0/qwen3_4b_thinking_v1/activation_stats.safetensors"
+    ]
+   },
+   {
+    "bytes": 1192135096,
+    "paths": [
+     "AlphaAvatar-distill/artifacts/stage1/e8_contribution_init_v1/checkpoint/model.safetensors",
+     "aad-artifacts/relay_retired/e8_init_20260810/e8_contribution_init_v1/checkpoint/model.safetensors"
+    ]
+   }
+  ],
+  "why_not_deleted": "both pairs are a live repo working artifact byte-identical to a copy under aad-artifacts/relay_retired/. The repo copies have live consumers: activation_stats.safetensors is named in calibration.py's metadata and read by stage_e8_inputs.py, and e8_contribution_init_v1/checkpoint is fetched by e8b_setup.sh. The relay_retired copies are not spare bytes either -- that tree exists to preserve objects DELETED FROM THE RELAY, so it is itself an accountability record. Neither copy is provably free of consequence to remove, and 2.92 GiB is not worth guessing over. Reported for a maintainer decision."
+ },
+ "retained_deliberately": [
+  {
+   "what": "aad-artifacts/autoinit/phase_a/ \u2014 8 searched checkpoints",
+   "why": "the six-candidate behavioural universe. Required to re-derive artifact digests, validate identity collapse, verify all three reuse records, and use fe9683e6a9c7 as the Phase-C incumbent"
+  },
+  {
+   "what": "aad-artifacts/autoinit/preflight_ctl_r0860k_{sa,sb}",
+   "why": "the permanent Stage-3 controls that materialized the equivalence interval and feasibility floor"
+  },
+  {
+   "what": "aad-artifacts/autoinit/phase_b/attempt{4,5}/states.jsonl",
+   "why": "the 26-55 MB search journals; the only record of what the searches explored"
+  },
+  {
+   "what": "aad-artifacts/{e2p1,e4,e6b,e7,p2_ceheavy}/ \u2014 prior-experiment checkpoints",
+   "why": "E-series evidence, out of scope for this closeout and not examined for retirement"
+  },
+  {
+   "what": "aad-artifacts/relay_retired/",
+   "why": "the retired-relay accountability archive"
+  }
+ ],
+ "policy": {
+  "git repository": "/home/ecs-user/AlphaAvatar-distill",
+  "canonical scientific artifacts": "/home/ecs-user/aad-artifacts",
+  "scratch": "/home/ecs-user/aad-scratch/sessions/<session-id>",
+  "rule": "no other AlphaAvatar-distill working root is created. The five $HOME phase_b_*_scr directories are gone and must not return."
+ }
+}

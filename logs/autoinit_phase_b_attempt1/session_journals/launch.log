@@ -1,0 +1,69 @@
+[05:42:20] budget: expected 1122 min $18.51 · soft $23.39 · hard $23.72 (authorized $26.80)
+[05:42:21] NVIDIA L40S $0.99/h, stock Low
+[05:42:21] session commit 218c51c75909 verified: harness digests to 5a84c04038bd…, carries the authorization and only logs/autoinit_phase_b_authorization.json differs from the authorized base
+[05:42:21] frozen science plan 02be33b9a7a8… matches the authorization
+[05:42:21] phase-B executable 5a84c04038bd… matches the grant
+[05:42:21] preregistration c78161aa15d4… binds this executable and both mixtures
+[05:42:21] 8 verified probes citable; pricing ten, not twelve
+[05:42:21] 300 GiB container disk against a 244.87 GiB peak working set
+[05:42:21] 6 files stage the 2 admitted Phase-A finalists for measurement
+[05:42:21] /home/ecs-user/aad-artifacts/autoinit/phase_a: 15.5 GiB free for 11.6 GiB of leaves and working room
+[05:42:22] precheck OK: 16 relay inputs (10 from AlphaAvatar/aadistill-artifacts, 6 from AlphaAvatar/aadistill-transport), 3 local assets
+[05:42:24] created 4dbqycjrivhq17 at $0.99/h
+[05:42:24] watchdog detached — hard 1438 min = $23.72
+[05:42:36] TCP 22 at 64.247.206.212:17960 after 0.2 min
+[05:42:39] draw 1: ssh reachable — $0.00
+[05:43:15] draw 1: image identity runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@580.159.03
+[05:43:15] draw 1: running setup
+[05:51:00] setup did not reach SETUP_DONE:
+ + tokenspeed-mla==0.1.8
+ + tokenspeed-triton==3.8.10.post20260721
+ + torch==2.13.0
+ + torch-c-dlpack-ext==0.1.5
+ + torchaudio==2.11.0
+ + torchcodec==0.16.0
+ + torchvision==0.28.0
+ + tqdm==4.70.0
+ + transformers==5.15.0
+ + triton==3.7.1
+ + truststore==0.10.4
+ + typer==0.27.1
+ + typing-extensions==4.16.0
+ + typing-inspection==0.4.4
+ + urllib3==2.7.0
+ + uvicorn==0.52.3
+ + uvloop==0.22.1
+ + vllm==0.27.1
+ + watchfiles==1.2.0
+ + websockets==17.0.1
+ + xgrammar==0.2.3
+ + yarl==1.24.5
+ + z3-solver==4.15.4.0
+[05:45:10] vllm offline install completed in 7s
+vllm 0.27.1 | torch 2.13.0+cu130 True
+MARKER:VLLM_READY
+[05:45:20] downloading the teacher at the pinned revision
+
+Fetching 10 files:   0%|          | 0/10 [00:00<?, ?it/s]
+Fetching 10 files:  20%|██        | 2/10 [00:00<00:00, 17.95it/s]
+Fetching 10 files:  60%|██████    | 6/10 [00:00<00:00, 28.44it/s]
+Fetching 10 files:  80%|████████  | 8/10 [00:20<00:00, 28.44it/s]
+Fetching 10 files:  90%|█████████ | 9/10 [00:21<00:03,  3.17s/it]
+Fetching 10 files: 100%|██████████| 10/10 [00:23<00:00,  2.88s/it]
+Fetching 10 files: 100%|██████████| 10/10 [00:23<00:00,  2.31s/it]
+MARKER:TEACHER_READY
+[05:45:44] checking the RoPE base resolves in every venv
+  transformers 5.13.1: qwen3_0p6b_init_v0 stored 5,000,000 runtime 5,000,000 OK
+  transformers 5.15.0: qwen3_0p6b_init_v0 stored 5,000,000 runtime 5,000,000 OK
+MARKER:ROPE_OK
+[05:45:55] CPU test suite (128 vCPUs visible, cgroup budget 13; cpu set 0-12)
+FAILED tests/autoinit/test_phase_b_pricing.py::test_every_historical_probe_reconstructs_and_reuse_is_verified
+FAILED tests/autoinit/test_phase_b_pricing.py::test_the_load_bearing_check_is_the_digest_re_derived_from_BYTES
+FAILED tests/docs/test_repository_structure.py::test_every_log_is_classified_in_the_catalog
+3 failed, 2196 passed, 84 skipped in 297.42s (0:04:57)
+[05:50:54] test suite failed rc=1
+SETUP_RC=1
+
+[05:51:00] ABORT after draw 1: setup_failed
+[05:51:00] deleting pod (setup setup_failed)
+[05:51:11] pod deleted — 8.8 min, $0.15; provider confirms gone: True

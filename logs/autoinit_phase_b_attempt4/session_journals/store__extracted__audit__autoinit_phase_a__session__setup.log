@@ -1,0 +1,383 @@
+[10:52:02] apt: git, ninja, zstd
+W: https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2404/x86_64/InRelease: Key is stored in legacy trusted.gpg keyring (/etc/apt/trusted.gpg), see the DEPRECATION section in apt-key(8) for details.
+debconf: delaying package configuration, since apt-utils is not installed
+MARKER:ENV_READY
+WARNING: huggingface-hub 1.28.0 does not provide the extra 'hf-transfer'
+WARNING: Running pip as the 'root' user can result in broken permissions and conflicting behaviour with the system package manager, possibly rendering your system unusable. It is recommended to use a virtual environment instead: https://pip.pypa.io/warnings/venv. Use the --root-user-action option if you know what you are doing and want to suppress this warning.
+[10:52:08] fetching the repo bundle
+warning: remote HEAD refers to nonexistent ref, unable to checkout
+27a366e8ce3f922c200269a24321eca1eb123bdd
+MARKER:REPO_READY
+[10:52:11] staging the session's declared science inputs from the relay
+  AlphaAvatar/aadistill-artifacts:stage1/qwen3_0p6b_init_v0/checkpoint/model.safetensors -> artifacts/stage1/qwen3_0p6b_init_v0/checkpoint/model.safetensors
+  AlphaAvatar/aadistill-artifacts:stage1/qwen3_0p6b_init_v0/checkpoint/config.json -> artifacts/stage1/qwen3_0p6b_init_v0/checkpoint/config.json
+  AlphaAvatar/aadistill-artifacts:stage1/qwen3_0p6b_init_v0/checkpoint/generation_config.json -> artifacts/stage1/qwen3_0p6b_init_v0/checkpoint/generation_config.json
+  AlphaAvatar/aadistill-artifacts:stage1/qwen3_0p6b_init_v0/checkpoint/tokenizer.json -> artifacts/stage1/qwen3_0p6b_init_v0/checkpoint/tokenizer.json
+  AlphaAvatar/aadistill-artifacts:stage1/qwen3_0p6b_init_v0/checkpoint/tokenizer_config.json -> artifacts/stage1/qwen3_0p6b_init_v0/checkpoint/tokenizer_config.json
+  AlphaAvatar/aadistill-artifacts:stage1/qwen3_0p6b_init_v0/checkpoint/chat_template.jinja -> artifacts/stage1/qwen3_0p6b_init_v0/checkpoint/chat_template.jinja
+  AlphaAvatar/aadistill-artifacts:stage3_recovery_corpus_v2/ladder_uniform/blocks.npz -> artifacts/stage3/ladder_uniform_probe/blocks.npz, artifacts/stage3/ladder_uniform/blocks.npz
+  AlphaAvatar/aadistill-artifacts:stage3_recovery_corpus_v2/ladder_uniform/ladder.json -> artifacts/stage3/ladder_uniform_probe/ladder.json, artifacts/stage3/ladder_uniform/ladder.json
+  AlphaAvatar/aadistill-artifacts:stage3_recovery_corpus_v2/ladder_uniform/audit.jsonl -> artifacts/stage3/ladder_uniform_probe/audit.jsonl, artifacts/stage3/ladder_uniform/audit.jsonl
+  AlphaAvatar/aadistill-artifacts:e8_inputs_20260810/calibration_v1/items.jsonl -> artifacts/stage1/e8_calibration_v1/items.jsonl
+  AlphaAvatar/aadistill-transport:phase_a_attempt12/selected_leaves/cca699c93f34dad7e94a5d13a25b2bc2/config.json -> artifacts/autoinit/phase_a_selected/cca699c93f34dad7e94a5d13a25b2bc2/config.json
+  AlphaAvatar/aadistill-transport:phase_a_attempt12/selected_leaves/cca699c93f34dad7e94a5d13a25b2bc2/generation_config.json -> artifacts/autoinit/phase_a_selected/cca699c93f34dad7e94a5d13a25b2bc2/generation_config.json
+  AlphaAvatar/aadistill-transport:phase_a_attempt12/selected_leaves/cca699c93f34dad7e94a5d13a25b2bc2/model.safetensors -> artifacts/autoinit/phase_a_selected/cca699c93f34dad7e94a5d13a25b2bc2/model.safetensors
+  AlphaAvatar/aadistill-transport:phase_a_attempt12/selected_leaves/85bde4ded2c31953f802e39cf2252c87/config.json -> artifacts/autoinit/phase_a_selected/85bde4ded2c31953f802e39cf2252c87/config.json
+  AlphaAvatar/aadistill-transport:phase_a_attempt12/selected_leaves/85bde4ded2c31953f802e39cf2252c87/generation_config.json -> artifacts/autoinit/phase_a_selected/85bde4ded2c31953f802e39cf2252c87/generation_config.json
+  AlphaAvatar/aadistill-transport:phase_a_attempt12/selected_leaves/85bde4ded2c31953f802e39cf2252c87/model.safetensors -> artifacts/autoinit/phase_a_selected/85bde4ded2c31953f802e39cf2252c87/model.safetensors
+  artifacts/stage1/qwen3_0p6b_init_v0/checkpoint/model.safetensors 86fbba78e8a2a324...
+  artifacts/stage3/ladder_uniform_probe/blocks.npz 6f324cb0f37bc0f0...
+  artifacts/stage3/ladder_uniform/blocks.npz 6f324cb0f37bc0f0...
+  artifacts/stage1/e8_calibration_v1/items.jsonl c7202338109e459b...
+  artifacts/autoinit/phase_a_selected/cca699c93f34dad7e94a5d13a25b2bc2/config.json e94e4d3a9cab307a...
+  artifacts/autoinit/phase_a_selected/cca699c93f34dad7e94a5d13a25b2bc2/generation_config.json 28fb42f15159b552...
+  artifacts/autoinit/phase_a_selected/cca699c93f34dad7e94a5d13a25b2bc2/model.safetensors db056398840f5c64...
+  artifacts/autoinit/phase_a_selected/85bde4ded2c31953f802e39cf2252c87/config.json e94e4d3a9cab307a...
+  artifacts/autoinit/phase_a_selected/85bde4ded2c31953f802e39cf2252c87/generation_config.json 28fb42f15159b552...
+  artifacts/autoinit/phase_a_selected/85bde4ded2c31953f802e39cf2252c87/model.safetensors 0a9a5a78e87cc800...
+  staged 16 inputs, verified 10 digests
+[10:52:38] installing the session's declared local assets: state_eval_v1:artifacts/stage1,recovery_search_v2:artifacts/stage3,reasoning_heavy_v2:artifacts/stage1
+[10:52:38]   state_eval_v1 -> artifacts/stage1/
+[10:52:38]   recovery_search_v2 -> artifacts/stage3/
+[10:52:38]   reasoning_heavy_v2 -> artifacts/stage1/
+MARKER:ASSETS_STAGED
+[10:52:38] training env: offline install from the relay wheelhouse
+[10:52:38] fetching the wheelhouse from the relay
+Fetching 91 files:   0%|          | 0/91 [00:00<?, ?it/s]Fetching 91 files:   1%|          | 1/91 [00:00<00:24,  3.73it/s]Fetching 91 files:   3%|▎         | 3/91 [00:00<00:09,  9.21it/s]Fetching 91 files:   7%|▋         | 6/91 [00:00<00:07, 11.85it/s]Fetching 91 files:   9%|▉         | 8/91 [00:00<00:08,  9.90it/s]Fetching 91 files:  11%|█         | 10/91 [00:00<00:06, 11.91it/s]Fetching 91 files:  13%|█▎        | 12/91 [00:01<00:06, 13.06it/s]Fetching 91 files:  15%|█▌        | 14/91 [00:01<00:05, 14.64it/s]Fetching 91 files:  18%|█▊        | 16/91 [00:01<00:06, 10.77it/s]Fetching 91 files:  22%|██▏       | 20/91 [00:01<00:04, 15.46it/s]Fetching 91 files:  26%|██▋       | 24/91 [00:01<00:03, 18.28it/s]Fetching 91 files:  31%|███       | 28/91 [00:01<00:02, 21.66it/s]Fetching 91 files:  34%|███▍      | 31/91 [00:02<00:03, 16.31it/s]Fetching 91 files:  36%|███▋      | 33/91 [00:02<00:04, 12.90it/s]Fetching 91 files:  38%|███▊      | 35/91 [00:02<00:04, 12.29it/s]Fetching 91 files:  41%|████      | 37/91 [00:02<00:04, 11.36it/s]Fetching 91 files:  43%|████▎     | 39/91 [00:03<00:04, 11.79it/s]Fetching 91 files:  45%|████▌     | 41/91 [00:03<00:06,  7.40it/s]Fetching 91 files:  47%|████▋     | 43/91 [00:09<00:41,  1.15it/s]Fetching 91 files:  48%|████▊     | 44/91 [00:09<00:35,  1.34it/s]Fetching 91 files:  49%|████▉     | 45/91 [00:09<00:28,  1.59it/s]Fetching 91 files:  51%|█████     | 46/91 [00:10<00:29,  1.54it/s]Fetching 91 files:  52%|█████▏    | 47/91 [00:11<00:38,  1.13it/s]Fetching 91 files:  53%|█████▎    | 48/91 [00:11<00:31,  1.36it/s]Fetching 91 files:  54%|█████▍    | 49/91 [00:12<00:31,  1.35it/s]Fetching 91 files:  55%|█████▍    | 50/91 [00:12<00:23,  1.73it/s]Fetching 91 files:  56%|█████▌    | 51/91 [00:13<00:25,  1.56it/s]Fetching 91 files:  57%|█████▋    | 52/91 [00:14<00:28,  1.37it/s]Fetching 91 files:  58%|█████▊    | 53/91 [00:16<00:39,  1.04s/it]Fetching 91 files:  59%|█████▉    | 54/91 [00:16<00:28,  1.29it/s]Fetching 91 files:  60%|██████    | 55/91 [00:18<00:39,  1.10s/it]Fetching 91 files:  62%|██████▏   | 56/91 [00:18<00:29,  1.21it/s]Fetching 91 files:  63%|██████▎   | 57/91 [00:18<00:21,  1.62it/s]Fetching 91 files:  65%|██████▍   | 59/91 [00:18<00:12,  2.63it/s]Fetching 91 files:  67%|██████▋   | 61/91 [00:19<00:07,  3.84it/s]Fetching 91 files:  68%|██████▊   | 62/91 [00:19<00:06,  4.35it/s]Fetching 91 files:  69%|██████▉   | 63/91 [00:19<00:07,  3.58it/s]Fetching 91 files:  73%|███████▎  | 66/91 [00:19<00:04,  6.17it/s]Fetching 91 files:  75%|███████▍  | 68/91 [00:19<00:03,  7.56it/s]Fetching 91 files:  77%|███████▋  | 70/91 [00:20<00:02,  7.87it/s]Fetching 91 files:  81%|████████▏ | 74/91 [00:20<00:01, 11.06it/s]Fetching 91 files:  85%|████████▍ | 77/91 [00:20<00:01, 10.49it/s]Fetching 91 files:  87%|████████▋ | 79/91 [00:20<00:01,  9.63it/s]Fetching 91 files:  89%|████████▉ | 81/91 [00:21<00:00, 10.20it/s]Fetching 91 files:  93%|█████████▎| 85/91 [00:21<00:00,  9.54it/s]Fetching 91 files:  96%|█████████▌| 87/91 [00:21<00:00,  9.55it/s]Fetching 91 files:  98%|█████████▊| 89/91 [00:21<00:00,  9.76it/s]Fetching 91 files: 100%|██████████| 91/91 [00:24<00:00,  2.33it/s]Fetching 91 files: 100%|██████████| 91/91 [00:24<00:00,  3.69it/s]
+[10:53:04] wheelhouse: 91 wheels, 3.9G
+Using CPython 3.12.3 interpreter at: /usr/local/bin/python
+Creating virtual environment at: /opt/train
+Activate with: source /opt/train/bin/activate
+Using Python 3.12.3 environment at: /opt/train
+Resolved 82 packages in 57ms
+Prepared 82 packages in 7.17s
+Installed 82 packages in 1.82s
+ + aiohappyeyeballs==2.7.1
+ + aiohttp==3.14.1
+ + aiosignal==1.4.0
+ + annotated-doc==0.0.4
+ + anyio==4.14.1
+ + attrs==26.1.0
+ + certifi==2026.6.17
+ + charset-normalizer==3.4.9
+ + click==8.4.2
+ + contourpy==1.3.3
+ + cuda-bindings==12.9.7
+ + cuda-pathfinder==1.6.0
+ + cuda-toolkit==12.8.1
+ + cycler==0.12.1
+ + datasets==5.0.0
+ + dill==0.4.1
+ + filelock==3.29.7
+ + fonttools==4.63.0
+ + frozenlist==1.8.0
+ + fsspec==2026.4.0
+ + h11==0.16.0
+ + hf-xet==1.5.1
+ + httpcore==1.0.9
+ + httpx==0.28.1
+ + huggingface-hub==1.23.0
+ + idna==3.18
+ + iniconfig==2.3.0
+ + jinja2==3.1.6
+ + kiwisolver==1.5.0
+ + markdown-it-py==4.2.0
+ + markupsafe==3.0.3
+ + matplotlib==3.11.0
+ + mdurl==0.1.2
+ + mpmath==1.3.0
+ + multidict==6.7.1
+ + multiprocess==0.70.19
+ + networkx==3.6.1
+ + numpy==2.5.1
+ + nvidia-cublas-cu12==12.8.4.1
+ + nvidia-cuda-cupti-cu12==12.8.90
+ + nvidia-cuda-nvrtc-cu12==12.8.93
+ + nvidia-cuda-runtime-cu12==12.8.90
+ + nvidia-cudnn-cu12==9.19.0.56
+ + nvidia-cufft-cu12==11.3.3.83
+ + nvidia-cufile-cu12==1.13.1.3
+ + nvidia-curand-cu12==10.3.9.90
+ + nvidia-cusolver-cu12==11.7.3.90
+ + nvidia-cusparse-cu12==12.5.8.93
+ + nvidia-cusparselt-cu12==0.7.1
+ + nvidia-nccl-cu12==2.28.9
+ + nvidia-nvjitlink-cu12==12.8.93
+ + nvidia-nvshmem-cu12==3.4.5
+ + nvidia-nvtx-cu12==12.8.90
+ + packaging==26.2
+ + pandas==3.0.3
+ + pillow==12.3.0
+ + pluggy==1.6.0
+ + propcache==0.5.2
+ + pyarrow==25.0.0
+ + pygments==2.20.0
+ + pyparsing==3.3.2
+ + pytest==9.1.1
+ + python-dateutil==2.9.0.post0
+ + pyyaml==6.0.3
+ + regex==2026.7.10
+ + requests==2.34.2
+ + rich==15.0.0
+ + safetensors==0.8.0
+ + setuptools==81.0.0
+ + shellingham==1.5.4
+ + six==1.17.0
+ + sympy==1.14.0
+ + tokenizers==0.22.2
+ + torch==2.11.0+cu128
+ + tqdm==4.68.4
+ + transformers==5.13.1
+ + triton==3.6.0
+ + typer==0.26.8
+ + typing-extensions==4.16.0
+ + urllib3==2.7.0
+ + xxhash==3.8.1
+ + yarl==1.24.2
+Using Python 3.12.3 environment at: /opt/train
+Resolved 1 package in 1ms
+   Building aadistill @ file:///workspace/aad
+      Built aadistill @ file:///workspace/aad
+Prepared 1 package in 295ms
+Installed 1 package in 2ms
+ + aadistill==0.0.1 (from file:///workspace/aad)
+[10:53:14] offline install completed in 10s
+train torch 2.11.0+cu128 NVIDIA L40S | transformers 5.13.1
+MARKER:TRAIN_ENV
+[10:53:21] verifying the frozen assets against the preregistered constants
+{
+  "passed": true,
+  "problems": []
+}
+MARKER:ASSETS_READY
+[10:53:23] vLLM venv, offline from the relay wheelhouse
+Fetching 196 files:   0%|          | 0/196 [00:00<?, ?it/s]Fetching 196 files:   1%|          | 1/196 [00:00<00:26,  7.45it/s]Fetching 196 files:   1%|          | 2/196 [00:00<00:24,  7.89it/s]Fetching 196 files:   3%|▎         | 5/196 [00:00<00:17, 11.19it/s]Fetching 196 files:   4%|▍         | 8/196 [00:00<00:20,  9.10it/s]Fetching 196 files:   5%|▌         | 10/196 [00:01<00:22,  8.29it/s]Fetching 196 files:   6%|▌         | 12/196 [00:01<00:21,  8.49it/s]Fetching 196 files:   7%|▋         | 14/196 [00:01<00:17, 10.14it/s]Fetching 196 files:   9%|▊         | 17/196 [00:01<00:16, 10.93it/s]Fetching 196 files:  11%|█         | 21/196 [00:01<00:13, 12.93it/s]Fetching 196 files:  13%|█▎        | 25/196 [00:02<00:11, 15.27it/s]Fetching 196 files:  14%|█▍        | 28/196 [00:02<00:13, 12.85it/s]Fetching 196 files:  17%|█▋        | 34/196 [00:02<00:09, 17.03it/s]Fetching 196 files:  18%|█▊        | 36/196 [00:02<00:09, 16.51it/s]Fetching 196 files:  19%|█▉        | 38/196 [00:02<00:09, 16.15it/s]Fetching 196 files:  20%|██        | 40/196 [00:03<00:12, 12.01it/s]Fetching 196 files:  21%|██▏       | 42/196 [00:03<00:11, 12.97it/s]Fetching 196 files:  23%|██▎       | 45/196 [00:03<00:11, 13.12it/s]Fetching 196 files:  25%|██▌       | 49/196 [00:03<00:09, 16.19it/s]Fetching 196 files:  26%|██▌       | 51/196 [00:03<00:09, 15.52it/s]Fetching 196 files:  28%|██▊       | 54/196 [00:04<00:08, 16.59it/s]Fetching 196 files:  29%|██▊       | 56/196 [00:04<00:08, 16.62it/s]Fetching 196 files:  31%|███       | 60/196 [00:04<00:07, 17.06it/s]Fetching 196 files:  32%|███▏      | 63/196 [00:04<00:07, 18.67it/s]Fetching 196 files:  33%|███▎      | 65/196 [00:04<00:07, 18.64it/s]Fetching 196 files:  34%|███▍      | 67/196 [00:04<00:07, 16.53it/s]Fetching 196 files:  36%|███▌      | 70/196 [00:04<00:07, 17.14it/s]Fetching 196 files:  37%|███▋      | 72/196 [00:05<00:17,  7.00it/s]Fetching 196 files:  38%|███▊      | 74/196 [00:05<00:14,  8.16it/s]Fetching 196 files:  39%|███▉      | 77/196 [00:06<00:11, 10.76it/s]Fetching 196 files:  40%|████      | 79/196 [00:06<00:14,  8.28it/s]Fetching 196 files:  41%|████▏     | 81/196 [00:06<00:13,  8.35it/s]Fetching 196 files:  42%|████▏     | 83/196 [00:06<00:12,  9.29it/s]Fetching 196 files:  43%|████▎     | 85/196 [00:07<00:11,  9.34it/s]Fetching 196 files:  44%|████▍     | 87/196 [00:07<00:22,  4.87it/s]Fetching 196 files:  45%|████▍     | 88/196 [00:08<00:21,  4.92it/s]Fetching 196 files:  45%|████▌     | 89/196 [00:08<00:20,  5.28it/s]Fetching 196 files:  46%|████▋     | 91/196 [00:08<00:21,  4.92it/s]Fetching 196 files:  47%|████▋     | 92/196 [00:09<00:27,  3.77it/s]Fetching 196 files:  47%|████▋     | 93/196 [00:09<00:25,  3.99it/s]Fetching 196 files:  48%|████▊     | 94/196 [00:09<00:23,  4.27it/s]Fetching 196 files:  48%|████▊     | 95/196 [00:09<00:26,  3.84it/s]Fetching 196 files:  49%|████▉     | 96/196 [00:10<00:26,  3.78it/s]Fetching 196 files:  49%|████▉     | 97/196 [00:10<00:22,  4.33it/s]Fetching 196 files:  50%|█████     | 98/196 [00:10<00:19,  4.96it/s]Fetching 196 files:  51%|█████     | 100/196 [00:10<00:21,  4.56it/s]Fetching 196 files:  52%|█████▏    | 102/196 [00:11<00:18,  5.00it/s]Fetching 196 files:  53%|█████▎    | 103/196 [00:11<00:18,  5.08it/s]Fetching 196 files:  53%|█████▎    | 104/196 [00:11<00:20,  4.43it/s]Fetching 196 files:  54%|█████▎    | 105/196 [00:12<00:30,  2.99it/s]Fetching 196 files:  54%|█████▍    | 106/196 [00:12<00:32,  2.77it/s]Fetching 196 files:  55%|█████▌    | 108/196 [00:13<00:21,  4.11it/s]Fetching 196 files:  57%|█████▋    | 112/196 [00:13<00:10,  7.71it/s]Fetching 196 files:  59%|█████▉    | 116/196 [00:13<00:06, 11.60it/s]Fetching 196 files:  60%|██████    | 118/196 [00:13<00:06, 11.48it/s]Fetching 196 files:  61%|██████    | 120/196 [00:13<00:06, 11.65it/s]Fetching 196 files:  62%|██████▏   | 122/196 [00:13<00:06, 10.82it/s]Fetching 196 files:  63%|██████▎   | 124/196 [00:14<00:07, 10.01it/s]Fetching 196 files:  65%|██████▍   | 127/196 [00:14<00:05, 12.96it/s]Fetching 196 files:  67%|██████▋   | 131/196 [00:14<00:04, 14.95it/s]Fetching 196 files:  68%|██████▊   | 133/196 [00:14<00:04, 13.84it/s]Fetching 196 files:  69%|██████▉   | 135/196 [00:14<00:04, 14.49it/s]Fetching 196 files:  70%|███████   | 138/196 [00:14<00:03, 17.10it/s]Fetching 196 files:  71%|███████▏  | 140/196 [00:15<00:04, 13.23it/s]Fetching 196 files:  73%|███████▎  | 143/196 [00:15<00:03, 14.59it/s]Fetching 196 files:  74%|███████▍  | 145/196 [00:15<00:03, 15.40it/s]Fetching 196 files:  75%|███████▌  | 147/196 [00:15<00:03, 13.32it/s]Fetching 196 files:  76%|███████▌  | 149/196 [00:15<00:03, 13.27it/s]Fetching 196 files:  77%|███████▋  | 151/196 [00:15<00:03, 12.53it/s]Fetching 196 files:  79%|███████▊  | 154/196 [00:16<00:02, 15.74it/s]Fetching 196 files:  80%|███████▉  | 156/196 [00:16<00:02, 16.11it/s]Fetching 196 files:  81%|████████  | 158/196 [00:16<00:03, 12.52it/s]Fetching 196 files:  83%|████████▎ | 162/196 [00:16<00:02, 16.88it/s]Fetching 196 files:  84%|████████▍ | 165/196 [00:16<00:01, 19.40it/s]Fetching 196 files:  86%|████████▌ | 168/196 [00:16<00:01, 16.68it/s]Fetching 196 files:  87%|████████▋ | 170/196 [00:17<00:02, 10.59it/s]Fetching 196 files:  88%|████████▊ | 172/196 [00:17<00:02, 11.89it/s]Fetching 196 files:  89%|████████▉ | 174/196 [00:17<00:02,  9.72it/s]Fetching 196 files:  90%|████████▉ | 176/196 [00:18<00:02,  7.24it/s]Fetching 196 files:  91%|█████████ | 178/196 [00:18<00:02,  6.36it/s]Fetching 196 files:  91%|█████████▏| 179/196 [00:18<00:02,  6.54it/s]Fetching 196 files:  92%|█████████▏| 181/196 [00:18<00:01,  8.03it/s]Fetching 196 files:  93%|█████████▎| 183/196 [00:19<00:01,  7.91it/s]Fetching 196 files:  94%|█████████▍| 185/196 [00:19<00:01,  9.35it/s]Fetching 196 files:  95%|█████████▌| 187/196 [00:19<00:00,  9.56it/s]Fetching 196 files:  96%|█████████▋| 189/196 [00:19<00:00,  8.03it/s]Fetching 196 files:  97%|█████████▋| 190/196 [00:20<00:00,  6.86it/s]Fetching 196 files:  98%|█████████▊| 193/196 [00:20<00:00,  5.78it/s]Fetching 196 files:  99%|█████████▉| 194/196 [00:21<00:00,  5.10it/s]Fetching 196 files: 100%|██████████| 196/196 [00:21<00:00,  3.49it/s]Fetching 196 files: 100%|██████████| 196/196 [00:21<00:00,  8.93it/s]
+[10:53:46] vllm wheelhouse: 196 wheels, 3.7G
+wheelhouse verified 196/196 against wheelhouse_vllm_sha256.json
+Using CPython 3.12.3 interpreter at: /usr/local/bin/python
+Creating virtual environment at: /opt/vllm
+Activate with: source /opt/vllm/bin/activate
+Using Python 3.12.3 environment at: /opt/vllm
+Resolved 196 packages in 69ms
+Prepared 196 packages in 7.20s
+Installed 196 packages in 2.08s
+ + aiohappyeyeballs==2.7.1
+ + aiohttp==3.14.3
+ + aiosignal==1.4.0
+ + annotated-doc==0.0.5
+ + annotated-types==0.8.0
+ + anthropic==0.122.0
+ + anyio==4.14.2
+ + apache-tvm-ffi==0.1.11
+ + astor==0.8.1
+ + attrs==26.1.0
+ + blake3==1.0.9
+ + cachetools==7.1.7
+ + cbor2==6.1.4
+ + certifi==2026.7.22
+ + cffi==2.1.1
+ + charset-normalizer==3.5.0
+ + click==8.4.2
+ + cloudpickle==3.1.2
+ + compressed-tensors==0.17.0
+ + cryptography==50.0.0
+ + cuda-bindings==13.3.1
+ + cuda-core==1.0.1
+ + cuda-pathfinder==1.6.0
+ + cuda-python==13.3.1
+ + cuda-tile==1.5.0
+ + cuda-toolkit==13.0.3.0
+ + depyf==0.20.0
+ + detect-installer==0.1.0
+ + dill==0.4.1
+ + distro==1.9.0
+ + dnspython==2.8.0
+ + docstring-parser==0.18.0
+ + einops==0.8.2
+ + email-validator==2.3.0
+ + fastapi==0.136.3
+ + fastapi-cli==0.0.32
+ + fastapi-cloud-cli==0.23.0
+ + fastar==0.11.0
+ + fastsafetensors==0.3.3
+ + filelock==3.32.3
+ + flashinfer-python==0.6.16.post3
+ + frozenlist==1.8.0
+ + fsspec==2026.7.0
+ + googleapis-common-protos==1.75.1
+ + grpcio==1.83.0
+ + h11==0.16.0
+ + hf-xet==1.6.0
+ + httpcore==1.0.9
+ + httpcore2==2.10.0
+ + httptools==0.8.0
+ + httpx==0.28.1
+ + httpx2==2.10.0
+ + huggingface-hub==1.27.0
+ + humming-kernels==0.1.10
+ + idna==3.18
+ + ijson==3.5.1
+ + interegular==0.3.3
+ + jinja2==3.1.6
+ + jiter==0.16.0
+ + jmespath==1.1.0
+ + jsonschema==4.26.0
+ + jsonschema-specifications==2025.9.1
+ + lark==1.2.2
+ + llguidance==1.7.6
+ + llvmlite==0.47.0
+ + lm-format-enforcer==0.11.3
+ + loguru==0.7.3
+ + markdown-it-py==4.2.0
+ + markupsafe==3.0.3
+ + mcp==2.0.0
+ + mcp-types==2.0.0
+ + mdurl==0.1.2
+ + mistral-common==1.11.7
+ + ml-dtypes==0.6.0
+ + model-hosting-container-standards==0.1.16
+ + mpmath==1.3.0
+ + msgspec==0.21.1
+ + multidict==6.7.1
+ + nccl4py==0.4.1
+ + networkx==3.6.1
+ + ninja==1.13.0
+ + numba==0.65.0
+ + numpy==2.3.5
+ + nvidia-cublas==13.1.1.3
+ + nvidia-cuda-cccl==13.3.3.4.1
+ + nvidia-cuda-crt==13.3.73
+ + nvidia-cuda-cupti==13.0.85
+ + nvidia-cuda-nvcc==13.3.73
+ + nvidia-cuda-nvdisasm==13.3.73
+ + nvidia-cuda-nvrtc==13.0.88
+ + nvidia-cuda-runtime==13.0.96
+ + nvidia-cudnn-cu13==9.20.0.48
+ + nvidia-cudnn-frontend==1.27.0
+ + nvidia-cufft==12.0.0.61
+ + nvidia-cufile==1.15.1.6
+ + nvidia-curand==10.4.0.35
+ + nvidia-cusolver==12.0.4.66
+ + nvidia-cusparse==12.6.3.3
+ + nvidia-cusparselt-cu13==0.8.1
+ + nvidia-cutlass-dsl==4.6.0
+ + nvidia-cutlass-dsl-libs-base==4.6.0
+ + nvidia-cutlass-dsl-libs-core==4.6.0
+ + nvidia-cutlass-dsl-libs-cu12==4.6.0
+ + nvidia-cutlass-dsl-libs-cu13==4.6.0
+ + nvidia-ml-py==13.610.43
+ + nvidia-nccl-cu13==2.29.7
+ + nvidia-nvjitlink==13.3.33
+ + nvidia-nvshmem-cu13==3.4.5
+ + nvidia-nvtx==13.0.85
+ + nvidia-nvvm==13.3.73
+ + nvtx==0.2.15
+ + openai==3.0.0
+ + openai-harmony==0.0.8
+ + opencv-python-headless==5.0.0.93
+ + opentelemetry-api==1.44.0
+ + opentelemetry-exporter-otlp==1.44.0
+ + opentelemetry-exporter-otlp-proto-common==1.44.0
+ + opentelemetry-exporter-otlp-proto-grpc==1.44.0
+ + opentelemetry-exporter-otlp-proto-http==1.44.0
+ + opentelemetry-proto==1.44.0
+ + opentelemetry-sdk==1.44.0
+ + opentelemetry-semantic-conventions==0.65b0
+ + opentelemetry-semantic-conventions-ai==0.5.1
+ + outlines-core==0.2.14
+ + packaging==26.3
+ + partial-json-parser==0.2.1.1.post7
+ + pillow==12.3.0
+ + prometheus-client==0.26.0
+ + prometheus-fastapi-instrumentator==8.1.0
+ + propcache==0.5.2
+ + protobuf==6.33.6
+ + psutil==7.2.2
+ + py-cpuinfo==9.0.0
+ + pybase64==1.5.0
+ + pycountry==26.2.16
+ + pycparser==3.0
+ + pydantic==2.13.4
+ + pydantic-core==2.46.4
+ + pydantic-extra-types==2.11.1
+ + pydantic-settings==2.15.0
+ + pyelftools==0.33
+ + pygments==2.20.0
+ + pyjwt==2.13.0
+ + pynvvideocodec==2.0.4
+ + python-dotenv==1.2.2
+ + python-json-logger==4.1.0
+ + python-multipart==0.0.32
+ + pyyaml==6.0.3
+ + pyzmq==27.1.0
+ + quack-kernels==0.6.1
+ + referencing==0.37.0
+ + regex==2026.7.19
+ + requests==2.34.2
+ + rich==15.0.0
+ + rich-toolkit==0.20.3
+ + rignore==0.8.1
+ + rpds-py==2026.6.3
+ + safetensors==0.8.0
+ + sentencepiece==0.2.2
+ + sentry-sdk==2.68.0
+ + setproctitle==1.3.7
+ + setuptools==80.10.2
+ + shellingham==1.5.4
+ + six==1.17.0
+ + sniffio==1.3.1
+ + sse-starlette==3.4.8
+ + starlette==1.6.0
+ + supervisor==4.3.0
+ + sympy==1.14.0
+ + tabulate==0.10.0
+ + tiktoken==0.13.0
+ + tilelang==0.1.12
+ + tokenizers==0.22.2
+ + tokenspeed-mla==0.1.8
+ + tokenspeed-triton==3.8.10.post20260721
+ + torch==2.13.0
+ + torch-c-dlpack-ext==0.1.5
+ + torchaudio==2.11.0
+ + torchcodec==0.16.0
+ + torchvision==0.28.0
+ + tqdm==4.70.0
+ + transformers==5.15.0
+ + triton==3.7.1
+ + truststore==0.10.4
+ + typer==0.27.1
+ + typing-extensions==4.16.0
+ + typing-inspection==0.4.4
+ + urllib3==2.7.0
+ + uvicorn==0.52.3
+ + uvloop==0.22.1
+ + vllm==0.27.1
+ + watchfiles==1.2.0
+ + websockets==17.0.1
+ + xgrammar==0.2.3
+ + yarl==1.24.5
+ + z3-solver==4.15.4.0
+[10:53:59] vllm offline install completed in 9s
+vllm 0.27.1 | torch 2.13.0+cu130 True
+MARKER:VLLM_READY
+[10:54:09] downloading the teacher at the pinned revision
+Fetching 10 files:   0%|          | 0/10 [00:00<?, ?it/s]Fetching 10 files:  20%|██        | 2/10 [00:00<00:00, 19.73it/s]Fetching 10 files:  60%|██████    | 6/10 [00:00<00:00, 28.47it/s]Fetching 10 files:  90%|█████████ | 9/10 [00:18<00:02,  2.75s/it]Fetching 10 files: 100%|██████████| 10/10 [00:20<00:00,  2.50s/it]Fetching 10 files: 100%|██████████| 10/10 [00:20<00:00,  2.00s/it]
+MARKER:TEACHER_READY
+[10:54:30] checking the RoPE base resolves in every venv
+  transformers 5.13.1: qwen3_0p6b_init_v0 stored 5,000,000 runtime 5,000,000 OK
+  transformers 5.15.0: qwen3_0p6b_init_v0 stored 5,000,000 runtime 5,000,000 OK
+MARKER:ROPE_OK
+[10:54:41] CPU test suite (256 vCPUs visible, cgroup budget 16; cpu set 0-15)
+........................................................................ [ 94%]
+........................................................................ [ 97%]
+............................................................             [100%]
+2280 passed, 84 skipped in 267.33s (0:04:27)
+[10:59:10] test suite passed in 269s on cpu set 0-15
+MARKER:TESTS_OK:269s
+[10:59:10] verifying logs/autoinit_phase_b_authorization.json binds to this session's plan (kind=phase_b)
+  autoinit.phase_b.20260827T102821Z: stages [0, 1, 2, 3, 4, 5], hard $35.6660, phase B True, phase A False, followon False
+MARKER:AUTHORIZATION_OK
+NVIDIA L40S, 46068 MiB, 580.159.03
+MARKER:SETUP_DONE
+[10:59:11] setup complete
+SETUP_RC=0
