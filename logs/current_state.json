@@ -1,6 +1,6 @@
 {
  "schema": "aadistill.current_state/v2",
- "generated_utc": "2026-08-30T21:18:37Z",
+ "generated_utc": "2026-08-31T05:18:56Z",
  "_contract": "The minimal machine-readable CURRENT snapshot: live facts only, no history, no per-attempt detail, no narrative. History lives in logs/decisions.md and the per-run directories; the human view is logs/STATE.md and the two must agree. Ownership: logs/CATALOG.md.",
  "baseline_commit": "884acb04c3aca3a548f825b5011f562131d9d86c",
  "baseline_commit_meaning": "The LAST TESTED IMPLEMENTATION: the commit whose tree produced the latest_verification figures (2524 passed / 12 skipped / 0 failed). Commits after it changed only logs and metadata -- no file in CONTINUATION_SOURCE_FILES_V2 -- so the tested implementation is unchanged.",
@@ -23,12 +23,12 @@
   "cumulative_spend_usd": 263.8597,
   "authorized_cap_usd": 283.76,
   "remaining_usd": 19.9003,
-  "planning_floor_usd": 5.4784,
+  "planning_floor_usd": null,
   "remaining_is_not_permission": true,
   "ledger": "logs/BUDGET_LEDGER.md",
   "headroom_note": "Phase-B attempts 1-5 cost $30.0200; behavioural continuation attempts 1-5 cost $3.8047 and CLOSED Phase B. Nothing further is funded or approved.",
-  "continuation_hard_ceiling_usd": 5.4784,
-  "continuation_planning_floor_usd": 4.183
+  "closed_continuation_pricing": "HISTORICAL: floor $4.1830 / ceiling $5.4784 / 1 probe priced the final fe9683e6a9c7/sc session, which is spent and closed. Not a standing allowance.",
+  "planning_floor_note": "no next paid session is planned or priced, so there is no planning floor. Phase C is unpriced and unauthorized."
  },
  "frozen": {
   "science_plan_hash": "02be33b9a7a8e26bc8bfb75795351e8cdc9ffd441b47066cc81887cfc511b55c",
@@ -48,9 +48,8 @@
   "phase_b_pricing": "HISTORICAL: floor $16.4555, ceiling $35.6660 \u2014 prices a P=2 search ALREADY BOUGHT.",
   "phase_b_stage1_selection_sha256": "84fd6496851995ae",
   "phase_b_identity": "amendment df413bd99119dab7, universe e94f15d2e648d86a, 6 distinct (8 assumed). Attempt-5 exec 3ad6a6e3edf1 / prereg 53f1347f6865: HISTORICAL, search bought.",
-  "continuation_b": "exec a5ce6311789eb4cd (62 files, set v3), SESSION PLAN v3 6d6f971364868d84, prereg bd827d12b6607356. Floor $4.1830, ceiling $5.4784, exactly ONE purchasable observation: fe9683e6a9c7/sc. Every sa, every sb and 85bde4ded2c3/sc are REUSE-ONLY and fail closed if missing. BOUND_EVIDENCE has 7 entries; attempt4_reuse_probes_dir_digest is bound. logs/autoinit_continuation_b_preregistration.json",
-  "phase_b_post_freeze": "exec digest moved 3d3b5d07 -> a043e2c7: shared SESSION_KIND dispatcher gained a continuation_b branch; Phase-B gate now accepts declared additive drift. 3 pre-existing branches byte-identical. Prereg NOT rewritten. logs/autoinit_phase_b_post_freeze_changes.json",
-  "continuation_b_result": "TIE_PENDING \u2014 see phase_b_result. Attempt 4's decision is WITHDRAWN; its fe9683e6a9c7/sb probe is retained, strictly reconstructed and authorization-bound."
+  "continuation_b": "CLOSED. Final session: exec a5ce6311789eb4cd, session plan V3 6d6f971364868d84, prereg bd827d12b6607356, authorization 20260830T194023Z (CONSUMED). It purchased exactly fe9683e6a9c7/sc for $1.5433 against a $5.4784 ceiling. No continuation is pending, priced or approved.",
+  "phase_b_post_freeze": "exec digest moved 3d3b5d07 -> a043e2c7: shared SESSION_KIND dispatcher gained a continuation_b branch; Phase-B gate now accepts declared additive drift. 3 pre-existing branches byte-identical. Prereg NOT rewritten. logs/autoinit_phase_b_post_freeze_changes.json"
  },
  "latest_verification": {
   "utc": "2026-08-30T21:18:37Z",
@@ -71,7 +70,7 @@
  ],
  "next_starting_point": {
   "status": "PHASE_B COMPLETE \u2014 RESOLVED, winner fe9683e6a9c7, by a margin of 0.000070 over the equivalence interval. Five continuation launches, $3.8047; the first three bought nothing and each closed a distinct defect.",
-  "the_ask": "REVIEW. The complete PHASE A vs PHASE B scientific comparison is owed next and must precede any Phase C execution. No paid work is approved.",
+  "the_ask": "REVIEW the Phase A vs Phase B comparison. No paid work is approved, priced or requested.",
   "budget": "cap $283.7600, spent $263.8597, headroom $19.9003. Nothing is funded."
  },
  "read_order": [
@@ -104,15 +103,13 @@
   "detail": "logs/decisions.md \u2014 provisional leader, two controls, comparability"
  },
  "next_sequence": {
-  "_status": "Phase B is CLOSED. The Phase A vs Phase B comparison is the next deliverable and is unpaid. Nothing below it is authorized, funded or started.",
-  "1_phase_b": "COMPLETE \u2014 RESOLVED. See phase_b_result.",
-  "1_phase_b_blocked_on": "nothing; Phase B is closed",
-  "1_phase_b_cost": "floor $4.1830, HARD CEILING $5.4784, hard_probes 1. The $8.0691 figure priced three probes and is superseded; the $35.6660 full-Phase-B figure is historical.",
-  "2_phase_a_vs_phase_b": "OWED IMMEDIATELY after the sc terminal result, before any other work: the full Phase A vs Phase B scientific comparison, as the handoff document. Do not collapse search-ranking, behavioural-selection, diagnostic and recovery-training evidence into one category.",
-  "3_phase_c": "PHASE C \u2014 operator R&D, starting with a new/improved ATTENTION operator against the frozen incumbent; then FFN, then RESIDUAL_WIDTH; joint confirmation search later.",
-  "4_canonical_stage1_nll": "DEFERRED until the final initialization is uniquely selected \u2014 after the operator-development program.",
-  "5_formal_recovery": "DEFERRED until after the operator-development program. A Phase-B winner is NOT authorization for formal recovery.",
-  "funding": "nothing is funded. One reviewed one-use authorization at ceiling $5.4784 against headroom $21.4436 is the only approved next paid action, and it is not yet issued."
+  "_status": "Phase B is CLOSED. The next deliverable is UNPAID and is the Phase A vs Phase B scientific comparison. Nothing below it is authorized, funded, priced or started.",
+  "1_phase_a_vs_phase_b": "the complete scientific comparison, from retained evidence, no GPU. MUST precede any Phase C execution. logs/phase_a_vs_phase_b_comparison.md",
+  "2_phase_c": "PHASE C \u2014 ATTENTION operator R&D against the frozen incumbent, with as clean a single-variable protocol as practical. Not designed, not priced, not authorized.",
+  "3_then": "only after ATTENTION is understood: FFN, then RESIDUAL_WIDTH; joint confirmation search later.",
+  "4_canonical_stage1_nll": "only after the final initialization is uniquely selected",
+  "5_formal_recovery": "DEFERRED until the operator-development program is complete. The Phase-B winner is NOT authorization for it.",
+  "funding": "nothing is funded or priced."
  },
  "canonical_infrastructure_moved_to": "docs/SESSION_ARCHITECTURE.md and logs/decisions.md",
  "phase_b_state": "PHASE_B COMPLETE \u2014 behavioural selection RESOLVED",
