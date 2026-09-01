@@ -3,7 +3,7 @@
  "preregistration_id": "autoinit.v1.phase_c1.execution",
  "written_utc": "2026-09-02T00:00:00Z",
  "_contract": "Everything the Phase-C1 session will run, bound before any C1 result exists. AUTHORIZES NOTHING: no pricing decision, no spend grant, no permission to launch. An authorization, if ever issued, binds THIS document.",
- "head_commit": "6048a4176119431bfbd03b715d5701e3bd3a4379",
+ "head_commit": "ac0d867adf6338424623b2d4d88c1465eed55108",
  "executable_source": {
   "digest": "a5bd40a86052f0125a16414bc98617782cdc011f70590cb938518bb25786740c",
   "files": [
@@ -636,5 +636,5 @@
   "any search, ranking, successive halving, tie-breaking or arm elimination"
  ],
  "authorizes": "nothing",
- "preregistration_sha256": "45c0e866deb645fa02d0f4b400f59837e9adaa62f7aaf7da25813770a0ea5807"
+ "preregistration_sha256": "58015cd3b5b1f0226b59702e7de60a3247b5725ebdcd9d351c547039bfb55666"
 }
