@@ -53,6 +53,10 @@ and their contents inventoried in
 | `src/aadistill/autoinit/phase_a.py` | the Phase-A **schema and frozen plan**. Carries no grant prose |
 | `src/aadistill/autoinit/phase_b.py` | the Phase-B session plan, its own executable-source identity, and the `PhaseBAuthorization` type whose `allows_phase_a` is False by type |
 | `src/aadistill/autoinit/reweight.py` | the R1–R5 calibration reweighting rule. Build-time only; the pod never runs it |
+| `src/aadistill/autoinit/fixed_path.py` | **Phase C1**: replays one frozen operator sequence with a fail-stop artifact-digest gate. Not a search — no enumeration, ranking, pruning or profile branching |
+| `src/aadistill/autoinit/c1_isolation.py` | **Phase C1**: the two-arm isolation plan (no rungs, no survivors, no tie-break), the seed-derivation rule, the paired prompt-cluster bootstrap and the frozen three-way decision |
+| `src/aadistill/autoinit/operators/attention_activation.py` | `attention.activation_importance_v1`. A **separate module** because `src/aadistill/autoinit/operators/attention.py` and its package `__init__` are members of `CONTINUATION_SOURCE_FILES_V2`; editing either moves a frozen Phase-B digest. Registered on import, deliberately outside `V1_IMPLEMENTATIONS` |
+| `src/aadistill/init/attention_stats.py` | streaming per-head second moments of the attention output — the exact sufficient statistic for the C1 head score |
 | `src/aadistill/init/` | Stage-0/1 primitives: activation statistics, contribution, sandwich init |
 | `src/aadistill/data/`, `src/aadistill/evaluation/`, `src/aadistill/models/`, `src/aadistill/rollout/` | corpora, scorers, student construction, rollout |
 | `src/aadistill/infrastructure/` | provider, budget, watchdog, artifact gate, log relay, manifests |

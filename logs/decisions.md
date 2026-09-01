@@ -6364,3 +6364,84 @@ recovery continuation under the derived **$16.7456** ceiling.
 - **Not decided here:** the 140.66 MiB of session transport bundles need no C0
   decision. The `aad-scratch` originals are **not** deleted in this phase.
 - **Revisit when:** a maintainer decides whether the originals may be released.
+
+---
+
+## 2026-09-01 — Phase C1 CPU machinery, and where the new operator had to live
+
+- **Context:** C0 is frozen and approved; C1 implementation was authorized at
+  `$0` / CPU only. Four pieces were needed: a fixed-path executor, the
+  replacement ATTENTION operator, the two-arm plan and decision rule, and the
+  confirmation battery.
+- **Decision — the replacement operator is `attention.activation_importance_v1`,
+  scored by realized residual-write energy.** For query head `h` and calibration
+  token `t`, with `a_h(t)` the head's slice of the concatenated attention output
+  and `W_o,h` the matching `o_proj` column block, `score_h = mean_t
+  ||W_o,h a_h(t)||^2`. Ranking is by that quantity, not by the cheaper
+  `E[||a_h||] * ||W_o,h||` approximation. Expanding the square gives an **exact**
+  sufficient statistic — `<W_o,h^T W_o,h, mean_t a_h a_h^T>_F` — so
+  `init/attention_stats.py` streams a per-head `head_dim x head_dim` second
+  moment (117 MiB at the C1 parent, against the 1.85 GiB the residual moments
+  already cost) and the operator contracts it against the weights at selection
+  time. Statistics are collected by a forward **pre-hook on `o_proj`**, which
+  already sees the per-head outputs, so no attention kernel changes.
+- **Selection topology is deliberately unchanged** from `weight_proxy_v0`: same
+  per-GQA-group retention (4 query heads per KV group → keep 2), same explicit
+  ascending-head-index tie-break, same verbatim row/column slicing, same
+  `modifies = {num_attention_heads}` and `preserves` sets. Only the importance
+  signal moves — that is what makes C1 an isolation test rather than two changes.
+- **Decision — the operator lives in its own module.** `operators/attention.py`
+  and `operators/__init__.py` are both members of `CONTINUATION_SOURCE_FILES_V2`,
+  the executable source set Phase B's **closed** preregistration binds to digest
+  `a5ce6311789e…`. Adding a class to either moved that digest, and
+  `test_the_preregistration_binds_the_live_executable_digest` caught it. The fix
+  is **not** to regenerate the frozen document — that would make a historical
+  record describe code that did not exist when it ran — so the operator moved to
+  `operators/attention_activation.py`, which is not in the declared set. It is
+  registered on import but is **not** imported by `operators/__init__` and is
+  **not** in `V1_IMPLEMENTATIONS`, so it cannot enter a beam, or change the C2
+  search space and cost, by an import side effect. Result: **no tracked source
+  file is modified by this work**, and all six Phase-A/B operator signature
+  hashes are byte-identical.
+- **Decision — the parent-rebuild digest gate stays a gate, per review.**
+  `fixed_path.py` pins `eea90c91…` for the pre-ATTENTION parent and `c313d1b4…`
+  for the reconstructed incumbent; a mismatch raises `FixedPathDigestMismatch`
+  carrying every intermediate identity, the DEPTH/FFN/ATTENTION selections and
+  the WIDTH projection diagnostics, and nothing downstream runs. It is not
+  waivable in flight.
+- **Decision — C1 gets its own plan type.** `C1IsolationPlan` has no `survivors`,
+  `rungs`, `tie_break_seed` or `equivalence` field at all, so elimination is
+  unrepresentable rather than merely rejected. It refuses any seed set that
+  touches `{20260726, 20260801, 20260813}`. `SuccessiveHalvingPlan`,
+  `EquivalenceRule` and `FeasibilityRule` are untouched.
+- **Bootstrap details bound now, before any C1 datum exists:** Mersenne Twister
+  via `random.Random`, seed domain-separated from the recovery seeds by
+  `":phase-c1:bootstrap"`, 20,000 iterations, stated percentile index
+  convention, within-stratum resampling. Chosen on reproducibility grounds only.
+- **Battery:** `c1_confirmation_v1`, 950 prompts / 850 scorable, content
+  `a285d61f…`, selected by ascending
+  `SHA256(C0_digest : phase-c1-battery : stratum : stable_id)`. The frozen
+  3:3:3:3:3:2 mixture is preserved exactly and no source-native difficulty field
+  stratifies it. Rendering is shared with the recovery-search convention through
+  `scripts/data/battery_render.py`, and a test re-renders the frozen
+  `recovery_search_v2` items to prove the two have not drifted. Isolation
+  verified by stable id **and** normalized content against all five roles: 0
+  collisions of either kind. **No model has been evaluated on it.**
+- **Correction found by the full suite — registration is now an explicit call.**
+  The first version registered at import. That is not enough isolation:
+  `BeamSearch._allowed_impl_ids` falls back to **every registered
+  implementation** when `SearchConfig.allowed_impls` is None, so merely importing
+  the module added a calibrated ATTENTION branch to an unrelated search and broke
+  `test_two_profiles_do_not_duplicate_the_weight_proxy_expansion` (10 expansions
+  became 12). Staying out of `V1_IMPLEMENTATIONS` does **not** on its own prevent
+  a beam from picking an operator up. Importing the module is now inert; a
+  consumer calls `register()`. A test asserts import registers nothing, and the
+  test fixtures unregister so registration cannot leak across a session.
+- **Alternatives considered:** implementing `attention.causal_kl_v1` first —
+  rejected per review, because individual-head ablation, global greedy,
+  per-group greedy and exhaustive 2-of-4 are scientifically different operators
+  and choosing one would change both the objective and the selection algorithm,
+  weakening the C1 interpretation. The hook and its documentation are retained.
+- **Risks:** the parent rebuild remains unproven until it runs on a GPU under the
+  bound runtime; a mismatch there stops C1 and goes to review with evidence.
+- **Revisit when:** the C1 execution preregistration is written.

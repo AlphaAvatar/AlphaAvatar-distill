@@ -1,0 +1,116 @@
+{
+ "schema": "aadistill.autoinit.teacher_binding/v1",
+ "generated_utc": "2026-09-01T00:00:00Z",
+ "_contract": "Immutable identity of the Phase-A/B root teacher, recovered at $0 from the local Hugging Face hub cache WITHOUT any network fetch. The Phase-A/B state journal recorded root_teacher_sha256 as all-zeros; this record supplies the byte-level binding that was missing, prospectively, for Phase C1. It does NOT rewrite any frozen Phase-A/B record.",
+ "repo_id": "Qwen/Qwen3-4B-Thinking-2507",
+ "revision": "768f209d9ea81521153ed38c47d515654e938aea",
+ "revision_source": "hub snapshot directory name; refs/main and refs/768f209d both resolve to it",
+ "hash_semantics": {
+  "lfs_sha256": "For an LFS-backed file the hub blob is named by the sha256 of its content. VERIFIED empirically on this box: tokenizer.json's blob name equals sha256(content).",
+  "git_blob_sha1": "For a non-LFS file the blob is named by the git blob SHA-1. VERIFIED empirically: config.json's blob name equals `git hash-object config.json`."
+ },
+ "weight_shards": [
+  "model-00001-of-00003.safetensors",
+  "model-00002-of-00003.safetensors",
+  "model-00003-of-00003.safetensors"
+ ],
+ "n_shards": 3,
+ "index_total_size_bytes": 8045591552,
+ "n_tensors": 398,
+ "expected_shard_sha256": {
+  "model-00001-of-00003.safetensors": "98178c1cddbca8ad76102afdbf76e4df79b64b82377ad4dca34c755cac00571a",
+  "model-00002-of-00003.safetensors": "57b5bd1f667d420350f169342a90b50e5ffc2aa202ba1819da1af3367ff2261f",
+  "model-00003-of-00003.safetensors": "e3cccb84e8926f3f18c334465639939a68af310b0729938fccc2de66a9a31953"
+ },
+ "weights_present_locally": false,
+ "weights_note": "The three shard blobs are ABSENT: the snapshot symlinks are dangling and only ~16 MB of config/tokenizer survives. ~8 GB must be re-fetched before any reconstruction. The expected hashes above were recovered from the surviving symlink targets, so the fetch is verifiable.",
+ "files": {
+  ".gitattributes": {
+   "blob_name": "52373fe24473b1aa44333d318f578ae6bf04b49b",
+   "hash_kind": "git_blob_sha1",
+   "content_present_locally": true,
+   "size_bytes": 1570,
+   "verified": true
+  },
+  "LICENSE": {
+   "blob_name": "6634c8cc3133b3848ec74b9f275acaaa1ea618ab",
+   "hash_kind": "git_blob_sha1",
+   "content_present_locally": true,
+   "size_bytes": 11343,
+   "verified": true
+  },
+  "README.md": {
+   "blob_name": "962b92df82aa870f4b6cad1768250634b44a1317",
+   "hash_kind": "git_blob_sha1",
+   "content_present_locally": true,
+   "size_bytes": 10063,
+   "verified": true
+  },
+  "config.json": {
+   "blob_name": "6988f134db143052042f2bd6e0c897bc6a605189",
+   "hash_kind": "git_blob_sha1",
+   "content_present_locally": true,
+   "size_bytes": 727,
+   "verified": true
+  },
+  "generation_config.json": {
+   "blob_name": "20a8a9156fc8c3f25295ca067f61fdf120d517c5",
+   "hash_kind": "git_blob_sha1",
+   "content_present_locally": true,
+   "size_bytes": 239,
+   "verified": true
+  },
+  "merges.txt": {
+   "blob_name": "20024bfe7c83998e9aeaf98a0cd6a2ce6306c2f0",
+   "hash_kind": "git_blob_sha1",
+   "content_present_locally": true,
+   "size_bytes": 1671839,
+   "verified": true
+  },
+  "model-00001-of-00003.safetensors": {
+   "blob_name": "98178c1cddbca8ad76102afdbf76e4df79b64b82377ad4dca34c755cac00571a",
+   "hash_kind": "lfs_sha256",
+   "content_present_locally": false
+  },
+  "model-00002-of-00003.safetensors": {
+   "blob_name": "57b5bd1f667d420350f169342a90b50e5ffc2aa202ba1819da1af3367ff2261f",
+   "hash_kind": "lfs_sha256",
+   "content_present_locally": false
+  },
+  "model-00003-of-00003.safetensors": {
+   "blob_name": "e3cccb84e8926f3f18c334465639939a68af310b0729938fccc2de66a9a31953",
+   "hash_kind": "lfs_sha256",
+   "content_present_locally": false
+  },
+  "model.safetensors.index.json": {
+   "blob_name": "4747b0297d3109f14db49886972e3369c9a00b2a",
+   "hash_kind": "git_blob_sha1",
+   "content_present_locally": true,
+   "size_bytes": 32819,
+   "verified": true
+  },
+  "tokenizer.json": {
+   "blob_name": "aeb13307a71acd8fe81861d94ad54ab689df773318809eed3cbe794b4492dae4",
+   "hash_kind": "lfs_sha256",
+   "content_present_locally": true,
+   "size_bytes": 11422654,
+   "verified": true
+  },
+  "tokenizer_config.json": {
+   "blob_name": "8dec7d58dda385ce95b469aa2d277ec162168e58",
+   "hash_kind": "git_blob_sha1",
+   "content_present_locally": true,
+   "size_bytes": 10834,
+   "verified": true
+  },
+  "vocab.json": {
+   "blob_name": "4783fe10ac3adce15ac8f358ef5462739852c569",
+   "hash_kind": "git_blob_sha1",
+   "content_present_locally": true,
+   "size_bytes": 2776833,
+   "verified": true
+  }
+ },
+ "verification_rule": "On fetch, every file in `files` must hash to its recorded blob_name under the matching convention. Reconstruction MUST NOT begin on any mismatch.",
+ "used_by": "logs/phase_c0_preregistration.json (Phase C1 fixed-path reconstruction)"
+}

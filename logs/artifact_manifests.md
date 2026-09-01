@@ -994,3 +994,44 @@ retrain.
 - **Related:** `logs/decisions.md` 2026-09-01; `logs/current_state.json`
   (`storage.preserved_scratch_20260901`); `logs/STATE.md`;
   `logs/phase_c0_sizing_evidence.json`.
+
+## Phase-C1 confirmation battery — built and frozen 2026-09-01
+
+- **Artifact:** `artifacts/stage3/c1_confirmation_v1/` — **out of tree**, not in
+  git. `.gitignore` excludes `artifacts/`, exactly as it does the frozen
+  `recovery_search_v2`, so the battery is identified by hash rather than stored
+  (AGENTS.md 2.5). 950 prompts / 850 scorable, 3.3 MiB.
+- **Committed identity:** [`phase_c1_battery.json`](phase_c1_battery.json) —
+  asset id, per-set sha256, pinned source revisions, sampling rule, isolation
+  result.
+- **Content hash:**
+  `a285d61f88de9da85e87818786cce8d350f03246365ff946207c61a6464fee3c`, over
+  newline-joined sorted `id:prompt_sha256` pairs — the same convention
+  `recovery_search_v2` uses, so equality proves membership, ordering, ids and
+  prompts are all fixed.
+- **Mixture:** gsm8k 150 · math_verified 150 · multihop 150 · rag 150 ·
+  knowledge 150 · tool 100 · code 100 (behaviour-only). The frozen historical
+  3:3:3:3:3:2 ratio scaled ×5, **not** reweighted by historical correctness.
+- **Selection:** ascending `SHA256(C0_digest + ":phase-c1-battery:" + stratum +
+  ":" + stable_source_id)`, ties by ascending id. The key is fixed by the pushed
+  C0 preregistration digest `fb2eeea5…`, which predates every C1 candidate. **No
+  model output of any kind is consulted**, and no source-native difficulty field
+  stratifies the sample.
+- **Creation command:** `PYTHONPATH=src .venv/bin/python
+  scripts/data/build_c1_confirmation_battery.py`. Renderers shared with the
+  recovery-search convention via `scripts/data/battery_render.py`.
+- **Determinism:** an independent rebuild into a separate directory reproduced
+  `content_sha256` and every per-set sha256 exactly. `manifest_sha256` differs
+  between builds only because it embeds `created_utc` and the output path.
+- **Isolation:** `scripts/autoinit/verify_c1_battery_isolation.py` — **PASS**,
+  0 stable-id and 0 normalized-content collisions against each of
+  `FINAL_PROMOTION`, `RECOVERY_SEARCH`, the full recovery-training corpus,
+  `STATE_EVALUATION` and `OPERATOR_CALIBRATION`.
+- **`FINAL_PROMOTION` is read for exclusion only.** It is not sampled from and
+  remains unconsumed as an evaluation asset.
+- **Sources:** the same pinned snapshots `recovery_search_v2` was built from —
+  gsm8k `740312ad`, MATH-500 `6e4ed1a2`, HotpotQA `1908d6af`, SQuAD-v2
+  `3ffb306f`, TriviaQA `0f7faf33`, xLAM `26d14ebf`, MBPP `4bb6404f`. The two
+  batteries differ in their sample, never in their source.
+- **Status: no model has been evaluated on it.** It exists so the C1 execution
+  preregistration can bind it; nothing has been measured.

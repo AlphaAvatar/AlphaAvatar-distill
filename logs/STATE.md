@@ -21,8 +21,33 @@ remaining.
 | Phase C2 | **NOT STARTED** |
 | formal recovery evidence | **NONE** |
 
-**Phase C is UNPRICED, UNAUTHORIZED, and has consumed no compute.** No C1
-implementation exists.
+**Phase C is UNPRICED, UNAUTHORIZED, and has consumed no compute.**
+
+## Phase C1 — CPU machinery implemented, nothing executed
+
+Design and implementation proceeded at `$0`; **execution did not**. What exists:
+
+| built | where |
+| --- | --- |
+| `attention.activation_importance_v1` | `autoinit/operators/attention_activation.py` — its **own** module. **Import is inert**; a consumer calls `register()`. Staying out of `V1_IMPLEMENTATIONS` is not enough on its own, because an unrestricted beam enumerates the whole registry |
+| fixed-path executor with the fail-stop digest gate | `autoinit/fixed_path.py` |
+| two-arm plan, seed rule, paired bootstrap, 3-way decision | `autoinit/c1_isolation.py` |
+| confirmation battery `c1_confirmation_v1`, 950/850 | out of tree; identity in [`phase_c1_battery.json`](phase_c1_battery.json) |
+| teacher shard binding | [`phase_c1_teacher_binding.json`](phase_c1_teacher_binding.json) |
+
+Still absent, all of it requiring GPU or a decision: the pre-ATTENTION parent
+`b8820f41d062` rebuild, the ~8 GB teacher weights, and the C1 execution
+preregistration that must materialize the three seed IDs. **No model has been
+evaluated on the C1 battery, and no probe has been trained.**
+
+> **Why the new operator lives in its own module.** `operators/attention.py` and
+> `operators/__init__.py` are both members of `CONTINUATION_SOURCE_FILES_V2`, the
+> executable source set Phase B's closed preregistration binds to
+> `a5ce6311789e…`. Adding a class to either moved that digest, leaving a frozen
+> historical document describing code that did not exist when it ran. Since a
+> frozen record must never be regenerated to match new code, the operator moved
+> instead. **No tracked source file is modified by this work** — every line is in
+> a new file, and all six Phase-A/B operator signature hashes are unchanged.
 
 ## Phase C0 — frozen 2026-09-01
 

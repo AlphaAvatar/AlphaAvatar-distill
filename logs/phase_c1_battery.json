@@ -1,0 +1,141 @@
+{
+ "schema": "aadistill.autoinit.c1_battery_identity/v1",
+ "generated_utc": "2026-09-01T00:00:00Z",
+ "_contract": "Committed identity of the Phase-C1 confirmation battery. The asset itself is OUT OF TREE under artifacts/, which .gitignore excludes exactly as it does the frozen recovery_search_v2 \u2014 large data is identified by hash here, not stored in git (AGENTS.md 2.5). The builder is committed and deterministic, so the asset is reproducible from this record.",
+ "asset_id": "c1_confirmation_v1",
+ "role": "C1_CONFIRMATION",
+ "path": "artifacts/stage3/c1_confirmation_v1",
+ "tracked_by_git": false,
+ "n_prompts": 950,
+ "n_scorable_prompts": 850,
+ "mixture": {
+  "gsm8k": 150,
+  "math_verified": 150,
+  "multihop": 150,
+  "rag": 150,
+  "knowledge": 150,
+  "tool": 100,
+  "code": 100
+ },
+ "scorable_sets": [
+  "gsm8k",
+  "knowledge",
+  "math_verified",
+  "multihop",
+  "rag",
+  "tool"
+ ],
+ "behaviour_only_sets": [
+  "code"
+ ],
+ "content_sha256": "a285d61f88de9da85e87818786cce8d350f03246365ff946207c61a6464fee3c",
+ "content_sha256_convention": "sha256 over newline-joined sorted 'id:prompt_sha256' pairs",
+ "manifest_sha256": "e6ff5cf536d515e6b466f2fc945c4368c89637d481c8ce1993ef3f3cf0909e42",
+ "set_sha256": {
+  "gsm8k": "f95017ca71ae77a0c98afee1d431c94c45fa328de602d51a07c1dfc87a086ee8",
+  "math_verified": "de302bda2d3949897ea5ba775f3ff2f1c48454c359b879555f918ffc745fba7d",
+  "multihop": "1c2652a9203fb9b3a766605a02fedf85f45f41bbc06919612add78e070d3ec34",
+  "rag": "1a3b0e876849916369421ba3629fa39e049c9d891ce753f2e9709042e5dcdb54",
+  "knowledge": "f52cc45f21a11100ba989001bca827f9c3cc953ad14e3e8f403381a4fe4afd35",
+  "tool": "bbd863d4431369d25e7d9675e8feb95395e46b271199146b5e2a01ea7ebc84a3",
+  "code": "f9da1df0d93d07910094985afea397580149ab0398af41230e0dfd3780479b89"
+ },
+ "set_counts": {
+  "gsm8k": 150,
+  "math_verified": 150,
+  "multihop": 150,
+  "rag": 150,
+  "knowledge": 150,
+  "tool": 100,
+  "code": 100
+ },
+ "sources": {
+  "gsm8k": {
+   "repo_id": "openai/gsm8k",
+   "revision": "740312add88f781978c0658806c59bc2815b9866",
+   "file": "main/test-00000-of-00001.parquet",
+   "size_bytes": 419088,
+   "sha256": "ee7b8da9e381df27b9e3f7758a159ab2bdaa4dbaa910546cbbc47e0cb44e4f59",
+   "n_rows": 1319
+  },
+  "math_verified": {
+   "repo_id": "HuggingFaceH4/MATH-500",
+   "revision": "6e4ed1a2a79af7d8630a6b768ec859cb5af4d3be",
+   "file": "test.jsonl",
+   "size_bytes": 446564,
+   "sha256": "35dc41080a3680858b27fa7e0533d2d547825316fc5dafe5d316f4ccc5a06132",
+   "n_rows": 500
+  },
+  "multihop": {
+   "repo_id": "hotpotqa/hotpot_qa",
+   "revision": "1908d6afbbead072334abe2965f91bd2709910ab",
+   "file": "distractor/validation-00000-of-00001.parquet",
+   "size_bytes": 27452575,
+   "sha256": "c20b638ca82b21d04fe12e14ff417ad05153d4d215a65de54497fca4e972f7c6",
+   "n_rows": 7405
+  },
+  "rag": {
+   "repo_id": "rajpurkar/squad_v2",
+   "revision": "3ffb306f725f7d2ce8394bc1873b24868140c412",
+   "file": "squad_v2/validation-00000-of-00001.parquet",
+   "size_bytes": 1350511,
+   "sha256": "0560174ab095c5ac0a8c8dc8da05f1625453c45a77e4ce9cabc6947ddfdd24cb",
+   "n_rows": 11873
+  },
+  "knowledge": {
+   "repo_id": "mandarjoshi/trivia_qa",
+   "revision": "0f7faf33a3908546c6fd5b73a660e0f8ff173c2f",
+   "file": "rc.nocontext/validation-00000-of-00001.parquet",
+   "size_bytes": 7335321,
+   "sha256": "48a5005c0eb4f8a4ae5b9868644297fd5bf1e694aeb3dc9c8ab958cac0d5b201",
+   "n_rows": 17944
+  },
+  "tool": {
+   "repo_id": "Salesforce/xlam-function-calling-60k",
+   "revision": "26d14ebfe18b1f7b524bd39b404b50af5dc97866",
+   "file": "xlam_function_calling_60k.json",
+   "size_bytes": 96116570,
+   "sha256": "4ef5c6f0dc552f2231f93f5853a9ef431e9e806d7aa514d0f6b615606ce576c6",
+   "n_rows": 60000
+  },
+  "code": {
+   "repo_id": "google-research-datasets/mbpp",
+   "revision": "4bb6404fdc6cacfda99d4ac4205087b89d32030c",
+   "file": "full/test-00000-of-00001.parquet",
+   "size_bytes": 115824,
+   "sha256": "566fd53060ffba5766dace1d1e2f4c38906781526de222b0dfbdbc325b696c77",
+   "n_rows": 500
+  }
+ },
+ "sampling_rule": {
+  "order": "ascending cryptographic rank, ties by ascending stable id",
+  "rank": "SHA256(C0_preregistration_digest + ':phase-c1-battery:' + stratum + ':' + stable_source_id)",
+  "base_digest": "fb2eeea531f9f0d11f84b77cd47dff30697122de90a072a7a80c3a7535e89280",
+  "base_digest_source": "logs/phase_c0_preregistration.json, commit be2ab08",
+  "outcome_dependence": "NONE \u2014 no model output of any kind is consulted",
+  "difficulty_reweighting": "none. Source-native metadata (MATH level, SQuAD answerability) is retained on the items and may be reported, but does not stratify.",
+  "filter": "skip excluded ids and excluded normalized prompt hashes",
+  "deterministic": true,
+  "normalization": "whitespace-collapsed, lowercased, for cross-role hashing"
+ },
+ "rendering": "scripts/data/battery_render.py \u2014 the same renderers, instructions and id conventions as recovery_search, asserted against the frozen artifact in tests/data/test_c1_battery.py",
+ "isolation_roles": [
+  "final_promotion",
+  "initializer_state_eval",
+  "operator_calibration",
+  "recovery_search",
+  "recovery_training"
+ ],
+ "reproducibility": {
+  "builder": "scripts/data/build_c1_confirmation_battery.py",
+  "renderers": "scripts/data/battery_render.py",
+  "verifier": "scripts/autoinit/verify_c1_battery_isolation.py",
+  "determinism": "an independent rebuild into a separate directory reproduced content_sha256 and every per-set sha256 exactly; manifest_sha256 differs only because it embeds created_utc and the output path",
+  "command": "PYTHONPATH=src .venv/bin/python scripts/data/build_c1_confirmation_battery.py"
+ },
+ "verification": {
+  "isolation": "PASS - disjoint from FINAL_PROMOTION, RECOVERY_SEARCH, the recovery training corpus, STATE_EVALUATION and OPERATOR_CALIBRATION by BOTH stable id and normalized prompt content; 0 collisions of either kind against every role",
+  "final_promotion": "read for exclusion only; not sampled from, remains unconsumed"
+ },
+ "no_model_has_been_evaluated_on_it": true
+}
