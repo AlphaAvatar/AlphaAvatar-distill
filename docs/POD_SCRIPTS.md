@@ -25,6 +25,8 @@ to appear below.
 | `autoinit_continuation_launch.py` | the Stage-3 continuation's **session specification** |
 | `autoinit_measurement_launch.py` | the bounded causal-depth runtime/backend measurement's **session specification**. Names `SpendAuthorization`, so it cannot start Phase A; runs no search, selects no depth map, writes no checkpoint |
 | `autoinit_recovery_continuation_launch.py` | the recovery continuation's **session specification**. Priced by `continuation_budget` ($16.7456 hard, no search), declares attempt 12's five preserved leaves as staged session inputs, and names a driver that cannot search |
+| `autoinit_c1_launch.py` | **Phase C1** session specification: fixed-path ATTENTION isolation. `SESSION_KIND=c1`, `C1Authorization`, a `BudgetSpec` derived from `logs/phase_c1_pricing.json`, and seven pre-provider gates. Runs no search |
+| `autoinit_c1_driver.py` | the C1 driver: replays the frozen path under the `eea90c91`/`c313d1b4` digest gates, then runs 2 arms x 3 fresh seeds. `stage1`, `run_rung` and `selection_row` all raise — no search, no rungs, no ranking |
 | `autoinit_recovery_continuation_driver.py` | its pod-side driver. Stage 1 IMPORTS the verified attempt-12 result — it never imports `phase_a_search`, never delegates to the searching `stage1`, and has no `--stage` value that searches |
 | `autoinit_preflight_driver.py` | the micro-preflight's pod-side driver |
 | `autoinit_phase_a_driver.py` | the Phase-A pod-side driver, six stages. Also the **base class Phase B inherits**, so it is inside the Phase-B executable-source identity too |

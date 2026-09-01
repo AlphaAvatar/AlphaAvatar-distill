@@ -88,7 +88,9 @@
   "expected_usd": 13.4277,
   "artifact_recovery_reserve_minutes": 20.0,
   "hard_ceiling_minutes": 833.8,
-  "hard_ceiling_usd": 13.7577
+  "hard_ceiling_usd": 13.7578,
+  "hard_ceiling_usd_exact": 13.757733,
+  "hard_ceiling_rounding": "ceil to 4 dp; a ceiling rounds UP or it under-authorizes the plan it prices"
  },
  "assumptions_that_could_move_the_number": [
   "The attention-statistics pass is UNMEASURED. If it costs 10x the FFN pass rather than 4x, the session grows by about 0.08 USD \u2014 small, because it runs once, not once per probe.",
@@ -109,5 +111,5 @@
   "note": "remaining headroom is NOT permission. Whether this session may be funded is a maintainer decision against the ledger, not a consequence of this file."
  },
  "authorizes": "nothing",
- "pricing_sha256": "70d2fec6a41c43b174990bb58645ac9c91c8dcf9859d7a634f8da47b974be7fd"
+ "pricing_sha256": "71604c1e225387cf36dc775812589ceb33dd6cb4e3f8a167108d30c541b189cb"
 }

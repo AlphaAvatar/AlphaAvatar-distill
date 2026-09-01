@@ -43,8 +43,14 @@ ARG_VARIANTS = ([], ["--transport", "relay"])
 DEFAULT_KIND = "spend"
 #: Kinds that must NOT share the generic loader. Each names a distinct
 #: authorization type whose ceiling prices a distinct amount of work.
-DEDICATED_KINDS = ("phase_a", "phase_b", "recovery_continuation", "continuation_b")
-BRANCH_RE = re.compile(r'^(?:el)?if \[ "\$SESSION_KIND" = "([a-z_]+)" \]; then$',
+DEDICATED_KINDS = ("phase_a", "phase_b", "recovery_continuation", "continuation_b",
+                   "c1")
+#: `[a-z0-9_]`, not `[a-z_]`. The original class could not match a kind with a
+#: digit in it, so `c1`'s branch was invisible to this parser and its body was
+#: attributed to the preceding branch — the test reported 'no branch handles c1'
+#: while the branch was sitting in the file. A parser that cannot see a real
+#: branch is the same hazard as a missing one.
+BRANCH_RE = re.compile(r'^(?:el)?if \[ "\$SESSION_KIND" = "([a-z0-9_]+)" \]; then$',
                        re.MULTILINE)
 
 

@@ -37,6 +37,12 @@ from aadistill.autoinit.c1_isolation import (  # noqa: E402
     bootstrap_seed,
     derive_recovery_seeds,
 )
+from aadistill.autoinit.c1_authorization import (  # noqa: E402
+    C1_HARNESS_SOURCE_FILES_V1,
+    SCHEMA as C1_AUTH_SCHEMA,
+    c1_harness_digest,
+    load_pricing,
+)
 from aadistill.autoinit.calibration import get_profile  # noqa: E402
 from aadistill.autoinit.operators import attention_activation  # noqa: E402
 from aadistill.autoinit.operators.attention_activation import (  # noqa: E402
@@ -113,6 +119,36 @@ def main() -> None:
 
         "head_commit": head,
         "executable_source": source_digest(),
+        #: What a GRANT binds: the full session harness, launcher and driver
+        #: included. `executable_source` above is the narrower science-only set
+        #: and is kept because it is what the readiness binding used.
+        "c1_harness": {
+            **c1_harness_digest(REPO),
+            "note": ("the set an authorization measures. It includes the launcher, "
+                     "the driver, the setup script, the operators the fixed path "
+                     "applies, the recovery and scoring paths the six probes "
+                     "invoke, and the session infrastructure they run through."),
+        },
+        "authorization": {
+            "schema": C1_AUTH_SCHEMA,
+            "type": "aadistill.autoinit.c1_authorization.C1Authorization",
+            "session_kind": "c1",
+            "allows_phase_a": False,
+            "allows_beam_search": False,
+            "n_harness_files": len(C1_HARNESS_SOURCE_FILES_V1),
+            "status": "NO GRANT EXISTS. No authorization has been issued.",
+        },
+        "launcher": "scripts/pod/autoinit_c1_launch.py",
+        "driver": "scripts/pod/autoinit_c1_driver.py",
+        "pricing": {
+            "path": "logs/phase_c1_pricing.json",
+            "pricing_sha256": load_pricing(REPO)["pricing_sha256"],
+            "floor_usd": load_pricing(REPO)["totals"]["floor_usd"],
+            "expected_usd": load_pricing(REPO)["totals"]["expected_usd"],
+            "hard_ceiling_usd": load_pricing(REPO)["totals"]["hard_ceiling_usd"],
+            "enforcement": ("BudgetSpec is derived from this record; the ceiling "
+                            "exists in exactly one place"),
+        },
         "c0_protocol": {
             "path": "logs/phase_c0_preregistration.json",
             "sha256": sha256_file(REPO / "logs/phase_c0_preregistration.json"),
@@ -357,6 +393,7 @@ def main() -> None:
     print(f"wrote {OUT.relative_to(REPO)}")
     print(f"  preregistration_sha256 {doc['preregistration_sha256']}")
     print(f"  executable_source      {doc['executable_source']['digest']}")
+    print(f"  c1_harness             {doc['c1_harness']['digest']} ({doc['c1_harness']['n_files']} files)")
     print(f"  session contract       {doc['c1_session_contract']['hash']}")
     print(f"  isolation plan         {doc['isolation_plan']['plan_hash']}")
     print(f"  incumbent path         {doc['fixed_path']['incumbent_spec_hash']}")

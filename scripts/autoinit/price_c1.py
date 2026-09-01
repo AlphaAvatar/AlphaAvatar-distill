@@ -29,6 +29,7 @@ only number an authorization should ever be written against.
 from __future__ import annotations
 
 import json
+import math
 import sys
 from pathlib import Path
 
@@ -144,7 +145,15 @@ def main() -> None:
             "expected_usd": round(minutes_to_usd(expected_min), 4),
             "artifact_recovery_reserve_minutes": ARTIFACT_RECOVERY_RESERVE_MIN,
             "hard_ceiling_minutes": round(ceiling_min, 2),
-            "hard_ceiling_usd": round(minutes_to_usd(ceiling_min), 4),
+            # ROUNDED UP, deliberately. A ceiling is the one figure that must
+            # never round down: at 4 dp the exact 13.757733 becomes 13.7577,
+            # which is $0.000033 BELOW the plan it is meant to authorize, and a
+            # grant written at that value fails closed with a $0.00 shortfall.
+            # Discovered by building the real BudgetSpec against it.
+            "hard_ceiling_usd": math.ceil(minutes_to_usd(ceiling_min) * 10000) / 10000,
+            "hard_ceiling_usd_exact": minutes_to_usd(ceiling_min),
+            "hard_ceiling_rounding": ("ceil to 4 dp; a ceiling rounds UP or it "
+                                      "under-authorizes the plan it prices"),
         },
         "assumptions_that_could_move_the_number": [
             ("The attention-statistics pass is UNMEASURED. If it costs 10x the FFN "

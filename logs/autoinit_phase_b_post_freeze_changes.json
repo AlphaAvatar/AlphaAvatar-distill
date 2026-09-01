@@ -6,7 +6,7 @@
   "baseline_ref": "05a0f429de1f892559282e1fdad45c455892f86c",
   "frozen_digest": "3d3b5d0717723cd3bf81bd9e8da1cedb0d78dc927e52d310e43b1d3a7d66f993",
   "frozen_set_version": 6,
-  "post_freeze_digest": "a043e2c76de80e92dd06691e474004e0cd2ed1933fe1d1d6d66f083ca7c6ab4a",
+  "post_freeze_digest": "1363e58196d98775fb11371dea805b16e042c2156a511a0e106dd207e5c78bc5",
   "changed_files": [
     "scripts/pod/autoinit_phase_b_launch.py",
     "scripts/pod/autoinit_preflight_setup.sh"
@@ -22,12 +22,13 @@
     "pre_existing_unchanged": {
       "phase_a": "91f17860d883975b6d2370525e75d72924bcd172283dfa1769d1cc5e8fdc7074",
       "phase_b": "6647692753c2ce65768075c3b9794a8f5b7e59e34dc04128745a93c2e3393edd",
-      "recovery_continuation": "fb0f99e2ffa2aba3259e2ffda849350c779e90598749f4787b47b4996243b890"
+      "recovery_continuation": "fb0f99e2ffa2aba3259e2ffda849350c779e90598749f4787b47b4996243b890",
+      "continuation_b": "cf5fe9e05c6b20220b97f9d8d8e29bcefa16314b7f21f5c309d2a9a417cb02a6"
     },
-    "pre_existing_changed": [],
     "added": [
-      "continuation_b"
-    ]
+      "c1"
+    ],
+    "pre_existing_changed": []
   },
   "why_this_is_safe_for_phase_b": "A Phase-B session exports SESSION_KIND=phase_b and takes its own branch, which is byte-identical to the frozen one. The added branch is unreachable from a Phase-B session by construction.",
   "new_runtime_module_not_in_the_frozen_set": {
@@ -43,5 +44,17 @@
     ]
   },
   "not_a_licence": "This does NOT authorize further edits to the Phase-B source set. Any future change must be recorded here with the same evidence, and a change that is not additive, or that alters a pre-existing dispatch branch, must fail the gate rather than be appended to this list.",
-  "note_sha256": "dc726c3729e966c2dc946ff0b50518e8384ed7ebbcc157fc598bdb497cb6051a"
+  "note_sha256": "dc726c3729e966c2dc946ff0b50518e8384ed7ebbcc157fc598bdb497cb6051a",
+  "post_freeze_digest_previous": "a043e2c76de80e92dd06691e474004e0cd2ed1933fe1d1d6d66f083ca7c6ab4a",
+  "history": [
+    {
+      "utc": "2026-09-02T00:00:00Z",
+      "declared_at_commit": "6048a4176119431bfbd03b715d5701e3bd3a4379",
+      "added_branch": "c1",
+      "digest_moved": "a043e2c76de80e92 -> 1363e58196d98775",
+      "why": "Phase C1 needs its own authorization type. Without a branch, SESSION_KIND falls through to 'spend' and loads a SpendAuthorization that refuses the C1 artifact -- the $0.2300 attempt-2 failure.",
+      "pre_existing_branches_byte_identical": true,
+      "also_fixed": "post_freeze._BRANCH matched only [a-z_]+, so a kind containing a digit was invisible: the c1 body was absorbed into the preceding branch's slice and this gate would have reported a PRE-EXISTING branch as changed, failing an additive and harmless drift. Widened to [a-z0-9_]+."
+    }
+  ]
 }

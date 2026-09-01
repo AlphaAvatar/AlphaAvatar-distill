@@ -6500,3 +6500,60 @@ recovery continuation under the derived **$16.7456** ceiling.
   until they run on a GPU.
 - **Revisit when:** an authorization type and launcher are written, or the price is
   accepted or refused.
+
+---
+
+## 2026-09-02 — C1 readiness: the runnable session, and four things the gates caught
+
+- **Context:** review accepted the price ($12.2070 / $13.4277 / $13.7577) as an
+  enforceable one-attempt ceiling and asked for three hygiene fixes plus the real
+  runnable session before any authorization.
+- **State normalized.** `baseline_commit` moved to `f46bf81`/2613 and then to this
+  tree; C1 reads **IMPLEMENTED / PRICED / NOT EXECUTED / NOT AUTHORIZED** in the
+  snapshot, `STATE.md`, `PHASE_INDEX.md` and the handoff; `planning_floor_usd` is
+  the accepted floor; `REPO_LAYOUT` no longer claims the operator registers on
+  import; and the "no tracked source file modified" claim is replaced by the
+  precise one.
+- **Battery canonicalized by COPY** to `aad-artifacts/autoinit/c1_confirmation_v1`
+  and re-verified from the copy (every file, every set hash, `a285d61f…`, 950/850).
+- **The runnable session exists:** `C1Authorization` (hard-`False`
+  `allows_phase_a`/`allows_beam_search`, refused by schema at load), a `BudgetSpec`
+  **derived** from `logs/phase_c1_pricing.json`, `autoinit_c1_launch.py`,
+  `autoinit_c1_driver.py`, a `SESSION_KIND=c1` branch, seven pre-provider gates,
+  and C1 added to `SESSION_LAUNCHERS`. The driver's `stage1`, `run_rung` and
+  `selection_row` all raise: no search, no rungs, no ranking.
+
+**Four defects the gates caught, none of which I would have found by reading.**
+
+1. **A ceiling that rounded down.** The exact plan is `$13.757733`; at 4 dp that
+   became `$13.7577`, which is **below** the plan it authorizes, and
+   `plan_session` refused it with a `$0.00` shortfall. A ceiling must round **up**
+   or it under-authorizes. Now `$13.7578`; the delta is `$0.000033`.
+2. **`SESSION_KIND=c1` was invisible to two parsers.** Both `post_freeze._BRANCH`
+   and the dispatch test matched `[a-z_]+`, which cannot contain a digit. The `c1`
+   branch existed in the script but was absorbed into the preceding branch's
+   slice — so the test reported "no branch handles c1" while the branch sat in the
+   file, and `post_freeze` would have reported a **pre-existing** branch as
+   changed and failed an additive, harmless drift. Widened to `[a-z0-9_]+` in the
+   production module and the test.
+3. **The session under-declared its staging.** C1 reads neither
+   `state_eval_v1` nor `recovery_search_v2`, so I did not stage them — but the
+   *shared* setup runs `verify_frozen_assets.py` unconditionally at ASSETS_READY
+   and checks both. A session declares what the **setup** requires, not what it
+   reads. That exact error cost the device-canary retry `$0.0637` and the
+   measurement session `$0.0700`.
+4. **The shared dispatcher moved two frozen digests.** Adding the branch moved
+   Phase B's executable digest (`a043e2c7…` → `1363e581…`) and the closed
+   continuation's (`a5ce6311…` → `45b0aaa7…`). Neither preregistration is
+   rewritten — that would destroy the evidence of what those runs executed. Both
+   drifts are **declared**, additive, with all pre-existing branches proven
+   byte-identical, following the precedent this project already set once.
+- **Operational note.** I twice left a `pytest` run going and started another; the
+  concurrent runs filled the root filesystem (0 bytes free) with per-run temp
+  checkpoint trees and every subsequent command failed on ENOSPC. Removing
+  `/tmp/pytest-of-ecs-user` recovered 9.4 GiB. One suite at a time.
+- **NO GRANT EXISTS.** The only C1 authorization artifact is a *candidate* at
+  `aad-scratch/sessions/c1-candidate/`, outside the repository, used to exercise
+  the real loader, `BudgetSpec` and pre-provider gates at `$0`. Never live, never
+  committed.
+- **Revisit when:** the maintainer decides whether to issue the one-use grant.

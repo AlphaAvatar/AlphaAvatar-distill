@@ -32,7 +32,13 @@ NOTE_PATH = "logs/autoinit_phase_b_post_freeze_changes.json"
 
 SETUP_SCRIPT = "scripts/pod/autoinit_preflight_setup.sh"
 
-_BRANCH = re.compile(r'^(?:el)?if \[ "\$SESSION_KIND" = "([a-z_]+)" \]; then$', re.M)
+#: `[a-z0-9_]`, not `[a-z_]`. The original class could not match a kind with a
+#: digit, so a `c1` branch was invisible here: its body was absorbed into the
+#: PRECEDING branch's slice, and this module would then report that pre-existing
+#: branch as changed and fail an additive, harmless drift. A gate that cannot see
+#: a branch is not a stricter gate, it is a wrong one.
+_BRANCH = re.compile(r'^(?:el)?if \[ "\$SESSION_KIND" = "([a-z0-9_]+)" \]; then$',
+                     re.M)
 
 
 def dispatch_branch_hashes(repo_root: str | Path = ".") -> dict[str, str]:

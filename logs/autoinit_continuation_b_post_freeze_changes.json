@@ -1,0 +1,17 @@
+{
+ "schema": "aadistill.autoinit.continuation_b_post_freeze_changes/v1",
+ "generated_utc": "2026-09-02T00:00:00Z",
+ "_contract": "The CLOSED continuation-B preregistration binds an executable-source digest. One of its members had to change so Phase C1 could exist at all: the SINGLE SESSION_KIND dispatcher shared by every launchable session, which needed a 'c1' branch. Recording that is the alternative to rewriting the preregistration \u2014 which would destroy the evidence of what attempt 5 actually executed \u2014 and to deleting the gate, which would destroy its meaning. This is the same situation, and the same remedy, as logs/autoinit_phase_b_post_freeze_changes.json.",
+ "continuation_b_status": "CLOSED and CONSUMED. Its authorization binds a NON-HEAD commit, so session_commit_gate rejects it and no continuation-B session can launch again. The frozen digest is historical evidence, not a live gate.",
+ "frozen_digest": "a5ce6311789eb4cd28902dfa8e2a65f1fea26123ab67a7fda025c8e8960d7141",
+ "post_freeze_digest": "45b0aaa79a095005f269fc411c43942185be8b960cf1e9a4a469f59ae0bbbfad",
+ "changed_files": [
+  "scripts/pod/autoinit_preflight_setup.sh"
+ ],
+ "change": "added the SESSION_KIND=c1 branch, which loads C1Authorization. Without it SESSION_KIND falls through to 'spend' and loads a SpendAuthorization that refuses the C1 artifact \u2014 Phase-B attempt 2 proved what that costs ($0.2300, a KeyError one step after the test gate passed).",
+ "pre_existing_branches_unchanged": true,
+ "pre_existing_branches_note": "the phase_a, phase_b, continuation_b and recovery_continuation branches are byte-identical; the c1 branch was inserted before recovery_continuation and changed no other line",
+ "preregistration_rewritten": false,
+ "scientific_impact": "NONE. No Phase-A/B result, metric, hash or artifact changes.",
+ "declared_at_commit": "6048a4176119431bfbd03b715d5701e3bd3a4379"
+}

@@ -578,6 +578,31 @@ print(f'  {a.authorization_id}: stages {list(a.authorized_stages)}, '
       f'hard \${a.hard_cap_usd:.4f}, search {a.runs_search}, '
       f'phase B {a.allows_phase_b}, followon {a.automatic_followon_start}')
 " || { say "THE SESSION AUTHORIZATION DOES NOT BIND TO THIS SESSION'S PLAN"; mark "AUTHORIZATION_MISMATCH"; exit 98; }
+elif [ "$SESSION_KIND" = "c1" ]; then
+  # A SIXTH type. Phase-C1's grant measures a harness containing the C1 launcher,
+  # driver, fixed-path replayer and the new ATTENTION operator, none of which
+  # appear in any earlier file set, and it carries a ceiling derived from
+  # logs/phase_c1_pricing.json for six 0.86M probes rather than for a search or a
+  # continuation. Every other branch would either refuse the artifact on schema or
+  # — worse — accept it while binding C1 to another phase's file list and price.
+  #
+  # This branch exists because a missing one is not a type error: SESSION_KIND
+  # falls through to `spend`, and attempt 2 of Phase B proved what that costs
+  # ($0.2300, a KeyError one step after the test gate passed).
+  cd "$REPO" && PYTHONPATH=src SESSION_AUTH_PATH="$SESSION_AUTH_PATH" \
+    SESSION_PLAN_HASH="$SESSION_PLAN_HASH" /opt/train/bin/python -c "
+import os
+from aadistill.autoinit.c1_authorization import C1Authorization
+a = C1Authorization.load(os.environ['SESSION_AUTH_PATH'])
+a.require_plan(os.environ['SESSION_PLAN_HASH'])
+assert a.authorizes_c1_isolation is True, 'a C1 session needs a C1 authorization'
+assert a.allows_phase_a is False, 'this artifact claims Phase A authorization'
+assert a.allows_beam_search is False, 'C1 replays one fixed path and runs no search'
+assert a.automatic_followon_start is False, 'nothing chains off C1'
+print(f'  {a.authorization_id}: stages {list(a.authorized_stages)}, '
+      f'hard \${a.hard_cap_usd:.4f}, C1 {a.authorizes_c1_isolation}, '
+      f'search {a.allows_beam_search}, phase A {a.allows_phase_a}')
+" || { say "THE SESSION AUTHORIZATION DOES NOT BIND TO THIS SESSION'S PLAN"; mark "AUTHORIZATION_MISMATCH"; exit 98; }
 elif [ "$SESSION_KIND" = "recovery_continuation" ]; then
   # A THIRD type, not a relaxation of the second. The continuation's artifact
   # carries `phase_a_authorized: true` (it runs Phase-A stages), so the spend

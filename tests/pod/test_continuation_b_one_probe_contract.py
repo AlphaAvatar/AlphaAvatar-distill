@@ -255,13 +255,34 @@ def test_the_preregistration_binds_the_live_executable_digest():
         (REPO / "logs/autoinit_continuation_b_preregistration.json").read_text())
     recorded = prereg["executable_source"]["digest"]
     live = continuation_source_digest(REPO)["digest"]
-    assert recorded == live, (
-        f"the preregistration binds {recorded[:12]}… but the source tree digests "
-        f"to {live[:12]}…. Regenerate it: an edit to a file in the source set "
-        "after the last regeneration leaves the document describing code that no "
-        "longer exists.")
-    assert prereg["executable_source"]["n_files"] == len(
-        continuation_source_digest(REPO)["files"])
+
+    if recorded != live:
+        # A drift is allowed ONLY when it is declared. The continuation is closed
+        # and consumed — its authorization binds a non-HEAD commit, so no
+        # continuation-B session can launch again — but the SINGLE SESSION_KIND
+        # dispatcher it measures is shared by every launchable session, and a new
+        # session needs a branch in it. Rewriting the preregistration would
+        # destroy the evidence of what attempt 5 executed; deleting this check
+        # would destroy its meaning. Declaring the change is the remedy this
+        # project already chose once, for the same file, when the continuation
+        # itself needed its branch.
+        record = REPO / "logs/autoinit_continuation_b_post_freeze_changes.json"
+        assert record.is_file(), (
+            f"the preregistration binds {recorded[:12]}… but the source tree "
+            f"digests to {live[:12]}… and nothing declares the change. Either "
+            "revert the edit or record it, as "
+            "logs/autoinit_phase_b_post_freeze_changes.json does.")
+        declared = json.loads(record.read_text())
+        assert declared["frozen_digest"] == recorded
+        assert declared["post_freeze_digest"] == live, (
+            "the declaration is itself stale: it records "
+            f"{declared['post_freeze_digest'][:12]}… but the tree is now "
+            f"{live[:12]}…")
+        assert declared["preregistration_rewritten"] is False
+        assert declared["scientific_impact"].startswith("NONE")
+    else:
+        assert prereg["executable_source"]["n_files"] == len(
+            continuation_source_digest(REPO)["files"])
 
 
 def test_the_preregistration_binds_the_live_session_plan_and_pricing():
@@ -352,8 +373,19 @@ def test_the_live_snapshot_records_the_terminal_phase_b_state():
     assert state["authorized"]["any"] is False
     assert state["running"]["pods"] == 0 and state["running"]["launchers"] == 0
     assert state["prepared_launch"]["any"] is False
-    assert state["budget"]["planning_floor_usd"] is None, (
-        "a planning floor implies a priced next session; none is planned")
+    # This used to require `planning_floor_usd is None` on the reasoning that a
+    # floor implies a priced next session and none was planned. C1 is now priced,
+    # so the assertion moved to what still protects the boundary: a floor may
+    # exist, but it must be the accepted pricing record's, and priced must not be
+    # mistaken for funded.
+    floor = state["budget"]["planning_floor_usd"]
+    if floor is not None:
+        pricing = json.loads((REPO / "logs/phase_c1_pricing.json").read_text())
+        assert floor == pricing["totals"]["floor_usd"], (
+            f"the snapshot's planning floor {floor} is not the accepted pricing "
+            f"record's {pricing['totals']['floor_usd']}")
+        assert pricing["authorizes"] == "nothing"
+        assert state["authorized"]["any"] is False, "priced is not authorized"
 
     # Phase C *execution* has not started.
     #
@@ -374,7 +406,9 @@ def test_the_live_snapshot_records_the_terminal_phase_b_state():
     # "NOT EXECUTED", not "NOT STARTED": implementation was authorized at $0 and
     # has landed, so only execution is still forbidden. This word becomes false
     # exactly when a probe runs, which is the thing worth guarding.
-    for word in ("NOT EXECUTED", "NOT PRICED", "NOT AUTHORIZED"):
+    # "NOT PRICED" dropped: C1 is priced now, which the review asked for. The two
+    # words left are the ones that only become false when money is committed.
+    for word in ("NOT EXECUTED", "NOT AUTHORIZED"):
         assert word in state["phase_c"]["c1"]["status"], word
     assert "NOT STARTED" in state["phase_c"]["c2"]["status"]
     # Nothing that needs a GPU may be claimed as built.

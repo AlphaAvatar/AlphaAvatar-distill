@@ -1,5 +1,5 @@
 **Updated:** 2026-09-01 · branch `main` · **PHASE B CLOSED · PHASE C0 FROZEN ·
-PHASE C1 IMPLEMENTED, NOT EXECUTED**
+PHASE C1 IMPLEMENTED + PRICED, NOT EXECUTED**
 
 # Current state
 
@@ -17,13 +17,16 @@ remaining.
 | Phase A | **COMPLETE / FROZEN** |
 | Phase B | **COMPLETE / RESOLVED / FROZEN** |
 | Phase C0 | **COMPLETE / APPROVED / FROZEN** |
-| Phase C1 | **IMPLEMENTED / NOT EXECUTED / NOT PRICED / NOT AUTHORIZED** |
+| Phase C1 | **IMPLEMENTED / PRICED / NOT EXECUTED / NOT AUTHORIZED** |
 | Phase C2 | **NOT STARTED** |
 | formal recovery evidence | **NONE** |
 
-**Phase C is UNPRICED, UNAUTHORIZED, and has consumed no compute.**
+**Phase C1 is PRICED and UNAUTHORIZED, and has consumed no compute.** Floor
+**$12.2070** · expected **$13.4277** · enforceable one-attempt ceiling
+**$13.7578**, against **$19.9003** headroom — **$6.1425** would remain if the
+whole ceiling were consumed. **Priced is not authorized: no grant exists.**
 
-## Phase C1 — IMPLEMENTED, NOT EXECUTED
+## Phase C1 — IMPLEMENTED and PRICED, NOT EXECUTED
 
 Design and implementation proceeded at `$0`; **execution did not**. What exists:
 
@@ -37,16 +40,20 @@ Design and implementation proceeded at `$0`; **execution did not**. What exists:
 
 | ten-stage session contract + the two fail-stop replay gates | `autoinit/c1_session.py` |
 | execution preregistration | [`phase_c1_execution_preregistration.json`](phase_c1_execution_preregistration.json) · `48beff49a1d087dc…` |
-| price bound | [`phase_c1_pricing.json`](phase_c1_pricing.json) · floor **$12.2070** · expected **$13.4277** · **ceiling $13.7577** |
+| price bound | [`phase_c1_pricing.json`](phase_c1_pricing.json) · floor **$12.2070** · expected **$13.4277** · **ceiling $13.7578** |
+| runnable session | `scripts/pod/autoinit_c1_launch.py` + `autoinit_c1_driver.py` · `SESSION_KIND=c1` · `C1Authorization` · 7 pre-provider gates |
 
 The three fresh seeds are **`1635674081`, `1656475568`, `696460635`**, derived
 from the frozen C0 digest and confirmed independently three ways.
 
-Still absent: the **pod launcher and driver** — a `SessionSpec` needs an
-authorization *type* and a `BudgetSpec`, and pricing precedes authorization, so
-writing them now would be untestable at `$0`. Also absent, both requiring GPU:
-the pre-ATTENTION parent `b8820f41d062` rebuild and the ~8 GB teacher weights.
-**No model has been evaluated on the C1 battery, and no probe has been trained.**
+**No grant exists.** The only C1 authorization artifact is a *candidate* at a
+scratch path outside the repository, structurally valid so the real launcher,
+loader, `BudgetSpec` and pre-provider gates can run at `$0`. It is not live and
+is never committed.
+
+Still absent, both requiring GPU or network: the pre-ATTENTION parent
+`b8820f41d062` rebuild and the ~8 GB teacher weights. **No model has been
+evaluated on the C1 battery, and no probe has been trained.**
 
 > **Why the new operator lives in its own module.** `operators/attention.py` and
 > its package `__init__` are both members of `CONTINUATION_SOURCE_FILES_V2`, the
