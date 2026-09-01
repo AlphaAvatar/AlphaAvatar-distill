@@ -6445,3 +6445,58 @@ recovery continuation under the derived **$16.7456** ceiling.
 - **Risks:** the parent rebuild remains unproven until it runs on a GPU under the
   bound runtime; a mismatch there stops C1 and goes to review with evidence.
 - **Revisit when:** the C1 execution preregistration is written.
+
+---
+
+## 2026-09-02 — C1 readiness: corrections, canonical battery, preregistration, price
+
+- **Context:** review found three metadata defects in `f46bf81` and asked for the
+  execution-readiness layer before any pricing decision.
+- **Corrections.** `current_state.json` still named `1a0d12b` as the last tested
+  implementation with the note "commits after it touched only logs/" — true until
+  `f46bf81` added the C1 source, false afterwards. Now `f46bf81` / `2613 passed /
+  12 skipped / 0 failed`. Phase C1's status is **IMPLEMENTED / NOT EXECUTED / NOT
+  PRICED / NOT AUTHORIZED** across the snapshot, `STATE.md`, `PHASE_INDEX.md` and
+  the handoff. `REPO_LAYOUT.md` said the new operator was "registered on import",
+  which was false after the registration fix; it now states that import is inert.
+  The claim "no tracked source file is modified by this work" is replaced by the
+  precise one: **no pre-existing tracked source implementation file was modified;
+  all C1 source implementation was added in new files.**
+- **Battery canonicalized by COPY, not rebuild.** The frozen bytes were promoted
+  to `/home/ecs-user/aad-artifacts/autoinit/c1_confirmation_v1` and re-verified
+  *from the copy*: every file byte-identical, every set sha256 equal to the frozen
+  manifest, `content_sha256` re-derived to `a285d61f…`, membership 950/850. The
+  repo-local copy is retained. Identity and selection rule untouched.
+- **Seeds materialized.** `1635674081`, `1656475568`, `696460635` — derived from
+  the frozen C0 digest by the committed rule, and independently confirmed three
+  ways (the implementation, a hand computation, and the reviewer's own
+  calculation, all agreeing). Distinct, and disjoint from the Phase-A/B seeds.
+- **Session structure.** `autoinit/c1_session.py` declares ten stages A–J with the
+  two replay gates as stop conditions that block *any* recovery training, the
+  evidence a mismatch must preserve, and `build_arm_specs`, which **refuses** to
+  construct the treatment arm until stage C has registered the operator — making
+  register-before-use a property of the code rather than a runbook step. It
+  contains no search, ranking, halving or tie-breaking, and a test checks its
+  import graph.
+- **Execution preregistration** at `logs/phase_c1_execution_preregistration.json`,
+  `48beff49a1d087dc…`. Every field derived from live objects; it authorizes
+  nothing.
+- **Pricing** at `logs/phase_c1_pricing.json`, `70d2fec6a41c43b1…`: floor
+  **$12.2070**, expected **$13.4277**, hard ceiling **$13.7577**. Two assumptions
+  are stated rather than buried — the 950-prompt evaluation is scaled explicitly
+  ×5 from the measured 190-prompt figure (`$4.8609`, the second largest item), and
+  the attention-statistics pass is labelled **UNMEASURED** and bounded at 4× the
+  slower of the two activation passes actually timed on the same parent. A
+  replay-gate mismatch ends the session for about `$1.30` and still buys a real
+  finding: that is the cheap outcome.
+- **Deliberately NOT built: the pod launcher and driver.** A `SessionSpec` needs an
+  `authorization_path` and `authorization_loader` — a C1 authorization *type* — and
+  a `BudgetSpec`. Pricing precedes authorization, so writing 500 lines of launcher
+  against an authorization that does not exist would be untestable at `$0` and is
+  exactly the "never-executed lines" failure that killed four paid pods.
+  `SESSION_LAUNCHERS` is therefore unchanged; that coverage debt attaches to the
+  launcher when it is written, as the review scoped it.
+- **Risks:** the attention-pass timing is unmeasured; the replay gates are unproven
+  until they run on a GPU.
+- **Revisit when:** an authorization type and launcher are written, or the price is
+  accepted or refused.

@@ -371,7 +371,10 @@ def test_the_live_snapshot_records_the_terminal_phase_b_state():
     # running.pods, budget.planning_floor_usd) already carry "nothing was bought".
     assert "FROZEN" in state["phase_c"]["c0"]["status"]
     assert state["phase_c"]["c0"]["authorizes"] == "nothing"
-    for word in ("NOT STARTED", "NOT PRICED", "NOT AUTHORIZED"):
+    # "NOT EXECUTED", not "NOT STARTED": implementation was authorized at $0 and
+    # has landed, so only execution is still forbidden. This word becomes false
+    # exactly when a probe runs, which is the thing worth guarding.
+    for word in ("NOT EXECUTED", "NOT PRICED", "NOT AUTHORIZED"):
         assert word in state["phase_c"]["c1"]["status"], word
     assert "NOT STARTED" in state["phase_c"]["c2"]["status"]
     # Nothing that needs a GPU may be claimed as built.

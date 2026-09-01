@@ -4,7 +4,7 @@
  "_contract": "Committed identity of the Phase-C1 confirmation battery. The asset itself is OUT OF TREE under artifacts/, which .gitignore excludes exactly as it does the frozen recovery_search_v2 \u2014 large data is identified by hash here, not stored in git (AGENTS.md 2.5). The builder is committed and deterministic, so the asset is reproducible from this record.",
  "asset_id": "c1_confirmation_v1",
  "role": "C1_CONFIRMATION",
- "path": "artifacts/stage3/c1_confirmation_v1",
+ "path": "artifacts/stage3/c1_confirmation_v1  (repo-local working copy, gitignored)",
  "tracked_by_git": false,
  "n_prompts": 950,
  "n_scorable_prompts": 850,
@@ -137,5 +137,20 @@
   "isolation": "PASS - disjoint from FINAL_PROMOTION, RECOVERY_SEARCH, the recovery training corpus, STATE_EVALUATION and OPERATOR_CALIBRATION by BOTH stable id and normalized prompt content; 0 collisions of either kind against every role",
   "final_promotion": "read for exclusion only; not sampled from, remains unconsumed"
  },
- "no_model_has_been_evaluated_on_it": true
+ "no_model_has_been_evaluated_on_it": true,
+ "canonical_path": "/home/ecs-user/aad-artifacts/autoinit/c1_confirmation_v1",
+ "canonicalized_utc": "2026-09-02T00:00:00Z",
+ "canonicalization": {
+  "method": "COPY of the already-frozen bytes. The battery was NOT rebuilt for this promotion, so the scientific identity and the selection rule are untouched.",
+  "n_files": 8,
+  "bytes": 3418000,
+  "verified_from_the_copy": [
+   "every file byte-identical to the repo-local source",
+   "every set sha256 equals the frozen manifest value",
+   "content_sha256 re-derived from the copy equals a285d61f...",
+   "membership 950 total / 850 scorable"
+  ],
+  "repo_local_copy_retained": true,
+  "why_two_copies": "aad-artifacts is the canonical scientific store a paid session reads from; the repo-local copy is the working artifact the builder and the isolation verifier operate on. Both are the same bytes and both are gitignored."
+ }
 }

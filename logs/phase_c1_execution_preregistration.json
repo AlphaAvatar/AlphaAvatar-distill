@@ -1,0 +1,388 @@
+{
+ "schema": "aadistill.autoinit.c1_execution_preregistration/v1",
+ "preregistration_id": "autoinit.v1.phase_c1.execution",
+ "written_utc": "2026-09-02T00:00:00Z",
+ "_contract": "Everything the Phase-C1 session will run, bound before any C1 result exists. AUTHORIZES NOTHING: no pricing decision, no spend grant, no permission to launch. An authorization, if ever issued, binds THIS document.",
+ "head_commit": "f46bf81b2c538708bb1e545cfdc3dca88c22e8ee",
+ "executable_source": {
+  "digest": "a5bd40a86052f0125a16414bc98617782cdc011f70590cb938518bb25786740c",
+  "files": [
+   {
+    "path": "scripts/autoinit/verify_c1_battery_isolation.py",
+    "sha256": "887f430f9ba54ab36fd2c95994a8ecbf0ccb27e53b26411af7e140d0933f843c",
+    "bytes": 6489
+   },
+   {
+    "path": "scripts/data/battery_render.py",
+    "sha256": "0ad2a7fc98585fdfc9d5061259b63aaff6072518d6acbf9ae0788f18eb35224d",
+    "bytes": 10231
+   },
+   {
+    "path": "scripts/data/build_c1_confirmation_battery.py",
+    "sha256": "26af35f56b6a30ba5786a147f9f1ff998de5a2a15c95d145356e6081e0c026b7",
+    "bytes": 13309
+   },
+   {
+    "path": "src/aadistill/autoinit/c1_isolation.py",
+    "sha256": "46e8b097690b20171c43fb2d151fc7928e5f7cb0df8e4c9eec6a6d3e8a5bd9cc",
+    "bytes": 19594
+   },
+   {
+    "path": "src/aadistill/autoinit/c1_session.py",
+    "sha256": "eaddf9711661b8d8aef1b1aec7036afabb6f75a621a5a1805fda260878a1d863",
+    "bytes": 13363
+   },
+   {
+    "path": "src/aadistill/autoinit/fixed_path.py",
+    "sha256": "e8424a18cbd86f65d622a61228c49fbcb92fd1f0aa5ede2d98aef2187d078357",
+    "bytes": 16049
+   },
+   {
+    "path": "src/aadistill/autoinit/operators/attention_activation.py",
+    "sha256": "2c719d632fadfa873ac6597ba812cb05b558340b1d7628db68baa62be0ba7aa8",
+    "bytes": 11284
+   },
+   {
+    "path": "src/aadistill/init/attention_stats.py",
+    "sha256": "6ee9c8b6a178cebce3fd1f7b52c9f7189ea2ba65767778beef2dd12b8628b25b",
+    "bytes": 6342
+   }
+  ],
+  "rule": "sha256 over sorted 'path:sha256' lines of the declared set"
+ },
+ "c0_protocol": {
+  "path": "logs/phase_c0_preregistration.json",
+  "sha256": "fb2eeea531f9f0d11f84b77cd47dff30697122de90a072a7a80c3a7535e89280",
+  "protocol_id": "autoinit.v1.phase_c0"
+ },
+ "c1_session_contract": {
+  "hash": "96871c2e38784ee6517bc3aa48fe6e8de749958e1a7cb967e2d6ccdcb90cec7d",
+  "stages": [
+   "A: session_setup",
+   "B: teacher_fetch_verify",
+   "C: register_operator",
+   "D: replay_parent",
+   "E: replay_incumbent",
+   "F: materialize_arms",
+   "G: recovery_probes",
+   "H: evaluate",
+   "I: decide",
+   "J: collect_teardown"
+  ],
+  "gate_stages": [
+   "teacher_fetch_verify",
+   "register_operator",
+   "replay_parent",
+   "replay_incumbent",
+   "materialize_arms"
+  ]
+ },
+ "treatment_operator": {
+  "impl_id": "attention.activation_importance_v1",
+  "signature_hash": "1171f3b791e2394d4b730b887f936763edd5bb4d31b52090cdccacef809e0e90",
+  "version": 1,
+  "calibration_need": "activation_stats",
+  "calibration_profile": "calib.domain_balanced@v1",
+  "score_definition": "score_h = mean_t || W_o,h @ a_h(t) ||^2",
+  "score_definition_long": "a_h(t) is query head h's slice of the concatenated attention output, i.e. the tensor o_proj consumes; W_o,h is o_proj's column block for that head. The score is the mean over calibration tokens of the squared L2 norm of that head's contribution to the residual stream. Computed EXACTLY from the streamed per-head second moment as <W_o,h^T W_o,h, mean_t a_h a_h^T>_F, not approximated.",
+  "selection": "per-GQA-group top-k, 4 query heads per KV group -> keep 2; descending score; ties by ASCENDING head index",
+  "preserved": "GQA grouping, head_dim, KV heads, RoPE basis; modifies = {num_attention_heads} only",
+  "registration": "EXPLICIT. Importing the module does not register the operator, because BeamSearch._allowed_impl_ids falls back to the entire registry when allowed_impls is None. Stage C registers it before any FixedPathSpec names it, and build_arm_specs refuses otherwise.",
+  "not_in_frozen_library": true,
+  "stats_spec": {
+   "spec_id": "attention_head_output_second_moment",
+   "version": 1,
+   "accumulation_dtype": "float64",
+   "quantities": [
+    "attn_head_sqsum",
+    "attn_token_count"
+   ],
+   "spec_hash": "4dd0e23a6b8b9e92dce711c597a9ebd7d7a3b477ffa59eb296a08850472ed134"
+  }
+ },
+ "incumbent_operator": {
+  "impl_id": "attention.weight_proxy_v0",
+  "calibration_profile": "calib.none@v1"
+ },
+ "fixed_path": {
+  "incumbent_spec_hash": "8b0bb455bfba069f2dcc1b4555cf40ecb7efe4cf53121a14937e7028131ae08d",
+  "treatment_spec_hash": "3a233a9017b3b8a717ff18fc1aaa171dad84f36adc97920765d181ca98c53612",
+  "incumbent_path_label": "DEPTH(calib.domain_balanced@v1)->FFN(calib.domain_balanced@v1)->RESIDUAL_WIDTH(calib.reasoning_heavy@v2)->ATTENTION(calib.none@v1)",
+  "treatment_path_label": "DEPTH(calib.domain_balanced@v1)->FFN(calib.domain_balanced@v1)->RESIDUAL_WIDTH(calib.reasoning_heavy@v2)->ATTENTION(calib.domain_balanced@v1)",
+  "shared_prefix": true,
+  "target_geometry": {
+   "head_dim": 128,
+   "hidden_size": 1024,
+   "intermediate_size": 3072,
+   "num_attention_heads": 16,
+   "num_hidden_layers": 28,
+   "num_key_value_heads": 8,
+   "tie_word_embeddings": true,
+   "vocab_size": 151936
+  },
+  "search_seed_carried": 20260815
+ },
+ "replay_gates": {
+  "expected_parent_digest": "eea90c91346a0745b8b1b847503b48fe73c33bb9d75d92c196dc43598e91e722",
+  "expected_parent_state_id": "b8820f41d062bffffca4b99148602136",
+  "expected_incumbent_digest": "c313d1b4081b9a3b410dddf7a29ebcaad8dd0759179d51e1d761238c1743a2a6",
+  "expected_incumbent_state_id": "fe9683e6a9c783bbc6fe276a78c851c6",
+  "fail_stop": "A mismatch at EITHER gate ENDS THE SESSION BEFORE ANY 0.86M RECOVERY TRAINING. No automatic waiver, no retry, no substitution of a rebuilt parent for the historical one. The mismatch evidence is preserved and referred to review; a functional-equivalence amendment is a decision to be made from that evidence, not pre-authorized here.",
+  "evidence_on_mismatch": [
+   "every intermediate artifact_digest, in order",
+   "DEPTH selected and removed blocks",
+   "FFN selected neurons per layer",
+   "WIDTH projection diagnostics",
+   "ATTENTION kept heads per layer",
+   "runtime: image digest, torch, transformers, CUDA runtime, driver, GPU",
+   "the expected and realized digests, side by side"
+  ]
+ },
+ "teacher": {
+  "repo_id": "Qwen/Qwen3-4B-Thinking-2507",
+  "revision": "768f209d9ea81521153ed38c47d515654e938aea",
+  "expected_shard_sha256": {
+   "model-00001-of-00003.safetensors": "98178c1cddbca8ad76102afdbf76e4df79b64b82377ad4dca34c755cac00571a",
+   "model-00002-of-00003.safetensors": "57b5bd1f667d420350f169342a90b50e5ffc2aa202ba1819da1af3367ff2261f",
+   "model-00003-of-00003.safetensors": "e3cccb84e8926f3f18c334465639939a68af310b0729938fccc2de66a9a31953"
+  },
+  "n_shards": 3,
+  "index_total_size_bytes": 8045591552,
+  "hash_semantics": {
+   "lfs_sha256": "For an LFS-backed file the hub blob is named by the sha256 of its content. VERIFIED empirically on this box: tokenizer.json's blob name equals sha256(content).",
+   "git_blob_sha1": "For a non-LFS file the blob is named by the git blob SHA-1. VERIFIED empirically: config.json's blob name equals `git hash-object config.json`."
+  },
+  "verification_rule": "On fetch, every file in `files` must hash to its recorded blob_name under the matching convention. Reconstruction MUST NOT begin on any mismatch.",
+  "binding_record": "logs/phase_c1_teacher_binding.json",
+  "weights_present_locally": false
+ },
+ "tokenizer_contract": {
+  "module": "aadistill.models.tokenizer_contract",
+  "rule": "leaves are weight-only by design \u2014 leaf_durability REFUSES a persisted leaf carrying tokenizer files, because that would change tokenizer_sha256 and therefore the artifact digest the metrics hang on. Both arms are packaged for evaluation through the tokenizer contract, not by copying files into the checkpoint.",
+  "teacher_tokenizer_sha256": "aeb13307a71acd8fe81861d94ad54ab689df773318809eed3cbe794b4492dae4"
+ },
+ "calibration": {
+  "calib.domain_balanced@v1": {
+   "profile_hash": "11f36a88bad4879f8ab0e3586ca1f0af035401e505dc97815bed8d47b9f32e9b",
+   "content_sha256": "d65c1f40e4837ea1bd5bcc33c68041a13b797c68f5be3c0686e0142ed761028f",
+   "items_path": "artifacts/stage1/e8_calibration_v1/items.jsonl",
+   "n_items": 67
+  },
+  "calib.reasoning_heavy@v2": {
+   "profile_hash": "6c67b8dff0e81a775371a62b1b293677e45c173f52aee119d036c95081782ddd",
+   "content_sha256": "cdb2838946b9355294406d2bc398bc8390306ced84a35b09900f45a033ccc370",
+   "items_path": "artifacts/stage1/reasoning_heavy_v2/items.jsonl",
+   "n_items": 62
+  },
+  "resolution": "fail-closed: resolve() re-derives and checks the content hash"
+ },
+ "isolation_plan": {
+  "plan_hash": "42a496f0923b1c321426721fb51487df15b5368703fe19a898354973324e27a2",
+  "plan": {
+   "schema": "aadistill.autoinit.c1_isolation_plan/v1",
+   "plan_id": "autoinit.v1.phase_c1",
+   "arms": [
+    {
+     "arm_id": "c1.incumbent",
+     "role": "incumbent",
+     "attention_impl_id": "attention.weight_proxy_v0",
+     "attention_profile_id": "calib.none@v1"
+    },
+    {
+     "arm_id": "c1.treatment",
+     "role": "treatment",
+     "attention_impl_id": "attention.activation_importance_v1",
+     "attention_profile_id": "calib.domain_balanced@v1"
+    }
+   ],
+   "seeds": [
+    1635674081,
+    1656475568,
+    696460635
+   ],
+   "probe_count": 6,
+   "battery_asset_id": "c1_confirmation_v1",
+   "battery_content_sha256": "a285d61f88de9da85e87818786cce8d350f03246365ff946207c61a6464fee3c",
+   "sesoi": 0.01,
+   "design_alternative": 0.015,
+   "alpha": 0.05,
+   "primary_metric": "correct_overall",
+   "secondary_metric": "usable_rollout_rate",
+   "seed_robustness_min_positive": 2,
+   "usable_pooled_min_delta": -0.05,
+   "usable_per_seed_min_delta": -0.1,
+   "catastrophic": {
+    "rule_id": "per_capability_collapse",
+    "candidate_max": 0.1,
+    "control_min": 0.4,
+    "control_operand": "incumbent",
+    "candidate_operand": "treatment",
+    "statement": "candidate usable_rollout_rate < 0.1 AND control usable_rollout_rate > 0.4 -> catastrophic failure, replacement vetoed",
+    "asymmetry": "deliberate: this can veto the treatment, never the incumbent. It is never positive ranking evidence."
+   },
+   "structure": {
+    "successive_halving": false,
+    "elimination_rung": false,
+    "tie_break_rung": false,
+    "search_ranking": false,
+    "both_arms_run_every_seed": true
+   },
+   "historical_seeds_rejected": [
+    20260726,
+    20260801,
+    20260813
+   ],
+   "notes": {}
+  }
+ },
+ "seeds": {
+  "values": [
+   1635674081,
+   1656475568,
+   696460635
+  ],
+  "count": 3,
+  "derivation": "seed_i = uint32_be(SHA256(C0_digest + ':phase-c1:recovery-seed:' + decimal(i))[0:4]) mod 2**31, i from 0, advancing past collisions with the historical seeds or an earlier draw",
+  "base_digest": "fb2eeea531f9f0d11f84b77cd47dff30697122de90a072a7a80c3a7535e89280",
+  "base_digest_source": "logs/phase_c0_preregistration.json (commit be2ab08)",
+  "historical_seeds_excluded": [
+   20260726,
+   20260801,
+   20260813
+  ],
+  "no_human_choice": "the rule leaves no discretion; the values are determined by a document frozen before the replacement operator existed",
+  "independently_confirmed": "recomputed by the committed implementation, by a hand computation, and by the reviewer, all three agreeing"
+ },
+ "battery": {
+  "asset_id": "c1_confirmation_v1",
+  "content_sha256": "a285d61f88de9da85e87818786cce8d350f03246365ff946207c61a6464fee3c",
+  "manifest_sha256": "e6ff5cf536d515e6b466f2fc945c4368c89637d481c8ce1993ef3f3cf0909e42",
+  "canonical_path": "/home/ecs-user/aad-artifacts/autoinit/c1_confirmation_v1",
+  "repo_local_copy": "artifacts/stage3/c1_confirmation_v1  (repo-local working copy, gitignored)",
+  "n_prompts": 950,
+  "n_scorable_prompts": 850,
+  "set_sha256": {
+   "gsm8k": "f95017ca71ae77a0c98afee1d431c94c45fa328de602d51a07c1dfc87a086ee8",
+   "math_verified": "de302bda2d3949897ea5ba775f3ff2f1c48454c359b879555f918ffc745fba7d",
+   "multihop": "1c2652a9203fb9b3a766605a02fedf85f45f41bbc06919612add78e070d3ec34",
+   "rag": "1a3b0e876849916369421ba3629fa39e049c9d891ce753f2e9709042e5dcdb54",
+   "knowledge": "f52cc45f21a11100ba989001bca827f9c3cc953ad14e3e8f403381a4fe4afd35",
+   "tool": "bbd863d4431369d25e7d9675e8feb95395e46b271199146b5e2a01ea7ebc84a3",
+   "code": "f9da1df0d93d07910094985afea397580149ab0398af41230e0dfd3780479b89"
+  },
+  "evaluated_once_per_probe": true,
+  "no_model_has_been_evaluated_on_it": true
+ },
+ "generation_protocol": {
+  "fingerprint": "1e5031c2b7debcccb6ab8f92d9863fb2a8381aefd534d5267cb0b519e6192206",
+  "protocol_id": "recovery_generation",
+  "version": 1,
+  "note": "the frozen Phase-A/B generation identity: greedy, temperature 0, P18-unrestricted max_tokens, degeneration stop, resolved context 8192"
+ },
+ "scoring_contract": {
+  "contract": "recovery_search_scoring@v2",
+  "digest": "808080a7c5d88d5a66760fd0d7eeabc5451c096ad0819f8c5663a0b8224660be"
+ },
+ "recovery_recipe": {
+  "recipe_id": "e1_p1_kd_heavy@0.86M",
+  "ce_weight": 0.25,
+  "kd_weight": 1.0,
+  "temperature": 1.0,
+  "kd_scope": "all",
+  "tokens": 860000,
+  "pack": "artifacts/stage3/ladder_uniform_probe",
+  "pack_sha256": "6f324cb0f37bc0f07128e554ce8c161879419537478950496534f75fcecb249c",
+  "block_len": 8192,
+  "description": "The recovery recipe every E1 arm used, at the rung the frozen battery was sampled from. Held fixed so a difference between two probes is a difference between two initializations."
+ },
+ "decision": {
+  "primary_endpoint": "correct_overall over the 850 scorable prompts",
+  "estimand": "Delta = mean over prompts ( mean over the 3 fixed seeds ( correct_treatment - correct_incumbent ) )",
+  "inference": "stratified prompt-cluster bootstrap; seeds are FIXED BLOCKS",
+  "ci_claim_boundary": "prompt-distribution uncertainty CONDITIONAL ON the three preregistered fresh recovery-seed checkpoint pairs; NOT a CI over hypothetical future recovery seeds",
+  "bootstrap": {
+   "algorithm": "python.random.Random(seed).randrange, Mersenne Twister",
+   "seed": 816109261,
+   "seed_derivation": "SHA256(C0_digest + ':phase-c1:bootstrap')[0:4] mod 2**31",
+   "iterations": 20000,
+   "quantile_convention": "sorted ascending; lower bound = stats[floor(alpha * B)], upper bound = stats[min(B - 1, floor((1 - alpha) * B))]; two-sided uses alpha/2 each side",
+   "stratum_convention": "resample n_h prompts with replacement WITHIN each stratum, independently across strata; the overall statistic is the size-weighted mean of the stratum means, which equals the unstratified mean when strata sizes are held at their observed values",
+   "bound_before_any_c1_datum_exists": true
+  },
+  "rule": {
+   "GO": [
+    "one-sided 95% LCB > 0",
+    "AND point estimate >= +0.010",
+    "AND at least 2 of 3 seed-specific deltas > 0",
+    "AND all behavioural guardrails pass"
+   ],
+   "NO_GO": [
+    "one-sided 95% UCB < +0.010",
+    "OR a preregistered behavioural veto fires"
+   ],
+   "INCONCLUSIVE": "otherwise; no forced winner"
+  },
+  "also_reported": [
+   "two-sided 95% CI",
+   "each seed-specific delta",
+   "McNemar counts per seed",
+   "per-set and per-domain diagnostics"
+  ]
+ },
+ "guardrails": {
+  "usable_rollout": {
+   "pooled_min_delta": -0.05,
+   "per_seed_min_delta": -0.1,
+   "role": "veto only; never positive ranking credit"
+  },
+  "catastrophic_capability": {
+   "rule_id": "per_capability_collapse",
+   "candidate_max": 0.1,
+   "control_min": 0.4,
+   "control_operand": "the INCUMBENT arm (fe9683 / current ATTENTION)",
+   "candidate_operand": "the TREATMENT arm (activation_importance_v1)",
+   "asymmetry": "deliberate: it can veto the treatment, never flag the incumbent. Never positive ranking evidence."
+  }
+ },
+ "runtime_requirements": {
+  "must_be_recorded_at_execution": [
+   "image digest",
+   "torch version",
+   "transformers version",
+   "CUDA runtime",
+   "host driver",
+   "GPU model",
+   "attention backend",
+   "dtype"
+  ],
+  "why": "the replay gates compare artifact digests, and config_sha256 folds in transformers_version while the WIDTH projection is a float64 eigendecomposition whose low bits depend on the BLAS kernel. A mismatch is only interpretable against the runtime that produced it.",
+  "phase_b_search_runtime_for_reference": {
+   "image": "runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@580.178.04",
+   "torch": "2.11.0+cu128",
+   "transformers": "5.13.1",
+   "cuda_runtime": "12.8",
+   "measurement_device": "cuda"
+  }
+ },
+ "evidence_manifest_contract": {
+  "required_before_teardown": [
+   "per-probe train_log.jsonl (6)",
+   "per-probe per-sample rows (6)",
+   "per-probe raw generations, every evaluated sample (P18)",
+   "per-probe scored aggregates (6)",
+   "both arm artifact identities and the verified parent identity",
+   "the fixed-path replay record for both arms",
+   "the decision record with all seed-specific deltas and McNemar counts",
+   "the runtime identity block"
+  ],
+  "gate": "collect_artifacts.py manifest -> archive -> verify-archive -> transfer -> verify-local -> gate; a missing required artifact blocks teardown"
+ },
+ "out_of_scope": [
+  "formal Stage-2/Stage-3 recovery training \u2014 explicitly NOT in scope; C1 is a fixed-path ATTENTION isolation using short 0.86M recovery probes and establishes no recovered-model capability",
+  "canonical Stage-1 NLL",
+  "Phase C2 joint re-search",
+  "any search, ranking, successive halving, tie-breaking or arm elimination"
+ ],
+ "authorizes": "nothing",
+ "preregistration_sha256": "48beff49a1d087dcb278fd51230138f862df1c3fcead8d1c0b34b7e84d937a08"
+}

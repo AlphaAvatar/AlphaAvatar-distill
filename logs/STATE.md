@@ -1,5 +1,5 @@
 **Updated:** 2026-09-01 · branch `main` · **PHASE B CLOSED · PHASE C0 FROZEN ·
-PHASE C1 NOT STARTED**
+PHASE C1 IMPLEMENTED, NOT EXECUTED**
 
 # Current state
 
@@ -17,13 +17,13 @@ remaining.
 | Phase A | **COMPLETE / FROZEN** |
 | Phase B | **COMPLETE / RESOLVED / FROZEN** |
 | Phase C0 | **COMPLETE / APPROVED / FROZEN** |
-| Phase C1 | **NOT STARTED** |
+| Phase C1 | **IMPLEMENTED / NOT EXECUTED / NOT PRICED / NOT AUTHORIZED** |
 | Phase C2 | **NOT STARTED** |
 | formal recovery evidence | **NONE** |
 
 **Phase C is UNPRICED, UNAUTHORIZED, and has consumed no compute.**
 
-## Phase C1 — CPU machinery implemented, nothing executed
+## Phase C1 — IMPLEMENTED, NOT EXECUTED
 
 Design and implementation proceeded at `$0`; **execution did not**. What exists:
 
@@ -35,19 +35,28 @@ Design and implementation proceeded at `$0`; **execution did not**. What exists:
 | confirmation battery `c1_confirmation_v1`, 950/850 | out of tree; identity in [`phase_c1_battery.json`](phase_c1_battery.json) |
 | teacher shard binding | [`phase_c1_teacher_binding.json`](phase_c1_teacher_binding.json) |
 
-Still absent, all of it requiring GPU or a decision: the pre-ATTENTION parent
-`b8820f41d062` rebuild, the ~8 GB teacher weights, and the C1 execution
-preregistration that must materialize the three seed IDs. **No model has been
-evaluated on the C1 battery, and no probe has been trained.**
+| ten-stage session contract + the two fail-stop replay gates | `autoinit/c1_session.py` |
+| execution preregistration | [`phase_c1_execution_preregistration.json`](phase_c1_execution_preregistration.json) · `48beff49a1d087dc…` |
+| price bound | [`phase_c1_pricing.json`](phase_c1_pricing.json) · floor **$12.2070** · expected **$13.4277** · **ceiling $13.7577** |
+
+The three fresh seeds are **`1635674081`, `1656475568`, `696460635`**, derived
+from the frozen C0 digest and confirmed independently three ways.
+
+Still absent: the **pod launcher and driver** — a `SessionSpec` needs an
+authorization *type* and a `BudgetSpec`, and pricing precedes authorization, so
+writing them now would be untestable at `$0`. Also absent, both requiring GPU:
+the pre-ATTENTION parent `b8820f41d062` rebuild and the ~8 GB teacher weights.
+**No model has been evaluated on the C1 battery, and no probe has been trained.**
 
 > **Why the new operator lives in its own module.** `operators/attention.py` and
-> `operators/__init__.py` are both members of `CONTINUATION_SOURCE_FILES_V2`, the
+> its package `__init__` are both members of `CONTINUATION_SOURCE_FILES_V2`, the
 > executable source set Phase B's closed preregistration binds to
 > `a5ce6311789e…`. Adding a class to either moved that digest, leaving a frozen
 > historical document describing code that did not exist when it ran. Since a
 > frozen record must never be regenerated to match new code, the operator moved
-> instead. **No tracked source file is modified by this work** — every line is in
-> a new file, and all six Phase-A/B operator signature hashes are unchanged.
+> instead. **No pre-existing tracked source implementation file was modified; all
+> C1 source implementation was added in new files.** All six Phase-A/B operator
+> signature hashes are unchanged.
 
 ## Phase C0 — frozen 2026-09-01
 

@@ -997,10 +997,17 @@ retrain.
 
 ## Phase-C1 confirmation battery — built and frozen 2026-09-01
 
-- **Artifact:** `artifacts/stage3/c1_confirmation_v1/` — **out of tree**, not in
-  git. `.gitignore` excludes `artifacts/`, exactly as it does the frozen
-  `recovery_search_v2`, so the battery is identified by hash rather than stored
-  (AGENTS.md 2.5). 950 prompts / 850 scorable, 3.3 MiB.
+- **Artifact:** **canonical at
+  `/home/ecs-user/aad-artifacts/autoinit/c1_confirmation_v1/`**, with the
+  repo-local working copy at `artifacts/stage3/c1_confirmation_v1/`. Both are
+  out of tree — `.gitignore` excludes `artifacts/`, exactly as it does the frozen
+  `recovery_search_v2` — so the battery is identified by hash rather than stored
+  (AGENTS.md 2.5). 950 prompts / 850 scorable, 3.26 MiB, 8 files.
+- **Canonicalized 2026-09-02 by COPY, not rebuild.** The frozen bytes were
+  promoted unchanged and re-verified *from the copy*: every file byte-identical,
+  every set sha256 equal to the frozen manifest value, `content_sha256`
+  re-derived to `a285d61f…`, membership 950/850. The repo-local copy is
+  retained. The scientific identity and the selection rule are untouched.
 - **Committed identity:** [`phase_c1_battery.json`](phase_c1_battery.json) —
   asset id, per-set sha256, pinned source revisions, sampling rule, isolation
   result.

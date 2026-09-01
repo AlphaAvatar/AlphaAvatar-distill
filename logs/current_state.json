@@ -2,8 +2,8 @@
  "schema": "aadistill.current_state/v2",
  "generated_utc": "2026-09-01T04:00:00Z",
  "_contract": "Minimal machine-readable CURRENT snapshot: live facts only, no history, no per-attempt detail, no narrative. History: logs/decisions.md and the per-run dirs. Human view: logs/STATE.md, which must agree. Ownership: logs/CATALOG.md.",
- "baseline_commit": "1a0d12b28dcf4071d60c5a8260b9e4e5d8443cde",
- "baseline_commit_meaning": "LAST TESTED IMPLEMENTATION: the tree that produced latest_verification (2530/12/0). Commits after it touched only logs/. The Phase-C0 freeze changed no runtime or source file.",
+ "baseline_commit": "f46bf81b2c538708bb1e545cfdc3dca88c22e8ee",
+ "baseline_commit_meaning": "LAST TESTED IMPLEMENTATION: the tree that produced latest_verification (2613/12/0); it ADDED the Phase-C1 source, scripts and tests. Corrected 2026-09-01 from 1a0d12b, whose 'only logs/ changed after it' note stopped being true at f46bf81.",
  "running": {
   "paid_compute": false,
   "pods": 0,
@@ -13,7 +13,7 @@
  "authorized": {
   "any": false,
   "note": "All five continuation grants retired. Nothing is authorized; no paid work is approved, priced or requested. Phase C0 authorizes nothing.",
-  "consumed_files_retained": "Six consumed logs/*_authorization.json remain; each binds a NON-HEAD commit so session_commit_gate rejects all six. Presence is not authorization -- 'any' answers that."
+  "consumed_files_retained": "Six consumed logs/*_authorization.json remain; each binds a NON-HEAD commit so session_commit_gate rejects all six. Presence is not authorization."
  },
  "prepared_launch": {
   "any": false,
@@ -43,7 +43,7 @@
    "fourth_seed": "never"
   },
   "seeds_scope": "PHASE A/B ONLY. Phase C1 uses 3 FRESH seeds, not these -- fe9683 was selected under sa/sb/sc.",
-  "calibration": "calib.domain_balanced@v1 (spec 11f36a88, content d65c1f40) and calib.reasoning_heavy@v2 (spec 6c67b8df, content cdb28389, items a2ff8c92). Both identities bound: profile_hash does NOT identify the sampled bytes",
+  "calibration": "calib.domain_balanced@v1 (spec 11f36a88, content d65c1f40) and calib.reasoning_heavy@v2 (spec 6c67b8df, content cdb28389, items a2ff8c92). profile_hash does NOT identify the sampled bytes",
   "runtime_comparability": "generation_runtime_comparability@v2",
   "phase_b_session_plan_hash": "23f23649b4be92bd8852bf9d89f8dcb372bc5a00a175ae631d32b9d71de8032d",
   "phase_b_stage1_selection_sha256": "84fd6496851995ae",
@@ -53,10 +53,12 @@
   "phase_c0_sizing": "logs/phase_c0_sizing_evidence.json -- N=850 scorable selected; P(GO | +0.015) = 0.8379 >= 0.80 at rho=0.15."
  },
  "latest_verification": {
-  "utc": "2026-09-01T04:00:00Z",
-  "kind": "CURRENT -- $0 Phase-C0 metadata/protocol freeze at the live tree. No compute, no pod, no authorization.",
-  "suite": "see logs/STATE.md for the tests run with this commit",
-  "pods": "0, via GraphQL myself{pods} uptime, not the CLI field"
+  "utc": "2026-09-01T00:00:00Z",
+  "kind": "CURRENT -- $0 CPU-only C1 implementation. No compute, no pod, no authorization.",
+  "commit": "f46bf81b2c538708bb1e545cfdc3dca88c22e8ee",
+  "suite": "2613 passed / 12 skipped / 0 failed (25m40s)",
+  "verifiers": "5/5 PASS: frozen_assets, historical/attempt4/attempt5 probe-reuse, c1_battery_isolation",
+  "pods": "0, via GraphQL myself{pods}, not the CLI field"
  },
  "abandoned": [
   "recovery_search_v1 (INVALID before first use)",
@@ -74,20 +76,15 @@
  "read_order": [
   "logs/PHASE_INDEX.md -- history by phase, START HERE",
   "logs/phase_c0_preregistration.json -- the FROZEN C1 protocol",
-  "logs/phase_c0_sizing_evidence.json -- the power evidence behind N=850",
-  "logs/phase_c_roadmap.md -- C0/C1/C2 structure",
-  "logs/phase_a_vs_phase_b_comparison.md -- what A and B concluded",
-  "logs/HANDOFF_next_session.md -- next-session handoffs",
   "logs/STATE.md -- human view of this file",
   "logs/CATALOG.md -- which log owns which fact",
-  "logs/BUDGET_LEDGER.md -- spend and caps",
   "AGENTS.md -- the binding working contract"
  ],
  "phases": {
   "phase_a": "COMPLETE / FROZEN",
   "phase_b": "COMPLETE / RESOLVED / FROZEN",
   "phase_c0": "COMPLETE / APPROVED / FROZEN",
-  "phase_c1": "NOT STARTED",
+  "phase_c1": "IMPLEMENTED / NOT EXECUTED / NOT PRICED / NOT AUTHORIZED",
   "phase_c2": "NOT STARTED",
   "formal_recovery_evidence": "NONE"
  },
@@ -97,7 +94,7 @@
   "winner": null,
   "pooled_correct_overall": "cca699c93f34 0.029412 | 85bde4ded2c3 0.019608 | control-qwen 0.008824",
   "pooled_usable_rollout": "cca699c93f34 0.6561 | 85bde4ded2c3 0.5456 | control-qwen 0.4947",
-  "kind": "SELECTION experiment under calib.domain_balanced@v1; 0.86M SELECTION probes, not recovery training. The small absolute rates are NOT recovered capability -- every arm including the control sits near the floor.",
+  "kind": "SELECTION experiment under calib.domain_balanced@v1; 0.86M SELECTION probes, not recovery training. The small absolute rates are NOT recovered capability.",
   "record": "logs/autoinit_recovery_continuation_attempt7/"
  },
  "phase_b_state": "PHASE_B COMPLETE -- behavioural selection RESOLVED",
@@ -118,22 +115,21 @@
  },
  "phase_c": {
   "c0": {
-   "status": "COMPLETE / APPROVED / FROZEN 2026-09-01",
-   "protocol": "logs/phase_c0_preregistration.json",
-   "sizing_evidence": "logs/phase_c0_sizing_evidence.json",
-   "battery": "950 total = 850 scorable + 100 non-scorable code; historical 3:3:3:3:3:2 mixture preserved exactly",
-   "seeds": "exactly 3 fresh paired recovery seeds as fixed experimental blocks; exact IDs NOT chosen -- they must be materialized and hash-bound in the C1 execution preregistration before any candidate result exists",
-   "endpoint": "primary correct_overall over 850 scorable; usable_rollout secondary/veto only",
-   "sesoi": "+0.010 absolute (decision boundary); design alternative +0.015 with P(GO) = 0.8379",
-   "inference": "stratified PROMPT-cluster bootstrap; the CI is conditional on the three fresh seed pairs and is NOT a seed-population interval",
+   "status": "COMPLETE / APPROVED / CANONICALLY FROZEN 2026-09-01 (commit be2ab08)",
+   "protocol": "logs/phase_c0_preregistration.json fb2eeea531f9f0d1",
+   "sizing_evidence": "logs/phase_c0_sizing_evidence.json 4786242d349e9b21",
+   "summary": "850 scorable / 950 total battery; 3 fresh paired seeds as fixed blocks; primary correct_overall; SESOI +0.010 boundary, design alternative +0.015 at P(GO)=0.8379; stratified PROMPT-cluster bootstrap whose CI is conditional on those three seed pairs",
    "authorizes": "nothing"
   },
   "c1": {
-   "status": "NOT STARTED / NOT PRICED / NOT AUTHORIZED. CPU machinery IMPLEMENTED; no compute, no probe, no behavioural result.",
+   "status": "IMPLEMENTED / NOT EXECUTED / NOT PRICED / NOT AUTHORIZED. CPU machinery and the battery exist; no recovery probe, no behavioural result, no paid compute.",
    "what_it_is": "fixed-path ATTENTION isolation using short 0.86M recovery probes: 2 arms x 3 fresh seeds = 6 E1_KD_HEAVY_0860K probes. NOT formal recovery evidence; establishes no recovered-model capability.",
    "incumbent": "fe9683e6a9c783bbc6fe276a78c851c6, digest c313d1b4081b, at aad-artifacts/autoinit/phase_a/<id>. WITH caveats: margin 0.000070, not distinguishable from cca699c93f34, not a benchmark, NOT recovered, operators not individually validated.",
-   "built": "attention.activation_importance_v1 in its OWN module (operators/attention_activation.py); import is INERT, a consumer calls register() -- an unrestricted beam enumerates the whole registry. fixed_path.py with the eea90c91/c313d1b4 fail-stop gate; c1_isolation.py; battery c1_confirmation_v1 950/850 a285d61f -- logs/phase_c1_battery.json",
-   "not_built": "pre-ATTENTION parent b8820f41d062 (GPU); teacher weights ~8 GB absent, hashes in logs/phase_c1_teacher_binding.json; the C1 execution preregistration, which must materialize the 3 seed IDs first"
+   "built": "attention.activation_importance_v1 (own module, import INERT, explicit register()); fixed_path.py + the eea90c91/c313d1b4 fail-stop gates; c1_session.py 10-stage contract; c1_isolation.py; battery c1_confirmation_v1 950/850 a285d61f",
+   "not_built": "pod launcher/driver (needs an authorization TYPE + BudgetSpec; pricing precedes authorization); the pre-ATTENTION parent rebuild (GPU); teacher weights ~8 GB absent",
+   "execution_prereg": "logs/phase_c1_execution_preregistration.json 48beff49a1d087dc",
+   "pricing": "logs/phase_c1_pricing.json 70d2fec6a41c43b1 -- floor $12.2070, expected $13.4277, CEILING $13.7577. Pricing only; not funded.",
+   "seeds": "1635674081, 1656475568, 696460635 (derived from the C0 digest)"
   },
   "c2": {
    "status": "NOT STARTED",
@@ -164,7 +160,8 @@
   "checkpoints_deleted": 0,
   "scientific_artifacts_deleted": 0,
   "open_maintainer_decision": "KEEP / unresolved ownership: 2 duplicate checkpoint pairs, 2.92 GiB. NOT deletion candidates.",
-  "closeout": "logs/storage_closeout_20260831.json"
+  "closeout": "logs/storage_closeout_20260831.json",
+  "c1_battery_canonical": "/home/ecs-user/aad-artifacts/autoinit/c1_confirmation_v1 -- COPY of the frozen bytes, 8 files, verified from the copy; repo-local working copy retained"
  },
  "blocker": "none.",
  "deferred_not_blocking": {
