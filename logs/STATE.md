@@ -9,7 +9,7 @@ not carry. If the two disagree, a structural test fails.
 
 **Nothing is running. Nothing is billing. Nothing is prepared for launch. Nothing
 is authorized.** Zero pods, zero orchestration, all five behavioural-continuation
-grants retired. Spend is `$263.8597` of the `$283.7600` cap, `$19.9003`
+grants retired. Spend is `$263.9383` of the `$283.7600` cap, `$19.8217`
 remaining.
 
 | phase | status |
@@ -26,7 +26,7 @@ remaining.
 **$13.7578**, against **$19.9003** headroom — **$6.1425** would remain if the
 whole ceiling were consumed. **Priced is not authorized: no grant exists.**
 
-## Phase C1 — ATTEMPT 1 ABORTED AT SETUP · authorization CONSUMED
+## Phase C1 — ATTEMPT 1 INFRASTRUCTURE-ABORTED · transport gap CLOSED · NOT CURRENTLY AUTHORIZED
 
 > **Attempt 1 aborted at setup, 2026-09-02.** All eight pre-provider gates
 > passed and pod `fccr23o9jcnrh0` was created, then setup failed with
@@ -36,7 +36,20 @@ whole ceiling were consumed. **Priced is not authorized: no grant exists.**
 > training, no evaluation. The one-use authorization is **consumed**; no retry is
 > authorized. Evidence in [`autoinit_c1_attempt1/`](autoinit_c1_attempt1/).
 >
-> The gap is a gate gap, not a code defect: "regenerate the git bundle and
+> **The gap is closed.** `bundle_staged_gate` is the ninth pre-provider gate.
+> The bundle name is now derived from `--session-commit`
+> (`aad_autoinit_<8hex>.bundle`), so `--bundle c1` fails at `$0`; and the gate
+> is read-only, downloading the real relay object, hashing it, running
+> `git bundle verify`, cloning, checking out the session commit exactly as the
+> pod does, and requiring the authorization and harness inside that checkout to
+> be the authorized ones. Preparation is a separate command,
+> `scripts/autoinit/stage_c1_bundle.py`, which may mutate the relay.
+>
+> Attempt 1 was an INFRASTRUCTURE ABORT, not a scientific attempt: no C1
+> measurement exists, so re-running the unchanged frozen protocol is
+> scientifically permissible. It is not currently authorized.
+>
+> The original gap was a gate gap, not a code defect: "regenerate the git bundle and
 > re-upload it" is a documented pre-session step in `scripts/pod/AGENTS.md`, and
 > the eight gates all verify the *contents* of the session commit while none
 > verifies that the pod can *obtain* it.
