@@ -518,6 +518,32 @@ def main() -> None:
                          "<probe_id>_generation_admission.json"],
         },
 
+        #: Whether the pod can OBTAIN the authorized commit. Attempt 1 passed
+        #: every content gate and died at SETUP_RC=1 on a bundle that did not
+        #: exist; this is the ninth gate that closes it.
+        "transport": {
+            "canonical_bundle_name": "aad_autoinit_<first 8 hex of session commit>.bundle",
+            "relay": "AlphaAvatar/aadistill-artifacts:transfer/<canonical name>",
+            "derived_from": "--session-commit; an alias fails at $0",
+            "preparation": ("scripts/autoinit/stage_c1_bundle.py -- MAY mutate the "
+                            "relay; refuses a commit that does not carry the "
+                            "authorization, and refuses to overwrite a different "
+                            "existing remote object"),
+            "gate": ("bundle_staged_gate, READ-ONLY: download the canonical relay "
+                     "object, sha256 it against the staged bundle, git bundle "
+                     "verify the round-tripped bytes, clone and check out the "
+                     "session commit exactly as the pod's setup does, then require "
+                     "the authorization inside the checkout to be the artifact the "
+                     "launcher is loading and the harness recomputed from that "
+                     "checkout to equal the authorized digest"),
+            "ordering": ("repair base -> issue -> commit ONLY the authorization -> "
+                         "that commit is the session commit -> bundle it -> upload "
+                         "-> gate -> provider. A bundle built for the "
+                         "pre-authorization base checks out a tree with no "
+                         "authorization in it"),
+            "n_pre_provider_gates": 9,
+        },
+
         "out_of_scope": [
             "formal Stage-2/Stage-3 recovery training — explicitly NOT in scope; C1 "
             "is a fixed-path ATTENTION isolation using short 0.86M recovery probes "

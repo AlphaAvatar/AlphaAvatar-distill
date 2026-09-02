@@ -3,7 +3,7 @@
  "preregistration_id": "autoinit.v1.phase_c1.execution",
  "written_utc": "2026-09-02T00:00:00Z",
  "_contract": "Everything the Phase-C1 session will run, bound before any C1 result exists. AUTHORIZES NOTHING: no pricing decision, no spend grant, no permission to launch. An authorization, if ever issued, binds THIS document.",
- "head_commit": "913a88af699a46a66feea82679d0ea6efb39de8a",
+ "head_commit": "aa2855caf1effd1d342190e4b4264a3a2c318ab3",
  "executable_source": {
   "digest": "a5bd40a86052f0125a16414bc98617782cdc011f70590cb938518bb25786740c",
   "files": [
@@ -51,7 +51,7 @@
   "rule": "sha256 over sorted 'path:sha256' lines of the declared set"
  },
  "c1_harness": {
-  "digest": "04302feaf8705cb38a5b11b651fe16dc72a243275a5f88be5736736920464452",
+  "digest": "a67a70f3714ac008866b5726a6ea9ec26bb6b5f58d746b0d81748c88ba3376f9",
   "files": [
    {
     "path": "configs/autoinit/c1_artifacts.json",
@@ -79,6 +79,11 @@
     "bytes": 21518
    },
    {
+    "path": "scripts/autoinit/stage_c1_bundle.py",
+    "sha256": "ac74fca2f2c2851200c2d05df5c22225501fd596609a13bf14f3c525f388d404",
+    "bytes": 4591
+   },
+   {
     "path": "scripts/evaluation/uncapped_eval.py",
     "sha256": "120e92dc08a49ae4e3ed74fbbc6537054c011382755cdec6418c11b341f780d4",
     "bytes": 28667
@@ -90,8 +95,8 @@
    },
    {
     "path": "scripts/pod/autoinit_c1_launch.py",
-    "sha256": "b38932cea875d2f222506a3c983f9a3354141a6f3073e1127855d16e15f7a3cd",
-    "bytes": 28624
+    "sha256": "31ec5de7f9a68ffe1a58435e42d2e47452525fc1349d413026ceda74ab09b7b2",
+    "bytes": 32011
    },
    {
     "path": "scripts/pod/autoinit_engine_probe.py",
@@ -155,8 +160,13 @@
    },
    {
     "path": "src/aadistill/autoinit/c1_authorization.py",
-    "sha256": "1ab771af85f2737b65708f373fb965b0eca0f0b08843240a7f65d552b087bfab",
-    "bytes": 15095
+    "sha256": "16ea0c644b1349c0c0eec7f1ff6074dc862d8979a991bdbd0165af49c30886c6",
+    "bytes": 15428
+   },
+   {
+    "path": "src/aadistill/autoinit/c1_bundle.py",
+    "sha256": "7b159d818206cf5c12c8e6bde721f9532494218585cc5af5000585d1cf0794a0",
+    "bytes": 12983
    },
    {
     "path": "src/aadistill/autoinit/c1_isolation.py",
@@ -364,7 +374,7 @@
     "bytes": 3567
    }
   ],
-  "n_files": 62,
+  "n_files": 64,
   "rule": "sha256 over sorted 'path:sha256' lines of the declared set",
   "note": "the set an authorization measures. It includes the launcher, the driver, the setup script, the operators the fixed path applies, the recovery and scoring paths the six probes invoke, and the session infrastructure they run through."
  },
@@ -374,7 +384,7 @@
   "session_kind": "c1",
   "allows_phase_a": false,
   "allows_beam_search": false,
-  "n_harness_files": 62,
+  "n_harness_files": 64,
   "status": "NO GRANT EXISTS. No authorization has been issued."
  },
  "launcher": "scripts/pod/autoinit_c1_launch.py",
@@ -821,6 +831,15 @@
    "<probe_id>_generation_admission.json"
   ]
  },
+ "transport": {
+  "canonical_bundle_name": "aad_autoinit_<first 8 hex of session commit>.bundle",
+  "relay": "AlphaAvatar/aadistill-artifacts:transfer/<canonical name>",
+  "derived_from": "--session-commit; an alias fails at $0",
+  "preparation": "scripts/autoinit/stage_c1_bundle.py -- MAY mutate the relay; refuses a commit that does not carry the authorization, and refuses to overwrite a different existing remote object",
+  "gate": "bundle_staged_gate, READ-ONLY: download the canonical relay object, sha256 it against the staged bundle, git bundle verify the round-tripped bytes, clone and check out the session commit exactly as the pod's setup does, then require the authorization inside the checkout to be the artifact the launcher is loading and the harness recomputed from that checkout to equal the authorized digest",
+  "ordering": "repair base -> issue -> commit ONLY the authorization -> that commit is the session commit -> bundle it -> upload -> gate -> provider. A bundle built for the pre-authorization base checks out a tree with no authorization in it",
+  "n_pre_provider_gates": 9
+ },
  "out_of_scope": [
   "formal Stage-2/Stage-3 recovery training \u2014 explicitly NOT in scope; C1 is a fixed-path ATTENTION isolation using short 0.86M recovery probes and establishes no recovered-model capability",
   "canonical Stage-1 NLL",
@@ -828,5 +847,5 @@
   "any search, ranking, successive halving, tie-breaking or arm elimination"
  ],
  "authorizes": "nothing",
- "preregistration_sha256": "54d858ed1dfe19390fd6626222cc304028ee652e7902a6cc30e2ff03f32b24b5"
+ "preregistration_sha256": "f5eff2e55f82487780c0fae822e487d86681ac082a06b1ef88015a0bf3577a42"
 }
