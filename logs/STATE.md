@@ -1,5 +1,5 @@
-**Updated:** 2026-09-01 · branch `main` · **PHASE B CLOSED · PHASE C0 FROZEN ·
-PHASE C1 IMPLEMENTED + PRICED, NOT EXECUTED**
+**Updated:** 2026-09-02 · branch `main` · **PHASE B CLOSED · PHASE C0 FROZEN ·
+PHASE C1 PRICED + PREREGISTERED, NOT RUNNABLE, NOT EXECUTED**
 
 # Current state
 
@@ -26,7 +26,21 @@ remaining.
 **$13.7578**, against **$19.9003** headroom — **$6.1425** would remain if the
 whole ceiling were consumed. **Priced is not authorized: no grant exists.**
 
-## Phase C1 — IMPLEMENTED and PRICED, NOT EXECUTED
+## Phase C1 — PRICED and PREREGISTERED, **NOT RUNNABLE**, NOT EXECUTED
+
+> **Blocker, found 2026-09-02.** `C1Driver` is a method library, not a wired
+> session: it does not override `run()`, so it inherits `PhaseADriver.run()`,
+> which dispatches numeric stages `0..5`. `teacher_verify`, `register_operator`,
+> `replay_and_build_arms`, `probe_descriptors` and `apply_decision` are called by
+> **nothing**. A paid session would run Phase A's stage 0, hit the overridden
+> `stage1()` (`NotImplementedError`, blocking) and exit `21`. Three related
+> defects: the inherited `battery()` evaluates `recovery_search_v2` rather than
+> `c1_confirmation_v1`; `probe_descriptors()` omits four keys `run_probe`
+> requires; `report_names` includes `c1_probe_results.json`, which nothing
+> writes. All four are in
+> [`decisions.md`](decisions.md) under *C1 evidence declaration, and the driver
+> that cannot produce it*. **C1 is NO-GO until the stage wiring is reviewed and
+> implemented.**
 
 Design and implementation proceeded at `$0`; **execution did not**. What exists:
 
@@ -39,9 +53,10 @@ Design and implementation proceeded at `$0`; **execution did not**. What exists:
 | teacher shard binding | [`phase_c1_teacher_binding.json`](phase_c1_teacher_binding.json) |
 
 | ten-stage session contract + the two fail-stop replay gates | `autoinit/c1_session.py` |
-| execution preregistration | [`phase_c1_execution_preregistration.json`](phase_c1_execution_preregistration.json) · `48beff49a1d087dc…` |
+| execution preregistration | [`phase_c1_execution_preregistration.json`](phase_c1_execution_preregistration.json) · `63ca7c2465b7a033…` · supersedes `58015cd3b5b1f022…`, which superseded `48beff49a1d087dc…` |
 | price bound | [`phase_c1_pricing.json`](phase_c1_pricing.json) · floor **$12.2070** · expected **$13.4277** · **ceiling $13.7578** |
-| runnable session | `scripts/pod/autoinit_c1_launch.py` + `autoinit_c1_driver.py` · `SESSION_KIND=c1` · `C1Authorization` · 7 pre-provider gates |
+| evidence declaration | [`configs/autoinit/c1_artifacts.json`](../configs/autoinit/c1_artifacts.json) + [`_failed`](../configs/autoinit/c1_artifacts_failed.json) — inside the measured harness, so editing what survives teardown moves the digest a grant binds |
+| session spec (**driver not wired**) | `scripts/pod/autoinit_c1_launch.py` + `autoinit_c1_driver.py` · `SESSION_KIND=c1` · `C1Authorization` · 8 pre-provider gates |
 
 The three fresh seeds are **`1635674081`, `1656475568`, `696460635`**, derived
 from the frozen C0 digest and confirmed independently three ways.

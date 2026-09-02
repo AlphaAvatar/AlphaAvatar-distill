@@ -23,7 +23,7 @@ implements and executes; you decide whether it may.
 | authorizations | **none live.** All five behavioural-continuation grants retired. Six consumed prior-phase files remain at `logs/*_authorization.json` — each binds a *non-HEAD* commit, so none can launch; they are kept because live drivers and issuers reference their paths |
 | pods / orchestration | **zero** |
 | Phase C0 | **COMPLETE / APPROVED / FROZEN** — [`phase_c0_preregistration.json`](phase_c0_preregistration.json) |
-| Phase C1 | **IMPLEMENTED / PRICED / NOT EXECUTED / NOT AUTHORIZED** — ceiling `$13.7578`, no grant |
+| Phase C1 | **PRICED / PREREGISTERED / NOT RUNNABLE / NOT EXECUTED / NOT AUTHORIZED** — ceiling `$13.7578`, no grant; the driver is not wired (see `decisions.md` 2026-09-02) |
 | Phase C2 | **NOT STARTED** |
 
 ## Phase A — COMPLETE
