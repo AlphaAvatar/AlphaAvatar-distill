@@ -1,0 +1,32 @@
+{
+ "schema": "aadistill.autoinit.c1_grant/v1",
+ "_what_this_is": "The maintainer decision that permits ONE Phase-C1 paid session. It is an INPUT to scripts/autoinit/issue_c1_authorization.py, which derives every identity — session commit, harness digest, isolation plan hash, science plan, preregistration, battery, teacher, scoring contract, ceiling — from the committed objects and REFUSES if this document asserts any of them. Reviewed and granted at HEAD d71ad2e7e2d18a59bc786dc743348cb3511c8363.",
+ "granted_by": "maintainer, final C1 grant review: GO on the frozen runnable C1 session at d71ad2e7e2d18a59bc786dc743348cb3511c8363",
+ "granted_for": "Phase C1 fixed-path ATTENTION isolation",
+ "covers": "Phase C1 fixed-path ATTENTION isolation: 2 arms x 3 fresh recovery seeds = 6 total 0.86M probes, one evaluation per completed probe on c1_confirmation_v1, and the frozen paired C1 decision. One grant, consumed by exactly one issuance, one launch attempt. No automatic retry, no second attempt, no automatic ceiling increase.",
+ "does_not_authorize": [
+  "Phase A",
+  "beam search",
+  "any search",
+  "Phase C2",
+  "formal Stage-2/Stage-3 recovery",
+  "canonical Stage-1 NLL",
+  "any follow-on run"
+ ],
+ "cumulative_spend_at_approval_usd": 263.8597,
+ "cumulative_cap_usd": 283.76,
+ "cap_note": "The project cumulative cap remains $283.7600 and is NOT raised by this grant. $19.9003 was uncommitted at approval; the $13.7578 ceiling leaves $6.1425.",
+ "reviewed_at_head": "d71ad2e7e2d18a59bc786dc743348cb3511c8363",
+ "reviewed_executable_implementation": "913a88af699a46a66feea82679d0ea6efb39de8a",
+ "failure_semantics": {
+  "teacher_identity_mismatch": "stop",
+  "replay_mismatch": "stop before recovery training; preserve the replay evidence; it is the attempt's result; no automatic retry",
+  "device_handoff_or_headroom": "stop before recovery",
+  "recovery_training_failure": "C1_INCOMPLETE; do not proceed to a partial confirmation experiment",
+  "stage_h_precondition": "all six trainings complete",
+  "generation_admission_failure": "preserve raw generations and the admission record; do not score that probe; do not evaluate a later probe; do not run stage I",
+  "stage_i_precondition": "six complete admitted and scored probe results",
+  "no_forced_conclusion": "an incomplete session yields no scientific conclusion"
+ },
+ "after_termination": "complete evidence recovery as far as the session contract permits, verify provider termination via the authoritative GraphQL pod check, and do not start C2 regardless of the C1 verdict."
+}
