@@ -162,7 +162,6 @@ def main() -> None:
             "status": "NO GRANT EXISTS. No authorization has been issued.",
         },
         "launcher": "scripts/pod/autoinit_c1_launch.py",
-        "driver": "scripts/pod/autoinit_c1_driver.py",
         "pricing": {
             "path": "logs/phase_c1_pricing.json",
             "pricing_sha256": load_pricing(REPO)["pricing_sha256"],
@@ -467,11 +466,56 @@ def main() -> None:
                      "the contract above at derived minimums, and — for the "
                      "failure spec — demand nothing that presupposes training"),
             "paths_are_the_driver_s": (
-                "the manifest root is artifacts/ and the paths under it are "
-                "PhaseADriver's, which C1Driver inherits: audit/autoinit_phase_a, "
-                "stage3/phase_a/<probe_id>, eval/phase_a/<probe_id>. The "
-                "launcher's ArtifactPolicy.audit_dirname 'autoinit_c1' governs "
-                "only the session-log copy and the report_names scp"),
+                "the manifest root is artifacts/ and the paths under it are the "
+                "STANDALONE C1 driver's own: audit/autoinit_c1, "
+                "stage3/c1/<probe_id>, eval/c1/<probe_id>. An earlier revision of "
+                "this document said they were PhaseADriver's, which C1Driver then "
+                "inherited; that inheritance is gone and no C1 evidence is written "
+                "under another phase's tree"),
+        },
+
+        "driver": {
+            "path": "scripts/pod/autoinit_c1_driver.py",
+            "standalone": True,
+            "subclasses_phase_a_driver": False,
+            "imports_phase_a_driver_or_launcher": False,
+            "owns_paths": ["artifacts/audit/autoinit_c1", "artifacts/stage3/c1",
+                           "artifacts/eval/c1"],
+            "stages": "B-I; A and J belong to the session runner",
+            "stage_g_h_separation": (
+                "stage G runs all six recovery trainings and opens no battery, "
+                "starts no evaluator and no scorer; stage H calls "
+                "require_all_trained() before the first evaluation. Evaluating "
+                "inside the training loop would let the first arm meet the "
+                "confirmation battery before the last arm was trained"),
+            "generation_admission": (
+                "NO PROBE RESULT IS ADMITTED unless the generation protocol "
+                "observed from THAT probe's raw per-set summaries is comparable "
+                "to the preregistered C1 evaluation protocol. The comparison runs "
+                "after generation and BEFORE the scorer; on failure the session "
+                "stops as C1_INCOMPLETE, that probe is not scored, no later probe "
+                "is evaluated and stage I does not run. The scorer is passed the "
+                "OBSERVED fingerprint, not the attested one — they are equal once "
+                "the check passes, and the direction of provenance is the point"),
+            "attested_evaluation_protocol": (
+                "written to artifacts/audit/autoinit_c1/"
+                "c1_attested_evaluation_protocol.json at the start of stage H, "
+                "before the first evaluation; the six admitted per-probe protocol "
+                "hashes must all equal it, and c1_probe_results.json carries the "
+                "observed generation fingerprint and observed "
+                "evaluation_protocol_hash for every probe"),
+            "scoring": (
+                "score_c1_confirmation.py only, on c1_confirmation_v1 only. The "
+                "frozen score_recovery_search.py is never invoked on this battery"),
+            "device_handoff": (
+                "complete_release -> require_released -> require_headroom before "
+                "probe 1, at the measured recovery-trainer requirement"),
+            "evidence": ["c1_evidence.json", "c1_replay_record.json",
+                         "c1_arm_identities.json", "c1_probe_results.json",
+                         "c1_decision.json",
+                         "c1_attested_evaluation_protocol.json",
+                         "c1_device_handoff.json",
+                         "<probe_id>_generation_admission.json"],
         },
 
         "out_of_scope": [

@@ -245,3 +245,86 @@ def test_every_gate_but_the_commit_binding_passes_against_the_candidate(launcher
         if not ok and name != "session_commit_and_lineage":
             failures.append(f"{name}: {msg}")
     assert not failures, failures
+
+
+# --- the preregistration must verify its own declared hash ------------------
+
+def _prereg_gate(tmp_path, monkeypatch, doc) -> tuple[bool, str]:
+    """Point the gate at a mutated copy, in a root that is otherwise the repo."""
+    import autoinit_c1_launch as L
+
+    root = tmp_path / "root"
+    (root / "logs").mkdir(parents=True, exist_ok=True)
+    (root / L.PREREG).write_text(json.dumps(doc, indent=1) + "\n")
+    monkeypatch.setattr(L, "REPO_ROOT", root)
+    monkeypatch.setattr(L, "c1_harness_digest",
+                        lambda *_a, **_k: {"digest": (doc.get("c1_harness") or {})
+                                           .get("digest", "")})
+    return L.preregistration_gate(None)
+
+
+def _prereg_doc() -> dict:
+    return json.loads(
+        (REPO / "logs/phase_c1_execution_preregistration.json").read_text())
+
+
+def test_the_preregistration_gate_verifies_the_self_hash(tmp_path, monkeypatch):
+    ok, why = _prereg_gate(tmp_path, monkeypatch, _prereg_doc())
+    assert ok, why
+    assert "self-hash verified" in why
+
+
+def test_a_field_edited_without_recomputing_the_hash_fails_the_gate(tmp_path,
+                                                                    monkeypatch):
+    """The mutation the gate exists for: only the harness block was checked
+    before, so the stage order, the decision rule and the admission rule could
+    all be edited after freezing and the gate would still pass."""
+    doc = _prereg_doc()
+    doc["decision"] = {**doc["decision"], "sesoi": 0.001}
+    ok, why = _prereg_gate(tmp_path, monkeypatch, doc)
+    assert not ok and "contents hash to" in why
+
+
+def test_a_restated_hash_fails_the_gate(tmp_path, monkeypatch):
+    doc = _prereg_doc()
+    doc["preregistration_sha256"] = "0" * 64
+    ok, why = _prereg_gate(tmp_path, monkeypatch, doc)
+    assert not ok and "contents hash to" in why
+
+
+def test_a_missing_hash_fails_the_gate(tmp_path, monkeypatch):
+    doc = _prereg_doc()
+    doc.pop("preregistration_sha256")
+    ok, why = _prereg_gate(tmp_path, monkeypatch, doc)
+    assert not ok and "declares no preregistration_sha256" in why
+
+
+def test_the_preregistration_describes_the_standalone_driver():
+    """It said C1Driver inherits PhaseADriver and writes phase_a paths. It does
+    not, and a preregistration that misdescribes the executable is worse than a
+    missing one: it is a false record of what was reviewed."""
+    doc = _prereg_doc()
+    text = json.dumps(doc)
+    for dead in ("audit/autoinit_phase_a", "stage3/phase_a/<probe_id>",
+                 "eval/phase_a/<probe_id>", "which C1Driver inherits"):
+        assert dead not in text, dead
+    d = doc["driver"]
+    assert d["standalone"] is True
+    assert d["subclasses_phase_a_driver"] is False
+    assert d["imports_phase_a_driver_or_launcher"] is False
+    assert d["owns_paths"] == ["artifacts/audit/autoinit_c1",
+                               "artifacts/stage3/c1", "artifacts/eval/c1"]
+    for key in ("stage_g_h_separation", "generation_admission",
+                "attested_evaluation_protocol", "scoring", "device_handoff"):
+        assert d[key], key
+    assert "NO PROBE RESULT IS ADMITTED" in d["generation_admission"]
+    assert "c1_attested_evaluation_protocol.json" in d["evidence"]
+
+
+def test_the_launcher_fetches_the_report_the_driver_actually_writes(spec):
+    """`attested_evaluation_protocol.json` was asked for; the driver writes
+    `c1_attested_evaluation_protocol.json`. The scp is best-effort, so the
+    mismatch would have fetched nothing, silently."""
+    driver_src = (REPO / "scripts/pod/autoinit_c1_driver.py").read_text()
+    for name in spec.artifacts.report_names:
+        assert f'"{name}"' in driver_src, name

@@ -65,6 +65,12 @@ class C1ProbeRecord:
     per_capability: Mapping[str, Mapping[str, Any]]
     scoring_contract: Mapping[str, Any]
     battery: Mapping[str, Any]
+    #: What the generations were ACTUALLY produced under, reconstructed from this
+    #: probe's own raw summaries and admitted against the attested protocol before
+    #: the scorer ran. Not the expected identity: the expected one is a statement
+    #: about the runtime, and a probe result must carry evidence about itself.
+    observed_generation_fingerprint: str = ""
+    observed_evaluation_protocol_hash: str = ""
 
     def __post_init__(self) -> None:
         if self.arm not in ARMS:
@@ -93,6 +99,9 @@ class C1ProbeRecord:
             "per_capability": {k: dict(v) for k, v in self.per_capability.items()},
             "scoring_contract": dict(self.scoring_contract),
             "battery": dict(self.battery),
+            "observed_generation_fingerprint": self.observed_generation_fingerprint,
+            "observed_evaluation_protocol_hash":
+                self.observed_evaluation_protocol_hash,
         }
 
 
@@ -231,6 +240,7 @@ def decision_inputs(
 
 def build_probe_results(records: Sequence[C1ProbeRecord], *, plan_hash: str,
                         seeds: Sequence[int], inputs: C1DecisionInputs,
+                        attested_evaluation_protocol_hash: str = "",
                         ) -> dict[str, Any]:
     """The `c1_probe_results.json` product: all six, bound to what produced them."""
     if len(records) != len(ARMS) * len(seeds):
@@ -247,6 +257,26 @@ def build_probe_results(records: Sequence[C1ProbeRecord], *, plan_hash: str,
             "the six probes were not all scored under one contract and one "
             f"battery: contracts={contracts}, batteries={batteries}")
 
+    #: Every probe must have been admitted, and admitted against the SAME
+    #: protocol. Six results measured under two protocols are not a paired
+    #: design, however comparable each was to its own attestation.
+    observed = {r.observed_evaluation_protocol_hash for r in records}
+    if len(observed) != 1 or not next(iter(observed)):
+        raise C1ResultsError(
+            "the six probes do not carry one observed evaluation-protocol hash: "
+            f"{sorted(observed)}. A probe with no admitted protocol was never "
+            "checked against the attestation.")
+    if (attested_evaluation_protocol_hash
+            and next(iter(observed)) != attested_evaluation_protocol_hash):
+        raise C1ResultsError(
+            f"the admitted protocol {next(iter(observed))} is not the attested "
+            f"{attested_evaluation_protocol_hash}")
+    fingerprints = {r.observed_generation_fingerprint for r in records}
+    if len(fingerprints) != 1 or not next(iter(fingerprints)):
+        raise C1ResultsError(
+            f"the six probes do not carry one observed generation fingerprint: "
+            f"{sorted(fingerprints)}")
+
     doc = {
         "schema": SCHEMA,
         "plan_hash": plan_hash,
@@ -255,6 +285,15 @@ def build_probe_results(records: Sequence[C1ProbeRecord], *, plan_hash: str,
         "n_probes": len(records),
         "scoring_contract": dict(records[0].scoring_contract),
         "battery": dict(records[0].battery),
+        "observed_evaluation_protocol_hash":
+            records[0].observed_evaluation_protocol_hash,
+        "observed_generation_fingerprint":
+            records[0].observed_generation_fingerprint,
+        "attested_evaluation_protocol_hash": attested_evaluation_protocol_hash,
+        "admission_rule": (
+            "no probe result is admitted unless the generation protocol observed "
+            "from that probe's raw summaries is comparable to the preregistered "
+            "C1 evaluation protocol; scoring runs only after that passes"),
         "probes": [r.as_dict() for r in sorted(records, key=lambda r: (r.arm, r.seed))],
         "decision_inputs_audit": dict(inputs.audit),
         "usable_pooled_delta": inputs.usable_pooled_delta,

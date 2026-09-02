@@ -165,7 +165,7 @@ GENERATION_RECORD = {
 }
 
 
-def _write_battery_generations(gen_dir: Path) -> None:
+def _write_battery_generations(gen_dir: Path, *, drift: bool = False) -> None:
     gen_dir.mkdir(parents=True, exist_ok=True)
     for name in C1_BATTERY_SETS:
         ids = [json.loads(x)["id"] for x in (BATTERY / f"{name}.jsonl").open()
@@ -173,9 +173,14 @@ def _write_battery_generations(gen_dir: Path) -> None:
         with (gen_dir / f"{name}.generations.jsonl").open("w") as f:
             for i in ids:
                 f.write(json.dumps({**GENERATION_RECORD, "id": i}) + "\n")
-        (gen_dir / f"{name}.json").write_text(json.dumps(
-            {**_summary_template(), "label": gen_dir.name,
-             "prompts": str(BATTERY / f"{name}.jsonl"), "n_samples": len(ids)}))
+        summary = {**_summary_template(), "label": gen_dir.name,
+                   "prompts": str(BATTERY / f"{name}.jsonl"), "n_samples": len(ids)}
+        if drift:
+            #: One MATERIAL generation field moved. The engine still produced a
+            #: complete set of rollouts; they were simply not produced under the
+            #: protocol the session attested.
+            summary["sampling"] = {**summary.get("sampling", {}), "temperature": 0.7}
+        (gen_dir / f"{name}.json").write_text(json.dumps(summary))
 
 
 #: The per-set summary `uncapped_eval` writes, taken from a REAL retained one so
@@ -250,7 +255,7 @@ def _args(**over):
 
 
 def _fake_hardware(monkeypatch, h, *, mismatch_at=None, train_fails=None,
-                   handoff_fails=False):
+                   handoff_fails=False, protocol_drift_at=None):
     """Replace ONLY the hardware-bound operations. The contracts stay real."""
     rec = h.rec
 
@@ -342,9 +347,31 @@ def _fake_hardware(monkeypatch, h, *, mismatch_at=None, train_fails=None,
     monkeypatch.setattr(D.C1Driver, "train_one", train_one)
 
     def attest(self):
+        """Only the engine probe is faked. The protocol object is REAL.
+
+        `admit_generation` compares against `self.evaluation_protocol`, so a
+        placeholder here would make the comparison vacuous — the harness would
+        certify a gate that never ran. The attested protocol is therefore built
+        from a clean synthetic generation set, exactly as the driver builds the
+        observed one, so the drift case genuinely differs.
+        """
         rec("engine_probe")
-        doc = {"generation_protocol_fingerprint": "f" * 64,
-               "evaluation_protocol_hash": "e" * 64,
+        clean = D.EVAL / "_attest_reference"
+        _write_battery_generations(clean)
+        summaries = [json.loads(q.read_text()) for q in sorted(clean.glob("*.json"))
+                     if not q.name.endswith(".generations.jsonl")]
+        gen = D.observe_generation_protocol(summaries).protocol
+        manifest = json.loads((D.BATTERY / "manifest.json").read_text())
+        contract = D.c1_scoring_contract(D.REPO)
+        self.evaluation_protocol = D.RecoveryEvaluationProtocol(
+            generation=gen, scoring_contract=contract["contract"],
+            scoring_digest=contract["digest"],
+            battery_artifact=manifest["artifact"],
+            battery_manifest_sha256=manifest["manifest_sha256"],
+            battery_content_sha256=manifest["content_sha256"])
+        doc = {"generation_protocol_fingerprint": gen.fingerprint,
+               "evaluation_protocol_hash":
+                   self.evaluation_protocol.evaluation_protocol_hash,
                "battery": {"content_sha256": D.C1_BATTERY_CONTENT_SHA256}}
         (D.AUDIT / "c1_attested_evaluation_protocol.json").write_text(
             json.dumps(doc, indent=2))
@@ -355,7 +382,8 @@ def _fake_hardware(monkeypatch, h, *, mismatch_at=None, train_fails=None,
     #: the REAL C1 scorer subprocess and the ordering all stay production code.
     def generate_one(self, name, package, gen_dir, sets):
         rec(f"evaluate:{name}")
-        _write_battery_generations(Path(gen_dir))
+        n = len([c for c in rec.calls if c.startswith("evaluate:")])
+        _write_battery_generations(Path(gen_dir), drift=(n == protocol_drift_at))
     monkeypatch.setattr(D.C1Driver, "generate_one", generate_one)
 
     def build_package(model_dir, *, tokenizer_source, dest,
@@ -576,3 +604,103 @@ def test_the_aggregation_uses_the_frozen_denominators_and_strata():
     assert sum(inputs.audit["strata_sizes"].values()) == 850
     assert "code" not in inputs.audit["strata_sizes"]
     assert len(inputs.correct["incumbent"][SEEDS[0]]) == 850
+
+
+# --- the generation-protocol admission gate ---------------------------------
+
+def test_a_drifted_generation_protocol_is_refused_before_scoring(harness,
+                                                                 monkeypatch):
+    """A complete set of rollouts produced under the wrong protocol is not a result.
+
+    The attestation is a statement about the runtime, made once from an engine
+    probe. It is not evidence about any particular probe's rollouts. Before this
+    gate, stage H recorded the observed fingerprint AFTER scoring and never
+    compared it to anything — so a drifted probe would have been scored, and its
+    result would have carried the EXPECTED identity.
+    """
+    code, driver = _run(monkeypatch, harness, protocol_drift_at=1)
+    assert code == 40
+    calls = harness.rec.calls
+    assert len([c for c in calls if c.startswith("evaluate:")]) == 1, calls
+    assert driver.ev["probes_evaluated"] == 0
+    assert driver.ev["decision_ran"] is False
+    assert not (harness.audit / "c1_decision.json").exists()
+    assert not (harness.audit / "c1_probe_results.json").exists()
+    assert not list(harness.audit.glob("*_c1_confirmation.json"))
+    assert "C1_INCOMPLETE" in (harness.tmp / "c1.status").read_text()
+    #: The generations and the refusal both survive; the artifact spec collects
+    #: them, so a refusal is a diagnosis rather than a loss.
+    admission = json.loads(
+        next(harness.audit.glob("*_generation_admission.json")).read_text())
+    assert admission["comparable"] is False
+    assert admission["reason"]
+    assert list(harness.eval.glob("*/*.generations.jsonl"))
+
+
+def test_every_admitted_probe_carries_its_observed_protocol(harness, monkeypatch):
+    _run(monkeypatch, harness)
+    results = json.loads((harness.audit / "c1_probe_results.json").read_text())
+    attested = json.loads(
+        (harness.audit / "c1_attested_evaluation_protocol.json").read_text())
+    hashes = {p["observed_evaluation_protocol_hash"] for p in results["probes"]}
+    prints = {p["observed_generation_fingerprint"] for p in results["probes"]}
+    assert len(hashes) == 1 and next(iter(hashes))
+    assert len(prints) == 1 and next(iter(prints))
+    assert results["observed_evaluation_protocol_hash"] == next(iter(hashes))
+    assert (results["attested_evaluation_protocol_hash"]
+            == attested["evaluation_protocol_hash"] == next(iter(hashes)))
+    assert "admission_rule" in results
+    for probe in results["probes"]:
+        rec = json.loads((harness.audit
+                          / f"{probe['probe_id']}_generation_admission.json").read_text())
+        assert rec["comparable"] is True
+        assert rec["evaluation_protocol_hash"] == probe[
+            "observed_evaluation_protocol_hash"]
+
+
+def test_the_scorer_is_given_the_observed_fingerprint_not_the_attested_one():
+    """Provenance direction. They are equal once admitted; which one is recorded
+    is the difference between evidence and expectation."""
+    src = DRIVER_SRC.read_text()
+    call = src.split('"--generation-fingerprint"', 1)[1][:200]
+    assert 'observed["generation_fingerprint"]' in call
+    assert "attested[" not in call
+
+
+def test_admission_runs_before_the_scorer_in_source_order():
+    src = DRIVER_SRC.read_text()
+    body = src.split("def stage_h", 1)[1]
+    assert body.index("self.admit_generation(") < body.index("_scoring")
+
+
+def test_probe_results_refuse_a_probe_with_no_admitted_protocol():
+    """Mutation target: dropping the admission would leave these fields empty."""
+    from aadistill.autoinit.c1_probe_results import (
+        C1ProbeRecord, C1ResultsError, build_probe_results, decision_inputs,
+    )
+    rows = _rows()
+    ps = {(a, s): rows for a in ("incumbent", "treatment") for s in SEEDS}
+    inputs = decision_inputs(ps, seeds=SEEDS)
+    def rec(arm, seed, **over):
+        return C1ProbeRecord(
+            probe_id=f"{arm}.{seed}", arm=arm, seed=seed,
+            initialization_artifact_digest="d" * 64, trained_run={},
+            result_path="r", result_sha256="h", per_sample_path="p",
+            per_sample_sha256="h", generations={},
+            counts={"n": 950, "usable": 1, "correct": 1, "n_scorable": 850,
+                    "usable_scorable": 1},
+            rates={}, per_capability={}, scoring_contract={"digest": "c"},
+            battery={"content_sha256": "b"},
+            **{"observed_generation_fingerprint": "f" * 64,
+               "observed_evaluation_protocol_hash": "e" * 64, **over})
+    good = [rec(a, s) for a in ("incumbent", "treatment") for s in SEEDS]
+    build_probe_results(good, plan_hash="p", seeds=SEEDS, inputs=inputs,
+                        attested_evaluation_protocol_hash="e" * 64)
+    blank = [rec(a, s, observed_evaluation_protocol_hash="")
+             if (a, s) == ("treatment", SEEDS[0]) else rec(a, s)
+             for a in ("incumbent", "treatment") for s in SEEDS]
+    with pytest.raises(C1ResultsError, match="observed evaluation-protocol"):
+        build_probe_results(blank, plan_hash="p", seeds=SEEDS, inputs=inputs)
+    with pytest.raises(C1ResultsError, match="not the attested"):
+        build_probe_results(good, plan_hash="p", seeds=SEEDS, inputs=inputs,
+                            attested_evaluation_protocol_hash="z" * 64)

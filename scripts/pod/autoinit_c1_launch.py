@@ -49,7 +49,9 @@ from aadistill.autoinit.c1_authorization import (  # noqa: E402
     c1_harness_digest,
 )
 from aadistill.autoinit.c1_isolation import derive_recovery_seeds  # noqa: E402
-from aadistill.infrastructure.manifest import sha256_file  # noqa: E402
+from aadistill.infrastructure.manifest import (  # noqa: E402
+    sha256_file, sha256_json,
+)
 from aadistill.infrastructure.session import (  # noqa: E402
     ArtifactPolicy, LocalAsset, MarkerPolicy, SessionContext, SessionSpec,
     SetupManifest, TeardownPolicy,
@@ -199,6 +201,23 @@ def preregistration_gate(ctx: SessionContext) -> tuple[bool, str]:
     if not p.is_file():
         return False, f"{PREREG} is missing; nothing describes what would run"
     doc = json.loads(p.read_text())
+
+    #: The document's own declared hash, recomputed under the writer's exact
+    #: convention: `sha256_json` over the document with `preregistration_sha256`
+    #: removed. Without this, only the harness block was checked — so every other
+    #: field, including the stage order, the decision rule and the admission rule,
+    #: could be edited after freezing and the gate would still pass. The commit
+    #: binding makes that hard to do unnoticed; it does not make it impossible.
+    stated = doc.get("preregistration_sha256")
+    recomputed = sha256_json({k: v for k, v in doc.items()
+                              if k != "preregistration_sha256"})
+    if not stated:
+        return False, "the preregistration declares no preregistration_sha256"
+    if stated != recomputed:
+        return False, (f"the preregistration declares {stated[:12]}… but its "
+                       f"contents hash to {recomputed[:12]}…; it was edited after "
+                       "it was written")
+
     live = c1_harness_digest(REPO_ROOT)["digest"]
     recorded = (doc.get("c1_harness") or {}).get("digest")
     if recorded != live:
@@ -206,7 +225,8 @@ def preregistration_gate(ctx: SessionContext) -> tuple[bool, str]:
                        f"{str(recorded)[:12]}… but the tree digests to {live[:12]}…")
     if doc.get("authorizes") != "nothing":
         return False, "the preregistration claims to authorize something"
-    return True, f"preregistration {doc.get('preregistration_sha256', '?')[:12]}…"
+    return True, (f"preregistration {stated[:12]}… (self-hash verified), harness "
+                  f"{live[:12]}…")
 
 
 def frozen_c1_science_gate(ctx: SessionContext) -> tuple[bool, str]:
@@ -455,7 +475,8 @@ def spec(args) -> SessionSpec:
             archive_basename="c1_artifacts.tar.gz",
             spec_success=SPEC_SUCCESS,
             spec_failed=SPEC_FAILED,
-            report_names=("c1_evidence.json", "attested_evaluation_protocol.json",
+            report_names=("c1_evidence.json",
+                          "c1_attested_evaluation_protocol.json",
                           "c1_replay_record.json", "c1_arm_identities.json",
                           "c1_probe_results.json", "c1_decision.json"),
             event_streams=probe_streams),

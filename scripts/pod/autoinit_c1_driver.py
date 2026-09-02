@@ -772,6 +772,60 @@ class C1Driver:
                 f"{name}: generation rc={out.returncode}; tail: "
                 f"...{(out.stdout + out.stderr)[-1200:]}")
 
+    def admit_generation(self, name: str, gen_dir: Path) -> dict:
+        """Refuse a probe whose generations were not produced under the protocol.
+
+        The attestation is a statement about what the runtime *should* do, made
+        once, from an engine probe. It is not evidence about any particular
+        probe's rollouts. This reconstructs the protocol from THIS probe's raw
+        per-set summaries and requires the resulting evaluation protocol to be
+        comparable to the attested one, under the same versioned relation the
+        rest of the project uses.
+
+        Fail-closed and BEFORE the scorer runs: a probe generated under a drifted
+        protocol must not be scored, must not be followed by another probe, and
+        must not reach the decision. The summaries stay on disk either way — the
+        artifact spec collects them — so a refusal is a diagnosis, not a loss.
+        """
+        summaries = [json.loads(p.read_text())
+                     for p in sorted(gen_dir.glob("*.json"))
+                     if not p.name.endswith(".generations.jsonl")]
+        observed_gen = observe_generation_protocol(summaries).protocol
+        manifest = json.loads((BATTERY / "manifest.json").read_text())
+        contract = c1_scoring_contract(REPO)
+        observed = RecoveryEvaluationProtocol(
+            generation=observed_gen,
+            scoring_contract=contract["contract"],
+            scoring_digest=contract["digest"],
+            battery_artifact=manifest["artifact"],
+            battery_manifest_sha256=manifest["manifest_sha256"],
+            battery_content_sha256=manifest["content_sha256"])
+        record = {
+            "probe_id": name,
+            "generation_fingerprint": observed_gen.fingerprint,
+            "evaluation_protocol_hash": observed.evaluation_protocol_hash,
+            "attested_evaluation_protocol_hash":
+                self.evaluation_protocol.evaluation_protocol_hash,
+            "n_summaries": len(summaries),
+        }
+        try:
+            observed.require_comparable(self.evaluation_protocol, context=name)
+        except Exception as exc:                                  # noqa: BLE001
+            record["comparable"] = False
+            record["reason"] = str(exc)[-1500:]
+            (AUDIT / f"{name}_generation_admission.json").write_text(
+                json.dumps(record, indent=2) + "\n")
+            raise C1DriverError(
+                f"{name}: the generations were not produced under the attested "
+                f"evaluation protocol, so this probe cannot be scored and no "
+                f"later probe may be evaluated. {exc}") from exc
+        record["comparable"] = True
+        (AUDIT / f"{name}_generation_admission.json").write_text(
+            json.dumps(record, indent=2) + "\n")
+        say(f"  {name}: generation protocol admitted "
+            f"({record['evaluation_protocol_hash'][:12]}…)")
+        return record
+
     def stage_h(self) -> None:
         mark("STAGE_START:H")
         self.require_all_trained()
@@ -787,6 +841,14 @@ class C1Driver:
             gen_dir = EVAL / name
             sets = json.loads((BATTERY / "manifest.json").read_text())["sets"]
             self.generate_one(name, package, gen_dir, sets)
+
+            #: ADMISSION, before scoring. The attestation says what the protocol
+            #: is expected to be; this says what it actually WAS, reconstructed
+            #: from this probe's own raw summaries. Scoring first and recording
+            #: the observed fingerprint afterwards — which is what this did — let
+            #: a result claim the expected identity before the evidence for it had
+            #: been admitted, and never compared the two at all.
+            observed = self.admit_generation(name, gen_dir)
             scored = AUDIT / f"{name}_c1_confirmation.json"
             per_sample = AUDIT / f"{name}_per_sample.jsonl"
             rc = self.gate(
@@ -796,22 +858,22 @@ class C1Driver:
                  "--per-sample", str(per_sample), "--arm", arm,
                  "--init-digest", record["initialization_artifact_digest"],
                  "--trained-run", str(REPO / record["run_completion"]),
-                 "--generation-fingerprint",
-                 attested["generation_protocol_fingerprint"]],
+                 #: The OBSERVED fingerprint, not the attested one. They are equal
+                 #: by the check above; the direction of provenance is the point.
+                 "--generation-fingerprint", observed["generation_fingerprint"]],
                 timeout=1800, python=sys.executable)
             if rc.returncode != 0:
                 raise C1DriverError(
                     f"{name}: scoring rc={rc.returncode}; tail: "
                     f"...{(rc.stdout + rc.stderr)[-1200:]}")
             result = json.loads(scored.read_text())
-            observed = observe_generation_protocol(
-                [json.loads(p.read_text()) for p in sorted(gen_dir.glob("*.json"))
-                 if not p.name.endswith(".generations.jsonl")]).protocol
             self.scored[(arm, seed)] = {
                 "record": record, "result": result,
                 "result_path": _rel(scored),
                 "per_sample_path": _rel(per_sample),
-                "observed_generation": observed.fingerprint,
+                "observed_generation": observed["generation_fingerprint"],
+                "observed_evaluation_protocol_hash":
+                    observed["evaluation_protocol_hash"],
             }
             self.ev["probes_evaluated"] = len(self.scored)
             self.save()
@@ -851,11 +913,17 @@ class C1Driver:
                 rates={k: r[k] for k in ("usable_rollout_rate", "correct_overall",
                                          "correct_given_usable")},
                 per_capability=r["per_capability"],
-                scoring_contract=r["scoring_contract"], battery=r["battery"]))
+                scoring_contract=r["scoring_contract"], battery=r["battery"],
+                observed_generation_fingerprint=s["observed_generation"],
+                observed_evaluation_protocol_hash=s[
+                    "observed_evaluation_protocol_hash"]))
 
         inputs = decision_inputs(per_sample, seeds=self.seeds)
-        results = build_probe_results(records, plan_hash=self.plan.plan_hash,
-                                      seeds=self.seeds, inputs=inputs)
+        results = build_probe_results(
+            records, plan_hash=self.plan.plan_hash, seeds=self.seeds,
+            inputs=inputs,
+            attested_evaluation_protocol_hash=(
+                self.evaluation_protocol.evaluation_protocol_hash))
         (AUDIT / "c1_probe_results.json").write_text(
             json.dumps(results, indent=2) + "\n")
 
