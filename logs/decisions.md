@@ -6557,3 +6557,86 @@ recovery continuation under the derived **$16.7456** ceiling.
   the real loader, `BudgetSpec` and pre-provider gates at `$0`. Never live, never
   committed.
 - **Revisit when:** the maintainer decides whether to issue the one-use grant.
+
+## 2026-09-02 — C1 evidence declaration, and the driver that cannot produce it
+
+- **Context:** review of the pushed `d43346f` tree found that
+  `configs/autoinit/c1_artifacts.json` and `configs/autoinit/c1_artifacts_failed.json`
+  were declared by the launcher and **absent from the repository**. Nothing
+  caught it: `SessionSpec.validate()` checks only that the two path *strings* are
+  non-empty, and `collect_artifacts.py` first opens the files on the pod, at
+  teardown, after the money is spent. Writing them required establishing which
+  paths the session actually produces — and that investigation found a larger
+  problem.
+- **Decision:** write both specs against the **producing code's own literals**;
+  add both to `C1_HARNESS_SOURCE_FILES_V1` (45 → 47 files) so an evidence
+  declaration cannot be edited without moving the digest a grant binds; add
+  `artifact_spec_gate` as an eighth `$0` pre-provider gate; bind both file
+  hashes in the execution preregistration; and record the driver findings below
+  **without fixing them**, because they are a separate change that needs its own
+  review.
+- **What the paths actually are.** `C1Driver` subclasses `PhaseADriver`, so it
+  inherits that module's `AUDIT = artifacts/audit/autoinit_phase_a`, its probe
+  `out_dir = artifacts/stage3/phase_a/<probe_id>` and its
+  `gen_dir = artifacts/eval/phase_a/<probe_id>`. The C1 records land **there**,
+  not under the launcher's `audit_dirname="autoinit_c1"`, which governs only the
+  session-log copy and the `report_names` scp. A spec written from the launcher's
+  name would have matched nothing — the same shape as Phase-B attempt 3's lost
+  search journal (`phase_a_search` vs `phase_b_search`).
+
+### Four defects found while establishing those paths
+
+The C1 driver is a **method library, not a wired session**. None of this is
+reachable at `$0` from any existing gate, and all of it would first be observed
+on a paid pod.
+
+1. **`C1Driver` never wires stages A–J.** It does not override `run()`, so it
+   inherits `PhaseADriver.run()`, which dispatches the numeric stages `0..5`.
+   `teacher_verify`, `register_operator`, `replay_and_build_arms`,
+   `probe_descriptors` and `apply_decision` are called by **nothing**. A paid
+   session would run Phase A's stage 0, hit the overridden `stage1()` —
+   `NotImplementedError`, and stage 1 is blocking — and exit `21` as
+   `PHASE_A_FAILED`. No teacher verification, no replay gate, no probe, no
+   decision.
+2. **The inherited `battery()` evaluates the wrong battery.** It reads the
+   Phase-A module's `BATTERY = artifacts/stage3/recovery_search_v2`; the C1
+   driver's own `BATTERY = artifacts/stage3/c1_confirmation_v1` is a module
+   global the parent method never sees. Stage 0's attestation pins
+   `BATTERY_CONTENT` to the Phase-A battery too.
+3. **`probe_descriptors()` emits descriptors the probe machinery cannot use.**
+   It returns `probe_id`, `arm`, `seed`, `rung`; `run_probe`/`probe_config`/
+   `restore_probe` require `student_checkpoint`, `student_artifact_digest`,
+   `state_id` and `is_control`.
+4. **`report_names` includes `c1_probe_results.json`, which nothing writes.**
+   The canonical per-probe results are the journals at
+   `audit/autoinit_phase_a/probes/<probe_id>.json`. Combined with defect (1)'s
+   `audit_dirname` split, the report scp and the live evidence relay would both
+   silently fetch nothing — they are `required=False` by design.
+- **Consequence:** C1 remains **NO-GO**. The artifact specs are now correct and
+  measured, but they describe outputs the current driver has no code path to
+  produce; the success spec is a statement of the frozen contract, not a
+  description of what `d43346f`+ would emit.
+- **A limitation that is NOT fixed, and is not a style choice.** One static
+  failure spec cannot distinguish failure modes. `ArtifactSpec.required` and
+  `min_matches` are constants, and `session_runner` selects between exactly two
+  spec files on one bit (`terminal != markers.success`) — which cannot separate a
+  stage-B teacher failure from a D/E `C1_REPLAY_MISMATCH` from a crash after four
+  probes. The required set is therefore the **intersection** over all terminal
+  failures: the session evidence record alone. `c1_replay_record.json` is the
+  product of a replay mismatch and is collected whenever present, but it cannot
+  be *required*, because a run that died at stage B never wrote it and demanding
+  it would block teardown on a billing pod. The residual hole — a defect that
+  silently failed to write the mismatch record would not block teardown — is
+  recorded in the spec's own `limitation` field. Closing it needs a third,
+  marker-selected spec and a widened `ArtifactPolicy`, touching shared
+  infrastructure used by five committed launchers; deliberately not done here.
+- **Alternatives considered:** binding the two spec hashes only in the
+  authorization, leaving them out of the harness set — rejected, because then
+  editing what evidence survives would not move the harness digest. Fixing the
+  driver in the same change — rejected: it is stage wiring, a battery override
+  and descriptor construction, which is science-adjacent implementation that
+  needs review, not a narrow config repair.
+- **Risks:** the success spec's 42-file generation minimum is derived from the
+  battery's seven sets; a battery change moves it, which the gate now checks.
+- **Revisit when:** the driver's stage wiring is reviewed and implemented. No
+  grant should be issued before then.

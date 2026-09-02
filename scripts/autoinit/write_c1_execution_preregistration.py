@@ -53,6 +53,13 @@ from aadistill.infrastructure.manifest import sha256_file, sha256_json  # noqa: 
 
 OUT = REPO / "logs/phase_c1_execution_preregistration.json"
 
+#: The two evidence declarations. Restated here rather than imported, because
+#: importing the launcher would pull the whole Phase-A launcher in; the copy is
+#: turned into a checked invariant by
+#: tests/pod/test_c1_artifact_specs.py::test_writer_and_launcher_name_the_same_specs.
+SPEC_SUCCESS = "configs/autoinit/c1_artifacts.json"
+SPEC_FAILED = "configs/autoinit/c1_artifacts_failed.json"
+
 #: Every file whose bytes decide what the C1 session does. Same shape and same
 #: failure mode as the other source-digest sets: a missing declared file raises
 #: rather than yielding a digest over a smaller contract.
@@ -90,6 +97,9 @@ def main() -> None:
 
     arms = CS.build_arm_specs()
     battery = json.loads((REPO / "logs/phase_c1_battery.json").read_text())
+    #: Derived, so the artifact-spec block cannot drift from the design.
+    n_probes = CS.C1_SESSION_CONTRACT.n_probes
+    n_sets = len(battery["set_sha256"])
     teacher = json.loads((REPO / "logs/phase_c1_teacher_binding.json").read_text())
     c0 = json.loads((REPO / "logs/phase_c0_preregistration.json").read_text())
 
@@ -375,6 +385,54 @@ def main() -> None:
             "gate": ("collect_artifacts.py manifest -> archive -> verify-archive -> "
                      "transfer -> verify-local -> gate; a missing required artifact "
                      "blocks teardown"),
+        },
+
+        #: The files that IMPLEMENT the contract above. Bound by hash here, and
+        #: also inside `c1_harness`, because a declaration of what evidence
+        #: survives teardown is an executable input: editing it changes what a
+        #: paid session brings home, and it must not be able to change without
+        #: moving the digest a grant binds. Both were absent from the tree that
+        #: passed every other precheck at `d43346f`, which is why they are
+        #: bound explicitly rather than left to the harness set alone.
+        "artifact_specs": {
+            "success": {
+                "path": SPEC_SUCCESS,
+                "sha256": sha256_file(REPO / SPEC_SUCCESS),
+                "requires": (
+                    f"{n_probes} train_log.jsonl, {n_probes} run_manifest, "
+                    f"{n_probes} run_completion, {n_probes} probe journals, "
+                    f"{n_probes} probe configs, {n_probes} per-sample files, "
+                    f"{n_probes} scored aggregates, {n_probes * n_sets} raw "
+                    f"generation files and {n_probes * n_sets} generation "
+                    "summaries (every set of every probe), plus the replay "
+                    "record, both arm identities, the decision, the attested "
+                    "protocol, the session evidence and the engine probe"),
+            },
+            "failed": {
+                "path": SPEC_FAILED,
+                "sha256": sha256_file(REPO / SPEC_FAILED),
+                "requires": (
+                    "the session evidence record only. Everything else is "
+                    "collected when present. `ArtifactSpec` has no conditional "
+                    "and the runner selects between exactly two spec files on "
+                    "one bit, so the required set is the intersection over "
+                    "every terminal failure state; requiring the replay record "
+                    "would block teardown on a run that failed before stage D. "
+                    "The residual hole is recorded in the file's `limitation` "
+                    "field and is a live review item, not a closed design."),
+            },
+            "gate": ("artifact_spec_gate in scripts/pod/autoinit_c1_launch.py, "
+                     "at $0 before provider creation: both files exist, parse, "
+                     "load through collect_artifacts.load_specs, stay inside the "
+                     "artifact roots, are inside the measured harness set, cover "
+                     "the contract above at derived minimums, and — for the "
+                     "failure spec — demand nothing that presupposes training"),
+            "paths_are_the_driver_s": (
+                "the manifest root is artifacts/ and the paths under it are "
+                "PhaseADriver's, which C1Driver inherits: audit/autoinit_phase_a, "
+                "stage3/phase_a/<probe_id>, eval/phase_a/<probe_id>. The "
+                "launcher's ArtifactPolicy.audit_dirname 'autoinit_c1' governs "
+                "only the session-log copy and the report_names scp"),
         },
 
         "out_of_scope": [

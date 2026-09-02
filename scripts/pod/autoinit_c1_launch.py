@@ -69,6 +69,11 @@ AUTH_PATH = "logs/autoinit_c1_authorization.json"
 
 PRICING = "logs/phase_c1_pricing.json"
 PREREG = "logs/phase_c1_execution_preregistration.json"
+#: Declared once. `artifact_spec_gate` reads these and `ArtifactPolicy` books
+#: them, so the gate cannot end up validating a different file than the one the
+#: pod is handed.
+SPEC_SUCCESS = "configs/autoinit/c1_artifacts.json"
+SPEC_FAILED = "configs/autoinit/c1_artifacts_failed.json"
 BATTERY_MANIFEST = "artifacts/stage3/c1_confirmation_v1/manifest.json"
 BATTERY_IDENTITY = "logs/phase_c1_battery.json"
 TEACHER_BINDING = "logs/phase_c1_teacher_binding.json"
@@ -231,6 +236,107 @@ def battery_staged_gate(ctx: SessionContext) -> tuple[bool, str]:
     return True, f"battery staged from bytes identical to {canonical}"
 
 
+#: Manifest-root-relative first path components a C1 artifact pattern may name.
+#: The manifest root is `{REPO}/artifacts`, so anything outside these is either a
+#: typo or an attempt to archive something this session does not own.
+ARTIFACT_ROOTS = ("audit", "eval", "stage3", "stage1", "autoinit")
+
+#: Classes that cannot exist until recovery training has produced them. A
+#: FAILED spec that *requires* any of these blocks teardown on a pod that
+#: correctly never trained -- the single most expensive way to be wrong here.
+POST_TRAINING_CLASSES = (
+    "probe_event_stream", "probe_run_manifest", "probe_run_completion",
+    "probe_journal", "probe_config", "per_sample", "scored_probe_aggregate",
+    "generations", "generation_summary", "probe_train_tail", "decision",
+)
+
+
+def artifact_spec_gate(ctx: SessionContext) -> tuple[bool, str]:
+    """Both artifact specs must exist, load, stay in-tree and cover the contract.
+
+    `SessionSpec.validate()` only checks that the two spec *path strings* are
+    non-empty; the files themselves are first read by `collect_artifacts.py` on
+    the pod, at teardown, after the money is spent. Both C1 spec files were in
+    fact absent from the tree that passed every other precheck. This gate closes
+    that: it is the one place a missing, unparseable, out-of-tree or
+    contract-violating evidence declaration can still be free.
+
+    The success minimums are DERIVED -- probes from the session contract, sets
+    from the staged battery manifest -- so a battery that gained or lost a set
+    moves the required generation count instead of silently accepting a spec
+    that would now archive six sevenths of the evidence.
+    """
+    from collect_artifacts import load_specs
+
+    paths = (SPEC_SUCCESS, SPEC_FAILED)
+    #: Requirement and invariant in one line: these files decide what evidence
+    #: survives, so they must be inside the set the authorization measures.
+    #: Without this, editing an evidence declaration would not move the harness
+    #: digest, and a grant would certify a collection policy it never saw.
+    unmeasured = [p for p in paths if p not in C1_HARNESS_SOURCE_FILES_V1]
+    if unmeasured:
+        return False, (f"{unmeasured} decide what evidence survives teardown but "
+                       "are outside the measured C1 harness set")
+    loaded = {}
+    for rel in paths:
+        p = REPO_ROOT / rel
+        if not p.is_file():
+            return False, (f"{rel} is missing; collection would die on the pod "
+                           "at teardown, with the evidence still on it")
+        try:
+            specs = load_specs(str(p))
+        except Exception as exc:                       # noqa: BLE001
+            return False, f"{rel} is not a spec collect_artifacts accepts: {exc}"
+        if not specs:
+            return False, f"{rel} declares no entries"
+        for s in specs:
+            head = s.pattern.split("/", 1)[0]
+            if (s.pattern.startswith("/") or ".." in s.pattern.split("/")
+                    or head not in ARTIFACT_ROOTS):
+                return False, (f"{rel}: pattern {s.pattern!r} leaves the "
+                               f"artifact roots {ARTIFACT_ROOTS}")
+        loaded[rel] = specs
+
+    n_probes = CS.C1_SESSION_CONTRACT.n_probes
+    n_sets = len(json.loads((REPO_ROOT / BATTERY_MANIFEST).read_text())["sets"])
+    #: The frozen `evidence_manifest_contract`, as enforceable minimums.
+    required_minimums = {
+        "probe_event_stream": n_probes,
+        "per_sample": n_probes,
+        "scored_probe_aggregate": n_probes,
+        "probe_journal": n_probes,
+        "generations": n_probes * n_sets,
+        "generation_summary": n_probes * n_sets,
+        "arm_identities": 1,
+        "replay_record": 1,
+        "decision": 1,
+        "attested_protocol": 1,
+        "session_evidence": 1,
+        "engine_probe": 1,
+    }
+    have = {}
+    for s in loaded[paths[0]]:
+        if s.required:
+            have[s.artifact_class] = max(have.get(s.artifact_class, 0),
+                                         s.min_matches)
+    gaps = [f"{k} requires {have.get(k, 0)}, contract needs {v}"
+            for k, v in required_minimums.items() if have.get(k, 0) < v]
+    if gaps:
+        return False, f"{paths[0]} does not cover the evidence contract: " \
+                      + "; ".join(gaps)
+
+    presupposed = sorted({s.artifact_class for s in loaded[paths[1]]
+                          if s.required and s.min_matches > 0
+                          and s.artifact_class in POST_TRAINING_CLASSES})
+    if presupposed:
+        return False, (f"{paths[1]} requires {presupposed}, which cannot exist "
+                       "before training; a replay mismatch would be unable to "
+                       "tear down")
+    return True, (f"success spec covers the contract ({n_probes} probes x "
+                  f"{n_sets} sets = {n_probes * n_sets} generation files); "
+                  f"failure spec presupposes no training")
+
+
 # ---------------------------------------------------------------------------
 
 def driver_command(ctx: SessionContext, plan) -> str:
@@ -301,8 +407,8 @@ def spec(args) -> SessionSpec:
             audit_dirname="autoinit_c1",
             evidence_filename="c1_evidence.json",
             archive_basename="c1_artifacts.tar.gz",
-            spec_success="configs/autoinit/c1_artifacts.json",
-            spec_failed="configs/autoinit/c1_artifacts_failed.json",
+            spec_success=SPEC_SUCCESS,
+            spec_failed=SPEC_FAILED,
             report_names=("c1_evidence.json", "attested_evaluation_protocol.json",
                           "c1_replay_record.json", "c1_arm_identities.json",
                           "c1_probe_results.json", "c1_decision.json"),
@@ -316,6 +422,7 @@ def spec(args) -> SessionSpec:
             frozen_c1_science_gate,
             teacher_binding_gate,
             battery_staged_gate,
+            artifact_spec_gate,
         ),
         evidence_fields={
             "c1_session_contract_hash": CS.C1_SESSION_CONTRACT.contract_hash,

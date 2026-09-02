@@ -41,6 +41,13 @@ SCHEMA = "aadistill.autoinit.c1_authorization/v1"
 #: Every file whose bytes decide what the paid C1 session executes. The
 #: authorization measures THIS set; a grant that declares a different one is
 #: certifying different code.
+#:
+#: The two artifact specs are in here for the same reason the collector is.
+#: `collect_artifacts.py` is only a spec interpreter — what actually decides
+#: which evidence survives teardown is the declared pattern list, and a session
+#: whose evidence contract can be edited without moving the harness digest has an
+#: unmeasured mutable input at exactly the point where loss is irreversible. They
+#: are configuration by file type and executable by consequence.
 C1_HARNESS_SOURCE_FILES_V1: tuple[str, ...] = (
     # the session, end to end
     "scripts/pod/autoinit_c1_launch.py",
@@ -49,6 +56,9 @@ C1_HARNESS_SOURCE_FILES_V1: tuple[str, ...] = (
     "scripts/pod/start_job.py",
     "scripts/pod/watchdog.py",
     "scripts/pod/collect_artifacts.py",
+    # what the collector is told to save, and what it may skip on failure
+    "configs/autoinit/c1_artifacts.json",
+    "configs/autoinit/c1_artifacts_failed.json",
     # the C1 science
     "src/aadistill/autoinit/c1_session.py",
     "src/aadistill/autoinit/c1_isolation.py",
