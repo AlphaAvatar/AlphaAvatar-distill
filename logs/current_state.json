@@ -54,7 +54,7 @@
  },
  "latest_verification": {
   "utc": "2026-09-02T00:00:00Z",
-  "kind": "CURRENT -- $0 CPU-only. Stage-H generation-protocol admission + preregistration self-hash gate. No compute, no pod, no grant.",
+  "kind": "C1 attempt 1: PAID, $0.0786, aborted at setup. No scientific stage ran.",
   "commit": "f6200c07a3cacc69bd6f903034497ce8a80e8469",
   "suite": "2753 passed / 13 skipped / 0 failed (32m05s)",
   "verifiers": "5/5 PASS: frozen_assets, historical/attempt4/attempt5 probe-reuse, c1_battery_isolation; scoring equivalence IDENTICAL/15",
@@ -67,9 +67,9 @@
   "the ATTENTION 'search declined to calibrate' reading: WITHDRAWN 2026-09-01"
  ],
  "next_starting_point": {
-  "status": "PHASE A, B and C0 CLOSED. C1 is runnable, priced and preregistered; NOT executed and NOT authorized.",
-  "the_ask": "final grant review of the frozen C1 commit, then a maintainer decision on whether to issue the one-use grant",
-  "budget": "C1 is priced at a $13.7578 ceiling against $19.9003 headroom. Priced is not authorized; nothing is funded."
+  "status": "C1 attempt 1 aborted at setup for $0.0786. Authorization consumed.",
+  "the_ask": "maintainer review of the bundle-staging gap, then a decision on whether to re-authorize a second C1 attempt",
+  "budget": "$263.9383 spent of the unchanged $283.7600 cap; $19.8217 uncommitted."
  },
  "read_order": [
   "logs/PHASE_INDEX.md -- history by phase, START HERE",
@@ -115,22 +115,22 @@
    "status": "COMPLETE / APPROVED / CANONICALLY FROZEN 2026-09-01 (commit be2ab08)",
    "protocol": "logs/phase_c0_preregistration.json fb2eeea531f9f0d1",
    "sizing_evidence": "logs/phase_c0_sizing_evidence.json 4786242d349e9b21",
-   "summary": "850 scorable / 950 total; 3 fresh paired seeds as fixed blocks; primary correct_overall; SESOI +0.010 boundary, design alternative +0.015 at P(GO)=0.8379; stratified PROMPT-cluster bootstrap on those seeds",
+   "summary": "850 scorable / 950 total; 3 fresh paired seeds as fixed blocks; primary correct_overall; SESOI +0.010, design alternative +0.015 at P(GO)=0.8379; stratified PROMPT-cluster bootstrap on those seeds",
    "authorizes": "nothing"
   },
   "c1": {
-   "status": "RUNNABLE / PRICED / PREREGISTERED / NOT EXECUTED / NOT AUTHORIZED. No probe, no behavioural result, no paid compute.",
+   "status": "ATTEMPT 1 ABORTED AT SETUP. Authorization ISSUED and CONSUMED; $0.0786; no scientific stage ran. NOT re-authorized.",
    "what_it_is": "fixed-path ATTENTION isolation, 2 arms x 3 fresh seeds = 6 E1_KD_HEAVY_0860K probes. NOT recovery evidence.",
    "incumbent": "fe9683e6a9c783bbc6fe276a78c851c6, digest c313d1b4081b. Margin 0.000070, not distinguishable from cca699c93f34, NOT recovered.",
-   "built": "attention.activation_importance_v1 (own module, import INERT, explicit register()); fixed_path + the eea90c91/c313d1b4 gates; c1_session 10-stage contract; c1_isolation; battery c1_confirmation_v1 950/850 a285d61f",
+   "built": "standalone driver (B-I, G/H separate, per-probe generation admission); attention.activation_importance_v1; fixed_path + the eea90c91/c313d1b4 gates; battery c1_confirmation_v1 950/850",
    "not_built": "no grant; the pre-ATTENTION parent rebuild and the ~8 GB teacher weights need GPU/network and have not run",
-   "execution_prereg": "logs/phase_c1_execution_preregistration.json 54d858ed1dfe1939 at head_commit 913a88a (supersedes bc48515d <- 63ca7c24 <- 58015cd3 <- 48beff49); harness 04302feaf8705cb3 over 62 files",
+   "execution_prereg": "logs/phase_c1_execution_preregistration.json 54d858ed1dfe1939 at head_commit 913a88a; harness 04302feaf8705cb3 over 62 files",
    "pricing": "logs/phase_c1_pricing.json -- floor $12.2070, expected $13.4277, CEILING $13.7578, enforced via BudgetSpec derived from that record",
    "seeds": "1635674081, 1656475568, 696460635 (derived from the C0 digest)",
    "session": "scripts/pod/autoinit_c1_launch.py + autoinit_c1_driver.py, SESSION_KIND=c1, C1Authorization, 8 pre-provider gates. STANDALONE: no Phase-A driver or launcher in the closure.",
-   "evidence": "configs/autoinit/c1_artifacts.json + _failed.json on the C1 paths, measured and hash-bound. Success requires 6 training streams, 6 per-sample, 42 generations, 6 aggregates, arm identities, probe results, decision.",
-   "scoring": "c1_confirmation_scoring@v1 77507935f21f83eb over 11 files. @v2 CANNOT run on c1_confirmation_v1 (module-constant pins; manifest['metrics'] absent). Both frozen assets untouched: @v2 808080a7, battery a285d61f. Equivalence IDENTICAL over 15 probes.",
-   "admission": "Stage H reconstructs each probe's protocol from ITS OWN summaries and requires comparability BEFORE scoring. On drift: unscored, no later probe, no decision, C1_INCOMPLETE. All six observed identities are bound in c1_probe_results.json."
+   "scoring": "c1_confirmation_scoring@v1 77507935 over 11 files; equivalence IDENTICAL over 15 probes. @v2 808080a7 and the battery a285d61f are untouched.",
+   "attempt1": "2026-09-02: 8/8 pre-provider gates PASS, pod fccr23o9jcnrh0 created, then SETUP_RC=1 -- the pod could not fetch transfer/c1, which does not exist: NO GIT BUNDLE was created for the session commit. Deleted at 4.8 min, provider confirms gone. No teacher fetch, no replay, no training, no evaluation. logs/autoinit_c1_attempt1/",
+   "blocker_for_attempt2": "the bundle is a documented pre-session step in scripts/pod/AGENTS.md, not a precheck; no $0 gate verifies the pod can OBTAIN the session commit. A bundle_staged_gate would have refused this at $0."
   },
   "c2": {
    "status": "NOT STARTED",
@@ -164,7 +164,7 @@
   "closeout": "logs/storage_closeout_20260831.json",
   "c1_battery_canonical": "/home/ecs-user/aad-artifacts/autoinit/c1_confirmation_v1 -- COPY of the frozen bytes, 8 files, verified from the copy; repo-local working copy retained"
  },
- "blocker": "none.",
+ "blocker": "C1 ATTEMPT 1 ABORTED AT SETUP; the one-use authorization is CONSUMED. No retry without a new maintainer review. Root cause: no git bundle on the relay for the session commit, and no pre-provider gate checks for one.",
  "deferred_not_blocking": {
   "_note": "open, none blocking. Detail: logs/HANDOFF_next_session.md",
   "duplicate_checkpoints": "2.92 GiB, KEEP / unresolved ownership -- maintainer decision",

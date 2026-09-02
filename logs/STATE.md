@@ -1,5 +1,5 @@
-**Updated:** 2026-09-02 · branch `main` · **PHASE B CLOSED · PHASE C0 FROZEN ·
-PHASE C1 RUNNABLE + PRICED, NOT EXECUTED, NOT AUTHORIZED**
+**Updated:** 2026-09-03 · branch `main` · **PHASE B CLOSED · PHASE C0 FROZEN ·
+PHASE C1 ATTEMPT 1 ABORTED AT SETUP, AUTHORIZATION CONSUMED**
 
 # Current state
 
@@ -26,7 +26,20 @@ remaining.
 **$13.7578**, against **$19.9003** headroom — **$6.1425** would remain if the
 whole ceiling were consumed. **Priced is not authorized: no grant exists.**
 
-## Phase C1 — RUNNABLE, PRICED and PREREGISTERED, NOT EXECUTED
+## Phase C1 — ATTEMPT 1 ABORTED AT SETUP · authorization CONSUMED
+
+> **Attempt 1 aborted at setup, 2026-09-02.** All eight pre-provider gates
+> passed and pod `fccr23o9jcnrh0` was created, then setup failed with
+> `SETUP_RC=1`: the pod could not fetch `transfer/c1`, because **no git bundle was
+> created for the session commit**. `$0.0786`, pod deleted at 4.8 min, provider
+> confirms gone. **No scientific stage ran** — no teacher fetch, no replay, no
+> training, no evaluation. The one-use authorization is **consumed**; no retry is
+> authorized. Evidence in [`autoinit_c1_attempt1/`](autoinit_c1_attempt1/).
+>
+> The gap is a gate gap, not a code defect: "regenerate the git bundle and
+> re-upload it" is a documented pre-session step in `scripts/pod/AGENTS.md`, and
+> the eight gates all verify the *contents* of the session commit while none
+> verifies that the pod can *obtain* it.
 
 > **Both 2026-09-02 blockers are closed.** The driver is now standalone — it
 > neither subclasses nor imports the Phase-A driver, owns stages B–I, binds the

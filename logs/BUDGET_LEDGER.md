@@ -1432,3 +1432,25 @@ The artifact is **not** edited: `granted_by` is inside `authorization_sha256`,
 and `phase_a.py` is inside the harness digest, so correcting the wording would
 move both and force a rebuild and reissue for an attribution nuance that is not
 an authorization defect. Recorded in prose, at the maintainer's direction.
+
+## Phase C1 — attempt 1, 2026-09-02
+
+| what | cost | evidence |
+| --- | --- | --- |
+| C1 attempt 1: ABORT at setup, draw 1. The pod could not fetch the repo bundle — `transfer/c1` does not exist on the relay, because **no bundle was created or uploaded for this session's commit**. `SETUP_RC=1`, no scientific stage ran, pod deleted 4.8 min after creation and provider-confirmed gone | $0.0786 | `logs/autoinit_c1_session.json`, `/home/ecs-user/c1_scr/{launch.log,watchdog.jsonl}` |
+
+**Cumulative: $263.8597 + $0.0786 = $263.9383 of the $283.7600 cap.** $19.8217
+uncommitted. The cap was not raised.
+
+**The authorization is consumed.** `logs/autoinit_c1_authorization.json` permitted
+ONE launch attempt; that attempt was made and its outcome is recorded above. No
+retry is authorized without a new maintainer review, and none was attempted.
+
+**Why no `$0` gate caught it.** All eight pre-provider gates verify the *contents*
+of the session commit — harness digest, lineage, authorization, preregistration,
+frozen science, teacher binding, battery, artifact specs. None verifies that the
+pod can *obtain* that commit. "Regenerate the git bundle at the current commit and
+re-upload it" is a documented pre-session step in `scripts/pod/AGENTS.md`, not a
+precheck, so it depends on an operator remembering it. The relay convention is
+`transfer/aad_autoinit_<8hex>.bundle`; `--bundle c1` named a file that never
+existed. A `bundle_staged_gate` would have refused this at `$0`.
