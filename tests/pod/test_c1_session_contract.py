@@ -124,9 +124,27 @@ def test_the_pricing_record_authorizes_nothing():
     assert pricing["authorizes"] == "nothing"
 
 
-def test_no_real_c1_grant_exists_in_the_repository():
-    assert not (REPO / "logs/autoinit_c1_authorization.json").exists(), (
-        "a C1 authorization is committed; none has been issued")
+def test_the_committed_c1_authorization_is_the_consumed_attempt_1_one():
+    """A grant WAS issued; it is consumed, and every gate must now refuse it.
+
+    This test used to assert the file did not exist. It does exist: attempt 1 was
+    authorized on 2026-09-02, spent $0.0786 and aborted at setup, and the
+    artifact is retained untouched as the record of that. What matters is no
+    longer absence but that presence cannot authorize anything -- the harness has
+    moved since, so the identity gates refuse it.
+    """
+    from aadistill.autoinit.c1_authorization import (
+        C1Authorization, c1_harness_digest,
+    )
+
+    p = REPO / "logs/autoinit_c1_authorization.json"
+    assert p.is_file(), "the attempt-1 authorization record must be retained"
+    auth = C1Authorization.load(p)
+    assert auth.allows_phase_a is False and auth.allows_beam_search is False
+    live = c1_harness_digest(REPO)["digest"]
+    assert auth.harness_source_digest != live, (
+        "the consumed attempt-1 grant still matches the live harness; it would "
+        "not be refused by c1_harness_gate")
 
 
 # --- the harness the grant measures ----------------------------------------
@@ -229,9 +247,17 @@ def test_the_session_declares_that_it_neither_searches_nor_eliminates(spec):
                     reason="no candidate authorization on this machine")
 def test_every_gate_but_the_commit_binding_passes_against_the_candidate(launcher,
                                                                         spec):
-    """The candidate is structurally valid and bound to the live identities, so
-    every `$0` gate must pass. `session_commit_and_lineage` cannot: it binds a
-    real issued commit, which does not exist before issuance."""
+    """Every `$0` gate must pass against the candidate except the two that
+    structurally cannot before a real issuance.
+
+    `session_commit_and_lineage` binds a real issued commit. `bundle_staged_gate`
+    needs a bundle for that commit actually uploaded to the relay, and a scratch
+    candidate has no such commit — uploading one to satisfy a unit test would
+    pollute the relay to prove nothing. Its real exercise is
+    `test_c1_bundle_transport.py`, which drives the identical `roundtrip` over
+    real bundles, real clones and real digests with only transport injected,
+    including the passing case.
+    """
     import types
 
     auth = C1Authorization.load(CANDIDATE)
@@ -242,9 +268,12 @@ def test_every_gate_but_the_commit_binding_passes_against_the_candidate(launcher
     for gate in spec.precheck:
         name = getattr(gate, "__name__", "session_commit_and_lineage")
         ok, msg = gate(ctx)
-        if not ok and name != "session_commit_and_lineage":
+        if not ok and name not in ("session_commit_and_lineage",
+                                   "bundle_staged_gate"):
             failures.append(f"{name}: {msg}")
     assert not failures, failures
+    assert "bundle_staged_gate" in [
+        getattr(g, "__name__", "") for g in spec.precheck]
 
 
 # --- the preregistration must verify its own declared hash ------------------

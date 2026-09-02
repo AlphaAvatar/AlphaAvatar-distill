@@ -45,9 +45,12 @@ def _git(*a, cwd=None):
 
 
 HEAD = _git("rev-parse", "HEAD", cwd=REPO)
-#: A commit that carries the (consumed) attempt-1 authorization, so the
-#: round-trip can check a real artifact rather than a synthesised one.
-AUTH_COMMIT = _git("log", "-1", "--format=%H", "--", AUTH_PATH, cwd=REPO)
+#: The session commit these tests bundle. HEAD, not the commit that first
+#: introduced the authorization: a real session commit carries BOTH the
+#: authorization artifact and the current harness, and the attempt-1 commit
+#: predates two harness files, so using it made the round-trip fail for a reason
+#: no real session could hit.
+AUTH_COMMIT = HEAD
 
 
 # --- the canonical name -----------------------------------------------------

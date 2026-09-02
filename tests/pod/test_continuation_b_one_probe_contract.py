@@ -412,12 +412,13 @@ def test_the_live_snapshot_records_the_terminal_phase_b_state():
     # running.pods, budget.planning_floor_usd) already carry "nothing was bought".
     assert "FROZEN" in state["phase_c"]["c0"]["status"]
     assert state["phase_c"]["c0"]["authorizes"] == "nothing"
-    # "NOT EXECUTED", not "NOT STARTED": implementation was authorized at $0 and
-    # has landed, so only execution is still forbidden. This word becomes false
-    # exactly when a probe runs, which is the thing worth guarding.
-    # "NOT PRICED" dropped: C1 is priced now, which the review asked for. The two
-    # words left are the ones that only become false when money is committed.
-    for word in ("NOT EXECUTED", "NOT AUTHORIZED"):
+    # "NOT SCIENTIFICALLY EXECUTED", not "NOT EXECUTED": attempt 1 DID run and
+    # spend $0.0786, and it produced no measurement, so the plain word became
+    # ambiguous the moment a pod existed. The guarded claim is the one that only
+    # becomes false when a C1 probe actually measures something.
+    # "NOT CURRENTLY AUTHORIZED", not "NOT AUTHORIZED": a grant was issued and
+    # consumed, and saying C1 was never authorized would be false.
+    for word in ("NOT SCIENTIFICALLY EXECUTED", "NOT CURRENTLY AUTHORIZED"):
         assert word in state["phase_c"]["c1"]["status"], word
     assert "NOT STARTED" in state["phase_c"]["c2"]["status"]
     # Nothing that needs a GPU may be claimed as built.
