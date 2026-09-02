@@ -14,7 +14,7 @@ duplicates no facts: every row is a status label and a link.
 | **Phase A** | COMPLETE | **`unresolved_equivalence`** — no winner. Numerical leader `cca699c93f34` |
 | **Phase B** | COMPLETE | **`resolved`** — winner `fe9683e6a9c7`, but the separation is razor-thin |
 | **Phase C0** | **COMPLETE / APPROVED / FROZEN** 2026-09-01 | protocol [`phase_c0_preregistration.json`](phase_c0_preregistration.json), sizing [`phase_c0_sizing_evidence.json`](phase_c0_sizing_evidence.json). N=850 scorable / 950 total, 3 fresh paired seeds |
-| **Phase C1** | **PRICED / PREREGISTERED / NOT RUNNABLE / NOT EXECUTED / NOT AUTHORIZED** | fixed-path ATTENTION isolation using short 0.86M recovery probes. Battery, price ($13.7578 ceiling), evidence specs and preregistration exist; **the driver's stages A-J are called by nothing**, so C1 is NO-GO. No grant, no probe, no arm evaluated. Structure in [`phase_c_roadmap.md`](phase_c_roadmap.md) |
+| **Phase C1** | **RUNNABLE / PRICED / NOT EXECUTED / NOT AUTHORIZED** | fixed-path ATTENTION isolation using short 0.86M recovery probes. Standalone driver (stages B–I, training and evaluation physically separate), `c1_confirmation_scoring@v1` with an IDENTICAL equivalence gate, evidence specs, price ($13.7578 ceiling) and preregistration all exist. No grant, no probe, no arm evaluated. Structure in [`phase_c_roadmap.md`](phase_c_roadmap.md) |
 | **Phase C2** | **NOT STARTED** | runs only if C1 finds a worthwhile ATTENTION formulation |
 
 > The two phases' best candidates are **not distinguishable**: `16/510` vs

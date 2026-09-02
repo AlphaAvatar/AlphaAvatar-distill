@@ -1,5 +1,5 @@
 **Updated:** 2026-09-02 · branch `main` · **PHASE B CLOSED · PHASE C0 FROZEN ·
-PHASE C1 PRICED + PREREGISTERED, NOT RUNNABLE, NOT EXECUTED**
+PHASE C1 RUNNABLE + PRICED, NOT EXECUTED, NOT AUTHORIZED**
 
 # Current state
 
@@ -26,21 +26,19 @@ remaining.
 **$13.7578**, against **$19.9003** headroom — **$6.1425** would remain if the
 whole ceiling were consumed. **Priced is not authorized: no grant exists.**
 
-## Phase C1 — PRICED and PREREGISTERED, **NOT RUNNABLE**, NOT EXECUTED
+## Phase C1 — RUNNABLE, PRICED and PREREGISTERED, NOT EXECUTED
 
-> **Blocker, found 2026-09-02.** `C1Driver` is a method library, not a wired
-> session: it does not override `run()`, so it inherits `PhaseADriver.run()`,
-> which dispatches numeric stages `0..5`. `teacher_verify`, `register_operator`,
-> `replay_and_build_arms`, `probe_descriptors` and `apply_decision` are called by
-> **nothing**. A paid session would run Phase A's stage 0, hit the overridden
-> `stage1()` (`NotImplementedError`, blocking) and exit `21`. Three related
-> defects: the inherited `battery()` evaluates `recovery_search_v2` rather than
-> `c1_confirmation_v1`; `probe_descriptors()` omits four keys `run_probe`
-> requires; `report_names` includes `c1_probe_results.json`, which nothing
-> writes. All four are in
-> [`decisions.md`](decisions.md) under *C1 evidence declaration, and the driver
-> that cannot produce it*. **C1 is NO-GO until the stage wiring is reviewed and
-> implemented.**
+> **Both 2026-09-02 blockers are closed.** The driver is now standalone — it
+> neither subclasses nor imports the Phase-A driver, owns stages B–I, binds the
+> C1 plan hash, writes only C1 paths, keeps training and evaluation physically
+> separate, and enforces the CUDA release/headroom gate before probe 1. And the
+> scoring blocker is resolved by **option 3**: `recovery_search_scoring@v2`
+> cannot run on this battery, so C1 declares `c1_confirmation_scoring@v1` and
+> leaves both frozen assets untouched. That the numbers did not move is
+> demonstrated, not asserted — 15 retained probes scored through both paths,
+> **IDENTICAL, 0 differences**. See
+> [`decisions.md`](decisions.md) and
+> [`phase_c1_scoring_equivalence.json`](phase_c1_scoring_equivalence.json).
 
 Design and implementation proceeded at `$0`; **execution did not**. What exists:
 
@@ -53,10 +51,11 @@ Design and implementation proceeded at `$0`; **execution did not**. What exists:
 | teacher shard binding | [`phase_c1_teacher_binding.json`](phase_c1_teacher_binding.json) |
 
 | ten-stage session contract + the two fail-stop replay gates | `autoinit/c1_session.py` |
-| execution preregistration | [`phase_c1_execution_preregistration.json`](phase_c1_execution_preregistration.json) · `63ca7c2465b7a033…` · supersedes `58015cd3b5b1f022…`, which superseded `48beff49a1d087dc…` |
+| execution preregistration | [`phase_c1_execution_preregistration.json`](phase_c1_execution_preregistration.json) · `bc48515d6a4fabcf…` · supersedes `63ca7c2465b7a033…` ← `58015cd3b5b1f022…` ← `48beff49a1d087dc…` |
 | price bound | [`phase_c1_pricing.json`](phase_c1_pricing.json) · floor **$12.2070** · expected **$13.4277** · **ceiling $13.7578** |
 | evidence declaration | [`configs/autoinit/c1_artifacts.json`](../configs/autoinit/c1_artifacts.json) + [`_failed`](../configs/autoinit/c1_artifacts_failed.json) — inside the measured harness, so editing what survives teardown moves the digest a grant binds |
-| session spec (**driver not wired**) | `scripts/pod/autoinit_c1_launch.py` + `autoinit_c1_driver.py` · `SESSION_KIND=c1` · `C1Authorization` · 8 pre-provider gates |
+| standalone session | `scripts/pod/autoinit_c1_launch.py` + `autoinit_c1_driver.py` · `SESSION_KIND=c1` · `C1Authorization` · 8 pre-provider gates · no Phase-A driver or launcher in the closure |
+| C1 scoring binding | `c1_confirmation_scoring@v1` · `77507935f21f83eb…` over 11 files · parent `recovery_search_scoring@v2` `808080a7…`, unchanged · equivalence **IDENTICAL / 15 cases / 0 differences** |
 
 The three fresh seeds are **`1635674081`, `1656475568`, `696460635`**, derived
 from the frozen C0 digest and confirmed independently three ways.

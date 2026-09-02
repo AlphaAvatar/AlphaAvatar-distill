@@ -6640,3 +6640,75 @@ on a paid pod.
   battery's seven sets; a battery change moves it, which the gate now checks.
 - **Revisit when:** the driver's stage wiring is reviewed and implemented. No
   grant should be issued before then.
+
+## 2026-09-02 — `c1_confirmation_scoring@v1`, and a standalone C1 driver
+
+- **Context:** two blockers, both found by direct execution rather than review.
+  `recovery_search_scoring@v2` cannot score `c1_confirmation_v1` — its battery
+  pins are module constants checked unconditionally, and its result builder reads
+  `manifest["metrics"]`, which the C1 manifest deliberately does not carry
+  (confirmed by running it with the pins overridden in memory: `KeyError:
+  'metrics'` after 150 rows). And `C1Driver` was a method library, not a wired
+  session: it inherited `PhaseADriver.run()`, so its own stages were dead code.
+- **Decision (scoring):** option 3. A C1-owned scorer with its own identity,
+  `c1_confirmation_scoring@v1`, leaving BOTH frozen assets untouched —
+  `recovery_search_scoring@v2` stays `808080a7…` for Phase A/B, and the battery
+  keeps `content a285d61f…` / `manifest e6ff5cf5…`. Every rule is imported from
+  the frozen implementation; only the loop over sets is restated, because the
+  historical scorer keeps it inline in `main()` and offers no seam.
+- **The restatement is admitted by evidence, not by review.**
+  `verify_c1_scoring_equivalence.py` scores real retained `recovery_search_v2`
+  generations through both paths and requires equality of every material
+  numerical field, per sample and in aggregate, with no tolerance. Result:
+  **IDENTICAL over 15 cases** — every retained probe on this box, all three
+  rungs, both candidates and the control, 2,850 rows, 0 differences. That is what
+  preserves the C0 power analysis and the SESOI under a new consumer identity.
+- **Two things the mutation pass corrected, and they matter more than the pass.**
+  The tool-structural-gate mutation *looked* inert: emptying the tuple stops the
+  loop writing the three structural fields, and the frozen `summarize` — which
+  iterates its own unpatched tuple — raises `KeyError`. Asserting only on the
+  diff list recorded a real detection as a blind spot. And `correct => usable`
+  genuinely **cannot** be covered by this gate: `correct_but_unusable` is 0 on all
+  15 probes, so the implication never fires in historical evidence. Recorded as a
+  coverage limit in the equivalence log and covered directly against the frozen
+  `score_recovery_row` instead, rather than left to look tested.
+- **Decision (driver):** standalone. No `PhaseADriver` in the MRO and no import
+  of it. C1 binds its own plan hash and refuses Phase A's, owns
+  `audit/autoinit_c1` / `stage3/c1` / `eval/c1`, executes B–I under
+  `assert_stage_order`, and emits only C1-native markers and evidence. Three
+  helpers worth reusing — `mark`, `say`, `trained_model_dir` — are ~30 lines and
+  were ported rather than obtained by importing a 1200-line operational driver.
+- **G and H are physically separate**, which is the load-bearing part. Phase A's
+  `run_probe` trains and immediately evaluates; C1 doing that would let the first
+  arm meet the confirmation battery before the last arm was trained. Stage G
+  starts no evaluator and no scorer; stage H calls `require_all_trained()` first.
+- **The two seams are `train_one` and `generate_one`, and nothing else.** An
+  earlier harness faked whole stages and therefore reimplemented the loop, the
+  guards and the ordering — it could not have noticed any of them breaking. Seven
+  mutations are now checked, and two of them initially passed: a guard weakened
+  from `!= 6` to `< 5` survived a test that only ever supplied one completion, and
+  a mutation that inserted an evaluation *after* the loop did not violate the
+  ordering property it was meant to break. Both were fixed rather than recorded.
+- **Alternatives considered:** parameterizing the frozen scorer's pins (moves
+  `808080a7…`, which finished records bind); adding `metrics` to the battery
+  manifest (moves `manifest_sha256`, and fixes only one of the two defects);
+  keeping the Phase-A launcher import (its `build_parser` gives C1
+  `--rung1-probes`, `--tie-break-probes` and `--search-minutes` — a command line
+  for a search this session cannot run).
+- **Costs paid to avoid moving frozen identities:** `C1_EVAL_TOKENIZER` lives in
+  the C1 launcher rather than beside the other frozen science inputs, because
+  that file is a member of five hash-bound sets and adding a C1-only group moved
+  all five. Two shared invariants were rescoped rather than satisfied by force —
+  the canonical-init staging rule now triggers on `model.safetensors` because it
+  is about loadability, and the continuation's purchase-seam scan is scoped to
+  scripts that import the Phase-A driver.
+- **An operational loss worth recording:** `git checkout <path>` inside a
+  mutation loop reverted the rewritten driver to its last COMMITTED version,
+  which was still the old skeleton, and destroyed ~700 uncommitted lines. They
+  were reconstructed. Commit before mutating.
+- **Risks:** the success spec's 42-file generation minimum is derived from the
+  battery's seven sets; the gate checks it. The failure spec still cannot
+  distinguish failure modes, which the driver now compensates for by verifying
+  its own mismatch record before emitting the marker.
+- **Revisit when:** the maintainer decides whether to issue the one-use grant.
+  Pricing is unchanged at `$12.2070 / $13.4277 / $13.7578`.
