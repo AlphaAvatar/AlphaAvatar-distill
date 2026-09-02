@@ -51,10 +51,11 @@ Design and implementation proceeded at `$0`; **execution did not**. What exists:
 | teacher shard binding | [`phase_c1_teacher_binding.json`](phase_c1_teacher_binding.json) |
 
 | ten-stage session contract + the two fail-stop replay gates | `autoinit/c1_session.py` |
-| execution preregistration | [`phase_c1_execution_preregistration.json`](phase_c1_execution_preregistration.json) · `bc48515d6a4fabcf…` · supersedes `63ca7c2465b7a033…` ← `58015cd3b5b1f022…` ← `48beff49a1d087dc…` |
+| execution preregistration | [`phase_c1_execution_preregistration.json`](phase_c1_execution_preregistration.json) · `54d858ed1dfe1939…` at `head_commit 913a88a` · supersedes `bc48515d…` ← `63ca7c24…` ← `58015cd3…` ← `48beff49…` |
 | price bound | [`phase_c1_pricing.json`](phase_c1_pricing.json) · floor **$12.2070** · expected **$13.4277** · **ceiling $13.7578** |
 | evidence declaration | [`configs/autoinit/c1_artifacts.json`](../configs/autoinit/c1_artifacts.json) + [`_failed`](../configs/autoinit/c1_artifacts_failed.json) — inside the measured harness, so editing what survives teardown moves the digest a grant binds |
 | standalone session | `scripts/pod/autoinit_c1_launch.py` + `autoinit_c1_driver.py` · `SESSION_KIND=c1` · `C1Authorization` · 8 pre-provider gates · no Phase-A driver or launcher in the closure |
+| Stage-H admission | no probe is scored unless the protocol observed from **its own** raw summaries is comparable to the attested one; on drift the session stops `C1_INCOMPLETE` before scoring, and no later probe is evaluated |
 | C1 scoring binding | `c1_confirmation_scoring@v1` · `77507935f21f83eb…` over 11 files · parent `recovery_search_scoring@v2` `808080a7…`, unchanged · equivalence **IDENTICAL / 15 cases / 0 differences** |
 
 The three fresh seeds are **`1635674081`, `1656475568`, `696460635`**, derived

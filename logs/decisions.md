@@ -6712,3 +6712,54 @@ on a paid pod.
   its own mismatch record before emitting the marker.
 - **Revisit when:** the maintainer decides whether to issue the one-use grant.
   Pricing is unchanged at `$12.2070 / $13.4277 / $13.7578`.
+
+## 2026-09-02 — Stage-H generation admission, and a preregistration that verifies itself
+
+- **Context:** the standalone driver attested the evaluation protocol once, from
+  an engine probe, then reconstructed each probe's observed protocol AFTER
+  scoring, stored only its fingerprint, and never compared the two. It also
+  passed the scorer the *attested* fingerprint, so a scored result could carry
+  the expected identity before any evidence for it had been admitted.
+- **Decision:** admission moves before scoring, per probe. Generate all seven
+  sets; rebuild the protocol from that probe's own raw summaries; construct the
+  matching `RecoveryEvaluationProtocol` over `c1_confirmation_scoring@v1` and the
+  frozen battery identity; `require_comparable` against the attestation. Only
+  then score, and score with the **observed** fingerprint. They are equal once
+  the check passes — the direction of provenance is the point.
+- **On failure:** the probe is not scored, no later probe is evaluated, stage I
+  does not run, the session stops `C1_INCOMPLETE`, and both the generations and a
+  `<probe_id>_generation_admission.json` are preserved. A refusal is a diagnosis,
+  not a loss.
+- **Bound into the evidence:** `c1_probe_results.json` carries
+  `observed_generation_fingerprint` and `observed_evaluation_protocol_hash` for
+  all six, and `build_probe_results` refuses a probe with no admitted protocol,
+  six probes carrying more than one, or an admitted protocol that is not the
+  attested one. Six results measured under two protocols are not a paired design.
+- **The harness fake had to change too, and that mattered.** `attest()` returned
+  a placeholder protocol; against a placeholder the new comparison is vacuous and
+  the harness would have certified a gate that never ran. It now builds a REAL
+  protocol from a clean synthetic generation set, so the drift case genuinely
+  differs. Mutation-checked: removing `require_comparable`, and restoring the
+  attested fingerprint at the scorer call, both fail the suite.
+- **`preregistration_gate` now recomputes the document's own declared hash**
+  under the writer's convention. Before, only the harness block was checked — so
+  the stage order, the decision rule and the admission rule could be edited after
+  freezing and the gate would still pass. No new authorization field: the commit
+  binding plus the lineage gate already tie the document to the authorized base.
+- **Two small defects with the same shape.** `report_names` asked for
+  `attested_evaluation_protocol.json` while the driver writes
+  `c1_attested_evaluation_protocol.json`; the scp is best-effort, so the mismatch
+  would have fetched nothing, silently. And the preregistration still said
+  `C1Driver` inherits `PhaseADriver` and writes `phase_a` paths — false since the
+  standalone repair. A preregistration that misdescribes the executable is worse
+  than a missing one: it is a false record of what was reviewed. The WRITER was
+  corrected first, then the document regenerated.
+- **Regeneration order was made explicit.** All executable changes committed at
+  `913a88a` with a clean tree; the writer run against that HEAD, so `head_commit`
+  identifies the executable implementation rather than a mixed tree; the document
+  committed separately at `f6200c0`.
+- **Unchanged:** every scientific key of the preregistration byte-identical, the
+  scoring contract `77507935…` and its parent `808080a7…`, the battery
+  `a285d61f…` / `e6ff5cf5…` / 950 / 850, and pricing at
+  `$12.2070 / $13.4277 / $13.7578`.
+- **Revisit when:** the maintainer decides whether to issue the one-use grant.
