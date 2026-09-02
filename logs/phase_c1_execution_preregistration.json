@@ -3,7 +3,7 @@
  "preregistration_id": "autoinit.v1.phase_c1.execution",
  "written_utc": "2026-09-02T00:00:00Z",
  "_contract": "Everything the Phase-C1 session will run, bound before any C1 result exists. AUTHORIZES NOTHING: no pricing decision, no spend grant, no permission to launch. An authorization, if ever issued, binds THIS document.",
- "head_commit": "ac0d867adf6338424623b2d4d88c1465eed55108",
+ "head_commit": "8bf8ea46e5c7f984f7fdd704d572a3968ce4ee3a",
  "executable_source": {
   "digest": "a5bd40a86052f0125a16414bc98617782cdc011f70590cb938518bb25786740c",
   "files": [
@@ -51,8 +51,18 @@
   "rule": "sha256 over sorted 'path:sha256' lines of the declared set"
  },
  "c1_harness": {
-  "digest": "882b3ad1e1ca8d77ed9bf1565199af510d8c06c31868aaf80ae8b1b59bce0907",
+  "digest": "1cbf3c70540f71e52882ae8074c6fa62f976ee07377f37975a788dc4eb5dc3c9",
   "files": [
+   {
+    "path": "configs/autoinit/c1_artifacts.json",
+    "sha256": "daf83c2a2d8be5f518f22292307354761acbadd70748ce5e1b9525cd8b0f5b2c",
+    "bytes": 5579
+   },
+   {
+    "path": "configs/autoinit/c1_artifacts_failed.json",
+    "sha256": "3c73b96b2c0e138fe88a68e71a8c62491dce693011a7f83434b6fcb7e57c6d22",
+    "bytes": 6724
+   },
    {
     "path": "scripts/autoinit/score_recovery_search.py",
     "sha256": "b19eba4c2c5f555aeb141811439ad5e5417a3222c3b57b78bad3f497eb90dba3",
@@ -70,8 +80,8 @@
    },
    {
     "path": "scripts/pod/autoinit_c1_launch.py",
-    "sha256": "5518a3aae964a41375663eecc894478946632d79c1dd876c3e34a9ba48d783e0",
-    "bytes": 17624
+    "sha256": "3b7d13b0a9d29f045ff9decc0ea1142e129bb66b561cdaba47c03189972a7e78",
+    "bytes": 22844
    },
    {
     "path": "scripts/pod/collect_artifacts.py",
@@ -110,8 +120,8 @@
    },
    {
     "path": "src/aadistill/autoinit/c1_authorization.py",
-    "sha256": "a2890eb3f36bfea0bd1f9d0042a23ee47a8da573bec3e0fdf11a654166f783ee",
-    "bytes": 13318
+    "sha256": "adc14cda564e1629098ef8baa00e1301dd6c11e03ff9386bd8621769d914e0db",
+    "bytes": 13950
    },
    {
     "path": "src/aadistill/autoinit/c1_isolation.py",
@@ -279,7 +289,7 @@
     "bytes": 14210
    }
   ],
-  "n_files": 45,
+  "n_files": 47,
   "rule": "sha256 over sorted 'path:sha256' lines of the declared set",
   "note": "the set an authorization measures. It includes the launcher, the driver, the setup script, the operators the fixed path applies, the recovery and scoring paths the six probes invoke, and the session infrastructure they run through."
  },
@@ -289,7 +299,7 @@
   "session_kind": "c1",
   "allows_phase_a": false,
   "allows_beam_search": false,
-  "n_harness_files": 45,
+  "n_harness_files": 47,
   "status": "NO GRANT EXISTS. No authorization has been issued."
  },
  "launcher": "scripts/pod/autoinit_c1_launch.py",
@@ -629,6 +639,20 @@
   ],
   "gate": "collect_artifacts.py manifest -> archive -> verify-archive -> transfer -> verify-local -> gate; a missing required artifact blocks teardown"
  },
+ "artifact_specs": {
+  "success": {
+   "path": "configs/autoinit/c1_artifacts.json",
+   "sha256": "daf83c2a2d8be5f518f22292307354761acbadd70748ce5e1b9525cd8b0f5b2c",
+   "requires": "6 train_log.jsonl, 6 run_manifest, 6 run_completion, 6 probe journals, 6 probe configs, 6 per-sample files, 6 scored aggregates, 42 raw generation files and 42 generation summaries (every set of every probe), plus the replay record, both arm identities, the decision, the attested protocol, the session evidence and the engine probe"
+  },
+  "failed": {
+   "path": "configs/autoinit/c1_artifacts_failed.json",
+   "sha256": "3c73b96b2c0e138fe88a68e71a8c62491dce693011a7f83434b6fcb7e57c6d22",
+   "requires": "the session evidence record only. Everything else is collected when present. `ArtifactSpec` has no conditional and the runner selects between exactly two spec files on one bit, so the required set is the intersection over every terminal failure state; requiring the replay record would block teardown on a run that failed before stage D. The residual hole is recorded in the file's `limitation` field and is a live review item, not a closed design."
+  },
+  "gate": "artifact_spec_gate in scripts/pod/autoinit_c1_launch.py, at $0 before provider creation: both files exist, parse, load through collect_artifacts.load_specs, stay inside the artifact roots, are inside the measured harness set, cover the contract above at derived minimums, and \u2014 for the failure spec \u2014 demand nothing that presupposes training",
+  "paths_are_the_driver_s": "the manifest root is artifacts/ and the paths under it are PhaseADriver's, which C1Driver inherits: audit/autoinit_phase_a, stage3/phase_a/<probe_id>, eval/phase_a/<probe_id>. The launcher's ArtifactPolicy.audit_dirname 'autoinit_c1' governs only the session-log copy and the report_names scp"
+ },
  "out_of_scope": [
   "formal Stage-2/Stage-3 recovery training \u2014 explicitly NOT in scope; C1 is a fixed-path ATTENTION isolation using short 0.86M recovery probes and establishes no recovered-model capability",
   "canonical Stage-1 NLL",
@@ -636,5 +660,5 @@
   "any search, ranking, successive halving, tie-breaking or arm elimination"
  ],
  "authorizes": "nothing",
- "preregistration_sha256": "58015cd3b5b1f0226b59702e7de60a3247b5725ebdcd9d351c547039bfb55666"
+ "preregistration_sha256": "63ca7c2465b7a033d394b9647a5e7882582940ade15719a85791f03748bbaf36"
 }
