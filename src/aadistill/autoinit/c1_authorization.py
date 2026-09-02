@@ -57,6 +57,11 @@ C1_HARNESS_SOURCE_FILES_V1: tuple[str, ...] = (
     "scripts/pod/watchdog.py",
     "scripts/pod/collect_artifacts.py",
     "scripts/pod/autoinit_science_inputs.py",
+    # transport: whether the pod can OBTAIN the authorized commit at all. Attempt
+    # 1 passed every content gate and died at SETUP_RC=1 on a bundle that did not
+    # exist. The staging tool is measured too: it decides what the pod checks out.
+    "src/aadistill/autoinit/c1_bundle.py",
+    "scripts/autoinit/stage_c1_bundle.py",
     # what the collector is told to save, and what it may skip on failure
     "configs/autoinit/c1_artifacts.json",
     "configs/autoinit/c1_artifacts_failed.json",

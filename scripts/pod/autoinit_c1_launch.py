@@ -48,6 +48,10 @@ from aadistill.autoinit.c1_authorization import (  # noqa: E402
     c1_hard_ceiling_usd,
     c1_harness_digest,
 )
+from aadistill.autoinit.c1_bundle import (  # noqa: E402
+    C1BundleError, canonical_bundle_name, hf_download,
+    require_canonical_bundle_arg, roundtrip,
+)
 from aadistill.autoinit.c1_isolation import derive_recovery_seeds  # noqa: E402
 from aadistill.infrastructure.manifest import (  # noqa: E402
     sha256_file, sha256_json,
@@ -122,6 +126,9 @@ SPEC_FAILED = "configs/autoinit/c1_artifacts_failed.json"
 BATTERY_MANIFEST = "artifacts/stage3/c1_confirmation_v1/manifest.json"
 BATTERY_IDENTITY = "logs/phase_c1_battery.json"
 TEACHER_BINDING = "logs/phase_c1_teacher_binding.json"
+#: Written by scripts/autoinit/stage_c1_bundle.py; the local half of the
+#: transport check. The gate verifies the REMOTE object against it.
+BUNDLE_RECORD = "logs/autoinit_c1_bundle.json"
 
 #: Dev-box-only assets the launcher scp's. The battery is 3.26 MiB and the
 #: reasoning-heavy mixture 0.76 MiB, so both fit the observed 0.44-0.72 MB/s
@@ -314,6 +321,65 @@ POST_TRAINING_CLASSES = (
 )
 
 
+def bundle_staged_gate(ctx: SessionContext) -> tuple[bool, str]:
+    """Can a pod, RIGHT NOW, obtain the exact authorized code?
+
+    Attempt 1 answered every other question correctly and died at `SETUP_RC=1`
+    fetching `transfer/c1`, an alias for nothing. Eight gates verified the
+    *contents* of the session commit; none asked whether the pod could reach it.
+
+    So this one operates on the object the pod would actually fetch. It derives
+    the canonical name from `--session-commit`, downloads that exact relay
+    object, hashes it against the staged bundle, `git bundle verify`s the
+    round-tripped bytes, clones them, and requires the checkout to be the exact
+    session commit, to carry the exact authorization the launcher is loading, and
+    to digest to the authorized harness value.
+
+    Read-only: it uploads nothing and mutates nothing. Preparation is
+    `scripts/autoinit/stage_c1_bundle.py`, deliberately a separate command, so
+    that what this verifies is the relay's state rather than a side effect of the
+    verification.
+    """
+    import tempfile
+
+    commit = ctx.args.session_commit
+    try:
+        require_canonical_bundle_arg(ctx.args.bundle, commit)
+    except C1BundleError as exc:
+        return False, str(exc)
+
+    staged = REPO_ROOT / BUNDLE_RECORD
+    if not staged.is_file():
+        return False, (f"{BUNDLE_RECORD} is missing; run "
+                       f"scripts/autoinit/stage_c1_bundle.py --session-commit "
+                       f"{commit} first")
+    record = json.loads(staged.read_text())
+    if record.get("session_commit") != commit:
+        return False, (f"{BUNDLE_RECORD} describes a bundle for "
+                       f"{str(record.get('session_commit'))[:12]}…, not the session "
+                       f"commit {commit[:12]}…")
+
+    auth_bytes = (REPO_ROOT / AUTH_PATH).read_bytes()
+    try:
+        with tempfile.TemporaryDirectory() as tmp:
+            evidence = roundtrip(
+                session_commit=commit,
+                local_bundle_sha256=record["sha256"],
+                authorization_bytes=auth_bytes,
+                authorization_path=AUTH_PATH,
+                expected_harness_digest=ctx.auth.harness_source_digest,
+                harness_files=tuple(ctx.auth.harness_source_files),
+                download=hf_download, workdir=Path(tmp))
+    except Exception as exc:                                   # noqa: BLE001
+        return False, f"the pod could not obtain the authorized commit: {exc}"
+
+    ctx.evidence["bundle_staged_check"] = evidence
+    return True, (f"{evidence['canonical_bundle_name']} ({evidence['bytes']} bytes, "
+                  f"{evidence['remote_sha256'][:12]}…) round-trips to "
+                  f"{evidence['roundtrip_head'][:12]}… carrying this authorization "
+                  f"and harness {evidence['roundtrip_harness_digest'][:12]}…")
+
+
 def artifact_spec_gate(ctx: SessionContext) -> tuple[bool, str]:
     """Both artifact specs must exist, load, stay in-tree and cover the contract.
 
@@ -490,6 +556,7 @@ def spec(args) -> SessionSpec:
             teacher_binding_gate,
             battery_staged_gate,
             artifact_spec_gate,
+            bundle_staged_gate,
         ),
         evidence_fields={
             "c1_session_contract_hash": CS.C1_SESSION_CONTRACT.contract_hash,
@@ -529,7 +596,9 @@ def build_parser():
         description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--scr", required=True)
     ap.add_argument("--session-commit", required=True)
-    ap.add_argument("--bundle", required=True)
+    ap.add_argument("--bundle", required=True,
+                    help="must be the canonical name derived from\n"
+                         "--session-commit; an alias fails at $0")
     ap.add_argument("--relay-repo", default="AlphaAvatar/aadistill-artifacts")
     ap.add_argument("--image",
                     default="runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404")
