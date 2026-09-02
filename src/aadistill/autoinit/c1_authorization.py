@@ -56,13 +56,35 @@ C1_HARNESS_SOURCE_FILES_V1: tuple[str, ...] = (
     "scripts/pod/start_job.py",
     "scripts/pod/watchdog.py",
     "scripts/pod/collect_artifacts.py",
+    "scripts/pod/autoinit_science_inputs.py",
     # what the collector is told to save, and what it may skip on failure
     "configs/autoinit/c1_artifacts.json",
     "configs/autoinit/c1_artifacts_failed.json",
+    # the C1 scoring binding, and every file that can move a C1 number.
+    # `recovery_search_scoring@v2` cannot run on this battery, so C1 declares
+    # `c1_confirmation_scoring@v1`; the three files V2 omits and this set does not
+    # are audit_tool_scoring, data/tools and data/verify.
+    "scripts/autoinit/score_c1_confirmation.py",
+    "src/aadistill/autoinit/c1_scoring.py",
+    "scripts/autoinit/audit_tool_scoring.py",
+    "src/aadistill/data/tools.py",
+    "src/aadistill/data/verify.py",
+    # the evaluation packaging and the six-probe aggregation
+    "src/aadistill/autoinit/c1_packaging.py",
+    "src/aadistill/autoinit/c1_probe_results.py",
+    "src/aadistill/autoinit/device_handoff.py",
+    "src/aadistill/models/teacher.py",
+    "scripts/pod/autoinit_engine_probe.py",
+    "scripts/training/train_stage3.py",
     # the C1 science
     "src/aadistill/autoinit/c1_session.py",
     "src/aadistill/autoinit/c1_isolation.py",
     "src/aadistill/autoinit/c1_authorization.py",
+    "src/aadistill/autoinit/authorization.py",
+    # both package __init__ files execute on import, and the operators one
+    # decides what `attention_activation` resolves to
+    "src/aadistill/autoinit/__init__.py",
+    "src/aadistill/autoinit/operators/__init__.py",
     "src/aadistill/autoinit/fixed_path.py",
     "src/aadistill/autoinit/operators/attention_activation.py",
     "src/aadistill/init/attention_stats.py",

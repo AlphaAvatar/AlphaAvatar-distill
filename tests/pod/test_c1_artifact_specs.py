@@ -8,13 +8,13 @@ pod, at teardown, after the money is spent.
 So these tests do two things a schema check cannot.
 
 They pin every pattern to the **producer's own literal**. The manifest root is
-`artifacts/`, and the paths under it are decided by `PhaseADriver`, which
-`C1Driver` subclasses -- `audit/autoinit_phase_a`, `stage3/phase_a/<probe_id>`,
-`eval/phase_a/<probe_id>` -- not by the C1 launcher's `audit_dirname`. A spec
-written from the launcher's name would match nothing, which is exactly how
-Phase-B attempt 3 lost its search journal to `phase_a_search` vs
-`phase_b_search`. Each pattern below is therefore asserted against the source
-line that writes it.
+`artifacts/`, and the paths under it are the standalone driver's own —
+`audit/autoinit_c1`, `stage3/c1/<probe_id>`, `eval/c1/<probe_id>`. An earlier
+version of these specs named `phase_a` paths, correctly, because the driver then
+inherited PhaseADriver and wrote there; that driver has been replaced. A spec
+whose paths drift from its producer matches nothing, which is exactly how Phase-B
+attempt 3 lost its search journal to `phase_a_search` vs `phase_b_search`. Each
+pattern below is asserted against the source line that writes it.
 
 And they run the **actual four-step collection** -- manifest, archive,
 verify-archive, verify-local -- over a synthetic C1-shaped filesystem, once for
@@ -82,34 +82,32 @@ def test_patterns_stay_within_the_artifact_roots(rel):
 # --- every pattern traces to the line that writes it ------------------------
 
 def test_patterns_match_the_producing_source_literals():
-    """The spec's paths are the driver's paths, not the launcher's dirname.
-
-    `ArtifactPolicy.audit_dirname="autoinit_c1"` only decides where the runner
-    copies session logs and where it scp's `report_names`. Everything the driver
-    writes goes to the INHERITED `audit/autoinit_phase_a`.
-    """
-    a = (REPO / "scripts/pod/autoinit_phase_a_driver.py").read_text()
+    """The spec's paths are the driver's own, and the driver is now C1's own."""
     c1 = (REPO / "scripts/pod/autoinit_c1_driver.py").read_text()
     trainer = (REPO / "scripts/training/train_stage3.py").read_text()
     ev = (REPO / "scripts/evaluation/uncapped_eval.py").read_text()
 
-    assert 'AUDIT = REPO / "artifacts/audit/autoinit_phase_a"' in a
-    assert '"out_dir": f"artifacts/stage3/phase_a/{name}"' in a
-    assert 'gen_dir = REPO / f"artifacts/eval/phase_a/{label}"' in a
-    assert 'AUDIT / f"{label}_per_sample.jsonl"' in a
-    assert 'AUDIT / f"{label}_recovery_search.json"' in a
-    assert 'AUDIT / "probes" / f"{name}.json"' in a
-    assert 'AUDIT / "configs" / f"{name}.json"' in a
-    assert 'AUDIT / f"{name}_train_tail.log"' in a
-    assert '(AUDIT / "phase_a_evidence.json")' in a
-    assert '(AUDIT / "attested_evaluation_protocol.json")' in a
+    assert 'AUDIT = REPO / "artifacts/audit/autoinit_c1"' in c1
+    assert 'TRAIN = REPO / "artifacts/stage3/c1"' in c1
+    assert 'EVAL = REPO / "artifacts/eval/c1"' in c1
+    assert '"out_dir": f"artifacts/stage3/c1/{name}"' in c1
+    assert 'AUDIT / f"{name}_per_sample.jsonl"' in c1
+    assert 'AUDIT / f"{name}_c1_confirmation.json"' in c1
+    assert 'AUDIT / "probes" / f"{name}.training.json"' in c1
+    assert 'AUDIT / "configs" / f"{name}.json"' in c1
+    assert 'AUDIT / f"{name}_train_tail.log"' in c1
     assert 'JsonlLogger(out_dir / "train_log.jsonl")' in trainer
     assert '"run_manifest.json"' in trainer and '"run_completion.json"' in trainer
     assert '.generations.jsonl' in ev
     for name in ("c1_replay_record.json", "c1_arm_identities.json",
-                 "c1_decision.json"):
+                 "c1_decision.json", "c1_probe_results.json", "c1_evidence.json",
+                 "c1_attested_evaluation_protocol.json",
+                 "c1_device_handoff.json"):
         assert f'"{name}"' in c1, name
     assert 'f"autoinit.v1.phase_c1.{arm}.{seed}"' in c1
+    #: The paths the previous spec named, now gone.
+    for dead in ("audit/autoinit_phase_a", "stage3/phase_a", "eval/phase_a"):
+        assert dead not in c1, dead
 
 
 def test_success_spec_covers_the_frozen_evidence_contract():
@@ -120,21 +118,22 @@ def test_success_spec_covers_the_frozen_evidence_contract():
     required = {s.artifact_class: s.min_matches
                 for s in load_specs(str(REPO / SUCCESS)) if s.required}
     for cls in ("probe_event_stream", "per_sample", "scored_probe_aggregate",
-                "probe_journal"):
+                "training_completion"):
         assert required.get(cls, 0) >= n_probes, cls
     # P18: every evaluated sample of every set of every probe.
     assert required.get("generations", 0) >= n_probes * len(SETS)
     assert required.get("generation_summary", 0) >= n_probes * len(SETS)
-    for cls in ("arm_identities", "replay_record", "decision",
-                "attested_protocol", "session_evidence", "engine_probe"):
+    for cls in ("arm_identities", "replay_record", "decision", "probe_results",
+                "attested_protocol", "session_evidence", "engine_probe",
+                "device_handoff"):
         assert required.get(cls, 0) >= 1, cls
 
 
 def test_failed_spec_requires_nothing_that_presupposes_training():
     post = {"probe_event_stream", "per_sample", "generations",
-            "generation_summary", "scored_probe_aggregate", "probe_journal",
+            "generation_summary", "scored_probe_aggregate", "training_completion",
             "probe_config", "probe_run_manifest", "probe_run_completion",
-            "decision", "probe_train_tail"}
+            "decision", "probe_results", "probe_train_tail"}
     for s in load_specs(str(REPO / FAILED)):
         if s.required and s.min_matches > 0:
             assert s.artifact_class not in post, s.artifact_class
@@ -145,7 +144,8 @@ def test_failed_spec_still_collects_the_replay_mismatch_evidence():
     would not contain it even when it exists."""
     classes = {s.artifact_class for s in load_specs(str(REPO / FAILED))}
     for cls in ("replay_record", "arm_identities", "engine_probe",
-                "session_evidence", "session_logs", "probe_event_stream"):
+                "session_evidence", "session_logs", "probe_event_stream",
+                "device_handoff", "probe_results"):
         assert cls in classes, cls
 
 
@@ -163,34 +163,37 @@ def _write(p: Path, text: str) -> None:
 
 def _replay_tree(root: Path) -> None:
     """What exists after a D/E mismatch: identities and evidence, no training."""
-    audit = root / "audit/autoinit_phase_a"
-    _write(audit / "phase_a_evidence.json", json.dumps({"outcome": "FAILED"}))
+    audit = root / "audit/autoinit_c1"
+    _write(audit / "c1_evidence.json", json.dumps(
+        {"outcome": "C1_REPLAY_MISMATCH", "training_started": False}))
     _write(audit / "c1_replay_record.json", json.dumps(
         {"schema": "aadistill.autoinit.c1_replay_mismatch/v1",
          "training_started": False, "runtime": {"torch": "x"}, "steps": []}))
     _write(audit / "engine_probe.json", "{}")
-    _write(root / "audit/autoinit_c1/session/autoinit_c1_run.log", "log\n")
+    _write(audit / "c1_device_handoff.json", "{}")
+    _write(audit / "session/autoinit_c1_run.log", "log\n")
 
 
 def _success_tree(root: Path) -> None:
     """What exists after ALL_DONE: the replay evidence plus all six probes."""
     _replay_tree(root)
-    audit = root / "audit/autoinit_phase_a"
+    audit = root / "audit/autoinit_c1"
     _write(audit / "c1_arm_identities.json", "{}")
     _write(audit / "c1_decision.json", "{}")
-    _write(audit / "attested_evaluation_protocol.json", "{}")
+    _write(audit / "c1_probe_results.json", "{}")
+    _write(audit / "c1_attested_evaluation_protocol.json", "{}")
     for probe in PROBES:
-        _write(root / f"stage3/phase_a/{probe}/train_log.jsonl", '{"step":1}\n')
-        _write(root / f"stage3/phase_a/{probe}/run_manifest.json", "{}")
-        _write(root / f"stage3/phase_a/{probe}/run_completion.json", "{}")
-        _write(audit / "probes" / f"{probe}.json", "{}")
+        _write(root / f"stage3/c1/{probe}/train_log.jsonl", '{"step":1}\n')
+        _write(root / f"stage3/c1/{probe}/run_manifest.json", "{}")
+        _write(root / f"stage3/c1/{probe}/run_completion.json", "{}")
+        _write(audit / "probes" / f"{probe}.training.json", "{}")
         _write(audit / "configs" / f"{probe}.json", "{}")
         _write(audit / f"{probe}_per_sample.jsonl", '{"i":0}\n')
-        _write(audit / f"{probe}_recovery_search.json", "{}")
+        _write(audit / f"{probe}_c1_confirmation.json", "{}")
         _write(audit / f"{probe}_train_tail.log", "tail\n")
         for s in SETS:
-            _write(root / f"eval/phase_a/{probe}/{s}.generations.jsonl", '{"g":1}\n')
-            _write(root / f"eval/phase_a/{probe}/{s}.json", "{}")
+            _write(root / f"eval/c1/{probe}/{s}.generations.jsonl", '{"g":1}\n')
+            _write(root / f"eval/c1/{probe}/{s}.json", "{}")
 
 
 def _collect(tmp: Path, root: Path, spec_rel: str) -> tuple[int, str]:
@@ -240,7 +243,7 @@ def test_replay_mismatch_round_trips_through_the_failed_spec(tmp_path):
     assert rc == 0, out
     manifest = json.loads((tmp_path / "manifest.json").read_text())
     paths = {e["path"] for e in manifest["entries"]}
-    assert "audit/autoinit_phase_a/c1_replay_record.json" in paths
+    assert "audit/autoinit_c1/c1_replay_record.json" in paths
     assert "audit/autoinit_c1/session/autoinit_c1_run.log" in paths
 
 
@@ -260,7 +263,7 @@ def test_one_missing_generation_set_fails_the_manifest(tmp_path):
     """41 of 42 is not "every evaluated sample". Mutation of the success case."""
     root = tmp_path / "artifacts"
     _success_tree(root)
-    (root / f"eval/phase_a/{PROBES[0]}/{SETS[0]}.generations.jsonl").unlink()
+    (root / f"eval/c1/{PROBES[0]}/{SETS[0]}.generations.jsonl").unlink()
     rc, out = _collect(tmp_path, root, SUCCESS)
     assert rc == 5, out
     assert "generations" in out

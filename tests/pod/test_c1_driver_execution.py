@@ -479,11 +479,19 @@ def test_a_failed_fourth_training_produces_no_evaluation_and_no_decision(
 
 # --- mutations --------------------------------------------------------------
 
-def test_mutation_evaluating_before_six_trainings_is_refused(harness, monkeypatch):
-    """Stage H's own guard, exercised directly."""
+@pytest.mark.parametrize("n_trained", [0, 1, 5])
+def test_mutation_evaluating_before_six_trainings_is_refused(harness, monkeypatch,
+                                                             n_trained):
+    """Stage H's own guard, exercised directly — including at FIVE.
+
+    The first version of this test only ever supplied one completion, so a guard
+    weakened from `!= 6` to `< 5` still passed it. Five is the case that matters:
+    it is what a session that lost exactly one probe looks like.
+    """
     _fake_hardware(monkeypatch, harness)
     driver = D.C1Driver(_args())
-    driver.training = {("incumbent", SEEDS[0]): {}}
+    keys = [(a, s) for a in ("incumbent", "treatment") for s in SEEDS]
+    driver.training = {k: {} for k in keys[:n_trained]}
     with pytest.raises(D.C1DriverError, match="six training completions"):
         D.C1Driver.stage_h(driver)
 

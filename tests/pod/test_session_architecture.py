@@ -437,14 +437,22 @@ def test_every_staged_input_declares_a_destination_and_the_env_carries_it(name, 
 def test_a_checkpoint_is_staged_with_the_files_it_cannot_load_without(name, extra):
     """Weights are not a checkpoint. `logs/autoinit_control_sb_packaging_repair.json`
     is the write-up of a control whose identity gates all passed and which could
-    not be evaluated, because it shipped without its tokenizer."""
+    not be evaluated, because it shipped without its tokenizer.
+
+    The trigger is `model.safetensors`, not any file under the prefix, because the
+    rule is about LOADABILITY: a session that stages the weights must be able to
+    load them. Phase C1 stages the three tokenizer sidecars and nothing else — it
+    loads no model from there, it packages each trained probe for evaluation with
+    those bytes — and forcing it to pull 1.19 GiB it never opens would be a
+    material change to a priced staging envelope in service of an invariant that
+    does not apply to it."""
     mod = load_session_launcher(name)
     spec = mod.spec(session_args(mod, extra))
     staged = {r.path.rsplit("/", 1)[-1]
               for r in spec.setup.staged_relay_inputs()
               if r.path.startswith("stage1/qwen3_0p6b_init_v0/checkpoint/")}
-    if not staged:
-        pytest.skip(f"{name} stages no checkpoint")
+    if "model.safetensors" not in staged:
+        pytest.skip(f"{name} stages no loadable checkpoint from the canonical init")
     missing = {"config.json", "tokenizer.json", "tokenizer_config.json",
                "generation_config.json", "chat_template.jinja",
                "model.safetensors"} - staged

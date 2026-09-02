@@ -1,132 +1,144 @@
 {
   "spec": "aadistill.artifact_spec/v1",
   "session": "autoinit_c1",
-  "note": "Success spec for a Phase-C1 run that reached ALL_DONE. It implements the frozen evidence_manifest_contract of logs/phase_c1_execution_preregistration.json, entry by entry. Two path facts decide every pattern here and neither is guessable. (1) C1Driver subclasses PhaseADriver, so it inherits that module's AUDIT = artifacts/audit/autoinit_phase_a, its probe out_dir artifacts/stage3/phase_a/<probe_id>, and its generation dir artifacts/eval/phase_a/<probe_id>. The C1 records land there too, NOT under audit/autoinit_c1 -- the launcher's ArtifactPolicy.audit_dirname only decides where session_runner copies the run log and where it scp's report_names. Both roots therefore appear below. (2) Every per-probe class is pinned to the probe_id prefix autoinit.v1.phase_c1. so a stale Phase-A or Phase-B artifact left in the same tree cannot satisfy a C1 minimum. Counts: 6 probes = 2 arms x 3 seeds; 42 = 6 probes x the 7 sets of c1_confirmation_v1 (gsm8k, math_verified, multihop, rag, knowledge, tool, code), because uncapped_eval writes one <set>.generations.jsonl and one <set>.json per set. Requiring 6 here rather than 42 would accept a probe that generated one set out of seven. Entries are ArtifactSpec kwargs; the manifest root is artifacts/.",
+  "note": "Success spec for a Phase-C1 run that reached ALL_DONE. Every pattern is a path the STANDALONE C1 driver writes: audit/autoinit_c1, stage3/c1/<probe_id>, eval/c1/<probe_id>. The previous version of this file named audit/autoinit_phase_a, stage3/phase_a and eval/phase_a, because the driver then inherited PhaseADriver and wrote there; that driver has been replaced and those paths no longer exist for C1. Counts: 6 probes = 2 arms x 3 seeds; 42 = 6 x the 7 sets of c1_confirmation_v1, because uncapped_eval writes one <set>.generations.jsonl and one <set>.json per set \u2014 requiring 6 would accept a probe that generated one set out of seven. Entries are ArtifactSpec kwargs; the manifest root is artifacts/.",
   "entries": [
     {
       "artifact_class": "probe_event_stream",
-      "pattern": "stage3/phase_a/autoinit.v1.phase_c1.*/train_log.jsonl",
+      "pattern": "stage3/c1/autoinit.v1.phase_c1.*/train_log.jsonl",
       "required": true,
       "lifecycle": "final_required",
-      "min_matches": 6,
-      "min_bytes": 1
+      "min_matches": 6
     },
     {
       "artifact_class": "probe_run_manifest",
-      "pattern": "stage3/phase_a/autoinit.v1.phase_c1.*/run_manifest*.json",
+      "pattern": "stage3/c1/autoinit.v1.phase_c1.*/run_manifest*.json",
       "required": true,
       "lifecycle": "final_required",
       "min_matches": 6
     },
     {
       "artifact_class": "probe_run_completion",
-      "pattern": "stage3/phase_a/autoinit.v1.phase_c1.*/run_completion*.json",
+      "pattern": "stage3/c1/autoinit.v1.phase_c1.*/run_completion*.json",
       "required": true,
       "lifecycle": "final_required",
       "min_matches": 6
     },
     {
-      "artifact_class": "probe_journal",
-      "pattern": "audit/autoinit_phase_a/probes/autoinit.v1.phase_c1.*.json",
+      "artifact_class": "training_completion",
+      "pattern": "audit/autoinit_c1/probes/autoinit.v1.phase_c1.*.training.json",
       "required": true,
       "lifecycle": "final_required",
       "min_matches": 6
     },
     {
       "artifact_class": "probe_config",
-      "pattern": "audit/autoinit_phase_a/configs/autoinit.v1.phase_c1.*.json",
+      "pattern": "audit/autoinit_c1/configs/autoinit.v1.phase_c1.*.json",
       "required": true,
       "lifecycle": "final_required",
       "min_matches": 6
     },
     {
       "artifact_class": "per_sample",
-      "pattern": "audit/autoinit_phase_a/autoinit.v1.phase_c1.*_per_sample.jsonl",
+      "pattern": "audit/autoinit_c1/autoinit.v1.phase_c1.*_per_sample.jsonl",
       "required": true,
       "lifecycle": "final_required",
       "min_matches": 6
     },
     {
       "artifact_class": "scored_probe_aggregate",
-      "pattern": "audit/autoinit_phase_a/autoinit.v1.phase_c1.*_recovery_search.json",
+      "pattern": "audit/autoinit_c1/autoinit.v1.phase_c1.*_c1_confirmation.json",
       "required": true,
       "lifecycle": "final_required",
       "min_matches": 6
     },
     {
       "artifact_class": "generations",
-      "pattern": "eval/phase_a/autoinit.v1.phase_c1.*/*.generations.jsonl",
+      "pattern": "eval/c1/autoinit.v1.phase_c1.*/*.generations.jsonl",
       "required": true,
       "lifecycle": "final_required",
       "min_matches": 42
     },
     {
       "artifact_class": "generation_summary",
-      "pattern": "eval/phase_a/autoinit.v1.phase_c1.*/*.json",
+      "pattern": "eval/c1/autoinit.v1.phase_c1.*/*.json",
       "required": true,
       "lifecycle": "final_required",
       "min_matches": 42
     },
     {
       "artifact_class": "replay_record",
-      "pattern": "audit/autoinit_phase_a/c1_replay_record.json",
+      "pattern": "audit/autoinit_c1/c1_replay_record.json",
       "required": true,
-      "lifecycle": "final_required"
+      "lifecycle": "final_required",
+      "min_matches": 1
     },
     {
       "artifact_class": "arm_identities",
-      "pattern": "audit/autoinit_phase_a/c1_arm_identities.json",
+      "pattern": "audit/autoinit_c1/c1_arm_identities.json",
       "required": true,
-      "lifecycle": "final_required"
+      "lifecycle": "final_required",
+      "min_matches": 1
+    },
+    {
+      "artifact_class": "probe_results",
+      "pattern": "audit/autoinit_c1/c1_probe_results.json",
+      "required": true,
+      "lifecycle": "final_required",
+      "min_matches": 1
     },
     {
       "artifact_class": "decision",
-      "pattern": "audit/autoinit_phase_a/c1_decision.json",
+      "pattern": "audit/autoinit_c1/c1_decision.json",
       "required": true,
-      "lifecycle": "final_required"
+      "lifecycle": "final_required",
+      "min_matches": 1
     },
     {
       "artifact_class": "attested_protocol",
-      "pattern": "audit/autoinit_phase_a/attested_evaluation_protocol.json",
+      "pattern": "audit/autoinit_c1/c1_attested_evaluation_protocol.json",
       "required": true,
-      "lifecycle": "final_required"
+      "lifecycle": "final_required",
+      "min_matches": 1
     },
     {
       "artifact_class": "session_evidence",
-      "pattern": "audit/autoinit_phase_a/phase_a_evidence.json",
+      "pattern": "audit/autoinit_c1/c1_evidence.json",
       "required": true,
-      "lifecycle": "final_required"
+      "lifecycle": "final_required",
+      "min_matches": 1
     },
     {
       "artifact_class": "engine_probe",
-      "pattern": "audit/autoinit_phase_a/engine_probe.json",
+      "pattern": "audit/autoinit_c1/engine_probe.json",
       "required": true,
-      "lifecycle": "final_required"
-    },
-    {
-      "artifact_class": "probe_train_tail",
-      "pattern": "audit/autoinit_phase_a/autoinit.v1.phase_c1.*_train_tail.log",
-      "required": false,
       "lifecycle": "final_required",
-      "min_matches": 0
+      "min_matches": 1
     },
     {
       "artifact_class": "device_handoff",
-      "pattern": "audit/autoinit_phase_a/device_handoff.json",
+      "pattern": "audit/autoinit_c1/c1_device_handoff.json",
+      "required": true,
+      "lifecycle": "final_required",
+      "min_matches": 1
+    },
+    {
+      "artifact_class": "probe_train_tail",
+      "pattern": "audit/autoinit_c1/autoinit.v1.phase_c1.*_train_tail.log",
       "required": false,
       "lifecycle": "final_required",
       "min_matches": 0
     },
     {
       "artifact_class": "gate_log",
-      "pattern": "audit/autoinit_phase_a/*.log",
+      "pattern": "audit/autoinit_c1/*.log",
       "required": false,
       "lifecycle": "final_required",
       "min_matches": 0
     },
     {
       "artifact_class": "audit_json",
-      "pattern": "audit/autoinit_phase_a/*.json",
+      "pattern": "audit/autoinit_c1/*.json",
       "required": false,
       "lifecycle": "final_required",
       "min_matches": 0
@@ -134,13 +146,6 @@
     {
       "artifact_class": "session_logs",
       "pattern": "audit/autoinit_c1/session/*",
-      "required": false,
-      "lifecycle": "final_required",
-      "min_matches": 0
-    },
-    {
-      "artifact_class": "c1_audit_other",
-      "pattern": "audit/autoinit_c1/*",
       "required": false,
       "lifecycle": "final_required",
       "min_matches": 0

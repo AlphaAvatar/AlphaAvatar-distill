@@ -58,10 +58,53 @@ from aadistill.infrastructure.session_prechecks import (  # noqa: E402
     session_commit_gate,
 )
 from aadistill.infrastructure.session_runner import REPO, WS, run_session  # noqa: E402
-from autoinit_phase_a_launch import (  # noqa: E402
-    TEACHER_REVISION, TEST_IGNORES, build_parser as phase_a_parser,
-)
+from aadistill.infrastructure.session import RelayInput  # noqa: E402
 from autoinit_science_inputs import CALIBRATION_V1, RECOVERY_LADDER  # noqa: E402
+
+#: The frozen EVALUATION tokenizer, and nothing else from that checkpoint.
+#:
+#: Declared HERE rather than beside the other frozen science inputs, which is
+#: where it belongs by topic: `scripts/pod/autoinit_science_inputs.py` is a member
+#: of FIVE hash-bound executable sets (Phase A, Phase B, both continuations and
+#: the measurement authorization), so adding a C1-only group to it moved five
+#: frozen digests for a group only C1 reads. The launcher is already inside the
+#: C1 harness, so the pins stay measured and no other phase's identity moves.
+#:
+#: Stage H evaluates each probe through a PACKAGE — the trained model files plus
+#: these three sidecars — so the frozen generation protocol's
+#: `tokenizer_source = "the evaluated checkpoint"` stays literally true without
+#: mutating the scientific checkpoint. Only the sidecars are needed: 10.9 MiB, not
+#: the 1.19 GiB of weights. The teacher's own tokenizer CANNOT substitute —
+#: `tokenizer.json` is 11,422,654 bytes at `aeb13307…` against `be756060…` here,
+#: `tokenizer_config.json` is 10,834 bytes against 694, and the teacher ships no
+#: `chat_template.jinja` at all.
+C1_EVAL_TOKENIZER: tuple[RelayInput, ...] = tuple(
+    RelayInput(f"stage1/qwen3_0p6b_init_v0/checkpoint/{name}",
+               dest="artifacts/stage1/qwen3_0p6b_init_v0/checkpoint", sha256=sha)
+    for name, sha in (
+        ("tokenizer.json",
+         "be75606093db2094d7cd20f3c2f385c212750648bd6ea4fb2bf507a6a4c55506"),
+        ("tokenizer_config.json",
+         "8fa82a4ba512c8bee7c1c5e82b9a71ddbef362e4665be5c8f7ce0afd78af129a"),
+        ("chat_template.jinja",
+         "3802169b2a02b81e6adb7ab4f64f91ff02db753c8c3a64a01c35192d3a61d8d7"),
+    )
+)
+
+#: C1's own, not Phase A's. The Phase-A launcher was imported for three things:
+#: the teacher revision (which `c1_session` already declares), a two-entry test
+#: ignore list, and its `build_parser` -- whose flags are `--rung1-probes`,
+#: `--rung2-probes`, `--tie-break-probes`, `--search-minutes`,
+#: `--stage-leaves-to-relay` and `--fetch-finalists`. Inheriting that parser gave
+#: this session a command line for a search it structurally cannot run, which is
+#: the same class of defect as inheriting its driver. So C1 declares its own.
+TEACHER_REVISION = CS.TEACHER_REVISION
+#: Two Phase-A rehearsals C1 does not exercise. C1's own execution regression is
+#: deliberately NOT ignored: it is ~60 seconds against a 2700 s gate, and running
+#: it on the pod proves the driver's control flow in the real environment before
+#: any stage spends money.
+TEST_IGNORES = ("tests/data/test_recovery_corpus_pipeline.py",
+                "tests/pod/test_phase_a_stages1_5_execute.py")
 
 STATUS = f"{WS}/autoinit_c1.status"
 RUN_LOG = f"{WS}/autoinit_c1_run.log"
@@ -304,7 +347,7 @@ def artifact_spec_gate(ctx: SessionContext) -> tuple[bool, str]:
         "probe_event_stream": n_probes,
         "per_sample": n_probes,
         "scored_probe_aggregate": n_probes,
-        "probe_journal": n_probes,
+        "training_completion": n_probes,
         "generations": n_probes * n_sets,
         "generation_summary": n_probes * n_sets,
         "arm_identities": 1,
@@ -312,6 +355,8 @@ def artifact_spec_gate(ctx: SessionContext) -> tuple[bool, str]:
         "decision": 1,
         "attested_protocol": 1,
         "session_evidence": 1,
+        "probe_results": 1,
+        "device_handoff": 1,
         "engine_probe": 1,
     }
     have = {}
@@ -375,7 +420,8 @@ def spec(args) -> SessionSpec:
         #: DERIVED from logs/phase_c1_pricing.json. Never written here.
         budget=c1_budget_spec(REPO_ROOT),
         setup=SetupManifest(
-            relay_inputs=(*RECOVERY_LADDER, *CALIBRATION_V1),
+            relay_inputs=(*RECOVERY_LADDER, *CALIBRATION_V1,
+                           *C1_EVAL_TOKENIZER),
             local_assets=LOCAL_ASSETS,
             #: Declared. Without it setup falls to SESSION_KIND=spend and loads a
             #: SpendAuthorization, which refuses this artifact — the session
@@ -454,8 +500,41 @@ def _plan_hash() -> str:
 
 
 def build_parser():
-    ap = phase_a_parser()
-    ap.set_defaults(out="logs/autoinit_c1_session.json")
+    """C1's session command line. No search flag exists to be set."""
+    import argparse
+    import os
+
+    ap = argparse.ArgumentParser(
+        description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    ap.add_argument("--scr", required=True)
+    ap.add_argument("--session-commit", required=True)
+    ap.add_argument("--bundle", required=True)
+    ap.add_argument("--relay-repo", default="AlphaAvatar/aadistill-artifacts")
+    ap.add_argument("--image",
+                    default="runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404")
+    ap.add_argument("--gpu", default="NVIDIA L40S")
+    ap.add_argument("--max-price", type=float, default=0.99)
+    #: Two arm materializations plus six probe checkpoints and their generations.
+    ap.add_argument("--disk-gb", type=int, default=200)
+    ap.add_argument("--probe-train-minutes", type=float, default=70.0)
+    ap.add_argument("--probe-battery-minutes", type=float, default=25.0)
+    ap.add_argument("--token-src",
+                    default=os.path.expanduser("~/.cache/huggingface/token"))
+    ap.add_argument("--uv-max-s", type=int, default=1500)
+    ap.add_argument("--tests-max-s", type=int, default=2700)
+    ap.add_argument("--startup-limit-min", type=float, default=15.0)
+    ap.add_argument("--create-attempts", type=int, default=8)
+    ap.add_argument("--host-draws", type=int, default=3)
+    ap.add_argument("--create-retry-seconds", type=float, default=300.0)
+    ap.add_argument("--setup-timeout-s", type=float, default=5400.0)
+    ap.add_argument("--poll-seconds", type=float, default=120.0)
+    #: The session is priced at ~14 GPU-hours; the poll limit must outlast the
+    #: hard threshold or the launcher would stop watching a billing pod.
+    ap.add_argument("--poll-limit-min", type=float, default=1320.0)
+    ap.add_argument("--settle-seconds", type=float, default=20.0)
+    ap.add_argument("--runpod-config",
+                    default=os.path.expanduser("~/.runpod/config.toml"))
+    ap.add_argument("--out", default="logs/autoinit_c1_session.json")
     return ap
 
 

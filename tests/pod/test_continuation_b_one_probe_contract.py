@@ -163,10 +163,19 @@ def test_the_purchase_seam_is_the_only_route_to_training(drv):
     override = inspect.getsource(drv.ContinuationDriver.probe_config)
     assert "require_purchasable" in override
 
-    # And no other caller exists anywhere in the pod scripts.
-    callers = [p for p in (REPO / "scripts/pod").glob("*.py")
-               if "self.probe_config(" in p.read_text()]
+    # And no other caller exists in this driver's LINEAGE. Scoped to scripts
+    # that import the Phase-A driver, because that is what the invariant is
+    # about: a session inheriting `run_probe` must not gain a second route to
+    # buying a probe. The standalone C1 driver has its own `probe_config` and its
+    # own training loop, imports none of this, and is not in scope — an
+    # unqualified scan over `scripts/pod` would make every future standalone
+    # driver fail a continuation invariant it cannot violate.
+    lineage = [p for p in (REPO / "scripts/pod").glob("*.py")
+               if "autoinit_phase_a_driver" in p.read_text()
+               or p.name == "autoinit_phase_a_driver.py"]
+    callers = [p for p in lineage if "self.probe_config(" in p.read_text()]
     assert [p.name for p in callers] == ["autoinit_phase_a_driver.py"], callers
+    assert "autoinit_c1_driver.py" not in [p.name for p in lineage]
 
 
 # --- 5. widening the runtime scope fails the pre-provider gate --------------

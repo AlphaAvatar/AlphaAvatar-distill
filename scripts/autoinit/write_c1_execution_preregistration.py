@@ -43,6 +43,9 @@ from aadistill.autoinit.c1_authorization import (  # noqa: E402
     c1_harness_digest,
     load_pricing,
 )
+from aadistill.autoinit.c1_scoring import (  # noqa: E402
+    C1_METRIC_CONTRACT, c1_scoring_contract,
+)
 from aadistill.autoinit.calibration import get_profile  # noqa: E402
 from aadistill.autoinit.operators import attention_activation  # noqa: E402
 from aadistill.autoinit.operators.attention_activation import (  # noqa: E402
@@ -87,6 +90,16 @@ def source_digest(files: tuple[str, ...] = C1_SOURCE_FILES) -> dict:
         "".join(f"{e['path']}:{e['sha256']}\n" for e in entries).encode()).hexdigest()
     return {"digest": digest, "files": entries,
             "rule": "sha256 over sorted 'path:sha256' lines of the declared set"}
+
+
+def _equivalence() -> dict:
+    """The admission-gate record. Absent means C1 cannot be authorized."""
+    p = REPO / "logs/phase_c1_scoring_equivalence.json"
+    if not p.is_file():
+        raise SystemExit(
+            "logs/phase_c1_scoring_equivalence.json is missing; the C1 scoring "
+            "binding has not been admitted and must not be preregistered")
+    return json.loads(p.read_text())
 
 
 def main() -> None:
@@ -304,9 +317,35 @@ def main() -> None:
                      "temperature 0, P18-unrestricted max_tokens, "
                      "degeneration stop, resolved context 8192"),
         },
+        #: SUPERSEDED BEFORE ANY C1 DATUM EXISTS. `recovery_search_scoring@v2`
+        #: was bound here and has been DEMONSTRATED non-executable on the frozen
+        #: C1 battery, in two independent places inside
+        #: `score_recovery_search.py`: its battery pins are module constants
+        #: checked unconditionally, and its result builder reads
+        #: `manifest["metrics"]`, which the C1 manifest deliberately does not
+        #: carry. Verified by execution — with the pins overridden in memory it
+        #: raised `KeyError: 'metrics'` after scoring 150 rows.
+        #:
+        #: Neither frozen asset is rewritten. @v2 remains the Phase-A/B identity
+        #: and the battery keeps `content_sha256 = a285d61f…`. C1 declares its own
+        #: binding with the SAME semantics, which an admission gate demonstrates
+        #: rather than asserts.
         "scoring_contract": {
-            "contract": "recovery_search_scoring@v2",
-            "digest": "808080a7c5d88d5a66760fd0d7eeabc5451c096ad0819f8c5663a0b8224660be",
+            **{k: v for k, v in c1_scoring_contract(REPO).items() if k != "files"},
+            "n_files": len(c1_scoring_contract(REPO)["files"]),
+            "files": [e["path"] for e in c1_scoring_contract(REPO)["files"]],
+            "metric_contract": C1_METRIC_CONTRACT,
+            "historical_numerical_equivalence": {
+                "record": "logs/phase_c1_scoring_equivalence.json",
+                "sha256": sha256_file(REPO / "logs/phase_c1_scoring_equivalence.json"),
+                "verdict": _equivalence()["verdict"],
+                "n_cases": _equivalence()["n_cases"],
+                "total_differences": _equivalence()["total_differences"],
+                "basis": ("real retained recovery_search_v2 generations scored "
+                          "through both paths; every material numerical field "
+                          "equal, per sample and in aggregate, no tolerance"),
+                "coverage_limits": _equivalence()["coverage_limits"],
+            },
         },
         "recovery_recipe": E1_KD_HEAVY_0860K.as_dict(),
 

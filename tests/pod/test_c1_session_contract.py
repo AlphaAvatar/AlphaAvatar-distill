@@ -164,16 +164,22 @@ def test_the_preregistration_records_the_live_harness_digest():
 # --- what the session cannot do --------------------------------------------
 
 def test_the_driver_cannot_search_rank_or_eliminate():
-    import inspect
+    """It has no such method to disable.
 
+    The earlier driver subclassed PhaseADriver and overrode `stage1`, `run_rung`
+    and `selection_row` to raise — which was necessary precisely BECAUSE it
+    inherited them. The standalone driver has no beam, no rungs and no ranking to
+    override, so absence is the stronger property and is what is asserted.
+    """
     spec_ = importlib.util.spec_from_file_location(
         "c1_driver_probe", REPO / "scripts/pod/autoinit_c1_driver.py")
     mod = importlib.util.module_from_spec(spec_)
     sys.modules["c1_driver_probe"] = mod
     spec_.loader.exec_module(mod)
-    for method in ("stage1", "run_rung", "selection_row"):
-        src = inspect.getsource(getattr(mod.C1Driver, method))
-        assert "raise NotImplementedError" in src, method
+    assert "PhaseADriver" not in [c.__name__ for c in mod.C1Driver.__mro__]
+    for method in ("stage1", "run_rung", "selection_row", "run_search",
+                   "pooled_over_rungs"):
+        assert not hasattr(mod.C1Driver, method), method
 
 
 def test_neither_launcher_nor_driver_imports_the_search():
@@ -198,8 +204,12 @@ def test_the_probe_schedule_is_six_and_names_the_frozen_seeds():
     mod = importlib.util.module_from_spec(spec_)
     sys.modules["c1_driver_sched"] = mod
     spec_.loader.exec_module(mod)
-    probes = mod.C1Driver.probe_descriptors(object.__new__(mod.C1Driver))
+    driver = object.__new__(mod.C1Driver)
+    driver.seeds = mod.derive_recovery_seeds()
+    driver.arm_init = {a: (f"/tmp/{a}", a * 16) for a in ("incumbent", "treatment")}
+    probes = driver.descriptors()
     assert len(probes) == 6
+    assert all(p["initialization_artifact_digest"] for p in probes)
     assert sorted({p["arm"] for p in probes}) == ["incumbent", "treatment"]
     assert sorted({p["seed"] for p in probes}) == [696460635, 1635674081, 1656475568]
     for arm in ("incumbent", "treatment"):

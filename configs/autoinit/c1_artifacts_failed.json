@@ -1,138 +1,146 @@
 {
   "spec": "aadistill.artifact_spec/v1",
   "session": "autoinit_c1_failed",
-  "note": "Reduced spec for a Phase-C1 run that did not reach ALL_DONE. Same manifest root (artifacts/) and same paths as the success spec; only the minimums differ.",
-  "limitation": "ONE STATIC SPEC CANNOT DISTINGUISH THE FAILURE MODES, and this is a real gap rather than a style choice. ArtifactSpec has no conditional: `required` and `min_matches` are constants that build_manifest evaluates against the filesystem with no knowledge of how far the session got, and session_runner selects between exactly two spec files on `terminal != markers.success` -- one bit, which cannot separate a stage-B teacher-verification failure from a D/E C1_REPLAY_MISMATCH from a crash after four of six probes. The required set below is therefore the INTERSECTION over every terminal state that reaches collection, which is small by arithmetic, not by preference. Concretely: c1_replay_record.json is the product of a C1_REPLAY_MISMATCH and is exactly what must come home in that case, but it does not exist yet if the run died at stage B, so requiring it would block teardown on a pod that correctly never wrote it -- the failure mode that has cost this project real money more than once. It is collected whenever present and cannot be *enforced* here. The consequence, stated plainly: a defect that silently failed to write the mismatch record would not block teardown. If the reviewer wants that enforced, the fix is not a bigger optional list -- it is a third, mode-specific spec selected by the terminal marker (C1_REPLAY_MISMATCH -> a spec that requires the replay record and the arm identities and forbids nothing else), which requires widening ArtifactPolicy from two spec paths to a marker->spec mapping. That is a change to shared session infrastructure used by five committed launchers and is deliberately NOT made here.",
-  "preserved_when_present": "the replay-mismatch record and every intermediate identity, selection and diagnostic it references (they are inline in its `steps`); the runtime identity block (inline in the replay record and in c1_arm_identities.json, plus engine_probe.json); the session evidence and run/status/setup logs that carry training_started=false; and every event stream that actually exists, including a partially written one from a probe that had started.",
+  "note": "Reduced spec for a Phase-C1 run that did not reach ALL_DONE. Same manifest root and same C1 paths as the success spec; only the minimums differ.",
+  "limitation": "ONE STATIC SPEC CANNOT DISTINGUISH THE FAILURE MODES. ArtifactSpec has no conditional -- `required` and `min_matches` are constants build_manifest evaluates against the filesystem with no knowledge of how far the session got -- and session_runner selects between exactly two spec files on one bit. The required set below is therefore the INTERSECTION over every terminal state that reaches collection, which is small by arithmetic, not by preference. c1_replay_record.json is the PRODUCT of a C1_REPLAY_MISMATCH and is exactly what must come home in that case, but it does not exist if the run died at stage B, so requiring it would block teardown on a pod that correctly never wrote it. THE DRIVER CLOSES THAT HOLE INSTEAD: C1Driver.replay_mismatch writes the record, reads it back, and refuses to emit the marker if it does not parse -- so the enforcement lives where the failure mode is known, without widening shared ArtifactPolicy to a third spec for five committed launchers.",
+  "preserved_when_present": "the replay-mismatch record and every intermediate identity, selection and diagnostic it references (inline in its `steps` and `steps_observed`); the runtime identity (inline in the replay record, the arm identities and the engine probe); the session evidence carrying training_started, probes_trained, probes_evaluated and decision_ran; the device-handoff record; and every event stream that exists, including a partial one.",
   "entries": [
     {
       "artifact_class": "session_evidence",
-      "pattern": "audit/autoinit_phase_a/phase_a_evidence.json",
+      "pattern": "audit/autoinit_c1/c1_evidence.json",
       "required": true,
-      "lifecycle": "final_required"
+      "lifecycle": "final_required",
+      "min_matches": 1
     },
     {
       "artifact_class": "replay_record",
-      "pattern": "audit/autoinit_phase_a/c1_replay_record.json",
+      "pattern": "audit/autoinit_c1/c1_replay_record.json",
       "required": false,
       "lifecycle": "final_required",
       "min_matches": 0
     },
     {
       "artifact_class": "arm_identities",
-      "pattern": "audit/autoinit_phase_a/c1_arm_identities.json",
+      "pattern": "audit/autoinit_c1/c1_arm_identities.json",
+      "required": false,
+      "lifecycle": "final_required",
+      "min_matches": 0
+    },
+    {
+      "artifact_class": "probe_results",
+      "pattern": "audit/autoinit_c1/c1_probe_results.json",
       "required": false,
       "lifecycle": "final_required",
       "min_matches": 0
     },
     {
       "artifact_class": "decision",
-      "pattern": "audit/autoinit_phase_a/c1_decision.json",
+      "pattern": "audit/autoinit_c1/c1_decision.json",
       "required": false,
       "lifecycle": "final_required",
       "min_matches": 0
     },
     {
       "artifact_class": "attested_protocol",
-      "pattern": "audit/autoinit_phase_a/attested_evaluation_protocol.json",
+      "pattern": "audit/autoinit_c1/c1_attested_evaluation_protocol.json",
       "required": false,
       "lifecycle": "final_required",
       "min_matches": 0
     },
     {
       "artifact_class": "engine_probe",
-      "pattern": "audit/autoinit_phase_a/engine_probe.json",
+      "pattern": "audit/autoinit_c1/engine_probe.json",
       "required": false,
       "lifecycle": "final_required",
       "min_matches": 0
     },
     {
       "artifact_class": "device_handoff",
-      "pattern": "audit/autoinit_phase_a/device_handoff.json",
+      "pattern": "audit/autoinit_c1/c1_device_handoff.json",
       "required": false,
       "lifecycle": "final_required",
       "min_matches": 0
     },
     {
       "artifact_class": "probe_event_stream",
-      "pattern": "stage3/phase_a/autoinit.v1.phase_c1.*/train_log.jsonl",
+      "pattern": "stage3/c1/autoinit.v1.phase_c1.*/train_log.jsonl",
       "required": false,
       "lifecycle": "final_required",
       "min_matches": 0
     },
     {
       "artifact_class": "probe_run_manifest",
-      "pattern": "stage3/phase_a/autoinit.v1.phase_c1.*/run_manifest*.json",
+      "pattern": "stage3/c1/autoinit.v1.phase_c1.*/run_manifest*.json",
       "required": false,
       "lifecycle": "final_required",
       "min_matches": 0
     },
     {
       "artifact_class": "probe_run_completion",
-      "pattern": "stage3/phase_a/autoinit.v1.phase_c1.*/run_completion*.json",
+      "pattern": "stage3/c1/autoinit.v1.phase_c1.*/run_completion*.json",
       "required": false,
       "lifecycle": "final_required",
       "min_matches": 0
     },
     {
-      "artifact_class": "probe_journal",
-      "pattern": "audit/autoinit_phase_a/probes/autoinit.v1.phase_c1.*.json",
+      "artifact_class": "training_completion",
+      "pattern": "audit/autoinit_c1/probes/autoinit.v1.phase_c1.*.training.json",
       "required": false,
       "lifecycle": "final_required",
       "min_matches": 0
     },
     {
       "artifact_class": "probe_config",
-      "pattern": "audit/autoinit_phase_a/configs/autoinit.v1.phase_c1.*.json",
+      "pattern": "audit/autoinit_c1/configs/autoinit.v1.phase_c1.*.json",
       "required": false,
       "lifecycle": "final_required",
       "min_matches": 0
     },
     {
       "artifact_class": "per_sample",
-      "pattern": "audit/autoinit_phase_a/autoinit.v1.phase_c1.*_per_sample.jsonl",
+      "pattern": "audit/autoinit_c1/autoinit.v1.phase_c1.*_per_sample.jsonl",
       "required": false,
       "lifecycle": "final_required",
       "min_matches": 0
     },
     {
       "artifact_class": "scored_probe_aggregate",
-      "pattern": "audit/autoinit_phase_a/autoinit.v1.phase_c1.*_recovery_search.json",
+      "pattern": "audit/autoinit_c1/autoinit.v1.phase_c1.*_c1_confirmation.json",
       "required": false,
       "lifecycle": "final_required",
       "min_matches": 0
     },
     {
       "artifact_class": "generations",
-      "pattern": "eval/phase_a/autoinit.v1.phase_c1.*/*.generations.jsonl",
+      "pattern": "eval/c1/autoinit.v1.phase_c1.*/*.generations.jsonl",
       "required": false,
       "lifecycle": "final_required",
       "min_matches": 0
     },
     {
       "artifact_class": "generation_summary",
-      "pattern": "eval/phase_a/autoinit.v1.phase_c1.*/*.json",
+      "pattern": "eval/c1/autoinit.v1.phase_c1.*/*.json",
       "required": false,
       "lifecycle": "final_required",
       "min_matches": 0
     },
     {
       "artifact_class": "probe_train_tail",
-      "pattern": "audit/autoinit_phase_a/autoinit.v1.phase_c1.*_train_tail.log",
+      "pattern": "audit/autoinit_c1/autoinit.v1.phase_c1.*_train_tail.log",
       "required": false,
       "lifecycle": "final_required",
       "min_matches": 0
     },
     {
       "artifact_class": "gate_log",
-      "pattern": "audit/autoinit_phase_a/*.log",
+      "pattern": "audit/autoinit_c1/*.log",
       "required": false,
       "lifecycle": "final_required",
       "min_matches": 0
     },
     {
       "artifact_class": "audit_json",
-      "pattern": "audit/autoinit_phase_a/*.json",
+      "pattern": "audit/autoinit_c1/*.json",
       "required": false,
       "lifecycle": "final_required",
       "min_matches": 0
@@ -140,13 +148,6 @@
     {
       "artifact_class": "session_logs",
       "pattern": "audit/autoinit_c1/session/*",
-      "required": false,
-      "lifecycle": "final_required",
-      "min_matches": 0
-    },
-    {
-      "artifact_class": "c1_audit_other",
-      "pattern": "audit/autoinit_c1/*",
       "required": false,
       "lifecycle": "final_required",
       "min_matches": 0

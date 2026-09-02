@@ -3,7 +3,7 @@
  "preregistration_id": "autoinit.v1.phase_c1.execution",
  "written_utc": "2026-09-02T00:00:00Z",
  "_contract": "Everything the Phase-C1 session will run, bound before any C1 result exists. AUTHORIZES NOTHING: no pricing decision, no spend grant, no permission to launch. An authorization, if ever issued, binds THIS document.",
- "head_commit": "8bf8ea46e5c7f984f7fdd704d572a3968ce4ee3a",
+ "head_commit": "5203716fe8abacec4cd311912464398b26606fe0",
  "executable_source": {
   "digest": "a5bd40a86052f0125a16414bc98617782cdc011f70590cb938518bb25786740c",
   "files": [
@@ -51,17 +51,27 @@
   "rule": "sha256 over sorted 'path:sha256' lines of the declared set"
  },
  "c1_harness": {
-  "digest": "1cbf3c70540f71e52882ae8074c6fa62f976ee07377f37975a788dc4eb5dc3c9",
+  "digest": "3a711dfc4b1470b02a1ecbb2d8bdd5691788ff774f20b31812a65270d51251cb",
   "files": [
    {
     "path": "configs/autoinit/c1_artifacts.json",
-    "sha256": "daf83c2a2d8be5f518f22292307354761acbadd70748ce5e1b9525cd8b0f5b2c",
-    "bytes": 5579
+    "sha256": "60a93a93015103af5504e67d30e75f801519d504fb256cb4d1e184bf19a7a888",
+    "bytes": 5102
    },
    {
     "path": "configs/autoinit/c1_artifacts_failed.json",
-    "sha256": "3c73b96b2c0e138fe88a68e71a8c62491dce693011a7f83434b6fcb7e57c6d22",
-    "bytes": 6724
+    "sha256": "f3606816f71c9c73fc5a51c29159e89c949cb251fff71f1ab7199d4190bc98f3",
+    "bytes": 6014
+   },
+   {
+    "path": "scripts/autoinit/audit_tool_scoring.py",
+    "sha256": "5cf55651d826509648f9d040405017bb8958fb31b6e352a19b60ab22c0fd6f41",
+    "bytes": 10252
+   },
+   {
+    "path": "scripts/autoinit/score_c1_confirmation.py",
+    "sha256": "5bb1265b2033b6caf6fa9bfc794e2d5002840b1ed3d9d610fee17d7df9a6dad2",
+    "bytes": 14543
    },
    {
     "path": "scripts/autoinit/score_recovery_search.py",
@@ -75,13 +85,23 @@
    },
    {
     "path": "scripts/pod/autoinit_c1_driver.py",
-    "sha256": "63b581bfcc02eaa280e04d1d8770f4b2e4256bcdc021563cd0dc6c03069704c7",
-    "bytes": 13086
+    "sha256": "0cd1dc6c84e99c7ea00cbf6ee7321585745211b02bfb9c5925cea36399961f48",
+    "bytes": 46600
    },
    {
     "path": "scripts/pod/autoinit_c1_launch.py",
-    "sha256": "3b7d13b0a9d29f045ff9decc0ea1142e129bb66b561cdaba47c03189972a7e78",
-    "bytes": 22844
+    "sha256": "163183a0064463c1d170bb6dfc54b98a7d88601e68301d9771405dfbdb13cb8c",
+    "bytes": 27543
+   },
+   {
+    "path": "scripts/pod/autoinit_engine_probe.py",
+    "sha256": "97fef0e555a6adfa857b75bdf826b2cad9567a70038cf267acc62b6d5ab07a0f",
+    "bytes": 3920
+   },
+   {
+    "path": "scripts/pod/autoinit_science_inputs.py",
+    "sha256": "474ba7b82f3141955ca8c6d06a15019eae8ee6776fb4f47e18aa5218b20dbbca",
+    "bytes": 4002
    },
    {
     "path": "scripts/pod/collect_artifacts.py",
@@ -104,6 +124,16 @@
     "bytes": 4544
    },
    {
+    "path": "scripts/training/train_stage3.py",
+    "sha256": "b23265cdae9196e1b192c531eaef37fc6a4d8605a6120344e6d3498176cdd72b",
+    "bytes": 15110
+   },
+   {
+    "path": "src/aadistill/autoinit/__init__.py",
+    "sha256": "f49a851b6d77c8fd9d184732acd0224fcb3ce8cc0f28fb19ba2f9e112c00ae1c",
+    "bytes": 4065
+   },
+   {
     "path": "src/aadistill/autoinit/adapters/qwen3.py",
     "sha256": "dd36a77b0b5ec0969cf22ad66a7444d1ccee21b8e0cb956db16caa0999a41fc7",
     "bytes": 9458
@@ -119,14 +149,34 @@
     "bytes": 8781
    },
    {
+    "path": "src/aadistill/autoinit/authorization.py",
+    "sha256": "c144412e88015c00cc25dbb53b9233c43720d87b128997888e5791189194f80c",
+    "bytes": 13614
+   },
+   {
     "path": "src/aadistill/autoinit/c1_authorization.py",
-    "sha256": "adc14cda564e1629098ef8baa00e1301dd6c11e03ff9386bd8621769d914e0db",
-    "bytes": 13950
+    "sha256": "1ab771af85f2737b65708f373fb965b0eca0f0b08843240a7f65d552b087bfab",
+    "bytes": 15095
    },
    {
     "path": "src/aadistill/autoinit/c1_isolation.py",
     "sha256": "46e8b097690b20171c43fb2d151fc7928e5f7cb0df8e4c9eec6a6d3e8a5bd9cc",
     "bytes": 19594
+   },
+   {
+    "path": "src/aadistill/autoinit/c1_packaging.py",
+    "sha256": "41035e193dd183223342d17a31c141292461610bdadd9bacb80b5f578aefd8d5",
+    "bytes": 6146
+   },
+   {
+    "path": "src/aadistill/autoinit/c1_probe_results.py",
+    "sha256": "b869226d1b0e72ed065b616fdda0a341dc402c237acc71ad696d01d93f219f80",
+    "bytes": 11952
+   },
+   {
+    "path": "src/aadistill/autoinit/c1_scoring.py",
+    "sha256": "9528dbd7ce24964f6ae7645cb0cd928076bb22a9c34b60b3c2839f01dbb90dfa",
+    "bytes": 12030
    },
    {
     "path": "src/aadistill/autoinit/c1_session.py",
@@ -144,6 +194,11 @@
     "bytes": 12044
    },
    {
+    "path": "src/aadistill/autoinit/device_handoff.py",
+    "sha256": "0f7a25ee84456be98d1bfe7f482481bda743a74b914c8e68a3d8f78941f1e8cd",
+    "bytes": 9993
+   },
+   {
     "path": "src/aadistill/autoinit/fixed_path.py",
     "sha256": "e8424a18cbd86f65d622a61228c49fbcb92fd1f0aa5ede2d98aef2187d078357",
     "bytes": 16049
@@ -157,6 +212,11 @@
     "path": "src/aadistill/autoinit/metrics.py",
     "sha256": "8a199452ad21b56171a8aa5aa78d88926a18ab0221d3f072ba46c7c589ebbe7f",
     "bytes": 21023
+   },
+   {
+    "path": "src/aadistill/autoinit/operators/__init__.py",
+    "sha256": "27b9707650416f7694c1b14bd83935de18fa0e3434c6cdeefb24724195f645c2",
+    "bytes": 2502
    },
    {
     "path": "src/aadistill/autoinit/operators/_common.py",
@@ -202,6 +262,16 @@
     "path": "src/aadistill/autoinit/stats.py",
     "sha256": "0cd11ececab0bda49174c7b05107a47faf43267338af53fcf476034d29434b59",
     "bytes": 4827
+   },
+   {
+    "path": "src/aadistill/data/tools.py",
+    "sha256": "2b3cc46aa26942227340f778e32b3faa4819b8d9a2a003c249e342f5f09b540a",
+    "bytes": 6043
+   },
+   {
+    "path": "src/aadistill/data/verify.py",
+    "sha256": "1860b77f93ac78ad8d50c014f596cb23696a98cc666d7aa6fe359ed0dc718af1",
+    "bytes": 7567
    },
    {
     "path": "src/aadistill/evaluation/behavior.py",
@@ -287,9 +357,14 @@
     "path": "src/aadistill/init/sandwich.py",
     "sha256": "c6e05bcaf55f0e0219e4f1d2bab044f0d13ed09d24cba0d126f865869b784bc3",
     "bytes": 14210
+   },
+   {
+    "path": "src/aadistill/models/teacher.py",
+    "sha256": "d8d070850dad37cb53d6db4cb548a48af08a5a705eb86bb7990d054125a525da",
+    "bytes": 3567
    }
   ],
-  "n_files": 47,
+  "n_files": 62,
   "rule": "sha256 over sorted 'path:sha256' lines of the declared set",
   "note": "the set an authorization measures. It includes the launcher, the driver, the setup script, the operators the fixed path applies, the recovery and scoring paths the six probes invoke, and the session infrastructure they run through."
  },
@@ -299,7 +374,7 @@
   "session_kind": "c1",
   "allows_phase_a": false,
   "allows_beam_search": false,
-  "n_harness_files": 47,
+  "n_harness_files": 62,
   "status": "NO GRANT EXISTS. No authorization has been issued."
  },
  "launcher": "scripts/pod/autoinit_c1_launch.py",
@@ -542,8 +617,75 @@
   "note": "the frozen Phase-A/B generation identity: greedy, temperature 0, P18-unrestricted max_tokens, degeneration stop, resolved context 8192"
  },
  "scoring_contract": {
-  "contract": "recovery_search_scoring@v2",
-  "digest": "808080a7c5d88d5a66760fd0d7eeabc5451c096ad0819f8c5663a0b8224660be"
+  "contract": "c1_confirmation_scoring@v1",
+  "contract_id": "c1_confirmation_scoring",
+  "version": 1,
+  "digest": "77507935f21f83ebf77fb35aa52256b26e89b623b3622563f63c4296efd44d2b",
+  "rule": "sha256 over sorted 'path:sha256' lines of the declared C1 scoring source set",
+  "semantic_parent": "recovery_search_scoring@v2",
+  "semantic_parent_digest": "808080a7c5d88d5a66760fd0d7eeabc5451c096ad0819f8c5663a0b8224660be",
+  "semantic_delta": "battery and result-schema binding only; correctness, usability, row composition, aggregation and capability semantics are the imported frozen implementations and are unchanged, which the historical numerical-equivalence gate demonstrates rather than asserts",
+  "closure_note": "wider than RECOVERY_SCORING_FILES_V2, which omits audit_tool_scoring.py, data/tools.py and data/verify.py although all three decide numbers. The historical contract is not rewritten; the hole is not repeated.",
+  "n_files": 11,
+  "files": [
+   "scripts/autoinit/audit_tool_scoring.py",
+   "scripts/autoinit/score_c1_confirmation.py",
+   "scripts/autoinit/score_recovery_search.py",
+   "src/aadistill/autoinit/c1_scoring.py",
+   "src/aadistill/autoinit/recovery.py",
+   "src/aadistill/data/tools.py",
+   "src/aadistill/data/verify.py",
+   "src/aadistill/evaluation/behavior.py",
+   "src/aadistill/evaluation/capability.py",
+   "src/aadistill/evaluation/strict_answer.py",
+   "src/aadistill/evaluation/usable_rollout.py"
+  ],
+  "metric_contract": {
+   "contract": "c1_confirmation_scoring@v1",
+   "defined_by": "source, not the battery manifest",
+   "correct_overall": {
+    "numerator": "correct on scorable prompts",
+    "denominator": "n_scorable",
+    "denominator_value": 850
+   },
+   "usable_rollout_rate": {
+    "numerator": "usable on ALL prompts",
+    "denominator": "n",
+    "denominator_value": 950
+   },
+   "correct_given_usable": {
+    "numerator": "correct on scorable prompts",
+    "denominator": "usable_scorable",
+    "role": "diagnostic; never reorders"
+   },
+   "scorable_sets": [
+    "gsm8k",
+    "knowledge",
+    "math_verified",
+    "multihop",
+    "rag",
+    "tool"
+   ],
+   "behaviour_only_sets": [
+    "code"
+   ],
+   "correct_implies_usable": "by construction, via the frozen score_recovery_row contract",
+   "tool_usability": "generic usable_rollout AND tool_call_emitted AND tool_call_parsed AND tool_name_valid",
+   "capability_schema": "CAPABILITY_SCHEMA_V1 (six scorable capabilities)",
+   "no_weighted_scalar": "usable_rollout_rate and correct_overall are reported separately and are never combined; usable_rollout is blind to correctness by construction"
+  },
+  "historical_numerical_equivalence": {
+   "record": "logs/phase_c1_scoring_equivalence.json",
+   "sha256": "0ee5ce346ee0a33a4376fa939022f880c4225b083821a8b0d0d09d7836c02959",
+   "verdict": "IDENTICAL",
+   "n_cases": 15,
+   "total_differences": 0,
+   "basis": "real retained recovery_search_v2 generations scored through both paths; every material numerical field equal, per sample and in aggregate, no tolerance",
+   "coverage_limits": {
+    "correct_implies_usable": "NOT covered by this gate: correct_but_unusable is 0 on every retained probe (0 of 15 have any), so the implication never fires in historical evidence. Covered directly in tests/autoinit/test_c1_confirmation_scoring.py against the frozen score_recovery_row, which C1 imports unmodified.",
+    "c1_battery_rows": "this gate runs on recovery_search_v2 by construction \u2014 it is the only battery both scorers can read. The C1 battery is exercised separately by the production-path tests."
+   }
+  }
  },
  "recovery_recipe": {
   "recipe_id": "e1_p1_kd_heavy@0.86M",
@@ -642,12 +784,12 @@
  "artifact_specs": {
   "success": {
    "path": "configs/autoinit/c1_artifacts.json",
-   "sha256": "daf83c2a2d8be5f518f22292307354761acbadd70748ce5e1b9525cd8b0f5b2c",
+   "sha256": "60a93a93015103af5504e67d30e75f801519d504fb256cb4d1e184bf19a7a888",
    "requires": "6 train_log.jsonl, 6 run_manifest, 6 run_completion, 6 probe journals, 6 probe configs, 6 per-sample files, 6 scored aggregates, 42 raw generation files and 42 generation summaries (every set of every probe), plus the replay record, both arm identities, the decision, the attested protocol, the session evidence and the engine probe"
   },
   "failed": {
    "path": "configs/autoinit/c1_artifacts_failed.json",
-   "sha256": "3c73b96b2c0e138fe88a68e71a8c62491dce693011a7f83434b6fcb7e57c6d22",
+   "sha256": "f3606816f71c9c73fc5a51c29159e89c949cb251fff71f1ab7199d4190bc98f3",
    "requires": "the session evidence record only. Everything else is collected when present. `ArtifactSpec` has no conditional and the runner selects between exactly two spec files on one bit, so the required set is the intersection over every terminal failure state; requiring the replay record would block teardown on a run that failed before stage D. The residual hole is recorded in the file's `limitation` field and is a live review item, not a closed design."
   },
   "gate": "artifact_spec_gate in scripts/pod/autoinit_c1_launch.py, at $0 before provider creation: both files exist, parse, load through collect_artifacts.load_specs, stay inside the artifact roots, are inside the measured harness set, cover the contract above at derived minimums, and \u2014 for the failure spec \u2014 demand nothing that presupposes training",
@@ -660,5 +802,5 @@
   "any search, ranking, successive halving, tie-breaking or arm elimination"
  ],
  "authorizes": "nothing",
- "preregistration_sha256": "63ca7c2465b7a033d394b9647a5e7882582940ade15719a85791f03748bbaf36"
+ "preregistration_sha256": "bc48515d6a4fabcfb5c3c4ad2e0c492c5ba5e4607126f23b1fa7a2c138d6bb1b"
 }
