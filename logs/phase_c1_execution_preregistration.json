@@ -3,7 +3,7 @@
  "preregistration_id": "autoinit.v1.phase_c1.execution",
  "written_utc": "2026-09-02T00:00:00Z",
  "_contract": "Everything the Phase-C1 session will run, bound before any C1 result exists. AUTHORIZES NOTHING: no pricing decision, no spend grant, no permission to launch. An authorization, if ever issued, binds THIS document.",
- "head_commit": "5203716fe8abacec4cd311912464398b26606fe0",
+ "head_commit": "913a88af699a46a66feea82679d0ea6efb39de8a",
  "executable_source": {
   "digest": "a5bd40a86052f0125a16414bc98617782cdc011f70590cb938518bb25786740c",
   "files": [
@@ -51,7 +51,7 @@
   "rule": "sha256 over sorted 'path:sha256' lines of the declared set"
  },
  "c1_harness": {
-  "digest": "3a711dfc4b1470b02a1ecbb2d8bdd5691788ff774f20b31812a65270d51251cb",
+  "digest": "04302feaf8705cb38a5b11b651fe16dc72a243275a5f88be5736736920464452",
   "files": [
    {
     "path": "configs/autoinit/c1_artifacts.json",
@@ -85,13 +85,13 @@
    },
    {
     "path": "scripts/pod/autoinit_c1_driver.py",
-    "sha256": "0cd1dc6c84e99c7ea00cbf6ee7321585745211b02bfb9c5925cea36399961f48",
-    "bytes": 46600
+    "sha256": "7a9ead77b12892e252350f00c2743a7666ba287ff01961eaf10395222e507d34",
+    "bytes": 50410
    },
    {
     "path": "scripts/pod/autoinit_c1_launch.py",
-    "sha256": "163183a0064463c1d170bb6dfc54b98a7d88601e68301d9771405dfbdb13cb8c",
-    "bytes": 27543
+    "sha256": "b38932cea875d2f222506a3c983f9a3354141a6f3073e1127855d16e15f7a3cd",
+    "bytes": 28624
    },
    {
     "path": "scripts/pod/autoinit_engine_probe.py",
@@ -170,8 +170,8 @@
    },
    {
     "path": "src/aadistill/autoinit/c1_probe_results.py",
-    "sha256": "b869226d1b0e72ed065b616fdda0a341dc402c237acc71ad696d01d93f219f80",
-    "bytes": 11952
+    "sha256": "25d214ba92d58c7c2608c986eb9c23244eddb660e0e3226c61f120d15f6a7c68",
+    "bytes": 14330
    },
    {
     "path": "src/aadistill/autoinit/c1_scoring.py",
@@ -378,7 +378,6 @@
   "status": "NO GRANT EXISTS. No authorization has been issued."
  },
  "launcher": "scripts/pod/autoinit_c1_launch.py",
- "driver": "scripts/pod/autoinit_c1_driver.py",
  "pricing": {
   "path": "logs/phase_c1_pricing.json",
   "pricing_sha256": "71604c1e225387cf36dc775812589ceb33dd6cb4e3f8a167108d30c541b189cb",
@@ -793,7 +792,34 @@
    "requires": "the session evidence record only. Everything else is collected when present. `ArtifactSpec` has no conditional and the runner selects between exactly two spec files on one bit, so the required set is the intersection over every terminal failure state; requiring the replay record would block teardown on a run that failed before stage D. The residual hole is recorded in the file's `limitation` field and is a live review item, not a closed design."
   },
   "gate": "artifact_spec_gate in scripts/pod/autoinit_c1_launch.py, at $0 before provider creation: both files exist, parse, load through collect_artifacts.load_specs, stay inside the artifact roots, are inside the measured harness set, cover the contract above at derived minimums, and \u2014 for the failure spec \u2014 demand nothing that presupposes training",
-  "paths_are_the_driver_s": "the manifest root is artifacts/ and the paths under it are PhaseADriver's, which C1Driver inherits: audit/autoinit_phase_a, stage3/phase_a/<probe_id>, eval/phase_a/<probe_id>. The launcher's ArtifactPolicy.audit_dirname 'autoinit_c1' governs only the session-log copy and the report_names scp"
+  "paths_are_the_driver_s": "the manifest root is artifacts/ and the paths under it are the STANDALONE C1 driver's own: audit/autoinit_c1, stage3/c1/<probe_id>, eval/c1/<probe_id>. An earlier revision of this document said they were PhaseADriver's, which C1Driver then inherited; that inheritance is gone and no C1 evidence is written under another phase's tree"
+ },
+ "driver": {
+  "path": "scripts/pod/autoinit_c1_driver.py",
+  "standalone": true,
+  "subclasses_phase_a_driver": false,
+  "imports_phase_a_driver_or_launcher": false,
+  "owns_paths": [
+   "artifacts/audit/autoinit_c1",
+   "artifacts/stage3/c1",
+   "artifacts/eval/c1"
+  ],
+  "stages": "B-I; A and J belong to the session runner",
+  "stage_g_h_separation": "stage G runs all six recovery trainings and opens no battery, starts no evaluator and no scorer; stage H calls require_all_trained() before the first evaluation. Evaluating inside the training loop would let the first arm meet the confirmation battery before the last arm was trained",
+  "generation_admission": "NO PROBE RESULT IS ADMITTED unless the generation protocol observed from THAT probe's raw per-set summaries is comparable to the preregistered C1 evaluation protocol. The comparison runs after generation and BEFORE the scorer; on failure the session stops as C1_INCOMPLETE, that probe is not scored, no later probe is evaluated and stage I does not run. The scorer is passed the OBSERVED fingerprint, not the attested one \u2014 they are equal once the check passes, and the direction of provenance is the point",
+  "attested_evaluation_protocol": "written to artifacts/audit/autoinit_c1/c1_attested_evaluation_protocol.json at the start of stage H, before the first evaluation; the six admitted per-probe protocol hashes must all equal it, and c1_probe_results.json carries the observed generation fingerprint and observed evaluation_protocol_hash for every probe",
+  "scoring": "score_c1_confirmation.py only, on c1_confirmation_v1 only. The frozen score_recovery_search.py is never invoked on this battery",
+  "device_handoff": "complete_release -> require_released -> require_headroom before probe 1, at the measured recovery-trainer requirement",
+  "evidence": [
+   "c1_evidence.json",
+   "c1_replay_record.json",
+   "c1_arm_identities.json",
+   "c1_probe_results.json",
+   "c1_decision.json",
+   "c1_attested_evaluation_protocol.json",
+   "c1_device_handoff.json",
+   "<probe_id>_generation_admission.json"
+  ]
  },
  "out_of_scope": [
   "formal Stage-2/Stage-3 recovery training \u2014 explicitly NOT in scope; C1 is a fixed-path ATTENTION isolation using short 0.86M recovery probes and establishes no recovered-model capability",
@@ -802,5 +828,5 @@
   "any search, ranking, successive halving, tie-breaking or arm elimination"
  ],
  "authorizes": "nothing",
- "preregistration_sha256": "bc48515d6a4fabcfb5c3c4ad2e0c492c5ba5e4607126f23b1fa7a2c138d6bb1b"
+ "preregistration_sha256": "54d858ed1dfe19390fd6626222cc304028ee652e7902a6cc30e2ff03f32b24b5"
 }
