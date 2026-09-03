@@ -26,7 +26,7 @@ remaining.
 **$13.7578**, against **$19.9003** headroom — **$6.1425** would remain if the
 whole ceiling were consumed. **Priced is not authorized: no grant exists.**
 
-## Phase C1 — ATTEMPTS 1 AND 2 INFRASTRUCTURE-ABORTED AT SETUP · NOT CURRENTLY AUTHORIZED
+## Phase C1 — ATTEMPTS 1 AND 2 INFRASTRUCTURE-ABORTED · BOTH SETUP GAPS CLOSED · NOT CURRENTLY AUTHORIZED
 
 > **Attempt 1 aborted at setup, 2026-09-02.** All eight pre-provider gates
 > passed and pod `fccr23o9jcnrh0` was created, then setup failed with
@@ -36,6 +36,20 @@ whole ceiling were consumed. **Priced is not authorized: no grant exists.**
 > training, no evaluation. The one-use authorization is **consumed**; no retry is
 > authorized. Evidence in [`autoinit_c1_attempt1/`](autoinit_c1_attempt1/).
 >
+> **The `ROPE_OK` gap is closed.** `rope_input_gate` is the tenth pre-provider
+> gate. C1 now stages the canonical **1,418-byte** `checkpoint/config.json`
+> (`a7131bb0…`, stored RoPE base 5,000,000) that the shared setup globs — not the
+> 1.19 GiB of weights, which that step never reads — and `ROPE_OK` itself is
+> untouched, because verifying the student RoPE under both runtimes is real C1
+> readiness. The hash was verified by downloading the relay object, not
+> transcribed. The config is a **setup readiness input**: no C1 number depends on
+> it, and the preregistration says so explicitly.
+>
+> The structural guard is now two invariants instead of one conflated rule:
+> loadability keyed on `model.safetensors`, and a separate rule that a session
+> declaring the `ROPE_OK` marker must stage a `checkpoint/config.json`. The
+> second is the one attempt 2 was missing.
+
 > **Attempt 2 aborted at the `ROPE_OK` setup gate, 2026-09-03.** All NINE
 > pre-provider gates passed, including the bundle round-trip — transport is
 > genuinely fixed. Setup then reached `TEACHER_READY` (7 of 11 markers: repo

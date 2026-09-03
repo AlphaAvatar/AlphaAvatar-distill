@@ -6805,3 +6805,45 @@ on a paid pod.
   total, no C1 measurement in existence. Both authorizations consumed. No third
   attempt without a new maintainer/scientific review. Cumulative `$264.0396` of an
   unchanged `$283.7600` cap.
+
+## 2026-09-03 — the ROPE_OK readiness input, and splitting one guard into two
+
+- **Decision:** stage the canonical `checkpoint/config.json` only — 1,418 bytes —
+  and leave `autoinit_preflight_setup.sh` untouched. The `ROPE_OK` step reads no
+  weights, so pulling the 1.19 GiB `CANONICAL_INIT` group to satisfy it would be
+  paying for bytes nothing opens; and skipping the step would discard a real
+  check, that the student RoPE base resolves under both the train and vLLM
+  runtimes.
+- **The hash was verified, not transcribed.** The repository already recorded
+  `a7131bb092b38a07…` in four places. The relay object was downloaded read-only
+  and hashed independently: 1,418 bytes, matching, with
+  `stored_rope_base` = 5,000,000. `rope_input_gate` re-derives it before every
+  launch rather than trusting this note.
+- **One guard became two, and the split is the point.** The old rule — *if any
+  canonical-init file is staged, require all six* — conflated loadability with
+  the setup's own dependency. Narrowing it to `model.safetensors` was right for
+  loadability and left nothing covering `ROPE_OK`. Now: loadability keyed on the
+  weights, and separately *if a session declares the `ROPE_OK` marker it must
+  stage a `checkpoint/config.json` into a `*/checkpoint` directory*. The pinned
+  hash is required of C1 specifically, not of every session — the older launchers
+  stage the whole group in which only the weights carry a pin, and they have
+  completed successfully; tightening that retroactively would repeat the
+  over-broad move that hid this defect in the first place.
+- **Executed at `$0`, not asserted from source text.** The real staging heredoc
+  from the shell script, driven by C1's real declared manifest, lands exactly the
+  config plus three sidecars byte-identically and never requests the weights. The
+  real `ROPE_OK` body refuses the attempt-2 filesystem, accepts the canonical
+  config, and refuses a wrong stored base.
+- **A mutation that did not bite, and why.** Setting the flat `rope_theta` to
+  10,000 changed nothing: `stored_rope_base` reads
+  `rope_parameters["rope_theta"]` first, because when both fields exist the flat
+  one is transformers-4's class default. The config carries only the nested form.
+  Retargeted, and the reason is recorded in the test — a mutation asserted against
+  the wrong field is a test that can never fail.
+- **Consumed grants fail closed against the repair**, as they should:
+  `session_commit_and_lineage`, `c1_harness_gate` and `bundle_staged_gate` all
+  refuse the attempt-2 authorization on the repaired tree.
+- **Pricing unchanged.** One extra 1,418-byte relay fetch.
+  `$12.2070 / $13.4277 / $13.7578`; worst case after a full Attempt 3 is
+  `$277.7974` with a `$5.9626` reserve. No cap increase.
+- **Revisit when:** the maintainer decides on Attempt 3.

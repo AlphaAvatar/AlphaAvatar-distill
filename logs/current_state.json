@@ -56,8 +56,8 @@
  },
  "latest_verification": {
   "utc": "2026-09-02T00:00:00Z",
-  "kind": "C1 attempt 2: PAID, $0.1013, aborted at the ROPE_OK setup gate. No scientific stage ran.",
-  "commit": "8d6a4e9e6a83a3299e875af431a08237b717e5d4",
+  "kind": "CURRENT -- $0. rope_input_gate (setup readiness). No compute, no pod, no grant.",
+  "commit": "086825a6334c59ac0d635c18f2c4def21fcbfbc4",
   "suite": "2753 passed / 13 skipped / 0 failed (32m05s)",
   "verifiers": "5/5 PASS: frozen_assets, historical/attempt4/attempt5 probe-reuse, c1_battery_isolation; scoring equivalence IDENTICAL/15",
   "pods": "0, via GraphQL myself{pods}, not the CLI field"
@@ -69,9 +69,9 @@
   "the ATTENTION 'search declined to calibrate' reading: WITHDRAWN 2026-09-01"
  ],
  "next_starting_point": {
-  "status": "C1 attempts 1 and 2 were both INFRASTRUCTURE ABORTS at setup; no C1 measurement exists. Transport is fixed; the staging contract is not.",
-  "the_ask": "maintainer review of the staging gap: stage the full canonical init (~1.19 GiB relay pull) or make ROPE_OK tolerate a tokenizer-only staging -- and restore the weakened guard test",
-  "budget": "$264.0396 spent of the unchanged $283.7600 cap; $19.7204 uncommitted."
+  "status": "C1 attempts 1 and 2 were INFRASTRUCTURE ABORTS; no C1 measurement exists. Both setup gaps are now closed and gated at $0.",
+  "the_ask": "Attempt-3 grant review, then issuance under the documented ordering",
+  "budget": "$264.0396 spent of the unchanged $283.7600 cap; $19.7204 uncommitted. An Attempt-3 ceiling of $13.7578 leaves a $5.9626 worst-case reserve."
  },
  "read_order": [
   "logs/PHASE_INDEX.md -- history by phase, START HERE",
@@ -126,14 +126,15 @@
    "incumbent": "fe9683e6a9c783bbc6fe276a78c851c6, digest c313d1b4081b. Margin 0.000070, not distinguishable from cca699c93f34, NOT recovered.",
    "built": "standalone driver (B-I, G/H separate, per-probe admission); attention.activation_importance_v1; fixed_path + eea90c91/c313d1b4 gates; battery 950/850",
    "not_built": "no grant; the pre-ATTENTION parent rebuild and the ~8 GB teacher weights need GPU/network and have not run locally",
-   "execution_prereg": "logs/phase_c1_execution_preregistration.json f5eff2e55f824877 at head_commit aa2855c; harness a67a70f3714ac008 over 64 files",
+   "execution_prereg": "logs/phase_c1_execution_preregistration.json 6e733a19085cb157 at head_commit 6c90dcb; harness c95d9b07d278d045 over 65 files",
    "pricing": "logs/phase_c1_pricing.json -- floor $12.2070, expected $13.4277, CEILING $13.7578, enforced via BudgetSpec derived from that record",
    "seeds": "1635674081, 1656475568, 696460635 (derived from the C0 digest)",
    "session": "scripts/pod/autoinit_c1_launch.py + autoinit_c1_driver.py, SESSION_KIND=c1, C1Authorization, 9 pre-provider gates. STANDALONE.",
    "scoring": "c1_confirmation_scoring@v1 77507935; equivalence IDENTICAL over 15 probes. @v2 808080a7 and battery a285d61f untouched.",
-   "attempt1": "2026-09-02 ABORT at setup: no git bundle existed for the session commit. $0.0786. logs/autoinit_c1_attempt1/",
-   "attempt2": "2026-09-03 ABORT at ROPE_OK: 9/9 gates PASS incl. the bundle round-trip; setup reached TEACHER_READY (teacher fetched and verified) then 'no staged checkpoint to check' -- C1 stages only tokenizer sidecars. $0.1013. logs/autoinit_c1_attempt2/",
-   "gates": "9 pre-provider gates, all PASS at attempt 2. Transport is closed; the SETUP STAGING contract is not."
+   "attempt1": "2026-09-02 ABORT at setup: no bundle existed for the session commit. $0.0786. logs/autoinit_c1_attempt1/",
+   "attempt2": "2026-09-03 ABORT at ROPE_OK: 9/9 gates PASS; setup reached TEACHER_READY then 'no staged checkpoint to check'. $0.1013. logs/autoinit_c1_attempt2/",
+   "gates": "10 pre-provider gates. Transport and RoPE readiness both closed; attempts 1 and 2 died on those two.",
+   "rope_gap_closed": "rope_input_gate, the TENTH gate: C1 stages the canonical 1,418-byte checkpoint/config.json (a7131bb0, RoPE base 5,000,000) that ROPE_OK globs. NOT the 1.19 GiB weights; ROPE_OK unchanged. A SETUP READINESS input only."
   },
   "c2": {
    "status": "NOT STARTED",
@@ -167,7 +168,7 @@
   "closeout": "logs/storage_closeout_20260831.json",
   "c1_battery_canonical": "/home/ecs-user/aad-artifacts/autoinit/c1_confirmation_v1 -- COPY of the frozen bytes, 8 files, verified from the copy; repo-local working copy retained"
  },
- "blocker": "C1 ATTEMPT 2 ABORTED AT ROPE_OK; its authorization is CONSUMED. The shared setup needs a LOADABLE checkpoint under artifacts/stage1/*/checkpoint/; C1 stages only tokenizer sidecars. I weakened the $0 guard for this on 2026-09-02.",
+ "blocker": "none. The attempt-1 transport gap and the attempt-2 ROPE_OK staging gap are both closed. Attempt 3 is scientifically permissible and NOT YET AUTHORIZED.",
  "deferred_not_blocking": {
   "_note": "open, none blocking. Detail: logs/HANDOFF_next_session.md",
   "duplicate_checkpoints": "2.92 GiB, KEEP / unresolved ownership -- maintainer decision",
