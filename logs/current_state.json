@@ -8,30 +8,30 @@
   "paid_compute": false,
   "pods": 0,
   "launchers": 0,
-  "note": "zero pods confirmed via GraphQL myself{pods} (empty list), not the CLI field; no launcher, watchdog or poller"
+  "note": "zero pods confirmed via GraphQL myself{pods}, not the CLI field; pj3c870n6yx70z deleted at 18.85 min, provider confirms gone"
  },
  "authorized": {
-  "any": true,
-  "note": "Attempt-3 authorization 955c9288 IS ISSUED and LIVE; no pod has been created under it. Maintainer ruling: the one launch attempt is consumed when a PROVIDER RESOURCE is created, not when the launcher is invoked.",
+  "any": false,
+  "note": "Attempt-3R authorization 9b562e0a is CONSUMED: pod pj3c870n6yx70z was created, which is what consumes a launch attempt.",
   "c1_attempt1": "CONSUMED. $0.0786, aborted at the bundle fetch.",
   "c1_attempt2": "CONSUMED. $0.1013, aborted at ROPE_OK.",
-  "c1_attempt3": "ISSUED; launcher declined on price; $0.00; no pod.",
-  "consumed_files_retained": "the attempt-1 and attempt-2 artifacts are archived in their attempt directories."
+  "c1_attempt3": "SUPERSEDED UNLAUNCHED by the approved repricing. $0.00, no pod.",
+  "c1_attempt3r": "CONSUMED. $0.3482, aborted at the pod CPU test gate; ROPE_OK passed."
  },
  "prepared_launch": {
-  "any": true,
-  "bundles": 1,
-  "note": "Attempt 3 IS prepared: authorization 955c9288 at ca519e67, bundle staged (c5a62d9c), 10/10 gates PASS. Blocked only by securePrice $1.09/h > $0.99/h."
+  "any": false,
+  "bundles": 0,
+  "note": "nothing is prepared. Attempt 3R launched and its authorization is consumed; a further C1 attempt needs a new maintainer grant."
  },
  "budget": {
-  "cumulative_spend_usd": 264.0396,
+  "cumulative_spend_usd": 264.3878,
   "authorized_cap_usd": 283.76,
-  "remaining_usd": 19.7204,
-  "planning_floor_usd": 12.207,
+  "remaining_usd": 19.3722,
+  "planning_floor_usd": 13.4401,
   "remaining_is_not_permission": true,
   "ledger": "logs/BUDGET_LEDGER.md",
-  "headroom_note": "Phase-B 1-5 $30.0200; continuation 1-5 $3.8047 and CLOSED Phase B; C1 attempt 1 $0.0786 and attempt 2 $0.1013, both INFRASTRUCTURE ABORTS with zero measurement.",
-  "planning_floor_note": "C1 pricing UNCHANGED: floor $12.2070, soft stop $13.4277, ceiling $13.7578. Worst case after one complete ATTEMPT 3: $277.7974 spent, $5.9626 reserve."
+  "headroom_note": "Phase-B 1-5 $30.0200; continuation 1-5 $3.8047 and CLOSED Phase B; C1 attempts 1/2/3R $0.0786 + $0.1013 + $0.3482, all INFRASTRUCTURE ABORTS with zero measurement.",
+  "planning_floor_note": "C1 REPRICED to secure L40S $1.09/h: floor $13.4401, soft stop $14.7841, ceiling $15.1475. $19.3722 remains, so exactly one more full C1 attempt fits -- by $4.22. It is not permission."
  },
  "frozen": {
   "science_plan_hash": "02be33b9a7a8e26bc8bfb75795351e8cdc9ffd441b47066cc81887cfc511b55c",
@@ -123,20 +123,20 @@
    "authorizes": "nothing"
   },
   "c1": {
-   "status": "IMPLEMENTED / PRICED / ATTEMPTS 1-2 INFRASTRUCTURE-ABORTED / ATTEMPT 3 NOT LAUNCHED (market price) / NOT SCIENTIFICALLY EXECUTED",
+   "status": "IMPLEMENTED / REPRICED / FOUR LAUNCH ATTEMPTS / NOT SCIENTIFICALLY EXECUTED / NOT CURRENTLY AUTHORIZED",
    "what_it_is": "fixed-path ATTENTION isolation, 2 arms x 3 fresh seeds = 6 E1_KD_HEAVY_0860K probes. NOT recovery evidence.",
    "incumbent": "fe9683e6a9c783bbc6fe276a78c851c6, digest c313d1b4081b. Margin 0.000070, not distinguishable from cca699c93f34, NOT recovered.",
-   "built": "standalone driver (B-I, G/H separate, per-probe admission); attention.activation_importance_v1; fixed_path + eea90c91/c313d1b4 gates; battery 950/850",
-   "not_built": "no grant; the pre-ATTENTION parent rebuild and the ~8 GB teacher weights need GPU/network and have not run locally",
-   "execution_prereg": "logs/phase_c1_execution_preregistration.json 6e733a19085cb157 at head_commit 6c90dcb; harness c95d9b07d278d045 over 65 files",
-   "pricing": "logs/phase_c1_pricing.json -- floor $12.2070, expected $13.4277, CEILING $13.7578, enforced via BudgetSpec derived from that record",
+   "execution_prereg": "logs/phase_c1_execution_preregistration.json 5e6eb5110fc7 at head_commit 1a91fed1; harness c95d9b07d278 over 65 files",
+   "pricing": "logs/phase_c1_pricing.json 909ed65f -- REPRICED to secure L40S $1.09/h. Floor $13.4401, soft $14.7841, CEILING $15.1475.",
    "seeds": "1635674081, 1656475568, 696460635 (derived from the C0 digest)",
-   "session": "scripts/pod/autoinit_c1_launch.py + autoinit_c1_driver.py, SESSION_KIND=c1, C1Authorization, 9 pre-provider gates. STANDALONE.",
    "scoring": "c1_confirmation_scoring@v1 77507935; equivalence IDENTICAL over 15 probes. @v2 808080a7 and battery a285d61f untouched.",
-   "attempt1": "2026-09-02 ABORT at bundle fetch. $0.0786. logs/autoinit_c1_attempt1/",
-   "attempt2": "2026-09-03 ABORT at ROPE_OK. $0.1013. logs/autoinit_c1_attempt2/",
-   "gates": "10 pre-provider gates, all PASS at attempt 3.",
-   "attempt3": "2026-09-04: authorization ISSUED, bundle staged, 10/10 gates PASS -- launcher refused TWICE on securePrice $1.09/h vs the priced $0.99/h. NO POD, $0.00 both times. logs/autoinit_c1_attempt3/"
+   "attempts": "1 $0.0786 bundle fetch; 2 $0.1013 ROPE_OK; 3 $0.00 price refusal, NOT LAUNCHED; 3R $0.3482 pod CPU test gate. $0.5281, zero science.",
+   "gates": "10 pre-provider gates, 10/10 PASS -- ACTUALLY EXECUTED for the first time at 3R. The runner prices BEFORE it gates, so attempts 1-3 ran none; the ledger claim that attempt 3 passed them was false.",
+   "reached_in_3r": "VLLM_READY, TEACHER_READY, ROPE_OK. Both earlier fatal gaps stayed closed.",
+   "blocker": "the pod CPU test gate: 14 failed, 2650 passed. tests/data/test_c1_battery.py's 7 renderer-parity cases read ~/.cache/huggingface/hub directly, ignoring HF_HOME, so they cannot pass on a pod. Attempts 1-3 died before TESTS_OK, so no pod ran them.",
+   "needs": "a maintainer decision; no automatic retry",
+   "not_built": "no grant; the pre-ATTENTION parent rebuild and the ~8 GB teacher weights need GPU/network and have not run locally",
+   "evidence": "logs/autoinit_c1_attempt3r/; only 3 of the 14 names came home"
   },
   "c2": {
    "status": "NOT STARTED",

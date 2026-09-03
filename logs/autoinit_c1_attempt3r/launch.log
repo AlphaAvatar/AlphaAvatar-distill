@@ -1,0 +1,73 @@
+[19:23:12] budget: expected 740 min $13.44 · soft $14.78 · hard $15.15 (authorized $15.15)
+[19:23:12] NVIDIA L40S $1.09/h, stock Medium
+[19:23:12] session commit 26fd4cc9e477 verified: harness digests to c95d9b07d278…, carries the authorization and only logs/autoinit_c1_authorization.json differs from the authorized base
+[19:23:12] C1 harness c95d9b07d278… over 65 files
+[19:23:12] ceiling $15.1475, derived from logs/phase_c1_pricing.json
+[19:23:12] preregistration 5e6eb5110fc7… (self-hash verified), harness c95d9b07d278…
+[19:23:12] seeds, both replay digests and the 950/850 battery a285d61f88de… are unchanged
+[19:23:12] 3 teacher shards bound at 768f209d9ea8…, none fetched
+[19:23:12] battery staged from bytes identical to /home/ecs-user/aad-artifacts/autoinit/c1_confirmation_v1
+[19:23:12] success spec covers the contract (6 probes x 7 sets = 42 generation files); failure spec presupposes no training
+[19:23:14] stage1/qwen3_0p6b_init_v0/checkpoint/config.json (1418 bytes, a7131bb092b3…) stages to artifacts/stage1/qwen3_0p6b_init_v0/checkpoint with stored RoPE base 5,000,000
+[19:23:17] aad_autoinit_26fd4cc9.bundle (7449366 bytes, 473396ae3f68…) round-trips to 26fd4cc9e477… carrying this authorization and harness c95d9b07d278…
+[19:23:18] precheck OK: 8 relay inputs (8 from AlphaAvatar/aadistill-artifacts), 4 local assets
+[19:23:19] created pj3c870n6yx70z at $1.09/h
+[19:23:19] watchdog detached — hard 834 min = $15.15
+[19:24:12]   starting (60s) — $0.02
+[19:25:15] TCP 22 at 64.247.206.216:19199 after 1.9 min
+[19:25:18] draw 1: ssh reachable — $0.04
+[19:26:02] draw 1: image identity runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@580.159.03
+[19:26:02] draw 1: running setup
+[19:41:59] setup did not reach SETUP_DONE:
+ + tokenspeed-mla==0.1.8
+ + tokenspeed-triton==3.8.10.post20260721
+ + torch==2.13.0
+ + torch-c-dlpack-ext==0.1.5
+ + torchaudio==2.11.0
+ + torchcodec==0.16.0
+ + torchvision==0.28.0
+ + tqdm==4.70.0
+ + transformers==5.15.0
+ + triton==3.7.1
+ + truststore==0.10.4
+ + typer==0.27.1
+ + typing-extensions==4.16.0
+ + typing-inspection==0.4.4
+ + urllib3==2.7.0
+ + uvicorn==0.52.3
+ + uvloop==0.22.1
+ + vllm==0.27.1
+ + watchfiles==1.2.0
+ + websockets==17.0.1
+ + xgrammar==0.2.3
+ + yarl==1.24.5
+ + z3-solver==4.15.4.0
+[19:27:58] vllm offline install completed in 11s
+vllm 0.27.1 | torch 2.13.0+cu130 True
+MARKER:VLLM_READY
+[19:28:08] downloading the teacher at the pinned revision
+
+Fetching 10 files:   0%|          | 0/10 [00:00<?, ?it/s]
+Fetching 10 files:  10%|█         | 1/10 [00:00<00:01,  6.52it/s]
+Fetching 10 files:  40%|████      | 4/10 [00:00<00:00, 16.36it/s]
+Fetching 10 files:  60%|██████    | 6/10 [00:00<00:00, 11.00it/s]
+Fetching 10 files:  80%|████████  | 8/10 [00:04<00:01,  1.28it/s]
+Fetching 10 files:  90%|█████████ | 9/10 [00:23<00:04,  4.72s/it]
+Fetching 10 files: 100%|██████████| 10/10 [00:24<00:00,  3.76s/it]
+Fetching 10 files: 100%|██████████| 10/10 [00:24<00:00,  2.40s/it]
+MARKER:TEACHER_READY
+[19:28:33] checking the RoPE base resolves in every venv
+  transformers 5.13.1: qwen3_0p6b_init_v0 stored 5,000,000 runtime 5,000,000 OK
+  transformers 5.15.0: qwen3_0p6b_init_v0 stored 5,000,000 runtime 5,000,000 OK
+MARKER:ROPE_OK
+[19:28:44] CPU test suite (256 vCPUs visible, cgroup budget 16; cpu set 0-15)
+FAILED tests/data/test_c1_battery.py::test_the_shared_renderers_reproduce_the_frozen_battery_byte_for_byte[tool]
+FAILED tests/docs/test_repository_structure.py::test_every_log_is_classified_in_the_catalog
+FAILED tests/pod/test_continuation_b_one_probe_contract.py::test_the_live_snapshot_records_the_terminal_phase_b_state
+14 failed, 2650 passed, 103 skipped in 787.78s (0:13:07)
+[19:41:53] test suite failed rc=1
+SETUP_RC=1
+
+[19:41:59] ABORT after draw 1: setup_failed
+[19:41:59] deleting pod (setup setup_failed)
+[19:42:10] pod deleted — 18.8 min, $0.34; provider confirms gone: True

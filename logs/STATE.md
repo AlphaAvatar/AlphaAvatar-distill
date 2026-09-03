@@ -1,5 +1,5 @@
-**Updated:** 2026-09-03 · branch `main` · **PHASE B CLOSED · PHASE C0 FROZEN ·
-PHASE C1 ATTEMPTS 1 AND 2 ABORTED AT SETUP, BOTH AUTHORIZATIONS CONSUMED**
+**Updated:** 2026-09-04 · branch `main` · **PHASE B CLOSED · PHASE C0 FROZEN ·
+PHASE C1 REPRICED, LAUNCHED AND ABORTED AT THE POD TEST GATE — STILL NEVER MEASURED**
 
 # Current state
 
@@ -7,27 +7,58 @@ The **human view of [`current_state.json`](current_state.json)**. That file owns
 the live facts; this one says the same things in prose and adds nothing it does
 not carry. If the two disagree, a structural test fails.
 
-**Nothing is running. Nothing is billing. No pod exists.** The Attempt-3 C1
-authorization `955c9288…` **is issued and live**, and no pod was ever created
-under it: the launcher refused at the market rate — `L40S $1.09/h` against the
-priced `$0.99/h` — and spent `$0.00`. Whether that consumes the grant's one
-launch attempt is a maintainer decision, and it has not been retried. Zero pods, zero orchestration, all five behavioural-continuation
-grants retired. Spend is `$264.0396` of the `$283.7600` cap, `$19.7204`
-remaining.
+**Nothing is running. Nothing is billing. No pod exists. Nothing is authorized.**
+Pod `pj3c870n6yx70z` was created at `$1.09/h`, ran 18.85 min, and was deleted;
+the provider confirms it is gone. That creation **consumed** the Attempt-3R
+authorization `9b562e0a…`, so **nothing is prepared for launch** and a further C1 attempt needs a new maintainer grant.
+Spend is `$264.3878` of the `$283.7600` cap, `$19.3722` remaining.
+
+C1 was repriced to the secure L40S rate the launcher actually pays — `$1.09/h`,
+`securePrice`, not the `$0.79` `communityPrice` I once misreported — with every
+minute assumption unchanged. Attempt 3, priced at `$0.99/h`, is
+`SUPERSEDED UNLAUNCHED`; it created no provider resource and cost `$0.00`.
 
 | phase | status |
 | --- | --- |
 | Phase A | **COMPLETE / FROZEN** |
 | Phase B | **COMPLETE / RESOLVED / FROZEN** |
 | Phase C0 | **COMPLETE / APPROVED / FROZEN** |
-| Phase C1 | **IMPLEMENTED / PRICED / NOT EXECUTED / NOT AUTHORIZED** |
+| Phase C1 | **IMPLEMENTED / REPRICED / FOUR LAUNCH ATTEMPTS / NEVER MEASURED** |
 | Phase C2 | **NOT STARTED** |
 | formal recovery evidence | **NONE** |
 
-**Phase C1 is PRICED and UNAUTHORIZED, and has consumed no compute.** Floor
-**$12.2070** · expected **$13.4277** · enforceable one-attempt ceiling
-**$13.7578**, against **$19.9003** headroom — **$6.1425** would remain if the
-whole ceiling were consumed. **Priced is not authorized: no grant exists.**
+**Phase C1 is REPRICED and has now consumed compute — but still no science.**
+Floor **$13.4401** · soft stop **$14.7841** · one-attempt ceiling **$15.1475** at
+the secure `$1.09/h`, against **$19.3722** headroom: exactly one more full attempt
+fits, by `$4.22`. **Headroom is not permission: no grant exists.**
+
+Four launch attempts, `$0.5281` total, **zero scientific stages** — no replay, no
+training, no evaluation, no decision:
+
+| attempt | cost | died at |
+| --- | --- | --- |
+| 1 | $0.0786 | bundle fetch — no bundle on the relay |
+| 2 | $0.1013 | `ROPE_OK` — no staged `config.json` |
+| 3 | $0.0000 | launcher refused the market price; **no pod created** |
+| 3R | $0.3482 | the pod CPU test gate — `14 failed, 2650 passed` |
+
+Attempt 3R reached `VLLM_READY → TEACHER_READY → ROPE_OK`: the two gaps that
+killed attempts 1 and 2 are closed and stayed closed. It then failed the setup
+test gate, which **no C1 attempt had ever reached before**.
+
+The dominant cause is `tests/data/test_c1_battery.py`: its seven renderer-parity
+cases call `snapshot()`, which reads `~/.cache/huggingface/hub` **directly,
+ignoring `HF_HOME`**. The dev box holds all seven dataset snapshots from earlier
+work; a fresh pod holds none and sets `HF_HOME=/workspace/hf` besides. Those
+tests can pass on this machine and can never pass on a pod.
+
+Only three of the fourteen names came home: setup writes the full list to
+`/workspace/pytest.log` and tails four lines, and the file dies with the pod.
+
+**The ten pre-provider gates were executed for the first time at 3R.**
+`SessionRunner.run` prices *before* it gates, so attempts 1–3 ran none of them;
+an earlier ledger claim that attempt 3 passed `10/10` was false and is corrected
+in [`BUDGET_LEDGER.md`](BUDGET_LEDGER.md).
 
 ## Phase C1 — ATTEMPT 3 AUTHORIZED, NOT LAUNCHED (market price) · NO C1 MEASUREMENT
 

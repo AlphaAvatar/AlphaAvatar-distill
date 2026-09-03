@@ -1547,3 +1547,36 @@ communityPrice   0.79      <- what I reported
 The secure price did not fall; it has been `$1.09` throughout, and my reading
 described a product this launcher does not provision. The relaunch cost nothing,
 but the premise for requesting it was mine and it was wrong.
+
+## 2026-09-04 — C1 Attempt-3R: repriced, launched, aborted at the pod test gate
+
+Repriced to secure L40S `$1.09/h` (`pricing_sha256 909ed65f…`, ceiling
+`$15.1475`, every minute assumption unchanged), issued authorization
+`9b562e0a…` at session commit `26fd4cc9`, staged bundle
+`aad_autoinit_26fd4cc9.bundle`, 10/10 pre-provider gates PASS, pod
+`pj3c870n6yx70z` created at `$1.09/h`.
+
+Setup reached **VLLM_READY → TEACHER_READY → ROPE_OK** — both previously fatal
+gaps are closed and stayed closed — and then **failed the CPU test suite**:
+`14 failed, 2650 passed, 103 skipped in 787.78s`. Pod deleted, provider confirms
+gone.
+
+| what | cost | evidence |
+| --- | --- | --- |
+| C1 attempt 3R: repriced launch, 18.85 min, **INFRASTRUCTURE ABORT at the pod test gate**. No replay, no training, no evaluation, no decision | $0.3482 | `logs/autoinit_c1_attempt3r/` |
+
+**Cumulative: $264.3878 of $283.7600.** `$19.3722` uncommitted — still less than
+one full C1 session at the repriced ceiling of `$15.1475`… which it now exceeds
+only by `$4.22`. A further C1 attempt is arithmetically possible exactly once
+more and needs a maintainer grant.
+
+Cost is recorded at the watchdog's last poll (19.17 min → `$0.3483`, written as
+`$0.3482`) rather than the launcher's `18.85 min → $0.3424`, because the
+watchdog polls the provider and the launcher measures its own wall clock; when
+they disagree the more expensive reading is the honest one.
+
+**Three of the fourteen failures are known; eleven are not.** `setup.sh` runs
+`uv run pytest tests/ -q 2>&1 | tail -3`, so only three `FAILED` lines ever
+reach the launch log. The full list went to `/workspace/pytest.log` on a pod
+that no longer exists. A gate that can fail 14 ways and report 3 is not a
+diagnosable gate, and that is a repair this abort has earned.
