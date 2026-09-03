@@ -1501,3 +1501,32 @@ aborts of a *running pod*. This is a market-price refusal before any resource
 existed. Whether it consumes the grant's one launch attempt is a maintainer
 question, not the launcher's and not mine. **No retry was attempted**, and
 `--max-price` was not raised.
+
+### Attempt 3, relaunch — 2026-09-04
+
+Maintainer review defined the one launch attempt as consumed when a **provider
+resource is created**, not when a launcher command is invoked, so the Attempt-3
+authorization `955c9288…` stayed live and the relaunch used the same session
+commit `ca519e67`, the same bundle and the same authorization bytes. All ten
+gates passed again. The launcher re-quoted **`$1.09/h`** and refused.
+
+| what | cost | evidence |
+| --- | --- | --- |
+| C1 attempt 3, second launcher invocation: 10/10 gates PASS, launcher refused at `$1.09/h` against the priced `$0.99/h`. **No pod, no provider resource, `$0.00`** | $0.0000 | `logs/autoinit_c1_attempt3/launch_relaunch.log` |
+
+**Cumulative unchanged: $264.0396 of $283.7600.**
+
+**A correction to the previous report.** I reported that the L40S rate had
+"fallen to `$0.79/h`, below the priced `$0.99/h`". That figure was
+`lowestPrice.uninterruptablePrice`, which equals `communityPrice`. The launcher
+prices on **`securePrice`**, and every prior session ran on secure cloud —
+attempt 2 created its pod at `$0.99/h` secure. Measured together now:
+
+```
+securePrice      1.09      <- what the launcher uses
+communityPrice   0.79      <- what I reported
+```
+
+The secure price did not fall; it has been `$1.09` throughout, and my reading
+described a product this launcher does not provision. The relaunch cost nothing,
+but the premise for requesting it was mine and it was wrong.

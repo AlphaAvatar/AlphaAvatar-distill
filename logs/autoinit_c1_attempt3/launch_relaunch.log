@@ -1,0 +1,5 @@
+[18:51:56] budget: expected 740 min $12.21 · soft $13.43 · hard $13.76 (authorized $13.76)
+[18:51:56] NVIDIA L40S $1.09/h, stock Medium
+[18:51:56] ABORT: $1.09/h above the priced $0.99/h
+
+autoinit-c1 INCOMPLETE — /home/ecs-user/AlphaAvatar-distill/logs/autoinit_c1_session.json. STOP for review. C1 replayed one frozen path under two digest gates and ran no search.

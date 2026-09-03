@@ -6902,3 +6902,23 @@ on a paid pod.
   which needs a new ceiling and therefore a new grant.
 - **Budget unchanged:** `$264.0396` of `$283.7600`, `$19.7204` uncommitted.
 - **Still zero C1 measurements** after three attempts and `$0.1799` total.
+
+## 2026-09-04 — the $0.79 quote was the wrong product
+
+- **What I got wrong.** I reported that the L40S rate had "fallen to `$0.79/h`,
+  below the priced `$0.99/h`", and said a relaunch was one command away. That
+  figure came from `lowestPrice.uninterruptablePrice`, which equals
+  `communityPrice`. `session_runner` prices on **`securePrice`**, and every prior
+  session ran on secure cloud — attempt 2 created its pod at `$0.99/h` secure.
+  Measured together: `securePrice 1.09`, `communityPrice 0.79`. The secure rate
+  never fell; my reading described a product this launcher does not provision.
+- **Cost:** `$0.00`. The relaunch created nothing, and both refusals were
+  correct. But the premise for asking to relaunch was mine and it was wrong, and
+  a maintainer acted on it.
+- **Rule going forward:** when reporting a price that gates a launch, read the
+  field the launcher reads. `session_runner.py` takes `rows[0]["securePrice"]`;
+  `stockStatus` comes from `lowestPrice`, which is why the two can look
+  consistent while describing different offerings.
+- **State of Attempt 3:** authorization `955c9288…` LIVE, session commit
+  `ca519e67`, bundle staged and verified, 10/10 gates passing. Blocked only by
+  the secure rate. Not looped, `--max-price` not raised, no second grant.

@@ -39,11 +39,18 @@ whole ceiling were consumed. **Priced is not authorized: no grant exists.**
 > training, no evaluation. The one-use authorization is **consumed**; no retry is
 > authorized. Evidence in [`autoinit_c1_attempt1/`](autoinit_c1_attempt1/).
 >
-> **Attempt 3 did not launch, 2026-09-04.** The authorization `955c9288…` was
-> issued, the bundle `aad_autoinit_ca519e67.bundle` staged, and **all ten
-> pre-provider gates passed** — then the launcher declined to create a pod:
-> `NVIDIA L40S $1.09/h, stock Low` against the priced `$0.99/h`. **No pod, no
-> provider resource, `$0.00`.** The refusal is arithmetically right: the ceiling
+> **Attempt 3 has not launched, 2026-09-04 — twice.** The authorization
+> `955c9288…` is issued and LIVE, the bundle `aad_autoinit_ca519e67.bundle` is
+> staged, and **all ten pre-provider gates pass** — but the launcher declines to
+> create a pod: `NVIDIA L40S securePrice $1.09/h` against the priced `$0.99/h`.
+> **No pod, no provider resource, `$0.00` on both invocations.** Maintainer
+> ruling: the one launch attempt is consumed when a *provider resource* is
+> created, not when the launcher is invoked, so the grant remains live.
+>
+> **`communityPrice` is `$0.79`, and that is a different product.** The launcher
+> prices on `securePrice`, as every prior session did — attempt 2 created its pod
+> at `$0.99/h` secure. A `$0.79` reading of `lowestPrice.uninterruptablePrice`
+> does not mean this session can run. The refusal is arithmetically right: the ceiling
 > is derived at `$0.99/h`, and 834 minutes at `$1.09/h` would cost `$15.15`
 > against a `$13.7578` cap. Raising `--max-price` is repricing, which the grant
 > does not authorize. Not retried. Evidence in

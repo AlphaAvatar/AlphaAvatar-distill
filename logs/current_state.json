@@ -12,7 +12,7 @@
  },
  "authorized": {
   "any": true,
-  "note": "Attempt-3 authorization 955c9288 IS ISSUED and live; NO pod was created under it -- the launcher refused on market price, $0.00. Whether that consumes the one launch attempt is a MAINTAINER decision.",
+  "note": "Attempt-3 authorization 955c9288 IS ISSUED and LIVE; no pod has been created under it. Maintainer ruling: the one launch attempt is consumed when a PROVIDER RESOURCE is created, not when the launcher is invoked.",
   "c1_attempt1": "CONSUMED. $0.0786, aborted at the bundle fetch.",
   "c1_attempt2": "CONSUMED. $0.1013, aborted at ROPE_OK.",
   "c1_attempt3": "ISSUED; launcher declined on price; $0.00; no pod.",
@@ -21,7 +21,7 @@
  "prepared_launch": {
   "any": true,
   "bundles": 1,
-  "note": "Attempt 3 IS prepared: authorization 955c9288 at ca519e67, bundle aad_autoinit_ca519e67.bundle staged (c5a62d9c), 10/10 gates PASS. Only the market rate blocks it."
+  "note": "Attempt 3 IS prepared: authorization 955c9288 at ca519e67, bundle staged (c5a62d9c), 10/10 gates PASS. Blocked only by securePrice $1.09/h > $0.99/h."
  },
  "budget": {
   "cumulative_spend_usd": 264.0396,
@@ -72,7 +72,7 @@
  ],
  "next_starting_point": {
   "status": "C1 is fully gated (10/10) and authorized; the launcher refused on market price. No C1 measurement exists.",
-  "the_ask": "maintainer decision: wait for L40S at <= $0.99/h and relaunch under the existing authorization, or reprice. Both are outside this grant.",
+  "the_ask": "maintainer decision: wait for L40S securePrice <= $0.99/h and relaunch under the live authorization, or reprice.",
   "budget": "$264.0396 spent of the unchanged $283.7600 cap; $19.7204 uncommitted."
  },
  "read_order": [
@@ -136,7 +136,7 @@
    "attempt1": "2026-09-02 ABORT at bundle fetch. $0.0786. logs/autoinit_c1_attempt1/",
    "attempt2": "2026-09-03 ABORT at ROPE_OK. $0.1013. logs/autoinit_c1_attempt2/",
    "gates": "10 pre-provider gates, all PASS at attempt 3.",
-   "attempt3": "2026-09-04: authorization ISSUED, bundle staged, 10/10 gates PASS -- launcher DECLINED: L40S $1.09/h vs priced $0.99/h. NO POD, $0.00. logs/autoinit_c1_attempt3/"
+   "attempt3": "2026-09-04: authorization ISSUED, bundle staged, 10/10 gates PASS -- launcher refused TWICE on securePrice $1.09/h vs the priced $0.99/h. NO POD, $0.00 both times. logs/autoinit_c1_attempt3/"
   },
   "c2": {
    "status": "NOT STARTED",
@@ -170,7 +170,7 @@
   "closeout": "logs/storage_closeout_20260831.json",
   "c1_battery_canonical": "/home/ecs-user/aad-artifacts/autoinit/c1_confirmation_v1 -- COPY of the frozen bytes, 8 files, verified from the copy; repo-local working copy retained"
  },
- "blocker": "C1 attempt 3 did not launch: L40S is quoted $1.09/h against the priced $0.99/h, and the ceiling is derived at $0.99/h. Maintainer decision: wait for the rate, or reprice. Not retried.",
+ "blocker": "C1 attempt 3 cannot launch: L40S securePrice $1.09/h vs the priced $0.99/h. communityPrice $0.79 is a DIFFERENT product the launcher does not provision. Maintainer decision: wait, or reprice. Not looped.",
  "deferred_not_blocking": {
   "_note": "open, none blocking. Detail: logs/HANDOFF_next_session.md",
   "duplicate_checkpoints": "2.92 GiB, KEEP / unresolved ownership -- maintainer decision",
