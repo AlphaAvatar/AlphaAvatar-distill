@@ -248,7 +248,7 @@ def harness(tmp_path, monkeypatch):
 
 def _args(**over):
     ap = D.build_parser()
-    a = ap.parse_args(["--soft-stop-usd", "13.4277", "--authorized-usd", "13.7578"])
+    a = ap.parse_args(["--soft-stop-usd", "14.7841", "--authorized-usd", "15.1475"])
     for k, v in over.items():
         setattr(a, k, v)
     return a

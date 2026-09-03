@@ -104,19 +104,38 @@ def test_the_ceiling_is_derived_from_the_accepted_pricing_record():
 
 def test_the_budget_plan_fits_that_ceiling_exactly():
     ceiling = c1_hard_ceiling_usd(REPO)
-    plan = c1_budget_spec(REPO).plan(price_per_hour=0.99, authorized_usd=ceiling)
+    plan = c1_budget_spec(REPO).plan(price_per_hour=1.09, authorized_usd=ceiling)
     assert plan.hard_terminate_usd <= ceiling
-    assert plan.expected_usd == pytest.approx(12.2070, abs=5e-4)
-    assert plan.soft_stop_usd == pytest.approx(13.4277, abs=5e-4)
+    assert plan.expected_usd == pytest.approx(13.4401, abs=5e-4)
+    assert plan.soft_stop_usd == pytest.approx(14.7841, abs=5e-4)
+
+
+def test_the_plan_is_priced_at_the_rate_the_launcher_actually_pays():
+    """Planning at a rate the provider no longer offers is how attempt 3 came to
+    hold an authorization it could not launch under: the ceiling was derived at
+    $0.99/h secure, the live secure rate was $1.09/h, and `session_runner` prices
+    on securePrice. So the rate above is not decoration — it is the number that
+    has to agree with the pricing record, and the SAME minutes at the stale rate
+    must NOT satisfy the current ceiling."""
+    from aadistill.infrastructure.budget import BudgetError
+
+    pricing = json.loads((REPO / "logs/phase_c1_pricing.json").read_text())
+    assert pricing["hardware"]["price_per_hour_usd"] == 1.09
+
+    stale = c1_budget_spec(REPO).plan(price_per_hour=0.99,
+                                      authorized_usd=c1_hard_ceiling_usd(REPO))
+    assert stale.hard_terminate_usd < 0.99 / 1.09 * c1_hard_ceiling_usd(REPO) + 1e-6
+    with pytest.raises(BudgetError):
+        c1_budget_spec(REPO).plan(price_per_hour=1.09, authorized_usd=13.7578)
 
 
 def test_a_ceiling_that_rounds_down_would_fail_closed():
-    """The 4-dp ceiling is rounded UP on purpose: the exact plan is $13.757733,
-    and a grant written at a rounded-DOWN $13.7577 under-authorizes it."""
+    """The 4-dp ceiling is rounded UP on purpose: the exact plan is $15.147403,
+    and a grant written at a rounded-DOWN $15.1474 under-authorizes it."""
     from aadistill.infrastructure.budget import BudgetError
 
     with pytest.raises(BudgetError):
-        c1_budget_spec(REPO).plan(price_per_hour=0.99, authorized_usd=13.7577)
+        c1_budget_spec(REPO).plan(price_per_hour=1.09, authorized_usd=15.1474)
 
 
 def test_the_pricing_record_authorizes_nothing():

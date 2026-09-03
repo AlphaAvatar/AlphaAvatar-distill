@@ -70,9 +70,16 @@ OUT = "logs/autoinit_c1_authorization.json"
 #: rather than mirror whatever the pricing file happens to say. A ceiling that
 #: simply echoes its source is not an independent check, and this is the last
 #: place a mis-priced session can be stopped before a grant exists.
-HARD_CEILING_USD = 13.7578
-PLANNING_FLOOR_USD = 12.2070
-SOFT_STOP_USD = 13.4277
+#:
+#: Amended 2026-09-04 for the approved repricing to the secure L40S rate of
+#: $1.09/h. Every minute assumption behind these is UNCHANGED — this restates a
+#: rate, not a plan. The superseded triple was 13.7578 / 12.2070 / 13.4277 at
+#: $0.99/h, and it is written here rather than deleted because the reason
+#: attempt 3 could not create a pod was that the ceiling had been derived at a
+#: rate the provider no longer offers.
+HARD_CEILING_USD = 15.1475
+PLANNING_FLOOR_USD = 13.4401
+SOFT_STOP_USD = 14.7841
 CUMULATIVE_CAP_USD = 283.76
 
 #: What a maintainer states. Everything else is computed.

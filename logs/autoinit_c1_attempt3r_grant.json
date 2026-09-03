@@ -1,0 +1,88 @@
+{
+ "schema": "aadistill.autoinit.c1_grant/v1",
+ "_what_this_is": "The maintainer decision permitting ONE Phase-C1 Attempt-3R paid session at the REPRICED secure L40S rate of $1.09/h. A NEW artifact: logs/autoinit_c1_grant.json, logs/autoinit_c1_attempt2_grant.json and logs/autoinit_c1_attempt3_grant.json each authorized one issuance, and none of them can be reused. It is an INPUT to scripts/autoinit/issue_c1_authorization.py, which derives every identity — session commit, harness digest, isolation plan hash, science plan, execution preregistration, battery, teacher, scoring contract, seeds and ceiling — from the committed live tree and REFUSES if this document asserts any of them.",
+ "granted_by": "maintainer, C1 repricing decision: reprice to the observed L40S securePrice of $1.09/h rather than keep waiting for $0.99/h. A pricing amendment only — no C1 science, source, harness, preregistration, battery, scorer or setup code changes. The unchanged frozen C1 protocol is authorized to execute exactly once at the repriced ceiling.",
+ "granted_for": "Phase C1 fixed-path ATTENTION isolation — C1 Attempt-3R, repriced execution",
+ "covers": "exactly one Attempt-3R C1 launch under the unchanged frozen protocol at a hard ceiling of $15.1475; 2 arms x 3 fresh seeds = 6 recovery probes, one confirmation evaluation per probe only after all six trainings complete, each admitted against its own observed generation protocol before scoring, followed by the frozen paired decision.",
+ "does_not_authorize": [
+  "Phase A",
+  "beam search",
+  "any search",
+  "Phase C2",
+  "formal Stage-2/Stage-3 recovery",
+  "canonical Stage-1 NLL",
+  "any follow-on",
+  "any automatic retry",
+  "any further attempt",
+  "any ceiling increase beyond $15.1475",
+  "any cap increase",
+  "price-chasing the market upward",
+  "an allowance for another full C1 retry"
+ ],
+ "cumulative_spend_at_approval_usd": 264.0396,
+ "cumulative_cap_usd": 283.76,
+ "cap_note": "The project cumulative cap remains $283.7600 and is NOT raised. $19.7204 available at approval; worst case after one complete Attempt-3R is $279.1871 spent, leaving a $4.5729 reserve. That reserve is smaller than one C1 session and is not an allowance for another one.",
+ "repricing": {
+  "decision": "reprice, do not wait",
+  "price_per_hour_usd": 1.09,
+  "price_field": "gpuTypes[0].securePrice — the field session_runner actually prices on",
+  "not_this_field": "communityPrice / lowestPrice.uninterruptablePrice, which read $0.79 at the same moment and describes a product this launcher does not provision. I reported that figure once as though it gated the launch; it did not.",
+  "launch_condition": "launch only if the live securePrice is <= $1.09/h; --max-price 1.09",
+  "do_not": "price-chase the market upward if it has moved past $1.09/h",
+  "minutes_unchanged": "every minute assumption behind the ceiling is identical to the $0.99/h record; only the rate and the derived USD moved",
+  "pricing_record": "logs/phase_c1_pricing.json, pricing_sha256 909ed65f0d0d559b6b509fd1701f2fb30c3885717b1041c726c33dec48ee5be3",
+  "totals": {
+   "floor_usd": 13.4401,
+   "soft_stop_usd": 14.7841,
+   "hard_ceiling_usd": 15.1475,
+   "hard_ceiling_usd_exact": 15.147403
+  }
+ },
+ "supersedes": {
+  "authorization": "955c9288",
+  "status": "SUPERSEDED UNLAUNCHED BY APPROVED REPRICING",
+  "consumed": false,
+  "reason": "it was issued at the $0.99/h ceiling and the launcher twice refused to create a pod at the live $1.09/h rate. Refusing is the correct behaviour: the ceiling was derived at a rate the provider no longer offers.",
+  "provider_resources_created": "NONE — a session is consumed when a provider resource is created, and none was",
+  "cost_usd": 0.0,
+  "archived": "logs/autoinit_c1_attempt3/autoinit_c1_authorization_955c9288_superseded.json"
+ },
+ "prior_attempts": {
+  "attempt_1": {
+   "outcome": "INFRASTRUCTURE ABORT at the bundle fetch",
+   "cost_usd": 0.0786,
+   "cause": "no git bundle existed on the relay for the session commit; --bundle named an alias",
+   "closed_by": "bundle_staged_gate (ninth), which round-trips the actual relay object",
+   "evidence": "logs/autoinit_c1_attempt1/"
+  },
+  "attempt_2": {
+   "outcome": "INFRASTRUCTURE ABORT at ROPE_OK",
+   "cost_usd": 0.1013,
+   "reached": "TEACHER_READY — 7 of 11 setup markers; teacher fetched and byte-verified",
+   "cause": "the shared setup globs artifacts/stage1/*/checkpoint/config.json and C1 staged only tokenizer sidecars there",
+   "closed_by": "rope_input_gate (tenth), plus a structural invariant separating loadability from the ROPE_OK staging dependency",
+   "evidence": "logs/autoinit_c1_attempt2/"
+  },
+  "attempt_3": {
+   "outcome": "NOT CONSUMED — launcher refused at the market rate, twice, before any provider resource existed",
+   "cost_usd": 0.0,
+   "cause": "the ceiling was priced at $0.99/h and the live securePrice is $1.09/h",
+   "closed_by": "this repricing",
+   "evidence": "logs/autoinit_c1_attempt3/"
+  },
+  "scientific_measurements_from_all_three": "NONE. No replay gate, no training, no evaluation, no decision. C1 has never measured anything."
+ },
+ "failure_semantics": {
+  "market_price_above_ceiling": "do not create a pod, do not raise the ceiling, do not loop waiting for a price; stop and report",
+  "teacher_identity_mismatch": "infrastructure/identity stop; no scientific conclusion",
+  "replay_mismatch": "stop before recovery; preserve the finding; no automatic retry; a real replay result but NOT ATTENTION behavioural evidence",
+  "device_handoff_or_headroom": "stop before training",
+  "recovery_training_failure": "C1_INCOMPLETE; no partial confirmation experiment",
+  "stage_h_precondition": "all six trainings complete",
+  "generation_admission_failure": "preserve the generations and the admission record; do not score that probe; evaluate no later probe; run no decision",
+  "stage_i_precondition": "six complete admitted and scored probe results",
+  "incomplete_evidence": "no C1 decision",
+  "all_done": "interpret only the frozen c1_decision.json"
+ },
+ "after_termination": "confirm the pod is gone through GraphQL. No further attempt and no C2 without a new review."
+}
