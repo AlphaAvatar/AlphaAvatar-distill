@@ -1,0 +1,43 @@
+{
+ "schema": "aadistill.autoinit.c1_grant/v1",
+ "_what_this_is": "The maintainer decision permitting ONE Phase-C1 Attempt-2 paid session. It is an INPUT to scripts/autoinit/issue_c1_authorization.py, which derives every identity — session commit, harness digest, isolation plan hash, science plan, execution preregistration, battery, teacher, scoring contract, seeds and ceiling — from the committed objects and REFUSES if this document asserts any of them. It is a NEW artifact: logs/autoinit_c1_grant.json authorized one issuance and one launch attempt, both of which were consumed by Attempt 1, and it cannot be reused.",
+ "granted_by": "maintainer, Attempt-2 final grant review: GO. Attempt 1 remains classified as an infrastructure abort with no scientific C1 measurement; the transport failure is closed by the ninth pre-provider gate.",
+ "granted_for": "Phase C1 fixed-path ATTENTION isolation — Attempt 2",
+ "covers": "exactly one Attempt-2 C1 launch under the unchanged frozen protocol; 2 arms x 3 fresh seeds = 6 recovery probes, one confirmation evaluation per probe only after all six trainings complete, followed by the frozen paired decision.",
+ "does_not_authorize": [
+  "Phase A",
+  "beam search",
+  "any search",
+  "Phase C2",
+  "formal Stage-2/Stage-3 recovery",
+  "canonical Stage-1 NLL",
+  "any follow-on",
+  "any automatic retry",
+  "any third attempt",
+  "any ceiling increase"
+ ],
+ "cumulative_spend_at_approval_usd": 263.9383,
+ "cumulative_cap_usd": 283.76,
+ "cap_note": "The project cumulative cap remains $283.7600 and is NOT raised. Worst case after one complete Attempt 2: $277.6961 spent, $6.0639 reserve.",
+ "attempt_1": {
+  "outcome": "INFRASTRUCTURE ABORT AT SETUP",
+  "cost_usd": 0.0786,
+  "scientific_stages_executed": "none — no teacher fetch, no replay, no training, no evaluation, no decision",
+  "cause": "no git bundle existed on the relay for the session commit; --bundle named an alias",
+  "consumed_grant": "logs/autoinit_c1_grant.json",
+  "consumed_authorization": "logs/autoinit_c1_attempt1/autoinit_c1_authorization.json",
+  "evidence": "logs/autoinit_c1_attempt1/"
+ },
+ "transport_gap_closed_by": "bundle_staged_gate, the ninth pre-provider gate: the canonical bundle name is derived from the session commit, and the gate performs a read-only round-trip of the actual relay object — download, sha256 against the staged bundle, git bundle verify, clone, checkout the session commit, and require the authorization bytes and recomputed harness digest inside that checkout to be the authorized ones.",
+ "failure_semantics": {
+  "teacher_identity_mismatch": "infrastructure/identity stop; no scientific conclusion",
+  "replay_mismatch": "stop before recovery; preserve the replay evidence; a real replay finding, but NOT ATTENTION behavioural evidence",
+  "device_handoff_or_headroom": "stop before training",
+  "recovery_training_failure": "C1_INCOMPLETE; zero partial confirmation experiment",
+  "stage_h_precondition": "all six trainings complete",
+  "generation_admission_failure": "C1_INCOMPLETE; preserve raw generations and the admission record; do not score that probe; evaluate no later probe; run no decision",
+  "stage_i_precondition": "six complete admitted and scored probe results",
+  "all_done": "interpret only the frozen c1_decision.json"
+ },
+ "after_termination": "verify authoritative provider termination via GraphQL. No C2 regardless of the C1 verdict. No third attempt without a new maintainer/scientific review."
+}
