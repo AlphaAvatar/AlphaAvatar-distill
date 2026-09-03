@@ -1,0 +1,56 @@
+[19:22:24] budget: expected 740 min $13.44 · soft $14.78 · hard $15.15 (authorized $15.15)
+[19:22:24] NVIDIA L40S $1.09/h, stock Medium
+
+make_plan -> True   quoted $1.09/h
+[19:22:24] session commit 26fd4cc9e477 verified: harness digests to c95d9b07d278…, carries the authorization and only logs/autoinit_c1_authorization.json differs from the authorized base
+[19:22:24] C1 harness c95d9b07d278… over 65 files
+[19:22:24] ceiling $15.1475, derived from logs/phase_c1_pricing.json
+[19:22:24] preregistration 5e6eb5110fc7… (self-hash verified), harness c95d9b07d278…
+[19:22:24] seeds, both replay digests and the 950/850 battery a285d61f88de… are unchanged
+[19:22:24] 3 teacher shards bound at 768f209d9ea8…, none fetched
+[19:22:24] battery staged from bytes identical to /home/ecs-user/aad-artifacts/autoinit/c1_confirmation_v1
+[19:22:24] success spec covers the contract (6 probes x 7 sets = 42 generation files); failure spec presupposes no training
+[19:22:26] stage1/qwen3_0p6b_init_v0/checkpoint/config.json (1418 bytes, a7131bb092b3…) stages to artifacts/stage1/qwen3_0p6b_init_v0/checkpoint with stored RoPE base 5,000,000
+[19:22:29] aad_autoinit_26fd4cc9.bundle (7449366 bytes, 473396ae3f68…) round-trips to 26fd4cc9e477… carrying this authorization and harness c95d9b07d278…
+[19:22:30] precheck OK: 8 relay inputs (8 from AlphaAvatar/aadistill-artifacts), 4 local assets
+
+=== 10/10 GATES PASS ===
+  [PASS] session_commit_and_lineage: session commit 26fd4cc9e477 verified: harness digests to c95d9b07d278…, carries the authorization and only logs/autoinit_c1_authorization.json differs from the authorized base
+  [PASS] c1_harness_gate: C1 harness c95d9b07d278… over 65 files
+  [PASS] pricing_identity_gate: ceiling $15.1475, derived from logs/phase_c1_pricing.json
+  [PASS] preregistration_gate: preregistration 5e6eb5110fc7… (self-hash verified), harness c95d9b07d278…
+  [PASS] frozen_c1_science_gate: seeds, both replay digests and the 950/850 battery a285d61f88de… are unchanged
+  [PASS] teacher_binding_gate: 3 teacher shards bound at 768f209d9ea8…, none fetched
+  [PASS] battery_staged_gate: battery staged from bytes identical to /home/ecs-user/aad-artifacts/autoinit/c1_confirmation_v1
+  [PASS] artifact_spec_gate: success spec covers the contract (6 probes x 7 sets = 42 generation files); failure spec presupposes no training
+  [PASS] rope_input_gate: stage1/qwen3_0p6b_init_v0/checkpoint/config.json (1418 bytes, a7131bb092b3…) stages to artifacts/stage1/qwen3_0p6b_init_v0/checkpoint with stored RoPE base 5,000,000
+  [PASS] bundle_staged_gate: aad_autoinit_26fd4cc9.bundle (7449366 bytes, 473396ae3f68…) round-trips to 26fd4cc9e477… carrying this authorization and harness c95d9b07d278…
+
+relay/local: {
+ "relay_needed": [
+  "stage3_recovery_corpus_v2/ladder_uniform/blocks.npz",
+  "stage3_recovery_corpus_v2/ladder_uniform/ladder.json",
+  "stage3_recovery_corpus_v2/ladder_uniform/audit.jsonl",
+  "e8_inputs_20260810/calibration_v1/items.jsonl",
+  "stage1/qwen3_0p6b_init_v0/checkpoint/tokenizer.json",
+  "stage1/qwen3_0p6b_init_v0/checkpoint/tokenizer_config.json",
+  "stage1/qwen3_0p6b_init_v0/checkpoint/chat_template.jinja",
+  "stage1/qwen3_0p6b_init_v0/checkpoint/config.json"
+ ],
+ "relay_missing": [],
+ "relay_repos": {
+  "AlphaAvatar/aadistill-artifacts": 8
+ },
+ "relay_repo_files_listed": {
+  "AlphaAvatar/aadistill-artifacts": 1176
+ },
+ "local_assets": [
+  "artifacts/stage3/c1_confirmation_v1",
+  "artifacts/stage1/reasoning_heavy_v2",
+  "artifacts/stage1/state_eval_v1",
+  "artifacts/stage3/recovery_search_v2"
+ ],
+ "local_missing": []
+}
+
+prechecks -> True. create() NOT called; no provider resource.

@@ -1507,12 +1507,29 @@ question, not the launcher's and not mine. **No retry was attempted**, and
 Maintainer review defined the one launch attempt as consumed when a **provider
 resource is created**, not when a launcher command is invoked, so the Attempt-3
 authorization `955c9288…` stayed live and the relaunch used the same session
-commit `ca519e67`, the same bundle and the same authorization bytes. All ten
-gates passed again. The launcher re-quoted **`$1.09/h`** and refused.
+commit `ca519e67`, the same bundle and the same authorization bytes. The launcher
+re-quoted **`$1.09/h`** and refused.
 
 | what | cost | evidence |
 | --- | --- | --- |
-| C1 attempt 3, second launcher invocation: 10/10 gates PASS, launcher refused at `$1.09/h` against the priced `$0.99/h`. **No pod, no provider resource, `$0.00`** | $0.0000 | `logs/autoinit_c1_attempt3/launch_relaunch.log` |
+| C1 attempt 3, second launcher invocation: launcher refused at `$1.09/h` against the priced `$0.99/h`. **No pod, no provider resource, `$0.00`** | $0.0000 | `logs/autoinit_c1_attempt3/launch_relaunch.log` |
+
+**Correction, 2026-09-04 — "all ten gates passed again" was false.** Both rows
+above originally claimed the ten pre-provider gates passed during attempt 3.
+`SessionRunner.run` is `if not self.make_plan() or not self.run_prechecks()`:
+it **prices before it gates**. Both attempt-3 invocations aborted inside
+`make_plan` at `0.0` elapsed, and the session record proves it — the timeline
+holds three entries (budget, price, ABORT), `stages` is `{}`, and there is no
+`prechecks` key at all. Attempt 3 never executed a single gate. I wrote the
+claim from the expectation that gates run first; the evidence I cited says the
+opposite, and it is a claim about what evidence exists, which makes it the worst
+kind to get wrong.
+
+The ten gates have now actually been executed, at `$0.0000`, by driving the real
+`SessionRunner.make_plan()` and `run_prechecks()` against the live tree and
+stopping before `create()` — the launcher's own `spec()`, the runner's own
+`context()`, no stubs. 10/10 PASS. Evidence:
+`logs/autoinit_c1_attempt3r/gate_rehearsal.txt`.
 
 **Cumulative unchanged: $264.0396 of $283.7600.**
 
