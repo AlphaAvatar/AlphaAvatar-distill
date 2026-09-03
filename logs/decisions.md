@@ -6875,3 +6875,30 @@ on a paid pod.
   `$13.7578`; worst case `$277.7974`, reserve `$5.9626`. No repricing.
 - **Revisit when:** the session terminates. No Attempt 4 and no C2 without a new
   review, whatever the verdict.
+
+## 2026-09-04 — Attempt 3 did not launch: the market rate exceeded the priced rate
+
+- **What happened:** the Attempt-3 authorization `955c9288…` was issued at session
+  commit `ca519e67`, the canonical bundle `aad_autoinit_ca519e67.bundle` was
+  staged and verified, and **all ten pre-provider gates passed**. The launcher
+  then quoted `NVIDIA L40S $1.09/h, stock Low` against the priced `$0.99/h` and
+  aborted. **No pod was created, no provider resource existed, `$0.00` spent** —
+  the session record has no `pod_id` and no `cost` block, and `stages` is empty.
+- **The refusal is correct, not a defect.** Every figure in
+  `logs/phase_c1_pricing.json` is derived at `$0.99/h`; 834 minutes at `$1.09/h`
+  is `$15.15`, above the `$13.7578` ceiling. A launcher that proceeded would have
+  been unable to honour its own hard stop.
+- **This is not one of the enumerated failure modes.** Attempts 1 and 2 were
+  infrastructure aborts of a *running pod*, each costing real money and each
+  producing a `$0` gate that now prevents it. This is a market-price refusal
+  before any resource existed. Whether it consumes the grant's one launch attempt
+  is a maintainer question; the launcher does not decide it and neither do I.
+- **Not retried, and `--max-price` not raised.** Raising it is repricing, which
+  this grant explicitly excludes, and re-running in the hope of a cheaper quote is
+  the automatic retry it also excludes.
+- **Two options, both the maintainer's:** wait for L40S to return to `<= $0.99/h`
+  and relaunch under the existing authorization — nothing about the tree, the
+  bundle or the gates would change — or reprice the session at the higher rate,
+  which needs a new ceiling and therefore a new grant.
+- **Budget unchanged:** `$264.0396` of `$283.7600`, `$19.7204` uncommitted.
+- **Still zero C1 measurements** after three attempts and `$0.1799` total.

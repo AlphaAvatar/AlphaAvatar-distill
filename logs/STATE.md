@@ -7,8 +7,11 @@ The **human view of [`current_state.json`](current_state.json)**. That file owns
 the live facts; this one says the same things in prose and adds nothing it does
 not carry. If the two disagree, a structural test fails.
 
-**Nothing is running. Nothing is billing. Nothing is prepared for launch. Nothing
-is authorized.** Zero pods, zero orchestration, all five behavioural-continuation
+**Nothing is running. Nothing is billing. No pod exists.** The Attempt-3 C1
+authorization `955c9288…` **is issued and live**, and no pod was ever created
+under it: the launcher refused at the market rate — `L40S $1.09/h` against the
+priced `$0.99/h` — and spent `$0.00`. Whether that consumes the grant's one
+launch attempt is a maintainer decision, and it has not been retried. Zero pods, zero orchestration, all five behavioural-continuation
 grants retired. Spend is `$264.0396` of the `$283.7600` cap, `$19.7204`
 remaining.
 
@@ -26,7 +29,7 @@ remaining.
 **$13.7578**, against **$19.9003** headroom — **$6.1425** would remain if the
 whole ceiling were consumed. **Priced is not authorized: no grant exists.**
 
-## Phase C1 — ATTEMPTS 1 AND 2 INFRASTRUCTURE-ABORTED · BOTH SETUP GAPS CLOSED · NOT CURRENTLY AUTHORIZED
+## Phase C1 — ATTEMPT 3 AUTHORIZED, NOT LAUNCHED (market price) · NO C1 MEASUREMENT
 
 > **Attempt 1 aborted at setup, 2026-09-02.** All eight pre-provider gates
 > passed and pod `fccr23o9jcnrh0` was created, then setup failed with
@@ -36,6 +39,16 @@ whole ceiling were consumed. **Priced is not authorized: no grant exists.**
 > training, no evaluation. The one-use authorization is **consumed**; no retry is
 > authorized. Evidence in [`autoinit_c1_attempt1/`](autoinit_c1_attempt1/).
 >
+> **Attempt 3 did not launch, 2026-09-04.** The authorization `955c9288…` was
+> issued, the bundle `aad_autoinit_ca519e67.bundle` staged, and **all ten
+> pre-provider gates passed** — then the launcher declined to create a pod:
+> `NVIDIA L40S $1.09/h, stock Low` against the priced `$0.99/h`. **No pod, no
+> provider resource, `$0.00`.** The refusal is arithmetically right: the ceiling
+> is derived at `$0.99/h`, and 834 minutes at `$1.09/h` would cost `$15.15`
+> against a `$13.7578` cap. Raising `--max-price` is repricing, which the grant
+> does not authorize. Not retried. Evidence in
+> [`autoinit_c1_attempt3/`](autoinit_c1_attempt3/).
+
 > **The `ROPE_OK` gap is closed.** `rope_input_gate` is the tenth pre-provider
 > gate. C1 now stages the canonical **1,418-byte** `checkpoint/config.json`
 > (`a7131bb0…`, stored RoPE base 5,000,000) that the shared setup globs — not the

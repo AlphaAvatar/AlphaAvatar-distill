@@ -11,16 +11,17 @@
   "note": "zero pods confirmed via GraphQL myself{pods} (empty list), not the CLI field; no launcher, watchdog or poller"
  },
  "authorized": {
-  "any": false,
-  "note": "NOTHING IS CURRENTLY AUTHORIZED. Two C1 grants were issued and both are CONSUMED by attempts that produced no measurement.",
+  "any": true,
+  "note": "Attempt-3 authorization 955c9288 IS ISSUED and live; NO pod was created under it -- the launcher refused on market price, $0.00. Whether that consumes the one launch attempt is a MAINTAINER decision.",
   "c1_attempt1": "CONSUMED. $0.0786, aborted at the bundle fetch.",
   "c1_attempt2": "CONSUMED. $0.1013, aborted at ROPE_OK.",
-  "consumed_files_retained": "Eight consumed logs/*_authorization.json remain; both C1 artifacts are preserved in their attempt directories."
+  "c1_attempt3": "ISSUED; launcher declined on price; $0.00; no pod.",
+  "consumed_files_retained": "the attempt-1 and attempt-2 artifacts are archived in their attempt directories."
  },
  "prepared_launch": {
-  "any": false,
-  "bundles": 0,
-  "note": "nothing is prepared for launch"
+  "any": true,
+  "bundles": 1,
+  "note": "Attempt 3 IS prepared: authorization 955c9288 at ca519e67, bundle aad_autoinit_ca519e67.bundle staged (c5a62d9c), 10/10 gates PASS. Only the market rate blocks it."
  },
  "budget": {
   "cumulative_spend_usd": 264.0396,
@@ -56,7 +57,7 @@
  },
  "latest_verification": {
   "utc": "2026-09-03T00:00:00Z",
-  "kind": "CURRENT -- $0. Final pre-grant frozen tree; ten pre-provider gates. No compute, no pod.",
+  "kind": "CURRENT -- Attempt-3 authorization issued, 10/10 gates PASS, launcher declined on price. No pod, $0.00.",
   "commit": "835ec84c5712855fb764b5d2948fc2f81ecb2bea",
   "executable_repair": "6c90dcb42f7b3f1a85b03fdd7ce9f43585efa06b",
   "suite": "2782 passed / 16 skipped / 0 failed (45m56s)",
@@ -70,9 +71,9 @@
   "the ATTENTION 'search declined to calibrate' reading: WITHDRAWN 2026-09-01"
  ],
  "next_starting_point": {
-  "status": "C1 attempts 1 and 2 were INFRASTRUCTURE ABORTS; no C1 measurement exists. Both setup gaps are now closed and gated at $0.",
-  "the_ask": "Attempt-3 grant review, then issuance under the documented ordering",
-  "budget": "$264.0396 spent of the unchanged $283.7600 cap; $19.7204 uncommitted. An Attempt-3 ceiling of $13.7578 leaves a $5.9626 worst-case reserve."
+  "status": "C1 is fully gated (10/10) and authorized; the launcher refused on market price. No C1 measurement exists.",
+  "the_ask": "maintainer decision: wait for L40S at <= $0.99/h and relaunch under the existing authorization, or reprice. Both are outside this grant.",
+  "budget": "$264.0396 spent of the unchanged $283.7600 cap; $19.7204 uncommitted."
  },
  "read_order": [
   "logs/PHASE_INDEX.md -- history by phase, START HERE",
@@ -122,7 +123,7 @@
    "authorizes": "nothing"
   },
   "c1": {
-   "status": "IMPLEMENTED / PRICED / ATTEMPTS 1 AND 2 INFRASTRUCTURE-ABORTED AT SETUP / NOT SCIENTIFICALLY EXECUTED / NOT CURRENTLY AUTHORIZED",
+   "status": "IMPLEMENTED / PRICED / ATTEMPTS 1-2 INFRASTRUCTURE-ABORTED / ATTEMPT 3 NOT LAUNCHED (market price) / NOT SCIENTIFICALLY EXECUTED",
    "what_it_is": "fixed-path ATTENTION isolation, 2 arms x 3 fresh seeds = 6 E1_KD_HEAVY_0860K probes. NOT recovery evidence.",
    "incumbent": "fe9683e6a9c783bbc6fe276a78c851c6, digest c313d1b4081b. Margin 0.000070, not distinguishable from cca699c93f34, NOT recovered.",
    "built": "standalone driver (B-I, G/H separate, per-probe admission); attention.activation_importance_v1; fixed_path + eea90c91/c313d1b4 gates; battery 950/850",
@@ -132,10 +133,10 @@
    "seeds": "1635674081, 1656475568, 696460635 (derived from the C0 digest)",
    "session": "scripts/pod/autoinit_c1_launch.py + autoinit_c1_driver.py, SESSION_KIND=c1, C1Authorization, 9 pre-provider gates. STANDALONE.",
    "scoring": "c1_confirmation_scoring@v1 77507935; equivalence IDENTICAL over 15 probes. @v2 808080a7 and battery a285d61f untouched.",
-   "attempt1": "2026-09-02 ABORT at setup: no bundle existed for the session commit. $0.0786. logs/autoinit_c1_attempt1/",
-   "attempt2": "2026-09-03 ABORT at ROPE_OK: 9/9 gates PASS; setup reached TEACHER_READY then 'no staged checkpoint to check'. $0.1013. logs/autoinit_c1_attempt2/",
-   "gates": "10 pre-provider gates. Transport and RoPE readiness both closed; attempts 1 and 2 died on those two.",
-   "rope_gap_closed": "rope_input_gate, the TENTH gate: C1 stages the canonical 1,418-byte checkpoint/config.json (a7131bb0, RoPE base 5,000,000) that ROPE_OK globs. Not the weights; ROPE_OK unchanged. Setup readiness only."
+   "attempt1": "2026-09-02 ABORT at bundle fetch. $0.0786. logs/autoinit_c1_attempt1/",
+   "attempt2": "2026-09-03 ABORT at ROPE_OK. $0.1013. logs/autoinit_c1_attempt2/",
+   "gates": "10 pre-provider gates, all PASS at attempt 3.",
+   "attempt3": "2026-09-04: authorization ISSUED, bundle staged, 10/10 gates PASS -- launcher DECLINED: L40S $1.09/h vs priced $0.99/h. NO POD, $0.00. logs/autoinit_c1_attempt3/"
   },
   "c2": {
    "status": "NOT STARTED",
@@ -169,7 +170,7 @@
   "closeout": "logs/storage_closeout_20260831.json",
   "c1_battery_canonical": "/home/ecs-user/aad-artifacts/autoinit/c1_confirmation_v1 -- COPY of the frozen bytes, 8 files, verified from the copy; repo-local working copy retained"
  },
- "blocker": "none. The attempt-1 transport gap and the attempt-2 ROPE_OK staging gap are both closed. Attempt 3 is scientifically permissible and NOT YET AUTHORIZED.",
+ "blocker": "C1 attempt 3 did not launch: L40S is quoted $1.09/h against the priced $0.99/h, and the ceiling is derived at $0.99/h. Maintainer decision: wait for the rate, or reprice. Not retried.",
  "deferred_not_blocking": {
   "_note": "open, none blocking. Detail: logs/HANDOFF_next_session.md",
   "duplicate_checkpoints": "2.92 GiB, KEEP / unresolved ownership -- maintainer decision",

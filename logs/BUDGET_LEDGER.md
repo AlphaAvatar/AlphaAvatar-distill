@@ -1482,3 +1482,22 @@ device-canary retry `$0.0637` and the measurement session `$0.0700`, and which
 this session had already applied correctly when staging `state_eval_v1` and
 `recovery_search_v2` for `verify_frozen_assets`. Weakening the test removed the
 only `$0` signal that would have refused this launch.
+
+## Phase C1 — attempt 3, 2026-09-04
+
+| what | cost | evidence |
+| --- | --- | --- |
+| C1 attempt 3: the launcher **declined to create a pod**. All ten pre-provider gates passed when run standalone, but the launcher checks the market rate first: `NVIDIA L40S $1.09/h, stock Low` against the priced `$0.99/h`, and aborted. **No pod was created, no provider resource existed, `$0.00` spent** — `logs/autoinit_c1_session.json` has no `pod_id` and no `cost` block, and `stages` is empty | $0.0000 | `logs/autoinit_c1_attempt3/` |
+
+**Cumulative unchanged: $264.0396 of the $283.7600 cap.** $19.7204 uncommitted.
+
+**The refusal is arithmetically correct.** The whole pricing record is derived at
+`$0.99/h`; at `$1.09/h` the same 834-minute hard-terminate window would cost
+`$15.15`, above the `$13.7578` ceiling. Raising `--max-price` would be a
+repricing decision, which this grant explicitly does not authorize.
+
+**Not one of the enumerated failure modes.** Attempts 1 and 2 were infrastructure
+aborts of a *running pod*. This is a market-price refusal before any resource
+existed. Whether it consumes the grant's one launch attempt is a maintainer
+question, not the launcher's and not mine. **No retry was attempted**, and
+`--max-price` was not raised.
