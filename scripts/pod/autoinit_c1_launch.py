@@ -32,6 +32,7 @@ at `$0.2300`, one step after its test gate passed.
 
 from __future__ import annotations
 
+import hashlib
 import json
 import sys
 from pathlib import Path
@@ -49,8 +50,8 @@ from aadistill.autoinit.c1_authorization import (  # noqa: E402
     c1_harness_digest,
 )
 from aadistill.autoinit.c1_bundle import (  # noqa: E402
-    C1BundleError, canonical_bundle_name, hf_download,
-    require_canonical_bundle_arg, roundtrip,
+    RELAY_REPO as RELAY_REPO_ID, C1BundleError, canonical_bundle_name,
+    hf_download, require_canonical_bundle_arg, roundtrip,
 )
 from aadistill.autoinit.c1_isolation import derive_recovery_seeds  # noqa: E402
 from aadistill.infrastructure.manifest import (  # noqa: E402
@@ -96,6 +97,31 @@ C1_EVAL_TOKENIZER: tuple[RelayInput, ...] = tuple(
          "3802169b2a02b81e6adb7ab4f64f91ff02db753c8c3a64a01c35192d3a61d8d7"),
     )
 )
+
+#: SETUP READINESS, not a C1 measurement input. The shared setup's `ROPE_OK` step
+#: globs `artifacts/stage1/*/checkpoint/config.json` and loads each match through
+#: `AutoConfig.from_pretrained` in BOTH venvs, requiring a stored RoPE base of
+#: 5,000,000. It reads no weights. C1 attempt 2 staged the three sidecars above
+#: and nothing else, so the glob was empty and setup exited `no staged checkpoint
+#: to check` after the teacher had already been fetched and verified — $0.1013.
+#:
+#: 1,418 bytes. The alternative was the full CANONICAL_INIT group, which would
+#: pull 1.19 GiB of weights this session never opens to satisfy a check that
+#: never reads them.
+#:
+#: The hash is INDEPENDENTLY VERIFIED, not transcribed: the relay object was
+#: downloaded read-only and hashed, and `rope_input_gate` re-derives it before
+#: every launch.
+C1_ROPE_INPUT: tuple[RelayInput, ...] = (
+    RelayInput("stage1/qwen3_0p6b_init_v0/checkpoint/config.json",
+               dest="artifacts/stage1/qwen3_0p6b_init_v0/checkpoint",
+               sha256="a7131bb092b38a078edc213961f0eb57eaead24f1396e25741f4887b1a694054"),
+)
+#: What `stored_rope_base` must report for the staged config, in both venvs.
+C1_ROPE_BASE = 5_000_000
+#: The directory the shared setup globs. Named once so the gate and the
+#: RelayInput cannot drift apart.
+C1_ROPE_CHECKPOINT_DIR = "artifacts/stage1/qwen3_0p6b_init_v0/checkpoint"
 
 #: C1's own, not Phase A's. The Phase-A launcher was imported for three things:
 #: the teacher revision (which `c1_session` already declares), a two-entry test
@@ -321,6 +347,63 @@ POST_TRAINING_CLASSES = (
 )
 
 
+def rope_input_gate(ctx: SessionContext) -> tuple[bool, str]:
+    """Does the shared setup have the input its `ROPE_OK` step requires?
+
+    Attempt 2 passed all nine gates, reached `TEACHER_READY` on the pod, and died
+    at `ROPE_OK` with `no staged checkpoint to check` — the setup globs
+    `artifacts/stage1/*/checkpoint/config.json` and C1 staged only tokenizer
+    sidecars there. `$0.1013` for a missing 1,418-byte file.
+
+    This is NOT a replacement for that pod-side check, which is the thing that
+    actually proves the RoPE base resolves under both runtimes. It proves only
+    that the input exists, is the canonical object, and carries the right base —
+    before a pod exists.
+
+    Read-only, and it downloads no weights.
+    """
+    import tempfile
+
+    if not C1_ROPE_INPUT:
+        return False, "the session declares no RoPE config input"
+    entry = C1_ROPE_INPUT[0]
+    if entry.dest != C1_ROPE_CHECKPOINT_DIR:
+        return False, (f"the RoPE config stages to {entry.dest!r}, not the "
+                       f"{C1_ROPE_CHECKPOINT_DIR!r} the shared setup globs")
+    if not (entry.sha256 or "").strip():
+        return False, "the RoPE config input carries no pinned sha256"
+    try:
+        with tempfile.TemporaryDirectory() as tmp:
+            got = hf_download(RELAY_REPO_ID, entry.path, Path(tmp))
+            data = Path(got).read_bytes()
+            digest = hashlib.sha256(data).hexdigest()
+            if digest != entry.sha256:
+                return False, (f"the relay's {entry.path} hashes to {digest}, "
+                               f"pinned {entry.sha256}")
+            cfg = json.loads(data)
+            from transformers import AutoConfig
+
+            from aadistill.models.student import stored_rope_base
+            loaded = AutoConfig.from_pretrained(str(Path(got).parent))
+            base = stored_rope_base(loaded)
+    except Exception as exc:                                   # noqa: BLE001
+        return False, f"the RoPE config input is not usable: {exc}"
+
+    if abs(base - C1_ROPE_BASE) > 1:
+        return False, (f"the staged config records RoPE base {base:,.0f}, not "
+                       f"{C1_ROPE_BASE:,.0f}; the pod's ROPE_OK step would refuse it")
+    ctx.evidence["rope_input_check"] = {
+        "relay_path": entry.path, "dest": entry.dest, "bytes": len(data),
+        "sha256": digest, "stored_rope_base": base,
+        "model_type": cfg.get("model_type"),
+        "weights_downloaded": False,
+        "note": ("proves the shared setup HAS its input; the pod-side ROPE_OK "
+                 "check still runs it through both venvs"),
+    }
+    return True, (f"{entry.path} ({len(data)} bytes, {digest[:12]}…) stages to "
+                  f"{entry.dest} with stored RoPE base {base:,.0f}")
+
+
 def bundle_staged_gate(ctx: SessionContext) -> tuple[bool, str]:
     """Can a pod, RIGHT NOW, obtain the exact authorized code?
 
@@ -507,7 +590,7 @@ def spec(args) -> SessionSpec:
         budget=c1_budget_spec(REPO_ROOT),
         setup=SetupManifest(
             relay_inputs=(*RECOVERY_LADDER, *CALIBRATION_V1,
-                           *C1_EVAL_TOKENIZER),
+                           *C1_EVAL_TOKENIZER, *C1_ROPE_INPUT),
             local_assets=LOCAL_ASSETS,
             #: Declared. Without it setup falls to SESSION_KIND=spend and loads a
             #: SpendAuthorization, which refuses this artifact — the session
@@ -556,6 +639,7 @@ def spec(args) -> SessionSpec:
             teacher_binding_gate,
             battery_staged_gate,
             artifact_spec_gate,
+            rope_input_gate,
             bundle_staged_gate,
         ),
         evidence_fields={

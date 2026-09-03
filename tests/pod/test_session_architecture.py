@@ -461,6 +461,60 @@ def test_a_checkpoint_is_staged_with_the_files_it_cannot_load_without(name, extr
         "checkpoint would not load")
 
 
+@pytest.mark.parametrize("name,extra", SESSION_LAUNCHERS,
+                         ids=lambda v: v if isinstance(v, str) else "")
+def test_a_session_that_asks_for_rope_ok_stages_a_config_for_it(name, extra):
+    """The invariant Attempt 2 was missing, and it is NOT the loadability one.
+
+    The shared setup's `ROPE_OK` step globs
+    `artifacts/stage1/*/checkpoint/config.json` and exits `no staged checkpoint to
+    check` if it finds none. It reads no weights. So the requirement is not "stage
+    a loadable checkpoint" — that is the separate rule above, keyed on
+    `model.safetensors` — it is "stage a config the RoPE gate can read".
+
+    C1 attempt 2 declared `ROPE_OK` in its setup markers, staged three tokenizer
+    sidecars into that directory and no `config.json`, passed all nine
+    pre-provider gates, reached `TEACHER_READY` on the pod and died here for
+    `$0.1013`. Conflating the two invariants is what let it through: the old rule
+    fired on ANY canonical-init file, I narrowed it to `model.safetensors` for the
+    right reason, and nothing was left covering this.
+    """
+    mod = load_session_launcher(name)
+    spec = mod.spec(session_args(mod, extra))
+    if "ROPE_OK" not in tuple(spec.setup.setup_markers):
+        pytest.skip(f"{name} does not ask for ROPE_OK")
+    configs = [r for r in spec.setup.staged_relay_inputs()
+               if r.path.endswith("/checkpoint/config.json")]
+    assert configs, (
+        f"{name} declares the ROPE_OK setup marker but stages no "
+        "checkpoint/config.json; the shared setup would exit 'no staged "
+        "checkpoint to check' after the teacher fetch")
+    assert any(r.dest.endswith("/checkpoint") for r in configs), (
+        f"{name} stages a config.json but none to a */checkpoint directory, so "
+        "the setup's artifacts/stage1/*/checkpoint/ glob would not find it: "
+        f"{[r.dest for r in configs]}")
+    #: A pinned hash is NOT required here. The older sessions stage the whole
+    #: CANONICAL_INIT group, in which only `model.safetensors` carries a pin, and
+    #: they have completed successfully; tightening that retroactively would be
+    #: the same over-broad move that hid the Attempt-2 defect. C1's own pin is
+    #: asserted in the C1-specific test below.
+
+
+def test_c1_stages_the_canonical_rope_config_specifically():
+    """C1's own binding, by hash: the object verified against the relay."""
+    mod = load_session_launcher("autoinit_c1_launch")
+    spec = mod.spec(session_args(mod, ()))
+    staged = {r.path: r for r in spec.setup.staged_relay_inputs()}
+    want = "stage1/qwen3_0p6b_init_v0/checkpoint/config.json"
+    assert want in staged, sorted(staged)
+    assert staged[want].sha256 == (
+        "a7131bb092b38a078edc213961f0eb57eaead24f1396e25741f4887b1a694054")
+    assert staged[want].dest == "artifacts/stage1/qwen3_0p6b_init_v0/checkpoint"
+    #: and NOT the weights, which the RoPE gate never reads
+    assert not [p for p in staged if p.endswith("model.safetensors")]
+    assert not [p for p in staged if p.endswith("generation_config.json")]
+
+
 def test_the_calibration_pin_matches_the_registry_that_already_carried_it():
     """One hash, two homes, and they may not drift.
 
@@ -714,3 +768,116 @@ def test_each_real_session_manifest_stages_through_the_real_block(
                 (repo / f"{r['dest']}/{r['path'].rsplit('/', 1)[-1]}"
                  ).read_bytes()).hexdigest()
             assert got == r["sha256"]
+
+
+# ---------------------------------------------------------------------------
+# The C1 RoPE readiness input, through the REAL staging block and the REAL
+# gate logic. Attempt 2 died at ROPE_OK after the teacher fetch, for $0.1013,
+# because the setup globs a config.json C1 did not stage.
+# ---------------------------------------------------------------------------
+
+def extract_rope_block() -> str:
+    """The `ROPE_OK` check body, verbatim from the shell script."""
+    text = SETUP.read_text()
+    start = text.index('say "checking the RoPE base resolves in every venv"')
+    body = text[text.index('$PY -c "', start) + len('$PY -c "'):]
+    body = body[:body.index('\n"\ndone')]
+    assert "no staged checkpoint to check" in body and "stored_rope_base" in body
+    return body.replace('\\"', '"')
+
+
+def run_rope_check(repo_root):
+    """Execute the real check body against a tree. Returns (rc, message)."""
+    import subprocess
+    import sys
+    import textwrap
+
+    body = extract_rope_block().replace("/workspace/aad", str(repo_root))
+    out = subprocess.run([sys.executable, "-c", textwrap.dedent(body)],
+                         capture_output=True, text=True, timeout=300)
+    return out.returncode, (out.stdout + out.stderr).strip()
+
+
+def _c1_relay_inputs():
+    mod = load_session_launcher("autoinit_c1_launch")
+    spec = mod.spec(session_args(mod, ()))
+    return [r for r in spec.setup.staged_relay_inputs()
+            if r.path.startswith("stage1/qwen3_0p6b_init_v0/checkpoint/")]
+
+
+def test_the_c1_checkpoint_inputs_land_where_the_rope_gate_globs(tmp_path,
+                                                                 monkeypatch):
+    """The REAL staging block, driven by C1's REAL declared manifest."""
+    import hashlib
+    import json as _json
+
+    local = REPO / "artifacts/stage1/qwen3_0p6b_init_v0/checkpoint"
+    inputs, relay = [], {}
+    for r in _c1_relay_inputs():
+        src = local / Path(r.path).name
+        if not src.is_file():
+            pytest.skip(f"{src} is not present on this machine")
+        relay[r.path] = src.read_bytes()
+        inputs.append({"repo": MAIN_RELAY, "path": r.path, "dest": r.dest,
+                       "sha256": r.sha256, "also_stage_to": None})
+    assert len(inputs) == 4, [i["path"] for i in inputs]
+
+    repo, fetched = run_staging(tmp_path, inputs, relay, monkeypatch)
+    dest = repo / "artifacts/stage1/qwen3_0p6b_init_v0/checkpoint"
+    landed = {p.name for p in dest.iterdir() if p.is_file()}
+    assert landed == {"config.json", "tokenizer.json", "tokenizer_config.json",
+                      "chat_template.jinja"}, landed
+    #: byte-identical to the pinned relay object
+    got = hashlib.sha256((dest / "config.json").read_bytes()).hexdigest()
+    assert got == "a7131bb092b38a078edc213961f0eb57eaead24f1396e25741f4887b1a694054"
+    #: and the weights were never asked for
+    assert not [p for p in fetched if p.endswith("model.safetensors")]
+
+
+def test_the_real_rope_check_refuses_a_tree_with_no_config(tmp_path):
+    """The Attempt-2 filesystem, reproduced: sidecars only, no config.json."""
+    d = tmp_path / "artifacts/stage1/qwen3_0p6b_init_v0/checkpoint"
+    d.mkdir(parents=True)
+    for name in ("tokenizer.json", "tokenizer_config.json", "chat_template.jinja"):
+        (d / name).write_text("{}")
+    rc, msg = run_rope_check(tmp_path)
+    assert rc != 0
+    assert "no staged checkpoint to check" in msg, msg
+
+
+def test_the_real_rope_check_accepts_the_canonical_config(tmp_path):
+    src = REPO / "artifacts/stage1/qwen3_0p6b_init_v0/checkpoint/config.json"
+    if not src.is_file():
+        pytest.skip("the canonical config is not present on this machine")
+    d = tmp_path / "artifacts/stage1/qwen3_0p6b_init_v0/checkpoint"
+    d.mkdir(parents=True)
+    (d / "config.json").write_bytes(src.read_bytes())
+    rc, msg = run_rope_check(tmp_path)
+    assert rc == 0, msg
+    assert "stored 5,000,000" in msg and "OK" in msg, msg
+
+
+def test_the_real_rope_check_refuses_a_wrong_stored_base(tmp_path):
+    """The mutation must move the NESTED field, not the flat one.
+
+    `stored_rope_base` reads `rope_parameters["rope_theta"]` first and falls back
+    to a flat `rope_theta` only when the nested form is absent — because when both
+    are present the flat one is transformers-4's class default, i.e. the wrong
+    value. This config carries `{"rope_parameters": {"rope_theta": 5000000}}` and
+    no flat field, so setting `rope_theta` changed nothing and the check still
+    passed. Asserting on the flat field would have been a mutation that never bit.
+    """
+    import json as _json
+
+    src = REPO / "artifacts/stage1/qwen3_0p6b_init_v0/checkpoint/config.json"
+    if not src.is_file():
+        pytest.skip("the canonical config is not present on this machine")
+    cfg = _json.loads(src.read_text())
+    assert cfg["rope_parameters"]["rope_theta"] == 5_000_000
+    cfg["rope_parameters"] = {**cfg["rope_parameters"], "rope_theta": 10_000}
+    d = tmp_path / "artifacts/stage1/qwen3_0p6b_init_v0/checkpoint"
+    d.mkdir(parents=True)
+    (d / "config.json").write_text(_json.dumps(cfg))
+    rc, msg = run_rope_check(tmp_path)
+    assert rc != 0, msg
+    assert "RoPE base" in msg or "rope" in msg.lower(), msg

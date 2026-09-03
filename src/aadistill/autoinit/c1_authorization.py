@@ -62,6 +62,9 @@ C1_HARNESS_SOURCE_FILES_V1: tuple[str, ...] = (
     # exist. The staging tool is measured too: it decides what the pod checks out.
     "src/aadistill/autoinit/c1_bundle.py",
     "scripts/autoinit/stage_c1_bundle.py",
+    # the shared setup step whose input C1 must stage, and the reader that
+    # decides whether the staged config satisfies it
+    "src/aadistill/models/student.py",
     # what the collector is told to save, and what it may skip on failure
     "configs/autoinit/c1_artifacts.json",
     "configs/autoinit/c1_artifacts_failed.json",
