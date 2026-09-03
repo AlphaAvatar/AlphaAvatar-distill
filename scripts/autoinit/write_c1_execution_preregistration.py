@@ -541,7 +541,41 @@ def main() -> None:
                          "-> gate -> provider. A bundle built for the "
                          "pre-authorization base checks out a tree with no "
                          "authorization in it"),
-            "n_pre_provider_gates": 9,
+            "n_pre_provider_gates": 10,
+        },
+
+        #: SETUP READINESS, explicitly NOT a C1 measurement input. The shared
+        #: setup's ROPE_OK step globs artifacts/stage1/*/checkpoint/config.json
+        #: and loads each match through AutoConfig in both venvs, requiring a
+        #: stored RoPE base of 5,000,000; it reads no weights. Attempt 2 staged
+        #: only the three evaluation tokenizer sidecars there and died at that
+        #: step for $0.1013 after the teacher had already been verified.
+        "setup_readiness": {
+            "rope_ok_input": {
+                "relay_path": "stage1/qwen3_0p6b_init_v0/checkpoint/config.json",
+                "dest": "artifacts/stage1/qwen3_0p6b_init_v0/checkpoint",
+                "sha256": sha256_file(
+                    REPO / "artifacts/stage1/qwen3_0p6b_init_v0/checkpoint/config.json"),
+                "bytes": (REPO / "artifacts/stage1/qwen3_0p6b_init_v0/checkpoint"
+                          "/config.json").stat().st_size,
+                "stored_rope_base": 5000000,
+                "verified": ("the relay object was downloaded read-only and hashed "
+                             "against the identity the repository already records; "
+                             "rope_input_gate re-derives it before every launch"),
+            },
+            "is_not_a_measurement_input": (
+                "this config is consumed ONLY by the shared setup's ROPE_OK step. "
+                "It is not read by any C1 stage: the arms are materialized from "
+                "the verified teacher, the probes train from the arm checkpoints, "
+                "and stage H evaluates a package built from the trained bytes plus "
+                "the three frozen tokenizer sidecars. No C1 number depends on it."),
+            "weights_not_staged": (
+                "model.safetensors and generation_config.json are deliberately NOT "
+                "pulled: 1.19 GiB for a check that reads neither"),
+            "gate": ("rope_input_gate, at $0 and read-only -- declared, correct "
+                     "destination, pinned, present on the relay, hashes to the pin, "
+                     "parses, and stored_rope_base == 5,000,000. It does not "
+                     "replace the pod-side ROPE_OK check under both runtimes"),
         },
 
         "out_of_scope": [

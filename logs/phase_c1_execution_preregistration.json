@@ -3,7 +3,7 @@
  "preregistration_id": "autoinit.v1.phase_c1.execution",
  "written_utc": "2026-09-02T00:00:00Z",
  "_contract": "Everything the Phase-C1 session will run, bound before any C1 result exists. AUTHORIZES NOTHING: no pricing decision, no spend grant, no permission to launch. An authorization, if ever issued, binds THIS document.",
- "head_commit": "aa2855caf1effd1d342190e4b4264a3a2c318ab3",
+ "head_commit": "6c90dcb42f7b3f1a85b03fdd7ce9f43585efa06b",
  "executable_source": {
   "digest": "a5bd40a86052f0125a16414bc98617782cdc011f70590cb938518bb25786740c",
   "files": [
@@ -51,7 +51,7 @@
   "rule": "sha256 over sorted 'path:sha256' lines of the declared set"
  },
  "c1_harness": {
-  "digest": "a67a70f3714ac008866b5726a6ea9ec26bb6b5f58d746b0d81748c88ba3376f9",
+  "digest": "c95d9b07d278d0451fda2157bae1cd00e333e717fe3a28b3c4a509d94e084baa",
   "files": [
    {
     "path": "configs/autoinit/c1_artifacts.json",
@@ -95,8 +95,8 @@
    },
    {
     "path": "scripts/pod/autoinit_c1_launch.py",
-    "sha256": "31ec5de7f9a68ffe1a58435e42d2e47452525fc1349d413026ceda74ab09b7b2",
-    "bytes": 32011
+    "sha256": "1f080e520eefdc7d8b62e08af4bb48476060f3ce193318fbd63497ad5644d95c",
+    "bytes": 36266
    },
    {
     "path": "scripts/pod/autoinit_engine_probe.py",
@@ -160,8 +160,8 @@
    },
    {
     "path": "src/aadistill/autoinit/c1_authorization.py",
-    "sha256": "16ea0c644b1349c0c0eec7f1ff6074dc862d8979a991bdbd0165af49c30886c6",
-    "bytes": 15428
+    "sha256": "9ab920e30da448dba5b814eac0193adc67859f3869eaee326a6cdafbfa6aa621",
+    "bytes": 15595
    },
    {
     "path": "src/aadistill/autoinit/c1_bundle.py",
@@ -369,12 +369,17 @@
     "bytes": 14210
    },
    {
+    "path": "src/aadistill/models/student.py",
+    "sha256": "90f60257f51d9bb1e3f51ddb5c70719cad09a43f5663cb68a73dbf4fec6e5e44",
+    "bytes": 6651
+   },
+   {
     "path": "src/aadistill/models/teacher.py",
     "sha256": "d8d070850dad37cb53d6db4cb548a48af08a5a705eb86bb7990d054125a525da",
     "bytes": 3567
    }
   ],
-  "n_files": 64,
+  "n_files": 65,
   "rule": "sha256 over sorted 'path:sha256' lines of the declared set",
   "note": "the set an authorization measures. It includes the launcher, the driver, the setup script, the operators the fixed path applies, the recovery and scoring paths the six probes invoke, and the session infrastructure they run through."
  },
@@ -384,7 +389,7 @@
   "session_kind": "c1",
   "allows_phase_a": false,
   "allows_beam_search": false,
-  "n_harness_files": 64,
+  "n_harness_files": 65,
   "status": "NO GRANT EXISTS. No authorization has been issued."
  },
  "launcher": "scripts/pod/autoinit_c1_launch.py",
@@ -838,7 +843,20 @@
   "preparation": "scripts/autoinit/stage_c1_bundle.py -- MAY mutate the relay; refuses a commit that does not carry the authorization, and refuses to overwrite a different existing remote object",
   "gate": "bundle_staged_gate, READ-ONLY: download the canonical relay object, sha256 it against the staged bundle, git bundle verify the round-tripped bytes, clone and check out the session commit exactly as the pod's setup does, then require the authorization inside the checkout to be the artifact the launcher is loading and the harness recomputed from that checkout to equal the authorized digest",
   "ordering": "repair base -> issue -> commit ONLY the authorization -> that commit is the session commit -> bundle it -> upload -> gate -> provider. A bundle built for the pre-authorization base checks out a tree with no authorization in it",
-  "n_pre_provider_gates": 9
+  "n_pre_provider_gates": 10
+ },
+ "setup_readiness": {
+  "rope_ok_input": {
+   "relay_path": "stage1/qwen3_0p6b_init_v0/checkpoint/config.json",
+   "dest": "artifacts/stage1/qwen3_0p6b_init_v0/checkpoint",
+   "sha256": "a7131bb092b38a078edc213961f0eb57eaead24f1396e25741f4887b1a694054",
+   "bytes": 1418,
+   "stored_rope_base": 5000000,
+   "verified": "the relay object was downloaded read-only and hashed against the identity the repository already records; rope_input_gate re-derives it before every launch"
+  },
+  "is_not_a_measurement_input": "this config is consumed ONLY by the shared setup's ROPE_OK step. It is not read by any C1 stage: the arms are materialized from the verified teacher, the probes train from the arm checkpoints, and stage H evaluates a package built from the trained bytes plus the three frozen tokenizer sidecars. No C1 number depends on it.",
+  "weights_not_staged": "model.safetensors and generation_config.json are deliberately NOT pulled: 1.19 GiB for a check that reads neither",
+  "gate": "rope_input_gate, at $0 and read-only -- declared, correct destination, pinned, present on the relay, hashes to the pin, parses, and stored_rope_base == 5,000,000. It does not replace the pod-side ROPE_OK check under both runtimes"
  },
  "out_of_scope": [
   "formal Stage-2/Stage-3 recovery training \u2014 explicitly NOT in scope; C1 is a fixed-path ATTENTION isolation using short 0.86M recovery probes and establishes no recovered-model capability",
@@ -847,5 +865,5 @@
   "any search, ranking, successive halving, tie-breaking or arm elimination"
  ],
  "authorizes": "nothing",
- "preregistration_sha256": "f5eff2e55f82487780c0fae822e487d86681ac082a06b1ef88015a0bf3577a42"
+ "preregistration_sha256": "6e733a19085cb15780ba36ea84a39a7efa57218f01864a59594a2532c28389b3"
 }
