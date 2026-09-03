@@ -281,8 +281,10 @@ def test_mutation_dropping_the_remote_roundtrip_is_caught():
     assert "upload_file" not in code
 
 
-def test_the_gate_is_wired_and_is_the_ninth():
-    """Nine now: the eight that passed while attempt 1 died, plus transport."""
+def test_the_gate_is_wired_and_the_count_is_ten():
+    """Ten now. Eight passed while attempt 1 died on transport; nine passed while
+    attempt 2 died on the ROPE_OK staging input. Each abort added the gate that
+    would have refused it at $0."""
     import autoinit_c1_launch as L
 
     args = L.build_parser().parse_args(
@@ -292,7 +294,8 @@ def test_the_gate_is_wired_and_is_the_ninth():
     names = [getattr(g, "__name__", "session_commit_and_lineage")
              for g in spec.precheck]
     assert "bundle_staged_gate" in names, names
-    assert len(spec.precheck) == 9, names
+    assert "rope_input_gate" in names, names
+    assert len(spec.precheck) == 10, names
 
 
 def test_preparation_is_a_separate_command_that_may_mutate_the_relay():

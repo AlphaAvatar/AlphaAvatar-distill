@@ -272,8 +272,9 @@ def test_every_gate_but_the_commit_binding_passes_against_the_candidate(launcher
                                    "bundle_staged_gate"):
             failures.append(f"{name}: {msg}")
     assert not failures, failures
-    assert "bundle_staged_gate" in [
-        getattr(g, "__name__", "") for g in spec.precheck]
+    names = [getattr(g, "__name__", "") for g in spec.precheck]
+    assert "bundle_staged_gate" in names and "rope_input_gate" in names, names
+    assert len(spec.precheck) == 10, names
 
 
 # --- the preregistration must verify its own declared hash ------------------
