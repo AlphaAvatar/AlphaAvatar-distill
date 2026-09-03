@@ -40,7 +40,15 @@ from aadistill.infrastructure.manifest import sha256_json  # noqa: E402
 
 OUT = REPO / "logs/phase_c1_pricing.json"
 
-PRICE_PER_HOUR = 0.99          # L40S, measured; same instance class as Phase A/B
+#: Secure-cloud L40S, the field `session_runner` prices on
+#: (`gpuTypes[0].securePrice`). Was 0.99 when Phase A/B ran and when C1 was first
+#: priced; the live secure rate is 1.09, and C1 attempt 3 refused to create a pod
+#: twice because of it. REPRICED 2026-09-04 by maintainer decision.
+#:
+#: `communityPrice` was 0.79 at the same moment. It is a DIFFERENT product this
+#: launcher does not provision, and reporting it as though it gated the launch is
+#: a mistake this record now names so it is not repeated.
+PRICE_PER_HOUR = 1.09
 N_ARMS, N_SEEDS = 2, 3
 N_PROBES = N_ARMS * N_SEEDS
 
@@ -126,10 +134,39 @@ def main() -> None:
 
     doc = {
         "schema": "aadistill.autoinit.c1_pricing/v1",
-        "generated_utc": "2026-09-02T00:00:00Z",
+        "generated_utc": "2026-09-04T00:00:00Z",
         "_contract": ("A conservative cost bound for the Phase-C1 session. PRICING "
                       "ONLY: this is not an authorization, not a grant, and not "
                       "permission to launch. Nothing here approves spending."),
+        "amendment": {
+            "date": "2026-09-04",
+            "what": "provider rate only, $0.99/h -> $1.09/h secure L40S",
+            "why": ("the previous record priced secure L40S at $0.99/h, which is "
+                    "what Phase A/B paid and what C1 attempt 2 was created at. The "
+                    "live secure rate is $1.09/h, and C1 attempt 3 refused to "
+                    "create a pod twice because of it -- correctly, since the "
+                    "whole ceiling was derived at $0.99/h."),
+            "not_changed": ("every minute assumption. Each line item's USD is "
+                            "recomputed from its UNCHANGED minutes at the new rate, "
+                            "and the floor/soft/hard minute envelope "
+                            "(739.82 / 813.802 / 833.802) is identical."),
+            "community_price_is_a_different_product": (
+                "communityPrice was $0.79 at the same moment. `session_runner` "
+                "prices on `gpuTypes[0].securePrice`, so the $0.79 figure never "
+                "gated this session; it was reported as though it did, once, and "
+                "that error is named here so the record cannot repeat it."),
+            "supersedes": {
+                "previous_price_per_hour_usd": 0.99,
+                "previous_floor_usd": 12.207,
+                "previous_expected_usd": 13.4277,
+                "previous_hard_ceiling_usd": 13.7578,
+            },
+            "budget_effect": ("worst-case cumulative rises from $277.7974 to "
+                              "$279.1871 against an unchanged $283.7600 cap, "
+                              "leaving a $4.5729 reserve. Approved by maintainer "
+                              "review; no cap increase, and no allowance for "
+                              "another full C1 retry."),
+        },
         "hardware": {"name": "L40S", "price_per_hour_usd": PRICE_PER_HOUR,
                      "basis": "measured; the instance class Phase A/B used"},
         "session_shape": {"arms": N_ARMS, "seeds": N_SEEDS, "probes": N_PROBES,
@@ -138,13 +175,13 @@ def main() -> None:
         "line_items": [dict(i, usd=round(minutes_to_usd(i["minutes"]), 4))
                        for i in items],
         "totals": {
-            "floor_minutes": round(floor_min, 2),
+            "floor_minutes": round(floor_min, 3),
             "floor_usd": round(minutes_to_usd(floor_min), 4),
             "contingency_fraction": CONTINGENCY_FRACTION,
-            "expected_minutes": round(expected_min, 2),
+            "expected_minutes": round(expected_min, 3),
             "expected_usd": round(minutes_to_usd(expected_min), 4),
             "artifact_recovery_reserve_minutes": ARTIFACT_RECOVERY_RESERVE_MIN,
-            "hard_ceiling_minutes": round(ceiling_min, 2),
+            "hard_ceiling_minutes": round(ceiling_min, 3),
             # ROUNDED UP, deliberately. A ceiling is the one figure that must
             # never round down: at 4 dp the exact 13.757733 becomes 13.7577,
             # which is $0.000033 BELOW the plan it is meant to authorize, and a

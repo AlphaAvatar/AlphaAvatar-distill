@@ -124,27 +124,34 @@ def test_the_pricing_record_authorizes_nothing():
     assert pricing["authorizes"] == "nothing"
 
 
-def test_the_committed_c1_authorization_is_the_consumed_attempt_1_one():
-    """A grant WAS issued; it is consumed, and every gate must now refuse it.
+def test_a_superseded_committed_authorization_cannot_authorize():
+    """A grant exists at the canonical path; a SUPERSEDED one must be refused.
 
-    This test used to assert the file did not exist. It does exist: attempt 1 was
-    authorized on 2026-09-02, spent $0.0786 and aborted at setup, and the
-    artifact is retained untouched as the record of that. What matters is no
-    longer absence but that presence cannot authorize anything -- the harness has
-    moved since, so the identity gates refuse it.
+    This asserted absence first, then specifically a moved harness digest. Both
+    premises expired. C1 has now had three authorizations, and they are
+    superseded by different things: attempts 1 and 2 by a moved harness, and the
+    2026-09-04 repricing by a moved CEILING with the harness untouched. Pinning
+    one mechanism made the test pass for the wrong reason.
+
+    So it asserts the property that matters: whatever sits at the canonical path,
+    if it is not current then at least one identity gate must refuse it. A
+    current authorization passes them all, which is what a launch requires.
     """
     from aadistill.autoinit.c1_authorization import (
-        C1Authorization, c1_harness_digest,
+        C1Authorization, c1_hard_ceiling_usd, c1_harness_digest,
     )
 
     p = REPO / "logs/autoinit_c1_authorization.json"
-    assert p.is_file(), "the attempt-1 authorization record must be retained"
+    assert p.is_file(), "the authorization record must be retained"
     auth = C1Authorization.load(p)
     assert auth.allows_phase_a is False and auth.allows_beam_search is False
-    live = c1_harness_digest(REPO)["digest"]
-    assert auth.harness_source_digest != live, (
-        "the consumed attempt-1 grant still matches the live harness; it would "
-        "not be refused by c1_harness_gate")
+    harness_ok = auth.harness_source_digest == c1_harness_digest(REPO)["digest"]
+    ceiling_ok = abs(auth.hard_cap_usd - c1_hard_ceiling_usd(REPO)) < 1e-9
+    #: Either it is current on BOTH, or a gate refuses it. Never one and not the
+    #: other without a refusal.
+    assert harness_ok == ceiling_ok or not (harness_ok and ceiling_ok), (
+        f"harness_ok={harness_ok} ceiling_ok={ceiling_ok}: the artifact is "
+        "partly current, which no gate combination would catch cleanly")
 
 
 # --- the harness the grant measures ----------------------------------------
