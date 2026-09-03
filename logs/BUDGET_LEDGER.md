@@ -1575,8 +1575,30 @@ Cost is recorded at the watchdog's last poll (19.17 min → `$0.3483`, written a
 watchdog polls the provider and the launcher measures its own wall clock; when
 they disagree the more expensive reading is the honest one.
 
-**Three of the fourteen failures are known; eleven are not.** `setup.sh` runs
-`uv run pytest tests/ -q 2>&1 | tail -3`, so only three `FAILED` lines ever
-reach the launch log. The full list went to `/workspace/pytest.log` on a pod
-that no longer exists. A gate that can fail 14 ways and report 3 is not a
-diagnosable gate, and that is a repair this abort has earned.
+**All fourteen are now enumerated, at `$0.0000`** — by running the same suite
+with `HOME` pointed at an empty directory, which is the condition a fresh pod is
+actually in. `logs/autoinit_c1_attempt3r/test_gate_enumeration.json`.
+
+| count | tests | cause |
+| --- | --- | --- |
+| 7 | `test_c1_battery.py` renderer parity, every group | `battery_render.py:33` reads `~/.cache/huggingface/hub` **directly**, ignoring `HF_HOME` |
+| 5 | `test_leaf_transport_publish.py`, all of them | `publish_selected_leaves.py:110` reads `~/.cache/huggingface/token`; pod setup writes it to `$HF_HOME/token` |
+| 1 | `test_every_log_is_classified_in_the_catalog` | my two unclassified attempt-3R log entries — FIXED |
+| 1 | `test_the_live_snapshot_records_the_terminal_phase_b_state` | the snapshot said an authorization was live — FIXED |
+
+7 + 5 + 1 + 1 = 14, and the sweep's own 13 reconciles as that set minus the two
+already fixed, plus one gate test needing network the empty `$HOME` denies.
+
+**It is a class, not a file.** Two modules hard-code `Path.home()` for HF state —
+the dataset cache and the credential — and both ignore the `HF_HOME` the pod does
+set. Repairing only the battery tests would have left the five transport tests to
+fail the same gate on the next attempt, for another `$0.35`, after I had reported
+it fixed.
+
+Three diagnostic notes this abort earned. `autoinit_preflight_setup.sh` runs
+`tail -4 /workspace/pytest.log` then `exit 1`, so 14 failures arrived as 3 names
+and the file died with the pod; one `grep '^FAILED'` would have been free.
+`simulate_pod_env.sh` exists to ask "would this suite pass on a pod?" but models
+only the gitignored-repo half, not `$HOME`, so it would have caught none of the
+twelve environment failures. And no C1 attempt had ever reached `TESTS_OK`
+before, which is why a gate that cannot pass on a pod survived three launches.

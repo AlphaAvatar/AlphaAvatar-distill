@@ -1,0 +1,617 @@
+.........................ssss.s......................................... [  2%]
+........................................................................ [  5%]
+........................................................................ [  7%]
+........................................................................ [ 10%]
+........................................................................ [ 13%]
+..........................FFFF.F........................................ [ 15%]
+........................................................................ [ 18%]
+........................................................................ [ 20%]
+........................................................................ [ 23%]
+...............................FFFFFFF.................................. [ 26%]
+...............ssssss................................................... [ 28%]
+........................................................................ [ 31%]
+......................ssssss............................................ [ 33%]
+........................................................................ [ 36%]
+........................................................................ [ 39%]
+........................................................................ [ 41%]
+........................................................................ [ 44%]
+........................................................................ [ 46%]
+........................................................................ [ 49%]
+........................................................................ [ 52%]
+.......................................................ssssss........... [ 54%]
+...ss....................F.............................................. [ 57%]
+........................................................................ [ 59%]
+........................................................................ [ 62%]
+..................................................s..................... [ 65%]
+.............s.......................................................... [ 67%]
+...sss.................................................................. [ 70%]
+........................................................................ [ 72%]
+........................................................................ [ 75%]
+........................................................................ [ 78%]
+.....................................................ss.......s......... [ 80%]
+......................................................................s. [ 83%]
+........................................................................ [ 85%]
+........s.sss......................................................ss... [ 88%]
+........................................................................ [ 91%]
+........................................................................ [ 93%]
+........................................................................ [ 96%]
+.......................s................................................ [ 98%]
+...............................                                          [100%]
+=================================== FAILURES ===================================
+___________ test_a_corrupted_remote_file_is_caught_by_the_round_trip ___________
+
+pub = <module 'publish_leaves' from '/home/ecs-user/AlphaAvatar-distill/scripts/autoinit/publish_selected_leaves.py'>
+tmp_path = PosixPath('/tmp/pytest-of-ecs-user/pytest-7/test_a_corrupted_remote_file_i0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f4e18afd270>
+
+    def test_a_corrupted_remote_file_is_caught_by_the_round_trip(pub, tmp_path,
+                                                                 monkeypatch):
+        """The hub serves different bytes than were uploaded."""
+        good = b"the real weights"
+        digest = hashlib.sha256(good).hexdigest()
+        man = manifest_for(pub, [{"filename": "model.safetensors", "size_bytes": len(good),
+                                  "sha256": digest,
+                                  "remote_path": "phase_a_attempt12/leaf0/model.safetensors"}])
+    
+        served = tmp_path / "served.bin"
+        served.write_bytes(b"corrupted bytes!")          # same length, wrong content
+        monkeypatch.setattr(pub, "remote_oids", lambda m: {
+            "phase_a_attempt12/leaf0/model.safetensors":
+                {"size_bytes": len(good), "lfs_sha256": digest}})
+        import huggingface_hub
+        monkeypatch.setattr(huggingface_hub, "hf_hub_download",
+                            lambda *a, **k: str(served))
+        monkeypatch.setattr(pub, "EVIDENCE", tmp_path / "evidence.json")
+        (tmp_path / "evidence.json").write_text(json.dumps({"leaves": [
+            {"state_id": "leaf0", "identity": {}}]}))
+    
+>       result = pub.verify(man)
+                 ^^^^^^^^^^^^^^^
+
+tests/autoinit/test_leaf_transport_publish.py:148: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+scripts/autoinit/publish_selected_leaves.py:253: in verify
+    repo_type="model", token=token(),
+                             ^^^^^^^
+scripts/autoinit/publish_selected_leaves.py:110: in token
+    return Path(os.path.expanduser("~/.cache/huggingface/token")).read_text().strip()
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../.local/share/uv/python/cpython-3.14.2-linux-x86_64-gnu/lib/python3.14/pathlib/__init__.py:787: in read_text
+    with self.open(mode='r', encoding=encoding, errors=errors, newline=newline) as f:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = PosixPath('/home/ecs-user/aad-artifacts/emptyhome/.cache/huggingface/token')
+mode = 'r', buffering = -1, encoding = 'locale', errors = None, newline = None
+
+    def open(self, mode='r', buffering=-1, encoding=None,
+             errors=None, newline=None):
+        """
+        Open the file pointed to by this path and return a file object, as
+        the built-in open() function does.
+        """
+        if "b" not in mode:
+            encoding = io.text_encoding(encoding)
+>       return io.open(self, mode, buffering, encoding, errors, newline)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       FileNotFoundError: [Errno 2] No such file or directory: '/home/ecs-user/aad-artifacts/emptyhome/.cache/huggingface/token'
+
+../.local/share/uv/python/cpython-3.14.2-linux-x86_64-gnu/lib/python3.14/pathlib/__init__.py:771: FileNotFoundError
+________________ test_a_size_mismatch_at_the_far_end_is_caught _________________
+
+pub = <module 'publish_leaves' from '/home/ecs-user/AlphaAvatar-distill/scripts/autoinit/publish_selected_leaves.py'>
+tmp_path = PosixPath('/tmp/pytest-of-ecs-user/pytest-7/test_a_size_mismatch_at_the_fa0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f4e1cc72f90>
+
+    def test_a_size_mismatch_at_the_far_end_is_caught(pub, tmp_path, monkeypatch):
+        man = manifest_for(pub, [{"filename": "model.safetensors", "size_bytes": 1000,
+                                  "sha256": "a" * 64,
+                                  "remote_path": "phase_a_attempt12/leaf0/model.safetensors"}])
+        monkeypatch.setattr(pub, "remote_oids", lambda m: {
+            "phase_a_attempt12/leaf0/model.safetensors":
+                {"size_bytes": 999, "lfs_sha256": "a" * 64}})
+        monkeypatch.setattr(pub, "EVIDENCE", tmp_path / "e.json")
+        (tmp_path / "e.json").write_text(json.dumps({"leaves": [
+            {"state_id": "leaf0", "identity": {}}]}))
+        import huggingface_hub
+        monkeypatch.setattr(huggingface_hub, "hf_hub_download",
+                            lambda *a, **k: str(tmp_path / "e.json"))
+>       result = pub.verify(man)
+                 ^^^^^^^^^^^^^^^
+
+tests/autoinit/test_leaf_transport_publish.py:165: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+scripts/autoinit/publish_selected_leaves.py:253: in verify
+    repo_type="model", token=token(),
+                             ^^^^^^^
+scripts/autoinit/publish_selected_leaves.py:110: in token
+    return Path(os.path.expanduser("~/.cache/huggingface/token")).read_text().strip()
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../.local/share/uv/python/cpython-3.14.2-linux-x86_64-gnu/lib/python3.14/pathlib/__init__.py:787: in read_text
+    with self.open(mode='r', encoding=encoding, errors=errors, newline=newline) as f:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = PosixPath('/home/ecs-user/aad-artifacts/emptyhome/.cache/huggingface/token')
+mode = 'r', buffering = -1, encoding = 'locale', errors = None, newline = None
+
+    def open(self, mode='r', buffering=-1, encoding=None,
+             errors=None, newline=None):
+        """
+        Open the file pointed to by this path and return a file object, as
+        the built-in open() function does.
+        """
+        if "b" not in mode:
+            encoding = io.text_encoding(encoding)
+>       return io.open(self, mode, buffering, encoding, errors, newline)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       FileNotFoundError: [Errno 2] No such file or directory: '/home/ecs-user/aad-artifacts/emptyhome/.cache/huggingface/token'
+
+../.local/share/uv/python/cpython-3.14.2-linux-x86_64-gnu/lib/python3.14/pathlib/__init__.py:771: FileNotFoundError
+_________ test_an_lfs_oid_that_disagrees_is_caught_without_downloading _________
+
+pub = <module 'publish_leaves' from '/home/ecs-user/AlphaAvatar-distill/scripts/autoinit/publish_selected_leaves.py'>
+tmp_path = PosixPath('/tmp/pytest-of-ecs-user/pytest-7/test_an_lfs_oid_that_disagrees0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f4e18b60d50>
+
+    def test_an_lfs_oid_that_disagrees_is_caught_without_downloading(pub, tmp_path,
+                                                                     monkeypatch):
+        """The cheap check: the hub's own content hash, compared before any bytes
+        move. A mismatch here means the upload landed something else."""
+        man = manifest_for(pub, [{"filename": "model.safetensors", "size_bytes": 10,
+                                  "sha256": "a" * 64,
+                                  "remote_path": "phase_a_attempt12/leaf0/model.safetensors"}])
+        monkeypatch.setattr(pub, "remote_oids", lambda m: {
+            "phase_a_attempt12/leaf0/model.safetensors":
+                {"size_bytes": 10, "lfs_sha256": "b" * 64}})
+        monkeypatch.setattr(pub, "EVIDENCE", tmp_path / "e.json")
+        (tmp_path / "e.json").write_text(json.dumps({"leaves": [
+            {"state_id": "leaf0", "identity": {}}]}))
+        import huggingface_hub
+        monkeypatch.setattr(huggingface_hub, "hf_hub_download",
+                            lambda *a, **k: str(tmp_path / "e.json"))
+>       result = pub.verify(man)
+                 ^^^^^^^^^^^^^^^
+
+tests/autoinit/test_leaf_transport_publish.py:185: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+scripts/autoinit/publish_selected_leaves.py:253: in verify
+    repo_type="model", token=token(),
+                             ^^^^^^^
+scripts/autoinit/publish_selected_leaves.py:110: in token
+    return Path(os.path.expanduser("~/.cache/huggingface/token")).read_text().strip()
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../.local/share/uv/python/cpython-3.14.2-linux-x86_64-gnu/lib/python3.14/pathlib/__init__.py:787: in read_text
+    with self.open(mode='r', encoding=encoding, errors=errors, newline=newline) as f:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = PosixPath('/home/ecs-user/aad-artifacts/emptyhome/.cache/huggingface/token')
+mode = 'r', buffering = -1, encoding = 'locale', errors = None, newline = None
+
+    def open(self, mode='r', buffering=-1, encoding=None,
+             errors=None, newline=None):
+        """
+        Open the file pointed to by this path and return a file object, as
+        the built-in open() function does.
+        """
+        if "b" not in mode:
+            encoding = io.text_encoding(encoding)
+>       return io.open(self, mode, buffering, encoding, errors, newline)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       FileNotFoundError: [Errno 2] No such file or directory: '/home/ecs-user/aad-artifacts/emptyhome/.cache/huggingface/token'
+
+../.local/share/uv/python/cpython-3.14.2-linux-x86_64-gnu/lib/python3.14/pathlib/__init__.py:771: FileNotFoundError
+________________ test_a_file_absent_from_the_far_end_is_caught _________________
+
+pub = <module 'publish_leaves' from '/home/ecs-user/AlphaAvatar-distill/scripts/autoinit/publish_selected_leaves.py'>
+tmp_path = PosixPath('/tmp/pytest-of-ecs-user/pytest-7/test_a_file_absent_from_the_fa0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f4e18b62250>
+
+    def test_a_file_absent_from_the_far_end_is_caught(pub, tmp_path, monkeypatch):
+        man = manifest_for(pub, [{"filename": "model.safetensors", "size_bytes": 10,
+                                  "sha256": "a" * 64,
+                                  "remote_path": "phase_a_attempt12/leaf0/model.safetensors"}])
+        monkeypatch.setattr(pub, "remote_oids", lambda m: {})
+        monkeypatch.setattr(pub, "EVIDENCE", tmp_path / "e.json")
+        (tmp_path / "e.json").write_text(json.dumps({"leaves": [
+            {"state_id": "leaf0", "identity": {}}]}))
+        import huggingface_hub
+        monkeypatch.setattr(huggingface_hub, "hf_hub_download",
+                            lambda *a, **k: str(tmp_path / "e.json"))
+>       result = pub.verify(man)
+                 ^^^^^^^^^^^^^^^
+
+tests/autoinit/test_leaf_transport_publish.py:200: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+scripts/autoinit/publish_selected_leaves.py:253: in verify
+    repo_type="model", token=token(),
+                             ^^^^^^^
+scripts/autoinit/publish_selected_leaves.py:110: in token
+    return Path(os.path.expanduser("~/.cache/huggingface/token")).read_text().strip()
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../.local/share/uv/python/cpython-3.14.2-linux-x86_64-gnu/lib/python3.14/pathlib/__init__.py:787: in read_text
+    with self.open(mode='r', encoding=encoding, errors=errors, newline=newline) as f:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = PosixPath('/home/ecs-user/aad-artifacts/emptyhome/.cache/huggingface/token')
+mode = 'r', buffering = -1, encoding = 'locale', errors = None, newline = None
+
+    def open(self, mode='r', buffering=-1, encoding=None,
+             errors=None, newline=None):
+        """
+        Open the file pointed to by this path and return a file object, as
+        the built-in open() function does.
+        """
+        if "b" not in mode:
+            encoding = io.text_encoding(encoding)
+>       return io.open(self, mode, buffering, encoding, errors, newline)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       FileNotFoundError: [Errno 2] No such file or directory: '/home/ecs-user/aad-artifacts/emptyhome/.cache/huggingface/token'
+
+../.local/share/uv/python/cpython-3.14.2-linux-x86_64-gnu/lib/python3.14/pathlib/__init__.py:771: FileNotFoundError
+________________ test_the_round_trip_needs_no_dev_box_directory ________________
+
+pub = <module 'publish_leaves' from '/home/ecs-user/AlphaAvatar-distill/scripts/autoinit/publish_selected_leaves.py'>
+tmp_path = PosixPath('/tmp/pytest-of-ecs-user/pytest-7/test_the_round_trip_needs_no_d0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f4e1cc67f50>
+
+    def test_the_round_trip_needs_no_dev_box_directory(pub, tmp_path, monkeypatch):
+        """The attempt-3 condition: no configured scratch, no dev-box scratch.
+    
+        `verify()` must still run. Pointing `DEV_BOX_SCRATCH` at a path that does
+        not exist reproduces a pod exactly for this code path, without needing one.
+        """
+        monkeypatch.delenv(pub.SCRATCH_ENV, raising=False)
+        monkeypatch.setattr(pub, "DEV_BOX_SCRATCH", tmp_path / "no-such-scratch")
+        assert pub.scratch_dir() is None, (
+            "with neither root present the publisher must defer to tempfile, not "
+            "name a directory the host may not have")
+    
+        man = manifest_for(pub, [{"filename": "model.safetensors", "size_bytes": 10,
+                                  "sha256": "a" * 64,
+                                  "remote_path": "phase_a_attempt12/leaf0/model.safetensors"}])
+        monkeypatch.setattr(pub, "remote_oids", lambda m: {
+            "phase_a_attempt12/leaf0/model.safetensors":
+                {"size_bytes": 10, "lfs_sha256": "a" * 64}})
+        monkeypatch.setattr(pub, "EVIDENCE", tmp_path / "e.json")
+        (tmp_path / "e.json").write_text(json.dumps({"leaves": [
+            {"state_id": "leaf0", "identity": {}}]}))
+        import huggingface_hub
+        monkeypatch.setattr(huggingface_hub, "hf_hub_download",
+                            lambda *a, **k: str(tmp_path / "e.json"))
+    
+        # The assertion is that this returns at all. Before the fix it raised
+        # FileNotFoundError from mkdtemp, which is what the pod saw.
+>       result = pub.verify(man)
+                 ^^^^^^^^^^^^^^^
+
+tests/autoinit/test_leaf_transport_publish.py:253: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+scripts/autoinit/publish_selected_leaves.py:253: in verify
+    repo_type="model", token=token(),
+                             ^^^^^^^
+scripts/autoinit/publish_selected_leaves.py:110: in token
+    return Path(os.path.expanduser("~/.cache/huggingface/token")).read_text().strip()
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../.local/share/uv/python/cpython-3.14.2-linux-x86_64-gnu/lib/python3.14/pathlib/__init__.py:787: in read_text
+    with self.open(mode='r', encoding=encoding, errors=errors, newline=newline) as f:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = PosixPath('/home/ecs-user/aad-artifacts/emptyhome/.cache/huggingface/token')
+mode = 'r', buffering = -1, encoding = 'locale', errors = None, newline = None
+
+    def open(self, mode='r', buffering=-1, encoding=None,
+             errors=None, newline=None):
+        """
+        Open the file pointed to by this path and return a file object, as
+        the built-in open() function does.
+        """
+        if "b" not in mode:
+            encoding = io.text_encoding(encoding)
+>       return io.open(self, mode, buffering, encoding, errors, newline)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       FileNotFoundError: [Errno 2] No such file or directory: '/home/ecs-user/aad-artifacts/emptyhome/.cache/huggingface/token'
+
+../.local/share/uv/python/cpython-3.14.2-linux-x86_64-gnu/lib/python3.14/pathlib/__init__.py:771: FileNotFoundError
+__ test_the_shared_renderers_reproduce_the_frozen_battery_byte_for_byte[code] __
+
+group = 'code'
+
+    @pytest.mark.parametrize("group", sorted(FROZEN_SOURCES))
+    def test_the_shared_renderers_reproduce_the_frozen_battery_byte_for_byte(group):
+        """Re-render `recovery_search_v2`'s own items and require exact equality.
+    
+        This is what stops the C1 copy of the rendering convention from drifting
+        away from the one every historical measurement used.
+        """
+        frozen = {i["id"]: i for i in
+                  (json.loads(l) for l in (FROZEN / f"{group}.jsonl").open() if l.strip())}
+        repo, rev, rel = FROZEN_SOURCES[group]
+>       rows = read_rows(repo, rev, rel)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/data/test_c1_battery.py:223: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+scripts/data/battery_render.py:64: in read_rows
+    f = snapshot(repo_id, revision) / relpath
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+repo_id = 'google-research-datasets/mbpp'
+revision = '4bb6404fdc6cacfda99d4ac4205087b89d32030c'
+
+    def snapshot(repo_id: str, revision: str) -> Path:
+        d = HUB / f"datasets--{repo_id.replace('/', '--')}" / "snapshots" / revision
+        if not d.is_dir():
+>           raise FileNotFoundError(
+                f"{repo_id}@{revision} is not in the local hub cache at {d}")
+E           FileNotFoundError: google-research-datasets/mbpp@4bb6404fdc6cacfda99d4ac4205087b89d32030c is not in the local hub cache at /home/ecs-user/aad-artifacts/emptyhome/.cache/huggingface/hub/datasets--google-research-datasets--mbpp/snapshots/4bb6404fdc6cacfda99d4ac4205087b89d32030c
+
+scripts/data/battery_render.py:57: FileNotFoundError
+_ test_the_shared_renderers_reproduce_the_frozen_battery_byte_for_byte[gsm8k] __
+
+group = 'gsm8k'
+
+    @pytest.mark.parametrize("group", sorted(FROZEN_SOURCES))
+    def test_the_shared_renderers_reproduce_the_frozen_battery_byte_for_byte(group):
+        """Re-render `recovery_search_v2`'s own items and require exact equality.
+    
+        This is what stops the C1 copy of the rendering convention from drifting
+        away from the one every historical measurement used.
+        """
+        frozen = {i["id"]: i for i in
+                  (json.loads(l) for l in (FROZEN / f"{group}.jsonl").open() if l.strip())}
+        repo, rev, rel = FROZEN_SOURCES[group]
+>       rows = read_rows(repo, rev, rel)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/data/test_c1_battery.py:223: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+scripts/data/battery_render.py:64: in read_rows
+    f = snapshot(repo_id, revision) / relpath
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+repo_id = 'openai/gsm8k', revision = '740312add88f781978c0658806c59bc2815b9866'
+
+    def snapshot(repo_id: str, revision: str) -> Path:
+        d = HUB / f"datasets--{repo_id.replace('/', '--')}" / "snapshots" / revision
+        if not d.is_dir():
+>           raise FileNotFoundError(
+                f"{repo_id}@{revision} is not in the local hub cache at {d}")
+E           FileNotFoundError: openai/gsm8k@740312add88f781978c0658806c59bc2815b9866 is not in the local hub cache at /home/ecs-user/aad-artifacts/emptyhome/.cache/huggingface/hub/datasets--openai--gsm8k/snapshots/740312add88f781978c0658806c59bc2815b9866
+
+scripts/data/battery_render.py:57: FileNotFoundError
+_ test_the_shared_renderers_reproduce_the_frozen_battery_byte_for_byte[knowledge] _
+
+group = 'knowledge'
+
+    @pytest.mark.parametrize("group", sorted(FROZEN_SOURCES))
+    def test_the_shared_renderers_reproduce_the_frozen_battery_byte_for_byte(group):
+        """Re-render `recovery_search_v2`'s own items and require exact equality.
+    
+        This is what stops the C1 copy of the rendering convention from drifting
+        away from the one every historical measurement used.
+        """
+        frozen = {i["id"]: i for i in
+                  (json.loads(l) for l in (FROZEN / f"{group}.jsonl").open() if l.strip())}
+        repo, rev, rel = FROZEN_SOURCES[group]
+>       rows = read_rows(repo, rev, rel)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/data/test_c1_battery.py:223: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+scripts/data/battery_render.py:64: in read_rows
+    f = snapshot(repo_id, revision) / relpath
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+repo_id = 'mandarjoshi/trivia_qa'
+revision = '0f7faf33a3908546c6fd5b73a660e0f8ff173c2f'
+
+    def snapshot(repo_id: str, revision: str) -> Path:
+        d = HUB / f"datasets--{repo_id.replace('/', '--')}" / "snapshots" / revision
+        if not d.is_dir():
+>           raise FileNotFoundError(
+                f"{repo_id}@{revision} is not in the local hub cache at {d}")
+E           FileNotFoundError: mandarjoshi/trivia_qa@0f7faf33a3908546c6fd5b73a660e0f8ff173c2f is not in the local hub cache at /home/ecs-user/aad-artifacts/emptyhome/.cache/huggingface/hub/datasets--mandarjoshi--trivia_qa/snapshots/0f7faf33a3908546c6fd5b73a660e0f8ff173c2f
+
+scripts/data/battery_render.py:57: FileNotFoundError
+_ test_the_shared_renderers_reproduce_the_frozen_battery_byte_for_byte[math_verified] _
+
+group = 'math_verified'
+
+    @pytest.mark.parametrize("group", sorted(FROZEN_SOURCES))
+    def test_the_shared_renderers_reproduce_the_frozen_battery_byte_for_byte(group):
+        """Re-render `recovery_search_v2`'s own items and require exact equality.
+    
+        This is what stops the C1 copy of the rendering convention from drifting
+        away from the one every historical measurement used.
+        """
+        frozen = {i["id"]: i for i in
+                  (json.loads(l) for l in (FROZEN / f"{group}.jsonl").open() if l.strip())}
+        repo, rev, rel = FROZEN_SOURCES[group]
+>       rows = read_rows(repo, rev, rel)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/data/test_c1_battery.py:223: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+scripts/data/battery_render.py:64: in read_rows
+    f = snapshot(repo_id, revision) / relpath
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+repo_id = 'HuggingFaceH4/MATH-500'
+revision = '6e4ed1a2a79af7d8630a6b768ec859cb5af4d3be'
+
+    def snapshot(repo_id: str, revision: str) -> Path:
+        d = HUB / f"datasets--{repo_id.replace('/', '--')}" / "snapshots" / revision
+        if not d.is_dir():
+>           raise FileNotFoundError(
+                f"{repo_id}@{revision} is not in the local hub cache at {d}")
+E           FileNotFoundError: HuggingFaceH4/MATH-500@6e4ed1a2a79af7d8630a6b768ec859cb5af4d3be is not in the local hub cache at /home/ecs-user/aad-artifacts/emptyhome/.cache/huggingface/hub/datasets--HuggingFaceH4--MATH-500/snapshots/6e4ed1a2a79af7d8630a6b768ec859cb5af4d3be
+
+scripts/data/battery_render.py:57: FileNotFoundError
+_ test_the_shared_renderers_reproduce_the_frozen_battery_byte_for_byte[multihop] _
+
+group = 'multihop'
+
+    @pytest.mark.parametrize("group", sorted(FROZEN_SOURCES))
+    def test_the_shared_renderers_reproduce_the_frozen_battery_byte_for_byte(group):
+        """Re-render `recovery_search_v2`'s own items and require exact equality.
+    
+        This is what stops the C1 copy of the rendering convention from drifting
+        away from the one every historical measurement used.
+        """
+        frozen = {i["id"]: i for i in
+                  (json.loads(l) for l in (FROZEN / f"{group}.jsonl").open() if l.strip())}
+        repo, rev, rel = FROZEN_SOURCES[group]
+>       rows = read_rows(repo, rev, rel)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/data/test_c1_battery.py:223: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+scripts/data/battery_render.py:64: in read_rows
+    f = snapshot(repo_id, revision) / relpath
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+repo_id = 'hotpotqa/hotpot_qa'
+revision = '1908d6afbbead072334abe2965f91bd2709910ab'
+
+    def snapshot(repo_id: str, revision: str) -> Path:
+        d = HUB / f"datasets--{repo_id.replace('/', '--')}" / "snapshots" / revision
+        if not d.is_dir():
+>           raise FileNotFoundError(
+                f"{repo_id}@{revision} is not in the local hub cache at {d}")
+E           FileNotFoundError: hotpotqa/hotpot_qa@1908d6afbbead072334abe2965f91bd2709910ab is not in the local hub cache at /home/ecs-user/aad-artifacts/emptyhome/.cache/huggingface/hub/datasets--hotpotqa--hotpot_qa/snapshots/1908d6afbbead072334abe2965f91bd2709910ab
+
+scripts/data/battery_render.py:57: FileNotFoundError
+__ test_the_shared_renderers_reproduce_the_frozen_battery_byte_for_byte[rag] ___
+
+group = 'rag'
+
+    @pytest.mark.parametrize("group", sorted(FROZEN_SOURCES))
+    def test_the_shared_renderers_reproduce_the_frozen_battery_byte_for_byte(group):
+        """Re-render `recovery_search_v2`'s own items and require exact equality.
+    
+        This is what stops the C1 copy of the rendering convention from drifting
+        away from the one every historical measurement used.
+        """
+        frozen = {i["id"]: i for i in
+                  (json.loads(l) for l in (FROZEN / f"{group}.jsonl").open() if l.strip())}
+        repo, rev, rel = FROZEN_SOURCES[group]
+>       rows = read_rows(repo, rev, rel)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/data/test_c1_battery.py:223: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+scripts/data/battery_render.py:64: in read_rows
+    f = snapshot(repo_id, revision) / relpath
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+repo_id = 'rajpurkar/squad_v2'
+revision = '3ffb306f725f7d2ce8394bc1873b24868140c412'
+
+    def snapshot(repo_id: str, revision: str) -> Path:
+        d = HUB / f"datasets--{repo_id.replace('/', '--')}" / "snapshots" / revision
+        if not d.is_dir():
+>           raise FileNotFoundError(
+                f"{repo_id}@{revision} is not in the local hub cache at {d}")
+E           FileNotFoundError: rajpurkar/squad_v2@3ffb306f725f7d2ce8394bc1873b24868140c412 is not in the local hub cache at /home/ecs-user/aad-artifacts/emptyhome/.cache/huggingface/hub/datasets--rajpurkar--squad_v2/snapshots/3ffb306f725f7d2ce8394bc1873b24868140c412
+
+scripts/data/battery_render.py:57: FileNotFoundError
+__ test_the_shared_renderers_reproduce_the_frozen_battery_byte_for_byte[tool] __
+
+group = 'tool'
+
+    @pytest.mark.parametrize("group", sorted(FROZEN_SOURCES))
+    def test_the_shared_renderers_reproduce_the_frozen_battery_byte_for_byte(group):
+        """Re-render `recovery_search_v2`'s own items and require exact equality.
+    
+        This is what stops the C1 copy of the rendering convention from drifting
+        away from the one every historical measurement used.
+        """
+        frozen = {i["id"]: i for i in
+                  (json.loads(l) for l in (FROZEN / f"{group}.jsonl").open() if l.strip())}
+        repo, rev, rel = FROZEN_SOURCES[group]
+>       rows = read_rows(repo, rev, rel)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/data/test_c1_battery.py:223: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+scripts/data/battery_render.py:64: in read_rows
+    f = snapshot(repo_id, revision) / relpath
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+repo_id = 'Salesforce/xlam-function-calling-60k'
+revision = '26d14ebfe18b1f7b524bd39b404b50af5dc97866'
+
+    def snapshot(repo_id: str, revision: str) -> Path:
+        d = HUB / f"datasets--{repo_id.replace('/', '--')}" / "snapshots" / revision
+        if not d.is_dir():
+>           raise FileNotFoundError(
+                f"{repo_id}@{revision} is not in the local hub cache at {d}")
+E           FileNotFoundError: Salesforce/xlam-function-calling-60k@26d14ebfe18b1f7b524bd39b404b50af5dc97866 is not in the local hub cache at /home/ecs-user/aad-artifacts/emptyhome/.cache/huggingface/hub/datasets--Salesforce--xlam-function-calling-60k/snapshots/26d14ebfe18b1f7b524bd39b404b50af5dc97866
+
+scripts/data/battery_render.py:57: FileNotFoundError
+_____ test_every_gate_but_the_commit_binding_passes_against_the_candidate ______
+
+launcher = <module 'autoinit_c1_launch' from '/home/ecs-user/AlphaAvatar-distill/scripts/pod/autoinit_c1_launch.py'>
+spec = SessionSpec(session_id='autoinit-c1', schema='aadistill.autoinit.c1_session/v1', description='Phase C1: fixed-path ATT... 'followon_reachable_from_this_launcher': False}, materialize_inputs=<function SessionSpec.<lambda> at 0x7f4e1d15dfe0>)
+
+    @pytest.mark.skipif(not CANDIDATE.is_file(),
+                        reason="no candidate authorization on this machine")
+    def test_every_gate_but_the_commit_binding_passes_against_the_candidate(launcher,
+                                                                            spec):
+        """Every `$0` gate must pass against the candidate except the two that
+        structurally cannot before a real issuance.
+    
+        `session_commit_and_lineage` binds a real issued commit. `bundle_staged_gate`
+        needs a bundle for that commit actually uploaded to the relay, and a scratch
+        candidate has no such commit — uploading one to satisfy a unit test would
+        pollute the relay to prove nothing. Its real exercise is
+        `test_c1_bundle_transport.py`, which drives the identical `roundtrip` over
+        real bundles, real clones and real digests with only transport injected,
+        including the passing case.
+        """
+        import types
+    
+        auth = C1Authorization.load(CANDIDATE)
+        ctx = types.SimpleNamespace(scr=Path("/tmp/c1gate"), args=session_args(launcher),
+                                    auth=auth, evidence={}, image_digest="candidate",
+                                    price=0.99, spent_usd=0.0)
+        failures = []
+        for gate in spec.precheck:
+            name = getattr(gate, "__name__", "session_commit_and_lineage")
+            ok, msg = gate(ctx)
+            if not ok and name not in ("session_commit_and_lineage",
+                                       "bundle_staged_gate"):
+                failures.append(f"{name}: {msg}")
+>       assert not failures, failures
+E       AssertionError: ['rope_input_gate: the RoPE config input is not usable: 401 Client Error. (Request ID: Root=1-6a99e009-5bed545370004a8...ons.
+E         For more details, see https://huggingface.co/docs/huggingface_hub/authentication
+E         Invalid username or password.']
+E       assert not ['rope_input_gate: the RoPE config input is not usable: 401 Client Error. (Request ID: Root=1-6a99e009-5bed545370004a8...ons.\nFor more details, see https://huggingface.co/docs/huggingface_hub/authentication\nInvalid username or password.']
+
+tests/pod/test_c1_session_contract.py:300: AssertionError
+=========================== short test summary info ============================
+FAILED tests/autoinit/test_leaf_transport_publish.py::test_a_corrupted_remote_file_is_caught_by_the_round_trip
+FAILED tests/autoinit/test_leaf_transport_publish.py::test_a_size_mismatch_at_the_far_end_is_caught
+FAILED tests/autoinit/test_leaf_transport_publish.py::test_an_lfs_oid_that_disagrees_is_caught_without_downloading
+FAILED tests/autoinit/test_leaf_transport_publish.py::test_a_file_absent_from_the_far_end_is_caught
+FAILED tests/autoinit/test_leaf_transport_publish.py::test_the_round_trip_needs_no_dev_box_directory
+FAILED tests/data/test_c1_battery.py::test_the_shared_renderers_reproduce_the_frozen_battery_byte_for_byte[code]
+FAILED tests/data/test_c1_battery.py::test_the_shared_renderers_reproduce_the_frozen_battery_byte_for_byte[gsm8k]
+FAILED tests/data/test_c1_battery.py::test_the_shared_renderers_reproduce_the_frozen_battery_byte_for_byte[knowledge]
+FAILED tests/data/test_c1_battery.py::test_the_shared_renderers_reproduce_the_frozen_battery_byte_for_byte[math_verified]
+FAILED tests/data/test_c1_battery.py::test_the_shared_renderers_reproduce_the_frozen_battery_byte_for_byte[multihop]
+FAILED tests/data/test_c1_battery.py::test_the_shared_renderers_reproduce_the_frozen_battery_byte_for_byte[rag]
+FAILED tests/data/test_c1_battery.py::test_the_shared_renderers_reproduce_the_frozen_battery_byte_for_byte[tool]
+FAILED tests/pod/test_c1_session_contract.py::test_every_gate_but_the_commit_binding_passes_against_the_candidate
+13 failed, 2713 passed, 41 skipped in 1214.04s (0:20:14)

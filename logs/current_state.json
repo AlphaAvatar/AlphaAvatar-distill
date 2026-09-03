@@ -131,12 +131,12 @@
    "seeds": "1635674081, 1656475568, 696460635 (derived from the C0 digest)",
    "scoring": "c1_confirmation_scoring@v1 77507935; equivalence IDENTICAL over 15 probes. @v2 808080a7 and battery a285d61f untouched.",
    "attempts": "1 $0.0786 bundle fetch; 2 $0.1013 ROPE_OK; 3 $0.00 price refusal, NOT LAUNCHED; 3R $0.3482 pod CPU test gate. $0.5281, zero science.",
-   "gates": "10 pre-provider gates, 10/10 PASS -- ACTUALLY EXECUTED for the first time at 3R. The runner prices BEFORE it gates, so attempts 1-3 ran none; the ledger claim that attempt 3 passed them was false.",
+   "gates": "10 pre-provider gates, 10/10 PASS -- EXECUTED for the first time at 3R. The runner prices BEFORE it gates, so attempts 1-3 ran none; the ledger claim that attempt 3 passed them was false.",
    "reached_in_3r": "VLLM_READY, TEACHER_READY, ROPE_OK. Both earlier fatal gaps stayed closed.",
-   "blocker": "the pod CPU test gate: 14 failed, 2650 passed. tests/data/test_c1_battery.py's 7 renderer-parity cases read ~/.cache/huggingface/hub directly, ignoring HF_HOME, so they cannot pass on a pod. Attempts 1-3 died before TESTS_OK, so no pod ran them.",
+   "blocker": "the pod CPU test gate: 14 failed, all enumerated at $0. 7 = test_c1_battery.py renderer parity, 5 = test_leaf_transport_publish.py, 2 = repository-state omissions of mine (fixed). Two modules hard-code Path.home() for HF state and ignore the HF_HOME the pod sets.",
    "needs": "a maintainer decision; no automatic retry",
    "not_built": "no grant; the pre-ATTENTION parent rebuild and the ~8 GB teacher weights need GPU/network and have not run locally",
-   "evidence": "logs/autoinit_c1_attempt3r/; only 3 of the 14 names came home"
+   "evidence": "logs/autoinit_c1_attempt3r/test_gate_enumeration.json"
   },
   "c2": {
    "status": "NOT STARTED",
