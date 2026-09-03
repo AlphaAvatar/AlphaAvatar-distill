@@ -1,0 +1,52 @@
+{
+ "schema": "aadistill.autoinit.c1_grant/v1",
+ "_what_this_is": "The maintainer decision permitting ONE Phase-C1 Attempt-3 paid session. A NEW artifact: logs/autoinit_c1_grant.json and logs/autoinit_c1_attempt2_grant.json each authorized one issuance and one launch attempt, and all four were consumed. It is an INPUT to scripts/autoinit/issue_c1_authorization.py, which derives every identity — session commit, harness digest, isolation plan hash, science plan, execution preregistration, battery, teacher, scoring contract, seeds and ceiling — from the committed live tree and REFUSES if this document asserts any of them.",
+ "granted_by": "maintainer, Attempt-3 final grant review: GO. Both previous attempts remain infrastructure aborts with ZERO C1 scientific measurements; the transport gap and the ROPE_OK staging gap are each closed by a $0 pre-provider gate.",
+ "granted_for": "Phase C1 fixed-path ATTENTION isolation — Attempt 3",
+ "covers": "exactly one Attempt-3 C1 launch under the unchanged frozen protocol; 2 arms x 3 fresh seeds = 6 recovery probes, one confirmation evaluation per probe only after all six trainings complete, each admitted against its own observed generation protocol before scoring, followed by the frozen paired decision.",
+ "does_not_authorize": [
+  "Phase A",
+  "beam search",
+  "any search",
+  "Phase C2",
+  "formal Stage-2/Stage-3 recovery",
+  "canonical Stage-1 NLL",
+  "any follow-on",
+  "any automatic retry",
+  "any fourth attempt",
+  "any ceiling increase"
+ ],
+ "cumulative_spend_at_approval_usd": 264.0396,
+ "cumulative_cap_usd": 283.76,
+ "cap_note": "The project cumulative cap remains $283.7600 and is NOT raised. $19.7204 available at approval; worst case after one complete Attempt 3 is $277.7974 spent, leaving a $5.9626 reserve.",
+ "prior_attempts": {
+  "attempt_1": {
+   "outcome": "INFRASTRUCTURE ABORT at the bundle fetch",
+   "cost_usd": 0.0786,
+   "cause": "no git bundle existed on the relay for the session commit; --bundle named an alias",
+   "closed_by": "bundle_staged_gate (ninth), which round-trips the actual relay object",
+   "evidence": "logs/autoinit_c1_attempt1/"
+  },
+  "attempt_2": {
+   "outcome": "INFRASTRUCTURE ABORT at ROPE_OK",
+   "cost_usd": 0.1013,
+   "reached": "TEACHER_READY — 7 of 11 setup markers; teacher fetched and byte-verified",
+   "cause": "the shared setup globs artifacts/stage1/*/checkpoint/config.json and C1 staged only tokenizer sidecars there",
+   "closed_by": "rope_input_gate (tenth), plus a structural invariant separating loadability from the ROPE_OK staging dependency",
+   "evidence": "logs/autoinit_c1_attempt2/"
+  },
+  "scientific_measurements_from_both": "NONE. No replay gate, no training, no evaluation, no decision."
+ },
+ "failure_semantics": {
+  "teacher_identity_mismatch": "infrastructure/identity stop; no scientific conclusion",
+  "replay_mismatch": "stop before recovery; preserve the finding; no automatic retry; a real replay result but NOT ATTENTION behavioural evidence",
+  "device_handoff_or_headroom": "stop before training",
+  "recovery_training_failure": "C1_INCOMPLETE; no partial confirmation experiment",
+  "stage_h_precondition": "all six trainings complete",
+  "generation_admission_failure": "preserve the generations and the admission record; do not score that probe; evaluate no later probe; run no decision",
+  "stage_i_precondition": "six complete admitted and scored probe results",
+  "incomplete_evidence": "no C1 decision",
+  "all_done": "interpret only the frozen c1_decision.json"
+ },
+ "after_termination": "confirm the pod is gone through GraphQL. No Attempt 4 and no C2 without a new review."
+}

@@ -2,8 +2,8 @@
  "schema": "aadistill.current_state/v2",
  "generated_utc": "2026-09-02T00:00:00Z",
  "_contract": "Minimal machine-readable CURRENT snapshot: live facts only. History: logs/decisions.md. Human view: logs/STATE.md. Ownership: logs/CATALOG.md.",
- "baseline_commit": "f6200c07a3cacc69bd6f903034497ce8a80e8469",
- "baseline_commit_meaning": "LAST TESTED IMPLEMENTATION: the tree that produced latest_verification (2742/13/0); only logs/ changed after it.",
+ "baseline_commit": "835ec84c5712855fb764b5d2948fc2f81ecb2bea",
+ "baseline_commit_meaning": "LAST TESTED IMPLEMENTATION: the tree that produced latest_verification (2782/16/0); only logs/ changed after it.",
  "running": {
   "paid_compute": false,
   "pods": 0,
@@ -29,8 +29,8 @@
   "planning_floor_usd": 12.207,
   "remaining_is_not_permission": true,
   "ledger": "logs/BUDGET_LEDGER.md",
-  "headroom_note": "Phase-B 1-5 $30.0200; continuation 1-5 $3.8047 and CLOSED Phase B; C1 attempt 1 $0.0786 and attempt 2 $0.1013, both aborted at setup. Nothing further is funded.",
-  "planning_floor_note": "C1 pricing UNCHANGED: floor $12.2070, soft stop $13.4277, ceiling $13.7578. Worst case after one complete attempt 2: $277.6961 spent, $6.0639 reserve."
+  "headroom_note": "Phase-B 1-5 $30.0200; continuation 1-5 $3.8047 and CLOSED Phase B; C1 attempt 1 $0.0786 and attempt 2 $0.1013, both INFRASTRUCTURE ABORTS with zero measurement.",
+  "planning_floor_note": "C1 pricing UNCHANGED: floor $12.2070, soft stop $13.4277, ceiling $13.7578. Worst case after one complete ATTEMPT 3: $277.7974 spent, $5.9626 reserve."
  },
  "frozen": {
   "science_plan_hash": "02be33b9a7a8e26bc8bfb75795351e8cdc9ffd441b47066cc81887cfc511b55c",
@@ -55,11 +55,12 @@
   "phase_c0_sizing": "logs/phase_c0_sizing_evidence.json -- N=850 scorable selected; P(GO | +0.015) = 0.8379 >= 0.80 at rho=0.15."
  },
  "latest_verification": {
-  "utc": "2026-09-02T00:00:00Z",
-  "kind": "CURRENT -- $0. rope_input_gate (setup readiness). No compute, no pod, no grant.",
-  "commit": "086825a6334c59ac0d635c18f2c4def21fcbfbc4",
-  "suite": "2753 passed / 13 skipped / 0 failed (32m05s)",
-  "verifiers": "5/5 PASS: frozen_assets, historical/attempt4/attempt5 probe-reuse, c1_battery_isolation; scoring equivalence IDENTICAL/15",
+  "utc": "2026-09-03T00:00:00Z",
+  "kind": "CURRENT -- $0. Final pre-grant frozen tree; ten pre-provider gates. No compute, no pod.",
+  "commit": "835ec84c5712855fb764b5d2948fc2f81ecb2bea",
+  "executable_repair": "6c90dcb42f7b3f1a85b03fdd7ce9f43585efa06b",
+  "suite": "2782 passed / 16 skipped / 0 failed (45m56s)",
+  "verifiers": "5/5 PASS; C1 scoring equivalence IDENTICAL/15/0",
   "pods": "0, via GraphQL myself{pods}, not the CLI field"
  },
  "abandoned": [
@@ -106,7 +107,7 @@
   "final_pooled_sa_sb_sc": "fe9683e6a9c7 16/510 = 0.031373 (usable 0.6842) | 85bde4ded2c3 10/510 = 0.019608 (usable 0.5456) | control 3/340 = 0.0088; see decisions.md",
   "margin": 0.011765,
   "clears_by": 7e-05,
-  "read_with_care": "clears by 0.000070 -- ~3.6% of ONE correct sample, ~1.23 standard errors at C0-measured noise. At 15 not 16 it would be unresolved_equivalence. Protocol-resolved but not comfortable.",
+  "read_with_care": "clears by 0.000070 -- ~3.6% of ONE correct sample, ~1.23 standard errors at C0-measured noise. Protocol-resolved but not comfortable.",
   "ranking_metric": "correct_overall; usable_rollout does NOT rank, though it agrees here",
   "not_capability": "SELECTION evidence under a fixed 0.86M probe. 16 correct of 510",
   "authorizes": "nothing",
@@ -134,7 +135,7 @@
    "attempt1": "2026-09-02 ABORT at setup: no bundle existed for the session commit. $0.0786. logs/autoinit_c1_attempt1/",
    "attempt2": "2026-09-03 ABORT at ROPE_OK: 9/9 gates PASS; setup reached TEACHER_READY then 'no staged checkpoint to check'. $0.1013. logs/autoinit_c1_attempt2/",
    "gates": "10 pre-provider gates. Transport and RoPE readiness both closed; attempts 1 and 2 died on those two.",
-   "rope_gap_closed": "rope_input_gate, the TENTH gate: C1 stages the canonical 1,418-byte checkpoint/config.json (a7131bb0, RoPE base 5,000,000) that ROPE_OK globs. NOT the 1.19 GiB weights; ROPE_OK unchanged. A SETUP READINESS input only."
+   "rope_gap_closed": "rope_input_gate, the TENTH gate: C1 stages the canonical 1,418-byte checkpoint/config.json (a7131bb0, RoPE base 5,000,000) that ROPE_OK globs. Not the weights; ROPE_OK unchanged. Setup readiness only."
   },
   "c2": {
    "status": "NOT STARTED",
@@ -149,7 +150,7 @@
    "scratch": "/home/ecs-user/aad-scratch/sessions/<session-id>"
   },
   "roots_note": "the ONLY working roots. The five $HOME/phase_b_*_scr are gone and must not return.",
-  "scratch_state": "The 2026-08-31 closeout retired the five $HOME/phase_b_*_scr roots ONLY. A 2026-09-01 audit found 11 of 12 Phase-A per-sample and 90 raw generation files still sole copies in aad-scratch.",
+  "scratch_state": "The 2026-08-31 closeout retired the five $HOME/phase_b_*_scr roots ONLY. A 2026-09-01 audit found 11 of 12 Phase-A per-sample and 90 raw generation files still sole copies there.",
   "preserved_scratch_20260901": {
    "path": "/home/ecs-user/aad-artifacts/autoinit/preserved_scratch_20260901/",
    "manifest": "MANIFEST.json, schema aadistill.promoted_raw_evidence/v1, sha256 3e1a72e2ade2fde610b95e41e147f7f93d37fd4418a4a2d9f61ae58d27cca0b7",

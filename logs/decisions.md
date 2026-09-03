@@ -6847,3 +6847,31 @@ on a paid pod.
   `$12.2070 / $13.4277 / $13.7578`; worst case after a full Attempt 3 is
   `$277.7974` with a `$5.9626` reserve. No cap increase.
 - **Revisit when:** the maintainer decides on Attempt 3.
+
+## 2026-09-04 — Attempt-3 grant
+
+- **Context:** attempts 1 and 2 are both infrastructure aborts totalling `$0.1799`
+  with **zero C1 scientific measurements** — no replay gate, no training, no
+  evaluation, no decision. Each failure produced the `$0` gate that would have
+  refused it: `bundle_staged_gate` (transport) and `rope_input_gate` (the
+  `ROPE_OK` staging input). The frozen protocol is unchanged, so a third
+  execution measures exactly what the first two were authorized to measure.
+- **Decision:** a NEW grant, `logs/autoinit_c1_attempt3_grant.json`. Neither
+  previous grant is reused: each authorized one issuance and one launch, and all
+  four were consumed. The issuer refuses a grant that asserts any derived
+  identity, so this document states only who permitted what, at what cumulative
+  spend, and what it excludes.
+- **Unchanged before issuance:** no C1 science, source, harness, pricing,
+  preregistration, battery, scorer or setup code was touched. The grant commit is
+  metadata only — the grant, this record, and the correction of stale
+  `latest_verification` and budget prose that still said "attempt 2" where it now
+  means the contemplated attempt 3.
+- **Ten gates, no deferrals.** Attempt 3 must clear
+  `session_commit_and_lineage`, `c1_harness_gate`, `pricing_identity_gate`,
+  `preregistration_gate`, `frozen_c1_science_gate`, `teacher_binding_gate`,
+  `battery_staged_gate`, `artifact_spec_gate`, `rope_input_gate` and
+  `bundle_staged_gate`. The last two each round-trip a real relay object.
+- **Budget:** `$264.0396` spent of an unchanged `$283.7600` cap. Ceiling
+  `$13.7578`; worst case `$277.7974`, reserve `$5.9626`. No repricing.
+- **Revisit when:** the session terminates. No Attempt 4 and no C2 without a new
+  review, whatever the verdict.
