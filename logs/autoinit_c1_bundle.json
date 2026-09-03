@@ -1,13 +1,13 @@
 {
  "schema": "aadistill.autoinit.c1_bundle/v1",
- "session_commit": "ca519e67981b87d4084a2b8b8daa0b7dafe44d3a",
- "canonical_bundle_name": "aad_autoinit_ca519e67.bundle",
+ "session_commit": "26fd4cc9e477c076fd19ff8b2fde743819ac59bd",
+ "canonical_bundle_name": "aad_autoinit_26fd4cc9.bundle",
  "relay_repo": "AlphaAvatar/aadistill-artifacts",
- "relay_path": "transfer/aad_autoinit_ca519e67.bundle",
- "sha256": "c5a62d9c85af757a7da42161a28dc403270584eb6153880314320b5a43c8e55a",
- "bytes": 7426279,
+ "relay_path": "transfer/aad_autoinit_26fd4cc9.bundle",
+ "sha256": "473396ae3f6846f7302ced4dbab3c06b3e783c303f08b4e1fa0b493ac8b1aa01",
+ "bytes": 7449366,
  "carries_authorization": "logs/autoinit_c1_authorization.json",
- "upload": "uploaded to AlphaAvatar/aadistill-artifacts:transfer/aad_autoinit_ca519e67.bundle",
- "verify": "The bundle contains this ref:\nca519e67981b87d4084a2b8b8daa0b7dafe44d3a refs/heads/_c1_bundle_ca519e67981b\nThe bundle records a complete history.\nThe bundle uses this hash algorithm: sha1",
+ "upload": "uploaded to AlphaAvatar/aadistill-artifacts:transfer/aad_autoinit_26fd4cc9.bundle",
+ "verify": "The bundle contains this ref:\n26fd4cc9e477c076fd19ff8b2fde743819ac59bd refs/heads/_c1_bundle_26fd4cc9e477\nThe bundle records a complete history.\nThe bundle uses this hash algorithm: sha1",
  "note": "the pre-provider bundle_staged_gate downloads this exact object, verifies it, checks it out and requires the resulting HEAD, authorization and harness digest to match. This record is the local half; the gate is the remote half."
 }
