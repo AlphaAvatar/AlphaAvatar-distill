@@ -12,9 +12,10 @@
  },
  "authorized": {
   "any": false,
-  "note": "NOTHING IS CURRENTLY AUTHORIZED. C1 attempt 1 WAS authorized and that grant is CONSUMED -- C1 has had a grant. The attempt-1 artifact is retained untouched; the gates refuse it now.",
-  "c1_attempt1": "CONSUMED. Issued 2026-09-02 at base a8b2f08, session commit a77aa440. One launch attempt, made and spent.",
-  "consumed_files_retained": "Seven consumed logs/*_authorization.json remain; each binds a non-current identity so the gates reject all seven."
+  "note": "NOTHING IS CURRENTLY AUTHORIZED. Two C1 grants were issued and both are CONSUMED by attempts that produced no measurement.",
+  "c1_attempt1": "CONSUMED. $0.0786, aborted at the bundle fetch.",
+  "c1_attempt2": "CONSUMED. $0.1013, aborted at ROPE_OK.",
+  "consumed_files_retained": "Eight consumed logs/*_authorization.json remain; both C1 artifacts are preserved in their attempt directories."
  },
  "prepared_launch": {
   "any": false,
@@ -22,13 +23,13 @@
   "note": "nothing is prepared for launch"
  },
  "budget": {
-  "cumulative_spend_usd": 263.9383,
+  "cumulative_spend_usd": 264.0396,
   "authorized_cap_usd": 283.76,
-  "remaining_usd": 19.8217,
+  "remaining_usd": 19.7204,
   "planning_floor_usd": 12.207,
   "remaining_is_not_permission": true,
   "ledger": "logs/BUDGET_LEDGER.md",
-  "headroom_note": "Phase-B 1-5 $30.0200; continuation 1-5 $3.8047 and CLOSED Phase B; C1 attempt 1 $0.0786, aborted at setup. Nothing further is funded.",
+  "headroom_note": "Phase-B 1-5 $30.0200; continuation 1-5 $3.8047 and CLOSED Phase B; C1 attempt 1 $0.0786 and attempt 2 $0.1013, both aborted at setup. Nothing further is funded.",
   "planning_floor_note": "C1 pricing UNCHANGED: floor $12.2070, soft stop $13.4277, ceiling $13.7578. Worst case after one complete attempt 2: $277.6961 spent, $6.0639 reserve."
  },
  "frozen": {
@@ -44,7 +45,7 @@
    "fourth_seed": "never"
   },
   "seeds_scope": "PHASE A/B ONLY. Phase C1 uses 3 FRESH seeds, not these -- fe9683 was selected under sa/sb/sc.",
-  "calibration": "calib.domain_balanced@v1 (spec 11f36a88, content d65c1f40) and calib.reasoning_heavy@v2 (spec 6c67b8df, content cdb28389, items a2ff8c92)",
+  "calibration": "calib.domain_balanced@v1 (spec 11f36a88, content d65c1f40) and calib.reasoning_heavy@v2 (spec 6c67b8df, content cdb28389)",
   "runtime_comparability": "generation_runtime_comparability@v2",
   "phase_b_session_plan_hash": "23f23649b4be92bd8852bf9d89f8dcb372bc5a00a175ae631d32b9d71de8032d",
   "phase_b_stage1_selection_sha256": "84fd6496851995ae",
@@ -55,7 +56,7 @@
  },
  "latest_verification": {
   "utc": "2026-09-02T00:00:00Z",
-  "kind": "CURRENT -- $0. bundle_staged_gate (transport). No compute, no pod, no grant.",
+  "kind": "C1 attempt 2: PAID, $0.1013, aborted at the ROPE_OK setup gate. No scientific stage ran.",
   "commit": "8d6a4e9e6a83a3299e875af431a08237b717e5d4",
   "suite": "2753 passed / 13 skipped / 0 failed (32m05s)",
   "verifiers": "5/5 PASS: frozen_assets, historical/attempt4/attempt5 probe-reuse, c1_battery_isolation; scoring equivalence IDENTICAL/15",
@@ -68,9 +69,9 @@
   "the ATTENTION 'search declined to calibrate' reading: WITHDRAWN 2026-09-01"
  ],
  "next_starting_point": {
-  "status": "C1 attempt 1 was an INFRASTRUCTURE ABORT, not a scientific attempt; no C1 measurement exists. The transport gate is implemented and frozen.",
-  "the_ask": "Attempt-2 grant review, then issuance under the documented ordering",
-  "budget": "$263.9383 spent of the unchanged $283.7600 cap; $19.8217 uncommitted. Attempt-2 ceiling $13.7578 leaves a $6.0639 worst-case reserve."
+  "status": "C1 attempts 1 and 2 were both INFRASTRUCTURE ABORTS at setup; no C1 measurement exists. Transport is fixed; the staging contract is not.",
+  "the_ask": "maintainer review of the staging gap: stage the full canonical init (~1.19 GiB relay pull) or make ROPE_OK tolerate a tokenizer-only staging -- and restore the weakened guard test",
+  "budget": "$264.0396 spent of the unchanged $283.7600 cap; $19.7204 uncommitted."
  },
  "read_order": [
   "logs/PHASE_INDEX.md -- history by phase, START HERE",
@@ -116,22 +117,23 @@
    "status": "COMPLETE / APPROVED / CANONICALLY FROZEN 2026-09-01 (commit be2ab08)",
    "protocol": "logs/phase_c0_preregistration.json fb2eeea531f9f0d1",
    "sizing_evidence": "logs/phase_c0_sizing_evidence.json 4786242d349e9b21",
-   "summary": "850 scorable / 950 total; 3 fresh paired seeds as fixed blocks; primary correct_overall; SESOI +0.010, design alternative +0.015 at P(GO)=0.8379; stratified PROMPT-cluster bootstrap",
+   "summary": "850 scorable / 950 total; 3 fresh paired seeds as fixed blocks; primary correct_overall; SESOI +0.010, design alternative +0.015; stratified PROMPT-cluster bootstrap",
    "authorizes": "nothing"
   },
   "c1": {
-   "status": "IMPLEMENTED / PRICED / ATTEMPT 1 INFRASTRUCTURE-ABORTED / NOT SCIENTIFICALLY EXECUTED / NOT CURRENTLY AUTHORIZED",
+   "status": "IMPLEMENTED / PRICED / ATTEMPTS 1 AND 2 INFRASTRUCTURE-ABORTED AT SETUP / NOT SCIENTIFICALLY EXECUTED / NOT CURRENTLY AUTHORIZED",
    "what_it_is": "fixed-path ATTENTION isolation, 2 arms x 3 fresh seeds = 6 E1_KD_HEAVY_0860K probes. NOT recovery evidence.",
    "incumbent": "fe9683e6a9c783bbc6fe276a78c851c6, digest c313d1b4081b. Margin 0.000070, not distinguishable from cca699c93f34, NOT recovered.",
-   "built": "standalone driver (B-I, G/H separate, per-probe admission); attention.activation_importance_v1; fixed_path + eea90c91/c313d1b4 gates; battery c1_confirmation_v1 950/850",
-   "not_built": "no grant; the pre-ATTENTION parent rebuild and the ~8 GB teacher weights need GPU/network and have not run",
+   "built": "standalone driver (B-I, G/H separate, per-probe admission); attention.activation_importance_v1; fixed_path + eea90c91/c313d1b4 gates; battery 950/850",
+   "not_built": "no grant; the pre-ATTENTION parent rebuild and the ~8 GB teacher weights need GPU/network and have not run locally",
    "execution_prereg": "logs/phase_c1_execution_preregistration.json f5eff2e55f824877 at head_commit aa2855c; harness a67a70f3714ac008 over 64 files",
    "pricing": "logs/phase_c1_pricing.json -- floor $12.2070, expected $13.4277, CEILING $13.7578, enforced via BudgetSpec derived from that record",
    "seeds": "1635674081, 1656475568, 696460635 (derived from the C0 digest)",
    "session": "scripts/pod/autoinit_c1_launch.py + autoinit_c1_driver.py, SESSION_KIND=c1, C1Authorization, 9 pre-provider gates. STANDALONE.",
    "scoring": "c1_confirmation_scoring@v1 77507935; equivalence IDENTICAL over 15 probes. @v2 808080a7 and battery a285d61f untouched.",
-   "attempt1": "2026-09-02 INFRASTRUCTURE ABORT AT SETUP: 8/8 gates passed, pod fccr23o9jcnrh0 created, SETUP_RC=1 -- no git bundle existed for the session commit. $0.0786. NO scientific C1 stage ran. logs/autoinit_c1_attempt1/",
-   "transport_gap_closed": "bundle_staged_gate, the NINTH gate: canonical aad_autoinit_<8hex>.bundle from --session-commit, then a read-only round-trip of the real relay object -- hash, verify, clone, checkout, authorization and harness must match. Prep: scripts/autoinit/stage_c1_bundle.py"
+   "attempt1": "2026-09-02 ABORT at setup: no git bundle existed for the session commit. $0.0786. logs/autoinit_c1_attempt1/",
+   "attempt2": "2026-09-03 ABORT at ROPE_OK: 9/9 gates PASS incl. the bundle round-trip; setup reached TEACHER_READY (teacher fetched and verified) then 'no staged checkpoint to check' -- C1 stages only tokenizer sidecars. $0.1013. logs/autoinit_c1_attempt2/",
+   "gates": "9 pre-provider gates, all PASS at attempt 2. Transport is closed; the SETUP STAGING contract is not."
   },
   "c2": {
    "status": "NOT STARTED",
@@ -165,7 +167,7 @@
   "closeout": "logs/storage_closeout_20260831.json",
   "c1_battery_canonical": "/home/ecs-user/aad-artifacts/autoinit/c1_confirmation_v1 -- COPY of the frozen bytes, 8 files, verified from the copy; repo-local working copy retained"
  },
- "blocker": "none. The attempt-1 transport gap is closed by bundle_staged_gate. C1 attempt 2 is scientifically permissible and NOT YET AUTHORIZED.",
+ "blocker": "C1 ATTEMPT 2 ABORTED AT ROPE_OK; its authorization is CONSUMED. The shared setup needs a LOADABLE checkpoint under artifacts/stage1/*/checkpoint/; C1 stages only tokenizer sidecars. I weakened the $0 guard for this on 2026-09-02.",
  "deferred_not_blocking": {
   "_note": "open, none blocking. Detail: logs/HANDOFF_next_session.md",
   "duplicate_checkpoints": "2.92 GiB, KEEP / unresolved ownership -- maintainer decision",
@@ -175,5 +177,5 @@
  },
  "handoff": "logs/HANDOFF_next_session.md",
  "history": "per-attempt records, failure patterns and cost history: logs/decisions.md, logs/BUDGET_LEDGER.md and the per-run dirs.",
- "historical_paid_verification": "2026-08-30T21:18:37Z, continuation attempt 5, the last PAID session: ALL_DONE, 8/8 gates, teardown confirmed."
+ "historical_paid_verification": "2026-08-30T21:18:37Z, continuation attempt 5, the last PAID session to reach ALL_DONE: 8/8 gates, teardown confirmed."
 }

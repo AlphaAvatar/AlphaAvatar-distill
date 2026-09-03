@@ -1454,3 +1454,31 @@ re-upload it" is a documented pre-session step in `scripts/pod/AGENTS.md`, not a
 precheck, so it depends on an operator remembering it. The relay convention is
 `transfer/aad_autoinit_<8hex>.bundle`; `--bundle c1` named a file that never
 existed. A `bundle_staged_gate` would have refused this at `$0`.
+
+## Phase C1 — attempt 2, 2026-09-03
+
+| what | cost | evidence |
+| --- | --- | --- |
+| C1 attempt 2: ABORT at setup, draw 1, at the **ROPE_OK** gate. Transport worked — the canonical bundle round-tripped and the pod checked out the exact session commit — and setup reached **TEACHER_READY** (7 of 11 markers): repo cloned, assets staged, both venvs built, vLLM ready, teacher fetched and byte-verified. Then `checking the RoPE base resolves in every venv` exited `no staged checkpoint to check`. The shared setup globs `artifacts/stage1/*/checkpoint/config.json`; C1 stages only the three tokenizer sidecars, so the glob was empty. `SETUP_RC=1`, no scientific stage ran, pod deleted at 6.1 min, provider-confirmed gone | $0.1013 | `logs/autoinit_c1_attempt2/` |
+
+**Cumulative: $263.9383 + $0.1013 = $264.0396 of the $283.7600 cap.** $19.7204
+uncommitted. The cap was not raised.
+
+**The Attempt-2 authorization is consumed.** One launch attempt, made. No third
+attempt without a new maintainer/scientific review.
+
+**Why no `$0` gate caught it, and why that is worse than attempt 1.** The shared
+setup's `ROPE_OK` step requires a *loadable* checkpoint under
+`artifacts/stage1/*/checkpoint/`. C1 stages only `tokenizer.json`,
+`tokenizer_config.json` and `chat_template.jinja` there — no `config.json` — so
+the glob found nothing.
+
+`tests/pod/test_session_architecture.py::test_a_checkpoint_is_staged_with_the_files_it_cannot_load_without`
+**was exactly that guard**, and on 2026-09-02 I narrowed its trigger from "any
+file under the canonical-init prefix" to "`model.safetensors`", reasoning that C1
+loads no model from there. That reasoning was about what C1 reads. The guard was
+about what the SHARED SETUP requires — the same distinction that cost the
+device-canary retry `$0.0637` and the measurement session `$0.0700`, and which
+this session had already applied correctly when staging `state_eval_v1` and
+`recovery_search_v2` for `verify_frozen_assets`. Weakening the test removed the
+only `$0` signal that would have refused this launch.

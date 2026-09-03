@@ -1,5 +1,5 @@
 **Updated:** 2026-09-03 · branch `main` · **PHASE B CLOSED · PHASE C0 FROZEN ·
-PHASE C1 ATTEMPT 1 ABORTED AT SETUP, AUTHORIZATION CONSUMED**
+PHASE C1 ATTEMPTS 1 AND 2 ABORTED AT SETUP, BOTH AUTHORIZATIONS CONSUMED**
 
 # Current state
 
@@ -9,7 +9,7 @@ not carry. If the two disagree, a structural test fails.
 
 **Nothing is running. Nothing is billing. Nothing is prepared for launch. Nothing
 is authorized.** Zero pods, zero orchestration, all five behavioural-continuation
-grants retired. Spend is `$263.9383` of the `$283.7600` cap, `$19.8217`
+grants retired. Spend is `$264.0396` of the `$283.7600` cap, `$19.7204`
 remaining.
 
 | phase | status |
@@ -26,7 +26,7 @@ remaining.
 **$13.7578**, against **$19.9003** headroom — **$6.1425** would remain if the
 whole ceiling were consumed. **Priced is not authorized: no grant exists.**
 
-## Phase C1 — ATTEMPT 1 INFRASTRUCTURE-ABORTED · transport gap CLOSED · NOT CURRENTLY AUTHORIZED
+## Phase C1 — ATTEMPTS 1 AND 2 INFRASTRUCTURE-ABORTED AT SETUP · NOT CURRENTLY AUTHORIZED
 
 > **Attempt 1 aborted at setup, 2026-09-02.** All eight pre-provider gates
 > passed and pod `fccr23o9jcnrh0` was created, then setup failed with
@@ -36,6 +36,23 @@ whole ceiling were consumed. **Priced is not authorized: no grant exists.**
 > training, no evaluation. The one-use authorization is **consumed**; no retry is
 > authorized. Evidence in [`autoinit_c1_attempt1/`](autoinit_c1_attempt1/).
 >
+> **Attempt 2 aborted at the `ROPE_OK` setup gate, 2026-09-03.** All NINE
+> pre-provider gates passed, including the bundle round-trip — transport is
+> genuinely fixed. Setup then reached `TEACHER_READY` (7 of 11 markers: repo
+> cloned at the exact commit, assets staged, both venvs built, vLLM ready,
+> teacher fetched and byte-verified) and died on
+> `no staged checkpoint to check`. The shared setup globs
+> `artifacts/stage1/*/checkpoint/config.json`; C1 stages only the three tokenizer
+> sidecars, so the glob was empty. `$0.1013`, pod deleted at 6.1 min, provider
+> confirms gone. **No scientific stage ran.**
+>
+> The `$0` guard for this existed and **I weakened it**: on 2026-09-02 I narrowed
+> `test_a_checkpoint_is_staged_with_the_files_it_cannot_load_without` from "any
+> file under the canonical-init prefix" to "`model.safetensors`", reasoning that
+> C1 loads no model from there. That is what C1 *reads*; the guard was about what
+> the shared SETUP *requires*. Evidence in
+> [`autoinit_c1_attempt2/`](autoinit_c1_attempt2/).
+
 > **The gap is closed.** `bundle_staged_gate` is the ninth pre-provider gate.
 > The bundle name is now derived from `--session-commit`
 > (`aad_autoinit_<8hex>.bundle`), so `--bundle c1` fails at `$0`; and the gate

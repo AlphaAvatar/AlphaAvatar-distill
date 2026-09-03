@@ -6763,3 +6763,45 @@ on a paid pod.
   `a285d61f…` / `e6ff5cf5…` / 950 / 850, and pricing at
   `$12.2070 / $13.4277 / $13.7578`.
 - **Revisit when:** the maintainer decides whether to issue the one-use grant.
+
+## 2026-09-03 — C1 attempt 2: the transport gate worked, the staging contract did not
+
+- **Context:** attempt 2 was authorized after the transport gap was closed. All
+  NINE pre-provider gates passed, including `bundle_staged_gate`'s remote
+  round-trip: `aad_autoinit_f54254a2.bundle`, 7,406,322 bytes, `cd6696b0…`
+  matching the staged sha256, `git bundle verify` rc=0, cloned, checked out to
+  `f54254a2` carrying the exact authorization and reproducing harness `a67a70f3`.
+- **What happened:** setup reached `TEACHER_READY` — 7 of 11 markers, so the repo
+  cloned at the right commit, the assets staged, both venvs built, vLLM came up,
+  and the teacher was fetched and byte-verified — then died at `ROPE_OK` with
+  `no staged checkpoint to check`. `$0.1013`, pod deleted at 6.1 min,
+  provider-confirmed gone. No scientific stage ran.
+- **Cause:** the shared setup globs
+  `artifacts/stage1/*/checkpoint/config.json` and exits if it finds nothing. C1
+  stages only `tokenizer.json`, `tokenizer_config.json` and `chat_template.jinja`
+  into that directory, so the glob was empty. The staging is *correct for what C1
+  reads* — stage H packages each probe with those three sidecars and loads no
+  model from there — and *wrong for what the shared setup requires*.
+- **The guard existed and I removed it.** On 2026-09-02
+  `test_a_checkpoint_is_staged_with_the_files_it_cannot_load_without` required all
+  six canonical-init files whenever any were staged. I narrowed its trigger to
+  `model.safetensors`, wrote a paragraph justifying it, and shipped. The
+  justification reasoned entirely from what C1 needs. The test was about what the
+  SETUP needs — the identical distinction that cost the device-canary retry
+  `$0.0637` and the measurement session `$0.0700`, and which this same session had
+  already applied correctly when it staged `state_eval_v1` and
+  `recovery_search_v2` for `verify_frozen_assets` without reading either.
+- **The rule this should have followed:** a shared guard that refuses your design
+  is evidence about the shared contract, not an obstacle to route around. If it
+  must be narrowed, the narrowing has to be justified from the CONSUMER's
+  requirements — here, `autoinit_preflight_setup.sh` — not from the session's.
+- **Two candidate repairs, for review; neither taken here.** Stage the full
+  `CANONICAL_INIT` relay group (six files, ~1.19 GiB pod-side pull, the documented
+  group that already exists) — simple, and pays for weights nothing reads. Or make
+  the shared `ROPE_OK` step skip cleanly when no loadable checkpoint is staged —
+  cheaper, and touches a file five sessions share. Either way the weakened guard
+  test must be restored first, because it is the thing that would have caught this.
+- **Status:** attempts 1 and 2 both INFRASTRUCTURE ABORTS at setup, `$0.1799`
+  total, no C1 measurement in existence. Both authorizations consumed. No third
+  attempt without a new maintainer/scientific review. Cumulative `$264.0396` of an
+  unchanged `$283.7600` cap.

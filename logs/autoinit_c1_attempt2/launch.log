@@ -1,0 +1,111 @@
+[05:24:26] budget: expected 740 min $12.21 · soft $13.43 · hard $13.76 (authorized $13.76)
+[05:24:26] NVIDIA L40S $0.99/h, stock Medium
+[05:24:26] session commit f54254a279e4 verified: harness digests to a67a70f3714a…, carries the authorization and only logs/autoinit_c1_authorization.json differs from the authorized base
+[05:24:26] C1 harness a67a70f3714a… over 64 files
+[05:24:26] ceiling $13.7578, derived from logs/phase_c1_pricing.json
+[05:24:26] preregistration f5eff2e55f82… (self-hash verified), harness a67a70f3714a…
+[05:24:26] seeds, both replay digests and the 950/850 battery a285d61f88de… are unchanged
+[05:24:26] 3 teacher shards bound at 768f209d9ea8…, none fetched
+[05:24:26] battery staged from bytes identical to /home/ecs-user/aad-artifacts/autoinit/c1_confirmation_v1
+[05:24:26] success spec covers the contract (6 probes x 7 sets = 42 generation files); failure spec presupposes no training
+[05:24:29] aad_autoinit_f54254a2.bundle (7406322 bytes, cd6696b0be00…) round-trips to f54254a279e4… carrying this authorization and harness a67a70f3714a…
+[05:24:30] precheck OK: 7 relay inputs (7 from AlphaAvatar/aadistill-artifacts), 4 local assets
+[05:24:32] created 8ywzifnsa5zery at $0.99/h
+[05:24:32] watchdog detached — hard 834 min = $13.76
+[05:25:25]   starting (60s) — $0.01
+[05:26:07] TCP 22 at 64.247.206.212:17566 after 1.6 min
+[05:26:11] draw 1: ssh reachable — $0.03
+[05:28:05] draw 1: image identity runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@580.159.03
+[05:28:05] draw 1: running setup
+[05:30:29] setup did not reach SETUP_DONE:
+ + sse-starlette==3.4.8
+ + starlette==1.6.0
+ + supervisor==4.3.0
+ + sympy==1.14.0
+ + tabulate==0.10.0
+ + tiktoken==0.13.0
+ + tilelang==0.1.12
+ + tokenizers==0.22.2
+ + tokenspeed-mla==0.1.8
+ + tokenspeed-triton==3.8.10.post20260721
+ + torch==2.13.0
+ + torch-c-dlpack-ext==0.1.5
+ + torchaudio==2.11.0
+ + torchcodec==0.16.0
+ + torchvision==0.28.0
+ + tqdm==4.70.0
+ + transformers==5.15.0
+ + triton==3.7.1
+ + truststore==0.10.4
+ + typer==0.27.1
+ + typing-extensions==4.16.0
+ + typing-inspection==0.4.4
+ + urllib3==2.7.0
+ + uvicorn==0.52.3
+ + uvloop==0.22.1
+ + vllm==0.27.1
+ + watchfiles==1.2.0
+ + websockets==17.0.1
+ + xgrammar==0.2.3
+ + yarl==1.24.5
+ + z3-solver==4.15.4.0
+[05:29:40] vllm offline install completed in 8s
+vllm 0.27.1 | torch 2.13.0+cu130 True
+MARKER:VLLM_READY
+[05:29:50] downloading the teacher at the pinned revision
+
+Fetching 10 files:   0%|          | 0/10 [00:00<?, ?it/s]
+Fetching 10 files:  20%|██        | 2/10 [00:00<00:00, 19.89it/s]
+Fetching 10 files:  60%|██████    | 6/10 [00:00<00:00, 30.95it/s]
+Fetching 10 files:  80%|████████  | 8/10 [00:20<00:00, 30.95it/s]
+Fetching 10 files:  90%|█████████ | 9/10 [00:20<00:03,  3.09s/it]
+Fetching 10 files: 100%|██████████| 10/10 [00:22<00:00,  2.81s/it]
+Fetching 10 files: 100%|██████████| 10/10 [00:22<00:00,  2.25s/it]
+MARKER:TEACHER_READY
+[05:30:17] checking the RoPE base resolves in every venv
+no staged checkpoint to check
+SETUP_RC=1
+
+[05:30:29] ABORT after draw 1: setup_failed
+[05:30:29] deleting pod (setup setup_failed)
+[05:30:40] pod deleted — 6.1 min, $0.10; provider confirms gone: True
+
+autoinit-c1 INCOMPLETE — /home/ecs-user/AlphaAvatar-distill/logs/autoinit_c1_session.json. STOP for review. C1 replayed one frozen path under two digest gates and ran no search.
+ + torchcodec==0.16.0
+ + torchvision==0.28.0
+ + tqdm==4.70.0
+ + transformers==5.15.0
+ + triton==3.7.1
+ + truststore==0.10.4
+ + typer==0.27.1
+ + typing-extensions==4.16.0
+ + typing-inspection==0.4.4
+ + urllib3==2.7.0
+ + uvicorn==0.52.3
+ + uvloop==0.22.1
+ + vllm==0.27.1
+ + watchfiles==1.2.0
+ + websockets==17.0.1
+ + xgrammar==0.2.3
+ + yarl==1.24.5
+ + z3-solver==4.15.4.0
+[05:29:40] vllm offline install completed in 8s
+vllm 0.27.1 | torch 2.13.0+cu130 True
+MARKER:VLLM_READY
+[05:29:50] downloading the teacher at the pinned revision
+
+Fetching 10 files:   0%|          | 0/10 [00:00<?, ?it/s]
+Fetching 10 files:  20%|██        | 2/10 [00:00<00:00, 19.89it/s]
+Fetching 10 files:  60%|██████    | 6/10 [00:00<00:00, 30.95it/s]
+Fetching 10 files:  80%|████████  | 8/10 [00:20<00:00, 30.95it/s]
+Fetching 10 files:  90%|█████████ | 9/10 [00:20<00:03,  3.09s/it]
+Fetching 10 files: 100%|██████████| 10/10 [00:22<00:00,  2.81s/it]
+Fetching 10 files: 100%|██████████| 10/10 [00:22<00:00,  2.25s/it]
+MARKER:TEACHER_READY
+[05:30:17] checking the RoPE base resolves in every venv
+no staged checkpoint to check
+SETUP_RC=1
+
+[05:30:29] ABORT after draw 1: setup_failed
+[05:30:29] deleting pod (setup setup_failed)
+[05:30:40] pod deleted — 6.1 min, $0.10; provider confirms gone: True
