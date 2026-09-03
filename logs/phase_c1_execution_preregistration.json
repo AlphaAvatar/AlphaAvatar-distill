@@ -3,7 +3,7 @@
  "preregistration_id": "autoinit.v1.phase_c1.execution",
  "written_utc": "2026-09-02T00:00:00Z",
  "_contract": "Everything the Phase-C1 session will run, bound before any C1 result exists. AUTHORIZES NOTHING: no pricing decision, no spend grant, no permission to launch. An authorization, if ever issued, binds THIS document.",
- "head_commit": "6c90dcb42f7b3f1a85b03fdd7ce9f43585efa06b",
+ "head_commit": "091a1be4fd6f7e7c634112db6c387752f83ba8db",
  "executable_source": {
   "digest": "a5bd40a86052f0125a16414bc98617782cdc011f70590cb938518bb25786740c",
   "files": [
@@ -395,10 +395,10 @@
  "launcher": "scripts/pod/autoinit_c1_launch.py",
  "pricing": {
   "path": "logs/phase_c1_pricing.json",
-  "pricing_sha256": "71604c1e225387cf36dc775812589ceb33dd6cb4e3f8a167108d30c541b189cb",
-  "floor_usd": 12.207,
-  "expected_usd": 13.4277,
-  "hard_ceiling_usd": 13.7578,
+  "pricing_sha256": "909ed65f0d0d559b6b509fd1701f2fb30c3885717b1041c726c33dec48ee5be3",
+  "floor_usd": 13.4401,
+  "expected_usd": 14.7841,
+  "hard_ceiling_usd": 15.1475,
   "enforcement": "BudgetSpec is derived from this record; the ceiling exists in exactly one place"
  },
  "c0_protocol": {
@@ -865,5 +865,5 @@
   "any search, ranking, successive halving, tie-breaking or arm elimination"
  ],
  "authorizes": "nothing",
- "preregistration_sha256": "6e733a19085cb15780ba36ea84a39a7efa57218f01864a59594a2532c28389b3"
+ "preregistration_sha256": "d94eb392a035f0114bdc8b29088663eadcb719f807ebe308b5f5116df2af6fc0"
 }
