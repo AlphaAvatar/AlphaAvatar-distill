@@ -2,13 +2,13 @@
  "schema": "aadistill.autoinit.c1_authorization/v1",
  "authorization_id": "autoinit.v1.phase_c1",
  "version": 1,
- "granted_utc": "2026-09-03T18:29:54+00:00",
- "granted_by": "maintainer, Attempt-3 final grant review: GO. Both previous attempts remain infrastructure aborts with ZERO C1 scientific measurements; the transport gap and the ROPE_OK staging gap are each closed by a $0 pre-provider gate.",
+ "granted_utc": "2026-09-03T19:18:17+00:00",
+ "granted_by": "maintainer, C1 repricing decision: reprice to the observed L40S securePrice of $1.09/h rather than keep waiting for $0.99/h. A pricing amendment only \u2014 no C1 science, source, harness, preregistration, battery, scorer or setup code changes. The unchanged frozen C1 protocol is authorized to execute exactly once at the repriced ceiling.",
  "plan_id": "autoinit.v1.phase_c1",
  "phase_a_session_plan_hash": "42a496f0923b1c321426721fb51487df15b5368703fe19a898354973324e27a2",
  "phase_a_science_plan_hash": "fb2eeea531f9f0d11f84b77cd47dff30697122de90a072a7a80c3a7535e89280",
- "expected_usd": 13.4277,
- "hard_cap_usd": 13.7578,
+ "expected_usd": 14.7841,
+ "hard_cap_usd": 15.1475,
  "authorized_stages": [
   0,
   1,
@@ -25,10 +25,10 @@
   "decision": "stage I requires six complete admitted and scored probes",
   "retry": "none. One launch attempt; no automatic retry, no second attempt, no automatic ceiling increase."
  },
- "scope_note": "exactly one Attempt-3 C1 launch under the unchanged frozen protocol; 2 arms x 3 fresh seeds = 6 recovery probes, one confirmation evaluation per probe only after all six trainings complete, each admitted against its own observed generation protocol before scoring, followed by the frozen paired decision.",
+ "scope_note": "exactly one Attempt-3R C1 launch under the unchanged frozen protocol at a hard ceiling of $15.1475; 2 arms x 3 fresh seeds = 6 recovery probes, one confirmation evaluation per probe only after all six trainings complete, each admitted against its own observed generation protocol before scoring, followed by the frozen paired decision.",
  "phase_a_authorized": false,
  "automatic_followon_start": false,
- "authorized_session_commit": "08a974e0eb9a05fd485151e948ad0e20b30ecc07",
+ "authorized_session_commit": "3c481483143f2fcb6291f2d47d097073537b55cd",
  "harness_source_digest": "c95d9b07d278d0451fda2157bae1cd00e333e717fe3a28b3c4a509d94e084baa",
  "harness_source_files": [
   "scripts/pod/autoinit_c1_launch.py",
@@ -97,18 +97,18 @@
   "src/aadistill/infrastructure/provider.py",
   "src/aadistill/infrastructure/artifact_gate.py"
  ],
- "per_launch_hard_usd": 13.7578,
- "provenance_commit": "08a974e0eb9a05fd485151e948ad0e20b30ecc07",
+ "per_launch_hard_usd": 15.1475,
+ "provenance_commit": "3c481483143f2fcb6291f2d47d097073537b55cd",
  "enforcement": "the launcher loads this artifact and refuses to create a pod whose priced hard threshold exceeds hard_cap_usd or per_launch_hard_usd, refuses a stage not in authorized_stages, refuses a harness that does not digest to the authorized value, and has no code path to any experiment after Phase A",
  "allows_phase_a": false,
  "allows_beam_search": false,
  "authorizes_c1_isolation": true,
  "scope": "2 arms x 3 fresh seeds = 6 fixed 0.86M recovery probes on one frozen path, evaluated once each on c1_confirmation_v1. No search, no ranking, no successive halving, no tie-breaking, no arm elimination, and no formal Stage-2/3 recovery.",
  "grant": {
-  "path": "logs/autoinit_c1_attempt3_grant.json",
-  "sha256": "eb9cfd394bc58ba7f3c473e7fe85459aae9b982ef67f121fb477fb2871c61723",
-  "granted_by": "maintainer, Attempt-3 final grant review: GO. Both previous attempts remain infrastructure aborts with ZERO C1 scientific measurements; the transport gap and the ROPE_OK staging gap are each closed by a $0 pre-provider gate.",
-  "covers": "exactly one Attempt-3 C1 launch under the unchanged frozen protocol; 2 arms x 3 fresh seeds = 6 recovery probes, one confirmation evaluation per probe only after all six trainings complete, each admitted against its own observed generation protocol before scoring, followed by the frozen paired decision.",
+  "path": "logs/autoinit_c1_attempt3r_grant.json",
+  "sha256": "871479784a0dabdf79870761fb67b37e43dfa312463084c536ec03e54a7c8733",
+  "granted_by": "maintainer, C1 repricing decision: reprice to the observed L40S securePrice of $1.09/h rather than keep waiting for $0.99/h. A pricing amendment only \u2014 no C1 science, source, harness, preregistration, battery, scorer or setup code changes. The unchanged frozen C1 protocol is authorized to execute exactly once at the repriced ceiling.",
+  "covers": "exactly one Attempt-3R C1 launch under the unchanged frozen protocol at a hard ceiling of $15.1475; 2 arms x 3 fresh seeds = 6 recovery probes, one confirmation evaluation per probe only after all six trainings complete, each admitted against its own observed generation protocol before scoring, followed by the frozen paired decision.",
   "cumulative_spend_at_approval_usd": 264.0396,
   "cumulative_cap_usd": 283.76,
   "does_not_authorize": [
@@ -120,13 +120,16 @@
    "canonical Stage-1 NLL",
    "any follow-on",
    "any automatic retry",
-   "any fourth attempt",
-   "any ceiling increase"
+   "any further attempt",
+   "any ceiling increase beyond $15.1475",
+   "any cap increase",
+   "price-chasing the market upward",
+   "an allowance for another full C1 retry"
   ]
  },
  "bound": {
-  "execution_preregistration": "6e733a19085cb15780ba36ea84a39a7efa57218f01864a59594a2532c28389b3",
-  "execution_preregistration_head_commit": "6c90dcb42f7b3f1a85b03fdd7ce9f43585efa06b",
+  "execution_preregistration": "5e6eb5110fc70fc9e9631533ca5beb66fc42efdce86915fbc13479eb6a66f898",
+  "execution_preregistration_head_commit": "1a91fed1e0a22415c1e7d6968001619861e24f02",
   "c1_harness_digest": "c95d9b07d278d0451fda2157bae1cd00e333e717fe3a28b3c4a509d94e084baa",
   "c1_harness_n_files": 65,
   "isolation_plan_hash": "42a496f0923b1c321426721fb51487df15b5368703fe19a898354973324e27a2",
@@ -157,9 +160,9 @@
    "incumbent": "c313d1b4081b9a3b410dddf7a29ebcaad8dd0759179d51e1d761238c1743a2a6"
   },
   "pricing": {
-   "floor_usd": 12.207,
-   "soft_stop_usd": 13.4277,
-   "hard_ceiling_usd": 13.7578,
+   "floor_usd": 13.4401,
+   "soft_stop_usd": 14.7841,
+   "hard_ceiling_usd": 15.1475,
    "cumulative_cap_usd": 283.76,
    "cumulative_spend_at_approval_usd": 264.0396
   }
@@ -174,8 +177,11 @@
   "canonical Stage-1 NLL",
   "any follow-on",
   "any automatic retry",
-  "any fourth attempt",
-  "any ceiling increase"
+  "any further attempt",
+  "any ceiling increase beyond $15.1475",
+  "any cap increase",
+  "price-chasing the market upward",
+  "an allowance for another full C1 retry"
  ],
- "authorization_sha256": "955c9288ce7c1ab76236a6a5279958217328a63a63faf54c9cacc21f1ebe3a1f"
+ "authorization_sha256": "9b562e0aa7cfcaa5e4352710287f92bd3d67619eb87449097298c776586e78cf"
 }
