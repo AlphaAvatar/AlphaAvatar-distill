@@ -1,17 +1,39 @@
 {
- "schema": "aadistill.autoinit.continuation_b_post_freeze_changes/v1",
- "generated_utc": "2026-09-02T00:00:00Z",
- "_contract": "The CLOSED continuation-B preregistration binds an executable-source digest. One of its members had to change so Phase C1 could exist at all: the SINGLE SESSION_KIND dispatcher shared by every launchable session, which needed a 'c1' branch. Recording that is the alternative to rewriting the preregistration \u2014 which would destroy the evidence of what attempt 5 actually executed \u2014 and to deleting the gate, which would destroy its meaning. This is the same situation, and the same remedy, as logs/autoinit_phase_b_post_freeze_changes.json.",
- "continuation_b_status": "CLOSED and CONSUMED. Its authorization binds a NON-HEAD commit, so session_commit_gate rejects it and no continuation-B session can launch again. The frozen digest is historical evidence, not a live gate.",
- "frozen_digest": "a5ce6311789eb4cd28902dfa8e2a65f1fea26123ab67a7fda025c8e8960d7141",
- "post_freeze_digest": "45b0aaa79a095005f269fc411c43942185be8b960cf1e9a4a469f59ae0bbbfad",
- "changed_files": [
-  "scripts/pod/autoinit_preflight_setup.sh"
- ],
- "change": "added the SESSION_KIND=c1 branch, which loads C1Authorization. Without it SESSION_KIND falls through to 'spend' and loads a SpendAuthorization that refuses the C1 artifact \u2014 Phase-B attempt 2 proved what that costs ($0.2300, a KeyError one step after the test gate passed).",
- "pre_existing_branches_unchanged": true,
- "pre_existing_branches_note": "the phase_a, phase_b, continuation_b and recovery_continuation branches are byte-identical; the c1 branch was inserted before recovery_continuation and changed no other line",
- "preregistration_rewritten": false,
- "scientific_impact": "NONE. No Phase-A/B result, metric, hash or artifact changes.",
- "declared_at_commit": "6048a4176119431bfbd03b715d5701e3bd3a4379"
+  "schema": "aadistill.autoinit.continuation_b_post_freeze_changes/v1",
+  "generated_utc": "2026-09-02T00:00:00Z",
+  "_contract": "The CLOSED continuation-B preregistration binds an executable-source digest. One of its members had to change so Phase C1 could exist at all: the SINGLE SESSION_KIND dispatcher shared by every launchable session, which needed a 'c1' branch. Recording that is the alternative to rewriting the preregistration \u2014 which would destroy the evidence of what attempt 5 actually executed \u2014 and to deleting the gate, which would destroy its meaning. This is the same situation, and the same remedy, as logs/autoinit_phase_b_post_freeze_changes.json.",
+  "continuation_b_status": "CLOSED and CONSUMED. Its authorization binds a NON-HEAD commit, so session_commit_gate rejects it and no continuation-B session can launch again. The frozen digest is historical evidence, not a live gate.",
+  "frozen_digest": "a5ce6311789eb4cd28902dfa8e2a65f1fea26123ab67a7fda025c8e8960d7141",
+  "post_freeze_digest": "09378a35860d504829ad8dfba2315a14c2e664a2f20e9b8ac5adbb37c507a562",
+  "changed_files": [
+    "scripts/pod/autoinit_preflight_setup.sh"
+  ],
+  "change": "SUPERSEDED as the latest entry -- see `history`. Two declared changes now: the SESSION_KIND=c1 branch (2026-09-02) and the test-gate failure summary (2026-09-04). Both additive, neither touching a pre-existing branch.",
+  "pre_existing_branches_unchanged": true,
+  "pre_existing_branches_note": "the phase_a, phase_b, continuation_b and recovery_continuation branches are byte-identical; the c1 branch was inserted before recovery_continuation and changed no other line",
+  "preregistration_rewritten": false,
+  "scientific_impact": "NONE. No Phase-A/B result, metric, hash or artifact changes.",
+  "declared_at_commit": "cd5cb7d3447db6e3a9a238c3c4f19c27fd4e7b0c",
+  "post_freeze_digest_previous": "45b0aaa79a095005f269fc411c43942185be8b960cf1e9a4a469f59ae0bbbfad",
+  "history": [
+    {
+      "utc": "2026-09-04T00:00:00Z",
+      "declared_at_commit": "cd5cb7d3447db6e3a9a238c3c4f19c27fd4e7b0c",
+      "digest_moved": "45b0aaa79a095005 -> 09378a35860d5048",
+      "change": "the pod CPU test gate now greps every FAILED/ERROR nodeid before its four-line tail. C1 attempt 3R died at that gate with 14 failures and brought home three names.",
+      "additive_only": true,
+      "lines_added": 9,
+      "lines_removed": 0,
+      "added_branch": null,
+      "pre_existing_branches_unchanged": true,
+      "scientific_impact": "NONE. Continuation B is CLOSED and its authorization CONSUMED; no Phase-A/B result, metric, hash or artifact changes. The added lines execute only on a failing test gate."
+    }
+  ],
+  "branch_hashes_at_latest_declaration": {
+    "phase_a": "91f17860d883975b6d2370525e75d72924bcd172283dfa1769d1cc5e8fdc7074",
+    "phase_b": "6647692753c2ce65768075c3b9794a8f5b7e59e34dc04128745a93c2e3393edd",
+    "continuation_b": "cf5fe9e05c6b20220b97f9d8d8e29bcefa16314b7f21f5c309d2a9a417cb02a6",
+    "c1": "2b044b95a4570bc82d83683d9807cfbeeaae02ba5beee50f9085f047a67ea6e8",
+    "recovery_continuation": "fb0f99e2ffa2aba3259e2ffda849350c779e90598749f4787b47b4996243b890"
+  }
 }

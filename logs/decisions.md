@@ -1,5 +1,77 @@
 # Decision records
 
+## 2026-09-04 — The pod environment is a test input, and a readiness record binds the executable
+
+- **Context:** C1 attempt 3R cleared `VLLM_READY → TEACHER_READY → ROPE_OK`, created
+  a pod, and died at the setup CPU test gate — `14 failed, 2650 passed`, `$0.3482`,
+  zero scientific stages. Ten pre-provider gates had passed. Twelve of the fourteen
+  failures were **environment**: tests reading a `$HOME` Hugging Face cache or
+  credential that no fresh pod has. They passed on the dev box and could not pass on
+  a pod, and three launches went by without anyone finding out, because no C1 attempt
+  had ever reached `TESTS_OK` before.
+- **Decision, four parts.**
+  1. `scripts/data/battery_render.py` resolves the hub cache **at call time** —
+     `HF_HUB_CACHE`, then `$HF_HOME/hub`, then `~/.cache/huggingface/hub` — instead of
+     freezing `Path.home()` at import. No repo id, revision, source file, renderer or
+     rendered byte changes.
+  2. Only the seven renderer-parity cases become environment-aware, skipping when
+     their pinned snapshot is absent and naming repo, revision and resolved path. The
+     guarantee **relocates** rather than disappears: `renderer_parity_gate` (gate 11)
+     requires all seven present and 7 PASS / 0 SKIP / 0 FAIL, sharing
+     `check_group_parity` with the pytest cases so two implementations cannot disagree
+     about what "identical" means.
+  3. `simulate_pod_env.sh` gains HOME/HF isolation, the dimension it never modelled.
+  4. One complete sweep under those conditions is recorded and bound by gate 12.
+- **What the reproduction overturned.** The five leaf-transport failures were
+  attributed to `publish_selected_leaves.py:110` reading `~/.cache/huggingface/token`.
+  Reproducing the exact five nodeids on the live tree **before** touching production
+  code showed they fail only when `HF_TOKEN` is unset — and pod setup exports it at
+  line 36, before the gate at line 475. Under the real pod condition all five PASS.
+  The `$0` enumeration had reproduced with no `HF_TOKEN` at all, which is not a
+  condition any pod is in. **No token code changed.** The consequence is uncomfortable
+  and is recorded rather than smoothed over: 7 renderer + 2 repository-state = 9, so
+  **five of the pod's fourteen failures are unexplained**. The pod-like sweep is now
+  the instrument for finding them, and the pod gate greps every failing nodeid, so a
+  next abort needs no reconstruction.
+- **Why the readiness record binds the executable and not `HEAD`.** The sweep takes
+  about three quarters of an hour — far too slow for a gate that runs while a pod
+  waits — so it is run once and recorded. Keying the record on the commit hash would
+  make it stale the moment the preregistration and documentation commits landed, and
+  the obvious way to make it green again would be re-running an hour-long sweep that
+  had not changed in any way that mattered. It binds two digests instead: the C1
+  harness, and a **pod test-environment digest** over `tests/**/*.py` plus the setup
+  script, the simulator, and the modules whose `$HOME` assumptions caused the abort.
+  The whole test tree is in there deliberately: a new test is exactly as able to fail
+  on a pod as new production code, which is the entire lesson of 3R.
+- **Alternatives considered:** staging the seven datasets to the pod (~4 GiB of
+  readiness input no C1 number reads, on a 0.72 MB/s uplink); deleting the parity
+  cases (destroys a guarantee every historical measurement depends on); skipping the
+  whole test file (hides the battery-construction and isolation tests too); making the
+  gate read a stored parity verdict (exactly as stale as the last time somebody
+  remembered to regenerate it — it executes live instead, in seconds).
+- **Blast radius, declared.** The C1 harness moves `c95d9b07…` → `4fe9b5c8…`, 65 → 68
+  files: `renderer_parity_gate` is reachable from the launcher and required by
+  `test_c1_source_closure`, while `battery_render` and `pod_environment` are declared
+  deliberately because they define what the gates MEAN. The Phase-B executable digest
+  moves `1363e581…` → `7427348e…` for the setup-script diagnostic, declared additive
+  in the existing post-freeze record with all four pre-existing `SESSION_KIND`
+  branches re-hashed byte-identical. **No C1 scientific field moves** — checked field
+  by field against the previous preregistration; the four that moved are
+  `head_commit`, `preregistration_sha256` and the harness digest/file list.
+- **Two findings left for the reviewer, deliberately not acted on.**
+  `scripts/pod/autoinit_preflight_setup.sh` is what `session_runner.py:528` uploads
+  and runs, and it is **not** in `C1_HARNESS_SOURCE_FILES_V1`, although Phase A, both
+  continuations and Phase B all name it in theirs. C1 instead names
+  `scripts/pod/setup.sh`, which this session does not run. Binding it in the
+  pod-environment record closes the practical hole — an edit invalidates the readiness
+  record and gate 12 refuses — but the harness omission itself is a governance
+  decision, not mine to make. Second: `logs/autoinit_phase_b_post_freeze_changes.json`
+  records `lines_added: 25, lines_removed: 0` for its first entry, which does not
+  reconcile with `git diff --numstat` against its own baseline (`13/5` and `59/0`);
+  the measured value is now recorded beside it rather than propagated.
+- **Revisit when:** the reviewer rules on the harness omission, or the next pod abort
+  produces a nodeid list — which it now will.
+
 ## 2026-08-29 — A frozen executable digest may move, if the move is recorded and provably additive
 
 - Context: `scripts/pod/autoinit_preflight_setup.sh` is simultaneously (a) a member

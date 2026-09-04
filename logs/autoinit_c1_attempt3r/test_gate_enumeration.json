@@ -1,56 +1,58 @@
 {
- "schema": "aadistill.autoinit.c1_test_gate_enumeration/v1",
- "_what_this_is": "the complete enumeration of the 14 failures that aborted C1 attempt 3R at the pod CPU test gate. The pod reported 3 names: autoinit_preflight_setup.sh tails 4 lines of /workspace/pytest.log and the file dies with the pod. This was recovered at $0 by running the same suite with HOME pointed at an empty directory, which is the condition a fresh pod is actually in.",
- "pod_run": {
-  "failed": 14,
-  "passed": 2650,
-  "skipped": 103,
-  "seconds": 787.78,
-  "names_that_came_home": [
-   "tests/data/test_c1_battery.py::test_the_shared_renderers_reproduce_the_frozen_battery_byte_for_byte[tool]",
-   "tests/docs/test_repository_structure.py::test_every_log_is_classified_in_the_catalog",
-   "tests/pod/test_continuation_b_one_probe_contract.py::test_the_live_snapshot_records_the_terminal_phase_b_state"
-  ]
- },
- "reproduction": {
-  "command": "HOME=<empty dir> PYTHONPATH=src pytest tests/ -q -p no:randomly --ignore=tests/data/test_recovery_corpus_pipeline.py --ignore=tests/pod/test_phase_a_stages1_5_execute.py",
-  "failed": 13,
-  "passed": 2713,
-  "skipped": 41,
-  "seconds": 1214.04,
-  "log": "logs/autoinit_c1_attempt3r/pod_like_home_sweep.log",
-  "reconciliation": "13 = the pod's 14 minus the two repository-state failures already fixed, plus one gate test that needs network the empty HOME denies -- an artifact of the sweep, not a pod failure"
- },
- "the_fourteen": [
-  {
-   "count": 7,
-   "tests": "tests/data/test_c1_battery.py::test_the_shared_renderers_reproduce_the_frozen_battery_byte_for_byte[code,gsm8k,knowledge,math_verified,multihop,rag,tool]",
-   "error": "FileNotFoundError: <repo>@<rev> is not in the local hub cache at <HOME>/.cache/huggingface/hub/...",
-   "cause": "scripts/data/battery_render.py:33 sets HUB = Path.home()/'.cache/huggingface/hub' and reads it DIRECTLY, ignoring HF_HOME -- which pod setup sets to /workspace/hf. The dev box holds all seven dataset snapshots from earlier work; a fresh pod holds none, and warming HF_HOME would not help because the path is not consulted.",
-   "status": "OPEN -- needs a maintainer decision"
+  "schema": "aadistill.autoinit.c1_test_gate_enumeration/v1",
+  "_what_this_is": "the complete enumeration of the 14 failures that aborted C1 attempt 3R at the pod CPU test gate. The pod reported 3 names: autoinit_preflight_setup.sh tails 4 lines of /workspace/pytest.log and the file dies with the pod. This was recovered at $0 by running the same suite with HOME pointed at an empty directory, which is the condition a fresh pod is actually in.",
+  "pod_run": {
+    "failed": 14,
+    "passed": 2650,
+    "skipped": 103,
+    "seconds": 787.78,
+    "names_that_came_home": [
+      "tests/data/test_c1_battery.py::test_the_shared_renderers_reproduce_the_frozen_battery_byte_for_byte[tool]",
+      "tests/docs/test_repository_structure.py::test_every_log_is_classified_in_the_catalog",
+      "tests/pod/test_continuation_b_one_probe_contract.py::test_the_live_snapshot_records_the_terminal_phase_b_state"
+    ]
   },
-  {
-   "count": 5,
-   "tests": "tests/autoinit/test_leaf_transport_publish.py (all five)",
-   "error": "FileNotFoundError: <HOME>/.cache/huggingface/token",
-   "cause": "scripts/autoinit/publish_selected_leaves.py:110 and retire_relay_copies.py:59 read ~/.cache/huggingface/token. Pod setup writes the token to $HF_HOME/token instead, so the path these read is empty on every pod.",
-   "status": "OPEN -- needs a maintainer decision",
-   "note": "this is why the repair is a CLASS and not one file. Fixing only the battery tests would have left these five to fail the same gate on the next attempt, after a 'fixed' report."
+  "reproduction": {
+    "command": "HOME=<empty dir> PYTHONPATH=src pytest tests/ -q -p no:randomly --ignore=tests/data/test_recovery_corpus_pipeline.py --ignore=tests/pod/test_phase_a_stages1_5_execute.py",
+    "failed": 13,
+    "passed": 2713,
+    "skipped": 41,
+    "seconds": 1214.04,
+    "log": "logs/autoinit_c1_attempt3r/pod_like_home_sweep.log",
+    "reconciliation": "13 = the pod's 14 minus the two repository-state failures already fixed, plus one gate test that needs network the empty HOME denies -- an artifact of the sweep, not a pod failure"
   },
-  {
-   "count": 1,
-   "tests": "tests/docs/test_repository_structure.py::test_every_log_is_classified_in_the_catalog",
-   "cause": "logs/autoinit_c1_attempt3r{,_grant.json} were created during the repricing and never classified in CATALOG.md",
-   "status": "FIXED at 5118755"
-  },
-  {
-   "count": 1,
-   "tests": "tests/pod/test_continuation_b_one_probe_contract.py::test_the_live_snapshot_records_the_terminal_phase_b_state",
-   "cause": "current_state.json recorded an authorization as live, which it truthfully was at launch time. Creating the pod consumed it, so the snapshot now records that and the assertion holds. The underlying tension -- this test asserts nothing is authorized, while the pod's gate runs DURING a session -- is real and unresolved.",
-   "status": "FIXED at 5118755; the structural tension is not"
-  }
- ],
- "why_it_was_never_seen": "no C1 attempt had reached TESTS_OK before: attempt 1 died at the bundle fetch, attempt 2 at ROPE_OK, attempt 3 never created a pod.",
- "tooling_gap": "scripts/pod/simulate_pod_env.sh exists to answer 'would this suite pass on a pod?' and hides gitignored REPO artifacts the bundle cannot carry. It says nothing about $HOME. Running it before this launch would not have caught any of the twelve environment failures.",
- "diagnostic_gap": "autoinit_preflight_setup.sh runs `tail -4 /workspace/pytest.log` then `exit 1`. One `grep '^FAILED\\|^ERROR'` before exiting would have brought all fourteen home for free."
+  "the_fourteen": [
+    {
+      "count": 7,
+      "tests": "tests/data/test_c1_battery.py::test_the_shared_renderers_reproduce_the_frozen_battery_byte_for_byte[code,gsm8k,knowledge,math_verified,multihop,rag,tool]",
+      "error": "FileNotFoundError: <repo>@<rev> is not in the local hub cache at <HOME>/.cache/huggingface/hub/...",
+      "cause": "scripts/data/battery_render.py:33 sets HUB = Path.home()/'.cache/huggingface/hub' and reads it DIRECTLY, ignoring HF_HOME -- which pod setup sets to /workspace/hf. The dev box holds all seven dataset snapshots from earlier work; a fresh pod holds none, and warming HF_HOME would not help because the path is not consulted.",
+      "status": "OPEN -- needs a maintainer decision"
+    },
+    {
+      "count": 5,
+      "tests": "tests/autoinit/test_leaf_transport_publish.py (all five)",
+      "error": "FileNotFoundError: <HOME>/.cache/huggingface/token",
+      "cause": "scripts/autoinit/publish_selected_leaves.py:110 and retire_relay_copies.py:59 read ~/.cache/huggingface/token. Pod setup writes the token to $HF_HOME/token instead, so the path these read is empty on every pod.",
+      "status": "WITHDRAWN 2026-09-04 \u2014 the attribution does not reproduce",
+      "note": "this is why the repair is a CLASS and not one file. Fixing only the battery tests would have left these five to fail the same gate on the next attempt, after a 'fixed' report.",
+      "correction": "These five fail ONLY when HF_TOKEN is unset. The reproduction above ran with an empty HOME and no HF_TOKEN; a pod is never in that state, because autoinit_preflight_setup.sh line 36 exports HF_TOKEN=\"$(cat $WS/hf/token)\" and the test gate is line 475. Re-run on the live tree under empty HOME + isolated HF_HOME + HF_HUB_CACHE + a non-empty HF_TOKEN: all five PASS. publish_selected_leaves.py already prefers HF_TOKEN and was NOT changed. CONSEQUENCE: five of the pod's fourteen failures are no longer accounted for, and 7 + 2 = 9 is all this enumeration can now explain. The two most likely candidates are tests needing gitignored artifacts a pod does not stage (the dimension simulate_pod_env.sh models and which was not run before 3R) and tests whose behaviour differs on a pod for reasons neither dimension captures. The pod-like sweep in logs/c1_pod_environment_verification.json is the instrument; the pod gate now also greps every failing nodeid, so a next abort will not need reconstruction at all."
+    },
+    {
+      "count": 1,
+      "tests": "tests/docs/test_repository_structure.py::test_every_log_is_classified_in_the_catalog",
+      "cause": "logs/autoinit_c1_attempt3r{,_grant.json} were created during the repricing and never classified in CATALOG.md",
+      "status": "FIXED at 5118755"
+    },
+    {
+      "count": 1,
+      "tests": "tests/pod/test_continuation_b_one_probe_contract.py::test_the_live_snapshot_records_the_terminal_phase_b_state",
+      "cause": "current_state.json recorded an authorization as live, which it truthfully was at launch time. Creating the pod consumed it, so the snapshot now records that and the assertion holds. The underlying tension -- this test asserts nothing is authorized, while the pod's gate runs DURING a session -- is real and unresolved.",
+      "status": "FIXED at 5118755; the structural tension is not"
+    }
+  ],
+  "why_it_was_never_seen": "no C1 attempt had reached TESTS_OK before: attempt 1 died at the bundle fetch, attempt 2 at ROPE_OK, attempt 3 never created a pod.",
+  "tooling_gap": "scripts/pod/simulate_pod_env.sh exists to answer 'would this suite pass on a pod?' and hides gitignored REPO artifacts the bundle cannot carry. It says nothing about $HOME. Running it before this launch would not have caught any of the twelve environment failures.",
+  "diagnostic_gap": "autoinit_preflight_setup.sh runs `tail -4 /workspace/pytest.log` then `exit 1`. One `grep '^FAILED\\|^ERROR'` before exiting would have brought all fourteen home for free.",
+  "_correction_20260904": "the 5-count leaf-transport row is WITHDRAWN; see its `correction`. The 7-count renderer-parity row stands and is repaired. The reconciliation arithmetic '7 + 5 + 1 + 1 = 14' no longer holds."
 }

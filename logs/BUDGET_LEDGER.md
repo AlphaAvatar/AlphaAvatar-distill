@@ -1582,18 +1582,20 @@ actually in. `logs/autoinit_c1_attempt3r/test_gate_enumeration.json`.
 | count | tests | cause |
 | --- | --- | --- |
 | 7 | `test_c1_battery.py` renderer parity, every group | `battery_render.py:33` reads `~/.cache/huggingface/hub` **directly**, ignoring `HF_HOME` |
-| 5 | `test_leaf_transport_publish.py`, all of them | `publish_selected_leaves.py:110` reads `~/.cache/huggingface/token`; pod setup writes it to `$HF_HOME/token` |
+| 5 | `test_leaf_transport_publish.py`, all of them | **WITHDRAWN 2026-09-04.** They fail only with `HF_TOKEN` unset, and pod setup exports it at line 36 before the gate at line 475. All five PASS under the real pod condition; `publish_selected_leaves.py` already preferred `HF_TOKEN` and was not changed. **Five of the fourteen are unexplained** |
 | 1 | `test_every_log_is_classified_in_the_catalog` | my two unclassified attempt-3R log entries — FIXED |
 | 1 | `test_the_live_snapshot_records_the_terminal_phase_b_state` | the snapshot said an authorization was live — FIXED |
 
 7 + 5 + 1 + 1 = 14, and the sweep's own 13 reconciles as that set minus the two
 already fixed, plus one gate test needing network the empty `$HOME` denies.
 
-**It is a class, not a file.** Two modules hard-code `Path.home()` for HF state —
-the dataset cache and the credential — and both ignore the `HF_HOME` the pod does
-set. Repairing only the battery tests would have left the five transport tests to
-fail the same gate on the next attempt, for another `$0.35`, after I had reported
-it fixed.
+**The class was half right.** The dataset cache genuinely did hard-code
+`Path.home()` and is repaired. The credential did not: `token()` had already
+preferred `HF_TOKEN`, and the pod exports one. The `$0` enumeration missed
+that because it reproduced with no `HF_TOKEN` at all — a condition no pod is
+in. Reproducing the exact five nodeids **before** editing production code is
+what caught it; the repair changed no token code and froze the behaviour in
+tests instead. Five of the fourteen pod failures remain unaccounted for.
 
 Three diagnostic notes this abort earned. `autoinit_preflight_setup.sh` runs
 `tail -4 /workspace/pytest.log` then `exit 1`, so 14 failures arrived as 3 names

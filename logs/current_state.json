@@ -1,184 +1,183 @@
 {
- "schema": "aadistill.current_state/v2",
- "generated_utc": "2026-09-02T00:00:00Z",
- "_contract": "Minimal machine-readable CURRENT snapshot: live facts only. History: logs/decisions.md. Human view: logs/STATE.md. Ownership: logs/CATALOG.md.",
- "baseline_commit": "835ec84c5712855fb764b5d2948fc2f81ecb2bea",
- "baseline_commit_meaning": "LAST TESTED IMPLEMENTATION: the tree that produced latest_verification (2782/16/0); only logs/ changed after it.",
- "running": {
-  "paid_compute": false,
-  "pods": 0,
-  "launchers": 0,
-  "note": "zero pods confirmed via GraphQL myself{pods}, not the CLI field; pj3c870n6yx70z deleted at 18.85 min, provider confirms gone"
- },
- "authorized": {
-  "any": false,
-  "note": "Attempt-3R authorization 9b562e0a is CONSUMED: pod pj3c870n6yx70z was created, which is what consumes a launch attempt.",
-  "c1_attempt1": "CONSUMED. $0.0786, aborted at the bundle fetch.",
-  "c1_attempt2": "CONSUMED. $0.1013, aborted at ROPE_OK.",
-  "c1_attempt3": "SUPERSEDED UNLAUNCHED by the approved repricing. $0.00, no pod.",
-  "c1_attempt3r": "CONSUMED. $0.3482, aborted at the pod CPU test gate; ROPE_OK passed."
- },
- "prepared_launch": {
-  "any": false,
-  "bundles": 0,
-  "note": "nothing is prepared. Attempt 3R launched and its authorization is consumed; a further C1 attempt needs a new maintainer grant."
- },
- "budget": {
-  "cumulative_spend_usd": 264.3878,
-  "authorized_cap_usd": 283.76,
-  "remaining_usd": 19.3722,
-  "planning_floor_usd": 13.4401,
-  "remaining_is_not_permission": true,
-  "ledger": "logs/BUDGET_LEDGER.md",
-  "headroom_note": "Phase-B 1-5 $30.0200; continuation 1-5 $3.8047 and CLOSED Phase B; C1 attempts 1/2/3R $0.0786 + $0.1013 + $0.3482, all INFRASTRUCTURE ABORTS with zero measurement.",
-  "planning_floor_note": "C1 REPRICED to secure L40S $1.09/h: floor $13.4401, soft stop $14.7841, ceiling $15.1475. $19.3722 remains, so exactly one more full C1 attempt fits -- by $4.22. It is not permission."
- },
- "frozen": {
-  "science_plan_hash": "02be33b9a7a8e26bc8bfb75795351e8cdc9ffd441b47066cc81887cfc511b55c",
-  "session_plan_hash": "9377a2dc61f21790dd111d72a5de0e039ea1d31afef2d09e18c98a0b0cc2a0aa",
-  "stage3_evaluation_protocol_hash": "250f72efbd43b86a475e8dda293b45f07ee61a4d858e147f4a5bd7681c32c2e4",
-  "equivalence_interval": 0.011695296982299022,
-  "feasibility_floor": 0.3,
-  "seeds": {
-   "sa": 20260726,
-   "sb": 20260801,
-   "sc_conditional": 20260813,
-   "fourth_seed": "never"
+  "schema": "aadistill.current_state/v2",
+  "generated_utc": "2026-09-04T00:00:00Z",
+  "_contract": "Minimal machine-readable CURRENT snapshot: live facts only. History: logs/decisions.md. Human view: logs/STATE.md. Ownership: logs/CATALOG.md.",
+  "baseline_commit": "cd5cb7d3447db6e3a9a238c3c4f19c27fd4e7b0c",
+  "baseline_commit_meaning": "LAST TESTED IMPLEMENTATION: the executable tree the pod-environment sweep ran against. Only logs/ changed after it.",
+  "running": {
+    "paid_compute": false,
+    "pods": 0,
+    "launchers": 0,
+    "note": "zero pods confirmed via GraphQL myself{pods}, not the CLI field; pj3c870n6yx70z deleted, provider confirms gone"
   },
-  "seeds_scope": "PHASE A/B ONLY. Phase C1 uses 3 FRESH seeds, not these -- fe9683 was selected under sa/sb/sc.",
-  "calibration": "calib.domain_balanced@v1 (spec 11f36a88, content d65c1f40) and calib.reasoning_heavy@v2 (spec 6c67b8df, content cdb28389)",
-  "runtime_comparability": "generation_runtime_comparability@v2",
-  "phase_b_session_plan_hash": "23f23649b4be92bd8852bf9d89f8dcb372bc5a00a175ae631d32b9d71de8032d",
-  "phase_b_stage1_selection_sha256": "84fd6496851995ae",
-  "phase_b_identity": "amendment df413bd99119dab7, universe e94f15d2e648d86a, 6 distinct candidates",
-  "continuation_b": "CLOSED. exec a5ce6311789eb4cd, prereg bd827d12b6607356, authorization CONSUMED.",
-  "phase_c0_protocol": "logs/phase_c0_preregistration.json -- phase_c0_protocol/v1, FROZEN 2026-09-01. Binds the C1 fixed path, geometry, recipe, arms, seeds, battery and decision.",
-  "phase_c0_sizing": "logs/phase_c0_sizing_evidence.json -- N=850 scorable selected; P(GO | +0.015) = 0.8379 >= 0.80 at rho=0.15."
- },
- "latest_verification": {
-  "utc": "2026-09-03T00:00:00Z",
-  "kind": "CURRENT -- Attempt-3 authorization issued, 10/10 gates PASS, launcher declined on price. No pod, $0.00.",
-  "commit": "835ec84c5712855fb764b5d2948fc2f81ecb2bea",
-  "executable_repair": "6c90dcb42f7b3f1a85b03fdd7ce9f43585efa06b",
-  "suite": "2782 passed / 16 skipped / 0 failed (45m56s)",
-  "verifiers": "5/5 PASS; C1 scoring equivalence IDENTICAL/15/0",
-  "pods": "0, via GraphQL myself{pods}, not the CLI field"
- },
- "abandoned": [
-  "recovery_search_v1; calib.reasoning_heavy@v1 (both INVALID/UNBUILDABLE before use)",
-  "the 14-probe Phase-B no-reuse path; student-prefix recovery (E5); any 4th A/B seed",
-  "the paid device-canary session path: TERMINATED 2026-08-18, evidence kept",
-  "the ATTENTION 'search declined to calibrate' reading: WITHDRAWN 2026-09-01"
- ],
- "next_starting_point": {
-  "status": "C1 is fully gated (10/10) and authorized; the launcher refused on market price. No C1 measurement exists.",
-  "the_ask": "maintainer decision: wait for L40S securePrice <= $0.99/h and relaunch under the live authorization, or reprice.",
-  "budget": "$264.0396 spent of the unchanged $283.7600 cap; $19.7204 uncommitted."
- },
- "read_order": [
-  "logs/PHASE_INDEX.md -- history by phase, START HERE",
-  "logs/phase_c0_preregistration.json -- the FROZEN C1 protocol",
-  "logs/STATE.md -- human view of this file",
-  "logs/CATALOG.md -- which log owns which fact",
-  "AGENTS.md -- the binding working contract"
- ],
- "phases": {
-  "phase_a": "COMPLETE / FROZEN",
-  "phase_b": "COMPLETE / RESOLVED / FROZEN",
-  "phase_c0": "COMPLETE / APPROVED / FROZEN",
-  "phase_c1": "IMPLEMENTED / PRICED / NOT EXECUTED / NOT AUTHORIZED",
-  "phase_c2": "NOT STARTED",
-  "formal_recovery_evidence": "NONE"
- },
- "phase_a_result": {
-  "status": "COMPLETE 2026-08-24, $12.8587, ALL_DONE",
-  "decision_status": "unresolved_equivalence",
-  "winner": null,
-  "kind": "SELECTION experiment under calib.domain_balanced@v1; 0.86M SELECTION probes. The small absolute rates are NOT recovered capability.",
-  "record": "logs/autoinit_recovery_continuation_attempt7/",
-  "pooled": "correct_overall cca699 0.029412 | 85bde 0.019608 | control 0.008824; usable 0.6561 | 0.5456 | 0.4947"
- },
- "phase_b_state": "PHASE_B COMPLETE -- behavioural selection RESOLVED",
- "phase_b_result": {
-  "status": "RESOLVED",
-  "winner": "fe9683e6a9c783bbc6fe276a78c851c6",
-  "winner_is_control": false,
-  "tie_break_ran": true,
-  "report_sha256": "8c8842b84fe85cece28beaa859c70b16a2724104b2a2b31975cd90b485611bee",
-  "final_pooled_sa_sb_sc": "fe9683e6a9c7 16/510 = 0.031373 (usable 0.6842) | 85bde4ded2c3 10/510 = 0.019608 (usable 0.5456) | control 3/340 = 0.0088; see decisions.md",
-  "margin": 0.011765,
-  "clears_by": 7e-05,
-  "read_with_care": "clears by 0.000070 -- ~3.6% of ONE correct sample, ~1.23 standard errors at C0-measured noise. Protocol-resolved but not comfortable.",
-  "ranking_metric": "correct_overall; usable_rollout does NOT rank, though it agrees here",
-  "not_capability": "SELECTION evidence under a fixed 0.86M probe. 16 correct of 510",
-  "authorizes": "nothing",
-  "record": "logs/autoinit_continuation_b_attempt5.json"
- },
- "phase_c": {
-  "c0": {
-   "status": "COMPLETE / APPROVED / CANONICALLY FROZEN 2026-09-01 (commit be2ab08)",
-   "protocol": "logs/phase_c0_preregistration.json fb2eeea531f9f0d1",
-   "sizing_evidence": "logs/phase_c0_sizing_evidence.json 4786242d349e9b21",
-   "summary": "850 scorable / 950 total; 3 fresh paired seeds as fixed blocks; primary correct_overall; SESOI +0.010, design alternative +0.015; stratified PROMPT-cluster bootstrap",
-   "authorizes": "nothing"
+  "authorized": {
+    "any": false,
+    "note": "Attempt-3R authorization 9b562e0a is CONSUMED: pod pj3c870n6yx70z was created, which is what consumes a launch attempt.",
+    "c1_attempt1": "CONSUMED. $0.0786, bundle fetch.",
+    "c1_attempt2": "CONSUMED. $0.1013, ROPE_OK.",
+    "c1_attempt3": "SUPERSEDED UNLAUNCHED by the reprice. $0.00, no pod.",
+    "c1_attempt3r": "CONSUMED. $0.3482, pod CPU test gate; ROPE_OK passed."
   },
-  "c1": {
-   "status": "IMPLEMENTED / REPRICED / FOUR LAUNCH ATTEMPTS / NOT SCIENTIFICALLY EXECUTED / NOT CURRENTLY AUTHORIZED",
-   "what_it_is": "fixed-path ATTENTION isolation, 2 arms x 3 fresh seeds = 6 E1_KD_HEAVY_0860K probes. NOT recovery evidence.",
-   "incumbent": "fe9683e6a9c783bbc6fe276a78c851c6, digest c313d1b4081b. Margin 0.000070, not distinguishable from cca699c93f34, NOT recovered.",
-   "execution_prereg": "logs/phase_c1_execution_preregistration.json 5e6eb5110fc7 at head_commit 1a91fed1; harness c95d9b07d278 over 65 files",
-   "pricing": "logs/phase_c1_pricing.json 909ed65f -- REPRICED to secure L40S $1.09/h. Floor $13.4401, soft $14.7841, CEILING $15.1475.",
-   "seeds": "1635674081, 1656475568, 696460635 (derived from the C0 digest)",
-   "scoring": "c1_confirmation_scoring@v1 77507935; equivalence IDENTICAL over 15 probes. @v2 808080a7 and battery a285d61f untouched.",
-   "attempts": "1 $0.0786 bundle fetch; 2 $0.1013 ROPE_OK; 3 $0.00 price refusal, NOT LAUNCHED; 3R $0.3482 pod CPU test gate. $0.5281, zero science.",
-   "gates": "10 pre-provider gates, 10/10 PASS -- EXECUTED for the first time at 3R. The runner prices BEFORE it gates, so attempts 1-3 ran none; the ledger claim that attempt 3 passed them was false.",
-   "reached_in_3r": "VLLM_READY, TEACHER_READY, ROPE_OK. Both earlier fatal gaps stayed closed.",
-   "blocker": "the pod CPU test gate: 14 failed, all enumerated at $0. 7 = test_c1_battery.py renderer parity, 5 = test_leaf_transport_publish.py, 2 = repository-state omissions of mine (fixed). Two modules hard-code Path.home() for HF state and ignore the HF_HOME the pod sets.",
-   "needs": "a maintainer decision; no automatic retry",
-   "not_built": "no grant; the pre-ATTENTION parent rebuild and the ~8 GB teacher weights need GPU/network and have not run locally",
-   "evidence": "logs/autoinit_c1_attempt3r/test_gate_enumeration.json"
+  "prepared_launch": {
+    "any": false,
+    "bundles": 0,
+    "note": "nothing is prepared. Attempt 3R launched and its authorization is consumed; a further C1 attempt needs a new maintainer grant."
   },
-  "c2": {
-   "status": "NOT STARTED",
-   "gate": "runs only if C1 finds a worthwhile ATTENTION formulation"
-  }
- },
- "storage": {
-  "measured_utc": "2026-09-01T04:00:00Z",
-  "roots": {
-   "git": "/home/ecs-user/AlphaAvatar-distill",
-   "canonical artifacts": "/home/ecs-user/aad-artifacts",
-   "scratch": "/home/ecs-user/aad-scratch/sessions/<session-id>"
+  "budget": {
+    "cumulative_spend_usd": 264.3878,
+    "authorized_cap_usd": 283.76,
+    "remaining_usd": 19.3722,
+    "planning_floor_usd": 13.4401,
+    "remaining_is_not_permission": true,
+    "ledger": "logs/BUDGET_LEDGER.md",
+    "headroom_note": "Phase-B 1-5 $30.0200; continuation 1-5 $3.8047 and CLOSED Phase B; C1 attempts 1/2/3R $0.5281, all INFRASTRUCTURE ABORTS with zero measurement.",
+    "planning_floor_note": "C1 REPRICED to secure L40S $1.09/h: floor $13.4401, soft $14.7841, ceiling $15.1475. $19.3722 remains -- exactly one more full attempt, by $4.22."
   },
-  "roots_note": "the ONLY working roots. The five $HOME/phase_b_*_scr are gone and must not return.",
-  "scratch_state": "The 2026-08-31 closeout retired the five $HOME/phase_b_*_scr roots ONLY. A 2026-09-01 audit found 11 of 12 Phase-A per-sample and 90 raw generation files still sole copies there.",
-  "preserved_scratch_20260901": {
-   "path": "/home/ecs-user/aad-artifacts/autoinit/preserved_scratch_20260901/",
-   "manifest": "MANIFEST.json, schema aadistill.promoted_raw_evidence/v1, sha256 3e1a72e2ade2fde610b95e41e147f7f93d37fd4418a4a2d9f61ae58d27cca0b7",
-   "n_files": 359,
-   "bytes": 13575205,
-   "size": "12.95 MiB",
-   "role": "canonical copy of the sole-copy Phase-A/B per-sample rows, raw generations, train logs and scored probe results",
-   "byte_for_byte": true,
-   "verified": "359/359 re-hashed, 0 missing, 0 mismatched; the copy ALONE re-derives the frozen pooled figures",
-   "sources_retained": "YES -- aad-scratch originals are NOT deleted",
-   "excluded": "140.66 MiB of session transport bundles; no decision required in C0"
+  "frozen": {
+    "science_plan_hash": "02be33b9a7a8e26bc8bfb75795351e8cdc9ffd441b47066cc81887cfc511b55c",
+    "session_plan_hash": "9377a2dc61f21790dd111d72a5de0e039ea1d31afef2d09e18c98a0b0cc2a0aa",
+    "stage3_evaluation_protocol_hash": "250f72efbd43b86a475e8dda293b45f07ee61a4d858e147f4a5bd7681c32c2e4",
+    "equivalence_interval": 0.011695296982299022,
+    "feasibility_floor": 0.3,
+    "seeds": {
+      "sa": 20260726,
+      "sb": 20260801,
+      "sc_conditional": 20260813,
+      "fourth_seed": "never"
+    },
+    "seeds_scope": "PHASE A/B ONLY. Phase C1 uses 3 FRESH seeds, not these -- fe9683 was selected under sa/sb/sc.",
+    "calibration": "calib.domain_balanced@v1 (spec 11f36a88, content d65c1f40) and calib.reasoning_heavy@v2 (spec 6c67b8df, content cdb28389)",
+    "runtime_comparability": "generation_runtime_comparability@v2",
+    "phase_b_session_plan_hash": "23f23649b4be92bd8852bf9d89f8dcb372bc5a00a175ae631d32b9d71de8032d",
+    "phase_b_stage1_selection_sha256": "84fd6496851995ae",
+    "phase_b_identity": "amendment df413bd99119dab7, universe e94f15d2e648d86a, 6 distinct candidates",
+    "continuation_b": "CLOSED. exec a5ce6311789eb4cd, prereg bd827d12b6607356, authorization CONSUMED.",
+    "phase_c0_protocol": "logs/phase_c0_preregistration.json -- phase_c0_protocol/v1, FROZEN 2026-09-01. Binds the C1 fixed path, geometry, recipe, arms, seeds, battery and decision.",
+    "phase_c0_sizing": "logs/phase_c0_sizing_evidence.json -- N=850 scorable selected; P(GO | +0.015) = 0.8379 >= 0.80 at rho=0.15."
   },
-  "checkpoints_deleted": 0,
-  "scientific_artifacts_deleted": 0,
-  "open_maintainer_decision": "KEEP / unresolved ownership: 2 duplicate checkpoint pairs, 2.92 GiB. NOT deletion candidates.",
-  "closeout": "logs/storage_closeout_20260831.json",
-  "c1_battery_canonical": "/home/ecs-user/aad-artifacts/autoinit/c1_confirmation_v1 -- COPY of the frozen bytes, 8 files, verified from the copy; repo-local working copy retained"
- },
- "blocker": "C1 attempt 3 cannot launch: L40S securePrice $1.09/h vs the priced $0.99/h. communityPrice $0.79 is a DIFFERENT product the launcher does not provision. Maintainer decision: wait, or reprice. Not looped.",
- "deferred_not_blocking": {
-  "_note": "open, none blocking. Detail: logs/HANDOFF_next_session.md",
-  "duplicate_checkpoints": "2.92 GiB, KEEP / unresolved ownership -- maintainer decision",
-  "session_launchers_coverage": "SESSION_LAUNCHERS omits the Phase-B and continuation launchers; deferred debt",
-  "issuer_relative_to": "cosmetic relative_to crash when --out is outside the repo, after writing the file",
-  "fe9683_sb_per_sample": "per-sample rows for fe9683/sb do not exist anywhere; only the aggregate probe JSON. Reduces historical calibration information; NOT a C1 blocker."
- },
- "handoff": "logs/HANDOFF_next_session.md",
- "history": "per-attempt records, failure patterns and cost history: logs/decisions.md, logs/BUDGET_LEDGER.md and the per-run dirs.",
- "historical_paid_verification": "2026-08-30T21:18:37Z, continuation attempt 5, the last PAID session to reach ALL_DONE: 8/8 gates, teardown confirmed."
+  "latest_verification": {
+    "utc": "2026-09-04T00:00:00Z",
+    "kind": "CURRENT -- the pod HOME/HF environment contract that aborted 3R is repaired and verified under a pod-like sweep. $0, no pod, no authorization.",
+    "commit": "cd5cb7d3447db6e3a9a238c3c4f19c27fd4e7b0c",
+    "executable_repair": "cd5cb7d3447db6e3a9a238c3c4f19c27fd4e7b0c",
+    "suite": "see logs/c1_pod_environment_verification.json",
+    "verifiers": "renderer parity 7/7 PASS 0 SKIP; leaf transport 5/5 PASS under empty HOME + isolated HF + synthetic HF_TOKEN",
+    "pods": "0, via GraphQL myself{pods}, not the CLI field"
+  },
+  "abandoned": [
+    "recovery_search_v1; calib.reasoning_heavy@v1 (both INVALID/UNBUILDABLE before use)",
+    "the 14-probe Phase-B no-reuse path; student-prefix recovery (E5); any 4th A/B seed",
+    "the paid device-canary session path: TERMINATED 2026-08-18, evidence kept",
+    "the ATTENTION 'search declined to calibrate' reading: WITHDRAWN 2026-09-01"
+  ],
+  "next_starting_point": {
+    "status": "C1 is gated 12/12; the pod test-gate blocker is REPAIRED and verified. No C1 measurement exists and nothing is authorized.",
+    "the_ask": "reviewer decision on the one remaining C1 grant. $19.3722 headroom vs a $15.1475 ceiling: it fits once, by $4.22.",
+    "budget": "$264.3878 spent of the unchanged $283.7600 cap; $19.3722 uncommitted.",
+    "blocker_resolved": "see STATE.md and decisions.md 2026-09-04"
+  },
+  "read_order": [
+    "logs/PHASE_INDEX.md -- history by phase, START HERE",
+    "logs/phase_c0_preregistration.json -- the FROZEN C1 protocol",
+    "logs/STATE.md -- human view of this file",
+    "logs/CATALOG.md -- which log owns which fact",
+    "AGENTS.md -- the binding working contract"
+  ],
+  "phases": {
+    "phase_a": "COMPLETE / FROZEN",
+    "phase_b": "COMPLETE / RESOLVED / FROZEN",
+    "phase_c0": "COMPLETE / APPROVED / FROZEN",
+    "phase_c1": "IMPLEMENTED / REPRICED / FOUR LAUNCH ATTEMPTS / NEVER MEASURED / NOT AUTHORIZED",
+    "phase_c2": "NOT STARTED",
+    "formal_recovery_evidence": "NONE"
+  },
+  "phase_a_result": {
+    "status": "COMPLETE 2026-08-24, $12.8587, ALL_DONE",
+    "decision_status": "unresolved_equivalence",
+    "winner": null,
+    "kind": "SELECTION experiment under calib.domain_balanced@v1; 0.86M SELECTION probes. The small absolute rates are NOT recovered capability.",
+    "record": "logs/autoinit_recovery_continuation_attempt7/",
+    "pooled": "correct_overall cca699 0.029412 | 85bde 0.019608 | control 0.008824; usable 0.6561 | 0.5456 | 0.4947"
+  },
+  "phase_b_state": "PHASE_B COMPLETE -- behavioural selection RESOLVED",
+  "phase_b_result": {
+    "status": "RESOLVED",
+    "winner": "fe9683e6a9c783bbc6fe276a78c851c6",
+    "winner_is_control": false,
+    "tie_break_ran": true,
+    "report_sha256": "8c8842b84fe85cece28beaa859c70b16a2724104b2a2b31975cd90b485611bee",
+    "final_pooled_sa_sb_sc": "fe9683e6a9c7 16/510 = 0.031373 (usable 0.6842) | 85bde4ded2c3 10/510 = 0.019608 | control 3/340 = 0.0088; see decisions.md",
+    "margin": 0.011765,
+    "clears_by": 7e-05,
+    "read_with_care": "clears by 0.000070 -- ~3.6% of ONE correct sample, ~1.23 SE at C0-measured noise. Protocol-resolved but not comfortable.",
+    "ranking_metric": "correct_overall; usable_rollout does NOT rank, though it agrees here",
+    "not_capability": "SELECTION evidence under a fixed 0.86M probe. 16 correct of 510",
+    "authorizes": "nothing",
+    "record": "logs/autoinit_continuation_b_attempt5.json"
+  },
+  "phase_c": {
+    "c0": {
+      "status": "COMPLETE / APPROVED / CANONICALLY FROZEN 2026-09-01 (commit be2ab08)",
+      "protocol": "logs/phase_c0_preregistration.json fb2eeea531f9f0d1",
+      "sizing_evidence": "logs/phase_c0_sizing_evidence.json 4786242d349e9b21",
+      "summary": "850 scorable / 950 total; 3 fresh paired seeds as fixed blocks; primary correct_overall; SESOI +0.010, design alternative +0.015.",
+      "authorizes": "nothing"
+    },
+    "c1": {
+      "status": "IMPLEMENTED / REPRICED / FOUR LAUNCH ATTEMPTS / NOT SCIENTIFICALLY EXECUTED / NOT CURRENTLY AUTHORIZED",
+      "what_it_is": "fixed-path ATTENTION isolation, 2 arms x 3 fresh seeds = 6 E1_KD_HEAVY_0860K probes. NOT recovery evidence.",
+      "incumbent": "fe9683e6a9c783bbc6fe276a78c851c6, digest c313d1b4081b. Margin 0.000070, not distinguishable from cca699c93f34, NOT recovered.",
+      "execution_prereg": "logs/phase_c1_execution_preregistration.json 5201a183914d at head_commit cd5cb7d3; harness 4fe9b5c80af2 over 68 files",
+      "pricing": "logs/phase_c1_pricing.json 909ed65f -- REPRICED to secure L40S $1.09/h. Floor $13.4401, soft $14.7841, CEILING $15.1475.",
+      "seeds": "1635674081, 1656475568, 696460635 (derived from the C0 digest)",
+      "scoring": "c1_confirmation_scoring@v1 77507935; equivalence IDENTICAL over 15 probes. @v2 808080a7 and battery a285d61f untouched.",
+      "attempts": "1 $0.0786 bundle fetch; 2 $0.1013 ROPE_OK; 3 $0.00 price refusal, no provider resource; 3R $0.3482 pod test gate. $0.5281, zero science.",
+      "gates": "12. The first ten ran for the first time at 3R -- the runner prices BEFORE it gates. renderer_parity (11) and pod_environment (12) were added after 3R.",
+      "reached_in_3r": "VLLM_READY, TEACHER_READY, ROPE_OK. Both earlier fatal gaps stayed closed.",
+      "blocker": "RESOLVED at $0. Of the 14: 7 renderer parity (repaired, gate 11), 2 repository state (fixed), 5 attributed to leaf transport but NOT REPRODUCIBLE and therefore UNEXPLAINED. See decisions.md 2026-09-04.",
+      "needs": "a maintainer decision; no automatic retry",
+      "not_built": "no grant; the pre-ATTENTION parent rebuild and the ~8 GB teacher weights need GPU/network and have not run locally",
+      "evidence": "logs/autoinit_c1_attempt3r/ (the 5-count row is WITHDRAWN)",
+      "readiness": "logs/c1_renderer_parity.json (7/7) and logs/c1_pod_environment_verification.json (gate 12)"
+    },
+    "c2": {
+      "status": "NOT STARTED",
+      "gate": "runs only if C1 finds a worthwhile ATTENTION formulation"
+    }
+  },
+  "storage": {
+    "measured_utc": "2026-09-01T04:00:00Z",
+    "roots": {
+      "git": "/home/ecs-user/AlphaAvatar-distill",
+      "canonical artifacts": "/home/ecs-user/aad-artifacts",
+      "scratch": "/home/ecs-user/aad-scratch/sessions/<session-id>"
+    },
+    "roots_note": "the ONLY working roots. The five $HOME/phase_b_*_scr are gone.",
+    "scratch_state": "the 2026-08-31 closeout retired the five $HOME/phase_b_*_scr roots ONLY; see STATE.md for the 2026-09-01 audit.",
+    "preserved_scratch_20260901": {
+      "path": "/home/ecs-user/aad-artifacts/autoinit/preserved_scratch_20260901/",
+      "manifest_sha256": "3e1a72e2ade2fde610b95e41e147f7f93d37fd4418a4a2d9f61ae58d27cca0b7",
+      "n_files": 359,
+      "bytes": 13575205,
+      "verified": "359/359 re-hashed, 0 missing, 0 mismatched; the copy ALONE re-derives the frozen pooled figures",
+      "sources_retained": "YES -- aad-scratch originals are NOT deleted",
+      "detail": "logs/STATE.md"
+    },
+    "checkpoints_deleted": 0,
+    "scientific_artifacts_deleted": 0,
+    "open_maintainer_decision": "KEEP / unresolved ownership: 2 duplicate checkpoint pairs, 2.92 GiB. NOT deletion candidates.",
+    "closeout": "logs/storage_closeout_20260831.json",
+    "c1_battery_canonical": "/home/ecs-user/aad-artifacts/autoinit/c1_confirmation_v1 -- COPY of the frozen bytes, 8 files, verified from the copy; repo-local working copy retained"
+  },
+  "blocker": "No C1 grant exists. The pod HOME/HF environment contract that aborted 3R is REPAIRED and verified at $0; the $0.99 price refusal was superseded by the approved $1.09/h reprice.",
+  "deferred_not_blocking": {
+    "_note": "open, none blocking. Detail: logs/HANDOFF_next_session.md",
+    "duplicate_checkpoints": "2.92 GiB, KEEP / unresolved ownership -- maintainer decision",
+    "session_launchers_coverage": "SESSION_LAUNCHERS omits the Phase-B and continuation launchers; deferred debt",
+    "issuer_relative_to": "cosmetic relative_to crash when --out is outside the repo, after writing the file",
+    "fe9683_sb_per_sample": "per-sample rows for fe9683/sb exist nowhere; only the aggregate probe JSON. Detail: HANDOFF_next_session.md"
+  },
+  "handoff": "logs/HANDOFF_next_session.md",
+  "history": "per-attempt records, failure patterns and cost history: logs/decisions.md, logs/BUDGET_LEDGER.md and the per-run dirs.",
+  "historical_paid_verification": "2026-08-30T21:18:37Z, continuation attempt 5, the last PAID session to reach ALL_DONE: 8/8 gates, teardown confirmed."
 }

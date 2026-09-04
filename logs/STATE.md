@@ -1,5 +1,6 @@
 **Updated:** 2026-09-04 · branch `main` · **PHASE B CLOSED · PHASE C0 FROZEN ·
-PHASE C1 REPRICED, LAUNCHED AND ABORTED AT THE POD TEST GATE — STILL NEVER MEASURED**
+PHASE C1 REPRICED, LAUNCHED, ABORTED AT THE POD TEST GATE — STILL NEVER MEASURED ·
+THE POD ENVIRONMENT CONTRACT IS REPAIRED AT `$0`**
 
 # Current state
 
@@ -47,10 +48,10 @@ killed attempts 1 and 2 are closed and stayed closed. It then failed the setup
 test gate, which **no C1 attempt had ever reached before**.
 
 The dominant cause is `tests/data/test_c1_battery.py`: its seven renderer-parity
-cases call `snapshot()`, which reads `~/.cache/huggingface/hub` **directly,
+cases called `snapshot()`, which read `~/.cache/huggingface/hub` **directly,
 ignoring `HF_HOME`**. The dev box holds all seven dataset snapshots from earlier
-work; a fresh pod holds none and sets `HF_HOME=/workspace/hf` besides. Those
-tests can pass on this machine and can never pass on a pod.
+work; a fresh pod holds none and sets its own `HF_HOME` besides. Those tests
+could pass on this machine and could never pass on a pod.
 
 Only three of the fourteen names came home: setup writes the full list to
 `/workspace/pytest.log` and tails four lines, and the file dies with the pod.
@@ -58,9 +59,60 @@ Only three of the fourteen names came home: setup writes the full list to
 **The ten pre-provider gates were executed for the first time at 3R.**
 `SessionRunner.run` prices *before* it gates, so attempts 1–3 ran none of them;
 an earlier ledger claim that attempt 3 passed `10/10` was false and is corrected
-in [`BUDGET_LEDGER.md`](BUDGET_LEDGER.md).
+in [`BUDGET_LEDGER.md`](BUDGET_LEDGER.md). **There are now twelve.**
 
-## Phase C1 — ATTEMPT 3 AUTHORIZED, NOT LAUNCHED (market price) · NO C1 MEASUREMENT
+## The pod environment contract — REPAIRED at `$0`, 2026-09-04
+
+`battery_render` resolves the hub cache **at call time** — `HF_HUB_CACHE`, then
+`$HF_HOME/hub`, then `~/.cache/huggingface/hub` — instead of freezing
+`Path.home()` at import. Repo ids, revisions, source files, renderer logic and
+rendered bytes are untouched, and all seven groups still reproduce the frozen
+`recovery_search_v2` prompts byte for byte.
+
+Only the seven parity cases became environment-aware: they **skip** when their
+pinned snapshot is absent, naming repo, revision and resolved path. Those ~4 GiB
+of datasets are a dev-box **readiness input** — not staged to the pod, read by no
+C1 number. The guarantee did not disappear, it moved to
+[`renderer_parity_gate.py`](../scripts/autoinit/renderer_parity_gate.py), the
+eleventh pre-provider gate, which requires all seven present and **7 PASS / 0
+SKIP / 0 FAIL** and shares `check_group_parity` with the pytest cases rather than
+reimplementing "identical". Evidence: [`c1_renderer_parity.json`](c1_renderer_parity.json).
+
+> **The five leaf-transport failures did not survive re-testing, and the earlier
+> diagnosis is partly wrong.** They were attributed to
+> `publish_selected_leaves.py` reading `~/.cache/huggingface/token`. Reproduced
+> on the live tree: those five fail **only when `HF_TOKEN` is unset**, and pod
+> setup exports it at line 36, well before the test gate at line 475. Under the
+> real pod condition all five **PASS**. So no production token code changed, the
+> regression is frozen by tests instead — and **five of the fourteen pod failures
+> are now unexplained**. The `$0` enumeration that produced that attribution ran
+> without `HF_TOKEN`, which a pod is never in. See
+> [`decisions.md`](decisions.md).
+
+`simulate_pod_env.sh` gained the dimension it never had. It modelled gitignored
+artifacts and said nothing about `$HOME`, so running it before 3R would have
+caught none of the twelve environment failures. It now also isolates `HOME`,
+`HF_HOME`, `HF_HUB_CACHE` and `HF_TOKEN`, asserts the dev cache is invisible,
+restores everything in the same `EXIT` trap, and **propagates the suite's exit
+code** — it used to end in `| tail -12` and exit `0` whatever happened.
+
+One complete sweep under those conditions is recorded in
+`c1_pod_environment_verification.json`,
+the twelfth pre-provider gate. It binds the **executable** — the C1 harness
+digest plus a digest over `tests/**/*.py`, the setup script, the simulator and
+the modules whose `$HOME` assumptions caused the abort — and deliberately **not**
+`HEAD`, so a preregistration or documentation commit cannot invalidate a
+three-quarter-hour sweep while any executable edit does.
+
+The pod gate itself now greps every `FAILED`/`ERROR` nodeid before its four-line
+tail. That one line would have brought all fourteen home for free.
+
+## Phase C1 — FOUR ATTEMPTS, NO MEASUREMENT · NOTHING AUTHORIZED
+
+The blockquotes below are the **history** of the four attempts, kept because each
+records a gap that is now closed. None of them is the current blocker: the price
+refusal was superseded by the approved reprice to `$1.09/h`, and the pod test
+gate is repaired above. The current position is simply that **no grant exists**.
 
 > **Attempt 1 aborted at setup, 2026-09-02.** All eight pre-provider gates
 > passed and pod `fccr23o9jcnrh0` was created, then setup failed with
@@ -69,6 +121,10 @@ in [`BUDGET_LEDGER.md`](BUDGET_LEDGER.md).
 > confirms gone. **No scientific stage ran** — no teacher fetch, no replay, no
 > training, no evaluation. The one-use authorization is **consumed**; no retry is
 > authorized. Evidence in [`autoinit_c1_attempt1/`](autoinit_c1_attempt1/).
+>
+> **Attempt 3 was a pre-provider price refusal — SUPERSEDED, not the current
+> blocker.** The reprice to secure L40S `$1.09/h` was approved and attempt 3R
+> launched under it. Kept for the `communityPrice`/`securePrice` lesson only.
 >
 > **Attempt 3 has not launched, 2026-09-04 — twice.** The authorization
 > `955c9288…` is issued and LIVE, the bundle `aad_autoinit_ca519e67.bundle` is
@@ -159,10 +215,10 @@ Design and implementation proceeded at `$0`; **execution did not**. What exists:
 | teacher shard binding | [`phase_c1_teacher_binding.json`](phase_c1_teacher_binding.json) |
 
 | ten-stage session contract + the two fail-stop replay gates | `autoinit/c1_session.py` |
-| execution preregistration | [`phase_c1_execution_preregistration.json`](phase_c1_execution_preregistration.json) · `54d858ed1dfe1939…` at `head_commit 913a88a` · supersedes `bc48515d…` ← `63ca7c24…` ← `58015cd3…` ← `48beff49…` |
-| price bound | [`phase_c1_pricing.json`](phase_c1_pricing.json) · floor **$12.2070** · expected **$13.4277** · **ceiling $13.7578** |
+| execution preregistration | [`phase_c1_execution_preregistration.json`](phase_c1_execution_preregistration.json) · `5201a183914ddeff…` at `head_commit cd5cb7d` · harness `4fe9b5c80af2…` over 68 files · every earlier revision moved only executable identity; no scientific field has ever moved |
+| price bound | [`phase_c1_pricing.json`](phase_c1_pricing.json) · REPRICED to secure L40S **$1.09/h** · floor **$13.4401** · soft stop **$14.7841** · **ceiling $15.1475** |
 | evidence declaration | [`configs/autoinit/c1_artifacts.json`](../configs/autoinit/c1_artifacts.json) + [`_failed`](../configs/autoinit/c1_artifacts_failed.json) — inside the measured harness, so editing what survives teardown moves the digest a grant binds |
-| standalone session | `scripts/pod/autoinit_c1_launch.py` + `autoinit_c1_driver.py` · `SESSION_KIND=c1` · `C1Authorization` · 8 pre-provider gates · no Phase-A driver or launcher in the closure |
+| standalone session | `scripts/pod/autoinit_c1_launch.py` + `autoinit_c1_driver.py` · `SESSION_KIND=c1` · `C1Authorization` · **12** pre-provider gates · no Phase-A driver or launcher in the closure |
 | Stage-H admission | no probe is scored unless the protocol observed from **its own** raw summaries is comparable to the attested one; on drift the session stops `C1_INCOMPLETE` before scoring, and no later probe is evaluated |
 | C1 scoring binding | `c1_confirmation_scoring@v1` · `77507935f21f83eb…` over 11 files · parent `recovery_search_scoring@v2` `808080a7…`, unchanged · equivalence **IDENTICAL / 15 cases / 0 differences** |
 
