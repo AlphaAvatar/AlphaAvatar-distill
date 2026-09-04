@@ -1,0 +1,88 @@
+{
+  "_what_this_is": "one complete pod-like sweep of the CPU test suite: the condition a fresh C1 pod is actually in, which is what C1 attempt 3R's setup test gate refused for $0.3482 with zero scientific stages run.",
+  "binding_rule": "this record binds the EXECUTABLE, not HEAD: the preregistration and the documentation commits that follow a sweep must not invalidate it, and an edit to any measured file must.",
+  "c1_harness_digest": "04fcb03292952f6c67a301a54a41d1ebd88f12ca06d81ddc72ad08665f60487a",
+  "c1_harness_n_files": 68,
+  "counts": {
+    "error": 0,
+    "failed": 0,
+    "passed": 2768,
+    "skipped": 61
+  },
+  "environment": {
+    "artifact_hiding": "the simulator's default HIDDEN_PATHS \u2014 the gitignored artifacts a session bundle cannot carry",
+    "dev_hf_cache_visible": false,
+    "hf_home_mode": "isolated \u2014 $PODSIM_ENV_ROOT/hf, outside the dev cache",
+    "hf_hub_cache_resolution": "$HF_HOME/hub, set explicitly as HF_HUB_CACHE",
+    "home_mode": "empty \u2014 a fresh directory created by the simulator",
+    "token_mode": "synthetic, non-empty; never printed, never a real credential"
+  },
+  "evidence": {
+    "junit": "/home/ecs-user/aad-scratch/podsim_junit.xml",
+    "pytest_log": "/home/ecs-user/aad-scratch/podsim_pytest.log"
+  },
+  "executable_head": "0457bab3a0defca510e1b0e329713c0b480e8620",
+  "expected_renderer_parity_skips": [
+    "tests/data/test_c1_battery.py::test_the_shared_renderers_reproduce_the_frozen_battery_byte_for_byte[code]",
+    "tests/data/test_c1_battery.py::test_the_shared_renderers_reproduce_the_frozen_battery_byte_for_byte[gsm8k]",
+    "tests/data/test_c1_battery.py::test_the_shared_renderers_reproduce_the_frozen_battery_byte_for_byte[knowledge]",
+    "tests/data/test_c1_battery.py::test_the_shared_renderers_reproduce_the_frozen_battery_byte_for_byte[math_verified]",
+    "tests/data/test_c1_battery.py::test_the_shared_renderers_reproduce_the_frozen_battery_byte_for_byte[multihop]",
+    "tests/data/test_c1_battery.py::test_the_shared_renderers_reproduce_the_frozen_battery_byte_for_byte[rag]",
+    "tests/data/test_c1_battery.py::test_the_shared_renderers_reproduce_the_frozen_battery_byte_for_byte[tool]"
+  ],
+  "failed_nodeids": [],
+  "leaf_transport_all_passed": true,
+  "leaf_transport_nodeids": [
+    "tests/autoinit/test_leaf_transport_publish.py::test_a_corrupted_remote_file_is_caught_by_the_round_trip",
+    "tests/autoinit/test_leaf_transport_publish.py::test_a_size_mismatch_at_the_far_end_is_caught",
+    "tests/autoinit/test_leaf_transport_publish.py::test_an_lfs_oid_that_disagrees_is_caught_without_downloading",
+    "tests/autoinit/test_leaf_transport_publish.py::test_a_file_absent_from_the_far_end_is_caught",
+    "tests/autoinit/test_leaf_transport_publish.py::test_the_round_trip_needs_no_dev_box_directory"
+  ],
+  "leaf_transport_observed": {
+    "tests/autoinit/test_leaf_transport_publish.py::test_a_corrupted_remote_file_is_caught_by_the_round_trip": "passed",
+    "tests/autoinit/test_leaf_transport_publish.py::test_a_file_absent_from_the_far_end_is_caught": "passed",
+    "tests/autoinit/test_leaf_transport_publish.py::test_a_size_mismatch_at_the_far_end_is_caught": "passed",
+    "tests/autoinit/test_leaf_transport_publish.py::test_an_lfs_oid_that_disagrees_is_caught_without_downloading": "passed",
+    "tests/autoinit/test_leaf_transport_publish.py::test_the_round_trip_needs_no_dev_box_directory": "passed"
+  },
+  "n_tests": 2829,
+  "pod_test_environment_digest": "0d79fd69f024c5645efd1c3ec230c5153c50fac3b709a4fe54d8569d58d2357d",
+  "pod_test_environment_n_files": 155,
+  "pod_test_environment_named_files": [
+    "scripts/pod/autoinit_preflight_setup.sh",
+    "scripts/pod/simulate_pod_env.sh",
+    "scripts/data/battery_render.py",
+    "scripts/autoinit/publish_selected_leaves.py",
+    "scripts/autoinit/renderer_parity_gate.py",
+    "scripts/autoinit/record_pod_environment.py"
+  ],
+  "problems": [],
+  "pytest_command": ".venv/bin/python -m pytest tests/ -q --ignore=tests/data/test_recovery_corpus_pipeline.py --ignore=tests/pod/test_phase_a_stages1_5_execute.py",
+  "pytest_command_note": "identical in test SELECTION to the pod gate in autoinit_preflight_setup.sh; --junitxml is a reporting flag added by the simulator so every skip and pass can be named exactly.",
+  "renderer_parity_is_proved_by": "logs/c1_renderer_parity.json",
+  "renderer_parity_observed": {
+    "tests/data/test_c1_battery.py::test_the_shared_renderers_reproduce_the_frozen_battery_byte_for_byte[code]": "skipped",
+    "tests/data/test_c1_battery.py::test_the_shared_renderers_reproduce_the_frozen_battery_byte_for_byte[gsm8k]": "skipped",
+    "tests/data/test_c1_battery.py::test_the_shared_renderers_reproduce_the_frozen_battery_byte_for_byte[knowledge]": "skipped",
+    "tests/data/test_c1_battery.py::test_the_shared_renderers_reproduce_the_frozen_battery_byte_for_byte[math_verified]": "skipped",
+    "tests/data/test_c1_battery.py::test_the_shared_renderers_reproduce_the_frozen_battery_byte_for_byte[multihop]": "skipped",
+    "tests/data/test_c1_battery.py::test_the_shared_renderers_reproduce_the_frozen_battery_byte_for_byte[rag]": "skipped",
+    "tests/data/test_c1_battery.py::test_the_shared_renderers_reproduce_the_frozen_battery_byte_for_byte[tool]": "skipped"
+  },
+  "renderer_parity_skipped_as_expected": true,
+  "repository_state_observed": {
+    "tests/docs/test_repository_structure.py::test_every_log_is_classified_in_the_catalog": "passed",
+    "tests/pod/test_continuation_b_one_probe_contract.py::test_the_live_snapshot_records_the_terminal_phase_b_state": "passed"
+  },
+  "schema": "aadistill.autoinit.c1_pod_environment_verification/v1",
+  "seconds": 754.1,
+  "self_sha256": "b5833e75b6ec67f7b394ece443ea8c012e7c17bc234370e636b2b4e768deecd7",
+  "simulator": "scripts/pod/simulate_pod_env.sh",
+  "simulator_command": "PODSIM_JUNIT=/home/ecs-user/aad-scratch/podsim_junit.xml PODSIM_LOG=/home/ecs-user/aad-scratch/podsim_pytest.log bash scripts/pod/simulate_pod_env.sh",
+  "simulator_exit_code": 0,
+  "tree_clean": true,
+  "unexpected_environment_skips": [],
+  "verdict": "PASS"
+}
