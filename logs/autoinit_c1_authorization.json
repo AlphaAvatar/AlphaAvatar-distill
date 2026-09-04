@@ -2,8 +2,8 @@
  "schema": "aadistill.autoinit.c1_authorization/v1",
  "authorization_id": "autoinit.v1.phase_c1",
  "version": 1,
- "granted_utc": "2026-09-03T19:18:17+00:00",
- "granted_by": "maintainer, C1 repricing decision: reprice to the observed L40S securePrice of $1.09/h rather than keep waiting for $0.99/h. A pricing amendment only \u2014 no C1 science, source, harness, preregistration, battery, scorer or setup code changes. The unchanged frozen C1 protocol is authorized to execute exactly once at the repriced ceiling.",
+ "granted_utc": "2026-09-04T19:42:00+00:00",
+ "granted_by": "maintainer, C1 final pre-provider review 2026-09-05: the C1 science, budget feasibility, HOME/HF environment repair, actual-preflight harness closure, gate-12 post-sweep repository lineage and the diagnostic-vs-launch-bound enforcement are ACCEPTED. The unchanged frozen C1 protocol is authorized to execute exactly once.",
  "plan_id": "autoinit.v1.phase_c1",
  "phase_a_session_plan_hash": "42a496f0923b1c321426721fb51487df15b5368703fe19a898354973324e27a2",
  "phase_a_science_plan_hash": "fb2eeea531f9f0d11f84b77cd47dff30697122de90a072a7a80c3a7535e89280",
@@ -25,15 +25,15 @@
   "decision": "stage I requires six complete admitted and scored probes",
   "retry": "none. One launch attempt; no automatic retry, no second attempt, no automatic ceiling increase."
  },
- "scope_note": "exactly one Attempt-3R C1 launch under the unchanged frozen protocol at a hard ceiling of $15.1475; 2 arms x 3 fresh seeds = 6 recovery probes, one confirmation evaluation per probe only after all six trainings complete, each admitted against its own observed generation protocol before scoring, followed by the frozen paired decision.",
+ "scope_note": "exactly one C1 launch under the unchanged frozen protocol at a hard ceiling of $15.1475; 2 arms x 3 fresh seeds = 6 recovery probes, one confirmation evaluation per probe only after all six trainings complete, each admitted against its own observed generation protocol before scoring, followed by the frozen paired decision.",
  "phase_a_authorized": false,
  "automatic_followon_start": false,
- "authorized_session_commit": "3c481483143f2fcb6291f2d47d097073537b55cd",
- "harness_source_digest": "c95d9b07d278d0451fda2157bae1cd00e333e717fe3a28b3c4a509d94e084baa",
+ "authorized_session_commit": "815feb70e5efff007520e27c3f0d929d730ce7bb",
+ "harness_source_digest": "974c8fa744d3db05877d26c35f89c14faa6a028a26b3daaa876da80db55c5278",
  "harness_source_files": [
   "scripts/pod/autoinit_c1_launch.py",
   "scripts/pod/autoinit_c1_driver.py",
-  "scripts/pod/setup.sh",
+  "scripts/pod/autoinit_preflight_setup.sh",
   "scripts/pod/start_job.py",
   "scripts/pod/watchdog.py",
   "scripts/pod/collect_artifacts.py",
@@ -41,6 +41,9 @@
   "src/aadistill/autoinit/c1_bundle.py",
   "scripts/autoinit/stage_c1_bundle.py",
   "src/aadistill/models/student.py",
+  "scripts/autoinit/renderer_parity_gate.py",
+  "scripts/data/battery_render.py",
+  "src/aadistill/autoinit/pod_environment.py",
   "configs/autoinit/c1_artifacts.json",
   "configs/autoinit/c1_artifacts_failed.json",
   "scripts/autoinit/score_c1_confirmation.py",
@@ -98,23 +101,26 @@
   "src/aadistill/infrastructure/artifact_gate.py"
  ],
  "per_launch_hard_usd": 15.1475,
- "provenance_commit": "3c481483143f2fcb6291f2d47d097073537b55cd",
+ "provenance_commit": "815feb70e5efff007520e27c3f0d929d730ce7bb",
  "enforcement": "the launcher loads this artifact and refuses to create a pod whose priced hard threshold exceeds hard_cap_usd or per_launch_hard_usd, refuses a stage not in authorized_stages, refuses a harness that does not digest to the authorized value, and has no code path to any experiment after Phase A",
  "allows_phase_a": false,
  "allows_beam_search": false,
  "authorizes_c1_isolation": true,
  "scope": "2 arms x 3 fresh seeds = 6 fixed 0.86M recovery probes on one frozen path, evaluated once each on c1_confirmation_v1. No search, no ranking, no successive halving, no tie-breaking, no arm elimination, and no formal Stage-2/3 recovery.",
  "grant": {
-  "path": "logs/autoinit_c1_attempt3r_grant.json",
-  "sha256": "871479784a0dabdf79870761fb67b37e43dfa312463084c536ec03e54a7c8733",
-  "granted_by": "maintainer, C1 repricing decision: reprice to the observed L40S securePrice of $1.09/h rather than keep waiting for $0.99/h. A pricing amendment only \u2014 no C1 science, source, harness, preregistration, battery, scorer or setup code changes. The unchanged frozen C1 protocol is authorized to execute exactly once at the repriced ceiling.",
-  "covers": "exactly one Attempt-3R C1 launch under the unchanged frozen protocol at a hard ceiling of $15.1475; 2 arms x 3 fresh seeds = 6 recovery probes, one confirmation evaluation per probe only after all six trainings complete, each admitted against its own observed generation protocol before scoring, followed by the frozen paired decision.",
-  "cumulative_spend_at_approval_usd": 264.0396,
+  "path": "logs/autoinit_c1_attempt4_grant.json",
+  "sha256": "ae1ca1bc184f1d621aad0edbe7163c33a070409af2be2191ccbdc7a3f48d0cc4",
+  "granted_by": "maintainer, C1 final pre-provider review 2026-09-05: the C1 science, budget feasibility, HOME/HF environment repair, actual-preflight harness closure, gate-12 post-sweep repository lineage and the diagnostic-vs-launch-bound enforcement are ACCEPTED. The unchanged frozen C1 protocol is authorized to execute exactly once.",
+  "covers": "exactly one C1 launch under the unchanged frozen protocol at a hard ceiling of $15.1475; 2 arms x 3 fresh seeds = 6 recovery probes, one confirmation evaluation per probe only after all six trainings complete, each admitted against its own observed generation protocol before scoring, followed by the frozen paired decision.",
+  "cumulative_spend_at_approval_usd": 264.3878,
   "cumulative_cap_usd": 283.76,
   "does_not_authorize": [
    "Phase A",
    "beam search",
    "any search",
+   "any ranking",
+   "any arm elimination",
+   "successive halving",
    "Phase C2",
    "formal Stage-2/Stage-3 recovery",
    "canonical Stage-1 NLL",
@@ -124,14 +130,15 @@
    "any ceiling increase beyond $15.1475",
    "any cap increase",
    "price-chasing the market upward",
+   "any scope expansion",
    "an allowance for another full C1 retry"
   ]
  },
  "bound": {
-  "execution_preregistration": "5e6eb5110fc70fc9e9631533ca5beb66fc42efdce86915fbc13479eb6a66f898",
-  "execution_preregistration_head_commit": "1a91fed1e0a22415c1e7d6968001619861e24f02",
-  "c1_harness_digest": "c95d9b07d278d0451fda2157bae1cd00e333e717fe3a28b3c4a509d94e084baa",
-  "c1_harness_n_files": 65,
+  "execution_preregistration": "71137f55c7fd18ff8d1647508b9d7bd7c5f7280136d3c1eb9cb1dc559ef8d23c",
+  "execution_preregistration_head_commit": "c8a2961c0ea93a7ece095256efdb143d550e5348",
+  "c1_harness_digest": "974c8fa744d3db05877d26c35f89c14faa6a028a26b3daaa876da80db55c5278",
+  "c1_harness_n_files": 68,
   "isolation_plan_hash": "42a496f0923b1c321426721fb51487df15b5368703fe19a898354973324e27a2",
   "c0_preregistration": "fb2eeea531f9f0d11f84b77cd47dff30697122de90a072a7a80c3a7535e89280",
   "battery": {
@@ -164,7 +171,7 @@
    "soft_stop_usd": 14.7841,
    "hard_ceiling_usd": 15.1475,
    "cumulative_cap_usd": 283.76,
-   "cumulative_spend_at_approval_usd": 264.0396
+   "cumulative_spend_at_approval_usd": 264.3878
   }
  },
  "one_use": "ONE grant, ONE issuance, ONE launch attempt. No automatic retry, no second attempt, no automatic ceiling increase. A failure is the attempt's result and needs a new maintainer review.",
@@ -172,6 +179,9 @@
   "Phase A",
   "beam search",
   "any search",
+  "any ranking",
+  "any arm elimination",
+  "successive halving",
   "Phase C2",
   "formal Stage-2/Stage-3 recovery",
   "canonical Stage-1 NLL",
@@ -181,7 +191,8 @@
   "any ceiling increase beyond $15.1475",
   "any cap increase",
   "price-chasing the market upward",
+  "any scope expansion",
   "an allowance for another full C1 retry"
  ],
- "authorization_sha256": "9b562e0aa7cfcaa5e4352710287f92bd3d67619eb87449097298c776586e78cf"
+ "authorization_sha256": "275b7643b7252fa4f4a3a69b8483599e6f9f5a947cc41326e496ed5d435e1489"
 }
