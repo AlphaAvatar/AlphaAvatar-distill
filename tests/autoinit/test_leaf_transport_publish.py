@@ -40,6 +40,48 @@ def pub():
     return load_publisher()
 
 
+#: A pod exports `HF_TOKEN` before its test gate and has no
+#: `~/.cache/huggingface/token`. Five tests in this module reach `token()` as an
+#: *argument* to `hf_hub_download` — it is evaluated even where the download
+#: itself is monkeypatched away — so on a host with neither, they raised
+#: `FileNotFoundError` and read as five failures of the transport logic.
+#:
+#: They are not that. Every network call here is faked; what they test is how the
+#: publisher reacts to a far end that lies, and none of them tests possession of a
+#: real credential. So the fixture supplies a synthetic one, and these tests PASS
+#: under an empty HOME rather than skipping — a skipped transport check on a pod
+#: is indistinguishable from one that never existed.
+SYNTHETIC_TOKEN = "hf_syntheticTestTokenNotACredential000"
+
+
+@pytest.fixture(autouse=True)
+def _pod_equivalent_token(monkeypatch):
+    monkeypatch.setenv("HF_TOKEN", SYNTHETIC_TOKEN)
+
+
+def test_the_token_is_read_from_the_environment_before_any_home_file(pub, tmp_path,
+                                                                     monkeypatch):
+    """The regression freeze for the pod's credential contract.
+
+    `HF_TOKEN` must win outright. If this ever falls back to a home path while the
+    variable is set, every pod test gate breaks again — which is the failure the
+    2026-09-04 environment repair was scoped around.
+    """
+    monkeypatch.setenv("HOME", str(tmp_path / "empty-home"))
+    monkeypatch.setenv("HF_TOKEN", "hf_fromTheEnvironment")
+    assert pub.token() == "hf_fromTheEnvironment"
+
+
+def test_the_home_token_file_is_still_the_fallback(pub, tmp_path, monkeypatch):
+    """The other branch, so neither is left unexecuted."""
+    home = tmp_path / "home"
+    (home / ".cache/huggingface").mkdir(parents=True)
+    (home / ".cache/huggingface/token").write_text("hf_fromTheHomeFile\n")
+    monkeypatch.delenv("HF_TOKEN", raising=False)
+    monkeypatch.setenv("HOME", str(home))
+    assert pub.token() == "hf_fromTheHomeFile"
+
+
 def test_the_transport_repo_is_not_the_main_relay(pub):
     """A transport path that pointed at the main relay would reintroduce the
     quota problem it exists to avoid."""

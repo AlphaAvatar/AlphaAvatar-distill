@@ -177,3 +177,169 @@ def test_the_trap_is_armed_only_after_the_lock_is_held():
     assert leftover_at < trap_at, (
         "the leftover-$HIDE check must also precede the trap, or refusing it "
         "would still trigger a restore")
+
+
+# --- the second dimension: HOME and Hugging Face -----------------------------
+#
+# Hiding gitignored ARTIFACTS was only half of what a pod does not have. C1
+# attempt 3R died at the pod's CPU test gate on 2026-09-04 with `14 failed,
+# 2650 passed`, and twelve of the fourteen were `$HOME`: tests reading a Hugging
+# Face dataset cache or credential file that no fresh pod possesses. The
+# simulator existed, was green, and modelled a machine that does not exist.
+#
+# These drive the real script and assert the isolation it now applies, because a
+# simulator that quietly kept the dev box's cache is worse than none — it is the
+# same green light with a stronger claim attached.
+
+def run_env_sim(root: Path, hide: Path, cmd: str, **extra):
+    """A sweep whose PODSIM_CMD reports on the environment it was given."""
+    return run_sim(root, hide, "artifacts/audit", cmd,
+                   PODSIM_ENV_ROOT=str(hide) + ".env", **extra)
+
+
+def test_the_simulated_home_is_a_fresh_empty_directory(tmp_path):
+    root = build_tree(tmp_path)
+    r = run_env_sim(root, tmp_path / "hidden",
+                    'echo "HOME=$HOME"; echo "ENTRIES=$(ls -A "$HOME" | wc -l)"')
+    assert r.returncode == 0, r.stdout + r.stderr
+    assert "ENTRIES=0" in r.stdout, r.stdout
+    assert f"HOME={tmp_path}" in r.stdout
+
+
+def test_the_dev_box_hf_cache_is_not_visible(tmp_path):
+    """The exact condition the seven renderer-parity cases must meet to skip."""
+    root = build_tree(tmp_path)
+    r = run_env_sim(root, tmp_path / "hidden",
+                    'test -e "$HOME/.cache/huggingface" && s=present || s=absent;'
+                    ' echo "CACHE=$s"; echo "HUB=$HF_HUB_CACHE";'
+                    ' echo "DATASETS=$(ls -A "$HF_HUB_CACHE" | wc -l)"')
+    assert r.returncode == 0, r.stdout + r.stderr
+    # Read the command's own output, not the `running:` echo of its source text.
+    assert "CACHE=absent" in r.stdout and "CACHE=present" not in r.stdout
+    assert "DATASETS=0" in r.stdout
+
+
+def test_hf_hub_cache_sits_under_the_isolated_hf_home(tmp_path):
+    root = build_tree(tmp_path)
+    r = run_env_sim(root, tmp_path / "hidden",
+                    'echo "HF_HOME=$HF_HOME"; echo "HUB=$HF_HUB_CACHE"')
+    assert r.returncode == 0, r.stdout + r.stderr
+    hf_home = [l for l in r.stdout.splitlines() if l.startswith("HF_HOME=")][0][8:]
+    hub = [l for l in r.stdout.splitlines() if l.startswith("HUB=")][0][4:]
+    assert hub == f"{hf_home}/hub"
+
+
+def test_variables_that_would_defeat_the_isolation_are_unset(tmp_path):
+    """Each of these names the real cache on its own, whatever HF_HOME says."""
+    root = build_tree(tmp_path)
+    leaky = {"HUGGINGFACE_HUB_CACHE": "/real/hub", "HF_DATASETS_CACHE": "/real/ds",
+             "TRANSFORMERS_CACHE": "/real/tf", "XDG_CACHE_HOME": "/real/xdg"}
+    r = run_env_sim(root, tmp_path / "hidden",
+                    'for v in HUGGINGFACE_HUB_CACHE HF_DATASETS_CACHE '
+                    'TRANSFORMERS_CACHE XDG_CACHE_HOME; do '
+                    'echo "$v=${!v-UNSET}"; done', **leaky)
+    assert r.returncode == 0, r.stdout + r.stderr
+    for v in leaky:
+        assert f"{v}=UNSET" in r.stdout, r.stdout
+
+
+def test_a_pod_equivalent_token_is_exported_and_never_printed(tmp_path):
+    """Pod setup exports HF_TOKEN before its test gate, so the simulation must
+    too — and the value must not reach a log."""
+    root = build_tree(tmp_path)
+    secret = "hf_thisMustNeverBePrinted12345"
+    r = run_env_sim(root, tmp_path / "hidden",
+                    'test -n "$HF_TOKEN" && echo TOKEN_PRESENT || echo TOKEN_MISSING',
+                    PODSIM_HF_TOKEN=secret)
+    assert r.returncode == 0, r.stdout + r.stderr
+    assert "TOKEN_PRESENT" in r.stdout
+    assert secret not in r.stdout and secret not in r.stderr
+
+
+def test_the_isolation_is_torn_down_after_a_normal_run(tmp_path):
+    root = build_tree(tmp_path)
+    hide = tmp_path / "hidden"
+    r = run_env_sim(root, hide, "true")
+    assert r.returncode == 0, r.stdout + r.stderr
+    assert "restored the environment" in r.stdout
+    assert not Path(str(hide) + ".env").exists()
+
+
+def test_the_isolation_is_torn_down_even_when_the_suite_fails(tmp_path):
+    """`finally`, not `if it worked`. A failing sweep is the normal case here.
+
+    The command is a subprocess that returns non-zero, which is what a failing
+    pytest run is. (A PODSIM_CMD that calls `exit` in the simulator's own shell
+    still restores — the EXIT trap fires — but it does so while the command's
+    output redirection is live, so the messages land in the log instead of on
+    stdout. `test_restoration_survives_a_command_that_exits_the_shell` covers
+    that shape by its observable effects rather than its chatter.)
+    """
+    root = build_tree(tmp_path)
+    hide = tmp_path / "hidden"
+    before = snapshot(root)
+    r = run_env_sim(root, hide, 'bash -c "exit 7"')
+    assert r.returncode == 7, (r.returncode, r.stdout + r.stderr)
+    assert "restored the environment" in r.stdout
+    assert "restored the hidden artifacts" in r.stdout
+    assert not Path(str(hide) + ".env").exists()
+    assert snapshot(root) == before
+
+
+def test_restoration_survives_a_command_that_exits_the_shell(tmp_path):
+    """`eval "exit 7"` terminates the simulator itself. The EXIT trap must still
+    put the tree and the environment back, however little it gets to say."""
+    root = build_tree(tmp_path)
+    hide = tmp_path / "hidden"
+    before = snapshot(root)
+    r = run_env_sim(root, hide, "exit 7")
+    assert r.returncode == 7, (r.returncode, r.stdout + r.stderr)
+    assert snapshot(root) == before, "the hidden artifacts were not restored"
+    assert not Path(str(hide) + ".env").exists()
+    assert not Path(str(hide) + ".lock").exists()
+
+
+def test_the_suite_exit_code_reaches_the_caller(tmp_path):
+    """It used to end in `| tail -12`, so every sweep exited 0 no matter what.
+    A readiness record built on that would assert a pass that never happened."""
+    root = build_tree(tmp_path)
+    assert run_env_sim(root, tmp_path / "hidden", "exit 3").returncode == 3
+    assert run_env_sim(root, tmp_path / "hidden", "true").returncode == 0
+
+
+def test_failing_nodeids_are_reported_before_the_tail(tmp_path):
+    """Attempt 3R's fourteen failures arrived as three names."""
+    root = build_tree(tmp_path)
+    cmd = ('echo "FAILED tests/a.py::test_one"; echo "FAILED tests/b.py::test_two";'
+           ' echo "ERROR tests/c.py::test_three"; echo "1 failed"; exit 1')
+    r = run_env_sim(root, tmp_path / "hidden", cmd)
+    assert r.returncode == 1
+    for nodeid in ("tests/a.py::test_one", "tests/b.py::test_two",
+                   "tests/c.py::test_three"):
+        assert nodeid in r.stdout, r.stdout
+
+
+def test_a_junit_report_is_requested_when_asked(tmp_path):
+    root = build_tree(tmp_path)
+    junit = tmp_path / "reports/j.xml"
+    r = run_env_sim(root, tmp_path / "hidden", 'echo "CMD=$0"',
+                    PODSIM_JUNIT=str(junit))
+    assert r.returncode == 0, r.stdout + r.stderr
+    assert f"--junitxml={junit}" in r.stdout
+    assert junit.parent.is_dir()
+
+
+def test_the_default_command_matches_the_pod_gates_selection():
+    """The simulator must not run a different suite from the pod. The interpreter
+    differs by design — the pod has /opt/train — but the selection must not."""
+    src = SCRIPT.read_text()
+    assert "-m pytest tests/ -q" in src
+    assert "uv run pytest" not in src, (
+        "`uv run` reaches into $HOME/.cache/uv, which the isolation empties")
+
+
+def test_the_environment_is_saved_before_it_is_changed():
+    """`save_env` must precede the first export, or the trap restores nothing."""
+    src = SCRIPT.read_text()
+    assert src.index("save_env\n") < src.index('export HOME="$ENVROOT/home"')
+    assert src.index("restore_env") < src.index('for p in "$HIDE"/*')

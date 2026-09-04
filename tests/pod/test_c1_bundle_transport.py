@@ -295,7 +295,9 @@ def test_the_gate_is_wired_and_the_count_is_ten():
              for g in spec.precheck]
     assert "bundle_staged_gate" in names, names
     assert "rope_input_gate" in names, names
-    assert len(spec.precheck) == 10, names
+    # 10 → 12 on 2026-09-04: `renderer_parity_gate` and `pod_environment_gate`
+    # were added after attempt 3R aborted at the pod's CPU test gate.
+    assert len(spec.precheck) == 12, names
 
 
 def test_preparation_is_a_separate_command_that_may_mutate_the_relay():

@@ -300,7 +300,11 @@ def test_every_gate_but_the_commit_binding_passes_against_the_candidate(launcher
     assert not failures, failures
     names = [getattr(g, "__name__", "") for g in spec.precheck]
     assert "bundle_staged_gate" in names and "rope_input_gate" in names, names
-    assert len(spec.precheck) == 10, names
+    # The two readiness gates attempt 3R paid for: it cleared ten gates, created
+    # a pod, and died on a CPU test suite nobody had run under a pod's HOME.
+    assert "renderer_parity_gate" in names, names
+    assert "pod_environment_gate" in names, names
+    assert len(spec.precheck) == 12, names
 
 
 # --- the preregistration must verify its own declared hash ------------------

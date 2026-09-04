@@ -21,7 +21,8 @@ sys.path.insert(0, str(REPO / "src"))
 sys.path.insert(0, str(REPO / "scripts/data"))
 
 from aadistill.data.extra_stream import content_sha256  # noqa: E402
-from battery_render import RENDERERS, norm, rank_key, rank_take, read_rows  # noqa: E402
+from battery_render import (FROZEN_SOURCES, RENDERERS, check_group_parity,  # noqa: E402
+                            norm, rank_key, rank_take)
 
 BATTERY = REPO / "artifacts/stage3/c1_confirmation_v1"
 FROZEN = REPO / "artifacts/stage3/recovery_search_v2"
@@ -190,57 +191,34 @@ def test_the_stratum_is_part_of_the_key():
 
 # --- rendering parity with the frozen recovery-search battery ---------------
 
-FROZEN_SOURCES = {
-    "gsm8k": ("openai/gsm8k", "740312add88f781978c0658806c59bc2815b9866",
-              "main/test-00000-of-00001.parquet"),
-    "math_verified": ("HuggingFaceH4/MATH-500",
-                      "6e4ed1a2a79af7d8630a6b768ec859cb5af4d3be", "test.jsonl"),
-    "multihop": ("hotpotqa/hotpot_qa", "1908d6afbbead072334abe2965f91bd2709910ab",
-                 "distractor/validation-00000-of-00001.parquet"),
-    "rag": ("rajpurkar/squad_v2", "3ffb306f725f7d2ce8394bc1873b24868140c412",
-            "squad_v2/validation-00000-of-00001.parquet"),
-    "knowledge": ("mandarjoshi/trivia_qa", "0f7faf33a3908546c6fd5b73a660e0f8ff173c2f",
-                  "rc.nocontext/validation-00000-of-00001.parquet"),
-    "code": ("google-research-datasets/mbpp",
-             "4bb6404fdc6cacfda99d4ac4205087b89d32030c",
-             "full/test-00000-of-00001.parquet"),
-    "tool": ("Salesforce/xlam-function-calling-60k",
-             "26d14ebfe18b1f7b524bd39b404b50af5dc97866",
-             "xlam_function_calling_60k.json"),
-}
-
-
 @pytest.mark.parametrize("group", sorted(FROZEN_SOURCES))
 def test_the_shared_renderers_reproduce_the_frozen_battery_byte_for_byte(group):
     """Re-render `recovery_search_v2`'s own items and require exact equality.
 
     This is what stops the C1 copy of the rendering convention from drifting
     away from the one every historical measurement used.
-    """
-    frozen = {i["id"]: i for i in
-              (json.loads(l) for l in (FROZEN / f"{group}.jsonl").open() if l.strip())}
-    repo, rev, rel = FROZEN_SOURCES[group]
-    rows = read_rows(repo, rev, rel)
-    if group == "gsm8k":
-        rows = [dict(r, _index=i) for i, r in enumerate(rows)]
-    make = RENDERERS[group]
 
-    # Counted over distinct ids, not rows: trivia_qa repeats `question_id`
-    # across source rows, so one frozen item can be re-rendered several times.
-    # Every one of those renderings must still agree.
-    checked: set[str] = set()
-    for row in rows:
-        item = make(row)
-        if item is None or str(item["id"]) not in frozen:
-            continue
-        want = frozen[str(item["id"])]
-        assert item["prompt_text"] == want["prompt_text"], item["id"]
-        assert item["messages"] == want["messages"], item["id"]
-        assert content_sha256(norm(item["prompt_text"])) == want["prompt_sha256"]
-        checked.add(str(item["id"]))
-    assert checked == set(frozen), (
-        f"{group}: re-rendered {len(checked)} of {len(frozen)} frozen items; "
-        f"missing {sorted(set(frozen) - checked)[:5]}")
+    These seven cases — and only these seven — need the pinned source snapshots
+    themselves, which are ~4 GiB of Hugging Face datasets that the C1 pod is not
+    given and does not need: they are a readiness input, never a C1 runtime or
+    scientific one. On a host without them the case skips rather than fails,
+    which is what aborted attempt 3R at the pod's setup test gate.
+
+    Skipping does **not** retire the guarantee, it relocates it: the dev-box
+    `renderer_parity_gate` requires all seven present and all seven PASS, with
+    zero skips, before a C1 provider may be created.
+    """
+    result = check_group_parity(group)
+    if result["status"] == "SOURCE_ABSENT":
+        pytest.skip(
+            f"pinned source snapshot absent: {result['repo_id']}@{result['revision']} "
+            f"(file {result['file']}) expected at {result['resolved_snapshot']} — "
+            "renderer parity is enforced at $0 by scripts/autoinit/renderer_parity_gate.py")
+    assert result["mismatches"] == [], f"{group}: {result['mismatches'][:5]}"
+    assert not result["missing"], (
+        f"{group}: re-rendered {result['n_checked']} of {result['n_frozen']} frozen "
+        f"items; missing {result['missing'][:5]}")
+    assert result["status"] == "PASS"
 
 
 def test_the_sources_are_the_same_pinned_revisions(manifest):

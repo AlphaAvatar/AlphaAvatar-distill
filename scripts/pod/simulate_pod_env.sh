@@ -74,6 +74,60 @@ if [ -d "$HIDE" ] && [ -n "$(ls -A "$HIDE" 2>/dev/null)" ]; then
 fi
 mkdir -p "$HIDE"
 
+# --- the second dimension: HOME and Hugging Face -----------------------------
+#
+# Hiding gitignored ARTIFACTS was only half of what a pod does not have. The
+# other half is $HOME. A fresh pod runs as root with an empty home, exports its
+# own HF_HOME, and holds no Hugging Face dataset cache and no credential file --
+# and this script said nothing about any of that.
+#
+# That gap cost C1 attempt 3R $0.3482 on 2026-09-04. Seven renderer-parity cases
+# read `~/.cache/huggingface/hub` directly, so they passed here and could never
+# pass on a pod; the simulator was run, was green, and described a machine that
+# does not exist. Twelve of the fourteen failures were environment, not code.
+#
+# So the simulated process gets: a fresh empty HOME, an isolated HF_HOME with
+# HF_HUB_CACHE beneath it, a non-empty synthetic HF_TOKEN exactly as pod setup
+# exports one before its test gate -- and no path back to the dev box's real
+# cache or real credential. The token is synthetic on purpose: these tests use
+# monkeypatched network calls, so they test transport logic, never possession of
+# a real credential, and a simulation that borrowed the operator's token would
+# hide a test that had quietly started needing it.
+#
+# Every variable is saved and put back by `restore_env`, which the same EXIT trap
+# runs before the artifacts are restored.
+ENVROOT=${PODSIM_ENV_ROOT:-"${HIDE}.env"}
+PODSIM_TOKEN=${PODSIM_HF_TOKEN:-"hf_podEquivalentSyntheticToken000000000"}
+
+#: Anything that could point the process back at the dev box's real HF state.
+ISOLATED_VARS="HOME HF_HOME HF_HUB_CACHE HF_TOKEN HUGGINGFACE_HUB_CACHE \
+HF_DATASETS_CACHE TRANSFORMERS_CACHE XDG_CACHE_HOME"
+
+SAVED_ENV=""
+save_env() {
+  for v in $ISOLATED_VARS; do
+    if [ -n "${!v+set}" ]; then
+      SAVED_ENV="${SAVED_ENV}${v}=${!v}"$'\n'
+    else
+      SAVED_ENV="${SAVED_ENV}${v}"$'\n'          # bare name == was unset
+    fi
+  done
+}
+
+restore_env() {
+  [ -n "$SAVED_ENV" ] || return 0
+  while IFS= read -r line; do
+    [ -n "$line" ] || continue
+    case "$line" in
+      *=*) export "${line%%=*}"="${line#*=}" ;;
+      *)   unset "$line" ;;
+    esac
+  done <<< "$SAVED_ENV"
+  rm -rf "$ENVROOT"
+  SAVED_ENV=""
+  echo "restored the environment"
+}
+
 # The trap is armed HERE, after the lock is held and after the leftover check --
 # never before. That ordering is what stops a losing sweep from restoring the
 # winner's saved paths: a loser exits at the lock check with no trap installed,
@@ -81,6 +135,7 @@ mkdir -p "$HIDE"
 # was tried and removed: it was unreachable, and an unreachable safeguard invites
 # exactly the false confidence this script has already cost once.
 restore() {
+  restore_env
   for p in "$HIDE"/*; do
     [ -e "$p" ] || continue
     n=$(basename "$p" | tr '@' '/')
@@ -145,6 +200,32 @@ while IFS= read -r p; do
 done <<< "$HIDDEN_PATHS"
 echo "hid $n path(s) a pod session does not receive"
 
+# Apply the HOME/HF isolation described above. Saved first, so the EXIT trap can
+# put the environment back whatever happens next.
+save_env
+rm -rf "$ENVROOT"
+mkdir -p "$ENVROOT/home" "$ENVROOT/hf/hub" || exit 5
+export HOME="$ENVROOT/home"
+export HF_HOME="$ENVROOT/hf"
+export HF_HUB_CACHE="$ENVROOT/hf/hub"
+export HF_TOKEN="$PODSIM_TOKEN"
+# These would each defeat the isolation on their own by naming the real cache.
+unset HUGGINGFACE_HUB_CACHE HF_DATASETS_CACHE TRANSFORMERS_CACHE XDG_CACHE_HOME
+
+# Assert the isolation instead of assuming it: a simulation that silently kept
+# the dev box's cache is the exact failure this dimension exists to prevent.
+if [ -e "$HOME/.cache/huggingface" ]; then
+  echo "REFUSING: the simulated HOME already has an HF cache at $HOME/.cache" >&2
+  exit 6
+fi
+if compgen -G "$HF_HUB_CACHE/datasets--*" > /dev/null; then
+  echo "REFUSING: the isolated hub cache is not empty; the dev box's datasets" >&2
+  echo "  are visible and the seven renderer-parity cases would not skip." >&2
+  exit 6
+fi
+# Never the token itself, only that one is present.
+echo "isolated HOME=$HOME (empty), HF_HOME=$HF_HOME, HF_TOKEN set (${#HF_TOKEN} chars, synthetic)"
+
 # Must stay byte-identical in its ignore list to the pod gate in
 # `autoinit_preflight_setup.sh`, or this simulates a command the pod does
 # not run. `tests/pod/test_phase_a_stages1_5_execute.py` is a PRE-flight
@@ -152,7 +233,41 @@ echo "hid $n path(s) a pod session does not receive"
 # takes ~20 minutes, and on the pod it would spend a large share of the
 # 2700 s gate re-proving what the dev box already proved -- against a
 # timeout whose exit 90 kills the session.
-PODSIM_CMD=${PODSIM_CMD:-"uv run pytest tests/ -q \
+#
+# The interpreter is the repo venv directly, not `uv run`. Two reasons, and both
+# are about fidelity: the pod's gate runs `/opt/train/bin/python -m pytest` against
+# a project installed editable, with no PYTHONPATH, which `.venv/bin/python -m pytest`
+# mirrors exactly -- and `uv run` would reach into `$HOME/.cache/uv`, which the
+# isolation above deliberately empties, so it would re-resolve the environment
+# inside a simulation rather than run the suite.
+PODSIM_CMD=${PODSIM_CMD:-".venv/bin/python -m pytest tests/ -q \
   --ignore=tests/data/test_recovery_corpus_pipeline.py \
   --ignore=tests/pod/test_phase_a_stages1_5_execute.py"}
-eval "$PODSIM_CMD" 2>&1 | tail -12
+
+# The pod writes /workspace/pytest.log and the file dies with the pod; here the
+# log survives, which is the whole point of simulating. `tail -12` alone threw
+# away the FAILED list on every previous sweep.
+#
+# It lands OUTSIDE the repository on purpose. `logs/` is tracked and every entry
+# in it must be classified in `CATALOG.md`, so writing there would both dirty the
+# working tree the sweep is asserting is clean and fail a structural test.
+PODSIM_LOG=${PODSIM_LOG:-"/home/ecs-user/aad-scratch/podsim_pytest.log"}
+mkdir -p "$(dirname "$PODSIM_LOG")"
+
+# `--junitxml` is a REPORTING flag: it changes nothing about which tests are
+# selected or how they execute, so the command still runs the pod's own suite.
+# It is the only way to name every skip and every pass exactly, which is what the
+# readiness record has to assert -- and what attempt 3R's `tail -4` could not say.
+if [ -n "${PODSIM_JUNIT:-}" ]; then
+  mkdir -p "$(dirname "$PODSIM_JUNIT")"
+  PODSIM_CMD="$PODSIM_CMD --junitxml=$PODSIM_JUNIT"
+  echo "junit report -> $PODSIM_JUNIT"
+fi
+
+echo "running: $PODSIM_CMD"
+eval "$PODSIM_CMD" > "$PODSIM_LOG" 2>&1
+PODSIM_RC=$?
+grep -E '^(FAILED|ERROR) ' "$PODSIM_LOG" || true
+tail -12 "$PODSIM_LOG"
+echo "pytest rc=$PODSIM_RC; full log at $PODSIM_LOG"
+exit "$PODSIM_RC"

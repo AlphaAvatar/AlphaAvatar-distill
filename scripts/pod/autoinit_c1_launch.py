@@ -40,6 +40,9 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO_ROOT / "src"))
 sys.path.insert(0, str(Path(__file__).resolve().parent))
+# `renderer_parity_gate` lives with the other dev-box verifiers, and the eleventh
+# pre-provider gate executes it directly rather than trusting a transcript of it.
+sys.path.insert(0, str(REPO_ROOT / "scripts/autoinit"))
 
 from aadistill.autoinit import c1_session as CS  # noqa: E402
 from aadistill.autoinit.c1_authorization import (  # noqa: E402
@@ -54,6 +57,10 @@ from aadistill.autoinit.c1_bundle import (  # noqa: E402
     hf_download, require_canonical_bundle_arg, roundtrip,
 )
 from aadistill.autoinit.c1_isolation import derive_recovery_seeds  # noqa: E402
+from aadistill.autoinit.pod_environment import (  # noqa: E402
+    RECORD_PATH as POD_ENV_RECORD, load_record as load_pod_env_record,
+    verify_record as verify_pod_env_record,
+)
 from aadistill.infrastructure.manifest import (  # noqa: E402
     sha256_file, sha256_json,
 )
@@ -404,6 +411,84 @@ def rope_input_gate(ctx: SessionContext) -> tuple[bool, str]:
                   f"{entry.dest} with stored RoPE base {base:,.0f}")
 
 
+def renderer_parity_gate(ctx: SessionContext) -> tuple[bool, str]:
+    """Is the C1 battery still rendered exactly as every historical measurement?
+
+    The seven parametrized parity cases in `tests/data/test_c1_battery.py` used to
+    carry this guarantee alone. They need the pinned Hugging Face source snapshots
+    — a dev-box readiness input, never a C1 runtime or scientific one — so on a
+    pod they could only ever fail, and on 2026-09-04 fourteen of them did, at the
+    setup test gate, for `$0.3482` with no scientific stage run.
+
+    Making them skip where the sources are absent would retire the guarantee if
+    nothing replaced it. This replaces it, on the one host that can prove it and
+    before a provider exists: all seven snapshots present, all seven groups
+    re-rendered byte for byte, zero skips. A skip is a refusal here.
+
+    Executes the check live rather than reading a stored verdict — it costs a few
+    seconds, and a recorded parity result is exactly as stale as the last time
+    somebody remembered to regenerate it.
+    """
+    try:
+        from renderer_parity_gate import gate_verdict, run_parity
+
+        record = run_parity()
+    except Exception as exc:                                   # noqa: BLE001
+        return False, f"cannot run the renderer parity check: {exc}"
+    ok, reason = gate_verdict(record)
+    ctx.evidence["renderer_parity"] = {
+        "verdict": "PASS" if ok else "FAIL",
+        "counts": record["counts"],
+        "resolved_hub_cache": record["resolved_hub_cache"],
+        "groups": [{k: g[k] for k in ("group", "status", "repo_id", "revision",
+                                      "file", "resolved_snapshot", "n_frozen",
+                                      "n_checked")}
+                   for g in record["groups"]],
+        "note": ("the seven pinned dataset snapshots are a dev-box readiness "
+                 "input; they are NOT staged to the pod and no C1 number reads "
+                 "them"),
+    }
+    return ok, reason
+
+
+def pod_environment_gate(ctx: SessionContext) -> tuple[bool, str]:
+    """Has this exact executable been proved to survive a pod's test gate?
+
+    Attempt 3R is the reason. It cleared `VLLM_READY → TEACHER_READY → ROPE_OK`
+    and then died on a CPU test suite that had never been run under the conditions
+    a fresh pod is in — empty `$HOME`, its own `HF_HOME`, no dataset cache, no
+    credential file. Twelve of the fourteen failures were environment.
+
+    The sweep that answers this takes about three quarters of an hour, far too
+    slow to run while a pod bills. So it is run once against a committed tree and
+    recorded, and this gate checks only that the recording still describes the
+    code that would run: the C1 harness digest and the pod test-environment digest
+    must both still match. Documentation and preregistration commits do not
+    invalidate it; an edit to the setup script, the simulator, the test tree or
+    the harness does.
+    """
+    try:
+        record = load_pod_env_record(REPO_ROOT)
+    except FileNotFoundError:
+        return False, (f"{POD_ENV_RECORD} does not exist: no pod-like sweep has "
+                       "been recorded for this executable")
+    except Exception as exc:                                   # noqa: BLE001
+        return False, f"cannot read {POD_ENV_RECORD}: {exc}"
+
+    ok, reason = verify_pod_env_record(record, REPO_ROOT)
+    ctx.evidence["pod_environment_verification"] = {
+        "verdict": "PASS" if ok else "FAIL",
+        "record": POD_ENV_RECORD,
+        "record_self_sha256": record.get("self_sha256"),
+        "swept_at_head": record.get("executable_head"),
+        "counts": record.get("counts"),
+        "renderer_parity_skips": record.get("renderer_parity_skipped_as_expected"),
+        "leaf_transport_all_passed": record.get("leaf_transport_all_passed"),
+        "reason": reason,
+    }
+    return ok, reason
+
+
 def bundle_staged_gate(ctx: SessionContext) -> tuple[bool, str]:
     """Can a pod, RIGHT NOW, obtain the exact authorized code?
 
@@ -641,6 +726,8 @@ def spec(args) -> SessionSpec:
             artifact_spec_gate,
             rope_input_gate,
             bundle_staged_gate,
+            renderer_parity_gate,
+            pod_environment_gate,
         ),
         evidence_fields={
             "c1_session_contract_hash": CS.C1_SESSION_CONTRACT.contract_hash,

@@ -20,6 +20,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import os
 import re
 import sys
 from pathlib import Path
@@ -29,8 +30,6 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO_ROOT / "src"))
 
 from aadistill.data.extra_stream import content_sha256  # noqa: E402
-
-HUB = Path.home() / ".cache/huggingface/hub"
 
 # Verbatim from build_recovery_search_battery.py. Changing any of these changes
 # every prompt, so they are constants, not parameters.
@@ -51,8 +50,42 @@ def norm(text: str) -> str:
 
 # --- pinned source reading --------------------------------------------------
 
+def hub_cache() -> Path:
+    """The hub cache root, resolved **at call time** from the environment.
+
+    Until 2026-09-04 this was a module-level `Path.home() / ".cache/huggingface/hub"`,
+    read directly. A pod exports `HF_HOME` and holds nothing under `$HOME`, so the
+    seven renderer-parity cases could pass on the dev box and could never pass on
+    a pod — which is what aborted C1 attempt 3R at the setup test gate for $0.3482.
+
+    The precedence is `huggingface_hub`'s own, so a warmed cache is found wherever
+    the surrounding tooling put it:
+
+    1. `HF_HUB_CACHE` — the explicit override, used verbatim;
+    2. `$HF_HOME/hub` — the cache a pod's `HF_HOME` implies;
+    3. `~/.cache/huggingface/hub` — the unconfigured default.
+
+    Resolution is deliberately **not** frozen at import: a caller that sets the
+    environment after importing this module, and every test that isolates the
+    cache with `monkeypatch.setenv`, must both be honoured.
+    """
+    explicit = os.environ.get("HF_HUB_CACHE", "").strip()
+    if explicit:
+        return Path(explicit)
+    hf_home = os.environ.get("HF_HOME", "").strip()
+    if hf_home:
+        return Path(hf_home) / "hub"
+    return Path.home() / ".cache/huggingface/hub"
+
+
+def snapshot_path(repo_id: str, revision: str) -> Path:
+    """Where a pinned snapshot *would* live. Does not require it to be there."""
+    return (hub_cache() / f"datasets--{repo_id.replace('/', '--')}"
+            / "snapshots" / revision)
+
+
 def snapshot(repo_id: str, revision: str) -> Path:
-    d = HUB / f"datasets--{repo_id.replace('/', '--')}" / "snapshots" / revision
+    d = snapshot_path(repo_id, revision)
     if not d.is_dir():
         raise FileNotFoundError(
             f"{repo_id}@{revision} is not in the local hub cache at {d}")
@@ -184,6 +217,98 @@ RENDERERS: dict[str, Callable[[dict], dict | None]] = {
     "multihop": make_multihop, "rag": make_rag, "knowledge": make_knowledge,
     "code": make_code, "tool": make_tool,
 }
+
+
+# --- renderer parity with the frozen recovery-search battery ----------------
+#
+# One implementation, two callers: `tests/data/test_c1_battery.py`, which skips a
+# group whose pinned snapshot is absent, and `scripts/autoinit/renderer_parity_gate.py`,
+# which refuses that same absence. Two independent comparison algorithms could
+# disagree about what parity means, which is the one thing this guarantee cannot
+# afford, so the algorithm lives here and neither caller reimplements it.
+
+#: The exact pinned sources the frozen `recovery_search_v2` prompts were built from.
+FROZEN_SOURCES: dict[str, tuple[str, str, str]] = {
+    "gsm8k": ("openai/gsm8k", "740312add88f781978c0658806c59bc2815b9866",
+              "main/test-00000-of-00001.parquet"),
+    "math_verified": ("HuggingFaceH4/MATH-500",
+                      "6e4ed1a2a79af7d8630a6b768ec859cb5af4d3be", "test.jsonl"),
+    "multihop": ("hotpotqa/hotpot_qa", "1908d6afbbead072334abe2965f91bd2709910ab",
+                 "distractor/validation-00000-of-00001.parquet"),
+    "rag": ("rajpurkar/squad_v2", "3ffb306f725f7d2ce8394bc1873b24868140c412",
+            "squad_v2/validation-00000-of-00001.parquet"),
+    "knowledge": ("mandarjoshi/trivia_qa", "0f7faf33a3908546c6fd5b73a660e0f8ff173c2f",
+                  "rc.nocontext/validation-00000-of-00001.parquet"),
+    "code": ("google-research-datasets/mbpp",
+             "4bb6404fdc6cacfda99d4ac4205087b89d32030c",
+             "full/test-00000-of-00001.parquet"),
+    "tool": ("Salesforce/xlam-function-calling-60k",
+             "26d14ebfe18b1f7b524bd39b404b50af5dc97866",
+             "xlam_function_calling_60k.json"),
+}
+
+FROZEN_BATTERY = REPO_ROOT / "artifacts/stage3/recovery_search_v2"
+
+
+def frozen_items(group: str) -> dict[str, dict]:
+    """The frozen recovery-search items of one group, keyed by id."""
+    f = FROZEN_BATTERY / f"{group}.jsonl"
+    return {str(i["id"]): i for i in
+            (json.loads(line) for line in f.open() if line.strip())}
+
+
+def check_group_parity(group: str) -> dict[str, Any]:
+    """Re-render one group's frozen items from source and compare byte for byte.
+
+    Returns a result record rather than raising, so the caller decides what an
+    absent source means. `status` is one of:
+
+    * `SOURCE_ABSENT` — the pinned snapshot is not in the resolved hub cache;
+    * `FAIL` — it is there and something no longer renders identically;
+    * `PASS` — every frozen item of the group was re-rendered, byte for byte.
+
+    Parity is counted over **distinct ids**, not rows: `trivia_qa` repeats
+    `question_id` across source rows, so one frozen item can be re-rendered
+    several times, and every one of those renderings must still agree.
+    """
+    repo, rev, rel = FROZEN_SOURCES[group]
+    resolved = snapshot_path(repo, rev)
+    frozen = frozen_items(group)
+    result: dict[str, Any] = {
+        "group": group, "repo_id": repo, "revision": rev, "file": rel,
+        "resolved_snapshot": str(resolved), "n_frozen": len(frozen),
+        "n_checked": 0, "mismatches": [], "missing": [],
+    }
+    if not resolved.is_dir():
+        result["status"] = "SOURCE_ABSENT"
+        return result
+
+    result["source_digest"] = source_digest(repo, rev, rel)
+    rows = read_rows(repo, rev, rel)
+    if group == "gsm8k":
+        rows = [dict(r, _index=i) for i, r in enumerate(rows)]
+    make = RENDERERS[group]
+
+    checked: set[str] = set()
+    for row in rows:
+        item = make(row)
+        if item is None or str(item["id"]) not in frozen:
+            continue
+        ident = str(item["id"])
+        want = frozen[ident]
+        if item["prompt_text"] != want["prompt_text"]:
+            result["mismatches"].append({"id": ident, "field": "prompt_text"})
+        elif item["messages"] != want["messages"]:
+            result["mismatches"].append({"id": ident, "field": "messages"})
+        elif content_sha256(norm(item["prompt_text"])) != want["prompt_sha256"]:
+            result["mismatches"].append({"id": ident, "field": "prompt_sha256"})
+        checked.add(ident)
+
+    result["n_checked"] = len(checked)
+    result["missing"] = sorted(set(frozen) - checked)
+    result["status"] = "PASS" if (
+        not result["mismatches"] and not result["missing"]) else "FAIL"
+    return result
 
 
 # --- deterministic, outcome-independent selection ---------------------------

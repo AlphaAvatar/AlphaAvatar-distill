@@ -65,6 +65,15 @@ C1_HARNESS_SOURCE_FILES_V1: tuple[str, ...] = (
     # the shared setup step whose input C1 must stage, and the reader that
     # decides whether the staged config satisfies it
     "src/aadistill/models/student.py",
+    # readiness: the two pre-provider gates added after C1 attempt 3R aborted at
+    # the pod's CPU test gate. `renderer_parity_gate` is reachable from the
+    # launcher and so is required here by `test_c1_source_closure`;
+    # `battery_render` is not reachable by that walk (`scripts/data` is outside
+    # its search path) and is declared anyway, because it defines what "renders
+    # identically" MEANS and the gate would certify a moved definition without it.
+    "scripts/autoinit/renderer_parity_gate.py",
+    "scripts/data/battery_render.py",
+    "src/aadistill/autoinit/pod_environment.py",
     # what the collector is told to save, and what it may skip on failure
     "configs/autoinit/c1_artifacts.json",
     "configs/autoinit/c1_artifacts_failed.json",

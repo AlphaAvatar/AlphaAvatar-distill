@@ -477,6 +477,15 @@ OMP_NUM_THREADS=$NTHREADS MKL_NUM_THREADS=$NTHREADS OPENBLAS_NUM_THREADS=$NTHREA
 RC=$?
 tt=$(( $(date -u +%s) - tt0 ))
 set -e
+# On failure, name EVERY failure before the tail. C1 attempt 3R died here with
+# `14 failed, 2650 passed` and brought home exactly three names: the tail is four
+# lines and /workspace/pytest.log dies with the pod, so the other eleven had to be
+# reconstructed afterwards by guessing at the pod's environment. One grep is free.
+if [ "$RC" -ne 0 ]; then
+  echo "--- every failing nodeid ---"
+  grep -E '^(FAILED|ERROR) ' /workspace/pytest.log || true
+  echo "--- log tail ---"
+fi
 tail -4 /workspace/pytest.log
 if [ "$RC" -eq 124 ]; then
   say "COLD HOST: the CPU test suite did not finish in ${TESTS_MAX_S:-2700}s"
