@@ -373,3 +373,20 @@ def test_the_committed_record_still_binds_the_live_executable():
         pytest.skip(f"{pe.RECORD_PATH} has not been produced yet")
     ok, why = pe.verify_record(json.loads(path.read_text()), REPO)
     assert ok, why
+
+
+def test_gate_twelve_is_excluded_from_the_candidate_sweep_for_a_stated_reason():
+    """The exclusion must stay narrow and stay justified.
+
+    `pod_environment_gate` consumes the pod sweep's own output, so it cannot also
+    be a precondition of the suite that sweep runs. That is a circularity, not a
+    convenience — but an exclusion list is exactly where a real gate goes to die
+    quietly, so both the membership and the reason are pinned here.
+    """
+    src = (REPO / "tests/pod/test_c1_session_contract.py").read_text()
+    assert 'structurally_unavailable = ("session_commit_and_lineage", "bundle_staged_gate",\n' \
+           '                                "pod_environment_gate")' in src, (
+        "the exclusion set changed shape; re-read why each member is in it")
+    assert "genuine\n    circularity" in src, "the reason for excluding gate 12 is gone"
+    assert "It is not left unexercised" in src, (
+        "the pointer to gate 12's real coverage is gone")

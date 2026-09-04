@@ -273,8 +273,8 @@ def test_the_session_declares_that_it_neither_searches_nor_eliminates(spec):
                     reason="no candidate authorization on this machine")
 def test_every_gate_but_the_commit_binding_passes_against_the_candidate(launcher,
                                                                         spec):
-    """Every `$0` gate must pass against the candidate except the two that
-    structurally cannot before a real issuance.
+    """Every `$0` gate must pass against the candidate except the three that
+    structurally cannot here.
 
     `session_commit_and_lineage` binds a real issued commit. `bundle_staged_gate`
     needs a bundle for that commit actually uploaded to the relay, and a scratch
@@ -283,6 +283,20 @@ def test_every_gate_but_the_commit_binding_passes_against_the_candidate(launcher
     `test_c1_bundle_transport.py`, which drives the identical `roundtrip` over
     real bundles, real clones and real digests with only transport injected,
     including the passing case.
+
+    `pod_environment_gate` joined them on 2026-09-04, and the reason is a genuine
+    circularity rather than a convenience. That gate requires a recorded pod-like
+    sweep that describes THIS tree, and the sweep writes its record only after the
+    suite — this test included — has finished. So during the run that produces the
+    record, the record either does not exist or describes an older tree, and no
+    ordering fixes that: a gate that consumes the suite's own output cannot also
+    be a precondition of it.
+
+    It is not left unexercised. `tests/autoinit/test_c1_readiness_gates.py` drives
+    `verify_record` directly against the live digests for a valid record, a
+    harness-drift record, a test-environment-drift record, a tampered self-hash, a
+    failed sweep and a dirty tree — stricter coverage than this test gives any
+    gate it does check.
     """
     import types
 
@@ -290,12 +304,14 @@ def test_every_gate_but_the_commit_binding_passes_against_the_candidate(launcher
     ctx = types.SimpleNamespace(scr=Path("/tmp/c1gate"), args=session_args(launcher),
                                 auth=auth, evidence={}, image_digest="candidate",
                                 price=0.99, spent_usd=0.0)
+    #: Named, with a reason each, so widening this is a decision somebody makes.
+    structurally_unavailable = ("session_commit_and_lineage", "bundle_staged_gate",
+                                "pod_environment_gate")
     failures = []
     for gate in spec.precheck:
         name = getattr(gate, "__name__", "session_commit_and_lineage")
         ok, msg = gate(ctx)
-        if not ok and name not in ("session_commit_and_lineage",
-                                   "bundle_staged_gate"):
+        if not ok and name not in structurally_unavailable:
             failures.append(f"{name}: {msg}")
     assert not failures, failures
     names = [getattr(g, "__name__", "") for g in spec.precheck]
