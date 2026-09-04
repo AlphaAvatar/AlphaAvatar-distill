@@ -57,7 +57,7 @@
   "problems": [],
   "pytest_command": ".venv/bin/python -m pytest tests/ -q --ignore=tests/data/test_recovery_corpus_pipeline.py --ignore=tests/pod/test_phase_a_stages1_5_execute.py",
   "pytest_command_note": "identical in test SELECTION to the pod gate in autoinit_preflight_setup.sh; --junitxml is a reporting flag added by the simulator so every skip and pass can be named exactly.",
-  "record_kind": "diagnostic",
+  "record_kind": "launch_bound",
   "record_kind_note": "diagnostic: proves the pod-like suite passes on this exact tree and that the readiness machinery works. A launch-bound record is the one a maintainer-approved C1 launch rests on, and is owed at the time that grant is issued.",
   "renderer_parity_is_proved_by": "logs/c1_renderer_parity.json",
   "renderer_parity_observed": {
@@ -75,12 +75,12 @@
     "tests/pod/test_continuation_b_one_probe_contract.py::test_the_live_snapshot_records_the_terminal_phase_b_state": "passed"
   },
   "schema": "aadistill.autoinit.c1_pod_environment_verification/v1",
-  "seconds": 825.4,
-  "self_sha256": "86d4842e007036928fc71ca33ac836336cf4d03e6f355daa32d40c01f6444981",
+  "seconds": 817.1,
+  "self_sha256": "12dc478638a25aeb4d59ea28bb6c7fd707750f8330200cc6806526bacad6d613",
   "simulator": "scripts/pod/simulate_pod_env.sh",
   "simulator_command": "PODSIM_JUNIT=/home/ecs-user/aad-scratch/podsim_junit.xml PODSIM_LOG=/home/ecs-user/aad-scratch/podsim_pytest.log bash scripts/pod/simulate_pod_env.sh",
   "simulator_exit_code": 0,
-  "swept_base_commit": "86260d243e6e83622e1ff919b696d03efd33aaf6",
+  "swept_base_commit": "47578f26c1a480afdffd8ef5ad8a5fb976461f98",
   "tree_clean": true,
   "unexpected_environment_skips": [],
   "verdict": "PASS"
