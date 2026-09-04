@@ -74,6 +74,13 @@ def main() -> int:
         rc = proc.returncode
         seconds = round(time.time() - started, 1)
 
+    if not Path(args.junit).is_file():
+        # An interrupted sweep leaves no report. Say so plainly and write
+        # nothing: a readiness record is evidence, and half a sweep is not.
+        print(f"\nNO RECORD WRITTEN: {args.junit} does not exist — the sweep did "
+              f"not finish (simulator exit {rc}). Re-run it.")
+        return 2
+
     junit = read_junit(args.junit)
     findings = evaluate_sweep(junit["outcomes"])
 

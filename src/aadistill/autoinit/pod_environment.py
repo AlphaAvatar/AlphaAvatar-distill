@@ -56,6 +56,10 @@ POD_TEST_ENVIRONMENT_FILES_V1: tuple[str, ...] = (
     "scripts/data/battery_render.py",
     "scripts/autoinit/publish_selected_leaves.py",
     "scripts/autoinit/renderer_parity_gate.py",
+    # The recorder decides what the record CLAIMS the sweep found. A parser that
+    # mislabelled a skip as a pass would certify a failing gate, and nothing else
+    # here would notice.
+    "scripts/autoinit/record_pod_environment.py",
 )
 
 #: The seven parametrized cases that legitimately skip on a pod: they re-open the

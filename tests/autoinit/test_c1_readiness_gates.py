@@ -294,6 +294,28 @@ def test_junit_nodeids_round_trip(tmp_path):
     assert got["counts"] == {"passed": 1, "skipped": 1, "failed": 1, "error": 0}
 
 
+# --- the pod gate's own diagnostics -----------------------------------------
+
+def test_the_pod_gate_names_every_failing_nodeid_before_it_exits():
+    """Attempt 3R reported `14 failed, 2650 passed` and brought home THREE names.
+
+    The gate tails four lines and `/workspace/pytest.log` dies with the pod, so
+    the other eleven had to be reconstructed at $0 afterwards — and that
+    reconstruction attributed five of them to a cause that does not survive
+    re-testing. One grep is free.
+    """
+    text = (REPO / "scripts/pod/autoinit_preflight_setup.sh").read_text()
+    block = text[text.index("CPU test suite"):]
+    grep_at = block.index("grep -E '^(FAILED|ERROR) ' /workspace/pytest.log")
+    tail_at = block.index("tail -4 /workspace/pytest.log")
+    exit_at = block.index('[ "$RC" -eq 0 ] || {')
+    assert grep_at < tail_at, "the failure list must precede the four-line tail"
+    assert grep_at < exit_at, "the gate exits before it names the failures"
+    # `|| true` so a log with no summary line cannot replace a test failure with a
+    # different, less informative one.
+    assert "|| true" in block[grep_at:grep_at + 120]
+
+
 # --- the record on disk, once it exists -------------------------------------
 
 def test_the_committed_record_still_binds_the_live_executable():
