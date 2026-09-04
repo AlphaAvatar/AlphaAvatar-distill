@@ -81,11 +81,22 @@ def _auth_bytes(commit: str) -> bytes:
     return out.stdout
 
 
-def _harness(commit: str, files: tuple[str, ...]) -> str:
+def _harness(commit: str, files: tuple[str, ...], *, allow_missing: bool = False,
+             ) -> str:
+    """The harness digest as of `commit`, over today's declared file list.
+
+    `allow_missing` exists for one caller, and only because it asks about a
+    commit that PREDATES the harness set it is handed. Every other caller must
+    keep failing loudly on an absent member: a digest computed over a smaller set
+    silently describes less code than would run, which is the property the real
+    `c1_harness_digest` refuses for the same reason.
+    """
     entries = []
     for rel in sorted(files):
         blob = subprocess.run(["git", "show", f"{commit}:{rel}"],
                               capture_output=True, cwd=REPO)
+        if blob.returncode != 0 and allow_missing:
+            continue
         assert blob.returncode == 0, rel
         entries.append({"path": rel,
                         "sha256": hashlib.sha256(blob.stdout).hexdigest()})
@@ -205,14 +216,21 @@ def test_a_checkout_whose_harness_digest_differs_fails(tmp_path, good_bundle,
 
 def test_a_missing_authorization_in_the_checkout_fails(tmp_path, files):
     """A bundle for the PRE-authorization base: the ordering error the runbook
-    warns about, caught rather than trusted."""
+    warns about, caught rather than trusted.
+
+    `allow_missing` because this deliberately reaches for a commit older than the
+    current harness set: the two readiness gates added on 2026-09-04 do not exist
+    there. The subject of this test is the ABSENT AUTHORIZATION, and the expected
+    harness digest is only scaffolding for reaching that check.
+    """
     base = _git("rev-parse", f"{AUTH_COMMIT}^", cwd=REPO)
     built = build_bundle(REPO, base, tmp_path / "base.bundle")
     with pytest.raises(C1BundleError):
         roundtrip(session_commit=base, local_bundle_sha256=built["sha256"],
                   authorization_bytes=_auth_bytes(AUTH_COMMIT),
                   authorization_path="logs/does_not_exist_here.json",
-                  expected_harness_digest=_harness(base, files),
+                  expected_harness_digest=_harness(base, files,
+                                                   allow_missing=True),
                   harness_files=files, download=_serve(Path(built["path"])),
                   workdir=tmp_path / "rt")
 

@@ -3,9 +3,9 @@
  "preregistration_id": "autoinit.v1.phase_c1.execution",
  "written_utc": "2026-09-02T00:00:00Z",
  "_contract": "Everything the Phase-C1 session will run, bound before any C1 result exists. AUTHORIZES NOTHING: no pricing decision, no spend grant, no permission to launch. An authorization, if ever issued, binds THIS document.",
- "head_commit": "1a91fed1e0a22415c1e7d6968001619861e24f02",
+ "head_commit": "1bc1e760aefbce987d53718615c4786ec3774128",
  "executable_source": {
-  "digest": "a5bd40a86052f0125a16414bc98617782cdc011f70590cb938518bb25786740c",
+  "digest": "30abb55620bff09f725a56058f1a2c5db65a8667553f43be05b9d93edb039d46",
   "files": [
    {
     "path": "scripts/autoinit/verify_c1_battery_isolation.py",
@@ -14,8 +14,8 @@
    },
    {
     "path": "scripts/data/battery_render.py",
-    "sha256": "0ad2a7fc98585fdfc9d5061259b63aaff6072518d6acbf9ae0788f18eb35224d",
-    "bytes": 10231
+    "sha256": "20eea99fc20dbd8608b86f301960cfeef09388234634aa90a34cccdc1866e725",
+    "bytes": 15885
    },
    {
     "path": "scripts/data/build_c1_confirmation_battery.py",
@@ -51,7 +51,7 @@
   "rule": "sha256 over sorted 'path:sha256' lines of the declared set"
  },
  "c1_harness": {
-  "digest": "c95d9b07d278d0451fda2157bae1cd00e333e717fe3a28b3c4a509d94e084baa",
+  "digest": "19051d00f4e1b3dc67f2c6bbd279f0d8ac881b324c09a0c2f8346a7f98e0ef37",
   "files": [
    {
     "path": "configs/autoinit/c1_artifacts.json",
@@ -69,6 +69,11 @@
     "bytes": 10252
    },
    {
+    "path": "scripts/autoinit/renderer_parity_gate.py",
+    "sha256": "6d0b242a3d23d471994fb738aa8d7c0ed1749c440c0f151833c6ce631bd7b26e",
+    "bytes": 6518
+   },
+   {
     "path": "scripts/autoinit/score_c1_confirmation.py",
     "sha256": "5bb1265b2033b6caf6fa9bfc794e2d5002840b1ed3d9d610fee17d7df9a6dad2",
     "bytes": 14543
@@ -84,6 +89,11 @@
     "bytes": 4591
    },
    {
+    "path": "scripts/data/battery_render.py",
+    "sha256": "20eea99fc20dbd8608b86f301960cfeef09388234634aa90a34cccdc1866e725",
+    "bytes": 15885
+   },
+   {
     "path": "scripts/evaluation/uncapped_eval.py",
     "sha256": "120e92dc08a49ae4e3ed74fbbc6537054c011382755cdec6418c11b341f780d4",
     "bytes": 28667
@@ -95,8 +105,8 @@
    },
    {
     "path": "scripts/pod/autoinit_c1_launch.py",
-    "sha256": "1f080e520eefdc7d8b62e08af4bb48476060f3ce193318fbd63497ad5644d95c",
-    "bytes": 36266
+    "sha256": "ad646dd1c7b24de55523e14405469de47da1d633310f8fc4c41b486086f955e2",
+    "bytes": 40649
    },
    {
     "path": "scripts/pod/autoinit_engine_probe.py",
@@ -160,8 +170,8 @@
    },
    {
     "path": "src/aadistill/autoinit/c1_authorization.py",
-    "sha256": "9ab920e30da448dba5b814eac0193adc67859f3869eaee326a6cdafbfa6aa621",
-    "bytes": 15595
+    "sha256": "b15edb33a965e2b7c543df52258d97663f36015dbaf6ee9adb3c255db759d87c",
+    "bytes": 16198
    },
    {
     "path": "src/aadistill/autoinit/c1_bundle.py",
@@ -262,6 +272,11 @@
     "path": "src/aadistill/autoinit/operators/width.py",
     "sha256": "e4e18bb3246520b3ccf09296bc2d137807b4507fb1843c0c7bbc9d32889230b0",
     "bytes": 7920
+   },
+   {
+    "path": "src/aadistill/autoinit/pod_environment.py",
+    "sha256": "f7f7bc8c0b5469e4dc90ec6b8c9ff52a77056ffb9d039ac240a711d52dad942b",
+    "bytes": 13189
    },
    {
     "path": "src/aadistill/autoinit/recovery.py",
@@ -379,7 +394,7 @@
     "bytes": 3567
    }
   ],
-  "n_files": 65,
+  "n_files": 68,
   "rule": "sha256 over sorted 'path:sha256' lines of the declared set",
   "note": "the set an authorization measures. It includes the launcher, the driver, the setup script, the operators the fixed path applies, the recovery and scoring paths the six probes invoke, and the session infrastructure they run through."
  },
@@ -389,7 +404,7 @@
   "session_kind": "c1",
   "allows_phase_a": false,
   "allows_beam_search": false,
-  "n_harness_files": 65,
+  "n_harness_files": 68,
   "status": "NO GRANT EXISTS. No authorization has been issued."
  },
  "launcher": "scripts/pod/autoinit_c1_launch.py",
@@ -865,5 +880,5 @@
   "any search, ranking, successive halving, tie-breaking or arm elimination"
  ],
  "authorizes": "nothing",
- "preregistration_sha256": "5e6eb5110fc70fc9e9631533ca5beb66fc42efdce86915fbc13479eb6a66f898"
+ "preregistration_sha256": "21f25c55214826275b93b1baaafdd9f2b296b72ab9d8381f809013bd60462c04"
 }
