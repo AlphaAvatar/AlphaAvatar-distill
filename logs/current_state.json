@@ -60,8 +60,8 @@
     "kind": "CURRENT -- the pod HOME/HF environment contract that aborted 3R is repaired and verified under a pod-like sweep. $0, no pod, no authorization.",
     "commit": "cd5cb7d3447db6e3a9a238c3c4f19c27fd4e7b0c",
     "executable_repair": "cd5cb7d3447db6e3a9a238c3c4f19c27fd4e7b0c",
-    "suite": "see logs/c1_pod_environment_verification.json",
-    "verifiers": "renderer parity 7/7 PASS 0 SKIP; leaf transport 5/5 PASS under empty HOME + isolated HF + synthetic HF_TOKEN",
+    "suite": "pod-like sweep 2768/61/0 (pass/skip/fail), rc=0, empty HOME + isolated HF",
+    "verifiers": "renderer parity 7/7 PASS 0 SKIP; leaf transport 5/5 PASS; 7 expected renderer skips; 0 unexpected env skips",
     "pods": "0, via GraphQL myself{pods}, not the CLI field"
   },
   "abandoned": [
@@ -138,7 +138,7 @@
       "needs": "a maintainer decision; no automatic retry",
       "not_built": "no grant; the pre-ATTENTION parent rebuild and the ~8 GB teacher weights need GPU/network and have not run locally",
       "evidence": "logs/autoinit_c1_attempt3r/ (the 5-count row is WITHDRAWN)",
-      "readiness": "logs/c1_renderer_parity.json (7/7) and logs/c1_pod_environment_verification.json (gate 12)"
+      "readiness": "logs/c1_renderer_parity.json (7/7 PASS) and logs/c1_pod_environment_verification.json (gate 12)"
     },
     "c2": {
       "status": "NOT STARTED",

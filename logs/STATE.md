@@ -97,8 +97,8 @@ restores everything in the same `EXIT` trap, and **propagates the suite's exit
 code** — it used to end in `| tail -12` and exit `0` whatever happened.
 
 One complete sweep under those conditions is recorded in
-`c1_pod_environment_verification.json`,
-the twelfth pre-provider gate. It binds the **executable** — the C1 harness
+[`c1_pod_environment_verification.json`](c1_pod_environment_verification.json)
+(`b5833e75b6ec…`), the twelfth pre-provider gate: **2768 passed, 61 skipped, 0 failed**, `rc=0`, clean tree — with the seven renderer-parity cases skipped exactly as expected, all five leaf-transport nodeids PASSED and zero unexpected environment skips. It binds the **executable** — the C1 harness
 digest plus a digest over `tests/**/*.py`, the setup script, the simulator and
 the modules whose `$HOME` assumptions caused the abort — and deliberately **not**
 `HEAD`, so a preregistration or documentation commit cannot invalidate a
