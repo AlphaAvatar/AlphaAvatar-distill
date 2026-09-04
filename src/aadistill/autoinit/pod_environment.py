@@ -131,19 +131,34 @@ def pod_test_environment_digest(repo_root: str | Path = ".") -> dict[str, Any]:
 
 # --- reading what the sweep actually did ------------------------------------
 
-def _nodeid(case: ET.Element) -> str:
-    """Reconstruct a pytest nodeid from a JUnit `testcase` element."""
-    f = case.get("file") or ""
+def _nodeid(case: ET.Element, repo_root: Path) -> str:
+    """Reconstruct a pytest nodeid from a JUnit `testcase` element.
+
+    pytest writes **no `file` attribute** — only `classname` and `name`. Assuming
+    otherwise produced nodeids like `::test_x` for every case, so the record's
+    lookups all read `ABSENT` and it could not tell a passing sweep from a
+    failing one. Found by running the sweep, which is the only reason it was
+    found at all.
+
+    `classname` is the dotted module path, with any test class appended:
+    `tests.pod.test_x` or `tests.pod.test_x.TestGroup`. The split point is
+    resolved against the filesystem — the longest dotted prefix that is a real
+    `.py` file is the module — rather than guessed from naming convention.
+    """
     cls = case.get("classname") or ""
     name = case.get("name") or ""
-    mod = f[:-3].replace("/", ".") if f.endswith(".py") else ""
-    if cls and mod and cls.startswith(mod + "."):
-        inner = cls[len(mod) + 1:].replace(".", "::")
-        return f"{f}::{inner}::{name}"
-    return f"{f}::{name}"
+    parts = cls.split(".") if cls else []
+    for cut in range(len(parts), 0, -1):
+        rel = "/".join(parts[:cut]) + ".py"
+        if (repo_root / rel).is_file():
+            inner = "::".join(parts[cut:])
+            return f"{rel}::{inner}::{name}" if inner else f"{rel}::{name}"
+    # No module resolved: keep the raw classname rather than silently emitting a
+    # nodeid with an empty path, which is what hid the defect the first time.
+    return f"{cls}::{name}" if cls else name
 
 
-def read_junit(path: str | Path) -> dict[str, Any]:
+def read_junit(path: str | Path, repo_root: str | Path = ".") -> dict[str, Any]:
     """Per-nodeid outcomes from a JUnit XML report.
 
     JUnit is a *reporting* flag: it changes nothing about which tests are
@@ -152,10 +167,13 @@ def read_junit(path: str | Path) -> dict[str, Any]:
     is the point — attempt 3R's four-line tail is why fourteen failures arrived
     as three.
     """
+    root = Path(repo_root)
     tree = ET.parse(str(path))
     outcomes: dict[str, str] = {}
+    n_cases = 0
     for case in tree.iter("testcase"):
-        nid = _nodeid(case)
+        n_cases += 1
+        nid = _nodeid(case, root)
         status = "passed"
         for child in case:
             tag = child.tag.lower()
@@ -166,6 +184,12 @@ def read_junit(path: str | Path) -> dict[str, Any]:
         outcomes[nid] = status
     counts = {s: sum(1 for v in outcomes.values() if v == s)
               for s in ("passed", "skipped", "failed", "error")}
+    # A collision means two testcases mapped to one nodeid and one outcome was
+    # silently dropped — which is exactly how a failure would disappear.
+    if n_cases != len(outcomes):
+        raise ValueError(
+            f"{n_cases} testcases collapsed to {len(outcomes)} nodeids; the "
+            "reconstruction is lossy and an outcome would be lost")
     return {"outcomes": outcomes, "counts": counts, "total": len(outcomes)}
 
 

@@ -81,7 +81,7 @@ def main() -> int:
               f"not finish (simulator exit {rc}). Re-run it.")
         return 2
 
-    junit = read_junit(args.junit)
+    junit = read_junit(args.junit, REPO_ROOT)
     findings = evaluate_sweep(junit["outcomes"])
 
     record = {

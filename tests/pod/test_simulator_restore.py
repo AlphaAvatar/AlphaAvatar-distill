@@ -343,3 +343,40 @@ def test_the_environment_is_saved_before_it_is_changed():
     src = SCRIPT.read_text()
     assert src.index("save_env\n") < src.index('export HOME="$ENVROOT/home"')
     assert src.index("restore_env") < src.index('for p in "$HIDE"/*')
+
+
+def test_a_nested_simulation_does_not_inherit_this_ones_control_variables(tmp_path):
+    """The 2026-09-04 sweep failed five of its own tests on this.
+
+    Every `PODSIM_*` variable is exported, and the tests above drive the real
+    script as a subprocess. So a nested run inherited the OUTER sweep's
+    `PODSIM_JUNIT`, appended a second `--junitxml=` to its own one-line command,
+    and overwrote the outer report — turning correct tests red and corrupting the
+    evidence the sweep existed to produce. They are inputs to one invocation.
+    """
+    root = build_tree(tmp_path)
+    names = ("PODSIM_JUNIT PODSIM_LOG PODSIM_CMD PODSIM_ROOT PODSIM_ENV_ROOT "
+             "PODSIM_HF_TOKEN HIDE_DIR PODSIM_LOCK HIDDEN_PATHS")
+    # `bash -c '...' _` so the appended `--junitxml=` lands as an ignored
+    # positional argument: the real PODSIM_CMD is a pytest invocation that takes
+    # the flag, and this probe must tolerate it the same way.
+    probe = f"""bash -c 'for v in {names}; do echo "$v=${{!v-UNSET}}"; done' _"""
+    r = run_env_sim(root, tmp_path / "hidden", probe,
+                    PODSIM_JUNIT=str(tmp_path / "outer.xml"))
+    assert r.returncode == 0, r.stdout + r.stderr
+    for v in names.split():
+        assert f"{v}=UNSET" in r.stdout, (
+            f"{v} leaked into the suite; a nested simulation would inherit it\n"
+            + r.stdout)
+
+
+def test_the_junit_flag_reaches_the_suite_but_not_its_children(tmp_path):
+    """The flag must still be appended for THIS run — the fix must not disable
+    the reporting it exists for."""
+    root = build_tree(tmp_path)
+    junit = tmp_path / "reports/j.xml"
+    r = run_env_sim(root, tmp_path / "hidden", 'echo ran',
+                    PODSIM_JUNIT=str(junit))
+    assert r.returncode == 0, r.stdout + r.stderr
+    assert f"--junitxml={junit}" in r.stdout          # appended to the command
+    assert "ran" in r.stdout

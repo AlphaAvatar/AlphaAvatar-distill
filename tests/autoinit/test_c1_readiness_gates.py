@@ -277,21 +277,68 @@ def test_any_failure_is_a_problem():
     assert findings["failed_nodeids"] == ["tests/other/test_thing.py::test_ok"]
 
 
-def test_junit_nodeids_round_trip(tmp_path):
-    """The record names nodeids; JUnit stores file/classname/name."""
+def test_junit_nodeids_round_trip_without_a_file_attribute(tmp_path):
+    """pytest writes NO `file` attribute — only `classname` and `name`.
+
+    Assuming otherwise produced `::test_x` for all 2820 cases, so every lookup in
+    the record read `ABSENT` and it could not distinguish a green sweep from a
+    red one. It reported `renderer-parity skip set is not the expected 7` on a
+    sweep where all seven had skipped correctly. Only running the sweep found it.
+    """
     xml = tmp_path / "j.xml"
     xml.write_text(
         '<testsuites><testsuite>'
-        '<testcase classname="tests.data.test_c1_battery" file="tests/data/test_c1_battery.py" name="test_a[tool]"/>'
-        '<testcase classname="tests.pod.test_x.TestGroup" file="tests/pod/test_x.py" name="test_b"><skipped/></testcase>'
-        '<testcase classname="tests.pod.test_y" file="tests/pod/test_y.py" name="test_c"><failure/></testcase>'
+        '<testcase classname="tests.data.test_c1_battery" name="test_a[tool]"/>'
+        '<testcase classname="tests.pod.test_simulator_restore" name="test_b">'
+        '<skipped/></testcase>'
+        '<testcase classname="tests.data.test_c1_battery" name="test_c">'
+        '<failure/></testcase>'
         '</testsuite></testsuites>')
-    got = pe.read_junit(xml)
+    got = pe.read_junit(xml, REPO)
     assert got["outcomes"] == {
         "tests/data/test_c1_battery.py::test_a[tool]": "passed",
-        "tests/pod/test_x.py::TestGroup::test_b": "skipped",
-        "tests/pod/test_y.py::test_c": "failed"}
+        "tests/pod/test_simulator_restore.py::test_b": "skipped",
+        "tests/data/test_c1_battery.py::test_c": "failed"}
     assert got["counts"] == {"passed": 1, "skipped": 1, "failed": 1, "error": 0}
+
+
+def test_a_test_class_is_resolved_against_the_real_module(tmp_path):
+    """`classname` appends the class, so the module boundary is resolved from the
+    filesystem rather than guessed from naming convention."""
+    xml = tmp_path / "j.xml"
+    xml.write_text(
+        '<testsuites><testsuite>'
+        '<testcase classname="tests.data.test_c1_battery.TestGroup" name="test_b"/>'
+        '</testsuite></testsuites>')
+    got = pe.read_junit(xml, REPO)
+    assert list(got["outcomes"]) == [
+        "tests/data/test_c1_battery.py::TestGroup::test_b"]
+
+
+def test_two_cases_collapsing_to_one_nodeid_is_refused(tmp_path):
+    """A lossy reconstruction would silently drop an outcome — and the one it
+    dropped could be the failure."""
+    xml = tmp_path / "j.xml"
+    xml.write_text(
+        '<testsuites><testsuite>'
+        '<testcase classname="tests.data.test_c1_battery" name="test_same"/>'
+        '<testcase classname="tests.data.test_c1_battery" name="test_same">'
+        '<failure/></testcase>'
+        '</testsuite></testsuites>')
+    with pytest.raises(ValueError, match="lossy"):
+        pe.read_junit(xml, REPO)
+
+
+def test_the_parsed_count_matches_the_suite_total(tmp_path):
+    """The arithmetic that caught the lossy case: 2820 testcases must produce
+    2820 nodeids."""
+    xml = tmp_path / "j.xml"
+    cases = "".join(
+        f'<testcase classname="tests.data.test_c1_battery" name="test_{i}"/>'
+        for i in range(50))
+    xml.write_text(f"<testsuites><testsuite>{cases}</testsuite></testsuites>")
+    got = pe.read_junit(xml, REPO)
+    assert got["total"] == 50 and got["counts"]["passed"] == 50
 
 
 # --- the pod gate's own diagnostics -----------------------------------------

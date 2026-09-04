@@ -265,9 +265,22 @@ if [ -n "${PODSIM_JUNIT:-}" ]; then
 fi
 
 echo "running: $PODSIM_CMD"
-eval "$PODSIM_CMD" > "$PODSIM_LOG" 2>&1
+
+# Capture, then UNSET, before running the suite. `tests/pod/test_simulator_restore.py`
+# drives this very script as a subprocess, and every PODSIM_* control variable
+# here is exported -- so a nested run inherited THIS invocation's settings. The
+# 2026-09-04 sweep proved what that costs: the nested simulators inherited
+# `PODSIM_JUNIT`, appended a second `--junitxml=` to their own one-line commands,
+# overwrote the outer sweep's report, and failed five tests that were correct.
+# They are inputs to one invocation and must not outlive it.
+_podsim_log="$PODSIM_LOG"
+_podsim_cmd="$PODSIM_CMD"
+unset PODSIM_JUNIT PODSIM_LOG PODSIM_CMD PODSIM_ROOT PODSIM_ENV_ROOT \
+      PODSIM_HF_TOKEN HIDE_DIR PODSIM_LOCK HIDDEN_PATHS
+
+eval "$_podsim_cmd" > "$_podsim_log" 2>&1
 PODSIM_RC=$?
-grep -E '^(FAILED|ERROR) ' "$PODSIM_LOG" || true
-tail -12 "$PODSIM_LOG"
-echo "pytest rc=$PODSIM_RC; full log at $PODSIM_LOG"
+grep -E '^(FAILED|ERROR) ' "$_podsim_log" || true
+tail -12 "$_podsim_log"
+echo "pytest rc=$PODSIM_RC; full log at $_podsim_log"
 exit "$PODSIM_RC"
