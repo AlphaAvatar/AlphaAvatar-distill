@@ -27,8 +27,18 @@ from .session import SessionContext
 
 
 def lineage_from_authorized_base(repo_root: Path, base: str | None, commit: str,
-                                 auth_path: str) -> dict:
-    """Is `commit` the authorized base plus the authorization artifact, and nothing else?
+                                 auth_path: str | tuple[str, ...]) -> dict:
+    """Is `commit` the authorized base plus the permitted artifacts, and nothing else?
+
+    `auth_path` accepts a tuple as well as a single path. That generalization was
+    added on 2026-09-04 for `pod_environment_gate`, which asks the identical
+    question of a different base — "is this tree the SWEPT commit plus only the
+    readiness record?" — and would otherwise have needed a second copy of these
+    fifty lines. Two copies of a lineage rule is how the original two session
+    gates drifted, which is why this function exists at all.
+
+    The existing caller passes a single path and is unchanged in strictness: one
+    permitted path in, one permitted path out.
 
     The harness digest proves the *declared harness files* did not move, and the
     auth-blob check proves the driver will load this exact grant. Neither says
@@ -45,7 +55,9 @@ def lineage_from_authorized_base(repo_root: Path, base: str | None, commit: str,
     Returns a record rather than a bool so the launcher can log exactly what it
     saw, including on the paths that refuse.
     """
+    allowed = (auth_path,) if isinstance(auth_path, str) else tuple(auth_path)
     out = {"authorized_base": base, "session_commit": commit,
+           "allowed_paths": list(allowed),
            "descends_from_base": None, "changed_paths": None,
            "unexpected_paths": None, "ok": False, "reason": ""}
     if not base:
@@ -71,16 +83,16 @@ def lineage_from_authorized_base(repo_root: Path, base: str | None, commit: str,
         return out
     changed = [p for p in diff.stdout.split("\n") if p.strip()]
     out["changed_paths"] = changed
-    out["unexpected_paths"] = [p for p in changed if p != auth_path]
+    out["unexpected_paths"] = [p for p in changed if p not in allowed]
     if out["unexpected_paths"]:
         out["reason"] = (
-            f"{len(out['unexpected_paths'])} path(s) other than {auth_path} "
-            f"changed between the authorized base and the session commit: "
+            f"{len(out['unexpected_paths'])} path(s) other than "
+            f"{list(allowed)} changed between the base and the session commit: "
             f"{out['unexpected_paths'][:8]}")
         return out
     out["ok"] = True
-    out["reason"] = (f"only {auth_path} differs from the authorized base"
-                     if changed else "identical to the authorized base")
+    out["reason"] = (f"only {sorted(set(changed))} differs from the base"
+                     if changed else "identical to the base")
     return out
 
 

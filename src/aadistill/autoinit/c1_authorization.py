@@ -52,7 +52,17 @@ C1_HARNESS_SOURCE_FILES_V1: tuple[str, ...] = (
     # the session, end to end
     "scripts/pod/autoinit_c1_launch.py",
     "scripts/pod/autoinit_c1_driver.py",
-    "scripts/pod/setup.sh",
+    # The setup script the pod ACTUALLY runs. `SessionRunner._launch` uploads
+    # `scripts/pod/autoinit_preflight_setup.sh` (session_runner.py:528) and runs
+    # it (:548); `SetupManifest` carries no setup-script field, so no session can
+    # substitute another. Until 2026-09-04 this line named `scripts/pod/setup.sh`
+    # instead — a legacy E-series script that NOTHING in the repository executes;
+    # its only remaining reference was this list. So the C1 grant measured a file
+    # that never runs and did not measure the one that does, while Phase A, Phase
+    # B and both continuations all name preflight in their own sets. C1 was the
+    # sole outlier, and the omission was invisible precisely because the digest
+    # verified perfectly against the wrong file.
+    "scripts/pod/autoinit_preflight_setup.sh",
     "scripts/pod/start_job.py",
     "scripts/pod/watchdog.py",
     "scripts/pod/collect_artifacts.py",

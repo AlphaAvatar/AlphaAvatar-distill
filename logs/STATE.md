@@ -91,7 +91,7 @@ reimplementing "identical". Evidence: [`c1_renderer_parity.json`](c1_renderer_pa
 
 `simulate_pod_env.sh` gained the dimension it never had. It modelled gitignored
 artifacts and said nothing about `$HOME`, so running it before 3R would have
-caught none of the twelve environment failures. It now also isolates `HOME`,
+caught none of the nine identified environment failures. It now also isolates `HOME`,
 `HF_HOME`, `HF_HUB_CACHE` and `HF_TOKEN`, asserts the dev cache is invisible,
 restores everything in the same `EXIT` trap, and **propagates the suite's exit
 code** — it used to end in `| tail -12` and exit `0` whatever happened.
@@ -106,6 +106,44 @@ three-quarter-hour sweep while any executable edit does.
 
 The pod gate itself now greps every `FAILED`/`ERROR` nodeid before its four-line
 tail. That one line would have brought all fourteen home for free.
+
+### The C1 harness measured the wrong setup script — closed 2026-09-04
+
+`C1_HARNESS_SOURCE_FILES_V1` named `scripts/pod/setup.sh`, a legacy E-series
+script that **nothing in the repository executes**; its only remaining reference
+was that list. Meanwhile `SessionRunner._launch` uploads and runs
+`scripts/pod/autoinit_preflight_setup.sh` — and `SetupManifest` carries no
+setup-script field, so no session can substitute another. The C1 grant therefore
+measured a file that never runs and left the one that does unmeasured, while
+Phase A, Phase B and both continuations all name preflight in their own sets.
+C1 was the sole outlier, and it was invisible because the digest verified
+perfectly against the wrong file.
+
+The set now names preflight, derived from the runner rather than transcribed:
+`test_the_harness_names_the_setup_script_the_runner_executes` reads
+`session_runner.py` for what it uploads and executes and requires the harness to
+contain exactly that, and the closure regression no longer accepts either file.
+`scripts/pod/setup.sh` is additionally asserted to be reachable from no
+executable code. Harness `04fcb032…` → `eb80b989…`, still 68 files: a one-for-one
+swap.
+
+Preflight left `POD_TEST_ENVIRONMENT_FILES_V1` in the same change. `verify_record`
+checks both digests, so a file in both is already caught by the first; the second
+binding added nothing and made two lists look like independent evidence. The two
+sets are now asserted disjoint.
+
+### Gate 12 also binds post-sweep repository lineage
+
+Both digests deliberately ignore `logs/` and `docs/` — but the pod's pytest suite
+**reads repository state**: `current_state.json`, `STATE.md`, `CATALOG.md`. The
+2026-09-04 sweep was recorded at `0457bab` and documentation commits landed after
+it, so the record certified a suite that had not run against the tree it
+described. Enumerating every pytest data dependency is a losing game, so the rule
+is git lineage instead, reusing `lineage_from_authorized_base` verbatim: the
+session commit must descend from the record's `swept_base_commit`, and the only
+tracked paths permitted to differ are the readiness record itself and — once a
+session is issued — the canonical authorization artifact the existing lineage
+contract already allows. Anything else means the sweep is owed again.
 
 ## Phase C1 — FOUR ATTEMPTS, NO MEASUREMENT · NOTHING AUTHORIZED
 
@@ -215,7 +253,7 @@ Design and implementation proceeded at `$0`; **execution did not**. What exists:
 | teacher shard binding | [`phase_c1_teacher_binding.json`](phase_c1_teacher_binding.json) |
 
 | ten-stage session contract + the two fail-stop replay gates | `autoinit/c1_session.py` |
-| execution preregistration | [`phase_c1_execution_preregistration.json`](phase_c1_execution_preregistration.json) · `7f05d50b8aeeaff7…` at `head_commit 4f85ecd` · harness `04fcb0329295…` over 68 files · every earlier revision moved only executable identity; no scientific field has ever moved |
+| execution preregistration | [`phase_c1_execution_preregistration.json`](phase_c1_execution_preregistration.json) · `2ae9bb0fa8e65983…` at `head_commit 3f7f37b` · harness `eb80b9899def…` over 68 files · every earlier revision moved only executable identity; no scientific field has ever moved |
 | price bound | [`phase_c1_pricing.json`](phase_c1_pricing.json) · REPRICED to secure L40S **$1.09/h** · floor **$13.4401** · soft stop **$14.7841** · **ceiling $15.1475** |
 | evidence declaration | [`configs/autoinit/c1_artifacts.json`](../configs/autoinit/c1_artifacts.json) + [`_failed`](../configs/autoinit/c1_artifacts_failed.json) — inside the measured harness, so editing what survives teardown moves the digest a grant binds |
 | standalone session | `scripts/pod/autoinit_c1_launch.py` + `autoinit_c1_driver.py` · `SESSION_KIND=c1` · `C1Authorization` · **12** pre-provider gates · no Phase-A driver or launcher in the closure |

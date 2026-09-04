@@ -1,14 +1,72 @@
 # Decision records
 
+## 2026-09-04 — The C1 grant measured a setup script the pod never runs
+
+- **Context:** `C1_HARNESS_SOURCE_FILES_V1` opened with the claim that it covers
+  every file whose bytes decide the paid C1 execution, and named
+  `scripts/pod/setup.sh`. `SessionRunner._launch` uploads
+  `scripts/pod/autoinit_preflight_setup.sh` (`session_runner.py:528`) and executes
+  it (`:548`), and `SetupManifest` has no setup-script field, so the path is not
+  configurable by any session. `scripts/pod/setup.sh` is executed by nothing: its
+  only reference anywhere in the repository was that list. Phase A, Phase B and
+  both continuations all name preflight in their own harness sets; C1 was the sole
+  outlier. The gap was invisible because the digest verified perfectly — against
+  the wrong file.
+- **Decision:** replace, not add. One-for-one swap, 68 files either way, harness
+  `04fcb032…` → `eb80b989…`. Preflight simultaneously LEAVES
+  `POD_TEST_ENVIRONMENT_FILES_V1`: binding it there was a partial mitigation
+  written when it was outside the harness, and `verify_record` checks both digests,
+  so a file in both is already caught by the first. The two sets are now asserted
+  disjoint, and the ternary that accepted either setup script is gone — a
+  regression that accepts either file cannot detect the wrong one.
+- **Derived, not transcribed.** `test_the_harness_names_the_setup_script_the_runner_executes`
+  parses `session_runner.py` for what it uploads and runs and requires the harness
+  to name exactly that; `test_no_session_can_substitute_a_different_setup_script`
+  fails if `SetupManifest` ever gains a setup-script field, because the proof
+  depends on the path not being configurable; and
+  `test_the_legacy_setup_script_is_executed_by_nothing` fails if anything starts
+  executing `setup.sh` again, so it cannot come back unmeasured the way it just
+  went unmeasured in reverse.
+
+## 2026-09-04 — Gate 12 binds post-sweep lineage, because the pod suite reads repository state
+
+- **Context:** the harness and pod test-environment digests deliberately ignore
+  `logs/` and `docs/`, so that preregistration and documentation commits do not
+  invalidate a three-quarter-hour sweep. But the pod's pytest suite READS
+  repository state — `current_state.json`, `STATE.md`, `CATALOG.md` — and two of
+  attempt 3R's fourteen failures were exactly that. The passing sweep was recorded
+  at `0457bab`; four documentation commits landed afterwards and gate 12 stayed
+  green. The record was certifying a suite that had never run against the tree it
+  described.
+- **Decision:** do not enumerate pytest's data dependencies — the next one added
+  would silently not be in the list. Ask git instead. The record names
+  `swept_base_commit`, and `verify_record` requires the session commit to descend
+  from it with **no tracked path changed except** the readiness record and, once a
+  session is issued, the canonical authorization artifact. `logs/**` is not a
+  permitted class; two paths are, by name.
+- **Reused rather than rebuilt.** `lineage_from_authorized_base` already asks this
+  exact question for the session gate, so it was generalized from one permitted
+  path to a tuple and the existing caller still passes exactly one — asserted, so
+  the generalization cannot have loosened the gate it was extracted for. No
+  thirteenth gate, no new framework.
+- **Consequence, accepted:** `current_state.json` can no longer carry the swept
+  commit, because it cannot know a hash that does not exist until after it is
+  written and it may not be edited afterwards. The record owns that identity and
+  the snapshot points at it. That duplication is what produced the `4f85ecda` vs
+  `0457bab` mismatch this review found.
+- **Revisit when:** a maintainer-approved grant exists and a launch-bound sweep is
+  run. The current record is labelled `diagnostic`.
+
 ## 2026-09-04 — The pod environment is a test input, and a readiness record binds the executable
 
 - **Context:** C1 attempt 3R cleared `VLLM_READY → TEACHER_READY → ROPE_OK`, created
   a pod, and died at the setup CPU test gate — `14 failed, 2650 passed`, `$0.3482`,
-  zero scientific stages. Ten pre-provider gates had passed. Twelve of the fourteen
-  failures were **environment**: tests reading a `$HOME` Hugging Face cache or
-  credential that no fresh pod has. They passed on the dev box and could not pass on
-  a pod, and three launches went by without anyone finding out, because no C1 attempt
-  had ever reached `TESTS_OK` before.
+  zero scientific stages. Ten pre-provider gates had passed. **Seven** were
+  renderer-parity cases reading a `$HOME` Hugging Face cache that no fresh pod has,
+  and two were repository state; the remaining **five are UNEXPLAINED** — see the
+  overturned attribution below. The seven passed on the dev box and could not pass
+  on a pod, and three launches went by without anyone finding out, because no C1
+  attempt had ever reached `TESTS_OK` before.
 - **Decision, four parts.**
   1. `scripts/data/battery_render.py` resolves the hub cache **at call time** —
      `HF_HUB_CACHE`, then `$HF_HOME/hub`, then `~/.cache/huggingface/hub` — instead of

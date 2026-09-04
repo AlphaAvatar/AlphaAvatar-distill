@@ -1,11 +1,15 @@
 """Proof that the pod's CPU test gate can pass, bound to the tree that proved it.
 
 C1 attempt 3R reached `VLLM_READY → TEACHER_READY → ROPE_OK` and then died at the
-setup test gate: `14 failed, 2650 passed`, `$0.3482`, no scientific stage. Twelve
-of the fourteen were environment, not code — tests that read `$HOME` for a
-Hugging Face cache or credential the pod does not have. They passed on the dev box
-and could not pass on a pod, and three launches went by without anyone finding
-out, because no C1 attempt had ever reached `TESTS_OK` before.
+setup test gate: `14 failed, 2650 passed`, `$0.3482`, no scientific stage. Seven
+were renderer-parity cases reading `$HOME` for a Hugging Face cache no pod has,
+and two were repository state. **The other five remain UNEXPLAINED**: they were
+attributed to leaf transport by a `$0` reproduction that ran with no `HF_TOKEN`,
+which is a state no pod is in, and that attribution does not reproduce.
+
+The seven passed on the dev box and could not pass on a pod, and three launches
+went by without anyone finding out, because no C1 attempt had ever reached
+`TESTS_OK` before.
 
 The suite that answers "would this pass on a pod?" takes roughly three quarters
 of an hour, which is far too slow to run inside a pre-provider gate while a pod
@@ -22,9 +26,13 @@ in any way that mattered. Two digests decide instead:
 
 * the C1 harness digest — everything the paid session executes;
 * the pod **test environment** digest — everything that decides what the pod's
-  test gate does and is outside that harness: the setup script that runs the
-  gate, the simulator that models it, the whole test tree, and the modules whose
-  `$HOME` assumptions caused the abort in the first place.
+  test gate does and is outside that harness: the simulator that models it, the
+  whole test tree, the publisher whose tests the gate runs, and the recorder
+  that writes this file. The pod's own setup script is NOT here: it is executed
+  on the pod, so the grant measures it, in the harness.
+
+Neither digest covers `logs/` or `docs/`, and the pod suite reads repository
+state — so a third check, `swept_base_commit` lineage, closes that gap.
 
 Change any of them and the record no longer describes the gate; the sweep is owed
 again. Change a log, a decision record or a README, and it does not.
@@ -42,23 +50,29 @@ from typing import Any
 SCHEMA = "aadistill.autoinit.c1_pod_environment_verification/v1"
 RECORD_PATH = "logs/c1_pod_environment_verification.json"
 
-#: Files outside `C1_HARNESS_SOURCE_FILES_V1` that decide the pod test gate's
-#: outcome. A list, not a glob, so each entry is a decision somebody made.
+#: Files that decide the pod test gate's outcome and are **outside**
+#: `C1_HARNESS_SOURCE_FILES_V1`. A list, not a glob, so each entry is a decision
+#: somebody made.
 #:
-#: `autoinit_preflight_setup.sh` is the pod setup the session runner actually
-#: uploads and runs — `session_runner.py:528`. It is NOT in the C1 harness set,
-#: although every other phase's set names it. Until that is resolved, binding it
-#: here is what stops an edit to the pod's own test gate from leaving a readiness
-#: record that no longer describes it.
+#: Strictly disjoint from the harness set, and `test_c1_readiness_gates` asserts
+#: it. `verify_record` checks BOTH digests, so a file named in both buys nothing:
+#: editing it already invalidates the record through the harness. Redundant
+#: binding only makes the two lists look like independent evidence when they are
+#: not. `autoinit_preflight_setup.sh`, `battery_render.py` and
+#: `renderer_parity_gate.py` were all listed here until 2026-09-04 and are now
+#: covered by the harness itself.
 POD_TEST_ENVIRONMENT_FILES_V1: tuple[str, ...] = (
-    "scripts/pod/autoinit_preflight_setup.sh",
+    #: The simulator that creates the pod-like conditions. Not executed on a pod,
+    #: so it has no place in the harness, but a change to it changes what the
+    #: recorded sweep MEANT.
     "scripts/pod/simulate_pod_env.sh",
-    "scripts/data/battery_render.py",
+    #: A dev-box publishing tool the paid session never runs — and whose tests the
+    #: pod's setup gate does. That asymmetry is exactly why it is measured here
+    #: and not in the harness.
     "scripts/autoinit/publish_selected_leaves.py",
-    "scripts/autoinit/renderer_parity_gate.py",
-    # The recorder decides what the record CLAIMS the sweep found. A parser that
-    # mislabelled a skip as a pass would certify a failing gate, and nothing else
-    # here would notice.
+    #: The recorder decides what the record CLAIMS the sweep found. A parser that
+    #: mislabelled a skip as a pass would certify a failing gate, and nothing else
+    #: here would notice.
     "scripts/autoinit/record_pod_environment.py",
 )
 
@@ -72,9 +86,17 @@ RENDERER_PARITY_NODEIDS: tuple[str, ...] = tuple(
     for g in ("code", "gsm8k", "knowledge", "math_verified", "multihop", "rag",
               "tool"))
 
-#: The five that must PASS, never skip. They drove attempt 3R's diagnosis and
-#: every one of them uses monkeypatched network calls, so none is a test of
+#: Five tests that must PASS, never skip, under an empty HOME and an isolated
+#: HF cache. Every one uses monkeypatched network calls, so none is a test of
 #: possessing a real credential.
+#:
+#: They are NOT the five unexplained attempt-3R failures. A $0 reproduction once
+#: attributed those to this module, but it ran with no `HF_TOKEN` — a state no
+#: pod is in, since setup exports one before the gate — and under the real pod
+#: condition all five PASS. That attribution is WITHDRAWN and the five actual
+#: failure identities remain unknown. This stays a mandatory regression set on
+#: its own merits: it is the shape of failure that aborted recovery continuation
+#: attempt 3 at $0.2011.
 LEAF_TRANSPORT_NODEIDS: tuple[str, ...] = tuple(
     f"tests/autoinit/test_leaf_transport_publish.py::{n}" for n in (
         "test_a_corrupted_remote_file_is_caught_by_the_round_trip",
@@ -265,13 +287,39 @@ def tree_is_clean(repo_root: str | Path = ".") -> bool:
     return out.returncode == 0 and not out.stdout.strip()
 
 
-def verify_record(record: dict[str, Any], repo_root: str | Path = ".",
+#: The only tracked path that may differ between the swept commit and the
+#: session commit before an authorization exists. The record is written after the
+#: sweep by construction, so its own commit can never be part of the swept tree.
+PERMITTED_POST_SWEEP_PATHS: tuple[str, ...] = (RECORD_PATH,)
+
+
+def verify_record(record: dict[str, Any], repo_root: str | Path = ".", *,
+                  session_commit: str | None = None,
+                  authorization_path: str | None = None,
                   ) -> tuple[bool, str]:
     """The cheap pre-provider check: does this record still describe live code?
 
     Never re-runs the sweep. It answers one question — is the thing that was
     proved still the thing that would run — and refuses when it cannot tell.
+
+    Two digests are not enough on their own. They cover the harness and the pod
+    test environment, and deliberately ignore `logs/` and `docs/` — but the pod's
+    pytest suite READS repository state: `current_state.json`, `STATE.md`,
+    `CATALOG.md`. The 2026-09-04 sweep was recorded at `0457bab` and four
+    documentation commits landed afterwards without invalidating anything, so the
+    record described a suite that had not been run against the tree it was
+    certifying.
+
+    Enumerating every pytest data dependency is a losing game — the next one
+    added would silently not be in the list. So this asks git instead, reusing
+    the session-lineage rule verbatim: the session commit must descend from
+    `swept_base_commit`, and the ONLY tracked paths permitted to differ are the
+    readiness record itself and, once a session is issued, the canonical
+    authorization artifact the existing lineage contract already allows. Any
+    other change — `logs/**`, docs, README, preregistration, state, tests,
+    source — means the sweep is owed again.
     """
+    from ..infrastructure.session_prechecks import lineage_from_authorized_base
     from .c1_authorization import c1_harness_digest
 
     if record.get("schema") != SCHEMA:
@@ -300,11 +348,29 @@ def verify_record(record: dict[str, Any], repo_root: str | Path = ".",
     if not record.get("tree_clean"):
         return False, "the sweep was recorded against a dirty working tree"
 
+    # --- post-sweep lineage -------------------------------------------------
+    root = Path(repo_root)
+    base = record.get("swept_base_commit")
+    if not base:
+        return False, ("the record names no swept_base_commit, so nothing "
+                       "constrains what changed after the sweep")
+    target = session_commit or head_commit(root)
+    allowed = list(PERMITTED_POST_SWEEP_PATHS)
+    if authorization_path:
+        allowed.append(authorization_path)
+    lineage = lineage_from_authorized_base(root, base, target, tuple(allowed))
+    if not lineage["ok"]:
+        return False, (f"post-sweep drift: {lineage['reason']}. The pod suite "
+                       "reads repository state, so anything beyond the permitted "
+                       "paths means the recorded sweep no longer describes the "
+                       "tree that would run")
+
     c = record.get("counts") or {}
     return True, (f"pod sweep {c.get('passed')} passed / {c.get('skipped')} skipped "
                   f"/ {c.get('failed', 0) + c.get('error', 0)} failed, 7 renderer "
                   f"skips, leaf transport 5/5, binds harness {live_harness[:12]}… "
-                  f"and environment {live_env[:12]}…")
+                  f"and environment {live_env[:12]}…, swept at {base[:8]} with "
+                  f"{lineage['reason']}")
 
 
 def load_record(repo_root: str | Path = ".") -> dict[str, Any]:

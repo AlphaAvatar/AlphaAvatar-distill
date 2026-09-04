@@ -457,7 +457,10 @@ def pod_environment_gate(ctx: SessionContext) -> tuple[bool, str]:
     Attempt 3R is the reason. It cleared `VLLM_READY → TEACHER_READY → ROPE_OK`
     and then died on a CPU test suite that had never been run under the conditions
     a fresh pod is in — empty `$HOME`, its own `HF_HOME`, no dataset cache, no
-    credential file. Twelve of the fourteen failures were environment.
+    credential file. Of the fourteen, 7 renderer-parity and 2 repository-state
+    failures were identified; the other 5 remain UNEXPLAINED. They were once
+    attributed to leaf transport, but that $0 reproduction ran with no
+    HF_TOKEN — a state no pod is in — and does not reproduce.
 
     The sweep that answers this takes about three quarters of an hour, far too
     slow to run while a pod bills. So it is run once against a committed tree and
@@ -475,12 +478,22 @@ def pod_environment_gate(ctx: SessionContext) -> tuple[bool, str]:
     except Exception as exc:                                   # noqa: BLE001
         return False, f"cannot read {POD_ENV_RECORD}: {exc}"
 
-    ok, reason = verify_pod_env_record(record, REPO_ROOT)
+    # The session commit is what the pod checks out, so it — not this working
+    # tree — is what must descend from the swept base. `AUTH_PATH` is permitted
+    # because an issued session commits its authorization after the sweep by
+    # construction; it is the same single path the session-lineage gate allows.
+    ok, reason = verify_pod_env_record(
+        record, REPO_ROOT,
+        session_commit=getattr(ctx.args, "session_commit", None),
+        authorization_path=AUTH_PATH)
     ctx.evidence["pod_environment_verification"] = {
         "verdict": "PASS" if ok else "FAIL",
         "record": POD_ENV_RECORD,
         "record_self_sha256": record.get("self_sha256"),
-        "swept_at_head": record.get("executable_head"),
+        "record_kind": record.get("record_kind"),
+        "swept_base_commit": record.get("swept_base_commit"),
+        "session_commit": getattr(ctx.args, "session_commit", None),
+        "permitted_post_sweep_paths": [POD_ENV_RECORD, AUTH_PATH],
         "counts": record.get("counts"),
         "renderer_parity_skips": record.get("renderer_parity_skipped_as_expected"),
         "leaf_transport_all_passed": record.get("leaf_transport_all_passed"),

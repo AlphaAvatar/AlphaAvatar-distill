@@ -22,6 +22,7 @@ from __future__ import annotations
 
 import ast
 import json
+import re
 import sys
 from pathlib import Path
 
@@ -150,3 +151,56 @@ def test_the_preregistration_records_the_live_harness():
     live = c1_harness_digest(REPO)
     assert doc["c1_harness"]["digest"] == live["digest"]
     assert doc["c1_harness"]["n_files"] == len(C1_HARNESS_SOURCE_FILES_V1)
+
+
+# --- the setup script the pod actually runs ---------------------------------
+
+def test_the_harness_names_the_setup_script_the_runner_executes():
+    """Derived from the runner, not transcribed from a list.
+
+    Until 2026-09-04 the C1 set named `scripts/pod/setup.sh` and the pod ran
+    `scripts/pod/autoinit_preflight_setup.sh`. The grant therefore measured a file
+    that never executes and left the one that does unmeasured — and the digest
+    verified perfectly the whole time, because it was a digest of the wrong thing.
+    """
+    runner = (REPO / "src/aadistill/infrastructure/session_runner.py").read_text()
+    uploaded = re.findall(r'"scripts/pod/(\w+\.sh)"', runner)
+    executed = re.findall(r"bash \{WS\}/(\w+\.sh)", runner)
+    assert uploaded == ["autoinit_preflight_setup.sh"], uploaded
+    assert executed == ["autoinit_preflight_setup.sh"], executed
+    for name in set(uploaded) | set(executed):
+        assert f"scripts/pod/{name}" in C1_HARNESS_SOURCE_FILES_V1, (
+            f"the runner executes scripts/pod/{name} and the C1 grant does not "
+            "measure it")
+
+
+def test_no_session_can_substitute_a_different_setup_script():
+    """The reachability proof only holds because the path is not configurable."""
+    from aadistill.infrastructure.session import SetupManifest
+
+    fields = set(SetupManifest.__dataclass_fields__)
+    assert not {f for f in fields if "script" in f or "setup_path" in f}, (
+        f"SetupManifest gained a setup-script field ({sorted(fields)}); the "
+        "harness can no longer name the executed setup from the runner alone")
+
+
+def test_the_legacy_setup_script_is_executed_by_nothing():
+    """`scripts/pod/setup.sh` may exist as history; it must not be reachable.
+
+    If some path starts executing it again, it needs measuring, and this fails
+    rather than letting it run unmeasured the way it just did in reverse.
+    """
+    hits = []
+    for path in sorted((REPO / "scripts").rglob("*.py")) + \
+            sorted((REPO / "scripts").rglob("*.sh")) + \
+            sorted((REPO / "src").rglob("*.py")):
+        if path.name == "setup.sh":
+            continue
+        for line in path.read_text(errors="ignore").splitlines():
+            stripped = line.strip()
+            if stripped.startswith("#"):
+                continue
+            if re.search(r"(?<![\w/])setup\.sh", stripped):
+                hits.append(f"{path.relative_to(REPO)}: {stripped[:90]}")
+    assert not hits, ("scripts/pod/setup.sh is referenced by executable code:\n"
+                      + "\n".join(hits))

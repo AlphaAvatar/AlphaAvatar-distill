@@ -183,9 +183,10 @@ def test_the_trap_is_armed_only_after_the_lock_is_held():
 #
 # Hiding gitignored ARTIFACTS was only half of what a pod does not have. C1
 # attempt 3R died at the pod's CPU test gate on 2026-09-04 with `14 failed,
-# 2650 passed`, and twelve of the fourteen were `$HOME`: tests reading a Hugging
-# Face dataset cache or credential file that no fresh pod possesses. The
-# simulator existed, was green, and modelled a machine that does not exist.
+# 2650 passed`. Seven were renderer-parity cases reading a `$HOME` Hugging Face
+# dataset cache no fresh pod possesses, and two were repository state; the other
+# five remain UNEXPLAINED. The simulator existed, was green, and modelled a
+# machine that does not exist.
 #
 # These drive the real script and assert the isolation it now applies, because a
 # simulator that quietly kept the dev box's cache is worse than none — it is the

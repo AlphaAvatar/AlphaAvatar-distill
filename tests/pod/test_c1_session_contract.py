@@ -178,9 +178,12 @@ def test_a_superseded_committed_authorization_cannot_authorize():
 def test_the_harness_set_covers_the_launcher_driver_and_c1_science():
     for required in ("scripts/pod/autoinit_c1_launch.py",
                      "scripts/pod/autoinit_c1_driver.py",
-                     "scripts/pod/autoinit_preflight_setup.sh"
-                     if "scripts/pod/autoinit_preflight_setup.sh"
-                     in C1_HARNESS_SOURCE_FILES_V1 else "scripts/pod/setup.sh",
+                     # NOT a ternary accepting either setup script. That is what
+                     # let the set name `scripts/pod/setup.sh` — which nothing in
+                     # the repository executes — while the pod ran
+                     # `autoinit_preflight_setup.sh` unmeasured. A regression that
+                     # accepts either file cannot detect the wrong one.
+                     "scripts/pod/autoinit_preflight_setup.sh",
                      "src/aadistill/autoinit/c1_session.py",
                      "src/aadistill/autoinit/c1_isolation.py",
                      "src/aadistill/autoinit/fixed_path.py",

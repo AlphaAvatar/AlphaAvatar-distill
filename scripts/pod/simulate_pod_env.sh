@@ -84,7 +84,10 @@ mkdir -p "$HIDE"
 # That gap cost C1 attempt 3R $0.3482 on 2026-09-04. Seven renderer-parity cases
 # read `~/.cache/huggingface/hub` directly, so they passed here and could never
 # pass on a pod; the simulator was run, was green, and described a machine that
-# does not exist. Twelve of the fourteen failures were environment, not code.
+# does not exist. Of the fourteen, 7 renderer-parity and 2 repository-state
+# failures were identified; the other 5 remain UNEXPLAINED -- the leaf-transport
+# attribution was withdrawn because it does not reproduce under the pod's real
+# HF_TOKEN contract.
 #
 # So the simulated process gets: a fresh empty HOME, an isolated HF_HOME with
 # HF_HUB_CACHE beneath it, a non-empty synthetic HF_TOKEN exactly as pod setup

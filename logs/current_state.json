@@ -2,8 +2,8 @@
   "schema": "aadistill.current_state/v2",
   "generated_utc": "2026-09-04T00:00:00Z",
   "_contract": "Minimal machine-readable CURRENT snapshot: live facts only. History: logs/decisions.md. Human view: logs/STATE.md. Ownership: logs/CATALOG.md.",
-  "baseline_commit": "4f85ecda0c474dcf6ab22348c73c18d4d36da0ad",
-  "baseline_commit_meaning": "LAST TESTED IMPLEMENTATION: the executable tree the pod-environment sweep ran against. Only logs/ changed after it.",
+  "baseline_commit": "logs/c1_pod_environment_verification.json:swept_base_commit",
+  "baseline_commit_meaning": "LAST TESTED IMPLEMENTATION is OWNED by the readiness record's swept_base_commit and deliberately not duplicated here. This snapshot cannot name a commit that does not exist until after it is written, and gate 12 now forbids editing state after the sweep -- so a copy here could only ever go stale. It did: 4f85ecda vs the record's 0457bab.",
   "running": {
     "paid_compute": false,
     "pods": 0,
@@ -57,7 +57,7 @@
   },
   "latest_verification": {
     "utc": "2026-09-04T00:00:00Z",
-    "kind": "CURRENT -- the pod HOME/HF environment contract that aborted 3R is repaired and verified under a pod-like sweep. $0, no pod, no authorization.",
+    "kind": "CURRENT -- pod HOME/HF contract repaired; C1 harness closure corrected. $0.",
     "commit": "cd5cb7d3447db6e3a9a238c3c4f19c27fd4e7b0c",
     "executable_repair": "cd5cb7d3447db6e3a9a238c3c4f19c27fd4e7b0c",
     "suite": "pod-like sweep 2768/61/0 (pass/skip/fail), rc=0, empty HOME + isolated HF",
@@ -95,7 +95,7 @@
     "status": "COMPLETE 2026-08-24, $12.8587, ALL_DONE",
     "decision_status": "unresolved_equivalence",
     "winner": null,
-    "kind": "SELECTION experiment under calib.domain_balanced@v1; 0.86M SELECTION probes. The small absolute rates are NOT recovered capability.",
+    "kind": "SELECTION experiment, 0.86M probes. The small absolute rates are NOT recovered capability.",
     "record": "logs/autoinit_recovery_continuation_attempt7/",
     "pooled": "correct_overall cca699 0.029412 | 85bde 0.019608 | control 0.008824; usable 0.6561 | 0.5456 | 0.4947"
   },
@@ -109,11 +109,11 @@
     "final_pooled_sa_sb_sc": "fe9683e6a9c7 16/510 = 0.031373 (usable 0.6842) | 85bde4ded2c3 10/510 = 0.019608 | control 3/340 = 0.0088; see decisions.md",
     "margin": 0.011765,
     "clears_by": 7e-05,
-    "read_with_care": "clears by 0.000070 -- ~3.6% of ONE correct sample, ~1.23 SE at C0-measured noise. Protocol-resolved but not comfortable.",
     "ranking_metric": "correct_overall; usable_rollout does NOT rank, though it agrees here",
     "not_capability": "SELECTION evidence under a fixed 0.86M probe. 16 correct of 510",
     "authorizes": "nothing",
-    "record": "logs/autoinit_continuation_b_attempt5.json"
+    "record": "logs/autoinit_continuation_b_attempt5.json",
+    "margin_note": "clears by 0.000070; read STATE.md before citing"
   },
   "phase_c": {
     "c0": {
@@ -126,15 +126,14 @@
     "c1": {
       "status": "IMPLEMENTED / REPRICED / FOUR LAUNCH ATTEMPTS / NOT SCIENTIFICALLY EXECUTED / NOT CURRENTLY AUTHORIZED",
       "what_it_is": "fixed-path ATTENTION isolation, 2 arms x 3 fresh seeds = 6 E1_KD_HEAVY_0860K probes. NOT recovery evidence.",
-      "incumbent": "fe9683e6a9c783bbc6fe276a78c851c6, digest c313d1b4081b. Margin 0.000070, not distinguishable from cca699c93f34, NOT recovered.",
-      "execution_prereg": "logs/phase_c1_execution_preregistration.json 7f05d50b8aee at head_commit 4f85ecda; harness 04fcb0329295 over 68 files",
-      "pricing": "logs/phase_c1_pricing.json 909ed65f -- REPRICED to secure L40S $1.09/h. Floor $13.4401, soft $14.7841, CEILING $15.1475.",
+      "incumbent": "fe9683e6a9c783bbc6fe276a78c851c6, digest c313d1b4081b. NOT recovered; margin in phase_b_result.",
+      "execution_prereg": "logs/phase_c1_execution_preregistration.json 2ae9bb0fa8e6 at head_commit 3f7f37be; harness eb80b9899def over 68 files",
+      "pricing": "logs/phase_c1_pricing.json 909ed65f -- secure L40S $1.09/h, CEILING $15.1475.",
       "seeds": "1635674081, 1656475568, 696460635 (derived from the C0 digest)",
       "scoring": "c1_confirmation_scoring@v1 77507935; equivalence IDENTICAL over 15 probes. @v2 808080a7 and battery a285d61f untouched.",
-      "attempts": "1 $0.0786 bundle fetch; 2 $0.1013 ROPE_OK; 3 $0.00 price refusal, no provider resource; 3R $0.3482 pod test gate. $0.5281, zero science.",
-      "gates": "12. The first ten ran for the first time at 3R -- the runner prices BEFORE it gates. renderer_parity (11) and pod_environment (12) were added after 3R.",
-      "reached_in_3r": "VLLM_READY, TEACHER_READY, ROPE_OK. Both earlier fatal gaps stayed closed.",
-      "blocker": "RESOLVED at $0. Of the 14: 7 renderer parity (repaired, gate 11), 2 repository state (fixed), 5 attributed to leaf transport but NOT REPRODUCIBLE and therefore UNEXPLAINED. See decisions.md 2026-09-04.",
+      "attempts": "4 launch attempts, $0.5281, ZERO science. Per-attempt cost: BUDGET_LEDGER.md; detail: logs/autoinit_c1_attempt*/",
+      "gates": "12 pre-provider gates. Detail: STATE.md, decisions.md 2026-09-04.",
+      "blocker": "RESOLVED at $0. Of the 14: 7 renderer parity (repaired), 2 repository state (fixed), 5 UNEXPLAINED. decisions.md 2026-09-04.",
       "needs": "a maintainer decision; no automatic retry",
       "not_built": "no grant; the pre-ATTENTION parent rebuild and the ~8 GB teacher weights need GPU/network and have not run locally",
       "evidence": "logs/autoinit_c1_attempt3r/ (the 5-count row is WITHDRAWN)",
@@ -158,24 +157,19 @@
       "path": "/home/ecs-user/aad-artifacts/autoinit/preserved_scratch_20260901/",
       "manifest_sha256": "3e1a72e2ade2fde610b95e41e147f7f93d37fd4418a4a2d9f61ae58d27cca0b7",
       "n_files": 359,
-      "bytes": 13575205,
-      "verified": "359/359 re-hashed, 0 missing, 0 mismatched; the copy ALONE re-derives the frozen pooled figures",
-      "sources_retained": "YES -- aad-scratch originals are NOT deleted",
-      "detail": "logs/STATE.md"
+      "verified": "359/359 re-hashed, 0 mismatched",
+      "sources_retained": "YES -- aad-scratch originals are NOT deleted"
     },
     "checkpoints_deleted": 0,
     "scientific_artifacts_deleted": 0,
     "open_maintainer_decision": "KEEP / unresolved ownership: 2 duplicate checkpoint pairs, 2.92 GiB. NOT deletion candidates.",
     "closeout": "logs/storage_closeout_20260831.json",
-    "c1_battery_canonical": "/home/ecs-user/aad-artifacts/autoinit/c1_confirmation_v1 -- COPY of the frozen bytes, 8 files, verified from the copy; repo-local working copy retained"
+    "c1_battery_canonical": "/home/ecs-user/aad-artifacts/autoinit/c1_confirmation_v1"
   },
   "blocker": "No C1 grant exists. The pod HOME/HF environment contract that aborted 3R is REPAIRED and verified at $0; the $0.99 price refusal was superseded by the approved $1.09/h reprice.",
   "deferred_not_blocking": {
     "_note": "open, none blocking. Detail: logs/HANDOFF_next_session.md",
-    "duplicate_checkpoints": "2.92 GiB, KEEP / unresolved ownership -- maintainer decision",
-    "session_launchers_coverage": "SESSION_LAUNCHERS omits the Phase-B and continuation launchers; deferred debt",
-    "issuer_relative_to": "cosmetic relative_to crash when --out is outside the repo, after writing the file",
-    "fe9683_sb_per_sample": "per-sample rows for fe9683/sb exist nowhere; only the aggregate probe JSON. Detail: HANDOFF_next_session.md"
+    "duplicate_checkpoints": "2.92 GiB, KEEP / unresolved ownership -- maintainer decision"
   },
   "handoff": "logs/HANDOFF_next_session.md",
   "history": "per-attempt records, failure patterns and cost history: logs/decisions.md, logs/BUDGET_LEDGER.md and the per-run dirs.",

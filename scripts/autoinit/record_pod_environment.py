@@ -51,6 +51,12 @@ def main() -> int:
     ap.add_argument("--log", default=DEFAULT_LOG)
     ap.add_argument("--from-existing", action="store_true",
                     help="parse a sweep that already ran instead of running one")
+    ap.add_argument("--kind", default="diagnostic",
+                    choices=("diagnostic", "launch_bound"),
+                    help=("`diagnostic` proves the machinery on the current tree; "
+                          "`launch_bound` is the sweep a maintainer-approved "
+                          "launch rests on. Default is deliberately the weaker "
+                          "claim."))
     args = ap.parse_args()
 
     # Captured BEFORE the record is written: writing it into logs/ is itself a
@@ -90,7 +96,17 @@ def main() -> int:
             "one complete pod-like sweep of the CPU test suite: the condition a "
             "fresh C1 pod is actually in, which is what C1 attempt 3R's setup "
             "test gate refused for $0.3482 with zero scientific stages run."),
-        "executable_head": head,
+        #: THE commit the sweep ran on, clean. `pod_environment_gate` requires
+        #: the session commit to descend from it with no tracked change beyond
+        #: the readiness record (and, once issued, the authorization artifact).
+        #: Captured before the sweep starts, when the tree is verified clean.
+        "swept_base_commit": head,
+        "record_kind": args.kind,
+        "record_kind_note": (
+            "diagnostic: proves the pod-like suite passes on this exact tree and "
+            "that the readiness machinery works. A launch-bound record is the one "
+            "a maintainer-approved C1 launch rests on, and is owed at the time "
+            "that grant is issued."),
         "tree_clean": clean_before,
         "c1_harness_digest": harness["digest"],
         "c1_harness_n_files": harness["n_files"],
