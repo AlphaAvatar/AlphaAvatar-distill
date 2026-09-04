@@ -11,10 +11,14 @@ so the command in the record is literally the command that produced the counts.
 A readiness record whose command field was typed by hand is a claim, not
 evidence.
 
-The sweep takes roughly three quarters of an hour. That is exactly why the record
-exists: `aadistill.autoinit.pod_environment.verify_record` re-checks in
-milliseconds that the recorded proof still describes the live executable, so a
-pre-provider gate never has to re-run this while a pod waits.
+The sweep takes about thirteen minutes. That is why the record exists:
+`aadistill.autoinit.pod_environment.verify_record` re-checks in milliseconds that
+the recorded proof still describes the live executable, so a pre-provider gate
+never has to re-run this while a pod waits.
+
+`--kind` defaults to `diagnostic`, the weaker claim: it says the pod-like suite
+passes on this tree and that the machinery works. A `launch_bound` record is the
+one a maintainer-approved launch rests on, and is owed when that grant is issued.
 
 Exit 0 when the sweep passes and the record is written; non-zero otherwise, and
 the record is still written so the failure is inspectable.
@@ -25,8 +29,10 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import shutil
 import subprocess
 import sys
+import tempfile
 import time
 from pathlib import Path
 
@@ -74,10 +80,30 @@ def main() -> int:
         rc, seconds = 0, 0.0
         print(f"parsing the existing sweep at {args.junit}")
     else:
-        print(f"running: {command}\n(this takes roughly 45 minutes)")
-        proc = subprocess.run(["bash", str(REPO_ROOT / SIMULATOR)],
-                              cwd=str(REPO_ROOT), env=env)
-        rc = proc.returncode
+        print(f"running: {command}\n(this takes roughly 13 minutes)")
+        # A sweep supersedes the record it is about to replace, and the suite it
+        # runs CONTAINS the two tests that verify that record. Leaving the old one
+        # in place makes them assert a stale artifact against the tree being
+        # swept, and they fail — which is a statement about the previous sweep,
+        # not this one. Move it aside for the duration; the tests skip when it is
+        # absent, which is the honest reading of "not yet recorded".
+        stash = None
+        live = REPO_ROOT / RECORD_PATH
+        try:
+            if live.is_file():
+                stash = Path(tempfile.mkdtemp(prefix="podsim-record-")) / live.name
+                shutil.move(str(live), str(stash))
+                print(f"moved the previous record aside -> {stash}")
+            proc = subprocess.run(["bash", str(REPO_ROOT / SIMULATOR)],
+                                  cwd=str(REPO_ROOT), env=env)
+            rc = proc.returncode
+        finally:
+            # Restored only if this run does not go on to write a new one; the
+            # write below overwrites it either way, so a failed sweep leaves the
+            # tree exactly as it found it.
+            if stash and stash.is_file() and not live.exists():
+                shutil.move(str(stash), str(live))
+                print("restored the previous record")
         seconds = round(time.time() - started, 1)
 
     if not Path(args.junit).is_file():
@@ -114,9 +140,13 @@ def main() -> int:
         "pod_test_environment_n_files": env_digest["n_files"],
         "pod_test_environment_named_files": env_digest["named_files"],
         "binding_rule": (
-            "this record binds the EXECUTABLE, not HEAD: the preregistration and "
-            "the documentation commits that follow a sweep must not invalidate "
-            "it, and an edit to any measured file must."),
+            "this record binds the EXECUTABLE via two digests, and the REPOSITORY "
+            "via swept_base_commit lineage. The digests ignore logs/ and docs/ so "
+            "that paperwork does not invalidate a sweep; the lineage rule then "
+            "permits exactly two post-sweep tracked paths -- this record, and (in "
+            "an issued session) the canonical authorization artifact -- because "
+            "the pod suite READS repository state and a documentation commit can "
+            "change what it asserts."),
         "simulator": SIMULATOR,
         "simulator_command": command,
         "environment": {
