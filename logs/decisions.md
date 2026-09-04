@@ -1,5 +1,54 @@
 # Decision records
 
+## 2026-09-05 — C1 attempt 4: twelve gates, a pod, and the same test gate again
+
+- **Outcome:** ABORT at the pod CPU test gate. `6 failed, 2743 passed, 111 skipped`.
+  Pod `d854jag1ybhny2`, `$1.09/h`, 38.46 min, `$0.6986`, deleted automatically,
+  provider confirms gone. **No scientific stage ran** — no replay, no training, no
+  evaluation, no decision. C1 has still never been measured. The one-use grant is
+  CONSUMED and permits no retry.
+- **What held.** Every gap closed after earlier attempts stayed closed. All twelve
+  pre-provider gates passed on the launcher's own fresh run immediately before
+  provider creation; the live secure quote was exactly `$1.09/h`; the bundle
+  round-tripped to the session commit carrying the authorization; setup reached
+  `ENV_READY → REPO_READY → ASSETS_STAGED → VLLM_READY → TEACHER_READY → ROPE_OK`;
+  the independent watchdog ran and ended on `pod_gone` well inside the ceiling; and
+  the `FAILED`/`ERROR` grep added after attempt 3R brought **all six names home**,
+  so nothing had to be reconstructed by guessing at the pod's environment.
+- **The root cause is one thing, and it is mine.** The launch-bound sweep ran with
+  `simulate_pod_env.sh`'s DEFAULT `HIDDEN_PATHS` instead of a set derived from what
+  C1 actually stages. The simulator's own docstring says to pass a session-specific
+  set — *"Simulate the session you are about to launch by hiding the initializations
+  it does not stage"* — and the comment above its default asserts that **every** pod
+  session stages `artifacts/stage3/corpus_v2` from the relay, which is false for C1.
+  C1's manifest declares three relay dests and four local assets, and `corpus_v2`
+  and `eval/battery_v2` are in neither.
+- **The arithmetic says exactly this.** Sweep `2798 passed / 62 skipped / 0 failed`;
+  pod `2743 / 111 / 6`. The pod skipped 49 more and failed 6 more; `49 + 6 = 55` is
+  precisely the pass delta. The simulation was 55 tests more generous than the
+  machine it claimed to model.
+- **Gate 12 was built to prevent exactly this, and did not.** Not because its
+  binding is wrong — the digests and the lineage were all correct, and it passed
+  legitimately — but because the *fidelity of the thing it binds* is parameterised
+  by a hand-passed shell variable with a wrong-by-default value. A gate that
+  certifies the output of a simulator cannot be stronger than the simulator's
+  faithfulness, and nothing forced that faithfulness to be derived from the session
+  manifest that already declares it.
+- **Three defect classes, none repaired here.** (1) `test_the_committed_record_still_binds_the_live_executable`
+  calls `verify_record` without `authorization_path`, so on an issued-session tree —
+  which is what a pod checks out — the authorization reads as post-sweep drift. The
+  GATE is right and passed; only the test is wrong, and no pre-issuance sweep could
+  have caught it, because before issuance the authorization is not in the tree.
+  (2) Two `test_c1_battery.py` cases read assets C1 does not stage. (3) Three
+  `test_phase_b_reuse_hostlocal.py` cases need a host-local store no pod has; Phase
+  B's own session ignores that file and C1's ignore list does not.
+- **Deliberately not fixed in this turn.** The instruction was closeout metadata
+  only. Repairs, and any decision about a further grant, belong to the review.
+- **Revisit when:** the reviewer rules. The obvious candidate repair is to derive
+  the simulator's hidden set from the session manifest rather than a default list,
+  so the sweep models the session being launched by construction — but that is a
+  proposal, not a change made.
+
 ## 2026-09-05 — One-use C1 grant approved (attempt 4), and the issuance order corrected
 
 - **Context:** the maintainer accepted the C1 science, budget feasibility, the

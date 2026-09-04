@@ -1,0 +1,66 @@
+{
+  "schema": "aadistill.autoinit.c1_attempt4_test_gate_failures/v1",
+  "_what_this_is": "the complete enumeration of the six failures that aborted C1 attempt 4 at the pod CPU test gate. All six names came home this time: the FAILED/ERROR grep added after attempt 3R worked, so nothing had to be reconstructed.",
+  "attempt": 4,
+  "pod_id": "d854jag1ybhny2",
+  "cost_usd": 0.6986,
+  "minutes": 38.46,
+  "markers_reached": [
+    "ENV_READY",
+    "REPO_READY",
+    "ASSETS_STAGED",
+    "VLLM_READY",
+    "TEACHER_READY",
+    "ROPE_OK"
+  ],
+  "died_at": "the CPU pytest gate, before TESTS_OK",
+  "pod_counts": {
+    "failed": 6,
+    "passed": 2743,
+    "skipped": 111,
+    "seconds": 1364.19
+  },
+  "launch_bound_sweep_counts": {
+    "failed": 0,
+    "passed": 2798,
+    "skipped": 62,
+    "seconds": 817
+  },
+  "reconciliation": "the pod skipped 49 MORE tests than the sweep and failed 6 that the sweep passed; 49 + 6 = 55 = the pass delta (2798 - 2743). The simulation was exactly 55 tests' worth more generous than the pod.",
+  "root_cause": "the launch-bound sweep ran with simulate_pod_env.sh's DEFAULT HIDDEN_PATHS instead of a set derived from what THIS session stages. The simulator's own docstring says to pass a session-specific HIDDEN_PATHS -- 'Simulate the session you are about to launch by hiding the initializations it does not stage' -- and its default comment asserts that 'every pod session stages artifacts/stage3/corpus_v2 from the relay', which is FALSE for C1. C1 stages 3 relay dests and 4 local assets, and corpus_v2 is in neither. So the sweep certified a machine more generous than the pod, which is the same class of defect as attempt 3R: a green simulation describing a machine that does not exist. Gate 12 was built to prevent exactly this and did not, because the simulator's fidelity is parameterised by a hand-passed variable I left at its default.",
+  "the_six": [
+    {
+      "count": 1,
+      "tests": "tests/autoinit/test_c1_readiness_gates.py::test_the_committed_record_still_binds_the_live_executable",
+      "cause": "MY OWN DEFECT, introduced with the gate-12 lineage work. The test calls verify_record(record, REPO) with no authorization_path, so only the readiness record is a permitted post-sweep path. On the pod, HEAD IS the session commit, which by construction also carries logs/autoinit_c1_authorization.json -- so the authorization reads as post-sweep drift and the record is refused.",
+      "reproduced_at_zero_cost": "verify_record(r, '.') -> FAIL 'post-sweep drift: 1 path(s) other than [record] changed'; verify_record(r, '.', authorization_path=AUTH) -> PASS.",
+      "note": "the GATE is correct -- the launcher passes authorization_path and gate 12 passed. Only the test omits it, so it can never pass on an issued-session tree. It could not have been caught by any pre-issuance sweep, because before issuance the authorization is not in the tree.",
+      "status": "OPEN -- needs a maintainer decision"
+    },
+    {
+      "count": 2,
+      "tests": "tests/data/test_c1_battery.py::test_it_is_disjoint_from_the_recovery_training_corpus, tests/data/test_c1_battery.py::test_final_promotion_is_still_intact_and_was_only_read",
+      "cause": "they read artifacts/stage3/corpus_v2/sessions.jsonl and artifacts/eval/battery_v2/manifest.json. C1 stages NEITHER: its relay dests are stage1/e8_calibration_v1, stage1/qwen3_0p6b_init_v0/checkpoint and stage3/ladder_uniform_probe, and its local assets are c1_confirmation_v1, reasoning_heavy_v2, state_eval_v1 and recovery_search_v2. The simulator's default hidden set hides neither, so they passed in the sweep.",
+      "status": "OPEN -- needs a maintainer decision"
+    },
+    {
+      "count": 3,
+      "tests": "tests/autoinit/test_phase_b_reuse_hostlocal.py (all three)",
+      "cause": "they need a host-local retained probe store that no pod has. Phase B's own session ignores this file in SESSION_TEST_IGNORES; C1's ignore list has only test_recovery_corpus_pipeline.py and test_phase_a_stages1_5_execute.py. The file name says hostlocal.",
+      "status": "OPEN -- needs a maintainer decision"
+    }
+  ],
+  "what_worked": "every gap closed after earlier attempts stayed closed. All 12 pre-provider gates passed on the launcher's own fresh run; the bundle round-tripped; VLLM_READY, TEACHER_READY and ROPE_OK were all reached; the FAILED/ERROR grep added after 3R brought all six names home with no reconstruction; the watchdog ran independently and ended on pod_gone; teardown was automatic and provider-confirmed.",
+  "not_reached": [
+    "TESTS_OK",
+    "AUTHORIZATION_OK",
+    "SETUP_DONE",
+    "any driver stage",
+    "replay",
+    "any recovery training",
+    "any confirmation generation",
+    "any scoring",
+    "any C1 decision"
+  ],
+  "scientific_result": "NONE. C1 has still never been measured."
+}

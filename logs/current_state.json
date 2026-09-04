@@ -1,6 +1,6 @@
 {
   "schema": "aadistill.current_state/v2",
-  "generated_utc": "2026-09-04T00:00:00Z",
+  "generated_utc": "2026-09-05T00:00:00Z",
   "_contract": "Minimal machine-readable CURRENT snapshot: live facts only. History: logs/decisions.md. Human view: logs/STATE.md. Ownership: logs/CATALOG.md.",
   "baseline_commit": "logs/c1_pod_environment_verification.json:swept_base_commit",
   "baseline_commit_meaning": "LAST TESTED IMPLEMENTATION is OWNED by the readiness record's swept_base_commit and deliberately not duplicated here. This snapshot cannot name a commit that does not exist until after it is written, and gate 12 now forbids editing state after the sweep -- so a copy here could only ever go stale. It did: 4f85ecda vs the record's 0457bab.",
@@ -12,26 +12,27 @@
   },
   "authorized": {
     "any": false,
-    "note": "GRANT APPROVED 2026-09-05 (logs/autoinit_c1_attempt4_grant.json), issuance pending. During the issuance window this boolean stays false BY DIRECTION: the snapshot cannot be edited after the launch-bound sweep without invalidating it. The canonical live permission is logs/autoinit_c1_authorization.json; normalize after the attempt closes.",
+    "note": "the attempt-4 authorization is CONSUMED: pod d854jag1ybhny2 was created, which is what consumes a launch attempt. The grant permits no retry.",
     "c1_attempt1": "CONSUMED. $0.0786, bundle fetch.",
     "c1_attempt2": "CONSUMED. $0.1013, ROPE_OK.",
     "c1_attempt3": "SUPERSEDED UNLAUNCHED by the reprice. $0.00, no pod.",
-    "c1_attempt3r": "CONSUMED. $0.3482, pod CPU test gate; ROPE_OK passed."
+    "c1_attempt3r": "CONSUMED. $0.3482, pod CPU test gate; ROPE_OK passed.",
+    "c1_attempt4": "CONSUMED. $0.6986, aborted at the pod CPU test gate."
   },
   "prepared_launch": {
     "any": false,
     "bundles": 0,
-    "note": "nothing staged at this commit. A bundle is staged AFTER issuance, and this field is likewise not editable during the window -- see authorized.note."
+    "note": "nothing prepared. The staged bundle aad_autoinit_637335ab.bundle exists on the relay but its authorization is consumed; a further attempt needs a new maintainer grant."
   },
   "budget": {
-    "cumulative_spend_usd": 264.3878,
+    "cumulative_spend_usd": 265.0864,
     "authorized_cap_usd": 283.76,
-    "remaining_usd": 19.3722,
+    "remaining_usd": 18.6736,
     "planning_floor_usd": 13.4401,
     "remaining_is_not_permission": true,
     "ledger": "logs/BUDGET_LEDGER.md",
-    "headroom_note": "Phase-B 1-5 $30.0200; continuation 1-5 $3.8047 and CLOSED Phase B; C1 attempts 1/2/3R $0.5281, all INFRASTRUCTURE ABORTS with zero measurement.",
-    "planning_floor_note": "C1 REPRICED to secure L40S $1.09/h: floor $13.4401, soft $14.7841, ceiling $15.1475. $19.3722 remains -- exactly one more full attempt, by $4.22."
+    "headroom_note": "Phase-B 1-5 $30.0200; continuation 1-5 $3.8047 and CLOSED Phase B; C1 attempts 1/2/3R/4 $1.2267, ALL infrastructure aborts with zero measurement.",
+    "planning_floor_note": "C1 at secure L40S $1.09/h: floor $13.4401, soft $14.7841, ceiling $15.1475. $18.6736 remains -- one more full attempt fits by $3.53, and headroom is not permission."
   },
   "frozen": {
     "science_plan_hash": "02be33b9a7a8e26bc8bfb75795351e8cdc9ffd441b47066cc81887cfc511b55c",
@@ -57,10 +58,9 @@
   },
   "latest_verification": {
     "utc": "2026-09-05T00:00:00Z",
-    "owned_by": "logs/c1_pod_environment_verification.json",
-    "owns": "record_kind, swept_base_commit, test counts, harness digest, pod-test-environment digest and verdict. Read them THERE.",
-    "renderer_parity_owned_by": "logs/c1_renderer_parity.json",
-    "why_not_duplicated": "this snapshot carried commit cd5cb7d and 2768/61/0 while the record said 4231b42 and 2787/62/0. A copy of a fact the record owns can only go stale, exactly as baseline_commit did."
+    "kind": "C1 attempt 4: 12/12 pre-provider gates PASS, pod created, ABORT at the pod CPU test gate. $0.6986, zero science.",
+    "owned_by": "logs/autoinit_c1_attempt4/test_gate_failures.json",
+    "pods": "0, provider-confirmed after teardown"
   },
   "abandoned": [
     "recovery_search_v1; calib.reasoning_heavy@v1 (both INVALID/UNBUILDABLE before use)",
@@ -69,10 +69,9 @@
     "the ATTENTION 'search declined to calibrate' reading: WITHDRAWN 2026-09-01"
   ],
   "next_starting_point": {
-    "status": "C1 is gated 12/12; the pod test-gate blocker is REPAIRED and verified. No C1 measurement exists and nothing is authorized.",
-    "the_ask": "reviewer decision on the one remaining C1 grant. $19.3722 headroom vs a $15.1475 ceiling: it fits once, by $4.22.",
-    "budget": "$264.3878 spent of the unchanged $283.7600 cap; $19.3722 uncommitted.",
-    "blocker_resolved": "see STATE.md and decisions.md 2026-09-04"
+    "status": "C1 attempt 4 aborted at the pod CPU test gate. No C1 measurement exists. Nothing is authorized.",
+    "the_ask": "reviewer decision. Three defect classes are enumerated and NONE is repaired -- this closeout is metadata only.",
+    "budget": "$265.0864 spent of the unchanged $283.7600 cap; $18.6736 uncommitted."
   },
   "read_order": [
     "logs/PHASE_INDEX.md -- history by phase, START HERE",
@@ -122,17 +121,17 @@
       "authorizes": "nothing"
     },
     "c1": {
-      "status": "IMPLEMENTED / REPRICED / FOUR LAUNCH ATTEMPTS / NOT SCIENTIFICALLY EXECUTED / NOT CURRENTLY AUTHORIZED",
+      "status": "IMPLEMENTED / FIVE LAUNCH ATTEMPTS / NOT SCIENTIFICALLY EXECUTED / NOT CURRENTLY AUTHORIZED",
       "what_it_is": "fixed-path ATTENTION isolation, 2 arms x 3 fresh seeds = 6 E1_KD_HEAVY_0860K probes. NOT recovery evidence.",
       "incumbent": "fe9683e6a9c783bbc6fe276a78c851c6, digest c313d1b4081b. NOT recovered; margin in phase_b_result.",
       "execution_prereg": "logs/phase_c1_execution_preregistration.json 71137f55c7fd at head_commit c8a2961c; harness 974c8fa744d3 over 68 files",
       "pricing": "logs/phase_c1_pricing.json 909ed65f -- secure L40S $1.09/h, CEILING $15.1475.",
       "seeds": "1635674081, 1656475568, 696460635 (derived from the C0 digest)",
       "scoring": "c1_confirmation_scoring@v1 77507935; equivalence IDENTICAL over 15 probes. @v2 808080a7 and battery a285d61f untouched.",
-      "attempts": "4 launch attempts, $0.5281, ZERO science. Per-attempt cost: BUDGET_LEDGER.md; detail: logs/autoinit_c1_attempt*/",
+      "attempts": "5 launch attempts, $1.2267, ZERO science. Per-attempt cost: BUDGET_LEDGER.md; detail: logs/autoinit_c1_attempt*/",
       "gates": "12 pre-provider gates. Detail: STATE.md, decisions.md 2026-09-04.",
-      "blocker": "RESOLVED at $0. Of the 14: 7 renderer parity (repaired), 2 repository state (fixed), 5 UNEXPLAINED. decisions.md 2026-09-04.",
-      "needs": "grant APPROVED (attempt 4); issuance, bundle and 12 gates pending, then a maintainer decision to create the provider resource",
+      "blocker": "attempt 4 died at the pod CPU test gate: 6 failures -- 1 my own readiness test omitting authorization_path, 2 reading assets C1 does not stage, 3 needing a host-local store. logs/autoinit_c1_attempt4/test_gate_failures.json",
+      "needs": "a new maintainer grant; no automatic retry",
       "not_built": "no grant; the pre-ATTENTION parent rebuild and the ~8 GB teacher weights need GPU/network and have not run locally",
       "evidence": "logs/autoinit_c1_attempt3r/ (the 5-count row is WITHDRAWN)",
       "readiness": "logs/c1_renderer_parity.json (7/7 PASS) and logs/c1_pod_environment_verification.json -- currently record_kind=diagnostic; gate 12 requires launch_bound before a provider is created"
@@ -164,7 +163,7 @@
     "closeout": "logs/storage_closeout_20260831.json",
     "c1_battery_canonical": "/home/ecs-user/aad-artifacts/autoinit/c1_confirmation_v1"
   },
-  "blocker": "No C1 grant exists. The pod HOME/HF environment contract that aborted 3R is REPAIRED and verified at $0; the $0.99 price refusal was superseded by the approved $1.09/h reprice.",
+  "blocker": "No C1 grant exists. Attempt 4 aborted at the pod CPU test gate with 6 failures, all enumerated. C1 has still never been measured.",
   "deferred_not_blocking": {
     "_note": "open, none blocking. Detail: logs/HANDOFF_next_session.md",
     "duplicate_checkpoints": "2.92 GiB, KEEP / unresolved ownership -- maintainer decision"

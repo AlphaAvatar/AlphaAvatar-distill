@@ -1565,7 +1565,15 @@ gone.
 | --- | --- | --- |
 | C1 attempt 3R: repriced launch, 18.85 min, **INFRASTRUCTURE ABORT at the pod test gate**. No replay, no training, no evaluation, no decision | $0.3482 | `logs/autoinit_c1_attempt3r/` |
 
-**Cumulative: $264.3878 of $283.7600.** `$19.3722` uncommitted — still less than
+| C1 attempt 4: launch-bound readiness, 12/12 gates, 38.46 min, **INFRASTRUCTURE ABORT at the pod test gate**. No replay, no training, no evaluation, no decision | $0.6986 | `logs/autoinit_c1_attempt4/` |
+
+**Cumulative: $265.0864 of $283.7600.** `$18.6736` uncommitted. The attempt-4 grant is CONSUMED — a provider resource was created — and it permits no retry.
+Worst case never approached: the watchdog's last poll read `$0.6986` at 38.46 min against a `$15.1475` ceiling.
+
+Cost is the watchdog's last poll (38.46 min → `$0.6986`) rather than the launcher's own 38.3 min → `$0.70` display, on the standing rule that the
+provider-polled reading wins.
+
+**Superseded line:** **Cumulative: $264.3878 of $283.7600.** `$19.3722` uncommitted — still less than
 one full C1 session at the repriced ceiling of `$15.1475`… which it now exceeds
 only by `$4.22`. A further C1 attempt is arithmetically possible exactly once
 more and needs a maintainer grant.

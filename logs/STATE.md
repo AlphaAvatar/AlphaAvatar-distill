@@ -1,6 +1,28 @@
-**Updated:** 2026-09-04 · branch `main` · **PHASE B CLOSED · PHASE C0 FROZEN ·
-PHASE C1 REPRICED, LAUNCHED, ABORTED AT THE POD TEST GATE — STILL NEVER MEASURED ·
-THE POD ENVIRONMENT CONTRACT IS REPAIRED AT `$0`**
+**Updated:** 2026-09-05 · branch `main` · **PHASE B CLOSED · PHASE C0 FROZEN ·
+PHASE C1 ATTEMPT 4 LAUNCHED AND ABORTED AT THE POD TEST GATE — STILL NEVER MEASURED**
+
+> **Attempt 4, 2026-09-05.** The one-use grant was approved and consumed. All
+> **12** pre-provider gates passed on the launcher's own fresh run, the bundle
+> round-tripped, pod `d854jag1ybhny2` was created at `$1.09/h`, and setup
+> reached `ENV_READY → REPO_READY → ASSETS_STAGED → VLLM_READY → TEACHER_READY
+> → ROPE_OK` before dying at the CPU test gate with **6 failed / 2743 passed /
+> 111 skipped**. `$0.6986`, 38.46 min, pod deleted, provider confirms gone.
+> **No scientific stage ran — no replay, no training, no evaluation, no
+> decision.** Cumulative `$265.0864` of `$283.7600`.
+>
+> **The root cause is one thing.** The launch-bound sweep ran with
+> `simulate_pod_env.sh`'s DEFAULT `HIDDEN_PATHS` rather than a set derived
+> from what C1 actually stages. The simulator's own docstring says to pass a
+> session-specific set, and its default comment asserts that *every* pod
+> session stages `artifacts/stage3/corpus_v2` — which is false for C1. The
+> sweep therefore certified a machine 55 tests more generous than the pod:
+> 49 extra skips plus the 6 failures exactly account for the pass delta.
+> Gate 12 exists to prevent this and did not, because the simulator's
+> fidelity is a hand-passed variable I left at its default.
+>
+> Full enumeration, with each of the three defect classes and its evidence:
+> [`autoinit_c1_attempt4/test_gate_failures.json`](autoinit_c1_attempt4/test_gate_failures.json).
+> **Nothing is repaired** — this closeout is metadata only.
 
 # Current state
 
@@ -12,7 +34,7 @@ not carry. If the two disagree, a structural test fails.
 Pod `pj3c870n6yx70z` was created at `$1.09/h`, ran 18.85 min, and was deleted;
 the provider confirms it is gone. That creation **consumed** the Attempt-3R
 authorization `9b562e0a…`, so **nothing is prepared for launch** and a further C1 attempt needs a new maintainer grant.
-Spend is `$264.3878` of the `$283.7600` cap, `$19.3722` remaining.
+Spend is `$265.0864` of the `$283.7600` cap, `$18.6736` remaining.
 
 C1 was repriced to the secure L40S rate the launcher actually pays — `$1.09/h`,
 `securePrice`, not the `$0.79` `communityPrice` I once misreported — with every
@@ -30,7 +52,7 @@ minute assumption unchanged. Attempt 3, priced at `$0.99/h`, is
 
 **Phase C1 is REPRICED and has now consumed compute — but still no science.**
 Floor **$13.4401** · soft stop **$14.7841** · one-attempt ceiling **$15.1475** at
-the secure `$1.09/h`, against **$19.3722** headroom: exactly one more full attempt
+the secure `$1.09/h`, against **$18.6736** headroom: one more full attempt
 fits, by `$4.22`. **Headroom is not permission: no grant exists.**
 
 Four launch attempts, `$0.5281` total, **zero scientific stages** — no replay, no
@@ -42,6 +64,7 @@ training, no evaluation, no decision:
 | 2 | $0.1013 | `ROPE_OK` — no staged `config.json` |
 | 3 | $0.0000 | launcher refused the market price; **no pod created** |
 | 3R | $0.3482 | the pod CPU test gate — `14 failed, 2650 passed` |
+| 4 | $0.6986 | the pod CPU test gate — `6 failed, 2743 passed`; 12/12 gates had passed |
 
 Attempt 3R reached `VLLM_READY → TEACHER_READY → ROPE_OK`: the two gaps that
 killed attempts 1 and 2 are closed and stayed closed. It then failed the setup

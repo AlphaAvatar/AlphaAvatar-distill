@@ -1,0 +1,95 @@
+[20:13:35] budget: expected 740 min $13.44 · soft $14.78 · hard $15.15 (authorized $15.15)
+[20:13:35] NVIDIA L40S $1.09/h, stock Low
+[20:13:35] session commit 637335abb7a4 verified: harness digests to 974c8fa744d3…, carries the authorization and only logs/autoinit_c1_authorization.json differs from the authorized base
+[20:13:35] C1 harness 974c8fa744d3… over 68 files
+[20:13:35] ceiling $15.1475, derived from logs/phase_c1_pricing.json
+[20:13:35] preregistration 71137f55c7fd… (self-hash verified), harness 974c8fa744d3…
+[20:13:35] seeds, both replay digests and the 950/850 battery a285d61f88de… are unchanged
+[20:13:35] 3 teacher shards bound at 768f209d9ea8…, none fetched
+[20:13:36] battery staged from bytes identical to /home/ecs-user/aad-artifacts/autoinit/c1_confirmation_v1
+[20:13:36] success spec covers the contract (6 probes x 7 sets = 42 generation files); failure spec presupposes no training
+[20:13:37] stage1/qwen3_0p6b_init_v0/checkpoint/config.json (1418 bytes, a7131bb092b3…) stages to artifacts/stage1/qwen3_0p6b_init_v0/checkpoint with stored RoPE base 5,000,000
+[20:13:40] aad_autoinit_637335ab.bundle (7587230 bytes, e4bc32c95d3d…) round-trips to 637335abb7a4… carrying this authorization and harness 974c8fa744d3…
+[20:13:43] 7/7 groups PASS, 0 skipped, 190 frozen prompts re-rendered byte for byte
+[20:13:43] pod sweep 2798 passed / 62 skipped / 0 failed, 7 renderer skips, leaf transport 5/5, binds harness 974c8fa744d3… and environment edd1d8125c09…, swept at 47578f26 with only ['logs/autoinit_c1_authorization.json', 'logs/c1_pod_environment_verification.json'] differs from the swept base
+[20:13:44] precheck OK: 8 relay inputs (8 from AlphaAvatar/aadistill-artifacts), 4 local assets
+[20:13:45] created d854jag1ybhny2 at $1.09/h
+[20:13:45] watchdog detached — hard 834 min = $15.15
+[20:14:39]   starting (60s) — $0.02
+[20:15:43]   starting (120s) — $0.04
+[20:16:47]   starting (180s) — $0.06
+[20:17:51]   starting (240s) — $0.07
+[20:18:54]   starting (300s) — $0.09
+[20:19:58]   starting (360s) — $0.11
+[20:21:02]   starting (420s) — $0.13
+[20:22:07]   starting (480s) — $0.15
+[20:23:12]   starting (540s) — $0.17
+[20:23:44] TCP 22 at 82.221.170.242:39867 after 10.0 min
+[20:23:46] draw 1: ssh reachable — $0.18
+[20:25:25] draw 1: image identity runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@580.159.03
+[20:25:25] draw 1: running setup
+[20:51:53] setup did not reach SETUP_DONE:
+%|█         | 1/10 [00:00<00:04,  2.14it/s]
+Fetching 10 files:  30%|███       | 3/10 [00:00<00:01,  6.28it/s]
+Fetching 10 files:  50%|█████     | 5/10 [00:00<00:00,  6.19it/s]
+Fetching 10 files:  60%|██████    | 6/10 [00:01<00:01,  3.44it/s]
+Fetching 10 files:  70%|███████   | 7/10 [00:02<00:01,  2.43it/s]
+Fetching 10 files:  80%|████████  | 8/10 [00:10<00:05,  2.60s/it]
+Fetching 10 files:  90%|█████████ | 9/10 [00:26<00:06,  6.36s/it]
+Fetching 10 files: 100%|██████████| 10/10 [00:28<00:00,  5.15s/it]
+Fetching 10 files: 100%|██████████| 10/10 [00:28<00:00,  2.82s/it]
+MARKER:TEACHER_READY
+[20:28:46] checking the RoPE base resolves in every venv
+  transformers 5.13.1: qwen3_0p6b_init_v0 stored 5,000,000 runtime 5,000,000 OK
+  transformers 5.15.0: qwen3_0p6b_init_v0 stored 5,000,000 runtime 5,000,000 OK
+MARKER:ROPE_OK
+[20:29:01] CPU test suite (128 vCPUs visible, cgroup budget 15; cpu set 0-14)
+--- every failing nodeid ---
+FAILED tests/autoinit/test_c1_readiness_gates.py::test_the_committed_record_still_binds_the_live_executable
+FAILED tests/autoinit/test_phase_b_reuse_hostlocal.py::test_every_historical_probe_reconstructs_and_reuse_is_verified
+FAILED tests/autoinit/test_phase_b_reuse_hostlocal.py::test_the_load_bearing_check_is_the_digest_re_derived_from_BYTES
+FAILED tests/autoinit/test_phase_b_reuse_hostlocal.py::test_the_pre_provider_gate_passes_against_the_retained_store
+FAILED tests/data/test_c1_battery.py::test_it_is_disjoint_from_the_recovery_training_corpus
+FAILED tests/data/test_c1_battery.py::test_final_promotion_is_still_intact_and_was_only_read
+--- log tail ---
+FAILED tests/autoinit/test_phase_b_reuse_hostlocal.py::test_the_pre_provider_gate_passes_against_the_retained_store
+FAILED tests/data/test_c1_battery.py::test_it_is_disjoint_from_the_recovery_training_corpus
+FAILED tests/data/test_c1_battery.py::test_final_promotion_is_still_intact_and_was_only_read
+6 failed, 2743 passed, 111 skipped in 1364.19s (0:22:44)
+[20:51:47] test suite failed rc=1
+SETUP_RC=1
+
+[20:51:53] ABORT after draw 1: setup_failed
+[20:51:53] deleting pod (setup setup_failed)
+[20:52:04] pod deleted — 38.3 min, $0.70; provider confirms gone: True
+
+autoinit-c1 INCOMPLETE — /home/ecs-user/AlphaAvatar-distill/logs/autoinit_c1_session.json. STOP for review. C1 replayed one frozen path under two digest gates and ran no search.
+��█████   | 7/10 [00:02<00:01,  2.43it/s]
+Fetching 10 files:  80%|████████  | 8/10 [00:10<00:05,  2.60s/it]
+Fetching 10 files:  90%|█████████ | 9/10 [00:26<00:06,  6.36s/it]
+Fetching 10 files: 100%|██████████| 10/10 [00:28<00:00,  5.15s/it]
+Fetching 10 files: 100%|██████████| 10/10 [00:28<00:00,  2.82s/it]
+MARKER:TEACHER_READY
+[20:28:46] checking the RoPE base resolves in every venv
+  transformers 5.13.1: qwen3_0p6b_init_v0 stored 5,000,000 runtime 5,000,000 OK
+  transformers 5.15.0: qwen3_0p6b_init_v0 stored 5,000,000 runtime 5,000,000 OK
+MARKER:ROPE_OK
+[20:29:01] CPU test suite (128 vCPUs visible, cgroup budget 15; cpu set 0-14)
+--- every failing nodeid ---
+FAILED tests/autoinit/test_c1_readiness_gates.py::test_the_committed_record_still_binds_the_live_executable
+FAILED tests/autoinit/test_phase_b_reuse_hostlocal.py::test_every_historical_probe_reconstructs_and_reuse_is_verified
+FAILED tests/autoinit/test_phase_b_reuse_hostlocal.py::test_the_load_bearing_check_is_the_digest_re_derived_from_BYTES
+FAILED tests/autoinit/test_phase_b_reuse_hostlocal.py::test_the_pre_provider_gate_passes_against_the_retained_store
+FAILED tests/data/test_c1_battery.py::test_it_is_disjoint_from_the_recovery_training_corpus
+FAILED tests/data/test_c1_battery.py::test_final_promotion_is_still_intact_and_was_only_read
+--- log tail ---
+FAILED tests/autoinit/test_phase_b_reuse_hostlocal.py::test_the_pre_provider_gate_passes_against_the_retained_store
+FAILED tests/data/test_c1_battery.py::test_it_is_disjoint_from_the_recovery_training_corpus
+FAILED tests/data/test_c1_battery.py::test_final_promotion_is_still_intact_and_was_only_read
+6 failed, 2743 passed, 111 skipped in 1364.19s (0:22:44)
+[20:51:47] test suite failed rc=1
+SETUP_RC=1
+
+[20:51:53] ABORT after draw 1: setup_failed
+[20:51:53] deleting pod (setup setup_failed)
+[20:52:04] pod deleted — 38.3 min, $0.70; provider confirms gone: True
