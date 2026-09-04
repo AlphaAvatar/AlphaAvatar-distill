@@ -304,9 +304,32 @@ def test_every_gate_but_the_commit_binding_passes_against_the_candidate(launcher
     ctx = types.SimpleNamespace(scr=Path("/tmp/c1gate"), args=session_args(launcher),
                                 auth=auth, evidence={}, image_digest="candidate",
                                 price=0.99, spent_usd=0.0)
+    import os
+
     #: Named, with a reason each, so widening this is a decision somebody makes.
-    structurally_unavailable = ("session_commit_and_lineage", "bundle_staged_gate",
-                                "pod_environment_gate")
+    structurally_unavailable = ["session_commit_and_lineage", "bundle_staged_gate",
+                                "pod_environment_gate"]
+    if os.environ.get("AAD_SYNTHETIC_HF_TOKEN"):
+        # Inside `simulate_pod_env.sh`: the credential is deliberately a fake and
+        # the Hugging Face cache is deliberately empty. Two gates need the real
+        # ones and cannot do otherwise there.
+        #
+        # `rope_input_gate` authenticates to the private relay to download and hash
+        # the pinned checkpoint config, and gets 401. `renderer_parity_gate` reads
+        # the seven pinned dataset snapshots, which the isolated cache does not
+        # have — that emptiness is the very condition the simulation exists to
+        # create, and it is why the seven parity cases skip there.
+        #
+        # Both are statements about the simulated environment, not about the gates.
+        # On a pod the token is real (`ROPE_OK` passed in attempt 3R) and this test
+        # does not run at all, because the candidate fixture is a dev-box scratch
+        # path. Handing the simulation the operator's real token and cache would
+        # defeat its purpose and hide any test that had started needing them.
+        #
+        # Neither is left unexercised: both run unconditionally on a real dev box —
+        # the run directly above this one, with no flag set — and gate 11 is driven
+        # against refusals in `test_c1_readiness_gates.py`.
+        structurally_unavailable += ["rope_input_gate", "renderer_parity_gate"]
     failures = []
     for gate in spec.precheck:
         name = getattr(gate, "__name__", "session_commit_and_lineage")

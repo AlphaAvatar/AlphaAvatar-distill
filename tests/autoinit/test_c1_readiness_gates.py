@@ -384,9 +384,37 @@ def test_gate_twelve_is_excluded_from_the_candidate_sweep_for_a_stated_reason():
     quietly, so both the membership and the reason are pinned here.
     """
     src = (REPO / "tests/pod/test_c1_session_contract.py").read_text()
-    assert 'structurally_unavailable = ("session_commit_and_lineage", "bundle_staged_gate",\n' \
-           '                                "pod_environment_gate")' in src, (
+    assert '"pod_environment_gate"]' in src, (
         "the exclusion set changed shape; re-read why each member is in it")
     assert "genuine\n    circularity" in src, "the reason for excluding gate 12 is gone"
     assert "It is not left unexercised" in src, (
         "the pointer to gate 12's real coverage is gone")
+
+
+def test_the_only_conditional_exclusion_is_the_synthetic_credential():
+    """Two gates are excluded ONLY inside the simulation, and only there.
+
+    `rope_input_gate` authenticates to the private relay (401 with a fake token);
+    `renderer_parity_gate` reads the seven pinned snapshots, which the isolated
+    cache deliberately lacks. Both must stay conditional: on a real dev box they
+    run, and an unconditional exclusion would retire the check that closed attempt
+    2 and the guarantee that replaced the skippable parity cases.
+    """
+    src = (REPO / "tests/pod/test_c1_session_contract.py").read_text()
+    assert 'if os.environ.get("AAD_SYNTHETIC_HF_TOKEN"):' in src
+    assert 'structurally_unavailable += ["rope_input_gate", "renderer_parity_gate"]' in src
+    # Conditional, not a member of the base list.
+    base = src[src.index("structurally_unavailable = ["):
+               src.index('if os.environ.get("AAD_SYNTHETIC_HF_TOKEN")')]
+    assert "rope_input_gate" not in base, (
+        "rope_input_gate became an unconditional exclusion; attempt 2 died at "
+        "ROPE_OK and this gate is what closed that gap")
+
+
+def test_the_simulator_announces_that_its_credential_is_synthetic():
+    sim = (REPO / "scripts/pod/simulate_pod_env.sh").read_text()
+    assert "export AAD_SYNTHETIC_HF_TOKEN=1" in sim
+    # It must survive the PODSIM_* unset, or the suite never sees it.
+    unset_line = sim[sim.index("unset PODSIM_JUNIT"):]
+    assert "AAD_SYNTHETIC_HF_TOKEN" not in unset_line.split("\n\n")[0], (
+        "the flag is unset before the suite runs, so nothing can read it")

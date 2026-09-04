@@ -100,8 +100,9 @@ ENVROOT=${PODSIM_ENV_ROOT:-"${HIDE}.env"}
 PODSIM_TOKEN=${PODSIM_HF_TOKEN:-"hf_podEquivalentSyntheticToken000000000"}
 
 #: Anything that could point the process back at the dev box's real HF state.
+#: `AAD_SYNTHETIC_HF_TOKEN` is the flag that says so out loud -- see below.
 ISOLATED_VARS="HOME HF_HOME HF_HUB_CACHE HF_TOKEN HUGGINGFACE_HUB_CACHE \
-HF_DATASETS_CACHE TRANSFORMERS_CACHE XDG_CACHE_HOME"
+HF_DATASETS_CACHE TRANSFORMERS_CACHE XDG_CACHE_HOME AAD_SYNTHETIC_HF_TOKEN"
 
 SAVED_ENV=""
 save_env() {
@@ -209,6 +210,13 @@ export HOME="$ENVROOT/home"
 export HF_HOME="$ENVROOT/hf"
 export HF_HUB_CACHE="$ENVROOT/hf/hub"
 export HF_TOKEN="$PODSIM_TOKEN"
+# Say out loud that the credential is a fake. A pod's token is real, so gates and
+# tests that AUTHENTICATE to the private relay work there and cannot work here --
+# `rope_input_gate` returned 401 in the 2026-09-04 sweep C for exactly this
+# reason. The honest options were to hand the simulation the operator's real
+# token, which would hide any test that had quietly started needing one, or to
+# let those few declare the requirement. This flag lets them declare it.
+export AAD_SYNTHETIC_HF_TOKEN=1
 # These would each defeat the isolation on their own by naming the real cache.
 unset HUGGINGFACE_HUB_CACHE HF_DATASETS_CACHE TRANSFORMERS_CACHE XDG_CACHE_HOME
 
