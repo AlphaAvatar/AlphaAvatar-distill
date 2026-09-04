@@ -380,3 +380,28 @@ def test_the_junit_flag_reaches_the_suite_but_not_its_children(tmp_path):
     assert r.returncode == 0, r.stdout + r.stderr
     assert f"--junitxml={junit}" in r.stdout          # appended to the command
     assert "ran" in r.stdout
+
+
+def test_the_default_log_path_is_per_invocation_not_a_shared_file(tmp_path):
+    """A fixed default log is a shared mutable file across nested runs.
+
+    Unsetting PODSIM_LOG so nested simulations cannot inherit it made every one
+    of them fall back to the SAME default and truncate the outer sweep's log
+    while the outer shell still held an open fd at its own offset. Sweep A's log
+    came back with its `FAILED` lines punched out: `grep` matched nothing in a
+    file whose own tail read `3 failed`. Deriving the default from `$HIDE` makes
+    it per-invocation by construction.
+    """
+    src = SCRIPT.read_text()
+    assert 'PODSIM_LOG=${PODSIM_LOG:-"${HIDE}.pytest.log"}' in src, (
+        "the default log path is not derived from the per-invocation $HIDE")
+
+    root = build_tree(tmp_path)
+    hide = tmp_path / "hidden"
+    r = run_env_sim(root, hide, "echo hello-from-the-suite")
+    assert r.returncode == 0, r.stdout + r.stderr
+    log = Path(str(hide) + ".pytest.log")
+    assert log.is_file(), f"no log at the per-invocation default {log}"
+    assert "hello-from-the-suite" in log.read_text()
+    assert not Path("/home/ecs-user/aad-scratch/podsim_pytest.log").samefile(log) \
+        if Path("/home/ecs-user/aad-scratch/podsim_pytest.log").exists() else True

@@ -251,7 +251,16 @@ PODSIM_CMD=${PODSIM_CMD:-".venv/bin/python -m pytest tests/ -q \
 # It lands OUTSIDE the repository on purpose. `logs/` is tracked and every entry
 # in it must be classified in `CATALOG.md`, so writing there would both dirty the
 # working tree the sweep is asserting is clean and fail a structural test.
-PODSIM_LOG=${PODSIM_LOG:-"/home/ecs-user/aad-scratch/podsim_pytest.log"}
+#
+# The default is derived from `$HIDE`, which is per-invocation, NOT a fixed global
+# path. A fixed default is a shared mutable file: unsetting PODSIM_LOG for the
+# suite (so nested runs cannot inherit it) made every nested simulation fall back
+# to the SAME default and truncate the outer sweep's log while the outer shell
+# still held an open fd at its own offset. The 2026-09-04 sweep A log came back
+# with its `FAILED` lines punched out -- `grep` found nothing in a file whose tail
+# plainly showed `3 failed`. Per-invocation by construction is the fix; inheriting
+# is not, because that is the bug this default exists to avoid.
+PODSIM_LOG=${PODSIM_LOG:-"${HIDE}.pytest.log"}
 mkdir -p "$(dirname "$PODSIM_LOG")"
 
 # `--junitxml` is a REPORTING flag: it changes nothing about which tests are
