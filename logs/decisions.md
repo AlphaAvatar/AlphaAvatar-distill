@@ -1,5 +1,45 @@
 # Decision records
 
+## 2026-09-05 — One-use C1 grant approved (attempt 4), and the issuance order corrected
+
+- **Context:** the maintainer accepted the C1 science, budget feasibility, the
+  HOME/HF environment repair, the actual-preflight harness closure, gate-12
+  post-sweep repository lineage and the diagnostic-vs-launch-bound enforcement, and
+  approved ONE C1 session. `logs/autoinit_c1_attempt4_grant.json` states only
+  maintainer-owned fields — who permitted what, `$264.3878` of the unchanged
+  `$283.7600` cap, and seventeen things it does not authorize. It asserts no
+  derived identity; the issuer refuses a grant that does.
+- **Order corrected, and this is the load-bearing part.** I previously reported the
+  order as "issue the authorization, then run the launch-bound sweep". That is
+  **wrong and would refuse at `$0`**. `session_commit_gate` requires the session
+  commit to differ from `authorized_session_commit` by exactly
+  `logs/autoinit_c1_authorization.json`. A sweep run after issuance adds
+  `logs/c1_pod_environment_verification.json` as a second path and the gate refuses.
+  Run before issuance, that record is the permitted readiness delta and the
+  authorization is the permitted issuance delta, so both lineage relations hold:
+  `authorized_session_commit -> session_commit` changes exactly the authorization,
+  and `swept_base_commit -> session_commit` changes exactly the record plus the
+  authorization.
+- **Canonical order:** grant + metadata commit; launch-bound sweep on that clean
+  pre-authorization tree; readiness-record-only commit; issue against that commit
+  with `--require-clean`; authorization-only commit; bundle staging; twelve `$0`
+  gates; stop.
+- **Frozen from the grant commit.** No source, test, preregistration, state,
+  catalog, decision or README path may move before launch. Exactly two tracked
+  paths may, and they are the two the lineage rule permits.
+- **A known inconsistency, accepted deliberately.** `current_state.json` continues
+  to read `authorized.any = false` through the issuance window. The snapshot cannot
+  be edited after the launch-bound sweep without invalidating it, and a structural
+  test asserts the boolean. The canonical live permission during the window is the
+  authorization artifact itself; the snapshot is normalized when the attempt closes.
+  This is the same structural tension the attempt-3R enumeration recorded as real
+  and unresolved — it is now at least written down where a reader will meet it.
+- **Price:** the accepted secure L40S rate remains `$1.09/h` and the ceiling remains
+  `$15.1475`. `--max-price` derives from the hash-verified pricing record. A live
+  secure quote above `$1.09/h` aborts at `$0` and returns for review.
+- **Revisit when:** the attempt closes, at which point the snapshot, ledger and
+  state are normalized against whatever actually happened.
+
 ## 2026-09-05 — A diagnostic sweep must not be able to authorize a paid launch
 
 - **Context:** the readiness record has carried `record_kind` since 2026-09-04,

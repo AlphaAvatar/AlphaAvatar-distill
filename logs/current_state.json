@@ -12,7 +12,7 @@
   },
   "authorized": {
     "any": false,
-    "note": "Attempt-3R authorization 9b562e0a is CONSUMED: pod pj3c870n6yx70z was created, which is what consumes a launch attempt.",
+    "note": "GRANT APPROVED 2026-09-05 (logs/autoinit_c1_attempt4_grant.json), issuance pending. During the issuance window this boolean stays false BY DIRECTION: the snapshot cannot be edited after the launch-bound sweep without invalidating it. The canonical live permission is logs/autoinit_c1_authorization.json; normalize after the attempt closes.",
     "c1_attempt1": "CONSUMED. $0.0786, bundle fetch.",
     "c1_attempt2": "CONSUMED. $0.1013, ROPE_OK.",
     "c1_attempt3": "SUPERSEDED UNLAUNCHED by the reprice. $0.00, no pod.",
@@ -21,7 +21,7 @@
   "prepared_launch": {
     "any": false,
     "bundles": 0,
-    "note": "nothing is prepared. Attempt 3R launched and its authorization is consumed; a further C1 attempt needs a new maintainer grant."
+    "note": "nothing staged at this commit. A bundle is staged AFTER issuance, and this field is likewise not editable during the window -- see authorized.note."
   },
   "budget": {
     "cumulative_spend_usd": 264.3878,
@@ -132,7 +132,7 @@
       "attempts": "4 launch attempts, $0.5281, ZERO science. Per-attempt cost: BUDGET_LEDGER.md; detail: logs/autoinit_c1_attempt*/",
       "gates": "12 pre-provider gates. Detail: STATE.md, decisions.md 2026-09-04.",
       "blocker": "RESOLVED at $0. Of the 14: 7 renderer parity (repaired), 2 repository state (fixed), 5 UNEXPLAINED. decisions.md 2026-09-04.",
-      "needs": "a maintainer decision; no automatic retry",
+      "needs": "grant APPROVED (attempt 4); issuance, bundle and 12 gates pending, then a maintainer decision to create the provider resource",
       "not_built": "no grant; the pre-ATTENTION parent rebuild and the ~8 GB teacher weights need GPU/network and have not run locally",
       "evidence": "logs/autoinit_c1_attempt3r/ (the 5-count row is WITHDRAWN)",
       "readiness": "logs/c1_renderer_parity.json (7/7 PASS) and logs/c1_pod_environment_verification.json -- currently record_kind=diagnostic; gate 12 requires launch_bound before a provider is created"

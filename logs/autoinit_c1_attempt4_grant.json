@@ -1,0 +1,58 @@
+{
+  "schema": "aadistill.autoinit.c1_grant/v1",
+  "_what_this_is": "The maintainer decision permitting ONE Phase-C1 paid session -- attempt 4. A NEW artifact: logs/autoinit_c1_grant.json, _attempt2_, _attempt3_ and _attempt3r_ each authorized one issuance and none can be reused. It is an INPUT to scripts/autoinit/issue_c1_authorization.py, which DERIVES every identity -- session commit, harness digest, isolation plan hash, science plan, execution preregistration, battery, teacher, scoring contract, seeds and ceiling -- from the committed live tree and REFUSES if this document asserts any of them. Nothing here is an identity claim.",
+  "granted_by": "maintainer, C1 final pre-provider review 2026-09-05: the C1 science, budget feasibility, HOME/HF environment repair, actual-preflight harness closure, gate-12 post-sweep repository lineage and the diagnostic-vs-launch-bound enforcement are ACCEPTED. The unchanged frozen C1 protocol is authorized to execute exactly once.",
+  "granted_for": "Phase C1 fixed-path ATTENTION isolation -- attempt 4",
+  "covers": "exactly one C1 launch under the unchanged frozen protocol at a hard ceiling of $15.1475; 2 arms x 3 fresh seeds = 6 recovery probes, one confirmation evaluation per probe only after all six trainings complete, each admitted against its own observed generation protocol before scoring, followed by the frozen paired decision.",
+  "does_not_authorize": [
+    "Phase A",
+    "beam search",
+    "any search",
+    "any ranking",
+    "any arm elimination",
+    "successive halving",
+    "Phase C2",
+    "formal Stage-2/Stage-3 recovery",
+    "canonical Stage-1 NLL",
+    "any follow-on",
+    "any automatic retry",
+    "any further attempt",
+    "any ceiling increase beyond $15.1475",
+    "any cap increase",
+    "price-chasing the market upward",
+    "any scope expansion",
+    "an allowance for another full C1 retry"
+  ],
+  "cumulative_spend_at_approval_usd": 264.3878,
+  "cumulative_cap_usd": 283.76,
+  "cap_note": "The project cumulative cap remains $283.7600 and is NOT raised. $19.3722 available at approval; worst case after one complete attempt is $279.5353 spent, leaving a $4.2247 reserve. That reserve is smaller than one C1 session and is NOT an allowance for another one.",
+  "one_use": {
+    "issuances_permitted": 1,
+    "launch_attempts_permitted": 1,
+    "consumed_when": "a PROVIDER RESOURCE is created, not when the launcher is invoked. Attempt 3 invoked the launcher twice, created nothing, cost $0.00 and was not consumed; attempt 3R created pod pj3c870n6yx70z and was.",
+    "no_retry": "an abort of any kind -- infrastructure, gate, price or scientific -- ends this grant. A further attempt needs a new maintainer decision."
+  },
+  "price": {
+    "accepted_secure_l40s_usd_per_hour": 1.09,
+    "price_field": "gpuTypes[0].securePrice -- the field session_runner prices on",
+    "launch_condition": "launch only if the live securePrice is <= $1.09/h. The launcher's --max-price now DERIVES from logs/phase_c1_pricing.json, so the rate is not restated on the command line.",
+    "above_that": "abort at $0 and return for review. Do not chase the market upward.",
+    "hard_ceiling_usd": 15.1475
+  },
+  "issuance_order": {
+    "_why": "session_commit_gate requires the authorization to be issued against a CLEAN commit and the session commit to differ from it by exactly the authorization path. A launch-bound sweep run AFTER issuance would add a second path and refuse; run before, it is the permitted readiness-record delta.",
+    "order": [
+      "1. this grant + metadata commit",
+      "2. launch-bound pod-like sweep on that clean pre-authorization tree",
+      "3. readiness-record-only commit",
+      "4. issue the authorization against that commit, --require-clean",
+      "5. authorization-only commit",
+      "6. bundle staging",
+      "7. all 12 $0 pre-provider gates",
+      "8. STOP for the final paid-launch decision"
+    ],
+    "frozen_after_this_commit": "no source, test, preregistration, state, catalog, decision or README path may change between this commit and launch. The only two tracked paths that may move are logs/c1_pod_environment_verification.json and logs/autoinit_c1_authorization.json, which is exactly what gate 12's lineage rule permits."
+  },
+  "current_state_during_the_window": "current_state.json continues to read authorized.any = false between this commit and the close of the attempt. That is DELIBERATE and directed: the snapshot may not be edited after the launch-bound sweep without invalidating it, and a structural test asserts the boolean. The canonical live permission during the window is logs/autoinit_c1_authorization.json. Normalize the snapshot after the attempt closes.",
+  "authorizes_nothing_by_itself": "this document permits an ISSUANCE. It creates no pod, reserves no provider resource and spends nothing."
+}
