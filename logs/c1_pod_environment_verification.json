@@ -1,12 +1,12 @@
 {
   "_what_this_is": "one complete pod-like sweep of the CPU test suite: the condition a fresh C1 pod is actually in, which is what C1 attempt 3R's setup test gate refused for $0.3482 with zero scientific stages run.",
   "binding_rule": "this record binds the EXECUTABLE via two digests, and the REPOSITORY via swept_base_commit lineage. The digests ignore logs/ and docs/ so that paperwork does not invalidate a sweep; the lineage rule then permits exactly two post-sweep tracked paths -- this record, and (in an issued session) the canonical authorization artifact -- because the pod suite READS repository state and a documentation commit can change what it asserts.",
-  "c1_harness_digest": "eb80b9899def57536664cef463697613704d98a1d1a321cafa72684670f71803",
+  "c1_harness_digest": "205658210f871a8c61c58f865d323f1b1c4069e621a286b41e91dc2d7ff9ae0d",
   "c1_harness_n_files": 68,
   "counts": {
     "error": 0,
-    "failed": 5,
-    "passed": 2780,
+    "failed": 0,
+    "passed": 2787,
     "skipped": 62
   },
   "environment": {
@@ -30,13 +30,7 @@
     "tests/data/test_c1_battery.py::test_the_shared_renderers_reproduce_the_frozen_battery_byte_for_byte[rag]",
     "tests/data/test_c1_battery.py::test_the_shared_renderers_reproduce_the_frozen_battery_byte_for_byte[tool]"
   ],
-  "failed_nodeids": [
-    "tests/autoinit/test_phase_b_plan.py::test_any_post_freeze_change_to_the_phase_b_executable_is_recorded_and_additive",
-    "tests/docs/test_repository_structure.py::test_no_markdown_link_points_at_a_file_that_is_not_there",
-    "tests/pod/test_continuation_b_one_probe_contract.py::test_the_live_snapshot_records_the_terminal_phase_b_state",
-    "tests/pod/test_continuation_b_one_probe_contract.py::test_the_preregistration_binds_the_live_executable_digest",
-    "tests/pod/test_phase_b_driver_and_launcher.py::test_the_preregistration_gate_binds_the_executable_and_both_mixtures"
-  ],
+  "failed_nodeids": [],
   "leaf_transport_all_passed": true,
   "leaf_transport_nodeids": [
     "tests/autoinit/test_leaf_transport_publish.py::test_a_corrupted_remote_file_is_caught_by_the_round_trip",
@@ -52,18 +46,15 @@
     "tests/autoinit/test_leaf_transport_publish.py::test_an_lfs_oid_that_disagrees_is_caught_without_downloading": "passed",
     "tests/autoinit/test_leaf_transport_publish.py::test_the_round_trip_needs_no_dev_box_directory": "passed"
   },
-  "n_tests": 2847,
-  "pod_test_environment_digest": "4e554f723d696f0c7be0a255481de16a11679a7135e8a8e1c112a03646eee910",
+  "n_tests": 2849,
+  "pod_test_environment_digest": "03eb5b3ea191ed5fa49b58849c8629ada08c67b8a7ae16269cafa49cf4a69b3b",
   "pod_test_environment_n_files": 152,
   "pod_test_environment_named_files": [
     "scripts/pod/simulate_pod_env.sh",
     "scripts/autoinit/publish_selected_leaves.py",
     "scripts/autoinit/record_pod_environment.py"
   ],
-  "problems": [
-    "5 failed/errored: ['tests/autoinit/test_phase_b_plan.py::test_any_post_freeze_change_to_the_phase_b_executable_is_recorded_and_additive', 'tests/docs/test_repository_structure.py::test_no_markdown_link_points_at_a_file_that_is_not_there', 'tests/pod/test_continuation_b_one_probe_contract.py::test_the_live_snapshot_records_the_terminal_phase_b_state', 'tests/pod/test_continuation_b_one_probe_contract.py::test_the_preregistration_binds_the_live_executable_digest', 'tests/pod/test_phase_b_driver_and_launcher.py::test_the_preregistration_gate_binds_the_executable_and_both_mixtures']",
-    "repository-state tests did not pass: {'tests/docs/test_repository_structure.py::test_every_log_is_classified_in_the_catalog': 'passed', 'tests/pod/test_continuation_b_one_probe_contract.py::test_the_live_snapshot_records_the_terminal_phase_b_state': 'failed'}"
-  ],
+  "problems": [],
   "pytest_command": ".venv/bin/python -m pytest tests/ -q --ignore=tests/data/test_recovery_corpus_pipeline.py --ignore=tests/pod/test_phase_a_stages1_5_execute.py",
   "pytest_command_note": "identical in test SELECTION to the pod gate in autoinit_preflight_setup.sh; --junitxml is a reporting flag added by the simulator so every skip and pass can be named exactly.",
   "record_kind": "diagnostic",
@@ -81,16 +72,16 @@
   "renderer_parity_skipped_as_expected": true,
   "repository_state_observed": {
     "tests/docs/test_repository_structure.py::test_every_log_is_classified_in_the_catalog": "passed",
-    "tests/pod/test_continuation_b_one_probe_contract.py::test_the_live_snapshot_records_the_terminal_phase_b_state": "failed"
+    "tests/pod/test_continuation_b_one_probe_contract.py::test_the_live_snapshot_records_the_terminal_phase_b_state": "passed"
   },
   "schema": "aadistill.autoinit.c1_pod_environment_verification/v1",
-  "seconds": 777.9,
-  "self_sha256": "e8d8016c279a2fabdb65c2c55f11d8324dbc7d41e7459434e8bd373f751a36d9",
+  "seconds": 753.5,
+  "self_sha256": "512e8bbdbafed62e92c92b7e3ae61d6ad1df84b06d0c677c0ef2ba970e650441",
   "simulator": "scripts/pod/simulate_pod_env.sh",
   "simulator_command": "PODSIM_JUNIT=/home/ecs-user/aad-scratch/podsim_junit.xml PODSIM_LOG=/home/ecs-user/aad-scratch/podsim_pytest.log bash scripts/pod/simulate_pod_env.sh",
-  "simulator_exit_code": 1,
-  "swept_base_commit": "9d88a3c36ae080ded1b55de4faf76d031627fac8",
+  "simulator_exit_code": 0,
+  "swept_base_commit": "4231b42bebe7b31c168c69d11834e6ccefd94870",
   "tree_clean": true,
   "unexpected_environment_skips": [],
-  "verdict": "FAIL"
+  "verdict": "PASS"
 }
