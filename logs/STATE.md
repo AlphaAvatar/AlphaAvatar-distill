@@ -97,8 +97,7 @@ restores everything in the same `EXIT` trap, and **propagates the suite's exit
 code** — it used to end in `| tail -12` and exit `0` whatever happened.
 
 One complete sweep under those conditions is recorded in
-[`c1_pod_environment_verification.json`](c1_pod_environment_verification.json)
-(`b5833e75b6ec…`), the twelfth pre-provider gate: **2768 passed, 61 skipped, 0 failed**, `rc=0`, clean tree — with the seven renderer-parity cases skipped exactly as expected, all five leaf-transport nodeids PASSED and zero unexpected environment skips. It binds the **executable** — the C1 harness
+`c1_pod_environment_verification.json`, the twelfth pre-provider gate: **2768 passed, 61 skipped, 0 failed**, `rc=0`, clean tree — with the seven renderer-parity cases skipped exactly as expected, all five leaf-transport nodeids PASSED and zero unexpected environment skips. It binds the **executable** — the C1 harness
 digest plus a digest over `tests/**/*.py`, the setup script, the simulator and
 the modules whose `$HOME` assumptions caused the abort — and deliberately **not**
 `HEAD`, so a preregistration or documentation commit cannot invalidate a
@@ -124,7 +123,7 @@ The set now names preflight, derived from the runner rather than transcribed:
 `session_runner.py` for what it uploads and executes and requires the harness to
 contain exactly that, and the closure regression no longer accepts either file.
 `scripts/pod/setup.sh` is additionally asserted to be reachable from no
-executable code. Harness `04fcb032…` → `eb80b989…`, still 68 files: a one-for-one
+executable code. Harness `04fcb032…` → `20565821…`, still 68 files: a one-for-one
 swap.
 
 Preflight left `POD_TEST_ENVIRONMENT_FILES_V1` in the same change. `verify_record`
@@ -253,7 +252,7 @@ Design and implementation proceeded at `$0`; **execution did not**. What exists:
 | teacher shard binding | [`phase_c1_teacher_binding.json`](phase_c1_teacher_binding.json) |
 
 | ten-stage session contract + the two fail-stop replay gates | `autoinit/c1_session.py` |
-| execution preregistration | [`phase_c1_execution_preregistration.json`](phase_c1_execution_preregistration.json) · `2ae9bb0fa8e65983…` at `head_commit 3f7f37b` · harness `eb80b9899def…` over 68 files · every earlier revision moved only executable identity; no scientific field has ever moved |
+| execution preregistration | [`phase_c1_execution_preregistration.json`](phase_c1_execution_preregistration.json) · `977a8f151b246183…` at `head_commit 9d88a3c` · harness `205658210f87…` over 68 files · every earlier revision moved only executable identity; no scientific field has ever moved |
 | price bound | [`phase_c1_pricing.json`](phase_c1_pricing.json) · REPRICED to secure L40S **$1.09/h** · floor **$13.4401** · soft stop **$14.7841** · **ceiling $15.1475** |
 | evidence declaration | [`configs/autoinit/c1_artifacts.json`](../configs/autoinit/c1_artifacts.json) + [`_failed`](../configs/autoinit/c1_artifacts_failed.json) — inside the measured harness, so editing what survives teardown moves the digest a grant binds |
 | standalone session | `scripts/pod/autoinit_c1_launch.py` + `autoinit_c1_driver.py` · `SESSION_KIND=c1` · `C1Authorization` · **12** pre-provider gates · no Phase-A driver or launcher in the closure |

@@ -11,18 +11,17 @@ The seven passed on the dev box and could not pass on a pod, and three launches
 went by without anyone finding out, because no C1 attempt had ever reached
 `TESTS_OK` before.
 
-The suite that answers "would this pass on a pod?" takes roughly three quarters
-of an hour, which is far too slow to run inside a pre-provider gate while a pod
-waits. So it is run once, deliberately, and what it produced is recorded here —
-and the cheap gate checks that the recording still describes the code that would
-actually run.
+The suite that answers "would this pass on a pod?" takes about thirteen minutes,
+which is far too slow to run inside a pre-provider gate while a pod waits. So it
+is run once, deliberately, and what it produced is recorded here — and the cheap
+gate checks that the recording still describes the code that would actually run.
 
 That binding is to the **executable**, never to `HEAD`. The normal order of work
 commits the executable first, runs the sweep against it, then writes a
 preregistration and updates documentation in later commits; a gate keyed on the
 commit hash would go stale the moment the paperwork landed, and the obvious way
-to make it green again would be to re-run an hour-long sweep that had not changed
-in any way that mattered. Two digests decide instead:
+to make it green again would be to re-run a sweep that had not changed in any way
+that mattered. Two digests decide instead:
 
 * the C1 harness digest — everything the paid session executes;
 * the pod **test environment** digest — everything that decides what the pod's
@@ -293,6 +292,45 @@ def tree_is_clean(repo_root: str | Path = ".") -> bool:
 PERMITTED_POST_SWEEP_PATHS: tuple[str, ...] = (RECORD_PATH,)
 
 
+def lineage_from_swept_base(repo_root: Path, base: str | None, commit: str,
+                            allowed_paths: tuple[str, ...]) -> dict[str, Any]:
+    """`lineage_from_authorized_base`, asked about more than one permitted path.
+
+    It **delegates**: the git plumbing — does the commit exist, does `commit`
+    descend from `base`, what differs between them — runs once, in the frozen
+    function, and only the permitted-set predicate is re-evaluated here on the
+    `changed_paths` it already returned. There is no second copy of the risky
+    part, which is what the session gates learned the hard way when two
+    hand-written copies of a lineage rule drifted.
+
+    It lives HERE rather than in `session_prechecks` on purpose.
+    `session_prechecks.py` is a member of Phase B's and continuation B's frozen
+    executable sets, and generalizing it in place moved both of those digests —
+    for a feature neither closed phase will ever use. This module is in the C1
+    harness alone, so the cost lands where the benefit does.
+    """
+    from ..infrastructure.session_prechecks import lineage_from_authorized_base
+
+    allowed = tuple(allowed_paths)
+    out = lineage_from_authorized_base(repo_root, base, commit,
+                                       allowed[0] if allowed else "")
+    if out["changed_paths"] is None:
+        return out                      # refused before the diff; nothing to widen
+    unexpected = [p for p in out["changed_paths"] if p not in allowed]
+    out["allowed_paths"] = list(allowed)
+    out["unexpected_paths"] = unexpected
+    out["ok"] = not unexpected
+    if unexpected:
+        out["reason"] = (
+            f"{len(unexpected)} path(s) other than {list(allowed)} changed "
+            f"between the swept base and the session commit: {unexpected[:8]}")
+    else:
+        out["reason"] = (f"only {sorted(set(out['changed_paths']))} differs from "
+                         "the swept base" if out["changed_paths"]
+                         else "identical to the swept base")
+    return out
+
+
 def verify_record(record: dict[str, Any], repo_root: str | Path = ".", *,
                   session_commit: str | None = None,
                   authorization_path: str | None = None,
@@ -319,7 +357,6 @@ def verify_record(record: dict[str, Any], repo_root: str | Path = ".", *,
     other change — `logs/**`, docs, README, preregistration, state, tests,
     source — means the sweep is owed again.
     """
-    from ..infrastructure.session_prechecks import lineage_from_authorized_base
     from .c1_authorization import c1_harness_digest
 
     if record.get("schema") != SCHEMA:
@@ -358,7 +395,7 @@ def verify_record(record: dict[str, Any], repo_root: str | Path = ".", *,
     allowed = list(PERMITTED_POST_SWEEP_PATHS)
     if authorization_path:
         allowed.append(authorization_path)
-    lineage = lineage_from_authorized_base(root, base, target, tuple(allowed))
+    lineage = lineage_from_swept_base(root, base, target, tuple(allowed))
     if not lineage["ok"]:
         return False, (f"post-sweep drift: {lineage['reason']}. The pod suite "
                        "reads repository state, so anything beyond the permitted "

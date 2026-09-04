@@ -663,3 +663,54 @@ def test_the_recorded_swept_commit_is_a_real_commit_in_this_repository():
     got = subprocess.run(["git", "-C", str(REPO), "cat-file", "-e",
                           f"{base}^{{commit}}"], capture_output=True)
     assert got.returncode == 0, f"swept_base_commit {base} is not a commit here"
+
+
+def test_the_swept_base_helper_delegates_rather_than_reimplementing():
+    """One copy of the git plumbing, and a proof that it agrees.
+
+    `lineage_from_swept_base` exists because gate 12 permits two paths and the
+    session gate permits one. It must not become a second hand-written lineage
+    rule: that is precisely how the two session gates drifted before
+    `lineage_from_authorized_base` was extracted. It delegates, and on the
+    single-path case it must agree with what it delegates to.
+    """
+    from aadistill.infrastructure import session_prechecks as sp
+
+    src = (REPO / "src/aadistill/autoinit/pod_environment.py").read_text()
+    assert "from ..infrastructure.session_prechecks import " \
+           "lineage_from_authorized_base" in src, "it no longer delegates"
+    for forbidden in ("merge-base", "--is-ancestor", "git diff"):
+        assert forbidden not in src, (
+            f"pod_environment re-implements git plumbing ({forbidden!r}); it must "
+            "delegate to lineage_from_authorized_base")
+
+    # And the session gate it delegates to is untouched: `session_prechecks.py`
+    # is inside Phase B's and continuation B's FROZEN executable sets, so
+    # generalizing it in place would move two closed phases' digests.
+    import inspect
+    sig = inspect.signature(sp.lineage_from_authorized_base)
+    assert sig.parameters["auth_path"].annotation in ("str", str), (
+        "session_prechecks was generalized in place; that moves frozen digests "
+        "for phases that will never use the feature")
+
+
+def test_the_delegate_agrees_with_the_frozen_rule_on_one_path(tmp_path,
+                                                              monkeypatch):
+    """Same inputs, same verdict — accepted and refused alike."""
+    from aadistill.infrastructure.session_prechecks import (
+        lineage_from_authorized_base)
+
+    root, rec, base = _swept_repo(tmp_path, monkeypatch)
+    head = _commit(root, pe.RECORD_PATH, '{"r": 1}\n', "record")
+    for allowed in (pe.RECORD_PATH, "logs/STATE.md"):
+        a = lineage_from_authorized_base(root, base, head, allowed)
+        b = pe.lineage_from_swept_base(root, base, head, (allowed,))
+        assert a["ok"] == b["ok"], allowed
+        assert a["unexpected_paths"] == b["unexpected_paths"], allowed
+        assert a["changed_paths"] == b["changed_paths"], allowed
+
+    # And a pre-diff refusal passes straight through, unwidened.
+    a = lineage_from_authorized_base(root, None, head, pe.RECORD_PATH)
+    b = pe.lineage_from_swept_base(root, None, head, (pe.RECORD_PATH,))
+    assert a["ok"] is False and b["ok"] is False
+    assert b["changed_paths"] is None
