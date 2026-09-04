@@ -331,9 +331,28 @@ def lineage_from_swept_base(repo_root: Path, base: str | None, commit: str,
     return out
 
 
+#: What a readiness record may claim to be.
+#:
+#: `diagnostic` proves the machinery and that the suite passes on a tree. It is
+#: real readiness evidence and stays valid as such. `launch_bound` is the sweep a
+#: maintainer-approved paid launch rests on — the same procedure, run deliberately
+#: as the thing the money will rest on rather than as a check that the plumbing
+#: works.
+#:
+#: The distinction was defined on 2026-09-04 and enforced by nothing: the paid
+#: gate accepted any PASS record and merely copied the kind into evidence, so a
+#: diagnostic sweep could have satisfied gate 12 and the promised launch-bound
+#: sweep need never have happened.
+RECORD_KINDS: tuple[str, ...] = ("diagnostic", "launch_bound")
+
+#: What `pod_environment_gate` requires before a provider resource is created.
+LAUNCH_BOUND: str = "launch_bound"
+
+
 def verify_record(record: dict[str, Any], repo_root: str | Path = ".", *,
                   session_commit: str | None = None,
                   authorization_path: str | None = None,
+                  required_kind: str | None = None,
                   ) -> tuple[bool, str]:
     """The cheap pre-provider check: does this record still describe live code?
 
@@ -367,6 +386,22 @@ def verify_record(record: dict[str, Any], repo_root: str | Path = ".", *,
     if record.get("verdict") != "PASS":
         return False, (f"the recorded sweep verdict is {record.get('verdict')!r}: "
                        f"{record.get('problems')}")
+
+    # AFTER the self-hash check, deliberately: editing `record_kind` in place to
+    # promote a diagnostic record is tampering, and must be reported as tampering
+    # rather than as a kind mismatch.
+    kind = record.get("record_kind")
+    if kind not in RECORD_KINDS:
+        return False, (f"the record declares record_kind {kind!r}, which is not "
+                       f"one of {list(RECORD_KINDS)}; a record that cannot say "
+                       "what it is cannot be relied on for anything")
+    if required_kind is not None and kind != required_kind:
+        return False, (
+            f"this record is {kind!r} and {required_kind!r} is required. A "
+            "diagnostic sweep proves the machinery works on a tree; it is not the "
+            "sweep a paid launch rests on. Re-run "
+            "`record_pod_environment.py --kind launch_bound` on the final "
+            "authorized tree.")
 
     try:
         live_harness = c1_harness_digest(repo_root)["digest"]

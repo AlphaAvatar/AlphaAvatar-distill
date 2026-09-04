@@ -1,5 +1,51 @@
 # Decision records
 
+## 2026-09-05 — A diagnostic sweep must not be able to authorize a paid launch
+
+- **Context:** the readiness record has carried `record_kind` since 2026-09-04,
+  with `diagnostic` and `launch_bound` defined in the recorder's own `--kind`
+  help. Nothing enforced it. `verify_record` accepted any record whose verdict was
+  `PASS`, and `pod_environment_gate` read `record_kind` only to copy it into
+  evidence. The diagnostic record sitting in the repository would therefore have
+  satisfied gate 12, and the launch-bound sweep the record itself promises need
+  never have been run. The distinction existed in prose and in no executable path.
+- **Decision:** a narrow `required_kind` argument on `verify_record`, and the
+  launcher passes `launch_bound`. Chosen over checking the field inside the gate
+  because the refusal then lives with the other record checks, in the function the
+  tests already drive, rather than in a launcher branch nothing else exercises. A
+  missing or unknown kind is refused outright, for the same reason a record with no
+  `swept_base_commit` is: an artifact that cannot say what it is cannot be relied
+  on for anything.
+- **Deliberately NOT a stronger rule.** Diagnostic records still verify. The cheap
+  "is this tree sound?" check is the thing the whole machinery was built around,
+  and making it impossible to answer without a maintainer grant would have been a
+  worse repair than the defect. `required_kind` is optional and only the paid path
+  passes it.
+- **Ordering matters.** The kind check runs AFTER the self-hash check, so promoting
+  a record by editing `record_kind` in place is reported as tampering rather than
+  as a kind mismatch. A test asserts the refusal message does not mention
+  `launch_bound` in that case.
+- **Revisit when:** a maintainer grant is issued and the launch-bound sweep is run
+  on the final authorized tree.
+
+## 2026-09-05 — The launcher's price default is derived, not re-declared
+
+- **Context:** `--max-price` defaulted to the literal `0.99`, left over from before
+  the approved reprice to the secure L40S rate of `$1.09/h`. Not a spend risk: the
+  runner refuses a live quote *above* `--max-price` before any provider resource
+  exists, which is why attempt 3 cost `$0.00` — a stale low default can only refuse
+  a launch, never buy one. But it meant the real rate had to be remembered on the
+  command line, and the price was carried in two places that could disagree.
+- **Decision:** derive it from `hardware.price_per_hour_usd` in
+  `logs/phase_c1_pricing.json` via `c1_price_per_hour_usd`, the same hash-verified
+  record `c1_hard_ceiling_usd` and `pricing_identity_gate` already read. One
+  hand-maintained price in the repository, and `load_pricing` refuses a record that
+  does not match its own `pricing_sha256`, so a tampered rate cannot reach a launch.
+- **What this does NOT do:** it does not chase the market. A secure quote above the
+  accepted rate still aborts at `$0` and comes back for review. Repricing remains a
+  maintainer decision recorded in the pricing artifact, not something a launcher
+  default can perform.
+
 ## 2026-09-04 — The C1 grant measured a setup script the pod never runs
 
 - **Context:** `C1_HARNESS_SOURCE_FILES_V1` opened with the claim that it covers

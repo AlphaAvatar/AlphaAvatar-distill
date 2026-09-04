@@ -101,7 +101,7 @@ def test_the_gate_runs_the_seven_real_groups_on_this_host():
 
 # --- gate 12: the pod environment record ------------------------------------
 
-def _valid_record(tmp_path: Path) -> dict:
+def _valid_record(tmp_path: Path, kind: str = "diagnostic") -> dict:
     """A record that binds the LIVE tree, so only the field under test differs."""
     from aadistill.autoinit.c1_authorization import c1_harness_digest
 
@@ -115,6 +115,7 @@ def _valid_record(tmp_path: Path) -> dict:
         "pod_test_environment_digest": pe.pod_test_environment_digest(REPO)["digest"],
         "counts": {"passed": 2700, "skipped": 48, "failed": 0, "error": 0},
         "verdict": "PASS",
+        "record_kind": kind,
         "problems": [],
     }
     rec["self_sha256"] = pe.self_hash(rec)
@@ -513,7 +514,7 @@ def _swept_repo(tmp_path, monkeypatch):
     rec = {"schema": pe.SCHEMA, "swept_base_commit": base, "tree_clean": True,
            "c1_harness_digest": "h" * 64, "pod_test_environment_digest": "e" * 64,
            "counts": {"passed": 10, "skipped": 1, "failed": 0, "error": 0},
-           "verdict": "PASS", "problems": []}
+           "verdict": "PASS", "record_kind": "diagnostic", "problems": []}
     rec["self_sha256"] = pe.self_hash(rec)
     return root, rec, base
 
@@ -714,3 +715,148 @@ def test_the_delegate_agrees_with_the_frozen_rule_on_one_path(tmp_path,
     b = pe.lineage_from_swept_base(root, None, head, (pe.RECORD_PATH,))
     assert a["ok"] is False and b["ok"] is False
     assert b["changed_paths"] is None
+
+
+def test_the_snapshot_does_not_duplicate_the_sweep_result():
+    """`latest_verification` points; it does not copy.
+
+    It carried `commit cd5cb7d` and `2768/61/0` while the readiness record said
+    `4231b42` and `2787/62/0` — the same failure mode as `baseline_commit`, one
+    field over. The record owns kind, swept base, counts, both digests and the
+    verdict; a second copy in a file that is edited on a different cadence can
+    only go stale.
+    """
+    lv = json.loads((REPO / "logs/current_state.json").read_text())[
+        "latest_verification"]
+    assert lv["owned_by"] == pe.RECORD_PATH
+    blob = json.dumps(lv)
+    assert not re.search(r"\b\d{3,4}\s*/\s*\d{1,3}\s*/\s*\d\b", blob.replace(
+        "2768/61/0", "").replace("2787/62/0", "")), (
+        f"latest_verification carries a pass/skip/fail triple: {blob}")
+    for key in ("suite", "counts", "swept_base_commit", "record_kind",
+                "c1_harness_digest", "pod_test_environment_digest", "verdict"):
+        assert key not in lv, (
+            f"latest_verification duplicates {key!r}, which the readiness record "
+            "owns")
+
+
+# --- gate 12: diagnostic is not launch-bound --------------------------------
+#
+# The two kinds were defined on 2026-09-04 and enforced by nothing. `verify_record`
+# accepted any PASS record and the launcher merely copied `record_kind` into
+# evidence, so the diagnostic sweep sitting in the repository could have satisfied
+# gate 12 and the promised launch-bound sweep need never have happened. The
+# distinction existed only in prose.
+
+def test_a_diagnostic_record_is_valid_readiness_evidence(tmp_path):
+    """It must keep verifying for anyone asking whether the tree is sound.
+
+    The repair must not make diagnostic verification impossible — that would
+    delete the cheap check the machinery was built around.
+    """
+    ok, why = pe.verify_record(_valid_record(tmp_path, "diagnostic"), REPO)
+    assert ok, why
+
+
+def test_a_diagnostic_record_is_refused_by_the_paid_launch_gate(tmp_path):
+    """The defect this closes: sound tree, wrong warrant."""
+    ok, why = pe.verify_record(_valid_record(tmp_path, "diagnostic"), REPO,
+                               required_kind=pe.LAUNCH_BOUND)
+    assert not ok
+    assert "'diagnostic'" in why and "launch_bound" in why
+    assert "--kind launch_bound" in why, "the refusal must say how to fix it"
+
+
+def test_a_launch_bound_record_is_accepted_by_the_paid_launch_gate(tmp_path):
+    ok, why = pe.verify_record(_valid_record(tmp_path, pe.LAUNCH_BOUND), REPO,
+                               required_kind=pe.LAUNCH_BOUND)
+    assert ok, why
+
+
+def test_a_missing_record_kind_is_refused(tmp_path):
+    rec = _valid_record(tmp_path)
+    rec.pop("record_kind")
+    rec["self_sha256"] = pe.self_hash(rec)
+    for required in (None, pe.LAUNCH_BOUND):
+        ok, why = pe.verify_record(rec, REPO, required_kind=required)
+        assert not ok and "record_kind" in why and "cannot say what it is" in why
+
+
+def test_an_unknown_record_kind_is_refused(tmp_path):
+    """Not silently treated as diagnostic, and not as launch-bound either."""
+    rec = _valid_record(tmp_path)
+    rec["record_kind"] = "provisional"
+    rec["self_sha256"] = pe.self_hash(rec)
+    for required in (None, pe.LAUNCH_BOUND):
+        ok, why = pe.verify_record(rec, REPO, required_kind=required)
+        assert not ok and "'provisional'" in why
+
+
+def test_promoting_the_kind_in_place_is_caught_as_tampering(tmp_path):
+    """Editing `record_kind` without recomputing the self-hash must read as
+    TAMPERING, not as a kind mismatch — the self-hash check comes first, so the
+    message names the right offence."""
+    rec = _valid_record(tmp_path, "diagnostic")
+    rec["record_kind"] = pe.LAUNCH_BOUND            # no re-hash: the whole point
+    ok, why = pe.verify_record(rec, REPO, required_kind=pe.LAUNCH_BOUND)
+    assert not ok
+    assert "self-hash" in why, why
+    assert "launch_bound" not in why, (
+        "a tampered record must be refused as tampered, not as a kind mismatch")
+
+
+def test_the_recorder_can_only_write_the_two_known_kinds():
+    """`--kind` choices and RECORD_KINDS must not drift apart."""
+    src = (REPO / "scripts/autoinit/record_pod_environment.py").read_text()
+    assert 'choices=("diagnostic", "launch_bound")' in src
+    assert pe.RECORD_KINDS == ("diagnostic", "launch_bound")
+    assert pe.LAUNCH_BOUND in pe.RECORD_KINDS
+    assert 'default="diagnostic"' in src, (
+        "the recorder must default to the WEAKER claim; a default of "
+        "launch_bound would make every casual sweep look launch-authorising")
+
+
+def test_the_paid_gate_requires_launch_bound():
+    """Read from the launcher, so the requirement cannot quietly be dropped."""
+    src = (REPO / "scripts/pod/autoinit_c1_launch.py").read_text()
+    assert "required_kind=LAUNCH_BOUND" in src, (
+        "pod_environment_gate no longer requires a launch-bound record")
+
+
+# --- the launcher's price default -------------------------------------------
+
+def test_the_max_price_default_comes_from_the_pricing_record():
+    """One hand-maintained price, and it is the one the pricing gate verifies.
+
+    The literal `0.99` survived the reprice to the accepted secure L40S rate of
+    `1.09`. It was never a spend risk — the runner refuses a live quote ABOVE
+    `--max-price` before any provider resource exists, so a stale low value can
+    only refuse a launch — but the operator had to remember the real rate, and the
+    price lived in two places.
+    """
+    import sys as _sys
+    from aadistill.autoinit.c1_authorization import c1_price_per_hour_usd
+
+    _sys.path.insert(0, str(REPO / "tests/pod"))
+    from session_specs import load_session_launcher, session_args
+
+    rate = c1_price_per_hour_usd(REPO)
+    assert rate == 1.09, f"the accepted secure L40S rate moved: {rate}"
+    args = session_args(load_session_launcher("autoinit_c1_launch"))
+    assert args.max_price == rate, (
+        f"--max-price defaults to {args.max_price}, the pricing record says {rate}")
+
+    src = (REPO / "scripts/pod/autoinit_c1_launch.py").read_text()
+    assert "default=c1_price_per_hour_usd(REPO_ROOT)" in src
+    assert "default=0.99" not in src, "the stale literal is back"
+
+
+def test_the_pricing_record_is_hash_verified_before_the_rate_is_used():
+    """A rate read from a tampered record would be worse than a stale literal."""
+    from aadistill.autoinit.c1_authorization import PRICING_PATH, load_pricing
+
+    src = (REPO / "src/aadistill/autoinit/c1_authorization.py").read_text()
+    assert "pricing_sha256" in src
+    doc = load_pricing(REPO)
+    assert doc["hardware"]["price_per_hour_usd"] == 1.09
+    assert PRICING_PATH == "logs/phase_c1_pricing.json"

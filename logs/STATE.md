@@ -131,6 +131,38 @@ checks both digests, so a file in both is already caught by the first; the secon
 binding added nothing and made two lists look like independent evidence. The two
 sets are now asserted disjoint.
 
+### A diagnostic sweep cannot authorize a paid launch — closed 2026-09-05
+
+The record carries `record_kind`: `diagnostic` proves the machinery and that the
+suite passes on a tree; `launch_bound` is the sweep a maintainer-approved paid
+launch rests on. Both were defined on 2026-09-04 and **enforced by nothing** —
+`verify_record` accepted any `PASS` record and the launcher copied the kind into
+evidence without reading it, so the diagnostic record in this repository could
+have satisfied gate 12 and the promised launch-bound sweep need never have
+happened.
+
+`verify_record` now takes `required_kind`, and `pod_environment_gate` passes
+`launch_bound`. A missing or unknown kind is refused outright. Diagnostic records
+remain valid readiness evidence for anyone asking whether the tree is sound; they
+are simply insufficient to create a provider resource. Promoting a record by
+editing `record_kind` in place is caught as **tampering**, because the self-hash
+check runs first.
+
+**The current record is `diagnostic`.** A `launch_bound` sweep is owed on the
+final authorized tree, at the time a grant is issued.
+
+### `--max-price` comes from the pricing record
+
+The launcher's default was the literal `0.99` left over from before the reprice,
+while the accepted secure L40S rate is **`$1.09/h`**. That was never a spend risk
+— the runner refuses a live quote *above* `--max-price` before any provider
+resource exists, so a stale low value can only refuse a launch — but the operator
+had to remember the real rate, and the price lived in two places. It is now
+derived from `phase_c1_pricing.json`, the same hash-verified record
+`pricing_identity_gate` already checks. **A secure quote above `$1.09/h` still
+aborts at `$0` and returns for review; this default does not chase the market
+upward.**
+
 ### Gate 12 also binds post-sweep repository lineage
 
 Both digests deliberately ignore `logs/` and `docs/` — but the pod's pytest suite
@@ -252,7 +284,7 @@ Design and implementation proceeded at `$0`; **execution did not**. What exists:
 | teacher shard binding | [`phase_c1_teacher_binding.json`](phase_c1_teacher_binding.json) |
 
 | ten-stage session contract + the two fail-stop replay gates | `autoinit/c1_session.py` |
-| execution preregistration | [`phase_c1_execution_preregistration.json`](phase_c1_execution_preregistration.json) · `977a8f151b246183…` at `head_commit 9d88a3c` · harness `205658210f87…` over 68 files · every earlier revision moved only executable identity; no scientific field has ever moved |
+| execution preregistration | [`phase_c1_execution_preregistration.json`](phase_c1_execution_preregistration.json) · `71137f55c7fd18ff…` at `head_commit c8a2961` · harness `974c8fa744d3…` over 68 files · every earlier revision moved only executable identity; no scientific field has ever moved |
 | price bound | [`phase_c1_pricing.json`](phase_c1_pricing.json) · REPRICED to secure L40S **$1.09/h** · floor **$13.4401** · soft stop **$14.7841** · **ceiling $15.1475** |
 | evidence declaration | [`configs/autoinit/c1_artifacts.json`](../configs/autoinit/c1_artifacts.json) + [`_failed`](../configs/autoinit/c1_artifacts_failed.json) — inside the measured harness, so editing what survives teardown moves the digest a grant binds |
 | standalone session | `scripts/pod/autoinit_c1_launch.py` + `autoinit_c1_driver.py` · `SESSION_KIND=c1` · `C1Authorization` · **12** pre-provider gates · no Phase-A driver or launcher in the closure |

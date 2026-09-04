@@ -56,13 +56,11 @@
     "phase_c0_sizing": "logs/phase_c0_sizing_evidence.json -- N=850 scorable selected; P(GO | +0.015) = 0.8379 >= 0.80 at rho=0.15."
   },
   "latest_verification": {
-    "utc": "2026-09-04T00:00:00Z",
-    "kind": "CURRENT -- pod HOME/HF contract repaired; C1 harness closure corrected. $0.",
-    "commit": "cd5cb7d3447db6e3a9a238c3c4f19c27fd4e7b0c",
-    "executable_repair": "cd5cb7d3447db6e3a9a238c3c4f19c27fd4e7b0c",
-    "suite": "pod-like sweep 2768/61/0 (pass/skip/fail), rc=0, empty HOME + isolated HF",
-    "verifiers": "renderer parity 7/7 PASS 0 SKIP; leaf transport 5/5 PASS; 7 expected renderer skips; 0 unexpected env skips",
-    "pods": "0, via GraphQL myself{pods}, not the CLI field"
+    "utc": "2026-09-05T00:00:00Z",
+    "owned_by": "logs/c1_pod_environment_verification.json",
+    "owns": "record_kind, swept_base_commit, test counts, harness digest, pod-test-environment digest and verdict. Read them THERE.",
+    "renderer_parity_owned_by": "logs/c1_renderer_parity.json",
+    "why_not_duplicated": "this snapshot carried commit cd5cb7d and 2768/61/0 while the record said 4231b42 and 2787/62/0. A copy of a fact the record owns can only go stale, exactly as baseline_commit did."
   },
   "abandoned": [
     "recovery_search_v1; calib.reasoning_heavy@v1 (both INVALID/UNBUILDABLE before use)",
@@ -127,7 +125,7 @@
       "status": "IMPLEMENTED / REPRICED / FOUR LAUNCH ATTEMPTS / NOT SCIENTIFICALLY EXECUTED / NOT CURRENTLY AUTHORIZED",
       "what_it_is": "fixed-path ATTENTION isolation, 2 arms x 3 fresh seeds = 6 E1_KD_HEAVY_0860K probes. NOT recovery evidence.",
       "incumbent": "fe9683e6a9c783bbc6fe276a78c851c6, digest c313d1b4081b. NOT recovered; margin in phase_b_result.",
-      "execution_prereg": "logs/phase_c1_execution_preregistration.json 977a8f151b24 at head_commit 9d88a3c3; harness 205658210f87 over 68 files",
+      "execution_prereg": "logs/phase_c1_execution_preregistration.json 71137f55c7fd at head_commit c8a2961c; harness 974c8fa744d3 over 68 files",
       "pricing": "logs/phase_c1_pricing.json 909ed65f -- secure L40S $1.09/h, CEILING $15.1475.",
       "seeds": "1635674081, 1656475568, 696460635 (derived from the C0 digest)",
       "scoring": "c1_confirmation_scoring@v1 77507935; equivalence IDENTICAL over 15 probes. @v2 808080a7 and battery a285d61f untouched.",
@@ -137,7 +135,7 @@
       "needs": "a maintainer decision; no automatic retry",
       "not_built": "no grant; the pre-ATTENTION parent rebuild and the ~8 GB teacher weights need GPU/network and have not run locally",
       "evidence": "logs/autoinit_c1_attempt3r/ (the 5-count row is WITHDRAWN)",
-      "readiness": "logs/c1_renderer_parity.json (7/7 PASS) and logs/c1_pod_environment_verification.json (gate 12)"
+      "readiness": "logs/c1_renderer_parity.json (7/7 PASS) and logs/c1_pod_environment_verification.json -- currently record_kind=diagnostic; gate 12 requires launch_bound before a provider is created"
     },
     "c2": {
       "status": "NOT STARTED",

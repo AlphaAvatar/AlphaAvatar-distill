@@ -349,3 +349,22 @@ def c1_budget_spec(repo_root: str | Path = ".") -> BudgetSpec:
 def c1_hard_ceiling_usd(repo_root: str | Path = ".") -> float:
     """The one place the enforceable ceiling comes from."""
     return float(load_pricing(repo_root)["totals"]["hard_ceiling_usd"])
+
+
+def c1_price_per_hour_usd(repo_root: str | Path = ".") -> float:
+    """The accepted hourly rate, from the same hash-verified record.
+
+    The launcher's `--max-price` default was the literal `0.99` left over from
+    before the reprice, while the accepted secure L40S rate is `1.09`. That is
+    not a spend risk — the runner refuses a live quote above `--max-price` before
+    any provider resource exists, so the stale value could only ever refuse a
+    launch, never buy one — but it meant the operator had to remember to pass the
+    real rate on the command line, and the price would have been carried in two
+    places.
+
+    Derived here rather than re-declared, so there is exactly one hand-maintained
+    price in the repository and it is the one `pricing_identity_gate` already
+    verifies. `load_pricing` refuses a record that does not match its own
+    `pricing_sha256`, so a tampered rate cannot reach a launch.
+    """
+    return float(load_pricing(repo_root)["hardware"]["price_per_hour_usd"])

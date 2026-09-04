@@ -51,6 +51,7 @@ from aadistill.autoinit.c1_authorization import (  # noqa: E402
     c1_budget_spec,
     c1_hard_ceiling_usd,
     c1_harness_digest,
+    c1_price_per_hour_usd,
 )
 from aadistill.autoinit.c1_bundle import (  # noqa: E402
     RELAY_REPO as RELAY_REPO_ID, C1BundleError, canonical_bundle_name,
@@ -58,8 +59,8 @@ from aadistill.autoinit.c1_bundle import (  # noqa: E402
 )
 from aadistill.autoinit.c1_isolation import derive_recovery_seeds  # noqa: E402
 from aadistill.autoinit.pod_environment import (  # noqa: E402
-    RECORD_PATH as POD_ENV_RECORD, load_record as load_pod_env_record,
-    verify_record as verify_pod_env_record,
+    LAUNCH_BOUND, RECORD_PATH as POD_ENV_RECORD,
+    load_record as load_pod_env_record, verify_record as verify_pod_env_record,
 )
 from aadistill.infrastructure.manifest import (  # noqa: E402
     sha256_file, sha256_json,
@@ -462,13 +463,23 @@ def pod_environment_gate(ctx: SessionContext) -> tuple[bool, str]:
     attributed to leaf transport, but that $0 reproduction ran with no
     HF_TOKEN — a state no pod is in — and does not reproduce.
 
-    The sweep that answers this takes about three quarters of an hour, far too
-    slow to run while a pod bills. So it is run once against a committed tree and
-    recorded, and this gate checks only that the recording still describes the
-    code that would run: the C1 harness digest and the pod test-environment digest
-    must both still match. Documentation and preregistration commits do not
-    invalidate it; an edit to the setup script, the simulator, the test tree or
-    the harness does.
+    The sweep that answers this takes about thirteen minutes, far too slow to run
+    while a pod bills. So it is run once against a committed tree and recorded,
+    and this gate checks that the recording still describes the code that would
+    run: the C1 harness digest and the pod test-environment digest must both still
+    match, and the session commit must descend from `swept_base_commit` with no
+    tracked path changed beyond the record itself and this session's
+    authorization.
+
+    **And the record must be `launch_bound`.** A `diagnostic` record proves the
+    machinery works on some tree; it is genuine readiness evidence and stays valid
+    as such, but it is not the sweep a paid launch rests on. Until 2026-09-05 this
+    gate accepted either and merely copied the kind into evidence, which meant the
+    promised launch-bound sweep need never have happened — the distinction existed
+    only in prose. Requiring it here is the whole enforcement: `verify_record`
+    takes `required_kind`, so a diagnostic record still verifies for anyone asking
+    whether the tree is sound, and refuses only the thing that creates a provider
+    resource.
     """
     try:
         record = load_pod_env_record(REPO_ROOT)
@@ -485,12 +496,14 @@ def pod_environment_gate(ctx: SessionContext) -> tuple[bool, str]:
     ok, reason = verify_pod_env_record(
         record, REPO_ROOT,
         session_commit=getattr(ctx.args, "session_commit", None),
-        authorization_path=AUTH_PATH)
+        authorization_path=AUTH_PATH,
+        required_kind=LAUNCH_BOUND)
     ctx.evidence["pod_environment_verification"] = {
         "verdict": "PASS" if ok else "FAIL",
         "record": POD_ENV_RECORD,
         "record_self_sha256": record.get("self_sha256"),
         "record_kind": record.get("record_kind"),
+        "required_record_kind": LAUNCH_BOUND,
         "swept_base_commit": record.get("swept_base_commit"),
         "session_commit": getattr(ctx.args, "session_commit", None),
         "permitted_post_sweep_paths": [POD_ENV_RECORD, AUTH_PATH],
@@ -787,7 +800,16 @@ def build_parser():
     ap.add_argument("--image",
                     default="runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404")
     ap.add_argument("--gpu", default="NVIDIA L40S")
-    ap.add_argument("--max-price", type=float, default=0.99)
+    # Derived from the hash-verified pricing record, not re-declared. The
+    # literal 0.99 here survived the reprice to the accepted secure L40S
+    # rate of 1.09; it was never a spend risk, because the runner refuses a
+    # live quote ABOVE --max-price before any provider resource exists, so a
+    # stale low value can only refuse a launch. But it meant the operator had
+    # to remember the real rate on the command line, and the price lived in
+    # two places. A quote above the accepted rate still aborts at $0 and
+    # returns for review: this default does not chase the market upward.
+    ap.add_argument("--max-price", type=float,
+                    default=c1_price_per_hour_usd(REPO_ROOT))
     #: Two arm materializations plus six probe checkpoints and their generations.
     ap.add_argument("--disk-gb", type=int, default=200)
     ap.add_argument("--probe-train-minutes", type=float, default=70.0)
