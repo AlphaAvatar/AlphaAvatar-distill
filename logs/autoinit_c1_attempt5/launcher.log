@@ -1,0 +1,71 @@
+[15:31:21] budget: expected 740 min $13.44 · soft $14.78 · hard $15.15 (authorized $15.15)
+[15:31:22] NVIDIA L40S $1.09/h, stock Medium
+[15:31:22] session commit 79c18adb295f verified: harness digests to 8b4dd4c0a00b…, carries the authorization and only logs/autoinit_c1_authorization.json differs from the authorized base
+[15:31:22] C1 harness 8b4dd4c0a00b… over 69 files
+[15:31:22] ceiling $15.1475, derived from logs/phase_c1_pricing.json
+[15:31:22] preregistration c5a19b6bd4e0… (self-hash verified), harness 8b4dd4c0a00b…
+[15:31:22] seeds, both replay digests and the 950/850 battery a285d61f88de… are unchanged
+[15:31:22] 3 teacher shards bound at 768f209d9ea8…, none fetched
+[15:31:22] battery staged from bytes identical to /home/ecs-user/aad-artifacts/autoinit/c1_confirmation_v1
+[15:31:22] success spec covers the contract (6 probes x 7 sets = 42 generation files); failure spec presupposes no training
+[15:31:24] stage1/qwen3_0p6b_init_v0/checkpoint/config.json (1418 bytes, a7131bb092b3…) stages to artifacts/stage1/qwen3_0p6b_init_v0/checkpoint with stored RoPE base 5,000,000
+[15:31:27] aad_autoinit_79c18adb.bundle (7669955 bytes, 2d1865ae7973…) round-trips to 79c18adb295f… carrying this authorization and harness 8b4dd4c0a00b…
+[15:31:30] 7/7 groups PASS, 0 skipped, 190 frozen prompts re-rendered byte for byte
+[15:31:30] pod sweep 2770 passed / 100 skipped / 0 failed, 7 renderer skips, leaf transport 5/5, binds harness 8b4dd4c0a00b… and environment d1dc606e26e9…, staging contract 9ef2356ee807…, swept at be826617 with only ['logs/autoinit_c1_authorization.json', 'logs/c1_pod_environment_verification.json'] differs from the swept base
+[15:31:30] precheck OK: 8 relay inputs (8 from AlphaAvatar/aadistill-artifacts), 4 local assets
+[15:31:32] created e2ghwfuerdrvni at $1.09/h
+[15:31:32] watchdog detached — hard 834 min = $15.15
+[15:31:54] TCP 22 at 202.181.159.213:12386 after 0.4 min
+[15:31:56] draw 1: ssh reachable — $0.01
+[15:32:35] draw 1: image identity runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@580.126.09
+[15:32:35] draw 1: running setup
+[15:48:41] setup did not reach SETUP_DONE:
+4.16.0
+ + typing-inspection==0.4.4
+ + urllib3==2.7.0
+ + uvicorn==0.52.3
+ + uvloop==0.22.1
+ + vllm==0.27.1
+ + watchfiles==1.2.0
+ + websockets==17.0.1
+ + xgrammar==0.2.3
+ + yarl==1.24.5
+ + z3-solver==4.15.4.0
+[15:34:45] vllm offline install completed in 9s
+vllm 0.27.1 | torch 2.13.0+cu130 True
+MARKER:VLLM_READY
+[15:34:53] downloading the teacher at the pinned revision
+
+Fetching 10 files:   0%|          | 0/10 [00:00<?, ?it/s]
+Fetching 10 files:  10%|█         | 1/10 [00:00<00:03,  2.51it/s]
+Fetching 10 files:  40%|████      | 4/10 [00:00<00:00,  6.86it/s]
+Fetching 10 files:  50%|█████     | 5/10 [00:00<00:00,  6.91it/s]
+Fetching 10 files:  60%|██████    | 6/10 [00:00<00:00,  7.51it/s]
+Fetching 10 files:  70%|███████   | 7/10 [00:01<00:00,  5.96it/s]
+Fetching 10 files:  80%|████████  | 8/10 [00:03<00:01,  1.06it/s]
+Fetching 10 files:  90%|█████████ | 9/10 [00:26<00:07,  7.38s/it]
+Fetching 10 files: 100%|██████████| 10/10 [00:28<00:00,  5.70s/it]
+Fetching 10 files: 100%|██████████| 10/10 [00:28<00:00,  2.85s/it]
+MARKER:TEACHER_READY
+[15:35:22] checking the RoPE base resolves in every venv
+  transformers 5.13.1: qwen3_0p6b_init_v0 stored 5,000,000 runtime 5,000,000 OK
+  transformers 5.15.0: qwen3_0p6b_init_v0 stored 5,000,000 runtime 5,000,000 OK
+MARKER:ROPE_OK
+[15:35:32] CPU test suite (128 vCPUs visible, cgroup budget 13; cpu set 0-12)
+--- every failing nodeid ---
+FAILED tests/autoinit/test_staging_contract.py::test_an_artifact_c1_does_not_stage_is_invisible
+FAILED tests/autoinit/test_staging_contract.py::test_an_undeclared_file_inside_a_staged_destination_stays_hidden
+--- log tail ---
+=========================== short test summary info ============================
+FAILED tests/autoinit/test_staging_contract.py::test_an_artifact_c1_does_not_stage_is_invisible
+FAILED tests/autoinit/test_staging_contract.py::test_an_undeclared_file_inside_a_staged_destination_stays_hidden
+2 failed, 2769 passed, 99 skipped in 781.84s (0:13:01)
+[15:48:36] test suite failed rc=1
+SETUP_RC=1
+
+[15:48:41] ABORT after draw 1: setup_failed
+[15:48:41] deleting pod (setup setup_failed)
+[15:48:52] pod deleted — 17.3 min, $0.31; provider confirms gone: True
+
+autoinit-c1 INCOMPLETE — /home/ecs-user/AlphaAvatar-distill/logs/autoinit_c1_session.json. STOP for review. C1 replayed one frozen path under two digest gates and ran no search.
+LAUNCHER_EXIT=11

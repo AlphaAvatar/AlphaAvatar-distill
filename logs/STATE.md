@@ -1,57 +1,59 @@
 **Updated:** 2026-09-05 · branch `main` · **PHASE B CLOSED · PHASE C0 FROZEN ·
-PHASE C1 ATTEMPT 4 LAUNCHED AND ABORTED AT THE POD TEST GATE — STILL NEVER MEASURED**
+PHASE C1 ATTEMPT 5 LAUNCHED AND ABORTED AT THE POD TEST GATE — STILL NEVER MEASURED**
 
-> **Attempt 4, 2026-09-05.** The one-use grant was approved and consumed. All
+> **Attempt 5, 2026-09-05.** The one-use grant was approved and consumed. All
 > **12** pre-provider gates passed on the launcher's own fresh run, the bundle
-> round-tripped, pod `d854jag1ybhny2` was created at `$1.09/h`, and setup
+> round-tripped, pod `e2ghwfuerdrvni` was created at `$1.09/h`, and setup
 > reached `ENV_READY → REPO_READY → ASSETS_STAGED → VLLM_READY → TEACHER_READY
-> → ROPE_OK` before dying at the CPU test gate with **6 failed / 2743 passed /
-> 111 skipped**. `$0.6986`, 38.46 min, pod deleted, provider confirms gone.
+> → ROPE_OK` before dying at the CPU test gate with **2 failed / 2769 passed /
+> 99 skipped**. `$0.3150`, 17.34 min, pod deleted, provider confirms gone.
 > **No scientific stage ran — no replay, no training, no evaluation, no
-> decision.** Cumulative `$265.0864` of `$283.7600`.
+> decision.** Cumulative `$265.4014` of `$283.7600`.
 >
-> **One escape mechanism, three failure classes, and a fourth defect that
-> never failed.** The earlier wording — "the root cause is one thing" — was too
-> coarse and is superseded.
+> **Attempt 4's cause did not recur.** The manifest-derived positive staged view
+> held: the pod's staging matched contract `9ef2356ee807`, and the 49 extra skips
+> and 6 failures the generic `HIDDEN_PATHS` complement produced are gone.
 >
-> The **escape mechanism** is that the launch-bound simulator was not
-> mechanically bound to the C1 staging contract: it ran on a hand-maintained
-> complement (`HIDDEN_PATHS`) instead of a view derived from the session's own
-> `SetupManifest`, so it could not be checked against the session it modelled.
-> Its default comment asserts that *every* pod session stages
-> `artifacts/stage3/corpus_v2`, which is false for C1. The sweep therefore
-> certified a machine 55 tests more generous than the pod: 49 extra skips plus
-> the 6 failures exactly account for the pass delta.
+> **The new cause is a skip guard, not the contract.** Both failures are
+> `tests/autoinit/test_staging_contract.py` cases that assert facts about files
+> which exist only on the dev box — that `corpus_v2`/`battery_v2` appear in the
+> HIDDEN set, and that the checkpoint directory holds an undeclared file. A pod
+> has neither, because they were never transferred. They are *correctly*
+> classified as dev-box-only — `pod_environment.DEVBOX_ONLY_NODEIDS` names these
+> two exact nodeids and the sweep recorded `devbox_only_skipped_as_expected:
+> true` — but the skip is produced by
+> `skipif(os.environ.get("AAD_SYNTHETIC_HF_TOKEN"))`, a flag **the simulator sets
+> and the pod does not**. The predicate encodes *"am I inside the simulator?"*
+> when the property it needed is *"does this machine hold the unstaged
+> artifacts?"*.
 >
-> The **three failure classes** are the issued-session readiness test omitting
-> `authorization_path` (1), battery cases reading historical roles C1 does not
-> stage (2), and the Phase-B host-local module whose byte store no pod has (3).
+> **The pod is the environment that breaks that equivalence.** It is
+> behaviourally identical to the simulation — no unstaged artifacts — while
+> carrying none of the simulation's markers, so a simulator-keyed guard is
+> exactly inverted there: it skips where the assertion would hold and runs where
+> it cannot. Gate 12 certified the skip as expected because the skip did occur;
+> what it could not ask is *why*.
 >
-> The **fourth defect produced no failure at all.** The `battery_v2` parameter
-> of `test_it_is_disjoint_from_each_jsonl_role_by_id_and_by_content` passed
-> VACUOUSLY: with the directory absent, `load()` globbed it to an empty row set
-> and both `not own & role` assertions held trivially. It reported disjointness
-> from a role it had never read, and would have gone on reporting green
-> indefinitely. The host-side verifier had the same hole, returning "zero
-> collisions" for an absent role. That is worse than the six, because nothing
-> would ever have surfaced it.
+> **One divergence is UNEXPLAINED.** If only those two moved skip→fail the pod's
+> skip count would be 98; it is 99, and the pod passed one fewer test than the
+> sweep. One test that PASSED in the sweep SKIPPED on the pod. The pod
+> diagnostics grep `^FAILED|^ERROR` only, so a skip divergence is invisible
+> unless it also fails — that list died with the pod. It did not cause this abort
+> and must not be assumed benign.
 >
-> Gate 12 exists to prevent the first and did not, because the simulator's
-> fidelity was a hand-passed variable left at its default.
->
-> Full enumeration, with each of the three defect classes and its evidence:
-> [`autoinit_c1_attempt4/test_gate_failures.json`](autoinit_c1_attempt4/test_gate_failures.json).
+> Full enumeration and root cause:
+> [`autoinit_c1_attempt5/test_gate_failures.json`](autoinit_c1_attempt5/test_gate_failures.json).
 > **Nothing is repaired** — this closeout is metadata only.
 
 # Current state
 
-> **Attempt-5 grant APPROVED, 2026-09-05 — not yet issued, nothing running.**
-> A NEW one-use grant ([`autoinit_c1_attempt5_grant.json`](autoinit_c1_attempt5_grant.json)).
-> Attempt 4's grant and authorization remain CONSUMED and are not reused. Spend
-> stays `$265.0864` of `$283.7600`; one full `$15.1475` ceiling still fits,
-> leaving `$3.5261` — **which is not authorization for another attempt.**
-> This commit is the frozen pre-authorization tree: after it, only the readiness
-> record and the authorization artifact may move.
+> **NOT CURRENTLY AUTHORIZED. Nothing is running, no pod exists, and no grant is
+> live.** The Attempt-5 grant and its authorization are CONSUMED — a provider
+> resource was created — and permit no retry. Spend is `$265.4014` of
+> `$283.7600`, leaving `$18.3586`: one full `$15.1475` ceiling still fits, with
+> `$3.2111` after it, **which is not authorization for another attempt.** A
+> sixth attempt needs a new maintainer decision, and the skip-guard defect above
+> is unrepaired.
 
 
 The **human view of [`current_state.json`](current_state.json)**. That file owns

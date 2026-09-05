@@ -1612,3 +1612,52 @@ and the file died with the pod; one `grep '^FAILED'` would have been free.
 only the gitignored-repo half, not `$HOME`, so it would have caught none of the
 twelve environment failures. And no C1 attempt had ever reached `TESTS_OK`
 before, which is why a gate that cannot pass on a pod survived three launches.
+
+---
+
+## 2026-09-05 — C1 attempt 5: the third abort at the same gate, `$0.3150`
+
+| what | cost | evidence |
+| --- | --- | --- |
+| C1 attempt 5: launch-bound readiness, 12/12 gates re-run by the launcher, 17.34 min, **INFRASTRUCTURE ABORT at the pod CPU test gate**. No replay, no training, no evaluation, no decision | $0.3150 | `logs/autoinit_c1_attempt5/` |
+
+**Cumulative: $265.4014 of $283.7600.** `$18.3586` uncommitted. The attempt-5
+grant is CONSUMED — pod `e2ghwfuerdrvni` was created — and it permits no retry.
+
+Cost is the provider-polled reading at deletion (17.3 min → `$0.31`, recorded by
+the session as `$0.315`), on the standing rule that the provider's figure wins.
+
+**Two failures, and the sweep had certified this exact tree seventeen minutes
+earlier.** Pod: `2769 passed, 99 skipped, 2 failed` in 781.84 s. Sweep:
+`2770 passed, 100 skipped, 0 failed` in 673.2 s. Same 2870 tests.
+
+| count | tests | cause |
+| --- | --- | --- |
+| 2 | `test_staging_contract.py::test_an_artifact_c1_does_not_stage_is_invisible`, `::test_an_undeclared_file_inside_a_staged_destination_stays_hidden` | both assert facts about files that exist only on the **dev box** — that `corpus_v2`/`battery_v2` appear in the hidden set, and that the checkpoint dir holds an undeclared file. A pod has neither, because they were never transferred |
+
+**The root cause is the guard, not the contract.** Both tests are correctly
+classified as dev-box-only — `pod_environment.DEVBOX_ONLY_NODEIDS` names these
+two exact nodeids and the sweep recorded `devbox_only_skipped_as_expected: true`.
+But the skip is produced by `pytest.mark.skipif(os.environ.get("AAD_SYNTHETIC_HF_TOKEN"))`,
+a flag **the simulator sets and the pod does not**. The predicate encodes "am I
+inside the simulator?" when the property it needed was "does this machine hold
+the unstaged artifacts?". The pod is the one environment behaviourally identical
+to the simulation — no unstaged artifacts — while carrying none of its markers,
+so the guard is exactly inverted there: it skips where the assertion would hold
+and runs where it cannot.
+
+Attempt 4's root cause did **not** recur. The manifest-derived positive staged
+view held; the 49 extra skips and 6 failures the generic `HIDDEN_PATHS`
+complement produced are gone, and the pod's own staging matched contract
+`9ef2356ee807`.
+
+**One divergence remains unexplained.** If exactly those two moved skip→fail the
+pod's skip count would be 98; it is 99, and the pod passed one fewer test than
+the sweep. So one test that PASSED in the sweep SKIPPED on the pod. The pod
+diagnostics grep `^FAILED|^ERROR` only, so a skip divergence is invisible unless
+it also fails — the pod's skip list was never captured and died with the pod. It
+did not cause this abort and must not be assumed benign.
+
+The diagnostic that *did* pay off: the `grep '^FAILED'` added after attempt 3R
+delivered both nodeids exactly, where attempt 3R lost fourteen failures to a
+four-line tail.

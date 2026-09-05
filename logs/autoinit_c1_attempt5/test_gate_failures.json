@@ -1,0 +1,61 @@
+{
+  "schema": "aadistill.autoinit.c1_test_gate_failures/v1",
+  "attempt": 5,
+  "pod_id": "e2ghwfuerdrvni",
+  "session_commit": "79c18adb295f3fc8498816a5d8b4a9f483f1ec6b",
+  "_what_this_is": "the complete enumeration of what the pod CPU test gate refused, from the launcher's own '--- every failing nodeid ---' block. Attempt 4 lost its detail to a 4-line tail; that grep is why this file can be exact.",
+
+  "counts": {
+    "pod": {"passed": 2769, "skipped": 99, "failed": 2, "error": 0, "total": 2870, "seconds": 781.84, "rc": 1},
+    "launch_bound_sweep": {"passed": 2770, "skipped": 100, "failed": 0, "error": 0, "total": 2870, "seconds": 673.2, "rc": 0},
+    "note": "the same 2870 tests were selected in both. The sweep certified this exact tree 17 minutes before the pod refused it."
+  },
+
+  "failures": [
+    {
+      "nodeid": "tests/autoinit/test_staging_contract.py::test_an_artifact_c1_does_not_stage_is_invisible",
+      "outcome_in_sweep": "skipped",
+      "outcome_on_pod": "failed",
+      "why": "it asserts that artifacts/stage3/corpus_v2 and artifacts/eval/battery_v2 appear in the HIDDEN set. The hidden set is the gitignored files present on disk that C1 does not stage. On a pod those artifacts were never transferred, so nothing is there to be hidden and the set is empty."
+    },
+    {
+      "nodeid": "tests/autoinit/test_staging_contract.py::test_an_undeclared_file_inside_a_staged_destination_stays_hidden",
+      "outcome_in_sweep": "skipped",
+      "outcome_on_pod": "failed",
+      "why": "it iterdir()s artifacts/stage1/qwen3_0p6b_init_v0/checkpoint on the live filesystem and asserts an UNDECLARED file is present there (the dev box holds six files, C1 stages four). On a pod the directory holds exactly the four staged files, so `undeclared` is empty and the assertion 'the dev box no longer holds an undeclared file here' fires."
+    }
+  ],
+
+  "root_cause": {
+    "one_sentence": "Both tests describe the DEV BOX's staged/hidden split and were guarded by a skipif keyed on AAD_SYNTHETIC_HF_TOKEN -- a flag the simulator sets and the pod does not -- so the guard encoded 'am I inside the simulator?' when the property it needed was 'does this machine hold the unstaged artifacts?'.",
+    "the_three_environments": {
+      "dev box, plain pytest": "flag unset, artifacts present -> tests RUN and PASS",
+      "dev box, simulate_pod_env.sh": "flag SET -> tests SKIP -> sweep green",
+      "pod": "flag unset (the pod exports a real HF_TOKEN), artifacts absent -> tests RUN and FAIL"
+    },
+    "why_the_readiness_record_did_not_catch_it": "it did the opposite: pod_environment.DEVBOX_ONLY_NODEIDS names these two exact nodeids, the sweep recorded devbox_only_skipped_as_expected = true, and gate 12 passed on that basis. The machinery correctly classified them as dev-box-only and then certified a skip that only the simulator produces.",
+    "generalisation": "the pod is the one environment that is behaviourally identical to the simulation -- no unstaged artifacts -- while carrying none of the simulation's markers. Any skip predicate keyed on a simulator marker is therefore inverted on the pod: it skips where the assertion would hold and runs where it cannot.",
+    "not_the_cause": [
+      "the staged view itself: the manifest-derived positive contract 9ef2356ee807 was correct, and the pod's own staging matched it",
+      "the attempt-4 root cause (a generic hand-maintained HIDDEN_PATHS complement), which was genuinely repaired -- the 49 extra skips and 6 failures it produced did not recur",
+      "any C1 scientific identity, all of which the launcher re-verified at $0 before creating the pod"
+    ]
+  },
+
+  "unexplained_residual": {
+    "claim": "one further simulator/pod divergence exists and is NOT accounted for by these two failures.",
+    "arithmetic": "if exactly the two named tests moved skip->fail, the pod's skip count would be 98. It is 99, and the pod passed one fewer test than the sweep. So one test that PASSED in the sweep SKIPPED on the pod.",
+    "why_it_cannot_be_named": "the pod diagnostics grep '^FAILED|^ERROR' only. A skip divergence is invisible unless it also fails, so the pod's skip list was never captured and died with the pod.",
+    "status": "UNEXPLAINED. It did not cause this abort, and it must not be assumed benign."
+  },
+
+  "scientific_status": {
+    "replay_parent": "NOT REACHED",
+    "replay_incumbent": "NOT REACHED",
+    "recovery_training_began": false,
+    "probes_trained": 0,
+    "probes_evaluated": 0,
+    "decision": "none",
+    "verdict": "C1 attempt 5 is an INFRASTRUCTURE ABORT. It is not evidence for or against the ATTENTION isolation, and must not be read as any C1 result."
+  }
+}
