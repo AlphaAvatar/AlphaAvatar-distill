@@ -963,3 +963,26 @@ def test_the_c1_readiness_owned_skip_set_is_exact():
     assert pe.BATTERY_STAGED_ROLE_NODEID not in expected
     findings = pe.evaluate_sweep(_outcomes())
     assert findings["expected_environment_skips"] == sorted(expected)
+
+
+def test_the_non_environment_exemption_is_named_and_narrow():
+    """One nodeid, with a reason, and it is NOT in the readiness-owned set.
+
+    Widening the watch to test_recovery_continuation_session.py surfaced a
+    pre-existing skip that has nothing to do with HOME, HF or staging: the branch
+    it covers is only live when no verified transport exists, and one does. The
+    answer is a named exemption, not a narrower watch that would also stop
+    noticing real staging skips in that module.
+    """
+    assert len(pe.KNOWN_NON_ENVIRONMENT_SKIPS) == 1
+    expected = (set(pe.RENDERER_PARITY_NODEIDS) | set(pe.BATTERY_SOURCE_NODEIDS)
+                | set(pe.DEVBOX_ONLY_NODEIDS) | set(pe.HOST_LOCAL_C1_NODEIDS))
+    assert not set(pe.KNOWN_NON_ENVIRONMENT_SKIPS) & expected
+    findings = pe.evaluate_sweep(
+        _outcomes(**{pe.KNOWN_NON_ENVIRONMENT_SKIPS[0]: "skipped"}))
+    assert findings["verdict"] == "PASS", findings["problems"]
+    # A different unexpected skip in that same module is still caught.
+    findings = pe.evaluate_sweep(_outcomes(**{
+        "tests/pod/test_recovery_continuation_session.py::test_something_new":
+            "skipped"}))
+    assert findings["verdict"] == "FAIL"

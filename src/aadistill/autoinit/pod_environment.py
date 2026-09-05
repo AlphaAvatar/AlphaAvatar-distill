@@ -151,6 +151,21 @@ HOST_LOCAL_C1_NODEIDS: tuple[str, ...] = (
     "test_the_entrypoint_refuses_a_substituted_leaf",
 )
 
+#: A legitimate skip inside a WATCHED module that is not environment-driven and
+#: so is not part of the readiness-owned expected set. It is named rather than
+#: silenced: widening the watch to that module surfaced it, and the honest answer
+#: is an exemption with a reason, not a narrower watch that would also stop
+#: noticing real staging skips there.
+#:
+#: `test_an_unverified_transport_declares_no_leaf_inputs` covers the branch taken
+#: when NO verified transport exists. The transport IS verified, so the branch is
+#: not live and the case skips — on the dev box exactly as in the simulation. It
+#: has nothing to do with HOME, HF or staging.
+KNOWN_NON_ENVIRONMENT_SKIPS: tuple[str, ...] = (
+    "tests/pod/test_recovery_continuation_session.py::"
+    "test_an_unverified_transport_declares_no_leaf_inputs",
+)
+
 #: Structural tests that failed on the pod for repository-state reasons and are
 #: reported separately, because "fixed" was claimed for them once already.
 REPOSITORY_STATE_NODEIDS: tuple[str, ...] = (
@@ -296,7 +311,8 @@ def evaluate_sweep(outcomes: dict[str, str]) -> dict[str, Any]:
                       | set(DEVBOX_ONLY_NODEIDS) | set(HOST_LOCAL_C1_NODEIDS))
     unexpected = sorted(
         n for n, s in outcomes.items()
-        if s == "skipped" and n.startswith(watched) and n not in expected_skips)
+        if s == "skipped" and n.startswith(watched)
+        and n not in expected_skips and n not in KNOWN_NON_ENVIRONMENT_SKIPS)
 
     problems: list[str] = []
     if failed:
@@ -342,6 +358,7 @@ def evaluate_sweep(outcomes: dict[str, str]) -> dict[str, Any]:
         "battery_staged_role_nodeid": BATTERY_STAGED_ROLE_NODEID,
         "battery_staged_role_outcome": staged_role,
         "expected_environment_skips": sorted(expected_skips),
+        "known_non_environment_skips": list(KNOWN_NON_ENVIRONMENT_SKIPS),
         "unexpected_environment_skips": unexpected,
         "problems": problems,
         "verdict": "PASS" if not problems else "FAIL",

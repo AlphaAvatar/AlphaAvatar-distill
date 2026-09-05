@@ -1,16 +1,16 @@
 {
   "_what_this_is": "one complete pod-like sweep of the CPU test suite: the condition a fresh C1 pod is actually in, which is what C1 attempt 3R's setup test gate refused for $0.3482 with zero scientific stages run.",
   "binding_rule": "this record binds the EXECUTABLE via two digests, and the REPOSITORY via swept_base_commit lineage. The digests ignore logs/ and docs/ so that paperwork does not invalidate a sweep; the lineage rule then permits exactly two post-sweep tracked paths -- this record, and (in an issued session) the canonical authorization artifact -- because the pod suite READS repository state and a documentation commit can change what it asserts.",
-  "c1_harness_digest": "9c7eb6b64311ca52647c34de7adfe5b0193291e4504da713f49ae3fc5539ca79",
+  "c1_harness_digest": "0dc24c144cbc2e8486448341da885be3fe1d6fe1c428794919e58bd7637f4f39",
   "c1_harness_n_files": 69,
   "counts": {
     "error": 0,
-    "failed": 8,
-    "passed": 2767,
-    "skipped": 98
+    "failed": 0,
+    "passed": 2765,
+    "skipped": 100
   },
   "environment": {
-    "artifact_hiding": "the simulator's default HIDDEN_PATHS \u2014 the gitignored artifacts a session bundle cannot carry",
+    "artifact_hiding": "manifest-derived positive staged view: 28 files visible from the C1 SetupManifest, 1020 hidden as the computed complement. NOT the simulator's generic default.",
     "dev_hf_cache_visible": false,
     "hf_home_mode": "isolated \u2014 $PODSIM_ENV_ROOT/hf, outside the dev cache",
     "hf_hub_cache_resolution": "$HF_HOME/hub, set explicitly as HF_HUB_CACHE",
@@ -30,16 +30,40 @@
     "tests/data/test_c1_battery.py::test_the_shared_renderers_reproduce_the_frozen_battery_byte_for_byte[rag]",
     "tests/data/test_c1_battery.py::test_the_shared_renderers_reproduce_the_frozen_battery_byte_for_byte[tool]"
   ],
-  "failed_nodeids": [
-    "tests/autoinit/test_stage1_import.py::test_the_control_arrives_unmeasured_and_the_gate_says_so",
-    "tests/autoinit/test_stage1_import.py::test_the_control_is_rebuilt_from_its_frozen_checkpoint",
-    "tests/autoinit/test_stage1_import.py::test_the_imported_leaves_pass_the_live_admission_gate",
-    "tests/autoinit/test_stage1_import.py::test_the_real_attempt12_result_imports",
-    "tests/pod/test_c1_session_contract.py::test_every_gate_but_the_commit_binding_passes_against_the_candidate",
-    "tests/pod/test_c1_session_contract.py::test_the_preregistration_records_the_live_harness_digest",
-    "tests/pod/test_c1_source_closure.py::test_the_preregistration_records_the_live_harness",
-    "tests/pod/test_recovery_continuation_session.py::test_the_real_stage1_entrypoint_imports_measures_admits_and_hands_off"
-  ],
+  "failed_nodeids": [],
+  "invocation_realized": {
+    "declared_test_ignores": [
+      "tests/data/test_recovery_corpus_pipeline.py",
+      "tests/pod/test_phase_a_stages1_5_execute.py",
+      "tests/autoinit/test_phase_b_reuse_hostlocal.py",
+      "tests/autoinit/test_stage1_import.py"
+    ],
+    "hidden_paths_passed": true,
+    "invoked_test_ignores": [
+      "tests/data/test_recovery_corpus_pipeline.py",
+      "tests/pod/test_phase_a_stages1_5_execute.py",
+      "tests/autoinit/test_phase_b_reuse_hostlocal.py",
+      "tests/autoinit/test_stage1_import.py"
+    ],
+    "problems": [],
+    "rule": "a manifest fact that is hashed but not realized in the invocation is refused here, before any PASS record exists",
+    "setup_environment_keys": [
+      "BUNDLE_NAME",
+      "SESSION_ASSETS",
+      "SESSION_AUTH_PATH",
+      "SESSION_COMMIT",
+      "SESSION_KIND",
+      "SESSION_PLAN_HASH",
+      "SESSION_RELAY_INPUTS",
+      "SESSION_STATUS",
+      "SESSION_TEST_IGNORES",
+      "TEACHER_REVISION",
+      "TESTS_MAX_S",
+      "UV_MAX_S"
+    ],
+    "setup_environment_realized": true,
+    "staging_contract_digest": "9ef2356ee80752978ca7dba78956383051135ea0a4cf23fa4b32abcb6269a9ab"
+  },
   "leaf_transport_all_passed": true,
   "leaf_transport_nodeids": [
     "tests/autoinit/test_leaf_transport_publish.py::test_a_corrupted_remote_file_is_caught_by_the_round_trip",
@@ -55,8 +79,8 @@
     "tests/autoinit/test_leaf_transport_publish.py::test_an_lfs_oid_that_disagrees_is_caught_without_downloading": "passed",
     "tests/autoinit/test_leaf_transport_publish.py::test_the_round_trip_needs_no_dev_box_directory": "passed"
   },
-  "n_tests": 2873,
-  "pod_test_environment_digest": "1ad7a793d2b9412bc51b924f53e737d240b9ca49d6862ac694e048b9bce03c08",
+  "n_tests": 2865,
+  "pod_test_environment_digest": "c3d61527ffa437ed9eb6dcc5c0e9608083affb03e84b8708826ea4d8d0736f00",
   "pod_test_environment_n_files": 153,
   "pod_test_environment_named_files": [
     "scripts/pod/simulate_pod_env.sh",
@@ -64,10 +88,10 @@
     "scripts/autoinit/record_pod_environment.py"
   ],
   "problems": [
-    "8 failed/errored: ['tests/autoinit/test_stage1_import.py::test_the_control_arrives_unmeasured_and_the_gate_says_so', 'tests/autoinit/test_stage1_import.py::test_the_control_is_rebuilt_from_its_frozen_checkpoint', 'tests/autoinit/test_stage1_import.py::test_the_imported_leaves_pass_the_live_admission_gate', 'tests/autoinit/test_stage1_import.py::test_the_real_attempt12_result_imports', 'tests/pod/test_c1_session_contract.py::test_every_gate_but_the_commit_binding_passes_against_the_candidate', 'tests/pod/test_c1_session_contract.py::test_the_preregistration_records_the_live_harness_digest', 'tests/pod/test_c1_source_closure.py::test_the_preregistration_records_the_live_harness', 'tests/pod/test_recovery_continuation_session.py::test_the_real_stage1_entrypoint_imports_measures_admits_and_hands_off']"
+    "unexpected environment skips: ['tests/pod/test_recovery_continuation_session.py::test_an_unverified_transport_declares_no_leaf_inputs']"
   ],
-  "pytest_command": ".venv/bin/python -m pytest tests/ -q --ignore=tests/data/test_recovery_corpus_pipeline.py --ignore=tests/pod/test_phase_a_stages1_5_execute.py",
-  "pytest_command_note": "identical in test SELECTION to the pod gate in autoinit_preflight_setup.sh; --junitxml is a reporting flag added by the simulator so every skip and pass can be named exactly.",
+  "pytest_command": ".venv/bin/python -m pytest tests/ -q --ignore=tests/data/test_recovery_corpus_pipeline.py --ignore=tests/pod/test_phase_a_stages1_5_execute.py --ignore=tests/autoinit/test_phase_b_reuse_hostlocal.py --ignore=tests/autoinit/test_stage1_import.py",
+  "pytest_command_note": "verbatim from PODSIM_CMD. Test SELECTION is the session's own SESSION_TEST_IGNORES; --junitxml is appended by the simulator as a reporting flag so every skip and pass can be named exactly.",
   "record_kind": "diagnostic",
   "record_kind_note": "diagnostic: proves the pod-like suite passes on this exact tree and that the readiness machinery works. A launch-bound record is the one a maintainer-approved C1 launch rests on, and is owed at the time that grant is issued.",
   "renderer_parity_is_proved_by": "logs/c1_renderer_parity.json",
@@ -86,13 +110,28 @@
     "tests/pod/test_continuation_b_one_probe_contract.py::test_the_live_snapshot_records_the_terminal_phase_b_state": "passed"
   },
   "schema": "aadistill.autoinit.c1_pod_environment_verification/v1",
-  "seconds": 737.7,
-  "self_sha256": "1a970c55e6c10479fcb0bdec67c95b813f92196eeadf363f44e6e90cd463ebc7",
+  "seconds": 700.6,
+  "self_sha256": "8d1f19aaeb816a1d483cf00ffb3a1f17754c2f8dd277f07170c4241de15bbbdc",
+  "setup_environment": {
+    "BUNDLE_NAME": "aad_autoinit_14c81a00.bundle",
+    "SESSION_ASSETS": "c1_confirmation_v1:artifacts/stage3,reasoning_heavy_v2:artifacts/stage1,state_eval_v1:artifacts/stage1,recovery_search_v2:artifacts/stage3",
+    "SESSION_AUTH_PATH": "logs/autoinit_c1_authorization.json",
+    "SESSION_COMMIT": "14c81a001d5479cfd2ce556eb3018a57c6ec0fcf",
+    "SESSION_KIND": "c1",
+    "SESSION_PLAN_HASH": "42a496f0923b1c321426721fb51487df15b5368703fe19a898354973324e27a2",
+    "SESSION_RELAY_INPUTS": "[{\"also_stage_to\":\"artifacts/stage3/ladder_uniform\",\"dest\":\"artifacts/stage3/ladder_uniform_probe\",\"path\":\"stage3_recovery_corpus_v2/ladder_uniform/blocks.npz\",\"repo\":\"AlphaAvatar/aadistill-artifacts\",\"sha256\":\"6f324cb0f37bc0f07128e554ce8c161879419537478950496534f75fcecb249c\"},{\"also_stage_to\":\"artifacts/stage3/ladder_uniform\",\"dest\":\"artifacts/stage3/ladder_uniform_probe\",\"path\":\"stage3_recovery_corpus_v2/ladder_uniform/ladder.json\",\"repo\":\"AlphaAvatar/aadistill-artifacts\",\"sha256\":null},{\"also_stage_to\":\"artifacts/stage3/ladder_uniform\",\"dest\":\"artifacts/stage3/ladder_uniform_probe\",\"path\":\"stage3_recovery_corpus_v2/ladder_uniform/audit.jsonl\",\"repo\":\"AlphaAvatar/aadistill-artifacts\",\"sha256\":null},{\"also_stage_to\":null,\"dest\":\"artifacts/stage1/e8_calibration_v1\",\"path\":\"e8_inputs_20260810/calibration_v1/items.jsonl\",\"repo\":\"AlphaAvatar/aadistill-artifacts\",\"sha256\":\"c7202338109e459b17b70456461e8f304fadea7929ea547accee21adbbe7fd0b\"},{\"also_stage_to\":null,\"dest\":\"artifacts/stage1/qwen3_0p6b_init_v0/checkpoint\",\"path\":\"stage1/qwen3_0p6b_init_v0/checkpoint/tokenizer.json\",\"repo\":\"AlphaAvatar/aadistill-artifacts\",\"sha256\":\"be75606093db2094d7cd20f3c2f385c212750648bd6ea4fb2bf507a6a4c55506\"},{\"also_stage_to\":null,\"dest\":\"artifacts/stage1/qwen3_0p6b_init_v0/checkpoint\",\"path\":\"stage1/qwen3_0p6b_init_v0/checkpoint/tokenizer_config.json\",\"repo\":\"AlphaAvatar/aadistill-artifacts\",\"sha256\":\"8fa82a4ba512c8bee7c1c5e82b9a71ddbef362e4665be5c8f7ce0afd78af129a\"},{\"also_stage_to\":null,\"dest\":\"artifacts/stage1/qwen3_0p6b_init_v0/checkpoint\",\"path\":\"stage1/qwen3_0p6b_init_v0/checkpoint/chat_template.jinja\",\"repo\":\"AlphaAvatar/aadistill-artifacts\",\"sha256\":\"3802169b2a02b81e6adb7ab4f64f91ff02db753c8c3a64a01c35192d3a61d8d7\"},{\"also_stage_to\":null,\"dest\":\"artifacts/stage1/qwen3_0p6b_init_v0/checkpoint\",\"path\":\"stage1/qwen3_0p6b_init_v0/checkpoint/config.json\",\"repo\":\"AlphaAvatar/aadistill-artifacts\",\"sha256\":\"a7131bb092b38a078edc213961f0eb57eaead24f1396e25741f4887b1a694054\"}]",
+    "SESSION_STATUS": "/workspace/autoinit_c1.status",
+    "SESSION_TEST_IGNORES": "--ignore=tests/data/test_recovery_corpus_pipeline.py --ignore=tests/pod/test_phase_a_stages1_5_execute.py --ignore=tests/autoinit/test_phase_b_reuse_hostlocal.py --ignore=tests/autoinit/test_stage1_import.py",
+    "TEACHER_REVISION": "768f209d9ea81521153ed38c47d515654e938aea",
+    "TESTS_MAX_S": "2700",
+    "UV_MAX_S": "1500"
+  },
+  "setup_environment_source": "SessionSpec.setup_environment(session_commit=<swept HEAD>, bundle=canonical_bundle_name(<swept HEAD>)) -- the same production method SessionRunner._launch calls. Not a reconstructed subset. No secret is stored: none of these keys carries one.",
   "simulator": "scripts/pod/simulate_pod_env.sh",
-  "simulator_command": "HIDDEN_PATHS=<1020 paths derived from the C1 SetupManifest, contract 1ebd6778603d> PODSIM_CMD=<derived, 3 ignores> PODSIM_JUNIT=/home/ecs-user/aad-scratch/podsim_junit.xml PODSIM_LOG=/home/ecs-user/aad-scratch/podsim_pytest.log bash scripts/pod/simulate_pod_env.sh",
-  "simulator_exit_code": 1,
+  "simulator_command": "<SessionSpec.setup_environment: 12 keys> HIDDEN_PATHS=<1020 derived paths, contract 9ef2356ee807> PODSIM_CMD=<derived> PODSIM_JUNIT=/home/ecs-user/aad-scratch/podsim_junit.xml PODSIM_LOG=/home/ecs-user/aad-scratch/podsim_pytest.log bash scripts/pod/simulate_pod_env.sh",
+  "simulator_exit_code": 0,
   "staging_contract": {
-    "digest": "1ebd6778603d75fb0f5d9d9e7c8609a57a8dee5afc9e0e3432833056713e5eae",
+    "digest": "9ef2356ee80752978ca7dba78956383051135ea0a4cf23fa4b32abcb6269a9ab",
     "local_asset_destinations": [
       "artifacts/stage1/reasoning_heavy_v2",
       "artifacts/stage1/state_eval_v1",
@@ -115,13 +154,16 @@
     "test_ignores": [
       "tests/data/test_recovery_corpus_pipeline.py",
       "tests/pod/test_phase_a_stages1_5_execute.py",
-      "tests/autoinit/test_phase_b_reuse_hostlocal.py"
+      "tests/autoinit/test_phase_b_reuse_hostlocal.py",
+      "tests/autoinit/test_stage1_import.py"
     ]
   },
-  "staging_contract_digest": "1ebd6778603d75fb0f5d9d9e7c8609a57a8dee5afc9e0e3432833056713e5eae",
+  "staging_contract_digest": "9ef2356ee80752978ca7dba78956383051135ea0a4cf23fa4b32abcb6269a9ab",
   "staging_contract_rule": "derived from spec(args).setup -- the same SetupManifest the SessionRunner launches. Relay inputs are modelled at FILE granularity (a RelayInput stages one named file into its dest, not the directory), local assets as whole trees. The hidden set is the computed complement, never a declared list.",
-  "swept_base_commit": "793da8ceb24b9d7d80c6e513a0f0df3b0a92ecc5",
+  "swept_base_commit": "14c81a001d5479cfd2ce556eb3018a57c6ec0fcf",
   "tree_clean": true,
-  "unexpected_environment_skips": [],
+  "unexpected_environment_skips": [
+    "tests/pod/test_recovery_continuation_session.py::test_an_unverified_transport_declares_no_leaf_inputs"
+  ],
   "verdict": "FAIL"
 }
