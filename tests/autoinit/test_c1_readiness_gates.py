@@ -116,6 +116,9 @@ def _valid_record(tmp_path: Path, kind: str = "diagnostic") -> dict:
         "counts": {"passed": 2700, "skipped": 48, "failed": 0, "error": 0},
         "verdict": "PASS",
         "record_kind": kind,
+        # Required for launch_bound since 2026-09-05: a record that cannot say
+        # which staged view it was swept under may have used the generic default.
+        "staging_contract_digest": "a" * 64,
         "problems": [],
     }
     rec["self_sha256"] = pe.self_hash(rec)
@@ -266,6 +269,10 @@ def test_the_five_leaf_transport_nodeids_are_the_historical_ones():
 
 def _outcomes(**over) -> dict[str, str]:
     o = {n: "skipped" for n in pe.RENDERER_PARITY_NODEIDS}
+    # The C1 construction-source cases skip because their historical roles are
+    # not staged; the one role C1 DOES stage must pass.
+    o.update({n: "skipped" for n in pe.BATTERY_SOURCE_NODEIDS})
+    o[pe.BATTERY_STAGED_ROLE_NODEID] = "passed"
     o.update({n: "passed" for n in pe.LEAF_TRANSPORT_NODEIDS})
     o.update({n: "passed" for n in pe.REPOSITORY_STATE_NODEIDS})
     o["tests/other/test_thing.py::test_ok"] = "passed"
@@ -914,3 +921,34 @@ def test_the_pricing_record_is_hash_verified_before_the_rate_is_used():
     doc = load_pricing(REPO)
     assert doc["hardware"]["price_per_hour_usd"] == 1.09
     assert PRICING_PATH == "logs/phase_c1_pricing.json"
+
+
+def test_a_battery_source_case_that_passed_means_the_role_leaked(tmp_path):
+    """If a construction-source case PASSES on a pod, the staged view was too
+    generous — or, worse, it passed vacuously against a role it never read."""
+    findings = pe.evaluate_sweep(
+        _outcomes(**{pe.BATTERY_SOURCE_NODEIDS[0]: "passed"}))
+    assert findings["verdict"] == "FAIL"
+    assert any("battery construction-source skip set" in p
+               for p in findings["problems"])
+
+
+def test_the_staged_battery_role_must_not_skip(tmp_path):
+    """C1 stages recovery_search_v2, so its disjointness parameter has to RUN.
+    A skip there would mean the local asset stopped being staged."""
+    findings = pe.evaluate_sweep(
+        _outcomes(**{pe.BATTERY_STAGED_ROLE_NODEID: "skipped"}))
+    assert findings["verdict"] == "FAIL"
+    assert any("role C1 DOES stage" in p for p in findings["problems"])
+
+
+def test_the_expected_environment_skip_set_is_exactly_ten():
+    """Seven renderer-parity source cases plus three battery construction-source
+    cases. Not 'exactly seven' — that was the pre-attempt-4 contract."""
+    expected = set(pe.RENDERER_PARITY_NODEIDS) | set(pe.BATTERY_SOURCE_NODEIDS)
+    assert len(pe.RENDERER_PARITY_NODEIDS) == 7
+    assert len(pe.BATTERY_SOURCE_NODEIDS) == 3
+    assert len(expected) == 10
+    assert pe.BATTERY_STAGED_ROLE_NODEID not in expected
+    findings = pe.evaluate_sweep(_outcomes())
+    assert findings["expected_environment_skips"] == sorted(expected)
