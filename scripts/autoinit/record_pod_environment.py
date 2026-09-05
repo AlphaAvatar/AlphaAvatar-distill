@@ -29,6 +29,7 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import re
 import shutil
 import subprocess
 import sys
@@ -53,25 +54,92 @@ from aadistill.autoinit.staging_contract import (  # noqa: E402
 SIMULATOR = "scripts/pod/simulate_pod_env.sh"
 
 
-def derive_c1_staging():
-    """Read C1's own SetupManifest. Refuses rather than falling back.
+def derive_c1_session():
+    """C1's own SessionSpec: the staged view AND the setup environment.
 
-    There is deliberately no default path here. A readiness sweep that cannot say
-    what this session stages must not run at all — falling back to the generic
-    simulator list is the exact failure being repaired, and a fallback would
-    reintroduce it the first time this import broke.
+    Refuses rather than falling back. A readiness sweep that cannot say what this
+    session stages, or under what environment it runs, must not run at all —
+    falling back to the generic simulator list is the exact failure being
+    repaired, and a fallback would reintroduce it the first time this broke.
+
+    The environment comes from `SessionSpec.setup_environment`, the SAME
+    production method `SessionRunner._launch` calls, never a reconstruction of a
+    subset. Attempt 4's record hashed the manifest and then launched pytest under
+    nothing but PODSIM/HIDDEN_PATHS, so the contract was hashed but never
+    realized — the child process never saw `SESSION_KIND=c1`, and any test that
+    keys on it behaved as though it were some other session.
+
+    `session_commit` is the clean HEAD being swept and `bundle` is the canonical
+    name for it, so a pre-authorization diagnostic describes the tree it actually
+    ran on. The authorization path is the DECLARED path; no live authorization is
+    needed and none is created.
     """
     import sys as _sys
     _sys.path.insert(0, str(REPO_ROOT / "scripts/pod"))
     _sys.path.insert(0, str(REPO_ROOT / "tests/pod"))
     from session_specs import load_session_launcher, session_args
+    from aadistill.autoinit.c1_bundle import canonical_bundle_name
 
     launcher = load_session_launcher("autoinit_c1_launch")
-    setup = launcher.spec(session_args(launcher)).setup
-    contract = derive_contract(setup, session_id="autoinit-c1")
-    return contract, describe(contract, REPO_ROOT)
+    spec = launcher.spec(session_args(launcher))
+    head = head_commit(REPO_ROOT)
+    setup_env = spec.setup_environment(session_commit=head,
+                                       bundle=canonical_bundle_name(head))
+    contract = derive_contract(spec.setup, session_id="autoinit-c1")
+    return spec, contract, describe(contract, REPO_ROOT), setup_env
 DEFAULT_JUNIT = "/home/ecs-user/aad-scratch/podsim_junit.xml"
 DEFAULT_LOG = "/home/ecs-user/aad-scratch/podsim_pytest.log"
+
+
+def check_invocation_matches(contract, setup_env, pytest_cmd, child_env):
+    """Refuse a PASS when the declaration and the invocation disagree.
+
+    This is the attempt-4 failure mode expressed as code. That record hashed a
+    SetupManifest and then launched pytest under an environment built from
+    nothing but PODSIM variables, so the contract was *hashed but never
+    realized*: the child never saw `SESSION_KIND=c1`, the staged view was the
+    generic default, and the recorded pytest command was a hand-written string
+    naming two ignores while the sweep ran a different selection. Every one of
+    those could disagree with the manifest and nothing noticed.
+
+    So the three facts a manifest declares -- test selection, environment,
+    staging -- are each compared against what was actually handed to the
+    subprocess, and any mismatch becomes a `problem`, which forces the verdict to
+    FAIL before a record can be written.
+    """
+    problems: list[str] = []
+
+    declared_ignores = list(contract["test_ignores"])
+    invoked_ignores = re.findall(r"--ignore=(\S+)", pytest_cmd)
+    if invoked_ignores != declared_ignores:
+        problems.append(
+            f"test selection mismatch: the manifest declares {declared_ignores} "
+            f"and the invocation passes {invoked_ignores}")
+
+    env_mismatch = {k: (v, child_env.get(k)) for k, v in setup_env.items()
+                    if child_env.get(k) != v}
+    if env_mismatch:
+        problems.append(
+            f"setup environment mismatch between the manifest and the child "
+            f"process: {sorted(env_mismatch)}")
+
+    if child_env.get("HIDDEN_PATHS") is None:
+        problems.append("no derived HIDDEN_PATHS was passed; the simulation would "
+                        "fall back to the generic default")
+    if child_env.get("PODSIM_CMD") != pytest_cmd:
+        problems.append("PODSIM_CMD is not the command this record describes")
+
+    return {
+        "declared_test_ignores": declared_ignores,
+        "invoked_test_ignores": invoked_ignores,
+        "setup_environment_keys": sorted(setup_env),
+        "setup_environment_realized": not env_mismatch,
+        "staging_contract_digest": contract["digest"],
+        "hidden_paths_passed": child_env.get("HIDDEN_PATHS") is not None,
+        "problems": problems,
+        "rule": ("a manifest fact that is hashed but not realized in the "
+                 "invocation is refused here, before any PASS record exists"),
+    }
 
 
 def main() -> int:
@@ -104,19 +172,29 @@ def main() -> int:
     # that then failed six ways for $0.6986. The visible set now comes from the
     # same SetupManifest the SessionRunner launches, and the hidden set is
     # computed as its complement rather than declared.
-    contract, staged_view = derive_c1_staging()
+    spec, contract, staged_view, setup_env = derive_c1_session()
     hidden = hidden_files(contract, REPO_ROOT)
     pytest_cmd = (".venv/bin/python -m pytest tests/ -q "
                   + " ".join(f"--ignore={i}" for i in contract["test_ignores"]))
-    env = {**os.environ, "PODSIM_JUNIT": args.junit, "PODSIM_LOG": args.log,
+    # The production setup environment is MERGED IN, so the child pytest runs
+    # under SESSION_KIND=c1 and the rest of what the pod is given.
+    env = {**os.environ, **setup_env,
+           "PODSIM_JUNIT": args.junit, "PODSIM_LOG": args.log,
            "HIDDEN_PATHS": "\n".join(hidden), "PODSIM_CMD": pytest_cmd}
-    command = (f"HIDDEN_PATHS=<{len(hidden)} paths derived from the C1 "
-               f"SetupManifest, contract {contract['digest'][:12]}> "
-               f"PODSIM_CMD=<derived, {len(contract['test_ignores'])} ignores> "
+    command = (f"<SessionSpec.setup_environment: {len(setup_env)} keys> "
+               f"HIDDEN_PATHS=<{len(hidden)} derived paths, contract "
+               f"{contract['digest'][:12]}> PODSIM_CMD=<derived> "
                f"PODSIM_JUNIT={args.junit} PODSIM_LOG={args.log} bash {SIMULATOR}")
     print(f"staging contract {contract['digest'][:12]}… — "
-          f"{staged_view['n_staged_files']} staged files visible, "
-          f"{len(hidden)} hidden; ignores {contract['test_ignores']}")
+          f"{staged_view['n_staged_files']} staged visible, {len(hidden)} hidden; "
+          f"{len(setup_env)} setup env keys incl SESSION_KIND="
+          f"{setup_env.get('SESSION_KIND')}; ignores {contract['test_ignores']}")
+
+    # THE ATTEMPT-4 FAILURE MODE, refused before a PASS can be written: the
+    # declaration and the invocation must agree. Hashing a contract the sweep did
+    # not actually run under is what produced a green record for a machine 55
+    # tests more generous than the pod.
+    realization = check_invocation_matches(contract, setup_env, pytest_cmd, env)
     started = time.time()
     if args.from_existing:
         rc, seconds = 0, 0.0
@@ -205,17 +283,27 @@ def main() -> int:
             "hf_hub_cache_resolution": "$HF_HOME/hub, set explicitly as HF_HUB_CACHE",
             "token_mode": "synthetic, non-empty; never printed, never a real credential",
             "dev_hf_cache_visible": False,
-            "artifact_hiding": ("the simulator's default HIDDEN_PATHS — the "
-                                "gitignored artifacts a session bundle cannot carry"),
+            "artifact_hiding": (
+                f"manifest-derived positive staged view: {staged_view['n_staged_files']} "
+                f"files visible from the C1 SetupManifest, {len(hidden)} hidden as "
+                f"the computed complement. NOT the simulator's generic default."),
         },
-        "pytest_command": (
-            ".venv/bin/python -m pytest tests/ -q "
-            "--ignore=tests/data/test_recovery_corpus_pipeline.py "
-            "--ignore=tests/pod/test_phase_a_stages1_5_execute.py"),
+        # THE command handed to PODSIM_CMD, not a transcription of one. A record
+        # that restates the command cannot be checked against the JUnit it claims
+        # to describe; attempt 4's said two ignores while the sweep ran a
+        # different selection entirely.
+        "pytest_command": pytest_cmd,
         "pytest_command_note": (
-            "identical in test SELECTION to the pod gate in "
-            "autoinit_preflight_setup.sh; --junitxml is a reporting flag added by "
-            "the simulator so every skip and pass can be named exactly."),
+            "verbatim from PODSIM_CMD. Test SELECTION is the session's own "
+            "SESSION_TEST_IGNORES; --junitxml is appended by the simulator as a "
+            "reporting flag so every skip and pass can be named exactly."),
+        "setup_environment": {k: v for k, v in sorted(setup_env.items())},
+        "setup_environment_source": (
+            "SessionSpec.setup_environment(session_commit=<swept HEAD>, "
+            "bundle=canonical_bundle_name(<swept HEAD>)) -- the same production "
+            "method SessionRunner._launch calls. Not a reconstructed subset. No "
+            "secret is stored: none of these keys carries one."),
+        "invocation_realized": realization,
         "simulator_exit_code": rc,
         "seconds": seconds,
         "counts": findings["counts"],
@@ -235,6 +323,9 @@ def main() -> int:
         "evidence": {"junit": args.junit, "pytest_log": args.log},
         "renderer_parity_is_proved_by": "logs/c1_renderer_parity.json",
     }
+    if realization["problems"]:
+        record["problems"] = list(record["problems"]) + realization["problems"]
+        record["verdict"] = "FAIL"
     if rc != 0 and not record["problems"]:
         record["problems"] = [f"the simulator exited {rc} with no failing nodeid"]
     record["self_sha256"] = self_hash(record)

@@ -59,10 +59,9 @@
   "latest_verification": {
     "utc": "2026-09-05T00:00:00Z",
     "owned_by": "logs/c1_pod_environment_verification.json",
-    "owns": "record_kind, swept_base_commit, staging-contract digest, test counts, harness digest, pod-test-environment digest and verdict. Read them THERE.",
+    "owns": "record_kind, swept_base_commit, staging-contract digest, setup environment, counts, both digests and verdict. Read them THERE.",
     "renderer_parity_owned_by": "logs/c1_renderer_parity.json",
-    "last_paid_attempt_owned_by": "logs/autoinit_c1_attempt4/test_gate_failures.json",
-    "why_not_duplicated": "a copy of a fact the record owns can only go stale, exactly as baseline_commit did."
+    "last_paid_attempt_owned_by": "logs/autoinit_c1_attempt4/test_gate_failures.json"
   },
   "abandoned": [
     "recovery_search_v1; calib.reasoning_heavy@v1 (both INVALID/UNBUILDABLE before use)",
@@ -71,8 +70,8 @@
     "the ATTENTION 'search declined to calibrate' reading: WITHDRAWN 2026-09-01"
   ],
   "next_starting_point": {
-    "status": "C1 attempt 4 aborted at the pod CPU test gate. No C1 measurement exists. Nothing is authorized.",
-    "the_ask": "reviewer decision. Three defect classes are enumerated and NONE is repaired -- this closeout is metadata only.",
+    "status": "Attempt-4 pod-fidelity repair complete at $0 and diagnostic-only. No C1 measurement exists; nothing is authorized.",
+    "the_ask": "reviewer decision on whether the pod-environment contract is now closed, and only then on a further grant.",
     "budget": "$265.0864 spent of the unchanged $283.7600 cap; $18.6736 uncommitted."
   },
   "read_order": [
@@ -126,17 +125,17 @@
       "status": "IMPLEMENTED / FIVE LAUNCH ATTEMPTS / NOT SCIENTIFICALLY EXECUTED / NOT CURRENTLY AUTHORIZED",
       "what_it_is": "fixed-path ATTENTION isolation, 2 arms x 3 fresh seeds = 6 E1_KD_HEAVY_0860K probes. NOT recovery evidence.",
       "incumbent": "fe9683e6a9c783bbc6fe276a78c851c6, digest c313d1b4081b. NOT recovered; margin in phase_b_result.",
-      "execution_prereg": "logs/phase_c1_execution_preregistration.json 71137f55c7fd at head_commit c8a2961c; harness 974c8fa744d3 over 68 files",
+      "execution_prereg": "logs/phase_c1_execution_preregistration.json 4981da3fec14 at head_commit e9775ac6; harness 0dc24c144cbc over 69 files",
       "pricing": "logs/phase_c1_pricing.json 909ed65f -- secure L40S $1.09/h, CEILING $15.1475.",
       "seeds": "1635674081, 1656475568, 696460635 (derived from the C0 digest)",
       "scoring": "c1_confirmation_scoring@v1 77507935; equivalence IDENTICAL over 15 probes. @v2 808080a7 and battery a285d61f untouched.",
       "attempts": "5 attempt LABELS: 1, 2, 3, 3R, 4. FOUR created paid provider resources; attempt 3 created none ($0.00). $1.2267 of C1 infrastructure spend, ZERO science. Ledger: BUDGET_LEDGER.md.",
       "gates": "12 pre-provider gates. Detail: STATE.md, decisions.md 2026-09-04.",
-      "blocker": "attempt 4 aborted at the pod CPU test gate. All 6 nodeids repaired: 1 skips (readiness), 2 skip with the role named, 3 ignored as a whole module. A 4th defect -- the vacuous battery_v2 pass -- is closed. KNOWN LIMITATION: the simulation does not model out-of-tree host-local stores, so 5 host-local tests run there that SKIP on a real pod. decisions.md 2026-09-05.",
-      "needs": "a new maintainer grant; no automatic retry",
+      "blocker": "Attempt-4 defects REPAIRED at $0: the staged view and the child pytest environment are now derived from the C1 SessionSpec, 4 whole-module ignores flow from the manifest, 3 battery source cases and 2 host-local Phase-A cases skip explicitly, and the vacuous battery_v2 pass is closed. C1 has still NEVER been measured. No grant.",
+      "needs": "reviewer decision; no grant, no authorization, no automatic retry",
       "not_built": "no grant; the pre-ATTENTION parent rebuild and the ~8 GB teacher weights need GPU/network and have not run locally",
       "evidence": "logs/autoinit_c1_attempt3r/ (the 5-count row is WITHDRAWN)",
-      "readiness": "logs/c1_renderer_parity.json (7/7) and logs/c1_pod_environment_verification.json (DIAGNOSTIC, kind=diagnostic; gate 12 requires launch_bound). The staged view is now DERIVED from the C1 SetupManifest, contract 1ebd6778."
+      "readiness": "logs/c1_renderer_parity.json (7/7) and c1_pod_environment_verification.json (DIAGNOSTIC only; gate 12 requires launch_bound). Staged view and setup environment both DERIVED from the C1 SessionSpec; staging contract 9ef2356ee807."
     },
     "c2": {
       "status": "NOT STARTED",

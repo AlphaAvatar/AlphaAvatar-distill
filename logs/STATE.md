@@ -175,6 +175,36 @@ checks both digests, so a file in both is already caught by the first; the secon
 binding added nothing and made two lists look like independent evidence. The two
 sets are now asserted disjoint.
 
+### The pod contract is now REALIZED, not merely hashed — 2026-09-05
+
+Attempt 4's readiness record hashed the C1 `SetupManifest` and then launched
+pytest under nothing but `PODSIM`/`HIDDEN_PATHS`. The contract was **hashed but
+never realized**: the child process never saw `SESSION_KIND=c1`, the staged view
+was the simulator's generic default, and the recorded pytest command was a
+hand-written string naming two ignores while the sweep ran a different selection.
+Every one of those could disagree with the manifest and nothing noticed.
+
+Both halves are now derived from the same `SessionSpec` the runner launches. The
+staged view comes from the manifest at file granularity; the environment comes
+from **`SessionSpec.setup_environment(session_commit=…, bundle=…)`**, the
+production method itself, merged into the simulator subprocess — twelve keys
+including `SESSION_KIND=c1`, `SESSION_TEST_IGNORES`, `SESSION_ASSETS` and
+`SESSION_RELAY_INPUTS`. The recorded command is the one handed to `PODSIM_CMD`,
+not a transcription of it.
+
+`check_invocation_matches` then compares all three declared facts — selection,
+environment, staging — against what the subprocess actually received, and any
+disagreement forces the verdict to FAIL **before** a record can be written. That
+is the attempt-4 failure mode expressed as code.
+
+Host-local Phase-A evidence is resolved by session semantics rather than by
+pretending the dev box's external store is a C1 input.
+`tests/autoinit/test_stage1_import.py` is a fourth whole-module ignore — the
+module runs against the real Attempt-12 retained checkpoints and module-skips on
+any machine without them. In `test_recovery_continuation_session.py` only the two
+cases whose premise is that store skip, and only under `SESSION_KIND=c1`; the
+rest of the module is portable structural evidence and still runs everywhere.
+
 ### A diagnostic sweep cannot authorize a paid launch — closed 2026-09-05
 
 The record carries `record_kind`: `diagnostic` proves the machinery and that the
@@ -328,7 +358,7 @@ Design and implementation proceeded at `$0`; **execution did not**. What exists:
 | teacher shard binding | [`phase_c1_teacher_binding.json`](phase_c1_teacher_binding.json) |
 
 | ten-stage session contract + the two fail-stop replay gates | `autoinit/c1_session.py` |
-| execution preregistration | [`phase_c1_execution_preregistration.json`](phase_c1_execution_preregistration.json) · `71137f55c7fd18ff…` at `head_commit c8a2961` · harness `974c8fa744d3…` over 68 files · every earlier revision moved only executable identity; no scientific field has ever moved |
+| execution preregistration | [`phase_c1_execution_preregistration.json`](phase_c1_execution_preregistration.json) · `4981da3fec142f32…` at `head_commit e9775ac` · harness `0dc24c144cbc…` over 69 files · every earlier revision moved only executable identity; no scientific field has ever moved |
 | price bound | [`phase_c1_pricing.json`](phase_c1_pricing.json) · REPRICED to secure L40S **$1.09/h** · floor **$13.4401** · soft stop **$14.7841** · **ceiling $15.1475** |
 | evidence declaration | [`configs/autoinit/c1_artifacts.json`](../configs/autoinit/c1_artifacts.json) + [`_failed`](../configs/autoinit/c1_artifacts_failed.json) — inside the measured harness, so editing what survives teardown moves the digest a grant binds |
 | standalone session | `scripts/pod/autoinit_c1_launch.py` + `autoinit_c1_driver.py` · `SESSION_KIND=c1` · `C1Authorization` · **12** pre-provider gates · no Phase-A driver or launcher in the closure |

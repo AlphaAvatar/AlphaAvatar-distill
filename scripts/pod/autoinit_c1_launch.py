@@ -153,9 +153,17 @@ TEACHER_REVISION = CS.TEACHER_REVISION
 #: rest on the same absent store and would fail the moment they were reached.
 #: Staging the store instead was rejected — it is Phase-B reuse evidence, not a C1
 #: runtime input, and no frozen Phase-B science is touched here.
+#: `test_stage1_import.py` joined on 2026-09-05. The WHOLE module runs against
+#: the real Attempt-12 retained checkpoints at
+#: `/home/ecs-user/aad-artifacts/autoinit/phase_a`, and module-skips on any
+#: machine without that store — which is every pod. It is host-local Phase-A
+#: evidence, not a declared C1 staged input, and copying it onto a billing GPU to
+#: satisfy pytest was rejected. This changes C1 TEST SELECTION only; the module's
+#: Phase-A and continuation semantics are untouched.
 TEST_IGNORES = ("tests/data/test_recovery_corpus_pipeline.py",
                 "tests/pod/test_phase_a_stages1_5_execute.py",
-                "tests/autoinit/test_phase_b_reuse_hostlocal.py")
+                "tests/autoinit/test_phase_b_reuse_hostlocal.py",
+                "tests/autoinit/test_stage1_import.py")
 
 STATUS = f"{WS}/autoinit_c1.status"
 RUN_LOG = f"{WS}/autoinit_c1_run.log"

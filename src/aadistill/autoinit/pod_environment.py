@@ -138,6 +138,19 @@ DEVBOX_ONLY_NODEIDS: tuple[str, ...] = (
     "test_an_undeclared_file_inside_a_staged_destination_stays_hidden",
 )
 
+#: Host-local Phase-A integration cases, scoped by `SESSION_KIND=c1`. Their
+#: premise is the retained leaf store at an absolute dev-box path that is
+#: deliberately never staged to a pod. They are named SEPARATELY from the other
+#: expected skips rather than folded into that count, because they skip for a
+#: different reason: not "this source is absent here" but "this session does not
+#: own that store". On a real pod they also skip, via their own store check.
+HOST_LOCAL_C1_NODEIDS: tuple[str, ...] = (
+    "tests/pod/test_recovery_continuation_session.py::"
+    "test_the_real_stage1_entrypoint_imports_measures_admits_and_hands_off",
+    "tests/pod/test_recovery_continuation_session.py::"
+    "test_the_entrypoint_refuses_a_substituted_leaf",
+)
+
 #: Structural tests that failed on the pod for repository-state reasons and are
 #: reported separately, because "fixed" was claimed for them once already.
 REPOSITORY_STATE_NODEIDS: tuple[str, ...] = (
@@ -263,6 +276,8 @@ def evaluate_sweep(outcomes: dict[str, str]) -> dict[str, Any]:
     repo_state = {n: outcomes.get(n, "ABSENT") for n in REPOSITORY_STATE_NODEIDS}
     repo_state_ok = all(s == "passed" for s in repo_state.values())
 
+    hostlocal = {n: outcomes.get(n, "ABSENT") for n in HOST_LOCAL_C1_NODEIDS}
+    hostlocal_ok = all(v == "skipped" for v in hostlocal.values())
     devbox = {n: outcomes.get(n, "ABSENT") for n in DEVBOX_ONLY_NODEIDS}
     devbox_ok = all(v == "skipped" for v in devbox.values())
     battery = {n: outcomes.get(n, "ABSENT") for n in BATTERY_SOURCE_NODEIDS}
@@ -275,9 +290,10 @@ def evaluate_sweep(outcomes: dict[str, str]) -> dict[str, Any]:
     # empty HOME is indistinguishable from one that never existed.
     watched = ("tests/data/test_c1_battery.py",
                "tests/autoinit/test_leaf_transport_publish.py",
-               "tests/autoinit/test_staging_contract.py")
+               "tests/autoinit/test_staging_contract.py",
+               "tests/pod/test_recovery_continuation_session.py")
     expected_skips = (set(RENDERER_PARITY_NODEIDS) | set(BATTERY_SOURCE_NODEIDS)
-                      | set(DEVBOX_ONLY_NODEIDS))
+                      | set(DEVBOX_ONLY_NODEIDS) | set(HOST_LOCAL_C1_NODEIDS))
     unexpected = sorted(
         n for n, s in outcomes.items()
         if s == "skipped" and n.startswith(watched) and n not in expected_skips)
@@ -291,6 +307,9 @@ def evaluate_sweep(outcomes: dict[str, str]) -> dict[str, Any]:
         problems.append(f"leaf transport did not pass 5/5: {leaf}")
     if not repo_state_ok:
         problems.append(f"repository-state tests did not pass: {repo_state}")
+    if not hostlocal_ok:
+        problems.append(f"host-local Phase-A cases did not skip under "
+                        f"SESSION_KIND=c1: {hostlocal}")
     if not devbox_ok:
         problems.append(f"dev-box-only staging self-tests did not skip inside the "
                         f"simulation: {devbox}")
@@ -314,6 +333,8 @@ def evaluate_sweep(outcomes: dict[str, str]) -> dict[str, Any]:
         "leaf_transport_all_passed": leaf_ok,
         "repository_state": repo_state,
         "repository_state_all_passed": repo_state_ok,
+        "host_local_c1_expected_skips": hostlocal,
+        "host_local_c1_skipped_as_expected": hostlocal_ok,
         "devbox_only_expected_skips": devbox,
         "devbox_only_skipped_as_expected": devbox_ok,
         "battery_source_expected_skips": battery,

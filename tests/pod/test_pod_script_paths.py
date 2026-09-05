@@ -647,7 +647,7 @@ def test_the_simulator_runs_each_session_s_own_ignore_list():
     assert '"PODSIM_CMD": pytest_cmd' in recorder, (
         "the recorder no longer passes a derived PODSIM_CMD, so the simulation "
         "would fall back to the generic default -- the attempt-4 defect")
-    assert "derive_c1_staging()" in recorder
+    assert "derive_c1_session()" in recorder
 
     for name, extra in SESSION_LAUNCHERS:
         mod = load_session_launcher(name)

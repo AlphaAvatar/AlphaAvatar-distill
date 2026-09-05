@@ -1,5 +1,39 @@
 # Decision records
 
+## 2026-09-05 — The pod contract must be realized, not merely hashed
+
+- **The remaining defect.** The readiness record hashed the C1 `SetupManifest`,
+  then launched pytest with only `PODSIM`/`HIDDEN_PATHS` set. The declaration and
+  the invocation were never compared, so the child never saw `SESSION_KIND=c1`,
+  the staged view was the generic default, and the recorded `pytest_command` was
+  a literal naming two ignores while the sweep ran a different selection. A
+  hashed contract that is not realized is not evidence of anything.
+- **Decision.** The environment now comes from
+  `SessionSpec.setup_environment(session_commit=<swept HEAD>, bundle=<canonical
+  name>)` — the production method `SessionRunner._launch` calls, not a
+  reconstruction — merged into the simulator subprocess. Twelve keys, including
+  `SESSION_KIND=c1`. The recorded command is the string handed to `PODSIM_CMD`.
+  `check_invocation_matches` compares selection, environment and staging against
+  what the subprocess received and forces FAIL on any disagreement, before a
+  record exists.
+- **Host-local Phase-A, by session semantics.** `test_stage1_import.py` becomes a
+  fourth whole-module C1 ignore: the module runs against the real Attempt-12
+  retained checkpoints and module-skips wherever they are absent, which is every
+  pod. In `test_recovery_continuation_session.py` only the two cases whose premise
+  is that store skip, scoped by `SESSION_KIND=c1`, because most of that module is
+  portable structural evidence that must keep running. The dev box's external
+  store is NOT simulated or copied as a C1 input.
+- **The three "extra" failures were stale, and are verified so.** The 8-failure
+  record stands unedited as history. Re-running its three preregistration/harness
+  nodeids against the final tree: all three PASS. They were sweep-order artifacts
+  of regenerating the preregistration after the sweep, not defects.
+- **Counting.** The C1 readiness-owned expected skip set is FOURTEEN in four
+  separately-named groups: 7 renderer-parity, 3 battery construction-source, 2
+  dev-box-only staging self-tests, 2 host-local Phase-A. It is not a claim about
+  the whole repository, which has other legitimate skips.
+- **Revisit when:** the reviewer rules on whether the pod-environment contract is
+  closed. No grant is implied or requested.
+
 ## 2026-09-05 — Attempt-4 root cause, restated: one escape mechanism, three classes, one vacuous pass
 
 - **Supersedes a sentence, not the evidence.** The closeout entry below says "the

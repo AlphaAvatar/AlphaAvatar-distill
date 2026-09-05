@@ -159,13 +159,14 @@ def test_the_recorder_derives_and_never_falls_back(contract):
     """No default path. A sweep that cannot say what this session stages must
     not run at all, because that is exactly what attempt 4 did."""
     src = (REPO / "scripts/autoinit/record_pod_environment.py").read_text()
-    assert "derive_c1_staging()" in src
+    assert "derive_c1_session()" in src
     assert '"HIDDEN_PATHS"' in src and '"PODSIM_CMD"' in src
     assert "hidden_files(contract, REPO_ROOT)" in src
     # No except-and-continue around the derivation.
-    head = src[src.index("def derive_c1_staging"):src.index("def main(")]
+    head = src[src.index("def derive_c1_session"):
+               src.index("def check_invocation_matches")]
     assert "except" not in head, (
-        "derive_c1_staging swallows an error and would let the sweep fall back "
+        "derive_c1_session swallows an error and would let the sweep fall back "
         "to the generic simulator default")
 
 
@@ -244,3 +245,132 @@ def test_the_verifier_declares_every_role_and_cross_checks_frozen_counts():
     for role, (key, rows_field, _ids) in v.EXPECTED.items():
         assert key in manifest["isolation"], role
         assert rows_field in manifest["isolation"][key], (role, rows_field)
+
+
+# --- the environment the child process actually runs under -------------------
+#
+# Attempt 4's record hashed the SetupManifest and then launched pytest under
+# nothing but PODSIM variables. The contract was hashed but never REALIZED: the
+# child never saw SESSION_KIND=c1, so any test keying on it behaved as though it
+# were some other session. These pin the realization, not the declaration.
+
+def _c1_session():
+    import sys as _sys
+    _sys.path.insert(0, str(REPO / "scripts/autoinit"))
+    from record_pod_environment import derive_c1_session
+    return derive_c1_session()
+
+
+def test_the_setup_environment_comes_from_the_production_method():
+    """`SessionSpec.setup_environment`, not a reconstructed subset."""
+    src = (REPO / "scripts/autoinit/record_pod_environment.py").read_text()
+    assert "spec.setup_environment(session_commit=" in src
+    assert "**setup_env," in src, "the production env is not merged into the child"
+    spec, contract, view, env = _c1_session()
+    for key in ("SESSION_COMMIT", "BUNDLE_NAME", "SESSION_STATUS",
+                "SESSION_AUTH_PATH", "SESSION_PLAN_HASH", "SESSION_ASSETS",
+                "SESSION_RELAY_INPUTS", "SESSION_TEST_IGNORES", "UV_MAX_S",
+                "TESTS_MAX_S", "TEACHER_REVISION", "SESSION_KIND"):
+        assert key in env, key
+    assert env["SESSION_KIND"] == "c1"
+
+
+def test_the_simulated_environment_equals_the_production_session_values():
+    """SESSION_TEST_IGNORES, SESSION_ASSETS and SESSION_RELAY_INPUTS observed in
+    simulation must be the SessionSpec's own values."""
+    spec, contract, view, env = _c1_session()
+    assert env["SESSION_TEST_IGNORES"] == spec.setup.test_ignores_env()
+    assert env["SESSION_ASSETS"] == spec.setup.assets_env()
+    assert env["SESSION_RELAY_INPUTS"] == spec.setup.relay_env()
+    assert env["SESSION_PLAN_HASH"] == spec.plan_hash
+    assert env["SESSION_AUTH_PATH"] == spec.authorization_path
+
+
+def test_changing_session_kind_moves_the_digest_and_the_child_environment(tmp_path):
+    """Both halves, because attempt 4 had the first without the second."""
+    import copy
+    import subprocess as sp
+    spec, contract, view, env = _c1_session()
+
+    changed = copy.copy(spec.setup)
+    object.__setattr__(changed, "env", {"SESSION_KIND": "not_c1"})
+    assert sc.derive_contract(changed)["digest"] != contract["digest"]
+
+    probe = "import os,sys; sys.stdout.write(os.environ.get('SESSION_KIND','<unset>'))"
+    seen = sp.run([sys.executable, "-c", probe], capture_output=True, text=True,
+                  env={**os.environ, **env}).stdout
+    assert seen == "c1", f"a child process observed SESSION_KIND={seen!r}"
+    other = sp.run([sys.executable, "-c", probe], capture_output=True, text=True,
+                   env={**os.environ, **env, "SESSION_KIND": "not_c1"}).stdout
+    assert other == "not_c1", "the probe cannot see the variable at all"
+
+
+def test_the_recorder_records_the_command_it_ran_not_a_transcription():
+    """A record that restates its command cannot be checked against its JUnit.
+    Attempt 4's said two ignores while the sweep ran a different selection."""
+    src = (REPO / "scripts/autoinit/record_pod_environment.py").read_text()
+    assert '"pytest_command": pytest_cmd,' in src
+    assert '"--ignore=tests/data/test_recovery_corpus_pipeline.py "' not in src, (
+        "a hand-transcribed pytest command is back in the record")
+    assert "the simulator's default HIDDEN_PATHS" not in src, (
+        "the record still describes the generic default it no longer uses")
+
+
+# --- item 8: hashed-but-not-realized must be impossible ----------------------
+
+def test_a_mismatched_invocation_refuses_before_a_pass_record_exists():
+    """THE attempt-4 failure mode, as a test.
+
+    Each of the three facts a manifest declares -- test selection, environment,
+    staging -- is compared against what was handed to the subprocess, and any
+    disagreement becomes a problem that forces the verdict to FAIL.
+    """
+    import sys as _sys
+    _sys.path.insert(0, str(REPO / "scripts/autoinit"))
+    from record_pod_environment import check_invocation_matches
+
+    spec, contract, view, env = _c1_session()
+    cmd = (".venv/bin/python -m pytest tests/ -q "
+           + " ".join(f"--ignore={i}" for i in contract["test_ignores"]))
+    good = {**env, "HIDDEN_PATHS": "a\nb", "PODSIM_CMD": cmd}
+    assert check_invocation_matches(contract, env, cmd, good)["problems"] == []
+
+    # 1. test selection differs from the manifest
+    fewer = ".venv/bin/python -m pytest tests/ -q --ignore=tests/only_one.py"
+    r = check_invocation_matches(contract, env, fewer,
+                                 {**good, "PODSIM_CMD": fewer})
+    assert any("test selection mismatch" in p for p in r["problems"])
+
+    # 2. the environment is not realized in the child
+    r = check_invocation_matches(contract, env, cmd,
+                                 {**good, "SESSION_KIND": "phase_a"})
+    assert any("setup environment mismatch" in p for p in r["problems"])
+
+    # 3. no derived staged view was passed -- the attempt-4 fallback
+    no_hidden = {k: v for k, v in good.items() if k != "HIDDEN_PATHS"}
+    r = check_invocation_matches(contract, env, cmd, no_hidden)
+    assert any("generic default" in p for p in r["problems"])
+
+    # and the recorder turns any of those into a FAIL verdict
+    src = (REPO / "scripts/autoinit/record_pod_environment.py").read_text()
+    assert 'if realization["problems"]:' in src
+    assert 'record["verdict"] = "FAIL"' in src
+
+
+def test_the_host_local_cases_are_named_separately_from_the_source_skips():
+    """They skip for a different reason and must not be folded into that count."""
+    from aadistill.autoinit import pod_environment as pe
+    assert len(pe.HOST_LOCAL_C1_NODEIDS) == 2
+    assert not (set(pe.HOST_LOCAL_C1_NODEIDS)
+                & (set(pe.RENDERER_PARITY_NODEIDS) | set(pe.BATTERY_SOURCE_NODEIDS)
+                   | set(pe.DEVBOX_ONLY_NODEIDS)))
+
+
+def test_c1_ignores_exactly_the_four_whole_modules():
+    spec, contract, view, env = _c1_session()
+    assert list(contract["test_ignores"]) == [
+        "tests/data/test_recovery_corpus_pipeline.py",
+        "tests/pod/test_phase_a_stages1_5_execute.py",
+        "tests/autoinit/test_phase_b_reuse_hostlocal.py",
+        "tests/autoinit/test_stage1_import.py",
+    ]
