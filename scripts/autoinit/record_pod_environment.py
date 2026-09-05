@@ -259,8 +259,11 @@ def main() -> int:
         "record_kind_note": (
             "diagnostic: proves the pod-like suite passes on this exact tree and "
             "that the readiness machinery works. A launch-bound record is the one "
-            "a maintainer-approved C1 launch rests on, and is owed at the time "
-            "that grant is issued."),
+            "a maintainer-approved C1 launch rests on. It is produced on the final "
+            "CLEAN PRE-AUTHORIZATION tree -- after the grant and all metadata are "
+            "committed, BEFORE the authorization is issued -- because a sweep run "
+            "after issuance adds a second path to the lineage diff and "
+            "session_commit_gate refuses."),
         "tree_clean": clean_before,
         "c1_harness_digest": harness["digest"],
         "c1_harness_n_files": harness["n_files"],

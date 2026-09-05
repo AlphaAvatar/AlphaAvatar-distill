@@ -986,3 +986,61 @@ def test_the_non_environment_exemption_is_named_and_narrow():
         "tests/pod/test_recovery_continuation_session.py::test_something_new":
             "skipped"}))
     assert findings["verdict"] == "FAIL"
+
+
+# --- the preregistration's operational contract ------------------------------
+
+def test_the_prereg_gate_count_and_order_equal_the_live_session():
+    """It said 10 while `spec.precheck` had held 12 since the two readiness gates
+    were added — a false execution fact in the document an authorization binds."""
+    import importlib.util
+
+    doc = json.loads(
+        (REPO / "logs/phase_c1_execution_preregistration.json").read_text())
+    transport = doc["transport"]
+
+    sys.path.insert(0, str(REPO / "scripts/pod"))
+    loader = importlib.util.spec_from_file_location(
+        "_c1_launch_for_test", REPO / "scripts/pod/autoinit_c1_launch.py")
+    mod = importlib.util.module_from_spec(loader)
+    sys.modules["_c1_launch_for_test"] = mod
+    loader.loader.exec_module(mod)
+    args = mod.build_parser().parse_args(
+        ["--scr", "/tmp/x", "--session-commit", "0" * 40,
+         "--bundle", "aad_autoinit_00000000.bundle"])
+    live = mod.spec(args).precheck
+    names = [getattr(g, "__name__", "session_commit_and_lineage") for g in live]
+
+    assert transport["n_pre_provider_gates"] == len(live) == 12
+    assert transport["pre_provider_gate_order"] == names
+    assert names[-2:] == ["renderer_parity_gate", "pod_environment_gate"]
+
+
+def test_the_prereg_states_the_canonical_issuance_ordering():
+    """Sweep BEFORE issuance. Stated backwards once, and it would refuse at $0."""
+    doc = json.loads(
+        (REPO / "logs/phase_c1_execution_preregistration.json").read_text())
+    steps = doc["transport"]["ordering"]
+    assert len(steps) == 9, steps
+    joined = " ".join(steps).lower()
+    sweep_at = next(i for i, s in enumerate(steps) if "launch_bound" in s)
+    record_at = next(i for i, s in enumerate(steps) if "readiness record" in s)
+    issue_at = next(i for i, s in enumerate(steps) if "issue the authorization" in s)
+    bundle_at = next(i for i, s in enumerate(steps) if "canonical bundle" in s)
+    gates_at = next(i for i, s in enumerate(steps) if "12 $0 pre-provider" in s)
+    provider_at = next(i for i, s in enumerate(steps) if "provider resource" in s)
+    assert sweep_at < record_at < issue_at < bundle_at < gates_at < provider_at
+    assert "why_the_sweep_precedes_issuance" in doc["transport"]
+    assert "ninth gate that closes it" not in json.dumps(doc)
+
+
+def test_the_launch_bound_refusal_names_the_pre_authorization_tree():
+    """Load-bearing operator guidance: the wrong wording produced a backwards
+    issuance order that session_commit_gate would have refused at $0."""
+    src = (REPO / "src/aadistill/autoinit/pod_environment.py").read_text()
+    assert "PRE-AUTHORIZATION tree" in src
+    assert "on the final authorized tree" not in src
+    rec = _valid_record(Path("/tmp"), "diagnostic")
+    ok, why = pe.verify_record(rec, REPO, required_kind=pe.LAUNCH_BOUND)
+    assert not ok
+    assert "PRE-AUTHORIZATION" in why and "BEFORE the authorization is issued" in why

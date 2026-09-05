@@ -520,8 +520,13 @@ def verify_record(record: dict[str, Any], repo_root: str | Path = ".", *,
             f"this record is {kind!r} and {required_kind!r} is required. A "
             "diagnostic sweep proves the machinery works on a tree; it is not the "
             "sweep a paid launch rests on. Re-run "
-            "`record_pod_environment.py --kind launch_bound` on the final "
-            "authorized tree.")
+            "`record_pod_environment.py --kind launch_bound` on the final CLEAN "
+            "PRE-AUTHORIZATION tree -- after the grant and all metadata are "
+            "committed and BEFORE the authorization is issued -- then commit only "
+            "the readiness record, and only then issue and commit the "
+            "authorization. Running it on the authorized tree instead adds a "
+            "second path to the lineage diff and session_commit_gate refuses; "
+            "that ordering was once reported backwards.")
 
     try:
         live_harness = c1_harness_digest(repo_root)["digest"]

@@ -102,8 +102,41 @@ def _equivalence() -> dict:
     return json.loads(p.read_text())
 
 
+def live_prechecks() -> tuple[int, list[str]]:
+    """The pre-provider gate count and order, READ FROM THE LIVE SESSION.
+
+    This was the literal `10` and a comment calling bundle transport "the ninth
+    gate", while `spec.precheck` had held twelve since `renderer_parity_gate` and
+    `pod_environment_gate` were added. A preregistration whose own transport
+    section misstates how many `$0` refusals stand between a grant and a provider
+    is a false execution fact in the document an authorization binds.
+
+    Derived from the same `spec(args)` the launcher builds, so it cannot drift
+    again. The import is side-effect-free: building a `SessionSpec` runs no gate,
+    contacts no relay and reads no authorization.
+    """
+    import importlib.util
+
+    sys.path.insert(0, str(REPO / "scripts/pod"))
+    loader = importlib.util.spec_from_file_location(
+        "_c1_launch_for_prereg", REPO / "scripts/pod/autoinit_c1_launch.py")
+    mod = importlib.util.module_from_spec(loader)
+    sys.modules["_c1_launch_for_prereg"] = mod
+    loader.loader.exec_module(mod)
+    args = mod.build_parser().parse_args(
+        ["--scr", "/tmp/prereg-probe", "--session-commit", "0" * 40,
+         "--bundle", "aad_autoinit_00000000.bundle"])
+    precheck = mod.spec(args).precheck
+    return len(precheck), [getattr(g, "__name__", "session_commit_and_lineage")
+                           for g in precheck]
+
+
 def main() -> None:
     attention_activation.register(replace=True)
+
+    # Read from the live session, so the transport section cannot restate a gate
+    # count the launcher no longer has.
+    _n_prechecks, _precheck_names = live_prechecks()
 
     seeds = derive_recovery_seeds()
     assert len(set(seeds)) == 3 and not set(seeds) & set(HISTORICAL_SEEDS)
@@ -520,7 +553,10 @@ def main() -> None:
 
         #: Whether the pod can OBTAIN the authorized commit. Attempt 1 passed
         #: every content gate and died at SETUP_RC=1 on a bundle that did not
-        #: exist; this is the ninth gate that closes it.
+        #: exist; `bundle_staged_gate` is the gate that closes it. Its ORDINAL is
+        #: not written here: it was "the ninth" until two readiness gates were
+        #: added after attempt 3R, and the ordinal went stale while the sentence
+        #: stayed. The live order is derived below.
         "transport": {
             "canonical_bundle_name": "aad_autoinit_<first 8 hex of session commit>.bundle",
             "relay": "AlphaAvatar/aadistill-artifacts:transfer/<canonical name>",
@@ -536,12 +572,38 @@ def main() -> None:
                      "the authorization inside the checkout to be the artifact the "
                      "launcher is loading and the harness recomputed from that "
                      "checkout to equal the authorized digest"),
-            "ordering": ("repair base -> issue -> commit ONLY the authorization -> "
-                         "that commit is the session commit -> bundle it -> upload "
-                         "-> gate -> provider. A bundle built for the "
-                         "pre-authorization base checks out a tree with no "
-                         "authorization in it"),
-            "n_pre_provider_gates": 10,
+            "ordering": [
+                "1. the maintainer grant and ALL final metadata are committed",
+                "2. that clean pre-authorization tree is frozen: no source, test, "
+                "preregistration, state, catalog or doc path may move after it",
+                "3. the real `--kind launch_bound` pod-like sweep runs on THAT tree",
+                "4. commit ONLY the readiness record",
+                "5. issue the authorization against that clean readiness commit, "
+                "--require-clean",
+                "6. commit ONLY the authorization artifact",
+                "7. stage the canonical bundle for that commit and round-trip it",
+                "8. run all 12 $0 pre-provider gates",
+                "9. create a provider resource ONLY after all 12 pass",
+            ],
+            "why_the_sweep_precedes_issuance": (
+                "session_commit_gate requires the session commit to differ from "
+                "authorized_session_commit by exactly the authorization path. A "
+                "launch-bound sweep run AFTER issuance adds the readiness record "
+                "as a second path and the gate refuses. Run before, the record is "
+                "the permitted readiness delta and the authorization is the "
+                "permitted issuance delta, so both lineage relations hold at once. "
+                "This ordering was once reported backwards; it is derived from the "
+                "gate, not from memory."),
+            "bundle_ordering": (
+                "the bundle must contain the commit that CARRIES the "
+                "authorization, so it is staged at step 7, after step 6. A bundle "
+                "built for the pre-authorization base checks out a tree with no "
+                "authorization in it"),
+            "n_pre_provider_gates": _n_prechecks,
+            "pre_provider_gate_order": _precheck_names,
+            "gate_count_source": (
+                "len(spec(args).precheck) on the live C1 SessionSpec, not a "
+                "literal. The literal said 10 while the session had 12."),
         },
 
         #: SETUP READINESS, explicitly NOT a C1 measurement input. The shared

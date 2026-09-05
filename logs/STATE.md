@@ -223,7 +223,10 @@ editing `record_kind` in place is caught as **tampering**, because the self-hash
 check runs first.
 
 **The current record is `diagnostic`.** A `launch_bound` sweep is owed on the
-final authorized tree, at the time a grant is issued.
+final CLEAN PRE-AUTHORIZATION tree — after the grant and all metadata are
+committed and **before** the authorization is issued. Running it on the
+authorized tree adds a second path to the lineage diff and `session_commit_gate`
+refuses; that ordering was once reported backwards here.
 
 ### `--max-price` comes from the pricing record
 
@@ -358,7 +361,7 @@ Design and implementation proceeded at `$0`; **execution did not**. What exists:
 | teacher shard binding | [`phase_c1_teacher_binding.json`](phase_c1_teacher_binding.json) |
 
 | ten-stage session contract + the two fail-stop replay gates | `autoinit/c1_session.py` |
-| execution preregistration | [`phase_c1_execution_preregistration.json`](phase_c1_execution_preregistration.json) · `09815a99e26fdbb4…` at `head_commit 5b5a889` · harness `30c000a34bdc…` over 69 files · every earlier revision moved only executable identity; no scientific field has ever moved |
+| execution preregistration | [`phase_c1_execution_preregistration.json`](phase_c1_execution_preregistration.json) · `c5a19b6bd4e0c50d…` at `head_commit 9bb2650` · harness `8b4dd4c0a00b…` over 69 files · every earlier revision moved only executable identity; no scientific field has ever moved |
 | price bound | [`phase_c1_pricing.json`](phase_c1_pricing.json) · REPRICED to secure L40S **$1.09/h** · floor **$13.4401** · soft stop **$14.7841** · **ceiling $15.1475** |
 | evidence declaration | [`configs/autoinit/c1_artifacts.json`](../configs/autoinit/c1_artifacts.json) + [`_failed`](../configs/autoinit/c1_artifacts_failed.json) — inside the measured harness, so editing what survives teardown moves the digest a grant binds |
 | standalone session | `scripts/pod/autoinit_c1_launch.py` + `autoinit_c1_driver.py` · `SESSION_KIND=c1` · `C1Authorization` · **12** pre-provider gates · no Phase-A driver or launcher in the closure |

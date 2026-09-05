@@ -3,7 +3,7 @@
  "preregistration_id": "autoinit.v1.phase_c1.execution",
  "written_utc": "2026-09-02T00:00:00Z",
  "_contract": "Everything the Phase-C1 session will run, bound before any C1 result exists. AUTHORIZES NOTHING: no pricing decision, no spend grant, no permission to launch. An authorization, if ever issued, binds THIS document.",
- "head_commit": "5b5a8899d9b8cfb6901d43b75ed6455842f16e60",
+ "head_commit": "9bb2650d16fc9e70dcfeada8f748a3dfb2ef89c7",
  "executable_source": {
   "digest": "7c5a9856f90e79c18382bf3a4a58b2fb647b62ac83be5bdbf3f7e6643d981795",
   "files": [
@@ -51,7 +51,7 @@
   "rule": "sha256 over sorted 'path:sha256' lines of the declared set"
  },
  "c1_harness": {
-  "digest": "30c000a34bdcfe7b1e5dc380e00cf8d6fdbb4e3da2aaa6a4e3f21148967e9750",
+  "digest": "8b4dd4c0a00b02720c193237b6241997ff6d0f9244cd423608542f9c61b7a7b5",
   "files": [
    {
     "path": "configs/autoinit/c1_artifacts.json",
@@ -275,8 +275,8 @@
    },
    {
     "path": "src/aadistill/autoinit/pod_environment.py",
-    "sha256": "edec7632d1dd73a07fa6f8580368e4fc09165941fb74b46707a96bb7f82aee35",
-    "bytes": 29226
+    "sha256": "ff52852ed3d9df10ae9637ef76abb8ab488bced82012e04c2e1f371aa168ec51",
+    "bytes": 29651
    },
    {
     "path": "src/aadistill/autoinit/recovery.py",
@@ -862,8 +862,35 @@
   "derived_from": "--session-commit; an alias fails at $0",
   "preparation": "scripts/autoinit/stage_c1_bundle.py -- MAY mutate the relay; refuses a commit that does not carry the authorization, and refuses to overwrite a different existing remote object",
   "gate": "bundle_staged_gate, READ-ONLY: download the canonical relay object, sha256 it against the staged bundle, git bundle verify the round-tripped bytes, clone and check out the session commit exactly as the pod's setup does, then require the authorization inside the checkout to be the artifact the launcher is loading and the harness recomputed from that checkout to equal the authorized digest",
-  "ordering": "repair base -> issue -> commit ONLY the authorization -> that commit is the session commit -> bundle it -> upload -> gate -> provider. A bundle built for the pre-authorization base checks out a tree with no authorization in it",
-  "n_pre_provider_gates": 10
+  "ordering": [
+   "1. the maintainer grant and ALL final metadata are committed",
+   "2. that clean pre-authorization tree is frozen: no source, test, preregistration, state, catalog or doc path may move after it",
+   "3. the real `--kind launch_bound` pod-like sweep runs on THAT tree",
+   "4. commit ONLY the readiness record",
+   "5. issue the authorization against that clean readiness commit, --require-clean",
+   "6. commit ONLY the authorization artifact",
+   "7. stage the canonical bundle for that commit and round-trip it",
+   "8. run all 12 $0 pre-provider gates",
+   "9. create a provider resource ONLY after all 12 pass"
+  ],
+  "why_the_sweep_precedes_issuance": "session_commit_gate requires the session commit to differ from authorized_session_commit by exactly the authorization path. A launch-bound sweep run AFTER issuance adds the readiness record as a second path and the gate refuses. Run before, the record is the permitted readiness delta and the authorization is the permitted issuance delta, so both lineage relations hold at once. This ordering was once reported backwards; it is derived from the gate, not from memory.",
+  "bundle_ordering": "the bundle must contain the commit that CARRIES the authorization, so it is staged at step 7, after step 6. A bundle built for the pre-authorization base checks out a tree with no authorization in it",
+  "n_pre_provider_gates": 12,
+  "pre_provider_gate_order": [
+   "session_commit_and_lineage",
+   "c1_harness_gate",
+   "pricing_identity_gate",
+   "preregistration_gate",
+   "frozen_c1_science_gate",
+   "teacher_binding_gate",
+   "battery_staged_gate",
+   "artifact_spec_gate",
+   "rope_input_gate",
+   "bundle_staged_gate",
+   "renderer_parity_gate",
+   "pod_environment_gate"
+  ],
+  "gate_count_source": "len(spec(args).precheck) on the live C1 SessionSpec, not a literal. The literal said 10 while the session had 12."
  },
  "setup_readiness": {
   "rope_ok_input": {
@@ -885,5 +912,5 @@
   "any search, ranking, successive halving, tie-breaking or arm elimination"
  ],
  "authorizes": "nothing",
- "preregistration_sha256": "09815a99e26fdbb406d229f45a930cb8d7ac4dc899830492f108e35c0f2562db"
+ "preregistration_sha256": "c5a19b6bd4e0c50d6c0758987fb47f57059a9883d024a7c54681254c4b8f6489"
 }
