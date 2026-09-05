@@ -558,9 +558,38 @@ class SessionRunner:
         if result["setup_done"] in ("", "0"):
             tail = target.run(f"tail -40 {WS}/setup.log", timeout=120).stdout
             self.say(f"setup did not reach SETUP_DONE:\n{tail[-2000:]}")
+            self._collect_setup_failure_evidence(target, draw)
             return "setup_failed"
         self.say(f"draw {draw}: setup complete — ${self.usd():.2f}")
         return "ok"
+
+    def _collect_setup_failure_evidence(self, target, draw: int) -> None:
+        """Pull the session's declared setup-failure files before teardown.
+
+        A setup abort deletes the pod from the setup branch and never reaches
+        artifact collection, and the launcher's own window is `tail -40`. C1
+        attempt 5's complete skip list did not fit in that window, so a
+        sweep/pod divergence it would have named is still unexplained.
+
+        Never raises: this runs while a pod bills, on a path that is already
+        failing, and losing the evidence must not also lose the teardown.
+        """
+        wanted = getattr(self.spec, "setup_failure_files", ())
+        if not wanted:
+            return
+        got: dict[str, str] = {}
+        for remote in wanted:
+            try:
+                out = target.run(f"cat {remote} 2>/dev/null || true",
+                                 timeout=120).stdout
+            except Exception as exc:                      # noqa: BLE001
+                got[remote] = f"<unreadable: {type(exc).__name__}: {exc}>"
+                continue
+            got[remote] = out[:400_000] if out.strip() else "<absent or empty>"
+        self.ev.setdefault("setup_failure_evidence", []).append(
+            {"draw": draw, "files": got})
+        named = ", ".join(sorted(wanted))
+        self.say(f"  preserved setup-failure evidence off-pod: {named}")
 
     # -- 5. run ------------------------------------------------------------
     def run(self) -> bool:

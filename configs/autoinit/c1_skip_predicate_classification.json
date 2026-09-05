@@ -1,0 +1,174 @@
+{
+ "schema": "aadistill.autoinit.c1_skip_predicate_classification/v1",
+ "_what_this_is": "the explicit C1 classification of every skip predicate the automatic audit cannot prove identical between the dev box and the pod. Written after C1 attempt 5 died at the pod test gate on a predicate keyed to the SIMULATOR's AAD_SYNTHETIC_HF_TOKEN. Each entry names the machine property the predicate actually reads and how a pod decides it.",
+ "how_it_is_checked": "scripts/autoinit/audit_skip_predicates.py resolves what it can from the manifest, the git index and the source, and requires every remaining predicate to appear here. A registered line that no longer holds a predicate is STALE and also fails, so this cannot rot into a list of excuses.",
+ "classes": {
+  "devbox_only_artifact": {
+   "decides_on_pod": "SKIP",
+   "why": "the premise is a gitignored artifact from an earlier experiment that C1's SetupManifest does not stage. A pod never receives it, so the test skips there by design. This is the SAME class as the two attempt-5 failures \u2014 the difference is that these ask the FILESYSTEM whether the artifact is present, so the pod and the simulation both answer correctly, while attempt 5's asked for a simulator marker the pod does not set."
+  },
+  "pinned_snapshot_source": {
+   "decides_on_pod": "SKIP",
+   "why": "depends on the seven pinned HF dataset snapshots, which live in the host HF cache and are not staged. Already a named readiness group (renderer parity / battery source); the sweep expects these skips."
+  },
+  "local_hf_cache": {
+   "decides_on_pod": "SKIP or RUN, machine-dependent",
+   "why": "needs the teacher tokenizer from the local HF cache. The pod exports HF_TOKEN and can populate it; the bare dev box may not have it. Skips cleanly either way and asserts nothing about the code."
+  },
+  "staging_premise_property": {
+   "decides_on_pod": "SKIP",
+   "why": "the repaired attempt-5 guards. They ask the filesystem for the property they need, so the dev box runs them and the pod and the simulation skip them for the same stated reason."
+  },
+  "session_semantics": {
+   "decides_on_pod": "SKIP",
+   "why": "keyed on SESSION_KIND, which the SetupManifest sets identically in the simulation and on the pod. This is the CORRECT shape of an environment guard: the session declares it, so both agree."
+  },
+  "manifest_derived": {
+   "decides_on_pod": "same as here",
+   "why": "decided by the SessionSpec or by tracked source text, not by the machine, so the sweep's verdict is the pod's verdict."
+  },
+  "machine_capability": {
+   "decides_on_pod": "SKIP or RUN, machine-dependent",
+   "why": "needs bubblewrap, the repo venv, the canonical checkpoint and a 196-wheel vLLM wheelhouse. A rehearsal harness, not a claim about C1; it skips with the specific capability it lacks."
+  }
+ },
+ "predicates": {
+  "tests/autoinit/test_c1_confirmation_scoring.py:106": {
+   "class": "devbox_only_artifact"
+  },
+  "tests/autoinit/test_c1_confirmation_scoring.py:145": {
+   "class": "devbox_only_artifact"
+  },
+  "tests/autoinit/test_c1_confirmation_scoring.py:157": {
+   "class": "devbox_only_artifact"
+  },
+  "tests/autoinit/test_c1_confirmation_scoring.py:192": {
+   "class": "devbox_only_artifact"
+  },
+  "tests/autoinit/test_c1_confirmation_scoring.py:97": {
+   "class": "devbox_only_artifact"
+  },
+  "tests/autoinit/test_c1_readiness_gates.py:96": {
+   "class": "pinned_snapshot_source"
+  },
+  "tests/autoinit/test_frozen_records.py:115": {
+   "class": "devbox_only_artifact"
+  },
+  "tests/autoinit/test_frozen_records.py:54": {
+   "class": "devbox_only_artifact"
+  },
+  "tests/autoinit/test_frozen_records.py:68": {
+   "class": "devbox_only_artifact"
+  },
+  "tests/autoinit/test_frozen_records.py:78": {
+   "class": "devbox_only_artifact"
+  },
+  "tests/autoinit/test_staging_contract.py:77": {
+   "class": "staging_premise_property",
+   "note": "the other two guards in this module (the destination-absent and nothing-undeclared premises) need NO entry: they resolve automatically to artifacts/stage1/qwen3_0p6b_init_v0/checkpoint, which C1's manifest stages, so the audit proves the premise travels."
+  },
+  "tests/data/test_c1_battery.py:260": {
+   "class": "pinned_snapshot_source"
+  },
+  "tests/data/test_c1_battery.py:63": {
+   "class": "pinned_snapshot_source"
+  },
+  "tests/data/test_c1_battery.py:66": {
+   "class": "pinned_snapshot_source"
+  },
+  "tests/data/test_dataset.py:32": {
+   "class": "local_hf_cache"
+  },
+  "tests/data/test_e7_streams.py:21": {
+   "class": "devbox_only_artifact"
+  },
+  "tests/data/test_sessions.py:56": {
+   "class": "local_hf_cache"
+  },
+  "tests/docs/test_repository_structure.py:139": {
+   "class": "devbox_only_artifact"
+  },
+  "tests/docs/test_storage_inventory.py:76": {
+   "class": "devbox_only_artifact"
+  },
+  "tests/evaluation/test_capability.py:357": {
+   "class": "devbox_only_artifact"
+  },
+  "tests/evaluation/test_e6_analysis.py:28": {
+   "class": "devbox_only_artifact"
+  },
+  "tests/evaluation/test_e6_registration.py:101": {
+   "class": "devbox_only_artifact"
+  },
+  "tests/evaluation/test_oracle_reasoning.py:31": {
+   "class": "local_hf_cache"
+  },
+  "tests/evaluation/test_perf_trend.py:76": {
+   "class": "devbox_only_artifact"
+  },
+  "tests/evaluation/test_strict_answer.py:141": {
+   "class": "devbox_only_artifact"
+  },
+  "tests/pod/test_c1_driver_execution.py:202": {
+   "class": "devbox_only_artifact"
+  },
+  "tests/pod/test_c1_session_contract.py:275": {
+   "class": "devbox_only_artifact"
+  },
+  "tests/pod/test_continuation_rehearsal.py:49": {
+   "class": "devbox_only_artifact"
+  },
+  "tests/pod/test_operational_hardening.py:60": {
+   "class": "manifest_derived"
+  },
+  "tests/pod/test_pod_script_paths.py:147": {
+   "class": "manifest_derived"
+  },
+  "tests/pod/test_reconstruct_training_events.py:149": {
+   "class": "devbox_only_artifact"
+  },
+  "tests/pod/test_recovery_continuation_session.py:126": {
+   "class": "manifest_derived"
+  },
+  "tests/pod/test_recovery_continuation_session.py:160": {
+   "class": "manifest_derived"
+  },
+  "tests/pod/test_recovery_continuation_session.py:215": {
+   "class": "devbox_only_artifact"
+  },
+  "tests/pod/test_recovery_continuation_session.py:232": {
+   "class": "manifest_derived"
+  },
+  "tests/pod/test_recovery_continuation_session.py:330": {
+   "class": "session_semantics"
+  },
+  "tests/pod/test_recovery_continuation_session.py:348": {
+   "class": "devbox_only_artifact"
+  },
+  "tests/pod/test_recovery_continuation_session.py:418": {
+   "class": "devbox_only_artifact"
+  },
+  "tests/pod/test_session_architecture.py:156": {
+   "class": "devbox_only_artifact"
+  },
+  "tests/pod/test_session_architecture.py:455": {
+   "class": "manifest_derived"
+  },
+  "tests/pod/test_session_architecture.py:485": {
+   "class": "manifest_derived"
+  },
+  "tests/pod/test_setup_end_to_end.py:144": {
+   "class": "machine_capability"
+  },
+  "tests/training/test_e8_arms.py:150": {
+   "class": "devbox_only_artifact"
+  },
+  "tests/training/test_e8_arms.py:158": {
+   "class": "devbox_only_artifact"
+  },
+  "tests/training/test_train.py:358": {
+   "class": "local_hf_cache"
+  }
+ },
+ "_resolved_automatically": "guards on a TRACKED logs/ record need no entry: the audit resolves the path through the module attribute that names it and finds it in the git index, so the premise provably travels in the bundle."
+}

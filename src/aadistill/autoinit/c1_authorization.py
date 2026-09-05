@@ -63,6 +63,10 @@ C1_HARNESS_SOURCE_FILES_V1: tuple[str, ...] = (
     # sole outlier, and the omission was invisible precisely because the digest
     # verified perfectly against the wrong file.
     "scripts/pod/autoinit_preflight_setup.sh",
+    # The setup gate's outcome summary. It decides whether a pod whose suite
+    # PASSED is nonetheless refused for skipping a different set than the sweep,
+    # so it is part of what a grant measures.
+    "scripts/pod/summarize_pytest_outcomes.py",
     "scripts/pod/start_job.py",
     "scripts/pod/watchdog.py",
     "scripts/pod/collect_artifacts.py",

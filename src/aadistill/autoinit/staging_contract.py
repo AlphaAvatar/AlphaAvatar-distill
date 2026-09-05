@@ -40,6 +40,7 @@ from __future__ import annotations
 import hashlib
 import json
 import subprocess
+from collections.abc import Sequence
 from pathlib import Path
 from typing import Any
 
@@ -169,6 +170,53 @@ def hidden_files(contract: dict[str, Any], repo_root: str | Path = ".") -> list[
     """
     staged = staged_files(contract, repo_root)
     return sorted(p for p in gitignored_files(repo_root) if p not in staged)
+
+
+# --- premises, asked of the filesystem rather than of the environment --------
+#
+# C1 attempt 5 died at the pod test gate for `$0.3150` because two tests about
+# this contract were guarded by `skipif(AAD_SYNTHETIC_HF_TOKEN)` — a flag the
+# SIMULATOR sets. That predicate asks "am I inside the simulation?" when the
+# property it needs is "does this machine hold the unstaged artifacts?". The pod
+# is behaviourally identical to the simulation — the files are not there — while
+# carrying none of its markers, so the guard was exactly inverted: it skipped
+# where the assertion would have held and ran where it could not.
+#
+# Both helpers below answer the property directly, so the dev box, the pod and
+# the simulation each get the right verdict from the same question.
+
+def sources_on_disk(repo_root: str | Path,
+                    roles: Sequence[str]) -> tuple[list[str], list[str]]:
+    """Split `roles` into those this machine actually holds files for, and not.
+
+    A hidden-set assertion needs the source present: `hidden_files` is the
+    arithmetic difference between what the manifest stages and what is on disk,
+    so a role that was never transferred contributes nothing to it. Absence is
+    the pod's correct condition and the simulation's, not a defect in either.
+    """
+    root = Path(repo_root)
+    present: list[str] = []
+    absent: list[str] = []
+    for role in roles:
+        d = root / role
+        holds = d.is_dir() and any(p.is_file() for p in d.rglob("*"))
+        (present if holds else absent).append(role)
+    return present, absent
+
+
+def undeclared_in_destination(repo_root: str | Path, dest: str,
+                              declared_names: Sequence[str]) -> set[str] | None:
+    """Filenames a destination holds beyond those the manifest stages into it.
+
+    Returns `None` when the destination does not exist at all — a DIFFERENT
+    premise from "it exists and holds nothing undeclared", which is the correct
+    state of a properly staged pod. Both are reasons to skip; conflating them
+    loses which machine you are on.
+    """
+    d = Path(repo_root) / dest
+    if not d.is_dir():
+        return None
+    return {p.name for p in d.iterdir() if p.is_file()} - set(declared_names)
 
 
 def describe(contract: dict[str, Any], repo_root: str | Path = ".") -> dict[str, Any]:

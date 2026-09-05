@@ -1,6 +1,6 @@
 {
  "schema": "aadistill.current_state/v2",
- "generated_utc": "2026-09-05T15:52:00+00:00",
+ "generated_utc": "2026-09-06T00:40:00+00:00",
  "_contract": "Minimal machine-readable CURRENT snapshot: live facts only. History: logs/decisions.md. Human view: logs/STATE.md. Ownership: logs/CATALOG.md.",
  "baseline_commit": "logs/c1_pod_environment_verification.json:swept_base_commit",
  "baseline_commit_meaning": "LAST TESTED IMPLEMENTATION is OWNED by the readiness record's swept_base_commit and deliberately not duplicated here. This snapshot cannot name a commit that does not exist until after it is written, and gate 12 now forbids editing state after the sweep -- so a copy here could only ever go stale. It did: 4f85ecda vs the record's 0457bab.",
@@ -71,8 +71,8 @@
   "the ATTENTION 'search declined to calibrate' reading: WITHDRAWN 2026-09-01"
  ],
  "next_starting_point": {
-  "status": "Attempt 5 launched and aborted at the pod test gate. No C1 measurement exists; nothing is authorized.",
-  "the_ask": "reviewer decision on the skip-guard defect and the unexplained skip divergence, and only then on a further grant.",
+  "status": "Attempt-5 postmortem repair complete at $0. No C1 measurement exists; nothing is authorized.",
+  "the_ask": "reviewer decision on the repaired guards, the skip-predicate audit, the fail-closed skip-set comparison whose stability is unproven, and the storage recovery.",
   "budget": "$265.4014 spent of the unchanged $283.7600 cap; $18.3586 uncommitted."
  },
  "read_order": [
@@ -132,11 +132,11 @@
    "scoring": "c1_confirmation_scoring@v1 77507935; equivalence IDENTICAL over 15 probes. @v2 808080a7 and battery a285d61f untouched.",
    "attempts": "5 attempt LABELS: 1, 2, 3, 3R, 4, 5. FIVE created paid provider resources; attempt 3 created none ($0.00). $1.5417 of C1 infrastructure spend, ZERO science. Ledger: BUDGET_LEDGER.md.",
    "gates": "12 pre-provider gates. Detail: STATE.md, decisions.md 2026-09-04.",
-   "blocker": "Attempt 5 aborted at the pod CPU test gate: 2 failed / 2769 passed / 99 skipped. Attempt 4's cause did NOT recur -- the manifest-derived staged view held. The new cause is the dev-box-only SKIP GUARD: skipif(AAD_SYNTHETIC_HF_TOKEN) encodes 'am I in the simulator?', not 'does this machine hold the unstaged artifacts?', so the two staging-contract cases skip in the sweep and RUN on the pod, where the artifacts they assert about were never transferred. UNREPAIRED.",
-   "needs": "a maintainer decision. The grant, the authorization and the launch attempt are all consumed.",
+   "blocker": "Attempt 5 aborted at the pod CPU test gate (2 failed / 2769 passed / 99 skipped). REPAIRED at $0 on 2026-09-06: the two guards now ask the filesystem for their premise instead of the simulator's AAD_SYNTHETIC_HF_TOKEN; a 95-predicate skip audit closes the class (45 registered, 0 unaccounted, 0 stale); and the pod gate now names every skip and fails closed on a skip-set divergence. C1 has still NEVER been measured. No grant.",
+   "needs": "a reviewer decision on the postmortem repair -- especially the fail-closed skip-set comparison, which has never run on a pod -- and only then on a further grant.",
    "not_built": "no grant; the pre-ATTENTION parent rebuild and the ~8 GB teacher weights need GPU/network and have not run locally",
    "evidence": "logs/autoinit_c1_attempt5/ (test_gate_failures.json carries the root cause and the unexplained skip)",
-   "readiness": "gate 12 certified the skip as expected -- devbox_only_skipped_as_expected true -- because the skip DID occur in simulation; what it cannot ask is why. One divergence is UNEXPLAINED: the pod skipped one test the sweep passed, and the pod skip list was never captured."
+   "readiness": "the committed record is STALE BY CONSTRUCTION -- the repair moved the harness digest, so a new sweep is owed before any launch. logs/c1_renderer_parity.json (7/7) and logs/c1_skip_predicate_audit.json (PASS) are current."
   },
   "c2": {
    "status": "NOT STARTED",
@@ -163,7 +163,9 @@
   "scientific_artifacts_deleted": 0,
   "open_maintainer_decision": "KEEP / unresolved ownership: 2 duplicate checkpoint pairs, 2.92 GiB. NOT deletion candidates.",
   "closeout": "logs/storage_closeout_20260831.json",
-  "c1_battery_canonical": "/home/ecs-user/aad-artifacts/autoinit/c1_confirmation_v1"
+  "c1_battery_canonical": "/home/ecs-user/aad-artifacts/autoinit/c1_confirmation_v1",
+  "free_space_note": "12.01 GiB free after the 2026-09-06 limited P12 cleanup of rebuildable caches and ephemeral residue ONLY; before it 0.64 GiB failed the suite with ENOSPC. aad-artifacts unchanged, the seven pinned snapshots intact. Every deletion: logs/c1_storage_recovery.json.",
+  "free_bytes": 12897964032
  },
  "blocker": "No C1 grant exists. Attempt 5 aborted at the pod CPU test gate with 2 failures from a simulator-keyed skip guard, plus one unexplained skip divergence. C1 has still never been measured.",
  "deferred_not_blocking": {

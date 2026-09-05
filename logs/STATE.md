@@ -1,5 +1,40 @@
-**Updated:** 2026-09-05 · branch `main` · **PHASE B CLOSED · PHASE C0 FROZEN ·
-PHASE C1 ATTEMPT 5 LAUNCHED AND ABORTED AT THE POD TEST GATE — STILL NEVER MEASURED**
+**Updated:** 2026-09-06 · branch `main` · **PHASE B CLOSED · PHASE C0 FROZEN ·
+PHASE C1 ATTEMPT 5 ABORTED AT THE POD TEST GATE, POSTMORTEM REPAIRED AT `$0` —
+STILL NEVER MEASURED**
+
+> **Postmortem repair, 2026-09-06 — `$0.0000`, no pod, no grant.** Three things
+> closed, none of them scientific:
+>
+> 1. **The two guards are repaired by their real premise.** They no longer read
+>    `AAD_SYNTHETIC_HF_TOKEN`. `sources_on_disk` and `undeclared_in_destination`
+>    ask the filesystem what it holds, so the dev box runs them, and the pod and
+>    the simulation skip them for the same stated reason. Three-environment
+>    regressions execute the actual test functions against pod-shaped and
+>    simulation-shaped roots; four mutations were confirmed caught.
+> 2. **The CLASS is closed, not just the incident.**
+>    [`c1_skip_predicate_audit.json`](c1_skip_predicate_audit.json) walks all
+>    **95** skip predicates in the C1-selected suite and resolves each path
+>    premise against the git index and the SetupManifest — the two mechanisms
+>    that actually put a file on a pod — rather than guessing from keywords. **45**
+>    that cannot be resolved carry an explicit classification; **0** unaccounted,
+>    **0** stale. A simulator-keyed premise anywhere is now a standing failure.
+> 3. **The skip set is evidence.** The pod gate writes JUnit, and
+>    `summarize_pytest_outcomes.py` names every FAILED, ERROR and SKIPPED nodeid
+>    with reasons, digests the skip set, and prints the exact set difference
+>    against the launch-bound sweep. It is **fail-closed** on `expected-skip-but-ran`
+>    and `unexpected pod-only skip`. `SessionSpec.setup_failure_files` pulls the
+>    summary off the pod before teardown, because a setup abort never reaches
+>    artifact collection and the launcher's window is `tail -40` — which is why
+>    attempt 5's 99 skip identities died with the pod.
+>
+> **The strict comparison has never run on a pod.** Its stability is unproven,
+> and it could itself abort attempt 6 at setup cost on a benign difference. That
+> is deliberate — a named `$0.30` abort beats six probes trained under an
+> unnamed environment difference — but it is a reviewer's call, not mine.
+>
+> **The readiness record is STALE by construction:** repairing the harness moved
+> its digest, so a new sweep is owed before any launch. That is the contract
+> working, not a defect.
 
 > **Attempt 5, 2026-09-05.** The one-use grant was approved and consumed. All
 > **12** pre-provider gates passed on the launcher's own fresh run, the bundle

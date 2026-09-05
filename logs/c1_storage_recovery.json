@@ -1,0 +1,147 @@
+{
+ "schema": "aadistill.autoinit.c1_storage_recovery/v1",
+ "_what_this_is": "the 2026-09-06 storage recovery, under a LIMITED P12 approval covering rebuildable caches and ephemeral residue only. Every measurement is `du -sb`; every free-space figure is `df -B1 /` taken after that deletion class.",
+ "why": "the dev box had 691,748,864 B free and the full suite failed with ENOSPC while safetensors wrote a shard, so no $0 verification could be trusted. Target: >= 12 GiB before another sweep.",
+ "free_bytes": {
+  "before": 691748864,
+  "after": 12897964032,
+  "target": 12884901888,
+  "target_reached": true
+ },
+ "inventory_before": {
+  "/home/ecs-user/aad-artifacts": 101703450317,
+  "/home/ecs-user/AlphaAvatar": 14492592965,
+  "/home/ecs-user/.cache": 11019773324,
+  "/home/ecs-user/AlphaAvatar-distill": 8862984884,
+  "/home/ecs-user/.vscode-server": 6846744335,
+  "/home/ecs-user/.npm": 3597309731,
+  "/tmp": 7309558688,
+  "/home/ecs-user/aad-scratch": 256389202,
+  "repo artifacts/": {
+   "stage3": 2758765143,
+   "stage1": 2410242311,
+   "stage0": 1947972026,
+   "audit": 132986261,
+   "stage2_v2": 75970127,
+   "eval": 67098310,
+   "autoinit": 1456942,
+   "pilot": 556946,
+   "stage2": 18872
+  }
+ },
+ "deleted": [
+  {
+   "path": "/tmp/pytest-of-ecs-user",
+   "measured_bytes": 2199215654,
+   "freed_bytes": 2257326080,
+   "class": "pytest temp + failed local safetensors outputs",
+   "why": "pytest's own tmp roots, including the shards the ENOSPC failure left behind"
+  },
+  {
+   "path": "~/.cache/uv",
+   "measured_bytes": 570866253,
+   "freed_bytes": 542208000,
+   "class": "uv cache",
+   "why": "rebuildable on the next resolve"
+  },
+  {
+   "path": "~/.cache/pre-commit",
+   "measured_bytes": 66761062,
+   "freed_bytes": 73900032,
+   "class": "pre-commit cache",
+   "why": "rebuildable on the next hook install"
+  },
+  {
+   "path": "~/.cache/pip",
+   "measured_bytes": 18379272,
+   "freed_bytes": 18444288,
+   "class": "pip cache",
+   "why": "rebuildable on the next install"
+  },
+  {
+   "path": "~/.cache/huggingface/xet",
+   "measured_bytes": 5160603,
+   "freed_bytes": 5283840,
+   "class": "HF xet cache",
+   "why": "a content cache in front of the hub"
+  },
+  {
+   "path": "/tmp/podsim-record-*",
+   "measured_bytes": 32768,
+   "freed_bytes": 32768,
+   "class": "pod-simulator quarantine",
+   "why": "8 empty record-stash dirs; no sole-copy evidence"
+  },
+  {
+   "path": "~/.cache/huggingface/hub/models--*",
+   "measured_bytes": 6233394269,
+   "freed_bytes": 6233829376,
+   "class": "locally cached downloadable model blobs",
+   "n_repos": 11,
+   "repos": [
+    "AlphaAvatar--aadistill-artifacts",
+    "AlphaAvatar--persona-speaker-attribute-onnx",
+    "AlphaAvatar--persona-speaker-vector-onnx",
+    "AlphaAvatar--plugins-persona",
+    "Qwen--Qwen3-0.6B",
+    "Qwen--Qwen3-4B-Thinking-2507",
+    "docling-project--docling-layout-heron",
+    "docling-project--docling-models",
+    "livekit--turn-detector",
+    "opendatalab--MinerU2.5-2509-1.2B",
+    "opendatalab--PDF-Extract-Kit-1.0"
+   ],
+   "why": "public HF model repos, re-downloadable and none a canonical scientific artifact. Only `models--*` was touched, so every `datasets--*` \u2014 including all seven pinned snapshots \u2014 was protected by construction. No repo source or test references Qwen3-0.6B by name."
+  },
+  {
+   "path": "/tmp/claude-1000/.../a79a17c5-.../scratchpad/roundtrip",
+   "measured_bytes": 1192178200,
+   "freed_bytes": 1192210432,
+   "class": "stale scratch, PROVEN duplicate",
+   "why": "a phase_b_attempt5 round-trip copy of leaf fe9683e6a9c783bbc6fe276a78c851c6. sha256 d025f38da508803845ea4d01b7cea160d117d47de3535965c7866dc05cd1e48e, byte-identical to the canonical /home/ecs-user/aad-artifacts/autoinit/phase_a/fe9683e6.../model.safetensors, which was re-hashed and left in place. Only the proven-duplicate subtree was removed; the rest of that scratchpad was NOT touched because its members were not proven duplicates."
+  },
+  {
+   "path": "~/.cache/alphaavatar/models",
+   "measured_bytes": 1880664273,
+   "freed_bytes": 1880719360,
+   "class": "locally cached downloadable model blobs",
+   "why": "persona / router / voice runtime models for the separate AlphaAvatar project, in a cache directory and re-downloadable. NOT an AlphaAvatar-distill scientific artifact. Flagged because it belongs to another project's workspace."
+  }
+ ],
+ "protected": {
+  "/home/ecs-user/aad-artifacts": "UNTOUCHED. 101,703,450,317 B before and after: the retained Phase-A checkpoint universe, permanent controls, Phase-B journals and raw evidence, relay_retired, preserved sole-copy evidence and the E-series checkpoints.",
+  "pinned_renderer_parity_snapshots": {
+   "protected_by": "only `models--*` was deleted; all seven are `datasets--*`",
+   "verified_present_after": [
+    "openai/gsm8k",
+    "HuggingFaceH4/MATH-500",
+    "hotpotqa/hotpot_qa",
+    "rajpurkar/squad_v2",
+    "mandarjoshi/trivia_qa",
+    "google-research-datasets/mbpp",
+    "Salesforce/xlam-function-calling-60k"
+   ]
+  },
+  "repo artifacts/": "UNTOUCHED",
+  "/home/ecs-user/aad-scratch": "UNTOUCHED, 256,389,202 B"
+ },
+ "not_deleted_though_large": {
+  "_why": "outside the approved enumeration. Measured and reported; a maintainer decision, not mine.",
+  "/home/ecs-user/.vscode-server": 6846744335,
+  "/home/ecs-user/.npm": 3597309731,
+  "/tmp/alphaavatar-semantic-addressing-20260903T093448Z": 3811068435,
+  "~/.cache/ms-playwright": 1214449747,
+  "/tmp/claude-1000 (other session scratchpads, minus the proven-duplicate subtree)": 67221930
+ },
+ "canonical_deletions": {
+  "count": 0,
+  "statement": "NO canonical checkpoint or scientific artifact was deleted. No P12 candidate-deletion proposal for aad-artifacts was needed, because the approved classes reached the target on their own."
+ },
+ "reconciliation": {
+  "sum_of_freed_bytes": 12203954176,
+  "observed_free_delta": 12206215168,
+  "difference": 2261,
+  "unit_note": "bytes*1024 in df terms; ~2.2 MB",
+  "why": "df was sampled between deletions on a live box, so the two disagree by about 2.2 MB of unrelated churn. Reported rather than reconciled away."
+ }
+}

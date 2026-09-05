@@ -234,7 +234,7 @@ def main() -> int:
         return 2
 
     junit = read_junit(args.junit, REPO_ROOT)
-    findings = evaluate_sweep(junit["outcomes"])
+    findings = evaluate_sweep(junit["outcomes"], junit.get("skip_reasons"))
 
     record = {
         "schema": SCHEMA,

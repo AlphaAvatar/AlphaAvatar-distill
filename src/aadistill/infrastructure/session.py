@@ -422,6 +422,18 @@ class SessionSpec:
     artifacts: ArtifactPolicy
     teardown: TeardownPolicy = field(default_factory=TeardownPolicy)
 
+    #: Small files to pull off the pod when SETUP FAILS, before teardown.
+    #:
+    #: A setup abort never reaches artifact collection — the pod is deleted from
+    #: the setup branch — and the launcher prints only `tail -40` of the setup
+    #: log. C1 attempt 5's complete skip list was therefore ~100 lines that could
+    #: not fit in the surviving window, and one sweep/pod divergence is still
+    #: unexplained because of it. Anything named here is read and embedded in the
+    #: session evidence, which is written on the dev box.
+    #:
+    #: Keep them SMALL: this is a `cat` over ssh on a billing pod.
+    setup_failure_files: tuple[str, ...] = ()
+
     #: `(ctx) -> (ok, message)`, all of them run before a pod is created. Phase
     #: A's two identity gates — the session-commit/harness/lineage check and the
     #: frozen science-plan check — are entries here rather than overridden

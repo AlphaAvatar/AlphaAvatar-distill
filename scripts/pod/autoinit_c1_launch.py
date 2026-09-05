@@ -772,6 +772,11 @@ def spec(args) -> SessionSpec:
                           "c1_probe_results.json", "c1_decision.json"),
             event_streams=probe_streams),
         teardown=TeardownPolicy(note="nothing chains off C1"),
+        # A setup abort deletes the pod before artifact collection and shows only
+        # `tail -40`, so attempt 5's 99 skip identities died with the pod and one
+        # sweep/pod divergence is still unexplained. This is small and is read
+        # while the pod still exists.
+        setup_failure_files=("/workspace/pytest_outcomes.json",),
         precheck=(
             session_commit_gate(REPO_ROOT, AUTH_PATH, check_lineage=True),
             c1_harness_gate,

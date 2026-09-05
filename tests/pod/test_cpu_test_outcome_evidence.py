@@ -1,0 +1,264 @@
+"""The pod CPU gate must preserve its COMPLETE outcome, not only its failures.
+
+C1 attempt 3R lost fourteen failures to a four-line tail. The `grep '^FAILED'`
+added afterwards fixed that half, and attempt 5 proved the other half was still
+missing: its diagnostics named both failing nodeids exactly and not one of the
+99 skips. The counts force a third divergence — a test the sweep PASSED that the
+pod SKIPPED — and it cannot be named, because that list died with the pod.
+"""
+
+from __future__ import annotations
+
+import json
+import subprocess
+import sys
+from pathlib import Path
+
+import pytest
+
+REPO = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(REPO / "src"))
+sys.path.insert(0, str(REPO / "scripts/pod"))
+
+from aadistill.autoinit import pod_environment as pe  # noqa: E402
+import summarize_pytest_outcomes as S  # noqa: E402
+
+SETUP = REPO / "scripts/pod/autoinit_preflight_setup.sh"
+
+
+def _junit(tmp_path: Path, cases: dict[str, tuple[str, str]]) -> Path:
+    """cases: (classname, name) -> (status, reason).
+
+    The modules are created for real: `_nodeid` reconstructs `tests/a.py::test_x`
+    from the dotted classname by RESOLVING it against the filesystem, because
+    pytest writes no `file` attribute. A fixture that skips that resolution would
+    not exercise the parser the pod uses.
+    """
+    for cls, _name in cases:
+        f = tmp_path / (cls.replace(".", "/") + ".py")
+        f.parent.mkdir(parents=True, exist_ok=True)
+        f.touch()
+    parts = ['<?xml version="1.0" encoding="utf-8"?><testsuites><testsuite>']
+    for (cls, name), (status, reason) in cases.items():
+        body = ""
+        if status == "skipped":
+            body = f'<skipped message="{reason}"/>'
+        elif status == "failed":
+            body = f'<failure message="{reason}"/>'
+        elif status == "error":
+            body = f'<error message="{reason}"/>'
+        parts.append(f'<testcase classname="{cls}" name="{name}">{body}</testcase>')
+    parts.append("</testsuite></testsuites>")
+    p = tmp_path / "junit.xml"
+    p.write_text("".join(parts))
+    return p
+
+
+# --- the gate actually produces the evidence ---------------------------------
+
+def test_the_setup_gate_writes_a_junit_report():
+    text = SETUP.read_text()
+    assert "--junitxml=/workspace/pytest_junit.xml" in text, (
+        "without a JUnit report the gate can name failures and never skips")
+
+
+def test_the_setup_gate_summarizes_on_both_paths():
+    """A PASSING gate whose skip set differs from the sweep's is as informative
+    as a failing one, and cheaper to learn at setup cost."""
+    text = SETUP.read_text()
+    assert "summarize_pytest_outcomes.py" in text
+    assert "--out /workspace/pytest_outcomes.json" in text
+    assert "--strict" in text
+    # It runs BEFORE the pass/fail branch, so it happens either way.
+    assert text.index("summarize_pytest_outcomes.py") < text.index(
+        '[ "$RC" -eq 0 ] || { say "test suite failed rc=$RC"; exit 1; }')
+
+
+def test_the_summary_survives_a_setup_abort():
+    """A setup abort never reaches artifact collection, and the launcher's own
+    window is `tail -40`. The file must be pulled while the pod still exists."""
+    sys.path.insert(0, str(REPO / "tests/pod"))
+    from session_specs import load_session_launcher, session_args
+    mod = load_session_launcher("autoinit_c1_launch")
+    spec = mod.spec(session_args(mod))
+    assert "/workspace/pytest_outcomes.json" in spec.setup_failure_files
+
+    runner = (REPO / "src/aadistill/infrastructure/session_runner.py").read_text()
+    assert "_collect_setup_failure_evidence(target, draw)" in runner
+    assert 'return "setup_failed"' in runner
+    # Collected BEFORE the return that leads to teardown.
+    assert runner.index("_collect_setup_failure_evidence(target, draw)") < \
+        runner.index('return "setup_failed"')
+
+
+def test_the_collector_never_raises_on_a_billing_pod(monkeypatch):
+    """It runs on an already-failing path while a pod bills; losing the evidence
+    must not also lose the teardown."""
+    import types
+
+    from aadistill.infrastructure.session_runner import SessionRunner
+
+    class Boom:
+        def run(self, *a, **k):
+            raise OSError("ssh died")
+
+    fake = types.SimpleNamespace(
+        spec=types.SimpleNamespace(setup_failure_files=("/workspace/x.json",)),
+        ev={}, say=lambda m: None)
+    SessionRunner._collect_setup_failure_evidence(fake, Boom(), 1)
+    got = fake.ev["setup_failure_evidence"][0]["files"]["/workspace/x.json"]
+    assert "unreadable" in got and "OSError" in got
+
+
+# --- the summary itself -------------------------------------------------------
+
+def test_every_outcome_class_is_named(tmp_path):
+    junit = _junit(tmp_path, {
+        ("tests.a", "test_p"): ("passed", ""),
+        ("tests.a", "test_s"): ("skipped", "premise absent: no artifact"),
+        ("tests.a", "test_f"): ("failed", "boom"),
+        ("tests.a", "test_e"): ("error", "collect"),
+    })
+    out = S.summarize(junit, None, tmp_path)
+    assert out["counts"] == {"passed": 1, "skipped": 1, "failed": 1, "error": 1}
+    assert out["failed_nodeids"] and out["error_nodeids"]
+    assert len(out["all_skipped_nodeids"]) == 1
+    assert "premise absent: no artifact" in json.dumps(out["skip_reasons"])
+    assert len(out["skip_set_digest"]) == 64
+
+
+def test_the_digest_is_order_independent_and_set_sensitive():
+    a = pe.skip_set_digest(["x::b", "x::a"])
+    assert a == pe.skip_set_digest(["x::a", "x::b", "x::a"])
+    assert a != pe.skip_set_digest(["x::a"])
+
+
+def test_the_two_divergence_shapes_are_reported_separately():
+    """`expected_but_ran` is attempt 5's shape; `unexpected_skip` is the shape of
+    the divergence attempt 5 never identified. Folding them together loses which
+    happened."""
+    cmp = pe.compare_skip_sets(["a", "b", "c"], ["b", "c", "d"])
+    assert cmp["expected_but_ran"] == ["a"]
+    assert cmp["unexpected_skip"] == ["d"]
+    assert not cmp["identical"]
+    assert pe.compare_skip_sets(["a"], ["a"])["identical"]
+
+
+def test_a_divergent_skip_set_is_refused_and_the_difference_printed(tmp_path):
+    """The whole point: --strict must exit non-zero and print the exact set."""
+    record = tmp_path / "record.json"
+    record.write_text(json.dumps(
+        {"findings": {"all_skipped_nodeids": ["tests/a.py::test_s",
+                                              "tests/a.py::test_only_in_sweep"]}}))
+    junit = _junit(tmp_path, {
+        ("tests.a", "test_s"): ("skipped", "r"),
+        ("tests.a", "test_only_in_sweep"): ("passed", ""),
+        ("tests.a", "test_pod_only"): ("skipped", "r"),
+    })
+    proc = subprocess.run(
+        [sys.executable, str(REPO / "scripts/pod/summarize_pytest_outcomes.py"),
+         "--junit", str(junit), "--out", str(tmp_path / "o.json"),
+         "--expected", str(record), "--repo", str(tmp_path), "--strict"],
+        capture_output=True, text=True)
+    assert proc.returncode == 1, proc.stdout
+    assert "expected-skip-but-RAN" in proc.stdout
+    assert "test_only_in_sweep" in proc.stdout
+    assert "unexpected POD-ONLY skip" in proc.stdout
+    assert "test_pod_only" in proc.stdout
+
+
+def test_an_identical_skip_set_is_accepted(tmp_path):
+    record = tmp_path / "record.json"
+    record.write_text(json.dumps(
+        {"findings": {"all_skipped_nodeids": ["tests/a.py::test_s"]}}))
+    junit = _junit(tmp_path, {("tests.a", "test_s"): ("skipped", "r"),
+                              ("tests.a", "test_p"): ("passed", "")})
+    out = S.summarize(junit, record, tmp_path)
+    assert out["comparison"]["identical"] is True
+
+
+def test_a_record_without_the_skip_set_says_so_rather_than_passing(tmp_path):
+    """A comparison that silently succeeds against a missing expectation is the
+    vacuous-pass shape this project has been bitten by before."""
+    record = tmp_path / "record.json"
+    record.write_text(json.dumps({"findings": {"counts": {"skipped": 3}}}))
+    junit = _junit(tmp_path, {("tests.a", "test_s"): ("skipped", "r")})
+    out = S.summarize(junit, record, tmp_path)
+    assert out["comparison"]["available"] is False
+    assert "only the named groups" in out["comparison"]["why"]
+
+
+def test_a_missing_junit_report_does_not_mask_the_suite_exit_code(tmp_path):
+    proc = subprocess.run(
+        [sys.executable, str(REPO / "scripts/pod/summarize_pytest_outcomes.py"),
+         "--junit", str(tmp_path / "nope.xml"), "--out", str(tmp_path / "o.json"),
+         "--strict"], capture_output=True, text=True)
+    assert proc.returncode == 0, "the summary must never invent a gate failure"
+    assert "no JUnit report" in proc.stdout
+
+
+# --- the readiness record carries the whole set ------------------------------
+
+def test_the_record_carries_the_complete_skip_set_and_its_digest():
+    outcomes = {"tests/a.py::test_p": "passed",
+                "tests/a.py::test_s": "skipped",
+                "tests/b.py::test_s2": "skipped"}
+    findings = pe.evaluate_sweep(outcomes, {"tests/a.py::test_s": "because"})
+    assert findings["all_skipped_nodeids"] == ["tests/a.py::test_s",
+                                               "tests/b.py::test_s2"]
+    assert findings["n_skipped"] == 2
+    assert findings["skip_set_digest"] == pe.skip_set_digest(
+        ["tests/a.py::test_s", "tests/b.py::test_s2"])
+    assert findings["skip_reasons"]["tests/a.py::test_s"] == "because"
+
+
+def test_the_named_groups_are_kept_beside_the_raw_set():
+    """The complete list is forensic. The fourteen named groups are the ones that
+    express C1 expectations, and a raw total must not replace them."""
+    findings = pe.evaluate_sweep({})
+    for group in ("renderer_parity_skipped_as_expected",
+                  "battery_source_skipped_as_expected",
+                  "devbox_only_skipped_as_expected",
+                  "host_local_c1_skipped_as_expected",
+                  "expected_environment_skips"):
+        assert group in findings
+    assert "not a target" in findings["skip_set_is_forensic_not_scientific"]
+
+
+def test_a_new_unclassified_skip_moves_the_digest(tmp_path):
+    """Mutation: one extra skip must change the outcome contract.
+
+    If the digest did not move, a sweep and a pod could differ by a whole test
+    and compare equal — which is the failure this whole section exists to end.
+    """
+    base = {"tests/a.py::test_p": "passed", "tests/a.py::test_s": "skipped"}
+    before = pe.evaluate_sweep(base)["skip_set_digest"]
+    after = pe.evaluate_sweep({**base, "tests/a.py::test_p": "skipped"})
+    assert after["skip_set_digest"] != before
+    assert after["n_skipped"] == 2
+    cmp = pe.compare_skip_sets(
+        [n for n, s in base.items() if s == "skipped"],
+        after["all_skipped_nodeids"])
+    assert cmp["unexpected_skip"] == ["tests/a.py::test_p"]
+    assert not cmp["identical"]
+
+
+def test_the_junit_parser_keeps_the_reason_not_just_the_status(tmp_path):
+    junit = _junit(tmp_path, {
+        ("tests.a", "test_s"): ("skipped", "premise absent: no corpus_v2 here")})
+    parsed = pe.read_junit(junit, tmp_path)
+    assert "no corpus_v2 here" in list(parsed["skip_reasons"].values())[0]
+
+
+def test_the_summariser_is_inside_the_measured_harness():
+    """It can refuse a pod whose suite passed, so a grant must measure it."""
+    from aadistill.autoinit.c1_authorization import C1_HARNESS_SOURCE_FILES_V1
+    assert "scripts/pod/summarize_pytest_outcomes.py" in C1_HARNESS_SOURCE_FILES_V1
+
+
+@pytest.mark.parametrize("field", ["all_skipped_nodeids", "skip_set_digest",
+                                   "n_skipped", "skip_reasons"])
+def test_the_recorder_writes_the_new_fields(field):
+    src = (REPO / "scripts/autoinit/record_pod_environment.py").read_text()
+    assert '"findings": findings,' in src, "the record embeds findings wholesale"
+    assert field in json.dumps(pe.evaluate_sweep({}, {}))

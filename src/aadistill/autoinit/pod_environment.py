@@ -43,6 +43,7 @@ import hashlib
 import json
 import subprocess
 import xml.etree.ElementTree as ET
+from collections.abc import Sequence
 from pathlib import Path
 from typing import Any
 
@@ -127,15 +128,25 @@ BATTERY_STAGED_ROLE_NODEID = (
     "test_it_is_disjoint_from_each_jsonl_role_by_id_and_by_content"
     "[artifacts/stage3/recovery_search_v2]")
 
-#: The two staging-contract self-tests that describe the DEV BOX's staged/hidden
-#: split. Inside the simulation that split has already been applied, so there is
-#: nothing left to prove hidden and they skip. Declared here so they are exact
-#: rather than merely unnoticed.
+#: The staging-contract self-tests that describe the DEV BOX's staged/hidden
+#: split. A pod never received the unstaged artifacts and the simulation has
+#: moved them aside, so in both there is nothing left to prove hidden and they
+#: skip. Declared here so they are exact rather than merely unnoticed.
+#:
+#: They skip because each ASKS THE FILESYSTEM for its own premise. Until the C1
+#: attempt-5 postmortem they skipped because of `AAD_SYNTHETIC_HF_TOKEN`, a flag
+#: the simulator sets and the pod does not — so this group was recorded
+#: `skipped_as_expected: true` by a sweep while the same tests RAN on the pod and
+#: failed. A group that names WHICH tests skipped cannot ask WHY, which is why
+#: the reason now lives in the test and the complete skip set is recorded beside
+#: this one.
 DEVBOX_ONLY_NODEIDS: tuple[str, ...] = (
     "tests/autoinit/test_staging_contract.py::"
     "test_an_artifact_c1_does_not_stage_is_invisible",
     "tests/autoinit/test_staging_contract.py::"
     "test_an_undeclared_file_inside_a_staged_destination_stays_hidden",
+    "tests/autoinit/test_staging_contract.py::"
+    "test_the_dev_box_satisfies_both_premises_and_so_both_tests_run",
 )
 
 #: Host-local Phase-A integration cases, scoped by `SESSION_KIND=c1`. Their
@@ -253,6 +264,7 @@ def read_junit(path: str | Path, repo_root: str | Path = ".") -> dict[str, Any]:
     root = Path(repo_root)
     tree = ET.parse(str(path))
     outcomes: dict[str, str] = {}
+    reasons: dict[str, str] = {}
     n_cases = 0
     for case in tree.iter("testcase"):
         n_cases += 1
@@ -263,6 +275,10 @@ def read_junit(path: str | Path, repo_root: str | Path = ".") -> dict[str, Any]:
             if tag in ("failure", "error", "skipped"):
                 status = {"failure": "failed", "error": "error",
                           "skipped": "skipped"}[tag]
+                if tag == "skipped":
+                    # Why it skipped, which is the half attempt 5 could not see.
+                    reasons[nid] = (child.get("message")
+                                    or (child.text or "").strip())[:300]
                 break
         outcomes[nid] = status
     counts = {s: sum(1 for v in outcomes.values() if v == s)
@@ -273,10 +289,45 @@ def read_junit(path: str | Path, repo_root: str | Path = ".") -> dict[str, Any]:
         raise ValueError(
             f"{n_cases} testcases collapsed to {len(outcomes)} nodeids; the "
             "reconstruction is lossy and an outcome would be lost")
-    return {"outcomes": outcomes, "counts": counts, "total": len(outcomes)}
+    return {"outcomes": outcomes, "counts": counts, "total": len(outcomes),
+            "skip_reasons": dict(sorted(reasons.items()))}
 
 
-def evaluate_sweep(outcomes: dict[str, str]) -> dict[str, Any]:
+def skip_set_digest(nodeids: Sequence[str]) -> str:
+    """Deterministic over the COMPLETE skip set, order-independent.
+
+    Two sweeps with the same digest skipped exactly the same tests. Attempt 5
+    could not make that comparison: its diagnostics named every FAILED nodeid and
+    no SKIPPED one, so a divergence that only moved a skip was invisible, and one
+    such divergence is still unexplained.
+    """
+    body = "\n".join(sorted(set(nodeids)))
+    return hashlib.sha256(body.encode()).hexdigest()
+
+
+def compare_skip_sets(expected: Sequence[str], actual: Sequence[str]
+                      ) -> dict[str, Any]:
+    """Which tests changed their mind between two machines.
+
+    `expected_but_ran` is the attempt-5 shape exactly: a test the sweep skipped
+    that the pod executed. `unexpected_skip` is the converse, and is the shape of
+    the one divergence attempt 5 never identified.
+    """
+    exp, act = set(expected), set(actual)
+    ran = sorted(exp - act)
+    extra = sorted(act - exp)
+    return {
+        "expected_skips": len(exp), "actual_skips": len(act),
+        "expected_but_ran": ran,
+        "unexpected_skip": extra,
+        "identical": not ran and not extra,
+        "expected_digest": skip_set_digest(exp),
+        "actual_digest": skip_set_digest(act),
+    }
+
+
+def evaluate_sweep(outcomes: dict[str, str],
+                   skip_reasons: dict[str, str] | None = None) -> dict[str, Any]:
     """Turn per-nodeid outcomes into the pass/fail findings the record asserts."""
     counts = {s: sum(1 for v in outcomes.values() if v == s)
               for s in ("passed", "skipped", "failed", "error")}
@@ -357,6 +408,16 @@ def evaluate_sweep(outcomes: dict[str, str]) -> dict[str, Any]:
         "battery_source_skipped_as_expected": battery_ok,
         "battery_staged_role_nodeid": BATTERY_STAGED_ROLE_NODEID,
         "battery_staged_role_outcome": staged_role,
+        "all_skipped_nodeids": sorted(n for n, s in outcomes.items()
+                                      if s == "skipped"),
+        "n_skipped": counts["skipped"],
+        "skip_set_digest": skip_set_digest(
+            [n for n, s in outcomes.items() if s == "skipped"]),
+        "skip_reasons": dict(sorted((skip_reasons or {}).items())),
+        "skip_set_is_forensic_not_scientific":
+            "the complete skip list exists so a pod/sweep divergence can be "
+            "NAMED. The total is not a target and carries no scientific "
+            "content; only the named groups above express C1 expectations.",
         "expected_environment_skips": sorted(expected_skips),
         "known_non_environment_skips": list(KNOWN_NON_ENVIRONMENT_SKIPS),
         "unexpected_environment_skips": unexpected,

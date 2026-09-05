@@ -470,9 +470,14 @@ tt0=$(date -u +%s)
 # the pod simulator's — a simulation that runs a different command from the pod
 # is not a simulation. Unquoted on purpose: `SESSION_TEST_IGNORES` is a
 # space-separated flag list, and quoting it would pass one long argument.
+# `--junitxml` is a REPORTING flag: it changes neither the selection nor the run,
+# and it is the only way to name every skip. Attempt 5's grep named both failures
+# exactly and not one of the 99 skips, and the counts prove a skip divergence
+# that is still unexplained because that list died with the pod.
 OMP_NUM_THREADS=$NTHREADS MKL_NUM_THREADS=$NTHREADS OPENBLAS_NUM_THREADS=$NTHREADS \
   taskset -c "$CPUS" \
   timeout "${TESTS_MAX_S:-2700}" /opt/train/bin/python -m pytest tests/ -q \
+  --junitxml=/workspace/pytest_junit.xml \
   ${SESSION_TEST_IGNORES:-} > /workspace/pytest.log 2>&1
 RC=$?
 tt=$(( $(date -u +%s) - tt0 ))
@@ -487,12 +492,31 @@ if [ "$RC" -ne 0 ]; then
   echo "--- log tail ---"
 fi
 tail -4 /workspace/pytest.log
+# The complete outcome — failures, errors, EVERY skip and its reason, and the
+# exact set difference against the launch-bound sweep's skip set. Written to
+# /workspace/pytest_outcomes.json, which the launcher pulls off the pod before
+# teardown on a setup failure (`SessionSpec.setup_failure_files`), because a
+# setup abort never reaches artifact collection and the launcher's own window is
+# `tail -40`. Runs on BOTH paths: a passing gate whose skip set differs from the
+# sweep's is exactly as informative as a failing one, and cheaper to learn now.
+set +e
+/opt/train/bin/python "$REPO/scripts/pod/summarize_pytest_outcomes.py" \
+  --junit /workspace/pytest_junit.xml \
+  --out /workspace/pytest_outcomes.json \
+  --expected "$REPO/logs/c1_pod_environment_verification.json" \
+  --repo "$REPO" --strict
+SUMMARY_RC=$?
+set -e
 if [ "$RC" -eq 124 ]; then
   say "COLD HOST: the CPU test suite did not finish in ${TESTS_MAX_S:-2700}s"
   mark "HOST_COLD:tests:${TESTS_MAX_S:-2700}s:$(nproc)vcpu:cpuset${CPUS}"
   exit 90
 fi
 [ "$RC" -eq 0 ] || { say "test suite failed rc=$RC"; exit 1; }
+# The suite passed but this machine did not run the suite the sweep certified.
+# Fail here, at setup cost, rather than train six probes under an environment
+# whose difference from the rehearsal is unnamed.
+[ "$SUMMARY_RC" -eq 0 ] || { say "skip set differs from the launch-bound sweep"; exit 1; }
 say "test suite passed in ${tt}s on cpu set ${CPUS}"
 mark "TESTS_OK:${tt}s"
 

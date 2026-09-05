@@ -40,6 +40,7 @@ to appear below.
 | `autoinit_engine_probe.py` | vLLM engine identity probe, run at stage 0 |
 | `watchdog.py` | the independent provider-side kill switch |
 | `collect_artifacts.py` | artifact manifest, gate and collection |
+| `summarize_pytest_outcomes.py` | the CPU gate's complete outcome — every FAILED, ERROR and SKIPPED nodeid with reasons, a skip-set digest, and the exact set difference against the launch-bound sweep. `--strict` refuses a pod whose suite passed but whose skip set is not the one the sweep certified |
 | `simulate_pod_env.sh` | runs the pod's exact test command locally with pod-absent artifacts hidden |
 | `retain_checkpoints.py` | per-run checkpoint retention: derives the keep set from a run's own log |
 | `start_job.py`, `run_env.sh` | detached start with a durable descriptor |
