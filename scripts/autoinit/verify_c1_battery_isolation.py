@@ -44,36 +44,80 @@ ROLES = {
 }
 
 
-def role_identities(rel: str, kind: str) -> tuple[set[str], set[str]]:
+#: The frozen per-role expectation, read from the battery's own manifest rather
+#: than restated here. A role that is present but has been swapped for some other
+#: nonempty asset would otherwise satisfy "nonempty" and prove nothing.
+EXPECTED = {
+    "FINAL_PROMOTION": ("final_promotion", "n_prompts", None),
+    "RECOVERY_SEARCH": ("recovery_search", "n_prompts", None),
+    "RECOVERY_TRAINING": ("recovery_training", "n_sessions", "distinct_source_ids"),
+    "STATE_EVALUATION": ("initializer_state_eval", "n_items", "excluded_source_ids"),
+    "OPERATOR_CALIBRATION": ("operator_calibration", "n_items", "excluded_source_ids"),
+}
+
+
+class RoleUnavailable(Exception):
+    """A declared isolation role is absent, empty, or contributed no rows.
+
+    Raised rather than returning empty sets, which is the whole repair. An absent
+    `jsonl_dir` used to glob to nothing, yield empty `ids`/`hashes`, and report
+    `id_collisions=0` — a PASS that had never read the role at all. Attempt 4's
+    pytest suite had the same hole for `battery_v2`, and unlike the two cases that
+    failed loudly it would have gone on reporting green indefinitely.
+    """
+
+
+def role_identities(rel: str, kind: str) -> tuple[set[str], set[str], int, int]:
+    """Ids, content hashes, row count and file count — refusing an empty role."""
     ids: set[str] = set()
     hashes: set[str] = set()
+    rows = 0
+    files = 0
+    target = REPO_ROOT / rel
+    if not target.exists():
+        raise RoleUnavailable(f"{rel} does not exist")
     if kind == "jsonl_dir":
-        for p in sorted((REPO_ROOT / rel).glob("*.jsonl")):
+        members = sorted(target.glob("*.jsonl"))
+        files = len(members)
+        if not members:
+            raise RoleUnavailable(f"{rel} contains no *.jsonl files")
+        for p in members:
             for line in p.open():
                 if not line.strip():
                     continue
                 r = json.loads(line)
+                rows += 1
                 ids.add(str(r["id"]))
                 if r.get("source_key"):
                     ids.add(str(r["source_key"]))
                 hashes.add(content_sha256(norm(r.get("prompt_text", ""))))
     elif kind == "sessions":
-        for line in (REPO_ROOT / rel).open():
+        files = 1
+        for line in target.open():
+            if not line.strip():
+                continue
             d = json.loads(line)
+            rows += 1
             ids.add(str(d["source_id"]))
             hashes.add(content_sha256(norm("\n".join(
                 str(m.get("content", "")) for m in d["messages"]
                 if m.get("role") != "assistant"))))
     elif kind == "items":
-        for line in (REPO_ROOT / rel).open():
+        files = 1
+        for line in target.open():
             if not line.strip():
                 continue
             d = json.loads(line)
+            rows += 1
             if d.get("source_id"):
                 ids.add(str(d["source_id"]))
     else:
         raise ValueError(kind)
-    return ids, hashes
+    if rows == 0:
+        raise RoleUnavailable(f"{rel} yielded zero rows")
+    if not ids:
+        raise RoleUnavailable(f"{rel} yielded zero identities")
+    return ids, hashes, rows, files
 
 
 def main() -> int:
@@ -120,11 +164,34 @@ def main() -> int:
     own_ids = set(ids) | {str(i["source_key"]) for i in items if i.get("source_key")}
     own_hashes = set(hashes)
     report = {}
+    isolation = manifest.get("isolation", {})
     for role, (rel, kind) in ROLES.items():
-        r_ids, r_hashes = role_identities(rel, kind)
+        try:
+            r_ids, r_hashes, r_rows, r_files = role_identities(rel, kind)
+        except RoleUnavailable as exc:
+            # FAIL, never "zero collisions". Every declared role must genuinely
+            # exist and be nonempty before it can contribute a PASS.
+            failures.append(f"{role}: UNAVAILABLE — {exc}. A disjointness claim "
+                            "against a role that was never read is vacuous.")
+            report[role] = {"asset": rel, "available": False}
+            continue
+        # Cross-check the frozen expectation, so a present-but-substituted asset
+        # cannot pass merely by being nonempty.
+        key, rows_field, ids_field = EXPECTED[role]
+        frozen = isolation.get(key, {})
+        want_rows = frozen.get(rows_field)
+        if want_rows is not None and r_rows != want_rows:
+            failures.append(f"{role}: {r_rows} rows, frozen manifest says "
+                            f"{rows_field}={want_rows}")
+        if ids_field:
+            want_ids = frozen.get(ids_field)
+            if want_ids is not None and len(r_ids) != want_ids:
+                failures.append(f"{role}: {len(r_ids)} identities, frozen manifest "
+                                f"says {ids_field}={want_ids}")
         id_hits = sorted(own_ids & r_ids)
         hash_hits = sorted(own_hashes & r_hashes)
-        report[role] = {"asset": rel, "role_ids": len(r_ids),
+        report[role] = {"asset": rel, "available": True, "files": r_files,
+                        "rows": r_rows, "role_ids": len(r_ids),
                         "role_prompt_hashes": len(r_hashes),
                         "id_collisions": len(id_hits),
                         "content_collisions": len(hash_hits)}
@@ -138,7 +205,11 @@ def main() -> int:
     print(f"content_sha256 {content} (matches manifest: "
           f"{content == manifest['content_sha256']})")
     for role, r in report.items():
-        print(f"  {role:22s} ids={r['role_ids']:6d} hashes={r['role_prompt_hashes']:6d} "
+        if not r.get("available"):
+            print(f"  {role:22s} UNAVAILABLE — {r['asset']}")
+            continue
+        print(f"  {role:22s} rows={r['rows']:6d} ids={r['role_ids']:6d} "
+              f"hashes={r['role_prompt_hashes']:6d} "
               f"-> id_collisions={r['id_collisions']} "
               f"content_collisions={r['content_collisions']}")
     if failures:
@@ -146,7 +217,9 @@ def main() -> int:
         for f in failures:
             print(f"  - {f}")
         return 1
-    print("\nPASS — disjoint from every role by BOTH stable id and normalized content")
+    print(f"\nPASS — all {len(ROLES)} roles present and nonempty, counts match the "
+          "frozen manifest, and the battery is disjoint from every one of them by "
+          "BOTH stable id and normalized content")
     return 0
 
 

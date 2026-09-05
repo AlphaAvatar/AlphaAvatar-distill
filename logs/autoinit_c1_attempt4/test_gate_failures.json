@@ -62,5 +62,19 @@
     "any scoring",
     "any C1 decision"
   ],
-  "scientific_result": "NONE. C1 has still never been measured."
+  "scientific_result": "NONE. C1 has still never been measured.",
+  "_correction_20260905": {
+    "_what_this_is": "a fresh review found the six-failure enumeration correct but the root-cause SENTENCE too coarse. The six failures below are preserved verbatim; nothing above this key has been rewritten.",
+    "superseded_claim": "'the root cause is one thing' -- that wording collapsed an escape MECHANISM, three failure CLASSES and a fourth defect that produced no failure at all into a single sentence.",
+    "corrected_structure": {
+      "one_readiness_escape_mechanism": "the launch-bound simulator was not mechanically bound to the C1 staging contract. It ran on a hand-maintained complement (HIDDEN_PATHS) instead of a view derived from the session's own SetupManifest, so it could not be checked against the session it claimed to model.",
+      "three_actual_pod_failure_classes": [
+        "the issued-session readiness test omitting authorization_path (1)",
+        "battery cases reading historical roles C1 does not stage (2)",
+        "the Phase-B host-local module, whose store no pod has (3)"
+      ],
+      "plus_one_vacuous_pass_that_never_failed": "the battery_v2 parameter of test_it_is_disjoint_from_each_jsonl_role_by_id_and_by_content. With the directory absent, load() globbed it to an empty row set and both `not own & role` assertions held TRIVIALLY -- it reported disjointness from a role it had never read, and would have gone on reporting green indefinitely. It is worse than the six, because nothing would ever have surfaced it. The same hole existed in the host-side verifier, which returned 'zero collisions' for an absent role."
+    },
+    "repaired_at": "2026-09-05, $0, no grant and no launch"
+  }
 }

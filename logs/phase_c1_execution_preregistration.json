@@ -3,14 +3,14 @@
  "preregistration_id": "autoinit.v1.phase_c1.execution",
  "written_utc": "2026-09-02T00:00:00Z",
  "_contract": "Everything the Phase-C1 session will run, bound before any C1 result exists. AUTHORIZES NOTHING: no pricing decision, no spend grant, no permission to launch. An authorization, if ever issued, binds THIS document.",
- "head_commit": "c8a2961c0ea93a7ece095256efdb143d550e5348",
+ "head_commit": "8f32886b08a5f10c1c23e33fad5d7c98663078f1",
  "executable_source": {
-  "digest": "30abb55620bff09f725a56058f1a2c5db65a8667553f43be05b9d93edb039d46",
+  "digest": "7c5a9856f90e79c18382bf3a4a58b2fb647b62ac83be5bdbf3f7e6643d981795",
   "files": [
    {
     "path": "scripts/autoinit/verify_c1_battery_isolation.py",
-    "sha256": "887f430f9ba54ab36fd2c95994a8ecbf0ccb27e53b26411af7e140d0933f843c",
-    "bytes": 6489
+    "sha256": "9c03ce35d237c3409f4eb970afd9175798faa8044b55ae83d32a1882304cdd74",
+    "bytes": 9939
    },
    {
     "path": "scripts/data/battery_render.py",
@@ -51,7 +51,7 @@
   "rule": "sha256 over sorted 'path:sha256' lines of the declared set"
  },
  "c1_harness": {
-  "digest": "974c8fa744d3db05877d26c35f89c14faa6a028a26b3daaa876da80db55c5278",
+  "digest": "c6fc936513407b6ead7dc53c8c73fc6f1db60606e4c8b95b7aa9518d1af1f9bc",
   "files": [
    {
     "path": "configs/autoinit/c1_artifacts.json",
@@ -105,8 +105,8 @@
    },
    {
     "path": "scripts/pod/autoinit_c1_launch.py",
-    "sha256": "0877a7934fe1a0f2c80a94f00acb4db320b7925b72287c07efd8ad9f5a2072d3",
-    "bytes": 42931
+    "sha256": "258777afb5f74e2c2c5301d6f3682bf21d4bde2c1d108d25851ac87a33c2aae7",
+    "bytes": 44481
    },
    {
     "path": "scripts/pod/autoinit_engine_probe.py",
@@ -170,8 +170,8 @@
    },
    {
     "path": "src/aadistill/autoinit/c1_authorization.py",
-    "sha256": "fa16f2cc1a58631a42eef99b49eec37598eda0e276563d63368273a6c9796069",
-    "bytes": 18013
+    "sha256": "4502d87858f6706aed030a67c9f59879f48e8a89f6f3b11eb67cae974dc30af3",
+    "bytes": 18444
    },
    {
     "path": "src/aadistill/autoinit/c1_bundle.py",
@@ -275,13 +275,18 @@
    },
    {
     "path": "src/aadistill/autoinit/pod_environment.py",
-    "sha256": "47653766d315b2c31849a5204dfe29a1408a3d487d65b4b12fbd07512918c514",
-    "bytes": 22350
+    "sha256": "6fe5ce87c3e43e15beadaafb057252171147a748f4136ed337a5ea0cf95edd92",
+    "bytes": 25985
    },
    {
     "path": "src/aadistill/autoinit/recovery.py",
     "sha256": "39d6598e210b9619d56463f6ba3000d47e1a97f7121e7db25b97213d4d6c799e",
     "bytes": 102452
+   },
+   {
+    "path": "src/aadistill/autoinit/staging_contract.py",
+    "sha256": "4588d1d6ba836b971e4dc21749be5314450b2efefb2cea5093cd32a7222ac455",
+    "bytes": 8466
    },
    {
     "path": "src/aadistill/autoinit/stats.py",
@@ -394,7 +399,7 @@
     "bytes": 3567
    }
   ],
-  "n_files": 68,
+  "n_files": 69,
   "rule": "sha256 over sorted 'path:sha256' lines of the declared set",
   "note": "the set an authorization measures. It includes the launcher, the driver, the setup script, the operators the fixed path applies, the recovery and scoring paths the six probes invoke, and the session infrastructure they run through."
  },
@@ -404,7 +409,7 @@
   "session_kind": "c1",
   "allows_phase_a": false,
   "allows_beam_search": false,
-  "n_harness_files": 68,
+  "n_harness_files": 69,
   "status": "NO GRANT EXISTS. No authorization has been issued."
  },
  "launcher": "scripts/pod/autoinit_c1_launch.py",
@@ -880,5 +885,5 @@
   "any search, ranking, successive halving, tie-breaking or arm elimination"
  ],
  "authorizes": "nothing",
- "preregistration_sha256": "71137f55c7fd18ff8d1647508b9d7bd7c5f7280136d3c1eb9cb1dc559ef8d23c"
+ "preregistration_sha256": "495a2ff745890c3701816d1cb0f3f5ca3fb5467b3aafb470532d8d0becc934cc"
 }

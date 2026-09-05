@@ -39,6 +39,36 @@ def load(directory: Path) -> list[dict]:
     return out
 
 
+#: Historical roles this battery must be disjoint FROM. They are construction and
+#: isolation evidence, not C1 runtime inputs, so a paid C1 pod deliberately does
+#: not stage them — and adding them to the staging manifest merely to satisfy
+#: pytest would put ~17 files of unrelated history on a billing GPU.
+#:
+#: The rule is that an absent role SKIPS with its name, and never passes. Until
+#: 2026-09-05 the `battery_v2` parameter of the jsonl-role test passed VACUOUSLY
+#: when the directory was absent: `load()` globs a missing directory into an empty
+#: list, so `role_ids` and `role_hashes` were empty and both `not ... &`
+#: assertions held trivially. It reported disjointness from a role it had never
+#: read. That is worse than the two cases that failed loudly on attempt 4,
+#: because it would have gone on reporting green forever.
+def require_role(path: Path, role: str) -> None:
+    """Skip — never pass — when a historical source role is absent."""
+    if not path.exists():
+        pytest.skip(
+            f"historical source role {role!r} is absent at {path.relative_to(REPO)}; "
+            "it is construction/isolation evidence, not a C1 runtime input, and a "
+            "C1 pod does not stage it. Host-side proof lives in "
+            "scripts/autoinit/verify_c1_battery_isolation.py, which REFUSES an "
+            "absent or empty role.")
+
+
+def require_nonempty_rows(rows: list, path: Path, role: str) -> None:
+    """A present-but-empty role proves nothing either."""
+    assert rows, (
+        f"{role} at {path.relative_to(REPO)} yielded zero rows; a disjointness "
+        "assertion against an empty set is vacuous")
+
+
 @pytest.fixture(scope="module")
 def manifest() -> dict:
     return json.loads((BATTERY / "manifest.json").read_text())
@@ -87,7 +117,9 @@ def test_there_are_no_duplicates_inside_the_battery(items):
 @pytest.mark.parametrize("role_dir", ["artifacts/eval/battery_v2",
                                       "artifacts/stage3/recovery_search_v2"])
 def test_it_is_disjoint_from_each_jsonl_role_by_id_and_by_content(items, role_dir):
+    require_role(REPO / role_dir, role_dir)
     rows = load(REPO / role_dir)
+    require_nonempty_rows(rows, REPO / role_dir, role_dir)
     role_ids = {str(r["id"]) for r in rows} | {
         str(r["source_key"]) for r in rows if r.get("source_key")}
     role_hashes = {content_sha256(norm(r.get("prompt_text", ""))) for r in rows}
@@ -98,8 +130,10 @@ def test_it_is_disjoint_from_each_jsonl_role_by_id_and_by_content(items, role_di
 
 
 def test_it_is_disjoint_from_the_recovery_training_corpus(items):
+    corpus = REPO / "artifacts/stage3/corpus_v2/sessions.jsonl"
+    require_role(corpus, "RECOVERY_TRAINING (corpus_v2/sessions.jsonl)")
     ids, hashes = set(), set()
-    for line in (REPO / "artifacts/stage3/corpus_v2/sessions.jsonl").open():
+    for line in corpus.open():
         d = json.loads(line)
         ids.add(str(d["source_id"]))
         hashes.add(content_sha256(norm("\n".join(
@@ -127,9 +161,13 @@ def test_it_is_disjoint_from_the_token_id_roles(items, rel):
 
 def test_final_promotion_is_still_intact_and_was_only_read(manifest):
     """It is an exclusion source, never a sample source."""
+    # The manifest half is frozen battery semantics and must pass anywhere.
     assert manifest["isolation"]["final_promotion"]["n_prompts"] == 770
     assert "not sampled from" in manifest["isolation"]["final_promotion"]["note"]
-    assert (REPO / "artifacts/eval/battery_v2/manifest.json").is_file()
+    # The source-presence half needs the historical role on disk.
+    promo = REPO / "artifacts/eval/battery_v2/manifest.json"
+    require_role(promo, "FINAL_PROMOTION (eval/battery_v2)")
+    assert promo.is_file()
 
 
 # --- selection is deterministic and outcome-independent ---------------------

@@ -46,7 +46,30 @@ from aadistill.autoinit.pod_environment import (  # noqa: E402
     self_hash, tree_is_clean,
 )
 
+from aadistill.autoinit.staging_contract import (  # noqa: E402
+    derive_contract, describe, hidden_files,
+)
+
 SIMULATOR = "scripts/pod/simulate_pod_env.sh"
+
+
+def derive_c1_staging():
+    """Read C1's own SetupManifest. Refuses rather than falling back.
+
+    There is deliberately no default path here. A readiness sweep that cannot say
+    what this session stages must not run at all — falling back to the generic
+    simulator list is the exact failure being repaired, and a fallback would
+    reintroduce it the first time this import broke.
+    """
+    import sys as _sys
+    _sys.path.insert(0, str(REPO_ROOT / "scripts/pod"))
+    _sys.path.insert(0, str(REPO_ROOT / "tests/pod"))
+    from session_specs import load_session_launcher, session_args
+
+    launcher = load_session_launcher("autoinit_c1_launch")
+    setup = launcher.spec(session_args(launcher)).setup
+    contract = derive_contract(setup, session_id="autoinit-c1")
+    return contract, describe(contract, REPO_ROOT)
 DEFAULT_JUNIT = "/home/ecs-user/aad-scratch/podsim_junit.xml"
 DEFAULT_LOG = "/home/ecs-user/aad-scratch/podsim_pytest.log"
 
@@ -72,9 +95,28 @@ def main() -> int:
     harness = c1_harness_digest(REPO_ROOT)
     env_digest = pod_test_environment_digest(REPO_ROOT)
 
-    env = {**os.environ, "PODSIM_JUNIT": args.junit, "PODSIM_LOG": args.log}
-    command = (f"PODSIM_JUNIT={args.junit} PODSIM_LOG={args.log} "
-               f"bash {SIMULATOR}")
+    # --- the staged view, DERIVED from the session that will be launched -----
+    #
+    # Attempt 4's sweep used simulate_pod_env.sh's generic default HIDDEN_PATHS,
+    # a hand-maintained complement whose own comment claimed every pod session
+    # stages artifacts/stage3/corpus_v2. C1 stages no such thing, so the sweep
+    # modelled a machine 55 tests more generous than the pod and certified a tree
+    # that then failed six ways for $0.6986. The visible set now comes from the
+    # same SetupManifest the SessionRunner launches, and the hidden set is
+    # computed as its complement rather than declared.
+    contract, staged_view = derive_c1_staging()
+    hidden = hidden_files(contract, REPO_ROOT)
+    pytest_cmd = (".venv/bin/python -m pytest tests/ -q "
+                  + " ".join(f"--ignore={i}" for i in contract["test_ignores"]))
+    env = {**os.environ, "PODSIM_JUNIT": args.junit, "PODSIM_LOG": args.log,
+           "HIDDEN_PATHS": "\n".join(hidden), "PODSIM_CMD": pytest_cmd}
+    command = (f"HIDDEN_PATHS=<{len(hidden)} paths derived from the C1 "
+               f"SetupManifest, contract {contract['digest'][:12]}> "
+               f"PODSIM_CMD=<derived, {len(contract['test_ignores'])} ignores> "
+               f"PODSIM_JUNIT={args.junit} PODSIM_LOG={args.log} bash {SIMULATOR}")
+    print(f"staging contract {contract['digest'][:12]}… — "
+          f"{staged_view['n_staged_files']} staged files visible, "
+          f"{len(hidden)} hidden; ignores {contract['test_ignores']}")
     started = time.time()
     if args.from_existing:
         rc, seconds = 0, 0.0
@@ -128,6 +170,14 @@ def main() -> int:
         #: Captured before the sweep starts, when the tree is verified clean.
         "swept_base_commit": head,
         "record_kind": args.kind,
+        "staging_contract_digest": contract["digest"],
+        "staging_contract": staged_view,
+        "staging_contract_rule": (
+            "derived from spec(args).setup -- the same SetupManifest the "
+            "SessionRunner launches. Relay inputs are modelled at FILE "
+            "granularity (a RelayInput stages one named file into its dest, not "
+            "the directory), local assets as whole trees. The hidden set is the "
+            "computed complement, never a declared list."),
         "record_kind_note": (
             "diagnostic: proves the pod-like suite passes on this exact tree and "
             "that the readiness machinery works. A launch-bound record is the one "

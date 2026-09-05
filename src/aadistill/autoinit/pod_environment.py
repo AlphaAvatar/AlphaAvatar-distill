@@ -104,6 +104,29 @@ LEAF_TRANSPORT_NODEIDS: tuple[str, ...] = tuple(
         "test_a_file_absent_from_the_far_end_is_caught",
         "test_the_round_trip_needs_no_dev_box_directory"))
 
+#: C1 construction-source cases that intentionally skip when their historical
+#: source role is absent — which is every pod, because those roles are isolation
+#: evidence and not C1 runtime inputs. They SKIP with the role named; they must
+#: never pass vacuously, which is exactly what the `battery_v2` parameter did
+#: until 2026-09-05 (an absent directory globbed to zero rows and the
+#: disjointness assertions held trivially).
+#:
+#: `recovery_search_v2` is deliberately NOT here: C1 stages it as a local asset,
+#: so its parameter of the same test must PASS on a pod.
+BATTERY_SOURCE_NODEIDS: tuple[str, ...] = (
+    "tests/data/test_c1_battery.py::"
+    "test_it_is_disjoint_from_each_jsonl_role_by_id_and_by_content"
+    "[artifacts/eval/battery_v2]",
+    "tests/data/test_c1_battery.py::test_it_is_disjoint_from_the_recovery_training_corpus",
+    "tests/data/test_c1_battery.py::test_final_promotion_is_still_intact_and_was_only_read",
+)
+
+#: The parameter that must still PASS on a pod, because C1 stages its source.
+BATTERY_STAGED_ROLE_NODEID = (
+    "tests/data/test_c1_battery.py::"
+    "test_it_is_disjoint_from_each_jsonl_role_by_id_and_by_content"
+    "[artifacts/stage3/recovery_search_v2]")
+
 #: Structural tests that failed on the pod for repository-state reasons and are
 #: reported separately, because "fixed" was claimed for them once already.
 REPOSITORY_STATE_NODEIDS: tuple[str, ...] = (
@@ -229,15 +252,20 @@ def evaluate_sweep(outcomes: dict[str, str]) -> dict[str, Any]:
     repo_state = {n: outcomes.get(n, "ABSENT") for n in REPOSITORY_STATE_NODEIDS}
     repo_state_ok = all(s == "passed" for s in repo_state.values())
 
+    battery = {n: outcomes.get(n, "ABSENT") for n in BATTERY_SOURCE_NODEIDS}
+    battery_ok = all(s == "skipped" for s in battery.values())
+    staged_role = outcomes.get(BATTERY_STAGED_ROLE_NODEID, "ABSENT")
+    staged_role_ok = staged_role == "passed"
+
     # Any OTHER skip in the two modules the environment repair touched is an
     # unexpected environment skip: a test that quietly stopped running under an
     # empty HOME is indistinguishable from one that never existed.
     watched = ("tests/data/test_c1_battery.py",
                "tests/autoinit/test_leaf_transport_publish.py")
+    expected_skips = set(RENDERER_PARITY_NODEIDS) | set(BATTERY_SOURCE_NODEIDS)
     unexpected = sorted(
         n for n, s in outcomes.items()
-        if s == "skipped" and n.startswith(watched)
-        and n not in RENDERER_PARITY_NODEIDS)
+        if s == "skipped" and n.startswith(watched) and n not in expected_skips)
 
     problems: list[str] = []
     if failed:
@@ -248,6 +276,14 @@ def evaluate_sweep(outcomes: dict[str, str]) -> dict[str, Any]:
         problems.append(f"leaf transport did not pass 5/5: {leaf}")
     if not repo_state_ok:
         problems.append(f"repository-state tests did not pass: {repo_state}")
+    if not battery_ok:
+        problems.append(f"battery construction-source skip set is not the "
+                        f"expected {len(BATTERY_SOURCE_NODEIDS)}: {battery}")
+    if not staged_role_ok:
+        problems.append(
+            f"the battery role C1 DOES stage did not pass: {staged_role!r}. "
+            "recovery_search_v2 is a local asset, so its disjointness parameter "
+            "must run on a pod, not skip.")
     if unexpected:
         problems.append(f"unexpected environment skips: {unexpected}")
 
@@ -260,6 +296,11 @@ def evaluate_sweep(outcomes: dict[str, str]) -> dict[str, Any]:
         "leaf_transport_all_passed": leaf_ok,
         "repository_state": repo_state,
         "repository_state_all_passed": repo_state_ok,
+        "battery_source_expected_skips": battery,
+        "battery_source_skipped_as_expected": battery_ok,
+        "battery_staged_role_nodeid": BATTERY_STAGED_ROLE_NODEID,
+        "battery_staged_role_outcome": staged_role,
+        "expected_environment_skips": sorted(expected_skips),
         "unexpected_environment_skips": unexpected,
         "problems": problems,
         "verdict": "PASS" if not problems else "FAIL",
@@ -353,6 +394,7 @@ def verify_record(record: dict[str, Any], repo_root: str | Path = ".", *,
                   session_commit: str | None = None,
                   authorization_path: str | None = None,
                   required_kind: str | None = None,
+                  staging_contract_digest: str | None = None,
                   ) -> tuple[bool, str]:
     """The cheap pre-provider check: does this record still describe live code?
 
@@ -395,6 +437,26 @@ def verify_record(record: dict[str, Any], repo_root: str | Path = ".", *,
         return False, (f"the record declares record_kind {kind!r}, which is not "
                        f"one of {list(RECORD_KINDS)}; a record that cannot say "
                        "what it is cannot be relied on for anything")
+    # The staged view the sweep ran under must be the one this session stages.
+    # Attempt 4's sweep used simulate_pod_env.sh's GENERIC default HIDDEN_PATHS,
+    # so it modelled a machine 55 tests more generous than the pod and certified
+    # a tree that then failed six ways. A launch-bound record must carry a
+    # contract derived from the session's own SetupManifest, and it must still
+    # describe the live one.
+    recorded_staging = record.get("staging_contract_digest")
+    if required_kind == LAUNCH_BOUND and not recorded_staging:
+        return False, (
+            "the record carries no staging_contract_digest, so the sweep it "
+            "describes may have used the generic simulator default rather than "
+            "this session's staging manifest. That is what aborted attempt 4.")
+    if (staging_contract_digest is not None and recorded_staging
+            and staging_contract_digest != recorded_staging):
+        return False, (
+            f"the record was swept under staging contract {recorded_staging[:12]}…, "
+            f"the live session stages {staging_contract_digest[:12]}… — relay "
+            "inputs, local assets, test ignores or the session kind moved, so the "
+            "sweep is owed again")
+
     if required_kind is not None and kind != required_kind:
         return False, (
             f"this record is {kind!r} and {required_kind!r} is required. A "
@@ -441,7 +503,8 @@ def verify_record(record: dict[str, Any], repo_root: str | Path = ".", *,
     return True, (f"pod sweep {c.get('passed')} passed / {c.get('skipped')} skipped "
                   f"/ {c.get('failed', 0) + c.get('error', 0)} failed, 7 renderer "
                   f"skips, leaf transport 5/5, binds harness {live_harness[:12]}… "
-                  f"and environment {live_env[:12]}…, swept at {base[:8]} with "
+                  f"and environment {live_env[:12]}…, staging contract "
+                  f"{str(recorded_staging)[:12]}…, swept at {base[:8]} with "
                   f"{lineage['reason']}")
 
 

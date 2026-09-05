@@ -1575,7 +1575,7 @@ provider-polled reading wins.
 
 **Superseded line:** **Cumulative: $264.3878 of $283.7600.** `$19.3722` uncommitted — still less than
 one full C1 session at the repriced ceiling of `$15.1475`… which it now exceeds
-only by `$4.22`. A further C1 attempt is arithmetically possible exactly once
+only by about `$3.53`. A further C1 attempt is arithmetically possible exactly once
 more and needs a maintainer grant.
 
 Cost is recorded at the watchdog's last poll (19.17 min → `$0.3483`, written as

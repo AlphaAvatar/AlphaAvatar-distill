@@ -10,15 +10,34 @@ PHASE C1 ATTEMPT 4 LAUNCHED AND ABORTED AT THE POD TEST GATE — STILL NEVER MEA
 > **No scientific stage ran — no replay, no training, no evaluation, no
 > decision.** Cumulative `$265.0864` of `$283.7600`.
 >
-> **The root cause is one thing.** The launch-bound sweep ran with
-> `simulate_pod_env.sh`'s DEFAULT `HIDDEN_PATHS` rather than a set derived
-> from what C1 actually stages. The simulator's own docstring says to pass a
-> session-specific set, and its default comment asserts that *every* pod
-> session stages `artifacts/stage3/corpus_v2` — which is false for C1. The
-> sweep therefore certified a machine 55 tests more generous than the pod:
-> 49 extra skips plus the 6 failures exactly account for the pass delta.
-> Gate 12 exists to prevent this and did not, because the simulator's
-> fidelity is a hand-passed variable I left at its default.
+> **One escape mechanism, three failure classes, and a fourth defect that
+> never failed.** The earlier wording — "the root cause is one thing" — was too
+> coarse and is superseded.
+>
+> The **escape mechanism** is that the launch-bound simulator was not
+> mechanically bound to the C1 staging contract: it ran on a hand-maintained
+> complement (`HIDDEN_PATHS`) instead of a view derived from the session's own
+> `SetupManifest`, so it could not be checked against the session it modelled.
+> Its default comment asserts that *every* pod session stages
+> `artifacts/stage3/corpus_v2`, which is false for C1. The sweep therefore
+> certified a machine 55 tests more generous than the pod: 49 extra skips plus
+> the 6 failures exactly account for the pass delta.
+>
+> The **three failure classes** are the issued-session readiness test omitting
+> `authorization_path` (1), battery cases reading historical roles C1 does not
+> stage (2), and the Phase-B host-local module whose byte store no pod has (3).
+>
+> The **fourth defect produced no failure at all.** The `battery_v2` parameter
+> of `test_it_is_disjoint_from_each_jsonl_role_by_id_and_by_content` passed
+> VACUOUSLY: with the directory absent, `load()` globbed it to an empty row set
+> and both `not own & role` assertions held trivially. It reported disjointness
+> from a role it had never read, and would have gone on reporting green
+> indefinitely. The host-side verifier had the same hole, returning "zero
+> collisions" for an absent role. That is worse than the six, because nothing
+> would ever have surfaced it.
+>
+> Gate 12 exists to prevent the first and did not, because the simulator's
+> fidelity was a hand-passed variable left at its default.
 >
 > Full enumeration, with each of the three defect classes and its evidence:
 > [`autoinit_c1_attempt4/test_gate_failures.json`](autoinit_c1_attempt4/test_gate_failures.json).
@@ -53,9 +72,11 @@ minute assumption unchanged. Attempt 3, priced at `$0.99/h`, is
 **Phase C1 is REPRICED and has now consumed compute — but still no science.**
 Floor **$13.4401** · soft stop **$14.7841** · one-attempt ceiling **$15.1475** at
 the secure `$1.09/h`, against **$18.6736** headroom: one more full attempt
-fits, by `$4.22`. **Headroom is not permission: no grant exists.**
+fits, by about `$3.53`. **Headroom is not permission: no grant exists.**
 
-Four launch attempts, `$0.5281` total, **zero scientific stages** — no replay, no
+Five attempt labels — 1, 2, 3, 3R, 4 — of which **four created paid provider
+resources**; attempt 3 created none and cost `$0.00`. `$1.2267` of C1
+infrastructure spend, **zero scientific stages** — no replay, no
 training, no evaluation, no decision:
 
 | attempt | cost | died at |

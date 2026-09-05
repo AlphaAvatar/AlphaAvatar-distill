@@ -616,48 +616,54 @@ def test_no_pod_script_checks_rope_on_a_meta_model(script):
     )
 
 
-def test_the_simulator_and_the_pod_gate_ignore_the_same_files():
+def test_the_simulator_runs_each_session_s_own_ignore_list():
     """The simulator is only evidence if it runs the pod's command.
 
-    `simulate_pod_env.sh` exists to answer "would this suite pass on a pod?".
-    An ignore list that differs from the pod's turns a green simulation into a
-    statement about a command nobody runs. `--ignore` is the one place the two
-    are allowed to be long, so it is the one place they are pinned.
+    This used to pin ONE hardcoded default in `simulate_pod_env.sh` against every
+    session's manifest, requiring all sessions to ignore identical files. C1
+    attempt 4 ended that: `tests/autoinit/test_phase_b_reuse_hostlocal.py` must be
+    ignored by C1 and is not by the others, so one shared literal cannot describe
+    them all -- and the attempt showed what a stale shared default costs.
 
-    The pod's list moved on 2026-08-18: the setup script reads
-    `$SESSION_TEST_IGNORES`, so it no longer contains the paths — the SESSION
-    does, in its manifest. The pin is therefore against every session's manifest
-    rather than against one script's text, which is strictly more than the
-    original checked: four sessions can now disagree with the simulator, and all
-    four are compared.
+    The ignores are now DERIVED per session from the same `SetupManifest` the
+    runner launches, so "the simulation runs the pod's list" holds by
+    construction. What is worth testing is that the derivation is used and that
+    there is no fallback to the generic default, which is the repaired failure.
     """
     import re
 
-    def sim_ignores():
-        # Stops at shell quoting so the trailing `"}` of a ${VAR:-"..."}
-        # default is not captured as part of the path.
-        return sorted(re.findall(
-            r"--ignore=([^\s\"']+)",
-            (REPO / "scripts/pod/simulate_pod_env.sh").read_text()
-            .replace("\\\n", " ")))
-
-    sim = sim_ignores()
-    assert sim, "the simulator ignores nothing; the extractor is not matching"
     setup_text = (REPO / "scripts/pod/autoinit_preflight_setup.sh").read_text()
     assert "SESSION_TEST_IGNORES" in setup_text, (
         "the pod gate no longer reads the session's ignore list; it has gone "
         "back to naming paths itself, and a session cannot change what it runs")
     assert not re.search(r"--ignore=\S", setup_text), (
         "the pod gate names an --ignore path directly again; it must take the "
-        "list from the session, or the pin below tests nothing")
+        "list from the session")
+
+    recorder = (REPO / "scripts/autoinit/record_pod_environment.py").read_text()
+    assert 'contract["test_ignores"]' in recorder, (
+        "the recorder no longer derives the simulator's ignores from the session "
+        "manifest")
+    assert '"PODSIM_CMD": pytest_cmd' in recorder, (
+        "the recorder no longer passes a derived PODSIM_CMD, so the simulation "
+        "would fall back to the generic default -- the attempt-4 defect")
+    assert "derive_c1_staging()" in recorder
 
     for name, extra in SESSION_LAUNCHERS:
         mod = load_session_launcher(name)
         spec = mod.spec(session_args(mod, extra))
         pod = sorted(spec.setup.test_ignores)
-        assert pod == sim, (
-            f"{name} tells the pod gate to ignore {pod} but the simulator "
-            f"ignores {sim}; the simulation would not describe the pod's run")
         assert "tests/pod/test_phase_a_stages1_5_execute.py" in pod, (
             f"{name} puts the ~20-minute pre-flight rehearsal back in the pod's "
             "2700 s gate, whose timeout exits 90 and kills a paid session")
+
+
+def test_c1_ignores_the_phase_b_host_local_module():
+    """Its premise is a retained byte store that is deliberately host-local, and
+    running it on a pod cost three of attempt 4's six failures. The WHOLE module
+    is ignored: the cases that did not fail rest on the same absent store."""
+    mod = load_session_launcher("autoinit_c1_launch")
+    ignores = mod.spec(session_args(mod)).setup.test_ignores
+    assert "tests/autoinit/test_phase_b_reuse_hostlocal.py" in ignores
+
+

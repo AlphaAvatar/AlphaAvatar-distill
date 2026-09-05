@@ -58,6 +58,7 @@ from aadistill.autoinit.c1_bundle import (  # noqa: E402
     hf_download, require_canonical_bundle_arg, roundtrip,
 )
 from aadistill.autoinit.c1_isolation import derive_recovery_seeds  # noqa: E402
+from aadistill.autoinit.staging_contract import derive_contract  # noqa: E402
 from aadistill.autoinit.pod_environment import (  # noqa: E402
     LAUNCH_BOUND, RECORD_PATH as POD_ENV_RECORD,
     load_record as load_pod_env_record, verify_record as verify_pod_env_record,
@@ -143,8 +144,18 @@ TEACHER_REVISION = CS.TEACHER_REVISION
 #: deliberately NOT ignored: it is ~60 seconds against a 2700 s gate, and running
 #: it on the pod proves the driver's control flow in the real environment before
 #: any stage spends money.
+#: `test_phase_b_reuse_hostlocal.py` joined them after attempt 4, which it cost
+#: three of its six failures. The module's premise is a retained probe byte store
+#: that is deliberately HOST-LOCAL — the file says so in its name — and Phase B's
+#: own session already excludes it from its pod test gate for exactly that reason.
+#: C1 re-ran it on a host where its premises are absent. The WHOLE module is
+#: ignored, not the three nodeids that happened to fail: the other cases in it
+#: rest on the same absent store and would fail the moment they were reached.
+#: Staging the store instead was rejected — it is Phase-B reuse evidence, not a C1
+#: runtime input, and no frozen Phase-B science is touched here.
 TEST_IGNORES = ("tests/data/test_recovery_corpus_pipeline.py",
-                "tests/pod/test_phase_a_stages1_5_execute.py")
+                "tests/pod/test_phase_a_stages1_5_execute.py",
+                "tests/autoinit/test_phase_b_reuse_hostlocal.py")
 
 STATUS = f"{WS}/autoinit_c1.status"
 RUN_LOG = f"{WS}/autoinit_c1_run.log"
@@ -493,11 +504,21 @@ def pod_environment_gate(ctx: SessionContext) -> tuple[bool, str]:
     # tree — is what must descend from the swept base. `AUTH_PATH` is permitted
     # because an issued session commits its authorization after the sweep by
     # construction; it is the same single path the session-lineage gate allows.
+    # The staged view the sweep ran under must be the one THIS session stages.
+    # Attempt 4's sweep used the simulator's generic default and modelled a
+    # machine 55 tests more generous than the pod.
+    try:
+        live_staging = derive_contract(spec(ctx.args).setup,
+                                       session_id="autoinit-c1")["digest"]
+    except Exception as exc:                                   # noqa: BLE001
+        return False, f"cannot derive this session's staging contract: {exc}"
+
     ok, reason = verify_pod_env_record(
         record, REPO_ROOT,
         session_commit=getattr(ctx.args, "session_commit", None),
         authorization_path=AUTH_PATH,
-        required_kind=LAUNCH_BOUND)
+        required_kind=LAUNCH_BOUND,
+        staging_contract_digest=live_staging)
     ctx.evidence["pod_environment_verification"] = {
         "verdict": "PASS" if ok else "FAIL",
         "record": POD_ENV_RECORD,
@@ -507,6 +528,8 @@ def pod_environment_gate(ctx: SessionContext) -> tuple[bool, str]:
         "swept_base_commit": record.get("swept_base_commit"),
         "session_commit": getattr(ctx.args, "session_commit", None),
         "permitted_post_sweep_paths": [POD_ENV_RECORD, AUTH_PATH],
+        "live_staging_contract_digest": live_staging,
+        "recorded_staging_contract_digest": record.get("staging_contract_digest"),
         "counts": record.get("counts"),
         "renderer_parity_skips": record.get("renderer_parity_skipped_as_expected"),
         "leaf_transport_all_passed": record.get("leaf_transport_all_passed"),

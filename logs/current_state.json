@@ -31,8 +31,8 @@
     "planning_floor_usd": 13.4401,
     "remaining_is_not_permission": true,
     "ledger": "logs/BUDGET_LEDGER.md",
-    "headroom_note": "Phase-B 1-5 $30.0200; continuation 1-5 $3.8047 and CLOSED Phase B; C1 attempts 1/2/3R/4 $1.2267, ALL infrastructure aborts with zero measurement.",
-    "planning_floor_note": "C1 at secure L40S $1.09/h: floor $13.4401, soft $14.7841, ceiling $15.1475. $18.6736 remains -- one more full attempt fits by $3.53, and headroom is not permission."
+    "headroom_note": "Phase-B 1-5 $30.0200; continuation 1-5 $3.8047 and CLOSED Phase B; C1 $1.2267 across four PAID attempts (1, 2, 3R, 4) plus attempt 3 at $0.00, all infrastructure aborts with zero measurement.",
+    "planning_floor_note": "C1 at secure L40S $1.09/h: floor $13.4401, soft $14.7841, ceiling $15.1475. $18.6736 remains, so one full attempt fits with about $3.53 reserve. Headroom is not permission."
   },
   "frozen": {
     "science_plan_hash": "02be33b9a7a8e26bc8bfb75795351e8cdc9ffd441b47066cc81887cfc511b55c",
@@ -58,9 +58,11 @@
   },
   "latest_verification": {
     "utc": "2026-09-05T00:00:00Z",
-    "kind": "C1 attempt 4: 12/12 pre-provider gates PASS, pod created, ABORT at the pod CPU test gate. $0.6986, zero science.",
-    "owned_by": "logs/autoinit_c1_attempt4/test_gate_failures.json",
-    "pods": "0, provider-confirmed after teardown"
+    "owned_by": "logs/c1_pod_environment_verification.json",
+    "owns": "record_kind, swept_base_commit, staging-contract digest, test counts, harness digest, pod-test-environment digest and verdict. Read them THERE.",
+    "renderer_parity_owned_by": "logs/c1_renderer_parity.json",
+    "last_paid_attempt_owned_by": "logs/autoinit_c1_attempt4/test_gate_failures.json",
+    "why_not_duplicated": "a copy of a fact the record owns can only go stale, exactly as baseline_commit did."
   },
   "abandoned": [
     "recovery_search_v1; calib.reasoning_heavy@v1 (both INVALID/UNBUILDABLE before use)",
@@ -128,7 +130,7 @@
       "pricing": "logs/phase_c1_pricing.json 909ed65f -- secure L40S $1.09/h, CEILING $15.1475.",
       "seeds": "1635674081, 1656475568, 696460635 (derived from the C0 digest)",
       "scoring": "c1_confirmation_scoring@v1 77507935; equivalence IDENTICAL over 15 probes. @v2 808080a7 and battery a285d61f untouched.",
-      "attempts": "5 launch attempts, $1.2267, ZERO science. Per-attempt cost: BUDGET_LEDGER.md; detail: logs/autoinit_c1_attempt*/",
+      "attempts": "5 attempt LABELS: 1, 2, 3, 3R, 4. FOUR created paid provider resources; attempt 3 created none ($0.00). $1.2267 of C1 infrastructure spend, ZERO science. Ledger: BUDGET_LEDGER.md.",
       "gates": "12 pre-provider gates. Detail: STATE.md, decisions.md 2026-09-04.",
       "blocker": "attempt 4 died at the pod CPU test gate: 6 failures -- 1 my own readiness test omitting authorization_path, 2 reading assets C1 does not stage, 3 needing a host-local store. logs/autoinit_c1_attempt4/test_gate_failures.json",
       "needs": "a new maintainer grant; no automatic retry",

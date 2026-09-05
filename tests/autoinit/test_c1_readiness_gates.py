@@ -409,14 +409,68 @@ def test_the_pod_gate_names_every_failing_nodeid_before_it_exits():
 
 # --- the record on disk, once it exists -------------------------------------
 
+C1_AUTH_PATH = "logs/autoinit_c1_authorization.json"
+
+
 def test_the_committed_record_still_binds_the_live_executable():
-    """This is gate 12 itself, run as a test. If it fails, the pod sweep is owed
-    again before any C1 launch — which is the point."""
+    """Gate 12 itself, run as a test — with the gate's OWN argument contract.
+
+    Until 2026-09-05 this called `verify_record(record, REPO)` and omitted
+    `authorization_path`, so only the readiness record counted as a permitted
+    post-sweep path. That is not the shape a pod is ever in: a pod checks out the
+    SESSION commit, which by construction also carries
+    `logs/autoinit_c1_authorization.json`, so the authorization read as post-sweep
+    drift and the record was refused. It cost one of attempt 4's six failures.
+
+    The production gate was already correct and passed — `pod_environment_gate`
+    passes `authorization_path=AUTH_PATH`. Only the test disagreed with it, and no
+    pre-issuance sweep could have caught that, because before issuance the
+    authorization is not in the tree to be objected to. So the test now asks the
+    question the gate asks, and `test_the_test_matches_the_paid_gate` below keeps
+    the two from drifting apart again.
+    """
     path = REPO / pe.RECORD_PATH
     if not path.is_file():
         pytest.skip(f"{pe.RECORD_PATH} has not been produced yet")
-    ok, why = pe.verify_record(json.loads(path.read_text()), REPO)
+    ok, why = pe.verify_record(json.loads(path.read_text()), REPO,
+                               authorization_path=C1_AUTH_PATH)
     assert ok, why
+
+
+def test_the_test_matches_the_paid_gate_argument_for_argument():
+    """The launcher's permitted-path set and this module's must be the same one."""
+    src = (REPO / "scripts/pod/autoinit_c1_launch.py").read_text()
+    assert 'AUTH_PATH = "logs/autoinit_c1_authorization.json"' in src
+    assert C1_AUTH_PATH == "logs/autoinit_c1_authorization.json"
+    assert "authorization_path=AUTH_PATH" in src, (
+        "the paid gate no longer permits the authorization path; this test would "
+        "then be stricter than the gate rather than equal to it")
+
+
+def test_a_pre_authorization_tree_is_accepted_with_the_record_alone(tmp_path,
+                                                                    monkeypatch):
+    """Before issuance: the readiness record is the only permitted delta."""
+    root, rec, base = _swept_repo(tmp_path, monkeypatch)
+    head = _commit(root, pe.RECORD_PATH, '{"r": 1}\n', "record the sweep")
+    ok, why = pe.verify_record(rec, root, session_commit=head,
+                               authorization_path=C1_AUTH_PATH)
+    assert ok, why
+
+
+def test_an_issued_session_tree_is_accepted_with_record_and_authorization(
+        tmp_path, monkeypatch):
+    """After issuance: exactly the shape a pod checks out. This is the case
+    attempt 4 refused."""
+    root, rec, base = _swept_repo(tmp_path, monkeypatch)
+    _commit(root, pe.RECORD_PATH, '{"r": 1}\n', "record the sweep")
+    head = _commit(root, C1_AUTH_PATH, '{"auth": 1}\n', "issue")
+    ok, why = pe.verify_record(rec, root, session_commit=head,
+                               authorization_path=C1_AUTH_PATH)
+    assert ok, why
+    # And the omission that caused the abort still refuses, so the fix is the
+    # argument and not a loosened rule.
+    ok2, why2 = pe.verify_record(rec, root, session_commit=head)
+    assert not ok2 and "post-sweep drift" in why2
 
 
 def test_gate_twelve_is_excluded_from_the_candidate_sweep_for_a_stated_reason():

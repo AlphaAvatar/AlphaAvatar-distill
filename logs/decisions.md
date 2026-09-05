@@ -1,5 +1,50 @@
 # Decision records
 
+## 2026-09-05 — Attempt-4 root cause, restated: one escape mechanism, three classes, one vacuous pass
+
+- **Supersedes a sentence, not the evidence.** The closeout entry below says "the
+  root cause is one thing". That collapsed three different kinds of thing, and a
+  fresh review found a fourth defect the six failures never revealed. The raw
+  enumeration in `logs/autoinit_c1_attempt4/test_gate_failures.json` is unchanged;
+  the correction is appended to it under `_correction_20260905`, exactly as the
+  attempt-3R withdrawal was appended rather than rewritten.
+- **The escape mechanism (one).** The launch-bound simulator was not mechanically
+  bound to the C1 staging contract. It ran on `HIDDEN_PATHS`, a hand-maintained
+  *complement* — "everything except these paths is present" — which cannot be
+  checked against anything and so drifts every time a session's staging changes.
+  Its own default comment asserted that every pod session stages
+  `artifacts/stage3/corpus_v2`; C1 stages no such thing.
+- **The failure classes (three).** The issued-session readiness test omitting
+  `authorization_path`; two battery cases reading historical roles C1 does not
+  stage; the Phase-B host-local module whose retained byte store no pod has.
+- **The vacuous pass (one, and it never failed).** The `battery_v2` parameter of
+  `test_it_is_disjoint_from_each_jsonl_role_by_id_and_by_content` passed
+  TRIVIALLY when the role was absent: `load()` globs a missing directory into an
+  empty row set, so both `not own & role` assertions held against nothing. It
+  reported disjointness from a role it had never read. The host-side verifier had
+  the identical hole, printing `id_collisions=0` for a role it could not open.
+  This is the worst of the four, because no attempt would ever have surfaced it —
+  it fails green, forever.
+- **The repair, and its direction.** The staged view is now DERIVED from
+  `spec(args).setup`, the same `SetupManifest` the runner launches:
+  `RelayInput` at file granularity (one named file into its destination, never
+  the directory), `LocalAsset` as a whole tree, plus the session kind, the setup
+  environment, the test ignores and the CPU/pytest contract. The hidden set is the
+  computed complement and exists nowhere as a declaration. A deterministic digest
+  binds it into the readiness record, `pod_environment_gate` compares it against
+  the live session, and a launch-bound record without one is refused — so falling
+  back to the generic default cannot produce a valid launch-bound sweep.
+- **What was deliberately NOT done.** `corpus_v2` and `eval/battery_v2` were not
+  added to the C1 staging manifest to satisfy pytest: they are construction and
+  isolation evidence, not runtime inputs, and staging them would put unrelated
+  history on a billing GPU. The affected assertions SKIP with the role named, and
+  the host-side verifier — which has the sources — now REFUSES an absent or empty
+  role and cross-checks every count against the battery's own frozen manifest.
+  `verify_c1_battery_isolation.py` was not wired into the launcher, so it does not
+  enter the harness; `staging_contract.py` did, because the gate executes it.
+- **Revisit when:** the reviewer rules. No grant is implied, and none is requested
+  here.
+
 ## 2026-09-05 — C1 attempt 4: twelve gates, a pod, and the same test gate again
 
 - **Outcome:** ABORT at the pod CPU test gate. `6 failed, 2743 passed, 111 skipped`.

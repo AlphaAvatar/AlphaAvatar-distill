@@ -84,6 +84,12 @@ C1_HARNESS_SOURCE_FILES_V1: tuple[str, ...] = (
     "scripts/autoinit/renderer_parity_gate.py",
     "scripts/data/battery_render.py",
     "src/aadistill/autoinit/pod_environment.py",
+    # Added after attempt 4. `pod_environment_gate` derives this session's staged
+    # view from it and refuses a readiness record swept under a different one, so
+    # it is launch-decision code: if it computed the wrong visible set, the gate
+    # would certify a sweep of a machine the pod is not. That is precisely what
+    # the generic HIDDEN_PATHS default did for $0.6986.
+    "src/aadistill/autoinit/staging_contract.py",
     # what the collector is told to save, and what it may skip on failure
     "configs/autoinit/c1_artifacts.json",
     "configs/autoinit/c1_artifacts_failed.json",
