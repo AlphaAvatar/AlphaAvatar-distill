@@ -3,10 +3,11 @@ PHASE C1 ATTEMPT 5 LAUNCHED AND ABORTED AT THE POD TEST GATE — STILL NEVER MEA
 
 > **Attempt 5, 2026-09-05.** The one-use grant was approved and consumed. All
 > **12** pre-provider gates passed on the launcher's own fresh run, the bundle
-> round-tripped, pod `e2ghwfuerdrvni` was created at `$1.09/h`, and setup
-> reached `ENV_READY → REPO_READY → ASSETS_STAGED → VLLM_READY → TEACHER_READY
-> → ROPE_OK` before dying at the CPU test gate with **2 failed / 2769 passed /
-> 99 skipped**. `$0.3150`, 17.34 min, pod deleted, provider confirms gone.
+> round-tripped, pod `e2ghwfuerdrvni` was created at `$1.09/h`, and setup emitted
+> `VLLM_READY → TEACHER_READY → ROPE_OK` before dying at the CPU test gate with
+> **2 failed / 2769 passed / 99 skipped**. Those three are the ONLY markers the
+> evidence carries: the launcher echoes back a failed setup's tail, so earlier
+> markers are neither confirmed nor denied by this record. `$0.3150`, 17.34 min, pod deleted, provider confirms gone.
 > **No scientific stage ran — no replay, no training, no evaluation, no
 > decision.** Cumulative `$265.4014` of `$283.7600`.
 >

@@ -4,13 +4,27 @@
   "pod_id": "e2ghwfuerdrvni",
   "session_commit": "79c18adb295f3fc8498816a5d8b4a9f483f1ec6b",
   "_what_this_is": "the complete enumeration of what the pod CPU test gate refused, from the launcher's own '--- every failing nodeid ---' block. Attempt 4 lost its detail to a 4-line tail; that grep is why this file can be exact.",
-
   "counts": {
-    "pod": {"passed": 2769, "skipped": 99, "failed": 2, "error": 0, "total": 2870, "seconds": 781.84, "rc": 1},
-    "launch_bound_sweep": {"passed": 2770, "skipped": 100, "failed": 0, "error": 0, "total": 2870, "seconds": 673.2, "rc": 0},
+    "pod": {
+      "passed": 2769,
+      "skipped": 99,
+      "failed": 2,
+      "error": 0,
+      "total": 2870,
+      "seconds": 781.84,
+      "rc": 1
+    },
+    "launch_bound_sweep": {
+      "passed": 2770,
+      "skipped": 100,
+      "failed": 0,
+      "error": 0,
+      "total": 2870,
+      "seconds": 673.2,
+      "rc": 0
+    },
     "note": "the same 2870 tests were selected in both. The sweep certified this exact tree 17 minutes before the pod refused it."
   },
-
   "failures": [
     {
       "nodeid": "tests/autoinit/test_staging_contract.py::test_an_artifact_c1_does_not_stage_is_invisible",
@@ -25,7 +39,6 @@
       "why": "it iterdir()s artifacts/stage1/qwen3_0p6b_init_v0/checkpoint on the live filesystem and asserts an UNDECLARED file is present there (the dev box holds six files, C1 stages four). On a pod the directory holds exactly the four staged files, so `undeclared` is empty and the assertion 'the dev box no longer holds an undeclared file here' fires."
     }
   ],
-
   "root_cause": {
     "one_sentence": "Both tests describe the DEV BOX's staged/hidden split and were guarded by a skipif keyed on AAD_SYNTHETIC_HF_TOKEN -- a flag the simulator sets and the pod does not -- so the guard encoded 'am I inside the simulator?' when the property it needed was 'does this machine hold the unstaged artifacts?'.",
     "the_three_environments": {
@@ -41,14 +54,12 @@
       "any C1 scientific identity, all of which the launcher re-verified at $0 before creating the pod"
     ]
   },
-
   "unexplained_residual": {
     "claim": "one further simulator/pod divergence exists and is NOT accounted for by these two failures.",
     "arithmetic": "if exactly the two named tests moved skip->fail, the pod's skip count would be 98. It is 99, and the pod passed one fewer test than the sweep. So one test that PASSED in the sweep SKIPPED on the pod.",
     "why_it_cannot_be_named": "the pod diagnostics grep '^FAILED|^ERROR' only. A skip divergence is invisible unless it also fails, so the pod's skip list was never captured and died with the pod.",
     "status": "UNEXPLAINED. It did not cause this abort, and it must not be assumed benign."
   },
-
   "scientific_status": {
     "replay_parent": "NOT REACHED",
     "replay_incumbent": "NOT REACHED",
@@ -57,5 +68,44 @@
     "probes_evaluated": 0,
     "decision": "none",
     "verdict": "C1 attempt 5 is an INFRASTRUCTURE ABORT. It is not evidence for or against the ATTENTION isolation, and must not be read as any C1 result."
+  },
+  "setup_markers_observed": {
+    "sequence": [
+      "MARKER:VLLM_READY",
+      "MARKER:TEACHER_READY",
+      "MARKER:ROPE_OK"
+    ],
+    "then": "SETUP_RC=1 at the CPU test gate",
+    "caveat": "these three are the only markers in the evidence. The launcher prints a failed setup's TAIL, so ENV_READY / REPO_READY / ASSETS_STAGED are neither confirmed nor denied here -- do not transcribe them from a previous attempt's report.",
+    "timing": {
+      "ssh_reachable": "15:31:56 (0.4 min)",
+      "setup_started": "15:32:35",
+      "vllm_installed": "15:34:45 (9 s)",
+      "teacher_download": "15:34:53",
+      "rope_check": "15:35:22",
+      "cpu_suite_started": "15:35:32",
+      "suite_failed": "15:48:36 (781.84 s)"
+    },
+    "image": "runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@580.126.09",
+    "host": "128 vCPUs visible, cgroup budget 13, cpu set 0-12"
+  },
+  "cost": {
+    "provider_polled_last_watchdog_tick": {
+      "usd": 0.3123,
+      "elapsed_minutes": 17.19,
+      "at": "2026-09-05T15:48:43Z"
+    },
+    "session_record": {
+      "usd": 0.315,
+      "elapsed_minutes": 17.34
+    },
+    "recorded": 0.315,
+    "rule": "the more expensive of the two readings is the honest one"
+  },
+  "timestamps": {
+    "created_utc": "2026-09-05T15:31:32Z",
+    "deleted_utc": "2026-09-05T15:48:52Z",
+    "watchdog_saw_terminated_utc": "2026-09-05T15:48:43Z",
+    "watchdog_end": "pod_gone after 18 ticks"
   }
 }
