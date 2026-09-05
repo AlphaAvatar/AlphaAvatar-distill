@@ -32,9 +32,22 @@ STILL NEVER MEASURED**
 > is deliberate — a named `$0.30` abort beats six probes trained under an
 > unnamed environment difference — but it is a reviewer's call, not mine.
 >
-> **The readiness record is STALE by construction:** repairing the harness moved
-> its digest, so a new sweep is owed before any launch. That is the contract
-> working, not a defect.
+> **Verification after the repair.** The full dev-box suite is **2942 passed /
+> 16 skipped / 0 failed** with nothing excluded, including
+> `test_phase_b_stage1_executes.py`, which had been failing on `ENOSPC` rather
+> than on any defect. One complete C1 manifest-derived diagnostic sweep is
+> **PASS — 2802 passed / 101 skipped / 0 failed / 0 error**, with all 101 skip
+> nodeids and reasons recorded, skip-set digest `bf53c0697a8a387c…`, the 15
+> readiness-owned groups exact, zero unexpected environment skips, leaf
+> transport 5/5, the staged battery role PASSED rather than vacuously skipped,
+> and the staged view unchanged at `9ef2356ee807…`. Renderer parity is 7/7 and
+> battery isolation passes all five roles with zero collisions.
+>
+> Repairing the harness moved its digest (`8b4dd4c0…` → `e3fb53b7…`, 70 files),
+> so the preregistration was rewritten for executable identity only and the
+> Phase-B and continuation-B post-freeze declarations were updated additively
+> (65 lines added, 0 removed). A **launch-bound** sweep is still owed before any
+> launch; this one is diagnostic.
 
 > **Attempt 5, 2026-09-05.** The one-use grant was approved and consumed. All
 > **12** pre-provider gates passed on the launcher's own fresh run, the bundle
