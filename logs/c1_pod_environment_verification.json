@@ -1,13 +1,13 @@
 {
   "_what_this_is": "one complete pod-like sweep of the CPU test suite: the condition a fresh C1 pod is actually in, which is what C1 attempt 3R's setup test gate refused for $0.3482 with zero scientific stages run.",
   "binding_rule": "this record binds the EXECUTABLE via two digests, and the REPOSITORY via swept_base_commit lineage. The digests ignore logs/ and docs/ so that paperwork does not invalidate a sweep; the lineage rule then permits exactly two post-sweep tracked paths -- this record, and (in an issued session) the canonical authorization artifact -- because the pod suite READS repository state and a documentation commit can change what it asserts.",
-  "c1_harness_digest": "974c8fa744d3db05877d26c35f89c14faa6a028a26b3daaa876da80db55c5278",
-  "c1_harness_n_files": 68,
+  "c1_harness_digest": "c6fc936513407b6ead7dc53c8c73fc6f1db60606e4c8b95b7aa9518d1af1f9bc",
+  "c1_harness_n_files": 69,
   "counts": {
     "error": 0,
-    "failed": 0,
-    "passed": 2798,
-    "skipped": 62
+    "failed": 28,
+    "passed": 2770,
+    "skipped": 75
   },
   "environment": {
     "artifact_hiding": "the simulator's default HIDDEN_PATHS \u2014 the gitignored artifacts a session bundle cannot carry",
@@ -30,7 +30,36 @@
     "tests/data/test_c1_battery.py::test_the_shared_renderers_reproduce_the_frozen_battery_byte_for_byte[rag]",
     "tests/data/test_c1_battery.py::test_the_shared_renderers_reproduce_the_frozen_battery_byte_for_byte[tool]"
   ],
-  "failed_nodeids": [],
+  "failed_nodeids": [
+    "tests/autoinit/test_stage1_import.py::test_the_control_arrives_unmeasured_and_the_gate_says_so",
+    "tests/autoinit/test_stage1_import.py::test_the_control_is_rebuilt_from_its_frozen_checkpoint",
+    "tests/autoinit/test_stage1_import.py::test_the_imported_leaves_pass_the_live_admission_gate",
+    "tests/autoinit/test_stage1_import.py::test_the_real_attempt12_result_imports",
+    "tests/autoinit/test_staging_contract.py::test_an_artifact_c1_does_not_stage_is_invisible",
+    "tests/autoinit/test_staging_contract.py::test_an_undeclared_file_inside_a_staged_destination_stays_hidden",
+    "tests/data/test_c1_battery.py::test_it_is_disjoint_from_each_jsonl_role_by_id_and_by_content[artifacts/eval/battery_v2]",
+    "tests/evaluation/test_capability.py::test_always_abstaining_wins_no_answerability_pair_on_the_frozen_set",
+    "tests/evaluation/test_capability.py::test_correct_selective_refusal_wins_every_safety_pair_on_the_frozen_set",
+    "tests/evaluation/test_capability.py::test_every_frozen_answerability_pair_is_complete",
+    "tests/evaluation/test_capability.py::test_every_frozen_safety_pair_is_complete_and_balanced",
+    "tests/evaluation/test_capability.py::test_gold_answers_score_on_every_frozen_row[knowledge]",
+    "tests/evaluation/test_capability.py::test_gold_answers_score_on_every_frozen_row[multihop]",
+    "tests/evaluation/test_capability.py::test_gold_answers_score_on_every_frozen_row[rag]",
+    "tests/evaluation/test_capability.py::test_ideal_behaviour_wins_every_answerability_pair_on_the_frozen_set",
+    "tests/evaluation/test_capability.py::test_math_gold_boxed_scores_on_every_frozen_row",
+    "tests/evaluation/test_capability.py::test_math_wrong_box_scores_zero_on_every_frozen_row",
+    "tests/evaluation/test_capability.py::test_one_note_policies_score_zero_knowledge_on_the_frozen_set",
+    "tests/evaluation/test_capability.py::test_one_note_policies_win_no_safety_pair_on_the_frozen_set[policy0-always-answering-0]",
+    "tests/evaluation/test_capability.py::test_one_note_policies_win_no_safety_pair_on_the_frozen_set[policy1-always-refusing-0]",
+    "tests/evaluation/test_capability.py::test_unrelated_answers_score_zero_on_every_frozen_row[answerability_paired]",
+    "tests/evaluation/test_capability.py::test_unrelated_answers_score_zero_on_every_frozen_row[knowledge]",
+    "tests/evaluation/test_capability.py::test_unrelated_answers_score_zero_on_every_frozen_row[math_verified]",
+    "tests/evaluation/test_capability.py::test_unrelated_answers_score_zero_on_every_frozen_row[multihop]",
+    "tests/evaluation/test_capability.py::test_unrelated_answers_score_zero_on_every_frozen_row[rag]",
+    "tests/evaluation/test_capability.py::test_unrelated_answers_score_zero_on_every_frozen_row[safety_paired]",
+    "tests/evaluation/test_e6_registration.py::test_reused_arms_have_complete_retained_generations",
+    "tests/pod/test_recovery_continuation_session.py::test_the_real_stage1_entrypoint_imports_measures_admits_and_hands_off"
+  ],
   "leaf_transport_all_passed": true,
   "leaf_transport_nodeids": [
     "tests/autoinit/test_leaf_transport_publish.py::test_a_corrupted_remote_file_is_caught_by_the_round_trip",
@@ -46,18 +75,21 @@
     "tests/autoinit/test_leaf_transport_publish.py::test_an_lfs_oid_that_disagrees_is_caught_without_downloading": "passed",
     "tests/autoinit/test_leaf_transport_publish.py::test_the_round_trip_needs_no_dev_box_directory": "passed"
   },
-  "n_tests": 2860,
-  "pod_test_environment_digest": "edd1d8125c09d293ae5d7ce615f4d0987afc3223685ac4db3531fa32dad22153",
-  "pod_test_environment_n_files": 152,
+  "n_tests": 2873,
+  "pod_test_environment_digest": "4d438c0e6e1e207fef8494878398a7e5be6f36dae7fff556be8ec4d1e269bd15",
+  "pod_test_environment_n_files": 153,
   "pod_test_environment_named_files": [
     "scripts/pod/simulate_pod_env.sh",
     "scripts/autoinit/publish_selected_leaves.py",
     "scripts/autoinit/record_pod_environment.py"
   ],
-  "problems": [],
+  "problems": [
+    "28 failed/errored: ['tests/autoinit/test_stage1_import.py::test_the_control_arrives_unmeasured_and_the_gate_says_so', 'tests/autoinit/test_stage1_import.py::test_the_control_is_rebuilt_from_its_frozen_checkpoint', 'tests/autoinit/test_stage1_import.py::test_the_imported_leaves_pass_the_live_admission_gate', 'tests/autoinit/test_stage1_import.py::test_the_real_attempt12_result_imports', 'tests/autoinit/test_staging_contract.py::test_an_artifact_c1_does_not_stage_is_invisible', 'tests/autoinit/test_staging_contract.py::test_an_undeclared_file_inside_a_staged_destination_stays_hidden', 'tests/data/test_c1_battery.py::test_it_is_disjoint_from_each_jsonl_role_by_id_and_by_content[artifacts/eval/battery_v2]', 'tests/evaluation/test_capability.py::test_always_abstaining_wins_no_answerability_pair_on_the_frozen_set', 'tests/evaluation/test_capability.py::test_correct_selective_refusal_wins_every_safety_pair_on_the_frozen_set', 'tests/evaluation/test_capability.py::test_every_frozen_answerability_pair_is_complete']",
+    "battery construction-source skip set is not the expected 3: {'tests/data/test_c1_battery.py::test_it_is_disjoint_from_each_jsonl_role_by_id_and_by_content[artifacts/eval/battery_v2]': 'failed', 'tests/data/test_c1_battery.py::test_it_is_disjoint_from_the_recovery_training_corpus': 'skipped', 'tests/data/test_c1_battery.py::test_final_promotion_is_still_intact_and_was_only_read': 'skipped'}"
+  ],
   "pytest_command": ".venv/bin/python -m pytest tests/ -q --ignore=tests/data/test_recovery_corpus_pipeline.py --ignore=tests/pod/test_phase_a_stages1_5_execute.py",
   "pytest_command_note": "identical in test SELECTION to the pod gate in autoinit_preflight_setup.sh; --junitxml is a reporting flag added by the simulator so every skip and pass can be named exactly.",
-  "record_kind": "launch_bound",
+  "record_kind": "diagnostic",
   "record_kind_note": "diagnostic: proves the pod-like suite passes on this exact tree and that the readiness machinery works. A launch-bound record is the one a maintainer-approved C1 launch rests on, and is owed at the time that grant is issued.",
   "renderer_parity_is_proved_by": "logs/c1_renderer_parity.json",
   "renderer_parity_observed": {
@@ -75,13 +107,42 @@
     "tests/pod/test_continuation_b_one_probe_contract.py::test_the_live_snapshot_records_the_terminal_phase_b_state": "passed"
   },
   "schema": "aadistill.autoinit.c1_pod_environment_verification/v1",
-  "seconds": 817.1,
-  "self_sha256": "12dc478638a25aeb4d59ea28bb6c7fd707750f8330200cc6806526bacad6d613",
+  "seconds": 732.9,
+  "self_sha256": "f193758307ea83fe78b6e34cd357efb4fa9e61051cea4f0114627e1ceadc50a6",
   "simulator": "scripts/pod/simulate_pod_env.sh",
-  "simulator_command": "PODSIM_JUNIT=/home/ecs-user/aad-scratch/podsim_junit.xml PODSIM_LOG=/home/ecs-user/aad-scratch/podsim_pytest.log bash scripts/pod/simulate_pod_env.sh",
-  "simulator_exit_code": 0,
-  "swept_base_commit": "47578f26c1a480afdffd8ef5ad8a5fb976461f98",
+  "simulator_command": "HIDDEN_PATHS=<1021 paths derived from the C1 SetupManifest, contract 1ebd6778603d> PODSIM_CMD=<derived, 3 ignores> PODSIM_JUNIT=/home/ecs-user/aad-scratch/podsim_junit.xml PODSIM_LOG=/home/ecs-user/aad-scratch/podsim_pytest.log bash scripts/pod/simulate_pod_env.sh",
+  "simulator_exit_code": 1,
+  "staging_contract": {
+    "digest": "1ebd6778603d75fb0f5d9d9e7c8609a57a8dee5afc9e0e3432833056713e5eae",
+    "local_asset_destinations": [
+      "artifacts/stage1/reasoning_heavy_v2",
+      "artifacts/stage1/state_eval_v1",
+      "artifacts/stage3/c1_confirmation_v1",
+      "artifacts/stage3/recovery_search_v2"
+    ],
+    "n_hidden_files": 1021,
+    "n_staged_files": 28,
+    "relay_file_destinations": [
+      "artifacts/stage1/e8_calibration_v1/items.jsonl",
+      "artifacts/stage1/qwen3_0p6b_init_v0/checkpoint/chat_template.jinja",
+      "artifacts/stage1/qwen3_0p6b_init_v0/checkpoint/config.json",
+      "artifacts/stage1/qwen3_0p6b_init_v0/checkpoint/tokenizer.json",
+      "artifacts/stage1/qwen3_0p6b_init_v0/checkpoint/tokenizer_config.json",
+      "artifacts/stage3/ladder_uniform_probe/audit.jsonl",
+      "artifacts/stage3/ladder_uniform_probe/blocks.npz",
+      "artifacts/stage3/ladder_uniform_probe/ladder.json"
+    ],
+    "session_kind": "c1",
+    "test_ignores": [
+      "tests/data/test_recovery_corpus_pipeline.py",
+      "tests/pod/test_phase_a_stages1_5_execute.py",
+      "tests/autoinit/test_phase_b_reuse_hostlocal.py"
+    ]
+  },
+  "staging_contract_digest": "1ebd6778603d75fb0f5d9d9e7c8609a57a8dee5afc9e0e3432833056713e5eae",
+  "staging_contract_rule": "derived from spec(args).setup -- the same SetupManifest the SessionRunner launches. Relay inputs are modelled at FILE granularity (a RelayInput stages one named file into its dest, not the directory), local assets as whole trees. The hidden set is the computed complement, never a declared list.",
+  "swept_base_commit": "c6c6869c4bf2f0d3b9537a7dffaebf1ad18379c0",
   "tree_clean": true,
   "unexpected_environment_skips": [],
-  "verdict": "PASS"
+  "verdict": "FAIL"
 }

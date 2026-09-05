@@ -127,6 +127,17 @@ BATTERY_STAGED_ROLE_NODEID = (
     "test_it_is_disjoint_from_each_jsonl_role_by_id_and_by_content"
     "[artifacts/stage3/recovery_search_v2]")
 
+#: The two staging-contract self-tests that describe the DEV BOX's staged/hidden
+#: split. Inside the simulation that split has already been applied, so there is
+#: nothing left to prove hidden and they skip. Declared here so they are exact
+#: rather than merely unnoticed.
+DEVBOX_ONLY_NODEIDS: tuple[str, ...] = (
+    "tests/autoinit/test_staging_contract.py::"
+    "test_an_artifact_c1_does_not_stage_is_invisible",
+    "tests/autoinit/test_staging_contract.py::"
+    "test_an_undeclared_file_inside_a_staged_destination_stays_hidden",
+)
+
 #: Structural tests that failed on the pod for repository-state reasons and are
 #: reported separately, because "fixed" was claimed for them once already.
 REPOSITORY_STATE_NODEIDS: tuple[str, ...] = (
@@ -252,6 +263,8 @@ def evaluate_sweep(outcomes: dict[str, str]) -> dict[str, Any]:
     repo_state = {n: outcomes.get(n, "ABSENT") for n in REPOSITORY_STATE_NODEIDS}
     repo_state_ok = all(s == "passed" for s in repo_state.values())
 
+    devbox = {n: outcomes.get(n, "ABSENT") for n in DEVBOX_ONLY_NODEIDS}
+    devbox_ok = all(v == "skipped" for v in devbox.values())
     battery = {n: outcomes.get(n, "ABSENT") for n in BATTERY_SOURCE_NODEIDS}
     battery_ok = all(s == "skipped" for s in battery.values())
     staged_role = outcomes.get(BATTERY_STAGED_ROLE_NODEID, "ABSENT")
@@ -261,8 +274,10 @@ def evaluate_sweep(outcomes: dict[str, str]) -> dict[str, Any]:
     # unexpected environment skip: a test that quietly stopped running under an
     # empty HOME is indistinguishable from one that never existed.
     watched = ("tests/data/test_c1_battery.py",
-               "tests/autoinit/test_leaf_transport_publish.py")
-    expected_skips = set(RENDERER_PARITY_NODEIDS) | set(BATTERY_SOURCE_NODEIDS)
+               "tests/autoinit/test_leaf_transport_publish.py",
+               "tests/autoinit/test_staging_contract.py")
+    expected_skips = (set(RENDERER_PARITY_NODEIDS) | set(BATTERY_SOURCE_NODEIDS)
+                      | set(DEVBOX_ONLY_NODEIDS))
     unexpected = sorted(
         n for n, s in outcomes.items()
         if s == "skipped" and n.startswith(watched) and n not in expected_skips)
@@ -276,6 +291,9 @@ def evaluate_sweep(outcomes: dict[str, str]) -> dict[str, Any]:
         problems.append(f"leaf transport did not pass 5/5: {leaf}")
     if not repo_state_ok:
         problems.append(f"repository-state tests did not pass: {repo_state}")
+    if not devbox_ok:
+        problems.append(f"dev-box-only staging self-tests did not skip inside the "
+                        f"simulation: {devbox}")
     if not battery_ok:
         problems.append(f"battery construction-source skip set is not the "
                         f"expected {len(BATTERY_SOURCE_NODEIDS)}: {battery}")
@@ -296,6 +314,8 @@ def evaluate_sweep(outcomes: dict[str, str]) -> dict[str, Any]:
         "leaf_transport_all_passed": leaf_ok,
         "repository_state": repo_state,
         "repository_state_all_passed": repo_state_ok,
+        "devbox_only_expected_skips": devbox,
+        "devbox_only_skipped_as_expected": devbox_ok,
         "battery_source_expected_skips": battery,
         "battery_source_skipped_as_expected": battery_ok,
         "battery_staged_role_nodeid": BATTERY_STAGED_ROLE_NODEID,

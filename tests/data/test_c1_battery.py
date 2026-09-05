@@ -52,7 +52,16 @@ def load(directory: Path) -> list[dict]:
 #: read. That is worse than the two cases that failed loudly on attempt 4,
 #: because it would have gone on reporting green forever.
 def require_role(path: Path, role: str) -> None:
-    """Skip — never pass — when a historical source role is absent."""
+    """Skip — never pass — when a historical source role is absent.
+
+    "Absent" includes a directory that holds no `*.jsonl`: the role has no data
+    either way, and a pod that never received it may still show the directory if
+    something recreated it. A directory that DOES hold jsonl files but yields no
+    rows is a different thing and fails, via `require_nonempty_rows`.
+    """
+    if path.is_dir() and not any(path.glob("*.jsonl")):
+        pytest.skip(f"historical source role {role!r} holds no *.jsonl at "
+                    f"{path.relative_to(REPO)}")
     if not path.exists():
         pytest.skip(
             f"historical source role {role!r} is absent at {path.relative_to(REPO)}; "

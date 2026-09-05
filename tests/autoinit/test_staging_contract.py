@@ -14,7 +14,7 @@ it drifts every time a session's staging changes. These pin the inversion.
 from __future__ import annotations
 
 import json
-import shutil
+import os
 import sys
 from pathlib import Path
 
@@ -42,6 +42,18 @@ def contract(c1_setup):
 
 # --- what the pod can see ---------------------------------------------------
 
+#: These two describe the DEV BOX's staged/hidden split, so they cannot run
+#: inside the simulation that split produces: there, the unstaged artifacts have
+#: already been moved aside, so `gitignored_files()` no longer lists them and the
+#: hidden set is legitimately empty. The simulator sets this flag, and it is the
+#: same one that tells the credential-dependent gates they hold a fake token.
+in_simulation = pytest.mark.skipif(
+    bool(os.environ.get("AAD_SYNTHETIC_HF_TOKEN")),
+    reason="runs on the dev box: inside the pod simulation the unstaged files "
+           "are already hidden, so there is nothing left to prove hidden")
+
+
+@in_simulation
 def test_an_artifact_c1_does_not_stage_is_invisible(contract):
     """`corpus_v2` and `eval/battery_v2` are exactly what attempt 4 tripped on."""
     hidden = set(sc.hidden_files(contract, REPO))
@@ -53,6 +65,7 @@ def test_an_artifact_c1_does_not_stage_is_invisible(contract):
             f"{role} is marked staged, and C1's manifest does not stage it")
 
 
+@in_simulation
 def test_an_undeclared_file_inside_a_staged_destination_stays_hidden(contract):
     """FILE granularity, and the reason it matters.
 

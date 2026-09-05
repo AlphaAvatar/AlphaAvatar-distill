@@ -204,6 +204,29 @@ while IFS= read -r p; do
 done <<< "$HIDDEN_PATHS"
 echo "hid $n path(s) a pod session does not receive"
 
+# Prune directories emptied by the hiding. A pod does not have an EMPTY
+# `artifacts/eval/battery_v2`; it has no such directory at all, and the
+# difference is not cosmetic. `tests/evaluation/test_capability.py` guards with
+# `skipif(not BATTERY.is_dir())`, so an empty directory left behind defeats the
+# guard: the tests run, find no rows and FAIL, where on a pod they skip. The
+# first manifest-derived sweep produced 28 such failures, 26 of them purely
+# because file-granularity hiding left the directory standing.
+#
+# `rmdir` only removes empty directories, and restore recreates the tree with
+# `mkdir -p "$(dirname "$n")"` before moving each path back, so this is exactly
+# reversible. Deepest-first, so parents empty out as children go.
+pruned=0
+while IFS= read -r p; do
+  [ -n "$p" ] || continue
+  d=$(dirname "$p")
+  while [ "$d" != "." ] && [ "$d" != "/" ]; do
+    rmdir "$d" 2>/dev/null || break
+    pruned=$((pruned + 1))
+    d=$(dirname "$d")
+  done
+done <<< "$(printf '%s\n' "$HIDDEN_PATHS" | sort -r)"
+echo "pruned $pruned director(ies) the hiding emptied"
+
 # Apply the HOME/HF isolation described above. Saved first, so the EXIT trap can
 # put the environment back whatever happens next.
 save_env

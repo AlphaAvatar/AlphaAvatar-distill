@@ -273,6 +273,7 @@ def _outcomes(**over) -> dict[str, str]:
     # not staged; the one role C1 DOES stage must pass.
     o.update({n: "skipped" for n in pe.BATTERY_SOURCE_NODEIDS})
     o[pe.BATTERY_STAGED_ROLE_NODEID] = "passed"
+    o.update({n: "skipped" for n in pe.DEVBOX_ONLY_NODEIDS})
     o.update({n: "passed" for n in pe.LEAF_TRANSPORT_NODEIDS})
     o.update({n: "passed" for n in pe.REPOSITORY_STATE_NODEIDS})
     o["tests/other/test_thing.py::test_ok"] = "passed"
@@ -942,13 +943,16 @@ def test_the_staged_battery_role_must_not_skip(tmp_path):
     assert any("role C1 DOES stage" in p for p in findings["problems"])
 
 
-def test_the_expected_environment_skip_set_is_exactly_ten():
-    """Seven renderer-parity source cases plus three battery construction-source
-    cases. Not 'exactly seven' — that was the pre-attempt-4 contract."""
-    expected = set(pe.RENDERER_PARITY_NODEIDS) | set(pe.BATTERY_SOURCE_NODEIDS)
+def test_the_expected_environment_skip_set_is_exactly_twelve():
+    """Seven renderer-parity source cases, three battery construction-source
+    cases, two dev-box-only staging self-tests. Not 'exactly seven' — that was
+    the pre-attempt-4 contract."""
+    expected = (set(pe.RENDERER_PARITY_NODEIDS) | set(pe.BATTERY_SOURCE_NODEIDS)
+                | set(pe.DEVBOX_ONLY_NODEIDS))
     assert len(pe.RENDERER_PARITY_NODEIDS) == 7
     assert len(pe.BATTERY_SOURCE_NODEIDS) == 3
-    assert len(expected) == 10
+    assert len(pe.DEVBOX_ONLY_NODEIDS) == 2
+    assert len(expected) == 12
     assert pe.BATTERY_STAGED_ROLE_NODEID not in expected
     findings = pe.evaluate_sweep(_outcomes())
     assert findings["expected_environment_skips"] == sorted(expected)
