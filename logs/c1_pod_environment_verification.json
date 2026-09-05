@@ -6,7 +6,7 @@
   "counts": {
     "error": 0,
     "failed": 0,
-    "passed": 2766,
+    "passed": 2767,
     "skipped": 100
   },
   "environment": {
@@ -21,6 +21,22 @@
     "junit": "/home/ecs-user/aad-scratch/podsim_junit.xml",
     "pytest_log": "/home/ecs-user/aad-scratch/podsim_pytest.log"
   },
+  "expected_environment_skips": [
+    "tests/autoinit/test_staging_contract.py::test_an_artifact_c1_does_not_stage_is_invisible",
+    "tests/autoinit/test_staging_contract.py::test_an_undeclared_file_inside_a_staged_destination_stays_hidden",
+    "tests/data/test_c1_battery.py::test_final_promotion_is_still_intact_and_was_only_read",
+    "tests/data/test_c1_battery.py::test_it_is_disjoint_from_each_jsonl_role_by_id_and_by_content[artifacts/eval/battery_v2]",
+    "tests/data/test_c1_battery.py::test_it_is_disjoint_from_the_recovery_training_corpus",
+    "tests/data/test_c1_battery.py::test_the_shared_renderers_reproduce_the_frozen_battery_byte_for_byte[code]",
+    "tests/data/test_c1_battery.py::test_the_shared_renderers_reproduce_the_frozen_battery_byte_for_byte[gsm8k]",
+    "tests/data/test_c1_battery.py::test_the_shared_renderers_reproduce_the_frozen_battery_byte_for_byte[knowledge]",
+    "tests/data/test_c1_battery.py::test_the_shared_renderers_reproduce_the_frozen_battery_byte_for_byte[math_verified]",
+    "tests/data/test_c1_battery.py::test_the_shared_renderers_reproduce_the_frozen_battery_byte_for_byte[multihop]",
+    "tests/data/test_c1_battery.py::test_the_shared_renderers_reproduce_the_frozen_battery_byte_for_byte[rag]",
+    "tests/data/test_c1_battery.py::test_the_shared_renderers_reproduce_the_frozen_battery_byte_for_byte[tool]",
+    "tests/pod/test_recovery_continuation_session.py::test_the_entrypoint_refuses_a_substituted_leaf",
+    "tests/pod/test_recovery_continuation_session.py::test_the_real_stage1_entrypoint_imports_measures_admits_and_hands_off"
+  ],
   "expected_renderer_parity_skips": [
     "tests/data/test_c1_battery.py::test_the_shared_renderers_reproduce_the_frozen_battery_byte_for_byte[code]",
     "tests/data/test_c1_battery.py::test_the_shared_renderers_reproduce_the_frozen_battery_byte_for_byte[gsm8k]",
@@ -31,6 +47,78 @@
     "tests/data/test_c1_battery.py::test_the_shared_renderers_reproduce_the_frozen_battery_byte_for_byte[tool]"
   ],
   "failed_nodeids": [],
+  "findings": {
+    "battery_source_expected_skips": {
+      "tests/data/test_c1_battery.py::test_final_promotion_is_still_intact_and_was_only_read": "skipped",
+      "tests/data/test_c1_battery.py::test_it_is_disjoint_from_each_jsonl_role_by_id_and_by_content[artifacts/eval/battery_v2]": "skipped",
+      "tests/data/test_c1_battery.py::test_it_is_disjoint_from_the_recovery_training_corpus": "skipped"
+    },
+    "battery_source_skipped_as_expected": true,
+    "battery_staged_role_nodeid": "tests/data/test_c1_battery.py::test_it_is_disjoint_from_each_jsonl_role_by_id_and_by_content[artifacts/stage3/recovery_search_v2]",
+    "battery_staged_role_outcome": "passed",
+    "counts": {
+      "error": 0,
+      "failed": 0,
+      "passed": 2767,
+      "skipped": 100
+    },
+    "devbox_only_expected_skips": {
+      "tests/autoinit/test_staging_contract.py::test_an_artifact_c1_does_not_stage_is_invisible": "skipped",
+      "tests/autoinit/test_staging_contract.py::test_an_undeclared_file_inside_a_staged_destination_stays_hidden": "skipped"
+    },
+    "devbox_only_skipped_as_expected": true,
+    "expected_environment_skips": [
+      "tests/autoinit/test_staging_contract.py::test_an_artifact_c1_does_not_stage_is_invisible",
+      "tests/autoinit/test_staging_contract.py::test_an_undeclared_file_inside_a_staged_destination_stays_hidden",
+      "tests/data/test_c1_battery.py::test_final_promotion_is_still_intact_and_was_only_read",
+      "tests/data/test_c1_battery.py::test_it_is_disjoint_from_each_jsonl_role_by_id_and_by_content[artifacts/eval/battery_v2]",
+      "tests/data/test_c1_battery.py::test_it_is_disjoint_from_the_recovery_training_corpus",
+      "tests/data/test_c1_battery.py::test_the_shared_renderers_reproduce_the_frozen_battery_byte_for_byte[code]",
+      "tests/data/test_c1_battery.py::test_the_shared_renderers_reproduce_the_frozen_battery_byte_for_byte[gsm8k]",
+      "tests/data/test_c1_battery.py::test_the_shared_renderers_reproduce_the_frozen_battery_byte_for_byte[knowledge]",
+      "tests/data/test_c1_battery.py::test_the_shared_renderers_reproduce_the_frozen_battery_byte_for_byte[math_verified]",
+      "tests/data/test_c1_battery.py::test_the_shared_renderers_reproduce_the_frozen_battery_byte_for_byte[multihop]",
+      "tests/data/test_c1_battery.py::test_the_shared_renderers_reproduce_the_frozen_battery_byte_for_byte[rag]",
+      "tests/data/test_c1_battery.py::test_the_shared_renderers_reproduce_the_frozen_battery_byte_for_byte[tool]",
+      "tests/pod/test_recovery_continuation_session.py::test_the_entrypoint_refuses_a_substituted_leaf",
+      "tests/pod/test_recovery_continuation_session.py::test_the_real_stage1_entrypoint_imports_measures_admits_and_hands_off"
+    ],
+    "failed_nodeids": [],
+    "host_local_c1_expected_skips": {
+      "tests/pod/test_recovery_continuation_session.py::test_the_entrypoint_refuses_a_substituted_leaf": "skipped",
+      "tests/pod/test_recovery_continuation_session.py::test_the_real_stage1_entrypoint_imports_measures_admits_and_hands_off": "skipped"
+    },
+    "host_local_c1_skipped_as_expected": true,
+    "known_non_environment_skips": [
+      "tests/pod/test_recovery_continuation_session.py::test_an_unverified_transport_declares_no_leaf_inputs"
+    ],
+    "leaf_transport": {
+      "tests/autoinit/test_leaf_transport_publish.py::test_a_corrupted_remote_file_is_caught_by_the_round_trip": "passed",
+      "tests/autoinit/test_leaf_transport_publish.py::test_a_file_absent_from_the_far_end_is_caught": "passed",
+      "tests/autoinit/test_leaf_transport_publish.py::test_a_size_mismatch_at_the_far_end_is_caught": "passed",
+      "tests/autoinit/test_leaf_transport_publish.py::test_an_lfs_oid_that_disagrees_is_caught_without_downloading": "passed",
+      "tests/autoinit/test_leaf_transport_publish.py::test_the_round_trip_needs_no_dev_box_directory": "passed"
+    },
+    "leaf_transport_all_passed": true,
+    "problems": [],
+    "renderer_parity_expected_skips": {
+      "tests/data/test_c1_battery.py::test_the_shared_renderers_reproduce_the_frozen_battery_byte_for_byte[code]": "skipped",
+      "tests/data/test_c1_battery.py::test_the_shared_renderers_reproduce_the_frozen_battery_byte_for_byte[gsm8k]": "skipped",
+      "tests/data/test_c1_battery.py::test_the_shared_renderers_reproduce_the_frozen_battery_byte_for_byte[knowledge]": "skipped",
+      "tests/data/test_c1_battery.py::test_the_shared_renderers_reproduce_the_frozen_battery_byte_for_byte[math_verified]": "skipped",
+      "tests/data/test_c1_battery.py::test_the_shared_renderers_reproduce_the_frozen_battery_byte_for_byte[multihop]": "skipped",
+      "tests/data/test_c1_battery.py::test_the_shared_renderers_reproduce_the_frozen_battery_byte_for_byte[rag]": "skipped",
+      "tests/data/test_c1_battery.py::test_the_shared_renderers_reproduce_the_frozen_battery_byte_for_byte[tool]": "skipped"
+    },
+    "renderer_parity_skipped_as_expected": true,
+    "repository_state": {
+      "tests/docs/test_repository_structure.py::test_every_log_is_classified_in_the_catalog": "passed",
+      "tests/pod/test_continuation_b_one_probe_contract.py::test_the_live_snapshot_records_the_terminal_phase_b_state": "passed"
+    },
+    "repository_state_all_passed": true,
+    "unexpected_environment_skips": [],
+    "verdict": "PASS"
+  },
   "invocation_realized": {
     "declared_test_ignores": [
       "tests/data/test_recovery_corpus_pipeline.py",
@@ -72,15 +160,8 @@
     "tests/autoinit/test_leaf_transport_publish.py::test_a_file_absent_from_the_far_end_is_caught",
     "tests/autoinit/test_leaf_transport_publish.py::test_the_round_trip_needs_no_dev_box_directory"
   ],
-  "leaf_transport_observed": {
-    "tests/autoinit/test_leaf_transport_publish.py::test_a_corrupted_remote_file_is_caught_by_the_round_trip": "passed",
-    "tests/autoinit/test_leaf_transport_publish.py::test_a_file_absent_from_the_far_end_is_caught": "passed",
-    "tests/autoinit/test_leaf_transport_publish.py::test_a_size_mismatch_at_the_far_end_is_caught": "passed",
-    "tests/autoinit/test_leaf_transport_publish.py::test_an_lfs_oid_that_disagrees_is_caught_without_downloading": "passed",
-    "tests/autoinit/test_leaf_transport_publish.py::test_the_round_trip_needs_no_dev_box_directory": "passed"
-  },
-  "n_tests": 2866,
-  "pod_test_environment_digest": "8bae59c34730067b089126fda464f41aea36e99fb1b1d4f76376e33a7c4fd9e2",
+  "n_tests": 2867,
+  "pod_test_environment_digest": "1f305bdb5741bfbb572e69af3f7b0f2e50ba377835acde3b8094cbc8dca2e255",
   "pod_test_environment_n_files": 153,
   "pod_test_environment_named_files": [
     "scripts/pod/simulate_pod_env.sh",
@@ -93,28 +174,15 @@
   "record_kind": "diagnostic",
   "record_kind_note": "diagnostic: proves the pod-like suite passes on this exact tree and that the readiness machinery works. A launch-bound record is the one a maintainer-approved C1 launch rests on, and is owed at the time that grant is issued.",
   "renderer_parity_is_proved_by": "logs/c1_renderer_parity.json",
-  "renderer_parity_observed": {
-    "tests/data/test_c1_battery.py::test_the_shared_renderers_reproduce_the_frozen_battery_byte_for_byte[code]": "skipped",
-    "tests/data/test_c1_battery.py::test_the_shared_renderers_reproduce_the_frozen_battery_byte_for_byte[gsm8k]": "skipped",
-    "tests/data/test_c1_battery.py::test_the_shared_renderers_reproduce_the_frozen_battery_byte_for_byte[knowledge]": "skipped",
-    "tests/data/test_c1_battery.py::test_the_shared_renderers_reproduce_the_frozen_battery_byte_for_byte[math_verified]": "skipped",
-    "tests/data/test_c1_battery.py::test_the_shared_renderers_reproduce_the_frozen_battery_byte_for_byte[multihop]": "skipped",
-    "tests/data/test_c1_battery.py::test_the_shared_renderers_reproduce_the_frozen_battery_byte_for_byte[rag]": "skipped",
-    "tests/data/test_c1_battery.py::test_the_shared_renderers_reproduce_the_frozen_battery_byte_for_byte[tool]": "skipped"
-  },
   "renderer_parity_skipped_as_expected": true,
-  "repository_state_observed": {
-    "tests/docs/test_repository_structure.py::test_every_log_is_classified_in_the_catalog": "passed",
-    "tests/pod/test_continuation_b_one_probe_contract.py::test_the_live_snapshot_records_the_terminal_phase_b_state": "passed"
-  },
   "schema": "aadistill.autoinit.c1_pod_environment_verification/v1",
-  "seconds": 678.3,
-  "self_sha256": "9ebf44307804676fc7ad150172e17db996f58fde7a811f5eaa11c432edd3cadd",
+  "seconds": 686.5,
+  "self_sha256": "ba06563bd534dc6d023875938e060a529806b4fecd7f4f3051a067398dc5d247",
   "setup_environment": {
-    "BUNDLE_NAME": "aad_autoinit_5b5a8899.bundle",
+    "BUNDLE_NAME": "aad_autoinit_fba81f95.bundle",
     "SESSION_ASSETS": "c1_confirmation_v1:artifacts/stage3,reasoning_heavy_v2:artifacts/stage1,state_eval_v1:artifacts/stage1,recovery_search_v2:artifacts/stage3",
     "SESSION_AUTH_PATH": "logs/autoinit_c1_authorization.json",
-    "SESSION_COMMIT": "5b5a8899d9b8cfb6901d43b75ed6455842f16e60",
+    "SESSION_COMMIT": "fba81f953ae9821e0a61eacba239bfceb75fd3e2",
     "SESSION_KIND": "c1",
     "SESSION_PLAN_HASH": "42a496f0923b1c321426721fb51487df15b5368703fe19a898354973324e27a2",
     "SESSION_RELAY_INPUTS": "[{\"also_stage_to\":\"artifacts/stage3/ladder_uniform\",\"dest\":\"artifacts/stage3/ladder_uniform_probe\",\"path\":\"stage3_recovery_corpus_v2/ladder_uniform/blocks.npz\",\"repo\":\"AlphaAvatar/aadistill-artifacts\",\"sha256\":\"6f324cb0f37bc0f07128e554ce8c161879419537478950496534f75fcecb249c\"},{\"also_stage_to\":\"artifacts/stage3/ladder_uniform\",\"dest\":\"artifacts/stage3/ladder_uniform_probe\",\"path\":\"stage3_recovery_corpus_v2/ladder_uniform/ladder.json\",\"repo\":\"AlphaAvatar/aadistill-artifacts\",\"sha256\":null},{\"also_stage_to\":\"artifacts/stage3/ladder_uniform\",\"dest\":\"artifacts/stage3/ladder_uniform_probe\",\"path\":\"stage3_recovery_corpus_v2/ladder_uniform/audit.jsonl\",\"repo\":\"AlphaAvatar/aadistill-artifacts\",\"sha256\":null},{\"also_stage_to\":null,\"dest\":\"artifacts/stage1/e8_calibration_v1\",\"path\":\"e8_inputs_20260810/calibration_v1/items.jsonl\",\"repo\":\"AlphaAvatar/aadistill-artifacts\",\"sha256\":\"c7202338109e459b17b70456461e8f304fadea7929ea547accee21adbbe7fd0b\"},{\"also_stage_to\":null,\"dest\":\"artifacts/stage1/qwen3_0p6b_init_v0/checkpoint\",\"path\":\"stage1/qwen3_0p6b_init_v0/checkpoint/tokenizer.json\",\"repo\":\"AlphaAvatar/aadistill-artifacts\",\"sha256\":\"be75606093db2094d7cd20f3c2f385c212750648bd6ea4fb2bf507a6a4c55506\"},{\"also_stage_to\":null,\"dest\":\"artifacts/stage1/qwen3_0p6b_init_v0/checkpoint\",\"path\":\"stage1/qwen3_0p6b_init_v0/checkpoint/tokenizer_config.json\",\"repo\":\"AlphaAvatar/aadistill-artifacts\",\"sha256\":\"8fa82a4ba512c8bee7c1c5e82b9a71ddbef362e4665be5c8f7ce0afd78af129a\"},{\"also_stage_to\":null,\"dest\":\"artifacts/stage1/qwen3_0p6b_init_v0/checkpoint\",\"path\":\"stage1/qwen3_0p6b_init_v0/checkpoint/chat_template.jinja\",\"repo\":\"AlphaAvatar/aadistill-artifacts\",\"sha256\":\"3802169b2a02b81e6adb7ab4f64f91ff02db753c8c3a64a01c35192d3a61d8d7\"},{\"also_stage_to\":null,\"dest\":\"artifacts/stage1/qwen3_0p6b_init_v0/checkpoint\",\"path\":\"stage1/qwen3_0p6b_init_v0/checkpoint/config.json\",\"repo\":\"AlphaAvatar/aadistill-artifacts\",\"sha256\":\"a7131bb092b38a078edc213961f0eb57eaead24f1396e25741f4887b1a694054\"}]",
@@ -158,7 +226,7 @@
   },
   "staging_contract_digest": "9ef2356ee80752978ca7dba78956383051135ea0a4cf23fa4b32abcb6269a9ab",
   "staging_contract_rule": "derived from spec(args).setup -- the same SetupManifest the SessionRunner launches. Relay inputs are modelled at FILE granularity (a RelayInput stages one named file into its dest, not the directory), local assets as whole trees. The hidden set is the computed complement, never a declared list.",
-  "swept_base_commit": "5b5a8899d9b8cfb6901d43b75ed6455842f16e60",
+  "swept_base_commit": "fba81f953ae9821e0a61eacba239bfceb75fd3e2",
   "tree_clean": true,
   "unexpected_environment_skips": [],
   "verdict": "PASS"
