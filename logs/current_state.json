@@ -132,11 +132,11 @@
       "scoring": "c1_confirmation_scoring@v1 77507935; equivalence IDENTICAL over 15 probes. @v2 808080a7 and battery a285d61f untouched.",
       "attempts": "5 attempt LABELS: 1, 2, 3, 3R, 4. FOUR created paid provider resources; attempt 3 created none ($0.00). $1.2267 of C1 infrastructure spend, ZERO science. Ledger: BUDGET_LEDGER.md.",
       "gates": "12 pre-provider gates. Detail: STATE.md, decisions.md 2026-09-04.",
-      "blocker": "attempt 4 died at the pod CPU test gate: 6 failures -- 1 my own readiness test omitting authorization_path, 2 reading assets C1 does not stage, 3 needing a host-local store. logs/autoinit_c1_attempt4/test_gate_failures.json",
+      "blocker": "attempt 4 aborted at the pod CPU test gate. All 6 nodeids repaired: 1 skips (readiness), 2 skip with the role named, 3 ignored as a whole module. A 4th defect -- the vacuous battery_v2 pass -- is closed. KNOWN LIMITATION: the simulation does not model out-of-tree host-local stores, so 5 host-local tests run there that SKIP on a real pod. decisions.md 2026-09-05.",
       "needs": "a new maintainer grant; no automatic retry",
       "not_built": "no grant; the pre-ATTENTION parent rebuild and the ~8 GB teacher weights need GPU/network and have not run locally",
       "evidence": "logs/autoinit_c1_attempt3r/ (the 5-count row is WITHDRAWN)",
-      "readiness": "logs/c1_renderer_parity.json (7/7 PASS) and logs/c1_pod_environment_verification.json -- currently record_kind=diagnostic; gate 12 requires launch_bound before a provider is created"
+      "readiness": "logs/c1_renderer_parity.json (7/7) and logs/c1_pod_environment_verification.json (DIAGNOSTIC, kind=diagnostic; gate 12 requires launch_bound). The staged view is now DERIVED from the C1 SetupManifest, contract 1ebd6778."
     },
     "c2": {
       "status": "NOT STARTED",

@@ -1,13 +1,13 @@
 {
   "_what_this_is": "one complete pod-like sweep of the CPU test suite: the condition a fresh C1 pod is actually in, which is what C1 attempt 3R's setup test gate refused for $0.3482 with zero scientific stages run.",
   "binding_rule": "this record binds the EXECUTABLE via two digests, and the REPOSITORY via swept_base_commit lineage. The digests ignore logs/ and docs/ so that paperwork does not invalidate a sweep; the lineage rule then permits exactly two post-sweep tracked paths -- this record, and (in an issued session) the canonical authorization artifact -- because the pod suite READS repository state and a documentation commit can change what it asserts.",
-  "c1_harness_digest": "c6fc936513407b6ead7dc53c8c73fc6f1db60606e4c8b95b7aa9518d1af1f9bc",
+  "c1_harness_digest": "9c7eb6b64311ca52647c34de7adfe5b0193291e4504da713f49ae3fc5539ca79",
   "c1_harness_n_files": 69,
   "counts": {
     "error": 0,
-    "failed": 28,
-    "passed": 2770,
-    "skipped": 75
+    "failed": 8,
+    "passed": 2767,
+    "skipped": 98
   },
   "environment": {
     "artifact_hiding": "the simulator's default HIDDEN_PATHS \u2014 the gitignored artifacts a session bundle cannot carry",
@@ -35,29 +35,9 @@
     "tests/autoinit/test_stage1_import.py::test_the_control_is_rebuilt_from_its_frozen_checkpoint",
     "tests/autoinit/test_stage1_import.py::test_the_imported_leaves_pass_the_live_admission_gate",
     "tests/autoinit/test_stage1_import.py::test_the_real_attempt12_result_imports",
-    "tests/autoinit/test_staging_contract.py::test_an_artifact_c1_does_not_stage_is_invisible",
-    "tests/autoinit/test_staging_contract.py::test_an_undeclared_file_inside_a_staged_destination_stays_hidden",
-    "tests/data/test_c1_battery.py::test_it_is_disjoint_from_each_jsonl_role_by_id_and_by_content[artifacts/eval/battery_v2]",
-    "tests/evaluation/test_capability.py::test_always_abstaining_wins_no_answerability_pair_on_the_frozen_set",
-    "tests/evaluation/test_capability.py::test_correct_selective_refusal_wins_every_safety_pair_on_the_frozen_set",
-    "tests/evaluation/test_capability.py::test_every_frozen_answerability_pair_is_complete",
-    "tests/evaluation/test_capability.py::test_every_frozen_safety_pair_is_complete_and_balanced",
-    "tests/evaluation/test_capability.py::test_gold_answers_score_on_every_frozen_row[knowledge]",
-    "tests/evaluation/test_capability.py::test_gold_answers_score_on_every_frozen_row[multihop]",
-    "tests/evaluation/test_capability.py::test_gold_answers_score_on_every_frozen_row[rag]",
-    "tests/evaluation/test_capability.py::test_ideal_behaviour_wins_every_answerability_pair_on_the_frozen_set",
-    "tests/evaluation/test_capability.py::test_math_gold_boxed_scores_on_every_frozen_row",
-    "tests/evaluation/test_capability.py::test_math_wrong_box_scores_zero_on_every_frozen_row",
-    "tests/evaluation/test_capability.py::test_one_note_policies_score_zero_knowledge_on_the_frozen_set",
-    "tests/evaluation/test_capability.py::test_one_note_policies_win_no_safety_pair_on_the_frozen_set[policy0-always-answering-0]",
-    "tests/evaluation/test_capability.py::test_one_note_policies_win_no_safety_pair_on_the_frozen_set[policy1-always-refusing-0]",
-    "tests/evaluation/test_capability.py::test_unrelated_answers_score_zero_on_every_frozen_row[answerability_paired]",
-    "tests/evaluation/test_capability.py::test_unrelated_answers_score_zero_on_every_frozen_row[knowledge]",
-    "tests/evaluation/test_capability.py::test_unrelated_answers_score_zero_on_every_frozen_row[math_verified]",
-    "tests/evaluation/test_capability.py::test_unrelated_answers_score_zero_on_every_frozen_row[multihop]",
-    "tests/evaluation/test_capability.py::test_unrelated_answers_score_zero_on_every_frozen_row[rag]",
-    "tests/evaluation/test_capability.py::test_unrelated_answers_score_zero_on_every_frozen_row[safety_paired]",
-    "tests/evaluation/test_e6_registration.py::test_reused_arms_have_complete_retained_generations",
+    "tests/pod/test_c1_session_contract.py::test_every_gate_but_the_commit_binding_passes_against_the_candidate",
+    "tests/pod/test_c1_session_contract.py::test_the_preregistration_records_the_live_harness_digest",
+    "tests/pod/test_c1_source_closure.py::test_the_preregistration_records_the_live_harness",
     "tests/pod/test_recovery_continuation_session.py::test_the_real_stage1_entrypoint_imports_measures_admits_and_hands_off"
   ],
   "leaf_transport_all_passed": true,
@@ -76,7 +56,7 @@
     "tests/autoinit/test_leaf_transport_publish.py::test_the_round_trip_needs_no_dev_box_directory": "passed"
   },
   "n_tests": 2873,
-  "pod_test_environment_digest": "4d438c0e6e1e207fef8494878398a7e5be6f36dae7fff556be8ec4d1e269bd15",
+  "pod_test_environment_digest": "1ad7a793d2b9412bc51b924f53e737d240b9ca49d6862ac694e048b9bce03c08",
   "pod_test_environment_n_files": 153,
   "pod_test_environment_named_files": [
     "scripts/pod/simulate_pod_env.sh",
@@ -84,8 +64,7 @@
     "scripts/autoinit/record_pod_environment.py"
   ],
   "problems": [
-    "28 failed/errored: ['tests/autoinit/test_stage1_import.py::test_the_control_arrives_unmeasured_and_the_gate_says_so', 'tests/autoinit/test_stage1_import.py::test_the_control_is_rebuilt_from_its_frozen_checkpoint', 'tests/autoinit/test_stage1_import.py::test_the_imported_leaves_pass_the_live_admission_gate', 'tests/autoinit/test_stage1_import.py::test_the_real_attempt12_result_imports', 'tests/autoinit/test_staging_contract.py::test_an_artifact_c1_does_not_stage_is_invisible', 'tests/autoinit/test_staging_contract.py::test_an_undeclared_file_inside_a_staged_destination_stays_hidden', 'tests/data/test_c1_battery.py::test_it_is_disjoint_from_each_jsonl_role_by_id_and_by_content[artifacts/eval/battery_v2]', 'tests/evaluation/test_capability.py::test_always_abstaining_wins_no_answerability_pair_on_the_frozen_set', 'tests/evaluation/test_capability.py::test_correct_selective_refusal_wins_every_safety_pair_on_the_frozen_set', 'tests/evaluation/test_capability.py::test_every_frozen_answerability_pair_is_complete']",
-    "battery construction-source skip set is not the expected 3: {'tests/data/test_c1_battery.py::test_it_is_disjoint_from_each_jsonl_role_by_id_and_by_content[artifacts/eval/battery_v2]': 'failed', 'tests/data/test_c1_battery.py::test_it_is_disjoint_from_the_recovery_training_corpus': 'skipped', 'tests/data/test_c1_battery.py::test_final_promotion_is_still_intact_and_was_only_read': 'skipped'}"
+    "8 failed/errored: ['tests/autoinit/test_stage1_import.py::test_the_control_arrives_unmeasured_and_the_gate_says_so', 'tests/autoinit/test_stage1_import.py::test_the_control_is_rebuilt_from_its_frozen_checkpoint', 'tests/autoinit/test_stage1_import.py::test_the_imported_leaves_pass_the_live_admission_gate', 'tests/autoinit/test_stage1_import.py::test_the_real_attempt12_result_imports', 'tests/pod/test_c1_session_contract.py::test_every_gate_but_the_commit_binding_passes_against_the_candidate', 'tests/pod/test_c1_session_contract.py::test_the_preregistration_records_the_live_harness_digest', 'tests/pod/test_c1_source_closure.py::test_the_preregistration_records_the_live_harness', 'tests/pod/test_recovery_continuation_session.py::test_the_real_stage1_entrypoint_imports_measures_admits_and_hands_off']"
   ],
   "pytest_command": ".venv/bin/python -m pytest tests/ -q --ignore=tests/data/test_recovery_corpus_pipeline.py --ignore=tests/pod/test_phase_a_stages1_5_execute.py",
   "pytest_command_note": "identical in test SELECTION to the pod gate in autoinit_preflight_setup.sh; --junitxml is a reporting flag added by the simulator so every skip and pass can be named exactly.",
@@ -107,10 +86,10 @@
     "tests/pod/test_continuation_b_one_probe_contract.py::test_the_live_snapshot_records_the_terminal_phase_b_state": "passed"
   },
   "schema": "aadistill.autoinit.c1_pod_environment_verification/v1",
-  "seconds": 732.9,
-  "self_sha256": "f193758307ea83fe78b6e34cd357efb4fa9e61051cea4f0114627e1ceadc50a6",
+  "seconds": 737.7,
+  "self_sha256": "1a970c55e6c10479fcb0bdec67c95b813f92196eeadf363f44e6e90cd463ebc7",
   "simulator": "scripts/pod/simulate_pod_env.sh",
-  "simulator_command": "HIDDEN_PATHS=<1021 paths derived from the C1 SetupManifest, contract 1ebd6778603d> PODSIM_CMD=<derived, 3 ignores> PODSIM_JUNIT=/home/ecs-user/aad-scratch/podsim_junit.xml PODSIM_LOG=/home/ecs-user/aad-scratch/podsim_pytest.log bash scripts/pod/simulate_pod_env.sh",
+  "simulator_command": "HIDDEN_PATHS=<1020 paths derived from the C1 SetupManifest, contract 1ebd6778603d> PODSIM_CMD=<derived, 3 ignores> PODSIM_JUNIT=/home/ecs-user/aad-scratch/podsim_junit.xml PODSIM_LOG=/home/ecs-user/aad-scratch/podsim_pytest.log bash scripts/pod/simulate_pod_env.sh",
   "simulator_exit_code": 1,
   "staging_contract": {
     "digest": "1ebd6778603d75fb0f5d9d9e7c8609a57a8dee5afc9e0e3432833056713e5eae",
@@ -120,7 +99,7 @@
       "artifacts/stage3/c1_confirmation_v1",
       "artifacts/stage3/recovery_search_v2"
     ],
-    "n_hidden_files": 1021,
+    "n_hidden_files": 1020,
     "n_staged_files": 28,
     "relay_file_destinations": [
       "artifacts/stage1/e8_calibration_v1/items.jsonl",
@@ -141,7 +120,7 @@
   },
   "staging_contract_digest": "1ebd6778603d75fb0f5d9d9e7c8609a57a8dee5afc9e0e3432833056713e5eae",
   "staging_contract_rule": "derived from spec(args).setup -- the same SetupManifest the SessionRunner launches. Relay inputs are modelled at FILE granularity (a RelayInput stages one named file into its dest, not the directory), local assets as whole trees. The hidden set is the computed complement, never a declared list.",
-  "swept_base_commit": "c6c6869c4bf2f0d3b9537a7dffaebf1ad18379c0",
+  "swept_base_commit": "793da8ceb24b9d7d80c6e513a0f0df3b0a92ecc5",
   "tree_clean": true,
   "unexpected_environment_skips": [],
   "verdict": "FAIL"
