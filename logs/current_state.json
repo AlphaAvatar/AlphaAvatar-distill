@@ -12,7 +12,7 @@
   },
   "authorized": {
     "any": false,
-    "note": "the attempt-4 authorization is CONSUMED: pod d854jag1ybhny2 was created, which is what consumes a launch attempt. The grant permits no retry.",
+    "note": "GRANT APPROVED 2026-09-05 (logs/autoinit_c1_attempt5_grant.json), issuance pending. This boolean stays false through the issuance window BY DESIGN: the snapshot cannot be edited after the launch-bound sweep without invalidating it. The canonical live permission is logs/autoinit_c1_authorization.json.",
     "c1_attempt1": "CONSUMED. $0.0786, bundle fetch.",
     "c1_attempt2": "CONSUMED. $0.1013, ROPE_OK.",
     "c1_attempt3": "SUPERSEDED UNLAUNCHED by the reprice. $0.00, no pod.",
@@ -22,7 +22,7 @@
   "prepared_launch": {
     "any": false,
     "bundles": 0,
-    "note": "nothing prepared. The staged bundle aad_autoinit_637335ab.bundle exists on the relay but its authorization is consumed; a further attempt needs a new maintainer grant."
+    "note": "nothing staged at this commit. The bundle is staged AFTER issuance; this field is likewise not editable during the window -- see authorized.note."
   },
   "budget": {
     "cumulative_spend_usd": 265.0864,
@@ -122,7 +122,7 @@
       "authorizes": "nothing"
     },
     "c1": {
-      "status": "IMPLEMENTED / FIVE LAUNCH ATTEMPTS / NOT SCIENTIFICALLY EXECUTED / NOT CURRENTLY AUTHORIZED",
+      "status": "IMPLEMENTED / FIVE PAID-ATTEMPT LABELS / NOT SCIENTIFICALLY EXECUTED / NOT CURRENTLY AUTHORIZED -- attempt-5 grant approved, not yet issued",
       "what_it_is": "fixed-path ATTENTION isolation, 2 arms x 3 fresh seeds = 6 E1_KD_HEAVY_0860K probes. NOT recovery evidence.",
       "incumbent": "fe9683e6a9c783bbc6fe276a78c851c6, digest c313d1b4081b. NOT recovered; margin in phase_b_result.",
       "execution_prereg": "logs/phase_c1_execution_preregistration.json c5a19b6bd4e0 at head_commit 9bb2650d; harness 8b4dd4c0a00b over 69 files; 12 pre-provider gates",
@@ -132,7 +132,7 @@
       "attempts": "5 attempt LABELS: 1, 2, 3, 3R, 4. FOUR created paid provider resources; attempt 3 created none ($0.00). $1.2267 of C1 infrastructure spend, ZERO science. Ledger: BUDGET_LEDGER.md.",
       "gates": "12 pre-provider gates. Detail: STATE.md, decisions.md 2026-09-04.",
       "blocker": "Attempt-4 defects REPAIRED at $0: the staged view and the child pytest environment are now derived from the C1 SessionSpec, 4 whole-module ignores flow from the manifest, 3 battery source cases and 2 host-local Phase-A cases skip explicitly, and the vacuous battery_v2 pass is closed. C1 has still NEVER been measured. No grant.",
-      "needs": "reviewer decision; no grant, no authorization, no automatic retry",
+      "needs": "grant APPROVED (attempt 5); launch-bound sweep, issuance, bundle and 12 gates pending, then a maintainer decision to create the provider resource",
       "not_built": "no grant; the pre-ATTENTION parent rebuild and the ~8 GB teacher weights need GPU/network and have not run locally",
       "evidence": "logs/autoinit_c1_attempt3r/ (the 5-count row is WITHDRAWN)",
       "readiness": "logs/c1_renderer_parity.json (7/7) and c1_pod_environment_verification.json (DIAGNOSTIC only; gate 12 requires launch_bound). Staged view and setup environment both DERIVED from the C1 SessionSpec; staging contract 9ef2356ee807."

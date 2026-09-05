@@ -1,0 +1,65 @@
+{
+  "schema": "aadistill.autoinit.c1_grant/v1",
+  "_what_this_is": "The maintainer decision permitting ONE Phase-C1 paid session -- attempt 5. A NEW artifact: the four prior grants each authorized one issuance and none can be reused. Attempt 4's grant and authorization remain CONSUMED. It is an INPUT to scripts/autoinit/issue_c1_authorization.py, which DERIVES every identity from the committed live tree and REFUSES if this document asserts any of them.",
+  "granted_by": "maintainer, C1 pod-fidelity closeout review 2026-09-05: the manifest-derived positive staged view, the SessionSpec.setup_environment realization, the fail-closed battery isolation, the corrected preregistration operational contract and the green pod-like diagnostic are ACCEPTED. GO for a new one-use grant. The unchanged frozen C1 protocol is authorized to execute exactly once.",
+  "granted_for": "Phase C1 fixed-path ATTENTION isolation -- attempt 5",
+  "covers": "exactly one C1 launch under the unchanged frozen protocol at a hard ceiling of $15.1475: the existing fixed-path ATTENTION isolation, 2 arms x 3 frozen fresh seeds = exactly six recovery probes, one confirmation evaluation per probe only after ALL SIX trainings complete, each admitted against its own observed generation protocol before scoring, followed by the existing frozen GO / NO-GO / INCONCLUSIVE decision.",
+  "does_not_authorize": [
+    "Phase A",
+    "Phase B search",
+    "beam search",
+    "any search",
+    "any ranking",
+    "arm elimination",
+    "successive halving",
+    "any extra seed",
+    "any adaptive rerun",
+    "Phase C2",
+    "formal Stage-2/Stage-3 recovery",
+    "canonical Stage-1 NLL",
+    "any follow-on work",
+    "a second provider-created attempt",
+    "any automatic retry",
+    "any ceiling increase beyond $15.1475",
+    "any cumulative-cap increase",
+    "price-chasing the market upward",
+    "any protocol change",
+    "any scope change"
+  ],
+  "cumulative_spend_at_approval_usd": 265.0864,
+  "cumulative_cap_usd": 283.76,
+  "cap_note": "The project cumulative cap remains $283.7600 and is NOT raised. $18.6736 is available at approval; worst case after one complete attempt at the $15.1475 ceiling is $280.2339 spent, leaving $3.5261. THAT REMAINDER IS NOT AUTHORIZATION FOR ANOTHER FULL ATTEMPT -- it is a quarter of one, and a further attempt needs a new maintainer decision.",
+  "one_use": {
+    "issuances_permitted": 1,
+    "launch_attempts_permitted": 1,
+    "consumed_when": "a PROVIDER RESOURCE is created, not when the launcher is invoked. Attempt 3 invoked the launcher twice, created nothing, cost $0.00 and was not consumed; attempt 3R and attempt 4 each created a pod and were.",
+    "no_retry": "an abort of any kind -- infrastructure, gate, price or scientific -- ends this grant. A further attempt needs a new maintainer decision. Attempt 4 aborted at the pod CPU test gate and was not retried."
+  },
+  "price": {
+    "accepted_secure_l40s_usd_per_hour": 1.09,
+    "price_field": "gpuTypes[0].securePrice -- the field session_runner prices on",
+    "launch_condition": "launch only if the live securePrice is <= $1.09/h. --max-price DERIVES from the hash-verified logs/phase_c1_pricing.json and is not restated.",
+    "above_that": "abort at $0 and return for review. Do not raise --max-price, do not amend the pricing record, do not chase the market.",
+    "hard_ceiling_usd": 15.1475
+  },
+  "issuance_order": {
+    "_why": "session_commit_gate requires the session commit to differ from authorized_session_commit by exactly the authorization path, so a launch-bound sweep run AFTER issuance adds a second path and the gate refuses. The preregistration's transport section now states this ordering and derives its gate count from the live SessionSpec.",
+    "order": [
+      "1. this grant + all final metadata committed",
+      "2. that clean pre-authorization tree frozen",
+      "3. real --kind launch_bound pod-like sweep on THAT tree",
+      "4. readiness-record-only commit",
+      "5. issue against that clean readiness commit, --require-clean",
+      "6. authorization-only commit",
+      "7. canonical bundle staging and round-trip",
+      "8. all 12 $0 pre-provider gates",
+      "9. STOP for the final paid-launch decision"
+    ],
+    "frozen_after_this_commit": "no source, test, preregistration, state, catalog, decision or README path may move between this commit and launch. Exactly two tracked paths may: logs/c1_pod_environment_verification.json and logs/autoinit_c1_authorization.json."
+  },
+  "current_state_during_the_window": "current_state.json continues to read authorized.any = false between this commit and the close of the attempt. That is DELIBERATE: the snapshot cannot be edited after the launch-bound sweep without invalidating it, and a structural test asserts the boolean. The canonical live permission during the window is logs/autoinit_c1_authorization.json.",
+  "supersedes": {
+    "attempt_4": "grant logs/autoinit_c1_attempt4_grant.json and its authorization are CONSUMED and are not reused. Attempt 4 created pod d854jag1ybhny2, aborted at the pod CPU test gate for $0.6986 with zero scientific stages, and its six failures are enumerated in logs/autoinit_c1_attempt4/test_gate_failures.json."
+  },
+  "authorizes_nothing_by_itself": "this document permits an ISSUANCE. It creates no pod, reserves no provider resource and spends nothing."
+}

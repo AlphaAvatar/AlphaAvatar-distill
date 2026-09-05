@@ -45,6 +45,15 @@ PHASE C1 ATTEMPT 4 LAUNCHED AND ABORTED AT THE POD TEST GATE — STILL NEVER MEA
 
 # Current state
 
+> **Attempt-5 grant APPROVED, 2026-09-05 — not yet issued, nothing running.**
+> A NEW one-use grant ([`autoinit_c1_attempt5_grant.json`](autoinit_c1_attempt5_grant.json)).
+> Attempt 4's grant and authorization remain CONSUMED and are not reused. Spend
+> stays `$265.0864` of `$283.7600`; one full `$15.1475` ceiling still fits,
+> leaving `$3.5261` — **which is not authorization for another attempt.**
+> This commit is the frozen pre-authorization tree: after it, only the readiness
+> record and the authorization artifact may move.
+
+
 The **human view of [`current_state.json`](current_state.json)**. That file owns
 the live facts; this one says the same things in prose and adds nothing it does
 not carry. If the two disagree, a structural test fails.

@@ -1,5 +1,26 @@
 # Decision records
 
+## 2026-09-05 — Attempt-5 one-use grant approved
+
+- **Context:** the reviewer accepted the manifest-derived staged view, the
+  `SessionSpec.setup_environment` realization, the fail-closed battery isolation,
+  the corrected preregistration operational contract (12 gates derived from the
+  live session, canonical issuance ordering) and the green pod-like diagnostic.
+  GO for a new one-use grant.
+- **Decision:** `logs/autoinit_c1_attempt5_grant.json`, stating only
+  maintainer-owned fields and asserting none of the nine identities the issuer
+  derives. One issuance, one provider-created attempt, the existing fixed path, 2
+  arms x 3 frozen seeds = six probes, confirmation only after all six trainings,
+  the existing frozen three-way decision. Twenty explicit non-authorizations.
+- **The reserve is not a budget.** `$265.0864 + $15.1475 = $280.2339` against a
+  `$283.7600` cap leaves `$3.5261`. That is a quarter of one attempt and the grant
+  says in its own text that it authorizes nothing further.
+- **Order, unchanged from the corrected preregistration:** grant + metadata
+  committed; tree frozen; launch-bound sweep; readiness-record-only commit; issue
+  with `--require-clean`; authorization-only commit; bundle; twelve gates; stop.
+  Attempt 4's grant and authorization stay consumed.
+- **Revisit when:** the attempt closes.
+
 ## 2026-09-05 — The pod contract must be realized, not merely hashed
 
 - **The remaining defect.** The readiness record hashed the C1 `SetupManifest`,
