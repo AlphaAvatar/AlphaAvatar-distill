@@ -374,3 +374,19 @@ def test_c1_ignores_exactly_the_four_whole_modules():
         "tests/autoinit/test_phase_b_reuse_hostlocal.py",
         "tests/autoinit/test_stage1_import.py",
     ]
+
+
+def test_the_record_embeds_the_whole_findings_block():
+    """Cherry-picking findings into the record is how the battery, host-local and
+    dev-box skip groups came to be computed but never written: a new group had to
+    be remembered in two places and the second was forgotten."""
+    src = (REPO / "scripts/autoinit/record_pod_environment.py").read_text()
+    assert '"findings": findings,' in src
+    from aadistill.autoinit import pod_environment as pe
+    keys = set(pe.evaluate_sweep({}))
+    for group in ("battery_source_skipped_as_expected",
+                  "host_local_c1_skipped_as_expected",
+                  "devbox_only_skipped_as_expected",
+                  "expected_environment_skips",
+                  "repository_state_all_passed"):
+        assert group in keys, group

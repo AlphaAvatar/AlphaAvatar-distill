@@ -125,7 +125,7 @@
       "status": "IMPLEMENTED / FIVE LAUNCH ATTEMPTS / NOT SCIENTIFICALLY EXECUTED / NOT CURRENTLY AUTHORIZED",
       "what_it_is": "fixed-path ATTENTION isolation, 2 arms x 3 fresh seeds = 6 E1_KD_HEAVY_0860K probes. NOT recovery evidence.",
       "incumbent": "fe9683e6a9c783bbc6fe276a78c851c6, digest c313d1b4081b. NOT recovered; margin in phase_b_result.",
-      "execution_prereg": "logs/phase_c1_execution_preregistration.json 66c97464c60d at head_commit 14c81a00; harness 30c000a34bdc over 69 files",
+      "execution_prereg": "logs/phase_c1_execution_preregistration.json 09815a99e26f at head_commit 5b5a8899; harness 30c000a34bdc over 69 files",
       "pricing": "logs/phase_c1_pricing.json 909ed65f -- secure L40S $1.09/h, CEILING $15.1475.",
       "seeds": "1635674081, 1656475568, 696460635 (derived from the C0 digest)",
       "scoring": "c1_confirmation_scoring@v1 77507935; equivalence IDENTICAL over 15 probes. @v2 808080a7 and battery a285d61f untouched.",

@@ -309,15 +309,19 @@ def main() -> int:
         "counts": findings["counts"],
         "n_tests": junit["total"],
         "failed_nodeids": findings["failed_nodeids"],
+        # The WHOLE findings block, not a hand-picked subset. Cherry-picking is
+        # how the record came to omit the battery, host-local and dev-box skip
+        # groups while `evaluate_sweep` was computing them: a new group had to be
+        # remembered in two places, and the second was forgotten. Same failure
+        # shape as the transcribed pytest command.
+        "findings": findings,
         "expected_renderer_parity_skips": list(RENDERER_PARITY_NODEIDS),
-        "renderer_parity_observed": findings["renderer_parity_expected_skips"],
+        "leaf_transport_nodeids": list(LEAF_TRANSPORT_NODEIDS),
         "renderer_parity_skipped_as_expected":
             findings["renderer_parity_skipped_as_expected"],
-        "leaf_transport_nodeids": list(LEAF_TRANSPORT_NODEIDS),
-        "leaf_transport_observed": findings["leaf_transport"],
         "leaf_transport_all_passed": findings["leaf_transport_all_passed"],
-        "repository_state_observed": findings["repository_state"],
         "unexpected_environment_skips": findings["unexpected_environment_skips"],
+        "expected_environment_skips": findings["expected_environment_skips"],
         "problems": findings["problems"],
         "verdict": findings["verdict"] if rc == 0 else "FAIL",
         "evidence": {"junit": args.junit, "pytest_log": args.log},
