@@ -47,6 +47,10 @@ from typing import Any
 #: has its own venv, so hiding ours would model nothing and break the run.
 TOOLING_PREFIXES: tuple[str, ...] = (
     ".venv/", ".pytest_cache/", ".ruff_cache/", ".mypy_cache/", ".git/",
+    # Agent/editor configuration, not a session artifact. Hiding it modelled
+    # nothing and left `.claude/settings.local.json` orphaned in $HIDE when a
+    # sweep was interrupted, which then refused the NEXT sweep at startup.
+    ".claude/", ".agents/", ".vscode/", ".idea/",
 )
 TOOLING_SUBSTRINGS: tuple[str, ...] = ("__pycache__/",)
 
