@@ -2,8 +2,8 @@
  "schema": "aadistill.autoinit.c1_authorization/v1",
  "authorization_id": "autoinit.v1.phase_c1",
  "version": 1,
- "granted_utc": "2026-09-06T13:37:24+00:00",
- "granted_by": "maintainer, C1 attempt-6 postmortem review 2026-09-06. Attempt 6 established two things on a real L40S that are now accepted: the command-scoped CPU-test environment hid CUDA during pytest and restored the real CUDA/teacher environment afterwards, and the strict complete skip-set comparison worked and correctly refused three real divergences. All four repairs are ACCEPTED: measurement scope for the two readiness-record self-consumers, a portable REPO_LAYOUT test, an explicit PODSIM_PYTHON with no ambient fallback, and failure message/traceback capture. GO for a new one-use grant.",
+ "granted_utc": "2026-09-06T16:32:24+00:00",
+ "granted_by": "maintainer, C1 attempt-7 postmortem review 2026-09-06. Attempt 7 was the FIRST to clear the pod CPU test gate: complete setup to TESTS_OK, strict complete skip-set parity matched exactly, the CPU-test scope behaved correctly, the explicit PODSIM_PYTHON worked on the pod, CUDA and the teacher cache were restored after the isolated scope, and AUTHORIZATION_OK and SETUP_DONE were reached. The single remaining blocker -- the launcher->driver CLI seam, where the launcher supplied `--stage all` and the driver's parser did not accept it -- is repaired by removing the flag and covered by a regression that parses the generated argv with the driver's OWN parser. GO for a new one-use grant.",
  "plan_id": "autoinit.v1.phase_c1",
  "phase_a_session_plan_hash": "42a496f0923b1c321426721fb51487df15b5368703fe19a898354973324e27a2",
  "phase_a_science_plan_hash": "fb2eeea531f9f0d11f84b77cd47dff30697122de90a072a7a80c3a7535e89280",
@@ -25,11 +25,11 @@
   "decision": "stage I requires six complete admitted and scored probes",
   "retry": "none. One launch attempt; no automatic retry, no second attempt, no automatic ceiling increase."
  },
- "scope_note": "exactly one C1 launch under the unchanged frozen protocol at a hard ceiling of $15.1475: the existing fixed-path ATTENTION isolation, 2 frozen arms x 3 frozen fresh seeds = exactly six recovery probes, one confirmation evaluation per probe only after ALL SIX trainings complete, each admitted against its own observed generation protocol before scoring, followed by the existing frozen GO / NO-GO / INCONCLUSIVE decision.",
+ "scope_note": "exactly one C1 launch under the unchanged frozen protocol at a hard ceiling of $15.1475: the frozen fixed-path ATTENTION isolation, 2 frozen arms x 3 frozen fresh seeds = exactly six recovery probes, one confirmation evaluation per probe only after ALL SIX trainings complete, each admitted against its own observed generation protocol before scoring, followed by the existing frozen GO / NO-GO / INCONCLUSIVE decision.",
  "phase_a_authorized": false,
  "automatic_followon_start": false,
- "authorized_session_commit": "49df524362c28f2ef084bd3940a2f6d2015af62d",
- "harness_source_digest": "e765a54fcd98f76fff931290d10e07fcd7d2adf5942278cefa495f5f74d7cd5f",
+ "authorized_session_commit": "b5733168a7c713894d92cc6b9d55e46fa182d9f5",
+ "harness_source_digest": "85329e7e701b1b3464b30ee8c35cdda710105323398007c993ef1c1003a5a0ab",
  "harness_source_files": [
   "scripts/pod/autoinit_c1_launch.py",
   "scripts/pod/autoinit_c1_driver.py",
@@ -105,18 +105,18 @@
   "src/aadistill/infrastructure/artifact_gate.py"
  ],
  "per_launch_hard_usd": 15.1475,
- "provenance_commit": "49df524362c28f2ef084bd3940a2f6d2015af62d",
+ "provenance_commit": "b5733168a7c713894d92cc6b9d55e46fa182d9f5",
  "enforcement": "the launcher loads this artifact and refuses to create a pod whose priced hard threshold exceeds hard_cap_usd or per_launch_hard_usd, refuses a stage not in authorized_stages, refuses a harness that does not digest to the authorized value, and has no code path to any experiment after Phase A",
  "allows_phase_a": false,
  "allows_beam_search": false,
  "authorizes_c1_isolation": true,
  "scope": "2 arms x 3 fresh seeds = 6 fixed 0.86M recovery probes on one frozen path, evaluated once each on c1_confirmation_v1. No search, no ranking, no successive halving, no tie-breaking, no arm elimination, and no formal Stage-2/3 recovery.",
  "grant": {
-  "path": "logs/autoinit_c1_attempt7_grant.json",
-  "sha256": "4336bab96cf2cefbafcaba16654f0e07af86eb6af352cfd86c6d845b2f250f31",
-  "granted_by": "maintainer, C1 attempt-6 postmortem review 2026-09-06. Attempt 6 established two things on a real L40S that are now accepted: the command-scoped CPU-test environment hid CUDA during pytest and restored the real CUDA/teacher environment afterwards, and the strict complete skip-set comparison worked and correctly refused three real divergences. All four repairs are ACCEPTED: measurement scope for the two readiness-record self-consumers, a portable REPO_LAYOUT test, an explicit PODSIM_PYTHON with no ambient fallback, and failure message/traceback capture. GO for a new one-use grant.",
-  "covers": "exactly one C1 launch under the unchanged frozen protocol at a hard ceiling of $15.1475: the existing fixed-path ATTENTION isolation, 2 frozen arms x 3 frozen fresh seeds = exactly six recovery probes, one confirmation evaluation per probe only after ALL SIX trainings complete, each admitted against its own observed generation protocol before scoring, followed by the existing frozen GO / NO-GO / INCONCLUSIVE decision.",
-  "cumulative_spend_at_approval_usd": 265.7679,
+  "path": "logs/autoinit_c1_attempt8_grant.json",
+  "sha256": "d1af9dd8da49933b6f174340a159f027167a4aecfde222af1a1d540184cb9b08",
+  "granted_by": "maintainer, C1 attempt-7 postmortem review 2026-09-06. Attempt 7 was the FIRST to clear the pod CPU test gate: complete setup to TESTS_OK, strict complete skip-set parity matched exactly, the CPU-test scope behaved correctly, the explicit PODSIM_PYTHON worked on the pod, CUDA and the teacher cache were restored after the isolated scope, and AUTHORIZATION_OK and SETUP_DONE were reached. The single remaining blocker -- the launcher->driver CLI seam, where the launcher supplied `--stage all` and the driver's parser did not accept it -- is repaired by removing the flag and covered by a regression that parses the generated argv with the driver's OWN parser. GO for a new one-use grant.",
+  "covers": "exactly one C1 launch under the unchanged frozen protocol at a hard ceiling of $15.1475: the frozen fixed-path ATTENTION isolation, 2 frozen arms x 3 frozen fresh seeds = exactly six recovery probes, one confirmation evaluation per probe only after ALL SIX trainings complete, each admitted against its own observed generation protocol before scoring, followed by the existing frozen GO / NO-GO / INCONCLUSIVE decision.",
+  "cumulative_spend_at_approval_usd": 266.191,
   "cumulative_cap_usd": 283.76,
   "does_not_authorize": [
    "any retry",
@@ -132,20 +132,21 @@
    "successive halving",
    "any extra seed",
    "any adaptive rerun",
+   "partial-stage execution",
    "Phase C2",
    "formal Stage-2/Stage-3 recovery",
    "canonical Stage-1 NLL",
    "any follow-on work",
-   "any scientific or protocol change",
+   "any scientific or protocol modification",
    "price-chasing the market upward",
    "any hard-ceiling increase beyond $15.1475",
-   "any project-cap increase"
+   "any cumulative-cap increase"
   ]
  },
  "bound": {
-  "execution_preregistration": "25062af9ef9c97d26623b10e9661adbd1f6dd4f59b9abaa2d5a09744d5c4ae27",
-  "execution_preregistration_head_commit": "48a85c7d4d87a27e40fc64c71f97c944d2605848",
-  "c1_harness_digest": "e765a54fcd98f76fff931290d10e07fcd7d2adf5942278cefa495f5f74d7cd5f",
+  "execution_preregistration": "1cdc49f3e8478e0a13f08873a01cfecaa72d91d6c4b372644f1bf8c8807ca601",
+  "execution_preregistration_head_commit": "5a57fd5a25085a1f304c4fc6abcdcd361614fa89",
+  "c1_harness_digest": "85329e7e701b1b3464b30ee8c35cdda710105323398007c993ef1c1003a5a0ab",
   "c1_harness_n_files": 72,
   "isolation_plan_hash": "42a496f0923b1c321426721fb51487df15b5368703fe19a898354973324e27a2",
   "c0_preregistration": "fb2eeea531f9f0d11f84b77cd47dff30697122de90a072a7a80c3a7535e89280",
@@ -179,7 +180,7 @@
    "soft_stop_usd": 14.7841,
    "hard_ceiling_usd": 15.1475,
    "cumulative_cap_usd": 283.76,
-   "cumulative_spend_at_approval_usd": 265.7679
+   "cumulative_spend_at_approval_usd": 266.191
   }
  },
  "one_use": "ONE grant, ONE issuance, ONE launch attempt. No automatic retry, no second attempt, no automatic ceiling increase. A failure is the attempt's result and needs a new maintainer review.",
@@ -197,14 +198,15 @@
   "successive halving",
   "any extra seed",
   "any adaptive rerun",
+  "partial-stage execution",
   "Phase C2",
   "formal Stage-2/Stage-3 recovery",
   "canonical Stage-1 NLL",
   "any follow-on work",
-  "any scientific or protocol change",
+  "any scientific or protocol modification",
   "price-chasing the market upward",
   "any hard-ceiling increase beyond $15.1475",
-  "any project-cap increase"
+  "any cumulative-cap increase"
  ],
- "authorization_sha256": "f8ca8bdefabef55288b491f3d98d1c8fb03206e58a6c6be2dbb3c855e7959abb"
+ "authorization_sha256": "0b15a9204172c924772df539ee279cb3b21ce184431d9a6fe5c70c32e6eafcf9"
 }
