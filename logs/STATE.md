@@ -35,6 +35,30 @@ PHASE C1 CPU-TEST PARITY REPAIRED AT `$0` — STILL NEVER MEASURED**
 > an L40S. A CPU dev box cannot prove it. The contract is applied and the
 > decision is proven stable here; the GPU half is first exercised on the next pod.
 
+> **Attempt-7 postmortem repair, 2026-09-06 — `$0.0000`, no pod, no grant.**
+> One production line: `--stage all` is REMOVED from
+> `autoinit_c1_launch.driver_command`. The driver's parser is untouched and
+> still has no `--stage` — `run()` already executes the whole fixed sequence
+> B → C → DE → F → G → H → I, and adding the flag even as a no-op would
+> create a stage-selection surface that partial C1 execution is not
+> authorized to have.
+>
+> **The seam now has the regression it never had.**
+> `tests/pod/test_launcher_driver_cli_seam.py` calls the real
+> `driver_command`, tokenizes with `shlex.split`, and hands every remaining
+> token to the real `autoinit_c1_driver.build_parser()`. It never restates
+> the driver's option list — the parser is the authority — and an AST scan
+> enforces that. Re-injecting attempt 7's exact `--stage all` argv is
+> required to raise `SystemExit(2)`. Restoring the flag in production makes
+> three of the five cases fail, so this would have caught attempt 7 at `$0`.
+>
+> **No thirteenth gate.** The count stays at 12: gate 12 binds the complete
+> launch-bound sweep to the final executable tree, so a passing sweep that
+> contains this module IS the `$0` pre-provider evidence for the seam.
+>
+> **Attempt 7 itself is unchanged:** CONFIRMED launcher→driver CLI mismatch,
+> replay NOT REACHED, training 0, evaluation 0, score 0, decision 0.
+
 > **Attempt 7, 2026-09-06 — the CPU gate FELL, then argparse.** Pod
 > `gfd8buh5tr51qb`, created at `$1.09/h`, deleted at 23.29 min for **`$0.4231`**,
 > provider confirms gone. Cumulative **`$266.1910`** of `$283.7600`, leaving

@@ -696,9 +696,23 @@ def artifact_spec_gate(ctx: SessionContext) -> tuple[bool, str]:
 # ---------------------------------------------------------------------------
 
 def driver_command(ctx: SessionContext, plan) -> str:
-    """The C1 driver. There is no argument that searches, ranks or eliminates."""
+    """The C1 driver. There is no argument that searches, ranks or eliminates.
+
+    And no `--stage` either. C1 attempt 7 cleared the pod CPU test gate -- the
+    first attempt ever to -- and then died at `$0.4231` because this function
+    emitted `--stage all` and the driver's parser has no such option: argparse
+    exited 2 before a line of the driver ran.
+
+    The flag is REMOVED rather than accepted, because `run()` already executes
+    the complete fixed sequence B -> C -> DE -> F -> G -> H -> I. Adding
+    `--stage` to the parser, even as a no-op, would create a stage-selection
+    surface, and partial C1 execution is not an authorized control.
+
+    `test_the_launcher_driver_cli_seam.py` now parses this exact string with the
+    driver's OWN parser, which is the authority on what it accepts.
+    """
     return (f"/opt/train/bin/python {REPO}/scripts/pod/autoinit_c1_driver.py "
-            f"--stage all --image-digest '{ctx.image_digest}' "
+            f"--image-digest '{ctx.image_digest}' "
             f"--rate {ctx.price or ctx.args.max_price} "
             f"--spent-usd {ctx.spent_usd:.4f} "
             f"--soft-stop-usd {plan.soft_stop_usd:.4f} "
