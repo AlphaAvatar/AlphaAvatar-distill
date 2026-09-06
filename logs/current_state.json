@@ -1,6 +1,6 @@
 {
  "schema": "aadistill.current_state/v2",
- "generated_utc": "2026-09-06T00:40:00+00:00",
+ "generated_utc": "2026-09-06T12:00:00Z",
  "_contract": "Minimal machine-readable CURRENT snapshot: live facts only. History: logs/decisions.md. Human view: logs/STATE.md. Ownership: logs/CATALOG.md.",
  "baseline_commit": "logs/c1_pod_environment_verification.json:swept_base_commit",
  "baseline_commit_meaning": "LAST TESTED IMPLEMENTATION is OWNED by the readiness record's swept_base_commit and deliberately not duplicated here. This snapshot cannot name a commit that does not exist until after it is written, and gate 12 now forbids editing state after the sweep -- so a copy here could only ever go stale. It did: 4f85ecda vs the record's 0457bab.",
@@ -71,8 +71,8 @@
   "the ATTENTION 'search declined to calibrate' reading: WITHDRAWN 2026-09-01"
  ],
  "next_starting_point": {
-  "status": "Attempt-5 postmortem repair complete at $0. No C1 measurement exists; nothing is authorized.",
-  "the_ask": "reviewer decision on the repaired guards, the skip-predicate audit, the fail-closed skip-set comparison whose stability is unproven, and the storage recovery.",
+  "status": "CPU-test parity repaired at $0 and verified. No C1 measurement exists; nothing is authorized.",
+  "the_ask": "a maintainer decision on a further one-use grant.",
   "budget": "$265.4014 spent of the unchanged $283.7600 cap; $18.3586 uncommitted."
  },
  "read_order": [
@@ -126,17 +126,17 @@
    "status": "IMPLEMENTED / SIX PAID-ATTEMPT LABELS / NOT SCIENTIFICALLY EXECUTED / NOT CURRENTLY AUTHORIZED -- attempt-5 grant CONSUMED at the pod test gate",
    "what_it_is": "fixed-path ATTENTION isolation, 2 arms x 3 fresh seeds = 6 E1_KD_HEAVY_0860K probes. NOT recovery evidence.",
    "incumbent": "fe9683e6a9c783bbc6fe276a78c851c6, digest c313d1b4081b. NOT recovered; margin in phase_b_result.",
-   "execution_prereg": "logs/phase_c1_execution_preregistration.json 49b76c8d1631 at head_commit 216c8733; harness 9c798b19498c over 72 files; 12 pre-provider gates",
+   "execution_prereg": "logs/phase_c1_execution_preregistration.json b4a74f8f7c34 at head_commit 577c5cdc; harness 21d959131745 over 72 files; 12 pre-provider gates",
    "pricing": "logs/phase_c1_pricing.json 909ed65f -- secure L40S $1.09/h, CEILING $15.1475.",
    "seeds": "1635674081, 1656475568, 696460635 (derived from the C0 digest)",
    "scoring": "c1_confirmation_scoring@v1 77507935; equivalence IDENTICAL over 15 probes. @v2 808080a7 and battery a285d61f untouched.",
    "attempts": "SIX attempt LABELS: 1, 2, 3, 3R, 4, 5. FIVE of them created a paid provider resource; attempt 3 created none ($0.00, the launcher declined on price). $1.5417 of C1 infrastructure spend, ZERO science. Ledger: BUDGET_LEDGER.md.",
    "gates": "12 pre-provider gates. Detail: STATE.md, decisions.md 2026-09-04.",
-   "blocker": "CPU-TEST PARITY, repaired at $0 on 2026-09-06 and not yet exercised on a pod. The new strict skip-set comparison compared a CPU diagnostic against an L40S with the teacher downloaded and would have false-aborted a HEALTHY pod. Both now run pytest under one declared command-scoped environment (cpu_test_env). C1 has still NEVER been measured.",
-   "needs": "a reviewer decision on the CPU-test parity contract -- its GPU half cannot be executed on a CPU dev box -- and only then on a further grant.",
+   "blocker": "NONE technical. The CPU-test parity repair is COMPLETE: the pod gate and the launch-bound diagnostic run pytest under one declared command-scoped environment (cpu_test_env 0708122244bf), so a strict skip-set comparison compares like with like instead of refusing a healthy L40S. strict_cpu_test_parity_ready=PASS; the final diagnostic is PASS with 0 failed / 0 error. C1 has still NEVER been measured and there is NO live authorization.",
+   "needs": "a maintainer grant. Everything $0 is closed: parity audit PASS, diagnostic PASS, renderer parity 7/7, battery isolation clean. A launch-bound sweep and an issuance are owed before any launch.",
    "not_built": "no grant; the pre-ATTENTION parent rebuild and the ~8 GB teacher weights need GPU/network and have not run locally",
    "evidence": "logs/autoinit_c1_attempt5/ (test_gate_failures.json carries the root cause and the unexplained skip)",
-   "readiness": "logs/c1_skip_predicate_audit.json: 97 predicates across 144 selected modules, strict_cpu_test_parity_ready=PASS, 0 unaccounted, 0 stale. The committed pod-environment record is a DIAGNOSTIC; a launch-bound sweep is owed before any launch."
+   "readiness": "logs/c1_skip_predicate_audit.json: 97 predicates across 144 selected modules, strict_cpu_test_parity_ready=PASS, 0 unaccounted, 0 stale. logs/c1_pod_environment_verification.json is a DIAGNOSTIC (2808 passed / 114 skipped / 0 failed), so a launch-bound sweep is owed before any launch."
   },
   "c2": {
    "status": "NOT STARTED",

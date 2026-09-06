@@ -35,6 +35,15 @@ PHASE C1 CPU-TEST PARITY REPAIRED AT `$0` — STILL NEVER MEASURED**
 > an L40S. A CPU dev box cannot prove it. The contract is applied and the
 > decision is proven stable here; the GPU half is first exercised on the next pod.
 
+> **Attempt-6 grant APPROVED, 2026-09-06 — not yet issued, nothing running.**
+> A NEW one-use grant ([`autoinit_c1_attempt6_grant.json`](autoinit_c1_attempt6_grant.json)).
+> Attempt 5's grant and authorization remain CONSUMED and are not reused. Spend
+> stays `$265.4014` of `$283.7600`; one full `$15.1475` ceiling still fits,
+> leaving about `$3.2111` — **which is not authorization for another attempt**,
+> and an early termination still requires a completely new review. This commit
+> is the frozen pre-authorization tree: after it, only the readiness record and
+> the authorization artifact may move.
+>
 > **Attempt 5 remains an INFRASTRUCTURE ABORT with ZERO C1 measurement**, and is
 > not reinterpreted as ATTENTION evidence by anything here.
 

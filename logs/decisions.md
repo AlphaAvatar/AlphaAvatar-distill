@@ -6923,6 +6923,39 @@ recovery continuation under the derived **$16.7456** ceiling.
   committed.
 - **Revisit when:** the maintainer decides whether to issue the one-use grant.
 
+## 2026-09-06 — C1 Attempt-6 grant, after the CPU-test parity repair
+
+- **Context:** attempt 5 aborted at the pod CPU test gate for `$0.3150`. Its
+  postmortem was accepted, but the repair introduced a strict skip-set
+  comparison that compared two intentionally different CPU-test environments: a
+  CPU diagnostic with an empty HF cache against an L40S with the pinned teacher
+  downloaded. It would have **false-aborted a healthy pod**. The one GPU
+  predicate in the selected suite runs without CUDA and skips with it — the
+  opposite decision there — and the tokenizer cases skip here and would have run
+  there.
+- **Decision:** keep the comparison; make the two commands run under ONE declared
+  environment. `aadistill.autoinit.cpu_test_env` (digest
+  `0708122244bf20b3c009e25adbc00dfa3ae2a4dda80827af0a99509353935bb2`) sets
+  `CUDA_VISIBLE_DEVICES=""`, a fresh empty `HOME`, an isolated empty HF root, and
+  clears the four cache redirectors. It is **command-scoped** via `env(1)` on the
+  pod, so the pinned install, the teacher download and the CUDA proof still run
+  for real — and CUDA plus the teacher cache are re-asserted after the gate.
+- **The fresh HOME had to be made to matter.** Host-local stores were hardcoded
+  `/home/ecs-user/aad-artifacts`, immune to it, so those cases ran in the
+  diagnostic and would have skipped on the pod. They resolve through
+  `Path.home()` now, the pattern `EVIDENCE_ROOTS` already used.
+- **Alternatives considered:** weaken the comparison to a subset (discards the
+  evidence attempt 5 paid for); waive the divergent predicates (an excuse list
+  that rots); a mount namespace (a general framework for one problem).
+- **Expected upside:** a strict comparison that can be trusted, and a named `$0.30`
+  abort instead of six probes trained under an unnamed environment difference.
+- **Risks:** the GPU half — that `CUDA_VISIBLE_DEVICES=""` hides an L40S — cannot
+  be executed on a CPU dev box. It is first exercised on the next pod. The
+  comparison is fail-closed, so its first real use could itself abort attempt 6.
+- **Grant:** `logs/autoinit_c1_attempt6_grant.json`. One issuance, one launch
+  attempt, no retry, `$15.1475` ceiling, `$265.4014` of `$283.7600` at approval.
+- **Revisit when:** attempt 6 reaches a terminal outcome.
+
 ## 2026-09-02 — C1 evidence declaration, and the driver that cannot produce it
 
 - **Context:** review of the pushed `d43346f` tree found that
