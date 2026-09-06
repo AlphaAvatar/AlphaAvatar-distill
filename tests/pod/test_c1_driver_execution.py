@@ -150,16 +150,25 @@ def treatment_registered():
 
 class _FakeStep:
     def __init__(self, i):
-        self.index, self.digest_expected, self.digest_matches = i, None, None
-        self.identity = types.SimpleNamespace(artifact_digest="d" * 64)
+        self.index = i
+        self.digest_expected = D.CS.EXPECTED_PARENT_DIGEST if i == 2 else None
+        self.digest_matches = True if i == 2 else None
+        self.identity = types.SimpleNamespace(
+            artifact_digest=(D.CS.EXPECTED_PARENT_DIGEST if i == 2 else "d" * 64))
         self.checkpoint_path = f"/tmp/ckpt{i}"
+        self.result_spec_hash = "s" * 64
 
     def as_dict(self):
         return {"index": self.index}
 
 
 def _capture_root(monkeypatch, driver):
-    """Run the real stage, capture what the root loader was asked for."""
+    """Run the real stage, capture what the root loader was asked for.
+
+    Both materializers are faked, because stage D uses the whole-path one and
+    stage F uses the verified-suffix one — the point of these cases is the
+    root_loader closure and the device it names, which is real either way.
+    """
     from aadistill.autoinit.adapters.qwen3 import QWEN3_ADAPTER
 
     seen: dict = {}
@@ -173,10 +182,24 @@ def _capture_root(monkeypatch, driver):
     def fake_materialize(spec, *, adapter, root_loader, workdir, repo_root,
                          on_step=None, **kw):
         seen["spec_device"] = spec.device
+        seen["deadline"] = kw.get("deadline")
         root_loader()                       # the closure under test
         return [_FakeStep(i) for i in range(4)]
 
+    def fake_suffix(spec, *, adapter, root_loader, workdir, verified,
+                    repo_root=".", on_step=None, **kw):
+        seen["spec_device"] = spec.device
+        seen["deadline"] = kw.get("deadline")
+        seen["start_index"] = verified.start_index
+        seen["expected_path_hash"] = verified.expected_path_hash
+        seen["prefix_reference_steps"] = tuple(verified.prefix_reference_steps)
+        seen["expected_suffix_steps"] = tuple(verified.expected_suffix_steps)
+        seen["expected_parent_digest"] = verified.expected_parent_artifact_digest
+        root_loader()
+        return [_FakeStep(verified.start_index)], {"premise": "faked"}
+
     monkeypatch.setattr(D, "materialize_fixed_path", fake_materialize)
+    monkeypatch.setattr(D, "materialize_fixed_path_suffix", fake_suffix)
     monkeypatch.setattr(D, "write_replay_record",
                         lambda *a, **k: Path("/dev/null"))
     return seen
@@ -216,6 +239,172 @@ def test_stage_f_loads_its_root_on_its_own_arm_device(
 
     assert seen["device"] == driver.arms["treatment"].device
     assert seen["path"] == driver.parent.checkpoint_path
+
+
+def test_stage_f_asks_for_the_frozen_suffix_and_nothing_else(
+        harness, monkeypatch, treatment_registered):
+    """What the driver ASSERTS to the executor, checked at the seam.
+
+    The refusals live in `fixed_path`; this is the other half — that the driver
+    hands it the frozen path hash, the frozen parent digest, the incumbent's own
+    prefix objects, and a start index derived from the prefix length rather than
+    written as `3`.
+    """
+    driver = D.C1Driver(_args())
+    driver.teacher_path = str(harness.tmp / "teacher")
+    _capture_root(monkeypatch, driver)
+    driver.stage_de()
+    driver.parent = _FakeStep(2)
+    driver.completed = [D.CS.stage(x).stage_id for x in ("B", "C", "D", "E")]
+
+    seen = _capture_root(monkeypatch, driver)
+    driver.stage_f()
+
+    treatment = driver.arms["treatment"]
+    incumbent = driver.arms["incumbent"]
+    assert seen["start_index"] == len(D.CS.PREFIX_STEPS) == 3
+    assert seen["expected_path_hash"] == treatment.spec_hash
+    assert seen["expected_parent_digest"] == D.CS.EXPECTED_PARENT_DIGEST
+    assert seen["prefix_reference_steps"] == tuple(incumbent.steps[:3])
+    assert seen["expected_suffix_steps"] == (D.CS.TREATMENT_ATTENTION,)
+    # the full four-step arm, unchanged — not a synthesized one-step spec
+    assert len(treatment.steps) == 4
+
+
+def test_stage_f_writes_a_treatment_record_that_claims_no_replay(
+        harness, monkeypatch, treatment_registered):
+    driver = D.C1Driver(_args())
+    driver.teacher_path = str(harness.tmp / "teacher")
+    _capture_root(monkeypatch, driver)
+    driver.stage_de()
+    driver.parent = _FakeStep(2)
+    driver.completed = [D.CS.stage(x).stage_id for x in ("B", "C", "D", "E")]
+    _capture_root(monkeypatch, driver)
+
+    driver.stage_f()
+
+    rec = json.loads((D.AUDIT / "c1_treatment_record.json").read_text())
+    assert rec["schema"] == "aadistill.autoinit.fixed_path_suffix_execution/v1"
+    assert rec["is_replay"] is False
+    assert rec["output_digest_was_pre_pinned"] is False
+    assert rec["executed_step_indices"] == [3]
+    assert rec["path_hash"] == driver.arms["treatment"].spec_hash
+    assert "NONE" in rec["output_digest_claim"]
+
+    ids = json.loads((D.AUDIT / "c1_arm_identities.json").read_text())
+    assert ids["treatment_executed_step_indices"] == [3]
+    assert ids["treatment_output_digest_was_pre_pinned"] is False
+    assert ids["treatment_record"].endswith("c1_treatment_record.json")
+
+
+def test_stage_f_refuses_to_report_success_if_more_than_the_suffix_ran(
+        harness, monkeypatch, treatment_registered):
+    """The driver re-checks the executor's answer instead of assuming it."""
+    driver = D.C1Driver(_args())
+    driver.teacher_path = str(harness.tmp / "teacher")
+    _capture_root(monkeypatch, driver)
+    driver.stage_de()
+    driver.parent = _FakeStep(2)
+    driver.completed = [D.CS.stage(x).stage_id for x in ("B", "C", "D", "E")]
+    _capture_root(monkeypatch, driver)
+
+    monkeypatch.setattr(
+        D, "materialize_fixed_path_suffix",
+        lambda spec, **kw: ([_FakeStep(2), _FakeStep(3)], {"premise": "faked"}))
+    with pytest.raises(D.C1DriverError, match="executed steps"):
+        driver.stage_f()
+
+
+# --- the deadline the fixed path never had ----------------------------------
+#
+# `OperatorContext.deadline` has existed for a long time and
+# `depth.causal_kl_greedy_v1` checks it once per candidate — it was added because
+# that operator ran 10.78 h against a 3.0 h budget. The SEARCH passes one. The
+# fixed path did not, so on the C1 path the field was always None and the check
+# was a no-op.
+
+def test_the_operator_deadline_is_the_sessions_existing_budget(harness):
+    """No invented timeout: the same two numbers every other decision uses."""
+    driver = D.C1Driver(_args())
+    d = driver.operator_deadline("stage D/E replay")
+
+    assert d.remaining_usd() == pytest.approx(
+        driver.a.soft_stop_usd - driver.usd(), abs=1e-6)
+    assert not d.expired()
+    d.check("before the first candidate")          # must not raise
+    assert d.checks == 1
+    assert d.as_dict()["soft_stop_usd"] == round(driver.a.soft_stop_usd, 4)
+
+    # DERIVED, not snapshotted: move the budget and the deadline moves with it.
+    # A timeout of its own would not.
+    before = d.remaining_usd()
+    driver.a.soft_stop_usd += 5.0
+    assert d.remaining_usd() == pytest.approx(before + 5.0, abs=1e-6)
+
+
+def test_a_fake_clock_past_the_soft_stop_stops_the_operator(harness, monkeypatch):
+    """Fake clock, so the assertion is about the rule and not about timing."""
+    driver = D.C1Driver(_args())
+    d = driver.operator_deadline("stage D/E replay")
+    monkeypatch.setattr(driver, "usd", lambda: driver.a.soft_stop_usd + 0.01)
+
+    assert d.expired()
+    with pytest.raises(D.C1DriverError, match="soft-stop budget is spent"):
+        d.check("candidate 7 of 32")
+    assert d.fired_at == "candidate 7 of 32"
+    assert d.as_dict()["expired"] is True
+
+
+def test_an_expired_deadline_is_C1_FAILED_and_never_a_replay_mismatch(
+        harness, monkeypatch):
+    """The classification, end to end through the REAL `run()`.
+
+    A budget stop compares no digest, so calling it a replay mismatch would put
+    a false claim about the frozen path's reproducibility into the record — the
+    same error the launcher's canned failure note used to make in prose.
+    """
+    _fake_hardware(monkeypatch, harness)
+
+    def expired_stage_de(self):
+        D.mark("STAGE_START:D")
+        self.usd = lambda: self.a.soft_stop_usd + 1.0      # the fake clock
+        self.operator_deadline("stage D/E replay").check("candidate 7 of 32")
+    monkeypatch.setattr(D.C1Driver, "stage_de", expired_stage_de)
+
+    driver = D.C1Driver(_args())
+    code = driver.run()
+
+    assert code == 40
+    status = D.STATUS.read_text()
+    assert "MARKER:C1_FAILED" in status
+    assert "C1_REPLAY_MISMATCH" not in status
+    assert not (D.AUDIT / "c1_replay_record.json").exists()
+    assert not (D.AUDIT / "c1_treatment_record.json").exists()
+    assert driver.ev["training_started"] is False
+    assert driver.ev["outcome"] == "C1_FAILED"
+    stage = driver.ev["stages"]["D"]
+    assert stage["passed"] is False
+    assert "soft-stop budget is spent" in stage["reason"]
+    # The message DENIES a mismatch rather than merely omitting the word, which
+    # is what a reader of the failure tail actually needs to see.
+    assert "not a replay mismatch" in stage["reason"]
+    assert "mismatch_record" not in stage
+
+
+def test_both_materializers_are_given_the_deadline(harness, monkeypatch,
+                                                   treatment_registered):
+    driver = D.C1Driver(_args())
+    driver.teacher_path = str(harness.tmp / "teacher")
+
+    seen = _capture_root(monkeypatch, driver)
+    driver.stage_de()
+    assert isinstance(seen["deadline"], D.C1OperatorDeadline)
+
+    driver.parent = _FakeStep(2)
+    driver.completed = [D.CS.stage(x).stage_id for x in ("B", "C", "D", "E")]
+    seen = _capture_root(monkeypatch, driver)
+    driver.stage_f()
+    assert isinstance(seen["deadline"], D.C1OperatorDeadline)
 
 
 def test_no_c1_root_is_loaded_outside_the_adapter():

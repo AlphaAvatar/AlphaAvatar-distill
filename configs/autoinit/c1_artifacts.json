@@ -1,7 +1,7 @@
 {
   "spec": "aadistill.artifact_spec/v1",
   "session": "autoinit_c1",
-  "note": "Success spec for a Phase-C1 run that reached ALL_DONE. Every pattern is a path the STANDALONE C1 driver writes: audit/autoinit_c1, stage3/c1/<probe_id>, eval/c1/<probe_id>. The previous version of this file named audit/autoinit_phase_a, stage3/phase_a and eval/phase_a, because the driver then inherited PhaseADriver and wrote there; that driver has been replaced and those paths no longer exist for C1. Counts: 6 probes = 2 arms x 3 seeds; 42 = 6 x the 7 sets of c1_confirmation_v1, because uncapped_eval writes one <set>.generations.jsonl and one <set>.json per set \u2014 requiring 6 would accept a probe that generated one set out of seven. Entries are ArtifactSpec kwargs; the manifest root is artifacts/.",
+  "note": "Success spec for a Phase-C1 run that reached ALL_DONE. Every pattern is a path the STANDALONE C1 driver writes: audit/autoinit_c1, stage3/c1/<probe_id>, eval/c1/<probe_id>. The previous version of this file named audit/autoinit_phase_a, stage3/phase_a and eval/phase_a, because the driver then inherited PhaseADriver and wrote there; that driver has been replaced and those paths no longer exist for C1. Counts: 6 probes = 2 arms x 3 seeds; 42 = 6 x the 7 sets of c1_confirmation_v1, because uncapped_eval writes one <set>.generations.jsonl and one <set>.json per set \u2014 requiring 6 would accept a probe that generated one set out of seven. Entries are ArtifactSpec kwargs; the manifest root is artifacts/. FULL SUCCESS NEEDS BOTH ARM RECORDS. c1_replay_record.json is the incumbent arm's replay against two frozen digests; c1_treatment_record.json is the treatment arm's verified-suffix execution, whose output digest was never pinned and which is therefore NOT a replay. Requiring only the first would let a session that reached ALL_DONE come home without any record of how the treatment arm was built \u2014 which arm-identities alone does not supply, because it names the output and not the verified prefix it came from.",
   "entries": [
     {
       "artifact_class": "probe_event_stream",
@@ -69,6 +69,13 @@
     {
       "artifact_class": "replay_record",
       "pattern": "audit/autoinit_c1/c1_replay_record.json",
+      "required": true,
+      "lifecycle": "final_required",
+      "min_matches": 1
+    },
+    {
+      "artifact_class": "treatment_record",
+      "pattern": "audit/autoinit_c1/c1_treatment_record.json",
       "required": true,
       "lifecycle": "final_required",
       "min_matches": 1

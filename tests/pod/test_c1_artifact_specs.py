@@ -175,9 +175,18 @@ def _replay_tree(root: Path) -> None:
 
 
 def _success_tree(root: Path) -> None:
-    """What exists after ALL_DONE: the replay evidence plus all six probes."""
+    """What exists after ALL_DONE: BOTH arm records plus all six probes.
+
+    Two records, not one. The incumbent arm replays against two frozen digests
+    and writes `c1_replay_record.json`; the treatment arm executes a verified
+    suffix whose output was never pinned and writes `c1_treatment_record.json`.
+    """
     _replay_tree(root)
     audit = root / "audit/autoinit_c1"
+    _write(audit / "c1_treatment_record.json", json.dumps(
+        {"schema": "aadistill.autoinit.fixed_path_suffix_execution/v1",
+         "is_replay": False, "output_digest_was_pre_pinned": False,
+         "executed_step_indices": [3], "steps": []}))
     _write(audit / "c1_arm_identities.json", "{}")
     _write(audit / "c1_decision.json", "{}")
     _write(audit / "c1_probe_results.json", "{}")
@@ -234,6 +243,40 @@ def test_full_success_round_trips_through_the_real_collector(tmp_path):
     n_gen = sum(1 for e in manifest["entries"]
                 if e["artifact_class"] == "generations")
     assert n_gen == len(PROBES) * len(SETS) == 42
+    classes_by_name = {e["artifact_class"] for e in manifest["entries"]}
+    assert {"replay_record", "treatment_record"} <= classes_by_name, (
+        "a full success must carry BOTH arm records")
+
+
+def test_a_success_without_the_treatment_record_is_refused(tmp_path):
+    """ALL_DONE is not enough: how the treatment arm was built must come home.
+
+    Before the verified-suffix repair the treatment arm produced no record of
+    its own at all — only `c1_arm_identities.json`, which names the OUTPUT and
+    says nothing about the parent it was built from or which steps ran. A
+    session could therefore reach ALL_DONE, be torn down, and leave no evidence
+    that the treatment arm shared the incumbent's verified prefix.
+    """
+    root = tmp_path / "artifacts"
+    _success_tree(root)
+    (root / "audit/autoinit_c1/c1_treatment_record.json").unlink()
+    rc, out = _collect(tmp_path, root, SUCCESS)
+    assert rc != 0
+    assert "treatment_record" in out
+
+
+def test_a_stage_f_failure_still_lets_the_incumbent_evidence_home(tmp_path):
+    """Stage D writes its record BEFORE stage F runs, so a stage-F failure must
+    not cost it — and must not demand a treatment record that never existed."""
+    root = tmp_path / "artifacts"
+    _replay_tree(root)                     # incumbent replay present, no stage F
+    assert not (root / "audit/autoinit_c1/c1_treatment_record.json").exists()
+    rc, out = _collect(tmp_path, root, FAILED)
+    assert rc == 0, out
+    manifest = json.loads((tmp_path / "manifest.json").read_text())
+    classes = {e["artifact_class"] for e in manifest["entries"]}
+    assert "replay_record" in classes
+    assert "treatment_record" not in classes
 
 
 def test_replay_mismatch_round_trips_through_the_failed_spec(tmp_path):

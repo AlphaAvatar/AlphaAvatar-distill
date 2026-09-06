@@ -74,15 +74,17 @@ class FixedPathRootDeviceMismatch(FixedPathError):
     entire parent replay would have run on the host CPU inside a paid GPU hour.
     """
 
-    def __init__(self, declared: str, actual: str):
+    def __init__(self, declared: str, actual: str,
+                 evidence: Mapping[str, Any] | None = None):
         self.declared = declared
         self.actual = actual
+        self.evidence = dict(evidence or {})
         super().__init__(
             f"the root model's weights are on {actual}, but this path declares "
             f"device {declared!r}. STOP: every operator reads the weights' real "
             "device, so the path would execute somewhere other than where it is "
             "specified to. Load the root on the declared device — do not relax "
-            "the declaration to match a misplaced model.")
+            f"the declaration to match a misplaced model. evidence={self.evidence}")
 
 
 class FixedPathDigestMismatch(FixedPathError):
@@ -254,22 +256,94 @@ def _selection_evidence(artifacts: Mapping[str, Any]) -> dict[str, Any]:
     return {k: artifacts[k] for k in SELECTION_ARTIFACTS if k in artifacts}
 
 
-def require_root_on_declared_device(model: Any, spec: FixedPathSpec) -> str:
-    """Refuse a root whose weights are not on `spec.device`. Returns the device.
+def verify_root_placement(model: Any, device: str) -> dict[str, Any]:
+    """Every parameter and every buffer, not just the first one. Returns evidence.
 
-    Read from `model.parameters()`, never from `ctx.device`: the context field is
-    the declaration, and a declaration cannot be evidence about itself. An
-    unindexed declaration (`"cuda"`) accepts any ordinal, because that is exactly
-    what `Tensor.to("cuda")` means; an indexed one must match exactly.
+    `model_device()` returns `next(model.parameters()).device` and stops there.
+    That answers "where did this model start" and not "where is this model",
+    which are different questions the moment anything is partially moved — a
+    `device_map` shard, a buffer left behind by a hand-written `.to()` on
+    submodules, or a `meta` tensor from a skipped materialization. Each of those
+    presents as a working model whose first parameter is in the right place, and
+    each would make an operator read or write on the wrong device mid-path.
+
+    Four refusals, all fail-closed:
+
+    * a **meta** parameter or buffer — no storage at all, so any read is a lie;
+    * **mixed types**, e.g. some CPU and some CUDA;
+    * **mixed CUDA ordinals**, even when every tensor is on a GPU;
+    * the **wrong ordinal** when the declaration names one (`"cuda:1"`).
+
+    An unindexed `"cuda"` accepts any single ordinal — that is what
+    `Tensor.to("cuda")` means — but still requires exactly one.
+
+    Deliberately does **not** move anything. Silently relocating a misplaced
+    model would destroy the evidence that it was misplaced, and the caller
+    declared a device precisely so that it would be honoured rather than
+    approximated.
     """
     import torch
 
-    declared = torch.device(spec.device)
-    actual = model_device(model)
+    declared = torch.device(device)
+    named: list[tuple[str, Any]] = []
+    n_params = 0
+    for name, t in model.named_parameters():
+        named.append((f"parameter {name}", t))
+        n_params += 1
+    n_buffers = 0
+    for name, t in model.named_buffers():
+        if t is None:                      # an unset optional buffer holds nothing
+            continue
+        named.append((f"buffer {name}", t))
+        n_buffers += 1
+
+    if not named:
+        raise FixedPathRootDeviceMismatch(
+            device, "<no tensors>",
+            {"reason": "the model exposes no parameters or buffers, so its "
+                       "placement cannot be verified at all",
+             "declared": device, "n_parameters": 0, "n_buffers": 0})
+
+    meta = [n for n, t in named if t.device.type == "meta"]
+    if meta:
+        raise FixedPathRootDeviceMismatch(
+            device, "meta",
+            {"reason": "meta tensors have no storage; this model was never "
+                       "materialized", "declared": device,
+             "meta_tensors": meta[:20], "n_meta": len(meta),
+             "n_parameters": n_params, "n_buffers": n_buffers})
+
+    seen: dict[str, list[str]] = {}
+    for n, t in named:
+        seen.setdefault(str(t.device), []).append(n)
+    places = sorted(seen)
+
+    evidence = {"declared": device, "n_parameters": n_params,
+                "n_buffers": n_buffers, "devices": places,
+                "n_tensors_checked": len(named)}
+
+    if len(places) > 1:
+        raise FixedPathRootDeviceMismatch(
+            device, "+".join(places),
+            {**evidence,
+             "reason": "the model's tensors are split across devices",
+             "examples": {p: seen[p][:5] for p in places}})
+
+    actual = torch.device(places[0])
     if actual.type != declared.type or (
             declared.index is not None and actual.index != declared.index):
-        raise FixedPathRootDeviceMismatch(spec.device, str(actual))
-    return str(actual)
+        raise FixedPathRootDeviceMismatch(device, places[0], evidence)
+
+    return {**evidence, "resolved": places[0]}
+
+
+def require_root_on_declared_device(model: Any, spec: FixedPathSpec) -> str:
+    """Refuse a root whose weights are not on `spec.device`. Returns the device.
+
+    Read from the tensors, never from `ctx.device`: the context field is the
+    declaration, and a declaration cannot be evidence about itself.
+    """
+    return verify_root_placement(model, spec.device)["resolved"]
 
 
 def materialize_fixed_path(
@@ -282,6 +356,7 @@ def materialize_fixed_path(
     stats_cache: StatsCache | None = None,
     calibration_items: Mapping[str, Sequence[Any]] | None = None,
     on_step: Callable[[StepResult], None] | None = None,
+    deadline: Any = None,
 ) -> list[StepResult]:
     """Apply every step in order, identifying and gating each intermediate.
 
@@ -294,6 +369,48 @@ def materialize_fixed_path(
     profile-resolved one arrive at DEPTH, FFN, WIDTH and ATTENTION in exactly one
     shape. Supplying items skips the resolver's content hash — it does not skip
     the item contract.
+
+    `deadline` is handed straight to `OperatorContext.deadline`. It is the
+    caller's budget object, not one this module invents: the search has passed
+    one for a long time and the fixed path did not, so an operator whose work is
+    measured in hours (`depth.causal_kl_greedy_v1` checks it per candidate) had
+    nothing to consult here.
+    """
+    model = root_loader()
+    # Before the first operator, and from the tensors rather than the
+    # declaration. `root_loader` is the caller's, so this is the only step whose
+    # placement the executor did not perform itself.
+    require_root_on_declared_device(model, spec)
+    return _run_steps(
+        spec, adapter=adapter, model=model, indices=range(len(spec.steps)),
+        parent_spec=adapter.spec_of(model), parent_digest=None,
+        workdir=workdir, repo_root=repo_root, stats_cache=stats_cache,
+        calibration_items=calibration_items, on_step=on_step,
+        deadline=deadline)
+
+
+def _run_steps(
+    spec: FixedPathSpec,
+    *,
+    adapter: ArchitectureAdapter,
+    model: Any,
+    indices: Sequence[int] | range,
+    parent_spec: ArchSpec,
+    parent_digest: str | None,
+    workdir: str | Path,
+    repo_root: str | Path,
+    stats_cache: StatsCache | None,
+    calibration_items: Mapping[str, Sequence[Any]] | None,
+    on_step: Callable[[StepResult], None] | None,
+    deadline: Any,
+) -> list[StepResult]:
+    """The step loop, walked by ORIGINAL index.
+
+    Shared by the whole-path and verified-suffix entry points so there is one
+    implementation of "apply a step of this spec". `indices` are indices into
+    `spec.steps`; a `StepResult.index` and its checkpoint directory are always
+    the step's index in the FULL spec, never its position in the slice, because
+    the identity of a step is where it sits on the frozen path.
     """
     import time
 
@@ -304,17 +421,10 @@ def materialize_fixed_path(
     resolved: dict[str, Sequence[Any]] = {
         key: prepare_calibration_items(items, profile_id=key)
         for key, items in dict(calibration_items or {}).items()}
-
-    model = root_loader()
-    # Before the first operator, and from the weights rather than the
-    # declaration. `root_loader` is the caller's, so this is the only step whose
-    # placement the executor did not perform itself.
-    require_root_on_declared_device(model, spec)
-    parent_spec = adapter.spec_of(model)
-    parent_digest: str | None = None
     results: list[StepResult] = []
 
-    for i, step in enumerate(spec.steps):
+    for i in indices:
+        step = spec.steps[i]
         impl = get_implementation(step.impl_id)
         # One place decides what an operator is actually invoked with, exactly as
         # the search does: a CalibrationNeed.NONE implementation gets the
@@ -366,6 +476,7 @@ def materialize_fixed_path(
                     numerical_config={
                         "device": spec.device,
                         "accumulation": spec.stats_spec.accumulation_dtype})),
+            deadline=deadline,
         )
 
         started = time.time()
@@ -419,6 +530,196 @@ def materialize_fixed_path(
     return results
 
 
+class FixedPathSuffixRefused(FixedPathError):
+    """A verified-suffix execution was refused before any operator ran."""
+
+    def __init__(self, reason: str, evidence: Mapping[str, Any]):
+        self.reason = reason
+        self.evidence = dict(evidence)
+        super().__init__(
+            f"verified-suffix execution refused: {reason}. STOP: nothing was "
+            "executed. The suffix entry point exists to skip a prefix that has "
+            "ALREADY been verified, so an unverified premise is not a slow path "
+            f"to fall back to — it is the whole risk. evidence={self.evidence}")
+
+
+@dataclass(frozen=True)
+class VerifiedSuffix:
+    """What the caller asserts, so this module can refuse without knowing C1.
+
+    Every expectation is supplied by the caller. No digest, path hash, operator
+    id or step index of any particular experiment appears in this file — the
+    C1 session owns those constants and hands them in, exactly as it hands in
+    the spec itself.
+    """
+
+    #: First ORIGINAL index to execute. The prefix below it is taken as given.
+    start_index: int
+    #: The StepResult that produced the parent, from the verified prefix run.
+    parent: StepResult
+    #: The frozen artifact digest the parent was pinned to.
+    expected_parent_artifact_digest: str
+    #: The frozen hash of the FULL path this suffix belongs to.
+    expected_path_hash: str
+    #: The prefix as executed elsewhere — normally the other arm's steps 0..n-1.
+    prefix_reference_steps: tuple[FixedPathStep, ...]
+    #: `(impl_id, profile_id)` for each step from `start_index` onward.
+    expected_suffix_steps: tuple[tuple[str, str], ...]
+
+    def as_dict(self) -> dict[str, Any]:
+        return {
+            "start_index": self.start_index,
+            "parent_step_index": self.parent.index,
+            "parent_checkpoint": self.parent.checkpoint_path,
+            "parent_artifact_digest": self.parent.identity.artifact_digest,
+            "parent_result_spec_hash": self.parent.result_spec_hash,
+            "expected_parent_artifact_digest": self.expected_parent_artifact_digest,
+            "expected_path_hash": self.expected_path_hash,
+            "prefix_reference_steps": [s.as_dict()
+                                       for s in self.prefix_reference_steps],
+            "expected_suffix_steps": [list(s) for s in self.expected_suffix_steps],
+        }
+
+
+def verify_suffix_premise(spec: FixedPathSpec, vs: VerifiedSuffix) -> dict[str, Any]:
+    """Every check that needs no model and no disk. Runs first, and cheaply.
+
+    Ordered so the most structural failure is reported rather than a downstream
+    symptom of it: a path that is not the frozen path makes every other question
+    meaningless.
+    """
+    ev: dict[str, Any] = {"path_id": spec.path_id, **vs.as_dict()}
+
+    if spec.spec_hash != vs.expected_path_hash:
+        raise FixedPathSuffixRefused(
+            "the spec is not the frozen path it claims to be",
+            {**ev, "actual_path_hash": spec.spec_hash})
+
+    n = len(spec.steps)
+    if not 0 < vs.start_index < n:
+        raise FixedPathSuffixRefused(
+            f"start_index {vs.start_index} is not a proper suffix of {n} steps",
+            ev)
+
+    if vs.parent.index != vs.start_index - 1:
+        raise FixedPathSuffixRefused(
+            f"the supplied parent is step {vs.parent.index}, but a suffix "
+            f"starting at {vs.start_index} must continue from step "
+            f"{vs.start_index - 1}", ev)
+
+    prefix = tuple(spec.steps[:vs.start_index])
+    if prefix != tuple(vs.prefix_reference_steps):
+        raise FixedPathSuffixRefused(
+            "this path's prefix is not the prefix that was actually executed, "
+            "so the parent on disk is not this path's parent",
+            {**ev, "this_prefix": [s.as_dict() for s in prefix]})
+
+    actual_suffix = tuple((s.impl_id, s.profile_id)
+                          for s in spec.steps[vs.start_index:])
+    if actual_suffix != tuple(tuple(s) for s in vs.expected_suffix_steps):
+        raise FixedPathSuffixRefused(
+            "the steps to execute are not the frozen ones",
+            {**ev, "actual_suffix_steps": [list(s) for s in actual_suffix]})
+
+    if vs.parent.identity.artifact_digest != vs.expected_parent_artifact_digest:
+        raise FixedPathSuffixRefused(
+            "the parent's realized artifact digest is not the frozen one", ev)
+    if vs.parent.digest_expected != vs.expected_parent_artifact_digest:
+        raise FixedPathSuffixRefused(
+            "the parent step was not pinned to the frozen parent digest, so it "
+            "was never gated against it", ev)
+    if vs.parent.digest_matches is not True:
+        raise FixedPathSuffixRefused(
+            "the parent step did not record a digest MATCH; an unverified "
+            "parent cannot be a verified prefix", ev)
+
+    return {**ev, "premise": "verified", "actual_path_hash": spec.spec_hash}
+
+
+def materialize_fixed_path_suffix(
+    spec: FixedPathSpec,
+    *,
+    adapter: ArchitectureAdapter,
+    root_loader: Callable[[], Any],
+    workdir: str | Path,
+    verified: VerifiedSuffix,
+    repo_root: str | Path = ".",
+    stats_cache: StatsCache | None = None,
+    calibration_items: Mapping[str, Sequence[Any]] | None = None,
+    on_step: Callable[[StepResult], None] | None = None,
+    deadline: Any = None,
+) -> tuple[list[StepResult], dict[str, Any]]:
+    """Execute the tail of a frozen path from an ALREADY-VERIFIED parent.
+
+    Two arms that share a prefix should not both compute it. The incumbent arm's
+    replay already produced, gated and wrote the shared parent; the treatment arm
+    differs only in its last step, so recomputing DEPTH, FFN and WIDTH would burn
+    GPU hours to reproduce a checkpoint that is sitting on disk — and, worse, the
+    first of those operators is **not applicable** to it, because that parent is
+    already at the target depth. Handing the full spec and the step-2 parent to
+    `materialize_fixed_path` therefore does not merely waste time; it raises.
+
+    The alternative that must NOT be taken is building a one-step
+    `FixedPathSpec` for the tail. That spec would have a different `path_hash`,
+    and the arm's identity is the full frozen path — a result bound to a
+    synthesized one-step path is a result for a different experiment. So the full
+    spec is passed unchanged, its hash is checked against the frozen one, and
+    only `indices` narrows. `StepResult.index` and the checkpoint directory keep
+    their ORIGINAL numbering.
+
+    Everything the caller asserts is checked before a single operator runs, in
+    two rounds: `verify_suffix_premise` for the structural claims, then the
+    physical ones — the checkpoint re-identified from disk, the loaded model's
+    placement, and its ArchSpec against the parent's recorded `result_spec_hash`.
+
+    Returns `(results, evidence)`; the evidence is what the caller writes into
+    the record, so that a reader can check the premise without rerunning it.
+    """
+    premise = verify_suffix_premise(spec, verified)
+
+    model = root_loader()
+    placement = verify_root_placement(model, spec.device)
+
+    parent_spec = adapter.spec_of(model)
+    if parent_spec.spec_hash != verified.parent.result_spec_hash:
+        raise FixedPathSuffixRefused(
+            "the loaded parent's architecture is not the one the verified step "
+            "recorded",
+            {**premise, "loaded_spec_hash": parent_spec.spec_hash,
+             "loaded_spec": parent_spec.describe()})
+
+    # Re-identified from the FILES, not trusted from the StepResult: the record
+    # says what was written, and this asks what is there now.
+    reident = identify_checkpoint(
+        verified.parent.checkpoint_path, adapter=adapter, spec=parent_spec,
+        num_parameters=adapter.param_count(parent_spec))
+    if reident.artifact_digest != verified.expected_parent_artifact_digest:
+        raise FixedPathSuffixRefused(
+            "the parent checkpoint on disk no longer identifies to the frozen "
+            "parent digest",
+            {**premise, "reidentified_artifact_digest": reident.artifact_digest})
+
+    results = _run_steps(
+        spec, adapter=adapter, model=model,
+        indices=range(verified.start_index, len(spec.steps)),
+        parent_spec=parent_spec,
+        parent_digest=reident.artifact_digest,
+        workdir=workdir, repo_root=repo_root, stats_cache=stats_cache,
+        calibration_items=calibration_items, on_step=on_step,
+        deadline=deadline)
+
+    evidence = {
+        **premise,
+        "executed_step_indices": list(range(verified.start_index, len(spec.steps))),
+        "prefix_step_indices_not_executed": list(range(verified.start_index)),
+        "root_placement": placement,
+        "parent_reidentified_artifact_digest": reident.artifact_digest,
+        "parent_reidentified_from": str(verified.parent.checkpoint_path),
+        "loaded_parent_spec_hash": parent_spec.spec_hash,
+    }
+    return results, evidence
+
+
 def write_replay_record(spec: FixedPathSpec, results: Sequence[StepResult],
                         path: str | Path, *, runtime: Mapping[str, Any],
                         root_binding: Mapping[str, Any] | None = None) -> Path:
@@ -438,6 +739,52 @@ def write_replay_record(spec: FixedPathSpec, results: Sequence[StepResult],
         "steps": [r.as_dict() for r in results],
         "all_pinned_digests_matched": all(
             r.digest_matches for r in results if r.digest_expected is not None),
+        "n_pinned": sum(1 for r in results if r.digest_expected is not None),
+    }
+    p.write_text(json.dumps(record, indent=1) + "\n")
+    return p
+
+
+def write_suffix_execution_record(
+    spec: FixedPathSpec,
+    results: Sequence[StepResult],
+    path: str | Path,
+    *,
+    runtime: Mapping[str, Any],
+    suffix_evidence: Mapping[str, Any],
+    calibration: Mapping[str, Any] | None = None,
+) -> Path:
+    """The auditable record of a verified-suffix execution.
+
+    Deliberately a DIFFERENT schema from the replay record, and it says so in
+    two places. A replay reproduces a checkpoint whose digest was frozen in
+    advance, and "matched" is the finding; this executes a step whose output has
+    never existed before, so there is nothing to match and claiming otherwise
+    would manufacture a reproducibility result. `output_digest_was_pre_pinned`
+    is written as an explicit `false` rather than left absent, because an absent
+    field reads as an oversight and a present `false` reads as a decision.
+    """
+    p = Path(path)
+    p.parent.mkdir(parents=True, exist_ok=True)
+    record = {
+        "schema": "aadistill.autoinit.fixed_path_suffix_execution/v1",
+        "_what_this_is": (
+            "one arm's tail, executed from a parent that ANOTHER run produced "
+            "and gated. It is not a replay: the executed step's output digest "
+            "was never pinned, so this record reports an identity, not a match."),
+        "path": spec.as_dict(),
+        "path_hash": spec.spec_hash,
+        "is_replay": False,
+        "output_digest_was_pre_pinned": False,
+        "output_digest_claim": (
+            "NONE. No expected digest exists for this output and none is "
+            "asserted. Do not read this record as a replay match."),
+        "verified_prefix": dict(suffix_evidence),
+        "calibration": dict(calibration or {}),
+        "runtime": dict(runtime),
+        "steps": [r.as_dict() for r in results],
+        "executed_step_indices": [r.index for r in results],
+        "output": results[-1].as_dict() if results else None,
         "n_pinned": sum(1 for r in results if r.digest_expected is not None),
     }
     p.write_text(json.dumps(record, indent=1) + "\n")

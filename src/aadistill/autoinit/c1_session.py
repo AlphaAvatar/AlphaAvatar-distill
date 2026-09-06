@@ -78,6 +78,15 @@ INCUMBENT_ATTENTION = ("attention.weight_proxy_v0", "calib.none@v1")
 TREATMENT_ATTENTION = ("attention.activation_importance_v1",
                        "calib.domain_balanced@v1")
 
+#: Where the treatment arm stops sharing the incumbent's work.
+#:
+#: DERIVED from `PREFIX_STEPS`, never written as `3`. The two arms are built by
+#: appending one step to this exact prefix, so the first index at which they can
+#: differ is the prefix's length by construction — and a literal would silently
+#: become wrong the moment the prefix changed, which is precisely the kind of
+#: drift the arms are built by `replace_tail` to prevent.
+TREATMENT_SUFFIX_START_INDEX = len(PREFIX_STEPS)
+
 #: The search seed the Phase-B run used. Every operator on this path declares
 #: `requires_seed=False` and `ChildBuilder` overwrites every parameter, so it
 #: cannot affect the output — it is carried so the FixedPathSpec hash describes

@@ -3,7 +3,7 @@
   "session": "autoinit_c1_failed",
   "note": "Reduced spec for a Phase-C1 run that did not reach ALL_DONE. Same manifest root and same C1 paths as the success spec; only the minimums differ.",
   "limitation": "ONE STATIC SPEC CANNOT DISTINGUISH THE FAILURE MODES. ArtifactSpec has no conditional -- `required` and `min_matches` are constants build_manifest evaluates against the filesystem with no knowledge of how far the session got -- and session_runner selects between exactly two spec files on one bit. The required set below is therefore the INTERSECTION over every terminal state that reaches collection, which is small by arithmetic, not by preference. c1_replay_record.json is the PRODUCT of a C1_REPLAY_MISMATCH and is exactly what must come home in that case, but it does not exist if the run died at stage B, so requiring it would block teardown on a pod that correctly never wrote it. THE DRIVER CLOSES THAT HOLE INSTEAD: C1Driver.replay_mismatch writes the record, reads it back, and refuses to emit the marker if it does not parse -- so the enforcement lives where the failure mode is known, without widening shared ArtifactPolicy to a third spec for five committed launchers.",
-  "preserved_when_present": "the replay-mismatch record and every intermediate identity, selection and diagnostic it references (inline in its `steps` and `steps_observed`); the runtime identity (inline in the replay record, the arm identities and the engine probe); the session evidence carrying training_started, probes_trained, probes_evaluated and decision_ran; the device-handoff record; and every event stream that exists, including a partial one.",
+  "preserved_when_present": "the incumbent replay record (which stage D writes BEFORE stage F runs, so a stage-F failure must never cost it), the treatment suffix-execution record when stage F got far enough to write one, the replay-mismatch record and every intermediate identity, selection and diagnostic it references (inline in its `steps` and `steps_observed`); the runtime identity (inline in the replay record, the arm identities and the engine probe); the session evidence carrying training_started, probes_trained, probes_evaluated and decision_ran; the device-handoff record; and every event stream that exists, including a partial one.",
   "entries": [
     {
       "artifact_class": "session_evidence",
@@ -15,6 +15,13 @@
     {
       "artifact_class": "replay_record",
       "pattern": "audit/autoinit_c1/c1_replay_record.json",
+      "required": false,
+      "lifecycle": "final_required",
+      "min_matches": 0
+    },
+    {
+      "artifact_class": "treatment_record",
+      "pattern": "audit/autoinit_c1/c1_treatment_record.json",
       "required": false,
       "lifecycle": "final_required",
       "min_matches": 0

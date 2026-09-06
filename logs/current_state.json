@@ -1,6 +1,6 @@
 {
  "schema": "aadistill.current_state/v2",
- "generated_utc": "2026-09-07T00:00:00Z",
+ "generated_utc": "2026-09-07T02:00:00Z",
  "_contract": "Minimal machine-readable CURRENT snapshot: live facts only. History: logs/decisions.md. Human view: logs/STATE.md. Ownership: logs/CATALOG.md.",
  "baseline_commit": "logs/c1_pod_environment_verification.json:swept_base_commit",
  "baseline_commit_meaning": "LAST TESTED IMPLEMENTATION is OWNED by the readiness record's swept_base_commit and deliberately not duplicated here. This snapshot cannot name a commit that does not exist until after it is written, and gate 12 now forbids editing state after the sweep -- so a copy here could only ever go stale. It did: 4f85ecda vs the record's 0457bab.",
@@ -89,7 +89,7 @@
   "phase_a": "COMPLETE / FROZEN",
   "phase_b": "COMPLETE / RESOLVED / FROZEN",
   "phase_c0": "COMPLETE / APPROVED / FROZEN",
-  "phase_c1": "IMPLEMENTED / REPRICED / FOUR LAUNCH ATTEMPTS / NEVER MEASURED / NOT AUTHORIZED",
+  "phase_c1": "IMPLEMENTED / REPRICED / NINE LABELS, EIGHT PAID / NEVER MEASURED / NOT CURRENTLY AUTHORIZED",
   "phase_c2": "NOT STARTED",
   "formal_recovery_evidence": "NONE"
  },
@@ -134,7 +134,7 @@
    "seeds": "1635674081, 1656475568, 696460635 (derived from the C0 digest)",
    "scoring": "c1_confirmation_scoring@v1 77507935; equivalence IDENTICAL over 15 probes. @v2 808080a7 and battery a285d61f untouched.",
    "attempts": "NINE LABELS: 1, 2, 3, 3R, 4, 5, 6, 7, 8 -- EIGHT created a paid provider resource, attempt 3 created none ($0.00). $2.9561 spent, ZERO science. Attempt 8 is the first whose driver ran a stage.",
-   "gates": "12 pre-provider gates. Detail: STATE.md, decisions.md 2026-09-04.",
+   "gates": "12 pre-provider gates. Detail: STATE.md.",
    "blocker": "REPAIRED AT $0, UNMEASURED ON HARDWARE. Attempt 8's KeyError: 'input_ids' is CONFIRMED as a lost preparation boundary -- frozen mixtures store tokens under 'ids', operators read 'input_ids', and the conversion lived only in a Phase-A script; calibration_items.py is now the one boundary. Second defect: stage D's root loaded on CPU under a cuda declaration. NOT a replay mismatch: no digest was compared. See STATE.md.",
    "needs": "scientific review of the $0 repair, then a maintainer decision on a ninth attempt. Grant, authorization and attempt are consumed.",
    "not_built": "no grant; the pre-ATTENTION parent rebuild and the ~8 GB teacher weights need GPU/network and have not run locally",

@@ -73,8 +73,11 @@ from aadistill.autoinit.device_handoff import (  # noqa: E402
     DeviceHandoffError, complete_release, cuda_memory, require_headroom,
     require_released,
 )
+from aadistill.autoinit.calibration import get_profile  # noqa: E402
 from aadistill.autoinit.fixed_path import (  # noqa: E402
-    FixedPathDigestMismatch, materialize_fixed_path, write_replay_record,
+    FixedPathDigestMismatch, VerifiedSuffix, materialize_fixed_path,
+    materialize_fixed_path_suffix, write_replay_record,
+    write_suffix_execution_record,
 )
 from aadistill.autoinit.generation import (  # noqa: E402
     RecoveryEvaluationProtocol, declared_generation_protocol,
@@ -144,6 +147,61 @@ def _trainer_bytes() -> int:
 
 class C1DriverError(RuntimeError):
     """A C1 stage refused. The message is the explanation."""
+
+
+class C1OperatorDeadline:
+    """The session's EXISTING soft-stop budget, exposed as an operator deadline.
+
+    `OperatorContext.deadline` has been a field for a long time and
+    `depth.causal_kl_greedy_v1` already calls `.check()` once per candidate —
+    it was added because that operator ran 10.78 h against a 3.0 h budget with
+    nothing between the affordability check and the cost watchdog consulting a
+    clock. The search passes one. The fixed path did not, so on the C1 path the
+    field was always `None` and the check was a no-op.
+
+    This invents no timeout. It reads `driver.usd()` and
+    `driver.a.soft_stop_usd`, the two numbers the session already prices every
+    other decision against, so the deadline and the spend can never disagree
+    about what is affordable. Deliberately NOT a second clock: a monotonic
+    countdown snapshotted in minutes would drift from `usd()` the moment either
+    is wrong, and there is no existing monotonic session deadline to reuse —
+    `C1Driver.t0` is `time.time()`.
+
+    It raises `C1DriverError`, so an expired budget is an ordinary
+    infrastructure failure that `run()` reports as `C1_FAILED`. It is emphatically
+    not a replay mismatch: no digest is involved, and nothing about the frozen
+    path's reproducibility has been observed.
+    """
+
+    def __init__(self, driver: "C1Driver", what: str):
+        self.driver = driver
+        self.what = what
+        self.checks = 0
+        self.fired_at = ""
+
+    def remaining_usd(self) -> float:
+        return self.driver.a.soft_stop_usd - self.driver.usd()
+
+    def expired(self) -> bool:
+        return self.remaining_usd() <= 0.0
+
+    def check(self, where: str = "") -> None:
+        self.checks += 1
+        if self.expired():
+            self.fired_at = where or self.fired_at or "unspecified"
+            raise C1DriverError(
+                f"the C1 soft-stop budget is spent during {self.what}: "
+                f"${self.driver.usd():.4f} of ${self.driver.a.soft_stop_usd:.4f} "
+                f"at {self.fired_at}. Stopping the operator rather than running "
+                "on to the watchdog's hard terminate. This is an infrastructure "
+                "stop, not a replay mismatch — no digest was compared.")
+
+    def as_dict(self) -> dict:
+        return {"what": self.what, "checks": self.checks,
+                "soft_stop_usd": round(self.driver.a.soft_stop_usd, 4),
+                "spend_usd": round(self.driver.usd(), 4),
+                "remaining_usd": round(self.remaining_usd(), 4),
+                "expired": self.expired(), "fired_at": self.fired_at or None}
 
 
 class C1ReplayMismatch(RuntimeError):
@@ -278,6 +336,10 @@ class C1Driver:
             say(f"AUTHORIZATION: {exc}")
             return False
         return True
+
+    def operator_deadline(self, what: str) -> C1OperatorDeadline:
+        """The existing budget, handed to the operators that can outrun it."""
+        return C1OperatorDeadline(self, what)
 
     def child_env(self) -> dict:
         return {**os.environ, "PYTHONPATH": f"{REPO}/src",
@@ -456,7 +518,8 @@ class C1Driver:
                 self.arms["incumbent"], adapter=QWEN3_ADAPTER,
                 root_loader=lambda: QWEN3_ADAPTER.load(
                     self.teacher_path, dtype="bfloat16", device=root_device),
-                workdir=WORK / "incumbent", repo_root=str(REPO), on_step=on_step)
+                workdir=WORK / "incumbent", repo_root=str(REPO), on_step=on_step,
+                deadline=self.operator_deadline("stage D/E replay"))
         except FixedPathDigestMismatch as exc:
             self.replay_mismatch(exc, runtime, seen)
             raise C1ReplayMismatch(str(exc)) from exc
@@ -513,18 +576,60 @@ class C1Driver:
         # Derived from the arm, not a second literal `"cuda"`: the two agreed,
         # but only because somebody kept them agreeing. Same rule as stage D.
         root_device = self.arms["treatment"].device
-        treatment = materialize_fixed_path(
-            self.arms["treatment"], adapter=QWEN3_ADAPTER,
+        treatment_spec = self.arms["treatment"]
+        start = CS.TREATMENT_SUFFIX_START_INDEX
+
+        #: The treatment arm's tail, from the parent stage D already produced and
+        #: GATED. Not `materialize_fixed_path`: that starts at step 0, and step 0
+        #: is DEPTH, which is not applicable to a parent already at the target
+        #: depth — so passing the full spec and the step-2 parent does not merely
+        #: recompute the shared prefix, it raises
+        #: `num_hidden_layers already at target`. And not a synthesized one-step
+        #: spec either: the arm's identity IS the full frozen four-step path, so a
+        #: result bound to a one-step path would be a result for another
+        #: experiment. The full spec is passed unchanged and only the executed
+        #: index range narrows.
+        verified = VerifiedSuffix(
+            start_index=start,
+            parent=self.parent,
+            expected_parent_artifact_digest=CS.EXPECTED_PARENT_DIGEST,
+            expected_path_hash=treatment_spec.spec_hash,
+            prefix_reference_steps=tuple(self.arms["incumbent"].steps[:start]),
+            expected_suffix_steps=(CS.TREATMENT_ATTENTION,),
+        )
+        treatment, suffix_evidence = materialize_fixed_path_suffix(
+            treatment_spec, adapter=QWEN3_ADAPTER,
             root_loader=lambda: QWEN3_ADAPTER.load(self.parent.checkpoint_path,
                                                    device=root_device),
-            workdir=WORK / "treatment", repo_root=str(REPO))
+            workdir=WORK / "treatment", repo_root=str(REPO), verified=verified,
+            deadline=self.operator_deadline("stage F treatment ATTENTION"))
+        if [r.index for r in treatment] != [start]:
+            raise C1DriverError(
+                f"stage F executed steps {[r.index for r in treatment]}; the "
+                f"treatment suffix is exactly step {start}")
+
+        runtime = self.runtime_identity()
+        record = write_suffix_execution_record(
+            treatment_spec, treatment, AUDIT / "c1_treatment_record.json",
+            runtime=runtime, suffix_evidence=suffix_evidence,
+            calibration={"profile_id": CS.TREATMENT_ATTENTION[1],
+                         "profile_hash": get_profile(
+                             CS.TREATMENT_ATTENTION[1]).profile_hash})
+        say(f"F: treatment {treatment[-1].identity.artifact_digest[:12]} "
+            f"from verified parent {CS.EXPECTED_PARENT_DIGEST[:12]} "
+            f"(step {start} only)")
+
         identities = {
             "schema": "aadistill.autoinit.c1_arm_identities/v1",
             "parent": self.parent.as_dict(),
             "incumbent": self.incumbent_step.as_dict(),
             "treatment": treatment[-1].as_dict(),
             "shared_parent": True,
-            "runtime": self.runtime_identity(),
+            "treatment_executed_step_indices": [r.index for r in treatment],
+            "treatment_record": _rel(record),
+            "treatment_record_sha256": sha256_file(record),
+            "treatment_output_digest_was_pre_pinned": False,
+            "runtime": runtime,
         }
         (AUDIT / "c1_arm_identities.json").write_text(
             json.dumps(identities, indent=1) + "\n")
@@ -534,7 +639,10 @@ class C1Driver:
             "treatment": (treatment[-1].checkpoint_path,
                           treatment[-1].identity.artifact_digest),
         }
-        self.complete("F", **{a: d for a, (_, d) in self.arm_init.items()})
+        self.complete("F", **{a: d for a, (_, d) in self.arm_init.items()},
+                      treatment_record=_rel(record),
+                      treatment_executed_step_indices=[r.index for r in treatment],
+                      treatment_is_a_replay=False)
 
     def release_device(self) -> dict:
         """Hand the card to the trainer, and prove the handoff before training.
