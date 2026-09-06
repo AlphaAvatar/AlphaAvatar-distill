@@ -1,6 +1,6 @@
 {
  "schema": "aadistill.current_state/v2",
- "generated_utc": "2026-09-06T15:10:00Z",
+ "generated_utc": "2026-09-06T16:18:23Z",
  "_contract": "Minimal machine-readable CURRENT snapshot: live facts only. History: logs/decisions.md. Human view: logs/STATE.md. Ownership: logs/CATALOG.md.",
  "baseline_commit": "logs/c1_pod_environment_verification.json:swept_base_commit",
  "baseline_commit_meaning": "LAST TESTED IMPLEMENTATION is OWNED by the readiness record's swept_base_commit and deliberately not duplicated here. This snapshot cannot name a commit that does not exist until after it is written, and gate 12 now forbids editing state after the sweep -- so a copy here could only ever go stale. It did: 4f85ecda vs the record's 0457bab.",
@@ -60,7 +60,7 @@
   "phase_c0_sizing": "logs/phase_c0_sizing_evidence.json -- N=850 scorable selected; P(GO | +0.015) = 0.8379 >= 0.80 at rho=0.15."
  },
  "latest_verification": {
-  "utc": "2026-09-06T13:09:58Z",
+  "utc": "2026-09-06T16:18:23Z",
   "owned_by": "logs/c1_pod_environment_verification.json",
   "owns": "record_kind, swept_base_commit, staging-contract digest, setup environment, counts, both digests and verdict. Read them THERE.",
   "renderer_parity_owned_by": "logs/c1_renderer_parity.json",
@@ -73,8 +73,8 @@
   "the ATTENTION 'search declined to calibrate' reading: WITHDRAWN 2026-09-01"
  ],
  "next_starting_point": {
-  "status": "Attempt-7 postmortem repair complete at $0. No C1 measurement exists; nothing is authorized.",
-  "the_ask": "reviewer decision on the launcher->driver CLI seam repair and its regression.",
+  "status": "Attempt-8 grant preparation. The attempt-7 CLI-seam repair is complete and verified at $0.",
+  "the_ask": "grant, launch-bound sweep, issuance, bundle, 12 gates, then STOP for the paid decision.",
   "budget": "$266.1910 spent of the unchanged $283.7600 cap; $17.5690 uncommitted."
  },
  "read_order": [
@@ -125,17 +125,17 @@
    "authorizes": "nothing"
   },
   "c1": {
-   "status": "IMPLEMENTED / EIGHT PAID-ATTEMPT LABELS / NOT SCIENTIFICALLY EXECUTED / NOT CURRENTLY AUTHORIZED -- attempt-7 grant CONSUMED after the driver exited 2",
+   "status": "IMPLEMENTED / EIGHT PAID-ATTEMPT LABELS / NOT SCIENTIFICALLY EXECUTED / NOT CURRENTLY AUTHORIZED -- attempt-8 grant in preparation",
    "what_it_is": "fixed-path ATTENTION isolation, 2 arms x 3 fresh seeds = 6 E1_KD_HEAVY_0860K probes. NOT recovery evidence.",
    "incumbent": "fe9683e6a9c783bbc6fe276a78c851c6, digest c313d1b4081b. NOT recovered; margin in phase_b_result.",
    "execution_prereg": "logs/phase_c1_execution_preregistration.json 1cdc49f3e847 at head_commit 5a57fd5a; harness 85329e7e701b over 72 files; 12 pre-provider gates",
    "pricing": "logs/phase_c1_pricing.json 909ed65f -- secure L40S $1.09/h, CEILING $15.1475.",
    "seeds": "1635674081, 1656475568, 696460635 (derived from the C0 digest)",
    "scoring": "c1_confirmation_scoring@v1 77507935; equivalence IDENTICAL over 15 probes. @v2 808080a7 and battery a285d61f untouched.",
-   "attempts": "EIGHT LABELS: 1, 2, 3, 3R, 4, 5, 6, 7 -- SEVEN created a paid provider resource, attempt 3 created none ($0.00). $2.3313 spent, ZERO science. Attempt 7 is the FIRST to clear the pod CPU test gate.",
+   "attempts": "EIGHT LABELS so far: 1, 2, 3, 3R, 4, 5, 6, 7 -- SEVEN created a paid provider resource, attempt 3 created none ($0.00). $2.3313 spent, ZERO science. Attempt 7 was the FIRST to clear the pod CPU test gate. Attempt 8 is in preparation and has created nothing.",
    "gates": "12 pre-provider gates. Detail: STATE.md, decisions.md 2026-09-04.",
    "blocker": "Attempt-7 postmortem REPAIRED at $0 on 2026-09-06: `--stage all` is removed from autoinit_c1_launch.driver_command, and test_launcher_driver_cli_seam.py now parses the generated command with the DRIVER's own parser -- the seam no $0 gate covered. The driver's parser is unchanged and still has no --stage; partial C1 execution is not an authorized control. Attempt 7 remains CONFIRMED launcher->driver CLI mismatch with replay NOT REACHED and zero training, evaluation, score or decision.",
-   "needs": "a reviewer decision on this repair, and only then a further one-use grant. No launch-bound record and no Attempt-8 grant exist.",
+   "needs": "a maintainer grant. The launcher->driver CLI seam is repaired and covered by a regression that parses the generated argv with the driver's own parser; a launch-bound sweep and an issuance are owed before any launch.",
    "not_built": "no grant; the pre-ATTENTION parent rebuild and the ~8 GB teacher weights need GPU/network and have not run locally",
    "evidence": "logs/autoinit_c1_attempt7/ (failure.json and relay/autoinit_c1_run.log)",
    "readiness": "logs/c1_skip_predicate_audit.json PASS. The committed pod-environment record is CONSUMED by attempt 7; a new sweep is owed before any launch."
