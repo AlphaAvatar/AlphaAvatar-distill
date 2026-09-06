@@ -29,6 +29,7 @@ REPO = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO / "src"))
 sys.path.insert(0, str(REPO / "scripts/autoinit"))
 
+from aadistill.autoinit import cpu_test_env as CTE
 from aadistill.autoinit import pod_environment as pe  # noqa: E402
 from renderer_parity_gate import (EXPECTED_GROUPS, gate_verdict,  # noqa: E402
                                   run_parity)
@@ -421,6 +422,31 @@ def test_the_pod_gate_names_every_failing_nodeid_before_it_exits():
 C1_AUTH_PATH = "logs/autoinit_c1_authorization.json"
 
 
+#: These two CONSUME the readiness record. `record_pod_environment.py` moves the
+#: previous record aside while producing its replacement — deliberately, so a
+#: sweep cannot certify itself — so inside that sweep the record is absent and
+#: they skip, while on a pod the committed record is present and they run. C1
+#: attempt 6 was refused at the pod CPU gate for exactly that pair, at `$0.3665`.
+#:
+#: That is a MEASUREMENT CIRCULARITY, not a machine difference, and it is the one
+#: thing `AAD_C1_CPU_TEST_SCOPE` is allowed to express: the marker is set
+#: identically by the simulator and by the pod, so both skip and the skip sets
+#: agree. It is NOT a simulator flag — keying an artifact premise on one of those
+#: is the attempt-5 defect.
+#:
+#: Nothing here weakens the live protection. Pre-provider gate 12 still runs
+#: `verify_record`, the issued-session lineage still checks the committed record,
+#: and an ordinary `pytest tests/` run — outside the scope — still executes both.
+def _skip_if_inside_the_measured_suite() -> None:
+    if CTE.in_cpu_test_scope():
+        pytest.skip(
+            f"{CTE.SCOPE_MARKER}: this pytest run IS the C1 CPU candidate suite "
+            "whose outcome the readiness record is built from, and the recorder "
+            "has moved that record aside for the duration. A test cannot consume "
+            "the record its own run produces. Gate 12 still verifies it before a "
+            "pod exists, and this case runs normally outside the measured suite.")
+
+
 def test_the_committed_record_still_binds_the_live_executable():
     """Gate 12 itself, run as a test — with the gate's OWN argument contract.
 
@@ -438,6 +464,7 @@ def test_the_committed_record_still_binds_the_live_executable():
     question the gate asks, and `test_the_test_matches_the_paid_gate` below keeps
     the two from drifting apart again.
     """
+    _skip_if_inside_the_measured_suite()
     path = REPO / pe.RECORD_PATH
     if not path.is_file():
         pytest.skip(f"{pe.RECORD_PATH} has not been produced yet")
@@ -719,6 +746,7 @@ def test_the_snapshot_does_not_duplicate_the_swept_commit():
 
 
 def test_the_recorded_swept_commit_is_a_real_commit_in_this_repository():
+    _skip_if_inside_the_measured_suite()
     path = REPO / pe.RECORD_PATH
     if not path.is_file():
         pytest.skip(f"{pe.RECORD_PATH} has not been produced yet")

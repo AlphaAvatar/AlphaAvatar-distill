@@ -68,9 +68,6 @@
   "tests/data/test_sessions.py::tokenizer": {
    "class": "local_hf_cache"
   },
-  "tests/docs/test_repository_structure.py::test_every_path_named_in_the_repo_layout_exists": {
-   "class": "devbox_only_artifact"
-  },
   "tests/docs/test_storage_inventory.py::test_the_registry_covers_the_out_of_tree_store": {
    "class": "devbox_only_artifact"
   },
@@ -152,5 +149,6 @@
  },
  "_resolved_automatically": "guards on a TRACKED logs/ record need no entry: the audit resolves the path through the module attribute that names it and finds it in the git index, so the premise provably travels in the bundle.",
  "_keying": "keyed by NODEID, not file:line. Line keys went stale the first time a comment was inserted above a constant, and a registry that goes stale on a whitespace change reports noise instead of drift.",
- "_parity": "`parity` says why the DIAGNOSTIC and the PAID POD must decide a predicate the same way once both run under aadistill.autoinit.cpu_test_env. 'Classified' is not 'strictly comparable': attempt 5's --strict comparison was correct machinery pointed at two different machines."
+ "_parity": "`parity` says why the DIAGNOSTIC and the PAID POD must decide a predicate the same way once both run under aadistill.autoinit.cpu_test_env. 'Classified' is not 'strictly comparable': attempt 5's --strict comparison was correct machinery pointed at two different machines.",
+ "_repo_layout_note": "test_every_path_named_in_the_repo_layout_exists needs NO entry: its trailing host-absence skip was removed after C1 attempt 6, so it now PASSES on the dev box, in the simulation and on a pod. Host-side existence is owned by test_storage_inventory.py, which is host-scoped on purpose."
 }

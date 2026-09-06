@@ -205,3 +205,25 @@ def test_the_audit_digest_does_not_depend_on_this_machines_artifacts(monkeypatch
         "the audit reads the live hidden set again; its digest would depend on "
         "whether the simulator has run")
     assert "def path_parity(p: dict, tracked: set[str], staged: set[str])" in src
+
+
+def test_the_measurement_scope_marker_is_not_a_simulator_marker(rec):
+    """They are opposites, and conflating them would undo the attempt-5 repair.
+
+    `AAD_C1_CPU_TEST_SCOPE` is set by BOTH the simulator and the pod, so a
+    predicate keyed on it decides the same way on both. `AAD_SYNTHETIC_HF_TOKEN`
+    is set by one, which is why keying an artifact premise on it cost a grant.
+    """
+    from aadistill.autoinit import cpu_test_env as cte
+    assert cte.SCOPE_MARKER == "AAD_C1_CPU_TEST_SCOPE"
+    assert cte.SCOPE_MARKER in cte.overlay("/x"), (
+        "the scope marker must be part of the shared contract, not set by one side")
+    assert "AAD_SYNTHETIC_HF_TOKEN" not in cte.overlay("/x")
+    # Checked before simulator_marker so one can never be read as the other.
+    assert A.PRECEDENCE.index("cpu_test_scope") < A.PRECEDENCE.index("simulator_marker")
+    scoped = [p for p in rec["predicates"] if p["signal"] == "cpu_test_scope"]
+    assert scoped, "the readiness-record scope guard is not being seen at all"
+    for p in scoped:
+        assert p["verdict"] == "same_on_pod"
+        assert p["parity"] == "normalized_by_contract"
+    assert not [p for p in rec["predicates"] if p["signal"] == "simulator_marker"]

@@ -53,6 +53,7 @@ def summarize(junit: Path, expected_record: Path | None, repo: Path) -> dict:
     parsed = pe.read_junit(junit, repo)
     outcomes = parsed["outcomes"]
     reasons = parsed.get("skip_reasons", {})
+    details = parsed.get("failure_details", {})
 
     def ids(status: str) -> list[str]:
         return sorted(n for n, s in outcomes.items() if s == status)
@@ -66,6 +67,9 @@ def summarize(junit: Path, expected_record: Path | None, repo: Path) -> dict:
         "error_nodeids": ids("error"),
         "all_skipped_nodeids": skipped,
         "skip_reasons": reasons,
+        # Every failure and error with its message and traceback. Attempt 6
+        # preserved 18 exact nodeids and no reason for any of them.
+        "failure_details": details,
         "skip_set_digest": pe.skip_set_digest(skipped),
         "comparison": None,
     }
@@ -98,6 +102,12 @@ def report(out: dict) -> None:
     for label, key in (("FAILED", "failed_nodeids"), ("ERROR", "error_nodeids")):
         for nodeid in out[key]:
             print(f"{label} {nodeid}")
+    # One line of WHY per failure, so the launcher's `tail -40` window carries a
+    # mechanism and not only a list of names. The full bodies go to the JSON.
+    for nodeid, d in list(out.get("failure_details", {}).items())[:PRINT_LIMIT]:
+        first = (d.get("message") or d.get("body") or "").strip().splitlines()
+        if first:
+            print(f"  WHY {nodeid.rsplit('::', 1)[-1]}: {first[0][:160]}")
     print(f"skip set digest: {out['skip_set_digest'][:16]}… "
           f"({len(out['all_skipped_nodeids'])} skipped, all named in the JSON)")
 

@@ -776,7 +776,9 @@ def spec(args) -> SessionSpec:
         # `tail -40`, so attempt 5's 99 skip identities died with the pod and one
         # sweep/pod divergence is still unexplained. This is small and is read
         # while the pod still exists.
-        setup_failure_files=("/workspace/pytest_outcomes.json",),
+        setup_failure_files=("/workspace/pytest_outcomes.json",
+                             "/workspace/pytest_junit.xml",
+                             "/workspace/pytest.log"),
         precheck=(
             session_commit_gate(REPO_ROOT, AUTH_PATH, check_lineage=True),
             c1_harness_gate,

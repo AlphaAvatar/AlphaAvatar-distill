@@ -45,6 +45,13 @@ SCHEMA = "aadistill.autoinit.c1_skip_predicate_audit/v1"
 #: `differs_on_pod` means the answer depends on the machine, and the sweep's
 #: verdict is therefore not the pod's.
 SIGNALS: dict[str, tuple[tuple[str, ...], str, str]] = {
+    "cpu_test_scope": (
+        ("in_cpu_test_scope", "AAD_C1_CPU_TEST_SCOPE", "SCOPE_MARKER"),
+        "same_on_pod",
+        "declares WHICH SUITE this is, not which machine runs it. Both the "
+        "simulator and the paid pod set it, so both decide the same way. It is "
+        "checked BEFORE simulator_marker precisely so the two can never be "
+        "confused: a simulator flag is set by one machine, this by both."),
     "simulator_marker": (
         ("AAD_SYNTHETIC_HF_TOKEN", "PODSIM_"),
         "differs_on_pod",
@@ -106,7 +113,7 @@ SIGNALS: dict[str, tuple[tuple[str, ...], str, str]] = {
 #: Signals whose presence in a condition is decided BEFORE the weaker ones.
 #: Order matters: a condition naming both a simulator marker and a repo path is
 #: a simulator-marker predicate.
-PRECEDENCE = ("simulator_marker", "unstaged_artifact", "absolute_devbox_path",
+PRECEDENCE = ("cpu_test_scope", "simulator_marker", "unstaged_artifact", "absolute_devbox_path",
               "home_directory", "gpu", "credential", "optional_dependency",
               "network", "staged_artifact", "repository_content",
               "filesystem_premise")
@@ -374,6 +381,10 @@ PARITY_BY_SIGNAL: dict[str, tuple[str, str]] = {
                    "the simulation — and is deliberately NOT isolated. Only "
                    "PRESENCE can be read; a predicate keyed on whether the token "
                    "is real is a simulator marker and is refused separately."),
+    "cpu_test_scope": ("normalized_by_contract",
+                       "AAD_C1_CPU_TEST_SCOPE is part of the shared CPU-test "
+                       "contract and is set identically by the simulator and the "
+                       "pod, so the measurement-circularity skip happens on both"),
     "filesystem_premise_onpod": ("same_on_pod",
                                  "every path it inspects is tracked or staged"),
     "staged_artifact": ("same_on_pod", "C1's manifest stages it"),

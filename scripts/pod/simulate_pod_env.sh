@@ -245,8 +245,30 @@ mkdir -p "$ENVROOT/home" "$ENVROOT/hf/hub" || exit 5
 # absolute for the same reason a relative `.venv/bin/python` is wrong: it would
 # resolve against the caller's directory.
 PODSIM_SCRIPT_DIR=$(cd "$(dirname "$0")" && pwd)
-PODSIM_PY="$PODSIM_SCRIPT_DIR/../../.venv/bin/python"
-[ -x "$PODSIM_PY" ] || PODSIM_PY=$(command -v python3)
+# The interpreter is an INPUT, never a guess.
+#
+# It used to fall back to `command -v python3`, which is whatever ambient Python
+# the machine happens to have: on a pod there is no repo `.venv` (it uses
+# /opt/train), so the pod ALWAYS took a fallback the dev box never exercised, and
+# C1 attempt 6 lost all 18 `test_simulator_restore.py` cases at the pod CPU gate.
+# That fallback is not even safe here — this dev box's /usr/bin/python3 is 3.6.8
+# and cannot parse the emitter.
+#
+# So: an explicit `PODSIM_PYTHON` (the recorder and the tests pass their own
+# `sys.executable`, which is /opt/train/bin/python on a pod), else the repo venv
+# IF IT EXISTS, else refuse. Never an ambient interpreter.
+if [ -n "${PODSIM_PYTHON:-}" ]; then
+  PODSIM_PY="$PODSIM_PYTHON"
+  [ -x "$PODSIM_PY" ] || {
+    echo "REFUSING: PODSIM_PYTHON=$PODSIM_PY is not executable" >&2; exit 5; }
+elif [ -x "$PODSIM_SCRIPT_DIR/../../.venv/bin/python" ]; then
+  PODSIM_PY="$PODSIM_SCRIPT_DIR/../../.venv/bin/python"
+else
+  echo "REFUSING: no interpreter. Pass PODSIM_PYTHON=\$sys.executable, or run" >&2
+  echo "  from a checkout whose .venv/bin/python exists. This script will NOT" >&2
+  echo "  pick an ambient python3: doing so cost C1 attempt 6 its CPU gate." >&2
+  exit 5
+fi
 # Captured and checked SEPARATELY: `eval "$(cmd)"` reports the status of `eval`,
 # not of `cmd`, so a failed emission would leave HOME pointing at the real one
 # and the isolation would silently not happen.
@@ -337,7 +359,7 @@ echo "running: $PODSIM_CMD"
 _podsim_log="$PODSIM_LOG"
 _podsim_cmd="$PODSIM_CMD"
 unset PODSIM_JUNIT PODSIM_LOG PODSIM_CMD PODSIM_ROOT PODSIM_ENV_ROOT \
-      PODSIM_HF_TOKEN HIDE_DIR PODSIM_LOCK HIDDEN_PATHS
+      PODSIM_HF_TOKEN HIDE_DIR PODSIM_LOCK HIDDEN_PATHS PODSIM_PYTHON
 
 eval "$_podsim_cmd" > "$_podsim_log" 2>&1
 PODSIM_RC=$?

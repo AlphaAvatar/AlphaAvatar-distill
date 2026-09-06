@@ -35,6 +35,43 @@ PHASE C1 CPU-TEST PARITY REPAIRED AT `$0` — STILL NEVER MEASURED**
 > an L40S. A CPU dev box cannot prove it. The contract is applied and the
 > decision is proven stable here; the GPU half is first exercised on the next pod.
 
+> **Attempt-6 postmortem repair, 2026-09-06 — `$0.0000`, no pod, no grant.**
+> Four repairs, none scientific. The strict complete skip-set comparison is
+> KEPT: it worked, and it refused three real divergences.
+>
+> 1. **Measurement circularity, resolved by scope.** `record_pod_environment.py`
+>    moves the readiness record aside while producing its replacement, so the two
+>    tests that CONSUME that record cannot run inside the sweep that makes it.
+>    The shared CPU-test contract now carries `AAD_C1_CPU_TEST_SCOPE`, set
+>    identically by the simulator and the pod, and only those two nodeids consult
+>    it. **It is not a simulator marker** — a simulator flag is set by one
+>    machine, this by both, and the audit checks it strictly ahead of
+>    `simulator_marker` so the two can never be confused. Gate 12 still runs
+>    `verify_record`, issued-session lineage still checks the committed record,
+>    and an ordinary `pytest tests/` run still executes both.
+> 2. **`REPO_LAYOUT` asks only portable questions now.** Its trailing
+>    host-absence `pytest.skip` is gone: a pod is not required to hold
+>    `/home/ecs-user/aad-artifacts`, and that legitimate absence must not turn a
+>    portable contract test from PASS into SKIP. The declaration and
+>    relative-path assertions are untouched, and host-side existence stays owned
+>    by `test_storage_inventory.py`. It passes with the roots present AND absent.
+> 3. **The simulator's interpreter is an input.** `PODSIM_PYTHON` is passed by
+>    the recorder and by the tests as their own `sys.executable`; the repo venv
+>    is used only if it exists; otherwise it REFUSES. The ambient
+>    `command -v python3` fallback is gone from executable code — a pod has no
+>    repo venv, so the pod always took a fallback the dev box never exercised.
+>    The marker is unset before `PODSIM_CMD` so it cannot leak into a nested run.
+> 4. **Failure detail survives.** Every failure and error now carries its
+>    message, type and traceback into `pytest_outcomes.json`, one `WHY` line
+>    reaches the launcher's `tail -40` window, and the raw `pytest.log` and
+>    `pytest_junit.xml` are pulled off the pod too, so a parser bug can never
+>    again be the only surviving evidence.
+>
+> **Attempt-6 root cause remains ATTRIBUTED to interpreter resolution; the
+> original mechanism is UNPROVEN because failure tracebacks were not preserved.**
+> All 18 nodeids pass under the explicit-interpreter path, which is evidence the
+> repair is right — not evidence the diagnosis was.
+
 > **Attempt 6, 2026-09-06 — LAUNCHED, ABORTED at the pod CPU test gate.** Pod
 > `n71opk7lv4fhzf`, created at `$1.09/h`, deleted at 20.17 min for **`$0.3665`**,
 > provider confirms gone. Cumulative **`$265.7679`** of `$283.7600`, leaving

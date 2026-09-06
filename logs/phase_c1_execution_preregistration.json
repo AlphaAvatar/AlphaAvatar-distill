@@ -3,7 +3,7 @@
  "preregistration_id": "autoinit.v1.phase_c1.execution",
  "written_utc": "2026-09-02T00:00:00Z",
  "_contract": "Everything the Phase-C1 session will run, bound before any C1 result exists. AUTHORIZES NOTHING: no pricing decision, no spend grant, no permission to launch. An authorization, if ever issued, binds THIS document.",
- "head_commit": "577c5cdcec5d59ac2249b86410de572ae7e3d597",
+ "head_commit": "48a85c7d4d87a27e40fc64c71f97c944d2605848",
  "executable_source": {
   "digest": "7c5a9856f90e79c18382bf3a4a58b2fb647b62ac83be5bdbf3f7e6643d981795",
   "files": [
@@ -51,7 +51,7 @@
   "rule": "sha256 over sorted 'path:sha256' lines of the declared set"
  },
  "c1_harness": {
-  "digest": "21d9591317459f1baa5c5ea9fed7e21f26e427be477e2f75d3438d34a841ab6d",
+  "digest": "e765a54fcd98f76fff931290d10e07fcd7d2adf5942278cefa495f5f74d7cd5f",
   "files": [
    {
     "path": "configs/autoinit/c1_artifacts.json",
@@ -105,8 +105,8 @@
    },
    {
     "path": "scripts/pod/autoinit_c1_launch.py",
-    "sha256": "25c80521438eaa31915a14de67199ef1a1a28b2ec63eac7bf35782c6a5fafa35",
-    "bytes": 45382
+    "sha256": "6f03a527cb348cba21c06c17067a388ef797dd6697e7e28b788cb90270102016",
+    "bytes": 45495
    },
    {
     "path": "scripts/pod/autoinit_engine_probe.py",
@@ -140,8 +140,8 @@
    },
    {
     "path": "scripts/pod/summarize_pytest_outcomes.py",
-    "sha256": "16be81d4bd9f932ba994d29da05b66e9483e36b34143e287f4a1e0c655a44b72",
-    "bytes": 6319
+    "sha256": "e9aeb39cfe97512b5681ceb1ba053842e93ffce53afa8bc5b4ba64ea18dbd5c4",
+    "bytes": 6959
    },
    {
     "path": "scripts/pod/watchdog.py",
@@ -220,8 +220,8 @@
    },
    {
     "path": "src/aadistill/autoinit/cpu_test_env.py",
-    "sha256": "4996abbf848225c40b4c8cebd937c4accbd5b1335a4f042311cd8125f9c32279",
-    "bytes": 6334
+    "sha256": "e05cff79deb2cc0d9247e593ce420c27423b5eb9638e5d57f82a2394597865b2",
+    "bytes": 7885
    },
    {
     "path": "src/aadistill/autoinit/device.py",
@@ -290,8 +290,8 @@
    },
    {
     "path": "src/aadistill/autoinit/pod_environment.py",
-    "sha256": "0f6faccf1052c10f7b6796a1be1952ff85f9e255088c4a64b2503733e55d7997",
-    "bytes": 33354
+    "sha256": "88ca930ecddbbb43c23f6bad2e207995439c42109a28299d9259644afa9e917a",
+    "bytes": 34097
    },
    {
     "path": "src/aadistill/autoinit/recovery.py",
@@ -927,5 +927,5 @@
   "any search, ranking, successive halving, tie-breaking or arm elimination"
  ],
  "authorizes": "nothing",
- "preregistration_sha256": "b4a74f8f7c341eb4bacb25d3e34f16135258f05d5485879cc4aa09428a2a3071"
+ "preregistration_sha256": "25062af9ef9c97d26623b10e9661adbd1f6dd4f59b9abaa2d5a09744d5c4ae27"
 }

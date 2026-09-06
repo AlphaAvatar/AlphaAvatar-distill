@@ -274,6 +274,7 @@ def read_junit(path: str | Path, repo_root: str | Path = ".") -> dict[str, Any]:
     tree = ET.parse(str(path))
     outcomes: dict[str, str] = {}
     reasons: dict[str, str] = {}
+    details: dict[str, dict[str, str]] = {}
     n_cases = 0
     for case in tree.iter("testcase"):
         n_cases += 1
@@ -288,6 +289,17 @@ def read_junit(path: str | Path, repo_root: str | Path = ".") -> dict[str, Any]:
                     # Why it skipped, which is the half attempt 5 could not see.
                     reasons[nid] = (child.get("message")
                                     or (child.text or "").strip())[:300]
+                else:
+                    # WHY it failed. Attempt 6 named all 18 failing nodeids and
+                    # not one message, so its mechanism is attributed rather than
+                    # proven — the same shape as attempt 3R's four-line tail and
+                    # attempt 5's missing skip list, one layer further in.
+                    details[nid] = {
+                        "kind": status,
+                        "type": child.get("type") or "",
+                        "message": (child.get("message") or "")[:2000],
+                        "body": (child.text or "").strip()[:8000],
+                    }
                 break
         outcomes[nid] = status
     counts = {s: sum(1 for v in outcomes.values() if v == s)
@@ -299,7 +311,8 @@ def read_junit(path: str | Path, repo_root: str | Path = ".") -> dict[str, Any]:
             f"{n_cases} testcases collapsed to {len(outcomes)} nodeids; the "
             "reconstruction is lossy and an outcome would be lost")
     return {"outcomes": outcomes, "counts": counts, "total": len(outcomes),
-            "skip_reasons": dict(sorted(reasons.items()))}
+            "skip_reasons": dict(sorted(reasons.items())),
+            "failure_details": dict(sorted(details.items()))}
 
 
 def skip_set_digest(nodeids: Sequence[str]) -> str:

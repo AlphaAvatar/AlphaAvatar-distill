@@ -17,6 +17,7 @@ logic.
 
 import os
 import subprocess
+import sys
 from pathlib import Path
 
 REPO = Path(__file__).resolve().parents[2]
@@ -30,6 +31,11 @@ def run_sim(root: Path, hide: Path, hidden_paths: str, cmd: str, **extra):
            "PODSIM_LOCK": str(hide) + ".lock",
            "HIDDEN_PATHS": hidden_paths,
            "PODSIM_CMD": cmd,
+           # The interpreter is an INPUT. `PODSIM_ROOT` here is a synthetic tree
+           # with no venv, which is also a pod's condition — and the ambient
+           # `command -v python3` the script used to fall back to is what cost C1
+           # attempt 6 all 18 cases in this module at the pod CPU gate.
+           "PODSIM_PYTHON": sys.executable,
            **extra}
     return subprocess.run(["bash", str(SCRIPT)], capture_output=True, text=True,
                           env=env)
@@ -410,3 +416,108 @@ def test_the_default_log_path_is_per_invocation_not_a_shared_file(tmp_path):
     assert "hello-from-the-suite" in log.read_text()
     assert not Path("/home/ecs-user/aad-scratch/podsim_pytest.log").samefile(log) \
         if Path("/home/ecs-user/aad-scratch/podsim_pytest.log").exists() else True
+
+
+# --- the interpreter is an input, never a guess -------------------------------
+#
+# C1 attempt 6 lost all 18 cases in this module at the pod CPU gate, for $0.3665.
+# The simulator resolved its interpreter as "repo .venv, else `command -v
+# python3`". A pod checkout has no repo .venv — it uses /opt/train — so the pod
+# ALWAYS took a fallback the dev box never exercised.
+
+#: The exact nodeids attempt 6 reported. Named, so the repair is checked against
+#: what actually failed rather than against this module in general.
+ATTEMPT_6_FAILED = (
+    "test_a_clean_run_that_recreates_nothing_still_restores_exactly",
+    "test_a_junit_report_is_requested_when_asked",
+    "test_a_nested_simulation_does_not_inherit_this_ones_control_variables",
+    "test_a_pod_equivalent_token_is_exported_and_never_printed",
+    "test_failing_nodeids_are_reported_before_the_tail",
+    "test_hf_hub_cache_sits_under_the_isolated_hf_home",
+    "test_restoration_survives_a_command_that_exits_the_shell",
+    "test_restore_reproduces_the_exact_pre_state_when_the_run_recreates_it",
+    "test_the_default_log_path_is_per_invocation_not_a_shared_file",
+    "test_the_dev_box_hf_cache_is_not_visible",
+    "test_the_isolation_is_torn_down_after_a_normal_run",
+    "test_the_isolation_is_torn_down_even_when_the_suite_fails",
+    "test_the_junit_flag_reaches_the_suite_but_not_its_children",
+    "test_the_lock_is_released_after_a_normal_run",
+    "test_the_recreated_content_is_quarantined_not_deleted",
+    "test_the_simulated_home_is_a_fresh_empty_directory",
+    "test_the_suite_exit_code_reaches_the_caller",
+    "test_variables_that_would_defeat_the_isolation_are_unset",
+)
+
+
+def test_the_ambient_python_fallback_is_gone_from_the_code():
+    """Comments may NAME the defect; executable lines may not contain it."""
+    code = "\n".join(ln for ln in SCRIPT.read_text().splitlines()
+                     if not ln.lstrip().startswith("#"))
+    for ambient in ("command -v python3", "/usr/bin/python3", "which python3"):
+        assert ambient not in code, (
+            f"{ambient!r} is back in executable code. An ambient interpreter is "
+            "whatever the machine happens to have; on a pod that is not the one "
+            "running the suite.")
+    assert 'PODSIM_PYTHON' in code and "REFUSING: no interpreter" in SCRIPT.read_text()
+
+
+def test_every_nodeid_attempt_6_lost_is_in_this_module():
+    """The repair is checked against the recorded failures, not a proxy."""
+    src = SCRIPT.parent.parent.parent / "tests/pod/test_simulator_restore.py"
+    text = src.read_text()
+    missing = [n for n in ATTEMPT_6_FAILED if f"def {n}(" not in text]
+    assert not missing, f"attempt 6 named nodeids this module no longer has: {missing}"
+    assert len(ATTEMPT_6_FAILED) == 18
+
+
+def test_an_explicit_interpreter_works_where_there_is_no_repo_venv(tmp_path):
+    """A synthetic PODSIM_ROOT with no `.venv` — which is a pod's condition."""
+    root = build_tree(tmp_path)
+    assert not (root / ".venv").exists()
+    r = run_env_sim(root, tmp_path / "hidden", 'echo "HOME=$HOME"')
+    assert r.returncode == 0, r.stdout + r.stderr
+    assert f"HOME={tmp_path}" in r.stdout
+
+
+def test_no_interpreter_and_no_repo_venv_refuses_loudly(tmp_path):
+    """Fail closed. A silent fallback is how the pod ran different code."""
+    fake = tmp_path / "checkout/scripts/pod"
+    fake.mkdir(parents=True)
+    (fake / SCRIPT.name).write_text(SCRIPT.read_text())
+    (fake / "cpu_test_env_args.py").write_text(
+        (SCRIPT.parent / "cpu_test_env_args.py").read_text())
+    assert not (tmp_path / "checkout/.venv").exists()
+
+    root = build_tree(tmp_path)
+    env = {k: v for k, v in os.environ.items() if k != "PODSIM_PYTHON"}
+    env.update({"PODSIM_ROOT": str(root), "HIDE_DIR": str(tmp_path / "h"),
+                "PODSIM_LOCK": str(tmp_path / "h.lock"),
+                "HIDDEN_PATHS": "artifacts/audit", "PODSIM_CMD": "true"})
+    r = subprocess.run(["bash", str(fake / SCRIPT.name)], capture_output=True,
+                       text=True, env=env)
+    assert r.returncode == 5, (r.returncode, r.stdout, r.stderr)
+    assert "REFUSING: no interpreter" in r.stderr
+
+
+def test_a_non_executable_interpreter_refuses_rather_than_falling_back(tmp_path):
+    root = build_tree(tmp_path)
+    r = run_env_sim(root, tmp_path / "hidden", 'echo hi',
+                    PODSIM_PYTHON=str(tmp_path / "not-a-python"))
+    assert r.returncode == 5, (r.returncode, r.stdout, r.stderr)
+    assert "is not executable" in r.stderr
+
+
+def test_a_nested_simulation_does_not_inherit_the_interpreter_control(tmp_path):
+    """`PODSIM_PYTHON` is invocation-local, like every other PODSIM_* control.
+
+    An outer sweep that leaked it would hand a nested run an interpreter chosen
+    for a different machine — the same shape as the PODSIM_JUNIT leak that failed
+    five correct tests in the 2026-09-04 sweep.
+    """
+    root = build_tree(tmp_path)
+    r = run_env_sim(root, tmp_path / "hidden",
+                    'echo "INNER=${PODSIM_PYTHON:-<unset>}"')
+    assert r.returncode == 0, r.stdout + r.stderr
+    assert "INNER=<unset>" in r.stdout, r.stdout
+    src = SCRIPT.read_text()
+    assert "PODSIM_LOCK HIDDEN_PATHS PODSIM_PYTHON" in src

@@ -33,6 +33,14 @@ from pathlib import Path
 
 CONTRACT = "aadistill.autoinit.c1_cpu_test_env/v1"
 
+#: Declares the SUITE, never the machine. Both the simulator and the paid pod set
+#: it; nothing else does. A predicate keyed on it says "my output is consumed by
+#: the readiness record this very invocation produces" — the one question that is
+#: genuinely the same on both machines and genuinely unanswerable inside the
+#: sweep. It is emphatically NOT a simulator flag: keying an artifact premise on
+#: one of those is what cost attempt 5 a grant.
+SCOPE_MARKER = "AAD_C1_CPU_TEST_SCOPE"
+
 #: Set for the pytest command. `HOME` is a fresh empty directory, so anything
 #: that locates host-local state through the home directory finds nothing —
 #: which is the pod's condition.
@@ -46,6 +54,16 @@ def overlay(scope_root: str | Path) -> dict[str, str]:
     """
     root = str(scope_root).rstrip("/")
     return {
+        # WHICH SUITE THIS IS, not which machine runs it. Set identically by the
+        # simulator and by the pod, so it can never become a simulator marker.
+        #
+        # `record_pod_environment.py` moves the previous readiness record aside
+        # while producing its replacement, so a test that CONSUMES that record
+        # cannot meaningfully run inside the sweep that produces it: it skips in
+        # every sweep and runs on every pod, forever. That is a measurement
+        # circularity, not a machine difference, and it is the only thing this
+        # marker is allowed to express.
+        SCOPE_MARKER: "1",
         # No accelerator, on either machine. The pod has an L40S; a predicate
         # that asks `torch.cuda.is_available()` would otherwise decide the
         # OPPOSITE way there from the diagnostic.
@@ -73,6 +91,17 @@ UNSET: tuple[str, ...] = (
 #: and the cache — not the credential — is what differs) and the session's own
 #: `SESSION_*` variables, which the manifest sets identically for both.
 PRESERVED: tuple[str, ...] = ("HF_TOKEN", "SESSION_KIND", "SESSION_TEST_IGNORES")
+
+
+def in_cpu_test_scope() -> bool:
+    """Is this pytest run the C1 CPU candidate suite the readiness record consumes?
+
+    True in the launch-bound/diagnostic sweep AND on the paid pod, false in an
+    ordinary `pytest tests/` run. The two machines therefore agree, which is the
+    whole point: a marker that only one of them sets is the attempt-5 defect.
+    """
+    import os
+    return bool(os.environ.get(SCOPE_MARKER))
 
 
 def env_args(scope_root: str | Path) -> list[str]:

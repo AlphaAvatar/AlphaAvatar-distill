@@ -262,3 +262,90 @@ def test_the_recorder_writes_the_new_fields(field):
     src = (REPO / "scripts/autoinit/record_pod_environment.py").read_text()
     assert '"findings": findings,' in src, "the record embeds findings wholesale"
     assert field in json.dumps(pe.evaluate_sweep({}, {}))
+
+
+# --- failure DETAIL, not just failure names ----------------------------------
+#
+# C1 attempt 6 preserved 18 exact failing nodeids and not one reason, so its
+# mechanism is attributed rather than proven. That is the same gap as attempt
+# 3R's four-line tail and attempt 5's missing skip list, one layer further in.
+
+def _junit_with_failure(tmp_path: Path, message: str, body: str) -> Path:
+    (tmp_path / "tests").mkdir(parents=True, exist_ok=True)
+    (tmp_path / "tests/a.py").touch()
+    p = tmp_path / "junit.xml"
+    p.write_text(
+        '<?xml version="1.0" encoding="utf-8"?><testsuites><testsuite>'
+        f'<testcase classname="tests.a" name="test_boom">'
+        f'<failure type="AssertionError" message="{message}">{body}</failure>'
+        "</testcase></testsuite></testsuites>")
+    return p
+
+
+def test_a_failure_message_and_traceback_survive_into_the_record(tmp_path):
+    body = ("Traceback (most recent call last):\n"
+            '  File "tests/a.py", line 3, in test_boom\n'
+            "    assert shutil.which('python3')\n"
+            "AssertionError: no interpreter on this machine")
+    junit = _junit_with_failure(tmp_path, "assert 0 == 1", body)
+    out = S.summarize(junit, None, tmp_path)
+    nodeid = out["failed_nodeids"][0]
+    detail = out["failure_details"][nodeid]
+    assert detail["kind"] == "failed"
+    assert detail["type"] == "AssertionError"
+    assert "assert 0 == 1" in detail["message"]
+    assert "no interpreter on this machine" in detail["body"]
+    assert "Traceback" in detail["body"]
+
+
+def test_an_error_body_survives_too(tmp_path):
+    (tmp_path / "tests").mkdir(parents=True, exist_ok=True)
+    (tmp_path / "tests/a.py").touch()
+    p = tmp_path / "junit.xml"
+    p.write_text('<?xml version="1.0"?><testsuites><testsuite>'
+                 '<testcase classname="tests.a" name="test_collect">'
+                 '<error type="CollectError" message="import failure">'
+                 'ModuleNotFoundError: no module named x</error>'
+                 "</testcase></testsuite></testsuites>")
+    out = S.summarize(p, None, tmp_path)
+    d = out["failure_details"][out["error_nodeids"][0]]
+    assert d["kind"] == "error" and "ModuleNotFoundError" in d["body"]
+
+
+def test_the_reason_is_printed_not_only_stored(tmp_path, capsys):
+    """The launcher's window is `tail -40`; a mechanism must reach it."""
+    junit = _junit_with_failure(tmp_path, "no interpreter on this machine", "x")
+    S.report(S.summarize(junit, None, tmp_path))
+    printed = capsys.readouterr().out
+    assert "WHY test_boom:" in printed
+    assert "no interpreter on this machine" in printed
+
+
+def test_mutation_dropping_failure_capture_is_caught(tmp_path, monkeypatch):
+    """If read_junit stopped recording bodies, these tests must go red."""
+    from aadistill.autoinit import pod_environment as pe_mod
+    real = pe_mod.read_junit
+
+    def stripped(*a, **k):
+        out = real(*a, **k)
+        out["failure_details"] = {}
+        return out
+
+    monkeypatch.setattr(S.pe, "read_junit", stripped)
+    junit = _junit_with_failure(tmp_path, "m", "b")
+    out = S.summarize(junit, None, tmp_path)
+    assert out["failure_details"] == {}, "the mutation did not take"
+    with pytest.raises(KeyError):
+        _ = out["failure_details"][out["failed_nodeids"][0]]
+
+
+def test_the_raw_cpu_test_artifacts_are_retrieved_before_teardown():
+    """A parser bug must not again be the only surviving evidence."""
+    sys.path.insert(0, str(REPO / "tests/pod"))
+    from session_specs import load_session_launcher, session_args
+    mod = load_session_launcher("autoinit_c1_launch")
+    files = mod.spec(session_args(mod)).setup_failure_files
+    for raw in ("/workspace/pytest_outcomes.json", "/workspace/pytest_junit.xml",
+                "/workspace/pytest.log"):
+        assert raw in files, f"{raw} would not survive a setup abort"
+    assert not any("token" in f.lower() or "credential" in f.lower() for f in files)

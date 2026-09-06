@@ -180,7 +180,11 @@ def main() -> int:
     # under SESSION_KIND=c1 and the rest of what the pod is given.
     env = {**os.environ, **setup_env,
            "PODSIM_JUNIT": args.junit, "PODSIM_LOG": args.log,
-           "HIDDEN_PATHS": "\n".join(hidden), "PODSIM_CMD": pytest_cmd}
+           "HIDDEN_PATHS": "\n".join(hidden), "PODSIM_CMD": pytest_cmd,
+           # The interpreter the simulator uses to emit the CPU-test contract.
+           # Explicit, because on a pod there is no repo venv and the ambient
+           # fallback that used to cover that gap cost attempt 6 its CPU gate.
+           "PODSIM_PYTHON": sys.executable}
     command = (f"<SessionSpec.setup_environment: {len(setup_env)} keys> "
                f"HIDDEN_PATHS=<{len(hidden)} derived paths, contract "
                f"{contract['digest'][:12]}> PODSIM_CMD=<derived> "

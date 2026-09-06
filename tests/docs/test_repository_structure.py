@@ -113,10 +113,17 @@ def test_every_path_named_in_the_repo_layout_exists():
     setup test gate after the staging, the frozen-asset gate and the RoPE check
     had all passed.
 
-    So they are checked the way `test_the_registry_covers_the_out_of_tree_store`
-    already checks that store: verified where they exist, skipped where they do
-    not. What is NOT skipped is that each one is a **declared** storage root —
-    a typo'd or invented absolute path still fails.
+    So this test asks only PORTABLE questions, which every machine can answer the
+    same way: every absolute path must be a DECLARED host-local storage root — a
+    typo'd or invented one still fails — and every repository-relative reference
+    must exist.
+
+    Whether those declared roots exist HERE is not asked, because it is not a
+    portable question. It used to be, via a trailing skip, and C1 attempt 6 was
+    refused at the pod CPU gate partly for it: the test ran on the dev box and
+    skipped on the pod, so the skip sets differed. Host-side existence is owned
+    by `test_storage_inventory.py::test_the_registry_covers_the_out_of_tree_store`,
+    which is host-scoped on purpose.
     """
     refs = {ref for ref in backticked(LAYOUT)
             if ("/" in ref or ref.endswith(".md"))
@@ -134,10 +141,20 @@ def test_every_path_named_in_the_repo_layout_exists():
     missing = sorted(r for r in refs - absolute if not (REPO / r).exists())
     assert not missing, f"REPO_LAYOUT.md names paths that do not exist: {missing}"
 
-    absent = sorted(r for r in absolute if not Path(r).exists())
-    if absent:
-        pytest.skip(f"declared host-local storage roots not on this machine: "
-                    f"{absent}")
+    # Deliberately NOT checked here: whether those declared host-local roots
+    # EXIST on this machine. A paid pod is not required to contain
+    # /home/ecs-user/aad-artifacts, and their legitimate absence must not turn a
+    # PORTABLE contract test from PASS into SKIP.
+    #
+    # C1 attempt 6 was refused at the pod CPU gate partly for this: the test ran
+    # on the dev box and skipped on the pod, an unexpected pod-only skip. The
+    # paths are absolute literals in Markdown, so no fresh $HOME can reach them —
+    # the fix is to stop asking a host question inside a portable test, not to
+    # waive the difference.
+    #
+    # Host-side existence and inventory remain owned by
+    # `test_storage_inventory.py::test_the_registry_covers_the_out_of_tree_store`,
+    # which is correctly host-scoped and skips where the store is absent.
 
 
 # --- STATE.md and current_state.json are one fact, two views ----------------

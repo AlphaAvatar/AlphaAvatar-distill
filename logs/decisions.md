@@ -6923,6 +6923,33 @@ recovery continuation under the derived **$16.7456** ceiling.
   committed.
 - **Revisit when:** the maintainer decides whether to issue the one-use grant.
 
+## 2026-09-06 — Attempt-6 postmortem: scope, portability, interpreter, detail
+
+- **Context:** attempt 6 was refused at the pod CPU gate for `$0.3665`. The
+  strict skip-set comparison worked and named three real divergences; two were
+  mine and one structural.
+- **Decision 1 — measurement scope, not a waiver.** The readiness recorder moves
+  its own record aside so a sweep cannot certify itself, so the two tests that
+  consume that record skip in every sweep and run on every pod. The shared
+  CPU-test contract gains `AAD_C1_CPU_TEST_SCOPE`, set by BOTH machines. Only
+  those two nodeids read it. Rejected: two comparator waivers (an excuse list) and
+  a prospective/fake record (evidence about nothing).
+- **Decision 2 — portable tests ask portable questions.** `REPO_LAYOUT`'s
+  host-absence skip is removed. Host existence belongs to the host-scoped
+  storage-inventory test.
+- **Decision 3 — the interpreter is an input.** `PODSIM_PYTHON`, else the repo
+  venv if present, else refuse. No ambient `python3`: a pod has no repo venv, so
+  it always took the untested branch. This dev box's `/usr/bin/python3` is 3.6.8
+  and cannot even parse the emitter, which shows the fallback was never safe.
+- **Decision 4 — capture the layer below.** Failure messages and tracebacks now
+  survive, plus the raw `pytest.log` and JUnit. Each previous repair captured one
+  more layer and stopped one short; this is the next one.
+- **Risk:** the attempt-6 mechanism stays ATTRIBUTED. A local pass proves the
+  repair works, not that the diagnosis was right, and the wording must not be
+  upgraded to CONFIRMED.
+- **Revisit when:** a future attempt reaches the CPU gate and its failure detail,
+  if any, is read from the record rather than inferred.
+
 ## 2026-09-06 — C1 Attempt-6 grant, after the CPU-test parity repair
 
 - **Context:** attempt 5 aborted at the pod CPU test gate for `$0.3150`. Its

@@ -10,9 +10,10 @@
  ],
  "n_predicates": 97,
  "by_signal": {
+  "cpu_test_scope": 1,
   "filesystem_premise_offpod": 6,
   "filesystem_premise_onpod": 37,
-  "filesystem_premise_unresolved": 5,
+  "filesystem_premise_unresolved": 4,
   "gpu": 1,
   "optional_dependency": 9,
   "repository_content": 2,
@@ -21,15 +22,14 @@
   "unstaged_artifact": 9
  },
  "n_differs_on_pod": 25,
- "n_unrecognised": 30,
- "n_registered": 36,
+ "n_unrecognised": 29,
+ "n_registered": 35,
  "registry": "configs/autoinit/c1_skip_predicate_classification.json",
  "registered_by_class": {
   "devbox_only_artifact": [
    "tests/autoinit/test_c1_confirmation_scoring.py",
    "tests/autoinit/test_frozen_records.py",
    "tests/data/test_e7_streams.py",
-   "tests/docs/test_repository_structure.py::test_every_path_named_in_the_repo_layout_exists",
    "tests/docs/test_storage_inventory.py::test_the_registry_covers_the_out_of_tree_store",
    "tests/evaluation/test_capability.py",
    "tests/evaluation/test_e6_analysis.py",
@@ -79,9 +79,10 @@
  "stale_registry_entries": [],
  "cpu_test_environment": {
   "contract": "aadistill.autoinit.c1_cpu_test_env/v1",
-  "digest": "0708122244bf20b3c009e25adbc00dfa3ae2a4dda80827af0a99509353935bb2",
+  "digest": "19d30027c01b78a54e479b969c5abae653cd738eafb87b57e5573a07b8ba86d6",
   "scope_root": "<SCOPE>",
   "set": {
+   "AAD_C1_CPU_TEST_SCOPE": "1",
    "CUDA_VISIBLE_DEVICES": "",
    "HOME": "<SCOPE>/home",
    "HF_HOME": "<SCOPE>/hf",
@@ -120,6 +121,10 @@
    "resolution": "normalized_by_contract",
    "evidence": "HF_TOKEN is non-empty on both \u2014 real on the pod, synthetic in the simulation \u2014 and is deliberately NOT isolated. Only PRESENCE can be read; a predicate keyed on whether the token is real is a simulator marker and is refused separately."
   },
+  "cpu_test_scope": {
+   "resolution": "normalized_by_contract",
+   "evidence": "AAD_C1_CPU_TEST_SCOPE is part of the shared CPU-test contract and is set identically by the simulator and the pod, so the measurement-circularity skip happens on both"
+  },
   "filesystem_premise_onpod": {
    "resolution": "same_on_pod",
    "evidence": "every path it inspects is tracked or staged"
@@ -148,7 +153,6 @@
   "tests/data/test_c1_battery.py::test_the_shared_renderers_reproduce_the_frozen_battery_byte_for_byte",
   "tests/data/test_dataset.py::tokenizer",
   "tests/data/test_sessions.py::tokenizer",
-  "tests/docs/test_repository_structure.py::test_every_path_named_in_the_repo_layout_exists",
   "tests/evaluation/test_oracle_reasoning.py::tok",
   "tests/evaluation/test_perf_trend.py::test_recorded_scores_match_their_scorecards",
   "tests/pod/test_c1_driver_execution.py::_summary_template",
@@ -249,7 +253,7 @@
   },
   {
    "file": "tests/autoinit/test_c1_readiness_gates.py",
-   "line": 96,
+   "line": 97,
    "kind": "pytest.skip",
    "function": "test_the_gate_runs_the_seven_real_groups_on_this_host",
    "condition": "record[\"counts\"][\"SOURCE_ABSENT\"]",
@@ -265,7 +269,23 @@
   },
   {
    "file": "tests/autoinit/test_c1_readiness_gates.py",
-   "line": 443,
+   "line": 442,
+   "kind": "pytest.skip",
+   "function": "_skip_if_inside_the_measured_suite",
+   "condition": "CTE.in_cpu_test_scope()",
+   "expanded": "CTE.in_cpu_test_scope()",
+   "signal": "cpu_test_scope",
+   "verdict": "same_on_pod",
+   "why": "declares WHICH SUITE this is, not which machine runs it. Both the simulator and the paid pod set it, so both decide the same way. It is checked BEFORE simulator_marker precisely so the two can never be confused: a simulator flag is set by one machine, this by both.",
+   "nodeid": "tests/autoinit/test_c1_readiness_gates.py::_skip_if_inside_the_measured_suite",
+   "readiness_group": null,
+   "registered_as": null,
+   "parity": "normalized_by_contract",
+   "parity_why": "AAD_C1_CPU_TEST_SCOPE is part of the shared CPU-test contract and is set identically by the simulator and the pod, so the measurement-circularity skip happens on both"
+  },
+  {
+   "file": "tests/autoinit/test_c1_readiness_gates.py",
+   "line": 470,
    "kind": "pytest.skip",
    "function": "test_the_committed_record_still_binds_the_live_executable",
    "condition": "not path.is_file()",
@@ -281,7 +301,7 @@
   },
   {
    "file": "tests/autoinit/test_c1_readiness_gates.py",
-   "line": 724,
+   "line": 752,
    "kind": "pytest.skip",
    "function": "test_the_recorded_swept_commit_is_a_real_commit_in_this_repository",
    "condition": "not path.is_file()",
@@ -790,22 +810,6 @@
    "registered_as": "local_hf_cache",
    "parity": "normalized_by_contract",
    "parity_why": "the teacher tokenizer is read from the HF cache. Setup downloads the pinned teacher into the REAL cache before the gate, but the pytest command runs against the isolated empty one, so the pod makes the same decision as the diagnostic. The real cache is asserted intact after the gate and is never re-downloaded."
-  },
-  {
-   "file": "tests/docs/test_repository_structure.py",
-   "line": 139,
-   "kind": "pytest.skip",
-   "function": "test_every_path_named_in_the_repo_layout_exists",
-   "condition": "absent",
-   "expanded": "absent | absent=sorted(r for r in absolute if not Path(r).exists()) | absolute={r for r in refs if r.startswith(\"/\")} | refs={ref for ref in backticked(LAYOUT)\n            if (\"/\" in ref or ref.endswith(\".md\"))\n            and \"*\" not in ref and \"{\" not in ref}",
-   "signal": "filesystem_premise_unresolved",
-   "verdict": "unknown",
-   "why": "an existence check whose path this audit could not read from source; a human must say what it inspects",
-   "nodeid": "tests/docs/test_repository_structure.py::test_every_path_named_in_the_repo_layout_exists",
-   "readiness_group": null,
-   "registered_as": "devbox_only_artifact",
-   "parity": "normalized_by_contract",
-   "parity_why": "the premise is host-local state reached either through $HOME (aad-artifacts / aad-scratch, and `os.path.expanduser(\"~\")` for the wheelhouse) or as a gitignored repo artifact. The contract points HOME at a fresh empty directory for the pytest command on BOTH machines, and the simulator hides the repo artifacts the pod never receives, so both decide absent. Verified mechanism, not assertion: the hardcoded /home/ecs-user literals were replaced with Path.home() precisely so the declared isolation could reach them."
   },
   {
    "file": "tests/docs/test_storage_inventory.py",
@@ -1721,6 +1725,10 @@
   }
  ],
  "signal_definitions": {
+  "cpu_test_scope": {
+   "verdict": "same_on_pod",
+   "why": "declares WHICH SUITE this is, not which machine runs it. Both the simulator and the paid pod set it, so both decide the same way. It is checked BEFORE simulator_marker precisely so the two can never be confused: a simulator flag is set by one machine, this by both."
+  },
   "simulator_marker": {
    "verdict": "differs_on_pod",
    "why": "THE ATTEMPT-5 DEFECT. Set by simulate_pod_env.sh and by nothing else, so it is false on the pod even when the condition it stands for holds. Never legitimate as a staging or artifact premise."
@@ -1767,5 +1775,5 @@
   }
  },
  "verdict": "PASS",
- "digest": "4d182a8a44f9df992ee7ea36a29e8dd62e5d0ea0e02b69a05259e9a3b2099abb"
+ "digest": "78e80592823e22122435cbfa0023d5b81c77c2f6b40966de0e0232e47e8e0102"
 }

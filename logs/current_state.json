@@ -1,6 +1,6 @@
 {
  "schema": "aadistill.current_state/v2",
- "generated_utc": "2026-09-06T12:00:00Z",
+ "generated_utc": "2026-09-06T18:00:00Z",
  "_contract": "Minimal machine-readable CURRENT snapshot: live facts only. History: logs/decisions.md. Human view: logs/STATE.md. Ownership: logs/CATALOG.md.",
  "baseline_commit": "logs/c1_pod_environment_verification.json:swept_base_commit",
  "baseline_commit_meaning": "LAST TESTED IMPLEMENTATION is OWNED by the readiness record's swept_base_commit and deliberately not duplicated here. This snapshot cannot name a commit that does not exist until after it is written, and gate 12 now forbids editing state after the sweep -- so a copy here could only ever go stale. It did: 4f85ecda vs the record's 0457bab.",
@@ -72,8 +72,8 @@
   "the ATTENTION 'search declined to calibrate' reading: WITHDRAWN 2026-09-01"
  ],
  "next_starting_point": {
-  "status": "Attempt 6 launched and aborted at the pod CPU test gate. No C1 measurement exists.",
-  "the_ask": "reviewer decision on the three divergences, two of which are mine and one structural.",
+  "status": "Attempt-6 postmortem repair complete at $0. No C1 measurement exists; nothing is authorized.",
+  "the_ask": "reviewer decision on the four repairs and on whether the attempt-6 mechanism is now sufficiently evidenced.",
   "budget": "$265.7679 spent of the unchanged $283.7600 cap; $17.9921 uncommitted."
  },
  "read_order": [
@@ -127,17 +127,17 @@
    "status": "IMPLEMENTED / SEVEN PAID-ATTEMPT LABELS / NOT SCIENTIFICALLY EXECUTED / NOT CURRENTLY AUTHORIZED -- attempt-6 grant CONSUMED at the pod CPU test gate",
    "what_it_is": "fixed-path ATTENTION isolation, 2 arms x 3 fresh seeds = 6 E1_KD_HEAVY_0860K probes. NOT recovery evidence.",
    "incumbent": "fe9683e6a9c783bbc6fe276a78c851c6, digest c313d1b4081b. NOT recovered; margin in phase_b_result.",
-   "execution_prereg": "logs/phase_c1_execution_preregistration.json b4a74f8f7c34 at head_commit 577c5cdc; harness 21d959131745 over 72 files; 12 pre-provider gates",
+   "execution_prereg": "logs/phase_c1_execution_preregistration.json 25062af9ef9c at head_commit 48a85c7d; harness e765a54fcd98 over 72 files; 12 pre-provider gates",
    "pricing": "logs/phase_c1_pricing.json 909ed65f -- secure L40S $1.09/h, CEILING $15.1475.",
    "seeds": "1635674081, 1656475568, 696460635 (derived from the C0 digest)",
    "scoring": "c1_confirmation_scoring@v1 77507935; equivalence IDENTICAL over 15 probes. @v2 808080a7 and battery a285d61f untouched.",
    "attempts": "SEVEN attempt LABELS: 1, 2, 3, 3R, 4, 5, 6. SIX created a paid provider resource; attempt 3 created none ($0.00). $1.9082 of C1 infrastructure spend, ZERO science.",
    "gates": "12 pre-provider gates. Detail: STATE.md, decisions.md 2026-09-04.",
-   "blocker": "Attempt 6 aborted at the pod CPU test gate: 2791 passed / 113 skipped / 18 failed against the sweep's 2808 / 114 / 0. The strict skip-set comparison WORKED and named three divergences: two tests the sweep skips only because the recorder stashes its own record (structural), one that skips on a pod because REPO_LAYOUT.md names absolute /home/ecs-user paths a fresh HOME cannot neutralize (a registry error: one parity claim asserted for a whole class). The 18 failures are all in the module the parity repair made shell out to cpu_test_env_args.py; ATTRIBUTED, not proven -- the outcomes file keeps skip reasons but only failure nodeids.",
-   "needs": "a reviewer decision. The grant, the authorization and the launch attempt are all consumed.",
+   "blocker": "Attempt-6 postmortem REPAIRED at $0 on 2026-09-06. The two readiness-record self-consumers now skip on BOTH machines via AAD_C1_CPU_TEST_SCOPE (a suite marker, not a simulator flag); the REPO_LAYOUT portable test no longer skips on host-local absence; the simulator takes an explicit PODSIM_PYTHON and refuses rather than picking an ambient interpreter; and failure messages/tracebacks plus the raw pytest.log and JUnit now survive a setup abort. Attempt-6's mechanism remains ATTRIBUTED, not confirmed. C1 has still NEVER been measured.",
+   "needs": "a reviewer decision on this repair, and only then a further one-use grant. No launch-bound record and no Attempt-7 grant exist.",
    "not_built": "no grant; the pre-ATTENTION parent rebuild and the ~8 GB teacher weights need GPU/network and have not run locally",
    "evidence": "logs/autoinit_c1_attempt6/ (test_gate_failures.json and pod_pytest_outcomes.json)",
-   "readiness": "the committed launch-bound record is CONSUMED by attempt 6 and its skip set is now known to differ from a pod's by three nodeids. A new sweep AND a resolution of the three divergences are owed before any launch."
+   "readiness": "logs/c1_skip_predicate_audit.json: 97 predicates across 144 modules, strict_cpu_test_parity_ready=PASS, 0 unaccounted, 0 stale. The committed pod-environment record is CONSUMED by attempt 6; a new sweep is owed before any launch."
   },
   "c2": {
    "status": "NOT STARTED",
