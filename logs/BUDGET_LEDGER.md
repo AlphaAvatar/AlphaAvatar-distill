@@ -1710,3 +1710,54 @@ pod. The CPU-test isolation did not leak: after the gate, on the real L40S, CUDA
 was available again and the teacher cache was intact. And the GPU predicate
 appears in neither divergence list, so `CUDA_VISIBLE_DEVICES=""` did hide an
 L40S — the one claim that could not be tested on a CPU box.
+
+---
+
+## 2026-09-06 — C1 attempt 7: past the CPU gate at last, then argparse, `$0.4231`
+
+| what | cost | evidence |
+| --- | --- | --- |
+| C1 attempt 7: launch-bound readiness, 12/12 gates, 23.29 min, **INFRASTRUCTURE ABORT — the driver exited 2 on an unrecognized argument**. No replay, no training, no evaluation, no decision | $0.4231 | `logs/autoinit_c1_attempt7/` |
+
+**Cumulative: $266.1910 of $283.7600.** `$17.5690` uncommitted. The attempt-7
+grant is CONSUMED — pod `gfd8buh5tr51qb` was created — and it permits no retry
+and no replacement pod.
+
+**The first C1 attempt ever to clear the pod CPU test gate.**
+`MARKER:TESTS_OK:861s`, then `AUTHORIZATION_OK`, then `SETUP_DONE`. Attempts 3R,
+4, 5 and 6 all died at that gate. The complete marker sequence survived for the
+first time too, relayed off the pod while it ran rather than glimpsed through a
+`tail -40` window: `ENV_READY → REPO_READY → ASSETS_STAGED → TRAIN_ENV →
+ASSETS_READY → VLLM_READY → TEACHER_READY → ROPE_OK → TESTS_OK → AUTHORIZATION_OK
+→ SETUP_DONE`.
+
+All four attempt-6 repairs are now validated on real hardware. The strict
+skip-set comparison is fail-closed on any difference and **did not fire**, so the
+pod's complete skip set equalled the launch-bound sweep's 114 nodeids at
+`ee74f9e3dd305c5d` — the first exact sweep/pod agreement in this project. The
+`AAD_C1_CPU_TEST_SCOPE` skip behaved identically on a pod, the explicit
+`PODSIM_PYTHON` held where there is no repo venv, and CUDA and the teacher cache
+were restored after the isolated scope.
+
+**Then the driver never ran.** Root cause **CONFIRMED**, quoted from its own
+relayed stderr rather than attributed:
+
+```
+autoinit_c1_driver.py: error: unrecognized arguments: --stage all
+```
+
+`autoinit_c1_launch.py:701` builds the command with `--stage all`; the C1
+driver's parser defines seven options and no `--stage`. argparse exits 2 before
+a line of the driver runs.
+
+**No `$0` gate could have caught it, and that is the finding.** Every
+pre-provider gate checks the LAUNCHER's inputs — its own argument namespace, the
+harness digest, the authorization, the bundle, the staged view, the readiness
+record. Nothing parses the string the launcher hands the DRIVER with the driver's
+own parser. This is the device-canary failure one level out: that one produced
+`missing_arguments(args)` for the runner's namespace, and the launcher→driver
+seam was left without the equivalent.
+
+The failure-detail capture added after attempt 6 is what made this diagnosable in
+minutes: the driver's stderr came home in `relay/autoinit_c1_run.log`. Nothing is
+repaired here.

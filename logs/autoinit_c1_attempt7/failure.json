@@ -1,0 +1,85 @@
+{
+  "schema": "aadistill.autoinit.c1_attempt_failure/v1",
+  "attempt": 7,
+  "pod_id": "gfd8buh5tr51qb",
+  "session_commit": "0d5b602649cdff5bf390655733d897900a65b964",
+  "_what_this_is": "the first C1 attempt to clear the pod CPU test gate, and the first whose root cause is CONFIRMED from the failing process's own output rather than attributed.",
+
+  "root_cause": {
+    "status": "CONFIRMED — quoted verbatim from the driver's relayed stderr, not inferred",
+    "evidence": "relay/autoinit_c1_run.log",
+    "message": "autoinit_c1_driver.py: error: unrecognized arguments: --stage all",
+    "exit_code": 2,
+    "what": "scripts/pod/autoinit_c1_launch.py builds the driver command with `--stage all` (line 701). scripts/pod/autoinit_c1_driver.py's parser defines --image-digest, --rate, --spent-usd, --soft-stop-usd, --authorized-usd, --probe-train-minutes and --probe-battery-minutes, and no --stage. argparse exits 2 before the driver runs a single line.",
+    "why_no_zero_cost_gate_caught_it": "every pre-provider gate checks the LAUNCHER's own inputs -- its argument namespace, the harness digest, the authorization, the bundle, the staged view, the readiness record. Nothing parses the string the launcher will hand the DRIVER with the driver's own parser. `missing_arguments(args)` validates the launcher namespace against what SessionRunner reads; it has no counterpart for the driver command.",
+    "precedent": "device-canary attempt 1 died at $0.0603 because the machinery read three attributes its parser had never defined, and nothing looked until a pod existed. That produced `missing_arguments`. This is the same shape one level out: launcher-to-driver instead of runner-to-args."
+  },
+
+  "what_this_attempt_established": {
+    "first_ever_TESTS_OK": "MARKER:TESTS_OK:861s. No C1 attempt had ever cleared the pod CPU test gate. Attempts 3R, 4, 5 and 6 all died there.",
+    "cpu_test_scope_works_on_a_pod": "the shared AAD_C1_CPU_TEST_SCOPE marker, set identically by the simulator and the pod, produced the intended skip on real hardware.",
+    "strict_skip_set_comparison_matched": "the gate is fail-closed on any difference and it did not fire, so the pod's complete skip set was IDENTICAL to the launch-bound sweep's 114 nodeids at digest ee74f9e3dd305c5d. That is the first exact agreement between a sweep and a pod in this project.",
+    "podsim_python_works": "the explicit-interpreter contract held on a machine with no repo .venv, which is what attempt 6 lost 18 cases to.",
+    "cuda_and_teacher_restored": "the committed post-gate assertions passed: MARKER:AUTHORIZATION_OK and MARKER:SETUP_DONE follow TESTS_OK, and setup does not reach them unless CUDA is available again and the real teacher cache is present.",
+    "note": "all four attempt-6 repairs are therefore validated on real hardware, at $0.4231."
+  },
+
+  "setup_markers_observed": {
+    "complete_and_from_the_relayed_status_file": [
+      "2026-09-06T13:45:17Z MARKER:ENV_READY",
+      "2026-09-06T13:45:22Z MARKER:REPO_READY",
+      "2026-09-06T13:45:28Z MARKER:ASSETS_STAGED",
+      "2026-09-06T13:46:09Z MARKER:TRAIN_ENV",
+      "2026-09-06T13:46:10Z MARKER:ASSETS_READY",
+      "2026-09-06T13:47:00Z MARKER:VLLM_READY",
+      "2026-09-06T13:47:15Z MARKER:TEACHER_READY",
+      "2026-09-06T13:47:25Z MARKER:ROPE_OK",
+      "2026-09-06T14:01:48Z MARKER:TESTS_OK:861s",
+      "2026-09-06T14:01:50Z MARKER:AUTHORIZATION_OK",
+      "2026-09-06T14:01:50Z MARKER:SETUP_DONE"
+    ],
+    "source": "relay/autoinit_c1.status, relayed off the pod while it ran. Every previous attempt reported markers only through the launcher's tail window; this is the complete sequence."
+  },
+
+  "cpu_test_gate": {
+    "verdict": "PASS",
+    "duration_s": 861,
+    "skip_set_comparison": "no divergence reported. The gate runs --strict and refuses on ANY difference, so silence here means the pod's skip set equalled the launch-bound record's 114 nodeids at digest ee74f9e3dd305c5d09e68d06cf068bd62cc8266644a2384e4431aeca2ac4db37.",
+    "counts_caveat": "the per-outcome counts were not echoed on the success path -- setup prints them only on failure. The equality is proven by the gate not firing, not by a transcribed count."
+  },
+
+  "scientific_status": {
+    "replay_parent": "NOT REACHED",
+    "replay_incumbent": "NOT REACHED",
+    "recovery_training_began": false,
+    "probes_trained": 0,
+    "probes_evaluated": 0,
+    "confirmation_admissions": 0,
+    "correct_overall": [],
+    "usable_rollout": [],
+    "paired_bootstrap_evidence": "none",
+    "decision": "none",
+    "verdict": "C1 attempt 7 is an INFRASTRUCTURE ABORT. It is not evidence for or against the ATTENTION isolation and must not be read as any C1 result."
+  },
+
+  "artifact_gate": {
+    "manifest_rc": 5,
+    "missing_required": "audit/autoinit_c1/c1_evidence.json (no file matched the pattern)",
+    "why": "correct and expected: the driver exited before writing anything, so the session evidence it owes does not exist. The gate refused, said so before teardown, and the teardown proceeded because failed=training_complete is an allowed terminal state."
+  },
+
+  "cost": {
+    "provider_polled_last_watchdog_tick": {"usd": 0.4231, "elapsed_minutes": 23.29, "at": "2026-09-06T14:05:40Z"},
+    "launcher_at_deletion": {"usd": 0.4168, "elapsed_minutes": 22.94},
+    "recorded": 0.4231,
+    "rule": "the provider-polled watchdog reading is the honest one and is also the larger"
+  },
+
+  "timestamps": {
+    "created_utc": "2026-09-06T13:42:22Z",
+    "deleted_utc": "2026-09-06T14:05:19Z",
+    "watchdog_end": "pod_gone after 24 ticks, 2026-09-06T14:05:40Z"
+  },
+
+  "not_repaired_here": "the launcher/driver argument mismatch is a $0 fix, and this closeout does not make it. The grant is consumed and permits no retry and no replacement pod."
+}

@@ -1,0 +1,6 @@
+usage: autoinit_c1_driver.py [-h] [--image-digest IMAGE_DIGEST] [--rate RATE]
+                             [--spent-usd SPENT_USD] --soft-stop-usd
+                             SOFT_STOP_USD --authorized-usd AUTHORIZED_USD
+                             [--probe-train-minutes PROBE_TRAIN_MINUTES]
+                             [--probe-battery-minutes PROBE_BATTERY_MINUTES]
+autoinit_c1_driver.py: error: unrecognized arguments: --stage all

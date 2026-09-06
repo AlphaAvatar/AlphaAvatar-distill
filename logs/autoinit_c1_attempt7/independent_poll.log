@@ -1,0 +1,3 @@
+2026-09-06T13:43:03Z | gfd8buh5tr51qb RUNNING $1.09/h up=Nones | [13:42:22] watchdog detached — hard 834 min = $15.15
+2026-09-06T13:53:05Z | gfd8buh5tr51qb RUNNING $1.09/h up=533s | [13:45:12] draw 1: running setup
+2026-09-06T14:03:06Z | gfd8buh5tr51qb RUNNING $1.09/h up=1133s | [14:01:57] driver detached, pid 12178, confirmed by descriptor_probe_exited — $0.36

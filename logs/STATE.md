@@ -35,7 +35,43 @@ PHASE C1 CPU-TEST PARITY REPAIRED AT `$0` — STILL NEVER MEASURED**
 > an L40S. A CPU dev box cannot prove it. The contract is applied and the
 > decision is proven stable here; the GPU half is first exercised on the next pod.
 
-> **Attempt-7 grant APPROVED, 2026-09-06 — not yet issued, nothing running.**
+> **Attempt 7, 2026-09-06 — the CPU gate FELL, then argparse.** Pod
+> `gfd8buh5tr51qb`, created at `$1.09/h`, deleted at 23.29 min for **`$0.4231`**,
+> provider confirms gone. Cumulative **`$266.1910`** of `$283.7600`, leaving
+> `$17.5690`. **No scientific stage ran — no replay, no training, no evaluation,
+> no decision.**
+>
+> **The first C1 attempt ever to clear the pod CPU test gate.**
+> `MARKER:TESTS_OK:861s`, then `AUTHORIZATION_OK`, then `SETUP_DONE`. Attempts
+> 3R, 4, 5 and 6 all died there. The complete marker sequence survived too,
+> relayed off the pod while it ran rather than glimpsed through a `tail -40`
+> window: `ENV_READY → REPO_READY → ASSETS_STAGED → TRAIN_ENV → ASSETS_READY →
+> VLLM_READY → TEACHER_READY → ROPE_OK → TESTS_OK → AUTHORIZATION_OK →
+> SETUP_DONE`.
+>
+> **All four attempt-6 repairs are validated on real hardware.** The strict
+> skip-set comparison is fail-closed on any difference and **did not fire**, so
+> the pod's complete skip set equalled the launch-bound sweep's 114 nodeids at
+> `ee74f9e3dd305c5d` — the first exact sweep/pod agreement in this project. The
+> `AAD_C1_CPU_TEST_SCOPE` skip behaved identically on a pod, the explicit
+> `PODSIM_PYTHON` held where there is no repo venv, and CUDA and the teacher
+> cache were restored after the isolated scope.
+>
+> **Then the driver never ran.** Root cause **CONFIRMED**, quoted from its own
+> relayed stderr rather than attributed:
+> `autoinit_c1_driver.py: error: unrecognized arguments: --stage all`.
+> `autoinit_c1_launch.py:701` builds that flag; the C1 driver's parser defines
+> seven options and no `--stage`. argparse exits 2 before a line of it runs.
+>
+> **No `$0` gate could have caught it, and that is the finding.** Every
+> pre-provider gate checks the LAUNCHER's inputs — its own argument namespace,
+> the harness digest, the authorization, the bundle, the staged view, the
+> readiness record. Nothing parses the string the launcher hands the DRIVER with
+> the driver's own parser. This is the device-canary failure one level out: that
+> one produced `missing_arguments(args)` for the runner's namespace, and the
+> launcher→driver seam was left without the equivalent. **Unrepaired.**
+
+> **Attempt-7 grant CONSUMED, 2026-09-06 — a provider resource was created.**
 > A NEW one-use grant ([`autoinit_c1_attempt7_grant.json`](autoinit_c1_attempt7_grant.json)).
 > Attempt 6's grant and authorization remain CONSUMED and are not reused. Spend
 > stays `$265.7679` of `$283.7600` with `$17.9921` uncommitted; one full

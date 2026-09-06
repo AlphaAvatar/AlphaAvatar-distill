@@ -1,6 +1,6 @@
 {
  "schema": "aadistill.current_state/v2",
- "generated_utc": "2026-09-06T13:09:58Z",
+ "generated_utc": "2026-09-06T14:20:00Z",
  "_contract": "Minimal machine-readable CURRENT snapshot: live facts only. History: logs/decisions.md. Human view: logs/STATE.md. Ownership: logs/CATALOG.md.",
  "baseline_commit": "logs/c1_pod_environment_verification.json:swept_base_commit",
  "baseline_commit_meaning": "LAST TESTED IMPLEMENTATION is OWNED by the readiness record's swept_base_commit and deliberately not duplicated here. This snapshot cannot name a commit that does not exist until after it is written, and gate 12 now forbids editing state after the sweep -- so a copy here could only ever go stale. It did: 4f85ecda vs the record's 0457bab.",
@@ -8,18 +8,19 @@
   "paid_compute": false,
   "pods": 0,
   "launchers": 0,
-  "note": "zero pods confirmed via GraphQL myself{pods}; n71opk7lv4fhzf deleted, provider confirms gone"
+  "note": "zero pods confirmed via GraphQL myself{pods}; gfd8buh5tr51qb deleted, provider confirms gone"
  },
  "authorized": {
   "any": false,
-  "note": "NO GRANT IS LIVE. The attempt-6 grant and its authorization are CONSUMED -- pod n71opk7lv4fhzf was created -- and permit no retry and no replacement pod.",
+  "note": "NO GRANT IS LIVE. The attempt-7 grant and its authorization are CONSUMED -- pod gfd8buh5tr51qb was created -- and permit no retry and no replacement pod.",
   "c1_attempt1": "CONSUMED. $0.0786, bundle fetch.",
   "c1_attempt2": "CONSUMED. $0.1013, ROPE_OK.",
   "c1_attempt3": "SUPERSEDED UNLAUNCHED by the reprice. $0.00, no pod.",
   "c1_attempt3r": "CONSUMED. $0.3482, pod CPU test gate; ROPE_OK passed.",
   "c1_attempt4": "CONSUMED. $0.6986, aborted at the pod CPU test gate.",
   "c1_attempt5": "CONSUMED. $0.3150, pod CPU test gate; ROPE_OK passed.",
-  "c1_attempt6": "CONSUMED. $0.3665, pod CPU test gate; strict skip-set comparison refused."
+  "c1_attempt6": "CONSUMED. $0.3665, pod CPU test gate; strict skip-set comparison refused.",
+  "c1_attempt7": "CONSUMED. $0.4231, driver exit 2 after TESTS_OK."
  },
  "prepared_launch": {
   "any": false,
@@ -27,14 +28,14 @@
   "note": "aad_autoinit_79c18adb.bundle 2d1865ae7973 remains on the relay from the consumed attempt 5; it authorizes nothing."
  },
  "budget": {
-  "cumulative_spend_usd": 265.7679,
+  "cumulative_spend_usd": 266.191,
   "authorized_cap_usd": 283.76,
-  "remaining_usd": 17.9921,
+  "remaining_usd": 17.569,
   "planning_floor_usd": 13.4401,
   "remaining_is_not_permission": true,
   "ledger": "logs/BUDGET_LEDGER.md",
-  "headroom_note": "Phase-B 1-5 $30.0200; continuation 1-5 $3.8047 and CLOSED Phase B; C1 $1.9082 across six PAID attempts (1, 2, 3R, 4, 5, 6) plus attempt 3 at $0.00, all infrastructure aborts with zero measurement.",
-  "planning_floor_note": "C1 at secure L40S $1.09/h: floor $13.4401, soft $14.7841, ceiling $15.1475. $17.9921 remains, so one full attempt fits with about $2.84 reserve. Headroom is not permission."
+  "headroom_note": "Phase-B 1-5 $30.0200; continuation 1-5 $3.8047 and CLOSED Phase B; C1 $2.3313 across seven PAID attempts plus attempt 3 at $0.00, all infrastructure aborts with zero measurement.",
+  "planning_floor_note": "C1 at secure L40S $1.09/h: floor $13.4401, soft $14.7841, ceiling $15.1475. $17.5690 remains, so one full attempt fits with about $2.42 reserve. Headroom is not permission."
  },
  "frozen": {
   "science_plan_hash": "02be33b9a7a8e26bc8bfb75795351e8cdc9ffd441b47066cc81887cfc511b55c",
@@ -63,7 +64,7 @@
   "owned_by": "logs/c1_pod_environment_verification.json",
   "owns": "record_kind, swept_base_commit, staging-contract digest, setup environment, counts, both digests and verdict. Read them THERE.",
   "renderer_parity_owned_by": "logs/c1_renderer_parity.json",
-  "last_paid_attempt_owned_by": "logs/autoinit_c1_attempt6/test_gate_failures.json"
+  "last_paid_attempt_owned_by": "logs/autoinit_c1_attempt7/failure.json"
  },
  "abandoned": [
   "recovery_search_v1; calib.reasoning_heavy@v1 (both INVALID/UNBUILDABLE before use)",
@@ -72,9 +73,9 @@
   "the ATTENTION 'search declined to calibrate' reading: WITHDRAWN 2026-09-01"
  ],
  "next_starting_point": {
-  "status": "Attempt-7 grant preparation. The attempt-6 repair is complete and verified at $0.",
-  "the_ask": "grant, launch-bound sweep, issuance, bundle, 12 gates, then STOP for the paid decision.",
-  "budget": "$265.7679 spent of the unchanged $283.7600 cap; $17.9921 uncommitted."
+  "status": "Attempt 7 cleared the CPU gate; the driver exited 2 before replay.",
+  "the_ask": "reviewer decision on the launcher/driver command seam, which no $0 gate covers.",
+  "budget": "$266.1910 spent of the unchanged $283.7600 cap; $17.5690 uncommitted."
  },
  "read_order": [
   "logs/PHASE_INDEX.md -- history by phase, START HERE",
@@ -124,19 +125,19 @@
    "authorizes": "nothing"
   },
   "c1": {
-   "status": "IMPLEMENTED / SEVEN PAID-ATTEMPT LABELS / NOT SCIENTIFICALLY EXECUTED / NOT CURRENTLY AUTHORIZED -- attempt-7 grant in preparation",
+   "status": "IMPLEMENTED / EIGHT PAID-ATTEMPT LABELS / NOT SCIENTIFICALLY EXECUTED / NOT CURRENTLY AUTHORIZED -- attempt-7 grant CONSUMED after the driver exited 2",
    "what_it_is": "fixed-path ATTENTION isolation, 2 arms x 3 fresh seeds = 6 E1_KD_HEAVY_0860K probes. NOT recovery evidence.",
    "incumbent": "fe9683e6a9c783bbc6fe276a78c851c6, digest c313d1b4081b. NOT recovered; margin in phase_b_result.",
    "execution_prereg": "logs/phase_c1_execution_preregistration.json 25062af9ef9c at head_commit 48a85c7d; harness e765a54fcd98 over 72 files; 12 pre-provider gates",
    "pricing": "logs/phase_c1_pricing.json 909ed65f -- secure L40S $1.09/h, CEILING $15.1475.",
    "seeds": "1635674081, 1656475568, 696460635 (derived from the C0 digest)",
    "scoring": "c1_confirmation_scoring@v1 77507935; equivalence IDENTICAL over 15 probes. @v2 808080a7 and battery a285d61f untouched.",
-   "attempts": "SEVEN LABELS so far: 1, 2, 3, 3R, 4, 5, 6 -- SIX created a paid provider resource, attempt 3 created none ($0.00). $1.9082 spent, ZERO science. Attempt 7 is in preparation and has created nothing.",
+   "attempts": "EIGHT LABELS: 1, 2, 3, 3R, 4, 5, 6, 7 -- SEVEN created a paid provider resource, attempt 3 created none ($0.00). $2.3313 spent, ZERO science. Attempt 7 is the FIRST to clear the pod CPU test gate.",
    "gates": "12 pre-provider gates. Detail: STATE.md, decisions.md 2026-09-04.",
-   "blocker": "Attempt-6 postmortem REPAIRED at $0 on 2026-09-06. The two readiness-record self-consumers now skip on BOTH machines via AAD_C1_CPU_TEST_SCOPE (a suite marker, not a simulator flag); the REPO_LAYOUT portable test no longer skips on host-local absence; the simulator takes an explicit PODSIM_PYTHON and refuses rather than picking an ambient interpreter; and failure messages/tracebacks plus the raw pytest.log and JUnit now survive a setup abort. Attempt-6's mechanism remains ATTRIBUTED, not confirmed. C1 has still NEVER been measured.",
-   "needs": "a reviewer decision on this repair, and only then a further one-use grant. No launch-bound record and no Attempt-7 grant exist.",
+   "blocker": "Attempt 7 cleared the CPU gate (MARKER:TESTS_OK:861s, skip set IDENTICAL to the launch-bound sweep) and then the driver exited 2: autoinit_c1_launch.py builds `--stage all` and the C1 driver's parser has no such option. CONFIRMED from the driver's own relayed stderr. No $0 gate parses the launcher's driver command with the driver's parser -- the device-canary failure one level out. UNREPAIRED.",
+   "needs": "a reviewer decision. The grant, the authorization and the launch attempt are all consumed.",
    "not_built": "no grant; the pre-ATTENTION parent rebuild and the ~8 GB teacher weights need GPU/network and have not run locally",
-   "evidence": "logs/autoinit_c1_attempt6/ (test_gate_failures.json and pod_pytest_outcomes.json)",
+   "evidence": "logs/autoinit_c1_attempt7/ (failure.json and relay/autoinit_c1_run.log)",
    "readiness": "logs/c1_skip_predicate_audit.json: 97 predicates across 144 modules, strict_cpu_test_parity_ready=PASS, 0 unaccounted, 0 stale. The committed pod-environment record is CONSUMED by attempt 6; a new sweep is owed before any launch."
   },
   "c2": {
@@ -168,7 +169,7 @@
   "free_space_note": "12.01 GiB free after the 2026-09-06 limited P12 cleanup of rebuildable caches and ephemeral residue ONLY; before it 0.64 GiB failed the suite with ENOSPC. aad-artifacts unchanged, the seven pinned snapshots intact. Every deletion: logs/c1_storage_recovery.json.",
   "free_bytes": 12897964032
  },
- "blocker": "No C1 grant exists. Attempt 6 aborted at the pod CPU test gate on three named skip-set divergences and 18 failures. C1 has still never been measured.",
+ "blocker": "No C1 grant exists. Attempt 7 passed the CPU gate and died on a launcher/driver argument mismatch. C1 has still never been measured.",
  "deferred_not_blocking": {
   "_note": "open, none blocking. Detail: logs/HANDOFF_next_session.md",
   "duplicate_checkpoints": "2.92 GiB, KEEP / unresolved ownership -- maintainer decision"
