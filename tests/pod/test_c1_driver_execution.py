@@ -127,6 +127,118 @@ def test_all_c1_paths_are_c1_owned():
         assert bad not in code, bad
 
 
+# --- the roots the driver loads, and where they land ------------------------
+#
+# `_fake_hardware` replaces `stage_de` WHOLE, so the harness below never executes
+# the real one — and the real one is where attempt 8's second defect lived. Stage
+# D declared `cuda` through `build_arm_specs(workdir_device="cuda")` and loaded
+# its root with a bare `AutoModelForCausalLM.from_pretrained(...).eval()`. Every
+# operator reads `model_device(model)`, the fact rather than the intent, so the
+# whole parent replay would have executed on the host CPU inside a paid GPU hour.
+#
+# These run the REAL `stage_de` and `stage_f`, faking only `materialize_fixed_path`
+# and the adapter's loader, so the root_loader closure itself is executed.
+
+@pytest.fixture
+def treatment_registered():
+    from aadistill.autoinit.operators import attention_activation
+
+    attention_activation.register(replace=True)
+    yield
+    attention_activation.unregister()
+
+
+class _FakeStep:
+    def __init__(self, i):
+        self.index, self.digest_expected, self.digest_matches = i, None, None
+        self.identity = types.SimpleNamespace(artifact_digest="d" * 64)
+        self.checkpoint_path = f"/tmp/ckpt{i}"
+
+    def as_dict(self):
+        return {"index": self.index}
+
+
+def _capture_root(monkeypatch, driver):
+    """Run the real stage, capture what the root loader was asked for."""
+    from aadistill.autoinit.adapters.qwen3 import QWEN3_ADAPTER
+
+    seen: dict = {}
+
+    def fake_load(path, dtype=None, device="cpu"):
+        seen.update(path=str(path), dtype=dtype, device=device)
+        return types.SimpleNamespace(config=types.SimpleNamespace())
+
+    monkeypatch.setattr(QWEN3_ADAPTER, "load", fake_load)
+
+    def fake_materialize(spec, *, adapter, root_loader, workdir, repo_root,
+                         on_step=None, **kw):
+        seen["spec_device"] = spec.device
+        root_loader()                       # the closure under test
+        return [_FakeStep(i) for i in range(4)]
+
+    monkeypatch.setattr(D, "materialize_fixed_path", fake_materialize)
+    monkeypatch.setattr(D, "write_replay_record",
+                        lambda *a, **k: Path("/dev/null"))
+    return seen
+
+
+def test_stage_d_loads_its_root_on_the_arm_declared_device(
+        harness, monkeypatch, treatment_registered):
+    driver = D.C1Driver(_args())
+    driver.teacher_path = str(harness.tmp / "teacher")
+    seen = _capture_root(monkeypatch, driver)
+
+    driver.stage_de()
+
+    assert seen["spec_device"] == "cuda", "the arm no longer declares cuda"
+    assert seen["device"] == seen["spec_device"], (
+        "stage D asked for a root on "
+        f"{seen['device']!r} while its arm declares {seen['spec_device']!r}")
+    assert seen["device"] == driver.arms["incumbent"].device
+    assert seen["path"] == driver.teacher_path
+    assert seen["dtype"] == "bfloat16"
+
+
+def test_stage_f_loads_its_root_on_its_own_arm_device(
+        harness, monkeypatch, treatment_registered):
+    driver = D.C1Driver(_args())
+    driver.teacher_path = str(harness.tmp / "teacher")
+    _capture_root(monkeypatch, driver)
+    driver.stage_de()
+    driver.parent = _FakeStep(2)
+    #: Stage F's own `complete("F")` runs the REAL order contract, so the four
+    #: stages that precede it must have happened. Declared rather than faked
+    #: away — a stage-order regression must still be visible here.
+    driver.completed = [D.CS.stage(x).stage_id for x in ("B", "C", "D", "E")]
+
+    seen = _capture_root(monkeypatch, driver)
+    driver.stage_f()
+
+    assert seen["device"] == driver.arms["treatment"].device
+    assert seen["path"] == driver.parent.checkpoint_path
+
+
+def test_no_c1_root_is_loaded_outside_the_adapter():
+    """The adapter owns the model lifecycle: path, dtype AND placement.
+
+    A raw `from_pretrained` is exactly the shape that lost the transfer, and it
+    loses it silently — the model is real, the config is right, and only the
+    weights are in the wrong place.
+    """
+    code = _executable_text(DRIVER_SRC)
+    assert "AutoModelForCausalLM" not in code
+    assert "from_pretrained" not in code
+
+
+def test_the_driver_uses_the_real_fixed_path_executor_and_its_device_gate():
+    """The refusal only protects the driver if the driver calls that function."""
+    from aadistill.autoinit import fixed_path
+
+    assert D.materialize_fixed_path is fixed_path.materialize_fixed_path
+    assert "require_root_on_declared_device" in \
+        (REPO / "src/aadistill/autoinit/fixed_path.py").read_text()
+
+
 def test_the_trainer_headroom_is_derived_from_the_committed_measurement():
     """39.79 + 1.35 + 0.51 GiB. Not a written constant."""
     assert D._trainer_bytes() == int((39.79 + 1.35 + 0.51) * 2**30)

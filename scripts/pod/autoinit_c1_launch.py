@@ -769,11 +769,24 @@ def spec(args) -> SessionSpec:
             success="ALL_DONE",
             failure=("C1_FAILED", "C1_REPLAY_MISMATCH", "C1_INCOMPLETE"),
             incomplete=("C1_INCOMPLETE",),
+            #: NEUTRAL, deliberately. `SessionRunner` prints this for ANY marker
+            #: in `failure`, so the previous text described a replay mismatch
+            #: whatever had actually happened — and on attempt 8 it did: stage D
+            #: raised `KeyError: 'input_ids'` before a single digest was
+            #: computed, and the launcher announced that the frozen path had not
+            #: reproduced its recorded digest. A false claim about reproducibility
+            #: for exactly the property C1 exists to test.
+            #:
+            #: A replay mismatch is asserted in ONE place, by the code that
+            #: observed one: `C1Driver.replay_mismatch` writes
+            #: `c1_replay_record.json` with the expected and actual digests, reads
+            #: it back, and only then emits `MARKER:C1_REPLAY_MISMATCH`. That path
+            #: is unchanged. This line must never anticipate it.
             failure_note=(
-                "a blocking stage failed — collecting evidence, then tearing "
-                "down. C1_REPLAY_MISMATCH is the scientific stop: the frozen path "
-                "did not reproduce its recorded digest, no recovery training was "
-                "started, and the mismatch evidence is the session's product.")),
+                "a blocking C1 stage failed — collecting evidence, then tearing "
+                "down. Classify from the explicit terminal marker and the "
+                "collected driver evidence; this line asserts nothing about "
+                "which stage failed or why.")),
         artifacts=ArtifactPolicy(
             audit_dirname="autoinit_c1",
             evidence_filename="c1_evidence.json",

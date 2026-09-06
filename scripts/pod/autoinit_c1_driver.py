@@ -414,7 +414,6 @@ class C1Driver:
     def stage_de(self) -> None:
         mark("STAGE_START:D")
         from aadistill.autoinit.adapters.qwen3 import QWEN3_ADAPTER
-        from transformers import AutoModelForCausalLM
 
         self.arms = CS.build_arm_specs(workdir_device="cuda")
         if not CS.arm_prefix_is_shared(self.arms):
@@ -444,11 +443,19 @@ class C1Driver:
                               expected=result.digest_expected,
                               selection=result.selection, runtime=runtime)
 
+        # Through the adapter, on the arm's OWN declared device. The teacher was
+        # loaded here by a raw `AutoModelForCausalLM.from_pretrained(...).eval()`
+        # with no transfer, so the root sat on the host CPU while the arm
+        # declared `cuda` — and every operator reads the weights' real device.
+        # The adapter already owns this lifecycle (path, dtype, device); stage F
+        # was always using it. `materialize_fixed_path` now refuses a root that
+        # is not on `spec.device`, so this cannot drift back silently.
+        root_device = self.arms["incumbent"].device
         try:
             steps = materialize_fixed_path(
                 self.arms["incumbent"], adapter=QWEN3_ADAPTER,
-                root_loader=lambda: AutoModelForCausalLM.from_pretrained(
-                    self.teacher_path, dtype="bfloat16").eval(),
+                root_loader=lambda: QWEN3_ADAPTER.load(
+                    self.teacher_path, dtype="bfloat16", device=root_device),
                 workdir=WORK / "incumbent", repo_root=str(REPO), on_step=on_step)
         except FixedPathDigestMismatch as exc:
             self.replay_mismatch(exc, runtime, seen)
@@ -503,10 +510,13 @@ class C1Driver:
         mark("STAGE_START:F")
         from aadistill.autoinit.adapters.qwen3 import QWEN3_ADAPTER
 
+        # Derived from the arm, not a second literal `"cuda"`: the two agreed,
+        # but only because somebody kept them agreeing. Same rule as stage D.
+        root_device = self.arms["treatment"].device
         treatment = materialize_fixed_path(
             self.arms["treatment"], adapter=QWEN3_ADAPTER,
             root_loader=lambda: QWEN3_ADAPTER.load(self.parent.checkpoint_path,
-                                                   device="cuda"),
+                                                   device=root_device),
             workdir=WORK / "treatment", repo_root=str(REPO))
         identities = {
             "schema": "aadistill.autoinit.c1_arm_identities/v1",

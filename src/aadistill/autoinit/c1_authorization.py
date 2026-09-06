@@ -146,6 +146,13 @@ C1_HARNESS_SOURCE_FILES_V1: tuple[str, ...] = (
     "src/aadistill/autoinit/arch.py",
     "src/aadistill/autoinit/artifact.py",
     "src/aadistill/autoinit/calibration.py",
+    # The raw -> operator-ready boundary the fixed path runs every mixture
+    # through. Not reachable by `test_c1_source_closure`'s depth-one walk — the
+    # driver imports `fixed_path`, and `fixed_path` imports this — and declared
+    # anyway, for the same reason `battery_render.py` is: it decides what the
+    # tokens the operators are calibrated on actually ARE. Attempt 8 died in the
+    # gap where it did not exist.
+    "src/aadistill/autoinit/calibration_items.py",
     "src/aadistill/autoinit/device.py",
     "src/aadistill/autoinit/metrics.py",
     "src/aadistill/autoinit/stats.py",

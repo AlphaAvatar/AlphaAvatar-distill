@@ -48,6 +48,8 @@ from .calibration import (
     get_profile,
     profile_for,
 )
+from .calibration_items import prepare_calibration_items
+from .device import model_device
 from .operators.base import OperatorContext, get_implementation
 from .stats import DEFAULT_STATS_SPEC, StatsCache, StatsSpec, stats_cache_key
 
@@ -56,6 +58,31 @@ SCHEMA = "aadistill.autoinit.fixed_path/v1"
 
 class FixedPathError(RuntimeError):
     """The path cannot be executed as specified."""
+
+
+class FixedPathRootDeviceMismatch(FixedPathError):
+    """The root model's weights are not where the path says the path executes.
+
+    `FixedPathSpec.device` is carried into `OperatorContext.device` and into the
+    stats cache key, and `adapter.load` binds every *later* parent to it. The
+    root is the one model the executor does not place itself — it comes from
+    `root_loader` — so it is the one place where declared and actual can differ.
+
+    They differed. C1 stage D declared `cuda` and loaded its root through a raw
+    `AutoModelForCausalLM.from_pretrained(...).eval()` with no transfer, and
+    `depth.apply` reads `model_device(model)` — the fact, not the intent — so the
+    entire parent replay would have run on the host CPU inside a paid GPU hour.
+    """
+
+    def __init__(self, declared: str, actual: str):
+        self.declared = declared
+        self.actual = actual
+        super().__init__(
+            f"the root model's weights are on {actual}, but this path declares "
+            f"device {declared!r}. STOP: every operator reads the weights' real "
+            "device, so the path would execute somewhere other than where it is "
+            "specified to. Load the root on the declared device — do not relax "
+            "the declaration to match a misplaced model.")
 
 
 class FixedPathDigestMismatch(FixedPathError):
@@ -227,6 +254,24 @@ def _selection_evidence(artifacts: Mapping[str, Any]) -> dict[str, Any]:
     return {k: artifacts[k] for k in SELECTION_ARTIFACTS if k in artifacts}
 
 
+def require_root_on_declared_device(model: Any, spec: FixedPathSpec) -> str:
+    """Refuse a root whose weights are not on `spec.device`. Returns the device.
+
+    Read from `model.parameters()`, never from `ctx.device`: the context field is
+    the declaration, and a declaration cannot be evidence about itself. An
+    unindexed declaration (`"cuda"`) accepts any ordinal, because that is exactly
+    what `Tensor.to("cuda")` means; an indexed one must match exactly.
+    """
+    import torch
+
+    declared = torch.device(spec.device)
+    actual = model_device(model)
+    if actual.type != declared.type or (
+            declared.index is not None and actual.index != declared.index):
+        raise FixedPathRootDeviceMismatch(spec.device, str(actual))
+    return str(actual)
+
+
 def materialize_fixed_path(
     spec: FixedPathSpec,
     *,
@@ -243,6 +288,12 @@ def materialize_fixed_path(
     `calibration_items` may be supplied to avoid re-resolving (the resolver
     verifies a content hash on every call); when omitted the profiles are
     resolved from `repo_root`, fail-closed.
+
+    Either way the items pass through `prepare_calibration_items` before they
+    reach an `OperatorContext`, so a caller-supplied mixture and a
+    profile-resolved one arrive at DEPTH, FFN, WIDTH and ATTENTION in exactly one
+    shape. Supplying items skips the resolver's content hash — it does not skip
+    the item contract.
     """
     import time
 
@@ -250,9 +301,15 @@ def materialize_fixed_path(
     work.mkdir(parents=True, exist_ok=True)
     cache = stats_cache if stats_cache is not None else StatsCache(
         stats_spec=spec.stats_spec)
-    resolved: dict[str, Sequence[Any]] = dict(calibration_items or {})
+    resolved: dict[str, Sequence[Any]] = {
+        key: prepare_calibration_items(items, profile_id=key)
+        for key, items in dict(calibration_items or {}).items()}
 
     model = root_loader()
+    # Before the first operator, and from the weights rather than the
+    # declaration. `root_loader` is the caller's, so this is the only step whose
+    # placement the executor did not perform itself.
+    require_root_on_declared_device(model, spec)
     parent_spec = adapter.spec_of(model)
     parent_digest: str | None = None
     results: list[StepResult] = []
@@ -277,7 +334,12 @@ def materialize_fixed_path(
             items: Sequence[Any] = ()
         else:
             if profile.qualified_id not in resolved:
-                resolved[profile.qualified_id] = profile.resolve(repo_root)
+                # `resolve()` hands back the RAW frozen evidence — tokens under
+                # `ids`, because that is what the pinned content hash is defined
+                # over. The operators read `input_ids`. One boundary converts.
+                resolved[profile.qualified_id] = prepare_calibration_items(
+                    profile.resolve(repo_root),
+                    profile_id=profile.qualified_id)
             items = resolved[profile.qualified_id]
 
         ok, reason = impl.applicable(parent_spec, spec.target_spec, adapter)
